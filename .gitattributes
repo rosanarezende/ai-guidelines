@@ -1,0 +1,6 @@
+# Normaliza todos os arquivos de texto para LF (evita CRLF no Windows)
+* text=auto eol=lf
+
+# Binários — sem conversão
+*.gz binary
+*.cjs binary

@@ -1,0 +1,52 @@
+# =========================================
+# .geminiignore — Gemini CLI official ignore file
+# Docs: https://www.geminicli.com/docs/cli/gemini-ignore/
+#
+# Este arquivo instrui o Gemini CLI a NÃO indexar
+# os caminhos abaixo ao compor o contexto do modelo.
+# Menos contexto irrelevante = menos tokens desperdiçados.
+# =========================================
+
+# Logs & diagnósticos
+*.log
+logs/
+*.heapsnapshot
+*.gz
+
+# IDE configs (não relevantes para o modelo)
+.vscode/
+.idea/
+
+# Secrets (nunca devem entrar no contexto)
+.env
+.env.*
+!.env.example
+
+# Binary assets (ilegíveis pelo modelo — não acrescentam contexto)
+public/images/
+**/*.png
+**/*.jpg
+**/*.jpeg
+**/*.gif
+**/*.webp
+**/*.svg
+**/*.mp4
+**/*.mp3
+**/*.woff
+**/*.woff2
+**/*.ttf
+**/*.pdf
+
+# Build & Cache
+.next/
+out/
+dist/
+build/
+.cache/
+.turbo/
+*.tsbuildinfo
+
+# Arquivos de lock (raramente úteis como contexto de texto)
+yarn.lock
+package-lock.json
+pnpm-lock.yaml

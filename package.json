@@ -1,0 +1,20 @@
+{
+  "name": "ai-guidelines",
+  "version": "1.1.0",
+  "description": "Portable AI governance framework — agnostic by design",
+  "private": true,
+  "bin": "./cli/ai-guidelines-cli.mjs",
+  "scripts": {
+    "test": "node --experimental-default-config-file --test cli/**/*.test.mjs cli/**/**/*.test.mjs tests/**/*.test.mjs",
+    "test:coverage": "node --experimental-default-config-file --experimental-test-coverage --test cli/**/*.test.mjs cli/**/**/*.test.mjs tests/**/*.test.mjs",
+    "check:repo": "yarn install --immutable && yarn check && yarn test:coverage",
+    "format": "prettier --write .",
+    "check": "prettier --check .",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "prettier": "^3.0.0"
+  },
+  "packageManager": "yarn@4.1.1"
+}

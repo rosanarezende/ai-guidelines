@@ -1,0 +1,184 @@
+# Business Rules: ai-guidelines CLI
+
+Este documento mapeia as regras de negócio canônicas da CLI, servindo de fonte única de verdade para os testes unitários BDD.
+
+## 1. Comportamento Global de Sincronização
+
+### [BR-CLI-SYNC-01] Delta Sync de Pastas
+
+DADO que a CLI precisa sincronizar o baseline core (`.ai-guidelines/rules/`)
+QUANDO executado
+ENTÃO deve copiar apenas os arquivos cujo conteúdo difere do destino, otimizando I/O e preservando timestamps de arquivos inalterados.
+
+### [BR-CLI-SYNC-02] Identificação de SSOT Radical (AGENTS.md)
+
+DADO o arquivo `AGENTS.md` no repositório alvo
+QUANDO o motor de adoção é acionado
+ENTÃO deve manter o arquivo raiz como ponteiro para `.ai-guidelines/AGENTS.md`, preservando conteúdo local fora do bloco gerenciado.
+
+### [BR-CLI-SYNC-03] Erro em Baseline Corrompido
+
+DADO que a pasta `.core/rules/` está ausente no framework CORE
+QUANDO executado
+ENTÃO deve lançar um erro crítico informando que o framework está incompleto.
+
+### [BR-CLI-SYNC-04] Persistência de .gitattributes
+
+DADO o arquivo `.gitattributes` no destino
+QUANDO o motor de baseline é acionado
+ENTÃO deve fundir as regras canônicas (LFS, line-endings) com as existentes usando merge atômico de linhas para garantir a integridade do controle de versão.
+
+### [BR-CLI-SYNC-05] Gestão Inteligente de .prettierignore
+
+DADO o arquivo `.prettierignore`
+QUANDO no modo `adopt`
+ENTÃO só deve injetar o arquivo se houver sinais de Prettier (dependências/scripts) e nenhum formatador rival detectado, evitando poluição de arquivos em repositórios que não adotam a ferramenta.
+
+### [BR-CLI-SYNC-06] Core Mandatório sem Skip
+
+DADO um comando `adopt` com flags de skip legadas para core
+QUANDO executado
+ENTÃO a CLI deve ignorar bypass de core (`pointers`, `rules`, `.gitattributes`) e aplicar somente o controle de features opt-in (`prettier`, `husky`, `ci`).
+
+### [BR-CLI-SYNC-07] Orientação para Formatadores Rivais
+
+DADO que um formatador rival foi detectado
+QUANDO no modo `adopt`
+ENTÃO a CLI deve fornecer orientações claras recomendando a permanência do rival ou passos para migração incremental para Prettier, evitando mudanças disruptivas.
+
+### [BR-CLI-SYNC-08] Detecção de Monorepo
+
+DADO um projeto com workspaces (pnpm, yarn, npm)
+QUANDO o baseline é aplicado
+ENTÃO deve alertar o usuário que o baseline será aplicado apenas na raiz, preservando os subpacotes para gestão manual do desenvolvedor.
+
+---
+
+## 2. Gestão de Dependências (package.json)
+
+### [BR-CLI-PKG-01] Aborto por Formatter Rival
+
+DADO um repositório existente (modo `adopt`)
+QUANDO detectado um formatador rival configurado (Ex: Biome, ESLint Prettier Plugin)
+ENTÃO a CLI deve pular a injeção do Prettier no `package.json` para evitar conflitos de ferramentas, a menos que `--force` seja usado.
+
+### [BR-CLI-PKG-02] Criação de Baseline em Repos Sem Package
+
+DADO um diretório sem `package.json`
+QUANDO executado em modo `init`
+ENTÃO deve criar um `package.json` minimalista com os scripts padrão de `format` e `check` apontando para o framework.
+
+### [BR-CLI-PKG-03] Fusão Inteligente (Merge)
+
+DADO um `package.json` preexistente
+QUANDO a CLI funde o fragmento de baseline
+ENTÃO deve adicionar os novos scripts e dependências sem sobrescrever versões já existentes que sejam mais recentes que o baseline, respeitando a soberania do projeto alvo.
+
+---
+
+## 3. Automação de Git Hooks (Husky)
+
+### [BR-CLI-HOOKS-01] Pré-requisito de Scripts
+
+DADO um repositório alvo
+QUANDO a CLI tenta instalar os Git Hooks
+ENTÃO só deve criar o hook `pre-commit` se o script `format` estiver presente, e o `pre-push` se o script `check` estiver presente no `package.json`.
+
+### [BR-CLI-HOOKS-02] Fusão de Conteúdo de Hook
+
+DADO um arquivo de hook preexistente (ex: `.husky/pre-commit`)
+QUANDO a CLI injeta o comando de baseline
+ENTÃO deve concatenar o novo comando aos existentes, a menos que o comando exato já esteja presente, garantindo idempotência.
+
+---
+
+## 4. Integração Contínua (GitHub Actions)
+
+### [BR-CLI-CI-01] Atualização Conservadora de Workflow Existente
+
+DADO que o arquivo `.github/workflows/ai-guidelines-ci.yml` já existe
+QUANDO em modo `adopt` (sem a flag `--force`)
+ENTÃO a CLI deve comparar o baseline e, em ambiente interativo (TTY), pedir confirmação antes de atualizar; sem confirmação, deve preservar o arquivo existente.
+
+### [BR-CLI-CI-02] Detecção de Runner e PackageManager
+
+DADO que a CLI está gerando o workflow de CI
+QUANDO executado
+ENTÃO de detectar se o projeto usa `yarn`, `npm` ou `pnpm` e ajustar os comandos de `install` e `check` no arquivo YAML para condizer com o ambiente real do projeto.
+
+### [BR-CLI-CI-03] Fallback de Script de Check
+
+DADO que o script de `check` (ou `format:check`) está ausente no `package.json`
+QUANDO o workflow de CI é gerado
+ENTÃO deve injetar um comando de fallback (echo) no YAML para garantir que o pipeline seja sintaticamente válido e explicite a falta de automação.
+
+---
+
+## 5. Proteção de Dados e Sanitização
+
+### [BR-CLI-FS-01] Bloqueio de Inicialização em Raiz de Sistema
+
+DADO que a CLI é chamada acidentalmente em pastas de sistema (Ex: `/`, `C:\`, `~`)
+QUANDO validado o alvo
+ENTÃO deve disparar um erro crítico e abortar a operação para evitar injeção de lixo em diretórios globais do usuário.
+
+---
+
+## 6. Processamento de Entrada [BR-CLI-INPUT]
+
+### [BR-CLI-INPUT-01] Parsing de Flags e Argumentos
+
+DADO argumentos via CLI
+QUANDO o parser é executado
+ENTÃO deve aceitar flags com `--` e valores separados por espaço ou `=`, tratando flags booleanas (`--force`, `--dry-run`, `--install`) de forma idempotente.
+
+### [BR-CLI-INPUT-02] Validação de Modos Suportados
+
+DADO um comando inserido pelo usuário
+QUANDO validado pelo shell
+ENTÃO deve permitir apenas `init` ou `adopt`, disparando a ajuda (`help`) em caso de comandos desconhecidos.
+
+---
+
+## 7. Entrada Guiada (Wizard) [BR-CLI-WIZARD]
+
+### [BR-CLI-WIZARD-01] Ativação Automática (Interatividade)
+
+DADO ausência de parâmetros obrigatórios (`init/adopt`, `--target`, etc.)
+QUANDO a CLI detecta um ambiente interativo (TTY)
+ENTÃO deve iniciar o Wizard automaticamente para capturar as informações necessárias do usuário.
+
+### [BR-CLI-WIZARD-02] Resolução de Valores Padrão
+
+DADO que o usuário pressiona `Enter` sem digitar uma resposta no Wizard
+QUANDO em ambiente TTY
+ENTÃO a CLI deve assumir os valores canônicos (`WIZARD_DEFAULTS`) definidos para o modo selecionado.
+
+### [BR-CLI-WIZARD-03] Rigor de Validação (Retry Loop)
+
+DADO uma entrada inválida fornecida pelo usuário no Wizard (ex: modo inexistente ou package manager não suportado)
+QUANDO validado pelo prompt
+ENTÃO deve emitir um alerta de erro e repetir a pergunta indefinidamente até que uma entrada válida seja fornecida, garantindo a integridade dos parâmetros de execução.
+
+---
+
+## 8. Orquestração de Alto Nível (Engine) [BR-CLI-ENG]
+
+### [BR-CLI-ENG-01] Guarda de Inicialização (Conflict Check)
+
+DADO o subcomando `init`
+QUANDO executado em um diretório que já contém arquivos de baseline (ex: `AGENTS.md`)
+ENTÃO deve abortar a execução com um erro explicativo para evitar corrupção de projetos existentes, a menos que `--force` seja explicitado.
+
+### [BR-CLI-ENG-02] Automação de Instalação Pós-Adoção
+
+DADO a adição de novas dependências durante o `adopt`
+QUANDO detectado ambiente TTY
+ENTÃO deve oferecer ao usuário a opção de instalar as dependências imediatamente usando o package manager detectado.
+
+---
+
+## Histórico de Versões (Gênese)
+
+- **v0.1.0**: Mapeamento das regras core de sincronização e proteção de framework.
+- **v0.2.0**: Mapeamento da camada de Shell (Input/Wizard/Engine).

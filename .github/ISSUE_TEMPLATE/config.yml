@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 🔒 Vulnerabilidade de segurança
+    url: https://github.com/rosanarezende/ai-guidelines/security/advisories/new
+    about: Reporte vulnerabilidades pelo GitHub Private Vulnerability Reporting (não abra issue pública). Detalhes em SECURITY.md.
+  - name: 📜 Código de Conduta
+    url: https://github.com/rosanarezende/ai-guidelines/blob/main/CODE_OF_CONDUCT.md
+    about: Leia antes de participar — comunidade ai-guidelines BR segue Contributor Covenant.
