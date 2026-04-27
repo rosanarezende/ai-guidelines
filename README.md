@@ -1,94 +1,59 @@
 # ai-guidelines BR
 
-> Case study vivo de governança de IA multi-agente em desenvolvimento de
-> software. Agnóstico de modelo, IDE e linguagem. Licença [Apache-2.0](LICENSE).
+> Estrutura de governança para desenvolvimento de software auxiliado por inteligência artificial, agnóstica em relação a modelos,
+> ambientes de desenvolvimento integrados (IDEs) e linguagens de programação. Licença [Apache-2.0](LICENSE).
 
 ---
 
-## O que é (e o que não é)
+## O que é?
 
-`ai-guidelines` é uma resposta concreta a uma dor real que o mantenedor
-enfrentou ao montar workflows com IA: **como manter coerência editorial e
-governança técnica entre múltiplos agentes (Claude, Gemini, Codex) sem
-reescrever as mesmas regras em N lugares**.
+`ai-guidelines` é um framework concebidO para mitigar o desafio de manter a coerência técnica e editorial ao **integrar múltiplos agentes de IA** (como o Claude, Gemini ou Codex) em projetos de desenvolvimento.
 
-**Não é uma solução definitiva.** É um caso vivo, opinionated, em evolução
-pública — desenhado para ser adotado, criticado e contribuído pela comunidade
-brasileira de desenvolvedores.
+A ferramenta centraliza a governança num único ponto, resolvendo problemas comuns de desorganização através de:
+- _Distribuição via CLI_: Aplicação automatizada e limpa de regras universais em qualquer repositório.
+- _Governança Multi-agente_: Regras de atuação agnósticas que operam independentemente do Large Language Model (LLM) utilizado.
+- _Modularidade (Opt-in)_: Configuração flexível de ferramentas de qualidade e estilo (como Prettier, Husky ou processos de CI).
 
-### Vs. [GitHub Spec Kit](https://github.com/github/spec-kit)
-
-Sobreposição de ~30% (ambos aplicam Spec-Driven Development como
-metodologia). Diferenciação real:
-
-| Aspecto              | spec-kit (GitHub)               | ai-guidelines                                                    |
-| :------------------- | :------------------------------ | :--------------------------------------------------------------- |
-| Distribuição         | Slash commands (template-based) | Pointer architecture (`adopt` puxa rules vivas)                  |
-| Surface              | GitHub-native                   | Multi-agent agnóstico (Claude / Gemini / Codex / Cursor)         |
-| Governança editorial | Implícita                       | First-class (ADRs, single source of truth, RPI loop)             |
-| Composição de regras | Não tem                         | Opt-in features composable (prettier, husky, ci, quality-gates)  |
-| Comunidade           | Internacional                   | BR-first (PT-BR, contribuição open source para comunidade local) |
-
-São complementares, não competidores. Quem usa spec-kit ganha methodology;
-quem usa ai-guidelines ganha methodology + distribuição via CLI + governança
-multi-agente + composição opt-in.
+**Não é uma solução definitiva.** É um caso vivo, em evolução pública — desenhado para ser adotado, criticado e contribuído pela comunidade brasileira de desenvolvedores.
 
 ---
 
-## Para começar
+## Como utilizar
 
-Três caminhos por persona:
+As diretrizes variam de acordo com o perfil de atuação no projeto:
 
-### 🚀 Quero usar o framework no meu repo
+### 🚀 Para Desenvolvedores
+
+A gestão das regras do projeto é feita através da Interface de Linha de Comandos (CLI):
 
 ```bash
-# Projeto novo — nasce AI-first desde o primeiro commit
-node cli/ai-guidelines-cli.mjs init --target ../meu-projeto --name meu-projeto --package-manager npm
+# Para novos projetos — Inicialização com arquitetura AI-first:
+node cli/ai-guidelines-cli.mjs init --target ../meu-projeto --name meu-projeto
 
-# Repo existente — adoção conservadora, nunca sobrescreve silenciosamente
-node cli/ai-guidelines-cli.mjs adopt --target ../repo-existente --dry-run   # preview
-node cli/ai-guidelines-cli.mjs adopt --target ../repo-existente             # aplica
+# Para repositórios existentes — Adoção conservadora (sem substituição silenciosa):
+node cli/ai-guidelines-cli.mjs adopt --target ../repo-existente --dry-run   # Modo de pré-visualização
+node cli/ai-guidelines-cli.mjs adopt --target ../repo-existente             # Aplicação definitiva
 ```
 
-> Em terminal interativo, o CLI abre wizard quando faltam argumentos. Em CI,
-> use flags explícitas. Detalhes em [Documentação de Features](docs/features.md).
+> Nota: A execução da CLI sem argumentos inicia automaticamente um assistente de configuração interativo. 
+> Em CI, use flags explícitas. Detalhes em [Documentação de Features](docs/features.md).
 
-### 🛠️ Quero contribuir
+### 🛠️ Para Contribuidores
 
-Ler [`CONTRIBUTING.md`](CONTRIBUTING.md) para o fluxo completo. Atalhos:
+A leitura do documento [`CONTRIBUTING.md`](CONTRIBUTING.md)  é recomendada para o entendimento completo do fluxo de trabalho. Em suma:
 
-- **Bug, fricção, ideia pequena:** abrir issue ou PR Draft direto.
-- **Feature / refactor maior:** registrar em
-  [`backlog.md`](.specify/specs/roadmap/backlog.md) → criar spec em
-  `.specify/specs/<slug>/` a partir dos templates SDD → branch → PR Draft.
+- **Correções menores (Bugs, pequenas fricções):** abrir issue ou Pull Request (PR) em estado de rascunho (Draft).
+- **Alterações de arquitetura ou novas funcionalidades:** registrar em [`backlog.md`](.specify/specs/roadmap/backlog.md) → criar spec em `.specify/specs/<slug>/` a partir dos templates SDD → branch → PR Draft.
 
 Comunidade ai-guidelines BR aceita contribuições em PT-BR e EN.
 
-### 🤖 Sou agente IA atuando neste repo
+### 🤖 Para Agentes de IA
 
 Ler [`AGENTS.md`](AGENTS.md) (Phase 0 obrigatório). Ciclo SDD descrito em
 [`docs/process/spec-foundation.md`](docs/process/spec-foundation.md).
 Workflow canônico de IA em
 [`.core/rules/global-rules.md`](.core/rules/global-rules.md) seção
 "Workflow com IA".
-
----
-
-## Por que existe
-
-Conforme a IA entrou no desenvolvimento de software, ficou claro que o problema
-não é apenas "ter acesso a um bom modelo". O problema real é:
-
-- cada repositório inventar seu próprio ritual de uso de IA;
-- agentes trabalharem sem contexto suficiente ou regras explícitas;
-- falta de continuidade entre sessões;
-- adoção difícil em projetos que já existem;
-- dependência excessiva de uma única ferramenta.
-
-O `ai-guidelines` se propõe a mitigar esses sintomas com uma base prática de
-governança: regras universais, protocolos de planejamento e execução,
-templates, um CLI `init + adopt`, e documentação pensada para humanos e
-agentes operarem o mesmo contrato.
 
 ---
 
@@ -113,14 +78,6 @@ agentes operarem o mesmo contrato.
 | `.core/rules/gemini.md` | Gemini CLI / Google     |
 | `.core/rules/codex.md`  | Codex / OpenAI          |
 
-### Processos reutilizáveis
-
-Em `docs/` estão os guias públicos de processos operacionais:
-
-- Fundação de specs (`docs/process/spec-foundation.md`) — lifecycle de SDD.
-- RPI Protocol (`docs/rpi-protocol.md`) — Ciclo Research → Plan → Implement.
-- TDD Guidelines (`docs/tdd-guidelines.md`) — padrões de testes e cobertura.
-
 ### CLI `init + adopt`
 
 O CLI vive em `cli/` e suporta:
@@ -139,9 +96,9 @@ Saiba mais sobre os módulos disponíveis em
 
 ---
 
-## Compatibilidade
+## Matriz de Compatibilidade
 
-| IA / Ferramenta    | Entrada                                 | Status       |
+| IA / Ferramenta    | Ponto de entrada                        | Status       |
 | :----------------- | :-------------------------------------- | :----------- |
 | Claude Code        | `AGENTS.md` + `.core/rules/claude.md`   | ✅ Suportado |
 | Gemini CLI         | `AGENTS.md` + `.core/rules/gemini.md`   | ✅ Suportado |
@@ -182,10 +139,8 @@ ai-guidelines/
 
 ## Roadmap
 
-O backlog vivo está em
-[`.specify/specs/roadmap/backlog.md`](.specify/specs/roadmap/backlog.md);
-specs concluídas em
-[`.specify/specs/roadmap/historico.md`](.specify/specs/roadmap/historico.md).
+O backlog vivo está em [`.specify/specs/roadmap/backlog.md`](.specify/specs/roadmap/backlog.md);
+specs concluídas em [`.specify/specs/roadmap/historico.md`](.specify/specs/roadmap/historico.md).
 
 Próximas iniciativas:
 
@@ -200,8 +155,7 @@ Próximas iniciativas:
 
 Seguimos [Semantic Versioning](https://semver.org/lang/pt-BR/).
 Histórico completo em [CHANGELOG.md](CHANGELOG.md).
-Versão atual: consultar a release mais recente no `CHANGELOG.md` e no
-`package.json`.
+Versão atual: consultar a release mais recente no `CHANGELOG.md` e no `package.json`.
 
 ---
 
@@ -221,10 +175,9 @@ Versão atual: consultar a release mais recente no `CHANGELOG.md` e no
 
 [Apache-2.0](LICENSE) © 2026 Rosana Rezende
 
-**TL;DR em português:**
+**Síntese das Condições de Utilização:**
 
-Você pode usar, copiar, modificar e distribuir este projeto — inclusive em
-produtos comerciais — sem precisar pedir permissão.
+A utilização, cópia, modificação e distribuição deste software — incluindo para fins comerciais — é permitida.
 
 O que você **precisa fazer:**
 
