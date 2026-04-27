@@ -35,6 +35,31 @@ describe("Feature: Rules (Governance Modules)", () => {
     assert.ok(exists, "Regras globais devem ser sincronizadas para a pasta de namespace");
   });
 
+  it("[BEHAVIOR] Deve ignorar subdiretórios (como opt-in) durante a sincronização", async () => {
+    const subTarget = path.join(targetDir, "sync-ignore-dirs");
+    await fs.mkdir(subTarget, { recursive: true });
+
+    const actions = [];
+    await applyRules(subTarget, {}, actions);
+
+    const rulesDir = path.join(subTarget, ".ai-guidelines", "rules");
+    const optInPath = path.join(rulesDir, "opt-in");
+    const optInFileExists = await fs
+      .access(path.join(rulesDir, "quality-gates.md"))
+      .then(() => true)
+      .catch(() => false);
+    const optInDirExists = await fs
+      .access(optInPath)
+      .then(() => true)
+      .catch(() => false);
+    assert.strictEqual(
+      optInDirExists,
+      false,
+      "Não deve copiar a pasta opt-in para dentro das regras"
+    );
+    assert.strictEqual(optInFileExists, false, "Não deve copiar regras opt-in indiscriminadamente");
+  });
+
   it("[IDEMPOTENCY] Não deve re-escrever arquivos idênticos", async () => {
     const subTarget = path.join(targetDir, "idempotency");
     await fs.mkdir(subTarget, { recursive: true });
@@ -65,6 +90,27 @@ describe("Feature: Rules (Governance Modules)", () => {
       .then(() => true)
       .catch(() => false);
     assert.strictEqual(exists, false, "Arquivo órfão deve ser removido pelo sync");
+  });
+
+  it("[PRUNE] Deve proteger arquivos de regras opt-in conhecidos", async () => {
+    const subTarget = path.join(targetDir, "prune-protect-optin");
+    const rulesDir = path.join(subTarget, ".ai-guidelines", "rules");
+    await fs.mkdir(rulesDir, { recursive: true });
+
+    const protectedPath = path.join(rulesDir, "quality-gates.md");
+    await fs.writeFile(protectedPath, "quality-gates content");
+
+    await applyRules(subTarget, { prune: true }, []);
+
+    const exists = await fs
+      .access(protectedPath)
+      .then(() => true)
+      .catch(() => false);
+    assert.strictEqual(
+      exists,
+      true,
+      "Arquivo opt-in conhecido não deve ser removido pelo prune global"
+    );
   });
 
   it("[PRUNE] NÃO deve remover órfãos se a flag prune estiver inativa", async () => {

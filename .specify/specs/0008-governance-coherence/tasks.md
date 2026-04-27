@@ -354,6 +354,15 @@
 - [ ] **E.14** `yarn check && yarn test` verde com novos testes
       (esperado: 90+/90+).
 
+### E.Refactor — Separação Arquitetural de Regras Opt-in
+
+- [x] **E.R1** Criar subdiretório `.core/rules/opt-in/` e mover `quality-gates.md` e `tdd.md` para ele, garantindo que `applyRules` não os copie indiscriminadamente.
+- [x] **E.R2** Atualizar `cli/features/core/rules.mjs` (`applyRules`) para ignorar subdiretórios (ex: `opt-in/`) durante a sincronização e proteger arquivos opt-in conhecidos durante o processo de _prune_ global.
+- [x] **E.R3** Atualizar `quality-gates.mjs` e `tdd.mjs` para lerem de `.core/rules/opt-in/` e implementarem a deleção (prune) local caso a feature esteja desativada e a flag `--prune` seja utilizada.
+- [x] **E.R4** Atualizar testes unitários (`rules.test.mjs`, `quality-gates.test.mjs`, `tdd.test.mjs`) para cobrir os novos cenários de exclusão e prune independente.
+- [x] **E.R5** Adicionar teste de integração (E2E) em `cli.integration.test.mjs` para validar a ausência e o prune dos arquivos opt-in no contexto do motor CLI completo.
+- [x] **E.R6** Documentar a distinção entre "Regras Core" e "Features Opt-in" em `docs/features.md`.
+
 ---
 
 ## Fase 1 — Sub-bloco F (Onboarding e contribuição)

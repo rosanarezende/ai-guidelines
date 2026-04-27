@@ -66,6 +66,30 @@ describe("Opt-in Feature: TDD [BR-OPT-TDD]", () => {
     );
   });
 
+  it("DADO a feature 'tdd' desativada com flag --prune QUANDO applyTdd ENTÃO deve remover o arquivo órfão do consumidor", async () => {
+    const actions = [];
+    const options = { features: [], "dry-run": false, prune: true };
+    const subDir = path.join(targetDir, "prune-test");
+    const rulesDir = path.join(subDir, ".ai-guidelines", "rules");
+    await fs.mkdir(rulesDir, { recursive: true });
+
+    const targetFile = path.join(rulesDir, "tdd.md");
+    await fs.writeFile(targetFile, "old content");
+
+    await applyTdd(subDir, options, {}, actions);
+
+    const exists = await fs
+      .access(targetFile)
+      .then(() => true)
+      .catch(() => false);
+
+    assert.strictEqual(exists, false, "O arquivo deve ser removido pelo prune da própria feature");
+    assert.ok(
+      actions.some((a) => a.includes("prune .ai-guidelines/rules/tdd.md")),
+      "Deve registrar o prune nas ações"
+    );
+  });
+
   it("DADO a feature 'tdd' ativa com --dry-run QUANDO applyTdd ENTÃO deve registrar a ação mas NÃO escrever o arquivo", async () => {
     const actions = [];
     const options = { features: ["tdd"], "dry-run": true };

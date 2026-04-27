@@ -6,17 +6,30 @@ import { ROOT_DIR } from "../../core/file-system.mjs";
  * Feature Opt-in: Quality Gates
  */
 export async function applyQualityGates(targetDir, options, context, actions) {
-  const { features = [] } = options;
+  const { features = [], prune = false } = options;
   const dryRun = Boolean(options?.["dry-run"]);
+
+  const sourceRulesPath = path.join(ROOT_DIR, ".core", "rules", "opt-in", "quality-gates.md");
+  const targetRulesDir = path.join(targetDir, ".ai-guidelines", "rules");
+  const targetRulesPath = path.join(targetRulesDir, "quality-gates.md");
 
   if (!features.includes("quality-gates")) {
     actions.push("skip quality-gates (feature desativada)");
+    if (prune) {
+      const exists = await fs
+        .access(targetRulesPath)
+        .then(() => true)
+        .catch(() => false);
+
+      if (exists) {
+        if (!dryRun) {
+          await fs.unlink(targetRulesPath);
+        }
+        actions.push("prune .ai-guidelines/rules/quality-gates.md (feature desativada)");
+      }
+    }
     return;
   }
-
-  const sourceRulesPath = path.join(ROOT_DIR, ".core", "rules", "quality-gates.md");
-  const targetRulesDir = path.join(targetDir, ".ai-guidelines", "rules");
-  const targetRulesPath = path.join(targetRulesDir, "quality-gates.md");
 
   try {
     const content = await fs.readFile(sourceRulesPath, "utf8");
