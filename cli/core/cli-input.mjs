@@ -10,14 +10,16 @@ const WIZARD_DEFAULTS = {
   target: ".",
   packageManager: "npm",
   dryRun: true,
-  features: "prettier,husky,ci",
+  features: "prettier,husky,ci,quality-gates,tdd",
 };
 
-const FEATURE_OPTIONS = ["prettier", "husky", "ci"];
+const FEATURE_OPTIONS = ["prettier", "husky", "ci", "quality-gates", "tdd"];
 const FEATURE_DESCRIPTIONS = {
   prettier: "Estilo e Padronização (Baseline Prettier)",
   husky: "Automação Local (Git Hooks)",
   ci: "Integração Contínua (GitHub Actions Workflow)",
+  "quality-gates": "Gates objetivos para código gerado por IA (Recomendado)",
+  tdd: "Regras de TDD/BDD (DADO/QUANDO/ENTÃO — Recomendado para projetos com testes)",
 };
 
 export function isSupportedMode(mode) {

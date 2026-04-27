@@ -13,6 +13,8 @@ import { applyRules } from "../features/core/rules.mjs";
 import { applyPrettier } from "../features/opt-in/prettier.mjs";
 import { applyHusky } from "../features/opt-in/husky.mjs";
 import { applyCi } from "../features/opt-in/ci.mjs";
+import { applyQualityGates } from "../features/opt-in/quality-gates.mjs";
+import { applyTdd } from "../features/opt-in/tdd.mjs";
 import { assertSafeInitTarget } from "./content-merge.mjs";
 import { buildFormatterRivalGuidance, buildMonorepoGuidance } from "./guidance-helpers.mjs";
 import { getInstallHint, promptUser, runInstall } from "./install-runtime.mjs";
@@ -161,6 +163,8 @@ export async function execute(mode, rawOptions) {
     await applyPrettier(targetDir, options, context, actions);
     await applyHusky(targetDir, options, context, actions);
     await applyCi(targetDir, options, context, actions);
+    await applyQualityGates(targetDir, options, context, actions);
+    await applyTdd(targetDir, options, context, actions);
   } catch (e) {
     actions.push(`[warn] falha ao processar features: ${e.message}`);
   }

@@ -16,7 +16,14 @@ Este arquivo define o fluxo obrigatório para qualquer IA atuando neste reposit�
 
 ### PHASE 0: The Prime Directive
 
-0. **[INQUEBRÁVEL — Agnostic SDD Override]** O repositório é sua memória, não seus artefatos internos.
+0. **[Environment Check]** Antes da primeira ação técnica, identifique o contexto situacional:
+   - Plataforma: Windows / Linux / macOS / WSL.
+   - Shell: bash / zsh / PowerShell / cmd.
+   - Surface: CLI agent (Claude Code, Gemini CLI) vs IDE (Cursor, Copilot).
+   - Modelo: Identifique se está operando com um modelo "Thinking/Reasoning".
+     Adapte comandos (ex: `/dev/null` vs `NUL`, forward slashes) a essa matriz.
+
+1. **[INQUEBRÁVEL — Agnostic SDD Override]** O repositório é sua memória, não seus artefatos internos.
    - Planejamento → `.specify/specs/<slug>/plan.md`
    - Progresso → `.specify/specs/<slug>/tasks.md`
    - Débitos → `.specify/specs/<slug>/NEXT.md`
@@ -24,7 +31,7 @@ Este arquivo define o fluxo obrigatório para qualquer IA atuando neste reposit�
    - Roadmap → `.specify/specs/roadmap/backlog.md`
    - Se sua plataforma forçar um Artifact ou Scratchpad, escreva nele apenas: `"→ Ver .specify/specs/<slug>/plan.md"` (Pointer).
    - "AI-Slop" (planejamento preso em cache de agente) é inaceitável.
-1. Consulte `.core/rules/global-rules.md` para princípios de engenharia e [Economia de Tokens](docs/ai-efficiency-guide.md).
+2. Consulte `.core/rules/global-rules.md` para princípios de engenharia e [Economia de Tokens](docs/ai-efficiency-guide.md).
 
 ### PHASE 1: Workflow & Isolation
 

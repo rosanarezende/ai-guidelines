@@ -8,6 +8,13 @@ Este arquivo define o fluxo obrigatório para qualquer IA atuando neste reposit�
 
 ### PHASE 0: The Prime Directive
 
+00. **[Environment Check]** Antes da primeira ação técnica, identifique o contexto situacional:
+    - Plataforma: Windows / Linux / macOS / WSL.
+    - Shell: bash / zsh / PowerShell / cmd.
+    - Surface: CLI agent (Claude Code, Gemini CLI) vs IDE (Cursor, Copilot).
+    - Modelo: Identifique se está operando com um modelo "Thinking/Reasoning".
+    Adapte comandos (ex: `/dev/null` vs `NUL`, forward slashes) a essa matriz.
+
 0. **[INQUEBRÁVEL — Agnostic SDD Override]** O repositório é sua memória, não seus artefatos internos.
    - Planejamento → `.specify/specs/<slug>/plan.md`
    - Progresso → `.specify/specs/<slug>/tasks.md`
