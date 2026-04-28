@@ -29,10 +29,25 @@ Specs ou candidatas priorizadas para iniciar em seguida. Ordem indica prioridade
 > da fila é Spec 0008 sub-blocos F+G (`feat/spec-0008-F-G`), que rodam
 > com o repo curado pela 0015.
 
-- **process-refinement** (Governança de Conhecimento e Concorrência)
-  - **Contexto:** Gaps processuais que causam colisão de Specs e perda de contexto de Research.
-  - **Escopo:** (1) Documentar workflow seguro para concorrência de Specs. (2) Tornar a leitura do `backlog.md` mandatória no `AGENTS.md` durante o boot. (3) Criar política para migrar a pasta `research/` local das specs para uma central global (`research-index.md`) no encerramento da Spec.
-  - **Origem:** Débitos levantados no `NEXT.md` da Spec 0016.
+- **process-refinement** (Governança de Conhecimento, Concorrência e Research Lifecycle)
+  - **Contexto:** Gaps processuais que causam colisão de Specs e perda de contexto de Research. A pasta `.specify/specs/researchs/` é temporária — criada para trazer pesquisas de specs anteriores a 0008 do repo privado/archived, mas sem política de catalogação permanente.
+  - **Escopo:**
+    1. **Concorrência de Specs**: documentar workflow seguro para branches concorrentes.
+    2. **Boot obrigatório**: tornar a leitura do `backlog.md` mandatória no `AGENTS.md` durante o boot.
+    3. **Research Lifecycle**: criar política inspirada no `NEXT.md` — ao encerrar uma spec, mover `research/` para localização canônica e mapear conteúdo relevante no `research-index.md`. Definir se pesquisas ficam junto à spec encerrada, migram para pasta central, ou ambos (link + cópia). Resolver a pasta temporária `researchs/` aplicando a nova política.
+    4. **Automatizar ciclo de vida de Gaps**: workflow que facilite a alimentação de `NEXT.md` e `backlog.md` a partir de insights capturados no chat (absorvido da seção Oportunidades).
+  - **Origem:** Débitos levantados no `NEXT.md` da Spec 0016 + revisão pós-Spec 0008.
+
+- **cli-refactor** (Refatoração Estrutural da CLI)
+  - **Fonte do insight:** revisão pós-Spec 0008, Fase 2.8 (taxonomia editorial/infraestrutura). Reorganização de `cli/features/opt-in/` em subpastas revelou fragilidade nos imports relativos (`../../../core/`) e falta de estrutura idiomática para projeto público.
+  - **Escopo potencial:**
+    1. **TypeScript**: migrar `.mjs` → `.ts` com `tsconfig.json` estrito, obtendo type-safety nas interfaces de features, options e context.
+    2. **Path aliases**: configurar `@/core/*`, `@/features/*`, `@/formatters/*` via `tsconfig paths` (ou `imports` do `package.json`), eliminando cadeias `../../../`.
+    3. **Reorganização de `cli/`**: avaliar se `cli/core/` ainda faz sentido vs dividir em `cli/engine/`, `cli/input/`, `cli/utils/` (content-merge, file-system). Atualmente `core/` mistura orquestração (engine), parsing (cli-input), I/O (file-system) e merge (content-merge).
+    4. **Reorganização de `docs/`**: consolidar `docs/cli/`, `docs/process/`, `docs/features.md` em estrutura sidebar-ready (ex: para Docusaurus/VitePress futuro).
+  - **Pré-requisitos:** Spec 0008 mergeada; decisão sobre bundler (tsup, esbuild, ou script Node nativo).
+  - **Riscos antecipados:** migração TS pode inflar `package.json` com deps de build; aliases precisam funcionar tanto em dev (`tsx`/`ts-node`) quanto no bundle publicado; diff será massivo (renomear ~40 arquivos).
+  - **Sinal de "está na hora":** quando adicionar nova feature CLI exigir mais de 3 níveis de `../` nos imports, ou quando onboarding de contribuidor externo tropeçar na estrutura.
 
 - **seguranca-ia-supply-chain** (spec 0012 — Segurança de IA tools / supply chain)
   - **Fonte do insight:** incidente Vercel/Contex.ai (abril/2026), análise Lucas Montano [Hackearam a Vercel via AI](https://www.youtube.com/watch?v=oDXYfesz0qw). Síntese em `synthesis.md` Tema 4.
@@ -47,7 +62,7 @@ Specs ou candidatas priorizadas para iniciar em seguida. Ordem indica prioridade
 - ~~**DRY nos testes das features Opt-in**: Abstrair o boilerplate de testes de integração/sincronização de regras (tdd, bdd, quality-gates) em um utilitário genérico `test-helpers.mjs`. (Débito da Spec 0016).~~ **Resolvido:** PR #1, Fase 2.7 — `cli/features/opt-in/test-helpers.mjs` com factory `createOptInRuleTestSuite()`.
 - **Sobreposição Hierárquica na Arquitetura de Prompt**: parcialmente resolvido pelo ADR 0004 (Governance Single Responsibility) na Vaga E da spec 0004. Monitorar compliance em sessões futuras.
 - **CLI `audit` — detecção de conflitos em configs globais**: comando que detecta `~/.gemini/GEMINI.md`, `~/.claude/CLAUDE.md`, `.cursorrules` globais, `~/.config/codex/instructions.md` e alerta sobre regras conflitantes com a Prime Directive do repositório. Fonte: ADR 0004.
-- **Automatizar ciclo de vida de Gaps**: workflow que facilite a alimentação de `NEXT.md` e `backlog.md` a partir de insights capturados no chat.
+- ~~**Automatizar ciclo de vida de Gaps**: workflow que facilite a alimentação de `NEXT.md` e `backlog.md` a partir de insights capturados no chat.~~ **Absorvido** por `process-refinement` (escopo item 4).
 - **Scaffold de fundação de spec via CLI** (`ai-guidelines spec init <slug>`): gerar `spec.md` + `plan.md` + `tasks.md` + `NEXT.md` a partir dos boilerplates com placeholders.
 
 ---
@@ -61,18 +76,6 @@ Specs ou candidatas que entram na fila depois de esgotado o Now. Ordem pode ser 
   - **Critérios de aceite (esboço):** `npx` funciona em projeto novo e existente;
   - **Pré-requisitos:** Spec 0005 concluída (✓); decisão de naming (bloqueador #1).
   - **Riscos antecipados:** GitHub tokens cross-repo exigem PAT fino ou GitHub App; Action que abre PRs em outro repo pode virar ruído sem gatilho correto (label `growth-relevant`); NPM org paga vs GitHub Packages.
-
-- **cli-refactor** (Refatoração Estrutural da CLI)
-  - **Fonte do insight:** revisão pós-Spec 0008, Fase 2.8 (taxonomia editorial/infraestrutura). Reorganização de `cli/features/opt-in/` em subpastas revelou fragilidade nos imports relativos (`../../../core/`) e falta de estrutura idiomática para projeto público.
-  - **Escopo potencial:**
-    1. **TypeScript**: migrar `.mjs` → `.ts` com `tsconfig.json` estrito, obtendo type-safety nas interfaces de features, options e context.
-    2. **Path aliases**: configurar `@/core/*`, `@/features/*`, `@/formatters/*` via `tsconfig paths` (ou `imports` do `package.json`), eliminando cadeias `../../../`.
-    3. **Reorganização de `cli/`**: avaliar se `cli/core/` ainda faz sentido vs dividir em `cli/engine/`, `cli/input/`, `cli/utils/` (content-merge, file-system). Atualmente `core/` mistura orquestração (engine), parsing (cli-input), I/O (file-system) e merge (content-merge).
-    4. **Reorganização de `docs/`**: consolidar `docs/cli/`, `docs/process/`, `docs/features.md` em estrutura com sidebar-ready (ex: para Docusaurus/VitePress futuro).
-    5. **Reorganização de `.specify/specs/researchs/`**: corrigir typo (`researchs` → `research`), padronizar estrutura interna.
-  - **Pré-requisitos:** Spec 0008 mergeada; decisão sobre bundler (tsup, esbuild, ou script Node nativo).
-  - **Riscos antecipados:** migração TS pode inflar `package.json` com deps de build; aliases precisam funcionar tanto em dev (`tsx`/`ts-node`) quanto no bundle publicado; diff será massivo (renomear ~40 arquivos).
-  - **Sinal de "está na hora":** quando adicionar nova feature CLI exigir mais de 3 níveis de `../` nos imports, ou quando onboarding de contribuidor externo tropeçar na estrutura.
 
 - **tracker-automation** (Automação profunda de Trackers)
   - **Contexto:** A Spec 0016 revelou que apenas instruir o agente num arquivo `.md` não garante automação confiável com GitHub Projects V2 (que usa GraphQL e IDs globais).
