@@ -29,6 +29,19 @@ Specs ou candidatas priorizadas para iniciar em seguida. Ordem indica prioridade
 > da fila é Spec 0008 sub-blocos F+G (`feat/spec-0008-F-G`), que rodam
 > com o repo curado pela 0015.
 
+- **process-refinement** (Governança de Conhecimento e Concorrência)
+  - **Contexto:** Gaps processuais que causam colisão de Specs e perda de contexto de Research.
+  - **Escopo:** (1) Documentar workflow seguro para concorrência de Specs. (2) Tornar a leitura do `backlog.md` mandatória no `AGENTS.md` durante o boot. (3) Criar política para migrar a pasta `research/` local das specs para uma central global (`research-index.md`) no encerramento da Spec.
+  - **Origem:** Débitos levantados no `NEXT.md` da Spec 0016.
+
+- **seguranca-ia-supply-chain** (spec 0012 — Segurança de IA tools / supply chain)
+  - **Fonte do insight:** incidente Vercel/Contex.ai (abril/2026), análise Lucas Montano [Hackearam a Vercel via AI](https://www.youtube.com/watch?v=oDXYfesz0qw). Síntese em `synthesis.md` Tema 4.
+  - **Insight central:** ataque NÃO foi exploit de NextJS nem da API Vercel — foi via Contex.ai (AI agents) autorizado por funcionário Vercel via Google Workspace OAuth. Padrão emergente: cada AI tool autorizada via OAuth = nova superfície de ataque. _"O elo mais fraco nunca esteve sendo modelo. É a integração ou OAuth que essas ferramentas pedem na tela de onboarding."_
+  - **Escopo potencial:** reescrever Regra 3 atual de `global-rules.md` cobrindo threat model OAuth de AI tools; criar `.core/rules/security.md` com política de marcação default sensitive, checklist de auditoria periódica de OAuth, política "nenhuma AI tool nova sem security review", rotação defensiva de secrets pós-incidente; comando CLI `audit-security` enumerando tools com OAuth.
+  - **Audiência diferente de 0008:** governança de **operador humano** (não do agente IA) — por isso spec separada.
+  - **Pré-requisitos:** Spec 0008 mergeada; idealmente decisão de visibilidade pública (cross-ref `project_ai_guidelines_visibilidade_publica.md`).
+  - **Sinal de "está na hora":** consumidor real precisa autorizar nova AI tool e pergunta "como avalio o risco?"; ou outro incidente público similar (provável dada a tendência 2026).
+
 ---
 
 ## Next (depois, ordem flexível)
@@ -46,25 +59,12 @@ Specs ou candidatas que entram na fila depois de esgotado o Now. Ordem pode ser 
   - **Escopo:** Feature opt-in (`tracker-github`) que injete scripts integradores (ex: `scripts/trackers/github-adapter.mjs`) e ensine o agente a rodar esses comandos no terminal para mover cards, garantindo precisão determinística.
   - **Origem:** Descoberta na Spec 0016.
 
-- **process-refinement** (Governança de Conhecimento e Concorrência)
-  - **Contexto:** Gaps processuais que causam colisão de Specs e perda de contexto de Research.
-  - **Escopo:** (1) Documentar workflow seguro para concorrência de Specs. (2) Tornar a leitura do `backlog.md` mandatória no `AGENTS.md` durante o boot. (3) Criar política para migrar a pasta `research/` local das specs para uma central global (`research-index.md`) no encerramento da Spec.
-  - **Origem:** Débitos levantados no `NEXT.md` da Spec 0016.
-
 - **regra-hierarquia** (spec 0011 — Hierarquia de regras por subdiretório)
   - **Fonte do insight:** Diego (Rocketseat), [Claude Code em monorepo full-stack](https://www.youtube.com/watch?v=ARYzqW0W7iI) 2026-01-22. Síntese em `.specify/specs/0008-governance-coherence/research/synthesis.md` Tema 1.
   - **Insight central:** ferramentas como Claude Code já carregam contexto sob demanda em subdiretórios. Em vez de inflar `AGENTS.md` raiz, separar por domínio: `api/AGENTS.md`, `api/src/auth/AGENTS.md`, `dashboard/AGENTS.md`. Resultado: contexto cirúrgico, sem inflar tokens.
   - **Escopo potencial:** padronizar hierarquia em `.core/rules/<topic>/AGENTS-fragment.md`; atualizar `cli/features/core/rules.mjs`; documentar no `AGENTS.md` raiz como agentes buscam fragmentos. Princípio (Diego): documentar **padrões**, não nomes de arquivo/pasta.
   - **Pré-requisitos:** Spec 0008 mergeada (sub-bloco A define regra acionável vs doc humano); decidir se hierarquia espelha layout do consumidor ou usa namespacing dentro de `.ai-guidelines/rules/<topic>/`.
   - **Sinal de "está na hora":** quando `global-rules.md` consolidado da 0008 inflar (>200 linhas) ou consumidor reclamar que "regras de domínios diferentes todo mundo lê tudo".
-
-- **seguranca-ia-supply-chain** (spec 0012 — Segurança de IA tools / supply chain)
-  - **Fonte do insight:** incidente Vercel/Contex.ai (abril/2026), análise Lucas Montano [Hackearam a Vercel via AI](https://www.youtube.com/watch?v=oDXYfesz0qw). Síntese em `synthesis.md` Tema 4.
-  - **Insight central:** ataque NÃO foi exploit de NextJS nem da API Vercel — foi via Contex.ai (AI agents) autorizado por funcionário Vercel via Google Workspace OAuth. Padrão emergente: cada AI tool autorizada via OAuth = nova superfície de ataque. _"O elo mais fraco nunca esteve sendo modelo. É a integração ou OAuth que essas ferramentas pedem na tela de onboarding."_
-  - **Escopo potencial:** reescrever Regra 3 atual de `global-rules.md` cobrindo threat model OAuth de AI tools; criar `.core/rules/security.md` com política de marcação default sensitive, checklist de auditoria periódica de OAuth, política "nenhuma AI tool nova sem security review", rotação defensiva de secrets pós-incidente; comando CLI `audit-security` enumerando tools com OAuth.
-  - **Audiência diferente de 0008:** governança de **operador humano** (não do agente IA) — por isso spec separada.
-  - **Pré-requisitos:** Spec 0008 mergeada; idealmente decisão de visibilidade pública (cross-ref `project_ai_guidelines_visibilidade_publica.md`).
-  - **Sinal de "está na hora":** consumidor real precisa autorizar nova AI tool e pergunta "como avalio o risco?"; ou outro incidente público similar (provável dada a tendência 2026).
 
 - **harness-engineering** (spec 0009 — Harness Engineering)
   - **Fonte do insight:** Uncle Bob via [Lucas Montano — "até o Uncle Bob virou Vibe Coder"](https://www.youtube.com/watch?v=MvFO-W9zZRk) (cyclomatic complexity, mutation testing); [Lucas Montano — "Vai Faltar Dev 2027"](https://www.youtube.com/watch?v=T9V7EyB_B9w) (bugs típicos de IA invisíveis em review humano: N+1, race conditions, memory leaks).
