@@ -62,6 +62,18 @@ Specs ou candidatas que entram na fila depois de esgotado o Now. Ordem pode ser 
   - **Pré-requisitos:** Spec 0005 concluída (✓); decisão de naming (bloqueador #1).
   - **Riscos antecipados:** GitHub tokens cross-repo exigem PAT fino ou GitHub App; Action que abre PRs em outro repo pode virar ruído sem gatilho correto (label `growth-relevant`); NPM org paga vs GitHub Packages.
 
+- **cli-refactor** (Refatoração Estrutural da CLI)
+  - **Fonte do insight:** revisão pós-Spec 0008, Fase 2.8 (taxonomia editorial/infraestrutura). Reorganização de `cli/features/opt-in/` em subpastas revelou fragilidade nos imports relativos (`../../../core/`) e falta de estrutura idiomática para projeto público.
+  - **Escopo potencial:**
+    1. **TypeScript**: migrar `.mjs` → `.ts` com `tsconfig.json` estrito, obtendo type-safety nas interfaces de features, options e context.
+    2. **Path aliases**: configurar `@/core/*`, `@/features/*`, `@/formatters/*` via `tsconfig paths` (ou `imports` do `package.json`), eliminando cadeias `../../../`.
+    3. **Reorganização de `cli/`**: avaliar se `cli/core/` ainda faz sentido vs dividir em `cli/engine/`, `cli/input/`, `cli/utils/` (content-merge, file-system). Atualmente `core/` mistura orquestração (engine), parsing (cli-input), I/O (file-system) e merge (content-merge).
+    4. **Reorganização de `docs/`**: consolidar `docs/cli/`, `docs/process/`, `docs/features.md` em estrutura com sidebar-ready (ex: para Docusaurus/VitePress futuro).
+    5. **Reorganização de `.specify/specs/researchs/`**: corrigir typo (`researchs` → `research`), padronizar estrutura interna.
+  - **Pré-requisitos:** Spec 0008 mergeada; decisão sobre bundler (tsup, esbuild, ou script Node nativo).
+  - **Riscos antecipados:** migração TS pode inflar `package.json` com deps de build; aliases precisam funcionar tanto em dev (`tsx`/`ts-node`) quanto no bundle publicado; diff será massivo (renomear ~40 arquivos).
+  - **Sinal de "está na hora":** quando adicionar nova feature CLI exigir mais de 3 níveis de `../` nos imports, ou quando onboarding de contribuidor externo tropeçar na estrutura.
+
 - **tracker-automation** (Automação profunda de Trackers)
   - **Contexto:** A Spec 0016 revelou que apenas instruir o agente num arquivo `.md` não garante automação confiável com GitHub Projects V2 (que usa GraphQL e IDs globais).
   - **Escopo:** Feature opt-in (`tracker-github`) que injete scripts integradores (ex: `scripts/trackers/github-adapter.mjs`) e ensine o agente a rodar esses comandos no terminal para mover cards, garantindo precisão determinística.
