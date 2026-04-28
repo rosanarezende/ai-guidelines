@@ -18,8 +18,8 @@ Specs atualmente em branch ativa. Formato enxuto.
   Sub-blocos pendentes: **C** (AI Efficiency Guide), **D** (Step 0 Environment Awareness), **E** (Quality Gates + TDD opt-in), **F** (Onboarding/contribuição), **G** (ADR de visibilidade pública). Próxima entrega: F+G em PR pós-Spec 0015; depois C+D; E por último.
 - **spec 0015** — Auditoria Destrutiva (`feat/spec-0015-destructive-audit` → PR #22).
   Limpeza do baseline antes de F+G: remoção de docs herdados de projetos externos (`design/`, `cinematic-ui-boilerplates`, `advanced-ai-patterns`, placeholders vazios em `skills/` e `mcp/`, `ai-review-ritual`), movimentação de `projects.md.example` para `.specify/templates/`. Reparo de referências cruzadas no `README.md`.
-- **spec 0016** — Adapters Opt-in / SDD Extension System (`feat/spec-0016-adapters-opt-in`).
-  Adapters opt-in para sincronizar SDD (backlog) com ferramentas externas (GitHub Projects, Jira, Linear), preservando a fonte de verdade no repositório.
+- **spec 0016** — Adapters Opt-in (Pausada/Pivotada).
+  O design provou ser excessivamente simplório. A spec atuou como Research/Discovery e gerou débitos mapeados nas próximas filas (automação real e refatoração). A branch será limpa e fechada ou reaproveitada como Issue.
 
 ---
 
@@ -42,6 +42,16 @@ Specs ou candidatas que entram na fila depois de esgotado o Now. Ordem pode ser 
   - **Critérios de aceite (esboço):** `npx` funciona em projeto novo e existente;
   - **Pré-requisitos:** Spec 0005 concluída (✓); decisão de naming (bloqueador #1).
   - **Riscos antecipados:** GitHub tokens cross-repo exigem PAT fino ou GitHub App; Action que abre PRs em outro repo pode virar ruído sem gatilho correto (label `growth-relevant`); NPM org paga vs GitHub Packages.
+
+- **tracker-automation** (Automação profunda de Trackers)
+  - **Contexto:** A Spec 0016 revelou que apenas instruir o agente num arquivo `.md` não garante automação confiável com GitHub Projects V2 (que usa GraphQL e IDs globais).
+  - **Escopo:** Feature opt-in (`tracker-github`) que injete scripts integradores (ex: `scripts/trackers/github-adapter.mjs`) e ensine o agente a rodar esses comandos no terminal para mover cards, garantindo precisão determinística.
+  - **Origem:** Descoberta na Spec 0016.
+
+- **process-refinement** (Governança de Conhecimento e Concorrência)
+  - **Contexto:** Gaps processuais que causam colisão de Specs e perda de contexto de Research.
+  - **Escopo:** (1) Documentar workflow seguro para concorrência de Specs. (2) Tornar a leitura do `backlog.md` mandatória no `AGENTS.md` durante o boot. (3) Criar política para migrar a pasta `research/` local das specs para uma central global (`research-index.md`) no encerramento da Spec.
+  - **Origem:** Débitos levantados no `NEXT.md` da Spec 0016.
 
 - **regra-hierarquia** (spec 0011 — Hierarquia de regras por subdiretório)
   - **Fonte do insight:** Diego (Rocketseat), [Claude Code em monorepo full-stack](https://www.youtube.com/watch?v=ARYzqW0W7iI) 2026-01-22. Síntese em `.specify/specs/0008-governance-coherence/research/synthesis.md` Tema 1.
@@ -110,6 +120,7 @@ Ideias, insights e débitos pequenos que ainda não justificam uma spec dedicada
 - **Template de `CLAUDE.md` / `GEMINI.md` / `CODEX.md` por IA**: hoje o init só gera `AGENTS.md` agnóstico; extensões específicas ficam manuais.
 - **Workflow / skill `codex-cross-review`** (Lucas Montano, Opus 4.7): antes de abrir PR, rodar Codex CLI com `--base <branch>` e classificar achados em P1/P2/P3. Adotar quando houver métrica de nitpicks recorrentes em review humano que codex pegaria.
 - **Estratégia de 1M token context** (Opus 4.7): para refactors de módulo grande, mandar arquivos inteiros em vez de resumos. Tradeoff — gasta mais por operação, economiza em iterações. Regra prática: usar quando o próprio Claude pedir arquivo extra 2+ vezes na mesma sessão.
+- **DRY nos testes das features Opt-in**: Abstrair o boilerplate de testes de integração/sincronização de regras (tdd, bdd, quality-gates) em um utilitário genérico `test-helpers.mjs`. (Débito da Spec 0016).
 - **Sobreposição Hierárquica na Arquitetura de Prompt**: parcialmente resolvido pelo ADR 0004 (Governance Single Responsibility) na Vaga E da spec 0004. Monitorar compliance em sessões futuras.
 - **CLI `audit` — detecção de conflitos em configs globais**: comando que detecta `~/.gemini/GEMINI.md`, `~/.claude/CLAUDE.md`, `.cursorrules` globais, `~/.config/codex/instructions.md` e alerta sobre regras conflitantes com a Prime Directive do repositório. Fonte: ADR 0004.
 - **Kubb / Swagger → hooks tipados + mocks** (Diego Fernandes, não é ai-guidelines): quando repositórios mantenedores tiverem APIs próprias, Kubb lê OpenAPI e gera código tipado. Apontamento cross-repo.
