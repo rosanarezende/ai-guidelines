@@ -10,16 +10,17 @@ const WIZARD_DEFAULTS = {
   target: ".",
   packageManager: "npm",
   dryRun: true,
-  features: "prettier,husky,ci,quality-gates,tdd",
+  features: "prettier,husky,ci,quality-gates,tdd,bdd",
 };
 
-const FEATURE_OPTIONS = ["prettier", "husky", "ci", "quality-gates", "tdd"];
+const FEATURE_OPTIONS = ["prettier", "husky", "ci", "quality-gates", "tdd", "bdd"];
 const FEATURE_DESCRIPTIONS = {
   prettier: "Estilo e Padronização (Baseline Prettier)",
   husky: "Automação Local (Git Hooks)",
   ci: "Integração Contínua (GitHub Actions Workflow)",
   "quality-gates": "Gates objetivos para código gerado por IA (Recomendado)",
-  tdd: "Regras de TDD/BDD (DADO/QUANDO/ENTÃO — Recomendado para projetos com testes)",
+  tdd: "TDD: Ciclo de Desenvolvimento Guiado por Testes (Red-Green-Refactor)",
+  bdd: "BDD: Comportamento Guiado por Testes (Dado/Quando/Então em Português ou Inglês)",
 };
 
 export function isSupportedMode(mode) {
@@ -40,6 +41,7 @@ Opções:
   --target <dir>             Diretório alvo (default: diretório atual)
   --name <project_name>      Nome do projeto (default: nome da pasta alvo)
   --package-manager <pm>     npm | pnpm | yarn | yarn@1.22.22 | yarn@4.1.1
+  --lang <pt|en>             Idioma para features (ex: tdd, bdd). Padrão: pt
   --force                    Sobrescreve arquivos suportados
   --dry-run                  Mostra ações sem escrever arquivos
   --install                  Instala dependências automaticamente
@@ -269,6 +271,19 @@ export async function resolveExecutionInput(mode, rawOptions) {
       .filter(Boolean);
   } else if (typeof wizardOptions.features === "string") {
     wizardOptions.features = wizardOptions.features.split(",").map((f) => f.trim());
+  }
+
+  if (
+    (wizardOptions.features.includes("tdd") || wizardOptions.features.includes("bdd")) &&
+    wizardOptions.lang === undefined
+  ) {
+    wizardOptions.lang = await promptTextWithDefault(
+      ask,
+      "Idioma para regras TDD/BDD (pt ou en)",
+      "pt",
+      (value) => ["pt", "en"].includes(value.toLowerCase()),
+      "Idioma inválido. Use pt ou en."
+    );
   }
 
   if (wizardOptions["dry-run"] === undefined) {
