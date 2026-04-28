@@ -237,21 +237,21 @@
 
 ## Fase 1 — Sub-bloco C (AI Efficiency)
 
-- [ ] **C.1** Mapear duplicação em `.core/rules/global-rules.md` entre
+- [x] **C.1** Mapear duplicação em `.core/rules/global-rules.md` entre
       "Economia de Tokens" (regras 7-9) e "Eficiência de IA — Lembrete
       Rápido" (linhas 33-39).
-- [ ] **C.2** Consolidar em **uma única seção** "Eficiência de IA" em
+- [x] **C.2** Consolidar em **uma única seção** "Eficiência de IA" em
       `global-rules.md`. Conteúdo final: 4-6 regras imperativas
       (model routing, modularidade, feedback cirúrgico, ignore files, link
       ao guia profundo).
-- [ ] **C.3** Reescrever `docs/ai-efficiency-guide.md`:
+- [x] **C.3** Reescrever `docs/ai-efficiency-guide.md`:
   - Substituir links quebrados (`for-gemini/setup.md`, `for-claude/setup.md`,
     `for-codex/setup.md`) por links a `.core/rules/<adapter>.md`.
   - Atualizar matriz de modelos (seção 5) para 2026: Claude 4.x (Opus/Sonnet/
     Haiku), Gemini 2.x, GPT-4o.
   - Adicionar seção "Prompt Caching" (relevante para Claude Code / Anthropic
     API).
-- [ ] **C.4** Adicionar conteúdo derivado do `synthesis.md` no
+- [x] **C.4** Adicionar conteúdo derivado do `synthesis.md` no
       `ai-efficiency-guide.md`:
   - Seção "Model routing inteligente + ceticismo informado": não confiar
     cegamente em "mais novo é melhor"; documentar adaptive thinking como
@@ -263,28 +263,28 @@
   - Seção "Cost awareness": como interpretar quotas/plan usage e quando
     rotacionar entre modelos ou fragmentar tarefa. **Visualizador automático
     fica para Spec 0014 (candidata)** — referenciar explicitamente.
-- [ ] **C.5** Confirmar que `AGENTS.md` regra 1 mantém referência única ao
+- [x] **C.5** Confirmar que `AGENTS.md` regra 1 mantém referência única ao
       guia (`docs/ai-efficiency-guide.md`).
-- [ ] **C.6** `yarn check && yarn test` verde.
+- [x] **C.6** `yarn check && yarn test` verde.
 
 ---
 
 ## Fase 1 — Sub-bloco D (Step 0 — Environment Awareness)
 
-- [ ] **D.1** Editar `AGENTS.md` Phase 0: inserir sub-item curto (≤ 8 linhas)
+- [x] **D.1** Editar `AGENTS.md` Phase 0: inserir sub-item curto (≤ 8 linhas)
       "Environment Check" antes da regra 0 atual, com matriz Plataforma/
       Shell/Surface/Modelo.
-- [ ] **D.2** Espelhar em `.core/templates/AGENTS-core.md.tmpl`.
-- [ ] **D.3** Adicionar nota em `.core/rules/global-rules.md` (seção
+- [x] **D.2** Espelhar em `.core/templates/AGENTS-core.md.tmpl`.
+- [x] **D.3** Adicionar nota em `.core/rules/global-rules.md` (seção
       Eficiência de IA, pós-consolidação C): "antes de comandos de shell,
       consulte Phase 0 → Environment Check".
-- [ ] **D.4** Smoke test manual:
+- [x] **D.4** Smoke test manual:
   - Sessão Claude Code (Windows + Git Bash): verificar se a IA explicita o
     ambiente antes da primeira ação de shell.
   - Sessão Gemini CLI ou Codex (Linux/WSL): mesmo teste.
   - Documentar resultados em `research/step-zero-smoke-test.md`.
-- [ ] **D.5** Refinar texto se smoke test mostrar ruído ou má adesão.
-- [ ] **D.6** `yarn check && yarn test` verde.
+- [x] **D.5** Refinar texto se smoke test mostrar ruído ou má adesão.
+- [x] **D.6** `yarn check && yarn test` verde.
 
 ---
 
@@ -298,7 +298,7 @@
 
 ### E — Quality Gates (feature opt-in)
 
-- [ ] **E.1** Criar `.core/rules/quality-gates.md` com checklist editorial
+- [x] **E.1** Criar `.core/rules/quality-gates.md` com checklist editorial
       mínimo (≤ 15 linhas) listando os 4 grupos de gates:
   - Análise estática (cyclomatic complexity, tamanho de módulo, estrutura
     de dependências).
@@ -308,31 +308,31 @@
     exemplos de tooling por linguagem em parênteses (ex.: "hypothesis em
     Python, fast-check em JS").
   - Secret scanning (cross-ref Spec 0012 candidata).
-- [ ] **E.2** Incluir ressalva: "gates objetivos pegam bugs locais;
+- [x] **E.2** Incluir ressalva: "gates objetivos pegam bugs locais;
       arquitetura crítica (tradeoffs, capacity, failure modes) ainda exige
       senior review humano".
-- [ ] **E.3** Manter agnosticismo: nenhuma menção a tooling específico no
+- [x] **E.3** Manter agnosticismo: nenhuma menção a tooling específico no
       texto principal — apenas categorias e exemplos entre parênteses.
-- [ ] **E.4** Criar `cli/features/opt-in/quality-gates.mjs` seguindo o
+- [x] **E.4** Criar `cli/features/opt-in/quality-gates.mjs` seguindo o
       padrão de `cli/features/opt-in/prettier.mjs`:
   - Função `applyQualityGates(targetDir, options, context, actions)`.
   - Quando ativada: copia `.core/rules/quality-gates.md` para
     `.ai-guidelines/rules/quality-gates.md`.
   - Quando pulada: nenhuma escrita; ação registrada em `actions`.
   - Suportar `--dry-run` e `--prune` consistentes com outras features.
-- [ ] **E.5** Atualizar `cli/core/cli-input.mjs`:
+- [x] **E.5** Atualizar `cli/core/cli-input.mjs`:
   - Adicionar `quality-gates` em `FEATURE_OPTIONS`.
   - Adicionar descrição em `FEATURE_DESCRIPTIONS`: "Gates objetivos para
     código gerado por IA (recomendado)".
   - Garantir que está na seleção sugerida por default no wizard.
-- [ ] **E.6** Atualizar `cli/core/engine.mjs` para invocar
+- [x] **E.6** Atualizar `cli/core/engine.mjs` para invocar
       `applyQualityGates` quando `features.includes("quality-gates")`.
-- [ ] **E.7** Criar `cli/features/opt-in/quality-gates.test.mjs` com BDD:
+- [x] **E.7** Criar `cli/features/opt-in/quality-gates.test.mjs` com BDD:
   - DADO `features: ["quality-gates"]` QUANDO `applyQualityGates` ENTÃO
     arquivo escrito em `.ai-guidelines/rules/quality-gates.md`.
   - DADO `features: []` QUANDO engine roda ENTÃO arquivo NÃO é escrito.
   - DADO `--dry-run` ENTÃO ação é registrada mas não escrita.
-- [ ] **E.8** Atualizar `ROADMAP.md` da Spec 0009 (já feito em commit
+- [x] **E.8** Atualizar `ROADMAP.md` da Spec 0009 (já feito em commit
       anterior; revalidar) com referência cruzada "implementa tecnicamente
       Spec 0008-E + 0008-E.TDD".
 
