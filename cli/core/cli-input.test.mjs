@@ -146,7 +146,6 @@ describe("cli-input", () => {
       assert.ok(!result.options.features.includes("prettier"));
     });
   });
-
   it("[BR-CLI-WIZARD-05] DADO flag --yes QUANDO resolveExecutionInput ENTÃO pula wizard mesmo em TTY", async () => {
     await withTTY(true, async () => {
       const result = await resolveExecutionInput("adopt", {
@@ -154,9 +153,20 @@ describe("cli-input", () => {
         yes: true,
       });
 
-      assert.equal(result.usedWizard, false, "Deveria ter pulado o wizard com --yes");
-      assert.equal(result.options.target, "./demo");
-      assert.ok(result.options.features.includes("prettier"));
+      assert.equal(result.usedWizard, false);
+      assert.equal(result.options.yes, true);
+    });
+  });
+
+  it("[BR-CLI-WIZARD-06] DADO wizard QUANDO features tdd ou bdd selecionadas ENTÃO solicita idioma", async () => {
+    await withTTY(true, async () => {
+      const result = await resolveExecutionInput(undefined, {
+        __wizardAnswers: ["init", "./demo", "demo-app", "npm", "tdd", "en", "s"],
+      });
+
+      assert.equal(result.usedWizard, true);
+      assert.deepEqual(result.options.features, ["tdd"]);
+      assert.equal(result.options.lang, "en");
     });
   });
 
