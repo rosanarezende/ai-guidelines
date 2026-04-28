@@ -9,7 +9,7 @@
 1. **Análise Estática:**
    - Complexidade ciclomática mantida sob controle (módulos pequenos e focados).
    - Ausência de dependências circulares.
-   - Nomes de variáveis e funções seguem a semântica PT-BR ou o padrão do projeto.
+   - Nomes de variáveis e funções seguem a semântica do projeto (PT-BR ou EN conforme convenção local).
 
 2. **Cobertura e Mutação:**
    - **Cobertura de Testes:** Mínimo recomendado de **85%**.
@@ -19,7 +19,7 @@
    - **Race Conditions:** Verificação de acessos concorrentes em estado compartilhado.
    - **N+1 Queries:** Verificação de eficiência em loops de dados/APIs.
    - **Memory Leaks:** Fechamento correto de recursos, streams e listeners.
-   - _Ferramentas recomendadas:_ Property-based testing (ex: Hypothesis em Python, fast-check em JS).
+   - _Ferramentas recomendadas:_ Property-based testing (ex: fast-check em JS, Hypothesis em Python).
 
 4. **Security & Secrets:**
    - Bloqueio de submissão de chaves, tokens ou credenciais (mesmo em comentários).
@@ -27,4 +27,8 @@
 
 ---
 
-Para implementar tecnicamente estes sensores em seu pipeline de CI, consulte a documentação técnica no repositório fonte do ai-guidelines.
+## Regras para Agentes de IA
+
+- Ao finalizar uma implementação, execute o checklist acima antes de reportar "done".
+- Se algum gate falhar, corrija antes de prosseguir — não delegue ao humano erros detectáveis por automação.
+- Em projetos com CI configurado, confirme que o pipeline está verde antes de considerar a tarefa concluída.

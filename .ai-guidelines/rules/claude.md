@@ -1,19 +1,23 @@
-# Guia de Setup Claude (Antigravity)
+# Adaptador: Claude (Anthropic)
 
-Este adaptador contém diretrizes para a interação com modelos Anthropic Claude (Haiku, Sonnet, Opus) via Interface Antigravity ou Cursor.
-
-## Otimização de Mensagens
-
-- **Haiku**: Utilize para refações rápidas e tarefas atômicas de codificação.
-- **Sonnet/Opus**: Utilize para planejamento arquitetural profundo e análise de múltiplos arquivos.
-
-## Contexto e Ignore
-
-- Utilize `.claudeignore` para repositórios acessados via Claude Desktop ou plugins específicos.
-- O formato segue o padrão `.gitignore`, similar ao `.geminiignore`.
+> Diretrizes complementares para agentes baseados em modelos Anthropic Claude.
+> Estas regras **complementam** (não substituem) o `global-rules.md`.
 
 ---
 
-## Observações de Comportamento
+## Model Routing
 
-Claude tende a ser extremamente verboso. Quando carregado com as **Global Rules**, ele deve priorizar respostas sucintas e foco em artefatos.
+- **Haiku / Sonnet leve:** tarefas atômicas de codificação, formatação, refatoração scoped.
+- **Sonnet / Opus:** planejamento arquitetural, análise de múltiplos arquivos, decisões de design complexas.
+
+## Contexto e Ignore
+
+- Utilize `.claudeignore` na raiz do repositório para controlar quais arquivos a IA carrega no contexto.
+- O formato segue o padrão `.gitignore`.
+- Claude carrega automaticamente o `AGENTS.md` da raiz — garanta que o ponteiro para `.ai-guidelines/` esteja presente.
+
+## Comportamento Observado
+
+- Claude tende a ser verboso por padrão. As Global Rules já instruem respostas sucintas — reforce se necessário com "seja conciso" no prompt.
+- Em sessões longas, Claude pode perder contexto de arquivos lidos no início. Use `/clear` ou reinicie a sessão quando perceber repetição de erros.
+- Claude Code respeita `CLAUDE.md` na raiz — este arquivo pode conter instruções específicas do projeto que complementam o baseline injetado.

@@ -1,13 +1,15 @@
-# Guia de Setup Gemini (Antigravity)
+# Adaptador: Gemini (Google)
 
-Este adaptador contém configurações específicas para o modelo Gemini 1.5 Pro/Flash e a CLI Antigravity.
-
-## Comandos Úteis
-
-- `/memory show`: Inspeciona o contexto de memória ativa.
-- `/clear`: Limpa a memória de curto prazo para evitar "podridão de contexto" em sessões longas.
+> Diretrizes complementares para agentes baseados em modelos Google Gemini e a CLI Gemini.
+> Estas regras **complementam** (não substituem) o `global-rules.md`.
 
 ---
+
+## Integração com CLI
+
+- Gemini CLI carrega automaticamente `GEMINI.md` na raiz e `~/.gemini/GEMINI.md` como config global.
+- Para instruções específicas do projeto, utilize `GEMINI.md` na raiz do repositório.
+- O `AGENTS.md` da raiz também é carregado — garanta que o ponteiro para `.ai-guidelines/` esteja presente.
 
 ## Skills Globais
 
@@ -57,7 +59,8 @@ logs/
 
 ---
 
-## Contexto de Projetos
+## Comportamento Observado
 
-Mantenha o mapeamento de seus projetos ativos em `~/.gemini/projects.md` (não versionado).
-Para estruturar seu índice local, consulte o template `project-config-boilerplate.md` no repositório fonte do `ai-guidelines` (em `.specify/templates/`).
+- Em sessões longas, use o conceito de "checkpoints" (salvar progresso em artefatos) para evitar perda de contexto.
+- Gemini tende a ser proativo em executar comandos — as Global Rules já restringem git push, mas reforce em tarefas destrutivas.
+- Para projetos com muitos arquivos, o `.geminiignore` é crítico — sem ele, o modelo pode gastar tokens lendo `node_modules`, builds e lockfiles.
