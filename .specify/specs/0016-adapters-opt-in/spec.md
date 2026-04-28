@@ -1,6 +1,6 @@
 # Spec 0016 — Adapters Opt-in para Trackers (GitHub Projects / Jira / Linear)
 
-> Status: Draft <!-- Draft | In Review | Active | Done -->
+> Status: Pivoted <!-- Draft | In Review | Active | Paused | Pivoted | Cancelled | Done -->
 > Author: Antigravity
 > Date: 2026-04-27
 > Owner: Rosana Rezende
