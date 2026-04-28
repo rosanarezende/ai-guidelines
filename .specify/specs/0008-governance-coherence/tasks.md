@@ -336,23 +336,15 @@
       anterior; revalidar) com referência cruzada "implementa tecnicamente
       Spec 0008-E + 0008-E.TDD".
 
-### E.TDD — Reclassificação de TDD como opt-in
+### E.TDD — Separação Arquitetural de TDD, BDD e i18n
 
-- [ ] **E.9** Promover regras imperativas de `docs/tdd-guidelines.md`
-      para novo arquivo `.core/rules/tdd.md` (extraindo apenas regras
-      acionáveis: ciclo Red→Green→Refactor obrigatório, descritores em
-      PT-BR, BDD `DADO/QUANDO/ENTÃO`, etc.). Manter `tdd-guidelines.md`
-      como doc explicativo (não vai ao consumidor).
-- [ ] **E.10** Criar `cli/features/opt-in/tdd.mjs` análogo a
-      `quality-gates.mjs`.
-- [ ] **E.11** Atualizar `cli-input.mjs` adicionando `tdd` em
-      `FEATURE_OPTIONS` com descrição "Regras de TDD/BDD (Red→Green→Refactor,
-      BDD PT-BR — recomendado para projetos com testes)".
-- [ ] **E.12** Atualizar `engine.mjs` para invocar `applyTdd` quando ativada.
-- [ ] **E.13** Criar `cli/features/opt-in/tdd.test.mjs` com BDD análogo a
-      E.7.
-- [ ] **E.14** `yarn check && yarn test` verde com novos testes
-      (esperado: 90+/90+).
+- [x] **E.9** Promover regras imperativas de `docs/tdd-guidelines.md` para novos arquivos em `.core/rules/opt-in/`: - `tdd-pt.md` e `tdd-en.md` (focados no ciclo técnico Red-Green-Refactor). - `bdd-pt.md` e `bdd-en.md` (focados no padrão DADO/QUANDO/ENTÃO).
+      Manter `tdd-guidelines.md` original como doc explicativo.
+- [x] **E.10** Atualizar testes ANTES da implementação (TDD para as próprias features): - Atualizar `cli/features/opt-in/tdd.test.mjs` e criar `bdd.test.mjs` garantindo suporte a i18n via parâmetro `options.lang`. - Atualizar `cli-input.test.mjs` para prever a pergunta sobre idioma e adição da feature `bdd`. - Atualizar `cli.integration.test.mjs` para validar o diff completo considerando TDD e BDD independentes.
+- [x] **E.11** Atualizar `cli-input.mjs`: - Adicionar `bdd` em `FEATURE_OPTIONS`. - Adicionar flag/pergunta `--lang` (pt/en, default pt) quando `tdd` ou `bdd` forem selecionados.
+- [x] **E.12** Criar/Atualizar as features no CLI: - Atualizar `cli/features/opt-in/tdd.mjs` para ler `.core/rules/opt-in/tdd-{lang}.md` e gerar `tdd.md` no alvo. - Criar `cli/features/opt-in/bdd.mjs` análogo para o BDD.
+- [x] **E.13** Atualizar `engine.mjs` para invocar ambas as features independentemente e passar as opções de `lang`.
+- [x] **E.14** `yarn check && yarn test` verde com os testes cobrindo a separação e os idiomas (esperado: sucesso em todos os cenários E2E e unitários).
 
 ### E.Refactor — Separação Arquitetural de Regras Opt-in
 

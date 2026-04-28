@@ -83,8 +83,9 @@ classificação por arquivo.
 **Regras a reclassificar como opt-in de stack** (decisão registrada 2026-04-24,
 observação 4):
 
-- **TDD/BDD** (`tdd-guidelines.md`) — nem todo repo escolhe BDD nem mesmo
-  testes. Vira `.core/rules/tdd.md` + feature opt-in `tdd` no CLI.
+- **TDD e BDD** (`tdd-guidelines.md`) — nem todo repo escolhe BDD nem mesmo
+  testes. Vira duas features separadas no CLI (`tdd` e `bdd`), com suporte
+  a escolha de idioma (PT-BR ou EN) para as regras geradas.
 - **Quality Gates** — sub-bloco E (ver detalhamento próprio).
 
 **Bloqueadores técnicos absorvidos por A** (PR #19):
