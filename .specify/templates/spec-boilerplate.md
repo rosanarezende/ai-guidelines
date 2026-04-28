@@ -1,6 +1,6 @@
 # Spec [Número] — [Título Curto]
 
-> Status: Draft <!-- Draft | In Review | Active | Done -->
+> Status: Draft <!-- Draft | In Review | Active | Paused | Pivoted | Cancelled | Done -->
 > Author: [Nome]
 > Date: [YYYY-MM-DD]
 > Owner: [Nome — quem responde por encerramento]

@@ -1,6 +1,6 @@
 # Spec 0008 — Governance Coherence
 
-> Status: Draft
+> Status: In Review
 > Author: Rosana Rezende
 > Date: 2026-04-23
 > Owner: Rosana Rezende

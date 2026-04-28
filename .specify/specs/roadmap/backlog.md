@@ -41,14 +41,15 @@ Specs ou candidatas que entram na fila depois de esgotado o Now. Ordem pode ser 
   - **Pré-requisitos:** Spec 0005 concluída (✓); decisão de naming (bloqueador #1).
   - **Riscos antecipados:** GitHub tokens cross-repo exigem PAT fino ou GitHub App; Action que abre PRs em outro repo pode virar ruído sem gatilho correto (label `growth-relevant`); NPM org paga vs GitHub Packages.
 
-- **roadmap-adapters** (spec 0016 — Roadmap Adapters / SDD Extension System)
-  - **Fonte do insight:** segunda rodada de review da pesquisa de roadmap benchmarks (2026-04-24). Convergência: `github/spec-kit` trata o mesmo problema via extension system (issues #880, #889, #1088 e discussion #1549).
-  - **Insight central:** `backlog.md` funciona para projetos solo/pequenos. Para multi-time / GitHub-native / Jira / Linear é necessário **adapters opt-in** que sincronizem `backlog.md` ↔ tracker externo sem quebrar o princípio "agente retoma trabalho lendo apenas o repo".
-  - **Escopo potencial:** feature opt-in em `cli/features/opt-in/adapters/` com subadapters (`github-projects.mjs`, `github-issues.mjs`, `jira.mjs`, `linear.mjs`); v1 `backlog push`/`backlog pull` unidirecionais; conflito → repo ganha; config em `.ai-guidelines/adapters.yaml`.
-  - **Precedentes técnicos:** Imdone (sync GH Issues ↔ Markdown), Stately, GitBook, ReadMe, Harness Git Experience, canonical sync-issues-github-jira.
-  - **Pré-requisitos:** Spec 0008 mergeada (formato `backlog.md` canonizado + Sub-bloco G ADR de visibilidade); Spec 0015 mergeada (repo curado); credenciais seguras (cross-ref Spec 0012).
-  - **Riscos antecipados:** sync bidirecional é difícil (drift, double-edit) — v1 unidirecional; APIs Projects v2 vs Jira vs Linear têm modelos diferentes; credenciais externas = nova superfície de ataque; setup caro pode reduzir adoção.
-  - **Sinal de "está na hora":** (a) `ai-guidelines` virou público e primeiro consumidor multi-time adota; (b) consumidor real começa a usar GitHub Projects em paralelo e reclama; (c) outro framework SDD lança extension system oficial.
+- **tracker-automation** (Automação profunda de Trackers)
+  - **Contexto:** A Spec 0016 revelou que apenas instruir o agente num arquivo `.md` não garante automação confiável com GitHub Projects V2 (que usa GraphQL e IDs globais).
+  - **Escopo:** Feature opt-in (`tracker-github`) que injete scripts integradores (ex: `scripts/trackers/github-adapter.mjs`) e ensine o agente a rodar esses comandos no terminal para mover cards, garantindo precisão determinística.
+  - **Origem:** Descoberta na Spec 0016.
+
+- **process-refinement** (Governança de Conhecimento e Concorrência)
+  - **Contexto:** Gaps processuais que causam colisão de Specs e perda de contexto de Research.
+  - **Escopo:** (1) Documentar workflow seguro para concorrência de Specs. (2) Tornar a leitura do `backlog.md` mandatória no `AGENTS.md` durante o boot. (3) Criar política para migrar a pasta `research/` local das specs para uma central global (`research-index.md`) no encerramento da Spec.
+  - **Origem:** Débitos levantados no `NEXT.md` da Spec 0016.
 
 - **regra-hierarquia** (spec 0011 — Hierarquia de regras por subdiretório)
   - **Fonte do insight:** Diego (Rocketseat), [Claude Code em monorepo full-stack](https://www.youtube.com/watch?v=ARYzqW0W7iI) 2026-01-22. Síntese em `.specify/specs/0008-governance-coherence/research/synthesis.md` Tema 1.
@@ -117,6 +118,7 @@ Ideias, insights e débitos pequenos que ainda não justificam uma spec dedicada
 - **Template de `CLAUDE.md` / `GEMINI.md` / `CODEX.md` por IA**: hoje o init só gera `AGENTS.md` agnóstico; extensões específicas ficam manuais.
 - **Workflow / skill `codex-cross-review`** (Lucas Montano, Opus 4.7): antes de abrir PR, rodar Codex CLI com `--base <branch>` e classificar achados em P1/P2/P3. Adotar quando houver métrica de nitpicks recorrentes em review humano que codex pegaria.
 - **Estratégia de 1M token context** (Opus 4.7): para refactors de módulo grande, mandar arquivos inteiros em vez de resumos. Tradeoff — gasta mais por operação, economiza em iterações. Regra prática: usar quando o próprio Claude pedir arquivo extra 2+ vezes na mesma sessão.
+- **DRY nos testes das features Opt-in**: Abstrair o boilerplate de testes de integração/sincronização de regras (tdd, bdd, quality-gates) em um utilitário genérico `test-helpers.mjs`. (Débito da Spec 0016).
 - **Sobreposição Hierárquica na Arquitetura de Prompt**: parcialmente resolvido pelo ADR 0004 (Governance Single Responsibility) na Vaga E da spec 0004. Monitorar compliance em sessões futuras.
 - **CLI `audit` — detecção de conflitos em configs globais**: comando que detecta `~/.gemini/GEMINI.md`, `~/.claude/CLAUDE.md`, `.cursorrules` globais, `~/.config/codex/instructions.md` e alerta sobre regras conflitantes com a Prime Directive do repositório. Fonte: ADR 0004.
 - **Kubb / Swagger → hooks tipados + mocks** (Diego Fernandes, não é ai-guidelines): quando repositórios mantenedores tiverem APIs próprias, Kubb lê OpenAPI e gera código tipado. Apontamento cross-repo.
