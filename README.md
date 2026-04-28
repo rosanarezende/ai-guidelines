@@ -118,7 +118,8 @@ ai-guidelines/
 │   └── templates/              # Templates injetados pelo init/adopt no repo alvo
 ├── cli/                        # CLI local (ai-guidelines-cli.mjs)
 │   ├── core/                   # Engine, file-system, cli-input, content-merge
-│   ├── features/               # core/ (pointers, rules, gitattributes) + opt-in/ (prettier, husky, ci)
+│   ├── features/               # core/ (pointers, rules, gitattributes)
+│   │   └── opt-in/             # editorial/ (tdd, bdd, quality-gates) + infrastructure/ (prettier, husky, ci)
 │   └── formatters/             # Detecção de PM, formatter rival, monorepo
 ├── docs/                       # Documentação exposta ao consumidor
 │   ├── cli/                    # Business Rules da CLI
@@ -145,10 +146,10 @@ specs concluídas em [`.specify/specs/roadmap/historico.md`](.specify/specs/road
 
 Próximas iniciativas:
 
+- Refinamento de processos (Research Lifecycle, concorrência de specs)
+- Refatoração estrutural da CLI (TypeScript, path aliases, reorganização)
 - Publicação como package npm (`@ai-guidelines/core`)
 - CLI `audit` para detecção de conflitos em configs globais de IA
-- Adapters opt-in para integração com GitHub Projects / Jira / Linear
-- Automações cross-repo e expansão do ecossistema
 
 ---
 

@@ -36,6 +36,7 @@ Specs ou candidatas priorizadas para iniciar em seguida. Ordem indica prioridade
     2. **Boot obrigatório**: tornar a leitura do `backlog.md` mandatória no `AGENTS.md` durante o boot.
     3. **Research Lifecycle**: criar política inspirada no `NEXT.md` — ao encerrar uma spec, mover `research/` para localização canônica e mapear conteúdo relevante no `research-index.md`. Definir se pesquisas ficam junto à spec encerrada, migram para pasta central, ou ambos (link + cópia). Resolver a pasta temporária `researchs/` aplicando a nova política.
     4. **Automatizar ciclo de vida de Gaps**: workflow que facilite a alimentação de `NEXT.md` e `backlog.md` a partir de insights capturados no chat (absorvido da seção Oportunidades).
+    5. **Reorganização do Backlog**: simplificar estrutura e formato do `backlog.md`. O formato atual é confuso — mistura specs numeradas, candidatas sem número, oportunidades e bloqueadores sem hierarquia visual clara. Definir formato padronizado para entradas, critérios de promoção entre seções (Now/Next/Later) e regras de archiving.
   - **Origem:** Débitos levantados no `NEXT.md` da Spec 0016 + revisão pós-Spec 0008.
 
 - **cli-refactor** (Refatoração Estrutural da CLI)
