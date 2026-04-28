@@ -415,6 +415,25 @@ sobre um repo já curado (não faz sentido decidir visibilidade com pastas
 
 ---
 
+### Sub-bloco H — Dogfooding (Opt-ins Locais)
+
+**Estado atual:** O framework possui features opt-in poderosas (`quality-gates`, `tdd`, `bdd`, `prettier`, `husky`, `ci`), mas o próprio repositório `ai-guidelines` não as utiliza formalmente em sua pasta `.ai-guidelines/rules/`, o que prejudica a adoção e teste das mesmas.
+Além disso, se aplicarmos essas regras no repositório, corremos o risco de incluí-las indevidamente no pacote npm que será consumido.
+
+**Decisão:**
+
+- **Ativar as features opt-in no próprio repositório** executando o CLI localmente (`node cli/ai-guidelines-cli.mjs adopt --target . --yes`). Isso vai injetar as regras (quality gates, tdd, bdd) na pasta `.ai-guidelines/rules/`, garantindo que os agentes que trabalham neste repositório sigam esses processos.
+- **Proteção do Consumidor (Isolamento NPM):** O arquivo `package.json` **obrigatoriamente** receberá o array `"files"`, detalhando apenas as pastas que compõem o pacote distribuído (`["cli", ".core", "docs", "README.md", "CHANGELOG.md"]`). Isso garante que os diretórios locais de uso da equipe (`.ai-guidelines/`, `tests/`, `.github/`, `.husky/`, `research/`, etc) **não sejam publicados** no npm.
+
+**Mudanças em arquivos:**
+
+- `package.json` — Adição do array `"files"`.
+- `.ai-guidelines/rules/*` — Gerados/atualizados pelo `adopt` e adicionados ao controle de versão.
+- `.github/workflows/ai-guidelines-ci.yml` — Gerado pelo `adopt` (CI Baseline).
+- `.husky/`, `.prettierignore` — Configurados pelo `adopt`.
+
+---
+
 ## ✅ Critérios de Aceite Detalhados (DoD operacional)
 
 ### Sub-bloco A — Filtro doc → rules
@@ -505,6 +524,13 @@ sobre um repo já curado (não faz sentido decidir visibilidade com pastas
       sobreposição com 0015).
 - [ ] README e CONTRIBUTING do Sub-bloco F refletem o tom adequado à
       decisão (validação cruzada F ↔ G).
+
+### Sub-bloco H — Dogfooding
+
+- [x] `package.json` possui um array `"files"` configurado restritamente `["cli", ".core", "docs", "README.md", "CHANGELOG.md"]`.
+- [x] Execução de `node cli/ai-guidelines-cli.mjs adopt --target . --yes` roda com sucesso e injeta opt-ins.
+- [x] Arquivos `.ai-guidelines/rules/quality-gates.md`, `tdd.md`, `bdd.md` constam no repositório.
+- [x] O NPM não exibe `.ai-guidelines/` nem `.husky/` no pacote final (pode ser validado com `npm pack --dry-run`).
 
 ### Globais (toda a spec)
 

@@ -545,6 +545,17 @@ init` ou `adopt`. Exemplos concretos.
 
 ---
 
+## Fase 2.5 — Dogfooding (Opt-ins locais)
+
+> **Decisão:** Implementar as features opt-in no próprio repositório `ai-guidelines` para uso da equipe/agentes, sem contaminar os pacotes npm dos consumidores.
+
+- [x] **2.5.1** Modificar `package.json` para adicionar o array `"files"` contendo apenas os diretórios públicos (`["cli", ".core", "docs", "README.md", "CHANGELOG.md"]`). Isso previne que `.ai-guidelines/`, `.husky/`, `.github/`, `tests/` vazem para o pacote npm publicado.
+- [x] **2.5.2** Executar o CLI no repositório: `node cli/ai-guidelines-cli.mjs adopt --target . --yes` para instanciar todas as features opt-in (`quality-gates`, `tdd`, `bdd`, `prettier`, `husky`, `ci`) localmente.
+- [x] **2.5.3** Garantir que os arquivos gerados no repositório (ex: `.ai-guidelines/rules/*.md`) sejam adicionados ao git para guiar agentes futuros.
+- [x] **2.5.4** Validar se a suíte de testes passa após a injeção local.
+
+---
+
 ## Fase 3 — Encerramento
 
 - [ ] **3.1** Após merge: deletar `.specify/specs/0008-.../NEXT.md` (se

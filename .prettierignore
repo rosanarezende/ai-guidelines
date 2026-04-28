@@ -1,0 +1,27 @@
+# Build artifacts
+dist/
+build/
+out/
+coverage/
+
+# Dependencies
+node_modules/
+.pnp
+.yarn/
+
+# Editors
+.vscode/
+.idea/
+*.swp
+
+# OS / env
+.DS_Store
+.env.local
+.env.*.local
+
+# Minified bundles
+*.min.js
+*.min.css
+
+# Monorepo outputs
+packages/*/dist/
