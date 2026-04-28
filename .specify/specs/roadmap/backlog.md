@@ -18,6 +18,8 @@ Specs atualmente em branch ativa. Formato enxuto.
   Sub-blocos pendentes: **C** (AI Efficiency Guide), **D** (Step 0 Environment Awareness), **E** (Quality Gates + TDD opt-in), **F** (Onboarding/contribuição), **G** (ADR de visibilidade pública). Próxima entrega: F+G em PR pós-Spec 0015; depois C+D; E por último.
 - **spec 0015** — Auditoria Destrutiva (`feat/spec-0015-destructive-audit` → PR #22).
   Limpeza do baseline antes de F+G: remoção de docs herdados de projetos externos (`design/`, `cinematic-ui-boilerplates`, `advanced-ai-patterns`, placeholders vazios em `skills/` e `mcp/`, `ai-review-ritual`), movimentação de `projects.md.example` para `.specify/templates/`. Reparo de referências cruzadas no `README.md`.
+- **spec 0016** — Adapters Opt-in / SDD Extension System (`feat/spec-0016-adapters-opt-in`).
+  Adapters opt-in para sincronizar SDD (backlog) com ferramentas externas (GitHub Projects, Jira, Linear), preservando a fonte de verdade no repositório.
 
 ---
 
@@ -40,15 +42,6 @@ Specs ou candidatas que entram na fila depois de esgotado o Now. Ordem pode ser 
   - **Critérios de aceite (esboço):** `npx` funciona em projeto novo e existente;
   - **Pré-requisitos:** Spec 0005 concluída (✓); decisão de naming (bloqueador #1).
   - **Riscos antecipados:** GitHub tokens cross-repo exigem PAT fino ou GitHub App; Action que abre PRs em outro repo pode virar ruído sem gatilho correto (label `growth-relevant`); NPM org paga vs GitHub Packages.
-
-- **roadmap-adapters** (spec 0016 — Roadmap Adapters / SDD Extension System)
-  - **Fonte do insight:** segunda rodada de review da pesquisa de roadmap benchmarks (2026-04-24). Convergência: `github/spec-kit` trata o mesmo problema via extension system (issues #880, #889, #1088 e discussion #1549).
-  - **Insight central:** `backlog.md` funciona para projetos solo/pequenos. Para multi-time / GitHub-native / Jira / Linear é necessário **adapters opt-in** que sincronizem `backlog.md` ↔ tracker externo sem quebrar o princípio "agente retoma trabalho lendo apenas o repo".
-  - **Escopo potencial:** feature opt-in em `cli/features/opt-in/adapters/` com subadapters (`github-projects.mjs`, `github-issues.mjs`, `jira.mjs`, `linear.mjs`); v1 `backlog push`/`backlog pull` unidirecionais; conflito → repo ganha; config em `.ai-guidelines/adapters.yaml`.
-  - **Precedentes técnicos:** Imdone (sync GH Issues ↔ Markdown), Stately, GitBook, ReadMe, Harness Git Experience, canonical sync-issues-github-jira.
-  - **Pré-requisitos:** Spec 0008 mergeada (formato `backlog.md` canonizado + Sub-bloco G ADR de visibilidade); Spec 0015 mergeada (repo curado); credenciais seguras (cross-ref Spec 0012).
-  - **Riscos antecipados:** sync bidirecional é difícil (drift, double-edit) — v1 unidirecional; APIs Projects v2 vs Jira vs Linear têm modelos diferentes; credenciais externas = nova superfície de ataque; setup caro pode reduzir adoção.
-  - **Sinal de "está na hora":** (a) `ai-guidelines` virou público e primeiro consumidor multi-time adota; (b) consumidor real começa a usar GitHub Projects em paralelo e reclama; (c) outro framework SDD lança extension system oficial.
 
 - **regra-hierarquia** (spec 0011 — Hierarquia de regras por subdiretório)
   - **Fonte do insight:** Diego (Rocketseat), [Claude Code em monorepo full-stack](https://www.youtube.com/watch?v=ARYzqW0W7iI) 2026-01-22. Síntese em `.specify/specs/0008-governance-coherence/research/synthesis.md` Tema 1.
