@@ -4,6 +4,7 @@ import os from "node:os";
 import assert from "node:assert/strict";
 import { describe, it, before, after } from "node:test";
 import { applyRules } from "./rules.mjs";
+import { OPT_IN_RULE_FILES } from "../../core/cli-input.mjs";
 
 async function createTempDir(prefix) {
   return await fs.mkdtemp(path.join(os.tmpdir(), `ai-test-rules-${prefix}-`));
@@ -159,5 +160,41 @@ describe("Feature: Rules (Governance Modules)", () => {
       .catch(() => false);
     assert.strictEqual(exists, false, "Não deve persistir arquivos de regra em dry-run");
     assert.ok(actions.some((a) => a.includes("[dry-run] mkdir .ai-guidelines/rules")));
+  });
+
+  it("[GOVERNANCE] OPT_IN_RULE_FILES deve conter todos os arquivos de regras opt-in editoriais", () => {
+    assert.ok(
+      OPT_IN_RULE_FILES.includes("quality-gates.md"),
+      "quality-gates.md deve estar em OPT_IN_RULE_FILES"
+    );
+    assert.ok(OPT_IN_RULE_FILES.includes("tdd.md"), "tdd.md deve estar em OPT_IN_RULE_FILES");
+    assert.ok(OPT_IN_RULE_FILES.includes("bdd.md"), "bdd.md deve estar em OPT_IN_RULE_FILES");
+    assert.ok(
+      !OPT_IN_RULE_FILES.includes("prettier.md"),
+      "prettier NÃO deve gerar arquivo de regra"
+    );
+    assert.ok(!OPT_IN_RULE_FILES.includes("husky.md"), "husky NÃO deve gerar arquivo de regra");
+    assert.ok(!OPT_IN_RULE_FILES.includes("ci.md"), "ci NÃO deve gerar arquivo de regra");
+  });
+
+  it("[PRUNE] Deve proteger bdd.md como regra opt-in conhecida", async () => {
+    const subTarget = path.join(targetDir, "prune-protect-bdd");
+    const rulesDir = path.join(subTarget, ".ai-guidelines", "rules");
+    await fs.mkdir(rulesDir, { recursive: true });
+
+    const protectedPath = path.join(rulesDir, "bdd.md");
+    await fs.writeFile(protectedPath, "bdd content");
+
+    await applyRules(subTarget, { prune: true }, []);
+
+    const exists = await fs
+      .access(protectedPath)
+      .then(() => true)
+      .catch(() => false);
+    assert.strictEqual(
+      exists,
+      true,
+      "Arquivo bdd.md opt-in não deve ser removido pelo prune global"
+    );
   });
 });

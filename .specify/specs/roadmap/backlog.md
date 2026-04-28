@@ -44,10 +44,11 @@ Specs ou candidatas priorizadas para iniciar em seguida. Ordem indica prioridade
 
 ### Oportunidades Priorizadas (Sem Spec)
 
-- **DRY nos testes das features Opt-in**: Abstrair o boilerplate de testes de integração/sincronização de regras (tdd, bdd, quality-gates) em um utilitário genérico `test-helpers.mjs`. (Débito da Spec 0016).
+- ~~**DRY nos testes das features Opt-in**: Abstrair o boilerplate de testes de integração/sincronização de regras (tdd, bdd, quality-gates) em um utilitário genérico `test-helpers.mjs`. (Débito da Spec 0016).~~ **Resolvido:** PR #1, Fase 2.7 — `cli/features/opt-in/test-helpers.mjs` com factory `createOptInRuleTestSuite()`.
 - **Sobreposição Hierárquica na Arquitetura de Prompt**: parcialmente resolvido pelo ADR 0004 (Governance Single Responsibility) na Vaga E da spec 0004. Monitorar compliance em sessões futuras.
 - **CLI `audit` — detecção de conflitos em configs globais**: comando que detecta `~/.gemini/GEMINI.md`, `~/.claude/CLAUDE.md`, `.cursorrules` globais, `~/.config/codex/instructions.md` e alerta sobre regras conflitantes com a Prime Directive do repositório. Fonte: ADR 0004.
 - **Automatizar ciclo de vida de Gaps**: workflow que facilite a alimentação de `NEXT.md` e `backlog.md` a partir de insights capturados no chat.
+- **Scaffold de fundação de spec via CLI** (`ai-guidelines spec init <slug>`): gerar `spec.md` + `plan.md` + `tasks.md` + `NEXT.md` a partir dos boilerplates com placeholders.
 
 ---
 
@@ -111,7 +112,6 @@ Decisões ou trabalho que bloqueiam múltiplas specs. Cada bloqueador lista as s
 
 Ideias, insights e débitos pequenos que ainda não justificam uma spec dedicada.
 
-- **Scaffold de fundação de spec via CLI** (`ai-guidelines spec init <slug>`): gerar `spec.md` + `plan.md` + `tasks.md` + `NEXT.md` a partir dos boilerplates com placeholders. Candidato para spec futura (baixa prioridade).
 - **Catalogar skills em `skills/`** com metadados (quando usar, última verificação, exemplos). Cross-ref Spec 0015 (auditoria pode mover skills/ para `docs/`).
 - **Publicar versão sanitizada** do `ai-guidelines` como package da futura empresa quando aplicável (continuidade metodológica).
 - **Expor skills via servidor MCP local** para Claude Desktop / Claude CLI consumir dinamicamente.

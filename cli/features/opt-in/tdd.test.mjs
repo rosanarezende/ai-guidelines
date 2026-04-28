@@ -1,139 +1,27 @@
-import fs from "node:fs/promises";
-import os from "node:os";
-import path from "node:path";
-import assert from "node:assert/strict";
 import { describe, it, before, after } from "node:test";
 import { applyTdd } from "./tdd.mjs";
+import { createOptInRuleTestSuite } from "./test-helpers.mjs";
 
 /**
  * [BR-OPT-TDD] Suite de Validação da Feature TDD
+ *
+ * Usa o utilitário genérico createOptInRuleTestSuite para gerar
+ * os cenários BDD padrão (ativar PT, ativar EN, skip, prune, dry-run).
  */
-describe("Opt-in Feature: TDD [BR-OPT-TDD]", () => {
-  let targetDir;
-
-  before(async () => {
-    targetDir = await fs.mkdtemp(path.join(os.tmpdir(), "ai-opt-tdd-test-"));
-  });
-
-  after(async () => {
-    await fs.rm(targetDir, { recursive: true, force: true });
-  });
-
-  it("DADO a feature 'tdd' ativa com idioma PT QUANDO applyTdd ENTÃO deve sincronizar o arquivo pt no destino", async () => {
-    const actions = [];
-    const options = { features: ["tdd"], "dry-run": false, lang: "pt" };
-    const ptDir = path.join(targetDir, "pt-test");
-
-    // Stub mock do source para o teste unitário não depender do FS real caso não exista ainda
-    const mockSourceDir = path.join(ptDir, ".core", "rules", "opt-in");
-    await fs.mkdir(mockSourceDir, { recursive: true });
-    await fs.writeFile(path.join(mockSourceDir, "tdd-pt.md"), "# TDD PT");
-
-    await applyTdd(ptDir, options, { rootDir: ptDir }, actions);
-
-    const targetFile = path.join(ptDir, ".ai-guidelines", "rules", "tdd.md");
-    const exists = await fs
-      .access(targetFile)
-      .then(() => true)
-      .catch(() => false);
-
-    assert.ok(exists, "O arquivo tdd.md deve ser criado no consumidor");
-    assert.ok(
-      actions.includes("sync .ai-guidelines/rules/tdd.md (lang: pt)"),
-      "Deve registrar a ação de sincronização com idioma pt"
-    );
-
-    const content = await fs.readFile(targetFile, "utf8");
-    assert.ok(content.includes("# TDD PT"), "O conteúdo deve ser o do template pt");
-  });
-
-  it("DADO a feature 'tdd' ativa com idioma EN QUANDO applyTdd ENTÃO deve sincronizar o arquivo en no destino", async () => {
-    const actions = [];
-    const options = { features: ["tdd"], "dry-run": false, lang: "en" };
-    const enDir = path.join(targetDir, "en-test");
-
-    const mockSourceDir = path.join(enDir, ".core", "rules", "opt-in");
-    await fs.mkdir(mockSourceDir, { recursive: true });
-    await fs.writeFile(path.join(mockSourceDir, "tdd-en.md"), "# TDD EN");
-
-    await applyTdd(enDir, options, { rootDir: enDir }, actions);
-
-    const targetFile = path.join(enDir, ".ai-guidelines", "rules", "tdd.md");
-    const content = await fs.readFile(targetFile, "utf8");
-
-    assert.ok(content.includes("# TDD EN"), "O conteúdo deve ser o do template en");
-  });
-
-  it("DADO a feature 'tdd' desativada QUANDO applyTdd ENTÃO não deve criar o arquivo", async () => {
-    const actions = [];
-    const options = { features: [], "dry-run": false, lang: "pt" };
-    const subDir = path.join(targetDir, "skip-test");
-    await fs.mkdir(subDir);
-
-    await applyTdd(subDir, options, { rootDir: subDir }, actions);
-
-    const targetFile = path.join(subDir, ".ai-guidelines", "rules", "tdd.md");
-    const exists = await fs
-      .access(targetFile)
-      .then(() => true)
-      .catch(() => false);
-
-    assert.strictEqual(
-      exists,
-      false,
-      "O arquivo não deve ser criado se a feature estiver desativada"
-    );
-    assert.ok(
-      actions.some((a) => a.includes("skip tdd")),
-      "Deve registrar o skip nas ações"
-    );
-  });
-
-  it("DADO a feature 'tdd' desativada com flag --prune QUANDO applyTdd ENTÃO deve remover o arquivo órfão do consumidor", async () => {
-    const actions = [];
-    const options = { features: [], "dry-run": false, prune: true, lang: "pt" };
-    const subDir = path.join(targetDir, "prune-test");
-    const rulesDir = path.join(subDir, ".ai-guidelines", "rules");
-    await fs.mkdir(rulesDir, { recursive: true });
-
-    const targetFile = path.join(rulesDir, "tdd.md");
-    await fs.writeFile(targetFile, "old content");
-
-    await applyTdd(subDir, options, { rootDir: subDir }, actions);
-
-    const exists = await fs
-      .access(targetFile)
-      .then(() => true)
-      .catch(() => false);
-
-    assert.strictEqual(exists, false, "O arquivo deve ser removido pelo prune da própria feature");
-    assert.ok(
-      actions.some((a) => a.includes("prune .ai-guidelines/rules/tdd.md")),
-      "Deve registrar o prune nas ações"
-    );
-  });
-
-  it("DADO a feature 'tdd' ativa com --dry-run QUANDO applyTdd ENTÃO deve registrar a ação mas NÃO escrever o arquivo", async () => {
-    const actions = [];
-    const options = { features: ["tdd"], "dry-run": true, lang: "pt" };
-    const dryDir = path.join(targetDir, "dry-run-test");
-
-    const mockSourceDir = path.join(dryDir, ".core", "rules", "opt-in");
-    await fs.mkdir(mockSourceDir, { recursive: true });
-    await fs.writeFile(path.join(mockSourceDir, "tdd-pt.md"), "# TDD PT");
-
-    await applyTdd(dryDir, options, { rootDir: dryDir }, actions);
-
-    const targetFile = path.join(dryDir, ".ai-guidelines", "rules", "tdd.md");
-    const exists = await fs
-      .access(targetFile)
-      .then(() => true)
-      .catch(() => false);
-
-    assert.strictEqual(exists, false, "O arquivo não deve ser escrito em modo dry-run");
-    assert.ok(
-      actions.includes("sync .ai-guidelines/rules/tdd.md (lang: pt)"),
-      "Deve registrar a intenção no log de ações"
-    );
-  });
+createOptInRuleTestSuite({
+  featureName: "tdd",
+  applyFn: applyTdd,
+  outputFileName: "tdd.md",
+  suiteLabel: "[BR-OPT-TDD]",
+  syncActionPattern: "sync .ai-guidelines/rules/tdd.md",
+  pruneActionPattern: "prune .ai-guidelines/rules/tdd.md",
+  usesI18n: true,
+  sourceFileNamePt: "tdd-pt.md",
+  sourceFileNameEn: "tdd-en.md",
+  mockContentPt: "# TDD PT",
+  mockContentEn: "# TDD EN",
+  describe,
+  it,
+  before,
+  after,
 });

@@ -23,6 +23,22 @@ const FEATURE_DESCRIPTIONS = {
   bdd: "BDD: Comportamento Guiado por Testes (Dado/Quando/Então em Português ou Inglês)",
 };
 
+/**
+ * Features de infraestrutura — NÃO geram arquivos em .ai-guidelines/rules/.
+ * Apenas as features NÃO listadas aqui produzem regras editoriais.
+ */
+const INFRASTRUCTURE_FEATURES = ["prettier", "husky", "ci"];
+
+/**
+ * Nomes dos arquivos .md gerados por features opt-in editoriais.
+ * Derivado programaticamente de FEATURE_OPTIONS, filtrando features
+ * de infraestrutura. Usado pelo motor de prune em rules.mjs para
+ * proteger arquivos opt-in ativos durante a limpeza global.
+ */
+export const OPT_IN_RULE_FILES = FEATURE_OPTIONS.filter(
+  (f) => !INFRASTRUCTURE_FEATURES.includes(f)
+).map((f) => `${f}.md`);
+
 export function isSupportedMode(mode) {
   return SUPPORTED_MODES.includes(mode);
 }

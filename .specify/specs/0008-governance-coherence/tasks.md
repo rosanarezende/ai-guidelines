@@ -559,6 +559,35 @@ init` ou `adopt`. Exemplos concretos.
 
 ---
 
+## ~~Fase 2.6 — Spec Init Command (Scaffold)~~ [REMOVIDA DO ESCOPO]
+
+> **Decisão (2026-04-28):** Removida deste PR por recomendação do code review.
+> O `spec init` é uma feature CLI nova sem relação com "Governance Coherence".
+> Mantido como item oportunista no `roadmap/backlog.md` (L51) para promoção
+> a spec separada quando priorizado.
+
+---
+
+## Fase 2.7 — Correções Pós-Review
+
+> **Origem:** Code review do PR #1 (2026-04-28).
+
+- [x] **2.7.1** Fix bug: `KNOWN_OPT_IN_RULES` faltava `"bdd.md"`. Derivar lista
+      programaticamente de `FEATURE_OPTIONS` via `OPT_IN_RULE_FILES` em `cli-input.mjs`,
+      filtrando features de infraestrutura (`prettier`, `husky`, `ci`).
+- [x] **2.7.2** Criar `test-helpers.mjs` com factory `createOptInRuleTestSuite()` para
+      eliminar boilerplate duplicado entre `quality-gates.test.mjs`, `tdd.test.mjs`
+      e `bdd.test.mjs` (DRY nos testes opt-in — débito do backlog L47).
+- [x] **2.7.3** Reescrever os 3 arquivos de teste opt-in para usar o helper DRY.
+- [x] **2.7.4** Adicionar teste de governança `[GOVERNANCE]` em `rules.test.mjs` validando
+      que `OPT_IN_RULE_FILES` contém todos os arquivos esperados e não contém features
+      de infraestrutura.
+- [x] **2.7.5** Adicionar teste explícito `[PRUNE]` para proteção de `bdd.md` no
+      prune global.
+- [x] **2.7.6** Validar suíte completa: 107/107 testes, cobertura 93%+.
+
+---
+
 ## Fase 3 — Encerramento
 
 - [ ] **3.1** Após merge: deletar `.specify/specs/0008-.../NEXT.md` (se

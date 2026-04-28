@@ -1,8 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { ROOT_DIR } from "../../core/file-system.mjs";
-
-const KNOWN_OPT_IN_RULES = ["quality-gates.md", "tdd.md"];
+import { OPT_IN_RULE_FILES } from "../../core/cli-input.mjs";
 
 /**
  * Sincroniza as regras de governança para .ai-guidelines/rules/
@@ -46,7 +45,7 @@ export async function applyRules(targetDir, options, actions) {
   if (prune) {
     const targetFiles = await fs.readdir(targetRulesDir);
     for (const file of targetFiles) {
-      if (!files.includes(file) && !KNOWN_OPT_IN_RULES.includes(file)) {
+      if (!files.includes(file) && !OPT_IN_RULE_FILES.includes(file)) {
         if (!dryRun) {
           await fs.unlink(path.join(targetRulesDir, file));
         }
