@@ -1,29 +1,53 @@
-# TDD & BDD: Desenvolvimento Guiado por Testes
+# BDD: Comportamento Guiado por Testes (Dado/Quando/Então)
 
-A adoção de TDD/BDD é recomendada para garantir a estabilidade de sistemas complexos e facilitar a refatoração segura por agentes de IA.
-
----
-
-## Ciclo Obrigatório
-
-1. **RED:** Escreva um teste que falhe para a nova funcionalidade ou correção.
-2. **GREEN:** Escreva o código mínimo necessário para fazer o teste passar.
-3. **REFACTOR:** Melhore o código mantendo o teste verde.
+> Esta regra instrui agentes de IA a estruturarem testes no formato BDD.
+> **Foco:** linguagem ubíqua, rastreabilidade e documentação viva.
 
 ---
 
-## Padrão de Escrita (BDD)
+## Formato Obrigatório
 
-Utilize a estrutura **DADO / QUANDO / ENTÃO** (ou Given/When/Then) em Português do Brasil para descrever comportamentos:
+Todos os testes DEVEM usar a estrutura **DADO / QUANDO / ENTÃO** em Português do Brasil:
 
-- **DADO** [cenário inicial / estado do sistema]
+- **DADO** [cenário inicial / pré-condição / estado do sistema]
 - **QUANDO** [ação executada pelo usuário ou sistema]
-- **ENTÃO** [resultado esperado / verificação]
+- **ENTÃO** [resultado esperado / asserção]
+
+### Exemplo
+
+```javascript
+it("DADO usuário sem permissão QUANDO tenta acessar painel ENTÃO retorna erro 403", () => {
+  // ...
+});
+```
 
 ---
 
-## Regras de Ouro
+## Rastreabilidade (Business Rules)
 
-- **Um Teste, Uma Intenção:** Evite testes "omni-bus" que validam múltiplos comportamentos não relacionados.
-- **Isolamento:** Testes unitários não devem depender de serviços externos (use mocks/stubs).
-- **IA-First Testing:** Sempre peça para a IA gerar os casos de borda (edge cases) baseados na spec antes de implementar a lógica.
+- Cada regra de negócio documentada DEVE ter um identificador único (ex: `[BR-CLI-SYNC-01]`).
+- Os testes que validam essa regra DEVEM incluir o identificador no nome.
+- Isso garante que qualquer regressão seja rastreável até a spec original.
+
+```javascript
+it("[BR-CLI-SYNC-01] DADO baseline desatualizado QUANDO executado adopt ENTÃO sincroniza apenas arquivos alterados", () => {
+  // ...
+});
+```
+
+---
+
+## Princípios BDD
+
+- **Linguagem Ubíqua:** Testes devem ser legíveis por humanos não-técnicos. Evite jargão de implementação nos nomes.
+- **Documentação Viva:** A suíte de testes serve como documentação executável do sistema. Se o teste não descreve o comportamento com clareza, reescreva-o.
+- **Cenários Atômicos:** Cada `it()` descreve exatamente um cenário. Não combine múltiplos fluxos.
+
+---
+
+## Regras para Agentes de IA
+
+- Ao criar testes, SEMPRE use o formato DADO/QUANDO/ENTÃO no nome do caso de teste.
+- Ao receber uma business rule (`[BR-*]`), inclua o ID no teste correspondente.
+- Gere cenários para fluxo feliz, fluxo alternativo e casos de erro.
+- Priorize legibilidade sobre concisão nos nomes dos testes.

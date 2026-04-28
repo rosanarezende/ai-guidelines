@@ -1,29 +1,53 @@
-# TDD & BDD: Desenvolvimento Guiado por Testes
+# BDD: Behavior-Driven Development (Given/When/Then)
 
-A adoção de TDD/BDD é recomendada para garantir a estabilidade de sistemas complexos e facilitar a refatoração segura por agentes de IA.
-
----
-
-## Ciclo Obrigatório
-
-1. **RED:** Escreva um teste que falhe para a nova funcionalidade ou correção.
-2. **GREEN:** Escreva o código mínimo necessário para fazer o teste passar.
-3. **REFACTOR:** Melhore o código mantendo o teste verde.
+> This rule instructs AI agents to structure tests in BDD format.
+> **Focus:** ubiquitous language, traceability and living documentation.
 
 ---
 
-## Padrão de Escrita (BDD)
+## Mandatory Format
 
-Utilize a estrutura **DADO / QUANDO / ENTÃO** (ou Given/When/Then) em Português do Brasil para descrever comportamentos:
+All tests MUST use the **GIVEN / WHEN / THEN** structure:
 
-- **DADO** [cenário inicial / estado do sistema]
-- **QUANDO** [ação executada pelo usuário ou sistema]
-- **ENTÃO** [resultado esperado / verificação]
+- **GIVEN** [initial scenario / precondition / system state]
+- **WHEN** [action performed by the user or system]
+- **THEN** [expected result / assertion]
+
+### Example
+
+```javascript
+it("GIVEN user without permission WHEN accessing dashboard THEN returns 403 error", () => {
+  // ...
+});
+```
 
 ---
 
-## Regras de Ouro
+## Traceability (Business Rules)
 
-- **Um Teste, Uma Intenção:** Evite testes "omni-bus" que validam múltiplos comportamentos não relacionados.
-- **Isolamento:** Testes unitários não devem depender de serviços externos (use mocks/stubs).
-- **IA-First Testing:** Sempre peça para a IA gerar os casos de borda (edge cases) baseados na spec antes de implementar a lógica.
+- Each documented business rule MUST have a unique identifier (e.g., `[BR-CLI-SYNC-01]`).
+- Tests validating that rule MUST include the identifier in their name.
+- This ensures any regression is traceable back to the original spec.
+
+```javascript
+it("[BR-CLI-SYNC-01] GIVEN outdated baseline WHEN adopt is executed THEN syncs only changed files", () => {
+  // ...
+});
+```
+
+---
+
+## BDD Principles
+
+- **Ubiquitous Language:** Tests should be readable by non-technical humans. Avoid implementation jargon in test names.
+- **Living Documentation:** The test suite serves as executable documentation of the system. If a test doesn't clearly describe the behavior, rewrite it.
+- **Atomic Scenarios:** Each `it()` describes exactly one scenario. Don't combine multiple flows.
+
+---
+
+## Rules for AI Agents
+
+- When creating tests, ALWAYS use the GIVEN/WHEN/THEN format in the test case name.
+- When receiving a business rule (`[BR-*]`), include the ID in the corresponding test.
+- Generate scenarios for happy path, alternative flow and error cases.
+- Prioritize readability over brevity in test names.
