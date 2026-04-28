@@ -20,16 +20,33 @@ describe("Feature: CI (GitHub Actions Governance)", () => {
     await fs.rm(targetDir, { recursive: true, force: true });
   });
 
-  it("[BEHAVIOR] Deve criar workflow com runner correto (npm/pnpm/yarn)", async () => {
-    const subTarget = path.join(targetDir, "npm-runner");
-    await fs.mkdir(subTarget, { recursive: true });
+  it("[BEHAVIOR] Deve criar workflow com comandos de instalação adequados para cada package manager", async () => {
+    const managers = [
+      { id: "npm", install: "npm ci", check: "npm run check" },
+      { id: "yarn-berry", install: "yarn install --immutable", check: "yarn check" },
+    ];
 
-    const context = { packageManager: { id: "npm", runner: "npm run" } };
-    await applyCi(subTarget, { features: ["ci"] }, context, []);
+    for (const pm of managers) {
+      const subTarget = path.join(targetDir, `runner-${pm.id}`);
+      await fs.mkdir(subTarget, { recursive: true });
 
-    const workflowPath = path.join(subTarget, ".github", "workflows", "ai-guidelines-ci.yml");
-    const content = await fs.readFile(workflowPath, "utf8");
-    assert.match(content, /npm install/, "Deve usar npm no workflow");
+      const context = { packageManager: { id: pm.id } };
+      await applyCi(subTarget, { features: ["ci"] }, context, []);
+
+      const workflowPath = path.join(subTarget, ".github", "workflows", "ai-guidelines-ci.yml");
+      const content = await fs.readFile(workflowPath, "utf8");
+
+      assert.match(
+        content,
+        new RegExp(pm.install.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")),
+        `Deve usar '${pm.install}' no workflow`
+      );
+      assert.match(
+        content,
+        new RegExp(pm.check.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")),
+        `Deve usar '${pm.check}' no workflow`
+      );
+    }
   });
 
   it("[PROTECTION] Não deve sobrescrever workflow existente sem --force", async () => {

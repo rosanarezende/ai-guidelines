@@ -552,7 +552,10 @@ init` ou `adopt`. Exemplos concretos.
 - [x] **2.5.1** Modificar `package.json` para adicionar o array `"files"` contendo apenas os diretórios públicos (`["cli", ".core", "docs", "README.md", "CHANGELOG.md"]`). Isso previne que `.ai-guidelines/`, `.husky/`, `.github/`, `tests/` vazem para o pacote npm publicado.
 - [x] **2.5.2** Executar o CLI no repositório: `node cli/ai-guidelines-cli.mjs adopt --target . --yes` para instanciar todas as features opt-in (`quality-gates`, `tdd`, `bdd`, `prettier`, `husky`, `ci`) localmente.
 - [x] **2.5.3** Garantir que os arquivos gerados no repositório (ex: `.ai-guidelines/rules/*.md`) sejam adicionados ao git para guiar agentes futuros.
-- [x] **2.5.4** Validar se a suíte de testes passa após a injeção local.
+- [x] **2.5.4** Atualizar teste `cli/features/opt-in/ci.test.mjs` para refletir os novos comandos esperados (BDD/TDD).
+- [x] **2.5.5** Corrigir `cli/features/opt-in/ci.mjs` para usar formatadores de `package-context.mjs` (resolveInstallCommand e resolveCiRunner).
+- [x] **2.5.6** Re-executar o CLI localmente para consertar o arquivo de workflow `.github/workflows/ai-guidelines-ci.yml`.
+- [x] **2.5.7** Validar se a suíte de testes (integração e unitários) passa após as correções.
 
 ---
 

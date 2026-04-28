@@ -24,7 +24,7 @@ jobs:
         run: corepack enable
 
       - name: Install dependencies
-        run: yarn-berry install
+        run: yarn install --immutable
 
       - name: Validate AI-first baseline
-        run: node .yarn/releases/yarn-4.1.1.cjs check
+        run: yarn check
