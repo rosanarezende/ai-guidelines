@@ -588,6 +588,26 @@ init` ou `adopt`. Exemplos concretos.
 
 ---
 
+## Fase 2.8 — Taxonomia Editorial vs Infraestrutura
+
+> **Origem:** Observação pós-review (2026-04-28): a distinção entre features editoriais e de infraestrutura não estava clara na estrutura de pastas, código-fonte nem documentação.
+
+- [x] **2.8.1** Criar subpastas `cli/features/opt-in/editorial/` e `cli/features/opt-in/infrastructure/`.
+- [x] **2.8.2** Mover quality-gates, tdd, bdd, test-helpers para `editorial/`.
+- [x] **2.8.3** Mover prettier, husky, ci para `infrastructure/`.
+- [x] **2.8.4** Atualizar imports em `engine.mjs` com caminhos novos e comentários semânticos.
+- [x] **2.8.5** Atualizar imports relativos internos (`../../core/` → `../../../core/`).
+- [x] **2.8.6** Reestruturar `cli-input.mjs`: exportar `EDITORIAL_FEATURES` e
+      `INFRASTRUCTURE_FEATURES` como fonte de verdade, derivar `FEATURE_OPTIONS`
+      por composição, simplificar `OPT_IN_RULE_FILES`.
+- [x] **2.8.7** Reescrever `docs/features.md` com terminologia "Infraestrutura"
+      consistente, tabela de taxonomia e referências aos paths do source.
+- [x] **2.8.8** Adicionar business rules `[BR-CLI-EDITORIAL-*]` e `[BR-CLI-INFRA]`
+      em `docs/cli/ai-guidelines-cli.md`, renumerar seções.
+- [x] **2.8.9** Validar suíte completa: 107/107 testes, cobertura 93%+.
+
+---
+
 ## Fase 3 — Encerramento
 
 - [ ] **3.1** Após merge: deletar `.specify/specs/0008-.../NEXT.md` (se

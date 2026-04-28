@@ -114,7 +114,52 @@ ENTÃO deve injetar um comando de fallback (echo) no YAML para garantir que o pi
 
 ---
 
-## 5. Proteção de Dados e Sanitização
+## 5. Features Opt-in — Editoriais (📝) [BR-CLI-EDITORIAL]
+
+> Features que sincronizam arquivos `.md` para `.ai-guidelines/rules/` do consumidor.
+> **CLI source**: `cli/features/opt-in/editorial/`
+
+### [BR-CLI-EDITORIAL-01] Taxonomia de Features
+
+DADO o sistema de features opt-in
+QUANDO classificadas
+ENTÃO devem seguir duas categorias: **Editoriais** (geram `.md` em `.ai-guidelines/rules/`) e **Infraestrutura** (modificam `package.json`, hooks, CI). A lista canônica é derivada de `EDITORIAL_FEATURES` e `INFRASTRUCTURE_FEATURES` em `cli-input.mjs`.
+
+### [BR-CLI-EDITORIAL-02] Sincronização de Regras
+
+DADO uma feature editorial ativa (ex: `quality-gates`, `tdd`, `bdd`)
+QUANDO executada
+ENTÃO deve copiar o template de `.core/rules/opt-in/<feature>.md` para `.ai-guidelines/rules/<feature>.md` no consumidor, respeitando idioma (`lang`) quando aplicável.
+
+### [BR-CLI-EDITORIAL-03] Prune Individual
+
+DADO uma feature editorial desativada com flag `--prune`
+QUANDO executada
+ENTÃO deve remover o arquivo correspondente do repositório consumidor (`.ai-guidelines/rules/<feature>.md`), sem afetar outros arquivos de regras (core ou outras features).
+
+### [BR-CLI-EDITORIAL-04] Proteção no Prune Global
+
+DADO o motor de prune global (via `applyRules`)
+QUANDO limpa arquivos órfãos de `.ai-guidelines/rules/`
+ENTÃO deve proteger todos os arquivos listados em `OPT_IN_RULE_FILES` (derivado de `EDITORIAL_FEATURES`), independentemente de estarem ativos ou não na execução corrente.
+
+---
+
+## 6. Features Opt-in — Infraestrutura (⚡) [BR-CLI-INFRA]
+
+> Features que modificam `package.json`, hooks e CI/CD do consumidor.
+> **CLI source**: `cli/features/opt-in/infrastructure/`
+> **Nota**: Não geram arquivos de regras em `.ai-guidelines/rules/`.
+
+As business rules para features de infraestrutura estão documentadas nas seções anteriores:
+
+- Prettier → [BR-CLI-SYNC-05](#br-cli-sync-05-gestão-inteligente-de-prettierignore), [BR-CLI-PKG-01](#br-cli-pkg-01-aborto-por-formatter-rival)
+- Husky → [BR-CLI-HOOKS-01](#br-cli-hooks-01-pré-requisito-de-scripts), [BR-CLI-HOOKS-02](#br-cli-hooks-02-fusão-de-conteúdo-de-hook)
+- CI → [BR-CLI-CI-01](#br-cli-ci-01-atualização-conservadora-de-workflow-existente) a [BR-CLI-CI-03](#br-cli-ci-03-fallback-de-script-de-check)
+
+---
+
+## 7. Proteção de Dados e Sanitização
 
 ### [BR-CLI-FS-01] Bloqueio de Inicialização em Raiz de Sistema
 
@@ -124,7 +169,7 @@ ENTÃO deve disparar um erro crítico e abortar a operação para evitar injeç�
 
 ---
 
-## 6. Processamento de Entrada [BR-CLI-INPUT]
+## 8. Processamento de Entrada [BR-CLI-INPUT]
 
 ### [BR-CLI-INPUT-01] Parsing de Flags e Argumentos
 
@@ -140,7 +185,7 @@ ENTÃO deve permitir apenas `init` ou `adopt`, disparando a ajuda (`help`) em ca
 
 ---
 
-## 7. Entrada Guiada (Wizard) [BR-CLI-WIZARD]
+## 9. Entrada Guiada (Wizard) [BR-CLI-WIZARD]
 
 ### [BR-CLI-WIZARD-01] Ativação Automática (Interatividade)
 
@@ -162,7 +207,7 @@ ENTÃO deve emitir um alerta de erro e repetir a pergunta indefinidamente até q
 
 ---
 
-## 8. Orquestração de Alto Nível (Engine) [BR-CLI-ENG]
+## 10. Orquestração de Alto Nível (Engine) [BR-CLI-ENG]
 
 ### [BR-CLI-ENG-01] Guarda de Inicialização (Conflict Check)
 
@@ -182,3 +227,4 @@ ENTÃO deve oferecer ao usuário a opção de instalar as dependências imediata
 
 - **v0.1.0**: Mapeamento das regras core de sincronização e proteção de framework.
 - **v0.2.0**: Mapeamento da camada de Shell (Input/Wizard/Engine).
+- **v0.3.0**: Taxonomia Editorial/Infraestrutura e business rules de features opt-in.

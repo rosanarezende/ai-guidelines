@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { mergeHookContent } from "../../core/content-merge.mjs";
-import { mergePackageJson } from "../../formatters/package-context.mjs";
+import { mergeHookContent } from "../../../core/content-merge.mjs";
+import { mergePackageJson } from "../../../formatters/package-context.mjs";
 
 /**
  * Governança de Automação (Husky Git Hooks)

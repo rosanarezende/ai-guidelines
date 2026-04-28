@@ -28,11 +28,22 @@ Estas funcionalidades são aplicadas automaticamente para garantir a integridade
 
 ## ⚡ Features Opt-in (Configuráveis)
 
-Funcionalidades que você pode escolher ativar via Wizard ou flags no `init`/`adopt`. Elas são divididas em duas categorias arquiteturais:
+Funcionalidades que você pode escolher ativar via Wizard ou flags no `init`/`adopt`. Elas são divididas em **duas categorias arquiteturais**:
 
-### Regras Editoriais (Opt-in)
+| Categoria          | Símbolo | O que fazem                                    | Onde ficam no source  |
+| :----------------- | :------ | :--------------------------------------------- | :-------------------- |
+| **Editoriais**     | 📝      | Sincronizam `.md` para `.ai-guidelines/rules/` | `.core/rules/opt-in/` |
+| **Infraestrutura** | ⚡      | Modificam `package.json`, hooks, CI/CD         | `.core/templates/`    |
+
+> **Nota**: Features de infraestrutura **não geram arquivos de regras**. Elas configuram ferramentas externas (Prettier, Husky, GitHub Actions) no projeto consumidor.
+
+---
+
+### 📝 Editoriais (sincronizam regras para `.ai-guidelines/rules/`)
 
 Arquivos de texto Markdown sincronizados para o consumidor. Ficam armazenados internamente em `.core/rules/opt-in/` para que o motor não os force como regras obrigatórias (diferente do `global-rules.md`). Quando desativadas via flag `--prune`, os scripts das features limpam ativamente os arquivos do repositório consumidor.
+
+**CLI source**: `cli/features/opt-in/editorial/`
 
 #### 4. Quality Gates
 
@@ -41,14 +52,16 @@ Arquivos de texto Markdown sincronizados para o consumidor. Ficam armazenados in
 
 #### 5. TDD / BDD
 
-- **O que faz**: Adiciona `tdd.md` em `.ai-guidelines/rules/`. Estabelece ciclo RED-GREEN-REFACTOR e testes no formato BDD em PT-BR como padrão imperativo.
+- **O que faz**: Adiciona `tdd.md` e/ou `bdd.md` em `.ai-guidelines/rules/`. Estabelece ciclo RED-GREEN-REFACTOR e testes no formato BDD em PT-BR ou EN como padrão imperativo.
 - **Por que**: Reduz dívida técnica em features extensas que precisam de validação estrutural.
 
 ---
 
-### Injeções Funcionais (Opt-in)
+### ⚡ Infraestrutura (modificam package.json, hooks, CI/CD)
 
-Modificam a infraestrutura (configurações, `package.json`, etc.) do projeto consumidor.
+Modificam a infraestrutura (configurações, `package.json`, workflows) do projeto consumidor. **Não geram arquivos de regras.**
+
+**CLI source**: `cli/features/opt-in/infrastructure/`
 
 #### 6. Prettier (Styling)
 

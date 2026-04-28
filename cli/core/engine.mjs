@@ -10,12 +10,14 @@ import {
 import { applyPointers } from "../features/core/pointers.mjs";
 import { applyGitattributes } from "../features/core/gitattributes.mjs";
 import { applyRules } from "../features/core/rules.mjs";
-import { applyPrettier } from "../features/opt-in/prettier.mjs";
-import { applyHusky } from "../features/opt-in/husky.mjs";
-import { applyCi } from "../features/opt-in/ci.mjs";
-import { applyQualityGates } from "../features/opt-in/quality-gates.mjs";
-import { applyTdd } from "../features/opt-in/tdd.mjs";
-import { applyBdd } from "../features/opt-in/bdd.mjs";
+// Opt-in — Infraestrutura (modificam package.json, hooks, CI)
+import { applyPrettier } from "../features/opt-in/infrastructure/prettier.mjs";
+import { applyHusky } from "../features/opt-in/infrastructure/husky.mjs";
+import { applyCi } from "../features/opt-in/infrastructure/ci.mjs";
+// Opt-in — Editoriais (sincronizam .md para .ai-guidelines/rules/)
+import { applyQualityGates } from "../features/opt-in/editorial/quality-gates.mjs";
+import { applyTdd } from "../features/opt-in/editorial/tdd.mjs";
+import { applyBdd } from "../features/opt-in/editorial/bdd.mjs";
 import { assertSafeInitTarget } from "./content-merge.mjs";
 import { buildFormatterRivalGuidance, buildMonorepoGuidance } from "./guidance-helpers.mjs";
 import { getInstallHint, promptUser, runInstall } from "./install-runtime.mjs";
@@ -158,12 +160,16 @@ export async function execute(mode, rawOptions) {
     }
   }
 
-  // 3. Features Opcionais
+  // 3. Features Opt-in
   try {
     await applyRules(targetDir, options, actions);
+
+    // 3a. Infraestrutura (modificam package.json, hooks, CI)
     await applyPrettier(targetDir, options, context, actions);
     await applyHusky(targetDir, options, context, actions);
     await applyCi(targetDir, options, context, actions);
+
+    // 3b. Editoriais (sincronizam .md para .ai-guidelines/rules/)
     await applyQualityGates(targetDir, options, context, actions);
     await applyTdd(targetDir, options, context, actions);
     await applyBdd(targetDir, options, context, actions);

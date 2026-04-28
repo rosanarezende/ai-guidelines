@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { ROOT_DIR } from "../../core/file-system.mjs";
-import { resolveInstallCommand, resolveCiRunner } from "../../formatters/package-context.mjs";
+import { ROOT_DIR } from "../../../core/file-system.mjs";
+import { resolveInstallCommand, resolveCiRunner } from "../../../formatters/package-context.mjs";
 
 /**
  * Governança de CI (GitHub Actions)

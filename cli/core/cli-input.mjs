@@ -13,31 +13,37 @@ const WIZARD_DEFAULTS = {
   features: "prettier,husky,ci,quality-gates,tdd,bdd",
 };
 
-const FEATURE_OPTIONS = ["prettier", "husky", "ci", "quality-gates", "tdd", "bdd"];
+/**
+ * Taxonomia das features opt-in.
+ *
+ * Editoriais    → sincronizam .md para .ai-guidelines/rules/ do consumidor.
+ * Infraestrutura → modificam package.json, hooks, CI/CD do consumidor.
+ *
+ * FEATURE_OPTIONS é derivado por composição; as listas tipadas
+ * (EDITORIAL / INFRASTRUCTURE) são a fonte de verdade.
+ */
+export const EDITORIAL_FEATURES = ["quality-gates", "tdd", "bdd"];
+export const INFRASTRUCTURE_FEATURES = ["prettier", "husky", "ci"];
+const FEATURE_OPTIONS = [...INFRASTRUCTURE_FEATURES, ...EDITORIAL_FEATURES];
+
 const FEATURE_DESCRIPTIONS = {
-  prettier: "Estilo e Padronização (Baseline Prettier)",
-  husky: "Automação Local (Git Hooks)",
-  ci: "Integração Contínua (GitHub Actions Workflow)",
-  "quality-gates": "Gates objetivos para código gerado por IA (Recomendado)",
-  tdd: "TDD: Ciclo de Desenvolvimento Guiado por Testes (Red-Green-Refactor)",
-  bdd: "BDD: Comportamento Guiado por Testes (Dado/Quando/Então em Português ou Inglês)",
+  // Infraestrutura
+  prettier: "⚡ Estilo e Padronização (Baseline Prettier)",
+  husky: "⚡ Automação Local (Git Hooks)",
+  ci: "⚡ Integração Contínua (GitHub Actions Workflow)",
+  // Editoriais
+  "quality-gates": "📝 Gates objetivos para código gerado por IA (Recomendado)",
+  tdd: "📝 TDD: Ciclo de Desenvolvimento Guiado por Testes (Red-Green-Refactor)",
+  bdd: "📝 BDD: Comportamento Guiado por Testes (Dado/Quando/Então em Português ou Inglês)",
 };
 
 /**
- * Features de infraestrutura — NÃO geram arquivos em .ai-guidelines/rules/.
- * Apenas as features NÃO listadas aqui produzem regras editoriais.
- */
-const INFRASTRUCTURE_FEATURES = ["prettier", "husky", "ci"];
-
-/**
  * Nomes dos arquivos .md gerados por features opt-in editoriais.
- * Derivado programaticamente de FEATURE_OPTIONS, filtrando features
- * de infraestrutura. Usado pelo motor de prune em rules.mjs para
- * proteger arquivos opt-in ativos durante a limpeza global.
+ * Derivado programaticamente de EDITORIAL_FEATURES.
+ * Usado pelo motor de prune em rules.mjs para proteger arquivos
+ * opt-in ativos durante a limpeza global.
  */
-export const OPT_IN_RULE_FILES = FEATURE_OPTIONS.filter(
-  (f) => !INFRASTRUCTURE_FEATURES.includes(f)
-).map((f) => `${f}.md`);
+export const OPT_IN_RULE_FILES = EDITORIAL_FEATURES.map((f) => `${f}.md`);
 
 export function isSupportedMode(mode) {
   return SUPPORTED_MODES.includes(mode);
