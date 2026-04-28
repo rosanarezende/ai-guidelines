@@ -46,3 +46,13 @@ O objetivo desta spec é padronizar **Adapters Opt-in** para que os agentes de I
 
 - **Pré-requisitos**: Spec 0008 (Governance Coherence) define o workflow básico das features opt-in.
 - **Riscos macro**: Complexidade de setup para o consumidor final (ex: a necessidade de configurar tokens de API ou MCP servers para que o agente possa interagir com o Jira/Linear).
+
+---
+
+## 🛑 Post-mortem / Motivo do Pivot (2026-04-27)
+
+A especificação foi **Pausada/Pivotada** após a fase inicial de prototipação. A premissa original assumia que criar arquivos de regras `.md` seria suficiente para os agentes automatizarem o GitHub Projects V2.
+
+Durante a execução orientada a testes (TDD), ficou claro que essa era uma "ilusão de automação". A integração real com Trackers modernos exige a injeção e uso de scripts executáveis (ex: `gh cli` ou GraphQL) devido a identificadores globais e complexidade das APIs, o que foge completamente do escopo "Opt-in de Markdown".
+
+Os débitos mapeados nesta sessão de pesquisa foram movidos para o `backlog.md` como as candidatas `tracker-automation` (para tratar a integração profunda isoladamente) e `process-refinement`. O código do CLI prototipado foi revertido para preservar a estabilidade da branch principal.

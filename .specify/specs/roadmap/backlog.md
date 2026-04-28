@@ -18,8 +18,6 @@ Specs atualmente em branch ativa. Formato enxuto.
   Sub-blocos pendentes: **C** (AI Efficiency Guide), **D** (Step 0 Environment Awareness), **E** (Quality Gates + TDD opt-in), **F** (Onboarding/contribuição), **G** (ADR de visibilidade pública). Próxima entrega: F+G em PR pós-Spec 0015; depois C+D; E por último.
 - **spec 0015** — Auditoria Destrutiva (`feat/spec-0015-destructive-audit` → PR #22).
   Limpeza do baseline antes de F+G: remoção de docs herdados de projetos externos (`design/`, `cinematic-ui-boilerplates`, `advanced-ai-patterns`, placeholders vazios em `skills/` e `mcp/`, `ai-review-ritual`), movimentação de `projects.md.example` para `.specify/templates/`. Reparo de referências cruzadas no `README.md`.
-- **spec 0016** — Adapters Opt-in (Pausada/Pivotada).
-  O design provou ser excessivamente simplório. A spec atuou como Research/Discovery e gerou débitos mapeados nas próximas filas (automação real e refatoração). A branch será limpa e fechada ou reaproveitada como Issue.
 
 ---
 
