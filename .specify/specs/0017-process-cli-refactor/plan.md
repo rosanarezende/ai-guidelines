@@ -83,67 +83,60 @@ injeta em repositórios consumidores).
 #### A.3 — Concorrência de Specs
 
 **Estado atual:**
+Não há documento descrevendo o que fazer quando duas branches modificam os mesmos arquivos de governança. O plano inicial era limitar a cota, o que é restritivo para OSS.
 
-Não há documento descrevendo o que fazer quando duas branches modificam os mesmos
-arquivos de governança (ex: `backlog.md`, `AGENTS.md`, templates).
+**Decisão Validada (Visibilidade + Justificativa):**
+Migrar para uma política de "Sinalização Semântica":
 
-**Decisão:**
-
-Nova seção em `docs/process/spec-foundation.md`: "Concorrência de Specs" com regras:
-
-- Máximo 1 spec em execução que toque `AGENTS.md` ou `global-rules.md` ao mesmo tempo.
-- Specs puramente documentais (`docs/`, `roadmap/`) podem rodar em paralelo com
-  cuidado nos rebases.
-- Protocolo de rebase: antes de abrir PR, rebase na `main` e resolver conflitos
-  nos arquivos compartilhados.
+- **Backlog Warnings**: A seção `## Em execução` do `backlog.md` deve listar os domínios impactados por cada spec ativa. Se houver sobreposição, sinalizar com `[!] CONFLICT-RISK`.
+- **Seção de Justificativa**: Incluir no template `spec.md` uma seção de "Justificativa de Concorrência" obrigatória se houver risco de conflito no backlog. O autor deve documentar como o isolamento será mantido.
+- **Configurabilidade (Policy)**: Permitir que o repositório alvo defina em `.ai-guidelines/config.json` sua política: `STRICT` (bloqueio), `ADVISORY` (avisos) ou `OPEN`.
 
 **Mudanças em arquivos:**
 
-- `docs/process/spec-foundation.md` — nova seção.
+- `docs/process/spec-foundation.md` — nova seção "Concurrency Policy".
+- `.specify/templates/spec-boilerplate.md` — nova seção de justificativa.
+- `.ai-guidelines/config.json` (ou equivalente) — definição de `concurrencyPolicy`.
 
 #### A.4 — Reorganização do Backlog
 
 **Estado atual:**
-
-`backlog.md` mistura: specs numeradas, candidatas sem número, oportunidades
-priorizadas, bloqueadores, oportunidades oportunistas — sem hierarquia visual
-clara e com critérios de promoção implícitos.
+`backlog.md` mistura formatos e não tem hierarquia visual clara.
 
 **Decisão:**
+Reformatar com hierarquia explícita e padronização total:
 
-Reformatar com hierarquia explícita:
-
-- Header de cada seção com critério de promoção documentado.
-- Entrada padronizada: `**slug** (label) — descrição 1 linha. Pré-req: X. Gatilho: Y.`
-  com detalhes em sub-seção colapsável (usando tags HTML `<details>` e `<summary>`).
-- Candidatas numeradas (ex: spec 0006) têm formato diferente de candidatas sem número.
-- Seção "Oportunidades Priorizadas" fundida com a seção Now (se priorizada, é Now).
+- **Formato Único**: Todas as entradas usam `**slug** (label)`. Entradas numeradas (ex: `spec 0006`) seguem um padrão legado e devem ser convertidas para o novo formato **removendo o número** (ex: `**npm-publication** (feature)`).
+- **Hierarquia Visual**: Header de cada seção com critério de promoção. Uso de `<details>` e `<summary>` para descrições.
+- **Shared Context**: Incluir campo `Shared Context` para specs em execução.
 
 **Mudanças em arquivos:**
 
 - `roadmap/backlog.md` — reforma completa de formato.
 
-#### A.5 — Pesquisa: AGENTS.md vs global-rules.md
+#### A.5 — Pesquisa: AGENTS.md vs global-rules.md (Matriz 2026)
 
 **Estado atual:**
+ADR 0004 definiu a separação. Precisamos validar se modelos modernos (Gemini 3, Claude 4) mantêm a eficácia com essa divisão ou se a escala de contexto atual permite/exige novos padrões.
 
-ADR 0004 definiu a separação (AGENTS.md = workflow operacional, global-rules.md =
-princípios de engenharia). Nunca foi testada empiricamente se os modelos respeitam
-a divisão ou se achatá-la seria mais eficaz.
+**Decisão Validada (Investigação Pesada):**
+Realizar benchmarking formal com data de corte em 2026-04-29:
 
-**Decisão:**
-
-Research Phase: testar com Claude, Gemini e Codex (ao menos 2 modelos) cenários
-de compliance. Documentar achados em `research/agents-vs-rules-compliance.md`.
-Resultado possível: confirmação da separação atual, ou recomendação de fusão (ADR
-revisado).
+- **Modelos Alvo**:
+  - **Google**: Gemini 3 Pro (Large Context), Gemini 3 Flash (Fast/Edge).
+  - **Anthropic**: Claude 4 Opus (Reasoning), Claude 4 Haiku (Efficient).
+  - **Microsoft/OpenAI (Codex)**: GPT 4.4 (SOTA 2026), GPT 4.4-mini.
+- **Protocolo de Validação**:
+  - **Fase de Documentação Inicial**: Gerar o arquivo de pesquisa como boilerplate antes da execução, para alocação incremental de achados.
+  - **Teste de Prioridade**: Regras conflitantes entre `global-rules.md` (System) e `AGENTS.md` (Context).
+  - **Teste de "Ruído"**: Eficácia da regra em contextos de 50k, 200k e 1M de tokens.
+  - **Teste de Estética**: Compliance com regras de UI/Design premium (essencial para o framework).
+- **Entregável**: Matriz de Compliance em `research/agents-vs-rules-compliance.md` com recomendações para o CLI (ex: se o CLI deve fundir arquivos para modelos Flash para garantir atenção).
 
 **Mudanças em arquivos:**
 
-- `.specify/specs/0017-process-cli-refactor/research/agents-vs-rules-compliance.md`
-  — novo arquivo de pesquisa.
-- Se resultado recomendar mudança: `adrs/0004-governance-single-responsibility.md`
-  revisado + potencial unificação de arquivos.
+- `.specify/specs/0017-process-cli-refactor/research/agents-vs-rules-compliance.md` — novo.
+- Potencial revisão do ADR 0004 baseada nos achados.
 
 #### A.6 — Validação Humana de Specs
 

@@ -84,14 +84,9 @@ humanos e futuros sub-agentes.
   com duplicatas. Aplicar política ao estado atual do repositório.
 - **Boot obrigatório**: leitura de `backlog.md` mandatória no `AGENTS.md` raiz e
   no template `.core/templates/AGENTS-core.md.tmpl`.
-- **Concorrência de specs**: documentar workflow seguro para branches concorrentes
-  (quando abrir duas branches, como evitar conflito em arquivos compartilhados
-  como `backlog.md`).
-- **Reorganização do backlog**: hierarquia visual clara, critérios de promoção
-  entre Now/Next/Later, formato padronizado para entradas, regras de archiving.
-- **Pesquisa empírica**: investigação da divisão AGENTS.md vs `global-rules.md`
-  (compliance por modelo — Claude, Gemini, Codex); resultado documentado em
-  `research/agents-vs-rules-compliance.md`.
+- **Concorrência de specs**: documentar workflow para branches concorrentes focado em visibilidade (warnings no backlog), justificativa técnica mandatória em caso de sobreposição e políticas configuráveis por repositório (STRICT/ADVISORY/OPEN).
+- **Reorganização do backlog**: hierarquia visual clara usando `<details>`, critérios de promoção entre Now/Next/Later, formato padronizado `**slug** (label)` (removendo números de specs legadas), e regras de archiving.
+- **Pesquisa de Compliance Multi-Modelo (2026)**: investigação profunda da divisão AGENTS.md vs `global-rules.md`. Benchmarking de hierarquia de instruções e atenção em janelas extensas com modelos de ponta (Gemini 3 Pro/Flash, Claude 4 Opus/Haiku, GPT 4.4/4.4-mini). Resultado em `research/agents-vs-rules-compliance.md`.
 - **Validação humana obrigatória**: formalizar no processo que agentes de IA devem
   exigir validação humana do `spec.md` ANTES de gerar o `plan.md` e `tasks.md`,
   impedindo decisões de design unilaterais não supervisionadas.
@@ -166,3 +161,4 @@ humanos e futuros sub-agentes.
   `global-rules.md` que sub-bloco A investiga.
 - `roadmap/backlog.md`: candidatas `process-refinement` (itens 1-6) e `cli-refactor`
   (itens 1-4 excluindo TS).
+- Research: [concurrency-best-practices.md](./research/concurrency-best-practices.md) — Melhores práticas para gestão de concorrência em projetos OSS.

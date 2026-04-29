@@ -1,4 +1,4 @@
-# Tasks — Spec 0017 Process Refinement & CLI Refactor
+# Tasks — Spec 0017: Process Refinement & CLI Refactor
 
 > Spec: [`./spec.md`](./spec.md)
 > Plan: [`./plan.md`](./plan.md)
@@ -16,9 +16,13 @@
 - [x] **0.2** `spec.md` + `plan.md` + `tasks.md` criados a partir dos templates.
 - [x] **0.3** `roadmap/backlog.md` atualizado: spec 0017 movida para "Em execução";
       candidatas `process-refinement` e `cli-refactor` removidas de "Now" (absorvidas).
-- [ ] **0.4** Pesquisa A.5 — investigação empírica de compliance AGENTS.md vs
-      `global-rules.md` com ao menos 2 modelos. Resultado em
-      `research/agents-vs-rules-compliance.md`.
+- [x] **0.4** Pesquisa: Melhores práticas para concorrência em projetos OSS (visibilidade + justificativa). Resultado em `research/concurrency-best-practices.md`.
+- [ ] **0.5** Pesquisa de Compliance Multi-Modelo (2026):
+  - [x] **0.5.1** Criação do boilerplate de pesquisa em `research/agents-vs-rules-compliance.md`.
+  - [ ] **0.5.2** Benchmark de Hierarquia de Instrução (System vs Context).
+  - [ ] **0.5.3** Design de Protocolo de Teste (Conflito, Ruído, Estética).
+  - [ ] **0.5.4** Execução de Matriz de Compliance (Gemini 3, Claude 4, GPT 4.4).
+  - [ ] **0.5.5** Conclusões e recomendações finais.
 
 ---
 
@@ -38,9 +42,10 @@
 - [ ] **A.5** Adicionar step de boot de leitura obrigatória de `backlog.md` no
       `.ai-guidelines/AGENTS.md` (template CLI) e no `AGENTS.md` raiz.
 - [ ] **A.6** Documentar concorrência de specs em `docs/process/spec-foundation.md`
-      (nova seção com regras e protocolo de rebase).
-- [ ] **A.7** Reformatar `roadmap/backlog.md`: hierarquia visual, critérios de
-      promoção Now/Next/Later explícitos, formato padronizado por tipo de entrada.
+      (nova seção focada em Visibilidade, Shared Context e Justificativa).
+- [ ] **A.7** Reformatar `roadmap/backlog.md`: padronizar entradas como `**slug** (label)` (removendo números de specs legadas), incluir campo `Shared Context` para specs ativas e usar `<details>`.
+- [ ] **A.8** Adicionar seção "Justificativa de Concorrência" no template `.specify/templates/spec-boilerplate.md`.
+- [ ] **A.9** Pesquisar/implementar configuração de `concurrencyPolicy` em `.ai-guidelines/config.json`.
 - [x] **A.8** Adicionar step em `tasks-boilerplate.md` e `spec-foundation.md` para exigir validação humana da spec antes do `plan.md` e `tasks.md`.
 - [ ] **A.9** `yarn check && yarn test` verde após A.
 
