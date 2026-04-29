@@ -46,10 +46,10 @@ humanos e futuros sub-agentes.
 
 ### Análise
 
-| Sub-bloco                      | Arquivos principais                                | Sobreposição     |
-| ------------------------------ | -------------------------------------------------- | ---------------- |
-| A. Process & Governance        | `AGENTS.md`, `docs/process/`, `.specify/`, roadmap | —                |
-| B. CLI & Docs Structure        | `cli/`, `docs/`, `package.json`                    | Média com A      |
+| Sub-bloco               | Arquivos principais                                | Sobreposição |
+| ----------------------- | -------------------------------------------------- | ------------ |
+| A. Process & Governance | `AGENTS.md`, `docs/process/`, `.specify/`, roadmap | —            |
+| B. CLI & Docs Structure | `cli/`, `docs/`, `package.json`                    | Média com A  |
 
 ### Conclusão
 

@@ -26,7 +26,6 @@ Specs atualmente em branch ativa. Formato enxuto.
 
 Specs ou candidatas priorizadas para iniciar em seguida. Ordem indica prioridade.
 
-
 - **cli-typescript** (Migração TypeScript da CLI)
   - **Fonte do insight:** Remanescente do cli-refactor após a Spec 0017 assumir a reorganização de pastas.
   - **Escopo potencial:** migrar `.mjs` → `.ts` com `tsconfig.json` estrito, obtendo type-safety nas interfaces de features, options e context.

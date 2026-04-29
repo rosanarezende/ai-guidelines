@@ -38,6 +38,7 @@ cada commit — sem accumular debt técnico para resolver na Fase 2.
 **Decisão validada (Opção B - Aprimorada):**
 
 Política "Migração centralizada com taxonomia": ao encerrar uma spec:
+
 - Os arquivos de pesquisa com valor reutilizável devem ser movidos para `.specify/specs/researchs/`.
 - **Estrutura de pastas**: Não usar pastas por spec. Usar subpastas baseadas em domínio/escopo. Exemplo de domínios (baseados no `research-index.md`):
   - `governance/` (Governança IA, SDD, Engenharia de Prompt)
@@ -65,10 +66,12 @@ retomam specs erradas ou ignoram prioridade definida.
 **Decisão:**
 
 Inserir no `AGENTS.md` raiz (bloco gerenciado pelo CLI — dentro do `<!-- BEGIN:ai-guidelines-core -->`) um novo step de boot:
+
 ```
 3. Antes de qualquer execução: ler `roadmap/backlog.md` — identificar spec em
    execução, prioridade Now, bloqueadores cross-spec.
 ```
+
 Mesma instrução adicionada ao template `.ai-guidelines/AGENTS.md` (o que o CLI
 injeta em repositórios consumidores).
 
@@ -87,6 +90,7 @@ arquivos de governança (ex: `backlog.md`, `AGENTS.md`, templates).
 **Decisão:**
 
 Nova seção em `docs/process/spec-foundation.md`: "Concorrência de Specs" com regras:
+
 - Máximo 1 spec em execução que toque `AGENTS.md` ou `global-rules.md` ao mesmo tempo.
 - Specs puramente documentais (`docs/`, `roadmap/`) podem rodar em paralelo com
   cuidado nos rebases.
@@ -108,6 +112,7 @@ clara e com critérios de promoção implícitos.
 **Decisão:**
 
 Reformatar com hierarquia explícita:
+
 - Header de cada seção com critério de promoção documentado.
 - Entrada padronizada: `**slug** (label) — descrição 1 linha. Pré-req: X. Gatilho: Y.`
   com detalhes em sub-seção colapsável (usando tags HTML `<details>` e `<summary>`).
@@ -200,6 +205,7 @@ nova feature adicionada em subpasta acumula um nível extra de `../`.
 
 Configurar `imports` field no `package.json` (Node.js Subpath Imports — suporte
 nativo desde Node 12.7, sem dependência de bundler):
+
 ```json
 {
   "imports": {
@@ -209,6 +215,7 @@ nativo desde Node 12.7, sem dependência de bundler):
   }
 }
 ```
+
 Atualizar todos os imports existentes para usar aliases.
 
 **Mudanças em arquivos:**
@@ -280,7 +287,7 @@ Estrutura plana sem agrupamento semântico, e o real propósito de alguns desses
 - **Unit**: testes existentes devem passar sem modificação após reorganização de
   imports (B.2). Se imports mudam, atualizar só o path, não a lógica.
 - **Manual smoke test**: após B.1+B.2, rodar `node cli/ai-guidelines-cli.mjs adopt
-  --target /tmp/test-consumer --dry-run` e verificar output.
+--target /tmp/test-consumer --dry-run` e verificar output.
 - **Pesquisa A.5**: teste empírico manual com 2+ modelos (não automatizado — é
   qualitative research).
 
@@ -305,11 +312,11 @@ Estrutura plana sem agrupamento semântico, e o real propósito de alguns desses
 
 ## ⚠️ Riscos técnicos (concretos)
 
-| Risco                                                          | Mitigação                                                              |
-| -------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| `imports` field do `package.json` não funciona com Yarn Berry  | Testar em isolamento antes de refatorar todos os arquivos              |
+| Risco                                                          | Mitigação                                                             |
+| -------------------------------------------------------------- | --------------------------------------------------------------------- |
+| `imports` field do `package.json` não funciona com Yarn Berry  | Testar em isolamento antes de refatorar todos os arquivos             |
 | Reorganização de `cli/core/` quebra imports não rastreados     | `grep -r 'from.*core/'` antes + testes como gate                      |
-| Pesquisa A.5 inconclusiva ou tomando mais de 2 sessões         | Delimitar escopo mínimo: 2 modelos, 3 cenários, resultado documentado  |
+| Pesquisa A.5 inconclusiva ou tomando mais de 2 sessões         | Delimitar escopo mínimo: 2 modelos, 3 cenários, resultado documentado |
 | docs/ reorganização cria links quebrados em README e AGENTS.md | Script de busca de refs antes + `yarn check` com `[BR-GOV-COH-01]`    |
 
 ---

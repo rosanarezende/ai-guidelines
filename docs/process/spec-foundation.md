@@ -86,14 +86,15 @@ Backlog de débitos adiados. Política:
 
 ### `research/` — conhecimento de apoio
 
-Pesquisas, benchmarks, auditorias, transcrições elaboradas durante a execução da spec. 
+Pesquisas, benchmarks, auditorias, transcrições elaboradas durante a execução da spec.
 
 **Política de Lifecycle (Migração Centralizada com Taxonomia):**
 Ao fechar a spec, arquivos com valor reutilizável devem ser:
+
 1. Renomeados para incluir a data atual como prefixo: `YYYY-MM-DD-nome-original.md`.
 2. Movidos fisicamente para a pasta central `.specify/specs/researchs/<domínio>/`, onde `<domínio>` deve ser o escopo da pesquisa (ex: `governance/`, `architecture/`, `oss/`). Não crie pastas por spec.
 3. Indexados em `.specify/specs/research-index.md`.
-A pasta `research/` local da spec pode ser deletada se não restar nada de útil (ou mantida apenas para rascunhos sem valor histórico).
+   A pasta `research/` local da spec pode ser deletada se não restar nada de útil (ou mantida apenas para rascunhos sem valor histórico).
 
 ---
 
@@ -177,8 +178,7 @@ Ao concluir uma spec e fazer merge para `main`:
 - [ ] Se `NEXT.md` existir: migrar débitos relevantes para
       `roadmap/backlog.md` (ou para issues/discussões, conforme o caso) e
       **deletar** `NEXT.md`.
-- [ ] `research/`: migrar arquivos de valor para `.specify/specs/researchs/<número-nome-da-spec>/` e indexar em
-      `.specify/specs/research-index.md` com link + resumo curto.
+- [ ] `research/`: migrar arquivos de valor seguindo a **Política de Lifecycle** (Seção 4.5): Renomear com prefixo `YYYY-MM-DD-`, mover para `.specify/specs/researchs/<domínio>/` e indexar em `.specify/specs/research-index.md`.
       Nenhum conhecimento (RAG) deve morrer na pasta da spec fechada.
 - [ ] Mover a entrada da spec para "Concluídas" em `roadmap/historico.md` mantendo o número como histórico.
 - [ ] Remover a entrada da spec da seção "Em execução" em `roadmap/backlog.md`.

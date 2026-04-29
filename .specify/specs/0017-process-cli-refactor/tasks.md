@@ -65,7 +65,7 @@
 ## Fase 2 — Validação cruzada e PR
 
 - [ ] **2.1** Smoke test: `node cli/ai-guidelines-cli.mjs adopt --target /tmp/consumer
-    --dry-run` — output sem erros.
+--dry-run` — output sem erros.
 - [ ] **2.2** Critérios de aceite de `spec.md` e DoD de `plan.md` confirmados.
 - [ ] **2.3** `CHANGELOG.md` atualizado com entrada para a versão.
 - [ ] **2.4** PR Draft via `gh pr create --draft` com template preenchido.
