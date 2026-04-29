@@ -22,7 +22,6 @@ Estudos técnicos sobre adoção, comportamento e _guardrails_ das plataformas l
 - [Catálogo Exaustivo de Regras de Negócio (BR-CLI)](./researchs/0005-cli-adopt-refactor/business-rules-catalog.md) _(Mapeamento de 36+ regras de governança)_.
 
 - [Auditoria de Coerência de Governança](./researchs/0008-governance-coherence/governance-coherence-audit.md) _(Mapeamento de links quebrados e redundâncias entre AGENTS.md e global-rules.md)_.
-- [Mapeamento: Documentação vs Regras Acionáveis](./researchs/0008-governance-coherence/mapping-doc-to-rules.md) _(Classificação de arquivos em humano, universal e opt-in)_.
 - [Síntese de Insights de Transcrições (Temas 1-6)](./researchs/0008-governance-coherence/synthesis.md) _(Destilação de vídeos/artigos sobre workflows agentic e eficiência)_.
 
 ## 🏗️ Design e Decisões de Arquitetura (Agnostic)
