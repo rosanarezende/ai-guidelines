@@ -83,8 +83,9 @@ classificação por arquivo.
 **Regras a reclassificar como opt-in de stack** (decisão registrada 2026-04-24,
 observação 4):
 
-- **TDD/BDD** (`tdd-guidelines.md`) — nem todo repo escolhe BDD nem mesmo
-  testes. Vira `.core/rules/tdd.md` + feature opt-in `tdd` no CLI.
+- **TDD e BDD** (`tdd-guidelines.md`) — nem todo repo escolhe BDD nem mesmo
+  testes. Vira duas features separadas no CLI (`tdd` e `bdd`), com suporte
+  a escolha de idioma (PT-BR ou EN) para as regras geradas.
 - **Quality Gates** — sub-bloco E (ver detalhamento próprio).
 
 **Bloqueadores técnicos absorvidos por A** (PR #19):
@@ -414,6 +415,25 @@ sobre um repo já curado (não faz sentido decidir visibilidade com pastas
 
 ---
 
+### Sub-bloco H — Dogfooding (Opt-ins Locais)
+
+**Estado atual:** O framework possui features opt-in poderosas (`quality-gates`, `tdd`, `bdd`, `prettier`, `husky`, `ci`), mas o próprio repositório `ai-guidelines` não as utiliza formalmente em sua pasta `.ai-guidelines/rules/`, o que prejudica a adoção e teste das mesmas.
+Além disso, se aplicarmos essas regras no repositório, corremos o risco de incluí-las indevidamente no pacote npm que será consumido.
+
+**Decisão:**
+
+- **Ativar as features opt-in no próprio repositório** executando o CLI localmente (`node cli/ai-guidelines-cli.mjs adopt --target . --yes`). Isso vai injetar as regras (quality gates, tdd, bdd) na pasta `.ai-guidelines/rules/`, garantindo que os agentes que trabalham neste repositório sigam esses processos.
+- **Proteção do Consumidor (Isolamento NPM):** O arquivo `package.json` **obrigatoriamente** receberá o array `"files"`, detalhando apenas as pastas que compõem o pacote distribuído (`["cli", ".core", "docs", "README.md", "CHANGELOG.md"]`). Isso garante que os diretórios locais de uso da equipe (`.ai-guidelines/`, `tests/`, `.github/`, `.husky/`, `research/`, etc) **não sejam publicados** no npm.
+
+**Mudanças em arquivos:**
+
+- `package.json` — Adição do array `"files"`.
+- `.ai-guidelines/rules/*` — Gerados/atualizados pelo `adopt` e adicionados ao controle de versão.
+- `.github/workflows/ai-guidelines-ci.yml` — Gerado pelo `adopt` (CI Baseline).
+- `.husky/`, `.prettierignore` — Configurados pelo `adopt`.
+
+---
+
 ## ✅ Critérios de Aceite Detalhados (DoD operacional)
 
 ### Sub-bloco A — Filtro doc → rules
@@ -504,6 +524,13 @@ sobre um repo já curado (não faz sentido decidir visibilidade com pastas
       sobreposição com 0015).
 - [ ] README e CONTRIBUTING do Sub-bloco F refletem o tom adequado à
       decisão (validação cruzada F ↔ G).
+
+### Sub-bloco H — Dogfooding
+
+- [x] `package.json` possui um array `"files"` configurado restritamente `["cli", ".core", "docs", "README.md", "CHANGELOG.md"]`.
+- [x] Execução de `node cli/ai-guidelines-cli.mjs adopt --target . --yes` roda com sucesso e injeta opt-ins.
+- [x] Arquivos `.ai-guidelines/rules/quality-gates.md`, `tdd.md`, `bdd.md` constam no repositório.
+- [x] O NPM não exibe `.ai-guidelines/` nem `.husky/` no pacote final (pode ser validado com `npm pack --dry-run`).
 
 ### Globais (toda a spec)
 
@@ -743,3 +770,8 @@ sobre um repo já curado (não faz sentido decidir visibilidade com pastas
     composable + governance coherence first-class).
 
 - **2026-04-26** — **Validação final e marcação de progresso (PRs #21, #22, #23)**. Após auditoria técnica, as fases F (Onboarding) e G (Visibilidade Pública) foram validadas como implementadas. O `CHANGELOG.md` foi atualizado (Tarefa 2.4) para consolidar as mudanças das Specs 0008 e 0015. As tarefas correspondentes no `tasks.md` foram marcadas como concluídas `[x]`, refletindo o estado real do repositório antes da abertura do PR consolidado. A Spec 0015 foi oficialmente encerrada.
+- **2026-04-27** — **Separação Arquitetural de Regras Editoriais Opt-in.** Durante a implementação das features opt-in (`quality-gates` e `tdd`), identificou-se que a função `applyRules` (que sincroniza as regras core) copiava indiscriminadamente todos os arquivos de `.core/rules/`. Para evitar que regras opt-in fossem sincronizadas mesmo quando desativadas, os arquivos opt-in foram movidos para a subpasta `.core/rules/opt-in/`. O motor CLI e a documentação (`docs/features.md`) foram atualizados para refletir essa distinção explícita.
+- **2026-04-28** — **Correção de injeção de dependências no CI.** Durante o dogfooding (Sub-bloco H), o comando `adopt` gerou comandos inválidos no workflow `.github/workflows/ai-guidelines-ci.yml` (como `yarn-berry install`). Identificou-se que a feature `ci.mjs` estava usando propriedades brutas (`packageManager.id` e `packageManager.runner`) em vez dos formatadores adequados. A correção usará `resolveInstallCommand` e `resolveCiRunner` de `package-context.mjs`, garantindo compatibilidade com npm, pnpm, yarn-classic e yarn-berry em ambientes de CI. A atualização seguirá rigorosamente o fluxo TDD/BDD existente e contará com a re-execução local da feature para reparar o repositório.
+- **2026-04-28** — **~~Adição do comando CLI `spec init <slug>`~~ [CANCELADA]**. A decisão original de absorver o `spec init` neste PR foi revertida após code review. O `spec init` é uma feature CLI nova sem relação direta com "Governance Coherence" e infla o diff do PR. Mantido como item oportunista no `roadmap/backlog.md` para promoção a spec separada.
+- **2026-04-28** — **Correções Pós-Review (Fase 2.7).** Code review identificou 1 bug (lista `KNOWN_OPT_IN_RULES` faltava `bdd.md`) e 2 riscos de manutenção. Ações implementadas: (1) derivação programática via `OPT_IN_RULE_FILES` exportado de `cli-input.mjs`, eliminando lista hardcoded; (2) criação de `test-helpers.mjs` com factory `createOptInRuleTestSuite()` para DRY nos testes opt-in (débito do backlog); (3) teste de governança em `rules.test.mjs` validando sincronização entre `OPT_IN_RULE_FILES` e features reais. Resultado: 107/107 testes, cobertura 93%+.
+- **2026-04-28** — **Taxonomia Editorial vs Infraestrutura (Fase 2.8).** Reorganização física das features opt-in em subpastas `editorial/` e `infrastructure/` sob `cli/features/opt-in/`. Reestruturação das constantes em `cli-input.mjs` (EDITORIAL_FEATURES, INFRASTRUCTURE_FEATURES como fontes de verdade, FEATURE_OPTIONS derivado por composição). Documentação alinhada: `docs/features.md` reescrito com terminologia "Infraestrutura" (substituindo "Injeções Funcionais"), `docs/cli/ai-guidelines-cli.md` com business rules BR-CLI-EDITORIAL-01 a 04 e BR-CLI-INFRA. Engine separado em blocos semânticos 3a/3b. 107/107 testes, cobertura 93%+.

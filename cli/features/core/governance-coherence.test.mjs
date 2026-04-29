@@ -23,7 +23,13 @@ const BROKEN_LINK_PATTERNS = [
 
 describe("Feature: Governance Coherence (Editorial Validation) [BR-GOV-COH]", () => {
   it("[BR-GOV-COH-01] DADO arquivos em .core/rules/ QUANDO validados ENTÃO não contêm links markdown para paths inexistentes no consumidor", async () => {
-    const files = await fs.readdir(RULES_DIR);
+    const dirents = await fs.readdir(RULES_DIR, { recursive: true, withFileTypes: true });
+    const files = dirents
+      .filter((dirent) => dirent.isFile() && dirent.name.endsWith(".md"))
+      .map((dirent) =>
+        path.relative(RULES_DIR, path.join(dirent.path || dirent.parentPath || "", dirent.name))
+      );
+
     const violations = [];
 
     for (const file of files) {

@@ -237,21 +237,21 @@
 
 ## Fase 1 — Sub-bloco C (AI Efficiency)
 
-- [ ] **C.1** Mapear duplicação em `.core/rules/global-rules.md` entre
+- [x] **C.1** Mapear duplicação em `.core/rules/global-rules.md` entre
       "Economia de Tokens" (regras 7-9) e "Eficiência de IA — Lembrete
       Rápido" (linhas 33-39).
-- [ ] **C.2** Consolidar em **uma única seção** "Eficiência de IA" em
+- [x] **C.2** Consolidar em **uma única seção** "Eficiência de IA" em
       `global-rules.md`. Conteúdo final: 4-6 regras imperativas
       (model routing, modularidade, feedback cirúrgico, ignore files, link
       ao guia profundo).
-- [ ] **C.3** Reescrever `docs/ai-efficiency-guide.md`:
+- [x] **C.3** Reescrever `docs/ai-efficiency-guide.md`:
   - Substituir links quebrados (`for-gemini/setup.md`, `for-claude/setup.md`,
     `for-codex/setup.md`) por links a `.core/rules/<adapter>.md`.
   - Atualizar matriz de modelos (seção 5) para 2026: Claude 4.x (Opus/Sonnet/
     Haiku), Gemini 2.x, GPT-4o.
   - Adicionar seção "Prompt Caching" (relevante para Claude Code / Anthropic
     API).
-- [ ] **C.4** Adicionar conteúdo derivado do `synthesis.md` no
+- [x] **C.4** Adicionar conteúdo derivado do `synthesis.md` no
       `ai-efficiency-guide.md`:
   - Seção "Model routing inteligente + ceticismo informado": não confiar
     cegamente em "mais novo é melhor"; documentar adaptive thinking como
@@ -263,28 +263,28 @@
   - Seção "Cost awareness": como interpretar quotas/plan usage e quando
     rotacionar entre modelos ou fragmentar tarefa. **Visualizador automático
     fica para Spec 0014 (candidata)** — referenciar explicitamente.
-- [ ] **C.5** Confirmar que `AGENTS.md` regra 1 mantém referência única ao
+- [x] **C.5** Confirmar que `AGENTS.md` regra 1 mantém referência única ao
       guia (`docs/ai-efficiency-guide.md`).
-- [ ] **C.6** `yarn check && yarn test` verde.
+- [x] **C.6** `yarn check && yarn test` verde.
 
 ---
 
 ## Fase 1 — Sub-bloco D (Step 0 — Environment Awareness)
 
-- [ ] **D.1** Editar `AGENTS.md` Phase 0: inserir sub-item curto (≤ 8 linhas)
+- [x] **D.1** Editar `AGENTS.md` Phase 0: inserir sub-item curto (≤ 8 linhas)
       "Environment Check" antes da regra 0 atual, com matriz Plataforma/
       Shell/Surface/Modelo.
-- [ ] **D.2** Espelhar em `.core/templates/AGENTS-core.md.tmpl`.
-- [ ] **D.3** Adicionar nota em `.core/rules/global-rules.md` (seção
+- [x] **D.2** Espelhar em `.core/templates/AGENTS-core.md.tmpl`.
+- [x] **D.3** Adicionar nota em `.core/rules/global-rules.md` (seção
       Eficiência de IA, pós-consolidação C): "antes de comandos de shell,
       consulte Phase 0 → Environment Check".
-- [ ] **D.4** Smoke test manual:
+- [x] **D.4** Smoke test manual:
   - Sessão Claude Code (Windows + Git Bash): verificar se a IA explicita o
     ambiente antes da primeira ação de shell.
   - Sessão Gemini CLI ou Codex (Linux/WSL): mesmo teste.
   - Documentar resultados em `research/step-zero-smoke-test.md`.
-- [ ] **D.5** Refinar texto se smoke test mostrar ruído ou má adesão.
-- [ ] **D.6** `yarn check && yarn test` verde.
+- [x] **D.5** Refinar texto se smoke test mostrar ruído ou má adesão.
+- [x] **D.6** `yarn check && yarn test` verde.
 
 ---
 
@@ -298,7 +298,7 @@
 
 ### E — Quality Gates (feature opt-in)
 
-- [ ] **E.1** Criar `.core/rules/quality-gates.md` com checklist editorial
+- [x] **E.1** Criar `.core/rules/quality-gates.md` com checklist editorial
       mínimo (≤ 15 linhas) listando os 4 grupos de gates:
   - Análise estática (cyclomatic complexity, tamanho de módulo, estrutura
     de dependências).
@@ -308,51 +308,52 @@
     exemplos de tooling por linguagem em parênteses (ex.: "hypothesis em
     Python, fast-check em JS").
   - Secret scanning (cross-ref Spec 0012 candidata).
-- [ ] **E.2** Incluir ressalva: "gates objetivos pegam bugs locais;
+- [x] **E.2** Incluir ressalva: "gates objetivos pegam bugs locais;
       arquitetura crítica (tradeoffs, capacity, failure modes) ainda exige
       senior review humano".
-- [ ] **E.3** Manter agnosticismo: nenhuma menção a tooling específico no
+- [x] **E.3** Manter agnosticismo: nenhuma menção a tooling específico no
       texto principal — apenas categorias e exemplos entre parênteses.
-- [ ] **E.4** Criar `cli/features/opt-in/quality-gates.mjs` seguindo o
+- [x] **E.4** Criar `cli/features/opt-in/quality-gates.mjs` seguindo o
       padrão de `cli/features/opt-in/prettier.mjs`:
   - Função `applyQualityGates(targetDir, options, context, actions)`.
   - Quando ativada: copia `.core/rules/quality-gates.md` para
     `.ai-guidelines/rules/quality-gates.md`.
   - Quando pulada: nenhuma escrita; ação registrada em `actions`.
   - Suportar `--dry-run` e `--prune` consistentes com outras features.
-- [ ] **E.5** Atualizar `cli/core/cli-input.mjs`:
+- [x] **E.5** Atualizar `cli/core/cli-input.mjs`:
   - Adicionar `quality-gates` em `FEATURE_OPTIONS`.
   - Adicionar descrição em `FEATURE_DESCRIPTIONS`: "Gates objetivos para
     código gerado por IA (recomendado)".
   - Garantir que está na seleção sugerida por default no wizard.
-- [ ] **E.6** Atualizar `cli/core/engine.mjs` para invocar
+- [x] **E.6** Atualizar `cli/core/engine.mjs` para invocar
       `applyQualityGates` quando `features.includes("quality-gates")`.
-- [ ] **E.7** Criar `cli/features/opt-in/quality-gates.test.mjs` com BDD:
+- [x] **E.7** Criar `cli/features/opt-in/quality-gates.test.mjs` com BDD:
   - DADO `features: ["quality-gates"]` QUANDO `applyQualityGates` ENTÃO
     arquivo escrito em `.ai-guidelines/rules/quality-gates.md`.
   - DADO `features: []` QUANDO engine roda ENTÃO arquivo NÃO é escrito.
   - DADO `--dry-run` ENTÃO ação é registrada mas não escrita.
-- [ ] **E.8** Atualizar `ROADMAP.md` da Spec 0009 (já feito em commit
+- [x] **E.8** Atualizar `ROADMAP.md` da Spec 0009 (já feito em commit
       anterior; revalidar) com referência cruzada "implementa tecnicamente
       Spec 0008-E + 0008-E.TDD".
 
-### E.TDD — Reclassificação de TDD como opt-in
+### E.TDD — Separação Arquitetural de TDD, BDD e i18n
 
-- [ ] **E.9** Promover regras imperativas de `docs/tdd-guidelines.md`
-      para novo arquivo `.core/rules/tdd.md` (extraindo apenas regras
-      acionáveis: ciclo Red→Green→Refactor obrigatório, descritores em
-      PT-BR, BDD `DADO/QUANDO/ENTÃO`, etc.). Manter `tdd-guidelines.md`
-      como doc explicativo (não vai ao consumidor).
-- [ ] **E.10** Criar `cli/features/opt-in/tdd.mjs` análogo a
-      `quality-gates.mjs`.
-- [ ] **E.11** Atualizar `cli-input.mjs` adicionando `tdd` em
-      `FEATURE_OPTIONS` com descrição "Regras de TDD/BDD (Red→Green→Refactor,
-      BDD PT-BR — recomendado para projetos com testes)".
-- [ ] **E.12** Atualizar `engine.mjs` para invocar `applyTdd` quando ativada.
-- [ ] **E.13** Criar `cli/features/opt-in/tdd.test.mjs` com BDD análogo a
-      E.7.
-- [ ] **E.14** `yarn check && yarn test` verde com novos testes
-      (esperado: 90+/90+).
+- [x] **E.9** Promover regras imperativas de `docs/tdd-guidelines.md` para novos arquivos em `.core/rules/opt-in/`: - `tdd-pt.md` e `tdd-en.md` (focados no ciclo técnico Red-Green-Refactor). - `bdd-pt.md` e `bdd-en.md` (focados no padrão DADO/QUANDO/ENTÃO).
+      Manter `tdd-guidelines.md` original como doc explicativo.
+- [x] **E.10** Atualizar testes ANTES da implementação (TDD para as próprias features): - Atualizar `cli/features/opt-in/tdd.test.mjs` e criar `bdd.test.mjs` garantindo suporte a i18n via parâmetro `options.lang`. - Atualizar `cli-input.test.mjs` para prever a pergunta sobre idioma e adição da feature `bdd`. - Atualizar `cli.integration.test.mjs` para validar o diff completo considerando TDD e BDD independentes.
+- [x] **E.11** Atualizar `cli-input.mjs`: - Adicionar `bdd` em `FEATURE_OPTIONS`. - Adicionar flag/pergunta `--lang` (pt/en, default pt) quando `tdd` ou `bdd` forem selecionados.
+- [x] **E.12** Criar/Atualizar as features no CLI: - Atualizar `cli/features/opt-in/tdd.mjs` para ler `.core/rules/opt-in/tdd-{lang}.md` e gerar `tdd.md` no alvo. - Criar `cli/features/opt-in/bdd.mjs` análogo para o BDD.
+- [x] **E.13** Atualizar `engine.mjs` para invocar ambas as features independentemente e passar as opções de `lang`.
+- [x] **E.14** `yarn check && yarn test` verde com os testes cobrindo a separação e os idiomas (esperado: sucesso em todos os cenários E2E e unitários).
+
+### E.Refactor — Separação Arquitetural de Regras Opt-in
+
+- [x] **E.R1** Criar subdiretório `.core/rules/opt-in/` e mover `quality-gates.md` e `tdd.md` para ele, garantindo que `applyRules` não os copie indiscriminadamente.
+- [x] **E.R2** Atualizar `cli/features/core/rules.mjs` (`applyRules`) para ignorar subdiretórios (ex: `opt-in/`) durante a sincronização e proteger arquivos opt-in conhecidos durante o processo de _prune_ global.
+- [x] **E.R3** Atualizar `quality-gates.mjs` e `tdd.mjs` para lerem de `.core/rules/opt-in/` e implementarem a deleção (prune) local caso a feature esteja desativada e a flag `--prune` seja utilizada.
+- [x] **E.R4** Atualizar testes unitários (`rules.test.mjs`, `quality-gates.test.mjs`, `tdd.test.mjs`) para cobrir os novos cenários de exclusão e prune independente.
+- [x] **E.R5** Adicionar teste de integração (E2E) em `cli.integration.test.mjs` para validar a ausência e o prune dos arquivos opt-in no contexto do motor CLI completo.
+- [x] **E.R6** Documentar a distinção entre "Regras Core" e "Features Opt-in" em `docs/features.md`.
 
 ---
 
@@ -541,6 +542,69 @@ init` ou `adopt`. Exemplos concretos.
       `.github/pull_request_template.md` preenchida e descrição apontando à
       spec.
 - [/] **2.6** Aguardar revisão humana antes de converter para Ready.
+
+---
+
+## Fase 2.5 — Dogfooding (Opt-ins locais)
+
+> **Decisão:** Implementar as features opt-in no próprio repositório `ai-guidelines` para uso da equipe/agentes, sem contaminar os pacotes npm dos consumidores.
+
+- [x] **2.5.1** Modificar `package.json` para adicionar o array `"files"` contendo apenas os diretórios públicos (`["cli", ".core", "docs", "README.md", "CHANGELOG.md"]`). Isso previne que `.ai-guidelines/`, `.husky/`, `.github/`, `tests/` vazem para o pacote npm publicado.
+- [x] **2.5.2** Executar o CLI no repositório: `node cli/ai-guidelines-cli.mjs adopt --target . --yes` para instanciar todas as features opt-in (`quality-gates`, `tdd`, `bdd`, `prettier`, `husky`, `ci`) localmente.
+- [x] **2.5.3** Garantir que os arquivos gerados no repositório (ex: `.ai-guidelines/rules/*.md`) sejam adicionados ao git para guiar agentes futuros.
+- [x] **2.5.4** Atualizar teste `cli/features/opt-in/ci.test.mjs` para refletir os novos comandos esperados (BDD/TDD).
+- [x] **2.5.5** Corrigir `cli/features/opt-in/ci.mjs` para usar formatadores de `package-context.mjs` (resolveInstallCommand e resolveCiRunner).
+- [x] **2.5.6** Re-executar o CLI localmente para consertar o arquivo de workflow `.github/workflows/ai-guidelines-ci.yml`.
+- [x] **2.5.7** Validar se a suíte de testes (integração e unitários) passa após as correções.
+
+---
+
+## ~~Fase 2.6 — Spec Init Command (Scaffold)~~ [REMOVIDA DO ESCOPO]
+
+> **Decisão (2026-04-28):** Removida deste PR por recomendação do code review.
+> O `spec init` é uma feature CLI nova sem relação com "Governance Coherence".
+> Mantido como item oportunista no `roadmap/backlog.md` (L51) para promoção
+> a spec separada quando priorizado.
+
+---
+
+## Fase 2.7 — Correções Pós-Review
+
+> **Origem:** Code review do PR #1 (2026-04-28).
+
+- [x] **2.7.1** Fix bug: `KNOWN_OPT_IN_RULES` faltava `"bdd.md"`. Derivar lista
+      programaticamente de `FEATURE_OPTIONS` via `OPT_IN_RULE_FILES` em `cli-input.mjs`,
+      filtrando features de infraestrutura (`prettier`, `husky`, `ci`).
+- [x] **2.7.2** Criar `test-helpers.mjs` com factory `createOptInRuleTestSuite()` para
+      eliminar boilerplate duplicado entre `quality-gates.test.mjs`, `tdd.test.mjs`
+      e `bdd.test.mjs` (DRY nos testes opt-in — débito do backlog L47).
+- [x] **2.7.3** Reescrever os 3 arquivos de teste opt-in para usar o helper DRY.
+- [x] **2.7.4** Adicionar teste de governança `[GOVERNANCE]` em `rules.test.mjs` validando
+      que `OPT_IN_RULE_FILES` contém todos os arquivos esperados e não contém features
+      de infraestrutura.
+- [x] **2.7.5** Adicionar teste explícito `[PRUNE]` para proteção de `bdd.md` no
+      prune global.
+- [x] **2.7.6** Validar suíte completa: 107/107 testes, cobertura 93%+.
+
+---
+
+## Fase 2.8 — Taxonomia Editorial vs Infraestrutura
+
+> **Origem:** Observação pós-review (2026-04-28): a distinção entre features editoriais e de infraestrutura não estava clara na estrutura de pastas, código-fonte nem documentação.
+
+- [x] **2.8.1** Criar subpastas `cli/features/opt-in/editorial/` e `cli/features/opt-in/infrastructure/`.
+- [x] **2.8.2** Mover quality-gates, tdd, bdd, test-helpers para `editorial/`.
+- [x] **2.8.3** Mover prettier, husky, ci para `infrastructure/`.
+- [x] **2.8.4** Atualizar imports em `engine.mjs` com caminhos novos e comentários semânticos.
+- [x] **2.8.5** Atualizar imports relativos internos (`../../core/` → `../../../core/`).
+- [x] **2.8.6** Reestruturar `cli-input.mjs`: exportar `EDITORIAL_FEATURES` e
+      `INFRASTRUCTURE_FEATURES` como fonte de verdade, derivar `FEATURE_OPTIONS`
+      por composição, simplificar `OPT_IN_RULE_FILES`.
+- [x] **2.8.7** Reescrever `docs/features.md` com terminologia "Infraestrutura"
+      consistente, tabela de taxonomia e referências aos paths do source.
+- [x] **2.8.8** Adicionar business rules `[BR-CLI-EDITORIAL-*]` e `[BR-CLI-INFRA]`
+      em `docs/cli/ai-guidelines-cli.md`, renumerar seções.
+- [x] **2.8.9** Validar suíte completa: 107/107 testes, cobertura 93%+.
 
 ---
 

@@ -10,15 +10,40 @@ const WIZARD_DEFAULTS = {
   target: ".",
   packageManager: "npm",
   dryRun: true,
-  features: "prettier,husky,ci",
+  features: "prettier,husky,ci,quality-gates,tdd,bdd",
 };
 
-const FEATURE_OPTIONS = ["prettier", "husky", "ci"];
+/**
+ * Taxonomia das features opt-in.
+ *
+ * Editoriais    → sincronizam .md para .ai-guidelines/rules/ do consumidor.
+ * Infraestrutura → modificam package.json, hooks, CI/CD do consumidor.
+ *
+ * FEATURE_OPTIONS é derivado por composição; as listas tipadas
+ * (EDITORIAL / INFRASTRUCTURE) são a fonte de verdade.
+ */
+export const EDITORIAL_FEATURES = ["quality-gates", "tdd", "bdd"];
+export const INFRASTRUCTURE_FEATURES = ["prettier", "husky", "ci"];
+const FEATURE_OPTIONS = [...INFRASTRUCTURE_FEATURES, ...EDITORIAL_FEATURES];
+
 const FEATURE_DESCRIPTIONS = {
-  prettier: "Estilo e Padronização (Baseline Prettier)",
-  husky: "Automação Local (Git Hooks)",
-  ci: "Integração Contínua (GitHub Actions Workflow)",
+  // Infraestrutura
+  prettier: "⚡ Estilo e Padronização (Baseline Prettier)",
+  husky: "⚡ Automação Local (Git Hooks)",
+  ci: "⚡ Integração Contínua (GitHub Actions Workflow)",
+  // Editoriais
+  "quality-gates": "📝 Gates objetivos para código gerado por IA (Recomendado)",
+  tdd: "📝 TDD: Ciclo de Desenvolvimento Guiado por Testes (Red-Green-Refactor)",
+  bdd: "📝 BDD: Comportamento Guiado por Testes (Dado/Quando/Então em Português ou Inglês)",
 };
+
+/**
+ * Nomes dos arquivos .md gerados por features opt-in editoriais.
+ * Derivado programaticamente de EDITORIAL_FEATURES.
+ * Usado pelo motor de prune em rules.mjs para proteger arquivos
+ * opt-in ativos durante a limpeza global.
+ */
+export const OPT_IN_RULE_FILES = EDITORIAL_FEATURES.map((f) => `${f}.md`);
 
 export function isSupportedMode(mode) {
   return SUPPORTED_MODES.includes(mode);
@@ -38,6 +63,7 @@ Opções:
   --target <dir>             Diretório alvo (default: diretório atual)
   --name <project_name>      Nome do projeto (default: nome da pasta alvo)
   --package-manager <pm>     npm | pnpm | yarn | yarn@1.22.22 | yarn@4.1.1
+  --lang <pt|en>             Idioma para features (ex: tdd, bdd). Padrão: pt
   --force                    Sobrescreve arquivos suportados
   --dry-run                  Mostra ações sem escrever arquivos
   --install                  Instala dependências automaticamente
@@ -267,6 +293,19 @@ export async function resolveExecutionInput(mode, rawOptions) {
       .filter(Boolean);
   } else if (typeof wizardOptions.features === "string") {
     wizardOptions.features = wizardOptions.features.split(",").map((f) => f.trim());
+  }
+
+  if (
+    (wizardOptions.features.includes("tdd") || wizardOptions.features.includes("bdd")) &&
+    wizardOptions.lang === undefined
+  ) {
+    wizardOptions.lang = await promptTextWithDefault(
+      ask,
+      "Idioma para regras TDD/BDD (pt ou en)",
+      "pt",
+      (value) => ["pt", "en"].includes(value.toLowerCase()),
+      "Idioma inválido. Use pt ou en."
+    );
   }
 
   if (wizardOptions["dry-run"] === undefined) {

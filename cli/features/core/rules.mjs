@@ -1,6 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { ROOT_DIR } from "../../core/file-system.mjs";
+import { OPT_IN_RULE_FILES } from "../../core/cli-input.mjs";
 
 /**
  * Sincroniza as regras de governança para .ai-guidelines/rules/
@@ -20,7 +21,8 @@ export async function applyRules(targetDir, options, actions) {
   }
   actions.push("sync baseline rules to .ai-guidelines/rules/");
 
-  const files = await fs.readdir(sourceRulesDir);
+  const dirents = await fs.readdir(sourceRulesDir, { withFileTypes: true });
+  const files = dirents.filter((dirent) => dirent.isFile()).map((dirent) => dirent.name);
 
   for (const file of files) {
     const src = path.join(sourceRulesDir, file);
@@ -43,7 +45,7 @@ export async function applyRules(targetDir, options, actions) {
   if (prune) {
     const targetFiles = await fs.readdir(targetRulesDir);
     for (const file of targetFiles) {
-      if (!files.includes(file)) {
+      if (!files.includes(file) && !OPT_IN_RULE_FILES.includes(file)) {
         if (!dryRun) {
           await fs.unlink(path.join(targetRulesDir, file));
         }

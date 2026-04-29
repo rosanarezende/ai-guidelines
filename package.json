@@ -4,6 +4,13 @@
   "description": "Portable AI governance framework — agnostic by design",
   "private": true,
   "bin": "./cli/ai-guidelines-cli.mjs",
+  "files": [
+    "cli",
+    ".core",
+    "docs",
+    "README.md",
+    "CHANGELOG.md"
+  ],
   "scripts": {
     "test": "node --experimental-default-config-file --test cli/**/*.test.mjs cli/**/**/*.test.mjs tests/**/*.test.mjs",
     "test:coverage": "node --experimental-default-config-file --experimental-test-coverage --test cli/**/*.test.mjs cli/**/**/*.test.mjs tests/**/*.test.mjs",

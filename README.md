@@ -10,6 +10,7 @@
 `ai-guidelines` é um framework concebidO para mitigar o desafio de manter a coerência técnica e editorial ao **integrar múltiplos agentes de IA** (como o Claude, Gemini ou Codex) em projetos de desenvolvimento.
 
 A ferramenta centraliza a governança num único ponto, resolvendo problemas comuns de desorganização através de:
+
 - _Distribuição via CLI_: Aplicação automatizada e limpa de regras universais em qualquer repositório.
 - _Governança Multi-agente_: Regras de atuação agnósticas que operam independentemente do Large Language Model (LLM) utilizado.
 - _Modularidade (Opt-in)_: Configuração flexível de ferramentas de qualidade e estilo (como Prettier, Husky ou processos de CI).
@@ -35,12 +36,12 @@ node cli/ai-guidelines-cli.mjs adopt --target ../repo-existente --dry-run   # Mo
 node cli/ai-guidelines-cli.mjs adopt --target ../repo-existente             # Aplicação definitiva
 ```
 
-> Nota: A execução da CLI sem argumentos inicia automaticamente um assistente de configuração interativo. 
+> Nota: A execução da CLI sem argumentos inicia automaticamente um assistente de configuração interativo.
 > Em CI, use flags explícitas. Detalhes em [Documentação de Features](docs/features.md).
 
 ### 🛠️ Para Contribuidores
 
-A leitura do documento [`CONTRIBUTING.md`](CONTRIBUTING.md)  é recomendada para o entendimento completo do fluxo de trabalho. Em suma:
+A leitura do documento [`CONTRIBUTING.md`](CONTRIBUTING.md) é recomendada para o entendimento completo do fluxo de trabalho. Em suma:
 
 - **Correções menores (Bugs, pequenas fricções):** abrir issue ou Pull Request (PR) em estado de rascunho (Draft).
 - **Alterações de arquitetura ou novas funcionalidades:** registrar em [`backlog.md`](.specify/specs/roadmap/backlog.md) → criar spec em `.specify/specs/<slug>/` a partir dos templates SDD → branch → PR Draft.
@@ -117,7 +118,8 @@ ai-guidelines/
 │   └── templates/              # Templates injetados pelo init/adopt no repo alvo
 ├── cli/                        # CLI local (ai-guidelines-cli.mjs)
 │   ├── core/                   # Engine, file-system, cli-input, content-merge
-│   ├── features/               # core/ (pointers, rules, gitattributes) + opt-in/ (prettier, husky, ci)
+│   ├── features/               # core/ (pointers, rules, gitattributes)
+│   │   └── opt-in/             # editorial/ (tdd, bdd, quality-gates) + infrastructure/ (prettier, husky, ci)
 │   └── formatters/             # Detecção de PM, formatter rival, monorepo
 ├── docs/                       # Documentação exposta ao consumidor
 │   ├── cli/                    # Business Rules da CLI
@@ -144,10 +146,10 @@ specs concluídas em [`.specify/specs/roadmap/historico.md`](.specify/specs/road
 
 Próximas iniciativas:
 
+- Refinamento de processos (Research Lifecycle, concorrência de specs)
+- Refatoração estrutural da CLI (TypeScript, path aliases, reorganização)
 - Publicação como package npm (`@ai-guidelines/core`)
 - CLI `audit` para detecção de conflitos em configs globais de IA
-- Adapters opt-in para integração com GitHub Projects / Jira / Linear
-- Automações cross-repo e expansão do ecossistema
 
 ---
 

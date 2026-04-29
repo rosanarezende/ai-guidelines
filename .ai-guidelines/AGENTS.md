@@ -52,12 +52,12 @@ Este arquivo define o fluxo obrigatório para qualquer IA atuando neste reposit�
 
 10. **Aja apenas mediante Plano Formado.** Antes de executar qualquer código, escolha a granularidade:
 
-    | Critério | Use `spec-foundation` | Use `plano leve` |
-    |---|---|---|
-    | Duração | > 1 sessão | 1 sessão |
-    | Escopo | > 1 arquivo fora de feature isolada | Ajuste pontual, local |
-    | Sobrevivência | Precisa sobreviver troca de IA/sessão | Descartável |
-    | Onde vive | `.specify/specs/<slug>/` (versionado) | Scratchpad da ferramenta (não versionado) |
+    | Critério      | Use `spec-foundation`                 | Use `plano leve`                          |
+    | ------------- | ------------------------------------- | ----------------------------------------- |
+    | Duração       | > 1 sessão                            | 1 sessão                                  |
+    | Escopo        | > 1 arquivo fora de feature isolada   | Ajuste pontual, local                     |
+    | Sobrevivência | Precisa sobreviver troca de IA/sessão | Descartável                               |
+    | Onde vive     | `.specify/specs/<slug>/` (versionado) | Scratchpad da ferramenta (não versionado) |
 
 11. **Checkpoints antes de ação.** Após absorver contexto extenso (múltiplos arquivos, specs, pesquisas), retorne um Checkpoint resumido e peça aprovação humana **antes** de executar Code Actions.
 

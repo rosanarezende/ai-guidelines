@@ -41,6 +41,18 @@ Em ordem cronológica reversa. Número mantido como rastreabilidade.
 
 ---
 
+## Specs Pivotadas / Pausadas
+
+Specs que iniciaram o RPI, mas tiveram seu escopo alterado drasticamente, provaram-se inviáveis no design inicial ou foram convertidas em Issues/novas candidatas antes do deploy.
+
+- **spec 0016** — Adapters Opt-in para Trackers
+  (`.specify/specs/0016-adapters-opt-in/`) — **Pivoted** (2026-04-27).
+  - O design inicial propunha injetar apenas arquivos `.md` (regras em texto) para que os agentes operassem Trackers.
+  - O laboratório (TDD) provou que se tratava de uma "ilusão de automação". A automação real de quadros (especialmente GitHub Projects V2) exige determinismo, scripts e chamadas de API (GraphQL).
+  - O código do CLI foi revertido e os aprendizados geraram novas candidatas no backlog (`tracker-automation`, `process-refinement`, DRY testing).
+
+---
+
 ## Specs absorvidas
 
 Specs propostas que foram fundidas em outra spec. Rastreabilidade via

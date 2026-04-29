@@ -50,7 +50,7 @@ describe("CLI Governance Business Rules [BR-CLI]", () => {
       );
 
       assert.ok(
-        coreContent.includes("### PHASE 0: The Prime Directive"),
+        coreContent.includes("### FASE 1: The Prime Directive"),
         "O core deve conter o baseline real, não o ponteiro"
       );
       assert.ok(
