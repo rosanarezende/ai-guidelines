@@ -17,7 +17,10 @@
 - [x] **0.3** `roadmap/backlog.md` atualizado: spec 0017 movida para "Em execução";
       candidatas `process-refinement` e `cli-refactor` removidas de "Now" (absorvidas).
 - [x] **0.4** Pesquisa: Melhores práticas para concorrência em projetos OSS (visibilidade + justificativa). Resultado em `research/concurrency-best-practices.md`.
-- [x] **0.5** Pesquisa de Compliance Multi-Modelo (2026): - [x] **0.5.1** Criação do boilerplate de pesquisa em `research/agents-vs-rules-compliance.md`. - [x] **0.5.2** Consolidação via Deep Research (veredito em `analise-arquitetural...md`). - [x] **0.5.3** Decisão arquitetural tomada: Padrão "Monolithic Compile" em execução.
+- [x] **0.5** Pesquisa de Compliance Multi-Modelo (2026):
+  - [x] **0.5.1** Criação do boilerplate de pesquisa em `research/agents-vs-rules-compliance.md`.
+  - [ ] **0.5.2** Consolidação via Deep Research (veredito em `analise-arquitetural...md`).
+  - [ ] **0.5.3** Decisão arquitetural tomada: Padrão "Monolithic Compile" em execução.
 
 ---
 
