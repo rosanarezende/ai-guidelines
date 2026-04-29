@@ -14,33 +14,28 @@ Detalhes de lifecycle em [`docs/process/spec-foundation.md`](../../../docs/proce
 
 Specs atualmente em branch ativa. Formato enxuto.
 
+- **spec 0017** — Process Refinement & CLI Refactor (`feat/spec-0017-process-cli-refactor`).
+  Fusão das candidatas `process-refinement` e `cli-refactor`. Sub-bloco A: política de
+  research lifecycle, boot obrigatório de agentes, concorrência de specs, reforma do
+  backlog, pesquisa AGENTS.md vs global-rules.md. Sub-bloco B: reorganização de
+  `cli/core/`, path aliases via `imports` do `package.json`, reorganização de `docs/`.
+
 ---
 
 ## Now (próxima fila, ordem importa)
 
 Specs ou candidatas priorizadas para iniciar em seguida. Ordem indica prioridade.
 
-- **process-refinement** (Governança de Conhecimento, Concorrência e Research Lifecycle)
-  - **Contexto:** Gaps processuais que causam colisão de Specs e perda de contexto de Research. A pasta `.specify/specs/researchs/` é temporária — criada para trazer pesquisas de specs anteriores a 0008 do repo privado/archived, mas sem política de catalogação permanente.
-  - **Escopo:**
-    1. **Concorrência de Specs**: documentar workflow seguro para branches concorrentes.
-    2. **Boot obrigatório**: tornar a leitura do `backlog.md` mandatória no `AGENTS.md` durante o boot.
-    3. **Research Lifecycle**: criar política inspirada no `NEXT.md` — ao encerrar uma spec, mover `research/` para localização canônica e mapear conteúdo relevante no `research-index.md`. Definir se pesquisas ficam junto à spec encerrada, migram para pasta central, ou ambos (link + cópia). Resolver a pasta temporária `researchs/` aplicando a nova política.
-    4. **Automatizar ciclo de vida de Gaps**: workflow que facilite a alimentação de `NEXT.md` e `backlog.md` a partir de insights capturados no chat (absorvido da seção Oportunidades).
-    5. **Reorganização do Backlog**: simplificar estrutura e formato do `backlog.md`. O formato atual é confuso — mistura specs numeradas, candidatas sem número, oportunidades e bloqueadores sem hierarquia visual clara. Definir formato padronizado para entradas, critérios de promoção entre seções (Now/Next/Later) e regras de archiving.
-    6. **Investigação AGENTS.md vs global-rules.md**: pesquisar se a divisão atual (AGENTS.md = workflow operacional, global-rules.md = princípios de engenharia) é de fato respeitada pelos modelos ou se consolidar tudo em AGENTS.md resultaria em melhor compliance. Testar com diferentes agentes (Claude, Gemini, Codex) e documentar achados. Cross-ref: ADR 0004 (Governance Single Responsibility).
-  - **Origem:** Débitos levantados no `NEXT.md` da Spec 0016 + revisão pós-Spec 0008.
 
-- **cli-refactor** (Refatoração Estrutural da CLI)
-  - **Fonte do insight:** revisão pós-Spec 0008, Fase 2.8 (taxonomia editorial/infraestrutura). Reorganização de `cli/features/opt-in/` em subpastas revelou fragilidade nos imports relativos (`../../../core/`) e falta de estrutura idiomática para projeto público.
-  - **Escopo potencial:**
-    1. **TypeScript**: migrar `.mjs` → `.ts` com `tsconfig.json` estrito, obtendo type-safety nas interfaces de features, options e context.
-    2. **Path aliases**: configurar `@/core/*`, `@/features/*`, `@/formatters/*` via `tsconfig paths` (ou `imports` do `package.json`), eliminando cadeias `../../../`.
-    3. **Reorganização de `cli/`**: avaliar se `cli/core/` ainda faz sentido vs dividir em `cli/engine/`, `cli/input/`, `cli/utils/` (content-merge, file-system). Atualmente `core/` mistura orquestração (engine), parsing (cli-input), I/O (file-system) e merge (content-merge).
-    4. **Reorganização de `docs/`**: consolidar `docs/cli/`, `docs/process/`, `docs/features.md` em estrutura sidebar-ready (ex: para Docusaurus/VitePress futuro).
-  - **Pré-requisitos:** Spec 0008 mergeada; decisão sobre bundler (tsup, esbuild, ou script Node nativo).
+- **cli-typescript** (Migração TypeScript da CLI)
+  - **Fonte do insight:** Remanescente do cli-refactor após a Spec 0017 assumir a reorganização de pastas.
+  - **Escopo potencial:** migrar `.mjs` → `.ts` com `tsconfig.json` estrito, obtendo type-safety nas interfaces de features, options e context.
+  - **Pré-requisitos:** Spec 0017 concluída (estrutura estável antes de migrar linguagem). Decisão sobre bundler (tsup, esbuild, ou script Node nativo).
   - **Riscos antecipados:** migração TS pode inflar `package.json` com deps de build; aliases precisam funcionar tanto em dev (`tsx`/`ts-node`) quanto no bundle publicado; diff será massivo (renomear ~40 arquivos).
-  - **Sinal de "está na hora":** quando adicionar nova feature CLI exigir mais de 3 níveis de `../` nos imports, ou quando onboarding de contribuidor externo tropeçar na estrutura.
+
+- **process-automations** (Automatização de ciclo de vida de Gaps via CLI)
+  - **Fonte do insight:** Remanescente do process-refinement (o processo em si foi absorvido pela 0017, mas a automação via CLI é separada).
+  - **Escopo potencial:** criar workflow/comando no CLI que facilite a alimentação de `NEXT.md` e `backlog.md` a partir de insights capturados no chat.
 
 - **seguranca-ia-supply-chain** (spec 0012 — Segurança de IA tools / supply chain)
   - **Fonte do insight:** incidente Vercel/Contex.ai (abril/2026), análise Lucas Montano [Hackearam a Vercel via AI](https://www.youtube.com/watch?v=oDXYfesz0qw). Síntese em `synthesis.md` Tema 4.
