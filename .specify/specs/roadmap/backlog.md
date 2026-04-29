@@ -37,6 +37,7 @@ Specs ou candidatas priorizadas para iniciar em seguida. Ordem indica prioridade
     3. **Research Lifecycle**: criar política inspirada no `NEXT.md` — ao encerrar uma spec, mover `research/` para localização canônica e mapear conteúdo relevante no `research-index.md`. Definir se pesquisas ficam junto à spec encerrada, migram para pasta central, ou ambos (link + cópia). Resolver a pasta temporária `researchs/` aplicando a nova política.
     4. **Automatizar ciclo de vida de Gaps**: workflow que facilite a alimentação de `NEXT.md` e `backlog.md` a partir de insights capturados no chat (absorvido da seção Oportunidades).
     5. **Reorganização do Backlog**: simplificar estrutura e formato do `backlog.md`. O formato atual é confuso — mistura specs numeradas, candidatas sem número, oportunidades e bloqueadores sem hierarquia visual clara. Definir formato padronizado para entradas, critérios de promoção entre seções (Now/Next/Later) e regras de archiving.
+    6. **Investigação AGENTS.md vs global-rules.md**: pesquisar se a divisão atual (AGENTS.md = workflow operacional, global-rules.md = princípios de engenharia) é de fato respeitada pelos modelos ou se consolidar tudo em AGENTS.md resultaria em melhor compliance. Testar com diferentes agentes (Claude, Gemini, Codex) e documentar achados. Cross-ref: ADR 0004 (Governance Single Responsibility).
   - **Origem:** Débitos levantados no `NEXT.md` da Spec 0016 + revisão pós-Spec 0008.
 
 - **cli-refactor** (Refatoração Estrutural da CLI)
@@ -77,6 +78,7 @@ Specs ou candidatas que entram na fila depois de esgotado o Now. Ordem pode ser 
   - **Critérios de aceite (esboço):** `npx` funciona em projeto novo e existente;
   - **Pré-requisitos:** Spec 0005 concluída (✓); decisão de naming (bloqueador #1).
   - **Riscos antecipados:** GitHub tokens cross-repo exigem PAT fino ou GitHub App; Action que abre PRs em outro repo pode virar ruído sem gatilho correto (label `growth-relevant`); NPM org paga vs GitHub Packages.
+  - **Research obrigatória — Update Strategy para Consumidores**: quando o framework atualiza templates (rules, AGENTS), como consumidores recebem o update? Atualmente `adopt --force` sobrescreve tudo. Investigar: (1) merge inteligente que preserve customizações locais vs atualizações upstream; (2) notificação de updates disponíveis (ex: comparar hash local vs publicado); (3) modelo de semver para templates (breaking change = regra removida/renomeada). Insight: revisão pós-Spec 0008 revelou que reescrever templates core impacta todos os consumidores — sem estratégia de migração, updates são destrutivos.
 
 - **tracker-automation** (Automação profunda de Trackers)
   - **Contexto:** A Spec 0016 revelou que apenas instruir o agente num arquivo `.md` não garante automação confiável com GitHub Projects V2 (que usa GraphQL e IDs globais).
