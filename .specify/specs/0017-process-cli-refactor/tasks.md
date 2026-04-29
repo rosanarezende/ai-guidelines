@@ -17,12 +17,7 @@
 - [x] **0.3** `roadmap/backlog.md` atualizado: spec 0017 movida para "Em execução";
       candidatas `process-refinement` e `cli-refactor` removidas de "Now" (absorvidas).
 - [x] **0.4** Pesquisa: Melhores práticas para concorrência em projetos OSS (visibilidade + justificativa). Resultado em `research/concurrency-best-practices.md`.
-- [ ] **0.5** Pesquisa de Compliance Multi-Modelo (2026):
-  - [x] **0.5.1** Criação do boilerplate de pesquisa em `research/agents-vs-rules-compliance.md`.
-  - [ ] **0.5.2** Benchmark de Hierarquia de Instrução (System vs Context).
-  - [ ] **0.5.3** Design de Protocolo de Teste (Conflito, Ruído, Estética).
-  - [ ] **0.5.4** Execução de Matriz de Compliance (Gemini 3, Claude 4, GPT 4.4).
-  - [ ] **0.5.5** Conclusões e recomendações finais.
+- [x] **0.5** Pesquisa de Compliance Multi-Modelo (2026): - [x] **0.5.1** Criação do boilerplate de pesquisa em `research/agents-vs-rules-compliance.md`. - [x] **0.5.2** Consolidação via Deep Research (veredito em `analise-arquitetural...md`). - [x] **0.5.3** Decisão arquitetural tomada: Padrão "Monolithic Compile" em execução.
 
 ---
 
@@ -39,8 +34,7 @@
 - [x] **A.4** Aplicar política ao estado atual do repositório: revisar entradas de
       `research-index.md` e alinhar com os arquivos que existem em
       `.specify/specs/0008-governance-coherence/research/` e `researchs/`.
-- [ ] **A.5** Adicionar step de boot de leitura obrigatória de `backlog.md` no
-      `.ai-guidelines/AGENTS.md` (template CLI) e no `AGENTS.md` raiz.
+- [ ] **A.5** Implementar **Monolithic Runtime Compiler** no boot: - [ ] Script/lógica para fusão de `AGENTS.md` + `global-rules.md` + `backlog.md`. - [ ] Atualizar `.ai-guidelines/AGENTS.md` (template CLI) e o raiz.
 - [ ] **A.6** Documentar concorrência de specs em `docs/process/spec-foundation.md`
       (nova seção focada em Visibilidade, Shared Context e Justificativa).
 - [ ] **A.7** Reformatar `roadmap/backlog.md`: padronizar entradas como `**slug** (label)` (removendo números de specs legadas), incluir campo `Shared Context` para specs ativas e usar `<details>`.
