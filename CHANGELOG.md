@@ -4,6 +4,16 @@ Todas as mudanças notáveis neste framework seguem [Semantic Versioning](https:
 
 ---
 
+## [Unreleased]
+
+### Alterado
+
+- CLI passa a compilar `.ai-guidelines/AGENTS.md` como artefato monolítico topológico: diretivas e regras no topo, módulos opt-in envelopados em tags XML no centro, e contexto tático na base.
+- Adicionados aliases nativos via `package.json#imports` (`#core/*`, `#features/*`, `#formatters/*`) para reduzir imports relativos profundos.
+- Pesquisas da Spec 0017 centralizadas em `.specify/specs/researchs/`, com índice atualizado e bootstrap reforçado para leitura obrigatória do backlog.
+
+---
+
 ## [1.2.0] — 2026-04-26
 
 ### Adicionado
