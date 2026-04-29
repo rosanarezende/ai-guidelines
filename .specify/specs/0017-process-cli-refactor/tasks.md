@@ -1,89 +1,58 @@
 # Tasks — Spec 0017: Process Refinement & CLI Refactor
 
-> Spec: [`./spec.md`](./spec.md)
-> Plan: [`./plan.md`](./plan.md)
-> Status: Draft
+> Spec: [./spec.md](./spec.md)
+> Plan: [./plan.md](./plan.md)
 
-> **Progress file vivo.** Atualizar a cada degrau concluído. Quando uma decisão
-> mudar, refletir em `plan.md` na seção "Decisões revisitadas" e ajustar tasks
-> impactadas.
+> **Instrução para a IA Executora**: Atualize os checkboxes com `[x]` estritamente após a conclusão e aprovação nos testes locais. Cada tarefa do Bloco A e Bloco B deve ser um commit atômico e testável.
 
 ---
 
-## Fase 0 — Setup e research
+## Fase 0 — Setup e Research (Concluída)
 
 - [x] **0.1** Branch `feat/spec-0017-process-cli-refactor` criada a partir de `main`.
 - [x] **0.2** `spec.md` + `plan.md` + `tasks.md` criados a partir dos templates.
-- [x] **0.3** `roadmap/backlog.md` atualizado: spec 0017 movida para "Em execução";
-      candidatas `process-refinement` e `cli-refactor` removidas de "Now" (absorvidas).
-- [x] **0.4** Pesquisa: Melhores práticas para concorrência em projetos OSS (visibilidade + justificativa). Resultado em `research/concurrency-best-practices.md`.
-- [x] **0.5** Pesquisa de Compliance Multi-Modelo (2026):
-  - [x] **0.5.1** Criação do boilerplate de pesquisa em `research/agents-vs-rules-compliance.md`.
-  - [ ] **0.5.2** Consolidação via Deep Research (veredito em `analise-arquitetural...md`).
-  - [ ] **0.5.3** Decisão arquitetural tomada: Padrão "Monolithic Compile" em execução.
+- [x] **0.3** `roadmap/backlog.md` atualizado com a fusão das specs.
+- [x] **0.4** Pesquisa de concorrência OSS concluída (`research/concurrency-best-practices.md`).
+- [x] **0.5** Pesquisa de Compliance Multi-Modelo (2026) concluída:
+  - [x] **0.5.1** Boilerplate de pesquisa criado.
+  - [x] **0.5.2** Consolidação via Deep Research (Veredito: Compilação Monolítica é essencial contra ManyIH).
+  - [x] **0.5.3** Decisão arquitetural de Topologia e Tags XML transposta para os documentos de planejamento.
 
 ---
 
-## Fase 1 — Execução
+## Fase 1 — Desenvolvimento
 
-### Sub-bloco [A] — Process & Governance Refinement
+### Bloco A — Process & Sanitization
 
-- [x] **A.1** Fix link quebrado em `.specify/specs/research-index.md`
-      (remoção da entrada `governance-coherence-audit.md` deletado no commit `6c16e85`).
-- [x] **A.2** Documentar política de Research Lifecycle em `docs/process/spec-foundation.md`
-      (nova seção: quando linkar no index, o que deletar, o que é arquivo local vs central).
-- [x] **A.3** Atualizar `tasks-boilerplate.md` Fase 3, item 3.2: reescrever para
-      refletir política de "link no research-index, não mover arquivo".
-- [x] **A.4** Aplicar política ao estado atual do repositório: revisar entradas de
-      `research-index.md` e alinhar com os arquivos que existem em
-      `.specify/specs/0008-governance-coherence/research/` e `researchs/`.
-- [ ] **A.5** Implementar **Monolithic Runtime Compiler** no boot: - [ ] Script/lógica para fusão de `AGENTS.md` + `global-rules.md` + `backlog.md`. - [ ] Atualizar `.ai-guidelines/AGENTS.md` (template CLI) e o raiz.
-- [ ] **A.6** Documentar concorrência de specs em `docs/process/spec-foundation.md`
-      (nova seção focada em Visibilidade, Shared Context e Justificativa).
-- [ ] **A.7** Reformatar `roadmap/backlog.md`: padronizar entradas como `**slug** (label)` (removendo números de specs legadas), incluir campo `Shared Context` para specs ativas e usar `<details>`.
-- [ ] **A.8** Adicionar seção "Justificativa de Concorrência" no template `.specify/templates/spec-boilerplate.md`.
-- [ ] **A.9** Pesquisar/implementar configuração de `concurrencyPolicy` em `.ai-guidelines/config.json`.
-- [x] **A.8** Adicionar step em `tasks-boilerplate.md` e `spec-foundation.md` para exigir validação humana da spec antes do `plan.md` e `tasks.md`.
-- [ ] **A.9** `yarn check && yarn test` verde após A.
+- [ ] **A.1 (Lifecycle)**: Revisar a pasta `.specify/specs/researchs/`. Renomear os arquivos importantes (ex: a pesquisa da tarefa 0.5) com o padrão `YYYY-MM-DD-nome.md`. Mover para pastas temáticas e atualizar `.specify/specs/research-index.md`.
+- [ ] **A.2 (Sanitização)**: Inspecionar o diretório `docs/`. Identificar documentos de regras técnicas e movê-los para `.core/rules/global-rules.md` ou transformá-los em módulos em `.core/rules/opt-in/`. Deletar documentação obsoleta.
+- [ ] **A.3 (Bootstrap)**: Atualizar `.core/templates/AGENTS-core.md.tmpl`. Inserir diretiva explícita no passo inicial para forçar o agente a ler `.specify/specs/roadmap/backlog.md` antes de executar ações de código.
 
-### Sub-bloco [B] — CLI & Docs Structure
+### Bloco B — CLI Architecture & Monolithic Compiler
 
-- [ ] **B.1** Pesquisa/validação: testar `imports` field do `package.json` (Node.js
-      Subpath Imports) com Yarn Berry e Node 24 CI. Documentar resultado em
-      `plan.md` seção "Decisões revisitadas" se houver incompatibilidade.
-- [ ] **B.2** Configurar `imports` field em `package.json` com aliases `#core/*`,
-      `#features/*`, `#formatters/*`.
-- [ ] **B.3** Atualizar todos os imports relativos em `cli/features/` e `cli/core/`
-      para usar aliases. Confirmar: nenhum import tem mais de 2 níveis de `../`.
-- [ ] **B.4** Avaliar reorganização de `cli/core/` (baseado em resultado de A +
-      pesquisa de responsabilidades). Executar reorganização se decisão for mover.
-- [ ] **B.5** Auditar o propósito dos arquivos em `docs/`, avaliar consolidação em `.core/rules/` e reorganizar o restante em estrutura sidebar-ready (aguarda A.2 definir
-      o que permanece em `docs/process/`). Atualizar refs em `README.md` e
-      `AGENTS.md`.
-- [ ] **B.6** `yarn check && yarn test` verde após B.
+- [ ] **B.1 (Imports POC)**: Adicionar o campo `"imports"` no `package.json` para `#core/*`, `#features/*`, `#formatters/*`. Modificar 1 arquivo simples (ex: `cli/formatters/package-context.mjs`) para usar o alias e rodar `yarn test` para validar suporte no Yarn Berry.
+- [ ] **B.2 (Imports Massivo)**: Realizar um _Search & Replace_ seguro em toda a árvore `cli/features/` e `cli/core/` trocando caminhos relativos de subida (ex: `../../../core/...`) pelos novos aliases.
+- [ ] **B.3 (Separação do Core)**: Refatorar `cli/core/engine.mjs` extraindo funções puras de leitura/escrita de arquivos para um novo `cli/core/io.mjs` e isolando o orquestrador.
+- [ ] **B.4 (Motor de Compilação - Topologia)**: Refatorar a lógica de mesclagem (atualmente em `content-merge.mjs` ou equivalente). Implementar os três buffers:
+  - Lógica para escrever `AGENTS-core` + Regras na zona "Topo".
+  - Lógica para escrever `AGENTS-pointer` na zona "Base".
+- [ ] **B.5 (Motor de Compilação - XML Tags)**: Adicionar lógica ao motor no loop dos módulos opt-in (zona "Centro"). Antes de anexar o conteúdo de arquivos como `tdd-pt.md` ou `quality-gates.md`, fazer o parser do nome da feature, criar tags relacionais (ex: `<FEATURE_TDD>`) e envolver o markdown lido, adicionando quebras de linha seguras.
+- [ ] **B.6 (Garantia de Qualidade)**: Rodar `yarn check && yarn test` e atualizar quaisquer testes unitários de `content-merge` e `engine` que tenham quebrado por conta do novo output com tags XML.
 
 ---
 
-## Fase 2 — Validação cruzada e PR
+## Fase 2 — Validação Cruzada e PR
 
-- [ ] **2.1** Smoke test: `node cli/ai-guidelines-cli.mjs adopt --target /tmp/consumer
---dry-run` — output sem erros.
-- [ ] **2.2** Critérios de aceite de `spec.md` e DoD de `plan.md` confirmados.
-- [ ] **2.3** `CHANGELOG.md` atualizado com entrada para a versão.
-- [ ] **2.4** PR Draft via `gh pr create --draft` com template preenchido.
-- [ ] **2.5** Aguardar revisão humana antes de converter para Ready.
+- [ ] **2.1** Executar Smoke Test: rodar o comando da CLI localmente `node cli/ai-guidelines-cli.mjs adopt --target /tmp/consumer --dry-run`. Inspecionar o arquivo gerado para verificar se o Sanduíche de Contexto (Topo/Centro/Base) e as Tags XML foram construídos corretamente.
+- [ ] **2.2** Testes de Integração: Atualizar o arquivo de testes de integração da CLI para suportar a nova estrutura monolítica.
+- [ ] **2.3** Atualizar o `CHANGELOG.md` com a nova arquitetura do compilador em tempo de execução.
+- [ ] **2.4** Gerar PR Draft via GitHub CLI com o template devidamente preenchido.
 
 ---
 
-## Fase 3 — Encerramento (após merge)
+## Fase 3 — Encerramento (Após Merge)
 
 > **[MANDATÓRIO]** Antes de abrir spec nova, completar este checklist.
 
-- [ ] **3.1** `NEXT.md` (se existir): migrar débitos relevantes para
-      `roadmap/backlog.md` e **deletar** o arquivo.
-- [ ] **3.2** `research/`: cada arquivo significativo deve ser renomeado para incluir a data (`YYYY-MM-DD-nome.md`) e movido para a pasta de domínio em `.specify/specs/researchs/<domínio>/`. Linká-los no `.specify/specs/research-index.md`.
-- [ ] **3.3** `spec.md` header: status → `Done`.
-- [ ] **3.4** `roadmap/historico.md`: spec movida para "Specs concluídas"
-      com data; entrada removida da seção "Em execução" em `roadmap/backlog.md`.
-- [ ] **3.5** Confirmar que nenhuma spec subsequente foi aberta antes deste
-      encerramento (regra: feche a anterior antes de abrir a próxima).
+- [ ] **3.1** `NEXT.md` (se existir): migrar débitos relevantes para `roadmap/backlog.md` e **deletar** o arquivo `NEXT.md`.
+- [ ] **3.2** Marcar a Spec 0017 como `Done` no header do `spec.md` e no board correspondente em `roadmap/backlog.md`.

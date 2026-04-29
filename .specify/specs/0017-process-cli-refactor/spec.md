@@ -1,4 +1,4 @@
-# Spec 0017 — Process Refinement & CLI Refactor
+# Spec 0017 — Process Refinement & CLI Refactor (Monolithic Compiler)
 
 > Status: Draft
 > Author: Antigravity
@@ -6,159 +6,63 @@
 > Owner: Rosana Rezende
 > Plan: [`./plan.md`](./plan.md)
 
-> **Princípio de imutabilidade:** após status `In Review`, este arquivo só
-> muda por consenso explícito. Decisões em aberto vão para `plan.md` (vivo).
-
-> **Fusão consolidada:** absorve as candidatas `process-refinement` e
-> `cli-refactor` registradas em `roadmap/backlog.md`. Ver decisão de fusão
-> abaixo.
+> **Princípio de imutabilidade:** após status `In Review`, este arquivo só muda por consenso explícito. Decisões em aberto vão para `plan.md` (vivo).
+> **Fusão consolidada:** absorve as candidatas `process-refinement` e `cli-refactor` registradas em `roadmap/backlog.md`, com a adição crítica do "Monolithic Runtime Compiler" baseado na pesquisa de compliance de 2026.
 
 ---
 
 ## 🎯 Objetivo
 
-O repositório acumulou dois conjuntos de débitos estruturais após a Spec 0008:
+O repositório `ai-guidelines` acumulou débitos estruturais críticos em três frentes distintas que precisam ser resolvidos sistemicamente:
 
-- **Processo e governança**: a política de lifecycle de research é vaga (evidenciada
-  pelas remoções manuais de duplicatas na Fase 3 da 0008), o boot dos agentes não
-  inclui leitura obrigatória do `backlog.md`, branches concorrentes não têm workflow
-  documentado, e a divisão AGENTS.md vs `global-rules.md` nunca foi validada
-  empiricamente com diferentes modelos.
-
-- **Arquitetura do CLI**: a reorganização de `cli/features/opt-in/` em subpastas
-  (Fase 2.8 da Spec 0008) revelou imports com 3+ níveis `../../../`, ausência de
-  aliases de caminho, e uma estrutura `cli/core/` que mistura responsabilidades
-  distintas (orquestração, parsing, I/O, merge). A `docs/` também cresce sem
-  estrutura sidebar-ready, dificultando o onboarding de contribuidores.
-
-O resultado esperado é um repositório com **política de research lifecycle clara e
-aplicada**, **backlog com formato canônico**, **boot de agentes mais robusto**, e
-uma **estrutura de CLI mais idiomática** — reduzindo fricção para contribuidores
-humanos e futuros sub-agentes.
+1. **Compliance Algorítmico (O "Fixed-tier Bottleneck")**: Pesquisas de vanguarda (2026) revelaram que injetar múltiplos arquivos de regras fragmentados (`AGENTS.md`, `global-rules.md`, `tdd.md`) no contexto de um LLM de fronteira causa "Ambiguidade de Precedência". O modelo perde a hierarquia de obediência e ignora regras do meio do prompt ("Lost in the Middle"). A IA implementadora precisará transformar a injeção modular atual em um motor de **Compilação Monolítica em Runtime**, mantendo os arquivos separados no repositório (para humanos), mas fundindo-os num único artefato estruturado antes de enviar à API.
+2. **Processo, Governança e Sanitização**: A política de lifecycle de pesquisas (`researchs/`) é vaga e gerou duplicatas. Adicionalmente, a pasta `docs/` possui conteúdos legados ou mal posicionados que precisam ser auditados; regras de negócio devem residir em `.core/rules/`, não em documentos soltos. O bootstrap dos agentes também precisa forçar a leitura do `backlog.md`.
+3. **Arquitetura e Dependency Hell no CLI**: A CLI sofre de imports relativos profundos (ex: `../../../core/engine.mjs`) que fragilizam o código. A estrutura de `cli/core/` atualmente mistura I/O, Orquestração e Parsing.
 
 ---
 
-## 🧠 Decisão de Fusão
+## 📐 Escopo técnico
 
-### Critério aplicado
+### A. Process, Governance & Sanitization
 
-> _"Se a entrega de um item altera o contrato de outro, devem ser specs separadas."_
+- **Lifecycle Rigoroso**: Formalizar o encerramento de specs. Arquivos em `research/` perdem a numeração temporária, ganham data ISO e vão para subpastas de domínio (`.specify/specs/researchs/<domínio>/`), com atualização obrigatória do `research-index.md`.
+- **Auditoria de `docs/`**: Analisar todos os arquivos na pasta `docs/`. O que for regra de comportamento do agente migra para `.core/rules/`; o que for obsoleto será removido; o que for manual humano fica.
+- **Workflow de Concorrência**: Criar um guia para gestão de branches simultâneas.
+- **Agent Bootstrap**: Atualizar `.core/templates/AGENTS-core.md.tmpl` para exigir a leitura obrigatória do `backlog.md` logo na inicialização.
 
-### Análise
+### B. CLI Architecture & Monolithic Compiler
 
-| Sub-bloco               | Arquivos principais                                | Sobreposição |
-| ----------------------- | -------------------------------------------------- | ------------ |
-| A. Process & Governance | `AGENTS.md`, `docs/process/`, `.specify/`, roadmap | —            |
-| B. CLI & Docs Structure | `cli/`, `docs/`, `package.json`                    | Média com A  |
-
-### Conclusão
-
-**Fundir** porque:
-
-1. A reorganização de `docs/` (B) depende de saber **o que permanece** em
-   `docs/process/` após A definir a política de research lifecycle — sem A, B
-   pode reorganizar a pasta e A desfazer o trabalho depois.
-2. Ambos são pré-requisitos para Spec 0006 (publicação npm) e Spec 0009 (harness
-   engineering): CLI estruturada + docs claros viabilizam onboarding de
-   contribuidores externos.
-3. Custo de spec separada (cerimônia, ROADMAP, branch, PR, review) > custo de
-   sub-blocos isolados com commits atômicos.
-
-### Fora desta fusão (spinoff)
-
-- **`cli-typescript`** — migração `.mjs` → `.ts` com `tsconfig.json` estrito:
-  escopo de ~40 arquivos + bundler decision + breaking changes nos tipos.
-  Complexidade justifica spec própria. Pré-requisito: esta spec concluída (estrutura
-  estável antes de migrar linguagem).
+- **Resolução de Dependências**: Implementar nativamente o campo `imports` no `package.json` para criar aliases (`#core/*`, `#features/*`, `#formatters/*`), eliminando de vez os caminhos relativos frágeis.
+- **Isolamento do Core**: Refatorar o diretório `cli/core/` para separar explicitamente:
+  - `orchestrator.mjs`: fluxo de execução da CLI.
+  - `io.mjs`: operações puras de File System.
+  - `content-merge.mjs` (que evoluirá para o `ast-compiler` descrito abaixo).
+- **Engenharia de Posição Topológica (O "Sanduíche de Contexto")**: O `content-merge.mjs` deixará de ser um simples concatenador de strings. Ele deve montar o prompt final obedecendo estritamente as zonas de atenção do LLM:
+  1. **Topo (Primazia)**: Injetar `AGENTS-core` + Regras do Provedor (`gemini.md` ou `claude.md`). Aqui ficam as "Prime Directives" (proibições absolutas).
+  2. **Centro (Metodologia)**: Injetar os módulos _opt-in_ (`tdd`, `quality-gates`). **Requisito Crítico**: A CLI deve envelopar o conteúdo destes arquivos automaticamente em _Tags XML Relacionais_ (ex: `<FEATURE_TDD> ... </FEATURE_TDD>`) para evitar diluição semântica.
+  3. **Base (Recência)**: Injetar o contexto imediato (`AGENTS-pointer`).
 
 ---
 
-## 📦 Escopo
+## 🚫 Out of scope
 
-### Dentro do escopo
-
-**Sub-bloco A — Process & Governance Refinement:**
-
-- Política formal de **research lifecycle**: onde ficam os `research/` após closure,
-  quando migrar para `researchs/`, como indexar no `research-index.md`, o que fazer
-  com duplicatas. Aplicar política ao estado atual do repositório.
-- **Boot obrigatório**: leitura de `backlog.md` mandatória no `AGENTS.md` raiz e
-  no template `.core/templates/AGENTS-core.md.tmpl`.
-- **Concorrência de specs**: documentar workflow para branches concorrentes focado em visibilidade (warnings no backlog), justificativa técnica mandatória em caso de sobreposição e políticas configuráveis por repositório (STRICT/ADVISORY/OPEN).
-- **Reorganização do backlog**: hierarquia visual clara usando `<details>`, critérios de promoção entre Now/Next/Later, formato padronizado `**slug** (label)` (removendo números de specs legadas), e regras de archiving.
-- **Pesquisa de Compliance Multi-Modelo (2026)**: investigação profunda da divisão AGENTS.md vs `global-rules.md`. Benchmarking de hierarquia de instruções e atenção em janelas extensas com modelos de ponta (Gemini 3 Pro/Flash, Claude 4 Opus/Haiku, GPT 4.4/4.4-mini). Resultado em `research/agents-vs-rules-compliance.md`.
-- **Validação humana obrigatória**: formalizar no processo que agentes de IA devem
-  exigir validação humana do `spec.md` ANTES de gerar o `plan.md` e `tasks.md`,
-  impedindo decisões de design unilaterais não supervisionadas.
-
-**Sub-bloco B — CLI & Docs Structure:**
-
-- **Reorganização de `cli/core/`**: separar responsabilidades distintas hoje
-  agrupadas (orquestração → engine, parsing → input, I/O → file-system, merge
-  → content-merge). Sem renomear arquivos se quebrar imports nos testes.
-- **Path aliases**: configurar `imports` field do `package.json` (`#core/*`,
-  `#features/*`, `#formatters/*`) eliminando `../../../` nos arquivos de features.
-- **Auditoria e Reorganização de `docs/`**: auditar o real propósito da pasta `docs/`
-  e seu conteúdo, avaliando se arquivos específicos devem ser consolidados em
-  `.core/rules/` em vez de apenas organizados visualmente. Estruturar o que sobrar
-  de forma lógica e sidebar-ready.
-
-### Fora do escopo
-
-- **Migração TypeScript** — candidata `cli-typescript` no backlog.
-- **Automatização de ciclo de vida de Gaps via CLI** — processo pode ser documentado
-  em A; automação CLI é escopo de spec própria.
-- **Spec 0012 (segurança IA)** — audiência e artefatos diferentes, sem sobreposição
-  com os arquivos desta spec.
+- Migração da base de código para TypeScript.
+- Criação de novos módulos `opt-in` não existentes.
+- Refatoração profunda do conteúdo semântico das regras (o foco é na arquitetura de injeção, agrupamento e envelopamento, não em reescrever o TDD).
 
 ---
 
-## ✅ Critérios de Aceite (alto nível)
+## ⚠️ Riscos e invariantes
 
-- [ ] Política de research lifecycle documentada em `docs/process/spec-foundation.md`
-      e no template `tasks-boilerplate.md` (Fase 3 atualizada). Estado atual do
-      repositório coerente com a política.
-- [ ] `AGENTS.md` raiz e template core incluem step de boot de leitura do
-      `backlog.md`.
-- [ ] Concorrência de specs documentada em `docs/process/`.
-- [ ] `roadmap/backlog.md` reformatado: hierarquia clara, critérios de promoção,
-      sem mistura de formatos.
-- [ ] Pesquisa `research/agents-vs-rules-compliance.md` com achados e
-      recomendações documentados.
-- [ ] Nenhum import em `cli/features/` com mais de 2 níveis de `../`.
-- [ ] `docs/` reorganizada com estrutura sidebar-ready.
-- [ ] `yarn check && yarn test` verde.
-- [ ] PR Draft revisado e aprovado por humano antes de Ready.
+- **Invariante**: O comando `yarn check && yarn test` **deve** passar verde após cada commit.
+- **Risco**: Aliases via `imports` do `package.json` podem conflitar com a resolução do Yarn Berry (PnP).
+  - _Mitigação_: Testar uma POC isolada com 1 arquivo antes de aplicar refatoração massiva.
+- **Risco**: A compilação monolítica gerar um artefato massivo que quebre a janela de contexto de modelos menores.
+  - _Mitigação_: Garantir que o artefato é injetado como "System/Developer Message" para usufruir de descontos de _Prompt Caching_.
 
 ---
 
-## 🛠️ Dependências e impactos (alto nível)
+## 🛠️ Dependências
 
-- **Pré-requisitos**: Spec 0008 (✓) e Spec 0015 (✓) concluídas.
-- **Specs afetadas**:
-  - Spec 0006 (npm publication) — beneficia-se de CLI estruturada e docs claros.
-  - Spec 0009 (harness engineering) — beneficia-se de CLI estruturada e processo
-    de concorrência de specs documentado.
-  - Candidata `cli-typescript` — depende de B concluído (estrutura estável antes
-    de migrar linguagem).
-- **Riscos macro**:
-  - Reorganização de `cli/core/` pode gerar diff massivo; mitigar com commits
-    atômicos por responsabilidade.
-  - Aliases via `imports` do `package.json` têm suporte nativo em Node.js a partir
-    de v12.7 (subpath imports) — validar comportamento com Yarn Berry e CI.
-  - Pesquisa de compliance por modelo pode levar mais de uma sessão; delimitar
-    escopo mínimo viável antes de executar.
-
----
-
-## 📚 Referências
-
-- Spec 0008: Governance Coherence — contexto da taxonomia, boilerplates e lacunas
-  de process que esta spec resolve.
-- Spec 0015: Auditoria Destrutiva — limpeza de docs que antecede reorganização de
-  `docs/`.
-- ADR 0004: Governance Single Responsibility — origem da divisão AGENTS.md vs
-  `global-rules.md` que sub-bloco A investiga.
-- `roadmap/backlog.md`: candidatas `process-refinement` (itens 1-6) e `cli-refactor`
-  (itens 1-4 excluindo TS).
-- Research: [concurrency-best-practices.md](./research/concurrency-best-practices.md) — Melhores práticas para gestão de concorrência em projetos OSS.
+- **Specs pré-requisitos**: Spec 0008 (Governance Coherence) e Spec 0015 (Auditoria Destrutiva) concluídas.
+- **Pesquisa Base**: `analise-arquitetural-de-governanca-para-agentes-autonomos-.md`.
