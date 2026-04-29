@@ -23,6 +23,8 @@ Estudos técnicos sobre adoção, comportamento e _guardrails_ das plataformas l
 
 - [Mapeamento: Documentação vs Regras Acionáveis](./researchs/governance/2026-04-26-mapping-doc-to-rules.md) _(Classificação de arquivos em humano, universal e opt-in)_.
 - [Síntese de Insights de Transcrições (Temas 1-6)](./researchs/governance/2026-04-26-governance-synthesis.md) _(Destilação de vídeos/artigos sobre workflows agentic e eficiência)_.
+- [Compliance Multi-Modelo: Regras Fragmentadas vs Runtime Monolítico](./researchs/governance/2026-04-29-agents-vs-rules-compliance.md) _(Veredito sintético para compilação monolítica contra ManyIH)_.
+- [Concorrência em Specs e Branches de Design](./researchs/governance/2026-04-29-concurrency-best-practices.md) _(Boas práticas para specs simultâneas, RFCs e coordenação assíncrona)_.
 
 ## 🏗️ Design e Decisões de Arquitetura (Agnostic)
 
@@ -33,6 +35,7 @@ Decolamentos de arquitetura de código, CLI, e refatorações complexas que afet
 - [Configuração Nativa do Node.js Test Runner](./researchs/architecture/2026-04-22-node-config-file.md) _(Substituição de scripts package.json por node.config.json)_.
 - [Análise Multica (Case de Estudo do Layout Público)](./researchs/architecture/2026-04-22-multica-analysis.md)
 - [Separação Arquitetural: TDD vs BDD](./researchs/architecture/2026-04-28-tdd-vs-bdd-separation.md) _(Racional para divisão de regras técnicas por domínio e idioma)_.
+- [Governança de Agentes por Compilador Monolítico em Runtime](./researchs/architecture/2026-04-29-monolithic-runtime-compiler-governance.md) _(Pesquisa arquitetural completa sobre hierarquia de instruções, lost-in-the-middle e topologia do prompt)_.
 
 ## 🛸 Open Source & Publicação
 

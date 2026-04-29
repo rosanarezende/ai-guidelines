@@ -51,3 +51,4 @@ it("[BR-CLI-SYNC-01] DADO baseline desatualizado QUANDO executado adopt ENTÃO s
 - Ao receber uma business rule (`[BR-*]`), inclua o ID no teste correspondente.
 - Gere cenários para fluxo feliz, fluxo alternativo e casos de erro.
 - Priorize legibilidade sobre concisão nos nomes dos testes.
+- Mantenha cada cenário atômico: um `it()` deve expressar uma intenção de negócio observável.

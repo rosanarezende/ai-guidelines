@@ -21,6 +21,7 @@ Este arquivo define o fluxo obrigatório para qualquer IA atuando neste reposit�
    - Débitos → `.specify/specs/<slug>/NEXT.md`
    - Conhecimento → `.specify/specs/<slug>/research/`
    - Roadmap → `.specify/specs/roadmap/backlog.md`
+   - Bootstrap obrigatório → leia `.specify/specs/roadmap/backlog.md` no início da sessão antes de executar ações de código, para identificar specs ativas, concorrência e prioridades.
    - Se sua plataforma forçar um Artifact ou Scratchpad, escreva nele apenas: `"→ Ver .specify/specs/<slug>/plan.md"` (Pointer).
    - "AI-Slop" (planejamento preso em cache de agente) é inaceitável.
 

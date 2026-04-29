@@ -23,6 +23,7 @@ Toda nova funcionalidade ou correção de bug DEVE seguir este ciclo:
 - **Isolamento:** Testes unitários não devem depender de serviços externos, rede ou banco de dados. Use mocks/stubs para dependências.
 - **Colocation:** Arquivos de teste devem ficar no mesmo diretório que o código testado (ex: `engine.mjs` → `engine.test.mjs`).
 - **Cobertura como Gate:** Mínimo recomendado de **85%** de cobertura de linhas. Exceções devem ser documentadas.
+- **Rastreabilidade:** Quando uma regra de negócio tiver identificador `[BR-*]`, o teste que a valida deve carregar o mesmo identificador no nome.
 
 ---
 
@@ -32,3 +33,4 @@ Toda nova funcionalidade ou correção de bug DEVE seguir este ciclo:
 - Gere casos de borda (edge cases) baseados na spec antes de implementar a lógica.
 - Se um teste existente quebrar durante refatoração, corrija-o antes de prosseguir.
 - Nunca delete ou desabilite testes para fazer o build passar.
+- Em frameworks com cobertura mandatória, trate queda de coverage como falha de implementação, não como detalhe de CI.
