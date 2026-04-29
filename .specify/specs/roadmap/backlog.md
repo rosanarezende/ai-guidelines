@@ -14,8 +14,6 @@ Detalhes de lifecycle em [`docs/process/spec-foundation.md`](../../../docs/proce
 
 Specs atualmente em branch ativa. Formato enxuto.
 
-- **spec 0008** — Governance Coherence (Sub-blocos A+B mergeados via PR #21 em 2026-04-25).
-  Sub-blocos pendentes: **C** (AI Efficiency Guide), **D** (Step 0 Environment Awareness), **E** (Quality Gates + TDD opt-in), **F** (Onboarding/contribuição), **G** (ADR de visibilidade pública). Próxima entrega: F+G em PR pós-Spec 0015; depois C+D; E por último.
 - **spec 0015** — Auditoria Destrutiva (`feat/spec-0015-destructive-audit` → PR #22).
   Limpeza do baseline antes de F+G: remoção de docs herdados de projetos externos (`design/`, `cinematic-ui-boilerplates`, `advanced-ai-patterns`, placeholders vazios em `skills/` e `mcp/`, `ai-review-ritual`), movimentação de `projects.md.example` para `.specify/templates/`. Reparo de referências cruzadas no `README.md`.
 
@@ -25,9 +23,7 @@ Specs atualmente em branch ativa. Formato enxuto.
 
 Specs ou candidatas priorizadas para iniciar em seguida. Ordem indica prioridade.
 
-> **Nota:** Spec 0015 está em execução (ver "Em execução" acima). Próxima
-> da fila é Spec 0008 sub-blocos F+G (`feat/spec-0008-F-G`), que rodam
-> com o repo curado pela 0015.
+> **Nota:** Spec 0015 está em execução (ver "Em execução" acima).
 
 - **process-refinement** (Governança de Conhecimento, Concorrência e Research Lifecycle)
   - **Contexto:** Gaps processuais que causam colisão de Specs e perda de contexto de Research. A pasta `.specify/specs/researchs/` é temporária — criada para trazer pesquisas de specs anteriores a 0008 do repo privado/archived, mas sem política de catalogação permanente.

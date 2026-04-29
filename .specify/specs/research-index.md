@@ -21,6 +21,10 @@ Estudos técnicos sobre adoção, comportamento e _guardrails_ das plataformas l
 - [Benchmark de Governança e Testes BDD (Node 24)](./researchs/0005-cli-adopt-refactor/cli-governance-benchmark.md) _(Comparativo Husky/Backstage e infra de testes)_.
 - [Catálogo Exaustivo de Regras de Negócio (BR-CLI)](./researchs/0005-cli-adopt-refactor/business-rules-catalog.md) _(Mapeamento de 36+ regras de governança)_.
 
+- [Auditoria de Coerência de Governança](./researchs/0008-governance-coherence/governance-coherence-audit.md) _(Mapeamento de links quebrados e redundâncias entre AGENTS.md e global-rules.md)_.
+- [Mapeamento: Documentação vs Regras Acionáveis](./researchs/0008-governance-coherence/mapping-doc-to-rules.md) _(Classificação de arquivos em humano, universal e opt-in)_.
+- [Síntese de Insights de Transcrições (Temas 1-6)](./researchs/0008-governance-coherence/synthesis.md) _(Destilação de vídeos/artigos sobre workflows agentic e eficiência)_.
+
 ## 🏗️ Design e Decisões de Arquitetura (Agnostic)
 
 Decolamentos de arquitetura de código, CLI, e refatorações complexas que afetaram o ecossistema.
@@ -29,6 +33,7 @@ Decolamentos de arquitetura de código, CLI, e refatorações complexas que afet
 - [Paridade de Business Rules do Motor](./researchs/0004-ai-dev-foundations-public-ready/business-rules-parity.md)
 - [Configuração Nativa do Node.js Test Runner](./researchs/0004-ai-dev-foundations-public-ready/node-config-file.md) _(Substituição de scripts package.json por node.config.json)_.
 - [Análise Multica (Case de Estudo do Layout Público)](./researchs/0004-ai-dev-foundations-public-ready/multica-analysis.md)
+- [Separação Arquitetural: TDD vs BDD](./researchs/0008-governance-coherence/tdd-vs-bdd-separation.md) _(Racional para divisão de regras técnicas por domínio e idioma)_.
 
 ## 🛸 Open Source & Publicação
 
@@ -36,6 +41,7 @@ Estudos visando preparar nosso framework interno CLI e guidelines para a comunid
 
 - [Benchmarks de Open Source Public-Ready](./researchs/0004-ai-dev-foundations-public-ready/benchmarks-public-oss.md)
 - [Estratégia de Notificações de Atualização (Interino)](./researchs/0004-ai-dev-foundations-public-ready/update-notifications-strategy.md)
+- [Benchmarks de Formato de Roadmap & Backlog](./researchs/0008-governance-coherence/roadmap-format-benchmarks.md) _(Análise de 9 projetos OSS para definição de lifecycle de specs)_.
 
 ---
 

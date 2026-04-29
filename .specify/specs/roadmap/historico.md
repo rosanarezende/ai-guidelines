@@ -13,6 +13,15 @@ editar retroativamente.
 
 Em ordem cronológica reversa. Número mantido como rastreabilidade.
 
+- **spec 0008** — Governance Coherence
+  (`.specify/specs/0008-governance-coherence/`) — **Done** (2026-04-28).
+  - Unificação de regras universais (mandatory core) vs opt-in de stack.
+  - Canonização RPI ↔ spec-foundation com 6 novos boilerplates SDD.
+  - Consolidação do AI Efficiency Guide e introdução do Phase 0 (Environment Check).
+  - Implementação de Quality Gates, TDD e BDD como features opt-in no CLI.
+  - Refatoração de README/CONTRIBUTING com tom orientado a comunidade (pós-ADR 0007).
+  - Decisão formal de visibilidade pública (fresh repo + snapshot curado).
+
 - **spec 0005** — CLI Adopt Refactor & Maturity (Pointer Architecture)
   (`.specify/specs/0005-cli-adopt-refactor/`) — **Done** (2026-04-22).
   - Transição para **Arquitetura de Ponteiros** no `AGENTS.md`.
