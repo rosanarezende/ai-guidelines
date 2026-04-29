@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { ROOT_DIR } from "../../core/file-system.mjs";
-import { OPT_IN_RULE_FILES } from "../../core/cli-input.mjs";
+import { ROOT_DIR } from "#core/file-system";
+import { OPT_IN_RULE_FILES } from "#core/cli-input";
 
 /**
  * Sincroniza as regras de governança para .ai-guidelines/rules/

@@ -2,10 +2,14 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
   extractCoreBlock,
+  buildFeatureTag,
+  compileMonolithicAgentsContent,
   mergeAgentsContent,
   mergeGitattributesContent,
   mergeHookContent,
   mergePrettierIgnoreContent,
+  normalizePointerForMonolith,
+  wrapFeatureModule,
 } from "./content-merge.mjs";
 
 describe("content-merge", () => {
@@ -30,6 +34,43 @@ describe("content-merge", () => {
 
     it("[BR-CLI-MERGE-02] DADO markdown sem marcadores QUANDO extrair core ENTÃO lança erro explícito", () => {
       assert.throws(() => extractCoreBlock("# No markers"), /Bloco canônico/);
+    });
+  });
+
+  describe("compileMonolithicAgentsContent", () => {
+    it("[BR-CLI-COMPILER-01] DADO buffers topologicos QUANDO compilar ENTÃO preserva ordem topo centro base", () => {
+      const compiled = compileMonolithicAgentsContent({
+        coreTemplate: "AGENTS core",
+        globalRules: "global rules",
+        providerRules: [{ name: "codex", content: "codex rules" }],
+        optInRules: [{ name: "quality-gates.md", content: "quality rules" }],
+        pointerTemplate: "pointer",
+      });
+
+      assert.ok(compiled.indexOf("AGENTS core") < compiled.indexOf("<FEATURE_QUALITY_GATES>"));
+      assert.ok(compiled.indexOf("<FEATURE_QUALITY_GATES>") < compiled.indexOf("pointer"));
+      assert.match(compiled, /Regras do Provedor: codex/);
+    });
+
+    it("[BR-CLI-COMPILER-02] DADO feature opt-in QUANDO envelopar ENTÃO usa tags XML relacionais", () => {
+      assert.equal(buildFeatureTag("quality-gates.md"), "FEATURE_QUALITY_GATES");
+      assert.equal(
+        wrapFeatureModule("tdd.md", "regra"),
+        ["<FEATURE_TDD>", "regra", "</FEATURE_TDD>"].join("\n\n")
+      );
+    });
+
+    it("[BR-CLI-COMPILER-03] DADO pointer bruto QUANDO normalizar ENTÃO remove link recursivo", () => {
+      const pointer = [
+        "Para ler a Prime Directive, acesse:",
+        "[.ai-guidelines/AGENTS.md](.ai-guidelines/AGENTS.md)",
+        "<!-- END:ai-guidelines-core -->",
+      ].join("\n");
+
+      const normalized = normalizePointerForMonolith(pointer);
+
+      assert.doesNotMatch(normalized, /\.ai-guidelines\/AGENTS\.md/);
+      assert.match(normalized, /ponteiro tático/);
     });
   });
 

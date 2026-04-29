@@ -2,7 +2,7 @@ import readline from "node:readline";
 import path from "node:path";
 import { spawn } from "node:child_process";
 import { fileExists } from "./file-system.mjs";
-import { resolveLocalInstallCommand } from "../formatters/package-context.mjs";
+import { resolveLocalInstallCommand } from "#formatters/package-context";
 
 export async function getInstallHint(targetDir, packageManager) {
   const { cmd, args } = resolveLocalInstallCommand(packageManager);

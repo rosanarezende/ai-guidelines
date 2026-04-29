@@ -3,8 +3,8 @@ import os from "node:os";
 import path from "node:path";
 import assert from "node:assert/strict";
 import { describe, it, before, after } from "node:test";
-import { applyPointers } from "../features/core/pointers.mjs";
-import { normalizePackageManager } from "../formatters/package-context.mjs";
+import { applyPointers } from "#features/core/pointers";
+import { normalizePackageManager } from "#formatters/package-context";
 
 /**
  * [BR-CLI] Suite de Validação de Regras de Negócio (BDD)

@@ -1,5 +1,5 @@
 import path from "node:path";
-import { fileExists, readTextIfExists } from "../core/file-system.mjs";
+import { fileExists, readTextIfExists } from "#core/file-system";
 
 const DEFAULT_YARN_BERRY_VERSION = "4.1.1";
 

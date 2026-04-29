@@ -5,7 +5,7 @@ import assert from "node:assert/strict";
 import { EventEmitter } from "node:events";
 import { describe, it } from "node:test";
 import { getInstallHint, runInstall } from "./install-runtime.mjs";
-import { normalizePackageManager } from "../formatters/package-context.mjs";
+import { normalizePackageManager } from "#formatters/package-context";
 
 async function createTempDir(prefix) {
   return fs.mkdtemp(path.join(os.tmpdir(), `${prefix}-`));

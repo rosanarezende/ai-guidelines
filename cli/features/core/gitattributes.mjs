@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { ROOT_DIR } from "../../core/file-system.mjs";
-import { mergeGitattributesContent } from "../../core/content-merge.mjs";
+import { ROOT_DIR } from "#core/file-system";
+import { mergeGitattributesContent } from "#core/content-merge";
 
 /**
  * Governança de Persistência e EOL (.gitattributes)

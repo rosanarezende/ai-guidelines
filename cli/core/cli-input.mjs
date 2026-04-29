@@ -1,6 +1,6 @@
 import path from "node:path";
 import readline from "node:readline";
-import { normalizePackageManager, detectPackageManager } from "../formatters/package-context.mjs";
+import { normalizePackageManager, detectPackageManager } from "#formatters/package-context";
 import { readTextIfExists } from "./file-system.mjs";
 
 const SUPPORTED_MODES = ["init", "adopt"];

@@ -38,6 +38,31 @@ describe("Feature: Pointers (AGENTS.md Architecture)", () => {
     assert.ok(coreExists, "Arquivo core deve ser criado em .ai-guidelines/");
   });
 
+  it("[COMPILER] Deve gerar AGENTS core monolitico com regras e opt-ins envelopados", async () => {
+    const subTarget = path.join(targetDir, "monolithic-core");
+    await fs.mkdir(subTarget, { recursive: true });
+
+    await applyPointers(subTarget, { features: ["quality-gates", "tdd"], lang: "pt" }, []);
+
+    const coreContent = await fs.readFile(
+      path.join(subTarget, ".ai-guidelines", "AGENTS.md"),
+      "utf8"
+    );
+
+    assert.match(coreContent, /Zona Topo: Diretivas Primarias/);
+    assert.match(coreContent, /Regras Globais/);
+    assert.match(coreContent, /<FEATURE_QUALITY_GATES>/);
+    assert.match(coreContent, /<FEATURE_TDD>/);
+    assert.ok(
+      coreContent.indexOf("Zona Topo: Diretivas Primarias") <
+        coreContent.indexOf("Zona Centro: Metodologias Opt-in")
+    );
+    assert.ok(
+      coreContent.indexOf("Zona Centro: Metodologias Opt-in") <
+        coreContent.indexOf("Zona Base: Contexto Tatico")
+    );
+  });
+
   it("[PRESERVATION] Deve manter conteúdo do usuário fora do bloco core", async () => {
     const subTarget = path.join(targetDir, "preserve-user");
     await fs.mkdir(subTarget, { recursive: true });

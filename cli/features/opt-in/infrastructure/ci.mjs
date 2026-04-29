@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { ROOT_DIR } from "../../../core/file-system.mjs";
-import { resolveInstallCommand, resolveCiRunner } from "../../../formatters/package-context.mjs";
+import { ROOT_DIR } from "#core/file-system";
+import { resolveInstallCommand, resolveCiRunner } from "#formatters/package-context";
 
 /**
  * Governança de CI (GitHub Actions)
@@ -61,7 +61,7 @@ export async function applyCi(targetDir, options, context, actions) {
       let shouldUpdate = false;
 
       if (isTTY) {
-        const { promptUser } = await import("../../core/install-runtime.mjs");
+        const { promptUser } = await import("#core/install-runtime");
         shouldUpdate = await promptUser(
           `\nNovo baseline de CI detectado (.github/workflows/ai-guidelines-ci.yml). Atualizar agora? [S/n] `
         );

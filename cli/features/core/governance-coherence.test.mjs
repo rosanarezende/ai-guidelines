@@ -2,7 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { ROOT_DIR } from "../../core/file-system.mjs";
+import { ROOT_DIR } from "#core/file-system";
 
 const RULES_DIR = path.join(ROOT_DIR, ".core", "rules");
 

@@ -1,26 +1,27 @@
 import path from "node:path";
-import { parseArgs, printHelp, resolveExecutionInput, isSupportedMode } from "./cli-input.mjs";
-import { ensureDir, fileExists, readTextIfExists } from "./file-system.mjs";
+import { parseArgs, printHelp, resolveExecutionInput, isSupportedMode } from "#core/cli-input";
+import { fileExists, readTextIfExists } from "#core/file-system";
+import { collectExistingPaths, ensureTargetDir, readPackageJson } from "#core/io";
 import {
   detectFormatterContext,
   detectMonorepoContext,
   detectNewDevDeps,
   detectPackageManager,
-} from "../formatters/package-context.mjs";
-import { applyPointers } from "../features/core/pointers.mjs";
-import { applyGitattributes } from "../features/core/gitattributes.mjs";
-import { applyRules } from "../features/core/rules.mjs";
+} from "#formatters/package-context";
+import { applyPointers } from "#features/core/pointers";
+import { applyGitattributes } from "#features/core/gitattributes";
+import { applyRules } from "#features/core/rules";
 // Opt-in — Infraestrutura (modificam package.json, hooks, CI)
-import { applyPrettier } from "../features/opt-in/infrastructure/prettier.mjs";
-import { applyHusky } from "../features/opt-in/infrastructure/husky.mjs";
-import { applyCi } from "../features/opt-in/infrastructure/ci.mjs";
+import { applyPrettier } from "#features/opt-in/infrastructure/prettier";
+import { applyHusky } from "#features/opt-in/infrastructure/husky";
+import { applyCi } from "#features/opt-in/infrastructure/ci";
 // Opt-in — Editoriais (sincronizam .md para .ai-guidelines/rules/)
-import { applyQualityGates } from "../features/opt-in/editorial/quality-gates.mjs";
-import { applyTdd } from "../features/opt-in/editorial/tdd.mjs";
-import { applyBdd } from "../features/opt-in/editorial/bdd.mjs";
-import { assertSafeInitTarget } from "./content-merge.mjs";
-import { buildFormatterRivalGuidance, buildMonorepoGuidance } from "./guidance-helpers.mjs";
-import { getInstallHint, promptUser, runInstall } from "./install-runtime.mjs";
+import { applyQualityGates } from "#features/opt-in/editorial/quality-gates";
+import { applyTdd } from "#features/opt-in/editorial/tdd";
+import { applyBdd } from "#features/opt-in/editorial/bdd";
+import { assertSafeInitTarget } from "#core/content-merge";
+import { buildFormatterRivalGuidance, buildMonorepoGuidance } from "#core/guidance-helpers";
+import { getInstallHint, promptUser, runInstall } from "#core/install-runtime";
 
 function buildOverwriteGuidance(mode, force) {
   if (force) {
@@ -78,17 +79,9 @@ export async function execute(mode, rawOptions) {
     "dry-run": Boolean(effectiveRawOptions["dry-run"]),
   };
 
-  await ensureDir(targetDir, options["dry-run"], []);
+  await ensureTargetDir(targetDir, options["dry-run"]);
 
-  const packageJsonText = await readTextIfExists(path.join(targetDir, "package.json"));
-  let packageJson = null;
-  if (packageJsonText) {
-    try {
-      packageJson = JSON.parse(packageJsonText);
-    } catch (e) {
-      console.warn(`[WARN] Erro ao processar package.json em ${targetDir}: ${e.message}`);
-    }
-  }
+  const { packageJson } = await readPackageJson(targetDir, console.warn);
   const formatterContext = await detectFormatterContext(targetDir, packageJson);
   const monorepoContext = await detectMonorepoContext(targetDir, packageJson);
   const packageManager = await detectPackageManager(
@@ -119,8 +112,7 @@ export async function execute(mode, rawOptions) {
   options.formatterContext = formatterContext;
 
   if (effectiveMode === "init") {
-    const conflicts = [];
-    for (const conflictPath of [
+    const conflicts = await collectExistingPaths(targetDir, [
       "AGENTS.md",
       ".gitattributes",
       ".prettierignore",
@@ -128,11 +120,7 @@ export async function execute(mode, rawOptions) {
       "package.json",
       ".ai-guidelines",
       path.join(".github", "workflows", "ai-guidelines-ci.yml"),
-    ]) {
-      if (await fileExists(path.join(targetDir, conflictPath))) {
-        conflicts.push(conflictPath);
-      }
-    }
+    ]);
     assertSafeInitTarget(conflicts, options.force);
   }
 

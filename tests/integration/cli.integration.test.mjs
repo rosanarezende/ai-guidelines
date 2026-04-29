@@ -89,4 +89,32 @@ describe("Integration: End-to-End Opt-in Features", () => {
       await fs.rm(targetDir, { recursive: true, force: true });
     }
   });
+
+  it("DADO comando adopt com opt-ins QUANDO executado ENTÃO gera AGENTS monolitico com sanduiche e tags", async () => {
+    const targetDir = await fs.mkdtemp(path.join(os.tmpdir(), "ai-e2e-monolith-"));
+
+    try {
+      await cliEntrypoint.execute("adopt", {
+        target: targetDir,
+        "package-manager": "npm",
+        "dry-run": false,
+        features: ["quality-gates", "tdd"],
+        lang: "pt",
+      });
+
+      const coreContent = await fs.readFile(
+        path.join(targetDir, ".ai-guidelines", "AGENTS.md"),
+        "utf8"
+      );
+
+      assert.match(coreContent, /Zona Topo: Diretivas Primarias/);
+      assert.match(coreContent, /Zona Centro: Metodologias Opt-in/);
+      assert.match(coreContent, /Zona Base: Contexto Tatico/);
+      assert.match(coreContent, /<FEATURE_QUALITY_GATES>/);
+      assert.match(coreContent, /<FEATURE_TDD>/);
+      assert.doesNotMatch(coreContent, /\[\.ai-guidelines\/AGENTS\.md\]/);
+    } finally {
+      await fs.rm(targetDir, { recursive: true, force: true });
+    }
+  });
 });

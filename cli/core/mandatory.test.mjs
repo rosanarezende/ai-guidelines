@@ -3,8 +3,8 @@ import os from "node:os";
 import path from "node:path";
 import assert from "node:assert/strict";
 import { describe, it, beforeEach, afterEach } from "node:test";
-import { applyPointers } from "../features/core/pointers.mjs";
-import { applyRules } from "../features/core/rules.mjs";
+import { applyPointers } from "#features/core/pointers";
+import { applyRules } from "#features/core/rules";
 
 describe("Mandatory Core Features", () => {
   let targetDir;

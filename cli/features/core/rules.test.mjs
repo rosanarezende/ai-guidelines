@@ -4,7 +4,7 @@ import os from "node:os";
 import assert from "node:assert/strict";
 import { describe, it, before, after } from "node:test";
 import { applyRules } from "./rules.mjs";
-import { OPT_IN_RULE_FILES } from "../../core/cli-input.mjs";
+import { OPT_IN_RULE_FILES } from "#core/cli-input";
 
 async function createTempDir(prefix) {
   return await fs.mkdtemp(path.join(os.tmpdir(), `ai-test-rules-${prefix}-`));
