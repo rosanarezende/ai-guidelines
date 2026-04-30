@@ -48,7 +48,7 @@
 - [x] **2.1** Executar Smoke Test: rodar o comando da CLI localmente `node cli/ai-guidelines-cli.mjs adopt --target /tmp/consumer --dry-run`. Inspecionar o arquivo gerado para verificar se o Sanduíche de Contexto (Topo/Centro/Base) e as Tags XML foram construídos corretamente.
 - [x] **2.2** Testes de Integração: Atualizar o arquivo de testes de integração da CLI para suportar a nova estrutura monolítica.
 - [x] **2.3** Atualizar o `CHANGELOG.md` com a nova arquitetura do compilador em tempo de execução.
-- [/] **2.4** Gerar PR Draft via GitHub CLI com o template devidamente preenchido.
+- [x] **2.4** Gerar PR Draft via GitHub CLI com o template devidamente preenchido.
 
 ---
 

@@ -1,6 +1,6 @@
 # Spec 0017 — Process Refinement & CLI Refactor (Monolithic Compiler)
 
-> Status: DRAFT
+> Status: DONE
 > Author: Antigravity
 > Date: 2026-04-29
 > Owner: Rosana Rezende

@@ -1,7 +1,7 @@
 # Plan — Spec 0017 Process Refinement & CLI Refactor
 
 > Spec: [./spec.md](./spec.md)
-> Status: Draft
+> Status: Done
 
 > **Vive durante a execução.** Diferente da `spec.md` (imutável após In Review), este arquivo é atualizado conforme o entendimento técnico evolui. A IA implementadora deve consultar este plano como seu roteiro.
 
