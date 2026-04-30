@@ -14,11 +14,14 @@ Detalhes de lifecycle em [`docs/process/spec-foundation.md`](../../../docs/proce
 
 Specs atualmente em branch ativa. Formato enxuto.
 
-- **spec 0017** — Process Refinement & CLI Refactor (`feat/spec-0017-process-cli-refactor`).
-  Fusão das candidatas `process-refinement` e `cli-refactor`. Sub-bloco A: política de
-  research lifecycle, boot obrigatório de agentes, concorrência de specs, reforma do
-  backlog, pesquisa AGENTS.md vs global-rules.md. Sub-bloco B: reorganização de
-  `cli/core/`, path aliases via `imports` do `package.json`, reorganização de `docs/`.
+- (Nenhuma spec em execução)
+
+---
+
+## Concluídas (Abril/2026)
+
+- **spec 0017** — Process Refinement & CLI Refactor.
+  Fusão das candidatas `process-refinement` e `cli-refactor`. Entrega do **Monolithic Runtime Compiler**, sanitização de `docs/` e aliasing nativo de pacotes.
 
 ---
 
