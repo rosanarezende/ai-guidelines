@@ -55,8 +55,7 @@ describe("content-merge (wrapper)", () => {
       assert.equal(buildFeatureTag("quality-gates.md"), "FEATURE_QUALITY_GATES");
       assert.equal(
         wrapFeatureModule("tdd.md", "regra"),
-        ["<FEATURE_TDD>", "regra", "</FEATURE_TDD>"]
-          .join("\n\n")
+        ["<FEATURE_TDD>", "regra", "</FEATURE_TDD>"].join("\n\n")
       );
     });
 
@@ -132,8 +131,7 @@ describe("content-merge (wrapper)", () => {
     it("[BR-CLI-MERGE-07] DADO conteudo compilado QUANDO wrapAiGuidelinesBlock ENTÃO envolve com tag mae", () => {
       assert.equal(
         wrapAiGuidelinesBlock("baseline"),
-        ["<AI_GUIDELINES>", "baseline", "</AI_GUIDELINES>"]
-          .join("\n\n")
+        ["<AI_GUIDELINES>", "baseline", "</AI_GUIDELINES>"].join("\n\n")
       );
     });
   });

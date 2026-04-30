@@ -28,9 +28,7 @@ export async function readRulesByName(sourceRulesDir, fileNames) {
 }
 
 export async function readOptInRules({ sourceRulesDir, editorialFeatures, features, lang }) {
-  const activeEditorialFeatures = editorialFeatures.filter((feature) =>
-    features.includes(feature)
-  );
+  const activeEditorialFeatures = editorialFeatures.filter((feature) => features.includes(feature));
   const rules = [];
 
   for (const feature of activeEditorialFeatures) {
