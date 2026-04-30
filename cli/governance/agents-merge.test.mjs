@@ -8,17 +8,19 @@ import {
 } from "./agents-merge.mjs";
 
 describe("agents-merge", () => {
-  it("[BR-CLI-MERGE-20] DADO conteúdo vazio QUANDO mergeAgentsContent ENTÃO cria apenas bloco AI_GUIDELINES", () => {
+  it("[BR-CLI-MERGE-20] DADO conteúdo vazio QUANDO mergeAgentsContent ENTÃO cria título e bloco AI_GUIDELINES", () => {
     const merged = mergeAgentsContent("", "baseline");
 
+    assert.match(merged, /^# AGENTS\.md/);
     assert.match(merged, /<AI_GUIDELINES>/);
     assert.match(merged, /baseline/);
     assert.match(merged, /<\/AI_GUIDELINES>/);
   });
 
-  it("[BR-CLI-MERGE-21] DADO AGENTS sem AI_GUIDELINES QUANDO mergeAgentsContent ENTÃO anexa bloco e preserva conteúdo", () => {
+  it("[BR-CLI-MERGE-21] DADO AGENTS sem AI_GUIDELINES QUANDO mergeAgentsContent ENTÃO garante título e anexa bloco", () => {
     const merged = mergeAgentsContent("# Projeto\n\nRegra local.\n", "baseline");
 
+    assert.match(merged, /^# AGENTS\.md/);
     assert.match(merged, /# Projeto/);
     assert.match(merged, /Regra local/);
     assert.match(merged, /<AI_GUIDELINES>/);

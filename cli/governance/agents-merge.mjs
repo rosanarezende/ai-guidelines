@@ -54,19 +54,29 @@ export function wrapAiGuidelinesBlock(content) {
 export function mergeAgentsContent(existingContent, fullTemplate) {
   const managedBlock = wrapAiGuidelinesBlock(fullTemplate);
 
+  // Garantir que o arquivo comece com o título correto (fora do bloco governado)
+  const ensureHeading = (text) => {
+    if (!text || !/^#\s+AGENTS\.md/i.test(text)) {
+      return `# AGENTS.md\n\n${(text || "").trimStart()}`;
+    }
+    return text;
+  };
+
   if (!existingContent) {
-    return `${managedBlock}\n`;
+    return `${ensureHeading("")}${managedBlock}\n`;
   }
 
-  assertValidAiGuidelinesBlock(existingContent);
+  const contentWithHeading = ensureHeading(existingContent);
 
-  const existingBlock = findAiGuidelinesBlock(existingContent);
+  assertValidAiGuidelinesBlock(contentWithHeading);
+
+  const existingBlock = findAiGuidelinesBlock(contentWithHeading);
   if (existingBlock) {
     const { start, end } = existingBlock;
-    return `${existingContent.slice(0, start)}${managedBlock}${existingContent.slice(end)}`;
+    return `${contentWithHeading.slice(0, start)}${managedBlock}${contentWithHeading.slice(end)}`;
   }
 
-  const legacyContent = stripLegacyCoreBlock(existingContent).trimEnd();
+  const legacyContent = stripLegacyCoreBlock(contentWithHeading).trimEnd();
 
   if (!legacyContent) {
     return `${managedBlock}\n`;
