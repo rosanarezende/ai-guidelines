@@ -158,13 +158,14 @@ Versão atual: consultar a release mais recente no `CHANGELOG.md` e no `package.
 
 ## Decisões arquiteturais
 
-| ADR                                                         | Decisão                                            |
-| :---------------------------------------------------------- | :------------------------------------------------- |
-| [ADR 0003](adrs/0003-cobertura-framework.md)                | Cobertura e framework de testes                    |
-| [ADR 0004](adrs/0004-governance-single-responsibility.md)   | Governança de responsabilidade única               |
-| [ADR 0005](adrs/0005-curadoria-publico-privado.md)          | Curadoria público/privado                          |
-| [ADR 0006](adrs/0006-licenca.md)                            | Licença Apache-2.0                                 |
-| [ADR 0007](adrs/0007-visibilidade-publica-ai-guidelines.md) | Visibilidade pública: fresh repo + snapshot curado |
+| ADR                                                             | Decisão                                            |
+| :-------------------------------------------------------------- | :------------------------------------------------- |
+| [ADR 0003](adrs/0003-cobertura-framework.md)                    | Cobertura e framework de testes                    |
+| [ADR 0004](adrs/0004-governance-single-responsibility.md)       | Governança de responsabilidade única               |
+| [ADR 0005](adrs/0005-curadoria-publico-privado.md)              | Curadoria público/privado                          |
+| [ADR 0006](adrs/0006-licenca.md)                                | Licença Apache-2.0                                 |
+| [ADR 0007](adrs/0007-visibilidade-publica-ai-guidelines.md)     | Visibilidade pública: fresh repo + snapshot curado |
+| [ADR 0008](adrs/0008-monolithic-runtime-compiler-governance.md) | Governança Monolítica (Runtime Compiler)           |
 
 ---
 
