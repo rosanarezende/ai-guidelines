@@ -69,12 +69,14 @@ describe("cli/args", () => {
     assert.equal(parsed.options["skip-husky"], true);
   });
 
-  it("[BR-CLI-INPUT-06] DADO flag prune sem valor QUANDO parseArgs rodar ENTÃO captura como booleano", () => {
+  it("[BR-CLI-INPUT-06] DADO flag prune QUANDO parseArgs rodar ENTÃO captura como booleano (inclusive inline)", () => {
     const parsed = parseArgs(["adopt", "--prune"]);
     const parsedInline = parseArgs(["adopt", "--prune=true"]);
+    const parsedInlineFalse = parseArgs(["adopt", "--prune=false"]);
 
     assert.equal(parsed.options.prune, true);
-    assert.equal(parsedInline.options.prune, "true");
+    assert.equal(parsedInline.options.prune, true);
+    assert.equal(parsedInlineFalse.options.prune, false);
   });
 
   it("[BR-CLI-INPUT-03] DADO tokens de wizard QUANDO sanitizeWizardRawOptions ENTÃO remove metadados internos", () => {
@@ -246,7 +248,7 @@ describe("cli/args", () => {
       const result = await resolveExecutionInput("init", {
         target: "demo",
         name: "fixed-name",
-        __wizardAnswers: ["npm", ""], // "" deve assumir o default (geralmente [S]/n)
+        __wizardAnswers: ["npm", ""],
       });
       assert.ok(result.options.target);
     });
