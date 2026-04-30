@@ -45,6 +45,8 @@ const FEATURE_DESCRIPTIONS = {
  */
 export const OPT_IN_RULE_FILES = EDITORIAL_FEATURES.map((f) => `${f}.md`);
 
+const BOOLEAN_FLAGS = new Set(["force", "dry-run", "install", "prune", "yes", "y"]);
+
 export function isSupportedMode(mode) {
   return SUPPORTED_MODES.includes(mode);
 }
@@ -72,6 +74,22 @@ Opções:
 `);
 }
 
+function normalizeInlineValue(key, value) {
+  if (!BOOLEAN_FLAGS.has(key) && !key.startsWith("skip-")) {
+    return value;
+  }
+
+  const normalized = String(value).trim().toLowerCase();
+  if (["true", "1", "yes", "y", "sim", "s"].includes(normalized)) {
+    return true;
+  }
+  if (["false", "0", "no", "n", "nao", "não"].includes(normalized)) {
+    return false;
+  }
+
+  return value;
+}
+
 export function parseArgs(argv) {
   const [command, ...rest] = argv;
   const options = {};
@@ -87,19 +105,11 @@ export function parseArgs(argv) {
     const key = flag.replace(/^-+/, "");
 
     if (inlineValue !== undefined) {
-      options[key] = inlineValue;
+      options[key] = normalizeInlineValue(key, inlineValue);
       continue;
     }
 
-    if (
-      key === "force" ||
-      key === "dry-run" ||
-      key === "install" ||
-      key === "prune" ||
-      key === "yes" ||
-      key === "y" ||
-      key.startsWith("skip-")
-    ) {
+    if (BOOLEAN_FLAGS.has(key) || key.startsWith("skip-")) {
       options[key] = true;
       continue;
     }
@@ -251,7 +261,6 @@ export async function resolveExecutionInput(mode, rawOptions) {
   }
 
   if (wizardOptions["package-manager"] === undefined) {
-    // Detecção inteligente antes de perguntar
     const pkgPath = path.join(wizardOptions.target, "package.json");
     const pkgContent = await readTextIfExists(pkgPath);
     let pkgJson = null;
