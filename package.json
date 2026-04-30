@@ -5,6 +5,7 @@
   "private": true,
   "bin": "./cli/ai-guidelines-cli.mjs",
   "imports": {
+    "#app/*": "./cli/app/*.mjs",
     "#core/*": "./cli/core/*.mjs",
     "#features/*": "./cli/features/*.mjs",
     "#formatters/*": "./cli/formatters/*.mjs",
