@@ -4,14 +4,6 @@ Todas as mudanças notáveis neste framework seguem [Semantic Versioning](https:
 
 ---
 
-## [Unreleased]
-
-### Adicionado
-
-- (Nenhuma mudança pendente)
-
----
-
 ## [1.3.0] — 2026-04-29
 
 ### Alterado
