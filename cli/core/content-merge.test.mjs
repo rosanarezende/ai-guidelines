@@ -5,15 +5,12 @@ import {
   buildFeatureTag,
   compileMonolithicAgentsContent,
   mergeAgentsContent,
-  mergeGitattributesContent,
-  mergeHookContent,
-  mergePrettierIgnoreContent,
   normalizePointerForMonolith,
   wrapAiGuidelinesBlock,
   wrapFeatureModule,
-} from "./content-merge.mjs";
+} from "#core/content-merge";
 
-describe("content-merge", () => {
+describe("content-merge (wrapper)", () => {
   describe("extractCoreBlock", () => {
     it("[BR-CLI-MERGE-01] DADO markdown com marcadores QUANDO extrair core ENTÃO retorna conteúdo limpo", () => {
       const content = [
@@ -58,7 +55,8 @@ describe("content-merge", () => {
       assert.equal(buildFeatureTag("quality-gates.md"), "FEATURE_QUALITY_GATES");
       assert.equal(
         wrapFeatureModule("tdd.md", "regra"),
-        ["<FEATURE_TDD>", "regra", "</FEATURE_TDD>"].join("\n\n")
+        ["<FEATURE_TDD>", "regra", "</FEATURE_TDD>"]
+          .join("\n\n")
       );
     });
 
@@ -116,62 +114,12 @@ describe("content-merge", () => {
       );
     });
 
-    it("[BR-CLI-MERGE-08] DADO bloco AI_GUIDELINES com fechamento antes da abertura QUANDO mergeAgentsContent ENTÃO aborta", () => {
-      const malformed = [
-        "# Projeto",
-        "",
-        "</AI_GUIDELINES>",
-        "",
-        "<AI_GUIDELINES>",
-        "conteudo",
-      ].join("\n");
-
-      assert.throws(() => mergeAgentsContent(malformed, "novo", false), /malformado/);
-    });
-
-    it("[BR-CLI-MERGE-09] DADO múltiplos blocos AI_GUIDELINES QUANDO mergeAgentsContent ENTÃO aborta", () => {
-      const malformed = [
-        "# Projeto",
-        "",
-        "<AI_GUIDELINES>",
-        "baseline 1",
-        "</AI_GUIDELINES>",
-        "",
-        "<AI_GUIDELINES>",
-        "baseline 2",
-        "</AI_GUIDELINES>",
-      ].join("\n");
-
-      assert.throws(() => mergeAgentsContent(malformed, "novo", false), /múltiplos/);
-    });
-
     it("[BR-CLI-MERGE-10] DADO AGENTS vazio QUANDO mergeAgentsContent ENTÃO cria apenas bloco AI_GUIDELINES", () => {
       const merged = mergeAgentsContent("", "baseline", false);
 
       assert.match(merged, /<AI_GUIDELINES>/);
       assert.match(merged, /baseline/);
       assert.match(merged, /<\/AI_GUIDELINES>/);
-      assert.doesNotMatch(merged, /BEGIN:ai-guidelines-core/);
-    });
-
-    it("[BR-CLI-MERGE-06] DADO ponteiro legado QUANDO mergeAgentsContent ENTÃO migra para AI_GUIDELINES sem manter ponteiro antigo", () => {
-      const existing = [
-        "# Projeto",
-        "",
-        "<!-- BEGIN:ai-guidelines-core -->",
-        "ponteiro antigo",
-        "<!-- END:ai-guidelines-core -->",
-        "",
-        "Regra local.",
-      ].join("\n");
-
-      const merged = mergeAgentsContent(existing, "baseline novo", false);
-
-      assert.match(merged, /# Projeto/);
-      assert.match(merged, /Regra local/);
-      assert.match(merged, /<AI_GUIDELINES>/);
-      assert.doesNotMatch(merged, /ponteiro antigo/);
-      assert.doesNotMatch(merged, /BEGIN:ai-guidelines-core/);
     });
 
     it("[BR-CLI-MERGE-11] DADO merge executado duas vezes QUANDO mergeAgentsContent ENTÃO resultado é idempotente", () => {
@@ -184,38 +132,9 @@ describe("content-merge", () => {
     it("[BR-CLI-MERGE-07] DADO conteudo compilado QUANDO wrapAiGuidelinesBlock ENTÃO envolve com tag mae", () => {
       assert.equal(
         wrapAiGuidelinesBlock("baseline"),
-        ["<AI_GUIDELINES>", "baseline", "</AI_GUIDELINES>"].join("\n\n")
+        ["<AI_GUIDELINES>", "baseline", "</AI_GUIDELINES>"]
+          .join("\n\n")
       );
     });
-  });
-
-  it("DADO gitattributes incompleto QUANDO mergeGitattributesContent ENTÃO anexa baseline", () => {
-    const existing = "*.png binary\n";
-    const baseline = "* text=auto eol=lf\n*.png binary\n";
-
-    const merged = mergeGitattributesContent(existing, baseline);
-
-    assert.match(merged, /\* text=auto eol=lf/);
-    assert.match(merged, /ai-guidelines baseline/);
-  });
-
-  it("DADO hook com shape incompatível QUANDO mergeHookContent ENTÃO lança erro de merge", () => {
-    assert.throws(
-      () =>
-        mergeHookContent(
-          '#!/bin/sh\nif [ -n "$CI" ]; then\nfi\n',
-          "npm run check",
-          false,
-          "pre-push"
-        ),
-      /shape não suportado/
-    );
-  });
-
-  it("DADO prettierignore incompleto QUANDO mergePrettierIgnoreContent ENTÃO anexa baseline", () => {
-    const merged = mergePrettierIgnoreContent("node_modules/\n", "dist/\nnode_modules/\n");
-
-    assert.match(merged, /dist\//);
-    assert.match(merged, /ai-guidelines prettier baseline/);
   });
 });
