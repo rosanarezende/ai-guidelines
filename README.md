@@ -1,7 +1,6 @@
 # ai-guidelines BR
 
-> Estrutura de governança para desenvolvimento de software auxiliado por inteligência artificial, agnóstica em relação a modelos,
-> ambientes de desenvolvimento integrados (IDEs) e linguagens de programação. Licença [Apache-2.0](LICENSE).
+> Estrutura de governança para desenvolvimento de software auxiliado por inteligência artificial, agnóstica em relação a modelos, ambientes de desenvolvimento integrados (IDEs) e linguagens de programação. Licença [Apache-2.0](LICENSE).
 
 ---
 
@@ -50,11 +49,8 @@ Comunidade ai-guidelines BR aceita contribuições em PT-BR e EN.
 
 ### 🤖 Para Agentes de IA
 
-Ler [`AGENTS.md`](AGENTS.md) (Phase 0 obrigatório). Ciclo SDD descrito em
-[`docs/process/spec-foundation.md`](docs/process/spec-foundation.md).
-Workflow canônico de IA em
-[`.core/rules/global-rules.md`](.core/rules/global-rules.md) seção
-"Workflow com IA".
+Ler [`AGENTS.md`](AGENTS.md): "FASE 1: The Prime Directive" e workflow canônico de IA em seção "Workflow com IA" obrigatórios.
+Ciclo SDD descrito em [`docs/process/spec-foundation.md`](docs/process/spec-foundation.md).
 
 ---
 
@@ -65,19 +61,10 @@ Workflow canônico de IA em
 | Arquivo                           | Propósito                                      |
 | :-------------------------------- | :--------------------------------------------- |
 | `AGENTS.md`                       | Fluxo obrigatório para IA e humanos neste repo |
-| `.core/rules/global-rules.md`     | Princípios agnósticos de engenharia AI-first   |
 | `docs/rpi-protocol.md`            | Ciclo Research → Plan → Implement              |
 | `docs/process/spec-foundation.md` | Lifecycle de specs e SDD versionado            |
 | `docs/tdd-guidelines.md`          | Padrões BDD e cobertura                        |
 | `docs/cli/ai-guidelines-cli.md`   | Constituição (Business Rules) da CLI           |
-
-### Adapters por ferramenta
-
-| Arquivo                 | Ferramenta              |
-| :---------------------- | :---------------------- |
-| `.core/rules/claude.md` | Claude Code / Anthropic |
-| `.core/rules/gemini.md` | Gemini CLI / Google     |
-| `.core/rules/codex.md`  | Codex / OpenAI          |
 
 ### CLI `init + adopt`
 
@@ -92,22 +79,22 @@ O CLI vive em `cli/` e suporta:
 - `--dry-run` — preview antes de qualquer escrita
 - `--force` — atualização explícita quando o diff está entendido
 - Runtime monolítico em `AGENTS.md`, delimitado por `<AI_GUIDELINES>`
-- Opt-ins editoriais compilados em tags XML (`<FEATURE_TDD>`, `<FEATURE_BDD>`, etc.) sem copiar `.ai-guidelines/rules/` para o consumidor
+- Opt-ins editoriais compilados em tags XML (`<FEATURE_TDD>`, `<FEATURE_BDD>`, etc.)
 
 Saiba mais sobre os módulos disponíveis em
 [Documentação de Features](docs/features.md).
 
 ---
 
-## Matriz de Compatibilidade
+## Matriz de Compatibilidade (adaptadores por IA)
 
-| IA / Ferramenta    | Ponto de entrada                        | Status       |
-| :----------------- | :-------------------------------------- | :----------- |
-| Claude Code        | `AGENTS.md` com `<AI_GUIDELINES>`       | ✅ Suportado |
-| Gemini CLI         | `AGENTS.md` com `<AI_GUIDELINES>`       | ✅ Suportado |
-| Codex / OpenAI CLI | `AGENTS.md` com `<AI_GUIDELINES>`       | ✅ Suportado |
-| GitHub Copilot     | instruções específicas quando aplicável | ⚡ Parcial   |
-| Outras IAs         | `AGENTS.md` como baseline               | 🔄 Esperado  |
+| IA / Ferramenta    | Ponto de entrada                                      | Status       |
+| :----------------- | :---------------------------------------------------- | :----------- |
+| Claude Code        | `AGENTS.md` com `Adaptador: Claude (Anthropic)`       | ✅ Suportado |
+| Gemini CLI         | `AGENTS.md` com `Adaptador: Gemini (Google)`          | ✅ Suportado |
+| Codex / OpenAI CLI | `AGENTS.md` com `Adaptador: Codex / Copilot (OpenAI)` | ✅ Suportado |
+| GitHub Copilot     | `AGENTS.md` com `Adaptador: Codex / Copilot (OpenAI)` | ⚡ Parcial   |
+| Outras IAs         | `AGENTS.md` como baseline                             | 🔄 Esperado  |
 
 ---
 
@@ -119,9 +106,15 @@ ai-guidelines/
 │   ├── rules/                  # Regras universais + adapters por IA (claude/gemini/codex)
 │   └── templates/              # Templates injetados pelo init/adopt no repo alvo
 ├── cli/                        # CLI local (ai-guidelines-cli.mjs)
-│   ├── core/                   # Engine, file-system, cli-input, content-merge
-│   ├── features/               # core/ (pointers, rules, gitattributes)
-│   │   └── opt-in/             # editorial/ (tdd, bdd, quality-gates) + infrastructure/ (prettier, husky, ci)
+│   ├── app/                    # Engine, orquestração e UI
+│   ├── cli/                    # Parser de argumentos e Wizard
+│   ├── fs/                     # I/O, file-system e merge-utils
+│   ├── governance/             # Monolith compiler e migrations
+│   ├── features/               # Módulos de funcionalidade (Features)
+│   │   ├── core/               # pointers (compiler), gitattributes
+│   │   └── opt-in/             #
+│   │       ├── editorial/      # tdd, bdd, quality-gates (injetados no monólito)
+│   │       └── infrastructure/ # prettier, husky, ci (modificam package.json/hooks)
 │   └── formatters/             # Detecção de PM, formatter rival, monorepo
 ├── docs/                       # Documentação exposta ao consumidor
 │   ├── cli/                    # Business Rules da CLI
@@ -148,8 +141,8 @@ specs concluídas em [`.specify/specs/roadmap/historico.md`](.specify/specs/road
 
 Próximas iniciativas:
 
-- Refinamento de processos (Research Lifecycle, concorrência de specs)
-- Refatoração estrutural da CLI (TypeScript, path aliases, reorganização)
+- Refinamento de processos (Research Lifecycle, concorrência de specs) [In Progress]
+- Migração TypeScript da CLI (`cli-typescript`)
 - Publicação como package npm (`@ai-guidelines/core`)
 - CLI `audit` para detecção de conflitos em configs globais de IA
 

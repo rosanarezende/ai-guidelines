@@ -10,6 +10,8 @@ Todas as mudanças notáveis neste framework seguem [Semantic Versioning](https:
 
 - CLI passa a compilar o bloco `<AI_GUIDELINES>` diretamente no `AGENTS.md` como artefato monolítico topológico: diretivas e regras no topo, módulos opt-in envelopados em tags XML no centro, e contexto tático na base.
 - `adopt` deixa de sincronizar `.ai-guidelines/rules/` no consumidor; regras individuais permanecem como fonte modular em `.core/rules/` no repositório do framework.
+- Refinamento da hierarquia semântica no `AGENTS.md`: Zonas em `##`, seções em `###` e subseções em `####`.
+- Remoção de redundância de títulos nos adaptadores de provedores (`Regras do Provedor:`).
 - Adicionados aliases nativos via `package.json#imports` para reduzir imports relativos profundos.
 - Pesquisas da Spec 0017 centralizadas em `.specify/specs/researchs/`, com índice atualizado e bootstrap reforçado para leitura obrigatória do backlog.
 

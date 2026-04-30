@@ -123,7 +123,7 @@ ENTÃO deve injetar um comando de fallback (echo) no YAML para garantir que o pi
 
 DADO o sistema de features opt-in
 QUANDO classificadas
-ENTÃO devem seguir duas categorias: **Editoriais** (geram blocos `<FEATURE_*>` no `AGENTS.md`) e **Infraestrutura** (modificam `package.json`, hooks, CI). A lista canônica é derivada de `EDITORIAL_FEATURES` e `INFRASTRUCTURE_FEATURES` em `cli-input.mjs`.
+ENTÃO devem seguir duas categorias: **Editoriais** (geram blocos `<FEATURE_*>` no `AGENTS.md`) e **Infraestrutura** (modificam `package.json`, hooks, CI). A lista canônica é derivada de `EDITORIAL_FEATURES` e `INFRASTRUCTURE_FEATURES` em `cli/cli/args.mjs`.
 
 ### [BR-CLI-EDITORIAL-02] Compilação de Regras
 
@@ -228,3 +228,4 @@ ENTÃO deve oferecer ao usuário a opção de instalar as dependências imediata
 - **v0.1.0**: Mapeamento das regras core de sincronização e proteção de framework.
 - **v0.2.0**: Mapeamento da camada de Shell (Input/Wizard/Engine).
 - **v0.3.0**: Taxonomia Editorial/Infraestrutura e business rules de features opt-in.
+- **v0.4.0**: Refatoração Monolítica (Spec 0017): Hierarquia semântica e injeção direta no `AGENTS.md`.

@@ -1,7 +1,7 @@
 # Guia de Eficiência de IA
 
 > Como maximizar a **precisão por token** ao trabalhar com agentes de IA em projetos de software.
-> Complementa as regras em `global-rules.md` com estratégias avançadas.
+> Complementa as regras do monólito `AGENTS.md` com estratégias avançadas.
 
 ---
 
@@ -27,13 +27,13 @@ Em 2026, a gestão de contexto evoluiu de "limitar arquivos" para "otimizar o ca
 
 Modelos modernos utilizam cache de prefixo: se a estrutura inicial do prompt (regras, contexto de arquitetura) se mantém estável, as chamadas subsequentes são mais baratas e rápidas.
 
-- **Estabilidade**: Evite alterar `global-rules.md` ou `AGENTS.md` no meio de uma tarefa.
+- **Estabilidade**: Evite alterar regras core ou o `AGENTS.md` no meio de uma tarefa.
 - **Injeção de Contexto**: Ferramentas CLI (Claude Code, Gemini CLI) otimizam isso automaticamente. Em ferramentas manuais, cole o contexto estático primeiro.
 
 ### Redução de Ruído
 
 - **Ignore Files**: Rigor absoluto com `.gitignore`, `.geminiignore` e `.claudeignore`. Nunca deixe `node_modules`, `dist`, `.git` ou logs entrarem no contexto.
-- **System Prompts vs User Prompts**: Mantenha as regras em arquivos (`AGENTS.md`, `global-rules.md`) e use o prompt do usuário apenas para a **intenção imediata**.
+- **System Prompts vs User Prompts**: Mantenha as regras fixas no monólito `AGENTS.md` e use o prompt do usuário apenas para a **intenção imediata**.
 
 ---
 

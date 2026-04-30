@@ -21,7 +21,7 @@ Transformar a pesquisa em uma estratégia técnica aprovada.
 - **Ação**:
   - Para iniciativas relevantes: criar fundação documental em `.specify/specs/<slug>/` (`spec.md`, `plan.md`, `tasks.md`, `NEXT.md` quando aplicável).
   - Para tarefas pequenas: manter um plano leve fora do versionamento do repositório (na própria ferramenta/agente).
-- **Prime Directive**: Aplica-se aqui o Phase 0 do `AGENTS.md` — o repositório é sua memória. Consulte `AGENTS.md` para detalhes de persistência em `.specify/specs/`.
+- **Prime Directive**: Aplica-se aqui a directive "FASE 1: The Prime Directive" do `AGENTS.md` — o repositório é sua memória. Consulte `AGENTS.md` para detalhes de persistência em `.specify/specs/`.
 
 ### 🏗️ Implement (Implementação)
 
