@@ -8,7 +8,7 @@ import {
   printHelp,
   resolveExecutionInput,
   sanitizeWizardRawOptions,
-} from "#core/cli-input";
+} from "./args.mjs";
 
 async function withTTY(value, callback) {
   const originalIsTTY = process.stdin.isTTY;
@@ -36,7 +36,7 @@ async function withTTY(value, callback) {
   }
 }
 
-describe("cli-input (wrapper)", () => {
+describe("cli/args", () => {
   it("[BR-CLI-INPUT-01] DADO flags do init QUANDO parseArgs rodar ENTÃO retorna command e options", () => {
     const parsed = parseArgs([
       "init",
@@ -183,13 +183,19 @@ describe("cli-input (wrapper)", () => {
 
   it("[BR-CLI-WIZARD-03] DADO entrada inválida QUANDO no Wizard ENTÃO entra em loop até resposta válida (Retry Loop)", async () => {
     await withTTY(true, async () => {
+      // Sequência: 'invalid-pm', 'invalid-pm2', 'pnpm'
       const result = await resolveExecutionInput("adopt", {
         target: ".",
         name: "demo",
+        // Pula o comando e target, vai direto pro PM
         __wizardAnswers: ["invalid-pm", "invalid-pm2", "pnpm", "s"],
       });
 
-      assert.equal(result.options["package-manager"], "pnpm");
+      assert.equal(
+        result.options["package-manager"],
+        "pnpm",
+        "Deveria ter aceitado pnpm após erros"
+      );
     });
   });
 
@@ -209,7 +215,25 @@ describe("cli-input (wrapper)", () => {
     console.log = (msg) => (output += msg);
     printHelp();
     console.log = originalLog;
-    assert.ok(output.includes("ai-guidelines CLI"));
+    assert.ok(output.includes("ai-guidelines CLI"), "Deveria conter cabeçalho CLI");
+    assert.ok(output.includes("init"), "Deveria conter comando init");
+    assert.ok(output.includes("adopt"), "Deveria conter comando adopt");
+  });
+
+  it("[BR-CLI-WIZARD-03] DADO erros de validacao no Wizard QUANDO em loop ENTÃO cobre ramificações de erro (Rigor)", async () => {
+    await withTTY(true, async () => {
+      // Forçar erro de PM (inválido por não estar na lista) para disparar o loop
+      const result = await resolveExecutionInput("init", {
+        target: "demo",
+        name: "fixed-name",
+        __wizardAnswers: ["invalid-pm", "npm", "s"],
+      });
+      assert.equal(
+        result.options["package-manager"],
+        "npm",
+        "Deveria ter aceitado npm após erro de validação"
+      );
+    });
   });
 
   it("[BR-CLI-INPUT-01] DADO argumentos extras QUANDO parseArgs ENTÃO lança erro explicativo", () => {
@@ -217,5 +241,16 @@ describe("cli-input (wrapper)", () => {
     assert.throws(() => {
       parseArgs(args);
     }, /Argumento inesperado: extra-garbage/);
+  });
+
+  it("[BR-CLI-WIZARD-*] DADO resposta vazia QUANDO campo tem default ENTÃO assume o default", async () => {
+    await withTTY(true, async () => {
+      const result = await resolveExecutionInput("init", {
+        target: "demo",
+        name: "fixed-name",
+        __wizardAnswers: ["npm", ""],
+      });
+      assert.ok(result.options.target);
+    });
   });
 });

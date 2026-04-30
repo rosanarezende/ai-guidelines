@@ -3,9 +3,9 @@ import os from "node:os";
 import path from "node:path";
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { collectExistingPaths, ensureTargetDir, readPackageJson } from "#core/io";
+import { collectExistingPaths, ensureTargetDir, readPackageJson } from "./io.mjs";
 
-describe("io (wrapper)", () => {
+describe("fs/io", () => {
   it("[BR-CLI-IO-01] DADO target inexistente QUANDO ensureTargetDir ENTÃO cria diretório", async () => {
     const target = path.join(await fs.mkdtemp(path.join(os.tmpdir(), "ai-io-")), "nested");
 

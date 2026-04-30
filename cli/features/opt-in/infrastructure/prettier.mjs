@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { ROOT_DIR } from "#core/file-system";
-import { mergePrettierIgnoreContent } from "#core/content-merge";
+import { mergePrettierIgnoreContent } from "#fs/merge-utils";
 import { mergePackageJson, detectNewDevDeps } from "#formatters/package-context";
 
 /**

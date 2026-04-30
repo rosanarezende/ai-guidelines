@@ -5,15 +5,12 @@ import {
   buildFeatureTag,
   compileMonolithicAgentsContent,
   mergeAgentsContent,
-  mergeGitattributesContent,
-  mergeHookContent,
-  mergePrettierIgnoreContent,
   normalizePointerForMonolith,
   wrapAiGuidelinesBlock,
   wrapFeatureModule,
-} from "./content-merge.mjs";
+} from "#core/content-merge";
 
-describe("content-merge", () => {
+describe("content-merge (wrapper)", () => {
   describe("extractCoreBlock", () => {
     it("[BR-CLI-MERGE-01] DADO markdown com marcadores QUANDO extrair core ENTÃO retorna conteúdo limpo", () => {
       const content = [
@@ -51,13 +48,15 @@ describe("content-merge", () => {
       assert.ok(compiled.indexOf("AGENTS core") < compiled.indexOf("<FEATURE_QUALITY_GATES>"));
       assert.ok(compiled.indexOf("<FEATURE_QUALITY_GATES>") < compiled.indexOf("pointer"));
       assert.match(compiled, /Regras do Provedor: codex/);
+      assert.ok(compiled.endsWith("\n"), "o compilador deve sempre terminar com newline");
     });
 
     it("[BR-CLI-COMPILER-02] DADO feature opt-in QUANDO envelopar ENTÃO usa tags XML relacionais", () => {
       assert.equal(buildFeatureTag("quality-gates.md"), "FEATURE_QUALITY_GATES");
       assert.equal(
         wrapFeatureModule("tdd.md", "regra"),
-        ["<FEATURE_TDD>", "regra", "</FEATURE_TDD>"].join("\n\n")
+        ["<FEATURE_TDD>", "regra", "</FEATURE_TDD>"]
+          .join("\n\n")
       );
     });
 
@@ -115,61 +114,27 @@ describe("content-merge", () => {
       );
     });
 
-    it("[BR-CLI-MERGE-06] DADO ponteiro legado QUANDO mergeAgentsContent ENTÃO migra para AI_GUIDELINES sem manter ponteiro antigo", () => {
-      const existing = [
-        "# Projeto",
-        "",
-        "<!-- BEGIN:ai-guidelines-core -->",
-        "ponteiro antigo",
-        "<!-- END:ai-guidelines-core -->",
-        "",
-        "Regra local.",
-      ].join("\n");
+    it("[BR-CLI-MERGE-10] DADO AGENTS vazio QUANDO mergeAgentsContent ENTÃO cria apenas bloco AI_GUIDELINES", () => {
+      const merged = mergeAgentsContent("", "baseline", false);
 
-      const merged = mergeAgentsContent(existing, "baseline novo", false);
-
-      assert.match(merged, /# Projeto/);
-      assert.match(merged, /Regra local/);
       assert.match(merged, /<AI_GUIDELINES>/);
-      assert.doesNotMatch(merged, /ponteiro antigo/);
-      assert.doesNotMatch(merged, /BEGIN:ai-guidelines-core/);
+      assert.match(merged, /baseline/);
+      assert.match(merged, /<\/AI_GUIDELINES>/);
+    });
+
+    it("[BR-CLI-MERGE-11] DADO merge executado duas vezes QUANDO mergeAgentsContent ENTÃO resultado é idempotente", () => {
+      const once = mergeAgentsContent("# Projeto\n\nRegra local.\n", "baseline", false);
+      const twice = mergeAgentsContent(once, "baseline", false);
+
+      assert.equal(twice, once);
     });
 
     it("[BR-CLI-MERGE-07] DADO conteudo compilado QUANDO wrapAiGuidelinesBlock ENTÃO envolve com tag mae", () => {
       assert.equal(
         wrapAiGuidelinesBlock("baseline"),
-        ["<AI_GUIDELINES>", "baseline", "</AI_GUIDELINES>"].join("\n\n")
+        ["<AI_GUIDELINES>", "baseline", "</AI_GUIDELINES>"]
+          .join("\n\n")
       );
     });
-  });
-
-  it("DADO gitattributes incompleto QUANDO mergeGitattributesContent ENTÃO anexa baseline", () => {
-    const existing = "*.png binary\n";
-    const baseline = "* text=auto eol=lf\n*.png binary\n";
-
-    const merged = mergeGitattributesContent(existing, baseline);
-
-    assert.match(merged, /\* text=auto eol=lf/);
-    assert.match(merged, /ai-guidelines baseline/);
-  });
-
-  it("DADO hook com shape incompatível QUANDO mergeHookContent ENTÃO lança erro de merge", () => {
-    assert.throws(
-      () =>
-        mergeHookContent(
-          '#!/bin/sh\nif [ -n "$CI" ]; then\nfi\n',
-          "npm run check",
-          false,
-          "pre-push"
-        ),
-      /shape não suportado/
-    );
-  });
-
-  it("DADO prettierignore incompleto QUANDO mergePrettierIgnoreContent ENTÃO anexa baseline", () => {
-    const merged = mergePrettierIgnoreContent("node_modules/\n", "dist/\nnode_modules/\n");
-
-    assert.match(merged, /dist\//);
-    assert.match(merged, /ai-guidelines prettier baseline/);
   });
 });
