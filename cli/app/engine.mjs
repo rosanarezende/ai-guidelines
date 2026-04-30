@@ -1,7 +1,7 @@
 import path from "node:path";
-import { parseArgs, printHelp, resolveExecutionInput, isSupportedMode } from "#core/cli-input";
-import { fileExists, readTextIfExists } from "#core/file-system";
-import { collectExistingPaths, ensureTargetDir, readPackageJson } from "#core/io";
+import { parseArgs, printHelp, resolveExecutionInput, isSupportedMode } from "#cli/args";
+import { fileExists, readTextIfExists } from "#fs/file-system";
+import { collectExistingPaths, ensureTargetDir, readPackageJson } from "#fs/io";
 import {
   detectFormatterContext,
   detectMonorepoContext,
@@ -15,8 +15,8 @@ import { applyPrettier } from "#features/opt-in/infrastructure/prettier";
 import { applyHusky } from "#features/opt-in/infrastructure/husky";
 import { applyCi } from "#features/opt-in/infrastructure/ci";
 import { assertSafeInitTarget } from "#governance/agents-merge";
-import { buildFormatterRivalGuidance, buildMonorepoGuidance } from "#core/guidance-helpers";
-import { getInstallHint, promptUser, runInstall } from "#core/install-runtime";
+import { buildFormatterRivalGuidance, buildMonorepoGuidance } from "#app/guidance";
+import { getInstallHint, promptUser, runInstall } from "#app/install";
 
 function buildOverwriteGuidance(mode, force) {
   if (force) {
