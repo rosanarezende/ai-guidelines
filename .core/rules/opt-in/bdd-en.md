@@ -1,11 +1,11 @@
-# BDD: Behavior-Driven Development (Given/When/Then)
+### BDD: Behavior-Driven Development (Given/When/Then)
 
 > This rule instructs AI agents to structure tests in BDD format.
 > **Focus:** ubiquitous language, traceability and living documentation.
 
 ---
 
-## Mandatory Format
+#### Mandatory Format
 
 All tests MUST use the **GIVEN / WHEN / THEN** structure:
 
@@ -13,7 +13,7 @@ All tests MUST use the **GIVEN / WHEN / THEN** structure:
 - **WHEN** [action performed by the user or system]
 - **THEN** [expected result / assertion]
 
-### Example
+#### Example
 
 ```javascript
 it("GIVEN user without permission WHEN accessing dashboard THEN returns 403 error", () => {
@@ -23,7 +23,7 @@ it("GIVEN user without permission WHEN accessing dashboard THEN returns 403 erro
 
 ---
 
-## Traceability (Business Rules)
+#### Traceability (Business Rules)
 
 - Each documented business rule MUST have a unique identifier (e.g., `[BR-CLI-SYNC-01]`).
 - Tests validating that rule MUST include the identifier in their name.
@@ -37,7 +37,7 @@ it("[BR-CLI-SYNC-01] GIVEN outdated baseline WHEN adopt is executed THEN syncs o
 
 ---
 
-## BDD Principles
+#### BDD Principles
 
 - **Ubiquitous Language:** Tests should be readable by non-technical humans. Avoid implementation jargon in test names.
 - **Living Documentation:** The test suite serves as executable documentation of the system. If a test doesn't clearly describe the behavior, rewrite it.
@@ -45,7 +45,7 @@ it("[BR-CLI-SYNC-01] GIVEN outdated baseline WHEN adopt is executed THEN syncs o
 
 ---
 
-## Rules for AI Agents
+#### Rules for AI Agents
 
 - When creating tests, ALWAYS use the GIVEN/WHEN/THEN format in the test case name.
 - When receiving a business rule (`[BR-*]`), include the ID in the corresponding test.
