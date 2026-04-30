@@ -1,11 +1,11 @@
-# TDD: Test-Driven Development (Red-Green-Refactor)
+### TDD: Test-Driven Development (Red-Green-Refactor)
 
 > This rule instructs AI agents to follow the strict TDD cycle.
 > **Focus:** code structure, feedback loop and coverage.
 
 ---
 
-## Mandatory Cycle (Strict TDD)
+#### Mandatory Cycle (Strict TDD)
 
 Every new feature or bug fix MUST follow this cycle:
 
@@ -17,7 +17,7 @@ Every new feature or bug fix MUST follow this cycle:
 
 ---
 
-## Structural Principles
+#### Structural Principles
 
 - **One Test, One Intent:** Each test case validates exactly one behavior. Avoid "omni-bus" tests.
 - **Isolation:** Unit tests must not depend on external services, network or databases. Use mocks/stubs for dependencies.
@@ -26,7 +26,7 @@ Every new feature or bug fix MUST follow this cycle:
 
 ---
 
-## Rules for AI Agents
+#### Rules for AI Agents
 
 - When receiving a task, write tests BEFORE the implementation.
 - Generate edge cases based on the spec before implementing the logic.

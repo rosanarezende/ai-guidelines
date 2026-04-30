@@ -6,17 +6,17 @@ O `ai-guidelines` é organizado em módulos de funcionalidade (Features), dividi
 
 Estas funcionalidades são aplicadas automaticamente para garantir a integridade da governança AI-First.
 
-### 1. Pointers (AGENTS.md)
+### 1. Runtime AGENTS.md
 
-- **O que faz**: Estabelece a arquitetura de ponteiros. Cria um `AGENTS.md` na raiz que aponta para o diretório de governança (`.ai-guidelines/`).
-- **Por que**: Garante que qualquer IA (ou humano) que entre no projeto saiba imediatamente onde encontrar as regras de engajamento, sem poluir a raiz do repositório.
-- **Arquivos**: `AGENTS.md`, `.ai-guidelines/AGENTS.md`.
+- **O que faz**: Compila o runtime de governança dentro da tag `<AI_GUIDELINES>` no `AGENTS.md` da raiz.
+- **Por que**: Garante que qualquer IA que leia `AGENTS.md` receba diretivas, regras globais, adapters e opt-ins em um único artefato topológico, preservando regras próprias do projeto fora da tag.
+- **Arquivos**: `AGENTS.md`.
 
-### 2. Rules
+### 2. Rules Compiler
 
-- **O que faz**: Sincroniza as diretrizes metodológicas e regras de engenharia do repositório central para o projeto local.
-- **Por que**: Mantém o projeto atualizado com os padrões de desenvolvimento (ex: SDD, Token Economy) sem necessidade de cópia manual.
-- **Arquivos**: `.ai-guidelines/rules/*`.
+- **O que faz**: Lê as regras modulares em `.core/rules/` e as injeta no bloco `<AI_GUIDELINES>`.
+- **Por que**: Mantém modularidade no source do framework sem espalhar arquivos de regras no consumidor.
+- **Arquivos**: `AGENTS.md`.
 
 ### 3. Gitattributes
 
@@ -30,29 +30,29 @@ Estas funcionalidades são aplicadas automaticamente para garantir a integridade
 
 Funcionalidades que você pode escolher ativar via Wizard ou flags no `init`/`adopt`. Elas são divididas em **duas categorias arquiteturais**:
 
-| Categoria          | Símbolo | O que fazem                                    | Onde ficam no source  |
-| :----------------- | :------ | :--------------------------------------------- | :-------------------- |
-| **Editoriais**     | 📝      | Sincronizam `.md` para `.ai-guidelines/rules/` | `.core/rules/opt-in/` |
-| **Infraestrutura** | ⚡      | Modificam `package.json`, hooks, CI/CD         | `.core/templates/`    |
+| Categoria          | Símbolo | O que fazem                                 | Onde ficam no source  |
+| :----------------- | :------ | :------------------------------------------ | :-------------------- |
+| **Editoriais**     | 📝      | Injetam blocos `<FEATURE_*>` no `AGENTS.md` | `.core/rules/opt-in/` |
+| **Infraestrutura** | ⚡      | Modificam `package.json`, hooks, CI/CD      | `.core/templates/`    |
 
 > **Nota**: Features de infraestrutura **não geram arquivos de regras**. Elas configuram ferramentas externas (Prettier, Husky, GitHub Actions) no projeto consumidor.
 
 ---
 
-### 📝 Editoriais (sincronizam regras para `.ai-guidelines/rules/`)
+### 📝 Editoriais (injetam regras em tags XML)
 
-Arquivos de texto Markdown sincronizados para o consumidor. Ficam armazenados internamente em `.core/rules/opt-in/` para que o motor não os force como regras obrigatórias (diferente do `global-rules.md`). Quando desativadas via flag `--prune`, os scripts das features limpam ativamente os arquivos do repositório consumidor.
+Arquivos de texto Markdown armazenados internamente em `.core/rules/opt-in/`. O compilador injeta apenas as features ativas dentro do bloco `<AI_GUIDELINES>`, usando tags como `<FEATURE_TDD>`. Quando desativadas via `--prune`, a recompilação remove o bloco XML correspondente sem tocar em conteúdo próprio do projeto.
 
 **CLI source**: `cli/features/opt-in/editorial/`
 
 #### 4. Quality Gates
 
-- **O que faz**: Adiciona `quality-gates.md` em `.ai-guidelines/rules/`. Define limites objetivos (ex: complexidade ciclomática, test coverage) a serem seguidos pelo LLM.
+- **O que faz**: Injeta `<FEATURE_QUALITY_GATES>` no `AGENTS.md`. Define limites objetivos (ex: complexidade ciclomática, test coverage) a serem seguidos pelo LLM.
 - **Por que**: Evita problemas difíceis de rastrear (Memory Leaks, N+1) injetados passivamente por IA.
 
 #### 5. TDD / BDD
 
-- **O que faz**: Adiciona `tdd.md` e/ou `bdd.md` em `.ai-guidelines/rules/`. Estabelece ciclo RED-GREEN-REFACTOR e testes no formato BDD em PT-BR ou EN como padrão imperativo.
+- **O que faz**: Injeta `<FEATURE_TDD>` e/ou `<FEATURE_BDD>` no `AGENTS.md`. Estabelece ciclo RED-GREEN-REFACTOR e testes no formato BDD em PT-BR ou EN como padrão imperativo.
 - **Por que**: Reduz dívida técnica em features extensas que precisam de validação estrutural.
 
 ---

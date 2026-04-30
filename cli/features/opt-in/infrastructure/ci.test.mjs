@@ -102,6 +102,13 @@ describe("Feature: CI (GitHub Actions Governance)", () => {
       .then(() => true)
       .catch(() => false);
     assert.equal(workflowExists, false);
-    assert.ok(actions.some((a) => a.includes("write .github/workflows/ai-guidelines-ci.yml")));
+    assert.ok(
+      actions.some((a) => a.includes("[dry-run] write .github/workflows/ai-guidelines-ci.yml"))
+    );
+    assert.equal(
+      actions.some((a) => a === "write .github/workflows/ai-guidelines-ci.yml (CI baseline)"),
+      false,
+      "Dry-run não deve registrar escrita real"
+    );
   });
 });

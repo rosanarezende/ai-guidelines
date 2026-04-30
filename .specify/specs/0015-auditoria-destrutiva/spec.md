@@ -1,6 +1,6 @@
 # Spec 0015 — Auditoria Destrutiva
 
-> Status: Active
+> Status: Done (PR #22 merged - 2026-04-28)
 > Author: Antigravity
 > Date: 2026-04-25
 > Owner: Rosana Rezende

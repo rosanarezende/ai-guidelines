@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { ROOT_DIR } from "../../../core/file-system.mjs";
-import { resolveInstallCommand, resolveCiRunner } from "../../../formatters/package-context.mjs";
+import { ROOT_DIR } from "#fs/file-system";
+import { resolveInstallCommand, resolveCiRunner } from "#formatters/package-context";
 
 /**
  * Governança de CI (GitHub Actions)
@@ -61,7 +61,7 @@ export async function applyCi(targetDir, options, context, actions) {
       let shouldUpdate = false;
 
       if (isTTY) {
-        const { promptUser } = await import("../../core/install-runtime.mjs");
+        const { promptUser } = await import("#app/install");
         shouldUpdate = await promptUser(
           `\nNovo baseline de CI detectado (.github/workflows/ai-guidelines-ci.yml). Atualizar agora? [S/n] `
         );
@@ -76,8 +76,10 @@ export async function applyCi(targetDir, options, context, actions) {
     }
   }
 
-  if (!dryRun) {
+  if (dryRun) {
+    actions.push("[dry-run] write .github/workflows/ai-guidelines-ci.yml (CI baseline)");
+  } else {
     await fs.writeFile(workflowPath, template);
+    actions.push("write .github/workflows/ai-guidelines-ci.yml (CI baseline)");
   }
-  actions.push(`write .github/workflows/ai-guidelines-ci.yml (CI baseline)`);
 }

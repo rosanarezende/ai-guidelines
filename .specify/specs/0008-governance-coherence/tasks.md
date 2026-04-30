@@ -610,10 +610,10 @@ init` ou `adopt`. Exemplos concretos.
 
 ## Fase 3 — Encerramento
 
-- [ ] **3.1** Após merge: deletar `.specify/specs/0008-.../NEXT.md` (se
+- [x] **3.1** Após merge: deletar `.specify/specs/0008-.../NEXT.md` (se
       criado), migrando débitos relevantes para `roadmap/backlog.md`.
-- [ ] **3.2** Atualizar `.specify/specs/research-index.md` com índice dos
+- [x] **3.2** Atualizar `.specify/specs/research-index.md` com índice dos
       arquivos de `research/` desta spec.
-- [ ] **3.3** Marcar spec como "Done" no header e mover entrada para
+- [x] **3.3** Marcar spec como "Done" no header e mover entrada para
       `roadmap/historico.md` (remover de "Em execução" em
       `roadmap/backlog.md`).

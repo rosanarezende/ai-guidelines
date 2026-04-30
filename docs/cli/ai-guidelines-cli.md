@@ -4,17 +4,17 @@ Este documento mapeia as regras de negócio canônicas da CLI, servindo de fonte
 
 ## 1. Comportamento Global de Sincronização
 
-### [BR-CLI-SYNC-01] Delta Sync de Pastas
+### [BR-CLI-SYNC-01] Delta Sync do Runtime
 
-DADO que a CLI precisa sincronizar o baseline core (`.ai-guidelines/rules/`)
+DADO que a CLI precisa sincronizar o runtime core no bloco `<AI_GUIDELINES>`
 QUANDO executado
-ENTÃO deve copiar apenas os arquivos cujo conteúdo difere do destino, otimizando I/O e preservando timestamps de arquivos inalterados.
+ENTÃO deve reescrever apenas o bloco gerenciado quando o conteúdo compilado diferir, preservando o restante do `AGENTS.md`.
 
 ### [BR-CLI-SYNC-02] Identificação de SSOT Radical (AGENTS.md)
 
 DADO o arquivo `AGENTS.md` no repositório alvo
 QUANDO o motor de adoção é acionado
-ENTÃO deve manter o arquivo raiz como ponteiro para `.ai-guidelines/AGENTS.md`, preservando conteúdo local fora do bloco gerenciado.
+ENTÃO deve manter o arquivo raiz como artefato runtime, preservando conteúdo local fora do bloco `<AI_GUIDELINES>`.
 
 ### [BR-CLI-SYNC-03] Erro em Baseline Corrompido
 
@@ -38,7 +38,7 @@ ENTÃO só deve injetar o arquivo se houver sinais de Prettier (dependências/sc
 
 DADO um comando `adopt` com flags de skip legadas para core
 QUANDO executado
-ENTÃO a CLI deve ignorar bypass de core (`pointers`, `rules`, `.gitattributes`) e aplicar somente o controle de features opt-in (`prettier`, `husky`, `ci`).
+ENTÃO a CLI deve ignorar bypass de core (`AGENTS.md`, `.gitattributes`) e aplicar somente o controle de features opt-in (`prettier`, `husky`, `ci`).
 
 ### [BR-CLI-SYNC-07] Orientação para Formatadores Rivais
 
@@ -116,32 +116,32 @@ ENTÃO deve injetar um comando de fallback (echo) no YAML para garantir que o pi
 
 ## 5. Features Opt-in — Editoriais (📝) [BR-CLI-EDITORIAL]
 
-> Features que sincronizam arquivos `.md` para `.ai-guidelines/rules/` do consumidor.
+> Features compiladas como blocos XML dentro de `<AI_GUIDELINES>`.
 > **CLI source**: `cli/features/opt-in/editorial/`
 
 ### [BR-CLI-EDITORIAL-01] Taxonomia de Features
 
 DADO o sistema de features opt-in
 QUANDO classificadas
-ENTÃO devem seguir duas categorias: **Editoriais** (geram `.md` em `.ai-guidelines/rules/`) e **Infraestrutura** (modificam `package.json`, hooks, CI). A lista canônica é derivada de `EDITORIAL_FEATURES` e `INFRASTRUCTURE_FEATURES` em `cli-input.mjs`.
+ENTÃO devem seguir duas categorias: **Editoriais** (geram blocos `<FEATURE_*>` no `AGENTS.md`) e **Infraestrutura** (modificam `package.json`, hooks, CI). A lista canônica é derivada de `EDITORIAL_FEATURES` e `INFRASTRUCTURE_FEATURES` em `cli/cli/args.mjs`.
 
-### [BR-CLI-EDITORIAL-02] Sincronização de Regras
+### [BR-CLI-EDITORIAL-02] Compilação de Regras
 
 DADO uma feature editorial ativa (ex: `quality-gates`, `tdd`, `bdd`)
 QUANDO executada
-ENTÃO deve copiar o template de `.core/rules/opt-in/<feature>.md` para `.ai-guidelines/rules/<feature>.md` no consumidor, respeitando idioma (`lang`) quando aplicável.
+ENTÃO deve injetar o template de `.core/rules/opt-in/<feature>.md` no `AGENTS.md` do consumidor, dentro de uma tag `<FEATURE_*>`, respeitando idioma (`lang`) quando aplicável.
 
 ### [BR-CLI-EDITORIAL-03] Prune Individual
 
 DADO uma feature editorial desativada com flag `--prune`
 QUANDO executada
-ENTÃO deve remover o arquivo correspondente do repositório consumidor (`.ai-guidelines/rules/<feature>.md`), sem afetar outros arquivos de regras (core ou outras features).
+ENTÃO deve remover o bloco `<FEATURE_*>` correspondente do `AGENTS.md`, sem afetar conteúdo fora de `<AI_GUIDELINES>`.
 
 ### [BR-CLI-EDITORIAL-04] Proteção no Prune Global
 
-DADO o motor de prune global (via `applyRules`)
-QUANDO limpa arquivos órfãos de `.ai-guidelines/rules/`
-ENTÃO deve proteger todos os arquivos listados em `OPT_IN_RULE_FILES` (derivado de `EDITORIAL_FEATURES`), independentemente de estarem ativos ou não na execução corrente.
+DADO o motor de prune global
+QUANDO recompila o bloco `<AI_GUIDELINES>`
+ENTÃO deve preservar conteúdo do consumidor fora da tag mãe e remover apenas blocos governados por `FEATURE_*` que não estejam ativos.
 
 ---
 
@@ -149,7 +149,7 @@ ENTÃO deve proteger todos os arquivos listados em `OPT_IN_RULE_FILES` (derivado
 
 > Features que modificam `package.json`, hooks e CI/CD do consumidor.
 > **CLI source**: `cli/features/opt-in/infrastructure/`
-> **Nota**: Não geram arquivos de regras em `.ai-guidelines/rules/`.
+> **Nota**: Não geram arquivos de regras no consumidor.
 
 As business rules para features de infraestrutura estão documentadas nas seções anteriores:
 
@@ -175,7 +175,7 @@ ENTÃO deve disparar um erro crítico e abortar a operação para evitar injeç�
 
 DADO argumentos via CLI
 QUANDO o parser é executado
-ENTÃO deve aceitar flags com `--` e valores separados por espaço ou `=`, tratando flags booleanas (`--force`, `--dry-run`, `--install`) de forma idempotente.
+ENTÃO deve aceitar flags com `--` e valores separados por espaço ou `=`, tratando flags booleanas (`--force`, `--dry-run`, `--install`, `--prune`) de forma idempotente.
 
 ### [BR-CLI-INPUT-02] Validação de Modos Suportados
 
@@ -228,3 +228,4 @@ ENTÃO deve oferecer ao usuário a opção de instalar as dependências imediata
 - **v0.1.0**: Mapeamento das regras core de sincronização e proteção de framework.
 - **v0.2.0**: Mapeamento da camada de Shell (Input/Wizard/Engine).
 - **v0.3.0**: Taxonomia Editorial/Infraestrutura e business rules de features opt-in.
+- **v0.4.0**: Refatoração Monolítica (Spec 0017): Hierarquia semântica e injeção direta no `AGENTS.md`.

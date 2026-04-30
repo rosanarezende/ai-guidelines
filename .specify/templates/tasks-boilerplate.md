@@ -13,14 +13,15 @@
 ## Fase 0 — Setup e research
 
 - [ ] **0.1** Branch `feat/spec-XXXX-<slug>` criada a partir de `main`.
-- [ ] **0.2** `spec.md` + `plan.md` + `tasks.md` criados a partir dos
-      templates em `.specify/templates/`.
-- [ ] **0.3** `roadmap/backlog.md` atualizado: spec nova movida para "Em
+- [ ] **0.2** `spec.md` instanciado a partir do template `.specify/templates/spec-boilerplate.md`.
+- [ ] **0.3** **[MANDATÓRIO]** Validação Humana: Aguardar o desenvolvedor aprovar o problema e o escopo definidos no `spec.md` **antes** de avançar.
+- [ ] **0.4** `plan.md` e `tasks.md` criados a partir dos templates após a aprovação da spec.
+- [ ] **0.5** `roadmap/backlog.md` atualizado: spec nova movida para "Em
       execução"; candidatas absorvidas migradas para `roadmap/historico.md`
       com ponteiro à spec absorvedora.
-- [ ] **0.4** Pesquisa inicial em `research/` quando aplicável (mapeamento,
+- [ ] **0.6** Pesquisa inicial em `research/` quando aplicável (mapeamento,
       auditoria, transcrições, benchmarks).
-- [ ] **0.5** Síntese consolidada em `research/synthesis.md` (se a pesquisa
+- [ ] **0.7** Síntese consolidada em `research/synthesis.md` (se a pesquisa
       tiver mais de 2 fontes).
 
 ---
@@ -62,8 +63,7 @@ Decompor por componente/sub-bloco do `plan.md`. Cada task deve ser observável
 
 - [ ] **3.1** `NEXT.md` (se existir): migrar débitos relevantes para
       `roadmap/backlog.md` e **deletar** o arquivo.
-- [ ] **3.2** `research/`: cada arquivo significativo entra com link e resumo
-      em `.specify/specs/research-index.md`.
+- [ ] **3.2** `research/`: cada arquivo significativo deve ser renomeado para incluir a data (`YYYY-MM-DD-nome.md`) e movido para a pasta de domínio correta em `.specify/specs/researchs/<domínio>/`. Adicionar link e resumo em `.specify/specs/research-index.md`.
 - [ ] **3.3** `spec.md` header: status → `Done`.
 - [ ] **3.4** `roadmap/historico.md`: spec movida para "Specs concluídas"
       com data; entrada removida da seção "Em execução" em

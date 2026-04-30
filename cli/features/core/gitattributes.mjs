@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { ROOT_DIR } from "../../core/file-system.mjs";
-import { mergeGitattributesContent } from "../../core/content-merge.mjs";
+import { ROOT_DIR } from "#fs/file-system";
+import { mergeGitattributesContent } from "#fs/merge-utils";
 
 /**
  * Governança de Persistência e EOL (.gitattributes)
@@ -25,8 +25,8 @@ export async function applyGitattributes(targetDir, options, actions) {
       actions.push("[dry-run] write .gitattributes (baseline sync)");
     } else {
       await fs.writeFile(gitattributesPath, updatedContent);
+      actions.push(`write ${path.basename(gitattributesPath)} (baseline sync)`);
     }
-    actions.push(`write ${path.basename(gitattributesPath)} (baseline sync)`);
     return { didWrite: true };
   }
 

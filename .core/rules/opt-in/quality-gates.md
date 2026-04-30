@@ -1,10 +1,10 @@
-# Quality Gates: Governança de Código Gerado por IA
+### Quality Gates: Governança de Código Gerado por IA
 
 > **Aviso:** O "Senior Review" humano permanece obrigatório para decisões arquiteturais, capacidade de carga e tradeoffs de longo prazo. Estes gates automatizam a detecção de bugs locais e estrutura de código.
 
 ---
 
-## Gates de Aceite (Checklist)
+#### Gates de Aceite (Checklist)
 
 1. **Análise Estática:**
    - Complexidade ciclomática mantida sob controle (módulos pequenos e focados).
@@ -27,7 +27,7 @@
 
 ---
 
-## Regras para Agentes de IA
+#### Regras para Agentes de IA
 
 - Ao finalizar uma implementação, execute o checklist acima antes de reportar "done".
 - Se algum gate falhar, corrija antes de prosseguir — não delegue ao humano erros detectáveis por automação.

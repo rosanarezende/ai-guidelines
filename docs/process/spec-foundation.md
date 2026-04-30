@@ -86,8 +86,15 @@ Backlog de débitos adiados. Política:
 
 ### `research/` — conhecimento de apoio
 
-Pesquisas, benchmarks, auditorias, transcrições. Cada artefato deve ser
-indexado em `.specify/specs/research-index.md` ao fechar a spec.
+Pesquisas, benchmarks, auditorias, transcrições elaboradas durante a execução da spec.
+
+**Política de Lifecycle (Migração Centralizada com Taxonomia):**
+Ao fechar a spec, arquivos com valor reutilizável devem ser:
+
+1. Renomeados para incluir a data atual como prefixo: `YYYY-MM-DD-nome-original.md`.
+2. Movidos fisicamente para a pasta central `.specify/specs/researchs/<domínio>/`, onde `<domínio>` deve ser o escopo da pesquisa (ex: `governance/`, `architecture/`, `oss/`). Não crie pastas por spec.
+3. Indexados em `.specify/specs/research-index.md`.
+   A pasta `research/` local da spec pode ser deletada se não restar nada de útil (ou mantida apenas para rascunhos sem valor histórico).
 
 ---
 
@@ -136,6 +143,7 @@ renumeração quando prioridade mudava (ex.: uma candidata renumerada de
 
 ## SDD Guardrails
 
+- **Validação Humana Obrigatória**: Agentes de IA devem **obrigatoriamente** exigir validação humana do `spec.md` ANTES de gerar o `plan.md` e `tasks.md`. Isso impede decisões de design arquitetural unilaterais não supervisionadas.
 - Não comece a codar sem um `plan.md` aprovado pelo humano.
 - Commits devem ser incrementais e referenciar o progresso das `tasks.md`.
 - Uma spec ativa por vez: **feche a spec anterior antes de abrir uma nova**.
@@ -170,8 +178,7 @@ Ao concluir uma spec e fazer merge para `main`:
 - [ ] Se `NEXT.md` existir: migrar débitos relevantes para
       `roadmap/backlog.md` (ou para issues/discussões, conforme o caso) e
       **deletar** `NEXT.md`.
-- [ ] Indexar todos os arquivos de `research/` em
-      `.specify/specs/research-index.md` com link + resumo curto.
+- [ ] `research/`: migrar arquivos de valor seguindo a **Política de Lifecycle** (Seção 4.5): Renomear com prefixo `YYYY-MM-DD-`, mover para `.specify/specs/researchs/<domínio>/` e indexar em `.specify/specs/research-index.md`.
       Nenhum conhecimento (RAG) deve morrer na pasta da spec fechada.
 - [ ] Mover a entrada da spec para "Concluídas" em `roadmap/historico.md` mantendo o número como histórico.
 - [ ] Remover a entrada da spec da seção "Em execução" em `roadmap/backlog.md`.

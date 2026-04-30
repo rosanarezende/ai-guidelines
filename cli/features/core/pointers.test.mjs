@@ -9,7 +9,7 @@ async function createTempDir(prefix) {
   return await fs.mkdtemp(path.join(os.tmpdir(), `ai-test-pointers-${prefix}-`));
 }
 
-describe("Feature: Pointers (AGENTS.md Architecture)", () => {
+describe("Feature: Pointers (AGENTS.md Runtime Architecture)", () => {
   let targetDir;
 
   before(async () => {
@@ -20,7 +20,7 @@ describe("Feature: Pointers (AGENTS.md Architecture)", () => {
     await fs.rm(targetDir, { recursive: true, force: true });
   });
 
-  it("[BEHAVIOR] Deve criar AGENTS.md como ponteiro e mover core para .ai-guidelines/", async () => {
+  it("[BEHAVIOR] Deve criar AGENTS.md como runtime monolitico governado", async () => {
     const subTarget = path.join(targetDir, "normal-flow");
     await fs.mkdir(subTarget, { recursive: true });
 
@@ -28,14 +28,37 @@ describe("Feature: Pointers (AGENTS.md Architecture)", () => {
     await applyPointers(subTarget, { features: ["pointers"] }, actions);
 
     const rootContent = await fs.readFile(path.join(subTarget, "AGENTS.md"), "utf8");
-    assert.match(rootContent, /Governança Centralizada/, "Raiz deve conter o texto de ponteiro");
-    assert.match(rootContent, /\.ai-guidelines\/AGENTS\.md/, "Raiz deve apontar para o core");
+    assert.match(rootContent, /<AI_GUIDELINES>/, "Raiz deve conter a tag mãe governada");
+    assert.match(rootContent, /Zona Topo: Diretivas Primarias/, "Raiz deve conter o monólito");
 
-    const coreExists = await fs
-      .access(path.join(subTarget, ".ai-guidelines", "AGENTS.md"))
+    const rulesDirExists = await fs
+      .access(path.join(subTarget, ".ai-guidelines", "rules"))
       .then(() => true)
       .catch(() => false);
-    assert.ok(coreExists, "Arquivo core deve ser criado em .ai-guidelines/");
+    assert.equal(rulesDirExists, false, "Não deve criar .ai-guidelines/rules no consumidor");
+  });
+
+  it("[COMPILER] Deve gerar AGENTS raiz monolitico com regras e opt-ins envelopados", async () => {
+    const subTarget = path.join(targetDir, "monolithic-core");
+    await fs.mkdir(subTarget, { recursive: true });
+
+    await applyPointers(subTarget, { features: ["quality-gates", "tdd"], lang: "pt" }, []);
+
+    const coreContent = await fs.readFile(path.join(subTarget, "AGENTS.md"), "utf8");
+
+    assert.match(coreContent, /<AI_GUIDELINES>/);
+    assert.match(coreContent, /Zona Topo: Diretivas Primarias/);
+    assert.match(coreContent, /Regras Globais/);
+    assert.match(coreContent, /<FEATURE_QUALITY_GATES>/);
+    assert.match(coreContent, /<FEATURE_TDD>/);
+    assert.ok(
+      coreContent.indexOf("Zona Topo: Diretivas Primarias") <
+        coreContent.indexOf("Zona Centro: Metodologias Opt-in")
+    );
+    assert.ok(
+      coreContent.indexOf("Zona Centro: Metodologias Opt-in") <
+        coreContent.indexOf("Zona Base: Contexto Tatico")
+    );
   });
 
   it("[PRESERVATION] Deve manter conteúdo do usuário fora do bloco core", async () => {
@@ -48,7 +71,7 @@ describe("Feature: Pointers (AGENTS.md Architecture)", () => {
 
     const content = await fs.readFile(agentsPath, "utf8");
     assert.match(content, /Minhas regras locais/, "Não deve apagar regras locais do usuário");
-    assert.match(content, /Governança Centralizada/, "Deve injetar o ponteiro");
+    assert.match(content, /<AI_GUIDELINES>/, "Deve injetar o bloco governado");
   });
 
   it("[BEHAVIOR] Deve injetar ponteiro por padrão no modo adopt", async () => {
@@ -62,7 +85,7 @@ describe("Feature: Pointers (AGENTS.md Architecture)", () => {
     const rootContent = await fs.readFile(path.join(subTarget, "AGENTS.md"), "utf8");
     assert.match(
       rootContent,
-      /Governança Centralizada/,
+      /<AI_GUIDELINES>/,
       "Deve injetar mesmo se não estiver na lista de features (comportamento core)"
     );
   });
@@ -99,13 +122,51 @@ describe("Feature: Pointers (AGENTS.md Architecture)", () => {
       .access(path.join(subTarget, "AGENTS.md"))
       .then(() => true)
       .catch(() => false);
-    const coreExists = await fs
-      .access(path.join(subTarget, ".ai-guidelines", "AGENTS.md"))
+    const rulesDirExists = await fs
+      .access(path.join(subTarget, ".ai-guidelines", "rules"))
       .then(() => true)
       .catch(() => false);
 
     assert.equal(rootExists, false);
-    assert.equal(coreExists, false);
+    assert.equal(rulesDirExists, false);
     assert.ok(actions.some((a) => a.includes("[dry-run] write AGENTS.md")));
+  });
+
+  it("[MIGRATION] Deve migrar ponteiro legado para AI_GUIDELINES na raiz", async () => {
+    const subTarget = path.join(targetDir, "legacy-pointer");
+    await fs.mkdir(subTarget, { recursive: true });
+    const agentsPath = path.join(subTarget, "AGENTS.md");
+    await fs.writeFile(
+      agentsPath,
+      [
+        "# Projeto",
+        "",
+        "<!-- BEGIN:ai-guidelines-core -->",
+        "ponteiro antigo",
+        "<!-- END:ai-guidelines-core -->",
+        "",
+        "Regra local.",
+      ].join("\n")
+    );
+
+    await applyPointers(subTarget, { features: ["tdd"], lang: "pt" }, []);
+
+    const content = await fs.readFile(agentsPath, "utf8");
+    assert.match(content, /# Projeto/);
+    assert.match(content, /Regra local/);
+    assert.match(content, /<AI_GUIDELINES>/);
+    assert.match(content, /<FEATURE_TDD>/);
+    assert.doesNotMatch(content, /ponteiro antigo/);
+  });
+
+  it("[PROTECTION] Deve abortar quando AI_GUIDELINES estiver malformado", async () => {
+    const subTarget = path.join(targetDir, "malformed");
+    await fs.mkdir(subTarget, { recursive: true });
+    await fs.writeFile(path.join(subTarget, "AGENTS.md"), "# Projeto\n\n<AI_GUIDELINES>\n");
+
+    await assert.rejects(
+      () => applyPointers(subTarget, { features: ["tdd"], lang: "pt" }, []),
+      /AI_GUIDELINES/
+    );
   });
 });

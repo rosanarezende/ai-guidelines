@@ -1,8 +1,8 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { ROOT_DIR } from "../../../core/file-system.mjs";
-import { mergePrettierIgnoreContent } from "../../../core/content-merge.mjs";
-import { mergePackageJson, detectNewDevDeps } from "../../../formatters/package-context.mjs";
+import { ROOT_DIR } from "#fs/file-system";
+import { mergePrettierIgnoreContent } from "#fs/merge-utils";
+import { mergePackageJson, detectNewDevDeps } from "#formatters/package-context";
 
 /**
  * Governança de Estilo (Prettier)

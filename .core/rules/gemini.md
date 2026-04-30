@@ -1,17 +1,17 @@
-# Adaptador: Gemini (Google)
+### Adaptador: Gemini (Google)
 
 > Diretrizes complementares para agentes baseados em modelos Google Gemini e a CLI Gemini.
 > Estas regras **complementam** (não substituem) o `global-rules.md`.
 
 ---
 
-## Integração com CLI
+#### Integração com CLI
 
 - Gemini CLI carrega automaticamente `GEMINI.md` na raiz e `~/.gemini/GEMINI.md` como config global.
 - Para instruções específicas do projeto, utilize `GEMINI.md` na raiz do repositório.
-- O `AGENTS.md` da raiz também é carregado — garanta que o ponteiro para `.ai-guidelines/` esteja presente.
+- O `AGENTS.md` da raiz também é carregado — garanta que o bloco `<AI_GUIDELINES>` esteja presente.
 
-## Skills Globais
+#### Skills Globais
 
 As skills globais (ferramentas personalizadas) residem em `~/.gemini/skills/`.
 
@@ -20,11 +20,11 @@ As skills globais (ferramentas personalizadas) residem em `~/.gemini/skills/`.
 
 ---
 
-## Estratégia de Ignore
+#### Estratégia de Ignore
 
 Utilize o arquivo `.geminiignore` na raiz de cada repositório para gerenciar a economia de tokens. Ele evita que arquivos de build, logs e binários poluam o contexto do modelo.
 
-### Exemplo de `.geminiignore` recomendado:
+#### Exemplo de `.geminiignore` recomendado:
 
 ```gitignore
 # Secrets (crítico)
@@ -59,7 +59,7 @@ logs/
 
 ---
 
-## Comportamento Observado
+#### Comportamento Observado
 
 - Em sessões longas, use o conceito de "checkpoints" (salvar progresso em artefatos) para evitar perda de contexto.
 - Gemini tende a ser proativo em executar comandos — as Global Rules já restringem git push, mas reforce em tarefas destrutivas.
