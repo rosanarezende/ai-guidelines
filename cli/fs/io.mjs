@@ -1,5 +1,5 @@
 import path from "node:path";
-import { ensureDir, fileExists, readTextIfExists } from "#core/file-system";
+import { ensureDir, fileExists, readTextIfExists } from "#fs/file-system";
 
 export async function ensureTargetDir(targetDir, dryRun) {
   await ensureDir(targetDir, dryRun, []);

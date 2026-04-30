@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { EDITORIAL_FEATURES } from "#core/cli-input";
-import { ROOT_DIR } from "#core/file-system";
+import { EDITORIAL_FEATURES } from "#cli/args";
+import { ROOT_DIR } from "#fs/file-system";
 import { mergeAgentsContent } from "#governance/agents-merge";
 import { compileMonolithicAgentsContent } from "#governance/monolith/compiler";
 import {

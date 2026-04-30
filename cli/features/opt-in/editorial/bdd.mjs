@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { ROOT_DIR } from "#core/file-system";
+import { ROOT_DIR } from "#fs/file-system";
 
 /**
  * Feature Opt-in: BDD

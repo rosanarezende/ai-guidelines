@@ -1,7 +1,7 @@
 import readline from "node:readline";
 import path from "node:path";
 import { spawn } from "node:child_process";
-import { fileExists } from "#core/file-system";
+import { fileExists } from "#fs/file-system";
 import { resolveLocalInstallCommand } from "#formatters/package-context";
 
 export async function getInstallHint(targetDir, packageManager) {

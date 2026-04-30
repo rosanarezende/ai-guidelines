@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { ROOT_DIR } from "#core/file-system";
+import { ROOT_DIR } from "#fs/file-system";
 import { resolveInstallCommand, resolveCiRunner } from "#formatters/package-context";
 
 /**
@@ -61,7 +61,7 @@ export async function applyCi(targetDir, options, context, actions) {
       let shouldUpdate = false;
 
       if (isTTY) {
-        const { promptUser } = await import("#core/install-runtime");
+        const { promptUser } = await import("#app/install");
         shouldUpdate = await promptUser(
           `\nNovo baseline de CI detectado (.github/workflows/ai-guidelines-ci.yml). Atualizar agora? [S/n] `
         );
