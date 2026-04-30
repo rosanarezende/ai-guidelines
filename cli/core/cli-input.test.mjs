@@ -8,7 +8,7 @@ import {
   printHelp,
   resolveExecutionInput,
   sanitizeWizardRawOptions,
-} from "./cli-input.mjs";
+} from "#core/cli-input";
 
 async function withTTY(value, callback) {
   const originalIsTTY = process.stdin.isTTY;
@@ -36,7 +36,7 @@ async function withTTY(value, callback) {
   }
 }
 
-describe("cli-input", () => {
+describe("cli-input (wrapper)", () => {
   it("[BR-CLI-INPUT-01] DADO flags do init QUANDO parseArgs rodar ENTÃO retorna command e options", () => {
     const parsed = parseArgs([
       "init",
@@ -154,6 +154,7 @@ describe("cli-input", () => {
       assert.ok(!result.options.features.includes("prettier"));
     });
   });
+
   it("[BR-CLI-WIZARD-05] DADO flag --yes QUANDO resolveExecutionInput ENTÃO pula wizard mesmo em TTY", async () => {
     await withTTY(true, async () => {
       const result = await resolveExecutionInput("adopt", {
