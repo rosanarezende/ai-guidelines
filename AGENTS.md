@@ -387,8 +387,6 @@ it("[BR-CLI-SYNC-01] DADO baseline desatualizado QUANDO executado adopt ENTÃO s
 
 ## Zona Base: Contexto Tatico
 
-# AGENTS.md
-
 <!-- BEGIN:ai-guidelines-core -->
 
 > [!IMPORTANT]

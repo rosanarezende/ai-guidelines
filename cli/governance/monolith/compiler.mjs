@@ -14,9 +14,12 @@ export function wrapFeatureModule(featureName, content) {
   return [`<${tag}>`, content.trim(), `</${tag}>`].join("\n\n");
 }
 
+function normalizeAgentsHeading(content) {
+  return content.replace(/^#\s+AGENTS\.md\s*\n+/, "");
+}
+
 export function normalizePointerForMonolith(pointerTemplate) {
-  return pointerTemplate
-    .replace(/^#\s+AGENTS\.md\s*\n+/, "")
+  return normalizeAgentsHeading(pointerTemplate)
     .replace(
       /Para ler a Prime Directive[\s\S]*?<!-- END:ai-guidelines-core -->/,
       [
@@ -46,7 +49,7 @@ export function compileMonolithicAgentsContent({
   pointerTemplate,
 }) {
   const topBuffer = buildSection("Zona Topo: Diretivas Primarias", [
-    coreTemplate,
+    normalizeAgentsHeading(coreTemplate),
     globalRules,
     ...providerRules.map(({ name, content }) =>
       buildSection(`Regras do Provedor: ${name}`, [content])

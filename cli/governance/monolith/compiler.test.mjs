@@ -10,7 +10,7 @@ import {
 describe("monolith/compiler", () => {
   it("[BR-CLI-COMPILER-20] DADO buffers QUANDO compilar ENTÃO preserva ordem topo centro base e newline final", () => {
     const compiled = compileMonolithicAgentsContent({
-      coreTemplate: "AGENTS core",
+      coreTemplate: "# AGENTS.md\n\nAGENTS core",
       globalRules: "global rules",
       providerRules: [{ name: "codex", content: "codex rules" }],
       optInRules: [{ name: "quality-gates.md", content: "quality rules" }],
@@ -18,6 +18,7 @@ describe("monolith/compiler", () => {
     });
 
     assert.ok(compiled.indexOf("AGENTS core") < compiled.indexOf("<FEATURE_QUALITY_GATES>"));
+    assert.doesNotMatch(compiled, /^# AGENTS\.md/m);
     assert.ok(compiled.indexOf("<FEATURE_QUALITY_GATES>") < compiled.indexOf("pointer"));
     assert.match(compiled, /Regras do Provedor: codex/);
     assert.ok(compiled.endsWith("\n"));
