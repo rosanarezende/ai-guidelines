@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { mergeHookContent } from "#core/content-merge";
+import { mergeHookContent } from "#fs/merge-utils";
 import { mergePackageJson } from "#formatters/package-context";
 
 /**
