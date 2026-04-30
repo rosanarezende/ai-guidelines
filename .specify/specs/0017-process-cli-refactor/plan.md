@@ -51,17 +51,17 @@ No final, o CLI fará um `join` destes três buffers, envolverá o resultado em 
 
 #### Aliases de Módulo
 
-O `package.json` deve ser alterado para incluir o subpath routing:
+O `package.json` foi alterado para incluir o subpath routing, `#features/*`, `#formatters/*`, etc.
 
-```json
-"imports": {
-  "#core/*": "./cli/core/*.mjs",
-  "#features/*": "./cli/features/*.mjs",
-  "#formatters/*": "./cli/formatters/*.mjs"
-}
-```
+#### Semantic Heading Hierarchy (Enforcement)
 
-A IA deverá rodar um script ou usar sed para substituir ocorrências de ../../core/ por #core/ na base de código, resolvendo o dependency hell.
+Para garantir que o monólito gerado seja semântico e fácil de navegar por IAs e humanos, o compilador deve forçar uma hierarquia rígida:
+
+- **Nível 2 (`##`)**: Reservado para as Zonas (Topo, Centro, Base).
+- **Nível 3 (`###`)**: Reservado para títulos de arquivos/recursos injetados (ex: "Regras Obrigatórias", "Regras do Provedor: X", "Feature: Y").
+- **Nível 4+ (`####`)**: Conteúdo interno dos arquivos.
+
+O motor deve ser ajustado para injetar `###` nos títulos de seção e os arquivos fonte em `.core/rules` devem ser sanitizados para não conterem títulos `H1` ou `H2`.
 
 ## ⚠️ Riscos e Portões de Qualidade (Quality Gates)
 

@@ -38,6 +38,8 @@
   - Lógica para escrever `AGENTS-pointer` na zona "Base".
 - [x] **B.5 (Motor de Compilação - XML Tags)**: Adicionar lógica ao motor no loop dos módulos opt-in (zona "Centro"). Antes de anexar o conteúdo de arquivos como `tdd-pt.md` ou `quality-gates.md`, fazer o parser do nome da feature, criar tags relacionais (ex: `<FEATURE_TDD>`) e envolver o markdown lido, adicionando quebras de linha seguras.
 - [x] **B.6 (Garantia de Qualidade)**: Rodar `yarn check && yarn test` e atualizar quaisquer testes unitários de `content-merge` e `engine` que tenham quebrado por conta do novo output com tags XML.
+- [x] **B.7 (Hierarquia Semântica)**: Refatorar `compiler.mjs` para permitir níveis de cabeçalho dinâmicos em `buildSection`. Ajustar "Regras do Provedor" para `###` (e posteriormente removido por redundância).
+- [x] **B.8 (Sanitização de Fontes)**: Revisar `.core/rules/` (gemini, claude, codex, etc.) e garantir que títulos internos sigam a hierarquia `####` e `#####` (shift +1 em relação ao padrão anterior).
 
 ---
 
