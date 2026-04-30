@@ -1,6 +1,6 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { execute, main } from "./core/engine.mjs";
+import { execute, main } from "./app/engine.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 
