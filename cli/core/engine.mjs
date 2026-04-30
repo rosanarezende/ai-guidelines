@@ -14,7 +14,7 @@ import { applyGitattributes } from "#features/core/gitattributes";
 import { applyPrettier } from "#features/opt-in/infrastructure/prettier";
 import { applyHusky } from "#features/opt-in/infrastructure/husky";
 import { applyCi } from "#features/opt-in/infrastructure/ci";
-import { assertSafeInitTarget } from "#core/content-merge";
+import { assertSafeInitTarget } from "#governance/agents-merge";
 import { buildFormatterRivalGuidance, buildMonorepoGuidance } from "#core/guidance-helpers";
 import { getInstallHint, promptUser, runInstall } from "#core/install-runtime";
 
