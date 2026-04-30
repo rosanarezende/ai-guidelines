@@ -6,6 +6,7 @@
   "bin": "./cli/ai-guidelines-cli.mjs",
   "imports": {
     "#app/*": "./cli/app/*.mjs",
+    "#cli/*": "./cli/cli/*.mjs",
     "#core/*": "./cli/core/*.mjs",
     "#features/*": "./cli/features/*.mjs",
     "#formatters/*": "./cli/formatters/*.mjs",
