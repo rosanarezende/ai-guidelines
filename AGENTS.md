@@ -11,15 +11,11 @@ Este arquivo define o fluxo obrigatório para qualquer IA atuando neste reposit�
 
 ## Zona Topo: Diretivas Primarias
 
-# AGENTS.md
-
 Este arquivo define o fluxo obrigatório para qualquer IA atuando neste repositório.
 
-## Regras Obrigatórias de Execução
+### Regras Obrigatórias de Execução
 
-<!-- BEGIN:ai-guidelines-core -->
-
-### FASE 1: The Prime Directive
+#### FASE 1: The Prime Directive
 
 1. **[Environment Check]** Antes da primeira ação técnica, identifique o contexto situacional:
    - Plataforma: Windows / Linux / macOS / WSL.
@@ -40,7 +36,7 @@ Este arquivo define o fluxo obrigatório para qualquer IA atuando neste reposit�
 
 3. Consulte a seção "Regras Globais" injetada neste bloco `<AI_GUIDELINES>` para princípios de engenharia e eficiência de IA.
 
-### FASE 2: Workflow & Isolation
+#### FASE 2: Workflow & Isolation
 
 4. **Nunca** inicie modificações ativas operando sob a branch `main` ou `master`. Confirme seu estado de _working tree_ ou crie uma branch sintética (`feat/`, `fix/`, `docs/`) antes de alterar fontes de verdade.
 
@@ -48,7 +44,7 @@ Este arquivo define o fluxo obrigatório para qualquer IA atuando neste reposit�
 
 6. Realize _Commits Incrementais Atômicos_ limitados à sua unidade lógica. Se a tarefa varrer design, código e spec simultaneamente, fracione as ações comissionadas em passos menores.
 
-### FASE 3: Quality Gates
+#### FASE 3: Quality Gates
 
 7. **[CI Compliance — HARNESS LOCK]** É terminantemente proibido submeter qualquer commit sem validar a cadeia de qualidade do projeto. Antes de `git commit`, execute **todos os scripts de validação** definidos no `package.json` do repositório (ex: `format`, `check`, `lint`, `test`). O padrão canônico é:
 
@@ -62,7 +58,7 @@ Este arquivo define o fluxo obrigatório para qualquer IA atuando neste reposit�
 
 9. Converta a operação de `Draft` para `Ready` apenas através da revalidação afirmativa Humana.
 
-### FASE 4: Communication & Agility
+#### FASE 4: Communication & Agility
 
 10. **Aja apenas mediante Plano Formado.** Antes de executar qualquer código, escolha a granularidade:
 
@@ -80,9 +76,7 @@ Este arquivo define o fluxo obrigatório para qualquer IA atuando neste reposit�
     - `NEXT.md` → registre débitos, bugs ou insights sem prioridade imediata.
     - **Nunca crie arquivos paralelos de roteirização.** Planos leves vivem na ferramenta, não no repositório.
 
-<!-- END:ai-guidelines-core -->
-
-# Regras Globais
+### Regras Globais
 
 > Fonte de verdade: bloco `<AI_GUIDELINES>` compilado no `AGENTS.md`.
 > Este arquivo define **princípios de engenharia** aplicáveis a qualquer projeto.
@@ -90,13 +84,13 @@ Este arquivo define o fluxo obrigatório para qualquer IA atuando neste reposit�
 
 ---
 
-## Princípios de Engenharia
+#### Princípios de Engenharia
 
 1. Sempre responda em **Português do Brasil (PT-BR)**.
 2. Não modifique arquivos essenciais ou pontos cegos de arquitetura (ex.: `.env`, dependências fundamentais) sem antes solicitar confirmação.
 3. **Acesso Seguro:** chaves de API jamais podem transitar por arquivos do frontend de forma acidental; garanta rigor com arquivos ignorados no `.gitignore`.
 
-## Eficiência de IA
+#### Eficiência de IA
 
 4. **Model Routing Inteligente:** Use modelos rápidos (ex: Flash, Haiku) para tarefas scoped e repetitivas. Reserve modelos avançados (ex: Pro, Opus) para planejamento arquitetural e decisões complexas.
 5. **Feedback Cirúrgico:** Ao iterar sobre código ou artefatos, forneça feedback diretamente no artefato com comentários cirúrgicos. Evite reenviar prompts extensos do zero.
@@ -104,11 +98,11 @@ Este arquivo define o fluxo obrigatório para qualquer IA atuando neste reposit�
 7. **Redução de Ruído:** Utilize arquivos de ignore (`.geminiignore`, `.gitignore`, `.claudeignore`) para remover arquivos desnecessários (logs, builds, node_modules) do contexto da IA.
 8. **Check de Contexto:** Monitore periodicamente o que a IA está "vendo" (ex: logs de tokens) para evitar deriva de contexto.
 
-## Governança de Agentes
+#### Governança de Agentes
 
 9. **Diretriz Primária — Git Push:** Nunca execute `git push` de forma autônoma. Todo envio de código ao repositório remoto **exige aprovação humana explícita do mantenedor** antes de ser iniciado. Aplica-se a qualquer agente de IA, script automatizado ou hook que não seja o pipeline oficial do repositório.
 
-## Workflow com IA
+#### Workflow com IA
 
 10. **Plan mode antes de agent mode:** antes de qualquer ação executiva (edição de arquivo, comando destrutivo, escrita), reserve pelo menos um ciclo de planejamento explícito. Reforça o ciclo RPI (Research → Plan → Implement).
 11. **Referencie um padrão existente ao gerar código novo:** localize um exemplo semelhante no repositório antes de criar do zero. Reduz alucinação e preserva consistência estilística.
@@ -119,74 +113,68 @@ Este arquivo define o fluxo obrigatório para qualquer IA atuando neste reposit�
 16. **Contexto enxuto e estável:** mantenha regras e contexto estático no baseline de governança, use o prompt imediato apenas para intenção tática, e evite inserir logs, builds, dependências ou arquivos gerados no contexto da IA.
 17. **Routing de esforço:** use modelos rápidos para tarefas locais e repetitivas; reserve modelos avançados ou reasoning para arquitetura, migrações, debugging complexo e decisões de alto impacto.
 
-## Regras do Provedor: claude
-
-# Adaptador: Claude (Anthropic)
+### Adaptador: Claude (Anthropic)
 
 > Diretrizes complementares para agentes baseados em modelos Anthropic Claude.
 > Estas regras **complementam** (não substituem) o `global-rules.md`.
 
 ---
 
-## Model Routing
+#### Model Routing
 
 - **Haiku / Sonnet leve:** tarefas atômicas de codificação, formatação, refatoração scoped.
 - **Sonnet / Opus:** planejamento arquitetural, análise de múltiplos arquivos, decisões de design complexas.
 
-## Contexto e Ignore
+#### Contexto e Ignore
 
 - Utilize `.claudeignore` na raiz do repositório para controlar quais arquivos a IA carrega no contexto.
 - O formato segue o padrão `.gitignore`.
 - Claude carrega automaticamente o `AGENTS.md` da raiz — garanta que o bloco `<AI_GUIDELINES>` esteja presente.
 
-## Comportamento Observado
+#### Comportamento Observado
 
 - Claude tende a ser verboso por padrão. As Global Rules já instruem respostas sucintas — reforce se necessário com "seja conciso" no prompt.
 - Em sessões longas, Claude pode perder contexto de arquivos lidos no início. Use `/clear` ou reinicie a sessão quando perceber repetição de erros.
 - Claude Code respeita `CLAUDE.md` na raiz — este arquivo pode conter instruções específicas do projeto que complementam o baseline injetado.
 
-## Regras do Provedor: codex
-
-# Adaptador: Codex / Copilot (OpenAI)
+### Adaptador: Codex / Copilot (OpenAI)
 
 > Diretrizes complementares para agentes baseados em modelos OpenAI (Codex, GPT-4o) e integrações via GitHub Copilot.
 > Estas regras **complementam** (não substituem) o `global-rules.md`.
 
 ---
 
-## Integração com IDE
+#### Integração com IDE
 
 - Copilot lê automaticamente o `AGENTS.md` da raiz do repositório.
 - Para instruções específicas do projeto no Copilot Chat, utilize `.github/copilot-instructions.md` — este arquivo é carregado como contexto adicional pelo Copilot.
 - Utilize comentários estruturados e JSDoc para auxiliar a conclusão de código em tempo real.
 
-## Contexto e Ignore
+#### Contexto e Ignore
 
 - Copilot respeita o `.gitignore` do repositório por padrão.
 - Para refinamentos de contexto no Copilot Chat, utilize referências diretas a arquivos via `#file`.
 - Codex CLI respeita `AGENTS.md` e `.codex/instructions.md` — garanta que o bloco `<AI_GUIDELINES>` esteja presente.
 
-## Comportamento Observado
+#### Comportamento Observado
 
 - Copilot inline tende a completar código baseado no contexto imediato (arquivo aberto + imports). Mantenha arquivos focados e com imports explícitos para melhores sugestões.
 - Codex em modo autônomo segue instruções de `AGENTS.md` rigorosamente — garanta que as regras de governança (ex: não fazer push) estejam claras.
 
-## Regras do Provedor: gemini
-
-# Adaptador: Gemini (Google)
+### Adaptador: Gemini (Google)
 
 > Diretrizes complementares para agentes baseados em modelos Google Gemini e a CLI Gemini.
 > Estas regras **complementam** (não substituem) o `global-rules.md`.
 
 ---
 
-## Integração com CLI
+#### Integração com CLI
 
 - Gemini CLI carrega automaticamente `GEMINI.md` na raiz e `~/.gemini/GEMINI.md` como config global.
 - Para instruções específicas do projeto, utilize `GEMINI.md` na raiz do repositório.
 - O `AGENTS.md` da raiz também é carregado — garanta que o bloco `<AI_GUIDELINES>` esteja presente.
 
-## Skills Globais
+#### Skills Globais
 
 As skills globais (ferramentas personalizadas) residem em `~/.gemini/skills/`.
 
@@ -195,11 +183,11 @@ As skills globais (ferramentas personalizadas) residem em `~/.gemini/skills/`.
 
 ---
 
-## Estratégia de Ignore
+#### Estratégia de Ignore
 
 Utilize o arquivo `.geminiignore` na raiz de cada repositório para gerenciar a economia de tokens. Ele evita que arquivos de build, logs e binários poluam o contexto do modelo.
 
-### Exemplo de `.geminiignore` recomendado:
+#### Exemplo de `.geminiignore` recomendado:
 
 ```gitignore
 # Secrets (crítico)
@@ -234,7 +222,7 @@ logs/
 
 ---
 
-## Comportamento Observado
+#### Comportamento Observado
 
 - Em sessões longas, use o conceito de "checkpoints" (salvar progresso em artefatos) para evitar perda de contexto.
 - Gemini tende a ser proativo em executar comandos — as Global Rules já restringem git push, mas reforce em tarefas destrutivas.
@@ -246,13 +234,13 @@ logs/
 
 <FEATURE_QUALITY_GATES>
 
-# Quality Gates: Governança de Código Gerado por IA
+### Quality Gates: Governança de Código Gerado por IA
 
 > **Aviso:** O "Senior Review" humano permanece obrigatório para decisões arquiteturais, capacidade de carga e tradeoffs de longo prazo. Estes gates automatizam a detecção de bugs locais e estrutura de código.
 
 ---
 
-## Gates de Aceite (Checklist)
+#### Gates de Aceite (Checklist)
 
 1. **Análise Estática:**
    - Complexidade ciclomática mantida sob controle (módulos pequenos e focados).
@@ -275,7 +263,7 @@ logs/
 
 ---
 
-## Regras para Agentes de IA
+#### Regras para Agentes de IA
 
 - Ao finalizar uma implementação, execute o checklist acima antes de reportar "done".
 - Se algum gate falhar, corrija antes de prosseguir — não delegue ao humano erros detectáveis por automação.
@@ -285,14 +273,14 @@ logs/
 
 <FEATURE_TDD>
 
-# TDD: Desenvolvimento Guiado por Testes (Red-Green-Refactor)
+### TDD: Desenvolvimento Guiado por Testes (Red-Green-Refactor)
 
 > Esta regra instrui agentes de IA a seguirem o ciclo TDD estrito.
 > **Foco:** estrutura de código, ciclo de feedback e cobertura.
 
 ---
 
-## Ciclo Obrigatório (Strict TDD)
+#### Ciclo Obrigatório (Strict TDD)
 
 Toda nova funcionalidade ou correção de bug DEVE seguir este ciclo:
 
@@ -304,7 +292,7 @@ Toda nova funcionalidade ou correção de bug DEVE seguir este ciclo:
 
 ---
 
-## Princípios Estruturais
+#### Princípios Estruturais
 
 - **Um Teste, Uma Intenção:** Cada caso de teste valida exatamente um comportamento. Evite testes "omni-bus".
 - **Isolamento:** Testes unitários não devem depender de serviços externos, rede ou banco de dados. Use mocks/stubs para dependências.
@@ -314,7 +302,7 @@ Toda nova funcionalidade ou correção de bug DEVE seguir este ciclo:
 
 ---
 
-## Regras para Agentes de IA
+#### Regras para Agentes de IA
 
 - Ao receber uma tarefa, escreva os testes ANTES da implementação.
 - Gere casos de borda (edge cases) baseados na spec antes de implementar a lógica.
@@ -326,14 +314,14 @@ Toda nova funcionalidade ou correção de bug DEVE seguir este ciclo:
 
 <FEATURE_BDD>
 
-# BDD: Comportamento Guiado por Testes (Dado/Quando/Então)
+### BDD: Comportamento Guiado por Testes (Dado/Quando/Então)
 
 > Esta regra instrui agentes de IA a estruturarem testes no formato BDD.
 > **Foco:** linguagem ubíqua, rastreabilidade e documentação viva.
 
 ---
 
-## Formato Obrigatório
+#### Formato Obrigatório
 
 Todos os testes DEVEM usar a estrutura **DADO / QUANDO / ENTÃO** em Português do Brasil:
 
@@ -341,7 +329,7 @@ Todos os testes DEVEM usar a estrutura **DADO / QUANDO / ENTÃO** em Português 
 - **QUANDO** [ação executada pelo usuário ou sistema]
 - **ENTÃO** [resultado esperado / asserção]
 
-### Exemplo
+#### Exemplo
 
 ```javascript
 it("DADO usuário sem permissão QUANDO tenta acessar painel ENTÃO retorna erro 403", () => {
@@ -351,7 +339,7 @@ it("DADO usuário sem permissão QUANDO tenta acessar painel ENTÃO retorna erro
 
 ---
 
-## Rastreabilidade (Business Rules)
+#### Rastreabilidade (Business Rules)
 
 - Cada regra de negócio documentada DEVE ter um identificador único (ex: `[BR-CLI-SYNC-01]`).
 - Os testes que validam essa regra DEVEM incluir o identificador no nome.
@@ -365,7 +353,7 @@ it("[BR-CLI-SYNC-01] DADO baseline desatualizado QUANDO executado adopt ENTÃO s
 
 ---
 
-## Princípios BDD
+#### Princípios BDD
 
 - **Linguagem Ubíqua:** Testes devem ser legíveis por humanos não-técnicos. Evite jargão de implementação nos nomes.
 - **Documentação Viva:** A suíte de testes serve como documentação executável do sistema. Se o teste não descreve o comportamento com clareza, reescreva-o.
@@ -373,7 +361,7 @@ it("[BR-CLI-SYNC-01] DADO baseline desatualizado QUANDO executado adopt ENTÃO s
 
 ---
 
-## Regras para Agentes de IA
+#### Regras para Agentes de IA
 
 - Ao criar testes, SEMPRE use o formato DADO/QUANDO/ENTÃO no nome do caso de teste.
 - Ao receber uma business rule (`[BR-*]`), inclua o ID no teste correspondente.
@@ -387,16 +375,12 @@ it("[BR-CLI-SYNC-01] DADO baseline desatualizado QUANDO executado adopt ENTÃO s
 
 ## Zona Base: Contexto Tatico
 
-<!-- BEGIN:ai-guidelines-core -->
-
 > [!IMPORTANT]
 > Este projeto utiliza o framework **ai-guidelines** para governança de IA.
 > As diretrizes operacionais e regras de engenharia ficam compiladas no bloco `<AI_GUIDELINES>` do `AGENTS.md`.
 
-## 🧠 Governança Centralizada
+### 🧠 Governança Centralizada
 
 O `AGENTS.md` da raiz é o artefato runtime. Conteúdo próprio do projeto deve ficar fora de `<AI_GUIDELINES>`.
-
-<!-- END:ai-guidelines-core -->
 
 </AI_GUIDELINES>
