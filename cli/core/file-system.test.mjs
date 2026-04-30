@@ -8,9 +8,9 @@ import {
   writeFileIfChanged,
   ensureDir,
   copyDirIfChanged,
-} from "./file-system.mjs";
+} from "#core/file-system";
 
-describe("file-system.mjs", () => {
+describe("file-system (wrapper)", () => {
   const tmpDir = path.join(os.tmpdir(), `ai-guidelines-fs-test-${Date.now()}`);
 
   it("DADO arquivo inexistente QUANDO readTextIfExists ENTÃO retorna null", async () => {
@@ -22,11 +22,9 @@ describe("file-system.mjs", () => {
     await fs.mkdir(tmpDir, { recursive: true });
     const filePath = path.join(tmpDir, "test.txt");
 
-    // Primeira vez: escreve
     const first = await writeFileIfChanged(filePath, "hello", false, []);
     assert.equal(first, true);
 
-    // Segunda vez: pula
     const second = await writeFileIfChanged(filePath, "hello", false, []);
     assert.equal(second, false);
 
