@@ -17,64 +17,65 @@ Este arquivo define o fluxo obrigatório para qualquer IA atuando neste reposit�
 
 #### FASE 1: The Prime Directive
 
-1. **[Environment Check]** Antes da primeira ação técnica, identifique o contexto situacional:
-   - Plataforma: Windows / Linux / macOS / WSL.
-   - Shell: bash / zsh / PowerShell / cmd.
-   - Surface: CLI agent (Claude Code, Gemini CLI) vs IDE (Cursor, Copilot).
-   - Modelo: Identifique se está operando com um modelo "Thinking/Reasoning".
-   - Adapte comandos (ex: `/dev/null` vs `NUL`, forward slashes) a essa matriz.
+1.1. **[Environment Check]** Antes da primeira ação técnica, identifique o contexto situacional:
 
-2. **[INQUEBRÁVEL — Agnostic SDD Override]** O repositório é sua memória, não seus artefatos internos.
-   - Planejamento → `.specify/specs/<slug>/plan.md`
-   - Progresso → `.specify/specs/<slug>/tasks.md`
-   - Débitos → `.specify/specs/<slug>/NEXT.md`
-   - Conhecimento → `.specify/specs/<slug>/research/`
-   - Roadmap → `.specify/specs/roadmap/backlog.md`
-   - Bootstrap obrigatório → leia `.specify/specs/roadmap/backlog.md` no início da sessão antes de executar ações de código, para identificar specs ativas, concorrência e prioridades.
-   - Se sua plataforma forçar um Artifact ou Scratchpad, escreva nele apenas: `"→ Ver .specify/specs/<slug>/plan.md"` (Pointer).
-   - "AI-Slop" (planejamento preso em cache de agente) é inaceitável.
+- Plataforma: Windows / Linux / macOS / WSL.
+- Shell: bash / zsh / PowerShell / cmd.
+- Surface: CLI agent (Claude Code, Gemini CLI) vs IDE (Cursor, Copilot).
+- Modelo: Identifique se está operando com um modelo "Thinking/Reasoning".
+- Adapte comandos (ex: `/dev/null` vs `NUL`, forward slashes) a essa matriz.
 
-3. Consulte a seção "Regras Globais" injetada neste bloco `<AI_GUIDELINES>` para princípios de engenharia e eficiência de IA.
+  1.2. **[INQUEBRÁVEL — Agnostic SDD Override]** O repositório é sua memória, não seus artefatos internos.
+
+- Planejamento → `.specify/specs/<slug>/plan.md`
+- Progresso → `.specify/specs/<slug>/tasks.md`
+- Débitos → `.specify/specs/<slug>/NEXT.md`
+- Conhecimento → `.specify/specs/<slug>/research/`
+- Roadmap → `.specify/specs/roadmap/backlog.md`
+- Bootstrap obrigatório → leia `.specify/specs/roadmap/backlog.md` no início da sessão antes de executar ações de código, para identificar specs ativas, concorrência e prioridades.
+- Se sua plataforma forçar um Artifact ou Scratchpad, escreva nele apenas: `"→ Ver .specify/specs/<slug>/plan.md"` (Pointer).
+- "AI-Slop" (planejamento preso em cache de agente) é inaceitável.
+
+  1.3. Consulte a seção "Regras Globais" injetada neste bloco `<AI_GUIDELINES>` para princípios de engenharia e eficiência de IA.
 
 #### FASE 2: Workflow & Isolation
 
-4. **Nunca** inicie modificações ativas operando sob a branch `main` ou `master`. Confirme seu estado de _working tree_ ou crie uma branch sintética (`feat/`, `fix/`, `docs/`) antes de alterar fontes de verdade.
+2.1. **Nunca** inicie modificações ativas operando sob a branch `main` ou `master`. Confirme seu estado de _working tree_ ou crie uma branch sintética (`feat/`, `fix/`, `docs/`) antes de alterar fontes de verdade.
 
-5. Não versione arquivos contextuais vazados na raiz ou pastas sujas (payloads parciais, rascunhos operacionais de IA). A persistência é apenas para _Release_.
+2.2. Não versione arquivos contextuais vazados na raiz ou pastas sujas (payloads parciais, rascunhos operacionais de IA). A persistência é apenas para _Release_.
 
-6. Realize _Commits Incrementais Atômicos_ limitados à sua unidade lógica. Se a tarefa varrer design, código e spec simultaneamente, fracione as ações comissionadas em passos menores.
+2.3. Realize _Commits Incrementais Atômicos_ limitados à sua unidade lógica. Se a tarefa varrer design, código e spec simultaneamente, fracione as ações comissionadas em passos menores.
+
+2.4. **[CRITICAL]** Nunca execute `git push` de forma autônoma. Todo envio de código ao repositório remoto **exige aprovação humana explícita do mantenedor** antes de ser iniciado. Aplica-se a qualquer agente de IA, script automatizado ou hook que não seja o pipeline oficial do repositório.
 
 #### FASE 3: Quality Gates
 
-7. **[CI Compliance — HARNESS LOCK]** É terminantemente proibido submeter qualquer commit sem validar a cadeia de qualidade do projeto. Antes de `git commit`, execute **todos os scripts de validação** definidos no `package.json` do repositório (ex: `format`, `check`, `lint`, `test`). O padrão canônico é:
+3.1. **[CI Compliance — HARNESS LOCK]** É terminantemente proibido submeter qualquer commit sem validar a cadeia de qualidade do projeto. Antes de `git commit`, execute **todos os scripts de validação** definidos no `package.json` do repositório (ex: `format`, `check`, `lint`, `test`). O padrão canônico é:
 
-   ```
-   <format_cmd> ; <check_cmd> ; git add . ; git commit -m "..."
-   ```
+```
+<format_cmd> ; <check_cmd> ; git add . ; git commit -m "..."
+```
 
-   Se o repositório define `yarn format` e `yarn check`, o comando concreto é: `yarn format ; yarn check ; git add . ; git commit -m "..."`. Adapte aos scripts do projeto — a regra é a **cadeia**, não o gerenciador.
+Se o repositório define `yarn format` e `yarn check`, o comando concreto é: `yarn format ; yarn check ; git add . ; git commit -m "..."`. Adapte aos scripts do projeto — a regra é a **cadeia**, não o gerenciador.
 
-8. A submissão de Pull Requests obrigatoriamente se inaugura no modo `Draft`, utilizando integralmente a matriz `.github/pull_request_template.md`.
+3.2. A submissão de Pull Requests obrigatoriamente se inaugura no modo `Draft`, utilizando integralmente a matriz `.github/pull_request_template.md`.
 
-9. Converta a operação de `Draft` para `Ready` apenas através da revalidação afirmativa Humana.
+3.3. Converta a operação de `Draft` para `Ready` apenas através da revalidação afirmativa Humana.
 
 #### FASE 4: Communication & Agility
 
-10. **Aja apenas mediante Plano Formado.** Antes de executar qualquer código, escolha a granularidade:
+4.1. **Aja apenas mediante Plano Formado.** Antes de executar qualquer código, escolha a granularidade:
 
-    | Critério      | Use `spec-foundation`                 | Use `plano leve`                          |
-    | ------------- | ------------------------------------- | ----------------------------------------- |
-    | Duração       | > 1 sessão                            | 1 sessão                                  |
-    | Escopo        | > 1 arquivo fora de feature isolada   | Ajuste pontual, local                     |
-    | Sobrevivência | Precisa sobreviver troca de IA/sessão | Descartável                               |
-    | Onde vive     | `.specify/specs/<slug>/` (versionado) | Scratchpad da ferramenta (não versionado) |
+    | Critério | Use `spec-foundation` | Use `plano leve` |
+    |---|---|---|
+    | Duração | > 1 sessão | 1 sessão |
+    | Escopo | > 1 arquivo fora de feature isolada | Ajuste pontual, local |
+    | Sobrevivência | Precisa sobreviver troca de IA/sessão | Descartável |
+    | Onde vive | `.specify/specs/<slug>/` (versionado) | Scratchpad da ferramenta (não versionado) |
 
-11. **Checkpoints antes de ação.** Após absorver contexto extenso (múltiplos arquivos, specs, pesquisas), retorne um Checkpoint resumido e peça aprovação humana **antes** de executar Code Actions.
+4.2. **Checkpoints antes de ação.** Após absorver contexto extenso (múltiplos arquivos, specs, pesquisas), retorne um Checkpoint resumido e peça aprovação humana **antes** de executar Code Actions.
 
-12. **Artefatos vivos.** Mantenha atualizados os artefatos SDD durante o trabalho:
-    - `tasks.md` → marque cada item como `[/]` (em progresso) ou `[x]` (concluído) a cada passo.
-    - `NEXT.md` → registre débitos, bugs ou insights sem prioridade imediata.
-    - **Nunca crie arquivos paralelos de roteirização.** Planos leves vivem na ferramenta, não no repositório.
+4.3. **Artefatos vivos.** Mantenha atualizados os artefatos SDD durante o trabalho: - `tasks.md` → marque cada item como `[/]` (em progresso) ou `[x]` (concluído) a cada passo. - `NEXT.md` → registre débitos, bugs ou insights sem prioridade imediata. - **Nunca crie arquivos paralelos de roteirização.** Planos leves vivem na ferramenta, não no repositório.
 
 ### Regras Globais
 
@@ -89,29 +90,29 @@ Este arquivo define o fluxo obrigatório para qualquer IA atuando neste reposit�
 1. Sempre responda em **Português do Brasil (PT-BR)**.
 2. Não modifique arquivos essenciais ou pontos cegos de arquitetura (ex.: `.env`, dependências fundamentais) sem antes solicitar confirmação.
 3. **Acesso Seguro:** chaves de API jamais podem transitar por arquivos do frontend de forma acidental; garanta rigor com arquivos ignorados no `.gitignore`.
+4. **Tipagem Estrita (Anti-Hacks):** Nunca ignore o sistema de tipos para acelerar a entrega. O uso de `any`, `as unknown`, manipulação de prototype ou coerções inseguras é proibido. Utilize type-guards, assertions seguras ou genéricos explícitos.
+5. **Estado e Mutabilidade:** Prefira sempre estruturas de dados imutáveis e composição de funções (ex: spread operator, métodos de array puros). Evite mutar estado compartilhado globalmente.
+6. **Tratamento de Erros (Fail-Fast):** Abrace a falha rápida. Erros devem ser capturados e propagados explicitamente (ou tipados como retorno). É terminantemente proibido o uso de blocos `try-catch` vazios ou que apenas loguem no console sem propagar a falha ou recuperar o estado.
+7. **Concorrência e Assincronicidade:** Ao gerenciar promessas ou threads, declare explicitamente a intenção (ex: `Promise.all` para execução paralela de tarefas independentes; `for...of` com `await` para dependentes). Evite fire-and-forget em funções assíncronas críticas sem tratamento de erro acoplado.
 
 #### Eficiência de IA
 
-4. **Model Routing Inteligente:** Use modelos rápidos (ex: Flash, Haiku) para tarefas scoped e repetitivas. Reserve modelos avançados (ex: Pro, Opus) para planejamento arquitetural e decisões complexas.
-5. **Feedback Cirúrgico:** Ao iterar sobre código ou artefatos, forneça feedback diretamente no artefato com comentários cirúrgicos. Evite reenviar prompts extensos do zero.
-6. **Modularidade (Regra de Ouro):** Divida tarefas complexas em blocos atômicos. Se uma solicitação afetar > 3 arquivos, sugira a quebra em sub-tarefas para preservar contexto e precisão.
-7. **Redução de Ruído:** Utilize arquivos de ignore (`.geminiignore`, `.gitignore`, `.claudeignore`) para remover arquivos desnecessários (logs, builds, node_modules) do contexto da IA.
-8. **Check de Contexto:** Monitore periodicamente o que a IA está "vendo" (ex: logs de tokens) para evitar deriva de contexto.
-
-#### Governança de Agentes
-
-9. **Diretriz Primária — Git Push:** Nunca execute `git push` de forma autônoma. Todo envio de código ao repositório remoto **exige aprovação humana explícita do mantenedor** antes de ser iniciado. Aplica-se a qualquer agente de IA, script automatizado ou hook que não seja o pipeline oficial do repositório.
+1. **Model Routing Inteligente:** Use modelos rápidos (ex: Flash, Haiku) para tarefas scoped e repetitivas. Reserve modelos avançados (ex: Pro, Opus) para planejamento arquitetural e decisões complexas.
+2. **Feedback Cirúrgico:** Ao iterar sobre código ou artefatos, forneça feedback diretamente no artefato com comentários cirúrgicos. Evite reenviar prompts extensos do zero.
+3. **Modularidade (Regra de Ouro):** Divida tarefas complexas em blocos atômicos. Se uma solicitação afetar > 3 arquivos, sugira a quebra em sub-tarefas para preservar contexto e precisão.
+4. **Redução de Ruído:** Utilize arquivos de ignore (`.geminiignore`, `.gitignore`, `.claudeignore`) para remover arquivos desnecessários (logs, builds, node_modules) do contexto da IA.
+5. **Check de Contexto:** Monitore periodicamente o que a IA está "vendo" (ex: logs de tokens) para evitar deriva de contexto.
 
 #### Workflow com IA
 
-10. **Plan mode antes de agent mode:** antes de qualquer ação executiva (edição de arquivo, comando destrutivo, escrita), reserve pelo menos um ciclo de planejamento explícito. Reforça o ciclo RPI (Research → Plan → Implement).
-11. **Referencie um padrão existente ao gerar código novo:** localize um exemplo semelhante no repositório antes de criar do zero. Reduz alucinação e preserva consistência estilística.
-12. **PR description colaborativo (3 etapas):** ao escrever ou editar PR description, (1) liste os tópicos relevantes para validação humana antes do texto final; (2) só escreva o texto após o humano editar/aprovar a lista; (3) submeta o texto final para um último check humano antes de criar/editar o PR.
-13. **Patterns agnósticos ao LLM:** não codifique expectativas específicas de um modelo ou plataforma; o mesmo baseline deve funcionar em qualquer agente (Claude, Gemini, Codex, equivalentes).
-14. **Padrões, não paths:** em regras novas, prefira descrever o padrão ("consulte o baseline de regras injetado") em vez do caminho literal. Paths tendem a quebrar em migrações; padrões sobrevivem. Paths convencionais (`.env`, `.gitignore`) são exceção aceitável.
-15. **RPI obrigatório:** antes de implementar, pesquise o estado atual, consolide o plano aprovado e só então execute. O repositório deve preservar specs, planos, tasks e pesquisas quando a iniciativa precisar sobreviver a troca de agente ou sessão.
-16. **Contexto enxuto e estável:** mantenha regras e contexto estático no baseline de governança, use o prompt imediato apenas para intenção tática, e evite inserir logs, builds, dependências ou arquivos gerados no contexto da IA.
-17. **Routing de esforço:** use modelos rápidos para tarefas locais e repetitivas; reserve modelos avançados ou reasoning para arquitetura, migrações, debugging complexo e decisões de alto impacto.
+1. **Plan mode antes de agent mode:** antes de qualquer ação executiva (edição de arquivo, comando destrutivo, escrita), reserve pelo menos um ciclo de planejamento explícito. Reforça o ciclo RPI (Research → Plan → Implement).
+2. **Referencie um padrão existente ao gerar código novo:** localize um exemplo semelhante no repositório antes de criar do zero. Reduz alucinação e preserva consistência estilística.
+3. **PR description colaborativo (3 etapas):** ao escrever ou editar PR description, (1) liste os tópicos relevantes para validação humana antes do texto final; (2) só escreva o texto após o humano editar/aprovar a lista; (3) submeta o texto final para um último check humano antes de criar/editar o PR.
+4. **Patterns agnósticos ao LLM:** não codifique expectativas específicas de um modelo ou plataforma; o mesmo baseline deve funcionar em qualquer agente (Claude, Gemini, Codex, equivalentes).
+5. **Padrões, não paths:** em regras novas, prefira descrever o padrão ("consulte o baseline de regras injetado") em vez do caminho literal. Paths tendem a quebrar em migrações; padrões sobrevivem. Paths convencionais (`.env`, `.gitignore`) são exceção aceitável.
+6. **RPI obrigatório:** antes de implementar, pesquise o estado atual, consolide o plano aprovado e só então execute. O repositório deve preservar specs, planos, tasks e pesquisas quando a iniciativa precisar sobreviver a troca de agente ou sessão.
+7. **Contexto enxuto e estável:** mantenha regras e contexto estático no baseline de governança, use o prompt imediato apenas para intenção tática, e evite inserir logs, builds, dependências ou arquivos gerados no contexto da IA.
+8. **Routing de esforço:** use modelos rápidos para tarefas locais e repetitivas; reserve modelos avançados ou reasoning para arquitetura, migrações, debugging complexo e decisões de alto impacto.
 
 ### Adaptador: Claude (Anthropic)
 
@@ -251,10 +252,10 @@ logs/
    - **Cobertura de Testes:** Mínimo recomendado de **85%**.
    - **Mutation Testing:** Mínimo de **60%** de kill rate (garante que os testes realmente validam a lógica).
 
-3. **Bugs Típicos de IA (Sensores):**
-   - **Race Conditions:** Verificação de acessos concorrentes em estado compartilhado.
-   - **N+1 Queries:** Verificação de eficiência em loops de dados/APIs.
-   - **Memory Leaks:** Fechamento correto de recursos, streams e listeners.
+3. **Sensores de Bugs Típicos de IA (Heurísticas obrigatórias):**
+   - **N+1 Queries/Calls:** O agente deve buscar proativamente por iterações (`map`, `for`) que executem chamadas de banco de dados ou APIs. Se encontrado, deve exigir/implementar batching ou data-loaders em vez de acessos sequenciais.
+   - **Race Conditions:** O agente deve analisar blocos assíncronos (ex: múltiplos `await` concorrentes) que leiam e modifiquem o mesmo estado em memória ou DB. Se não houver garantia de atomicidade (transação, lock ou estado local seguro), o design deve ser rejeitado.
+   - **Memory Leaks:** Sempre que o agente implementar _listeners_, observadores, subscrições de stream ou timers (`setInterval`), deve compulsoriamente implementar a função de limpeza (teardown/dispose) correspondente no ciclo de vida apropriado do framework usado.
    - _Ferramentas recomendadas:_ Property-based testing (ex: fast-check em JS, Hypothesis em Python).
 
 4. **Security & Secrets:**

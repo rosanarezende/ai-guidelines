@@ -14,13 +14,29 @@ Detalhes de lifecycle em [`docs/process/spec-foundation.md`](../../../docs/proce
 
 Specs atualmente em branch ativa. Formato enxuto.
 
-- (Nenhuma spec em execução)
+- **0018-rules-content-deepening** (Content Overhaul do AGENTS.md)
+  - **Escopo:** Transformar regras procedurais em diretrizes normativas de engenharia e detalhar sensores de IA em quality-gates.
 
 ---
 
 ## Now (próxima fila, ordem importa)
 
 Specs ou candidatas priorizadas para iniciar em seguida. Ordem indica prioridade.
+
+- **seguranca-ia-supply-chain** (spec 0012 — Segurança de IA tools / supply chain)
+  - **Fonte do insight:** incidente Vercel/Contex.ai (abril/2026), análise Lucas Montano [Hackearam a Vercel via AI](https://www.youtube.com/watch?v=oDXYfesz0qw). Síntese em `synthesis.md` Tema 4.
+  - **Insight central:** ataque NÃO foi exploit de NextJS nem da API Vercel — foi via Contex.ai (AI agents) autorizado por funcionário Vercel via Google Workspace OAuth. Padrão emergente: cada AI tool autorizada via OAuth = nova superfície de ataque. _"O elo mais fraco nunca esteve sendo modelo. É a integração ou OAuth que essas ferramentas pedem na tela de onboarding."_
+  - **Escopo potencial:** reescrever Regra 3 atual de `global-rules.md` cobrindo threat model OAuth de AI tools; criar `.core/rules/security.md` com política de marcação default sensitive, checklist de auditoria periódica de OAuth, política "nenhuma AI tool nova sem security review", rotação defensiva de secrets pós-incidente; comando CLI `audit-security` enumerando tools com OAuth.
+  - **Audiência diferente de 0008:** governança de **operador humano** (não do agente IA) — por isso spec separada.
+  - **Pré-requisitos:** Spec 0008 mergeada; idealmente decisão de visibilidade pública (cross-ref `project_ai_guidelines_visibilidade_publica.md`).
+  - **Sinal de "está na hora":** consumidor real precisa autorizar nova AI tool e pergunta "como avalio o risco?"; ou outro incidente público similar (provável dada a tendência 2026).
+
+- **regra-hierarquia** (spec 0011 — Hierarquia de regras por subdiretório)
+  - **Fonte do insight:** Diego (Rocketseat), [Claude Code em monorepo full-stack](https://www.youtube.com/watch?v=ARYzqW0W7iI) 2026-01-22. Síntese em `.specify/specs/0008-governance-coherence/research/synthesis.md` Tema 1.
+  - **Insight central:** ferramentas como Claude Code já carregam contexto sob demanda em subdiretórios. Em vez de inflar `AGENTS.md` raiz, separar por domínio: `api/AGENTS.md`, `api/src/auth/AGENTS.md`, `dashboard/AGENTS.md`. Resultado: contexto cirúrgico, sem inflar tokens.
+  - **Escopo potencial:** padronizar hierarquia em `.core/rules/<topic>/AGENTS-fragment.md`; atualizar `cli/features/core/rules.mjs`; documentar no `AGENTS.md` raiz como agentes buscam fragmentos. Princípio (Diego): documentar **padrões**, não nomes de arquivo/pasta.
+  - **Pré-requisitos:** Spec 0008 e Spec 0018 concluídas.
+  - **Sinal de "está na hora":** quando `global-rules.md` consolidado inflar (>200 linhas) ou consumidor reclamar que "regras de domínios diferentes todo mundo lê tudo".
 
 - **cli-typescript** (Migração TypeScript da CLI)
   - **Fonte do insight:** Remanescente do cli-refactor após a Spec 0017 assumir a reorganização de pastas.
@@ -31,14 +47,6 @@ Specs ou candidatas priorizadas para iniciar em seguida. Ordem indica prioridade
 - **process-automations** (Automatização de ciclo de vida de Gaps via CLI)
   - **Fonte do insight:** Remanescente do process-refinement (o processo em si foi absorvido pela 0017, mas a automação via CLI é separada).
   - **Escopo potencial:** criar workflow/comando no CLI que facilite a alimentação de `NEXT.md` e `backlog.md` a partir de insights capturados no chat.
-
-- **seguranca-ia-supply-chain** (spec 0012 — Segurança de IA tools / supply chain)
-  - **Fonte do insight:** incidente Vercel/Contex.ai (abril/2026), análise Lucas Montano [Hackearam a Vercel via AI](https://www.youtube.com/watch?v=oDXYfesz0qw). Síntese em `synthesis.md` Tema 4.
-  - **Insight central:** ataque NÃO foi exploit de NextJS nem da API Vercel — foi via Contex.ai (AI agents) autorizado por funcionário Vercel via Google Workspace OAuth. Padrão emergente: cada AI tool autorizada via OAuth = nova superfície de ataque. _"O elo mais fraco nunca esteve sendo modelo. É a integração ou OAuth que essas ferramentas pedem na tela de onboarding."_
-  - **Escopo potencial:** reescrever Regra 3 atual de `global-rules.md` cobrindo threat model OAuth de AI tools; criar `.core/rules/security.md` com política de marcação default sensitive, checklist de auditoria periódica de OAuth, política "nenhuma AI tool nova sem security review", rotação defensiva de secrets pós-incidente; comando CLI `audit-security` enumerando tools com OAuth.
-  - **Audiência diferente de 0008:** governança de **operador humano** (não do agente IA) — por isso spec separada.
-  - **Pré-requisitos:** Spec 0008 mergeada; idealmente decisão de visibilidade pública (cross-ref `project_ai_guidelines_visibilidade_publica.md`).
-  - **Sinal de "está na hora":** consumidor real precisa autorizar nova AI tool e pergunta "como avalio o risco?"; ou outro incidente público similar (provável dada a tendência 2026).
 
 ### Oportunidades Priorizadas (Sem Spec)
 
