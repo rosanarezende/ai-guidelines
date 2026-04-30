@@ -9,6 +9,7 @@ import { mergePackageJson } from "#formatters/package-context";
 export async function applyHusky(targetDir, options, context, actions) {
   const { features = [] } = options;
   const dryRun = Boolean(options?.["dry-run"]);
+  const force = Boolean(options?.force);
   const { packageManager = { id: "npm", runner: "npm run" } } = context;
 
   if (!features.includes("husky")) {
@@ -52,7 +53,7 @@ export async function applyHusky(targetDir, options, context, actions) {
       currentContent = await fs.readFile(hookPath, "utf8");
     } catch (e) {}
 
-    const updatedContent = mergeHookContent(currentContent, hook.command);
+    const updatedContent = mergeHookContent(currentContent, hook.command, force, hook.name);
     if (currentContent !== updatedContent) {
       if (!dryRun) {
         await fs.writeFile(hookPath, updatedContent, { mode: 0o755 });
