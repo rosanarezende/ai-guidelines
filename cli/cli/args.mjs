@@ -1,7 +1,7 @@
 import path from "node:path";
 import readline from "node:readline";
 import { normalizePackageManager, detectPackageManager } from "#formatters/package-context";
-import { readTextIfExists } from "#core/file-system";
+import { readTextIfExists } from "#fs/file-system";
 
 const SUPPORTED_MODES = ["init", "adopt"];
 const WIZARD_REQUIRED_KEYS = ["target", "name", "package-manager", "dry-run"];
