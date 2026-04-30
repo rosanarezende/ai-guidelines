@@ -18,13 +18,6 @@ Specs atualmente em branch ativa. Formato enxuto.
 
 ---
 
-## Concluídas (Abril/2026)
-
-- **spec 0017** — Process Refinement & CLI Refactor.
-  Fusão das candidatas `process-refinement` e `cli-refactor`. Entrega do **Monolithic Runtime Compiler**, sanitização de `docs/` e aliasing nativo de pacotes.
-
----
-
 ## Now (próxima fila, ordem importa)
 
 Specs ou candidatas priorizadas para iniciar em seguida. Ordem indica prioridade.

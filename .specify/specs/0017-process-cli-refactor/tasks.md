@@ -54,5 +54,5 @@
 
 > **[MANDATÓRIO]** Antes de abrir spec nova, completar este checklist.
 
-- [ ] **3.1** `NEXT.md` (se existir): migrar débitos relevantes para `roadmap/backlog.md` e **deletar** o arquivo `NEXT.md`.
-- [ ] **3.2** Marcar a Spec 0017 como `Done` no header do `spec.md` e no board correspondente em `roadmap/backlog.md`.
+- [x] **3.1** `NEXT.md` (se existir): migrar débitos relevantes para `roadmap/backlog.md` e **deletar** o arquivo `NEXT.md`.
+- [x] **3.2** Marcar a Spec 0017 como `Done` no header do `spec.md` e no board correspondente em `roadmap/backlog.md`.

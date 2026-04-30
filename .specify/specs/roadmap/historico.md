@@ -13,6 +13,23 @@ editar retroativamente.
 
 Em ordem cronológica reversa. Número mantido como rastreabilidade.
 
+- **spec 0017** — Process Refinement & CLI Refactor
+  (`.specify/specs/0017-process-cli-refactor/`) — **Done** (2026-04-29, PR #3).
+
+  Refatoração fundamental para mitigar a degradação de compliance ("Fixed-tier Bottleneck") através de uma nova arquitetura de injeção de contexto.
+
+  **Sub-bloco A — Process & Sanitization:**
+  - Auditoria e limpeza da pasta `docs/`; regras técnicas migradas para `.core/rules/`.
+  - Política de lifecycle de pesquisas formalizada e indexada.
+  - Bootstrap do agente reforçado com leitura obrigatória do `backlog.md`.
+
+  **Sub-bloco B — CLI Architecture & Monolithic Compiler:**
+  - Implementação do **Monolithic Runtime Compiler**: unifica o `AGENTS.md` em um artefato topológico (Sanduíche de Contexto: Topo/Centro/Base) usando tags XML relacionais.
+  - Path Aliases via `package.json#imports` (`#core/*`, `#features/*`, `#formatters/*`) para eliminar imports relativos frágeis.
+  - Isolamento do motor de I/O em `cli/core/io.mjs`.
+
+  **Qualidade:** Golden Green mantido com 94% de cobertura.
+
 - **spec 0008** — Governance Coherence
   (`.specify/specs/0008-governance-coherence/`) — **Done** (2026-04-28, PR #1).
 
