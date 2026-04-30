@@ -126,8 +126,9 @@ export function wrapFeatureModule(featureName, content) {
 
 export function normalizePointerForMonolith(pointerTemplate) {
   return pointerTemplate
+    .replace(/^#\s+AGENTS\.md\s*/i, "") // Remove título redundante
     .replace(
-      /Para ler a Prime Directive[\s\S]*?<!-- END:ai-guidelines-core -->/,
+      /(?:Para ler a Prime Directive[\s\S]*?|<!-- BEGIN:ai-guidelines-core -->[\s\S]*?)<!-- END:ai-guidelines-core -->/,
       [
         "O AGENTS.md da raiz atua como ponteiro tático para este baseline compilado.",
         "Mantenha referências específicas do repositório apenas fora do bloco canônico da raiz.",
