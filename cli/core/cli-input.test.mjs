@@ -69,6 +69,14 @@ describe("cli-input", () => {
     assert.equal(parsed.options["skip-husky"], true);
   });
 
+  it("[BR-CLI-INPUT-06] DADO flag prune sem valor QUANDO parseArgs rodar ENTÃO captura como booleano", () => {
+    const parsed = parseArgs(["adopt", "--prune"]);
+    const parsedInline = parseArgs(["adopt", "--prune=true"]);
+
+    assert.equal(parsed.options.prune, true);
+    assert.equal(parsedInline.options.prune, "true");
+  });
+
   it("[BR-CLI-INPUT-03] DADO tokens de wizard QUANDO sanitizeWizardRawOptions ENTÃO remove metadados internos", () => {
     const result = sanitizeWizardRawOptions({
       target: ".",

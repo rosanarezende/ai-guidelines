@@ -49,6 +49,11 @@ describe("Feature: gitattributes", () => {
       .catch(() => false);
     assert.equal(exists, false);
     assert.ok(actions.some((a) => a.includes("[dry-run] write .gitattributes")));
+    assert.equal(
+      actions.some((a) => a === "write .gitattributes (baseline sync)"),
+      false,
+      "Dry-run não deve registrar escrita real"
+    );
   });
 
   it("[BR-GIT-04] DADO arquivo já sincronizado QUANDO applyGitattributes ENTÃO não re-escreve", async () => {

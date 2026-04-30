@@ -4,7 +4,6 @@ import path from "node:path";
 import assert from "node:assert/strict";
 import { describe, it, beforeEach, afterEach } from "node:test";
 import { applyPointers } from "#features/core/pointers";
-import { applyRules } from "#features/core/rules";
 
 describe("Mandatory Core Features", () => {
   let targetDir;
@@ -35,17 +34,17 @@ describe("Mandatory Core Features", () => {
     );
   });
 
-  it("should NOT skip rules even if skip-rules flag is passed", async () => {
+  it("should NOT create consumer rules directory through pointers", async () => {
     const rulesDir = path.join(targetDir, ".ai-guidelines", "rules");
     const actions = [];
 
-    await applyRules(targetDir, { "dry-run": false, "skip-rules": true }, actions);
+    await applyPointers(targetDir, { "dry-run": false, "skip-rules": true }, actions);
 
     const exists = await fs
       .access(rulesDir)
       .then(() => true)
       .catch(() => false);
-    assert.ok(exists, ".ai-guidelines/rules deve ser criada mesmo com flag de skip");
+    assert.equal(exists, false, ".ai-guidelines/rules não deve ser criada no consumidor");
     assert.ok(!actions.includes("skip rules (flag detectada)"), "Não deve registrar skip no log");
   });
 });

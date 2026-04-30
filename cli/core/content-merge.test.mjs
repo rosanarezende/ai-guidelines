@@ -9,6 +9,7 @@ import {
   mergeHookContent,
   mergePrettierIgnoreContent,
   normalizePointerForMonolith,
+  wrapAiGuidelinesBlock,
   wrapFeatureModule,
 } from "./content-merge.mjs";
 
@@ -75,19 +76,70 @@ describe("content-merge", () => {
   });
 
   describe("mergeAgentsContent", () => {
-    it("[BR-CLI-MERGE-03] DADO AGENTS sem marcadores QUANDO mergeAgentsContent ENTÃO anexa bloco canônico", () => {
-      const template = [
-        "# AGENTS",
+    it("[BR-CLI-MERGE-03] DADO AGENTS com regras próprias QUANDO mergeAgentsContent ENTÃO preserva fora de AI_GUIDELINES", () => {
+      const merged = mergeAgentsContent("# Projeto\n\nRegra local.\n", "baseline", false);
+
+      assert.match(merged, /# Projeto/);
+      assert.match(merged, /Regra local/);
+      assert.match(merged, /<AI_GUIDELINES>/);
+      assert.match(merged, /baseline/);
+      assert.match(merged, /<\/AI_GUIDELINES>/);
+    });
+
+    it("[BR-CLI-MERGE-04] DADO AGENTS ja governado QUANDO mergeAgentsContent ENTÃO substitui somente AI_GUIDELINES", () => {
+      const existing = [
+        "# Projeto",
         "",
-        "<!-- BEGIN:ai-guidelines-core -->",
-        "core",
-        "<!-- END:ai-guidelines-core -->",
+        "<AI_GUIDELINES>",
+        "",
+        "baseline antigo",
+        "",
+        "</AI_GUIDELINES>",
+        "",
+        "Regra depois.",
+        "",
       ].join("\n");
 
-      const merged = mergeAgentsContent("# AGENTS\n\n## Local\n", template, false);
+      const merged = mergeAgentsContent(existing, "baseline novo", false);
 
-      assert.match(merged, /## Local/);
-      assert.match(merged, /BEGIN:ai-guidelines-core/);
+      assert.match(merged, /# Projeto/);
+      assert.match(merged, /Regra depois/);
+      assert.match(merged, /baseline novo/);
+      assert.doesNotMatch(merged, /baseline antigo/);
+    });
+
+    it("[BR-CLI-MERGE-05] DADO bloco AI_GUIDELINES malformado QUANDO mergeAgentsContent ENTÃO aborta", () => {
+      assert.throws(
+        () => mergeAgentsContent("# Projeto\n\n<AI_GUIDELINES>\nsem fechamento\n", "novo", false),
+        /AI_GUIDELINES/
+      );
+    });
+
+    it("[BR-CLI-MERGE-06] DADO ponteiro legado QUANDO mergeAgentsContent ENTÃO migra para AI_GUIDELINES sem manter ponteiro antigo", () => {
+      const existing = [
+        "# Projeto",
+        "",
+        "<!-- BEGIN:ai-guidelines-core -->",
+        "ponteiro antigo",
+        "<!-- END:ai-guidelines-core -->",
+        "",
+        "Regra local.",
+      ].join("\n");
+
+      const merged = mergeAgentsContent(existing, "baseline novo", false);
+
+      assert.match(merged, /# Projeto/);
+      assert.match(merged, /Regra local/);
+      assert.match(merged, /<AI_GUIDELINES>/);
+      assert.doesNotMatch(merged, /ponteiro antigo/);
+      assert.doesNotMatch(merged, /BEGIN:ai-guidelines-core/);
+    });
+
+    it("[BR-CLI-MERGE-07] DADO conteudo compilado QUANDO wrapAiGuidelinesBlock ENTÃO envolve com tag mae", () => {
+      assert.equal(
+        wrapAiGuidelinesBlock("baseline"),
+        ["<AI_GUIDELINES>", "baseline", "</AI_GUIDELINES>"].join("\n\n")
+      );
     });
   });
 

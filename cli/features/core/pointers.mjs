@@ -47,7 +47,7 @@ async function readOptInRules(sourceRulesDir, features, lang) {
 }
 
 /**
- * Aplica a arquitetura de ponteiros no AGENTS.md da raiz.
+ * Aplica o runtime monolítico governado no AGENTS.md da raiz.
  * Esta feature é considerada CORE e mandatória para a governança.
  */
 export async function applyPointers(targetDir, options, actions) {
@@ -58,14 +58,6 @@ export async function applyPointers(targetDir, options, actions) {
   // Nota: Não checamos features.includes("pointers") porque agora é core.
 
   const rootAgentsPath = path.join(targetDir, "AGENTS.md");
-  const coreAgentsPath = path.join(targetDir, ".ai-guidelines", "AGENTS.md");
-
-  // 1. Garantir pasta .ai-guidelines
-  if (dryRun) {
-    actions.push("[dry-run] mkdir .ai-guidelines");
-  } else {
-    await fs.mkdir(path.join(targetDir, ".ai-guidelines"), { recursive: true });
-  }
 
   // 2. Ler conteúdo atual ou criar vazio
   let currentContent = "";
@@ -75,7 +67,7 @@ export async function applyPointers(targetDir, options, actions) {
     // Arquivo não existe, tudo bem
   }
 
-  // 3. Mesclar conteúdo para criar o ponteiro na raiz
+  // 3. Mesclar conteúdo para criar/atualizar o runtime governado na raiz
   const pointerTemplatePath = path.join(ROOT_DIR, ".core", "templates", "AGENTS-pointer.md.tmpl");
   const coreTemplatePath = path.join(ROOT_DIR, ".core", "templates", "AGENTS-core.md.tmpl");
   const sourceRulesDir = path.join(ROOT_DIR, ".core", "rules");
@@ -100,28 +92,19 @@ export async function applyPointers(targetDir, options, actions) {
     pointerTemplate,
   });
 
-  // O mergeAgentsContent injeta o ponteiro e preserva o resto do arquivo raiz
-  const rootContent = mergeAgentsContent(currentContent, pointerTemplate);
+  // O mergeAgentsContent injeta/substitui apenas o bloco <AI_GUIDELINES>
+  // e preserva regras próprias do consumidor fora dele.
+  const rootContent = mergeAgentsContent(currentContent, monolithicBaseline, options.force);
 
-  // 4. Escrever na raiz (Ponteiro)
+  // 4. Escrever na raiz (runtime monolítico)
   if (currentContent !== rootContent) {
     if (dryRun) {
-      actions.push("[dry-run] write AGENTS.md (pointer injected)");
+      actions.push("[dry-run] write AGENTS.md (ai-guidelines runtime updated)");
     } else {
       await fs.writeFile(rootAgentsPath, rootContent);
     }
-    actions.push(`write ${path.basename(rootAgentsPath)} (pointer injected)`);
-  }
-
-  // 5. Escrever no core (.ai-guidelines/AGENTS.md)
-  // Nota: No destino core, escrevemos o baseline real, não o ponteiro.
-  const currentCoreContent = await fs.readFile(coreAgentsPath, "utf8").catch(() => "");
-  if (currentCoreContent !== monolithicBaseline) {
-    if (dryRun) {
-      actions.push("[dry-run] write .ai-guidelines/AGENTS.md (core rules updated)");
-    } else {
-      await fs.writeFile(coreAgentsPath, monolithicBaseline);
+    if (!dryRun) {
+      actions.push(`write ${path.basename(rootAgentsPath)} (ai-guidelines runtime updated)`);
     }
-    actions.push(`write .ai-guidelines/${path.basename(coreAgentsPath)} (core rules updated)`);
   }
 }

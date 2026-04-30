@@ -16,7 +16,7 @@ const WIZARD_DEFAULTS = {
 /**
  * Taxonomia das features opt-in.
  *
- * Editoriais    → sincronizam .md para .ai-guidelines/rules/ do consumidor.
+ * Editoriais    → são compiladas no bloco <AI_GUIDELINES> do AGENTS.md.
  * Infraestrutura → modificam package.json, hooks, CI/CD do consumidor.
  *
  * FEATURE_OPTIONS é derivado por composição; as listas tipadas
@@ -95,6 +95,7 @@ export function parseArgs(argv) {
       key === "force" ||
       key === "dry-run" ||
       key === "install" ||
+      key === "prune" ||
       key === "yes" ||
       key === "y" ||
       key.startsWith("skip-")

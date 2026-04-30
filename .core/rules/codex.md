@@ -15,7 +15,7 @@
 
 - Copilot respeita o `.gitignore` do repositório por padrão.
 - Para refinamentos de contexto no Copilot Chat, utilize referências diretas a arquivos via `#file`.
-- Codex CLI respeita `AGENTS.md` e `.codex/instructions.md` — garanta que o ponteiro para `.ai-guidelines/` esteja presente.
+- Codex CLI respeita `AGENTS.md` e `.codex/instructions.md` — garanta que o bloco `<AI_GUIDELINES>` esteja presente.
 
 ## Comportamento Observado
 

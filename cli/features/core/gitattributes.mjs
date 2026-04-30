@@ -25,8 +25,8 @@ export async function applyGitattributes(targetDir, options, actions) {
       actions.push("[dry-run] write .gitattributes (baseline sync)");
     } else {
       await fs.writeFile(gitattributesPath, updatedContent);
+      actions.push(`write ${path.basename(gitattributesPath)} (baseline sync)`);
     }
-    actions.push(`write ${path.basename(gitattributesPath)} (baseline sync)`);
     return { didWrite: true };
   }
 

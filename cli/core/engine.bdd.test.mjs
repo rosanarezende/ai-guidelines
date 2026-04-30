@@ -21,11 +21,10 @@ describe("CLI Governance Business Rules [BR-CLI]", () => {
     await fs.rm(targetDir, { recursive: true, force: true });
   });
 
-  // [BR-CLI-01]: Arquitetura de Ponteiros
+  // [BR-CLI-01]: Runtime monolítico
   describe("Ponteiros de Governança [BR-CLI-01]", () => {
-    it("DADO um AGENTS.md existente QUANDO applyPointers ENTÃO deve injetar o ponteiro e criar o core baseline separado", async () => {
+    it("DADO um AGENTS.md existente QUANDO applyPointers ENTÃO deve injetar AI_GUIDELINES e preservar regras locais", async () => {
       const agentsPath = path.join(targetDir, "AGENTS.md");
-      const corePath = path.join(targetDir, ".ai-guidelines", "AGENTS.md");
       const originalContent = "# My Rules\nLocal rule 1";
 
       await fs.writeFile(agentsPath, originalContent);
@@ -34,28 +33,20 @@ describe("CLI Governance Business Rules [BR-CLI]", () => {
       await applyPointers(targetDir, { "dry-run": false }, actions);
 
       const rootContent = await fs.readFile(agentsPath, "utf8");
-      const coreContent = await fs.readFile(corePath, "utf8");
 
-      assert.ok(
-        rootContent.includes("<!-- BEGIN:ai-guidelines-core -->"),
-        "Deve conter o bloco de ponteiro na raiz"
-      );
-      assert.ok(
-        rootContent.includes(".ai-guidelines/AGENTS.md"),
-        "Deve apontar para o arquivo core"
-      );
+      assert.ok(rootContent.includes("<AI_GUIDELINES>"), "Deve conter o bloco governado na raiz");
       assert.ok(
         rootContent.includes("Local rule 1"),
         "Deve preservar as regras originais do usuário"
       );
 
       assert.ok(
-        coreContent.includes("### FASE 1: The Prime Directive"),
-        "O core deve conter o baseline real, não o ponteiro"
+        rootContent.includes("### FASE 1: The Prime Directive"),
+        "O AGENTS deve conter o baseline real"
       );
       assert.ok(
-        !coreContent.includes("👉 **[.ai-guidelines/AGENTS.md]"),
-        "O core NÃO deve conter o link para si mesmo (sem recursividade)"
+        !rootContent.includes("👉 **[.ai-guidelines/AGENTS.md]"),
+        "O AGENTS NÃO deve depender do link para .ai-guidelines/AGENTS.md"
       );
     });
   });

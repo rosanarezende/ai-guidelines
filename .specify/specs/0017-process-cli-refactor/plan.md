@@ -27,15 +27,27 @@ A IA deve inspecionar a pasta `docs/`. Documentos que prescrevem como o agente o
 
 A arquitetura do `ai-guidelines-cli` precisa mudar sua forma de ingerir os _templates_. Em vez de um _stream_ sequencial ingênuo, a lógica em `cli/core/content-merge.mjs` (ou num novo `ast-compiler.mjs`) precisa ser refatorada para construir uma árvore abstrata e ordená-la antes de salvar o arquivo final no repositório alvo.
 
+#### Decisão revisada — Runtime único no `AGENTS.md`
+
+Após smoke test no próprio repositório, o contrato foi ajustado: o consumidor não recebe `.ai-guidelines/rules/` nem `.ai-guidelines/AGENTS.md`. O único artefato runtime é o `AGENTS.md` da raiz, com o conteúdo do framework delimitado por:
+
+```xml
+<AI_GUIDELINES>
+...
+</AI_GUIDELINES>
+```
+
+Conteúdo próprio do projeto consumidor deve permanecer fora dessa tag e nunca ser reescrito pelo motor. Em reexecuções do `adopt`, a CLI substitui somente o bloco `<AI_GUIDELINES>`. Features opt-in são geradas como blocos internos (`<FEATURE_TDD>`, `<FEATURE_BDD>`, `<FEATURE_QUALITY_GATES>`), permitindo atualização e prune por recompilação do runtime.
+
 #### Estruturação da Compilação Topológica
 
 O motor deve possuir três _buffers_ em memória:
 
 1. `bufferTopo`: Adiciona o conteúdo de `AGENTS-core.md.tmpl` e, em seguida, anexa as `global-rules` e as regras específicas do modelo (`gemini.md`, `claude.md`).
-2. `bufferCentro`: Itera sobre todos os recursos opt-in ativados (`tdd-pt.md`, `quality-gates.md`, etc.). Para cada um, lê o texto, injeta um prefixo `<MÓDULO_NOME>` e sufixo `</MÓDULO_NOME>` e anexa ao buffer.
-3. `bufferBase`: Adiciona o contexto tático que guiará as ações imediatas (`AGENTS-pointer`).
+2. `bufferCentro`: Itera sobre todos os recursos opt-in ativados (`tdd-pt.md`, `quality-gates.md`, etc.). Para cada um, lê o texto, injeta um prefixo `<FEATURE_NOME>` e sufixo `</FEATURE_NOME>` e anexa ao buffer.
+3. `bufferBase`: Adiciona o contexto tático que guiará as ações imediatas dentro do runtime.
 
-No final, o CLI fará um `join` destes três buffers e escreverá o monólito final que será consumido pela IA no diretório alvo.
+No final, o CLI fará um `join` destes três buffers, envolverá o resultado em `<AI_GUIDELINES>` e escreverá o monólito final no `AGENTS.md` consumido pela IA no diretório alvo.
 
 #### Aliases de Módulo
 

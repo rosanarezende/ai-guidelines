@@ -15,7 +15,7 @@
 
 O repositório `ai-guidelines` acumulou débitos estruturais críticos em três frentes distintas que precisam ser resolvidos sistemicamente:
 
-1. **Compliance Algorítmico (O "Fixed-tier Bottleneck")**: Pesquisas de vanguarda (2026) revelaram que injetar múltiplos arquivos de regras fragmentados (`AGENTS.md`, `global-rules.md`, `tdd.md`) no contexto de um LLM de fronteira causa "Ambiguidade de Precedência". O modelo perde a hierarquia de obediência e ignora regras do meio do prompt ("Lost in the Middle"). A IA implementadora precisará transformar a injeção modular atual em um motor de **Compilação Monolítica em Runtime**, mantendo os arquivos separados no repositório (para humanos), mas fundindo-os num único artefato estruturado antes de enviar à API.
+1. **Compliance Algorítmico (O "Fixed-tier Bottleneck")**: Pesquisas de vanguarda (2026) revelaram que injetar múltiplos arquivos de regras fragmentados (`AGENTS.md`, `global-rules.md`, `tdd.md`) no contexto de um LLM de fronteira causa "Ambiguidade de Precedência". O modelo perde a hierarquia de obediência e ignora regras do meio do prompt ("Lost in the Middle"). A IA implementadora precisará transformar a injeção modular atual em um motor de **Compilação Monolítica em Runtime**, mantendo os arquivos separados no repositório do framework (para humanos), mas fundindo-os no `AGENTS.md` do consumidor dentro de `<AI_GUIDELINES>`.
 2. **Processo, Governança e Sanitização**: A política de lifecycle de pesquisas (`researchs/`) é vaga e gerou duplicatas. Adicionalmente, a pasta `docs/` possui conteúdos legados ou mal posicionados que precisam ser auditados; regras de negócio devem residir em `.core/rules/`, não em documentos soltos. O bootstrap dos agentes também precisa forçar a leitura do `backlog.md`.
 3. **Arquitetura e Dependency Hell no CLI**: A CLI sofre de imports relativos profundos (ex: `../../../core/engine.mjs`) que fragilizam o código. A estrutura de `cli/core/` atualmente mistura I/O, Orquestração e Parsing.
 
@@ -40,7 +40,9 @@ O repositório `ai-guidelines` acumulou débitos estruturais críticos em três 
 - **Engenharia de Posição Topológica (O "Sanduíche de Contexto")**: O `content-merge.mjs` deixará de ser um simples concatenador de strings. Ele deve montar o prompt final obedecendo estritamente as zonas de atenção do LLM:
   1. **Topo (Primazia)**: Injetar `AGENTS-core` + Regras do Provedor (`gemini.md` ou `claude.md`). Aqui ficam as "Prime Directives" (proibições absolutas).
   2. **Centro (Metodologia)**: Injetar os módulos _opt-in_ (`tdd`, `quality-gates`). **Requisito Crítico**: A CLI deve envelopar o conteúdo destes arquivos automaticamente em _Tags XML Relacionais_ (ex: `<FEATURE_TDD> ... </FEATURE_TDD>`) para evitar diluição semântica.
-  3. **Base (Recência)**: Injetar o contexto imediato (`AGENTS-pointer`).
+  3. **Base (Recência)**: Injetar o contexto imediato dentro do runtime.
+- **Fronteira de Segurança**: Todo conteúdo gerado pelo framework deve ficar dentro de `<AI_GUIDELINES> ... </AI_GUIDELINES>` no `AGENTS.md`. Conteúdo fora dessa tag pertence ao consumidor e deve ser preservado.
+- **Sem cópia modular no consumidor**: `adopt` não deve sincronizar `.ai-guidelines/rules/`; as regras individuais seguem como fonte modular em `.core/rules/` no repositório do framework.
 
 ---
 

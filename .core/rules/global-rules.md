@@ -1,6 +1,6 @@
 # Regras Globais
 
-> Fonte de verdade: `.ai-guidelines/rules/global-rules.md`
+> Fonte de verdade: bloco `<AI_GUIDELINES>` compilado no `AGENTS.md`.
 > Este arquivo define **princípios de engenharia** aplicáveis a qualquer projeto.
 > Para workflow operacional (git, branch, CI, PRs), consulte o `AGENTS.md` do repositório.
 

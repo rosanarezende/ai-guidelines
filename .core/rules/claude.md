@@ -14,7 +14,7 @@
 
 - Utilize `.claudeignore` na raiz do repositório para controlar quais arquivos a IA carrega no contexto.
 - O formato segue o padrão `.gitignore`.
-- Claude carrega automaticamente o `AGENTS.md` da raiz — garanta que o ponteiro para `.ai-guidelines/` esteja presente.
+- Claude carrega automaticamente o `AGENTS.md` da raiz — garanta que o bloco `<AI_GUIDELINES>` esteja presente.
 
 ## Comportamento Observado
 

@@ -9,7 +9,7 @@
 
 - Gemini CLI carrega automaticamente `GEMINI.md` na raiz e `~/.gemini/GEMINI.md` como config global.
 - Para instruções específicas do projeto, utilize `GEMINI.md` na raiz do repositório.
-- O `AGENTS.md` da raiz também é carregado — garanta que o ponteiro para `.ai-guidelines/` esteja presente.
+- O `AGENTS.md` da raiz também é carregado — garanta que o bloco `<AI_GUIDELINES>` esteja presente.
 
 ## Skills Globais
 

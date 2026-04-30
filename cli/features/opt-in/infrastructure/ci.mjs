@@ -76,8 +76,10 @@ export async function applyCi(targetDir, options, context, actions) {
     }
   }
 
-  if (!dryRun) {
+  if (dryRun) {
+    actions.push("[dry-run] write .github/workflows/ai-guidelines-ci.yml (CI baseline)");
+  } else {
     await fs.writeFile(workflowPath, template);
+    actions.push("write .github/workflows/ai-guidelines-ci.yml (CI baseline)");
   }
-  actions.push(`write .github/workflows/ai-guidelines-ci.yml (CI baseline)`);
 }

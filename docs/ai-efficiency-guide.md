@@ -77,4 +77,4 @@ Acompanhe o consumo para evitar interrupções de fluxo:
 ---
 
 > [!NOTE]
-> **Adaptadores de IA:** Para configurações específicas de cada ferramenta (paths, ignore files, comportamento observado), consulte os adaptadores em `.ai-guidelines/rules/` (claude, gemini, codex).
+> **Adaptadores de IA:** Para configurações específicas de cada ferramenta (paths, ignore files, comportamento observado), consulte os adaptadores compilados no bloco `<AI_GUIDELINES>` do `AGENTS.md`.

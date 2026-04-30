@@ -91,6 +91,8 @@ O CLI vive em `cli/` e suporta:
 - EOL awareness no Windows
 - `--dry-run` — preview antes de qualquer escrita
 - `--force` — atualização explícita quando o diff está entendido
+- Runtime monolítico em `AGENTS.md`, delimitado por `<AI_GUIDELINES>`
+- Opt-ins editoriais compilados em tags XML (`<FEATURE_TDD>`, `<FEATURE_BDD>`, etc.) sem copiar `.ai-guidelines/rules/` para o consumidor
 
 Saiba mais sobre os módulos disponíveis em
 [Documentação de Features](docs/features.md).
@@ -101,9 +103,9 @@ Saiba mais sobre os módulos disponíveis em
 
 | IA / Ferramenta    | Ponto de entrada                        | Status       |
 | :----------------- | :-------------------------------------- | :----------- |
-| Claude Code        | `AGENTS.md` + `.core/rules/claude.md`   | ✅ Suportado |
-| Gemini CLI         | `AGENTS.md` + `.core/rules/gemini.md`   | ✅ Suportado |
-| Codex / OpenAI CLI | `AGENTS.md` + `.core/rules/codex.md`    | ✅ Suportado |
+| Claude Code        | `AGENTS.md` com `<AI_GUIDELINES>`       | ✅ Suportado |
+| Gemini CLI         | `AGENTS.md` com `<AI_GUIDELINES>`       | ✅ Suportado |
+| Codex / OpenAI CLI | `AGENTS.md` com `<AI_GUIDELINES>`       | ✅ Suportado |
 | GitHub Copilot     | instruções específicas quando aplicável | ⚡ Parcial   |
 | Outras IAs         | `AGENTS.md` como baseline               | 🔄 Esperado  |
 

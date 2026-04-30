@@ -10,15 +10,10 @@ import {
 } from "#formatters/package-context";
 import { applyPointers } from "#features/core/pointers";
 import { applyGitattributes } from "#features/core/gitattributes";
-import { applyRules } from "#features/core/rules";
 // Opt-in — Infraestrutura (modificam package.json, hooks, CI)
 import { applyPrettier } from "#features/opt-in/infrastructure/prettier";
 import { applyHusky } from "#features/opt-in/infrastructure/husky";
 import { applyCi } from "#features/opt-in/infrastructure/ci";
-// Opt-in — Editoriais (sincronizam .md para .ai-guidelines/rules/)
-import { applyQualityGates } from "#features/opt-in/editorial/quality-gates";
-import { applyTdd } from "#features/opt-in/editorial/tdd";
-import { applyBdd } from "#features/opt-in/editorial/bdd";
 import { assertSafeInitTarget } from "#core/content-merge";
 import { buildFormatterRivalGuidance, buildMonorepoGuidance } from "#core/guidance-helpers";
 import { getInstallHint, promptUser, runInstall } from "#core/install-runtime";
@@ -118,7 +113,6 @@ export async function execute(mode, rawOptions) {
       ".prettierignore",
       ".husky",
       "package.json",
-      ".ai-guidelines",
       path.join(".github", "workflows", "ai-guidelines-ci.yml"),
     ]);
     assertSafeInitTarget(conflicts, options.force);
@@ -148,19 +142,12 @@ export async function execute(mode, rawOptions) {
     }
   }
 
-  // 3. Features Opt-in
+  // 3. Features Opt-in de infraestrutura. Regras editoriais são compiladas
+  // diretamente no bloco <AI_GUIDELINES> do AGENTS.md por applyPointers.
   try {
-    await applyRules(targetDir, options, actions);
-
-    // 3a. Infraestrutura (modificam package.json, hooks, CI)
     await applyPrettier(targetDir, options, context, actions);
     await applyHusky(targetDir, options, context, actions);
     await applyCi(targetDir, options, context, actions);
-
-    // 3b. Editoriais (sincronizam .md para .ai-guidelines/rules/)
-    await applyQualityGates(targetDir, options, context, actions);
-    await applyTdd(targetDir, options, context, actions);
-    await applyBdd(targetDir, options, context, actions);
   } catch (e) {
     actions.push(`[warn] falha ao processar features: ${e.message}`);
   }
