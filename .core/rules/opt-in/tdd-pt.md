@@ -1,11 +1,11 @@
-# TDD: Desenvolvimento Guiado por Testes (Red-Green-Refactor)
+### TDD: Desenvolvimento Guiado por Testes (Red-Green-Refactor)
 
 > Esta regra instrui agentes de IA a seguirem o ciclo TDD estrito.
 > **Foco:** estrutura de código, ciclo de feedback e cobertura.
 
 ---
 
-## Ciclo Obrigatório (Strict TDD)
+#### Ciclo Obrigatório (Strict TDD)
 
 Toda nova funcionalidade ou correção de bug DEVE seguir este ciclo:
 
@@ -17,7 +17,7 @@ Toda nova funcionalidade ou correção de bug DEVE seguir este ciclo:
 
 ---
 
-## Princípios Estruturais
+#### Princípios Estruturais
 
 - **Um Teste, Uma Intenção:** Cada caso de teste valida exatamente um comportamento. Evite testes "omni-bus".
 - **Isolamento:** Testes unitários não devem depender de serviços externos, rede ou banco de dados. Use mocks/stubs para dependências.
@@ -27,7 +27,7 @@ Toda nova funcionalidade ou correção de bug DEVE seguir este ciclo:
 
 ---
 
-## Regras para Agentes de IA
+#### Regras para Agentes de IA
 
 - Ao receber uma tarefa, escreva os testes ANTES da implementação.
 - Gere casos de borda (edge cases) baseados na spec antes de implementar a lógica.

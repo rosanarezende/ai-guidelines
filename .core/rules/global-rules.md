@@ -1,4 +1,4 @@
-# Regras Globais
+### Regras Globais
 
 > Fonte de verdade: bloco `<AI_GUIDELINES>` compilado no `AGENTS.md`.
 > Este arquivo define **princípios de engenharia** aplicáveis a qualquer projeto.
@@ -6,13 +6,13 @@
 
 ---
 
-## Princípios de Engenharia
+#### Princípios de Engenharia
 
 1. Sempre responda em **Português do Brasil (PT-BR)**.
 2. Não modifique arquivos essenciais ou pontos cegos de arquitetura (ex.: `.env`, dependências fundamentais) sem antes solicitar confirmação.
 3. **Acesso Seguro:** chaves de API jamais podem transitar por arquivos do frontend de forma acidental; garanta rigor com arquivos ignorados no `.gitignore`.
 
-## Eficiência de IA
+#### Eficiência de IA
 
 4. **Model Routing Inteligente:** Use modelos rápidos (ex: Flash, Haiku) para tarefas scoped e repetitivas. Reserve modelos avançados (ex: Pro, Opus) para planejamento arquitetural e decisões complexas.
 5. **Feedback Cirúrgico:** Ao iterar sobre código ou artefatos, forneça feedback diretamente no artefato com comentários cirúrgicos. Evite reenviar prompts extensos do zero.
@@ -20,11 +20,11 @@
 7. **Redução de Ruído:** Utilize arquivos de ignore (`.geminiignore`, `.gitignore`, `.claudeignore`) para remover arquivos desnecessários (logs, builds, node_modules) do contexto da IA.
 8. **Check de Contexto:** Monitore periodicamente o que a IA está "vendo" (ex: logs de tokens) para evitar deriva de contexto.
 
-## Governança de Agentes
+#### Governança de Agentes
 
 9. **Diretriz Primária — Git Push:** Nunca execute `git push` de forma autônoma. Todo envio de código ao repositório remoto **exige aprovação humana explícita do mantenedor** antes de ser iniciado. Aplica-se a qualquer agente de IA, script automatizado ou hook que não seja o pipeline oficial do repositório.
 
-## Workflow com IA
+#### Workflow com IA
 
 10. **Plan mode antes de agent mode:** antes de qualquer ação executiva (edição de arquivo, comando destrutivo, escrita), reserve pelo menos um ciclo de planejamento explícito. Reforça o ciclo RPI (Research → Plan → Implement).
 11. **Referencie um padrão existente ao gerar código novo:** localize um exemplo semelhante no repositório antes de criar do zero. Reduz alucinação e preserva consistência estilística.
