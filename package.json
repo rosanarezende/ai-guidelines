@@ -7,7 +7,9 @@
   "imports": {
     "#core/*": "./cli/core/*.mjs",
     "#features/*": "./cli/features/*.mjs",
-    "#formatters/*": "./cli/formatters/*.mjs"
+    "#formatters/*": "./cli/formatters/*.mjs",
+    "#governance/*": "./cli/governance/*.mjs",
+    "#governance/monolith/*": "./cli/governance/monolith/*.mjs"
   },
   "files": [
     "cli",
