@@ -14,12 +14,10 @@ export function wrapFeatureModule(featureName, content) {
   return [`<${tag}>`, content.trim(), `</${tag}>`].join("\n\n");
 }
 
-function normalizeAgentsHeading(content) {
-  return content.replace(/^#\s+AGENTS\.md\s*\n+/, "");
-}
-
 export function normalizePointerForMonolith(pointerTemplate) {
-  return normalizeAgentsHeading(pointerTemplate)
+  // O pointerTemplate agora é "headless" por design.
+  // Mantemos apenas o suporte a remover o bloco legado caso ele exista.
+  return pointerTemplate
     .replace(
       /Para ler a Prime Directive[\s\S]*?<!-- END:ai-guidelines-core -->/,
       [
@@ -31,14 +29,11 @@ export function normalizePointerForMonolith(pointerTemplate) {
     .trim();
 }
 
-function buildSection(title, parts) {
-  const visibleParts = parts.map((part) => part?.trim()).filter(Boolean);
-
-  if (visibleParts.length === 0) {
-    return "";
-  }
-
-  return [`## ${title}`, ...visibleParts].join("\n\n");
+function buildSection(title, buffers, level = 2) {
+  const content = buffers.filter(Boolean).join("\n\n");
+  if (!content) return "";
+  const hashes = "#".repeat(level);
+  return [`${hashes} ${title}`, content].join("\n\n");
 }
 
 export function compileMonolithicAgentsContent({
@@ -49,11 +44,9 @@ export function compileMonolithicAgentsContent({
   pointerTemplate,
 }) {
   const topBuffer = buildSection("Zona Topo: Diretivas Primarias", [
-    normalizeAgentsHeading(coreTemplate),
+    coreTemplate,
     globalRules,
-    ...providerRules.map(({ name, content }) =>
-      buildSection(`Regras do Provedor: ${name}`, [content])
-    ),
+    ...providerRules.map(({ content }) => content),
   ]);
 
   const centerBuffer = buildSection(
