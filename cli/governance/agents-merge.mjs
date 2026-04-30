@@ -1,7 +1,17 @@
+import { stripLegacyCoreBlock } from "./migrations/legacy-core-block.mjs";
+
 const CORE_BEGIN = "<!-- BEGIN:ai-guidelines-core -->";
 const CORE_END = "<!-- END:ai-guidelines-core -->";
 const AI_GUIDELINES_OPEN = "<AI_GUIDELINES>";
 const AI_GUIDELINES_CLOSE = "</AI_GUIDELINES>";
+
+export function assertSafeInitTarget(conflicts, force) {
+  if (conflicts.length > 0 && !force) {
+    throw new Error(
+      `init encontrou arquivos já presentes (${conflicts.join(", ")}). Use --force ou adote o repositório com o comando "adopt".`
+    );
+  }
+}
 
 export function extractCoreBlock(content) {
   const start = content.indexOf(CORE_BEGIN);
@@ -63,16 +73,6 @@ export function mergeAgentsContent(existingContent, fullTemplate) {
   }
 
   return `${legacyContent}\n\n${managedBlock}\n`;
-}
-
-function stripLegacyCoreBlock(content) {
-  if (!content.includes(CORE_BEGIN) || !content.includes(CORE_END)) {
-    return content;
-  }
-
-  const start = content.indexOf(CORE_BEGIN);
-  const end = content.indexOf(CORE_END) + CORE_END.length;
-  return `${content.slice(0, start)}${content.slice(end)}`;
 }
 
 function findAiGuidelinesBlock(content) {
