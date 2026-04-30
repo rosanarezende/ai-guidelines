@@ -51,6 +51,7 @@ describe("content-merge", () => {
       assert.ok(compiled.indexOf("AGENTS core") < compiled.indexOf("<FEATURE_QUALITY_GATES>"));
       assert.ok(compiled.indexOf("<FEATURE_QUALITY_GATES>") < compiled.indexOf("pointer"));
       assert.match(compiled, /Regras do Provedor: codex/);
+      assert.ok(compiled.endsWith("\n"), "o compilador deve sempre terminar com newline");
     });
 
     it("[BR-CLI-COMPILER-02] DADO feature opt-in QUANDO envelopar ENTÃO usa tags XML relacionais", () => {
@@ -115,6 +116,44 @@ describe("content-merge", () => {
       );
     });
 
+    it("[BR-CLI-MERGE-08] DADO bloco AI_GUIDELINES com fechamento antes da abertura QUANDO mergeAgentsContent ENTÃO aborta", () => {
+      const malformed = [
+        "# Projeto",
+        "",
+        "</AI_GUIDELINES>",
+        "",
+        "<AI_GUIDELINES>",
+        "conteudo",
+      ].join("\n");
+
+      assert.throws(() => mergeAgentsContent(malformed, "novo", false), /malformado/);
+    });
+
+    it("[BR-CLI-MERGE-09] DADO múltiplos blocos AI_GUIDELINES QUANDO mergeAgentsContent ENTÃO aborta", () => {
+      const malformed = [
+        "# Projeto",
+        "",
+        "<AI_GUIDELINES>",
+        "baseline 1",
+        "</AI_GUIDELINES>",
+        "",
+        "<AI_GUIDELINES>",
+        "baseline 2",
+        "</AI_GUIDELINES>",
+      ].join("\n");
+
+      assert.throws(() => mergeAgentsContent(malformed, "novo", false), /múltiplos/);
+    });
+
+    it("[BR-CLI-MERGE-10] DADO AGENTS vazio QUANDO mergeAgentsContent ENTÃO cria apenas bloco AI_GUIDELINES", () => {
+      const merged = mergeAgentsContent("", "baseline", false);
+
+      assert.match(merged, /<AI_GUIDELINES>/);
+      assert.match(merged, /baseline/);
+      assert.match(merged, /<\/AI_GUIDELINES>/);
+      assert.doesNotMatch(merged, /BEGIN:ai-guidelines-core/);
+    });
+
     it("[BR-CLI-MERGE-06] DADO ponteiro legado QUANDO mergeAgentsContent ENTÃO migra para AI_GUIDELINES sem manter ponteiro antigo", () => {
       const existing = [
         "# Projeto",
@@ -133,6 +172,13 @@ describe("content-merge", () => {
       assert.match(merged, /<AI_GUIDELINES>/);
       assert.doesNotMatch(merged, /ponteiro antigo/);
       assert.doesNotMatch(merged, /BEGIN:ai-guidelines-core/);
+    });
+
+    it("[BR-CLI-MERGE-11] DADO merge executado duas vezes QUANDO mergeAgentsContent ENTÃO resultado é idempotente", () => {
+      const once = mergeAgentsContent("# Projeto\n\nRegra local.\n", "baseline", false);
+      const twice = mergeAgentsContent(once, "baseline", false);
+
+      assert.equal(twice, once);
     });
 
     it("[BR-CLI-MERGE-07] DADO conteudo compilado QUANDO wrapAiGuidelinesBlock ENTÃO envolve com tag mae", () => {
