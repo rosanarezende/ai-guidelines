@@ -2,6 +2,7 @@ const SECTION_SEPARATOR = "\n\n---\n\n";
 
 export function buildFeatureTag(featureName) {
   return `FEATURE_${featureName
+    .trim()
     .replace(/\.md$/i, "")
     .replace(/[^a-z0-9]+/gi, "_")
     .replace(/^_+|_+$/g, "")
@@ -15,6 +16,7 @@ export function wrapFeatureModule(featureName, content) {
 
 export function normalizePointerForMonolith(pointerTemplate) {
   return pointerTemplate
+    .replace(/^#\s+AGENTS\.md\s*\n+/, "")
     .replace(
       /Para ler a Prime Directive[\s\S]*?<!-- END:ai-guidelines-core -->/,
       [
