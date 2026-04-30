@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
+  assertSafeInitTarget,
   assertValidAiGuidelinesBlock,
   mergeAgentsContent,
   wrapAiGuidelinesBlock,
@@ -79,5 +80,13 @@ describe("agents-merge", () => {
     const twice = mergeAgentsContent(once, "baseline");
 
     assert.equal(twice, once);
+  });
+
+  it("[BR-CLI-INIT-01] DADO conflitos e sem force QUANDO assertSafeInitTarget ENTÃO aborta", () => {
+    assert.throws(() => assertSafeInitTarget(["AGENTS.md"], false), /init encontrou arquivos/);
+  });
+
+  it("[BR-CLI-INIT-02] DADO conflitos e force QUANDO assertSafeInitTarget ENTÃO não aborta", () => {
+    assert.doesNotThrow(() => assertSafeInitTarget(["AGENTS.md"], true));
   });
 });
