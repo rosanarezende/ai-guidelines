@@ -6,6 +6,14 @@ Todas as mudanças notáveis neste framework seguem [Semantic Versioning](https:
 
 ## [Unreleased]
 
+### Adicionado
+
+- (Nenhuma mudança pendente)
+
+---
+
+## [1.3.0] — 2026-04-29
+
 ### Alterado
 
 - CLI passa a compilar o bloco `<AI_GUIDELINES>` diretamente no `AGENTS.md` como artefato monolítico topológico: diretivas e regras no topo, módulos opt-in envelopados em tags XML no centro, e contexto tático na base.
