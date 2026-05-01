@@ -1,8 +1,8 @@
 # Spec 0018 — Rules Content Deepening
 
-> Status: Draft (revised 2026-04-30)
+> Status: Draft (revised 2026-05-01)
 > Author: Rosana Rezende
-> Date: 2026-04-30 (rev. de 2026-04-30 inicial)
+> Date: 2026-04-30 (rev. inicial; ampliação 2026-04-30 pass 2 + 3; reformulação framing 2026-05-01)
 > Owner: Rosana Rezende
 > Plan: [`./plan.md`](./plan.md)
 > Decision Brief: [`./decision-brief.md`](./decision-brief.md)

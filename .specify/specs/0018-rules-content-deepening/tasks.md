@@ -47,12 +47,12 @@
 
 ### Sub-bloco [A.1] — Popular `decision-brief.md` com opções (Bloco A)
 
-- [ ] **A.1.1** A partir da matriz de A.0, popular `[DEC-0018-A01]` (updates por boilerplate, umbrella com sub-rows) com opções e tradeoffs.
-- [ ] **A.1.2** Popular `[DEC-0018-A02]` (estrutura do campo "Tipo de spec") com opções.
-- [ ] **A.1.3** Popular `[DEC-0018-A03]` (localização e formato da política content × infra em `spec-foundation.md`) com opções.
-- [ ] **A.1.4** Popular `[DEC-0018-A04]` (texto da linha em `global-rules.md`) com candidatos.
-- [ ] **A.1.5** Popular `[DEC-0018-A05]` (formato do `decision-brief-boilerplate.md`) com opções derivadas do dogfood (A.0.6).
-- [ ] **A.1.6** Popular `[DEC-0018-A06]` (localização física da seção "Tipos de spec" + workflow em dois passes) com opções.
+- [x] **A.1.1** A partir da matriz de A.0, popular `[DEC-0018-A01]` (updates por boilerplate, umbrella com sub-rows) com opções e tradeoffs. — Sub-rows A01.1 a A01.8 com itens `[manter|revisar|adicionar|remover]` referenciando audit § 8.1–8.8.
+- [x] **A.1.2** Popular `[DEC-0018-A02]` (estrutura do campo "Tipo de spec") com opções. — 4 sub-eixos (cardinalidade / semântica / default / diferenciação operacional) com opções A–C.
+- [x] **A.1.3** Popular `[DEC-0018-A03]` (localização e formato da política content × infra em `spec-foundation.md`) com opções. — 3 sub-eixos (localização interna / formato / sincronização do drift bidirecional § 4.2).
+- [x] **A.1.4** Popular `[DEC-0018-A04]` (texto da linha em `global-rules.md`) com candidatos. — 2 sub-eixos (subseção / redação) com 4 candidatos textuais (A–D).
+- [x] **A.1.5** Popular `[DEC-0018-A05]` (formato do `decision-brief-boilerplate.md`) com opções derivadas do dogfood (A.0.6). — 5 sub-eixos cobrindo D8–D17 da auditoria.
+- [x] **A.1.6** Popular `[DEC-0018-A06]` (localização física da seção "Tipos de spec" + workflow em dois passes) com opções. — Já populado na criação do brief; cross-ref para audit § 4.3 e § 9 adicionada.
 
 ---
 
