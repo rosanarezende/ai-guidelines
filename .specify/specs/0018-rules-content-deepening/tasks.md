@@ -28,8 +28,8 @@
 - [x] **0.5** `roadmap/backlog.md` atualizado: spec 0018 em "Em execução".
 - [x] **0.6** Reabertura formal: `spec.md`, `plan.md` e `tasks.md` reescritos como `Draft (revised 2026-04-30)`.
 - [x] **0.7** Refatoração pass 2: estrutura Stage 1 + Gate adotada após feedback do owner.
-- [ ] **0.8** Criar `decision-brief.md` inicial com pontos `[DEC-0018-A01]`–`[DEC-0018-A06]` (Bloco A) e `[DEC-0018-B01]`–`[DEC-0018-B08]` (Bloco B), todos em status `Pendente`, sem opções preenchidas (opções entram durante Fases 1 e 2).
-- [ ] **0.9** **[MANDATÓRIO]** Validação Humana da revisão pass 2: aprovar a estrutura A+B em Stage 1 + Gate antes de iniciar Fase 1. Cumprida quando o owner sinalizar "ok prosseguir".
+- [x] **0.8** Criar `decision-brief.md` inicial com pontos `[DEC-0018-A01]`–`[DEC-0018-A06]` (Bloco A) e `[DEC-0018-B01]`–`[DEC-0018-B08]` (Bloco B), todos em status `Pendente`, sem opções preenchidas (opções entram durante Fases 1 e 2).
+- [x] **0.9** **[MANDATÓRIO]** Validação Humana da revisão pass 2: aprovar a estrutura A+B em Stage 1 + Gate antes de iniciar Fase 1. Owner sinalizou "iniciar a Fase 1 (A.0 audit dos boilerplates)" em 2026-05-01.
 
 ---
 
@@ -37,13 +37,13 @@
 
 ### Sub-bloco [A.0] — Auditoria
 
-- [ ] **A.0.1** Inventariar os 7 boilerplates em `.specify/templates/`: campos, propósito declarado, vocabulário usado.
-- [ ] **A.0.2** Mapear como specs executadas (0008, 0015, 0016, 0017, 0018-rev0) preencheram cada artefato — capturar campos ignorados, campos ad-hoc adicionados, seções que cresceram informalmente.
-- [ ] **A.0.3** Cross-check entre boilerplates × `docs/process/spec-foundation.md`: detectar drift bidirecional (políticas ausentes em boilerplate; campos ausentes em política).
-- [ ] **A.0.4** Catalogar lacunas trazidas pela prática: "Decisão de Fusão", "Decisões revisitadas", "Tipo de spec" (conteúdo × infra), "Cross-refs com specs irmãs", "Conteúdo candidato pré-research", outras emergentes.
-- [ ] **A.0.5** Catalogar ruído removível: campos que nunca foram preenchidos.
-- [ ] **A.0.6** Avaliar dogfood: o `decision-brief.md` desta spec funcionou? Que campos, IDs, transições de status foram úteis ou problemáticos? Que melhorias informam o futuro `decision-brief-boilerplate.md`?
-- [ ] **A.0.7** Produzir matriz **boilerplate × manter | revisar | adicionar | remover** com justificativa por linha em `research/2026-04-30-boilerplates-audit.md`. **Sem decisões finais** — apenas opções estruturadas.
+- [x] **A.0.1** Inventariar os 7 boilerplates em `.specify/templates/`: campos, propósito declarado, vocabulário usado. — Output: `research/2026-04-30-boilerplates-audit.md` § 2.
+- [x] **A.0.2** Mapear como specs executadas (0008, 0015, 0016, 0017, 0018-rev0) preencheram cada artefato — capturar campos ignorados, campos ad-hoc adicionados, seções que cresceram informalmente. — Output: § 3 (drift estrutural).
+- [x] **A.0.3** Cross-check entre boilerplates × `docs/process/spec-foundation.md`: detectar drift bidirecional (políticas ausentes em boilerplate; campos ausentes em política). — Output: § 4.
+- [x] **A.0.4** Catalogar lacunas trazidas pela prática: "Decisão de Fusão", "Decisões revisitadas", "Tipo de spec" (conteúdo × infra), "Cross-refs com specs irmãs", "Conteúdo candidato pré-research", outras emergentes. — Output: § 5 (16 lacunas L1–L16).
+- [x] **A.0.5** Catalogar ruído removível: campos que nunca foram preenchidos. — Output: § 6 (7 itens R1–R7).
+- [x] **A.0.6** Avaliar dogfood: o `decision-brief.md` desta spec funcionou? Que campos, IDs, transições de status foram úteis ou problemáticos? Que melhorias informam o futuro `decision-brief-boilerplate.md`? — Output: § 7 (D1–D18).
+- [x] **A.0.7** Produzir matriz **boilerplate × manter | revisar | adicionar | remover** com justificativa por linha em `research/2026-04-30-boilerplates-audit.md`. **Sem decisões finais** — apenas opções estruturadas. — Output: § 8 (8.1 a 8.8, incluindo o 8º artefato `decision-brief-boilerplate.md`).
 
 ### Sub-bloco [A.1] — Popular `decision-brief.md` com opções (Bloco A)
 
