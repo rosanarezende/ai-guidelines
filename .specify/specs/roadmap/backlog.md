@@ -14,14 +14,27 @@ Detalhes de lifecycle em [`docs/process/spec-foundation.md`](../../../docs/proce
 
 Specs atualmente em branch ativa. Formato enxuto.
 
-- **0018-rules-content-deepening** (Content Overhaul do AGENTS.md)
-  - **Escopo:** Transformar regras procedurais em diretrizes normativas de engenharia e detalhar sensores de IA em quality-gates.
+- **0018-rules-content-deepening** (Content Overhaul + Política framework para specs de conteúdo) — _Draft (revised 2026-04-30)_
+  - **Escopo:** Duas entregas intencionais na mesma branch.
+    - **Bloco A:** auditoria research-backed dos 7 boilerplates de `.specify/templates/`; canonização da distinção **spec de conteúdo × infraestrutura** com checklist diferenciado (research+eval mandatórios em specs de conteúdo); sincronização com `docs/process/spec-foundation.md`; linha em `global-rules.md`.
+    - **Bloco B:** content overhaul research-backed de `global-rules.md` e `quality-gates.md` — research lifecycle (5 sínteses externas + baseline de tokens), taxonomia consolidada (meta-regras agente × princípios universais × heurísticas domínio), catálogo `[RULE-ENG-*]`, eval empírico mínimo em ≥2 provedores, reconciliação do conteúdo já-mergeado em `b9efb83`.
+  - **Fronteira com 0011 (hierarquia) e 0009 (harness):** definida em B.1; débitos vão para `NEXT.md` desta spec.
 
 ---
 
 ## Now (próxima fila, ordem importa)
 
 Specs ou candidatas priorizadas para iniciar em seguida. Ordem indica prioridade.
+
+- **governance-information-architecture** (Auditoria + classificação canônica de informação essencial do framework)
+  - **Fonte do insight:** revisão da Spec 0018 (Stage 1, 2026-04-30) — owner identificou que `docs/process/spec-foundation.md` é constituição operacional viva, mas está misturada em `docs/` com documentos descritivos; ausência de catálogo de informação essencial; gêneros documentais (constituição × ADR × regra runtime × doc descritivo × referência) sem classificação explícita nem regra de "qual gênero vai para onde".
+  - **Insight central:** o framework hoje tem 5+ classes de informação espalhadas em `docs/`, `adrs/`, `.core/`, `.specify/`, raiz — sem catálogo único, sem princípio de classificação documentado. ADRs cobrem decisões singulares; `spec-foundation.md` cobre processo vivo; `.core/rules/*` cobrem runtime distribuído; `docs/features.md`/`ai-efficiency-guide.md` são descritivos. Tudo coabita sem fronteira. Novo agente/contribuidor precisa adivinhar onde olhar primeiro.
+  - **Escopo potencial:** auditoria de placement atual de cada documento essencial; classificação canônica em N classes (constituição operacional × ADRs × regras runtime distribuídas × documentação descritiva × referência operacional); decisão entre catálogo central (`INFORMATION-CATALOG.md`) vs reorganização física (`.specify/foundation/`) vs híbrido; decisão sobre ADRs absorverem decisões atômicas que hoje vivem dentro de `spec-foundation.md`; tornar a política parte do framework distribuído (template) se aplicável.
+  - **Audiência:** governança meta-framework (não regras runtime). **Diferente de Spec 0011** que trata de hierarquia de _rules editoriais runtime_ — esta candidata trata de hierarquia de _meta-docs do framework_. Problemas paralelos.
+  - **Pré-requisitos:** Spec 0018 mergeada (a 0018 está editando `spec-foundation.md` adicionando workflow em dois passes; reorganização concorrente seria conflict).
+  - **Sinal de "está na hora":** 0018 fechada (gatilho automático); ou novo agente/contribuidor pedir explicação sobre "onde olhar para X" no repo antes mesmo de 0018 fechar.
+  - **Riscos antecipados:** tocar em paths estáveis (`docs/`, `adrs/`) gera diff amplo; pode requerer migração de links em vários docs (`README.md`, `AGENTS.md`, `CONTRIBUTING.md`, `CLAUDE.md`). Mitigar com rename + ponteiro de redirect comentado nos arquivos antigos durante transição.
+  - **Cross-ref:** `[DEC-0018-A06]` na decision-brief da 0018 captura o débito tático (onde fica a seção "Tipos de spec") cuja resposta arquitetural ampla é desta candidata.
 
 - **seguranca-ia-supply-chain** (spec 0012 — Segurança de IA tools / supply chain)
   - **Fonte do insight:** incidente Vercel/Contex.ai (abril/2026), análise Lucas Montano [Hackearam a Vercel via AI](https://www.youtube.com/watch?v=oDXYfesz0qw). Síntese em `synthesis.md` Tema 4.
