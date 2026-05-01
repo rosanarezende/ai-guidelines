@@ -60,10 +60,10 @@
 
 ### Sub-bloco [B.0] — Research
 
-- [ ] **B.0.1** `research/2026-04-30-benchmark-rules-content.md` — provedores (Anthropic, OpenAI, Google), OSS curado (Kong, ClickHouse, Bun, multica), `awesome-cursorrules`, Continue, Aider conventions.
-- [ ] **B.0.2** `research/2026-04-30-empirical-bugs-ai-code.md` — METR, SWE-bench, Aider eval, estudos sobre falhas em código IA.
-- [ ] **B.0.3** `research/2026-04-30-external-bug-taxonomies.md` — CWE, SEI CERT, Sonar, OWASP-LLM.
-- [ ] **B.0.4** `research/2026-04-30-spec-driven-tools-rules.md` — Spec Kit, BMAD, OpenSpec, Continue, Aider; foco em rules editoriais e decisões pré-design.
+- [x] **B.0.1** `research/2026-04-30-benchmark-rules-content.md` — provedores (Anthropic, OpenAI, Google), OSS curado (Kong, ClickHouse, Bun, multica), `awesome-cursorrules`, Continue, Aider conventions.
+- [x] **B.0.2** `research/2026-04-30-empirical-bugs-ai-code.md` — METR, SWE-bench, Aider eval, estudos sobre falhas em código IA.
+- [x] **B.0.3** `research/2026-04-30-external-bug-taxonomies.md` — CWE, SEI CERT, Sonar, OWASP-LLM.
+- [x] **B.0.4** `research/2026-04-30-spec-driven-tools-rules.md` — Spec Kit, BMAD, OpenSpec, Continue, Aider; foco em rules editoriais e decisões pré-design.
 - [ ] **B.0.5** `research/2026-04-30-tokens-baseline-budget.md` — medição instrumental do `<AI_GUIDELINES>` atual + projeção de teto.
 
 ### Sub-bloco [B.1] — Popular `decision-brief.md` com opções (Bloco B)
