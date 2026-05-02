@@ -606,20 +606,24 @@ Independente do eixo primário, toda regra carrega tag de evidência (sugestão 
 
 **Decisão do Gate Humano:**
 
-- **Status:** [ ] Pendente | [ ] Resolvido
+- **Status:** [ ] Pendente | [x] Resolvido
 - **Sub-eixo 1 — Critério-teste para classificar regra (marque com `x`):**
   - [ ] A (Audience: Cross-IA vs Adapter específica vs Opt-in)
   - [ ] B (Duplicação intolerável: igual em 2 adapters = global)
-  - [ ] C (Escopo de injeção em runtime)
+  - [x] C (Escopo de injeção em runtime)
   - [ ] D (Híbrido A + Posição crítica: regras críticas vão pro topo)
 - **Sub-eixo 2 — Arquitetura física (marque com `x`):**
   - [ ] E (Manter status quo flat: 1 global + 3 adapters + opt-in flat)
-  - [ ] F (Hierarquia apenas por subdiretório dentro de `opt-in/`)
+  - [x] F (Hierarquia apenas por subdiretório dentro de `opt-in/`)
   - [ ] G (Split de `global-rules.md` em múltiplos arquivos temáticos)
   - [ ] H (Hierarquia full por subdiretório em todas as pastas)
   - [ ] I (Novo arquivo `meta-rules.md` exclusivo para metainstruções do agente)
-- **Justificativa / Ressalvas:** >
-- **Data / Owner:**
+- **Justificativa / Ressalvas:** A combinação C + F estabelece o modelo de "Dashboard Central com IDs Imutáveis":
+  - **Dinâmica de Arquivos:** As regras permanecem fisicamente consolidadas no repositório do framework em `.core/rules/`, separadas por domínio (`global-rules.md` para universais, diretórios dedicados para `opt-in/` e `providers/`).
+  - **Rastreabilidade (Business Rules Parity):** Exigência absoluta de IDs simbólicos em cada regra documental (ex: `[RULE-UNI-01]`, `[RULE-OPT-TDD-02]`). Os testes do compilador na pasta `cli/` referenciarão explicitamente esses IDs (`it('enforces [RULE-OPT-TDD-02] by...', ...)`).
+  - **Trade-offs Aceitos:** Privilegia a clareza visual para humanos (Dashboard) e a garantia de cobertura de negócio (1-to-1 com código). Evita o Context Rot ao manter regras modulares no repositório base; o Monolithic Compiler cuida de montar o contexto seguro apenas no consumidor final.
+  - **Fronteira com Spec 0011:** Esta decisão rege a estrutura do *source* (ai-guidelines). A hierarquia de pastas no consumidor será decidida exclusivamente na Spec 0011.
+- **Data / Owner:** 2026-05-02 / @rosanarezende
 
 ---
 
@@ -1152,7 +1156,7 @@ Posição atual (Tok-H): `core` 1.232; `global-rules` 1.273; max adapter (gemini
 | `[DEC-0018-A05]` | A     | Resolved |
 | `[DEC-0018-A06]` | A     | Resolved |
 | `[DEC-0018-B01]` | B     | Resolved |
-| `[DEC-0018-B02]` | B     | Pendente |
+| `[DEC-0018-B02]` | B     | Resolved |
 | `[DEC-0018-B03]` | B     | Pendente |
 | `[DEC-0018-B04]` | B     | Pendente |
 | `[DEC-0018-B05]` | B     | Pendente |
