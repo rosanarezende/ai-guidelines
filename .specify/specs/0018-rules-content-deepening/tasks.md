@@ -107,13 +107,13 @@
 
 > Origem: [`[DEC-0018-A01]`](./decision-brief.md#dec-0018-a01-updates-por-boilerplate). Plan: § A.2.
 
-- [ ] **4.A2.1** `spec-boilerplate.md`: adicionar campo **Tipo de spec** (obrigatório, sem default — `evidence-driven` | `deterministic` | `mixed`); adicionar campo opcional **Decision Brief**; adicionar subseções opcionais 🧠 **Decisão de Fusão**, 🛑 **Post-mortem / Motivo do Pivot**, **Cross-refs com specs irmãs**; revisar status composto (`Done (PR #X — YYYY-MM-DD)`); remover prescrição literal de `research/synthesis.md`; adicionar referência cruzada para "Princípios da Escrita" de `spec-foundation.md`.
-- [ ] **4.A2.2** `plan-boilerplate.md`: formalizar formato 📐 **Decisões revisitadas** (data + mudança + razão + impacto); adicionar bloco **Stage 1/Stage 2 placeholder** condicional ao tipo; relaxar cap "2-4 linhas" do Princípio guia; adicionar subseção opcional 📎 **Anexo — Conteúdo candidato pré-research**.
-- [ ] **4.A2.3** `next-boilerplate.md`: adicionar trigger explícito de **criação** ("criar quando a spec gerar débitos conscientes"); downgrade da subseção ✂️ "Itens descartados deliberadamente" para opcional.
-- [ ] **4.A2.4** `roadmap-boilerplate.md`: alinhar com promoção de `tracker`/`repo-first` para `spec-foundation.md` (cross-ref a 4.A5.2).
-- [ ] **4.A2.5** `research-index-boilerplate.md`: sincronizar com a política de research lifecycle de `spec-foundation.md`.
-- [ ] **4.A2.6** `project-config-boilerplate.md`: confirmar zero churn (validar contra auditoria § 8.7).
-- [ ] **4.A2.7** Atualizar header da `spec.md` desta 0018 com `Tipo de spec: evidence-driven` (exceção consciente à imutabilidade pós-`In Review`, registrada em `plan.md` "Decisões revisitadas").
+- [x] **4.A2.1** `spec-boilerplate.md`: adicionar campo **Tipo de spec** (obrigatório, sem default — `evidence-driven` | `deterministic` | `mixed`); adicionar campo opcional **Decision Brief**; adicionar subseções opcionais 🧠 **Decisão de Fusão**, 🛑 **Post-mortem / Motivo do Pivot**, **Cross-refs com specs irmãs**; revisar status composto (`Done (PR #X — YYYY-MM-DD)`); remover prescrição literal de `research/synthesis.md`; adicionar referência cruzada para "Princípios da Escrita" de `spec-foundation.md`.
+- [x] **4.A2.2** `plan-boilerplate.md`: formalizar formato 📐 **Decisões revisitadas** (data + mudança + razão + impacto); adicionar bloco **Stage 1/Stage 2 placeholder** condicional ao tipo; relaxar cap "2-4 linhas" do Princípio guia; adicionar subseção opcional 📎 **Anexo — Conteúdo candidato pré-research**.
+- [x] **4.A2.3** `next-boilerplate.md`: adicionar trigger explícito de **criação** ("criar quando a spec gerar débitos conscientes"); downgrade da subseção ✂️ "Itens descartados deliberadamente" para opcional.
+- [x] **4.A2.4** `roadmap-boilerplate.md`: alinhar com promoção de `tracker`/`repo-first` para `spec-foundation.md` (cross-ref a 4.A5.2).
+- [x] **4.A2.5** `research-index-boilerplate.md`: sincronizar com a política de research lifecycle de `spec-foundation.md`.
+- [x] **4.A2.6** `project-config-boilerplate.md`: confirmar zero churn (validar contra auditoria § 8.7).
+- [x] **4.A2.7** Atualizar header da `spec.md` desta 0018 com `Tipo de spec: evidence-driven` (exceção consciente à imutabilidade pós-`In Review`, registrada em `plan.md` "Decisões revisitadas").
 - [ ] **4.A2.8** **[COMMIT]** `feat(spec-0018): updates incrementais de 7 boilerplates + spec.md retroativa`.
 
 ### Sub-bloco [A.3] — Reestruturação `tasks-boilerplate.md` em 5 fases + split por tipo

@@ -4,6 +4,7 @@
 > Author: Rosana Rezende
 > Date: 2026-04-30 (rev. inicial; ampliação 2026-04-30 pass 2 + 3; reformulação framing 2026-05-01)
 > Owner: Rosana Rezende
+> Tipo de spec: evidence-driven <!-- Campo retroativo (Spec 0018 4.A2.7): a regra é instituída por esta própria spec; aplicar a si mesma é dogfood necessário. Exceção consciente à imutabilidade pós-`In Review` registrada em `plan.md` § "Decisões revisitadas" (entrada 2026-05-02). -->
 > Plan: [`./plan.md`](./plan.md)
 > Decision Brief: [`./decision-brief.md`](./decision-brief.md)
 
