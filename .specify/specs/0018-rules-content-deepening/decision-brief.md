@@ -434,35 +434,36 @@ Recomendação: **D16.A** — gate explícito é didático e evita ambiguidade.
 
 **Decisão do Gate Humano:**
 
-- **Status:** [ ] Pendente | [ ] Resolvido
+- **Status:** [ ] Pendente | [x] Resolvido
 - **Sub-eixo 1 — Estrutura por ponto `[DEC-*]` (marque com `x`):**
   - [ ] A (Mínima: Pergunta + Opções + Decisão)
   - [ ] B (Padrão: Pergunta + Contexto + Opções + Decisão)
   - [ ] C (Estendida: Pergunta + Contexto + Eixos a decidir + Opções + Recomendação + Decisão)
-  - [ ] D (Híbrida adaptativa: B por default, C quando exige decomposição)
+  - [x] D (Híbrida adaptativa: B por default, C quando exige decomposição)
 - **Sub-eixo 2 — Convenção de IDs e legendas (marque com `x`):**
   - [ ] A (`[DEC-NNNN-XYZ]`)
   - [ ] B (`[DEC-NNNN-XYZ.W]` granular)
   - [ ] C (Opção A + Legenda canônica de status no topo do boilerplate)
-  - [ ] D (Opção A + C + Convenção documentada de pontos derivados/novos)
+  - [x] D (Opção A + C + Convenção documentada de pontos derivados/novos)
 - **Sub-eixo 3 — Recomendação inicial e tradeoffs (marque com `x`):**
   - [ ] A (Mandatória em todo ponto)
   - [ ] B (Opcional, só quando há dominância)
   - [ ] C (Mandatória + obrigatoriamente justificada por research)
-  - [ ] D (Opcional + nota explícita com gatilho de evidência convergente)
-  - **D9 - Tradeoffs:** [ ] D9.A (Tabela) | [ ] D9.B (Lista bulleted) | [ ] D9.C (Aceitar ambos)
+  - [x] D (Opcional + nota explícita com gatilho de evidência convergente)
+  - **D9 - Tradeoffs:** [ ] D9.A (Tabela) | [ ] D9.B (Lista bulleted) | [x] D9.C (Aceitar ambos)
 - **Sub-eixo 4 — Resumo de status e gate (marque com `x`):**
   - [ ] A (Apenas headers individuais)
   - [ ] B (Apenas tabela final)
-  - [ ] C (Headers + Tabela manual)
+  - [x] C (Headers + Tabela manual)
   - [ ] D (Headers + Tabela por script)
-  - **D16 - Bloco Gate:** [ ] D16.A (Bloco final explicito) | [ ] D16.B (Na própria tabela) | [ ] D16.C (Gate implícito)
+  - **D16 - Bloco Gate:** [x] D16.A (Bloco final explicito) | [ ] D16.B (Na própria tabela) | [ ] D16.C (Gate implícito)
 - **Sub-eixo 5 — Checklist pós-gate (marque com `x`):**
   - [ ] A (Apenas avisar "atualizar plan e tasks")
-  - [ ] B (Checklist explícito de 4 passos)
+  - [x] B (Checklist explícito de 4 passos)
   - [ ] C (B + Referência ao formato Stage 1/2)
 - **Justificativa / Ressalvas:** >
-- **Data / Owner:**
+  Adoção do combo D + D + D (com D9.C) + C (com D16.A) + B baseado nos aprendizados empíricos (dogfooding) desta spec. Essa estrutura garante flexibilidade para decisões de diferentes complexidades (Híbrida), legibilidade (tradeoffs flexíveis) e, mais criticamente, impõe um "Gate de Revisão" formalizado (D16.A) e um checklist rígido (B) para impedir o avanço acidental ou a fragmentação antes da transição para a Fase de Implementação.
+- **Data / Owner:** 2026-05-02 / @rosanarezende
 
 ---
 
