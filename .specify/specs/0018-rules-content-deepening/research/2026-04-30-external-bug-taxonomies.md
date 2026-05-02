@@ -51,15 +51,15 @@ sources:
    é "regras editoriais para um agente IA escrever código de produção"
    (correctness + manutenibilidade + segurança + processo + colaboração).
    Cada fonte cobre **um eixo dominante**:
-   - CWE → eixo *security/correctness* baixo nível.
-   - CERT → eixo *secure coding* por linguagem (C/C++/Java/Perl/Android).
-   - SonarSource → eixo *quality model* multi-domínio (Reliability,
+   - CWE → eixo _security/correctness_ baixo nível.
+   - CERT → eixo _secure coding_ por linguagem (C/C++/Java/Perl/Android).
+   - SonarSource → eixo _quality model_ multi-domínio (Reliability,
      Maintainability, Security) com tipo binário (Bug / Code Smell /
      Vulnerability / Hotspot).
-   - OWASP Top 10 (web) → eixo *application security risks*.
-   - OWASP Top 10 for LLM → eixo *LLM-specific risks* (relevante porque o
+   - OWASP Top 10 (web) → eixo _application security risks_.
+   - OWASP Top 10 for LLM → eixo _LLM-specific risks_ (relevante porque o
      consumidor do `ai-guidelines` é, ele próprio, um sistema com IA).
-   - ESLint → eixo *correctness/best practices/style/ES6* em JS.
+   - ESLint → eixo _correctness/best practices/style/ES6_ em JS.
 3. **Convergência num núcleo de 3-4 dimensões.** Atravessando as fontes,
    emerge um núcleo recorrente: **correctness** (o código está errado),
    **security** (o código pode ser explorado), **maintainability /
@@ -78,7 +78,7 @@ sources:
    mais rico; OWASP-LLM 2025 também segue (descrição → tipos → impacto →
    mitigação → cenários de ataque → referências).
 6. **Para o escopo `ai-guidelines`, a taxonomia mais aplicável é uma
-   *combinação*** — não uma única fonte. As opções estruturadas estão na
+   _combinação_** — não uma única fonte. As opções estruturadas estão na
    §10. A linha de força mais frequente nas fontes é a **divisão
    Sonar-style em 3-4 tipos top-level** (correctness / security /
    maintainability / [+ style ou + processo IA]) com **subcategorias por
@@ -109,7 +109,7 @@ vivem no CVE); é o **catálogo de classes** de defeito.
 A organização é **hierárquica e multidimensional**, com vistas (views)
 diferentes:
 
-- **Research View (CWE-1000)** — agrupa por *theoretical concept*. Tem
+- **Research View (CWE-1000)** — agrupa por _theoretical concept_. Tem
   ~10 categorias top-level ("Pillars"): por exemplo, Improper Access
   Control, Improper Interaction Between Multiple Correctly-Behaving
   Entities, Improper Control of a Resource Through its Lifetime, Improper
@@ -117,8 +117,8 @@ diferentes:
   Improper Adherence to Coding Standards, Insufficient Control Flow
   Management, Protection Mechanism Failure, Incorrect Calculation,
   Incorrect Comparison.
-- **Development View (CWE-699)** — agrupa por *concept familiar to
-  developers* (Audit, Authentication, Authorization, Cryptographic
+- **Development View (CWE-699)** — agrupa por _concept familiar to
+  developers_ (Audit, Authentication, Authorization, Cryptographic
   Issues, Memory Buffer Errors, etc.).
 - **Architectural View (CWE-1008)** — agrupa por princípio arquitetural.
 - **Top 25 View (CWE-1425 para 2024)** — vista plana ranqueada.
@@ -132,39 +132,39 @@ A metodologia: dataset de 31.770 CVEs publicados entre 2023-06-01 e
 2024-06-01; cada CVE mapeia para uma CWE; score = frequência × severidade
 CVSS médio.
 
-| # | CWE | Nome |
-| -: | :-- | :--- |
-| 1 | CWE-79 | Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting') |
-| 2 | CWE-787 | Out-of-bounds Write |
-| 3 | CWE-89 | Improper Neutralization of Special Elements used in an SQL Command ('SQL Injection') |
-| 4 | CWE-352 | Cross-Site Request Forgery (CSRF) |
-| 5 | CWE-22 | Improper Limitation of a Pathname to a Restricted Directory ('Path Traversal') |
-| 6 | CWE-125 | Out-of-bounds Read |
-| 7 | CWE-78 | Improper Neutralization of Special Elements used in an OS Command ('OS Command Injection') |
-| 8 | CWE-416 | Use After Free |
-| 9 | CWE-862 | Missing Authorization |
-| 10 | CWE-434 | Unrestricted Upload of File with Dangerous Type |
-| 11 | CWE-94 | Improper Control of Generation of Code ('Code Injection') |
-| 12 | CWE-20 | Improper Input Validation |
-| 13 | CWE-77 | Improper Neutralization of Special Elements used in a Command ('Command Injection') |
-| 14 | CWE-287 | Improper Authentication |
-| 15 | CWE-269 | Improper Privilege Management |
-| 16 | CWE-502 | Deserialization of Untrusted Data |
-| 17 | CWE-200 | Exposure of Sensitive Information to an Unauthorized Actor |
-| 18 | CWE-863 | Incorrect Authorization |
-| 19 | CWE-918 | Server-Side Request Forgery (SSRF) |
-| 20 | CWE-119 | Improper Restriction of Operations within the Bounds of a Memory Buffer |
-| 21 | CWE-476 | NULL Pointer Dereference |
-| 22 | CWE-798 | Use of Hard-coded Credentials |
-| 23 | CWE-190 | Integer Overflow or Wraparound |
-| 24 | CWE-400 | Uncontrolled Resource Consumption |
-| 25 | CWE-306 | Missing Authentication for Critical Function |
+|   # | CWE     | Nome                                                                                       |
+| --: | :------ | :----------------------------------------------------------------------------------------- |
+|   1 | CWE-79  | Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')       |
+|   2 | CWE-787 | Out-of-bounds Write                                                                        |
+|   3 | CWE-89  | Improper Neutralization of Special Elements used in an SQL Command ('SQL Injection')       |
+|   4 | CWE-352 | Cross-Site Request Forgery (CSRF)                                                          |
+|   5 | CWE-22  | Improper Limitation of a Pathname to a Restricted Directory ('Path Traversal')             |
+|   6 | CWE-125 | Out-of-bounds Read                                                                         |
+|   7 | CWE-78  | Improper Neutralization of Special Elements used in an OS Command ('OS Command Injection') |
+|   8 | CWE-416 | Use After Free                                                                             |
+|   9 | CWE-862 | Missing Authorization                                                                      |
+|  10 | CWE-434 | Unrestricted Upload of File with Dangerous Type                                            |
+|  11 | CWE-94  | Improper Control of Generation of Code ('Code Injection')                                  |
+|  12 | CWE-20  | Improper Input Validation                                                                  |
+|  13 | CWE-77  | Improper Neutralization of Special Elements used in a Command ('Command Injection')        |
+|  14 | CWE-287 | Improper Authentication                                                                    |
+|  15 | CWE-269 | Improper Privilege Management                                                              |
+|  16 | CWE-502 | Deserialization of Untrusted Data                                                          |
+|  17 | CWE-200 | Exposure of Sensitive Information to an Unauthorized Actor                                 |
+|  18 | CWE-863 | Incorrect Authorization                                                                    |
+|  19 | CWE-918 | Server-Side Request Forgery (SSRF)                                                         |
+|  20 | CWE-119 | Improper Restriction of Operations within the Bounds of a Memory Buffer                    |
+|  21 | CWE-476 | NULL Pointer Dereference                                                                   |
+|  22 | CWE-798 | Use of Hard-coded Credentials                                                              |
+|  23 | CWE-190 | Integer Overflow or Wraparound                                                             |
+|  24 | CWE-400 | Uncontrolled Resource Consumption                                                          |
+|  25 | CWE-306 | Missing Authentication for Critical Function                                               |
 
 Fonte: <https://cwe.mitre.org/top25/archive/2024/2024_top25_list.html>.
 
-Observação editorial: o Top 25 mistura *injection*, *memory safety*,
-*authn/authz*, *resource exhaustion*. Não é uma taxonomia limpa por
-domínio — é um *ranking de risco agregado*. Para fins de taxonomia
+Observação editorial: o Top 25 mistura _injection_, _memory safety_,
+_authn/authz_, _resource exhaustion_. Não é uma taxonomia limpa por
+domínio — é um _ranking de risco agregado_. Para fins de taxonomia
 descritiva, a **Research View (CWE-1000)** com seus ~10 Pillars é melhor
 âncora.
 
@@ -240,29 +240,29 @@ concatenation" (Preprocessor, regra 30, linguagem C).
 
 Conforme listadas pelo wiki.sei.cmu.edu / blackduck.com:
 
-| Mnemonic | Categoria |
-| :-- | :-- |
-| PRE | Preprocessor |
-| DCL | Declarations and Initialization |
-| EXP | Expressions |
-| INT | Integers |
-| FLP | Floating Point |
-| ARR | Arrays |
-| STR | Characters and Strings |
-| MEM | Memory Management |
-| FIO | Input Output |
-| ENV | Environment |
-| SIG | Signals |
-| ERR | Error Handling |
-| API | Application Programming Interfaces |
-| CON | Concurrency |
-| MSC | Miscellaneous |
-| POS | POSIX |
-| WIN | Microsoft Windows |
+| Mnemonic | Categoria                          |
+| :------- | :--------------------------------- |
+| PRE      | Preprocessor                       |
+| DCL      | Declarations and Initialization    |
+| EXP      | Expressions                        |
+| INT      | Integers                           |
+| FLP      | Floating Point                     |
+| ARR      | Arrays                             |
+| STR      | Characters and Strings             |
+| MEM      | Memory Management                  |
+| FIO      | Input Output                       |
+| ENV      | Environment                        |
+| SIG      | Signals                            |
+| ERR      | Error Handling                     |
+| API      | Application Programming Interfaces |
+| CON      | Concurrency                        |
+| MSC      | Miscellaneous                      |
+| POS      | POSIX                              |
+| WIN      | Microsoft Windows                  |
 
 Observação: a categorização do CERT é **sintática/de subsistema da
 linguagem** (preprocessor, expressões, ponteiros, I/O), não por
-*efeito* (security/correctness). Isso é coerente com o público-alvo:
+_efeito_ (security/correctness). Isso é coerente com o público-alvo:
 desenvolvedores C escrevendo código defensivo.
 
 ### 3.4 Campos canônicos de uma regra CERT
@@ -374,23 +374,23 @@ A documentação SonarQube referencia conformidade explícita com:
 Lista das 10 categorias mais críticas de risco em aplicações web,
 ranqueadas por dados comunitários + Top 10 community survey.
 
-| ID | Categoria |
-| :-- | :-- |
-| A01:2021 | Broken Access Control |
-| A02:2021 | Cryptographic Failures (renamed from "Sensitive Data Exposure") |
-| A03:2021 | Injection (now includes XSS) |
-| A04:2021 | Insecure Design |
-| A05:2021 | Security Misconfiguration (now includes XXE) |
-| A06:2021 | Vulnerable and Outdated Components |
-| A07:2021 | Identification and Authentication Failures |
+| ID       | Categoria                                                                |
+| :------- | :----------------------------------------------------------------------- |
+| A01:2021 | Broken Access Control                                                    |
+| A02:2021 | Cryptographic Failures (renamed from "Sensitive Data Exposure")          |
+| A03:2021 | Injection (now includes XSS)                                             |
+| A04:2021 | Insecure Design                                                          |
+| A05:2021 | Security Misconfiguration (now includes XXE)                             |
+| A06:2021 | Vulnerable and Outdated Components                                       |
+| A07:2021 | Identification and Authentication Failures                               |
 | A08:2021 | Software and Data Integrity Failures (includes Insecure Deserialization) |
-| A09:2021 | Security Logging and Monitoring Failures |
-| A10:2021 | Server-Side Request Forgery (SSRF) |
+| A09:2021 | Security Logging and Monitoring Failures                                 |
+| A10:2021 | Server-Side Request Forgery (SSRF)                                       |
 
 > **Nota de fact-check**: a search engine devolveu uma variante do A07
 > rotulada "Cross-Site Scripting (XSS)", mas a documentação oficial
-> (owasp.org/Top10/2021) lista A07 como *Identification and
-> Authentication Failures* — e XSS foi consolidado dentro de A03
+> (owasp.org/Top10/2021) lista A07 como _Identification and
+> Authentication Failures_ — e XSS foi consolidado dentro de A03
 > Injection. Tomamos a versão oficial.
 
 ### 5.2 OWASP Top 10:2025 (em desenvolvimento)
@@ -430,22 +430,22 @@ Mantido pelo **OWASP GenAI Security Project**. A versão corrente é
 **v2.0 / 2025**, publicada 2024-11-18 (PDF
 `OWASP-Top-10-for-LLMs-v2025.pdf`). É a taxonomia mais relevante para
 contextos de **agente IA escrevendo código**, embora seu foco primário
-seja *aplicações que integram LLM* (não "código gerado por LLM" em si).
+seja _aplicações que integram LLM_ (não "código gerado por LLM" em si).
 
 ### 6.2 Lista 2025 completa
 
-| ID | Categoria | Resumo |
-| :-- | :-- | :-- |
-| LLM01:2025 | Prompt Injection | Instruções maliciosas (diretas via input ou indiretas via documentos retornados, tool outputs, web pages) sobrescrevem o comportamento pretendido do LLM. |
-| LLM02:2025 | Sensitive Information Disclosure | Exposição não intencional de dados privados, credenciais, API keys ou informação confidencial nas saídas do LLM. |
-| LLM03:2025 | Supply Chain | Vulnerabilidades em modelos de terceiros, datasets pré-treinados, plugins, extensões. |
-| LLM04:2025 | Data and Model Poisoning | Manipulação de dados de treino/fine-tuning/embeddings. |
-| LLM05:2025 | Improper Output Handling | Plugins ou consumidores aceitam output do LLM sem sanitização → XSS, RCE em backend. |
-| LLM06:2025 | Excessive Agency | Conceder ao LLM autonomia/ferramentas/permissões em excesso. |
-| LLM07:2025 | System Prompt Leakage | Exposição de prompts de sistema com instruções/credenciais sensíveis (novo em 2025). |
-| LLM08:2025 | Vector and Embedding Weaknesses | Vulnerabilidades em sistemas RAG e bancos vetoriais (novo em 2025). |
-| LLM09:2025 | Misinformation | Saídas factualmente erradas / hallucinations geram dependência incorreta. |
-| LLM10:2025 | Unbounded Consumption | Uso excessivo de recursos (DoS, exfiltração financeira, replicação não autorizada do modelo). |
+| ID         | Categoria                        | Resumo                                                                                                                                                    |
+| :--------- | :------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| LLM01:2025 | Prompt Injection                 | Instruções maliciosas (diretas via input ou indiretas via documentos retornados, tool outputs, web pages) sobrescrevem o comportamento pretendido do LLM. |
+| LLM02:2025 | Sensitive Information Disclosure | Exposição não intencional de dados privados, credenciais, API keys ou informação confidencial nas saídas do LLM.                                          |
+| LLM03:2025 | Supply Chain                     | Vulnerabilidades em modelos de terceiros, datasets pré-treinados, plugins, extensões.                                                                     |
+| LLM04:2025 | Data and Model Poisoning         | Manipulação de dados de treino/fine-tuning/embeddings.                                                                                                    |
+| LLM05:2025 | Improper Output Handling         | Plugins ou consumidores aceitam output do LLM sem sanitização → XSS, RCE em backend.                                                                      |
+| LLM06:2025 | Excessive Agency                 | Conceder ao LLM autonomia/ferramentas/permissões em excesso.                                                                                              |
+| LLM07:2025 | System Prompt Leakage            | Exposição de prompts de sistema com instruções/credenciais sensíveis (novo em 2025).                                                                      |
+| LLM08:2025 | Vector and Embedding Weaknesses  | Vulnerabilidades em sistemas RAG e bancos vetoriais (novo em 2025).                                                                                       |
+| LLM09:2025 | Misinformation                   | Saídas factualmente erradas / hallucinations geram dependência incorreta.                                                                                 |
+| LLM10:2025 | Unbounded Consumption            | Uso excessivo de recursos (DoS, exfiltração financeira, replicação não autorizada do modelo).                                                             |
 
 ### 6.3 Estrutura/campos de uma entrada LLM0X
 
@@ -478,7 +478,7 @@ código**. Há duas leituras possíveis:
    (input sanitization de prompts, output handling, etc.). Essa é a
    leitura óbvia.
 2. **Aplicar OWASP-LLM ao próprio framework** — o `ai-guidelines` é
-   *consumido por agentes IA*; regras como "não vazar system prompts" ou
+   _consumido por agentes IA_; regras como "não vazar system prompts" ou
    "não conceder excessive agency a si mesmo" podem refletir como o
    agente deve se comportar enquanto escreve código. Essa é uma leitura
    mais sutil, e pode justificar uma sub-categoria "regras de
@@ -493,15 +493,15 @@ código**. Há duas leituras possíveis:
 ESLint historicamente organizou suas regras (até o redesenho de
 docs em ~v8) em sete categorias:
 
-| Categoria | Propósito |
-| :-- | :-- |
-| Possible Errors | Apanha erros prováveis em código (ex.: `no-undef`, `no-extra-semi`, `no-unreachable`). |
-| Best Practices | Práticas que evitam bugs e facilitam manutenção (ex.: `eqeqeq`, `curly`, `no-eval`). |
-| Strict Mode | Uso correto de `"use strict"`. |
-| Variables | Boas práticas de declaração e escopo (ex.: `no-unused-vars`, `no-shadow`). |
-| Node.js and CommonJS | Idiomas do Node (ex.: `no-process-exit`). |
-| Stylistic Issues | Formatação, naming, sintaxe equivalente (ex.: `camelcase`, `quotes`, `indent`). |
-| ECMAScript 6 | Idiomas ES6+ (ex.: `no-var`, `prefer-const`, `arrow-spacing`). |
+| Categoria            | Propósito                                                                              |
+| :------------------- | :------------------------------------------------------------------------------------- |
+| Possible Errors      | Apanha erros prováveis em código (ex.: `no-undef`, `no-extra-semi`, `no-unreachable`). |
+| Best Practices       | Práticas que evitam bugs e facilitam manutenção (ex.: `eqeqeq`, `curly`, `no-eval`).   |
+| Strict Mode          | Uso correto de `"use strict"`.                                                         |
+| Variables            | Boas práticas de declaração e escopo (ex.: `no-unused-vars`, `no-shadow`).             |
+| Node.js and CommonJS | Idiomas do Node (ex.: `no-process-exit`).                                              |
+| Stylistic Issues     | Formatação, naming, sintaxe equivalente (ex.: `camelcase`, `quotes`, `indent`).        |
+| ECMAScript 6         | Idiomas ES6+ (ex.: `no-var`, `prefer-const`, `arrow-spacing`).                         |
 
 A partir do `@stylistic/eslint-plugin` (eslint.style), ESLint
 **desacoplou** as regras puramente estilísticas — Prettier
@@ -511,10 +511,10 @@ e dprint cobrem isso melhor. As demais categorias seguem.
 
 ESLint classifica por **propósito da regra**:
 
-- *Detecta um bug provável*?  → Possible Errors.
-- *Evita um bug futuro / facilita manutenção*?  → Best Practices.
-- *Cuida de naming/formatting sem alterar runtime*?  → Stylistic.
-- *Idioma específico de uma versão da linguagem*?  → ECMAScript 6.
+- _Detecta um bug provável_? → Possible Errors.
+- _Evita um bug futuro / facilita manutenção_? → Best Practices.
+- _Cuida de naming/formatting sem alterar runtime_? → Stylistic.
+- _Idioma específico de uma versão da linguagem_? → ECMAScript 6.
 
 Não há eixo de **severity** intrínseco — quem configura o `eslint.config`
 escolhe `error` / `warn` / `off` por regra.
@@ -538,21 +538,21 @@ escolhe `error` / `warn` / `off` por regra.
 
 Tabela: **eixo de defeito × fontes que cobrem**.
 
-| Eixo / domínio | CWE | CERT | Sonar | OWASP Top 10 (web) | OWASP Top 10 LLM | ESLint |
-| :-- | :--: | :--: | :--: | :--: | :--: | :--: |
-| **Security — injection** | Sim (CWE-79, 89, 78, 94, 77) | Sim (várias FIO/STR/EXP) | Sim (Vulnerability) | Sim (A03) | Sim (LLM01, LLM05) | Parcial (`no-eval`) |
-| **Security — auth/authz** | Sim (CWE-287, 862, 863, 269, 306) | Parcial | Sim (Vulnerability/Hotspot) | Sim (A01, A07) | Indireto | Não |
-| **Security — crypto** | Sim (CWE-327, 798) | Sim (MSC para C) | Sim (Vulnerability) | Sim (A02) | Não | Não |
-| **Security — config / supply chain** | Sim (CWE-1188 família) | Não | Sim (Hotspot) | Sim (A05, A06, A08) | Sim (LLM03) | Não |
-| **Security — LLM-specific** | Não (CWE ainda incipiente em LLM) | Não | Não (parcial em rules recentes) | Não | **Sim** (todo o catálogo) | Não |
-| **Memory safety** | Sim (CWE-787, 125, 416, 119, 476, 190) | Sim (MEM, ARR, INT, FLP) | Sim (Bug em C++) | Não | Não | Não |
-| **Correctness — logic / control flow** | Parcial (CWE-665, 754) | Sim (EXP, INT, ERR) | Sim (Bug) | Não | Não | Sim (Possible Errors) |
-| **Correctness — error handling** | Parcial (CWE-754, 755) | Sim (ERR) | Sim (Bug + Code Smell) | Indireto (A09) | Não | Sim (Best Practices) |
-| **Maintainability — complexity / smells** | Não | Parcial (Recommendations) | **Sim** (Code Smell) | Não | Não | Sim (Best Practices) |
-| **Maintainability — readability / style** | Não | Não | Sim (Code Smell minor) | Não | Não | **Sim** (Stylistic) |
-| **Resource exhaustion / DoS** | Sim (CWE-400) | Sim (CON, MEM) | Sim (Bug/Hotspot) | Indireto | Sim (LLM10) | Não |
-| **Logging / observability** | Sim (CWE-117, 778) | Não | Sim (Code Smell) | Sim (A09) | Não | Não |
-| **Process / collaboration / IA editorial** | Não | Não | Não | Não | Parcial (LLM06 Excessive Agency) | Não |
+| Eixo / domínio                             |                  CWE                   |           CERT            |              Sonar              | OWASP Top 10 (web)  |         OWASP Top 10 LLM         |        ESLint         |
+| :----------------------------------------- | :------------------------------------: | :-----------------------: | :-----------------------------: | :-----------------: | :------------------------------: | :-------------------: |
+| **Security — injection**                   |      Sim (CWE-79, 89, 78, 94, 77)      | Sim (várias FIO/STR/EXP)  |       Sim (Vulnerability)       |      Sim (A03)      |        Sim (LLM01, LLM05)        |  Parcial (`no-eval`)  |
+| **Security — auth/authz**                  |   Sim (CWE-287, 862, 863, 269, 306)    |          Parcial          |   Sim (Vulnerability/Hotspot)   |   Sim (A01, A07)    |             Indireto             |          Não          |
+| **Security — crypto**                      |           Sim (CWE-327, 798)           |     Sim (MSC para C)      |       Sim (Vulnerability)       |      Sim (A02)      |               Não                |          Não          |
+| **Security — config / supply chain**       |         Sim (CWE-1188 família)         |            Não            |          Sim (Hotspot)          | Sim (A05, A06, A08) |           Sim (LLM03)            |          Não          |
+| **Security — LLM-specific**                |   Não (CWE ainda incipiente em LLM)    |            Não            | Não (parcial em rules recentes) |         Não         |    **Sim** (todo o catálogo)     |          Não          |
+| **Memory safety**                          | Sim (CWE-787, 125, 416, 119, 476, 190) | Sim (MEM, ARR, INT, FLP)  |        Sim (Bug em C++)         |         Não         |               Não                |          Não          |
+| **Correctness — logic / control flow**     |         Parcial (CWE-665, 754)         |    Sim (EXP, INT, ERR)    |            Sim (Bug)            |         Não         |               Não                | Sim (Possible Errors) |
+| **Correctness — error handling**           |         Parcial (CWE-754, 755)         |         Sim (ERR)         |     Sim (Bug + Code Smell)      |   Indireto (A09)    |               Não                | Sim (Best Practices)  |
+| **Maintainability — complexity / smells**  |                  Não                   | Parcial (Recommendations) |      **Sim** (Code Smell)       |         Não         |               Não                | Sim (Best Practices)  |
+| **Maintainability — readability / style**  |                  Não                   |            Não            |     Sim (Code Smell minor)      |         Não         |               Não                |  **Sim** (Stylistic)  |
+| **Resource exhaustion / DoS**              |             Sim (CWE-400)              |      Sim (CON, MEM)       |        Sim (Bug/Hotspot)        |      Indireto       |           Sim (LLM10)            |          Não          |
+| **Logging / observability**                |           Sim (CWE-117, 778)           |            Não            |        Sim (Code Smell)         |      Sim (A09)      |               Não                |          Não          |
+| **Process / collaboration / IA editorial** |                  Não                   |            Não            |               Não               |         Não         | Parcial (LLM06 Excessive Agency) |          Não          |
 
 **Leituras-chave da tabela**:
 
@@ -592,16 +592,16 @@ O escopo cobre, no mínimo:
 
 ### 9.2 Quais taxonomias se mapeiam
 
-| Eixo do `ai-guidelines` | Taxonomia(s) que melhor mapeia |
-| :-- | :-- |
-| Correctness universal | ESLint Possible Errors + CERT EXP/ERR + Sonar Bug |
-| Security básica | CWE Top 25 (subset) + OWASP Top 10 web (subset) |
-| Maintainability | Sonar Code Smell + ESLint Best Practices |
-| Style / convention | Sonar Code Smell minor + ESLint Stylistic (mas **delegado** a Prettier no framework) |
-| LLM/IA-specific | OWASP Top 10 for LLM (LLM01, 02, 05, 06 são os mais aderentes) |
-| Processo / colaboração | **Nenhuma fonte externa cobre** — é contribuição original do framework |
+| Eixo do `ai-guidelines` | Taxonomia(s) que melhor mapeia                                                       |
+| :---------------------- | :----------------------------------------------------------------------------------- |
+| Correctness universal   | ESLint Possible Errors + CERT EXP/ERR + Sonar Bug                                    |
+| Security básica         | CWE Top 25 (subset) + OWASP Top 10 web (subset)                                      |
+| Maintainability         | Sonar Code Smell + ESLint Best Practices                                             |
+| Style / convention      | Sonar Code Smell minor + ESLint Stylistic (mas **delegado** a Prettier no framework) |
+| LLM/IA-specific         | OWASP Top 10 for LLM (LLM01, 02, 05, 06 são os mais aderentes)                       |
+| Processo / colaboração  | **Nenhuma fonte externa cobre** — é contribuição original do framework               |
 
-### 9.3 Quais taxonomias *não* se mapeiam
+### 9.3 Quais taxonomias _não_ se mapeiam
 
 - **CERT integralmente** — é por linguagem (C/C++/Java); o framework é
   **multi-linguagem por design**. Mas o **formato de "Risk Assessment"**
@@ -609,12 +609,12 @@ O escopo cobre, no mínimo:
 - **CWE granular individual** — usar 900 CWEs é overkill. Mas usar
   **CWE como cross-ref** ("ver CWE-79") é portável e barato.
 - **OWASP Top 10 web na íntegra** — muitas categorias (A05 misconfig,
-  A06 outdated components) são *operacionais*, não editoriais.
+  A06 outdated components) são _operacionais_, não editoriais.
 
 ### 9.4 Eixo "processo / IA editorial" como contribuição original
 
 Há um espaço **não preenchido** por nenhuma das fontes externas:
-*regras sobre como o agente IA deve se comportar editorialmente*
+_regras sobre como o agente IA deve se comportar editorialmente_
 (idioma, cadeia de commit, formato de teste, decision-brief antes de
 mudanças não-triviais, fail-fast em PRs). Esse eixo é **sui generis** ao
 `ai-guidelines` e talvez à categoria mais ampla de "AI coding agent
@@ -677,7 +677,7 @@ Domínio (tags livres):
   CI rodando essas regras** (são editoriais para a IA), então severity é
   semi-arbitrário; setup overhead alto para autores de novas regras.
 
-#### Opção D — Estratificação por *fase* (inspirada em CERT "Modes of Introduction")
+#### Opção D — Estratificação por _fase_ (inspirada em CERT "Modes of Introduction")
 
 ```
 1. Design-time rules        (decisão arquitetural)
@@ -694,14 +694,14 @@ Domínio (tags livres):
 
 #### Síntese das opções
 
-| Critério | A (4 Sonar) | B (6 + LLM) | C (3 dim + tags) | D (4 fase SDLC) |
-| :-- | :--: | :--: | :--: | :--: |
-| Aderência a fonte externa | Alta (Sonar) | Média (Sonar + OWASP-LLM) | Alta (Sonar) | Média (CERT) |
-| Cobre eixo IA-editorial | Sim (top-level) | Sim (top-level) | Sim (tag) | Não direto |
-| Cobre LLM-security | Não destaca | Sim (top-level) | Sim (tag) | Não direto |
-| Custo cognitivo p/ autor | Baixo | Médio | Alto | Médio |
-| Compatível com cross-ref CWE | Sim | Sim | Sim | Indireto |
-| Risco de sobreposição | Médio | Médio-alto | Baixo | Alto |
+| Critério                     |   A (4 Sonar)   |        B (6 + LLM)        | C (3 dim + tags) | D (4 fase SDLC) |
+| :--------------------------- | :-------------: | :-----------------------: | :--------------: | :-------------: |
+| Aderência a fonte externa    |  Alta (Sonar)   | Média (Sonar + OWASP-LLM) |   Alta (Sonar)   |  Média (CERT)   |
+| Cobre eixo IA-editorial      | Sim (top-level) |      Sim (top-level)      |    Sim (tag)     |   Não direto    |
+| Cobre LLM-security           |   Não destaca   |      Sim (top-level)      |    Sim (tag)     |   Não direto    |
+| Custo cognitivo p/ autor     |      Baixo      |           Médio           |       Alto       |      Médio      |
+| Compatível com cross-ref CWE |       Sim       |            Sim            |       Sim        |    Indireto     |
+| Risco de sobreposição        |      Médio      |        Médio-alto         |      Baixo       |      Alto       |
 
 ### 10.2 Opções para `[DEC-0018-B05]` — Metodologia de eval mínimo
 
@@ -711,6 +711,7 @@ propósito" também vem das fontes:
 #### Opção E1 — Eval no estilo "CERT Risk Assessment"
 
 Para cada regra, exigir:
+
 - **Severity** (Low/Medium/High).
 - **Likelihood** (Unlikely/Probable/Likely).
 - **Remediation Cost** (High/Medium/Low).
@@ -723,6 +724,7 @@ Para cada regra, exigir:
 #### Opção E2 — Eval no estilo "OWASP Top 10 Factors"
 
 Para cada regra, exigir:
+
 - **Incidence** (frequência no corpus de PRs/commits do framework).
 - **Exploitability / Impact** (consequência se a IA viola).
 - **Detectability** (humano consegue notar a violação?).
@@ -736,13 +738,14 @@ Para cada regra, exigir:
 #### Opção E3 — Eval no estilo "ESLint regression test" (golden examples)
 
 Para cada regra, exigir:
+
 - **Exemplo non-compliant** (mínimo 1, ideal 2-3).
 - **Exemplo compliant** (par a par).
 - **Prompt-eval**: rodar uma IA contra o `AGENTS.md` que **inclui** a
   regra e contra um `AGENTS.md` que **não** inclui; medir delta no
   comportamento sobre os exemplos.
 
-- **Prós**: empirista; mensura *o efeito da regra na IA*, não só sua
+- **Prós**: empirista; mensura _o efeito da regra na IA_, não só sua
   formulação. Alinha com a natureza do produto (regras editoriais para
   IA → o eval correto é "a IA muda?").
 - **Contras**: requer infra de eval (test runner contra modelo); custo
@@ -751,6 +754,7 @@ Para cada regra, exigir:
 #### Opção E4 — Eval estilo "Sonar RSPEC + see also"
 
 Para cada regra, exigir o mínimo da RSPEC do Sonar:
+
 - ID, Name, Why is this an issue?, Noncompliant, Compliant, Exceptions,
   See also (CWE/OWASP/CERT/ESLint refs), Tags, Severity.
 - **Sem** prompt-eval — eval = revisão por humano + cross-ref.
@@ -761,7 +765,7 @@ Para cada regra, exigir o mínimo da RSPEC do Sonar:
 #### Síntese E
 
 Combinação plausível: **E4 obrigatório + E3 amostral** — toda regra tem
-RSPEC mínima, e um *subset* de regras críticas tem prompt-eval real
+RSPEC mínima, e um _subset_ de regras críticas tem prompt-eval real
 (golden examples rodados contra modelo).
 
 ### 10.3 Observação meta sobre as opções
@@ -815,15 +819,15 @@ estrutural, outra metodológica.
 
 ## Anexo A — Cross-reference rápido CWE × OWASP web × OWASP-LLM
 
-| Tema | CWE primário | OWASP web | OWASP-LLM |
-| :-- | :-- | :-- | :-- |
-| Injection genérica | CWE-77, 78, 89, 94 | A03 | LLM01 (prompt), LLM05 (output) |
-| Sensitive data exposure | CWE-200, 798 | A02, A04 | LLM02, LLM07 |
-| Authn/authz | CWE-287, 306, 862, 863 | A01, A07 | LLM06 (excessive agency) |
-| Supply chain integrity | CWE-1357, 502 | A06, A08 | LLM03, LLM04 |
-| Resource exhaustion | CWE-400 | (indireto) | LLM10 |
-| Logging | CWE-117, 778 | A09 | (indireto) |
-| SSRF | CWE-918 | A10 | (não direto) |
+| Tema                    | CWE primário           | OWASP web  | OWASP-LLM                      |
+| :---------------------- | :--------------------- | :--------- | :----------------------------- |
+| Injection genérica      | CWE-77, 78, 89, 94     | A03        | LLM01 (prompt), LLM05 (output) |
+| Sensitive data exposure | CWE-200, 798           | A02, A04   | LLM02, LLM07                   |
+| Authn/authz             | CWE-287, 306, 862, 863 | A01, A07   | LLM06 (excessive agency)       |
+| Supply chain integrity  | CWE-1357, 502          | A06, A08   | LLM03, LLM04                   |
+| Resource exhaustion     | CWE-400                | (indireto) | LLM10                          |
+| Logging                 | CWE-117, 778           | A09        | (indireto)                     |
+| SSRF                    | CWE-918                | A10        | (não direto)                   |
 
 ---
 
@@ -831,8 +835,8 @@ estrutural, outra metodológica.
 
 Baseado em interseção CWE / CERT / Sonar RSPEC / OWASP-LLM / ESLint:
 
-```yaml
-id: AIGL-XXX                # ID local do framework
+````yaml
+id: AIGL-XXX # ID local do framework
 name: Frase prescritiva curta
 type: correctness | security | maintainability | process-ia
 severity: blocker | critical | major | minor | info
@@ -841,27 +845,33 @@ why_is_this_an_issue: |
 noncompliant_example: |
   ```ts
   // código que viola
-  ```
+````
+
 compliant_example: |
-  ```ts
-  // versão correta
-  ```
+
+```ts
+// versão correta
+```
+
 exceptions: |
-  Quando a regra não se aplica.
-risk_assessment:                # opcional, estilo CERT
-  likelihood: unlikely | probable | likely
-  impact: low | medium | high
-  remediation_cost: low | medium | high
+Quando a regra não se aplica.
+risk_assessment: # opcional, estilo CERT
+likelihood: unlikely | probable | likely
+impact: low | medium | high
+remediation_cost: low | medium | high
 see_also:
-  - CWE-XX
-  - OWASP-A0X / OWASP-LLM0X
-  - CERT XXX-NN-LANG
-  - ESLint rule-name
-tags: [correctness, llm, ts]
-applicable_languages: [ts, js, ...]   # ou "all"
-introduced_in_version: 0.X.0
-mode_of_introduction: design | implementation | review | operation
+
+- CWE-XX
+- OWASP-A0X / OWASP-LLM0X
+- CERT XXX-NN-LANG
+- ESLint rule-name
+  tags: [correctness, llm, ts]
+  applicable_languages: [ts, js, ...] # ou "all"
+  introduced_in_version: 0.X.0
+  mode_of_introduction: design | implementation | review | operation
+
 ```
 
 Esse esqueleto é uma **proposta consolidada para discussão**, não
 decisão. Cabe a `[DEC-0018-B01]` aceitar/rejeitar/encurtar.
+```

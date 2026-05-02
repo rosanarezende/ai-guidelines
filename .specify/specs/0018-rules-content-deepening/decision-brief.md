@@ -4,7 +4,7 @@
 > Plan: [`./plan.md`](./plan.md)
 > Tasks: [`./tasks.md`](./tasks.md)
 > Status: **Open** <!-- Open | Partial | Resolved -->
-> Última atualização: 2026-05-01 (Bloco A populado em A.1; A02/A03/A04 reformulados pelo eixo evidence-driven para portabilidade cross-repo; Bloco B aguarda B.0)
+> Última atualização: 2026-05-01 (Bloco A populado em A.1; A02/A03/A04 reformulados pelo eixo evidence-driven para portabilidade cross-repo; Bloco B populado em B.1 com base nas 5 sínteses de B.0)
 
 > **Apresenta opções com tradeoffs antes do gate humano e registra decisões
 > validadas após o gate.** Este artefato é o gate canônico entre Stage 1
@@ -441,18 +441,47 @@ Recomendação: **D16.A** — gate explícito é didático e evita ambiguidade.
 
 ### [DEC-0018-B01] Taxonomia das categorias de regras
 
-**Pergunta:** quantas categorias separar e quais? Hipótese inicial: (a) meta-regras do agente, (b) princípios universais de engenharia, (c) heurísticas de domínio — mas pode emergir outra estrutura da research.
+**Pergunta:** quantas categorias separar e quais? Hipótese inicial mencionada na rev1 do plan ((a) meta-regras / (b) princípios universais / (c) heurísticas de domínio) é apenas uma das opções viáveis — research aponta múltiplas alternativas.
 
 **Contexto (research):**
 
-- A preencher após `research/2026-04-30-benchmark-rules-content.md` e `spec-driven-tools-rules.md`.
+- [`research/2026-04-30-benchmark-rules-content.md`](./research/2026-04-30-benchmark-rules-content.md) § 4 (padrões emergentes), § 6.1 (opções A–D para B01) — convergência absoluta entre Anthropic/OpenAI/Google é "markdown puro + headings", **sem taxonomia normativa**; OSS curado divide por **stack** (awesome-cursorrules, 13 categorias) ou por **escopo de aplicação** (Continue, alwaysApply); **nenhum benchmark separa por função editorial** — `ai-guidelines` é mais explícito que o estado-da-arte.
+- [`research/2026-04-30-empirical-bugs-ai-code.md`](./research/2026-04-30-empirical-bugs-ai-code.md) § 7.1 — sugere **três eixos ortogonais**: tipo de defeito (hallucination/functional/security/reliability/maintainability/process), camada de detecção (linter/teste/mutation/review/runtime), evidência empírica (forte/média/emergente/heurística declarada).
+- [`research/2026-04-30-external-bug-taxonomies.md`](./research/2026-04-30-external-bug-taxonomies.md) § 10.1 — quatro opções estruturadas inspiradas em fontes maduras: Sonar (4 cat), OWASP-LLM + correctness (6 cat), 3 dimensões + tags (Sonar full), 4 fases SDLC (CERT).
+- [`research/2026-04-30-spec-driven-tools-rules.md`](./research/2026-04-30-spec-driven-tools-rules.md) § 11 — opções observadas em SDD tools: eixo único (Spec Kit/BMAD), dual universal × scope (Continue/Cursor), trial categorial (≈ ai-guidelines atual), categoria adicional "decisão pré-design", categoria adicional "agente-vs-código".
+- [`research/2026-04-30-tokens-baseline-budget.md`](./research/2026-04-30-tokens-baseline-budget.md) § 8.1 — baseline atual mostra `global-rules.md` (33 % do compilado-min) como o maior _driver_ unitário; qualquer taxonomia que infle universal cresce o teto agregado.
 
-**Opções:** _(populate after research)_
+**Estrutura das opções:** o ponto é **multi-dimensional** (eixo principal + eixo secundário). Opções abaixo cobrem o eixo principal; o eixo secundário (scope/colocação) é tratado em `[DEC-0018-B02]`. Convenção: cada opção referencia o research § correspondente.
+
+#### Sub-eixo 1 — Eixo primário da taxonomia
+
+| Opção | Eixo primário                                                                                                                     | Pró                                                                                                                                                           | Contra                                                                                                                                            |
+| :---- | :-------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------ |
+| A     | **Por stack/tecnologia** (modelo awesome-cursorrules, 13 cat: frontend/backend/mobile/CSS/state…)                                 | Precedente massivo (36k stars); familiar a contribuidores OSS; casa com `globs` Continue-style                                                                | `ai-guidelines` é stack-agnóstico por design; força framework a virar catálogo stack-specific; colide com identidade canônica (`global-rules.md`) |
+| B     | **Por função editorial** (filosofia / processo / gates / gotchas / convenções) — proposta nativa                                  | Reflete identidade do framework (regras IA-agnósticas vs opt-in); separação útil para o leitor entender intent (princípio vs checklist)                       | Sem precedente direto; risco de over-engineering se taxonomia não casar com como usuários **buscam** as regras                                    |
+| C     | **Por escopo de aplicação** (always-on / conditional / on-demand) — modelo Continue + Anthropic                                   | Alinhado com a separação física que `ai-guidelines` já tem (`global-rules.md` × `opt-in/*.md`); convergente com Continue (`alwaysApply`) e Anthropic (Skills) | Taxonomia de **mecanismo**, não de **conteúdo**; dois leitores buscando "regras sobre TDD" não as agrupariam por "always-on" e sim por tema       |
+| D     | **Por tipo de defeito** (Sonar 4 cat: Correctness / Security / Maintainability / Process)                                         | Convergente com indústria; mapeia para tags PR/issue; cross-ref CWE/OWASP                                                                                     | "Process / IA-Editorial" não tem âncora externa; pode virar saco de gato; sobreposição Correctness ↔ Maintainability                              |
+| E     | **Por tipo de defeito + LLM-security** (6 cat: Correctness / Security / LLM-Security / Maintainability / Quality Gates / Process) | Explicita o eixo LLM/IA — diferencial do framework; isola Quality Gates como categoria de 1ª classe; reflete `.core/rules/` × `opt-in/`                       | 6 categorias é o limite cognitivo; risco de sobreposição Security ↔ LLM-Security; alguns consumidores vão querer simplificar                      |
+| F     | **Híbrida — função editorial dentro de escopo** (D × A: primeiro escopo, depois função)                                           | Respeita arquitetura física existente **e** navegabilidade; espelha o split universal × per-IA × opt-in já em uso                                             | Dimensionalidade dobrada; risco de células vazias (ex.: "filosofia × per-IA"); 2 coordenadas para contribuidores                                  |
+| G     | **3 dimensões ortogonais com tags** (Sonar full: Tipo × Severidade × Domínio livre)                                               | Mais expressivo; permite filtrar regras de várias formas; espelha sistema de produção                                                                         | Mais cognitivamente caro; framework não tem CI rodando regras (são editoriais); severity é semi-arbitrário; setup overhead alto                   |
+
+#### Sub-eixo 2 — Eixo secundário (calibração de evidência)
+
+Independente do eixo primário, toda regra carrega tag de evidência (sugestão de [`empirical-bugs § 7.1`](./research/2026-04-30-empirical-bugs-ai-code.md)):
+
+| Opção | Política sobre tag de evidência                                                                                                     | Pró                                                                               | Contra                                                   |
+| :---- | :---------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------- | :------------------------------------------------------- |
+| H     | **Mandatória** (toda regra declara força: Forte / Média / Emergente / Heurística declarada)                                         | Combate "AI-slop disfarçado"; força fundamentação; alinha com objetivo da 0018    | Atrito alto para contribuir; bloqueia regra sem source   |
+| I     | **Opcional** (tag aparece quando há fonte; ausência = "heurística")                                                                 | Menor atrito; aceita regras observadas internamente sem corpus externo            | Permite reentrada do anti-pattern pré-research           |
+| J     | **Mandatória só para categorias-âncora**: Correctness/Security/Reliability exigem evidência; Process/Editorial podem ser declaradas | Compromisso: rigor onde carrega risco real; flex onde a regra é convenção interna | 2 regimes para manter; precisa documentar onde se aplica |
+
+**Recomendação inicial (a confirmar pós-gate):** **F (eixo primário) + J (tag de evidência)**. Justificativa: F preserva a arquitetura `.core/rules/` × `opt-in/` já vencedora (Spec 0008) e adiciona discriminação editorial — coerente com a Spec 0018 sem refundar; J ataca o problema-raiz da 0018 (b9efb83 sem fonte) onde ele dói (regras de defeito) sem inflar atrito em regras editoriais. **Não recomendar A** (colide com identidade); **não recomendar G** (over-engineering para o tamanho atual). C/D/E são alternativas próximas — owner pode escolher se preferir alinhamento mais forte com Sonar (D/E) em detrimento do split universal × per-IA × opt-in.
 
 **Decisão (preencher pós-gate):**
 
 - Status: `Pendente`
-- Escolha: \_\_\_
+- Escolha (Sub-eixo 1, eixo primário): \_\_\_
+- Escolha (Sub-eixo 2, tag de evidência): \_\_\_
 - Justificativa: \_\_\_
 - Data: \_\_\_
 - Owner: \_\_\_
@@ -461,19 +490,50 @@ Recomendação: **D16.A** — gate explícito é didático e evita ambiguidade.
 
 ### [DEC-0018-B02] Colocação por categoria
 
-**Pergunta:** cada categoria definida em `[DEC-0018-B01]` vai para qual arquivo (`global-rules.md` × `claude.md`/`codex.md`/`gemini.md` × `opt-in/*.md` × novos arquivos)?
+**Pergunta:** dado um pedaço de conteúdo, em qual arquivo ele vive — `global-rules.md` × `{claude,codex,gemini}.md` × `opt-in/*.md` × novos arquivos? Que critério mecânico aplica para evitar drift e duplicação?
 
 **Contexto (research):**
 
-- Depende de `[DEC-0018-B01]`.
-- Informado por `benchmark-rules-content.md` e medição de tokens em `tokens-baseline-budget.md`.
+- [`research/2026-04-30-benchmark-rules-content.md`](./research/2026-04-30-benchmark-rules-content.md) § 6.2 — três opções estruturadas (audience / duplicação intolerável / escopo de injeção); convergência absoluta entre provedores oficiais é "hierarquia por proximidade no filesystem", **não** por marcação semântica.
+- [`research/2026-04-30-spec-driven-tools-rules.md`](./research/2026-04-30-spec-driven-tools-rules.md) § 11 (B02) — opções observadas: monolith único (BMAD), prefixos numéricos (Continue/Cline), frontmatter scope (Cursor `.mdc`), pastas por taxonomia (awesome-cursorrules; modelo já em uso aqui), decision-briefs em `.specify/specs/<spec>/`.
+- [`research/2026-04-30-tokens-baseline-budget.md`](./research/2026-04-30-tokens-baseline-budget.md) § 8.1 — colocação tem efeito sobre **recall** segundo Liu et al. ("Lost in the Middle"): zona topo (`global-rules.md` + adapters) tem vantagem de posição; zona centro (opt-in) tem pior recall mesmo quando ativada. Implicação: regras críticas precisam ficar no topo.
+- [`research/2026-04-30-empirical-bugs-ai-code.md`](./research/2026-04-30-empirical-bugs-ai-code.md) § 7.3 — opção C de B08 (refundar catálogo) implica re-colocação; B02 e B08 têm acoplamento.
+- Spec 0008 (governance-coherence) já cravou: `global-rules.md` é universal IA-agnóstica; adapters são por-IA; opt-in é dependente de stack/processo. **Esta decisão deve respeitar esse contrato** ou propor amendment explícito.
 
-**Opções:** _(populate after research)_
+**Estrutura das opções:** o ponto pergunta dois sub-eixos: (1) **critério-teste** para classificar uma regra; (2) **arquitetura física** (manter vs introduzir novos arquivos/diretórios). Sub-eixos podem fechar independentemente.
+
+#### Sub-eixo 1 — Critério-teste para classificar uma regra
+
+| Opção | Critério                                                                                                                                                           | Pró                                                                                                 | Contra                                                                                                                                 |
+| :---- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------- |
+| A     | **Audience** (quem precisa saber?). Cross-IA → `global-rules.md`; sintaxe-específica de IA → adapter; stack/processo → `opt-in/*.md`                               | Claro; defensável; alinhado com Spec 0008                                                           | Zona cinza para regras universais com nuance por adapter (ex.: "use plan mode" → Anthropic Plan Mode, OpenAI raciocínio, Gemini agent) |
+| B     | **Duplicação intolerável**. Mesma regra em 2+ adapters → `global-rules.md`; diverge fundamentalmente → adapter                                                     | Minimiza duplicação por construção; alinhado com anti-pattern "duplicação cross-arquivo"            | Pode forçar regras essencialmente per-IA para o universal só porque se traduzem para todas as três                                     |
+| C     | **Escopo de injeção** (cobertura runtime). Sempre injetada → `global-rules.md`; condicional → `opt-in/*.md`; per-IA → adapter                                      | Critério mecânico; cada arquivo tem audience runtime claramente definida; fácil de lintar           | Foco mecânico esconde a pergunta editorial ("isso vale para todo mundo?"); pode levar `global-rules.md` a virar dump                   |
+| D     | **Híbrido A + posição**. A como critério primário; quando ambíguo, considerar **posição no compilado** (zona topo vs centro) e priorizar topo para regras críticas | Endereça a evidência de Lost-in-the-Middle (§ 6.1 do tokens-baseline-budget); preserva clareza de A | Complexidade leve adicional; "regra crítica" precisa de definição (cross-ref a `[DEC-0018-B01]` Sub-eixo 2 / tag de evidência)         |
+
+#### Sub-eixo 2 — Arquitetura física
+
+| Opção | Arquitetura                                                                                                                                       | Pró                                                                                                                                                                      | Contra                                                                                                                                                          |
+| :---- | :------------------------------------------------------------------------------------------------------------------------------------------------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| E     | **Manter status quo**: `global-rules.md` (1 arquivo) + 3 adapters + `opt-in/*.md` (flat)                                                          | Zero churn; testes/snapshots intactos; modelo já validado pela Spec 0008                                                                                                 | Não escala se Bloco B inflar; B02-D (zona topo) só endereçável por ordem de inserção, não por estrutura                                                         |
+| F     | **Hierarquia por subdiretório dentro de `opt-in/`** (ex.: `opt-in/editorial/`, `opt-in/engineering/`, `opt-in/security/`)                         | Prepara terreno para Spec 0011 sem antecipá-la; deixa universal/adapter intactos                                                                                         | Spec 0011 está no roadmap como "Now"; antecipar parcialmente pode gerar débito (mover de novo)                                                                  |
+| G     | **Split de `global-rules.md` em arquivos temáticos** (ex.: `global-engineering.md`, `global-process.md`, `global-philosophy.md`)                  | Endereça B02-D aplicando taxonomia B01-B/F na própria zona topo; cada arquivo cabe num teto menor                                                                        | Cada arquivo concatenado precisa novo header/separador no compiler; zonas topo crescem em número de arquivos (mas não em tokens necessariamente)                |
+| H     | **Hierarquia full por subdiretório** (`global-rules/<categoria>/*.md` + `opt-in/<categoria>/*.md`) — adoção parcial da Spec 0011                  | Solução completa de organização                                                                                                                                          | **Antecipar 0011** colidiria com pré-requisito declarado em `roadmap/backlog.md` ("0018 mergeada"); inverte ordem de execução                                   |
+| I     | **Novo arquivo `meta-rules.md`** para meta-regras do agente (model routing, plan mode, contexto enxuto), separando-as de princípios de engenharia | Limpa `global-rules.md` que hoje mistura "Princípios de Engenharia" + "Eficiência de IA" + "Workflow com IA"; aproveita opção E adicional do spec-driven research (§ 11) | Mais um arquivo; precisa decisão sobre nome (`meta-rules.md` vs `agent-rules.md` vs outro); cresce surface de adapter (claude/codex/gemini precisam saber dele) |
+
+**Recomendação inicial (a confirmar pós-gate):** **D + E** como mínimo; **D + F** como upgrade controlado. Justificativa:
+
+- **D** (Sub-eixo 1) endereça simultaneamente o critério editorial (audience) e a evidência empírica de posição (Lost-in-the-Middle) sem inverter a Spec 0008.
+- **E** (Sub-eixo 2) é o caminho de menor risco: mantém arquitetura validada; deixa **F** disponível como adoção incremental se o Bloco B mostrar que `opt-in/` precisa de scoping antes da Spec 0011.
+- **G** é alternativa séria se `[DEC-0018-B01]` resolver eixo primário em B/F (função editorial). **H** é prematuro (viola pré-requisito de 0011); **I** é preferência tática que cabe ser rediscutida durante reconciliação do b9efb83 (`[DEC-0018-B08]`) — onde "Eficiência de IA" e "Workflow com IA" estão hoje misturados.
+
+**Cross-ref:** decisão de B02 cruza com `[DEC-0018-B03]` (orçamento) — qualquer arquitetura escolhida deve caber no teto agregado decidido em B03; cruza com `[DEC-0018-B06]` (fronteira 0011) — F/H antecipam parcialmente a Spec 0011.
 
 **Decisão (preencher pós-gate):**
 
 - Status: `Pendente`
-- Escolha: \_\_\_
+- Escolha (Sub-eixo 1, critério): \_\_\_
+- Escolha (Sub-eixo 2, arquitetura): \_\_\_
 - Justificativa: \_\_\_
 - Data: \_\_\_
 - Owner: \_\_\_
@@ -482,18 +542,84 @@ Recomendação: **D16.A** — gate explícito é didático e evita ambiguidade.
 
 ### [DEC-0018-B03] Orçamento de tokens
 
-**Pergunta:** qual teto de tokens por arquivo e agregado para o `<AI_GUIDELINES>` compilado? Qual baseline e qual margem de crescimento aceitável?
+**Pergunta:** qual teto de tokens **por arquivo** e **agregado** para o `<AI_GUIDELINES>` compilado? Hard ceiling ou soft ceiling? Que enforcement (lint determinístico × audit por processo)? Que unidade canônica (tokens × linhas × instruções)?
 
 **Contexto (research):**
 
-- A preencher após `research/2026-04-30-tokens-baseline-budget.md`.
+- [`research/2026-04-30-tokens-baseline-budget.md`](./research/2026-04-30-tokens-baseline-budget.md) — medição instrumental dos 3 cenários compilados (min 3,3–3,8 K, qg 3,9–4,5 K, full 4,9–5,5 K tokens); distribuição por arquivo-fonte (drivers: `core` 32 %, `global-rules` 33 %, adapters 31 %); convergência de evidência externa que sustenta tetos; § 9 traz famílias de opções (granularidade, tipo de teto, valores numéricos, enforcement).
+- [Anthropic Claude Code best-practices](https://code.claude.com/docs/en/best-practices) — _"Bloated CLAUDE.md files cause Claude to ignore your actual instructions"_, _"if a rule is getting lost, the file is probably too long"_; sem número absoluto.
+- [HumanLayer "Writing a good claude.md"](https://www.humanlayer.dev/blog/writing-a-good-claude-md) — "<300 linhas, idealmente <60". Compilado-min está em 238 linhas (cabe); compilado-full em 381 (estoura).
+- [MindStudio "Context rot in Claude Code skills"](https://www.mindstudio.ai/blog/context-rot-claude-code-skills-bloated-files) — "<2.000–3.000 tokens por skill file"; "exceeding the threshold = signal to audit, not to expand".
+- [AGENTS.md / Hivetrail](https://hivetrail.com/blog/agents-md-vs-claude-md-cross-tool-standard) — "frontier LLMs reliably follow ~150–200 instructions"; budget por **instruction-count**, não tokens.
+- [Cem Karaca, "My CLAUDE.md was eating 42K tokens"](https://medium.com/@cem.karaca/my-claude-md-was-eating-42-000-tokens-per-conversation-heres-how-i-fixed-it-85ffba809bd4) — trajetória empírica de inflação (150→1207 linhas / 2K→42K tokens em 9 meses).
+- [Chroma "Context Rot" 2025](https://research.trychroma.com/context-rot) — degradação **a cada incremento** de comprimento, não só perto do limite anunciado.
 
-**Opções:** _(populate after research)_
+**Estrutura das opções:** ponto **multi-dimensional**. 4 sub-eixos independentes (granularidade × tipo × valores × enforcement) — owner pode resolver cada um separadamente. Convenção: tokens medidos via Tok-H (banda alta, chars/3,5 — calibrada para PT-BR via tokens-baseline-budget § 3.2).
+
+#### Sub-eixo 1 — Granularidade do teto
+
+| Opção | Granularidade                      | Pró                              | Contra                                      |
+| :---- | :--------------------------------- | :------------------------------- | :------------------------------------------ |
+| A     | Apenas teto **agregado**           | Simples de medir e comunicar     | Ignora _drivers_ individuais inflados       |
+| B     | Apenas teto **por arquivo**        | Localiza inflação cirurgicamente | Agregado pode crescer no acúmulo silencioso |
+| C     | **Ambos** (por arquivo + agregado) | Defesa em profundidade           | Mais regra para manter / lintar             |
+
+#### Sub-eixo 2 — Tipo de teto
+
+| Opção | Tipo                                                  | Pró                                          | Contra                                                       |
+| :---- | :---------------------------------------------------- | :------------------------------------------- | :----------------------------------------------------------- |
+| D     | **Hard ceiling** (lint falha)                         | Enforcement determinístico                   | Bloqueia PR legítimo; tendência a "comentar pra desbloquear" |
+| E     | **Soft ceiling + audit obrigatório**                  | Alinhado com MindStudio; preserva flex       | Enforcement por processo (humano); drift possível            |
+| F     | **Soft → Hard escalonado** (aviso `≥ X`, falha `≥ Y`) | Aviso antes de bloquear; reduz fricção de PR | Mais complexo; 2 thresholds para manter                      |
+
+#### Sub-eixo 3 — Valores numéricos
+
+Posição atual (Tok-H): `core` 1.232; `global-rules` 1.273; max adapter (gemini) 502; max opt-in (qg) 630; **compilado-min** 3.815; **compilado-qg** 4.472; **compilado-full** 5.554.
+
+| Opção | Teto agregado                                                  | Universal/file       | Adapter/file | Opt-in/file | Cabe o status atual?                                                                     |
+| :---- | :------------------------------------------------------------- | :------------------- | :----------- | :---------- | :--------------------------------------------------------------------------------------- |
+| G     | ≤ 4 K tokens                                                   | ≤ 1.000 tok          | ≤ 400 tok    | ≤ 800 tok   | **Não** — `core` 1.232 e `global-rules` 1.273 estouram universal; gemini estoura adapter |
+| H     | ≤ 6 K tokens                                                   | ≤ 1.500 tok          | ≤ 600 tok    | ≤ 1.200 tok | **Sim** para min/qg/full atuais; pequena folga                                           |
+| I     | ≤ 8 K tokens                                                   | ≤ 2.000 tok          | ≤ 800 tok    | ≤ 1.500 tok | **Sim** confortavelmente; folga grande                                                   |
+| J     | ≤ 10 K tokens                                                  | ≤ 3.000 tok          | ≤ 1.500 tok  | ≤ 3.000 tok | **Sim** com folga; alinhado com MindStudio (≤ 3 K por arquivo)                           |
+| K     | **% relativo**: ≤ 5 % de janela usável de 100 K (= 5 K tokens) | derivado do agregado | derivado     | derivado    | Equivalente numérico ao **H** mas com fundamento explícito                               |
+
+#### Sub-eixo 4 — Enforcement / instrumentação
+
+| Opção | Enforcement                                                                                                     | Pró                                 | Contra                                                   |
+| :---- | :-------------------------------------------------------------------------------------------------------------- | :---------------------------------- | :------------------------------------------------------- |
+| L     | **Manual** (revisão de PR / checklist)                                                                          | Sem código novo                     | Drift inevitável; depende de disciplina                  |
+| M     | **Lint custom** em `cli/governance/monolith/` que mede chars (Tok-H) e falha por threshold                      | Determinístico; dentro do framework | Heurística pode divergir do tokenizer Anthropic em ±10 % |
+| N     | **Lint via Anthropic [`messages.count_tokens`](https://docs.anthropic.com/en/api/messages-count-tokens)** em CI | Canônico (oficial)                  | Requer secret no CI; rate-limit; latência                |
+| O     | **M (heurística como gate) + N opcional** (sanity check periódico off-CI)                                       | Compromisso pragmático              | 2 mecanismos; precisa documentar quando rodar N          |
+
+#### Sub-eixo 5 — Unidade canônica documentada em `global-rules.md`
+
+| Opção | Unidade primária                                                                | Pró                                                                | Contra                                                                            |
+| :---- | :------------------------------------------------------------------------------ | :----------------------------------------------------------------- | :-------------------------------------------------------------------------------- |
+| P     | **Tokens** (com Tok-H como heurística)                                          | Mesma unidade dos modelos; converte direto para custo/sessão       | Heurística aproximada; precisa documentar metodologia                             |
+| Q     | **Linhas**                                                                      | Direto medir em qualquer editor; alinhado com Anthropic/HumanLayer | Variável conforme prosa-densa vs bullets; razão tokens/linha cresce com o tamanho |
+| R     | **Instruções** (item-count)                                                     | Alinhado com AGENTS.md/Hivetrail "150–200 instruções"              | Definição de "instrução" é ambígua (bullet vs frase vs parágrafo)                 |
+| S     | **Multi-unidade**: tokens primário; linhas/instruções como derivadas auxiliares | Triangulação; cada unidade boa para um caso de uso                 | Mais pesado de comunicar                                                          |
+
+**Recomendação inicial (a confirmar pós-gate):** **C + E + H + O + P** (com **S** como anotação informacional). Justificativa:
+
+- **C** (granularidade dupla) — sem ambos, drift entra por algum lado.
+- **E** (soft ceiling + audit) — alinhado com MindStudio "exceeding = signal to audit, not to expand"; preserva capacidade de exceção legítima sem virar escape hatch.
+- **H** (≤ 6 K agregado / ≤ 1,5 K universal / ≤ 600 adapter / ≤ 1,2 K opt-in) — cabe o estado atual com ~6 % de folga no agregado; deixa espaço razoável para Bloco B sem permitir inflação descontrolada. **G** (4 K) é apertado demais (rebenta no estado atual); **I/J** abrem caminho para regredir (Cem Karaca month-3 caiu em 8 K com 400 linhas).
+- **O** (lint heurístico no framework + count_tokens canônico off-CI) — determinismo onde dói (PR-time) sem acoplar CI a secret externa; sanidade canônica como auditoria periódica.
+- **P** (tokens primário) — unidade que importa para o consumidor real; **Q/R** ficam derivadas em comentário pedagógico no `global-rules.md` ("≤ 6 K tokens ≈ ≤ 300 linhas ≈ ≤ 50 itens-âncora").
+
+**Dependências:** `[DEC-0018-B02]` (colocação) deve respeitar este teto; `[DEC-0018-B06]` (fronteira 0011) usa este teto como trigger ("se o agregado cruzar X, Spec 0011 vira mandatória"); `[DEC-0018-B08]` (reconciliação b9efb83) precisa garantir que o conteúdo reconciliado caiba no teto.
 
 **Decisão (preencher pós-gate):**
 
 - Status: `Pendente`
-- Escolha: \_\_\_
+- Escolha (Sub-eixo 1, granularidade): \_\_\_
+- Escolha (Sub-eixo 2, tipo): \_\_\_
+- Escolha (Sub-eixo 3, valores numéricos): \_\_\_
+- Escolha (Sub-eixo 4, enforcement): \_\_\_
+- Escolha (Sub-eixo 5, unidade): \_\_\_
 - Justificativa: \_\_\_
 - Data: \_\_\_
 - Owner: \_\_\_
@@ -502,18 +628,62 @@ Recomendação: **D16.A** — gate explícito é didático e evita ambiguidade.
 
 ### [DEC-0018-B04] Formato do catálogo de regras
 
-**Pergunta:** que campos cada regra carrega (nome, trigger, anti-padrão, exemplo positivo, exemplo negativo, fonte)? Que convenção de ID (`[RULE-*]` paralelo a `[BR-*]` da CLI? Outra?)? Hierarquia entre arquivos (uma regra em um único arquivo? Adapter ≠ universal?).
+**Pergunta:** que campos cada regra carrega? Que convenção de ID (`[RULE-*]`, `[GR-*]`, `AIGL-*` paralelos ao `[BR-*]` da CLI)? Estrutura mínima por regra ou prosa livre? Frontmatter YAML por regra ou inline em arquivo monolítico?
 
 **Contexto (research):**
 
-- A preencher após `benchmark-rules-content.md` e `spec-driven-tools-rules.md`.
+- [`research/2026-04-30-benchmark-rules-content.md`](./research/2026-04-30-benchmark-rules-content.md) § 6.3 — quatro opções estruturadas: prosa livre + headings (Anthropic/OpenAI/Aider), frontmatter YAML por regra (Continue/Anthropic Skills), IDs inline com sintaxe leve (modelo `BR-*` já em uso aqui), estrutura mínima de compromisso (heading + ID + intent + body livre + verificação opcional).
+- [`research/2026-04-30-external-bug-taxonomies.md`](./research/2026-04-30-external-bug-taxonomies.md) Anexo B — **esqueleto consolidado** de "regra bem documentada" derivado da interseção CWE / CERT / Sonar RSPEC / OWASP-LLM / ESLint. Campos: `id`, `name`, `type`, `severity`, `why_is_this_an_issue`, `noncompliant_example`, `compliant_example`, `exceptions`, `risk_assessment` (opcional CERT), `see_also` (cross-refs), `tags`, `applicable_languages`, `introduced_in_version`, `mode_of_introduction`.
+- [`research/2026-04-30-spec-driven-tools-rules.md`](./research/2026-04-30-spec-driven-tools-rules.md) § 5–8 — Continue tem schema explícito (`name`, `globs`, `regex`, `alwaysApply`, `description`); Cursor `.mdc` tem frontmatter pareado a globs; Cline expande YAML; Spec Kit/BMAD/OpenSpec não impõem schema.
+- [`research/2026-04-30-tokens-baseline-budget.md`](./research/2026-04-30-tokens-baseline-budget.md) — formato afeta densidade de tokens; frontmatter pesado infla cada regra.
 
-**Opções:** _(populate after research)_
+**Estrutura das opções:** 3 sub-eixos: (1) **estrutura por regra**; (2) **convenção de ID**; (3) **organização físico-arquivo**.
+
+#### Sub-eixo 1 — Estrutura por regra
+
+| Opção | Estrutura                                                                                                                          | Pró                                                                                                                                                                 | Contra                                                                                                                         |
+| :---- | :--------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :----------------------------------------------------------------------------------------------------------------------------- |
+| A     | **Prosa livre + headings** (Anthropic/OpenAI/Aider)                                                                                | Máxima legibilidade; barreira zero p/ contribuir; alinhado com 100 % dos provedores oficiais                                                                        | Sem rastreabilidade; teste/CI não tem âncora estável; diverge da convenção `BR-*` interna                                      |
+| B     | **Frontmatter YAML por regra** (modelo Continue, RSPEC Sonar, esqueleto AnexoB completo)                                           | Schema completo; permite ferramental (linter/generator/busca por tag); padrão indústria                                                                             | Uma regra/arquivo explode quantidade de arquivos; monolito com múltiplos blocos YAML é não-padrão; atrito de contribuição alto |
+| C     | **IDs inline com sintaxe leve** (`[GR-XXXX]` ou `[RULE-XXXX]` no início do bullet/heading; corpo prosa)                            | Rastreabilidade preservada sem schema pesado; convergente com `BR-*` interno; permite citar regra em PR/teste/ADR                                                   | Precisa de processo de alocação de IDs; risco de IDs órfãos se regras mudam de arquivo                                         |
+| D     | **Estrutura mínima por regra** (heading H3 com ID curto + 1 frase de _intent_ + corpo livre + opcional _verificação_)              | Compromisso: rastreabilidade (ID) + navegabilidade (heading) + intent claro + verificabilidade — alinhado com Anthropic best-practice "give Claude a way to verify" | Estrutura nova; precisa adoção disciplinada; risco de variações inconsistentes se contribuidores ignorarem campos opcionais    |
+| E     | **D + campos opcionais condicionais por categoria** (ex.: `severity` mandatório em `[RULE-SEC-*]` mas opcional em `[RULE-EDIT-*]`) | Combina rigor onde dói com flex onde cabe — espelha a recomendação **J** de `[DEC-0018-B01]` Sub-eixo 2 (tag de evidência)                                          | Mais complexo; precisa documentar quando cada campo é mandatório (mais ruído de boilerplate)                                   |
+
+#### Sub-eixo 2 — Convenção de IDs
+
+| Opção | Convenção                                                                                    | Pró                                                                                                                         | Contra                                                              |
+| :---- | :------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------ |
+| F     | `[RULE-NNNN]` global sequencial                                                              | Simples; espelha `BR-NNNN`                                                                                                  | Não codifica categoria; precisa lookup para entender domínio        |
+| G     | `[RULE-<CAT>-NN]` (ex.: `[RULE-ENG-01]`, `[RULE-SEC-01]`, `[RULE-PROC-01]`)                  | Cat embutida no ID; legível                                                                                                 | Categoria fica acoplada ao ID; renomeação da categoria invalida IDs |
+| H     | `[GR-NNNN]` para universal + `[OPT-<feature>-NN]` para opt-in + `[ADP-<ia>-NN]` para adapter | Codifica colocação no próprio ID; espelha arquitetura física (`global-rules.md` × `opt-in/*` × `adapters`)                  | 3 prefixos; precisa documentar; renomeação de feature invalida IDs  |
+| I     | `AIGL-NNN` (alinhado com Anexo B do external-bug-taxonomies)                                 | Alinhado com sugestão research; "AI-Guidelines" embutido — útil quando regras vão para `roadmap/backlog.md` ou outras specs | Não diferencia categoria; só prefixa o framework                    |
+| J     | **Misto**: prefixo por colocação (H) + campo `category` interno na regra                     | ID estável (não muda com renomeação de cat); colocação na cara                                                              | 2 lugares para classificar (ID + campo)                             |
+
+#### Sub-eixo 3 — Organização físico-arquivo
+
+| Opção | Onde regras vivem                                                                                               | Pró                                                                                      | Contra                                                                |
+| :---- | :-------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------- | :-------------------------------------------------------------------- |
+| K     | **Status quo**: regras inline em `.core/rules/*.md` (monolito por arquivo)                                      | Zero churn; um lugar por arquivo                                                         | Catálogo cresce sem disciplina visual                                 |
+| L     | **Catálogo separado** `.core/rules/catalog.md` linkado pelos arquivos canônicos                                 | Source-of-truth única; arquivos canônicos viram pointers                                 | Indireção; agente pode não seguir o link; reorganização do framework  |
+| M     | **Continue-style**: `.core/rules/atomic/<rule>.md` com frontmatter (uma regra/arquivo)                          | Granularidade máxima; ferramental fácil; fácil shifting de regra                         | Explode número de arquivos; muda profundamente o compiler             |
+| N     | **K + apêndice "Catálogo + cross-ref" em `.core/rules/catalog.md`** (resumo navegável; regras vivem onde estão) | Compromisso: regras seguem como inline (familiar) + catálogo dá visão global e cross-ref | Risco de drift entre catálogo e regras; precisa de lint cross-arquivo |
+
+**Recomendação inicial (a confirmar pós-gate):** **D + H + N**. Justificativa:
+
+- **D** (estrutura mínima) — barreira de contribuição baixa; rastreabilidade adequada; cabe no orçamento de tokens (frontmatter pesado de B inflaria cada regra ~30 tokens × n regras → conflito com `[DEC-0018-B03]`).
+- **H** (prefixos por colocação) — leitor sabe imediatamente "isto é universal" vs "isto vem de feature X" só pelo ID; alinha com o critério de `[DEC-0018-B02]` (escopo de injeção).
+- **N** (regras inline + catálogo separado) — preserva familiaridade e zero-churn nos arquivos canônicos; oferece visão global navegável; alinha com prática Sonar (RSPEC + see-also).
+- **E** (Sub-eixo 1 estendido) é candidato sério se `[DEC-0018-B05]` cravar metodologia que demande severity/risk-assessment para categorias específicas. Owner pode escolher D agora e migrar para E em Stage 2 se eval evidenciar necessidade.
+- **B** (frontmatter completo) é over-engineering hoje; reservado como evolução opcional (gatilhada se Spec 0009 / harness-engineering cravar enforcement automático).
+
+**Dependências:** decisão depende de `[DEC-0018-B01]` (taxonomia define quais categorias prefixos H precisam representar) e influencia `[DEC-0018-B05]` (eval precisa de regra com formato estável). Owner pode escolher Sub-eixo 1 e 2 condicional ("D/H confirmados após B01 fechar").
 
 **Decisão (preencher pós-gate):**
 
 - Status: `Pendente`
-- Escolha: \_\_\_
+- Escolha (Sub-eixo 1, estrutura): \_\_\_
+- Escolha (Sub-eixo 2, IDs): \_\_\_
+- Escolha (Sub-eixo 3, organização): \_\_\_
 - Justificativa: \_\_\_
 - Data: \_\_\_
 - Owner: \_\_\_
@@ -522,18 +692,80 @@ Recomendação: **D16.A** — gate explícito é didático e evita ambiguidade.
 
 ### [DEC-0018-B05] Metodologia do eval mínimo
 
-**Pergunta:** quantos prompts canônicos? Quais provedores (≥2)? Que métrica (kill rate? outra?)? Que threshold de corte (regras com kill rate baixo são repostadas ou cortadas)? Como tratar não-determinismo do LLM?
+**Pergunta:** quantos prompts canônicos? Quais provedores (≥ 2)? Que métrica (kill-rate? passa/não-passa?)? Que threshold de corte? Como tratar não-determinismo do LLM? Que escopo cabe aqui (eval mínimo manual) vs Spec 0009 (harness automatizado)?
 
 **Contexto (research):**
 
-- A preencher após `empirical-bugs-ai-code.md` e `external-bug-taxonomies.md`.
+- [`research/2026-04-30-empirical-bugs-ai-code.md`](./research/2026-04-30-empirical-bugs-ai-code.md) § 7.2 — lições da literatura: SWE-Bench+ teve **47,93 % de falsos positivos** se confiar só em "passa/não-passa"; declarar a camada (modelo standalone vs agente vs agente-com-tools); cobrir múltiplas linguagens; problema de tamanho realista (snippets HumanEval-style não exibem race/memory/N+1); anti-leak por construção; múltiplas rodadas (Spracklen: 43 % dos hallucinated packages são **consistentes** entre runs). 3 opções estruturadas: A "narrow & deep", B "broad & shallow", C híbrido.
+- [`research/2026-04-30-external-bug-taxonomies.md`](./research/2026-04-30-external-bug-taxonomies.md) § 10.2 — 4 opções complementares (combináveis): E1 "CERT Risk Assessment" (severity × likelihood × remediation cost); E2 "OWASP Top-10 factors" (incidence × exploitability × detectability); E3 "ESLint regression test" (golden examples + prompt-eval); E4 "Sonar RSPEC + see-also" (documentação rigorosa, sem prompt-eval). Síntese: **E4 obrigatório + E3 amostral**.
+- [`research/2026-04-30-spec-driven-tools-rules.md`](./research/2026-04-30-spec-driven-tools-rules.md) — nenhuma das ferramentas SDD pesquisadas (Spec Kit, BMAD, OpenSpec, Continue, Aider, Cursor, Cline) implementa eval de "regra cumpre seu propósito". Eval contra modelo é território não-padronizado.
+- Contexto de operação: framework é PT-BR; provedores alvo são Claude, Codex, Gemini (matching `.core/rules/{claude,codex,gemini}.md`); custo de inference é da owner (sem CI Anthropic key configurada); volume aceitável de eval semanal/mensal é restrito.
 
-**Opções:** _(populate after research)_
+**Estrutura das opções:** as opções são naturalmente **multi-dimensionais** e parcialmente **combináveis** (uma metodologia é um vetor: largura × profundidade × tipo-de-asserção × ferramenta de medição). 5 sub-eixos.
+
+#### Sub-eixo 1 — Largura × profundidade
+
+| Opção | Forma                                                                                                    | Pró                                                                   | Contra                                                               |
+| :---- | :------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------- | :------------------------------------------------------------------- |
+| A     | **Narrow & deep**: 3–5 cenários cobrindo exatamente as categorias de B01, com mutation + inspeção humana | Calibrado; mensura efeito da regra; alinhado com tamanho do framework | Caro; cobertura editorial limitada                                   |
+| B     | **Broad & shallow**: dezenas de cenários auto-rodáveis, métrica simples (pass/fail + scanner CWE)        | Amplo; replicável; barato                                             | Vícios SWE-bench-like; falsos positivos altos                        |
+| C     | **Híbrido**: B amplo para regressão CI; A trimestral para calibração                                     | Compromisso entre cobertura e custo                                   | 2 mecanismos para manter; precisa de governance de quando rodar cada |
+
+#### Sub-eixo 2 — Tipo de asserção (o que se mede)
+
+| Opção | Asserção                                                                                                               | Pró                                                                                               | Contra                                                                               |
+| :---- | :--------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------ | :----------------------------------------------------------------------------------- |
+| D     | **Pass/Fail por cenário** (modelo Aider eval, HumanEval)                                                               | Simples; binário                                                                                  | 47,93 % de falsos positivos em SWE-Bench+; subestima regras semânticas               |
+| E     | **Mutation kill-rate** (regra "mata" o mutante introduzido?)                                                           | Empírico; mede efeito da regra contra _bug-shape_; alinha com Quality Gates feature (≥ 60 % kill) | Requer pipeline de mutation testing; caro; só aplica a regras detectáveis em código  |
+| F     | **Delta comportamental**: rodar IA com regra × sem regra; medir mudança de comportamento contra golden examples (E3)   | Mensura **o efeito da regra na IA** (não só formulação); empirista                                | Requer infra de eval (test runner contra modelo); custo alto; golden set para manter |
+| G     | **Documentação obrigatória** (E4 — RSPEC mínima): each rule has Why / Noncompliant / Compliant / Exceptions / See-also | Barato; alinha com prática indústria; ergonômico; bom para regras editoriais não auto-rodáveis    | Não mede efeito na IA — só formaliza documentação                                    |
+| H     | **G + F amostral**: G obrigatório em toda regra; F só para subset crítico (regras com tag "Forte" de B01-J)            | Compromisso pragmático: rigor onde dói, doc-only onde basta                                       | Precisa critério para "subset crítico" (cross-ref tag B01)                           |
+
+#### Sub-eixo 3 — Provedores e quantidade
+
+| Opção | Provedores                                                                   | Pró                                                                                                                                                  | Contra                                                             |
+| :---- | :--------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------- |
+| I     | **1 provedor** (Claude, paritário ao framework principal)                    | Custo mínimo; rápido                                                                                                                                 | Não detecta variação cross-IA; risco de regra IA-específica passar |
+| J     | **2 provedores** (Claude + Gemini, ou Claude + GPT)                          | Cobre divergência cross-IA; alinhado com [`empirical-bugs § 7.2`](./research/2026-04-30-empirical-bugs-ai-code.md) "Cobrir múltiplas linguagens/IAs" | Custo dobra; 2 chaves para gerenciar                               |
+| K     | **3 provedores** (Claude + Codex + Gemini, paritários aos adapters)          | Coerente com a estrutura `.core/rules/{claude,codex,gemini}.md`; cobre todos os adapters                                                             | Custo triplica; chaves múltiplas; tempo de eval maior              |
+| L     | **2 provedores + 1 fallback** (Claude + Gemini com Codex como backup ad-hoc) | Compromisso de custo + cobertura                                                                                                                     | Heurística "quando rodar fallback?" precisa documentação           |
+
+#### Sub-eixo 4 — Não-determinismo
+
+| Opção | Como tratar                                                                                      | Pró                                                                         | Contra                                                       |
+| :---- | :----------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------- | :----------------------------------------------------------- |
+| M     | **Single-shot, temperature = 0**                                                                 | Determinístico; reprodutível; simples                                       | Não captura variabilidade real (consumidores rodam temp > 0) |
+| N     | **N=3 rodadas, reportar passa-rate** (alinha com Spracklen: 43 % de hallucinations consistentes) | Captura variabilidade; permite distinguir bug determinístico de estocástico | Custo 3 ×; precisa decidir threshold (passa em 2/3? 3/3?)    |
+| O     | **N=5 + bootstrap CI**                                                                           | Robusto estatisticamente                                                    | Custo alto; over-engineering para eval mínimo                |
+
+#### Sub-eixo 5 — Threshold de corte
+
+| Opção | Threshold                                                                                                 | Pró                                                       | Contra                                                    |
+| :---- | :-------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------- | :-------------------------------------------------------- |
+| P     | **Hard**: regra reprovada em ≥ X % das rodadas → cortada                                                  | Determinístico; força corte                               | Pode cortar regra útil que apenas precisa de reformulação |
+| Q     | **Soft**: regra reprovada → flag em `NEXT.md` como débito de revisão; reavalia em próxima rodada          | Preserva regra; permite iteração editorial                | Drift inevitável se débitos não forem trabalhados         |
+| R     | **Categorizado**: regras com tag "Forte" (B01-J) seguem P; regras com tag "Heurística declarada" seguem Q | Rigor onde dói; flex onde a regra é assumidamente opinião | 2 regimes; precisa documentar                             |
+
+**Recomendação inicial (a confirmar pós-gate):** **C + H + J + N + R** como vetor candidato:
+
+- **C** (híbrido) — ataca o tradeoff custo × cobertura sem cravar um lado.
+- **H** (G obrigatório + F amostral) — endereça o achado central de [`empirical-bugs § 7.2`](./research/2026-04-30-empirical-bugs-ai-code.md): documentação rigorosa para todas; eval real para regras críticas. Síntese E4 + E3 do `external-bug-taxonomies` confirma.
+- **J** (2 provedores) — Claude paritário ao adapter principal + Gemini para detectar variação cross-IA. **K** (3 provedores) é mais alinhado mas custa 50 % mais; deixar como upgrade pós-validação.
+- **N** (3 rodadas) — captura não-determinismo sem inflar para over-engineering; passa-rate de **2/3** como default plausível (3/3 estoura em qualquer flutuação).
+- **R** (categorizado) — espelha tag de evidência decidida em `[DEC-0018-B01]` Sub-eixo 2 / opção J.
+
+**Não-recomendar pré-gate:** **D** (pass/fail puro) sozinho — falsos positivos altos demais; **E** (mutation) sozinho — só aplica a regras detectáveis em código, exclui editoriais. **I** (1 provedor) — não detecta o problema central de variação cross-IA.
+
+**Cross-ref para `[DEC-0018-B07]`:** este eval mínimo é seed; a versão automatizada/agente-validador/gate fica para Spec 0009 (harness-engineering). Fronteira definida em B07.
 
 **Decisão (preencher pós-gate):**
 
 - Status: `Pendente`
-- Escolha: \_\_\_
+- Escolha (Sub-eixo 1, largura): \_\_\_
+- Escolha (Sub-eixo 2, asserção): \_\_\_
+- Escolha (Sub-eixo 3, provedores): \_\_\_
+- Escolha (Sub-eixo 4, não-determinismo): \_\_\_
+- Escolha (Sub-eixo 5, threshold): \_\_\_
 - Justificativa: \_\_\_
 - Data: \_\_\_
 - Owner: \_\_\_
@@ -542,19 +774,60 @@ Recomendação: **D16.A** — gate explícito é didático e evita ambiguidade.
 
 ### [DEC-0018-B06] Fronteira com Spec 0011 (regra-hierarquia)
 
-**Pergunta:** se a categoria (c) heurísticas de domínio (ou equivalente decidido em B01) crescer, em que ponto a hierarquia por subdiretório (Spec 0011) se torna necessária? Que débito declarar em `NEXT.md`?
+**Pergunta:** em que **gatilho mensurável** a hierarquia por subdiretório (Spec 0011) deixa de ser "feature requested" e vira mandatória? Que débitos a Spec 0018 declara em `NEXT.md` para passar à 0011? Que partes de organização hierárquica esta spec **antecipa** vs **adia**?
 
 **Contexto (research):**
 
-- Backlog: `regra-hierarquia` em "Now"; pré-requisito declarado é a 0018 concluída.
-- Informado por `tokens-baseline-budget.md` e `[DEC-0018-B02]`.
+- [`roadmap/backlog.md`](../../roadmap/backlog.md) linhas 90–95 — Spec 0011 está em "Now"; pré-requisito declarado: "Spec 0008 mergeada" + "decidir se hierarquia espelha layout do consumidor ou usa namespacing dentro de `.ai-guidelines/rules/<topic>/`". **Sinal-de-pronto** documentado: "quando `global-rules.md` consolidado da 0008 inflar (>200 linhas) ou consumidor reclamar que regras de domínios diferentes todo mundo lê tudo". O baseline atual de `global-rules.md` é **37 linhas / 1.273 tokens** ([`tokens-baseline-budget § 4.2`](./research/2026-04-30-tokens-baseline-budget.md)).
+- [`research/2026-04-30-tokens-baseline-budget.md`](./research/2026-04-30-tokens-baseline-budget.md) § 8.3 — três triggers candidatos derivados de evidência: (1) agregado compilado ≥ X tokens (X depende de `[DEC-0018-B03]`); (2) número de arquivos opt-in ≥ Y (atual: 3 + 2 variantes EN; sugestivamente 8–10); (3) instruções/regras agregadas ≥ 150 (referência AGENTS.md "150–200 instruções").
+- [`research/2026-04-30-spec-driven-tools-rules.md`](./research/2026-04-30-spec-driven-tools-rules.md) § 11 (B06) — **fronteira sugerida**: Spec 0018 define **conteúdo e taxonomia**; Spec 0011 define **governança da mudança e organização hierárquica** (quem pode editar, como propagar, amendment vs delta). Não há overlap semântico. OpenSpec delta specs e Cline AI-editable rules sugerem padrões para 0011.
+- [`research/2026-04-30-benchmark-rules-content.md`](./research/2026-04-30-benchmark-rules-content.md) § 4 — **convergência absoluta**: Anthropic/OpenAI/Google/Continue todos implementam "hierarquia por proximidade no filesystem"; é o único mecanismo unânime de scoping. Spec 0011 alinha com esse padrão.
 
-**Opções:** _(populate after research)_
+**Estrutura das opções:** 3 sub-eixos: (1) **fronteira semântica** (o que pertence a qual spec); (2) **gatilho de transição** (quando 0011 vira mandatória); (3) **conteúdo do `NEXT.md`**.
+
+#### Sub-eixo 1 — Fronteira semântica
+
+| Opção | Fronteira                                                                                                                                 | Pró                                                                                           | Contra                                                                           |
+| :---- | :---------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------- |
+| A     | **0018: conteúdo + taxonomia + colocação rasa; 0011: hierarquia profunda (subdiretórios)**                                                | Preserva separação clean; 0018 entrega resultado tangível; 0011 vira responsabilidade isolada | Se `[DEC-0018-B02]` escolher F (subdiretório em opt-in/), antecipa parte da 0011 |
+| B     | **0018 entrega TUDO inclusive hierarquia inicial; 0011 entrega apenas governança da mudança** (amendment, delta-spec, compliance)         | Spec 0018 fica completa em escopo                                                             | Inflar 0018; aumentar PR; arrastar prazo                                         |
+| C     | **0018 entrega taxonomia + sinaliza 0011; 0011 absorve qualquer pendência hierárquica**                                                   | Mínimo escopo para 0018; 0011 absorve toda a complexidade                                     | Se hierarquia for necessária para enforcement de B03 (orçamento), bloqueia 0018  |
+| D     | **0018 = taxonomia + colocação atual + organização lógica via prefixos de ID** (B04 H/J); 0011 = organização física por subdiretório real | Compromisso: organização cognitiva entrega valor agora; organização física fica para 0011     | Prefixos de ID podem virar inconsistentes se 0011 mudar a colocação              |
+
+#### Sub-eixo 2 — Gatilho de transição (quando 0011 vira mandatória)
+
+| Opção | Gatilho                                                                                                       | Pró                                                                        | Contra                                                                                                                         |
+| :---- | :------------------------------------------------------------------------------------------------------------ | :------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------- |
+| E     | **Por linhas de `global-rules.md`** (status quo do backlog: > 200 linhas)                                     | Já documentado; familiar                                                   | Linhas variam com prosa-densa vs bullet; ver [`tokens-baseline-budget § 3.3`](./research/2026-04-30-tokens-baseline-budget.md) |
+| F     | **Por tokens agregados do compilado** (ex.: ≥ 70 % do teto agregado decidido em `[DEC-0018-B03]`)             | Coerente com B03; mensurável; alinha com evidência empírica de context-rot | Acoplado a B03; precisa lint para checar                                                                                       |
+| G     | **Por número de arquivos opt-in** (ex.: ≥ 8 arquivos)                                                         | Direto; sinaliza scoping necessário                                        | Conta arquivos, não conteúdo; arquivos podem variar muito de tamanho                                                           |
+| H     | **Por número de regras agregadas** (item-count, ex.: ≥ 100 regras totais; ref AGENTS.md "150–200 instruções") | Alinha com convenção AGENTS.md                                             | Definição de "regra/instrução" é ambígua se B04 escolher D (estrutura mínima)                                                  |
+| I     | **Múltiplo (E + F + G)**: qualquer um dispara                                                                 | Defesa em profundidade; primeiro gatilho que dispara é o que vale          | 3 medições para acompanhar                                                                                                     |
+| J     | **Subjetivo**: "quando consumidor reclamar de regras misturadas"                                              | Aceita feedback empírico real                                              | Sem trigger objetivo; pode arrastar arbitrariamente                                                                            |
+
+#### Sub-eixo 3 — Conteúdo do `NEXT.md` (débitos para Spec 0011)
+
+| Opção | Que débitos declarar                                                                                                                                                                       | Pró                                                    | Contra                                                              |
+| :---- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------- | :------------------------------------------------------------------ |
+| K     | **Mínimo**: declarar gatilho escolhido em Sub-eixo 2 + cross-ref para 0011                                                                                                                 | Curto; foco                                            | Pode esquecer detalhes editoriais de B01/B04 que importam para 0011 |
+| L     | **K + lista de regras candidatas a hierarquização** (subset que claramente quer subdiretório próprio)                                                                                      | Concreto; quem trabalhar 0011 não começa do zero       | Lista pode ficar obsoleta se reconciliação b9efb83 mudar regras     |
+| M     | **L + decisão sobre namespacing**: hierarquia espelha layout do consumidor (`api/AGENTS.md`) ou namespacing interno (`.ai-guidelines/rules/<topic>/`) — pré-requisito declarado em backlog | Resolve antecipadamente o pré-requisito                | Pode antecipar decisão que cabe na 0011                             |
+| N     | **K + apêndice "estado canônico do `<AI_GUIDELINES>` ao fim da 0018"** (medição de tokens, listagem de regras, taxonomia final)                                                            | Snapshot útil para 0011 começar com baseline conhecido | Mais conteúdo no `NEXT.md` (que será deletado no encerramento)      |
+
+**Recomendação inicial (a confirmar pós-gate):** **A + I + N**:
+
+- **A** (fronteira clean) — preserva escopo; 0018 entrega valor sem inflar; 0011 fica isolada e endereçável independentemente.
+- **I** (gatilho múltiplo E+F+G) — primeiro a disparar é o sinal real; **F** (tokens) é o mais empírico; **E** e **G** capturam dimensões diferentes que F sozinho perde.
+- **N** (NEXT.md mínimo + snapshot canônico) — minimiza prosa em arquivo descartável; entrega contexto operacional concreto.
+
+**Caso especial:** se `[DEC-0018-B02]` Sub-eixo 2 escolher **F** (hierarquia por subdiretório dentro de `opt-in/`), a fronteira deste B06 muda para **D** (Sub-eixo 1) — a hierarquia inicial fica em 0018; 0011 só absorve governança da mudança. Owner deve decidir B02 e B06 em sequência ou marcá-los como dependentes.
 
 **Decisão (preencher pós-gate):**
 
 - Status: `Pendente`
-- Escolha: \_\_\_
+- Escolha (Sub-eixo 1, fronteira): \_\_\_
+- Escolha (Sub-eixo 2, gatilho): \_\_\_
+- Escolha (Sub-eixo 3, NEXT.md): \_\_\_
 - Justificativa: \_\_\_
 - Data: \_\_\_
 - Owner: \_\_\_
@@ -563,19 +836,60 @@ Recomendação: **D16.A** — gate explícito é didático e evita ambiguidade.
 
 ### [DEC-0018-B07] Fronteira com Spec 0009 (harness-engineering)
 
-**Pergunta:** o eval mínimo desta spec é seed para 0009. Que parte fica aqui (eval manual, registrado em research) e que parte fica para 0009 (harness automatizado, agente validador, integração com `/ultra-review`)?
+**Pergunta:** o eval mínimo decidido em `[DEC-0018-B05]` é **seed** para Spec 0009 (harness-engineering). Que parte fica aqui (eval manual, registrado em research) e que parte fica para 0009 (harness automatizado, agente validador separado, sensores em CI, integração com `/ultra-review`)? Que débitos declarar em `NEXT.md`?
 
 **Contexto (research):**
 
-- Backlog: `harness-engineering` em "Next"; cross-ref Spec 0008-E.
-- Informado por `[DEC-0018-B05]`.
+- [`roadmap/backlog.md`](../../roadmap/backlog.md) linhas 97–104 — Spec 0009 está em "Next"; **fonte do insight**: Uncle Bob via Lucas Montano (cyclomatic complexity, mutation testing); "Vai Faltar Dev 2027" (bugs típicos de IA invisíveis em review humano: N+1, race conditions, memory leaks). **Cross-ref Spec 0008-E**: 0008 entrega o **checklist editorial**; 0009 entrega a **implementação técnica**. **Tipos de falha que spec-driven não resolve sozinho**: amnésia entre sessões, falso "done", implementador e validador no mesmo processo, slop acumulado (degradação 5–10 %/iteração), bugs de IA invisíveis em review humano. **Escopo potencial**: agente validador separado com contrato "um-a-um"; sensores automáticos obrigatórios; evaluation como gate; integração com `/ultra-review`. **Custo de adoção**: elevado — multi-agent + sensors em cada feature = 2–3 × tokens por PR. **Sinal-de-pronto**: usuário rodar `/clear` e novo agente não conseguir retomar; ou PR precisar de 3+ rounds de correção que sensor automático pegaria.
+- [`research/2026-04-30-empirical-bugs-ai-code.md`](./research/2026-04-30-empirical-bugs-ai-code.md) § 7.2 — eval mínimo desta spec é manual/episódico; harness é eval contínuo/automático. As lições gerais (declarar a camada, anti-leak, múltiplas rodadas, golden examples) **continuam aplicáveis** ao harness — esta spec **planta as fundações metodológicas**, 0009 **as instrumenta**.
+- [`research/2026-04-30-spec-driven-tools-rules.md`](./research/2026-04-30-spec-driven-tools-rules.md) § 11 (B07) — observação metodológica: nenhuma das ferramentas SDD pesquisadas implementa o equivalente do harness 0009. É território fronteira.
+- Observação meta: a research file `spec-driven-tools-rules` § 11 (B07) **erroneamente** descreve Spec 0009 como "visibilidade pública / npm orgs". A descrição correta consta no `roadmap/backlog.md` e no header deste ponto: 0009 é **harness-engineering**. Tratado como erro tipográfico do research; não invalida demais conclusões.
 
-**Opções:** _(populate after research)_
+**Estrutura das opções:** 3 sub-eixos: (1) **escopo do que fica em 0018**; (2) **escopo do que vai para 0009**; (3) **artefatos de transição** (o que registrar em research/NEXT.md para 0009 começar bem).
+
+#### Sub-eixo 1 — Escopo retido em 0018 (eval mínimo)
+
+| Opção | Escopo retido                                                                                                                       | Pró                                                         | Contra                                                            |
+| :---- | :---------------------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------- | :---------------------------------------------------------------- |
+| A     | **Apenas documentação metodológica** (RSPEC mínima por regra — opção G de B05). Nenhuma rodada de eval real é executada nesta spec. | Custo zero; foca no editorial                               | Não valida o catálogo; B08 (reconciliação) fica sem evidence-base |
+| B     | **A + 1 rodada manual de eval** (single-shot por regra crítica) registrada em `research/2026-04-30-eval-results.md` (novo)          | Provê evidence-base para B08; sinaliza viabilidade          | Custo moderado; resultados single-shot têm reservas (cf. B05)     |
+| C     | **A + N rodadas manuais** (vetor de B05 escolhido) registradas em `research/2026-04-30-eval-results.md`                             | Cumpre o que B05 cravar; calibra B08 com rigor              | Custo significativo; pode arrastar prazo da 0018                  |
+| D     | **A + B amostral (subset crítico)** + débito de "rodar full eval em ciclo de 0009"                                                  | Compromisso: começa com baseline + transfere ônus para 0009 | Subset arbitrário; precisa documentar critério                    |
+
+#### Sub-eixo 2 — Escopo transferido para 0009
+
+| Opção | Escopo transferido                                                                                                                | Pró                                                             | Contra                                                            |
+| :---- | :-------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------- | :---------------------------------------------------------------- |
+| E     | **Tudo automatizado**: agente validador separado, sensores CI, integração `/ultra-review`, eval em CI                             | Escopo claro; 0009 é "trazer eval ao runtime"                   | 0009 fica grande; reduz pressão para entregar partes incrementais |
+| F     | **Tudo automatizado + governance** (matriz de quando rodar eval: PR, nightly, release)                                            | Endereça custo (2–3 × tokens) com política de quando rodar      | Mais escopo para 0009; pode arrastar                              |
+| G     | **Apenas o agente validador + sensores básicos**; eval pleno fica para uma terceira spec ainda não nomeada                        | Reduz escopo de 0009; permite incremento                        | Cria dependência futura indefinida                                |
+| H     | **E + adoção do eval mínimo de 0018 como _baseline regression_** (qualquer mudança em rules invalida eval; precisa rodar de novo) | Eval baseline-driven; combina com `[DEC-0018-B03]` (re-medição) | Acoplamento eval ↔ catálogo; precisa de governance de invalidação |
+
+#### Sub-eixo 3 — Artefatos de transição
+
+| Opção | Artefatos a deixar prontos                                                                                                                                           | Pró                                                 | Contra                                                                     |
+| :---- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------- | :------------------------------------------------------------------------- |
+| I     | **Mínimo**: `NEXT.md` com pointer para 0009 + cross-ref a `[DEC-0018-B05]`                                                                                           | Curto                                               | 0009 começa quase do zero                                                  |
+| J     | **I + research congelado em `.specify/specs/researchs/<dom>/`** (todos os 5 researches da 0018 são reutilizáveis; B05 + empirical-bugs são particularmente valiosos) | Reaproveitamento direto; alinhado com lifecycle SDD | _(é o que F9.2 do encerramento já fará — trivial)_                         |
+| K     | **J + golden examples codificados** (se B05 escolheu F/H — delta comportamental — os golden examples já podem ser commitados em `.core/eval/<rule-id>.md`)           | 0009 herda corpus pronto                            | Acoplamento eval ↔ rule-id; renomeação invalida; mais arquivos para manter |
+| L     | **K + skeleton de instrumentação** (esqueleto de script para rodar eval contra modelo, sem chave configurada — pronto para 0009 acoplar)                             | 0009 herda código + corpus                          | Antecipa decisão arquitetural de 0009 (qual SDK, qual provider abstrair)   |
+
+**Recomendação inicial (a confirmar pós-gate):** **D + H + J**:
+
+- **D** (eval amostral em 0018) — provê evidence-base para `[DEC-0018-B08]` (reconciliação) sem inflar 0018; aceita explicitamente que eval pleno é para 0009.
+- **H** (todo o automatizado em 0009 + eval mínimo como baseline-regression) — preserva o trabalho desta spec como _âncora canônica_; mudanças em rules são re-evaluadas pelo harness.
+- **J** (research congelado + cross-ref no NEXT.md) — caminho de menor antecipação; **K** e **L** são candidatos sérios mas dependem de escolhas de B05 (F/H delta comportamental) e arrastam decisão arquitetural de 0009 (qual SDK, qual abstração) — não cabem em Stage 1.
+
+**Cross-ref para `[DEC-0018-B05]`:** **D** só faz sentido se B05 escolher H (G obrigatório + F amostral). Owner pode escolher D condicional ("D se B05 fechar em H/C; senão A").
+
+**Cross-ref para `[DEC-0018-B08]`:** evidência produzida em D alimenta B08 (critério "tem source/passa eval?"). Sem D, B08 fica sem evidence-base e cai em opção A do próprio B08 ("manter como heurística declarada").
 
 **Decisão (preencher pós-gate):**
 
 - Status: `Pendente`
-- Escolha: \_\_\_
+- Escolha (Sub-eixo 1, 0018): \_\_\_
+- Escolha (Sub-eixo 2, 0009): \_\_\_
+- Escolha (Sub-eixo 3, transição): \_\_\_
 - Justificativa: \_\_\_
 - Data: \_\_\_
 - Owner: \_\_\_
@@ -584,19 +898,72 @@ Recomendação: **D16.A** — gate explícito é didático e evita ambiguidade.
 
 ### [DEC-0018-B08] Política de reconciliação do conteúdo b9efb83
 
-**Pergunta:** para cada regra do conteúdo de `global-rules.md` e `quality-gates.md` mergeado em b9efb83, que critério aplicar (manter | revisar | reverter)? Critério é "passou no eval"? "Tem fonte"? Combinação?
+**Pergunta:** para cada regra do conteúdo mergeado em `b9efb83` (20 itens em `global-rules.md` + 4 categorias em `quality-gates.md`), que critério aplicar (manter / revisar / reverter)? Critério é "tem source"? "Passa eval"? Combinação? Quem é a unidade de decisão (regra-a-regra × bloco × seção)?
 
 **Contexto (research):**
 
-- Anexo do `plan.md` resume o conteúdo de b9efb83.
-- Informado por todas as 5 sínteses de B.0.
+- [Anexo do `plan.md`](./plan.md) — resumo do conteúdo de `b9efb83`. **`global-rules.md` (20 itens em 3 seções)**: _Princípios de Engenharia_ (7: PT-BR, não modificar arquivos críticos sem confirmação, acesso seguro a chaves, tipagem estrita, estado/imutabilidade, fail-fast, concorrência explícita); _Eficiência de IA_ (5: model routing, feedback cirúrgico, modularidade, redução de ruído, check de contexto); _Workflow com IA_ (8: plan mode, referenciar padrão existente, PR description colaborativo, patterns agnósticos, padrões-não-paths, RPI obrigatório, contexto enxuto, routing de esforço). **`quality-gates.md` (4 categorias)**: análise estática, cobertura+mutação (≥85 %/≥60 % kill), sensores de bugs típicos de IA (N+1, race conditions, memory leaks — _declarativo, sem fonte_), security & secrets.
+- [`research/2026-04-30-empirical-bugs-ai-code.md`](./research/2026-04-30-empirical-bugs-ai-code.md) § 4 (verificação dos sensores) e § 7.3 (3 opções estruturadas A/B/C). Achado: **dos 3 sensores do b9efb83, race conditions e memory leaks têm evidência empírica média a moderada (concorrência em CONCUR; software aging studies); N+1 não aparece como categoria autônoma em nenhuma taxonomia consultada — é heurística de engenharia sem suporte empírico direto**. Ver § 4 para detalhes.
+- [`research/2026-04-30-external-bug-taxonomies.md`](./research/2026-04-30-external-bug-taxonomies.md) — taxonomias maduras (CWE, CERT, Sonar, OWASP-LLM) **não tratam N+1 como categoria autônoma**. Aparece, quando aparece, como sub-padrão dentro de "performance" ou "code-smell".
+- [`research/2026-04-30-tokens-baseline-budget.md`](./research/2026-04-30-tokens-baseline-budget.md) § 4.2 — `global-rules.md` pós-b9efb83 pesa **1.114–1.273 tokens / 37 linhas / 33 % do compilado-min**. Qualquer revisão (manter, expandir, reverter) tem efeito direto no orçamento de `[DEC-0018-B03]`.
+- [`research/2026-04-30-benchmark-rules-content.md`](./research/2026-04-30-benchmark-rules-content.md) § 5 — anti-padrões observados em `CLAUDE.md` de produção: **"Regras hipotéticas sem ancoragem"**, _"Toda linha deve traçar de volta a um incidente real"_; **"Regras sem fonte/owner"** — em catálogos curados, regras frequentemente não declaram autoria/data, problema de auditabilidade. b9efb83 cai exatamente nesses anti-padrões.
 
-**Opções:** _(populate after research)_
+**Estrutura das opções:** ponto multidimensional. Sub-eixos: (1) **unidade de decisão**; (2) **critério de manter/revisar/reverter**; (3) **artefato de registro**.
+
+#### Sub-eixo 1 — Unidade de decisão
+
+| Opção | Unidade                                                                                                                                    | Pró                                                  | Contra                                                                   |
+| :---- | :----------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------- | :----------------------------------------------------------------------- |
+| A     | **Regra-a-regra** (24 itens individuais decididos)                                                                                         | Granularidade máxima; preserva o que é bom           | Custo de revisão alto; risco de inconsistência cross-regra               |
+| B     | **Por seção** (3 seções de `global-rules` + 4 categorias de `quality-gates`)                                                               | Custo moderado; respeita a estrutura editorial atual | Pode forçar manter regra ruim que esteja numa seção majoritariamente boa |
+| C     | **Bloco inteiro** (todo b9efb83 vai por uma única política)                                                                                | Decisão rápida                                       | Joga fora regras boas com regras ruins (ou vice-versa)                   |
+| D     | **Híbrido** (regra-a-regra para `quality-gates` que é onde a evidência aponta lacunas; por seção para `global-rules` que é mais editorial) | Calibra rigor com onde dói                           | Precisa de critério para "dor"                                           |
+
+#### Sub-eixo 2 — Critério de manter/revisar/reverter
+
+| Opção | Critério                                                                                                                                                                                               | Pró                                                                          | Contra                                                                                             |
+| :---- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------- |
+| E     | **Tem source explícita?** (≥ 1 fonte CWE/CERT/Sonar/OWASP/paper) → manter; sem source → reverter                                                                                                       | Empirista puro                                                               | Cor regras editoriais (PT-BR, plan mode, RPI obrigatório) não têm CWE — viraria reverso falsamente |
+| F     | **Passa eval?** (eval mínimo de B05 mostra delta comportamental positivo)                                                                                                                              | Mensura efeito real; usa o que B05 cravar                                    | Caro; acoplado à execução do eval (depende de B07 também); regras editoriais podem não testar bem  |
+| G     | **Categorizado por tipo de regra**: regras editoriais (PT-BR, plan mode) → manter (são convenção interna); regras de defeito (sensores QG) → exigir source; regras de processo → manter se replicáveis | Espelha a tag de evidência de `[DEC-0018-B01]` Sub-eixo 2 (J — categorizado) | 3 regimes para manter; precisa critério para classificar                                           |
+| H     | **Combinação E+F**: source obrigatória; eval valida quando source for fraca                                                                                                                            | Defesa em profundidade                                                       | Custo combinado; regras editoriais ficam ainda em zona cinza                                       |
+| I     | **Manter status quo + reverter apenas o claramente sem evidência** (N+1; outras heurísticas declaradamente sem source)                                                                                 | Custo mínimo; preserva trabalho                                              | Reincide no problema-raiz da 0018: aceita conteúdo sem evidence-base                               |
+
+#### Sub-eixo 3 — Artefato de registro da decisão
+
+| Opção | Artefato                                                                                                                                   | Pró                                                          | Contra                                                                |
+| :---- | :----------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------- | :-------------------------------------------------------------------- |
+| J     | **Tabela inline em `plan.md` v2** (regra/decisão/justificativa)                                                                            | Tudo num arquivo já consultado                               | `plan.md` cresce; tabela longa pode embotar leitura                   |
+| K     | **Apêndice em `plan.md` v2** (separado, "📎 Reconciliação b9efb83")                                                                        | Isolado; não inflar o corpo do plan                          | Apêndice cresce também                                                |
+| L     | **Arquivo dedicado** `research/2026-04-30-b9efb83-reconciliation.md`                                                                       | Limpo; rastreável; não polui plan                            | Mais um arquivo (mas é research; cabe lifecycle)                      |
+| M     | **CHANGELOG.md** + comentário em commit que aplicar a reconciliação                                                                        | Rastreabilidade git nativa                                   | Pode ficar disperso; CHANGELOG não é lugar de justificativa detalhada |
+| N     | **L + commit-message-driven**: cada regra revertida tem commit isolado; cada manter declara source no `b04-formato` (Why-is-this-an-issue) | Granularidade máxima; rastreabilidade dupla (research + git) | Custo de governance alto                                              |
+
+#### Sub-eixo 4 — Ordem temporal (quando reconciliar)
+
+| Opção | Quando                                                                                                      | Pró                                                       | Contra                                                                    |
+| :---- | :---------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------- | :------------------------------------------------------------------------ |
+| O     | **Antes** de aplicar `[DEC-0018-B01]`/`[DEC-0018-B04]` (Stage 2): reverter o que cabe; depois reorganizar   | Reconciliação não fica refém da reorganização             | Pode reverter regra que se torna salvável depois                          |
+| P     | **Depois** de B01/B04 (Stage 2): aplicar nova taxonomia/formato → reavaliar regra-a-regra com novo critério | Cada regra tem oportunidade no novo formato antes de cair | Mais churn; regra ruim entra na nova taxonomia mesmo que destinada a sair |
+| Q     | **Em paralelo** com B01/B04: revisar enquanto reorganiza                                                    | Eficiente em tempo                                        | Difícil rastrear "isto saiu por reconciliação ou por reorganização?"      |
+
+**Recomendação inicial (a confirmar pós-gate):** **D + G + L + O**:
+
+- **D** (híbrido) — `quality-gates.md` é onde a research aponta lacunas (N+1 sem source, race/memory com evidência média): merece regra-a-regra. `global-rules.md` é editorial: revisar por seção é suficiente.
+- **G** (categorizado por tipo) — endereça honestamente o ponto de que regras editoriais (PT-BR, plan mode, RPI) **não precisam** de CWE source; o problema-raiz é regra-de-defeito sem source. Espelha a recomendação **J** de `[DEC-0018-B01]` (tag de evidência).
+- **L** (arquivo dedicado) — preserva rastreabilidade sem inflar `plan.md`; alinha com lifecycle de research (move para `.specify/specs/researchs/governance/` no encerramento, F9.2).
+- **O** (antes da reorganização) — separa o problema "isto tem evidência?" do problema "como organizar?". Reorganizar depois fica mais limpo.
+- **N** (commit-message-driven) é candidato sério se `[DEC-0018-B07]` cravar artefato robusto (K do B07 — golden examples + skeleton). Owner pode upgrades L→N se 0009 antecipar instrumentação.
+
+**Cross-ref:** depende de `[DEC-0018-B01]` (categorias para classificar editorial vs defeito) e influencia `[DEC-0018-B03]` (revisão pode reduzir tokens em `global-rules.md`, dando folga ao orçamento).
 
 **Decisão (preencher pós-gate):**
 
 - Status: `Pendente`
-- Escolha: \_\_\_
+- Escolha (Sub-eixo 1, unidade): \_\_\_
+- Escolha (Sub-eixo 2, critério): \_\_\_
+- Escolha (Sub-eixo 3, artefato): \_\_\_
+- Escolha (Sub-eixo 4, ordem): \_\_\_
 - Justificativa: \_\_\_
 - Data: \_\_\_
 - Owner: \_\_\_

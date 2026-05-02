@@ -246,25 +246,25 @@ A tabela abaixo cruza as categorias mais citadas por estudo. Frequência
 relativa é **dentro do estudo de origem** — não comparável entre linhas.
 "—" significa "categoria não nomeada nesse estudo".
 
-| Categoria                                  | Tambon 2024 (333 bugs, 3 LLMs) | Liu 2025 — LLM Hallucinations (real-world) | Survey 2025 (lit. review)         | CONCUR 2025 (concorrência) | Fu 2025 — Copilot security | Pearce 2021 — Copilot CWE Top-25 |
-| :----------------------------------------- | :----------------------------- | :----------------------------------------- | :-------------------------------- | :------------------------- | :------------------------- | :------------------------------- |
-| Hallucinated object/API                    | sim ("Hallucinated Object")    | **20.41%** (API Knowledge Conflicts)       | "Hallucination" — categoria       | —                          | parcial (CWE-94)           | —                                |
-| Functional requirement violation           | sim ("Misinterpretation")      | **36.66%**                                 | **"Functional bugs" (56 estudos)** | parcial                    | —                          | —                                |
-| Syntax error                               | sim                            | —                                          | **"Syntax bugs" (32 estudos)**    | 71% das compilation errors | —                          | —                                |
-| Missing corner case                        | sim                            | —                                          | parcial (functional)              | parcial                    | —                          | parcial                          |
-| Wrong attribute / wrong type               | sim                            | parcial                                    | parcial                           | —                          | —                          | —                                |
-| Incomplete generation / silly mistake      | sim                            | —                                          | parcial                           | —                          | —                          | —                                |
-| **Race conditions / deadlocks**            | —                              | —                                          | parcial ("Reliability")           | **68 RC + 77 DL** em 23 LLMs | —                          | parcial (CWE-362 não top)        |
-| **Memory leaks / memory bugs**             | —                              | —                                          | sim ("System bugs → Memory bugs") | —                          | —                          | parcial (CWE-401, -416)          |
-| **N+1 queries**                            | —                              | —                                          | —                                 | —                          | —                          | —                                |
-| Insecure randomness (CWE-330)              | —                              | —                                          | —                                 | —                          | **18.15%**                 | top                              |
-| Code injection (CWE-94)                    | —                              | —                                          | —                                 | —                          | **9.87%**                  | top                              |
-| Cross-site scripting (CWE-79)              | —                              | —                                          | —                                 | —                          | **9.55%**                  | top                              |
-| OS command injection (CWE-78)              | —                              | —                                          | —                                 | —                          | **6.21%**                  | top (mais prevalente Python)     |
-| SQL injection (CWE-89)                     | —                              | —                                          | —                                 | —                          | parcial                    | top                              |
-| Package hallucination / slopsquatting      | —                              | parcial (Library/Dependency Conflicts)     | parcial                           | —                          | —                          | —                                |
-| Prompt-biased code                         | sim                            | parcial                                    | —                                 | —                          | —                          | —                                |
-| Environment / dependency conflict          | —                              | **0.94% + 11.26%** (env + deps)            | sim                               | —                          | —                          | —                                |
+| Categoria                             | Tambon 2024 (333 bugs, 3 LLMs) | Liu 2025 — LLM Hallucinations (real-world) | Survey 2025 (lit. review)          | CONCUR 2025 (concorrência)   | Fu 2025 — Copilot security | Pearce 2021 — Copilot CWE Top-25 |
+| :------------------------------------ | :----------------------------- | :----------------------------------------- | :--------------------------------- | :--------------------------- | :------------------------- | :------------------------------- |
+| Hallucinated object/API               | sim ("Hallucinated Object")    | **20.41%** (API Knowledge Conflicts)       | "Hallucination" — categoria        | —                            | parcial (CWE-94)           | —                                |
+| Functional requirement violation      | sim ("Misinterpretation")      | **36.66%**                                 | **"Functional bugs" (56 estudos)** | parcial                      | —                          | —                                |
+| Syntax error                          | sim                            | —                                          | **"Syntax bugs" (32 estudos)**     | 71% das compilation errors   | —                          | —                                |
+| Missing corner case                   | sim                            | —                                          | parcial (functional)               | parcial                      | —                          | parcial                          |
+| Wrong attribute / wrong type          | sim                            | parcial                                    | parcial                            | —                            | —                          | —                                |
+| Incomplete generation / silly mistake | sim                            | —                                          | parcial                            | —                            | —                          | —                                |
+| **Race conditions / deadlocks**       | —                              | —                                          | parcial ("Reliability")            | **68 RC + 77 DL** em 23 LLMs | —                          | parcial (CWE-362 não top)        |
+| **Memory leaks / memory bugs**        | —                              | —                                          | sim ("System bugs → Memory bugs")  | —                            | —                          | parcial (CWE-401, -416)          |
+| **N+1 queries**                       | —                              | —                                          | —                                  | —                            | —                          | —                                |
+| Insecure randomness (CWE-330)         | —                              | —                                          | —                                  | —                            | **18.15%**                 | top                              |
+| Code injection (CWE-94)               | —                              | —                                          | —                                  | —                            | **9.87%**                  | top                              |
+| Cross-site scripting (CWE-79)         | —                              | —                                          | —                                  | —                            | **9.55%**                  | top                              |
+| OS command injection (CWE-78)         | —                              | —                                          | —                                  | —                            | **6.21%**                  | top (mais prevalente Python)     |
+| SQL injection (CWE-89)                | —                              | —                                          | —                                  | —                            | parcial                    | top                              |
+| Package hallucination / slopsquatting | —                              | parcial (Library/Dependency Conflicts)     | parcial                            | —                            | —                          | —                                |
+| Prompt-biased code                    | sim                            | parcial                                    | —                                  | —                            | —                          | —                                |
+| Environment / dependency conflict     | —                              | **0.94% + 11.26%** (env + deps)            | sim                                | —                            | —                          | —                                |
 
 ### Observações sobre a tabela
 
@@ -349,11 +349,11 @@ circunstancial?"
 
 ### 4.4 Síntese da reconciliação `b9efb83`
 
-| Sensor          | Evidência empírica  | Quantificação         | Recomendação para `[DEC-0018-B08]` |
-| :-------------- | :------------------ | :-------------------- | :--------------------------------- |
-| N+1 queries     | Fraca / ausente     | N/D                   | Reclassificar como heurística declarada (não evidence-backed) **ou** mover para anexo de "padrões observados em campo, sem citação acadêmica direta" |
-| Race conditions | Forte com viés      | 68 em CONCUR (23 LLMs) | Manter no catálogo com escopo declarado ("código concorrente") |
-| Memory leaks    | Média / emergente   | Casos qualitativos    | Manter com caveat de "evidência emergente"; considerar separar por linguagem (Rust/C++/Go vs. Python/JS) |
+| Sensor          | Evidência empírica | Quantificação          | Recomendação para `[DEC-0018-B08]`                                                                                                                   |
+| :-------------- | :----------------- | :--------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------- |
+| N+1 queries     | Fraca / ausente    | N/D                    | Reclassificar como heurística declarada (não evidence-backed) **ou** mover para anexo de "padrões observados em campo, sem citação acadêmica direta" |
+| Race conditions | Forte com viés     | 68 em CONCUR (23 LLMs) | Manter no catálogo com escopo declarado ("código concorrente")                                                                                       |
+| Memory leaks    | Média / emergente  | Casos qualitativos     | Manter com caveat de "evidência emergente"; considerar separar por linguagem (Rust/C++/Go vs. Python/JS)                                             |
 
 ---
 

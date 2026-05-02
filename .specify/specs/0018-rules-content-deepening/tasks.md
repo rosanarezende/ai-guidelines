@@ -3,7 +3,7 @@
 > Spec: [`./spec.md`](./spec.md)
 > Plan: [`./plan.md`](./plan.md)
 > Decision Brief: [`./decision-brief.md`](./decision-brief.md)
-> Status: Draft (revised 2026-04-30) — **Stage 1 (Research)**
+> Status: Draft (revised 2026-04-30) — **Stage 1 (Research) — Fase 2 / Bloco B concluído 2026-05-01; aguardando gate humano (Fase 3)**
 
 > **Progress file vivo, em duas etapas.** Stage 1 (abaixo) cobre Setup +
 > Research + Síntese de opções + Gate humano. Fases de Stage 2 (catálogo,
@@ -64,18 +64,18 @@
 - [x] **B.0.2** `research/2026-04-30-empirical-bugs-ai-code.md` — METR, SWE-bench, Aider eval, estudos sobre falhas em código IA.
 - [x] **B.0.3** `research/2026-04-30-external-bug-taxonomies.md` — CWE, SEI CERT, Sonar, OWASP-LLM.
 - [x] **B.0.4** `research/2026-04-30-spec-driven-tools-rules.md` — Spec Kit, BMAD, OpenSpec, Continue, Aider; foco em rules editoriais e decisões pré-design.
-- [ ] **B.0.5** `research/2026-04-30-tokens-baseline-budget.md` — medição instrumental do `<AI_GUIDELINES>` atual + projeção de teto.
+- [x] **B.0.5** `research/2026-04-30-tokens-baseline-budget.md` — medição instrumental do `<AI_GUIDELINES>` atual (compilado-min ≈3,3–3,8 K tokens / 238 linhas; full ≈4,9–5,5 K) + síntese cross-fontes (Anthropic best-practices, HumanLayer, MindStudio, Chroma context-rot, Lost-in-the-Middle, Cem Karaca trajetória) + projeção de teto.
 
 ### Sub-bloco [B.1] — Popular `decision-brief.md` com opções (Bloco B)
 
-- [ ] **B.1.1** Popular `[DEC-0018-B01]` (taxonomia das categorias de regras) com opções.
-- [ ] **B.1.2** Popular `[DEC-0018-B02]` (colocação por categoria) com opções.
-- [ ] **B.1.3** Popular `[DEC-0018-B03]` (orçamento de tokens) com opções e medições baseline.
-- [ ] **B.1.4** Popular `[DEC-0018-B04]` (formato do catálogo de regras) com opções.
-- [ ] **B.1.5** Popular `[DEC-0018-B05]` (metodologia do eval) com opções.
-- [ ] **B.1.6** Popular `[DEC-0018-B06]` (fronteira com Spec 0011) com opções.
-- [ ] **B.1.7** Popular `[DEC-0018-B07]` (fronteira com Spec 0009) com opções.
-- [ ] **B.1.8** Popular `[DEC-0018-B08]` (política de reconciliação do b9efb83) com opções.
+- [x] **B.1.1** Popular `[DEC-0018-B01]` (taxonomia das categorias de regras) com opções. — 2 sub-eixos (eixo primário A–G; tag de evidência H–J), com cross-refs para 4 researches.
+- [x] **B.1.2** Popular `[DEC-0018-B02]` (colocação por categoria) com opções. — 2 sub-eixos (critério-teste A–D; arquitetura física E–I).
+- [x] **B.1.3** Popular `[DEC-0018-B03]` (orçamento de tokens) com opções e medições baseline. — 5 sub-eixos (granularidade A–C; tipo D–F; valores numéricos G–K; enforcement L–O; unidade canônica P–S).
+- [x] **B.1.4** Popular `[DEC-0018-B04]` (formato do catálogo de regras) com opções. — 3 sub-eixos (estrutura A–E; IDs F–J; organização físico-arquivo K–N).
+- [x] **B.1.5** Popular `[DEC-0018-B05]` (metodologia do eval) com opções. — 5 sub-eixos (largura×profundidade A–C; asserção D–H; provedores I–L; não-determinismo M–O; threshold P–R).
+- [x] **B.1.6** Popular `[DEC-0018-B06]` (fronteira com Spec 0011) com opções. — 3 sub-eixos (fronteira semântica A–D; gatilho de transição E–J; conteúdo NEXT.md K–N).
+- [x] **B.1.7** Popular `[DEC-0018-B07]` (fronteira com Spec 0009) com opções. — 3 sub-eixos (escopo retido A–D; escopo transferido E–H; artefatos de transição I–L).
+- [x] **B.1.8** Popular `[DEC-0018-B08]` (política de reconciliação do b9efb83) com opções. — 4 sub-eixos (unidade A–D; critério E–I; artefato J–N; ordem temporal O–Q), com identificação explícita de N+1 como heurística sem suporte empírico.
 
 ---
 

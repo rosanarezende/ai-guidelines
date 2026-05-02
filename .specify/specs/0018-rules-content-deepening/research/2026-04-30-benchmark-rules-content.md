@@ -48,26 +48,29 @@ Achados-chave:
 ### 2.1 Anthropic — `CLAUDE.md`
 
 **Estrutura física**:
+
 - Localização hierárquica: `~/.claude/CLAUDE.md` (global, todas as sessões), `./CLAUDE.md` (projeto, versionado), `./CLAUDE.local.md` (projeto, gitignored), `parent/CLAUDE.md` (monorepo), `child/CLAUDE.md` (carregado on-demand quando se trabalha no diretório).
 - Imports: sintaxe `@path/to/import` permite modularização (ex.: `@docs/git-instructions.md`).
 - Carregamento: **a cada conversa**, sempre injetado no contexto.
 
 **Categorias/taxonomia**:
+
 - Não normativa. A documentação oficial lista, em formato de tabela ✅/❌, **o que incluir e o que excluir**:
 
-| ✅ Incluir | ❌ Excluir |
-| --- | --- |
+| ✅ Incluir                                      | ❌ Excluir                                        |
+| ----------------------------------------------- | ------------------------------------------------- |
 | Bash commands que Claude não consegue adivinhar | Qualquer coisa que Claude descobre lendo o código |
-| Code style que diverge do padrão | Convenções padrão da linguagem |
-| Instruções de teste e test runners preferidos | Documentação de API detalhada (linkar) |
-| Etiqueta de repositório (branch naming, PR) | Informação que muda com frequência |
-| Decisões arquiteturais específicas | Descrições file-by-file do codebase |
-| Quirks de ambiente (env vars necessárias) | Práticas auto-evidentes ("escreva código limpo") |
-| Gotchas e comportamentos não-óbvios | Tutoriais longos |
+| Code style que diverge do padrão                | Convenções padrão da linguagem                    |
+| Instruções de teste e test runners preferidos   | Documentação de API detalhada (linkar)            |
+| Etiqueta de repositório (branch naming, PR)     | Informação que muda com frequência                |
+| Decisões arquiteturais específicas              | Descrições file-by-file do codebase               |
+| Quirks de ambiente (env vars necessárias)       | Práticas auto-evidentes ("escreva código limpo")  |
+| Gotchas e comportamentos não-óbvios             | Tutoriais longos                                  |
 
 - Exemplo canônico mostrado pela Anthropic usa apenas duas seções: `# Code style` e `# Workflow` — ~6 linhas no total.
 
 **Formato por regra**:
+
 - **Bullets** dominam. Prosa só para preâmbulos.
 - Sem campos estruturados, sem IDs.
 - Ênfase via maiúsculas inline ("IMPORTANT:", "YOU MUST") é recomendada — mas explicitamente "use sparingly, emphasis scales poorly".
@@ -75,12 +78,14 @@ Achados-chave:
 **Convenção de IDs**: Nenhuma formalmente. Headings markdown servem como anchors implícitas para `@import`.
 
 **Comprimento típico**:
+
 - "Keep it short and human-readable".
 - HumanLayer (post Anthropic-aligned): roda com < 60 linhas.
 - Diretrizes mais agressivas: < 200 linhas. Anthropic explicitamente diz < 300.
 - Heurística de poda: para cada linha, perguntar "removendo isso, Claude erraria?". Se não, cortar.
 
 **Distinção relevante feita pela Anthropic**:
+
 - CLAUDE.md = sempre injetado → só conteúdo "broadly applicable".
 - **Skills** (`.claude/skills/<nome>/SKILL.md` com frontmatter `name`/`description`) = on-demand, carregados quando o agente julga relevante.
 - **Hooks** (`.claude/settings.json`) = determinísticos, executam scripts em pontos do workflow. "Use hooks for actions that must happen every time with zero exceptions" — vs. CLAUDE.md "advisory".
@@ -89,6 +94,7 @@ Achados-chave:
 Esta separação CLAUDE.md / Skills / Hooks / Subagents é a peça mais explícita de **separação por intenção** que se encontra entre os provedores.
 
 Fontes:
+
 - https://code.claude.com/docs/en/best-practices
 - https://www.humanlayer.dev/blog/writing-a-good-claude-md
 - https://www.turbodocx.com/blog/how-to-write-claude-md-best-practices
@@ -96,6 +102,7 @@ Fontes:
 ### 2.2 OpenAI — `AGENTS.md`
 
 **Estrutura física**:
+
 - Spec oficial em https://agents.md (mantido pela OpenAI/Codex).
 - Localização: raiz do repositório, mas múltiplos arquivos em subdiretórios são suportados.
 - Hierarquia: "the closest AGENTS.md to the edited file wins; explicit user chat prompts override everything".
@@ -104,8 +111,9 @@ Fontes:
 - Limite operacional do Codex: `project_doc_max_bytes = 32 KiB`, configurável. Quando excede, "split instructions across nested directories".
 
 **Categorias/taxonomia**:
+
 - A spec é explícita: **sem campos obrigatórios, qualquer heading**.
-- Categorias *populares* (sugeridas pela própria spec):
+- Categorias _populares_ (sugeridas pela própria spec):
   1. Project overview
   2. Build and test commands
   3. Code style guidelines
@@ -116,26 +124,31 @@ Fontes:
 - Codex adiciona vocabulário próprio: "working agreements" (defaults de equipe), "repository expectations" (normas do projeto), "service-specific rules" (subsistemas).
 
 **Formato por regra**:
+
 - Markdown padrão. Sem frontmatter requerido.
 - Sem IDs. Sem schema.
 
 **Convenção de IDs**: Nenhuma.
 
 **Comprimento típico**:
+
 - Não especificado explicitamente. O byte cap de 32 KiB do Codex equivale aproximadamente a ~600–800 linhas markdown — limite **operacional**, não recomendação editorial.
 - Exemplo na spec: ~30 linhas em 4 seções (dev tips, testing, PR conventions, lint/typecheck).
 
 **Adoção**:
+
 - Compatível com Codex (OpenAI), Jules (Google), Factory, Aider, goose, opencode, Zed, Warp, VS Code, Devin (Cognition).
 - Repo principal da OpenAI mantém **88 arquivos AGENTS.md** simultaneamente — evidência forte do padrão "um por subprojeto".
 
 Fontes:
+
 - https://agents.md
 - https://developers.openai.com/codex/guides/agents-md
 
 ### 2.3 Google — `GEMINI.md`
 
 **Estrutura física**:
+
 - Hierarquia em três níveis explícitos:
   1. **Global**: `~/.gemini/GEMINI.md` (todos os projetos)
   2. **Project**: `GEMINI.md` no working dir e parents até a raiz `.git`
@@ -148,6 +161,7 @@ Fontes:
 **Coexistência com AGENTS.md**: se ambos existem no mesmo diretório, `GEMINI.md` tem precedência (no Gemini CLI). Android Studio implementa o mesmo: `GEMINI.md` > `AGENTS.md`.
 
 **Categorias/taxonomia (Android Studio docs, mais prescritivo que o gemini-cli core)**:
+
 1. **Code Location References** ("the main activity is at X.kt")
 2. **Architecture Guidelines** ("place all business logic in ViewModels")
 3. **Technology Preferences** ("use library X for navigation; no XML layouts")
@@ -155,6 +169,7 @@ Fontes:
 5. **Company/Team Style Guides**
 
 **Formato por regra**:
+
 - Markdown padrão. Headings e bullets recomendados — sem schema.
 - Modularização via `@./shared/style-guidance.md`.
 
@@ -172,6 +187,7 @@ Fontes:
 Esta tabela é a mais próxima de uma matriz "universal × scoped × on-demand" entre os provedores oficiais.
 
 Fontes:
+
 - https://google-gemini.github.io/gemini-cli/docs/cli/gemini-md.html
 - https://developer.android.com/studio/gemini/agent-files
 
@@ -180,11 +196,13 @@ Fontes:
 ### 3.1 awesome-cursorrules (PatrickJS/awesome-cursorrules)
 
 **Estrutura física**:
+
 - Diretório por regra: `rules/<technology>-<focus>-cursorrules-prompt-file/`
 - Arquivos: `.cursorrules` (regra) + `README.md` opcional (créditos/descrição).
 - 36.900+ stars; ~280+ regras catalogadas no momento da coleta.
 
 **Taxonomia (treze categorias, no README de raiz)**:
+
 1. Frontend Frameworks and Libraries (React, Vue, Angular, Next.js, Astro, SvelteKit, Solid, Qwik)
 2. Backend and Full-Stack (Node.js, Python, Go, Java, Laravel, Rails, Elixir, WordPress)
 3. Mobile Development (React Native, Flutter, SwiftUI, Android, NativeScript)
@@ -202,10 +220,12 @@ Fontes:
 **Observação crítica**: a taxonomia é **stack-oriented** (por tecnologia/framework), **não por função editorial**. Não há a distinção "filosofia × processo × gate × gotcha".
 
 **Formato por regra**:
+
 - Prosa narrativa em primeira/segunda pessoa: "You are an expert in...". Comprimento médio 100–300 linhas.
 - Sem frontmatter, sem IDs.
 
 Fontes:
+
 - https://github.com/PatrickJS/awesome-cursorrules
 
 ### 3.2 Continue.dev — sistema de rules
@@ -213,6 +233,7 @@ Fontes:
 Continue é o único caso onde existe **um schema formalizado** para regras.
 
 **Estrutura física**:
+
 - `.continue/rules/` no workspace, ou Hub rules referenciadas via `config.yaml`.
 - Suporta `.md` (com frontmatter YAML) ou `.yaml` puro. Documentação recomenda Markdown.
 - Ordem de carregamento determinística: Hub assistant rules → Hub rules referenciadas → Local workspace rules → Global rules.
@@ -221,22 +242,23 @@ Continue é o único caso onde existe **um schema formalizado** para regras.
 
 ```yaml
 ---
-name: <obrigatório>            # display name
-globs: "**/*.{ts,tsx}"         # opcional, file pattern matching
+name: <obrigatório> # display name
+globs: "**/*.{ts,tsx}" # opcional, file pattern matching
 regex: "import .* from 'react'" # opcional, content pattern matching
-alwaysApply: false             # tristate: true | false | undefined
-description: "..."             # opcional, agente usa para self-selecionar
+alwaysApply: false # tristate: true | false | undefined
+description: "..." # opcional, agente usa para self-selecionar
 ---
-
 # Conteúdo da regra em markdown
 ```
 
 **Semântica de `alwaysApply`**:
+
 - `true`: sempre incluída.
 - `false`: incluída se globs casarem **ou** se o agente decidir baseado em `description`.
 - `undefined` (default): incluída se não houver globs **ou** se globs casarem.
 
 **Categorias/taxonomia**:
+
 - Continue não impõe categoria. O catálogo público `continuedev/awesome-rules` agrupa em:
   1. **General** (cross-cutting: error handling, security)
   2. **Language Specific**
@@ -251,21 +273,25 @@ Esta taxonomia mistura **escopo técnico** (linguagem, framework) com **função
 **Comprimento típico**: regras individuais costumam ser 20–100 linhas. O sistema é projetado para **muitas regras pequenas**, ao contrário do CLAUDE.md monolítico.
 
 Fontes:
+
 - https://docs.continue.dev/customize/deep-dives/rules
 - https://github.com/continuedev/awesome-rules
 
 ### 3.3 Aider — `CONVENTIONS.md`
 
 **Estrutura física**:
+
 - Único arquivo na raiz: `CONVENTIONS.md`. Ou nome arbitrário via `--conventions-file`.
 - Carregado por sessão: `aider --read CONVENTIONS.md` ou `/read CONVENTIONS.md` (read-only).
 - Configuração persistente via `.aider.conf.yml`.
 
 **Conventions repo (Aider-AI/conventions)**:
+
 - Subdiretórios **por caso de uso**, não por linguagem. Cada um contém `README.md` (purpose) + `CONVENTIONS.md` (regras).
 - Sem taxonomia normativa — convidam contribuidores a "criar subdiretório com nome descritivo".
 
 **Categorias sugeridas pela documentação**:
+
 - Coding style rules
 - Preferred libraries and packages
 - Type hint requirements
@@ -277,6 +303,7 @@ Fontes:
 **Comprimento típico**: não especificado. Exemplos comunitários são tipicamente 40–150 linhas.
 
 Fontes:
+
 - https://aider.chat/docs/usage/conventions.html
 - https://github.com/Aider-AI/conventions/blob/main/README.md
 
@@ -310,14 +337,14 @@ Fonte: https://github.com/PostHog/housekeeper/blob/main/CLAUDE.md
 
 ### 3.7 Tabela comparativa OSS
 
-| Projeto | Estrutura | Taxonomia | Formato | Comprimento típico |
-| --- | --- | --- | --- | --- |
-| awesome-cursorrules | Um diretório por regra; `.cursorrules` + README | 13 categorias por **stack/tecnologia** | Prosa "You are an expert in..." | 100–300 linhas/regra |
-| Continue.dev rules | `.continue/rules/<rule>.md` com frontmatter YAML | Hub categoriza em 7 grupos (General / Language / Framework / Quality / Docs / Testing / DevOps) | Markdown + frontmatter (`name`, `globs`, `regex`, `alwaysApply`, `description`) | 20–100 linhas/regra |
-| Aider conventions | Único `CONVENTIONS.md` ou repo comunitário com subdirs por caso de uso | Não normativa; sugestões: style/libraries/types/testing/docs | Prosa + bullets, sem schema | 40–150 linhas |
-| Bun (oven-sh) | Único `CLAUDE.md` na raiz | 8 H2 por **fluxo de trabalho** (build/test/architecture/review/debug) | Prosa + bullets aninhados + code blocks; emphasis via CRITICAL/Do not | ~321 linhas |
-| ClickHouse pg_stat_ch | Único `CLAUDE.md` | 10 H2 por **aspecto do projeto** (overview/deps/build/test/style/arch) | Bullets + tabelas + code blocks | ~137 linhas |
-| PostHog housekeeper | Único `CLAUDE.md` | 12 H2; introduz **Default vs Optional** como modos | Prosa + bullets | ~92 linhas |
+| Projeto               | Estrutura                                                              | Taxonomia                                                                                       | Formato                                                                         | Comprimento típico   |
+| --------------------- | ---------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- | -------------------- |
+| awesome-cursorrules   | Um diretório por regra; `.cursorrules` + README                        | 13 categorias por **stack/tecnologia**                                                          | Prosa "You are an expert in..."                                                 | 100–300 linhas/regra |
+| Continue.dev rules    | `.continue/rules/<rule>.md` com frontmatter YAML                       | Hub categoriza em 7 grupos (General / Language / Framework / Quality / Docs / Testing / DevOps) | Markdown + frontmatter (`name`, `globs`, `regex`, `alwaysApply`, `description`) | 20–100 linhas/regra  |
+| Aider conventions     | Único `CONVENTIONS.md` ou repo comunitário com subdirs por caso de uso | Não normativa; sugestões: style/libraries/types/testing/docs                                    | Prosa + bullets, sem schema                                                     | 40–150 linhas        |
+| Bun (oven-sh)         | Único `CLAUDE.md` na raiz                                              | 8 H2 por **fluxo de trabalho** (build/test/architecture/review/debug)                           | Prosa + bullets aninhados + code blocks; emphasis via CRITICAL/Do not           | ~321 linhas          |
+| ClickHouse pg_stat_ch | Único `CLAUDE.md`                                                      | 10 H2 por **aspecto do projeto** (overview/deps/build/test/style/arch)                          | Bullets + tabelas + code blocks                                                 | ~137 linhas          |
+| PostHog housekeeper   | Único `CLAUDE.md`                                                      | 12 H2; introduz **Default vs Optional** como modos                                              | Prosa + bullets                                                                 | ~92 linhas           |
 
 ## 4. Padrões emergentes
 
@@ -362,21 +389,25 @@ Esta seção apresenta opções estruturadas com tradeoffs. **Não decide.**
 A pergunta: como agrupar regras editoriais em `ai-guidelines`?
 
 **Opção A — Taxonomia por stack/tecnologia** (modelo awesome-cursorrules)
+
 - Categorias: Frontend, Backend, Mobile, Testing, DevOps, Language-Specific.
 - Prós: precedente massivo (36k stars), familiar a contribuidores OSS, casa bem com `globs` em Continue-style.
 - Contras: `ai-guidelines` é **stack-agnóstico por design** (`global-rules.md` é universal). Esta taxonomia força o framework a virar catálogo de regras stack-specific — colide com a identidade canônica.
 
 **Opção B — Taxonomia por função editorial** (proposta nativa do Spec 0018)
+
 - Categorias possíveis: Filosofia, Processo, Gates de qualidade, Gotchas/anti-padrões, Convenções de comunicação.
 - Prós: reflete a identidade do framework (regras IA-agnósticas vs opt-in stack); separação útil para o leitor entender intent (princípio vs. checklist).
 - Contras: sem precedente direto entre os benchmarks. Risco de sobre-engenharia se taxonomia não casar com como usuários **buscam** as regras.
 
 **Opção C — Taxonomia por escopo de aplicação** (modelo Continue + Anthropic)
+
 - Categorias: Always-on (universal), Conditional (opt-in via feature/flag), On-demand (skill/subagent).
 - Prós: alinhado com a separação física que `ai-guidelines` já tem (`global-rules.md` × `opt-in/*.md`). Convergente com Continue (`alwaysApply`) e Anthropic (CLAUDE.md vs Skills).
 - Contras: é uma taxonomia de **mecanismo**, não de **conteúdo**. Dois leitores buscando "regras sobre TDD" não as agrupariam por "always-on", e sim por tema.
 
 **Opção D — Híbrida (função editorial dentro de escopo)**
+
 - Hierarquia: primeiro escopo (universal/opt-in/per-IA), depois função (filosofia/processo/gate/gotcha).
 - Prós: respeita simultaneamente a arquitetura física existente e a navegabilidade do leitor.
 - Contras: dimensionalidade dobrada; risco de células vazias (ex.: "filosofia × per-IA"); contributores precisam aprender duas coordenadas.
@@ -386,6 +417,7 @@ A pergunta: como agrupar regras editoriais em `ai-guidelines`?
 A pergunta: dado um pedaço de conteúdo, em qual arquivo ele vive (`global-rules.md` × `{claude,codex,gemini}.md` × `opt-in/*.md`)?
 
 **Opção A — Critério "audience"** (quem precisa saber?)
+
 - Regra cross-IA → `global-rules.md`.
 - Regra que só faz sentido para um adapter (sintaxe específica do CLAUDE.md, comportamento do Codex CLI) → `{claude,codex,gemini}.md`.
 - Regra dependente de stack/processo → `opt-in/*.md`.
@@ -393,12 +425,14 @@ A pergunta: dado um pedaço de conteúdo, em qual arquivo ele vive (`global-rule
 - Contras: zona cinza para regras que se aplicam a **todas** IAs mas têm nuance por adapter (ex.: "use plan mode" → Anthropic Plan Mode, OpenAI raciocínio, Gemini agent mode).
 
 **Opção B — Critério "duplicação intolerável"**
+
 - Se a mesma regra precisa aparecer em 2+ adapters, vai para `global-rules.md`.
 - Se diverge fundamentalmente entre adapters, vai para o adapter específico.
 - Prós: minimiza duplicação por construção; alinhado com o anti-padrão "duplicação cross-arquivo".
 - Contras: pode forçar regras essencialmente per-IA para o universal só porque se traduzem para todas as três.
 
 **Opção C — Critério "escopo de injeção"**
+
 - Conteúdo sempre injetado (cobertura 100% dos consumidores) → `global-rules.md`.
 - Conteúdo injetado quando feature ativa → `opt-in/*.md`.
 - Conteúdo carregado pela IA específica → `{claude,codex,gemini}.md`.
@@ -410,29 +444,36 @@ A pergunta: dado um pedaço de conteúdo, em qual arquivo ele vive (`global-rule
 A pergunta: cada regra deve ter estrutura formal (ID, campos, frontmatter)? Ou é prosa livre como Anthropic/OpenAI recomendam?
 
 **Opção A — Prosa livre + headings markdown** (modelo Anthropic/OpenAI/Aider)
+
 - Cada regra é um parágrafo ou bullet sob heading temática. Sem ID. Sem campos.
 - Prós: máxima legibilidade; barreira zero para contribuir; alinhado com 100% dos provedores oficiais.
 - Contras: sem rastreabilidade. Se um teste/CI quer asseverar "regra X foi cumprida", não há ancoragem estável. `ai-guidelines` já usa IDs `BR-*` para business rules — divergiria daquela convenção.
 
 **Opção B — Frontmatter YAML por regra** (modelo Continue)
+
 - Cada regra é um arquivo `.md` (ou bloco) com frontmatter `name`, `description`, `scope`, `tags`, `applies_to`.
 - Prós: schema estruturado; permite ferramental (linter, generator, busca por tag); precedente em Continue e Anthropic Skills.
 - Contras: uma regra por arquivo explode a quantidade de arquivos; um arquivo monolítico com múltiplos blocos frontmatter é não-padrão. Aumenta atrito de contribuição.
 
-**Opção C — IDs inline com sintaxe leve** (modelo BR-* já usado em `ai-guidelines`)
+**Opção C — IDs inline com sintaxe leve** (modelo BR-\* já usado em `ai-guidelines`)
+
 - Cada regra começa com `[GR-XXXX]` (Global Rule) ou `[OPT-<feature>-XX]`. Conteúdo permanece prosa.
 - Prós: rastreabilidade preservada sem schema pesado; convergente com a convenção interna existente; permite citar a regra em PRs, testes, ADRs.
 - Contras: precisa de processo de alocação de IDs (igual a `BR-*`); risco de IDs órfãos se regras mudam de arquivo.
 
 **Opção D — Estrutura mínima por regra** (compromisso)
+
 - Cada regra: heading H3 com ID curto + 1 frase de "intent" + corpo livre + (opcional) "verificação" e "gotcha relacionado".
 - Exemplo:
+
   ```markdown
   ### [GR-0042] Fail-fast em catch vazio
+
   **Intent**: Erros silenciados perdem rastreabilidade.
   Nunca capture exceção sem propagar ou recuperar estado. ...
   **Verificação**: ESLint `no-empty` ativado.
   ```
+
 - Prós: balanceia rastreabilidade (ID), navegabilidade (heading), intent claro (1 linha), conteúdo livre, verificabilidade (alinhado com Anthropic best practice "give Claude a way to verify").
 - Contras: estrutura nova; precisa de adoção disciplinada; risco de variações inconsistentes se contribuidores ignorarem campos opcionais.
 

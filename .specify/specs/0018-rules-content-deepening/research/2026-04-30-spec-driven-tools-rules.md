@@ -308,13 +308,13 @@ regex: "TODO"
 
 ### Campos do frontmatter
 
-| Campo         | Obrigatório       | Função                                                   |
-| :------------ | :---------------- | :------------------------------------------------------- |
-| `name`        | Sim (em YAML)     | Display title                                            |
-| `globs`       | Não               | Padrões de arquivo que disparam inclusão                 |
-| `regex`       | Não               | Padrões de conteúdo para inclusão condicional            |
-| `description` | Não               | Ajuda agente decidir relevância quando `alwaysApply:false`|
-| `alwaysApply` | Não               | Controla comportamento de inclusão                       |
+| Campo         | Obrigatório   | Função                                                     |
+| :------------ | :------------ | :--------------------------------------------------------- |
+| `name`        | Sim (em YAML) | Display title                                              |
+| `globs`       | Não           | Padrões de arquivo que disparam inclusão                   |
+| `regex`       | Não           | Padrões de conteúdo para inclusão condicional              |
+| `description` | Não           | Ajuda agente decidir relevância quando `alwaysApply:false` |
+| `alwaysApply` | Não           | Controla comportamento de inclusão                         |
 
 ### Comportamento de `alwaysApply`
 
@@ -547,16 +547,16 @@ Workspace rules > global rules em conflitos.
 
 ## 9. Tabela comparativa
 
-| Ferramenta     | Universal × per-IA           | Gate humano formal                            | Formato de regra                          | Convenção de ID         | Fronteira spec-a-spec       |
-| :------------- | :--------------------------- | :-------------------------------------------- | :---------------------------------------- | :---------------------- | :-------------------------- |
-| **Spec Kit**   | Constituição única           | Phase -1 (conceitual, sem artefato dedicado)  | Prosa Markdown, 9 artigos                 | Articles I–IX           | Não documentada             |
-| **BMAD**       | `project-context.md` único   | **Sim** — `bmad-check-implementation-readiness` PASS/CONCERNS/FAIL | Step files com `<halt-condition>` | Não há                  | Por artefatos sequenciais   |
-| **OpenSpec**   | Sem distinção                | Implícito (deps as enablers)                  | RFC 2119 + Given/When/Then                | Nomes de requirements   | **Sim** — delta specs       |
-| **Continue**   | Apenas universal (workspace + global) | Não                                  | Markdown + frontmatter (`globs`, `alwaysApply`) | Prefixo numérico ordena | N/A                  |
-| **Aider**      | Apenas universal             | Não                                           | Markdown puro (sem frontmatter)           | Não há                  | N/A                         |
-| **Cursor**     | Apenas universal (com globs) | Não                                           | `.mdc` + frontmatter (`globs`, `description`) | Pasta = identificador | N/A                       |
-| **Cline**      | Workspace × global           | Não                                           | `.md`/`.txt` + frontmatter (`paths`)      | Prefixo numérico ordena | N/A                         |
-| **ai-guidelines** (atual) | **global × per-IA × opt-in × infrastructure** | `decision-brief.md` (proposto Spec 0018) | `.md` + tags `<FEATURE_*>` no monolith | `[BR-*]` em testes / `[DEC-*]` em briefs | Cross-spec referenciado |
+| Ferramenta                | Universal × per-IA                            | Gate humano formal                                                 | Formato de regra                                | Convenção de ID                          | Fronteira spec-a-spec     |
+| :------------------------ | :-------------------------------------------- | :----------------------------------------------------------------- | :---------------------------------------------- | :--------------------------------------- | :------------------------ |
+| **Spec Kit**              | Constituição única                            | Phase -1 (conceitual, sem artefato dedicado)                       | Prosa Markdown, 9 artigos                       | Articles I–IX                            | Não documentada           |
+| **BMAD**                  | `project-context.md` único                    | **Sim** — `bmad-check-implementation-readiness` PASS/CONCERNS/FAIL | Step files com `<halt-condition>`               | Não há                                   | Por artefatos sequenciais |
+| **OpenSpec**              | Sem distinção                                 | Implícito (deps as enablers)                                       | RFC 2119 + Given/When/Then                      | Nomes de requirements                    | **Sim** — delta specs     |
+| **Continue**              | Apenas universal (workspace + global)         | Não                                                                | Markdown + frontmatter (`globs`, `alwaysApply`) | Prefixo numérico ordena                  | N/A                       |
+| **Aider**                 | Apenas universal                              | Não                                                                | Markdown puro (sem frontmatter)                 | Não há                                   | N/A                       |
+| **Cursor**                | Apenas universal (com globs)                  | Não                                                                | `.mdc` + frontmatter (`globs`, `description`)   | Pasta = identificador                    | N/A                       |
+| **Cline**                 | Workspace × global                            | Não                                                                | `.md`/`.txt` + frontmatter (`paths`)            | Prefixo numérico ordena                  | N/A                       |
+| **ai-guidelines** (atual) | **global × per-IA × opt-in × infrastructure** | `decision-brief.md` (proposto Spec 0018)                           | `.md` + tags `<FEATURE_*>` no monolith          | `[BR-*]` em testes / `[DEC-*]` em briefs | Cross-spec referenciado   |
 
 ---
 
