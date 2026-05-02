@@ -209,7 +209,7 @@ Pergunta a responder ao classificar uma spec: _qual é o teste para distinguir o
   - [x] B (Boilerplates separados por tipo)
   - [ ] C (Boilerplate único + apêndice "Stage 1+Gate" condicional injetado)
 - **Justificativa / Ressalvas:** >
-  Adoção das opções B + A + C, conforme recomendado pela pesquisa, garantindo que o framework possa lidar tanto com demandas investigativas complexas  (como um discovery técnico pré-implementação) quanto com tarefas determinísticas de engenharia (como uma refatoração ou clean-up de código), forçando a classificação prévia no header.
+  Adoção das opções B + A + C, conforme recomendado pela pesquisa, garantindo que o framework possa lidar tanto com demandas investigativas complexas (como um discovery técnico pré-implementação) quanto com tarefas determinísticas de engenharia (como uma refatoração ou clean-up de código), forçando a classificação prévia no header.
   Para o Sub-eixo 4, divergimos da pesquisa e adotamos a **Opção B (Boilerplates separados)**. A justificativa é a economia de tokens e redução de carga cognitiva para a IA. Ter templates separados (`tasks-evidence-driven-boilerplate.md`, etc.) evita que o agente gaste contexto lendo regras condicionais complexas na hora de instanciar a spec. O pequeno custo de manutenção duplicada compensa o ganho em previsibilidade e eficiência do prompt.
 - **Data / Owner:** 2026-05-02 / @rosanarezende
 
@@ -269,9 +269,9 @@ A auditoria § 4.2 lista 6 campos em boilerplates sem justificativa em `spec-fou
 
 **Decisão do Gate Humano:**
 
-- **Status:** [ ] Pendente | [ ] Resolvido
+- **Status:** [ ] Pendente | [x] Resolvido
 - **Sub-eixo 1 — Localização interna no spec-foundation (marque com `x`):**
-  - [ ] A (Nova seção "Tipos de spec" logo após "Quando usar spec-foundation")
+  - [x] A (Nova seção "Tipos de spec" logo após "Quando usar spec-foundation")
   - [ ] B (Estender "Hierarquia de documentos" com sub-seção)
   - [ ] C (Nova seção "Workflow em dois passes" ao final)
   - [ ] D (Híbrido: subseção curta em "Hierarquia" + seção "Workflow em dois passes")
@@ -279,13 +279,14 @@ A auditoria § 4.2 lista 6 campos em boilerplates sem justificativa em `spec-fou
   - [ ] A (Tabela de 3 linhas × colunas)
   - [ ] B (Sub-seções por tipo em prosa com exemplos)
   - [ ] C (Diagrama ASCII de fluxo + tabela de tipos)
-  - [ ] D (Híbrido: tabela compacta + 1 parágrafo gate + exemplos cross-repo)
+  - [x] D (Híbrido: tabela compacta + 1 parágrafo gate + exemplos cross-repo)
 - **Sub-eixo 3 — Sincronização do drift bidirecional (marque com `x`):**
   - [ ] Opção 1 (Manter as políticas atuais como convenções exclusivas de boilerplates)
   - [ ] Opção 2 (Promover todas as políticas apontadas para a spec-foundation)
-  - [ ] Misto (Promover `tracker`/`repo-first` e o trigger de `NEXT.md`; manter formato de decisões e riscos como convenção local de boilerplate)
+  - [x] Misto (Promover `tracker`/`repo-first` e o trigger de `NEXT.md`; manter formato de decisões e riscos como convenção local de boilerplate)
 - **Justificativa / Ressalvas:** >
-- **Data / Owner:**
+  Embora o arquivo `spec-foundation.md` atual sofra de problemas arquiteturais (é uma documentação 'humana' não consumida pelos repositórios alvo, e será refatorado na spec futura 'governance-information-architecture'), decidimos injetar a nova seção "Tipos de spec" nele agora (Opções A e D) para evitar a criação prematura de novos arquivos soltos. No momento da implementação, a nova seção deve receber uma anotação de débito (TODO) indicando que seu conteúdo deverá ser migrado para o catálogo de regras canônicas na próxima refatoração arquitetural. Adotamos o modelo misto para o drift bidirecional para não inflar desnecessariamente um arquivo que já está destinado ao refatoramento.
+- **Data / Owner:** 2026-05-02 / @rosanarezende
 
 ---
 
@@ -486,14 +487,15 @@ Recomendação: **D16.A** — gate explícito é didático e evita ambiguidade.
 
 **Decisão do Gate Humano:**
 
-- **Status:** [ ] Pendente | [ ] Resolvido
+- **Status:** [ ] Pendente | [x] Resolvido
 - **Escolha (marque com `x`):**
-  - [ ] A (Acrescentar nova seção ao próprio `docs/process/spec-foundation.md`)
-  - [ ] B (Novo arquivo `docs/process/spec-types.md` referenciado)
-  - [ ] C (ADR atômica nova + ponteiro mínimo no spec-foundation.md)
-  - [ ] D (Aguardar e bloquear até rodar a `governance-information-architecture`)
+  - [x] A (Acrescentar nova seção ao próprio `docs/process/spec-foundation.md` como status quo)
+  - [ ] B (Novo arquivo `docs/process/spec-types.md` e apenas linkar)
+  - [ ] C (Criar uma ADR atômica nova e linkar)
+  - [ ] D (Aguardar e bloquear a spec até rodar a `governance-information-architecture`)
 - **Justificativa / Ressalvas:** >
-- **Data / Owner:**
+  Decisão tática de curto prazo. Cientes de que o `spec-foundation.md` precisa ser refatorado para que regras de fluxo cheguem aos repositórios alvo, optamos pela inserção no arquivo atual (Opção A) para não bloquear a entrega da Spec 0018. A reestruturação profunda da arquitetura de informação (gêneros documentais, o que vai ou não para a CLI) fica delegada para a candidata `governance-information-architecture` no backlog, usando a versão final desta spec como baseline.
+- **Data / Owner:** 2026-05-02 / @rosanarezende
 
 ---
 
@@ -1141,10 +1143,10 @@ Posição atual (Tok-H): `core` 1.232; `global-rules` 1.273; max adapter (gemini
 | :--------------- | :---- | :------- |
 | `[DEC-0018-A01]` | A     | Resolved |
 | `[DEC-0018-A02]` | A     | Resolved |
-| `[DEC-0018-A03]` | A     | Pendente |
+| `[DEC-0018-A03]` | A     | Resolved |
 | `[DEC-0018-A04]` | A     | Pendente |
 | `[DEC-0018-A05]` | A     | Pendente |
-| `[DEC-0018-A06]` | A     | Pendente |
+| `[DEC-0018-A06]` | A     | Resolved |
 | `[DEC-0018-B01]` | B     | Pendente |
 | `[DEC-0018-B02]` | B     | Pendente |
 | `[DEC-0018-B03]` | B     | Pendente |
