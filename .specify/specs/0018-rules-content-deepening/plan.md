@@ -2,14 +2,14 @@
 
 > Spec: [`./spec.md`](./spec.md)
 > Decision Brief: [`./decision-brief.md`](./decision-brief.md)
-> Status: Draft (revised 2026-04-30) — **Stage 1 (Research)**
+> Status: In Progress — **Stage 2 (Implementation)** — revised 2026-05-02 (Stage 1 encerrado, gate humano `Resolved` em todos os pontos `[DEC-0018-*]`)
 
-> **Plano em dois passes.** Stage 1 (este conteúdo) só formula perguntas
-> de pesquisa, eixos de análise e critérios de decisão — sem cravar
-> taxonomia, formato de catálogo, metodologia de eval ou fronteiras.
-> Decisões emergem do `decision-brief.md` após gate humano. Stage 2
-> (preencher pós-gate) acrescenta apêndice com decisões validadas e
-> desenho técnico derivado.
+> **Plano em dois passes — Stage 1 concluído.** Stage 1 produziu 1 auditoria
+> editorial + 5 researches externas + decision-brief com 14 pontos resolvidos
+> no gate humano de 2026-05-02. Stage 2 (esta versão) cristaliza o desenho
+> técnico derivado das decisões cravadas e detalha as fases operacionais
+> de implementação. Cada subseção `A.2`–`A.6` e `B.2`–`B.7` referencia
+> explicitamente o `[DEC-0018-*]` que a alimenta.
 
 ---
 
@@ -58,10 +58,66 @@ A partir da matriz de A.0, registrar em `decision-brief.md` cada ponto pendente 
 - `[DEC-0018-A05]` Formato definitivo do `decision-brief-boilerplate.md` (informado pelo dogfood desta própria brief).
 - `[DEC-0018-A06]` Localização física da seção "Tipos de spec" + workflow em dois passes em `spec-foundation.md`.
 
-##### A.2 a A.6 — Stage 2 (preencher pós-gate)
+##### A.2 — Updates incrementais nos 7 boilerplates existentes
 
-> Tasks de implementação derivadas das decisões validadas em `decision-brief.md`.
-> Esta seção será reescrita após Stage 1 + Gate.
+Derivado de `[DEC-0018-A01]` (matriz híbrida). Cada item segue a sub-row da decisão (`A01.1` a `A01.7`):
+
+- `spec-boilerplate.md` (A01.1): adicionar campo **Tipo de spec** obrigatório no header (gatilho de A02 sub-eixo 3 = C); adicionar campo opcional **Decision Brief**, subseções opcionais 🧠 **Decisão de Fusão**, 🛑 **Post-mortem**, e **Cross-refs com specs irmãs**; revisar status composto (`Done (PR #X — YYYY-MM-DD)`); remover prescrição literal de `research/synthesis.md`.
+- `plan-boilerplate.md` (A01.2): formalizar formato da seção 📐 **Decisões revisitadas** (data + mudança + razão + impacto, com cap orientativo); adicionar bloco **Stage 1/Stage 2 placeholder** condicional ao tipo `evidence-driven`/`mixed`; relaxar cap de 2-4 linhas em "Princípio guia"; subseção opcional 📎 **Anexo — Conteúdo candidato pré-research**.
+- `next-boilerplate.md` (A01.4): trigger explícito de **criação** ("criar quando a spec gerar débitos conscientes"); downgrade de "Itens descartados deliberadamente" para opcional.
+- `roadmap-boilerplate.md` (A01.6): sincronizar com a promoção de `tracker`/`repo-first` para `spec-foundation.md` (cf. A.5).
+- `research-index-boilerplate.md` (A01.5): sincronizar política de research lifecycle com a constituição.
+- `project-config-boilerplate.md` (A01.7): zero churn (confirmado pela auditoria).
+
+##### A.3 — Reestruturação canônica de `tasks-boilerplate.md` em 5 fases + split por tipo de spec
+
+Derivado da ressalva do owner em `[DEC-0018-A01]` e de `[DEC-0018-A02]` Sub-eixo 4 = B (boilerplates separados).
+
+**Modelo canônico (5 fases — substituirá o atual modelo de 3 fases):**
+
+| Fase | Nome                                | Conteúdo                                                                                                                                                  |
+| :--- | :---------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0    | Setup                               | Bootstrap, instanciação de artefatos, validação humana inicial.                                                                                           |
+| 1    | Implementação A                     | Primeiro sub-bloco de implementação. Exige **commits incrementais** ao final de cada sub-bloco (atomicidade tipo "história de usuário concluída").        |
+| 2    | Implementação B                     | Segundo sub-bloco. Mesma exigência de commits incrementais. Specs single-bloco fundem 1+2 com nota explícita.                                             |
+| 3    | Preparação para Review (Gate Homol) | Empacotamento e homologação. Status muda para `In Review`, atualiza-se a descrição do PR, e a execução pausa **aguardando Gate de Review Humano formal**. |
+| 4    | Encerramento Pré-Merge              | Encerramento ocorre **na branch do PR, antes do merge**. Pós-merge não tem tarefa. Migra research, deleta NEXT.md, atualiza roadmap, finaliza CHANGELOG.  |
+
+**Split por tipo de spec** (`[DEC-0018-A02]` Sub-eixo 4 = B): manter `tasks-boilerplate.md` como variante genérica de referência e adicionar três variantes especializadas:
+
+- `tasks-evidence-driven-boilerplate.md` — inclui sub-bloco "Stage 1 (Research)" + "Gate humano via decision-brief.md" entre Setup e Implementação.
+- `tasks-deterministic-boilerplate.md` — single-pass, sem Stage 1 (entra direto em Implementação A após Setup).
+- `tasks-mixed-boilerplate.md` — híbrido: Stage 1 condicional para sub-blocos identificados como evidence-driven; restante single-pass.
+
+A justificativa documentada do owner é economia de tokens e redução de carga cognitiva: a IA instancia já com o checklist correto sem precisar resolver condicionais em runtime.
+
+##### A.4 — Criar `decision-brief-boilerplate.md` (8º artefato)
+
+Derivado de `[DEC-0018-A05]`. Formato canônico:
+
+| Sub-eixo                     | Decisão  | Implicação no boilerplate                                                                                                                                                           |
+| :--------------------------- | :------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. Estrutura por ponto       | D        | Estrutura híbrida adaptativa: padrão **B** (Pergunta + Contexto + Opções + Decisão); decompor em sub-eixos (**C**) quando o ponto exige.                                            |
+| 2. Convenção de IDs          | A+C+D    | `[DEC-NNNN-XYZ]` + legenda canônica de status (Open/Partial/Resolved/Pendente) no topo + convenção documentada para pontos derivados (origem + IDs sem gaps).                       |
+| 3. Recomendação inicial      | D + D9.C | Opcional, com nota explícita do gatilho ("incluir quando há evidência convergente em ≥ 1 research"). Tradeoffs aceita tabela ou lista bulleted.                                     |
+| 4. Resumo de status          | C        | Headers individuais + Tabela final manual de "Resumo de status".                                                                                                                    |
+| 4-bis. Bloco Gate            | D16.A    | Bloco final explícito **✅ Gate fechado** (data + owner + checkbox por ponto).                                                                                                      |
+| 5. Checklist pós-gate (4 ✅) | B        | Checklist explícito: (1) `plan.md` v2 com seções derivadas; (2) `tasks.md` v2 substitui placeholder; (3) status agregado da brief → `Resolved`; (4) commit atômico marcando o gate. |
+
+##### A.5 — Atualizar `docs/process/spec-foundation.md`
+
+Derivado de `[DEC-0018-A03]` (A + D + Misto) e `[DEC-0018-A06]` (A — manter no `spec-foundation.md` atual).
+
+- **Nova seção "Tipos de spec"** logo após "Quando usar spec-foundation". Formato híbrido (D): tabela compacta de 3 linhas (`evidence-driven` / `deterministic` / `mixed`) × colunas (Critério-teste / Workflow / Exemplo cross-repo) + 1 parágrafo descrevendo o gate humano + nota com 2-3 exemplos por tipo de repo (SaaS, library, infra-as-code, ML pipeline).
+- **Critério-teste universal** explicitado: _"o design depende de evidência técnica/pesquisa ainda não coletada?"_ (`[DEC-0018-A02]` Sub-eixo 2 = A).
+- **Sincronização do drift bidirecional** (sub-eixo 3 = misto): promover para a constituição (i) o princípio "repo-first, integração-friendly" + campo `tracker` (do `roadmap-boilerplate.md`) e (ii) o trigger de criação de `NEXT.md` (de `tasks-boilerplate.md` Fase 0). Os demais (formato de "Decisões revisitadas", "Riscos macro", emojis do research-index) ficam como convenção localizada.
+- **TODO de migração explícita** em comentário visível no topo da nova seção: anotar que o conteúdo deverá migrar para a futura spec **`governance-information-architecture`** (já presente no backlog), que reorganizará a arquitetura de informação do framework. Isto preserva a coerência arquitetural sem bloquear esta entrega.
+
+##### A.6 — Atualizar `.core/rules/global-rules.md`
+
+Derivado de `[DEC-0018-A04]` (A + D — texto híbrido). Localização: subseção **"Workflow com IA"** (existente). Texto cravado pelo owner:
+
+> **Tipo de spec é declarado no header (`evidence-driven`, `deterministic`, `mixed`).** Specs `evidence-driven` ou `mixed` exigem um gate humano via `decision-brief.md` antes da implementação — o teste é: _"o design depende de evidência técnica/pesquisa ainda não coletada?"_. Detalhes em `docs/process/spec-foundation.md`.
 
 #### [B | Content Overhaul Research-Backed (Rules)]
 
@@ -99,10 +155,159 @@ A partir das 5 sínteses, registrar em `decision-brief.md`:
 - `[DEC-0018-B07]` Fronteira com Spec 0009 (harness-engineering).
 - `[DEC-0018-B08]` Política de reconciliação do conteúdo b9efb83 (critérios de manter/revisar/reverter).
 
-##### B.2 a B.5 — Stage 2 (preencher pós-gate)
+##### B.2 — Purga radical do legado `b9efb83` (precede a reorganização)
 
-> Catálogo, eval, reconciliação e aplicação final em `.core/rules/*` derivam das decisões validadas em `decision-brief.md`.
-> Esta seção será reescrita após Stage 1 + Gate.
+Derivado de `[DEC-0018-B08]` = A + E + L + O. Postura de **purga radical**: regra-a-regra (A), com **source canônica externa obrigatória** (E — CWE / CERT / Sonar RSPEC / OWASP / paper validado), aplicado **ANTES** de qualquer reformatação ou migração de taxonomia (O). Documentação dedicada em `research/2026-04-30-b9efb83-reconciliation.md` (L).
+
+Procedimento:
+
+1. Inventariar as 24 regras candidatas (20 itens em 3 seções de `.core/rules/global-rules.md` + 4 categorias em `.core/rules/opt-in/quality-gates.md`).
+2. Para cada regra, atribuir **fonte canônica candidata** (URL + ID externo, ex.: `CWE-89`, `OWASP-LLM01`, `Sonar S2068`). Sem source aceitável, **reverter** sem cerimônia.
+3. Tabela final em `research/2026-04-30-b9efb83-reconciliation.md` com colunas: regra / texto original / source proposta / decisão (`manter` | `reverter` | `revisar com source X`) / justificativa.
+4. Aplicar reversões em `.core/rules/*.md` num commit isolado, antes de qualquer trabalho de B.3+.
+
+Heurísticas de defeito sem suporte empírico (notavelmente **N+1**, identificado em `research/2026-04-30-empirical-bugs-ai-code.md` § 4 e § 7.3 como ausente das taxonomias maduras) são revertidas. Regras de _race conditions_ e _memory leaks_ são candidatas a manter se source CONCUR/aging-studies pode ser citada explicitamente.
+
+##### B.3 — Arquitetura **Docs-as-Code**: schema bilíngue + parser YAML → `rules.json`
+
+Derivado de `[DEC-0018-B01]` (F + J — taxonomia híbrida + tag de evidência categorizada), `[DEC-0018-B02]` (C + F — escopo de injeção + hierarquia em `opt-in/`), `[DEC-0018-B04]` (E + H + N — estrutura mínima estendida + IDs por escopo + catálogo navegável).
+
+###### Schema canônico de uma regra
+
+Cada regra é um bloco markdown com **frontmatter YAML** + corpo bilíngue. O corpo separa explicitamente o que vai para a IA (inglês, foco em compliance) do que fica para humanos (PT-BR, foco em manutenibilidade OSS).
+
+```markdown
+---
+id: GR-0001
+scope: universal # universal | adapter | opt-in
+adapter: null # claude | codex | gemini (se scope=adapter)
+opt_in_feature: null # tdd | bdd | quality-gates | ... (se scope=opt-in)
+category: security # correctness | security | maintainability | process | editorial
+evidence_strength: strong # strong | medium | emerging | declared_heuristic
+sources:
+  - "CWE-89"
+  - "OWASP-A03:2021"
+applicable_languages: ["*"]
+tags: [sql, input-validation]
+---
+
+## [GR-0001] Sanitize SQL inputs
+
+**Instruction (en):**
+Always sanitize user input before constructing SQL queries. Use parameterized
+queries via the data layer's prepared statement API. Never concatenate user
+input into raw SQL strings.
+
+**Documentação (pt-br):**
+Sempre higienize entrada de usuário antes de construir queries SQL...
+
+**Why this is an issue / Por que isto é um problema:**
+[justificativa em PT-BR]
+
+**Noncompliant example:**
+\`\`\`sql
+SELECT \* FROM users WHERE name = '${input}';
+\`\`\`
+
+**Compliant example:**
+\`\`\`sql
+SELECT \* FROM users WHERE name = ?;
+\`\`\`
+
+**See also:** [GR-0042], [OPT-SECURITY-03]
+```
+
+**Convenção de IDs** (`[DEC-0018-B04]` Sub-eixo 2 = H):
+
+- `[GR-NNNN]` — universal (em `.core/rules/global-rules.md`).
+- `[ADP-NNNN]` — adapter por IA (em `.core/rules/{claude,codex,gemini}.md`).
+- `[OPT-NNNN]` — opt-in (em `.core/rules/opt-in/<feature>/*.md`).
+
+**Categorias-âncora** (`[DEC-0018-B01]` Sub-eixo 2 = J): `correctness` e `security` exigem `evidence_strength: strong` ou `medium` com `sources` não-vazio. `process`, `editorial` e `maintainability` aceitam `declared_heuristic` sem source.
+
+**Hierarquia em `opt-in/`** (`[DEC-0018-B02]` Sub-eixo 2 = F): subdiretórios temáticos (ex.: `opt-in/editorial/`, `opt-in/security/`) — não antecipa a Spec 0011, que tratará da hierarquia profunda também em `global-rules` e nos consumidores.
+
+###### Pipeline de build
+
+```
+.core/rules/**/*.md (markdown bilíngue + frontmatter YAML)
+        │
+        ▼
+[1] cli/governance/monolith/rules-parser.mjs
+    • Lê todos os .md sob .core/rules/
+    • Extrai frontmatter (parser YAML nativo, sem dep externa nova)
+    • Valida schema (id único; categoria-âncora exige source; cross-refs apontam IDs existentes)
+    • Falha rápido em violação
+        │
+        ▼
+[2] cli/governance/monolith/rules-builder.mjs
+    • Serializa o catálogo completo em rules.json (build artifact)
+    • Estrutura: { rules: [...], by_id: {...}, by_scope: {...}, generated_at, schema_version }
+        │
+        ├──▶ rules.json (build artifact — consumido por API/dashboard externo)
+        │
+        ▼
+[3] cli/governance/monolith/compiler.mjs (refatorado)
+    • Itera regras filtradas por escopo de injeção (universal + adapters ativos + opt-in selecionados)
+    • Extrai apenas o bloco "Instruction (en)" de cada regra
+    • Documentação PT-BR fica fora do <AI_GUIDELINES> (economia de tokens, foco em compliance)
+        │
+        ▼
+AGENTS.md do consumidor
+    bloco <AI_GUIDELINES> contém:
+      - core directives
+      - instruction_en de cada regra ativa
+      - sem documentação humana (essa vive no repo do framework + dashboard)
+```
+
+##### B.4 — Migração das regras sobreviventes para o formato bilíngue
+
+1. Aplicar o schema YAML (B.3) a cada regra que sobreviveu à purga (B.2) e a cada regra introduzida pelo Bloco B.
+2. Atribuir IDs canônicos (`[GR-NNNN]`, `[ADP-NNNN]`, `[OPT-NNNN]`).
+3. **Tradução qualificada** do campo `Instruction` para Inglês — performance dos modelos de fronteira é mais alta em inglês para instruções imperativas (justificativa registrada em A04 como decisão consciente). Documentação em PT-BR é mantida e melhorada para acessibilidade OSS.
+4. Cobertura mínima de cross-refs: cada regra com `category: security` ou `correctness` tem ≥ 1 entrada em `see_also` apontando para regra correlata ou opt-in feature.
+
+##### B.5 — Eval amostral (Stage 2 limitado a baseline)
+
+Derivado de `[DEC-0018-B05]` (C + H + K + N + R) e `[DEC-0018-B07]` (D — apenas amostral nesta spec; eval pleno é da Spec 0009).
+
+| Dimensão         | Decisão                                                                                                          |
+| :--------------- | :--------------------------------------------------------------------------------------------------------------- |
+| Largura×prof     | Híbrido (C) — broad amostral aqui; calibração trimestral fica para 0009.                                         |
+| Asserção         | G obrigatório (RSPEC mínima por regra) + F amostral (delta comportamental) — **H** combinado.                    |
+| Provedores       | Claude + Codex + Gemini (K — paritários aos 3 adapters).                                                         |
+| Não-determinismo | 3 rodadas (N), passa-rate **2/3**.                                                                               |
+| Threshold        | Categorizado (R): regras `evidence_strength: strong` reprovadas → cortadas (hard); demais → débito em `NEXT.md`. |
+
+Output: `research/2026-04-30-eval-results.md` documentando subset selecionado, prompts canônicos, passa-rate por regra × provedor, decisões de corte/débito.
+
+##### B.6 — Token budget: lint heurístico + sanity check Anthropic API
+
+Derivado de `[DEC-0018-B03]` (C + E + H + O + P).
+
+| Sub-eixo             | Decisão                                                                                                                                                                      |
+| :------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. Granularidade     | C — por arquivo **e** agregado.                                                                                                                                              |
+| 2. Tipo de teto      | E — **soft ceiling** + audit obrigatório.                                                                                                                                    |
+| 3. Valores numéricos | H — agregado ≤ 6 K tokens; universal ≤ 1,5 K; adapter ≤ 600; opt-in ≤ 1,2 K.                                                                                                 |
+| 4. Enforcement       | O — lint heurístico local (Tok-H = chars/3,5 calibrado para PT-BR) integrado a `yarn check`; sanity check off-CI via `messages.count_tokens` (script standalone, periódico). |
+| 5. Unidade canônica  | P — tokens (Tok-H), com linhas/instruções em comentário derivado.                                                                                                            |
+
+Implementação em `cli/governance/monolith/token-budget.mjs`. Soft ceiling = `WARN`, nunca `FAIL` — alinhado com MindStudio "exceeding the threshold = signal to audit, not to expand". Consumo ≥ 70 % do teto agregado dispara audit obrigatório no PR description **e** funciona como gatilho da Spec 0011 (cf. B.7).
+
+##### B.7 — Catálogo navegável + `NEXT.md` (débitos cravados)
+
+###### Catálogo navegável (`[DEC-0018-B04]` Sub-eixo 3 = N)
+
+`.core/rules/catalog.md` — gerado/mantido como índice humano, com 1 linha por regra (ID + intent curto + escopo + categoria + link). Não é fonte da verdade (regras vivem inline nos seus arquivos canônicos), mas dá visão global e cross-ref navegável. Drift entre catálogo e regras é mitigado por validação cruzada no `rules-parser`.
+
+###### `NEXT.md` (débitos cravados)
+
+Derivado de `[DEC-0018-B06]` (A + F + N) e `[DEC-0018-B07]` (D + H + J).
+
+- **Spec 0011 (regra-hierarquia)** — gatilho mensurável: **agregado compilado ≥ 4,2 K tokens (= 70 % do teto de 6 K)**. Apêndice com snapshot canônico do `<AI_GUIDELINES>` ao fim da 0018 (medição Tok-H, listagem de regras, taxonomia final, cobertura de cross-refs) para que a 0011 inicie com baseline conhecido.
+- **Spec 0009 (harness-engineering)** — todo o pipeline automatizado (agente validador separado, sensores em CI, integração `/ultra-review`) fica para 0009 (H). Eval mínimo da 0018 (B.5) **é declarado como baseline-regression**: qualquer mudança no catálogo invalida o baseline e exige re-rodada no harness 0009. Researches 0018 (5 arquivos) ficam congelados em `.specify/specs/researchs/governance/` (J) — F9.2 do encerramento se encarrega.
+- **Inovação a abrir como spec futura — Scaffolding Inteligente de Provedores** (registrada em B07): a CLI deverá detectar provedores ativos no consumidor (heurística: presença de `CLAUDE.md`, `.codex/`, `gemini.md` etc.) e gerar automaticamente: (i) **arquivos restritivos** estilo `.claudeignore` focando contexto; (ii) **trampolins** como `CLAUDE.md` contendo apenas `@AGENTS.md` para impedir drift entre adapter file e fonte canônica. Mitiga _Context Rot_ e elimina arquivos soltos. Candidata a virar Spec autônoma após merge da 0018.
 
 ---
 
@@ -116,9 +321,34 @@ A partir das 5 sínteses, registrar em `decision-brief.md`:
 - [ ] Gate humano: owner revisou e marcou cada ponto `Resolved` com escolha + justificativa + data.
 - [ ] Status do `decision-brief.md` atualizado para `Resolved` (todos os pontos fechados).
 
-### Stage 2 (pós-gate — DoD a ser detalhado)
+### Stage 2 (Implementação)
 
-> A ser preenchido após Gate humano.
+**Bloco A — Boilerplates + foundation + global-rules**
+
+- [ ] 7 boilerplates existentes atualizados conforme matriz `[DEC-0018-A01]` (A.2).
+- [ ] `tasks-boilerplate.md` reestruturado em 5 fases canônicas (A.3).
+- [ ] 3 boilerplates especializados por tipo criados: `tasks-evidence-driven-`, `tasks-deterministic-`, `tasks-mixed-` (A.3).
+- [ ] `decision-brief-boilerplate.md` (8º artefato) criado conforme `[DEC-0018-A05]` (A.4).
+- [ ] `docs/process/spec-foundation.md` ganha seção "Tipos de spec" com TODO de migração para `governance-information-architecture` (A.5).
+- [ ] `.core/rules/global-rules.md` ganha linha cravada em `[DEC-0018-A04]` na subseção "Workflow com IA" (A.6).
+- [ ] `spec.md` desta 0018 retroactivamente recebe `Tipo de spec: evidence-driven` no header — registrado em "Decisões revisitadas" como exceção consciente à imutabilidade pós-`In Review` (a regra é criada por esta própria spec).
+
+**Bloco B — Conteúdo + pipeline Docs-as-Code**
+
+- [ ] `research/2026-04-30-b9efb83-reconciliation.md` publicado: 24 regras avaliadas, source canônica externa por regra ou justificativa de reverso (B.2).
+- [ ] Reversões de b9efb83 aplicadas em `.core/rules/*` num commit isolado, antes de B.3+ (B.2).
+- [ ] `cli/governance/monolith/rules-parser.mjs` implementado com testes BDD em PT-BR + traceability `[BR-*]` (cobertura ≥ 85 %, kill-rate ≥ 60 %) (B.3).
+- [ ] Schema YAML formal documentado em `decision-brief-boilerplate.md` (8º artefato) e em `CLAUDE.md` raiz (B.3).
+- [ ] `cli/governance/monolith/rules-builder.mjs` gera `rules.json` em build-time; alvo `yarn build:rules` exposto (B.3).
+- [ ] `cli/governance/monolith/compiler.mjs` refatorado: extrai apenas `Instruction (en)` para `<AI_GUIDELINES>`; documentação PT-BR fica fora do bloco compilado (B.3).
+- [ ] Snapshots de `cli/app/engine.test.mjs` e `cli/governance/agents-merge.test.mjs` revisados e atualizados conscientemente (não silenciosamente) (B.3).
+- [ ] Regras sobreviventes migradas para formato bilíngue com IDs canônicos `[GR-*]` / `[ADP-*]` / `[OPT-*]` (B.4).
+- [ ] Tradução qualificada do campo `Instruction` para Inglês em todas as regras sobreviventes (B.4).
+- [ ] `research/2026-04-30-eval-results.md` publicado: subset crítico × 3 provedores (Claude/Codex/Gemini) × 3 rodadas (B.5).
+- [ ] `cli/governance/monolith/token-budget.mjs` implementado: lint heurístico (WARN soft ceiling, sem FAIL) integrado em `yarn check` (B.6).
+- [ ] Script standalone `cli/scripts/token-sanity-check.mjs` (off-CI) chama `messages.count_tokens` para auditoria periódica (B.6).
+- [ ] `.core/rules/catalog.md` gerado/mantido como índice navegável humano (B.7).
+- [ ] `NEXT.md` cravado: gatilho 4,2 K tokens para Spec 0011 + snapshot canônico; baseline-regression para Spec 0009; Scaffolding Inteligente como spec futura (B.7).
 
 ### Globais (toda a spec)
 
@@ -130,9 +360,11 @@ A partir das 5 sínteses, registrar em `decision-brief.md`:
 
 ## 🧪 Estratégia de Testes
 
-- **Unit/Integração**: testes existentes em `cli/governance/monolith/` e `tests/integration/` cobrem o pipeline. Devem continuar verdes; ajustar snapshots em Stage 2 se a estrutura do `<AI_GUIDELINES>` mudar.
-- **Editorial (manual, Stage 2)**: lint de redundância cross-arquivo entre `global-rules.md` e adapters; revisão de legibilidade do AGENTS.md compilado.
-- **Empírico (eval B-Stage 2)**: detalhes definidos em `[DEC-0018-B05]`. Resultado em `research/2026-04-30-eval-results.md`. Não roda em CI por agora — débito para Spec 0009.
+- **Unit/Integração (Stage 2)**: testes existentes em `cli/governance/monolith/` e `tests/integration/` continuam verdes; novos componentes (`rules-parser.mjs`, `rules-builder.mjs`, `token-budget.mjs`) seguem a convenção co-located + BDD em PT-BR + traceability `[BR-*]` (cobertura ≥ 85 %, kill-rate ≥ 60 %). Snapshots de `compiler.test.mjs` e `agents-merge.test.mjs` revisados conscientemente para refletir o split bilíngue do `<AI_GUIDELINES>`.
+- **Validação cruzada do schema (Stage 2)**: `rules-parser.mjs` valida em build-time (i) IDs únicos, (ii) cross-refs (`see_also`) apontando para IDs existentes, (iii) categorias-âncora (`correctness`, `security`) com `evidence_strength: strong | medium` e `sources` não-vazio. Falha rápido em violação.
+- **Token budget (Stage 2)**: `token-budget.mjs` integrado em `yarn check`. Soft ceiling = `WARN`; nunca `FAIL` (alinhado com decisão `[DEC-0018-B03]` E). Sanity check periódico off-CI via `messages.count_tokens`.
+- **Editorial (manual, Stage 2)**: lint de redundância cross-arquivo entre `global-rules.md` e adapters; revisão de legibilidade do `AGENTS.md` compilado em consumidor real (`adopt --dry-run`).
+- **Empírico (eval B.5)**: subset crítico × 3 provedores × 3 rodadas; resultado em `research/2026-04-30-eval-results.md`. Não roda em CI — débito para Spec 0009 (baseline-regression cravado em `NEXT.md`).
 
 ---
 
@@ -148,17 +380,46 @@ A partir das 5 sínteses, registrar em `decision-brief.md`:
 - `research/2026-04-30-tokens-baseline-budget.md` (novo).
 - `decision-brief.md` (criado em Fase 0; populado durante A.1 e B.1).
 
-**Stage 2 (pós-gate — lista exaustiva a ser refinada conforme decisões):**
+**Stage 2 (Implementação):**
 
-- `.specify/templates/*` (7 existentes + 1 novo `decision-brief-boilerplate.md`).
-- `docs/process/spec-foundation.md`.
-- `.core/rules/global-rules.md`.
-- `.core/rules/opt-in/quality-gates.md`.
-- `.core/rules/{claude,codex,gemini}.md` (potencial, conforme `[DEC-0018-B02]`).
-- `research/2026-04-30-eval-results.md` (novo, Stage 2).
-- `CHANGELOG.md`.
-- `.specify/specs/research-index.md` (encerramento).
-- `NEXT.md` (criado se houver débitos — fronteiras 0011/0009 conforme `[DEC-0018-B06]`/`[DEC-0018-B07]`).
+_Boilerplates e foundation (Bloco A):_
+
+- `.specify/templates/spec-boilerplate.md` (atualizar — A.2).
+- `.specify/templates/plan-boilerplate.md` (atualizar — A.2).
+- `.specify/templates/tasks-boilerplate.md` (reestruturar para 5 fases — A.3).
+- `.specify/templates/tasks-evidence-driven-boilerplate.md` (novo — A.3).
+- `.specify/templates/tasks-deterministic-boilerplate.md` (novo — A.3).
+- `.specify/templates/tasks-mixed-boilerplate.md` (novo — A.3).
+- `.specify/templates/next-boilerplate.md` (atualizar — A.2).
+- `.specify/templates/roadmap-boilerplate.md` (atualizar — A.2).
+- `.specify/templates/research-index-boilerplate.md` (atualizar — A.2).
+- `.specify/templates/decision-brief-boilerplate.md` (novo, 8º artefato — A.4).
+- `docs/process/spec-foundation.md` (nova seção "Tipos de spec" + sync de drift — A.5).
+- `.core/rules/global-rules.md` (linha em "Workflow com IA" — A.6 + reorganização Bloco B).
+
+_Conteúdo, pipeline e instrumentação (Bloco B):_
+
+- `.core/rules/global-rules.md` (purga + bilíngue + IDs `[GR-*]` — B.2/B.4).
+- `.core/rules/{claude,codex,gemini}.md` (bilíngue + IDs `[ADP-*]` — B.4).
+- `.core/rules/opt-in/quality-gates.md` (purga + bilíngue + IDs `[OPT-*]` — B.2/B.4; possível subdiretório `opt-in/security/` ou `opt-in/editorial/` conforme B.3).
+- `.core/rules/catalog.md` (novo — B.7).
+- `cli/governance/monolith/rules-parser.mjs` + `.test.mjs` (novo — B.3).
+- `cli/governance/monolith/rules-builder.mjs` + `.test.mjs` (novo — B.3).
+- `cli/governance/monolith/compiler.mjs` + `.test.mjs` (refatorar para bilíngue — B.3).
+- `cli/governance/monolith/token-budget.mjs` + `.test.mjs` (novo — B.6).
+- `cli/scripts/token-sanity-check.mjs` (novo, off-CI — B.6).
+- `package.json` (alvos `yarn build:rules`, hook em `yarn check` para token-budget — B.3/B.6).
+
+_Researches, registros e encerramento:_
+
+- `research/2026-04-30-b9efb83-reconciliation.md` (novo — B.2).
+- `research/2026-04-30-eval-results.md` (novo — B.5).
+- `NEXT.md` (criado em Fase 5; deletado na Fase 7 — débitos para 0011, 0009, Scaffolding).
+- `CHANGELOG.md` (entrada da 0018 — Fase 7).
+- `.specify/specs/research-index.md` (Fase 7 — F9.2 do encerramento, migração dos 6 researches).
+- `.specify/specs/roadmap/historico.md` + `roadmap/backlog.md` (Fase 7 — encerramento).
+- `CLAUDE.md` raiz (documentar o pipeline Docs-as-Code e o schema bilíngue — B.3).
+- `spec.md` desta 0018 (header retroativo `Tipo de spec: evidence-driven` — A.2; registrado em "Decisões revisitadas").
 
 ---
 
@@ -190,6 +451,12 @@ A partir das 5 sínteses, registrar em `decision-brief.md`:
   - **Mudança:** primeira reescrita ainda cravava decisões pré-research (taxonomia (a)/(b)/(c), formato `[RULE-ENG-NN]`, "8–12 prompts × ≥2 provedores"). Reformulada para modelo Stage 1 (research + opções no `decision-brief.md`) → Gate humano → Stage 2 (design + implementação). `decision-brief.md` introduzido como artefato canônico de gate; será formalizado como 8º boilerplate em Bloco A.
   - **Por quê:** owner identificou que a estrutura anterior reproduzia o erro de fundo da rev. inicial — pulava o gate humano pós-research e travava o desenho antes de ter evidência.
   - **Implicação em `tasks.md`:** estrutura completamente reescrita; Fases 4+ (Stage 2) ficam como placeholder até o gate.
+
+- **2026-05-02 — Encerramento Stage 1 + abertura Stage 2.**
+  - **Mudança:** gate humano resolveu todos os 14 pontos `[DEC-0018-*]` em `decision-brief.md`. Sub-blocos `A.2`–`A.6` e `B.2`–`B.7` reescritos com desenho técnico cravado: estratégia bilíngue (instrução em inglês para a IA, documentação em PT-BR para humanos), pipeline Docs-as-Code (parser YAML → `rules.json` → compiler bilíngue), purga radical do legado `b9efb83` por source canônica externa, soft ceiling de 6 K tokens (gatilho 4,2 K para Spec 0011), eval amostral em 3 provedores. Novo modelo de 5 fases para `tasks-boilerplate.md` (Setup → Impl A → Impl B → Review prep → Pré-merge close) com split por tipo de spec.
+  - **Por quê:** Stage 1 entregou auditoria editorial (boilerplates) + 5 researches externas com decisões fundamentadas. O desenho técnico agora deriva linearmente da matriz de decisões — qualquer rota não derivada do brief é rejeitada como acreção pré-research.
+  - **Implicação em `tasks.md`:** Fase 4+ deixa de ser placeholder; passa a operar como **Stage 2 dogfoodando o novo modelo de 5 fases** (Fases 4–7 numeradas continuamente, mapeando para as fases canônicas 1–4 do novo `tasks-boilerplate.md`). Fases 0–3 atuais permanecem como histórico do Stage 1 (já completas).
+  - **Exceção consciente à imutabilidade da `spec.md`:** a 0018 cria o campo "Tipo de spec" — sua própria `spec.md` recebe o campo retroativamente em A.2. Justificativa: a regra é instituída por esta spec; aplicar a regra a si mesma é dogfooding necessário.
 
 ---
 
