@@ -544,21 +544,22 @@ Independente do eixo primário, toda regra carrega tag de evidência (sugestão 
 
 **Decisão do Gate Humano:**
 
-- **Status:** [ ] Pendente | [ ] Resolvido
+- **Status:** [ ] Pendente | [x] Resolvido
 - **Sub-eixo 1 — Eixo primário da taxonomia (marque com `x`):**
   - [ ] A (Por stack/tecnologia - modelo awesome-cursorrules, 13 cats)
   - [ ] B (Por função editorial - filosofia/processo/gates/gotchas/convenções)
   - [ ] C (Por escopo de aplicação - always-on/conditional/on-demand)
   - [ ] D (Por tipo de defeito - Sonar 4 cats: Correctness/Security/Maintainability/Process)
   - [ ] E (Por tipo de defeito + LLM-security - 6 cats)
-  - [ ] F (Híbrida — função editorial DENTRO de escopo universal/per-IA/opt-in)
+  - [x] F (Híbrida — função editorial DENTRO de escopo universal/per-IA/opt-in)
   - [ ] G (3 dimensões ortogonais com tags estilo Sonar full)
 - **Sub-eixo 2 — Eixo secundário: tag de evidência (marque com `x`):**
   - [ ] H (Mandatória para todas as regras: Forte/Média/Emergente/Heurística)
   - [ ] I (Opcional, quando não há = "heurística")
-  - [ ] J (Mandatória APENAS para categorias-âncora como Correctness/Security; opcional para Process/Editorial)
+  - [x] J (Mandatória APENAS para categorias-âncora como Correctness/Security; opcional para Process/Editorial)
 - **Justificativa / Ressalvas:** >
-- **Data / Owner:**
+  Adoção da taxonomia híbrida (F) para preservar a estrutura de injeção da CLI (Universal/Opt-in) ao mesmo tempo que se adiciona clareza editorial ao catálogo de regras. Adoção de evidência categorizada (J) para garantir flexibilidade em cenários reais de engenharia: regras de processo e negócio internas podem ser tratadas como "Heurísticas Declaradas" sem fricção, enquanto regras de mitigação de defeitos críticos (Correctness/Security) continuam a exigir validação empírica.
+- **Data / Owner:** 2026-05-02 / @rosanarezende
 
 ---
 
@@ -1147,10 +1148,10 @@ Posição atual (Tok-H): `core` 1.232; `global-rules` 1.273; max adapter (gemini
 | `[DEC-0018-A01]` | A     | Resolved |
 | `[DEC-0018-A02]` | A     | Resolved |
 | `[DEC-0018-A03]` | A     | Resolved |
-| `[DEC-0018-A04]` | A     | Pendente |
-| `[DEC-0018-A05]` | A     | Pendente |
+| `[DEC-0018-A04]` | A     | Resolved |
+| `[DEC-0018-A05]` | A     | Resolved |
 | `[DEC-0018-A06]` | A     | Resolved |
-| `[DEC-0018-B01]` | B     | Pendente |
+| `[DEC-0018-B01]` | B     | Resolved |
 | `[DEC-0018-B02]` | B     | Pendente |
 | `[DEC-0018-B03]` | B     | Pendente |
 | `[DEC-0018-B04]` | B     | Pendente |
