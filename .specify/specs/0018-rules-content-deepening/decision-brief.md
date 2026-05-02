@@ -110,13 +110,17 @@
 **Recomendação inicial (a confirmar pós-gate):** aceitar a matriz inteira (Opção Global "Aceitar"), com `[adicionar]`s gatilhados por tipo de spec ficando condicionais à resolução de `[DEC-0018-A02]`. Justificativa: cada item da matriz tem evidência empírica direta na auditoria; rejeitar item-a-item sem nova research seria voltar à acreção sem evidência que motivou a 0018.
 
 **Decisão do Gate Humano:**
-- **Status:** [ ] Pendente | [ ] Resolvido
+- **Status:** [ ] Pendente | [x] Resolvido
 - **Escolha Consolidada (marque com `x`):**
   - [ ] Opção Global Aceitar (Aplica a matriz inteira de A01.1 a A01.8, com adições condicionais atreladas à A02)
-  - [ ] Opção Global Híbrida (Aceitar matriz, mas com as ressalvas detalhadas abaixo na justificativa)
+  - [x] Opção Global Híbrida (Aceitar matriz, mas com as ressalvas detalhadas abaixo na justificativa)
   - [ ] Opção Global Rejeitar (Voltar para Stage 1 com novo research)
 - **Justificativa / Ressalvas:** > 
-- **Data / Owner:** 
+  Aceito a matriz de atualizações, mas com modificações estruturais profundas para o `tasks-boilerplate.md` focadas em previsibilidade, quebra de complexidade e PRs autossuficientes. O boilerplate passará a ter **5 Fases (0 a 4)**:
+  **1. Fases 1 e 2 (Implementação A e B):** A implementação será dividida em duas fases distintas para quebrar a complexidade lógica. Ambas exigem "Commits Incrementais" explícitos ao final de cada sub-bloco para evitar gerações monolíticas e perda de contexto da IA.
+  **2. Fase 3 (Preparação para Review - O Novo Gate):** Fase exclusiva para empacotamento. Exige mudar o status do `spec.md` e `plan.md` para "In Review", atualizar a descrição do PR com o contexto da entrega, e parar a execução aguardando o **[MANDATÓRIO] Gate de Review Humano** do código e da spec.
+  **3. Fase 4 (Encerramento Pré-Merge):** Nenhuma tarefa deve ocorrer após o merge. O encerramento ocorre *na própria branch do PR após a aprovação da Fase 3*. Conterá as consolidações finais (migração de pesquisas, atualização do research-index, exclusão do NEXT.md e mudança de status para "Done"). O merge só ocorre com o pacote 100% atômico e concluído.
+- **Data / Owner:** 2026-05-02 / @rosanarezende
 
 ---
 
