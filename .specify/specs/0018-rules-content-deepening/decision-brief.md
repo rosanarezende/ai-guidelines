@@ -622,7 +622,7 @@ Independente do eixo primário, toda regra carrega tag de evidência (sugestão 
   - **Dinâmica de Arquivos:** As regras permanecem fisicamente consolidadas no repositório do framework em `.core/rules/`, separadas por domínio (`global-rules.md` para universais, diretórios dedicados para `opt-in/` e `providers/`).
   - **Rastreabilidade (Business Rules Parity):** Exigência absoluta de IDs simbólicos em cada regra documental (ex: `[RULE-UNI-01]`, `[RULE-OPT-TDD-02]`). Os testes do compilador na pasta `cli/` referenciarão explicitamente esses IDs (`it('enforces [RULE-OPT-TDD-02] by...', ...)`).
   - **Trade-offs Aceitos:** Privilegia a clareza visual para humanos (Dashboard) e a garantia de cobertura de negócio (1-to-1 com código). Evita o Context Rot ao manter regras modulares no repositório base; o Monolithic Compiler cuida de montar o contexto seguro apenas no consumidor final.
-  - **Fronteira com Spec 0011:** Esta decisão rege a estrutura do *source* (ai-guidelines). A hierarquia de pastas no consumidor será decidida exclusivamente na Spec 0011.
+  - **Fronteira com Spec 0011:** Esta decisão rege a estrutura do _source_ (ai-guidelines). A hierarquia de pastas no consumidor será decidida exclusivamente na Spec 0011.
 - **Data / Owner:** 2026-05-02 / @rosanarezende
 
 ---
