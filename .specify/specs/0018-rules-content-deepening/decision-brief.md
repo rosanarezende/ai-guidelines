@@ -333,19 +333,21 @@ Restrição: ≤ 2 linhas; aponta para `docs/process/spec-foundation.md`; não d
 
 **Decisão do Gate Humano:**
 
-- **Status:** [ ] Pendente | [ ] Resolvido
+- **Status:** [ ] Pendente | [x] Resolvido
 - **Sub-eixo 1 — Subseção em `global-rules.md` (marque com `x`):**
-  - [ ] A ("Workflow com IA" - existente)
+  - [x] A ("Workflow com IA" - existente)
   - [ ] B ("Spec lifecycle" - nova seção dedicada)
   - [ ] C ("Princípios de Engenharia")
 - **Sub-eixo 2 — Texto candidato (marque com `x`):**
   - [ ] A (Completo: lista todos os tipos, artefatos e passes)
   - [ ] B (Comportamental: "Antes de implementar quando o design depende de evidência...")
   - [ ] C (Foco na ação: "Classifique a spec por tipo no header...")
-  - [ ] D (Híbrido: Linha curta destacada + bullet explicando o critério-teste e o gate)
+  - [x] D (Híbrido: Linha curta destacada + bullet explicando o critério-teste e o gate)
 - **Texto final (se desejar redigir ou ajustar a opção escolhida):** >
+  "**Tipo de spec é declarado no header (`evidence-driven`, `deterministic`, `mixed`).** Specs `evidence-driven` ou `mixed` exigem um gate humano via `decision-brief.md` antes da implementação — o teste é: _'o design depende de evidência técnica/pesquisa ainda não coletada?'_. Detalhes em `docs/process/spec-foundation.md`."
 - **Justificativa / Ressalvas:** >
-- **Data / Owner:**
+  Adoção das opções recomendadas (A + D) para minimizar churn no arquivo global de regras, aproveitando a seção de workflow existente. O texto híbrido foi ajustado para refletir a taxonomia de 3 tipos decidida no A02, fornecendo à IA a instrução exata de comportamento sem duplicar a documentação extensa que viverá no spec-foundation.
+- **Data / Owner:** 2026-05-02 / @rosanarezende
 
 ---
 
