@@ -701,18 +701,18 @@ Posição atual (Tok-H): `core` 1.232; `global-rules` 1.273; max adapter (gemini
 
 **Decisão do Gate Humano:**
 
-- **Status:** [ ] Pendente | [ ] Resolvido
+- **Status:** [ ] Pendente | [x] Resolvido
 - **Sub-eixo 1 — Granularidade do teto (marque com `x`):**
   - [ ] A (Apenas teto agregado final)
   - [ ] B (Apenas teto por arquivo individual)
-  - [ ] C (Ambos: por arquivo + agregado)
+  - [x] C (Ambos: por arquivo + agregado)
 - **Sub-eixo 2 — Tipo de teto (marque com `x`):**
   - [ ] D (Hard ceiling: lint CI falha o build)
-  - [ ] E (Soft ceiling + Audit manual obrigatório via gate)
+  - [x] E (Soft ceiling + Audit manual obrigatório via gate)
   - [ ] F (Soft → Hard escalonado: avisa primeiro, depois falha)
 - **Sub-eixo 3 — Valores numéricos (marque com `x`):**
   - [ ] G (≤ 4 K tokens totais agregados)
-  - [ ] H (≤ 6 K tokens totais agregados - tem folga segura hoje)
+  - [x] H (≤ 6 K tokens totais agregados - tem folga segura hoje)
   - [ ] I (≤ 8 K tokens totais agregados)
   - [ ] J (≤ 10 K tokens totais agregados)
   - [ ] K (% relativo ao tamanho da janela de contexto)
@@ -720,14 +720,15 @@ Posição atual (Tok-H): `core` 1.232; `global-rules` 1.273; max adapter (gemini
   - [ ] L (Manual: checklist de revisão do PR)
   - [ ] M (Lint heurístico rodando localmente)
   - [ ] N (Lint via API da Anthropic no CI)
-  - [ ] O (M local como gate + N como sanity check periódico)
+  - [x] O (M local como gate + N como sanity check periódico)
 - **Sub-eixo 5 — Unidade canônica documentada (marque com `x`):**
-  - [ ] P (Tokens via Tok-H)
+  - [x] P (Tokens via Tok-H)
   - [ ] Q (Quantidade de Linhas de markdown)
   - [ ] R (Quantidade de Instruções)
   - [ ] S (Multi-unidade: tokens principal, linhas/instruções como referência)
 - **Justificativa / Ressalvas:** >
-- **Data / Owner:**
+  Adotamos uma abordagem de "defesa em profundidade" para combater o _Context Rot_. O orçamento será gerido com granularidade dupla (C) e medido em tokens (P), estabelecendo um limite prático de 6K tokens (H). Para evitar bloquear fluxos de trabalho legítimos de forma rígida, este será um "soft ceiling" verificado através da auditoria em PRs (E) e suportado por lint local complementado por validações periódicas de CI (O). Isto garante eficiência económica sem comprometer a flexibilidade do desenvolvimento iterativo.
+- **Data / Owner:** 2026-05-02 / @rosanarezende
 
 ---
 
@@ -785,26 +786,30 @@ Posição atual (Tok-H): `core` 1.232; `global-rules` 1.273; max adapter (gemini
 
 **Decisão do Gate Humano:**
 
-- **Status:** [ ] Pendente | [ ] Resolvido
+- **Status:** [ ] Pendente | [x] Resolvido
 - **Sub-eixo 1 — Estrutura por regra (marque com `x`):**
   - [ ] A (Prosa livre + headings apenas)
   - [ ] B (Frontmatter YAML por regra: modelo Sonar/Continue completo)
   - [ ] C (IDs inline com sintaxe leve + corpo prosa)
-  - [ ] D (Estrutura mínima: heading H3 + ID curto + intent + corpo + verify)
+  - [x] D (Estrutura mínima: heading H3 + ID curto + intent + corpo + verify)
   - [ ] E (D + campos opcionais condicionais por categoria)
 - **Sub-eixo 2 — Convenção de IDs (marque com `x`):**
   - [ ] F (`[RULE-NNNN]` global sequencial)
   - [ ] G (`[RULE-<CAT>-NN]` por categoria)
-  - [ ] H (`[GR-NNNN]`, `[OPT-NNNN]`, `[ADP-NNNN]` por escopo de injeção)
+  - [x] H (`[GR-NNNN]`, `[OPT-NNNN]`, `[ADP-NNNN]` por escopo de injeção)
   - [ ] I (`AIGL-NNN` genérico alinhado com taxonomias)
   - [ ] J (Misto: Prefixo de escopo H + campo `category` interno)
 - **Sub-eixo 3 — Organização físico-arquivo (marque com `x`):**
   - [ ] K (Status quo: monolito inline em `.core/rules/*.md`)
   - [ ] L (Catálogo massivo em `.core/rules/catalog.md` + links)
   - [ ] M (Continue-style: `.core/rules/atomic/<rule>.md` 1 por arquivo)
-  - [ ] N (K + apêndice com catálogo resumo/índice em `catalog.md`)
+  - [x] N (K + apêndice com catálogo resumo/índice em `catalog.md`)
 - **Justificativa / Ressalvas:** >
-- **Data / Owner:**
+  A adoção da combinação D + H + N resolve o atrito entre a experiência de escrita e a utilidade dos dados estruturados (Living Documentation).
+  **1. Baixa Fricção (Developer Experience):** Ao adotar uma estrutura mínima em Markdown (D) com IDs simbólicos baseados no escopo de injeção (H, ex: `[GR-NNNN]`), mantemos a criação e revisão de regras no GitHub extremamente fluida, evitando a dor e a poluição visual de escrever código multiline dentro de arquivos `.json` puros.
+  **2. Visão Docs-as-Code (Dashboard API):** Manter as regras no Markdown não sacrifica a análise de dados. Pelo contrário, prepara o terreno para um pipeline avançado: o compilador CLI (ou um script dedicado) varrerá os `.md`, extrairá os IDs e o Frontmatter/Metadados, e gerará um `rules.json` ou exporá uma API em tempo de build.
+  **3. Valor para Stakeholders:** Essa API alimentará um futuro "Dashboard de Regras de Negócio" (ex: aplicação Next.js estática ou dashboard interno), permitindo pesquisa avançada, filtros por categoria e acompanhamento de métricas de compliance para PMs, Stakeholders e Devs, unindo a Business Rules Parity no código a uma interface visual amigável sem torturar quem escreve as regras.
+- **Data / Owner:** 2026-05-02 / @rosanarezende
 
 ---
 
@@ -1157,8 +1162,8 @@ Posição atual (Tok-H): `core` 1.232; `global-rules` 1.273; max adapter (gemini
 | `[DEC-0018-A06]` | A     | Resolved |
 | `[DEC-0018-B01]` | B     | Resolved |
 | `[DEC-0018-B02]` | B     | Resolved |
-| `[DEC-0018-B03]` | B     | Pendente |
-| `[DEC-0018-B04]` | B     | Pendente |
+| `[DEC-0018-B03]` | B     | Resolved |
+| `[DEC-0018-B04]` | B     | Resolved |
 | `[DEC-0018-B05]` | B     | Pendente |
 | `[DEC-0018-B06]` | B     | Pendente |
 | `[DEC-0018-B07]` | B     | Pendente |
