@@ -3,7 +3,7 @@
 > Spec: [`./spec.md`](./spec.md)
 > Plan: [`./plan.md`](./plan.md)
 > Tasks: [`./tasks.md`](./tasks.md)
-> Status: **Partial** <!-- Open | Partial | Resolved -->
+> Status: **Resolved** <!-- Open | Partial | Resolved -->
 > Última atualização: 2026-05-01 (Bloco A populado em A.1; A02/A03/A04 reformulados pelo eixo evidence-driven para portabilidade cross-repo; Bloco B populado em B.1 com base nas 5 sínteses de B.0)
 
 > **Apresenta opções com tradeoffs antes do gate humano e registra decisões
@@ -791,8 +791,8 @@ Posição atual (Tok-H): `core` 1.232; `global-rules` 1.273; max adapter (gemini
   - [ ] A (Prosa livre + headings apenas)
   - [ ] B (Frontmatter YAML por regra: modelo Sonar/Continue completo)
   - [ ] C (IDs inline com sintaxe leve + corpo prosa)
-  - [x] D (Estrutura mínima: heading H3 + ID curto + intent + corpo + verify)
-  - [ ] E (D + campos opcionais condicionais por categoria)
+  - [ ] D (Estrutura mínima: heading H3 + ID curto + intent + corpo + verify)
+  - [x] E (D + campos opcionais condicionais por categoria)
 - **Sub-eixo 2 — Convenção de IDs (marque com `x`):**
   - [ ] F (`[RULE-NNNN]` global sequencial)
   - [ ] G (`[RULE-<CAT>-NN]` por categoria)
@@ -805,10 +805,11 @@ Posição atual (Tok-H): `core` 1.232; `global-rules` 1.273; max adapter (gemini
   - [ ] M (Continue-style: `.core/rules/atomic/<rule>.md` 1 por arquivo)
   - [x] N (K + apêndice com catálogo resumo/índice em `catalog.md`)
 - **Justificativa / Ressalvas:** >
-  A adoção da combinação D + H + N resolve o atrito entre a experiência de escrita e a utilidade dos dados estruturados (Living Documentation).
+  A adoção da combinação E + H + N resolve o atrito entre a experiência de escrita e a utilidade dos dados estruturados (Living Documentation).
   **1. Baixa Fricção (Developer Experience):** Ao adotar uma estrutura mínima em Markdown (D) com IDs simbólicos baseados no escopo de injeção (H, ex: `[GR-NNNN]`), mantemos a criação e revisão de regras no GitHub extremamente fluida, evitando a dor e a poluição visual de escrever código multiline dentro de arquivos `.json` puros.
-  **2. Visão Docs-as-Code (Dashboard API):** Manter as regras no Markdown não sacrifica a análise de dados. Pelo contrário, prepara o terreno para um pipeline avançado: o compilador CLI (ou um script dedicado) varrerá os `.md`, extrairá os IDs e o Frontmatter/Metadados, e gerará um `rules.json` ou exporá uma API em tempo de build.
-  **3. Valor para Stakeholders:** Essa API alimentará um futuro "Dashboard de Regras de Negócio" (ex: aplicação Next.js estática ou dashboard interno), permitindo pesquisa avançada, filtros por categoria e acompanhamento de métricas de compliance para PMs, Stakeholders e Devs, unindo a Business Rules Parity no código a uma interface visual amigável sem torturar quem escreve as regras.
+  **2. Estratégia Bilíngue de Performance:** Implementaremos o modelo "Instrução em Inglês / Documentação em Português". A regra no repositório será mantida em PT-BR para facilitar a manutenção pela comunidade brasileira (OSS Accessibility), mas o campo imperativo de instrução (o que a IA lê no `AGENTS.md`) será escrito em **Inglês**, visando maior compliance e menor taxa de alucinação nos modelos de fronteira.
+  **3. Visão Docs-as-Code (Dashboard API):** Manter as regras no Markdown não sacrifica a análise de dados. O compilador CLI varrerá os `.md`, extrairá os IDs e o Frontmatter/Metadados, e gerará um `rules.json` ou exporá uma API em tempo de build.
+  **4. Valor para Stakeholders:** Essa API alimentará um futuro "Dashboard de Regras de Negócio" (ex: Next.js), permitindo pesquisa avançada, filtros por categoria e acompanhamento de métricas de compliance para PMs e Devs, unindo a Business Rules Parity no código a uma interface visual amigável.
 - **Data / Owner:** 2026-05-02 / @rosanarezende
 
 ---
@@ -883,32 +884,33 @@ Posição atual (Tok-H): `core` 1.232; `global-rules` 1.273; max adapter (gemini
 
 **Decisão do Gate Humano:**
 
-- **Status:** [ ] Pendente | [ ] Resolvido
+- **Status:** [ ] Pendente | [x] Resolvido
 - **Sub-eixo 1 — Largura × Profundidade (marque com `x`):**
   - [ ] A (Narrow & deep: 3-5 cenários aprofundados com inspeção humana)
   - [ ] B (Broad & shallow: dezenas de cenários auto-rodáveis simplificados)
-  - [ ] C (Híbrido: B para regressão em CI, A trimestral para calibração)
+  - [x] C (Híbrido: B para regressão em CI, A trimestral para calibração)
 - **Sub-eixo 2 — Tipo de asserção (marque com `x`):**
   - [ ] D (Pass/Fail por cenário)
   - [ ] E (Mutation kill-rate)
   - [ ] F (Delta comportamental contra golden examples)
   - [ ] G (Apenas verificação documental no padrão Sonar/RSPEC)
-  - [ ] H (Híbrido: G obrigatório para todas, F apenas por amostragem nas críticas)
+  - [x] H (Híbrido: G obrigatório para todas, F apenas por amostragem nas críticas)
 - **Sub-eixo 3 — Provedores e quantidade (marque com `x`):**
   - [ ] I (1 provedor: apenas Claude)
   - [ ] J (2 provedores: Claude + Gemini para divergência)
-  - [ ] K (3 provedores: Claude + Codex + Gemini)
+  - [x] K (3 provedores: Claude + Codex + Gemini)
   - [ ] L (2 provedores + 1 fallback sob demanda)
 - **Sub-eixo 4 — Não-determinismo (marque com `x`):**
   - [ ] M (Single-shot, temperature 0)
-  - [ ] N (3 rodadas, considerando taxa de passe ex: 2/3)
+  - [x] N (3 rodadas, considerando taxa de passe ex: 2/3)
   - [ ] O (5 rodadas com bootstrap no CI)
 - **Sub-eixo 5 — Threshold de corte (marque com `x`):**
   - [ ] P (Hard: reprovou no % exigido, é cortada da codebase)
   - [ ] Q (Soft: reprovou, vira débito listado em `NEXT.md`)
-  - [ ] R (Categorizado: Hard para críticas, Soft para opinativas/heurísticas)
+  - [x] R (Categorizado: Hard para críticas, Soft para opinativas/heurísticas)
 - **Justificativa / Ressalvas:** >
-- **Data / Owner:**
+  Adotamos uma abordagem baseada em ROI (Retorno sobre Investimento). Testes "pass/fail" binários para IA geram quase 48% de falsos positivos, então exigiremos documentação estruturada (RSPEC) para todas as regras (G), mas faremos o teste "Delta Comportamental" (F) apenas por amostragem nas regras de Defeito Crítico. Como a validação da Spec 0018 estabelece o "Baseline", optamos por rodar a avaliação manual nos **3 provedores mapeados (Claude, Codex, Gemini)** (Opção K), visto que o custo pontual é irrisório comparado ao ganho de confiança cross-platform. Para isolar alucinações estocásticas, adotamos o passe de 2/3 rodadas (N).
+- **Data / Owner:** 2026-05-02 / @rosanarezende
 
 ---
 
@@ -964,15 +966,15 @@ Posição atual (Tok-H): `core` 1.232; `global-rules` 1.273; max adapter (gemini
 
 **Decisão do Gate Humano:**
 
-- **Status:** [ ] Pendente | [ ] Resolvido
+- **Status:** [ ] Pendente | [x] Resolvido
 - **Sub-eixo 1 — Fronteira semântica (marque com `x`):**
-  - [ ] A (0018 taxonomia rasa / 0011 hierarquia profunda real)
+  - [x] A (0018 taxonomia rasa / 0011 hierarquia profunda real)
   - [ ] B (0018 entrega tudo, 0011 faz só governança/amendments)
   - [ ] C (0018 sinaliza taxonomia, 0011 absorve o resto)
   - [ ] D (0018 lógica por prefixos ID, 0011 faz as pastas)
 - **Sub-eixo 2 — Gatilho de transição p/ a 0011 virar mandatória (marque com `x`):**
   - [ ] E (Por volume de linhas do global-rules)
-  - [ ] F (Por tokens agregados, cruzando 70% do teto)
+  - [x] F (Por tokens agregados, cruzando 70% do teto)
   - [ ] G (Por quantidade de arquivos opt-in criados)
   - [ ] H (Por quantidade total de regras/instruções)
   - [ ] I (Qualquer um dos acimas: E + F + G)
@@ -981,9 +983,10 @@ Posição atual (Tok-H): `core` 1.232; `global-rules` 1.273; max adapter (gemini
   - [ ] K (Apenas gatilho e link)
   - [ ] L (K + lista de regras suspeitas precisando hierarquia)
   - [ ] M (L + decisão do namespacing antecipada)
-  - [ ] N (K + apêndice com snapshot de medição ao fim da 0018)
+  - [x] N (K + apêndice com snapshot de medição ao fim da 0018)
 - **Justificativa / Ressalvas:** >
-- **Data / Owner:**
+  A fronteira semântica (A) mantém o escopo focado: a 0018 organiza logicamente, a 0011 criará os subdiretórios no projeto consumidor final. O gatilho escolhido (F) é a decisão mais pragmática: descartámos os medidores humanos (Linhas ou Arquivos) que causam "métricas de vaidade", pois 200 linhas de bullets curtos pesam muito menos na IA do que 100 linhas de prosa densa. O "Context Rot" é um problema de tokens. Ao focar exclusivamente em cruzar 70% do nosso limite de 6K Tokens (validado no B03), atrelamos a necessidade da Spec 0011 estritamente à limitação física da IA, evitando o overhead de ter de acompanhar múltiplos gatilhos falsos.
+- **Data / Owner:** 2026-05-02 / @rosanarezende
 
 ---
 
@@ -1039,24 +1042,26 @@ Posição atual (Tok-H): `core` 1.232; `global-rules` 1.273; max adapter (gemini
 
 **Decisão do Gate Humano:**
 
-- **Status:** [ ] Pendente | [ ] Resolvido
+- **Status:** [ ] Pendente | [x] Resolvido
 - **Sub-eixo 1 — Escopo retido na 0018 (marque com `x`):**
   - [ ] A (Nenhum teste. Apenas a documentação RSPEC)
   - [ ] B (A + 1 rodada de eval manual em regra crítica salva em research)
   - [ ] C (A + Múltiplas rodadas manuais salvas em research)
-  - [ ] D (A + B amostral + Débito pra 0009 automatizar)
+  - [x] D (A + B amostral + Débito pra 0009 automatizar)
 - **Sub-eixo 2 — Escopo transferido pra 0009 (marque com `x`):**
   - [ ] E (Tudo: validador, CI, ultra-review, etc)
   - [ ] F (E + política de release governance)
   - [ ] G (Apenas validador base + sensores)
-  - [ ] H (E + O teste manual da 0018 vira baseline no CI da 0009)
+  - [x] H (E + O teste manual da 0018 vira baseline no CI da 0009)
 - **Sub-eixo 3 — Artefatos de transição em NEXT.md (marque com `x`):**
   - [ ] I (Mínimo: link pra 0009)
-  - [ ] J (I + Papers de pesquisa congelados em pastas para a 0009 ler)
+  - [x] J (I + Papers de pesquisa congelados em pastas para a 0009 ler)
   - [ ] K (J + Golden examples já salvos em `.core/eval/`)
   - [ ] L (K + Esqueleto de código bash/node para a 0009 herdar)
 - **Justificativa / Ressalvas:** >
-- **Data / Owner:**
+  Para mantermos o pragmatismo e não bloquearmos a entrega de conteúdo da Spec 0018 com o over-engineering de um pipeline de testes autônomo, cravamos que a 0018 fará apenas o _eval manual amostral_ (D) e transferirá o fardo da automação total para a Spec 0009 (H), deixando as pesquisas prontas (J).
+  **Inovação arquitetural mapeada para o NEXT.md:** A transição para a próxima etapa da CLI registrará o débito para a criação de um **Scaffolding Inteligente de Provedores**. A CLI deverá identificar provedores usados pelo consumidor (ex: Claude) e gerar automaticamente arquivos restritivos (como `.claudeignore`) e arquivos de trampolim (como um `CLAUDE.md` contendo apenas a referência firme `@AGENTS.md`). Isso mitigará o "Context Rot", reduzirá documentos soltos e melhorará o _flow_ de desenvolvedores e agentes.
+- **Data / Owner:** 2026-05-02 / @rosanarezende
 
 ---
 
@@ -1123,14 +1128,14 @@ Posição atual (Tok-H): `core` 1.232; `global-rules` 1.273; max adapter (gemini
 
 **Decisão do Gate Humano:**
 
-- **Status:** [ ] Pendente | [ ] Resolvido
+- **Status:** [ ] Pendente | [x] Resolvido
 - **Sub-eixo 1 — Unidade de decisão (marque com `x`):**
-  - [ ] A (Regra-a-regra)
+  - [x] A (Regra-a-regra)
   - [ ] B (Por seção dos arquivos)
   - [ ] C (O Bloco B inteiro de uma vez)
   - [ ] D (Híbrido: Regra-a-regra p/ QG; Seção p/ Global Rules)
 - **Sub-eixo 2 — Critério de manter/revisar/reverter (marque com `x`):**
-  - [ ] E (Tem source explícita?)
+  - [x] E (Tem source explícita?)
   - [ ] F (Passa no eval empírico?)
   - [ ] G (Categorizado: source p/ defeito, manter p/ editorial)
   - [ ] H (Combinação E + F)
@@ -1138,15 +1143,16 @@ Posição atual (Tok-H): `core` 1.232; `global-rules` 1.273; max adapter (gemini
 - **Sub-eixo 3 — Artefato de registro (marque com `x`):**
   - [ ] J (Tabela inline em `plan.md`)
   - [ ] K (Apêndice em `plan.md`)
-  - [ ] L (Arquivo `.md` de reconciliação em `/research`)
+  - [x] L (Arquivo `.md` de reconciliação em `/research`)
   - [ ] M (CHANGELOG + commit)
   - [ ] N (L + commits atômicos detalhados por regra revertida)
 - **Sub-eixo 4 — Ordem temporal (quando reconciliar) (marque com `x`):**
-  - [ ] O (Antes do novo formato/taxonomia: reverter o ruim e reorganizar o bom)
+  - [x] O (Antes do novo formato/taxonomia: reverter o ruim e reorganizar o bom)
   - [ ] P (Depois: formata tudo para a taxonomia nova e depois corta)
   - [ ] Q (Paralelo)
 - **Justificativa / Ressalvas:** >
-- **Data / Owner:**
+  Postura de **Purga Radical**. Sendo este o coração do framework, não toleraremos "AI-slop" ou heurísticas sem evidência. A análise será granular, item por item (A), exigindo obrigatoriamente uma **Fonte Externa Canônica** (E) para que a regra sobreviva (CWE, OWASP, Sonar, ou papers validados). Regras de workflow ou diretrizes editoriais legadas sem fundamentação empírica clara serão revertidas. O objetivo é reconstruir o catálogo a partir de um núcleo 100% estrito e comprovável, garantindo que o esforço de tradução e otimização para a estratégia bilíngue seja aplicado apenas em conteúdo de alto valor técnico. A faxina será documentada num arquivo de research dedicado (L) e ocorrerá ANTES (O) de qualquer formatação para a nova taxonomia.
+- **Data / Owner:** 2026-04-30 / @rosanarezende
 
 ---
 
@@ -1164,9 +1170,9 @@ Posição atual (Tok-H): `core` 1.232; `global-rules` 1.273; max adapter (gemini
 | `[DEC-0018-B02]` | B     | Resolved |
 | `[DEC-0018-B03]` | B     | Resolved |
 | `[DEC-0018-B04]` | B     | Resolved |
-| `[DEC-0018-B05]` | B     | Pendente |
-| `[DEC-0018-B06]` | B     | Pendente |
-| `[DEC-0018-B07]` | B     | Pendente |
-| `[DEC-0018-B08]` | B     | Pendente |
+| `[DEC-0018-B05]` | B     | Resolved |
+| `[DEC-0018-B06]` | B     | Resolved |
+| `[DEC-0018-B07]` | B     | Resolved |
+| `[DEC-0018-B08]` | B     | Resolved |
 
 **Status agregado:** `Open` (transita para `Partial` quando ≥1 ponto for `Resolved`; transita para `Resolved` quando todos forem `Resolved`).
