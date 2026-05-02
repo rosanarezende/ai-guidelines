@@ -109,13 +109,14 @@
 
 **Recomendação inicial (a confirmar pós-gate):** aceitar a matriz inteira (Opção Global "Aceitar"), com `[adicionar]`s gatilhados por tipo de spec ficando condicionais à resolução de `[DEC-0018-A02]`. Justificativa: cada item da matriz tem evidência empírica direta na auditoria; rejeitar item-a-item sem nova research seria voltar à acreção sem evidência que motivou a 0018.
 
-**Decisão (preencher pós-gate):**
-
-- Status: `Pendente`
-- Escolha consolidada: \_\_\_
-- Justificativa: \_\_\_
-- Data: \_\_\_
-- Owner: \_\_\_
+**Decisão do Gate Humano:**
+- **Status:** [ ] Pendente | [ ] Resolvido
+- **Escolha Consolidada (marque com `x`):**
+  - [ ] Opção Global Aceitar (Aplica a matriz inteira de A01.1 a A01.8, com adições condicionais atreladas à A02)
+  - [ ] Opção Global Híbrida (Aceitar matriz, mas com as ressalvas detalhadas abaixo na justificativa)
+  - [ ] Opção Global Rejeitar (Voltar para Stage 1 com novo research)
+- **Justificativa / Ressalvas:** > 
+- **Data / Owner:** 
 
 ---
 
@@ -181,16 +182,28 @@ Pergunta a responder ao classificar uma spec: _qual é o teste para distinguir o
 
 **Recomendação inicial (a confirmar pós-gate):** **C** — preserva fonte única + permite enforcement do gate sem inflar specs `deterministic`. Implica leve incremento ao processo de instanciação (script ou checklist humano).
 
-**Decisão (preencher pós-gate):**
-
-- Status: `Pendente`
-- Escolha (Sub-eixo 1, cardinalidade): \_\_\_
-- Escolha (Sub-eixo 2, critério): \_\_\_
-- Escolha (Sub-eixo 3, default): \_\_\_
-- Escolha (Sub-eixo 4, diferenciação operacional): \_\_\_
-- Justificativa: \_\_\_
-- Data: \_\_\_
-- Owner: \_\_\_
+**Decisão do Gate Humano:**
+- **Status:** [ ] Pendente | [ ] Resolvido
+- **Sub-eixo 1 — Cardinalidade dos valores (marque com `x`):**
+  - [ ] A (2 tipos: `evidence-driven` | `deterministic`)
+  - [ ] B (3 tipos: `evidence-driven` | `deterministic` | `mixed`)
+  - [ ] C (Workflow direto: `single-pass` | `two-pass-with-gate`)
+  - [ ] D (A ou B + sub-categoria customizável pelo consumidor)
+- **Sub-eixo 2 — Critério distintivo (marque com `x`):**
+  - [ ] A (A evidência é exigida pré-design?)
+  - [ ] B (Por arquivo tocado: regras vs infra)
+  - [ ] C (Por consumidor da entrega)
+  - [ ] D (Por incerteza percebida: alta vs baixa)
+- **Sub-eixo 3 — Default quando campo ausente (marque com `x`):**
+  - [ ] A (`deterministic`)
+  - [ ] B (`evidence-driven`)
+  - [ ] C (Sem default — campo obrigatório no header)
+- **Sub-eixo 4 — Diferenciação operacional em tasks (marque com `x`):**
+  - [ ] A (Boilerplate único com marcadores visuais de gatilho)
+  - [ ] B (Boilerplates separados por tipo)
+  - [ ] C (Boilerplate único + apêndice "Stage 1+Gate" condicional injetado)
+- **Justificativa / Ressalvas:** > 
+- **Data / Owner:** 
 
 ---
 
@@ -246,15 +259,24 @@ A auditoria § 4.2 lista 6 campos em boilerplates sem justificativa em `spec-fou
 
 **Recomendação inicial (a confirmar pós-gate):** promover `tracker`/`repo-first` (princípio cross-spec) e o trigger de NEXT.md (lifecycle); manter os outros como convenção localizada de boilerplate.
 
-**Decisão (preencher pós-gate):**
-
-- Status: `Pendente`
-- Escolha (Sub-eixo 1): \_\_\_
-- Escolha (Sub-eixo 2): \_\_\_
-- Escolha (Sub-eixo 3): \_\_\_
-- Justificativa: \_\_\_
-- Data: \_\_\_
-- Owner: \_\_\_
+**Decisão do Gate Humano:**
+- **Status:** [ ] Pendente | [ ] Resolvido
+- **Sub-eixo 1 — Localização interna no spec-foundation (marque com `x`):**
+  - [ ] A (Nova seção "Tipos de spec" logo após "Quando usar spec-foundation")
+  - [ ] B (Estender "Hierarquia de documentos" com sub-seção)
+  - [ ] C (Nova seção "Workflow em dois passes" ao final)
+  - [ ] D (Híbrido: subseção curta em "Hierarquia" + seção "Workflow em dois passes")
+- **Sub-eixo 2 — Formato (marque com `x`):**
+  - [ ] A (Tabela de 3 linhas × colunas)
+  - [ ] B (Sub-seções por tipo em prosa com exemplos)
+  - [ ] C (Diagrama ASCII de fluxo + tabela de tipos)
+  - [ ] D (Híbrido: tabela compacta + 1 parágrafo gate + exemplos cross-repo)
+- **Sub-eixo 3 — Sincronização do drift bidirecional (marque com `x`):**
+  - [ ] Opção 1 (Manter as políticas atuais como convenções exclusivas de boilerplates)
+  - [ ] Opção 2 (Promover todas as políticas apontadas para a spec-foundation)
+  - [ ] Misto (Promover `tracker`/`repo-first` e o trigger de `NEXT.md`; manter formato de decisões e riscos como convenção local de boilerplate)
+- **Justificativa / Ressalvas:** > 
+- **Data / Owner:** 
 
 ---
 
@@ -299,15 +321,20 @@ Restrição: ≤ 2 linhas; aponta para `docs/process/spec-foundation.md`; não d
 
 **Dependências:** redação final depende de `[DEC-0018-A02]` (cardinalidade + nomes dos valores) e `[DEC-0018-A03]` (formato em spec-foundation.md). Owner pode escolher Opção D condicional ("redação final ajustada após A02/A03").
 
-**Decisão (preencher pós-gate):**
-
-- Status: `Pendente`
-- Escolha (Sub-eixo 1): \_\_\_
-- Escolha (Sub-eixo 2): \_\_\_
-- Texto final aprovado: \_\_\_
-- Justificativa: \_\_\_
-- Data: \_\_\_
-- Owner: \_\_\_
+**Decisão do Gate Humano:**
+- **Status:** [ ] Pendente | [ ] Resolvido
+- **Sub-eixo 1 — Subseção em `global-rules.md` (marque com `x`):**
+  - [ ] A ("Workflow com IA" - existente)
+  - [ ] B ("Spec lifecycle" - nova seção dedicada)
+  - [ ] C ("Princípios de Engenharia")
+- **Sub-eixo 2 — Texto candidato (marque com `x`):**
+  - [ ] A (Completo: lista todos os tipos, artefatos e passes)
+  - [ ] B (Comportamental: "Antes de implementar quando o design depende de evidência...")
+  - [ ] C (Foco na ação: "Classifique a spec por tipo no header...")
+  - [ ] D (Híbrido: Linha curta destacada + bullet explicando o critério-teste e o gate)
+- **Texto final (se desejar redigir ou ajustar a opção escolhida):** > 
+- **Justificativa / Ressalvas:** > 
+- **Data / Owner:** 
 
 ---
 
@@ -392,17 +419,36 @@ Recomendação: **D16.A** — gate explícito é didático e evita ambiguidade.
 
 **Recomendação inicial (a confirmar pós-gate):** **B**. **C** seria a escolha se A02 fechar antes de A05; aceitar B agora e revisitar se necessário.
 
-**Decisão (preencher pós-gate):**
-
-- Status: `Pendente`
-- Escolha (Sub-eixo 1, estrutura): \_\_\_
-- Escolha (Sub-eixo 2, IDs/legendas): \_\_\_
-- Escolha (Sub-eixo 3, recomendação inicial + D9): \_\_\_
-- Escolha (Sub-eixo 4, status + D16): \_\_\_
-- Escolha (Sub-eixo 5, pós-gate): \_\_\_
-- Justificativa: \_\_\_
-- Data: \_\_\_
-- Owner: \_\_\_
+**Decisão do Gate Humano:**
+- **Status:** [ ] Pendente | [ ] Resolvido
+- **Sub-eixo 1 — Estrutura por ponto `[DEC-*]` (marque com `x`):**
+  - [ ] A (Mínima: Pergunta + Opções + Decisão)
+  - [ ] B (Padrão: Pergunta + Contexto + Opções + Decisão)
+  - [ ] C (Estendida: Pergunta + Contexto + Eixos a decidir + Opções + Recomendação + Decisão)
+  - [ ] D (Híbrida adaptativa: B por default, C quando exige decomposição)
+- **Sub-eixo 2 — Convenção de IDs e legendas (marque com `x`):**
+  - [ ] A (`[DEC-NNNN-XYZ]`)
+  - [ ] B (`[DEC-NNNN-XYZ.W]` granular)
+  - [ ] C (Opção A + Legenda canônica de status no topo do boilerplate)
+  - [ ] D (Opção A + C + Convenção documentada de pontos derivados/novos)
+- **Sub-eixo 3 — Recomendação inicial e tradeoffs (marque com `x`):**
+  - [ ] A (Mandatória em todo ponto)
+  - [ ] B (Opcional, só quando há dominância)
+  - [ ] C (Mandatória + obrigatoriamente justificada por research)
+  - [ ] D (Opcional + nota explícita com gatilho de evidência convergente)
+  - **D9 - Tradeoffs:** [ ] D9.A (Tabela) | [ ] D9.B (Lista bulleted) | [ ] D9.C (Aceitar ambos)
+- **Sub-eixo 4 — Resumo de status e gate (marque com `x`):**
+  - [ ] A (Apenas headers individuais)
+  - [ ] B (Apenas tabela final)
+  - [ ] C (Headers + Tabela manual)
+  - [ ] D (Headers + Tabela por script)
+  - **D16 - Bloco Gate:** [ ] D16.A (Bloco final explicito) | [ ] D16.B (Na própria tabela) | [ ] D16.C (Gate implícito)
+- **Sub-eixo 5 — Checklist pós-gate (marque com `x`):**
+  - [ ] A (Apenas avisar "atualizar plan e tasks")
+  - [ ] B (Checklist explícito de 4 passos)
+  - [ ] C (B + Referência ao formato Stage 1/2)
+- **Justificativa / Ressalvas:** > 
+- **Data / Owner:** 
 
 ---
 
@@ -427,13 +473,15 @@ Recomendação: **D16.A** — gate explícito é didático e evita ambiguidade.
 
 **Recomendação inicial (a confirmar pós-gate):** **A** — entregar a 0018 no `spec-foundation.md` atual e tratar o reposicionamento como migração executada pela `governance-information-architecture` quando ela rodar. Opções B/C antecipam decisão arquitetural sem evidência; D viola priorização.
 
-**Decisão (preencher pós-gate):**
-
-- Status: `Pendente`
-- Escolha: \_\_\_
-- Justificativa: \_\_\_
-- Data: \_\_\_
-- Owner: \_\_\_
+**Decisão do Gate Humano:**
+- **Status:** [ ] Pendente | [ ] Resolvido
+- **Escolha (marque com `x`):**
+  - [ ] A (Acrescentar nova seção ao próprio `docs/process/spec-foundation.md`)
+  - [ ] B (Novo arquivo `docs/process/spec-types.md` referenciado)
+  - [ ] C (ADR atômica nova + ponteiro mínimo no spec-foundation.md)
+  - [ ] D (Aguardar e bloquear até rodar a `governance-information-architecture`)
+- **Justificativa / Ressalvas:** > 
+- **Data / Owner:** 
 
 ---
 
@@ -477,14 +525,22 @@ Independente do eixo primário, toda regra carrega tag de evidência (sugestão 
 
 **Recomendação inicial (a confirmar pós-gate):** **F (eixo primário) + J (tag de evidência)**. Justificativa: F preserva a arquitetura `.core/rules/` × `opt-in/` já vencedora (Spec 0008) e adiciona discriminação editorial — coerente com a Spec 0018 sem refundar; J ataca o problema-raiz da 0018 (b9efb83 sem fonte) onde ele dói (regras de defeito) sem inflar atrito em regras editoriais. **Não recomendar A** (colide com identidade); **não recomendar G** (over-engineering para o tamanho atual). C/D/E são alternativas próximas — owner pode escolher se preferir alinhamento mais forte com Sonar (D/E) em detrimento do split universal × per-IA × opt-in.
 
-**Decisão (preencher pós-gate):**
-
-- Status: `Pendente`
-- Escolha (Sub-eixo 1, eixo primário): \_\_\_
-- Escolha (Sub-eixo 2, tag de evidência): \_\_\_
-- Justificativa: \_\_\_
-- Data: \_\_\_
-- Owner: \_\_\_
+**Decisão do Gate Humano:**
+- **Status:** [ ] Pendente | [ ] Resolvido
+- **Sub-eixo 1 — Eixo primário da taxonomia (marque com `x`):**
+  - [ ] A (Por stack/tecnologia - modelo awesome-cursorrules, 13 cats)
+  - [ ] B (Por função editorial - filosofia/processo/gates/gotchas/convenções)
+  - [ ] C (Por escopo de aplicação - always-on/conditional/on-demand)
+  - [ ] D (Por tipo de defeito - Sonar 4 cats: Correctness/Security/Maintainability/Process)
+  - [ ] E (Por tipo de defeito + LLM-security - 6 cats)
+  - [ ] F (Híbrida — função editorial DENTRO de escopo universal/per-IA/opt-in)
+  - [ ] G (3 dimensões ortogonais com tags estilo Sonar full)
+- **Sub-eixo 2 — Eixo secundário: tag de evidência (marque com `x`):**
+  - [ ] H (Mandatória para todas as regras: Forte/Média/Emergente/Heurística)
+  - [ ] I (Opcional, quando não há = "heurística")
+  - [ ] J (Mandatória APENAS para categorias-âncora como Correctness/Security; opcional para Process/Editorial)
+- **Justificativa / Ressalvas:** > 
+- **Data / Owner:** 
 
 ---
 
@@ -529,14 +585,21 @@ Independente do eixo primário, toda regra carrega tag de evidência (sugestão 
 
 **Cross-ref:** decisão de B02 cruza com `[DEC-0018-B03]` (orçamento) — qualquer arquitetura escolhida deve caber no teto agregado decidido em B03; cruza com `[DEC-0018-B06]` (fronteira 0011) — F/H antecipam parcialmente a Spec 0011.
 
-**Decisão (preencher pós-gate):**
-
-- Status: `Pendente`
-- Escolha (Sub-eixo 1, critério): \_\_\_
-- Escolha (Sub-eixo 2, arquitetura): \_\_\_
-- Justificativa: \_\_\_
-- Data: \_\_\_
-- Owner: \_\_\_
+**Decisão do Gate Humano:**
+- **Status:** [ ] Pendente | [ ] Resolvido
+- **Sub-eixo 1 — Critério-teste para classificar regra (marque com `x`):**
+  - [ ] A (Audience: Cross-IA vs Adapter específica vs Opt-in)
+  - [ ] B (Duplicação intolerável: igual em 2 adapters = global)
+  - [ ] C (Escopo de injeção em runtime)
+  - [ ] D (Híbrido A + Posição crítica: regras críticas vão pro topo)
+- **Sub-eixo 2 — Arquitetura física (marque com `x`):**
+  - [ ] E (Manter status quo flat: 1 global + 3 adapters + opt-in flat)
+  - [ ] F (Hierarquia apenas por subdiretório dentro de `opt-in/`)
+  - [ ] G (Split de `global-rules.md` em múltiplos arquivos temáticos)
+  - [ ] H (Hierarquia full por subdiretório em todas as pastas)
+  - [ ] I (Novo arquivo `meta-rules.md` exclusivo para metainstruções do agente)
+- **Justificativa / Ressalvas:** > 
+- **Data / Owner:** 
 
 ---
 
@@ -612,17 +675,34 @@ Posição atual (Tok-H): `core` 1.232; `global-rules` 1.273; max adapter (gemini
 
 **Dependências:** `[DEC-0018-B02]` (colocação) deve respeitar este teto; `[DEC-0018-B06]` (fronteira 0011) usa este teto como trigger ("se o agregado cruzar X, Spec 0011 vira mandatória"); `[DEC-0018-B08]` (reconciliação b9efb83) precisa garantir que o conteúdo reconciliado caiba no teto.
 
-**Decisão (preencher pós-gate):**
-
-- Status: `Pendente`
-- Escolha (Sub-eixo 1, granularidade): \_\_\_
-- Escolha (Sub-eixo 2, tipo): \_\_\_
-- Escolha (Sub-eixo 3, valores numéricos): \_\_\_
-- Escolha (Sub-eixo 4, enforcement): \_\_\_
-- Escolha (Sub-eixo 5, unidade): \_\_\_
-- Justificativa: \_\_\_
-- Data: \_\_\_
-- Owner: \_\_\_
+**Decisão do Gate Humano:**
+- **Status:** [ ] Pendente | [ ] Resolvido
+- **Sub-eixo 1 — Granularidade do teto (marque com `x`):**
+  - [ ] A (Apenas teto agregado final)
+  - [ ] B (Apenas teto por arquivo individual)
+  - [ ] C (Ambos: por arquivo + agregado)
+- **Sub-eixo 2 — Tipo de teto (marque com `x`):**
+  - [ ] D (Hard ceiling: lint CI falha o build)
+  - [ ] E (Soft ceiling + Audit manual obrigatório via gate)
+  - [ ] F (Soft → Hard escalonado: avisa primeiro, depois falha)
+- **Sub-eixo 3 — Valores numéricos (marque com `x`):**
+  - [ ] G (≤ 4 K tokens totais agregados)
+  - [ ] H (≤ 6 K tokens totais agregados - tem folga segura hoje)
+  - [ ] I (≤ 8 K tokens totais agregados)
+  - [ ] J (≤ 10 K tokens totais agregados)
+  - [ ] K (% relativo ao tamanho da janela de contexto)
+- **Sub-eixo 4 — Enforcement / instrumentação (marque com `x`):**
+  - [ ] L (Manual: checklist de revisão do PR)
+  - [ ] M (Lint heurístico rodando localmente)
+  - [ ] N (Lint via API da Anthropic no CI)
+  - [ ] O (M local como gate + N como sanity check periódico)
+- **Sub-eixo 5 — Unidade canônica documentada (marque com `x`):**
+  - [ ] P (Tokens via Tok-H)
+  - [ ] Q (Quantidade de Linhas de markdown)
+  - [ ] R (Quantidade de Instruções)
+  - [ ] S (Multi-unidade: tokens principal, linhas/instruções como referência)
+- **Justificativa / Ressalvas:** > 
+- **Data / Owner:** 
 
 ---
 
@@ -678,15 +758,27 @@ Posição atual (Tok-H): `core` 1.232; `global-rules` 1.273; max adapter (gemini
 
 **Dependências:** decisão depende de `[DEC-0018-B01]` (taxonomia define quais categorias prefixos H precisam representar) e influencia `[DEC-0018-B05]` (eval precisa de regra com formato estável). Owner pode escolher Sub-eixo 1 e 2 condicional ("D/H confirmados após B01 fechar").
 
-**Decisão (preencher pós-gate):**
-
-- Status: `Pendente`
-- Escolha (Sub-eixo 1, estrutura): \_\_\_
-- Escolha (Sub-eixo 2, IDs): \_\_\_
-- Escolha (Sub-eixo 3, organização): \_\_\_
-- Justificativa: \_\_\_
-- Data: \_\_\_
-- Owner: \_\_\_
+**Decisão do Gate Humano:**
+- **Status:** [ ] Pendente | [ ] Resolvido
+- **Sub-eixo 1 — Estrutura por regra (marque com `x`):**
+  - [ ] A (Prosa livre + headings apenas)
+  - [ ] B (Frontmatter YAML por regra: modelo Sonar/Continue completo)
+  - [ ] C (IDs inline com sintaxe leve + corpo prosa)
+  - [ ] D (Estrutura mínima: heading H3 + ID curto + intent + corpo + verify)
+  - [ ] E (D + campos opcionais condicionais por categoria)
+- **Sub-eixo 2 — Convenção de IDs (marque com `x`):**
+  - [ ] F (`[RULE-NNNN]` global sequencial)
+  - [ ] G (`[RULE-<CAT>-NN]` por categoria)
+  - [ ] H (`[GR-NNNN]`, `[OPT-NNNN]`, `[ADP-NNNN]` por escopo de injeção)
+  - [ ] I (`AIGL-NNN` genérico alinhado com taxonomias)
+  - [ ] J (Misto: Prefixo de escopo H + campo `category` interno)
+- **Sub-eixo 3 — Organização físico-arquivo (marque com `x`):**
+  - [ ] K (Status quo: monolito inline em `.core/rules/*.md`)
+  - [ ] L (Catálogo massivo em `.core/rules/catalog.md` + links)
+  - [ ] M (Continue-style: `.core/rules/atomic/<rule>.md` 1 por arquivo)
+  - [ ] N (K + apêndice com catálogo resumo/índice em `catalog.md`)
+- **Justificativa / Ressalvas:** > 
+- **Data / Owner:** 
 
 ---
 
@@ -758,17 +850,33 @@ Posição atual (Tok-H): `core` 1.232; `global-rules` 1.273; max adapter (gemini
 
 **Cross-ref para `[DEC-0018-B07]`:** este eval mínimo é seed; a versão automatizada/agente-validador/gate fica para Spec 0009 (harness-engineering). Fronteira definida em B07.
 
-**Decisão (preencher pós-gate):**
-
-- Status: `Pendente`
-- Escolha (Sub-eixo 1, largura): \_\_\_
-- Escolha (Sub-eixo 2, asserção): \_\_\_
-- Escolha (Sub-eixo 3, provedores): \_\_\_
-- Escolha (Sub-eixo 4, não-determinismo): \_\_\_
-- Escolha (Sub-eixo 5, threshold): \_\_\_
-- Justificativa: \_\_\_
-- Data: \_\_\_
-- Owner: \_\_\_
+**Decisão do Gate Humano:**
+- **Status:** [ ] Pendente | [ ] Resolvido
+- **Sub-eixo 1 — Largura × Profundidade (marque com `x`):**
+  - [ ] A (Narrow & deep: 3-5 cenários aprofundados com inspeção humana)
+  - [ ] B (Broad & shallow: dezenas de cenários auto-rodáveis simplificados)
+  - [ ] C (Híbrido: B para regressão em CI, A trimestral para calibração)
+- **Sub-eixo 2 — Tipo de asserção (marque com `x`):**
+  - [ ] D (Pass/Fail por cenário)
+  - [ ] E (Mutation kill-rate)
+  - [ ] F (Delta comportamental contra golden examples)
+  - [ ] G (Apenas verificação documental no padrão Sonar/RSPEC)
+  - [ ] H (Híbrido: G obrigatório para todas, F apenas por amostragem nas críticas)
+- **Sub-eixo 3 — Provedores e quantidade (marque com `x`):**
+  - [ ] I (1 provedor: apenas Claude)
+  - [ ] J (2 provedores: Claude + Gemini para divergência)
+  - [ ] K (3 provedores: Claude + Codex + Gemini)
+  - [ ] L (2 provedores + 1 fallback sob demanda)
+- **Sub-eixo 4 — Não-determinismo (marque com `x`):**
+  - [ ] M (Single-shot, temperature 0)
+  - [ ] N (3 rodadas, considerando taxa de passe ex: 2/3)
+  - [ ] O (5 rodadas com bootstrap no CI)
+- **Sub-eixo 5 — Threshold de corte (marque com `x`):**
+  - [ ] P (Hard: reprovou no % exigido, é cortada da codebase)
+  - [ ] Q (Soft: reprovou, vira débito listado em `NEXT.md`)
+  - [ ] R (Categorizado: Hard para críticas, Soft para opinativas/heurísticas)
+- **Justificativa / Ressalvas:** > 
+- **Data / Owner:** 
 
 ---
 
@@ -822,15 +930,27 @@ Posição atual (Tok-H): `core` 1.232; `global-rules` 1.273; max adapter (gemini
 
 **Caso especial:** se `[DEC-0018-B02]` Sub-eixo 2 escolher **F** (hierarquia por subdiretório dentro de `opt-in/`), a fronteira deste B06 muda para **D** (Sub-eixo 1) — a hierarquia inicial fica em 0018; 0011 só absorve governança da mudança. Owner deve decidir B02 e B06 em sequência ou marcá-los como dependentes.
 
-**Decisão (preencher pós-gate):**
-
-- Status: `Pendente`
-- Escolha (Sub-eixo 1, fronteira): \_\_\_
-- Escolha (Sub-eixo 2, gatilho): \_\_\_
-- Escolha (Sub-eixo 3, NEXT.md): \_\_\_
-- Justificativa: \_\_\_
-- Data: \_\_\_
-- Owner: \_\_\_
+**Decisão do Gate Humano:**
+- **Status:** [ ] Pendente | [ ] Resolvido
+- **Sub-eixo 1 — Fronteira semântica (marque com `x`):**
+  - [ ] A (0018 taxonomia rasa / 0011 hierarquia profunda real)
+  - [ ] B (0018 entrega tudo, 0011 faz só governança/amendments)
+  - [ ] C (0018 sinaliza taxonomia, 0011 absorve o resto)
+  - [ ] D (0018 lógica por prefixos ID, 0011 faz as pastas)
+- **Sub-eixo 2 — Gatilho de transição p/ a 0011 virar mandatória (marque com `x`):**
+  - [ ] E (Por volume de linhas do global-rules)
+  - [ ] F (Por tokens agregados, cruzando 70% do teto)
+  - [ ] G (Por quantidade de arquivos opt-in criados)
+  - [ ] H (Por quantidade total de regras/instruções)
+  - [ ] I (Qualquer um dos acimas: E + F + G)
+  - [ ] J (Subjetivo, reclamação do usuário)
+- **Sub-eixo 3 — Conteúdo de débito do NEXT.md (marque com `x`):**
+  - [ ] K (Apenas gatilho e link)
+  - [ ] L (K + lista de regras suspeitas precisando hierarquia)
+  - [ ] M (L + decisão do namespacing antecipada)
+  - [ ] N (K + apêndice com snapshot de medição ao fim da 0018)
+- **Justificativa / Ressalvas:** > 
+- **Data / Owner:** 
 
 ---
 
@@ -884,15 +1004,25 @@ Posição atual (Tok-H): `core` 1.232; `global-rules` 1.273; max adapter (gemini
 
 **Cross-ref para `[DEC-0018-B08]`:** evidência produzida em D alimenta B08 (critério "tem source/passa eval?"). Sem D, B08 fica sem evidence-base e cai em opção A do próprio B08 ("manter como heurística declarada").
 
-**Decisão (preencher pós-gate):**
-
-- Status: `Pendente`
-- Escolha (Sub-eixo 1, 0018): \_\_\_
-- Escolha (Sub-eixo 2, 0009): \_\_\_
-- Escolha (Sub-eixo 3, transição): \_\_\_
-- Justificativa: \_\_\_
-- Data: \_\_\_
-- Owner: \_\_\_
+**Decisão do Gate Humano:**
+- **Status:** [ ] Pendente | [ ] Resolvido
+- **Sub-eixo 1 — Escopo retido na 0018 (marque com `x`):**
+  - [ ] A (Nenhum teste. Apenas a documentação RSPEC)
+  - [ ] B (A + 1 rodada de eval manual em regra crítica salva em research)
+  - [ ] C (A + Múltiplas rodadas manuais salvas em research)
+  - [ ] D (A + B amostral + Débito pra 0009 automatizar)
+- **Sub-eixo 2 — Escopo transferido pra 0009 (marque com `x`):**
+  - [ ] E (Tudo: validador, CI, ultra-review, etc)
+  - [ ] F (E + política de release governance)
+  - [ ] G (Apenas validador base + sensores)
+  - [ ] H (E + O teste manual da 0018 vira baseline no CI da 0009)
+- **Sub-eixo 3 — Artefatos de transição em NEXT.md (marque com `x`):**
+  - [ ] I (Mínimo: link pra 0009)
+  - [ ] J (I + Papers de pesquisa congelados em pastas para a 0009 ler)
+  - [ ] K (J + Golden examples já salvos em `.core/eval/`)
+  - [ ] L (K + Esqueleto de código bash/node para a 0009 herdar)
+- **Justificativa / Ressalvas:** > 
+- **Data / Owner:** 
 
 ---
 
@@ -957,16 +1087,31 @@ Posição atual (Tok-H): `core` 1.232; `global-rules` 1.273; max adapter (gemini
 
 **Cross-ref:** depende de `[DEC-0018-B01]` (categorias para classificar editorial vs defeito) e influencia `[DEC-0018-B03]` (revisão pode reduzir tokens em `global-rules.md`, dando folga ao orçamento).
 
-**Decisão (preencher pós-gate):**
-
-- Status: `Pendente`
-- Escolha (Sub-eixo 1, unidade): \_\_\_
-- Escolha (Sub-eixo 2, critério): \_\_\_
-- Escolha (Sub-eixo 3, artefato): \_\_\_
-- Escolha (Sub-eixo 4, ordem): \_\_\_
-- Justificativa: \_\_\_
-- Data: \_\_\_
-- Owner: \_\_\_
+**Decisão do Gate Humano:**
+- **Status:** [ ] Pendente | [ ] Resolvido
+- **Sub-eixo 1 — Unidade de decisão (marque com `x`):**
+  - [ ] A (Regra-a-regra)
+  - [ ] B (Por seção dos arquivos)
+  - [ ] C (O Bloco B inteiro de uma vez)
+  - [ ] D (Híbrido: Regra-a-regra p/ QG; Seção p/ Global Rules)
+- **Sub-eixo 2 — Critério de manter/revisar/reverter (marque com `x`):**
+  - [ ] E (Tem source explícita?)
+  - [ ] F (Passa no eval empírico?)
+  - [ ] G (Categorizado: source p/ defeito, manter p/ editorial)
+  - [ ] H (Combinação E + F)
+  - [ ] I (Manter status quo, só reverter explicitamente sem evidência como N+1)
+- **Sub-eixo 3 — Artefato de registro (marque com `x`):**
+  - [ ] J (Tabela inline em `plan.md`)
+  - [ ] K (Apêndice em `plan.md`)
+  - [ ] L (Arquivo `.md` de reconciliação em `/research`)
+  - [ ] M (CHANGELOG + commit)
+  - [ ] N (L + commits atômicos detalhados por regra revertida)
+- **Sub-eixo 4 — Ordem temporal (quando reconciliar) (marque com `x`):**
+  - [ ] O (Antes do novo formato/taxonomia: reverter o ruim e reorganizar o bom)
+  - [ ] P (Depois: formata tudo para a taxonomia nova e depois corta)
+  - [ ] Q (Paralelo)
+- **Justificativa / Ressalvas:** > 
+- **Data / Owner:** 
 
 ---
 
