@@ -118,8 +118,8 @@
 
 > **Reabertura A.2 — 2026-05-02.** Após cravarmos a premissa de que `.specify/templates/` será ofertado aos repos consumidores (registrada em `plan.md` § "Decisões revisitadas" 2026-05-02), os 5 boilerplates editados em 4.A2.1–4.A2.5 precisam revisão de **agnosticismo de stack** análoga à que aplicamos em `tasks-boilerplate.md` e `tasks-evidence-driven-boilerplate.md` nesta sessão (comandos do `ai-guidelines` viram exemplos opcionais com nota de adaptação). Executar **após sub-bloco A.3 completo**.
 
-- [ ] **4.A2.9** Revisar `spec-boilerplate.md`, `plan-boilerplate.md`, `next-boilerplate.md`, `roadmap-boilerplate.md`, `research-index-boilerplate.md` — aplicar agnosticismo de stack: comandos `yarn`, `node cli/ai-guidelines-cli.mjs`, paths assumindo estrutura interna do `ai-guidelines` viram ilustrações opcionais com nota "ou equivalente do stack do consumidor".
-- [ ] **4.A2.10** **[COMMIT]** `refactor(spec-0018): boilerplates do A.2 ganham agnosticismo de stack para distribuição`.
+- [x] **4.A2.9** Revisar `spec-boilerplate.md`, `plan-boilerplate.md`, `next-boilerplate.md`, `roadmap-boilerplate.md`, `research-index-boilerplate.md` — aplicar agnosticismo de stack: comandos `yarn`, `node cli/ai-guidelines-cli.mjs`, paths assumindo estrutura interna do `ai-guidelines` viram ilustrações opcionais com nota "ou equivalente do stack do consumidor". — Auditoria identificou apenas 2 dos 5 com cravamentos: `spec-boilerplate.md` (L52, DoD `yarn check && yarn test`) e `plan-boilerplate.md` (L76-78 DoD `yarn`/`yarn test`/diff em consumidor + L88 extensão `.test.mjs`). `next-`, `roadmap-` e `research-index-` são puramente semânticos (paths do framework SDD), zero ajuste.
+- [x] **4.A2.10** **[COMMIT]** `refactor(spec-0018): boilerplates do A.2 ganham agnosticismo de stack para distribuição`.
 
 ### Sub-bloco [A.3] — Reestruturação `tasks-boilerplate.md` em 5 fases + split por tipo
 
@@ -129,7 +129,7 @@
 - [x] **4.A3.2** Criar `.specify/templates/tasks-evidence-driven-boilerplate.md`: variante com sub-bloco "Stage 1 (Research)" + "Gate humano via decision-brief" entre Setup e Implementação A.
 - [x] **4.A3.3** Criar `.specify/templates/tasks-deterministic-boilerplate.md`: variante single-pass (Setup → Implementação A direto, sem Stage 1). — Gerado com Gemini 3.1 Pro + revisão Claude (4 ajustes editoriais: estilo L9, parêntese L30, gramática + nota L96, alinhamento da nota da Spec 0017 L100).
 - [x] **4.A3.4** Criar `.specify/templates/tasks-mixed-boilerplate.md`: variante híbrida (Stage 1 condicional para sub-blocos identificados como evidence-driven). — Gerado com Gemini 3.1 Pro + revisão Claude (3 ajustes editoriais: bullet L17, caveat de paralelismo L24, cláusula L137).
-- [ ] **4.A3.5** **[COMMIT]** `feat(spec-0018): tasks-boilerplate em 5 fases + split por tipo de spec`.
+- [x] **4.A3.5** **[COMMIT]** `feat(spec-0018): tasks-boilerplate em 5 fases + split por tipo de spec`.
 
 ### Sub-bloco [A.4] — Criar `decision-brief-boilerplate.md` (8º artefato)
 
