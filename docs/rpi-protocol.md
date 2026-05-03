@@ -50,7 +50,7 @@ Critério objetivo de escolha no passo **Plan**:
   - Escopo **local a um arquivo** ou unidade lógica isolada.
   - Nenhum handoff futuro depende do plano escrito.
 
-Implementação canônica de spec-foundation (lifecycle, templates, checklists de abertura/fechamento): ver `docs/process/spec-foundation.md`.
+Implementação canônica de spec-foundation (lifecycle, templates, checklists de abertura/fechamento): ver `.core/process/spec-foundation.md`.
 
 ---
 

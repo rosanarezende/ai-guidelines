@@ -6,7 +6,7 @@
 > encerramento pré-merge** (fase final do `tasks.md`); itens ainda relevantes
 > migram antes para `.specify/specs/roadmap/backlog.md`.
 >
-> Fonte: `docs/process/spec-foundation.md` — política de NEXT.md.
+> Fonte: `.core/process/spec-foundation.md` — política de NEXT.md.
 
 ---
 

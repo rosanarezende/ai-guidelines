@@ -20,7 +20,7 @@ As últimas specs (0008, 0017) entregaram um motor de **infraestrutura de injeç
 
 Esta spec tem **duas entregas intencionais e de mesmo peso**, na mesma branch e mesma PR, porque a primeira é pré-requisito metodológico da segunda e ambas nascem do mesmo insight ("o repositório acelera infraestrutura mas não disciplina conteúdo"):
 
-- **Bloco A — Política framework + auditoria editorial dos boilerplates.** Auditar os 7 boilerplates de `.specify/templates/`, criar o 8º (`decision-brief-boilerplate.md`), sincronizar com `docs/process/spec-foundation.md` e canonizar a distinção **spec de conteúdo × spec de infraestrutura** com **workflow em dois passes** (Stage 1 research → gate humano via decision-brief → Stage 2 design+implementação) para specs de conteúdo.
+- **Bloco A — Política framework + auditoria editorial dos boilerplates.** Auditar os 7 boilerplates de `.specify/templates/`, criar o 8º (`decision-brief-boilerplate.md`), sincronizar com `.core/process/spec-foundation.md` e canonizar a distinção **spec de conteúdo × spec de infraestrutura** com **workflow em dois passes** (Stage 1 research → gate humano via decision-brief → Stage 2 design+implementação) para specs de conteúdo.
 - **Bloco B — Content overhaul research-backed das regras.** Aplicar a política recém-criada à própria 0018: research lifecycle → decision-brief com opções → gate humano → catálogo de regras → eval empírico mínimo → reconciliação do conteúdo já-mergeado em b9efb83.
 
 A spec original (rev. inicial) propôs apenas o Bloco B, sem research e sem eval, violando o ciclo RPI do próprio framework. Esta revisão corrige a omissão e dogfood-a a regra: **a primeira spec de conteúdo é a que cria a regra que a rege**, e a primeira instância de `decision-brief.md` (esta) é o protótipo do `decision-brief-boilerplate.md` que o Bloco A formalizará.
@@ -35,10 +35,10 @@ A spec original (rev. inicial) propôs apenas o Bloco B, sem research e sem eval
 
 - Auditoria research-backed dos 7 boilerplates existentes em `.specify/templates/` (`spec-`, `plan-`, `tasks-`, `next-`, `research-index-`, `roadmap-`, `project-config-`).
 - Criação do 8º boilerplate `decision-brief-boilerplate.md`, formalizando o artefato de gate humano.
-- Cross-check com `docs/process/spec-foundation.md` para detectar drift bidirecional.
+- Cross-check com `.core/process/spec-foundation.md` para detectar drift bidirecional.
 - Atualização dos boilerplates conforme decisões consolidadas em `decision-brief.md`.
 - Adição do campo **"Tipo de spec"** (`conteúdo` | `infraestrutura` | `mista`) em `spec-boilerplate.md` e checklist diferenciado em `tasks-boilerplate.md`.
-- Política em `docs/process/spec-foundation.md`: workflow em dois passes para specs de conteúdo, com gate humano via `decision-brief.md`; specs de infraestrutura mantêm o fluxo single-pass atual.
+- Política em `.core/process/spec-foundation.md`: workflow em dois passes para specs de conteúdo, com gate humano via `decision-brief.md`; specs de infraestrutura mantêm o fluxo single-pass atual.
 - Linha condensada em `.core/rules/global-rules.md` referenciando a política.
 
 **Bloco B — Content overhaul (rules)**
@@ -58,7 +58,7 @@ A spec original (rev. inicial) propôs apenas o Bloco B, sem research e sem eval
 
 ## ✅ Critérios de Aceite (alto nível)
 
-- [ ] Política **conteúdo × infraestrutura** publicada em `docs/process/spec-foundation.md`, descrevendo workflow em dois passes com gate humano via `decision-brief.md`.
+- [ ] Política **conteúdo × infraestrutura** publicada em `.core/process/spec-foundation.md`, descrevendo workflow em dois passes com gate humano via `decision-brief.md`.
 - [ ] Os 7 boilerplates existentes auditados; matriz de decisão registrada em `research/`; `decision-brief-boilerplate.md` (8º) criado; updates aplicados conforme decisões validadas; cross-check com `spec-foundation.md` sem drift residual.
 - [ ] `decision-brief.md` desta spec com **todas as decisões em status `Resolved`** antes de iniciar Stage 2 (design + implementação).
 - [ ] Catálogo de regras produzido conforme formato validado em `decision-brief.md`, com fonte/evidência por regra (research).

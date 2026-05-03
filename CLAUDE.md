@@ -115,7 +115,7 @@ Trabalho não-trivial vive em `.specify/specs/<slug>/`. Não escreva planos em s
 - Templates canônicos em `.specify/templates/`.
 - Numeração: candidatas no backlog vivem por slug; o número (`0008-...`) é alocado quando saem do backlog para uma branch.
 - Branches: `feat/spec-XXXX-<slug>`, `fix/<descrição>`, `docs/<descrição>`. **Nunca** alterar `main` diretamente.
-- Lifecycle completo em `docs/process/spec-foundation.md`. Ciclo RPI (Research → Plan → Implement) em `docs/rpi-protocol.md`.
+- Lifecycle completo em `.core/process/spec-foundation.md`. Ciclo RPI (Research → Plan → Implement) em `docs/rpi-protocol.md`.
 
 ## Princípios não-óbvios deste código
 

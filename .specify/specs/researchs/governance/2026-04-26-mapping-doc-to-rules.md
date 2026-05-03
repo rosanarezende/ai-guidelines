@@ -149,7 +149,7 @@ solto antes do snapshot.
 
 ---
 
-### `docs/process/spec-foundation.md` — humano + é alvo de B
+### `.core/process/spec-foundation.md` — humano + é alvo de B
 
 **Conteúdo:** lifecycle de specs.
 
@@ -210,7 +210,7 @@ remoção destrutiva fica para Spec 0015 (que consome essa classificação).
    e `docs/process/` que quebram no consumidor.
 3. `.core/templates/AGENTS-core.md.tmpl` tem linha 19 corrigida (task A.7 —
    bloqueador 3 do PR #19).
-4. `docs/process/spec-foundation.md` atualizado em B.4 (distinção
+4. `.core/process/spec-foundation.md` atualizado em B.4 (distinção
    spec/plan, lifecycle, categoria universal vs opt-in).
 
 **Diferido para Spec 0015:**

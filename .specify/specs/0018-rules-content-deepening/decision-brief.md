@@ -217,7 +217,7 @@ Pergunta a responder ao classificar uma spec: _qual é o teste para distinguir o
 
 ### [DEC-0018-A03] Localização e formato da política de tipos de spec em `spec-foundation.md`
 
-**Pergunta:** onde, dentro de `docs/process/spec-foundation.md`, inserir a seção sobre tipos de spec (`evidence-driven` × `deterministic` × `mixed` — ver `[DEC-0018-A02]`) e o workflow em dois passes? Como descrevê-la sem inflar o documento, e cobrindo exemplos por tipo de repo (não só `ai-guidelines`)? E como sincronizar o drift bidirecional § 4.2 da auditoria (políticas hoje em boilerplates que deveriam viver na constituição)?
+**Pergunta:** onde, dentro de `.core/process/spec-foundation.md`, inserir a seção sobre tipos de spec (`evidence-driven` × `deterministic` × `mixed` — ver `[DEC-0018-A02]`) e o workflow em dois passes? Como descrevê-la sem inflar o documento, e cobrindo exemplos por tipo de repo (não só `ai-guidelines`)? E como sincronizar o drift bidirecional § 4.2 da auditoria (políticas hoje em boilerplates que deveriam viver na constituição)?
 
 **Contexto (research):**
 
@@ -318,14 +318,14 @@ Hoje `global-rules.md` (pós-b9efb83) tem 3 seções: Princípios de Engenharia,
 
 #### Sub-eixo 2 — Texto candidato
 
-Restrição: ≤ 2 linhas; aponta para `docs/process/spec-foundation.md`; não duplica conteúdo.
+Restrição: ≤ 2 linhas; aponta para `.core/process/spec-foundation.md`; não duplica conteúdo.
 
-| Opção | Redação candidata                                                                                                                                                                                                                                                                                                         | Pró                                                      | Contra                                                                   |
-| :---- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :------------------------------------------------------- | :----------------------------------------------------------------------- |
-| A     | "**Specs têm tipo declarado** (`evidence-driven` \| `deterministic` \| `mixed`); specs `evidence-driven` ou `mixed` seguem workflow em dois passes (Stage 1 research → gate humano via `decision-brief.md` → Stage 2 implementação). Detalhes em `docs/process/spec-foundation.md`."                                      | Completo; auto-contido; cita o gate                      | 2-3 linhas (no limite); cita o nome do artefato (acoplamento ao formato) |
-| B     | "**Antes de implementar quando o design depende de evidência ainda não coletada** (research/benchmark/interview/threat-model), registre opções e gate humano em `decision-brief.md` da spec. Detalhes em `docs/process/spec-foundation.md`."                                                                              | Curto; foco no comportamento esperado; universal         | Não cita o nome do tipo — leitor precisa inferir                         |
-| C     | "**Classifique a spec por tipo** no header (`evidence-driven` \| `deterministic` \| `mixed`); o tipo determina o lifecycle (single-pass × dois passes com gate humano). Ver `docs/process/spec-foundation.md`."                                                                                                           | Foco na ação concreta (classificar); aponta consequência | Não cita `decision-brief.md` — leitor pula para spec-foundation          |
-| D     | _(híbrido)_ Linha curta na subseção + 1 bullet de contexto: <br/> "**Tipo de spec é declarado no header**. Specs `evidence-driven` ou `mixed` exigem gate humano via `decision-brief.md` antes de Stage 2 — o teste é 'o design depende de evidência ainda não coletada?'. Ver `docs/process/spec-foundation.md`." (~2 ℓ) | Compromisso: ação + critério-teste + consequência        | Médio em todas as dimensões; mais densa que A/C                          |
+| Opção | Redação candidata                                                                                                                                                                                                                                                                                                          | Pró                                                      | Contra                                                                   |
+| :---- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------- | :----------------------------------------------------------------------- |
+| A     | "**Specs têm tipo declarado** (`evidence-driven` \| `deterministic` \| `mixed`); specs `evidence-driven` ou `mixed` seguem workflow em dois passes (Stage 1 research → gate humano via `decision-brief.md` → Stage 2 implementação). Detalhes em `.core/process/spec-foundation.md`."                                      | Completo; auto-contido; cita o gate                      | 2-3 linhas (no limite); cita o nome do artefato (acoplamento ao formato) |
+| B     | "**Antes de implementar quando o design depende de evidência ainda não coletada** (research/benchmark/interview/threat-model), registre opções e gate humano em `decision-brief.md` da spec. Detalhes em `.core/process/spec-foundation.md`."                                                                              | Curto; foco no comportamento esperado; universal         | Não cita o nome do tipo — leitor precisa inferir                         |
+| C     | "**Classifique a spec por tipo** no header (`evidence-driven` \| `deterministic` \| `mixed`); o tipo determina o lifecycle (single-pass × dois passes com gate humano). Ver `.core/process/spec-foundation.md`."                                                                                                           | Foco na ação concreta (classificar); aponta consequência | Não cita `decision-brief.md` — leitor pula para spec-foundation          |
+| D     | _(híbrido)_ Linha curta na subseção + 1 bullet de contexto: <br/> "**Tipo de spec é declarado no header**. Specs `evidence-driven` ou `mixed` exigem gate humano via `decision-brief.md` antes de Stage 2 — o teste é 'o design depende de evidência ainda não coletada?'. Ver `.core/process/spec-foundation.md`." (~2 ℓ) | Compromisso: ação + critério-teste + consequência        | Médio em todas as dimensões; mais densa que A/C                          |
 
 **Recomendação inicial (a confirmar pós-gate):** **D** — equilibra concretude (declare tipo) com critério-teste universal ("evidência ainda não coletada?") e consequência observável (gate antes de Stage 2). Acoplamento ao nome `decision-brief.md` é aceitável: o boilerplate é fixo no framework.
 
@@ -344,7 +344,7 @@ Restrição: ≤ 2 linhas; aponta para `docs/process/spec-foundation.md`; não d
   - [ ] C (Foco na ação: "Classifique a spec por tipo no header...")
   - [x] D (Híbrido: Linha curta destacada + bullet explicando o critério-teste e o gate)
 - **Texto final (se desejar redigir ou ajustar a opção escolhida):** >
-  "**Tipo de spec é declarado no header (`evidence-driven`, `deterministic`, `mixed`).** Specs `evidence-driven` ou `mixed` exigem um gate humano via `decision-brief.md` antes da implementação — o teste é: _'o design depende de evidência técnica/pesquisa ainda não coletada?'_. Detalhes em `docs/process/spec-foundation.md`."
+  "**Tipo de spec é declarado no header (`evidence-driven`, `deterministic`, `mixed`).** Specs `evidence-driven` ou `mixed` exigem um gate humano via `decision-brief.md` antes da implementação — o teste é: _'o design depende de evidência técnica/pesquisa ainda não coletada?'_. Detalhes em `.core/process/spec-foundation.md`."
 - **Justificativa / Ressalvas:** >
   Adoção das opções recomendadas (A + D) para minimizar churn no arquivo global de regras, aproveitando a seção de workflow existente. O texto híbrido foi ajustado para refletir a taxonomia de 3 tipos decidida no A02, fornecendo à IA a instrução exata de comportamento sem duplicar a documentação extensa que viverá no spec-foundation.
 - **Data / Owner:** 2026-05-02 / @rosanarezende
@@ -473,7 +473,7 @@ Recomendação: **D16.A** — gate explícito é didático e evita ambiguidade.
 
 **Contexto (research):**
 
-- Discussão pass 3 da revisão da spec 0018 (2026-04-30): owner identificou que `docs/process/spec-foundation.md` é constituição operacional viva, misturada em `docs/` com documentos descritivos; ausência de catálogo de informação essencial; gêneros documentais sem classificação explícita.
+- Discussão pass 3 da revisão da spec 0018 (2026-04-30): owner identificou que `.core/process/spec-foundation.md` é constituição operacional viva, misturada em `docs/` com documentos descritivos; ausência de catálogo de informação essencial; gêneros documentais sem classificação explícita.
 - A candidata `governance-information-architecture` foi adicionada a `roadmap/backlog.md` (topo de "Now") justamente para tratar este problema arquitetural amplo.
 - [`research/2026-04-30-boilerplates-audit.md`](./research/2026-04-30-boilerplates-audit.md) § 4.3 confirma o gap: nem boilerplate nem `spec-foundation.md` classificam por tipo. § 9 mantém a recomendação inicial **A** como coerente com a priorização (resposta tática enquanto a candidata arquitetural espera).
 
@@ -481,7 +481,7 @@ Recomendação: **D16.A** — gate explícito é didático e evita ambiguidade.
 
 | Opção | Onde                                                                                                        | Pró                                                                               | Contra                                                                                |
 | :---- | :---------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------ |
-| A     | Acrescentar nova seção ao próprio `docs/process/spec-foundation.md` (status quo)                            | Mínimo churn; entrega 0018 sem expandir escopo; não antecipa decisão arquitetural | Acumula dívida; `spec-foundation.md` cresce; reforça mistura de gêneros               |
+| A     | Acrescentar nova seção ao próprio `.core/process/spec-foundation.md` (status quo)                           | Mínimo churn; entrega 0018 sem expandir escopo; não antecipa decisão arquitetural | Acumula dívida; `spec-foundation.md` cresce; reforça mistura de gêneros               |
 | B     | Novo arquivo `docs/process/spec-types.md` cross-ref'd pelo `spec-foundation.md`                             | Modular; menor inflação por arquivo                                               | Cria dependência cruzada antes da decisão maior; provável move depois                 |
 | C     | ADR atômica nova (ex: `adrs/0009-spec-types-content-vs-infra.md`) + ponteiro mínimo em `spec-foundation.md` | Imobiliza a decisão; alinha com o gênero ADR                                      | Política operacional viva em ADR (gênero não-canônico); split entre runbook e decisão |
 | D     | Aguardar `governance-information-architecture` para definir antes de aplicar a política                     | Coerente arquiteturalmente                                                        | Bloqueia 0018 indefinidamente — incompatível com priorização                          |
@@ -492,7 +492,7 @@ Recomendação: **D16.A** — gate explícito é didático e evita ambiguidade.
 
 - **Status:** [ ] Pendente | [x] Resolvido
 - **Escolha (marque com `x`):**
-  - [x] A (Acrescentar nova seção ao próprio `docs/process/spec-foundation.md` como status quo)
+  - [x] A (Acrescentar nova seção ao próprio `.core/process/spec-foundation.md` como status quo)
   - [ ] B (Novo arquivo `docs/process/spec-types.md` e apenas linkar)
   - [ ] C (Criar uma ADR atômica nova e linkar)
   - [ ] D (Aguardar e bloquear a spec até rodar a `governance-information-architecture`)

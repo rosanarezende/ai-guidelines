@@ -28,7 +28,7 @@ ADRs estendidos (referência, não modificação): **0004** (Governance Single R
 **Estado atual** (baseline antes da spec):
 
 - `.specify/templates/` contém 7 boilerplates: `spec-`, `plan-`, `tasks-`, `next-`, `research-index-`, `roadmap-`, `project-config-`.
-- `docs/process/spec-foundation.md` canoniza lifecycle de specs, política `NEXT.md`, política de migração de research e categorias universal × opt-in **para regras**, mas **não** classifica specs por tipo de entrega (conteúdo × infra) e **não** descreve workflow em dois passes.
+- `.core/process/spec-foundation.md` canoniza lifecycle de specs, política `NEXT.md`, política de migração de research e categorias universal × opt-in **para regras**, mas **não** classifica specs por tipo de entrega (conteúdo × infra) e **não** descreve workflow em dois passes.
 - Specs executadas (0008, 0015, 0016, 0017, 0018-rev0) divergiram dos boilerplates ao adicionar/omitir seções (ex: "Decisão de Fusão" em 0008 não está no `spec-boilerplate`). A divergência prática é informação editorial não capturada.
 - Inexistente: artefato canônico de gate humano pré-design. `decision-brief.md` desta spec é a primeira instância (hand-rolled).
 
@@ -104,7 +104,7 @@ Derivado de `[DEC-0018-A05]`. Formato canônico:
 | 4-bis. Bloco Gate            | D16.A    | Bloco final explícito **✅ Gate fechado** (data + owner + checkbox por ponto).                                                                                                      |
 | 5. Checklist pós-gate (4 ✅) | B        | Checklist explícito: (1) `plan.md` v2 com seções derivadas; (2) `tasks.md` v2 substitui placeholder; (3) status agregado da brief → `Resolved`; (4) commit atômico marcando o gate. |
 
-##### A.5 — Atualizar `docs/process/spec-foundation.md`
+##### A.5 — Atualizar `.core/process/spec-foundation.md`
 
 Derivado de `[DEC-0018-A03]` (A + D + Misto) e `[DEC-0018-A06]` (A — manter no `spec-foundation.md` atual).
 
@@ -117,7 +117,7 @@ Derivado de `[DEC-0018-A03]` (A + D + Misto) e `[DEC-0018-A06]` (A — manter no
 
 Derivado de `[DEC-0018-A04]` (A + D — texto híbrido). Localização: subseção **"Workflow com IA"** (existente). Texto cravado pelo owner:
 
-> **Tipo de spec é declarado no header (`evidence-driven`, `deterministic`, `mixed`).** Specs `evidence-driven` ou `mixed` exigem um gate humano via `decision-brief.md` antes da implementação — o teste é: _"o design depende de evidência técnica/pesquisa ainda não coletada?"_. Detalhes em `docs/process/spec-foundation.md`.
+> **Tipo de spec é declarado no header (`evidence-driven`, `deterministic`, `mixed`).** Specs `evidence-driven` ou `mixed` exigem um gate humano via `decision-brief.md` antes da implementação — o teste é: _"o design depende de evidência técnica/pesquisa ainda não coletada?"_. Detalhes em `.core/process/spec-foundation.md`.
 
 #### [B | Content Overhaul Research-Backed (Rules)]
 
@@ -329,7 +329,7 @@ Derivado de `[DEC-0018-B06]` (A + F + N) e `[DEC-0018-B07]` (D + H + J).
 - [ ] `tasks-boilerplate.md` reestruturado em 5 fases canônicas (A.3).
 - [ ] 3 boilerplates especializados por tipo criados: `tasks-evidence-driven-`, `tasks-deterministic-`, `tasks-mixed-` (A.3).
 - [ ] `decision-brief-boilerplate.md` (8º artefato) criado conforme `[DEC-0018-A05]` (A.4).
-- [ ] `docs/process/spec-foundation.md` ganha seção "Tipos de spec" com TODO de migração para `governance-information-architecture` (A.5).
+- [ ] `.core/process/spec-foundation.md` ganha seção "Tipos de spec" com TODO de migração para `governance-information-architecture` (A.5).
 - [ ] `.core/rules/global-rules.md` ganha linha cravada em `[DEC-0018-A04]` na subseção "Workflow com IA" (A.6).
 - [ ] `spec.md` desta 0018 retroactivamente recebe `Tipo de spec: evidence-driven` no header — registrado em "Decisões revisitadas" como exceção consciente à imutabilidade pós-`In Review` (a regra é criada por esta própria spec).
 
@@ -394,7 +394,7 @@ _Boilerplates e foundation (Bloco A):_
 - `.specify/templates/roadmap-boilerplate.md` (atualizar — A.2).
 - `.specify/templates/research-index-boilerplate.md` (atualizar — A.2).
 - `.specify/templates/decision-brief-boilerplate.md` (novo, 8º artefato — A.4).
-- `docs/process/spec-foundation.md` (nova seção "Tipos de spec" + sync de drift — A.5).
+- `.core/process/spec-foundation.md` (nova seção "Tipos de spec" + sync de drift — A.5).
 - `.core/rules/global-rules.md` (linha em "Workflow com IA" — A.6 + reorganização Bloco B).
 
 _Conteúdo, pipeline e instrumentação (Bloco B):_
@@ -457,6 +457,21 @@ _Researches, registros e encerramento:_
   - **Por quê:** Stage 1 entregou auditoria editorial (boilerplates) + 5 researches externas com decisões fundamentadas. O desenho técnico agora deriva linearmente da matriz de decisões — qualquer rota não derivada do brief é rejeitada como acreção pré-research.
   - **Implicação em `tasks.md`:** Fase 4+ deixa de ser placeholder; passa a operar como **Stage 2 dogfoodando o novo modelo de 5 fases** (Fases 4–7 numeradas continuamente, mapeando para as fases canônicas 1–4 do novo `tasks-boilerplate.md`). Fases 0–3 atuais permanecem como histórico do Stage 1 (já completas).
   - **Exceção consciente à imutabilidade da `spec.md`:** a 0018 cria o campo "Tipo de spec" — sua própria `spec.md` recebe o campo retroativamente em A.2. Justificativa: a regra é instituída por esta spec; aplicar a regra a si mesma é dogfooding necessário.
+
+- **2026-05-02 — Reabertura controlada de A.5 (concorrência de specs + premissa de distribuição dos boilerplates).**
+  - **Mudança:** durante 4.A3.2 (criação do `tasks-evidence-driven-boilerplate.md`), o owner identificou dois drifts colaterais que afetam a redação dos boilerplates de tasks e exigem ajuste em A.5 (`.core/process/spec-foundation.md`):
+    - (i) **Concorrência de specs** — `spec-foundation.md` linhas 149-150 cravam _"uma spec ativa por vez: feche a spec anterior antes de abrir uma nova"_, lendo-se como restrição global do repo. Isso **contradiz** a research da Spec 0017 [`2026-04-29-concurrency-best-practices.md`](../../specs/researchs/governance/2026-04-29-concurrency-best-practices.md) (OSS opera com múltiplas RFCs/specs simultâneas, gerenciadas via Issue-first + backlog visualizável) e a própria linha 186 do mesmo documento (_"uma sessão, uma spec ativa"_, escopo de sessão). É **débito da 0017** que vazou — a research foi feita, mas a redação canônica não foi reconciliada.
+    - (ii) **Premissa de distribuição** — `.specify/templates/` será ofertado aos repos consumidores como parte da metodologia SDD do framework. Boilerplates devem ser **agnósticos ao stack interno** do `ai-guidelines`; comandos específicos (`yarn check:repo`, CLI `adopt --dry-run`) viram **ilustrações opcionais** com nota de adaptação ao stack do consumidor.
+  - **Por quê:** ambos os drifts ficaram visíveis ao escrever o checklist genérico distribuível. Boilerplate replicar a redação ambígua perpetuaria o erro em todos os consumidores.
+  - **Implicação em `tasks-boilerplate.md` e `tasks-evidence-driven-boilerplate.md`:** itens 4.7 (concorrência) e 3.4/3.5 (validação em ambiente real) já foram reformulados nesta sessão para refletir o escopo correto + agnosticismo de stack.
+  - **Implicação em A.5:** adicionar sub-task `4.A5.5` para reconciliar `spec-foundation.md` linhas 149-150 com a research da 0017 e com a redação alinhada da linha 186. **Não é revisita do gate humano** (`[DEC-0018-A01]` cravou apenas a manutenção do MANDATÓRIO em 0.3 e 3.5, sem fixar redação que diferenciasse sessão × repo) — é fidelidade à fonte canônica + research existente.
+
+- **2026-05-02 — Movimentação `spec-foundation.md` para `.core/process/` (decorrência da premissa de distribuição).**
+  - **Mudança:** `docs/process/spec-foundation.md` foi movido (via `git mv`, histórico preservado) para `.core/process/spec-foundation.md`. Stub temporário criado em `docs/process/spec-foundation.md` apontando para o novo path. 18 arquivos vivos atualizados com substituição mecânica (`docs/process/spec-foundation` → `.core/process/spec-foundation`). 4 arquivos imutáveis (Spec 0008 + `roadmap/historico.md`) **não foram tocados** — preservam path antigo via stub.
+  - **Por quê:** `.core/` é o material distribuível aos repos consumidores via CLI. Como a premissa cravada nesta sessão é que `.specify/templates/` (e a metodologia SDD por extensão) será ofertada como "riqueza" do framework aos consumidores, a constituição operacional do SDD precisa estar em `.core/` para participar da distribuição. A pasta `.core/process/` é categoria nova (até então só havia `.core/rules/` e `.core/templates/`).
+  - **Distribuição efetiva via CLI:** **fora de escopo desta spec.** A 0018 apenas posiciona o arquivo no novo path; a integração no pipeline do `compiler.mjs` / `engine.mjs` é débito explícito da próxima spec de governance (`governance-information-architecture`, candidata em `roadmap/backlog.md`).
+  - **Stub temporário:** preservado em `docs/process/spec-foundation.md` para manter links de specs históricas (Spec 0008 e `roadmap/historico.md`) funcionais. Marcado para remoção pela `governance-information-architecture` (registrado como débito em `NEXT.md` ao fim da 0018).
+  - **Implicação em A.5:** sub-task `4.A5.0` cravada e marcada `[x]` (movimentação concluída nesta sessão); sub-task `4.A2.9` aberta para revisão de agnosticismo nos 5 boilerplates já commitados em A.2 (após sub-bloco A.3 completo).
 
 ---
 

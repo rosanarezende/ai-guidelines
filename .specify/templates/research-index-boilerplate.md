@@ -5,7 +5,7 @@
 > evitando que pesquisa morra em pasta fechada.
 >
 > **Política de research lifecycle:** fonte canônica em
-> `docs/process/spec-foundation.md` § "research/ — conhecimento de apoio"
+> `.core/process/spec-foundation.md` § "research/ — conhecimento de apoio"
 > (renomear com prefixo `YYYY-MM-DD-` → mover para
 > `.specify/specs/researchs/<domínio>/` → indexar aqui). Este boilerplate
 > documenta o **formato do índice**; a política de migração não é redefinida
@@ -31,7 +31,7 @@ consultam este arquivo como referência editorial.
 > **Manutenção**: Toda vez que uma Spec for finalizada, o desenvolvedor
 > (humano ou IA) **DEVE** transpor os arquivos de valor histórico de sua
 > pasta `research/` local para `.specify/specs/researchs/<domínio>/` e
-> indexar aqui (ver `docs/process/spec-foundation.md`).
+> indexar aqui (ver `.core/process/spec-foundation.md`).
 
 ---
 

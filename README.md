@@ -50,7 +50,7 @@ Comunidade ai-guidelines BR aceita contribuições em PT-BR e EN.
 ### 🤖 Para Agentes de IA
 
 Ler [`AGENTS.md`](AGENTS.md): "FASE 1: The Prime Directive" e workflow canônico de IA em seção "Workflow com IA" obrigatórios.
-Ciclo SDD descrito em [`docs/process/spec-foundation.md`](docs/process/spec-foundation.md).
+Ciclo SDD descrito em [`.core/process/spec-foundation.md`](.core/process/spec-foundation.md).
 
 ---
 
@@ -58,13 +58,13 @@ Ciclo SDD descrito em [`docs/process/spec-foundation.md`](docs/process/spec-foun
 
 ### Regras e protocolos
 
-| Arquivo                           | Propósito                                      |
-| :-------------------------------- | :--------------------------------------------- |
-| `AGENTS.md`                       | Fluxo obrigatório para IA e humanos neste repo |
-| `docs/rpi-protocol.md`            | Ciclo Research → Plan → Implement              |
-| `docs/process/spec-foundation.md` | Lifecycle de specs e SDD versionado            |
-| `docs/tdd-guidelines.md`          | Padrões BDD e cobertura                        |
-| `docs/cli/ai-guidelines-cli.md`   | Constituição (Business Rules) da CLI           |
+| Arquivo                            | Propósito                                      |
+| :--------------------------------- | :--------------------------------------------- |
+| `AGENTS.md`                        | Fluxo obrigatório para IA e humanos neste repo |
+| `docs/rpi-protocol.md`             | Ciclo Research → Plan → Implement              |
+| `.core/process/spec-foundation.md` | Lifecycle de specs e SDD versionado            |
+| `docs/tdd-guidelines.md`           | Padrões BDD e cobertura                        |
+| `docs/cli/ai-guidelines-cli.md`    | Constituição (Business Rules) da CLI           |
 
 ### CLI `init + adopt`
 

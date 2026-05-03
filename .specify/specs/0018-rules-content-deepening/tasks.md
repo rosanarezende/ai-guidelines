@@ -46,7 +46,7 @@
 
 - [x] **A.0.1** Inventariar os 7 boilerplates em `.specify/templates/`: campos, propósito declarado, vocabulário usado. — Output: `research/2026-04-30-boilerplates-audit.md` § 2.
 - [x] **A.0.2** Mapear como specs executadas (0008, 0015, 0016, 0017, 0018-rev0) preencheram cada artefato — capturar campos ignorados, campos ad-hoc adicionados, seções que cresceram informalmente. — Output: § 3 (drift estrutural).
-- [x] **A.0.3** Cross-check entre boilerplates × `docs/process/spec-foundation.md`: detectar drift bidirecional (políticas ausentes em boilerplate; campos ausentes em política). — Output: § 4.
+- [x] **A.0.3** Cross-check entre boilerplates × `.core/process/spec-foundation.md`: detectar drift bidirecional (políticas ausentes em boilerplate; campos ausentes em política). — Output: § 4.
 - [x] **A.0.4** Catalogar lacunas trazidas pela prática: "Decisão de Fusão", "Decisões revisitadas", "Tipo de spec" (conteúdo × infra), "Cross-refs com specs irmãs", "Conteúdo candidato pré-research", outras emergentes. — Output: § 5 (16 lacunas L1–L16).
 - [x] **A.0.5** Catalogar ruído removível: campos que nunca foram preenchidos. — Output: § 6 (7 itens R1–R7).
 - [x] **A.0.6** Avaliar dogfood: o `decision-brief.md` desta spec funcionou? Que campos, IDs, transições de status foram úteis ou problemáticos? Que melhorias informam o futuro `decision-brief-boilerplate.md`? — Output: § 7 (D1–D18).
@@ -114,14 +114,19 @@
 - [x] **4.A2.5** `research-index-boilerplate.md`: sincronizar com a política de research lifecycle de `spec-foundation.md`.
 - [x] **4.A2.6** `project-config-boilerplate.md`: confirmar zero churn (validar contra auditoria § 8.7).
 - [x] **4.A2.7** Atualizar header da `spec.md` desta 0018 com `Tipo de spec: evidence-driven` (exceção consciente à imutabilidade pós-`In Review`, registrada em `plan.md` "Decisões revisitadas").
-- [ ] **4.A2.8** **[COMMIT]** `feat(spec-0018): updates incrementais de 7 boilerplates + spec.md retroativa`.
+- [x] **4.A2.8** **[COMMIT]** `feat(spec-0018): updates incrementais de 7 boilerplates + spec.md retroativa`.
+
+> **Reabertura A.2 — 2026-05-02.** Após cravarmos a premissa de que `.specify/templates/` será ofertado aos repos consumidores (registrada em `plan.md` § "Decisões revisitadas" 2026-05-02), os 5 boilerplates editados em 4.A2.1–4.A2.5 precisam revisão de **agnosticismo de stack** análoga à que aplicamos em `tasks-boilerplate.md` e `tasks-evidence-driven-boilerplate.md` nesta sessão (comandos do `ai-guidelines` viram exemplos opcionais com nota de adaptação). Executar **após sub-bloco A.3 completo**.
+
+- [ ] **4.A2.9** Revisar `spec-boilerplate.md`, `plan-boilerplate.md`, `next-boilerplate.md`, `roadmap-boilerplate.md`, `research-index-boilerplate.md` — aplicar agnosticismo de stack: comandos `yarn`, `node cli/ai-guidelines-cli.mjs`, paths assumindo estrutura interna do `ai-guidelines` viram ilustrações opcionais com nota "ou equivalente do stack do consumidor".
+- [ ] **4.A2.10** **[COMMIT]** `refactor(spec-0018): boilerplates do A.2 ganham agnosticismo de stack para distribuição`.
 
 ### Sub-bloco [A.3] — Reestruturação `tasks-boilerplate.md` em 5 fases + split por tipo
 
 > Origem: [`[DEC-0018-A01]`](./decision-brief.md#dec-0018-a01-updates-por-boilerplate) ressalva e [`[DEC-0018-A02]`](./decision-brief.md#dec-0018-a02-estrutura-do-campo-tipo-de-spec) Sub-eixo 4 = B. Plan: § A.3.
 
-- [ ] **4.A3.1** Reescrever `.specify/templates/tasks-boilerplate.md` com nova estrutura de 5 fases (0–4): Setup → Implementação A → Implementação B → Preparação para Review (Gate de Homologação) → Encerramento Pré-Merge.
-- [ ] **4.A3.2** Criar `.specify/templates/tasks-evidence-driven-boilerplate.md`: variante com sub-bloco "Stage 1 (Research)" + "Gate humano via decision-brief" entre Setup e Implementação A.
+- [x] **4.A3.1** Reescrever `.specify/templates/tasks-boilerplate.md` com nova estrutura de 5 fases (0–4): Setup → Implementação A → Implementação B → Preparação para Review (Gate de Homologação) → Encerramento Pré-Merge.
+- [x] **4.A3.2** Criar `.specify/templates/tasks-evidence-driven-boilerplate.md`: variante com sub-bloco "Stage 1 (Research)" + "Gate humano via decision-brief" entre Setup e Implementação A.
 - [ ] **4.A3.3** Criar `.specify/templates/tasks-deterministic-boilerplate.md`: variante single-pass (Setup → Implementação A direto, sem Stage 1).
 - [ ] **4.A3.4** Criar `.specify/templates/tasks-mixed-boilerplate.md`: variante híbrida (Stage 1 condicional para sub-blocos identificados como evidence-driven).
 - [ ] **4.A3.5** **[COMMIT]** `feat(spec-0018): tasks-boilerplate em 5 fases + split por tipo de spec`.
@@ -133,21 +138,23 @@
 - [ ] **4.A4.1** Criar `.specify/templates/decision-brief-boilerplate.md` com: estrutura híbrida adaptativa (B padrão / C decomposto); convenção de IDs `[DEC-NNNN-XYZ]` + legenda canônica de status no topo + convenção documentada para pontos derivados; recomendação inicial opcional com gatilho "evidência convergente em ≥ 1 research"; tradeoffs aceitando tabela ou lista bulleted (D9.C); headers individuais + Tabela "Resumo de status" final manual; Bloco final explícito **✅ Gate fechado**; checklist explícito de 4 passos pós-gate.
 - [ ] **4.A4.2** **[COMMIT]** `feat(spec-0018): decision-brief-boilerplate.md (8º artefato canônico)`.
 
-### Sub-bloco [A.5] — Atualizar `docs/process/spec-foundation.md`
+### Sub-bloco [A.5] — Atualizar `.core/process/spec-foundation.md`
 
 > Origem: [`[DEC-0018-A03]`](./decision-brief.md#dec-0018-a03-localização-e-formato-da-política-de-tipos-de-spec-em-spec-foundationmd) (A + D + Misto) e [`[DEC-0018-A06]`](./decision-brief.md#dec-0018-a06-localização-física-da-seção-tipos-de-spec--workflow-em-dois-passes) (A). Plan: § A.5.
 
+- [x] **4.A5.0** **Movimentação física**: `git mv docs/process/spec-foundation.md .core/process/spec-foundation.md` + stub temporário em `docs/process/spec-foundation.md` apontando ao novo path + substituição de path em 18 arquivos vivos (4 arquivos imutáveis — Spec 0008 e `roadmap/historico.md` — preservam path antigo via stub). Distribuição efetiva via CLI fica como débito da próxima spec `governance-information-architecture` (registrado em `NEXT.md` ao fim da 0018). Concluído em 2026-05-02 nesta sessão; registrado em `plan.md` § "Decisões revisitadas".
 - [ ] **4.A5.1** Adicionar nova seção **"Tipos de spec"** logo após "Quando usar spec-foundation". Formato híbrido: tabela compacta (3 linhas × Critério-teste / Workflow / Exemplo) + 1 parágrafo descrevendo o gate humano + nota com 2-3 exemplos cross-repo (SaaS, library, infra-as-code, ML pipeline).
 - [ ] **4.A5.2** Promover para `spec-foundation.md` o princípio "repo-first, integração-friendly" + campo `tracker` (atualmente em `roadmap-boilerplate.md`).
 - [ ] **4.A5.3** Promover para `spec-foundation.md` o trigger de criação de `NEXT.md` ("criar quando há débitos conscientes").
 - [ ] **4.A5.4** Adicionar comentário **TODO** visível no topo da nova seção: anotação explícita de que o conteúdo deverá migrar para a futura spec **`governance-information-architecture`** (do backlog) na refatoração arquitetural.
-- [ ] **4.A5.5** **[COMMIT]** `docs(spec-0018): spec-foundation.md ganha "Tipos de spec" + sync de drift bidirecional`.
+- [ ] **4.A5.5** **Reconciliar concorrência de specs em `spec-foundation.md`** (débito da Spec 0017 que vazou): linhas 149-150 hoje cravam _"uma spec ativa por vez: feche a spec anterior antes de abrir uma nova"_ — lê-se como restrição global do repo. Reescrever para alinhar com (i) a research da 0017 [`2026-04-29-concurrency-best-practices.md`](../../specs/researchs/governance/2026-04-29-concurrency-best-practices.md) (OSS opera com múltiplas RFCs simultâneas via Issue-first + backlog) e (ii) a linha 186 do mesmo documento (_"uma sessão, uma spec ativa"_ — escopo de sessão). Redação alvo: tornar explícito que o limite é **por sessão de trabalho / contribuidor**, não por repositório. Cross-ref para a research no rodapé da seção. Registrado em `plan.md` § "Decisões revisitadas" 2026-05-02.
+- [ ] **4.A5.6** **[COMMIT]** `docs(spec-0018): spec-foundation.md ganha "Tipos de spec" + sync de drift bidirecional + reconciliação de concorrência (0017)`.
 
 ### Sub-bloco [A.6] — Atualizar `.core/rules/global-rules.md` (linha de workflow)
 
 > Origem: [`[DEC-0018-A04]`](./decision-brief.md#dec-0018-a04-texto-da-linha-em-global-rulesmd) (A + D). Plan: § A.6.
 
-- [ ] **4.A6.1** Adicionar à subseção **"Workflow com IA"** o texto cravado pelo owner em A04: _"Tipo de spec é declarado no header (`evidence-driven`, `deterministic`, `mixed`). Specs `evidence-driven` ou `mixed` exigem um gate humano via `decision-brief.md` antes da implementação — o teste é: 'o design depende de evidência técnica/pesquisa ainda não coletada?'. Detalhes em `docs/process/spec-foundation.md`."_
+- [ ] **4.A6.1** Adicionar à subseção **"Workflow com IA"** o texto cravado pelo owner em A04: _"Tipo de spec é declarado no header (`evidence-driven`, `deterministic`, `mixed`). Specs `evidence-driven` ou `mixed` exigem um gate humano via `decision-brief.md` antes da implementação — o teste é: 'o design depende de evidência técnica/pesquisa ainda não coletada?'. Detalhes em `.core/process/spec-foundation.md`."_
 - [ ] **4.A6.2** **[COMMIT]** `docs(spec-0018): global-rules.md acrescenta linha sobre tipo de spec + gate humano`.
 
 ---

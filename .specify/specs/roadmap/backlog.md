@@ -6,7 +6,7 @@ Este arquivo é o backlog vivo do repositório. Captura specs em execução, pr�
 
 **Política repo-first, integração-friendly:** o repositório é a memória canônica. Ferramentas externas (GitHub Projects, Jira, Linear, etc.) podem ser camada colaborativa humana via campo opcional `tracker` nas entradas abaixo, mas o resumo mínimo no `backlog.md` é mandatório.
 
-Detalhes de lifecycle em [`docs/process/spec-foundation.md`](../../../docs/process/spec-foundation.md).
+Detalhes de lifecycle em [`.core/process/spec-foundation.md`](../../../.core/process/spec-foundation.md).
 
 ---
 
@@ -16,7 +16,7 @@ Specs atualmente em branch ativa. Formato enxuto.
 
 - **0018-rules-content-deepening** (Content Overhaul + Política framework para specs de conteúdo) — _Draft (revised 2026-04-30)_
   - **Escopo:** Duas entregas intencionais na mesma branch.
-    - **Bloco A:** auditoria research-backed dos 7 boilerplates de `.specify/templates/`; canonização da distinção **spec de conteúdo × infraestrutura** com checklist diferenciado (research+eval mandatórios em specs de conteúdo); sincronização com `docs/process/spec-foundation.md`; linha em `global-rules.md`.
+    - **Bloco A:** auditoria research-backed dos 7 boilerplates de `.specify/templates/`; canonização da distinção **spec de conteúdo × infraestrutura** com checklist diferenciado (research+eval mandatórios em specs de conteúdo); sincronização com `.core/process/spec-foundation.md`; linha em `global-rules.md`.
     - **Bloco B:** content overhaul research-backed de `global-rules.md` e `quality-gates.md` — research lifecycle (5 sínteses externas + baseline de tokens), taxonomia consolidada (meta-regras agente × princípios universais × heurísticas domínio), catálogo `[RULE-ENG-*]`, eval empírico mínimo em ≥2 provedores, reconciliação do conteúdo já-mergeado em `b9efb83`.
   - **Fronteira com 0011 (hierarquia) e 0009 (harness):** definida em B.1; débitos vão para `NEXT.md` desta spec.
 
@@ -27,7 +27,7 @@ Specs atualmente em branch ativa. Formato enxuto.
 Specs ou candidatas priorizadas para iniciar em seguida. Ordem indica prioridade.
 
 - **governance-information-architecture** (Auditoria + classificação canônica de informação essencial do framework)
-  - **Fonte do insight:** revisão da Spec 0018 (Stage 1, 2026-04-30) — owner identificou que `docs/process/spec-foundation.md` é constituição operacional viva, mas está misturada em `docs/` com documentos descritivos; ausência de catálogo de informação essencial; gêneros documentais (constituição × ADR × regra runtime × doc descritivo × referência) sem classificação explícita nem regra de "qual gênero vai para onde".
+  - **Fonte do insight:** revisão da Spec 0018 (Stage 1, 2026-04-30) — owner identificou que `.core/process/spec-foundation.md` é constituição operacional viva, mas está misturada em `docs/` com documentos descritivos; ausência de catálogo de informação essencial; gêneros documentais (constituição × ADR × regra runtime × doc descritivo × referência) sem classificação explícita nem regra de "qual gênero vai para onde".
   - **Insight central:** o framework hoje tem 5+ classes de informação espalhadas em `docs/`, `adrs/`, `.core/`, `.specify/`, raiz — sem catálogo único, sem princípio de classificação documentado. ADRs cobrem decisões singulares; `spec-foundation.md` cobre processo vivo; `.core/rules/*` cobrem runtime distribuído; `docs/features.md`/`ai-efficiency-guide.md` são descritivos. Tudo coabita sem fronteira. Novo agente/contribuidor precisa adivinhar onde olhar primeiro.
   - **Escopo potencial:** auditoria de placement atual de cada documento essencial; classificação canônica em N classes (constituição operacional × ADRs × regras runtime distribuídas × documentação descritiva × referência operacional); decisão entre catálogo central (`INFORMATION-CATALOG.md`) vs reorganização física (`.specify/foundation/`) vs híbrido; decisão sobre ADRs absorverem decisões atômicas que hoje vivem dentro de `spec-foundation.md`; tornar a política parte do framework distribuído (template) se aplicável.
   - **Audiência:** governança meta-framework (não regras runtime). **Diferente de Spec 0011** que trata de hierarquia de _rules editoriais runtime_ — esta candidata trata de hierarquia de _meta-docs do framework_. Problemas paralelos.

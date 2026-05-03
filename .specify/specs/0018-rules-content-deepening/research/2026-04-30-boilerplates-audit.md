@@ -13,7 +13,7 @@ inputs:
   - .specify/templates/research-index-boilerplate.md
   - .specify/templates/roadmap-boilerplate.md
   - .specify/templates/project-config-boilerplate.md
-  - docs/process/spec-foundation.md
+  - .core/process/spec-foundation.md
   - .specify/specs/0008-governance-coherence/{spec,plan,tasks}.md
   - .specify/specs/0015-auditoria-destrutiva/{spec,plan,tasks}.md
   - .specify/specs/0016-adapters-opt-in/{spec,plan,tasks}.md
@@ -40,7 +40,7 @@ informa:
 ## 1. Sumário executivo
 
 A auditoria cruzou os 7 boilerplates de `.specify/templates/` com (a) a
-política canônica em `docs/process/spec-foundation.md` e (b) o
+política canônica em `.core/process/spec-foundation.md` e (b) o
 preenchimento real das 5 specs disponíveis (0008, 0015, 0016, 0017 e a
 própria 0018-rev1). Três tipos de problema apareceram:
 
@@ -123,7 +123,7 @@ políticas que **não aparecem** em `spec-foundation.md`.
 
 ---
 
-## 4. A.0.3 — Cross-check com `docs/process/spec-foundation.md`
+## 4. A.0.3 — Cross-check com `.core/process/spec-foundation.md`
 
 ### 4.1 Política presente em `spec-foundation.md` mas ausente nos boilerplates
 
