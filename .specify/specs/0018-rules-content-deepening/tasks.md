@@ -127,8 +127,8 @@
 
 - [x] **4.A3.1** Reescrever `.specify/templates/tasks-boilerplate.md` com nova estrutura de 5 fases (0–4): Setup → Implementação A → Implementação B → Preparação para Review (Gate de Homologação) → Encerramento Pré-Merge.
 - [x] **4.A3.2** Criar `.specify/templates/tasks-evidence-driven-boilerplate.md`: variante com sub-bloco "Stage 1 (Research)" + "Gate humano via decision-brief" entre Setup e Implementação A.
-- [ ] **4.A3.3** Criar `.specify/templates/tasks-deterministic-boilerplate.md`: variante single-pass (Setup → Implementação A direto, sem Stage 1).
-- [ ] **4.A3.4** Criar `.specify/templates/tasks-mixed-boilerplate.md`: variante híbrida (Stage 1 condicional para sub-blocos identificados como evidence-driven).
+- [x] **4.A3.3** Criar `.specify/templates/tasks-deterministic-boilerplate.md`: variante single-pass (Setup → Implementação A direto, sem Stage 1). — Gerado com Gemini 3.1 Pro + revisão Claude (4 ajustes editoriais: estilo L9, parêntese L30, gramática + nota L96, alinhamento da nota da Spec 0017 L100).
+- [x] **4.A3.4** Criar `.specify/templates/tasks-mixed-boilerplate.md`: variante híbrida (Stage 1 condicional para sub-blocos identificados como evidence-driven). — Gerado com Gemini 3.1 Pro + revisão Claude (3 ajustes editoriais: bullet L17, caveat de paralelismo L24, cláusula L137).
 - [ ] **4.A3.5** **[COMMIT]** `feat(spec-0018): tasks-boilerplate em 5 fases + split por tipo de spec`.
 
 ### Sub-bloco [A.4] — Criar `decision-brief-boilerplate.md` (8º artefato)
