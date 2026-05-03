@@ -14,11 +14,11 @@
 
 ## Legenda canônica de status
 
-| Status     | Significado                                                                                  |
-| :--------- | :------------------------------------------------------------------------------------------- |
-| `Open`     | Ponto criado, sem opções populadas (ainda em research).                                      |
-| `Pendente` | Opções populadas com tradeoffs, aguardando o gate humano.                                    |
-| `Partial`  | Algumas sub-decisões cravadas, outras abertas. Aplica-se apenas a pontos com sub-eixos.      |
+| Status     | Significado                                                                                                        |
+| :--------- | :----------------------------------------------------------------------------------------------------------------- |
+| `Open`     | Ponto criado, sem opções populadas (ainda em research).                                                            |
+| `Pendente` | Opções populadas com tradeoffs, aguardando o gate humano.                                                          |
+| `Partial`  | Algumas sub-decisões cravadas, outras abertas. Aplica-se apenas a pontos com sub-eixos.                            |
 | `Resolved` | Escolha cravada com data + owner. **Imutável** — mudanças posteriores vão para `plan.md` § "Decisões revisitadas". |
 
 **Status agregado da brief** (campo no header):
@@ -44,7 +44,7 @@ A brief aceita duas formas de estruturar um ponto, escolhidas pelo autor conform
 
 ### Forma B (padrão) — para pontos com 1 dimensão de escolha
 
-````markdown
+```markdown
 ### [DEC-NNNN-XYZ] [Título curto da decisão]
 
 **Pergunta:** [pergunta única que o ponto responde].
@@ -76,11 +76,11 @@ A brief aceita duas formas de estruturar um ponto, escolhidas pelo autor conform
 - **Justificativa / Ressalvas:** >
   [Texto livre — owner registra a razão da escolha e ressalvas relevantes para Stage 2.]
 - **Data / Owner:** [YYYY-MM-DD] / [@owner]
-````
+```
 
 ### Forma C (decomposta) — para pontos compostos por múltiplas dimensões
 
-````markdown
+```markdown
 ### [DEC-NNNN-XYZ] [Título curto da decisão]
 
 **Pergunta:** [pergunta meta que o ponto responde].
@@ -122,7 +122,7 @@ A brief aceita duas formas de estruturar um ponto, escolhidas pelo autor conform
 - **Justificativa / Ressalvas:** >
   [Texto livre cobrindo a composição final das escolhas.]
 - **Data / Owner:** [YYYY-MM-DD] / [@owner]
-````
+```
 
 **Diretriz para escolher entre B e C:** use **B** quando o ponto tem uma única dimensão de escolha; use **C** quando o ponto se decompõe em decisões **independentes** que podem ser resolvidas em momentos diferentes (status do ponto pode ficar `Partial` enquanto algumas sub-decisões aguardam mais research).
 
@@ -158,11 +158,11 @@ A brief aceita duas formas de estruturar um ponto, escolhidas pelo autor conform
 
 > Tabela manual mantida pelo autor. Atualizar a cada mudança de status. **Drift entre headers individuais e esta tabela bloqueia o gate** — a coerência é responsabilidade humana (não há script de geração nesta versão).
 
-| ID               | Bloco | Status   |
-| :--------------- | :---- | :------- |
-| `[DEC-NNNN-A01]` | A     | Open     |
-| `[DEC-NNNN-A02]` | A     | Open     |
-| `[DEC-NNNN-B01]` | B     | Open     |
+| ID               | Bloco | Status |
+| :--------------- | :---- | :----- |
+| `[DEC-NNNN-A01]` | A     | Open   |
+| `[DEC-NNNN-A02]` | A     | Open   |
+| `[DEC-NNNN-B01]` | B     | Open   |
 
 **Status agregado:** [Open | Pendente | Partial | Resolved] — atualizar conforme o estado consolidado da tabela acima e refletir no campo do header.
 
