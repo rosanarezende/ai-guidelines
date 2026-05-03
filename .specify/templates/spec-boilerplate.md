@@ -49,7 +49,7 @@ operacional (DoD por componente, casos de teste) fica em `plan.md`.
 
 - [ ] Critério 1 — verificável de fora.
 - [ ] Critério 2.
-- [ ] `yarn check && yarn test` verde (sempre).
+- [ ] Pipeline de check + test verde, sempre (ex.: `yarn check && yarn test` no `ai-guidelines`; substitua pelo equivalente do stack do consumidor — `npm test`, `pnpm verify`, `cargo test`, `pytest`, etc.).
 - [ ] PR Draft revisado e aprovado por humano antes de Ready.
 
 ---

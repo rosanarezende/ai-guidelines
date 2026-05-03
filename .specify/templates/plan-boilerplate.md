@@ -73,9 +73,9 @@ Granular, por componente/sub-bloco. Itens marcáveis durante execução.
 
 ### Globais (toda a spec)
 
-- [ ] `yarn check` verde.
-- [ ] `yarn test` verde (XX/XX testes).
-- [ ] Diff em consumidor real revisado: zero quebras.
+- [ ] Pipeline de format/lint verde (ex.: `yarn check` no `ai-guidelines`; ou equivalente do stack do consumidor — `npm run lint`, `pnpm format --check`, `cargo fmt --check`, `ruff check`, etc.).
+- [ ] Suíte de testes verde — XX/XX (ex.: `yarn test` no `ai-guidelines`; ou equivalente do stack do consumidor).
+- [ ] Diff em consumidor real revisado: zero quebras (quando aplicável; specs puramente internas podem registrar "não-aplicável" com justificativa).
 
 ---
 
@@ -85,7 +85,7 @@ Granular, por componente/sub-bloco. Itens marcáveis durante execução.
 - **Integração**: cenários cross-componente.
 - **Manual**: smoke tests em ambientes que automação não cobre.
 
-Citar arquivos concretos (`tests/<file>.test.mjs`) quando souber.
+Citar arquivos concretos quando souber (ex.: `tests/<file>.test.mjs` no `ai-guidelines`; adapte à convenção de teste do stack do consumidor — `*.test.ts`, `*_test.go`, `test_*.py`, etc.).
 
 ---
 
