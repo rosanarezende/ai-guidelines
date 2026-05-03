@@ -356,6 +356,11 @@ function parseYamlSubset(yamlContent) {
 function parseScalar(value) {
   const trimmed = value.trim();
 
+  // Return null for empty strings (filtered later)
+  if (!trimmed) {
+    return null;
+  }
+
   // Remove surrounding quotes
   if (
     (trimmed.startsWith('"') && trimmed.endsWith('"')) ||

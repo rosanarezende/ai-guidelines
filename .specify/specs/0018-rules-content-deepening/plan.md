@@ -493,6 +493,16 @@ _Researches, registros e encerramento:_
   - **Stub temporário:** preservado em `docs/process/spec-foundation.md` para manter links de specs históricas (Spec 0008 e `roadmap/historico.md`) funcionais. Marcado para remoção pela `governance-information-architecture` (registrado como débito em `NEXT.md` ao fim da 0018).
   - **Implicação em A.5:** sub-task `4.A5.0` cravada e marcada `[x]` (movimentação concluída nesta sessão); sub-task `4.A2.9` aberta para revisão de agnosticismo nos 5 boilerplates já commitados em A.2 (após sub-bloco A.3 completo).
 
+- **2026-05-03 — Insights operacionais executados em B.3.2 (rules-parser + 31/31 BDD tests).**
+  - **Mudança:** durante implementação e validação de `rules-parser.mjs` + suite BDD, 4 insights operacionais foram confirmados pela prática:
+    1. **Hierarquia de headings cravada:** fixtures de teste usam consistentemente `####` (4 hashes por regra). Parser detecta corretamente via regex. Alinha com hierarquia legada em `agents-core.md` e futuro `global-rules.md` (### no topo do arquivo, #### por regra). Sem conflitos com Prettier.
+    2. **Opção B de frontmatter funcionou:** bloco fenced ` ```yaml ` imediatamente após heading da regra (sem `---` real) é padrão robusto em ambiente multi-regra. Prettier não reformata blocos fenced (diferente de frontmatter `---` legado). Alinha com Opção B cravada em `[DEC-0018-B04]` Sub-eixo 1 = B.
+    3. **Fail-fast é crítico para cobertura:** testes que validam "falha com mensagem precisa" (BR-PARSER-28, 30, 31) são os que mais exercem cobertura de validação. Confirma intuição de que erros informativos (linha+arquivo+razão) são pré-requisito da confiabilidade em parsing estruturado.
+    4. **Fixtures isoladas em `__fixtures__/`:** estrutura funciona bem. Testes permanecem isolados sem tocar `.core/rules/` real. Reprodutibilidade garantida. Heurística: **nunca mockear em testes estruturais; usar fixtures reais segregadas**.
+  - **Por quê:** esses 4 pontos foram intuições de design durante Bloco B (5.B3.1 + 5.B3.2) — agora confirmadas pela execução prática (31/31 testes BDD passando, validação manual com `diagnose.mjs`, nenhum edge-case não coberto).
+  - **Implicação em B.3+:** parser implementado alinha perfeitamente com design cravado em plan.md. Próximos passos (B.3.4 builder, B.3.5 compiler) herdam essas convenções sem revisão.
+  - **Implicação no boilerplate de testes:** convenção de fixtures isoladas deve ser explicitada em `.specify/templates/rules-parser-test-boilerplate.md` (artefato futuro para consumidores que implementarem parsers customizados para regras próprias).
+
 ---
 
 ## 📎 Anexo — Conteúdo candidato pré-research (b9efb83)

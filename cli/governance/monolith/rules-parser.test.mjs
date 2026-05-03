@@ -70,7 +70,7 @@ describe("Rules Parser (BDD + TDD)", () => {
     it("[BR-PARSER-06] detects rule with #### heading", async () => {
       const content = `## Bloco
 
-### [GR-0001] Primeira regra
+#### [GR-0001] Primeira regra
 
 \`\`\`yaml
 id: GR-0001
@@ -94,7 +94,7 @@ Descrição.`;
     it("[BR-PARSER-07] detects multiple rules in one file", async () => {
       const content = `## Bloco
 
-### [GR-0010] Regra 1
+#### [GR-0010] Regra 1
 
 \`\`\`yaml
 id: GR-0010
@@ -106,7 +106,7 @@ applicable_languages: []
 tags: []
 \`\`\`
 
-### [GR-0011] Regra 2
+#### [GR-0011] Regra 2
 
 \`\`\`yaml
 id: GR-0011
@@ -139,7 +139,7 @@ Apenas texto, sem regras.`;
 
   describe("[BR-PARSER-09] DADO regra sem bloco YAML QUANDO parsear ENTÃO trata como erro", async () => {
     it("[BR-PARSER-09] rule without YAML block is error", async () => {
-      const content = `### [GR-0099] Regra sem YAML
+      const content = `#### [GR-0099] Regra sem YAML
 
 Apenas descrição, sem bloco \`\`\`yaml\`\`\`.`;
 
@@ -446,7 +446,7 @@ sources:
 
   describe("[BR-PARSER-28] DADO arquivo com YAML malformado QUANDO parsear ENTÃO falha com mensagem precisa", async () => {
     it("[BR-PARSER-28] fails on malformed YAML with line number", async () => {
-      const content = `### [GR-0001] Test
+      const content = `#### [GR-0001] Test
 
 \`\`\`yaml
 id: GR-0001
@@ -473,7 +473,7 @@ sources:
 
   describe("[BR-PARSER-30] DADO rule com scope inválido QUANDO fail-fast ENTÃO falha imediatamente", async () => {
     it("[BR-PARSER-30] fail-fast on invalid scope", async () => {
-      const content = `### [GR-0001] Test
+      const content = `#### [GR-0001] Test
 
 \`\`\`yaml
 id: GR-0001
@@ -493,7 +493,7 @@ tags: []
 
   describe("[BR-PARSER-31] DADO rule com evidence_strength inválido QUANDO fail-fast ENTÃO falha imediatamente", async () => {
     it("[BR-PARSER-31] fail-fast on invalid evidence_strength", async () => {
-      const content = `### [GR-0001] Test
+      const content = `#### [GR-0001] Test
 
 \`\`\`yaml
 id: GR-0001
@@ -523,29 +523,73 @@ tags: []
 function parseYamlSubset(yaml) {
   const result = {};
   const lines = yaml.split("\n");
+  let currentArray = null;
+  let currentKey = null;
 
-  for (const line of lines) {
-    // Skip comments and empty lines
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
     const trimmed = line.replace(/#.*$/, "").trim();
+
+    // Skip empty lines
     if (!trimmed) continue;
 
-    // Simple key: value parsing
-    const match = trimmed.match(/^([a-z_]+):\s*(.+)$/);
-    if (match) {
-      const [, key, value] = match;
+    // Detect indentation level
+    const match = line.match(/^( *)/);
+    const leadingSpaces = match ? match[1].length : 0;
 
-      // Parse arrays
+    // Check for consistent indentation (multiple of 2)
+    if (leadingSpaces > 0 && leadingSpaces % 2 !== 0) {
+      throw new Error(
+        `YAML indentation error at line ${i + 1}: expected 2-space indent, got ${leadingSpaces} spaces`
+      );
+    }
+
+    // Array item: - value
+    if (trimmed.startsWith("- ")) {
+      if (!currentArray) {
+        throw new Error(`Unexpected array item at line ${i + 1}: no array started`);
+      }
+      const arrayValue = trimmed.slice(2).trim();
+      // Remove quotes if present
+      const cleanValue = arrayValue.replace(/^["']|["']$/g, "");
+      if (cleanValue) {
+        currentArray.push(cleanValue);
+      }
+    } else if (trimmed.includes(":")) {
+      // Key: value pair
+      const colonIndex = trimmed.indexOf(":");
+      const key = trimmed.slice(0, colonIndex).trim();
+      const value = trimmed.slice(colonIndex + 1).trim();
+
+      // If we had an array, store it
+      if (currentArray) {
+        result[currentKey] = currentArray;
+        currentArray = null;
+        currentKey = null;
+      }
+
+      // Parse value
       if (value.startsWith("[") && value.endsWith("]")) {
+        // Inline array: [a, b, c]
         const inner = value.slice(1, -1);
         result[key] = inner
           .split(",")
           .map((s) => s.trim().replace(/^["']|["']$/g, ""))
           .filter(Boolean);
+      } else if (value === "") {
+        // Start of multi-line array
+        currentKey = key;
+        currentArray = [];
       } else {
-        // Parse scalar values (remove quotes)
+        // Scalar value (remove quotes)
         result[key] = value.replace(/^["']|["']$/g, "");
       }
     }
+  }
+
+  // Finalize any pending array
+  if (currentArray) {
+    result[currentKey] = currentArray;
   }
 
   return result;
