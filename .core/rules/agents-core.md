@@ -1,15 +1,18 @@
-# AGENTS-core — Diretivas sempre-injetadas
+### AGENTS-core — Diretivas sempre-injetadas
 
 > **Fonte revisável** das diretivas que o `compiler.mjs` insere no topo do bloco `<AI_GUIDELINES>` em todo `AGENTS.md` distribuído. Hoje vivem em `.core/templates/AGENTS-core.md.tmpl` (template estático); migração desse path para este arquivo (e o desligamento da injeção dupla) fica para [Spec 0018 — sub-bloco B.3.5 (refactor compiler)](../../.specify/specs/0018-rules-content-deepening/plan.md). Enquanto B.3.5 não roda, este arquivo é **catálogo revisável paralelo** — não é injetado.
 >
-> **Convenção YAML cravada (alinha com `5.B3.1` no `tasks.md`):** cada regra começa com **frontmatter `---`** imediatamente seguido por `## [ID] Title`. O `rules-parser.mjs` (B.3.2) detecta o padrão `---\n<yaml>\n---\n## [...]` para extrair o bloco YAML de cada regra dentro de arquivos multi-regra como este. Categoria predominante aqui: `process`. Sources canônicas externas (CWE/CERT/Sonar/OWASP/paper) não se aplicam à maioria — diretivas operacionais ficam com `evidence_strength: declared_heuristic`. O ledger derivado em `.core/rules/_meta/agents-core-ledger.md` (B.3.4) será a interface humana de revisão crítica.
+> **Convenção YAML cravada em 2026-05-03 (alinha com `5.B3.1` no `tasks.md`):** **Opção B — primeiro bloco fenced ` ```yaml ` imediatamente após cada heading de regra** (frontmatter `---` real foi descartado: não sobrevive a Prettier em arquivos multi-regra, pois o tooling padrão só reconhece frontmatter no início absoluto do arquivo). O `rules-parser.mjs` (B.3.2) detecta cada regra pelo padrão "heading de regra → próximo bloco fenced `yaml`". Categoria predominante aqui: `process`. Sources canônicas externas (CWE/CERT/Sonar/OWASP/paper) não se aplicam à maioria — diretivas operacionais ficam com `evidence_strength: declared_heuristic`. O ledger derivado em `.core/rules/_meta/agents-core-ledger.md` (B.3.4) será a interface humana de revisão crítica.
 >
 > **Regra editorial cravada (5.B3.1.5 / 2026-05-03):** `Instruction (en)` é runtime injetado pelo compiler em B.3.5 — deve ser **imperativa em 1–3 linhas**, sem tabelas, sem blocos de exemplo, sem rationale. Tabelas, exemplos, racional, "why" e "see also" vivem em `Documentação (pt-br)` ou seções dedicadas (docs-only).
+>
+> **Hierarquia de headings cravada:** este arquivo usa `###` no topo e `####` por regra para alinhar com `global-rules.md` / `opt-in/quality-gates.md`. Compiler em B.3.5 deve preservar esta hierarquia (ou rebaixá-la consistentemente) ao injetar no `<AI_GUIDELINES>` do `AGENTS.md` consumidor — `#`/`##` quebram a formatação do destino.
 
 ---
 
----
+#### [CORE-01] Environment check antes da primeira ação
 
+```yaml
 id: CORE-01
 scope: universal
 category: process
@@ -17,10 +20,7 @@ evidence_strength: declared_heuristic
 sources: []
 applicable_languages: ["*"]
 tags: [core, agents, always_injected, environment]
-
----
-
-## [CORE-01] Environment check antes da primeira ação
+```
 
 **Instruction (en):**
 Before the first technical action, identify platform, shell, surface (CLI vs IDE), and model class; adapt commands accordingly.
@@ -40,6 +40,9 @@ Antes da primeira ação técnica, identifique o contexto situacional:
 
 ---
 
+#### [CORE-02] Agnostic SDD Override — repositório como memória
+
+```yaml
 id: CORE-02
 scope: universal
 category: process
@@ -47,10 +50,7 @@ evidence_strength: declared_heuristic
 sources: []
 applicable_languages: ["*"]
 tags: [core, agents, always_injected, sdd, inquebrável]
-
----
-
-## [CORE-02] Agnostic SDD Override — repositório como memória
+```
 
 **Instruction (en):**
 The repository is your memory. Persist plans, progress, debts, knowledge, and roadmap under `.specify/specs/`. Read `roadmap/backlog.md` at session start. If the platform forces a scratchpad, write only a pointer to the spec file. Planning trapped in agent cache (AI-slop) is unacceptable.
@@ -73,6 +73,9 @@ The repository is your memory. Persist plans, progress, debts, knowledge, and ro
 
 ---
 
+#### [CORE-03] Cross-ref para Regras Globais
+
+```yaml
 id: CORE-03
 scope: universal
 category: process
@@ -80,10 +83,7 @@ evidence_strength: declared_heuristic
 sources: []
 applicable_languages: ["*"]
 tags: [core, agents, always_injected, pointer]
-
----
-
-## [CORE-03] Cross-ref para Regras Globais
+```
 
 **Instruction (en):**
 Consult the "Global Rules" section injected later in this `<AI_GUIDELINES>` block for engineering principles and AI efficiency.
@@ -97,6 +97,9 @@ Consulte a seção "Regras Globais" injetada neste bloco `<AI_GUIDELINES>` para 
 
 ---
 
+#### [CORE-04] Nunca trabalhe direto em main/master
+
+```yaml
 id: CORE-04
 scope: universal
 category: process
@@ -104,10 +107,7 @@ evidence_strength: declared_heuristic
 sources: []
 applicable_languages: ["*"]
 tags: [core, agents, always_injected, git, branch]
-
----
-
-## [CORE-04] Nunca trabalhe direto em main/master
+```
 
 **Instruction (en):**
 Never start active modifications on `main` or `master`. Create a synthetic branch (`feat/`, `fix/`, `docs/`) before changing sources of truth.
@@ -119,6 +119,9 @@ Nunca inicie modificações ativas operando sob a branch `main` ou `master`. Con
 
 ---
 
+#### [CORE-05] Não versione contexto vazado
+
+```yaml
 id: CORE-05
 scope: universal
 category: process
@@ -126,10 +129,7 @@ evidence_strength: declared_heuristic
 sources: []
 applicable_languages: ["*"]
 tags: [core, agents, always_injected, git, hygiene]
-
----
-
-## [CORE-05] Não versione contexto vazado
+```
 
 **Instruction (en):**
 Do not version stray context files at the repo root or in working folders (partial payloads, AI scratch). Persistence is for _Release_ only.
@@ -141,6 +141,9 @@ Não versione arquivos contextuais vazados na raiz ou pastas sujas (payloads par
 
 ---
 
+#### [CORE-06] Commits incrementais atômicos
+
+```yaml
 id: CORE-06
 scope: universal
 category: process
@@ -148,10 +151,7 @@ evidence_strength: declared_heuristic
 sources: []
 applicable_languages: ["*"]
 tags: [core, agents, always_injected, git, commit]
-
----
-
-## [CORE-06] Commits incrementais atômicos
+```
 
 **Instruction (en):**
 Make atomic incremental commits limited to one logical unit. Split tasks that span design + code + spec.
@@ -163,6 +163,9 @@ Realize _Commits Incrementais Atômicos_ limitados à sua unidade lógica. Se a 
 
 ---
 
+#### [CORE-07] Nunca execute git push autonomamente
+
+```yaml
 id: CORE-07
 scope: universal
 category: process
@@ -170,10 +173,7 @@ evidence_strength: declared_heuristic
 sources: []
 applicable_languages: ["*"]
 tags: [core, agents, always_injected, git, safety, critical]
-
----
-
-## [CORE-07] Nunca execute git push autonomamente
+```
 
 **Instruction (en):**
 **[CRITICAL]** Never execute `git push` autonomously. Any remote push requires explicit human approval from the maintainer.
@@ -187,6 +187,9 @@ tags: [core, agents, always_injected, git, safety, critical]
 
 ---
 
+#### [CORE-08] HARNESS LOCK — cadeia de qualidade obrigatória pré-commit
+
+```yaml
 id: CORE-08
 scope: universal
 category: process
@@ -194,10 +197,7 @@ evidence_strength: declared_heuristic
 sources: []
 applicable_languages: ["*"]
 tags: [core, agents, always_injected, git, commit, ci, harness_lock]
-
----
-
-## [CORE-08] HARNESS LOCK — cadeia de qualidade obrigatória pré-commit
+```
 
 **Instruction (en):**
 **[HARNESS LOCK]** Before any `git commit`, run the project's full validation chain (format, check, lint, test) as declared in `package.json`. The rule is the chain, not the package manager — adapt to project scripts.
@@ -205,7 +205,7 @@ tags: [core, agents, always_injected, git, commit, ci, harness_lock]
 **Documentação (pt-br):**
 **[CI Compliance — HARNESS LOCK]** É terminantemente proibido submeter qualquer commit sem validar a cadeia de qualidade do projeto. Antes de `git commit`, execute **todos os scripts de validação** definidos no `package.json` do repositório (ex.: `format`, `check`, `lint`, `test`). O padrão canônico é:
 
-```
+```text
 <format_cmd> ; <check_cmd> ; git add . ; git commit -m "..."
 ```
 
@@ -217,6 +217,9 @@ Se o repositório define `yarn format` e `yarn check`, o comando concreto é: `y
 
 ---
 
+#### [CORE-09] PRs abrem como Draft com matriz oficial
+
+```yaml
 id: CORE-09
 scope: universal
 category: process
@@ -224,10 +227,7 @@ evidence_strength: declared_heuristic
 sources: []
 applicable_languages: ["*"]
 tags: [core, agents, always_injected, pr, github]
-
----
-
-## [CORE-09] PRs abrem como Draft com matriz oficial
+```
 
 **Instruction (en):**
 Open Pull Requests in `Draft` mode using the full `.github/pull_request_template.md` matrix.
@@ -239,6 +239,9 @@ A submissão de Pull Requests obrigatoriamente se inaugura no modo `Draft`, util
 
 ---
 
+#### [CORE-10] Draft → Ready apenas via revalidação humana
+
+```yaml
 id: CORE-10
 scope: universal
 category: process
@@ -246,10 +249,7 @@ evidence_strength: declared_heuristic
 sources: []
 applicable_languages: ["*"]
 tags: [core, agents, always_injected, pr, github, gate]
-
----
-
-## [CORE-10] Draft → Ready apenas via revalidação humana
+```
 
 **Instruction (en):**
 Convert PRs from `Draft` to `Ready` only after explicit human revalidation.
@@ -261,6 +261,9 @@ Converta a operação de `Draft` para `Ready` apenas através da revalidação a
 
 ---
 
+#### [CORE-11] Plano formado antes de ação
+
+```yaml
 id: CORE-11
 scope: universal
 category: process
@@ -268,10 +271,7 @@ evidence_strength: declared_heuristic
 sources: []
 applicable_languages: ["*"]
 tags: [core, agents, always_injected, planning]
-
----
-
-## [CORE-11] Plano formado antes de ação
+```
 
 **Instruction (en):**
 Act only with a formed plan. Use `spec-foundation` for work that must survive session/agent changes; use a tool-scratchpad lightweight plan only for single-session, local, disposable adjustments.
@@ -294,6 +294,9 @@ Act only with a formed plan. Use `spec-foundation` for work that must survive se
 
 ---
 
+#### [CORE-12] Checkpoints antes de ação após contexto extenso
+
+```yaml
 id: CORE-12
 scope: universal
 category: process
@@ -301,10 +304,7 @@ evidence_strength: declared_heuristic
 sources: []
 applicable_languages: ["*"]
 tags: [core, agents, always_injected, checkpoint]
-
----
-
-## [CORE-12] Checkpoints antes de ação após contexto extenso
+```
 
 **Instruction (en):**
 After absorbing extensive context, return a summary Checkpoint and request human approval before executing Code Actions.
@@ -316,6 +316,9 @@ After absorbing extensive context, return a summary Checkpoint and request human
 
 ---
 
+#### [CORE-13] Artefatos vivos durante o trabalho
+
+```yaml
 id: CORE-13
 scope: universal
 category: process
@@ -323,10 +326,7 @@ evidence_strength: declared_heuristic
 sources: []
 applicable_languages: ["*"]
 tags: [core, agents, always_injected, sdd, lifecycle]
-
----
-
-## [CORE-13] Artefatos vivos durante o trabalho
+```
 
 **Instruction (en):**
 Keep SDD artifacts updated continuously: mark `tasks.md` items `[/]` (in progress) or `[x]` (done) as you go; record debts in `NEXT.md`. Never create parallel routing files in the repo.
