@@ -135,8 +135,8 @@
 
 > Origem: [`[DEC-0018-A05]`](./decision-brief.md#dec-0018-a05-formato-do-decision-brief-boilerplatemd). Plan: § A.4.
 
-- [ ] **4.A4.1** Criar `.specify/templates/decision-brief-boilerplate.md` com: estrutura híbrida adaptativa (B padrão / C decomposto); convenção de IDs `[DEC-NNNN-XYZ]` + legenda canônica de status no topo + convenção documentada para pontos derivados; recomendação inicial opcional com gatilho "evidência convergente em ≥ 1 research"; tradeoffs aceitando tabela ou lista bulleted (D9.C); headers individuais + Tabela "Resumo de status" final manual; Bloco final explícito **✅ Gate fechado**; checklist explícito de 4 passos pós-gate.
-- [ ] **4.A4.2** **[COMMIT]** `feat(spec-0018): decision-brief-boilerplate.md (8º artefato canônico)`.
+- [x] **4.A4.1** Criar `.specify/templates/decision-brief-boilerplate.md` com: estrutura híbrida adaptativa (B padrão / C decomposto); convenção de IDs `[DEC-NNNN-XYZ]` + legenda canônica de status no topo + convenção documentada para pontos derivados; recomendação inicial opcional com gatilho "evidência convergente em ≥ 1 research"; tradeoffs aceitando tabela ou lista bulleted (D9.C); headers individuais + Tabela "Resumo de status" final manual; Bloco final explícito **✅ Gate fechado**; checklist explícito de 4 passos pós-gate. — Boilerplate criado cravando o combo D + (A+C+D) + (D + D9.C) + (C + D16.A) + B; uso de fences ```` ```` (4 backticks) para mostrar templates markdown dentro do markdown; nota explícita "permanece no diretório da spec após o merge" coerente com Fase 4 das tasks-boilerplates.
+- [x] **4.A4.2** **[COMMIT]** `feat(spec-0018): decision-brief-boilerplate.md (8º artefato canônico)`.
 
 ### Sub-bloco [A.5] — Atualizar `.core/process/spec-foundation.md`
 
