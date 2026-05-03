@@ -155,7 +155,7 @@
 > Origem: [`[DEC-0018-A04]`](./decision-brief.md#dec-0018-a04-texto-da-linha-em-global-rulesmd) (A + D). Plan: § A.6.
 
 - [x] **4.A6.1** Adicionar à subseção **"Workflow com IA"** o texto cravado pelo owner em A04: _"Tipo de spec é declarado no header (`evidence-driven`, `deterministic`, `mixed`). Specs `evidence-driven` ou `mixed` exigem um gate humano via `decision-brief.md` antes da implementação — o teste é: 'o design depende de evidência técnica/pesquisa ainda não coletada?'. Detalhes em `.core/process/spec-foundation.md`."_ — Inserido como item 7 entre "RPI obrigatório" (item 6) e "Contexto enxuto" (renumerado para 8); itens 7 e 8 antigos viram 8 e 9. Texto idêntico ao cravado em [DEC-0018-A04] linha 347 do brief.\_
-- [ ] **4.A6.2** **[COMMIT]** `docs(spec-0018): global-rules.md acrescenta linha sobre tipo de spec + gate humano`.
+- [x] **4.A6.2** **[COMMIT]** `docs(spec-0018): global-rules.md acrescenta linha sobre tipo de spec + gate humano`.
 
 ---
 
@@ -167,12 +167,14 @@
 
 > Origem: [`[DEC-0018-B08]`](./decision-brief.md#dec-0018-b08-política-de-reconciliação-do-conteúdo-b9efb83) (A + E + L + O). Plan: § B.2.
 
-- [ ] **5.B2.1** Inventariar 24 regras candidatas (20 itens em 3 seções de `.core/rules/global-rules.md` + 4 categorias em `.core/rules/opt-in/quality-gates.md`) numa tabela seed.
-- [ ] **5.B2.2** Para cada regra, pesquisar e atribuir **fonte canônica externa** candidata (CWE, CERT, Sonar RSPEC, OWASP, paper validado). Documentar URL + ID externo. Sem source aceitável → `reverter`.
-- [ ] **5.B2.3** Validar no research [`empirical-bugs`](./research/2026-04-30-empirical-bugs-ai-code.md) e [`external-bug-taxonomies`](./research/2026-04-30-external-bug-taxonomies.md) os achados sobre N+1 (heurística sem suporte empírico — reverter), race conditions e memory leaks (medium evidence — manter se source é citada).
-- [ ] **5.B2.4** Publicar `research/2026-04-30-b9efb83-reconciliation.md` com tabela final: regra / texto original / source proposta / decisão (`manter` | `reverter` | `revisar com source X`) / justificativa.
-- [ ] **5.B2.5** Aplicar reversões em `.core/rules/*.md` num commit isolado, ANTES de qualquer trabalho de B.3+.
-- [ ] **5.B2.6** **[COMMIT]** `refactor(spec-0018): purga radical b9efb83 — remove regras sem fonte canônica`.
+> **Reabertura controlada B.2 — 2026-05-03.** Após inventário inicial (5.B2.1/5.B2.2), owner introduziu um **quarto estado de decisão** `mover (convenção)` para preservar regras pain-driven sem source canônica. Aplica-se a **PE-01** (PT-BR), **EF-04** (Redução de Ruído) e **WF-03** (PR description 3 etapas). Mudança expande (não reverte) o critério **E** de [`[DEC-0018-B08]`](./decision-brief.md#dec-0018-b08-política-de-reconciliação-do-conteúdo-b9efb83); brief permanece `Resolved`. Adicionalmente: débito cravado para regra **nova** "IA gera apenas texto do commit" (não no inventário b9efb83 — adição em B.4). Justificativa completa em [`plan.md` § Decisões revisitadas — 2026-05-03](./plan.md#-decisões-revisitadas).
+
+- [x] **5.B2.1** Inventariar 24 regras candidatas (20 itens em 3 seções de `.core/rules/global-rules.md` + 4 categorias em `.core/rules/opt-in/quality-gates.md`) numa tabela seed.
+- [x] **5.B2.2** Para cada regra, pesquisar e atribuir **fonte canônica externa** candidata (CWE, CERT, Sonar RSPEC, OWASP, paper validado). Documentar URL + ID externo. Sem source aceitável → `reverter`.
+- [x] **5.B2.3** Validar no research [`empirical-bugs`](./research/2026-04-30-empirical-bugs-ai-code.md) e [`external-bug-taxonomies`](./research/2026-04-30-external-bug-taxonomies.md) os achados sobre N+1 (heurística sem suporte empírico — reverter), race conditions e memory leaks (medium evidence — manter se source é citada).
+- [x] **5.B2.4** Publicar `research/2026-04-30-b9efb83-reconciliation.md` com tabela final: regra / texto original / source proposta / decisão (`manter` | `reverter` | `revisar com source X` | `mover (convenção)`) / justificativa. Validado pelo owner em 2026-05-03 (incluindo expansão para 4º estado de decisão `mover (convenção)`).
+- [x] **5.B2.5** Aplicar reversões em `.core/rules/*.md` num commit isolado, ANTES de qualquer trabalho de B.3+.
+- [x] **5.B2.6** **[COMMIT]** `refactor(spec-0018): purga radical b9efb83 — remove regras sem fonte canônica`.
 
 ### Sub-bloco [B.3] — Schema bilíngue + parser YAML + builder `rules.json`
 

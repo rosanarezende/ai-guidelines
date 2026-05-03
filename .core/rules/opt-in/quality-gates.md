@@ -16,9 +16,8 @@
    - **Mutation Testing:** Mínimo de **60%** de kill rate (garante que os testes realmente validam a lógica).
 
 3. **Sensores de Bugs Típicos de IA (Heurísticas obrigatórias):**
-   - **N+1 Queries/Calls:** O agente deve buscar proativamente por iterações (`map`, `for`) que executem chamadas de banco de dados ou APIs. Se encontrado, deve exigir/implementar batching ou data-loaders em vez de acessos sequenciais.
-   - **Race Conditions:** O agente deve analisar blocos assíncronos (ex: múltiplos `await` concorrentes) que leiam e modifiquem o mesmo estado em memória ou DB. Se não houver garantia de atomicidade (transação, lock ou estado local seguro), o design deve ser rejeitado.
-   - **Memory Leaks:** Sempre que o agente implementar _listeners_, observadores, subscrições de stream ou timers (`setInterval`), deve compulsoriamente implementar a função de limpeza (teardown/dispose) correspondente no ciclo de vida apropriado do framework usado.
+   - **Race Conditions:** O agente deve analisar blocos assíncronos (ex: múltiplos `await` concorrentes) que leiam e modifiquem o mesmo estado em memória ou DB. Se não houver garantia de atomicidade (transação, lock ou estado local seguro), o design deve ser rejeitado. _Source canônica: CWE-362; evidência empírica em CONCUR 2025._
+   - **Memory Leaks:** Sempre que o agente implementar _listeners_, observadores, subscrições de stream ou timers (`setInterval`), deve compulsoriamente implementar a função de limpeza (teardown/dispose) correspondente no ciclo de vida apropriado do framework usado. _Source canônica: CWE-401; evidência emergente em "Investigating Software Aging in LLM-Generated Software Systems" (2025)._
    - _Ferramentas recomendadas:_ Property-based testing (ex: fast-check em JS, Hypothesis em Python).
 
 4. **Security & Secrets:**
