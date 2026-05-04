@@ -341,3 +341,27 @@ Keep SDD artifacts updated continuously: mark `tasks.md` items `[/]` (in progres
 **Why this matters:** artefatos SDD desatualizados = perda do dogfood do framework. Atualização incremental preserva rastreabilidade.
 
 **See also:** `[CORE-02]` (Agnostic SDD Override).
+
+---
+
+#### [CORE-14] Mensagem de commit sugerida: IA fornece apenas a mensagem
+
+```yaml
+id: CORE-14
+scope: universal
+category: process
+evidence_strength: declared_heuristic
+sources: []
+applicable_languages: ["*"]
+tags: [core, agents, always_injected, git, commit, safety]
+```
+
+**Instruction (en):**
+At the end of each sub-block, provide only the commit message suggestion. The human executes the full validation chain (`yarn format ; yarn check ; ...`) and `git commit`.
+
+**Documentação (pt-br):**
+Ao concluir um sub-bloco, IA fornece **apenas** a mensagem sugerida do commit (`feat(spec-XXXX): ...`). O humano executa a cadeia completa de validação (`yarn format ; yarn check ; git add . ; git commit -m "..."`).
+
+**Why this matters:** economiza tokens e impede IA de operar git autonomamente. Honra `[CORE-07]` (push) e `[CORE-08]` (HARNESS LOCK).
+
+**See also:** `[CORE-08]` (HARNESS LOCK), `[CORE-07]` (Nunca execute git push autonomamente).

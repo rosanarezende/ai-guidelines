@@ -15,7 +15,9 @@
 
 ## 📝 Débitos Abertos
 
-### Débito B.4 — Nova regra `[CORE-14]` para gate de commit
+### ~~Débito B.4 — Nova regra `[CORE-14]` para gate de commit~~
+
+**[RESOLVIDO]** — Implementado em commit: `feat(spec-0018): adiciona [CORE-14] gate de commit message protocol`
 
 **Origem:** `[CORE-08]` § "Débito B.4 (cravado em B.2 — 2026-05-03)"  
 **Constatado:** 2026-05-03 durante implementação de `rules-parser.mjs` (B.3.2 Green Phase)  

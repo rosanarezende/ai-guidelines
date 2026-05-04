@@ -64,3 +64,9 @@ Este arquivo define o fluxo obrigatório para qualquer IA atuando neste reposit�
     - `tasks.md` → marque cada item como `[/]` (em progresso) ou `[x]` (concluído) a cada passo.
     - `NEXT.md` → registre débitos, bugs ou insights sem prioridade imediata.
     - **Nunca crie arquivos paralelos de roteirização.** Planos leves vivem na ferramenta, não no repositório.
+
+#### FASE 5: Commit Message Protocol
+
+5.1. **Ao concluir cada sub-bloco, forneça apenas a mensagem sugerida do commit.** O humano executa a cadeia completa de validação (`yarn format ; yarn check ; git add . ; git commit -m "..."`).
+
+   **Why this matters:** economiza tokens e impede IA de operar git autonomamente. Honra o protocolo de segurança de push (`[CORE-07]`) e HARNESS LOCK (`[CORE-08]`).

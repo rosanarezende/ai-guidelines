@@ -366,10 +366,7 @@ describe("monolith/compiler (rules-driven)", () => {
       result.content.includes("This is a test instruction in English"),
       "Content should include instruction from test-rules.md"
     );
-    assert.ok(
-      result.content.includes("### [GR-TEST-01]"),
-      "Should include GR-TEST-01 rule header"
-    );
+    assert.ok(result.content.includes("### [GR-TEST-01]"), "Should include GR-TEST-01 rule header");
   });
 
   it("[BR-COMPILER-24] DADO path inexistente QUANDO compileRulesFromCatalog ENTÃO success=false + errors", async () => {
