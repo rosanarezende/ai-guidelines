@@ -162,7 +162,7 @@ Derivado de `[DEC-0018-B08]` = A + E + L + O. Postura de **purga radical**: regr
 Procedimento:
 
 1. Inventariar as 24 regras candidatas (20 itens em 3 seções de `.core/rules/global-rules.md` + 4 categorias em `.core/rules/opt-in/quality-gates.md`).
-2. Para cada regra, atribuir **fonte canônica candidata** (URL + ID externo, ex.: `CWE-89`, `OWASP-LLM01`, `Sonar S2068`). Sem source aceitável, **reverter** sem cerimônia.
+2. Para cada regra, atribuir **fonte canônica candidata** (URL + ID externo, ex.: `CWE-89`, `OWASP-A03:2021`, `Sonar S2068`). Sem source aceitável, **reverter** sem cerimônia.
 3. Tabela final em `research/2026-04-30-b9efb83-reconciliation.md` com colunas: regra / texto original / source proposta / decisão (`manter` | `reverter` | `revisar com source X`) / justificativa.
 4. Aplicar reversões em `.core/rules/*.md` num commit isolado, antes de qualquer trabalho de B.3+.
 
@@ -174,24 +174,23 @@ Derivado de `[DEC-0018-B01]` (F + J — taxonomia híbrida + tag de evidência c
 
 ###### Schema canônico de uma regra
 
-Cada regra é um bloco markdown com **frontmatter YAML** + corpo bilíngue. O corpo separa explicitamente o que vai para a IA (inglês, foco em compliance) do que fica para humanos (PT-BR, foco em manutenibilidade OSS).
+Cada regra é um bloco markdown com um **cabeçalho de regra** e um **bloco de código YAML cercado** (`fenced code block`) contendo seus metadados, seguido por um corpo bilíngue. O corpo separa explicitamente o que vai para a IA (inglês, foco em compliance) do que fica para humanos (PT-BR, foco em manutenibilidade OSS).
 
-```markdown
----
+````markdown
+#### [GR-0001] Sanitize SQL inputs
+
+```yaml
 id: GR-0001
-scope: universal # universal | adapter | opt-in
-adapter: null # claude | codex | gemini (se scope=adapter)
-opt_in_feature: null # tdd | bdd | quality-gates | ... (se scope=opt-in)
-category: security # correctness | security | maintainability | process | editorial
-evidence_strength: strong # strong | medium | emerging | declared_heuristic
+scope: universal
+category: security
+evidence_strength: strong
 sources:
   - "CWE-89"
   - "OWASP-A03:2021"
 applicable_languages: ["*"]
 tags: [sql, input-validation]
----
-
-## [GR-0001] Sanitize SQL inputs
+```
+````
 
 **Instruction (en):**
 Always sanitize user input before constructing SQL queries. Use parameterized
@@ -205,16 +204,19 @@ Sempre higienize entrada de usuário antes de construir queries SQL...
 [justificativa em PT-BR]
 
 **Noncompliant example:**
-\`\`\`sql
-SELECT \* FROM users WHERE name = '${input}';
-\`\`\`
+
+```sql
+SELECT * FROM users WHERE name = '${input}';
+```
 
 **Compliant example:**
-\`\`\`sql
-SELECT \* FROM users WHERE name = ?;
-\`\`\`
+
+```sql
+SELECT * FROM users WHERE name = ?;
+```
 
 **See also:** [GR-0042], [OPT-SECURITY-03]
+
 ```
 
 **Convenção de IDs** (`[DEC-0018-B04]` Sub-eixo 2 = H):
@@ -230,35 +232,34 @@ SELECT \* FROM users WHERE name = ?;
 ###### Pipeline de build
 
 ```
-.core/rules/**/*.md (markdown bilíngue + frontmatter YAML)
-        │
-        ▼
+
+.core/rules/\*_/_.md (markdown bilíngue + frontmatter YAML)
+│
+▼
 [1] cli/governance/monolith/rules-parser.mjs
-    • Lê todos os .md sob .core/rules/
-    • Extrai frontmatter (parser YAML nativo, sem dep externa nova)
-    • Valida schema (id único; categoria-âncora exige source; cross-refs apontam IDs existentes)
-    • Falha rápido em violação
-        │
-        ▼
+• Lê todos os .md sob .core/rules/
+• Extrai frontmatter (parser YAML nativo, sem dep externa nova)
+• Valida schema (id único; categoria-âncora exige source; cross-refs apontam IDs existentes)
+• Falha rápido em violação
+│
+▼
 [2] cli/governance/monolith/rules-builder.mjs
-    • Serializa o catálogo completo em rules.json (build artifact)
-    • Estrutura: { rules: [...], by_id: {...}, by_scope: {...}, generated_at, schema_version }
-        │
-        ├──▶ rules.json (build artifact — consumido por API/dashboard externo)
-        │
-        ▼
+• Serializa o catálogo completo em rules.json (build artifact)
+• Estrutura: { rules: [...], by_id: {...}, by_scope: {...}, generated_at, schema_version }
+│
+├──▶ rules.json (build artifact — consumido por API/dashboard externo)
+│
+▼
 [3] cli/governance/monolith/compiler.mjs (refatorado)
-    • Itera regras filtradas por escopo de injeção (universal + adapters ativos + opt-in selecionados)
-    • Extrai apenas o bloco "Instruction (en)" de cada regra
-    • Documentação PT-BR fica fora do <AI_GUIDELINES> (economia de tokens, foco em compliance)
-        │
-        ▼
+• Itera regras filtradas por escopo de injeção (universal + adapters ativos + opt-in selecionados)
+• Extrai apenas o bloco "Instruction (en)" de cada regra
+• Documentação PT-BR fica fora do <AI_GUIDELINES> (economia de tokens, foco em compliance)
+│
+▼
 AGENTS.md do consumidor
-    bloco <AI_GUIDELINES> contém:
-      - core directives
-      - instruction_en de cada regra ativa
-      - sem documentação humana (essa vive no repo do framework + dashboard)
-```
+bloco <AI_GUIDELINES> contém: - core directives - instruction_en de cada regra ativa - sem documentação humana (essa vive no repo do framework + dashboard)
+
+````
 
 ##### B.4 — Migração das regras sobreviventes para o formato bilíngue
 
@@ -523,3 +524,4 @@ Resumo do conteúdo mergeado em `b9efb83` (`feat: implement content deepening fr
 - Security & secrets.
 
 **Decisão pré-fato (a ser reconciliada em Stage 2 sob evidência de research e eval):** manter, revisar ou reverter por regra. Nenhuma é assumida correta sem passar pelo filtro do catálogo e/ou eval definidos em `decision-brief.md`.
+````

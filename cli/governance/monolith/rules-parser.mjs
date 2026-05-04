@@ -91,11 +91,18 @@ export function parseRuleFile(filePath, content) {
     const ruleId = match[1];
     const ruleTitle = match[2];
     const headingIndex = match.index;
+    const ruleStartIndex = headingIndex + match[0].length;
 
-    // Find the next YAML block (```yaml ... ```)
+    // Find the end of the current rule (start of the next one or end of file)
+    const nextHeadingMatch = headingRegex.exec(content);
+    const ruleEndIndex = nextHeadingMatch ? nextHeadingMatch.index : content.length;
+    headingRegex.lastIndex = ruleStartIndex; // Reset for the next iteration's find
+
+    const ruleContent = content.slice(ruleStartIndex, ruleEndIndex);
+
+    // Find the YAML block within the current rule's content
     const yamlBlockRegex = /```yaml\s*\n([\s\S]*?)```/;
-    const afterHeading = content.slice(headingIndex + match[0].length);
-    const yamlMatch = yamlBlockRegex.exec(afterHeading);
+    const yamlMatch = yamlBlockRegex.exec(ruleContent);
 
     if (!yamlMatch) {
       errors.push(
@@ -106,6 +113,39 @@ export function parseRuleFile(filePath, content) {
     }
 
     const yamlContent = yamlMatch[1];
+    const bodyContentStartIndex = yamlMatch.index + yamlMatch[0].length;
+    const bodyContent = ruleContent.slice(bodyContentStartIndex).trim();
+
+    // Extract instruction_en and documentation_pt from the body
+    const instructionMarker = "**Instruction (en):**";
+    const documentationMarker = "**Documentação (pt-br):**";
+
+    const instructionIndex = bodyContent.indexOf(instructionMarker);
+    const documentationIndex = bodyContent.indexOf(documentationMarker);
+
+    let instruction_en = "";
+    let documentation_pt = "";
+
+    if (instructionIndex !== -1) {
+      const instructionStart = instructionIndex + instructionMarker.length;
+      const instructionEnd = documentationIndex !== -1 ? documentationIndex : bodyContent.length;
+      instruction_en = bodyContent.slice(instructionStart, instructionEnd).trim();
+    }
+
+    if (documentationIndex !== -1) {
+      const documentationStart = documentationIndex + documentationMarker.length;
+      documentation_pt = bodyContent.slice(documentationStart).replace(/---/g, "").trim();
+    }
+
+    // Fail-fast if instruction_en is missing
+    if (!instruction_en) {
+      errors.push(
+        `[MISSING_INSTRUCTION_EN] Rule [${ruleId}] in ${path.basename(
+          filePath
+        )}: The '**Instruction (en):**' marker is missing or the content is empty.`
+      );
+      continue;
+    }
 
     // Parse the YAML block
     let parsedYaml;
@@ -133,6 +173,8 @@ export function parseRuleFile(filePath, content) {
       ...parsedYaml,
       file: filePath,
       title: ruleTitle,
+      instruction_en,
+      documentation_pt,
     });
   }
 

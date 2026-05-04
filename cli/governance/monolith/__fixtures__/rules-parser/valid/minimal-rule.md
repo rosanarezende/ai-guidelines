@@ -12,4 +12,10 @@ applicable_languages: []
 tags: [workflow]
 ```
 
+**Instruction (en):**
+This is a minimal instruction.
+
+**Documentação (pt-br):**
+Esta é uma documentação mínima.
+
 Descrição da regra.

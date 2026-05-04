@@ -19,4 +19,10 @@ applicable_languages:
 tags: [multi, test, arrays]
 ```
 
+**Instruction (en):**
+This is an instruction for array variations.
+
+**Documentação (pt-br):**
+Esta é uma documentação para variações de array.
+
 Descrição.

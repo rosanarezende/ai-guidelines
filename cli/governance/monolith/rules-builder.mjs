@@ -13,11 +13,11 @@
  */
 
 import { parseRulesFromDirectory } from "#governance/monolith/rules-parser";
-import { writeFileSync, mkdirSync } from "node:fs";
+import { writeFileSync, mkdirSync, readFileSync, existsSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 
 // Constants
-const RULES_OUTPUT_PATH = resolve(".core/rules/rules.json");
+const RULES_OUTPUT_PATH = resolve(".core/rules/_meta/rules.json");
 const LEDGER_OUTPUT_PATH = resolve(".core/rules/_meta/agents-core-ledger.md");
 const LEDGER_DIR = dirname(LEDGER_OUTPUT_PATH);
 
@@ -50,6 +50,20 @@ const REQUIRES_SOURCES = new Set([
  */
 export async function buildRulesCatalog(sourceRulesDir, options = {}) {
   const errors = [];
+  let oldGeneratedAt = null;
+
+  // Attempt to read existing catalog to preserve generated_at
+  if (existsSync(RULES_OUTPUT_PATH)) {
+    try {
+      const oldContent = readFileSync(RULES_OUTPUT_PATH, "utf-8");
+      const oldCatalog = JSON.parse(oldContent);
+      if (oldCatalog.generated_at) {
+        oldGeneratedAt = oldCatalog.generated_at;
+      }
+    } catch (e) {
+      // Ignore if file is invalid, will be overwritten
+    }
+  }
 
   try {
     // Step 1: Parse all rules from directory
@@ -86,7 +100,7 @@ export async function buildRulesCatalog(sourceRulesDir, options = {}) {
       by_id,
       by_scope,
       by_feature,
-      generated_at: new Date().toISOString(),
+      generated_at: oldGeneratedAt || new Date().toISOString(),
       schema_version: "1.0",
     };
 
@@ -306,9 +320,19 @@ export async function saveCatalogArtifacts(catalogJson, ledgerMarkdown) {
   const errors = [];
 
   try {
-    // Save rules.json
+    // Save rules.json, but only if content has changed
     const jsonContent = serializeToJson(catalogJson);
-    writeFileSync(RULES_OUTPUT_PATH, jsonContent, "utf-8");
+    let shouldWrite = true;
+    if (existsSync(RULES_OUTPUT_PATH)) {
+      const oldContent = readFileSync(RULES_OUTPUT_PATH, "utf-8");
+      if (oldContent === jsonContent) {
+        shouldWrite = false;
+      }
+    }
+
+    if (shouldWrite) {
+      writeFileSync(RULES_OUTPUT_PATH, jsonContent, "utf-8");
+    }
   } catch (err) {
     errors.push(`[SAVE_ERROR] Failed to write ${RULES_OUTPUT_PATH}: ${err.message}`);
   }

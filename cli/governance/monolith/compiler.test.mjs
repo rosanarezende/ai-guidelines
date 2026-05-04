@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
-import { describe, it } from "node:test";
-import { resolve } from "node:path";
+import { describe, it, before, after } from "node:test";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "url";
 import {
   buildFeatureTag,
   compileMonolithicAgentsContent,
@@ -14,6 +15,11 @@ import {
   compileRulesContent,
   compileRulesFromCatalog,
 } from "./compiler.mjs";
+import { buildRulesCatalog } from "./rules-builder.mjs";
+import fs from "node:fs/promises";
+import os from "node:os";
+
+const __dirname = resolve(dirname(fileURLToPath(import.meta.url)));
 
 describe("monolith/compiler", () => {
   it("[BR-CLI-COMPILER-20] DADO buffers QUANDO compilar ENTÃO preserva ordem topo centro base e newline final", () => {
@@ -67,22 +73,42 @@ describe("monolith/compiler", () => {
 // ============================================================================
 
 describe("monolith/compiler (rules-driven)", () => {
+  let tempDir;
+  let tempRulesJsonPath;
+
+  before(async () => {
+    // Create a temporary directory for test artifacts
+    tempDir = await fs.mkdtemp(resolve(os.tmpdir(), "compiler-test-"));
+    tempRulesJsonPath = resolve(tempDir, "rules.json");
+
+    // Build a temporary rules.json from fixtures
+    const fixtureDir = resolve(__dirname, "__fixtures__", "rules-parser", "valid");
+    const { catalogJson, success, errors } = await buildRulesCatalog(fixtureDir);
+
+    if (!success) {
+      console.error("Failed to build test catalog:", errors);
+      throw new Error("Test setup failed: could not build rules.json from fixtures.");
+    }
+
+    await fs.writeFile(tempRulesJsonPath, JSON.stringify(catalogJson, null, 2));
+  });
+
+  after(async () => {
+    // Clean up the temporary directory
+    if (tempDir) {
+      await fs.rm(tempDir, { recursive: true, force: true });
+    }
+  });
+
   // ============================================================================
   // Discovery & I/O (BR-COMPILER-01..03)
   // ============================================================================
 
   it("[BR-COMPILER-01] DADO catálogo válido QUANDO loadRulesCatalog ENTÃO carrega com sucesso", async () => {
-    // Use rules.json if it exists, otherwise test with mock
-    try {
-      const catalog = await loadRulesCatalog(resolve(".core/rules/_meta/rules.json"));
-      assert.ok(catalog, "Should load catalog");
-      assert.ok(Array.isArray(catalog.rules), "Should have rules array");
-      assert.ok(catalog.schema_version, "Should have schema_version");
-      assert.ok(catalog.generated_at, "Should have generated_at");
-    } catch (err) {
-      // Skip if rules.json doesn't exist yet
-      assert.ok(err.message.includes("ENOENT") || err.message.includes("not found"));
-    }
+    const catalog = await loadRulesCatalog(tempRulesJsonPath);
+    assert.ok(catalog, "Should load catalog from temp file");
+    assert.ok(Array.isArray(catalog.rules), "Should have rules array");
+    assert.strictEqual(catalog.rules.length > 0, true, "Should have rules from fixtures");
   });
 
   it("[BR-COMPILER-02] DADO path inexistente QUANDO loadRulesCatalog ENTÃO falha com erro", async () => {
@@ -317,26 +343,26 @@ describe("monolith/compiler (rules-driven)", () => {
   // File-based Compilation (BR-COMPILER-23..25)
   // ============================================================================
 
-  it("[BR-COMPILER-23] DADO rules.json válido QUANDO compileRulesFromCatalog ENTÃO success=true", async () => {
-    const result = await compileRulesFromCatalog(resolve(".core/rules/_meta/rules.json"), {
+  it("[BR-COMPILER-23] DADO rules.json válido QUANDO compileRulesFromCatalog ENTÃO success=true e contém conteúdo", async () => {
+    const result = await compileRulesFromCatalog(tempRulesJsonPath, {
       includeAdapters: ["claude"],
       optInFeatures: [],
     });
 
-    // Skip if rules.json doesn't exist yet
-    if (!result.success) {
-      assert.ok(
-        result.errors.some(
-          (e) => e.includes("ENOENT") || e.includes("not found") || e.includes("ENOENT")
-        )
-      );
-      return;
-    }
+    assert.strictEqual(
+      result.success,
+      true,
+      `Compilation should succeed. Errors: ${result.errors.join(", ")}`
+    );
+    assert.ok(result.content, "Compiled content should not be empty");
+    assert.ok(result.rulesCount > 0, "Should report compiled rules");
+    assert.ok(result.generatedAt, "Should have a generatedAt timestamp");
 
-    assert.strictEqual(result.success, true);
-    assert.ok(result.content !== undefined);
-    assert.ok(result.rulesCount >= 0);
-    assert.ok(result.generatedAt);
+    // Check for actual content from the fixture
+    assert.ok(
+      result.content.includes("This is a test instruction in English"),
+      "Content should include instruction from test-rules.md"
+    );
   });
 
   it("[BR-COMPILER-24] DADO path inexistente QUANDO compileRulesFromCatalog ENTÃO success=false + errors", async () => {
@@ -348,22 +374,13 @@ describe("monolith/compiler (rules-driven)", () => {
   });
 
   it("[BR-COMPILER-25] DADO múltiplos adapters + features QUANDO compileRulesFromCatalog ENTÃO preserva estrutura", async () => {
-    const result = await compileRulesFromCatalog(resolve(".core/rules/_meta/rules.json"), {
+    const result = await compileRulesFromCatalog(tempRulesJsonPath, {
       includeAdapters: ["claude", "codex", "gemini"],
       optInFeatures: ["tdd", "bdd"],
     });
 
-    // Skip if rules.json doesn't exist yet
-    if (!result.success) {
-      assert.ok(
-        result.errors.some(
-          (e) => e.includes("ENOENT") || e.includes("not found") || e.includes("COMPILER_ERROR")
-        )
-      );
-      return;
-    }
-
     assert.strictEqual(result.success, true);
-    assert.ok(result.rulesCount >= 0);
+    assert.ok(result.rulesCount > 0);
+    assert.ok(result.content.includes("Universal Rules"));
   });
 });

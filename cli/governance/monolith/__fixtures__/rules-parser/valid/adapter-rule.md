@@ -13,4 +13,10 @@ applicable_languages: []
 tags: [claude]
 ```
 
+**Instruction (en):**
+This is an instruction.
+
+**Documentação (pt-br):**
+Esta é uma documentação.
+
 Descrição.

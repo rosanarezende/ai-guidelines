@@ -137,14 +137,36 @@ Apenas texto, sem regras.`;
     });
   });
 
-  describe("[BR-PARSER-09] DADO regra sem bloco YAML QUANDO parsear ENTÃO trata como erro", async () => {
-    it("[BR-PARSER-09] rule without YAML block is error", async () => {
+  describe("[BR-PARSER-09] DADO regra sem bloco YAML QUANDO parsear ENTÃO trata como erro e não vaza", async () => {
+    it("[BR-PARSER-09] rule without YAML block is error and does not capture next YAML", async () => {
       const content = `#### [GR-0099] Regra sem YAML
 
-Apenas descrição, sem bloco \`\`\`yaml\`\`\`.`;
+Apenas descrição, sem bloco \`\`\`yaml\`\`\`.
+
+#### [GR-0100] Próxima Regra
+
+\`\`\`yaml
+id: GR-0100
+scope: universal
+category: correctness
+evidence_strength: strong
+sources: ["CWE-1"]
+applicable_languages: []
+tags: []
+\`\`\`
+**Instruction (en):**
+Instruction here.
+`;
 
       const result = await parseRuleFile("test.md", content);
-      assert.strictEqual(result.errors.length > 0, true, "Should error on missing YAML block");
+      assert.strictEqual(
+        result.errors.length,
+        1,
+        "Should have one error for the missing YAML block"
+      );
+      assert.ok(result.errors[0].includes("[MISSING_YAML_BLOCK] Rule [GR-0099]"));
+      assert.strictEqual(result.rules.length, 1, "Should only parse the valid rule");
+      assert.strictEqual(result.rules[0].id, "GR-0100");
     });
   });
 
@@ -437,6 +459,101 @@ sources:
       const result = validateRule(rule);
       assert.strictEqual(result.valid, false);
       assert.ok(result.errors.some((e) => e.includes("adapter")));
+    });
+  });
+
+  // ============================================================================
+  // BODY PARSING TESTS (NEW)
+  // ============================================================================
+  describe("[BR-PARSER-32] DADO regra com instruction e documentation QUANDO parsear ENTÃO extrai ambos", async () => {
+    it("extracts instruction_en and documentation_pt correctly", async () => {
+      const content = `
+#### [GR-TEST-01] Happy Path Rule
+
+\`\`\`yaml
+id: GR-TEST-01
+scope: universal
+category: correctness
+evidence_strength: strong
+sources: ["TEST-1"]
+applicable_languages: ["all"]
+tags: ["test"]
+\`\`\`
+
+**Instruction (en):**
+
+This is a test instruction in English.
+It can span multiple lines.
+
+**Documentação (pt-br):**
+
+Esta é uma documentação de teste em português.
+---
+Também pode ter múltiplas linhas e separadores.
+`;
+      const result = parseRuleFile("test.md", content);
+      assert.strictEqual(result.rules.length, 1);
+      assert.strictEqual(result.errors.length, 0);
+      const rule = result.rules[0];
+      assert.strictEqual(
+        rule.instruction_en,
+        "This is a test instruction in English.\nIt can span multiple lines."
+      );
+      assert.strictEqual(
+        rule.documentation_pt,
+        "Esta é uma documentação de teste em português.\n\nTambém pode ter múltiplas linhas e separadores."
+      );
+    });
+  });
+
+  describe("[BR-PARSER-33] DADO regra sem marcador de instrução QUANDO parsear ENTÃO retorna erro", async () => {
+    it("fails when instruction marker is missing", async () => {
+      const content = `
+#### [GR-TEST-03] Rule with missing instruction marker
+
+\`\`\`yaml
+id: GR-TEST-03
+scope: universal
+category: process
+evidence_strength: declared_heuristic
+sources: []
+applicable_languages: ["all"]
+tags: ["test"]
+\`\`\`
+
+This rule is missing the instruction marker and should fail.
+`;
+      const result = parseRuleFile("test.md", content);
+      assert.strictEqual(result.rules.length, 0);
+      assert.strictEqual(result.errors.length, 1);
+      assert.ok(result.errors[0].includes("MISSING_INSTRUCTION_EN"));
+    });
+  });
+
+  describe("[BR-PARSER-34] DADO regra com instrução vazia QUANDO parsear ENTÃO retorna erro", async () => {
+    it("fails when instruction content is empty", async () => {
+      const content = `
+#### [GR-TEST-04] Rule with empty instruction
+
+\`\`\`yaml
+id: GR-TEST-04
+scope: universal
+category: process
+evidence_strength: declared_heuristic
+sources: []
+applicable_languages: ["all"]
+tags: ["test"]
+\`\`\`
+
+**Instruction (en):**
+
+**Documentação (pt-br):**
+This rule has an empty instruction and should fail.
+`;
+      const result = parseRuleFile("test.md", content);
+      assert.strictEqual(result.rules.length, 0);
+      assert.strictEqual(result.errors.length, 1);
+      assert.ok(result.errors[0].includes("MISSING_INSTRUCTION_EN"));
     });
   });
 
