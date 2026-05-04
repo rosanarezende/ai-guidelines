@@ -3,7 +3,11 @@ import path from "node:path";
 import { EDITORIAL_FEATURES } from "#cli/args";
 import { ROOT_DIR } from "#fs/file-system";
 import { mergeAgentsContent } from "#governance/agents-merge";
-import { compileMonolithicAgentsContent } from "#governance/monolith/compiler";
+import {
+  compileCoreRulesContent,
+  compileMonolithicAgentsContent,
+  loadRulesCatalog,
+} from "#governance/monolith/compiler";
 import {
   normalizeProviderSelection,
   readOptInRules,
@@ -34,7 +38,22 @@ export async function applyPointers(targetDir, options, actions) {
   const sourceRulesDir = path.join(ROOT_DIR, ".core", "rules");
 
   const pointerTemplate = await fs.readFile(pointerTemplatePath, "utf8");
-  const coreBaseline = await fs.readFile(coreTemplatePath, "utf8");
+
+  // 5.B3.1.5.5 cutover: prefer compiled core rules from rules.json catalog;
+  // fall back to the legacy static template only if the catalog is missing.
+  // No double injection: when the catalog provides core, the .tmpl is ignored.
+  const rulesJsonPath = path.join(sourceRulesDir, "_meta", "rules.json");
+  let coreBaseline = "";
+  try {
+    const catalog = await loadRulesCatalog(rulesJsonPath);
+    coreBaseline = compileCoreRulesContent(catalog);
+  } catch {
+    // Catalog absent or unreadable; fall back below.
+  }
+  if (!coreBaseline) {
+    coreBaseline = await fs.readFile(coreTemplatePath, "utf8");
+  }
+
   const globalRules = await fs.readFile(path.join(sourceRulesDir, "global-rules.md"), "utf8");
 
   const providerRules = await readRulesByName(

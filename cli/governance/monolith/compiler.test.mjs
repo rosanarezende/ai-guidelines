@@ -14,6 +14,7 @@ import {
   formatOptInRules,
   compileRulesContent,
   compileRulesFromCatalog,
+  compileCoreRulesContent,
 } from "./compiler.mjs";
 import { buildRulesCatalog } from "./rules-builder.mjs";
 import fs from "node:fs/promises";
@@ -386,5 +387,65 @@ describe("monolith/compiler (rules-driven)", () => {
     assert.strictEqual(result.success, true);
     assert.ok(result.rulesCount > 0);
     assert.ok(result.content.includes("Universal Rules"));
+  });
+
+  // ============================================================================
+  // Core Rules Cutover (BR-COMPILER-26..29) — 5.B3.1.5.5
+  // ============================================================================
+
+  it("[BR-COMPILER-26] DADO catálogo com regras tagged core QUANDO compileCoreRulesContent ENTÃO retorna apenas core universais", () => {
+    const catalog = {
+      rules: [
+        {
+          id: "CORE-01",
+          scope: "universal",
+          tags: ["core", "agents"],
+          instruction_en: "Core rule one",
+        },
+        {
+          id: "GR-01",
+          scope: "universal",
+          tags: ["security"],
+          instruction_en: "Non-core universal",
+        },
+        {
+          id: "ADP-01",
+          scope: "adapter",
+          adapter: "claude",
+          tags: ["core"],
+          instruction_en: "Core adapter ignored",
+        },
+      ],
+    };
+    const result = compileCoreRulesContent(catalog);
+    assert.ok(result.includes("CORE-01"));
+    assert.ok(result.includes("Core rule one"));
+    assert.ok(!result.includes("GR-01"));
+    assert.ok(!result.includes("ADP-01"));
+  });
+
+  it("[BR-COMPILER-27] DADO catálogo sem regras core QUANDO compileCoreRulesContent ENTÃO retorna empty string (fallback gate)", () => {
+    const catalog = {
+      rules: [{ id: "GR-01", scope: "universal", tags: [], instruction_en: "X" }],
+    };
+    assert.strictEqual(compileCoreRulesContent(catalog), "");
+  });
+
+  it("[BR-COMPILER-28] DADO catálogo null/inválido QUANDO compileCoreRulesContent ENTÃO retorna empty string", () => {
+    assert.strictEqual(compileCoreRulesContent(null), "");
+    assert.strictEqual(compileCoreRulesContent({}), "");
+    assert.strictEqual(compileCoreRulesContent({ rules: "not-array" }), "");
+  });
+
+  it("[BR-COMPILER-29] DADO regras core sem instruction_en QUANDO compileCoreRulesContent ENTÃO ignora regras vazias", () => {
+    const catalog = {
+      rules: [
+        { id: "CORE-01", scope: "universal", tags: ["core"], instruction_en: "Has body" },
+        { id: "CORE-02", scope: "universal", tags: ["core"] },
+      ],
+    };
+    const result = compileCoreRulesContent(catalog);
+    assert.ok(result.includes("CORE-01"));
+    assert.ok(!result.includes("CORE-02"));
   });
 });

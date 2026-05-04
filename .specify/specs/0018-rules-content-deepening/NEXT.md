@@ -93,7 +93,7 @@ Adicionar à seção "Política de NEXT.md" em `spec-foundation.md`:
 
 **Task associada:**
 
-- [ ] Criar `[CORE-14]` em `agents-core.md`
+- [x] Criar `[CORE-14]` em `agents-core.md`
 - [ ] Validar schema YAML
 - [ ] Cravar `_TODO in CORE-13` referenciando B.4 (ligação bidirecional)
 - [ ] Testar injeção em B.3.5

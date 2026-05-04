@@ -170,6 +170,31 @@ export function compileRulesContent(catalog, options = {}) {
 }
 
 /**
+ * Compile only CORE-tagged universal rules into a content block suitable to
+ * replace the static `AGENTS-core.md.tmpl` baseline (5.B3.1.5.5 cutover).
+ *
+ * Filters: rule.scope === "universal" AND rule.tags includes "core".
+ * Output: concatenation of `Instruction (en)` per rule, prefixed by `### [ID]`.
+ * Empty string if catalog is missing/invalid or no core rules exist (caller
+ * decides fallback).
+ *
+ * @param {Object} catalog - rules.json content
+ * @returns {string}
+ */
+export function compileCoreRulesContent(catalog) {
+  if (!catalog || !Array.isArray(catalog.rules)) return "";
+
+  const coreRules = catalog.rules.filter(
+    (rule) =>
+      rule && rule.scope === "universal" && Array.isArray(rule.tags) && rule.tags.includes("core")
+  );
+
+  if (coreRules.length === 0) return "";
+
+  return coreRules.map(formatRuleInstruction).filter(Boolean).join("\n\n");
+}
+
+/**
  * Main entry: compile from rules.json file
  * @param {string} rulesJsonPath - path to rules.json
  * @param {Object} options
