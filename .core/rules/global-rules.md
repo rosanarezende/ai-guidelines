@@ -1,29 +1,203 @@
-### Regras Globais
+### Global Rules — Regras universais (runtime)
 
 > Fonte de verdade: bloco `<AI_GUIDELINES>` compilado no `AGENTS.md`.
-> Este arquivo define **princípios de engenharia** aplicáveis a qualquer projeto.
-> Para workflow operacional (git, branch, CI, PRs), consulte o `AGENTS.md` do repositório.
+> Este arquivo define princípios universais aplicáveis a qualquer projeto.
+> Workflow operacional (git/PR/CI) vive no `agents-core.md`.
+
+> **Convenção YAML (Spec 0018 / B.3):**
+>
+> - `#### [ID] Title`
+> - bloco ```yaml imediatamente após
+> - `Instruction (en)` = runtime
+> - `Documentação (pt-br)` = docs
 
 ---
 
-#### Princípios de Engenharia
+## Engineering Principles
 
-1. **Acesso Seguro:** chaves de API jamais podem transitar por arquivos do frontend de forma acidental; garanta rigor com arquivos ignorados no `.gitignore`.
-2. **Tipagem Estrita (Anti-Hacks):** Nunca ignore o sistema de tipos para acelerar a entrega. O uso de `any`, `as unknown`, manipulação de prototype ou coerções inseguras é proibido. Utilize type-guards, assertions seguras ou genéricos explícitos.
-3. **Estado e Mutabilidade:** Prefira sempre estruturas de dados imutáveis e composição de funções (ex: spread operator, métodos de array puros). Evite mutar estado compartilhado globalmente.
-4. **Tratamento de Erros (Fail-Fast):** Abrace a falha rápida. Erros devem ser capturados e propagados explicitamente (ou tipados como retorno). É terminantemente proibido o uso de blocos `try-catch` vazios ou que apenas loguem no console sem propagar a falha ou recuperar o estado.
-5. **Concorrência e Assincronicidade:** Ao gerenciar promessas ou threads, declare explicitamente a intenção (ex: `Promise.all` para execução paralela de tarefas independentes; `for...of` com `await` para dependentes). Evite fire-and-forget em funções assíncronas críticas sem tratamento de erro acoplado.
+#### [GR-0001] Secure secret handling
 
-#### Workflow com IA
+```yaml
+id: GR-0001
+scope: universal
+category: security
+evidence_strength: strong
+sources: ["OWASP-A2", "CWE-522"]
+tags: [engineering, security]
+```
 
-1. **Tipo de spec é declarado no header (`evidence-driven`, `deterministic`, `mixed`).** Specs `evidence-driven` ou `mixed` exigem um gate humano via `decision-brief.md` antes da implementação — o teste é: _"o design depende de evidência técnica/pesquisa ainda não coletada?"_. Detalhes em `.core/process/spec-foundation.md`.
+**Instruction (en):**
+Never expose secrets in frontend code or versioned files. Store them in environment variables and ensure they are ignored by version control.
+
+**Documentação (pt-br):**
+Chaves de API nunca devem transitar pelo frontend ou arquivos versionados.
+Use `.gitignore` e variáveis de ambiente corretamente.
 
 ---
 
-#### Convenções do Owner
+#### [GR-0002] Strict typing (anti-hacks)
 
-> Regras pragmáticas mantidas por decisão do mantenedor do `ai-guidelines`. **Não têm source canônica externa** (CWE/CERT/Sonar/OWASP/paper) — vivem aqui por dor real e aprendizado prático, podendo não generalizar para todo repositório. Categoria editorialmente segregada do núcleo evidence-driven acima. Reorganização definitiva (opt-in module dedicado vs. seção segregada permanente) fica para Spec 0018 sub-bloco B.4.
+```yaml
+id: GR-0002
+scope: universal
+category: correctness
+evidence_strength: medium
+sources: []
+tags: [engineering, typing]
+```
 
-1. **Idioma do repositório:** responda no idioma padrão do projeto (neste repo: **PT-BR**).
-2. **Redução de Ruído:** utilize arquivos de ignore (`.geminiignore`, `.gitignore`, `.claudeignore`) para remover arquivos desnecessários (logs, builds, `node_modules`) do contexto da IA. Candidata a virar automação na spec futura "Scaffolding Inteligente de Provedores".
-3. **PR description colaborativo (3 etapas):** ao escrever ou editar PR description, (1) liste os tópicos relevantes para validação humana antes do texto final; (2) só escreva o texto após o humano editar/aprovar a lista; (3) submeta o texto final para um último check humano antes de criar/editar o PR.
+**Instruction (en):**
+Do not bypass the type system. Avoid unsafe casts (`any`, `unknown`, prototype manipulation) and use explicit type guards or generics.
+
+**Documentação (pt-br):**
+Evite `any`, `as unknown`, coerções inseguras e manipulação de prototype.
+Prefira type guards e tipagem explícita.
+
+---
+
+#### [GR-0003] Immutability over shared mutation
+
+```yaml
+id: GR-0003
+scope: universal
+category: maintainability
+evidence_strength: declared_heuristic
+sources: []
+tags: [engineering, immutability]
+```
+
+**Instruction (en):**
+Use immutable data structures and pure functions. Do not mutate shared state.
+
+**Documentação (pt-br):**
+Prefira estruturas imutáveis e funções puras.
+Evite estado global mutável.
+
+---
+
+#### [GR-0004] Fail-fast error handling
+
+```yaml
+id: GR-0004
+scope: universal
+category: correctness
+evidence_strength: strong
+sources: ["CWE-703"]
+tags: [engineering, errors]
+```
+
+**Instruction (en):**
+Fail fast and propagate errors explicitly. Do not swallow exceptions or use empty catch blocks.
+
+**Documentação (pt-br):**
+Nunca use try/catch vazio ou que apenas loga.
+Erro deve ser propagado ou tratado corretamente.
+
+---
+
+#### [GR-0005] Explicit async and concurrency intent
+
+```yaml
+id: GR-0005
+scope: universal
+category: correctness
+evidence_strength: medium
+sources: []
+tags: [engineering, concurrency]
+```
+
+**Instruction (en):**
+Make concurrency explicit: use `Promise.all` for independent tasks and `await` sequencing for dependent ones. Do not use fire-and-forget without error handling.
+
+**Documentação (pt-br):**
+Use `Promise.all` para paralelo e `await` sequencial para dependências.
+Evite fire-and-forget sem tratamento de erro.
+
+---
+
+## AI Workflow Rules
+
+#### [GR-0101] Spec type must be declared
+
+```yaml
+id: GR-0101
+scope: universal
+category: process
+evidence_strength: declared_heuristic
+sources: []
+tags: [workflow, spec]
+```
+
+**Instruction (en):**
+Declare the spec type (evidence-driven, deterministic, or mixed) and require human approval when design depends on unresolved evidence.
+
+**Documentação (pt-br):**
+Specs `evidence-driven` ou `mixed` exigem decision-brief antes da implementação.
+
+---
+
+## Owner Conventions (Non-evidence rules)
+
+> Regras baseadas em prática real. Não possuem source canônica.
+> Mantidas separadas do núcleo evidence-driven.
+
+#### [GR-0201] Repository language standard
+
+```yaml
+id: GR-0201
+scope: universal
+category: editorial
+evidence_strength: declared_heuristic
+sources: []
+tags: [owner, language]
+```
+
+**Instruction (en):**
+Always respond using the repository default language.
+
+**Documentação (pt-br):**
+Neste repositório: sempre responder em PT-BR.
+
+---
+
+#### [GR-0202] Context noise reduction
+
+```yaml
+id: GR-0202
+scope: universal
+category: process
+evidence_strength: declared_heuristic
+sources: []
+tags: [owner, ai_efficiency]
+```
+
+**Instruction (en):**
+Exclude irrelevant files (logs, builds, dependencies) from the AI context using ignore files.
+
+**Documentação (pt-br):**
+Use `.gitignore`, `.claudeignore`, `.geminiignore` para remover logs,
+builds e `node_modules` do contexto.
+
+---
+
+#### [GR-0203] Collaborative PR description
+
+```yaml
+id: GR-0203
+scope: universal
+category: process
+evidence_strength: declared_heuristic
+sources: []
+tags: [owner, workflow]
+```
+
+**Instruction (en):**
+Build PR descriptions in three steps: outline topics, get human approval, then generate the final text using the repository template (if available) and perform a final human validation.
+
+**Documentação (pt-br):**
+Fluxo obrigatório:
+
+1. listar tópicos
+2. humano valida
+3. gerar texto final (seguindo template do repositório, se existir)
+4. humano valida novamente
