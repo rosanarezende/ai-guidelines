@@ -20,6 +20,7 @@ describe("Rules Parser (BDD + TDD)", () => {
 
       // Deve ter encontrado 6 arquivos válidos (fixtures/valid/*.md)
       assert.ok(result.rules.length > 0, "Should find at least one rule");
+      assert.deepStrictEqual(result.errors, []);
     });
   });
 
@@ -82,7 +83,9 @@ applicable_languages: []
 tags: []
 \`\`\`
 
-Descrição.`;
+Descrição.
+**Instruction (en):**
+Instruction here.`;
 
       const result = await parseRuleFile("test.md", content);
       assert.strictEqual(result.rules.length, 1);
@@ -106,6 +109,9 @@ applicable_languages: []
 tags: []
 \`\`\`
 
+**Instruction (en):**
+Instruction rule 1.
+
 #### [GR-0011] Regra 2
 
 \`\`\`yaml
@@ -116,7 +122,10 @@ evidence_strength: strong
 sources: ["CWE-2"]
 applicable_languages: []
 tags: []
-\`\`\``;
+\`\`\`
+
+**Instruction (en):**
+Instruction rule 2.`;
 
       const result = await parseRuleFile("test.md", content);
       assert.strictEqual(result.rules.length, 2);
@@ -488,8 +497,8 @@ It can span multiple lines.
 **Documentação (pt-br):**
 
 Esta é uma documentação de teste em português.
----
-Também pode ter múltiplas linhas e separadores.
+
+Também pode ter múltiplas linhas.
 `;
       const result = parseRuleFile("test.md", content);
       assert.strictEqual(result.rules.length, 1);
@@ -501,7 +510,7 @@ Também pode ter múltiplas linhas e separadores.
       );
       assert.strictEqual(
         rule.documentation_pt,
-        "Esta é uma documentação de teste em português.\n\nTambém pode ter múltiplas linhas e separadores."
+        "Esta é uma documentação de teste em português.\n\nTambém pode ter múltiplas linhas."
       );
     });
   });
@@ -570,7 +579,10 @@ id: GR-0001
 sources:
   - "item1"
  - "bad indent"
-\`\`\``;
+\`\`\`
+
+**Instruction (en):**
+Instruction here.`;
 
       const result = await parseRuleFile("test.md", content);
       assert.ok(result.errors.length > 0);
@@ -600,7 +612,10 @@ evidence_strength: strong
 sources: ["CWE-1"]
 applicable_languages: []
 tags: []
-\`\`\``;
+\`\`\`
+
+**Instruction (en):**
+Instruction here.`;
 
       const result = await parseRuleFile("test.md", content);
       assert.ok(result.errors.length > 0);
@@ -620,7 +635,10 @@ evidence_strength: "INVALID_STRENGTH"
 sources: ["CWE-1"]
 applicable_languages: []
 tags: []
-\`\`\``;
+\`\`\`
+
+**Instruction (en):**
+Instruction here.`;
 
       const result = await parseRuleFile("test.md", content);
       assert.ok(result.errors.length > 0);

@@ -86,8 +86,11 @@ describe("monolith/compiler (rules-driven)", () => {
     const { catalogJson, success, errors } = await buildRulesCatalog(fixtureDir);
 
     if (!success) {
-      console.error("Failed to build test catalog:", errors);
-      throw new Error("Test setup failed: could not build rules.json from fixtures.");
+      // console.error("Failed to build test catalog:", errors);
+      throw new Error(
+        "Test setup failed: could not build rules.json from fixtures.\n" +
+          (errors?.join("\n") ?? "(no errors)")
+      );
     }
 
     await fs.writeFile(tempRulesJsonPath, JSON.stringify(catalogJson, null, 2));
@@ -362,6 +365,10 @@ describe("monolith/compiler (rules-driven)", () => {
     assert.ok(
       result.content.includes("This is a test instruction in English"),
       "Content should include instruction from test-rules.md"
+    );
+    assert.ok(
+      result.content.includes("### [GR-TEST-01]"),
+      "Should include GR-TEST-01 rule header"
     );
   });
 

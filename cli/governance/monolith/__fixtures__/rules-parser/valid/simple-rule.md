@@ -16,6 +16,9 @@ tags: [type-safety, correctness]
 
 Descrição da regra aqui.
 
+**Instruction (en):**
+Fixture instruction.
+
 #### [GR-0002] Segunda regra no mesmo arquivo
 
 ```yaml
@@ -30,3 +33,6 @@ tags: [security]
 ```
 
 Outra regra.
+
+**Instruction (en):**
+Fixture instruction for the second rule.

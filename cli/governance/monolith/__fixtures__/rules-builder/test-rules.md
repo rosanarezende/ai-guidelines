@@ -18,8 +18,6 @@ This is a test rule for universal scope.
 **Documentação (pt-br):**
 Regra de teste para escopo universal.
 
----
-
 #### [TEST-02] Test rule opt-in
 
 ```yaml
@@ -38,8 +36,6 @@ This is a test rule for opt-in scope.
 
 **Documentação (pt-br):**
 Regra de teste para escopo opt-in.
-
----
 
 #### [TEST-03] Test rule adapter
 

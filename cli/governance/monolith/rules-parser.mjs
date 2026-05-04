@@ -120,8 +120,8 @@ export function parseRuleFile(filePath, content) {
     const instructionMarker = "**Instruction (en):**";
     const documentationMarker = "**Documentação (pt-br):**";
 
-    const instructionIndex = bodyContent.indexOf(instructionMarker);
-    const documentationIndex = bodyContent.indexOf(documentationMarker);
+    const instructionIndex = findMarkerOutsideCodeFences(bodyContent, instructionMarker);
+    const documentationIndex = findMarkerOutsideCodeFences(bodyContent, documentationMarker);
 
     let instruction_en = "";
     let documentation_pt = "";
@@ -134,7 +134,15 @@ export function parseRuleFile(filePath, content) {
 
     if (documentationIndex !== -1) {
       const documentationStart = documentationIndex + documentationMarker.length;
-      documentation_pt = bodyContent.slice(documentationStart).replace(/---/g, "").trim();
+      documentation_pt = bodyContent.slice(documentationStart).trim();
+    }
+
+    if (documentationIndex !== -1 && documentationIndex < instructionIndex) {
+      errors.push(
+        `[INVALID_MARKER_ORDER] Rule [${ruleId}] in ${path.basename(filePath)}: ` +
+          `'**Documentação (pt-br):**' appears before '**Instruction (en):**'.`
+      );
+      continue;
     }
 
     // Fail-fast if instruction_en is missing
@@ -413,4 +421,26 @@ function parseScalar(value) {
 
   // Return as-is for unquoted values
   return trimmed;
+}
+
+function findMarkerOutsideCodeFences(text, marker) {
+  const lines = text.split("\n");
+  let inFence = false;
+  let offset = 0;
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (trimmed.startsWith("```")) {
+      inFence = !inFence;
+    }
+
+    if (!inFence) {
+      const idx = line.indexOf(marker);
+      if (idx !== -1) return offset + idx;
+    }
+
+    offset += line.length + 1; // + "\n"
+  }
+
+  return -1;
 }
