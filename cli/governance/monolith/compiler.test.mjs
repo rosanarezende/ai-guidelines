@@ -437,6 +437,26 @@ describe("monolith/compiler (rules-driven)", () => {
     assert.strictEqual(compileCoreRulesContent({ rules: "not-array" }), "");
   });
 
+  it("[BR-COMPILER-29-INTEG] DADO catálogo construído das fixtures core QUANDO compileCoreRulesContent ENTÃO contém CORE-14 com sua Instruction (en)", async () => {
+    const coreFixturesDir = resolve(
+      __dirname,
+      "__fixtures__",
+      "rules-builder",
+      "core-tags"
+    );
+    const { catalogJson, success, errors } = await buildRulesCatalog(coreFixturesDir);
+    assert.strictEqual(success, true, `build failed: ${errors?.join(", ")}`);
+
+    const coreOutput = compileCoreRulesContent(catalogJson);
+    assert.ok(coreOutput.length > 0, "core output must not be empty");
+    assert.ok(coreOutput.includes("### [CORE-14]"));
+    assert.ok(
+      coreOutput.includes("The AI generates only the commit message text"),
+      "must include CORE-14 Instruction (en)"
+    );
+    assert.ok(!coreOutput.includes("FASE 5"), "no legacy template phases leaked into core output");
+  });
+
   it("[BR-COMPILER-29] DADO regras core sem instruction_en QUANDO compileCoreRulesContent ENTÃO ignora regras vazias", () => {
     const catalog = {
       rules: [

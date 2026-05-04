@@ -266,35 +266,34 @@ export function validateBuildOutput(catalog) {
  * @returns {string} Markdown table
  */
 export function generateCoreAgentsLedger(rules) {
-  // Sort by ID
-  const sorted = [...rules].sort((a, b) => a.id.localeCompare(b.id));
+  // Filter to core-tagged rules only (defensive: caller may pass full rules[])
+  const coreOnly = rules.filter((r) => Array.isArray(r.tags) && r.tags.includes("core"));
 
-  // Build header
+  // Sort by ID (stable string compare)
+  const sorted = [...coreOnly].sort((a, b) => a.id.localeCompare(b.id));
+
+  // Header is timestamp-free for determinism (no churn on rebuild)
   let markdown = `# Agents Core Ledger
 
 > Automatically generated ledger of CORE rules (tags: core).
-> Generated at: ${new Date().toISOString()}
 > **DO NOT EDIT MANUALLY** — regenerate via \`yarn build:rules\`.
 
 ## Rules Table
 
-| ID | Scope | Category | Evidence Strength | Adapters | Chars | Lines |
-|----|-------|----------|-------------------|----------|-------|-------|
+| ID | Title | Category | Evidence Strength | Sources | Chars | Lines |
+|----|-------|----------|-------------------|---------|-------|-------|
 `;
 
-  // Build rows
   for (const rule of sorted) {
     const id = rule.id || "?";
-    const scope = rule.scope || "?";
+    const title = (rule.title || "—").replace(/\|/g, "\\|");
     const category = rule.category || "?";
     const strength = rule.evidence_strength || "?";
-    const adapters = rule.adapter ? rule.adapter : "—";
-    // Rough estimation: count chars in Instruction (en)
+    const sourcesCount = Array.isArray(rule.sources) ? rule.sources.length : 0;
     const chars = rule.instruction_en ? rule.instruction_en.length : 0;
-    // Rough estimation: count lines (split by \n)
     const lines = rule.instruction_en ? rule.instruction_en.split("\n").length : 0;
 
-    markdown += `| ${id} | ${scope} | ${category} | ${strength} | ${adapters} | ${chars} | ${lines} |\n`;
+    markdown += `| ${id} | ${title} | ${category} | ${strength} | ${sourcesCount} | ${chars} | ${lines} |\n`;
   }
 
   return markdown;
@@ -319,18 +318,23 @@ function serializeToJson(catalog) {
 export async function saveCatalogArtifacts(catalogJson, ledgerMarkdown) {
   const errors = [];
 
+  // Ensure _meta/ exists for both artifacts before any write attempt.
   try {
-    // Save rules.json, but only if content has changed
+    mkdirSync(LEDGER_DIR, { recursive: true });
+  } catch (err) {
+    errors.push(`[SAVE_ERROR] Failed to create ${LEDGER_DIR}: ${err.message}`);
+    return { success: false, errors };
+  }
+
+  try {
+    // Save rules.json, but only if content changed (avoids HARNESS_LOCK churn)
     const jsonContent = serializeToJson(catalogJson);
-    let shouldWrite = true;
     if (existsSync(RULES_OUTPUT_PATH)) {
       const oldContent = readFileSync(RULES_OUTPUT_PATH, "utf-8");
-      if (oldContent === jsonContent) {
-        shouldWrite = false;
+      if (oldContent !== jsonContent) {
+        writeFileSync(RULES_OUTPUT_PATH, jsonContent, "utf-8");
       }
-    }
-
-    if (shouldWrite) {
+    } else {
       writeFileSync(RULES_OUTPUT_PATH, jsonContent, "utf-8");
     }
   } catch (err) {
@@ -338,10 +342,15 @@ export async function saveCatalogArtifacts(catalogJson, ledgerMarkdown) {
   }
 
   try {
-    // Ensure _meta/ directory exists
-    mkdirSync(LEDGER_DIR, { recursive: true });
-    // Save ledger markdown
-    writeFileSync(LEDGER_OUTPUT_PATH, ledgerMarkdown, "utf-8");
+    // Save ledger only if content changed (deterministic + no churn).
+    if (existsSync(LEDGER_OUTPUT_PATH)) {
+      const oldContent = readFileSync(LEDGER_OUTPUT_PATH, "utf-8");
+      if (oldContent !== ledgerMarkdown) {
+        writeFileSync(LEDGER_OUTPUT_PATH, ledgerMarkdown, "utf-8");
+      }
+    } else {
+      writeFileSync(LEDGER_OUTPUT_PATH, ledgerMarkdown, "utf-8");
+    }
   } catch (err) {
     errors.push(`[SAVE_ERROR] Failed to write ${LEDGER_OUTPUT_PATH}: ${err.message}`);
   }

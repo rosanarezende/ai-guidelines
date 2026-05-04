@@ -1,6 +1,6 @@
 ### AGENTS-core — Diretivas sempre-injetadas
 
-> **Fonte revisável** das diretivas que o `compiler.mjs` insere no topo do bloco `<AI_GUIDELINES>` em todo `AGENTS.md` distribuído. Hoje vivem em `.core/templates/AGENTS-core.md.tmpl` (template estático); migração desse path para este arquivo (e o desligamento da injeção dupla) fica para [Spec 0018 — sub-bloco B.3.5 (refactor compiler)](../../.specify/specs/0018-rules-content-deepening/plan.md). Enquanto B.3.5 não roda, este arquivo é **catálogo revisável paralelo** — não é injetado.
+> **Fonte canônica** das diretivas que o `compiler.mjs` insere no topo do bloco `<AI_GUIDELINES>` em todo `AGENTS.md` distribuído. Cutover aplicado em 5.B3.1.5.5 (2026-05-04): `pointers.mjs` consome `.core/rules/_meta/rules.json` via `compileCoreRulesContent()` filtrando `scope: universal` + `tags: core`. O template `.core/templates/AGENTS-core.md.tmpl` permanece apenas como **fallback** quando o catálogo está ausente/inválido (sem injeção dupla). Remoção definitiva do `.tmpl` é débito de B.7 / `NEXT.md`.
 >
 > **Convenção YAML cravada em 2026-05-03 (alinha com `5.B3.1` no `tasks.md`):** **Opção B — primeiro bloco fenced ` ```yaml ` imediatamente após cada heading de regra** (frontmatter `---` real foi descartado: não sobrevive a Prettier em arquivos multi-regra, pois o tooling padrão só reconhece frontmatter no início absoluto do arquivo). O `rules-parser.mjs` (B.3.2) detecta cada regra pelo padrão "heading de regra → próximo bloco fenced `yaml`". Categoria predominante aqui: `process`. Sources canônicas externas (CWE/CERT/Sonar/OWASP/paper) não se aplicam à maioria — diretivas operacionais ficam com `evidence_strength: declared_heuristic`. O ledger derivado em `.core/rules/_meta/agents-core-ledger.md` (B.3.4) será a interface humana de revisão crítica.
 >
@@ -213,7 +213,7 @@ Se o repositório define `yarn format` e `yarn check`, o comando concreto é: `y
 
 **Why this matters:** o gate local replica o gate de CI. Pular = empurrar o erro para o pipeline e gastar ciclo de revisão humano com algo automatizável.
 
-**Débito B.4 (cravado em B.2 — 2026-05-03):** mesclar com a regra **nova** "ao concluir um sub-bloco, IA fornece **apenas** a mensagem sugerida do commit; humano executa a cadeia". Economiza tokens e impede IA de operar git autonomamente.
+**Cross-ref:** complementada por `[CORE-14]` (commit message protocol — IA gera apenas o texto sugerido; humano executa a cadeia).
 
 ---
 

@@ -238,9 +238,12 @@ describe("Rules Builder", () => {
       const coreRules = rules.filter((r) => r.tags && r.tags.includes("core"));
       const ledger = generateCoreAgentsLedger(coreRules);
 
-      // Should have markdown table structure
+      // Should have markdown table structure (new deterministic schema)
       assert.ok(ledger.includes("| ID |") || coreRules.length === 0);
-      assert.ok(ledger.includes("Scope") || coreRules.length === 0);
+      assert.ok(ledger.includes("Title") || coreRules.length === 0);
+      assert.ok(ledger.includes("Sources") || coreRules.length === 0);
+      // Determinism: no timestamp in ledger header
+      assert.ok(!ledger.includes("Generated at"));
     });
 
     it("[BR-BUILDER-18] DADO core rules sem ordem específica QUANDO gerar ledger ENTÃO sorted por ID", async () => {
@@ -274,6 +277,36 @@ describe("Rules Builder", () => {
 
       assert.ok(ledger.includes("Agents Core Ledger"));
       assert.ok(ledger.includes("DO NOT EDIT MANUALLY") || coreRules.length === 0);
+    });
+
+    it("[BR-BUILDER-19A] DADO fixtures com CORE-01/08/14 QUANDO buildRulesCatalog + ledger ENTÃO ledger contém todos os IDs core e exclui não-core", async () => {
+      const result = await buildRulesCatalog(CORE_TAGS_DIR);
+      assert.strictEqual(result.success, true, `errors: ${result.errors.join(", ")}`);
+      assert.deepStrictEqual(result.errors, []);
+
+      const ledger = generateCoreAgentsLedger(result.catalogJson.rules);
+      assert.ok(ledger.includes("CORE-01"));
+      assert.ok(ledger.includes("CORE-08"));
+      assert.ok(ledger.includes("CORE-14"));
+      assert.ok(!ledger.includes("GR-NONCORE-01"), "non-core rule must be filtered out");
+      assert.ok(!ledger.includes("Generated at"), "ledger must be timestamp-free");
+    });
+
+    it("[BR-BUILDER-19B] DADO fixtures core QUANDO gerar ledger ENTÃO IDs aparecem em ordem ascendente (CORE-01 < CORE-08 < CORE-14)", async () => {
+      const result = await buildRulesCatalog(CORE_TAGS_DIR);
+      const ledger = generateCoreAgentsLedger(result.catalogJson.rules);
+
+      const i01 = ledger.indexOf("CORE-01");
+      const i08 = ledger.indexOf("CORE-08");
+      const i14 = ledger.indexOf("CORE-14");
+      assert.ok(i01 > 0 && i08 > i01 && i14 > i08, `unsorted ledger: ${i01}/${i08}/${i14}`);
+    });
+
+    it("[BR-BUILDER-19C] DADO o mesmo catálogo QUANDO ledger é gerado duas vezes ENTÃO output é determinístico (byte-for-byte)", async () => {
+      const result = await buildRulesCatalog(CORE_TAGS_DIR);
+      const a = generateCoreAgentsLedger(result.catalogJson.rules);
+      const b = generateCoreAgentsLedger(result.catalogJson.rules);
+      assert.strictEqual(a, b);
     });
   });
 
