@@ -16,10 +16,23 @@ import { parseRulesFromDirectory } from "#governance/monolith/rules-parser";
 import { writeFileSync, mkdirSync, readFileSync, existsSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 
-// Constants
-const RULES_OUTPUT_PATH = resolve(".core/rules/_meta/rules.json");
-const LEDGER_OUTPUT_PATH = resolve(".core/rules/_meta/agents-core-ledger.md");
-const LEDGER_DIR = dirname(LEDGER_OUTPUT_PATH);
+// Defaults — overridable via options.outputDir for tests
+const DEFAULT_META_DIR = resolve(".core/rules/_meta");
+const RULES_OUTPUT_PATH = resolve(DEFAULT_META_DIR, "rules.json");
+const LEDGER_OUTPUT_PATH = resolve(DEFAULT_META_DIR, "agents-core-ledger.md");
+const LEDGER_DIR = DEFAULT_META_DIR;
+
+function resolveArtifactPaths(outputDir) {
+  if (!outputDir) {
+    return { rulesPath: RULES_OUTPUT_PATH, ledgerPath: LEDGER_OUTPUT_PATH, dir: LEDGER_DIR };
+  }
+  const dir = resolve(outputDir);
+  return {
+    rulesPath: resolve(dir, "rules.json"),
+    ledgerPath: resolve(dir, "agents-core-ledger.md"),
+    dir,
+  };
+}
 
 // Valid values for enum fields
 const VALID_SCOPES = new Set(["universal", "adapter", "opt-in"]);
@@ -51,11 +64,12 @@ const REQUIRES_SOURCES = new Set([
 export async function buildRulesCatalog(sourceRulesDir, options = {}) {
   const errors = [];
   let oldGeneratedAt = null;
+  const { rulesPath } = resolveArtifactPaths(options.outputDir);
 
-  // Attempt to read existing catalog to preserve generated_at
-  if (existsSync(RULES_OUTPUT_PATH)) {
+  // Attempt to read existing catalog to preserve generated_at (deterministic build).
+  if (existsSync(rulesPath)) {
     try {
-      const oldContent = readFileSync(RULES_OUTPUT_PATH, "utf-8");
+      const oldContent = readFileSync(rulesPath, "utf-8");
       const oldCatalog = JSON.parse(oldContent);
       if (oldCatalog.generated_at) {
         oldGeneratedAt = oldCatalog.generated_at;
@@ -315,44 +329,45 @@ function serializeToJson(catalog) {
  * @param {string} ledgerMarkdown
  * @returns {Promise<{success: boolean, errors: string[]}>}
  */
-export async function saveCatalogArtifacts(catalogJson, ledgerMarkdown) {
+export async function saveCatalogArtifacts(catalogJson, ledgerMarkdown, options = {}) {
   const errors = [];
+  const { rulesPath, ledgerPath, dir } = resolveArtifactPaths(options.outputDir);
 
-  // Ensure _meta/ exists for both artifacts before any write attempt.
+  // Ensure target dir exists before any write attempt.
   try {
-    mkdirSync(LEDGER_DIR, { recursive: true });
+    mkdirSync(dir, { recursive: true });
   } catch (err) {
-    errors.push(`[SAVE_ERROR] Failed to create ${LEDGER_DIR}: ${err.message}`);
+    errors.push(`[SAVE_ERROR] Failed to create ${dir}: ${err.message}`);
     return { success: false, errors };
   }
 
   try {
     // Save rules.json, but only if content changed (avoids HARNESS_LOCK churn)
     const jsonContent = serializeToJson(catalogJson);
-    if (existsSync(RULES_OUTPUT_PATH)) {
-      const oldContent = readFileSync(RULES_OUTPUT_PATH, "utf-8");
+    if (existsSync(rulesPath)) {
+      const oldContent = readFileSync(rulesPath, "utf-8");
       if (oldContent !== jsonContent) {
-        writeFileSync(RULES_OUTPUT_PATH, jsonContent, "utf-8");
+        writeFileSync(rulesPath, jsonContent, "utf-8");
       }
     } else {
-      writeFileSync(RULES_OUTPUT_PATH, jsonContent, "utf-8");
+      writeFileSync(rulesPath, jsonContent, "utf-8");
     }
   } catch (err) {
-    errors.push(`[SAVE_ERROR] Failed to write ${RULES_OUTPUT_PATH}: ${err.message}`);
+    errors.push(`[SAVE_ERROR] Failed to write ${rulesPath}: ${err.message}`);
   }
 
   try {
     // Save ledger only if content changed (deterministic + no churn).
-    if (existsSync(LEDGER_OUTPUT_PATH)) {
-      const oldContent = readFileSync(LEDGER_OUTPUT_PATH, "utf-8");
+    if (existsSync(ledgerPath)) {
+      const oldContent = readFileSync(ledgerPath, "utf-8");
       if (oldContent !== ledgerMarkdown) {
-        writeFileSync(LEDGER_OUTPUT_PATH, ledgerMarkdown, "utf-8");
+        writeFileSync(ledgerPath, ledgerMarkdown, "utf-8");
       }
     } else {
-      writeFileSync(LEDGER_OUTPUT_PATH, ledgerMarkdown, "utf-8");
+      writeFileSync(ledgerPath, ledgerMarkdown, "utf-8");
     }
   } catch (err) {
-    errors.push(`[SAVE_ERROR] Failed to write ${LEDGER_OUTPUT_PATH}: ${err.message}`);
+    errors.push(`[SAVE_ERROR] Failed to write ${ledgerPath}: ${err.message}`);
   }
 
   return { success: errors.length === 0, errors };

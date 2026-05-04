@@ -438,12 +438,7 @@ describe("monolith/compiler (rules-driven)", () => {
   });
 
   it("[BR-COMPILER-29-INTEG] DADO catálogo construído das fixtures core QUANDO compileCoreRulesContent ENTÃO contém CORE-14 com sua Instruction (en)", async () => {
-    const coreFixturesDir = resolve(
-      __dirname,
-      "__fixtures__",
-      "rules-builder",
-      "core-tags"
-    );
+    const coreFixturesDir = resolve(__dirname, "__fixtures__", "rules-builder", "core-tags");
     const { catalogJson, success, errors } = await buildRulesCatalog(coreFixturesDir);
     assert.strictEqual(success, true, `build failed: ${errors?.join(", ")}`);
 

@@ -7,11 +7,13 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { resolve } from "node:path";
-import { readFileSync, existsSync } from "node:fs";
+import { readFileSync, existsSync, mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
 import {
   buildRulesCatalog,
   validateBuildOutput,
   generateCoreAgentsLedger,
+  saveCatalogArtifacts,
 } from "#governance/monolith/rules-builder";
 
 // Fixture directory (builder test fixtures)
@@ -380,13 +382,30 @@ describe("Rules Builder", () => {
       assert.ok(/^\d{4}-\d{2}-\d{2}T/.test(generated_at));
     });
 
-    it("[BR-BUILDER-26] DADO múltiplas builds mesmo dia QUANDO comparar generated_at ENTÃO timestamps são únicos", async () => {
-      const result1 = await buildRulesCatalog(FIXTURES_DIR);
-      // Small delay to ensure millisecond difference
-      await new Promise((resolve) => setTimeout(resolve, 10));
-      const result2 = await buildRulesCatalog(FIXTURES_DIR);
+    it("[BR-BUILDER-26] DADO rules.json prévio QUANDO rebuildar ENTÃO generated_at é preservado (determinismo)", async () => {
+      const tempOut = mkdtempSync(resolve(tmpdir(), "rules-builder-determinism-"));
+      try {
+        // Primeira build: sem rules.json existente → gera generated_at agora.
+        const first = await buildRulesCatalog(FIXTURES_DIR, { outputDir: tempOut });
+        assert.strictEqual(first.success, true);
+        const save1 = await saveCatalogArtifacts(first.catalogJson, "", { outputDir: tempOut });
+        assert.strictEqual(save1.success, true);
+        const firstGenAt = first.catalogJson.generated_at;
 
-      assert.notStrictEqual(result1.catalogJson.generated_at, result2.catalogJson.generated_at);
+        // Pequeno delay para garantir que, sem reuso, "agora" seria diferente.
+        await new Promise((r) => setTimeout(r, 10));
+
+        // Segunda build: lê o rules.json salvo e DEVE preservar o generated_at.
+        const second = await buildRulesCatalog(FIXTURES_DIR, { outputDir: tempOut });
+        assert.strictEqual(second.success, true);
+        assert.strictEqual(
+          second.catalogJson.generated_at,
+          firstGenAt,
+          "generated_at deve ser preservado quando rules.json prévio existe"
+        );
+      } finally {
+        rmSync(tempOut, { recursive: true, force: true });
+      }
     });
   });
 
