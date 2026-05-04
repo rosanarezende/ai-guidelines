@@ -1,10 +1,14 @@
+/**
+ * Rules Compiler (Rules-Driven)
+ * Consumes rules.json from rules-builder.mjs
+ * Extracts Instruction (en) blocks para <AI_GUIDELINES> injeção
+ * Zero dependências externas.
+ */
+
 import { promises as fs } from "node:fs";
+import path from "node:path";
 
 const SECTION_SEPARATOR = "\n\n---\n\n";
-
-// ============================================================================
-// Rules-Driven Compiler (5.B3.5 — new functionality)
-// ============================================================================
 
 /**
  * Load rules catalog from rules.json
@@ -61,6 +65,8 @@ export function filterRulesByScope(rules, options = {}) {
 
 /**
  * Extract Instruction (en) block from rule
+ * Rule structure: { id, instructions: "PT-BR\n\n```en\n...\n```\n\nDocumentação..." }
+ * or: { id, instruction_en: "...", documentation_pt: "..." }
  * @param {Object} rule
  * @returns {string} - Instruction (en) content or empty string
  */
@@ -97,8 +103,8 @@ export function formatRuleInstruction(rule) {
   const instruction = extractInstructionEn(rule);
   if (!instruction) return "";
 
-  // Format: ### [ID] {instruction}
-  const title = rule.id ? `### [${rule.id}]` : "### Rule";
+  // Format: [ID] Title\n\n{instruction}
+  const title = rule.id ? `### [${rule.id}] ${rule.id}` : "### Rule";
   return [title, instruction].filter(Boolean).join("\n\n");
 }
 
@@ -135,7 +141,7 @@ export function compileRulesContent(catalog, options = {}) {
   const filtered = filterRulesByScope(catalog.rules, options);
   const sections = [];
 
-  // Universal rules
+  // Universal rules (Zona Topo)
   if (filtered.universal.length > 0) {
     const universalContent = filtered.universal
       .map(formatRuleInstruction)
@@ -147,7 +153,7 @@ export function compileRulesContent(catalog, options = {}) {
     }
   }
 
-  // Adapter rules
+  // Adapter rules (Zona Topo - continuação)
   if (Object.keys(filtered.adapters).length > 0) {
     for (const [adapter, rules] of Object.entries(filtered.adapters)) {
       const adapterContent = rules.map(formatRuleInstruction).filter(Boolean).join("\n\n");
@@ -158,7 +164,7 @@ export function compileRulesContent(catalog, options = {}) {
     }
   }
 
-  // Opt-in rules
+  // Opt-in rules (Zona Centro)
   if (Object.keys(filtered.optIn).length > 0) {
     const optInContent = formatOptInRules(filtered.optIn);
     if (optInContent) {
@@ -200,9 +206,7 @@ export async function compileRulesFromCatalog(rulesJsonPath, options = {}) {
   }
 }
 
-// ============================================================================
-// Template-based Compiler (legacy, preserved for compatibility)
-// ============================================================================
+// === Original template-based functions (preserved for compatibility) ===
 
 export function buildFeatureTag(featureName) {
   return `FEATURE_${featureName
@@ -219,8 +223,6 @@ export function wrapFeatureModule(featureName, content) {
 }
 
 export function normalizePointerForMonolith(pointerTemplate) {
-  // O pointerTemplate agora é "headless" por design.
-  // Mantemos apenas o suporte a remover o bloco legado caso ele exista.
   return pointerTemplate
     .replace(
       /Para ler a Prime Directive[\s\S]*?<!-- END:ai-guidelines-core -->/,
