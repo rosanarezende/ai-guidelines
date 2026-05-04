@@ -23,9 +23,10 @@
   "scripts": {
     "test": "node --experimental-default-config-file --test cli/**/*.test.mjs cli/**/**/*.test.mjs tests/**/*.test.mjs",
     "test:coverage": "node --experimental-default-config-file --experimental-test-coverage --test cli/**/*.test.mjs cli/**/**/*.test.mjs tests/**/*.test.mjs",
+    "build:rules": "node cli/governance/monolith/rules-builder.mjs",
     "check:repo": "yarn install --immutable && yarn check && yarn test:coverage",
     "format": "prettier --write .",
-    "check": "prettier --check .",
+    "check": "prettier --check . && yarn build:rules",
     "prepare": "husky"
   },
   "devDependencies": {
