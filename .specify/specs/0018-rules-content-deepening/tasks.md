@@ -239,12 +239,12 @@
 
 > Origem: [`[DEC-0018-B03]`](./decision-brief.md#dec-0018-b03-orçamento-de-tokens) (C + E + H + O + P). Plan: § B.6.
 
-- [ ] **5.B6.1** Implementar `cli/governance/monolith/token-budget.mjs`: medição via Tok-H (chars/3,5 calibrado para PT-BR) + tetos por escopo (agregado ≤ 6 K; universal ≤ 1,5 K; adapter ≤ 600; opt-in ≤ 1,2 K).
-- [ ] **5.B6.2** Soft ceiling: lint emite `WARN` ao 70 % de qualquer teto; **nunca** `FAIL` (alinhado com decisão E). Tests co-located.
-- [ ] **5.B6.3** Hook em `yarn check` para reportar status de tokens (sem quebrar o build em soft ceiling).
-- [ ] **5.B6.4** Implementar `cli/scripts/token-sanity-check.mjs` (off-CI, standalone): chama `messages.count_tokens` da API Anthropic para auditoria periódica. Documentar quando rodar (pré-release; revisão mensal).
-- [ ] **5.B6.5** Documentar metodologia Tok-H em `global-rules.md` (princípio editorial; unidade canônica = tokens, com linhas/instruções como derivadas pedagógicas).
-- [ ] **5.B6.6** **[COMMIT]** `feat(spec-0018): token budget lint (soft ceiling 6K) + sanity check via Anthropic API`.
+- [x] **5.B6.1** Implementar `cli/governance/monolith/token-budget.mjs`: medição via Tok-H (chars/3,5 calibrado para PT-BR) + tetos por escopo (agregado ≤ 6 K; universal ≤ 1,5 K; adapter ≤ 600; opt-in ≤ 1,2 K).
+- [x] **5.B6.2** Soft ceiling: lint emite `WARN` ao 70 % de qualquer teto; **nunca** `FAIL` (alinhado com decisão E). Tests co-located.
+- [x] **5.B6.3** Hook em `yarn check` para reportar status de tokens (sem quebrar o build em soft ceiling).
+- [x] **5.B6.4** Implementar `cli/scripts/token-sanity-check.mjs` (off-CI, standalone): chama `messages.count_tokens` da API Anthropic para auditoria periódica. Documentar quando rodar (pré-release; revisão mensal).
+- [x] **5.B6.5** Documentar metodologia Tok-H em `global-rules.md` (princípio editorial; unidade canônica = tokens, com linhas/instruções como derivadas pedagógicas).
+- [x] **5.B6.6** **[COMMIT]** `feat(spec-0018): token budget lint (soft ceiling 6K) + sanity check via Anthropic API`.
 
 ### Sub-bloco [B.7] — Catálogo navegável + `NEXT.md` (débitos cravados)
 

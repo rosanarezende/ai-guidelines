@@ -78,23 +78,20 @@ describe("Rules Builder", () => {
       const { rules, by_id } = result.catalogJson;
 
       // Cada regra em rules[] deve estar em by_id
-      for (const rule of rules) {
-        assert.ok(by_id[rule.id], `Rule ${rule.id} not found in by_id`);
-        assert.deepStrictEqual(by_id[rule.id], rule);
+      for (let i = 0; i < rules.length; i++) {
+        const rule = rules[i];
+        assert.strictEqual(by_id[rule.id], i, `Rule ${rule.id} index mismatch`);
       }
     });
 
-    it("[BR-BUILDER-06] DADO by_id índice QUANDO consultar ID válido ENTÃO retorna regra completa", async () => {
+    it("[BR-BUILDER-06] DADO by_id índice QUANDO consultar ID válido ENTÃO retorna index da regra", async () => {
       const result = await buildRulesCatalog(FIXTURES_DIR);
       const { by_id } = result.catalogJson;
 
       // Verificar que first rule está acessível
       const firstId = Object.keys(by_id)[0];
       if (firstId) {
-        const rule = by_id[firstId];
-        assert.ok(rule.id);
-        assert.ok(rule.scope);
-        assert.ok(rule.category);
+        assert.strictEqual(typeof by_id[firstId], "number");
       }
     });
 
@@ -121,9 +118,11 @@ describe("Rules Builder", () => {
 
       // Verificar que cada rule em rules está em seu scope correspondente
       for (const rule of rules) {
-        const scopeRules = by_scope[rule.scope] || [];
-        const found = scopeRules.find((r) => r.id === rule.id);
-        assert.ok(found, `Rule ${rule.id} with scope ${rule.scope} not found in by_scope`);
+        const scopeIds = by_scope[rule.scope] || [];
+        assert.ok(
+          scopeIds.includes(rule.id),
+          `Rule ${rule.id} with scope ${rule.scope} not found in by_scope`
+        );
       }
     });
 
@@ -144,12 +143,11 @@ describe("Rules Builder", () => {
       const { by_scope } = result.catalogJson;
 
       // Count rules by scope
-      for (const [scope, scopeRules] of Object.entries(by_scope)) {
-        assert.ok(Array.isArray(scopeRules), `by_scope[${scope}] is not array`);
+      for (const [scope, scopeIds] of Object.entries(by_scope)) {
+        assert.ok(Array.isArray(scopeIds), `by_scope[${scope}] is not array`);
         // Verificar que não há duplicatas no mesmo scope
-        const ids = scopeRules.map((r) => r.id);
-        const uniqueIds = new Set(ids);
-        assert.strictEqual(ids.length, uniqueIds.size, `Duplicates in by_scope[${scope}]`);
+        const uniqueIds = new Set(scopeIds);
+        assert.strictEqual(scopeIds.length, uniqueIds.size, `Duplicates in by_scope[${scope}]`);
       }
     });
 
@@ -176,11 +174,12 @@ describe("Rules Builder", () => {
 
     it("[BR-BUILDER-14] DADO regra sem opt_in_feature QUANDO buildByFeature ENTÃO não aparece em índice", async () => {
       const result = await buildRulesCatalog(FIXTURES_DIR);
-      const { rules, by_feature } = result.catalogJson;
+      const { rules, by_feature, by_id } = result.catalogJson;
 
       // Rules sem feature não devem estar em by_feature
-      for (const [feature, featureRules] of Object.entries(by_feature)) {
-        for (const rule of featureRules) {
+      for (const [feature, featureIds] of Object.entries(by_feature)) {
+        for (const id of featureIds) {
+          const rule = rules[by_id[id]];
           assert.ok(
             rule.opt_in_feature,
             `Rule ${rule.id} in by_feature[${feature}] missing feature`
@@ -207,7 +206,7 @@ describe("Rules Builder", () => {
       // Verify by_feature matches expected
       for (const [feature, ruleIds] of Object.entries(expectedFeatures)) {
         assert.ok(feature in by_feature, `Feature ${feature} missing in by_feature`);
-        const actualIds = by_feature[feature].map((r) => r.id);
+        const actualIds = by_feature[feature];
         assert.deepStrictEqual(
           actualIds.sort(),
           ruleIds.sort(),

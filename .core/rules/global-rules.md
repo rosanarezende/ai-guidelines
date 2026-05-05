@@ -144,6 +144,26 @@ Specs `evidence-driven` ou `mixed` exigem decision-brief antes da implementaçã
 
 ---
 
+#### [GR-0102] Token Budget Methodology (Tok-H)
+
+```yaml
+id: GR-0102
+scope: universal
+category: editorial
+evidence_strength: declared_heuristic
+sources: []
+applicable_languages: ["*"]
+tags: [workflow, spec, tokens]
+```
+
+**Instruction (en):**
+When measuring the token cost of new guidelines, use the Tok-H heuristic: aggregate characters divided by 3.5. Ensure the resulting payload respects established soft ceilings (6000 aggregate, 1500 universal, 600 adapter, 1200 opt-in).
+
+**Documentação (pt-br):**
+A unidade canônica de orçamento de contexto é o token, medido pela heurística Tok-H (caracteres / 3,5, calibrado para PT-BR/EN). Linhas e quantidade de instruções são derivadas pedagógicas. Respeite os soft ceilings: agregado ≤ 6 K, universal ≤ 1,5 K, adapter ≤ 600, opt-in ≤ 1,2 K.
+
+---
+
 ## Owner Conventions (Non-evidence rules)
 
 > Regras baseadas em prática real. Não possuem source canônica.

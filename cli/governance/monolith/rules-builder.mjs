@@ -16,6 +16,7 @@ import { parseRulesFromDirectory } from "#governance/monolith/rules-parser";
 import { writeFileSync, mkdirSync, readFileSync, existsSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { analyzeBudget } from "./token-budget.mjs";
 
 // Defaults — overridable via options.outputDir for tests
 const DEFAULT_META_DIR = resolve(".core/rules/_meta");
@@ -138,7 +139,7 @@ export async function buildRulesCatalog(sourceRulesDir, options = {}) {
 }
 
 /**
- * Build by_id index (ID -> Rule)
+ * Build by_id index (ID -> index in rules array)
  * @param {Array} rules
  * @param {Array} errors Accumulator
  * @returns {Object}
@@ -147,7 +148,8 @@ function buildById(rules, errors) {
   const by_id = {};
   const seenIds = new Set();
 
-  for (const rule of rules) {
+  for (let i = 0; i < rules.length; i++) {
+    const rule = rules[i];
     if (!rule.id) {
       errors.push(`[INDEX_ERROR] Rule missing 'id' field`);
       continue;
@@ -159,14 +161,14 @@ function buildById(rules, errors) {
     }
 
     seenIds.add(rule.id);
-    by_id[rule.id] = rule;
+    by_id[rule.id] = i;
   }
 
   return by_id;
 }
 
 /**
- * Build by_scope index (scope -> Array<Rule>)
+ * Build by_scope index (scope -> Array<Rule ID>)
  * @param {Array} rules
  * @returns {Object}
  */
@@ -179,7 +181,7 @@ function buildByScope(rules) {
 
   for (const rule of rules) {
     if (VALID_SCOPES.has(rule.scope)) {
-      by_scope[rule.scope].push(rule);
+      by_scope[rule.scope].push(rule.id);
     }
   }
 
@@ -187,7 +189,7 @@ function buildByScope(rules) {
 }
 
 /**
- * Build by_feature index (opt_in_feature -> Array<Rule>)
+ * Build by_feature index (opt_in_feature -> Array<Rule ID>)
  * Only includes opt-in rules with valid opt_in_feature field
  * @param {Array} rules
  * @returns {Object}
@@ -200,7 +202,7 @@ function buildByFeature(rules) {
       if (!by_feature[rule.opt_in_feature]) {
         by_feature[rule.opt_in_feature] = [];
       }
-      by_feature[rule.opt_in_feature].push(rule);
+      by_feature[rule.opt_in_feature].push(rule.id);
     }
   }
 
@@ -226,46 +228,45 @@ export function validateBuildOutput(catalog) {
     errors.push("[VALIDATE_ERROR] Catalog.rules is not an array");
   } else if (!by_id || Object.keys(by_id).length !== rules.length) {
     errors.push(
-      `[VALIDATE_ERROR] by_id size (${by_id ? Object.keys(by_id).length : 0}) != rules length (${rules.length})`
+      `[VALIDATE_ERROR] by_id size (${by_id ? Object.keys(by_id).length : 0}) != rules length (${Array.isArray(rules) ? rules.length : 0})`
     );
   }
 
-  // Check 2: All rules in rules[] are in by_id
+  // Check 2: All rules in rules[] are in by_id with correct index
   if (Array.isArray(rules) && by_id) {
-    for (const rule of rules) {
-      if (!by_id[rule.id]) {
-        errors.push(`[VALIDATE_ERROR] Rule ID ${rule.id} in rules[] but not in by_id`);
+    for (let i = 0; i < rules.length; i++) {
+      const rule = rules[i];
+      if (by_id[rule.id] !== i) {
+        errors.push(`[VALIDATE_ERROR] Rule ID ${rule.id} index mismatch in by_id`);
       }
     }
   }
 
-  // Check 3: by_scope entries are valid subsets
+  // Check 3: by_scope entries are valid subsets (using IDs)
   if (by_scope && typeof by_scope === "object") {
-    for (const [scope, scopeRules] of Object.entries(by_scope)) {
-      if (!Array.isArray(scopeRules)) {
+    for (const [scope, scopeIds] of Object.entries(by_scope)) {
+      if (!Array.isArray(scopeIds)) {
         errors.push(`[VALIDATE_ERROR] by_scope[${scope}] is not an array`);
         continue;
       }
-      for (const rule of scopeRules) {
-        if (!by_id || !by_id[rule.id]) {
-          errors.push(`[VALIDATE_ERROR] Rule ${rule.id} in by_scope[${scope}] but not in by_id`);
+      for (const id of scopeIds) {
+        if (!by_id || by_id[id] === undefined) {
+          errors.push(`[VALIDATE_ERROR] Rule ID ${id} in by_scope[${scope}] but not in by_id`);
         }
       }
     }
   }
 
-  // Check 4: by_feature entries are valid subsets
+  // Check 4: by_feature entries are valid subsets (using IDs)
   if (by_feature && typeof by_feature === "object") {
-    for (const [feature, featureRules] of Object.entries(by_feature)) {
-      if (!Array.isArray(featureRules)) {
+    for (const [feature, featureIds] of Object.entries(by_feature)) {
+      if (!Array.isArray(featureIds)) {
         errors.push(`[VALIDATE_ERROR] by_feature[${feature}] is not an array`);
         continue;
       }
-      for (const rule of featureRules) {
-        if (!by_id || !by_id[rule.id]) {
-          errors.push(
-            `[VALIDATE_ERROR] Rule ${rule.id} in by_feature[${feature}] but not in by_id`
-          );
+      for (const id of featureIds) {
+        if (!by_id || by_id[id] === undefined) {
+          errors.push(`[VALIDATE_ERROR] Rule ID ${id} in by_feature[${feature}] but not in by_id`);
         }
       }
     }
@@ -403,6 +404,12 @@ if (isMain) {
       console.log(`   - by_id: ${Object.keys(catalogJson.by_id).length} entries`);
       console.log(`   - by_scope: ${JSON.stringify(Object.keys(catalogJson.by_scope))}`);
       console.log(`   - Ledger: ${LEDGER_OUTPUT_PATH}`);
+
+      const budget = analyzeBudget(catalogJson);
+      if (budget.warnings.length > 0) {
+        console.log("\n⚠️ Token Budget Warnings:");
+        budget.warnings.forEach((w) => console.log(`   ${w}`));
+      }
     } catch (err) {
       console.error(`❌ Unexpected error: ${err.message}`);
       process.exit(1);
