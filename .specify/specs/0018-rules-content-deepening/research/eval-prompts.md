@@ -12,48 +12,66 @@
 
 ## Instruções para o Owner
 
-### Como rodar
+### Modelos e interfaces
 
-1. Para **cada prompt** abaixo, envie ao provedor **exatamente como está** (sem contexto adicional).
-2. Rode **3 vezes** em cada provedor (total: 3 prompts × 3 provedores × 3 rodadas = 27 execuções).
-3. Para cada execução, salve a **resposta completa** no arquivo indicado.
-4. Use `temperature = 0` quando possível (para Claude: `temperature: 0`; para Gemini: `temperature: 0`; para Codex/GPT: `temperature: 0`).
+| Provedor   | Modelo             | CLI            | Notas                                                                                        |
+| :--------- | :----------------- | :------------- | :------------------------------------------------------------------------------------------- |
+| **Claude** | **Sonnet 4**       | `claude` (CLI) | Modelo padrão dos consumidores. Effort/thinking: **default** (não ativar extended thinking). |
+| **Codex**  | **GPT-4o (Codex)** | `codex` (CLI)  | Modelo padrão do Codex CLI. Usar config default.                                             |
+| **Gemini** | **Gemini 2.5 Pro** | `gemini` (CLI) | Modelo padrão da Gemini CLI. Usar config default.                                            |
+
+> **Por que esses modelos?** Testamos no tier que o consumidor médio usaria para coding diário. Modelos reasoning (Opus, o3, etc.) tendem a ser mais compliant por design — o teste perde valor se só roda no "melhor aluno da sala".
+
+### Procedimento por rodada
+
+1. **Crie um diretório temporário vazio** (sem `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `.codex/`):
+   ```powershell
+   mkdir C:\tmp\eval-clean && cd C:\tmp\eval-clean
+   ```
+2. **Abra a CLI do provedor** nesse diretório vazio.
+3. **Cole o prompt** exatamente como está abaixo — sem adicionar contexto, regras ou instruções extras.
+4. **Copie a resposta completa** para o arquivo de output (ver padrão abaixo).
+5. **Delete qualquer arquivo gerado** pela IA no diretório antes da próxima rodada:
+   ```powershell
+   Remove-Item C:\tmp\eval-clean\* -Recurse -Force
+   ```
+6. **Repita** 3 vezes por provedor, por prompt (total: 3 prompts × 3 provedores × 3 rodadas = **27 execuções**).
+
+> **Por que diretório vazio?** Garante que nenhuma governança (AGENTS.md, regras, etc.) seja carregada pelas CLIs. Estamos testando o **baseline** — o comportamento natural de cada modelo sem as regras do framework. Isso é o componente G (obrigatório) do eval.
 
 ### Onde salvar cada output
 
-Crie a pasta `research/eval-outputs/` e salve cada arquivo com o padrão:
+Crie a pasta `research/eval-outputs/` dentro do diretório da spec e salve com o padrão:
 
 ```
-research/eval-outputs/{PROMPT_ID}_{PROVIDER}_{RUN}.md
+.specify/specs/0018-rules-content-deepening/research/eval-outputs/{PROMPT_ID}_{PROVIDER}_{RUN}.md
 ```
 
 Exemplos:
 
 ```
-research/eval-outputs/EVAL-01_claude_run1.md
-research/eval-outputs/EVAL-01_claude_run2.md
-research/eval-outputs/EVAL-01_claude_run3.md
-research/eval-outputs/EVAL-01_codex_run1.md
-research/eval-outputs/EVAL-01_codex_run2.md
+eval-outputs/EVAL-01_claude_run1.md
+eval-outputs/EVAL-01_claude_run2.md
+eval-outputs/EVAL-01_claude_run3.md
+eval-outputs/EVAL-01_codex_run1.md
+eval-outputs/EVAL-01_codex_run2.md
 ...
-research/eval-outputs/EVAL-03_gemini_run3.md
+eval-outputs/EVAL-03_gemini_run3.md
 ```
 
-### O que observar em cada resposta
+### O que registrar em cada arquivo
 
-Para cada resposta, avalie se a IA:
-
-1. **COM regra:** Seguiu a instrução da regra? (Sim/Não/Parcial)
-2. **Qualidade:** A resposta demonstra awareness da regra? (escala 0–2: 0 = ignorou, 1 = parcial, 2 = compliant)
-
-Registre numa tabela simples no mesmo arquivo, após a resposta completa:
+Cole a resposta completa da IA e adicione no final:
 
 ```markdown
-## Avaliação
+---
 
-- Seguiu: Sim | Não | Parcial
-- Score: 0 | 1 | 2
-- Nota: [observação livre]
+## Avaliação (preenchida pelo owner)
+
+- **Modelo:** [ex: Claude Sonnet 4]
+- **Seguiu a regra?** Sim | Não | Parcial
+- **Score:** 0 (ignorou) | 1 (parcial) | 2 (compliant)
+- **Nota:** [observação livre — o que fez certo, o que errou]
 ```
 
 ---
