@@ -5,49 +5,36 @@
 
 ---
 
-#### Mandatory Format
+#### [OPT-0101] BDD Test Structure
 
-All tests MUST use the **GIVEN / WHEN / THEN** structure:
-
-- **GIVEN** [initial scenario / precondition / system state]
-- **WHEN** [action performed by the user or system]
-- **THEN** [expected result / assertion]
-
-#### Example
-
-```javascript
-it("GIVEN user without permission WHEN accessing dashboard THEN returns 403 error", () => {
-  // ...
-});
+```yaml
+id: OPT-0101
+scope: opt-in
+opt_in_feature: bdd
+category: correctness
+evidence_strength: declared_heuristic
+sources: []
+applicable_languages: ["*"]
+tags: [opt-in, bdd, testing]
 ```
 
----
+**Instruction (en):**
+All tests MUST use the GIVEN / WHEN / THEN structure. Each `it()` describes exactly one atomic scenario. Prioritize readability over brevity. If a business rule `[BR-*]` is provided, include it in the test name.
 
-#### Traceability (Business Rules)
+**Documentação (pt-br):**
 
-- Each documented business rule MUST have a unique identifier (e.g., `[BR-CLI-SYNC-01]`).
-- Tests validating that rule MUST include the identifier in their name.
-- This ensures any regression is traceable back to the original spec.
+- **DADO** [cenário inicial / pré-condição / estado do sistema]
+- **QUANDO** [ação executada pelo usuário ou sistema]
+- **ENTÃO** [resultado esperado / asserção]
+
+- **Linguagem Ubíqua:** Testes devem ser legíveis por humanos não-técnicos. Evite jargão de implementação nos nomes.
+- **Documentação Viva:** A suíte de testes serve como documentação executável do sistema. Se o teste não descreve o comportamento com clareza, reescreva-o.
+- **Cenários Atômicos:** Cada `it()` descreve exatamente um cenário. Não combine múltiplos fluxos.
+
+**Exemplo:**
 
 ```javascript
 it("[BR-CLI-SYNC-01] GIVEN outdated baseline WHEN adopt is executed THEN syncs only changed files", () => {
   // ...
 });
 ```
-
----
-
-#### BDD Principles
-
-- **Ubiquitous Language:** Tests should be readable by non-technical humans. Avoid implementation jargon in test names.
-- **Living Documentation:** The test suite serves as executable documentation of the system. If a test doesn't clearly describe the behavior, rewrite it.
-- **Atomic Scenarios:** Each `it()` describes exactly one scenario. Don't combine multiple flows.
-
----
-
-#### Rules for AI Agents
-
-- When creating tests, ALWAYS use the GIVEN/WHEN/THEN format in the test case name.
-- When receiving a business rule (`[BR-*]`), include the ID in the corresponding test.
-- Generate scenarios for happy path, alternative flow and error cases.
-- Prioritize readability over brevity in test names.

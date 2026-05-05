@@ -5,50 +5,36 @@
 
 ---
 
-#### Formato Obrigatório
+#### [OPT-0201] Estrutura de Teste BDD
 
-Todos os testes DEVEM usar a estrutura **DADO / QUANDO / ENTÃO** em Português do Brasil:
+```yaml
+id: OPT-0201
+scope: opt-in
+opt_in_feature: bdd
+category: correctness
+evidence_strength: declared_heuristic
+sources: []
+applicable_languages: ["*"]
+tags: [opt-in, bdd, testing]
+```
+
+**Instruction (en):**
+All tests MUST use the GIVEN / WHEN / THEN structure in Brazilian Portuguese (DADO/QUANDO/ENTÃO). Each `it()` describes exactly one atomic scenario. Prioritize readability over brevity. If a business rule `[BR-*]` is provided, include it in the test name.
+
+**Documentação (pt-br):**
 
 - **DADO** [cenário inicial / pré-condição / estado do sistema]
 - **QUANDO** [ação executada pelo usuário ou sistema]
 - **ENTÃO** [resultado esperado / asserção]
 
-#### Exemplo
+- **Linguagem Ubíqua:** Testes devem ser legíveis por humanos não-técnicos. Evite jargão de implementação nos nomes.
+- **Documentação Viva:** A suíte de testes serve como documentação executável do sistema. Se o teste não descreve o comportamento com clareza, reescreva-o.
+- **Cenários Atômicos:** Cada `it()` descreve exatamente um cenário. Não combine múltiplos fluxos.
 
-```javascript
-it("DADO usuário sem permissão QUANDO tenta acessar painel ENTÃO retorna erro 403", () => {
-  // ...
-});
-```
-
----
-
-#### Rastreabilidade (Business Rules)
-
-- Cada regra de negócio documentada DEVE ter um identificador único (ex: `[BR-CLI-SYNC-01]`).
-- Os testes que validam essa regra DEVEM incluir o identificador no nome.
-- Isso garante que qualquer regressão seja rastreável até a spec original.
+**Exemplo:**
 
 ```javascript
 it("[BR-CLI-SYNC-01] DADO baseline desatualizado QUANDO executado adopt ENTÃO sincroniza apenas arquivos alterados", () => {
   // ...
 });
 ```
-
----
-
-#### Princípios BDD
-
-- **Linguagem Ubíqua:** Testes devem ser legíveis por humanos não-técnicos. Evite jargão de implementação nos nomes.
-- **Documentação Viva:** A suíte de testes serve como documentação executável do sistema. Se o teste não descreve o comportamento com clareza, reescreva-o.
-- **Cenários Atômicos:** Cada `it()` descreve exatamente um cenário. Não combine múltiplos fluxos.
-
----
-
-#### Regras para Agentes de IA
-
-- Ao criar testes, SEMPRE use o formato DADO/QUANDO/ENTÃO no nome do caso de teste.
-- Ao receber uma business rule (`[BR-*]`), inclua o ID no teste correspondente.
-- Gere cenários para fluxo feliz, fluxo alternativo e casos de erro.
-- Priorize legibilidade sobre concisão nos nomes dos testes.
-- Mantenha cada cenário atômico: um `it()` deve expressar uma intenção de negócio observável.

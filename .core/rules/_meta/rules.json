@@ -296,6 +296,206 @@
       "documentation_pt": "Ao concluir um sub-bloco, IA fornece **apenas** a mensagem sugerida do commit (`feat(spec-XXXX): ...`). O humano executa a cadeia completa de validação (`yarn format ; yarn check ; git add . ; git commit -m \"...\"`).\n\n**Why this matters:** economiza tokens e impede IA de operar git autonomamente. Honra `[CORE-07]` (push) e `[CORE-08]` (HARNESS LOCK).\n\n**See also:** `[CORE-08]` (HARNESS LOCK), `[CORE-07]` (Nunca execute git push autonomamente)."
     },
     {
+      "id": "ADP-0101",
+      "scope": "adapter",
+      "adapter": "claude",
+      "category": "process",
+      "evidence_strength": "declared_heuristic",
+      "sources": [],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "adapter",
+        "claude",
+        "routing"
+      ],
+      "file": ".core\\rules\\claude.md",
+      "title": "Model Routing",
+      "instruction_en": "Use Haiku or Sonnet for scoped, atomic coding tasks. Reserve Opus or Sonnet for architectural planning, multi-file analysis, and complex design decisions.",
+      "documentation_pt": "- **Haiku / Sonnet leve:** tarefas atômicas de codificação, formatação, refatoração scoped.\n- **Sonnet / Opus:** planejamento arquitetural, análise de múltiplos arquivos, decisões de design complexas."
+    },
+    {
+      "id": "ADP-0102",
+      "scope": "adapter",
+      "adapter": "claude",
+      "category": "process",
+      "evidence_strength": "declared_heuristic",
+      "sources": [],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "adapter",
+        "claude",
+        "context"
+      ],
+      "file": ".core\\rules\\claude.md",
+      "title": "Context e Ignore",
+      "instruction_en": "Use `.claudeignore` to control context payload. Ensure `AGENTS.md` and the `<AI_GUIDELINES>` block are properly loaded.",
+      "documentation_pt": "- Utilize `.claudeignore` na raiz do repositório para controlar quais arquivos a IA carrega no contexto.\n- O formato segue o padrão `.gitignore`.\n- Claude carrega automaticamente o `AGENTS.md` da raiz — garanta que o bloco `<AI_GUIDELINES>` esteja presente."
+    },
+    {
+      "id": "ADP-0103",
+      "scope": "adapter",
+      "adapter": "claude",
+      "category": "process",
+      "evidence_strength": "declared_heuristic",
+      "sources": [],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "adapter",
+        "claude",
+        "behavior"
+      ],
+      "file": ".core\\rules\\claude.md",
+      "title": "Comportamento Observado",
+      "instruction_en": "Be concise to counter Claude's default verbosity. In long sessions, use `/clear` or restart if context drift occurs. Respect `CLAUDE.md` for project-specific instructions.",
+      "documentation_pt": "- Claude tende a ser verboso por padrão. As Global Rules já instruem respostas sucintas — reforce se necessário com \"seja conciso\" no prompt.\n- Em sessões longas, Claude pode perder contexto de arquivos lidos no início. Use `/clear` ou reinicie a sessão quando perceber repetição de erros.\n- Claude Code respeita `CLAUDE.md` na raiz — este arquivo pode conter instruções específicas do projeto que complementam o baseline injetado."
+    },
+    {
+      "id": "ADP-0201",
+      "scope": "adapter",
+      "adapter": "codex",
+      "category": "process",
+      "evidence_strength": "declared_heuristic",
+      "sources": [],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "adapter",
+        "codex",
+        "ide"
+      ],
+      "file": ".core\\rules\\codex.md",
+      "title": "Integração com IDE",
+      "instruction_en": "Leverage `.github/copilot-instructions.md` for project instructions in Copilot Chat. Use structured comments and JSDoc to guide inline code completion.",
+      "documentation_pt": "- Copilot lê automaticamente o `AGENTS.md` da raiz do repositório.\n- Para instruções específicas do projeto no Copilot Chat, utilize `.github/copilot-instructions.md` — este arquivo é carregado como contexto adicional pelo Copilot.\n- Utilize comentários estruturados e JSDoc para auxiliar a conclusão de código em tempo real."
+    },
+    {
+      "id": "ADP-0202",
+      "scope": "adapter",
+      "adapter": "codex",
+      "category": "process",
+      "evidence_strength": "declared_heuristic",
+      "sources": [],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "adapter",
+        "codex",
+        "context"
+      ],
+      "file": ".core\\rules\\codex.md",
+      "title": "Contexto e Ignore",
+      "instruction_en": "Use `#file` references to refine context in Copilot Chat. Ensure Codex CLI loads `AGENTS.md` properly.",
+      "documentation_pt": "- Copilot respeita o `.gitignore` do repositório por padrão.\n- Para refinamentos de contexto no Copilot Chat, utilize referências diretas a arquivos via `#file`.\n- Codex CLI respeita `AGENTS.md` e `.codex/instructions.md` — garanta que o bloco `<AI_GUIDELINES>` esteja presente."
+    },
+    {
+      "id": "ADP-0203",
+      "scope": "adapter",
+      "adapter": "codex",
+      "category": "process",
+      "evidence_strength": "declared_heuristic",
+      "sources": [],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "adapter",
+        "codex",
+        "behavior"
+      ],
+      "file": ".core\\rules\\codex.md",
+      "title": "Comportamento Observado",
+      "instruction_en": "Keep files focused and imports explicit to improve inline suggestions. Strictly follow governance rules (e.g., no autonomous push) when operating autonomously.",
+      "documentation_pt": "- Copilot inline tende a completar código baseado no contexto imediato (arquivo aberto + imports). Mantenha arquivos focados e com imports explícitos para melhores sugestões.\n- Codex em modo autônomo segue instruções de `AGENTS.md` rigorosamente — garanta que as regras de governança (ex: não fazer push) estejam claras."
+    },
+    {
+      "id": "ADP-0301",
+      "scope": "adapter",
+      "adapter": "gemini",
+      "category": "process",
+      "evidence_strength": "declared_heuristic",
+      "sources": [],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "adapter",
+        "gemini",
+        "cli"
+      ],
+      "file": ".core\\rules\\gemini.md",
+      "title": "Integração com CLI",
+      "instruction_en": "Load project-specific instructions from `GEMINI.md` and ensure `<AI_GUIDELINES>` in `AGENTS.md` is present.",
+      "documentation_pt": "- Gemini CLI carrega automaticamente `GEMINI.md` na raiz e `~/.gemini/GEMINI.md` como config global.\n- Para instruções específicas do projeto, utilize `GEMINI.md` na raiz do repositório.\n- O `AGENTS.md` da raiz também é carregado — garanta que o bloco `<AI_GUIDELINES>` esteja presente."
+    },
+    {
+      "id": "ADP-0302",
+      "scope": "adapter",
+      "adapter": "gemini",
+      "category": "process",
+      "evidence_strength": "declared_heuristic",
+      "sources": [],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "adapter",
+        "gemini",
+        "skills"
+      ],
+      "file": ".core\\rules\\gemini.md",
+      "title": "Skills Globais",
+      "instruction_en": "Manage global skills carefully in `~/.gemini/skills/` and prune unused scripts to prevent token bloat.",
+      "documentation_pt": "As skills globais (ferramentas personalizadas) residem em `~/.gemini/skills/`. Periodicamente, remova scripts que não utiliza ativamente, pois eles degradam a performance."
+    },
+    {
+      "id": "ADP-0303",
+      "scope": "adapter",
+      "adapter": "gemini",
+      "category": "process",
+      "evidence_strength": "declared_heuristic",
+      "sources": [],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "adapter",
+        "gemini",
+        "context"
+      ],
+      "file": ".core\\rules\\gemini.md",
+      "title": "Estratégia de Ignore",
+      "instruction_en": "Aggressively use `.geminiignore` to exclude build artifacts, logs, binaries, and dependencies from context, preventing token waste.",
+      "documentation_pt": "Utilize o arquivo `.geminiignore` na raiz para evitar que arquivos de build, logs e binários poluam o contexto. Crítico para economia de tokens."
+    },
+    {
+      "id": "ADP-0304",
+      "scope": "adapter",
+      "adapter": "gemini",
+      "category": "process",
+      "evidence_strength": "declared_heuristic",
+      "sources": [],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "adapter",
+        "gemini",
+        "behavior"
+      ],
+      "file": ".core\\rules\\gemini.md",
+      "title": "Comportamento Observado",
+      "instruction_en": "Use checkpoints via artifacts to preserve context in long sessions. Reinforce destructive command constraints, as Gemini tends to be highly proactive.",
+      "documentation_pt": "- Em sessões longas, use o conceito de \"checkpoints\" (salvar progresso em artefatos) para evitar perda de contexto.\n- Gemini tende a ser proativo em executar comandos — reforce a proibição de `git push` e tarefas destrutivas."
+    },
+    {
       "id": "GR-0001",
       "scope": "universal",
       "category": "security",
@@ -465,6 +665,111 @@
       "title": "Collaborative PR description",
       "instruction_en": "Build PR descriptions in three steps: outline topics, get human approval, then generate the final text using the repository template (if available) and perform a final human validation.",
       "documentation_pt": "Fluxo obrigatório:\n\n1. listar tópicos\n2. humano valida\n3. gerar texto final (seguindo template do repositório, se existir)\n4. humano valida novamente"
+    },
+    {
+      "id": "OPT-0101",
+      "scope": "opt-in",
+      "opt_in_feature": "bdd",
+      "category": "correctness",
+      "evidence_strength": "declared_heuristic",
+      "sources": [],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "opt-in",
+        "bdd",
+        "testing"
+      ],
+      "file": ".core\\rules\\opt-in\\bdd-en.md",
+      "title": "BDD Test Structure",
+      "instruction_en": "All tests MUST use the GIVEN / WHEN / THEN structure. Each `it()` describes exactly one atomic scenario. Prioritize readability over brevity. If a business rule `[BR-*]` is provided, include it in the test name.",
+      "documentation_pt": "- **DADO** [cenário inicial / pré-condição / estado do sistema]\n- **QUANDO** [ação executada pelo usuário ou sistema]\n- **ENTÃO** [resultado esperado / asserção]\n\n- **Linguagem Ubíqua:** Testes devem ser legíveis por humanos não-técnicos. Evite jargão de implementação nos nomes.\n- **Documentação Viva:** A suíte de testes serve como documentação executável do sistema. Se o teste não descreve o comportamento com clareza, reescreva-o.\n- **Cenários Atômicos:** Cada `it()` descreve exatamente um cenário. Não combine múltiplos fluxos.\n\n**Exemplo:**\n\n```javascript\nit(\"[BR-CLI-SYNC-01] GIVEN outdated baseline WHEN adopt is executed THEN syncs only changed files\", () => {\n  // ...\n});\n```"
+    },
+    {
+      "id": "OPT-0201",
+      "scope": "opt-in",
+      "opt_in_feature": "bdd",
+      "category": "correctness",
+      "evidence_strength": "declared_heuristic",
+      "sources": [],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "opt-in",
+        "bdd",
+        "testing"
+      ],
+      "file": ".core\\rules\\opt-in\\bdd-pt.md",
+      "title": "Estrutura de Teste BDD",
+      "instruction_en": "All tests MUST use the GIVEN / WHEN / THEN structure in Brazilian Portuguese (DADO/QUANDO/ENTÃO). Each `it()` describes exactly one atomic scenario. Prioritize readability over brevity. If a business rule `[BR-*]` is provided, include it in the test name.",
+      "documentation_pt": "- **DADO** [cenário inicial / pré-condição / estado do sistema]\n- **QUANDO** [ação executada pelo usuário ou sistema]\n- **ENTÃO** [resultado esperado / asserção]\n\n- **Linguagem Ubíqua:** Testes devem ser legíveis por humanos não-técnicos. Evite jargão de implementação nos nomes.\n- **Documentação Viva:** A suíte de testes serve como documentação executável do sistema. Se o teste não descreve o comportamento com clareza, reescreva-o.\n- **Cenários Atômicos:** Cada `it()` descreve exatamente um cenário. Não combine múltiplos fluxos.\n\n**Exemplo:**\n\n```javascript\nit(\"[BR-CLI-SYNC-01] DADO baseline desatualizado QUANDO executado adopt ENTÃO sincroniza apenas arquivos alterados\", () => {\n  // ...\n});\n```"
+    },
+    {
+      "id": "OPT-0301",
+      "scope": "opt-in",
+      "opt_in_feature": "quality-gates",
+      "category": "correctness",
+      "evidence_strength": "medium",
+      "sources": [
+        "CWE-362",
+        "CWE-401",
+        "CONCUR 2025",
+        "Investigating Software Aging in LLM-Generated Software Systems (2025)"
+      ],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "opt-in",
+        "quality-gates",
+        "review"
+      ],
+      "file": ".core\\rules\\opt-in\\quality-gates.md",
+      "title": "Quality Gates (Checklist)",
+      "instruction_en": "Before reporting a task as done, ensure: no circular dependencies, proper teardown for listeners/timers (prevent memory leaks), no unguarded asynchronous state mutations (prevent race conditions), >85% test coverage, >60% mutation kill rate, and no secrets in code/comments. Fix any automated failures before requesting human review.",
+      "documentation_pt": "1. **Análise Estática:** Complexidade ciclomática mantida sob controle, ausência de dependências circulares, nomes de variáveis/funções seguem a semântica do projeto.\n2. **Cobertura e Mutação:** Mínimo recomendado de 85% de cobertura, mínimo de 60% de kill rate.\n3. **Sensores de Bugs Típicos de IA:**\n   - **Race Conditions:** Se não houver garantia de atomicidade em blocos assíncronos (transação, lock ou estado local seguro), rejeite o design.\n   - **Memory Leaks:** Sempre implemente a função de limpeza (teardown/dispose) correspondente no ciclo de vida apropriado do framework usado.\n4. **Security & Secrets:** Bloqueio de chaves/tokens; validação de inputs contra injeção."
+    },
+    {
+      "id": "OPT-0401",
+      "scope": "opt-in",
+      "opt_in_feature": "tdd",
+      "category": "correctness",
+      "evidence_strength": "declared_heuristic",
+      "sources": [],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "opt-in",
+        "tdd",
+        "testing"
+      ],
+      "file": ".core\\rules\\opt-in\\tdd-en.md",
+      "title": "Strict TDD Cycle",
+      "instruction_en": "Every new feature or bug fix MUST follow the RED -> GREEN -> REFACTOR cycle. Write a failing test first. Never skip the RED step. Write minimum code to pass. Maintain >85% coverage. Test files must be colocated. Unit tests must be isolated with mocks/stubs.",
+      "documentation_pt": "1. **RED:** Escreva um teste que falhe — defina o comportamento esperado antes de qualquer implementação.\n2. **GREEN:** Escreva o código mínimo necessário para fazer o teste passar. Sem otimizações prematuras.\n3. **REFACTOR:** Melhore o código (nomes, estrutura, DRY) mantendo todos os testes verdes.\n\n- **Isolamento:** Testes unitários não devem depender de serviços externos, rede ou banco de dados. Use mocks/stubs.\n- **Colocation:** Arquivos de teste devem ficar no mesmo diretório que o código testado."
+    },
+    {
+      "id": "OPT-0501",
+      "scope": "opt-in",
+      "opt_in_feature": "tdd",
+      "category": "correctness",
+      "evidence_strength": "declared_heuristic",
+      "sources": [],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "opt-in",
+        "tdd",
+        "testing"
+      ],
+      "file": ".core\\rules\\opt-in\\tdd-pt.md",
+      "title": "Ciclo TDD Estrito",
+      "instruction_en": "Every new feature or bug fix MUST follow the RED -> GREEN -> REFACTOR cycle. Write a failing test first. Never skip the RED step. Write minimum code to pass. Maintain >85% coverage. Test files must be colocated. Unit tests must be isolated with mocks/stubs. If a business rule `[BR-*]` is provided, include it in the test name.",
+      "documentation_pt": "1. **RED:** Escreva um teste que falhe — defina o comportamento esperado antes de qualquer implementação.\n2. **GREEN:** Escreva o código mínimo necessário para fazer o teste passar. Sem otimizações prematuras.\n3. **REFACTOR:** Melhore o código (nomes, estrutura, DRY) mantendo todos os testes verdes.\n\n- **Isolamento:** Testes unitários não devem depender de serviços externos, rede ou banco de dados. Use mocks/stubs para dependências.\n- **Colocation:** Arquivos de teste devem ficar no mesmo diretório que o código testado (ex: `engine.mjs` → `engine.test.mjs`).\n- **Rastreabilidade:** Quando uma regra de negócio tiver identificador `[BR-*]`, o teste que a valida deve carregar o mesmo identificador no nome."
     }
   ],
   "by_id": {
@@ -763,6 +1068,206 @@
       "instruction_en": "At the end of each sub-block, provide only the commit message suggestion. The human executes the full validation chain (`yarn format ; yarn check ; ...`) and `git commit`.",
       "documentation_pt": "Ao concluir um sub-bloco, IA fornece **apenas** a mensagem sugerida do commit (`feat(spec-XXXX): ...`). O humano executa a cadeia completa de validação (`yarn format ; yarn check ; git add . ; git commit -m \"...\"`).\n\n**Why this matters:** economiza tokens e impede IA de operar git autonomamente. Honra `[CORE-07]` (push) e `[CORE-08]` (HARNESS LOCK).\n\n**See also:** `[CORE-08]` (HARNESS LOCK), `[CORE-07]` (Nunca execute git push autonomamente)."
     },
+    "ADP-0101": {
+      "id": "ADP-0101",
+      "scope": "adapter",
+      "adapter": "claude",
+      "category": "process",
+      "evidence_strength": "declared_heuristic",
+      "sources": [],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "adapter",
+        "claude",
+        "routing"
+      ],
+      "file": ".core\\rules\\claude.md",
+      "title": "Model Routing",
+      "instruction_en": "Use Haiku or Sonnet for scoped, atomic coding tasks. Reserve Opus or Sonnet for architectural planning, multi-file analysis, and complex design decisions.",
+      "documentation_pt": "- **Haiku / Sonnet leve:** tarefas atômicas de codificação, formatação, refatoração scoped.\n- **Sonnet / Opus:** planejamento arquitetural, análise de múltiplos arquivos, decisões de design complexas."
+    },
+    "ADP-0102": {
+      "id": "ADP-0102",
+      "scope": "adapter",
+      "adapter": "claude",
+      "category": "process",
+      "evidence_strength": "declared_heuristic",
+      "sources": [],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "adapter",
+        "claude",
+        "context"
+      ],
+      "file": ".core\\rules\\claude.md",
+      "title": "Context e Ignore",
+      "instruction_en": "Use `.claudeignore` to control context payload. Ensure `AGENTS.md` and the `<AI_GUIDELINES>` block are properly loaded.",
+      "documentation_pt": "- Utilize `.claudeignore` na raiz do repositório para controlar quais arquivos a IA carrega no contexto.\n- O formato segue o padrão `.gitignore`.\n- Claude carrega automaticamente o `AGENTS.md` da raiz — garanta que o bloco `<AI_GUIDELINES>` esteja presente."
+    },
+    "ADP-0103": {
+      "id": "ADP-0103",
+      "scope": "adapter",
+      "adapter": "claude",
+      "category": "process",
+      "evidence_strength": "declared_heuristic",
+      "sources": [],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "adapter",
+        "claude",
+        "behavior"
+      ],
+      "file": ".core\\rules\\claude.md",
+      "title": "Comportamento Observado",
+      "instruction_en": "Be concise to counter Claude's default verbosity. In long sessions, use `/clear` or restart if context drift occurs. Respect `CLAUDE.md` for project-specific instructions.",
+      "documentation_pt": "- Claude tende a ser verboso por padrão. As Global Rules já instruem respostas sucintas — reforce se necessário com \"seja conciso\" no prompt.\n- Em sessões longas, Claude pode perder contexto de arquivos lidos no início. Use `/clear` ou reinicie a sessão quando perceber repetição de erros.\n- Claude Code respeita `CLAUDE.md` na raiz — este arquivo pode conter instruções específicas do projeto que complementam o baseline injetado."
+    },
+    "ADP-0201": {
+      "id": "ADP-0201",
+      "scope": "adapter",
+      "adapter": "codex",
+      "category": "process",
+      "evidence_strength": "declared_heuristic",
+      "sources": [],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "adapter",
+        "codex",
+        "ide"
+      ],
+      "file": ".core\\rules\\codex.md",
+      "title": "Integração com IDE",
+      "instruction_en": "Leverage `.github/copilot-instructions.md` for project instructions in Copilot Chat. Use structured comments and JSDoc to guide inline code completion.",
+      "documentation_pt": "- Copilot lê automaticamente o `AGENTS.md` da raiz do repositório.\n- Para instruções específicas do projeto no Copilot Chat, utilize `.github/copilot-instructions.md` — este arquivo é carregado como contexto adicional pelo Copilot.\n- Utilize comentários estruturados e JSDoc para auxiliar a conclusão de código em tempo real."
+    },
+    "ADP-0202": {
+      "id": "ADP-0202",
+      "scope": "adapter",
+      "adapter": "codex",
+      "category": "process",
+      "evidence_strength": "declared_heuristic",
+      "sources": [],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "adapter",
+        "codex",
+        "context"
+      ],
+      "file": ".core\\rules\\codex.md",
+      "title": "Contexto e Ignore",
+      "instruction_en": "Use `#file` references to refine context in Copilot Chat. Ensure Codex CLI loads `AGENTS.md` properly.",
+      "documentation_pt": "- Copilot respeita o `.gitignore` do repositório por padrão.\n- Para refinamentos de contexto no Copilot Chat, utilize referências diretas a arquivos via `#file`.\n- Codex CLI respeita `AGENTS.md` e `.codex/instructions.md` — garanta que o bloco `<AI_GUIDELINES>` esteja presente."
+    },
+    "ADP-0203": {
+      "id": "ADP-0203",
+      "scope": "adapter",
+      "adapter": "codex",
+      "category": "process",
+      "evidence_strength": "declared_heuristic",
+      "sources": [],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "adapter",
+        "codex",
+        "behavior"
+      ],
+      "file": ".core\\rules\\codex.md",
+      "title": "Comportamento Observado",
+      "instruction_en": "Keep files focused and imports explicit to improve inline suggestions. Strictly follow governance rules (e.g., no autonomous push) when operating autonomously.",
+      "documentation_pt": "- Copilot inline tende a completar código baseado no contexto imediato (arquivo aberto + imports). Mantenha arquivos focados e com imports explícitos para melhores sugestões.\n- Codex em modo autônomo segue instruções de `AGENTS.md` rigorosamente — garanta que as regras de governança (ex: não fazer push) estejam claras."
+    },
+    "ADP-0301": {
+      "id": "ADP-0301",
+      "scope": "adapter",
+      "adapter": "gemini",
+      "category": "process",
+      "evidence_strength": "declared_heuristic",
+      "sources": [],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "adapter",
+        "gemini",
+        "cli"
+      ],
+      "file": ".core\\rules\\gemini.md",
+      "title": "Integração com CLI",
+      "instruction_en": "Load project-specific instructions from `GEMINI.md` and ensure `<AI_GUIDELINES>` in `AGENTS.md` is present.",
+      "documentation_pt": "- Gemini CLI carrega automaticamente `GEMINI.md` na raiz e `~/.gemini/GEMINI.md` como config global.\n- Para instruções específicas do projeto, utilize `GEMINI.md` na raiz do repositório.\n- O `AGENTS.md` da raiz também é carregado — garanta que o bloco `<AI_GUIDELINES>` esteja presente."
+    },
+    "ADP-0302": {
+      "id": "ADP-0302",
+      "scope": "adapter",
+      "adapter": "gemini",
+      "category": "process",
+      "evidence_strength": "declared_heuristic",
+      "sources": [],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "adapter",
+        "gemini",
+        "skills"
+      ],
+      "file": ".core\\rules\\gemini.md",
+      "title": "Skills Globais",
+      "instruction_en": "Manage global skills carefully in `~/.gemini/skills/` and prune unused scripts to prevent token bloat.",
+      "documentation_pt": "As skills globais (ferramentas personalizadas) residem em `~/.gemini/skills/`. Periodicamente, remova scripts que não utiliza ativamente, pois eles degradam a performance."
+    },
+    "ADP-0303": {
+      "id": "ADP-0303",
+      "scope": "adapter",
+      "adapter": "gemini",
+      "category": "process",
+      "evidence_strength": "declared_heuristic",
+      "sources": [],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "adapter",
+        "gemini",
+        "context"
+      ],
+      "file": ".core\\rules\\gemini.md",
+      "title": "Estratégia de Ignore",
+      "instruction_en": "Aggressively use `.geminiignore` to exclude build artifacts, logs, binaries, and dependencies from context, preventing token waste.",
+      "documentation_pt": "Utilize o arquivo `.geminiignore` na raiz para evitar que arquivos de build, logs e binários poluam o contexto. Crítico para economia de tokens."
+    },
+    "ADP-0304": {
+      "id": "ADP-0304",
+      "scope": "adapter",
+      "adapter": "gemini",
+      "category": "process",
+      "evidence_strength": "declared_heuristic",
+      "sources": [],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "adapter",
+        "gemini",
+        "behavior"
+      ],
+      "file": ".core\\rules\\gemini.md",
+      "title": "Comportamento Observado",
+      "instruction_en": "Use checkpoints via artifacts to preserve context in long sessions. Reinforce destructive command constraints, as Gemini tends to be highly proactive.",
+      "documentation_pt": "- Em sessões longas, use o conceito de \"checkpoints\" (salvar progresso em artefatos) para evitar perda de contexto.\n- Gemini tende a ser proativo em executar comandos — reforce a proibição de `git push` e tarefas destrutivas."
+    },
     "GR-0001": {
       "id": "GR-0001",
       "scope": "universal",
@@ -933,6 +1438,111 @@
       "title": "Collaborative PR description",
       "instruction_en": "Build PR descriptions in three steps: outline topics, get human approval, then generate the final text using the repository template (if available) and perform a final human validation.",
       "documentation_pt": "Fluxo obrigatório:\n\n1. listar tópicos\n2. humano valida\n3. gerar texto final (seguindo template do repositório, se existir)\n4. humano valida novamente"
+    },
+    "OPT-0101": {
+      "id": "OPT-0101",
+      "scope": "opt-in",
+      "opt_in_feature": "bdd",
+      "category": "correctness",
+      "evidence_strength": "declared_heuristic",
+      "sources": [],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "opt-in",
+        "bdd",
+        "testing"
+      ],
+      "file": ".core\\rules\\opt-in\\bdd-en.md",
+      "title": "BDD Test Structure",
+      "instruction_en": "All tests MUST use the GIVEN / WHEN / THEN structure. Each `it()` describes exactly one atomic scenario. Prioritize readability over brevity. If a business rule `[BR-*]` is provided, include it in the test name.",
+      "documentation_pt": "- **DADO** [cenário inicial / pré-condição / estado do sistema]\n- **QUANDO** [ação executada pelo usuário ou sistema]\n- **ENTÃO** [resultado esperado / asserção]\n\n- **Linguagem Ubíqua:** Testes devem ser legíveis por humanos não-técnicos. Evite jargão de implementação nos nomes.\n- **Documentação Viva:** A suíte de testes serve como documentação executável do sistema. Se o teste não descreve o comportamento com clareza, reescreva-o.\n- **Cenários Atômicos:** Cada `it()` descreve exatamente um cenário. Não combine múltiplos fluxos.\n\n**Exemplo:**\n\n```javascript\nit(\"[BR-CLI-SYNC-01] GIVEN outdated baseline WHEN adopt is executed THEN syncs only changed files\", () => {\n  // ...\n});\n```"
+    },
+    "OPT-0201": {
+      "id": "OPT-0201",
+      "scope": "opt-in",
+      "opt_in_feature": "bdd",
+      "category": "correctness",
+      "evidence_strength": "declared_heuristic",
+      "sources": [],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "opt-in",
+        "bdd",
+        "testing"
+      ],
+      "file": ".core\\rules\\opt-in\\bdd-pt.md",
+      "title": "Estrutura de Teste BDD",
+      "instruction_en": "All tests MUST use the GIVEN / WHEN / THEN structure in Brazilian Portuguese (DADO/QUANDO/ENTÃO). Each `it()` describes exactly one atomic scenario. Prioritize readability over brevity. If a business rule `[BR-*]` is provided, include it in the test name.",
+      "documentation_pt": "- **DADO** [cenário inicial / pré-condição / estado do sistema]\n- **QUANDO** [ação executada pelo usuário ou sistema]\n- **ENTÃO** [resultado esperado / asserção]\n\n- **Linguagem Ubíqua:** Testes devem ser legíveis por humanos não-técnicos. Evite jargão de implementação nos nomes.\n- **Documentação Viva:** A suíte de testes serve como documentação executável do sistema. Se o teste não descreve o comportamento com clareza, reescreva-o.\n- **Cenários Atômicos:** Cada `it()` descreve exatamente um cenário. Não combine múltiplos fluxos.\n\n**Exemplo:**\n\n```javascript\nit(\"[BR-CLI-SYNC-01] DADO baseline desatualizado QUANDO executado adopt ENTÃO sincroniza apenas arquivos alterados\", () => {\n  // ...\n});\n```"
+    },
+    "OPT-0301": {
+      "id": "OPT-0301",
+      "scope": "opt-in",
+      "opt_in_feature": "quality-gates",
+      "category": "correctness",
+      "evidence_strength": "medium",
+      "sources": [
+        "CWE-362",
+        "CWE-401",
+        "CONCUR 2025",
+        "Investigating Software Aging in LLM-Generated Software Systems (2025)"
+      ],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "opt-in",
+        "quality-gates",
+        "review"
+      ],
+      "file": ".core\\rules\\opt-in\\quality-gates.md",
+      "title": "Quality Gates (Checklist)",
+      "instruction_en": "Before reporting a task as done, ensure: no circular dependencies, proper teardown for listeners/timers (prevent memory leaks), no unguarded asynchronous state mutations (prevent race conditions), >85% test coverage, >60% mutation kill rate, and no secrets in code/comments. Fix any automated failures before requesting human review.",
+      "documentation_pt": "1. **Análise Estática:** Complexidade ciclomática mantida sob controle, ausência de dependências circulares, nomes de variáveis/funções seguem a semântica do projeto.\n2. **Cobertura e Mutação:** Mínimo recomendado de 85% de cobertura, mínimo de 60% de kill rate.\n3. **Sensores de Bugs Típicos de IA:**\n   - **Race Conditions:** Se não houver garantia de atomicidade em blocos assíncronos (transação, lock ou estado local seguro), rejeite o design.\n   - **Memory Leaks:** Sempre implemente a função de limpeza (teardown/dispose) correspondente no ciclo de vida apropriado do framework usado.\n4. **Security & Secrets:** Bloqueio de chaves/tokens; validação de inputs contra injeção."
+    },
+    "OPT-0401": {
+      "id": "OPT-0401",
+      "scope": "opt-in",
+      "opt_in_feature": "tdd",
+      "category": "correctness",
+      "evidence_strength": "declared_heuristic",
+      "sources": [],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "opt-in",
+        "tdd",
+        "testing"
+      ],
+      "file": ".core\\rules\\opt-in\\tdd-en.md",
+      "title": "Strict TDD Cycle",
+      "instruction_en": "Every new feature or bug fix MUST follow the RED -> GREEN -> REFACTOR cycle. Write a failing test first. Never skip the RED step. Write minimum code to pass. Maintain >85% coverage. Test files must be colocated. Unit tests must be isolated with mocks/stubs.",
+      "documentation_pt": "1. **RED:** Escreva um teste que falhe — defina o comportamento esperado antes de qualquer implementação.\n2. **GREEN:** Escreva o código mínimo necessário para fazer o teste passar. Sem otimizações prematuras.\n3. **REFACTOR:** Melhore o código (nomes, estrutura, DRY) mantendo todos os testes verdes.\n\n- **Isolamento:** Testes unitários não devem depender de serviços externos, rede ou banco de dados. Use mocks/stubs.\n- **Colocation:** Arquivos de teste devem ficar no mesmo diretório que o código testado."
+    },
+    "OPT-0501": {
+      "id": "OPT-0501",
+      "scope": "opt-in",
+      "opt_in_feature": "tdd",
+      "category": "correctness",
+      "evidence_strength": "declared_heuristic",
+      "sources": [],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "opt-in",
+        "tdd",
+        "testing"
+      ],
+      "file": ".core\\rules\\opt-in\\tdd-pt.md",
+      "title": "Ciclo TDD Estrito",
+      "instruction_en": "Every new feature or bug fix MUST follow the RED -> GREEN -> REFACTOR cycle. Write a failing test first. Never skip the RED step. Write minimum code to pass. Maintain >85% coverage. Test files must be colocated. Unit tests must be isolated with mocks/stubs. If a business rule `[BR-*]` is provided, include it in the test name.",
+      "documentation_pt": "1. **RED:** Escreva um teste que falhe — defina o comportamento esperado antes de qualquer implementação.\n2. **GREEN:** Escreva o código mínimo necessário para fazer o teste passar. Sem otimizações prematuras.\n3. **REFACTOR:** Melhore o código (nomes, estrutura, DRY) mantendo todos os testes verdes.\n\n- **Isolamento:** Testes unitários não devem depender de serviços externos, rede ou banco de dados. Use mocks/stubs para dependências.\n- **Colocation:** Arquivos de teste devem ficar no mesmo diretório que o código testado (ex: `engine.mjs` → `engine.test.mjs`).\n- **Rastreabilidade:** Quando uma regra de negócio tiver identificador `[BR-*]`, o teste que a valida deve carregar o mesmo identificador no nome."
     }
   },
   "by_scope": {
@@ -1404,10 +2014,429 @@
         "documentation_pt": "Fluxo obrigatório:\n\n1. listar tópicos\n2. humano valida\n3. gerar texto final (seguindo template do repositório, se existir)\n4. humano valida novamente"
       }
     ],
-    "adapter": [],
-    "opt-in": []
+    "adapter": [
+      {
+        "id": "ADP-0101",
+        "scope": "adapter",
+        "adapter": "claude",
+        "category": "process",
+        "evidence_strength": "declared_heuristic",
+        "sources": [],
+        "applicable_languages": [
+          "*"
+        ],
+        "tags": [
+          "adapter",
+          "claude",
+          "routing"
+        ],
+        "file": ".core\\rules\\claude.md",
+        "title": "Model Routing",
+        "instruction_en": "Use Haiku or Sonnet for scoped, atomic coding tasks. Reserve Opus or Sonnet for architectural planning, multi-file analysis, and complex design decisions.",
+        "documentation_pt": "- **Haiku / Sonnet leve:** tarefas atômicas de codificação, formatação, refatoração scoped.\n- **Sonnet / Opus:** planejamento arquitetural, análise de múltiplos arquivos, decisões de design complexas."
+      },
+      {
+        "id": "ADP-0102",
+        "scope": "adapter",
+        "adapter": "claude",
+        "category": "process",
+        "evidence_strength": "declared_heuristic",
+        "sources": [],
+        "applicable_languages": [
+          "*"
+        ],
+        "tags": [
+          "adapter",
+          "claude",
+          "context"
+        ],
+        "file": ".core\\rules\\claude.md",
+        "title": "Context e Ignore",
+        "instruction_en": "Use `.claudeignore` to control context payload. Ensure `AGENTS.md` and the `<AI_GUIDELINES>` block are properly loaded.",
+        "documentation_pt": "- Utilize `.claudeignore` na raiz do repositório para controlar quais arquivos a IA carrega no contexto.\n- O formato segue o padrão `.gitignore`.\n- Claude carrega automaticamente o `AGENTS.md` da raiz — garanta que o bloco `<AI_GUIDELINES>` esteja presente."
+      },
+      {
+        "id": "ADP-0103",
+        "scope": "adapter",
+        "adapter": "claude",
+        "category": "process",
+        "evidence_strength": "declared_heuristic",
+        "sources": [],
+        "applicable_languages": [
+          "*"
+        ],
+        "tags": [
+          "adapter",
+          "claude",
+          "behavior"
+        ],
+        "file": ".core\\rules\\claude.md",
+        "title": "Comportamento Observado",
+        "instruction_en": "Be concise to counter Claude's default verbosity. In long sessions, use `/clear` or restart if context drift occurs. Respect `CLAUDE.md` for project-specific instructions.",
+        "documentation_pt": "- Claude tende a ser verboso por padrão. As Global Rules já instruem respostas sucintas — reforce se necessário com \"seja conciso\" no prompt.\n- Em sessões longas, Claude pode perder contexto de arquivos lidos no início. Use `/clear` ou reinicie a sessão quando perceber repetição de erros.\n- Claude Code respeita `CLAUDE.md` na raiz — este arquivo pode conter instruções específicas do projeto que complementam o baseline injetado."
+      },
+      {
+        "id": "ADP-0201",
+        "scope": "adapter",
+        "adapter": "codex",
+        "category": "process",
+        "evidence_strength": "declared_heuristic",
+        "sources": [],
+        "applicable_languages": [
+          "*"
+        ],
+        "tags": [
+          "adapter",
+          "codex",
+          "ide"
+        ],
+        "file": ".core\\rules\\codex.md",
+        "title": "Integração com IDE",
+        "instruction_en": "Leverage `.github/copilot-instructions.md` for project instructions in Copilot Chat. Use structured comments and JSDoc to guide inline code completion.",
+        "documentation_pt": "- Copilot lê automaticamente o `AGENTS.md` da raiz do repositório.\n- Para instruções específicas do projeto no Copilot Chat, utilize `.github/copilot-instructions.md` — este arquivo é carregado como contexto adicional pelo Copilot.\n- Utilize comentários estruturados e JSDoc para auxiliar a conclusão de código em tempo real."
+      },
+      {
+        "id": "ADP-0202",
+        "scope": "adapter",
+        "adapter": "codex",
+        "category": "process",
+        "evidence_strength": "declared_heuristic",
+        "sources": [],
+        "applicable_languages": [
+          "*"
+        ],
+        "tags": [
+          "adapter",
+          "codex",
+          "context"
+        ],
+        "file": ".core\\rules\\codex.md",
+        "title": "Contexto e Ignore",
+        "instruction_en": "Use `#file` references to refine context in Copilot Chat. Ensure Codex CLI loads `AGENTS.md` properly.",
+        "documentation_pt": "- Copilot respeita o `.gitignore` do repositório por padrão.\n- Para refinamentos de contexto no Copilot Chat, utilize referências diretas a arquivos via `#file`.\n- Codex CLI respeita `AGENTS.md` e `.codex/instructions.md` — garanta que o bloco `<AI_GUIDELINES>` esteja presente."
+      },
+      {
+        "id": "ADP-0203",
+        "scope": "adapter",
+        "adapter": "codex",
+        "category": "process",
+        "evidence_strength": "declared_heuristic",
+        "sources": [],
+        "applicable_languages": [
+          "*"
+        ],
+        "tags": [
+          "adapter",
+          "codex",
+          "behavior"
+        ],
+        "file": ".core\\rules\\codex.md",
+        "title": "Comportamento Observado",
+        "instruction_en": "Keep files focused and imports explicit to improve inline suggestions. Strictly follow governance rules (e.g., no autonomous push) when operating autonomously.",
+        "documentation_pt": "- Copilot inline tende a completar código baseado no contexto imediato (arquivo aberto + imports). Mantenha arquivos focados e com imports explícitos para melhores sugestões.\n- Codex em modo autônomo segue instruções de `AGENTS.md` rigorosamente — garanta que as regras de governança (ex: não fazer push) estejam claras."
+      },
+      {
+        "id": "ADP-0301",
+        "scope": "adapter",
+        "adapter": "gemini",
+        "category": "process",
+        "evidence_strength": "declared_heuristic",
+        "sources": [],
+        "applicable_languages": [
+          "*"
+        ],
+        "tags": [
+          "adapter",
+          "gemini",
+          "cli"
+        ],
+        "file": ".core\\rules\\gemini.md",
+        "title": "Integração com CLI",
+        "instruction_en": "Load project-specific instructions from `GEMINI.md` and ensure `<AI_GUIDELINES>` in `AGENTS.md` is present.",
+        "documentation_pt": "- Gemini CLI carrega automaticamente `GEMINI.md` na raiz e `~/.gemini/GEMINI.md` como config global.\n- Para instruções específicas do projeto, utilize `GEMINI.md` na raiz do repositório.\n- O `AGENTS.md` da raiz também é carregado — garanta que o bloco `<AI_GUIDELINES>` esteja presente."
+      },
+      {
+        "id": "ADP-0302",
+        "scope": "adapter",
+        "adapter": "gemini",
+        "category": "process",
+        "evidence_strength": "declared_heuristic",
+        "sources": [],
+        "applicable_languages": [
+          "*"
+        ],
+        "tags": [
+          "adapter",
+          "gemini",
+          "skills"
+        ],
+        "file": ".core\\rules\\gemini.md",
+        "title": "Skills Globais",
+        "instruction_en": "Manage global skills carefully in `~/.gemini/skills/` and prune unused scripts to prevent token bloat.",
+        "documentation_pt": "As skills globais (ferramentas personalizadas) residem em `~/.gemini/skills/`. Periodicamente, remova scripts que não utiliza ativamente, pois eles degradam a performance."
+      },
+      {
+        "id": "ADP-0303",
+        "scope": "adapter",
+        "adapter": "gemini",
+        "category": "process",
+        "evidence_strength": "declared_heuristic",
+        "sources": [],
+        "applicable_languages": [
+          "*"
+        ],
+        "tags": [
+          "adapter",
+          "gemini",
+          "context"
+        ],
+        "file": ".core\\rules\\gemini.md",
+        "title": "Estratégia de Ignore",
+        "instruction_en": "Aggressively use `.geminiignore` to exclude build artifacts, logs, binaries, and dependencies from context, preventing token waste.",
+        "documentation_pt": "Utilize o arquivo `.geminiignore` na raiz para evitar que arquivos de build, logs e binários poluam o contexto. Crítico para economia de tokens."
+      },
+      {
+        "id": "ADP-0304",
+        "scope": "adapter",
+        "adapter": "gemini",
+        "category": "process",
+        "evidence_strength": "declared_heuristic",
+        "sources": [],
+        "applicable_languages": [
+          "*"
+        ],
+        "tags": [
+          "adapter",
+          "gemini",
+          "behavior"
+        ],
+        "file": ".core\\rules\\gemini.md",
+        "title": "Comportamento Observado",
+        "instruction_en": "Use checkpoints via artifacts to preserve context in long sessions. Reinforce destructive command constraints, as Gemini tends to be highly proactive.",
+        "documentation_pt": "- Em sessões longas, use o conceito de \"checkpoints\" (salvar progresso em artefatos) para evitar perda de contexto.\n- Gemini tende a ser proativo em executar comandos — reforce a proibição de `git push` e tarefas destrutivas."
+      }
+    ],
+    "opt-in": [
+      {
+        "id": "OPT-0101",
+        "scope": "opt-in",
+        "opt_in_feature": "bdd",
+        "category": "correctness",
+        "evidence_strength": "declared_heuristic",
+        "sources": [],
+        "applicable_languages": [
+          "*"
+        ],
+        "tags": [
+          "opt-in",
+          "bdd",
+          "testing"
+        ],
+        "file": ".core\\rules\\opt-in\\bdd-en.md",
+        "title": "BDD Test Structure",
+        "instruction_en": "All tests MUST use the GIVEN / WHEN / THEN structure. Each `it()` describes exactly one atomic scenario. Prioritize readability over brevity. If a business rule `[BR-*]` is provided, include it in the test name.",
+        "documentation_pt": "- **DADO** [cenário inicial / pré-condição / estado do sistema]\n- **QUANDO** [ação executada pelo usuário ou sistema]\n- **ENTÃO** [resultado esperado / asserção]\n\n- **Linguagem Ubíqua:** Testes devem ser legíveis por humanos não-técnicos. Evite jargão de implementação nos nomes.\n- **Documentação Viva:** A suíte de testes serve como documentação executável do sistema. Se o teste não descreve o comportamento com clareza, reescreva-o.\n- **Cenários Atômicos:** Cada `it()` descreve exatamente um cenário. Não combine múltiplos fluxos.\n\n**Exemplo:**\n\n```javascript\nit(\"[BR-CLI-SYNC-01] GIVEN outdated baseline WHEN adopt is executed THEN syncs only changed files\", () => {\n  // ...\n});\n```"
+      },
+      {
+        "id": "OPT-0201",
+        "scope": "opt-in",
+        "opt_in_feature": "bdd",
+        "category": "correctness",
+        "evidence_strength": "declared_heuristic",
+        "sources": [],
+        "applicable_languages": [
+          "*"
+        ],
+        "tags": [
+          "opt-in",
+          "bdd",
+          "testing"
+        ],
+        "file": ".core\\rules\\opt-in\\bdd-pt.md",
+        "title": "Estrutura de Teste BDD",
+        "instruction_en": "All tests MUST use the GIVEN / WHEN / THEN structure in Brazilian Portuguese (DADO/QUANDO/ENTÃO). Each `it()` describes exactly one atomic scenario. Prioritize readability over brevity. If a business rule `[BR-*]` is provided, include it in the test name.",
+        "documentation_pt": "- **DADO** [cenário inicial / pré-condição / estado do sistema]\n- **QUANDO** [ação executada pelo usuário ou sistema]\n- **ENTÃO** [resultado esperado / asserção]\n\n- **Linguagem Ubíqua:** Testes devem ser legíveis por humanos não-técnicos. Evite jargão de implementação nos nomes.\n- **Documentação Viva:** A suíte de testes serve como documentação executável do sistema. Se o teste não descreve o comportamento com clareza, reescreva-o.\n- **Cenários Atômicos:** Cada `it()` descreve exatamente um cenário. Não combine múltiplos fluxos.\n\n**Exemplo:**\n\n```javascript\nit(\"[BR-CLI-SYNC-01] DADO baseline desatualizado QUANDO executado adopt ENTÃO sincroniza apenas arquivos alterados\", () => {\n  // ...\n});\n```"
+      },
+      {
+        "id": "OPT-0301",
+        "scope": "opt-in",
+        "opt_in_feature": "quality-gates",
+        "category": "correctness",
+        "evidence_strength": "medium",
+        "sources": [
+          "CWE-362",
+          "CWE-401",
+          "CONCUR 2025",
+          "Investigating Software Aging in LLM-Generated Software Systems (2025)"
+        ],
+        "applicable_languages": [
+          "*"
+        ],
+        "tags": [
+          "opt-in",
+          "quality-gates",
+          "review"
+        ],
+        "file": ".core\\rules\\opt-in\\quality-gates.md",
+        "title": "Quality Gates (Checklist)",
+        "instruction_en": "Before reporting a task as done, ensure: no circular dependencies, proper teardown for listeners/timers (prevent memory leaks), no unguarded asynchronous state mutations (prevent race conditions), >85% test coverage, >60% mutation kill rate, and no secrets in code/comments. Fix any automated failures before requesting human review.",
+        "documentation_pt": "1. **Análise Estática:** Complexidade ciclomática mantida sob controle, ausência de dependências circulares, nomes de variáveis/funções seguem a semântica do projeto.\n2. **Cobertura e Mutação:** Mínimo recomendado de 85% de cobertura, mínimo de 60% de kill rate.\n3. **Sensores de Bugs Típicos de IA:**\n   - **Race Conditions:** Se não houver garantia de atomicidade em blocos assíncronos (transação, lock ou estado local seguro), rejeite o design.\n   - **Memory Leaks:** Sempre implemente a função de limpeza (teardown/dispose) correspondente no ciclo de vida apropriado do framework usado.\n4. **Security & Secrets:** Bloqueio de chaves/tokens; validação de inputs contra injeção."
+      },
+      {
+        "id": "OPT-0401",
+        "scope": "opt-in",
+        "opt_in_feature": "tdd",
+        "category": "correctness",
+        "evidence_strength": "declared_heuristic",
+        "sources": [],
+        "applicable_languages": [
+          "*"
+        ],
+        "tags": [
+          "opt-in",
+          "tdd",
+          "testing"
+        ],
+        "file": ".core\\rules\\opt-in\\tdd-en.md",
+        "title": "Strict TDD Cycle",
+        "instruction_en": "Every new feature or bug fix MUST follow the RED -> GREEN -> REFACTOR cycle. Write a failing test first. Never skip the RED step. Write minimum code to pass. Maintain >85% coverage. Test files must be colocated. Unit tests must be isolated with mocks/stubs.",
+        "documentation_pt": "1. **RED:** Escreva um teste que falhe — defina o comportamento esperado antes de qualquer implementação.\n2. **GREEN:** Escreva o código mínimo necessário para fazer o teste passar. Sem otimizações prematuras.\n3. **REFACTOR:** Melhore o código (nomes, estrutura, DRY) mantendo todos os testes verdes.\n\n- **Isolamento:** Testes unitários não devem depender de serviços externos, rede ou banco de dados. Use mocks/stubs.\n- **Colocation:** Arquivos de teste devem ficar no mesmo diretório que o código testado."
+      },
+      {
+        "id": "OPT-0501",
+        "scope": "opt-in",
+        "opt_in_feature": "tdd",
+        "category": "correctness",
+        "evidence_strength": "declared_heuristic",
+        "sources": [],
+        "applicable_languages": [
+          "*"
+        ],
+        "tags": [
+          "opt-in",
+          "tdd",
+          "testing"
+        ],
+        "file": ".core\\rules\\opt-in\\tdd-pt.md",
+        "title": "Ciclo TDD Estrito",
+        "instruction_en": "Every new feature or bug fix MUST follow the RED -> GREEN -> REFACTOR cycle. Write a failing test first. Never skip the RED step. Write minimum code to pass. Maintain >85% coverage. Test files must be colocated. Unit tests must be isolated with mocks/stubs. If a business rule `[BR-*]` is provided, include it in the test name.",
+        "documentation_pt": "1. **RED:** Escreva um teste que falhe — defina o comportamento esperado antes de qualquer implementação.\n2. **GREEN:** Escreva o código mínimo necessário para fazer o teste passar. Sem otimizações prematuras.\n3. **REFACTOR:** Melhore o código (nomes, estrutura, DRY) mantendo todos os testes verdes.\n\n- **Isolamento:** Testes unitários não devem depender de serviços externos, rede ou banco de dados. Use mocks/stubs para dependências.\n- **Colocation:** Arquivos de teste devem ficar no mesmo diretório que o código testado (ex: `engine.mjs` → `engine.test.mjs`).\n- **Rastreabilidade:** Quando uma regra de negócio tiver identificador `[BR-*]`, o teste que a valida deve carregar o mesmo identificador no nome."
+      }
+    ]
   },
-  "by_feature": {},
+  "by_feature": {
+    "bdd": [
+      {
+        "id": "OPT-0101",
+        "scope": "opt-in",
+        "opt_in_feature": "bdd",
+        "category": "correctness",
+        "evidence_strength": "declared_heuristic",
+        "sources": [],
+        "applicable_languages": [
+          "*"
+        ],
+        "tags": [
+          "opt-in",
+          "bdd",
+          "testing"
+        ],
+        "file": ".core\\rules\\opt-in\\bdd-en.md",
+        "title": "BDD Test Structure",
+        "instruction_en": "All tests MUST use the GIVEN / WHEN / THEN structure. Each `it()` describes exactly one atomic scenario. Prioritize readability over brevity. If a business rule `[BR-*]` is provided, include it in the test name.",
+        "documentation_pt": "- **DADO** [cenário inicial / pré-condição / estado do sistema]\n- **QUANDO** [ação executada pelo usuário ou sistema]\n- **ENTÃO** [resultado esperado / asserção]\n\n- **Linguagem Ubíqua:** Testes devem ser legíveis por humanos não-técnicos. Evite jargão de implementação nos nomes.\n- **Documentação Viva:** A suíte de testes serve como documentação executável do sistema. Se o teste não descreve o comportamento com clareza, reescreva-o.\n- **Cenários Atômicos:** Cada `it()` descreve exatamente um cenário. Não combine múltiplos fluxos.\n\n**Exemplo:**\n\n```javascript\nit(\"[BR-CLI-SYNC-01] GIVEN outdated baseline WHEN adopt is executed THEN syncs only changed files\", () => {\n  // ...\n});\n```"
+      },
+      {
+        "id": "OPT-0201",
+        "scope": "opt-in",
+        "opt_in_feature": "bdd",
+        "category": "correctness",
+        "evidence_strength": "declared_heuristic",
+        "sources": [],
+        "applicable_languages": [
+          "*"
+        ],
+        "tags": [
+          "opt-in",
+          "bdd",
+          "testing"
+        ],
+        "file": ".core\\rules\\opt-in\\bdd-pt.md",
+        "title": "Estrutura de Teste BDD",
+        "instruction_en": "All tests MUST use the GIVEN / WHEN / THEN structure in Brazilian Portuguese (DADO/QUANDO/ENTÃO). Each `it()` describes exactly one atomic scenario. Prioritize readability over brevity. If a business rule `[BR-*]` is provided, include it in the test name.",
+        "documentation_pt": "- **DADO** [cenário inicial / pré-condição / estado do sistema]\n- **QUANDO** [ação executada pelo usuário ou sistema]\n- **ENTÃO** [resultado esperado / asserção]\n\n- **Linguagem Ubíqua:** Testes devem ser legíveis por humanos não-técnicos. Evite jargão de implementação nos nomes.\n- **Documentação Viva:** A suíte de testes serve como documentação executável do sistema. Se o teste não descreve o comportamento com clareza, reescreva-o.\n- **Cenários Atômicos:** Cada `it()` descreve exatamente um cenário. Não combine múltiplos fluxos.\n\n**Exemplo:**\n\n```javascript\nit(\"[BR-CLI-SYNC-01] DADO baseline desatualizado QUANDO executado adopt ENTÃO sincroniza apenas arquivos alterados\", () => {\n  // ...\n});\n```"
+      }
+    ],
+    "quality-gates": [
+      {
+        "id": "OPT-0301",
+        "scope": "opt-in",
+        "opt_in_feature": "quality-gates",
+        "category": "correctness",
+        "evidence_strength": "medium",
+        "sources": [
+          "CWE-362",
+          "CWE-401",
+          "CONCUR 2025",
+          "Investigating Software Aging in LLM-Generated Software Systems (2025)"
+        ],
+        "applicable_languages": [
+          "*"
+        ],
+        "tags": [
+          "opt-in",
+          "quality-gates",
+          "review"
+        ],
+        "file": ".core\\rules\\opt-in\\quality-gates.md",
+        "title": "Quality Gates (Checklist)",
+        "instruction_en": "Before reporting a task as done, ensure: no circular dependencies, proper teardown for listeners/timers (prevent memory leaks), no unguarded asynchronous state mutations (prevent race conditions), >85% test coverage, >60% mutation kill rate, and no secrets in code/comments. Fix any automated failures before requesting human review.",
+        "documentation_pt": "1. **Análise Estática:** Complexidade ciclomática mantida sob controle, ausência de dependências circulares, nomes de variáveis/funções seguem a semântica do projeto.\n2. **Cobertura e Mutação:** Mínimo recomendado de 85% de cobertura, mínimo de 60% de kill rate.\n3. **Sensores de Bugs Típicos de IA:**\n   - **Race Conditions:** Se não houver garantia de atomicidade em blocos assíncronos (transação, lock ou estado local seguro), rejeite o design.\n   - **Memory Leaks:** Sempre implemente a função de limpeza (teardown/dispose) correspondente no ciclo de vida apropriado do framework usado.\n4. **Security & Secrets:** Bloqueio de chaves/tokens; validação de inputs contra injeção."
+      }
+    ],
+    "tdd": [
+      {
+        "id": "OPT-0401",
+        "scope": "opt-in",
+        "opt_in_feature": "tdd",
+        "category": "correctness",
+        "evidence_strength": "declared_heuristic",
+        "sources": [],
+        "applicable_languages": [
+          "*"
+        ],
+        "tags": [
+          "opt-in",
+          "tdd",
+          "testing"
+        ],
+        "file": ".core\\rules\\opt-in\\tdd-en.md",
+        "title": "Strict TDD Cycle",
+        "instruction_en": "Every new feature or bug fix MUST follow the RED -> GREEN -> REFACTOR cycle. Write a failing test first. Never skip the RED step. Write minimum code to pass. Maintain >85% coverage. Test files must be colocated. Unit tests must be isolated with mocks/stubs.",
+        "documentation_pt": "1. **RED:** Escreva um teste que falhe — defina o comportamento esperado antes de qualquer implementação.\n2. **GREEN:** Escreva o código mínimo necessário para fazer o teste passar. Sem otimizações prematuras.\n3. **REFACTOR:** Melhore o código (nomes, estrutura, DRY) mantendo todos os testes verdes.\n\n- **Isolamento:** Testes unitários não devem depender de serviços externos, rede ou banco de dados. Use mocks/stubs.\n- **Colocation:** Arquivos de teste devem ficar no mesmo diretório que o código testado."
+      },
+      {
+        "id": "OPT-0501",
+        "scope": "opt-in",
+        "opt_in_feature": "tdd",
+        "category": "correctness",
+        "evidence_strength": "declared_heuristic",
+        "sources": [],
+        "applicable_languages": [
+          "*"
+        ],
+        "tags": [
+          "opt-in",
+          "tdd",
+          "testing"
+        ],
+        "file": ".core\\rules\\opt-in\\tdd-pt.md",
+        "title": "Ciclo TDD Estrito",
+        "instruction_en": "Every new feature or bug fix MUST follow the RED -> GREEN -> REFACTOR cycle. Write a failing test first. Never skip the RED step. Write minimum code to pass. Maintain >85% coverage. Test files must be colocated. Unit tests must be isolated with mocks/stubs. If a business rule `[BR-*]` is provided, include it in the test name.",
+        "documentation_pt": "1. **RED:** Escreva um teste que falhe — defina o comportamento esperado antes de qualquer implementação.\n2. **GREEN:** Escreva o código mínimo necessário para fazer o teste passar. Sem otimizações prematuras.\n3. **REFACTOR:** Melhore o código (nomes, estrutura, DRY) mantendo todos os testes verdes.\n\n- **Isolamento:** Testes unitários não devem depender de serviços externos, rede ou banco de dados. Use mocks/stubs para dependências.\n- **Colocation:** Arquivos de teste devem ficar no mesmo diretório que o código testado (ex: `engine.mjs` → `engine.test.mjs`).\n- **Rastreabilidade:** Quando uma regra de negócio tiver identificador `[BR-*]`, o teste que a valida deve carregar o mesmo identificador no nome."
+      }
+    ]
+  },
   "generated_at": "2026-05-05T15:37:31.886Z",
   "schema_version": "1.0"
 }

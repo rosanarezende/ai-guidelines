@@ -4,30 +4,31 @@
 
 ---
 
-#### Gates de Aceite (Checklist)
+#### [OPT-0301] Quality Gates (Checklist)
 
-1. **Análise Estática:**
-   - Complexidade ciclomática mantida sob controle (módulos pequenos e focados).
-   - Ausência de dependências circulares.
-   - Nomes de variáveis e funções seguem a semântica do projeto (PT-BR ou EN conforme convenção local).
+```yaml
+id: OPT-0301
+scope: opt-in
+opt_in_feature: quality-gates
+category: correctness
+evidence_strength: medium
+sources:
+  - "CWE-362"
+  - "CWE-401"
+  - "CONCUR 2025"
+  - "Investigating Software Aging in LLM-Generated Software Systems (2025)"
+applicable_languages: ["*"]
+tags: [opt-in, quality-gates, review]
+```
 
-2. **Cobertura e Mutação:**
-   - **Cobertura de Testes:** Mínimo recomendado de **85%**.
-   - **Mutation Testing:** Mínimo de **60%** de kill rate (garante que os testes realmente validam a lógica).
+**Instruction (en):**
+Before reporting a task as done, ensure: no circular dependencies, proper teardown for listeners/timers (prevent memory leaks), no unguarded asynchronous state mutations (prevent race conditions), >85% test coverage, >60% mutation kill rate, and no secrets in code/comments. Fix any automated failures before requesting human review.
 
-3. **Sensores de Bugs Típicos de IA (Heurísticas obrigatórias):**
-   - **Race Conditions:** O agente deve analisar blocos assíncronos (ex: múltiplos `await` concorrentes) que leiam e modifiquem o mesmo estado em memória ou DB. Se não houver garantia de atomicidade (transação, lock ou estado local seguro), o design deve ser rejeitado. _Source canônica: CWE-362; evidência empírica em CONCUR 2025._
-   - **Memory Leaks:** Sempre que o agente implementar _listeners_, observadores, subscrições de stream ou timers (`setInterval`), deve compulsoriamente implementar a função de limpeza (teardown/dispose) correspondente no ciclo de vida apropriado do framework usado. _Source canônica: CWE-401; evidência emergente em "Investigating Software Aging in LLM-Generated Software Systems" (2025)._
-   - _Ferramentas recomendadas:_ Property-based testing (ex: fast-check em JS, Hypothesis em Python).
+**Documentação (pt-br):**
 
-4. **Security & Secrets:**
-   - Bloqueio de submissão de chaves, tokens ou credenciais (mesmo em comentários).
-   - Validação de inputs contra injeção de código.
-
----
-
-#### Regras para Agentes de IA
-
-- Ao finalizar uma implementação, execute o checklist acima antes de reportar "done".
-- Se algum gate falhar, corrija antes de prosseguir — não delegue ao humano erros detectáveis por automação.
-- Em projetos com CI configurado, confirme que o pipeline está verde antes de considerar a tarefa concluída.
+1. **Análise Estática:** Complexidade ciclomática mantida sob controle, ausência de dependências circulares, nomes de variáveis/funções seguem a semântica do projeto.
+2. **Cobertura e Mutação:** Mínimo recomendado de 85% de cobertura, mínimo de 60% de kill rate.
+3. **Sensores de Bugs Típicos de IA:**
+   - **Race Conditions:** Se não houver garantia de atomicidade em blocos assíncronos (transação, lock ou estado local seguro), rejeite o design.
+   - **Memory Leaks:** Sempre implemente a função de limpeza (teardown/dispose) correspondente no ciclo de vida apropriado do framework usado.
+4. **Security & Secrets:** Bloqueio de chaves/tokens; validação de inputs contra injeção.

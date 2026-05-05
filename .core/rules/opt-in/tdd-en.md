@@ -5,30 +5,27 @@
 
 ---
 
-#### Mandatory Cycle (Strict TDD)
+#### [OPT-0401] Strict TDD Cycle
 
-Every new feature or bug fix MUST follow this cycle:
+```yaml
+id: OPT-0401
+scope: opt-in
+opt_in_feature: tdd
+category: correctness
+evidence_strength: declared_heuristic
+sources: []
+applicable_languages: ["*"]
+tags: [opt-in, tdd, testing]
+```
 
-1. **RED:** Write a failing test — define the expected behavior before any implementation.
-2. **GREEN:** Write the minimum code necessary to make the test pass. No premature optimizations.
-3. **REFACTOR:** Improve the code (naming, structure, DRY) while keeping all tests green.
+**Instruction (en):**
+Every new feature or bug fix MUST follow the RED -> GREEN -> REFACTOR cycle. Write a failing test first. Never skip the RED step. Write minimum code to pass. Maintain >85% coverage. Test files must be colocated. Unit tests must be isolated with mocks/stubs.
 
-> **Rule:** Never skip the RED step. Code without a previously failing test is not TDD.
+**Documentação (pt-br):**
 
----
+1. **RED:** Escreva um teste que falhe — defina o comportamento esperado antes de qualquer implementação.
+2. **GREEN:** Escreva o código mínimo necessário para fazer o teste passar. Sem otimizações prematuras.
+3. **REFACTOR:** Melhore o código (nomes, estrutura, DRY) mantendo todos os testes verdes.
 
-#### Structural Principles
-
-- **One Test, One Intent:** Each test case validates exactly one behavior. Avoid "omni-bus" tests.
-- **Isolation:** Unit tests must not depend on external services, network or databases. Use mocks/stubs for dependencies.
-- **Colocation:** Test files should live in the same directory as the code under test (e.g., `engine.mjs` → `engine.test.mjs`).
-- **Coverage as Gate:** Minimum recommended **85%** line coverage. Exceptions must be documented.
-
----
-
-#### Rules for AI Agents
-
-- When receiving a task, write tests BEFORE the implementation.
-- Generate edge cases based on the spec before implementing the logic.
-- If an existing test breaks during refactoring, fix it before proceeding.
-- Never delete or disable tests to make the build pass.
+- **Isolamento:** Testes unitários não devem depender de serviços externos, rede ou banco de dados. Use mocks/stubs.
+- **Colocation:** Arquivos de teste devem ficar no mesmo diretório que o código testado.
