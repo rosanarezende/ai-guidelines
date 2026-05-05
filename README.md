@@ -65,13 +65,16 @@ Ciclo SDD descrito em [`.core/process/spec-foundation.md`](.core/process/spec-fo
 | `.core/process/spec-foundation.md` | Lifecycle de specs e SDD versionado            |
 | `docs/tdd-guidelines.md`           | Padrões BDD e cobertura                        |
 | `docs/cli/ai-guidelines-cli.md`    | Constituição (Business Rules) da CLI           |
+| `.core/rules/_meta/rules.json`     | Catálogo consolidado de regras em JSON         |
+| `.core/rules/catalog.md`           | Catálogo navegável e documentação humana       |
 
-### CLI `init + adopt`
+### CLI `init`, `adopt` e `ai:check`
 
 O CLI vive em `cli/` e suporta:
 
 - `init` — baseline AI-first para projeto novo
 - `adopt` — adoção conservadora em repo existente
+- `yarn ai:check` — CLI de auditoria (Quality Gates e Token Linting)
 - Wizard interativo em TTY
 - Detecção de formatter rival (`biome`, `dprint`, `rome`, `standard`)
 - Detecção de monorepo (npm/yarn/bun/pnpm workspaces)
@@ -80,6 +83,7 @@ O CLI vive em `cli/` e suporta:
 - `--force` — atualização explícita quando o diff está entendido
 - Runtime monolítico em `AGENTS.md`, delimitado por `<AI_GUIDELINES>`
 - Opt-ins editoriais compilados em tags XML (`<FEATURE_TDD>`, `<FEATURE_BDD>`, etc.)
+- Gerenciamento de Token Budget (soft ceilings) baseado na heurística Tok-H
 
 Saiba mais sobre os módulos disponíveis em
 [Documentação de Features](docs/features.md).
@@ -103,13 +107,20 @@ Saiba mais sobre os módulos disponíveis em
 ```text
 ai-guidelines/
 ├── .core/                      # Baseline canônico (consumido pelo CLI)
-│   ├── rules/                  # Regras universais + adapters por IA (claude/gemini/codex)
+│   ├── rules/                  # Regras bilíngues (YAML + Markdown)
+│   │   ├── _meta/              # Catálogo compilado (rules.json e ledger)
+│   │   ├── opt-in/             # Regras vinculadas a features opcionais
+│   │   └── catalog.md          # Catálogo navegável (humano)
 │   └── templates/              # Templates injetados pelo init/adopt no repo alvo
 ├── cli/                        # CLI local (ai-guidelines-cli.mjs)
 │   ├── app/                    # Engine, orquestração e UI
 │   ├── cli/                    # Parser de argumentos e Wizard
+│   ├── commands/               # Comandos de auditoria (ai-check.mjs)
 │   ├── fs/                     # I/O, file-system e merge-utils
-│   ├── governance/             # Monolith compiler e migrations
+│   ├── governance/             # Compiladores e Motores de Análise
+│   │   ├── monolith/           # Rules Builder, Parser e Token Budget
+│   │   ├── quality-gates/      # Sensores baseados no rules.json
+│   │   └── evaluation/         # Eval Runner (agregação de violações)
 │   ├── features/               # Módulos de funcionalidade (Features)
 │   │   ├── core/               # pointers (compiler), gitattributes
 │   │   └── opt-in/             #

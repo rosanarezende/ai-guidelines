@@ -19,8 +19,10 @@ Yarn 4 (PnP) é o gerenciador canônico — `.pnp.cjs` e `.pnp.loader.mjs` são 
 
 ```bash
 yarn install --immutable     # bootstrap (lockfile não muta)
+yarn build:rules             # reconstrói o catálogo rules.json e catalog.md
 yarn format                  # prettier --write .
-yarn check                   # prettier --check .
+yarn check                   # prettier --check . && yarn build:rules
+yarn ai:check                # quality gates via sensors locais e lint heurístico
 yarn test                    # node --test sobre cli/**/*.test.mjs e tests/**
 yarn test:coverage           # idem, com --experimental-test-coverage
 yarn check:repo              # install + check + test:coverage (pipeline CI)
@@ -50,6 +52,8 @@ node --test --test-name-pattern='BR-CLI-SYNC-01' cli/governance/agents-merge.tes
 ```bash
 yarn format ; yarn check ; git add . ; git commit -m "..."
 ```
+
+Se for investigar problemas de código/token de IA, rode antes `yarn ai:check`. Se editar as regras `.core/rules/`, lembre de rodar `yarn build:rules` (ou simplesmente `yarn check` que já o inclui).
 
 E **nunca** execute `git push` autonomamente — exige aprovação humana explícita. Husky (`.husky/`) replica os gates localmente.
 

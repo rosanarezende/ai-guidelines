@@ -263,10 +263,11 @@
 
 > Mapeamento canônico: Fase 6 desta spec ≡ **Fase 3 (Preparação para Review)** do novo `tasks-boilerplate.md`. Esta fase é **exclusiva para empacotamento e homologação**. Nenhuma implementação após este ponto, exceto correções demandadas pelo review.
 
-- [ ] **6.1** Atualizar header da `spec.md` desta 0018: status → `In Review`.
+- [x] **6.1** Atualizar header da `spec.md` desta 0018: status → `In Review`.
+- [x] **6.1.1** Atualizar documentação raiz (`README.md`, `CLAUDE.md`, `docs/features.md`).
 - [ ] **6.2** Rodar pipeline canônico: `yarn check:repo` (= `install --immutable` + `format --check` + `test:coverage`) verde.
 - [ ] **6.3** Validar token budget agregado ≤ 6 K (warning ≥ 4,2 K registrado no PR description se aplicável).
-- [ ] **6.4** Validar bilingual schema: nenhuma regra sobrevivente sem `Instruction (en)` E `Documentação (pt-br)`.
+- [x] **6.4** Validar bilingual schema: nenhuma regra sobrevivente sem `Instruction (en)` E `Documentação (pt-br)`.
 - [ ] **6.5** Diff em consumidor real: `node cli/ai-guidelines-cli.mjs adopt --target ../<consumidor> --dry-run` revisado para regressões.
 - [ ] **6.6** Atualizar PR description (3 etapas conforme regra de PR collab): contexto → decisões cravadas (cross-ref `decision-brief.md`) → impacto cross-spec (0011, 0009, governance-information-architecture, Scaffolding).
 - [ ] **6.7** **[MANDATÓRIO]** Aguardar Gate de Review Humano (homologação técnica formal). **Não prosseguir** para Fase 7 sem aprovação explícita.

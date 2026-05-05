@@ -78,3 +78,14 @@ Modificam a infraestrutura (configurações, `package.json`, workflows) do proje
 
 - **O que faz**: Cria um workflow de Integração Contínua (`ai-guidelines-ci.yml`) adaptado ao seu gerenciador de pacotes (npm, yarn, pnpm).
 - **Por que**: Bloqueia merges de códigos que não passam nos critérios de qualidade "Golden Green".
+
+---
+
+### 🛡️ Auditoria e Governança (CLI tool)
+
+Ferramentas internas de governança distribuídas junto ao `ai-guidelines`.
+
+#### 9. AI Check (`yarn ai:check`)
+
+- **O que faz**: Prover sensores locais ("Quality Gates") que rastreiam violações de regras estruturais e auxiliam no controle do uso de tokens na janela de contexto das IAs. Verifica heurísticas de degradação (como ausência de ignore files ou presença de `node_modules` no contexto) e regras catalogadas.
+- **Por que**: A ferramenta apenas reporta violações como alertas (`warnings`) agrupadas por regra (`ruleId`). O processo de build não quebra, garantindo baixo atrito (fail-open) enquanto educa o desenvolvedor.
