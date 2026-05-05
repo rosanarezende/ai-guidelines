@@ -26,6 +26,7 @@
     "build:rules": "node cli/governance/monolith/rules-builder.mjs",
     "check:repo": "yarn install --immutable && yarn check && yarn test:coverage",
     "format": "prettier --write .",
+    "ai:check": "node cli/commands/ai-check.mjs",
     "check": "prettier --check . && yarn build:rules",
     "prepare": "husky"
   },
