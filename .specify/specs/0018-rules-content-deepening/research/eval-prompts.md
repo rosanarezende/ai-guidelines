@@ -14,11 +14,11 @@
 
 ### Modelos e interfaces
 
-| Provedor   | Modelo             | CLI            | Notas                                                                                        |
-| :--------- | :----------------- | :------------- | :------------------------------------------------------------------------------------------- |
-| **Claude** | **Sonnet 4**       | `claude` (CLI) | Modelo padrão dos consumidores. Effort/thinking: **default** (não ativar extended thinking). |
-| **Codex**  | **GPT-4o (Codex)** | `codex` (CLI)  | Modelo padrão do Codex CLI. Usar config default.                                             |
-| **Gemini** | **Gemini 2.5 Pro** | `gemini` (CLI) | Modelo padrão da Gemini CLI. Usar config default.                                            |
+| Provedor   | Modelo             | CLI            | Notas                                                                                            |
+| :--------- | :----------------- | :------------- | :----------------------------------------------------------------------------------------------- |
+| **Claude** | **Sonnet 4.6**     | `claude` (CLI) | Modelo padrão dos consumidores. Effort/thinking: **default** (não ativar extended thinking).     |
+| **Codex**  | **gpt-5.4**        | `codex` (CLI)  | "Strong model for everyday coding" — equivalente ao Sonnet no tier. Não usar gpt-5.5 (frontier). |
+| **Gemini** | **gemini-2.5-pro** | `gemini` (CLI) | Estável, tier pro equivalente. Não usar modelos `3.x-preview` (frontier/experimental).           |
 
 > **Por que esses modelos?** Testamos no tier que o consumidor médio usaria para coding diário. Modelos reasoning (Opus, o3, etc.) tendem a ser mais compliant por design — o teste perde valor se só roda no "melhor aluno da sala".
 
@@ -35,7 +35,7 @@
    ```powershell
    Remove-Item C:\tmp\eval-clean\* -Recurse -Force
    ```
-6. **Repita** 3 vezes por provedor, por prompt (total: 3 prompts × 3 provedores × 3 rodadas = **27 execuções**).
+6. **Repita** para cada provedor, por prompt (total: 3 prompts × 3 provedores × 1 rodada = **9 execuções**).
 
 > **Por que diretório vazio?** Garante que nenhuma governança (AGENTS.md, regras, etc.) seja carregada pelas CLIs. Estamos testando o **baseline** — o comportamento natural de cada modelo sem as regras do framework. Isso é o componente G (obrigatório) do eval.
 
@@ -164,11 +164,11 @@ Use async/await and fetch.
 
 | Prompt    | Regra   | Provedores              | Rodadas | Total execuções |
 | :-------- | :------ | :---------------------- | :------ | :-------------- |
-| EVAL-01   | GR-0001 | Claude + Codex + Gemini | 3 cada  | 9               |
-| EVAL-02   | GR-0004 | Claude + Codex + Gemini | 3 cada  | 9               |
-| EVAL-03   | GR-0005 | Claude + Codex + Gemini | 3 cada  | 9               |
-| **Total** |         |                         |         | **27**          |
+| EVAL-01   | GR-0001 | Claude + Codex + Gemini | 1 cada  | 3               |
+| EVAL-02   | GR-0004 | Claude + Codex + Gemini | 1 cada  | 3               |
+| EVAL-03   | GR-0005 | Claude + Codex + Gemini | 1 cada  | 3               |
+| **Total** |         |                         |         | **9**           |
 
-> **Custo estimado:** ~27 chamadas de API com prompts curtos (~100-200 tokens input cada). Custo irrisório.
+> **Por que N=1?** Benchmark externo `[EXT-AKITA-2026]` (30+ modelos, 8 dimensões, auditoria humana) já fornece evidência empírica robusta. Nosso eval amostral valida o subset específico das regras — se resultado for ambíguo/parcial em alguma execução, rodamos N extra naquele caso.
 >
-> **Tempo estimado:** ~30-45 minutos para rodar todas as 27 execuções e preencher avaliações.
+> **Tempo estimado:** ~15-20 minutos para rodar as 9 execuções e preencher avaliações.
