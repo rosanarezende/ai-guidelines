@@ -14,24 +14,32 @@
 
 import { parseRulesFromDirectory } from "#governance/monolith/rules-parser";
 import { writeFileSync, mkdirSync, readFileSync, existsSync } from "node:fs";
-import { dirname, resolve } from "node:path";
+import { dirname, resolve, relative } from "node:path";
 import { fileURLToPath } from "node:url";
+import { execSync } from "node:child_process";
 import { analyzeBudget } from "./token-budget.mjs";
 
 // Defaults — overridable via options.outputDir for tests
 const DEFAULT_META_DIR = resolve(".core/rules/_meta");
 const RULES_OUTPUT_PATH = resolve(DEFAULT_META_DIR, "rules.json");
 const LEDGER_OUTPUT_PATH = resolve(DEFAULT_META_DIR, "agents-core-ledger.md");
+const CATALOG_OUTPUT_PATH = resolve(DEFAULT_META_DIR, "..", "catalog.md");
 const LEDGER_DIR = DEFAULT_META_DIR;
 
 function resolveArtifactPaths(outputDir) {
   if (!outputDir) {
-    return { rulesPath: RULES_OUTPUT_PATH, ledgerPath: LEDGER_OUTPUT_PATH, dir: LEDGER_DIR };
+    return {
+      rulesPath: RULES_OUTPUT_PATH,
+      ledgerPath: LEDGER_OUTPUT_PATH,
+      catalogPath: CATALOG_OUTPUT_PATH,
+      dir: LEDGER_DIR,
+    };
   }
   const dir = resolve(outputDir);
   return {
     rulesPath: resolve(dir, "rules.json"),
     ledgerPath: resolve(dir, "agents-core-ledger.md"),
+    catalogPath: resolve(dir, "..", "catalog.md"),
     dir,
   };
 }
@@ -131,11 +139,50 @@ export async function buildRulesCatalog(sourceRulesDir, options = {}) {
     const coreRules = rules.filter((r) => r.tags && r.tags.includes("core"));
     const ledgerMarkdown = generateCoreAgentsLedger(coreRules);
 
-    return { catalogJson, ledgerMarkdown, errors: [], success: true };
+    // Step 7: Generate human catalog
+    const humanCatalogMarkdown = generateCatalogMarkdown(rules, resolve(sourceRulesDir));
+
+    return { catalogJson, ledgerMarkdown, humanCatalogMarkdown, errors: [], success: true };
   } catch (err) {
     errors.push(`[BUILDER_ERROR] ${err.message}`);
-    return { catalogJson: null, ledgerMarkdown: null, errors, success: false };
+    return {
+      catalogJson: null,
+      ledgerMarkdown: null,
+      humanCatalogMarkdown: null,
+      errors,
+      success: false,
+    };
   }
+}
+
+/**
+ * Generate human-readable catalog markdown
+ * @param {Array} rules
+ * @param {string} baseDir Base directory for relative paths
+ * @returns {string}
+ */
+export function generateCatalogMarkdown(rules, baseDir) {
+  const sorted = [...rules].sort((a, b) => a.id.localeCompare(b.id));
+
+  let markdown = `# Rules Catalog\n\n> Índice navegável gerado automaticamente.\n> **NÃO EDITE ESTE ARQUIVO** — ele é reconstruído via \`yarn build:rules\`.\n\n| ID | Title | Scope | Category | Link |\n|----|-------|-------|----------|------|\n`;
+
+  for (const rule of sorted) {
+    const id = rule.id || "?";
+    const title = (rule.title || "—").replace(/\|/g, "\\|");
+    const scope = rule.scope || "?";
+    const category = rule.category || "?";
+
+    let link = "—";
+    if (rule.file) {
+      const relPath = relative(baseDir, rule.file).replace(/\\/g, "/");
+      const anchor = id.toLowerCase().replace(/[^a-z0-9]+/g, "");
+      link = `[Ver](${relPath}#${anchor})`;
+    }
+
+    markdown += `| **${id}** | ${title} | \`${scope}\` | \`${category}\` | ${link} |\n`;
+  }
+
+  return markdown;
 }
 
 /**
@@ -329,11 +376,18 @@ function serializeToJson(catalog) {
  * Save catalog and ledger to disk
  * @param {Object} catalogJson
  * @param {string} ledgerMarkdown
+ * @param {string} humanCatalogMarkdown
+ * @param {Object} options
  * @returns {Promise<{success: boolean, errors: string[]}>}
  */
-export async function saveCatalogArtifacts(catalogJson, ledgerMarkdown, options = {}) {
+export async function saveCatalogArtifacts(
+  catalogJson,
+  ledgerMarkdown,
+  humanCatalogMarkdown,
+  options = {}
+) {
   const errors = [];
-  const { rulesPath, ledgerPath, dir } = resolveArtifactPaths(options.outputDir);
+  const { rulesPath, ledgerPath, catalogPath, dir } = resolveArtifactPaths(options.outputDir);
 
   // Ensure target dir exists before any write attempt.
   try {
@@ -372,6 +426,30 @@ export async function saveCatalogArtifacts(catalogJson, ledgerMarkdown, options 
     errors.push(`[SAVE_ERROR] Failed to write ${ledgerPath}: ${err.message}`);
   }
 
+  try {
+    if (humanCatalogMarkdown && catalogPath) {
+      if (existsSync(catalogPath)) {
+        const oldContent = readFileSync(catalogPath, "utf-8");
+        if (oldContent !== humanCatalogMarkdown) {
+          writeFileSync(catalogPath, humanCatalogMarkdown, "utf-8");
+        }
+      } else {
+        writeFileSync(catalogPath, humanCatalogMarkdown, "utf-8");
+      }
+    }
+  } catch (err) {
+    errors.push(`[SAVE_ERROR] Failed to write ${catalogPath}: ${err.message}`);
+  }
+
+  // Auto-format generated artifacts to prevent Prettier check failures
+  try {
+    execSync(`yarn prettier --write "${rulesPath}" "${ledgerPath}" "${catalogPath}"`, {
+      stdio: "ignore",
+    });
+  } catch (err) {
+    // Non-fatal if prettier fails (e.g., in a test environment without yarn)
+  }
+
   return { success: errors.length === 0, errors };
 }
 
@@ -382,7 +460,7 @@ const isMain =
 if (isMain) {
   (async () => {
     try {
-      const { catalogJson, ledgerMarkdown, errors, success } =
+      const { catalogJson, ledgerMarkdown, humanCatalogMarkdown, errors, success } =
         await buildRulesCatalog("./.core/rules");
 
       if (!success) {
@@ -392,7 +470,11 @@ if (isMain) {
       }
 
       // Save artifacts
-      const saveResult = await saveCatalogArtifacts(catalogJson, ledgerMarkdown);
+      const saveResult = await saveCatalogArtifacts(
+        catalogJson,
+        ledgerMarkdown,
+        humanCatalogMarkdown
+      );
       if (!saveResult.success) {
         console.error("❌ Save failed:");
         saveResult.errors.forEach((err) => console.error(`  - ${err}`));

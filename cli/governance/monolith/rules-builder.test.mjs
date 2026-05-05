@@ -387,7 +387,7 @@ describe("Rules Builder", () => {
         // Primeira build: sem rules.json existente → gera generated_at agora.
         const first = await buildRulesCatalog(FIXTURES_DIR, { outputDir: tempOut });
         assert.strictEqual(first.success, true);
-        const save1 = await saveCatalogArtifacts(first.catalogJson, "", { outputDir: tempOut });
+        const save1 = await saveCatalogArtifacts(first.catalogJson, "", "", { outputDir: tempOut });
         assert.strictEqual(save1.success, true);
         const firstGenAt = first.catalogJson.generated_at;
 

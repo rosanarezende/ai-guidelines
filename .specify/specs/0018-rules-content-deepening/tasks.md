@@ -250,12 +250,12 @@
 
 > Origem: [`[DEC-0018-B04]`](./decision-brief.md#dec-0018-b04-formato-do-catálogo-de-regras) Sub-eixo 3 = N; [`[DEC-0018-B06]`](./decision-brief.md#dec-0018-b06-fronteira-com-spec-0011-regra-hierarquia) (A + F + N); [`[DEC-0018-B07]`](./decision-brief.md#dec-0018-b07-fronteira-com-spec-0009-harness-engineering) (D + H + J). Plan: § B.7.
 
-- [ ] **5.B7.1** Gerar/manter `.core/rules/catalog.md`: índice navegável humano com 1 linha por regra (ID + intent curto + escopo + categoria + link). Validar cross-refs no `rules-parser.mjs` (5.B3.2).
-- [ ] **5.B7.2** Criar `NEXT.md` com:
+- [x] **5.B7.1** Gerar/manter `.core/rules/catalog.md`: índice navegável humano com 1 linha por regra (ID + intent curto + escopo + categoria + link). Validar cross-refs no `rules-parser.mjs` (5.B3.2).
+- [x] **5.B7.2** Criar `NEXT.md` com:
   - **Spec 0011 (regra-hierarquia)**: gatilho cravado `agregado compilado ≥ 4,2 K tokens (= 70 % do teto de 6 K)`; apêndice com snapshot canônico do `<AI_GUIDELINES>` ao fim da 0018 (medição Tok-H, listagem de regras, taxonomia final, cobertura de cross-refs).
   - **Spec 0009 (harness-engineering)**: pointer + nota cravando que "eval mínimo da 0018 = baseline-regression no harness" (qualquer mudança em rules invalida baseline e exige re-rodada).
   - **Inovação spec futura — Scaffolding Inteligente de Provedores**: CLI detecta provedores ativos no consumidor (heurística: presença de `CLAUDE.md`, `.codex/`, `gemini.md`) e gera (i) `.claudeignore` focado e (ii) trampolins (`CLAUDE.md` contendo apenas `@AGENTS.md`) — mitiga _Context Rot_ e elimina arquivos soltos.
-- [ ] **5.B7.3** **[COMMIT]** `docs(spec-0018): catálogo navegável + NEXT.md (débitos para 0011, 0009, Scaffolding)`.
+- [x] **5.B7.3** **[COMMIT]** `docs(spec-0018): catálogo navegável + NEXT.md (débitos para 0011, 0009, Scaffolding)`.
 
 ---
 
