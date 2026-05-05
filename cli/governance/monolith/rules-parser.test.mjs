@@ -535,12 +535,12 @@ This rule is missing the instruction marker and should fail.
       const result = parseRuleFile("test.md", content);
       assert.strictEqual(result.rules.length, 0);
       assert.strictEqual(result.errors.length, 1);
-      assert.ok(result.errors[0].includes("MISSING_INSTRUCTION_EN"));
+      assert.ok(result.errors[0].includes("INVALID_CONTENT"));
     });
   });
 
-  describe("[BR-PARSER-34] DADO regra com instrução vazia QUANDO parsear ENTÃO retorna erro", async () => {
-    it("fails when instruction content is empty", async () => {
+  describe("[BR-PARSER-34] DADO regra com instrução vazia ou muito curta QUANDO parsear ENTÃO retorna erro", async () => {
+    it("fails when instruction content is empty or less than 10 chars", async () => {
       const content = `
 #### [GR-TEST-04] Rule with empty instruction
 
@@ -555,6 +555,7 @@ tags: ["test"]
 \`\`\`
 
 **Instruction (en):**
+short
 
 **Documentação (pt-br):**
 This rule has an empty instruction and should fail.
@@ -562,7 +563,38 @@ This rule has an empty instruction and should fail.
       const result = parseRuleFile("test.md", content);
       assert.strictEqual(result.rules.length, 0);
       assert.strictEqual(result.errors.length, 1);
-      assert.ok(result.errors[0].includes("MISSING_INSTRUCTION_EN"));
+      assert.ok(result.errors[0].includes("INVALID_CONTENT"));
+    });
+  });
+
+  describe("[BR-PARSER-35] DADO regra com blocos duplicados QUANDO parsear ENTÃO falha com DUPLICATE_SECTION", async () => {
+    it("fails when instruction or documentation markers are duplicated", async () => {
+      const content = `
+#### [GR-TEST-05] Rule with duplicate instruction
+
+\`\`\`yaml
+id: GR-TEST-05
+scope: universal
+category: process
+evidence_strength: declared_heuristic
+sources: []
+applicable_languages: ["all"]
+tags: ["test"]
+\`\`\`
+
+**Instruction (en):**
+This is a valid instruction that is at least 10 chars long.
+
+**Instruction (en):**
+Duplicate instruction block.
+
+**Documentação (pt-br):**
+Some docs.
+`;
+      const result = parseRuleFile("test.md", content);
+      assert.strictEqual(result.rules.length, 0);
+      assert.strictEqual(result.errors.length, 1);
+      assert.ok(result.errors[0].includes("DUPLICATE_SECTION"));
     });
   });
 

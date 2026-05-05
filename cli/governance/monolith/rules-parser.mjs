@@ -120,6 +120,17 @@ export function parseRuleFile(filePath, content) {
     const instructionMarker = "**Instruction (en):**";
     const documentationMarker = "**Documentação (pt-br):**";
 
+    const instructionCount = bodyContent.split(instructionMarker).length - 1;
+    const documentationCount = bodyContent.split(documentationMarker).length - 1;
+
+    if (instructionCount > 1 || documentationCount > 1) {
+      errors.push(
+        `[DUPLICATE_SECTION] Rule [${ruleId}] in ${path.basename(filePath)}: ` +
+          `Multiple '**Instruction (en):**' or '**Documentação (pt-br):**' blocks found.`
+      );
+      continue;
+    }
+
     const instructionIndex = findMarkerOutsideCodeFences(bodyContent, instructionMarker);
     const documentationIndex = findMarkerOutsideCodeFences(bodyContent, documentationMarker);
 
@@ -141,18 +152,17 @@ export function parseRuleFile(filePath, content) {
 
     if (documentationIndex !== -1 && documentationIndex < instructionIndex) {
       errors.push(
-        `[INVALID_MARKER_ORDER] Rule [${ruleId}] in ${path.basename(filePath)}: ` +
+        `[INVALID_RULE] Rule [${ruleId}] in ${path.basename(filePath)}: ` +
           `'**Documentação (pt-br):**' appears before '**Instruction (en):**'.`
       );
       continue;
     }
 
-    // Fail-fast if instruction_en is missing
-    if (!instruction_en) {
+    // Fail-fast if instruction_en is missing or too short
+    if (!instruction_en || instruction_en.length < 10) {
       errors.push(
-        `[MISSING_INSTRUCTION_EN] Rule [${ruleId}] in ${path.basename(
-          filePath
-        )}: The '**Instruction (en):**' marker is missing or the content is empty.`
+        `[INVALID_CONTENT] Rule [${ruleId}] in ${path.basename(filePath)}: ` +
+          `The '**Instruction (en):**' content is missing or too short (minimum 10 characters).`
       );
       continue;
     }
@@ -163,7 +173,7 @@ export function parseRuleFile(filePath, content) {
       parsedYaml = parseYamlSubset(yamlContent);
     } catch (err) {
       errors.push(
-        `[YAML_PARSE_ERROR] Rule [${ruleId}] in ${path.basename(filePath)}: ` + `${err.message}`
+        `[INVALID_RULE] Rule [${ruleId}] in ${path.basename(filePath)}: YAML_PARSE_ERROR - ${err.message}`
       );
       continue;
     }
@@ -172,7 +182,7 @@ export function parseRuleFile(filePath, content) {
     const validation = validateRule(parsedYaml);
     if (!validation.valid) {
       errors.push(
-        `[SCHEMA_VALIDATION_ERROR] Rule [${ruleId}] in ${path.basename(filePath)}: ` +
+        `[INVALID_SCHEMA] Rule [${ruleId}] in ${path.basename(filePath)}: ` +
           validation.errors.join("; ")
       );
       continue;
