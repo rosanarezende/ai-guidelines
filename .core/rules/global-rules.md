@@ -23,6 +23,7 @@ scope: universal
 category: security
 evidence_strength: strong
 sources: ["OWASP-A2", "CWE-522"]
+applicable_languages: ["*"]
 tags: [engineering, security]
 ```
 
@@ -42,7 +43,8 @@ id: GR-0002
 scope: universal
 category: correctness
 evidence_strength: medium
-sources: []
+sources: ["CWE-704"]
+applicable_languages: ["*"]
 tags: [engineering, typing]
 ```
 
@@ -63,6 +65,7 @@ scope: universal
 category: maintainability
 evidence_strength: declared_heuristic
 sources: []
+applicable_languages: ["*"]
 tags: [engineering, immutability]
 ```
 
@@ -83,6 +86,7 @@ scope: universal
 category: correctness
 evidence_strength: strong
 sources: ["CWE-703"]
+applicable_languages: ["*"]
 tags: [engineering, errors]
 ```
 
@@ -102,7 +106,8 @@ id: GR-0005
 scope: universal
 category: correctness
 evidence_strength: medium
-sources: []
+sources: ["CWE-362"]
+applicable_languages: ["*"]
 tags: [engineering, concurrency]
 ```
 
@@ -125,6 +130,7 @@ scope: universal
 category: process
 evidence_strength: declared_heuristic
 sources: []
+applicable_languages: ["*"]
 tags: [workflow, spec]
 ```
 
@@ -149,6 +155,7 @@ scope: universal
 category: editorial
 evidence_strength: declared_heuristic
 sources: []
+applicable_languages: ["*"]
 tags: [owner, language]
 ```
 
@@ -168,6 +175,7 @@ scope: universal
 category: process
 evidence_strength: declared_heuristic
 sources: []
+applicable_languages: ["*"]
 tags: [owner, ai_efficiency]
 ```
 
@@ -188,6 +196,7 @@ scope: universal
 category: process
 evidence_strength: declared_heuristic
 sources: []
+applicable_languages: ["*"]
 tags: [owner, workflow]
 ```
 

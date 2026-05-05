@@ -217,7 +217,7 @@
 
 > Origem: [`[DEC-0018-B04]`](./decision-brief.md#dec-0018-b04-formato-do-catálogo-de-regras). Plan: § B.4.
 
-- [ ] **5.B4.1** Reorganizar `.core/rules/global-rules.md`: cada regra como heading H2 com frontmatter YAML inline e corpo bilíngue (`Instruction (en)` / `Documentação (pt-br)` / `Why this is an issue` / `Noncompliant example` / `Compliant example` / `See also`). Atribuir IDs `[GR-NNNN]` sequenciais.
+- [x] **5.B4.1** Reorganizar `.core/rules/global-rules.md`: cada regra como heading H2 com frontmatter YAML inline e corpo bilíngue (`Instruction (en)` / `Documentação (pt-br)` / `Why this is an issue` / `Noncompliant example` / `Compliant example` / `See also`). Atribuir IDs `[GR-NNNN]` sequenciais. — **B.4.1 concluído (global-rules migrado e validado via rules.json).**
 - [ ] **5.B4.2** Mesma operação em `.core/rules/{claude,codex,gemini}.md` com IDs `[ADP-NNNN]` (e campo `adapter`).
 - [ ] **5.B4.3** Mesma operação em `.core/rules/opt-in/*.md` com IDs `[OPT-NNNN]` (e campo `opt_in_feature`). Aplicar hierarquia inicial em subdiretórios `opt-in/<tema>/` quando o tema ficar evidente (ex.: `opt-in/security/`, `opt-in/editorial/`) — sem antecipar a Spec 0011.
 - [ ] **5.B4.4** **Tradução qualificada** do campo `Instruction` para Inglês — toda regra sobrevivente. Foco em jargão idiomático para modelos de fronteira; revisão humana antes do commit.

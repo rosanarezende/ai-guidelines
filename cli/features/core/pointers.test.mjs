@@ -48,7 +48,7 @@ describe("Feature: Pointers (AGENTS.md Runtime Architecture)", () => {
 
     assert.match(coreContent, /<AI_GUIDELINES>/);
     assert.match(coreContent, /Zona Topo: Diretivas Primarias/);
-    assert.match(coreContent, /Regras Globais/);
+    assert.match(coreContent, /Global Rules.*Regras universais/);
     assert.match(coreContent, /<FEATURE_QUALITY_GATES>/);
     assert.match(coreContent, /<FEATURE_TDD>/);
     assert.ok(
