@@ -504,6 +504,11 @@ _Researches, registros e encerramento:_
   - **Implicação em B.3+:** parser implementado alinha perfeitamente com design cravado em plan.md. Próximos passos (B.3.4 builder, B.3.5 compiler) herdam essas convenções sem revisão.
   - **Implicação no boilerplate de testes:** convenção de fixtures isoladas deve ser explicitada em `.specify/templates/rules-parser-test-boilerplate.md` (artefato futuro para consumidores que implementarem parsers customizados para regras próprias).
 
+- **2026-05-04 — Execução antecipada de B.4.3.**
+  - **Mudança:** Quality-gates básicos iniciados antes do término do sub-bloco B.4.
+  - **Por quê:** Validar o enforcement em escopo limitado (heurístico, sem CI ou AST) para garantir a integridade do pipeline Docs-as-Code durante a migração das regras.
+  - **Escopo:** Heurístico, sem CI, sem AST. Objetivo: validar enforcement.
+
 ---
 
 ## 📎 Anexo — Conteúdo candidato pré-research (b9efb83)
