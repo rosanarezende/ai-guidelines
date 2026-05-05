@@ -228,7 +228,7 @@
 
 > Origem: [`[DEC-0018-B05]`](./decision-brief.md#dec-0018-b05-metodologia-do-eval-mínimo) (C + H + K + N + R) e [`[DEC-0018-B07]`](./decision-brief.md#dec-0018-b07-fronteira-com-spec-0009-harness-engineering) (D — só amostral aqui). Plan: § B.5.
 
-- [ ] **5.B5.1** Selecionar subset crítico: regras com `evidence_strength: strong` + categorias-âncora (`correctness`, `security`).
+- [/] **5.B5.1** Selecionar subset crítico: regras com `evidence_strength: strong` + categorias-âncora (`correctness`, `security`). _(Pendente de commit: eval-runner.mjs básico implementado como base)_
 - [ ] **5.B5.2** Definir prompts canônicos para asserção F (delta comportamental) — cenários reproduzíveis com noncompliant_example como input.
 - [ ] **5.B5.3** Rodar 3 rodadas em **Claude + Codex + Gemini** para cada prompt (vetor K + N).
 - [ ] **5.B5.4** Registrar passa-rate por regra × provedor com limiar **2/3** em `research/2026-04-30-eval-results.md`.
