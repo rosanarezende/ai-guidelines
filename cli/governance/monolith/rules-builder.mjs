@@ -15,6 +15,7 @@
 import { parseRulesFromDirectory } from "#governance/monolith/rules-parser";
 import { writeFileSync, mkdirSync, readFileSync, existsSync } from "node:fs";
 import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
 // Defaults — overridable via options.outputDir for tests
 const DEFAULT_META_DIR = resolve(".core/rules/_meta");
@@ -374,7 +375,10 @@ export async function saveCatalogArtifacts(catalogJson, ledgerMarkdown, options 
 }
 
 // Standalone execution
-if (import.meta.url === `file://${process.argv[1]}`) {
+const isMain =
+  process.argv[1] && resolve(process.argv[1]) === resolve(fileURLToPath(import.meta.url));
+
+if (isMain) {
   (async () => {
     try {
       const { catalogJson, ledgerMarkdown, errors, success } =

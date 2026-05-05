@@ -129,12 +129,14 @@ export function parseRuleFile(filePath, content) {
     if (instructionIndex !== -1) {
       const instructionStart = instructionIndex + instructionMarker.length;
       const instructionEnd = documentationIndex !== -1 ? documentationIndex : bodyContent.length;
-      instruction_en = bodyContent.slice(instructionStart, instructionEnd).trim();
+      const rawInstruction = bodyContent.slice(instructionStart, instructionEnd);
+      instruction_en = extractSectionUntilBoundary(rawInstruction).trim();
     }
 
     if (documentationIndex !== -1) {
       const documentationStart = documentationIndex + documentationMarker.length;
-      documentation_pt = bodyContent.slice(documentationStart).trim();
+      const rawDocumentation = bodyContent.slice(documentationStart);
+      documentation_pt = extractSectionUntilBoundary(rawDocumentation).trim();
     }
 
     if (documentationIndex !== -1 && documentationIndex < instructionIndex) {
@@ -261,6 +263,25 @@ export function validateRule(rule) {
 // ============================================================================
 // INTERNAL HELPERS
 // ============================================================================
+
+/**
+ * Extract text until a structural boundary is reached.
+ * Boundaries: ---, ## , ####
+ */
+function extractSectionUntilBoundary(text) {
+  const lines = text.split("\n");
+  const result = [];
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (trimmed.startsWith("---") || trimmed.startsWith("## ") || trimmed.startsWith("#### ")) {
+      break;
+    }
+    result.push(line);
+  }
+
+  return result.join("\n");
+}
 
 /**
  * Check if a file should be ignored

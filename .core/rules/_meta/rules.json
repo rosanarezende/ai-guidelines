@@ -6,12 +6,19 @@
       "category": "process",
       "evidence_strength": "declared_heuristic",
       "sources": [],
-      "applicable_languages": ["*"],
-      "tags": ["core", "agents", "always_injected", "environment"],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "core",
+        "agents",
+        "always_injected",
+        "environment"
+      ],
       "file": ".core\\rules\\agents-core.md",
       "title": "Environment check antes da primeira ação",
       "instruction_en": "Before the first technical action, identify platform, shell, surface (CLI vs IDE), and model class; adapt commands accordingly.",
-      "documentation_pt": "Antes da primeira ação técnica, identifique o contexto situacional:\n\n- Plataforma: Windows / Linux / macOS / WSL.\n- Shell: bash / zsh / PowerShell / cmd.\n- Surface: CLI agent (Claude Code, Gemini CLI) vs IDE (Cursor, Copilot).\n- Modelo: identifique se está operando com um modelo \"Thinking/Reasoning\".\n- Adapte comandos (ex.: `/dev/null` vs `NUL`, forward slashes) a essa matriz.\n\n**Why this matters:** comandos hardcoded para um SO/shell quebram silenciosamente em outro. Falha rápida no início economiza loops de retry.\n\n**See also:** `[CORE-08]` (HARNESS LOCK).\n\n---"
+      "documentation_pt": "Antes da primeira ação técnica, identifique o contexto situacional:\n\n- Plataforma: Windows / Linux / macOS / WSL.\n- Shell: bash / zsh / PowerShell / cmd.\n- Surface: CLI agent (Claude Code, Gemini CLI) vs IDE (Cursor, Copilot).\n- Modelo: identifique se está operando com um modelo \"Thinking/Reasoning\".\n- Adapte comandos (ex.: `/dev/null` vs `NUL`, forward slashes) a essa matriz.\n\n**Why this matters:** comandos hardcoded para um SO/shell quebram silenciosamente em outro. Falha rápida no início economiza loops de retry.\n\n**See also:** `[CORE-08]` (HARNESS LOCK)."
     },
     {
       "id": "CORE-02",
@@ -19,12 +26,20 @@
       "category": "process",
       "evidence_strength": "declared_heuristic",
       "sources": [],
-      "applicable_languages": ["*"],
-      "tags": ["core", "agents", "always_injected", "sdd", "inquebrável"],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "core",
+        "agents",
+        "always_injected",
+        "sdd",
+        "inquebrável"
+      ],
       "file": ".core\\rules\\agents-core.md",
       "title": "Agnostic SDD Override — repositório como memória",
       "instruction_en": "The repository is your memory. Persist plans, progress, debts, knowledge, and roadmap under `.specify/specs/`. Read `roadmap/backlog.md` at session start. If the platform forces a scratchpad, write only a pointer to the spec file. Planning trapped in agent cache (AI-slop) is unacceptable.",
-      "documentation_pt": "**[INQUEBRÁVEL]** O repositório é sua memória, não seus artefatos internos.\n\n- Planejamento → `.specify/specs/<slug>/plan.md`\n- Progresso → `.specify/specs/<slug>/tasks.md`\n- Débitos → `.specify/specs/<slug>/NEXT.md`\n- Conhecimento → `.specify/specs/<slug>/research/`\n- Roadmap → `.specify/specs/roadmap/backlog.md`\n- Bootstrap obrigatório → leia `.specify/specs/roadmap/backlog.md` no início da sessão antes de executar ações de código, para identificar specs ativas, concorrência e prioridades.\n- Se sua plataforma forçar um Artifact ou Scratchpad, escreva nele apenas: `\"→ Ver .specify/specs/<slug>/plan.md\"` (Pointer).\n- \"AI-Slop\" (planejamento preso em cache de agente) é inaceitável.\n\n**Why this matters:** planejamento em cache não sobrevive troca de sessão/agente. SDD repo-first é o que torna o framework agnóstico de IA.\n\n**See also:** `[CORE-13]` (Artefatos vivos), `[CORE-11]` (Plano formado).\n\n---"
+      "documentation_pt": "**[INQUEBRÁVEL]** O repositório é sua memória, não seus artefatos internos.\n\n- Planejamento → `.specify/specs/<slug>/plan.md`\n- Progresso → `.specify/specs/<slug>/tasks.md`\n- Débitos → `.specify/specs/<slug>/NEXT.md`\n- Conhecimento → `.specify/specs/<slug>/research/`\n- Roadmap → `.specify/specs/roadmap/backlog.md`\n- Bootstrap obrigatório → leia `.specify/specs/roadmap/backlog.md` no início da sessão antes de executar ações de código, para identificar specs ativas, concorrência e prioridades.\n- Se sua plataforma forçar um Artifact ou Scratchpad, escreva nele apenas: `\"→ Ver .specify/specs/<slug>/plan.md\"` (Pointer).\n- \"AI-Slop\" (planejamento preso em cache de agente) é inaceitável.\n\n**Why this matters:** planejamento em cache não sobrevive troca de sessão/agente. SDD repo-first é o que torna o framework agnóstico de IA.\n\n**See also:** `[CORE-13]` (Artefatos vivos), `[CORE-11]` (Plano formado)."
     },
     {
       "id": "CORE-03",
@@ -32,12 +47,19 @@
       "category": "process",
       "evidence_strength": "declared_heuristic",
       "sources": [],
-      "applicable_languages": ["*"],
-      "tags": ["core", "agents", "always_injected", "pointer"],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "core",
+        "agents",
+        "always_injected",
+        "pointer"
+      ],
       "file": ".core\\rules\\agents-core.md",
       "title": "Cross-ref para Regras Globais",
       "instruction_en": "Consult the \"Global Rules\" section injected later in this `<AI_GUIDELINES>` block for engineering principles and AI efficiency.",
-      "documentation_pt": "Consulte a seção \"Regras Globais\" injetada neste bloco `<AI_GUIDELINES>` para princípios de engenharia e eficiência de IA.\n\n**Why this matters:** cross-ref interno ao bloco compilado; evita IA pular a seção de regras universais.\n\n> **Candidata a corte em B.3.5:** se o compiler for refatorado para deixar a hierarquia óbvia (core → global → opt-in), este pointer textual vira redundante.\n\n---"
+      "documentation_pt": "Consulte a seção \"Regras Globais\" injetada neste bloco `<AI_GUIDELINES>` para princípios de engenharia e eficiência de IA.\n\n**Why this matters:** cross-ref interno ao bloco compilado; evita IA pular a seção de regras universais.\n\n> **Candidata a corte em B.3.5:** se o compiler for refatorado para deixar a hierarquia óbvia (core → global → opt-in), este pointer textual vira redundante."
     },
     {
       "id": "CORE-04",
@@ -45,12 +67,20 @@
       "category": "process",
       "evidence_strength": "declared_heuristic",
       "sources": [],
-      "applicable_languages": ["*"],
-      "tags": ["core", "agents", "always_injected", "git", "branch"],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "core",
+        "agents",
+        "always_injected",
+        "git",
+        "branch"
+      ],
       "file": ".core\\rules\\agents-core.md",
       "title": "Nunca trabalhe direto em main/master",
       "instruction_en": "Never start active modifications on `main` or `master`. Create a synthetic branch (`feat/`, `fix/`, `docs/`) before changing sources of truth.",
-      "documentation_pt": "Nunca inicie modificações ativas operando sob a branch `main` ou `master`. Confirme seu estado de _working tree_ ou crie uma branch sintética (`feat/`, `fix/`, `docs/`) antes de alterar fontes de verdade.\n\n**Why this matters:** trabalho direto em main desfaz revisão por PR e arrisca push acidental para upstream protegido.\n\n---"
+      "documentation_pt": "Nunca inicie modificações ativas operando sob a branch `main` ou `master`. Confirme seu estado de _working tree_ ou crie uma branch sintética (`feat/`, `fix/`, `docs/`) antes de alterar fontes de verdade.\n\n**Why this matters:** trabalho direto em main desfaz revisão por PR e arrisca push acidental para upstream protegido."
     },
     {
       "id": "CORE-05",
@@ -58,12 +88,20 @@
       "category": "process",
       "evidence_strength": "declared_heuristic",
       "sources": [],
-      "applicable_languages": ["*"],
-      "tags": ["core", "agents", "always_injected", "git", "hygiene"],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "core",
+        "agents",
+        "always_injected",
+        "git",
+        "hygiene"
+      ],
       "file": ".core\\rules\\agents-core.md",
       "title": "Não versione contexto vazado",
       "instruction_en": "Do not version stray context files at the repo root or in working folders (partial payloads, AI scratch). Persistence is for _Release_ only.",
-      "documentation_pt": "Não versione arquivos contextuais vazados na raiz ou pastas sujas (payloads parciais, rascunhos operacionais de IA). A persistência é apenas para _Release_.\n\n**Why this matters:** rascunhos da IA poluem o histórico e podem vazar prompts/secrets; pertencem ao scratchpad da ferramenta, não ao repo.\n\n---"
+      "documentation_pt": "Não versione arquivos contextuais vazados na raiz ou pastas sujas (payloads parciais, rascunhos operacionais de IA). A persistência é apenas para _Release_.\n\n**Why this matters:** rascunhos da IA poluem o histórico e podem vazar prompts/secrets; pertencem ao scratchpad da ferramenta, não ao repo."
     },
     {
       "id": "CORE-06",
@@ -71,12 +109,20 @@
       "category": "process",
       "evidence_strength": "declared_heuristic",
       "sources": [],
-      "applicable_languages": ["*"],
-      "tags": ["core", "agents", "always_injected", "git", "commit"],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "core",
+        "agents",
+        "always_injected",
+        "git",
+        "commit"
+      ],
       "file": ".core\\rules\\agents-core.md",
       "title": "Commits incrementais atômicos",
       "instruction_en": "Make atomic incremental commits limited to one logical unit. Split tasks that span design + code + spec.",
-      "documentation_pt": "Realize _Commits Incrementais Atômicos_ limitados à sua unidade lógica. Se a tarefa varrer design, código e spec simultaneamente, fracione as ações comissionadas em passos menores.\n\n**Why this matters:** commits monolíticos sabotam `git bisect` e forçam revisão \"tudo ou nada\". Commit atômico = unidade revisável independente.\n\n---"
+      "documentation_pt": "Realize _Commits Incrementais Atômicos_ limitados à sua unidade lógica. Se a tarefa varrer design, código e spec simultaneamente, fracione as ações comissionadas em passos menores.\n\n**Why this matters:** commits monolíticos sabotam `git bisect` e forçam revisão \"tudo ou nada\". Commit atômico = unidade revisável independente."
     },
     {
       "id": "CORE-07",
@@ -84,12 +130,21 @@
       "category": "process",
       "evidence_strength": "declared_heuristic",
       "sources": [],
-      "applicable_languages": ["*"],
-      "tags": ["core", "agents", "always_injected", "git", "safety", "critical"],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "core",
+        "agents",
+        "always_injected",
+        "git",
+        "safety",
+        "critical"
+      ],
       "file": ".core\\rules\\agents-core.md",
       "title": "Nunca execute git push autonomamente",
       "instruction_en": "**[CRITICAL]** Never execute `git push` autonomously. Any remote push requires explicit human approval from the maintainer.",
-      "documentation_pt": "**[CRITICAL]** Nunca execute `git push` de forma autônoma. Todo envio de código ao repositório remoto **exige aprovação humana explícita do mantenedor** antes de ser iniciado. Aplica-se a qualquer agente de IA, script automatizado ou hook que não seja o pipeline oficial do repositório.\n\n**Why this matters:** push autônomo escapa do gate de revisão humana e pode publicar código não-validado. Linha cravada como `[CRITICAL]` no template original.\n\n**See also:** `[CORE-08]` (HARNESS LOCK).\n\n---"
+      "documentation_pt": "**[CRITICAL]** Nunca execute `git push` de forma autônoma. Todo envio de código ao repositório remoto **exige aprovação humana explícita do mantenedor** antes de ser iniciado. Aplica-se a qualquer agente de IA, script automatizado ou hook que não seja o pipeline oficial do repositório.\n\n**Why this matters:** push autônomo escapa do gate de revisão humana e pode publicar código não-validado. Linha cravada como `[CRITICAL]` no template original.\n\n**See also:** `[CORE-08]` (HARNESS LOCK)."
     },
     {
       "id": "CORE-08",
@@ -97,12 +152,22 @@
       "category": "process",
       "evidence_strength": "declared_heuristic",
       "sources": [],
-      "applicable_languages": ["*"],
-      "tags": ["core", "agents", "always_injected", "git", "commit", "ci", "harness_lock"],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "core",
+        "agents",
+        "always_injected",
+        "git",
+        "commit",
+        "ci",
+        "harness_lock"
+      ],
       "file": ".core\\rules\\agents-core.md",
       "title": "HARNESS LOCK — cadeia de qualidade obrigatória pré-commit",
       "instruction_en": "**[HARNESS LOCK]** Before any `git commit`, run the project's full validation chain (format, check, lint, test) as declared in `package.json`. The rule is the chain, not the package manager — adapt to project scripts.",
-      "documentation_pt": "**[CI Compliance — HARNESS LOCK]** É terminantemente proibido submeter qualquer commit sem validar a cadeia de qualidade do projeto. Antes de `git commit`, execute **todos os scripts de validação** definidos no `package.json` do repositório (ex.: `format`, `check`, `lint`, `test`). O padrão canônico é:\n\n```text\n<format_cmd> ; <check_cmd> ; git add . ; git commit -m \"...\"\n```\n\nSe o repositório define `yarn format` e `yarn check`, o comando concreto é: `yarn format ; yarn check ; git add . ; git commit -m \"...\"`. Adapte aos scripts do projeto — a regra é a **cadeia**, não o gerenciador.\n\n**Why this matters:** o gate local replica o gate de CI. Pular = empurrar o erro para o pipeline e gastar ciclo de revisão humano com algo automatizável.\n\n**Cross-ref:** complementada por `[CORE-14]` (commit message protocol — IA gera apenas o texto sugerido; humano executa a cadeia).\n\n---"
+      "documentation_pt": "**[CI Compliance — HARNESS LOCK]** É terminantemente proibido submeter qualquer commit sem validar a cadeia de qualidade do projeto. Antes de `git commit`, execute **todos os scripts de validação** definidos no `package.json` do repositório (ex.: `format`, `check`, `lint`, `test`). O padrão canônico é:\n\n```text\n<format_cmd> ; <check_cmd> ; git add . ; git commit -m \"...\"\n```\n\nSe o repositório define `yarn format` e `yarn check`, o comando concreto é: `yarn format ; yarn check ; git add . ; git commit -m \"...\"`. Adapte aos scripts do projeto — a regra é a **cadeia**, não o gerenciador.\n\n**Why this matters:** o gate local replica o gate de CI. Pular = empurrar o erro para o pipeline e gastar ciclo de revisão humano com algo automatizável.\n\n**Cross-ref:** complementada por `[CORE-14]` (commit message protocol — IA gera apenas o texto sugerido; humano executa a cadeia)."
     },
     {
       "id": "CORE-09",
@@ -110,12 +175,20 @@
       "category": "process",
       "evidence_strength": "declared_heuristic",
       "sources": [],
-      "applicable_languages": ["*"],
-      "tags": ["core", "agents", "always_injected", "pr", "github"],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "core",
+        "agents",
+        "always_injected",
+        "pr",
+        "github"
+      ],
       "file": ".core\\rules\\agents-core.md",
       "title": "PRs abrem como Draft com matriz oficial",
       "instruction_en": "Open Pull Requests in `Draft` mode using the full `.github/pull_request_template.md` matrix.",
-      "documentation_pt": "A submissão de Pull Requests obrigatoriamente se inaugura no modo `Draft`, utilizando integralmente a matriz `.github/pull_request_template.md`.\n\n**Why this matters:** Draft sinaliza WIP e impede que CI/reviewers tratem o PR como pronto antes da hora.\n\n---"
+      "documentation_pt": "A submissão de Pull Requests obrigatoriamente se inaugura no modo `Draft`, utilizando integralmente a matriz `.github/pull_request_template.md`.\n\n**Why this matters:** Draft sinaliza WIP e impede que CI/reviewers tratem o PR como pronto antes da hora."
     },
     {
       "id": "CORE-10",
@@ -123,12 +196,21 @@
       "category": "process",
       "evidence_strength": "declared_heuristic",
       "sources": [],
-      "applicable_languages": ["*"],
-      "tags": ["core", "agents", "always_injected", "pr", "github", "gate"],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "core",
+        "agents",
+        "always_injected",
+        "pr",
+        "github",
+        "gate"
+      ],
       "file": ".core\\rules\\agents-core.md",
       "title": "Draft → Ready apenas via revalidação humana",
       "instruction_en": "Convert PRs from `Draft` to `Ready` only after explicit human revalidation.",
-      "documentation_pt": "Converta a operação de `Draft` para `Ready` apenas através da revalidação afirmativa Humana.\n\n**Why this matters:** transição Draft→Ready é gate humano explícito; IA não decide sozinha que está pronto.\n\n---"
+      "documentation_pt": "Converta a operação de `Draft` para `Ready` apenas através da revalidação afirmativa Humana.\n\n**Why this matters:** transição Draft→Ready é gate humano explícito; IA não decide sozinha que está pronto."
     },
     {
       "id": "CORE-11",
@@ -136,12 +218,19 @@
       "category": "process",
       "evidence_strength": "declared_heuristic",
       "sources": [],
-      "applicable_languages": ["*"],
-      "tags": ["core", "agents", "always_injected", "planning"],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "core",
+        "agents",
+        "always_injected",
+        "planning"
+      ],
       "file": ".core\\rules\\agents-core.md",
       "title": "Plano formado antes de ação",
       "instruction_en": "Act only with a formed plan. Use `spec-foundation` for work that must survive session/agent changes; use a tool-scratchpad lightweight plan only for single-session, local, disposable adjustments.",
-      "documentation_pt": "**Aja apenas mediante Plano Formado.** Antes de executar qualquer código, escolha a granularidade:\n\n| Critério      | Use `spec-foundation`                 | Use `plano leve`                          |\n| :------------ | :------------------------------------ | :---------------------------------------- |\n| Duração       | > 1 sessão                            | 1 sessão                                  |\n| Escopo        | > 1 arquivo fora de feature isolada   | Ajuste pontual, local                     |\n| Sobrevivência | Precisa sobreviver troca de IA/sessão | Descartável                               |\n| Onde vive     | `.specify/specs/<slug>/` (versionado) | Scratchpad da ferramenta (não versionado) |\n\n**Why this matters:** ação sem plano formado = sintoma clássico de AI-slop. A tabela é o critério-teste objetivo entre `spec-foundation` e plano leve.\n\n**See also:** `[CORE-02]` (Agnostic SDD Override). _TODO(B.4): adicionar cross-ref para o ID canônico da regra \"Tipo de spec\" quando `global-rules.md` migrar para o schema bilíngue + IDs `[GR-NNNN]`._ Hoje a regra vive em [`.core/rules/global-rules.md` § \"Workflow com IA\"](./global-rules.md#workflow-com-ia).\n\n> **Candidata a docs-only em B.3.5:** a tabela detalhada pode migrar para `.core/process/spec-foundation.md` (já tem seção \"Tipos de spec\" hoje). O core-runtime mantém só a frase imperativa.\n\n---"
+      "documentation_pt": "**Aja apenas mediante Plano Formado.** Antes de executar qualquer código, escolha a granularidade:\n\n| Critério      | Use `spec-foundation`                 | Use `plano leve`                          |\n| :------------ | :------------------------------------ | :---------------------------------------- |\n| Duração       | > 1 sessão                            | 1 sessão                                  |\n| Escopo        | > 1 arquivo fora de feature isolada   | Ajuste pontual, local                     |\n| Sobrevivência | Precisa sobreviver troca de IA/sessão | Descartável                               |\n| Onde vive     | `.specify/specs/<slug>/` (versionado) | Scratchpad da ferramenta (não versionado) |\n\n**Why this matters:** ação sem plano formado = sintoma clássico de AI-slop. A tabela é o critério-teste objetivo entre `spec-foundation` e plano leve.\n\n**See also:** `[CORE-02]` (Agnostic SDD Override). _TODO(B.4): adicionar cross-ref para o ID canônico da regra \"Tipo de spec\" quando `global-rules.md` migrar para o schema bilíngue + IDs `[GR-NNNN]`._ Hoje a regra vive em [`.core/rules/global-rules.md` § \"Workflow com IA\"](./global-rules.md#workflow-com-ia).\n\n> **Candidata a docs-only em B.3.5:** a tabela detalhada pode migrar para `.core/process/spec-foundation.md` (já tem seção \"Tipos de spec\" hoje). O core-runtime mantém só a frase imperativa."
     },
     {
       "id": "CORE-12",
@@ -149,12 +238,19 @@
       "category": "process",
       "evidence_strength": "declared_heuristic",
       "sources": [],
-      "applicable_languages": ["*"],
-      "tags": ["core", "agents", "always_injected", "checkpoint"],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "core",
+        "agents",
+        "always_injected",
+        "checkpoint"
+      ],
       "file": ".core\\rules\\agents-core.md",
       "title": "Checkpoints antes de ação após contexto extenso",
       "instruction_en": "After absorbing extensive context, return a summary Checkpoint and request human approval before executing Code Actions.",
-      "documentation_pt": "**Checkpoints antes de ação.** Após absorver contexto extenso (múltiplos arquivos, specs, pesquisas), retorne um Checkpoint resumido e peça aprovação humana **antes** de executar Code Actions.\n\n**Why this matters:** evita \"IA absorve 50 arquivos e parte direto para edição agressiva\". Checkpoint = oportunidade de o humano corrigir interpretação errada.\n\n---"
+      "documentation_pt": "**Checkpoints antes de ação.** Após absorver contexto extenso (múltiplos arquivos, specs, pesquisas), retorne um Checkpoint resumido e peça aprovação humana **antes** de executar Code Actions.\n\n**Why this matters:** evita \"IA absorve 50 arquivos e parte direto para edição agressiva\". Checkpoint = oportunidade de o humano corrigir interpretação errada."
     },
     {
       "id": "CORE-13",
@@ -162,12 +258,20 @@
       "category": "process",
       "evidence_strength": "declared_heuristic",
       "sources": [],
-      "applicable_languages": ["*"],
-      "tags": ["core", "agents", "always_injected", "sdd", "lifecycle"],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "core",
+        "agents",
+        "always_injected",
+        "sdd",
+        "lifecycle"
+      ],
       "file": ".core\\rules\\agents-core.md",
       "title": "Artefatos vivos durante o trabalho",
       "instruction_en": "Keep SDD artifacts updated continuously: mark `tasks.md` items `[/]` (in progress) or `[x]` (done) as you go; record debts in `NEXT.md`. Never create parallel routing files in the repo.",
-      "documentation_pt": "**Artefatos vivos.** Mantenha atualizados os artefatos SDD durante o trabalho:\n\n- `tasks.md` → marque cada item como `[/]` (em progresso) ou `[x]` (concluído) a cada passo.\n- `NEXT.md` → registre débitos, bugs ou insights sem prioridade imediata.\n- **Nunca crie arquivos paralelos de roteirização.** Planos leves vivem na ferramenta, não no repositório.\n\n**Why this matters:** artefatos SDD desatualizados = perda do dogfood do framework. Atualização incremental preserva rastreabilidade.\n\n**See also:** `[CORE-02]` (Agnostic SDD Override).\n\n---"
+      "documentation_pt": "**Artefatos vivos.** Mantenha atualizados os artefatos SDD durante o trabalho:\n\n- `tasks.md` → marque cada item como `[/]` (em progresso) ou `[x]` (concluído) a cada passo.\n- `NEXT.md` → registre débitos, bugs ou insights sem prioridade imediata.\n- **Nunca crie arquivos paralelos de roteirização.** Planos leves vivem na ferramenta, não no repositório.\n\n**Why this matters:** artefatos SDD desatualizados = perda do dogfood do framework. Atualização incremental preserva rastreabilidade.\n\n**See also:** `[CORE-02]` (Agnostic SDD Override)."
     },
     {
       "id": "CORE-14",
@@ -175,8 +279,17 @@
       "category": "process",
       "evidence_strength": "declared_heuristic",
       "sources": [],
-      "applicable_languages": ["*"],
-      "tags": ["core", "agents", "always_injected", "git", "commit", "safety"],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "core",
+        "agents",
+        "always_injected",
+        "git",
+        "commit",
+        "safety"
+      ],
       "file": ".core\\rules\\agents-core.md",
       "title": "Mensagem de commit sugerida: IA fornece apenas a mensagem",
       "instruction_en": "At the end of each sub-block, provide only the commit message suggestion. The human executes the full validation chain (`yarn format ; yarn check ; ...`) and `git commit`.",
@@ -187,26 +300,41 @@
       "scope": "universal",
       "category": "security",
       "evidence_strength": "strong",
-      "sources": ["OWASP-A2", "CWE-522"],
-      "applicable_languages": ["*"],
-      "tags": ["engineering", "security"],
+      "sources": [
+        "OWASP-A2",
+        "CWE-522"
+      ],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "engineering",
+        "security"
+      ],
       "file": ".core\\rules\\global-rules.md",
       "title": "Secure secret handling",
       "instruction_en": "Never expose secrets in frontend code or versioned files. Store them in environment variables and ensure they are ignored by version control.",
-      "documentation_pt": "Chaves de API nunca devem transitar pelo frontend ou arquivos versionados.\nUse `.gitignore` e variáveis de ambiente corretamente.\n\n---"
+      "documentation_pt": "Chaves de API nunca devem transitar pelo frontend ou arquivos versionados.\nUse `.gitignore` e variáveis de ambiente corretamente."
     },
     {
       "id": "GR-0002",
       "scope": "universal",
       "category": "correctness",
       "evidence_strength": "medium",
-      "sources": ["CWE-704"],
-      "applicable_languages": ["*"],
-      "tags": ["engineering", "typing"],
+      "sources": [
+        "CWE-704"
+      ],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "engineering",
+        "typing"
+      ],
       "file": ".core\\rules\\global-rules.md",
       "title": "Strict typing (anti-hacks)",
       "instruction_en": "Do not bypass the type system. Avoid unsafe casts (`any`, `unknown`, prototype manipulation) and use explicit type guards or generics.",
-      "documentation_pt": "Evite `any`, `as unknown`, coerções inseguras e manipulação de prototype.\nPrefira type guards e tipagem explícita.\n\n---"
+      "documentation_pt": "Evite `any`, `as unknown`, coerções inseguras e manipulação de prototype.\nPrefira type guards e tipagem explícita."
     },
     {
       "id": "GR-0003",
@@ -214,38 +342,57 @@
       "category": "maintainability",
       "evidence_strength": "declared_heuristic",
       "sources": [],
-      "applicable_languages": ["*"],
-      "tags": ["engineering", "immutability"],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "engineering",
+        "immutability"
+      ],
       "file": ".core\\rules\\global-rules.md",
       "title": "Immutability over shared mutation",
       "instruction_en": "Use immutable data structures and pure functions. Do not mutate shared state.",
-      "documentation_pt": "Prefira estruturas imutáveis e funções puras.\nEvite estado global mutável.\n\n---"
+      "documentation_pt": "Prefira estruturas imutáveis e funções puras.\nEvite estado global mutável."
     },
     {
       "id": "GR-0004",
       "scope": "universal",
       "category": "correctness",
       "evidence_strength": "strong",
-      "sources": ["CWE-703"],
-      "applicable_languages": ["*"],
-      "tags": ["engineering", "errors"],
+      "sources": [
+        "CWE-703"
+      ],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "engineering",
+        "errors"
+      ],
       "file": ".core\\rules\\global-rules.md",
       "title": "Fail-fast error handling",
       "instruction_en": "Fail fast and propagate errors explicitly. Do not swallow exceptions or use empty catch blocks.",
-      "documentation_pt": "Nunca use try/catch vazio ou que apenas loga.\nErro deve ser propagado ou tratado corretamente.\n\n---"
+      "documentation_pt": "Nunca use try/catch vazio ou que apenas loga.\nErro deve ser propagado ou tratado corretamente."
     },
     {
       "id": "GR-0005",
       "scope": "universal",
       "category": "correctness",
       "evidence_strength": "medium",
-      "sources": ["CWE-362"],
-      "applicable_languages": ["*"],
-      "tags": ["engineering", "concurrency"],
+      "sources": [
+        "CWE-362"
+      ],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "engineering",
+        "concurrency"
+      ],
       "file": ".core\\rules\\global-rules.md",
       "title": "Explicit async and concurrency intent",
       "instruction_en": "Make concurrency explicit: use `Promise.all` for independent tasks and `await` sequencing for dependent ones. Do not use fire-and-forget without error handling.",
-      "documentation_pt": "Use `Promise.all` para paralelo e `await` sequencial para dependências.\nEvite fire-and-forget sem tratamento de erro.\n\n---\n\n## AI Workflow Rules"
+      "documentation_pt": "Use `Promise.all` para paralelo e `await` sequencial para dependências.\nEvite fire-and-forget sem tratamento de erro."
     },
     {
       "id": "GR-0101",
@@ -253,12 +400,17 @@
       "category": "process",
       "evidence_strength": "declared_heuristic",
       "sources": [],
-      "applicable_languages": ["*"],
-      "tags": ["workflow", "spec"],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "workflow",
+        "spec"
+      ],
       "file": ".core\\rules\\global-rules.md",
       "title": "Spec type must be declared",
       "instruction_en": "Declare the spec type (evidence-driven, deterministic, or mixed) and require human approval when design depends on unresolved evidence.",
-      "documentation_pt": "Specs `evidence-driven` ou `mixed` exigem decision-brief antes da implementação.\n\n---\n\n## Owner Conventions (Non-evidence rules)\n\n> Regras baseadas em prática real. Não possuem source canônica.\n> Mantidas separadas do núcleo evidence-driven."
+      "documentation_pt": "Specs `evidence-driven` ou `mixed` exigem decision-brief antes da implementação."
     },
     {
       "id": "GR-0201",
@@ -266,12 +418,17 @@
       "category": "editorial",
       "evidence_strength": "declared_heuristic",
       "sources": [],
-      "applicable_languages": ["*"],
-      "tags": ["owner", "language"],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "owner",
+        "language"
+      ],
       "file": ".core\\rules\\global-rules.md",
       "title": "Repository language standard",
       "instruction_en": "Always respond using the repository default language.",
-      "documentation_pt": "Neste repositório: sempre responder em PT-BR.\n\n---"
+      "documentation_pt": "Neste repositório: sempre responder em PT-BR."
     },
     {
       "id": "GR-0202",
@@ -279,12 +436,17 @@
       "category": "process",
       "evidence_strength": "declared_heuristic",
       "sources": [],
-      "applicable_languages": ["*"],
-      "tags": ["owner", "ai_efficiency"],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "owner",
+        "ai_efficiency"
+      ],
       "file": ".core\\rules\\global-rules.md",
       "title": "Context noise reduction",
       "instruction_en": "Exclude irrelevant files (logs, builds, dependencies) from the AI context using ignore files.",
-      "documentation_pt": "Use `.gitignore`, `.claudeignore`, `.geminiignore` para remover logs,\nbuilds e `node_modules` do contexto.\n\n---"
+      "documentation_pt": "Use `.gitignore`, `.claudeignore`, `.geminiignore` para remover logs,\nbuilds e `node_modules` do contexto."
     },
     {
       "id": "GR-0203",
@@ -292,8 +454,13 @@
       "category": "process",
       "evidence_strength": "declared_heuristic",
       "sources": [],
-      "applicable_languages": ["*"],
-      "tags": ["owner", "workflow"],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "owner",
+        "workflow"
+      ],
       "file": ".core\\rules\\global-rules.md",
       "title": "Collaborative PR description",
       "instruction_en": "Build PR descriptions in three steps: outline topics, get human approval, then generate the final text using the repository template (if available) and perform a final human validation.",
@@ -307,12 +474,19 @@
       "category": "process",
       "evidence_strength": "declared_heuristic",
       "sources": [],
-      "applicable_languages": ["*"],
-      "tags": ["core", "agents", "always_injected", "environment"],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "core",
+        "agents",
+        "always_injected",
+        "environment"
+      ],
       "file": ".core\\rules\\agents-core.md",
       "title": "Environment check antes da primeira ação",
       "instruction_en": "Before the first technical action, identify platform, shell, surface (CLI vs IDE), and model class; adapt commands accordingly.",
-      "documentation_pt": "Antes da primeira ação técnica, identifique o contexto situacional:\n\n- Plataforma: Windows / Linux / macOS / WSL.\n- Shell: bash / zsh / PowerShell / cmd.\n- Surface: CLI agent (Claude Code, Gemini CLI) vs IDE (Cursor, Copilot).\n- Modelo: identifique se está operando com um modelo \"Thinking/Reasoning\".\n- Adapte comandos (ex.: `/dev/null` vs `NUL`, forward slashes) a essa matriz.\n\n**Why this matters:** comandos hardcoded para um SO/shell quebram silenciosamente em outro. Falha rápida no início economiza loops de retry.\n\n**See also:** `[CORE-08]` (HARNESS LOCK).\n\n---"
+      "documentation_pt": "Antes da primeira ação técnica, identifique o contexto situacional:\n\n- Plataforma: Windows / Linux / macOS / WSL.\n- Shell: bash / zsh / PowerShell / cmd.\n- Surface: CLI agent (Claude Code, Gemini CLI) vs IDE (Cursor, Copilot).\n- Modelo: identifique se está operando com um modelo \"Thinking/Reasoning\".\n- Adapte comandos (ex.: `/dev/null` vs `NUL`, forward slashes) a essa matriz.\n\n**Why this matters:** comandos hardcoded para um SO/shell quebram silenciosamente em outro. Falha rápida no início economiza loops de retry.\n\n**See also:** `[CORE-08]` (HARNESS LOCK)."
     },
     "CORE-02": {
       "id": "CORE-02",
@@ -320,12 +494,20 @@
       "category": "process",
       "evidence_strength": "declared_heuristic",
       "sources": [],
-      "applicable_languages": ["*"],
-      "tags": ["core", "agents", "always_injected", "sdd", "inquebrável"],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "core",
+        "agents",
+        "always_injected",
+        "sdd",
+        "inquebrável"
+      ],
       "file": ".core\\rules\\agents-core.md",
       "title": "Agnostic SDD Override — repositório como memória",
       "instruction_en": "The repository is your memory. Persist plans, progress, debts, knowledge, and roadmap under `.specify/specs/`. Read `roadmap/backlog.md` at session start. If the platform forces a scratchpad, write only a pointer to the spec file. Planning trapped in agent cache (AI-slop) is unacceptable.",
-      "documentation_pt": "**[INQUEBRÁVEL]** O repositório é sua memória, não seus artefatos internos.\n\n- Planejamento → `.specify/specs/<slug>/plan.md`\n- Progresso → `.specify/specs/<slug>/tasks.md`\n- Débitos → `.specify/specs/<slug>/NEXT.md`\n- Conhecimento → `.specify/specs/<slug>/research/`\n- Roadmap → `.specify/specs/roadmap/backlog.md`\n- Bootstrap obrigatório → leia `.specify/specs/roadmap/backlog.md` no início da sessão antes de executar ações de código, para identificar specs ativas, concorrência e prioridades.\n- Se sua plataforma forçar um Artifact ou Scratchpad, escreva nele apenas: `\"→ Ver .specify/specs/<slug>/plan.md\"` (Pointer).\n- \"AI-Slop\" (planejamento preso em cache de agente) é inaceitável.\n\n**Why this matters:** planejamento em cache não sobrevive troca de sessão/agente. SDD repo-first é o que torna o framework agnóstico de IA.\n\n**See also:** `[CORE-13]` (Artefatos vivos), `[CORE-11]` (Plano formado).\n\n---"
+      "documentation_pt": "**[INQUEBRÁVEL]** O repositório é sua memória, não seus artefatos internos.\n\n- Planejamento → `.specify/specs/<slug>/plan.md`\n- Progresso → `.specify/specs/<slug>/tasks.md`\n- Débitos → `.specify/specs/<slug>/NEXT.md`\n- Conhecimento → `.specify/specs/<slug>/research/`\n- Roadmap → `.specify/specs/roadmap/backlog.md`\n- Bootstrap obrigatório → leia `.specify/specs/roadmap/backlog.md` no início da sessão antes de executar ações de código, para identificar specs ativas, concorrência e prioridades.\n- Se sua plataforma forçar um Artifact ou Scratchpad, escreva nele apenas: `\"→ Ver .specify/specs/<slug>/plan.md\"` (Pointer).\n- \"AI-Slop\" (planejamento preso em cache de agente) é inaceitável.\n\n**Why this matters:** planejamento em cache não sobrevive troca de sessão/agente. SDD repo-first é o que torna o framework agnóstico de IA.\n\n**See also:** `[CORE-13]` (Artefatos vivos), `[CORE-11]` (Plano formado)."
     },
     "CORE-03": {
       "id": "CORE-03",
@@ -333,12 +515,19 @@
       "category": "process",
       "evidence_strength": "declared_heuristic",
       "sources": [],
-      "applicable_languages": ["*"],
-      "tags": ["core", "agents", "always_injected", "pointer"],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "core",
+        "agents",
+        "always_injected",
+        "pointer"
+      ],
       "file": ".core\\rules\\agents-core.md",
       "title": "Cross-ref para Regras Globais",
       "instruction_en": "Consult the \"Global Rules\" section injected later in this `<AI_GUIDELINES>` block for engineering principles and AI efficiency.",
-      "documentation_pt": "Consulte a seção \"Regras Globais\" injetada neste bloco `<AI_GUIDELINES>` para princípios de engenharia e eficiência de IA.\n\n**Why this matters:** cross-ref interno ao bloco compilado; evita IA pular a seção de regras universais.\n\n> **Candidata a corte em B.3.5:** se o compiler for refatorado para deixar a hierarquia óbvia (core → global → opt-in), este pointer textual vira redundante.\n\n---"
+      "documentation_pt": "Consulte a seção \"Regras Globais\" injetada neste bloco `<AI_GUIDELINES>` para princípios de engenharia e eficiência de IA.\n\n**Why this matters:** cross-ref interno ao bloco compilado; evita IA pular a seção de regras universais.\n\n> **Candidata a corte em B.3.5:** se o compiler for refatorado para deixar a hierarquia óbvia (core → global → opt-in), este pointer textual vira redundante."
     },
     "CORE-04": {
       "id": "CORE-04",
@@ -346,12 +535,20 @@
       "category": "process",
       "evidence_strength": "declared_heuristic",
       "sources": [],
-      "applicable_languages": ["*"],
-      "tags": ["core", "agents", "always_injected", "git", "branch"],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "core",
+        "agents",
+        "always_injected",
+        "git",
+        "branch"
+      ],
       "file": ".core\\rules\\agents-core.md",
       "title": "Nunca trabalhe direto em main/master",
       "instruction_en": "Never start active modifications on `main` or `master`. Create a synthetic branch (`feat/`, `fix/`, `docs/`) before changing sources of truth.",
-      "documentation_pt": "Nunca inicie modificações ativas operando sob a branch `main` ou `master`. Confirme seu estado de _working tree_ ou crie uma branch sintética (`feat/`, `fix/`, `docs/`) antes de alterar fontes de verdade.\n\n**Why this matters:** trabalho direto em main desfaz revisão por PR e arrisca push acidental para upstream protegido.\n\n---"
+      "documentation_pt": "Nunca inicie modificações ativas operando sob a branch `main` ou `master`. Confirme seu estado de _working tree_ ou crie uma branch sintética (`feat/`, `fix/`, `docs/`) antes de alterar fontes de verdade.\n\n**Why this matters:** trabalho direto em main desfaz revisão por PR e arrisca push acidental para upstream protegido."
     },
     "CORE-05": {
       "id": "CORE-05",
@@ -359,12 +556,20 @@
       "category": "process",
       "evidence_strength": "declared_heuristic",
       "sources": [],
-      "applicable_languages": ["*"],
-      "tags": ["core", "agents", "always_injected", "git", "hygiene"],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "core",
+        "agents",
+        "always_injected",
+        "git",
+        "hygiene"
+      ],
       "file": ".core\\rules\\agents-core.md",
       "title": "Não versione contexto vazado",
       "instruction_en": "Do not version stray context files at the repo root or in working folders (partial payloads, AI scratch). Persistence is for _Release_ only.",
-      "documentation_pt": "Não versione arquivos contextuais vazados na raiz ou pastas sujas (payloads parciais, rascunhos operacionais de IA). A persistência é apenas para _Release_.\n\n**Why this matters:** rascunhos da IA poluem o histórico e podem vazar prompts/secrets; pertencem ao scratchpad da ferramenta, não ao repo.\n\n---"
+      "documentation_pt": "Não versione arquivos contextuais vazados na raiz ou pastas sujas (payloads parciais, rascunhos operacionais de IA). A persistência é apenas para _Release_.\n\n**Why this matters:** rascunhos da IA poluem o histórico e podem vazar prompts/secrets; pertencem ao scratchpad da ferramenta, não ao repo."
     },
     "CORE-06": {
       "id": "CORE-06",
@@ -372,12 +577,20 @@
       "category": "process",
       "evidence_strength": "declared_heuristic",
       "sources": [],
-      "applicable_languages": ["*"],
-      "tags": ["core", "agents", "always_injected", "git", "commit"],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "core",
+        "agents",
+        "always_injected",
+        "git",
+        "commit"
+      ],
       "file": ".core\\rules\\agents-core.md",
       "title": "Commits incrementais atômicos",
       "instruction_en": "Make atomic incremental commits limited to one logical unit. Split tasks that span design + code + spec.",
-      "documentation_pt": "Realize _Commits Incrementais Atômicos_ limitados à sua unidade lógica. Se a tarefa varrer design, código e spec simultaneamente, fracione as ações comissionadas em passos menores.\n\n**Why this matters:** commits monolíticos sabotam `git bisect` e forçam revisão \"tudo ou nada\". Commit atômico = unidade revisável independente.\n\n---"
+      "documentation_pt": "Realize _Commits Incrementais Atômicos_ limitados à sua unidade lógica. Se a tarefa varrer design, código e spec simultaneamente, fracione as ações comissionadas em passos menores.\n\n**Why this matters:** commits monolíticos sabotam `git bisect` e forçam revisão \"tudo ou nada\". Commit atômico = unidade revisável independente."
     },
     "CORE-07": {
       "id": "CORE-07",
@@ -385,12 +598,21 @@
       "category": "process",
       "evidence_strength": "declared_heuristic",
       "sources": [],
-      "applicable_languages": ["*"],
-      "tags": ["core", "agents", "always_injected", "git", "safety", "critical"],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "core",
+        "agents",
+        "always_injected",
+        "git",
+        "safety",
+        "critical"
+      ],
       "file": ".core\\rules\\agents-core.md",
       "title": "Nunca execute git push autonomamente",
       "instruction_en": "**[CRITICAL]** Never execute `git push` autonomously. Any remote push requires explicit human approval from the maintainer.",
-      "documentation_pt": "**[CRITICAL]** Nunca execute `git push` de forma autônoma. Todo envio de código ao repositório remoto **exige aprovação humana explícita do mantenedor** antes de ser iniciado. Aplica-se a qualquer agente de IA, script automatizado ou hook que não seja o pipeline oficial do repositório.\n\n**Why this matters:** push autônomo escapa do gate de revisão humana e pode publicar código não-validado. Linha cravada como `[CRITICAL]` no template original.\n\n**See also:** `[CORE-08]` (HARNESS LOCK).\n\n---"
+      "documentation_pt": "**[CRITICAL]** Nunca execute `git push` de forma autônoma. Todo envio de código ao repositório remoto **exige aprovação humana explícita do mantenedor** antes de ser iniciado. Aplica-se a qualquer agente de IA, script automatizado ou hook que não seja o pipeline oficial do repositório.\n\n**Why this matters:** push autônomo escapa do gate de revisão humana e pode publicar código não-validado. Linha cravada como `[CRITICAL]` no template original.\n\n**See also:** `[CORE-08]` (HARNESS LOCK)."
     },
     "CORE-08": {
       "id": "CORE-08",
@@ -398,12 +620,22 @@
       "category": "process",
       "evidence_strength": "declared_heuristic",
       "sources": [],
-      "applicable_languages": ["*"],
-      "tags": ["core", "agents", "always_injected", "git", "commit", "ci", "harness_lock"],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "core",
+        "agents",
+        "always_injected",
+        "git",
+        "commit",
+        "ci",
+        "harness_lock"
+      ],
       "file": ".core\\rules\\agents-core.md",
       "title": "HARNESS LOCK — cadeia de qualidade obrigatória pré-commit",
       "instruction_en": "**[HARNESS LOCK]** Before any `git commit`, run the project's full validation chain (format, check, lint, test) as declared in `package.json`. The rule is the chain, not the package manager — adapt to project scripts.",
-      "documentation_pt": "**[CI Compliance — HARNESS LOCK]** É terminantemente proibido submeter qualquer commit sem validar a cadeia de qualidade do projeto. Antes de `git commit`, execute **todos os scripts de validação** definidos no `package.json` do repositório (ex.: `format`, `check`, `lint`, `test`). O padrão canônico é:\n\n```text\n<format_cmd> ; <check_cmd> ; git add . ; git commit -m \"...\"\n```\n\nSe o repositório define `yarn format` e `yarn check`, o comando concreto é: `yarn format ; yarn check ; git add . ; git commit -m \"...\"`. Adapte aos scripts do projeto — a regra é a **cadeia**, não o gerenciador.\n\n**Why this matters:** o gate local replica o gate de CI. Pular = empurrar o erro para o pipeline e gastar ciclo de revisão humano com algo automatizável.\n\n**Cross-ref:** complementada por `[CORE-14]` (commit message protocol — IA gera apenas o texto sugerido; humano executa a cadeia).\n\n---"
+      "documentation_pt": "**[CI Compliance — HARNESS LOCK]** É terminantemente proibido submeter qualquer commit sem validar a cadeia de qualidade do projeto. Antes de `git commit`, execute **todos os scripts de validação** definidos no `package.json` do repositório (ex.: `format`, `check`, `lint`, `test`). O padrão canônico é:\n\n```text\n<format_cmd> ; <check_cmd> ; git add . ; git commit -m \"...\"\n```\n\nSe o repositório define `yarn format` e `yarn check`, o comando concreto é: `yarn format ; yarn check ; git add . ; git commit -m \"...\"`. Adapte aos scripts do projeto — a regra é a **cadeia**, não o gerenciador.\n\n**Why this matters:** o gate local replica o gate de CI. Pular = empurrar o erro para o pipeline e gastar ciclo de revisão humano com algo automatizável.\n\n**Cross-ref:** complementada por `[CORE-14]` (commit message protocol — IA gera apenas o texto sugerido; humano executa a cadeia)."
     },
     "CORE-09": {
       "id": "CORE-09",
@@ -411,12 +643,20 @@
       "category": "process",
       "evidence_strength": "declared_heuristic",
       "sources": [],
-      "applicable_languages": ["*"],
-      "tags": ["core", "agents", "always_injected", "pr", "github"],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "core",
+        "agents",
+        "always_injected",
+        "pr",
+        "github"
+      ],
       "file": ".core\\rules\\agents-core.md",
       "title": "PRs abrem como Draft com matriz oficial",
       "instruction_en": "Open Pull Requests in `Draft` mode using the full `.github/pull_request_template.md` matrix.",
-      "documentation_pt": "A submissão de Pull Requests obrigatoriamente se inaugura no modo `Draft`, utilizando integralmente a matriz `.github/pull_request_template.md`.\n\n**Why this matters:** Draft sinaliza WIP e impede que CI/reviewers tratem o PR como pronto antes da hora.\n\n---"
+      "documentation_pt": "A submissão de Pull Requests obrigatoriamente se inaugura no modo `Draft`, utilizando integralmente a matriz `.github/pull_request_template.md`.\n\n**Why this matters:** Draft sinaliza WIP e impede que CI/reviewers tratem o PR como pronto antes da hora."
     },
     "CORE-10": {
       "id": "CORE-10",
@@ -424,12 +664,21 @@
       "category": "process",
       "evidence_strength": "declared_heuristic",
       "sources": [],
-      "applicable_languages": ["*"],
-      "tags": ["core", "agents", "always_injected", "pr", "github", "gate"],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "core",
+        "agents",
+        "always_injected",
+        "pr",
+        "github",
+        "gate"
+      ],
       "file": ".core\\rules\\agents-core.md",
       "title": "Draft → Ready apenas via revalidação humana",
       "instruction_en": "Convert PRs from `Draft` to `Ready` only after explicit human revalidation.",
-      "documentation_pt": "Converta a operação de `Draft` para `Ready` apenas através da revalidação afirmativa Humana.\n\n**Why this matters:** transição Draft→Ready é gate humano explícito; IA não decide sozinha que está pronto.\n\n---"
+      "documentation_pt": "Converta a operação de `Draft` para `Ready` apenas através da revalidação afirmativa Humana.\n\n**Why this matters:** transição Draft→Ready é gate humano explícito; IA não decide sozinha que está pronto."
     },
     "CORE-11": {
       "id": "CORE-11",
@@ -437,12 +686,19 @@
       "category": "process",
       "evidence_strength": "declared_heuristic",
       "sources": [],
-      "applicable_languages": ["*"],
-      "tags": ["core", "agents", "always_injected", "planning"],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "core",
+        "agents",
+        "always_injected",
+        "planning"
+      ],
       "file": ".core\\rules\\agents-core.md",
       "title": "Plano formado antes de ação",
       "instruction_en": "Act only with a formed plan. Use `spec-foundation` for work that must survive session/agent changes; use a tool-scratchpad lightweight plan only for single-session, local, disposable adjustments.",
-      "documentation_pt": "**Aja apenas mediante Plano Formado.** Antes de executar qualquer código, escolha a granularidade:\n\n| Critério      | Use `spec-foundation`                 | Use `plano leve`                          |\n| :------------ | :------------------------------------ | :---------------------------------------- |\n| Duração       | > 1 sessão                            | 1 sessão                                  |\n| Escopo        | > 1 arquivo fora de feature isolada   | Ajuste pontual, local                     |\n| Sobrevivência | Precisa sobreviver troca de IA/sessão | Descartável                               |\n| Onde vive     | `.specify/specs/<slug>/` (versionado) | Scratchpad da ferramenta (não versionado) |\n\n**Why this matters:** ação sem plano formado = sintoma clássico de AI-slop. A tabela é o critério-teste objetivo entre `spec-foundation` e plano leve.\n\n**See also:** `[CORE-02]` (Agnostic SDD Override). _TODO(B.4): adicionar cross-ref para o ID canônico da regra \"Tipo de spec\" quando `global-rules.md` migrar para o schema bilíngue + IDs `[GR-NNNN]`._ Hoje a regra vive em [`.core/rules/global-rules.md` § \"Workflow com IA\"](./global-rules.md#workflow-com-ia).\n\n> **Candidata a docs-only em B.3.5:** a tabela detalhada pode migrar para `.core/process/spec-foundation.md` (já tem seção \"Tipos de spec\" hoje). O core-runtime mantém só a frase imperativa.\n\n---"
+      "documentation_pt": "**Aja apenas mediante Plano Formado.** Antes de executar qualquer código, escolha a granularidade:\n\n| Critério      | Use `spec-foundation`                 | Use `plano leve`                          |\n| :------------ | :------------------------------------ | :---------------------------------------- |\n| Duração       | > 1 sessão                            | 1 sessão                                  |\n| Escopo        | > 1 arquivo fora de feature isolada   | Ajuste pontual, local                     |\n| Sobrevivência | Precisa sobreviver troca de IA/sessão | Descartável                               |\n| Onde vive     | `.specify/specs/<slug>/` (versionado) | Scratchpad da ferramenta (não versionado) |\n\n**Why this matters:** ação sem plano formado = sintoma clássico de AI-slop. A tabela é o critério-teste objetivo entre `spec-foundation` e plano leve.\n\n**See also:** `[CORE-02]` (Agnostic SDD Override). _TODO(B.4): adicionar cross-ref para o ID canônico da regra \"Tipo de spec\" quando `global-rules.md` migrar para o schema bilíngue + IDs `[GR-NNNN]`._ Hoje a regra vive em [`.core/rules/global-rules.md` § \"Workflow com IA\"](./global-rules.md#workflow-com-ia).\n\n> **Candidata a docs-only em B.3.5:** a tabela detalhada pode migrar para `.core/process/spec-foundation.md` (já tem seção \"Tipos de spec\" hoje). O core-runtime mantém só a frase imperativa."
     },
     "CORE-12": {
       "id": "CORE-12",
@@ -450,12 +706,19 @@
       "category": "process",
       "evidence_strength": "declared_heuristic",
       "sources": [],
-      "applicable_languages": ["*"],
-      "tags": ["core", "agents", "always_injected", "checkpoint"],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "core",
+        "agents",
+        "always_injected",
+        "checkpoint"
+      ],
       "file": ".core\\rules\\agents-core.md",
       "title": "Checkpoints antes de ação após contexto extenso",
       "instruction_en": "After absorbing extensive context, return a summary Checkpoint and request human approval before executing Code Actions.",
-      "documentation_pt": "**Checkpoints antes de ação.** Após absorver contexto extenso (múltiplos arquivos, specs, pesquisas), retorne um Checkpoint resumido e peça aprovação humana **antes** de executar Code Actions.\n\n**Why this matters:** evita \"IA absorve 50 arquivos e parte direto para edição agressiva\". Checkpoint = oportunidade de o humano corrigir interpretação errada.\n\n---"
+      "documentation_pt": "**Checkpoints antes de ação.** Após absorver contexto extenso (múltiplos arquivos, specs, pesquisas), retorne um Checkpoint resumido e peça aprovação humana **antes** de executar Code Actions.\n\n**Why this matters:** evita \"IA absorve 50 arquivos e parte direto para edição agressiva\". Checkpoint = oportunidade de o humano corrigir interpretação errada."
     },
     "CORE-13": {
       "id": "CORE-13",
@@ -463,12 +726,20 @@
       "category": "process",
       "evidence_strength": "declared_heuristic",
       "sources": [],
-      "applicable_languages": ["*"],
-      "tags": ["core", "agents", "always_injected", "sdd", "lifecycle"],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "core",
+        "agents",
+        "always_injected",
+        "sdd",
+        "lifecycle"
+      ],
       "file": ".core\\rules\\agents-core.md",
       "title": "Artefatos vivos durante o trabalho",
       "instruction_en": "Keep SDD artifacts updated continuously: mark `tasks.md` items `[/]` (in progress) or `[x]` (done) as you go; record debts in `NEXT.md`. Never create parallel routing files in the repo.",
-      "documentation_pt": "**Artefatos vivos.** Mantenha atualizados os artefatos SDD durante o trabalho:\n\n- `tasks.md` → marque cada item como `[/]` (em progresso) ou `[x]` (concluído) a cada passo.\n- `NEXT.md` → registre débitos, bugs ou insights sem prioridade imediata.\n- **Nunca crie arquivos paralelos de roteirização.** Planos leves vivem na ferramenta, não no repositório.\n\n**Why this matters:** artefatos SDD desatualizados = perda do dogfood do framework. Atualização incremental preserva rastreabilidade.\n\n**See also:** `[CORE-02]` (Agnostic SDD Override).\n\n---"
+      "documentation_pt": "**Artefatos vivos.** Mantenha atualizados os artefatos SDD durante o trabalho:\n\n- `tasks.md` → marque cada item como `[/]` (em progresso) ou `[x]` (concluído) a cada passo.\n- `NEXT.md` → registre débitos, bugs ou insights sem prioridade imediata.\n- **Nunca crie arquivos paralelos de roteirização.** Planos leves vivem na ferramenta, não no repositório.\n\n**Why this matters:** artefatos SDD desatualizados = perda do dogfood do framework. Atualização incremental preserva rastreabilidade.\n\n**See also:** `[CORE-02]` (Agnostic SDD Override)."
     },
     "CORE-14": {
       "id": "CORE-14",
@@ -476,8 +747,17 @@
       "category": "process",
       "evidence_strength": "declared_heuristic",
       "sources": [],
-      "applicable_languages": ["*"],
-      "tags": ["core", "agents", "always_injected", "git", "commit", "safety"],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "core",
+        "agents",
+        "always_injected",
+        "git",
+        "commit",
+        "safety"
+      ],
       "file": ".core\\rules\\agents-core.md",
       "title": "Mensagem de commit sugerida: IA fornece apenas a mensagem",
       "instruction_en": "At the end of each sub-block, provide only the commit message suggestion. The human executes the full validation chain (`yarn format ; yarn check ; ...`) and `git commit`.",
@@ -488,26 +768,41 @@
       "scope": "universal",
       "category": "security",
       "evidence_strength": "strong",
-      "sources": ["OWASP-A2", "CWE-522"],
-      "applicable_languages": ["*"],
-      "tags": ["engineering", "security"],
+      "sources": [
+        "OWASP-A2",
+        "CWE-522"
+      ],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "engineering",
+        "security"
+      ],
       "file": ".core\\rules\\global-rules.md",
       "title": "Secure secret handling",
       "instruction_en": "Never expose secrets in frontend code or versioned files. Store them in environment variables and ensure they are ignored by version control.",
-      "documentation_pt": "Chaves de API nunca devem transitar pelo frontend ou arquivos versionados.\nUse `.gitignore` e variáveis de ambiente corretamente.\n\n---"
+      "documentation_pt": "Chaves de API nunca devem transitar pelo frontend ou arquivos versionados.\nUse `.gitignore` e variáveis de ambiente corretamente."
     },
     "GR-0002": {
       "id": "GR-0002",
       "scope": "universal",
       "category": "correctness",
       "evidence_strength": "medium",
-      "sources": ["CWE-704"],
-      "applicable_languages": ["*"],
-      "tags": ["engineering", "typing"],
+      "sources": [
+        "CWE-704"
+      ],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "engineering",
+        "typing"
+      ],
       "file": ".core\\rules\\global-rules.md",
       "title": "Strict typing (anti-hacks)",
       "instruction_en": "Do not bypass the type system. Avoid unsafe casts (`any`, `unknown`, prototype manipulation) and use explicit type guards or generics.",
-      "documentation_pt": "Evite `any`, `as unknown`, coerções inseguras e manipulação de prototype.\nPrefira type guards e tipagem explícita.\n\n---"
+      "documentation_pt": "Evite `any`, `as unknown`, coerções inseguras e manipulação de prototype.\nPrefira type guards e tipagem explícita."
     },
     "GR-0003": {
       "id": "GR-0003",
@@ -515,38 +810,57 @@
       "category": "maintainability",
       "evidence_strength": "declared_heuristic",
       "sources": [],
-      "applicable_languages": ["*"],
-      "tags": ["engineering", "immutability"],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "engineering",
+        "immutability"
+      ],
       "file": ".core\\rules\\global-rules.md",
       "title": "Immutability over shared mutation",
       "instruction_en": "Use immutable data structures and pure functions. Do not mutate shared state.",
-      "documentation_pt": "Prefira estruturas imutáveis e funções puras.\nEvite estado global mutável.\n\n---"
+      "documentation_pt": "Prefira estruturas imutáveis e funções puras.\nEvite estado global mutável."
     },
     "GR-0004": {
       "id": "GR-0004",
       "scope": "universal",
       "category": "correctness",
       "evidence_strength": "strong",
-      "sources": ["CWE-703"],
-      "applicable_languages": ["*"],
-      "tags": ["engineering", "errors"],
+      "sources": [
+        "CWE-703"
+      ],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "engineering",
+        "errors"
+      ],
       "file": ".core\\rules\\global-rules.md",
       "title": "Fail-fast error handling",
       "instruction_en": "Fail fast and propagate errors explicitly. Do not swallow exceptions or use empty catch blocks.",
-      "documentation_pt": "Nunca use try/catch vazio ou que apenas loga.\nErro deve ser propagado ou tratado corretamente.\n\n---"
+      "documentation_pt": "Nunca use try/catch vazio ou que apenas loga.\nErro deve ser propagado ou tratado corretamente."
     },
     "GR-0005": {
       "id": "GR-0005",
       "scope": "universal",
       "category": "correctness",
       "evidence_strength": "medium",
-      "sources": ["CWE-362"],
-      "applicable_languages": ["*"],
-      "tags": ["engineering", "concurrency"],
+      "sources": [
+        "CWE-362"
+      ],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "engineering",
+        "concurrency"
+      ],
       "file": ".core\\rules\\global-rules.md",
       "title": "Explicit async and concurrency intent",
       "instruction_en": "Make concurrency explicit: use `Promise.all` for independent tasks and `await` sequencing for dependent ones. Do not use fire-and-forget without error handling.",
-      "documentation_pt": "Use `Promise.all` para paralelo e `await` sequencial para dependências.\nEvite fire-and-forget sem tratamento de erro.\n\n---\n\n## AI Workflow Rules"
+      "documentation_pt": "Use `Promise.all` para paralelo e `await` sequencial para dependências.\nEvite fire-and-forget sem tratamento de erro."
     },
     "GR-0101": {
       "id": "GR-0101",
@@ -554,12 +868,17 @@
       "category": "process",
       "evidence_strength": "declared_heuristic",
       "sources": [],
-      "applicable_languages": ["*"],
-      "tags": ["workflow", "spec"],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "workflow",
+        "spec"
+      ],
       "file": ".core\\rules\\global-rules.md",
       "title": "Spec type must be declared",
       "instruction_en": "Declare the spec type (evidence-driven, deterministic, or mixed) and require human approval when design depends on unresolved evidence.",
-      "documentation_pt": "Specs `evidence-driven` ou `mixed` exigem decision-brief antes da implementação.\n\n---\n\n## Owner Conventions (Non-evidence rules)\n\n> Regras baseadas em prática real. Não possuem source canônica.\n> Mantidas separadas do núcleo evidence-driven."
+      "documentation_pt": "Specs `evidence-driven` ou `mixed` exigem decision-brief antes da implementação."
     },
     "GR-0201": {
       "id": "GR-0201",
@@ -567,12 +886,17 @@
       "category": "editorial",
       "evidence_strength": "declared_heuristic",
       "sources": [],
-      "applicable_languages": ["*"],
-      "tags": ["owner", "language"],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "owner",
+        "language"
+      ],
       "file": ".core\\rules\\global-rules.md",
       "title": "Repository language standard",
       "instruction_en": "Always respond using the repository default language.",
-      "documentation_pt": "Neste repositório: sempre responder em PT-BR.\n\n---"
+      "documentation_pt": "Neste repositório: sempre responder em PT-BR."
     },
     "GR-0202": {
       "id": "GR-0202",
@@ -580,12 +904,17 @@
       "category": "process",
       "evidence_strength": "declared_heuristic",
       "sources": [],
-      "applicable_languages": ["*"],
-      "tags": ["owner", "ai_efficiency"],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "owner",
+        "ai_efficiency"
+      ],
       "file": ".core\\rules\\global-rules.md",
       "title": "Context noise reduction",
       "instruction_en": "Exclude irrelevant files (logs, builds, dependencies) from the AI context using ignore files.",
-      "documentation_pt": "Use `.gitignore`, `.claudeignore`, `.geminiignore` para remover logs,\nbuilds e `node_modules` do contexto.\n\n---"
+      "documentation_pt": "Use `.gitignore`, `.claudeignore`, `.geminiignore` para remover logs,\nbuilds e `node_modules` do contexto."
     },
     "GR-0203": {
       "id": "GR-0203",
@@ -593,8 +922,13 @@
       "category": "process",
       "evidence_strength": "declared_heuristic",
       "sources": [],
-      "applicable_languages": ["*"],
-      "tags": ["owner", "workflow"],
+      "applicable_languages": [
+        "*"
+      ],
+      "tags": [
+        "owner",
+        "workflow"
+      ],
       "file": ".core\\rules\\global-rules.md",
       "title": "Collaborative PR description",
       "instruction_en": "Build PR descriptions in three steps: outline topics, get human approval, then generate the final text using the repository template (if available) and perform a final human validation.",
@@ -609,12 +943,19 @@
         "category": "process",
         "evidence_strength": "declared_heuristic",
         "sources": [],
-        "applicable_languages": ["*"],
-        "tags": ["core", "agents", "always_injected", "environment"],
+        "applicable_languages": [
+          "*"
+        ],
+        "tags": [
+          "core",
+          "agents",
+          "always_injected",
+          "environment"
+        ],
         "file": ".core\\rules\\agents-core.md",
         "title": "Environment check antes da primeira ação",
         "instruction_en": "Before the first technical action, identify platform, shell, surface (CLI vs IDE), and model class; adapt commands accordingly.",
-        "documentation_pt": "Antes da primeira ação técnica, identifique o contexto situacional:\n\n- Plataforma: Windows / Linux / macOS / WSL.\n- Shell: bash / zsh / PowerShell / cmd.\n- Surface: CLI agent (Claude Code, Gemini CLI) vs IDE (Cursor, Copilot).\n- Modelo: identifique se está operando com um modelo \"Thinking/Reasoning\".\n- Adapte comandos (ex.: `/dev/null` vs `NUL`, forward slashes) a essa matriz.\n\n**Why this matters:** comandos hardcoded para um SO/shell quebram silenciosamente em outro. Falha rápida no início economiza loops de retry.\n\n**See also:** `[CORE-08]` (HARNESS LOCK).\n\n---"
+        "documentation_pt": "Antes da primeira ação técnica, identifique o contexto situacional:\n\n- Plataforma: Windows / Linux / macOS / WSL.\n- Shell: bash / zsh / PowerShell / cmd.\n- Surface: CLI agent (Claude Code, Gemini CLI) vs IDE (Cursor, Copilot).\n- Modelo: identifique se está operando com um modelo \"Thinking/Reasoning\".\n- Adapte comandos (ex.: `/dev/null` vs `NUL`, forward slashes) a essa matriz.\n\n**Why this matters:** comandos hardcoded para um SO/shell quebram silenciosamente em outro. Falha rápida no início economiza loops de retry.\n\n**See also:** `[CORE-08]` (HARNESS LOCK)."
       },
       {
         "id": "CORE-02",
@@ -622,12 +963,20 @@
         "category": "process",
         "evidence_strength": "declared_heuristic",
         "sources": [],
-        "applicable_languages": ["*"],
-        "tags": ["core", "agents", "always_injected", "sdd", "inquebrável"],
+        "applicable_languages": [
+          "*"
+        ],
+        "tags": [
+          "core",
+          "agents",
+          "always_injected",
+          "sdd",
+          "inquebrável"
+        ],
         "file": ".core\\rules\\agents-core.md",
         "title": "Agnostic SDD Override — repositório como memória",
         "instruction_en": "The repository is your memory. Persist plans, progress, debts, knowledge, and roadmap under `.specify/specs/`. Read `roadmap/backlog.md` at session start. If the platform forces a scratchpad, write only a pointer to the spec file. Planning trapped in agent cache (AI-slop) is unacceptable.",
-        "documentation_pt": "**[INQUEBRÁVEL]** O repositório é sua memória, não seus artefatos internos.\n\n- Planejamento → `.specify/specs/<slug>/plan.md`\n- Progresso → `.specify/specs/<slug>/tasks.md`\n- Débitos → `.specify/specs/<slug>/NEXT.md`\n- Conhecimento → `.specify/specs/<slug>/research/`\n- Roadmap → `.specify/specs/roadmap/backlog.md`\n- Bootstrap obrigatório → leia `.specify/specs/roadmap/backlog.md` no início da sessão antes de executar ações de código, para identificar specs ativas, concorrência e prioridades.\n- Se sua plataforma forçar um Artifact ou Scratchpad, escreva nele apenas: `\"→ Ver .specify/specs/<slug>/plan.md\"` (Pointer).\n- \"AI-Slop\" (planejamento preso em cache de agente) é inaceitável.\n\n**Why this matters:** planejamento em cache não sobrevive troca de sessão/agente. SDD repo-first é o que torna o framework agnóstico de IA.\n\n**See also:** `[CORE-13]` (Artefatos vivos), `[CORE-11]` (Plano formado).\n\n---"
+        "documentation_pt": "**[INQUEBRÁVEL]** O repositório é sua memória, não seus artefatos internos.\n\n- Planejamento → `.specify/specs/<slug>/plan.md`\n- Progresso → `.specify/specs/<slug>/tasks.md`\n- Débitos → `.specify/specs/<slug>/NEXT.md`\n- Conhecimento → `.specify/specs/<slug>/research/`\n- Roadmap → `.specify/specs/roadmap/backlog.md`\n- Bootstrap obrigatório → leia `.specify/specs/roadmap/backlog.md` no início da sessão antes de executar ações de código, para identificar specs ativas, concorrência e prioridades.\n- Se sua plataforma forçar um Artifact ou Scratchpad, escreva nele apenas: `\"→ Ver .specify/specs/<slug>/plan.md\"` (Pointer).\n- \"AI-Slop\" (planejamento preso em cache de agente) é inaceitável.\n\n**Why this matters:** planejamento em cache não sobrevive troca de sessão/agente. SDD repo-first é o que torna o framework agnóstico de IA.\n\n**See also:** `[CORE-13]` (Artefatos vivos), `[CORE-11]` (Plano formado)."
       },
       {
         "id": "CORE-03",
@@ -635,12 +984,19 @@
         "category": "process",
         "evidence_strength": "declared_heuristic",
         "sources": [],
-        "applicable_languages": ["*"],
-        "tags": ["core", "agents", "always_injected", "pointer"],
+        "applicable_languages": [
+          "*"
+        ],
+        "tags": [
+          "core",
+          "agents",
+          "always_injected",
+          "pointer"
+        ],
         "file": ".core\\rules\\agents-core.md",
         "title": "Cross-ref para Regras Globais",
         "instruction_en": "Consult the \"Global Rules\" section injected later in this `<AI_GUIDELINES>` block for engineering principles and AI efficiency.",
-        "documentation_pt": "Consulte a seção \"Regras Globais\" injetada neste bloco `<AI_GUIDELINES>` para princípios de engenharia e eficiência de IA.\n\n**Why this matters:** cross-ref interno ao bloco compilado; evita IA pular a seção de regras universais.\n\n> **Candidata a corte em B.3.5:** se o compiler for refatorado para deixar a hierarquia óbvia (core → global → opt-in), este pointer textual vira redundante.\n\n---"
+        "documentation_pt": "Consulte a seção \"Regras Globais\" injetada neste bloco `<AI_GUIDELINES>` para princípios de engenharia e eficiência de IA.\n\n**Why this matters:** cross-ref interno ao bloco compilado; evita IA pular a seção de regras universais.\n\n> **Candidata a corte em B.3.5:** se o compiler for refatorado para deixar a hierarquia óbvia (core → global → opt-in), este pointer textual vira redundante."
       },
       {
         "id": "CORE-04",
@@ -648,12 +1004,20 @@
         "category": "process",
         "evidence_strength": "declared_heuristic",
         "sources": [],
-        "applicable_languages": ["*"],
-        "tags": ["core", "agents", "always_injected", "git", "branch"],
+        "applicable_languages": [
+          "*"
+        ],
+        "tags": [
+          "core",
+          "agents",
+          "always_injected",
+          "git",
+          "branch"
+        ],
         "file": ".core\\rules\\agents-core.md",
         "title": "Nunca trabalhe direto em main/master",
         "instruction_en": "Never start active modifications on `main` or `master`. Create a synthetic branch (`feat/`, `fix/`, `docs/`) before changing sources of truth.",
-        "documentation_pt": "Nunca inicie modificações ativas operando sob a branch `main` ou `master`. Confirme seu estado de _working tree_ ou crie uma branch sintética (`feat/`, `fix/`, `docs/`) antes de alterar fontes de verdade.\n\n**Why this matters:** trabalho direto em main desfaz revisão por PR e arrisca push acidental para upstream protegido.\n\n---"
+        "documentation_pt": "Nunca inicie modificações ativas operando sob a branch `main` ou `master`. Confirme seu estado de _working tree_ ou crie uma branch sintética (`feat/`, `fix/`, `docs/`) antes de alterar fontes de verdade.\n\n**Why this matters:** trabalho direto em main desfaz revisão por PR e arrisca push acidental para upstream protegido."
       },
       {
         "id": "CORE-05",
@@ -661,12 +1025,20 @@
         "category": "process",
         "evidence_strength": "declared_heuristic",
         "sources": [],
-        "applicable_languages": ["*"],
-        "tags": ["core", "agents", "always_injected", "git", "hygiene"],
+        "applicable_languages": [
+          "*"
+        ],
+        "tags": [
+          "core",
+          "agents",
+          "always_injected",
+          "git",
+          "hygiene"
+        ],
         "file": ".core\\rules\\agents-core.md",
         "title": "Não versione contexto vazado",
         "instruction_en": "Do not version stray context files at the repo root or in working folders (partial payloads, AI scratch). Persistence is for _Release_ only.",
-        "documentation_pt": "Não versione arquivos contextuais vazados na raiz ou pastas sujas (payloads parciais, rascunhos operacionais de IA). A persistência é apenas para _Release_.\n\n**Why this matters:** rascunhos da IA poluem o histórico e podem vazar prompts/secrets; pertencem ao scratchpad da ferramenta, não ao repo.\n\n---"
+        "documentation_pt": "Não versione arquivos contextuais vazados na raiz ou pastas sujas (payloads parciais, rascunhos operacionais de IA). A persistência é apenas para _Release_.\n\n**Why this matters:** rascunhos da IA poluem o histórico e podem vazar prompts/secrets; pertencem ao scratchpad da ferramenta, não ao repo."
       },
       {
         "id": "CORE-06",
@@ -674,12 +1046,20 @@
         "category": "process",
         "evidence_strength": "declared_heuristic",
         "sources": [],
-        "applicable_languages": ["*"],
-        "tags": ["core", "agents", "always_injected", "git", "commit"],
+        "applicable_languages": [
+          "*"
+        ],
+        "tags": [
+          "core",
+          "agents",
+          "always_injected",
+          "git",
+          "commit"
+        ],
         "file": ".core\\rules\\agents-core.md",
         "title": "Commits incrementais atômicos",
         "instruction_en": "Make atomic incremental commits limited to one logical unit. Split tasks that span design + code + spec.",
-        "documentation_pt": "Realize _Commits Incrementais Atômicos_ limitados à sua unidade lógica. Se a tarefa varrer design, código e spec simultaneamente, fracione as ações comissionadas em passos menores.\n\n**Why this matters:** commits monolíticos sabotam `git bisect` e forçam revisão \"tudo ou nada\". Commit atômico = unidade revisável independente.\n\n---"
+        "documentation_pt": "Realize _Commits Incrementais Atômicos_ limitados à sua unidade lógica. Se a tarefa varrer design, código e spec simultaneamente, fracione as ações comissionadas em passos menores.\n\n**Why this matters:** commits monolíticos sabotam `git bisect` e forçam revisão \"tudo ou nada\". Commit atômico = unidade revisável independente."
       },
       {
         "id": "CORE-07",
@@ -687,12 +1067,21 @@
         "category": "process",
         "evidence_strength": "declared_heuristic",
         "sources": [],
-        "applicable_languages": ["*"],
-        "tags": ["core", "agents", "always_injected", "git", "safety", "critical"],
+        "applicable_languages": [
+          "*"
+        ],
+        "tags": [
+          "core",
+          "agents",
+          "always_injected",
+          "git",
+          "safety",
+          "critical"
+        ],
         "file": ".core\\rules\\agents-core.md",
         "title": "Nunca execute git push autonomamente",
         "instruction_en": "**[CRITICAL]** Never execute `git push` autonomously. Any remote push requires explicit human approval from the maintainer.",
-        "documentation_pt": "**[CRITICAL]** Nunca execute `git push` de forma autônoma. Todo envio de código ao repositório remoto **exige aprovação humana explícita do mantenedor** antes de ser iniciado. Aplica-se a qualquer agente de IA, script automatizado ou hook que não seja o pipeline oficial do repositório.\n\n**Why this matters:** push autônomo escapa do gate de revisão humana e pode publicar código não-validado. Linha cravada como `[CRITICAL]` no template original.\n\n**See also:** `[CORE-08]` (HARNESS LOCK).\n\n---"
+        "documentation_pt": "**[CRITICAL]** Nunca execute `git push` de forma autônoma. Todo envio de código ao repositório remoto **exige aprovação humana explícita do mantenedor** antes de ser iniciado. Aplica-se a qualquer agente de IA, script automatizado ou hook que não seja o pipeline oficial do repositório.\n\n**Why this matters:** push autônomo escapa do gate de revisão humana e pode publicar código não-validado. Linha cravada como `[CRITICAL]` no template original.\n\n**See also:** `[CORE-08]` (HARNESS LOCK)."
       },
       {
         "id": "CORE-08",
@@ -700,12 +1089,22 @@
         "category": "process",
         "evidence_strength": "declared_heuristic",
         "sources": [],
-        "applicable_languages": ["*"],
-        "tags": ["core", "agents", "always_injected", "git", "commit", "ci", "harness_lock"],
+        "applicable_languages": [
+          "*"
+        ],
+        "tags": [
+          "core",
+          "agents",
+          "always_injected",
+          "git",
+          "commit",
+          "ci",
+          "harness_lock"
+        ],
         "file": ".core\\rules\\agents-core.md",
         "title": "HARNESS LOCK — cadeia de qualidade obrigatória pré-commit",
         "instruction_en": "**[HARNESS LOCK]** Before any `git commit`, run the project's full validation chain (format, check, lint, test) as declared in `package.json`. The rule is the chain, not the package manager — adapt to project scripts.",
-        "documentation_pt": "**[CI Compliance — HARNESS LOCK]** É terminantemente proibido submeter qualquer commit sem validar a cadeia de qualidade do projeto. Antes de `git commit`, execute **todos os scripts de validação** definidos no `package.json` do repositório (ex.: `format`, `check`, `lint`, `test`). O padrão canônico é:\n\n```text\n<format_cmd> ; <check_cmd> ; git add . ; git commit -m \"...\"\n```\n\nSe o repositório define `yarn format` e `yarn check`, o comando concreto é: `yarn format ; yarn check ; git add . ; git commit -m \"...\"`. Adapte aos scripts do projeto — a regra é a **cadeia**, não o gerenciador.\n\n**Why this matters:** o gate local replica o gate de CI. Pular = empurrar o erro para o pipeline e gastar ciclo de revisão humano com algo automatizável.\n\n**Cross-ref:** complementada por `[CORE-14]` (commit message protocol — IA gera apenas o texto sugerido; humano executa a cadeia).\n\n---"
+        "documentation_pt": "**[CI Compliance — HARNESS LOCK]** É terminantemente proibido submeter qualquer commit sem validar a cadeia de qualidade do projeto. Antes de `git commit`, execute **todos os scripts de validação** definidos no `package.json` do repositório (ex.: `format`, `check`, `lint`, `test`). O padrão canônico é:\n\n```text\n<format_cmd> ; <check_cmd> ; git add . ; git commit -m \"...\"\n```\n\nSe o repositório define `yarn format` e `yarn check`, o comando concreto é: `yarn format ; yarn check ; git add . ; git commit -m \"...\"`. Adapte aos scripts do projeto — a regra é a **cadeia**, não o gerenciador.\n\n**Why this matters:** o gate local replica o gate de CI. Pular = empurrar o erro para o pipeline e gastar ciclo de revisão humano com algo automatizável.\n\n**Cross-ref:** complementada por `[CORE-14]` (commit message protocol — IA gera apenas o texto sugerido; humano executa a cadeia)."
       },
       {
         "id": "CORE-09",
@@ -713,12 +1112,20 @@
         "category": "process",
         "evidence_strength": "declared_heuristic",
         "sources": [],
-        "applicable_languages": ["*"],
-        "tags": ["core", "agents", "always_injected", "pr", "github"],
+        "applicable_languages": [
+          "*"
+        ],
+        "tags": [
+          "core",
+          "agents",
+          "always_injected",
+          "pr",
+          "github"
+        ],
         "file": ".core\\rules\\agents-core.md",
         "title": "PRs abrem como Draft com matriz oficial",
         "instruction_en": "Open Pull Requests in `Draft` mode using the full `.github/pull_request_template.md` matrix.",
-        "documentation_pt": "A submissão de Pull Requests obrigatoriamente se inaugura no modo `Draft`, utilizando integralmente a matriz `.github/pull_request_template.md`.\n\n**Why this matters:** Draft sinaliza WIP e impede que CI/reviewers tratem o PR como pronto antes da hora.\n\n---"
+        "documentation_pt": "A submissão de Pull Requests obrigatoriamente se inaugura no modo `Draft`, utilizando integralmente a matriz `.github/pull_request_template.md`.\n\n**Why this matters:** Draft sinaliza WIP e impede que CI/reviewers tratem o PR como pronto antes da hora."
       },
       {
         "id": "CORE-10",
@@ -726,12 +1133,21 @@
         "category": "process",
         "evidence_strength": "declared_heuristic",
         "sources": [],
-        "applicable_languages": ["*"],
-        "tags": ["core", "agents", "always_injected", "pr", "github", "gate"],
+        "applicable_languages": [
+          "*"
+        ],
+        "tags": [
+          "core",
+          "agents",
+          "always_injected",
+          "pr",
+          "github",
+          "gate"
+        ],
         "file": ".core\\rules\\agents-core.md",
         "title": "Draft → Ready apenas via revalidação humana",
         "instruction_en": "Convert PRs from `Draft` to `Ready` only after explicit human revalidation.",
-        "documentation_pt": "Converta a operação de `Draft` para `Ready` apenas através da revalidação afirmativa Humana.\n\n**Why this matters:** transição Draft→Ready é gate humano explícito; IA não decide sozinha que está pronto.\n\n---"
+        "documentation_pt": "Converta a operação de `Draft` para `Ready` apenas através da revalidação afirmativa Humana.\n\n**Why this matters:** transição Draft→Ready é gate humano explícito; IA não decide sozinha que está pronto."
       },
       {
         "id": "CORE-11",
@@ -739,12 +1155,19 @@
         "category": "process",
         "evidence_strength": "declared_heuristic",
         "sources": [],
-        "applicable_languages": ["*"],
-        "tags": ["core", "agents", "always_injected", "planning"],
+        "applicable_languages": [
+          "*"
+        ],
+        "tags": [
+          "core",
+          "agents",
+          "always_injected",
+          "planning"
+        ],
         "file": ".core\\rules\\agents-core.md",
         "title": "Plano formado antes de ação",
         "instruction_en": "Act only with a formed plan. Use `spec-foundation` for work that must survive session/agent changes; use a tool-scratchpad lightweight plan only for single-session, local, disposable adjustments.",
-        "documentation_pt": "**Aja apenas mediante Plano Formado.** Antes de executar qualquer código, escolha a granularidade:\n\n| Critério      | Use `spec-foundation`                 | Use `plano leve`                          |\n| :------------ | :------------------------------------ | :---------------------------------------- |\n| Duração       | > 1 sessão                            | 1 sessão                                  |\n| Escopo        | > 1 arquivo fora de feature isolada   | Ajuste pontual, local                     |\n| Sobrevivência | Precisa sobreviver troca de IA/sessão | Descartável                               |\n| Onde vive     | `.specify/specs/<slug>/` (versionado) | Scratchpad da ferramenta (não versionado) |\n\n**Why this matters:** ação sem plano formado = sintoma clássico de AI-slop. A tabela é o critério-teste objetivo entre `spec-foundation` e plano leve.\n\n**See also:** `[CORE-02]` (Agnostic SDD Override). _TODO(B.4): adicionar cross-ref para o ID canônico da regra \"Tipo de spec\" quando `global-rules.md` migrar para o schema bilíngue + IDs `[GR-NNNN]`._ Hoje a regra vive em [`.core/rules/global-rules.md` § \"Workflow com IA\"](./global-rules.md#workflow-com-ia).\n\n> **Candidata a docs-only em B.3.5:** a tabela detalhada pode migrar para `.core/process/spec-foundation.md` (já tem seção \"Tipos de spec\" hoje). O core-runtime mantém só a frase imperativa.\n\n---"
+        "documentation_pt": "**Aja apenas mediante Plano Formado.** Antes de executar qualquer código, escolha a granularidade:\n\n| Critério      | Use `spec-foundation`                 | Use `plano leve`                          |\n| :------------ | :------------------------------------ | :---------------------------------------- |\n| Duração       | > 1 sessão                            | 1 sessão                                  |\n| Escopo        | > 1 arquivo fora de feature isolada   | Ajuste pontual, local                     |\n| Sobrevivência | Precisa sobreviver troca de IA/sessão | Descartável                               |\n| Onde vive     | `.specify/specs/<slug>/` (versionado) | Scratchpad da ferramenta (não versionado) |\n\n**Why this matters:** ação sem plano formado = sintoma clássico de AI-slop. A tabela é o critério-teste objetivo entre `spec-foundation` e plano leve.\n\n**See also:** `[CORE-02]` (Agnostic SDD Override). _TODO(B.4): adicionar cross-ref para o ID canônico da regra \"Tipo de spec\" quando `global-rules.md` migrar para o schema bilíngue + IDs `[GR-NNNN]`._ Hoje a regra vive em [`.core/rules/global-rules.md` § \"Workflow com IA\"](./global-rules.md#workflow-com-ia).\n\n> **Candidata a docs-only em B.3.5:** a tabela detalhada pode migrar para `.core/process/spec-foundation.md` (já tem seção \"Tipos de spec\" hoje). O core-runtime mantém só a frase imperativa."
       },
       {
         "id": "CORE-12",
@@ -752,12 +1175,19 @@
         "category": "process",
         "evidence_strength": "declared_heuristic",
         "sources": [],
-        "applicable_languages": ["*"],
-        "tags": ["core", "agents", "always_injected", "checkpoint"],
+        "applicable_languages": [
+          "*"
+        ],
+        "tags": [
+          "core",
+          "agents",
+          "always_injected",
+          "checkpoint"
+        ],
         "file": ".core\\rules\\agents-core.md",
         "title": "Checkpoints antes de ação após contexto extenso",
         "instruction_en": "After absorbing extensive context, return a summary Checkpoint and request human approval before executing Code Actions.",
-        "documentation_pt": "**Checkpoints antes de ação.** Após absorver contexto extenso (múltiplos arquivos, specs, pesquisas), retorne um Checkpoint resumido e peça aprovação humana **antes** de executar Code Actions.\n\n**Why this matters:** evita \"IA absorve 50 arquivos e parte direto para edição agressiva\". Checkpoint = oportunidade de o humano corrigir interpretação errada.\n\n---"
+        "documentation_pt": "**Checkpoints antes de ação.** Após absorver contexto extenso (múltiplos arquivos, specs, pesquisas), retorne um Checkpoint resumido e peça aprovação humana **antes** de executar Code Actions.\n\n**Why this matters:** evita \"IA absorve 50 arquivos e parte direto para edição agressiva\". Checkpoint = oportunidade de o humano corrigir interpretação errada."
       },
       {
         "id": "CORE-13",
@@ -765,12 +1195,20 @@
         "category": "process",
         "evidence_strength": "declared_heuristic",
         "sources": [],
-        "applicable_languages": ["*"],
-        "tags": ["core", "agents", "always_injected", "sdd", "lifecycle"],
+        "applicable_languages": [
+          "*"
+        ],
+        "tags": [
+          "core",
+          "agents",
+          "always_injected",
+          "sdd",
+          "lifecycle"
+        ],
         "file": ".core\\rules\\agents-core.md",
         "title": "Artefatos vivos durante o trabalho",
         "instruction_en": "Keep SDD artifacts updated continuously: mark `tasks.md` items `[/]` (in progress) or `[x]` (done) as you go; record debts in `NEXT.md`. Never create parallel routing files in the repo.",
-        "documentation_pt": "**Artefatos vivos.** Mantenha atualizados os artefatos SDD durante o trabalho:\n\n- `tasks.md` → marque cada item como `[/]` (em progresso) ou `[x]` (concluído) a cada passo.\n- `NEXT.md` → registre débitos, bugs ou insights sem prioridade imediata.\n- **Nunca crie arquivos paralelos de roteirização.** Planos leves vivem na ferramenta, não no repositório.\n\n**Why this matters:** artefatos SDD desatualizados = perda do dogfood do framework. Atualização incremental preserva rastreabilidade.\n\n**See also:** `[CORE-02]` (Agnostic SDD Override).\n\n---"
+        "documentation_pt": "**Artefatos vivos.** Mantenha atualizados os artefatos SDD durante o trabalho:\n\n- `tasks.md` → marque cada item como `[/]` (em progresso) ou `[x]` (concluído) a cada passo.\n- `NEXT.md` → registre débitos, bugs ou insights sem prioridade imediata.\n- **Nunca crie arquivos paralelos de roteirização.** Planos leves vivem na ferramenta, não no repositório.\n\n**Why this matters:** artefatos SDD desatualizados = perda do dogfood do framework. Atualização incremental preserva rastreabilidade.\n\n**See also:** `[CORE-02]` (Agnostic SDD Override)."
       },
       {
         "id": "CORE-14",
@@ -778,8 +1216,17 @@
         "category": "process",
         "evidence_strength": "declared_heuristic",
         "sources": [],
-        "applicable_languages": ["*"],
-        "tags": ["core", "agents", "always_injected", "git", "commit", "safety"],
+        "applicable_languages": [
+          "*"
+        ],
+        "tags": [
+          "core",
+          "agents",
+          "always_injected",
+          "git",
+          "commit",
+          "safety"
+        ],
         "file": ".core\\rules\\agents-core.md",
         "title": "Mensagem de commit sugerida: IA fornece apenas a mensagem",
         "instruction_en": "At the end of each sub-block, provide only the commit message suggestion. The human executes the full validation chain (`yarn format ; yarn check ; ...`) and `git commit`.",
@@ -790,26 +1237,41 @@
         "scope": "universal",
         "category": "security",
         "evidence_strength": "strong",
-        "sources": ["OWASP-A2", "CWE-522"],
-        "applicable_languages": ["*"],
-        "tags": ["engineering", "security"],
+        "sources": [
+          "OWASP-A2",
+          "CWE-522"
+        ],
+        "applicable_languages": [
+          "*"
+        ],
+        "tags": [
+          "engineering",
+          "security"
+        ],
         "file": ".core\\rules\\global-rules.md",
         "title": "Secure secret handling",
         "instruction_en": "Never expose secrets in frontend code or versioned files. Store them in environment variables and ensure they are ignored by version control.",
-        "documentation_pt": "Chaves de API nunca devem transitar pelo frontend ou arquivos versionados.\nUse `.gitignore` e variáveis de ambiente corretamente.\n\n---"
+        "documentation_pt": "Chaves de API nunca devem transitar pelo frontend ou arquivos versionados.\nUse `.gitignore` e variáveis de ambiente corretamente."
       },
       {
         "id": "GR-0002",
         "scope": "universal",
         "category": "correctness",
         "evidence_strength": "medium",
-        "sources": ["CWE-704"],
-        "applicable_languages": ["*"],
-        "tags": ["engineering", "typing"],
+        "sources": [
+          "CWE-704"
+        ],
+        "applicable_languages": [
+          "*"
+        ],
+        "tags": [
+          "engineering",
+          "typing"
+        ],
         "file": ".core\\rules\\global-rules.md",
         "title": "Strict typing (anti-hacks)",
         "instruction_en": "Do not bypass the type system. Avoid unsafe casts (`any`, `unknown`, prototype manipulation) and use explicit type guards or generics.",
-        "documentation_pt": "Evite `any`, `as unknown`, coerções inseguras e manipulação de prototype.\nPrefira type guards e tipagem explícita.\n\n---"
+        "documentation_pt": "Evite `any`, `as unknown`, coerções inseguras e manipulação de prototype.\nPrefira type guards e tipagem explícita."
       },
       {
         "id": "GR-0003",
@@ -817,38 +1279,57 @@
         "category": "maintainability",
         "evidence_strength": "declared_heuristic",
         "sources": [],
-        "applicable_languages": ["*"],
-        "tags": ["engineering", "immutability"],
+        "applicable_languages": [
+          "*"
+        ],
+        "tags": [
+          "engineering",
+          "immutability"
+        ],
         "file": ".core\\rules\\global-rules.md",
         "title": "Immutability over shared mutation",
         "instruction_en": "Use immutable data structures and pure functions. Do not mutate shared state.",
-        "documentation_pt": "Prefira estruturas imutáveis e funções puras.\nEvite estado global mutável.\n\n---"
+        "documentation_pt": "Prefira estruturas imutáveis e funções puras.\nEvite estado global mutável."
       },
       {
         "id": "GR-0004",
         "scope": "universal",
         "category": "correctness",
         "evidence_strength": "strong",
-        "sources": ["CWE-703"],
-        "applicable_languages": ["*"],
-        "tags": ["engineering", "errors"],
+        "sources": [
+          "CWE-703"
+        ],
+        "applicable_languages": [
+          "*"
+        ],
+        "tags": [
+          "engineering",
+          "errors"
+        ],
         "file": ".core\\rules\\global-rules.md",
         "title": "Fail-fast error handling",
         "instruction_en": "Fail fast and propagate errors explicitly. Do not swallow exceptions or use empty catch blocks.",
-        "documentation_pt": "Nunca use try/catch vazio ou que apenas loga.\nErro deve ser propagado ou tratado corretamente.\n\n---"
+        "documentation_pt": "Nunca use try/catch vazio ou que apenas loga.\nErro deve ser propagado ou tratado corretamente."
       },
       {
         "id": "GR-0005",
         "scope": "universal",
         "category": "correctness",
         "evidence_strength": "medium",
-        "sources": ["CWE-362"],
-        "applicable_languages": ["*"],
-        "tags": ["engineering", "concurrency"],
+        "sources": [
+          "CWE-362"
+        ],
+        "applicable_languages": [
+          "*"
+        ],
+        "tags": [
+          "engineering",
+          "concurrency"
+        ],
         "file": ".core\\rules\\global-rules.md",
         "title": "Explicit async and concurrency intent",
         "instruction_en": "Make concurrency explicit: use `Promise.all` for independent tasks and `await` sequencing for dependent ones. Do not use fire-and-forget without error handling.",
-        "documentation_pt": "Use `Promise.all` para paralelo e `await` sequencial para dependências.\nEvite fire-and-forget sem tratamento de erro.\n\n---\n\n## AI Workflow Rules"
+        "documentation_pt": "Use `Promise.all` para paralelo e `await` sequencial para dependências.\nEvite fire-and-forget sem tratamento de erro."
       },
       {
         "id": "GR-0101",
@@ -856,12 +1337,17 @@
         "category": "process",
         "evidence_strength": "declared_heuristic",
         "sources": [],
-        "applicable_languages": ["*"],
-        "tags": ["workflow", "spec"],
+        "applicable_languages": [
+          "*"
+        ],
+        "tags": [
+          "workflow",
+          "spec"
+        ],
         "file": ".core\\rules\\global-rules.md",
         "title": "Spec type must be declared",
         "instruction_en": "Declare the spec type (evidence-driven, deterministic, or mixed) and require human approval when design depends on unresolved evidence.",
-        "documentation_pt": "Specs `evidence-driven` ou `mixed` exigem decision-brief antes da implementação.\n\n---\n\n## Owner Conventions (Non-evidence rules)\n\n> Regras baseadas em prática real. Não possuem source canônica.\n> Mantidas separadas do núcleo evidence-driven."
+        "documentation_pt": "Specs `evidence-driven` ou `mixed` exigem decision-brief antes da implementação."
       },
       {
         "id": "GR-0201",
@@ -869,12 +1355,17 @@
         "category": "editorial",
         "evidence_strength": "declared_heuristic",
         "sources": [],
-        "applicable_languages": ["*"],
-        "tags": ["owner", "language"],
+        "applicable_languages": [
+          "*"
+        ],
+        "tags": [
+          "owner",
+          "language"
+        ],
         "file": ".core\\rules\\global-rules.md",
         "title": "Repository language standard",
         "instruction_en": "Always respond using the repository default language.",
-        "documentation_pt": "Neste repositório: sempre responder em PT-BR.\n\n---"
+        "documentation_pt": "Neste repositório: sempre responder em PT-BR."
       },
       {
         "id": "GR-0202",
@@ -882,12 +1373,17 @@
         "category": "process",
         "evidence_strength": "declared_heuristic",
         "sources": [],
-        "applicable_languages": ["*"],
-        "tags": ["owner", "ai_efficiency"],
+        "applicable_languages": [
+          "*"
+        ],
+        "tags": [
+          "owner",
+          "ai_efficiency"
+        ],
         "file": ".core\\rules\\global-rules.md",
         "title": "Context noise reduction",
         "instruction_en": "Exclude irrelevant files (logs, builds, dependencies) from the AI context using ignore files.",
-        "documentation_pt": "Use `.gitignore`, `.claudeignore`, `.geminiignore` para remover logs,\nbuilds e `node_modules` do contexto.\n\n---"
+        "documentation_pt": "Use `.gitignore`, `.claudeignore`, `.geminiignore` para remover logs,\nbuilds e `node_modules` do contexto."
       },
       {
         "id": "GR-0203",
@@ -895,8 +1391,13 @@
         "category": "process",
         "evidence_strength": "declared_heuristic",
         "sources": [],
-        "applicable_languages": ["*"],
-        "tags": ["owner", "workflow"],
+        "applicable_languages": [
+          "*"
+        ],
+        "tags": [
+          "owner",
+          "workflow"
+        ],
         "file": ".core\\rules\\global-rules.md",
         "title": "Collaborative PR description",
         "instruction_en": "Build PR descriptions in three steps: outline topics, get human approval, then generate the final text using the repository template (if available) and perform a final human validation.",
