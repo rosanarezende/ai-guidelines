@@ -15,50 +15,6 @@
 
 ## 📝 Débitos Abertos
 
-### ~~Débito B.4 — Nova regra `[CORE-14]` para gate de commit~~
-
-**[RESOLVIDO]** — Implementado em commit: `feat(spec-0018): adiciona [CORE-14] gate de commit message protocol`
-
-**Origem:** `[CORE-08]` § "Débito B.4 (cravado em B.2 — 2026-05-03)"  
-**Constatado:** 2026-05-03 durante implementação de `rules-parser.mjs` (B.3.2 Green Phase)  
-**Prioridade:** Alta  
-**Tipo:** Nova regra no `agents-core.md` (categoria: `process`, scope: `universal`)
-
-**Descrição:**
-
-Regra nova consolidando o padrão que emergiu durante B.3.2: **ao concluir um sub-bloco, IA fornece APENAS a mensagem sugerida do commit; humano executa a cadeia `yarn format ; yarn check ; git add . ; git commit`**.
-
-**Justificativa:**
-
-- Economiza ~200–300 tokens por commit (IA não roda validações, não executa git)
-- Bloqueia IA de operar git autonomamente (força gate humano explícito em `[CORE-07]`)
-- Delega responsabilidade de CI/formating ao mantenedor
-- Alinha com postura de `[CORE-07]` (push explícito) e `[CORE-08]` (HARNESS LOCK)
-
-**Proposta de `[CORE-14]`:**
-
-```yaml
-id: CORE-14
-scope: universal
-category: process
-evidence_strength: declared_heuristic
-sources: []
-applicable_languages: ["*"]
-tags: [core, agents, always_injected, git, commit, safety]
-```
-
-**Instruction (en):**
-At the end of each sub-block, provide only the commit message suggestion. The human executes the full validation chain (`yarn format ; yarn check ; ...`) and `git commit`.
-
-**Documentação (pt-br):**
-Ao concluir um sub-bloco, IA fornece **apenas** a mensagem sugerida do commit (`feat(spec-XXXX): ...`). O humano executa a cadeia completa de validação (`yarn format ; yarn check ; git add . ; git commit -m "..."`).
-
-**Why this matters:** economiza tokens e impede IA de operar git autonomamente. Honra `[CORE-07]` (push) e `[CORE-08]` (HARNESS LOCK).
-
-**Onde vive:**
-
----
-
 ### Débito A.7 — Documentação: diferença entre débitos NEXT.md vs tasks.md em spec-foundation.md
 
 **Origem:** identificado durante B.3.2 Green Phase (2026-05-03)  

@@ -336,13 +336,13 @@ Derivado de `[DEC-0018-B06]` (A + F + N) e `[DEC-0018-B07]` (D + H + J).
 
 **Bloco B — Conteúdo + pipeline Docs-as-Code**
 
-- [ ] `research/2026-04-30-b9efb83-reconciliation.md` publicado: 24 regras avaliadas, source canônica externa por regra ou justificativa de reverso (B.2).
-- [ ] Reversões de b9efb83 aplicadas em `.core/rules/*` num commit isolado, antes de B.3+ (B.2).
-- [ ] `cli/governance/monolith/rules-parser.mjs` implementado com testes BDD em PT-BR + traceability `[BR-*]` (cobertura ≥ 85 %, kill-rate ≥ 60 %) (B.3).
-- [ ] Schema YAML formal documentado em `decision-brief-boilerplate.md` (8º artefato) e em `CLAUDE.md` raiz (B.3).
-- [ ] `cli/governance/monolith/rules-builder.mjs` gera `rules.json` em build-time; alvo `yarn build:rules` exposto (B.3).
-- [ ] `cli/governance/monolith/compiler.mjs` refatorado: extrai apenas `Instruction (en)` para `<AI_GUIDELINES>`; documentação PT-BR fica fora do bloco compilado (B.3).
-- [ ] Snapshots de `cli/app/engine.test.mjs` e `cli/governance/agents-merge.test.mjs` revisados e atualizados conscientemente (não silenciosamente) (B.3).
+- [x] `research/2026-04-30-b9efb83-reconciliation.md` publicado: 24 regras avaliadas, source canônica externa por regra ou justificativa de reverso (B.2).
+- [x] Reversões de b9efb83 aplicadas em `.core/rules/*` num commit isolado, antes de B.3+ (B.2).
+- [x] `cli/governance/monolith/rules-parser.mjs` implementado com testes BDD em PT-BR + traceability `[BR-*]` (cobertura ≥ 85 %, kill-rate ≥ 60 %) (B.3).
+- [x] Schema YAML formal documentado em `decision-brief-boilerplate.md` (8º artefato) e em `CLAUDE.md` raiz (B.3).
+- [x] `cli/governance/monolith/rules-builder.mjs` gera `rules.json` em build-time; alvo `yarn build:rules` exposto (B.3).
+- [x] `cli/governance/monolith/compiler.mjs` refatorado: extrai apenas `Instruction (en)` para `<AI_GUIDELINES>`; documentação PT-BR fica fora do bloco compilado (B.3).
+- [x] Snapshots de `cli/app/engine.test.mjs` e `cli/governance/agents-merge.test.mjs` revisados e atualizados conscientemente (não silenciosamente) (B.3).
 - [ ] Regras sobreviventes migradas para formato bilíngue com IDs canônicos `[GR-*]` / `[ADP-*]` / `[OPT-*]` (B.4).
 - [ ] Tradução qualificada do campo `Instruction` para Inglês em todas as regras sobreviventes (B.4).
 - [ ] `research/2026-04-30-eval-results.md` publicado: subset crítico × 3 provedores (Claude/Codex/Gemini) × 3 rodadas (B.5).
