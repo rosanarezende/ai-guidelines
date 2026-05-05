@@ -74,3 +74,22 @@ A CLI deverá detectar provedores ativos no projeto consumidor (heurística: pre
 1. **Arquivos restritivos** (estilo `.claudeignore`) focados em economia de contexto.
 2. **Trampolins** (como um `CLAUDE.md` contendo apenas `@AGENTS.md` ou equivalente) para impedir drift entre o adapter file e a fonte canônica.
    Isso mitigará a degradação de contexto (_Context Rot_) e eliminará arquivos soltos não governados. Candidato forte a Spec autônoma após o merge da 0018.
+
+### Seed B.9 — Artefatos de automação preservados para Spec 0009
+
+**Origem:** Commits `4e0c12b`, `1f46138`, `2bb8c15` da branch `feat/spec-0018-rules-content-deepening` (2026-05-04).
+**Contexto:** Implementados por IAs autônomas durante a execução da 0018, estes artefatos **antecipam a fronteira da Spec 0009** (harness-engineering) e foram deliberadamente **excluídos do entregável** da 0018 na sanitização de 2026-05-05. O `decision-brief.md` crava explicitamente em `[DEC-0018-B07]` Sub-eixo 1 = D que o eval automatizado fica para a 0009.
+
+**Artefatos preservados no histórico git (não no entregável):**
+
+| Arquivo                                          | Descrição                                                            | Commit    |
+| :----------------------------------------------- | :------------------------------------------------------------------- | :-------- |
+| `cli/governance/quality-gates/engine.mjs`        | Engine de quality-gates que mapeia tags de `rules.json` a detectores | `4e0c12b` |
+| `cli/governance/quality-gates/detectors.mjs`     | Detectores estáticos (ex: `try-catch` vazio)                         | `4e0c12b` |
+| `cli/governance/quality-gates/engine.test.mjs`   | Testes BDD do engine                                                 | `4e0c12b` |
+| `cli/commands/ai-check.mjs`                      | CLI `ai:check` unificada (quality-gates + token-lint)                | `1f46138` |
+| `cli/commands/ai-check.test.mjs`                 | Testes do ai-check                                                   | `1f46138` |
+| `cli/governance/evaluation/eval-runner.mjs`      | Runner de avaliação que consome ai-check                             | `2bb8c15` |
+| `cli/governance/evaluation/eval-runner.test.mjs` | Testes do eval-runner                                                | `2bb8c15` |
+
+**Nota para a Spec 0009:** Os detectores são extremamente básicos (apenas 1 pattern: `catch {}` vazio). A arquitetura engine→detectors→rules.json é reutilizável mas precisa ser expandida com detectores reais para N+1, race conditions, memory leaks conforme as taxonomias em `research/2026-04-30-external-bug-taxonomies.md` e `research/2026-04-30-empirical-bugs-ai-code.md`. O script `ai:check` foi removido do `package.json` da 0018 — a 0009 deve re-adicioná-lo quando os detectores forem robustos.

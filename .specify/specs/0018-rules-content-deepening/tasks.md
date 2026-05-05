@@ -228,9 +228,9 @@
 
 > Origem: [`[DEC-0018-B05]`](./decision-brief.md#dec-0018-b05-metodologia-do-eval-mínimo) (C + H + K + N + R) e [`[DEC-0018-B07]`](./decision-brief.md#dec-0018-b07-fronteira-com-spec-0009-harness-engineering) (D — só amostral aqui). Plan: § B.5.
 
-- [/] **5.B5.1** Selecionar subset crítico: regras com `evidence_strength: strong` + categorias-âncora (`correctness`, `security`). _(Pendente de commit: eval-runner.mjs básico implementado como base)_
-- [ ] **5.B5.2** Definir prompts canônicos para asserção F (delta comportamental) — cenários reproduzíveis com noncompliant_example como input.
-- [ ] **5.B5.3** Rodar 3 rodadas em **Claude + Codex + Gemini** para cada prompt (vetor K + N).
+- [x] **5.B5.1** Selecionar subset crítico: regras com `evidence_strength: strong` ou `medium` + categorias-âncora (`correctness`, `security`). — **Subset cravado (sanitização 2026-05-05):** GR-0001 (security/strong), GR-0004 (correctness/strong), GR-0005 (correctness/medium). GR-0002 e OPT-0301 ficam como débito para 0009 (menos testáveis via prompt único). _Nota: `eval-runner.mjs` anteriormente listado aqui foi reclassificado como seed para Spec 0009 — ver `NEXT.md` § Seed B.9._
+- [x] **5.B5.2** Definir prompts canônicos para asserção F (delta comportamental) — cenários reproduzíveis. — **Publicados em [`research/eval-prompts.md`](./research/eval-prompts.md)** (sanitização 2026-05-05): EVAL-01 (secrets), EVAL-02 (error swallowing), EVAL-03 (unsafe concurrency). Cada prompt com critério de PASS/FAIL explícito.
+- [/] **5.B5.3** Rodar 3 rodadas em **Claude + Codex + Gemini** para cada prompt (vetor K + N). — _Aguardando execução manual pelo owner. Outputs em `research/eval-outputs/{PROMPT_ID}_{PROVIDER}_{RUN}.md`._
 - [ ] **5.B5.4** Registrar passa-rate por regra × provedor com limiar **2/3** em `research/2026-04-30-eval-results.md`.
 - [ ] **5.B5.5** Aplicar threshold categorizado (R): regras críticas reprovadas → cortadas no catálogo; regras opinativas/heurísticas reprovadas → débito em `NEXT.md`.
 - [ ] **5.B5.6** **[COMMIT]** `research(spec-0018): eval amostral em 3 provedores publicado`.
