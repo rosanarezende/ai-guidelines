@@ -118,6 +118,8 @@ Make concurrency explicit: use `Promise.all` for independent tasks and `await` s
 Use `Promise.all` para paralelo e `await` sequencial para dependências.
 Evite fire-and-forget sem tratamento de erro.
 
+**See also:** [OPT-0301]
+
 ---
 
 ## AI Workflow Rules

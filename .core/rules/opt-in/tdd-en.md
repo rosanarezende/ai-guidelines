@@ -29,3 +29,5 @@ Every new feature or bug fix MUST follow the RED -> GREEN -> REFACTOR cycle. Wri
 
 - **Isolamento:** Testes unitários não devem depender de serviços externos, rede ou banco de dados. Use mocks/stubs.
 - **Colocation:** Arquivos de teste devem ficar no mesmo diretório que o código testado.
+
+**See also:** [OPT-0101], [OPT-0201]

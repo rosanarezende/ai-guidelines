@@ -38,3 +38,5 @@ it("[BR-CLI-SYNC-01] DADO baseline desatualizado QUANDO executado adopt ENTÃO s
   // ...
 });
 ```
+
+**See also:** [OPT-0401], [OPT-0501]

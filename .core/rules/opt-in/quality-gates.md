@@ -32,3 +32,5 @@ Before reporting a task as done, ensure: no circular dependencies, proper teardo
    - **Race Conditions:** Se não houver garantia de atomicidade em blocos assíncronos (transação, lock ou estado local seguro), rejeite o design.
    - **Memory Leaks:** Sempre implemente a função de limpeza (teardown/dispose) correspondente no ciclo de vida apropriado do framework usado.
 4. **Security & Secrets:** Bloqueio de chaves/tokens; validação de inputs contra injeção.
+
+**See also:** [GR-0001], [GR-0002], [GR-0004], [GR-0005]

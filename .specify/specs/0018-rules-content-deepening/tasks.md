@@ -220,9 +220,9 @@
 - [x] **5.B4.1** Reorganizar `.core/rules/global-rules.md`: cada regra como heading H2 com frontmatter YAML inline e corpo bilíngue (`Instruction (en)` / `Documentação (pt-br)` / `Why this is an issue` / `Noncompliant example` / `Compliant example` / `See also`). Atribuir IDs `[GR-NNNN]` sequenciais. — **B.4.1 concluído (global-rules migrado e validado via rules.json).**
 - [x] **5.B4.2** Mesma operação em `.core/rules/{claude,codex,gemini}.md` com IDs `[ADP-NNNN]` (e campo `adapter`).
 - [x] **5.B4.3** Mesma operação em `.core/rules/opt-in/*.md` com IDs `[OPT-NNNN]` (e campo `opt_in_feature`). Aplicar hierarquia inicial em subdiretórios `opt-in/<tema>/` quando o tema ficar evidente (ex.: `opt-in/security/`, `opt-in/editorial/`) — sem antecipar a Spec 0011.
-- [ ] **5.B4.4** **Tradução qualificada** do campo `Instruction` para Inglês — toda regra sobrevivente. Foco em jargão idiomático para modelos de fronteira; revisão humana antes do commit.
-- [ ] **5.B4.5** Cobertura mínima de cross-refs: cada regra `category: security` ou `correctness` tem ≥ 1 entrada em `see_also`.
-- [ ] **5.B4.6** **[COMMIT]** `feat(spec-0018): regras migradas para formato bilíngue + IDs canônicos`.
+- [x] **5.B4.4** **Tradução qualificada** do campo `Instruction` para Inglês — toda regra sobrevivente. Foco em jargão idiomático para modelos de fronteira; revisão humana antes do commit.
+- [x] **5.B4.5** Cobertura mínima de cross-refs: cada regra `category: security` ou `correctness` tem ≥ 1 entrada em `see_also`.
+- [x] **5.B4.6** **[COMMIT]** `feat(spec-0018): regras migradas para formato bilíngue + IDs canônicos`.
 
 ### Sub-bloco [B.5] — Eval amostral em 3 provedores
 

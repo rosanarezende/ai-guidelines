@@ -38,3 +38,5 @@ it("[BR-CLI-SYNC-01] GIVEN outdated baseline WHEN adopt is executed THEN syncs o
   // ...
 });
 ```
+
+**See also:** [OPT-0401], [OPT-0501]
