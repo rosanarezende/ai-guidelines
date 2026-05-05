@@ -17,6 +17,8 @@ sources:
   - "CWE-401"
   - "CONCUR 2025"
   - "Investigating Software Aging in LLM-Generated Software Systems (2025)"
+  - "EXT-AKITA-2026"
+validated_by_benchmark: true
 applicable_languages: ["*"]
 tags: [opt-in, quality-gates, review]
 ```

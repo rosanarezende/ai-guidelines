@@ -24,6 +24,7 @@ const REQUIRED_FIELDS = [
   "applicable_languages",
   "tags",
 ];
+const OPTIONAL_FIELDS = ["validated_by_benchmark"];
 const ADAPTER_VALUES = ["claude", "codex", "gemini"];
 
 /**
@@ -233,6 +234,11 @@ export function validateRule(rule) {
     );
   }
 
+  // Validate sources is an array
+  if ("sources" in rule && !Array.isArray(rule.sources)) {
+    errors.push(`Field "sources" must be an array (even if it contains external evidence).`);
+  }
+
   // Special validation: correctness/security + strong/medium requires non-empty sources
   if (
     ["correctness", "security"].includes(rule.category) &&
@@ -262,6 +268,18 @@ export function validateRule(rule) {
   // Validate adapter value if present
   if (rule.adapter && !ADAPTER_VALUES.includes(rule.adapter)) {
     errors.push(`Invalid adapter "${rule.adapter}". Allowed: ${ADAPTER_VALUES.join(", ")}`);
+  }
+
+  // Validate optional field: validated_by_benchmark (must be boolean if present)
+  if ("validated_by_benchmark" in rule && typeof rule.validated_by_benchmark !== "boolean") {
+    // Accept string "true"/"false" from YAML parser (parseScalar returns strings)
+    if (rule.validated_by_benchmark === "true" || rule.validated_by_benchmark === "false") {
+      rule.validated_by_benchmark = rule.validated_by_benchmark === "true";
+    } else {
+      errors.push(
+        `Invalid validated_by_benchmark "${rule.validated_by_benchmark}". Must be true or false.`
+      );
+    }
   }
 
   return {

@@ -677,6 +677,130 @@ Instruction here.`;
       assert.ok(result.errors[0].includes("evidence_strength"));
     });
   });
+
+  // ============================================================================
+  // OPTIONAL FIELDS: validated_by_benchmark + sources (BR-PARSER-40..46)
+  // ============================================================================
+
+  describe("[BR-PARSER-40] DADO rule com validated_by_benchmark: true QUANDO validar ENTÃO aceita como boolean", async () => {
+    it("[BR-PARSER-40] accepts validated_by_benchmark true", async () => {
+      const rule = {
+        id: "TEST-40",
+        scope: "universal",
+        category: "process",
+        evidence_strength: "declared_heuristic",
+        sources: [],
+        applicable_languages: ["*"],
+        tags: [],
+        validated_by_benchmark: "true",
+      };
+      const result = validateRule(rule);
+      assert.strictEqual(result.valid, true, `Errors: ${result.errors.join("; ")}`);
+      assert.strictEqual(rule.validated_by_benchmark, true, "Should coerce string to boolean");
+    });
+  });
+
+  describe("[BR-PARSER-41] DADO rule com validated_by_benchmark: false QUANDO validar ENTÃO aceita como boolean", async () => {
+    it("[BR-PARSER-41] accepts validated_by_benchmark false", async () => {
+      const rule = {
+        id: "TEST-41",
+        scope: "universal",
+        category: "process",
+        evidence_strength: "declared_heuristic",
+        sources: [],
+        applicable_languages: ["*"],
+        tags: [],
+        validated_by_benchmark: "false",
+      };
+      const result = validateRule(rule);
+      assert.strictEqual(result.valid, true, `Errors: ${result.errors.join("; ")}`);
+      assert.strictEqual(rule.validated_by_benchmark, false, "Should coerce string to boolean");
+    });
+  });
+
+  describe("[BR-PARSER-42] DADO rule com validated_by_benchmark inválido QUANDO validar ENTÃO falha", async () => {
+    it("[BR-PARSER-42] rejects invalid validated_by_benchmark", async () => {
+      const rule = {
+        id: "TEST-42",
+        scope: "universal",
+        category: "process",
+        evidence_strength: "declared_heuristic",
+        sources: [],
+        applicable_languages: ["*"],
+        tags: [],
+        validated_by_benchmark: "maybe",
+      };
+      const result = validateRule(rule);
+      assert.strictEqual(result.valid, false);
+      assert.ok(result.errors.some((e) => e.includes("validated_by_benchmark")));
+    });
+  });
+
+  describe("[BR-PARSER-43] DADO rule sem validated_by_benchmark QUANDO validar ENTÃO aceita (campo opcional)", async () => {
+    it("[BR-PARSER-43] accepts rule without validated_by_benchmark", async () => {
+      const rule = {
+        id: "TEST-43",
+        scope: "universal",
+        category: "process",
+        evidence_strength: "declared_heuristic",
+        sources: [],
+        applicable_languages: ["*"],
+        tags: [],
+      };
+      const result = validateRule(rule);
+      assert.strictEqual(result.valid, true, `Errors: ${result.errors.join("; ")}`);
+      assert.strictEqual("validated_by_benchmark" in rule, false, "Should not add field if absent");
+    });
+  });
+
+  describe("[BR-PARSER-44] DADO rule com external evidence at sources array válido QUANDO validar ENTÃO aceita", async () => {
+    it("[BR-PARSER-44] accepts valid external evidence at sources array", async () => {
+      const rule = {
+        id: "TEST-44",
+        scope: "universal",
+        category: "process",
+        evidence_strength: "declared_heuristic",
+        sources: ["EXT-AKITA-2026", "EXT-AIJAIL-2026"],
+        applicable_languages: ["*"],
+        tags: [],
+      };
+      const result = validateRule(rule);
+      assert.strictEqual(result.valid, true, `Errors: ${result.errors.join("; ")}`);
+    });
+  });
+
+  describe("[BR-PARSER-45] DADO rule com external evidence at sources não-array QUANDO validar ENTÃO falha", async () => {
+    it("[BR-PARSER-45] rejects non-array external evidence at sources", async () => {
+      const rule = {
+        id: "TEST-45",
+        scope: "universal",
+        category: "process",
+        evidence_strength: "declared_heuristic",
+        sources: "EXT-AKITA-2026",
+        applicable_languages: ["*"],
+        tags: [],
+      };
+      const result = validateRule(rule);
+      assert.strictEqual(result.valid, false);
+      assert.ok(result.errors.some((e) => e.includes("sources")));
+    });
+  });
+
+  describe("[BR-PARSER-46] DADO rule sem external evidence at sources QUANDO validar ENTÃO aceita (campo opcional)", async () => {
+    it("[BR-PARSER-46] accepts rule without external evidence at sources", async () => {
+      const rule = {
+        id: "TEST-46",
+        scope: "universal",
+        category: "process",
+        evidence_strength: "declared_heuristic",
+        sources: [],
+        applicable_languages: ["*"],
+        tags: [],
+      };
+      const result = validateRule(rule);
+      assert.strictEqual(result.valid, true, `Errors: ${result.errors.join("; ")}`);
+    });
+  });
 });
 
 // ============================================================================

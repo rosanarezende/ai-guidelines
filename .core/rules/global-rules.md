@@ -22,7 +22,8 @@ id: GR-0001
 scope: universal
 category: security
 evidence_strength: strong
-sources: ["OWASP-A2", "CWE-522"]
+sources: ["OWASP-A2", "CWE-522", "EXT-AKITA-2026", "EXT-AIJAIL-2026"]
+validated_by_benchmark: true
 applicable_languages: ["*"]
 tags: [engineering, security]
 ```
@@ -85,7 +86,8 @@ id: GR-0004
 scope: universal
 category: correctness
 evidence_strength: strong
-sources: ["CWE-703"]
+sources: ["CWE-703", "EXT-AKITA-2026"]
+validated_by_benchmark: true
 applicable_languages: ["*"]
 tags: [engineering, errors]
 ```
@@ -106,7 +108,8 @@ id: GR-0005
 scope: universal
 category: correctness
 evidence_strength: medium
-sources: ["CWE-362"]
+sources: ["CWE-362", "EXT-AKITA-2026"]
+validated_by_benchmark: true
 applicable_languages: ["*"]
 tags: [engineering, concurrency]
 ```
