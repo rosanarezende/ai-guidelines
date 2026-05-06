@@ -4,6 +4,26 @@ Todas as mudanças notáveis neste framework seguem [Semantic Versioning](https:
 
 ---
 
+## [Unreleased]
+
+### Adicionado
+
+- **Spec 0018 (Rules Content Deepening)**:
+  - `decision-brief-boilerplate.md` como 8º artefato canônico do SDD.
+  - Catálogo de regras bilíngue Docs-as-Code com `rules.json`, IDs `[CORE-*]`, `[GR-*]`, `[ADP-*]`, `[OPT-*]` e índice navegável em `.core/rules/catalog.md`.
+  - Budget heurístico Tok-H com soft ceiling agregado de 6K tokens e alertas por escopo.
+  - Baseline de eval amostral para Claude, Codex e Gemini, com corpus congelado em `.specify/specs/researchs/`.
+
+### Alterado
+
+- `spec-foundation.md` passa a formalizar specs `evidence-driven` / `deterministic` / `mixed`, o gate humano por `decision-brief.md` e a distinção entre débitos da spec atual (`tasks.md`) e débitos futuros (`NEXT.md`).
+- `AGENTS.md` e o runtime compilado passam a consumir apenas `Instruction (en)` do catálogo e corrigem o bootstrap de `CORE-02` para `.specify/specs/roadmap/backlog.md`.
+- Regras opt-in ganham hierarquia mínima por tema em `.core/rules/opt-in/methodologies/` e `.core/rules/opt-in/quality/`.
+
+### Removido
+
+- Conteúdo legado sem evidência canônica do pacote inicial `b9efb83`, conforme a reconciliação radical da Spec 0018.
+
 ## [1.3.0] — 2026-04-30
 
 ### Alterado

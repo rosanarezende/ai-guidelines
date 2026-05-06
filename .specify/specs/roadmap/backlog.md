@@ -14,11 +14,7 @@ Detalhes de lifecycle em [`.core/process/spec-foundation.md`](../../../.core/pro
 
 Specs atualmente em branch ativa. Formato enxuto.
 
-- **0018-rules-content-deepening** (Content Overhaul + Política framework para specs de conteúdo) — _In Review (revised 2026-05-04)_
-  - **Escopo:** Duas entregas intencionais na mesma branch.
-    - **Bloco A:** auditoria research-backed dos 7 boilerplates de `.specify/templates/`; canonização da distinção **spec de conteúdo × infraestrutura** com checklist diferenciado (research+eval mandatórios em specs de conteúdo); sincronização com `.core/process/spec-foundation.md`; linha em `global-rules.md`.
-    - **Bloco B:** content overhaul research-backed de `global-rules.md`, adapters e `quality-gates` — research lifecycle, catálogo bilíngue Docs-as-Code (`rules.json`, IDs `[GR-*]` / `[ADP-*]` / `[OPT-*]`), eval amostral baseline em Claude/Codex/Gemini e reconciliação do conteúdo já-mergeado em `b9efb83`.
-  - **Fronteira com 0011 (hierarquia) e 0009 (harness):** definida em B.1; débitos vão para `NEXT.md` desta spec.
+Nenhuma spec em execução no momento.
 
 ---
 
@@ -48,8 +44,9 @@ Specs ou candidatas priorizadas para iniciar em seguida. Ordem indica prioridade
   - **Fonte do insight:** Diego (Rocketseat), [Claude Code em monorepo full-stack](https://www.youtube.com/watch?v=ARYzqW0W7iI) 2026-01-22. Síntese em `.specify/specs/0008-governance-coherence/research/synthesis.md` Tema 1.
   - **Insight central:** ferramentas como Claude Code já carregam contexto sob demanda em subdiretórios. Em vez de inflar `AGENTS.md` raiz, separar por domínio: `api/AGENTS.md`, `api/src/auth/AGENTS.md`, `dashboard/AGENTS.md`. Resultado: contexto cirúrgico, sem inflar tokens.
   - **Escopo potencial:** padronizar hierarquia em `.core/rules/<topic>/AGENTS-fragment.md`; atualizar `cli/features/core/rules.mjs`; documentar no `AGENTS.md` raiz como agentes buscam fragmentos. Princípio (Diego): documentar **padrões**, não nomes de arquivo/pasta.
-  - **Pré-requisitos:** Spec 0008 e Spec 0018 concluídas.
-  - **Sinal de "está na hora":** quando `global-rules.md` consolidado inflar (>200 linhas) ou consumidor reclamar que "regras de domínios diferentes todo mundo lê tudo".
+  - **Pré-requisitos:** Spec 0008 e Spec 0018 concluídas (✓). A 0018 já deixou a hierarquia mínima em `.core/rules/opt-in/{methodologies,quality}/`, mas a governança completa da mudança continua fora de escopo.
+  - **Gatilho objetivo pós-0018:** priorizar quando o agregado compilado atingir **4,2 K tokens** (70% do teto de 6 K) ou quando consumidores começarem a reclamar de leitura indiferenciada entre domínios.
+  - **Seed deixada pela 0018:** snapshot canônico do runtime final (token budget, catálogo, taxonomia e cross-refs) para a 0011 partir de baseline conhecido.
 
 - **cli-typescript** (Migração TypeScript da CLI)
   - **Fonte do insight:** Remanescente do cli-refactor após a Spec 0017 assumir a reorganização de pastas.
@@ -87,21 +84,22 @@ Specs ou candidatas que entram na fila depois de esgotado o Now. Ordem pode ser 
   - **Escopo:** Feature opt-in (`tracker-github`) que injete scripts integradores (ex: `scripts/trackers/github-adapter.mjs`) e ensine o agente a rodar esses comandos no terminal para mover cards, garantindo precisão determinística.
   - **Origem:** Descoberta na Spec 0016.
 
-- **regra-hierarquia** (spec 0011 — Hierarquia de regras por subdiretório)
-  - **Fonte do insight:** Diego (Rocketseat), [Claude Code em monorepo full-stack](https://www.youtube.com/watch?v=ARYzqW0W7iI) 2026-01-22. Síntese em `.specify/specs/0008-governance-coherence/research/synthesis.md` Tema 1.
-  - **Insight central:** ferramentas como Claude Code já carregam contexto sob demanda em subdiretórios. Em vez de inflar `AGENTS.md` raiz, separar por domínio: `api/AGENTS.md`, `api/src/auth/AGENTS.md`, `dashboard/AGENTS.md`. Resultado: contexto cirúrgico, sem inflar tokens.
-  - **Escopo potencial:** padronizar hierarquia em `.core/rules/<topic>/AGENTS-fragment.md`; atualizar `cli/features/core/rules.mjs`; documentar no `AGENTS.md` raiz como agentes buscam fragmentos. Princípio (Diego): documentar **padrões**, não nomes de arquivo/pasta.
-  - **Pré-requisitos:** Spec 0008 mergeada (sub-bloco A define regra acionável vs doc humano); decidir se hierarquia espelha layout do consumidor ou usa namespacing dentro de `.ai-guidelines/rules/<topic>/`.
-  - **Sinal de "está na hora":** quando `global-rules.md` consolidado da 0008 inflar (>200 linhas) ou consumidor reclamar que "regras de domínios diferentes todo mundo lê tudo".
-
 - **harness-engineering** (spec 0009 — Harness Engineering)
   - **Fonte do insight:** Uncle Bob via [Lucas Montano — "até o Uncle Bob virou Vibe Coder"](https://www.youtube.com/watch?v=MvFO-W9zZRk) (cyclomatic complexity, mutation testing); [Lucas Montano — "Vai Faltar Dev 2027"](https://www.youtube.com/watch?v=T9V7EyB_B9w) (bugs típicos de IA invisíveis em review humano: N+1, race conditions, memory leaks).
   - **Cross-ref Spec 0008-E:** 0008 entrega o **checklist editorial**; 0009 entrega a **implementação técnica**.
   - **Tipos de falha que spec-driven não resolve sozinho:** amnésia entre sessões, falso "done", implementador e validador no mesmo processo, slop acumulado (degradação 5-10%/iteração), bugs de IA invisíveis em review humano.
   - **Escopo potencial:** agente validador separado com contrato "um-a-um"; sensores automáticos obrigatórios (prettier/typecheck/testes como gate, análise estática, mutation kill rate, detecção de bugs típicos de IA, secret scanning); evaluation como gate; integração com `/ultra-review`.
   - **Custo de adoção:** custo elevado assumido — multi-agent + sensors em cada feature = 2-3× tokens por PR. Compensa apenas quando custo de regressão começar a doer mais que custo de tokens.
-  - **Pré-requisitos:** Spec 0003 mergeada (✓); idealmente Spec 0008 mergeada antes (sub-bloco B canoniza RPI ↔ spec-foundation; sub-bloco E canoniza checklist editorial); pelo menos um ciclo real de regressão para justificar overhead.
+  - **Pré-requisitos:** Spec 0003 mergeada (✓); idealmente Spec 0008 mergeada antes (sub-bloco B canoniza RPI ↔ spec-foundation; sub-bloco E canoniza checklist editorial); baseline da Spec 0018 já concluído.
+  - **Seed deixada pela 0018:** o eval manual da 0018 vira **baseline-regression**; qualquer mudança futura em `rules` invalida esse baseline e exige re-rodada no harness. Research package congelado em `.specify/specs/researchs/governance/` + `.specify/specs/researchs/architecture/`.
+  - **Artefatos preservados no histórico git:** `quality-gates/engine`, `detectors`, `ai-check` e `eval-runner` foram deliberadamente removidos do entregável da 0018, mas ficam como seed arquitetural para a 0009.
   - **Sinal de "está na hora":** um usuário rodar `/clear` esperando continuar uma spec e o agente novo não conseguir retomar com `tasks.md` + git; ou PR precisar de 3+ rounds de correção por causa de coisas que sensor automático pegaria.
+
+- **scaffolding-inteligente-de-provedores** (Candidata — automação de provider detection + trampolins)
+  - **Fonte do insight:** fechamento da Spec 0018 (`NEXT.md` B.7.3) e sanitização do runtime bilíngue.
+  - **Insight central:** consumidores tendem a acumular `CLAUDE.md`, `GEMINI.md`, `.codex/` e arquivos soltos sem governança, o que acelera _Context Rot_ e drift entre adapters e a fonte canônica.
+  - **Escopo potencial:** a CLI detecta provedores ativos no consumidor e gera automaticamente (i) arquivos restritivos tipo `.claudeignore`, (ii) trampolins mínimos como `CLAUDE.md` contendo apenas `@AGENTS.md`, e (iii) guardrails para manter adapter files alinhados ao runtime.
+  - **Pré-requisitos:** baseline da 0018 consolidado; definição de UX mínima para `init`/`adopt`.
 
 ---
 

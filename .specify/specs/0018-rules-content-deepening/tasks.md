@@ -3,7 +3,7 @@
 > Spec: [`./spec.md`](./spec.md)
 > Plan: [`./plan.md`](./plan.md)
 > Decision Brief: [`./decision-brief.md`](./decision-brief.md)
-> Status: In Progress — **Stage 2 (Implementation)** — Fases 0–3 concluídas (Stage 1 + gate humano); Fases 4–7 abertas (Stage 2)
+> Status: Done (PR #4 — 2026-05-06)
 
 > **Progress file vivo, em duas etapas.** Stage 1 (Fases 0–3) cobre Setup +
 > Research + Síntese de opções + Gate humano — todas marcadas `[x]`. Stage 2
@@ -281,9 +281,9 @@
 - [x] **6.4** Validar bilingual schema: nenhuma regra sobrevivente sem `Instruction (en)` E `Documentação (pt-br)`.
 - [x] **6.5** Diff em consumidor real: `node cli/ai-guidelines-cli.mjs adopt --target .` executado localmente. — _Testado com `--dry-run` e depois rodado de fato, revelando a persistência de textos PT-BR no AGENTS.md compilado._
 - [x] **6.5.1** Refatorar `compiler.mjs` e `pointers.mjs` via TDD/BDD para extrair apenas a `Instruction (en)` do `rules.json` e traduzir os headers das Zonas para o inglês (Top Zone, Center Zone, Base Zone). Garantir que os testes de integração e unitários passem.
-- [/] **6.6** Atualizar PR description (3 etapas conforme regra de PR collab): contexto → decisões cravadas (cross-ref `decision-brief.md`) → impacto cross-spec (0011, 0009, governance-information-architecture, Scaffolding). — _Apresentando tópicos para aprovação do owner._
-- [ ] **6.7** **[MANDATÓRIO]** Aguardar Gate de Review Humano (homologação técnica formal). **Não prosseguir** para Fase 7 sem aprovação explícita.
-- [ ] **6.8** Aplicar correções demandadas em loops de review até aprovação. Cada correção é commit incremental rastreável.
+- [x] **6.6** Atualizar PR description (3 etapas conforme regra de PR collab): contexto → decisões cravadas (cross-ref `decision-brief.md`) → impacto cross-spec (0011, 0009, governance-information-architecture, Scaffolding). — _Descrição do PR atualizada e revisada pelo owner antes da conversão para Ready._
+- [x] **6.7** **[MANDATÓRIO]** Aguardar Gate de Review Humano (homologação técnica formal). **Não prosseguir** para Fase 7 sem aprovação explícita. — _Gate explícito recebido no chat em 2026-05-06, junto da conversão do PR para Ready._
+- [x] **6.8** Aplicar correções demandadas em loops de review até aprovação. Cada correção é commit incremental rastreável. — _Sanitização final aplicada (drifts documentais, fechamento de Phase 6 e preparação de Phase 7)._
 
 ---
 
@@ -291,12 +291,12 @@
 
 > Mapeamento canônico: Fase 7 desta spec ≡ **Fase 4 (Encerramento Pré-Merge)** do novo `tasks-boilerplate.md`. **[MANDATÓRIO]** Esta fase ocorre **na branch do PR, antes do merge**. Nenhuma tarefa após o merge.
 
-- [ ] **7.1** `NEXT.md`: migrar débitos para `.specify/specs/roadmap/backlog.md` (atualizar candidatas Spec 0011, Spec 0009, abrir candidata "Scaffolding Inteligente de Provedores") e **deletar** o arquivo.
-- [ ] **7.2** Migrar os **12 arquivos markdown** de `research/` da 0018 para `.specify/specs/researchs/governance/` ou `architecture/` conforme domínio; mover também os **9 outputs brutos** de `research/eval-outputs/` para um destino indexável preservando rastreabilidade. Atualizar `.specify/specs/research-index.md` com link e resumo.
-- [ ] **7.3** `decision-brief.md` permanece no diretório da spec (`.specify/specs/0018-rules-content-deepening/`) como artefato histórico — **não migra**.
-- [ ] **7.4** `spec.md` header: status → `Done (PR #X — YYYY-MM-DD)`.
-- [ ] **7.5** `.specify/specs/roadmap/historico.md`: spec 0018 movida para "Specs concluídas" com data; entrada removida da seção "Em execução" em `.specify/specs/roadmap/backlog.md`.
-- [ ] **7.6** `CHANGELOG.md`: entrada da 0018 (purga radical b9efb83 + pipeline Docs-as-Code bilíngue + soft ceiling de tokens + 8º boilerplate `decision-brief` + reestruturação tasks em 5 fases).
-- [ ] **7.7** Confirmar que o encerramento da 0018 não conflita com outra spec ativa **na mesma sessão / do mesmo contribuidor** (regra correta após a reconciliação de concorrência da 0017).
-- [ ] **7.8** **[COMMIT]** `chore(spec-0018): encerramento pré-merge — research migrado, NEXT removido, status final`.
-- [ ] **7.9** Aprovação humana explícita para merge. **[MANDATÓRIO]** Não fazer merge autonomamente.
+- [x] **7.1** `NEXT.md`: migrar débitos para `.specify/specs/roadmap/backlog.md` (atualizar candidatas Spec 0011, Spec 0009, abrir candidata "Scaffolding Inteligente de Provedores") e **deletar** o arquivo.
+- [x] **7.2** Migrar os **12 arquivos markdown** de `research/` da 0018 para `.specify/specs/researchs/governance/` ou `architecture/` conforme domínio; mover também os **9 outputs brutos** de `research/eval-outputs/` para um destino indexável preservando rastreabilidade. Atualizar `.specify/specs/research-index.md` com link e resumo.
+- [x] **7.3** `decision-brief.md` permanece no diretório da spec (`.specify/specs/0018-rules-content-deepening/`) como artefato histórico — **não migra**.
+- [x] **7.4** `spec.md` header: status → `Done (PR #4 — 2026-05-06)`.
+- [x] **7.5** `.specify/specs/roadmap/historico.md`: spec 0018 movida para "Specs concluídas" com data; entrada removida da seção "Em execução" em `.specify/specs/roadmap/backlog.md`.
+- [x] **7.6** `CHANGELOG.md`: entrada da 0018 (purga radical b9efb83 + pipeline Docs-as-Code bilíngue + soft ceiling de tokens + 8º boilerplate `decision-brief` + reestruturação tasks em 5 fases).
+- [x] **7.7** Confirmar que o encerramento da 0018 não conflita com outra spec ativa **na mesma sessão / do mesmo contribuidor** (regra correta após a reconciliação de concorrência da 0017). — _Nenhum conflito ativo detectado nesta sessão no momento do fechamento._
+- [x] **7.8** **[COMMIT]** `chore(spec-0018): encerramento pré-merge — research migrado, NEXT removido, status final`. — _Commit final executado pelo owner durante o fechamento do PR._
+- [x] **7.9** Aprovação humana explícita para merge. **[MANDATÓRIO]** Não fazer merge autonomamente. — _Owner converteu o PR para Ready e autorizou explicitamente o encerramento final em 2026-05-06; merge continua manual._

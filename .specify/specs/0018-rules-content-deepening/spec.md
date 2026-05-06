@@ -1,6 +1,6 @@
 # Spec 0018 — Rules Content Deepening
 
-> Status: In Review (revised 2026-05-04)
+> Status: Done (PR #4 — 2026-05-06)
 > Author: Rosana Rezende
 > Date: 2026-04-30 (rev. inicial; ampliação 2026-04-30 pass 2 + 3; reformulação framing 2026-05-01)
 > Owner: Rosana Rezende

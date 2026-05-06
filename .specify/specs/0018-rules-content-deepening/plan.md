@@ -2,7 +2,7 @@
 
 > Spec: [`./spec.md`](./spec.md)
 > Decision Brief: [`./decision-brief.md`](./decision-brief.md)
-> Status: In Progress — **Stage 2 (Implementation)** — revised 2026-05-06 (Stage 1 encerrado, gate humano `Resolved` em todos os pontos `[DEC-0018-*]`; sanitização documental e fechamento em preparação)
+> Status: Done (PR #4 — 2026-05-06)
 
 > **Plano em dois passes — Stage 1 concluído.** Stage 1 produziu 1 auditoria
 > editorial + 5 researches externas + decision-brief com 14 pontos resolvidos

@@ -13,6 +13,25 @@ editar retroativamente.
 
 Em ordem cronológica reversa. Número mantido como rastreabilidade.
 
+- **spec 0018** — Rules Content Deepening
+  (`.specify/specs/0018-rules-content-deepening/`) — **Done** (2026-05-06, PR #4).
+
+  Fecha a reconstrução research-backed do conteúdo de regras do framework e dogfooda a própria política de specs `evidence-driven`.
+
+  **Sub-bloco A — Política framework + boilerplates:**
+  - Formalização do campo `Tipo de spec` (`evidence-driven`, `deterministic`, `mixed`) e do gate humano via `decision-brief.md`.
+  - Revisão dos boilerplates SDD e criação do `decision-brief-boilerplate.md`.
+  - Sincronização de `.core/process/spec-foundation.md` com o workflow em dois passes e com a política de lifecycle de `NEXT.md`.
+
+  **Sub-bloco B — Rules content overhaul:**
+  - Purga radical do legado `b9efb83`, mantendo apenas o que sobreviveu à reconciliação source-backed.
+  - Pipeline Docs-as-Code para regras (`rules-parser`, `rules-builder`, `rules.json`, compiler/pointers).
+  - Catálogo bilíngue com `Instruction (en)` para runtime e documentação PT-BR para humanos.
+  - Token budget com Tok-H, IDs canônicos `[GR-*]` / `[ADP-*]` / `[OPT-*]` e hierarquia mínima de `opt-in/` em `methodologies/` e `quality/`.
+  - Eval amostral baseline em Claude, Codex e Gemini, com research centralizada em `.specify/specs/researchs/`.
+
+  **Qualidade:** `yarn format`, `yarn check` e `yarn test` verdes no fechamento; 213/213 testes passando e warning de budget universal mantido abaixo do teto.
+
 - **spec 0017** — Process Refinement & CLI Refactor
   (`.specify/specs/0017-process-cli-refactor/`) — **Done** (2026-04-29, PR #3).
 

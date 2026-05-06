@@ -106,6 +106,8 @@ Progresso operacional. Marca tasks `[x]` a cada degrau. **Modelo canônico de 5 
 Backlog de débitos adiados. Política:
 
 - **Criar somente quando** a spec gerar débitos conscientes (insights fora do escopo, refactors adiados, riscos não mitigados, dependências para specs futuras). **Sem débitos → não criar** o arquivo. NEXT.md vazio ou prematuro é ruído.
+- **Se o item ainda será resolvido antes do merge desta própria spec**, ele **não** vai para `NEXT.md`: registre em `tasks.md` como sub-task do bloco apropriado, com status `[/]` enquanto estiver em progresso.
+- **Se o item explicitamente vazou do escopo e dependerá de outra spec / issue / decisão futura**, aí sim ele entra em `NEXT.md` até a migração final para `roadmap/backlog.md`.
 - **Deletar no encerramento pré-merge** (fase final do `tasks.md`), migrando débitos para `roadmap/backlog.md` (ou issues/discussões, conforme o caso).
 - Nunca sobreviver a uma spec fechada — `NEXT.md` órfão é AI-slop.
 
