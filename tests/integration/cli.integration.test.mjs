@@ -43,9 +43,9 @@ describe("Integration: Runtime Monolítico no AGENTS.md", () => {
       const agentsContent = await fs.readFile(path.join(targetDir, "AGENTS.md"), "utf8");
 
       assert.match(agentsContent, /<AI_GUIDELINES>/);
-      assert.match(agentsContent, /Zona Topo: Diretivas Primarias/);
-      assert.match(agentsContent, /Zona Centro: Metodologias Opt-in/);
-      assert.match(agentsContent, /Zona Base: Contexto Tatico/);
+      assert.match(agentsContent, /Top Zone: Primary Directives/);
+      assert.match(agentsContent, /Center Zone: Opt-in Methodologies/);
+      assert.match(agentsContent, /Base Zone: Tactical Context/);
       assert.match(agentsContent, /<FEATURE_QUALITY_GATES>/);
       assert.match(agentsContent, /<FEATURE_TDD>/);
       assert.match(agentsContent, /<FEATURE_BDD>/);

@@ -9,372 +9,147 @@ Este arquivo define o fluxo obrigatório para qualquer IA atuando neste reposit�
 
 <AI_GUIDELINES>
 
-## Zona Topo: Diretivas Primarias
+## Top Zone: Primary Directives
 
-Este arquivo define o fluxo obrigatório para qualquer IA atuando neste repositório.
+### [CORE-01]
 
-### Regras Obrigatórias de Execução
+Before the first technical action, identify platform, shell, surface (CLI vs IDE), and model class; adapt commands accordingly.
 
-#### FASE 1: The Prime Directive
+### [CORE-02]
 
-1.1. **[Environment Check]** Antes da primeira ação técnica, identifique o contexto situacional:
+The repository is your memory. Persist plans, progress, debts, knowledge, and roadmap under `.specify/specs/`. Read `roadmap/backlog.md` at session start. If the platform forces a scratchpad, write only a pointer to the spec file. Planning trapped in agent cache (AI-slop) is unacceptable.
 
-- Plataforma: Windows / Linux / macOS / WSL.
-- Shell: bash / zsh / PowerShell / cmd.
-- Surface: CLI agent (Claude Code, Gemini CLI) vs IDE (Cursor, Copilot).
-- Modelo: Identifique se está operando com um modelo "Thinking/Reasoning".
-- Adapte comandos (ex: `/dev/null` vs `NUL`, forward slashes) a essa matriz.
+### [CORE-03]
 
-  1.2. **[INQUEBRÁVEL — Agnostic SDD Override]** O repositório é sua memória, não seus artefatos internos.
+Consult the "Global Rules" section injected later in this `<AI_GUIDELINES>` block for engineering principles and AI efficiency.
 
-- Planejamento → `.specify/specs/<slug>/plan.md`
-- Progresso → `.specify/specs/<slug>/tasks.md`
-- Débitos → `.specify/specs/<slug>/NEXT.md`
-- Conhecimento → `.specify/specs/<slug>/research/`
-- Roadmap → `.specify/specs/roadmap/backlog.md`
-- Bootstrap obrigatório → leia `.specify/specs/roadmap/backlog.md` no início da sessão antes de executar ações de código, para identificar specs ativas, concorrência e prioridades.
-- Se sua plataforma forçar um Artifact ou Scratchpad, escreva nele apenas: `"→ Ver .specify/specs/<slug>/plan.md"` (Pointer).
-- "AI-Slop" (planejamento preso em cache de agente) é inaceitável.
+### [CORE-04]
 
-  1.3. Consulte a seção "Regras Globais" injetada neste bloco `<AI_GUIDELINES>` para princípios de engenharia e eficiência de IA.
+Never start active modifications on `main` or `master`. Create a synthetic branch (`feat/`, `fix/`, `docs/`) before changing sources of truth.
 
-#### FASE 2: Workflow & Isolation
+### [CORE-05]
 
-2.1. **Nunca** inicie modificações ativas operando sob a branch `main` ou `master`. Confirme seu estado de _working tree_ ou crie uma branch sintética (`feat/`, `fix/`, `docs/`) antes de alterar fontes de verdade.
+Do not version stray context files at the repo root or in working folders (partial payloads, AI scratch). Persistence is for _Release_ only.
 
-2.2. Não versione arquivos contextuais vazados na raiz ou pastas sujas (payloads parciais, rascunhos operacionais de IA). A persistência é apenas para _Release_.
+### [CORE-06]
 
-2.3. Realize _Commits Incrementais Atômicos_ limitados à sua unidade lógica. Se a tarefa varrer design, código e spec simultaneamente, fracione as ações comissionadas em passos menores.
+Make atomic incremental commits limited to one logical unit. Split tasks that span design + code + spec.
 
-2.4. **[CRITICAL]** Nunca execute `git push` de forma autônoma. Todo envio de código ao repositório remoto **exige aprovação humana explícita do mantenedor** antes de ser iniciado. Aplica-se a qualquer agente de IA, script automatizado ou hook que não seja o pipeline oficial do repositório.
+### [CORE-07]
 
-#### FASE 3: Quality Gates
+**[CRITICAL]** Never execute `git push` autonomously. Any remote push requires explicit human approval from the maintainer.
 
-3.1. **[CI Compliance — HARNESS LOCK]** É terminantemente proibido submeter qualquer commit sem validar a cadeia de qualidade do projeto. Antes de `git commit`, execute **todos os scripts de validação** definidos no `package.json` do repositório (ex: `format`, `check`, `lint`, `test`). O padrão canônico é:
+### [CORE-08]
 
-```
-<format_cmd> ; <check_cmd> ; git add . ; git commit -m "..."
-```
+**[HARNESS LOCK]** Before any `git commit`, run the project's full validation chain (format, check, lint, test) as declared in `package.json`. The rule is the chain, not the package manager — adapt to project scripts.
 
-Se o repositório define `yarn format` e `yarn check`, o comando concreto é: `yarn format ; yarn check ; git add . ; git commit -m "..."`. Adapte aos scripts do projeto — a regra é a **cadeia**, não o gerenciador.
+### [CORE-09]
 
-3.2. A submissão de Pull Requests obrigatoriamente se inaugura no modo `Draft`, utilizando integralmente a matriz `.github/pull_request_template.md`.
+Open Pull Requests in `Draft` mode using the full `.github/pull_request_template.md` matrix.
 
-3.3. Converta a operação de `Draft` para `Ready` apenas através da revalidação afirmativa Humana.
+### [CORE-10]
 
-#### FASE 4: Communication & Agility
+Convert PRs from `Draft` to `Ready` only after explicit human revalidation.
 
-4.1. **Aja apenas mediante Plano Formado.** Antes de executar qualquer código, escolha a granularidade:
+### [CORE-11]
 
-    | Critério | Use `spec-foundation` | Use `plano leve` |
-    |---|---|---|
-    | Duração | > 1 sessão | 1 sessão |
-    | Escopo | > 1 arquivo fora de feature isolada | Ajuste pontual, local |
-    | Sobrevivência | Precisa sobreviver troca de IA/sessão | Descartável |
-    | Onde vive | `.specify/specs/<slug>/` (versionado) | Scratchpad da ferramenta (não versionado) |
+Act only with a formed plan. Use `spec-foundation` for work that must survive session/agent changes; use a tool-scratchpad lightweight plan only for single-session, local, disposable adjustments.
 
-4.2. **Checkpoints antes de ação.** Após absorver contexto extenso (múltiplos arquivos, specs, pesquisas), retorne um Checkpoint resumido e peça aprovação humana **antes** de executar Code Actions.
+### [CORE-12]
 
-4.3. **Artefatos vivos.** Mantenha atualizados os artefatos SDD durante o trabalho: - `tasks.md` → marque cada item como `[/]` (em progresso) ou `[x]` (concluído) a cada passo. - `NEXT.md` → registre débitos, bugs ou insights sem prioridade imediata. - **Nunca crie arquivos paralelos de roteirização.** Planos leves vivem na ferramenta, não no repositório.
+After absorbing extensive context, return a summary Checkpoint and request human approval before executing Code Actions.
 
-### Regras Globais
+### [CORE-13]
 
-> Fonte de verdade: bloco `<AI_GUIDELINES>` compilado no `AGENTS.md`.
-> Este arquivo define **princípios de engenharia** aplicáveis a qualquer projeto.
-> Para workflow operacional (git, branch, CI, PRs), consulte o `AGENTS.md` do repositório.
+Keep SDD artifacts updated continuously: mark `tasks.md` items `[/]` (in progress) or `[x]` (done) as you go; record debts in `NEXT.md`. Never create parallel routing files in the repo.
 
----
+### [CORE-14]
 
-#### Princípios de Engenharia
+At the end of each sub-block, provide only the commit message suggestion. The human executes the full validation chain (`yarn format ; yarn check ; ...`) and `git commit`.
 
-1. Sempre responda em **Português do Brasil (PT-BR)**.
-2. Não modifique arquivos essenciais ou pontos cegos de arquitetura (ex.: `.env`, dependências fundamentais) sem antes solicitar confirmação.
-3. **Acesso Seguro:** chaves de API jamais podem transitar por arquivos do frontend de forma acidental; garanta rigor com arquivos ignorados no `.gitignore`.
-4. **Tipagem Estrita (Anti-Hacks):** Nunca ignore o sistema de tipos para acelerar a entrega. O uso de `any`, `as unknown`, manipulação de prototype ou coerções inseguras é proibido. Utilize type-guards, assertions seguras ou genéricos explícitos.
-5. **Estado e Mutabilidade:** Prefira sempre estruturas de dados imutáveis e composição de funções (ex: spread operator, métodos de array puros). Evite mutar estado compartilhado globalmente.
-6. **Tratamento de Erros (Fail-Fast):** Abrace a falha rápida. Erros devem ser capturados e propagados explicitamente (ou tipados como retorno). É terminantemente proibido o uso de blocos `try-catch` vazios ou que apenas loguem no console sem propagar a falha ou recuperar o estado.
-7. **Concorrência e Assincronicidade:** Ao gerenciar promessas ou threads, declare explicitamente a intenção (ex: `Promise.all` para execução paralela de tarefas independentes; `for...of` com `await` para dependentes). Evite fire-and-forget em funções assíncronas críticas sem tratamento de erro acoplado.
+### [GR-0001]
 
-#### Eficiência de IA
+Never expose secrets in frontend code or versioned files. Store them in environment variables and ensure they are ignored by version control.
 
-1. **Model Routing Inteligente:** Use modelos rápidos (ex: Flash, Haiku) para tarefas scoped e repetitivas. Reserve modelos avançados (ex: Pro, Opus) para planejamento arquitetural e decisões complexas.
-2. **Feedback Cirúrgico:** Ao iterar sobre código ou artefatos, forneça feedback diretamente no artefato com comentários cirúrgicos. Evite reenviar prompts extensos do zero.
-3. **Modularidade (Regra de Ouro):** Divida tarefas complexas em blocos atômicos. Se uma solicitação afetar > 3 arquivos, sugira a quebra em sub-tarefas para preservar contexto e precisão.
-4. **Redução de Ruído:** Utilize arquivos de ignore (`.geminiignore`, `.gitignore`, `.claudeignore`) para remover arquivos desnecessários (logs, builds, node_modules) do contexto da IA.
-5. **Check de Contexto:** Monitore periodicamente o que a IA está "vendo" (ex: logs de tokens) para evitar deriva de contexto.
+### [GR-0002]
 
-#### Workflow com IA
+Do not bypass the type system. Avoid unsafe casts (`any`, `unknown`, prototype manipulation) and use explicit type guards or generics.
 
-1. **Plan mode antes de agent mode:** antes de qualquer ação executiva (edição de arquivo, comando destrutivo, escrita), reserve pelo menos um ciclo de planejamento explícito. Reforça o ciclo RPI (Research → Plan → Implement).
-2. **Referencie um padrão existente ao gerar código novo:** localize um exemplo semelhante no repositório antes de criar do zero. Reduz alucinação e preserva consistência estilística.
-3. **PR description colaborativo (3 etapas):** ao escrever ou editar PR description, (1) liste os tópicos relevantes para validação humana antes do texto final; (2) só escreva o texto após o humano editar/aprovar a lista; (3) submeta o texto final para um último check humano antes de criar/editar o PR.
-4. **Patterns agnósticos ao LLM:** não codifique expectativas específicas de um modelo ou plataforma; o mesmo baseline deve funcionar em qualquer agente (Claude, Gemini, Codex, equivalentes).
-5. **Padrões, não paths:** em regras novas, prefira descrever o padrão ("consulte o baseline de regras injetado") em vez do caminho literal. Paths tendem a quebrar em migrações; padrões sobrevivem. Paths convencionais (`.env`, `.gitignore`) são exceção aceitável.
-6. **RPI obrigatório:** antes de implementar, pesquise o estado atual, consolide o plano aprovado e só então execute. O repositório deve preservar specs, planos, tasks e pesquisas quando a iniciativa precisar sobreviver a troca de agente ou sessão.
-7. **Contexto enxuto e estável:** mantenha regras e contexto estático no baseline de governança, use o prompt imediato apenas para intenção tática, e evite inserir logs, builds, dependências ou arquivos gerados no contexto da IA.
-8. **Routing de esforço:** use modelos rápidos para tarefas locais e repetitivas; reserve modelos avançados ou reasoning para arquitetura, migrações, debugging complexo e decisões de alto impacto.
+### [GR-0003]
 
-### Adaptador: Claude (Anthropic)
+Use immutable data structures and pure functions. Do not mutate shared state.
 
-> Diretrizes complementares para agentes baseados em modelos Anthropic Claude.
-> Estas regras **complementam** (não substituem) o `global-rules.md`.
+### [GR-0004]
+
+Fail fast and propagate errors explicitly. Do not swallow exceptions or use empty catch blocks.
+
+### [GR-0005]
+
+Make concurrency explicit: use `Promise.all` for independent tasks and `await` sequencing for dependent ones. Do not use fire-and-forget without error handling.
+
+### [GR-0006]
+
+Never install, add, or upgrade third-party packages autonomously. When new dependencies are needed, propose the exact package name and version, and wait for explicit human approval before running any install command (`npm install`, `pip install`, `cargo add`, `gem install`, `go get`, etc.). This applies to all package manifests: `package.json`, `requirements.txt`, `Cargo.toml`, `Gemfile`, `go.mod`, and equivalents.
+
+### [GR-0101]
+
+Declare the spec type (evidence-driven, deterministic, or mixed) and require human approval when design depends on unresolved evidence.
+
+### [GR-0102]
+
+When measuring the token cost of new guidelines, use the Tok-H heuristic: aggregate characters divided by 3.5. Ensure the resulting payload respects established soft ceilings (6000 aggregate, 1500 universal, 600 adapter, 1200 opt-in).
+
+### [GR-0201]
+
+Always respond using the repository default language.
+
+### [GR-0202]
+
+Exclude irrelevant files (logs, builds, dependencies) from the AI context using ignore files.
+
+### [GR-0203]
+
+Build PR descriptions in three steps: outline topics, get human approval, then generate the final text using the repository template (if available) and perform a final human validation.
 
 ---
 
-#### Model Routing
+## Center Zone: Opt-in Methodologies
 
-- **Haiku / Sonnet leve:** tarefas atômicas de codificação, formatação, refatoração scoped.
-- **Sonnet / Opus:** planejamento arquitetural, análise de múltiplos arquivos, decisões de design complexas.
+<FEATURE_BDD>
 
-#### Contexto e Ignore
+### [OPT-0101]
 
-- Utilize `.claudeignore` na raiz do repositório para controlar quais arquivos a IA carrega no contexto.
-- O formato segue o padrão `.gitignore`.
-- Claude carrega automaticamente o `AGENTS.md` da raiz — garanta que o bloco `<AI_GUIDELINES>` esteja presente.
+All tests MUST use the GIVEN / WHEN / THEN structure. Each `it()` describes exactly one atomic scenario. Prioritize readability over brevity. If a business rule `[BR-*]` is provided, include it in the test name.
 
-#### Comportamento Observado
+### [OPT-0201]
 
-- Claude tende a ser verboso por padrão. As Global Rules já instruem respostas sucintas — reforce se necessário com "seja conciso" no prompt.
-- Em sessões longas, Claude pode perder contexto de arquivos lidos no início. Use `/clear` ou reinicie a sessão quando perceber repetição de erros.
-- Claude Code respeita `CLAUDE.md` na raiz — este arquivo pode conter instruções específicas do projeto que complementam o baseline injetado.
+All tests MUST use the GIVEN / WHEN / THEN structure in Brazilian Portuguese (DADO/QUANDO/ENTÃO). Each `it()` describes exactly one atomic scenario. Prioritize readability over brevity. If a business rule `[BR-*]` is provided, include it in the test name.
 
-### Adaptador: Codex / Copilot (OpenAI)
-
-> Diretrizes complementares para agentes baseados em modelos OpenAI (Codex, GPT-4o) e integrações via GitHub Copilot.
-> Estas regras **complementam** (não substituem) o `global-rules.md`.
-
----
-
-#### Integração com IDE
-
-- Copilot lê automaticamente o `AGENTS.md` da raiz do repositório.
-- Para instruções específicas do projeto no Copilot Chat, utilize `.github/copilot-instructions.md` — este arquivo é carregado como contexto adicional pelo Copilot.
-- Utilize comentários estruturados e JSDoc para auxiliar a conclusão de código em tempo real.
-
-#### Contexto e Ignore
-
-- Copilot respeita o `.gitignore` do repositório por padrão.
-- Para refinamentos de contexto no Copilot Chat, utilize referências diretas a arquivos via `#file`.
-- Codex CLI respeita `AGENTS.md` e `.codex/instructions.md` — garanta que o bloco `<AI_GUIDELINES>` esteja presente.
-
-#### Comportamento Observado
-
-- Copilot inline tende a completar código baseado no contexto imediato (arquivo aberto + imports). Mantenha arquivos focados e com imports explícitos para melhores sugestões.
-- Codex em modo autônomo segue instruções de `AGENTS.md` rigorosamente — garanta que as regras de governança (ex: não fazer push) estejam claras.
-
-### Adaptador: Gemini (Google)
-
-> Diretrizes complementares para agentes baseados em modelos Google Gemini e a CLI Gemini.
-> Estas regras **complementam** (não substituem) o `global-rules.md`.
-
----
-
-#### Integração com CLI
-
-- Gemini CLI carrega automaticamente `GEMINI.md` na raiz e `~/.gemini/GEMINI.md` como config global.
-- Para instruções específicas do projeto, utilize `GEMINI.md` na raiz do repositório.
-- O `AGENTS.md` da raiz também é carregado — garanta que o bloco `<AI_GUIDELINES>` esteja presente.
-
-#### Skills Globais
-
-As skills globais (ferramentas personalizadas) residem em `~/.gemini/skills/`.
-
-> [!TIP]
-> Periodicamente, remova scripts que não utiliza ativamente, pois eles são carregados como tokens de "System Prompt" em todas as interações e podem degradar a performance do modelo.
-
----
-
-#### Estratégia de Ignore
-
-Utilize o arquivo `.geminiignore` na raiz de cada repositório para gerenciar a economia de tokens. Ele evita que arquivos de build, logs e binários poluam o contexto do modelo.
-
-#### Exemplo de `.geminiignore` recomendado:
-
-```gitignore
-# Secrets (crítico)
-.env
-.env.*
-!.env.example
-
-# Binários e Media
-**/*.png
-**/*.jpg
-**/*.pdf
-**/*.woff
-**/*.mp4
-
-# Build, Cache & Lockfiles
-.next/
-dist/
-build/
-.cache/
-*.tsbuildinfo
-yarn.lock
-package-lock.json
-
-# Logs
-*.log
-logs/
-
-# IDE
-.vscode/
-.idea/
-```
-
----
-
-#### Comportamento Observado
-
-- Em sessões longas, use o conceito de "checkpoints" (salvar progresso em artefatos) para evitar perda de contexto.
-- Gemini tende a ser proativo em executar comandos — as Global Rules já restringem git push, mas reforce em tarefas destrutivas.
-- Para projetos com muitos arquivos, o `.geminiignore` é crítico — sem ele, o modelo pode gastar tokens lendo `node_modules`, builds e lockfiles.
-
----
-
-## Zona Centro: Metodologias Opt-in
+</FEATURE_BDD>
 
 <FEATURE_QUALITY_GATES>
 
-### Quality Gates: Governança de Código Gerado por IA
+### [OPT-0301]
 
-> **Aviso:** O "Senior Review" humano permanece obrigatório para decisões arquiteturais, capacidade de carga e tradeoffs de longo prazo. Estes gates automatizam a detecção de bugs locais e estrutura de código.
-
----
-
-#### Gates de Aceite (Checklist)
-
-1. **Análise Estática:**
-   - Complexidade ciclomática mantida sob controle (módulos pequenos e focados).
-   - Ausência de dependências circulares.
-   - Nomes de variáveis e funções seguem a semântica do projeto (PT-BR ou EN conforme convenção local).
-
-2. **Cobertura e Mutação:**
-   - **Cobertura de Testes:** Mínimo recomendado de **85%**.
-   - **Mutation Testing:** Mínimo de **60%** de kill rate (garante que os testes realmente validam a lógica).
-
-3. **Sensores de Bugs Típicos de IA (Heurísticas obrigatórias):**
-   - **N+1 Queries/Calls:** O agente deve buscar proativamente por iterações (`map`, `for`) que executem chamadas de banco de dados ou APIs. Se encontrado, deve exigir/implementar batching ou data-loaders em vez de acessos sequenciais.
-   - **Race Conditions:** O agente deve analisar blocos assíncronos (ex: múltiplos `await` concorrentes) que leiam e modifiquem o mesmo estado em memória ou DB. Se não houver garantia de atomicidade (transação, lock ou estado local seguro), o design deve ser rejeitado.
-   - **Memory Leaks:** Sempre que o agente implementar _listeners_, observadores, subscrições de stream ou timers (`setInterval`), deve compulsoriamente implementar a função de limpeza (teardown/dispose) correspondente no ciclo de vida apropriado do framework usado.
-   - _Ferramentas recomendadas:_ Property-based testing (ex: fast-check em JS, Hypothesis em Python).
-
-4. **Security & Secrets:**
-   - Bloqueio de submissão de chaves, tokens ou credenciais (mesmo em comentários).
-   - Validação de inputs contra injeção de código.
-
----
-
-#### Regras para Agentes de IA
-
-- Ao finalizar uma implementação, execute o checklist acima antes de reportar "done".
-- Se algum gate falhar, corrija antes de prosseguir — não delegue ao humano erros detectáveis por automação.
-- Em projetos com CI configurado, confirme que o pipeline está verde antes de considerar a tarefa concluída.
+Before reporting a task as done, ensure: no circular dependencies, proper teardown for listeners/timers (prevent memory leaks), no unguarded asynchronous state mutations (prevent race conditions), >85% test coverage, >60% mutation kill rate, and no secrets in code/comments. Fix any automated failures before requesting human review.
 
 </FEATURE_QUALITY_GATES>
 
 <FEATURE_TDD>
 
-### TDD: Desenvolvimento Guiado por Testes (Red-Green-Refactor)
+### [OPT-0401]
 
-> Esta regra instrui agentes de IA a seguirem o ciclo TDD estrito.
-> **Foco:** estrutura de código, ciclo de feedback e cobertura.
+Every new feature or bug fix MUST follow the RED -> GREEN -> REFACTOR cycle. Write a failing test first. Never skip the RED step. Write minimum code to pass. Maintain >85% coverage. Test files must be colocated. Unit tests must be isolated with mocks/stubs.
 
----
+### [OPT-0501]
 
-#### Ciclo Obrigatório (Strict TDD)
-
-Toda nova funcionalidade ou correção de bug DEVE seguir este ciclo:
-
-1. **RED:** Escreva um teste que falhe — defina o comportamento esperado antes de qualquer implementação.
-2. **GREEN:** Escreva o código mínimo necessário para fazer o teste passar. Sem otimizações prematuras.
-3. **REFACTOR:** Melhore o código (nomes, estrutura, DRY) mantendo todos os testes verdes.
-
-> **Regra:** Nunca pule o passo RED. Código sem teste que falhou primeiro não é TDD.
-
----
-
-#### Princípios Estruturais
-
-- **Um Teste, Uma Intenção:** Cada caso de teste valida exatamente um comportamento. Evite testes "omni-bus".
-- **Isolamento:** Testes unitários não devem depender de serviços externos, rede ou banco de dados. Use mocks/stubs para dependências.
-- **Colocation:** Arquivos de teste devem ficar no mesmo diretório que o código testado (ex: `engine.mjs` → `engine.test.mjs`).
-- **Cobertura como Gate:** Mínimo recomendado de **85%** de cobertura de linhas. Exceções devem ser documentadas.
-- **Rastreabilidade:** Quando uma regra de negócio tiver identificador `[BR-*]`, o teste que a valida deve carregar o mesmo identificador no nome.
-
----
-
-#### Regras para Agentes de IA
-
-- Ao receber uma tarefa, escreva os testes ANTES da implementação.
-- Gere casos de borda (edge cases) baseados na spec antes de implementar a lógica.
-- Se um teste existente quebrar durante refatoração, corrija-o antes de prosseguir.
-- Nunca delete ou desabilite testes para fazer o build passar.
-- Em frameworks com cobertura mandatória, trate queda de coverage como falha de implementação, não como detalhe de CI.
+Every new feature or bug fix MUST follow the RED -> GREEN -> REFACTOR cycle. Write a failing test first. Never skip the RED step. Write minimum code to pass. Maintain >85% coverage. Test files must be colocated. Unit tests must be isolated with mocks/stubs. If a business rule `[BR-*]` is provided, include it in the test name.
 
 </FEATURE_TDD>
 
-<FEATURE_BDD>
-
-### BDD: Comportamento Guiado por Testes (Dado/Quando/Então)
-
-> Esta regra instrui agentes de IA a estruturarem testes no formato BDD.
-> **Foco:** linguagem ubíqua, rastreabilidade e documentação viva.
-
 ---
 
-#### Formato Obrigatório
-
-Todos os testes DEVEM usar a estrutura **DADO / QUANDO / ENTÃO** em Português do Brasil:
-
-- **DADO** [cenário inicial / pré-condição / estado do sistema]
-- **QUANDO** [ação executada pelo usuário ou sistema]
-- **ENTÃO** [resultado esperado / asserção]
-
-#### Exemplo
-
-```javascript
-it("DADO usuário sem permissão QUANDO tenta acessar painel ENTÃO retorna erro 403", () => {
-  // ...
-});
-```
-
----
-
-#### Rastreabilidade (Business Rules)
-
-- Cada regra de negócio documentada DEVE ter um identificador único (ex: `[BR-CLI-SYNC-01]`).
-- Os testes que validam essa regra DEVEM incluir o identificador no nome.
-- Isso garante que qualquer regressão seja rastreável até a spec original.
-
-```javascript
-it("[BR-CLI-SYNC-01] DADO baseline desatualizado QUANDO executado adopt ENTÃO sincroniza apenas arquivos alterados", () => {
-  // ...
-});
-```
-
----
-
-#### Princípios BDD
-
-- **Linguagem Ubíqua:** Testes devem ser legíveis por humanos não-técnicos. Evite jargão de implementação nos nomes.
-- **Documentação Viva:** A suíte de testes serve como documentação executável do sistema. Se o teste não descreve o comportamento com clareza, reescreva-o.
-- **Cenários Atômicos:** Cada `it()` descreve exatamente um cenário. Não combine múltiplos fluxos.
-
----
-
-#### Regras para Agentes de IA
-
-- Ao criar testes, SEMPRE use o formato DADO/QUANDO/ENTÃO no nome do caso de teste.
-- Ao receber uma business rule (`[BR-*]`), inclua o ID no teste correspondente.
-- Gere cenários para fluxo feliz, fluxo alternativo e casos de erro.
-- Priorize legibilidade sobre concisão nos nomes dos testes.
-- Mantenha cada cenário atômico: um `it()` deve expressar uma intenção de negócio observável.
-
-</FEATURE_BDD>
-
----
-
-## Zona Base: Contexto Tatico
+## Base Zone: Tactical Context
 
 > [!IMPORTANT]
 > Este projeto utiliza o framework **ai-guidelines** para governança de IA.

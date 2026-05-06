@@ -43,10 +43,7 @@ export function filterRulesByScope(rules, options = {}) {
       }
       adapters[rule.adapter].push(rule);
     } else if (rule.scope === "opt-in") {
-      if (
-        !rule.opt_in_feature ||
-        (optInFeatures.length > 0 && !optInFeatures.includes(rule.opt_in_feature))
-      ) {
+      if (!rule.opt_in_feature || !optInFeatures.includes(rule.opt_in_feature)) {
         continue;
       }
       if (!optIn[rule.opt_in_feature]) {
@@ -272,18 +269,18 @@ export function compileMonolithicAgentsContent({
   optInRules = [],
   pointerTemplate,
 }) {
-  const topBuffer = buildSection("Zona Topo: Diretivas Primarias", [
+  const topBuffer = buildSection("Top Zone: Primary Directives", [
     coreTemplate,
     globalRules,
     ...providerRules.map(({ content }) => content),
   ]);
 
   const centerBuffer = buildSection(
-    "Zona Centro: Metodologias Opt-in",
+    "Center Zone: Opt-in Methodologies",
     optInRules.map(({ name, content }) => wrapFeatureModule(name, content))
   );
 
-  const baseBuffer = buildSection("Zona Base: Contexto Tatico", [
+  const baseBuffer = buildSection("Base Zone: Tactical Context", [
     normalizePointerForMonolith(pointerTemplate),
   ]);
 

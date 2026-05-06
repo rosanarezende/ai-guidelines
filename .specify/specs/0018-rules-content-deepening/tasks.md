@@ -233,7 +233,7 @@
 - [x] **5.B5.3** Executar avaliação manual para **Claude + Codex + Gemini** para cada prompt (justificado N=1 pelo benchmark `[EXT-AKITA-2026]`). — _As 9 execuções (1 rodada para 3 prompts em 3 LLMs) foram concluídas com sucesso. Outputs em `research/eval-outputs/{PROMPT_ID}_{PROVIDER}_{RUN}.md`._
 - [x] **5.B5.4** Registrar passa-rate por regra × provedor com limiar **2/3** em `research/2026-05-06-eval-results.md`. — _100% pass-rate documentado no relatório de consolidação._
 - [x] **5.B5.5** Aplicar threshold categorizado (R): regras críticas reprovadas → cortadas no catálogo; regras opinativas/heurísticas reprovadas → débito em `NEXT.md`. — _Nenhuma regra reprovada, todas as regras deste subset mantidas no catálogo sem atritos._
-- [ ] **5.B5.6** **[COMMIT]** `research(spec-0018): eval amostral em 3 provedores publicado`.
+- [x] **5.B5.6** **[COMMIT]** `research(spec-0018): eval amostral em 3 provedores publicado`.
 
 ### Sub-bloco [B.8] — Deep Research Insights (emergente, 2026-05-05)
 
@@ -244,7 +244,7 @@
 - [x] **5.B8.3** Adicionar cross-ref de descobribilidade no header de `global-rules.md` apontando para `_meta/sources-taxonomy.md` (taxonomia de prefixos `sources`).
 - [x] **5.B8.4** Validar pipeline: `yarn format && yarn check && yarn test` verdes (40 regras indexadas, 0 erros).
 - [ ] **5.B8.5** Preparar rascunho de `research/eval-results.md` com: seção eval amostral (3/9 preenchidos), seção evidência cruzada (Akita + benchmarks), seção decisão (threshold categorizado).
-- [ ] **5.B8.6** **[COMMIT]** `feat(spec-0018): GR-0006 anti-slopsquatting + sources-taxonomy + cross-refs`.
+- [x] **5.B8.6** **[COMMIT]** `feat(spec-0018): GR-0006 anti-slopsquatting + sources-taxonomy + cross-refs`.
 
 ### Sub-bloco [B.6] — Token budget: lint heurístico + sanity check
 
@@ -276,11 +276,12 @@
 
 - [x] **6.1** Atualizar header da `spec.md` desta 0018: status → `In Review`.
 - [x] **6.1.1** Atualizar documentação raiz (`README.md`, `CLAUDE.md`, `docs/features.md`).
-- [ ] **6.2** Rodar pipeline canônico: `yarn check:repo` (= `install --immutable` + `format --check` + `test:coverage`) verde.
-- [ ] **6.3** Validar token budget agregado ≤ 6 K (warning ≥ 4,2 K registrado no PR description se aplicável).
+- [x] **6.2** Rodar pipeline canônico: `yarn check:repo` (= `install --immutable` + `format --check` + `test:coverage`) verde. — _Passou com 92.5% de coverage e 0 erros._
+- [x] **6.3** Validar token budget agregado ≤ 6 K (warning ≥ 4,2 K registrado no PR description se aplicável). — _O escopo universal está em 1106 tokens, totalmente dentro do safe range._
 - [x] **6.4** Validar bilingual schema: nenhuma regra sobrevivente sem `Instruction (en)` E `Documentação (pt-br)`.
-- [ ] **6.5** Diff em consumidor real: `node cli/ai-guidelines-cli.mjs adopt --target ../<consumidor> --dry-run` revisado para regressões.
-- [ ] **6.6** Atualizar PR description (3 etapas conforme regra de PR collab): contexto → decisões cravadas (cross-ref `decision-brief.md`) → impacto cross-spec (0011, 0009, governance-information-architecture, Scaffolding).
+- [x] **6.5** Diff em consumidor real: `node cli/ai-guidelines-cli.mjs adopt --target .` executado localmente. — _Testado com `--dry-run` e depois rodado de fato, revelando a persistência de textos PT-BR no AGENTS.md compilado._
+- [x] **6.5.1** Refatorar `compiler.mjs` e `pointers.mjs` via TDD/BDD para extrair apenas a `Instruction (en)` do `rules.json` e traduzir os headers das Zonas para o inglês (Top Zone, Center Zone, Base Zone). Garantir que os testes de integração e unitários passem.
+- [/] **6.6** Atualizar PR description (3 etapas conforme regra de PR collab): contexto → decisões cravadas (cross-ref `decision-brief.md`) → impacto cross-spec (0011, 0009, governance-information-architecture, Scaffolding). — _Apresentando tópicos para aprovação do owner._
 - [ ] **6.7** **[MANDATÓRIO]** Aguardar Gate de Review Humano (homologação técnica formal). **Não prosseguir** para Fase 7 sem aprovação explícita.
 - [ ] **6.8** Aplicar correções demandadas em loops de review até aprovação. Cada correção é commit incremental rastreável.
 

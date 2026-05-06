@@ -509,6 +509,11 @@ _Researches, registros e encerramento:_
   - **Por quê:** Validar o enforcement em escopo limitado (heurístico, sem CI ou AST) para garantir a integridade do pipeline Docs-as-Code durante a migração das regras.
   - **Escopo:** Heurístico, sem CI, sem AST. Objetivo: validar enforcement.
 
+- **2026-05-06 — Revisão de B.3.5 (Bugfix do Compiler e Pointers).**
+  - **Mudança:** Durante validação no consumidor (Fase 6.5), identificou-se que o `AGENTS.md` compilado continuava recebendo os headers em PT-BR e o bloco de `Documentação (pt-br)`, violando o princípio cravado de extrair estritamente a `Instruction (en)` para otimização de tokens da IA. O problema estava em `applyPointers` lendo os arquivos `.md` brutos em vez do catálogo `rules.json`.
+  - **Por quê:** Bug no fluxo legado preservado durante B.3.5. Correção é obrigatória para atingir o objetivo da spec.
+  - **Implicação em B.3.5:** Refatorar `compiler.mjs` para headers em Inglês ("Top Zone", "Center Zone") e `pointers.mjs` para usar `filterRulesByScope` a partir do `rules.json`. Implementação segue BDD/TDD.
+
 ---
 
 ## 📎 Anexo — Conteúdo candidato pré-research (b9efb83)

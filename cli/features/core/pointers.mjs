@@ -7,6 +7,8 @@ import {
   compileCoreRulesContent,
   compileMonolithicAgentsContent,
   loadRulesCatalog,
+  filterRulesByScope,
+  formatRuleInstruction,
 } from "#governance/monolith/compiler";
 import {
   normalizeProviderSelection,
@@ -44,8 +46,9 @@ export async function applyPointers(targetDir, options, actions) {
   // No double injection: when the catalog provides core, the .tmpl is ignored.
   const rulesJsonPath = path.join(sourceRulesDir, "_meta", "rules.json");
   let coreBaseline = "";
+  let catalog = null;
   try {
-    const catalog = await loadRulesCatalog(rulesJsonPath);
+    catalog = await loadRulesCatalog(rulesJsonPath);
     coreBaseline = compileCoreRulesContent(catalog);
   } catch {
     // Catalog absent or unreadable; fall back below.
@@ -54,19 +57,47 @@ export async function applyPointers(targetDir, options, actions) {
     coreBaseline = await fs.readFile(coreTemplatePath, "utf8");
   }
 
-  const globalRules = await fs.readFile(path.join(sourceRulesDir, "global-rules.md"), "utf8");
+  let globalRules = "";
+  let providerRules = [];
+  let optInRules = [];
 
-  const providerRules = await readRulesByName(
-    sourceRulesDir,
-    normalizeProviderSelection(options.provider)
-  );
+  const providerSelection = normalizeProviderSelection(options.provider);
+  const features = options.features ?? [];
 
-  const optInRules = await readOptInRules({
-    sourceRulesDir,
-    editorialFeatures: EDITORIAL_FEATURES,
-    features: options.features ?? [],
-    lang: options.lang ?? "pt",
-  });
+  if (catalog) {
+    const filtered = filterRulesByScope(catalog.rules, {
+      includeAdapters: providerSelection,
+      optInFeatures: features,
+    });
+
+    const nonCoreUniversal = filtered.universal.filter(
+      (rule) => !(Array.isArray(rule.tags) && rule.tags.includes("core"))
+    );
+    globalRules = nonCoreUniversal.map(formatRuleInstruction).filter(Boolean).join("\n\n");
+
+    for (const [adapter, rules] of Object.entries(filtered.adapters)) {
+      const content = rules.map(formatRuleInstruction).filter(Boolean).join("\n\n");
+      if (content) {
+        providerRules.push({ name: adapter, content: `### Adapter: ${adapter}\n\n${content}` });
+      }
+    }
+
+    for (const [feature, rules] of Object.entries(filtered.optIn)) {
+      const content = rules.map(formatRuleInstruction).filter(Boolean).join("\n\n");
+      if (content) {
+        optInRules.push({ name: feature, content });
+      }
+    }
+  } else {
+    globalRules = await fs.readFile(path.join(sourceRulesDir, "global-rules.md"), "utf8");
+    providerRules = await readRulesByName(sourceRulesDir, providerSelection);
+    optInRules = await readOptInRules({
+      sourceRulesDir,
+      editorialFeatures: EDITORIAL_FEATURES,
+      features,
+      lang: options.lang ?? "pt",
+    });
+  }
 
   const monolithicBaseline = compileMonolithicAgentsContent({
     coreTemplate: coreBaseline,
