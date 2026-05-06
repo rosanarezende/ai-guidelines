@@ -94,17 +94,15 @@ A CLI deverá detectar provedores ativos no projeto consumidor (heurística: pre
 
 **Nota para a Spec 0009:** Os detectores são extremamente básicos (apenas 1 pattern: `catch {}` vazio). A arquitetura engine→detectors→rules.json é reutilizável mas precisa ser expandida com detectores reais para N+1, race conditions, memory leaks conforme as taxonomias em `research/2026-04-30-external-bug-taxonomies.md` e `research/2026-04-30-empirical-bugs-ai-code.md`. O script `ai:check` foi removido do `package.json` da 0018 — a 0009 deve re-adicioná-lo quando os detectores forem robustos.
 
-### Seed B.10 — Referências externas no rationale das regras
+### ~~Seed B.10 — Referências externas no rationale das regras~~ ✅ RESOLVIDO
 
 **Origem:** Pesquisa `research/2026-05-05-akita-benchmark-analysis.md`
-**Contexto:** O benchmark [EXT-AKITA-2026] fornece evidência empírica forte para GR-0001, GR-0004 e OPT-0301. Atualmente, as regras não referenciam benchmarks externos.
+**Resolução (2026-05-05):** Decisão de unificar `external_evidence` dentro de `sources` com prefixo `EXT-*` + campo `validated_by_benchmark: true/false`. Implementado em:
 
-**Ação proposta (spec futura):**
-
-- Adicionar campo `external_evidence` (ou expandir `sources`) no schema YAML das regras
-- Popular com `[EXT-AKITA-2026]` para GR-0001, GR-0004, OPT-0301
-- Popular com `[EXT-AIJAIL-2026]` para GR-0001 (tooling recomendado: `ai-jail --mask .env`)
-- Considerar campo `validated_by_benchmark: true/false` no YAML para sinalizar regras com evidência empírica
+- `_meta/sources-taxonomy.md` — taxonomia de prefixos e registro de referências externas
+- `rules-parser.mjs` (L27, L273-283) — validação do campo `validated_by_benchmark`
+- `global-rules.md` — GR-0001, GR-0004, GR-0005 populados com `EXT-AKITA-2026`; GR-0001 com `EXT-AIJAIL-2026`
+- Cross-ref de descobribilidade adicionada no header de `global-rules.md`
 
 ### Seed B.11 — Secure Agent Execution (ai-jail + GR-0001)
 
@@ -116,3 +114,8 @@ A CLI deverá detectar provedores ativos no projeto consumidor (heurística: pre
 1. Documentar `ai-jail` como tooling recomendado no rationale da regra GR-0001
 2. Explorar integração com o CLI: `npx ai-guidelines adopt --sandbox` poderia gerar `.ai-jail` com masks automáticas para patterns `.env*` + `credentials*`
 3. Mapear o conceito de "lockdown mode" do ai-jail para nossa taxonomia de severidade (hard/soft → default/lockdown)
+
+### ~~Seed B.12 — Anti-Slopsquatting Gate~~ ✅ RESOLVIDO
+
+**Origem:** Deep research `benchmark-LLM-para-governanca-AI.md` (Sonar §3: 19,7% de alucinação de pacotes) + paper USENIX 2025.
+**Resolução (2026-05-05):** Implementado como `[GR-0006] No autonomous dependency installation (Anti-Slopsquatting)` em `global-rules.md`. Sources: CWE-1357, OWASP-CICD-A06, EXT-SONAR-LLM-2026. Registrado em `sources-taxonomy.md`. Pipeline verde (40 regras, 0 erros).

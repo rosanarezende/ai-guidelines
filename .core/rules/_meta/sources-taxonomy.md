@@ -47,10 +47,11 @@ sources: ["CWE-704"]
 
 ## Registro de Referências Externas (`EXT-*`)
 
-| ID                | Fonte                        | Tipo                                          | URL                                                            | Regras impactadas                   |
-| :---------------- | :--------------------------- | :-------------------------------------------- | :------------------------------------------------------------- | :---------------------------------- |
-| `EXT-AKITA-2026`  | llm-coding-benchmark (Akita) | Benchmark empírico (30+ modelos, 8 dimensões) | [github](https://github.com/akitaonrails/llm-coding-benchmark) | GR-0001, GR-0004, GR-0005, OPT-0301 |
-| `EXT-AIJAIL-2026` | ai-jail (Akita)              | Tooling complementar (sandbox para agentes)   | [github](https://github.com/akitaonrails/ai-jail)              | GR-0001                             |
+| ID                   | Fonte                        | Tipo                                          | URL                                                                                              | Regras impactadas                   |
+| :------------------- | :--------------------------- | :-------------------------------------------- | :----------------------------------------------------------------------------------------------- | :---------------------------------- |
+| `EXT-AKITA-2026`     | llm-coding-benchmark (Akita) | Benchmark empírico (30+ modelos, 8 dimensões) | [github](https://github.com/akitaonrails/llm-coding-benchmark)                                   | GR-0001, GR-0004, GR-0005, OPT-0301 |
+| `EXT-AIJAIL-2026`    | ai-jail (Akita)              | Tooling complementar (sandbox para agentes)   | [github](https://github.com/akitaonrails/ai-jail)                                                | GR-0001                             |
+| `EXT-SONAR-LLM-2026` | Sonar LLM Leaderboard 2026   | Benchmark empírico (qualidade + segurança)    | [sonarsource](https://www.sonarsource.com/the-coding-personalities-of-leading-llms/leaderboard/) | GR-0006                             |
 
 ---
 
@@ -61,6 +62,7 @@ sources: ["CWE-704"]
 | **GR-0001**  | OWASP-A2, CWE-522, EXT-AKITA-2026, EXT-AIJAIL-2026        | `true`                   | Benchmark Akita: Tier A protege secrets naturalmente. ai-jail: tooling operacional complementar |
 | **GR-0004**  | CWE-703, EXT-AKITA-2026                                   | `true`                   | Benchmark Akita: error handling é o principal diferenciador entre tiers                         |
 | **GR-0005**  | CWE-362, EXT-AKITA-2026                                   | `true`                   | Benchmark Akita + eval próprio: modelos usam Promise.all naturalmente                           |
+| **GR-0006**  | CWE-1357, OWASP-CICD-A06, EXT-SONAR-LLM-2026              | `true`                   | Sonar LLM 2026: 19,7% de alucinação de pacotes; paper USENIX confirma repetibilidade            |
 | **OPT-0301** | CWE-362, CWE-401, CONCUR 2025, paper 2025, EXT-AKITA-2026 | `true`                   | Benchmark Akita: qualidade de testes (mocks, coverage) é métrica auditada                       |
 | **GR-0002**  | CWE-704                                                   | —                        | Nenhum benchmark testou typing diretamente                                                      |
 | **GR-0003**  | _(vazio)_                                                 | —                        | Heurística declarada, sem fonte normativa ou empírica                                           |

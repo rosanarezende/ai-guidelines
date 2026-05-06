@@ -10,6 +10,7 @@
 > - bloco ```yaml imediatamente após
 > - `Instruction (en)` = runtime
 > - `Documentação (pt-br)` = docs
+> - Taxonomia de `sources` (prefixos `CWE-*`, `OWASP-*`, `EXT-*`): [`_meta/sources-taxonomy.md`](./_meta/sources-taxonomy.md)
 
 ---
 
@@ -122,6 +123,51 @@ Use `Promise.all` para paralelo e `await` sequencial para dependências.
 Evite fire-and-forget sem tratamento de erro.
 
 **See also:** [OPT-0301]
+
+---
+
+#### [GR-0006] No autonomous dependency installation (Anti-Slopsquatting)
+
+```yaml
+id: GR-0006
+scope: universal
+category: security
+evidence_strength: strong
+sources: ["CWE-1357", "OWASP-CICD-A06", "EXT-SONAR-LLM-2026"]
+validated_by_benchmark: true
+applicable_languages: ["*"]
+tags: [engineering, security, supply-chain]
+```
+
+**Instruction (en):**
+Never install, add, or upgrade third-party packages autonomously. When new dependencies are needed, propose the exact package name and version, and wait for explicit human approval before running any install command (`npm install`, `pip install`, `cargo add`, `gem install`, `go get`, etc.). This applies to all package manifests: `package.json`, `requirements.txt`, `Cargo.toml`, `Gemfile`, `go.mod`, and equivalents.
+
+**Documentação (pt-br):**
+Agentes IA alucinam nomes de pacotes inexistentes em até 19,7% das recomendações (USENIX 2025). Atacantes registram esses nomes em npm/PyPI com payloads maliciosos ("slopsquatting"). A regra proíbe a instalação autônoma: o agente propõe, o humano valida e executa.
+
+**Why this is an issue / Por que isto é um problema:**
+LLMs geram nomes de pacotes plausíveis mas inexistentes de forma repetível e previsível. Atacantes monitoram esses padrões e registram os nomes fabricados com malware. Como agentes frequentemente sugerem tanto o código quanto o comando de instalação, a confiança cega leva à execução de `npm install pacote-malicioso` sem verificação.
+
+**Noncompliant example:**
+
+```bash
+# Agente executa autonomamente:
+npm install express-mongoose-validator
+# ↑ Pacote alucinado — pode ser malware registrado por atacante
+```
+
+**Compliant example:**
+
+```markdown
+# Agente propõe no chat:
+
+"Sugiro instalar `zod@3.23.8` para validação de schemas.
+Por favor, verifique no npm e execute: `npm install zod@3.23.8`"
+
+# ↑ Humano verifica e executa manualmente
+```
+
+**See also:** [GR-0001]
 
 ---
 

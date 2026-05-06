@@ -235,6 +235,17 @@
 - [ ] **5.B5.5** Aplicar threshold categorizado (R): regras críticas reprovadas → cortadas no catálogo; regras opinativas/heurísticas reprovadas → débito em `NEXT.md`.
 - [ ] **5.B5.6** **[COMMIT]** `research(spec-0018): eval amostral em 3 provedores publicado`.
 
+### Sub-bloco [B.8] — Deep Research Insights (emergente, 2026-05-05)
+
+> Origem: Análise de 3 documentos de deep research (Gemini) cruzada com estado atual da spec. Tasks emergentes que não estavam no plan original mas cabem no escopo.
+
+- [x] **5.B8.1** Implementar regra `[GR-0006] No autonomous dependency installation (Anti-Slopsquatting)` em `global-rules.md` — Sources: CWE-1357, OWASP-CICD-A06, EXT-SONAR-LLM-2026. `validated_by_benchmark: true`. Formato bilíngue completo com noncompliant/compliant examples.
+- [x] **5.B8.2** Registrar `EXT-SONAR-LLM-2026` em `_meta/sources-taxonomy.md` (tabela de referências externas + tabela de estado das regras validadas).
+- [x] **5.B8.3** Adicionar cross-ref de descobribilidade no header de `global-rules.md` apontando para `_meta/sources-taxonomy.md` (taxonomia de prefixos `sources`).
+- [x] **5.B8.4** Validar pipeline: `yarn format && yarn check && yarn test` verdes (40 regras indexadas, 0 erros).
+- [ ] **5.B8.5** Preparar rascunho de `research/eval-results.md` com: seção eval amostral (3/9 preenchidos), seção evidência cruzada (Akita + benchmarks), seção decisão (threshold categorizado).
+- [ ] **5.B8.6** **[COMMIT]** `feat(spec-0018): GR-0006 anti-slopsquatting + sources-taxonomy + cross-refs`.
+
 ### Sub-bloco [B.6] — Token budget: lint heurístico + sanity check
 
 > Origem: [`[DEC-0018-B03]`](./decision-brief.md#dec-0018-b03-orçamento-de-tokens) (C + E + H + O + P). Plan: § B.6.
