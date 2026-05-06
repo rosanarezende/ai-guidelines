@@ -95,21 +95,22 @@ entendimento técnico evolui. Conteúdo:
 
 Progresso operacional. Marca tasks `[x]` a cada degrau. **Modelo canônico de 5 fases** (instanciado a partir da variante de boilerplate apropriada ao tipo declarado na `spec.md` — ver § "Templates"):
 
-- **Fase 0**: Setup (bootstrap, criação de branch, instanciação de artefatos, validação humana inicial). Em `evidence-driven`/`mixed`, esta fase também inclui **Stage 1** (Research → `decision-brief.md` populado → Gate humano `Resolved`).
+- **Fase 0**: Setup (bootstrap, criação de branch, instanciação de artefatos, validação humana inicial, criação do PR em Draft). Em `evidence-driven`/`mixed`, esta fase também inclui **Stage 1** (Research → `decision-brief.md` populado → Gate humano `Resolved`).
 - **Fase 1**: Implementação A (primeiro sub-bloco; encerra com commit incremental atômico).
 - **Fase 2**: Implementação B (segundo sub-bloco; mesmo critério de atomicidade). Specs single-bloco fundem 1+2 com nota explícita.
 - **Fase 3**: Preparação para Review (Gate de Homologação) — empacotamento, pipeline verde, PR description, **aguardar gate humano formal**.
 - **Fase 4**: Encerramento pré-merge (na branch do PR, antes do merge — migra research, deleta `NEXT.md`, atualiza roadmap, status final).
 
-### `NEXT.md` — temporário-mandatório
+### `NEXT.md` — obrigatório contínuo
 
-Backlog de débitos adiados. Política:
+Backlog de débitos adiados da spec. Política:
 
-- **Criar somente quando** a spec gerar débitos conscientes (insights fora do escopo, refactors adiados, riscos não mitigados, dependências para specs futuras). **Sem débitos → não criar** o arquivo. NEXT.md vazio ou prematuro é ruído.
-- **Se o item ainda será resolvido antes do merge desta própria spec**, ele **não** vai para `NEXT.md`: registre em `tasks.md` como sub-task do bloco apropriado, com status `[/]` enquanto estiver em progresso.
-- **Se o item explicitamente vazou do escopo e dependerá de outra spec / issue / decisão futura**, aí sim ele entra em `NEXT.md` até a migração final para `roadmap/backlog.md`.
-- **Deletar no encerramento pré-merge** (fase final do `tasks.md`), migrando débitos para `roadmap/backlog.md` (ou issues/discussões, conforme o caso).
-- Nunca sobreviver a uma spec fechada — `NEXT.md` órfão é AI-slop.
+- **Sempre criar** na instanciação da spec.
+- **Análise contínua**: ao final de cada fase, o agente deve analisar se discussões, tradeoffs ou itens descartados geraram débitos conscientes (riscos não mitigados, dependências para specs futuras) e registrá-los.
+- **Se o item ainda será resolvido antes do merge desta própria spec**, ele **não** vai para `NEXT.md`: registre em `tasks.md`.
+- **Se o item explicitamente vazou do escopo**, ele entra em `NEXT.md` até a migração final.
+- **Deletar no encerramento pré-merge** (fase final do `tasks.md`), migrando débitos para `roadmap/backlog.md` (ou issues/discussões).
+- Nunca sobreviver a uma spec fechada.
 
 ### `research/` — conhecimento de apoio
 

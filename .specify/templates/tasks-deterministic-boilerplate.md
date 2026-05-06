@@ -30,7 +30,8 @@
 - [ ] **0.7** `plan.md` instanciado a partir de `.specify/templates/plan-boilerplate.md` — em specs `deterministic`, a seção "Stage 1 / Stage 2 placeholder" do template é omitida; o `plan.md` entra direto em design técnico.
 - [ ] **0.8** `tasks.md` (este arquivo) instanciado a partir desta variante.
 - [ ] **0.9** `roadmap/backlog.md` atualizado: spec movida para "Em execução"; candidatas absorvidas migradas para `roadmap/historico.md` com ponteiro à spec absorvedora.
-- [ ] **0.10** `NEXT.md` criado **somente se** a spec gerar débitos conscientes ao fim. Não criar prematuramente.
+- [ ] **0.10** `NEXT.md` instanciado (mandatório).
+- [ ] **0.11** Criar Pull Request em Draft.
 
 ---
 
@@ -47,12 +48,14 @@
 - [ ] **1.A.1** Descrição da task (1–3 linhas, com path concreto).
 - [ ] **1.A.2** Próxima task.
 - [ ] **1.A.N** Pipeline de check + test verde após o sub-bloco A (ex.: `yarn check && yarn test` no `ai-guidelines`; substitua pelo equivalente do stack do consumidor — `npm test`, `pnpm verify`, `cargo test`, `pytest`, etc.).
-- [ ] **1.A.[COMMIT]** Commit incremental atômico: `<tipo>(spec-NNNN): <resumo do sub-bloco A>`.
+- [ ] **1.A.4** Análise de débitos: atualizar `NEXT.md`.
+- [ ] **1.A.[COMMIT]** texto de commit incremental sugerido: "<tipo>(spec-NNNN): <resumo do sub-bloco A>"
 
 ### Sub-bloco [B] — [nome do sub-bloco no plan]
 
 - [ ] **1.B.1** ...
-- [ ] **1.B.[COMMIT]** Commit incremental atômico do sub-bloco B.
+- [ ] **1.B.2** Análise de débitos: atualizar `NEXT.md`.
+- [ ] **1.B.[COMMIT]** texto de commit incremental sugerido: "<tipo>(spec-NNNN): <resumo do sub-bloco B>"
 
 > **Specs single-bloco:** se o `plan.md` define apenas um bloco de implementação, **fundir Fase 1 + Fase 2** num único conjunto de sub-blocos com nota explícita no header desta fase. Não pular Fase 2 silenciosamente.
 
@@ -65,12 +68,14 @@
 ### Sub-bloco [C] — [nome do sub-bloco no plan]
 
 - [ ] **2.C.1** ...
-- [ ] **2.C.[COMMIT]** Commit incremental atômico do sub-bloco C.
+- [ ] **2.C.2** Análise de débitos: atualizar `NEXT.md`.
+- [ ] **2.C.[COMMIT]** texto de commit incremental sugerido: "<tipo>(spec-NNNN): <resumo do sub-bloco C>"
 
 ### Sub-bloco [D] — [nome do sub-bloco no plan]
 
 - [ ] **2.D.1** ...
-- [ ] **2.D.[COMMIT]** Commit incremental atômico do sub-bloco D.
+- [ ] **2.D.2** Análise de débitos: atualizar `NEXT.md`.
+- [ ] **2.D.[COMMIT]** texto de commit incremental sugerido: "<tipo>(spec-NNNN): <resumo do sub-bloco D>"
 
 ---
 
@@ -82,7 +87,7 @@
 - [ ] **3.2** Pipeline canônico verde: rodar a suíte completa (install bloqueado/immutable + format check + test com coverage). Ex. no `ai-guidelines`: `yarn check:repo`. Em outros stacks: `npm ci && npm run lint && npm test`, `pnpm install --frozen-lockfile && pnpm verify`, ou equivalente.
 - [ ] **3.3** Critérios de aceite de `spec.md` (alto nível) e DoD de `plan.md` (detalhado) confirmados ponto-a-ponto.
 - [ ] **3.4** Validar a entrega em **ambiente real** quando aplicável: rodar a feature em consumidor / staging / espelho de prod, revisando regressões. Para specs do `ai-guidelines` que tocam compilador/rules, o canal canônico é `node cli/ai-guidelines-cli.mjs adopt --target ../<consumidor> --dry-run`. Specs puramente internas (refactor sem mudança de comportamento, ajustes de teste, etc.) podem registrar "não-aplicável" no PR com justificativa.
-- [ ] **3.5** PR criado/atualizado: descrição em 3 etapas (contexto → decisões cravadas → impacto cross-spec) conforme regra de PR collab.
+- [ ] **3.5** PR atualizado: descrição em 3 etapas (contexto → decisões cravadas → impacto cross-spec) conforme regra de PR collab.
 - [ ] **3.6** **[MANDATÓRIO]** Aguardar **Gate de Review Humano** — homologação técnica formal. **Não prosseguir** para Fase 4 sem aprovação explícita.
 - [ ] **3.7** Aplicar correções demandadas em loops de review até aprovação; cada correção é commit incremental rastreável.
 
