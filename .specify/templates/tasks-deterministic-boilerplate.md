@@ -31,7 +31,7 @@
 - [ ] **0.8** `tasks.md` (este arquivo) instanciado a partir desta variante.
 - [ ] **0.9** `roadmap/backlog.md` atualizado: spec movida para "Em execução"; candidatas absorvidas migradas para `roadmap/historico.md` com ponteiro à spec absorvedora.
 - [ ] **0.10** `NEXT.md` instanciado (mandatório).
-- [ ] **0.11** Criar Pull Request em Draft.
+- [ ] **0.11** Criar Pull Request em Draft. O agente usa o template do repositório se existir (ex: `.github/pull_request_template.md`), preenchendo as informações da spec. Caso não exista template, adicionar uma descrição concisa do contexto e escopo inicial.
 
 ---
 

@@ -22,7 +22,7 @@
 - [x] **0.9** `decision-brief.md` instanciado.
 - [x] **0.10** `roadmap/backlog.md` atualizado: spec movida para "Em execução".
 - [x] **0.11** `NEXT.md` instanciado (mandatório).
-- [ ] **0.12** Criar Pull Request em Draft.
+- [x] **0.12** Criar Pull Request em Draft. O agente usa o template do repositório se existir (ex: `.github/pull_request_template.md`), preenchendo as informações da spec. Caso não exista template, adicionar uma descrição concisa do contexto e escopo inicial.
 
 ### Sub-bloco [0.Research] — Stage 1: produzir researches
 
