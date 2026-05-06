@@ -68,6 +68,7 @@ export async function applyPointers(targetDir, options, actions) {
     const filtered = filterRulesByScope(catalog.rules, {
       includeAdapters: providerSelection,
       optInFeatures: features,
+      lang: options.lang ?? "pt",
     });
 
     const nonCoreUniversal = filtered.universal.filter(

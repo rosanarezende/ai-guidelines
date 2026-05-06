@@ -117,10 +117,6 @@ Build PR descriptions in three steps: outline topics, get human approval, then g
 
 <FEATURE_BDD>
 
-### [OPT-0101]
-
-All tests MUST use the GIVEN / WHEN / THEN structure. Each `it()` describes exactly one atomic scenario. Prioritize readability over brevity. If a business rule `[BR-*]` is provided, include it in the test name.
-
 ### [OPT-0201]
 
 All tests MUST use the GIVEN / WHEN / THEN structure in Brazilian Portuguese (DADO/QUANDO/ENTÃO). Each `it()` describes exactly one atomic scenario. Prioritize readability over brevity. If a business rule `[BR-*]` is provided, include it in the test name.
@@ -137,10 +133,6 @@ Before reporting a task as done, ensure: no circular dependencies, proper teardo
 
 <FEATURE_TDD>
 
-### [OPT-0401]
-
-Every new feature or bug fix MUST follow the RED -> GREEN -> REFACTOR cycle. Write a failing test first. Never skip the RED step. Write minimum code to pass. Maintain >85% coverage. Test files must be colocated. Unit tests must be isolated with mocks/stubs.
-
 ### [OPT-0501]
 
 Every new feature or bug fix MUST follow the RED -> GREEN -> REFACTOR cycle. Write a failing test first. Never skip the RED step. Write minimum code to pass. Maintain >85% coverage. Test files must be colocated. Unit tests must be isolated with mocks/stubs. If a business rule `[BR-*]` is provided, include it in the test name.
@@ -152,11 +144,11 @@ Every new feature or bug fix MUST follow the RED -> GREEN -> REFACTOR cycle. Wri
 ## Base Zone: Tactical Context
 
 > [!IMPORTANT]
-> Este projeto utiliza o framework **ai-guidelines** para governança de IA.
-> As diretrizes operacionais e regras de engenharia ficam compiladas no bloco `<AI_GUIDELINES>` do `AGENTS.md`.
+> This project uses the **ai-guidelines** framework for AI governance.
+> Operational guidelines and engineering rules are compiled within the `<AI_GUIDELINES>` block in `AGENTS.md`.
 
-### 🧠 Governança Centralizada
+### 🧠 Centralized Governance
 
-O `AGENTS.md` da raiz é o artefato runtime. Conteúdo próprio do projeto deve ficar fora de `<AI_GUIDELINES>`.
+The root `AGENTS.md` is the runtime artifact. Project-specific content must remain outside of the `<AI_GUIDELINES>` block.
 
 </AI_GUIDELINES>

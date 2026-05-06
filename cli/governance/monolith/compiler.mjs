@@ -23,7 +23,11 @@ export async function loadRulesCatalog(rulesJsonPath) {
  * @returns {Object} - { universal: [...], adapters: {...}, optIn: {...} }
  */
 export function filterRulesByScope(rules, options = {}) {
-  const { includeAdapters = ["claude", "codex", "gemini"], optInFeatures = [] } = options;
+  const {
+    includeAdapters = ["claude", "codex", "gemini"],
+    optInFeatures = [],
+    lang = "pt",
+  } = options;
 
   const universal = [];
   const adapters = {};
@@ -46,6 +50,12 @@ export function filterRulesByScope(rules, options = {}) {
       if (!rule.opt_in_feature || !optInFeatures.includes(rule.opt_in_feature)) {
         continue;
       }
+
+      if (rule.file) {
+        if (lang === "en" && rule.file.endsWith("-pt.md")) continue;
+        if (lang === "pt" && rule.file.endsWith("-en.md")) continue;
+      }
+
       if (!optIn[rule.opt_in_feature]) {
         optIn[rule.opt_in_feature] = [];
       }
