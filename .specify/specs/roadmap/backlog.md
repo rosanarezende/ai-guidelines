@@ -22,6 +22,15 @@ Nenhuma spec em execução no momento.
 
 Specs ou candidatas priorizadas para iniciar em seguida. Ordem indica prioridade.
 
+- **bootstrap-consumidor-e-runtime** (CLI + distribuição de templates + recompilação do runtime `AGENTS.md`)
+  - **Fonte do insight:** fechamento da Spec 0018 (`NEXT.md` B.7.3), sanitização do runtime bilíngue e revisão manual pós-fechamento no repositório mantenedor.
+  - **Insight central:** a 0018 estabilizou o catálogo de regras e o build bilíngue, mas a experiência do consumidor ainda ficou incompleta em quatro pontos acoplados: (i) consumidores tendem a acumular `CLAUDE.md`, `GEMINI.md`, `.codex/` e arquivos soltos sem governança, acelerando _Context Rot_ e drift entre adapters e a fonte canônica; (ii) `.specify/templates/` não é distribuído para o repo-alvo; (iii) o wizard do CLI ainda pergunta `features` como lista única, sem separar opt-ins editoriais de infraestrutura; (iv) o `AGENTS.md` final exige nova rodada de arquitetura editorial/topológica, com revisão de ordem, repetição, sequenciamento e possível remoção definitiva do `agents-pointer`.
+  - **Escopo potencial:** a CLI detectar provedores ativos no consumidor e gerar automaticamente arquivos restritivos tipo `.claudeignore`, trampolins mínimos como `CLAUDE.md` contendo apenas `@AGENTS.md` e guardrails para manter adapter files alinhados ao runtime; sincronizar `.specify/templates/` no `init`/`adopt` quando fizer sentido para o consumidor; redesenhar a UX do wizard para perguntar por categorias separadas de opt-in; revisar o compiler do runtime para explicitar zonas e ordem semântica real; decidir se `AGENTS-pointer.md.tmpl` ainda existe, vira fallback puro ou é removido; revisar regras repetidas, redundantes ou fora de sequência no payload final.
+  - **Não-objetivos:** reabrir a decisão de conteúdo evidence-driven da 0018; mexer no baseline de benchmark/eval; fazer hierarquia completa por subdiretório estilo Spec 0011.
+  - **Pré-requisitos:** Spec 0018 concluída (✓); PR #4 revisado pelo owner; baseline atual congelado em `historico.md` para permitir refactor sem perder referência.
+  - **Sinal de "está na hora":** owner sinaliza desconforto com o `AGENTS.md` compilado final; consumidor precisar dos boilerplates SDD no repo-alvo; fricção recorrente no wizard por não distinguir opt-ins editoriais vs infraestrutura; ou surgir drift entre `AGENTS.md` e arquivos específicos de provider no repo-alvo.
+  - **Cross-ref:** incorpora integralmente a hipótese de `scaffolding-inteligente-de-provedores` e a expande para um problema maior de bootstrap/runtime do consumidor.
+
 - **governance-information-architecture** (Auditoria + classificação canônica de informação essencial do framework)
   - **Fonte do insight:** revisão da Spec 0018 (Stage 1, 2026-04-30) — owner identificou que `.core/process/spec-foundation.md` é constituição operacional viva, mas está misturada em `docs/` com documentos descritivos; ausência de catálogo de informação essencial; gêneros documentais (constituição × ADR × regra runtime × doc descritivo × referência) sem classificação explícita nem regra de "qual gênero vai para onde".
   - **Insight central:** o framework hoje tem 5+ classes de informação espalhadas em `docs/`, `adrs/`, `.core/`, `.specify/`, raiz — sem catálogo único, sem princípio de classificação documentado. ADRs cobrem decisões singulares; `spec-foundation.md` cobre processo vivo; `.core/rules/*` cobrem runtime distribuído; `docs/features.md`/`ai-efficiency-guide.md` são descritivos. Tudo coabita sem fronteira. Novo agente/contribuidor precisa adivinhar onde olhar primeiro.
@@ -95,11 +104,7 @@ Specs ou candidatas que entram na fila depois de esgotado o Now. Ordem pode ser 
   - **Artefatos preservados no histórico git:** `quality-gates/engine`, `detectors`, `ai-check` e `eval-runner` foram deliberadamente removidos do entregável da 0018, mas ficam como seed arquitetural para a 0009.
   - **Sinal de "está na hora":** um usuário rodar `/clear` esperando continuar uma spec e o agente novo não conseguir retomar com `tasks.md` + git; ou PR precisar de 3+ rounds de correção por causa de coisas que sensor automático pegaria.
 
-- **scaffolding-inteligente-de-provedores** (Candidata — automação de provider detection + trampolins)
-  - **Fonte do insight:** fechamento da Spec 0018 (`NEXT.md` B.7.3) e sanitização do runtime bilíngue.
-  - **Insight central:** consumidores tendem a acumular `CLAUDE.md`, `GEMINI.md`, `.codex/` e arquivos soltos sem governança, o que acelera _Context Rot_ e drift entre adapters e a fonte canônica.
-  - **Escopo potencial:** a CLI detecta provedores ativos no consumidor e gera automaticamente (i) arquivos restritivos tipo `.claudeignore`, (ii) trampolins mínimos como `CLAUDE.md` contendo apenas `@AGENTS.md`, e (iii) guardrails para manter adapter files alinhados ao runtime.
-  - **Pré-requisitos:** baseline da 0018 consolidado; definição de UX mínima para `init`/`adopt`.
+- ~~**scaffolding-inteligente-de-provedores** (Candidata — automação de provider detection + trampolins)~~ **Incorporada** em `bootstrap-consumidor-e-runtime`: mantém a tese original de provider detection + trampolins + guardrails contra _Context Rot_, agora somada à distribuição de boilerplates SDD, UX do wizard e refactor topológico do `AGENTS.md`.
 
 ---
 
