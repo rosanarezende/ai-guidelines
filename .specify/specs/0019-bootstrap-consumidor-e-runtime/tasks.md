@@ -1,0 +1,100 @@
+# Tasks — Spec 0019 Bootstrap Consumidor e Runtime — `mixed`
+
+> Spec: [`./spec.md`](./spec.md)
+> Plan: [`./plan.md`](./plan.md)
+> Decision Brief: [`./decision-brief.md`](./decision-brief.md)
+> Status: Draft
+
+---
+
+## Fase 0 — Setup + Stage 1 (Research → Decision-Brief → Gate humano)
+
+### Sub-bloco [0.Setup] — Bootstrap e instanciação
+
+- [x] **0.1** **Bootstrap**: ler `roadmap/backlog.md` e `.core/process/spec-foundation.md`.
+- [x] **0.2** **Tipo de spec** confirmado como `mixed` no header da `spec.md`.
+- [x] **0.3** **Slug semântico** definido (`0019-bootstrap-consumidor-e-runtime`).
+- [x] **0.4** Branch `feat/spec-0019-bootstrap-consumidor-e-runtime` criada a partir de `main`.
+- [x] **0.5** `spec.md` instanciado.
+- [x] **0.6** **[MANDATÓRIO]** Validação Humana inicial: owner aprova problema e escopo.
+- [x] **0.7** `plan.md` instanciado com os blocos A `(deterministic)` e B `(evidence-driven)`.
+- [x] **0.8** `tasks.md` instanciado.
+- [x] **0.9** `decision-brief.md` instanciado.
+- [x] **0.10** `roadmap/backlog.md` atualizado: spec movida para "Em execução".
+- [ ] **0.11** `NEXT.md` criado **somente se** a spec gerar débitos conscientes ao fim.
+
+### Sub-bloco [0.Research] — Stage 1: produzir researches
+
+- [x] **0.R.1** Listar perguntas de research a responder em `plan.md`.
+- [x] **0.R.2** Produzir `research/YYYY-MM-DD-<tema>.md` por pergunta.
+- [x] **0.R.3** Validar critério: cada research cobre perguntas do `plan.md`.
+- [ ] **0.R.[COMMIT]** Commit incremental atômico.
+
+### Sub-bloco [0.Brief] — Stage 1: popular `decision-brief.md` com opções
+
+- [x] **0.B.1** Para cada `[DEC-0019-*]`: registrar Pergunta + Contexto + Opções.
+- [x] **0.B.2** Cross-refs entre pontos.
+- [x] **0.B.3** Tabela "Resumo de status" no fim do brief.
+- [ ] **0.B.[COMMIT]** Commit incremental atômico.
+
+### Sub-bloco [0.Gate] — Gate humano (decision-brief → Resolved)
+
+- [ ] **0.G.1** Owner revisa `decision-brief.md` com todos os pontos `[DEC-0019-*]`.
+- [ ] **0.G.2** Para cada ponto: owner escolhe opção e justifica; status muda para `Resolved`.
+- [ ] **0.G.3** Iterar se necessário.
+- [ ] **0.G.4** Status agregado mudado para `Resolved`.
+- [ ] **0.G.5** `plan.md` v2 publicado (seções de design técnico `(evidence-driven)` derivadas das decisões).
+- [ ] **0.G.6** `tasks.md` v2: atualizar Fases 1–4.
+- [ ] **0.G.[COMMIT]** Commit atômico.
+
+---
+
+## Fase 1 — Implementação A (Stage 2)
+
+### Sub-bloco [A] — CLI Wizard & Template Distribution `(deterministic)`
+
+- [ ] **1.A.1** Atualizar scripts de init e adopt para copiar a pasta `.specify/templates` para `.ai-guidelines/templates` no consumidor.
+- [ ] **1.A.2** Refatorar wizard para apresentar prompts de features em categorias (Editoriais, Processo, etc).
+- [ ] **1.A.3** Remover arquivo legado `.core/templates/AGENTS-pointer.md.tmpl` e referências na compilação.
+- [ ] **1.A.N** Pipeline de check + test verde.
+- [ ] **1.A.[COMMIT]** Commit incremental atômico.
+
+### Sub-bloco [B] — Runtime Architecture & Trampolines `(evidence-driven)`
+
+- [ ] **1.B.1** [Placeholder Stage 2] Implementar scaffolding de arquivos `.claudeignore` e/ou wrappers baseados no gate humano.
+- [ ] **1.B.2** [Placeholder Stage 2] Atualizar compiler.mjs conforme revisão topológica do runtime.
+- [ ] **1.B.N** Pipeline de check + test verde.
+- [ ] **1.B.[COMMIT]** Commit incremental atômico do sub-bloco B.
+
+---
+
+## Fase 2 — Implementação B (Stage 2)
+
+(Fundido na Fase 1, já que os sub-blocos A e B cobrem o escopo técnico, salvo descoberta de novos sub-blocos).
+
+---
+
+## Fase 3 — Preparação para Review (Gate de Homologação)
+
+- [ ] **3.1** Atualizar header da `spec.md`: status → `In Review`.
+- [ ] **3.2** Pipeline canônico verde (`yarn check:repo` ou similar).
+- [ ] **3.3** Critérios de aceite de `spec.md` e DoD de `plan.md` confirmados.
+- [ ] **3.4** `decision-brief.md`: validar pontos `Resolved` contra o design.
+- [ ] **3.5** Validar a entrega em ambiente real (`adopt --dry-run`).
+- [ ] **3.6** PR criado/atualizado com descrição em 3 etapas.
+- [ ] **3.7** **[MANDATÓRIO]** Aguardar Gate de Review Humano.
+- [ ] **3.8** Aplicar correções.
+
+---
+
+## Fase 4 — Encerramento Pré-Merge
+
+- [ ] **4.1** `NEXT.md` deletado se existir e pendências migradas.
+- [ ] **4.2** Migração de research.
+- [ ] **4.3** `decision-brief.md` permanece no diretório da spec.
+- [ ] **4.4** `spec.md` header atualizado.
+- [ ] **4.5** `roadmap/historico.md` atualizado.
+- [ ] **4.6** `CHANGELOG.md` atualizado (se aplicável).
+- [ ] **4.7** Confirmar limites por sessão.
+- [ ] **4.8** Commit `chore(spec-0019): encerramento pré-merge`.
+- [ ] **4.9** **[MANDATÓRIO]** Aprovação humana explícita para merge.
