@@ -53,7 +53,7 @@ tags: [core, agents, always_injected, sdd, inquebrável]
 ```
 
 **Instruction (en):**
-The repository is your memory. Persist plans, progress, debts, knowledge, and roadmap under `.specify/specs/`. Read `roadmap/backlog.md` at session start. If the platform forces a scratchpad, write only a pointer to the spec file. Planning trapped in agent cache (AI-slop) is unacceptable.
+The repository is your memory. Persist plans, progress, debts, knowledge, and roadmap under `.specify/specs/`. Read `.specify/specs/roadmap/backlog.md` at session start. If the platform forces a scratchpad, write only a pointer to the spec file. Planning trapped in agent cache (AI-slop) is unacceptable.
 
 **Documentação (pt-br):**
 **[INQUEBRÁVEL]** O repositório é sua memória, não seus artefatos internos.

@@ -2,7 +2,7 @@
 
 > **Spec:** [Spec 0018 — Rules Content Deepening](../spec.md)
 > **Decisão âncora:** [`[DEC-0018-B08]`](../decision-brief.md#dec-0018-b08-política-de-reconciliação-do-conteúdo-b9efb83) — combo **A + E + L + O**
-> **Status:** Em construção (Sub-bloco B.2 de Stage 2)
+> **Status:** Concluído (Sub-bloco B.2 de Stage 2)
 > **Data:** 2026-05-03
 
 ---

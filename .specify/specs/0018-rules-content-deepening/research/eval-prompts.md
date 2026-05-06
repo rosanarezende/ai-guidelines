@@ -5,7 +5,7 @@
 > - **C** (Híbrido): amostra crítica agora, regressão broad em 0009
 > - **H** (G obrigatório + F amostral): delta comportamental nas regras do subset
 > - **K** (3 provedores): Claude + Codex + Gemini
-> - **N** (3 rodadas): passa-rate 2/3
+> - **N real desta baseline**: 1 rodada por provedor; rodadas extras só em caso ambíguo
 > - **R** (Categorizado): hard para críticas, soft para heurísticas
 
 ---

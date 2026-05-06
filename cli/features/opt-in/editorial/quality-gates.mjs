@@ -1,6 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { ROOT_DIR } from "#fs/file-system";
+import { getOptInRuleRelativePath } from "#governance/monolith/rules-loader";
 
 /**
  * Feature Opt-in: Quality Gates
@@ -8,8 +9,14 @@ import { ROOT_DIR } from "#fs/file-system";
 export async function applyQualityGates(targetDir, options, context, actions) {
   const { features = [], prune = false } = options;
   const dryRun = Boolean(options?.["dry-run"]);
+  const baseDir = context.rootDir || ROOT_DIR;
 
-  const sourceRulesPath = path.join(ROOT_DIR, ".core", "rules", "opt-in", "quality-gates.md");
+  const sourceRulesPath = path.join(
+    baseDir,
+    ".core",
+    "rules",
+    getOptInRuleRelativePath("quality-gates")
+  );
   const targetRulesDir = path.join(targetDir, ".ai-guidelines", "rules");
   const targetRulesPath = path.join(targetRulesDir, "quality-gates.md");
 

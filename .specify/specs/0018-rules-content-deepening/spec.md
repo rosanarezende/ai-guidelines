@@ -37,7 +37,7 @@ A spec original (rev. inicial) propôs apenas o Bloco B, sem research e sem eval
 - Criação do 8º boilerplate `decision-brief-boilerplate.md`, formalizando o artefato de gate humano.
 - Cross-check com `.core/process/spec-foundation.md` para detectar drift bidirecional.
 - Atualização dos boilerplates conforme decisões consolidadas em `decision-brief.md`.
-- Adição do campo **"Tipo de spec"** (`conteúdo` | `infraestrutura` | `mista`) em `spec-boilerplate.md` e checklist diferenciado em `tasks-boilerplate.md`.
+- Adição do campo **"Tipo de spec"** (`evidence-driven` | `deterministic` | `mixed`) em `spec-boilerplate.md` e checklist diferenciado em `tasks-boilerplate.md`.
 - Política em `.core/process/spec-foundation.md`: workflow em dois passes para specs de conteúdo, com gate humano via `decision-brief.md`; specs de infraestrutura mantêm o fluxo single-pass atual.
 - Linha condensada em `.core/rules/global-rules.md` referenciando a política.
 
@@ -87,7 +87,7 @@ Mandatória nesta spec — é a primeira a aplicar a política do Bloco A a si m
 - `research/2026-04-30-spec-driven-tools-rules.md` — Spec Kit (GitHub), BMAD, OpenSpec, Continue, Aider — como tratam regras editoriais vs infraestrutura, e como tratam decisões pré-design.
 - `research/2026-04-30-tokens-baseline-budget.md` — medição do `<AI_GUIDELINES>` atual + projeção de teto por arquivo.
 
-**Síntese cross-research** consolidada nas opções apresentadas em `decision-brief.md` (não em `research/synthesis.md` separado — a brief absorve a função de síntese decisional). Resultados do eval (Stage 2) ficam em `research/2026-04-30-eval-results.md`.
+**Síntese cross-research** consolidada nas opções apresentadas em `decision-brief.md` (não em `research/synthesis.md` separado — a brief absorve a função de síntese decisional). Resultados do eval (Stage 2) ficam em `research/2026-05-06-eval-results.md`.
 
 Lifecycle de fechamento: ao mergear, todas as researches migram para `.specify/specs/researchs/governance/` (ou `architecture/` quando o domínio for arquitetural) com prefixo de data e indexadas em `research-index.md`. `decision-brief.md` permanece no diretório da spec.
 

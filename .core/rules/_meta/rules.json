@@ -23,7 +23,7 @@
       "tags": ["core", "agents", "always_injected", "sdd", "inquebrável"],
       "file": ".core\\rules\\agents-core.md",
       "title": "Agnostic SDD Override — repositório como memória",
-      "instruction_en": "The repository is your memory. Persist plans, progress, debts, knowledge, and roadmap under `.specify/specs/`. Read `roadmap/backlog.md` at session start. If the platform forces a scratchpad, write only a pointer to the spec file. Planning trapped in agent cache (AI-slop) is unacceptable.",
+      "instruction_en": "The repository is your memory. Persist plans, progress, debts, knowledge, and roadmap under `.specify/specs/`. Read `.specify/specs/roadmap/backlog.md` at session start. If the platform forces a scratchpad, write only a pointer to the spec file. Planning trapped in agent cache (AI-slop) is unacceptable.",
       "documentation_pt": "**[INQUEBRÁVEL]** O repositório é sua memória, não seus artefatos internos.\n\n- Planejamento → `.specify/specs/<slug>/plan.md`\n- Progresso → `.specify/specs/<slug>/tasks.md`\n- Débitos → `.specify/specs/<slug>/NEXT.md`\n- Conhecimento → `.specify/specs/<slug>/research/`\n- Roadmap → `.specify/specs/roadmap/backlog.md`\n- Bootstrap obrigatório → leia `.specify/specs/roadmap/backlog.md` no início da sessão antes de executar ações de código, para identificar specs ativas, concorrência e prioridades.\n- Se sua plataforma forçar um Artifact ou Scratchpad, escreva nele apenas: `\"→ Ver .specify/specs/<slug>/plan.md\"` (Pointer).\n- \"AI-Slop\" (planejamento preso em cache de agente) é inaceitável.\n\n**Why this matters:** planejamento em cache não sobrevive troca de sessão/agente. SDD repo-first é o que torna o framework agnóstico de IA.\n\n**See also:** `[CORE-13]` (Artefatos vivos), `[CORE-11]` (Plano formado)."
     },
     {
@@ -478,7 +478,7 @@
       "sources": [],
       "applicable_languages": ["*"],
       "tags": ["opt-in", "bdd", "testing"],
-      "file": ".core\\rules\\opt-in\\bdd-en.md",
+      "file": ".core\\rules\\opt-in\\methodologies\\bdd-en.md",
       "title": "BDD Test Structure",
       "instruction_en": "All tests MUST use the GIVEN / WHEN / THEN structure. Each `it()` describes exactly one atomic scenario. Prioritize readability over brevity. If a business rule `[BR-*]` is provided, include it in the test name.",
       "documentation_pt": "- **DADO** [cenário inicial / pré-condição / estado do sistema]\n- **QUANDO** [ação executada pelo usuário ou sistema]\n- **ENTÃO** [resultado esperado / asserção]\n\n- **Linguagem Ubíqua:** Testes devem ser legíveis por humanos não-técnicos. Evite jargão de implementação nos nomes.\n- **Documentação Viva:** A suíte de testes serve como documentação executável do sistema. Se o teste não descreve o comportamento com clareza, reescreva-o.\n- **Cenários Atômicos:** Cada `it()` descreve exatamente um cenário. Não combine múltiplos fluxos.\n\n**Exemplo:**\n\n```javascript\nit(\"[BR-CLI-SYNC-01] GIVEN outdated baseline WHEN adopt is executed THEN syncs only changed files\", () => {\n  // ...\n});\n```\n\n**See also:** [OPT-0401], [OPT-0501]"
@@ -492,10 +492,38 @@
       "sources": [],
       "applicable_languages": ["*"],
       "tags": ["opt-in", "bdd", "testing"],
-      "file": ".core\\rules\\opt-in\\bdd-pt.md",
+      "file": ".core\\rules\\opt-in\\methodologies\\bdd-pt.md",
       "title": "Estrutura de Teste BDD",
       "instruction_en": "All tests MUST use the GIVEN / WHEN / THEN structure in Brazilian Portuguese (DADO/QUANDO/ENTÃO). Each `it()` describes exactly one atomic scenario. Prioritize readability over brevity. If a business rule `[BR-*]` is provided, include it in the test name.",
       "documentation_pt": "- **DADO** [cenário inicial / pré-condição / estado do sistema]\n- **QUANDO** [ação executada pelo usuário ou sistema]\n- **ENTÃO** [resultado esperado / asserção]\n\n- **Linguagem Ubíqua:** Testes devem ser legíveis por humanos não-técnicos. Evite jargão de implementação nos nomes.\n- **Documentação Viva:** A suíte de testes serve como documentação executável do sistema. Se o teste não descreve o comportamento com clareza, reescreva-o.\n- **Cenários Atômicos:** Cada `it()` descreve exatamente um cenário. Não combine múltiplos fluxos.\n\n**Exemplo:**\n\n```javascript\nit(\"[BR-CLI-SYNC-01] DADO baseline desatualizado QUANDO executado adopt ENTÃO sincroniza apenas arquivos alterados\", () => {\n  // ...\n});\n```\n\n**See also:** [OPT-0401], [OPT-0501]"
+    },
+    {
+      "id": "OPT-0401",
+      "scope": "opt-in",
+      "opt_in_feature": "tdd",
+      "category": "correctness",
+      "evidence_strength": "declared_heuristic",
+      "sources": [],
+      "applicable_languages": ["*"],
+      "tags": ["opt-in", "tdd", "testing"],
+      "file": ".core\\rules\\opt-in\\methodologies\\tdd-en.md",
+      "title": "Strict TDD Cycle",
+      "instruction_en": "Every new feature or bug fix MUST follow the RED -> GREEN -> REFACTOR cycle. Write a failing test first. Never skip the RED step. Write minimum code to pass. Maintain >85% coverage. Test files must be colocated. Unit tests must be isolated with mocks/stubs.",
+      "documentation_pt": "1. **RED:** Escreva um teste que falhe — defina o comportamento esperado antes de qualquer implementação.\n2. **GREEN:** Escreva o código mínimo necessário para fazer o teste passar. Sem otimizações prematuras.\n3. **REFACTOR:** Melhore o código (nomes, estrutura, DRY) mantendo todos os testes verdes.\n\n- **Isolamento:** Testes unitários não devem depender de serviços externos, rede ou banco de dados. Use mocks/stubs.\n- **Colocation:** Arquivos de teste devem ficar no mesmo diretório que o código testado.\n\n**See also:** [OPT-0101], [OPT-0201]"
+    },
+    {
+      "id": "OPT-0501",
+      "scope": "opt-in",
+      "opt_in_feature": "tdd",
+      "category": "correctness",
+      "evidence_strength": "declared_heuristic",
+      "sources": [],
+      "applicable_languages": ["*"],
+      "tags": ["opt-in", "tdd", "testing"],
+      "file": ".core\\rules\\opt-in\\methodologies\\tdd-pt.md",
+      "title": "Ciclo TDD Estrito",
+      "instruction_en": "Every new feature or bug fix MUST follow the RED -> GREEN -> REFACTOR cycle. Write a failing test first. Never skip the RED step. Write minimum code to pass. Maintain >85% coverage. Test files must be colocated. Unit tests must be isolated with mocks/stubs. If a business rule `[BR-*]` is provided, include it in the test name.",
+      "documentation_pt": "1. **RED:** Escreva um teste que falhe — defina o comportamento esperado antes de qualquer implementação.\n2. **GREEN:** Escreva o código mínimo necessário para fazer o teste passar. Sem otimizações prematuras.\n3. **REFACTOR:** Melhore o código (nomes, estrutura, DRY) mantendo todos os testes verdes.\n\n- **Isolamento:** Testes unitários não devem depender de serviços externos, rede ou banco de dados. Use mocks/stubs para dependências.\n- **Colocation:** Arquivos de teste devem ficar no mesmo diretório que o código testado (ex: `engine.mjs` → `engine.test.mjs`).\n- **Rastreabilidade:** Quando uma regra de negócio tiver identificador `[BR-*]`, o teste que a valida deve carregar o mesmo identificador no nome.\n\n**See also:** [OPT-0101], [OPT-0201]"
     },
     {
       "id": "OPT-0301",
@@ -513,38 +541,10 @@
       "validated_by_benchmark": true,
       "applicable_languages": ["*"],
       "tags": ["opt-in", "quality-gates", "review"],
-      "file": ".core\\rules\\opt-in\\quality-gates.md",
+      "file": ".core\\rules\\opt-in\\quality\\quality-gates.md",
       "title": "Quality Gates (Checklist)",
       "instruction_en": "Before reporting a task as done, ensure: no circular dependencies, proper teardown for listeners/timers (prevent memory leaks), no unguarded asynchronous state mutations (prevent race conditions), >85% test coverage, >60% mutation kill rate, and no secrets in code/comments. Fix any automated failures before requesting human review.",
       "documentation_pt": "1. **Análise Estática:** Complexidade ciclomática mantida sob controle, ausência de dependências circulares, nomes de variáveis/funções seguem a semântica do projeto.\n2. **Cobertura e Mutação:** Mínimo recomendado de 85% de cobertura, mínimo de 60% de kill rate.\n3. **Sensores de Bugs Típicos de IA:**\n   - **Race Conditions:** Se não houver garantia de atomicidade em blocos assíncronos (transação, lock ou estado local seguro), rejeite o design.\n   - **Memory Leaks:** Sempre implemente a função de limpeza (teardown/dispose) correspondente no ciclo de vida apropriado do framework usado.\n4. **Security & Secrets:** Bloqueio de chaves/tokens; validação de inputs contra injeção.\n\n**See also:** [GR-0001], [GR-0002], [GR-0004], [GR-0005]"
-    },
-    {
-      "id": "OPT-0401",
-      "scope": "opt-in",
-      "opt_in_feature": "tdd",
-      "category": "correctness",
-      "evidence_strength": "declared_heuristic",
-      "sources": [],
-      "applicable_languages": ["*"],
-      "tags": ["opt-in", "tdd", "testing"],
-      "file": ".core\\rules\\opt-in\\tdd-en.md",
-      "title": "Strict TDD Cycle",
-      "instruction_en": "Every new feature or bug fix MUST follow the RED -> GREEN -> REFACTOR cycle. Write a failing test first. Never skip the RED step. Write minimum code to pass. Maintain >85% coverage. Test files must be colocated. Unit tests must be isolated with mocks/stubs.",
-      "documentation_pt": "1. **RED:** Escreva um teste que falhe — defina o comportamento esperado antes de qualquer implementação.\n2. **GREEN:** Escreva o código mínimo necessário para fazer o teste passar. Sem otimizações prematuras.\n3. **REFACTOR:** Melhore o código (nomes, estrutura, DRY) mantendo todos os testes verdes.\n\n- **Isolamento:** Testes unitários não devem depender de serviços externos, rede ou banco de dados. Use mocks/stubs.\n- **Colocation:** Arquivos de teste devem ficar no mesmo diretório que o código testado.\n\n**See also:** [OPT-0101], [OPT-0201]"
-    },
-    {
-      "id": "OPT-0501",
-      "scope": "opt-in",
-      "opt_in_feature": "tdd",
-      "category": "correctness",
-      "evidence_strength": "declared_heuristic",
-      "sources": [],
-      "applicable_languages": ["*"],
-      "tags": ["opt-in", "tdd", "testing"],
-      "file": ".core\\rules\\opt-in\\tdd-pt.md",
-      "title": "Ciclo TDD Estrito",
-      "instruction_en": "Every new feature or bug fix MUST follow the RED -> GREEN -> REFACTOR cycle. Write a failing test first. Never skip the RED step. Write minimum code to pass. Maintain >85% coverage. Test files must be colocated. Unit tests must be isolated with mocks/stubs. If a business rule `[BR-*]` is provided, include it in the test name.",
-      "documentation_pt": "1. **RED:** Escreva um teste que falhe — defina o comportamento esperado antes de qualquer implementação.\n2. **GREEN:** Escreva o código mínimo necessário para fazer o teste passar. Sem otimizações prematuras.\n3. **REFACTOR:** Melhore o código (nomes, estrutura, DRY) mantendo todos os testes verdes.\n\n- **Isolamento:** Testes unitários não devem depender de serviços externos, rede ou banco de dados. Use mocks/stubs para dependências.\n- **Colocation:** Arquivos de teste devem ficar no mesmo diretório que o código testado (ex: `engine.mjs` → `engine.test.mjs`).\n- **Rastreabilidade:** Quando uma regra de negócio tiver identificador `[BR-*]`, o teste que a valida deve carregar o mesmo identificador no nome.\n\n**See also:** [OPT-0101], [OPT-0201]"
     }
   ],
   "by_scope": {
@@ -587,12 +587,12 @@
       "ADP-0303",
       "ADP-0304"
     ],
-    "opt-in": ["OPT-0101", "OPT-0201", "OPT-0301", "OPT-0401", "OPT-0501"]
+    "opt-in": ["OPT-0101", "OPT-0201", "OPT-0401", "OPT-0501", "OPT-0301"]
   },
   "by_feature": {
     "bdd": ["OPT-0101", "OPT-0201"],
-    "quality-gates": ["OPT-0301"],
-    "tdd": ["OPT-0401", "OPT-0501"]
+    "tdd": ["OPT-0401", "OPT-0501"],
+    "quality-gates": ["OPT-0301"]
   },
   "generated_at": "2026-05-05T17:43:56.161Z",
   "schema_version": "1.0"

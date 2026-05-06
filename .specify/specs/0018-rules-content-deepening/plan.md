@@ -2,7 +2,7 @@
 
 > Spec: [`./spec.md`](./spec.md)
 > Decision Brief: [`./decision-brief.md`](./decision-brief.md)
-> Status: In Progress — **Stage 2 (Implementation)** — revised 2026-05-02 (Stage 1 encerrado, gate humano `Resolved` em todos os pontos `[DEC-0018-*]`)
+> Status: In Progress — **Stage 2 (Implementation)** — revised 2026-05-06 (Stage 1 encerrado, gate humano `Resolved` em todos os pontos `[DEC-0018-*]`; sanitização documental e fechamento em preparação)
 
 > **Plano em dois passes — Stage 1 concluído.** Stage 1 produziu 1 auditoria
 > editorial + 5 researches externas + decision-brief com 14 pontos resolvidos
@@ -277,10 +277,10 @@ Derivado de `[DEC-0018-B05]` (C + H + K + N + R) e `[DEC-0018-B07]` (D — apena
 | Largura×prof     | Híbrido (C) — broad amostral aqui; calibração trimestral fica para 0009.                                         |
 | Asserção         | G obrigatório (RSPEC mínima por regra) + F amostral (delta comportamental) — **H** combinado.                    |
 | Provedores       | Claude + Codex + Gemini (K — paritários aos 3 adapters).                                                         |
-| Não-determinismo | 3 rodadas (N), passa-rate **2/3**.                                                                               |
+| Não-determinismo | **Execução revisitada:** 1 rodada documentada por provedor, com re-rodada apenas se houver ambiguidade material; amparo empírico principal vem de `[EXT-AKITA-2026]`. |
 | Threshold        | Categorizado (R): regras `evidence_strength: strong` reprovadas → cortadas (hard); demais → débito em `NEXT.md`. |
 
-Output: `research/2026-04-30-eval-results.md` documentando subset selecionado, prompts canônicos, passa-rate por regra × provedor, decisões de corte/débito.
+Output: `research/2026-05-06-eval-results.md` documentando subset selecionado, prompts canônicos, resultado por regra × provedor, decisões de corte/débito e a justificativa explícita do `N=1`.
 
 ##### B.6 — Token budget: lint heurístico + sanity check Anthropic API
 
@@ -307,7 +307,7 @@ Implementação em `cli/governance/monolith/token-budget.mjs`. Soft ceiling = `W
 Derivado de `[DEC-0018-B06]` (A + F + N) e `[DEC-0018-B07]` (D + H + J).
 
 - **Spec 0011 (regra-hierarquia)** — gatilho mensurável: **agregado compilado ≥ 4,2 K tokens (= 70 % do teto de 6 K)**. Apêndice com snapshot canônico do `<AI_GUIDELINES>` ao fim da 0018 (medição Tok-H, listagem de regras, taxonomia final, cobertura de cross-refs) para que a 0011 inicie com baseline conhecido.
-- **Spec 0009 (harness-engineering)** — todo o pipeline automatizado (agente validador separado, sensores em CI, integração `/ultra-review`) fica para 0009 (H). Eval mínimo da 0018 (B.5) **é declarado como baseline-regression**: qualquer mudança no catálogo invalida o baseline e exige re-rodada no harness 0009. Researches 0018 (5 arquivos) ficam congelados em `.specify/specs/researchs/governance/` (J) — F9.2 do encerramento se encarrega.
+- **Spec 0009 (harness-engineering)** — todo o pipeline automatizado (agente validador separado, sensores em CI, integração `/ultra-review`) fica para 0009 (H). Eval mínimo da 0018 (B.5) **é declarado como baseline-regression**: qualquer mudança no catálogo invalida o baseline e exige re-rodada no harness 0009. Artefatos de research da 0018 (**12 markdowns top-level + 9 outputs brutos de eval**) ficam congelados em `.specify/specs/researchs/governance/` / `architecture/` conforme domínio — Fase 7 do encerramento se encarrega.
 - **Inovação a abrir como spec futura — Scaffolding Inteligente de Provedores** (registrada em B07): a CLI deverá detectar provedores ativos no consumidor (heurística: presença de `CLAUDE.md`, `.codex/`, `gemini.md` etc.) e gerar automaticamente: (i) **arquivos restritivos** estilo `.claudeignore` focando contexto; (ii) **trampolins** como `CLAUDE.md` contendo apenas `@AGENTS.md` para impedir drift entre adapter file e fonte canônica. Mitiga _Context Rot_ e elimina arquivos soltos. Candidata a virar Spec autônoma após merge da 0018.
 
 ---
@@ -345,7 +345,7 @@ Derivado de `[DEC-0018-B06]` (A + F + N) e `[DEC-0018-B07]` (D + H + J).
 - [x] Snapshots de `cli/app/engine.test.mjs` e `cli/governance/agents-merge.test.mjs` revisados e atualizados conscientemente (não silenciosamente) (B.3).
 - [ ] Regras sobreviventes migradas para formato bilíngue com IDs canônicos `[GR-*]` / `[ADP-*]` / `[OPT-*]` (B.4).
 - [ ] Tradução qualificada do campo `Instruction` para Inglês em todas as regras sobreviventes (B.4).
-- [ ] `research/2026-04-30-eval-results.md` publicado: subset crítico × 3 provedores (Claude/Codex/Gemini) × 3 rodadas (B.5).
+- [ ] `research/2026-05-06-eval-results.md` publicado: subset crítico × 3 provedores (Claude/Codex/Gemini) × 1 rodada documentada por provedor, com justificativa explícita do `N=1` (B.5).
 - [ ] `cli/governance/monolith/token-budget.mjs` implementado: lint heurístico (WARN soft ceiling, sem FAIL) integrado em `yarn check` (B.6).
 - [ ] Script standalone `cli/scripts/token-sanity-check.mjs` (off-CI) chama `messages.count_tokens` para auditoria periódica (B.6).
 - [ ] `.core/rules/catalog.md` gerado/mantido como índice navegável humano (B.7).
@@ -365,7 +365,7 @@ Derivado de `[DEC-0018-B06]` (A + F + N) e `[DEC-0018-B07]` (D + H + J).
 - **Validação cruzada do schema (Stage 2)**: `rules-parser.mjs` valida em build-time (i) IDs únicos, (ii) cross-refs (`see_also`) apontando para IDs existentes, (iii) categorias-âncora (`correctness`, `security`) com `evidence_strength: strong | medium` e `sources` não-vazio. Falha rápido em violação.
 - **Token budget (Stage 2)**: `token-budget.mjs` integrado em `yarn check`. Soft ceiling = `WARN`; nunca `FAIL` (alinhado com decisão `[DEC-0018-B03]` E). Sanity check periódico off-CI via `messages.count_tokens`.
 - **Editorial (manual, Stage 2)**: lint de redundância cross-arquivo entre `global-rules.md` e adapters; revisão de legibilidade do `AGENTS.md` compilado em consumidor real (`adopt --dry-run`).
-- **Empírico (eval B.5)**: subset crítico × 3 provedores × 3 rodadas; resultado em `research/2026-04-30-eval-results.md`. Não roda em CI — débito para Spec 0009 (baseline-regression cravado em `NEXT.md`).
+- **Empírico (eval B.5)**: subset crítico × 3 provedores × 1 rodada documentada por provedor; resultado em `research/2026-05-06-eval-results.md`. Não roda em CI — débito para Spec 0009 (baseline-regression cravado em `NEXT.md`).
 
 ---
 
@@ -414,11 +414,11 @@ _Conteúdo, pipeline e instrumentação (Bloco B):_
 _Researches, registros e encerramento:_
 
 - `research/2026-04-30-b9efb83-reconciliation.md` (novo — B.2).
-- `research/2026-04-30-eval-results.md` (novo — B.5).
+- `research/2026-05-06-eval-results.md` (novo — B.5).
 - `NEXT.md` (criado em Fase 5; deletado na Fase 7 — débitos para 0011, 0009, Scaffolding).
 - `CHANGELOG.md` (entrada da 0018 — Fase 7).
-- `.specify/specs/research-index.md` (Fase 7 — F9.2 do encerramento, migração dos 6 researches).
-- `.specify/specs/roadmap/historico.md` + `roadmap/backlog.md` (Fase 7 — encerramento).
+- `.specify/specs/research-index.md` (Fase 7 — migração dos 12 researches markdown + 9 outputs de eval).
+- `.specify/specs/roadmap/historico.md` + `.specify/specs/roadmap/backlog.md` (Fase 7 — encerramento).
 - `CLAUDE.md` raiz (documentar o pipeline Docs-as-Code e o schema bilíngue — B.3).
 - `spec.md` desta 0018 (header retroativo `Tipo de spec: evidence-driven` — A.2; registrado em "Decisões revisitadas").
 
@@ -513,6 +513,11 @@ _Researches, registros e encerramento:_
   - **Mudança:** Durante validação no consumidor (Fase 6.5), identificou-se que o `AGENTS.md` compilado continuava recebendo os headers em PT-BR e o bloco de `Documentação (pt-br)`, violando o princípio cravado de extrair estritamente a `Instruction (en)` para otimização de tokens da IA. O problema estava em `applyPointers` lendo os arquivos `.md` brutos em vez do catálogo `rules.json`.
   - **Por quê:** Bug no fluxo legado preservado durante B.3.5. Correção é obrigatória para atingir o objetivo da spec.
   - **Implicação em B.3.5:** Refatorar `compiler.mjs` para headers em Inglês ("Top Zone", "Center Zone") e `pointers.mjs` para usar `filterRulesByScope` a partir do `rules.json`. Implementação segue BDD/TDD.
+
+- **2026-05-06 — Sanitização de B.5 (eval amostral: `N=3` → `N=1` documentado).**
+  - **Mudança:** a execução final do eval foi reduzida para **1 rodada por provedor** (`research/2026-05-06-eval-results.md`), mantendo Claude + Codex + Gemini e o subset crítico. Re-rodada ficou reservada apenas para caso ambíguo ou inconclusivo.
+  - **Por quê:** o benchmark externo `[EXT-AKITA-2026]` já fornece evidência robusta de variabilidade cross-model/harness em escala; na 0018, o objetivo do eval é validar aderência do nosso subset crítico, não reproduzir sozinho a análise estatística completa. O custo marginal de `N=3` não alteraria a decisão de catálogo no estado atual.
+  - **Implicação em `tasks.md` / research:** referências de `3 rodadas` e `2/3` foram substituídas pelo baseline real `N=1` com justificativa explícita. O desvio fica registrado aqui, sem reescrever a decisão histórica do gate em `decision-brief.md`.
 
 ---
 

@@ -14,10 +14,10 @@ Detalhes de lifecycle em [`.core/process/spec-foundation.md`](../../../.core/pro
 
 Specs atualmente em branch ativa. Formato enxuto.
 
-- **0018-rules-content-deepening** (Content Overhaul + Política framework para specs de conteúdo) — _Draft (revised 2026-04-30)_
+- **0018-rules-content-deepening** (Content Overhaul + Política framework para specs de conteúdo) — _In Review (revised 2026-05-04)_
   - **Escopo:** Duas entregas intencionais na mesma branch.
     - **Bloco A:** auditoria research-backed dos 7 boilerplates de `.specify/templates/`; canonização da distinção **spec de conteúdo × infraestrutura** com checklist diferenciado (research+eval mandatórios em specs de conteúdo); sincronização com `.core/process/spec-foundation.md`; linha em `global-rules.md`.
-    - **Bloco B:** content overhaul research-backed de `global-rules.md` e `quality-gates.md` — research lifecycle (5 sínteses externas + baseline de tokens), taxonomia consolidada (meta-regras agente × princípios universais × heurísticas domínio), catálogo `[RULE-ENG-*]`, eval empírico mínimo em ≥2 provedores, reconciliação do conteúdo já-mergeado em `b9efb83`.
+    - **Bloco B:** content overhaul research-backed de `global-rules.md`, adapters e `quality-gates` — research lifecycle, catálogo bilíngue Docs-as-Code (`rules.json`, IDs `[GR-*]` / `[ADP-*]` / `[OPT-*]`), eval amostral baseline em Claude/Codex/Gemini e reconciliação do conteúdo já-mergeado em `b9efb83`.
   - **Fronteira com 0011 (hierarquia) e 0009 (harness):** definida em B.1; débitos vão para `NEXT.md` desta spec.
 
 ---

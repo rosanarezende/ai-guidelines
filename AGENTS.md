@@ -17,7 +17,7 @@ Before the first technical action, identify platform, shell, surface (CLI vs IDE
 
 ### [CORE-02]
 
-The repository is your memory. Persist plans, progress, debts, knowledge, and roadmap under `.specify/specs/`. Read `roadmap/backlog.md` at session start. If the platform forces a scratchpad, write only a pointer to the spec file. Planning trapped in agent cache (AI-slop) is unacceptable.
+The repository is your memory. Persist plans, progress, debts, knowledge, and roadmap under `.specify/specs/`. Read `.specify/specs/roadmap/backlog.md` at session start. If the platform forces a scratchpad, write only a pointer to the spec file. Planning trapped in agent cache (AI-slop) is unacceptable.
 
 ### [CORE-03]
 
@@ -123,14 +123,6 @@ All tests MUST use the GIVEN / WHEN / THEN structure in Brazilian Portuguese (DA
 
 </FEATURE_BDD>
 
-<FEATURE_QUALITY_GATES>
-
-### [OPT-0301]
-
-Before reporting a task as done, ensure: no circular dependencies, proper teardown for listeners/timers (prevent memory leaks), no unguarded asynchronous state mutations (prevent race conditions), >85% test coverage, >60% mutation kill rate, and no secrets in code/comments. Fix any automated failures before requesting human review.
-
-</FEATURE_QUALITY_GATES>
-
 <FEATURE_TDD>
 
 ### [OPT-0501]
@@ -138,6 +130,14 @@ Before reporting a task as done, ensure: no circular dependencies, proper teardo
 Every new feature or bug fix MUST follow the RED -> GREEN -> REFACTOR cycle. Write a failing test first. Never skip the RED step. Write minimum code to pass. Maintain >85% coverage. Test files must be colocated. Unit tests must be isolated with mocks/stubs. If a business rule `[BR-*]` is provided, include it in the test name.
 
 </FEATURE_TDD>
+
+<FEATURE_QUALITY_GATES>
+
+### [OPT-0301]
+
+Before reporting a task as done, ensure: no circular dependencies, proper teardown for listeners/timers (prevent memory leaks), no unguarded asynchronous state mutations (prevent race conditions), >85% test coverage, >60% mutation kill rate, and no secrets in code/comments. Fix any automated failures before requesting human review.
+
+</FEATURE_QUALITY_GATES>
 
 ---
 

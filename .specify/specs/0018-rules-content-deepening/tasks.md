@@ -219,7 +219,7 @@
 
 - [x] **5.B4.1** Reorganizar `.core/rules/global-rules.md`: cada regra como heading H2 com frontmatter YAML inline e corpo bilíngue (`Instruction (en)` / `Documentação (pt-br)` / `Why this is an issue` / `Noncompliant example` / `Compliant example` / `See also`). Atribuir IDs `[GR-NNNN]` sequenciais. — **B.4.1 concluído (global-rules migrado e validado via rules.json).**
 - [x] **5.B4.2** Mesma operação em `.core/rules/{claude,codex,gemini}.md` com IDs `[ADP-NNNN]` (e campo `adapter`).
-- [x] **5.B4.3** Mesma operação em `.core/rules/opt-in/*.md` com IDs `[OPT-NNNN]` (e campo `opt_in_feature`). Aplicar hierarquia inicial em subdiretórios `opt-in/<tema>/` quando o tema ficar evidente (ex.: `opt-in/security/`, `opt-in/editorial/`) — sem antecipar a Spec 0011.
+- [x] **5.B4.3** Mesma operação em `.core/rules/opt-in/*.md` com IDs `[OPT-NNNN]` (e campo `opt_in_feature`). Aplicar hierarquia inicial **mínima** em `opt-in/methodologies/` (BDD/TDD) e `opt-in/quality/` (`quality-gates`) — sem antecipar a Spec 0011.
 - [x] **5.B4.4** **Tradução qualificada** do campo `Instruction` para Inglês — toda regra sobrevivente. Foco em jargão idiomático para modelos de fronteira; revisão humana antes do commit.
 - [x] **5.B4.5** Cobertura mínima de cross-refs: cada regra `category: security` ou `correctness` tem ≥ 1 entrada em `see_also`.
 - [x] **5.B4.6** **[COMMIT]** `feat(spec-0018): regras migradas para formato bilíngue + IDs canônicos`.
@@ -231,7 +231,7 @@
 - [x] **5.B5.1** Selecionar subset crítico: regras com `evidence_strength: strong` ou `medium` + categorias-âncora (`correctness`, `security`). — **Subset cravado (sanitização 2026-05-05):** GR-0001 (security/strong), GR-0004 (correctness/strong), GR-0005 (correctness/medium). GR-0002 e OPT-0301 ficam como débito para 0009 (menos testáveis via prompt único). _Nota: `eval-runner.mjs` anteriormente listado aqui foi reclassificado como seed para Spec 0009 — ver `NEXT.md` § Seed B.9._
 - [x] **5.B5.2** Definir prompts canônicos para asserção F (delta comportamental) — cenários reproduzíveis. — **Publicados em [`research/eval-prompts.md`](./research/eval-prompts.md)** (sanitização 2026-05-05): EVAL-01 (secrets), EVAL-02 (error swallowing), EVAL-03 (unsafe concurrency). Cada prompt com critério de PASS/FAIL explícito.
 - [x] **5.B5.3** Executar avaliação manual para **Claude + Codex + Gemini** para cada prompt (justificado N=1 pelo benchmark `[EXT-AKITA-2026]`). — _As 9 execuções (1 rodada para 3 prompts em 3 LLMs) foram concluídas com sucesso. Outputs em `research/eval-outputs/{PROMPT_ID}_{PROVIDER}_{RUN}.md`._
-- [x] **5.B5.4** Registrar passa-rate por regra × provedor com limiar **2/3** em `research/2026-05-06-eval-results.md`. — _100% pass-rate documentado no relatório de consolidação._
+- [x] **5.B5.4** Registrar resultado por regra × provedor em `research/2026-05-06-eval-results.md`, com baseline real `N=1` e justificativa explícita do desvio em relação ao gate original. — _100% de aprovação documentado no relatório de consolidação._
 - [x] **5.B5.5** Aplicar threshold categorizado (R): regras críticas reprovadas → cortadas no catálogo; regras opinativas/heurísticas reprovadas → débito em `NEXT.md`. — _Nenhuma regra reprovada, todas as regras deste subset mantidas no catálogo sem atritos._
 - [x] **5.B5.6** **[COMMIT]** `research(spec-0018): eval amostral em 3 provedores publicado`.
 
@@ -291,12 +291,12 @@
 
 > Mapeamento canônico: Fase 7 desta spec ≡ **Fase 4 (Encerramento Pré-Merge)** do novo `tasks-boilerplate.md`. **[MANDATÓRIO]** Esta fase ocorre **na branch do PR, antes do merge**. Nenhuma tarefa após o merge.
 
-- [ ] **7.1** `NEXT.md`: migrar débitos para `roadmap/backlog.md` (atualizar candidatas Spec 0011, Spec 0009, abrir candidata "Scaffolding Inteligente de Provedores") e **deletar** o arquivo.
-- [ ] **7.2** Migrar 6 researches da 0018 para `.specify/specs/researchs/governance/` (auditoria, b9efb83-reconciliation, eval-results) ou `architecture/` (benchmark, bug-taxonomies, spec-driven-tools, tokens-baseline, empirical-bugs) conforme domínio. Atualizar `.specify/specs/research-index.md` com link e resumo.
+- [ ] **7.1** `NEXT.md`: migrar débitos para `.specify/specs/roadmap/backlog.md` (atualizar candidatas Spec 0011, Spec 0009, abrir candidata "Scaffolding Inteligente de Provedores") e **deletar** o arquivo.
+- [ ] **7.2** Migrar os **12 arquivos markdown** de `research/` da 0018 para `.specify/specs/researchs/governance/` ou `architecture/` conforme domínio; mover também os **9 outputs brutos** de `research/eval-outputs/` para um destino indexável preservando rastreabilidade. Atualizar `.specify/specs/research-index.md` com link e resumo.
 - [ ] **7.3** `decision-brief.md` permanece no diretório da spec (`.specify/specs/0018-rules-content-deepening/`) como artefato histórico — **não migra**.
 - [ ] **7.4** `spec.md` header: status → `Done (PR #X — YYYY-MM-DD)`.
-- [ ] **7.5** `roadmap/historico.md`: spec 0018 movida para "Specs concluídas" com data; entrada removida da seção "Em execução" em `roadmap/backlog.md`.
+- [ ] **7.5** `.specify/specs/roadmap/historico.md`: spec 0018 movida para "Specs concluídas" com data; entrada removida da seção "Em execução" em `.specify/specs/roadmap/backlog.md`.
 - [ ] **7.6** `CHANGELOG.md`: entrada da 0018 (purga radical b9efb83 + pipeline Docs-as-Code bilíngue + soft ceiling de tokens + 8º boilerplate `decision-brief` + reestruturação tasks em 5 fases).
-- [ ] **7.7** Confirmar que **nenhuma spec subsequente foi aberta** antes deste encerramento (regra de "uma spec ativa").
+- [ ] **7.7** Confirmar que o encerramento da 0018 não conflita com outra spec ativa **na mesma sessão / do mesmo contribuidor** (regra correta após a reconciliação de concorrência da 0017).
 - [ ] **7.8** **[COMMIT]** `chore(spec-0018): encerramento pré-merge — research migrado, NEXT removido, status final`.
 - [ ] **7.9** Aprovação humana explícita para merge. **[MANDATÓRIO]** Não fazer merge autonomamente.

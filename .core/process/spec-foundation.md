@@ -50,10 +50,10 @@ Toda spec declara seu **tipo** no header da `spec.md`, em **campo obrigatório s
 A Spec 0008 canonizou uma distinção explícita para regras publicadas pelo
 baseline. Use esta classificação ao decidir **onde** uma regra nova deve viver:
 
-| Categoria                                                                          | Destino                                             | Sincronização ao consumidor       |
-| :--------------------------------------------------------------------------------- | :-------------------------------------------------- | :-------------------------------- |
-| **Universal de governança IA** (workflow, plan mode, PR collab, environment check) | `.core/rules/global-rules.md` (sempre injetado)     | Mandatory core — sempre vai       |
-| **Opt-in de stack/processo** (Quality Gates, TDD, formatter)                       | `.core/rules/<feature>.md` + `cli/features/opt-in/` | Wizard pergunta; default sugerido |
+| Categoria                                                                          | Destino                                                   | Sincronização ao consumidor       |
+| :--------------------------------------------------------------------------------- | :-------------------------------------------------------- | :-------------------------------- |
+| **Universal de governança IA** (workflow, plan mode, PR collab, environment check) | `.core/rules/global-rules.md` (sempre injetado)           | Mandatory core — sempre vai       |
+| **Opt-in de stack/processo** (Quality Gates, TDD, formatter)                       | `.core/rules/opt-in/<tema>/*.md` + `cli/features/opt-in/` | Wizard pergunta; default sugerido |
 
 A distinção **estende a Spec 0005** ("opt-in é exatamente o que varia por
 stack") a regras editoriais. Regras puramente de processo/IA que valem para
