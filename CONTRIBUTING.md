@@ -126,18 +126,18 @@ chore(ci): atualizar threshold de cobertura para 85%
 
 Cada conteúdo vive em **um único lugar**; outros documentos apenas linkam:
 
-| Conteúdo                          | Vive em                           | Outros docs apenas linkam    |
-| :-------------------------------- | :-------------------------------- | :--------------------------- |
-| Workflow obrigatório do agente IA | `AGENTS.md`                       | README, CONTRIBUTING         |
-| Princípios de engenharia (regras) | `.core/rules/global-rules.md`     | AGENTS, CONTRIBUTING, README |
-| Como contribuir (humano)          | `CONTRIBUTING.md`                 | README                       |
-| Lifecycle de specs                | `docs/process/spec-foundation.md` | AGENTS, CONTRIBUTING         |
-| Visão geral do framework          | `README.md`                       | (raiz, ponto de entrada)     |
+| Conteúdo                          | Vive em                            | Outros docs apenas linkam    |
+| :-------------------------------- | :--------------------------------- | :--------------------------- |
+| Workflow obrigatório do agente IA | `AGENTS.md`                        | README, CONTRIBUTING         |
+| Princípios de engenharia (regras) | `.core/rules/global-rules.md`      | AGENTS, CONTRIBUTING, README |
+| Como contribuir (humano)          | `CONTRIBUTING.md`                  | README                       |
+| Lifecycle de specs                | `.core/process/spec-foundation.md` | AGENTS, CONTRIBUTING         |
+| Visão geral do framework          | `README.md`                        | (raiz, ponto de entrada)     |
 
 Antes de começar, leia:
 
 - [`AGENTS.md`](AGENTS.md) — fluxo obrigatório, princípios de engenharia e workflow (humanos e agentes).
-- [`docs/process/spec-foundation.md`](docs/process/spec-foundation.md) — quando abrir spec, como estruturar `spec.md`/`plan.md`/`tasks.md` e como fechar débitos/research.
+- [`.core/process/spec-foundation.md`](.core/process/spec-foundation.md) — quando abrir spec, como estruturar `spec.md`/`plan.md`/`tasks.md` e como fechar débitos/research.
 - [`.specify/specs/roadmap/backlog.md`](.specify/specs/roadmap/backlog.md) — backlog e candidatas.
 
 ---

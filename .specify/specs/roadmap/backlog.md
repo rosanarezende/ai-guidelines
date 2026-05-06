@@ -6,7 +6,7 @@ Este arquivo é o backlog vivo do repositório. Captura specs em execução, pr�
 
 **Política repo-first, integração-friendly:** o repositório é a memória canônica. Ferramentas externas (GitHub Projects, Jira, Linear, etc.) podem ser camada colaborativa humana via campo opcional `tracker` nas entradas abaixo, mas o resumo mínimo no `backlog.md` é mandatório.
 
-Detalhes de lifecycle em [`docs/process/spec-foundation.md`](../../../docs/process/spec-foundation.md).
+Detalhes de lifecycle em [`.core/process/spec-foundation.md`](../../../.core/process/spec-foundation.md).
 
 ---
 
@@ -14,13 +14,48 @@ Detalhes de lifecycle em [`docs/process/spec-foundation.md`](../../../docs/proce
 
 Specs atualmente em branch ativa. Formato enxuto.
 
-- (Nenhuma spec em execução)
+Nenhuma spec em execução no momento.
 
 ---
 
 ## Now (próxima fila, ordem importa)
 
 Specs ou candidatas priorizadas para iniciar em seguida. Ordem indica prioridade.
+
+- **bootstrap-consumidor-e-runtime** (CLI + distribuição de templates + recompilação do runtime `AGENTS.md`)
+  - **Fonte do insight:** fechamento da Spec 0018 (`NEXT.md` B.7.3), sanitização do runtime bilíngue e revisão manual pós-fechamento no repositório mantenedor.
+  - **Insight central:** a 0018 estabilizou o catálogo de regras e o build bilíngue, mas a experiência do consumidor ainda ficou incompleta em quatro pontos acoplados: (i) consumidores tendem a acumular `CLAUDE.md`, `GEMINI.md`, `.codex/` e arquivos soltos sem governança, acelerando _Context Rot_ e drift entre adapters e a fonte canônica; (ii) `.specify/templates/` não é distribuído para o repo-alvo; (iii) o wizard do CLI ainda pergunta `features` como lista única, sem separar opt-ins editoriais de infraestrutura; (iv) o `AGENTS.md` final exige nova rodada de arquitetura editorial/topológica, com revisão de ordem, repetição, sequenciamento e possível remoção definitiva do `agents-pointer`.
+  - **Escopo potencial:** a CLI detectar provedores ativos no consumidor e gerar automaticamente arquivos restritivos tipo `.claudeignore`, trampolins mínimos como `CLAUDE.md` contendo apenas `@AGENTS.md` e guardrails para manter adapter files alinhados ao runtime; sincronizar `.specify/templates/` no `init`/`adopt` quando fizer sentido para o consumidor; redesenhar a UX do wizard para perguntar por categorias separadas de opt-in; revisar o compiler do runtime para explicitar zonas e ordem semântica real; decidir se `AGENTS-pointer.md.tmpl` ainda existe, vira fallback puro ou é removido; revisar regras repetidas, redundantes ou fora de sequência no payload final.
+  - **Não-objetivos:** reabrir a decisão de conteúdo evidence-driven da 0018; mexer no baseline de benchmark/eval; fazer hierarquia completa por subdiretório estilo Spec 0011.
+  - **Pré-requisitos:** Spec 0018 concluída (✓); PR #4 revisado pelo owner; baseline atual congelado em `historico.md` para permitir refactor sem perder referência.
+  - **Sinal de "está na hora":** owner sinaliza desconforto com o `AGENTS.md` compilado final; consumidor precisar dos boilerplates SDD no repo-alvo; fricção recorrente no wizard por não distinguir opt-ins editoriais vs infraestrutura; ou surgir drift entre `AGENTS.md` e arquivos específicos de provider no repo-alvo.
+  - **Cross-ref:** incorpora integralmente a hipótese de `scaffolding-inteligente-de-provedores` e a expande para um problema maior de bootstrap/runtime do consumidor.
+
+- **governance-information-architecture** (Auditoria + classificação canônica de informação essencial do framework)
+  - **Fonte do insight:** revisão da Spec 0018 (Stage 1, 2026-04-30) — owner identificou que `.core/process/spec-foundation.md` é constituição operacional viva, mas está misturada em `docs/` com documentos descritivos; ausência de catálogo de informação essencial; gêneros documentais (constituição × ADR × regra runtime × doc descritivo × referência) sem classificação explícita nem regra de "qual gênero vai para onde".
+  - **Insight central:** o framework hoje tem 5+ classes de informação espalhadas em `docs/`, `adrs/`, `.core/`, `.specify/`, raiz — sem catálogo único, sem princípio de classificação documentado. ADRs cobrem decisões singulares; `spec-foundation.md` cobre processo vivo; `.core/rules/*` cobrem runtime distribuído; `docs/features.md`/`ai-efficiency-guide.md` são descritivos. Tudo coabita sem fronteira. Novo agente/contribuidor precisa adivinhar onde olhar primeiro.
+  - **Escopo potencial:** auditoria de placement atual de cada documento essencial; classificação canônica em N classes (constituição operacional × ADRs × regras runtime distribuídas × documentação descritiva × referência operacional); decisão entre catálogo central (`INFORMATION-CATALOG.md`) vs reorganização física (`.specify/foundation/`) vs híbrido; decisão sobre ADRs absorverem decisões atômicas que hoje vivem dentro de `spec-foundation.md`; tornar a política parte do framework distribuído (template) se aplicável.
+  - **Audiência:** governança meta-framework (não regras runtime). **Diferente de Spec 0011** que trata de hierarquia de _rules editoriais runtime_ — esta candidata trata de hierarquia de _meta-docs do framework_. Problemas paralelos.
+  - **Pré-requisitos:** Spec 0018 mergeada (a 0018 está editando `spec-foundation.md` adicionando workflow em dois passes; reorganização concorrente seria conflict).
+  - **Sinal de "está na hora":** 0018 fechada (gatilho automático); ou novo agente/contribuidor pedir explicação sobre "onde olhar para X" no repo antes mesmo de 0018 fechar.
+  - **Riscos antecipados:** tocar em paths estáveis (`docs/`, `adrs/`) gera diff amplo; pode requerer migração de links em vários docs (`README.md`, `AGENTS.md`, `CONTRIBUTING.md`, `CLAUDE.md`). Mitigar com rename + ponteiro de redirect comentado nos arquivos antigos durante transição.
+  - **Cross-ref:** `[DEC-0018-A06]` na decision-brief da 0018 captura o débito tático (onde fica a seção "Tipos de spec") cuja resposta arquitetural ampla é desta candidata.
+
+- **seguranca-ia-supply-chain** (spec 0012 — Segurança de IA tools / supply chain)
+  - **Fonte do insight:** incidente Vercel/Contex.ai (abril/2026), análise Lucas Montano [Hackearam a Vercel via AI](https://www.youtube.com/watch?v=oDXYfesz0qw). Síntese em `synthesis.md` Tema 4.
+  - **Insight central:** ataque NÃO foi exploit de NextJS nem da API Vercel — foi via Contex.ai (AI agents) autorizado por funcionário Vercel via Google Workspace OAuth. Padrão emergente: cada AI tool autorizada via OAuth = nova superfície de ataque. _"O elo mais fraco nunca esteve sendo modelo. É a integração ou OAuth que essas ferramentas pedem na tela de onboarding."_
+  - **Escopo potencial:** reescrever Regra 3 atual de `global-rules.md` cobrindo threat model OAuth de AI tools; criar `.core/rules/security.md` com política de marcação default sensitive, checklist de auditoria periódica de OAuth, política "nenhuma AI tool nova sem security review", rotação defensiva de secrets pós-incidente; comando CLI `audit-security` enumerando tools com OAuth.
+  - **Audiência diferente de 0008:** governança de **operador humano** (não do agente IA) — por isso spec separada.
+  - **Pré-requisitos:** Spec 0008 mergeada; idealmente decisão de visibilidade pública (cross-ref `project_ai_guidelines_visibilidade_publica.md`).
+  - **Sinal de "está na hora":** consumidor real precisa autorizar nova AI tool e pergunta "como avalio o risco?"; ou outro incidente público similar (provável dada a tendência 2026).
+
+- **regra-hierarquia** (spec 0011 — Hierarquia de regras por subdiretório)
+  - **Fonte do insight:** Diego (Rocketseat), [Claude Code em monorepo full-stack](https://www.youtube.com/watch?v=ARYzqW0W7iI) 2026-01-22. Síntese em `.specify/specs/0008-governance-coherence/research/synthesis.md` Tema 1.
+  - **Insight central:** ferramentas como Claude Code já carregam contexto sob demanda em subdiretórios. Em vez de inflar `AGENTS.md` raiz, separar por domínio: `api/AGENTS.md`, `api/src/auth/AGENTS.md`, `dashboard/AGENTS.md`. Resultado: contexto cirúrgico, sem inflar tokens.
+  - **Escopo potencial:** padronizar hierarquia em `.core/rules/<topic>/AGENTS-fragment.md`; atualizar `cli/features/core/rules.mjs`; documentar no `AGENTS.md` raiz como agentes buscam fragmentos. Princípio (Diego): documentar **padrões**, não nomes de arquivo/pasta.
+  - **Pré-requisitos:** Spec 0008 e Spec 0018 concluídas (✓). A 0018 já deixou a hierarquia mínima em `.core/rules/opt-in/{methodologies,quality}/`, mas a governança completa da mudança continua fora de escopo.
+  - **Gatilho objetivo pós-0018:** priorizar quando o agregado compilado atingir **4,2 K tokens** (70% do teto de 6 K) ou quando consumidores começarem a reclamar de leitura indiferenciada entre domínios.
+  - **Seed deixada pela 0018:** snapshot canônico do runtime final (token budget, catálogo, taxonomia e cross-refs) para a 0011 partir de baseline conhecido.
 
 - **cli-typescript** (Migração TypeScript da CLI)
   - **Fonte do insight:** Remanescente do cli-refactor após a Spec 0017 assumir a reorganização de pastas.
@@ -31,14 +66,6 @@ Specs ou candidatas priorizadas para iniciar em seguida. Ordem indica prioridade
 - **process-automations** (Automatização de ciclo de vida de Gaps via CLI)
   - **Fonte do insight:** Remanescente do process-refinement (o processo em si foi absorvido pela 0017, mas a automação via CLI é separada).
   - **Escopo potencial:** criar workflow/comando no CLI que facilite a alimentação de `NEXT.md` e `backlog.md` a partir de insights capturados no chat.
-
-- **seguranca-ia-supply-chain** (spec 0012 — Segurança de IA tools / supply chain)
-  - **Fonte do insight:** incidente Vercel/Contex.ai (abril/2026), análise Lucas Montano [Hackearam a Vercel via AI](https://www.youtube.com/watch?v=oDXYfesz0qw). Síntese em `synthesis.md` Tema 4.
-  - **Insight central:** ataque NÃO foi exploit de NextJS nem da API Vercel — foi via Contex.ai (AI agents) autorizado por funcionário Vercel via Google Workspace OAuth. Padrão emergente: cada AI tool autorizada via OAuth = nova superfície de ataque. _"O elo mais fraco nunca esteve sendo modelo. É a integração ou OAuth que essas ferramentas pedem na tela de onboarding."_
-  - **Escopo potencial:** reescrever Regra 3 atual de `global-rules.md` cobrindo threat model OAuth de AI tools; criar `.core/rules/security.md` com política de marcação default sensitive, checklist de auditoria periódica de OAuth, política "nenhuma AI tool nova sem security review", rotação defensiva de secrets pós-incidente; comando CLI `audit-security` enumerando tools com OAuth.
-  - **Audiência diferente de 0008:** governança de **operador humano** (não do agente IA) — por isso spec separada.
-  - **Pré-requisitos:** Spec 0008 mergeada; idealmente decisão de visibilidade pública (cross-ref `project_ai_guidelines_visibilidade_publica.md`).
-  - **Sinal de "está na hora":** consumidor real precisa autorizar nova AI tool e pergunta "como avalio o risco?"; ou outro incidente público similar (provável dada a tendência 2026).
 
 ### Oportunidades Priorizadas (Sem Spec)
 
@@ -66,21 +93,18 @@ Specs ou candidatas que entram na fila depois de esgotado o Now. Ordem pode ser 
   - **Escopo:** Feature opt-in (`tracker-github`) que injete scripts integradores (ex: `scripts/trackers/github-adapter.mjs`) e ensine o agente a rodar esses comandos no terminal para mover cards, garantindo precisão determinística.
   - **Origem:** Descoberta na Spec 0016.
 
-- **regra-hierarquia** (spec 0011 — Hierarquia de regras por subdiretório)
-  - **Fonte do insight:** Diego (Rocketseat), [Claude Code em monorepo full-stack](https://www.youtube.com/watch?v=ARYzqW0W7iI) 2026-01-22. Síntese em `.specify/specs/0008-governance-coherence/research/synthesis.md` Tema 1.
-  - **Insight central:** ferramentas como Claude Code já carregam contexto sob demanda em subdiretórios. Em vez de inflar `AGENTS.md` raiz, separar por domínio: `api/AGENTS.md`, `api/src/auth/AGENTS.md`, `dashboard/AGENTS.md`. Resultado: contexto cirúrgico, sem inflar tokens.
-  - **Escopo potencial:** padronizar hierarquia em `.core/rules/<topic>/AGENTS-fragment.md`; atualizar `cli/features/core/rules.mjs`; documentar no `AGENTS.md` raiz como agentes buscam fragmentos. Princípio (Diego): documentar **padrões**, não nomes de arquivo/pasta.
-  - **Pré-requisitos:** Spec 0008 mergeada (sub-bloco A define regra acionável vs doc humano); decidir se hierarquia espelha layout do consumidor ou usa namespacing dentro de `.ai-guidelines/rules/<topic>/`.
-  - **Sinal de "está na hora":** quando `global-rules.md` consolidado da 0008 inflar (>200 linhas) ou consumidor reclamar que "regras de domínios diferentes todo mundo lê tudo".
-
 - **harness-engineering** (spec 0009 — Harness Engineering)
   - **Fonte do insight:** Uncle Bob via [Lucas Montano — "até o Uncle Bob virou Vibe Coder"](https://www.youtube.com/watch?v=MvFO-W9zZRk) (cyclomatic complexity, mutation testing); [Lucas Montano — "Vai Faltar Dev 2027"](https://www.youtube.com/watch?v=T9V7EyB_B9w) (bugs típicos de IA invisíveis em review humano: N+1, race conditions, memory leaks).
   - **Cross-ref Spec 0008-E:** 0008 entrega o **checklist editorial**; 0009 entrega a **implementação técnica**.
   - **Tipos de falha que spec-driven não resolve sozinho:** amnésia entre sessões, falso "done", implementador e validador no mesmo processo, slop acumulado (degradação 5-10%/iteração), bugs de IA invisíveis em review humano.
   - **Escopo potencial:** agente validador separado com contrato "um-a-um"; sensores automáticos obrigatórios (prettier/typecheck/testes como gate, análise estática, mutation kill rate, detecção de bugs típicos de IA, secret scanning); evaluation como gate; integração com `/ultra-review`.
   - **Custo de adoção:** custo elevado assumido — multi-agent + sensors em cada feature = 2-3× tokens por PR. Compensa apenas quando custo de regressão começar a doer mais que custo de tokens.
-  - **Pré-requisitos:** Spec 0003 mergeada (✓); idealmente Spec 0008 mergeada antes (sub-bloco B canoniza RPI ↔ spec-foundation; sub-bloco E canoniza checklist editorial); pelo menos um ciclo real de regressão para justificar overhead.
+  - **Pré-requisitos:** Spec 0003 mergeada (✓); idealmente Spec 0008 mergeada antes (sub-bloco B canoniza RPI ↔ spec-foundation; sub-bloco E canoniza checklist editorial); baseline da Spec 0018 já concluído.
+  - **Seed deixada pela 0018:** o eval manual da 0018 vira **baseline-regression**; qualquer mudança futura em `rules` invalida esse baseline e exige re-rodada no harness. Research package congelado em `.specify/specs/researchs/governance/` + `.specify/specs/researchs/architecture/`.
+  - **Artefatos preservados no histórico git:** `quality-gates/engine`, `detectors`, `ai-check` e `eval-runner` foram deliberadamente removidos do entregável da 0018, mas ficam como seed arquitetural para a 0009.
   - **Sinal de "está na hora":** um usuário rodar `/clear` esperando continuar uma spec e o agente novo não conseguir retomar com `tasks.md` + git; ou PR precisar de 3+ rounds de correção por causa de coisas que sensor automático pegaria.
+
+- ~~**scaffolding-inteligente-de-provedores** (Candidata — automação de provider detection + trampolins)~~ **Incorporada** em `bootstrap-consumidor-e-runtime`: mantém a tese original de provider detection + trampolins + guardrails contra _Context Rot_, agora somada à distribuição de boilerplates SDD, UX do wizard e refactor topológico do `AGENTS.md`.
 
 ---
 

@@ -16,6 +16,8 @@ createOptInRuleTestSuite({
   syncActionPattern: "sync .ai-guidelines/rules/quality-gates.md",
   pruneActionPattern: "prune .ai-guidelines/rules/quality-gates.md",
   usesI18n: false,
+  sourceFileNamePt: "quality/quality-gates.md",
+  mockContentPt: "# Quality Gates",
   describe,
   it,
   before,

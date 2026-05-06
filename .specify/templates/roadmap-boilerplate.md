@@ -1,10 +1,14 @@
 # Roadmap — Boilerplate
 
 > Formato canônico dos 2 arquivos que compõem o roadmap do projeto, vivos em
-> `.specify/specs/roadmap/`. Decisão Spec 0008 sub-bloco B (ver
-> `.specify/specs/0008-governance-coherence/research/roadmap-format-benchmarks.md`):
+> `.specify/specs/roadmap/`. Decisão Spec 0008 sub-bloco B (research migrado para
+> `.specify/specs/researchs/oss/2026-04-26-roadmap-format-benchmarks.md`):
 > migração de arquivo único `ROADMAP.md` para pasta `roadmap/` com split
 > passado vs presente-futuro; candidatas vivem por slug (sem número).
+>
+> **Princípio "repo-first, integração-friendly" + campo `tracker`:** fonte
+> canônica em `.core/process/spec-foundation.md` (Spec 0018 promove o princípio
+> à constituição). Este boilerplate apenas aplica.
 
 Instancie estes 2 arquivos em `.specify/specs/roadmap/` (já criados pela
 Spec 0008 no repo atual; este boilerplate documenta o formato para
@@ -78,7 +82,8 @@ abrir spec nova ou fechar uma spec existente.
 **Política repo-first, integração-friendly:** o repositório é a memória
 canônica. Ferramentas externas (GitHub Projects, Jira, Linear, etc.) podem
 ser camada colaborativa humana via campo opcional `tracker` nas entradas
-abaixo, mas o resumo mínimo no `backlog.md` é mandatório.
+abaixo, mas o resumo mínimo no `backlog.md` é mandatório. Detalhes em
+`.core/process/spec-foundation.md`.
 
 ---
 
@@ -172,7 +177,7 @@ evolua.
 - Campo `tracker` é opcional. Quando presente, é link para tracker externo
   (Issue, Project, Jira, Linear). O resumo no `backlog.md` é **sempre**
   mandatório — nunca delegar totalmente ao tracker externo (princípio
-  repo-first).
+  repo-first; ver `.core/process/spec-foundation.md`).
 
 ---
 
@@ -186,5 +191,5 @@ Projetos que ainda tenham `.specify/specs/ROADMAP.md` (formato pré-Spec 0008) d
 
 Depois deletar `ROADMAP.md` e atualizar referências em `AGENTS.md`,
 `.core/templates/AGENTS-core.md.tmpl`, `README.md`, `CONTRIBUTING.md`,
-`docs/process/spec-foundation.md`, `docs/rpi-protocol.md` e
+`.core/process/spec-foundation.md`, `docs/rpi-protocol.md` e
 demais templates SDD que citem o caminho antigo.

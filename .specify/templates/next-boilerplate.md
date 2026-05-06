@@ -1,11 +1,12 @@
 # NEXT — Spec [Número] [Título Curto]
 
-> **Arquivo temporário.** DELETADO no encerramento da spec (Fase 3.1 do
-> `tasks.md`). Itens ainda relevantes migram para
-> `.specify/specs/roadmap/backlog.md` antes da deleção.
+> **Arquivo temporário.** Criar **apenas quando a spec gera débitos conscientes**
+> (insights fora do escopo, refactors adiados, riscos não mitigados, dependências
+> para specs futuras). Specs sem débitos não criam o arquivo. **DELETADO no
+> encerramento pré-merge** (fase final do `tasks.md`); itens ainda relevantes
+> migram antes para `.specify/specs/roadmap/backlog.md`.
 >
-> Fonte: `spec-foundation.md` — "NEXT.md (Opcional): Backlog de itens que
-> ficaram de fora para versões futuras".
+> Fonte: `.core/process/spec-foundation.md` — política de NEXT.md.
 
 ---
 
@@ -30,8 +31,10 @@ Use esta seção para registrar:
 
 ## ✂️ Itens descartados deliberadamente
 
-Quando algo foi avaliado e rejeitado durante a spec, registrar aqui com
-rationale. Evita re-discussão futura.
+> _Subseção opcional._ Incluir apenas se algo foi **avaliado e explicitamente
+> rejeitado** durante a spec, com rationale que evita re-discussão futura. A
+> maioria das specs não precisa desta subseção — a justificativa de não-fazer
+> já vive em `spec.md` § "Fora do escopo".
 
 - **[Item]** — rejeitado em [data]. Motivo: [...].
 

@@ -1,6 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { ROOT_DIR } from "#fs/file-system";
+import { getOptInRuleRelativePath } from "#governance/monolith/rules-loader";
 
 /**
  * Feature Opt-in: TDD
@@ -12,7 +13,12 @@ export async function applyTdd(targetDir, options, context, actions) {
   // Usar o ROOT_DIR do context em testes unitários para mock fs via options se rootDir definido
   const baseDir = context.rootDir || ROOT_DIR;
 
-  const sourceRulesPath = path.join(baseDir, ".core", "rules", "opt-in", `tdd-${lang}.md`);
+  const sourceRulesPath = path.join(
+    baseDir,
+    ".core",
+    "rules",
+    getOptInRuleRelativePath("tdd", lang)
+  );
   const targetRulesDir = path.join(targetDir, ".ai-guidelines", "rules");
   const targetRulesPath = path.join(targetRulesDir, "tdd.md");
 

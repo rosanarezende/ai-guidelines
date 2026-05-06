@@ -288,7 +288,7 @@ Criar:
 ```
 
 E **atualizar referências** em `AGENTS.md`, `README.md`, `CONTRIBUTING.md`,
-`docs/process/spec-foundation.md`, templates SDD para o novo caminho.
+`.core/process/spec-foundation.md`, templates SDD para o novo caminho.
 
 **Manter `.specify/specs/ROADMAP.md` como arquivo stub** linkando para os dois
 novos por um commit de transição (opcional, para não quebrar bookmarks

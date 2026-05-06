@@ -9,7 +9,8 @@
       "scratch/**",
       ".specify/**",
       ".pnp.loader.mjs",
-      ".pnp.cjs"
+      ".pnp.cjs",
+      ".yarn/**"
     ]
   }
 }

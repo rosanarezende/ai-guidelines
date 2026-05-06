@@ -34,17 +34,18 @@ export async function fileExists(filePath) {
 
 /**
  * Cria a estrutura de mock do source para testes que precisam de
- * templates em `.core/rules/opt-in/`.
+ * templates em `.core/rules/opt-in/` usando a hierarquia mínima por tema.
  *
  * @param {string} baseDir - Diretório raiz do mock
- * @param {string} sourceFileName - Nome do arquivo fonte (ex: "tdd-pt.md")
+ * @param {string} sourceFileName - Nome relativo do arquivo fonte (ex: "methodologies/tdd-pt.md")
  * @param {string} content - Conteúdo do arquivo mock
  * @returns {string} caminho do diretório de mock criado
  */
 export async function createMockSource(baseDir, sourceFileName, content) {
   const mockSourceDir = path.join(baseDir, ".core", "rules", "opt-in");
-  await fs.mkdir(mockSourceDir, { recursive: true });
-  await fs.writeFile(path.join(mockSourceDir, sourceFileName), content);
+  const targetPath = path.join(mockSourceDir, sourceFileName);
+  await fs.mkdir(path.dirname(targetPath), { recursive: true });
+  await fs.writeFile(targetPath, content);
   return mockSourceDir;
 }
 
@@ -87,6 +88,7 @@ export function createOptInRuleTestSuite(config) {
     before: testBefore,
     after: testAfter,
   } = config;
+  const canUseMockSource = Boolean(sourceFileNamePt && mockContentPt);
 
   desc(`Opt-in Feature: ${featureName} ${suiteLabel}`, () => {
     let targetDir;
@@ -112,7 +114,7 @@ export function createOptInRuleTestSuite(config) {
         const subDir = usesI18n ? path.join(targetDir, "pt-test") : targetDir;
 
         let context = {};
-        if (usesI18n) {
+        if (canUseMockSource) {
           await createMockSource(subDir, sourceFileNamePt, mockContentPt);
           context = { rootDir: subDir };
         }
@@ -166,7 +168,7 @@ export function createOptInRuleTestSuite(config) {
         const subDir = path.join(targetDir, "skip-test");
         await fs.mkdir(subDir);
 
-        const context = usesI18n ? { rootDir: subDir } : {};
+        const context = canUseMockSource ? { rootDir: subDir } : {};
         await applyFn(subDir, options, context, actions);
 
         const targetFile = path.join(subDir, ".ai-guidelines", "rules", outputFileName);
@@ -200,7 +202,7 @@ export function createOptInRuleTestSuite(config) {
         const targetFile = path.join(rulesDir, outputFileName);
         await fs.writeFile(targetFile, "old content");
 
-        const context = usesI18n ? { rootDir: subDir } : {};
+        const context = canUseMockSource ? { rootDir: subDir } : {};
         await applyFn(subDir, options, context, actions);
 
         assert.strictEqual(
@@ -228,7 +230,7 @@ export function createOptInRuleTestSuite(config) {
         const dryDir = path.join(targetDir, "dry-run-test");
 
         let context = {};
-        if (usesI18n) {
+        if (canUseMockSource) {
           await createMockSource(dryDir, sourceFileNamePt, mockContentPt);
           context = { rootDir: dryDir };
         }

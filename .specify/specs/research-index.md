@@ -25,6 +25,14 @@ Estudos técnicos sobre adoção, comportamento e _guardrails_ das plataformas l
 - [Síntese de Insights de Transcrições (Temas 1-6)](./researchs/governance/2026-04-26-governance-synthesis.md) _(Destilação de vídeos/artigos sobre workflows agentic e eficiência)_.
 - [Compliance Multi-Modelo: Regras Fragmentadas vs Runtime Monolítico](./researchs/governance/2026-04-29-agents-vs-rules-compliance.md) _(Veredito sintético para compilação monolítica contra ManyIH)_.
 - [Concorrência em Specs e Branches de Design](./researchs/governance/2026-04-29-concurrency-best-practices.md) _(Boas práticas para specs simultâneas, RFCs e coordenação assíncrona)_.
+- [Auditoria Editorial dos Boilerplates SDD](./researchs/governance/2026-04-30-boilerplates-audit.md) _(Base do bloco A da Spec 0018: drift real dos boilerplates, lacunas e formato do decision-brief)_.
+- [Reconciliação do Legado b9efb83](./researchs/governance/2026-04-30-b9efb83-reconciliation.md) _(Purga radical regra-a-regra do conteúdo pré-research da Spec 0018)_.
+- [Benchmark Externo: Akita LLM Coding Benchmark](./researchs/governance/2026-05-05-akita-benchmark-analysis.md) _(Evidência empírica cruzada para GR-0001, GR-0004, GR-0005 e o desvio controlado do eval para N=1)_.
+- [Benchmarks de LLM para Governança de IA](./researchs/governance/2026-05-05-benchmark-LLM-para-governanca-AI.md) _(Leitura arquitetural ampla de SWE-bench e benchmarks 2025-2026 aplicada ao framework)_.
+- [Viabilidade de Integração com Projetos Externos](./researchs/governance/2026-05-05-integration-viability.md) _(Compatibilidade de licenças, fair use e limites de integração com tooling e benchmarks externos)_.
+- [Prompts Canônicos do Eval Amostral da Spec 0018](./researchs/governance/2026-05-06-eval-prompts.md) _(Corpus manual de avaliação para secrets, error swallowing e concorrência insegura)_.
+- [Resultados do Eval Amostral da Spec 0018](./researchs/governance/2026-05-06-eval-results.md) _(Consolidação do baseline Claude/Codex/Gemini após a sanitização final do Stage 2)_.
+- [Outputs Brutos do Eval Amostral da Spec 0018](./researchs/governance/2026-05-06-spec-0018-eval-outputs/README.md) _(Arquivo-índice para as 9 execuções salvas do baseline manual)_.
 
 ## 🏗️ Design e Decisões de Arquitetura (Agnostic)
 
@@ -36,6 +44,11 @@ Decolamentos de arquitetura de código, CLI, e refatorações complexas que afet
 - [Análise Multica (Case de Estudo do Layout Público)](./researchs/architecture/2026-04-22-multica-analysis.md)
 - [Separação Arquitetural: TDD vs BDD](./researchs/architecture/2026-04-28-tdd-vs-bdd-separation.md) _(Racional para divisão de regras técnicas por domínio e idioma)_.
 - [Governança de Agentes por Compilador Monolítico em Runtime](./researchs/architecture/2026-04-29-monolithic-runtime-compiler-governance.md) _(Pesquisa arquitetural completa sobre hierarquia de instruções, lost-in-the-middle e topologia do prompt)_.
+- [Benchmark de Rules Content em Provedores e OSS Curado](./researchs/architecture/2026-04-30-benchmark-rules-content.md) _(Padrões e anti-padrões de regras editoriais em Anthropic, OpenAI, Google e OSS selecionado)_.
+- [Bugs Empíricos em Código Gerado por IA](./researchs/architecture/2026-04-30-empirical-bugs-ai-code.md) _(Base para race conditions, memory leaks e descarte de N+1 como categoria evidence-backed)_.
+- [Taxonomias Externas de Defeitos](./researchs/architecture/2026-04-30-external-bug-taxonomies.md) _(Mapeamento CWE/CERT/Sonar/OWASP-LLM para o catálogo de regras do framework)_.
+- [Spec-Driven Tools e Regras de Governança](./researchs/architecture/2026-04-30-spec-driven-tools-rules.md) _(Como ferramentas SDD e runtimes agentic tratam regras editoriais, escopo e decisões pré-design)_.
+- [Baseline de Tokens e Orçamento Tok-H](./researchs/architecture/2026-04-30-tokens-baseline-budget.md) _(Medição instrumental do runtime e definição do teto heurístico adotado na Spec 0018)_.
 
 ## 🛸 Open Source & Publicação
 

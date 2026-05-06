@@ -29,7 +29,7 @@ describe("Feature: Pointers (AGENTS.md Runtime Architecture)", () => {
 
     const rootContent = await fs.readFile(path.join(subTarget, "AGENTS.md"), "utf8");
     assert.match(rootContent, /<AI_GUIDELINES>/, "Raiz deve conter a tag mãe governada");
-    assert.match(rootContent, /Zona Topo: Diretivas Primarias/, "Raiz deve conter o monólito");
+    assert.match(rootContent, /Top Zone: Primary Directives/, "Raiz deve conter o monólito");
 
     const rulesDirExists = await fs
       .access(path.join(subTarget, ".ai-guidelines", "rules"))
@@ -47,17 +47,16 @@ describe("Feature: Pointers (AGENTS.md Runtime Architecture)", () => {
     const coreContent = await fs.readFile(path.join(subTarget, "AGENTS.md"), "utf8");
 
     assert.match(coreContent, /<AI_GUIDELINES>/);
-    assert.match(coreContent, /Zona Topo: Diretivas Primarias/);
-    assert.match(coreContent, /Regras Globais/);
+    assert.match(coreContent, /Top Zone: Primary Directives/);
     assert.match(coreContent, /<FEATURE_QUALITY_GATES>/);
     assert.match(coreContent, /<FEATURE_TDD>/);
     assert.ok(
-      coreContent.indexOf("Zona Topo: Diretivas Primarias") <
-        coreContent.indexOf("Zona Centro: Metodologias Opt-in")
+      coreContent.indexOf("Top Zone: Primary Directives") <
+        coreContent.indexOf("Center Zone: Opt-in Methodologies")
     );
     assert.ok(
-      coreContent.indexOf("Zona Centro: Metodologias Opt-in") <
-        coreContent.indexOf("Zona Base: Contexto Tatico")
+      coreContent.indexOf("Center Zone: Opt-in Methodologies") <
+        coreContent.indexOf("Base Zone: Tactical Context")
     );
   });
 
