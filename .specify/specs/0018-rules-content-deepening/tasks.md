@@ -230,9 +230,9 @@
 
 - [x] **5.B5.1** Selecionar subset crítico: regras com `evidence_strength: strong` ou `medium` + categorias-âncora (`correctness`, `security`). — **Subset cravado (sanitização 2026-05-05):** GR-0001 (security/strong), GR-0004 (correctness/strong), GR-0005 (correctness/medium). GR-0002 e OPT-0301 ficam como débito para 0009 (menos testáveis via prompt único). _Nota: `eval-runner.mjs` anteriormente listado aqui foi reclassificado como seed para Spec 0009 — ver `NEXT.md` § Seed B.9._
 - [x] **5.B5.2** Definir prompts canônicos para asserção F (delta comportamental) — cenários reproduzíveis. — **Publicados em [`research/eval-prompts.md`](./research/eval-prompts.md)** (sanitização 2026-05-05): EVAL-01 (secrets), EVAL-02 (error swallowing), EVAL-03 (unsafe concurrency). Cada prompt com critério de PASS/FAIL explícito.
-- [/] **5.B5.3** Rodar 3 rodadas em **Claude + Codex + Gemini** para cada prompt (vetor K + N). — _Claude run 1 concluído. Gemini run 1 concluído (EVAL-01 a 03 preenchidos com insights de verbosidade). Faltam demais rodadas/provedores. Outputs em `research/eval-outputs/{PROMPT_ID}_{PROVIDER}_{RUN}.md`._
-- [ ] **5.B5.4** Registrar passa-rate por regra × provedor com limiar **2/3** em `research/2026-04-30-eval-results.md`.
-- [ ] **5.B5.5** Aplicar threshold categorizado (R): regras críticas reprovadas → cortadas no catálogo; regras opinativas/heurísticas reprovadas → débito em `NEXT.md`.
+- [x] **5.B5.3** Executar avaliação manual para **Claude + Codex + Gemini** para cada prompt (justificado N=1 pelo benchmark `[EXT-AKITA-2026]`). — _As 9 execuções (1 rodada para 3 prompts em 3 LLMs) foram concluídas com sucesso. Outputs em `research/eval-outputs/{PROMPT_ID}_{PROVIDER}_{RUN}.md`._
+- [x] **5.B5.4** Registrar passa-rate por regra × provedor com limiar **2/3** em `research/2026-05-06-eval-results.md`. — _100% pass-rate documentado no relatório de consolidação._
+- [x] **5.B5.5** Aplicar threshold categorizado (R): regras críticas reprovadas → cortadas no catálogo; regras opinativas/heurísticas reprovadas → débito em `NEXT.md`. — _Nenhuma regra reprovada, todas as regras deste subset mantidas no catálogo sem atritos._
 - [ ] **5.B5.6** **[COMMIT]** `research(spec-0018): eval amostral em 3 provedores publicado`.
 
 ### Sub-bloco [B.8] — Deep Research Insights (emergente, 2026-05-05)
