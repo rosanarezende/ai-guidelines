@@ -245,7 +245,7 @@ SELECT * FROM users WHERE name = ?;
 ▼
 [2] cli/governance/monolith/rules-builder.mjs
 • Serializa o catálogo completo em rules.json (build artifact)
-• Estrutura: { rules: [...], by_id: {...}, by_scope: {...}, generated_at, schema_version }
+• Estrutura: { rules: [...], by_scope: {...}, generated_at, schema_version }
 │
 ├──▶ rules.json (build artifact — consumido por API/dashboard externo)
 │

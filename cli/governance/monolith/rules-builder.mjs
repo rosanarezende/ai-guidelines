@@ -1,7 +1,7 @@
 /**
  * Rules Builder — Catalog Serialization & Ledger Generation
  *
- * Consolidates parser output into structured catalog (rules.json) with 4 indices
+ * Consolidates parser output into structured catalog (rules.json) with 3 indices
  * + generates ledger for core rules. No external dependencies.
  *
  * Usage:
@@ -110,7 +110,6 @@ export async function buildRulesCatalog(sourceRulesDir, options = {}) {
     }
 
     // Step 3: Build indices
-    const by_id = buildById(rules, errors);
     const by_scope = buildByScope(rules);
     const by_feature = buildByFeature(rules);
 
@@ -121,7 +120,6 @@ export async function buildRulesCatalog(sourceRulesDir, options = {}) {
     // Step 4: Create catalog object
     const catalogJson = {
       rules,
-      by_id,
       by_scope,
       by_feature,
       generated_at: oldGeneratedAt || new Date().toISOString(),
@@ -186,35 +184,6 @@ export function generateCatalogMarkdown(rules, baseDir) {
 }
 
 /**
- * Build by_id index (ID -> index in rules array)
- * @param {Array} rules
- * @param {Array} errors Accumulator
- * @returns {Object}
- */
-function buildById(rules, errors) {
-  const by_id = {};
-  const seenIds = new Set();
-
-  for (let i = 0; i < rules.length; i++) {
-    const rule = rules[i];
-    if (!rule.id) {
-      errors.push(`[INDEX_ERROR] Rule missing 'id' field`);
-      continue;
-    }
-
-    if (seenIds.has(rule.id)) {
-      errors.push(`[INDEX_ERROR] Duplicate rule ID: ${rule.id}`);
-      continue;
-    }
-
-    seenIds.add(rule.id);
-    by_id[rule.id] = i;
-  }
-
-  return by_id;
-}
-
-/**
  * Build by_scope index (scope -> Array<Rule ID>)
  * @param {Array} rules
  * @returns {Object}
@@ -268,28 +237,25 @@ export function validateBuildOutput(catalog) {
     return { valid: false, errors: ["[VALIDATE_ERROR] Catalog is not an object"] };
   }
 
-  const { rules, by_id, by_scope, by_feature } = catalog;
+  const { rules, by_scope, by_feature } = catalog;
 
-  // Check 1: rules[] count matches by_id count
+  // Check 1: rules[] is an array
   if (!Array.isArray(rules)) {
     errors.push("[VALIDATE_ERROR] Catalog.rules is not an array");
-  } else if (!by_id || Object.keys(by_id).length !== rules.length) {
+    return { valid: false, errors };
+  }
+
+  // Build ID set from rules[] for cross-index validation
+  const ruleIds = new Set(rules.map((r) => r.id));
+
+  // Check 2: no duplicate IDs in rules[]
+  if (ruleIds.size !== rules.length) {
     errors.push(
-      `[VALIDATE_ERROR] by_id size (${by_id ? Object.keys(by_id).length : 0}) != rules length (${Array.isArray(rules) ? rules.length : 0})`
+      `[VALIDATE_ERROR] Duplicate IDs in rules[] (${rules.length} rules, ${ruleIds.size} unique IDs)`
     );
   }
 
-  // Check 2: All rules in rules[] are in by_id with correct index
-  if (Array.isArray(rules) && by_id) {
-    for (let i = 0; i < rules.length; i++) {
-      const rule = rules[i];
-      if (by_id[rule.id] !== i) {
-        errors.push(`[VALIDATE_ERROR] Rule ID ${rule.id} index mismatch in by_id`);
-      }
-    }
-  }
-
-  // Check 3: by_scope entries are valid subsets (using IDs)
+  // Check 3: by_scope entries reference valid rule IDs
   if (by_scope && typeof by_scope === "object") {
     for (const [scope, scopeIds] of Object.entries(by_scope)) {
       if (!Array.isArray(scopeIds)) {
@@ -297,14 +263,14 @@ export function validateBuildOutput(catalog) {
         continue;
       }
       for (const id of scopeIds) {
-        if (!by_id || by_id[id] === undefined) {
-          errors.push(`[VALIDATE_ERROR] Rule ID ${id} in by_scope[${scope}] but not in by_id`);
+        if (!ruleIds.has(id)) {
+          errors.push(`[VALIDATE_ERROR] Rule ID ${id} in by_scope[${scope}] but not in rules[]`);
         }
       }
     }
   }
 
-  // Check 4: by_feature entries are valid subsets (using IDs)
+  // Check 4: by_feature entries reference valid rule IDs
   if (by_feature && typeof by_feature === "object") {
     for (const [feature, featureIds] of Object.entries(by_feature)) {
       if (!Array.isArray(featureIds)) {
@@ -312,8 +278,10 @@ export function validateBuildOutput(catalog) {
         continue;
       }
       for (const id of featureIds) {
-        if (!by_id || by_id[id] === undefined) {
-          errors.push(`[VALIDATE_ERROR] Rule ID ${id} in by_feature[${feature}] but not in by_id`);
+        if (!ruleIds.has(id)) {
+          errors.push(
+            `[VALIDATE_ERROR] Rule ID ${id} in by_feature[${feature}] but not in rules[]`
+          );
         }
       }
     }
@@ -483,7 +451,6 @@ if (isMain) {
 
       console.log("✅ rules.json built successfully");
       console.log(`   - ${catalogJson.rules.length} rules indexed`);
-      console.log(`   - by_id: ${Object.keys(catalogJson.by_id).length} entries`);
       console.log(`   - by_scope: ${JSON.stringify(Object.keys(catalogJson.by_scope))}`);
       console.log(`   - Ledger: ${LEDGER_OUTPUT_PATH}`);
 

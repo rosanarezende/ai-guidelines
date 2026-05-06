@@ -26,13 +26,12 @@ const EMPTY_DIR = resolve("cli/governance/monolith/__fixtures__/rules-builder/em
 
 describe("Rules Builder", () => {
   describe("Discovery & I/O", () => {
-    it("[BR-BUILDER-01] DADO diretório com regras válidas QUANDO buildRulesCatalog ENTÃO retorna catálogo com 4 índices", async () => {
+    it("[BR-BUILDER-01] DADO diretório com regras válidas QUANDO buildRulesCatalog ENTÃO retorna catálogo com 3 índices", async () => {
       const result = await buildRulesCatalog(FIXTURES_DIR);
 
       assert.strictEqual(result.success, true);
       assert.ok(result.catalogJson);
       assert.ok(Array.isArray(result.catalogJson.rules));
-      assert.ok(typeof result.catalogJson.by_id === "object");
       assert.ok(typeof result.catalogJson.by_scope === "object");
       assert.ok(typeof result.catalogJson.by_feature === "object");
       assert.ok(result.catalogJson.generated_at);
@@ -64,50 +63,10 @@ describe("Rules Builder", () => {
 
       assert.ok(result.catalogJson);
       assert.ok("rules" in result.catalogJson);
-      assert.ok("by_id" in result.catalogJson);
       assert.ok("by_scope" in result.catalogJson);
       assert.ok("by_feature" in result.catalogJson);
       assert.ok("generated_at" in result.catalogJson);
       assert.ok("schema_version" in result.catalogJson);
-    });
-  });
-
-  describe("Indexing by ID", () => {
-    it("[BR-BUILDER-05] DADO regras com IDs únicos QUANDO buildById ENTÃO every rule accessible via by_id[id]", async () => {
-      const result = await buildRulesCatalog(FIXTURES_DIR);
-      const { rules, by_id } = result.catalogJson;
-
-      // Cada regra em rules[] deve estar em by_id
-      for (let i = 0; i < rules.length; i++) {
-        const rule = rules[i];
-        assert.strictEqual(by_id[rule.id], i, `Rule ${rule.id} index mismatch`);
-      }
-    });
-
-    it("[BR-BUILDER-06] DADO by_id índice QUANDO consultar ID válido ENTÃO retorna index da regra", async () => {
-      const result = await buildRulesCatalog(FIXTURES_DIR);
-      const { by_id } = result.catalogJson;
-
-      // Verificar que first rule está acessível
-      const firstId = Object.keys(by_id)[0];
-      if (firstId) {
-        assert.strictEqual(typeof by_id[firstId], "number");
-      }
-    });
-
-    it("[BR-BUILDER-07] DADO by_id índice QUANDO consultar ID inexistente ENTÃO retorna undefined", async () => {
-      const result = await buildRulesCatalog(FIXTURES_DIR);
-      const { by_id } = result.catalogJson;
-
-      const nonexistentId = "FAKE-9999";
-      assert.strictEqual(by_id[nonexistentId], undefined);
-    });
-
-    it("[BR-BUILDER-08] DADO regras em rules[] QUANDO contar entries em by_id ENTÃO counts são iguais", async () => {
-      const result = await buildRulesCatalog(FIXTURES_DIR);
-      const { rules, by_id } = result.catalogJson;
-
-      assert.strictEqual(rules.length, Object.keys(by_id).length);
     });
   });
 
@@ -174,12 +133,12 @@ describe("Rules Builder", () => {
 
     it("[BR-BUILDER-14] DADO regra sem opt_in_feature QUANDO buildByFeature ENTÃO não aparece em índice", async () => {
       const result = await buildRulesCatalog(FIXTURES_DIR);
-      const { rules, by_feature, by_id } = result.catalogJson;
+      const { rules, by_feature } = result.catalogJson;
 
       // Rules sem feature não devem estar em by_feature
       for (const [feature, featureIds] of Object.entries(by_feature)) {
         for (const id of featureIds) {
-          const rule = rules[by_id[id]];
+          const rule = rules.find((r) => r.id === id);
           assert.ok(
             rule.opt_in_feature,
             `Rule ${rule.id} in by_feature[${feature}] missing feature`
@@ -320,11 +279,10 @@ describe("Rules Builder", () => {
       assert.strictEqual(validation.errors.length, 0);
     });
 
-    it("[BR-BUILDER-21] DADO catálogo com inconsistência (regra em rules[] faltando em by_id) QUANDO validate ENTÃO detecta error", async () => {
+    it("[BR-BUILDER-21] DADO catálogo com inconsistência (regra em by_scope mas não em rules[]) QUANDO validate ENTÃO detecta error", async () => {
       const mockCatalog = {
         rules: [{ id: "TEST-1", scope: "universal", category: "process" }],
-        by_id: {}, // Missing TEST-1
-        by_scope: { universal: [{ id: "TEST-1" }], adapter: [], "opt-in": [] },
+        by_scope: { universal: ["TEST-1", "FAKE-1"], adapter: [], "opt-in": [] },
         by_feature: {},
       };
 
@@ -337,8 +295,7 @@ describe("Rules Builder", () => {
     it("[BR-BUILDER-22] DADO by_scope com regra inexistente QUANDO validate ENTÃO detecta error", async () => {
       const mockCatalog = {
         rules: [],
-        by_id: {},
-        by_scope: { universal: [{ id: "FAKE-1" }], adapter: [], "opt-in": [] },
+        by_scope: { universal: ["FAKE-1"], adapter: [], "opt-in": [] },
         by_feature: {},
       };
 
@@ -348,10 +305,9 @@ describe("Rules Builder", () => {
       assert.ok(validation.errors.length > 0);
     });
 
-    it("[BR-BUILDER-23] DADO catálogo com tamanho mismatch (by_id size != rules length) QUANDO validate ENTÃO detecta error", async () => {
+    it("[BR-BUILDER-23] DADO catálogo com IDs duplicados em rules[] QUANDO validate ENTÃO detecta error", async () => {
       const mockCatalog = {
-        rules: [{ id: "TEST-1" }, { id: "TEST-2" }],
-        by_id: { "TEST-1": { id: "TEST-1" } }, // Missing TEST-2
+        rules: [{ id: "TEST-1" }, { id: "TEST-1" }],
         by_scope: { universal: [], adapter: [], "opt-in": [] },
         by_feature: {},
       };
@@ -359,7 +315,7 @@ describe("Rules Builder", () => {
       const validation = validateBuildOutput(mockCatalog);
 
       assert.strictEqual(validation.valid, false);
-      assert.ok(validation.errors.some((err) => err.includes("by_id size")));
+      assert.ok(validation.errors.some((err) => err.includes("Duplicate IDs")));
     });
   });
 

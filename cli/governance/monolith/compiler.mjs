@@ -9,7 +9,7 @@ const SECTION_SEPARATOR = "\n\n---\n\n";
 /**
  * Load rules catalog from rules.json
  * @param {string} rulesJsonPath
- * @returns {Promise<{rules: Array, by_id: Object, by_scope: Object, by_feature: Object, generated_at: string, schema_version: string}>}
+ * @returns {Promise<{rules: Array, by_scope: Object, by_feature: Object, generated_at: string, schema_version: string}>}
  */
 export async function loadRulesCatalog(rulesJsonPath) {
   const content = await fs.readFile(rulesJsonPath, "utf-8");
