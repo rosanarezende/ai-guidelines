@@ -44,12 +44,20 @@ describe("Integration: Runtime Monolítico no AGENTS.md", () => {
 
       assert.match(agentsContent, /<AI_GUIDELINES>/);
       assert.match(agentsContent, /Top Zone: Primary Directives/);
+      assert.match(agentsContent, /Lifecycle & Spec System/);
+      assert.match(agentsContent, /Git & PR Workflow/);
+      assert.match(agentsContent, /Engineering Principles/);
       assert.match(agentsContent, /Center Zone: Opt-in Methodologies/);
       assert.match(agentsContent, /Base Zone: Tactical Context/);
       assert.match(agentsContent, /<FEATURE_QUALITY_GATES>/);
       assert.match(agentsContent, /<FEATURE_TDD>/);
       assert.match(agentsContent, /<FEATURE_BDD>/);
       assert.equal(await exists(path.join(targetDir, ".ai-guidelines", "rules")), false);
+      assert.equal(await exists(path.join(targetDir, ".ai-guidelines", "config.json")), true);
+      assert.equal(
+        await exists(path.join(targetDir, ".ai-guidelines", "templates", "spec-boilerplate.md")),
+        true
+      );
     });
   });
 
@@ -156,6 +164,24 @@ describe("Integration: Runtime Monolítico no AGENTS.md", () => {
       assert.match(agentsContent, /<AI_GUIDELINES>/);
       assert.match(agentsContent, /<FEATURE_QUALITY_GATES>/);
       assert.doesNotMatch(agentsContent, /ponteiro antigo/);
+    });
+  });
+
+  it("DADO comando providers QUANDO selecionar subset ENTÃO atualiza apenas trampolins correspondentes", async () => {
+    await withTempTarget("ai-e2e-providers-", async (targetDir) => {
+      await cliEntrypoint.execute("providers", {
+        target: targetDir,
+        "dry-run": false,
+        providers: ["claude", "cursor"],
+      });
+
+      assert.equal(await exists(path.join(targetDir, "CLAUDE.md")), true);
+      assert.equal(
+        await exists(path.join(targetDir, ".cursor", "rules", "ai-guidelines.mdc")),
+        true
+      );
+      assert.equal(await exists(path.join(targetDir, "GEMINI.md")), false);
+      assert.equal(await exists(path.join(targetDir, ".openai", "instructions.md")), false);
     });
   });
 });

@@ -19,6 +19,14 @@ import { buildFormatterRivalGuidance, buildMonorepoGuidance } from "#app/guidanc
 import { getInstallHint, promptUser, runInstall } from "#app/install";
 
 function buildOverwriteGuidance(mode, force) {
+  if (mode === "providers") {
+    return [
+      force
+        ? "modo --force ativo: os trampolins nativos dos providers selecionados podem ser sobrescritos"
+        : "modo conservador: arquivos nativos de provider existentes so sao sobrescritos com --force",
+    ];
+  }
+
   if (force) {
     if (mode === "init") {
       return [
@@ -75,6 +83,34 @@ export async function execute(mode, rawOptions) {
   };
 
   await ensureTargetDir(targetDir, options["dry-run"]);
+
+  if (effectiveMode === "providers") {
+    const actions = [];
+
+    for (const guidanceLine of buildOverwriteGuidance(effectiveMode, options.force)) {
+      actions.push(guidanceLine);
+    }
+
+    await applyPointers(targetDir, options, actions);
+
+    if (executionInput.usedWizard) {
+      console.log("Wizard: parâmetros ausentes preenchidos com entrada guiada.");
+    }
+
+    console.log(`Modo: ${effectiveMode}`);
+    console.log(`Target: ${targetDir}`);
+
+    if (actions.length === 0) {
+      console.log("Nenhuma mudança necessária.");
+    } else {
+      console.log("Ações:");
+      for (const action of actions) {
+        console.log(`- ${action}`);
+      }
+    }
+
+    return;
+  }
 
   const { packageJson } = await readPackageJson(targetDir, console.warn);
   const formatterContext = await detectFormatterContext(targetDir, packageJson);

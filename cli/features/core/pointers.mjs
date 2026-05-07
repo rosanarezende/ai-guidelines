@@ -4,17 +4,36 @@ import { EDITORIAL_FEATURES } from "#cli/args";
 import { ROOT_DIR } from "#fs/file-system";
 import { mergeAgentsContent } from "#governance/agents-merge";
 import {
-  compileCoreRulesContent,
   compileMonolithicAgentsContent,
   loadRulesCatalog,
   filterRulesByScope,
   formatRuleInstruction,
+  groupUniversalRulesByZone,
 } from "#governance/monolith/compiler";
 import {
-  normalizeProviderSelection,
+  normalizeAdapterSelection,
   readOptInRules,
   readRulesByName,
 } from "#governance/monolith/rules-loader";
+import { resolveAiGuidelinesConfig, writeAiGuidelinesConfig } from "#features/core/config";
+import { syncConsumerTemplates } from "#features/core/templates";
+import { syncProviderTrampolines } from "#features/core/trampolines";
+
+function buildTacticalContext(sddDir) {
+  return [
+    "> [!IMPORTANT]",
+    "> This project uses the **ai-guidelines** framework for AI governance.",
+    "> Operational guidelines and engineering rules are compiled within the `<AI_GUIDELINES>` block in `AGENTS.md`.",
+    "",
+    "### Centralized Governance",
+    "",
+    "The root `AGENTS.md` is the runtime artifact. Project-specific content must remain outside of the `<AI_GUIDELINES>` block.",
+    "",
+    "### Consumer Bootstrap",
+    "",
+    `Consumer-local ai-guidelines assets live under \`${sddDir}/\`. Templates mirrored by the CLI live in \`${sddDir}/templates/\`. Specs and roadmap remain under \`.specify/specs/\`.`,
+  ].join("\n");
+}
 
 /**
  * Aplica o runtime monolítico governado no AGENTS.md da raiz.
@@ -25,6 +44,25 @@ export async function applyPointers(targetDir, options, actions) {
   // Pointers são CORE e mandatórios.
 
   const rootAgentsPath = path.join(targetDir, "AGENTS.md");
+  const config = await resolveAiGuidelinesConfig(targetDir, options);
+
+  await writeAiGuidelinesConfig(targetDir, config, dryRun, actions);
+  await syncConsumerTemplates(
+    targetDir,
+    config,
+    { dryRun, prune: Boolean(options?.prune) },
+    actions
+  );
+  await syncProviderTrampolines(
+    targetDir,
+    config,
+    {
+      dryRun,
+      prune: Boolean(options?.prune),
+      force: Boolean(options?.force),
+    },
+    actions
+  );
 
   // Ler conteúdo atual ou criar vazio
   let currentContent = "";
@@ -35,46 +73,36 @@ export async function applyPointers(targetDir, options, actions) {
   }
 
   // Mesclar conteúdo para criar/atualizar o runtime governado na raiz
-  const pointerTemplatePath = path.join(ROOT_DIR, ".core", "templates", "AGENTS-pointer.md.tmpl");
-  const coreTemplatePath = path.join(ROOT_DIR, ".core", "templates", "AGENTS-core.md.tmpl");
   const sourceRulesDir = path.join(ROOT_DIR, ".core", "rules");
-
-  const pointerTemplate = await fs.readFile(pointerTemplatePath, "utf8");
-
-  // 5.B3.1.5.5 cutover: prefer compiled core rules from rules.json catalog;
-  // fall back to the legacy static template only if the catalog is missing.
-  // No double injection: when the catalog provides core, the .tmpl is ignored.
   const rulesJsonPath = path.join(sourceRulesDir, "_meta", "rules.json");
-  let coreBaseline = "";
   let catalog = null;
   try {
     catalog = await loadRulesCatalog(rulesJsonPath);
-    coreBaseline = compileCoreRulesContent(catalog);
   } catch {
     // Catalog absent or unreadable; fall back below.
   }
-  if (!coreBaseline) {
-    coreBaseline = await fs.readFile(coreTemplatePath, "utf8");
-  }
 
-  let globalRules = "";
+  let primaryDirectives = "";
+  let lifecycleRules = "";
+  let gitRules = "";
+  let engineeringRules = "";
   let providerRules = [];
   let optInRules = [];
 
-  const providerSelection = normalizeProviderSelection(options.provider);
+  const adapterSelection = normalizeAdapterSelection(config.adapters);
   const features = options.features ?? [];
 
   if (catalog) {
     const filtered = filterRulesByScope(catalog.rules, {
-      includeAdapters: providerSelection,
+      includeAdapters: adapterSelection,
       optInFeatures: features,
       lang: options.lang ?? "pt",
     });
-
-    const nonCoreUniversal = filtered.universal.filter(
-      (rule) => !(Array.isArray(rule.tags) && rule.tags.includes("core"))
-    );
-    globalRules = nonCoreUniversal.map(formatRuleInstruction).filter(Boolean).join("\n\n");
+    const groupedUniversalRules = groupUniversalRulesByZone(filtered.universal);
+    primaryDirectives = groupedUniversalRules.primaryDirectives;
+    lifecycleRules = groupedUniversalRules.lifecycleRules;
+    gitRules = groupedUniversalRules.gitRules;
+    engineeringRules = groupedUniversalRules.engineeringRules;
 
     for (const [adapter, rules] of Object.entries(filtered.adapters)) {
       const content = rules.map(formatRuleInstruction).filter(Boolean).join("\n\n");
@@ -90,8 +118,11 @@ export async function applyPointers(targetDir, options, actions) {
       }
     }
   } else {
-    globalRules = await fs.readFile(path.join(sourceRulesDir, "global-rules.md"), "utf8");
-    providerRules = await readRulesByName(sourceRulesDir, providerSelection);
+    primaryDirectives = await fs.readFile(
+      path.join(ROOT_DIR, ".core", "templates", "AGENTS-core.md.tmpl"),
+      "utf8"
+    );
+    providerRules = await readRulesByName(sourceRulesDir, adapterSelection);
     optInRules = await readOptInRules({
       sourceRulesDir,
       editorialFeatures: EDITORIAL_FEATURES,
@@ -101,11 +132,13 @@ export async function applyPointers(targetDir, options, actions) {
   }
 
   const monolithicBaseline = compileMonolithicAgentsContent({
-    coreTemplate: coreBaseline,
-    globalRules,
+    primaryDirectives,
+    lifecycleRules,
+    gitRules,
+    engineeringRules,
     providerRules,
     optInRules,
-    pointerTemplate,
+    tacticalContext: buildTacticalContext(config.sdd_dir),
   });
 
   // O mergeAgentsContent injeta/substitui apenas o bloco <AI_GUIDELINES>

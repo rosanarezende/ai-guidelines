@@ -30,6 +30,22 @@ describe("Feature: Pointers (AGENTS.md Runtime Architecture)", () => {
     const rootContent = await fs.readFile(path.join(subTarget, "AGENTS.md"), "utf8");
     assert.match(rootContent, /<AI_GUIDELINES>/, "Raiz deve conter a tag mãe governada");
     assert.match(rootContent, /Top Zone: Primary Directives/, "Raiz deve conter o monólito");
+    assert.equal(
+      await fs
+        .access(path.join(subTarget, ".ai-guidelines", "config.json"))
+        .then(() => true)
+        .catch(() => false),
+      true,
+      "Deve persistir config do consumidor"
+    );
+    assert.equal(
+      await fs
+        .access(path.join(subTarget, ".ai-guidelines", "templates", "spec-boilerplate.md"))
+        .then(() => true)
+        .catch(() => false),
+      true,
+      "Deve sincronizar boilerplates SDD"
+    );
 
     const rulesDirExists = await fs
       .access(path.join(subTarget, ".ai-guidelines", "rules"))
@@ -48,10 +64,17 @@ describe("Feature: Pointers (AGENTS.md Runtime Architecture)", () => {
 
     assert.match(coreContent, /<AI_GUIDELINES>/);
     assert.match(coreContent, /Top Zone: Primary Directives/);
+    assert.match(coreContent, /Lifecycle & Spec System/);
+    assert.match(coreContent, /Git & PR Workflow/);
+    assert.match(coreContent, /Engineering Principles/);
     assert.match(coreContent, /<FEATURE_QUALITY_GATES>/);
     assert.match(coreContent, /<FEATURE_TDD>/);
     assert.ok(
       coreContent.indexOf("Top Zone: Primary Directives") <
+        coreContent.indexOf("Lifecycle & Spec System")
+    );
+    assert.ok(
+      coreContent.indexOf("Engineering Principles") <
         coreContent.indexOf("Center Zone: Opt-in Methodologies")
     );
     assert.ok(
@@ -128,6 +151,13 @@ describe("Feature: Pointers (AGENTS.md Runtime Architecture)", () => {
 
     assert.equal(rootExists, false);
     assert.equal(rulesDirExists, false);
+    assert.equal(
+      await fs
+        .access(path.join(subTarget, ".ai-guidelines", "config.json"))
+        .then(() => true)
+        .catch(() => false),
+      false
+    );
     assert.ok(actions.some((a) => a.includes("[dry-run] write AGENTS.md")));
   });
 
@@ -166,6 +196,39 @@ describe("Feature: Pointers (AGENTS.md Runtime Architecture)", () => {
     await assert.rejects(
       () => applyPointers(subTarget, { features: ["tdd"], lang: "pt" }, []),
       /AI_GUIDELINES/
+    );
+  });
+
+  it("[PROVIDERS] Deve gerar apenas trampolins dos providers selecionados", async () => {
+    const subTarget = path.join(targetDir, "providers");
+    await fs.mkdir(subTarget, { recursive: true });
+
+    await applyPointers(
+      subTarget,
+      { providers: ["claude", "openai"], features: ["quality-gates"] },
+      []
+    );
+
+    assert.equal(
+      await fs
+        .access(path.join(subTarget, "CLAUDE.md"))
+        .then(() => true)
+        .catch(() => false),
+      true
+    );
+    assert.equal(
+      await fs
+        .access(path.join(subTarget, ".openai", "instructions.md"))
+        .then(() => true)
+        .catch(() => false),
+      true
+    );
+    assert.equal(
+      await fs
+        .access(path.join(subTarget, "GEMINI.md"))
+        .then(() => true)
+        .catch(() => false),
+      false
     );
   });
 });

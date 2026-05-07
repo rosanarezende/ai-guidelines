@@ -15,6 +15,7 @@ import {
   compileRulesContent,
   compileRulesFromCatalog,
   compileCoreRulesContent,
+  groupUniversalRulesByZone,
 } from "./compiler.mjs";
 import { buildRulesCatalog } from "./rules-builder.mjs";
 import fs from "node:fs/promises";
@@ -66,6 +67,20 @@ describe("monolith/compiler", () => {
 
     assert.doesNotMatch(normalized, /\.ai-guidelines\/AGENTS\.md/);
     assert.match(normalized, /<!-- END:ai-guidelines-core -->/);
+  });
+
+  it("[BR-CLI-COMPILER-23] DADO regras universais mistas QUANDO agrupar por zona ENTÃO separa lifecycle git e engineering", () => {
+    const grouped = groupUniversalRulesByZone([
+      { id: "CORE-01", instruction_en: "env", tags: ["core", "environment"] },
+      { id: "CORE-02", instruction_en: "sdd", tags: ["core", "sdd"] },
+      { id: "CORE-08", instruction_en: "harness", tags: ["core", "git", "harness_lock"] },
+      { id: "GR-0001", instruction_en: "security", tags: ["engineering", "security"] },
+    ]);
+
+    assert.match(grouped.primaryDirectives, /CORE-01/);
+    assert.match(grouped.lifecycleRules, /CORE-02/);
+    assert.match(grouped.gitRules, /CORE-08/);
+    assert.match(grouped.engineeringRules, /GR-0001/);
   });
 });
 

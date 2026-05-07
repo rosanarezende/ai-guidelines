@@ -2,15 +2,16 @@ import path from "node:path";
 import readline from "node:readline";
 import { normalizePackageManager, detectPackageManager } from "#formatters/package-context";
 import { readTextIfExists } from "#fs/file-system";
+import { DEFAULT_PROVIDERS, getSupportedProviders } from "#features/core/config";
 
-const SUPPORTED_MODES = ["init", "adopt"];
-const WIZARD_REQUIRED_KEYS = ["target", "name", "package-manager", "dry-run"];
+const SUPPORTED_MODES = ["init", "adopt", "providers"];
 const WIZARD_DEFAULTS = {
   mode: "adopt",
   target: ".",
   packageManager: "npm",
   dryRun: true,
   features: "prettier,husky,ci,quality-gates,tdd,bdd",
+  providers: DEFAULT_PROVIDERS.join(","),
 };
 
 /**
@@ -37,6 +38,17 @@ const FEATURE_DESCRIPTIONS = {
   bdd: "📝 BDD: Comportamento Guiado por Testes (Dado/Quando/Então em Português ou Inglês)",
 };
 
+const SUPPORTED_PROVIDER_OPTIONS = getSupportedProviders();
+const PROVIDER_DESCRIPTIONS = {
+  claude: "Claude Code (CLAUDE.md + .claudeignore)",
+  cursor: "Cursor (.cursor/rules/ai-guidelines.mdc)",
+  copilot: "GitHub Copilot (.github/copilot-instructions.md)",
+  windsurf: "Windsurf (.windsurfrules)",
+  gemini: "Gemini (GEMINI.md + .aiexclude)",
+  aider: "Aider (CONVENTIONS.md + .aiderignore)",
+  openai: "OpenAI / Codex (.openai/instructions.md + .gptignore)",
+};
+
 /**
  * Nomes dos arquivos .md gerados por features opt-in editoriais.
  * Derivado programaticamente de EDITORIAL_FEATURES.
@@ -55,16 +67,18 @@ export function printHelp() {
   console.log(`ai-guidelines CLI
 
 Uso:
-  node scripts/ai-guidelines-cli.mjs <init|adopt> [opcoes]
+  node scripts/ai-guidelines-cli.mjs <init|adopt|providers> [opcoes]
 
 Comandos:
   init   Cria baseline AI-first em projeto novo
   adopt  Aplica baseline AI-first em repositório existente
+  providers  Adiciona ou atualiza trampolins nativos de IA/IDE no repositório alvo
 
 Opções:
   --target <dir>             Diretório alvo (default: diretório atual)
   --name <project_name>      Nome do projeto (default: nome da pasta alvo)
   --package-manager <pm>     npm | pnpm | yarn | yarn@1.22.22 | yarn@4.1.1
+  --providers <lista>        claude,cursor,copilot,windsurf,gemini,aider,openai
   --lang <pt|en>             Idioma para features (ex: tdd, bdd). Padrão: pt
   --force                    Sobrescreve arquivos suportados
   --dry-run                  Mostra ações sem escrever arquivos
@@ -199,7 +213,12 @@ function shouldUseWizard(mode, rawOptions) {
     return false;
   }
 
-  return WIZARD_REQUIRED_KEYS.some((key) => rawOptions[key] === undefined);
+  const requiredKeys =
+    mode === "providers"
+      ? ["target", "providers", "dry-run"]
+      : ["target", "name", "package-manager", "providers", "dry-run"];
+
+  return requiredKeys.some((key) => rawOptions[key] === undefined);
 }
 
 function isValidPackageManagerInput(value) {
@@ -215,10 +234,15 @@ export async function resolveExecutionInput(mode, rawOptions) {
   const cleanOptions = sanitizeWizardRawOptions(rawOptions);
 
   if (!shouldUseWizard(mode, cleanOptions)) {
-    if (cleanOptions.features === undefined) {
+    if (cleanOptions.features === undefined && mode !== "providers") {
       cleanOptions.features = FEATURE_OPTIONS.filter((f) => !cleanOptions[`skip-${f}`]);
     } else if (typeof cleanOptions.features === "string") {
       cleanOptions.features = cleanOptions.features.split(",").map((f) => f.trim());
+    }
+    if (cleanOptions.providers === undefined) {
+      cleanOptions.providers = WIZARD_DEFAULTS.providers.split(",");
+    } else if (typeof cleanOptions.providers === "string") {
+      cleanOptions.providers = cleanOptions.providers.split(",").map((provider) => provider.trim());
     }
     return { mode, options: cleanOptions, usedWizard: false };
   }
@@ -250,7 +274,7 @@ export async function resolveExecutionInput(mode, rawOptions) {
 
   const defaultName = path.basename(path.resolve(wizardOptions.target));
 
-  if (wizardOptions.name === undefined) {
+  if (resolvedMode !== "providers" && wizardOptions.name === undefined) {
     wizardOptions.name = await promptTextWithDefault(
       ask,
       "Nome do projeto",
@@ -260,7 +284,7 @@ export async function resolveExecutionInput(mode, rawOptions) {
     );
   }
 
-  if (wizardOptions["package-manager"] === undefined) {
+  if (resolvedMode !== "providers" && wizardOptions["package-manager"] === undefined) {
     const pkgPath = path.join(wizardOptions.target, "package.json");
     const pkgContent = await readTextIfExists(pkgPath);
     let pkgJson = null;
@@ -281,12 +305,45 @@ export async function resolveExecutionInput(mode, rawOptions) {
     );
   }
 
-  if (wizardOptions.features === undefined) {
+  if (wizardOptions.providers === undefined) {
+    const providerPrompt =
+      "Providers e IDEs para gerar trampolins nativos:\n" +
+      SUPPORTED_PROVIDER_OPTIONS.map(
+        (provider) => `  - ${provider}: ${PROVIDER_DESCRIPTIONS[provider]}`
+      ).join("\n") +
+      `\nSeleção [${WIZARD_DEFAULTS.providers}]: `;
+
+    const providersInput = await promptTextWithDefault(
+      ask,
+      providerPrompt,
+      WIZARD_DEFAULTS.providers,
+      (value) =>
+        value
+          .split(",")
+          .every(
+            (provider) =>
+              SUPPORTED_PROVIDER_OPTIONS.includes(provider.trim()) || provider.trim() === ""
+          ),
+      "Um ou mais providers são inválidos."
+    );
+
+    wizardOptions.providers = providersInput
+      .split(",")
+      .map((provider) => provider.trim())
+      .filter(Boolean);
+  } else if (typeof wizardOptions.providers === "string") {
+    wizardOptions.providers = wizardOptions.providers.split(",").map((provider) => provider.trim());
+  }
+
+  if (resolvedMode !== "providers" && wizardOptions.features === undefined) {
     const suggestedFeatures = FEATURE_OPTIONS.filter((f) => !wizardOptions[`skip-${f}`]).join(",");
 
     const featurePrompt =
       "Features para ativar:\n" +
-      FEATURE_OPTIONS.map((f) => `  - ${f}: ${FEATURE_DESCRIPTIONS[f]}`).join("\n") +
+      "Infraestrutura:\n" +
+      INFRASTRUCTURE_FEATURES.map((f) => `  - ${f}: ${FEATURE_DESCRIPTIONS[f]}`).join("\n") +
+      "\nEditoriais:\n" +
+      EDITORIAL_FEATURES.map((f) => `  - ${f}: ${FEATURE_DESCRIPTIONS[f]}`).join("\n") +
       `\nSeleção [${suggestedFeatures}]: `;
 
     const featuresInput = await promptTextWithDefault(
@@ -301,11 +358,12 @@ export async function resolveExecutionInput(mode, rawOptions) {
       .split(",")
       .map((f) => f.trim())
       .filter(Boolean);
-  } else if (typeof wizardOptions.features === "string") {
+  } else if (resolvedMode !== "providers" && typeof wizardOptions.features === "string") {
     wizardOptions.features = wizardOptions.features.split(",").map((f) => f.trim());
   }
 
   if (
+    resolvedMode !== "providers" &&
     (wizardOptions.features.includes("tdd") || wizardOptions.features.includes("bdd")) &&
     wizardOptions.lang === undefined
   ) {
