@@ -1,3 +1,5 @@
+<!-- ai-guidelines-template: tasks-evidence-driven-boilerplate v=1 -->
+
 # Tasks — Spec [Número] [Título Curto] — `evidence-driven`
 
 > Spec: [`./spec.md`](./spec.md)
@@ -34,6 +36,7 @@
 - [ ] **0.10** `roadmap/backlog.md` atualizado: spec movida para "Em execução"; candidatas absorvidas migradas para `roadmap/historico.md` com ponteiro à spec absorvedora.
 - [ ] **0.11** `NEXT.md` instanciado (mandatório).
 - [ ] **0.12** Criar Pull Request em Draft. O agente usa o template do repositório se existir (ex: `.github/pull_request_template.md`), preenchendo as informações da spec. Caso não exista template, adicionar uma descrição concisa do contexto e escopo inicial.
+- [ ] **0.[COMMIT]** texto de commit atômico sugerido: "chore(spec-NNNN): setup inicial da spec". A IA deve fornecer a sugestão de commit como saída padrão de fechamento do sub-bloco, sem perguntar ao usuário.
 
 ### Sub-bloco [0.Research] — Stage 1: produzir researches
 
@@ -43,7 +46,7 @@
 - [ ] **0.R.2** Produzir `research/YYYY-MM-DD-<tema>.md` por pergunta. Cada arquivo cita fontes (URL + ID externo quando aplicável: CWE-NNN, paper, benchmark publicado, transcrição).
 - [ ] **0.R.3** Validar critério: cada research cobre pelo menos uma pergunta do `plan.md` E alimenta pelo menos um ponto `[DEC-*]`. Sem ambos, research sai do escopo (mover para `_drafts/` ou descartar).
 - [ ] **0.R.4** Análise de débitos: atualizar `NEXT.md` com eventuais insights secundários.
-- [ ] **0.R.[COMMIT]** texto de commit incremental sugerido: "research(spec-NNNN): sínteses Stage 1 publicadas"
+- [ ] **0.R.[COMMIT]** texto de commit incremental sugerido: "research(spec-NNNN): sínteses Stage 1 publicadas". A IA deve fornecer a sugestão de commit como saída padrão de fechamento do sub-bloco, sem perguntar.
 
 ### Sub-bloco [0.Brief] — Stage 1: popular `decision-brief.md` com opções
 
@@ -53,7 +56,7 @@
 - [ ] **0.B.2** Cross-refs entre pontos: pontos com dependência mútua explicitam o vínculo (ex.: "redação final depende de `[DEC-NNNN-AYY]`").
 - [ ] **0.B.3** Tabela "Resumo de status" no fim do brief com todos os pontos em `Pendente`.
 - [ ] **0.B.4** Análise de débitos: atualizar `NEXT.md`.
-- [ ] **0.B.[COMMIT]** texto de commit incremental sugerido: "docs(spec-NNNN): decision-brief.md populado com opções Stage 1"
+- [ ] **0.B.[COMMIT]** texto de commit incremental sugerido: "docs(spec-NNNN): decision-brief.md populado com opções Stage 1". A IA deve fornecer a sugestão de commit como saída padrão de fechamento do sub-bloco, sem perguntar.
 
 ### Sub-bloco [0.Gate] — Gate humano (decision-brief → Resolved)
 
@@ -66,13 +69,13 @@
 - [ ] **0.G.5** `plan.md` v2 publicado: seções de design técnico derivadas das decisões cravadas. Cada subseção referencia o `[DEC-NNNN-*]` correspondente. Stage 2 deixa de ser placeholder.
 - [ ] **0.G.6** `tasks.md` v2: este arquivo é atualizado — Fases 1–4 abaixo passam de placeholder para tasks operacionais derivadas do plan v2. Status atualizado para `In Progress (Stage 2)`.
 - [ ] **0.G.7** Análise de débitos: atualizar `NEXT.md`.
-- [ ] **0.G.[COMMIT]** texto de commit atômico sugerido: "docs(spec-NNNN): gate humano fechado — plan v2 + tasks v2 publicados"
+- [ ] **0.G.[COMMIT]** texto de commit atômico sugerido: "docs(spec-NNNN): gate humano fechado — plan v2 + tasks v2 publicados". A IA deve fornecer a sugestão de commit como saída padrão de fechamento do sub-bloco, sem perguntar.
 
 ---
 
 ## Fase 1 — Implementação A (Stage 2)
 
-> Primeiro sub-bloco de implementação derivado do `plan.md` v2. Cada sub-bloco encerra com **commit incremental atômico** — atomicidade tipo "história de usuário concluída", não "fim do dia". Cada sub-bloco referencia explicitamente o `[DEC-NNNN-*]` que o alimenta.
+> Primeiro sub-bloco de implementação derivado do `plan.md` v2. Cada sub-bloco encerra com **commit incremental atômico** — atomicidade tipo "história de usuário concluída", não "fim do dia". A IA deve fornecer a sugestão de commit como saída padrão de fechamento, sem perguntar. Cada sub-bloco referencia explicitamente o `[DEC-NNNN-*]` que o alimenta.
 
 > **Nota — promoção de regra.** Se a spec promover regra editorial / de processo / de IA, classificar explicitamente como **universal** × **opt-in** (cf. `.core/process/spec-foundation.md` § "Categorias de regras").
 
@@ -84,37 +87,29 @@
 - [ ] **1.A.2** Próxima task.
 - [ ] **1.A.N** Pipeline de check + test verde após o sub-bloco A (ex.: `yarn check && yarn test` no `ai-guidelines`; substitua pelo equivalente do stack do consumidor — `npm test`, `pnpm verify`, `cargo test`, `pytest`, etc.).
 - [ ] **1.A.4** Análise de débitos: atualizar `NEXT.md`.
-- [ ] **1.A.[COMMIT]** texto de commit incremental sugerido: "<tipo>(spec-NNNN): <resumo do sub-bloco A>"
+- [ ] **1.A.[COMMIT]** texto de commit incremental sugerido: "<tipo>(spec-NNNN): <resumo do sub-bloco A>". A IA deve fornecer a sugestão de commit como saída padrão de fechamento do sub-bloco, sem perguntar.
 
 ### Sub-bloco [B] — [nome do sub-bloco no plan]
 
 - [ ] **1.B.1** ...
 - [ ] **1.B.2** Análise de débitos: atualizar `NEXT.md`.
-- [ ] **1.B.[COMMIT]** texto de commit incremental sugerido: "<tipo>(spec-NNNN): <resumo do sub-bloco B>"
-
-> **Specs single-bloco:** se o `plan.md` define apenas um bloco de implementação, **fundir Fase 1 + Fase 2** num único conjunto de sub-blocos com nota explícita no header desta fase. Não pular Fase 2 silenciosamente.
+- [ ] **1.B.[COMMIT]** texto de commit incremental sugerido: "<tipo>(spec-NNNN): <resumo do sub-bloco B>". A IA deve fornecer a sugestão de commit como saída padrão de fechamento do sub-bloco, sem perguntar.
 
 ---
 
-## Fase 2 — Implementação B (Stage 2)
+## Fase Extra Condicional (Implementação B, Migração, etc.)
 
-> Segundo sub-bloco de implementação. Mesma exigência de **commits incrementais atômicos** ao final de cada sub-bloco. Specs single-bloco fundem 1+2 (cf. nota acima).
+> Fase opcional. Criada apenas quando houver um segundo estágio real de implementação, migração, hardening ou rollout.
 
 ### Sub-bloco [C] — [nome do sub-bloco no plan]
 
-- [ ] **2.C.1** ...
-- [ ] **2.C.2** Análise de débitos: atualizar `NEXT.md`.
-- [ ] **2.C.[COMMIT]** texto de commit incremental sugerido: "<tipo>(spec-NNNN): <resumo do sub-bloco C>"
-
-### Sub-bloco [D] — [nome do sub-bloco no plan]
-
-- [ ] **2.D.1** ...
-- [ ] **2.D.2** Análise de débitos: atualizar `NEXT.md`.
-- [ ] **2.D.[COMMIT]** texto de commit incremental sugerido: "<tipo>(spec-NNNN): <resumo do sub-bloco D>"
+- [ ] **C.1** ...
+- [ ] **C.2** Análise de débitos: atualizar `NEXT.md`.
+- [ ] **C.[COMMIT]** texto de commit incremental sugerido: "<tipo>(spec-NNNN): <resumo do sub-bloco C>". A IA deve fornecer a sugestão de commit como saída padrão de fechamento do sub-bloco, sem perguntar.
 
 ---
 
-## Fase 3 — Preparação para Review (Gate de Homologação)
+## Fase de Review (Gate de Homologação)
 
 > **Fase exclusiva para empacotamento e homologação.** Nenhuma implementação nova após este ponto, exceto correções demandadas pelo review humano.
 
@@ -129,7 +124,7 @@
 
 ---
 
-## Fase 4 — Encerramento Pré-Merge
+## Fase de Encerramento Pré-Merge
 
 > **[MANDATÓRIO]** Esta fase ocorre **na branch do PR, antes do merge**. Nenhuma tarefa pós-merge. O merge só ocorre após este checklist completo.
 

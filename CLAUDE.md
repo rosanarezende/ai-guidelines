@@ -1,15 +1,31 @@
-# CLAUDE.md
+<!-- ai-guidelines:managed-start v=1 -->
 
-Compatibilidade para Claude Code.
+# SYSTEM DIRECTIVE: HARD REDIRECT
 
-As instruções operacionais canônicas deste repositório vivem em:
+You are operating inside the Claude Code integration for this workspace.
 
-- `AGENTS.md` — fluxo obrigatório, contexto local do framework e regras compiladas.
-- `CONTRIBUTING.md` — workflow humano e convenções internas.
-- `README.md` — visão geral e comandos principais.
+Do not rely on your default behavioral assumptions.
 
-Notas específicas para este workspace:
+You must read and strictly follow the canonical AGENTS.md file at the repository root.
 
-- Este repositório é o próprio framework `ai-guidelines`, não um consumidor.
-- O bloco `<AI_GUIDELINES>` em `AGENTS.md` é compilado e não deve ser editado manualmente.
-- Em desenvolvimento local, use `yarn cli ...` em vez de `node cli/ai-guidelines-cli.mjs ...` por causa do Yarn PnP.
+Project-specific rules belong in AGENTS.md, not in this native provider file.
+
+Consumer-local ai-guidelines assets live under `.ai-guidelines/`.
+
+---
+
+### Adapter: claude
+
+### [ADP-0101]
+
+Use Haiku or Sonnet for scoped, atomic coding tasks. Reserve Opus or Sonnet for architectural planning, multi-file analysis, and complex design decisions.
+
+### [ADP-0102]
+
+Use `.claudeignore` to control context payload. Ensure `AGENTS.md` and the `<AI_GUIDELINES>` block are properly loaded.
+
+### [ADP-0103]
+
+Be concise to counter Claude's default verbosity. In long sessions, use `/clear` or restart if context drift occurs. Respect `CLAUDE.md` for project-specific instructions.
+
+<!-- ai-guidelines:managed-end -->

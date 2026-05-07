@@ -48,54 +48,6 @@ Consult the "Global Rules" section injected later in this `<AI_GUIDELINES>` bloc
 
 Always respond using the repository default language.
 
-### Provider Adapters
-
-### Adapter: claude
-
-### [ADP-0101]
-
-Use Haiku or Sonnet for scoped, atomic coding tasks. Reserve Opus or Sonnet for architectural planning, multi-file analysis, and complex design decisions.
-
-### [ADP-0102]
-
-Use `.claudeignore` to control context payload. Ensure `AGENTS.md` and the `<AI_GUIDELINES>` block are properly loaded.
-
-### [ADP-0103]
-
-Be concise to counter Claude's default verbosity. In long sessions, use `/clear` or restart if context drift occurs. Respect `CLAUDE.md` for project-specific instructions.
-
-### Adapter: codex
-
-### [ADP-0201]
-
-Leverage `.github/copilot-instructions.md` for project instructions in Copilot Chat. Use structured comments and JSDoc to guide inline code completion.
-
-### [ADP-0202]
-
-Use `#file` references to refine context in Copilot Chat. Ensure Codex CLI loads `AGENTS.md` properly.
-
-### [ADP-0203]
-
-Keep files focused and imports explicit to improve inline suggestions. Strictly follow governance rules (e.g., no autonomous push) when operating autonomously.
-
-### Adapter: gemini
-
-### [ADP-0301]
-
-Load project-specific instructions from `GEMINI.md` and ensure `<AI_GUIDELINES>` in `AGENTS.md` is present.
-
-### [ADP-0302]
-
-Manage global skills carefully in `~/.gemini/skills/` and prune unused scripts to prevent token bloat.
-
-### [ADP-0303]
-
-Aggressively use `.geminiignore` to exclude build artifacts, logs, binaries, and dependencies from context, preventing token waste.
-
-### [ADP-0304]
-
-Use checkpoints via artifacts to preserve context in long sessions. Reinforce destructive command constraints, as Gemini tends to be highly proactive.
-
 ---
 
 ## Lifecycle & Spec System

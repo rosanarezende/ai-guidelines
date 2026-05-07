@@ -1,3 +1,5 @@
+<!-- ai-guidelines-template: project-config-boilerplate v=1 -->
+
 # projects.md — Contexto Local de Projetos
 
 > Este arquivo NÃO é versionado. Copie-o para `~/.gemini/projects.md` (ou equivalente
