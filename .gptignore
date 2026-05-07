@@ -1,0 +1,10 @@
+node_modules
+.git
+.yarn
+dist
+build
+coverage
+.next
+.turbo
+.cache
+.ai-guidelines/templates

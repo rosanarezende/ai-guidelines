@@ -1,0 +1,5 @@
+{
+  "sdd_dir": ".ai-guidelines",
+  "providers": ["claude", "gemini", "openai"],
+  "adapters": ["claude", "gemini", "codex"]
+}
