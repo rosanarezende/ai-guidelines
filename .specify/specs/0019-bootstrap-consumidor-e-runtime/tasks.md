@@ -95,7 +95,7 @@
 - [x] **3.3** Critérios de aceite de `spec.md` e DoD de `plan.md` confirmados.
 - [x] **3.4** `decision-brief.md`: validar pontos `Resolved` contra o design.
 - [x] **3.5** Validar a entrega em ambiente real (`yarn cli adopt --target . --dry-run`).
-- [ ] **3.6** PR atualizado com descrição em 3 etapas.
+- [x] **3.6** PR atualizado com descrição em 3 etapas.
 - [ ] **3.7** **[MANDATÓRIO]** Aguardar Gate de Review Humano.
 - [ ] **3.8** Aplicar correções.
 

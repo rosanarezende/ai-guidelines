@@ -32,12 +32,13 @@
 - [ ] **0.9** `roadmap/backlog.md` atualizado: spec movida para "Em execução"; candidatas absorvidas migradas para `roadmap/historico.md` com ponteiro à spec absorvedora.
 - [ ] **0.10** `NEXT.md` instanciado (mandatório).
 - [ ] **0.11** Criar Pull Request em Draft. O agente usa o template do repositório se existir (ex: `.github/pull_request_template.md`), preenchendo as informações da spec. Caso não exista template, adicionar uma descrição concisa do contexto e escopo inicial.
+- [ ] **0.[COMMIT]** texto de commit atômico sugerido: "chore(spec-NNNN): setup inicial da spec". A IA deve fornecer a sugestão de commit como saída padrão de fechamento do sub-bloco, sem perguntar ao usuário.
 
 ---
 
 ## Fase 1 — Implementação A
 
-> Primeiro sub-bloco de implementação derivado do `plan.md`. Cada sub-bloco encerra com **commit incremental atômico** — atomicidade tipo "história de usuário concluída", não "fim do dia".
+> Bloco principal de implementação derivado do `plan.md`. Cada sub-bloco encerra com **commit incremental atômico** — atomicidade tipo "história de usuário concluída", não "fim do dia". A IA deve fornecer a sugestão de commit como saída padrão de fechamento, sem perguntar.
 
 > **Nota — promoção de regra.** Se a spec promover regra editorial / de processo / de IA, classificar explicitamente como **universal** × **opt-in** (cf. `.core/process/spec-foundation.md` § "Categorias de regras").
 
@@ -49,37 +50,29 @@
 - [ ] **1.A.2** Próxima task.
 - [ ] **1.A.N** Pipeline de check + test verde após o sub-bloco A (ex.: `yarn check && yarn test` no `ai-guidelines`; substitua pelo equivalente do stack do consumidor — `npm test`, `pnpm verify`, `cargo test`, `pytest`, etc.).
 - [ ] **1.A.4** Análise de débitos: atualizar `NEXT.md`.
-- [ ] **1.A.[COMMIT]** texto de commit incremental sugerido: "<tipo>(spec-NNNN): <resumo do sub-bloco A>"
+- [ ] **1.A.[COMMIT]** texto de commit incremental sugerido: "<tipo>(spec-NNNN): <resumo do sub-bloco A>". A IA deve fornecer a sugestão de commit como saída padrão de fechamento do sub-bloco, sem perguntar.
 
 ### Sub-bloco [B] — [nome do sub-bloco no plan]
 
 - [ ] **1.B.1** ...
 - [ ] **1.B.2** Análise de débitos: atualizar `NEXT.md`.
-- [ ] **1.B.[COMMIT]** texto de commit incremental sugerido: "<tipo>(spec-NNNN): <resumo do sub-bloco B>"
-
-> **Specs single-bloco:** se o `plan.md` define apenas um bloco de implementação, **fundir Fase 1 + Fase 2** num único conjunto de sub-blocos com nota explícita no header desta fase. Não pular Fase 2 silenciosamente.
+- [ ] **1.B.[COMMIT]** texto de commit incremental sugerido: "<tipo>(spec-NNNN): <resumo do sub-bloco B>". A IA deve fornecer a sugestão de commit como saída padrão de fechamento do sub-bloco, sem perguntar.
 
 ---
 
-## Fase 2 — Implementação B
+## Fase Extra Condicional (Implementação B, Migração, etc.)
 
-> Segundo sub-bloco de implementação. Mesma exigência de **commits incrementais atômicos** ao final de cada sub-bloco. Specs single-bloco fundem 1+2 (cf. nota acima).
+> Fase opcional. Criada apenas quando houver um segundo estágio real de implementação, migração, hardening ou rollout.
 
 ### Sub-bloco [C] — [nome do sub-bloco no plan]
 
-- [ ] **2.C.1** ...
-- [ ] **2.C.2** Análise de débitos: atualizar `NEXT.md`.
-- [ ] **2.C.[COMMIT]** texto de commit incremental sugerido: "<tipo>(spec-NNNN): <resumo do sub-bloco C>"
-
-### Sub-bloco [D] — [nome do sub-bloco no plan]
-
-- [ ] **2.D.1** ...
-- [ ] **2.D.2** Análise de débitos: atualizar `NEXT.md`.
-- [ ] **2.D.[COMMIT]** texto de commit incremental sugerido: "<tipo>(spec-NNNN): <resumo do sub-bloco D>"
+- [ ] **C.1** ...
+- [ ] **C.2** Análise de débitos: atualizar `NEXT.md`.
+- [ ] **C.[COMMIT]** texto de commit incremental sugerido: "<tipo>(spec-NNNN): <resumo do sub-bloco C>". A IA deve fornecer a sugestão de commit como saída padrão de fechamento do sub-bloco, sem perguntar.
 
 ---
 
-## Fase 3 — Preparação para Review (Gate de Homologação)
+## Fase de Review (Gate de Homologação)
 
 > **Fase exclusiva para empacotamento e homologação.** Nenhuma implementação nova após este ponto, exceto correções demandadas pelo review humano.
 
@@ -93,7 +86,7 @@
 
 ---
 
-## Fase 4 — Encerramento Pré-Merge
+## Fase de Encerramento Pré-Merge
 
 > **[MANDATÓRIO]** Esta fase ocorre **na branch do PR, antes do merge**. Nenhuma tarefa pós-merge. O merge só ocorre após este checklist completo.
 

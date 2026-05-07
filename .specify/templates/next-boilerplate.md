@@ -15,19 +15,19 @@
 
 > Débitos conscientes (refactors postergados, edge cases não cobertos, riscos não mitigados). Subdivididos pela fase em que foram gerados.
 
-### Débitos da Fase 0
+### Débitos da Fase 0 (Setup)
 
 _(Nenhum débito registrado ainda)_
 
-### Débitos da Fase 1
+### Débitos da Fase 1 (Implementação)
 
 _(Nenhum débito registrado ainda)_
 
-### Débitos da Fase 2
+### Débitos de Fases Adicionais (se aplicável)
 
 _(Nenhum débito registrado ainda)_
 
-### Débitos da Fase 3
+### Débitos da Fase de Review
 
 _(Nenhum débito registrado ainda)_
 

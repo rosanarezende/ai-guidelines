@@ -41,7 +41,7 @@ Toda spec declara seu **tipo** no header da `spec.md`, em **campo obrigatório s
 - `tasks-evidence-driven-boilerplate.md` — Stage 1 entre Setup e Implementação A.
 - `tasks-deterministic-boilerplate.md` — single-pass, sem Stage 1.
 - `tasks-mixed-boilerplate.md` — híbrido com caveat de paralelismo.
-- `tasks-boilerplate.md` (genérico) — referência canônica do modelo de 5 fases.
+- `tasks-boilerplate.md` (genérico) — referência canônica da espinha dorsal de fases.
 
 ---
 
@@ -93,13 +93,13 @@ entendimento técnico evolui. Conteúdo:
 
 ### `tasks.md` — checklist vivo
 
-Progresso operacional. Marca tasks `[x]` a cada degrau. **Modelo canônico de 5 fases** (instanciado a partir da variante de boilerplate apropriada ao tipo declarado na `spec.md` — ver § "Templates"):
+Progresso operacional. Marca tasks `[x]` a cada degrau. **Espinha dorsal de execução** (instanciado a partir da variante de boilerplate apropriada ao tipo declarado na `spec.md` — ver § "Templates"):
 
-- **Fase 0**: Setup (bootstrap, criação de branch, instanciação de artefatos, validação humana inicial, criação do PR em Draft). Em `evidence-driven`/`mixed`, esta fase também inclui **Stage 1** (Research → `decision-brief.md` populado → Gate humano `Resolved`).
-- **Fase 1**: Implementação A (primeiro sub-bloco; encerra com commit incremental atômico).
-- **Fase 2**: Implementação B (segundo sub-bloco; mesmo critério de atomicidade). Specs single-bloco fundem 1+2 com nota explícita.
-- **Fase 3**: Preparação para Review (Gate de Homologação) — empacotamento, pipeline verde, PR description, **aguardar gate humano formal**.
-- **Fase 4**: Encerramento pré-merge (na branch do PR, antes do merge — migra research, deleta `NEXT.md`, atualiza roadmap, status final).
+- **Fase 0 (Setup)**: Bootstrap, criação de branch, instanciação de artefatos, criação do PR em Draft. Em `evidence-driven`/`mixed`, esta fase também inclui **Stage 1** (Research → Gate humano). O sub-bloco encerra obrigatoriamente com um `[COMMIT]` de setup gerado sem perguntar.
+- **Fase 1 (Implementação Principal)**: Execução técnica do sub-bloco primário; encerra obrigatoriamente com sugestão de `[COMMIT]` atômico.
+- **Fase Extra Condicional (Migração/Hardening/Rollout)**: Adicionada apenas se houver um segundo estágio real. O boilerplate foca na Fase 1 e omite fases implementativas extras a menos que explicitamente necessárias.
+- **Fase de Review (Gate de Homologação)**: Empacotamento, pipeline verde, descrição em 3 etapas do PR, **aguardar gate humano formal**.
+- **Fase de Encerramento (Pré-Merge)**: Migra research, consolida e deleta `NEXT.md`, atualiza roadmap, status final.
 
 ### `NEXT.md` — obrigatório contínuo
 
@@ -146,7 +146,7 @@ Boilerplates canônicos em `.specify/templates/`:
 
 **Variantes de `tasks.md`** (escolha conforme o tipo declarado no header da `spec.md`):
 
-- `tasks-boilerplate.md` — variante genérica de referência (modelo de 5 fases).
+- `tasks-boilerplate.md` — variante genérica de referência (espinha dorsal de fases).
 - `tasks-evidence-driven-boilerplate.md` — Stage 1 + Gate humano antes da Implementação A.
 - `tasks-deterministic-boilerplate.md` — single-pass, sem Stage 1.
 - `tasks-mixed-boilerplate.md` — Stage 1 condicional para sub-blocos `(evidence-driven)`.
