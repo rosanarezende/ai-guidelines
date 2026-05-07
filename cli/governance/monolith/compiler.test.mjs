@@ -38,7 +38,7 @@ describe("monolith/compiler", () => {
     assert.ok(compiled.endsWith("\n"));
   });
 
-  it("[BR-CLI-COMPILER-30] DADO compilação QUANDO emitida ENTÃO NÃO contém seção Provider Adapters (movida para trampolins)", () => {
+  it("[BR-CLI-COMPILER-30] DADO compilação QUANDO emitida ENTÃO NÃO contém seção Provider Adapters (movida para provider entrypoints)", () => {
     const compiled = compileMonolithicAgentsContent({
       primaryDirectives: "PRIMARY",
       lifecycleRules: "LIFECYCLE",
@@ -56,7 +56,7 @@ describe("monolith/compiler", () => {
     assert.doesNotMatch(
       compiled,
       /### Adapter:/,
-      "Adapter content vive nos trampolins, não no AGENTS.md"
+      "Adapter content vive nos provider entrypoints, não no AGENTS.md"
     );
     assert.match(compiled, /Top Zone: Primary Directives/);
     assert.match(compiled, /Lifecycle & Spec System/);

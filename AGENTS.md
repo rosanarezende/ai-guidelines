@@ -20,7 +20,7 @@ Conteúdo específico deste repositório deve ficar fora de `<AI_GUIDELINES>`. O
 
 ## Quickstart Local
 
-Este workspace usa Yarn 4 com Plug'n'Play. Para execução local da CLI, o caminho suportado é `yarn cli ...`.
+Este workspace usa Yarn 4 com Plug'n'Play. Para execução local da CLI, o caminho suportado é `yarn guidelines ...`.
 
 ```bash
 yarn install --immutable
@@ -29,7 +29,7 @@ yarn format
 yarn check
 yarn test
 yarn check:repo
-yarn cli adopt --target . --dry-run
+yarn guidelines adopt --target . --dry-run
 ```
 
 <AI_GUIDELINES>

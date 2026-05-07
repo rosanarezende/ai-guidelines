@@ -359,7 +359,7 @@ function buildSection(title, buffers, level = 2) {
  *
  * **Adapter content NÃO é injetado aqui** desde 2026-05-07 (Spec 0019,
  * `[DEC-0019-C02]`). Regras específicas de cada adapter (`claude`, `codex`,
- * `gemini`) passam a viver dentro do trampolino do provider correspondente
+ * `gemini`) passam a viver dentro do provider entrypoint do provider correspondente
  * (CLAUDE.md, .openai/instructions.md, GEMINI.md), no bloco `managed-block`,
  * abaixo do hard-redirect. Essa colocalização elimina o wrapper H3 órfão
  * `### Provider Adapters` que existia no compilado e dá a cada provider um

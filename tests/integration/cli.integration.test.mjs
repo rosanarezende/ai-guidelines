@@ -167,7 +167,7 @@ describe("Integration: Runtime Monolítico no AGENTS.md", () => {
     });
   });
 
-  it("DADO comando providers QUANDO selecionar subset ENTÃO atualiza apenas trampolins correspondentes", async () => {
+  it("DADO comando providers QUANDO selecionar subset ENTÃO atualiza apenas provider entrypoints correspondentes", async () => {
     await withTempTarget("ai-e2e-providers-", async (targetDir) => {
       await cliEntrypoint.execute("providers", {
         target: targetDir,
@@ -250,8 +250,8 @@ describe("Integration: Runtime Monolítico no AGENTS.md", () => {
     });
   });
 
-  it("DADO trampolino preexistente sem marcadores QUANDO adopt ENTÃO bloco gerenciado prepended e conteúdo legado preservado abaixo", async () => {
-    await withTempTarget("ai-e2e-legacy-trampoline-", async (targetDir) => {
+  it("DADO provider entrypoint preexistente sem marcadores QUANDO adopt ENTÃO bloco gerenciado prepended e conteúdo legado preservado abaixo", async () => {
+    await withTempTarget("ai-e2e-legacy-provider-entrypoint-", async (targetDir) => {
       const claudePath = path.join(targetDir, "CLAUDE.md");
       const legacyContent = "# Custom Claude rules\n\nNotes from before ai-guidelines.\n";
       await fs.writeFile(claudePath, legacyContent, "utf8");
@@ -277,7 +277,7 @@ describe("Integration: Runtime Monolítico no AGENTS.md", () => {
     });
   });
 
-  it("DADO trampolino com marcadores QUANDO update ENTÃO atualiza apenas o bloco interno e preserva sufixo do consumidor", async () => {
+  it("DADO provider entrypoint com marcadores QUANDO update ENTÃO atualiza apenas o bloco interno e preserva sufixo do consumidor", async () => {
     await withTempTarget("ai-e2e-managed-update-", async (targetDir) => {
       await cliEntrypoint.execute("adopt", {
         target: targetDir,

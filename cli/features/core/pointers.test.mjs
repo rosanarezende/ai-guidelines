@@ -199,7 +199,7 @@ describe("Feature: Pointers (AGENTS.md Runtime Architecture)", () => {
     );
   });
 
-  it("[PROVIDERS] Deve gerar apenas trampolins dos providers selecionados", async () => {
+  it("[PROVIDERS] Deve gerar apenas provider entrypoints dos providers selecionados", async () => {
     const subTarget = path.join(targetDir, "providers");
     await fs.mkdir(subTarget, { recursive: true });
 

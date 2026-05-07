@@ -24,14 +24,14 @@ function buildOverwriteGuidance(mode, force) {
     return [
       force
         ? "modo --force ativo: o conteúdo legado preservado abaixo de blocos managed em arquivos preexistentes pode ser descartado"
-        : "modo update headless: bloco managed dos trampolins é atualizado no lugar; conteúdo do consumidor fora do bloco fica intocado",
+        : "modo update headless: bloco managed dos provider entrypoints é atualizado no lugar; conteúdo do consumidor fora do bloco fica intocado",
     ];
   }
 
   if (mode === "providers") {
     return [
       force
-        ? "modo --force ativo: os trampolins nativos dos providers selecionados podem ser sobrescritos"
+        ? "modo --force ativo: os provider entrypoints nativos dos providers selecionados podem ser sobrescritos"
         : "modo conservador: arquivos nativos de provider existentes so sao sobrescritos com --force",
     ];
   }

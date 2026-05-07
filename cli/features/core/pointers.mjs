@@ -21,7 +21,7 @@ import {
   writeAiGuidelinesConfig,
 } from "#features/core/config";
 import { syncConsumerTemplates } from "#features/core/templates";
-import { syncProviderTrampolines } from "#features/core/trampolines";
+import { syncProviderEntrypoints } from "#features/core/provider-entrypoints";
 
 function buildTacticalContext(sddDir) {
   return [
@@ -136,7 +136,7 @@ export async function applyPointers(targetDir, options, actions) {
 
   const compiled = await loadCompiledRules(config);
 
-  await syncProviderTrampolines(
+  await syncProviderEntrypoints(
     targetDir,
     { ...config, adapterRulesByName: compiled.adapterRulesByName },
     { dryRun, prune, force },

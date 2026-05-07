@@ -75,7 +75,7 @@ export function printHelp() {
   console.log(`ai-guidelines CLI
 
 Uso:
-  yarn cli <init|adopt|providers|update> [opcoes]
+  yarn guidelines <init|adopt|providers|update> [opcoes]
 
 Comandos:
   init           Cria baseline AI-first em projeto novo
@@ -387,11 +387,11 @@ export async function resolveExecutionInput(mode, rawOptions) {
         },
         {
           value: "providers",
-          name: "providers — adiciona ou atualiza trampolins nativos",
+          name: "providers — adiciona ou atualiza provider entrypoints nativos",
         },
         {
           value: "update",
-          name: "update — re-aplica trampolins, templates e runtime a partir do config existente",
+          name: "update — re-aplica provider entrypoints, templates e runtime a partir do config existente",
         },
       ],
       WIZARD_DEFAULTS.mode,
@@ -446,7 +446,7 @@ export async function resolveExecutionInput(mode, rawOptions) {
   if (wizardOptions.providers === undefined) {
     wizardOptions.providers = await promptCheckboxWithDefault(
       prompter,
-      "Providers e IDEs para gerar trampolins nativos",
+      "Providers e IDEs para gerar provider entrypoints nativos",
       SUPPORTED_PROVIDER_OPTIONS.map((provider) => ({
         value: provider,
         name: `${provider} — ${PROVIDER_DESCRIPTIONS[provider]}`,

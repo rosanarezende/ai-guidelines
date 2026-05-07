@@ -42,7 +42,7 @@ function buildMarkdownInner(providerLabel, sddDir, adapterContents) {
   return sections.join("\n\n---\n\n");
 }
 
-function getProviderTrampolines(provider, sddDir, adapterRulesByName = {}) {
+function getProviderEntrypoints(provider, sddDir, adapterRulesByName = {}) {
   const adapters = getAdaptersForProvider(provider);
   const adapterContents = adapters
     .map((adapter) => adapterRulesByName[adapter])
@@ -90,7 +90,7 @@ function getProviderTrampolines(provider, sddDir, adapterRulesByName = {}) {
 
 function getAllManagedRelativePaths(sddDir) {
   return getSupportedProviders().flatMap((provider) => {
-    return getProviderTrampolines(provider, sddDir).map(([relativePath]) => relativePath);
+    return getProviderEntrypoints(provider, sddDir).map(([relativePath]) => relativePath);
   });
 }
 
@@ -123,7 +123,7 @@ function describeAction(state, relativePath, dryRun) {
   }
 }
 
-async function writeManagedTrampoline(targetDir, relativePath, innerContent, options, actions) {
+async function writeManagedEntrypoint(targetDir, relativePath, innerContent, options, actions) {
   const absolutePath = path.join(targetDir, relativePath);
   const currentContent = await readTextIfExists(absolutePath);
   const syntax = inferSyntaxFromPath(relativePath);
@@ -157,11 +157,11 @@ async function writeManagedTrampoline(targetDir, relativePath, innerContent, opt
   }
 }
 
-export async function syncProviderTrampolines(targetDir, config, options, actions) {
+export async function syncProviderEntrypoints(targetDir, config, options, actions) {
   const adapterRulesByName = config.adapterRulesByName ?? {};
 
   const selectedFiles = config.providers.flatMap((provider) => {
-    return getProviderTrampolines(provider, config.sdd_dir, adapterRulesByName);
+    return getProviderEntrypoints(provider, config.sdd_dir, adapterRulesByName);
   });
 
   for (const [relativePath] of selectedFiles) {
@@ -170,7 +170,7 @@ export async function syncProviderTrampolines(targetDir, config, options, action
   }
 
   for (const [relativePath, content] of selectedFiles) {
-    await writeManagedTrampoline(targetDir, relativePath, content, options, actions);
+    await writeManagedEntrypoint(targetDir, relativePath, content, options, actions);
   }
 
   if (!options.prune) {
