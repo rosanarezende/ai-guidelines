@@ -136,4 +136,4 @@
 - [x] **4.6** `CHANGELOG.md` atualizado em `[Unreleased]` cobrindo a entrega completa (managed-block, comando `update`, `check-budget`, rename `yarn cli` → `yarn guidelines`, refator topológico do `AGENTS.md`, etc.).
 - [x] **4.7** `yarn guidelines check-budget` confirmou todos os escopos dentro do limite (universal 74%, opt-in 33%, AGENTS.md 56%, entrypoints 28-30%; 0 warnings).
 - [x] **4.8** Commit `chore(spec-0019): encerramento pré-merge` (este).
-- [ ] **4.9** **[MANDATÓRIO]** Aprovação humana explícita para merge.
+- [x] **4.9** **[MANDATÓRIO]** Aprovação humana explícita para merge — owner aprovou em 2026-05-07 após revisão; PR pronto para merge.

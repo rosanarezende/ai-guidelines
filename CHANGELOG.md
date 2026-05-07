@@ -6,6 +6,14 @@ Todas as mudanças notáveis neste framework seguem [Semantic Versioning](https:
 
 ## [Unreleased]
 
+_(Sem mudanças não-publicadas no momento.)_
+
+---
+
+## [1.4.0] — 2026-05-07
+
+Release agrupada cobrindo as Specs 0018 (catálogo Docs-as-Code de regras) e 0019 (bootstrap do consumidor + runtime). PRs auto-suficientes: ambos os PRs deixam o repositório em estado liberável no merge.
+
 ### Adicionado
 
 - **Spec 0019 (Bootstrap Consumidor e Runtime)** — PR #5, consenso 2026-05-07:
@@ -48,6 +56,8 @@ Todas as mudanças notáveis neste framework seguem [Semantic Versioning](https:
 ### Removido
 
 - Conteúdo legado sem evidência canônica do pacote inicial `b9efb83`, conforme a reconciliação radical da Spec 0018.
+
+---
 
 ## [1.3.0] — 2026-04-30
 

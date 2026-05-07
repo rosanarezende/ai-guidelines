@@ -101,6 +101,8 @@ Progresso operacional. Marca tasks `[x]` a cada degrau. **Espinha dorsal de exec
 - **Fase de Review (Gate de Homologação)**: Empacotamento, pipeline verde, descrição em 3 etapas do PR, **aguardar gate humano formal**.
 - **Fase de Encerramento (Pré-Merge)**: Migra research, consolida e deleta `NEXT.md`, atualiza roadmap, status final.
 
+> **Princípio de PR auto-suficiente:** o merge não dispara nenhum trabalho adicional. Antes do merge, o PR já deve conter: status `Done (PR #N — YYYY-MM-DD)` em `spec.md`, entrada completa em `roadmap/historico.md`, remoção de `roadmap/backlog.md§Em execução`, `research-index.md` atualizado com as pesquisas migradas, `CHANGELOG.md` com a release publicada (não em `[Unreleased]`) e bump da `version` em `package.json`. Se o agente encontrar pendências durante o merge ("falta atualizar histórico", "faltou o changelog"), elas eram para ter sido cobertas na Fase 4 — abrir hotfix ou commit pré-merge é uma falha do checklist, não comportamento esperado.
+
 ### `NEXT.md` — obrigatório contínuo
 
 Backlog de débitos adiados da spec. Política:

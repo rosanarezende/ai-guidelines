@@ -1,6 +1,6 @@
 # Spec 0019 — Bootstrap Consumidor e Runtime
 
-> Status: In Review
+> Status: Done (PR #5 — 2026-05-07)
 > Author: Antigravity
 > Date: 2026-05-06
 > Owner: Rosana Rezende
