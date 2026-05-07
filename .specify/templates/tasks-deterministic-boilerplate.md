@@ -1,3 +1,5 @@
+<!-- ai-guidelines-template: tasks-deterministic-boilerplate v=1 -->
+
 # Tasks — Spec [Número] [Título Curto] — `deterministic`
 
 > Spec: [`./spec.md`](./spec.md)

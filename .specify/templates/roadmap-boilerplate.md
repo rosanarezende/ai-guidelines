@@ -1,3 +1,5 @@
+<!-- ai-guidelines-template: roadmap-boilerplate v=1 -->
+
 # Roadmap — Boilerplate
 
 > Formato canônico dos 2 arquivos que compõem o roadmap do projeto, vivos em

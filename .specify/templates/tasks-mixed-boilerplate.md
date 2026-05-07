@@ -1,3 +1,5 @@
+<!-- ai-guidelines-template: tasks-mixed-boilerplate v=1 -->
+
 # Tasks — Spec [Número] [Título Curto] — `mixed`
 
 > Spec: [`./spec.md`](./spec.md)

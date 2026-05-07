@@ -1,3 +1,5 @@
+<!-- ai-guidelines-template: research-index-boilerplate v=1 -->
+
 # Research Index — Boilerplate
 
 > Formato canônico do `.specify/specs/research-index.md`. Este índice

@@ -1,3 +1,5 @@
+<!-- ai-guidelines-template: plan-boilerplate v=1 -->
+
 # Plan — Spec [Número] [Título Curto]
 
 > Spec: [`./spec.md`](./spec.md)

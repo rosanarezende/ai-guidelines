@@ -1,3 +1,5 @@
+<!-- ai-guidelines-template: tasks-boilerplate v=1 -->
+
 # Tasks — Spec [Número] [Título Curto]
 
 > Spec: [`./spec.md`](./spec.md)

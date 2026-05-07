@@ -1,3 +1,5 @@
+<!-- ai-guidelines-template: decision-brief-boilerplate v=1 -->
+
 # Decision Brief — Spec [Número] [Título Curto]
 
 > Spec: [`./spec.md`](./spec.md)

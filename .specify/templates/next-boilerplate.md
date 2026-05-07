@@ -1,3 +1,5 @@
+<!-- ai-guidelines-template: next-boilerplate v=1 -->
+
 # NEXT — Spec [Número] [Título Curto]
 
 > **Arquivo de acompanhamento contínuo.** Instanciado **sempre** no setup da spec.

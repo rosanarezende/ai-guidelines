@@ -1,3 +1,5 @@
+<!-- ai-guidelines-template: spec-boilerplate v=1 -->
+
 # Spec [Número] — [Título Curto]
 
 > Status: Draft <!-- Draft | In Review | Active | Paused | Pivoted | Cancelled | Done. Status composto é aceito (ex.: `Done (PR #42 — 2026-05-12)`, `Draft (revised 2026-05-02)`, `Pivoted (2026-04-20 — ver § Post-mortem)`). -->
