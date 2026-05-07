@@ -14,7 +14,9 @@ Detalhes de lifecycle em [`.core/process/spec-foundation.md`](../../../.core/pro
 
 Specs atualmente em branch ativa. Formato enxuto.
 
-- **0019-bootstrap-consumidor-e-runtime** (CLI + distribuição de templates + recompilação do runtime `AGENTS.md`)
+_(Nenhuma spec em execução no momento — 2026-05-07.)_
+
+> **Spec 0019** (`bootstrap-consumidor-e-runtime`) concluída: ver entrada em [`historico.md`](./historico.md). PR #5 aguardando aprovação humana para merge.
 
 ---
 
@@ -143,7 +145,7 @@ Ideias, insights e débitos pequenos que ainda não justificam uma spec dedicada
 - **Estratégia de 1M token context** (Opus 4.7): para refactors de módulo grande, mandar arquivos inteiros em vez de resumos. Tradeoff — gasta mais por operação, economiza em iterações. Regra prática: usar quando o próprio Claude pedir arquivo extra 2+ vezes na mesma sessão.
 - **Kubb / Swagger → hooks tipados + mocks** (Diego Fernandes, não é ai-guidelines): quando repositórios mantenedores tiverem APIs próprias, Kubb lê OpenAPI e gera código tipado. Apontamento cross-repo.
 - **Governança de Diálogo e Decisão**: pesquisar alternativas ao `interaction-map.md` (Decision Logs agentic-aware) para evitar artefato efêmero sem peso de Plano.
-- **Check de Atualização interino no CLI**: antes da Spec 0006 (NPM), avaliar sensor leve no CLI que consulte API do GitHub para alertar sobre novas tags de release. Ver `research/update-notifications-strategy.md`.
+- **Check de Atualização interino no CLI**: antes da Spec 0006 (NPM), avaliar sensor leve no CLI que consulte API do GitHub para alertar sobre novas tags de release. Ver `research/update-notifications-strategy.md`. **Contexto adicional da Spec 0019:** a infraestrutura de update determinístico já existe (`yarn guidelines update` + `managed-block` + versionamento de templates). Falta apenas o sensor que avisa "vX.Y disponível, rode update" — decisões em aberto: (a) cache TTL para evitar request a cada invocação, (b) opt-out via env var, (c) acoplamento com 0006 como fonte canônica de "latest". Pode virar mini-spec ou ser absorvido pela 0006.
 - **Ajustes de UX no Gate de Cobertura**: refinar mensagens de erro e thresholds com base nos aprendizados da spec 0004 (thresholds realistas vs artificiais).
 
 ---

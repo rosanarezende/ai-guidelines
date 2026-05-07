@@ -119,21 +119,21 @@
 - [x] **3.5** Validar a entrega em ambiente real (`yarn cli adopt --target . --dry-run`).
 - [x] **3.6** PR atualizado com descrição em 3 etapas.
 - [x] **3.7** Gate de Review Humano executado — owner identificou itens críticos (regressão silenciosa em `--prune`, path traversal em `sdd_dir`, H3 órfão) e ampliou escopo para política de update unificada (sub-bloco C).
-- [ ] **3.8** Aplicar correções do sub-bloco C (Fase 1.C completa).
-- [ ] **3.9** Re-validar entrega em ambiente real após correções (`yarn cli adopt`, `yarn cli providers`, `yarn cli update`, todos em `--dry-run`).
-- [ ] **3.10** Atualizar PR body refletindo escopo expandido e disclosure de IA atualizada.
+- [x] **3.8** Aplicar correções do sub-bloco C (Fase 1.C completa).
+- [x] **3.9** Re-validar entrega em ambiente real após correções (`yarn guidelines adopt`, `yarn guidelines providers`, `yarn guidelines update`, todos em `--dry-run`). Comando renomeado de `yarn cli` para `yarn guidelines` durante a fase.
+- [x] **3.10** Atualizar PR body refletindo escopo expandido e disclosure de IA atualizada.
 - [ ] **3.11** **[MANDATÓRIO]** Aguardar segundo Gate de Review Humano (pós-correções).
 
 ---
 
 ## Fase 4 — Encerramento Pré-Merge
 
-- [ ] **4.1** `NEXT.md` deletado se existir e pendências migradas.
-- [ ] **4.2** Migração de research.
-- [ ] **4.3** `decision-brief.md` permanece no diretório da spec.
-- [ ] **4.4** `spec.md` header atualizado.
-- [ ] **4.5** `roadmap/historico.md` atualizado.
-- [ ] **4.6** `CHANGELOG.md` atualizado (se aplicável).
-- [ ] **4.7** Confirmar limites por sessão.
-- [ ] **4.8** Commit `chore(spec-0019): encerramento pré-merge`.
+- [x] **4.1** `NEXT.md` deletado; insight 3 (notificação proativa de updates) migrado para o item oportunista "Check de Atualização interino no CLI" no `backlog.md`.
+- [x] **4.2** Researches migrados: `research/2026-05-06-{topologia-runtime,trampolins-e-guardrails}.md` → `.specify/specs/researchs/architecture/`. Links em `decision-brief.md` e `plan.md` atualizados.
+- [x] **4.3** `decision-brief.md` permanece no diretório da spec (com bloco C adicionado em 2026-05-07).
+- [x] **4.4** `spec.md` header em `In Review`, com nota de reabertura consensuada (2026-05-07). Status final → `Done` será aplicado pós-merge.
+- [x] **4.5** `roadmap/historico.md` atualizado com entrada da Spec 0019 (sub-blocos A/B/C, researches migrados, métricas de qualidade). `backlog.md` removeu a 0019 da seção "Em execução".
+- [x] **4.6** `CHANGELOG.md` atualizado em `[Unreleased]` cobrindo a entrega completa (managed-block, comando `update`, `check-budget`, rename `yarn cli` → `yarn guidelines`, refator topológico do `AGENTS.md`, etc.).
+- [x] **4.7** `yarn guidelines check-budget` confirmou todos os escopos dentro do limite (universal 74%, opt-in 33%, AGENTS.md 56%, entrypoints 28-30%; 0 warnings).
+- [x] **4.8** Commit `chore(spec-0019): encerramento pré-merge` (este).
 - [ ] **4.9** **[MANDATÓRIO]** Aprovação humana explícita para merge.

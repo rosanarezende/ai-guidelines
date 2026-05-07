@@ -18,7 +18,7 @@
 
 **Contexto (research):**
 
-- [`research/2026-05-06-trampolins-e-guardrails.md`](./research/2026-05-06-trampolins-e-guardrails.md) traz um mapeamento completo para 2026 (`.cursor/rules/ai-guidelines.mdc`, `.github/copilot-instructions.md`, `.openai/instructions.md`, etc). O design proposto envolve injetar um "Hard-Redirect" indicando ao LLM que o `AGENTS.md` é mandatório.
+- [`researchs/architecture/2026-05-06-trampolins-e-guardrails.md`](../researchs/architecture/2026-05-06-trampolins-e-guardrails.md) traz um mapeamento completo para 2026 (`.cursor/rules/ai-guidelines.mdc`, `.github/copilot-instructions.md`, `.openai/instructions.md`, etc). O design proposto envolve injetar um "Hard-Redirect" indicando ao LLM que o `AGENTS.md` é mandatório.
 
 **Opções:**
 
@@ -43,7 +43,7 @@
 
 **Contexto (research):**
 
-- [`research/2026-05-06-topologia-runtime.md`](./research/2026-05-06-topologia-runtime.md) documenta que regras de Git (`CORE-04`, `06`, `08`, `07`, `09`, `10`, `14`, `GR-0203`) e do Sistema de Templates (`CORE-02`, `11`, `13`, `GR-0101`, `0202`) estão espalhadas no compilado final, causando esquecimento de ciclo pelo modelo.
+- [`researchs/architecture/2026-05-06-topologia-runtime.md`](../researchs/architecture/2026-05-06-topologia-runtime.md) documenta que regras de Git (`CORE-04`, `06`, `08`, `07`, `09`, `10`, `14`, `GR-0203`) e do Sistema de Templates (`CORE-02`, `11`, `13`, `GR-0101`, `0202`) estão espalhadas no compilado final, causando esquecimento de ciclo pelo modelo.
 
 **Opções:**
 

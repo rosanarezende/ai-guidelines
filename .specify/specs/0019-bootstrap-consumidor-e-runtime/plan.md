@@ -18,8 +18,8 @@
 
 > Arquivos de pesquisa que fundamentam o `decision-brief.md`.
 
-- `research/2026-05-06-trampolins-e-guardrails.md` — Responde: Como mitigar o Context Rot gerando scaffolding de inicialização de providers na CLI? (Alimenta `[DEC-0019-B01]`).
-- `research/2026-05-06-topologia-runtime.md` — Responde: Qual deve ser a hierarquia e as divisões semânticas (zonas) do AGENTS.md para deixá-lo legível e menos monolítico? (Alimenta `[DEC-0019-B02]`).
+- `researchs/architecture/2026-05-06-trampolins-e-guardrails.md` — Responde: Como mitigar o Context Rot gerando scaffolding de inicialização de providers na CLI? (Alimenta `[DEC-0019-B01]`). _Migrado de `research/` para `.specify/specs/researchs/architecture/` no encerramento pré-merge._
+- `researchs/architecture/2026-05-06-topologia-runtime.md` — Responde: Qual deve ser a hierarquia e as divisões semânticas (zonas) do AGENTS.md para deixá-lo legível e menos monolítico? (Alimenta `[DEC-0019-B02]`). _Migrado idem._
 
 ---
 
