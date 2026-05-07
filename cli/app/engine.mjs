@@ -19,6 +19,14 @@ import { buildFormatterRivalGuidance, buildMonorepoGuidance } from "#app/guidanc
 import { getInstallHint, promptUser, runInstall } from "#app/install";
 
 function buildOverwriteGuidance(mode, force) {
+  if (mode === "update") {
+    return [
+      force
+        ? "modo --force ativo: o conteúdo legado preservado abaixo de blocos managed em arquivos preexistentes pode ser descartado"
+        : "modo update headless: bloco managed dos trampolins é atualizado no lugar; conteúdo do consumidor fora do bloco fica intocado",
+    ];
+  }
+
   if (mode === "providers") {
     return [
       force
@@ -113,7 +121,7 @@ export async function execute(mode, rawOptions) {
 
   if (!isSupportedMode(effectiveMode)) {
     throw new Error(
-      `Comando não suportado: ${effectiveMode}. Use --help para ver os comandos disponíveis (init, adopt).`
+      `Comando não suportado: ${effectiveMode}. Use --help para ver os comandos disponíveis (init, adopt, providers, update).`
     );
   }
 
@@ -128,7 +136,7 @@ export async function execute(mode, rawOptions) {
 
   await ensureTargetDir(targetDir, options["dry-run"]);
 
-  if (effectiveMode === "providers") {
+  if (effectiveMode === "providers" || effectiveMode === "update") {
     const actions = [];
 
     for (const guidanceLine of buildOverwriteGuidance(effectiveMode, options.force)) {

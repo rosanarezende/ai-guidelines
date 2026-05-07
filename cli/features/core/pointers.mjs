@@ -39,46 +39,10 @@ function buildTacticalContext(sddDir) {
   ].join("\n");
 }
 
-/**
- * Aplica o runtime monolítico governado no AGENTS.md da raiz.
- * Esta feature é considerada CORE e mandatória para a governança.
- */
-export async function applyPointers(targetDir, options, actions) {
-  const dryRun = Boolean(options?.["dry-run"]);
-  // Pointers são CORE e mandatórios.
-
-  const rootAgentsPath = path.join(targetDir, "AGENTS.md");
-  const config = await resolveAiGuidelinesConfig(targetDir, options);
-
-  await writeAiGuidelinesConfig(targetDir, config, dryRun, actions);
-  await syncConsumerTemplates(
-    targetDir,
-    config,
-    { dryRun, prune: Boolean(options?.prune) },
-    actions
-  );
-  await syncProviderTrampolines(
-    targetDir,
-    config,
-    {
-      dryRun,
-      prune: Boolean(options?.prune),
-      force: Boolean(options?.force),
-    },
-    actions
-  );
-
-  // Ler conteúdo atual ou criar vazio
-  let currentContent = "";
-  try {
-    currentContent = await fs.readFile(rootAgentsPath, "utf8");
-  } catch {
-    // Arquivo não existe, tudo bem
-  }
-
-  // Mesclar conteúdo para criar/atualizar o runtime governado na raiz
+async function loadCompiledRules(config) {
   const sourceRulesDir = path.join(ROOT_DIR, ".core", "rules");
   const rulesJsonPath = path.join(sourceRulesDir, "_meta", "rules.json");
+
   let catalog = null;
   try {
     catalog = await loadRulesCatalog(rulesJsonPath);
@@ -86,33 +50,30 @@ export async function applyPointers(targetDir, options, actions) {
     // Catalog absent or unreadable; fall back below.
   }
 
+  const adapterSelection = normalizeAdapterSelection(deriveAdaptersFromProviders(config.providers));
+  const adapterRulesByName = {};
+  const optInRules = [];
   let primaryDirectives = "";
   let lifecycleRules = "";
   let gitRules = "";
   let engineeringRules = "";
-  let providerRules = [];
-  let optInRules = [];
-
-  const adapterSelection = normalizeAdapterSelection(deriveAdaptersFromProviders(config.providers));
-  const features = options.features ?? config.features ?? [];
-  const lang = options.lang ?? config.lang ?? "pt";
 
   if (catalog) {
     const filtered = filterRulesByScope(catalog.rules, {
       includeAdapters: adapterSelection,
-      optInFeatures: features,
-      lang,
+      optInFeatures: config.features,
+      lang: config.lang,
     });
-    const groupedUniversalRules = groupUniversalRulesByZone(filtered.universal);
-    primaryDirectives = groupedUniversalRules.primaryDirectives;
-    lifecycleRules = groupedUniversalRules.lifecycleRules;
-    gitRules = groupedUniversalRules.gitRules;
-    engineeringRules = groupedUniversalRules.engineeringRules;
+    const grouped = groupUniversalRulesByZone(filtered.universal);
+    primaryDirectives = grouped.primaryDirectives;
+    lifecycleRules = grouped.lifecycleRules;
+    gitRules = grouped.gitRules;
+    engineeringRules = grouped.engineeringRules;
 
     for (const [adapter, rules] of Object.entries(filtered.adapters)) {
       const content = rules.map(formatRuleInstruction).filter(Boolean).join("\n\n");
       if (content) {
-        providerRules.push({ name: adapter, content: `### Adapter: ${adapter}\n\n${content}` });
+        adapterRulesByName[adapter] = `### Adapter: ${adapter}\n\n${content}`;
       }
     }
 
@@ -127,22 +88,75 @@ export async function applyPointers(targetDir, options, actions) {
       path.join(ROOT_DIR, ".core", "templates", "AGENTS-core.md.tmpl"),
       "utf8"
     );
-    providerRules = await readRulesByName(sourceRulesDir, adapterSelection);
-    optInRules = await readOptInRules({
+    const fallbackAdapters = await readRulesByName(sourceRulesDir, adapterSelection);
+    for (const { name, content } of fallbackAdapters) {
+      adapterRulesByName[name] = content;
+    }
+    const fallbackOptIn = await readOptInRules({
       sourceRulesDir,
       editorialFeatures: EDITORIAL_FEATURES,
-      features,
-      lang,
+      features: config.features,
+      lang: config.lang,
     });
+    optInRules.push(...fallbackOptIn);
   }
 
-  const monolithicBaseline = compileMonolithicAgentsContent({
+  return {
     primaryDirectives,
     lifecycleRules,
     gitRules,
     engineeringRules,
-    providerRules,
     optInRules,
+    adapterRulesByName,
+  };
+}
+
+/**
+ * Aplica o runtime monolítico governado no AGENTS.md da raiz.
+ * Esta feature é considerada CORE e mandatória para a governança.
+ */
+export async function applyPointers(targetDir, options, actions) {
+  const dryRun = Boolean(options?.["dry-run"]);
+  const force = Boolean(options?.force);
+  const prune = Boolean(options?.prune);
+
+  const rootAgentsPath = path.join(targetDir, "AGENTS.md");
+  const config = await resolveAiGuidelinesConfig(targetDir, options);
+
+  await writeAiGuidelinesConfig(targetDir, config, dryRun, actions);
+
+  // Templates SDD operam em modo `mirror` (overwrite total). `--prune` só é
+  // propagado a partir de init/adopt/update — nunca via comando providers.
+  await syncConsumerTemplates(
+    targetDir,
+    config,
+    { dryRun, prune: prune && options?.mode !== "providers" },
+    actions
+  );
+
+  const compiled = await loadCompiledRules(config);
+
+  await syncProviderTrampolines(
+    targetDir,
+    { ...config, adapterRulesByName: compiled.adapterRulesByName },
+    { dryRun, prune, force },
+    actions
+  );
+
+  // Ler conteúdo atual ou criar vazio
+  let currentContent = "";
+  try {
+    currentContent = await fs.readFile(rootAgentsPath, "utf8");
+  } catch {
+    // Arquivo não existe, tudo bem
+  }
+
+  const monolithicBaseline = compileMonolithicAgentsContent({
+    primaryDirectives: compiled.primaryDirectives,
+    lifecycleRules: compiled.lifecycleRules,
+    gitRules: compiled.gitRules,
+    engineeringRules: compiled.engineeringRules,
+    optInRules: compiled.optInRules,
     tacticalContext: buildTacticalContext(config.sdd_dir),
   });
 
@@ -150,7 +164,6 @@ export async function applyPointers(targetDir, options, actions) {
   // e preserva regras próprias do consumidor fora dele.
   const rootContent = mergeAgentsContent(currentContent, monolithicBaseline);
 
-  // Escrever na raiz (runtime monolítico)
   if (currentContent !== rootContent) {
     if (dryRun) {
       actions.push("[dry-run] write AGENTS.md (ai-guidelines runtime updated)");

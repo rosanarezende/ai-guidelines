@@ -137,6 +137,11 @@ function classifyUniversalRule(rule) {
     return "primary";
   }
 
+  // GR-0203 (PR Curator workflow) é classificado manualmente como "git" porque
+  // suas tags incluem `pr` mas também `gate`/`workflow`, que poderiam empurrar
+  // a regra para outras zonas conforme a heurística genérica abaixo. O override
+  // explícito mantém a regra junto das demais regras de Git & PR Workflow,
+  // preservando a contiguidade semântica decidida em [DEC-0019-B02].
   if (rule.id === "GR-0203") {
     return "git";
   }
@@ -349,6 +354,18 @@ function buildSection(title, buffers, level = 2) {
   return [`${hashes} ${title}`, content].join("\n\n");
 }
 
+/**
+ * Compila o conteúdo do `<AI_GUIDELINES>` no `AGENTS.md` raiz.
+ *
+ * **Adapter content NÃO é injetado aqui** desde 2026-05-07 (Spec 0019,
+ * `[DEC-0019-C02]`). Regras específicas de cada adapter (`claude`, `codex`,
+ * `gemini`) passam a viver dentro do trampolino do provider correspondente
+ * (CLAUDE.md, .openai/instructions.md, GEMINI.md), no bloco `managed-block`,
+ * abaixo do hard-redirect. Essa colocalização elimina o wrapper H3 órfão
+ * `### Provider Adapters` que existia no compilado e dá a cada provider um
+ * único arquivo nativo com tudo o que precisa para complementar a camada
+ * universal.
+ */
 export function compileMonolithicAgentsContent({
   primaryDirectives,
   lifecycleRules,
@@ -356,7 +373,6 @@ export function compileMonolithicAgentsContent({
   engineeringRules,
   coreTemplate,
   globalRules,
-  providerRules = [],
   optInRules = [],
   tacticalContext,
   pointerTemplate,
@@ -369,14 +385,7 @@ export function compileMonolithicAgentsContent({
     tacticalContext !== undefined
   ) {
     return [
-      buildSection("Top Zone: Primary Directives", [
-        primaryDirectives,
-        buildSection(
-          "Provider Adapters",
-          providerRules.map(({ content }) => content),
-          3
-        ),
-      ]),
+      buildSection("Top Zone: Primary Directives", [primaryDirectives]),
       buildSection("Lifecycle & Spec System", [lifecycleRules]),
       buildSection("Git & PR Workflow", [gitRules]),
       buildSection("Engineering Principles", [engineeringRules]),
@@ -391,11 +400,7 @@ export function compileMonolithicAgentsContent({
       .concat("\n");
   }
 
-  const topBuffer = buildSection("Top Zone: Primary Directives", [
-    coreTemplate,
-    globalRules,
-    ...providerRules.map(({ content }) => content),
-  ]);
+  const topBuffer = buildSection("Top Zone: Primary Directives", [coreTemplate, globalRules]);
 
   const centerBuffer = buildSection(
     "Center Zone: Opt-in Methodologies",

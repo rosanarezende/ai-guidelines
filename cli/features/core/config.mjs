@@ -20,6 +20,10 @@ const PROVIDER_TO_ADAPTERS = {
   copilot: ["codex"],
 };
 
+export function getAdaptersForProvider(provider) {
+  return PROVIDER_TO_ADAPTERS[provider] ?? [];
+}
+
 function unique(values) {
   return [...new Set(values)];
 }
@@ -55,6 +59,36 @@ export function deriveAdaptersFromProviders(providers) {
   );
 }
 
+/**
+ * Valida que `sddDir` é um path relativo seguro contido em `targetDir`.
+ *
+ * Como `sdd_dir` vem do `config.json` lido do disco (potencialmente
+ * commitado por terceiros em monorepos), um valor malicioso como
+ * `"../../etc"` ou `"/etc"` faria a CLI escrever fora do `targetDir`.
+ * Esta função normaliza e rejeita esses casos com erro descritivo.
+ */
+export function validateSddDir(sddDir, targetDir) {
+  if (typeof sddDir !== "string" || sddDir.trim() === "") {
+    throw new Error(`sdd_dir inválido: deve ser uma string não-vazia (recebido: ${sddDir})`);
+  }
+
+  if (path.isAbsolute(sddDir)) {
+    throw new Error(`sdd_dir inválido: caminho absoluto não é permitido (${sddDir})`);
+  }
+
+  const resolved = path.resolve(targetDir, sddDir);
+  const resolvedTarget = path.resolve(targetDir);
+  const relativeFromTarget = path.relative(resolvedTarget, resolved);
+
+  if (
+    relativeFromTarget.startsWith("..") ||
+    path.isAbsolute(relativeFromTarget) ||
+    relativeFromTarget === ".."
+  ) {
+    throw new Error(`sdd_dir inválido: deve permanecer dentro do targetDir (recebido: ${sddDir})`);
+  }
+}
+
 export function getConfigPath(targetDir, sddDir = DEFAULT_SDD_DIR) {
   return path.join(targetDir, sddDir, "config.json");
 }
@@ -80,6 +114,7 @@ export async function resolveAiGuidelinesConfig(targetDir, options = {}) {
     (await readAiGuidelinesConfig(targetDir, DEFAULT_SDD_DIR));
 
   const sddDir = options["sdd-dir"] ?? discoveredConfig?.sdd_dir ?? DEFAULT_SDD_DIR;
+  validateSddDir(sddDir, targetDir);
   const selectedProvidersInput = options.providers ?? options.provider;
   const selectedProviders = normalizeSelectedProviders(
     selectedProvidersInput ?? discoveredConfig?.providers

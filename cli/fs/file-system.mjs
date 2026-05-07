@@ -38,7 +38,8 @@ export function stringifyJson(value) {
 
 export async function ensureDir(filePath, dryRun, actions) {
   if (dryRun) {
-    actions.push(`[dry-run] mkdir -p ${filePath}`);
+    const displayPath = path.relative(process.cwd(), filePath) || filePath;
+    actions.push(`[dry-run] mkdir -p ${displayPath}`);
     return;
   }
 
@@ -51,7 +52,11 @@ export async function writeFileIfChanged(filePath, nextContent, dryRun, actions)
     return false;
   }
 
-  actions.push(`${dryRun ? "[dry-run] " : ""}write ${path.relative(ROOT_DIR, filePath)}`);
+  // Relativizamos a CWD do processo (≈ diretório do consumidor) em vez de
+  // ROOT_DIR (raiz do framework distribuído via node_modules), para que
+  // os logs façam sentido para quem está rodando a CLI.
+  const displayPath = path.relative(process.cwd(), filePath) || filePath;
+  actions.push(`${dryRun ? "[dry-run] " : ""}write ${displayPath}`);
 
   if (!dryRun) {
     await ensureDir(path.dirname(filePath), false, actions);

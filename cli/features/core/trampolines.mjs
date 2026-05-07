@@ -1,6 +1,8 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { ensureDir, fileExists, readTextIfExists, writeFileIfChanged } from "#fs/file-system";
+import { ensureDir, fileExists, readTextIfExists } from "#fs/file-system";
+import { applyManagedBlock, inferSyntaxFromPath } from "#features/core/managed-block";
+import { getAdaptersForProvider, getSupportedProviders } from "#features/core/config";
 
 function buildCommonContextIgnores(sddDir) {
   return [
@@ -28,55 +30,68 @@ function buildHardRedirect(providerLabel, sddDir) {
   ].join("\n\n");
 }
 
-function buildCursorRedirect(sddDir) {
-  return [
-    "---",
-    "description: ai-guidelines hard redirect",
-    "alwaysApply: true",
-    "---",
-    "",
-    buildHardRedirect("Cursor", sddDir),
-  ].join("\n");
+const CURSOR_FRONTMATTER = [
+  "---",
+  "description: ai-guidelines hard redirect",
+  "alwaysApply: true",
+  "---",
+].join("\n");
+
+function buildMarkdownInner(providerLabel, sddDir, adapterContents) {
+  const sections = [buildHardRedirect(providerLabel, sddDir), ...adapterContents.filter(Boolean)];
+  return sections.join("\n\n---\n\n");
 }
 
-function getManagedProviderFiles(provider, sddDir) {
+function getProviderTrampolines(provider, sddDir, adapterRulesByName = {}) {
+  const adapters = getAdaptersForProvider(provider);
+  const adapterContents = adapters
+    .map((adapter) => adapterRulesByName[adapter])
+    .filter((content) => typeof content === "string" && content.length > 0);
+
   const commonContextIgnores = buildCommonContextIgnores(sddDir);
-  const redirects = {
+
+  const recipes = {
     claude: [
-      ["CLAUDE.md", buildHardRedirect("Claude Code", sddDir)],
+      ["CLAUDE.md", buildMarkdownInner("Claude Code", sddDir, adapterContents)],
       [".claudeignore", commonContextIgnores],
     ],
-    cursor: [[path.join(".cursor", "rules", "ai-guidelines.mdc"), buildCursorRedirect(sddDir)]],
+    cursor: [
+      [
+        path.join(".cursor", "rules", "ai-guidelines.mdc"),
+        buildMarkdownInner("Cursor", sddDir, adapterContents),
+      ],
+    ],
     copilot: [
       [
         path.join(".github", "copilot-instructions.md"),
-        buildHardRedirect("GitHub Copilot", sddDir),
+        buildMarkdownInner("GitHub Copilot", sddDir, adapterContents),
       ],
     ],
-    windsurf: [[".windsurfrules", buildHardRedirect("Windsurf", sddDir)]],
+    windsurf: [[".windsurfrules", buildMarkdownInner("Windsurf", sddDir, adapterContents)]],
     gemini: [
-      ["GEMINI.md", buildHardRedirect("Gemini", sddDir)],
+      ["GEMINI.md", buildMarkdownInner("Gemini", sddDir, adapterContents)],
       [".aiexclude", commonContextIgnores],
     ],
     aider: [
-      ["CONVENTIONS.md", buildHardRedirect("Aider", sddDir)],
+      ["CONVENTIONS.md", buildMarkdownInner("Aider", sddDir, adapterContents)],
       [".aiderignore", commonContextIgnores],
     ],
     openai: [
-      [path.join(".openai", "instructions.md"), buildHardRedirect("OpenAI / Codex", sddDir)],
+      [
+        path.join(".openai", "instructions.md"),
+        buildMarkdownInner("OpenAI / Codex", sddDir, adapterContents),
+      ],
       [".gptignore", commonContextIgnores],
     ],
   };
 
-  return redirects[provider] ?? [];
+  return recipes[provider] ?? [];
 }
 
 function getAllManagedRelativePaths(sddDir) {
-  return ["claude", "cursor", "copilot", "windsurf", "gemini", "aider", "openai"].flatMap(
-    (provider) => {
-      return getManagedProviderFiles(provider, sddDir).map(([relativePath]) => relativePath);
-    }
-  );
+  return getSupportedProviders().flatMap((provider) => {
+    return getProviderTrampolines(provider, sddDir).map(([relativePath]) => relativePath);
+  });
 }
 
 async function removeManagedFile(targetDir, relativePath, dryRun, actions) {
@@ -92,23 +107,61 @@ async function removeManagedFile(targetDir, relativePath, dryRun, actions) {
   }
 }
 
-async function writeManagedFile(targetDir, relativePath, content, options, actions) {
+function describeAction(state, relativePath, dryRun) {
+  const prefix = dryRun ? "[dry-run] " : "";
+  switch (state) {
+    case "created":
+      return `${prefix}write ${relativePath}`;
+    case "block-updated":
+      return `${prefix}update managed block in ${relativePath}`;
+    case "legacy-prepended":
+      return `${prefix}prepend managed block to existing ${relativePath} (legacy content preserved)`;
+    case "legacy-overwritten":
+      return `${prefix}overwrite ${relativePath} (--force, legacy content discarded)`;
+    default:
+      return null;
+  }
+}
+
+async function writeManagedTrampoline(targetDir, relativePath, innerContent, options, actions) {
   const absolutePath = path.join(targetDir, relativePath);
   const currentContent = await readTextIfExists(absolutePath);
+  const syntax = inferSyntaxFromPath(relativePath);
 
-  if (currentContent !== null && currentContent !== content && !options.force) {
-    actions.push(
-      `preserve ${relativePath} (existing native provider file; use --force to overwrite)`
-    );
+  const result = applyManagedBlock(currentContent, innerContent, {
+    syntax,
+    force: Boolean(options.force),
+  });
+
+  if (!result.content) {
     return;
   }
 
-  await writeFileIfChanged(absolutePath, content, options.dryRun, actions);
+  let finalContent = result.content;
+
+  // Cursor's .mdc requires YAML frontmatter at the top on first creation. We
+  // emit it as a fixed prelude above the managed block; subsequent updates
+  // hit the "block-updated" path and leave the existing frontmatter alone.
+  if (relativePath.endsWith(".mdc") && result.state === "created") {
+    finalContent = `${CURSOR_FRONTMATTER}\n\n${result.content}`;
+  }
+
+  const action = describeAction(result.state, relativePath, options.dryRun);
+  if (action) {
+    actions.push(action);
+  }
+
+  if (!options.dryRun) {
+    await ensureDir(path.dirname(absolutePath), false, actions);
+    await fs.writeFile(absolutePath, finalContent, "utf8");
+  }
 }
 
 export async function syncProviderTrampolines(targetDir, config, options, actions) {
+  const adapterRulesByName = config.adapterRulesByName ?? {};
+
   const selectedFiles = config.providers.flatMap((provider) => {
-    return getManagedProviderFiles(provider, config.sdd_dir);
+    return getProviderTrampolines(provider, config.sdd_dir, adapterRulesByName);
   });
 
   for (const [relativePath] of selectedFiles) {
@@ -117,7 +170,7 @@ export async function syncProviderTrampolines(targetDir, config, options, action
   }
 
   for (const [relativePath, content] of selectedFiles) {
-    await writeManagedFile(targetDir, relativePath, content, options, actions);
+    await writeManagedTrampoline(targetDir, relativePath, content, options, actions);
   }
 
   if (!options.prune) {

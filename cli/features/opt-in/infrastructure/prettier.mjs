@@ -57,7 +57,7 @@ export async function applyPrettier(targetDir, options, context, actions) {
   if (!dryRun) {
     await fs.writeFile(pkgPath, JSON.stringify(updatedPkg, null, 2) + "\n");
   }
-  actions.push("update package.json (prettier scripts & deps)");
+  actions.push(`${dryRun ? "[dry-run] " : ""}update package.json (prettier scripts & deps)`);
 
   const ignorePath = path.join(targetDir, ".prettierignore");
   let currentIgnore = "";
@@ -73,6 +73,6 @@ export async function applyPrettier(targetDir, options, context, actions) {
     if (!dryRun) {
       await fs.writeFile(ignorePath, updatedIgnore);
     }
-    actions.push(`write ${path.basename(ignorePath)}`);
+    actions.push(`${dryRun ? "[dry-run] " : ""}write ${path.basename(ignorePath)}`);
   }
 }

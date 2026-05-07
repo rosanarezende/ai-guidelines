@@ -4,7 +4,7 @@ import { normalizePackageManager, detectPackageManager } from "#formatters/packa
 import { readTextIfExists } from "#fs/file-system";
 import { DEFAULT_PROVIDERS, getSupportedProviders } from "#features/core/config";
 
-const SUPPORTED_MODES = ["init", "adopt", "providers"];
+const SUPPORTED_MODES = ["init", "adopt", "providers", "update"];
 const WIZARD_DEFAULTS = {
   mode: "adopt",
   target: ".",
@@ -75,12 +75,16 @@ export function printHelp() {
   console.log(`ai-guidelines CLI
 
 Uso:
-  yarn cli <init|adopt|providers> [opcoes]
+  yarn cli <init|adopt|providers|update> [opcoes]
 
 Comandos:
-  init   Cria baseline AI-first em projeto novo
-  adopt  Aplica baseline AI-first em repositório existente
+  init       Cria baseline AI-first em projeto novo
+  adopt      Aplica baseline AI-first em repositório existente
   providers  Adiciona ou atualiza trampolins nativos de IA/IDE no repositório alvo
+  update     Re-aplica trampolins, templates SDD e recompila AGENTS.md a partir do
+             .ai-guidelines/config.json existente (idempotente, headless, não modifica
+             config). Use após atualizar a versão do framework para receber updates
+             de hard-redirect, adapter rules e templates sem reabrir o wizard.
 
 Opções:
   --target <dir>             Diretório alvo (default: diretório atual)
@@ -321,6 +325,12 @@ function shouldUseWizard(mode, rawOptions) {
     return false;
   }
 
+  // O comando `update` é headless por contrato — ele lê o config.json existente
+  // e re-aplica deterministicamente. Nunca abre wizard.
+  if (mode === "update") {
+    return false;
+  }
+
   const requiredKeys =
     mode === "providers"
       ? ["target", "providers", "dry-run"]
@@ -376,9 +386,13 @@ export async function resolveExecutionInput(mode, rawOptions) {
           value: "providers",
           name: "providers — adiciona ou atualiza trampolins nativos",
         },
+        {
+          value: "update",
+          name: "update — re-aplica trampolins, templates e runtime a partir do config existente",
+        },
       ],
       WIZARD_DEFAULTS.mode,
-      "Modo inválido. Use init ou adopt."
+      "Modo inválido. Use init, adopt, providers ou update."
     );
     resolvedMode = modeInput.toLowerCase();
   }
