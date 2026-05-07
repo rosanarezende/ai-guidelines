@@ -35,11 +35,42 @@ yarn cli init --target ../meu-projeto --name meu-projeto
 # Para repositórios existentes — Adoção conservadora (sem substituição silenciosa):
 yarn cli adopt --target ../repo-existente --dry-run   # Modo de pré-visualização
 yarn cli adopt --target ../repo-existente             # Aplicação definitiva
+
+# Para gerenciar trampolins nativos (CLAUDE.md, GEMINI.md, .openai/instructions.md, ...):
+yarn cli providers --target ../repo --providers claude,gemini,openai
+yarn cli providers --target ../repo --providers claude --prune   # Remove os demais
+
+# Para receber atualizações do framework após upgrade da CLI:
+yarn cli update --target ../repo --dry-run   # Mostra o que mudaria
+yarn cli update --target ../repo             # Re-aplica a partir do .ai-guidelines/config.json
 ```
 
-> Nota: A execução da CLI sem argumentos inicia automaticamente um assistente de configuração interativo.
-> Em desenvolvimento local neste repositório, use `yarn cli ...` para garantir a resolução de dependências em ambiente Yarn PnP.
-> Em CI, use flags explícitas. Detalhes em [Documentação de Features](docs/features.md).
+> Notas:
+>
+> - A execução da CLI sem argumentos inicia automaticamente um assistente de configuração interativo.
+> - Em desenvolvimento local neste repositório, use `yarn cli ...` para garantir a resolução de dependências em ambiente Yarn PnP.
+> - O comando `update` é idempotente e headless: lê o `.ai-guidelines/config.json` existente e re-emite trampolins, templates SDD e o `AGENTS.md` compilado, sem reabrir o wizard nem destruir customizações locais (ver "Política de update" abaixo).
+> - Em CI, use flags explícitas. Detalhes em [Documentação de Features](docs/features.md).
+
+#### Política de update (managed-block + mirror)
+
+Os artefatos distribuídos ao consumidor seguem dois modos de update:
+
+- **`managed-block`** para trampolins nativos (`CLAUDE.md`, `GEMINI.md`, `.openai/instructions.md`, `.cursor/rules/ai-guidelines.mdc`, etc.) e ignore files (`.claudeignore`, `.aiexclude`, `.gptignore`, `.aiderignore`). O conteúdo gerenciado pela CLI fica entre marcadores:
+
+  ```markdown
+  <!-- ai-guidelines:managed-start v=1 -->
+
+  ...hard-redirect + adapter rules...
+
+  <!-- ai-guidelines:managed-end -->
+  ```
+
+  Updates substituem **apenas o bloco interno**. Conteúdo do consumidor fora dos marcadores é preservado. Em arquivos pré-existentes sem marcadores, a CLI faz prepend do bloco gerenciado e injeta um comentário em PT-BR sinalizando que o conteúdo legado abaixo deve ser revisado pelo mantenedor humano.
+
+- **`mirror`** para `.ai-guidelines/templates/` (boilerplates SDD copiados de `.specify/templates/` da fonte). Overwrite total é seguro porque esses arquivos não são editados in-place — o trabalho do consumidor vive em `.specify/specs/<slug>/`. Cada template carrega um header de versão (ex.: `<!-- ai-guidelines-template: spec-boilerplate v=1 -->`) e a CLI loga transições no formato `write spec-boilerplate.md (template v=1 -> v=2)` quando uma versão sobe.
+
+`yarn cli providers --prune` remove apenas os trampolins de providers não selecionados — **nunca** apaga arquivos em `.ai-guidelines/templates/`.
 
 ### 🛠️ Para Contribuidores
 
@@ -81,20 +112,23 @@ Ciclo SDD descrito em [`.core/process/spec-foundation.md`](.core/process/spec-fo
 | `.core/rules/_meta/rules.json`     | Catálogo consolidado de regras em JSON         |
 | `.core/rules/catalog.md`           | Catálogo navegável e documentação humana       |
 
-### CLI `init`, `adopt` e `ai:check`
+### CLI `init`, `adopt`, `providers`, `update` e `ai:check`
 
 O CLI vive em `cli/` e suporta:
 
-- `init` — baseline AI-first para projeto novo
-- `adopt` — adoção conservadora em repo existente
+- `init` — baseline AI-first para projeto novo (interativo via wizard)
+- `adopt` — adoção conservadora em repo existente (interativo via wizard)
+- `providers` — adiciona ou remove trampolins nativos (managed-block); `--prune` é autoritativo apenas para providers
+- `update` — re-aplica trampolins, templates SDD e `AGENTS.md` a partir do `.ai-guidelines/config.json` existente (headless, idempotente, não modifica config)
 - `yarn ai:check` — CLI de auditoria (Quality Gates e Token Linting)
-- Wizard interativo em TTY
-- Detecção de formatter rival (`biome`, `dprint`, `rome`, `standard`)
+- Wizard interativo em TTY com categorias (Editorial / Infra) e checkbox via `@inquirer/prompts`
+- Detecção de formatter rival (`biome`, `dprint`, `rome`, `standard`) com override granular
 - Detecção de monorepo (npm/yarn/bun/pnpm workspaces)
 - EOL awareness no Windows
 - `--dry-run` — preview antes de qualquer escrita
-- `--force` — atualização explícita quando o diff está entendido
-- Runtime monolítico em `AGENTS.md`, delimitado por `<AI_GUIDELINES>`
+- `--force` — sobrescreve conteúdo legado fora do bloco managed (raro)
+- Runtime monolítico em `AGENTS.md`, delimitado por `<AI_GUIDELINES>` e organizado em zonas temáticas (Top: Primary Directives, Lifecycle & Spec System, Git & PR Workflow, Engineering Principles, Center: Opt-in Methodologies, Base: Tactical Context)
+- Adapter rules colocalizadas no trampolino do provider correspondente (não mais no `AGENTS.md` compilado)
 - Opt-ins editoriais compilados em tags XML (`<FEATURE_TDD>`, `<FEATURE_BDD>`, etc.)
 - Gerenciamento de Token Budget (soft ceilings) baseado na heurística Tok-H
 
@@ -105,13 +139,18 @@ Saiba mais sobre os módulos disponíveis em
 
 ## Matriz de Compatibilidade (adaptadores por IA)
 
-| IA / Ferramenta    | Ponto de entrada                                      | Status       |
-| :----------------- | :---------------------------------------------------- | :----------- |
-| Claude Code        | `AGENTS.md` com `Adaptador: Claude (Anthropic)`       | ✅ Suportado |
-| Gemini CLI         | `AGENTS.md` com `Adaptador: Gemini (Google)`          | ✅ Suportado |
-| Codex / OpenAI CLI | `AGENTS.md` com `Adaptador: Codex / Copilot (OpenAI)` | ✅ Suportado |
-| GitHub Copilot     | `AGENTS.md` com `Adaptador: Codex / Copilot (OpenAI)` | ⚡ Parcial   |
-| Outras IAs         | `AGENTS.md` como baseline                             | 🔄 Esperado  |
+A partir da Spec 0019, cada provider lê **um único arquivo nativo** com hard-redirect para `AGENTS.md` + as adapter rules específicas (todos dentro do bloco `managed-block`). O `AGENTS.md` compilado deixou de carregar a seção `Provider Adapters`.
+
+| IA / Ferramenta    | Ponto de entrada (trampolino managed-block) | Status       |
+| :----------------- | :------------------------------------------ | :----------- |
+| Claude Code        | `CLAUDE.md` + `.claudeignore`               | ✅ Suportado |
+| Gemini CLI         | `GEMINI.md` + `.aiexclude`                  | ✅ Suportado |
+| Codex / OpenAI CLI | `.openai/instructions.md` + `.gptignore`    | ✅ Suportado |
+| Cursor             | `.cursor/rules/ai-guidelines.mdc`           | ✅ Suportado |
+| GitHub Copilot     | `.github/copilot-instructions.md`           | ⚡ Parcial   |
+| Windsurf           | `.windsurfrules`                            | ✅ Suportado |
+| Aider              | `CONVENTIONS.md` + `.aiderignore`           | ✅ Suportado |
+| Outras IAs         | `AGENTS.md` como baseline                   | 🔄 Esperado  |
 
 ---
 
