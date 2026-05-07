@@ -15,7 +15,11 @@ import {
   readOptInRules,
   readRulesByName,
 } from "#governance/monolith/rules-loader";
-import { resolveAiGuidelinesConfig, writeAiGuidelinesConfig } from "#features/core/config";
+import {
+  deriveAdaptersFromProviders,
+  resolveAiGuidelinesConfig,
+  writeAiGuidelinesConfig,
+} from "#features/core/config";
 import { syncConsumerTemplates } from "#features/core/templates";
 import { syncProviderTrampolines } from "#features/core/trampolines";
 
@@ -89,14 +93,15 @@ export async function applyPointers(targetDir, options, actions) {
   let providerRules = [];
   let optInRules = [];
 
-  const adapterSelection = normalizeAdapterSelection(config.adapters);
-  const features = options.features ?? [];
+  const adapterSelection = normalizeAdapterSelection(deriveAdaptersFromProviders(config.providers));
+  const features = options.features ?? config.features ?? [];
+  const lang = options.lang ?? config.lang ?? "pt";
 
   if (catalog) {
     const filtered = filterRulesByScope(catalog.rules, {
       includeAdapters: adapterSelection,
       optInFeatures: features,
-      lang: options.lang ?? "pt",
+      lang,
     });
     const groupedUniversalRules = groupUniversalRulesByZone(filtered.universal);
     primaryDirectives = groupedUniversalRules.primaryDirectives;
@@ -127,7 +132,7 @@ export async function applyPointers(targetDir, options, actions) {
       sourceRulesDir,
       editorialFeatures: EDITORIAL_FEATURES,
       features,
-      lang: options.lang ?? "pt",
+      lang,
     });
   }
 

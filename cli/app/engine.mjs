@@ -61,6 +61,49 @@ function buildEolMismatchGuidance() {
   ];
 }
 
+async function resolveInteractiveFeatureOverrides(options, formatterContext, actions) {
+  const features = options.features ?? [];
+  const prettierBlocked =
+    features.includes("prettier") &&
+    formatterContext.shouldSkipPrettier &&
+    !options.force &&
+    !options["force-prettier"];
+
+  if (!prettierBlocked) {
+    return options;
+  }
+
+  if (!process.stdin.isTTY) {
+    actions.push(
+      `skip prettier (formatter rival detectado: ${formatterContext.rival?.label || "Desconhecido"}; use --force-prettier ou --force para sobrescrever)`
+    );
+    return options;
+  }
+
+  console.log(
+    `\nA feature prettier foi selecionada, mas detectamos um formatador rival (${formatterContext.rival?.label || "Desconhecido"}).`
+  );
+  const confirmed = await promptUser(
+    "Deseja sobrescrever essa incompatibilidade e injetar o baseline Prettier mesmo assim? [s/N] ",
+    false
+  );
+
+  if (!confirmed) {
+    actions.push(
+      `prettier não será aplicado por incompatibilidade com ${formatterContext.rival?.label || "formatador rival"}`
+    );
+    return options;
+  }
+
+  actions.push(
+    `override prettier confirmado pelo usuário apesar de formatter rival detectado (${formatterContext.rival?.label || "Desconhecido"})`
+  );
+  return {
+    ...options,
+    "force-prettier": true,
+  };
+}
+
 export async function execute(mode, rawOptions) {
   const executionInput = await resolveExecutionInput(mode, rawOptions);
   const effectiveMode = executionInput.mode;
@@ -76,6 +119,7 @@ export async function execute(mode, rawOptions) {
 
   const options = {
     ...effectiveRawOptions,
+    mode: effectiveMode,
     target: targetDir,
     name: projectName,
     force: Boolean(effectiveRawOptions.force),
@@ -140,7 +184,12 @@ export async function execute(mode, rawOptions) {
     );
   }
 
-  options.formatterContext = formatterContext;
+  const resolvedOptions = await resolveInteractiveFeatureOverrides(
+    options,
+    formatterContext,
+    actions
+  );
+  resolvedOptions.formatterContext = formatterContext;
 
   if (effectiveMode === "init") {
     const conflicts = await collectExistingPaths(targetDir, [
@@ -151,7 +200,7 @@ export async function execute(mode, rawOptions) {
       "package.json",
       path.join(".github", "workflows", "ai-guidelines-ci.yml"),
     ]);
-    assertSafeInitTarget(conflicts, options.force);
+    assertSafeInitTarget(conflicts, resolvedOptions.force);
   }
 
   const context = {
@@ -161,10 +210,10 @@ export async function execute(mode, rawOptions) {
   };
 
   // 1. Pointers (CORE - Mandatório)
-  await applyPointers(targetDir, options, actions);
+  await applyPointers(targetDir, resolvedOptions, actions);
 
   // 2. Gitattributes (Core/Persistence)
-  const gitattributesResult = await applyGitattributes(targetDir, options, actions);
+  const gitattributesResult = await applyGitattributes(targetDir, resolvedOptions, actions);
 
   if (
     shouldWarnAboutEolMismatch(
@@ -181,9 +230,9 @@ export async function execute(mode, rawOptions) {
   // 3. Features Opt-in de infraestrutura. Regras editoriais são compiladas
   // diretamente no bloco <AI_GUIDELINES> do AGENTS.md por applyPointers.
   try {
-    await applyPrettier(targetDir, options, context, actions);
-    await applyHusky(targetDir, options, context, actions);
-    await applyCi(targetDir, options, context, actions);
+    await applyPrettier(targetDir, resolvedOptions, context, actions);
+    await applyHusky(targetDir, resolvedOptions, context, actions);
+    await applyCi(targetDir, resolvedOptions, context, actions);
   } catch (e) {
     actions.push(`[warn] falha ao processar features: ${e.message}`);
   }
@@ -199,7 +248,7 @@ export async function execute(mode, rawOptions) {
   const newDeps =
     effectiveMode === "adopt" && updatedPkg ? detectNewDevDeps(packageJson, updatedPkg) : [];
 
-  if (newDeps.length > 0 && options["dry-run"]) {
+  if (newDeps.length > 0 && resolvedOptions["dry-run"]) {
     actions.push(`[dry-run] install ${newDeps.join(", ")} (novas dependências detectadas)`);
   }
 
@@ -220,10 +269,10 @@ export async function execute(mode, rawOptions) {
     }
   }
 
-  if (newDeps.length > 0 && !options["dry-run"]) {
+  if (newDeps.length > 0 && !resolvedOptions["dry-run"]) {
     const installHint = await getInstallHint(targetDir, packageManager);
 
-    if (options.install) {
+    if (resolvedOptions.install) {
       console.log(`\nInstalando dependências (${newDeps.join(", ")})...`);
       await runInstall(targetDir, packageManager);
       console.log("Dependências instaladas.");

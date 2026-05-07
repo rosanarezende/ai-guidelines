@@ -7,6 +7,31 @@ Este arquivo define o fluxo obrigatório para qualquer IA atuando neste reposit�
 > **Atuando para um humano contribuidor?** Leia também
 > [`CONTRIBUTING.md`](CONTRIBUTING.md) para os 4 workflows por persona (ajuste rápido, feature/refactor, spec consolidada, agente IA com autonomia). Este `AGENTS.md` cobre a parte operacional do agente; `CONTRIBUTING.md` cobre o fluxo humano que o agente está apoiando.
 
+## Contexto Local
+
+Este repositório é o próprio framework `ai-guidelines`, não um consumidor do framework. Aqui vivem o baseline canônico em `.core/` e a CLI em `cli/` que serão distribuídos para outros repositórios via `init`, `adopt` e `providers`.
+
+O `AGENTS.md` raiz tem papel duplo:
+
+- documentação operacional local para humanos e agentes que contribuem neste repositório;
+- artefato runtime de exemplo, com o bloco `<AI_GUIDELINES>` compilado pelo próprio framework.
+
+Conteúdo específico deste repositório deve ficar fora de `<AI_GUIDELINES>`. O bloco compilado não é editado manualmente.
+
+## Quickstart Local
+
+Este workspace usa Yarn 4 com Plug'n'Play. Para execução local da CLI, o caminho suportado é `yarn cli ...`.
+
+```bash
+yarn install --immutable
+yarn build:rules
+yarn format
+yarn check
+yarn test
+yarn check:repo
+yarn cli adopt --target . --dry-run
+```
+
 <AI_GUIDELINES>
 
 ## Top Zone: Primary Directives

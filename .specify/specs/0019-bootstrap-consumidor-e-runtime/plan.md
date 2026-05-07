@@ -2,7 +2,7 @@
 
 > Spec: [`./spec.md`](./spec.md)
 > Decision Brief: [`./decision-brief.md`](./decision-brief.md)
-> Status: Draft
+> Status: In Review
 
 ---
 
@@ -41,15 +41,21 @@ CLI pergunta as features numa lista flat. Não copia `.specify/templates` para o
 - Refatorar wizard (`cli.mjs` ou módulo interativo correspondente) para agrupar escolhas (ex: Editoriais vs. CI/CD vs. Processo).
 - Substituir o fluxo manual de CSV em `readline` por prompts interativos com `@inquirer/prompts`, usando `checkbox` para seleções múltiplas e `select`/`confirm` quando aplicável.
 - Formalizar a execução local da CLI via scripts `yarn cli*`, evitando o uso suportado de `node cli/ai-guidelines-cli.mjs` em ambiente Yarn PnP.
+- Quando uma feature selecionada entrar em conflito com contexto detectado do consumidor, informar explicitamente o bloqueio e oferecer override interativo granular no wizard/TTY, sem exigir `--force` global.
+- O comando `providers` deve preservar `features`/`lang` do runtime existente e fazer merge aditivo de providers por padrão, usando `--prune` como modo autoritativo para remoção.
 - Atualizar módulo de `init`/`adopt` para realizar a cópia controlada do diretório `.specify/templates/` da origem para dentro de `.ai-guidelines/templates` no repo consumidor.
 - Remoção definitiva do arquivo legado `.core/templates/AGENTS-pointer.md.tmpl` e de suas referências, já que o modelo de pointer único foi descontinuado.
-- Persistir a configuração mínima do consumidor em `.ai-guidelines/config.json`, incluindo ao menos `sdd_dir`, `providers` e `adapters`.
+- Persistir a configuração mínima do consumidor em `.ai-guidelines/config.json`, incluindo `sdd_dir`, `providers`, `features` e `lang`; `adapters` seguem como derivação interna, não como contrato persistido.
+- Redistribuir o conteúdo útil do `CLAUDE.md` raiz entre `AGENTS.md` fora de `<AI_GUIDELINES>`, `README.md` e `CONTRIBUTING.md`, reduzindo o arquivo Claude local a um ponteiro mínimo para evitar drift documental.
 
 **Mudanças em arquivos**:
 
 - `cli/ai-guidelines-cli.mjs` (ou arquivos dentro de `cli/features/`) — Refatoração do prompt interativo e workflow de deploy.
 - `package.json` / `yarn.lock` — inclusão de `@inquirer/prompts` como dependência de runtime aprovada pelo owner.
 - `README.md` e templates SDD — atualização do comando canônico para `yarn cli`.
+- `AGENTS.md` / `CLAUDE.md` / `CONTRIBUTING.md` — consolidação do contexto operacional local e remoção de redundância específica de provider.
+- `cli/app/engine.mjs` / `cli/features/opt-in/infrastructure/prettier.mjs` — prompts de incompatibilidade e override granular.
+- `cli/features/core/config.mjs` / `cli/features/core/pointers.mjs` — persistência ampliada de config e merge semântico do comando `providers`.
 
 #### [B | Runtime Architecture & Trampolines] `(evidence-driven)`
 
@@ -79,9 +85,12 @@ O compilador constrói um `AGENTS.md` monolítico que ainda sofre de redundânci
 - [x] O CLI agrupa corretamente as categorias ao rodar interativamente.
 - [x] O wizard substitui entrada CSV por UX de seleção interativa (`checkbox`) para features e providers.
 - [x] O repositório expõe scripts `yarn cli*` e documenta esse contrato como caminho suportado de execução local.
+- [x] A CLI informa quando uma feature selecionada é bloqueada por incompatibilidade detectada e oferece override granular em modo interativo.
+- [x] O comando `providers` preserva opt-ins editoriais já ativos no `AGENTS.md` e não remove providers previamente configurados sem intenção explícita (`--prune`).
 - [x] Templates em `.specify/templates/` são escritos em `.ai-guidelines/templates/` no projeto-alvo.
 - [x] O template `.core/templates/AGENTS-pointer.md.tmpl` e menções no código da CLI foram removidos.
 - [x] `.ai-guidelines/config.json` persiste a configuração mínima do bootstrap.
+- [x] O contexto operacional local antes concentrado em `CLAUDE.md` passa a viver em documentos canônicos compartilhados, e `CLAUDE.md` vira apenas um ponteiro compatível.
 
 ### Componente [B]
 
@@ -126,3 +135,5 @@ O compilador constrói um `AGENTS.md` monolítico que ainda sofre de redundânci
 - **2026-05-06** — `providers` e `adapters` foram separados em camadas distintas. Os arquivos nativos de tooling (`CLAUDE.md`, `.cursor/rules/ai-guidelines.mdc`, `.openai/instructions.md`) passaram a ser governados por `providers`, enquanto o monólito usa `adapters` (`claude`, `codex`, `gemini`) derivados por mapeamento determinístico. Motivo: nem todo provider precisa de regras próprias no `AGENTS.md`, mas todos podem precisar de hard-redirect.
 - **2026-05-06** — O runtime deixou de depender do template `AGENTS-pointer` e passou a compor a base tática diretamente no compilador. Motivo: eliminar o ponteiro legado e centralizar a topologia final do payload no mesmo fluxo que já monta as zonas temáticas.
 - **2026-05-06** — O owner aprovou ampliar a spec para adotar `@inquirer/prompts` no wizard. Motivo: entrada CSV em CLI interativa é UX inadequada para seleção múltipla; `checkbox` passa a ser requisito funcional do bootstrap.
+- **2026-05-06** — O owner aprovou esvaziar o `CLAUDE.md` local em favor de documentos canônicos compartilhados, preservando apenas um ponteiro mínimo compatível com Claude. Motivo: reduzir drift entre instruções por provider e documentação real do repositório.
+- **2026-05-06** — `adapters` deixaram de ser persistidos no `config.json`; o arquivo expõe apenas o contrato do usuário (`providers`, `features`, `lang`, `sdd_dir`) e o compilador deriva adapters internamente. Motivo: reduzir vazamento de abstração interna e evitar estranheza como `openai -> codex` no estado persistido.

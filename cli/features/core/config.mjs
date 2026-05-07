@@ -1,7 +1,5 @@
 import path from "node:path";
 import { readTextIfExists, stringifyJson, writeFileIfChanged } from "#fs/file-system";
-import { normalizeAdapterSelection } from "#governance/monolith/rules-loader";
-
 export const DEFAULT_SDD_DIR = ".ai-guidelines";
 export const DEFAULT_PROVIDERS = ["claude", "gemini", "openai"];
 
@@ -24,6 +22,15 @@ const PROVIDER_TO_ADAPTERS = {
 
 function unique(values) {
   return [...new Set(values)];
+}
+
+function normalizeSelectedFeatures(input) {
+  if (input === undefined || input === null) {
+    return [];
+  }
+
+  const features = Array.isArray(input) ? input : String(input).split(",");
+  return unique(features.map((item) => item.trim()).filter(Boolean));
 }
 
 export function normalizeSelectedProviders(input) {
@@ -73,24 +80,41 @@ export async function resolveAiGuidelinesConfig(targetDir, options = {}) {
     (await readAiGuidelinesConfig(targetDir, DEFAULT_SDD_DIR));
 
   const sddDir = options["sdd-dir"] ?? discoveredConfig?.sdd_dir ?? DEFAULT_SDD_DIR;
-  const providers = normalizeSelectedProviders(
-    options.providers ?? options.provider ?? discoveredConfig?.providers
+  const selectedProvidersInput = options.providers ?? options.provider;
+  const selectedProviders = normalizeSelectedProviders(
+    selectedProvidersInput ?? discoveredConfig?.providers
   );
-  const adapters =
-    options.adapters !== undefined
-      ? normalizeAdapterSelection(options.adapters)
-      : deriveAdaptersFromProviders(providers);
+  const providers =
+    options.mode === "providers" &&
+    selectedProvidersInput !== undefined &&
+    !options.prune &&
+    Array.isArray(discoveredConfig?.providers)
+      ? unique([...discoveredConfig.providers, ...selectedProviders])
+      : selectedProviders;
+  const features = normalizeSelectedFeatures(options.features ?? discoveredConfig?.features);
+  const lang = options.lang ?? discoveredConfig?.lang ?? "pt";
 
   return {
     sdd_dir: sddDir,
     providers,
-    adapters,
+    features,
+    lang,
   };
 }
 
 export async function writeAiGuidelinesConfig(targetDir, config, dryRun, actions) {
   const configPath = getConfigPath(targetDir, config.sdd_dir);
-  return writeFileIfChanged(configPath, stringifyJson(config), dryRun, actions);
+  return writeFileIfChanged(
+    configPath,
+    stringifyJson({
+      sdd_dir: config.sdd_dir,
+      providers: config.providers,
+      features: config.features,
+      lang: config.lang,
+    }),
+    dryRun,
+    actions
+  );
 }
 
 export function getSupportedProviders() {

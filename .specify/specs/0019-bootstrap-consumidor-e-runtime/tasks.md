@@ -3,7 +3,7 @@
 > Spec: [`./spec.md`](./spec.md)
 > Plan: [`./plan.md`](./plan.md)
 > Decision Brief: [`./decision-brief.md`](./decision-brief.md)
-> Status: Draft
+> Status: In Review
 
 ---
 
@@ -61,7 +61,10 @@
 - [x] **1.A.2** Refatorar wizard para apresentar prompts de features em categorias (Editoriais, Processo, etc).
 - [x] **1.A.2.2** Substituir perguntas CSV do wizard por `checkbox`/`select` via `@inquirer/prompts`.
 - [x] **1.A.2.3** Formalizar execução local da CLI via `yarn cli*` e atualizar o comando canônico na documentação/templates para compatibilidade com Yarn PnP.
-- [x] **1.A.2.1** Persistir `.ai-guidelines/config.json` com `sdd_dir`, `providers` e `adapters`.
+- [x] **1.A.2.4** Redistribuir conteúdo útil do `CLAUDE.md` para documentos canônicos (`AGENTS.md` fora de `<AI_GUIDELINES>`, `README.md`, `CONTRIBUTING.md`) e reduzir o arquivo a ponteiro mínimo.
+- [x] **1.A.2.5** Informar incompatibilidades de features selecionadas/default no modo interativo e oferecer override granular quando aplicável.
+- [x] **1.B.1.2** Corrigir `providers` para preservar `features/lang` do runtime existente e fazer merge aditivo de providers por padrão.
+- [x] **1.A.2.1** Persistir `.ai-guidelines/config.json` com `sdd_dir`, `providers`, `features` e `lang`, derivando `adapters` apenas em runtime.
 - [x] **1.A.3** Remover arquivo legado `.core/templates/AGENTS-pointer.md.tmpl` e referências na compilação.
 - [x] **1.A.N** Pipeline de check + test verde.
 - [x] **1.A.4** Análise de débitos para o `NEXT.md`.
@@ -87,10 +90,10 @@
 
 ## Fase 3 — Preparação para Review (Gate de Homologação)
 
-- [ ] **3.1** Atualizar header da `spec.md`: status → `In Review`.
+- [x] **3.1** Atualizar header da `spec.md`: status → `In Review`.
 - [x] **3.2** Pipeline canônico verde (`yarn check:repo` ou similar).
-- [ ] **3.3** Critérios de aceite de `spec.md` e DoD de `plan.md` confirmados.
-- [ ] **3.4** `decision-brief.md`: validar pontos `Resolved` contra o design.
+- [x] **3.3** Critérios de aceite de `spec.md` e DoD de `plan.md` confirmados.
+- [x] **3.4** `decision-brief.md`: validar pontos `Resolved` contra o design.
 - [x] **3.5** Validar a entrega em ambiente real (`yarn cli adopt --target . --dry-run`).
 - [ ] **3.6** PR atualizado com descrição em 3 etapas.
 - [ ] **3.7** **[MANDATÓRIO]** Aguardar Gate de Review Humano.

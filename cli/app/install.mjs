@@ -40,13 +40,17 @@ export async function runInstall(targetDir, packageManager, { spawnFn = spawn } 
   });
 }
 
-export function promptUser(question) {
+export function promptUser(question, defaultYes = true) {
   return new Promise((resolve) => {
     const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
     rl.question(question, (answer) => {
       rl.close();
       const normalized = answer.trim().toLowerCase();
-      resolve(normalized === "" || normalized === "s" || normalized === "y");
+      if (normalized === "") {
+        resolve(defaultYes);
+        return;
+      }
+      resolve(normalized === "s" || normalized === "y");
     });
   });
 }

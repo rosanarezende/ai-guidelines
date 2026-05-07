@@ -1,5 +1,6 @@
 {
   "sdd_dir": ".ai-guidelines",
   "providers": ["claude", "gemini", "openai"],
-  "adapters": ["claude", "gemini", "codex"]
+  "features": ["prettier", "husky", "ci", "quality-gates", "tdd", "bdd"],
+  "lang": "pt"
 }

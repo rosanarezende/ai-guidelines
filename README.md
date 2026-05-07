@@ -8,6 +8,8 @@
 
 `ai-guidelines` é um framework concebidO para mitigar o desafio de manter a coerência técnica e editorial ao **integrar múltiplos agentes de IA** (como o Claude, Gemini ou Codex) em projetos de desenvolvimento.
 
+Este repositório é o **framework canônico**, não apenas um exemplo de consumo. Alterações em `.core/`, `cli/` e nos templates mudam o baseline distribuído para repositórios consumidores.
+
 A ferramenta centraliza a governança num único ponto, resolvendo problemas comuns de desorganização através de:
 
 - _Distribuição via CLI_: Aplicação automatizada e limpa de regras universais em qualquer repositório.
@@ -47,6 +49,16 @@ A leitura do documento [`CONTRIBUTING.md`](CONTRIBUTING.md) é recomendada para 
 - **Alterações de arquitetura ou novas funcionalidades:** registrar em [`backlog.md`](.specify/specs/roadmap/backlog.md) → criar spec em `.specify/specs/<slug>/` a partir dos templates SDD → branch → PR Draft.
 
 Comunidade ai-guidelines BR aceita contribuições em PT-BR e EN.
+
+Para desenvolver o próprio framework localmente:
+
+```bash
+yarn install --immutable
+yarn build:rules
+yarn check
+yarn test
+yarn check:repo
+```
 
 ### 🤖 Para Agentes de IA
 

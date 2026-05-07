@@ -57,7 +57,15 @@ const PROVIDER_DESCRIPTIONS = {
  */
 export const OPT_IN_RULE_FILES = EDITORIAL_FEATURES.map((f) => `${f}.md`);
 
-const BOOLEAN_FLAGS = new Set(["force", "dry-run", "install", "prune", "yes", "y"]);
+const BOOLEAN_FLAGS = new Set([
+  "force",
+  "force-prettier",
+  "dry-run",
+  "install",
+  "prune",
+  "yes",
+  "y",
+]);
 
 export function isSupportedMode(mode) {
   return SUPPORTED_MODES.includes(mode);
@@ -81,6 +89,7 @@ Opções:
   --providers <lista>        claude,cursor,copilot,windsurf,gemini,aider,openai
   --lang <pt|en>             Idioma para features (ex: tdd, bdd). Padrão: pt
   --force                    Sobrescreve arquivos suportados
+  --force-prettier           Força baseline Prettier mesmo com formatter rival detectado
   --dry-run                  Mostra ações sem escrever arquivos
   --install                  Instala dependências automaticamente
   --prune                    Remove arquivos órfãos em .ai-guidelines/ (adopt)

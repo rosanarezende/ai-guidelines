@@ -1,6 +1,6 @@
 # Spec 0019 — Bootstrap Consumidor e Runtime
 
-> Status: Draft
+> Status: In Review
 > Author: Antigravity
 > Date: 2026-05-06
 > Owner: Rosana Rezende
@@ -46,11 +46,11 @@ O `AGENTS.md` compilado resultante também precisa de uma revisão topológica (
 
 ## ✅ Critérios de Aceite (alto nível)
 
-- [ ] A CLI distribui corretamente os templates SDD (ex. spec-boilerplate) ao consumidor.
-- [ ] O wizard da CLI apresenta categorização distinta para features editoriais e operacionais (infra).
-- [ ] Trampolins para modelos específicos são criados por padrão para conter e desestimular "Context Rot".
-- [ ] O arquivo compilado `AGENTS.md` apresenta estrutura limpa, coesa e com zonas declaradas.
-- [ ] Pipeline de check + test verde, sempre (`yarn check && yarn test`).
+- [x] A CLI distribui corretamente os templates SDD (ex. spec-boilerplate) ao consumidor.
+- [x] O wizard da CLI apresenta categorização distinta para features editoriais e operacionais (infra).
+- [x] Trampolins para modelos específicos são criados por padrão para conter e desestimular "Context Rot".
+- [x] O arquivo compilado `AGENTS.md` apresenta estrutura limpa, coesa e com zonas declaradas.
+- [x] Pipeline de check + test verde, sempre (`yarn check && yarn test`).
 - [ ] PR Draft revisado e aprovado por humano antes de Ready.
 
 ---

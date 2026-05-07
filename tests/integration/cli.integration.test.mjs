@@ -184,4 +184,69 @@ describe("Integration: Runtime Monolítico no AGENTS.md", () => {
       assert.equal(await exists(path.join(targetDir, ".openai", "instructions.md")), false);
     });
   });
+
+  it("DADO adopt com opt-ins e providers prévios QUANDO providers adicionar um novo provider ENTÃO preserva opt-ins e providers existentes", async () => {
+    await withTempTarget("ai-e2e-providers-merge-", async (targetDir) => {
+      await cliEntrypoint.execute("adopt", {
+        target: targetDir,
+        "package-manager": "npm",
+        "dry-run": false,
+        providers: ["claude", "openai"],
+        features: ["quality-gates", "tdd"],
+        lang: "pt",
+      });
+
+      await cliEntrypoint.execute("providers", {
+        target: targetDir,
+        "dry-run": false,
+        providers: ["gemini"],
+      });
+
+      const agentsContent = await fs.readFile(path.join(targetDir, "AGENTS.md"), "utf8");
+      const config = JSON.parse(
+        await fs.readFile(path.join(targetDir, ".ai-guidelines", "config.json"), "utf8")
+      );
+
+      assert.match(agentsContent, /<FEATURE_QUALITY_GATES>/);
+      assert.match(agentsContent, /<FEATURE_TDD>/);
+      assert.equal(await exists(path.join(targetDir, "CLAUDE.md")), true);
+      assert.equal(await exists(path.join(targetDir, ".openai", "instructions.md")), true);
+      assert.equal(await exists(path.join(targetDir, "GEMINI.md")), true);
+      assert.deepEqual(config.providers, ["claude", "openai", "gemini"]);
+      assert.deepEqual(config.features, ["quality-gates", "tdd"]);
+      assert.equal(config.lang, "pt");
+    });
+  });
+
+  it("DADO providers com prune QUANDO selecionar novo subset ENTÃO remove providers não selecionados mas preserva opt-ins", async () => {
+    await withTempTarget("ai-e2e-providers-prune-", async (targetDir) => {
+      await cliEntrypoint.execute("adopt", {
+        target: targetDir,
+        "package-manager": "npm",
+        "dry-run": false,
+        providers: ["claude", "openai"],
+        features: ["bdd"],
+        lang: "en",
+      });
+
+      await cliEntrypoint.execute("providers", {
+        target: targetDir,
+        "dry-run": false,
+        providers: ["claude"],
+        prune: true,
+      });
+
+      const agentsContent = await fs.readFile(path.join(targetDir, "AGENTS.md"), "utf8");
+      const config = JSON.parse(
+        await fs.readFile(path.join(targetDir, ".ai-guidelines", "config.json"), "utf8")
+      );
+
+      assert.match(agentsContent, /<FEATURE_BDD>/);
+      assert.equal(await exists(path.join(targetDir, "CLAUDE.md")), true);
+      assert.equal(await exists(path.join(targetDir, ".openai", "instructions.md")), false);
+      assert.deepEqual(config.providers, ["claude"]);
+      assert.deepEqual(config.features, ["bdd"]);
+      assert.equal(config.lang, "en");
+    });
+  });
 });
