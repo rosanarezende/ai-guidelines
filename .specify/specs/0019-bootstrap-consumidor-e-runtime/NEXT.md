@@ -43,6 +43,12 @@ _(Nenhum débito registrado ainda)_
 - **O Insight**: separar `providers` de `adapters` reduz acoplamento e permite ampliar hard-redirects sem inflar o catálogo semântico do `AGENTS.md`.
 - **Ação Sugerida**: manter essa distinção como base para futuras expansões de providers e eventual catálogo dedicado de adapters se o framework passar a ter regras específicas para Cursor/Windsurf/Aider.
 
+### 2. Ciclo de vida de atualização dos `.specify/templates` distribuídos
+
+- **O Contexto**: a partir da 0019, a CLI passa a copiar `.specify/templates/` para `.ai-guidelines/templates/` no consumidor durante `init`/`adopt`. Hoje não há contrato explícito de versionamento nem caminho oficial de update — se o framework atualizar um boilerplate (ex.: `tasks-mixed-boilerplate.md`), o consumidor só recebe a mudança rerodando `adopt`, o que sobrescreve customizações locais sem aviso.
+- **O Insight**: distribuir templates sem estratégia de update cria drift do dia 1 — espelha o problema de "Context Rot" que a 0019 resolveu para providers, mas agora no eixo temporal. Decisões em aberto: (a) versionamento dos templates (semver no `config.json` por template ou hash global?); (b) política de update (overwrite vs. merge inteligente vs. diff interativo); (c) detecção de customização local do consumidor; (d) comando `update`/`sync` dedicado vs. flag em `adopt`; (e) notificação de updates disponíveis (cross-ref item oportunista "Check de Atualização interino no CLI").
+- **Ação Sugerida**: nova spec `evidence-driven` candidata `template-lifecycle-e-update` no backlog (seção Next). Não cabe ampliar a 0019 — ela está `In Review` com gate fechado e princípio de imutabilidade ativo. Workaround temporário até a nova spec entregar: rerodar `yarn cli adopt` aceitando overwrite.
+
 <!-- Template de Insight:
 ### 1. [Título do Insight]
 
