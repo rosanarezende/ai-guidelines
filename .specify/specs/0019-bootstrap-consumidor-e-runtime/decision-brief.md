@@ -3,8 +3,8 @@
 > Spec: [`./spec.md`](./spec.md)
 > Plan: [`./plan.md`](./plan.md)
 > Tasks: [`./tasks.md`](./tasks.md)
-> Status agregado: **Pendente**
-> Última atualização: 2026-05-06 — Instanciação inicial
+> Status agregado: **Resolved**
+> Última atualização: 2026-05-07 — Gate humano fechado
 
 ---
 
@@ -18,23 +18,24 @@
 
 **Contexto (research):**
 
-- [`research/2026-05-06-trampolins-e-guardrails.md`](./research/2026-05-06-trampolins-e-guardrails.md) aponta que paths de regras (`CORE-02`, etc) estarão quebrados no consumidor se fixarmos `.specify/` e copiarmos para `.ai-guidelines/`. A CLI precisa tratar paths dinamicamente (templating) no compilador e criar guardrails (`CLAUDE.md`) fixos que redirecionem a atenção do LLM para a fonte canônica.
+- [`research/2026-05-06-trampolins-e-guardrails.md`](./research/2026-05-06-trampolins-e-guardrails.md) traz um mapeamento completo para 2026 (`.cursor/rules/ai-guidelines.mdc`, `.github/copilot-instructions.md`, `.openai/instructions.md`, etc). O design proposto envolve injetar um "Hard-Redirect" indicando ao LLM que o `AGENTS.md` é mandatório.
 
 **Opções:**
 
-| Opção | Descrição                                                                                                                                                                                              | Pró                                                                                        | Contra                                                                                                            |
-| :---- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------- |
-| A     | **Scaffolding e Diretório Fixo:** A CLI força a cópia para `.ai-guidelines/` e as regras no catálogo são reescritas com o path estático da nova pasta. Gera `CLAUDE.md` de redirecionamento.           | Mais simples de compilar, não requer parser com interpolação de strings no `compiler.mjs`. | Consumidor perde a flexibilidade de nomear sua pasta de SDD caso conflite com algo.                               |
-| B     | **Diretório Dinâmico + Tokens:** A CLI pergunta o diretório (default `.ai-guidelines/`), salva config local e o `compiler.mjs` usa `{{SDD_DIR}}` para interpolar dinamicamente os caminhos nas regras. | Extremamente flexível; regras do framework mantêm agnósticas quanto ao diretório final.    | Requer atualização no catálogo de regras (`rules.json`) para usar `{{SDD_DIR}}` e mudança no motor do compilador. |
+| Opção | Descrição                                                                                                                                                                              | Pró                                                                               | Contra                                                                         |
+| :---- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------- | :----------------------------------------------------------------------------- |
+| A     | **Wizard Multiselect + Comando Autônomo:** A CLI pergunta via Inquirer quais providers a equipe usa, gera apenas esses trampolins. Um comando auxiliar permite adicionar novos depois. | Gestão granular, repo limpo, altamente extensível para novos providers no futuro. | Maior esforço de implementação (novo fluxo no Inquirer e comando auxiliar).    |
+| B     | **Injeção Silenciosa Fixo:** A CLI gera automaticamente os trampolins dos 7 principais providers sempre que roda o `init`/`adopt`, sem perguntar.                                      | Zero fricção para o usuário, garante cobertura total.                             | Suja o repositório consumidor com arquivos de provedores que a equipe não usa. |
 
 **Decisão do Gate Humano:**
 
-- **Status:** [ ] Pendente | [ ] Resolvido
+- **Status:** [ ] Pendente | [x] Resolvido
 - **Escolha (marque com `x`):**
-  - [ ] A
+  - [x] A
   - [ ] B
 - **Justificativa / Ressalvas:** >
-- **Data / Owner:** [YYYY-MM-DD] / [@owner]
+  A pesquisa (`2026-05-06-trampolins-e-guardrails.md`) comprova que o "Context Rot" e as alucinações arquiteturais ocorrem devido à proliferação de arquivos de instrução nativos lidos automaticamente por cada extensão/IA (`.cursor/rules/ai-guidelines.mdc`, `CLAUDE.md`, `.openai/instructions.md`, etc.). A Opção A resolve isso de forma ativa: o CLI se apropria desses arquivos gerando "Trampolins" (Hard-Redirects irredutíveis apontando para o `AGENTS.md`) e injetando arquivos de ignorados (`.claudeignore`, `.aiexclude`) para proteger o budget de tokens. Eliminar essa fricção manual no setup garante a adoção e retenção do framework nos repositórios consumidores. A criação do comando autônomo (`ai-guidelines providers`) protege o ciclo de vida do projeto, permitindo a adição de novos trampolins caso a equipe migre de ferramenta no futuro. Ressalva técnica para a implementação: será necessário utilizar interpolação (ex: `{{SDD_DIR}}`) no compilador para garantir que os caminhos não quebrem no repositório de destino.
+- **Data / Owner:** 2026-05-06 / @rosanarezende
 
 ### [DEC-0019-B02] Topologia e ordem do compilado AGENTS.md
 
@@ -53,12 +54,13 @@
 
 **Decisão do Gate Humano:**
 
-- **Status:** [ ] Pendente | [ ] Resolvido
+- **Status:** [ ] Pendente | [x] Resolvido
 - **Escolha (marque com `x`):**
-  - [ ] A
+  - [x] A
   - [ ] B
 - **Justificativa / Ressalvas:** >
-- **Data / Owner:** [YYYY-MM-DD] / [@owner]
+  Apoiada na pesquisa de topologia (`2026-05-06-topologia-runtime.md`), a Opção A é a única fundação viável para garantir compliance em LLMs de fronteira. Índices remissivos (Opção B) auxiliam a navegação humana, mas não resolvem a fragmentação no espaço vetorial da janela de contexto. O agrupamento por domínio (contiguidade semântica) força a atenção unificada da IA para todas as regras de um mesmo ciclo, prevenindo falhas operacionais e alucinações. O débito técnico planejado para o `compiler.mjs` — que deverá iterar regras agrupando-as por `tags` ou nova chave `zone` no `rules.json` — é estritamente necessário para preservar o repositório como uma fonte inquebrável de verdade.
+- **Data / Owner:** 2026-05-06 / @rosanarezende
 
 ---
 
@@ -66,17 +68,17 @@
 
 | ID               | Bloco | Status   |
 | :--------------- | :---- | :------- |
-| `[DEC-0019-B01]` | B     | Pendente |
-| `[DEC-0019-B02]` | B     | Pendente |
+| `[DEC-0019-B01]` | B     | Resolved |
+| `[DEC-0019-B02]` | B     | Resolved |
 
-**Status agregado:** Pendente
+**Status agregado:** Resolved
 
 ---
 
 ## ✅ Gate fechado
 
-- **Data:** [YYYY-MM-DD]
-- **Owner:** [@owner]
+- **Data:** 2026-05-07
+- **Owner:** [@rosanarezende]
 - **Pontos resolvidos:**
-  - [ ] `[DEC-0019-B01]`
-  - [ ] `[DEC-0019-B02]`
+  - [x] `[DEC-0019-B01]`
+  - [x] `[DEC-0019-B02]`

@@ -29,25 +29,25 @@
 - [x] **0.R.1** Listar perguntas de research a responder em `plan.md`.
 - [x] **0.R.2** Produzir `research/YYYY-MM-DD-<tema>.md` por pergunta.
 - [x] **0.R.3** Validar critério: cada research cobre perguntas do `plan.md`.
-- [ ] **0.R.4** Análise de débitos: registrar em `NEXT.md` insights que fujam do escopo.
-- [ ] **0.R.[COMMIT]** texto de commit incremental sugerido: "research(spec-0019): sínteses Stage 1 publicadas"
+- [x] **0.R.4** Análise de débitos: registrar em `NEXT.md` insights que fujam do escopo.
+- [x] **0.R.[COMMIT]** texto de commit incremental sugerido: "research(spec-0019): sínteses Stage 1 publicadas"
 
 ### Sub-bloco [0.Brief] — Stage 1: popular `decision-brief.md` com opções
 
 - [x] **0.B.1** Para cada `[DEC-0019-*]`: registrar Pergunta + Contexto + Opções.
 - [x] **0.B.2** Cross-refs entre pontos.
 - [x] **0.B.3** Tabela "Resumo de status" no fim do brief.
-- [ ] **0.B.4** Análise de débitos: registrar em `NEXT.md` opções descartadas que viram débitos.
-- [ ] **0.B.[COMMIT]** texto de commit incremental sugerido: "docs(spec-0019): decision-brief.md populado com opções Stage 1"
+- [x] **0.B.4** Análise de débitos: registrar em `NEXT.md` opções descartadas que viram débitos.
+- [x] **0.B.[COMMIT]** texto de commit incremental sugerido: "docs(spec-0019): decision-brief.md populado com opções Stage 1"
 
 ### Sub-bloco [0.Gate] — Gate humano (decision-brief → Resolved)
 
-- [ ] **0.G.1** Owner revisa `decision-brief.md` com todos os pontos `[DEC-0019-*]`.
-- [ ] **0.G.2** Para cada ponto: owner escolhe opção e justifica; status muda para `Resolved`.
-- [ ] **0.G.3** Iterar se necessário.
-- [ ] **0.G.4** Status agregado mudado para `Resolved`.
-- [ ] **0.G.5** `plan.md` v2 publicado (seções de design técnico `(evidence-driven)` derivadas das decisões).
-- [ ] **0.G.6** `tasks.md` v2: atualizar Fases 1–4.
+- [x] **0.G.1** Owner revisa `decision-brief.md` com todos os pontos `[DEC-0019-*]`.
+- [x] **0.G.2** Para cada ponto: owner escolhe opção e justifica; status muda para `Resolved`.
+- [x] **0.G.3** Iterar se necessário.
+- [x] **0.G.4** Status agregado mudado para `Resolved`.
+- [x] **0.G.5** `plan.md` v2 publicado (seções de design técnico `(evidence-driven)` derivadas das decisões).
+- [x] **0.G.6** `tasks.md` v2: atualizar Fases 1–4.
 - [ ] **0.G.7** Análise de débitos para o `NEXT.md`.
 - [ ] **0.G.[COMMIT]** texto de commit atômico sugerido: "docs(spec-0019): gate humano fechado — plan v2 + tasks v2 publicados"
 
@@ -59,6 +59,7 @@
 
 - [ ] **1.A.1** Atualizar scripts de init e adopt para copiar a pasta `.specify/templates` para `.ai-guidelines/templates` no consumidor.
 - [ ] **1.A.2** Refatorar wizard para apresentar prompts de features em categorias (Editoriais, Processo, etc).
+- [ ] **1.A.2.1** Persistir `.ai-guidelines/config.json` com `sdd_dir`, `providers` e `adapters`.
 - [ ] **1.A.3** Remover arquivo legado `.core/templates/AGENTS-pointer.md.tmpl` e referências na compilação.
 - [ ] **1.A.N** Pipeline de check + test verde.
 - [ ] **1.A.4** Análise de débitos para o `NEXT.md`.
@@ -66,8 +67,9 @@
 
 ### Sub-bloco [B] — Runtime Architecture & Trampolines `(evidence-driven)`
 
-- [ ] **1.B.1** [Placeholder Stage 2] Implementar scaffolding de arquivos `.claudeignore` e/ou wrappers baseados no gate humano.
-- [ ] **1.B.2** [Placeholder Stage 2] Atualizar compiler.mjs conforme revisão topológica do runtime.
+- [ ] **1.B.1** Implementar scaffolding de trampolins e ignore files por provider selecionado.
+- [ ] **1.B.1.1** Criar comando `providers` para adicionar/atualizar trampolins sem rerodar `adopt`.
+- [ ] **1.B.2** Atualizar `compiler.mjs` para zones temáticas e interpolação via `sdd_dir`.
 - [ ] **1.B.N** Pipeline de check + test verde.
 - [ ] **1.B.3** Análise de débitos para o `NEXT.md`.
 - [ ] **1.B.[COMMIT]** texto de commit incremental sugerido: "feat(spec-0019): Runtime Architecture & Trampolines"

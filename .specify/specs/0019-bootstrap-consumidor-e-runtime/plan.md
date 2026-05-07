@@ -41,6 +41,7 @@ CLI pergunta as features numa lista flat. Não copia `.specify/templates` para o
 - Refatorar wizard (`cli.mjs` ou módulo interativo correspondente) para agrupar escolhas (ex: Editoriais vs. CI/CD vs. Processo).
 - Atualizar módulo de `init`/`adopt` para realizar a cópia controlada do diretório `.specify/templates/` da origem para dentro de `.ai-guidelines/templates` no repo consumidor.
 - Remoção definitiva do arquivo legado `.core/templates/AGENTS-pointer.md.tmpl` e de suas referências, já que o modelo de pointer único foi descontinuado.
+- Persistir a configuração mínima do consumidor em `.ai-guidelines/config.json`, incluindo ao menos `sdd_dir`, `providers` e `adapters`.
 
 **Mudanças em arquivos**:
 
@@ -52,11 +53,18 @@ CLI pergunta as features numa lista flat. Não copia `.specify/templates` para o
 O compilador constrói um `AGENTS.md` monolítico que ainda sofre de redundâncias e inclui um ponteiro frágil. Arquivos de adapter (`CLAUDE.md`, etc) proliferam sem controle no consumidor.
 
 **Decisão**:
-[Placeholder Stage 2: aguardando `decision-brief.md` sobre scaffolding de trampolins e estrutura topológica do AGENTS]
+
+- Implementar seleção explícita de providers no wizard e via flags/CLI (`providers`), gerando apenas os trampolins e ignore files correspondentes aos providers escolhidos.
+- Separar `providers` (arquivos nativos como `CLAUDE.md`, `.cursor/rules/ai-guidelines.mdc`, `.openai/instructions.md`) de `adapters` do monólito (`claude`, `codex`, `gemini`), com mapeamento determinístico entre eles quando aplicável.
+- Remover o template legado `AGENTS-pointer` e passar a compilar o `AGENTS.md` diretamente em zonas temáticas: `Top Zone: Primary Directives`, `Lifecycle & Spec System`, `Git & PR Workflow`, `Engineering Principles`, `Center Zone: Opt-in Methodologies` e `Base Zone: Tactical Context`.
+- Usar `sdd_dir` do config para interpolar caminhos do consumidor dentro do runtime compilado, evitando referências hardcoded ao repositório mantenedor.
 
 **Mudanças em arquivos**:
 
 - `cli/features/core/compiler.mjs` e afins.
+- `cli/features/core/trampolines.mjs` — novo módulo para scaffolding de providers.
+- `cli/features/core/templates.mjs` — novo módulo para sincronização de `.specify/templates`.
+- `cli/features/core/config.mjs` — novo módulo para leitura/escrita de `.ai-guidelines/config.json`.
 
 ---
 
@@ -67,11 +75,13 @@ O compilador constrói um `AGENTS.md` monolítico que ainda sofre de redundânci
 - [ ] O CLI agrupa corretamente as categorias ao rodar interativamente.
 - [ ] Templates em `.specify/templates/` são escritos em `.ai-guidelines/templates/` no projeto-alvo.
 - [ ] O template `.core/templates/AGENTS-pointer.md.tmpl` e menções no código da CLI foram removidos.
+- [ ] `.ai-guidelines/config.json` persiste a configuração mínima do bootstrap.
 
 ### Componente [B]
 
-- [ ] [Placeholder Stage 2]
-- [ ] [Placeholder Stage 2]
+- [ ] O wizard e o comando `providers` geram apenas trampolins/ignore files dos providers selecionados.
+- [ ] O compilado `AGENTS.md` passa a ser agrupado por zonas temáticas sem depender do template legado `AGENTS-pointer`.
+- [ ] O runtime compilado usa interpolação baseada em `sdd_dir` para paths do consumidor.
 
 ### Globais (toda a spec)
 
@@ -89,8 +99,10 @@ O compilador constrói um `AGENTS.md` monolítico que ainda sofre de redundânci
 ## 🛠️ Arquivos modificados (esperado)
 
 - `cli/ai-guidelines-cli.mjs` — Atualização do wizard.
-- `cli/features/core/compiler.mjs` — Atualização do builder/compilador de runtime.
-- `cli/features/core/pointers.mjs` — [Dependente da decisão B]
+- `cli/features/core/pointers.mjs` — passa a orquestrar config, templates, trampolins e compilação final.
+- `cli/governance/monolith/compiler.mjs` — atualização do builder/compilador de runtime.
+- `cli/cli/args.mjs` — categorias do wizard + seleção de providers.
+- `cli/app/engine.mjs` — suporte ao novo comando `providers`.
 
 ---
 
