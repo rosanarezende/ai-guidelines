@@ -10,6 +10,7 @@ import {
 } from "#formatters/package-context";
 import { applyPointers } from "#features/core/pointers";
 import { applyGitattributes } from "#features/core/gitattributes";
+import { runBudgetReport } from "#features/core/budget-report";
 // Opt-in — Infraestrutura (modificam package.json, hooks, CI)
 import { applyPrettier } from "#features/opt-in/infrastructure/prettier";
 import { applyHusky } from "#features/opt-in/infrastructure/husky";
@@ -121,8 +122,13 @@ export async function execute(mode, rawOptions) {
 
   if (!isSupportedMode(effectiveMode)) {
     throw new Error(
-      `Comando não suportado: ${effectiveMode}. Use --help para ver os comandos disponíveis (init, adopt, providers, update).`
+      `Comando não suportado: ${effectiveMode}. Use --help para ver os comandos disponíveis (init, adopt, providers, update, check-budget).`
     );
+  }
+
+  if (effectiveMode === "check-budget") {
+    await runBudgetReport();
+    return;
   }
 
   const options = {

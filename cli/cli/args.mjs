@@ -4,7 +4,7 @@ import { normalizePackageManager, detectPackageManager } from "#formatters/packa
 import { readTextIfExists } from "#fs/file-system";
 import { DEFAULT_PROVIDERS, getSupportedProviders } from "#features/core/config";
 
-const SUPPORTED_MODES = ["init", "adopt", "providers", "update"];
+const SUPPORTED_MODES = ["init", "adopt", "providers", "update", "check-budget"];
 const WIZARD_DEFAULTS = {
   mode: "adopt",
   target: ".",
@@ -78,13 +78,16 @@ Uso:
   yarn cli <init|adopt|providers|update> [opcoes]
 
 Comandos:
-  init       Cria baseline AI-first em projeto novo
-  adopt      Aplica baseline AI-first em repositório existente
-  providers  Adiciona ou atualiza trampolins nativos de IA/IDE no repositório alvo
-  update     Re-aplica trampolins, templates SDD e recompila AGENTS.md a partir do
-             .ai-guidelines/config.json existente (idempotente, headless, não modifica
-             config). Use após atualizar a versão do framework para receber updates
-             de hard-redirect, adapter rules e templates sem reabrir o wizard.
+  init           Cria baseline AI-first em projeto novo
+  adopt          Aplica baseline AI-first em repositório existente
+  providers      Adiciona ou atualiza arquivos nativos de provider (CLAUDE.md, GEMINI.md,
+                 .openai/instructions.md, .cursor/rules/ai-guidelines.mdc, etc.)
+  update         Re-aplica provider entrypoints, templates SDD e recompila AGENTS.md a partir
+                 do .ai-guidelines/config.json existente (idempotente, headless, não modifica
+                 config). Use após atualizar a versão do framework para receber updates
+                 de hard-redirect, adapter rules e templates sem reabrir o wizard.
+  check-budget   Imprime o relatório de orçamento de tokens (universal, opt-in, AGENTS.md
+                 compilado e cada provider entrypoint) com base no rules.json do framework.
 
 Opções:
   --target <dir>             Diretório alvo (default: diretório atual)
@@ -325,9 +328,9 @@ function shouldUseWizard(mode, rawOptions) {
     return false;
   }
 
-  // O comando `update` é headless por contrato — ele lê o config.json existente
-  // e re-aplica deterministicamente. Nunca abre wizard.
-  if (mode === "update") {
+  // Os comandos `update` e `check-budget` são headless por contrato — leem
+  // estado existente (config / catálogo) e nunca abrem wizard.
+  if (mode === "update" || mode === "check-budget") {
     return false;
   }
 
