@@ -72,21 +72,21 @@ O compilador constrói um `AGENTS.md` monolítico que ainda sofre de redundânci
 
 ### Componente [A]
 
-- [ ] O CLI agrupa corretamente as categorias ao rodar interativamente.
-- [ ] Templates em `.specify/templates/` são escritos em `.ai-guidelines/templates/` no projeto-alvo.
-- [ ] O template `.core/templates/AGENTS-pointer.md.tmpl` e menções no código da CLI foram removidos.
-- [ ] `.ai-guidelines/config.json` persiste a configuração mínima do bootstrap.
+- [x] O CLI agrupa corretamente as categorias ao rodar interativamente.
+- [x] Templates em `.specify/templates/` são escritos em `.ai-guidelines/templates/` no projeto-alvo.
+- [x] O template `.core/templates/AGENTS-pointer.md.tmpl` e menções no código da CLI foram removidos.
+- [x] `.ai-guidelines/config.json` persiste a configuração mínima do bootstrap.
 
 ### Componente [B]
 
-- [ ] O wizard e o comando `providers` geram apenas trampolins/ignore files dos providers selecionados.
-- [ ] O compilado `AGENTS.md` passa a ser agrupado por zonas temáticas sem depender do template legado `AGENTS-pointer`.
-- [ ] O runtime compilado usa interpolação baseada em `sdd_dir` para paths do consumidor.
+- [x] O wizard e o comando `providers` geram apenas trampolins/ignore files dos providers selecionados.
+- [x] O compilado `AGENTS.md` passa a ser agrupado por zonas temáticas sem depender do template legado `AGENTS-pointer`.
+- [x] O runtime compilado usa interpolação baseada em `sdd_dir` para paths do consumidor.
 
 ### Globais (toda a spec)
 
-- [ ] Pipeline de format/lint verde (`yarn check`).
-- [ ] Suíte de testes verde (`yarn test`).
+- [x] Pipeline de format/lint verde (`yarn check`).
+- [x] Suíte de testes verde (`yarn test`).
 
 ---
 
@@ -116,4 +116,5 @@ O compilador constrói um `AGENTS.md` monolítico que ainda sofre de redundânci
 
 ## 📐 Decisões revisitadas
 
-_(Vazio no início)_
+- **2026-05-06** — `providers` e `adapters` foram separados em camadas distintas. Os arquivos nativos de tooling (`CLAUDE.md`, `.cursor/rules/ai-guidelines.mdc`, `.openai/instructions.md`) passaram a ser governados por `providers`, enquanto o monólito usa `adapters` (`claude`, `codex`, `gemini`) derivados por mapeamento determinístico. Motivo: nem todo provider precisa de regras próprias no `AGENTS.md`, mas todos podem precisar de hard-redirect.
+- **2026-05-06** — O runtime deixou de depender do template `AGENTS-pointer` e passou a compor a base tática diretamente no compilador. Motivo: eliminar o ponteiro legado e centralizar a topologia final do payload no mesmo fluxo que já monta as zonas temáticas.

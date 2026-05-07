@@ -37,7 +37,11 @@ _(Nenhum débito registrado ainda)_
 
 > Insights técnicos, discussões ricas ou ideias de features que apareceram durante a execução, mas estão claramente fora do escopo atual.
 
-_(Nenhum insight registrado ainda)_
+### 1. Providers nativos e adapters do monólito não são a mesma abstração
+
+- **O Contexto**: a decisão `[DEC-0019-B01]` amplia o bootstrap para arquivos nativos de ferramentas como Cursor, Copilot e Windsurf, enquanto o catálogo atual de regras do runtime só possui adapters `claude`, `codex` e `gemini`.
+- **O Insight**: separar `providers` de `adapters` reduz acoplamento e permite ampliar hard-redirects sem inflar o catálogo semântico do `AGENTS.md`.
+- **Ação Sugerida**: manter essa distinção como base para futuras expansões de providers e eventual catálogo dedicado de adapters se o framework passar a ter regras específicas para Cursor/Windsurf/Aider.
 
 <!-- Template de Insight:
 ### 1. [Título do Insight]
