@@ -39,6 +39,8 @@ CLI pergunta as features numa lista flat. Não copia `.specify/templates` para o
 **Decisão**:
 
 - Refatorar wizard (`cli.mjs` ou módulo interativo correspondente) para agrupar escolhas (ex: Editoriais vs. CI/CD vs. Processo).
+- Substituir o fluxo manual de CSV em `readline` por prompts interativos com `@inquirer/prompts`, usando `checkbox` para seleções múltiplas e `select`/`confirm` quando aplicável.
+- Formalizar a execução local da CLI via scripts `yarn cli*`, evitando o uso suportado de `node cli/ai-guidelines-cli.mjs` em ambiente Yarn PnP.
 - Atualizar módulo de `init`/`adopt` para realizar a cópia controlada do diretório `.specify/templates/` da origem para dentro de `.ai-guidelines/templates` no repo consumidor.
 - Remoção definitiva do arquivo legado `.core/templates/AGENTS-pointer.md.tmpl` e de suas referências, já que o modelo de pointer único foi descontinuado.
 - Persistir a configuração mínima do consumidor em `.ai-guidelines/config.json`, incluindo ao menos `sdd_dir`, `providers` e `adapters`.
@@ -46,6 +48,8 @@ CLI pergunta as features numa lista flat. Não copia `.specify/templates` para o
 **Mudanças em arquivos**:
 
 - `cli/ai-guidelines-cli.mjs` (ou arquivos dentro de `cli/features/`) — Refatoração do prompt interativo e workflow de deploy.
+- `package.json` / `yarn.lock` — inclusão de `@inquirer/prompts` como dependência de runtime aprovada pelo owner.
+- `README.md` e templates SDD — atualização do comando canônico para `yarn cli`.
 
 #### [B | Runtime Architecture & Trampolines] `(evidence-driven)`
 
@@ -73,6 +77,8 @@ O compilador constrói um `AGENTS.md` monolítico que ainda sofre de redundânci
 ### Componente [A]
 
 - [x] O CLI agrupa corretamente as categorias ao rodar interativamente.
+- [x] O wizard substitui entrada CSV por UX de seleção interativa (`checkbox`) para features e providers.
+- [x] O repositório expõe scripts `yarn cli*` e documenta esse contrato como caminho suportado de execução local.
 - [x] Templates em `.specify/templates/` são escritos em `.ai-guidelines/templates/` no projeto-alvo.
 - [x] O template `.core/templates/AGENTS-pointer.md.tmpl` e menções no código da CLI foram removidos.
 - [x] `.ai-guidelines/config.json` persiste a configuração mínima do bootstrap.
@@ -102,6 +108,7 @@ O compilador constrói um `AGENTS.md` monolítico que ainda sofre de redundânci
 - `cli/features/core/pointers.mjs` — passa a orquestrar config, templates, trampolins e compilação final.
 - `cli/governance/monolith/compiler.mjs` — atualização do builder/compilador de runtime.
 - `cli/cli/args.mjs` — categorias do wizard + seleção de providers.
+- `package.json` / `yarn.lock` — dependência de prompts interativos.
 - `cli/app/engine.mjs` — suporte ao novo comando `providers`.
 
 ---
@@ -118,3 +125,4 @@ O compilador constrói um `AGENTS.md` monolítico que ainda sofre de redundânci
 
 - **2026-05-06** — `providers` e `adapters` foram separados em camadas distintas. Os arquivos nativos de tooling (`CLAUDE.md`, `.cursor/rules/ai-guidelines.mdc`, `.openai/instructions.md`) passaram a ser governados por `providers`, enquanto o monólito usa `adapters` (`claude`, `codex`, `gemini`) derivados por mapeamento determinístico. Motivo: nem todo provider precisa de regras próprias no `AGENTS.md`, mas todos podem precisar de hard-redirect.
 - **2026-05-06** — O runtime deixou de depender do template `AGENTS-pointer` e passou a compor a base tática diretamente no compilador. Motivo: eliminar o ponteiro legado e centralizar a topologia final do payload no mesmo fluxo que já monta as zonas temáticas.
+- **2026-05-06** — O owner aprovou ampliar a spec para adotar `@inquirer/prompts` no wizard. Motivo: entrada CSV em CLI interativa é UX inadequada para seleção múltipla; `checkbox` passa a ser requisito funcional do bootstrap.

@@ -96,8 +96,8 @@ describe("cli/args", () => {
           "./demo",
           "demo-app",
           "npm",
-          "claude,gemini,openai",
-          "prettier,husky",
+          ["claude", "gemini", "openai"],
+          ["prettier", "husky"],
           "s",
         ],
       });
@@ -188,8 +188,8 @@ describe("cli/args", () => {
           "./demo",
           "demo-app",
           "npm",
-          "claude,gemini,openai",
-          "tdd",
+          ["claude", "gemini", "openai"],
+          ["tdd"],
           "en",
           "s",
         ],
@@ -208,7 +208,7 @@ describe("cli/args", () => {
         target: ".",
         name: "demo",
         // Pula o comando e target, vai direto pro PM
-        __wizardAnswers: ["invalid-pm", "invalid-pm2", "pnpm", "claude,openai", "", "s"],
+        __wizardAnswers: ["invalid-pm", "invalid-pm2", "pnpm", ["claude", "openai"], "", "s"],
       });
 
       assert.equal(
@@ -246,7 +246,7 @@ describe("cli/args", () => {
       const result = await resolveExecutionInput("init", {
         target: "demo",
         name: "fixed-name",
-        __wizardAnswers: ["invalid-pm", "npm", "claude,gemini,openai", "", "s"],
+        __wizardAnswers: ["invalid-pm", "npm", ["claude", "gemini", "openai"], "", "s"],
       });
       assert.equal(
         result.options["package-manager"],
@@ -277,7 +277,7 @@ describe("cli/args", () => {
   it("[BR-CLI-WIZARD-07] DADO modo providers QUANDO wizard rodar ENTÃO resolve providers sem exigir package manager ou features", async () => {
     await withTTY(true, async () => {
       const result = await resolveExecutionInput("providers", {
-        __wizardAnswers: ["./demo", "claude,cursor,openai", "s"],
+        __wizardAnswers: ["./demo", ["claude", "cursor", "openai"], "s"],
       });
 
       assert.equal(result.mode, "providers");

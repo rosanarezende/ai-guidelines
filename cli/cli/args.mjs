@@ -1,5 +1,5 @@
 import path from "node:path";
-import readline from "node:readline";
+import { checkbox, confirm, input, select } from "@inquirer/prompts";
 import { normalizePackageManager, detectPackageManager } from "#formatters/package-context";
 import { readTextIfExists } from "#fs/file-system";
 import { DEFAULT_PROVIDERS, getSupportedProviders } from "#features/core/config";
@@ -67,7 +67,7 @@ export function printHelp() {
   console.log(`ai-guidelines CLI
 
 Uso:
-  node scripts/ai-guidelines-cli.mjs <init|adopt|providers> [opcoes]
+  yarn cli <init|adopt|providers> [opcoes]
 
 Comandos:
   init   Cria baseline AI-first em projeto novo
@@ -145,29 +145,79 @@ export function sanitizeWizardRawOptions(rawOptions) {
   return cleanOptions;
 }
 
-function createWizardAsker(rawOptions) {
+function createWizardPrompter(rawOptions) {
   const scriptedAnswers = Array.isArray(rawOptions?.__wizardAnswers)
     ? [...rawOptions.__wizardAnswers]
     : null;
 
   if (scriptedAnswers) {
-    return async () => scriptedAnswers.shift() ?? "";
+    return {
+      scripted: true,
+      async input() {
+        return scriptedAnswers.shift() ?? "";
+      },
+      async select() {
+        const answer = scriptedAnswers.shift();
+        return answer === undefined ? "" : answer;
+      },
+      async checkbox() {
+        const answer = scriptedAnswers.shift();
+        if (answer === "") {
+          return "__DEFAULT__";
+        }
+        if (Array.isArray(answer)) {
+          return answer;
+        }
+        if (typeof answer === "string") {
+          return answer
+            .split(",")
+            .map((item) => item.trim())
+            .filter(Boolean);
+        }
+        return [];
+      },
+      async confirm() {
+        const answer = scriptedAnswers.shift();
+        if (typeof answer === "boolean") {
+          return answer;
+        }
+        return answer ?? "";
+      },
+    };
   }
 
-  return (question) => {
-    return new Promise((resolve) => {
-      const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-      rl.question(question, (answer) => {
-        rl.close();
-        resolve(answer);
-      });
-    });
+  return null;
+}
+
+async function resolveInteractivePrompter(rawOptions) {
+  const scriptedPrompter = createWizardPrompter(rawOptions);
+  if (scriptedPrompter) {
+    return scriptedPrompter;
+  }
+
+  return {
+    scripted: false,
+    input: (options) => input(options),
+    select: (options) => select(options),
+    checkbox: (options) => checkbox(options),
+    confirm: (options) => confirm(options),
   };
 }
 
-async function promptTextWithDefault(ask, questionLabel, defaultValue, validate, errorMessage) {
+async function promptTextWithDefault(
+  prompter,
+  questionLabel,
+  defaultValue,
+  validate,
+  errorMessage
+) {
   while (true) {
-    const answer = (await ask(`${questionLabel} [${defaultValue}]: `)).trim();
+    const answer = String(
+      await prompter.input({
+        message: questionLabel,
+        default: defaultValue,
+      })
+    ).trim();
     const resolved = answer === "" ? defaultValue : answer;
 
     if (!validate || validate(resolved)) {
@@ -178,25 +228,74 @@ async function promptTextWithDefault(ask, questionLabel, defaultValue, validate,
   }
 }
 
-async function promptBooleanWithDefault(ask, questionLabel, defaultValue) {
-  const hint = defaultValue ? "S/n" : "s/N";
-
+async function promptBooleanWithDefault(prompter, questionLabel, defaultValue) {
   while (true) {
-    const answer = (await ask(`${questionLabel} [${hint}] `)).trim().toLowerCase();
+    const answer = await prompter.confirm({
+      message: questionLabel,
+      default: defaultValue,
+    });
 
-    if (answer === "") {
+    if (typeof answer === "boolean") {
+      return answer;
+    }
+
+    const normalizedAnswer = String(answer).trim().toLowerCase();
+
+    if (normalizedAnswer === "") {
       return defaultValue;
     }
 
-    if (["s", "sim", "y", "yes"].includes(answer)) {
+    if (["s", "sim", "y", "yes"].includes(normalizedAnswer)) {
       return true;
     }
 
-    if (["n", "nao", "não", "no"].includes(answer)) {
+    if (["n", "nao", "não", "no"].includes(normalizedAnswer)) {
       return false;
     }
 
     console.log("Entrada inválida. Responda com s ou n.");
+  }
+}
+
+async function promptSelectWithDefault(prompter, message, choices, defaultValue, errorMessage) {
+  while (true) {
+    const answer = await prompter.select({
+      message,
+      choices,
+      default: defaultValue,
+    });
+
+    const normalizedAnswer = String(answer).trim() || defaultValue;
+    if (choices.some((choice) => choice.value === normalizedAnswer)) {
+      return normalizedAnswer;
+    }
+
+    console.log(errorMessage);
+  }
+}
+
+async function promptCheckboxWithDefault(prompter, message, choices, defaultValues, errorMessage) {
+  while (true) {
+    const answer = await prompter.checkbox({
+      message,
+      choices,
+      default: defaultValues,
+      required: true,
+    });
+
+    if (answer === "__DEFAULT__") {
+      return defaultValues;
+    }
+
+    if (
+      Array.isArray(answer) &&
+      answer.length > 0 &&
+      answer.every((item) => choices.some((choice) => choice.value === item))
+    ) {
+      return answer;
+    }
+
+    console.log(errorMessage);
   }
 }
 
@@ -247,16 +346,29 @@ export async function resolveExecutionInput(mode, rawOptions) {
     return { mode, options: cleanOptions, usedWizard: false };
   }
 
-  const ask = createWizardAsker(rawOptions);
+  const prompter = await resolveInteractivePrompter(rawOptions);
   const wizardOptions = { ...cleanOptions };
   let resolvedMode = mode;
 
   if (!isSupportedMode(resolvedMode)) {
-    const modeInput = await promptTextWithDefault(
-      ask,
-      "Modo (init/adopt) - init cria um projeto novo com baseline AI-first; adopt aplica o baseline de forma conservadora em repo existente",
+    const modeInput = await promptSelectWithDefault(
+      prompter,
+      "Modo de execução",
+      [
+        {
+          value: "init",
+          name: "init — cria um projeto novo com baseline AI-first",
+        },
+        {
+          value: "adopt",
+          name: "adopt — aplica o baseline de forma conservadora em repo existente",
+        },
+        {
+          value: "providers",
+          name: "providers — adiciona ou atualiza trampolins nativos",
+        },
+      ],
       WIZARD_DEFAULTS.mode,
-      (value) => isSupportedMode(value.toLowerCase()),
       "Modo inválido. Use init ou adopt."
     );
     resolvedMode = modeInput.toLowerCase();
@@ -264,7 +376,7 @@ export async function resolveExecutionInput(mode, rawOptions) {
 
   if (wizardOptions.target === undefined) {
     wizardOptions.target = await promptTextWithDefault(
-      ask,
+      prompter,
       "Diretório alvo",
       WIZARD_DEFAULTS.target,
       (value) => value.trim().length > 0,
@@ -276,7 +388,7 @@ export async function resolveExecutionInput(mode, rawOptions) {
 
   if (resolvedMode !== "providers" && wizardOptions.name === undefined) {
     wizardOptions.name = await promptTextWithDefault(
-      ask,
+      prompter,
       "Nome do projeto",
       defaultName,
       (value) => value.trim().length > 0,
@@ -297,7 +409,7 @@ export async function resolveExecutionInput(mode, rawOptions) {
     const detectedPm = await detectPackageManager(wizardOptions.target, null, pkgJson);
 
     wizardOptions["package-manager"] = await promptTextWithDefault(
-      ask,
+      prompter,
       "Package manager",
       detectedPm.label,
       isValidPackageManagerInput,
@@ -306,58 +418,39 @@ export async function resolveExecutionInput(mode, rawOptions) {
   }
 
   if (wizardOptions.providers === undefined) {
-    const providerPrompt =
-      "Providers e IDEs para gerar trampolins nativos:\n" +
-      SUPPORTED_PROVIDER_OPTIONS.map(
-        (provider) => `  - ${provider}: ${PROVIDER_DESCRIPTIONS[provider]}`
-      ).join("\n") +
-      `\nSeleção [${WIZARD_DEFAULTS.providers}]: `;
-
-    const providersInput = await promptTextWithDefault(
-      ask,
-      providerPrompt,
-      WIZARD_DEFAULTS.providers,
-      (value) =>
-        value
-          .split(",")
-          .every(
-            (provider) =>
-              SUPPORTED_PROVIDER_OPTIONS.includes(provider.trim()) || provider.trim() === ""
-          ),
+    wizardOptions.providers = await promptCheckboxWithDefault(
+      prompter,
+      "Providers e IDEs para gerar trampolins nativos",
+      SUPPORTED_PROVIDER_OPTIONS.map((provider) => ({
+        value: provider,
+        name: `${provider} — ${PROVIDER_DESCRIPTIONS[provider]}`,
+      })),
+      WIZARD_DEFAULTS.providers.split(","),
       "Um ou mais providers são inválidos."
     );
-
-    wizardOptions.providers = providersInput
-      .split(",")
-      .map((provider) => provider.trim())
-      .filter(Boolean);
   } else if (typeof wizardOptions.providers === "string") {
     wizardOptions.providers = wizardOptions.providers.split(",").map((provider) => provider.trim());
   }
 
   if (resolvedMode !== "providers" && wizardOptions.features === undefined) {
-    const suggestedFeatures = FEATURE_OPTIONS.filter((f) => !wizardOptions[`skip-${f}`]).join(",");
+    const suggestedFeatures = FEATURE_OPTIONS.filter((f) => !wizardOptions[`skip-${f}`]);
 
-    const featurePrompt =
-      "Features para ativar:\n" +
-      "Infraestrutura:\n" +
-      INFRASTRUCTURE_FEATURES.map((f) => `  - ${f}: ${FEATURE_DESCRIPTIONS[f]}`).join("\n") +
-      "\nEditoriais:\n" +
-      EDITORIAL_FEATURES.map((f) => `  - ${f}: ${FEATURE_DESCRIPTIONS[f]}`).join("\n") +
-      `\nSeleção [${suggestedFeatures}]: `;
-
-    const featuresInput = await promptTextWithDefault(
-      ask,
-      featurePrompt,
+    wizardOptions.features = await promptCheckboxWithDefault(
+      prompter,
+      "Features para ativar",
+      [
+        ...INFRASTRUCTURE_FEATURES.map((feature) => ({
+          value: feature,
+          name: `[Infra] ${feature} — ${FEATURE_DESCRIPTIONS[feature]}`,
+        })),
+        ...EDITORIAL_FEATURES.map((feature) => ({
+          value: feature,
+          name: `[Editorial] ${feature} — ${FEATURE_DESCRIPTIONS[feature]}`,
+        })),
+      ],
       suggestedFeatures,
-      (value) =>
-        value.split(",").every((f) => FEATURE_OPTIONS.includes(f.trim()) || f.trim() === ""),
       "Uma ou mais features são inválidas."
     );
-    wizardOptions.features = featuresInput
-      .split(",")
-      .map((f) => f.trim())
-      .filter(Boolean);
   } else if (resolvedMode !== "providers" && typeof wizardOptions.features === "string") {
     wizardOptions.features = wizardOptions.features.split(",").map((f) => f.trim());
   }
@@ -367,18 +460,21 @@ export async function resolveExecutionInput(mode, rawOptions) {
     (wizardOptions.features.includes("tdd") || wizardOptions.features.includes("bdd")) &&
     wizardOptions.lang === undefined
   ) {
-    wizardOptions.lang = await promptTextWithDefault(
-      ask,
-      "Idioma para regras TDD/BDD (pt ou en)",
+    wizardOptions.lang = await promptSelectWithDefault(
+      prompter,
+      "Idioma para regras TDD/BDD",
+      [
+        { value: "pt", name: "pt — Português do Brasil" },
+        { value: "en", name: "en — English" },
+      ],
       "pt",
-      (value) => ["pt", "en"].includes(value.toLowerCase()),
       "Idioma inválido. Use pt ou en."
     );
   }
 
   if (wizardOptions["dry-run"] === undefined) {
     wizardOptions["dry-run"] = await promptBooleanWithDefault(
-      ask,
+      prompter,
       "Executar em dry-run? (simula as ações sem escrever arquivos)",
       WIZARD_DEFAULTS.dryRun
     );

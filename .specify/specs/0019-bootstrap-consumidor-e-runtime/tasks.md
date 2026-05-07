@@ -59,11 +59,14 @@
 
 - [x] **1.A.1** Atualizar scripts de init e adopt para copiar a pasta `.specify/templates` para `.ai-guidelines/templates` no consumidor.
 - [x] **1.A.2** Refatorar wizard para apresentar prompts de features em categorias (Editoriais, Processo, etc).
+- [x] **1.A.2.2** Substituir perguntas CSV do wizard por `checkbox`/`select` via `@inquirer/prompts`.
+- [x] **1.A.2.3** Formalizar execução local da CLI via `yarn cli*` e atualizar o comando canônico na documentação/templates para compatibilidade com Yarn PnP.
 - [x] **1.A.2.1** Persistir `.ai-guidelines/config.json` com `sdd_dir`, `providers` e `adapters`.
 - [x] **1.A.3** Remover arquivo legado `.core/templates/AGENTS-pointer.md.tmpl` e referências na compilação.
 - [x] **1.A.N** Pipeline de check + test verde.
 - [x] **1.A.4** Análise de débitos para o `NEXT.md`.
 - [x] **1.A.[COMMIT]** texto de commit incremental sugerido: "feat(spec-0019): CLI Wizard & Template Distribution"
+- [x] **1.A.[COMMIT-UX]** texto de commit incremental sugerido: "feat(spec-0019): melhora UX do wizard com inquirer"
 
 ### Sub-bloco [B] — Runtime Architecture & Trampolines `(evidence-driven)`
 
@@ -85,10 +88,10 @@
 ## Fase 3 — Preparação para Review (Gate de Homologação)
 
 - [ ] **3.1** Atualizar header da `spec.md`: status → `In Review`.
-- [ ] **3.2** Pipeline canônico verde (`yarn check:repo` ou similar).
+- [x] **3.2** Pipeline canônico verde (`yarn check:repo` ou similar).
 - [ ] **3.3** Critérios de aceite de `spec.md` e DoD de `plan.md` confirmados.
 - [ ] **3.4** `decision-brief.md`: validar pontos `Resolved` contra o design.
-- [ ] **3.5** Validar a entrega em ambiente real (`adopt --dry-run`).
+- [x] **3.5** Validar a entrega em ambiente real (`yarn cli adopt --target . --dry-run`).
 - [ ] **3.6** PR atualizado com descrição em 3 etapas.
 - [ ] **3.7** **[MANDATÓRIO]** Aguardar Gate de Review Humano.
 - [ ] **3.8** Aplicar correções.

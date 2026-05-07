@@ -28,14 +28,15 @@ A gestão das regras do projeto é feita através da Interface de Linha de Coman
 
 ```bash
 # Para novos projetos — Inicialização com arquitetura AI-first:
-node cli/ai-guidelines-cli.mjs init --target ../meu-projeto --name meu-projeto
+yarn cli init --target ../meu-projeto --name meu-projeto
 
 # Para repositórios existentes — Adoção conservadora (sem substituição silenciosa):
-node cli/ai-guidelines-cli.mjs adopt --target ../repo-existente --dry-run   # Modo de pré-visualização
-node cli/ai-guidelines-cli.mjs adopt --target ../repo-existente             # Aplicação definitiva
+yarn cli adopt --target ../repo-existente --dry-run   # Modo de pré-visualização
+yarn cli adopt --target ../repo-existente             # Aplicação definitiva
 ```
 
 > Nota: A execução da CLI sem argumentos inicia automaticamente um assistente de configuração interativo.
+> Em desenvolvimento local neste repositório, use `yarn cli ...` para garantir a resolução de dependências em ambiente Yarn PnP.
 > Em CI, use flags explícitas. Detalhes em [Documentação de Features](docs/features.md).
 
 ### 🛠️ Para Contribuidores

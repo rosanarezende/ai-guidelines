@@ -31,6 +31,8 @@ O `AGENTS.md` compilado resultante também precisa de uma revisão topológica (
 - Scaffolding de guardrails específicos por provedor (ex: `.claudeignore`) e trampolins mínimos (`CLAUDE.md` com um pointer).
 - Sincronização e distribuição da pasta `.specify/templates/` para `.ai-guidelines/templates` nos consumidores no `init/adopt`.
 - Separação em categorias do wizard interativo (opt-ins editoriais separados de infraestrutura).
+- Refatoração do wizard interativo para prompts robustos de seleção múltipla com `checkbox`, incluindo adoção de biblioteca especializada aprovada pelo owner.
+- Formalização do contrato de execução local da CLI via scripts `yarn`, compatível com Yarn PnP e com a dependência de prompts em runtime.
 - Revisão do compilador do runtime `AGENTS.md` para garantir clareza semântica, eliminando duplicações.
 - Remoção do template legado `AGENTS-pointer`.
 
@@ -38,6 +40,7 @@ O `AGENTS.md` compilado resultante também precisa de uma revisão topológica (
 
 - **Reabertura do baseline de conteúdo (Spec 0018):** Nenhuma alteração nas regras aprovadas, apenas mudança na _disposição_ (arquitetura do payload).
 - **Hierarquia por subdiretórios:** Essa é responsabilidade da candidata _regra-hierarquia_ (Spec 0011).
+- **Troca ampla de framework de CLI além dos prompts interativos**: a adoção fica restrita ao `@inquirer/prompts` para resolver UX de seleção e não abre escopo para reconstrução total da interface.
 
 ---
 
