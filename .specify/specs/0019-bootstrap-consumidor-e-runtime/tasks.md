@@ -80,11 +80,33 @@
 - [x] **1.B.3** Análise de débitos para o `NEXT.md`.
 - [x] **1.B.[COMMIT]** texto de commit incremental sugerido: "feat(spec-0019): Runtime Architecture & Trampolines"
 
+### Sub-bloco [C] — Update Lifecycle Unificado `(deterministic, adicionado em 2026-05-07)`
+
+- [x] **1.C.1** Implementar módulo `cli/features/core/managed-block.mjs`: parser/serializer de blocos delimitados por `<!-- ai-guidelines:managed-start v=1 -->` ... `<!-- ai-guidelines:managed-end -->` (Markdown) e `# ai-guidelines:managed-start v=1` ... `# ai-guidelines:managed-end` (gitignore-style). Três estratégias de write: arquivo novo, arquivo gerenciado existente (substitui apenas bloco interno), arquivo legado sem marcadores (prepend bloco + comentário humano em PT-BR + conteúdo legado preservado abaixo).
+- [x] **1.C.2** Cobrir `managed-block.mjs` com testes unitários: arquivo novo, arquivo gerenciado existente, arquivo legado sem marcadores, idempotência (rerodar não duplica), arquivo idêntico (no-op), versionamento `v=N` antigo (warning).
+- [x] **1.C.3** Refatorar `cli/features/core/trampolines.mjs` para emitir conteúdo via `managed-block`. Adapter rules do provider correspondente (`.core/rules/adapters/<id>.md` quando aplicável) são injetadas dentro do bloco gerenciado, abaixo do hard-redirect. Mapping: `claude→claude`, `openai→codex`, `gemini→gemini`; demais providers (cursor, copilot, windsurf, aider) recebem só hard-redirect.
+- [x] **1.C.4** Remover seção `### Provider Adapters` do `cli/governance/monolith/compiler.mjs` (e o H3 órfão). Atualizar testes do compiler e snapshots.
+- [x] **1.C.5** `cli/features/core/templates.mjs` opera em modo `mirror` controlado: aceita flag `prune` apenas quando chamado por `init`/`adopt`/`update`, nunca por `providers`. Corrige bug de regressão silenciosa em `.ai-guidelines/templates/`.
+- [x] **1.C.6** Adicionar comando `update` em `cli/app/engine.mjs` e registrar em `cli/cli/args.mjs` (parser + help). Comportamento: lê `.ai-guidelines/config.json`, re-aplica trampolins (managed-block) + templates (mirror) + recompilação do `AGENTS.md`. Headless por padrão; `--force` reescreve conteúdo legado também (raro).
+- [x] **1.C.7** Validar `sdd_dir` em `cli/features/core/config.mjs` contra path traversal (não absoluto, sem `..`, contido em `targetDir`).
+- [x] **1.C.8** Onda 1+2 de correções residuais do PR review:
+  - [x] mensagens de erro em `engine.mjs` e `args.mjs` incluem `providers`/`update`;
+  - [x] logs de `writeFileIfChanged`/`ensureDir` relativos a `process.cwd()` (não a `ROOT_DIR`);
+  - [x] action de prettier prefixa `[dry-run]` quando aplicável.
+- [x] **1.C.9** Onda 3 — polimentos: importar `SUPPORTED_PROVIDERS` em `trampolines.mjs`; simplificar fallback redundante em `pointers.mjs`; comentar heurística `GR-0203 → "git"`.
+- [x] **1.C.10** Estender `tests/integration/cli.integration.test.mjs`: trampoline preexistente sem marcadores → bloco gerenciado prepended + comentário humano; trampoline com marcadores → apenas bloco interno atualizado; rerodar `update` é idempotente; `providers --prune` NÃO apaga templates SDD; `sdd_dir` malicioso é rejeitado.
+- [x] **1.C.N** Pipeline de check + test verde.
+- [x] **1.C.11** Análise de débitos para o `NEXT.md`.
+- [x] **1.C.[COMMIT-DOCS]** texto sugerido: "docs(spec-0019): reabre escopo para update lifecycle e adapter migration"
+- [x] **1.C.[COMMIT-MANAGED]** texto sugerido: "feat(spec-0019): introduz managed-block e comando update"
+- [x] **1.C.[COMMIT-ADAPTER]** texto sugerido: "feat(spec-0019): migra adapter content para trampolins"
+- [x] **1.C.[COMMIT-FIX]** texto sugerido: "fix(spec-0019): correções residuais do PR review"
+
 ---
 
 ## Fase 2 — Implementação B (Stage 2)
 
-(Fundido na Fase 1, já que os sub-blocos A e B cobrem o escopo técnico, salvo descoberta de novos sub-blocos).
+(Fundido na Fase 1, já que os sub-blocos A, B e C cobrem o escopo técnico, salvo descoberta de novos sub-blocos).
 
 ---
 
@@ -96,8 +118,11 @@
 - [x] **3.4** `decision-brief.md`: validar pontos `Resolved` contra o design.
 - [x] **3.5** Validar a entrega em ambiente real (`yarn cli adopt --target . --dry-run`).
 - [x] **3.6** PR atualizado com descrição em 3 etapas.
-- [ ] **3.7** **[MANDATÓRIO]** Aguardar Gate de Review Humano.
-- [ ] **3.8** Aplicar correções.
+- [x] **3.7** Gate de Review Humano executado — owner identificou itens críticos (regressão silenciosa em `--prune`, path traversal em `sdd_dir`, H3 órfão) e ampliou escopo para política de update unificada (sub-bloco C).
+- [ ] **3.8** Aplicar correções do sub-bloco C (Fase 1.C completa).
+- [ ] **3.9** Re-validar entrega em ambiente real após correções (`yarn cli adopt`, `yarn cli providers`, `yarn cli update`, todos em `--dry-run`).
+- [ ] **3.10** Atualizar PR body refletindo escopo expandido e disclosure de IA atualizada.
+- [ ] **3.11** **[MANDATÓRIO]** Aguardar segundo Gate de Review Humano (pós-correções).
 
 ---
 

@@ -72,21 +72,14 @@ Specs ou candidatas priorizadas para iniciar em seguida. Ordem indica prioridade
 
 Specs ou candidatas que entram na fila depois de esgotado o Now. Ordem pode ser reorganizada sem renumeração.
 
-- **template-lifecycle-e-update** (Candidata `evidence-driven` — ciclo de vida e update dos templates distribuídos)
-  - **Fonte do insight:** revisão pós-implementação da Spec 0019 (2026-05-07). A 0019 passou a copiar `.specify/templates/` para `.ai-guidelines/templates/` no consumidor, mas não definiu contrato de update. Cross-ref `NEXT.md` da 0019, item "Ciclo de vida de atualização dos `.specify/templates` distribuídos".
-  - **Insight central:** distribuir templates sem estratégia de update cria drift do dia 1 — espelha o "Context Rot" que a 0019 resolveu para providers, agora no eixo temporal. Hoje a única forma de receber atualização é rerodar `adopt`, que sobrescreve customizações locais sem aviso. Absorve a "Research obrigatória — Update Strategy" antes embutida na spec 0006.
-  - **Escopo potencial:** (1) versionamento de templates (semver por template no `config.json` vs. hash global vs. bundle versionado); (2) política de update (overwrite vs. merge três-vias vs. diff interativo); (3) detecção de customização local do consumidor (hash de baseline na primeira cópia); (4) comando dedicado (`yarn cli update` ou `sync`) vs. flag em `adopt`; (5) notificação de updates disponíveis no startup do CLI (cross-ref item oportunista "Check de Atualização interino no CLI").
-  - **Audiência:** consumidores já adotantes do framework (não first-time `init`).
-  - **Pré-requisitos:** Spec 0019 mergeada (estabelece o que é distribuído); idealmente Spec 0006 ainda não publicada para evitar contrato de update fixado prematuramente em npm.
-  - **Sinal de "está na hora":** primeiro consumidor real reportar drift entre seu `.ai-guidelines/templates/` e a versão upstream; ou mudança em `tasks-*-boilerplate.md` que precise ser propagada e disparar a pergunta "como avisar quem já adotou?".
-  - **Riscos antecipados:** merge três-vias exige baseline persistido (espaço extra no consumidor); semver por template multiplica metadata em `config.json`; UX interativa de diff pode virar fricção se mal calibrada.
+- ~~**template-lifecycle-e-update** (Candidata `evidence-driven` — ciclo de vida e update dos templates distribuídos)~~ **Absorvido pela Spec 0019** (reabertura consensuada 2026-05-07). A política de update unificada (`managed-block` para trampolins/ignores, `mirror` para templates SDD) e o comando `update` foram adicionados ao escopo da 0019 como sub-bloco C. Decidido resolver antes do merge para não fixar contrato que mudaria pouco depois e gerar re-trabalho na primeira leva de consumidores.
 
 - **npm-publication** (spec 0006 — Publicação npm + automação cross-repo)
   - **Escopo:** publicar core como package `@<scope>/ai-guidelines` (`init`/`adopt` via `npx`); ativar `pr-curator` como GH Action real em repositório da mantenedora;
   - **Critérios de aceite (esboço):** `npx` funciona em projeto novo e existente;
-  - **Pré-requisitos:** Spec 0005 concluída (✓); decisão de naming (bloqueador #1); idealmente `template-lifecycle-e-update` definida antes (contrato de update afeta o que será publicado em npm).
+  - **Pré-requisitos:** Spec 0005 concluída (✓); decisão de naming (bloqueador #1); Spec 0019 mergeada (entrega o contrato de update via `managed-block` + comando `update`).
   - **Riscos antecipados:** GitHub tokens cross-repo exigem PAT fino ou GitHub App; Action que abre PRs em outro repo pode virar ruído sem gatilho correto (label `growth-relevant`); NPM org paga vs GitHub Packages.
-  - **Cross-ref:** "Research obrigatória — Update Strategy para Consumidores" foi promovida para candidata standalone `template-lifecycle-e-update` (acima).
+  - **Cross-ref:** estratégia de update fica resolvida pela 0019 (sub-bloco C); a 0006 só publica o pacote sob esse contrato.
 
 - **tracker-automation** (Automação profunda de Trackers)
   - **Contexto:** A Spec 0016 revelou que apenas instruir o agente num arquivo `.md` não garante automação confiável com GitHub Projects V2 (que usa GraphQL e IDs globais).

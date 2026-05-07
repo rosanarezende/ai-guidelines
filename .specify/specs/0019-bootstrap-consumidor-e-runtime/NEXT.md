@@ -43,11 +43,17 @@ _(Nenhum débito registrado ainda)_
 - **O Insight**: separar `providers` de `adapters` reduz acoplamento e permite ampliar hard-redirects sem inflar o catálogo semântico do `AGENTS.md`.
 - **Ação Sugerida**: manter essa distinção como base para futuras expansões de providers e eventual catálogo dedicado de adapters se o framework passar a ter regras específicas para Cursor/Windsurf/Aider.
 
-### 2. Ciclo de vida de atualização dos `.specify/templates` distribuídos
+### 2. ~~Ciclo de vida de atualização dos `.specify/templates` distribuídos~~ — **Absorvido pelo sub-bloco C da própria 0019**
 
-- **O Contexto**: a partir da 0019, a CLI passa a copiar `.specify/templates/` para `.ai-guidelines/templates/` no consumidor durante `init`/`adopt`. Hoje não há contrato explícito de versionamento nem caminho oficial de update — se o framework atualizar um boilerplate (ex.: `tasks-mixed-boilerplate.md`), o consumidor só recebe a mudança rerodando `adopt`, o que sobrescreve customizações locais sem aviso.
-- **O Insight**: distribuir templates sem estratégia de update cria drift do dia 1 — espelha o problema de "Context Rot" que a 0019 resolveu para providers, mas agora no eixo temporal. Decisões em aberto: (a) versionamento dos templates (semver no `config.json` por template ou hash global?); (b) política de update (overwrite vs. merge inteligente vs. diff interativo); (c) detecção de customização local do consumidor; (d) comando `update`/`sync` dedicado vs. flag em `adopt`; (e) notificação de updates disponíveis (cross-ref item oportunista "Check de Atualização interino no CLI").
-- **Ação Sugerida**: nova spec `evidence-driven` candidata `template-lifecycle-e-update` no backlog (seção Next). Não cabe ampliar a 0019 — ela está `In Review` com gate fechado e princípio de imutabilidade ativo. Workaround temporário até a nova spec entregar: rerodar `yarn cli adopt` aceitando overwrite.
+- **Status**: resolvido dentro do escopo da spec após reabertura consensuada (2026-05-07).
+- **O Contexto original**: a primeira implementação distribuía `.specify/templates/` sem contrato de update, e `providers --prune` propagava prune para o destino, com risco de regressão silenciosa de dados.
+- **Resolução**: política unificada `managed-block` (trampolins/ignores) + `mirror` (templates SDD), com comando `update` dedicado lendo `config.json` existente. Ver decision-brief, bloco C e plan.md, sub-bloco C.
+
+### 3. Notificação proativa de updates disponíveis no CLI
+
+- **O Contexto**: a 0019 entrega a infraestrutura de update determinístico (managed-block + comando `update`), mas não o sensor que avisa quando atualizar — consumidor só descobre que tem update se rodar manualmente.
+- **O Insight**: um sensor leve no startup do CLI (consulta GitHub releases ou hash do bundle distribuído via npm na 0006) pode imprimir "📦 ai-guidelines vX.Y disponível, rode `yarn cli update`". Decisões em aberto: (a) cache de TTL para evitar request a cada invocação; (b) opt-out via env var; (c) acoplamento com 0006 (publicação npm = fonte de verdade do "latest").
+- **Ação Sugerida**: permanece como item oportunista no `roadmap/backlog.md` ("Check de Atualização interino no CLI"). Pré-requisito natural: 0006 mergeada para ter um endpoint estável de "latest version". Pode virar mini-spec ou ser absorvida pela 0006.
 
 <!-- Template de Insight:
 ### 1. [Título do Insight]
