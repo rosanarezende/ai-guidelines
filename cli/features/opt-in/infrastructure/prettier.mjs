@@ -10,6 +10,7 @@ import { mergePackageJson, detectNewDevDeps } from "#formatters/package-context"
 export async function applyPrettier(targetDir, options, context, actions) {
   const { features = [] } = options;
   const dryRun = Boolean(options?.["dry-run"]);
+  const forcePrettier = Boolean(options?.force || options?.["force-prettier"]);
   const { formatterContext = {} } = context;
 
   if (!features.includes("prettier")) {
@@ -17,11 +18,17 @@ export async function applyPrettier(targetDir, options, context, actions) {
     return;
   }
 
-  if (formatterContext.shouldSkipPrettier) {
+  if (formatterContext.shouldSkipPrettier && !forcePrettier) {
     actions.push(
       `skip prettier (formatter rival detectado: ${formatterContext.rival?.label || "Desconhecido"})`
     );
     return;
+  }
+
+  if (formatterContext.shouldSkipPrettier && forcePrettier) {
+    actions.push(
+      `override prettier (formatter rival detectado: ${formatterContext.rival?.label || "Desconhecido"}; sobrescrita explícita ativa)`
+    );
   }
 
   const pkgPath = path.join(targetDir, "package.json");
@@ -50,7 +57,7 @@ export async function applyPrettier(targetDir, options, context, actions) {
   if (!dryRun) {
     await fs.writeFile(pkgPath, JSON.stringify(updatedPkg, null, 2) + "\n");
   }
-  actions.push("update package.json (prettier scripts & deps)");
+  actions.push(`${dryRun ? "[dry-run] " : ""}update package.json (prettier scripts & deps)`);
 
   const ignorePath = path.join(targetDir, ".prettierignore");
   let currentIgnore = "";
@@ -66,6 +73,6 @@ export async function applyPrettier(targetDir, options, context, actions) {
     if (!dryRun) {
       await fs.writeFile(ignorePath, updatedIgnore);
     }
-    actions.push(`write ${path.basename(ignorePath)}`);
+    actions.push(`${dryRun ? "[dry-run] " : ""}write ${path.basename(ignorePath)}`);
   }
 }

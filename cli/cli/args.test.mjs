@@ -91,7 +91,15 @@ describe("cli/args", () => {
   it("[BR-CLI-WIZARD-01] DADO ausência de parâmetros QUANDO ambiente TTY ENTÃO aciona o wizard", async () => {
     await withTTY(true, async () => {
       const result = await resolveExecutionInput(undefined, {
-        __wizardAnswers: ["init", "./demo", "demo-app", "npm", "prettier,husky", "s"],
+        __wizardAnswers: [
+          "init",
+          "./demo",
+          "demo-app",
+          "npm",
+          ["claude", "gemini", "openai"],
+          ["prettier", "husky"],
+          "s",
+        ],
       });
 
       assert.equal(result.usedWizard, true, "Deveria ter acionado o wizard");
@@ -108,7 +116,7 @@ describe("cli/args", () => {
       await withTTY(true, async () => {
         const result = await resolveExecutionInput(undefined, {
           target: tmpDir,
-          __wizardAnswers: ["", "", "", "", ""], // [mode, name, pm, features, dryRun]
+          __wizardAnswers: ["", "", "", "", "", ""], // [mode, name, pm, providers, features, dryRun]
         });
 
         assert.equal(result.mode, "adopt", "Default mode deve ser adopt");
@@ -137,11 +145,13 @@ describe("cli/args", () => {
         "package-manager": "npm",
         "dry-run": true,
         features: "pointers,rules",
+        providers: "claude,openai",
       });
 
       assert.equal(result.usedWizard, false);
       assert.equal(result.mode, "init");
       assert.deepEqual(result.options.features, ["pointers", "rules"]);
+      assert.deepEqual(result.options.providers, ["claude", "openai"]);
     });
   });
 
@@ -154,6 +164,7 @@ describe("cli/args", () => {
 
       assert.ok(result.options.features.includes("husky"));
       assert.ok(!result.options.features.includes("prettier"));
+      assert.deepEqual(result.options.providers, ["claude", "gemini", "openai"]);
     });
   });
 
@@ -172,7 +183,16 @@ describe("cli/args", () => {
   it("[BR-CLI-WIZARD-06] DADO wizard QUANDO features tdd ou bdd selecionadas ENTÃO solicita idioma", async () => {
     await withTTY(true, async () => {
       const result = await resolveExecutionInput(undefined, {
-        __wizardAnswers: ["init", "./demo", "demo-app", "npm", "tdd", "en", "s"],
+        __wizardAnswers: [
+          "init",
+          "./demo",
+          "demo-app",
+          "npm",
+          ["claude", "gemini", "openai"],
+          ["tdd"],
+          "en",
+          "s",
+        ],
       });
 
       assert.equal(result.usedWizard, true);
@@ -188,7 +208,7 @@ describe("cli/args", () => {
         target: ".",
         name: "demo",
         // Pula o comando e target, vai direto pro PM
-        __wizardAnswers: ["invalid-pm", "invalid-pm2", "pnpm", "s"],
+        __wizardAnswers: ["invalid-pm", "invalid-pm2", "pnpm", ["claude", "openai"], "", "s"],
       });
 
       assert.equal(
@@ -226,7 +246,7 @@ describe("cli/args", () => {
       const result = await resolveExecutionInput("init", {
         target: "demo",
         name: "fixed-name",
-        __wizardAnswers: ["invalid-pm", "npm", "s"],
+        __wizardAnswers: ["invalid-pm", "npm", ["claude", "gemini", "openai"], "", "s"],
       });
       assert.equal(
         result.options["package-manager"],
@@ -248,9 +268,22 @@ describe("cli/args", () => {
       const result = await resolveExecutionInput("init", {
         target: "demo",
         name: "fixed-name",
-        __wizardAnswers: ["npm", ""],
+        __wizardAnswers: ["npm", "", "", ""],
       });
       assert.ok(result.options.target);
+    });
+  });
+
+  it("[BR-CLI-WIZARD-07] DADO modo providers QUANDO wizard rodar ENTÃO resolve providers sem exigir package manager ou features", async () => {
+    await withTTY(true, async () => {
+      const result = await resolveExecutionInput("providers", {
+        __wizardAnswers: ["./demo", ["claude", "cursor", "openai"], "s"],
+      });
+
+      assert.equal(result.mode, "providers");
+      assert.deepEqual(result.options.providers, ["claude", "cursor", "openai"]);
+      assert.equal(result.options["package-manager"], undefined);
+      assert.equal(result.options.features, undefined);
     });
   });
 });

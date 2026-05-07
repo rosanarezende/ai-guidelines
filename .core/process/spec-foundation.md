@@ -41,7 +41,7 @@ Toda spec declara seu **tipo** no header da `spec.md`, em **campo obrigatório s
 - `tasks-evidence-driven-boilerplate.md` — Stage 1 entre Setup e Implementação A.
 - `tasks-deterministic-boilerplate.md` — single-pass, sem Stage 1.
 - `tasks-mixed-boilerplate.md` — híbrido com caveat de paralelismo.
-- `tasks-boilerplate.md` (genérico) — referência canônica do modelo de 5 fases.
+- `tasks-boilerplate.md` (genérico) — referência canônica da espinha dorsal de fases.
 
 ---
 
@@ -93,23 +93,26 @@ entendimento técnico evolui. Conteúdo:
 
 ### `tasks.md` — checklist vivo
 
-Progresso operacional. Marca tasks `[x]` a cada degrau. **Modelo canônico de 5 fases** (instanciado a partir da variante de boilerplate apropriada ao tipo declarado na `spec.md` — ver § "Templates"):
+Progresso operacional. Marca tasks `[x]` a cada degrau. **Espinha dorsal de execução** (instanciado a partir da variante de boilerplate apropriada ao tipo declarado na `spec.md` — ver § "Templates"):
 
-- **Fase 0**: Setup (bootstrap, criação de branch, instanciação de artefatos, validação humana inicial). Em `evidence-driven`/`mixed`, esta fase também inclui **Stage 1** (Research → `decision-brief.md` populado → Gate humano `Resolved`).
-- **Fase 1**: Implementação A (primeiro sub-bloco; encerra com commit incremental atômico).
-- **Fase 2**: Implementação B (segundo sub-bloco; mesmo critério de atomicidade). Specs single-bloco fundem 1+2 com nota explícita.
-- **Fase 3**: Preparação para Review (Gate de Homologação) — empacotamento, pipeline verde, PR description, **aguardar gate humano formal**.
-- **Fase 4**: Encerramento pré-merge (na branch do PR, antes do merge — migra research, deleta `NEXT.md`, atualiza roadmap, status final).
+- **Fase 0 (Setup)**: Bootstrap, criação de branch, instanciação de artefatos, criação do PR em Draft. Em `evidence-driven`/`mixed`, esta fase também inclui **Stage 1** (Research → Gate humano). O sub-bloco encerra obrigatoriamente com um `[COMMIT]` de setup gerado sem perguntar.
+- **Fase 1 (Implementação Principal)**: Execução técnica do sub-bloco primário; encerra obrigatoriamente com sugestão de `[COMMIT]` atômico.
+- **Fase Extra Condicional (Migração/Hardening/Rollout)**: Adicionada apenas se houver um segundo estágio real. O boilerplate foca na Fase 1 e omite fases implementativas extras a menos que explicitamente necessárias.
+- **Fase de Review (Gate de Homologação)**: Empacotamento, pipeline verde, descrição em 3 etapas do PR, **aguardar gate humano formal**.
+- **Fase de Encerramento (Pré-Merge)**: Migra research, consolida e deleta `NEXT.md`, atualiza roadmap, status final.
 
-### `NEXT.md` — temporário-mandatório
+> **Princípio de PR auto-suficiente:** o merge não dispara nenhum trabalho adicional. Antes do merge, o PR já deve conter: status `Done (PR #N — YYYY-MM-DD)` em `spec.md`, entrada completa em `roadmap/historico.md`, remoção de `roadmap/backlog.md§Em execução`, `research-index.md` atualizado com as pesquisas migradas, `CHANGELOG.md` com a release publicada (não em `[Unreleased]`) e bump da `version` em `package.json`. Se o agente encontrar pendências durante o merge ("falta atualizar histórico", "faltou o changelog"), elas eram para ter sido cobertas na Fase 4 — abrir hotfix ou commit pré-merge é uma falha do checklist, não comportamento esperado.
 
-Backlog de débitos adiados. Política:
+### `NEXT.md` — obrigatório contínuo
 
-- **Criar somente quando** a spec gerar débitos conscientes (insights fora do escopo, refactors adiados, riscos não mitigados, dependências para specs futuras). **Sem débitos → não criar** o arquivo. NEXT.md vazio ou prematuro é ruído.
-- **Se o item ainda será resolvido antes do merge desta própria spec**, ele **não** vai para `NEXT.md`: registre em `tasks.md` como sub-task do bloco apropriado, com status `[/]` enquanto estiver em progresso.
-- **Se o item explicitamente vazou do escopo e dependerá de outra spec / issue / decisão futura**, aí sim ele entra em `NEXT.md` até a migração final para `roadmap/backlog.md`.
-- **Deletar no encerramento pré-merge** (fase final do `tasks.md`), migrando débitos para `roadmap/backlog.md` (ou issues/discussões, conforme o caso).
-- Nunca sobreviver a uma spec fechada — `NEXT.md` órfão é AI-slop.
+Backlog de débitos adiados da spec. Política:
+
+- **Sempre criar** na instanciação da spec.
+- **Análise contínua**: ao final de cada fase, o agente deve analisar se discussões, tradeoffs ou itens descartados geraram débitos conscientes (riscos não mitigados, dependências para specs futuras) e registrá-los.
+- **Se o item ainda será resolvido antes do merge desta própria spec**, ele **não** vai para `NEXT.md`: registre em `tasks.md`.
+- **Se o item explicitamente vazou do escopo**, ele entra em `NEXT.md` até a migração final.
+- **Deletar no encerramento pré-merge** (fase final do `tasks.md`), migrando débitos para `roadmap/backlog.md` (ou issues/discussões).
+- Nunca sobreviver a uma spec fechada.
 
 ### `research/` — conhecimento de apoio
 
@@ -145,7 +148,7 @@ Boilerplates canônicos em `.specify/templates/`:
 
 **Variantes de `tasks.md`** (escolha conforme o tipo declarado no header da `spec.md`):
 
-- `tasks-boilerplate.md` — variante genérica de referência (modelo de 5 fases).
+- `tasks-boilerplate.md` — variante genérica de referência (espinha dorsal de fases).
 - `tasks-evidence-driven-boilerplate.md` — Stage 1 + Gate humano antes da Implementação A.
 - `tasks-deterministic-boilerplate.md` — single-pass, sem Stage 1.
 - `tasks-mixed-boilerplate.md` — Stage 1 condicional para sub-blocos `(evidence-driven)`.

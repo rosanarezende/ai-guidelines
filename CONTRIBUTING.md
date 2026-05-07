@@ -142,6 +142,19 @@ Antes de começar, leia:
 
 ---
 
+## Convenções internas do framework
+
+Este repositório desenvolve o próprio `ai-guidelines`. Algumas convenções locais importam para evitar drift:
+
+- `AGENTS.md` é ao mesmo tempo documento operacional local e artefato runtime de exemplo.
+- O bloco `<AI_GUIDELINES>` em `AGENTS.md` é compilado; contexto local do repositório fica fora dele.
+- O workspace usa Yarn 4 com Plug'n'Play. Para executar a CLI localmente, use `yarn guidelines ...`, não `node cli/ai-guidelines-cli.mjs ...`.
+- Ao editar regras em `.core/rules/`, rode `yarn check` para reconstruir `rules.json` e o ledger.
+- Ao editar a CLI, preserve o contrato entre `cli/cli/args.mjs`, `cli/app/engine.mjs` e `docs/cli/ai-guidelines-cli.md`.
+- Features editoriais (`tdd`, `bdd`, `quality-gates`) e de infraestrutura (`prettier`, `husky`, `ci`) têm taxonomias distintas e não devem ser misturadas na documentação nem no wizard.
+
+---
+
 ## Dúvidas?
 
 Abra uma issue no GitHub com um dos [templates disponíveis](.github/ISSUE_TEMPLATE).

@@ -49,6 +49,8 @@ Decolamentos de arquitetura de código, CLI, e refatorações complexas que afet
 - [Taxonomias Externas de Defeitos](./researchs/architecture/2026-04-30-external-bug-taxonomies.md) _(Mapeamento CWE/CERT/Sonar/OWASP-LLM para o catálogo de regras do framework)_.
 - [Spec-Driven Tools e Regras de Governança](./researchs/architecture/2026-04-30-spec-driven-tools-rules.md) _(Como ferramentas SDD e runtimes agentic tratam regras editoriais, escopo e decisões pré-design)_.
 - [Baseline de Tokens e Orçamento Tok-H](./researchs/architecture/2026-04-30-tokens-baseline-budget.md) _(Medição instrumental do runtime e definição do teto heurístico adotado na Spec 0018)_.
+- [Topologia do Runtime AGENTS.md](./researchs/architecture/2026-05-06-topologia-runtime.md) _(Diagnóstico da dispersão semântica no compilado e fundação para as zonas temáticas adotadas em `[DEC-0019-B02]`)_.
+- [Trampolins e Provider Guardrails contra Context Rot](./researchs/architecture/2026-05-06-trampolins-e-guardrails.md) _(Mapeamento dos arquivos nativos de IA/IDE para 2026 e racional do hard-redirect adotado em `[DEC-0019-B01]`)_.
 
 ## 🛸 Open Source & Publicação
 

@@ -1,0 +1,12 @@
+# ai-guidelines:managed-start v=1
+node_modules
+.git
+.yarn
+dist
+build
+coverage
+.next
+.turbo
+.cache
+.ai-guidelines/templates
+# ai-guidelines:managed-end

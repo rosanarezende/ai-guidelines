@@ -13,6 +13,38 @@ editar retroativamente.
 
 Em ordem cronológica reversa. Número mantido como rastreabilidade.
 
+- **spec 0019** — Bootstrap Consumidor e Runtime
+  (`.specify/specs/0019-bootstrap-consumidor-e-runtime/`) — **Done** (2026-05-07, PR #5).
+
+  Fecha a cadeia de bootstrap do consumidor e do runtime compilado. Spec do tipo `mixed` que **foi reaberta consensualmente** (2026-05-07) durante o gate de review humano para absorver o spinoff `template-lifecycle-e-update`, eliminando débito imediato após uma revisão técnica que identificou regressões silenciosas.
+
+  **Sub-bloco A — CLI Wizard & Template Distribution (`deterministic`):**
+  - Wizard refatorado com `@inquirer/prompts` (checkbox/select/confirm) e categorias (Editorial / Infra).
+  - Distribuição de `.specify/templates/` para `.ai-guidelines/templates/` no `init`/`adopt`.
+  - `.ai-guidelines/config.json` persiste apenas o contrato do usuário (`sdd_dir`, `providers`, `features`, `lang`); adapters são derivados em runtime.
+  - Comando `providers` com merge aditivo + `--prune` autoritativo apenas para providers selecionados.
+  - Execução local via `yarn cli` (renomeado posteriormente para `yarn guidelines`) compatível com Yarn PnP.
+  - Override granular de incompatibilidades (formatter rival) sem `--force` global.
+  - Template legado `AGENTS-pointer` removido; `CLAUDE.md` raiz reduzido a ponteiro mínimo, conteúdo migrado para `AGENTS.md`/`README.md`/`CONTRIBUTING.md`.
+
+  **Sub-bloco B — Runtime Architecture & Trampolines (`evidence-driven`, `[DEC-0019-B01]` / `[DEC-0019-B02]`):**
+  - Compilador agrupando AGENTS.md em zonas temáticas (Top Zone: Primary Directives, Lifecycle & Spec System, Git & PR Workflow, Engineering Principles, Center Zone: Opt-in Methodologies, Base Zone: Tactical Context).
+  - Interpolação de `sdd_dir` para evitar paths hardcoded ao repositório mantenedor.
+  - Provider entrypoints (CLAUDE.md, GEMINI.md, .openai/instructions.md, .cursor/rules/ai-guidelines.mdc, etc.) gerados apenas para os providers selecionados.
+
+  **Sub-bloco C — Update Lifecycle Unificado (`deterministic`, adicionado 2026-05-07, `[DEC-0019-C01]` / `[DEC-0019-C02]`):**
+  - Política unificada de update com dois modos: `managed-block` (marcadores `<!-- ai-guidelines:managed-start v=1 --> ... <!-- ai-guidelines:managed-end -->` para trampolins/ignores) + `mirror` (overwrite total para templates SDD).
+  - Adapter content **migrado do `AGENTS.md` para o trampolino do provider correspondente**, eliminando o wrapper H3 `### Provider Adapters` órfão.
+  - Comando `update` headless e idempotente que lê `.ai-guidelines/config.json` existente e re-aplica trampolins + templates + recompilação.
+  - Versionamento leve `<!-- ai-guidelines-template: <slug> v=N -->` em cada boilerplate SDD; CLI loga transições no formato `(template v=1 -> v=2)`.
+  - Renomes operacionais: "trampolino" → `provider-entrypoint` no código; `yarn cli` → `yarn guidelines` como comando canônico.
+  - Comando `check-budget` com novos limits derivados do dogfooding e da research `tokens-baseline-budget`: `agentsMd: 2700`, `perAdapter: 800`, soft ceiling 75%.
+  - Validação de `sdd_dir` contra path traversal antes de qualquer I/O.
+
+  **Researches migrados para `.specify/specs/researchs/architecture/`:** `2026-05-06-trampolins-e-guardrails.md`, `2026-05-06-topologia-runtime.md`.
+
+  **Qualidade:** `yarn check` e `yarn test` verdes no fechamento; 263/263 testes passando, orçamento de tokens dentro dos limites em todos os escopos (universal 74%, opt-in 33%, AGENTS.md 56%, entrypoints ~28-30%).
+
 - **spec 0018** — Rules Content Deepening
   (`.specify/specs/0018-rules-content-deepening/`) — **Done** (2026-05-06, PR #4).
 

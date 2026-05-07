@@ -6,7 +6,40 @@ Todas as mudanças notáveis neste framework seguem [Semantic Versioning](https:
 
 ## [Unreleased]
 
+_(Sem mudanças não-publicadas no momento.)_
+
+---
+
+## [1.4.0] — 2026-05-07
+
+Release agrupada cobrindo as Specs 0018 (catálogo Docs-as-Code de regras) e 0019 (bootstrap do consumidor + runtime). PRs auto-suficientes: ambos os PRs deixam o repositório em estado liberável no merge.
+
 ### Adicionado
+
+- **Spec 0019 (Bootstrap Consumidor e Runtime)** — PR #5, consenso 2026-05-07:
+  - **Política unificada de update** dos artefatos distribuídos ao consumidor:
+    - `managed-block` para trampolins (`CLAUDE.md`, `GEMINI.md`, `.openai/instructions.md`, `.cursor/rules/ai-guidelines.mdc`, `.github/copilot-instructions.md`, `.windsurfrules`, `CONVENTIONS.md`) e ignore files (`.claudeignore`, `.aiexclude`, `.gptignore`, `.aiderignore`). Marcadores `<!-- ai-guidelines:managed-start v=1 --> ... <!-- ai-guidelines:managed-end -->` (e variante `# ...` para gitignore-style) delimitam a região controlada pela CLI; conteúdo do consumidor fora dos marcadores é preservado, com comentário PT-BR sinalizando legado em arquivos preexistentes.
+    - `mirror` para `.ai-guidelines/templates/`: overwrite total seguro porque boilerplates SDD não são editados in-place. Cada template carrega header de versão `<!-- ai-guidelines-template: <slug> v=N -->`; a CLI loga transições no formato `(template v=1 -> v=2)`.
+  - Comandos novos `yarn guidelines update` (re-aplica trampolins + templates + recompilação de forma headless e idempotente) e `yarn guidelines check-budget` (relatório de orçamento de tokens por scope, AGENTS.md compilado e cada provider entrypoint).
+  - Wizard interativo refatorado com `@inquirer/prompts` (checkbox/select/confirm) e categorias (Editorial / Infra).
+  - Distribuição da pasta `.specify/templates/` para `.ai-guidelines/templates/` no `init`/`adopt`.
+  - `.ai-guidelines/config.json` persiste apenas o contrato do usuário (`sdd_dir`, `providers`, `features`, `lang`); adapters são derivados em runtime.
+  - Comando `providers` com merge aditivo + `--prune` autoritativo apenas para providers (nunca apaga `.ai-guidelines/templates/`).
+  - Override granular de incompatibilidades (formatter rival) sem `--force` global.
+  - Validação de `sdd_dir` contra path traversal antes de qualquer I/O.
+
+### Alterado
+
+- **Comando canônico da CLI:** `yarn cli` → `yarn guidelines` (troca direta sem alias deprecado, repositório ainda em pré-1.0).
+- **Topologia do `AGENTS.md` compilado:** organizado em zonas temáticas (`Top Zone: Primary Directives`, `Lifecycle & Spec System`, `Git & PR Workflow`, `Engineering Principles`, `Center Zone: Opt-in Methodologies`, `Base Zone: Tactical Context`); paths interpolam `sdd_dir` em vez de hardcode.
+- **Adapter content migrado para os trampolins:** regras específicas de cada adapter (`.core/rules/{claude,codex,gemini}.md`) deixam de ser injetadas no `AGENTS.md` e passam a viver dentro do `managed-block` do trampolino correspondente. O `AGENTS.md` perde a seção `### Provider Adapters`.
+- **Token budget refinado:** novos limits derivados da research e do dogfooding pós-Spec 0019: `agentsMd: 2700` (universal + opt-in), `perAdapter: 800` (hard-redirect + adapter rules de um provider), soft ceiling subiu de 70% para 75%. O escopo `aggregate: 6000` foi substituído por métricas mais úteis por arquivo emitido.
+- **Renome interno:** "trampolino" → `provider-entrypoint` no código (`cli/features/core/provider-entrypoints.mjs`), refletindo a nomenclatura já usada na matriz de compatibilidade.
+- **`CLAUDE.md` raiz** do framework reduzido a ponteiro mínimo; conteúdo migrado para `AGENTS.md`/`README.md`/`CONTRIBUTING.md`.
+
+### Removido
+
+- Template legado `.core/templates/AGENTS-pointer.md.tmpl` e referências relacionadas no compilador.
 
 - **Spec 0018 (Rules Content Deepening)**:
   - `decision-brief-boilerplate.md` como 8º artefato canônico do SDD.
@@ -23,6 +56,8 @@ Todas as mudanças notáveis neste framework seguem [Semantic Versioning](https:
 ### Removido
 
 - Conteúdo legado sem evidência canônica do pacote inicial `b9efb83`, conforme a reconciliação radical da Spec 0018.
+
+---
 
 ## [1.3.0] — 2026-04-30
 

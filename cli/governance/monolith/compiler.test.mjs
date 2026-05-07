@@ -15,6 +15,7 @@ import {
   compileRulesContent,
   compileRulesFromCatalog,
   compileCoreRulesContent,
+  groupUniversalRulesByZone,
 } from "./compiler.mjs";
 import { buildRulesCatalog } from "./rules-builder.mjs";
 import fs from "node:fs/promises";
@@ -27,7 +28,6 @@ describe("monolith/compiler", () => {
     const compiled = compileMonolithicAgentsContent({
       coreTemplate: "AGENTS core",
       globalRules: "global rules",
-      providerRules: [{ name: "codex", content: "codex rules" }],
       optInRules: [{ name: "quality-gates.md", content: "quality rules" }],
       pointerTemplate: "pointer",
     });
@@ -35,8 +35,34 @@ describe("monolith/compiler", () => {
     assert.ok(compiled.indexOf("AGENTS core") < compiled.indexOf("<FEATURE_QUALITY_GATES>"));
     assert.doesNotMatch(compiled, /^# AGENTS\.md/m);
     assert.ok(compiled.indexOf("<FEATURE_QUALITY_GATES>") < compiled.indexOf("pointer"));
-    assert.match(compiled, /codex rules/);
     assert.ok(compiled.endsWith("\n"));
+  });
+
+  it("[BR-CLI-COMPILER-30] DADO compilação QUANDO emitida ENTÃO NÃO contém seção Provider Adapters (movida para provider entrypoints)", () => {
+    const compiled = compileMonolithicAgentsContent({
+      primaryDirectives: "PRIMARY",
+      lifecycleRules: "LIFECYCLE",
+      gitRules: "GIT",
+      engineeringRules: "ENG",
+      optInRules: [],
+      tacticalContext: "TACTICAL",
+    });
+
+    assert.doesNotMatch(
+      compiled,
+      /Provider Adapters/,
+      "AGENTS.md compilado não pode conter Provider Adapters desde [DEC-0019-C02]"
+    );
+    assert.doesNotMatch(
+      compiled,
+      /### Adapter:/,
+      "Adapter content vive nos provider entrypoints, não no AGENTS.md"
+    );
+    assert.match(compiled, /Top Zone: Primary Directives/);
+    assert.match(compiled, /Lifecycle & Spec System/);
+    assert.match(compiled, /Git & PR Workflow/);
+    assert.match(compiled, /Engineering Principles/);
+    assert.match(compiled, /Base Zone: Tactical Context/);
   });
 
   it("[BR-CLI-COMPILER-21] DADO feature opt-in QUANDO envelopar ENTÃO tags são saneadas e estáveis", () => {
@@ -66,6 +92,20 @@ describe("monolith/compiler", () => {
 
     assert.doesNotMatch(normalized, /\.ai-guidelines\/AGENTS\.md/);
     assert.match(normalized, /<!-- END:ai-guidelines-core -->/);
+  });
+
+  it("[BR-CLI-COMPILER-23] DADO regras universais mistas QUANDO agrupar por zona ENTÃO separa lifecycle git e engineering", () => {
+    const grouped = groupUniversalRulesByZone([
+      { id: "CORE-01", instruction_en: "env", tags: ["core", "environment"] },
+      { id: "CORE-02", instruction_en: "sdd", tags: ["core", "sdd"] },
+      { id: "CORE-08", instruction_en: "harness", tags: ["core", "git", "harness_lock"] },
+      { id: "GR-0001", instruction_en: "security", tags: ["engineering", "security"] },
+    ]);
+
+    assert.match(grouped.primaryDirectives, /CORE-01/);
+    assert.match(grouped.lifecycleRules, /CORE-02/);
+    assert.match(grouped.gitRules, /CORE-08/);
+    assert.match(grouped.engineeringRules, /GR-0001/);
   });
 });
 

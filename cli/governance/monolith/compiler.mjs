@@ -128,6 +128,88 @@ export function formatOptInRules(optInRules) {
   return sections.join("\n\n");
 }
 
+function hasAnyTag(rule, tags) {
+  return tags.some((tag) => Array.isArray(rule.tags) && rule.tags.includes(tag));
+}
+
+function classifyUniversalRule(rule) {
+  if (!rule) {
+    return "primary";
+  }
+
+  // GR-0203 (PR Curator workflow) é classificado manualmente como "git" porque
+  // suas tags incluem `pr` mas também `gate`/`workflow`, que poderiam empurrar
+  // a regra para outras zonas conforme a heurística genérica abaixo. O override
+  // explícito mantém a regra junto das demais regras de Git & PR Workflow,
+  // preservando a contiguidade semântica decidida em [DEC-0019-B02].
+  if (rule.id === "GR-0203") {
+    return "git";
+  }
+
+  if (
+    rule.category === "security" ||
+    rule.category === "correctness" ||
+    rule.category === "maintainability" ||
+    hasAnyTag(rule, ["engineering", "security", "typing", "immutability", "errors", "concurrency"])
+  ) {
+    return "engineering";
+  }
+
+  if (
+    hasAnyTag(rule, [
+      "git",
+      "branch",
+      "commit",
+      "pr",
+      "github",
+      "gate",
+      "hygiene",
+      "safety",
+      "harness_lock",
+    ])
+  ) {
+    return "git";
+  }
+
+  if (
+    hasAnyTag(rule, [
+      "sdd",
+      "planning",
+      "checkpoint",
+      "lifecycle",
+      "workflow",
+      "spec",
+      "tokens",
+      "ai_efficiency",
+    ])
+  ) {
+    return "lifecycle";
+  }
+
+  return "primary";
+}
+
+export function groupUniversalRulesByZone(rules) {
+  const grouped = {
+    primary: [],
+    lifecycle: [],
+    git: [],
+    engineering: [],
+  };
+
+  for (const rule of rules) {
+    const zone = classifyUniversalRule(rule);
+    grouped[zone].push(rule);
+  }
+
+  return {
+    primaryDirectives: grouped.primary.map(formatRuleInstruction).filter(Boolean).join("\n\n"),
+    lifecycleRules: grouped.lifecycle.map(formatRuleInstruction).filter(Boolean).join("\n\n"),
+    gitRules: grouped.git.map(formatRuleInstruction).filter(Boolean).join("\n\n"),
+    engineeringRules: grouped.engineering.map(formatRuleInstruction).filter(Boolean).join("\n\n"),
+  };
+}
+
 /**
  * Compile rules from catalog into <AI_GUIDELINES> content
  * @param {Object} catalog - rules.json content
@@ -272,18 +354,53 @@ function buildSection(title, buffers, level = 2) {
   return [`${hashes} ${title}`, content].join("\n\n");
 }
 
+/**
+ * Compila o conteúdo do `<AI_GUIDELINES>` no `AGENTS.md` raiz.
+ *
+ * **Adapter content NÃO é injetado aqui** desde 2026-05-07 (Spec 0019,
+ * `[DEC-0019-C02]`). Regras específicas de cada adapter (`claude`, `codex`,
+ * `gemini`) passam a viver dentro do provider entrypoint do provider correspondente
+ * (CLAUDE.md, .openai/instructions.md, GEMINI.md), no bloco `managed-block`,
+ * abaixo do hard-redirect. Essa colocalização elimina o wrapper H3 órfão
+ * `### Provider Adapters` que existia no compilado e dá a cada provider um
+ * único arquivo nativo com tudo o que precisa para complementar a camada
+ * universal.
+ */
 export function compileMonolithicAgentsContent({
+  primaryDirectives,
+  lifecycleRules,
+  gitRules,
+  engineeringRules,
   coreTemplate,
   globalRules,
-  providerRules = [],
   optInRules = [],
+  tacticalContext,
   pointerTemplate,
 }) {
-  const topBuffer = buildSection("Top Zone: Primary Directives", [
-    coreTemplate,
-    globalRules,
-    ...providerRules.map(({ content }) => content),
-  ]);
+  if (
+    primaryDirectives !== undefined ||
+    lifecycleRules !== undefined ||
+    gitRules !== undefined ||
+    engineeringRules !== undefined ||
+    tacticalContext !== undefined
+  ) {
+    return [
+      buildSection("Top Zone: Primary Directives", [primaryDirectives]),
+      buildSection("Lifecycle & Spec System", [lifecycleRules]),
+      buildSection("Git & PR Workflow", [gitRules]),
+      buildSection("Engineering Principles", [engineeringRules]),
+      buildSection(
+        "Center Zone: Opt-in Methodologies",
+        optInRules.map(({ name, content }) => wrapFeatureModule(name, content))
+      ),
+      buildSection("Base Zone: Tactical Context", [tacticalContext]),
+    ]
+      .filter(Boolean)
+      .join(SECTION_SEPARATOR)
+      .concat("\n");
+  }
+
+  const topBuffer = buildSection("Top Zone: Primary Directives", [coreTemplate, globalRules]);
 
   const centerBuffer = buildSection(
     "Center Zone: Opt-in Methodologies",

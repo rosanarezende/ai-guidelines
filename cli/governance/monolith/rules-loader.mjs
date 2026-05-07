@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 
-const PROVIDER_RULE_FILES = ["claude.md", "codex.md", "gemini.md"];
+const SUPPORTED_ADAPTERS = ["claude", "codex", "gemini"];
 const OPT_IN_RULE_RELATIVE_PATHS = {
   bdd: {
     en: path.join("opt-in", "methodologies", "bdd-en.md"),
@@ -29,25 +29,30 @@ export function getOptInRuleRelativePath(feature, lang = "pt") {
   return rulePath.default;
 }
 
-export function normalizeProviderSelection(provider) {
+export function normalizeAdapterSelection(provider) {
   if (!provider || provider === "all") {
-    return PROVIDER_RULE_FILES;
+    return SUPPORTED_ADAPTERS;
   }
 
   const providers = Array.isArray(provider) ? provider : String(provider).split(",");
   return providers
     .map((item) => item.trim().toLowerCase())
     .filter(Boolean)
-    .map((item) => (item.endsWith(".md") ? item : `${item}.md`))
-    .filter((item) => PROVIDER_RULE_FILES.includes(item));
+    .map((item) => item.replace(/\.md$/i, ""))
+    .filter((item) => SUPPORTED_ADAPTERS.includes(item));
+}
+
+export function normalizeProviderSelection(provider) {
+  return normalizeAdapterSelection(provider);
 }
 
 export async function readRulesByName(sourceRulesDir, fileNames) {
   const rules = [];
 
   for (const fileName of fileNames) {
-    const content = await fs.readFile(path.join(sourceRulesDir, fileName), "utf8");
-    rules.push({ name: fileName.replace(/\.md$/i, ""), content });
+    const normalizedName = fileName.replace(/\.md$/i, "");
+    const content = await fs.readFile(path.join(sourceRulesDir, `${normalizedName}.md`), "utf8");
+    rules.push({ name: normalizedName, content });
   }
 
   return rules;

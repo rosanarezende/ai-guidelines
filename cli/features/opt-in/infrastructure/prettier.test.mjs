@@ -57,6 +57,25 @@ describe("Feature: Prettier (Styling Governance)", () => {
     assert.strictEqual(pkg.devDependencies.prettier, undefined, "Não deve injetar prettier");
   });
 
+  it("[FORCE] DADO formatter rival QUANDO force-prettier estiver ativo ENTÃO injeta prettier mesmo assim", async () => {
+    const subTarget = path.join(targetDir, "force-rival-flow");
+    await fs.mkdir(subTarget, { recursive: true });
+    const pkgPath = path.join(subTarget, "package.json");
+    await fs.writeFile(pkgPath, JSON.stringify({ devDependencies: { "@biomejs/biome": "1.0.0" } }));
+
+    const actions = [];
+    const options = { features: ["prettier"], "force-prettier": true };
+    const context = { formatterContext: { shouldSkipPrettier: true, rival: { label: "Biome" } } };
+
+    await applyPrettier(subTarget, options, context, actions);
+
+    const log = actions.join("\n");
+    assert.match(log, /override prettier .* Biome/, "Deve logar override explícito");
+
+    const pkg = JSON.parse(await fs.readFile(pkgPath, "utf8"));
+    assert.ok(pkg.devDependencies.prettier, "Deve injetar prettier mesmo com rival");
+  });
+
   it("[FALSO-POSITIVO] Não deve reportar como nova dependência se já existir no package.json", async () => {
     const subTarget = path.join(targetDir, "existing-dep");
     await fs.mkdir(subTarget, { recursive: true });

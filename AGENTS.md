@@ -7,6 +7,31 @@ Este arquivo define o fluxo obrigatório para qualquer IA atuando neste reposit�
 > **Atuando para um humano contribuidor?** Leia também
 > [`CONTRIBUTING.md`](CONTRIBUTING.md) para os 4 workflows por persona (ajuste rápido, feature/refactor, spec consolidada, agente IA com autonomia). Este `AGENTS.md` cobre a parte operacional do agente; `CONTRIBUTING.md` cobre o fluxo humano que o agente está apoiando.
 
+## Contexto Local
+
+Este repositório é o próprio framework `ai-guidelines`, não um consumidor do framework. Aqui vivem o baseline canônico em `.core/` e a CLI em `cli/` que serão distribuídos para outros repositórios via `init`, `adopt` e `providers`.
+
+O `AGENTS.md` raiz tem papel duplo:
+
+- documentação operacional local para humanos e agentes que contribuem neste repositório;
+- artefato runtime de exemplo, com o bloco `<AI_GUIDELINES>` compilado pelo próprio framework.
+
+Conteúdo específico deste repositório deve ficar fora de `<AI_GUIDELINES>`. O bloco compilado não é editado manualmente.
+
+## Quickstart Local
+
+Este workspace usa Yarn 4 com Plug'n'Play. Para execução local da CLI, o caminho suportado é `yarn guidelines ...`.
+
+```bash
+yarn install --immutable
+yarn build:rules
+yarn format
+yarn check
+yarn test
+yarn check:repo
+yarn guidelines adopt --target . --dry-run
+```
+
 <AI_GUIDELINES>
 
 ## Top Zone: Primary Directives
@@ -15,13 +40,49 @@ Este arquivo define o fluxo obrigatório para qualquer IA atuando neste reposit�
 
 Before the first technical action, identify platform, shell, surface (CLI vs IDE), and model class; adapt commands accordingly.
 
+### [CORE-03]
+
+Consult the "Global Rules" section injected later in this `<AI_GUIDELINES>` block for engineering principles and AI efficiency.
+
+### [GR-0201]
+
+Always respond using the repository default language.
+
+---
+
+## Lifecycle & Spec System
+
 ### [CORE-02]
 
 The repository is your memory. Persist plans, progress, debts, knowledge, and roadmap under `.specify/specs/`. Read `.specify/specs/roadmap/backlog.md` at session start. If the platform forces a scratchpad, write only a pointer to the spec file. Planning trapped in agent cache (AI-slop) is unacceptable.
 
-### [CORE-03]
+### [CORE-11]
 
-Consult the "Global Rules" section injected later in this `<AI_GUIDELINES>` block for engineering principles and AI efficiency.
+Act only with a formed plan. Use `spec-foundation` for work that must survive session/agent changes; use a tool-scratchpad lightweight plan only for single-session, local, disposable adjustments.
+
+### [CORE-12]
+
+After absorbing extensive context, return a summary Checkpoint and request human approval before executing Code Actions.
+
+### [CORE-13]
+
+Keep SDD artifacts updated continuously: mark `tasks.md` items `[/]` (in progress) or `[x]` (done) as you go; record debts in `NEXT.md`. Never create parallel routing files in the repo.
+
+### [GR-0101]
+
+Declare the spec type (evidence-driven, deterministic, or mixed) and require human approval when design depends on unresolved evidence.
+
+### [GR-0102]
+
+When measuring the token cost of new guidelines, use the Tok-H heuristic: aggregate characters divided by 3.5. Ensure the resulting payload respects established soft ceilings (6000 aggregate, 1500 universal, 600 adapter, 1200 opt-in).
+
+### [GR-0202]
+
+Exclude irrelevant files (logs, builds, dependencies) from the AI context using ignore files.
+
+---
+
+## Git & PR Workflow
 
 ### [CORE-04]
 
@@ -51,21 +112,17 @@ Open Pull Requests in `Draft` mode using the full `.github/pull_request_template
 
 Convert PRs from `Draft` to `Ready` only after explicit human revalidation.
 
-### [CORE-11]
-
-Act only with a formed plan. Use `spec-foundation` for work that must survive session/agent changes; use a tool-scratchpad lightweight plan only for single-session, local, disposable adjustments.
-
-### [CORE-12]
-
-After absorbing extensive context, return a summary Checkpoint and request human approval before executing Code Actions.
-
-### [CORE-13]
-
-Keep SDD artifacts updated continuously: mark `tasks.md` items `[/]` (in progress) or `[x]` (done) as you go; record debts in `NEXT.md`. Never create parallel routing files in the repo.
-
 ### [CORE-14]
 
 At the end of each sub-block, provide only the commit message suggestion. The human executes the full validation chain (`yarn format ; yarn check ; ...`) and `git commit`.
+
+### [GR-0203]
+
+Build PR descriptions in three steps: outline topics, get human approval, then generate the final text using the repository template (if available) and perform a final human validation.
+
+---
+
+## Engineering Principles
 
 ### [GR-0001]
 
@@ -90,26 +147,6 @@ Make concurrency explicit: use `Promise.all` for independent tasks and `await` s
 ### [GR-0006]
 
 Never install, add, or upgrade third-party packages autonomously. When new dependencies are needed, propose the exact package name and version, and wait for explicit human approval before running any install command (`npm install`, `pip install`, `cargo add`, `gem install`, `go get`, etc.). This applies to all package manifests: `package.json`, `requirements.txt`, `Cargo.toml`, `Gemfile`, `go.mod`, and equivalents.
-
-### [GR-0101]
-
-Declare the spec type (evidence-driven, deterministic, or mixed) and require human approval when design depends on unresolved evidence.
-
-### [GR-0102]
-
-When measuring the token cost of new guidelines, use the Tok-H heuristic: aggregate characters divided by 3.5. Ensure the resulting payload respects established soft ceilings (6000 aggregate, 1500 universal, 600 adapter, 1200 opt-in).
-
-### [GR-0201]
-
-Always respond using the repository default language.
-
-### [GR-0202]
-
-Exclude irrelevant files (logs, builds, dependencies) from the AI context using ignore files.
-
-### [GR-0203]
-
-Build PR descriptions in three steps: outline topics, get human approval, then generate the final text using the repository template (if available) and perform a final human validation.
 
 ---
 
@@ -147,8 +184,12 @@ Before reporting a task as done, ensure: no circular dependencies, proper teardo
 > This project uses the **ai-guidelines** framework for AI governance.
 > Operational guidelines and engineering rules are compiled within the `<AI_GUIDELINES>` block in `AGENTS.md`.
 
-### 🧠 Centralized Governance
+### Centralized Governance
 
 The root `AGENTS.md` is the runtime artifact. Project-specific content must remain outside of the `<AI_GUIDELINES>` block.
+
+### Consumer Bootstrap
+
+Consumer-local ai-guidelines assets live under `.ai-guidelines/`. Templates mirrored by the CLI live in `.ai-guidelines/templates/`. Specs and roadmap remain under `.specify/specs/`.
 
 </AI_GUIDELINES>

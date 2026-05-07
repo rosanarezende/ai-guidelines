@@ -14,22 +14,15 @@ Detalhes de lifecycle em [`.core/process/spec-foundation.md`](../../../.core/pro
 
 Specs atualmente em branch ativa. Formato enxuto.
 
-Nenhuma spec em execução no momento.
+_(Nenhuma spec em execução no momento — 2026-05-07.)_
+
+> **Spec 0019** (`bootstrap-consumidor-e-runtime`) concluída: ver entrada em [`historico.md`](./historico.md). PR #5 aguardando aprovação humana para merge.
 
 ---
 
 ## Now (próxima fila, ordem importa)
 
 Specs ou candidatas priorizadas para iniciar em seguida. Ordem indica prioridade.
-
-- **bootstrap-consumidor-e-runtime** (CLI + distribuição de templates + recompilação do runtime `AGENTS.md`)
-  - **Fonte do insight:** fechamento da Spec 0018 (`NEXT.md` B.7.3), sanitização do runtime bilíngue e revisão manual pós-fechamento no repositório mantenedor.
-  - **Insight central:** a 0018 estabilizou o catálogo de regras e o build bilíngue, mas a experiência do consumidor ainda ficou incompleta em quatro pontos acoplados: (i) consumidores tendem a acumular `CLAUDE.md`, `GEMINI.md`, `.codex/` e arquivos soltos sem governança, acelerando _Context Rot_ e drift entre adapters e a fonte canônica; (ii) `.specify/templates/` não é distribuído para o repo-alvo; (iii) o wizard do CLI ainda pergunta `features` como lista única, sem separar opt-ins editoriais de infraestrutura; (iv) o `AGENTS.md` final exige nova rodada de arquitetura editorial/topológica, com revisão de ordem, repetição, sequenciamento e possível remoção definitiva do `agents-pointer`.
-  - **Escopo potencial:** a CLI detectar provedores ativos no consumidor e gerar automaticamente arquivos restritivos tipo `.claudeignore`, trampolins mínimos como `CLAUDE.md` contendo apenas `@AGENTS.md` e guardrails para manter adapter files alinhados ao runtime; sincronizar `.specify/templates/` no `init`/`adopt` quando fizer sentido para o consumidor; redesenhar a UX do wizard para perguntar por categorias separadas de opt-in; revisar o compiler do runtime para explicitar zonas e ordem semântica real; decidir se `AGENTS-pointer.md.tmpl` ainda existe, vira fallback puro ou é removido; revisar regras repetidas, redundantes ou fora de sequência no payload final.
-  - **Não-objetivos:** reabrir a decisão de conteúdo evidence-driven da 0018; mexer no baseline de benchmark/eval; fazer hierarquia completa por subdiretório estilo Spec 0011.
-  - **Pré-requisitos:** Spec 0018 concluída (✓); PR #4 revisado pelo owner; baseline atual congelado em `historico.md` para permitir refactor sem perder referência.
-  - **Sinal de "está na hora":** owner sinaliza desconforto com o `AGENTS.md` compilado final; consumidor precisar dos boilerplates SDD no repo-alvo; fricção recorrente no wizard por não distinguir opt-ins editoriais vs infraestrutura; ou surgir drift entre `AGENTS.md` e arquivos específicos de provider no repo-alvo.
-  - **Cross-ref:** incorpora integralmente a hipótese de `scaffolding-inteligente-de-provedores` e a expande para um problema maior de bootstrap/runtime do consumidor.
 
 - **governance-information-architecture** (Auditoria + classificação canônica de informação essencial do framework)
   - **Fonte do insight:** revisão da Spec 0018 (Stage 1, 2026-04-30) — owner identificou que `.core/process/spec-foundation.md` é constituição operacional viva, mas está misturada em `docs/` com documentos descritivos; ausência de catálogo de informação essencial; gêneros documentais (constituição × ADR × regra runtime × doc descritivo × referência) sem classificação explícita nem regra de "qual gênero vai para onde".
@@ -81,12 +74,14 @@ Specs ou candidatas priorizadas para iniciar em seguida. Ordem indica prioridade
 
 Specs ou candidatas que entram na fila depois de esgotado o Now. Ordem pode ser reorganizada sem renumeração.
 
+- ~~**template-lifecycle-e-update** (Candidata `evidence-driven` — ciclo de vida e update dos templates distribuídos)~~ **Absorvido pela Spec 0019** (reabertura consensuada 2026-05-07). A política de update unificada (`managed-block` para trampolins/ignores, `mirror` para templates SDD) e o comando `update` foram adicionados ao escopo da 0019 como sub-bloco C. Decidido resolver antes do merge para não fixar contrato que mudaria pouco depois e gerar re-trabalho na primeira leva de consumidores.
+
 - **npm-publication** (spec 0006 — Publicação npm + automação cross-repo)
   - **Escopo:** publicar core como package `@<scope>/ai-guidelines` (`init`/`adopt` via `npx`); ativar `pr-curator` como GH Action real em repositório da mantenedora;
   - **Critérios de aceite (esboço):** `npx` funciona em projeto novo e existente;
-  - **Pré-requisitos:** Spec 0005 concluída (✓); decisão de naming (bloqueador #1).
+  - **Pré-requisitos:** Spec 0005 concluída (✓); decisão de naming (bloqueador #1); Spec 0019 mergeada (entrega o contrato de update via `managed-block` + comando `update`).
   - **Riscos antecipados:** GitHub tokens cross-repo exigem PAT fino ou GitHub App; Action que abre PRs em outro repo pode virar ruído sem gatilho correto (label `growth-relevant`); NPM org paga vs GitHub Packages.
-  - **Research obrigatória — Update Strategy para Consumidores**: quando o framework atualiza templates (rules, AGENTS), como consumidores recebem o update? Atualmente `adopt --force` sobrescreve tudo. Investigar: (1) merge inteligente que preserve customizações locais vs atualizações upstream; (2) notificação de updates disponíveis (ex: comparar hash local vs publicado); (3) modelo de semver para templates (breaking change = regra removida/renomeada). Insight: revisão pós-Spec 0008 revelou que reescrever templates core impacta todos os consumidores — sem estratégia de migração, updates são destrutivos.
+  - **Cross-ref:** estratégia de update fica resolvida pela 0019 (sub-bloco C); a 0006 só publica o pacote sob esse contrato.
 
 - **tracker-automation** (Automação profunda de Trackers)
   - **Contexto:** A Spec 0016 revelou que apenas instruir o agente num arquivo `.md` não garante automação confiável com GitHub Projects V2 (que usa GraphQL e IDs globais).
@@ -150,7 +145,7 @@ Ideias, insights e débitos pequenos que ainda não justificam uma spec dedicada
 - **Estratégia de 1M token context** (Opus 4.7): para refactors de módulo grande, mandar arquivos inteiros em vez de resumos. Tradeoff — gasta mais por operação, economiza em iterações. Regra prática: usar quando o próprio Claude pedir arquivo extra 2+ vezes na mesma sessão.
 - **Kubb / Swagger → hooks tipados + mocks** (Diego Fernandes, não é ai-guidelines): quando repositórios mantenedores tiverem APIs próprias, Kubb lê OpenAPI e gera código tipado. Apontamento cross-repo.
 - **Governança de Diálogo e Decisão**: pesquisar alternativas ao `interaction-map.md` (Decision Logs agentic-aware) para evitar artefato efêmero sem peso de Plano.
-- **Check de Atualização interino no CLI**: antes da Spec 0006 (NPM), avaliar sensor leve no CLI que consulte API do GitHub para alertar sobre novas tags de release. Ver `research/update-notifications-strategy.md`.
+- **Check de Atualização interino no CLI**: antes da Spec 0006 (NPM), avaliar sensor leve no CLI que consulte API do GitHub para alertar sobre novas tags de release. Ver `research/update-notifications-strategy.md`. **Contexto adicional da Spec 0019:** a infraestrutura de update determinístico já existe (`yarn guidelines update` + `managed-block` + versionamento de templates). Falta apenas o sensor que avisa "vX.Y disponível, rode update" — decisões em aberto: (a) cache TTL para evitar request a cada invocação, (b) opt-out via env var, (c) acoplamento com 0006 como fonte canônica de "latest". Pode virar mini-spec ou ser absorvido pela 0006.
 - **Ajustes de UX no Gate de Cobertura**: refinar mensagens de erro e thresholds com base nos aprendizados da spec 0004 (thresholds realistas vs artificiais).
 
 ---
