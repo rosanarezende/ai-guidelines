@@ -231,4 +231,7 @@ Publish enxuto sobre infra existente: o pacote já está ~90% pronto no `package
 
 ## 📐 Decisões revisitadas
 
-_(Nenhuma reversão registrada — preencher durante a execução se necessário.)_
+- **2026-05-07 — Templates SDD permanecem em `.specify/templates` na Spec 0020.**
+  - **Decisão anterior considerada:** antecipar a Spec 0021 e mover os boilerplates SDD para `.core/` agora, para alinhar runtime publicável e placement canônico.
+  - **Decisão revista:** **não mover** nesta spec. O pacote publicado passa a incluir explicitamente `.specify/templates` no campo `files` do `package.json`, mantendo o contrato vigente da CLI e evitando churn amplo em documentação, specs históricas e referências internas.
+  - **Motivo:** o bug descoberto pela smoke era de payload do tarball, não de incapacidade técnica da CLI. Resolver via allowlist do publish fecha a 0020 com baixo risco. A reorganização semântica/física dos boilerplates continua como débito arquitetural para a Spec 0021 (`governance-information-architecture`).

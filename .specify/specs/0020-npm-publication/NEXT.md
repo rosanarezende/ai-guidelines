@@ -21,7 +21,11 @@ _(Nenhum débito registrado ainda)_
 
 ### Débitos da Fase 1 (Implementação)
 
-_(Nenhum débito registrado ainda)_
+### 2. Placement canônico dos boilerplates SDD ainda está pendente
+
+- **O Contexto**: a smoke do tarball expôs que o pacote publicado precisa carregar os boilerplates distribuídos ao consumidor, hoje lidos de `.specify/templates/` por `cli/features/core/templates.mjs`. A correção mínima e segura para a Spec 0020 foi incluir `.specify/templates` explicitamente no payload do npm.
+- **O Débito**: a localização desses boilerplates continua semântica e fisicamente híbrida: artefato distribuído do framework vivendo sob `.specify/`, que também abriga memória de execução (`specs/`). Isso conflui com a discussão maior da Spec 0021 sobre classificação canônica de informação.
+- **Ação Sugerida**: tratar a migração de `.specify/templates` para um lar canônico em `.core/` como decisão arquitetural explícita da Spec 0021, com plano de migração de referências (`README`, `.core/process/spec-foundation.md`, specs históricas e código da CLI) em bloco próprio.
 
 ### Débitos de Fases Adicionais (Publish / Review)
 

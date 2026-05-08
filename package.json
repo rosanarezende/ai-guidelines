@@ -34,6 +34,7 @@
     "!cli/**/*.test.mjs",
     "!cli/**/__fixtures__",
     ".core",
+    ".specify/templates",
     "docs",
     "README.md",
     "CHANGELOG.md"

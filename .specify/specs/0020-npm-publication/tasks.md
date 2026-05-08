@@ -58,20 +58,20 @@
 - [x] **1.B.2** Índice de ADRs atualizado: a tabela canônica vive em `README.md` § "Decisões arquiteturais" (não em `adrs/README.md`, que é descritivo); ADR 0009 adicionado lá.
 - [x] **1.B.3** Cross-ref do ADR 0009 no `CHANGELOG.md` da entrada `[1.0.0]`.
 - [x] **1.B.4** Análise de débitos: nenhum novo débito (escopo do ADR fechado e auto-contido).
-- [ ] **1.B.[COMMIT]** texto de commit incremental sugerido: `docs(spec-0020): ADR 0009 de naming e registry`.
+- [x] **1.B.[COMMIT]** texto de commit incremental sugerido: `docs(spec-0020): ADR 0009 de naming e registry`.
 
 ### Sub-bloco [C] — Smoke tests sobre tarball
 
 > Origem: [`plan.md` § Componente C](./plan.md)
 
-- [ ] **1.C.1** Criar `tests/smoke/helpers/tarball.mjs`: API mínima (`packLocal()`, `installInTempDir(tarballPath)`, `cleanup()`); tudo via Node API (sem shell POSIX).
-- [ ] **1.C.2** Criar `tests/smoke/init-empty.test.mjs`: instala tarball em diretório vazio, roda `npx ai-guidelines init`, valida artefatos esperados (`.ai-guidelines/`, `AGENTS.md`).
-- [ ] **1.C.3** Criar `tests/smoke/init-existing-project.test.mjs`: setup mock com `package.json` + arquivos sentinela; valida que `init` não sobrescreve fora de `managed-block`.
-- [ ] **1.C.4** Criar `tests/smoke/update-managed-block.test.mjs`: pós-init, simula nova versão do framework e valida que `update` aplica patch corretamente sob `managed-block` (contrato Spec 0019).
-- [ ] **1.C.5** Suíte smoke verde local em Windows (validação manual nativa antes de subir para CI).
-- [ ] **1.C.6** Pipeline `yarn check && yarn test` verde.
-- [ ] **1.C.7** Análise de débitos: atualizar `NEXT.md`.
-- [ ] **1.C.[COMMIT]** texto de commit incremental sugerido: `test(spec-0020): smoke tests sobre tarball para init e update`.
+- [x] **1.C.1** Criar `tests/smoke/helpers/tarball.mjs`: API mínima (`packLocal()`, `installInTempDir(tarballPath)`, `cleanup()`); tudo via Node API (sem shell POSIX).
+- [x] **1.C.2** Criar `tests/smoke/init-empty.test.mjs`: instala tarball em diretório vazio, roda `npx ai-guidelines init`, valida artefatos esperados (`.ai-guidelines/`, `AGENTS.md`).
+- [x] **1.C.3** Criar `tests/smoke/init-existing-project.test.mjs`: setup mock com `package.json` + arquivos sentinela; valida que `init` não sobrescreve fora de `managed-block`.
+- [x] **1.C.4** Criar `tests/smoke/update-managed-block.test.mjs`: pós-init, simula nova versão do framework e valida que `update` aplica patch corretamente sob `managed-block` (contrato Spec 0019).
+- [x] **1.C.5** Suíte smoke verde local em Windows: bug de spawn (`shell:true` + `node.exe` com path contendo espaços + `.cmd` exigindo shell desde Node 20+/CVE-2024-27980) corrigido em `tests/smoke/helpers/tarball.mjs` via resolver de `npm`/`npx`/`yarn` para `.cmd` e `shell:true` condicional. As três suítes (`init-empty`, `init-existing-project`, `update-managed-block`) passam ponta-a-ponta.
+- [x] **1.C.6** Pipeline `yarn check && yarn test` verde com a suíte smoke incluída.
+- [x] **1.C.7** Análise de débitos: atualizar `NEXT.md`.
+- [x] **1.C.[COMMIT]** texto de commit incremental sugerido: `test(spec-0020): smoke tests sobre tarball para init e update`.
 
 ### Sub-bloco [D] — CI matriz multi-SO
 
