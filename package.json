@@ -19,7 +19,9 @@
     "copilot",
     "cli"
   ],
-  "bin": "./cli/ai-guidelines-cli.mjs",
+  "bin": {
+    "ai-guidelines": "cli/ai-guidelines-cli.mjs"
+  },
   "imports": {
     "#app/*": "./cli/app/*.mjs",
     "#cli/*": "./cli/cli/*.mjs",

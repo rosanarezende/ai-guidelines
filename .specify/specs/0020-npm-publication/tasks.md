@@ -128,9 +128,9 @@
 
 > Origem: [`plan.md` § Componente G](./plan.md)
 
-- [ ] **2.G.1** Confirmar CI matriz verde no último commit da branch.
-- [ ] **2.G.2** `npm publish --dry-run` final: revisar tarball; confirmar `version` = `1.0.0`; confirmar ausência de arquivos sensíveis.
-- [ ] **2.G.3** Confirmar `CHANGELOG.md` com entrada `[1.0.0] — YYYY-MM-DD` publicada (não em `[Unreleased]`).
+- [x] **2.G.1** Matriz CI verde confirmada no commit `8fa425f` pelo owner em 2026-05-08 (6 jobs: 3 SOs × Node 22.x/24.x).
+- [x] **2.G.2** `npm publish --dry-run --ignore-scripts` final em 2026-05-08: 81 arquivos, 120.7 kB / 427.5 kB unpacked. **Ajuste necessário:** primeiro dry-run emitiu warnings sobre `"bin"` (string `./cli/ai-guidelines-cli.mjs` foi convertida para objeto e o path sofreu sanitização). Aplicado `npm pkg fix` que normalizou para forma canônica `{ "ai-guidelines": "cli/ai-guidelines-cli.mjs" }`; segundo dry-run sem warnings. `yarn test:smoke` 3/3 verde com o novo formato (consumidor pós-publish via `npx ai-guidelines` agora resolve corretamente). Sem arquivos sensíveis no tarball; `version: 1.0.0` confirmado.
+- [x] **2.G.3** `CHANGELOG.md` entrada `[1.0.0] — 2026-05-08` publicada (não em `[Unreleased]`); confirmado em 1.A.6 e re-confirmado agora.
 - [ ] **2.G.4** **[MANDATÓRIO]** Aprovação humana explícita para publish (operação irreversível; janela de unpublish é 72h e tem custos).
 - [ ] **2.G.5** `npm publish --access public` (executado por humano com credenciais; agente não publica autonomamente).
 - [ ] **2.G.6** Validar `npm view ai-guidelines version` = `1.0.0`.
@@ -165,5 +165,5 @@
 - [x] **4.4** `historico.md` recebeu entrada completa da Spec 0020 (sub-blocos A/B/C/D/F/H, recorte de E, métricas, cross-refs). `backlog.md` § "Em execução" esvaziado; entrada detalhada removida de "Now"; ponteiro para histórico adicionado.
 - [x] **4.5** `CHANGELOG.md` entrada `[1.0.0] — 2026-05-08` confirmada (1.A.6 + 2.G.3); `package.json::version` confirmado em `1.0.0`.
 - [x] **4.6** Sessão atual não abriu outra spec — `0020-npm-publication` permaneceu como única spec ativa do encerramento.
-- [ ] **4.7** **[COMMIT]** `chore(spec-0020): encerramento pré-merge — status final e limpeza de débitos`.
+- [x] **4.7** **[COMMIT]** `chore(spec-0020): encerramento pré-merge — status final e limpeza de débitos`. _(commit `8fa425f`.)_
 - [ ] **4.8** **[MANDATÓRIO]** Aprovação humana explícita para merge. **Não fazer merge autonomamente.**
