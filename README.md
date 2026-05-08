@@ -69,16 +69,21 @@ Todo comando aceita `--dry-run` para preview e `--help` para detalhes. Sem argum
 
 ## Compatibilidade Multi-IA
 
-| IA / Ferramenta    | Provider entrypoint (managed-block)      | Status       |
-| :----------------- | :--------------------------------------- | :----------- |
-| Claude Code        | `CLAUDE.md` + `.claudeignore`            | ✅ Suportado |
-| Gemini CLI         | `GEMINI.md` + `.aiexclude`               | ✅ Suportado |
-| Codex / OpenAI CLI | `.openai/instructions.md` + `.gptignore` | ✅ Suportado |
-| Cursor             | `.cursor/rules/ai-guidelines.mdc`        | ✅ Suportado |
-| GitHub Copilot     | `.github/copilot-instructions.md`        | ⚡ Parcial   |
-| Windsurf           | `.windsurfrules`                         | ✅ Suportado |
-| Aider              | `CONVENTIONS.md` + `.aiderignore`        | ✅ Suportado |
-| Outras IAs         | `AGENTS.md` como fallback universal      | 🔄 Esperado  |
+| IA / Ferramenta    | Provider entrypoint                      | Validação                   |
+| :----------------- | :--------------------------------------- | :-------------------------- |
+| Claude Code        | `CLAUDE.md` + `.claudeignore`            | ✅ E2E validado             |
+| Gemini CLI         | `GEMINI.md` + `.aiexclude`               | ✅ E2E validado             |
+| Codex / OpenAI CLI | `.openai/instructions.md` + `.gptignore` | ✅ E2E validado             |
+| GitHub Copilot     | `.github/copilot-instructions.md`        | 🔧 Distribuição configurada |
+| Cursor             | `.cursor/rules/ai-guidelines.mdc`        | 🔧 Distribuição configurada |
+| Windsurf           | `.windsurfrules`                         | 🔧 Distribuição configurada |
+| Aider              | `CONVENTIONS.md` + `.aiderignore`        | 🔧 Distribuição configurada |
+| Outras IAs         | `AGENTS.md` como fallback universal      | 🔄 Esperado                 |
+
+> ✅ **E2E validado:** validação empírica feita pela mantenedora em uso real ou em smoke tests dedicados de specs anteriores.
+> 🔧 **Distribuição configurada:** provider entrypoint gerado conforme contrato documentado da IA; comportamento ponta-a-ponta com a IA real ainda não foi testado pela mantenedora.
+>
+> Contribuições com evidência de uso real são bem-vindas — promovem linhas de "distribuição configurada" para "E2E validado" em releases futuras.
 
 ## Como funciona (em um minuto)
 
