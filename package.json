@@ -1,9 +1,25 @@
 {
   "name": "ai-guidelines",
-  "version": "1.4.0",
+  "version": "1.0.0",
   "description": "Portable AI governance framework — agnostic by design",
-  "private": true,
-  "bin": "./cli/ai-guidelines-cli.mjs",
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/rosanarezende/ai-guidelines#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rosanarezende/ai-guidelines.git"
+  },
+  "bugs": {
+    "url": "https://github.com/rosanarezende/ai-guidelines/issues"
+  },
+  "keywords": [
+    "ai",
+    "governance",
+    "agents",
+    "claude",
+    "copilot",
+    "cli"
+  ],
+  "bin": "cli/ai-guidelines-cli.mjs",
   "imports": {
     "#app/*": "./cli/app/*.mjs",
     "#cli/*": "./cli/cli/*.mjs",
@@ -15,7 +31,10 @@
   },
   "files": [
     "cli",
+    "!cli/**/*.test.mjs",
+    "!cli/**/__fixtures__",
     ".core",
+    ".specify/templates",
     "docs",
     "README.md",
     "CHANGELOG.md"
@@ -26,6 +45,7 @@
     "guidelines:adopt": "node cli/ai-guidelines-cli.mjs adopt",
     "guidelines:providers": "node cli/ai-guidelines-cli.mjs providers",
     "test": "node --experimental-default-config-file --test cli/**/*.test.mjs cli/**/**/*.test.mjs tests/**/*.test.mjs",
+    "test:smoke": "node --experimental-default-config-file --test tests/smoke/*.test.mjs",
     "test:coverage": "node --experimental-default-config-file --experimental-test-coverage --test cli/**/*.test.mjs cli/**/**/*.test.mjs tests/**/*.test.mjs",
     "build:rules": "node cli/governance/monolith/rules-builder.mjs",
     "check:repo": "yarn install --immutable && yarn check && yarn test:coverage",
@@ -38,6 +58,9 @@
     "prettier": "^3.0.0"
   },
   "packageManager": "yarn@4.1.1",
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "dependencies": {
     "@inquirer/prompts": "7.8.4"
   }

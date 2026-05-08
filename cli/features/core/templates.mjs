@@ -1,25 +1,16 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { ROOT_DIR, ensureDir, fileExists, readTextIfExists } from "#fs/file-system";
+import {
+  ROOT_DIR,
+  ensureDir,
+  fileExists,
+  listFilesRecursive,
+  readTextIfExists,
+} from "#fs/file-system";
 import {
   describeTemplateTransition,
   parseTemplateMetadata,
 } from "#features/core/template-metadata";
-
-async function listFilesRecursive(dir) {
-  if (!(await fileExists(dir))) {
-    return [];
-  }
-  const entries = await fs.readdir(dir, { withFileTypes: true, recursive: true });
-  const files = [];
-  for (const entry of entries) {
-    if (entry.isDirectory()) continue;
-    const entryDir = entry.path || entry.parentPath;
-    if (typeof entryDir !== "string") continue;
-    files.push(path.join(entryDir, entry.name));
-  }
-  return files;
-}
 
 function relPath(targetFilePath) {
   return path.relative(process.cwd(), targetFilePath) || targetFilePath;

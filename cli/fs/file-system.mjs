@@ -71,6 +71,36 @@ export async function loadTemplate(templateName) {
   return fs.readFile(templatePath, "utf8");
 }
 
+// Recursão manual em vez de `fs.readdir(..., { recursive: true })` + `entry.parentPath`:
+// o comportamento de `Dirent.path`/`parentPath` em modo recursive variou entre Node
+// 20/21/22 (e tem bugs reportados em Windows/macOS sobre paths concatenados de forma
+// inconsistente), o que se manifestou como `mkdir 'C:\C:\...'` no smoke CI Windows
+// Node 22 e como sync silenciosamente vazio em macOS Node 24. Recursão manual é
+// determinística cross-version e cross-SO.
+export async function listFilesRecursive(rootDir) {
+  if (!(await fileExists(rootDir))) {
+    return [];
+  }
+
+  const collected = [];
+  const stack = [rootDir];
+
+  while (stack.length > 0) {
+    const currentDir = stack.pop();
+    const entries = await fs.readdir(currentDir, { withFileTypes: true });
+    for (const entry of entries) {
+      const fullPath = path.join(currentDir, entry.name);
+      if (entry.isDirectory()) {
+        stack.push(fullPath);
+      } else if (entry.isFile()) {
+        collected.push(fullPath);
+      }
+    }
+  }
+
+  return collected;
+}
+
 export async function copyDirIfChanged(sourceDir, targetDir, dryRun, actions, options = {}) {
   if (!(await fileExists(sourceDir))) {
     return;
@@ -80,48 +110,28 @@ export async function copyDirIfChanged(sourceDir, targetDir, dryRun, actions, op
     actions.push(`sync ${path.basename(sourceDir)} -> target`);
   }
 
-  const entries = await fs.readdir(sourceDir, { withFileTypes: true, recursive: true });
+  const sourceFiles = await listFilesRecursive(sourceDir);
+  const sourceRelativeSet = new Set();
 
-  for (const entry of entries) {
-    if (entry.isDirectory()) {
-      continue;
-    }
-
-    const entryDir = entry.path || entry.parentPath;
-    if (typeof entryDir !== "string") {
-      continue;
-    }
-
-    const sourceFilePath = path.join(entryDir, entry.name);
+  for (const sourceFilePath of sourceFiles) {
     const relativePath = path.relative(sourceDir, sourceFilePath);
+    sourceRelativeSet.add(relativePath);
     const targetFilePath = path.join(targetDir, relativePath);
 
     const content = await fs.readFile(sourceFilePath, "utf8");
     await writeFileIfChanged(targetFilePath, content, dryRun, actions);
   }
 
-  if (options.prune) {
-    const sourceFiles = entries
-      .filter((e) => !e.isDirectory())
-      .map((e) => path.relative(sourceDir, path.join(e.path || e.parentPath, e.name)));
-    const sourceFilesSet = new Set(sourceFiles);
-
-    if (await fileExists(targetDir)) {
-      const targetEntries = await fs.readdir(targetDir, { withFileTypes: true, recursive: true });
-      for (const entry of targetEntries) {
-        if (entry.isDirectory()) {
-          continue;
-        }
-        const targetEntryDir = entry.path || entry.parentPath;
-        const targetFilePath = path.join(targetEntryDir, entry.name);
-        const relativePath = path.relative(targetDir, targetFilePath);
-
-        if (!sourceFilesSet.has(relativePath)) {
-          actions.push(`${dryRun ? "[dry-run] " : ""}prune ${relativePath}`);
-          if (!dryRun) {
-            await fs.unlink(targetFilePath);
-          }
-        }
+  if (options.prune && (await fileExists(targetDir))) {
+    const targetFiles = await listFilesRecursive(targetDir);
+    for (const targetFilePath of targetFiles) {
+      const relativePath = path.relative(targetDir, targetFilePath);
+      if (sourceRelativeSet.has(relativePath)) {
+        continue;
+      }
+      actions.push(`${dryRun ? "[dry-run] " : ""}prune ${relativePath}`);
+      if (!dryRun) {
+        await fs.unlink(targetFilePath);
       }
     }
   }

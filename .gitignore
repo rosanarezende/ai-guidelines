@@ -22,3 +22,10 @@ scratch/
 coverage/
 *-report.txt
 checks_ai_guidelines.txt
+
+# Logs
+logs/
+*.log
+
+# Arquivos temporários
+.tmp/
