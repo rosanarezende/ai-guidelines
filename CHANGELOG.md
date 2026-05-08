@@ -17,7 +17,7 @@ Primeiro release público no registry npm. Spec 0020 (`npm-publication`) — des
 ### Adicionado
 
 - **Metadados de publish em `package.json`:** campos `license` (`Apache-2.0`, conforme ADR 0006), `repository`, `homepage`, `bugs`, `keywords` e `engines.node` (`>=22.0.0` — piso técnico real exigido pelos scripts de teste do CLI).
-- **Pacote publicável no registry npm público** sob o nome não-scoped `ai-guidelines` (decisão de naming registrada em ADR 0009 — entrega da própria Spec 0020).
+- **Pacote publicável no registry npm público** sob o nome não-scoped `ai-guidelines` (decisão de naming + estratégia de registry + auth do `pr-curator` registradas em [ADR 0009](adrs/0009-package-naming-and-registry.md) — entrega da própria Spec 0020).
 
 ### Alterado
 

@@ -54,10 +54,10 @@
 
 > Origem: [`plan.md` § Componente B](./plan.md)
 
-- [ ] **1.B.1** Criar `adrs/0009-package-naming-and-registry.md` com: decisão (`ai-guidelines` não-scoped + reserva `@ai-guidelines/<addon>`); critério decisivo; registry público; auth do `pr-curator` (preferência GitHub App, PAT fino como bootstrap); janela de unpublish 72h como rede de segurança.
-- [ ] **1.B.2** Atualizar `adrs/README.md` (se houver índice) com o novo ADR.
-- [ ] **1.B.3** Cross-ref do ADR no `CHANGELOG.md` da entrada `[1.0.0]`.
-- [ ] **1.B.4** Análise de débitos: atualizar `NEXT.md`.
+- [x] **1.B.1** Criado `adrs/0009-package-naming-and-registry.md` com 3 decisões cravadas: (1) naming `ai-guidelines` não-scoped + reserva `@ai-guidelines/<addon>`; (2) registry público padrão (gratuito); (3) auth do `pr-curator` — GitHub App preferencial, PAT fino como bootstrap documentado. Janela de unpublish do npm (72h) registrada como rede de segurança operacional.
+- [x] **1.B.2** Índice de ADRs atualizado: a tabela canônica vive em `README.md` § "Decisões arquiteturais" (não em `adrs/README.md`, que é descritivo); ADR 0009 adicionado lá.
+- [x] **1.B.3** Cross-ref do ADR 0009 no `CHANGELOG.md` da entrada `[1.0.0]`.
+- [x] **1.B.4** Análise de débitos: nenhum novo débito (escopo do ADR fechado e auto-contido).
 - [ ] **1.B.[COMMIT]** texto de commit incremental sugerido: `docs(spec-0020): ADR 0009 de naming e registry`.
 
 ### Sub-bloco [C] — Smoke tests sobre tarball
@@ -102,8 +102,8 @@
 
 > Origem: [`plan.md` § Componente F](./plan.md)
 
-- [ ] **1.F.1** Adicionar seção "Instalação" no topo do `README.md` com `npx ai-guidelines init` como caminho canônico para consumidores externos.
-- [ ] **1.F.2** Realocar orientação `yarn guidelines …` para seção "Contribuindo" / "Desenvolvimento local"; sinalizar explicitamente como fluxo interno.
+- [x] **1.F.1** README atualizado: bloco principal de comandos da seção "Para Desenvolvedores" usa `npx ai-guidelines …` como caminho canônico para consumidores externos (requer Node ≥ 22; suporta `npx ai-guidelines@<versão>` para pinning em CI). _(Antecipado no sub-bloco B junto com a entrada do ADR 0009 no índice de ADRs.)_
+- [x] **1.F.2** Orientação `yarn guidelines …` realocada para seção "Para Contribuidores" como equivalente local explícito de `npx ai-guidelines`, com rationale do Yarn PnP. Cross-ref bidirecional entre as duas seções.
 - [ ] **1.F.3** Não tocar em `docs/` profundamente — escopo profundo de reorganização fica para Spec 0021 (registrar como decisão consciente em `NEXT.md` se aparecer fricção).
 - [ ] **1.F.4** Análise de débitos: atualizar `NEXT.md`.
 - [ ] **1.F.[COMMIT]** texto de commit incremental sugerido: `docs(spec-0020): README consumer-facing com npx ai-guidelines`.

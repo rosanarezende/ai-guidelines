@@ -30,27 +30,28 @@ A gestão das regras do projeto é feita através da Interface de Linha de Coman
 
 ```bash
 # Para novos projetos — Inicialização com arquitetura AI-first:
-yarn guidelines init --target ../meu-projeto --name meu-projeto
+npx ai-guidelines init --target ../meu-projeto --name meu-projeto
 
 # Para repositórios existentes — Adoção conservadora (sem substituição silenciosa):
-yarn guidelines adopt --target ../repo-existente --dry-run   # Modo de pré-visualização
-yarn guidelines adopt --target ../repo-existente             # Aplicação definitiva
+npx ai-guidelines adopt --target ../repo-existente --dry-run   # Modo de pré-visualização
+npx ai-guidelines adopt --target ../repo-existente             # Aplicação definitiva
 
 # Para gerenciar provider entrypoints nativos (CLAUDE.md, GEMINI.md, .openai/instructions.md, ...):
-yarn guidelines providers --target ../repo --providers claude,gemini,openai
-yarn guidelines providers --target ../repo --providers claude --prune   # Remove os demais
+npx ai-guidelines providers --target ../repo --providers claude,gemini,openai
+npx ai-guidelines providers --target ../repo --providers claude --prune   # Remove os demais
 
 # Para receber atualizações do framework após upgrade da CLI:
-yarn guidelines update --target ../repo --dry-run   # Mostra o que mudaria
-yarn guidelines update --target ../repo             # Re-aplica a partir do .ai-guidelines/config.json
+npx ai-guidelines update --target ../repo --dry-run   # Mostra o que mudaria
+npx ai-guidelines update --target ../repo             # Re-aplica a partir do .ai-guidelines/config.json
 ```
 
 > Notas:
 >
 > - A execução da CLI sem argumentos inicia automaticamente um assistente de configuração interativo.
-> - Em desenvolvimento local neste repositório, use `yarn guidelines ...` para garantir a resolução de dependências em ambiente Yarn PnP.
+> - `npx ai-guidelines` é o caminho canônico para consumidores externos — busca a versão mais recente publicada no registry npm (requer Node ≥ 22). Para fixar uma versão específica em CI, use `npx ai-guidelines@<versão> ...`.
 > - O comando `update` é idempotente e headless: lê o `.ai-guidelines/config.json` existente e re-emite provider entrypoints, templates SDD e o `AGENTS.md` compilado, sem reabrir o wizard nem destruir customizações locais (ver "Política de update" abaixo).
 > - Em CI, use flags explícitas. Detalhes em [Documentação de Features](docs/features.md).
+> - **Contribuidores trabalhando neste repositório localmente** (Yarn PnP) usam `yarn guidelines ...` em vez de `npx`; ver seção "Para Contribuidores" abaixo.
 
 #### Política de update (managed-block + mirror)
 
@@ -70,7 +71,7 @@ Os artefatos distribuídos ao consumidor seguem dois modos de update:
 
 - **`mirror`** para `.ai-guidelines/templates/` (boilerplates SDD copiados de `.specify/templates/` da fonte). Overwrite total é seguro porque esses arquivos não são editados in-place — o trabalho do consumidor vive em `.specify/specs/<slug>/`. Cada template carrega um header de versão (ex.: `<!-- ai-guidelines-template: spec-boilerplate v=1 -->`) e a CLI loga transições no formato `write spec-boilerplate.md (template v=1 -> v=2)` quando uma versão sobe.
 
-`yarn guidelines providers --prune` remove apenas os provider entrypoints de providers não selecionados — **nunca** apaga arquivos em `.ai-guidelines/templates/`.
+`npx ai-guidelines providers --prune` remove apenas os provider entrypoints de providers não selecionados — **nunca** apaga arquivos em `.ai-guidelines/templates/`.
 
 ### 🛠️ Para Contribuidores
 
@@ -89,6 +90,14 @@ yarn build:rules
 yarn check
 yarn test
 yarn check:repo
+```
+
+Ao operar a CLI **a partir deste repositório**, use `yarn guidelines …` (equivalente local de `npx ai-guidelines …`): a invocação via Yarn PnP garante que o código em desenvolvimento seja executado com resolução correta de dependências, sem depender do tarball publicado.
+
+```bash
+yarn guidelines init    --target ../meu-projeto --name meu-projeto
+yarn guidelines adopt   --target ../repo-existente --dry-run
+yarn guidelines update  --target ../repo --dry-run
 ```
 
 ### 🤖 Para Agentes de IA
@@ -229,6 +238,7 @@ Versão atual: consultar a release mais recente no `CHANGELOG.md` e no `package.
 | [ADR 0006](adrs/0006-licenca.md)                                | Licença Apache-2.0                                 |
 | [ADR 0007](adrs/0007-visibilidade-publica-ai-guidelines.md)     | Visibilidade pública: fresh repo + snapshot curado |
 | [ADR 0008](adrs/0008-monolithic-runtime-compiler-governance.md) | Governança Monolítica (Runtime Compiler)           |
+| [ADR 0009](adrs/0009-package-naming-and-registry.md)            | Naming do pacote npm e estratégia de registry      |
 
 ---
 
