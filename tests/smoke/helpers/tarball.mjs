@@ -183,30 +183,6 @@ export async function installInTempDir(tarballPath) {
     "tarball instalado deve expor node_modules/ai-guidelines/package.json"
   );
 
-  // Diagnóstico cross-SO: confirmar que o tarball inclui artefatos críticos
-  // que applyPointers depende (rules.json e templates SDD). Se algum estiver
-  // ausente, init/adopt rodam mas produzem AGENTS.md vazio e não copiam
-  // boilerplates, sem lançar erro visível — exatamente o sintoma observado
-  // em macOS. Mantido como log para facilitar diagnose em qualquer SO.
-  const rulesJsonPath = path.join(packageDir, ".core", "rules", "_meta", "rules.json");
-  const templateBoilerplatePath = path.join(
-    packageDir,
-    ".specify",
-    "templates",
-    "spec-boilerplate.md"
-  );
-  const coreTemplatePath = path.join(packageDir, ".core", "templates", "AGENTS-core.md.tmpl");
-  console.error(
-    `[smoke-debug] platform=${process.platform} node=${process.version} packageDir=${packageDir}`
-  );
-  console.error(`[smoke-debug]   rules.json exists=${await exists(rulesJsonPath)}`);
-  console.error(
-    `[smoke-debug]   .specify/templates/spec-boilerplate.md exists=${await exists(templateBoilerplatePath)}`
-  );
-  console.error(
-    `[smoke-debug]   .core/templates/AGENTS-core.md.tmpl exists=${await exists(coreTemplatePath)}`
-  );
-
   return {
     sandboxDir,
     runnerDir,
@@ -226,20 +202,8 @@ export async function runInstalledCli(packageDir, args, options = {}) {
 
   assert.ok(relativeBinPath, "package instalado deve declarar bin para ai-guidelines");
 
-  const result = await runNode(path.join(packageDir, relativeBinPath), args, {
+  return runNode(path.join(packageDir, relativeBinPath), args, {
     cwd: options.cwd ?? packageDir,
     env: options.env,
   });
-
-  // Diagnose cross-SO: imprimir o output da CLI para o test runner. Em
-  // CI verde isso vira ruído controlado; quando há falha, aparece no log
-  // do GitHub Actions e dispensa instrumentação ad-hoc para reproduzir.
-  if (result.stdout) {
-    console.error(`[smoke-debug] CLI stdout (${args[0]}):\n${result.stdout}`);
-  }
-  if (result.stderr) {
-    console.error(`[smoke-debug] CLI stderr (${args[0]}):\n${result.stderr}`);
-  }
-
-  return result;
 }

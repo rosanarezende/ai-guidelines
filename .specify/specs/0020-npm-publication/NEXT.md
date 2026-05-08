@@ -55,6 +55,12 @@ _(Nenhum débito registrado ainda)_
 
 ---
 
+### 3. `import.meta.url` em macOS resolve symlinks; `process.argv[1]` não
+
+- **O Contexto**: durante a Fase 1 da Spec 0020, smoke tests rodando contra o tarball em macOS CI saíam com exit 0 mas sem criar nenhum artefato — CLI silenciosamente não fazia nada. Logs `[smoke-debug]` revelaram que stdout e stderr da CLI ficavam **vazios** (nem `Modo:` nem `Erro:`), o que descartava throws silenciosos e isolava o problema no guard de entrypoint do `cli/ai-guidelines-cli.mjs`.
+- **O Insight**: em macOS, `os.tmpdir()` retorna `/var/folders/...` que é **symlink** para `/private/var/folders/...`. Quando Node carrega um módulo de dentro de um symlinked path, `import.meta.url` (e por extensão `fileURLToPath(import.meta.url)`) aponta para o caminho **resolvido** (`/private/...`), enquanto `process.argv[1]` mantém o caminho **literal** (`/var/...`) que foi passado na linha de comando. O guard `path.resolve(argv[1]) === __filename` falha silenciosamente — `main()` nunca é invocada e o processo termina com exit 0. Bug invisível em Linux (`/tmp` sem symlink) e Windows (`%TEMP%` sem symlink); aparece em macOS sempre que o consumidor instala o pacote sob `/var/folders/...` (cache npm default em algumas configs, sandboxes de teste, GitHub Actions runners).
+- **Ação Sugerida**: já registrado no fix do `cli/ai-guidelines-cli.mjs` (sub-bloco H da Spec 0020) — `realpathSync` normaliza ambos os lados antes da comparação. Pode virar nota curta em `docs/cli/ai-guidelines-cli.md` ou FAQ de contribuidor como armadilha cross-platform conhecida.
+
 ### 2. `fs.readdir(..., { recursive: true })` + `entry.parentPath` é frágil cross-Node-version
 
 - **O Contexto**: a primeira execução do `smoke-multi-os.yml` (sub-bloco D) expôs falhas em Windows Node 22.x (`mkdir 'C:\C:\…'` — path duplicado) e macOS Node 24.x (`init`/`adopt`/`update` viram no-op silencioso sem criar artefatos). O smoke local em Windows + Node 24 passava porque o comportamento dependia de `entry.path || entry.parentPath` em modo recursive — API que mudou de comportamento entre Node 20/21/22 (e tem bugs reportados em Windows/macOS).
