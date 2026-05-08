@@ -10,6 +10,32 @@ _(Sem mudanças não-publicadas no momento.)_
 
 ---
 
+## [1.0.1] — 2026-05-08
+
+Hotfix do primeiro release público + reescrita da landing pública (`README.md`).
+
+### Corrigido
+
+- **Bug crítico no entrypoint do `bin`** (afetava 100% dos consumidores via `npx`/`npm exec` em qualquer SO): o arquivo apontado por `package.json::bin` (`cli/ai-guidelines-cli.mjs`) não tinha shebang `#!/usr/bin/env node`. Sem shebang, o shim que o npm gera em Windows tentava executar o `.mjs` diretamente, e o sistema usava associação de extensão (editor de texto) — resultando em saída silenciosa com exit 0 sem rodar a CLI. Em Unix o cenário era análogo. Corrigido com a adição da linha `#!/usr/bin/env node` no topo do arquivo, conforme [npm docs `package.json#bin`](https://docs.npmjs.com/cli/v10/configuring-npm/package-json#bin). _(O smoke existente passou pré-publish porque invocava o entrypoint via `node <path>` direto, simulando o resultado que o shim deveria entregar — não testava o shim em si.)_
+
+### Adicionado
+
+- **Smoke test de regressão `tests/smoke/bin-shim.test.mjs`** cobrindo dois invariantes que teriam pego o bug acima e ficam como rede de segurança para futuras releases:
+  1. **Estático** — primeira linha do arquivo apontado por `package.json::bin` precisa começar com shebang e referenciar `node`.
+  2. **Comportamental** — invocar o bin via shim do npm (`node_modules/.bin/<name>` cross-platform) precisa executar a CLI e criar os artefatos esperados no target. Cobre o caminho real do consumidor pós-publish (`npx ai-guidelines …`), não apenas o entrypoint isolado.
+
+### Alterado
+
+- **`README.md` reescrito como landing pública consumer-facing** (-65% de extensão, de 271 para 95 linhas). Foco em valor concreto para o consumidor que chega via npmjs.com: tagline forte, quick start no topo, bullets de ganho real, comandos essenciais em tabela, compatibilidade Multi-IA, "como funciona em um minuto". Hero image (`docs/assets/ai-guidelines-flow.png`) ilustra o ciclo completo de governança (Backlog → Spec → Plano → Execução → PR → Merge → Valor entregue) com extensões emergentes (Lifecycle de release, Arquitetura da informação).
+- **`CONTRIBUTING.md` ampliado** absorveu material que vivia no README e era irrelevante para consumidor externo: setup local de desenvolvimento (Node ≥ 22, Yarn 4 PnP, `yarn guidelines …`), estrutura completa do repositório, convenções internas. Cross-ref explícita para a sequência canônica de release em `.core/process/spec-foundation.md`.
+- **`docs/cli/ai-guidelines-cli.md`** ganhou seção 0 — "Política de Update — `managed-block` + `mirror`" — que vivia no README e era referência técnica detalhada inadequada para landing.
+
+### Lição operacional cravada
+
+- **Smoke deve cobrir o caminho real do consumidor, não apenas o entrypoint isolado.** Invocar `node <bin-path>` simula o **resultado** que o shim deveria entregar com sucesso; não simula o **shim em si**. Para CLIs publicadas via `bin`, smoke obrigatório precisa rodar via `node_modules/.bin/<name>` (cross-platform). Regra incorporada como sub-bloco H da Spec 0020 e refletida no smoke `bin-shim.test.mjs`.
+
+---
+
 ## [1.0.0] — 2026-05-08
 
 Primeiro release público no registry npm. Spec 0020 (`npm-publication`) — destrava distribuição via `npx ai-guidelines init` para consumidores externos. Versionamento foi resetado de `1.4.0` interno para `1.0.0` deliberadamente: nenhuma das versões anteriores (`0.x` / `1.x`) chegou a ser publicada (`package.json` carregava `"private": true`); `1.0.0` inicia a série pública e ancora SemVer a partir do contrato real instalável.
