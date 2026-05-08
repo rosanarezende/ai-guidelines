@@ -111,7 +111,6 @@ Progresso operacional. Marca tasks `[x]` a cada degrau. **Espinha dorsal de exec
 > 4. Owner roda o publish a partir do `main` atualizado (`npm publish --access public`, equivalente em PyPI/Maven, etc.).
 > 5. Owner cria tag anotada `v<X.Y.Z>` no commit-novo de `main` (gerado pelo squash) e faz `git push origin v<X.Y.Z>`.
 > 6. **Fase 5 — Release Sync (obrigatória, ver `tasks.md` da spec):** agente cria branch curta `release/v<X.Y.Z>-sync` a partir de `main` e abre mini-PR que:
->
 >    - cita o SHA real do commit publicado em `historico.md` da spec correspondente;
 >    - registra `tag v<X.Y.Z>`, `version: <X.Y.Z>`, link do registry público e data;
 >    - opcionalmente, ajusta badges/links externos no `README.md`.
