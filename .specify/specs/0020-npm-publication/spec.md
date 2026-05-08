@@ -19,7 +19,9 @@
 
 O framework `ai-guidelines` está há ciclos sendo descrito como "instalável via `npx`" mas nunca foi publicado no registry npm — `package.json` carrega `"private": true`, versão interna em `1.4.0` e nenhum consumidor externo consegue de fato rodar `npx ai-guidelines init`. Auditoria em 2026-05-07 mostrou que o pacote está ~90% pronto (nome `ai-guidelines` configurado, `bin`/`files`/`dependencies` corretos); o gap é cerimonial (metadados de publish, ADR de naming, smoke tests cross-SO) e bloqueia a narrativa de portfólio que pressupõe pacote real instalável.
 
-O resultado esperado é o pacote `ai-guidelines@1.0.0` publicado no registry público e instalável de fora do repositório, com `npx ai-guidelines init` funcionando em diretório vazio e em projeto existente, validado por CI nos três sistemas operacionais (Windows, Linux, macOS) sobre o tarball de publish (e não sobre o checkout local). A decisão de naming — `ai-guidelines` não-scoped como package principal, org `@ai-guidelines` reservada para extensões — fica registrada em ADR formal, e a Action `pr-curator` passa a operar como integração real entre repositórios da mantenedora.
+O resultado esperado é o pacote `ai-guidelines@1.0.0` publicado no registry público e instalável de fora do repositório, com `npx ai-guidelines init` funcionando em diretório vazio e em projeto existente, validado por CI nos três sistemas operacionais (Windows, Linux, macOS) sobre o tarball de publish (e não sobre o checkout local). A decisão de naming — `ai-guidelines` não-scoped como package principal, org `@ai-guidelines` reservada para extensões — fica registrada em ADR formal.
+
+> **Recorte de escopo — 2026-05-08.** A ativação do `pr-curator` como GitHub Action ativa, originalmente listada nesta spec, foi extraída para spec própria (`pr-curator-action`, registrada em `roadmap/backlog.md`). Auditoria durante a Fase 1 mostrou que o comando `pr-curator` ainda não existe como código na CLI — apenas como documento de workflow editorial — e construir o Action exigiria implementar a feature do zero, o que extrapola o escopo "publicar pacote no npm". Publicação no registry não depende dessa automação cross-repo; o consumidor `npx ai-guidelines init` funciona independentemente.
 
 ---
 
@@ -31,7 +33,6 @@ O resultado esperado é o pacote `ai-guidelines@1.0.0` publicado no registry pú
 - ADR de naming: `ai-guidelines` não-scoped como package principal; org `@ai-guidelines/<addon>` reservada para extensões futuras; rationale de registry público vs paid org documentado.
 - Smoke tests de `npx ai-guidelines init` rodando contra o **tarball** (via `npm pack` + `npm install <tarball>`) em diretório vazio e em projeto existente, garantindo que o pacote publicado — não o checkout — produz o resultado esperado.
 - CI multi-SO (Windows / Linux / macOS) executando os smoke tests sobre o tarball; matriz mínima como gate de release.
-- Ativação de `pr-curator` como GitHub Action real em repositório da mantenedora (autenticação cross-repo via PAT fino ou GitHub App, gatilho por label `growth-relevant`).
 - Documentação consumer-facing no `README`: seção de instalação trocando orientação interna `yarn guidelines` por `npx ai-guidelines`, mantendo seção de contribuidor distinta.
 - Publish efetivo de `ai-guidelines@1.0.0` no registry npm público.
 
@@ -42,6 +43,7 @@ O resultado esperado é o pacote `ai-guidelines@1.0.0` publicado no registry pú
 - Padrão distribuído de fragmentação `AGENTS.md` no consumidor — fica para Spec 0011.
 - Versionamento semântico avançado / canários multi-tag — começa simples (`latest` apenas); evolui se houver demanda real pós-1.0.0.
 - Migração para GitHub Packages ou registry privado — registry público padrão (gratuito) é suficiente; ADR registra que privado só se justificar acesso restrito futuro.
+- **Ativação do `pr-curator` como GitHub Action ativa** — extraído em 2026-05-08 para spec própria (`pr-curator-action`, ver `roadmap/backlog.md`). Implementar requer primeiro o comando como feature da CLI; ortogonal à publicação npm. ADR 0009 (decisão de auth GitHub App vs PAT fino) permanece válido e é insumo da spec futura.
 
 ---
 
@@ -52,7 +54,6 @@ O resultado esperado é o pacote `ai-guidelines@1.0.0` publicado no registry pú
 - [ ] Comando `update` aplica patches sob `managed-block` em consumidor recém-init (contrato herdado da Spec 0019, validado aqui ponta-a-ponta).
 - [ ] CI matriz (Windows / Linux / macOS) verde sobre o tarball antes do publish.
 - [ ] ADR de naming registrado em `adrs/` com rationale de não-scoped + reserva de `@ai-guidelines`.
-- [ ] `pr-curator` configurado como GH Action ativa, com gatilho documentado e teste de fluxo cross-repo executado pelo menos uma vez.
 - [ ] Pacote `ai-guidelines@1.0.0` publicado no registry npm público e instalável (`npm view ai-guidelines version` retorna `1.0.0`).
 - [ ] `README.md` com seção consumer-facing usando `npx ai-guidelines` (orientação interna `yarn guidelines` permanece em seção de contribuidor).
 - [ ] Pipeline de check + test verde (`yarn check && yarn test`).
@@ -74,7 +75,7 @@ O resultado esperado é o pacote `ai-guidelines@1.0.0` publicado no registry pú
 - **Riscos macro:**
   - **Janela de exposição do nome:** alguém pode publicar `ai-guidelines` antes de 0020 fechar — mitigação adotada foi promover a spec imediatamente para fechar a janela; janela de `unpublish` do npm é 72h após publish.
   - **Visibilidade pública** (cf. ADR 0007): pacote publicado é leitura indireta do repositório — qualquer conteúdo em `files` do `package.json` (`cli`, `.core`, `docs`, `README.md`, `CHANGELOG.md`) vai ao registry; auditar antes do publish.
-  - **Tokens cross-repo do `pr-curator`:** PAT fino expira / GitHub App exige instalação — escolha registrada em ADR para evitar bikeshedding futuro.
+  - ~~**Tokens cross-repo do `pr-curator`:**~~ — risco transferido para a spec `pr-curator-action`. ADR 0009 já registrou a escolha (GitHub App preferencial; PAT fino como bootstrap) e permanece válido para a spec futura.
 
 ---
 

@@ -44,7 +44,7 @@
 - [x] **1.A.3** Adicionar `keywords` curados: `ai`, `governance`, `agents`, `claude`, `copilot`, `cli` (revisar com owner antes do publish).
 - [x] **1.A.4** Adicionar `engines.node` com `>=22.0.0` — CI roda Node 24, mas o piso técnico real é 22 (flags `--experimental-default-config-file` e `--experimental-test-coverage` exigem Node 22+).
 - [x] **1.A.5** Bumpar `version` de `1.4.0` para `1.0.0`.
-- [x] **1.A.6** `CHANGELOG.md`: entrada `[1.0.0] — 2026-05-07` documentando início da série pública e justificativa do reset (1.4.0 interno nunca foi publicado).
+- [x] **1.A.6** `CHANGELOG.md`: entrada `[1.0.0] — 2026-05-08` documentando início da série pública e justificativa do reset (1.4.0 interno nunca foi publicado). _(Data ajustada de 2026-05-07 para 2026-05-08 — release real ocorrerá nesta data.)_
 - [x] **1.A.7** Validar `npm publish --dry-run`: aceita sem erros (113 → 70 arquivos após exclusão de `*.test.mjs` + `__fixtures__/` via globs negativos no campo `files`); tarball contém `cli` (sem testes), `.core`, `docs`, `README.md`, `CHANGELOG.md`. Tamanho final: 102 kB / 343 kB unpacked.
 - [x] **1.A.8** Pipeline `yarn check && yarn test` verde após o sub-bloco (exit 0, suíte completa passa).
 - [x] **1.A.9** Análise de débitos: `NEXT.md` atualizado (insight sobre `.npmignore` × `files`).
@@ -83,20 +83,15 @@
 - [ ] **1.D.4** **[PARA HUMANO]** Configurar `smoke / *` como required check em branch protection do `main` (requer permissão admin no repositório). Não bloqueante para 1.0.0; pode ser feito junto com a aprovação do publish em 2.G.4.
 - [ ] **1.D.5** Confirmar matriz verde em PR Draft após push (rodar pelo menos uma vez).
 - [x] **1.D.6** Análise de débitos: nenhum novo débito; D.4 fica como ação operacional para humano (registrada acima).
-- [ ] **1.D.[COMMIT]** texto de commit incremental sugerido: `ci(spec-0020): matriz multi-SO sobre tarball`.
+- [x] **1.D.[COMMIT]** texto de commit incremental sugerido: `ci(spec-0020): matriz multi-SO sobre tarball`. _(commit `8497c59`.)_
 
-### Sub-bloco [E] — `pr-curator` como GH Action ativa
+### ~~Sub-bloco [E] — `pr-curator` como GH Action ativa~~ — extraído em 2026-05-08
 
-> Origem: [`plan.md` § Componente E](./plan.md)
->
-> **Nota — promoção de regra.** Não há promoção de regra editorial neste sub-bloco; é integração de tooling.
+> **⛔ EXTRAÍDO desta spec por decisão de owner em 2026-05-08.** Auditoria durante a Fase 1 mostrou que o comando `pr-curator` **não existe** como código na CLI (revisão de `cli/features/{core,opt-in}/`) — apenas como documento de workflow editorial referenciado em ADR/CHANGELOG. Publicação no registry não depende dessa automação cross-repo. Escopo transferido para spec própria (`pr-curator-action`) registrada em `roadmap/backlog.md`. ADR 0009 (Decisão 3 — auth) permanece como insumo. Detalhe em `plan.md` § "Decisões revisitadas" e `spec.md` § "Fora do escopo".
 
-- [ ] **1.E.1** Criar `.github/workflows/pr-curator.yml` com gatilho `pull_request` filtrado por label `growth-relevant`.
-- [ ] **1.E.2** Configurar auth conforme ADR 0009 (preferência GitHub App; PAT fino aceitável como bootstrap inicial). Documentar setup necessário (criação do App / geração do PAT) em comentário no workflow ou em `docs/`.
-- [ ] **1.E.3** Workflow executa `pr-curator` contra o PR e abre PR cross-repo no destino.
-- [ ] **1.E.4** Executar pelo menos um fluxo end-to-end real (PR de teste com label) e registrar evidência no PR desta spec.
-- [ ] **1.E.5** Análise de débitos: atualizar `NEXT.md`.
-- [ ] **1.E.[COMMIT]** texto de commit incremental sugerido: `ci(spec-0020): pr-curator como GitHub Action ativa`.
+- [~] **1.E.1–1.E.4** Transferidos para a spec `pr-curator-action`.
+- [x] **1.E.5** Análise de débitos: decisão de extração registrada em `plan.md` (decisão revisitada), `spec.md` (objetivo + fora do escopo + critério de aceite removido) e `roadmap/backlog.md` (nova spec candidata).
+- [~] **1.E.[COMMIT]** sem commit próprio nesta spec; o ajuste de escopo entra no commit de fechamento da Fase 1 (`docs(spec-0020): extrai pr-curator-action e fecha Fase 1`).
 
 ### Sub-bloco [F] — README consumer-facing
 
@@ -104,9 +99,9 @@
 
 - [x] **1.F.1** README atualizado: bloco principal de comandos da seção "Para Desenvolvedores" usa `npx ai-guidelines …` como caminho canônico para consumidores externos (requer Node ≥ 22; suporta `npx ai-guidelines@<versão>` para pinning em CI). _(Antecipado no sub-bloco B junto com a entrada do ADR 0009 no índice de ADRs.)_
 - [x] **1.F.2** Orientação `yarn guidelines …` realocada para seção "Para Contribuidores" como equivalente local explícito de `npx ai-guidelines`, com rationale do Yarn PnP. Cross-ref bidirecional entre as duas seções.
-- [ ] **1.F.3** Não tocar em `docs/` profundamente — escopo profundo de reorganização fica para Spec 0021 (registrar como decisão consciente em `NEXT.md` se aparecer fricção).
-- [ ] **1.F.4** Análise de débitos: atualizar `NEXT.md`.
-- [ ] **1.F.[COMMIT]** texto de commit incremental sugerido: `docs(spec-0020): README consumer-facing com npx ai-guidelines`.
+- [x] **1.F.3** `docs/` não tocado nesta spec — reorganização profunda fica para Spec 0021. Sem fricção encontrada (mudança no README foi suficiente para o caminho consumidor; nada em `docs/` precisou de ajuste para tornar o pacote utilizável via `npx`).
+- [x] **1.F.4** Análise de débitos: `NEXT.md` atualizado (débito #3 registra blocker do sub-bloco E — `pr-curator` não implementado como código CLI; recomendação de extrair para spec própria).
+- [x] **1.F.[COMMIT]** texto de commit incremental sugerido: `docs(spec-0020): README consumer-facing com npx ai-guidelines`. _(Antecipado no commit `18b116a` junto com a entrada do ADR 0009; F.3/F.4 acompanham o commit de fechamento da fase.)_
 
 ---
 

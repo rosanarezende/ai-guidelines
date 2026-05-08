@@ -27,6 +27,12 @@ _(Nenhum débito registrado ainda)_
 - **O Débito**: a localização desses boilerplates continua semântica e fisicamente híbrida: artefato distribuído do framework vivendo sob `.specify/`, que também abriga memória de execução (`specs/`). Isso conflui com a discussão maior da Spec 0021 sobre classificação canônica de informação.
 - **Ação Sugerida**: tratar a migração de `.specify/templates` para um lar canônico em `.core/` como decisão arquitetural explícita da Spec 0021, com plano de migração de referências (`README`, `.core/process/spec-foundation.md`, specs históricas e código da CLI) em bloco próprio.
 
+### 3. Sub-bloco E (`pr-curator` como GH Action ativa) extraído para spec própria
+
+- **O Contexto**: auditoria em `cli/features/{core,opt-in}/` durante a Fase 1 (2026-05-08) confirmou que o comando `pr-curator` **não existe** como código na CLI — apenas como documento de workflow editorial referenciado no `CHANGELOG.md` e no ADR 0009. O `plan.md` original assumia, incorretamente, que a feature já estava implementada.
+- **A Decisão (2026-05-08, owner)**: `pr-curator` **não é requisito** para publicação npm — `npx ai-guidelines init` funciona independentemente dessa automação cross-repo. Sub-bloco E extraído em definitivo desta spec; escopo transferido para a spec candidata `pr-curator-action` (registrada em `roadmap/backlog.md`). ADR 0009 permanece insumo arquitetural válido para essa spec futura.
+- **Reflexos aplicados**: `spec.md` (objetivo, escopo, critérios de aceite, riscos) ajustado; `plan.md` (Componente E + DoD + arquivos modificados + tabela de riscos + "Decisões revisitadas") ajustado; `tasks.md` § Sub-bloco E marcado como extraído; `roadmap/backlog.md` recebeu nova candidata `pr-curator-action`.
+
 ### Débitos de Fases Adicionais (Publish / Review)
 
 _(Nenhum débito registrado ainda)_

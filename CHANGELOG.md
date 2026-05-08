@@ -10,7 +10,7 @@ _(Sem mudanças não-publicadas no momento.)_
 
 ---
 
-## [1.0.0] — 2026-05-07
+## [1.0.0] — 2026-05-08
 
 Primeiro release público no registry npm. Spec 0020 (`npm-publication`) — destrava distribuição via `npx ai-guidelines init` para consumidores externos. Versionamento foi resetado de `1.4.0` interno para `1.0.0` deliberadamente: nenhuma das versões anteriores (`0.x` / `1.x`) chegou a ser publicada (`package.json` carregava `"private": true`); `1.0.0` inicia a série pública e ancora SemVer a partir do contrato real instalável.
 

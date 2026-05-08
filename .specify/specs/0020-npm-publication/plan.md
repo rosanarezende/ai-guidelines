@@ -85,9 +85,11 @@ Publish enxuto sobre infra existente: o pacote já está ~90% pronto no `package
 
 - `.github/workflows/smoke-multi-os.yml` (novo) ou estender `.github/workflows/<existente>.yml` se já houver.
 
-#### [E] `pr-curator` como GH Action ativa
+#### [E] ~~`pr-curator` como GH Action ativa~~ — extraído em 2026-05-08
 
-**Estado atual:** `pr-curator` existe como código no CLI; não está plugado como Action real.
+**Status:** ⛔ **REMOVIDO desta spec.** Auditoria durante a Fase 1 mostrou que o comando `pr-curator` **não existe** como código na CLI (revisão de `cli/features/{core,opt-in}/` em 2026-05-08) — apenas como documento de workflow editorial referenciado em ADR/CHANGELOG/docs. Construir o Action exigiria implementar a feature CLI primeiro, escopo que extrapola a publicação npm. A spec `pr-curator-action` foi criada em `roadmap/backlog.md` para tratar esse trabalho.
+
+**Estado atual histórico (pré-recorte):** `pr-curator` existe como código no CLI; não está plugado como Action real. _(Esta afirmação revelou-se incorreta na auditoria de 2026-05-08; o documento de workflow editorial foi confundido com implementação.)_
 
 **Decisão:**
 
@@ -99,8 +101,8 @@ Publish enxuto sobre infra existente: o pacote já está ~90% pronto no `package
 
 **Mudanças em arquivos:**
 
-- `.github/workflows/pr-curator.yml` (novo).
-- `docs/<...>` — documentação curta de operação (gatilho, label, troubleshooting de auth).
+- ~~`.github/workflows/pr-curator.yml`~~ — escopo transferido para spec `pr-curator-action`.
+- ~~`docs/<...>` — documentação curta de operação~~ — idem.
 
 #### [F] README consumer-facing
 
@@ -163,11 +165,9 @@ Publish enxuto sobre infra existente: o pacote já está ~90% pronto no `package
 - [ ] Job instala o tarball (não o checkout) antes de rodar smoke.
 - [ ] Workflow é gate de merge para a branch.
 
-### Componente [E] — pr-curator
+### ~~Componente [E] — pr-curator~~ — extraído para spec própria em 2026-05-08
 
-- [ ] Workflow `pr-curator.yml` configurado com label `growth-relevant` como gatilho.
-- [ ] Auth funcionando (GitHub App ou PAT fino conforme ADR).
-- [ ] Pelo menos um fluxo cross-repo executado e documentado.
+- DoD transferido para a spec `pr-curator-action` (registrada em `roadmap/backlog.md`). ADR 0009 (Decisão 3 — auth) permanece insumo dessa spec futura.
 
 ### Componente [F] — README
 
@@ -210,7 +210,7 @@ Publish enxuto sobre infra existente: o pacote já está ~90% pronto no `package
 - `tests/smoke/update-managed-block.test.mjs` (novo).
 - `tests/smoke/helpers/tarball.mjs` (novo).
 - `.github/workflows/smoke-multi-os.yml` (novo).
-- `.github/workflows/pr-curator.yml` (novo).
+- ~~`.github/workflows/pr-curator.yml`~~ — extraído para spec `pr-curator-action` (2026-05-08).
 - `.specify/specs/roadmap/backlog.md` — atualizar status da spec ao longo da execução.
 - `.specify/specs/roadmap/historico.md` — entrada de encerramento no merge.
 
@@ -218,18 +218,23 @@ Publish enxuto sobre infra existente: o pacote já está ~90% pronto no `package
 
 ## ⚠️ Riscos técnicos (concretos)
 
-| Risco                                                                   | Mitigação                                                                                                                                                   |
-| :---------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Smoke em Windows quebra por path separator / shell                      | Usar APIs Node (`path.join`, `node:fs`) em todos os helpers; nada de `&&` shell-specific nos workflows; testar localmente em Windows antes de subir CI.     |
-| Tarball inclui arquivos sensíveis ou inflado                            | Revisar `npm pack --dry-run` no DoD do componente A; ajustar `files` em `package.json` se aparecer ruído.                                                   |
-| Auth do `pr-curator` falha em produção (PAT expira / App não instalado) | ADR 0009 cravar a escolha + procedimento de rotação; workflow registra falha de auth com mensagem clara em vez de erro genérico do gh-action.               |
-| Bug crítico no primeiro publish                                         | Fluxo de retry: `1.0.1` patch é o caminho preferido; `unpublish` apenas dentro da janela de 72h e só se o bug for crítico (corrupção de estado consumidor). |
-| Bump 1.4.0 → 1.0.0 confunde quem acompanha o repo                       | Entrada explícita no `CHANGELOG.md` justificando o reset (1.4.0 nunca foi publicado, 1.0.0 inicia série pública); ADR 0009 referencia.                      |
-| `engines.node` mais alto do que CI atual quebra usuário                 | Confirmar piso lendo CI atual; alinhar `engines.node` ao mínimo que o CI matriz testa.                                                                      |
+| Risco                                                   | Mitigação                                                                                                                                                              |
+| :------------------------------------------------------ | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Smoke em Windows quebra por path separator / shell      | Usar APIs Node (`path.join`, `node:fs`) em todos os helpers; nada de `&&` shell-specific nos workflows; testar localmente em Windows antes de subir CI.                |
+| Tarball inclui arquivos sensíveis ou inflado            | Revisar `npm pack --dry-run` no DoD do componente A; ajustar `files` em `package.json` se aparecer ruído.                                                              |
+| ~~Auth do `pr-curator` falha em produção~~              | _Risco transferido para a spec `pr-curator-action`._ ADR 0009 permanece como decisão arquitetural válida; mitigação operacional será detalhada no plan da spec futura. |
+| Bug crítico no primeiro publish                         | Fluxo de retry: `1.0.1` patch é o caminho preferido; `unpublish` apenas dentro da janela de 72h e só se o bug for crítico (corrupção de estado consumidor).            |
+| Bump 1.4.0 → 1.0.0 confunde quem acompanha o repo       | Entrada explícita no `CHANGELOG.md` justificando o reset (1.4.0 nunca foi publicado, 1.0.0 inicia série pública); ADR 0009 referencia.                                 |
+| `engines.node` mais alto do que CI atual quebra usuário | Confirmar piso lendo CI atual; alinhar `engines.node` ao mínimo que o CI matriz testa.                                                                                 |
 
 ---
 
 ## 📐 Decisões revisitadas
+
+- **2026-05-08 — Sub-bloco E (`pr-curator` como GH Action ativa) extraído para spec própria.**
+  - **Decisão anterior considerada:** entregar a Action `pr-curator` dentro da Spec 0020, com auth conforme ADR 0009 e validação cross-repo end-to-end.
+  - **Decisão revista:** **remover** o componente desta spec e abrir spec própria (`pr-curator-action`) no `roadmap/backlog.md`. ADR 0009 permanece válido como insumo dessa spec futura.
+  - **Motivo:** auditoria de `cli/features/{core,opt-in}/` em 2026-05-08 confirmou que o comando `pr-curator` **não existe** como código na CLI (apenas como documento de workflow editorial referenciado em ADR/CHANGELOG). Construir uma Action que invoca um comando inexistente seria implementação-fantasma; implementar a feature do zero extrapola "publicar pacote no npm". Publicação no registry é independente dessa automação cross-repo — `npx ai-guidelines init` funciona sem ela.
 
 - **2026-05-08 — Matriz Node do `smoke-multi-os.yml`: `[22.x, 24.x]`, não `20.x`.**
   - **Decisão anterior considerada:** matriz Node `[20.x]` (LTS amplamente disponível na época da escrita do plan), conforme [`§ Componente D`](#d-ci-matriz-multi-so) original.
