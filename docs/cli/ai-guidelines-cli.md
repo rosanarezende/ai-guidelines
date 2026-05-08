@@ -2,6 +2,38 @@
 
 Este documento mapeia as regras de negócio canônicas da CLI, servindo de fonte única de verdade para os testes unitários BDD.
 
+## 0. Política de Update — `managed-block` + `mirror`
+
+Os artefatos distribuídos ao consumidor seguem **dois modos de update** distintos, escolhidos por tipo de arquivo:
+
+### Modo `managed-block`
+
+Aplicável a: provider entrypoints nativos (`CLAUDE.md`, `GEMINI.md`, `.openai/instructions.md`, `.cursor/rules/ai-guidelines.mdc`, `.windsurfrules`, `CONVENTIONS.md`, etc.) e _ignore files_ (`.claudeignore`, `.aiexclude`, `.gptignore`, `.aiderignore`).
+
+O conteúdo gerenciado pela CLI fica entre marcadores explícitos:
+
+```markdown
+<!-- ai-guidelines:managed-start v=1 -->
+
+...hard-redirect para AGENTS.md + adapter rules específicas...
+
+<!-- ai-guidelines:managed-end -->
+```
+
+Updates substituem **apenas o bloco interno**. Conteúdo do consumidor fora dos marcadores é preservado em qualquer cenário. Em arquivos pré-existentes sem marcadores (adoção), a CLI faz prepend do bloco gerenciado e injeta um comentário em PT-BR sinalizando que o conteúdo legado abaixo deve ser revisado pelo mantenedor humano.
+
+### Modo `mirror`
+
+Aplicável a: boilerplates SDD copiados para `.ai-guidelines/templates/` (origem em `.specify/templates/` da fonte).
+
+Overwrite total é seguro porque esses arquivos **não são editados in-place**: o trabalho do consumidor vive em `.specify/specs/<slug>/` (instâncias dos templates), não nos templates em si. Cada template carrega header de versão (`<!-- ai-guidelines-template: <slug> v=N -->`) e a CLI loga transições no formato `write spec-boilerplate.md (template v=1 -> v=2)` quando uma versão sobe.
+
+### Garantia de não-destruição
+
+`npx ai-guidelines providers --prune` remove apenas os provider entrypoints de providers **não selecionados** — **nunca** apaga arquivos em `.ai-guidelines/templates/` nem conteúdo do consumidor fora de `managed-block`.
+
+---
+
 ## 1. Comportamento Global de Sincronização
 
 ### [BR-CLI-SYNC-01] Delta Sync do Runtime

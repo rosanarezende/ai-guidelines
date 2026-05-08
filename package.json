@@ -1,6 +1,6 @@
 {
   "name": "ai-guidelines",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Portable AI governance framework — agnostic by design",
   "license": "Apache-2.0",
   "homepage": "https://github.com/rosanarezende/ai-guidelines#readme",
@@ -36,6 +36,7 @@
     ".core",
     ".specify/templates",
     "docs",
+    "!docs/assets",
     "README.md",
     "CHANGELOG.md"
   ],

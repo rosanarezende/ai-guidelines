@@ -142,16 +142,83 @@ Antes de começar, leia:
 
 ---
 
+## Setup local de desenvolvimento
+
+Este repositório é o **framework canônico**, não apenas um exemplo de consumo: alterações em `.core/`, `cli/` e nos templates SDD mudam o baseline distribuído via npm para todos os repositórios consumidores.
+
+### Pré-requisitos
+
+- **Node ≥ 22** (piso técnico real — scripts de teste usam flags experimentais disponíveis a partir do Node 22).
+- **Yarn 4** com Plug'n'Play (gerenciado via `corepack enable`).
+
+### Comandos canônicos
+
+```bash
+yarn install --immutable     # restaura node_modules sob PnP
+yarn build:rules             # compila .core/rules/_meta/rules.json + ledger
+yarn check                   # prettier check + build:rules
+yarn test                    # suíte completa (unit + integration + smoke)
+yarn check:repo              # pipeline canônico (install immutable + check + test:coverage)
+```
+
+### Operando a CLI a partir deste repositório
+
+Use **`yarn guidelines …`** em vez de `npx ai-guidelines …`. O Yarn PnP garante que o código em desenvolvimento seja executado com resolução correta de dependências, sem depender do tarball publicado:
+
+```bash
+yarn guidelines init    --target ../meu-projeto --name meu-projeto
+yarn guidelines adopt   --target ../repo-existente --dry-run
+yarn guidelines update  --target ../repo --dry-run
+```
+
+Não use `node cli/ai-guidelines-cli.mjs …` direto — quebra resolução de imports `#cli/*`, `#features/*`, etc., sob PnP.
+
+## Estrutura do repositório
+
+```text
+ai-guidelines/
+├── .core/                      # Baseline canônico distribuído pela CLI
+│   ├── rules/                  # Regras bilíngues (YAML + Markdown)
+│   │   ├── _meta/              # Catálogo compilado (rules.json + ledger)
+│   │   ├── opt-in/             # Regras vinculadas a features opcionais
+│   │   └── catalog.md          # Catálogo navegável (humano)
+│   └── templates/              # Templates injetados pelo init/adopt
+├── cli/                        # CLI (ai-guidelines-cli.mjs)
+│   ├── app/                    # Engine, orquestração, UI
+│   ├── cli/                    # Parser de args + Wizard
+│   ├── commands/               # Comandos de auditoria (ai-check.mjs)
+│   ├── fs/                     # I/O, file-system, merge-utils
+│   ├── governance/             # Compiladores e motores de análise
+│   │   ├── monolith/           # Rules Builder, Parser, Token Budget
+│   │   ├── quality-gates/      # Sensores baseados em rules.json
+│   │   └── evaluation/         # Eval Runner
+│   ├── features/               # Módulos de funcionalidade
+│   │   ├── core/               # pointers (compiler), gitattributes
+│   │   └── opt-in/
+│   │       ├── editorial/      # tdd, bdd, quality-gates
+│   │       └── infrastructure/ # prettier, husky, ci
+│   └── formatters/             # Detecção de PM, formatter rival, monorepo
+├── docs/                       # Documentação exposta ao consumidor
+├── adrs/                       # Decisões arquiteturais (ADRs)
+├── tests/                      # Testes (integration + smoke)
+├── .specify/specs/             # Specs SDD em execução + roadmap/
+├── AGENTS.md                   # Fluxo obrigatório deste repositório
+├── CONTRIBUTING.md             # Este arquivo
+├── LICENSE                     # Apache-2.0
+├── CHANGELOG.md                # Histórico de versões
+└── README.md                   # Landing pública (npm + GitHub)
+```
+
 ## Convenções internas do framework
 
-Este repositório desenvolve o próprio `ai-guidelines`. Algumas convenções locais importam para evitar drift:
+Algumas regras locais importam para evitar drift:
 
-- `AGENTS.md` é ao mesmo tempo documento operacional local e artefato runtime de exemplo.
-- O bloco `<AI_GUIDELINES>` em `AGENTS.md` é compilado; contexto local do repositório fica fora dele.
-- O workspace usa Yarn 4 com Plug'n'Play. Para executar a CLI localmente, use `yarn guidelines ...`, não `node cli/ai-guidelines-cli.mjs ...`.
+- `AGENTS.md` é ao mesmo tempo documento operacional local **e** artefato runtime de exemplo.
+- O bloco `<AI_GUIDELINES>` em `AGENTS.md` é compilado a partir das regras em `.core/rules/`; contexto local do repositório fica **fora** dele.
 - Ao editar regras em `.core/rules/`, rode `yarn check` para reconstruir `rules.json` e o ledger.
 - Ao editar a CLI, preserve o contrato entre `cli/cli/args.mjs`, `cli/app/engine.mjs` e `docs/cli/ai-guidelines-cli.md`.
 - Features editoriais (`tdd`, `bdd`, `quality-gates`) e de infraestrutura (`prettier`, `husky`, `ci`) têm taxonomias distintas e não devem ser misturadas na documentação nem no wizard.
+- Sequência de release (publish em registry npm) é cravada em [`.core/process/spec-foundation.md`](.core/process/spec-foundation.md) § "Sequência canônica para specs com publish em registry externo" — leia antes de qualquer trabalho que envolva publish.
 
 ---
 
