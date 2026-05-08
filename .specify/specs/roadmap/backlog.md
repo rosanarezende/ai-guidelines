@@ -158,12 +158,11 @@ Specs ou candidatas que aguardam um gatilho externo (adoção, incidente, decis�
 
 Decisões ou trabalho que bloqueiam múltiplas specs. Cada bloqueador lista as specs impactadas.
 
-### 2. Release Sync da Spec 0020 (`ai-guidelines@1.0.0`) pendente
+### 2. ~~Release Sync da Spec 0020 (`ai-guidelines@1.0.0` + `1.0.1`)~~ — **resolvido em 2026-05-08**
 
-- **Status:** ativo a partir do merge da Spec 0020 + publish 1.0.0 em 2026-05-08; resolvido quando o mini-PR `release/v1.0.0-sync` for mergeado em `main`.
-- **Bloqueia:** abertura de **qualquer** nova spec até a Fase 5 (Release Sync) ser concluída. Regra cravada em `.core/process/spec-foundation.md` § "Bloqueio de nova spec por Release Sync pendente".
-- **Por que existe:** o publish + tag acontecem **pós-merge** da spec original (sequência canônica para evitar tag órfã com squash merge). Sem o mini-PR de Release Sync, o `historico.md` da spec referencia apenas o SHA da branch (que sumiu após squash); o mini-PR cita o SHA real de `main`, registra `tag v<X.Y.Z>`, `version`, link npm e data, fechando o gap entre o PR auto-suficiente da spec e o ato pós-merge de release.
-- **Origem:** padrão nasceu de dor real durante a execução da Spec 0020 (erro de sequência detectado pelo owner antes do publish irreversível). Decidido como regra de framework em 2026-05-08.
+- **Resolução:** mini-PR `release/v1.0-sync` (PR #8) atualiza `roadmap/historico.md` com SHAs reais (`9ef875a` para `1.0.0`, `2bd4af3` para `1.0.1`), tags (`v1.0.0`, `v1.0.1`), links do registry e data — fechando o gap entre o PR auto-suficiente da Spec 0020 e o ato pós-merge de release. A remoção deste bloqueador é parte do mesmo PR (princípio de PR auto-suficiente: tudo o que precisa ficar consistente após o merge sai junto).
+- **Padrão de framework cravado:** sequência canônica `merge → checkout main → publish → tag → Mini-PR de Release Sync` documentada em `.core/process/spec-foundation.md` § "Sequência canônica para specs com publish em registry externo", junto com a regra de bloqueio de nova spec enquanto Release Sync estiver pendente. Vale para releases futuras.
+- **Origem:** padrão nasceu de dor real durante a execução da Spec 0020 — erro de sequência detectado pelo owner antes do publish irreversível, evoluindo para decisão arquitetural em vez de fix tático.
 
 ### 1. ~~Naming decision do package `ai-guidelines`~~ — **resolvido em 2026-05-07**
 
