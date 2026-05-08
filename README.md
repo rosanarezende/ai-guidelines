@@ -5,7 +5,7 @@
 <h1 align="center">ai-guidelines</h1>
 
 <p align="center">
-  <strong>Governança AI-first portátil para times que usam múltiplos modelos de IA.</strong>
+  <strong>Governança AI-first portátil. Do backlog ao valor entregue, com coerência multi-IA.</strong>
 </p>
 
 <p align="center">
@@ -18,9 +18,21 @@
 
 ## Por que existe
 
-Times modernos misturam Claude, Gemini, Codex, Cursor, Copilot — cada IA com seu próprio arquivo de regras, convenções e _ignore lists_. Sem governança comum, cada provider lê instruções divergentes e o time vira árbitro de regras conflitantes.
+Adotar IAs no fluxo de desenvolvimento sério expõe três fricções que o ferramental atual não resolve em conjunto:
 
-O `ai-guidelines` resolve isso com **um runtime governado único** (`AGENTS.md`) que a CLI compila e distribui automaticamente para provider entrypoints sincronizados — `CLAUDE.md`, `GEMINI.md`, `.openai/instructions.md`, `.cursor/rules/`, e por aí vai. Você escreve a regra uma vez; o framework propaga.
+**Coerência entre múltiplos modelos.** Cada IA traz seu próprio arquivo de regras, convenções e _ignore lists_. Sem governança comum, Claude, Gemini, Codex, Cursor e Copilot leem instruções divergentes — e o time humano vira árbitro de conflitos.
+
+**Processo rastreável, do problema ao valor.** A maior parte do ferramental cobre apenas a fase de codificação assistida. Backlog, especificação, decisões arquiteturais, gates humanos, distribuição cross-repo e visibilidade para liderança ficam por conta da disciplina manual.
+
+**Auditabilidade real, não confiança implícita.** Sem marcadores explícitos do que foi gerado pela CLI, do que foi atualizado e do que foi preservado, cada update vira aposta. Operadores humanos perdem controle sobre o estado do projeto.
+
+O `ai-guidelines` cobre os três eixos no mesmo framework:
+
+- **Runtime governado único** (`AGENTS.md`) que compila e distribui regras para provider entrypoints sincronizados (`CLAUDE.md`, `GEMINI.md`, `.openai/instructions.md`, `.cursor/rules/`, e por aí vai).
+- **Ciclo de specs versionado** — Backlog → Spec → Plano → Execução → PR → Merge → Valor entregue — com gates humanos explícitos onde importa, e capítulos emergentes para release lifecycle e arquitetura da informação (ver imagem acima).
+- **Política de update auditável** (`managed-block` + `mirror`) que delimita o que a CLI gerencia e o que é do consumidor — sem sobrescrita silenciosa.
+
+Você escreve a regra uma vez. Você abre uma spec uma vez. O framework propaga e te leva até o merge.
 
 ## Quick start
 
