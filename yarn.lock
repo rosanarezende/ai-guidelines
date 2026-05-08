@@ -260,7 +260,7 @@ __metadata:
     husky: "npm:^9.1.7"
     prettier: "npm:^3.0.0"
   bin:
-    ai-guidelines: ./cli/ai-guidelines-cli.mjs
+    ai-guidelines: cli/ai-guidelines-cli.mjs
   languageName: unknown
   linkType: soft
 
