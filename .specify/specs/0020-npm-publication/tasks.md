@@ -122,7 +122,7 @@
 
 ## Fase 2 — Publish (Implementação B)
 
-> Fase exclusiva de release. Ocorre **após** review humano da Fase 3 ou imediatamente antes, conforme decisão do owner. CI matriz (D) verde é pré-requisito não negociável.
+> Fase exclusiva de release. **Sequência canônica:** Fase 4 (encerramento pré-merge) → **gate humano de merge (4.8)** → squash merge no `main` → checkout `main` → publish a partir de `main` → tag `v1.0.0` no commit-novo de `main` → push da tag. CI matriz (D) verde é pré-requisito não negociável. **Erro de sequência detectado em 2026-05-08** (sequência original colocava publish antes do merge): com squash merge, tag pré-merge ficaria órfã da história principal. Regra geral cravada em `.core/process/spec-foundation.md` § "Sequência canônica para specs com publish em registry externo".
 
 ### Sub-bloco [G] — Publish 1.0.0
 
@@ -131,13 +131,13 @@
 - [x] **2.G.1** Matriz CI verde confirmada no commit `8fa425f` pelo owner em 2026-05-08 (6 jobs: 3 SOs × Node 22.x/24.x).
 - [x] **2.G.2** `npm publish --dry-run --ignore-scripts` final em 2026-05-08: 81 arquivos, 120.7 kB / 427.5 kB unpacked. **Iteração até forma estável:** (1) primeiro dry-run com `bin: "./cli/ai-guidelines-cli.mjs"` emitiu warning crítico `"bin[ai-guidelines]" script name cli/ai-guidelines-cli.mjs was invalid and removed` — o `./` no path fazia npm sanitizar e **remover** a entrada do manifesto publicado, o que faria `npx ai-guidelines` falhar pós-publish. (2) Aplicado `npm pkg fix` que normalizou para `{ "ai-guidelines": "cli/ai-guidelines-cli.mjs" }`. (3) Após push, CI quebrou em `yarn install --immutable` — Yarn 4.1.1 re-normalizou para forma string `"cli/ai-guidelines-cli.mjs"` (sem `./`) e detectou drift no `yarn.lock`. (4) Sincronizado `yarn.lock` localmente e re-validado: dry-run agora só emite warning **informativo** `"bin" was converted to an object` (sem mensagem de remoção) — forma string sem `./` é aceita por npm e yarn simultaneamente. `yarn test:smoke` 3/3 verde nas duas iterações. Sem arquivos sensíveis no tarball; `version: 1.0.0` confirmado.
 - [x] **2.G.3** `CHANGELOG.md` entrada `[1.0.0] — 2026-05-08` publicada (não em `[Unreleased]`); confirmado em 1.A.6 e re-confirmado agora.
-- [ ] **2.G.4** **[MANDATÓRIO]** Aprovação humana explícita para publish (operação irreversível; janela de unpublish é 72h e tem custos).
-- [ ] **2.G.5** `npm publish --access public` (executado por humano com credenciais; agente não publica autonomamente).
+- [x] **2.G.4** **Aprovação humana explícita** dada pelo owner em 2026-05-08 após CI verde no commit `07fbf22`. _Aprovação autoriza o ato de publish; sequência reordenada para acontecer depois do merge (ver nota da Fase 2)._
+- [ ] **2.G.5** **[Após merge do PR #6 e checkout do `main` atualizado]** `npm publish --access public --ignore-scripts` (executado por humano com credenciais; agente não publica autonomamente).
 - [ ] **2.G.6** Validar `npm view ai-guidelines version` = `1.0.0`.
 - [ ] **2.G.7** Instalação manual final em sandbox limpo: `mkdir tmp && cd tmp && npx ai-guidelines init` — confirmar funcionamento sem o checkout local.
-- [ ] **2.G.8** Tag git `v1.0.0` no commit publicado.
-- [ ] **2.G.9** Análise de débitos: atualizar `NEXT.md`.
-- [ ] **2.G.[COMMIT]** texto de commit sugerido: `release(spec-0020): publish ai-guidelines@1.0.0`.
+- [ ] **2.G.8** Tag git `v1.0.0` no commit-novo de `main` gerado pelo squash merge (não no commit `07fbf22` da branch). `git tag v1.0.0 <sha-novo> && git push origin v1.0.0`.
+- [ ] **2.G.9** Análise de débitos: `NEXT.md` foi deletado na Fase 4; débitos de Fase 2 inexistentes (sem novos descobertos pós-publish).
+- [ ] **2.G.[COMMIT]** texto de commit sugerido: `release(spec-0020): publish ai-guidelines@1.0.0`. _Não-aplicável nesta sequência: o ato de publish não gera commit (apenas tag); todos os ajustes de código já moram nos commits da Fase 1 + ajustes pré-publish da Fase 2.G.2 (`d43dc2c`, `07fbf22`)._
 
 ---
 
@@ -166,4 +166,4 @@
 - [x] **4.5** `CHANGELOG.md` entrada `[1.0.0] — 2026-05-08` confirmada (1.A.6 + 2.G.3); `package.json::version` confirmado em `1.0.0`.
 - [x] **4.6** Sessão atual não abriu outra spec — `0020-npm-publication` permaneceu como única spec ativa do encerramento.
 - [x] **4.7** **[COMMIT]** `chore(spec-0020): encerramento pré-merge — status final e limpeza de débitos`. _(commit `8fa425f`.)_
-- [ ] **4.8** **[MANDATÓRIO]** Aprovação humana explícita para merge. **Não fazer merge autonomamente.**
+- [ ] **4.8** **[MANDATÓRIO]** Aprovação humana explícita para merge (squash). **Não fazer merge autonomamente.** Após o merge, owner faz `git checkout main && git pull` e prossegue com 2.G.5 (publish a partir de `main`); agente fecha 2.G.6–2.G.8 (validação + tag).

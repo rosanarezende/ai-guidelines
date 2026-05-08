@@ -103,6 +103,8 @@ Progresso operacional. Marca tasks `[x]` a cada degrau. **Espinha dorsal de exec
 
 > **Princípio de PR auto-suficiente:** o merge não dispara nenhum trabalho adicional. Antes do merge, o PR já deve conter: status `Done (PR #N — YYYY-MM-DD)` em `spec.md`, entrada completa em `roadmap/historico.md`, remoção de `roadmap/backlog.md§Em execução`, `research-index.md` atualizado com as pesquisas migradas, `CHANGELOG.md` com a release publicada (não em `[Unreleased]`) e bump da `version` em `package.json`. Se o agente encontrar pendências durante o merge ("falta atualizar histórico", "faltou o changelog"), elas eram para ter sido cobertas na Fase 4 — abrir hotfix ou commit pré-merge é uma falha do checklist, não comportamento esperado.
 
+> **Sequência canônica para specs com publish em registry externo (npm, PyPI, Maven, etc.):** `merge → checkout main → tag → publish`. **Nunca publicar antes do merge** se o repositório usa **squash merge** (que é o default do GitHub e o padrão deste repo): o squash gera um commit-novo em `main`, fazendo qualquer tag colocada em commit pré-merge ficar órfã da história principal. O tarball publicado teria o mesmo *diff* que o main, mas o commit-hash referenciado pela tag não existiria em `main` — quem fizer `git checkout v<X.Y.Z>` cairia fora da árvore. Em repositórios com **merge commit** (não-squash) a sequência inversa (publish → merge) é tecnicamente segura, mas a sequência canônica acima vale para ambos: é a mais simples de operar, audita e reverter. **Lição operacional registrada na Spec 0020 (npm-publication, 2026-05-08)** após erro de sequência detectado pelo owner antes do publish irreversível.
+
 ### `NEXT.md` — obrigatório contínuo
 
 Backlog de débitos adiados da spec. Política:

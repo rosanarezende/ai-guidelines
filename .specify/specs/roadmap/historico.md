@@ -49,7 +49,9 @@ Em ordem cronológica reversa. Número mantido como rastreabilidade.
 
   **Recorte de escopo (2026-05-08):** sub-bloco E (`pr-curator` como GH Action ativa) extraído para spec própria (`pr-curator-action`, registrada em `roadmap/backlog.md` Next). Auditoria revelou que o comando não existe na CLI; implementar do zero extrapola "publicar npm". ADR 0009 (Decisão 3 — auth) permanece insumo da spec futura.
 
-  **Métricas:** PR #6, 8+ commits incrementais. CI matriz 6 jobs verdes. Suíte completa 266/266; coverage agregada 92,88%. Tarball final: 102 kB / 343 kB unpacked. Pacote publicado como `ai-guidelines@1.0.0` no registry npm público.
+  **Métricas:** PR #6, 8+ commits incrementais. CI matriz 6 jobs verdes. Suíte completa 266/266; coverage agregada 92,88%. Tarball final: ~120 kB / ~427 kB unpacked. Pacote publicado como `ai-guidelines@1.0.0` no registry npm público.
+
+  **Lição operacional cravada (2026-05-08):** sequência de publish foi reordenada **antes do ato irreversível** após o owner detectar erro: a sequência original (publish na branch antes do merge) deixaria a tag `v1.0.0` órfã da história principal porque o repo usa **squash merge** (squash gera commit-novo em `main` que não existe na branch). Regra cravada em `.core/process/spec-foundation.md` § "Sequência canônica para specs com publish em registry externo": **merge → checkout `main` → publish → tag**. Vale para releases futuras (1.0.1, 1.1.0, etc.).
 
   **Cross-refs:** ADR 0006 (license Apache-2.0), ADR 0007 (visibilidade pública), ADR 0009 (naming + registry — entrega da própria 0020). Spec 0019 (`managed-block` validado ponta-a-ponta no smoke). Débito #2 do `NEXT.md` (placement canônico de `.specify/templates`) foi migrado para a entrada da Spec 0021 no `backlog.md` como insumo arquitetural.
 
