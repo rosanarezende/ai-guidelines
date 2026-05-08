@@ -77,12 +77,12 @@
 
 > Origem: [`plan.md` § Componente D](./plan.md)
 
-- [ ] **1.D.1** Auditar `.github/workflows/` atuais para identificar piso de Node e workflow base.
-- [ ] **1.D.2** Criar (ou estender) `.github/workflows/smoke-multi-os.yml` com matriz `os: [ubuntu-latest, windows-latest, macos-latest]` × `node: [20.x]`.
-- [ ] **1.D.3** Job: `npm pack` → `npm install <tarball>` em diretório temp → roda suíte `tests/smoke/*`.
-- [ ] **1.D.4** Configurar workflow como required check em branch protection (registrar como item para humano se requer permissão de admin).
-- [ ] **1.D.5** Confirmar matriz verde em PR Draft (rodar pelo menos uma vez).
-- [ ] **1.D.6** Análise de débitos: atualizar `NEXT.md`.
+- [x] **1.D.1** Auditado: `.github/workflows/` contém `ai-guidelines-ci.yml` e `content-guardrails.yml`, ambos `ubuntu-latest` × Node 24, gatilhos `pull_request → main` + `push → main`. Workflow novo segue mesma forma (corepack + `yarn install --immutable`).
+- [x] **1.D.2** Criado `.github/workflows/smoke-multi-os.yml` com matriz `os: [ubuntu-latest, windows-latest, macos-latest]` × `node: [22.x, 24.x]`. **Decisão revisitada** vs plan original (Node 20.x): alinhada com `engines.node >=22.0.0` cravado em 1.A.4 — registrada em `plan.md` § "Decisões revisitadas".
+- [x] **1.D.3** Job executa `yarn test:smoke` (script novo em `package.json`); a suíte `tests/smoke/*` faz `npm pack` + `npm install <tarball>` em diretório temp internamente via `tests/smoke/helpers/tarball.mjs`. Validado localmente em Windows (3/3 suítes verdes, ~63s).
+- [ ] **1.D.4** **[PARA HUMANO]** Configurar `smoke / *` como required check em branch protection do `main` (requer permissão admin no repositório). Não bloqueante para 1.0.0; pode ser feito junto com a aprovação do publish em 2.G.4.
+- [ ] **1.D.5** Confirmar matriz verde em PR Draft após push (rodar pelo menos uma vez).
+- [x] **1.D.6** Análise de débitos: nenhum novo débito; D.4 fica como ação operacional para humano (registrada acima).
 - [ ] **1.D.[COMMIT]** texto de commit incremental sugerido: `ci(spec-0020): matriz multi-SO sobre tarball`.
 
 ### Sub-bloco [E] — `pr-curator` como GH Action ativa

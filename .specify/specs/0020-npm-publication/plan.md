@@ -231,6 +231,11 @@ Publish enxuto sobre infra existente: o pacote já está ~90% pronto no `package
 
 ## 📐 Decisões revisitadas
 
+- **2026-05-08 — Matriz Node do `smoke-multi-os.yml`: `[22.x, 24.x]`, não `20.x`.**
+  - **Decisão anterior considerada:** matriz Node `[20.x]` (LTS amplamente disponível na época da escrita do plan), conforme [`§ Componente D`](#d-ci-matriz-multi-so) original.
+  - **Decisão revista:** matriz `[22.x, 24.x]`. 22.x cobre o piso de `engines.node` cravado em 1.A.4 (`>=22.0.0`); 24.x replica o Node usado pelos workflows pré-existentes (`ai-guidelines-ci.yml`, `content-guardrails.yml`) e exercita a versão atual em produção interna.
+  - **Motivo:** Node 20.x está abaixo do piso técnico real (scripts `test`/`test:coverage` exigem flags `--experimental-default-config-file` e `--experimental-test-coverage`, ambas Node 22+). Manter `20.x` na CI testaria uma combinação que `engines` já recusa, gerando ruído sem cobrir cenário real de consumidor.
+
 - **2026-05-07 — Templates SDD permanecem em `.specify/templates` na Spec 0020.**
   - **Decisão anterior considerada:** antecipar a Spec 0021 e mover os boilerplates SDD para `.core/` agora, para alinhar runtime publicável e placement canônico.
   - **Decisão revista:** **não mover** nesta spec. O pacote publicado passa a incluir explicitamente `.specify/templates` no campo `files` do `package.json`, mantendo o contrato vigente da CLI e evitando churn amplo em documentação, specs históricas e referências internas.

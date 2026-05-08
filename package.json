@@ -45,6 +45,7 @@
     "guidelines:adopt": "node cli/ai-guidelines-cli.mjs adopt",
     "guidelines:providers": "node cli/ai-guidelines-cli.mjs providers",
     "test": "node --experimental-default-config-file --test cli/**/*.test.mjs cli/**/**/*.test.mjs tests/**/*.test.mjs",
+    "test:smoke": "node --experimental-default-config-file --test tests/smoke/*.test.mjs",
     "test:coverage": "node --experimental-default-config-file --experimental-test-coverage --test cli/**/*.test.mjs cli/**/**/*.test.mjs tests/**/*.test.mjs",
     "build:rules": "node cli/governance/monolith/rules-builder.mjs",
     "check:repo": "yarn install --immutable && yarn check && yarn test:coverage",
