@@ -96,9 +96,9 @@
 - [x] **1.H.5** Diagnóstico complementar via logs `[smoke-debug]` no CI macOS (commit `9312e3a`): logs revelaram que `[smoke-debug] CLI stdout/stderr` ficavam **vazios** em macOS — CLI saía com exit 0 sem imprimir uma linha sequer. Causa raiz: em macOS, `os.tmpdir()` retorna `/var/folders/...` que é symlink para `/private/var/folders/...`. Node resolve symlinks ao carregar o módulo, fazendo `import.meta.url` apontar para `/private/...` enquanto `process.argv[1]` mantém o caminho literal `/var/...`. O guard `if (path.resolve(process.argv[1]) === __filename) await main()` em `cli/ai-guidelines-cli.mjs` falhava silenciosamente — `main()` nunca era invocada e a CLI saía com exit 0 sem erro. Bug invisível em Linux (`/tmp` sem symlink) e Windows (`%TEMP%` sem symlink), e impactaria também usuários macOS reais consumindo via `npx` se o cache do npm fosse colocado em `/var/folders/...` (default de algumas configs).
 - [x] **1.H.6** Fix do guard de entrypoint: `cli/ai-guidelines-cli.mjs` passou a comparar via `realpathSync(process.argv[1])` × `realpathSync(__filename)`, normalizando ambos os lados antes da comparação. Fallback `try/catch` retorna `false` se algum dos paths não puder ser resolvido (segurança). Logs `[smoke-debug]` removidos do helper de smoke após cumprirem o papel diagnóstico.
 - [x] **1.H.7** Pipeline `yarn check && yarn test:smoke` verde local pós-fix do entrypoint (3/3 smoke).
-- [ ] **1.H.8** Confirmar matriz CI verde no push (`smoke / *` em todos os 6 jobs: 3 SOs × 2 versões Node).
-- [ ] **1.H.9** Análise de débitos: atualizar `NEXT.md` com o aprendizado sobre `import.meta.url` em macOS symlinks.
-- [ ] **1.H.[COMMIT]** dois commits: `fix(spec-0020): recursão manual em copyDirIfChanged + hardening de packLocal` (commit `62bb54e`, já feito) e `fix(spec-0020): realpathSync no guard de entrypoint para macOS symlinks` (a fazer agora).
+- [x] **1.H.8** Matriz CI verde nos 6 jobs (3 SOs × 2 versões Node) confirmada pelo owner em 2026-05-08 após push do commit `d917d7f`.
+- [x] **1.H.9** Análise de débitos: `NEXT.md` § "Insights e Descobertas" #3 documenta o aprendizado sobre `import.meta.url` resolver symlinks em macOS enquanto `process.argv[1]` mantém o path literal.
+- [x] **1.H.[COMMIT]** dois commits aplicados: `62bb54e` (recursão manual + hardening de packLocal) e `d917d7f` (realpathSync no guard de entrypoint).
 
 ### ~~Sub-bloco [E] — `pr-curator` como GH Action ativa~~ — extraído em 2026-05-08
 
@@ -145,11 +145,11 @@
 
 > **Fase exclusiva para empacotamento e homologação.** Nenhuma implementação nova após este ponto, exceto correções demandadas pelo review humano.
 
-- [ ] **3.1** Atualizar header da `spec.md`: status → `In Review`.
-- [ ] **3.2** Pipeline canônico verde: `yarn check:repo` (install bloqueado/immutable + format check + test com coverage).
-- [ ] **3.3** Critérios de aceite de `spec.md` (alto nível) e DoD de `plan.md` (detalhado) confirmados ponto-a-ponto.
-- [ ] **3.4** Validação em ambiente real: instalação do tarball em consumidor / sandbox limpo nos 3 SOs (mínimo Windows + Linux).
-- [ ] **3.5** PR atualizado: descrição em 3 etapas (contexto → decisões cravadas → impacto cross-spec).
+- [x] **3.1** Header da `spec.md` atualizado: status → `In Review`.
+- [x] **3.2** Pipeline canônico verde: `yarn check:repo` rodado local em 2026-05-08 (266/266; coverage agregada 92,88%; sem warnings de format).
+- [x] **3.3** Critérios de aceite de `spec.md` revisados ponto-a-ponto: 7/9 marcados como atendidos; 2 dependem do gate (publish 1.0.0 e aprovação Ready). DoD do `plan.md` cobertos pelos commits da Fase 1 (componentes A, B, C, D, F, H; E extraído).
+- [x] **3.4** Validação em ambiente real: matriz CI `smoke-multi-os.yml` cobriu instalação do tarball nos 3 SOs (ubuntu/windows/macos × Node 22.x/24.x = 6 jobs verdes em 2026-05-08). Sandbox local Windows + Node 24 também verde via `yarn test:smoke`.
+- [ ] **3.5** PR atualizado: descrição em 3 etapas (contexto → decisões cravadas → impacto cross-spec). _(Owner pode atualizar via `gh pr edit` ou UI; conteúdo sugerido fica disponível abaixo.)_
 - [ ] **3.6** **[MANDATÓRIO]** Aguardar **Gate de Review Humano**. **Não prosseguir** sem aprovação explícita.
 - [ ] **3.7** Aplicar correções demandadas em loops de review até aprovação; cada correção é commit incremental rastreável.
 

@@ -1,6 +1,6 @@
 # Spec 0020 — npm-publication
 
-> Status: Draft
+> Status: In Review
 > Author: rosanarezende
 > Date: 2026-05-07
 > Owner: rosanarezende
@@ -49,15 +49,15 @@ O resultado esperado é o pacote `ai-guidelines@1.0.0` publicado no registry pú
 
 ## ✅ Critérios de Aceite (alto nível)
 
-- [ ] `npx ai-guidelines init` funciona em diretório vazio: smoke test verde sobre o tarball em Windows, Linux e macOS.
-- [ ] `npx ai-guidelines init` funciona em projeto existente sem quebra de arquivos pré-existentes; smoke test verde nos 3 SOs.
-- [ ] Comando `update` aplica patches sob `managed-block` em consumidor recém-init (contrato herdado da Spec 0019, validado aqui ponta-a-ponta).
-- [ ] CI matriz (Windows / Linux / macOS) verde sobre o tarball antes do publish.
-- [ ] ADR de naming registrado em `adrs/` com rationale de não-scoped + reserva de `@ai-guidelines`.
-- [ ] Pacote `ai-guidelines@1.0.0` publicado no registry npm público e instalável (`npm view ai-guidelines version` retorna `1.0.0`).
-- [ ] `README.md` com seção consumer-facing usando `npx ai-guidelines` (orientação interna `yarn guidelines` permanece em seção de contribuidor).
-- [ ] Pipeline de check + test verde (`yarn check && yarn test`).
-- [ ] PR Draft revisado e aprovado por humano antes de Ready.
+- [x] `npx ai-guidelines init` funciona em diretório vazio: smoke test verde sobre o tarball em Windows, Linux e macOS. _(sub-bloco C + matriz D verde nos 6 jobs em 2026-05-08.)_
+- [x] `npx ai-guidelines init` funciona em projeto existente sem quebra de arquivos pré-existentes; smoke test verde nos 3 SOs. _(idem.)_
+- [x] Comando `update` aplica patches sob `managed-block` em consumidor recém-init (contrato herdado da Spec 0019, validado aqui ponta-a-ponta). _(idem; suite `update-managed-block.test.mjs`.)_
+- [x] CI matriz (Windows / Linux / macOS) verde sobre o tarball antes do publish. _(workflow `smoke-multi-os.yml`, 6 jobs verdes em 2026-05-08.)_
+- [x] ADR de naming registrado em `adrs/` com rationale de não-scoped + reserva de `@ai-guidelines`. _(ADR 0009 — `adrs/0009-package-naming-and-registry.md`.)_
+- [ ] Pacote `ai-guidelines@1.0.0` publicado no registry npm público e instalável (`npm view ai-guidelines version` retorna `1.0.0`). _(Fase 2 — requer gate humano explícito em 2.G.4.)_
+- [x] `README.md` com seção consumer-facing usando `npx ai-guidelines` (orientação interna `yarn guidelines` permanece em seção de contribuidor). _(commit `18b116a`, sub-bloco F.)_
+- [x] Pipeline de check + test verde (`yarn check && yarn test`). _(`yarn check:repo` verde local em 2026-05-08: 266/266; CI ai-guidelines-check + content-guardrails verdes.)_
+- [ ] PR Draft revisado e aprovado por humano antes de Ready. _(Gate humano — 3.6.)_
 
 ---
 
