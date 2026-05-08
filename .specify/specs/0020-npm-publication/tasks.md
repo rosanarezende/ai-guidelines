@@ -150,8 +150,8 @@
 - [x] **3.3** Critérios de aceite de `spec.md` revisados ponto-a-ponto: 7/9 marcados como atendidos; 2 dependem do gate (publish 1.0.0 e aprovação Ready). DoD do `plan.md` cobertos pelos commits da Fase 1 (componentes A, B, C, D, F, H; E extraído).
 - [x] **3.4** Validação em ambiente real: matriz CI `smoke-multi-os.yml` cobriu instalação do tarball nos 3 SOs (ubuntu/windows/macos × Node 22.x/24.x = 6 jobs verdes em 2026-05-08). Sandbox local Windows + Node 24 também verde via `yarn test:smoke`.
 - [x] **3.5** PR #6 atualizado via `gh pr edit` em 2026-05-08: descrição em 3 etapas (contexto → decisões cravadas → impacto cross-spec). URL: https://github.com/rosanarezende/ai-guidelines/pull/6.
-- [ ] **3.6** **[MANDATÓRIO]** Aguardar **Gate de Review Humano**. **Não prosseguir** sem aprovação explícita.
-- [ ] **3.7** Aplicar correções demandadas em loops de review até aprovação; cada correção é commit incremental rastreável.
+- [x] **3.6** **Gate de Review Humano** aprovado pelo owner em 2026-05-08. PR #6 convertido de Draft para Ready for Review e gate explícito dado.
+- [x] **3.7** Sem correções demandadas no review.
 
 ---
 
@@ -159,11 +159,11 @@
 
 > **[MANDATÓRIO]** Esta fase ocorre **na branch do PR, antes do merge**. Nenhuma tarefa pós-merge — o pacote deve estar **100% auto-suficiente** no momento do merge.
 
-- [ ] **4.1** `NEXT.md`: migrar débitos relevantes para `roadmap/backlog.md` e **deletar** o arquivo.
-- [ ] **4.2** Migração de research: provavelmente não-aplicável (spec `deterministic` sem research ad-hoc); registrar "não-aplicável" no PR se confirmado.
-- [ ] **4.3** `spec.md` header: status → `Done (PR #X — YYYY-MM-DD)`.
-- [ ] **4.4** `roadmap/historico.md`: spec movida para "Specs concluídas" com data; entrada removida de "Em execução" em `roadmap/backlog.md`.
-- [ ] **4.5** `CHANGELOG.md`: confirmar entrada `[1.0.0] — YYYY-MM-DD` publicada (já feita em 1.A.6 + 2.G.3); confirmar `version` em `package.json` = `1.0.0`.
-- [ ] **4.6** **[MANDATÓRIO]** Confirmar que **a sessão atual** não abriu outra spec antes deste encerramento (uma sessão, uma spec ativa).
+- [x] **4.1** `NEXT.md` deletado em 2026-05-08. Débitos migrados: #2 (placement de `.specify/templates`) → entrada da Spec 0021 no `backlog.md` como insumo arquitetural; #3 (`pr-curator` extraído) → já registrado na candidata `pr-curator-action`. Insights #1, #2, #3 (3 armadilhas cross-platform) → entrada única em "Itens oportunistas" do `backlog.md`.
+- [x] **4.2** Migração de research: **não-aplicável**. Spec `deterministic` sem research ad-hoc.
+- [x] **4.3** `spec.md` header atualizado: status → `Done (PR #6 — 2026-05-08)`.
+- [x] **4.4** `historico.md` recebeu entrada completa da Spec 0020 (sub-blocos A/B/C/D/F/H, recorte de E, métricas, cross-refs). `backlog.md` § "Em execução" esvaziado; entrada detalhada removida de "Now"; ponteiro para histórico adicionado.
+- [x] **4.5** `CHANGELOG.md` entrada `[1.0.0] — 2026-05-08` confirmada (1.A.6 + 2.G.3); `package.json::version` confirmado em `1.0.0`.
+- [x] **4.6** Sessão atual não abriu outra spec — `0020-npm-publication` permaneceu como única spec ativa do encerramento.
 - [ ] **4.7** **[COMMIT]** `chore(spec-0020): encerramento pré-merge — status final e limpeza de débitos`.
 - [ ] **4.8** **[MANDATÓRIO]** Aprovação humana explícita para merge. **Não fazer merge autonomamente.**

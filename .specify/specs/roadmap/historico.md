@@ -13,6 +13,46 @@ editar retroativamente.
 
 Em ordem cronológica reversa. Número mantido como rastreabilidade.
 
+- **spec 0020** — npm-publication
+  (`.specify/specs/0020-npm-publication/`) — **Done** (2026-05-08, PR #6).
+
+  Primeiro release público do pacote `ai-guidelines` no registry npm. Spec do tipo `deterministic` (sem Stage 1 / decision-brief). Auditoria do `package.json` em 2026-05-07 mostrou que o pacote estava ~90% pronto; o gap era cerimonial (metadados de publish, ADR de naming, smoke sobre tarball, CI multi-SO, README consumer-facing). Versão resetada de `1.4.0` interno (nunca publicado) para `1.0.0` ancorando SemVer ao primeiro contrato real instalável.
+
+  **Sub-bloco A — Metadados de publish em `package.json` (`deterministic`):**
+  - Removido `"private": true`; adicionados `license` (Apache-2.0, conforme ADR 0006), `repository`, `homepage`, `bugs`, `keywords` curados, `engines.node` (`>=22.0.0` — piso técnico real exigido por `--experimental-default-config-file` e `--experimental-test-coverage`).
+  - Bump de `1.4.0` → `1.0.0`; entrada `[1.0.0] — 2026-05-08` no `CHANGELOG.md` documentando o reset.
+  - Allowlist de publish via globs negativos no campo `files` (`!cli/**/*.test.mjs`, `!cli/**/__fixtures__`); tarball reduzido de 113 → 70 arquivos (133 kB → 102 kB).
+
+  **Sub-bloco B — ADR 0009 (naming + registry):**
+  - Decisão 1: package principal `ai-guidelines` não-scoped; org `@ai-guidelines/<addon>` reservada para extensões futuras.
+  - Decisão 2: registry público padrão (gratuito); paid org / privado fica como gatilho condicional.
+  - Decisão 3: auth da Action `pr-curator` — GitHub App preferencial; PAT fino aceitável como bootstrap documentado.
+  - Janela de unpublish do npm (72h) registrada como rede de segurança operacional.
+
+  **Sub-bloco C — Smoke tests sobre tarball (`deterministic`):**
+  - Suíte `tests/smoke/*.test.mjs` rodando `npm pack` + `npm install <tarball>` em sandbox temp + `npx ai-guidelines init/adopt/update`.
+  - Helper `tests/smoke/helpers/tarball.mjs` cross-platform (Node API, sem shell POSIX).
+  - 3 suítes: `init-empty`, `init-existing-project`, `update-managed-block`.
+
+  **Sub-bloco D — CI matriz multi-SO:**
+  - Workflow `.github/workflows/smoke-multi-os.yml` × `[ubuntu, windows, macos]` × Node `[22.x, 24.x]` = 6 jobs.
+  - Matriz Node revisada de `[20.x]` para `[22.x, 24.x]` para alinhar com `engines.node >=22.0.0` (registrado em "Decisões revisitadas").
+
+  **Sub-bloco F — README consumer-facing:**
+  - Bloco principal de comandos passou a usar `npx ai-guidelines …` como caminho canônico para consumidores externos.
+  - Orientação `yarn guidelines …` realocada para seção "Para Contribuidores" como equivalente local explícito (Yarn PnP).
+
+  **Sub-bloco H — Hardening cross-SO da CLI sobre tarball (aberto retroativamente após primeira execução vermelha da matriz CI):**
+  - **Bug 1** — Windows Node 22.x: `mkdir 'C:\C:\…\.specify\templates'` (path duplicado). Causa: `fs.readdir(absolute, { recursive: true })` + `entry.parentPath` é frágil entre versões Node + SOs. Substituído por recursão manual stack-based em `cli/fs/file-system.mjs::listFilesRecursive`; `copyDirIfChanged` reescrito; `cli/features/core/templates.mjs` passou a importar do helper canônico.
+  - **Bug 2** — macOS Node 22.x/24.x: CLI saía silenciosamente com exit 0 sem criar artefatos. Causa: em macOS, `os.tmpdir()` retorna `/var/folders/...` que é symlink para `/private/var/folders/...`. Node resolve symlinks ao carregar o módulo, fazendo `import.meta.url` apontar para `/private/...` enquanto `process.argv[1]` mantém o caminho literal `/var/...`. O guard `path.resolve(argv[1]) === __filename` em `cli/ai-guidelines-cli.mjs` falhava silenciosamente. **Bug afeta todo consumidor macOS via `npx` em qualquer cache sob `/var/folders/...`** — fix com `realpathSync` em ambos os lados foi necessário para 1.0.0 funcionar no SO.
+  - **Bug 3** — `packLocal()` parseava JSON sem validar exit code; endurecido para localizar início do array JSON em `stdout` e mostrar `stdout+stderr` reais em falhas.
+
+  **Recorte de escopo (2026-05-08):** sub-bloco E (`pr-curator` como GH Action ativa) extraído para spec própria (`pr-curator-action`, registrada em `roadmap/backlog.md` Next). Auditoria revelou que o comando não existe na CLI; implementar do zero extrapola "publicar npm". ADR 0009 (Decisão 3 — auth) permanece insumo da spec futura.
+
+  **Métricas:** PR #6, 8+ commits incrementais. CI matriz 6 jobs verdes. Suíte completa 266/266; coverage agregada 92,88%. Tarball final: 102 kB / 343 kB unpacked. Pacote publicado como `ai-guidelines@1.0.0` no registry npm público.
+
+  **Cross-refs:** ADR 0006 (license Apache-2.0), ADR 0007 (visibilidade pública), ADR 0009 (naming + registry — entrega da própria 0020). Spec 0019 (`managed-block` validado ponta-a-ponta no smoke). Débito #2 do `NEXT.md` (placement canônico de `.specify/templates`) foi migrado para a entrada da Spec 0021 no `backlog.md` como insumo arquitetural.
+
 - **spec 0019** — Bootstrap Consumidor e Runtime
   (`.specify/specs/0019-bootstrap-consumidor-e-runtime/`) — **Done** (2026-05-07, PR #5).
 

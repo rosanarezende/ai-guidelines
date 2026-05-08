@@ -1,6 +1,6 @@
 # Spec 0020 — npm-publication
 
-> Status: In Review
+> Status: Done (PR #6 — 2026-05-08)
 > Author: rosanarezende
 > Date: 2026-05-07
 > Owner: rosanarezende
