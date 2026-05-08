@@ -102,7 +102,7 @@ export async function packLocal() {
   const npmCacheDir = path.join(packDir, "npm-cache");
 
   try {
-    const { stdout } = await runCommand(
+    const { stdout, stderr } = await runCommand(
       "npm",
       ["pack", "--ignore-scripts", "--json", "--pack-destination", packDir],
       {
@@ -112,7 +112,24 @@ export async function packLocal() {
         },
       }
     );
-    const parsed = JSON.parse(stdout);
+    // npm pack --json pode emitir notices/warnings antes do JSON em alguns
+    // ambientes; localizamos o início do array JSON para evitar JSON.parse
+    // engasgando com texto livre. Se nada parece JSON, falhamos com stderr
+    // visível em vez de "Unexpected token 'e'".
+    const jsonStart = stdout.indexOf("[");
+    if (jsonStart === -1) {
+      throw new Error(
+        `npm pack --json não retornou JSON parseável.\nstdout:\n${stdout}\nstderr:\n${stderr}`
+      );
+    }
+    let parsed;
+    try {
+      parsed = JSON.parse(stdout.slice(jsonStart));
+    } catch (parseError) {
+      throw new Error(
+        `Falha ao parsear saída de npm pack --json: ${parseError.message}\nstdout:\n${stdout}\nstderr:\n${stderr}`
+      );
+    }
     const [firstEntry] = parsed;
     assert.ok(firstEntry?.filename, "npm pack --json deve retornar filename");
 

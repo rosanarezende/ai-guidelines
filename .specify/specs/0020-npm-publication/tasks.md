@@ -85,6 +85,18 @@
 - [x] **1.D.6** Análise de débitos: nenhum novo débito; D.4 fica como ação operacional para humano (registrada acima).
 - [x] **1.D.[COMMIT]** texto de commit incremental sugerido: `ci(spec-0020): matriz multi-SO sobre tarball`. _(commit `8497c59`.)_
 
+### Sub-bloco [H] — Hardening cross-SO da CLI sobre tarball (descoberto pela matriz CI)
+
+> **Origem:** primeira execução de `smoke-multi-os.yml` em PR Draft (2026-05-08) expôs falhas em Windows Node 22.x e macOS Node 22.x/24.x que o smoke local em Windows + Node 24 mascarava. Sub-bloco aberto retroativamente em vez de spec própria por dois motivos: (1) consertar é pré-requisito de 1.0.0 (Fase 2 não pode publicar com smoke quebrando em 2/3 SOs), (2) escopo do fix é cirúrgico (~50 linhas).
+
+- [x] **1.H.1** Diagnóstico das 3 falhas: (a) Windows N22 — `mkdir 'C:\C:\…\.specify\templates'` por path duplicado; (b) macOS N22 — `JSON.parse Unexpected token 'e', "error: cou…"` no helper `packLocal`; (c) macOS N24 — `init`/`adopt`/`update` rodam sem erro mas não criam artefatos esperados. Causa raiz comum em (a) e (c): `fs.readdir(absolutePath, { recursive: true })` + `entry.path || entry.parentPath` é frágil entre versões Node + SOs (issue conhecida do Node sobre Dirent recursive). Causa de (b) é independente — helper de smoke parsing JSON sem validar exit code.
+- [x] **1.H.2** Substituir recursão via `entry.parentPath` por recursão manual determinística: novo helper `listFilesRecursive(rootDir)` em `cli/fs/file-system.mjs` (stack-based, `fs.readdir` não-recursive). `copyDirIfChanged` reescrito para usá-lo; `cli/features/core/templates.mjs` passou a importar do helper canônico em vez de manter cópia local.
+- [x] **1.H.3** Endurecer `tests/smoke/helpers/tarball.mjs::packLocal()`: localizar início do array JSON em `stdout` antes de parsear; em caso de falha, lançar erro com `stdout`+`stderr` visíveis em vez de `JSON.parse: Unexpected token`.
+- [x] **1.H.4** Pipeline `yarn test` verde local: 266/266 testes passam (incluindo 3 smoke suites + 92 suites totais; coverage agregada 92,89%).
+- [ ] **1.H.5** Confirmar matriz CI verde no push (`smoke / *` em todos os 6 jobs: 3 SOs × 2 versões Node).
+- [ ] **1.H.6** Análise de débitos: registrar em `NEXT.md` o aprendizado sobre fragilidade do `fs.readdir(..., { recursive: true })` cross-Node-version (insight, não débito).
+- [ ] **1.H.[COMMIT]** texto de commit incremental sugerido: `fix(spec-0020): recursão manual em copyDirIfChanged + hardening de packLocal`.
+
 ### ~~Sub-bloco [E] — `pr-curator` como GH Action ativa~~ — extraído em 2026-05-08
 
 > **⛔ EXTRAÍDO desta spec por decisão de owner em 2026-05-08.** Auditoria durante a Fase 1 mostrou que o comando `pr-curator` **não existe** como código na CLI (revisão de `cli/features/{core,opt-in}/`) — apenas como documento de workflow editorial referenciado em ADR/CHANGELOG. Publicação no registry não depende dessa automação cross-repo. Escopo transferido para spec própria (`pr-curator-action`) registrada em `roadmap/backlog.md`. ADR 0009 (Decisão 3 — auth) permanece como insumo. Detalhe em `plan.md` § "Decisões revisitadas" e `spec.md` § "Fora do escopo".

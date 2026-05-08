@@ -55,6 +55,14 @@ _(Nenhum débito registrado ainda)_
 
 ---
 
+### 2. `fs.readdir(..., { recursive: true })` + `entry.parentPath` é frágil cross-Node-version
+
+- **O Contexto**: a primeira execução do `smoke-multi-os.yml` (sub-bloco D) expôs falhas em Windows Node 22.x (`mkdir 'C:\C:\…'` — path duplicado) e macOS Node 24.x (`init`/`adopt`/`update` viram no-op silencioso sem criar artefatos). O smoke local em Windows + Node 24 passava porque o comportamento dependia de `entry.path || entry.parentPath` em modo recursive — API que mudou de comportamento entre Node 20/21/22 (e tem bugs reportados em Windows/macOS).
+- **O Insight**: para qualquer travessia recursiva de diretório que **importe a corretude do path** (cópia, sync, prune), recursão manual stack-based com `fs.readdir` não-recursive é determinística cross-version e cross-SO. `recursive: true` é OK quando o consumidor só precisa contar entries ou listar nomes, não quando os paths são usados em `path.join`/`path.relative` subsequentes.
+- **Ação Sugerida**: pode virar uma seção curta em `docs/cli/ai-guidelines-cli.md` ou em FAQ de contribuidor como armadilha conhecida ("evite `entry.parentPath` em recursive readdir"). O helper `listFilesRecursive` em `cli/fs/file-system.mjs` já é a referência canônica para o repositório.
+
+---
+
 ## ✂️ Itens descartados deliberadamente
 
 _(Nenhum item descartado ainda)_
