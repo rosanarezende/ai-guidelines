@@ -103,7 +103,25 @@ Progresso operacional. Marca tasks `[x]` a cada degrau. **Espinha dorsal de exec
 
 > **Princípio de PR auto-suficiente:** o merge não dispara nenhum trabalho adicional. Antes do merge, o PR já deve conter: status `Done (PR #N — YYYY-MM-DD)` em `spec.md`, entrada completa em `roadmap/historico.md`, remoção de `roadmap/backlog.md§Em execução`, `research-index.md` atualizado com as pesquisas migradas, `CHANGELOG.md` com a release publicada (não em `[Unreleased]`) e bump da `version` em `package.json`. Se o agente encontrar pendências durante o merge ("falta atualizar histórico", "faltou o changelog"), elas eram para ter sido cobertas na Fase 4 — abrir hotfix ou commit pré-merge é uma falha do checklist, não comportamento esperado.
 
-> **Sequência canônica para specs com publish em registry externo (npm, PyPI, Maven, etc.):** `merge → checkout main → tag → publish`. **Nunca publicar antes do merge** se o repositório usa **squash merge** (que é o default do GitHub e o padrão deste repo): o squash gera um commit-novo em `main`, fazendo qualquer tag colocada em commit pré-merge ficar órfã da história principal. O tarball publicado teria o mesmo _diff_ que o main, mas o commit-hash referenciado pela tag não existiria em `main` — quem fizer `git checkout v<X.Y.Z>` cairia fora da árvore. Em repositórios com **merge commit** (não-squash) a sequência inversa (publish → merge) é tecnicamente segura, mas a sequência canônica acima vale para ambos: é a mais simples de operar, audita e reverter. **Lição operacional registrada na Spec 0020 (npm-publication, 2026-05-08)** após erro de sequência detectado pelo owner antes do publish irreversível.
+> **Sequência canônica para specs com publish em registry externo (npm, PyPI, Maven, etc.):**
+>
+> 1. Fase 4 (encerramento pré-merge) completa — `historico.md` populado, `NEXT.md` deletado, status `Done` em `spec.md`.
+> 2. **Gate humano de merge** (4.8) → squash merge no `main`.
+> 3. Owner faz `git checkout main && git pull` localmente.
+> 4. Owner roda o publish a partir do `main` atualizado (`npm publish --access public`, equivalente em PyPI/Maven, etc.).
+> 5. Owner cria tag anotada `v<X.Y.Z>` no commit-novo de `main` (gerado pelo squash) e faz `git push origin v<X.Y.Z>`.
+> 6. **Fase 5 — Release Sync (obrigatória, ver `tasks.md` da spec):** agente cria branch curta `release/v<X.Y.Z>-sync` a partir de `main` e abre mini-PR que:
+>
+>    - cita o SHA real do commit publicado em `historico.md` da spec correspondente;
+>    - registra `tag v<X.Y.Z>`, `version: <X.Y.Z>`, link do registry público e data;
+>    - opcionalmente, ajusta badges/links externos no `README.md`.
+>      Squash merge regular após gate humano.
+>
+> **Nunca publicar antes do merge** se o repo usa **squash merge** (default do GitHub, padrão deste repo): squash gera commit-novo em `main`, fazendo qualquer tag colocada em commit pré-merge ficar órfã da história principal. Em repositórios com merge commit não-squash, a sequência inversa (publish → merge) é tecnicamente segura, mas a sequência canônica acima vale para ambos — é a mais simples de operar, auditar e reverter.
+
+> **Bloqueio de nova spec por Release Sync pendente:** enquanto a Fase 5 (Release Sync) da spec mais recente estiver pendente, **nenhuma nova spec pode entrar em execução**. Estende a regra "uma sessão, uma spec ativa" ao ciclo completo de release. Operacionalmente: enquanto a Fase 5 não for mergeada, `roadmap/backlog.md` mantém entrada em `§ Bloqueadores cross-spec` com a Release Sync pendente. Specs em `Now`/`Next` que dependam do release publicado podem aguardar; specs ortogonais aguardam por disciplina (evita acumular fluxos paralelos de release).
+
+> **Lição operacional cravada na Spec 0020 (npm-publication, 2026-05-08):** sequência foi reordenada antes do publish irreversível após erro de sequência detectado pelo owner (a sequência original colocava publish antes do merge, o que tornaria a tag órfã). O padrão de Mini-PR de Release Sync e a regra de bloqueio acima nasceram como resposta direta a essa dor.
 
 ### `NEXT.md` — obrigatório contínuo
 

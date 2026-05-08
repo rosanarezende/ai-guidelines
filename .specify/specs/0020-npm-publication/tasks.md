@@ -166,4 +166,18 @@
 - [x] **4.5** `CHANGELOG.md` entrada `[1.0.0] — 2026-05-08` confirmada (1.A.6 + 2.G.3); `package.json::version` confirmado em `1.0.0`.
 - [x] **4.6** Sessão atual não abriu outra spec — `0020-npm-publication` permaneceu como única spec ativa do encerramento.
 - [x] **4.7** **[COMMIT]** `chore(spec-0020): encerramento pré-merge — status final e limpeza de débitos`. _(commit `8fa425f`.)_
-- [ ] **4.8** **[MANDATÓRIO]** Aprovação humana explícita para merge (squash). **Não fazer merge autonomamente.** Após o merge, owner faz `git checkout main && git pull` e prossegue com 2.G.5 (publish a partir de `main`); agente fecha 2.G.6–2.G.8 (validação + tag).
+- [ ] **4.8** **[MANDATÓRIO]** Aprovação humana explícita para merge (squash). **Não fazer merge autonomamente.** Após o merge, owner faz `git checkout main && git pull` e prossegue com 2.G.5 (publish a partir de `main`); agente fecha 2.G.6–2.G.8 (validação + tag) e abre **Fase 5** (Release Sync).
+
+---
+
+## Fase 5 — Release Sync (Pós-Publish)
+
+> **Padrão criado pela Spec 0020 e cravado no framework** em `.core/process/spec-foundation.md` § "Sequência canônica para specs com publish em registry externo". Mini-PR pós-publish que sincroniza o commit-hash real do release com o `main`, fechando o gap entre o "PR auto-suficiente" da spec e o ato pós-merge de publish/tag. Enquanto esta fase estiver pendente, **nenhuma nova spec pode entrar em execução** (regra de bloqueio cravada em `roadmap/backlog.md§Bloqueadores cross-spec`).
+
+- [ ] **5.1** Após 2.G.5–2.G.8 concluídos, agente cria branch `release/v1.0.0-sync` a partir de `main` atualizado.
+- [ ] **5.2** Agente edita `roadmap/historico.md` da Spec 0020 substituindo o placeholder do SHA pelo SHA real do commit-novo de `main` (gerado pelo squash merge); registra `tag v1.0.0`, `version: 1.0.0`, link `https://www.npmjs.com/package/ai-guidelines/v/1.0.0` e data de publicação.
+- [ ] **5.3** Opcional: badge npm no `README.md` consumer-facing (`![npm](https://img.shields.io/npm/v/ai-guidelines)` ou similar).
+- [ ] **5.4** Agente abre PR pequeno: `release(spec-0020): sync ai-guidelines@1.0.0 no historico`. Descrição curta com SHA, tag, link npm.
+- [ ] **5.5** **[MANDATÓRIO]** Aprovação humana para merge (squash) do mini-PR.
+- [ ] **5.6** Squash merge do mini-PR.
+- [ ] **5.7** Bloqueio em `roadmap/backlog.md§Bloqueadores cross-spec` removido; nova spec pode ser aberta a partir deste ponto.

@@ -158,6 +158,13 @@ Specs ou candidatas que aguardam um gatilho externo (adoção, incidente, decis�
 
 Decisões ou trabalho que bloqueiam múltiplas specs. Cada bloqueador lista as specs impactadas.
 
+### 2. Release Sync da Spec 0020 (`ai-guidelines@1.0.0`) pendente
+
+- **Status:** ativo a partir do merge da Spec 0020 + publish 1.0.0 em 2026-05-08; resolvido quando o mini-PR `release/v1.0.0-sync` for mergeado em `main`.
+- **Bloqueia:** abertura de **qualquer** nova spec até a Fase 5 (Release Sync) ser concluída. Regra cravada em `.core/process/spec-foundation.md` § "Bloqueio de nova spec por Release Sync pendente".
+- **Por que existe:** o publish + tag acontecem **pós-merge** da spec original (sequência canônica para evitar tag órfã com squash merge). Sem o mini-PR de Release Sync, o `historico.md` da spec referencia apenas o SHA da branch (que sumiu após squash); o mini-PR cita o SHA real de `main`, registra `tag v<X.Y.Z>`, `version`, link npm e data, fechando o gap entre o PR auto-suficiente da spec e o ato pós-merge de release.
+- **Origem:** padrão nasceu de dor real durante a execução da Spec 0020 (erro de sequência detectado pelo owner antes do publish irreversível). Decidido como regra de framework em 2026-05-08.
+
 ### 1. ~~Naming decision do package `ai-guidelines`~~ — **resolvido em 2026-05-07**
 
 - **Impactava:** spec 0006 (renumerada como Spec 0020 com a promoção).
