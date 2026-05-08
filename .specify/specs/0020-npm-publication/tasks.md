@@ -149,7 +149,7 @@
 - [x] **3.2** Pipeline canônico verde: `yarn check:repo` rodado local em 2026-05-08 (266/266; coverage agregada 92,88%; sem warnings de format).
 - [x] **3.3** Critérios de aceite de `spec.md` revisados ponto-a-ponto: 7/9 marcados como atendidos; 2 dependem do gate (publish 1.0.0 e aprovação Ready). DoD do `plan.md` cobertos pelos commits da Fase 1 (componentes A, B, C, D, F, H; E extraído).
 - [x] **3.4** Validação em ambiente real: matriz CI `smoke-multi-os.yml` cobriu instalação do tarball nos 3 SOs (ubuntu/windows/macos × Node 22.x/24.x = 6 jobs verdes em 2026-05-08). Sandbox local Windows + Node 24 também verde via `yarn test:smoke`.
-- [ ] **3.5** PR atualizado: descrição em 3 etapas (contexto → decisões cravadas → impacto cross-spec). _(Owner pode atualizar via `gh pr edit` ou UI; conteúdo sugerido fica disponível abaixo.)_
+- [x] **3.5** PR #6 atualizado via `gh pr edit` em 2026-05-08: descrição em 3 etapas (contexto → decisões cravadas → impacto cross-spec). URL: https://github.com/rosanarezende/ai-guidelines/pull/6.
 - [ ] **3.6** **[MANDATÓRIO]** Aguardar **Gate de Review Humano**. **Não prosseguir** sem aprovação explícita.
 - [ ] **3.7** Aplicar correções demandadas em loops de review até aprovação; cada correção é commit incremental rastreável.
 
