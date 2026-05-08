@@ -37,7 +37,11 @@ _(Nenhum débito registrado ainda)_
 
 > Insights técnicos, discussões ricas ou ideias de features que apareceram durante a execução, mas estão claramente fora do escopo atual.
 
-_(Nenhum insight registrado ainda)_
+### 1. `.npmignore` é ignorado quando `files` está em `package.json`
+
+- **O Contexto**: durante 1.A.7, o primeiro `npm publish --dry-run` revelou que o tarball incluía 43 arquivos `*.test.mjs` e fixtures (`__fixtures__/`) dentro de `cli/**`. Tentativa inicial de criar `.npmignore` não filtrou nada — `total files` permaneceu em 113.
+- **O Insight**: quando o campo `files` está presente em `package.json`, o npm o trata como autoritativo e ignora `.npmignore` para os caminhos listados. A solução correta é usar globs com negação dentro do próprio `files` (`"!cli/**/*.test.mjs"`, `"!cli/**/__fixtures__"`), o que reduziu o tarball de 113 → 70 arquivos (133 kB → 102 kB).
+- **Ação Sugerida**: pode virar uma seção curta em `docs/cli/ai-guidelines-cli.md` ou em FAQ de contribuidor, como armadilha conhecida. Não é candidata a spec própria.
 
 ---
 

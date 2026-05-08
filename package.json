@@ -1,8 +1,24 @@
 {
   "name": "ai-guidelines",
-  "version": "1.4.0",
+  "version": "1.0.0",
   "description": "Portable AI governance framework — agnostic by design",
-  "private": true,
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/rosanarezende/ai-guidelines#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rosanarezende/ai-guidelines.git"
+  },
+  "bugs": {
+    "url": "https://github.com/rosanarezende/ai-guidelines/issues"
+  },
+  "keywords": [
+    "ai",
+    "governance",
+    "agents",
+    "claude",
+    "copilot",
+    "cli"
+  ],
   "bin": "./cli/ai-guidelines-cli.mjs",
   "imports": {
     "#app/*": "./cli/app/*.mjs",
@@ -15,6 +31,8 @@
   },
   "files": [
     "cli",
+    "!cli/**/*.test.mjs",
+    "!cli/**/__fixtures__",
     ".core",
     "docs",
     "README.md",
@@ -38,6 +56,9 @@
     "prettier": "^3.0.0"
   },
   "packageManager": "yarn@4.1.1",
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "dependencies": {
     "@inquirer/prompts": "7.8.4"
   }

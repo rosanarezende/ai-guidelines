@@ -26,8 +26,8 @@
 - [x] **0.8** `tasks.md` (este arquivo) instanciado a partir da variante `deterministic`.
 - [x] **0.9** `roadmap/backlog.md`: spec já em "Em execução" desde 2026-05-07 (entrada criada na promoção). Confirmar formato no início da Fase 1.
 - [x] **0.10** `NEXT.md` instanciado.
-- [ ] **0.11** Criar Pull Request em Draft usando template do repositório (se existir em `.github/pull_request_template.md`); descrição inicial cobrindo contexto + escopo.
-- [ ] **0.[COMMIT]** texto de commit atômico sugerido: `chore(spec-0020): setup inicial da spec npm-publication`.
+- [x] **0.11** Criar Pull Request em Draft usando template do repositório (se existir em `.github/pull_request_template.md`); descrição inicial cobrindo contexto + escopo.
+- [x] **0.[COMMIT]** texto de commit atômico sugerido: `chore(spec-0020): setup inicial da spec npm-publication`.
 
 ---
 
@@ -39,15 +39,15 @@
 
 > Origem: [`plan.md` § Componente A](./plan.md)
 
-- [ ] **1.A.1** Remover `"private": true` de `package.json`.
-- [ ] **1.A.2** Adicionar `license: "MIT"` (alinhado a ADR 0006); `repository` (`type: git`, `url: git+https://github.com/<org>/ai-guidelines.git`); `homepage`; `bugs.url`.
-- [ ] **1.A.3** Adicionar `keywords` curados: `ai`, `governance`, `agents`, `claude`, `copilot`, `cli` (revisar com owner antes do publish).
-- [ ] **1.A.4** Adicionar `engines.node` com piso compatível com CI atual (validar lendo workflows existentes).
-- [ ] **1.A.5** Bumpar `version` de `1.4.0` para `1.0.0`.
-- [ ] **1.A.6** `CHANGELOG.md`: entrada `[1.0.0] — YYYY-MM-DD` documentando início da série pública e justificativa do reset (1.4.0 interno nunca foi publicado).
-- [ ] **1.A.7** Validar `npm publish --dry-run`: aceita sem erros e tarball contém apenas `cli`, `.core`, `docs`, `README.md`, `CHANGELOG.md`.
-- [ ] **1.A.8** Pipeline `yarn check && yarn test` verde após o sub-bloco.
-- [ ] **1.A.9** Análise de débitos: atualizar `NEXT.md`.
+- [x] **1.A.1** Remover `"private": true` de `package.json`.
+- [x] **1.A.2** Adicionar `license: "Apache-2.0"` (conforme ADR 0006); `repository` (`type: git`, `url: git+https://github.com/rosanarezende/ai-guidelines.git`); `homepage`; `bugs.url`.
+- [x] **1.A.3** Adicionar `keywords` curados: `ai`, `governance`, `agents`, `claude`, `copilot`, `cli` (revisar com owner antes do publish).
+- [x] **1.A.4** Adicionar `engines.node` com `>=22.0.0` — CI roda Node 24, mas o piso técnico real é 22 (flags `--experimental-default-config-file` e `--experimental-test-coverage` exigem Node 22+).
+- [x] **1.A.5** Bumpar `version` de `1.4.0` para `1.0.0`.
+- [x] **1.A.6** `CHANGELOG.md`: entrada `[1.0.0] — 2026-05-07` documentando início da série pública e justificativa do reset (1.4.0 interno nunca foi publicado).
+- [x] **1.A.7** Validar `npm publish --dry-run`: aceita sem erros (113 → 70 arquivos após exclusão de `*.test.mjs` + `__fixtures__/` via globs negativos no campo `files`); tarball contém `cli` (sem testes), `.core`, `docs`, `README.md`, `CHANGELOG.md`. Tamanho final: 102 kB / 343 kB unpacked.
+- [x] **1.A.8** Pipeline `yarn check && yarn test` verde após o sub-bloco (exit 0, suíte completa passa).
+- [x] **1.A.9** Análise de débitos: `NEXT.md` atualizado (insight sobre `.npmignore` × `files`).
 - [ ] **1.A.[COMMIT]** texto de commit incremental sugerido: `chore(spec-0020): metadados de publish em package.json e bump para 1.0.0`.
 
 ### Sub-bloco [B] — ADR de naming + registry

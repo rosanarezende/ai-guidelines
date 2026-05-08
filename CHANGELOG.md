@@ -10,6 +10,26 @@ _(Sem mudanças não-publicadas no momento.)_
 
 ---
 
+## [1.0.0] — 2026-05-07
+
+Primeiro release público no registry npm. Spec 0020 (`npm-publication`) — destrava distribuição via `npx ai-guidelines init` para consumidores externos. Versionamento foi resetado de `1.4.0` interno para `1.0.0` deliberadamente: nenhuma das versões anteriores (`0.x` / `1.x`) chegou a ser publicada (`package.json` carregava `"private": true`); `1.0.0` inicia a série pública e ancora SemVer a partir do contrato real instalável.
+
+### Adicionado
+
+- **Metadados de publish em `package.json`:** campos `license` (`Apache-2.0`, conforme ADR 0006), `repository`, `homepage`, `bugs`, `keywords` e `engines.node` (`>=22.0.0` — piso técnico real exigido pelos scripts de teste do CLI).
+- **Pacote publicável no registry npm público** sob o nome não-scoped `ai-guidelines` (decisão de naming registrada em ADR 0009 — entrega da própria Spec 0020).
+
+### Alterado
+
+- **Flag `"private": true` removida** de `package.json` — habilita `npm publish`.
+
+### Notas de migração
+
+- **Para consumidores:** usar `npx ai-guidelines init` em vez de clonar o repositório (orientação interna `yarn guidelines …` permanece como fluxo de contribuidor).
+- **Para o ecossistema:** a org `@ai-guidelines` (npmjs.com) fica **reservada** para extensões futuras (`@ai-guidelines/<addon>`); package principal continuará não-scoped.
+
+---
+
 ## [1.4.0] — 2026-05-07
 
 Release agrupada cobrindo as Specs 0018 (catálogo Docs-as-Code de regras) e 0019 (bootstrap do consumidor + runtime). PRs auto-suficientes: ambos os PRs deixam o repositório em estado liberável no merge.

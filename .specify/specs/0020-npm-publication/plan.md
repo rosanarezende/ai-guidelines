@@ -24,8 +24,8 @@ Publish enxuto sobre infra existente: o pacote já está ~90% pronto no `package
 **Decisão:**
 
 - Remover `"private": true`.
-- Adicionar campos canônicos: `license` (`MIT`, alinhado a ADR 0006), `repository` (`type: git, url: git+https://github.com/<org>/ai-guidelines.git`), `homepage`, `bugs.url`, `keywords` (curados — `ai`, `governance`, `agents`, `claude`, `copilot`, `cli`).
-- Adicionar `engines.node` declarando piso suportado (≥ 20.x — alinhado ao node usado em CI atual; validar em A.3).
+- Adicionar campos canônicos: `license` (`Apache-2.0`, conforme ADR 0006), `repository` (`type: git, url: git+https://github.com/rosanarezende/ai-guidelines.git`), `homepage`, `bugs.url`, `keywords` (curados — `ai`, `governance`, `agents`, `claude`, `copilot`, `cli`).
+- Adicionar `engines.node` com piso `>=22.0.0` — CI atual roda Node 24, mas o piso técnico real é 22 (scripts `test`/`test:coverage` usam `--experimental-default-config-file` e `--experimental-test-coverage`, ambos disponíveis a partir do Node 22).
 - Bumpar `version` de `1.4.0` para `1.0.0` (1.4.0 interno nunca foi publicado; 1.0.0 inicia a série pública). Registrar a quebra de versionamento no `CHANGELOG.md`.
 
 **Mudanças em arquivos:**
