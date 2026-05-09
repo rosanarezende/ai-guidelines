@@ -128,21 +128,23 @@
 
 **Decisão do Gate Humano:**
 
-- **Status:** [ ] Pendente | [ ] Resolvido
+- **Status:** [ ] Pendente | [x] Resolvido
 - **Sub-eixo 1 — Existência do `spec_workspace_dir` (marque com `x`):**
   - [ ] A
-  - [ ] B
+  - [x] B
 - **Sub-eixo 2 — Default do `spec_workspace_dir` (marque com `x`):**
   - [ ] A
-  - [ ] B
+  - [x] B
   - [ ] C
 - **Sub-eixo 3 — Lar do registro estruturado (marque com `x`):**
-  - [ ] A
+  - [x] A
   - [ ] B
   - [ ] C
 - **Justificativa / Ressalvas:** >
-  [Preencher no gate.]
-- **Data / Owner:** [YYYY-MM-DD] / [@owner]
+  Sub-eixo 1 (Contrato): A introdução formal do spec_workspace_dir oficializa a separação entre os artefatos internos da ferramenta e a memória operacional de engenharia do time.
+  Sub-eixo 2 (Caminho): Adotaremos .governance/ como o novo root unificado. A análise do código demonstrou que o cliente hoje sofre com fragmentação (templates e config em .ai-guidelines/ e o workspace manual em .specify/). O novo root consolida tudo isso. Visão de Growth/PLG: O nome .governance/ é agnóstico e profissional, reduzindo a barreira psicológica de entrada (vendor lock-in).
+  Sub-eixo 3 (Estado): O registry.yml deve morar aberto na raiz do workspace (.governance/registry.yml). Visão de Ownership: O estado canônico não é "cache" temporário da CLI, é patrimônio intelectual do repositório do cliente. Mantê-lo visível e versionado garante transparência, governança descentralizada e portabilidade.
+- **Data / Owner:** 2026-05-09 / @rosanarezende
 
 ## Bloco B — Escopo da 0021 e placement canônico
 
