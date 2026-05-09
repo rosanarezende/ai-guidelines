@@ -15,22 +15,40 @@
 
 ### Débitos da Fase 0 (Setup)
 
-_(Nenhum débito registrado ainda)_
+_(Nenhum débito registrado)_
 
-### Débitos da Fase 1 (Implementação)
+### Débitos da Fase 1 (Fundação Arquitetural)
 
-_(Nenhum débito registrado ainda)_
+_(A preencher conforme execução)_
 
-### Débitos de Fases Adicionais (se aplicável)
+### Débitos da Fase 2 (Reestruturação Física)
 
-_(Nenhum débito registrado ainda)_
+_(A preencher conforme execução)_
 
-### Débitos da Fase de Review
+### Débitos da Fase 3 (Living Documentation + Engine)
 
-_(Nenhum débito registrado ainda)_
+_(A preencher conforme execução)_
+
+### Débitos da Fase 4 (Migração)
+
+_(A preencher conforme execução)_
 
 ---
 
 ## 💡 Insights e Descobertas
 
-_(Nenhum insight fora de escopo registrado ainda)_
+### Alteração do Boilerplate de Tasks (Spec 0021)
+
+**Context**: A 0021 resultaria em ~3000-3500 linhas de código distribuídas em 6 sub-blocos (1.A-B, 2.A-C, 3.A-B, 4.A-B, Extra). O boilerplate original de `tasks.md` agrupava **todos** os sub-blocos sob uma única branch, gerando 1 PR-monolítica ou múltiplas micro-PRs (~200 linhas cada).
+
+**Decisão**: Reestruturar para **5 PRs sequenciais** (PR0 + PR1-4), cada uma com:
+
+- Um `[NEW-BRANCH]` por Fase (não por sub-bloco)
+- Múltiplos commits atômicos por sub-bloco dentro da mesma PR
+- Um `[PULL-REQUEST-READY]` e aprovação humana no final de cada Fase
+
+**Implicação**: Reduz micro-gerenciamento (11 possíveis PRs → 5), sem perder atomicidade de commits (cada sub-bloco mantém seu commit incremental). Facilita review modular e permite gates de aprovação estratégicos entre Fases.
+
+**Recomendação para próximas specs substanciais**: Usar este modelo quando tamanho previsto > 2000 linhas. Ajustar número de PRs conforme interdependências (fases desacopladas podem virar PRs paralelas).
+
+_(Sem novos insights registrados nesta sessão)_
