@@ -301,6 +301,94 @@
 - **Justificativa / Ressalvas:** > A reorganização física alinha o repositório-fonte à nova taxonomia canónica estabelecida, eliminando dívida técnica e facilitando a navegação de agentes de IA e humanos pelo próprio código do framework. Embora introduza algum churn inicial devido à necessidade de atualizar caminhos e referências nos scripts de build da CLI, o ganho de coerência a longo prazo justifica o esforço (Option B).
 - **Data / Owner:** 2026-05-09 / @rosanarezende
 
+## Bloco C — Saúde Técnica e Dívidas Associadas
+
+> **Bloco Mandatório.** O objetivo é forçar a análise sobre a saúde da base de código que implementará a spec, prevenindo que dívidas técnicas não-mapeadas comprometam a entrega.
+
+### [DEC-0021-C01] Saúde arquitetural e dívidas técnicas
+
+**Pergunta:** Qual é o estado de saúde do componente que implementará esta spec, e quais dívidas técnicas existentes podem impactar o escopo?
+
+**Contexto (research):**
+
+- A análise de saúde técnica é um pré-requisito para um planejamento de implementação realista.
+- Identificar dívidas técnicas relevantes no Stage 1 permite que o escopo da spec seja ajustado (se necessário) para pagá-las, em vez de acumular mais complexidade sobre uma base frágil.
+
+**Eixos a decidir:**
+
+1. **Saúde Arquitetural:** Qual é o diagnóstico do componente principal afetado?
+2. **Dívidas Técnicas:** Existem dívidas pré-existentes que a spec irá exacerbar?
+3. **Metodologia de Design e Implementação:** Qual metodologia guiará a re-arquitetura da CLI para garantir uma solução robusta e de alta qualidade?
+
+#### Sub-eixo 1 — Saúde Arquitetural
+
+| Opção | Descrição                                                                                                                                                                                                   |
+| :---- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A     | **Saudável:** A arquitetura do componente é clara, coesa e pronta para absorver as novas funcionalidades sem atritos significativos.                                                                        |
+| B     | **Requer Refatoração:** O componente funciona, mas sua estrutura interna é confusa, acoplada ou carece de padrões claros. A implementação exigirá uma refatoração tática.                                   |
+| C     | **Requer Re-arquitetura:** A fundação do componente é fundamentalmente falha ou inadequada para os novos requisitos. A implementação segura exige um redesenho completo antes da entrega de novas features. |
+
+#### Sub-eixo 2 — Dívidas Técnicas
+
+| Opção | Descrição                                                                                                                                                                                          |
+| :---- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A     | **Nenhuma Dívida Relevante:** Nenhuma dívida técnica existente impacta diretamente o escopo desta spec.                                                                                            |
+| B     | **Dívidas Contidas:** Existem dívidas, mas elas podem ser isoladas ou contornadas. O plano de implementação deve registrá-las.                                                                     |
+| C     | **Dívidas Bloqueadoras:** Dívidas existentes (ex: dependências obsoletas, falta de testes) tornam a implementação insegura ou impraticável. O escopo da spec **deve ser expandido** para pagá-las. |
+
+#### Sub-eixo 3 — Metodologia de Design e Implementação
+
+| Opção | Descrição                                                                                                                                                                                                                                                                                                       |
+| :---- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A     | **Refatoração Reativa:** Manter a estrutura da CLI atual, aplicando apenas as modificações necessárias para suportar `.governance/`. A qualidade seria garantida por testes de regressão.                                                                                                                       |
+| B     | **TDD/BDD Estrito:** Adotar um processo formal de Test-Driven Development. Escrever uma suíte de testes completa para a nova CLI (que falhará inicialmente) e então escrever o código de implementação para fazê-la passar.                                                                                     |
+| C     | **DDD + TDD/BDD:** A abordagem mais profunda. Primeiro, aplicar os princípios de Domain-Driven Design para modelar o domínio da CLI (ex: `Registry`, `GovernanceWorkspace`, `CommandBus`), estabelecendo uma linguagem ubíqua e limites de contexto claros. Em seguida, implementar este modelo usando TDD/BDD. |
+
+**Decisão do Gate Humano:**
+
+- **Status:** [ ] Pendente | [x] Resolvido
+- **Sub-eixo 1 — Saúde Arquitetural (marque com `x`):**
+  - [ ] A
+  - [ ] B
+  - [x] C
+- **Sub-eixo 2 — Dívidas Técnicas (marque com `x`):**
+  - [ ] A
+  - [ ] B
+  - [x] C
+- **Sub-eixo 3 — Metodologia de Design e Implementação (marque com `x`):**
+  - [ ] A
+  - [ ] B
+  - [x] C
+- **Justificativa / Ressalvas:** > A decisão de exigir uma re-arquitetura total baseada em DDD + TDD/BDD fundamenta-se na necessidade crítica de erradicar o código frágil da CLI legada e implementar o paradigma de "Documentação Viva" (Living Documentation).
+  O modelo manual anterior de regras de negócio (docs/cli/ai-guidelines-cli.md) falhou devido ao 'drift' (defasagem) inevitável entre o código executado e o texto escrito. Para suportar a complexidade do novo ecossistema estruturado (o novo root .governance/ e o registry.yml), é absolutamente mandatório aplicar primeiro o Domain-Driven Design (DDD), isolando e modelando os domínios da aplicação de forma limpa, com linguagem ubíqua e limites de contexto claros (ex: criando entidades/agregados explícitos como Registry, GovernanceWorkspace, RuleExtractor).
+  Em cima desse modelo de domínio robusto, aplicaremos TDD/BDD estrito para inverter a Fonte da Verdade (SSOT): os próprios blocos de teste da aplicação (it/test), estritamente mapeados com identificadores de regras de negócio (ex: [BR-CLI-*]), passarão a ser a Única Fonte da Verdade. Criaremos um mecanismo de extração automática (seja via script AST estático ou um Custom Reporter rodando sobre os testes nativos) que varrerá essa suíte de testes madura e exportará um artefato estruturado (JSON ou YAML) diretamente para a pasta .governance/. Esse artefato servirá como uma API declarativa e viva para futuros dashboards executivos, garantindo visibilidade 100% real do que está rodando em produção para a liderança e stakeholders, além de criar um forte incentivo cultural (gamification e visibilidade) para que a equipe de engenharia escreva testes com altíssima qualidade e precisão descritiva.
+- **Data / Owner:** 2026-05-09 / @rosanarezende
+
+## Bloco D — Engine de Templates e Composição Modular
+
+### [DEC-0021-D01] Arquitetura de Templates: Composição vs. Espelhamento
+
+**Pergunta:** Como o framework deve gerenciar a criação de novos artefatos (tasks, plans, specs) no novo paradigma "Governance-Driven", evitando redundância e facilitando a manutenção dos boilerplates?
+
+**Opções:**
+| Opção | Descrição | Pró | Contra |
+| :---- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------- |
+| A | **Mirroring (Status Quo):** A CLI copia arquivos inteiros de `.governance/templates/` para a pasta da spec. | Simplicidade inicial e fácil entendimento do processo de geração. | Alta redundância (ex: 4 arquivos de tasks quase idênticos), difícil manutenção e evolução dos templates. |
+| B | **Templates com Lógica Interna:** Um único arquivo com condicionais pesadas (ex: Handlebars/Mustache) processadas pela CLI. | Reduz a redundância física, mantendo um único template para cada tipo de artefato. | A complexidade das condicionais torna o template difícil de ler, editar e manter, especialmente para usuários não técnicos. |
+| C | **Composição Atômica:** A CLI monta o arquivo final combinando "partes" atômicas (partials). O tipo da spec no `registry.yml` dita a "receita" de montagem (Ex: Spec mixed = Partes A+B+C; evidence-driven = A+B+D). | Elimina redundância, facilita manutenção e evolução dos templates. Permite flexibilidade máxima na composição de artefatos. | Requer implementação mais complexa na CLI e uma estrutura clara de partials para evitar confusão. Necessita de documentação clara para os consumidores entenderem como as partes se combinam. |
+
+**Decisão do Gate Humano:**
+
+- **Status:** [ ] Pendente | [x] Resolvido
+- **Escolha (marque com `x`):**
+  - [ ] A
+  - [ ] B
+  - [x] C
+- **Justificativa / Ressalvas:** > A adoção da Composição Atômica (Opção C) reflete a maturidade do framework, que evoluiu de um mero "gerador de specs" (Spec-Driven) para um motor completo (Governance-Driven). O espelhamento simples gera arquivos redundantes e difíceis de evoluir. Ao utilizarmos partials atômicas (ex: setup.md, research.md, implementation.md isolados em .governance/templates/partials/), aplicamos o princípio DRY (Don't Repeat Yourself). Qualquer melhoria em uma etapa metodológica (ex: como fazer Análise de Gaps) é alterada em um único lugar e propagada automaticamente para todas as "receitas" de entregas que utilizam aquela parte. Essa engine de composição será orquestrada pela nova CLI re-arquitetada em DDD, onde a TemplateEngine ditará a montagem com base na tipagem definida no registry.yml.
+- **Data / Owner:** 2026-05-09 / @rosanarezende
+
+---
+
 ## Resumo de status
 
 | ID               | Bloco | Status    |
@@ -313,6 +401,8 @@
 | `[DEC-0021-B03]` | B     | Resolvido |
 | `[DEC-0021-B04]` | B     | Resolvido |
 | `[DEC-0021-B05]` | B     | Resolvido |
+| `[DEC-0021-C01]` | C     | Resolvido |
+| `[DEC-0021-D01]` | D     | Resolvido |
 
 **Status agregado:** `Resolvido`
 
@@ -331,3 +421,5 @@
   - [x] `[DEC-0021-B03]`
   - [x] `[DEC-0021-B04]`
   - [x] `[DEC-0021-B05]`
+  - [x] `[DEC-0021-C01]`
+  - [x] `[DEC-0021-D01]`

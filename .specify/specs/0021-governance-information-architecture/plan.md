@@ -14,34 +14,23 @@
 
 ## 🛰️ Stage 1 / Stage 2
 
-> **Stage 1 (Research → opções).** Consolidar a evidência já coletada em 2026-05-08, fechar lacunas residuais e cristalizar no `decision-brief.md` as opções sobre: fonte primária de estado, classes de artefato, fronteira `sdd_dir` vs `spec_workspace_dir`, política de placement documental e envelope Fases 1–3 vs 4–5. Nenhum design físico definitivo entra antes do gate.
+> **Stage 1 (Research → Gate humano)** está encerrado em 2026-05-09. O `decision-brief.md` fechou os Blocos A, B, C e D, resolvendo: fonte primária do estado, taxonomia de artefatos de valor, root `.governance/`, placement documental, fronteira foundation/ADR, reorganização de `.core/rules/`, re-arquitetura da CLI, Living Documentation e composição atômica.
 >
-> **Stage 2 (Design + Implementação).** Depois do gate humano, a spec deve materializar as decisões aprovadas em contrato arquitetural, layout/versionamento do registro estruturado, visões derivadas mínimas e ajustes de placement/documentação necessários. O recorte executável da 0021 termina nas Fases 1, 2 e 3; Fases 4 e 5 ficam apenas mapeadas.
+> **Stage 2 (Design + Implementação)** passa a materializar essas decisões de forma integrada. O trabalho não se reduz à nova CLI: ele precisa preservar os eixos A/B do gate e usar os Blocos C/D como fundação técnica para executar o novo modelo Governance-Driven. O recorte executável da 0021 continua terminando nas Fases 1, 2 e 3; Fases 4 e 5 ficam apenas mapeadas.
 
 ---
 
-## 📚 Research Lifecycle
+## 🧭 Estado Pós-Gate
 
-> Perguntas de Stage 1 e os insumos que já as alimentam.
+- `[DEC-0021-A01]` confirmou YAML versionado no repositório como base do estado canônico repo-first híbrido.
+- `[DEC-0021-A02]` consolidou os 6 pilares de valor: `spec`, `exploration`, `fix`, `patch`, `incident`, `proposal`.
+- `[DEC-0021-A03]` aprovou `.governance/` como root unificado do consumidor, com `registry.yml` visível na raiz do workspace.
+- `[DEC-0021-B01]` manteve o corte Fases 1–3 agora e 4–5 depois.
+- `[DEC-0021-B02]`, `[B03]`, `[B04]` e `[B05]` fecharam placement documental, modelo híbrido, fronteira foundation/ADR e reorganização de `.core/rules/`.
+- `[DEC-0021-C01]` expandiu formalmente o Stage 2 para re-arquitetura total da CLI em DDD + TDD/BDD e Living Documentation orientada por `[BR-CLI-*]`.
+- `[DEC-0021-D01]` descartou o espelhamento cego de boilerplates e aprovou composição modular por `partials` e `recipes`.
 
-- **Q1. Qual é a fonte primária de estado do framework?**  
-  Alimenta `[DEC-0021-A01]`. Base inicial: `.specify/specs/researchs/architecture/2026-05-08-repo-first-structured-registry.md`.
-- **Q2. Como artefatos não-spec entram como origem de valor sem virar conhecimento solto?**  
-  Alimenta `[DEC-0021-A02]`. Base inicial: o mesmo research de registro estruturado + backlog da candidata 0021.
-- **Q3. Qual é a fronteira entre `sdd_dir`, eventual `spec_workspace_dir` e o lar físico do estado estruturado?**  
-  Alimenta `[DEC-0021-A03]`. Base inicial: `.specify/specs/researchs/architecture/2026-05-08-consumer-bootstrap-frictions.md`.
-- **Q4. O que exatamente a 0021 entrega agora e o que apenas mapeia para depois?**  
-  Alimenta `[DEC-0021-B01]`. Base inicial: backlog da 0021 + research de registro estruturado § 9–11.
-- **Q5. Como a política de placement documental e os gêneros ausentes/futuros ficam resolvidos sem implementar tudo agora?**  
-  Alimenta `[DEC-0021-B02]`. Base inicial: backlog da 0021 + `.core/process/spec-foundation.md` + débito herdado da 0020 sobre `.specify/templates/`.
-- **Q6. A política canônica deve nascer como catálogo central, reorganização física ou híbrido?**  
-  Alimenta `[DEC-0021-B03]`. Base inicial: backlog original da candidata 0021, especialmente o escopo potencial de `INFORMATION-CATALOG.md` vs reorganização física.
-- **Q7. Que tipo de decisão sai de `spec-foundation.md` e vira ADR?**  
-  Alimenta `[DEC-0021-B04]`. Base inicial: `[DEC-0018-A06]` + débito explícito de migração arquitetural em `.core/process/spec-foundation.md`.
-- **Q8. O `.core/rules/` atual precisa reorganização física interna no repo?**  
-  Alimenta `[DEC-0021-B05]`. Base inicial: backlog original da candidata 0021 + distinção formal com a Spec 0011.
-
-> **Nota operacional do Stage 1:** a spec nasce reaproveitando evidence package já migrado para `.specify/specs/researchs/architecture/`. Só criar `./research/` local novo se o gate abrir uma pergunta que os insumos atuais não resolvam.
+**Implicação operacional:** o Stage 2 precisa ser planejado como implementação arquitetural integrada, não como soma de tarefas isoladas de path rename, doc cleanup ou refactor local de CLI.
 
 ---
 
@@ -49,87 +38,165 @@
 
 ### Princípio guia
 
-Antes de mover arquivos ou automatizar comandos, a 0021 precisa fechar a pergunta estrutural: qual é o estado canônico do framework e como cada gênero documental ou artefato de valor se conecta a esse estado. A implementação deve seguir o princípio **repo-first híbrido** e evitar dois desvios: transformar Markdown narrativo em storage único permanente ou introduzir banco/serviço externo como fonte primária cedo demais.
+A 0021 precisa responder simultaneamente a duas camadas:
 
-### Componentes ou Sub-blocos
+1. **Arquitetura de informação do framework**: onde o estado vive, como os gêneros documentais se organizam e como os 6 pilares de valor entram no fluxo repo-first.
+2. **Fundação técnica do runtime**: como a CLI, os templates, os testes e a documentação executável passam a sustentar esse modelo sem drift.
 
-#### [A | Estado Canônico Repo-First Híbrido]
+A implementação deve seguir o princípio **repo-first híbrido** e evitar quatro desvios:
 
-**Estado atual** (baseline antes da spec):
+- manter Markdown narrativo como storage primário permanente;
+- introduzir banco/serviço externo cedo demais;
+- trocar apenas nomes de paths sem atacar o acoplamento legado da CLI;
+- inverter a SSOT para testes sem normalizar a taxonomia e o pipeline de extração.
 
-- `backlog.md` e `historico.md` são a memória viva mais acessível para humanos e IA, mas concentram status e relacionamentos em Markdown narrativo.
-- O framework ainda é spec-cêntrico: PRDs, incidentes, frictions e entregas `no-spec` existem como insumo, mas não como entidades canônicas de primeira classe.
-- Não existe um registro estruturado versionado que permita derivar backlog/histórico sem parsing frágil de narrativa.
+### [A] Estado canônico e taxonomia de valor
 
-**Decisão**:
+**Estado atual do legado:**
 
-Stage 1 precisa fechar se o estado canônico será um registro estruturado dentro do repositório, quais invariantes esse modelo preserva e qual lote mínimo de migração prova o fluxo sem cair em big-bang. Stage 2 só poderá introduzir diretórios, schema e visões derivadas depois de `[DEC-0021-A01]` e `[DEC-0021-A02]` estarem resolvidos.
+- `backlog.md` e `historico.md` concentram memória narrativa, mas não operam como registro estruturado consultável.
+- O framework ainda carrega forte inércia espec-cêntrica, apesar de a pesquisa e o gate já terem aprovado outros tipos de origem de valor.
+- O estado atual depende de convenção editorial mais do que de contrato de domínio.
 
-**Mudanças em arquivos**:
+**Arquitetura-alvo:**
 
-- `<path do registro estruturado, a definir em [DEC-0021-A03]>` — novo storage canônico versionado.
-- `.specify/specs/roadmap/backlog.md` — passa a refletir o modelo derivado ou a política de derivação.
-- `.specify/specs/roadmap/historico.md` — idem.
-- `.core/process/spec-foundation.md` — explicitar a fonte primária e o papel de Markdown derivado.
+- `.governance/registry.yml` passa a ser o estado primário versionado do workspace.
+- O modelo de domínio precisa representar explicitamente os 6 pilares de valor, seus IDs, status, relações e regras mínimas de promoção/resolução.
+- `backlog.md`, `historico.md` e visões futuras passam a ser derivados do estado estruturado, nunca o inverso.
 
-#### [B | Placement Documental e Gêneros de Valor]
+**Decisões executáveis derivadas do gate:**
 
-**Estado atual** (baseline antes da spec):
+- provar o modelo com lote mínimo que inclua pelo menos uma origem não-spec, uma spec e uma entrega relacionada;
+- impedir que o novo registry nasça com shape ocultamente espec-cêntrico;
+- manter Fases 4 e 5 apenas mapeadas, sem antecipar banco, dashboard ou backend como fonte primária.
 
-- `.core/process/spec-foundation.md` é constituição operacional viva, mas carrega débito explícito de migração arquitetural.
-- `docs/`, `adrs/`, `.core/rules/`, raiz e `.specify/` convivem sem catálogo canônico de gêneros e sem reserva formal para PRD/intake, handoff e telemetria.
-- `.specify/templates/` continua num lar tático herdado da 0020, apesar de ser artefato distribuído pelo framework.
+### [B] Placement documental e arquitetura informacional
 
-**Decisão**:
+**Estado atual do legado:**
 
-Stage 1 precisa separar duas camadas: (1) placement de gêneros documentais do meta-framework; (2) artefatos de origem de valor que alimentam o estado estruturado. O gate deve dizer o que fica em `.core/`, o que permanece em `adrs/`, `docs/`, `.specify/` e qual é o lar reservado para gêneros ausentes/futuros. A decisão também precisa tratar o placement canônico de `.specify/templates/` sem quebrar o fluxo já publicado.
-Stage 1 também precisa fechar três perguntas que estavam melhor formuladas no backlog original da candidata e não podem ficar implícitas:
+- `.core/process/spec-foundation.md` mistura constituição viva, regras de lifecycle e decisões arquiteturais que já merecem outro gênero.
+- `docs/`, `adrs/`, `.core/rules/`, `.specify/` e raiz do repo convivem sem uma política final coerente de placement.
+- `.specify/templates/` ainda ocupa um lar tático herdado da 0020 e incompatível com a decisão de composição modular.
 
-- qual é o **carrier canônico** da política de informação: catálogo central, reorganização física direcionada ou híbrido;
-- se decisões atômicas hoje embutidas em `spec-foundation.md` devem continuar ali ou migrar seletivamente para ADRs;
-- se o `.core/rules/` atual exige reorganização física interna no repo, distinguindo isso explicitamente da fragmentação distribuída do consumidor (Spec 0011).
+**Arquitetura-alvo:**
 
-**Mudanças em arquivos**:
+- o framework adota um modelo híbrido: catálogo canônico curto + reorganização física dirigida.
+- a constituição operacional do ciclo vivo fica em um foundation document renomeado/refatorado; decisões estáveis e cross-spec migram seletivamente para ADRs.
+- `.core/rules/` deve refletir melhor a taxonomia final aprovada, alinhando topologia, compilação e consumo.
+- `docs/` deixa de ser uma ilha órfã; seu conteúdo útil precisa ser redistribuído para um lar canônico ou explicitamente depreciado.
 
-- `.core/process/spec-foundation.md` — remoção de dívida ou redirects, conforme o gate.
-- `adrs/**` — se o gate decidir que parte do conteúdo hoje embutido em `spec-foundation.md` deve migrar para ADRs formais.
-- `.core/rules/**` — se o gate aprovar reorganização física interna alinhada à taxonomia final.
-- `.specify/specs/research-index.md` — eventual ajuste de framing se o placement de research mudar.
-- `README.md`, `AGENTS.md`, `CONTRIBUTING.md`, `docs/**` — ajustes de links/ponteiros se houver reorganização física.
-- `cli/features/core/templates.mjs` e adjacentes — se a decisão sobre `.specify/templates/` exigir alinhamento de código.
+**Decisões executáveis derivadas do gate:**
 
-#### [C | Contrato do Workspace do Consumidor]
+- tratar placement e depreciação documental como parte da spec, não como arrumação posterior;
+- alinhar README, CONTRIBUTING, AGENTS, templates distribuídos e help da CLI com a nova topologia;
+- garantir que `build:rules`, catálogos e smoke tests acompanhem a reorganização de `.core/rules/`.
 
-**Estado atual** (baseline antes da spec):
+### [C] Re-arquitetura da CLI e workspace do consumidor
 
-- O consumidor recebe `sdd_dir` como contrato de runtime/documentação distribuída, mas não existe um conceito formal de `spec_workspace_dir`.
-- A fricção observada em consumo real mostra que falta um bootstrap explícito do sistema documental e falta resposta única sobre onde specs, backlog, histórico e memória correlata devem viver.
+**Estado atual do legado:**
 
-**Decisão**:
+- a CLI atual é funcional, mas cresceu por agregação reativa e acoplamento de paths, modos e assets.
+- `config.mjs`, `templates.mjs`, `pointers.mjs`, `args.mjs` e os testes de integração ainda codificam `.ai-guidelines/`, `.specify/templates/` e o contrato monolítico atual.
+- o runtime publicado, o help da CLI e a superfície do pacote ainda distribuem o modelo anterior.
 
-Stage 1 precisa definir se `spec_workspace_dir` passa a existir como conceito formal, qual é o default canônico, como ele se distingue de `sdd_dir` e como futuros comandos consomem essa separação. A decisão também precisa dizer onde o registro estruturado mora em relação a esse workspace.
+**Arquitetura-alvo:**
 
-**Mudanças em arquivos**:
+- a nova CLI deve ser redesenhada sob DDD + TDD/BDD.
+- `GovernanceWorkspace` resolve root, layout físico, migração e compatibilidade com legado.
+- `Registry` modela o estado versionado.
+- `RulesEngine` mantém a compilação e projeção das regras.
+- `TemplateEngine` governa recipes, partials, montagem e validação estrutural.
+- `LivingDocumentation` extrai e publica regras `[BR-CLI-*]`.
+- `Application` orquestra os casos de uso `init`, `adopt`, `providers`, `update`, `status` e afins sem carregar a lógica de domínio em si.
 
-- `.core/process/spec-foundation.md` — definição do contrato.
-- `.specify/templates/project-config-boilerplate.md` ou equivalente — se o contrato exigir surfaced config futura.
-- `cli/features/core/config.mjs` e docs futuras — apenas se o gate decidir que a spec já deve alinhar naming/contrato, sem implementar os comandos finais.
+**Decisões executáveis derivadas do gate:**
 
-#### [D | Envelope de Entrega da 0021]
+- a camada de compatibilidade com `.ai-guidelines/` e `.specify/` deve ser explícita e temporária;
+- mudanças em package publish surface, workflows, smoke tests e help fazem parte do mesmo redesign;
+- o root `.governance/` não pode ser implementado como alias superficial sobre a estrutura antiga.
 
-**Estado atual** (baseline antes da spec):
+### [D] Living Documentation e composição modular
 
-- O backlog e o research já apontam uma sequência em cinco fases, mas a fronteira exata entre "entregar agora" e "mapear para depois" ainda não está congelada em artefato formal de spec.
+**Estado atual do legado:**
 
-**Decisão**:
+- parte da suíte já usa IDs `[BR-CLI-*]`, `[BR-GIT-*]`, `[BR-BUILDER-*]`, etc., mas a taxonomia ainda é inconsistente.
+- não existe pipeline canônico que extraia essas regras e publique um artefato estruturado do que realmente está coberto/rodando.
+- o sync atual de templates ainda espelha arquivos inteiros de `.specify/templates/`, o que contradiz a decisão do Bloco D.
 
-Stage 1 deve travar que esta spec entrega **Fase 1 (contrato), Fase 2 (registro estruturado no repo) e Fase 3 (visões derivadas mínimas)**, enquanto **Fase 4 (SQLite/projeção local)** e **Fase 5 (dashboard/superfície de produto)** ficam apenas descritas como evolução. O gate também precisa decidir qual lote mínimo de migração prova o modelo sem exigir retro-migração total.
+**Arquitetura-alvo:**
 
-**Mudanças em arquivos**:
+- os testes `[BR-CLI-*]` viram a SSOT do comportamento da CLI.
+- uma pipeline de extração por AST parsing ou reporter dedicado gera artefato estruturado dentro de `.governance/`.
+- `recipes` pertencem ao domínio `TemplateEngine` e modelam como um artefato final é montado.
+- `partials` são blocos Markdown completos e válidos por contrato, nunca fragmentos arbitrários.
 
-- `.specify/specs/0021-governance-information-architecture/tasks.md` — Fase 1+ derivada do gate.
-- `<scripts ou geradores, se o gate aprovar>` — geração de Markdown derivado/status estruturado.
-- `.specify/specs/roadmap/backlog.md` / `historico.md` — prova inicial do modelo derivado, se entrar no Stage 2.
+**Decisões executáveis derivadas do gate:**
+
+- a normalização da suíte de testes é pré-condição para uma Living Documentation confiável;
+- a validação de render final precisa ser estrutural, não apenas visual;
+- o abandono do mirror de arquivos inteiros deve ocorrer só depois de a nova recipe engine estar pronta para substituí-lo.
+
+---
+
+## 🧩 Domínios da Nova CLI
+
+### `Registry`
+
+- Responsável por schema, IDs, tipos de artefato, relações, promotion rules e serialização do `registry.yml`.
+- Não contém lógica de renderização de documentos finais.
+
+### `GovernanceWorkspace`
+
+- Resolve root `.governance/`, paths internos, layout do workspace, migrações e compatibilidade com consumidores legados.
+- Centraliza a política de leitura/escrita dos diretórios canônicos.
+
+### `RulesEngine`
+
+- Responsável por parser, build, catálogo, compilação monolítica e projeções de regras.
+- Precisa acompanhar a reorganização física de `.core/rules/` sem quebrar CI e publish.
+
+### `TemplateEngine`
+
+- Responsável por `recipes`, `partials`, slots, assembly e validação de Markdown.
+- `registry.yml` informa estado e tipagem; as receitas pertencem a este domínio.
+
+### `LivingDocumentation`
+
+- Responsável por varrer a suíte de testes, extrair `[BR-CLI-*]`, gerar artefatos estruturados e proteger o sistema contra drift.
+- Deve operar como API declarativa viva para humans, IA e futuras projeções de status.
+
+### `Application / Use Cases`
+
+- Camada fina que orquestra comandos como `init`, `adopt`, `providers`, `update`, `status` e futuras automações.
+- Não deve acumular lógica de path, templates, regras ou merge de runtime diretamente.
+
+---
+
+## 🔄 Estratégia de Transição
+
+### Sequência segura
+
+1. Fechar documentalmente o Stage 1 nos artefatos da spec.
+2. Modelar os bounded contexts e isolar a fundação da nova CLI.
+3. Introduzir camada explícita de compatibilidade com paths legados.
+4. Reestruturar root `.governance/`, assets e publish surface.
+5. Normalizar a suíte `[BR-CLI-*]` e ativar Living Documentation.
+6. Implementar recipes + partials e só então remover o mirror de boilerplates integrais.
+7. Atualizar placement documental, docs públicas, CI, hooks e smoke tests.
+
+### Compatibilidade com legado
+
+- Leitura de `.ai-guidelines/` e `.specify/` deve existir só como bridge de migração.
+- O contrato final distribuído ao consumidor precisa falar em `.governance/`, não em alias oculto.
+- A smoke suite precisa validar instalação via tarball já sobre a nova topologia.
+
+### Impactos transversais obrigatórios
+
+- `package.json` publish surface e scripts.
+- workflows de CI e smoke multi-OS.
+- hooks Husky.
+- README, CONTRIBUTING, AGENTS e help textual da CLI.
+- testes de integração que hoje afirmam a existência de `.ai-guidelines/` e `.specify/templates/`.
 
 ---
 
@@ -137,41 +204,44 @@ Stage 1 deve travar que esta spec entrega **Fase 1 (contrato), Fase 2 (registro 
 
 ### Componente [A]
 
-- [ ] `[DEC-0021-A01]` fechado com invariantes explícitas para a fonte primária do estado.
-- [ ] `[DEC-0021-A02]` fechado com classes de artefato, relações mínimas e regra de promoção/resolução.
-- [ ] Stage 2 prova o modelo com um lote pequeno e representativo, não centrado apenas em specs.
+- [ ] `[DEC-0021-A01]` refletido em contrato explícito de estado primário repo-first híbrido.
+- [ ] `[DEC-0021-A02]` refletido em taxonomia concreta dos 6 pilares de valor.
+- [ ] Stage 2 prova o modelo com lote pequeno e representativo, não centrado apenas em specs.
 
 ### Componente [B]
 
-- [ ] `[DEC-0021-B02]` fechado com catálogo canônico de placement documental e reserva de lar para gêneros futuros.
-- [ ] `[DEC-0021-B03]` fechado com o carrier da política de arquitetura de informação explicitado.
-- [ ] `[DEC-0021-B04]` fechado com a fronteira entre constituição/processo vivo e decisões que merecem ADR formal.
-- [ ] `[DEC-0021-B05]` fechado com decisão explícita sobre o placement interno de `.core/rules/` no repo.
-- [ ] A decisão sobre `.specify/templates/` fica explícita com impacto documentado para CLI e documentação.
+- [ ] `[DEC-0021-B02]`, `[B03]`, `[B04]` e `[B05]` refletidos no placement final, foundation document, ADRs e topologia de `.core/rules/`.
+- [ ] A decisão sobre templates distribuídos deixa de depender de `.specify/templates/` como lar tático permanente.
+- [ ] A documentação pública e operacional deixa de apontar para a arquitetura antiga.
 
 ### Componente [C]
 
-- [ ] `[DEC-0021-A03]` fechado com definição de `sdd_dir`, `spec_workspace_dir`, defaults e fronteira de responsabilidade.
-- [ ] O contrato deixa claro onde futuros comandos de bootstrap/status vão se acoplar sem cristalizar implementação prematura.
+- [ ] `[DEC-0021-A03]` refletido no contrato do workspace do consumidor com `.governance/` como root canônico.
+- [ ] `[DEC-0021-C01]` refletido em bounded contexts, linguagem ubíqua e casos de uso da nova CLI.
+- [ ] A camada de compatibilidade com o legado está explícita e controlada.
 
 ### Componente [D]
 
-- [ ] `[DEC-0021-B01]` fechado com escopo da própria 0021: Fases 1–3 entram; Fases 4–5 ficam apenas mapeadas.
-- [ ] A estratégia de migração inicial evita big-bang histórico e define um conjunto mínimo de prova.
+- [ ] `[DEC-0021-D01]` refletido em `recipes` + `partials` + validação estrutural do render.
+- [ ] O sync de templates deixa de ser espelhamento cego de boilerplates inteiros.
+- [ ] Os testes `[BR-CLI-*]` alimentam artefato estruturado em `.governance/` sem drift.
 
 ### Globais (toda a spec)
 
 - [ ] Pipeline de format/lint verde (ex.: `yarn check`).
-- [ ] Suíte de testes verde — XX/XX (ex.: `yarn test`), ou registro explícito de não-aplicabilidade técnica se a entrega for puramente documental sem efeito executável.
+- [ ] Suíte de testes verde (ex.: `yarn test`) com cobertura adequada para a nova fundação da CLI.
+- [ ] Smoke tarball validado com a nova topologia do consumidor.
 - [ ] Diff em consumidor real revisado: zero quebras, quando a spec tocar contrato distribuído ao consumidor.
 
 ---
 
 ## 🧪 Estratégia de Testes
 
-- **Unit/BDD**: se Stage 2 introduzir geradores ou schema parser, cobrir com testes dedicados no `cli/` ou em helpers de estado derivado.
-- **Integração**: validar que um lote mínimo do registro estruturado consegue derivar `backlog.md`/`historico.md` sem perda de legibilidade.
-- **Manual**: revisar o contrato resultante contra o caso real do consumidor `site`, especialmente na fronteira `sdd_dir` vs `spec_workspace_dir`.
+- **Domínio / BDD**: cobrir `Registry`, `GovernanceWorkspace`, `TemplateEngine` e `LivingDocumentation` com testes de comportamento rastreáveis.
+- **Integração**: validar que o workspace consegue produzir estado, runtime e artefatos compostos coerentes a partir do novo root `.governance/`.
+- **Living Documentation**: testar extração, determinismo do artefato e falha por drift.
+- **Smoke**: validar tarball publicado/local instalado em Windows, Linux e macOS com a nova topologia.
+- **Manual**: revisar contrato final contra a fricção observada no consumidor `site`, especialmente onboarding, root unificado e update idempotente.
 
 ---
 
@@ -180,27 +250,30 @@ Stage 1 deve travar que esta spec entrega **Fase 1 (contrato), Fase 2 (registro 
 - `.specify/specs/0021-governance-information-architecture/spec.md` — contrato da spec.
 - `.specify/specs/0021-governance-information-architecture/plan.md` — design vivo.
 - `.specify/specs/0021-governance-information-architecture/tasks.md` — execução viva.
-- `.specify/specs/0021-governance-information-architecture/decision-brief.md` — gate Stage 1.
+- `.specify/specs/0021-governance-information-architecture/decision-brief.md` — gate Stage 1 já fechado.
 - `.specify/specs/0021-governance-information-architecture/NEXT.md` — débitos conscientes.
-- `.specify/specs/roadmap/backlog.md` — status da spec e, no Stage 2, eventual prova derivada.
-- `.core/process/spec-foundation.md` — contrato canônico de estado/placement.
+- `.specify/specs/roadmap/backlog.md` — status da spec e eventuais implicações da migração.
+- `.core/process/spec-foundation.md` ou sucessor renomeado — contrato canônico do lifecycle Governance-Driven.
 - `.specify/specs/research-index.md` — se a reorganização do placement de research exigir ajuste.
-- `<path do registro estruturado, a definir>` — introdução do storage canônico repo-first.
-- `README.md`, `CONTRIBUTING.md`, `AGENTS.md`, `docs/**`, `cli/features/core/templates.mjs` — apenas se o gate confirmar reorganização física com impacto nesses pontos.
+- `.core/rules/**` e artefatos gerados em `_meta/` — reorganização física + alinhamento do builder.
+- `cli/**` — re-arquitetura da CLI e casos de uso do novo workspace.
+- `README.md`, `CONTRIBUTING.md`, `AGENTS.md`, `docs/**`, workflows, hooks e testes smoke/integração — alinhamento da topologia e do contrato distribuído.
 
 ---
 
 ## ⚠️ Riscos técnicos (concretos)
 
-| Risco                                                                  | Mitigação                                                                                                                        |
-| :--------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------- |
-| Registry nascente ficar spec-cêntrico e não provar artefatos não-spec  | Exigir lote mínimo de prova com pelo menos uma origem não-spec, uma spec e uma entrega relacionada.                              |
-| Formalizar `spec_workspace_dir` cedo demais e quebrar UX futura        | Tratar a decisão como contrato, não como comando pronto; validar contra o caso real do consumidor antes de cristalizar defaults. |
-| Reorganização física ampla gerar churn desnecessário em links e código | Separar Stage 1 (contrato) de Stage 2 (migração controlada), com redirects/ponteiros quando necessário.                          |
-| Schema crescer demais antes de validar o fluxo mínimo                  | Diferenciar campos obrigatórios de recomendados e rejeitar maximalismo no gate.                                                  |
+| Risco                                                                | Mitigação                                                                                                          |
+| :------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------- |
+| Root `.governance/` virar apenas rename cosmético sobre CLI acoplada | Atacar primeiro bounded contexts e camada de compatibilidade explícita; só depois cortar paths legados.            |
+| Registry nascer espec-cêntrico por inércia                           | Exigir lote mínimo de prova com pelo menos uma origem não-spec, uma spec e uma entrega relacionada.                |
+| Living Documentation nascer incompleta ou enganosa                   | Normalizar a taxonomia dos testes `[BR-CLI-*]`, testar extração e falhar CI por drift.                             |
+| Partials gerarem Markdown válido porém semanticamente quebrado       | Validar montagem por slots/blocos e rodar checks estruturais no render final.                                      |
+| Reorganização física ampla gerar churn em links, build e smoke       | Sequenciar foundation → compatibilidade → migração → cleanup, com atualização atômica de código, docs e pipelines. |
+| Publish surface continuar distribuindo contrato antigo               | Revisar `package.json`, assets incluídos no tarball e smoke tests antes de considerar a migração concluída.        |
 
 ---
 
 ## 📐 Decisões revisitadas
 
-_(Nenhuma ainda — spec recém-instanciada. Revisitas pós-gate serão registradas aqui.)_
+- **2026-05-09** — O Stage 2 deixou de ser descrito apenas como materialização do modelo repo-first híbrido e passou a incorporar formalmente a re-arquitetura da CLI, Living Documentation e composição modular. **Motivo:** decisões `[DEC-0021-C01]` e `[DEC-0021-D01]` fecharam que a arquitetura de informação e a fundação técnica da ferramenta são inseparáveis nesta spec.
