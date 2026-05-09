@@ -170,14 +170,13 @@
 
 **Decisão do Gate Humano:**
 
-- **Status:** [ ] Pendente | [ ] Resolvido
+- **Status:** [ ] Pendente | [x] Resolvido
 - **Escolha (marque com `x`):**
   - [ ] A
-  - [ ] B
+  - [x] B
   - [ ] C
-- **Justificativa / Ressalvas:** >
-  [Preencher no gate.]
-- **Data / Owner:** [YYYY-MM-DD] / [@owner]
+- **Justificativa / Ressalvas:** > Implementar as Fases 1, 2 e 3 garante a validação prática da nova arquitetura (o YAML como registro estruturado primário e a CLI gerando as visões Markdown derivadas mínimas) e entrega valor imediato de governança ao consumidor sem risco de over-engineering. Adiar uma camada de banco de dados e interfaces visuais complexas (Fases 4 e 5) protege o orçamento de tokens da IA durante este ciclo de desenvolvimento e foca puramente na resolução da dor raiz identificada na arquitetura atual.
+- **Data / Owner:** 2026-05-09 / @rosanarezende
 
 ### [DEC-0021-B02] Política de placement documental e lar de gêneros futuros
 
@@ -201,14 +200,13 @@
 
 **Decisão do Gate Humano:**
 
-- **Status:** [ ] Pendente | [ ] Resolvido
+- **Status:** [ ] Pendente | [x] Resolvido
 - **Escolha (marque com `x`):**
   - [ ] A
-  - [ ] B
+  - [x] B
   - [ ] C
-- **Justificativa / Ressalvas:** >
-  [Preencher no gate.]
-- **Data / Owner:** [YYYY-MM-DD] / [@owner]
+- **Justificativa / Ressalvas:** > A reserva explícita de lar canônico atua como um plano diretor para a arquitetura de informação. Ao estabelecermos agora onde residirão os artefactos futuros (PRD/intake, telemetria, handoffs) no interior de .governance/, ancoramos a arquitetura no longo prazo sem estourar o limite de tokens implementando fluxos que não são o foco atual. Isto fecha em definitivo a dívida da Spec 0020 e previne reaberturas dispendiosas deste tópico em ciclos posteriores de planeamento.
+- **Data / Owner:** 2026-05-09 / @rosanarezende
 
 ---
 
@@ -234,14 +232,14 @@
 
 **Decisão do Gate Humano:**
 
-- **Status:** [ ] Pendente | [ ] Resolvido
+- **Status:** [ ] Pendente | [x] Resolvido
 - **Escolha (marque com `x`):**
   - [ ] A
   - [ ] B
-  - [ ] C
-- **Justificativa / Ressalvas:** >
-  [Preencher no gate.]
-- **Data / Owner:** [YYYY-MM-DD] / [@owner]
+  - [x] C
+- **Justificativa / Ressalvas:** > A adoção de um modelo híbrido garante que a arquitetura seja autoexplicativa pela própria topologia das pastas (ex: .governance/specs, .governance/incidents), mas com o apoio de um catálogo central escrito que rege o ciclo de vida e resolve ambiguidades.
+  Ressalva Crítica: Conforme apontado no gate, o arquivo .core/process/spec-foundation.md atual carrega um nome obsoleto. Visto que o framework aprovou o modelo de 6 pilares de valor (onde spec é apenas um deles), o termo "spec-foundation" gera dissonância cognitiva. A implementação desta spec exigirá renomear e refatorar este arquivo para refletir a governança como um todo (ex.: governance-foundation.md, workflow-foundation.md, state-lifecycle.md ou information-architecture.md), alinhando o título à sua real responsabilidade arquitetural. Esta mudança é crucial para evitar confusão futura sobre o papel do arquivo e para comunicar claramente que ele é a base de toda a governança, não apenas das specs.
+- **Data / Owner:** 2026-05-09 / @rosanarezende
 
 ### [DEC-0021-B04] Fronteira entre `spec-foundation.md` e ADRs
 
@@ -265,14 +263,13 @@
 
 **Decisão do Gate Humano:**
 
-- **Status:** [ ] Pendente | [ ] Resolvido
+- **Status:** [ ] Pendente | [x] Resolvido
 - **Escolha (marque com `x`):**
   - [ ] A
   - [ ] B
-  - [ ] C
-- **Justificativa / Ressalvas:** >
-  [Preencher no gate.]
-- **Data / Owner:** [YYYY-MM-DD] / [@owner]
+  - [x] C
+- **Justificativa / Ressalvas:** > A adoção de uma fronteira híbrida explícita (Opção C) resolve a sobrecarga cognitiva do atual spec-foundation.md. O documento central (que será renomeado, ex: governance-foundation.md) passa a focar estritamente no "processo vivo", manual de uso e constituição do ciclo de vida (como os 6 novos pilares de entrega definidos no DEC-0021-A02). Decisões técnicas irreversíveis, justificativas de arquitetura ou escolhas de ferramentas estruturais que atualmente poluem o documento devem ser expurgadas e formalizadas como ADRs (Architecture Decision Records). Isto garante uma leitura operacional rápida para o dia a dia e um arquivo histórico adequado para justificativas técnicas.
+- **Data / Owner:** 2026-05-09 / @rosanarezende
 
 ### [DEC-0021-B05] Placement interno de `.core/rules/` no repositório
 
@@ -296,14 +293,13 @@
 
 **Decisão do Gate Humano:**
 
-- **Status:** [ ] Pendente | [ ] Resolvido
+- **Status:** [ ] Pendente | [x] Resolvido
 - **Escolha (marque com `x`):**
   - [ ] A
-  - [ ] B
+  - [x] B
   - [ ] C
-- **Justificativa / Ressalvas:** >
-  [Preencher no gate.]
-- **Data / Owner:** [YYYY-MM-DD] / [@owner]
+- **Justificativa / Ressalvas:** > A reorganização física alinha o repositório-fonte à nova taxonomia canónica estabelecida, eliminando dívida técnica e facilitando a navegação de agentes de IA e humanos pelo próprio código do framework. Embora introduza algum churn inicial devido à necessidade de atualizar caminhos e referências nos scripts de build da CLI, o ganho de coerência a longo prazo justifica o esforço (Option B).
+- **Data / Owner:** 2026-05-09 / @rosanarezende
 
 ## Resumo de status
 
@@ -311,27 +307,27 @@
 | :--------------- | :---- | :-------- |
 | `[DEC-0021-A01]` | A     | Resolvido |
 | `[DEC-0021-A02]` | A     | Resolvido |
-| `[DEC-0021-A03]` | A     | Pendente  |
-| `[DEC-0021-B01]` | B     | Pendente  |
-| `[DEC-0021-B02]` | B     | Pendente  |
-| `[DEC-0021-B03]` | B     | Pendente  |
-| `[DEC-0021-B04]` | B     | Pendente  |
-| `[DEC-0021-B05]` | B     | Pendente  |
+| `[DEC-0021-A03]` | A     | Resolvido |
+| `[DEC-0021-B01]` | B     | Resolvido |
+| `[DEC-0021-B02]` | B     | Resolvido |
+| `[DEC-0021-B03]` | B     | Resolvido |
+| `[DEC-0021-B04]` | B     | Resolvido |
+| `[DEC-0021-B05]` | B     | Resolvido |
 
-**Status agregado:** `Pendente`
+**Status agregado:** `Resolvido`
 
 ---
 
 ## ✅ Gate fechado
 
-- **Data:** [YYYY-MM-DD]
-- **Owner:** [@owner]
+- **Data:** 2026-05-09
+- **Owner:** @rosanarezende
 - **Pontos resolvidos:**
-  - [ ] `[DEC-0021-A01]`
-  - [ ] `[DEC-0021-A02]`
-  - [ ] `[DEC-0021-A03]`
-  - [ ] `[DEC-0021-B01]`
-  - [ ] `[DEC-0021-B02]`
-  - [ ] `[DEC-0021-B03]`
-  - [ ] `[DEC-0021-B04]`
-  - [ ] `[DEC-0021-B05]`
+  - [x] `[DEC-0021-A01]`
+  - [x] `[DEC-0021-A02]`
+  - [x] `[DEC-0021-A03]`
+  - [x] `[DEC-0021-B01]`
+  - [x] `[DEC-0021-B02]`
+  - [x] `[DEC-0021-B03]`
+  - [x] `[DEC-0021-B04]`
+  - [x] `[DEC-0021-B05]`
