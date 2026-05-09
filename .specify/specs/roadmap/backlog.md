@@ -17,9 +17,12 @@ Specs atualmente em branch ativa. Formato enxuto.
 - **spec 0021** — `governance-information-architecture`
   (`.specify/specs/0021-governance-information-architecture/`) — **In Progress (Stage 1)** _(branch `feat/spec-0021-governance-information-architecture`, aberta em 2026-05-08 a partir de `main`)._
   - **Tipo:** `evidence-driven`.
+  - **Histórico de numeração:** era a candidata `0020-governance-information-architecture` até 2026-05-07; foi renumerada para 0021 quando `npm-publication` foi promovida e a branch original da candidata foi reaproveitada pela 0020.
+  - **Fonte do insight:** revisão da Spec 0018 (Stage 1, 2026-04-30) + benchmark comparativo externo de 2026-05-07, que reforçou a ausência de PRD/intake estruturado, handoff contracts e telemetria como gêneros com lar canônico explícito.
   - **Foco ativo do Stage 1:** (1) modelo canônico de estado repo-first híbrido; (2) artefatos não-spec como origem de valor; (3) fronteira `sdd_dir` vs `spec_workspace_dir`; (4) recorte Fases 1–3 agora e Fases 4–5 apenas mapeadas.
+  - **Perguntas reincorporadas do backlog original:** catálogo central vs reorganização física vs híbrido; ADRs vs `spec-foundation.md`; reorganização física interna de `.core/rules/` no repo.
   - **Insumos obrigatórios já lidos na abertura:** `.core/process/spec-foundation.md`, `researchs/architecture/2026-05-08-consumer-bootstrap-frictions.md` e `researchs/architecture/2026-05-08-repo-first-structured-registry.md`.
-  - **Cross-ref operacional:** abertura formal aprovada pela owner em 2026-05-08; gate humano de Stage 1 pendente em `.specify/specs/0021-governance-information-architecture/decision-brief.md`.
+  - **Cross-ref operacional:** abertura formal aprovada pela owner em 2026-05-08; gate humano de Stage 1 pendente em `.specify/specs/0021-governance-information-architecture/decision-brief.md`. Débito tático herdado: `[DEC-0018-A06]`.
 
 > **Spec 0019** (`bootstrap-consumidor-e-runtime`) concluída e mergeada em 2026-05-07 (PR #5, commit `35af73a`).
 > **Spec 0020** (`npm-publication`) concluída e mergeada em 2026-05-08 (PR #6).
@@ -31,7 +34,7 @@ Specs atualmente em branch ativa. Formato enxuto.
 
 Specs ou candidatas priorizadas para iniciar em seguida. Ordem indica prioridade.
 
-- **governance-information-architecture** (spec **0021**) — movida para **Em execução** em 2026-05-08. O escopo ativo agora vive em `.specify/specs/0021-governance-information-architecture/` e o gate humano de Stage 1 será conduzido pelo `decision-brief.md` da spec.
+- **governance-information-architecture** (spec **0021**) — movida para **Em execução** em 2026-05-08. O escopo ativo agora vive em `.specify/specs/0021-governance-information-architecture/`, com reincorporação das perguntas históricas sobre carrier da política, fronteira ADR vs `spec-foundation.md` e placement interno de `.core/rules/`.
 
 - **stakeholder-intake-pipeline** (Pipeline estruturado de PRD/intake → spec)
   - **Fonte do insight:** análise comparativa de frameworks AI-driven externos (2026-05-07) — frameworks maduros formalizam um contrato de entrada (PRD parseável → tasks atômicas com critérios de aceitação). O ai-guidelines hoje vai do chat → backlog → spec sem etapa estruturada antes; o `Ciclo de Fricção` (regra 7 do backlog) reconhece a porta de entrada via tag `friction` mas não define o **shape mínimo** do pedido.

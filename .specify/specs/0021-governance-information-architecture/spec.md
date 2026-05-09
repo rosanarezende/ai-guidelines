@@ -26,6 +26,14 @@ O resultado esperado desta spec é uma arquitetura de informação única e expl
 
 ---
 
+## 🧭 Origem Editorial
+
+- **Histórico de numeração:** esta iniciativa era a candidata `0020-governance-information-architecture` até 2026-05-07. Foi renumerada para **0021** quando `npm-publication` foi promovida após a auditoria do `package.json`; a branch original foi reaproveitada pela 0020 e a abertura formal desta spec ficou pendente até o fechamento daquela sequência.
+- **Fonte do insight:** a raiz da spec está no Stage 1 da Spec 0018 (2026-04-30), quando ficou explícito que `.core/process/spec-foundation.md` opera como constituição viva, mas coabita sem fronteira clara com documentos descritivos e com decisões arquiteturais de outra natureza. Esse diagnóstico foi reforçado em 2026-05-07 por benchmark comparativo de frameworks AI-driven, que expôs três gêneros ainda ausentes no framework: PRD/intake estruturado, contratos de handoff e telemetria.
+- **Cross-ref tático que vira pergunta arquitetural:** `[DEC-0018-A06]` capturou o débito imediato sobre onde deveria viver a seção "Tipos de spec"; a 0021 responde esse débito em nível de arquitetura de informação, não como ajuste isolado de redação.
+
+---
+
 ## 📦 Escopo
 
 ### Dentro do escopo
@@ -33,6 +41,9 @@ O resultado esperado desta spec é uma arquitetura de informação única e expl
 - Definir a política canônica de arquitetura de informação do framework: classes documentais, fronteiras entre `.core/`, `adrs/`, `docs/`, raiz e artefatos operacionais de `.specify/`.
 - Decidir o modelo canônico de estado **repo-first híbrido**: registro estruturado versionado no repositório como fonte primária, Markdown derivado para humanos/IA e projeções futuras apenas como derivados.
 - Tratar artefatos não-spec como origem legítima de valor, com taxonomia mínima, relações e regras de promoção/resolução (`prd`, `incident`, `friction`, `note`, `spec`, `delivery`, `adr` e equivalentes que o gate confirmar).
+- Decidir qual é o **carrier canônico** da política de arquitetura de informação: catálogo central, reorganização física direcionada ou modelo híbrido.
+- Decidir se decisões atômicas hoje embutidas em `spec-foundation.md` devem permanecer como constituição/processo vivo, migrar para ADRs ou seguir uma fronteira híbrida explícita.
+- Decidir a reorganização física do próprio `.core/rules/` **dentro deste repositório** — incluindo relação entre top/center/base e universal/opt-in — sem confundir esse trabalho com a fragmentação distribuída no consumidor.
 - Decidir a fronteira formal entre `sdd_dir` e eventual `spec_workspace_dir`, incluindo default canônico e implicações para futuros comandos `config`, `spec init`, `intake` e `status`.
 - Entregar o recorte arquitetural das **Fases 1, 2 e 3** da 0021: contrato, introdução do registro estruturado no repo e visões derivadas mínimas; **Fases 4 e 5** ficam apenas mapeadas.
 - Reservar lar canônico para gêneros ainda não implementados, mas já aprovados como necessidade futura: PRD/intake estruturado, contratos de handoff/decision logs e telemetria do framework.
@@ -52,6 +63,7 @@ O resultado esperado desta spec é uma arquitetura de informação única e expl
 
 - [ ] Existe uma resposta única e curta para: "onde vive o estado canônico de PRDs, incidentes, specs e entregas, e como isso vira backlog/histórico?".
 - [ ] A arquitetura declara explicitamente o papel de artefatos não-spec como origem de valor, com IDs, relações e modo de resolução/promoção canônicos.
+- [ ] A spec decide explicitamente o carrier da política de informação (catálogo, reorganização física ou híbrido), a fronteira ADR vs `spec-foundation.md` e o placement interno de `.core/rules/`.
 - [ ] A fronteira `sdd_dir` vs `spec_workspace_dir` está documentada com defaults, responsabilidades e impacto sobre automações futuras.
 - [ ] O recorte da própria 0021 está fechado: Fases 1, 2 e 3 entram como entregável desta spec; Fases 4 e 5 ficam apenas mapeadas como evolução posterior.
 - [ ] A política de placement documental e o lar canônico de gêneros ausentes/futuros estão explícitos, evitando reabrir a discussão em specs posteriores.
@@ -65,6 +77,7 @@ O resultado esperado desta spec é uma arquitetura de informação única e expl
 - [`./decision-brief.md`](./decision-brief.md) — gate humano de decisões pré-design.
 - [`.specify/specs/researchs/architecture/2026-05-08-consumer-bootstrap-frictions.md`](../researchs/architecture/2026-05-08-consumer-bootstrap-frictions.md) — evidência empírica para `sdd_dir` vs `spec_workspace_dir` e contrato de onboarding.
 - [`.specify/specs/researchs/architecture/2026-05-08-repo-first-structured-registry.md`](../researchs/architecture/2026-05-08-repo-first-structured-registry.md) — direção preferencial para o modelo repo-first híbrido.
+- `decision-brief.md` da Spec 0018 — especialmente `[DEC-0018-A06]`, que transforma o débito tático sobre "Tipos de spec" numa pergunta ampla de placement/gênero documental.
 - `.specify/specs/roadmap/backlog.md` — fonte de escopo vivo, riscos e cross-refs desta candidata antes da abertura formal.
 
 ---

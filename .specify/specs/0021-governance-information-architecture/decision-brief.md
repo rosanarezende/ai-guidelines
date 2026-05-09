@@ -6,7 +6,7 @@
 > Plan: [`./plan.md`](./plan.md)
 > Tasks: [`./tasks.md`](./tasks.md)
 > Status agregado: **Pendente**
-> Última atualização: 2026-05-08 — brief inicial populada a partir do backlog da candidata e dos researches de arquitetura de 2026-05-08.
+> Última atualização: 2026-05-08 — brief inicial populada a partir do backlog da candidata, do débito herdado da Spec 0018 e dos researches de arquitetura de 2026-05-08.
 
 > **Artefato canônico do gate humano entre Stage 1 (research) e Stage 2 (design + implementação)** para specs `evidence-driven` ou `mixed`.
 
@@ -137,7 +137,7 @@
   [Preencher no gate.]
 - **Data / Owner:** [YYYY-MM-DD] / [@owner]
 
-## Bloco B — Scope da 0021 e placement canônico
+## Bloco B — Escopo da 0021 e placement canônico
 
 ### [DEC-0021-B01] Envelope de entrega: Fases 1–3 agora, 4–5 depois
 
@@ -203,6 +203,99 @@
 
 ---
 
+### [DEC-0021-B03] Carrier da política de arquitetura de informação
+
+**Pergunta:** qual artefato ou combinação de artefatos carrega a política canônica de arquitetura de informação do framework?
+
+**Contexto (research):**
+
+- O backlog original da candidata 0021 já colocava explicitamente a alternativa entre catálogo central (`INFORMATION-CATALOG.md`), reorganização física (`.specify/foundation/` ou equivalente) e híbrido.
+- A própria abertura atual da 0021 absorveu o problema de placement, mas ainda não cravou onde a política ficará legível e auditável para um agente novo.
+- A experiência do repositório mostra que depender só de reorganização física ou só de texto narrativo tende a perder clareza em algum eixo.
+
+**Opções:**
+
+| Opção | Descrição                                                                                                                       | Pró                                                | Contra                                                                                 |
+| :---- | :------------------------------------------------------------------------------------------------------------------------------ | :------------------------------------------------- | :------------------------------------------------------------------------------------- |
+| A     | **Catálogo central apenas**: um arquivo canônico lista classes, destinos e regras de lookup, sem reorganização física relevante | Alta legibilidade e rastreabilidade textual        | Pode virar mapa que descreve uma topologia que o repo real não expressa                |
+| B     | **Reorganização física apenas**: a arquitetura é comunicada principalmente pelos próprios paths finais                          | O repo “fala por si”                               | Sem catálogo explícito, agentes e humanos ainda precisam inferir princípios e exceções |
+| C     | **Modelo híbrido**: catálogo curto e canônico + reorganização física direcionada onde o ganho justificar                        | Combina explicabilidade com topologia real do repo | Exige disciplina para manter catálogo e repo sincronizados                             |
+
+**Recomendação inicial (a confirmar pós-gate):** **C**. A 0021 trata um problema de semântica e de placement; depender só de um dos dois meios tende a deixar metade do problema aberta.
+
+**Decisão do Gate Humano:**
+
+- **Status:** [ ] Pendente | [ ] Resolvido
+- **Escolha (marque com `x`):**
+  - [ ] A
+  - [ ] B
+  - [ ] C
+- **Justificativa / Ressalvas:** >
+  [Preencher no gate.]
+- **Data / Owner:** [YYYY-MM-DD] / [@owner]
+
+### [DEC-0021-B04] Fronteira entre `spec-foundation.md` e ADRs
+
+**Pergunta:** decisões atômicas hoje embutidas em `.core/process/spec-foundation.md` devem permanecer como constituição/processo vivo, migrar para ADRs formais ou seguir uma fronteira híbrida explícita?
+
+**Contexto (research):**
+
+- `[DEC-0018-A06]` capturou o débito tático sobre "onde fica a seção Tipos de spec", mas a raiz do problema é maior: `spec-foundation.md` concentra processo vivo e também decisões arquiteturais que podem merecer outro gênero documental.
+- O backlog original da 0021 já levantava explicitamente a pergunta sobre ADRs absorverem decisões atômicas hoje embutidas em `spec-foundation.md`.
+- A própria `spec-foundation.md` já se autoidentifica como carregando migração arquitetural pendente, o que indica fronteira ainda não resolvida.
+
+**Opções:**
+
+| Opção | Descrição                                                                                                                                                                           | Pró                                                                                        | Contra                                                                             |
+| :---- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------- |
+| A     | **Manter tudo em `spec-foundation.md`**; ADR fica só para decisões maiores não ligadas ao processo                                                                                  | Menor churn e menos dispersão                                                              | Mantém mistura entre constituição viva e decisões arquiteturais específicas        |
+| B     | **Migrar o máximo possível para ADRs**; `spec-foundation.md` vira só manual/processo                                                                                                | ADRs ficam mais completos e rastreáveis                                                    | Pode fragmentar demais a leitura do processo e transformar o fluxo em caça a links |
+| C     | **Fronteira híbrida explícita**: processo vivo e constituição operacional ficam em `spec-foundation.md`; decisões arquiteturais cross-spec, estáveis e justificadas migram para ADR | Mantém leitura operacional curta e dá lar adequado ao que realmente é decisão arquitetural | Exige critério claro para evitar ambiguidade futura                                |
+
+**Recomendação inicial (a confirmar pós-gate):** **C**. O débito de `[DEC-0018-A06]` parece ser justamente de fronteira, não de “mover tudo” para um lado só.
+
+**Decisão do Gate Humano:**
+
+- **Status:** [ ] Pendente | [ ] Resolvido
+- **Escolha (marque com `x`):**
+  - [ ] A
+  - [ ] B
+  - [ ] C
+- **Justificativa / Ressalvas:** >
+  [Preencher no gate.]
+- **Data / Owner:** [YYYY-MM-DD] / [@owner]
+
+### [DEC-0021-B05] Placement interno de `.core/rules/` no repositório
+
+**Pergunta:** a 0021 deve reorganizar fisicamente o próprio `.core/rules/` no repo para refletir melhor a taxonomia canônica do framework?
+
+**Contexto (research):**
+
+- O backlog original da candidata 0021 citava explicitamente a reorganização física do `.core/rules/` no repo como parte do escopo potencial, deixando claro que isso **não** é o mesmo trabalho da Spec 0011.
+- A abertura atual da 0021 fala em placement documental amplo, mas ainda não força uma decisão específica sobre o layout interno de `.core/rules/`.
+- O runtime já usa categorias como top/center/base e universal/opt-in; o repo-fonte pode ou não querer espelhar melhor essa taxonomia no layout físico.
+
+**Opções:**
+
+| Opção | Descrição                                                                                                                                                 | Pró                                            | Contra                                                                                  |
+| :---- | :-------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------- | :-------------------------------------------------------------------------------------- |
+| A     | **Sem reorganização física agora**; documentar a taxonomia mantendo `.core/rules/` como está                                                              | Menor churn                                    | Pode preservar uma topologia de origem menos clara do que a taxonomia final             |
+| B     | **Reorganização física interna direcionada** em `.core/rules/`, alinhada à taxonomia canônica aprovada, com redirects/ajustes de referência se necessário | Aproxima repo-fonte, taxonomia e runtime       | Gera diff amplo e precisa de coordenação com código/documentação                        |
+| C     | **Mover `.core/rules/` para outra família de paths mais ampla já nesta spec**                                                                             | Pode produzir arquitetura ainda mais semântica | Risco alto de over-move e de misturar este trabalho com outras migrações ao mesmo tempo |
+
+**Recomendação inicial (a confirmar pós-gate):** **B** ou **A**, dependendo do custo real de migração após o gate. A pergunta precisa ser resolvida explicitamente; deixá-la implícita reabriria o tema depois.
+
+**Decisão do Gate Humano:**
+
+- **Status:** [ ] Pendente | [ ] Resolvido
+- **Escolha (marque com `x`):**
+  - [ ] A
+  - [ ] B
+  - [ ] C
+- **Justificativa / Ressalvas:** >
+  [Preencher no gate.]
+- **Data / Owner:** [YYYY-MM-DD] / [@owner]
+
 ## Resumo de status
 
 | ID               | Bloco | Status   |
@@ -212,6 +305,9 @@
 | `[DEC-0021-A03]` | A     | Pendente |
 | `[DEC-0021-B01]` | B     | Pendente |
 | `[DEC-0021-B02]` | B     | Pendente |
+| `[DEC-0021-B03]` | B     | Pendente |
+| `[DEC-0021-B04]` | B     | Pendente |
+| `[DEC-0021-B05]` | B     | Pendente |
 
 **Status agregado:** `Pendente`
 
@@ -227,3 +323,6 @@
   - [ ] `[DEC-0021-A03]`
   - [ ] `[DEC-0021-B01]`
   - [ ] `[DEC-0021-B02]`
+  - [ ] `[DEC-0021-B03]`
+  - [ ] `[DEC-0021-B04]`
+  - [ ] `[DEC-0021-B05]`

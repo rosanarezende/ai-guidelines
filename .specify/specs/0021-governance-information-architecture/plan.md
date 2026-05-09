@@ -34,6 +34,12 @@
   Alimenta `[DEC-0021-B01]`. Base inicial: backlog da 0021 + research de registro estruturado § 9–11.
 - **Q5. Como a política de placement documental e os gêneros ausentes/futuros ficam resolvidos sem implementar tudo agora?**  
   Alimenta `[DEC-0021-B02]`. Base inicial: backlog da 0021 + `.core/process/spec-foundation.md` + débito herdado da 0020 sobre `.specify/templates/`.
+- **Q6. A política canônica deve nascer como catálogo central, reorganização física ou híbrido?**  
+  Alimenta `[DEC-0021-B03]`. Base inicial: backlog original da candidata 0021, especialmente o escopo potencial de `INFORMATION-CATALOG.md` vs reorganização física.
+- **Q7. Que tipo de decisão sai de `spec-foundation.md` e vira ADR?**  
+  Alimenta `[DEC-0021-B04]`. Base inicial: `[DEC-0018-A06]` + débito explícito de migração arquitetural em `.core/process/spec-foundation.md`.
+- **Q8. O `.core/rules/` atual precisa reorganização física interna no repo?**  
+  Alimenta `[DEC-0021-B05]`. Base inicial: backlog original da candidata 0021 + distinção formal com a Spec 0011.
 
 > **Nota operacional do Stage 1:** a spec nasce reaproveitando evidence package já migrado para `.specify/specs/researchs/architecture/`. Só criar `./research/` local novo se o gate abrir uma pergunta que os insumos atuais não resolvam.
 
@@ -77,10 +83,17 @@ Stage 1 precisa fechar se o estado canônico será um registro estruturado dentr
 **Decisão**:
 
 Stage 1 precisa separar duas camadas: (1) placement de gêneros documentais do meta-framework; (2) artefatos de origem de valor que alimentam o estado estruturado. O gate deve dizer o que fica em `.core/`, o que permanece em `adrs/`, `docs/`, `.specify/` e qual é o lar reservado para gêneros ausentes/futuros. A decisão também precisa tratar o placement canônico de `.specify/templates/` sem quebrar o fluxo já publicado.
+Stage 1 também precisa fechar três perguntas que estavam melhor formuladas no backlog original da candidata e não podem ficar implícitas:
+
+- qual é o **carrier canônico** da política de informação: catálogo central, reorganização física direcionada ou híbrido;
+- se decisões atômicas hoje embutidas em `spec-foundation.md` devem continuar ali ou migrar seletivamente para ADRs;
+- se o `.core/rules/` atual exige reorganização física interna no repo, distinguindo isso explicitamente da fragmentação distribuída do consumidor (Spec 0011).
 
 **Mudanças em arquivos**:
 
 - `.core/process/spec-foundation.md` — remoção de dívida ou redirects, conforme o gate.
+- `adrs/**` — se o gate decidir que parte do conteúdo hoje embutido em `spec-foundation.md` deve migrar para ADRs formais.
+- `.core/rules/**` — se o gate aprovar reorganização física interna alinhada à taxonomia final.
 - `.specify/specs/research-index.md` — eventual ajuste de framing se o placement de research mudar.
 - `README.md`, `AGENTS.md`, `CONTRIBUTING.md`, `docs/**` — ajustes de links/ponteiros se houver reorganização física.
 - `cli/features/core/templates.mjs` e adjacentes — se a decisão sobre `.specify/templates/` exigir alinhamento de código.
@@ -131,6 +144,9 @@ Stage 1 deve travar que esta spec entrega **Fase 1 (contrato), Fase 2 (registro 
 ### Componente [B]
 
 - [ ] `[DEC-0021-B02]` fechado com catálogo canônico de placement documental e reserva de lar para gêneros futuros.
+- [ ] `[DEC-0021-B03]` fechado com o carrier da política de arquitetura de informação explicitado.
+- [ ] `[DEC-0021-B04]` fechado com a fronteira entre constituição/processo vivo e decisões que merecem ADR formal.
+- [ ] `[DEC-0021-B05]` fechado com decisão explícita sobre o placement interno de `.core/rules/` no repo.
 - [ ] A decisão sobre `.specify/templates/` fica explícita com impacto documentado para CLI e documentação.
 
 ### Componente [C]

@@ -28,9 +28,9 @@
 - [x] **0.7** `plan.md` instanciado a partir de `.specify/templates/plan-boilerplate.md` com bloco Stage 1 / Stage 2 e perguntas explícitas de research.
 - [x] **0.8** `tasks.md` (este arquivo) instanciado a partir desta variante.
 - [x] **0.9** `decision-brief.md` instanciado com pontos `[DEC-0021-*]` em status `Pendente`.
-- [x] **0.10** `roadmap/backlog.md` atualizado: 0021 movida para "Em execução".
+- [x] **0.10** `roadmap/backlog.md` atualizado: 0021 movida para "Em execução", preservando rastreabilidade editorial mínima da candidata original.
 - [x] **0.11** `NEXT.md` instanciado (mandatório).
-- [ ] **0.12** Criar Pull Request em Draft usando o template do repositório, se aplicável.
+- [x] **0.12** Criar Pull Request em Draft usando o template do repositório, se aplicável.
 - [x] **0.[COMMIT]** texto de commit atômico sugerido: `chore(spec-0021): setup inicial da spec governance-information-architecture`.
 
 ### Sub-bloco [0.Research] — Stage 1: produzir researches
@@ -45,7 +45,7 @@
 
 ### Sub-bloco [0.Brief] — Stage 1: popular `decision-brief.md` com opções
 
-- [x] **0.B.1** Popular `[DEC-0021-A01]`, `[DEC-0021-A02]`, `[DEC-0021-A03]`, `[DEC-0021-B01]` e `[DEC-0021-B02]` com pergunta, contexto, opções e tradeoffs.
+- [x] **0.B.1** Popular `[DEC-0021-A01]`, `[DEC-0021-A02]`, `[DEC-0021-A03]`, `[DEC-0021-B01]`, `[DEC-0021-B02]`, `[DEC-0021-B03]`, `[DEC-0021-B04]` e `[DEC-0021-B05]` com pergunta, contexto, opções e tradeoffs.
 - [x] **0.B.2** Registrar recomendações iniciais quando já houver evidência convergente nos insumos de 2026-05-08.
 - [x] **0.B.3** Publicar a tabela "Resumo de status" com todos os pontos em `Pendente`.
 - [x] **0.B.4** Análise de débitos: nenhum débito novo obrigatório identificado na abertura; `NEXT.md` permanece sem itens.
@@ -85,9 +85,12 @@
 
 - [ ] **1.B.1** Aplicar a política canônica de placement para constituição operacional, ADRs, docs descritivos, referências e artefatos de framework.
 - [ ] **1.B.2** Reservar explicitamente o lar canônico de PRD/intake, handoff/decision logs e telemetria sem implementar seus pipelines completos.
-- [ ] **1.B.3** Tratar o placement de `.specify/templates/` conforme o gate, com plano de migração de referências e da CLI se aplicável.
+- [ ] **1.B.3** Decidir e materializar o **carrier** da política de arquitetura de informação: catálogo central, reorganização física direcionada ou modelo híbrido.
+- [ ] **1.B.4** Tratar a fronteira ADR vs `spec-foundation.md`: o que permanece como constituição/processo vivo e o que deve migrar para ADR formal.
+- [ ] **1.B.5** Tratar o placement interno de `.core/rules/` conforme o gate, distinguindo explicitamente esse trabalho da fragmentação distribuída do consumidor.
+- [ ] **1.B.6** Tratar o placement de `.specify/templates/` conforme o gate, com plano de migração de referências e da CLI se aplicável.
 - [ ] **1.B.N** Pipeline de check + test verde após o sub-bloco B.
-- [ ] **1.B.4** Análise de débitos: atualizar `NEXT.md`.
+- [ ] **1.B.7** Análise de débitos: atualizar `NEXT.md`.
 - [ ] **1.B.[COMMIT]** texto de commit incremental sugerido: `docs(spec-0021): define placement canônico de informação`.
 
 ### Sub-bloco [C] — Contrato `sdd_dir` vs `spec_workspace_dir`
@@ -119,7 +122,7 @@
 ### Sub-bloco [E] — Migração controlada e redirects
 
 - [ ] **E.1** Se o gate aprovar reorganização física ampla, aplicar migração controlada com redirects/ponteiros no mesmo commit do rename.
-- [ ] **E.2** Confirmar que links históricos e references essenciais continuam íntegros.
+- [ ] **E.2** Confirmar que links históricos, cross-refs editoriais e referências essenciais continuam íntegros.
 - [ ] **E.3** Análise de débitos: atualizar `NEXT.md`.
 - [ ] **E.[COMMIT]** texto de commit incremental sugerido: `refactor(spec-0021): migração controlada da arquitetura de informação`.
 
