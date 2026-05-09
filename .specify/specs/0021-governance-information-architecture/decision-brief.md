@@ -38,14 +38,14 @@
 
 **Decisão do Gate Humano:**
 
-- **Status:** [ ] Pendente | [ ] Resolvido
+- **Status:** [ ] Pendente | [x] Resolvido
 - **Escolha (marque com `x`):**
   - [ ] A
-  - [ ] B
+  - [x] B
   - [ ] C
-- **Justificativa / Ressalvas:** >
-  [Preencher no gate.]
-- **Data / Owner:** [YYYY-MM-DD] / [@owner]
+- **Justificativa / Ressalvas:** > O YAML atua perfeitamente na fronteira da Human-AI Co-creation. Ele é legível para Code Reviews humanos, suporta comentários embutidos (vital para governança técnica) e lida bem com blocos de texto multilinhas (como descrições de incidentes ou resumos de specs). Ao mesmo tempo, fornece o schema rígido (campos tipados) que a CLI precisa para gerar views em Markdown automaticamente (backlog.md gerado, não mantido à mão). O JSONL é descartado aqui por ser otimizado para machine streaming/append logs, sendo péssimo para revisão humana em repositórios.
+  Nota sobre extensibilidade: O formato YAML é trivialmente convertido para JSON via scripts simples na CLI Node.js, o que pavimenta o caminho sem fricção para consumo futuro em dashboards e agregadores de métricas (candidatas no backlog)
+- **Data / Owner:** 2026-05-09 / @rosanarezende
 
 ### [DEC-0021-A02] Artefatos não-spec como origem de valor
 
@@ -69,14 +69,21 @@
 
 **Decisão do Gate Humano:**
 
-- **Status:** [ ] Pendente | [ ] Resolvido
+- **Status:** [ ] Pendente | [x] Resolvido
 - **Escolha (marque com `x`):**
   - [ ] A
-  - [ ] B
+  - [x] B
   - [ ] C
-- **Justificativa / Ressalvas:** >
-  [Preencher no gate.]
-- **Data / Owner:** [YYYY-MM-DD] / [@owner]
+- **Justificativa / Ressalvas:** > Avaliamos e escolhemos a expansão mínima (Opção B), mas com uma forte ressalva taxonômica alinhada ao mercado AI-First e à rotina real de engenharia de Growth. Em vez da lista extensa sugerida pelo research (prd, note, delivery, etc.), consolidaremos o registry em 6 pilares MECE (mutuamente exclusivos e coletivamente exaustivos) focados na intenção de saída e na carga operacional do ciclo de vida:
+
+1. spec: Entrega estruturada (Feature nova, mudança arquitetural). Exige e passa por todo o ciclo RPI do ai-guidelines.
+2. exploration: Provas de Conceito (PoCs), Spikes e estudos técnicos práticos. O entregável foca no aprendizado e no arquivamento seguro (gerando uma PR em formato Draft ou branch salva). Garante que o protótipo sujo permaneça referenciável no futuro sem poluir a branch principal ou sofrer PR rot.
+3. fix: Correção de um comportamento funcional que falhou. Exige uma documentação mínima (plan + tasks), fornecendo rastreio sem a burocracia de uma spec completa.
+4. patch: Manutenção invisível ao usuário final (update de bibliotecas, linting, chore, refactor técnico transparente). Pula completamente a esteira documental pesada.
+5. incident: Fricção grave, downtime de infraestrutura ou quebra crítica de CI. Diferencia-se do fix por possuir severidade atribuída, impactar métricas de negócio e agir como alerta máximo.
+6. proposal: Sementes de backlog. Ideias soltas, melhorias pontuais de UI/UX ou features sugeridas que constam no registro (YAML) sem exigir a criação física de pastas ou ciclos, prontas para serem promovidas a specs quando o time tiver apetite.
+
+- **Data / Owner:** 2026-05-09 / @rosanarezende
 
 ### [DEC-0021-A03] Fronteira entre `sdd_dir`, `spec_workspace_dir` e o lar físico do estado
 
@@ -298,16 +305,16 @@
 
 ## Resumo de status
 
-| ID               | Bloco | Status   |
-| :--------------- | :---- | :------- |
-| `[DEC-0021-A01]` | A     | Pendente |
-| `[DEC-0021-A02]` | A     | Pendente |
-| `[DEC-0021-A03]` | A     | Pendente |
-| `[DEC-0021-B01]` | B     | Pendente |
-| `[DEC-0021-B02]` | B     | Pendente |
-| `[DEC-0021-B03]` | B     | Pendente |
-| `[DEC-0021-B04]` | B     | Pendente |
-| `[DEC-0021-B05]` | B     | Pendente |
+| ID               | Bloco | Status    |
+| :--------------- | :---- | :-------- |
+| `[DEC-0021-A01]` | A     | Resolvido |
+| `[DEC-0021-A02]` | A     | Resolvido |
+| `[DEC-0021-A03]` | A     | Pendente  |
+| `[DEC-0021-B01]` | B     | Pendente  |
+| `[DEC-0021-B02]` | B     | Pendente  |
+| `[DEC-0021-B03]` | B     | Pendente  |
+| `[DEC-0021-B04]` | B     | Pendente  |
+| `[DEC-0021-B05]` | B     | Pendente  |
 
 **Status agregado:** `Pendente`
 
