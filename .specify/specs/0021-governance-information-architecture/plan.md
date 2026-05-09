@@ -277,3 +277,8 @@ A implementação deve seguir o princípio **repo-first híbrido** e evitar quat
 ## 📐 Decisões revisitadas
 
 - **2026-05-09** — O Stage 2 deixou de ser descrito apenas como materialização do modelo repo-first híbrido e passou a incorporar formalmente a re-arquitetura da CLI, Living Documentation e composição modular. **Motivo:** decisões `[DEC-0021-C01]` e `[DEC-0021-D01]` fecharam que a arquitetura de informação e a fundação técnica da ferramenta são inseparáveis nesta spec.
+
+- **2026-05-09 (Sessão de Planejamento da Fase 1)** — Decidida a modernização da stack técnica da CLI, ampliando o escopo da Fase 1 para incluir:
+  - **Migração de JavaScript (`.mjs`) para TypeScript (`.ts`)**: Para garantir segurança de tipos na nova arquitetura DDD, melhorar a manutenibilidade e a experiência de desenvolvimento (IntelliSense). A decisão se baseia no fato de que a nova arquitetura se beneficia imensamente de contratos explícitos (interfaces, tipos), e este é o momento ideal para a migração, evitando retrabalho.
+  - **Substituição do Node.js Test Runner por Jest**: Para alinhar a estratégia de testes (TDD/BDD) com a nova stack TypeScript. Jest oferece um ecossistema mais maduro, suporte de primeira classe para TypeScript via `ts-jest` e um ferramental de mocking e asserções mais rico, eliminando a dependência de flags experimentais do Node.js.
+  - **Motivo da Revisita**: O plano original não especificava a linguagem ou o test runner. A re-arquitetura completa da CLI (decisão `[DEC-0021-C01]`) tornou essa decisão técnica um pré-requisito para uma fundação de alta qualidade. Como ambas as ferramentas são `devDependencies`, não há impacto no pacote final distribuído.

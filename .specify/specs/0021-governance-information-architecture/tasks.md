@@ -85,41 +85,57 @@
 - [x] **0.G.7** Replanejamento do Stage 2 aprovado pela owner antes dos edits nos artefatos.
 - [x] **0.G.[COMMIT]** texto de commit atômico sugerido: `docs(spec-0021): gate humano fechado — plan v2 + tasks v2 publicados`.
 - [x] **0.G.[PULL-REQUEST]** Atualizar PR com descrição focada em Stage 1 (contexto → perguntas de research → opções iniciais). O PR será marcado como "Ready for review", aguardando o fechamento do gate humano para Stage 2.
-- [ ] **0.G.[MANDATÓRIO]** Aprovação humana explícita para merge. **Não fazer merge autonomamente.**
+- [x] **0.G.[MANDATÓRIO]** Aprovação humana explícita para merge. **Não fazer merge autonomamente.**
 
 ---
 
 ## Fase 1 — Fundação arquitetural da nova CLI (DDD + TDD/BDD)
 
-> Esta fase funda os domínios da nova CLI sem ainda executar a migração física completa do workspace. Ela existe para impedir que `.governance/` e `registry.yml` sejam implementados sobre a mesma arquitetura acoplada do legado.
+> Esta fase funda os domínios da nova CLI em um ambiente isolado (`src/`) usando TypeScript e Jest, sem modificar o código legado (`cli/`). A abordagem "Strangler Fig" garante uma transição segura e testável. O código legado continuará funcionando enquanto o novo domínio é construído e validado.
 >
-> **PR1**: Branches `feat/spec-0021-fase-1`, commits incrementais (1.A, 1.B), merge após aprovação humana.
+> **PR1**: Branch `feat/spec-0021-fase-1`, commits incrementais (1.0, 1.A, 1.B), merge após aprovação humana.
 
-### Sub-bloco [1.A] — Ubiquitous language e bounded contexts
+### Sub-bloco [1.0] — Setup Técnico (TypeScript + Jest)
 
-- [ ] **1.A.[NEW-BRANCH]** Branch `feat/spec-0021-fase-1` criada a partir de `feat/spec-0021-governance-information-architecture` (PR0 já mergeada).
-- [ ] **1.A.1** Definir linguagem ubíqua da nova CLI alinhada aos 6 pilares de valor e aos domínios aprovados no gate.
-- [ ] **1.A.2** Delimitar formalmente os bounded contexts `Registry`, `GovernanceWorkspace`, `RulesEngine`, `TemplateEngine` e `LivingDocumentation`.
-- [ ] **1.A.3** Separar `Application`, `Domain` e `Infrastructure` para os casos de uso principais da CLI.
-- [ ] **1.A.4** Registrar contratos de input/output dos casos de uso prioritários (`init`, `adopt`, `providers`, `update` e successors).
-- [ ] **1.A.N** Pipeline de check + test verde após o sub-bloco 1.A.
-- [ ] **1.A.5** Análise de débitos: atualizar `NEXT.md`.
-- [ ] **1.A.[COMMIT]** Commit atômico sugerido: `refactor(spec-0021): funda bounded contexts da cli governance-driven`.
+- [x] **1.0.[NEW-BRANCH]** Branch `feat/spec-0021-fase-1` criada a partir de `main` (PR0 já mergeada).
+- [x] **1.0.1** Adicionar dependências de desenvolvimento: `typescript`, `ts-node`, `jest`, `ts-jest`, `@types/node`, `@types/jest`.
+- [x] **1.0.2** Criar `tsconfig.json` na raiz, configurado para ESM (`"module": "NodeNext"`) e output em `dist/`.
+- [x] **1.0.3** Criar `jest.config.ts` na raiz, configurado para usar `ts-jest` e apontar para os testes em `src/`.
+- [x] **1.0.4** Atualizar `package.json`: adicionar scripts `test:nova-cli` e `build` para o novo ambiente TS.
+- [x] **1.0.5** Criar um teste de smoke (`src/smoke.test.ts`) para garantir que a configuração do Jest está funcionando.
+- [x] **1.0.N** Pipeline de check + test verde após o sub-bloco 1.0.
+- [ ] **1.0.6** Análise de débitos: atualizar `NEXT.md`.
+- [x] **1.0.[COMMIT]** Commit atômico sugerido: `chore(spec-0021): setup typescript e jest para nova cli`.
 
-### Sub-bloco [1.B] — TDD/BDD fundacional e normalização da suíte
+### Sub-bloco [1.A] — Linguagem Ubíqua e Contratos do Domínio
 
-- [ ] **1.B.1** Auditar a suíte existente e mapear quais regras da CLI devem convergir para o padrão `[BR-CLI-*]`.
-- [ ] **1.B.2** Eliminar lacunas críticas em testes de comportamento do domínio da CLI antes da migração estrutural.
-- [ ] **1.B.3** Definir convenção estável para naming, granularidade e rastreabilidade dos testes de comportamento da CLI.
-- [ ] **1.B.4** Garantir que a nova fundação possa evoluir sem drift entre domínio, caso de uso e suite de testes.
-- [ ] **1.B.N** Pipeline de check + test verde após o sub-bloco 1.B.
+> Foco: Traduzir as decisões do gate (`decision-brief.md`) em uma arquitetura de domínio explícita e testável. A linguagem ubíqua dos 6 pilares será materializada em tipos e interfaces, e os testes de comportamento serão escritos (e desabilitados) para validar esses contratos.
+
+- [ ] **1.A.1** Criar a estrutura de diretórios `src/app`, `src/domain`, `src/infrastructure`.
+- [ ] **1.A.2** **[Linguagem Ubíqua]** Em `src/domain/entities/`, definir os tipos e interfaces que representam os 6 pilares de valor: `Spec`, `Exploration`, `Fix`, `Patch`, `Incident`, `Proposal`. Cada um deve refletir seus atributos únicos conforme o `decision-brief.md`.
+- [ ] **1.A.3** **[Bounded Contexts]** Definir as interfaces para os principais serviços do domínio: `RegistryService` (para gerenciar o `registry.yml`), `WorkspaceService` (para interagir com o filesystem do `.governance/`), e `PolicyService` (para validar as regras de transição de estado, ex: `proposal` -> `spec`).
+- [ ] **1.A.4** **[TDD]** Escrever a suíte de testes de comportamento em `src/domain/**/*.test.ts` que valida os contratos e as regras de negócio. Ex: "DADO um `proposal` QUANDO promovido a `spec` ENTÃO ele deve ter um `spec.md` associado".
+- [ ] **1.A.5** **[TDD]** Marcar todos os novos testes com `it.skip`. O objetivo é criar um blueprint executável da arquitetura e dos requisitos de negócio antes da implementação.
+- [ ] **1.A.N** Pipeline de check + test verde (pois os testes do domínio estão desabilitados).
+- [ ] **1.A.6** Análise de débitos: atualizar `NEXT.md`.
+- [ ] **1.A.[COMMIT]** Commit atômico sugerido: `feat(spec-0021): define linguagem ubíqua e contratos do domínio`.
+
+### Sub-bloco [1.B] — Normalização da Suíte e Implementação do Domínio
+
+> Foco: Implementar a lógica de negócio para satisfazer os contratos definidos no sub-bloco 1.A, ativando os testes progressivamente. O objetivo é ter um domínio central sólido e 100% testado, isolado do legado.
+
+- [ ] **1.B.1** Implementar as entidades e a lógica de negócio dentro de `src/domain/`, seguindo as interfaces do sub-bloco anterior.
+- [ ] **1.B.2** **[Ciclo GREEN]** Ativar os testes (`it.skip` -> `it`), um por um ou por módulo, e escrever o código mínimo necessário no domínio para que eles passem.
+- [ ] **1.B.3** Garantir que a suíte de testes do novo domínio atinja alta cobertura e valide todas as regras de negócio definidas no `decision-brief.md`.
+- [ ] **1.B.4** Implementar os casos de uso em `src/app/` que orquestram o domínio, também com cobertura de testes unitários.
+- [ ] **1.B.N** Pipeline de check + test verde, com todos os testes do novo domínio passando.
 - [ ] **1.B.5** Análise de débitos: atualizar `NEXT.md`.
-- [ ] **1.B.[COMMIT]** Commit atômico sugerido: `test(spec-0021): normaliza suíte bdd da nova cli`.
+- [ ] **1.B.[COMMIT]** Commit atômico sugerido: `feat(spec-0021): implementa e valida o novo domínio da CLI`.
 
 ### Encerramento de PR1
 
 - [ ] **1.[PULL-REQUEST]** Criar ou atualizar Pull Request em Draft com título `feat(spec-0021): Fase 1 — Fundação Arquitetural (PR1)`.
-- [ ] **1.[DESCRIPTION]** Descrever em 3 seções: (1) contexto da fundação DDD; (2) decisões de bounded contexts e casos de uso; (3) impacto na suite de testes e roadmap.
+- [ ] **1.[DESCRIPTION]** Descrever em 3 seções: (1) Rationale da migração para TS/Jest e Strangler Fig; (2) Arquitetura DDD em `src/` e testes de comportamento; (3) Status: domínio fundado e testado, legado intacto.
 - [ ] **1.[READY-FOR-REVIEW]** Marcar PR como "Ready for review" após conclusão de 1.B e pipeline verde.
 - [ ] **1.[MANDATÓRIO]** Aguardar aprovação humana explícita. **Não fazer merge autonomamente.**
 - [ ] **1.[MERGE]** Após aprovação, fazer merge com `git commit -m "..."` seguindo a chain em AGENTS.md.

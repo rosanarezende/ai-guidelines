@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    // Não gerar arquivos de saída para os testes
+    "noEmit": true
+  },
+  "include": [
+    // Inclui o código fonte
+    "src/**/*.ts",
+    // Inclui os arquivos de configuração e setup do Jest
+    ".jest/setup.ts",
+    "jest.config.ts" // Se você voltar a usar jest.config.ts no futuro
+  ]
+}
