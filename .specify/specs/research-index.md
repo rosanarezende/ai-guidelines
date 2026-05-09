@@ -51,6 +51,8 @@ Decolamentos de arquitetura de código, CLI, e refatorações complexas que afet
 - [Baseline de Tokens e Orçamento Tok-H](./researchs/architecture/2026-04-30-tokens-baseline-budget.md) _(Medição instrumental do runtime e definição do teto heurístico adotado na Spec 0018)_.
 - [Topologia do Runtime AGENTS.md](./researchs/architecture/2026-05-06-topologia-runtime.md) _(Diagnóstico da dispersão semântica no compilado e fundação para as zonas temáticas adotadas em `[DEC-0019-B02]`)_.
 - [Trampolins e Provider Guardrails contra Context Rot](./researchs/architecture/2026-05-06-trampolins-e-guardrails.md) _(Mapeamento dos arquivos nativos de IA/IDE para 2026 e racional do hard-redirect adotado em `[DEC-0019-B01]`)_.
+- [Fricções de Bootstrap em Consumo Real (`site`)](./researchs/architecture/2026-05-08-consumer-bootstrap-frictions.md) _(Latência percebida, encerramento estranho do TTY e lacuna de onboarding explícito no fluxo `yarn add` + `npx ai-guidelines`)_.
+- [Repo-First com Registro Estruturado, Markdown Derivado e Projeções](./researchs/architecture/2026-05-08-repo-first-structured-registry.md) _(Modelo híbrido proposto para backlog/histórico: estado canônico no repo, visões Markdown derivadas e projeções futuras como SQLite/dashboard)_.
 
 ## 🛸 Open Source & Publicação
 
