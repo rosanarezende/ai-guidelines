@@ -1,6 +1,18 @@
 import { WorkItem, WorkItemType } from "../entities";
 
 /**
+ * Port (Interface) para acesso ao sistema de arquivos.
+ * Permite que o domínio seja testado sem dependência direta de 'node:fs'.
+ */
+export interface FileSystem {
+  readFile(path: string): Promise<string>;
+  writeFile(path: string, content: string): Promise<void>;
+  exists(path: string): Promise<boolean>;
+  mkdir(path: string, recursive?: boolean): Promise<void>;
+  readDir(path: string): Promise<string[]>;
+}
+
+/**
  * Interface para gerenciar o registro estruturado (registry.yml).
  * Lida com a persistência e recuperação do estado canônico.
  */

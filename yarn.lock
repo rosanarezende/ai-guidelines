@@ -1206,6 +1206,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/yaml@npm:^1.9.7":
+  version: 1.9.7
+  resolution: "@types/yaml@npm:1.9.7"
+  dependencies:
+    yaml: "npm:*"
+  checksum: 10c0/0bbb3015ecf4e483a5431b35a8029374cd944eac67f74973814e287d7075adaa86b30aa40efc53666b4b0a462bdd0b8846a86792039ac600560f29f35821a83b
+  languageName: node
+  linkType: hard
+
 "@types/yargs-parser@npm:*":
   version: 21.0.3
   resolution: "@types/yargs-parser@npm:21.0.3"
@@ -1396,6 +1405,7 @@ __metadata:
     "@inquirer/prompts": "npm:7.8.4"
     "@types/jest": "npm:^30.0.0"
     "@types/node": "npm:^25.6.2"
+    "@types/yaml": "npm:^1.9.7"
     husky: "npm:^9.1.7"
     jest: "npm:^30.4.2"
     jest-util: "npm:^30.4.1"
@@ -1403,6 +1413,7 @@ __metadata:
     ts-jest: "npm:^29.4.9"
     ts-node: "npm:^10.9.2"
     typescript: "npm:^6.0.3"
+    yaml: "npm:^2.8.4"
   bin:
     ai-guidelines: cli/ai-guidelines-cli.mjs
   languageName: unknown
@@ -3793,6 +3804,15 @@ __metadata:
   version: 5.0.0
   resolution: "yallist@npm:5.0.0"
   checksum: 10c0/a499c81ce6d4a1d260d4ea0f6d49ab4da09681e32c3f0472dee16667ed69d01dae63a3b81745a24bd78476ec4fcf856114cb4896ace738e01da34b2c42235416
+  languageName: node
+  linkType: hard
+
+"yaml@npm:*, yaml@npm:^2.8.4":
+  version: 2.8.4
+  resolution: "yaml@npm:2.8.4"
+  bin:
+    yaml: bin.mjs
+  checksum: 10c0/0a33a1fa28d4bc79f61a12ec7ef7a2bce0ce5f8e80c6eaecfb4a0c88c08767dd1ede372b6a3bcd70891213b8c9f3169b355c97e77026d3b3459e10d2cccaef1e
   languageName: node
   linkType: hard
 

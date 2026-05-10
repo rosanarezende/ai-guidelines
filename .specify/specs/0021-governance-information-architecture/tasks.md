@@ -124,12 +124,12 @@
 
 > Foco: Implementar a lógica de negócio para satisfazer os contratos definidos no sub-bloco 1.A, isolando o domínio puro da infraestrutura (filesystem). O objetivo é ter um motor de governança 100% testado e desacoplado.
 
-- [ ] **1.B.1** **[Infrastructure]** Implementar o `FileSystemAdapter` em `src/infrastructure/`, responsável pelas operações reais de IO no novo root `.governance/`.
-- [ ] **1.B.2** **[Domain Services]** Implementar `RegistryService` e `WorkspaceService` em `src/domain/services/`, utilizando o adapter de infraestrutura via injeção de dependência.
-- [ ] **1.B.3** **[Domain Logic]** Implementar o `PolicyService` com as regras de transição (ex: `proposal` -> `spec`) e validação de metadados obrigatórios por tipo.
-- [ ] **1.B.4** **[Application Services]** Criar casos de uso em `src/app/` (ex: `RegisterItemUseCase`, `PromoteItemUseCase`) que orquestram os serviços do domínio.
-- [ ] **1.B.5** **[Ciclo GREEN]** Ativar os testes (`it.skip` -> `it`) em `src/domain/domain.test.ts` e garantir que a lógica de negócio satisfaça todos os critérios `[BR-CLI-*]`.
-- [ ] **1.B.6** **[Persistence]** Garantir que a serialização/deserialização do `registry.yml` (YAML) preserve comentários e a ordem dos itens conforme o gate.
+- [x] **1.B.1** **[Infrastructure]** Implementar o `FileSystemAdapter` em `src/infrastructure/`, responsável pelas operações reais de IO no novo root `.governance/`.
+- [x] **1.B.2** **[Domain Services]** Implementar `RegistryService` e `WorkspaceService` em `src/domain/services/`, utilizando o adapter de infraestrutura via injeção de dependência.
+- [x] **1.B.3** **[Domain Logic]** Implementar o `PolicyService` com as regras de transição (ex: `proposal` -> `spec`) e validação de metadados obrigatórios por tipo.
+- [x] **1.B.4** **[Application Services]** Criar casos de uso em `src/app/` (ex: `RegisterItemUseCase`, `PromoteItemUseCase`) que orquestram os serviços do domínio.
+- [/] **1.B.5** **[Ciclo GREEN]** Ativar os testes (`it.skip` -> `it`) em `src/domain/domain.test.ts` e garantir que a lógica de negócio satisfaça todos os critérios `[BR-CLI-*]`.
+- [x] **1.B.6** **[Persistence]** Garantir que a serialização/deserialização do `registry.yml` (YAML) preserve comentários e a ordem dos itens conforme o gate.
 - [ ] **1.B.N** Pipeline de check + test verde, com o novo domínio 100% coberto.
 - [ ] **1.B.7** Análise de débitos: atualizar `NEXT.md`.
 - [ ] **1.B.[COMMIT]** Commit atômico sugerido: `feat(spec-0021): implementa motor de governança (DDD) e adapters de infra`.

@@ -60,6 +60,7 @@
   "devDependencies": {
     "@types/jest": "^30.0.0",
     "@types/node": "^25.6.2",
+    "@types/yaml": "^1.9.7",
     "husky": "^9.1.7",
     "jest": "^30.4.2",
     "jest-util": "^30.4.1",
@@ -73,6 +74,7 @@
     "node": ">=22.0.0"
   },
   "dependencies": {
-    "@inquirer/prompts": "7.8.4"
+    "@inquirer/prompts": "7.8.4",
+    "yaml": "^2.8.4"
   }
 }
