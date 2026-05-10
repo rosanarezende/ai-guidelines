@@ -37,18 +37,47 @@ _(A preencher conforme execução)_
 
 ## 💡 Insights e Descobertas
 
-### Alteração do Boilerplate de Tasks (Spec 0021)
+### Evolução do Boilerplate de `tasks.md`: quando e como quebrar em múltiplas PRs (Harness Lock)
 
-**Context**: A 0021 resultaria em ~3000-3500 linhas de código distribuídas em 6 sub-blocos (1.A-B, 2.A-C, 3.A-B, 4.A-B, Extra). O boilerplate original de `tasks.md` agrupava **todos** os sub-blocos sob uma única branch, gerando 1 PR-monolítica ou múltiplas micro-PRs (~200 linhas cada).
+**Contexto:** A Spec 0021 mostrou que “uma PR por spec” não escala quando o trabalho altera contratos críticos (paths/root, SSOT, engine/runtime) e exige validação humana por checkpoints. Sem um critério explícito, o repositório tende a dois extremos ruins: **mega-PRs irrevisáveis** ou **micro-PRs com churn**.
 
-**Decisão**: Reestruturar para **5 PRs sequenciais** (PR0 + PR1-4), cada uma com:
+**Proposta (melhoria do boilerplate):** adicionar ao boilerplate um bloco canônico **“PR Strategy Decision”** que determine, de forma objetiva, se a spec exige Harness Lock (múltiplas PRs) e quantas PRs são recomendadas.
 
-- Um `[NEW-BRANCH]` por Fase (não por sub-bloco)
-- Múltiplos commits atômicos por sub-bloco dentro da mesma PR
-- Um `[PULL-REQUEST-READY]` e aprovação humana no final de cada Fase
+#### 1) Critérios objetivos para recomendar quebra em PRs (gate)
 
-**Implicação**: Reduz micro-gerenciamento (11 possíveis PRs → 5), sem perder atomicidade de commits (cada sub-bloco mantém seu commit incremental). Facilita review modular e permite gates de aprovação estratégicos entre Fases.
+> Regra sugerida: **se 2+ critérios abaixo forem verdadeiros, a spec deve usar Harness Lock (≥3 PRs)**.
 
-**Recomendação para próximas specs substanciais**: Usar este modelo quando tamanho previsto > 2000 linhas. Ajustar número de PRs conforme interdependências (fases desacopladas podem virar PRs paralelas).
+- **Mudança de contrato do consumidor** (paths/root, comandos, publish surface, smoke).
+- **Migração/compatibilidade** (Strangler Fig, bridges, precedence, rollback, deprecation).
+- **Novo SSOT ou mudança de storage** (registry estruturado, schema, determinismo de serialização).
+- **Re-arquitetura de runtime/CLI** (DDD + TDD/BDD, bounded contexts novos).
+- **Mudança de topologia interna crítica** (ex.: reorganização de `.core/rules/` impactando builder/runtime/CI).
+- **Introdução de engine “inteligente”** (AST extraction/living docs, template engine por composição).
+- **Diff estimado alto** (heurística: >2000 LOC, ou tocando múltiplas superfícies core: CI + runtime + docs + publish).
+
+#### 2) Como sugerir o número de PRs (dimensionamento simples)
+
+- **1 PR**: mudanças pequenas/localizadas, sem contrato do consumidor, sem migração, sem engine/runtime.
+- **3 PRs (mínimo Harness Lock):**
+  1. Domain/Contracts
+  2. Topology/Migration
+  3. Consolidation/Docs/Smoke
+- **5 PRs (modelo tipo 0021)** quando houver simultaneamente **mudança de contrato + migração + engine/runtime**:
+  1. **Domain Memory Foundation** (DDD core, sem IO real)
+  2. **Topology Migration Layer** (Strangler Fig + builder/runtime)
+  3. **Executable Intelligence Runtime** (Living Docs + Template Engine)
+  4. **Governance Consolidation** (carrier/placement + foundation/ADR + cleanup)
+  5. **Final Homologation** (smoke/tarball/ambiente real) — opcional conforme risco
+
+#### 3) Contrato obrigatório por PR (Harness Lock)
+
+Quando Harness Lock for recomendado, o boilerplate deve exigir que cada fase inclua no `tasks.md`:
+
+- `[PR-MGMT.NEW-BRANCH]` (branch canônica)
+- `[PR-MGMT.DESCRIPTION]` (template em 6 seções: decisões/domínios/invariantes/riscos/rollback/validação)
+- `[PR-MGMT.REVIEW-GATE]` (pipeline verde + aprovação humana)
+- `[PR-MGMT.MERGE-CHAIN]` (comandos obrigatórios)
+
+**Benefício:** o `tasks.md` deixa de ser apenas lista de tarefas e passa a operar como **contrato executável**: define quando quebrar PRs, reduz risco de mega-PR irrevisável, elimina micro-PR churn, e preserva gates humanos (CORE-12/14).
 
 _(Sem novos insights registrados nesta sessão)_
