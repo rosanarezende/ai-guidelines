@@ -1,328 +1,777 @@
-<!-- ai-guidelines-template: tasks-evidence-driven-boilerplate v=3 -->
+<!-- ai-guidelines-template: tasks-evidence-driven-boilerplate v=7 (spec-0021-grade, copy/paste ready) -->
 
 # Tasks — Spec 0021 Governance Information Architecture — `evidence-driven`
 
-> Spec: [`./spec.md`](./spec.md)
-> Plan: [`./plan.md`](./plan.md)
-> Decision Brief: [`./decision-brief.md`](./decision-brief.md)
+> Spec: [`./spec.md`](./spec.md)  
+> Plan: [`./plan.md`](./plan.md)  
+> Decision Brief: [`./decision-brief.md`](./decision-brief.md)  
 > Status: In Progress (Stage 2)
 
-> **Progress file vivo.** Atualizar a cada degrau concluído. Quando uma decisão mudar, refletir em `plan.md` na seção 📐 "Decisões revisitadas" e ajustar tasks impactadas. Não retroceder status sem registro.
+> **Progress file vivo.** Atualizar a cada degrau concluído. Quando uma decisão mudar, refletir em `plan.md` na seção 📐 “Decisões revisitadas” e ajustar tasks impactadas.  
+> **Rastreabilidade total:** toda fase/sub-bloco deve estar ancorado em `[DEC-0021-*]` (decision-brief).  
+> **Harness Lock:** nenhuma fase avança sem validação humana + técnica (CORE-12/CORE-14).
 
-> **Variante `evidence-driven`.** Use este boilerplate quando o **Tipo de spec** declarado no header da `spec.md` é `evidence-driven` — i.e., o design depende de evidência técnica/pesquisa **ainda não coletada** (cf. `.core/process/spec-foundation.md` § "Tipos de spec"). A diferença canônica em relação ao boilerplate genérico é a expansão da **Fase 0** com Stage 1 (Research → Decision-Brief → Gate humano), executada **antes** da Implementação A. Stage 2 só inicia após o gate humano resolver todos os pontos `[DEC-NNNN-*]` do `decision-brief.md`.
+---
+
+## 📌 Invariantes não negociáveis (contrato do gate)
+
+**Âncoras:** `[DEC-0021-A01]`, `[DEC-0021-A02]`, `[DEC-0021-A03]`, `[DEC-0021-B01]`, `[DEC-0021-B02]`, `[DEC-0021-B03]`, `[DEC-0021-B04]`, `[DEC-0021-B05]`, `[DEC-0021-C01]`, `[DEC-0021-D01]`
+
+1. **Repo-first híbrido:** YAML versionado no repo como SSOT; Markdown apenas derivado; projeções futuras (DB/dashboard) só como derivados. `[DEC-0021-A01]`
+2. **Pilares MECE como origem de valor:** `spec`, `exploration`, `fix`, `patch`, `incident`, `proposal`, `experiment`. `[DEC-0021-A02]`
+3. **Root do consumidor:** `.governance/` como root unificado; `registry.yml` visível na raiz. `[DEC-0021-A03]`
+4. **Recorte:** Fases 1–3 entregues; Fases 4–5 apenas mapeadas (sem produto/DB/dashboard). `[DEC-0021-B01]`
+5. **Placement/lar futuro:** reservar lar canônico para intake/PRD, handoff, telemetria. `[DEC-0021-B02]`
+6. **Carrier híbrido:** catálogo curto + reorganização física dirigida. `[DEC-0021-B03]`
+7. **Foundation vs ADR:** fronteira híbrida explícita; foundation como constituição viva; ADR como decisões estáveis. `[DEC-0021-B04]`
+8. **`.core/rules/` deve refletir taxonomia:** reorganização física dirigida alinhada ao runtime/builder. `[DEC-0021-B05]`
+9. **DDD + TDD/BDD obrigatório:** re-arquitetura total da CLI; testes como SSOT. `[DEC-0021-C01]`
+10. **Templates por composição atômica:** recipes + partials + validação estrutural; abandonar mirror legado só quando equivalente. `[DEC-0021-D01]`
 
 ---
 
 ## 📋 Estratégia de PRs — 5 Entregas Sequenciais (Harness Lock)
 
-> **Rationale**: Esta especificação resultará em código estrutural crítico (~3500 linhas). Seguindo o **CORE-12** e **CORE-14**, o trabalho é blindado por uma estratégia de **Harness Lock** com 5 PRs sequenciais. Uma única mega-PR seria impossível de revisar com segurança; micro-PRs gerariam churn. Este equilíbrio garante que cada domínio DDD seja validado atomicamente antes do próximo degrau.
+> **Rationale:** evitar mega-PR e também evitar micro-PR churn.  
+> **Gate por fase:** cada PR (fase) precisa de branch dedicada, descrição temática, gate humano e cadeia de merge obrigatória.
 
-| PR      | Fase   | Domínios Focais                                   | Status      |
-| ------- | ------ | ------------------------------------------------- | ----------- |
-| **PR0** | Fase 0 | Setup + Stage 1 (Research/Brief/Gate)             | ✅ Merged   |
-| **PR1** | Fase 1 | **DDD Core**: Domain, Registry, UseCases (Memory) | [/] Active  |
-| **PR2** | Fase 2 | **Topology**: GovernanceWorkspace, RulesEngine    | [ ] Pending |
-| **PR3** | Fase 3 | **Intelligence**: LivingDocs, TemplateEngine      | [ ] Pending |
-| **PR4** | Fase 4 | **Lifecycle**: Foundation, ADRs, Legacy Cleanup   | [ ] Pending |
-
-> **Fluxo de Gate**: A cada fase, deve-se abrir a PR, preencher a descrição temática, passar pelo **Review Humano** e executar a **Cadeia de Merge Obrigatória** (`yarn format ; yarn check ; yarn test:nova-cli ; git commit`).
+| PR      | Fase   | Domínios focais                                                            | Status      |
+| ------- | ------ | -------------------------------------------------------------------------- | ----------- |
+| **PR0** | Fase 0 | Setup + Stage 1 (Research/Brief/Gate)                                      | ✅ Merged   |
+| **PR1** | Fase 1 | DDD Core (Domain/Policy/Registry in-memory) + UseCases (sem IO real)       | [/] Active  |
+| **PR2** | Fase 2 | Topology (GovernanceWorkspace Strangler Fig + RulesEngine builder/runtime) | [ ] Pending |
+| **PR3** | Fase 3 | Intelligence (LivingDocumentation AST + TemplateEngine composition)        | [ ] Pending |
+| **PR4** | Fase 4 | Consolidation (carrier/placement + foundation/ADR + legacy cleanup)        | [ ] Pending |
 
 ---
 
-## Fase 0 — Setup + Stage 1 (Research → Decision-Brief → Gate humano)
+## 🔒 Bloco obrigatório de gerenciamento por PR (Harness Lock)
 
-> **Concluída.** O gate humano fechou em 2026-05-09. Esta fase permanece aqui como trilha de auditoria do lifecycle `evidence-driven`.
+Cada fase **DEVE** conter (no próprio `tasks.md`) os itens abaixo:
 
-### Sub-bloco [0.Setup] — Bootstrap e instanciação
+### [PR-MGMT.NEW-BRANCH]
 
-- [x] **0.1** **Bootstrap**: ler `roadmap/backlog.md` (spec ativa, prioridades, candidatas absorvidas) e `.core/process/spec-foundation.md` § "Tipos de spec".
-- [x] **0.2** **Tipo de spec** confirmado como `evidence-driven` no header da `spec.md`. Critério-teste: _"o design depende de evidência técnica/pesquisa ainda não coletada?"_ → **sim**.
-- [x] **0.3** **Slug semântico** definido: `governance-information-architecture`.
+- Criar branch da fase a partir de `main` (assumindo fase anterior mergeada).
+
+### [PR-MGMT.DESCRIPTION]
+
+- Descrever em 6 seções:
+  1. Decisões `[DEC-*]` impactadas
+  2. Bounded contexts tocados
+  3. Invariantes protegidas (e como)
+  4. Riscos mitigados (hardcoded paths, drift, churn)
+  5. Estratégia de rollback/escape hatch
+  6. Como validar (comandos + evidências)
+
+### [PR-MGMT.REVIEW-GATE]
+
+- Checklist obrigatório:
+  - [ ] Pipeline verde
+  - [ ] Rastreabilidade `[DEC-*]` aplicada (sub-blocos e pontos críticos)
+  - [ ] TDD/BDD com evidência de RED→GREEN (não só scaffolding)
+  - [ ] Boundaries preservados (domain/app/infra)
+  - [ ] Compatibilidade validada (quando aplicável)
+  - [ ] Drift guard (quando aplicável)
+  - [ ] Smoke tests (quando aplicável)
+
+### [PR-MGMT.MERGE-CHAIN]
+
+- Cadeia mínima:
+
+```bash
+yarn format
+yarn check
+yarn test:nova-cli
+```
+
+- Cadeias adicionais conforme fase:
+
+```bash
+yarn build:rules
+yarn smoke
+```
+
+---
+
+# ✅ Fase 0 — Setup + Stage 1 (Research → Decision-Brief → Gate humano)
+
+> **Concluída.** Manter integralmente as fases já concluídas (Fase 0 e sub-blocos 1.0/1.A).
+> **Âncoras:** todos os `[DEC-0021-*]` (gate fechado)
+
+## Sub-bloco [0.Setup] — Bootstrap e instanciação
+
+- [x] **0.1** Bootstrap: ler `roadmap/backlog.md` e `.core/process/spec-foundation.md` § “Tipos de spec”.
+- [x] **0.2** Tipo de spec confirmado como `evidence-driven` no header da `spec.md`.
+- [x] **0.3** Slug semântico definido: `governance-information-architecture`.
 - [x] **0.4** Branch `feat/spec-0021-governance-information-architecture` criada a partir de `main`.
-- [x] **0.5** `spec.md` instanciado a partir de `.specify/templates/spec-boilerplate.md`; header completo com `Tipo de spec: evidence-driven` e campo `Decision Brief` apontando para `./decision-brief.md`.
-- [x] **0.6** **[MANDATÓRIO]** Validação Humana inicial: owner aprovou o problema e o escopo antes dos Code Actions.
-- [x] **0.7** `plan.md` instanciado a partir de `.specify/templates/plan-boilerplate.md` com bloco Stage 1 / Stage 2 e perguntas explícitas de research.
-- [x] **0.8** `tasks.md` (este arquivo) instanciado a partir desta variante.
-- [x] **0.9** `decision-brief.md` instanciado com pontos `[DEC-0021-*]` em status `Pendente`.
-- [x] **0.10** `roadmap/backlog.md` atualizado: 0021 movida para "Em execução", preservando rastreabilidade editorial mínima da candidata original.
+- [x] **0.5** `spec.md` instanciado a partir do boilerplate; header completo com link para `decision-brief.md`.
+- [x] **0.6** [MANDATÓRIO] Validação humana inicial: owner aprovou problema e escopo.
+- [x] **0.7** `plan.md` instanciado com bloco Stage 1/Stage 2 e perguntas de research.
+- [x] **0.8** `tasks.md` instanciado.
+- [x] **0.9** `decision-brief.md` instanciado com `[DEC-0021-*]` em `Pendente`.
+- [x] **0.10** `roadmap/backlog.md` atualizado: 0021 em execução.
 - [x] **0.11** `NEXT.md` instanciado (mandatório).
-- [x] **0.[COMMIT]** texto de commit atômico sugerido: `chore(spec-0021): setup inicial da spec governance-information-architecture`.
-- [x] **0.[PULL-REQUEST]** Criar Pull Request em Draft (usando o template do repositório, se aplicável).
+- [x] **0.[COMMIT]** `chore(spec-0021): setup inicial da spec governance-information-architecture`.
+- [x] **0.[PULL-REQUEST]** Criar PR em Draft.
 
-### Sub-bloco [0.Research] — Stage 1: produzir researches
+## Sub-bloco [0.Research] — Stage 1: produzir researches
 
-- [x] **0.R.1** Listar perguntas de research a responder em `plan.md`, cada uma cruzada com o ponto `[DEC-0021-*]` correspondente.
-- [x] **0.R.2** Consolidar o pacote inicial de evidência usando os dois researches obrigatórios de 2026-05-08 e o backlog da candidata.
-- [x] **0.R.3** Produzir research complementar quando o pós-gate evidenciou lacunas reais de implementação (`2026-05-09-post-gate-gap-analysis.md`).
-- [x] **0.R.4** Análise de débitos e implicações técnicas incorporada ao replanejamento do Stage 2.
-- [x] **0.R.[COMMIT]** texto de commit incremental sugerido: `research(spec-0021): sínteses Stage 1 publicadas`.
+- [x] **0.R.1** Listar perguntas de research no `plan.md` cruzadas com `[DEC-0021-*]`.
+- [x] **0.R.2** Consolidar pacote inicial de evidência (researchs 2026-05-08 + backlog).
+- [x] **0.R.3** Produzir research complementar pós-gate (`post-gate-gap-analysis.md`).
+- [x] **0.R.4** Incorporar débitos e implicações técnicas ao replanejamento do Stage 2.
+- [x] **0.R.[COMMIT]** `research(spec-0021): sínteses Stage 1 publicadas`.
 
-### Sub-bloco [0.Brief] — Stage 1: popular `decision-brief.md` com opções
+## Sub-bloco [0.Brief] — Stage 1: popular `decision-brief.md`
 
-- [x] **0.B.1** Popular `[DEC-0021-A01]`, `[DEC-0021-A02]`, `[DEC-0021-A03]`, `[DEC-0021-B01]`, `[DEC-0021-B02]`, `[DEC-0021-B03]`, `[DEC-0021-B04]` e `[DEC-0021-B05]` com pergunta, contexto, opções e tradeoffs.
-- [x] **0.B.2** Registrar recomendações iniciais quando já houver evidência convergente nos insumos de 2026-05-08.
-- [x] **0.B.3** Publicar a tabela "Resumo de status" com todos os pontos em `Pendente`.
-- [x] **0.B.4** Análise de débitos inicial registrada e depois expandida pelo pós-gate.
-- [x] **0.B.[COMMIT]** texto de commit incremental sugerido: `docs(spec-0021): decision-brief.md populado com opções Stage 1`.
+- [x] **0.B.1** Popular `[DEC-0021-A01..B05]` com opções e tradeoffs.
+- [x] **0.B.2** Recomendações iniciais quando evidência convergente existir.
+- [x] **0.B.3** Tabela resumo de status.
+- [x] **0.B.4** Débitos iniciais registrados.
+- [x] **0.B.[COMMIT]** `docs(spec-0021): decision-brief.md populado com opções Stage 1`.
 
-### Sub-bloco [0.Gate] — Gate humano (decision-brief → Resolved)
+## Sub-bloco [0.Gate] — Gate humano (decision-brief → Resolved)
 
-> **Fechado. Stage 2 está autorizado.**
-
-- [x] **0.G.1** Owner revisou `decision-brief.md` com todos os pontos `[DEC-0021-*]`.
-- [x] **0.G.2** Para cada ponto: owner escolheu opção, justificou e fechou status em `Resolved`.
-- [x] **0.G.3** Perguntas que exigiram aprofundamento retornaram ao research antes do fechamento do gate.
-- [x] **0.G.4** Status agregado do `decision-brief.md` mudou para `Resolved` com bloco final "✅ Gate fechado" assinado.
-- [x] **0.G.5** `plan.md` passou a exigir v2 orientado pelas decisões cravadas.
-- [x] **0.G.6** `tasks.md` passou a exigir v2 com Fases de Stage 2 reordenadas e aprofundadas.
-- [x] **0.G.7** Replanejamento do Stage 2 aprovado pela owner antes dos edits nos artefatos.
-- [x] **0.G.[COMMIT]** texto de commit atômico sugerido: `docs(spec-0021): gate humano fechado — plan v2 + tasks v2 publicados`.
-- [x] **0.G.[PULL-REQUEST]** Atualizar PR com descrição focada em Stage 1 (contexto → perguntas de research → opções iniciais). O PR será marcado como "Ready for review", aguardando o fechamento do gate humano para Stage 2.
-- [x] **0.G.[MANDATÓRIO]** Aprovação humana explícita para merge. **Não fazer merge autonomamente.**
+- [x] **0.G.1** Owner revisou o `decision-brief.md`.
+- [x] **0.G.2** Owner escolheu opções e fechou todos `[DEC-0021-*]` como `Resolved`.
+- [x] **0.G.3** Perguntas que exigiram aprofundamento retornaram ao research antes do fechamento.
+- [x] **0.G.4** Status agregado `Resolved` + bloco “Gate fechado”.
+- [x] **0.G.5** `plan.md` passa a exigir v2.
+- [x] **0.G.6** `tasks.md` passa a exigir v2.
+- [x] **0.G.7** Replanejamento do Stage 2 aprovado pela owner.
+- [x] **0.G.[COMMIT]** `docs(spec-0021): gate humano fechado — plan v2 + tasks v2 publicados`.
+- [x] **0.G.[PULL-REQUEST]** PR atualizado com descrição Stage 1.
+- [x] **0.G.[MANDATÓRIO]** Aprovação humana explícita para merge.
 
 ---
 
-## Fase 1 — Fundação Core (DDD Memory Layer)
+# 🚧 Fase 1 — Fundação Core (DDD Memory Layer) — PR1
 
-> **PR1**: Branch `feat/spec-0021-fase-1-core`. Foco: Lógica pura, Registry e Políticas em memória (Pure DDD).
-> Cadeia: `yarn format ; yarn check ; yarn test:nova-cli ; git commit`.
+> **Âncoras:** `[DEC-0021-A01]`, `[DEC-0021-A02]`, `[DEC-0021-C01]`
+> **Objetivo:** fundar domínio/políticas/registry em memória + orquestração por casos de uso, sem acoplamento prematuro.
 
-### Sub-bloco [1.0] — Setup Técnico (TypeScript + Jest)
+## [PR-MGMT] PR1
 
-- [x] **1.0.[NEW-BRANCH]** Branch `feat/spec-0021-fase-1` criada a partir de `main` (PR0 já mergeada).
-- [x] **1.0.1** Adicionar dependências de desenvolvimento: `typescript`, `ts-node`, `jest`, `ts-jest`, `@types/node`, `@types/jest`.
-- [x] **1.0.2** Criar `tsconfig.json` na raiz, configurado para ESM (`"module": "NodeNext"`) e output em `dist/`.
-- [x] **1.0.3** Criar `jest.config.ts` na raiz, configurado para usar `ts-jest` e apontar para os testes em `src/`.
-- [x] **1.0.4** Atualizar `package.json`: adicionar scripts `test:nova-cli` e `build` para o novo ambiente TS.
-- [x] **1.0.5** Criar um teste de smoke (`src/smoke.test.ts`) para garantir que a configuração do Jest está funcionando.
-- [x] **1.0.N** Pipeline de check + test verde após o sub-bloco 1.0.
-- [x] **1.0.6** Análise de débitos: atualizar `NEXT.md`.
-- [x] **1.0.[COMMIT]** Commit atômico sugerido: `chore(spec-0021): setup typescript e jest para nova cli`.
+- [ ] **1.[PR-MGMT.NEW-BRANCH]** Branch: `feat/spec-0021-pr1-domain-memory-foundation`.
+- [ ] **1.[PR-MGMT.DESCRIPTION]** (6 seções obrigatórias).
+- [ ] **1.[PR-MGMT.REVIEW-GATE]** Gate humano obrigatório.
+- [ ] **1.[PR-MGMT.MERGE-CHAIN]** `yarn format ; yarn check ; yarn test:nova-cli`.
 
-### Sub-bloco [1.A] — Governança por Blueprints (Living Documentation)
+## Sub-bloco [1.0] — Setup Técnico (TypeScript + Jest) ✅
 
-> Foco: Consolidar a suíte de testes como a Única Fonte da Verdade (SSOT) para as regras de negócio. Sanitizar o ambiente para garantir pureza arquitetural antes da implementação real.
+> **Âncora:** `[DEC-0021-C01]` (mantido integralmente)
 
-- [x] **1.A.1** Centralizar e estruturar os blueprints de teste em `src/` seguindo as áreas de negócio: `domain/policy`, `domain/registry`, `domain/workspace`, `app/use-cases` e `infrastructure/filesystem`.
-- [x] **1.A.2** Enriquecer os blueprints com as regras MECE dos 7 pilares, métricas de Growth, requisitos de incidentes e mensagens de erro específicas extraídas do `decision-brief.md` e da análise da CLI legada.
-- [x] **1.A.3** **[Sanitização]** Deletar toda a implementação precoce em `src/` para garantir o ciclo RED -> GREEN sustentável e fundado em contratos puros.
-- [x] **1.A.4** Validar a suíte de blueprints (`yarn test:nova-cli`) garantindo 100% de cobertura de regras em modo `it.skip`.
-- [x] **1.A.5** Criar o `BLUEPRINT_STRUCTURE.md` como guia canônico para humanos e agentes navegarem pela governança técnica.
-- [x] **1.A.N** Pipeline de check + test verde (com 100% de skips válidos).
-- [x] **1.A.6** Análise de débitos: atualizar `NEXT.md`.
-- [x] **1.A.[COMMIT]** Commit atômico realizado: `chore(spec-0021): pasta src sanitizada e blueprints enriquecidos com insights da implementação precoce`.
+- [x] **1.0.[NEW-BRANCH]** Branch `feat/spec-0021-fase-1` criada a partir de `main` (PR0 mergeada).
+- [x] **1.0.1** Dependências dev: `typescript`, `ts-node`, `jest`, `ts-jest`, `@types/node`, `@types/jest`.
+- [x] **1.0.2** `tsconfig.json` ESM (`module: NodeNext`) e output `dist/`.
+- [x] **1.0.3** `jest.config.ts` usando `ts-jest` e testes em `src/`.
+- [x] **1.0.4** Scripts `test:nova-cli` e `build`.
+- [x] **1.0.5** Smoke test (`src/smoke.test.ts`).
+- [x] **1.0.N** Pipeline verde.
+- [x] **1.0.6** Débitos: atualizar `NEXT.md`.
+- [x] **1.0.[COMMIT]** `chore(spec-0021): setup typescript e jest para nova cli`.
 
-### Sub-bloco [1.B] — O Coração do Domínio (Entidades e Políticas Puras)
+## Sub-bloco [1.A] — Governança por Blueprints (Living Documentation) ✅
 
-> Foco: Implementar o "Cérebro" da governança seguindo o **DDD Puro**. Sem IO, apenas lógica e tipos ricos que garantem a integridade dos 7 pilares (MECE) definidos em [DEC-0021-A02].
+> **Âncoras:** `[DEC-0021-C01]`, `[DEC-0021-D01]` (mantido integralmente)
 
-- [ ] **1.B.1** **[Linguagem Ubíqua]** Materializar as entidades em `src/domain/entities/` (Spec, Exploration, Fix, Patch, Incident, Proposal, Experiment). Cada uma deve refletir os atributos e restrições de [DEC-0021-A02] (ex: `Experiment` exige `hypothesis` e `successMetrics`).
-- [ ] **1.B.2** **[Domain Brain]** Implementar o `GovernancePolicyService` como o oráculo das regras:
-  - Validar transições de maturidade (ex: Proposal [review/done] -> Spec; Experiment [won] -> Spec).
-  - Aplicar restrições MECE (Impedir campos de `experiment` em `patch`, garantir `severity` em `incident`).
-  - Validar descritividade mínima (títulos e hipóteses com comprimento mínimo).
-- [ ] **1.B.3** **[TDD / Ciclo GREEN]** Ativar os testes de `src/domain/policy/Pillars.test.ts` e `Promotion.test.ts`. O domínio deve atingir estado verde baseado em lógica pura em memória.
-- [ ] **1.B.4** Análise de débitos: atualizar `NEXT.md`.
-- [ ] **1.B.[COMMIT]** Commit atômico sugerido: `feat(spec-0021): implementa coração do domínio e motor de políticas (Pure DDD)`.
+- [x] **1.A.1** Estruturar blueprints em `src/` (domain/app/infra).
+- [x] **1.A.2** Enriquecer blueprints com regras MECE e mensagens de erro.
+- [x] **1.A.3** Sanitização: deletar implementação precoce em `src/`.
+- [x] **1.A.4** Validar `yarn test:nova-cli` com `it.skip`.
+- [x] **1.A.5** Criar `BLUEPRINT_STRUCTURE.md`.
+- [x] **1.A.N** Pipeline verde (skips válidos).
+- [x] **1.A.6** Débitos: atualizar `NEXT.md`.
+- [x] **1.A.[COMMIT]** `chore(spec-0021): pasta src sanitizada e blueprints enriquecidos...`.
 
-### Sub-bloco [1.C] — Persistência Estruturada e Integridade (Registry SSOT)
+## Sub-bloco [1.AS] — Sanitização intermediária (Blueprint Integrity Lock) 🧼
 
-> Foco: O `registry.yml` como fonte única de verdade (SSOT), conforme [DEC-0021-A01]. A persistência deve ser "human-friendly" para suportar Code Review.
+> **Âncora:** `[DEC-0021-C01]`
+> **Objetivo:** impedir drift/boundary leak antes de iniciar implementação real.
 
-- [ ] **1.C.1** **[YAML SSOT]** Implementar o `GovernanceRegistryService` garantindo:
-  - Preservação de comentários manuais de governança (Vital para DEC-0021-A01).
-  - Estabilidade de diff (ordem determinística dos itens para evitar churn em PRs).
-  - Automatização de metadados de auditoria (`updatedAt`, imutabilidade de `id` e `createdAt`).
-- [ ] **1.C.2** **[Schema Guard]** Implementar validação de schema rígida para evitar corrupção do estado estruturado.
-- [ ] **1.C.3** **[TDD / Ciclo GREEN]** Ativar e passar os testes de `src/domain/registry/Integrity.test.ts`.
-- [ ] **1.C.4** Análise de débitos: atualizar `NEXT.md`.
-- [ ] **1.C.[COMMIT]** Commit atômico sugerido: `feat(spec-0021): implementa registro estruturado com preservação de comentários (YAML SSOT)`.
+- [ ] **1.AS.1 [Boundaries]** Criar guardrails anti-acoplamento:
+  - `src/domain/**` não importa `src/app/**` nem `src/infrastructure/**`.
+  - `src/app/**` acessa infra apenas via ports.
 
-### Sub-bloco [1.D] — Mapeamento Físico e Orquestração (App Layer)
+- [ ] **1.AS.2 [Enforcement]** Adicionar verificação que falha build/test se boundary for violado (teste, script ou lint rule).
+- [ ] **1.AS.3 [Blueprint strength]** Fortalecer testes críticos com casos negativos e mensagens determinísticas:
+  - `Pillars.test.ts` e `Promotion.test.ts`
+  - `Integrity.test.ts` (invariantes mínimas do registry em memória)
 
-> Foco: Conectar o domínio à infraestrutura. Aqui nasce a percepção física do workspace `.governance/`, conforme [DEC-0021-A03].
+- [ ] **1.AS.4 [Skip policy]** Padrão obrigatório para `it.skip`:
+  - `// [SKIP-REASON: <X>]` + âncora `[DEC-*]`
 
-- [ ] **1.D.1** **[Infrastructure Adapter]** Implementar o `FileSystemAdapter` em `src/infrastructure/` com guardas de escopo estrito ao root `.governance/`.
-- [ ] **1.D.2** **[Physical Mapping]** Implementar o `GovernanceWorkspaceService`:
-  - Lógica de isolamento: diferenciar itens Densos (com pasta física) de Virtuais (apenas registro).
-  - Inicialização das subpastas canônicas (specs, incidents, experiments, explorations).
-- [ ] **1.D.3** **[Application Layer]** Implementar os Use Cases `RegisterWorkItem` e `PromoteWorkItem`:
-  - Orquestração atômica: Validação -> Persistência YAML -> Criação Física.
-  - **Lógica de Rollback**: Garantir que uma falha de disco não deixe o Registro em estado inconsistente.
-- [ ] **1.D.4** **[BDD/TDD / Ciclo GREEN]** Ativar e passar os testes de `Isolation.test.ts` e as suítes em `src/app/use-cases/`.
-- [ ] **1.D.[COMMIT]** Commit atômico sugerido: `feat(spec-0021): orquestração de casos de uso e mapeamento físico do workspace .governance/`.
+- [ ] **1.AS.N** Pipeline verde.
+- [ ] **1.AS.[COMMIT]** `chore(spec-0021): sanitização intermediária — blueprint integrity lock`.
 
-### Encerramento de PR1
+## Sub-bloco [1.B] — Domínio (Entidades + Políticas puras) 🧠
 
-- [ ] **1.[PULL-REQUEST]** Criar ou atualizar Pull Request em Draft com título `feat(spec-0021): Fase 1 — Fundação Arquitetural (PR1)`.
-- [ ] **1.[DESCRIPTION]** Descrever em 3 seções: (1) Governança por Blueprints (RED); (2) Domínio DDD fundado (GREEN); (3) Orquestração atômica.
-- [ ] **1.[READY-FOR-REVIEW]** Marcar PR como "Ready for review" após conclusão de 1.D e pipeline verde.
+> **Âncoras:** `[DEC-0021-A02]`, `[DEC-0021-C01]`
+
+- [ ] **1.B.1** Linguagem ubíqua: `WorkItemId`, `WorkItemKind`, `LifecycleStatus`, `ValueStatus`, `ResolutionMode`.
+- [ ] **1.B.2** Entidades com invariantes:
+  - `Incident.severity` obrigatório
+  - `Experiment.hypothesis` + `successMetrics` obrigatórios
+  - `Patch` não aceita campos experimentais
+  - `Proposal` não pode pular maturidade
+
+- [ ] **1.B.3** `GovernancePolicyService` (oráculo):
+  - transições por tipo
+  - promoções (proposal→spec, experiment(won)→spec)
+  - guardrails MECE
+
+- [ ] **1.B.4** Ativar (de-skip) e passar `Pillars.test.ts` e `Promotion.test.ts`.
+- [ ] **1.B.N** Pipeline verde.
+- [ ] **1.B.[COMMIT]** `feat(spec-0021): domínio + políticas puras (DDD core green)`.
+
+## Sub-bloco [1.C] — Registry SSOT (memória + integridade) 📚
+
+> **Âncoras:** `[DEC-0021-A01]`, `[DEC-0021-C01]`
+
+- [ ] **1.C.1** Schema mínimo em memória: `id`, `kind`, `title`, `status`, `createdAt`, `updatedAt`, `sourceRefs[]`.
+- [ ] **1.C.2** Ordenação canônica (diferença determinística).
+- [ ] **1.C.3** Integridade: IDs únicos, imutabilidade `id/createdAt`, refs válidas.
+- [ ] **1.C.4** Ativar (de-skip) e passar `Integrity.test.ts`.
+- [ ] **1.C.5** Registrar decisão de implementação para “preservar comentários no YAML” (aprovação humana se dependência externa).
+- [ ] **1.C.N** Pipeline verde.
+- [ ] **1.C.[COMMIT]** `feat(spec-0021): registry SSOT (memória) + integridade`.
+
+## Sub-bloco [1.D] — Use Cases + Atomicidade (policy-first) 🧩
+
+> **Âncoras:** `[DEC-0021-A03]`, `[DEC-0021-C01]`
+
+- [ ] **1.D.1** Ports: `RegistryStore`, `WorkspaceStore`, `Clock`, `IdGenerator`.
+- [ ] **1.D.2** Use cases: `RegisterWorkItem`, `PromoteWorkItem`.
+- [ ] **1.D.3** Atomicidade/rollback: falha na criação física não pode deixar registry inconsistente.
+- [ ] **1.D.4** Ativar (de-skip) e passar `RegisterItem.test.ts` e `PromoteItem.test.ts`.
+- [ ] **1.D.N** Pipeline verde.
+- [ ] **1.D.[COMMIT]** `feat(spec-0021): use cases atômicos (policy-first)`.
+
+## Encerramento de PR1 (gate)
+
+- [ ] **1.[READY-FOR-REVIEW]** Só marcar “Ready” quando:
+  - testes críticos verdes (não só skip)
+  - boundaries enforcement ativo
+  - registry integrity verde
+  - use cases com rollback verde
+
 - [ ] **1.[MANDATÓRIO]** Aguardar aprovação humana explícita.
-- [ ] **1.[MERGE]** Após aprovação, fazer merge com `git commit -m "..."` seguindo a chain em AGENTS.md.
+- [ ] **1.[MERGE]** Merge após gate humano.
 
 ---
 
-## Fase 2 — Reestruturação física do workspace e contratos do consumidor
+# 🚧 Fase 2 — Topology Migration Layer (PR2)
 
-> Esta fase materializa os Blocos A e B do gate no filesystem, no contrato do consumidor e na superfície publicada do framework.
->
-> **Dependência**: PR1 deve estar mergeada.
->
-> **PR2**: Branch `feat/spec-0021-fase-2`, commits incrementais (2.A, 2.B, 2.C), merge após aprovação humana.
+> **Âncoras:** `[DEC-0021-A03]`, `[DEC-0021-B05]`, `[DEC-0021-C01]`
+> **Objetivo:** operacionalizar Strangler Fig + alinhar `.core/rules/` com builder/runtime.
+> **Regra:** esta fase NÃO é rename cosmético; ela define contratos de migração e compatibilidade.
 
-### Sub-bloco [2.A] — Estado canônico repo-first híbrido
+## [PR-MGMT] PR2
 
-- [ ] **2.A.[NEW-BRANCH]** Branch `feat/spec-0021-fase-2` criada a partir de `main` (assumindo PR1 já mergeada).
-- [ ] **2.A.1** Introduzir o contrato canônico do estado estruturado em `.governance/registry.yml`, com IDs, campos mínimos e invariantes documentadas.
-- [ ] **2.A.2** Provar o modelo com um lote mínimo representativo que inclua pelo menos uma origem não-spec, uma spec e uma entrega relacionada.
-- [ ] **2.A.3** Validar que o modelo não depende de banco/serviço externo e pode ser reconstruído apenas a partir do repositório.
-- [ ] **2.A.N** Pipeline de check + test verde após o sub-bloco 2.A.
-- [ ] **2.A.4** Análise de débitos: atualizar `NEXT.md`.
-- [ ] **2.A.[COMMIT]** Commit atômico sugerido: `feat(spec-0021): introduz estado repo-first híbrido em .governance`.
-
-### Sub-bloco [2.B] — Placement documental e foundation/ADR
-
-- [ ] **2.B.1** **[Catálogo]** Criar o `GOVERNANCE-CATALOG.md` (ou similar) como carrier canônico da política de arquitetura de informação (Modelo Híbrido DEC-0021-B03).
-- [ ] **2.B.2** **[Refactor Foundation]** Renomear e refatorar `.core/process/spec-foundation.md` para `governance-foundation.md` (ou `lifecycle.md`), removendo débitos arquiteturais para ADRs conforme DEC-0021-B04.
-- [ ] **2.B.3** **[Placement]** Aplicar a política de placement para ADRs, docs descritivos e referências sob a nova topologia.
-- [ ] **2.B.4** **[Rules Topology]** Reorganizar fisicamente `.core/rules/` seguindo a taxonomia (Top/Center/Base), conforme DEC-0021-B05.
-- [ ] **2.B.5** **[Reserva]** Reservar explicitamente os paths de PRD/intake, handoff e telemetria em `.governance/`.
-- [ ] **2.B.6** **[Depreciação]** Migrar conteúdo útil de `docs/` para `.core/docs/` ou `.governance/` e depreciar a pasta raiz `docs/` (Gap Analysis).
-- [ ] **2.B.N** Pipeline de check + test verde após o sub-bloco 2.B.
-- [ ] **2.B.7** Análise de débitos: atualizar `NEXT.md`.
-- [ ] **2.B.[COMMIT]** Commit atômico sugerido: `docs(spec-0021): consolida catálogo de governança e nova topologia`.
-
-### Sub-bloco [2.C] — Root `.governance/` e compatibilidade com legado
-
-- [ ] **2.C.1** Formalizar o contrato entre `sdd_dir`, `spec_workspace_dir` e o novo root `.governance/`.
-- [ ] **2.C.2** Introduzir camada explícita de compatibilidade para leitura/migração de `.ai-guidelines/` e `.specify/`.
-- [ ] **2.C.3** Alinhar help da CLI, surface publicada do pacote, smoke tests e docs com o novo contrato do consumidor.
-- [ ] **2.C.4** Validar o contrato contra a fricção observada no consumidor `site`, evitando ambiguidade de onboarding.
-- [ ] **2.C.N** Pipeline de check + test verde após o sub-bloco 2.C.
-- [ ] **2.C.5** Análise de débitos: atualizar `NEXT.md`.
-- [ ] **2.C.[COMMIT]** Commit atômico sugerido: `refactor(spec-0021): introduz root .governance com bridge de legado`.
-
-### Encerramento de PR2
-
-- [ ] **2.[PULL-REQUEST]** Criar ou atualizar Pull Request em Draft com título `feat(spec-0021): Fase 2 — Reestruturação Física (PR2)`.
-- [ ] **2.[DESCRIPTION]** Descrever em 3 seções: (1) estado canônico e registry.yml; (2) placement documental e foundation; (3) root .governance/ e compatibilidade.
-- [ ] **2.[READY-FOR-REVIEW]** Marcar PR como "Ready for review" após conclusão de 2.C e pipeline verde.
-- [ ] **2.[MANDATÓRIO]** Aguardar aprovação humana explícita. **Não fazer merge autonomamente.**
-- [ ] **2.[MERGE]** Após aprovação, fazer merge com `git commit -m "..."` seguindo a chain em AGENTS.md.
+- [ ] **2.[PR-MGMT.NEW-BRANCH]** Branch: `feat/spec-0021-pr2-topology-migration-layer`.
+- [ ] **2.[PR-MGMT.DESCRIPTION]** (6 seções obrigatórias).
+- [ ] **2.[PR-MGMT.REVIEW-GATE]** Gate humano obrigatório.
+- [ ] **2.[PR-MGMT.MERGE-CHAIN]** `yarn format ; yarn check ; yarn test:nova-cli ; yarn build:rules`.
 
 ---
 
-## Fase 3 — Living Documentation e Engine de Composição
+## Sub-bloco [2.A] — GovernanceWorkspace (Strangler Fig) 🏛️
 
-> Esta fase implementa os Blocos C (Living Documentation) e D (composição modular) do gate como capacidades concretas do framework.
->
-> **Dependência**: PR2 deve estar mergeada.
->
-> **PR3**: Branch `feat/spec-0021-fase-3`, commits incrementais (3.A, 3.B, 4.A, 4.B), merge após aprovação humana.
+> **Âncoras:** `[DEC-0021-A03]`, `[DEC-0021-C01]`
 
-### Sub-bloco [3.A] — Contrato da documentação viva
+### Contratos obrigatórios (precisam virar testes)
 
-- [ ] **3.A.[NEW-BRANCH]** Branch `feat/spec-0021-fase-3` criada a partir de `main` (assumindo PR2 já mergeada).
-- [ ] **3.A.1** Definir o schema do artefato estruturado gerado a partir dos testes `[BR-CLI-*]`.
-- [ ] **3.A.2** Decidir o formato inicial de saída em `.governance/` e os metadados mínimos necessários para consumo futuro.
-- [ ] **3.A.3** Garantir determinismo do artefato gerado para evitar churn artificial em PRs e builds.
-- [ ] **3.A.N** Pipeline de check + test verde após o sub-bloco 3.A.
-- [ ] **3.A.4** Análise de débitos: atualizar `NEXT.md`.
-- [ ] **3.A.[COMMIT]** Commit atômico sugerido: `feat(spec-0021): define contrato da living documentation`.
+- [ ] **2.A.1 [Discovery Contract]** Detectar estado do repo:
+  - workspace já em `.governance/`
+  - legado em `.specify/` e/ou `.ai-guidelines/`
+  - estado “misto” (ambos existem) deve falhar com instrução explícita (sem heurística silenciosa)
 
-### Sub-bloco [3.B] — Extração automática e guardrails de drift
+- [ ] **2.A.2 [Precedence Policy]** Regra explícita:
+  - se `.governance/` existe: é SSOT; legado só pode ser lido via modo explícito (bridge)
+  - se `.governance/` não existe: CLI oferece migração/adopção (não alias invisível)
 
-- [ ] **3.B.1** Implementar extração automática dos testes `[BR-CLI-*]` via AST parsing ou reporter dedicado.
-- [ ] **3.B.2** Integrar a geração do artefato ao ciclo local e ao CI.
-- [ ] **3.B.3** Falhar a pipeline quando houver drift entre comportamento testado e artefato estruturado gerado.
-- [ ] **3.B.4** Validar cobertura dos comportamentos críticos da CLI sob a nova taxonomia de regras.
-- [ ] **3.B.N** Pipeline de check + test verde após o sub-bloco 3.B.
-- [ ] **3.B.5** Análise de débitos: atualizar `NEXT.md`.
-- [ ] **3.B.[COMMIT]** Commit atômico sugerido: `feat(spec-0021): extrai br-cli para .governance`.
+- [ ] **2.A.3 [Idempotência]** Rodar “adopt/migrate” duas vezes não gera churn nem duplica estado.
+- [ ] **2.A.4 [Rollback]** Falha durante migração não corrompe `registry.yml` nem topologia física:
+  - se criar pasta falhar, rollback do registry
+  - se persistir registry falhar, rollback do filesystem (quando aplicável)
 
-### Sub-bloco [4.A] — Recipes e partials
+- [ ] **2.A.5 [Deprecation Plan]** Definir marco explícito de deprecação:
+  - quando parar de ler `.specify/` / `.ai-guidelines/`
+  - como comunicar (warnings determinísticos)
 
-- [ ] **4.A.1** Definir o schema declarativo das `recipes` de montagem.
-- [ ] **4.A.2** Quebrar os boilerplates atuais em `partials` atômicos com fronteiras estruturais claras.
-- [ ] **4.A.3** Garantir que `partials` sejam blocos Markdown completos e válidos por contrato.
-- [ ] **4.A.4** Mapear como `artifactKind`, `workflowType`, idioma e stage resolvem a receita final.
-- [ ] **4.A.N** Pipeline de check + test verde após o sub-bloco 4.A.
-- [ ] **4.A.5** Análise de débitos: atualizar `NEXT.md`.
-- [ ] **4.A.[COMMIT]** Commit atômico sugerido: `refactor(spec-0021): introduz recipes e partials`.
+- [ ] **2.A.6 [No-Silent-Alias]** Proibir “alias mágico” que masque caminhos antigos como se fossem `.governance/`.
 
-### Sub-bloco [4.B] — Montagem, validação estrutural e retirada do mirror legado
+### Implementação (bounded context)
 
-- [ ] **4.B.1** Implementar a montagem dos artefatos finais a partir de `recipes` e `partials`.
-- [ ] **4.B.2** Validar integridade estrutural do Markdown gerado antes da persistência.
-- [ ] **4.B.3** Substituir o sync legado de boilerplates integrais pelo novo fluxo de composição modular.
-- [ ] **4.B.4** Garantir que customizações do consumidor sigam protegidas pelo novo modelo quando aplicável.
-- [ ] **4.B.N** Pipeline de check + test verde após o sub-bloco 4.B.
-- [ ] **4.B.5** Análise de débitos: atualizar `NEXT.md`.
-- [ ] **4.B.[COMMIT]** Commit atômico sugerido: `feat(spec-0021): substitui mirror por composição atômica`.
+- [ ] **2.A.7** Implementar `GovernanceWorkspace` como agregado:
+  - resolve root
+  - aplica precedence
+  - executa migração idempotente
+  - expõe “workspace state” para a Application layer
 
-### Encerramento de PR3
+- [ ] **2.A.8** Implementar bridges explícitas (temporárias) para leitura do legado:
+  - ponteiros/control flags, nunca path hardcoded espalhado
 
-- [ ] **3.[PULL-REQUEST]** Criar ou atualizar Pull Request em Draft com título `feat(spec-0021): Fase 3 — Living Documentation + Engine (PR3)`.
-- [ ] **3.[DESCRIPTION]** Descrever em 3 seções: (1) contrato e extração de [BR-CLI-*]; (2) schema e pipeline de living docs; (3) recipes, partials e composição modular.
-- [ ] **3.[READY-FOR-REVIEW]** Marcar PR como "Ready for review" após conclusão de 4.B e pipeline verde.
-- [ ] **3.[MANDATÓRIO]** Aguardar aprovação humana explícita. **Não fazer merge autonomamente.**
-- [ ] **3.[MERGE]** Após aprovação, fazer merge com `git commit -m "..."` seguindo a chain em AGENTS.md.
+### Testes (obrigatórios)
+
+- [ ] **2.A.9** Criar e passar:
+  - `WorkspaceDiscovery.test.ts`
+  - `LegacyPrecedence.test.ts`
+  - `WorkspaceMigrationIdempotency.test.ts`
+  - `WorkspaceRollback.test.ts`
+
+- [ ] **2.A.N** Pipeline verde.
+
+- [ ] **2.A.[COMMIT]** `feat(spec-0021): GovernanceWorkspace (strangler fig operacional)`.
 
 ---
 
-## Fase 4 — Migração e Cleanup
+## Sub-bloco [2.B] — Registry YAML SSOT (IO real) 🧾
 
-> Esta fase executa renomeações finais, redirects e validação da topologia completa.
->
-> **Dependência**: PR3 deve estar mergeada.
->
-> **PR4**: Branch `feat/spec-0021-fase-4`, commit final (E), merge após aprovação humana.
+> **Âncoras:** `[DEC-0021-A01]`, `[DEC-0021-A03]`, `[DEC-0021-C01]`
+> **Objetivo:** sair do “in-memory” e fazer IO real com YAML mantendo propriedade human-friendly.
 
-### Sub-bloco [E] — Migração controlada e redirects
+### Contratos obrigatórios
 
-- [ ] **E.[NEW-BRANCH]** Branch `feat/spec-0021-fase-4` criada a partir de `main` (assumindo PR3 já mergeada).
-- [ ] **E.1** Se a reorganização física for ampla, aplicar migração controlada com redirects/ponteiros no mesmo commit do rename.
-- [ ] **E.2** Confirmar que links históricos, cross-refs editoriais, workflows e referências essenciais continuam íntegros.
-- [ ] **E.3** Validar o tarball e o comportamento headless após a migração final dos paths.
-- [ ] **E.4** Análise de débitos: atualizar `NEXT.md`.
-- [ ] **E.N** Pipeline de check + test verde após o sub-bloco E.
-- [ ] **E.[COMMIT]** Commit atômico sugerido: `refactor(spec-0021): migração controlada da arquitetura governance-driven`.
+- [ ] **2.B.1 [Round-trip]** Read → write não pode destruir informação essencial.
+- [ ] **2.B.2 [Determinismo]** Serialização ordenada e estável (evitar churn em PRs).
+- [ ] **2.B.3 [Imutabilidade]** `id` e `createdAt` imutáveis; `updatedAt` controlado.
+- [ ] **2.B.4 [Schema Guard]** Rejeitar estado inválido com erros determinísticos (mensagens estáveis).
+- [ ] **2.B.5 [Comment Preservation]** Estratégia explícita (hard-mode):
+  - ou implementar preservação
+  - ou escolher lib e documentar tradeoff (exige aprovação humana explícita)
 
-### Encerramento de PR4
+### Implementação
 
-- [ ] **4.[PULL-REQUEST]** Criar ou atualizar Pull Request em Draft com título `refactor(spec-0021): Fase 4 — Migração e Cleanup (PR4)`.
-- [ ] **4.[DESCRIPTION]** Descrever: renomeações finais, redirects, validação tarball, smoke tests com nova topologia.
-- [ ] **4.[READY-FOR-REVIEW]** Marcar PR como "Ready for review" após conclusão de E e pipeline verde.
-- [ ] **4.[MANDATÓRIO]** Aguardar aprovação humana explícita. **Não fazer merge autonomamente.**
-- [ ] **4.[MERGE]** Após aprovação, fazer merge com `git commit -m "..."` seguindo a chain em AGENTS.md.
+- [ ] **2.B.6** Implementar `GovernanceRegistryStore` (infra) e `RegistryService` (domain boundary):
+  - ports no app layer
+  - infra faz IO
+  - domain valida e decide
+
+### Testes (obrigatórios)
+
+- [ ] **2.B.7** Criar e passar:
+  - `RegistryYamlDeterminism.test.ts`
+  - `RegistrySchemaGuard.test.ts`
+  - `RegistryRoundTrip.test.ts`
+  - `RegistryCommentPreservation.test.ts` (ou marcado com `SKIP-REASON` explícito)
+
+- [ ] **2.B.N** Pipeline verde.
+
+- [ ] **2.B.[COMMIT]** `feat(spec-0021): YAML registry SSOT com guardrails (determinístico)`.
 
 ---
 
-## Fase de Review (Gate de Homologação)
+## Sub-bloco [2.C] — RulesEngine (builder/runtime alignment) 🧠
 
-> Executada após todas as PRs (0-4) estarem mergeadas em `main`.
+> **Âncoras:** `[DEC-0021-B05]`, `[DEC-0021-C01]`
+> **Objetivo:** alinhar topologia física `.core/rules/` com builder e runtime.
+> **Regra:** reorg físico deve ser atômico com update de loaders/scripts/tests.
+
+### Contratos obrigatórios
+
+- [ ] **2.C.1 [Taxonomia]** Formalizar Top/Center/Base e refletir na topologia física.
+- [ ] **2.C.2 [Determinismo]** Build/projeções determinísticos.
+- [ ] **2.C.3 [Compatibility]** Se houver consumers internos, garantir ponteiros/redirects no mesmo commit.
+- [ ] **2.C.4 [No Hardcoded Paths]** Centralizar resolução de paths no domínio (ou infra adapter único).
+
+### Implementação
+
+- [ ] **2.C.5** Implementar `RulesEngine` (bounded context):
+  - parser pipeline
+  - build pipeline
+  - projection pipeline
+  - runtime lookup
+
+- [ ] **2.C.6** Reorganizar `.core/rules/` de forma dirigida (um commit atômico) + atualizar:
+  - `yarn build:rules` (ou equivalente)
+  - loaders/imports
+  - docs/pointers
+  - smoke tests
+
+### Testes (obrigatórios)
+
+- [ ] **2.C.7** Criar e passar:
+  - `RulesCompilation.test.ts`
+  - `RulesProjection.test.ts`
+  - `RulesTopologyConsistency.test.ts`
+
+- [ ] **2.C.N** Pipeline verde incluindo `yarn build:rules`.
+
+- [ ] **2.C.[COMMIT]** `refactor(spec-0021): RulesEngine + reorg .core/rules alinhada ao runtime`.
+
+---
+
+## Sub-bloco [2.D] — Superfície publicada e docs de contrato 📣
+
+> **Âncoras:** `[DEC-0021-A03]`, `[DEC-0021-B02]`
+> **Objetivo:** garantir que help/docs/smoke referenciem `.governance/` como contrato real.
+
+- [ ] **2.D.1** Atualizar docs e help da CLI para `.governance/` (sem alias mágico).
+- [ ] **2.D.2** Reservar diretórios canônicos dentro de `.governance/` para:
+  - `intake/` (PRD/intake)
+  - `handoff/`
+  - `telemetry/`
+
+- [ ] **2.D.3** Atualizar smoke tests que assumem `.specify/`/`.ai-guidelines/`.
+- [ ] **2.D.N** Pipeline verde.
+- [ ] **2.D.[COMMIT]** `docs(spec-0021): contrato .governance + reservas canônicas`.
+
+---
+
+## Encerramento de PR2 (gate)
+
+- [ ] **2.[READY-FOR-REVIEW]** Só marcar “Ready” quando:
+  - migrations com precedence/idempotência/rollback provados por testes
+  - registry YAML com determinismo e schema guard (e decisão sobre comentários)
+  - rules reorg atômico com `build:rules` verde
+  - docs/smoke alinhados ao contrato `.governance/`
+
+- [ ] **2.[MANDATÓRIO]** Aguardar aprovação humana explícita.
+- [ ] **2.[MERGE]** Merge após gate humano.
+
+---
+
+# 🚧 Fase 3 — Executable Intelligence Runtime (PR3)
+
+> **Âncoras:** `[DEC-0021-C01]`, `[DEC-0021-D01]`
+> **Objetivo:** Living Documentation como projeção viva (AST + drift guard) + TemplateEngine por composição atômica com validação estrutural.
+
+## [PR-MGMT] PR3
+
+- [ ] **3.[PR-MGMT.NEW-BRANCH]** Branch: `feat/spec-0021-pr3-executable-intelligence-runtime`.
+- [ ] **3.[PR-MGMT.DESCRIPTION]** (6 seções obrigatórias).
+- [ ] **3.[PR-MGMT.REVIEW-GATE]** Gate humano obrigatório.
+- [ ] **3.[PR-MGMT.MERGE-CHAIN]** `yarn format ; yarn check ; yarn test:nova-cli` (+ comandos novos da fase).
+
+---
+
+## Sub-bloco [3.A] — LivingDocumentation: schema, versioning, determinismo 🛰️
+
+> **Âncora:** `[DEC-0021-C01]`
+
+### Contratos obrigatórios
+
+- [ ] **3.A.1 [Schema v0]** Definir schema do artefato gerado a partir de testes `[BR-CLI-*]`:
+  - `ruleId`
+  - `title` (ou summary)
+  - `boundedContext`
+  - `domain`
+  - `source` (file + line range)
+  - `tags`
+  - `coverageState` (covered/pending/deprecated)
+  - `schemaVersion`
+
+- [ ] **3.A.2 [Versioning]** Definir evolução: como migrar v0→v1 sem quebrar consumers.
+- [ ] **3.A.3 [Determinismo]** Ordenação e serialização determinísticas:
+  - mesma entrada => mesmo output byte-a-byte
+  - sem timestamps variáveis no arquivo (ou separados)
+
+- [ ] **3.A.4 [Path]** Definir path canônico dentro de `.governance/` para o artefato (ex.: `.governance/living-docs.yml`).
+
+### Testes (obrigatórios)
+
+- [ ] **3.A.5** Criar e passar:
+  - `LivingDocsSchema.test.ts`
+  - `LivingDocsDeterminism.test.ts`
+  - `LivingDocsVersioning.test.ts`
+
+- [ ] **3.A.N** Pipeline verde.
+
+- [ ] **3.A.[COMMIT]** `feat(spec-0021): living docs schema (v0) + determinismo`.
+
+---
+
+## Sub-bloco [3.B] — AST extraction (sem regex frágil) + source mapping 🧬
+
+> **Âncora:** `[DEC-0021-C01]`
+
+### Contratos obrigatórios
+
+- [ ] **3.B.1 [AST-first]** Extrair `[BR-CLI-*]` via AST (TypeScript/Jest), não regex.
+- [ ] **3.B.2 [Source mapping]** Capturar file/linha com consistência (line range quando aplicável).
+- [ ] **3.B.3 [False positives]** Evitar extração de IDs em strings irrelevantes.
+- [ ] **3.B.4 [Coverage semantics]** Definir o que é “covered”: teste ativo vs skip.
+
+### Implementação
+
+- [ ] **3.B.5** Implementar `RuleExtractor` (bounded context LivingDocumentation):
+  - parse suite
+  - extrai IDs
+  - agrega metadados
+  - escreve artefato determinístico
+
+### Testes (obrigatórios)
+
+- [ ] **3.B.6** Criar e passar:
+  - `AstRuleExtractor.test.ts`
+  - `RuleExtractorSourceMap.test.ts`
+  - `RuleExtractorFalsePositives.test.ts`
+
+- [ ] **3.B.N** Pipeline verde.
+
+- [ ] **3.B.[COMMIT]** `feat(spec-0021): AST extractor de BR-CLI com source mapping`.
+
+---
+
+## Sub-bloco [3.C] — Drift guard (CI) + definição formal de drift 🧨
+
+> **Âncora:** `[DEC-0021-C01]`
+
+### Definição formal de drift (obrigatória)
+
+- [ ] **3.C.1** Drift é qualquer uma das condições:
+  - teste ativo com `[BR-CLI-*]` sem entrada no artefato gerado
+  - ID renomeado sem atualização do artefato
+  - artefato gerado divergente do repositório (não commitado/atualizado)
+  - mudança de ordenação/serialização que cause churn artificial
+
+- [ ] **3.C.2** Definir mecanismo de falha:
+  - gerar artefato
+  - comparar com versão commitada (diff determinístico)
+  - falhar CI se diferente
+
+### Implementação
+
+- [ ] **3.C.3** Criar script/command `yarn living-docs:generate` e `yarn living-docs:check`.
+- [ ] **3.C.4** Integrar `living-docs:check` ao CI (job obrigatório).
+
+### Testes (obrigatórios)
+
+- [ ] **3.C.5** Criar e passar:
+  - `DriftGuardDetectsOutdatedArtifact.test.ts`
+  - `DriftGuardNoChurn.test.ts`
+
+- [ ] **3.C.N** Pipeline verde incluindo CI/local check.
+
+- [ ] **3.C.[COMMIT]** `feat(spec-0021): drift guard (CI) para living docs`.
+
+---
+
+## Sub-bloco [3.D] — TemplateEngine: schema de recipes + partials atômicos 🧩
+
+> **Âncora:** `[DEC-0021-D01]`
+
+### Contratos obrigatórios
+
+- [ ] **3.D.1 [Recipes schema]** Definir schema declarativo das recipes:
+  - `artifactKind` (spec/plan/tasks/…)
+  - `workflowType` (evidence-driven/mixed/…)
+  - `language`
+  - `slots[]` (ordem canônica)
+  - `partials[]` por slot
+
+- [ ] **3.D.2 [Partials contract]** Cada partial deve ser Markdown válido completo (não fragmento arbitrário).
+- [ ] **3.D.3 [Determinismo]** Montagem determinística: mesma recipe => mesmo output.
+
+### Implementação
+
+- [ ] **3.D.4** Implementar `TemplateEngine`:
+  - resolve recipe (por registry.yml ou por argumento)
+  - carrega partials
+  - monta por slots
+  - valida estrutura antes de persistir
+
+### Testes (obrigatórios)
+
+- [ ] **3.D.5** Criar e passar:
+  - `RecipeResolution.test.ts`
+  - `PartialsContract.test.ts`
+  - `DeterministicAssembly.test.ts`
+
+- [ ] **3.D.N** Pipeline verde.
+
+- [ ] **3.D.[COMMIT]** `feat(spec-0021): TemplateEngine (recipes + partials)`.
+
+---
+
+## Sub-bloco [3.E] — Validação estrutural do Markdown (semântica, não estética) 🧱
+
+> **Âncora:** `[DEC-0021-D01]`
+
+### Contratos obrigatórios
+
+- [ ] **3.E.1** Validar invariantes por `artifactKind`:
+  - headings mandatórios
+  - ordem de seções
+  - blocos obrigatórios (ex.: Harness Lock em tasks)
+  - proibir seções indevidas (ex.: “Stage 1” em artefato errado)
+
+- [ ] **3.E.2** Validar coerência recipe/slots:
+  - slot faltando => falha
+  - partial inválido => falha
+
+- [ ] **3.E.3** Mensagens determinísticas (para PR review).
+
+### Testes (obrigatórios)
+
+- [ ] **3.E.4** Criar e passar:
+  - `MarkdownStructuralValidation.test.ts`
+  - `SlotCompleteness.test.ts`
+  - `ForbiddenComposition.test.ts`
+
+- [ ] **3.E.N** Pipeline verde.
+
+- [ ] **3.E.[COMMIT]** `feat(spec-0021): validação estrutural de markdown para recipes`.
+
+---
+
+## Sub-bloco [3.F] — Retirada segura do mirror legado 🧯
+
+> **Âncora:** `[DEC-0021-D01]`
+> **Regra:** só remover mirror após equivalência mínima validada.
+
+- [ ] **3.F.1** Mapear equivalência mínima:
+  - arquivos gerados pelo mirror atual vs pelo TemplateEngine
+  - delta aceito (apenas o intencional)
+
+- [ ] **3.F.2** Criar testes de regressão de geração (snapshot determinístico).
+- [ ] **3.F.3** Trocar fluxo padrão para recipes/partials.
+- [ ] **3.F.4** Depreciar mirror com warning determinístico e prazo (se necessário).
+- [ ] **3.F.N** Pipeline verde.
+- [ ] **3.F.[COMMIT]** `refactor(spec-0021): remove mirror legado após equivalência (recipes)`.
+
+---
+
+## Encerramento de PR3 (gate)
+
+- [ ] **3.[READY-FOR-REVIEW]** Só marcar “Ready” quando:
+  - schema v0 definido + determinismo provado
+  - AST extractor funcional (sem regex) + source mapping
+  - drift guard integrado ao CI
+  - TemplateEngine monta + valida estruturalmente
+  - mirror legado removido ou formalmente depreciado com regressão coberta
+
+- [ ] **3.[MANDATÓRIO]** Aguardar aprovação humana explícita.
+- [ ] **3.[MERGE]** Merge após gate humano.
+
+---
+
+# 🚧 Fase 4 — Governance Consolidation (PR4)
+
+> **Âncoras:** `[DEC-0021-B02]`, `[DEC-0021-B03]`, `[DEC-0021-B04]`, `[DEC-0021-B05]`
+> **Objetivo:** consolidar arquitetura de informação do repo-fonte (carrier + placement + foundation/ADR) e remover ilhas de docs/ponteiros quebrados.
+> **Nota:** Fases 4–5 “produto/DB/dashboard” continuam fora do escopo (apenas mapeadas) `[DEC-0021-B01]`.
+
+## [PR-MGMT] PR4
+
+- [ ] **4.[PR-MGMT.NEW-BRANCH]** Branch: `feat/spec-0021-pr4-governance-consolidation`.
+- [ ] **4.[PR-MGMT.DESCRIPTION]** (6 seções obrigatórias).
+- [ ] **4.[PR-MGMT.REVIEW-GATE]** Gate humano obrigatório.
+- [ ] **4.[PR-MGMT.MERGE-CHAIN]** `yarn format ; yarn check ; yarn test:nova-cli` (+ smoke se aplicável).
+
+---
+
+## Sub-bloco [4.A] — Carrier híbrido: catálogo canônico + topologia dirigida 🗺️
+
+> **Âncoras:** `[DEC-0021-B02]`, `[DEC-0021-B03]`
+
+- [ ] **4.A.1** Criar `GOVERNANCE-CATALOG.md` (ou nome final) como carrier canônico curto:
+  - classes/gêneros
+  - paths canônicos
+  - regras de lookup
+  - lifecycle/responsabilidades
+
+- [ ] **4.A.2** Garantir consistência com a topologia real do repo (modelo híbrido):
+  - se o catálogo diz X, o repo deve expressar X
+
+- [ ] **4.A.3** Reservar explicitamente paths de gêneros futuros em `.governance/`:
+  - `intake/`
+  - `handoff/`
+  - `telemetry/`
+
+- [ ] **4.A.N** Pipeline verde.
+- [ ] **4.A.[COMMIT]** `docs(spec-0021): carrier híbrido (catálogo) + reservas de lar`.
+
+---
+
+## Sub-bloco [4.B] — Foundation vs ADR (fronteira híbrida explícita) 📜
+
+> **Âncora:** `[DEC-0021-B04]`
+
+- [ ] **4.B.1** Renomear/refatorar `.core/process/spec-foundation.md` para refletir governança (nome final decidido aqui).
+- [ ] **4.B.2** Extrair decisões arquiteturais estáveis para ADRs:
+  - critério de migração: “decisão estável/cross-spec”
+  - foundation permanece processo vivo e constituição operacional
+
+- [ ] **4.B.3** Atualizar links/cross-refs após renomeação.
+- [ ] **4.B.N** Pipeline verde.
+- [ ] **4.B.[COMMIT]** `refactor(spec-0021): fronteira foundation/ADR aplicada`.
+
+---
+
+## Sub-bloco [4.C] — Cleanup holístico de docs e ponteiros (eliminar ilhas) 🧹
+
+> **Âncoras:** `[DEC-0021-B03]`, `[DEC-0021-B04]`
+> **Objetivo:** remover “ilhas órfãs” (ex.: `/docs`) e alinhar todos os ponteiros ao novo contrato.
+
+- [ ] **4.C.1** Auditar `/docs` e decidir:
+  - migrar conteúdo útil para lar canônico
+  - depreciar/remover o resto
+
+- [ ] **4.C.2** Atualizar ponteiros públicos e internos:
+  - `README.md`
+  - `CONTRIBUTING.md`
+  - `AGENTS.md`
+  - docs de CLI/help
+
+- [ ] **4.C.3** Validar que não há referências quebradas a `.specify/`/`.ai-guidelines/` quando o contrato final é `.governance/`.
+- [ ] **4.C.N** Pipeline verde.
+- [ ] **4.C.[COMMIT]** `docs(spec-0021): cleanup holístico de docs + ponteiros`.
+
+---
+
+## Sub-bloco [4.D] — Homologação final (contrato distribuído) ✅
+
+> **Âncoras:** `[DEC-0021-A03]`, `[DEC-0021-C01]`, `[DEC-0021-D01]`
+
+- [ ] **4.D.1** Smoke: validar instalação/execução headless e geração de artefatos sob `.governance/`.
+- [ ] **4.D.2** Validar `registry.yml` como SSOT e markdown derivado coerente.
+- [ ] **4.D.3** Validar living docs (geração + check) e drift guard.
+- [ ] **4.D.4** Validar TemplateEngine (recipes/partials) gerando artefatos válidos.
+- [ ] **4.D.N** Pipeline verde.
+- [ ] **4.D.[COMMIT]** `chore(spec-0021): homologação final (contrato governance-driven)`.
+
+---
+
+## Encerramento de PR4 (gate)
+
+- [ ] **4.[READY-FOR-REVIEW]** Só marcar “Ready” quando:
+  - carrier híbrido publicado
+  - foundation/ADR fronteira aplicada
+  - docs/ponteiros alinhados
+  - smoke/homologação verde
+
+- [ ] **4.[MANDATÓRIO]** Aguardar aprovação humana explícita.
+- [ ] **4.[MERGE]** Merge após gate humano.
+
+---
+
+# 🔎 Fase de Review (Gate de Homologação)
+
+> Executada após PR0–PR4 estarem mergeadas em `main`.
 
 - [ ] **R.1** Atualizar header da `spec.md`: status → `In Review`.
-- [ ] **R.2** Pipeline canônico verde: rodar a suíte completa pertinente ao escopo final da spec.
-- [ ] **R.3** Critérios de aceite de `spec.md` e DoD de `plan.md` confirmados ponto-a-ponto.
-- [ ] **R.4** `decision-brief.md`: validar que todos os pontos `[DEC-0021-*]` estão `Resolved` e refletidos no design final.
-- [ ] **R.5** Validar a entrega em ambiente real quando aplicável, especialmente contrato distribuído, Living Documentation e recipes.
-- [ ] **R.6** Descrição consolidada de todas as PRs em um bloco final: contexto → decisões cravadas → impacto cross-spec.
-- [ ] **R.7** **[MANDATÓRIO]** Aguardar Gate de Review Humano.
-- [ ] **R.8** Aplicar correções demandadas em loops de review até aprovação.
+- [ ] **R.2** Pipeline canônico verde (suite completa).
+- [ ] **R.3** Confirmar critérios de aceite da `spec.md` e DoD do `plan.md`.
+- [ ] **R.4** Confirmar todos `[DEC-0021-*]` refletidos em código, docs e topologia.
+- [ ] **R.5** Validar em ambiente real quando aplicável (tarball/smoke).
+- [ ] **R.6** Consolidar descrição final de entrega.
+- [ ] **R.7** **[MANDATÓRIO]** Gate humano final.
+- [ ] **R.8** Iterar correções até aprovação.
 
 ---
 
-## Fase de Encerramento Pré-Merge
+# 🧾 Encerramento Pré-Merge
 
-> Executada no mesmo branch/PR de stage final, após aprovação do gate de review.
+> Executado no branch/PR final após aprovação do gate.
 
-- [ ] **F.1** `NEXT.md`: migrar débitos relevantes para `roadmap/backlog.md` e deletar o arquivo.
+- [ ] **F.1** `NEXT.md`: migrar débitos relevantes para `roadmap/backlog.md` e deletar `NEXT.md`.
 - [ ] **F.2** Migrar research novo relevante para `.specify/specs/researchs/<domínio>/` e indexar em `research-index.md`.
 - [ ] **F.3** `decision-brief.md` permanece no diretório da spec.
-- [ ] **F.4** `spec.md` header: status → `Done (PR #X — YYYY-MM-DD)`.
-- [ ] **F.5** `roadmap/historico.md`: mover a 0021 para concluídas e remover de "Em execução" em `backlog.md`.
-- [ ] **F.6** Atualizar `CHANGELOG.md` e `package.json` se houver comportamento publicado alterado; se a entrega for apenas documental/estrutural sem release, registrar "não-aplicável" com justificativa.
-- [ ] **F.7** Confirmar que a sessão atual não abriu outra spec antes deste encerramento.
-- [ ] **F.8** **[COMMIT]** `chore(spec-0021): encerramento pré-merge — research migrado, NEXT removido, status final`.
-- [ ] **F.9** **[MANDATÓRIO]** Aprovação humana explícita para merge. **Não fazer merge autonomamente.**
+- [ ] **F.4** `spec.md`: status → `Done (PR #X — YYYY-MM-DD)`.
+- [ ] **F.5** `roadmap/historico.md`: mover 0021 para concluídas e remover de “Em execução”.
+- [ ] **F.6** Atualizar `CHANGELOG.md` e `package.json` se houver impacto publicado (ou registrar “não aplicável”).
+- [ ] **F.7** Confirmar que nenhuma outra spec foi aberta antes do encerramento desta.
+- [ ] **F.8 [COMMIT]** `chore(spec-0021): encerramento pré-merge — research migrado, NEXT removido, status final`.
+- [ ] **F.9 [MANDATÓRIO]** Aprovação humana explícita para merge.
