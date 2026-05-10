@@ -264,14 +264,14 @@ yarn smoke
 
 ## Encerramento de PR1 (gate)
 
-- [ ] **1.[READY-FOR-REVIEW]** Só marcar “Ready” quando:
+- [x] **1.[READY-FOR-REVIEW]** Só marcar “Ready” quando:
   - testes críticos verdes (não só skip)
   - boundaries enforcement ativo
   - registry integrity verde
   - use cases com rollback verde
 
-- [ ] **1.[MANDATÓRIO]** Aguardar aprovação humana explícita.
-- [ ] **1.[MERGE]** Merge após gate humano.
+- [x] **1.[MANDATÓRIO]** Aguardar aprovação humana explícita.
+- [x] **1.[MERGE]** Merge após gate humano.
 
 ---
 
@@ -283,7 +283,7 @@ yarn smoke
 
 ## [PR-MGMT] PR2
 
-- [ ] **2.[PR-MGMT.NEW-BRANCH]** Branch: `feat/spec-0021-pr2-topology-migration-layer`.
+- [x] **2.[PR-MGMT.NEW-BRANCH]** Branch: `feat/spec-0021-pr2-topology-migration-layer`.
 - [ ] **2.[PR-MGMT.DESCRIPTION]** (6 seções obrigatórias).
 - [ ] **2.[PR-MGMT.REVIEW-GATE]** Gate humano obrigatório.
 - [ ] **2.[PR-MGMT.MERGE-CHAIN]** `yarn format ; yarn check ; yarn test:nova-cli ; yarn build:rules`.
@@ -296,17 +296,17 @@ yarn smoke
 
 ### Contratos obrigatórios (precisam virar testes)
 
-- [ ] **2.A.1 [Discovery Contract]** Detectar estado do repo:
+- [x] **2.A.1 [Discovery Contract]** Detectar estado do repo:
   - workspace já em `.governance/`
   - legado em `.specify/` e/ou `.ai-guidelines/`
   - estado “misto” (ambos existem) deve falhar com instrução explícita (sem heurística silenciosa)
 
-- [ ] **2.A.2 [Precedence Policy]** Regra explícita:
+- [x] **2.A.2 [Precedence Policy]** Regra explícita:
   - se `.governance/` existe: é SSOT; legado só pode ser lido via modo explícito (bridge)
   - se `.governance/` não existe: CLI oferece migração/adopção (não alias invisível)
 
-- [ ] **2.A.3 [Idempotência]** Rodar “adopt/migrate” duas vezes não gera churn nem duplica estado.
-- [ ] **2.A.4 [Rollback]** Falha durante migração não corrompe `registry.yml` nem topologia física:
+- [x] **2.A.3 [Idempotência]** Rodar “adopt/migrate” duas vezes não gera churn nem duplica estado.
+- [x] **2.A.4 [Rollback]** Falha durante migração não corrompe `registry.yml` nem topologia física:
   - se criar pasta falhar, rollback do registry
   - se persistir registry falhar, rollback do filesystem (quando aplicável)
 
@@ -314,11 +314,11 @@ yarn smoke
   - quando parar de ler `.specify/` / `.ai-guidelines/`
   - como comunicar (warnings determinísticos)
 
-- [ ] **2.A.6 [No-Silent-Alias]** Proibir “alias mágico” que masque caminhos antigos como se fossem `.governance/`.
+- [x] **2.A.6 [No-Silent-Alias]** Proibir “alias mágico” que masque caminhos antigos como se fossem `.governance/`.
 
 ### Implementação (bounded context)
 
-- [ ] **2.A.7** Implementar `GovernanceWorkspace` como agregado:
+- [x] **2.A.7** Implementar `GovernanceWorkspace` como agregado:
   - resolve root
   - aplica precedence
   - executa migração idempotente
@@ -329,13 +329,13 @@ yarn smoke
 
 ### Testes (obrigatórios)
 
-- [ ] **2.A.9** Criar e passar:
+- [x] **2.A.9** Criar e passar:
   - `WorkspaceDiscovery.test.ts`
   - `LegacyPrecedence.test.ts`
   - `WorkspaceMigrationIdempotency.test.ts`
   - `WorkspaceRollback.test.ts`
 
-- [ ] **2.A.N** Pipeline verde.
+- [x] **2.A.N** Pipeline verde.
 
 - [ ] **2.A.[COMMIT]** `feat(spec-0021): GovernanceWorkspace (strangler fig operacional)`.
 
