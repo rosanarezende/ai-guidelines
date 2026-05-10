@@ -19,7 +19,14 @@ _(Nenhum débito registrado)_
 
 ### Débitos da Fase 1 (Fundação Arquitetural)
 
-_(A preencher conforme execução)_
+Foram identificados os seguintes riscos arquiteturais ainda existentes:
+
+1. WorkItemPatch é estruturalmente wide. Como envelope de mutação, aceita todos os campos — incluindo id/createdAt (com runtime guard de imutabilidade no Registry). Migração para um patch tipado por categoria é trabalho do PR2 quando o YAML schema-guard chegar.
+2. Cast as WorkItem em Registry.update. O merge {...current, ...patch} não pode ser provado type-safe pelo TS sobre o union; o cast é deliberado e está documentado no código.
+3. Boundary enforcement por regex. Continua provisório; o ARCHITECTURE.md trata a migração para AST como obrigatória antes de carregamento dinâmico/plugins. Risco baixo no PR1, ativo a partir do PR3.
+4. Glossário "ubíquo" não tem enforcement automático. Convivência entre identificadores no código e definições do §G ainda é convencional. Evolução natural quando o LivingDocumentation (PR3) puder cruzar AST × glossário.
+5. Ausência de testes integrados E2E. Use cases testados com doubles; o cruzamento Application + Infrastructure real só acontece quando o IO chegar (PR2).
+6. ResolutionMode modelado, mas pouco exercitado. Semântica de cleaned-up/kept para experiments perdidos só será coberta no PR2/PR3.
 
 ### Débitos da Fase 2 (Reestruturação Física)
 
