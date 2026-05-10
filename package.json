@@ -52,17 +52,29 @@
     "check:repo": "yarn install --immutable && yarn check && yarn test:coverage",
     "format": "prettier --write .",
     "check": "prettier --check . && yarn build:rules",
-    "prepare": "husky"
+    "prepare": "husky",
+    "build": "tsc",
+    "test:nova-cli": "jest --config ./.jest/jest.config.js",
+    "test:nova-cli:coverage": "jest --config ./.jest/jest.config.js --coverage"
   },
   "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "@types/node": "^25.6.2",
+    "@types/yaml": "^1.9.7",
     "husky": "^9.1.7",
-    "prettier": "^3.0.0"
+    "jest": "^30.4.2",
+    "jest-util": "^30.4.1",
+    "prettier": "^3.0.0",
+    "ts-jest": "^29.4.9",
+    "ts-node": "^10.9.2",
+    "typescript": "^6.0.3"
   },
   "packageManager": "yarn@4.1.1",
   "engines": {
     "node": ">=22.0.0"
   },
   "dependencies": {
-    "@inquirer/prompts": "7.8.4"
+    "@inquirer/prompts": "7.8.4",
+    "yaml": "^2.8.4"
   }
 }

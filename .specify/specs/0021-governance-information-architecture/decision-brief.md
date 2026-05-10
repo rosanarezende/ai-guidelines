@@ -82,6 +82,7 @@
 4. patch: Manutenção invisível ao usuário final (update de bibliotecas, linting, chore, refactor técnico transparente). Pula completamente a esteira documental pesada.
 5. incident: Fricção grave, downtime de infraestrutura ou quebra crítica de CI. Diferencia-se do fix por possuir severidade atribuída, impactar métricas de negócio e agir como alerta máximo.
 6. proposal: Sementes de backlog. Ideias soltas, melhorias pontuais de UI/UX ou features sugeridas que constam no registro (YAML) sem exigir a criação física de pastas ou ciclos, prontas para serem promovidas a specs quando o time tiver apetite.
+7. experiment: Mudanças baseadas em hipóteses (Growth/Testes A-B). Equilibra a velocidade necessária para validar métricas com o rigor de segurança para não quebrar a produção. Exige definição clara de hipótese, variantes e métricas de sucesso, ocupando o espaço entre o `patch` (rápido mas arriscado) e a `spec` (segura mas lenta).
 
 - **Data / Owner:** 2026-05-09 / @rosanarezende
 
