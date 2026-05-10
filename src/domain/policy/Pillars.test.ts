@@ -1,59 +1,171 @@
 /**
- * [BR-CLI-POLICY-01] Os 7 Pilares de Valor (MECE)
- * Regras de intenção de saída e carga operacional conforme DEC-0021-A02.
+ * [BR-CLI-POLICY] Os 7 Pilares de Valor (MECE).
+ * Regras de intenção de saída e carga operacional conforme [DEC-0021-A02].
  */
+import { GovernanceError } from "../shared/errors.js";
+import { assertValidDraft } from "../work-item/WorkItemPolicy.js";
+
 describe("Domínio — Definição dos Pilares [BR-CLI-POLICY]", () => {
-  describe("Pilar: Spec (Entrega Estruturada)", () => {
-    it.skip("DADO uma 'spec' QUANDO criada ENTÃO deve exigir 'workspacePath' e passar por todo o ciclo RPI [BR-CLI-POLICY-01]", () => {
-      // Regra: Specs são o pilar de maior rigor e documentação.
+  describe("Pilar denso (spec/experiment/exploration/incident)", () => {
+    it.each(["spec", "exploration"] as const)(
+      "DADO um item denso '%s' SEM workspacePath ENTÃO POLICY_DENSE_REQUIRES_WORKSPACE [BR-CLI-POLICY-01]",
+      (kind) => {
+        try {
+          assertValidDraft({ id: "wi-1", kind, title: "Item denso" });
+          fail("deveria ter lançado");
+        } catch (e) {
+          expect(e).toBeInstanceOf(GovernanceError);
+          expect((e as GovernanceError).code).toBe("POLICY_DENSE_REQUIRES_WORKSPACE");
+        }
+      }
+    );
+
+    it("DADO uma 'spec' COM 'workspacePath' e título válido ENTÃO passa", () => {
+      expect(() =>
+        assertValidDraft({
+          id: "wi-1",
+          kind: "spec",
+          title: "Spec válida",
+          workspacePath: ".governance/specs/0001-x",
+        })
+      ).not.toThrow();
     });
   });
 
   describe("Pilar: Experiment (Growth Engineering)", () => {
-    it.skip("DADO um 'experiment' QUANDO criado ENTÃO deve exigir 'hypothesis' (min 10 chars), 'successMetrics' e 'workspacePath' [BR-CLI-POLICY-03]", () => {
-      // Regra: Baseado no Playbook de Growth, sem métricas não há experimento.
+    it("DADO um 'experiment' SEM hypothesis ENTÃO falha com POLICY_EXPERIMENT_REQUIRES_HYPOTHESIS [BR-CLI-POLICY-03]", () => {
+      try {
+        assertValidDraft({
+          id: "wi-2",
+          kind: "experiment",
+          title: "Exp título",
+          successMetrics: ["ctr"],
+          workspacePath: ".governance/experiments/01",
+        });
+        fail("deveria ter lançado");
+      } catch (e) {
+        expect((e as GovernanceError).code).toBe("POLICY_EXPERIMENT_REQUIRES_HYPOTHESIS");
+      }
     });
 
-    it.skip("DADO um 'experiment' finalizado QUANDO o resultado for 'lost' ou 'inconclusive' ENTÃO deve exigir confirmação de 'cleaned-up' [BR-CLI-POLICY-03]", () => {
-      // Regra: Evitar poluição do código com hipóteses refutadas.
+    it("DADO um 'experiment' com hypothesis curta (<10) ENTÃO falha", () => {
+      try {
+        assertValidDraft({
+          id: "wi-2",
+          kind: "experiment",
+          title: "Exp título",
+          hypothesis: "curta",
+          successMetrics: ["ctr"],
+        });
+        fail("deveria ter lançado");
+      } catch (e) {
+        expect((e as GovernanceError).code).toBe("POLICY_EXPERIMENT_REQUIRES_HYPOTHESIS");
+      }
+    });
+
+    it("DADO um 'experiment' SEM successMetrics ENTÃO falha com POLICY_EXPERIMENT_REQUIRES_METRICS", () => {
+      try {
+        assertValidDraft({
+          id: "wi-2",
+          kind: "experiment",
+          title: "Exp título",
+          hypothesis: "Aumentaremos a conversão em 10%",
+        });
+        fail("deveria ter lançado");
+      } catch (e) {
+        expect((e as GovernanceError).code).toBe("POLICY_EXPERIMENT_REQUIRES_METRICS");
+      }
     });
   });
 
   describe("Pilar: Incident (Fricção Crítica)", () => {
-    it.skip("DADO um 'incident' QUANDO registrado ENTÃO deve exigir 'severity' e 'workspacePath' [BR-CLI-POLICY-02]", () => {
-      // Regra: Incidentes são alertas máximos que impactam métricas.
+    it("DADO um 'incident' SEM severity ENTÃO falha com POLICY_INCIDENT_REQUIRES_SEVERITY [BR-CLI-POLICY-02]", () => {
+      try {
+        assertValidDraft({
+          id: "wi-3",
+          kind: "incident",
+          title: "Incidente xpto",
+          workspacePath: ".governance/incidents/01",
+        });
+        fail("deveria ter lançado");
+      } catch (e) {
+        expect((e as GovernanceError).code).toBe("POLICY_INCIDENT_REQUIRES_SEVERITY");
+      }
     });
-  });
 
-  describe("Pilar: Exploration (PoCs/Spikes)", () => {
-    it.skip("DADO uma 'exploration' QUANDO finalizada ENTÃO o entregável deve focar no aprendizado e arquivamento (Draft PR ou Branch) [BR-CLI-POLICY-01]", () => {
-      // Regra: Explorações servem para aprendizado rápido sem poluir a main.
+    it("DADO um 'incident' com severity e workspacePath ENTÃO passa", () => {
+      expect(() =>
+        assertValidDraft({
+          id: "wi-3",
+          kind: "incident",
+          title: "Incidente xpto",
+          severity: "high",
+          workspacePath: ".governance/incidents/01",
+        })
+      ).not.toThrow();
     });
   });
 
   describe("Pilar: Proposal (Sementes de Backlog)", () => {
-    it.skip("DADO uma 'proposal' QUANDO registrada ENTÃO deve ser estritamente virtual (sem pasta física) [BR-CLI-POLICY-01]", () => {
-      // Regra: Proposals são ideias no YAML prontas para futura promoção.
+    it("DADO uma 'proposal' COM workspacePath ENTÃO falha com POLICY_PROPOSAL_MUST_BE_VIRTUAL [BR-CLI-POLICY-01]", () => {
+      try {
+        assertValidDraft({
+          id: "wi-4",
+          kind: "proposal",
+          title: "Proposta xyz",
+          workspacePath: ".governance/proposals/01",
+        });
+        fail("deveria ter lançado");
+      } catch (e) {
+        expect((e as GovernanceError).code).toBe("POLICY_PROPOSAL_MUST_BE_VIRTUAL");
+      }
     });
   });
 
   describe("Pilares de Manutenção: Fix e Patch", () => {
-    it.skip("DADO um 'fix' QUANDO registrado ENTÃO deve exigir documentação mínima (plan + tasks) vinculada a um erro funcional [BR-CLI-POLICY-01]", () => {
-      // Regra: Fixes rastreiam correções sem a burocracia de uma spec, mas com registro de passos.
+    it("DADO um 'patch' COM hypothesis ENTÃO falha com POLICY_PATCH_REJECTS_EXPERIMENT_FIELDS [BR-CLI-POLICY-01]", () => {
+      try {
+        assertValidDraft({
+          id: "wi-5",
+          kind: "patch",
+          title: "Patch xpto",
+          hypothesis: "isso é proibido em patch",
+        });
+        fail("deveria ter lançado");
+      } catch (e) {
+        expect((e as GovernanceError).code).toBe("POLICY_PATCH_REJECTS_EXPERIMENT_FIELDS");
+      }
     });
 
-    it.skip("DADO um 'patch' QUANDO registrado ENTÃO deve permitir pular completamente a esteira documental (refactors transparentes) [BR-CLI-POLICY-01]", () => {
-      // Regra: Patches são manutenções invisíveis ao usuário final (DEC-0021-A02).
+    it("DADO um 'patch' COM severity ENTÃO falha com POLICY_PATCH_REJECTS_INCIDENT_FIELDS", () => {
+      try {
+        assertValidDraft({
+          id: "wi-5",
+          kind: "patch",
+          title: "Patch xpto",
+          severity: "low",
+        });
+        fail("deveria ter lançado");
+      } catch (e) {
+        expect((e as GovernanceError).code).toBe("POLICY_PATCH_REJECTS_INCIDENT_FIELDS");
+      }
     });
 
-    it.skip("DADO um 'patch' QUANDO processado ENTÃO não deve aceitar campos de 'hipótese' ou 'severidade' [BR-CLI-POLICY-01]", () => {
-      // Regra: MECE — campos de outros pilares são proibidos para evitar confusão.
+    it("DADO um 'patch' simples ENTÃO passa", () => {
+      expect(() =>
+        assertValidDraft({ id: "wi-5", kind: "patch", title: "Patch limpo" })
+      ).not.toThrow();
     });
   });
 
   describe("Validações Comuns", () => {
-    it.skip("DADO qualquer item QUANDO registrado ENTÃO deve exigir título com no mínimo 5 caracteres [BR-CLI-POLICY-01]", () => {
-      // Regra: Garantir descritividade mínima nos registros.
+    it("DADO qualquer item COM título <5 chars ENTÃO falha com POLICY_TITLE_TOO_SHORT [BR-CLI-POLICY-01]", () => {
+      try {
+        assertValidDraft({ id: "wi-6", kind: "fix", title: "ab" });
+        fail("deveria ter lançado");
+      } catch (e) {
+        expect((e as GovernanceError).code).toBe("POLICY_TITLE_TOO_SHORT");
+      }
     });
   });
 });

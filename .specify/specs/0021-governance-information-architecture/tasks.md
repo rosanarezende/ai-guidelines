@@ -187,65 +187,80 @@ yarn smoke
 ## Sub-bloco [1.AS] — Sanitização intermediária (Blueprint Integrity Lock) 🧼
 
 > **Âncora:** `[DEC-0021-C01]`
-> **Objetivo:** impedir drift/boundary leak antes de iniciar implementação real.
+> **Objetivo:** impedir drift/boundary leak antes da expansão arquitetural.
 
-- [ ] **1.AS.1 [Boundaries]** Criar guardrails anti-acoplamento:
-  - `src/domain/**` não importa `src/app/**` nem `src/infrastructure/**`.
-  - `src/app/**` acessa infra apenas via ports.
+- [x] **1.AS.1 [Boundaries]** Guardrails anti-acoplamento implementados:
+  - `domain/**` não importa `app/**` nem `infrastructure/**`
+  - `app/**` acessa infraestrutura apenas via ports
+- [x] **1.AS.2 [Enforcement]** Boundary enforcement automatizado via `Boundaries.test.ts`
+- [x] **1.AS.3 [Blueprint strength]** Testes críticos fortalecidos com:
+  - casos negativos
+  - mensagens determinísticas
+  - invariantes explícitas
+- [x] **1.AS.4 [Skip policy]** Política de `it.skip` aplicada com `SKIP-REASON`
+- [x] **1.AS.N** Pipeline verde
+- [x] **1.AS.[COMMIT]** `chore(spec-0021): blueprint integrity lock`
 
-- [ ] **1.AS.2 [Enforcement]** Adicionar verificação que falha build/test se boundary for violado (teste, script ou lint rule).
-- [ ] **1.AS.3 [Blueprint strength]** Fortalecer testes críticos com casos negativos e mensagens determinísticas:
-  - `Pillars.test.ts` e `Promotion.test.ts`
-  - `Integrity.test.ts` (invariantes mínimas do registry em memória)
+---
 
-- [ ] **1.AS.4 [Skip policy]** Padrão obrigatório para `it.skip`:
-  - `// [SKIP-REASON: <X>]` + âncora `[DEC-*]`
-
-- [ ] **1.AS.N** Pipeline verde.
-- [ ] **1.AS.[COMMIT]** `chore(spec-0021): sanitização intermediária — blueprint integrity lock`.
-
-## Sub-bloco [1.B] — Domínio (Entidades + Políticas puras) 🧠
+## Sub-bloco [1.B] — Domínio (Entidades + Policies puras) 🧠
 
 > **Âncoras:** `[DEC-0021-A02]`, `[DEC-0021-C01]`
 
-- [ ] **1.B.1** Linguagem ubíqua: `WorkItemId`, `WorkItemKind`, `LifecycleStatus`, `ValueStatus`, `ResolutionMode`.
-- [ ] **1.B.2** Entidades com invariantes:
-  - `Incident.severity` obrigatório
-  - `Experiment.hypothesis` + `successMetrics` obrigatórios
-  - `Patch` não aceita campos experimentais
-  - `Proposal` não pode pular maturidade
+- [x] **1.B.1** Linguagem ubíqua formalizada:
+  - `WorkItemKind`
+  - `LifecycleStatus`
+  - `ResolutionMode`
+  - `Dense/Virtual`
+- [x] **1.B.2** Domínio separado em:
+  - `WorkItem`
+  - `WorkItemDraft`
+  - `WorkItemPolicy`
+- [x] **1.B.3** `GovernancePolicies` introduzido como façade fina de composição
+- [x] **1.B.4** `PromotionPolicy` extraído como policy pura isolada
+- [x] **1.B.5** Regras MECE implementadas e validadas
+- [x] **1.B.6** `Pillars.test.ts` e `Promotion.test.ts` ativos e verdes
+- [x] **1.B.N** Pipeline verde
+- [x] **1.B.[COMMIT]** `feat(spec-0021): domínio + policies puras consolidadas`
 
-- [ ] **1.B.3** `GovernancePolicyService` (oráculo):
-  - transições por tipo
-  - promoções (proposal→spec, experiment(won)→spec)
-  - guardrails MECE
-
-- [ ] **1.B.4** Ativar (de-skip) e passar `Pillars.test.ts` e `Promotion.test.ts`.
-- [ ] **1.B.N** Pipeline verde.
-- [ ] **1.B.[COMMIT]** `feat(spec-0021): domínio + políticas puras (DDD core green)`.
+---
 
 ## Sub-bloco [1.C] — Registry SSOT (memória + integridade) 📚
 
 > **Âncoras:** `[DEC-0021-A01]`, `[DEC-0021-C01]`
 
-- [ ] **1.C.1** Schema mínimo em memória: `id`, `kind`, `title`, `status`, `createdAt`, `updatedAt`, `sourceRefs[]`.
-- [ ] **1.C.2** Ordenação canônica (diferença determinística).
-- [ ] **1.C.3** Integridade: IDs únicos, imutabilidade `id/createdAt`, refs válidas.
-- [ ] **1.C.4** Ativar (de-skip) e passar `Integrity.test.ts`.
-- [ ] **1.C.5** Registrar decisão de implementação para “preservar comentários no YAML” (aprovação humana se dependência externa).
-- [ ] **1.C.N** Pipeline verde.
-- [ ] **1.C.[COMMIT]** `feat(spec-0021): registry SSOT (memória) + integridade`.
+- [x] **1.C.1** Registry em memória implementado
+- [x] **1.C.2** Ordenação determinística aplicada
+- [x] **1.C.3** Integridade implementada:
+  - unicidade de IDs
+  - imutabilidade de `id`
+  - imutabilidade de `createdAt`
+  - `updatedAt` controlado
+- [x] **1.C.4** `Integrity.test.ts` ativo e verde
+- [ ] **1.C.5** Estratégia definitiva para preservação de comentários YAML (adiado para IO real)
+- [x] **1.C.N** Pipeline verde
+- [x] **1.C.[COMMIT]** `feat(spec-0021): registry SSOT em memória`
 
-## Sub-bloco [1.D] — Use Cases + Atomicidade (policy-first) 🧩
+---
+
+## Sub-bloco [1.D] — Application Layer + Atomicidade 🧩
 
 > **Âncoras:** `[DEC-0021-A03]`, `[DEC-0021-C01]`
 
-- [ ] **1.D.1** Ports: `RegistryStore`, `WorkspaceStore`, `Clock`, `IdGenerator`.
-- [ ] **1.D.2** Use cases: `RegisterWorkItem`, `PromoteWorkItem`.
-- [ ] **1.D.3** Atomicidade/rollback: falha na criação física não pode deixar registry inconsistente.
-- [ ] **1.D.4** Ativar (de-skip) e passar `RegisterItem.test.ts` e `PromoteItem.test.ts`.
-- [ ] **1.D.N** Pipeline verde.
-- [ ] **1.D.[COMMIT]** `feat(spec-0021): use cases atômicos (policy-first)`.
+- [x] **1.D.1** Ports implementados:
+  - `RegistryStore`
+  - `WorkspaceStore`
+  - `Clock`
+  - `IdGenerator`
+- [x] **1.D.2** Use cases implementados:
+  - `RegisterWorkItem`
+  - `PromoteWorkItem`
+- [x] **1.D.3** Rollback bilateral implementado:
+  - rollback registry
+  - rollback workspace
+- [x] **1.D.4** `RegisterItem.test.ts` e `PromoteItem.test.ts` ativos e verdes
+- [x] **1.D.N** Pipeline verde
+- [x] **1.D.[COMMIT]** `feat(spec-0021): application layer policy-first`
 
 ## Encerramento de PR1 (gate)
 

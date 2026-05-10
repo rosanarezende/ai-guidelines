@@ -1,23 +1,21 @@
 /**
- * [BR-CLI-INFRA-01] Adaptador de Filesystem
- * Contrato técnico para operações de IO atômicas e seguras.
+ * [BR-CLI-INFRA-01] Adaptador de Filesystem.
+ * Esta suíte permanece toda em it.skip nesta fase: o FileSystemAdapter real
+ * (escopo, atomicidade de escrita) é entregue no PR2 [DEC-0021-A03].
  */
 describe("Infraestrutura — FileSystemAdapter [BR-CLI-INFRA]", () => {
   describe("Segurança e Escopo", () => {
-    it.skip("DADO uma tentativa de escrita fora do diretório root '.governance/' ENTÃO deve lançar erro de violação de escopo", () => {
-      // Regra: Garantir que a CLI de governança não altere arquivos arbitrários do repositório.
-    });
+    // [SKIP-REASON: Fase 2 — escopo '.governance/' é o root do PR2 [DEC-0021-A03]]
+    it.skip("DADO escrita fora do root '.governance/' ENTÃO erro de violação de escopo [DEC-0021-A03]", () => {});
   });
 
   describe("Atomicidade de Escrita", () => {
-    it.skip("DADO uma operação de gravação no 'registry.yml' QUANDO o sistema falha ENTÃO o arquivo original deve permanecer intacto", () => {
-      // Regra: Proteção vital para a SSOT (Single Source of Truth).
-    });
+    // [SKIP-REASON: Fase 2 — atomicidade de IO real (rename atômico) é PR2 [DEC-0021-A01]]
+    it.skip("DADO gravação no 'registry.yml' QUANDO falha ENTÃO arquivo original permanece intacto [DEC-0021-A01]", () => {});
   });
 
   describe("Interface de Diretórios", () => {
-    it.skip("DADO um caminho QUANDO verificado ENTÃO deve retornar se é um arquivo, diretório ou inexistente", () => {
-      // Regra: Suporte para as validações de sanidade do WorkspaceService.
-    });
+    // [SKIP-REASON: Fase 2 — checagem de tipo de path é parte do FileSystemAdapter (PR2) [DEC-0021-A03]]
+    it.skip("DADO um caminho QUANDO verificado ENTÃO retorna se é arquivo, diretório ou inexistente [DEC-0021-A03]", () => {});
   });
 });
