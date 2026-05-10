@@ -366,33 +366,31 @@ yarn smoke
 
 ### Contratos obrigatórios
 
-- [ ] **2.B.1 [Round-trip]** Read → write não pode destruir informação essencial.
-- [ ] **2.B.2 [Determinismo]** Serialização ordenada e estável (evitar churn em PRs).
-- [ ] **2.B.3 [Imutabilidade]** `id` e `createdAt` imutáveis; `updatedAt` controlado.
-- [ ] **2.B.4 [Schema Guard]** Rejeitar estado inválido com erros determinísticos (mensagens estáveis).
-- [ ] **2.B.5 [Comment Preservation]** Estratégia explícita (hard-mode):
-  - ou implementar preservação
-  - ou escolher lib e documentar tradeoff (exige aprovação humana explícita)
+- [x] **2.B.1 [Round-trip]** Read → write não pode destruir informação essencial.
+- [x] **2.B.2 [Determinismo]** Serialização ordenada e estável (evitar churn em PRs).
+- [x] **2.B.3 [Imutabilidade]** `id` e `createdAt` imutáveis; `updatedAt` controlado.
+- [x] **2.B.4 [Schema Guard]** Rejeitar estado inválido com erros determinísticos (mensagens estáveis).
+- [x] **2.B.5 [Comment Preservation]** Caminho A implementado: `parseDocument` + mutação granular preserva comentários inline e de cabeçalho em `load → mutate → save`. Limitação herdada do yaml@2 (`commentBefore` migra para o próximo nó em `remove`) documentada como comportamento conservador (não-destrutivo).
 
 ### Implementação
 
-- [ ] **2.B.6** Implementar `GovernanceRegistryStore` (infra) e `RegistryService` (domain boundary):
-  - ports no app layer
-  - infra faz IO
-  - domain valida e decide
+- [x] **2.B.6** Implementar `GovernanceRegistryStore` (infra) e `RegistryService` (domain boundary):
+  - ports no app layer (`PersistentRegistryStore`)
+  - infra faz IO (`src/infrastructure/yaml/`)
+  - domain valida e decide (schema guard puro em `registrySchema.ts`)
 
 ### Testes (obrigatórios)
 
-- [ ] **2.B.7** Criar e passar:
+- [x] **2.B.7** Criar e passar:
   - `RegistryYamlDeterminism.test.ts`
   - `RegistrySchemaGuard.test.ts`
   - `RegistryRoundTrip.test.ts`
-  - `RegistryCommentPreservation.test.ts` (ou marcado com `SKIP-REASON` explícito)
+  - `RegistryCommentPreservation.test.ts`
 
-- [ ] **2.B.N** Pipeline verde.
+- [x] **2.B.N** Pipeline verde (101 passed, 15 skipped pré-existentes, 0 failed).
 
-- [ ] **2.B.[DEBT-REVIEW]** `NEXT.md`: registrar resolução dos skips `FileSystemAdapter.test.ts` (atomicidade) e `Isolation.test.ts` quando `NodeRegistryStore` + `NodeWorkspaceStore` materializarem `.governance/`; documentar decisão sobre Comment Preservation (2.B.5) como débito ou resolvido.
-- [ ] **2.B.[ARCHITECTURE]** `ARCHITECTURE.md`: mover `Registry (YAML SSOT)` de §B.2 para §B.1 PR2; documentar atomicidade `tmp+rename`; atualizar invariante 7 (YAML existe); glossário ganha `GovernanceRegistryStore` / `RegistryService` / códigos `REGISTRY_YAML_*`.
+- [x] **2.B.[DEBT-REVIEW]** `NEXT.md` atualizado 2026-05-10: `FileSystemAdapter.test.ts` resolvido por equivalência (atomicidade coberta no novo store); `Isolation.test.ts` segue em skip por dependência de `WorkspaceStore` real (não-2.B); Comment Preservation registrada como implementada com limitação conservadora; cobertura ergonômica do `RegistryService` e ligação CLI→store real documentadas como débitos.
+- [x] **2.B.[ARCHITECTURE]** `ARCHITECTURE.md` atualizado 2026-05-10: `Registry (YAML SSOT)` movido de §B.2 para §B.1 PR2; invariante 7 reescrita ("YAML é SSOT real"); §G ganhou `GovernanceRegistryStore`, `PersistentRegistryStore`, `RegistryService`, família `REGISTRY_YAML_*`; §F roadmap reflete "2.A/2.B entregues".
 - [ ] **2.B.[COMMIT]** `feat(spec-0021): YAML registry SSOT com guardrails (determinístico)`.
 
 ---

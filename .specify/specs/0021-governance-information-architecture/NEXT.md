@@ -38,6 +38,14 @@ Foram identificados os seguintes riscos arquiteturais ainda existentes:
 4. **`Isolation.test.ts` segue em skip.** A criação de pasta **por item denso** (`.governance/specs/<id>/`) depende de plugar um adapter real do `WorkspaceStore` (atual port já existente) — fica natural em 2.B quando `NodeRegistryStore` materializar `registry.yml` no mesmo `.governance/`.
 5. **`FileSystemAdapter.test.ts` segue em skip.** Atomicidade de escrita (`tmp + rename`) é exatamente o contrato que 2.B precisa implementar para `registry.yml`. Promover skips a testes reais lá.
 
+#### Sub-bloco 2.B (Registry YAML SSOT) — registrado em 2026-05-10
+
+1. **`FileSystemAdapter.test.ts` resolvido por equivalência.** A atomicidade (`tmp + rename`) está agora coberta por `RegistryRoundTrip.test.ts` ("DADO save falhando ENTÃO arquivo original permanece intacto") sobre o store real. Manter os `it.skip` originais por ora (eles ainda descrevem um adapter genérico de filesystem que não existe como bloco isolado); converter em débito para retirada formal quando — e se — um `FileSystemAdapter` separado for extraído.
+2. **`Isolation.test.ts` segue em skip.** Continua dependendo de plugar adapter real para `WorkspaceStore` (pasta `.governance/specs/<id>/`). Independente de 2.B; é puramente sobre densidade física por item. Resolução natural quando 2.C/2.D ligar `WorkspaceStore` ao IO real do `.governance/`.
+3. **Comment Preservation (2.B.5) implementada (Caminho A) com limitação documentada.** `commentBefore` em yaml@2 está vinculado ao **próximo nó** da seq; ao remover um item, o comentário-cabeça migra para o item seguinte ao invés de sumir. Comportamento é **conservador por design** (jamais destrói texto do usuário) e está documentado em `RegistryCommentPreservation.test.ts`. Evolução opcional: detectar comentários "órfãos" e mover para área neutra (header) — só se a dor real aparecer; abrir ADR específica nesse caso.
+4. **Cobertura do `RegistryService` abaixo do esperado.** Service tem CRUD via DI mas só `add` é exercitado em teste explícito (RoundTrip). `update`/`remove`/`load`/`save` via service ainda só são cobertos indiretamente via `GovernanceRegistryStore`. Aceitar como débito ergonômico — a regra de negócio vive no store; o service é casca fina.
+5. **Não há use case que orquestre `RegistryService` real ainda.** `RegisterWorkItem`/`PromoteWorkItem` seguem com `RegistryStore` injetado (in-memory nos testes). A ligação CLI → `GovernanceRegistryStore` real chega em 2.D / PR4 quando a CLI for plugada no `.governance/` materializado.
+
 ### Débitos da Fase 3 (Living Documentation + Engine)
 
 ### Débitos da Fase 3 (Living Documentation + Engine)
