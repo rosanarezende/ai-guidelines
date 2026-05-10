@@ -109,28 +109,30 @@
 
 ### Sub-bloco [1.A] — Linguagem Ubíqua e Contratos do Domínio
 
-> Foco: Traduzir as decisões do gate (`decision-brief.md`) em uma arquitetura de domínio explícita e testável. A linguagem ubíqua dos 6 pilares será materializada em tipos e interfaces, e os testes de comportamento serão escritos (e desabilitados) para validar esses contratos.
+> Foco: Traduzir as decisões do gate (`decision-brief.md`) em uma arquitetura de domínio explícita e testável. A linguagem ubíqua dos 7 pilares será materializada em tipos e interfaces, e os testes de comportamento serão escritos (e desabilitados) para validar esses contratos.
 
 - [x] **1.A.1** Criar a estrutura de diretórios `src/app`, `src/domain`, `src/infrastructure`.
-- [x] **1.A.2** **[Linguagem Ubíqua]** Em `src/domain/entities/`, definir os tipos e interfaces que representam os 6 pilares de valor: `Spec`, `Exploration`, `Fix`, `Patch`, `Incident`, `Proposal`. Cada um deve refletir seus atributos únicos conforme o `decision-brief.md`.
+- [x] **1.A.2** **[Linguagem Ubíqua]** Em `src/domain/entities/`, definir os tipos e interfaces que representam os 7 pilares de valor: `Spec`, `Exploration`, `Fix`, `Patch`, `Incident`, `Proposal`, `Experiment`. Cada um deve refletir seus atributos únicos conforme o `decision-brief.md`.
 - [x] **1.A.3** **[Bounded Contexts]** Definir as interfaces para os principais serviços do domínio: `RegistryService` (para gerenciar o `registry.yml`), `WorkspaceService` (para interagir com o filesystem do `.governance/`), e `PolicyService` (para validar as regras de transição de estado, ex: `proposal` -> `spec`).
 - [x] **1.A.4** **[TDD]** Escrever a suíte de testes de comportamento em `src/domain/**/*.test.ts` que valida os contratos e as regras de negócio. Ex: "DADO um `proposal` QUANDO promovido a `spec` ENTÃO ele deve ter um `spec.md` associado".
 - [x] **1.A.5** **[TDD]** Marcar todos os novos testes com `it.skip`. O objetivo é criar um blueprint executável da arquitetura e dos requisitos de negócio antes da implementação.
 - [x] **1.A.N** Pipeline de check + test verde (pois os testes do domínio estão desabilitados).
 - [x] **1.A.6** Análise de débitos: atualizar `NEXT.md`.
-- [ ] **1.A.[COMMIT]** Commit atômico sugerido: `feat(spec-0021): define linguagem ubíqua e contratos do domínio`.
+- [x] **1.A.[COMMIT]** Commit atômico sugerido: `feat(spec-0021): define linguagem ubíqua e contratos do domínio`.
 
-### Sub-bloco [1.B] — Normalização da Suíte e Implementação do Domínio
+### Sub-bloco [1.B] — Implementação do Domínio e Infraestrutura (DDD)
 
-> Foco: Implementar a lógica de negócio para satisfazer os contratos definidos no sub-bloco 1.A, ativando os testes progressivamente. O objetivo é ter um domínio central sólido e 100% testado, isolado do legado.
+> Foco: Implementar a lógica de negócio para satisfazer os contratos definidos no sub-bloco 1.A, isolando o domínio puro da infraestrutura (filesystem). O objetivo é ter um motor de governança 100% testado e desacoplado.
 
-- [ ] **1.B.1** Implementar as entidades e a lógica de negócio dentro de `src/domain/`, seguindo as interfaces do sub-bloco anterior.
-- [ ] **1.B.2** **[Ciclo GREEN]** Ativar os testes (`it.skip` -> `it`), um por um ou por módulo, e escrever o código mínimo necessário no domínio para que eles passem.
-- [ ] **1.B.3** Garantir que a suíte de testes do novo domínio atinja alta cobertura e valide todas as regras de negócio definidas no `decision-brief.md`.
-- [ ] **1.B.4** Implementar os casos de uso em `src/app/` que orquestram o domínio, também com cobertura de testes unitários.
-- [ ] **1.B.N** Pipeline de check + test verde, com todos os testes do novo domínio passando.
-- [ ] **1.B.5** Análise de débitos: atualizar `NEXT.md`.
-- [ ] **1.B.[COMMIT]** Commit atômico sugerido: `feat(spec-0021): implementa e valida o novo domínio da CLI`.
+- [ ] **1.B.1** **[Infrastructure]** Implementar o `FileSystemAdapter` em `src/infrastructure/`, responsável pelas operações reais de IO no novo root `.governance/`.
+- [ ] **1.B.2** **[Domain Services]** Implementar `RegistryService` e `WorkspaceService` em `src/domain/services/`, utilizando o adapter de infraestrutura via injeção de dependência.
+- [ ] **1.B.3** **[Domain Logic]** Implementar o `PolicyService` com as regras de transição (ex: `proposal` -> `spec`) e validação de metadados obrigatórios por tipo.
+- [ ] **1.B.4** **[Application Services]** Criar casos de uso em `src/app/` (ex: `RegisterItemUseCase`, `PromoteItemUseCase`) que orquestram os serviços do domínio.
+- [ ] **1.B.5** **[Ciclo GREEN]** Ativar os testes (`it.skip` -> `it`) em `src/domain/domain.test.ts` e garantir que a lógica de negócio satisfaça todos os critérios `[BR-CLI-*]`.
+- [ ] **1.B.6** **[Persistence]** Garantir que a serialização/deserialização do `registry.yml` (YAML) preserve comentários e a ordem dos itens conforme o gate.
+- [ ] **1.B.N** Pipeline de check + test verde, com o novo domínio 100% coberto.
+- [ ] **1.B.7** Análise de débitos: atualizar `NEXT.md`.
+- [ ] **1.B.[COMMIT]** Commit atômico sugerido: `feat(spec-0021): implementa motor de governança (DDD) e adapters de infra`.
 
 ### Encerramento de PR1
 
@@ -162,15 +164,15 @@
 
 ### Sub-bloco [2.B] — Placement documental e foundation/ADR
 
-- [ ] **2.B.1** Aplicar a política canônica de placement para constituição operacional, ADRs, docs descritivos, referências e artefatos de framework.
-- [ ] **2.B.2** Reservar explicitamente o lar canônico de PRD/intake, handoff/decision logs e telemetria sem implementar seus pipelines completos.
-- [ ] **2.B.3** Materializar o modelo híbrido de arquitetura de informação: catálogo curto + reorganização física direcionada.
-- [ ] **2.B.4** Tratar a fronteira foundation vs ADR, incluindo renome/refactor do documento-base do lifecycle.
-- [ ] **2.B.5** Tratar o placement interno de `.core/rules/` conforme o gate, distinguindo explicitamente esse trabalho da fragmentação distribuída do consumidor.
-- [ ] **2.B.6** Tratar o destino de `docs/` e demais ilhas documentais sob a nova topologia canônica.
+- [ ] **2.B.1** **[Catálogo]** Criar o `GOVERNANCE-CATALOG.md` (ou similar) como carrier canônico da política de arquitetura de informação (Modelo Híbrido DEC-0021-B03).
+- [ ] **2.B.2** **[Refactor Foundation]** Renomear e refatorar `.core/process/spec-foundation.md` para `governance-foundation.md` (ou `lifecycle.md`), removendo débitos arquiteturais para ADRs conforme DEC-0021-B04.
+- [ ] **2.B.3** **[Placement]** Aplicar a política de placement para ADRs, docs descritivos e referências sob a nova topologia.
+- [ ] **2.B.4** **[Rules Topology]** Reorganizar fisicamente `.core/rules/` seguindo a taxonomia (Top/Center/Base), conforme DEC-0021-B05.
+- [ ] **2.B.5** **[Reserva]** Reservar explicitamente os paths de PRD/intake, handoff e telemetria em `.governance/`.
+- [ ] **2.B.6** **[Depreciação]** Migrar conteúdo útil de `docs/` para `.core/docs/` ou `.governance/` e depreciar a pasta raiz `docs/` (Gap Analysis).
 - [ ] **2.B.N** Pipeline de check + test verde após o sub-bloco 2.B.
 - [ ] **2.B.7** Análise de débitos: atualizar `NEXT.md`.
-- [ ] **2.B.[COMMIT]** Commit atômico sugerido: `docs(spec-0021): consolida placement governance-driven`.
+- [ ] **2.B.[COMMIT]** Commit atômico sugerido: `docs(spec-0021): consolida catálogo de governança e nova topologia`.
 
 ### Sub-bloco [2.C] — Root `.governance/` e compatibilidade com legado
 

@@ -51,4 +51,14 @@ describe("Domain Contracts — Governance Lifecycle", () => {
       // Persistence of outcome data
     });
   });
+
+  describe("Growth Experiments [BR-CLI-POLICY-03]", () => {
+    it.skip("DADO um 'experiment' QUANDO registrado ENTÃO ele deve obrigatoriamente possuir uma hipótese e métricas de sucesso", () => {
+      // Validation logic for experiment metadata
+    });
+
+    it.skip("DADO um 'experiment' QUANDO finalizado ENTÃO ele deve obrigatoriamente registrar o status de limpeza (cleanupStatus)", () => {
+      // Pós-experimento: evitar lixo no código
+    });
+  });
 });

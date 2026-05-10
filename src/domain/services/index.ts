@@ -1,66 +1,72 @@
 import { WorkItem, WorkItemType } from "../entities";
 
 /**
- * Interface for managing the structured registry (registry.yml).
- * Handles persistence and retrieval of the canonical state.
+ * Interface para gerenciar o registro estruturado (registry.yml).
+ * Lida com a persistência e recuperação do estado canônico.
  */
 export interface RegistryService {
   /**
-   * Loads all work items from the registry.
+   * Carrega todos os itens de trabalho do registro.
    */
   loadAll(): Promise<WorkItem[]>;
 
   /**
-   * Retrieves a specific work item by its ID.
+   * Recupera um item de trabalho específico pelo seu ID.
    */
   getById(id: string): Promise<WorkItem | undefined>;
 
   /**
-   * Saves or updates a work item in the registry.
+   * Persiste um novo item de trabalho. Falha se o ID já existir.
    */
-  save(item: WorkItem): Promise<void>;
+  create(item: WorkItem): Promise<void>;
 
   /**
-   * Removes a work item from the registry.
+   * Atualiza um item existente. Protege campos imutáveis (id, createdAt).
+   */
+  update(id: string, partial: Partial<WorkItem>): Promise<void>;
+
+  /**
+   * Remove um item de trabalho.
+   * Implementações podem optar por 'Soft Delete' para auditoria.
    */
   delete(id: string): Promise<void>;
 }
 
 /**
- * Interface for interacting with the governance workspace filesystem (.governance/).
- * Handles folder creation, template application, and artifact management.
+ * Interface para interagir com o sistema de arquivos do workspace de governança (.governance/).
+ * Lida com criação de pastas, aplicação de templates e gestão de artefatos.
  */
 export interface WorkspaceService {
   /**
-   * Initializes the .governance/ directory structure if it doesn't exist.
+   * Inicializa a estrutura do diretório .governance/ se ela não existir.
    */
   initWorkspace(): Promise<void>;
 
   /**
-   * Creates the physical storage (folders/files) for a work item.
-   * Based on the item type and configured templates.
+   * Cria o armazenamento físico (pastas/arquivos) para um item de trabalho.
+   * Baseado no tipo do item e nos templates configurados.
    */
   createItemWorkspace(item: WorkItem): Promise<void>;
 
   /**
-   * Checks if the physical storage for a work item exists.
+   * Verifica se o armazenamento físico para um item de trabalho existe.
    */
   itemWorkspaceExists(item: WorkItem): Promise<boolean>;
 
   /**
-   * Reads an artifact (e.g., spec.md) from a work item's workspace.
+   * Lê um artefato (ex: spec.md) do workspace de um item de trabalho.
    */
   readArtifact(item: WorkItem, filename: string): Promise<string>;
 }
 
 /**
- * Interface for validating state transitions and business rules.
- * Implements the governance policies.
+ * Interface para validar transições de estado e regras de negócio.
+ * Implementa as políticas de governança.
  */
 export interface PolicyService {
   /**
-   * Validates if a work item can transition from its current state to a new one.
-   * e.g., "proposal" -> "spec" promotion rules.
+   * Valida se um item de trabalho pode transicionar de seu estado atual para um novo.
+   * ex: regras de promoção de "proposal" -> "spec".
    */
   validateTransition(
     item: WorkItem,
@@ -68,7 +74,7 @@ export interface PolicyService {
   ): Promise<{ valid: boolean; errors?: string[] }>;
 
   /**
-   * Validates if a work item satisfies all required metadata for its current type.
+   * Valida se um item de trabalho satisfaz todos os metadados obrigatórios para seu tipo atual.
    */
   validateMetadata(item: WorkItem): Promise<{ valid: boolean; errors?: string[] }>;
 }
