@@ -46,7 +46,7 @@
 - [x] **0.2** **Tipo de spec** confirmado como `evidence-driven` no header da `spec.md`. Critério-teste: _"o design depende de evidência técnica/pesquisa ainda não coletada?"_ → **sim**.
 - [x] **0.3** **Slug semântico** definido: `governance-information-architecture`.
 - [x] **0.4** Branch `feat/spec-0021-governance-information-architecture` criada a partir de `main`.
-- [x] **0.5** `spec.md` instanciado a partir de `.specify/templates/spec-boilerplate.md`; header completo with `Tipo de spec: evidence-driven` e campo `Decision Brief` apontando para `./decision-brief.md`.
+- [x] **0.5** `spec.md` instanciado a partir de `.specify/templates/spec-boilerplate.md`; header completo com `Tipo de spec: evidence-driven` e campo `Decision Brief` apontando para `./decision-brief.md`.
 - [x] **0.6** **[MANDATÓRIO]** Validação Humana inicial: owner aprovou o problema e o escopo antes dos Code Actions.
 - [x] **0.7** `plan.md` instanciado a partir de `.specify/templates/plan-boilerplate.md` com bloco Stage 1 / Stage 2 e perguntas explícitas de research.
 - [x] **0.8** `tasks.md` (este arquivo) instanciado a partir desta variante.
@@ -101,7 +101,7 @@
 - [x] **1.0.1** Adicionar dependências de desenvolvimento: `typescript`, `ts-node`, `jest`, `ts-jest`, `@types/node`, `@types/jest`.
 - [x] **1.0.2** Criar `tsconfig.json` na raiz, configurado para ESM (`"module": "NodeNext"`) e output em `dist/`.
 - [x] **1.0.3** Criar `jest.config.ts` na raiz, configurado para usar `ts-jest` e apontar para os testes em `src/`.
-- [x] **1.0.4** Atualizar `package.json`: adicionar scripts `test:nova-cli` e `build` para the novo ambiente TS.
+- [x] **1.0.4** Atualizar `package.json`: adicionar scripts `test:nova-cli` e `build` para o novo ambiente TS.
 - [x] **1.0.5** Criar um teste de smoke (`src/smoke.test.ts`) para garantir que a configuração do Jest está funcionando.
 - [x] **1.0.N** Pipeline de check + test verde após o sub-bloco 1.0.
 - [x] **1.0.6** Análise de débitos: atualizar `NEXT.md`.
@@ -158,109 +158,179 @@
   - Orquestração atômica: Validação -> Persistência YAML -> Criação Física.
   - **Lógica de Rollback**: Garantir que uma falha de disco não deixe o Registro em estado inconsistente.
 - [ ] **1.D.4** **[BDD/TDD / Ciclo GREEN]** Ativar e passar os testes de `Isolation.test.ts` e as suítes em `src/app/use-cases/`.
-- [ ] **1.D.N** Pipeline de check + test verde 100% para toda a Fase 1.
-- [ ] **1.D.5** Análise de débitos: atualizar `NEXT.md`.
 - [ ] **1.D.[COMMIT]** Commit atômico sugerido: `feat(spec-0021): orquestração de casos de uso e mapeamento físico do workspace .governance/`.
 
-### Encerramento de PR1 (Fundação Arquitetural)
+### Encerramento de PR1
 
 - [ ] **1.[PULL-REQUEST]** Criar ou atualizar Pull Request em Draft com título `feat(spec-0021): Fase 1 — Fundação Arquitetural (PR1)`.
-- [ ] **1.[DESCRIPTION]** Descrever em 3 seções: (1) Governança por Blueprints (RED); (2) Domínio DDD fundado (GREEN); (3) Orquestração atômica e infra.
+- [ ] **1.[DESCRIPTION]** Descrever em 3 seções: (1) Governança por Blueprints (RED); (2) Domínio DDD fundado (GREEN); (3) Orquestração atômica.
 - [ ] **1.[READY-FOR-REVIEW]** Marcar PR como "Ready for review" após conclusão de 1.D e pipeline verde.
-- [ ] **1.[MANDATÓRIO]** Aguardar aprovação humana explícita do Maintainer. **Não fazer merge autonomamente.**
-- [ ] **1.[MERGE]** Após aprovação, fazer merge com `yarn format ; yarn check ; git commit -m "..." ; ...`.
+- [ ] **1.[MANDATÓRIO]** Aguardar aprovação humana explícita.
+- [ ] **1.[MERGE]** Após aprovação, fazer merge com `git commit -m "..."` seguindo a chain em AGENTS.md.
 
 ---
 
-## Fase 2 — Topologia Física e Workspace (Governance-Driven)
+## Fase 2 — Reestruturação física do workspace e contratos do consumidor
 
-> Esta fase materializa as decisões de placement e catálogo documental ([DEC-0021-B01 a B05]), utilizando o motor fundado na Fase 1 para mudar a realidade física do repositório.
+> Esta fase materializa os Blocos A e B do gate no filesystem, no contrato do consumidor e na superfície publicada do framework.
+>
+> **Dependência**: PR1 deve estar mergeada.
 >
 > **PR2**: Branch `feat/spec-0021-fase-2`, commits incrementais (2.A, 2.B, 2.C), merge após aprovação humana.
 
-### Sub-bloco [2.A] — GovernanceWorkspace (Root e Migração)
+### Sub-bloco [2.A] — Estado canônico repo-first híbrido
 
-- [ ] **2.A.[NEW-BRANCH]** Branch `feat/spec-0021-fase-2` criada a partir de `main` (PR1 mergeada).
-- [ ] **2.A.1** **[Strangler Fig]** Ativar o `GovernanceWorkspaceService` para gerenciar a migração automática de `.specify/` e `.ai-guidelines/` para `.governance/`.
-- [ ] **2.A.2** **[Registry Bootstrap]** Popular o `registry.yml` com um lote representativo do legado, provando o modelo híbrido.
-- [ ] **2.A.3** **[TDD / Ciclo GREEN]** Validar que a CLI prioriza o novo root mas mantém bridge de compatibilidade.
+- [ ] **2.A.[NEW-BRANCH]** Branch `feat/spec-0021-fase-2` criada a partir de `main` (assumindo PR1 já mergeada).
+- [ ] **2.A.1** Introduzir o contrato canônico do estado estruturado em `.governance/registry.yml`, com IDs, campos mínimos e invariantes documentadas.
+- [ ] **2.A.2** Provar o modelo com um lote mínimo representativo que inclua pelo menos uma origem não-spec, uma spec e uma entrega relacionada.
+- [ ] **2.A.3** Validar que o modelo não depende de banco/serviço externo e pode ser reconstruído apenas a partir do repositório.
+- [ ] **2.A.N** Pipeline de check + test verde após o sub-bloco 2.A.
 - [ ] **2.A.4** Análise de débitos: atualizar `NEXT.md`.
-- [ ] **2.A.[COMMIT]** Commit sugerido: `refactor(spec-0021): introduz root .governance com lógica de migração strangler fig`.
+- [ ] **2.A.[COMMIT]** Commit atômico sugerido: `feat(spec-0021): introduz estado repo-first híbrido em .governance`.
 
-### Sub-bloco [2.B] — RulesEngine (Topologia de Regras)
+### Sub-bloco [2.B] — Placement documental e foundation/ADR
 
-- [ ] **2.B.1** **[Rules Topology]** Reorganizar fisicamente `.core/rules/` seguindo a taxonomia (Top/Center/Base) conforme [DEC-0021-B05].
-- [ ] **2.B.2** **[Build Alignment]** Atualizar `build:rules`, catálogos e scripts de compilação para suportar a nova topologia sem quebrar o runtime.
-- [ ] **2.B.3** **[TDD / Ciclo GREEN]** Validar compilação e projeções com a nova estrutura física.
-- [ ] **2.B.[COMMIT]** Commit sugerido: `feat(spec-0021): reorganiza .core/rules seguindo a nova taxonomia canônica`.
+- [ ] **2.B.1** **[Catálogo]** Criar o `GOVERNANCE-CATALOG.md` (ou similar) como carrier canônico da política de arquitetura de informação (Modelo Híbrido DEC-0021-B03).
+- [ ] **2.B.2** **[Refactor Foundation]** Renomear e refatorar `.core/process/spec-foundation.md` para `governance-foundation.md` (ou `lifecycle.md`), removendo débitos arquiteturais para ADRs conforme DEC-0021-B04.
+- [ ] **2.B.3** **[Placement]** Aplicar a política de placement para ADRs, docs descritivos e referências sob a nova topologia.
+- [ ] **2.B.4** **[Rules Topology]** Reorganizar fisicamente `.core/rules/` seguindo a taxonomia (Top/Center/Base), conforme DEC-0021-B05.
+- [ ] **2.B.5** **[Reserva]** Reservar explicitamente os paths de PRD/intake, handoff e telemetria em `.governance/`.
+- [ ] **2.B.6** **[Depreciação]** Migrar conteúdo útil de `docs/` para `.core/docs/` ou `.governance/` e depreciar a pasta raiz `docs/` (Gap Analysis).
+- [ ] **2.B.N** Pipeline de check + test verde após o sub-bloco 2.B.
+- [ ] **2.B.7** Análise de débitos: atualizar `NEXT.md`.
+- [ ] **2.B.[COMMIT]** Commit atômico sugerido: `docs(spec-0021): consolida catálogo de governança e nova topologia`.
 
-### Sub-bloco [2.C] — Placement Documental e Foundation
+### Sub-bloco [2.C] — Root `.governance/` e compatibilidade com legado
 
-- [ ] **2.C.1** **[Catalog]** Criar o `GOVERNANCE-CATALOG.md` como carrier da política de AI ([DEC-0021-B03]).
-- [ ] **2.C.2** **[Foundation Refactor]** Renomear `spec-foundation.md` para `governance-foundation.md`, refatorando o manual operacional para os 7 pilares.
-- [ ] **2.C.3** **[ADR Migration]** Migrar decisões arquiteturais atômicas de foundation para ADRs conforme [DEC-0021-B04].
-- [ ] **2.C.4** **[Cleanup]** Depreciar o diretório raiz `docs/` e redistribuir conteúdo útil.
+- [ ] **2.C.1** Formalizar o contrato entre `sdd_dir`, `spec_workspace_dir` e o novo root `.governance/`.
+- [ ] **2.C.2** Introduzir camada explícita de compatibilidade para leitura/migração de `.ai-guidelines/` e `.specify/`.
+- [ ] **2.C.3** Alinhar help da CLI, surface publicada do pacote, smoke tests e docs com o novo contrato do consumidor.
+- [ ] **2.C.4** Validar o contrato contra a fricção observada no consumidor `site`, evitando ambiguidade de onboarding.
+- [ ] **2.C.N** Pipeline de check + test verde após o sub-bloco 2.C.
 - [ ] **2.C.5** Análise de débitos: atualizar `NEXT.md`.
-- [ ] **2.C.[COMMIT]** Commit sugerido: `docs(spec-0021): consolida catálogo de governança e refatora foundation document`.
+- [ ] **2.C.[COMMIT]** Commit atômico sugerido: `refactor(spec-0021): introduz root .governance com bridge de legado`.
 
-### Encerramento de PR2 (Topologia e Workspace)
+### Encerramento de PR2
 
-- [ ] **2.[PULL-REQUEST]** Criar ou atualizar Pull Request em Draft com título `feat(spec-0021): Fase 2 — Topologia Física e Workspace (PR2)`.
-- [ ] **2.[DESCRIPTION]** Descrever: (1) Novo root .governance/; (2) Nova topologia de regras; (3) Catálogo e Foundation refatorada.
+- [ ] **2.[PULL-REQUEST]** Criar ou atualizar Pull Request em Draft com título `feat(spec-0021): Fase 2 — Reestruturação Física (PR2)`.
+- [ ] **2.[DESCRIPTION]** Descrever em 3 seções: (1) estado canônico e registry.yml; (2) placement documental e foundation; (3) root .governance/ e compatibilidade.
 - [ ] **2.[READY-FOR-REVIEW]** Marcar PR como "Ready for review" após conclusão de 2.C e pipeline verde.
-- [ ] **2.[MANDATÓRIO]** Aguardar aprovação humana explícita.
-- [ ] **2.[MERGE]** Após aprovação, fazer merge seguindo a chain em AGENTS.md.
+- [ ] **2.[MANDATÓRIO]** Aguardar aprovação humana explícita. **Não fazer merge autonomamente.**
+- [ ] **2.[MERGE]** Após aprovação, fazer merge com `git commit -m "..."` seguindo a chain em AGENTS.md.
 
 ---
 
-## Fase 3 — Inteligência e Automação (Living Docs & Templates)
+## Fase 3 — Living Documentation e Engine de Composição
 
-> A fase final entrega as capacidades avançadas de "Documentação Viva" e "Composição Modular" ([DEC-0021-C01 e D01]).
+> Esta fase implementa os Blocos C (Living Documentation) e D (composição modular) do gate como capacidades concretas do framework.
 >
-> **PR3**: Branch `feat/spec-0021-fase-3`, commits incrementais (3.A, 3.B), merge após aprovação humana.
+> **Dependência**: PR2 deve estar mergeada.
+>
+> **PR3**: Branch `feat/spec-0021-fase-3`, commits incrementais (3.A, 3.B, 4.A, 4.B), merge após aprovação humana.
 
-### Sub-bloco [3.A] — LivingDocumentation (Gabarito Vivo)
+### Sub-bloco [3.A] — Contrato da documentação viva
 
-- [ ] **3.A.[NEW-BRANCH]** Branch `feat/spec-0021-fase-3` criada a partir de `main` (PR2 mergeada).
-- [ ] **3.A.1** **[Rule Extractor]** Implementar o serviço que extrai IDs `[BR-CLI-*]` das suítes de teste de Fase 1 via AST parsing ou Reporter.
-- [ ] **3.A.2** **[Drift Guard]** Integrar a extração ao CI, garantindo que o artefato gerado em `.governance/` reflita 100% do comportamento real.
-- [ ] **3.A.3** **[TDD / Ciclo GREEN]** Validar determinismo e falha por drift no pipeline.
-- [ ] **3.A.[COMMIT]** Commit sugerido: `feat(spec-0021): ativa motor de living documentation extraído dos testes`.
+- [ ] **3.A.[NEW-BRANCH]** Branch `feat/spec-0021-fase-3` criada a partir de `main` (assumindo PR2 já mergeada).
+- [ ] **3.A.1** Definir o schema do artefato estruturado gerado a partir dos testes `[BR-CLI-*]`.
+- [ ] **3.A.2** Decidir o formato inicial de saída em `.governance/` e os metadados mínimos necessários para consumo futuro.
+- [ ] **3.A.3** Garantir determinismo do artefato gerado para evitar churn artificial em PRs e builds.
+- [ ] **3.A.N** Pipeline de check + test verde após o sub-bloco 3.A.
+- [ ] **3.A.4** Análise de débitos: atualizar `NEXT.md`.
+- [ ] **3.A.[COMMIT]** Commit atômico sugerido: `feat(spec-0021): define contrato da living documentation`.
 
-### Sub-bloco [3.B] — TemplateEngine (Composição Atômica)
+### Sub-bloco [3.B] — Extração automática e guardrails de drift
 
-- [ ] **3.B.1** **[Recipe Engine]** Implementar o motor que monta documentos finais combinando `partials` baseados em `recipes` do domínio.
-- [ ] **3.B.2** **[Atomic Partials]** Quebrar os boilerplates integrais (tasks, plan, spec) em blocos Markdown válidos e reutilizáveis.
-- [ ] **3.B.3** **[Legacy Mirror Removal]** Substituir o espelhamento de arquivos inteiros pelo novo fluxo de montagem modular.
-- [ ] **3.B.4** **[BDD/TDD / Ciclo GREEN]** Validar integridade estrutural do Markdown gerado.
+- [ ] **3.B.1** Implementar extração automática dos testes `[BR-CLI-*]` via AST parsing ou reporter dedicado.
+- [ ] **3.B.2** Integrar a geração do artefato ao ciclo local e ao CI.
+- [ ] **3.B.3** Falhar a pipeline quando houver drift entre comportamento testado e artefato estruturado gerado.
+- [ ] **3.B.4** Validar cobertura dos comportamentos críticos da CLI sob a nova taxonomia de regras.
+- [ ] **3.B.N** Pipeline de check + test verde após o sub-bloco 3.B.
 - [ ] **3.B.5** Análise de débitos: atualizar `NEXT.md`.
-- [ ] **3.B.[COMMIT]** Commit sugerido: `feat(spec-0021): substitui mirror de boilerplates por composição atômica modular`.
+- [ ] **3.B.[COMMIT]** Commit atômico sugerido: `feat(spec-0021): extrai br-cli para .governance`.
 
-### Encerramento de PR3 (Inteligência e Automação)
+### Sub-bloco [4.A] — Recipes e partials
 
-- [ ] **3.[PULL-REQUEST]** Criar ou atualizar Pull Request em Draft com título `feat(spec-0021): Fase 3 — Inteligência e Automação (PR3)`.
-- [ ] **3.[DESCRIPTION]** Descrever: (1) Extração automática de regras [BR-CLI-*]; (2) Engine de Recipes e Partials; (3) Remoção do mirror legado.
-- [ ] **3.[READY-FOR-REVIEW]** Marcar PR como "Ready for review" após conclusão de 3.B e pipeline verde.
-- [ ] **3.[MANDATÓRIO]** Aguardar aprovação humana explícita.
-- [ ] **3.[MERGE]** Após aprovação, fazer merge seguindo a chain em AGENTS.md.
+- [ ] **4.A.1** Definir o schema declarativo das `recipes` de montagem.
+- [ ] **4.A.2** Quebrar os boilerplates atuais em `partials` atômicos com fronteiras estruturais claras.
+- [ ] **4.A.3** Garantir que `partials` sejam blocos Markdown completos e válidos por contrato.
+- [ ] **4.A.4** Mapear como `artifactKind`, `workflowType`, idioma e stage resolvem a receita final.
+- [ ] **4.A.N** Pipeline de check + test verde após o sub-bloco 4.A.
+- [ ] **4.A.5** Análise de débitos: atualizar `NEXT.md`.
+- [ ] **4.A.[COMMIT]** Commit atômico sugerido: `refactor(spec-0021): introduz recipes e partials`.
+
+### Sub-bloco [4.B] — Montagem, validação estrutural e retirada do mirror legado
+
+- [ ] **4.B.1** Implementar a montagem dos artefatos finais a partir de `recipes` e `partials`.
+- [ ] **4.B.2** Validar integridade estrutural do Markdown gerado antes da persistência.
+- [ ] **4.B.3** Substituir o sync legado de boilerplates integrais pelo novo fluxo de composição modular.
+- [ ] **4.B.4** Garantir que customizações do consumidor sigam protegidas pelo novo modelo quando aplicável.
+- [ ] **4.B.N** Pipeline de check + test verde após o sub-bloco 4.B.
+- [ ] **4.B.5** Análise de débitos: atualizar `NEXT.md`.
+- [ ] **4.B.[COMMIT]** Commit atômico sugerido: `feat(spec-0021): substitui mirror por composição atômica`.
+
+### Encerramento de PR3
+
+- [ ] **3.[PULL-REQUEST]** Criar ou atualizar Pull Request em Draft com título `feat(spec-0021): Fase 3 — Living Documentation + Engine (PR3)`.
+- [ ] **3.[DESCRIPTION]** Descrever em 3 seções: (1) contrato e extração de [BR-CLI-*]; (2) schema e pipeline de living docs; (3) recipes, partials e composição modular.
+- [ ] **3.[READY-FOR-REVIEW]** Marcar PR como "Ready for review" após conclusão de 4.B e pipeline verde.
+- [ ] **3.[MANDATÓRIO]** Aguardar aprovação humana explícita. **Não fazer merge autonomamente.**
+- [ ] **3.[MERGE]** Após aprovação, fazer merge com `git commit -m "..."` seguindo a chain em AGENTS.md.
 
 ---
 
-## Fase 4 — Cleanup Final e Homologação (PR4)
+## Fase 4 — Migração e Cleanup
 
-> **PR4**: Branch `feat/spec-0021-fase-4`, commit final (4.A), merge após aprovação humana.
+> Esta fase executa renomeações finais, redirects e validação da topologia completa.
+>
+> **Dependência**: PR3 deve estar mergeada.
+>
+> **PR4**: Branch `feat/spec-0021-fase-4`, commit final (E), merge após aprovação humana.
 
-### Sub-bloco [4.A] — Cleanup e Smoke Tests
+### Sub-bloco [E] — Migração controlada e redirects
 
-- [ ] **4.A.[NEW-BRANCH]** Branch `feat/spec-0021-fase-4` criada a partir de `main` (PR3 mergeada).
-- [ ] **4.A.1** **[Smoke Tests]** Atualizar a suíte smoke para validar a nova topologia e o contrato `.governance/` em Windows, Linux e macOS.
-- [ ] **4.A.2** **[Legacy Removal]** Remover definitivamente códigos de suporte a paths legados se o plano strangler fig permitir o corte agora.
-- [ ] **4.A.3** **[Final Review]** Revisar README, CONTRIBUTING, AGENTS e help textual para garantir 100% de alinhamento.
-- [ ] **4.A.N** Pipeline de homologação verde (check + test + smoke).
-- [ ] **4.A.[COMMIT]** Commit sugerido: `chore(spec-0021): cleanup final, smoke tests multi-OS e alinhamento de docs`.
+- [ ] **E.[NEW-BRANCH]** Branch `feat/spec-0021-fase-4` criada a partir de `main` (assumindo PR3 já mergeada).
+- [ ] **E.1** Se a reorganização física for ampla, aplicar migração controlada com redirects/ponteiros no mesmo commit do rename.
+- [ ] **E.2** Confirmar que links históricos, cross-refs editoriais, workflows e referências essenciais continuam íntegros.
+- [ ] **E.3** Validar o tarball e o comportamento headless após a migração final dos paths.
+- [ ] **E.4** Análise de débitos: atualizar `NEXT.md`.
+- [ ] **E.N** Pipeline de check + test verde após o sub-bloco E.
+- [ ] **E.[COMMIT]** Commit atômico sugerido: `refactor(spec-0021): migração controlada da arquitetura governance-driven`.
+
+### Encerramento de PR4
+
+- [ ] **4.[PULL-REQUEST]** Criar ou atualizar Pull Request em Draft com título `refactor(spec-0021): Fase 4 — Migração e Cleanup (PR4)`.
+- [ ] **4.[DESCRIPTION]** Descrever: renomeações finais, redirects, validação tarball, smoke tests com nova topologia.
+- [ ] **4.[READY-FOR-REVIEW]** Marcar PR como "Ready for review" após conclusão de E e pipeline verde.
+- [ ] **4.[MANDATÓRIO]** Aguardar aprovação humana explícita. **Não fazer merge autonomamente.**
+- [ ] **4.[MERGE]** Após aprovação, fazer merge com `git commit -m "..."` seguindo a chain em AGENTS.md.
 
 ---
 
-## Fase de Review e Encerramento Final
+## Fase de Review (Gate de Homologação)
 
-- [ ] **R.1-R.8** Gate de Homologação e Cleanup (ver template).
+> Executada após todas as PRs (0-4) estarem mergeadas em `main`.
+
+- [ ] **R.1** Atualizar header da `spec.md`: status → `In Review`.
+- [ ] **R.2** Pipeline canônico verde: rodar a suíte completa pertinente ao escopo final da spec.
+- [ ] **R.3** Critérios de aceite de `spec.md` e DoD de `plan.md` confirmados ponto-a-ponto.
+- [ ] **R.4** `decision-brief.md`: validar que todos os pontos `[DEC-0021-*]` estão `Resolved` e refletidos no design final.
+- [ ] **R.5** Validar a entrega em ambiente real quando aplicável, especialmente contrato distribuído, Living Documentation e recipes.
+- [ ] **R.6** Descrição consolidada de todas as PRs em um bloco final: contexto → decisões cravadas → impacto cross-spec.
+- [ ] **R.7** **[MANDATÓRIO]** Aguardar Gate de Review Humano.
+- [ ] **R.8** Aplicar correções demandadas em loops de review até aprovação.
+
+---
+
+## Fase de Encerramento Pré-Merge
+
+> Executada no mesmo branch/PR de stage final, após aprovação do gate de review.
+
+- [ ] **F.1** `NEXT.md`: migrar débitos relevantes para `roadmap/backlog.md` e deletar o arquivo.
+- [ ] **F.2** Migrar research novo relevante para `.specify/specs/researchs/<domínio>/` e indexar em `research-index.md`.
+- [ ] **F.3** `decision-brief.md` permanece no diretório da spec.
+- [ ] **F.4** `spec.md` header: status → `Done (PR #X — YYYY-MM-DD)`.
+- [ ] **F.5** `roadmap/historico.md`: mover a 0021 para concluídas e remover de "Em execução" em `backlog.md`.
+- [ ] **F.6** Atualizar `CHANGELOG.md` e `package.json` se houver comportamento publicado alterado; se a entrega for apenas documental/estrutural sem release, registrar "não-aplicável" com justificativa.
+- [ ] **F.7** Confirmar que a sessão atual não abriu outra spec antes deste encerramento.
+- [ ] **F.8** **[COMMIT]** `chore(spec-0021): encerramento pré-merge — research migrado, NEXT removido, status final`.
+- [ ] **F.9** **[MANDATÓRIO]** Aprovação humana explícita para merge. **Não fazer merge autonomamente.**
