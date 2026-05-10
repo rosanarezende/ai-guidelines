@@ -13,26 +13,19 @@
 
 ---
 
-## 📋 Estratégia de PRs — 5 Entregas Sequenciais
+## 📋 Estratégia de PRs — 5 Entregas Sequenciais (Harness Lock)
 
-> Esta spec resultará em código substancial (~3000-3500 lines). Para facilitar review e respeitar o CORE-12 (checkpoints com aprovação humana), o trabalho foi reorganizado em **5 PRs sequenciais**, cada uma com escopo coeso e dependência clara da anterior.
->
-> **Rationale**: Uma única mega-PR de 3500 linhas seria difícil de revisar atomicamente. Micro-PRs de ~200 linhas levariam a churn excessivo de merges. A estrutura de 5 PRs balanceia:
->
-> - ✅ Coesão temática (cada PR aborda um domínio ou camada)
-> - ✅ Dependências explícitas (PR2 depende de PR1, etc.)
-> - ✅ Tamanho revisável (~500-1400 linhas por PR)
-> - ✅ Gates de aprovação entre PRs para evitar retrabalho
+> **Rationale**: Esta especificação resultará em código estrutural crítico (~3500 linhas). Seguindo o **CORE-12** e **CORE-14**, o trabalho é blindado por uma estratégia de **Harness Lock** com 5 PRs sequenciais. Uma única mega-PR seria impossível de revisar com segurança; micro-PRs gerariam churn. Este equilíbrio garante que cada domínio DDD seja validado atomicamente antes do próximo degrau.
 
-| PR      | Fase      | Tamanho           | Descrição                                                   |
-| ------- | --------- | ----------------- | ----------------------------------------------------------- |
-| **PR0** | Fase 0    | Concluído         | Setup + Research + Decision-Brief + Gate (já em PR aberta)  |
-| **PR1** | Fase 1    | ~500-700 linhas   | Fundação arquitetural: bounded contexts + TDD/BDD           |
-| **PR2** | Fase 2    | ~800-1100 linhas  | Reestruturação física: estado + topologia + compatibilidade |
-| **PR3** | Fases 3+4 | ~1050-1400 linhas | Automação + motor novo: living docs + composição modular    |
-| **PR4** | Extra     | ~100-200 linhas   | Cleanup final: migração controlada + redirects              |
+| PR      | Fase   | Domínios Focais                                   | Status      |
+| ------- | ------ | ------------------------------------------------- | ----------- |
+| **PR0** | Fase 0 | Setup + Stage 1 (Research/Brief/Gate)             | ✅ Merged   |
+| **PR1** | Fase 1 | **DDD Core**: Domain, Registry, UseCases (Memory) | [/] Active  |
+| **PR2** | Fase 2 | **Topology**: GovernanceWorkspace, RulesEngine    | [ ] Pending |
+| **PR3** | Fase 3 | **Intelligence**: LivingDocs, TemplateEngine      | [ ] Pending |
+| **PR4** | Fase 4 | **Lifecycle**: Foundation, ADRs, Legacy Cleanup   | [ ] Pending |
 
-> **Fluxo**: PR1 → (human gate) → PR2 → (human gate) → PR3 → (human gate) → PR4 → (review final) → merge `main`
+> **Fluxo de Gate**: A cada fase, deve-se abrir a PR, preencher a descrição temática, passar pelo **Review Humano** e executar a **Cadeia de Merge Obrigatória** (`yarn format ; yarn check ; yarn test:nova-cli ; git commit`).
 
 ---
 
@@ -74,7 +67,7 @@
 
 ### Sub-bloco [0.Gate] — Gate humano (decision-brief → Resolved)
 
-> **Fechado.** Stage 2 está autorizado.
+> **Fechado. Stage 2 está autorizado.**
 
 - [x] **0.G.1** Owner revisou `decision-brief.md` com todos os pontos `[DEC-0021-*]`.
 - [x] **0.G.2** Para cada ponto: owner escolheu opção, justificou e fechou status em `Resolved`.
@@ -89,11 +82,10 @@
 
 ---
 
-## Fase 1 — Fundação arquitetural da nova CLI (DDD + TDD/BDD)
+## Fase 1 — Fundação Core (DDD Memory Layer)
 
-> Esta fase funda os domínios da nova CLI em um ambiente isolado (`src/`) usando TypeScript e Jest, sem modificar o código legado (`cli/`). A abordagem "Strangler Fig" garante uma transição segura e testável. O código legado continuará funcionando enquanto o novo domínio é construído e validado.
->
-> **PR1**: Branch `feat/spec-0021-fase-1`, commits incrementais (1.0, 1.A, 1.B, 1.C, 1.D), merge após aprovação humana.
+> **PR1**: Branch `feat/spec-0021-fase-1-core`. Foco: Lógica pura, Registry e Políticas em memória (Pure DDD).
+> Cadeia: `yarn format ; yarn check ; yarn test:nova-cli ; git commit`.
 
 ### Sub-bloco [1.0] — Setup Técnico (TypeScript + Jest)
 

@@ -174,15 +174,13 @@ A implementação deve seguir o princípio **repo-first híbrido** e evitar quat
 
 ## 🔄 Estratégia de Transição
 
-### Sequência segura
+### Sequência segura (Harness Lock — 5 PRs)
 
-1. Fechar documentalmente o Stage 1 nos artefatos da spec.
-2. Modelar os bounded contexts e isolar a fundação da nova CLI.
-3. Introduzir camada explícita de compatibilidade com paths legados.
-4. Reestruturar root `.governance/`, assets e publish surface.
-5. Normalizar a suíte `[BR-CLI-*]` e ativar Living Documentation.
-6. Implementar recipes + partials e só então remover o mirror de boilerplates integrais.
-7. Atualizar placement documental, docs públicas, CI, hooks e smoke tests.
+1. **PR1: Domain Core (Fase 1)** — Modelagem de entidades, políticas e registry em memória (Pure DDD).
+2. **PR2: Physical Topology (Fase 2)** — Domínios `GovernanceWorkspace` (Strangler Fig) e `RulesEngine` (Topologia física).
+3. **PR3: Intelligence Engine (Fase 3)** — Domínios `LivingDocumentation` (AST Extraction) e `TemplateEngine` (Composição Atômica).
+4. **PR4: Lifecycle Consolidation (Fase 4)** — Refatoração de foundation, ADRs e limpeza de legado.
+5. **PR5: Final Homologation** — Testes em ambiente real e merge final.
 
 ### Compatibilidade com legado
 
