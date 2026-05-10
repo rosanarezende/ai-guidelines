@@ -104,20 +104,20 @@
 - [x] **1.0.4** Atualizar `package.json`: adicionar scripts `test:nova-cli` e `build` para o novo ambiente TS.
 - [x] **1.0.5** Criar um teste de smoke (`src/smoke.test.ts`) para garantir que a configuração do Jest está funcionando.
 - [x] **1.0.N** Pipeline de check + test verde após o sub-bloco 1.0.
-- [ ] **1.0.6** Análise de débitos: atualizar `NEXT.md`.
+- [x] **1.0.6** Análise de débitos: atualizar `NEXT.md`.
 - [x] **1.0.[COMMIT]** Commit atômico sugerido: `chore(spec-0021): setup typescript e jest para nova cli`.
 
 ### Sub-bloco [1.A] — Linguagem Ubíqua e Contratos do Domínio
 
 > Foco: Traduzir as decisões do gate (`decision-brief.md`) em uma arquitetura de domínio explícita e testável. A linguagem ubíqua dos 6 pilares será materializada em tipos e interfaces, e os testes de comportamento serão escritos (e desabilitados) para validar esses contratos.
 
-- [ ] **1.A.1** Criar a estrutura de diretórios `src/app`, `src/domain`, `src/infrastructure`.
-- [ ] **1.A.2** **[Linguagem Ubíqua]** Em `src/domain/entities/`, definir os tipos e interfaces que representam os 6 pilares de valor: `Spec`, `Exploration`, `Fix`, `Patch`, `Incident`, `Proposal`. Cada um deve refletir seus atributos únicos conforme o `decision-brief.md`.
-- [ ] **1.A.3** **[Bounded Contexts]** Definir as interfaces para os principais serviços do domínio: `RegistryService` (para gerenciar o `registry.yml`), `WorkspaceService` (para interagir com o filesystem do `.governance/`), e `PolicyService` (para validar as regras de transição de estado, ex: `proposal` -> `spec`).
-- [ ] **1.A.4** **[TDD]** Escrever a suíte de testes de comportamento em `src/domain/**/*.test.ts` que valida os contratos e as regras de negócio. Ex: "DADO um `proposal` QUANDO promovido a `spec` ENTÃO ele deve ter um `spec.md` associado".
-- [ ] **1.A.5** **[TDD]** Marcar todos os novos testes com `it.skip`. O objetivo é criar um blueprint executável da arquitetura e dos requisitos de negócio antes da implementação.
-- [ ] **1.A.N** Pipeline de check + test verde (pois os testes do domínio estão desabilitados).
-- [ ] **1.A.6** Análise de débitos: atualizar `NEXT.md`.
+- [x] **1.A.1** Criar a estrutura de diretórios `src/app`, `src/domain`, `src/infrastructure`.
+- [x] **1.A.2** **[Linguagem Ubíqua]** Em `src/domain/entities/`, definir os tipos e interfaces que representam os 6 pilares de valor: `Spec`, `Exploration`, `Fix`, `Patch`, `Incident`, `Proposal`. Cada um deve refletir seus atributos únicos conforme o `decision-brief.md`.
+- [x] **1.A.3** **[Bounded Contexts]** Definir as interfaces para os principais serviços do domínio: `RegistryService` (para gerenciar o `registry.yml`), `WorkspaceService` (para interagir com o filesystem do `.governance/`), e `PolicyService` (para validar as regras de transição de estado, ex: `proposal` -> `spec`).
+- [x] **1.A.4** **[TDD]** Escrever a suíte de testes de comportamento em `src/domain/**/*.test.ts` que valida os contratos e as regras de negócio. Ex: "DADO um `proposal` QUANDO promovido a `spec` ENTÃO ele deve ter um `spec.md` associado".
+- [x] **1.A.5** **[TDD]** Marcar todos os novos testes com `it.skip`. O objetivo é criar um blueprint executável da arquitetura e dos requisitos de negócio antes da implementação.
+- [x] **1.A.N** Pipeline de check + test verde (pois os testes do domínio estão desabilitados).
+- [x] **1.A.6** Análise de débitos: atualizar `NEXT.md`.
 - [ ] **1.A.[COMMIT]** Commit atômico sugerido: `feat(spec-0021): define linguagem ubíqua e contratos do domínio`.
 
 ### Sub-bloco [1.B] — Normalização da Suíte e Implementação do Domínio

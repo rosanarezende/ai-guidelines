@@ -1,23 +1,32 @@
 /** @type {import('ts-jest').JestConfigWithTsJest} */
 module.exports = {
-  rootDir: "..", // Aponta a raiz para o diretório principal do projeto
+  rootDir: "..",
   testEnvironment: "node",
   preset: "ts-jest/presets/default-esm",
+
+  moduleNameMapper: {
+    "^(\\.{1,2}/.*)\\.js$": "$1",
+  },
+
   transform: {
-    "^.+\\.m?[tj]s$": [
+    "^.+\\.tsx?$": [
       "ts-jest",
       {
         useESM: true,
-        tsconfig: "<rootDir>/tsconfig.jest.json",
+        tsconfig: "<rootDir>/tsconfig.json",
       },
     ],
   },
-  moduleFileExtensions: ["ts", "js", "json", "node"],
+
+  setupFilesAfterEnv: ["<rootDir>/src/test-utils/setup.ts"],
   testMatch: ["<rootDir>/src/**/*.test.ts"],
-  testPathIgnorePatterns: ["/node_modules/", "/dist/"],
+  moduleFileExtensions: ["ts", "js", "json", "node"],
   collectCoverage: true,
   coverageDirectory: "<rootDir>/coverage",
-  collectCoverageFrom: ["<rootDir>/src/**/*.ts", "!<rootDir>/src/**/*.test.ts"],
-  // Aponta para um arquivo de setup que criaremos a seguir
-  setupFilesAfterEnv: ["<rootDir>/.jest/setup.ts"],
+  collectCoverageFrom: [
+    "<rootDir>/src/**/*.ts",
+    "!<rootDir>/src/**/*.test.ts",
+    "!<rootDir>/src/test-utils/**/*.ts",
+  ],
+  testPathIgnorePatterns: ["/node_modules/", "/dist/"],
 };
