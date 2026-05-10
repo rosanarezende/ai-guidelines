@@ -91,6 +91,22 @@ yarn build:rules
 yarn smoke
 ```
 
+### [SUB-MGMT.MANDATORY] — Contrato obrigatório por sub-bloco
+
+> A partir de 2026-05-10 (durante PR2.A): **todo sub-bloco** das fases 2, 3 e 4 DEVE encerrar com dois itens explícitos antes do `[COMMIT]`, e ambos precisam ser verificáveis no diff do sub-bloco:
+
+- **`[<id>.DEBT-REVIEW]`** — revisitar `.specify/specs/0021-governance-information-architecture/NEXT.md`:
+  - marcar débitos da fase anterior que o sub-bloco resolveu (parcial ou totalmente);
+  - registrar débitos novos introduzidos pelo sub-bloco (com data + escopo claro);
+  - se nada mudou, declarar explicitamente "nenhum impacto em débitos" no commit.
+- **`[<id>.ARCHITECTURE]`** — atualizar `.core/governance/ARCHITECTURE.md` quando o sub-bloco:
+  - criar/renomear bounded context;
+  - introduzir invariante, port ou erro de domínio novo;
+  - alterar glossário, roadmap ou semântica de migração/rollback;
+  - se nenhuma das condições se aplicar, declarar explicitamente "sem impacto em ARCHITECTURE" no commit.
+
+**Por que obrigatório:** evita drift silencioso entre código e doc canônica, e mantém `NEXT.md` como espelho honesto da fase em execução. Falha desta validação reabre o sub-bloco — não é débito futuro.
+
 ---
 
 # ✅ Fase 0 — Setup + Stage 1 (Research → Decision-Brief → Gate humano)
@@ -337,6 +353,8 @@ yarn smoke
 
 - [x] **2.A.N** Pipeline verde.
 
+- [x] **2.A.[DEBT-REVIEW]** `NEXT.md` atualizado 2026-05-10: débito 5 (E2E) marcado como parcialmente mitigado via `NodeWorkspaceIntegration.test.ts`; novos débitos 2.A.5 (deprecation plan), 2.A.8 (bridge reader), race em `existedBefore`, skips de `Isolation.test.ts` e `FileSystemAdapter.test.ts` registrados.
+- [x] **2.A.[ARCHITECTURE]** `ARCHITECTURE.md` atualizado 2026-05-10: §B.1 ganhou tabela PR2 com `GovernanceWorkspace`; §B.2 removeu-o de "reservado"; §C ganhou invariantes 9 (precedência explícita) e 10 (rollback não-destrutivo); §F roadmap; §G glossário com `WorkspaceProvisioner`, `FileSystemProbe`, `WorkspaceState`, `WorkspaceResolution`, `MigrationPlan`.
 - [ ] **2.A.[COMMIT]** `feat(spec-0021): GovernanceWorkspace (strangler fig operacional)`.
 
 ---
@@ -373,6 +391,8 @@ yarn smoke
 
 - [ ] **2.B.N** Pipeline verde.
 
+- [ ] **2.B.[DEBT-REVIEW]** `NEXT.md`: registrar resolução dos skips `FileSystemAdapter.test.ts` (atomicidade) e `Isolation.test.ts` quando `NodeRegistryStore` + `NodeWorkspaceStore` materializarem `.governance/`; documentar decisão sobre Comment Preservation (2.B.5) como débito ou resolvido.
+- [ ] **2.B.[ARCHITECTURE]** `ARCHITECTURE.md`: mover `Registry (YAML SSOT)` de §B.2 para §B.1 PR2; documentar atomicidade `tmp+rename`; atualizar invariante 7 (YAML existe); glossário ganha `GovernanceRegistryStore` / `RegistryService` / códigos `REGISTRY_YAML_*`.
 - [ ] **2.B.[COMMIT]** `feat(spec-0021): YAML registry SSOT com guardrails (determinístico)`.
 
 ---
@@ -413,6 +433,8 @@ yarn smoke
 
 - [ ] **2.C.N** Pipeline verde incluindo `yarn build:rules`.
 
+- [ ] **2.C.[DEBT-REVIEW]** `NEXT.md`: registrar débitos da reorganização física (compat redirects, hardcoded paths remanescentes) e decisão sobre Top/Center/Base; débito 3 (Boundary Lock por regex) revisitar se RulesEngine antecipar carga dinâmica.
+- [ ] **2.C.[ARCHITECTURE]** `ARCHITECTURE.md`: mover `RulesEngine` para §B.1 PR2 com pipelines (parse/build/projection/lookup); §C ganha invariante sobre centralização de paths; glossário ganha `RulesEngine`, `RuleScope` (universal/adapter/opt-in).
 - [ ] **2.C.[COMMIT]** `refactor(spec-0021): RulesEngine + reorg .core/rules alinhada ao runtime`.
 
 ---
@@ -430,6 +452,8 @@ yarn smoke
 
 - [ ] **2.D.3** Atualizar smoke tests que assumem `.specify/`/`.ai-guidelines/`.
 - [ ] **2.D.N** Pipeline verde.
+- [ ] **2.D.[DEBT-REVIEW]** `NEXT.md`: fechar 2.A.5 (deprecation plan) se 2.D formalizar marco + warnings; registrar débitos de docs/help legados que ainda referenciem `.specify/`.
+- [ ] **2.D.[ARCHITECTURE]** `ARCHITECTURE.md`: §H (Convenções de topologia) ganha entrada `.governance/{intake,handoff,telemetry}` como reservas canônicas; §C confirma "smoke = contrato `.governance/`".
 - [ ] **2.D.[COMMIT]** `docs(spec-0021): contrato .governance + reservas canônicas`.
 
 ---
@@ -493,6 +517,8 @@ yarn smoke
 
 - [ ] **3.A.N** Pipeline verde.
 
+- [ ] **3.A.[DEBT-REVIEW]** `NEXT.md`: registrar/resolver débitos relativos a schema versioning e ordem determinística; débito 4 (glossário sem enforcement) revisitar se schema cruzar com glossário.
+- [ ] **3.A.[ARCHITECTURE]** `ARCHITECTURE.md`: §B.1 PR3 ganha `LivingDocumentation`; §G glossário ganha `LivingDocsSchema`, `coverageState`, `schemaVersion`.
 - [ ] **3.A.[COMMIT]** `feat(spec-0021): living docs schema (v0) + determinismo`.
 
 ---
@@ -525,6 +551,8 @@ yarn smoke
 
 - [ ] **3.B.N** Pipeline verde.
 
+- [ ] **3.B.[DEBT-REVIEW]** `NEXT.md`: marcar débito 3 (Boundary Lock por regex) como elegível para migração AST agora que TS Compiler API existe; débito 4 (glossário) revisitar se extrator puder cruzar com §G.
+- [ ] **3.B.[ARCHITECTURE]** `ARCHITECTURE.md`: §D Boundary Enforcement atualiza para AST; §B.1 PR3 ganha `RuleExtractor`; glossário ganha `AstRuleExtractor`, `SourceMap`.
 - [ ] **3.B.[COMMIT]** `feat(spec-0021): AST extractor de BR-CLI com source mapping`.
 
 ---
@@ -559,6 +587,8 @@ yarn smoke
 
 - [ ] **3.C.N** Pipeline verde incluindo CI/local check.
 
+- [ ] **3.C.[DEBT-REVIEW]** `NEXT.md`: registrar débitos de cobertura CI (jobs adicionais, custo de execução) e qualquer falso-positivo conhecido do drift guard.
+- [ ] **3.C.[ARCHITECTURE]** `ARCHITECTURE.md`: §C ganha invariante sobre drift guard como gate de CI; §G glossário ganha `DriftGuard`.
 - [ ] **3.C.[COMMIT]** `feat(spec-0021): drift guard (CI) para living docs`.
 
 ---
@@ -596,6 +626,8 @@ yarn smoke
 
 - [ ] **3.D.N** Pipeline verde.
 
+- [ ] **3.D.[DEBT-REVIEW]** `NEXT.md`: registrar débitos sobre recipes legadas não cobertas; preparar marco de retirada do mirror legado (3.F).
+- [ ] **3.D.[ARCHITECTURE]** `ARCHITECTURE.md`: §B.1 PR3 ganha `TemplateEngine`; §G glossário confirma `Recipe`, `Partial`, `slots[]`.
 - [ ] **3.D.[COMMIT]** `feat(spec-0021): TemplateEngine (recipes + partials)`.
 
 ---
@@ -627,6 +659,8 @@ yarn smoke
 
 - [ ] **3.E.N** Pipeline verde.
 
+- [ ] **3.E.[DEBT-REVIEW]** `NEXT.md`: registrar débitos sobre invariantes estruturais não cobertas por `artifactKind` (deixar lista explícita).
+- [ ] **3.E.[ARCHITECTURE]** `ARCHITECTURE.md`: §C ganha invariante sobre validação estrutural por `artifactKind`; §G glossário ganha `MarkdownStructuralValidation`.
 - [ ] **3.E.[COMMIT]** `feat(spec-0021): validação estrutural de markdown para recipes`.
 
 ---
@@ -644,6 +678,8 @@ yarn smoke
 - [ ] **3.F.3** Trocar fluxo padrão para recipes/partials.
 - [ ] **3.F.4** Depreciar mirror com warning determinístico e prazo (se necessário).
 - [ ] **3.F.N** Pipeline verde.
+- [ ] **3.F.[DEBT-REVIEW]** `NEXT.md`: fechar débitos relativos a mirror legado; registrar qualquer caminho não migrado com warning + prazo.
+- [ ] **3.F.[ARCHITECTURE]** `ARCHITECTURE.md`: §F roadmap reflete depreciação do mirror; §H convenções ganham nota sobre recipes como fonte canônica.
 - [ ] **3.F.[COMMIT]** `refactor(spec-0021): remove mirror legado após equivalência (recipes)`.
 
 ---
@@ -696,6 +732,8 @@ yarn smoke
   - `telemetry/`
 
 - [ ] **4.A.N** Pipeline verde.
+- [ ] **4.A.[DEBT-REVIEW]** `NEXT.md`: registrar débitos do catálogo (gêneros futuros mapeados mas não implementados).
+- [ ] **4.A.[ARCHITECTURE]** `ARCHITECTURE.md`: §H convenções ganha referência ao `GOVERNANCE-CATALOG.md` como carrier canônico.
 - [ ] **4.A.[COMMIT]** `docs(spec-0021): carrier híbrido (catálogo) + reservas de lar`.
 
 ---
@@ -711,6 +749,8 @@ yarn smoke
 
 - [ ] **4.B.3** Atualizar links/cross-refs após renomeação.
 - [ ] **4.B.N** Pipeline verde.
+- [ ] **4.B.[DEBT-REVIEW]** `NEXT.md`: registrar débitos sobre decisões ainda misturadas entre foundation e ADR.
+- [ ] **4.B.[ARCHITECTURE]** `ARCHITECTURE.md`: §I "Como contribuir" ganha entrada sobre critério de migração foundation→ADR.
 - [ ] **4.B.[COMMIT]** `refactor(spec-0021): fronteira foundation/ADR aplicada`.
 
 ---
@@ -732,6 +772,8 @@ yarn smoke
 
 - [ ] **4.C.3** Validar que não há referências quebradas a `.specify/`/`.ai-guidelines/` quando o contrato final é `.governance/`.
 - [ ] **4.C.N** Pipeline verde.
+- [ ] **4.C.[DEBT-REVIEW]** `NEXT.md`: fechar débitos sobre referências quebradas a `.specify/`/`.ai-guidelines/`; registrar conteúdo de `/docs` que migrou vs foi depreciado.
+- [ ] **4.C.[ARCHITECTURE]** `ARCHITECTURE.md`: §H atualiza para refletir cleanup; remover menções a `/docs` se não for mais lar canônico.
 - [ ] **4.C.[COMMIT]** `docs(spec-0021): cleanup holístico de docs + ponteiros`.
 
 ---
@@ -745,6 +787,8 @@ yarn smoke
 - [ ] **4.D.3** Validar living docs (geração + check) e drift guard.
 - [ ] **4.D.4** Validar TemplateEngine (recipes/partials) gerando artefatos válidos.
 - [ ] **4.D.N** Pipeline verde.
+- [ ] **4.D.[DEBT-REVIEW]** `NEXT.md`: revisão final pré-merge — todo débito remanescente migra para `roadmap/backlog.md` ou vira issue (vide F.1).
+- [ ] **4.D.[ARCHITECTURE]** `ARCHITECTURE.md`: snapshot final do roadmap (§F) marcando PR1–PR4 como ✅; estado pós-merge declarado.
 - [ ] **4.D.[COMMIT]** `chore(spec-0021): homologação final (contrato governance-driven)`.
 
 ---

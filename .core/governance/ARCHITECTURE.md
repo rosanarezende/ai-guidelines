@@ -28,23 +28,30 @@ Princípios arquiteturais:
 
 ## B — Bounded contexts
 
-### B.1 Implementados (PR1)
+### B.1 Implementados
+
+#### PR1 (Fundação Core)
 
 | Contexto           | Pasta                 | Responsabilidade                                                                                                                                                                             | Pode conhecer                         | NÃO pode conhecer                                                 |
 | ------------------ | --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------- | ----------------------------------------------------------------- |
 | **Domain**         | `src/domain/`         | Modelo do mundo: entidade `WorkItem` (discriminated union Dense/Virtual), invariantes por pilar, políticas puras de promoção, registry SSOT em memória. Funções determinísticas, sem efeito. | Apenas outros módulos do `domain/`    | `app/`, `infrastructure/`, Node APIs (`fs`, `path`, `process`)    |
 | **Application**    | `src/app/`            | Orquestração de casos de uso (`RegisterWorkItem`, `PromoteWorkItem`). Garante atomicidade e ordem (policy → registry → workspace). Tudo via ports.                                           | `domain/`, `app/ports/`               | `infrastructure/` direto, qualquer IO concreto                    |
-| **Infrastructure** | `src/infrastructure/` | Adaptadores técnicos (filesystem, YAML, processos). Nenhuma implementação real ainda — apenas blueprints (testes em skip) que congelam o contrato do PR2.                                    | `domain/`, ports do `app/`, Node APIs | Conhecer use cases por dentro; chamar outras infras circularmente |
+| **Infrastructure** | `src/infrastructure/` | Adaptadores técnicos (filesystem, YAML, processos). No PR1 apenas blueprints (testes em skip) que congelavam o contrato.                                                                     | `domain/`, ports do `app/`, Node APIs | Conhecer use cases por dentro; chamar outras infras circularmente |
+
+#### PR2 (Topology Migration Layer) — em curso
+
+| Contexto                | Pasta                                                                                                                                                               | Responsabilidade                                                                                                                                                                                                                                                                                                                                 | Estado                                                                                                 |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------ |
+| **GovernanceWorkspace** | `src/domain/workspace/` + `src/app/use-cases/{DiscoverWorkspace,AdoptWorkspace}.ts` + `src/infrastructure/filesystem/Node{FileSystemProbe,WorkspaceProvisioner}.ts` | Descoberta e adoção do `.governance/` como root unificado. Discriminated union `WorkspaceState` (`pristine \| governance \| legacy \| mixed`), `resolvePrecedence` sem alias mágico, `planAdoption` determinístico com reservas canônicas (`intake/handoff/telemetry`), adoção idempotente e rollback bilateral via port `WorkspaceProvisioner`. | ✅ Implementado em 2.A. Bridge reader (`allowExplicitLegacyBridge`) é flag — use case fica para 2.A.8. |
 
 ### B.2 Reservados / futuros
 
-| Contexto                 | Status    | Quando       | Responsabilidade prevista                                                                                                                                        |
-| ------------------------ | --------- | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **GovernanceWorkspace**  | Reservado | PR2 (Fase 2) | Resolver `.governance/` como root unificado, aplicar precedência sobre legados, executar migração idempotente, expor estado para a Application `[DEC-0021-A03]`. |
-| **Registry (YAML SSOT)** | Parcial   | PR2 (Fase 2) | Persistir o registry em `registry.yml` com determinismo, schema guard, imutabilidade e estratégia explícita de preservação de comentários `[DEC-0021-A01]`.      |
-| **RulesEngine**          | Reservado | PR2 (Fase 2) | Alinhar topologia física `.core/rules/` com builder/runtime; pipelines de parse, build, projection e lookup.                                                     |
-| **LivingDocumentation**  | Reservado | PR3 (Fase 3) | Extrair `[BR-CLI-*]` via AST, gerar artefato determinístico, expor drift guard no CI `[DEC-0021-C01]`.                                                           |
-| **TemplateEngine**       | Reservado | PR3 (Fase 3) | Recipes + partials, montagem por slots, validação estrutural de Markdown `[DEC-0021-D01]`.                                                                       |
+| Contexto                 | Status    | Quando       | Responsabilidade prevista                                                                                                                                   |
+| ------------------------ | --------- | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Registry (YAML SSOT)** | Parcial   | PR2 (Fase 2) | Persistir o registry em `registry.yml` com determinismo, schema guard, imutabilidade e estratégia explícita de preservação de comentários `[DEC-0021-A01]`. |
+| **RulesEngine**          | Reservado | PR2 (Fase 2) | Alinhar topologia física `.core/rules/` com builder/runtime; pipelines de parse, build, projection e lookup.                                                |
+| **LivingDocumentation**  | Reservado | PR3 (Fase 3) | Extrair `[BR-CLI-*]` via AST, gerar artefato determinístico, expor drift guard no CI `[DEC-0021-C01]`.                                                      |
+| **TemplateEngine**       | Reservado | PR3 (Fase 3) | Recipes + partials, montagem por slots, validação estrutural de Markdown `[DEC-0021-D01]`.                                                                  |
 
 Cada contexto futuro deve aparecer como subdiretório explícito quando nascer e ser documentado aqui antes de ganhar IO real.
 
@@ -60,8 +67,10 @@ Estas invariantes são contrato; quebrá-las é um erro de design, não de estil
 4. **Atomicidade bilateral.** Falha em criar workspace ⇒ rollback do registry. Falha em persistir registry ⇒ rollback do workspace já criado. Blueprints garantem ambos os sentidos.
 5. **Registry é SSOT lógica.** No PR1 vive em memória; no PR2 vira `registry.yml`. Em ambos os modos: IDs únicos, `id` e `createdAt` imutáveis, `updatedAt` controlado pelo Clock, listagem determinística.
 6. **WorkItem é discriminated union.** `WorkItem = DenseWorkItem | VirtualWorkItem`, discriminado por `kind`. Combinações inválidas (ex.: `severity` em `proposal`, `workspacePath` ausente em `spec`) são rejeitadas por construção/policy — não por convenção.
-7. **YAML ainda não existe.** PR1 não introduz parsing/escrita de YAML. Qualquer teste que dependa de IO real está em `it.skip` com `[SKIP-REASON]` apontando para PR2/PR3.
+7. **YAML ainda não existe.** PR2.A não introduziu parsing/escrita de YAML; chega em 2.B. Testes que dependem de IO YAML real seguem em `it.skip` com `[SKIP-REASON]`.
 8. **Anti-drift é objetivo estrutural.** Tudo que precisa permanecer alinhado entre código e documentação tem (ou terá) um teste que falha quando divergir — boundaries hoje, living docs no PR3.
+9. **Workspace tem precedência explícita.** `.governance/` é SSOT quando presente sozinho; legado puro exige adoção explícita; estado misto falha com código estável `WORKSPACE_AMBIGUOUS_STATE` a menos que o caller opte por bridge explícita. **Sem fallback invisível.**
+10. **Rollback nunca é destrutivo.** `WorkspaceProvisioner.ensureDirectory` retorna `boolean` (criou-agora vs já-existia), e `removeDirectoryIfEmpty` só apaga diretórios vazios. Rollback bilateral reverte apenas o que **este run** criou — conteúdo pré-existente do usuário é inviolável.
 
 ---
 
@@ -159,13 +168,13 @@ Toda decisão de promoção devolve um `WorkItemPatch` puro; aplicar ao registry
 
 ## F — Roadmap arquitetural
 
-| PR  | Fase   | Foco                                                                                                                                                                | Estado      |
-| --- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
-| PR0 | Fase 0 | Setup, research, decision-brief, gate humano                                                                                                                        | ✅ Merged   |
-| PR1 | Fase 1 | DDD core (domain + policy + registry em memória) + use cases atômicos via ports + Boundary Lock + discriminated union (Dense/Virtual) + façade `GovernancePolicies` | 🚧 Atual    |
-| PR2 | Fase 2 | `GovernanceWorkspace` (Strangler Fig sobre `.specify/` legado) + `Registry` YAML real + `RulesEngine`                                                               | ⏭️ Pendente |
-| PR3 | Fase 3 | `LivingDocumentation` (AST + drift guard CI) + `TemplateEngine` (recipes/partials) + validação estrutural de Markdown + **migração do Boundary Lock para AST**      | ⏭️ Pendente |
-| PR4 | Fase 4 | Consolidação: carrier híbrido + foundation/ADR + cleanup de docs/ponteiros + homologação                                                                            | ⏭️ Pendente |
+| PR  | Fase   | Foco                                                                                                                                                                | Estado                                     |
+| --- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| PR0 | Fase 0 | Setup, research, decision-brief, gate humano                                                                                                                        | ✅ Merged                                  |
+| PR1 | Fase 1 | DDD core (domain + policy + registry em memória) + use cases atômicos via ports + Boundary Lock + discriminated union (Dense/Virtual) + façade `GovernancePolicies` | ✅ Merged                                  |
+| PR2 | Fase 2 | `GovernanceWorkspace` (Strangler Fig sobre `.specify/` legado) + `Registry` YAML real + `RulesEngine`                                                               | 🚧 Atual — 2.A entregue; 2.B/C/D pendentes |
+| PR3 | Fase 3 | `LivingDocumentation` (AST + drift guard CI) + `TemplateEngine` (recipes/partials) + validação estrutural de Markdown + **migração do Boundary Lock para AST**      | ⏭️ Pendente                                |
+| PR4 | Fase 4 | Consolidação: carrier híbrido + foundation/ADR + cleanup de docs/ponteiros + homologação                                                                            | ⏭️ Pendente                                |
 
 PR3/PR4 só ganham diretórios em `src/` quando começarem; reservar nomes hoje seria abstração vazia.
 
@@ -175,32 +184,37 @@ PR3/PR4 só ganham diretórios em `src/` quando começarem; reservar nomes hoje 
 
 Termos abaixo têm significado preciso no runtime; usar fora desse significado é divergência a corrigir.
 
-| Termo                   | Definição operacional                                                                                                                             |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- | -------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| **WorkItem**            | Entidade central; **discriminated union** `DenseWorkItem                                                                                          | VirtualWorkItem`discriminada por`kind`. |
-| **DenseWorkItem**       | Variante de WorkItem para `spec                                                                                                                   | experiment                              | exploration                                                                | incident`. `workspacePath`obrigatório. Tem par físico em`.governance/` (a partir do PR2). |
-| **VirtualWorkItem**     | Variante de WorkItem para `proposal                                                                                                               | patch                                   | fix`. Sem `workspacePath` por construção; nenhum IO de workspace é gerado. |
-| **WorkItemDraft**       | DTO de entrada para criação de um `WorkItem`; sem timestamps, sem id obrigatório no input do use case.                                            |
-| **WorkItemPatch**       | Envelope estrutural de mutação consumido por `RegistryStore.update` e produzido por `PromotionPolicy`.                                            |
-| **WorkItemPolicy**      | Política pura que valida um draft contra os invariantes do seu pilar (`assertValidDraft`).                                                        |
-| **PromotionPolicy**     | Política pura que decide se/como um item pode ser promovido entre pilares e devolve o `WorkItemPatch` a aplicar.                                  |
-| **PromotionPatch**      | Alias semântico de `WorkItemPatch` no contexto de promoção.                                                                                       |
-| **GovernancePolicies**  | Fachada fina (não-God) que compõe as políticas puras (`validateNewItem`, `promote`). Plural intencional: novos eixos viram módulos plugados aqui. |
-| **Registry**            | Coleção SSOT de WorkItems. PR1: `InMemoryRegistry`. PR2: `registry.yml` no `.governance/` do consumidor.                                          |
-| **RegistryStore**       | Port (`src/app/ports/RegistryStore.ts`) através do qual a Application interage com o registry sem depender da implementação.                      |
-| **WorkspaceStore**      | Port para criação/remoção física de pastas de itens densos. Sem implementação real no PR1; doubles em test-utils.                                 |
-| **Clock / IdGenerator** | Ports utilitários para tempo e IDs determinísticos em testes. Implementações reais entram quando a CLI for ligada (PR2/PR3).                      |
-| **Dense item**          | Item de pilar denso (`spec                                                                                                                        | experiment                              | exploration                                                                | incident`); use case cria pasta a partir de `workspacePath`.                              |
-| **Virtual item**        | Item de pilar virtual (`proposal                                                                                                                  | patch                                   | fix`); use case garante zero IO no workspace.                              |
-| **Promotion**           | Transição entre pilares regida pela `PromotionPolicy` (proposal→spec; experiment(won)→spec). Maintenance kinds não promovem.                      |
-| **ResolutionMode**      | Modo de fechamento de um experimento perdido/inconclusivo (`cleaned-up                                                                            | kept                                    | pending`). Modelado para uso completo no PR2/PR3.                          |
-| **GovernanceError**     | Erro de domínio com `code` estável (ex.: `POLICY_PROPOSAL_NOT_MATURE`). O `code` é a SSOT de mensagens em testes e UI.                            |
-| **`[BR-CLI-*]`**        | Identificador estável de regra de negócio inscrita nos testes; futura entrada de `living-docs.yml` (PR3).                                         |
-| **`[DEC-0021-*]`**      | Decisão arquitetural ancorada no `decision-brief.md` da Spec 0021; usada para rastreabilidade em código quando agrega valor documental.           |
-| **LivingDocumentation** | Artefato derivado dos testes (PR3); fonte de verdade legível das `[BR-CLI-*]` ativas, com drift guard no CI.                                      |
-| **Recipe**              | Declaração estrutural de um artefato (spec/plan/tasks/...) em termos de `slots` e `partials` (PR3, TemplateEngine).                               |
-| **Partial**             | Fragmento Markdown autossuficiente, slot-addressable, usado por uma `Recipe` para montar um artefato final por composição atômica.                |
-| **Composição atômica**  | Princípio: gerar artefatos por agregação determinística de partials, não por espelhamento de templates monolíticos `[DEC-0021-D01]`.              |
+| Termo                    | Definição operacional                                                                                                                                                                                                                   |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- | -------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| **WorkItem**             | Entidade central; **discriminated union** `DenseWorkItem                                                                                                                                                                                | VirtualWorkItem`discriminada por`kind`. |
+| **DenseWorkItem**        | Variante de WorkItem para `spec                                                                                                                                                                                                         | experiment                              | exploration                                                                | incident`. `workspacePath`obrigatório. Tem par físico em`.governance/` (a partir do PR2). |
+| **VirtualWorkItem**      | Variante de WorkItem para `proposal                                                                                                                                                                                                     | patch                                   | fix`. Sem `workspacePath` por construção; nenhum IO de workspace é gerado. |
+| **WorkItemDraft**        | DTO de entrada para criação de um `WorkItem`; sem timestamps, sem id obrigatório no input do use case.                                                                                                                                  |
+| **WorkItemPatch**        | Envelope estrutural de mutação consumido por `RegistryStore.update` e produzido por `PromotionPolicy`.                                                                                                                                  |
+| **WorkItemPolicy**       | Política pura que valida um draft contra os invariantes do seu pilar (`assertValidDraft`).                                                                                                                                              |
+| **PromotionPolicy**      | Política pura que decide se/como um item pode ser promovido entre pilares e devolve o `WorkItemPatch` a aplicar.                                                                                                                        |
+| **PromotionPatch**       | Alias semântico de `WorkItemPatch` no contexto de promoção.                                                                                                                                                                             |
+| **GovernancePolicies**   | Fachada fina (não-God) que compõe as políticas puras (`validateNewItem`, `promote`). Plural intencional: novos eixos viram módulos plugados aqui.                                                                                       |
+| **Registry**             | Coleção SSOT de WorkItems. PR1: `InMemoryRegistry`. PR2: `registry.yml` no `.governance/` do consumidor.                                                                                                                                |
+| **RegistryStore**        | Port (`src/app/ports/RegistryStore.ts`) através do qual a Application interage com o registry sem depender da implementação.                                                                                                            |
+| **WorkspaceStore**       | Port para criação/remoção física de pastas de itens densos. Sem implementação real no PR1; doubles em test-utils.                                                                                                                       |
+| **WorkspaceProvisioner** | Port para a **raiz** `.governance/` (distinto de `WorkspaceStore` que cuida de pastas por item). `ensureDirectory` retorna `boolean` para sinalizar criação efetiva; `removeDirectoryIfEmpty` é cláusula de não-destruição em rollback. |
+| **FileSystemProbe**      | Port read-only para inspeção do filesystem. Usado por `DiscoverWorkspace`; intencionalmente separado do provisioner para compor leitura sem permissão de escrita.                                                                       |
+| **WorkspaceState**       | Discriminated union pura `pristine \| governance \| legacy \| mixed` derivada de `RootsSnapshot` por `deriveWorkspaceState`. Não decide ações — apenas descreve o filesystem.                                                           |
+| **WorkspaceResolution**  | Resultado da política de precedência: `needs-init \| governance-ssot \| needs-adoption \| ambiguous`. `ambiguous` é a forma materializada do "estado misto sem bridge".                                                                 |
+| **MigrationPlan**        | Plano determinístico produzido por `planAdoption(state)`. Lista `ensure-directory` para `.governance/` + reservas canônicas (`intake/handoff/telemetry`) e marca `noticedLegacy`. Sem IO embutido.                                      |
+| **Clock / IdGenerator**  | Ports utilitários para tempo e IDs determinísticos em testes. Implementações reais entram quando a CLI for ligada (PR2/PR3).                                                                                                            |
+| **Dense item**           | Item de pilar denso (`spec                                                                                                                                                                                                              | experiment                              | exploration                                                                | incident`); use case cria pasta a partir de `workspacePath`.                              |
+| **Virtual item**         | Item de pilar virtual (`proposal                                                                                                                                                                                                        | patch                                   | fix`); use case garante zero IO no workspace.                              |
+| **Promotion**            | Transição entre pilares regida pela `PromotionPolicy` (proposal→spec; experiment(won)→spec). Maintenance kinds não promovem.                                                                                                            |
+| **ResolutionMode**       | Modo de fechamento de um experimento perdido/inconclusivo (`cleaned-up                                                                                                                                                                  | kept                                    | pending`). Modelado para uso completo no PR2/PR3.                          |
+| **GovernanceError**      | Erro de domínio com `code` estável (ex.: `POLICY_PROPOSAL_NOT_MATURE`). O `code` é a SSOT de mensagens em testes e UI.                                                                                                                  |
+| **`[BR-CLI-*]`**         | Identificador estável de regra de negócio inscrita nos testes; futura entrada de `living-docs.yml` (PR3).                                                                                                                               |
+| **`[DEC-0021-*]`**       | Decisão arquitetural ancorada no `decision-brief.md` da Spec 0021; usada para rastreabilidade em código quando agrega valor documental.                                                                                                 |
+| **LivingDocumentation**  | Artefato derivado dos testes (PR3); fonte de verdade legível das `[BR-CLI-*]` ativas, com drift guard no CI.                                                                                                                            |
+| **Recipe**               | Declaração estrutural de um artefato (spec/plan/tasks/...) em termos de `slots` e `partials` (PR3, TemplateEngine).                                                                                                                     |
+| **Partial**              | Fragmento Markdown autossuficiente, slot-addressable, usado por uma `Recipe` para montar um artefato final por composição atômica.                                                                                                      |
+| **Composição atômica**   | Princípio: gerar artefatos por agregação determinística de partials, não por espelhamento de templates monolíticos `[DEC-0021-D01]`.                                                                                                    |
 
 ---
 

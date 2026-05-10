@@ -25,18 +25,26 @@ Foram identificados os seguintes riscos arquiteturais ainda existentes:
 2. Cast as WorkItem em Registry.update. O merge {...current, ...patch} não pode ser provado type-safe pelo TS sobre o union; o cast é deliberado e está documentado no código.
 3. Boundary enforcement por regex. Continua provisório; o ARCHITECTURE.md trata a migração para AST como obrigatória antes de carregamento dinâmico/plugins. Risco baixo no PR1, ativo a partir do PR3.
 4. Glossário "ubíquo" não tem enforcement automático. Convivência entre identificadores no código e definições do §G ainda é convencional. Evolução natural quando o LivingDocumentation (PR3) puder cruzar AST × glossário.
-5. Ausência de testes integrados E2E. Use cases testados com doubles; o cruzamento Application + Infrastructure real só acontece quando o IO chegar (PR2).
+5. ~~Ausência de testes integrados E2E.~~ **Parcialmente mitigado em 2.A** — `NodeWorkspaceIntegration.test.ts` exercita o adapter real do filesystem (mkdir/scope/rollback). Permanece pendente: E2E cruzando Application use cases + adapters reais (chega quando `NodeRegistryStore` existir em 2.B).
 6. ResolutionMode modelado, mas pouco exercitado. Semântica de cleaned-up/kept para experiments perdidos só será coberta no PR2/PR3.
 
 ### Débitos da Fase 2 (Reestruturação Física)
 
-_(A preencher conforme execução)_
+#### Sub-bloco 2.A (GovernanceWorkspace) — registrado em 2026-05-10
+
+1. **2.A.5 — Deprecation plan do legado não definido.** Quando parar de ler `.specify/` / `.ai-guidelines/`? Como comunicar (warnings determinísticos, schedule)? Decisão de produto pendente; bloqueia retirada formal do legado em PR4.
+2. **2.A.8 — Bridge reader não implementado.** O flag `allowExplicitLegacyBridge` existe em `WorkspacePrecedence`, mas nenhum use case lê de `.specify/` ainda. Quando um consumidor pedir essa leitura (provavelmente em PR4 durante consolidação), criar `ReadLegacyArtifact` use case + port `LegacyReader`.
+3. **Race window em `NodeWorkspaceProvisioner.ensureDirectory`.** O pré-check `existedBefore` é separado do `mkdirSync` — outro processo poderia criar o diretório entre os dois. Em runtime single-process da CLI o risco é nulo; documentar no contrato e revisitar se a CLI virar daemon.
+4. **`Isolation.test.ts` segue em skip.** A criação de pasta **por item denso** (`.governance/specs/<id>/`) depende de plugar um adapter real do `WorkspaceStore` (atual port já existente) — fica natural em 2.B quando `NodeRegistryStore` materializar `registry.yml` no mesmo `.governance/`.
+5. **`FileSystemAdapter.test.ts` segue em skip.** Atomicidade de escrita (`tmp + rename`) é exatamente o contrato que 2.B precisa implementar para `registry.yml`. Promover skips a testes reais lá.
+
+### Débitos da Fase 3 (Living Documentation + Engine)
 
 ### Débitos da Fase 3 (Living Documentation + Engine)
 
 _(A preencher conforme execução)_
 
-### Débitos da Fase 4 (Migração)
+### Débitos da Fase 4 (Consolidação)
 
 _(A preencher conforme execução)_
 
