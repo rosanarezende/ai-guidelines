@@ -3,6 +3,12 @@
  * Regras para o novo root '.governance/'.
  */
 describe("Domínio — Isolamento de Workspace [BR-CLI-WORKSPACE]", () => {
+  describe("Inicialização do Workspace", () => {
+    it.skip("DADO a inicialização do workspace ENTÃO deve criar as subpastas canônicas (specs, experiments, explorations, incidents) [BR-CLI-WORKSPACE-01]", () => {
+      // Regra: Estrutura física organizada por pilar.
+    });
+  });
+
   describe("Mapeamento Físico (Pares de Valor)", () => {
     it.skip("DADO um item 'denso' ('spec', 'experiment', 'exploration', 'incident') QUANDO registrado ENTÃO deve garantir a criação da pasta em '.governance/' [BR-CLI-WORKSPACE-01]", () => {
       // DEC-0021-A03: Unificação de .specify e .ai-guidelines no novo root.

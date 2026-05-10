@@ -4,8 +4,8 @@
  */
 describe("Domínio — Promoção e Maturidade [BR-CLI-POLICY]", () => {
   describe("Promoção: Proposal -> Spec", () => {
-    it.skip("DADO uma 'proposal' QUANDO tentada a promoção ENTÃO deve exigir que o status seja 'review' ou 'done' [BR-CLI-POLICY-01]", () => {
-      // Regra: Apenas ideias com apetite validado podem virar specs formais.
+    it.skip("DADO uma 'proposal' QUANDO tentada a promoção ENTÃO deve exigir status 'review' ou 'done' sob pena de erro de maturidade [BR-CLI-POLICY-01]", () => {
+      // Mensagem esperada: "Uma 'proposal' só pode ser promovida a 'spec' quando estiver em status 'review' ou 'done'."
     });
 
     it.skip("DADO a promoção para 'spec' ENTÃO o sistema deve exigir o upgrade de metadados para incluir 'workspacePath' [BR-CLI-POLICY-01]", () => {
@@ -14,8 +14,8 @@ describe("Domínio — Promoção e Maturidade [BR-CLI-POLICY]", () => {
   });
 
   describe("Promoção: Experiment -> Spec (Shape-up)", () => {
-    it.skip("DADO um 'experiment' finalizado QUANDO o 'outcome' for 'won' ENTÃO deve permitir a promoção para 'spec' [BR-CLI-POLICY-03]", () => {
-      // Regra: Experimentos vencedores são a base legítima para features estruturadas.
+    it.skip("DADO um 'experiment' finalizado QUANDO o 'outcome' NÃO for 'won' ENTÃO deve impedir a promoção com erro de Shape-up [BR-CLI-POLICY-03]", () => {
+      // Mensagem esperada: "Apenas experimentos com resultado 'won' (vencedor) podem ser promovidos a 'spec' (Shape-up)."
     });
 
     it.skip("DADO a promoção de um experimento 'won' ENTÃO a nova 'spec' deve herdar as métricas e aprendizados originais [BR-CLI-POLICY-03]", () => {

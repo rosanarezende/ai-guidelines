@@ -4,13 +4,13 @@
  */
 describe("Domínio — Definição dos Pilares [BR-CLI-POLICY]", () => {
   describe("Pilar: Spec (Entrega Estruturada)", () => {
-    it.skip("DADO uma 'spec' QUANDO criada ENTÃO deve exigir passagem por todo o ciclo RPI (Research, Plan, Implement) [BR-CLI-POLICY-01]", () => {
+    it.skip("DADO uma 'spec' QUANDO criada ENTÃO deve exigir 'workspacePath' e passar por todo o ciclo RPI [BR-CLI-POLICY-01]", () => {
       // Regra: Specs são o pilar de maior rigor e documentação.
     });
   });
 
   describe("Pilar: Experiment (Growth Engineering)", () => {
-    it.skip("DADO um 'experiment' QUANDO criado ENTÃO deve exigir obrigatoriamente 'hypothesis', 'variants' e 'successMetrics' [BR-CLI-POLICY-03]", () => {
+    it.skip("DADO um 'experiment' QUANDO criado ENTÃO deve exigir 'hypothesis' (min 10 chars), 'successMetrics' e 'workspacePath' [BR-CLI-POLICY-03]", () => {
       // Regra: Baseado no Playbook de Growth, sem métricas não há experimento.
     });
 
@@ -20,7 +20,7 @@ describe("Domínio — Definição dos Pilares [BR-CLI-POLICY]", () => {
   });
 
   describe("Pilar: Incident (Fricção Crítica)", () => {
-    it.skip("DADO um 'incident' QUANDO registrado ENTÃO deve exigir 'severity' vinculada a impacto de negócio [BR-CLI-POLICY-02]", () => {
+    it.skip("DADO um 'incident' QUANDO registrado ENTÃO deve exigir 'severity' e 'workspacePath' [BR-CLI-POLICY-02]", () => {
       // Regra: Incidentes são alertas máximos que impactam métricas.
     });
   });
@@ -48,6 +48,12 @@ describe("Domínio — Definição dos Pilares [BR-CLI-POLICY]", () => {
 
     it.skip("DADO um 'patch' QUANDO processado ENTÃO não deve aceitar campos de 'hipótese' ou 'severidade' [BR-CLI-POLICY-01]", () => {
       // Regra: MECE — campos de outros pilares são proibidos para evitar confusão.
+    });
+  });
+
+  describe("Validações Comuns", () => {
+    it.skip("DADO qualquer item QUANDO registrado ENTÃO deve exigir título com no mínimo 5 caracteres [BR-CLI-POLICY-01]", () => {
+      // Regra: Garantir descritividade mínima nos registros.
     });
   });
 });

@@ -1,6 +1,6 @@
 /**
  * [BR-CLI-REGISTRY-01] Integridade do Registro YAML
- * Regras para o registro.yml como SSOT (Single Source of Truth).
+ * Regras para o registry.yml como SSOT (Single Source of Truth).
  */
 describe("Domínio — Integridade do Registro [BR-CLI-REGISTRY]", () => {
   describe("[BR-CLI-REGISTRY-01] Validação de Schema e Tipagem", () => {
@@ -20,6 +20,10 @@ describe("Domínio — Integridade do Registro [BR-CLI-REGISTRY]", () => {
   describe("Unicidade e Imutabilidade", () => {
     it.skip("DADO um item existente QUANDO atualizado ENTÃO os campos 'id' e 'createdAt' devem ser estritamente preservados [BR-CLI-REGISTRY-01]", () => {
       // Regra: Garantia de imutabilidade histórica para auditoria via Git.
+    });
+
+    it.skip("DADO uma atualização no registro ENTÃO deve garantir a atualização automática do campo 'updatedAt' [BR-CLI-REGISTRY-01]", () => {
+      // Regra: Automação de metadados para garantir auditoria real.
     });
   });
 
