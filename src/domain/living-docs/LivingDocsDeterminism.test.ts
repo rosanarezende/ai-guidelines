@@ -144,3 +144,189 @@ describe("LivingDocs — Canonicalização determinística [BR-CLI-LIVING-DOCS-D
     });
   });
 });
+
+describe("LivingDocs — Agregação por ruleId [BR-CLI-LIVING-DOCS-DETERMINISM]", () => {
+  const baseSource = {
+    file: "src/x.test.ts",
+    lineStart: 1,
+    lineEnd: 1,
+    testName: "t",
+    coverageState: "covered" as const,
+  };
+  const baseAgg: Omit<LivingDocsEntry, "ruleId" | "tags" | "evidence"> = {
+    title: "regra",
+    boundedContext: "policy",
+    domain: "X",
+    coverageState: "covered",
+  };
+
+  describe("Agregação cross-entry mesmo ruleId/mesmo file", () => {
+    it("DADO 3 entries com mesmo ruleId/mesmo file ENTÃO 1 entry com evidence[]=3 e tags união [BR-CLI-LIVING-DOCS-DETERMINISM-09]", () => {
+      const result = canonicalizeArtifact({
+        schemaVersion: LIVING_DOCS_SCHEMA_VERSION,
+        entries: [
+          {
+            ...baseAgg,
+            ruleId: "BR-CLI-Y",
+            evidence: [{ ...baseSource, lineStart: 30, lineEnd: 32, testName: "WHEN" }],
+            tags: ["b"],
+          },
+          {
+            ...baseAgg,
+            ruleId: "BR-CLI-Y",
+            evidence: [{ ...baseSource, lineStart: 10, lineEnd: 12, testName: "GIVEN" }],
+            tags: ["a"],
+          },
+          {
+            ...baseAgg,
+            ruleId: "BR-CLI-Y",
+            evidence: [{ ...baseSource, lineStart: 50, lineEnd: 55, testName: "THEN" }],
+            tags: ["c"],
+          },
+        ],
+      });
+      expect(result.entries).toHaveLength(1);
+      const agg = result.entries[0];
+      expect(agg.evidence).toHaveLength(3);
+      // Ordenado por lineStart ascendente
+      expect(agg.evidence.map((ev) => ev.testName)).toEqual(["GIVEN", "WHEN", "THEN"]);
+      expect(agg.tags).toEqual(["a", "b", "c"]);
+    });
+
+    it("DADO entries com evidence duplicada (mesmo file+lineStart+lineEnd+testName) ENTÃO dedup preserva 1 [BR-CLI-LIVING-DOCS-DETERMINISM-10]", () => {
+      const dup = { ...baseSource, lineStart: 10, lineEnd: 12, testName: "WHEN" };
+      const result = canonicalizeArtifact({
+        schemaVersion: LIVING_DOCS_SCHEMA_VERSION,
+        entries: [
+          { ...baseAgg, ruleId: "BR-CLI-X", evidence: [dup], tags: [] },
+          { ...baseAgg, ruleId: "BR-CLI-X", evidence: [dup], tags: [] },
+        ],
+      });
+      expect(result.entries).toHaveLength(1);
+      expect(result.entries[0].evidence).toHaveLength(1);
+    });
+
+    it("DADO ruleId em files diferentes ENTÃO LIVING_DOCS_RULE_CROSS_FILE [BR-CLI-LIVING-DOCS-DETERMINISM-11]", () => {
+      try {
+        canonicalizeArtifact({
+          schemaVersion: LIVING_DOCS_SCHEMA_VERSION,
+          entries: [
+            {
+              ...baseAgg,
+              ruleId: "BR-CLI-Z",
+              evidence: [{ ...baseSource, file: "src/a.test.ts" }],
+              tags: [],
+            },
+            {
+              ...baseAgg,
+              ruleId: "BR-CLI-Z",
+              evidence: [{ ...baseSource, file: "src/b.test.ts" }],
+              tags: [],
+            },
+          ],
+        });
+        fail("deveria ter lançado");
+      } catch (e) {
+        expect((e as { code: string }).code).toBe("LIVING_DOCS_RULE_CROSS_FILE");
+      }
+    });
+  });
+
+  describe("Fusão de coverageState (matriz)", () => {
+    function aggregate(states: readonly LivingDocsEntry["coverageState"][]): LivingDocsEntry {
+      return canonicalizeArtifact({
+        schemaVersion: LIVING_DOCS_SCHEMA_VERSION,
+        entries: states.map((state, i) => ({
+          ...baseAgg,
+          ruleId: "BR-CLI-FUSION",
+          coverageState: state,
+          evidence: [{ ...baseSource, lineStart: i + 1, lineEnd: i + 1, coverageState: state }],
+          tags: [],
+        })),
+      }).entries[0];
+    }
+
+    it("DADO todas evidence='covered' ENTÃO entry.coverageState='covered' [BR-CLI-LIVING-DOCS-DETERMINISM-12]", () => {
+      expect(aggregate(["covered", "covered", "covered"]).coverageState).toBe("covered");
+    });
+
+    it("DADO todas evidence='pending' ENTÃO entry.coverageState='pending' [BR-CLI-LIVING-DOCS-DETERMINISM-13]", () => {
+      expect(aggregate(["pending", "pending"]).coverageState).toBe("pending");
+    });
+
+    it("DADO mistura covered+pending ENTÃO entry.coverageState='covered' (cobertura existe, mesmo parcial) [BR-CLI-LIVING-DOCS-DETERMINISM-14]", () => {
+      expect(aggregate(["covered", "pending"]).coverageState).toBe("covered");
+    });
+
+    it("DADO mistura deprecated+covered ENTÃO LIVING_DOCS_INCONSISTENT_DEPRECATION [BR-CLI-LIVING-DOCS-DETERMINISM-15]", () => {
+      try {
+        aggregate(["deprecated", "covered"]);
+        fail("deveria ter lançado");
+      } catch (e) {
+        expect((e as { code: string }).code).toBe("LIVING_DOCS_INCONSISTENT_DEPRECATION");
+      }
+    });
+  });
+
+  describe("Bypass convergente vs divergente", () => {
+    const bypass = (until: string, ref: string, reason: string) => ({ until, ref, reason });
+
+    function aggregateBypass(
+      bypasses: ReadonlyArray<{ until: string; ref: string; reason: string } | undefined>
+    ): LivingDocsEntry {
+      return canonicalizeArtifact({
+        schemaVersion: LIVING_DOCS_SCHEMA_VERSION,
+        entries: bypasses.map((b, i) => ({
+          ...baseAgg,
+          ruleId: "BR-CLI-DEP-FUSION",
+          coverageState: "deprecated" as const,
+          evidence: [
+            {
+              ...baseSource,
+              lineStart: i + 1,
+              lineEnd: i + 1,
+              coverageState: "deprecated" as const,
+              ...(b !== undefined ? { bypass: b } : {}),
+            },
+          ],
+          tags: [],
+          ...(b !== undefined ? { bypass: b } : {}),
+        })),
+      }).entries[0];
+    }
+
+    it("DADO todas evidence deprecated COM bypass idêntico ENTÃO entry.bypass = bypass único [BR-CLI-LIVING-DOCS-DETERMINISM-16]", () => {
+      const b = bypass("2026-12-31", "INC-1", "motivo válido aqui");
+      const agg = aggregateBypass([b, b, b]);
+      expect(agg.coverageState).toBe("deprecated");
+      expect(agg.bypass).toEqual(b);
+    });
+
+    it("DADO bypass divergente entre evidence ENTÃO LIVING_DOCS_BYPASS_DIVERGENT [BR-CLI-LIVING-DOCS-DETERMINISM-17]", () => {
+      try {
+        aggregateBypass([
+          bypass("2026-12-31", "INC-1", "motivo válido aqui"),
+          bypass("2027-01-15", "INC-1", "motivo válido aqui"),
+        ]);
+        fail("deveria ter lançado");
+      } catch (e) {
+        expect((e as { code: string }).code).toBe("LIVING_DOCS_BYPASS_DIVERGENT");
+      }
+    });
+
+    it("DADO bypass declarado em parte das evidence ENTÃO LIVING_DOCS_BYPASS_DIVERGENT [BR-CLI-LIVING-DOCS-DETERMINISM-18]", () => {
+      try {
+        aggregateBypass([bypass("2026-12-31", "INC-1", "motivo válido aqui"), undefined]);
+        fail("deveria ter lançado");
+      } catch (e) {
+        expect((e as { code: string }).code).toBe("LIVING_DOCS_BYPASS_DIVERGENT");
+      }
+    });
+
+    it("DADO todas evidence deprecated SEM bypass ENTÃO entry.bypass omitido [BR-CLI-LIVING-DOCS-DETERMINISM-19]", () => {
+      const agg = aggregateBypass([undefined, undefined]);
+      expect(agg.coverageState).toBe("deprecated");
+      expect(agg.bypass).toBeUndefined();
+    });
+  });
+});

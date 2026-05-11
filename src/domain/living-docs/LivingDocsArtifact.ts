@@ -15,7 +15,13 @@
  *    byte-a-byte; sem timestamps no artefato.
  */
 import { GovernanceError } from "../shared/errors.js";
-import { assertValidEntry, LivingDocsEntry, LivingDocsSource } from "./LivingDocsEntry.js";
+import {
+  assertValidEntry,
+  CoverageState,
+  LivingDocsBypass,
+  LivingDocsEntry,
+  LivingDocsSource,
+} from "./LivingDocsEntry.js";
 
 /** Versão corrente do schema. Bump exige ADR de extensão (ADR 0002 §6). */
 export const LIVING_DOCS_SCHEMA_VERSION = "v0" as const;
@@ -87,17 +93,47 @@ export function assertValidArtifact(input: unknown): asserts input is LivingDocs
 
 /**
  * Canonicaliza o artefato para forma determinística:
+ *  - entries cruas com mesmo `ruleId` são **agregadas** numa única entry,
+ *    com `evidence[]` unificado (1 rule → N evidências);
+ *  - `coverageState` no topo é fusão determinística dos evidence[i]
+ *    (ver `mergeCoverageState`);
+ *  - bloco `bypass` no topo só aparece quando todos `evidence[*].bypass`
+ *    convergem em `(until, ref, reason)`; divergência é erro fatal;
  *  - entries ordenadas alfabeticamente por ruleId (lexicographic puro, sem
  *    locale-sensitive sort — estabilidade > intuição);
- *  - tags de cada entry deduplicadas e ordenadas alfabeticamente;
- *  - estrutura do artefato preservada sem campos temporais.
+ *  - tags da entry agregada são união dos tags das entries cruas,
+ *    deduplicadas e ordenadas alfabeticamente;
+ *  - evidence ordenada por (file, lineStart, lineEnd, testName).
+ *
+ * Invariantes adicionais (introduzidas em [3.C.4-prep], 2026-05-11):
+ *  - `LIVING_DOCS_RULE_CROSS_FILE`: uma rule não pode aparecer em mais de
+ *    um arquivo `.test.ts`.
+ *  - `LIVING_DOCS_INCONSISTENT_DEPRECATION`: evidence mista
+ *    `deprecated` ⊕ `covered`/`pending` é rejeitada.
+ *  - `LIVING_DOCS_BYPASS_DIVERGENT`: bypass declarado em parte das
+ *    evidências deprecated, ou diretivas que não coincidem.
  *
  * Idempotente: `canonicalize(canonicalize(x))` produz JSON idêntico a
  * `canonicalize(x)`. Garante o contrato byte-a-byte do drift guard (ADR
  * 0003 + ADR 0004).
  */
 export function canonicalizeArtifact(input: LivingDocsArtifact): LivingDocsArtifact {
-  const sortedEntries = [...input.entries]
+  const groups = new Map<string, LivingDocsEntry[]>();
+  for (const entry of input.entries) {
+    const list = groups.get(entry.ruleId);
+    if (list === undefined) {
+      groups.set(entry.ruleId, [entry]);
+    } else {
+      list.push(entry);
+    }
+  }
+
+  const aggregated: LivingDocsEntry[] = [];
+  for (const [ruleId, rawEntries] of groups) {
+    aggregated.push(mergeRawEntries(ruleId, rawEntries));
+  }
+
+  const sortedEntries = aggregated
     .map((entry) => canonicalizeEntry(entry))
     .sort((a, b) => (a.ruleId < b.ruleId ? -1 : a.ruleId > b.ruleId ? 1 : 0));
 
@@ -105,6 +141,124 @@ export function canonicalizeArtifact(input: LivingDocsArtifact): LivingDocsArtif
     schemaVersion: input.schemaVersion,
     entries: sortedEntries,
   };
+}
+
+/**
+ * Funde N entries cruas com mesmo `ruleId` numa única entry agregada.
+ *
+ * Regras:
+ *  - Evidence: união dos `evidence[]` de cada entry crua, com dedup por
+ *    `(file, lineStart, lineEnd, testName)` para preservar idempotência.
+ *  - Tags: união simples (canonicalizeEntry deduplica/ordena depois).
+ *  - title/boundedContext/domain: vêm da entry crua com menor `(file,
+ *    lineStart)` — escolha estável e determinística.
+ *  - coverageState: fusão por `mergeCoverageState`.
+ *  - bypass: convergência verificada por `mergeBypass`.
+ *  - cross-file: rejeitado com `LIVING_DOCS_RULE_CROSS_FILE`.
+ */
+function mergeRawEntries(ruleId: string, rawEntries: readonly LivingDocsEntry[]): LivingDocsEntry {
+  const allEvidence = dedupEvidence(rawEntries.flatMap((entry) => [...entry.evidence]));
+  assertSingleFile(ruleId, allEvidence);
+
+  const allTags = rawEntries.flatMap((entry) => [...entry.tags]);
+
+  const primary = pickPrimaryEntry(rawEntries);
+
+  const coverageState = mergeCoverageState(ruleId, allEvidence);
+  const bypass = coverageState === "deprecated" ? mergeBypass(ruleId, allEvidence) : undefined;
+
+  return {
+    ruleId,
+    title: primary.title,
+    boundedContext: primary.boundedContext,
+    domain: primary.domain,
+    evidence: allEvidence,
+    tags: allTags,
+    coverageState,
+    ...(bypass !== undefined ? { bypass } : {}),
+  };
+}
+
+function dedupEvidence(evidence: readonly LivingDocsSource[]): LivingDocsSource[] {
+  const seen = new Map<string, LivingDocsSource>();
+  for (const ev of evidence) {
+    const key = `${ev.file}|${ev.lineStart}|${ev.lineEnd}|${ev.testName}`;
+    if (!seen.has(key)) seen.set(key, ev);
+  }
+  return [...seen.values()];
+}
+
+function assertSingleFile(ruleId: string, evidence: readonly LivingDocsSource[]): void {
+  const files = new Set(evidence.map((ev) => ev.file));
+  if (files.size > 1) {
+    const list = [...files].sort().join(", ");
+    throw new GovernanceError(
+      "LIVING_DOCS_RULE_CROSS_FILE",
+      `Living Docs: ruleId '${ruleId}' aparece em múltiplos arquivos [${list}]. Uma rule só pode viver em um arquivo .test.ts.`
+    );
+  }
+}
+
+function pickPrimaryEntry(rawEntries: readonly LivingDocsEntry[]): LivingDocsEntry {
+  // Entry crua com menor (file, lineStart) — estável e determinística.
+  // Como cross-file já foi rejeitado a montante, todos terão mesmo file
+  // (mas usamos `file` no comparador para o caso de chamada isolada).
+  return [...rawEntries].sort((a, b) => {
+    const ea = a.evidence[0];
+    const eb = b.evidence[0];
+    if (ea.file !== eb.file) return ea.file < eb.file ? -1 : 1;
+    return ea.lineStart - eb.lineStart;
+  })[0];
+}
+
+function mergeCoverageState(ruleId: string, evidence: readonly LivingDocsSource[]): CoverageState {
+  const states = evidence.map((ev) => ev.coverageState);
+  const hasCovered = states.includes("covered");
+  const hasPending = states.includes("pending");
+  const hasDeprecated = states.includes("deprecated");
+
+  if (hasDeprecated && (hasCovered || hasPending)) {
+    throw new GovernanceError(
+      "LIVING_DOCS_INCONSISTENT_DEPRECATION",
+      `Living Docs: ruleId '${ruleId}' tem evidências mistas — algumas marcadas como 'deprecated' e outras como 'covered'/'pending'. Marque todas as evidências como deprecated (com bypass declarado) ou nenhuma.`
+    );
+  }
+  if (hasDeprecated) return "deprecated";
+  if (hasCovered) return "covered";
+  return "pending";
+}
+
+function mergeBypass(
+  ruleId: string,
+  evidence: readonly LivingDocsSource[]
+): LivingDocsBypass | undefined {
+  const withBypass = evidence.filter(
+    (ev): ev is LivingDocsSource & { bypass: LivingDocsBypass } => ev.bypass !== undefined
+  );
+  if (withBypass.length === 0) return undefined;
+  if (withBypass.length !== evidence.length) {
+    throw new GovernanceError(
+      "LIVING_DOCS_BYPASS_DIVERGENT",
+      `Living Docs: ruleId '${ruleId}' tem bypass declarado em ${withBypass.length} de ${evidence.length} evidências deprecated. Bypass deve estar presente em todas as evidências deprecated ou em nenhuma.`
+    );
+  }
+  const ref = withBypass[0].bypass;
+  for (const ev of withBypass) {
+    if (
+      ev.bypass.until !== ref.until ||
+      ev.bypass.ref !== ref.ref ||
+      ev.bypass.reason !== ref.reason
+    ) {
+      const summary = withBypass
+        .map((e) => `(until=${e.bypass.until}, ref=${e.bypass.ref})`)
+        .join(", ");
+      throw new GovernanceError(
+        "LIVING_DOCS_BYPASS_DIVERGENT",
+        `Living Docs: ruleId '${ruleId}' tem bypass divergente entre evidências [${summary}]. Todas as diretivas devem coincidir em (until, ref, reason).`
+      );
+    }
+  }
+  return { until: ref.until, ref: ref.ref, reason: ref.reason };
 }
 
 function canonicalizeEntry(entry: LivingDocsEntry): LivingDocsEntry {
