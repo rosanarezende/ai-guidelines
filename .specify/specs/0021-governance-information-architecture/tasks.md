@@ -476,16 +476,18 @@ yarn smoke
 > **Âncoras:** `[DEC-0021-A03]`, `[DEC-0021-B02]`
 > **Objetivo:** garantir que help/docs/smoke referenciem `.governance/` como contrato real.
 
-- [ ] **2.D.1** Atualizar docs e help da CLI para `.governance/` (sem alias mágico).
-- [ ] **2.D.2** Reservar diretórios canônicos dentro de `.governance/` para:
-  - `intake/` (PRD/intake)
-  - `handoff/`
-  - `telemetry/`
+- [x] **2.D.1** Docs e help da CLI declaram `.governance/` como contrato canônico de longo prazo; `.ai-guidelines/` marcada como bridge legada explícita (sem alias mágico). Sites atualizados: `docs/cli/ai-guidelines-cli.md` (header com 📣 Contrato Governance-Driven; BR-CLI-EDITORIAL-02 corrige drift 2.C de `opt-in/<feature>.md` para `center/methodologies/`/`base/quality/`), `AGENTS.md` § Consumer Bootstrap, `README.md` § modo `mirror`, `cli/cli/args.mjs` `printHelp` (rodapé "Contrato Governance-Driven").
+- [x] **2.D.2** Reservas canônicas em `.governance/`:
+  - `intake/` (PRD/intake) — spec posterior `stakeholder-intake-pipeline`
+  - `handoff/` — spec posterior `handoff-contracts-formalization`
+  - `telemetry/` — spec posterior `framework-observability-dashboard`
 
-- [ ] **2.D.3** Atualizar smoke tests que assumem `.specify/`/`.ai-guidelines/`.
-- [ ] **2.D.N** Pipeline verde.
-- [ ] **2.D.[DEBT-REVIEW]** `NEXT.md`: fechar 2.A.5 (deprecation plan) se 2.D formalizar marco + warnings; registrar débitos de docs/help legados que ainda referenciem `.specify/`.
-- [ ] **2.D.[ARCHITECTURE]** `ARCHITECTURE.md`: §H (Convenções de topologia) ganha entrada `.governance/{intake,handoff,telemetry}` como reservas canônicas; §C confirma "smoke = contrato `.governance/`".
+  Declaradas como `RESERVED_GOVERNANCE_DIRS` em `src/domain/workspace/MigrationPlan.ts` e materializadas idempotentemente por `AdoptWorkspace.execute`. Drift guard novo: `ReservedDirsContract.test.ts` força conjunto exato `[intake, handoff, telemetry]`.
+
+- [x] **2.D.3** Smoke/integration headers atualizados declarando bridge legada testada e referenciando débito de migração: `tests/smoke/{bin-shim,init-empty,update-managed-block}.test.mjs` + `tests/integration/cli.integration.test.mjs`. **Sem mudanças funcionais** — testes seguem afirmando o que a CLI mjs realmente faz (escreve em `.ai-guidelines/`); migração das asserções para `.governance/` é PR4 quando `AdoptWorkspace` for plugado.
+- [x] **2.D.N** Pipeline verde: 130 ts + 267 mjs + build:rules sem churn.
+- [x] **2.D.[DEBT-REVIEW]** `NEXT.md`: 2.A.5 (deprecation plan) **fechado** via declaração de contrato em `ARCHITECTURE.md` §C inv. 12 + §H; cutover técnico marcado para PR4. Novos débitos documentais registrados (docs/help legados, specs históricas pré-2.C, drift guard de reservas).
+- [x] **2.D.[ARCHITECTURE]** `ARCHITECTURE.md`: §H ganhou entrada `.governance/{intake,handoff,telemetry}` como reservas canônicas (consumer-side) com cross-ref a especs posteriores; §C ganhou invariante 12 ("smoke = contrato `.governance/`" com bridge legada explícita até PR4); duplicação acidental em §H removida (relíquia das edits 2.C).
 - [ ] **2.D.[COMMIT]** `docs(spec-0021): contrato .governance + reservas canônicas`.
 
 ---

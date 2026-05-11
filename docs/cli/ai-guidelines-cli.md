@@ -2,6 +2,10 @@
 
 Este documento mapeia as regras de negócio canônicas da CLI, servindo de fonte única de verdade para os testes unitários BDD.
 
+> **📣 Contrato Governance-Driven (Spec 0021).** O contrato canônico de longo prazo do consumidor é `.governance/` como root unificado (PR2/PR3 da Spec 0021 — ver `.specify/specs/0021-governance-information-architecture/`). A CLI mjs descrita aqui ainda escreve em `.ai-guidelines/` no consumidor — esse caminho funciona como **bridge legado explícita** até a CLI ser plugada no novo `GovernanceWorkspace` (rastreado em PR4). Nenhum alias mágico é introduzido entre os dois roots; a migração acontece por adoção explícita.
+>
+> **Reservas canônicas em `.governance/`:** `intake/` (PRD/intake), `handoff/`, `telemetry/`. Materializadas como `RESERVED_GOVERNANCE_DIRS` em `src/domain/workspace/MigrationPlan.ts` e criadas idempotentemente por `AdoptWorkspace`. Smoke tests atuais validam o **bridge legado** (`.ai-guidelines/`); a migração para asserções sob `.governance/` chega quando a CLI plugar o novo workspace.
+
 ## 0. Política de Update — `managed-block` + `mirror`
 
 Os artefatos distribuídos ao consumidor seguem **dois modos de update** distintos, escolhidos por tipo de arquivo:
@@ -161,7 +165,7 @@ ENTÃO devem seguir duas categorias: **Editoriais** (geram blocos `<FEATURE_*>` 
 
 DADO uma feature editorial ativa (ex: `quality-gates`, `tdd`, `bdd`)
 QUANDO executada
-ENTÃO deve injetar o template de `.core/rules/opt-in/<feature>.md` no `AGENTS.md` do consumidor, dentro de uma tag `<FEATURE_*>`, respeitando idioma (`lang`) quando aplicável.
+ENTÃO deve injetar o template de `.core/rules/center/methodologies/<feature>.md` (TDD/BDD) ou `.core/rules/base/quality/<feature>.md` (quality-gates) no `AGENTS.md` do consumidor, dentro de uma tag `<FEATURE_*>`, respeitando idioma (`lang`) quando aplicável. A topologia física `.core/rules/{top,center,base,adapters}/` foi formalizada em 2.C — ver `.core/governance/ARCHITECTURE.md` §H.
 
 ### [BR-CLI-EDITORIAL-03] Prune Individual
 

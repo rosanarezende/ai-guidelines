@@ -101,6 +101,12 @@ Opções:
   --install                  Instala dependências automaticamente
   --prune                    Remove arquivos órfãos em .ai-guidelines/ (adopt)
   --yes, -y                  Aceita todos os defaults e pula o Wizard
+
+Contrato Governance-Driven (Spec 0021):
+  A CLI atual escreve em .ai-guidelines/ (bridge legado). O contrato canônico
+  de longo prazo é .governance/ como root unificado, com reservas intake/,
+  handoff/ e telemetry/. A migração CLI → GovernanceWorkspace acontece em PR4;
+  nenhum alias mágico é introduzido — adoção é sempre explícita.
 `);
 }
 

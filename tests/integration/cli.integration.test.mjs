@@ -1,3 +1,11 @@
+// [BR-CLI-INTEGRATION] Integration tests — engine + features end-to-end.
+//
+// Contrato testado: fluxos completos `init`/`adopt` que escrevem em
+// `.ai-guidelines/` no consumidor (bridge legada da Spec 0021). Contrato
+// canônico de longo prazo: `.governance/` como root unificado (PR4 da Spec
+// 0021 plugará `AdoptWorkspace`). Migração das asserções para `.governance/`
+// é débito rastreado em
+// `.specify/specs/0021-governance-information-architecture/NEXT.md`.
 import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import path from "node:path";

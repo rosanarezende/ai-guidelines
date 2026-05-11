@@ -1,3 +1,10 @@
+// [BR-CLI-SMOKE] Smoke test — update do managed-block.
+//
+// Contrato testado: idempotência do `update` sobre `.ai-guidelines/` no
+// consumidor. Bridge legada da Spec 0021 — a CLI mjs atual ainda opera sobre
+// `.ai-guidelines/`. Contrato canônico de longo prazo: `.governance/` (PR4).
+// Débito de migração rastreado em
+// `.specify/specs/0021-governance-information-architecture/NEXT.md`.
 import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import path from "node:path";

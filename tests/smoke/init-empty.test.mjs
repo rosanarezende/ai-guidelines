@@ -1,3 +1,12 @@
+// [BR-CLI-SMOKE] Smoke test — init em projeto vazio.
+//
+// Contrato testado: `init --target <dir>` cria `.ai-guidelines/config.json`
+// e o restante do baseline no consumidor. Este caminho corresponde à BRIDGE
+// LEGADA da Spec 0021 — a CLI mjs atual escreve em `.ai-guidelines/` até a CLI
+// ser plugada no novo `GovernanceWorkspace`. O contrato canônico de longo prazo
+// é `.governance/` (ver `.core/governance/ARCHITECTURE.md` §H e Spec 0021 PR4).
+// Migração das asserções para `.governance/` chega quando a CLI migrar — débito
+// rastreado em `.specify/specs/0021-governance-information-architecture/NEXT.md`.
 import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import path from "node:path";

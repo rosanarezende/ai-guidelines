@@ -32,7 +32,7 @@ Foram identificados os seguintes riscos arquiteturais ainda existentes:
 
 #### Sub-bloco 2.A (GovernanceWorkspace) — registrado em 2026-05-10
 
-1. **2.A.5 — Deprecation plan do legado não definido.** Quando parar de ler `.specify/` / `.ai-guidelines/`? Como comunicar (warnings determinísticos, schedule)? Decisão de produto pendente; bloqueia retirada formal do legado em PR4.
+1. ~~**2.A.5 — Deprecation plan do legado não definido.**~~ **Resolvido em 2.D (2026-05-10):** o contrato canônico declarado em `ARCHITECTURE.md` §C invariante 12 + §H formaliza `.governance/` como root consumidor e marca `.ai-guidelines/` (atualmente escrito pela CLI mjs) como **bridge legada explícita**. O marco objetivo de retirada do legado é **PR4 / 4.C (cleanup holístico)**, condicionado a plugar `AdoptWorkspace` no engine mjs em PR3/PR4 e atualizar docs distribuídas (README, AGENTS.md do consumidor, help da CLI). Sem warnings de deprecação no CLI por enquanto — a bridge é silenciosa-por-design (não-disruptiva) até o cutover; warnings serão acionados em PR4 quando a migração real começar.
 2. **2.A.8 — Bridge reader não implementado.** O flag `allowExplicitLegacyBridge` existe em `WorkspacePrecedence`, mas nenhum use case lê de `.specify/` ainda. Quando um consumidor pedir essa leitura (provavelmente em PR4 durante consolidação), criar `ReadLegacyArtifact` use case + port `LegacyReader`.
 3. **Race window em `NodeWorkspaceProvisioner.ensureDirectory`.** O pré-check `existedBefore` é separado do `mkdirSync` — outro processo poderia criar o diretório entre os dois. Em runtime single-process da CLI o risco é nulo; documentar no contrato e revisitar se a CLI virar daemon.
 4. **`Isolation.test.ts` segue em skip.** A criação de pasta **por item denso** (`.governance/specs/<id>/`) depende de plugar um adapter real do `WorkspaceStore` (atual port já existente) — fica natural em 2.B quando `NodeRegistryStore` materializar `registry.yml` no mesmo `.governance/`.
@@ -59,6 +59,13 @@ Foram identificados os seguintes riscos arquiteturais ainda existentes:
 1. **Auditoria DDD executada.** Doc completo em [`./audit-2026-05-10-pre-2d-sanitization.md`](./audit-2026-05-10-pre-2d-sanitization.md). Achado bloqueador (policy virtual incompleta — só `proposal` era validada) corrigido; drift de contagem de pilares (6 → 7) reconciliado em `plan.md` e `decision-brief.md` A02; `tasks.md` 1.C.5 e PR1 PR-MGMT marcados retroativos; `ARCHITECTURE.md` §E.3 ganhou explicação da inversão de ordem `Register`/`Promote`; helper puro `assertRegistryImmutables` extraído para `src/domain/registry/integrity.ts` (consumido por `InMemoryRegistry` e `GovernanceRegistryStore`).
 2. **Pillars.test.ts ganhou suite parametrizada** cobrindo os 3 virtual kinds (`proposal`/`patch`/`fix`) com o novo código `POLICY_VIRTUAL_REJECTS_WORKSPACE`. O código antigo `POLICY_PROPOSAL_MUST_BE_VIRTUAL` deixou de ser emitido (sem release pública dependendo dele — pre-1.0).
 3. **Nenhum débito novo aberto.** Achados pequenos (B5/B6/C-series) ou são oportunismo sem dor real (não tocar agora) ou viraram débitos já existentes atualizados com referência à auditoria.
+
+#### Sub-bloco 2.D (Superfície publicada + contrato `.governance/`) — registrado em 2026-05-10
+
+1. **Débito 2.A.5 fechado.** Deprecation plan formalizado via contrato `.governance/` declarado em `ARCHITECTURE.md` §C invariante 12 + §H reservas canônicas. Cutover técnico para PR4.
+2. **Docs / help legados ainda apontam para `.ai-guidelines/` no consumidor.** Honesto-por-design — a CLI mjs ainda escreve lá. Sites afetados que **descrevem o estado atual**: `cli/cli/args.mjs` `printHelp` (linha `--prune Remove arquivos órfãos em .ai-guidelines/`), `docs/cli/ai-guidelines-cli.md` (BR-CLI-EDITORIAL-02 etc.), `AGENTS.md` § Consumer Bootstrap, `README.md` § modo `mirror`. **Não trocar agora** — viraria mentira. Migração coordenada em PR4 com o cutover da engine.
+3. **Specs históricas referenciam `opt-in/methodologies/` e `opt-in/quality/` no texto** (`.specify/specs/0008|0015|0016|0017|0018|0019`). Débito documental herdado de 2.C; manter no escopo de **4.C (cleanup holístico)** — não é honesto reescrever specs já mergeadas, e elas têm valor histórico.
+4. **`RESERVED_GOVERNANCE_DIRS` ganha drift guard.** `ReservedDirsContract.test.ts` em `src/domain/workspace/` valida o conjunto exato `[intake, handoff, telemetry]`. Alterar o conjunto sem revisar `ARCHITECTURE.md` §H e `docs/cli/ai-guidelines-cli.md` faz o pipeline cair.
 
 ### Débitos da Fase 3 (Living Documentation + Engine)
 
