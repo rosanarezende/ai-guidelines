@@ -519,6 +519,38 @@ yarn smoke
 
 ---
 
+## Sub-bloco [3.0] — Saneamento de Fundação (ADRs + taxonomia) 🧭
+
+> **Âncoras:** `[DEC-0021-A02]`, `[DEC-0021-B04]`, `[DEC-0021-C01]`, `[DEC-0021-D01]`
+> **Objetivo:** fechar decisões arquiteturais via ADRs locais antes do TDD e corrigir o naming `exploration` → `spike` (validado por pesquisa MECE em [`../researchs/governance/2026-05-11-mece-taxonomy-and-adr-audit.md`](../../researchs/governance/2026-05-11-mece-taxonomy-and-adr-audit.md)).
+> **Regra:** este sub-bloco entra **antes** de 3.A; nenhum código de domínio é tocado em 3.A antes do 3.0 fechar.
+
+### 3.0.A — Renomeação `exploration` → `spike` (ressalva textual a [DEC-0021-A02])
+
+- [ ] **3.0.A.1** Atualizar domínio: `WorkItemKind`, `PILLAR_INVARIANTS`, `assertValidDraft`, `integrity` helpers, todos os tipos derivados. Find/replace controlado.
+- [ ] **3.0.A.2** Atualizar testes: `Pillars.test.ts`, `Promotion.test.ts`, fixtures de registry e qualquer doubles que cite `exploration`.
+- [ ] **3.0.A.3** Atualizar infraestrutura: `registrySchema.ts` (`UNKNOWN_KIND` continua estável; só o conjunto válido muda).
+- [ ] **3.0.A.4** Atualizar docs canônicas: `decision-brief.md` [DEC-0021-A02] com ressalva 2026-05-11 ("validado por pesquisa MECE — `exploration` renomeado para `spike` por colisão com vocabulário Product Discovery AI-first"), `plan.md` linha 25 (lista dos 7 pilares), `ARCHITECTURE.md` §3.1 e §5 glossário, `ARCHITECTURE-REFERENCE.md` §3.1 e §5.
+- [ ] **3.0.A.5** Pipeline verde após renomeação (`yarn format ; yarn check ; yarn test:nova-cli`).
+
+### 3.0.B — Redigir e revisar ADRs novas (lar canônico em `.core/governance/adrs/`)
+
+- [ ] **3.0.B.1** Criar diretório `.core/governance/adrs/` (antecipando consolidação proposta em 4.B.5 — ADRs novas nascem aqui; legadas em `/adrs/` migram em PR4).
+- [ ] **3.0.B.2** ADR `0001-taxonomy-mece-pillars` — ratifica os 7 pilares e a renomeação `exploration` → `spike`.
+- [ ] **3.0.B.3** ADR `0002-coverage-state-enum` — `coverageState ∈ {covered, pending, deprecated}` como enum fechado.
+- [ ] **3.0.B.4** ADR `0003-drift-guard-bypass` — sintaxe canônica `// living-docs:allow-drift until=YYYY-MM-DD ref=<ID> reason="..."`, com erro fatal em data expirada ou campo ausente.
+- [ ] **3.0.B.5** ADR `0004-ast-only-extraction` — TypeScript Compiler API; custom reporter Jest fica para evolução pós-PR3.
+- [ ] **3.0.B.6** ADR `0005-structural-validation` — validação por `artifactKind` cobre semântica (headings/ordem/blocos mandatórios), não estética.
+- [ ] **3.0.B.7** Gate humano obrigatório: rascunhos revisados pelo Arquiteto Líder antes do TDD começar.
+
+### 3.0.[DEBT-REVIEW]
+
+- [ ] **3.0.[DEBT-REVIEW]** `NEXT.md`: registrar que renomeação `exploration` → `spike` foi aplicada; cross-ref com pesquisa MECE.
+- [ ] **3.0.[ARCHITECTURE]** `ARCHITECTURE.md` + `ARCHITECTURE-REFERENCE.md`: §3.1 tabela de pilares atualizada (rotulagem `spike`), §5 glossário sincronizado, §F roadmap referencia ADRs `.core/governance/adrs/0001-0005`.
+- [ ] **3.0.[COMMIT]** `refactor(spec-0021): renomeia exploration→spike + ADRs fundacionais do PR3`.
+
+---
+
 ## Sub-bloco [3.A] — LivingDocumentation: schema, versioning, determinismo 🛰️
 
 > **Âncora:** `[DEC-0021-C01]`
@@ -782,9 +814,20 @@ yarn smoke
   - foundation permanece processo vivo e constituição operacional
 
 - [ ] **4.B.3** Atualizar links/cross-refs após renomeação.
+- [ ] **4.B.4** Auditoria das ADRs históricas em `/adrs/` + re-classificação (ancorada em [`../researchs/governance/2026-05-11-mece-taxonomy-and-adr-audit.md`](../../researchs/governance/2026-05-11-mece-taxonomy-and-adr-audit.md) §2):
+  - ADR 0003 (Cobertura+Living Docs): marcar `Parcialmente Superseded by .core/governance/adrs/0002-coverage-state-enum.md` (parte do contrato `[BR-CLI-*]` migrou para Living Docs); parte tática (threshold 95% + lista de exceções por número de linha) **extraída** para `.core/process/coverage-policy.md` como policy operacional viva.
+  - ADR 0004 (Single Responsibility): marcar `Superseded by ADR 0008` (governança monolítica absorveu o problema).
+  - ADRs 0005-0009: confirmadas como Aceitas; nenhuma mudança.
+- [ ] **4.B.5** Consolidar `/adrs/` na arquitetura de informação:
+  - Mover `/adrs/*.md` → `.core/governance/adrs/` (alinha com `.core/governance/ARCHITECTURE*.md`).
+  - Atualizar cross-refs em `README.md`, `AGENTS.md`, MEMORY do agente, ADRs internas que se auto-referenciam.
+  - Numeração legada (0003-0009) preservada para evitar quebra de referências históricas; novas ADRs do PR3 (0001-0005 locais) **renumeradas para 0010-0014** ao serem promovidas para o lar consolidado.
+- [ ] **4.B.6** Reescrever `adrs/README.md` (hoje rotulado "ADRs de Prompt Engineering — Micro-Decisões", vocabulário pré-PR1):
+  - Reflete fronteira híbrida `[DEC-0021-B04]`: ADR = decisão arquitetural estável cross-spec; foundation/process = constituição operacional viva.
+  - Documenta critério de migração foundation→ADR (4.B.2) e ciclo de promoção ADR local→global no encerramento de spec.
 - [ ] **4.B.N** Pipeline verde.
-- [ ] **4.B.[DEBT-REVIEW]** `NEXT.md`: registrar débitos sobre decisões ainda misturadas entre foundation e ADR.
-- [ ] **4.B.[ARCHITECTURE]** `ARCHITECTURE.md`: §I "Como contribuir" ganha entrada sobre critério de migração foundation→ADR.
+- [ ] **4.B.[DEBT-REVIEW]** `NEXT.md`: registrar débitos sobre decisões ainda misturadas entre foundation e ADR; marcar reclassificação 0003/0004 aplicada.
+- [ ] **4.B.[ARCHITECTURE]** `ARCHITECTURE.md`: §I "Como contribuir" ganha entrada sobre critério de migração foundation→ADR; §H ganha referência a `.core/governance/adrs/` como lar canônico consolidado.
 - [ ] **4.B.[COMMIT]** `refactor(spec-0021): fronteira foundation/ADR aplicada`.
 
 ---
