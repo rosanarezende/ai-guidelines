@@ -1,6 +1,7 @@
 # ADR 0004 — Análise Estática AST como SSOT para Artefatos Derivados de Código
 
-**Status:** Proposta
+**Status:** Aceita
+**Data:** 2026-05-11
 **Origem histórica:** Spec 0021 (`governance-information-architecture`)
 **Pesquisa de suporte:** `.specify/specs/researchs/governance/2026-05-11-living-docs-and-template-composition-practices.md`
 

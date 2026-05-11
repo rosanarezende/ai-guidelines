@@ -1,6 +1,7 @@
 # ADR 0005 — Separação entre Validação Semântica e Validação Estética em Artefatos Gerados
 
-**Status:** Proposta
+**Status:** Aceita
+**Data:** 2026-05-11
 **Origem histórica:** Spec 0021 (`governance-information-architecture`)
 **Pesquisa de suporte:** `.specify/specs/researchs/governance/2026-05-11-living-docs-and-template-composition-practices.md`
 
@@ -41,9 +42,11 @@ Esse desenho permite que cada camada evolua em seu próprio ritmo, com critério
 
 2. **Critérios são declarativos, por gênero, não code-hardcoded.** A própria recipe (ou schema do gênero) declara seções obrigatórias, ordem, proibições. O validator é genérico e consome a especificação — adicionar gênero novo é editar dados, não código.
 
-3. **Mensagens determinísticas e auto-explicativas.** Cada falha gera código estável (`STRUCT_MISSING_HEADING`, `STRUCT_OUT_OF_ORDER`, `STRUCT_FORBIDDEN_SECTION`, `STRUCT_PARTIAL_NOT_FOUND`) e mensagem que cita `artifactKind`, slot ofensor, expectativa. Quem leu o erro sabe imediatamente o que corrigir.
+3. **Recipe é o contrato de validação — não objeto auxiliar.** A mesma recipe que descreve **como montar** o artefato (slots, partials, ordem) **também descreve quais invariantes** o artefato precisa cumprir. Não há recipe que só monta sem declarar requisitos, nem schema de validação separado da recipe. A unidade é uma só: editar a recipe é editar simultaneamente "o que produzir" e "o que aceitar como válido". Isso impede o anti-padrão histórico de **recipe + validator desincronizados** (recipe gera Markdown que o próprio validator rejeita).
 
-4. **Validação estética fica fora do engine.** O produtor do artefato **não bloqueia** por:
+4. **Mensagens determinísticas e auto-explicativas.** Cada falha gera código estável (`STRUCT_MISSING_HEADING`, `STRUCT_OUT_OF_ORDER`, `STRUCT_FORBIDDEN_SECTION`, `STRUCT_PARTIAL_NOT_FOUND`) e mensagem que cita `artifactKind`, slot ofensor, expectativa. Quem leu o erro sabe imediatamente o que corrigir.
+
+5. **Validação estética fica fora do engine.** O produtor do artefato **não bloqueia** por:
    - estilo de bullet (`-` vs `*`);
    - número de blank lines entre seções;
    - presença de trailing whitespace;
@@ -51,9 +54,9 @@ Esse desenho permite que cada camada evolua em seu próprio ritmo, com critério
    - largura de linha;
    - encoding de aspas.
 
-5. **Linting estético adotado, se necessário, em camada separada e opcional.** Pré-commit hook ou job CI dedicado (markdownlint, prettier, remark-lint) com configuração própria. Roda em paralelo ao engine, **não acoplado**. Configuração explícita vive em arquivo dedicado (`.markdownlint.yml` etc.), nunca embutida no template engine.
+6. **Linting estético adotado, se necessário, em camada separada e opcional.** Pré-commit hook ou job CI dedicado (markdownlint, prettier, remark-lint) com configuração própria. Roda em paralelo ao engine, **não acoplado**. Configuração explícita vive em arquivo dedicado (`.markdownlint.yml` etc.), nunca embutida no template engine.
 
-6. **Princípio se estende a outros artefatos.** Não é regra exclusiva de Markdown:
+7. **Princípio se estende a outros artefatos.** Não é regra exclusiva de Markdown:
    - YAML do registry: valida `schema` (campos obrigatórios, tipos, enums) — não valida ordem alfabética de chaves dentro de bloco ou indentação cosmética.
    - JSON de manifests: valida shape — não valida pretty-printing.
    - Bash/shell scripts gerados: valida invariantes funcionais — não valida shellcheck-style.

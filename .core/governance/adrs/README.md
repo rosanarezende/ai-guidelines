@@ -51,12 +51,12 @@ Toda ADR carrega:
 
 ## ADRs ativas neste diretório
 
-| #    | Título                                                                 | Princípio                                                                       | Status   |
-| ---- | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------- | -------- |
-| 0001 | Work Items como Taxonomia MECE de Intenção de Saída                    | Trabalho classificado por intenção de saída, MECE em uma dimensão               | Proposta |
-| 0002 | Outcomes em Artefatos Derivados são Enums Fechados                     | Estados modelados como enum fechado, mensagens nomeando o conjunto válido       | Proposta |
-| 0003 | Bypass Auditável de Contratos de CI via Diretivas Declarativas In-Code | Bypass como diretiva próxima à infração, expirável, com referência rastreável   | Proposta |
-| 0004 | Análise Estática AST como SSOT para Artefatos Derivados de Código      | Artefatos derivados são função pura do AST; telemetria runtime é camada aditiva | Proposta |
-| 0005 | Separação entre Validação Semântica e Estética em Artefatos Gerados    | Engine valida semântica de gênero; lint estético em camada separada opcional    | Proposta |
+| #    | Título                                                                 | Princípio                                                                       | Status |
+| ---- | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------- | ------ |
+| 0001 | Work Items como Taxonomia MECE de Intenção de Saída                    | Trabalho classificado por intenção de saída, MECE em uma dimensão               | Aceita |
+| 0002 | Outcomes em Artefatos Derivados são Enums Fechados                     | Estados modelados como enum fechado, mensagens nomeando o conjunto válido       | Aceita |
+| 0003 | Bypass Auditável de Contratos de CI via Diretivas Declarativas In-Code | Bypass como diretiva próxima à infração, expirável, com referência rastreável   | Aceita |
+| 0004 | Análise Estática AST como SSOT para Artefatos Derivados de Código      | Artefatos derivados são função pura do AST; telemetria runtime é camada aditiva | Aceita |
+| 0005 | Separação entre Validação Semântica e Estética em Artefatos Gerados    | Engine valida semântica de gênero; lint estético em camada separada opcional    | Aceita |
 
-Status muda para `Aceita` após gate humano formal do Arquiteto Líder durante encerramento do sub-bloco `[3.0]`.
+Gate humano formal das 5 ADRs realizado pelo Arquiteto Líder em 2026-05-11; todas Aceitas com ajustes pontuais aplicados (ver `tasks.md` sub-bloco `[3.0.B]`).

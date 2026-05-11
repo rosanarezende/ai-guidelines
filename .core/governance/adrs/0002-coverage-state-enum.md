@@ -1,6 +1,7 @@
 # ADR 0002 — Outcomes em Artefatos Derivados são Enums Fechados com Mensagem Determinística
 
-**Status:** Proposta
+**Status:** Aceita
+**Data:** 2026-05-11
 **Origem histórica:** Spec 0021 (`governance-information-architecture`)
 **Pesquisa de suporte:** `.specify/specs/researchs/governance/2026-05-11-living-docs-and-template-composition-practices.md`
 

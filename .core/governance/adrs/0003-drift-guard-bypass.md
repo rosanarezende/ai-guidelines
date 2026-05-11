@@ -1,6 +1,7 @@
 # ADR 0003 — Bypass Auditável de Contratos de CI via Diretivas Declarativas In-Code
 
-**Status:** Proposta
+**Status:** Aceita
+**Data:** 2026-05-11
 **Origem histórica:** Spec 0021 (`governance-information-architecture`)
 **Pesquisa de suporte:** `.specify/specs/researchs/governance/2026-05-11-living-docs-and-template-composition-practices.md`
 

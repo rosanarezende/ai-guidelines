@@ -535,13 +535,13 @@ yarn smoke
 
 ### 3.0.B — Redigir e revisar ADRs novas (lar canônico em `.core/governance/adrs/`)
 
-- [ ] **3.0.B.1** Criar diretório `.core/governance/adrs/` (antecipando consolidação proposta em 4.B.5 — ADRs novas nascem aqui; legadas em `/adrs/` migram em PR4).
-- [ ] **3.0.B.2** ADR `0001-taxonomy-mece-pillars` — ratifica os 7 pilares e a renomeação `exploration` → `spike`.
-- [ ] **3.0.B.3** ADR `0002-coverage-state-enum` — `coverageState ∈ {covered, pending, deprecated}` como enum fechado.
-- [ ] **3.0.B.4** ADR `0003-drift-guard-bypass` — sintaxe canônica `// living-docs:allow-drift until=YYYY-MM-DD ref=<ID> reason="..."`, com erro fatal em data expirada ou campo ausente.
-- [ ] **3.0.B.5** ADR `0004-ast-only-extraction` — TypeScript Compiler API; custom reporter Jest fica para evolução pós-PR3.
-- [ ] **3.0.B.6** ADR `0005-structural-validation` — validação por `artifactKind` cobre semântica (headings/ordem/blocos mandatórios), não estética.
-- [ ] **3.0.B.7** Gate humano obrigatório: rascunhos revisados pelo Arquiteto Líder antes do TDD começar.
+- [x] **3.0.B.1** Criar diretório `.core/governance/adrs/` (antecipando consolidação proposta em 4.B.5 — ADRs novas nascem aqui; legadas em `/adrs/` migram em PR4).
+- [x] **3.0.B.2** ADR `0001-taxonomy-mece-pillars` — **Work Items como Taxonomia MECE de Intenção de Saída**. Aceita 2026-05-11 com nota sobre disciplina humana exigida na promoção (proposal→spec) para evitar drift entre registry.yml e estado real.
+- [x] **3.0.B.3** ADR `0002-coverage-state-enum` — **Outcomes em Artefatos Derivados são Enums Fechados com Mensagem Determinística**. Aceita 2026-05-11; consolida padrão já praticado em 7 enums anteriores.
+- [x] **3.0.B.4** ADR `0003-drift-guard-bypass` — **Bypass Auditável de Contratos de CI via Diretivas Declarativas In-Code**. Aceita 2026-05-11 com sintaxe canônica `// <guard-id>:allow-drift until=YYYY-MM-DD ref=<ID> reason="..."` aplicável a múltiplos guards futuros (não só living-docs).
+- [x] **3.0.B.5** ADR `0004-ast-only-extraction` — **Análise Estática AST como SSOT para Artefatos Derivados de Código**. Aceita 2026-05-11; telemetria runtime fica como camada aditiva opcional.
+- [x] **3.0.B.6** ADR `0005-structural-validation` — **Separação entre Validação Semântica e Estética em Artefatos Gerados**. Aceita 2026-05-11; recipe é o contrato de validação (não objeto auxiliar) — reforçado em 3.E.0.
+- [x] **3.0.B.7** Gate humano realizado pelo Arquiteto Líder em 2026-05-11; 5 ADRs aprovadas com 2 ajustes pontuais aplicados (0001 — disciplina humana na promoção; 0005 — recipe como contrato).
 
 ### 3.0.[DEBT-REVIEW]
 
@@ -700,11 +700,18 @@ yarn smoke
 
 ## Sub-bloco [3.E] — Validação estrutural do Markdown (semântica, não estética) 🧱
 
-> **Âncora:** `[DEC-0021-D01]`
+> **Âncoras:** `[DEC-0021-D01]`, ADR `.core/governance/adrs/0005-structural-validation.md`
+> **Princípio guia (ADR 0005):** Recipe é o contrato de validação — não objeto auxiliar. A mesma recipe que descreve **como montar** o artefato declara **quais invariantes** ele precisa cumprir. Não há schema de validação separado.
 
 ### Contratos obrigatórios
 
-- [ ] **3.E.1** Validar invariantes por `artifactKind`:
+- [ ] **3.E.0 [Recipe = contrato]** Schema da Recipe (definido em 3.D.1) **deve** declarar, no mesmo arquivo:
+  - slots obrigatórios + ordem;
+  - cardinalidade por slot (`required: true`, `minOccurrences`, `maxOccurrences`);
+  - partials válidos por slot;
+  - seções proibidas para o `artifactKind`.
+    Validator consome essa declaração — não há fonte separada de invariantes. Adicionar gênero novo é editar a recipe correspondente, nunca código do validator.
+- [ ] **3.E.1** Validar invariantes por `artifactKind` consumindo o que a recipe declara:
   - headings mandatórios
   - ordem de seções
   - blocos obrigatórios (ex.: Harness Lock em tasks)
@@ -713,8 +720,9 @@ yarn smoke
 - [ ] **3.E.2** Validar coerência recipe/slots:
   - slot faltando => falha
   - partial inválido => falha
+  - recipe que monta artefato que ela mesma rejeitaria => falha (auto-coerência)
 
-- [ ] **3.E.3** Mensagens determinísticas (para PR review).
+- [ ] **3.E.3** Mensagens determinísticas com códigos estáveis (`STRUCT_MISSING_HEADING`, `STRUCT_OUT_OF_ORDER`, `STRUCT_FORBIDDEN_SECTION`, `STRUCT_PARTIAL_NOT_FOUND`, `STRUCT_RECIPE_SELF_INCONSISTENT`).
 
 ### Testes (obrigatórios)
 

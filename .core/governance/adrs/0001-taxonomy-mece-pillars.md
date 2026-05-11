@@ -1,6 +1,7 @@
 # ADR 0001 — Work Items como Taxonomia MECE de Intenção de Saída
 
-**Status:** Proposta
+**Status:** Aceita
+**Data:** 2026-05-11
 **Origem histórica:** Spec 0021 (`governance-information-architecture`)
 **Pesquisa de suporte:** `.specify/specs/researchs/governance/2026-05-11-mece-taxonomy-and-adr-audit.md`
 
@@ -88,7 +89,8 @@ Esse princípio governa o que vira `WorkItemKind` no domínio, o que ganha pasta
 
 ### Negativas / Riscos
 
-- Zonas cinza em fronteiras (`fix`↔`patch`, `patch`↔`spec` em refactor médio) exigem disciplina humana. Aceito como custo de granularidade fina.
+- Zonas cinza em fronteiras (`fix`↔`patch`, `patch`↔`spec` em refactor médio) exigem disciplina humana **na criação** do item. Aceito como custo de granularidade fina.
+- **Disciplina humana exigida também na promoção, não só na criação.** Quando um `proposal` amadurece e vira `spec` (ou um `experiment` vencedor vira `spec`), o registry precisa ser atualizado deliberadamente — o framework não detecta automaticamente que uma proposta deveria ter sido promovida. Se a promoção for esquecida, o `registry.yml` mantém o item no pilar antigo enquanto o trabalho real avança no pilar novo, gerando drift entre estado declarado e estado verdadeiro. Mitigação: políticas puras (`PromotionPolicy`) garantem que **se** a promoção for invocada, ela é estrutural e auditável; mitigação cultural: cada vez que um draft `proposal` ganha `workspacePath` na cabeça do autor, esse é o gatilho para invocar `promote`.
 - Sete categorias são mais do que três — exige onboarding um pouco maior. Mitigação: tabela acima e exemplos no glossário.
 - Vocabulário pode envelhecer (qualquer termo pode colidir com algum domínio futuro). A regra do item 6 fornece o caminho de renomeação sem reabrir a taxonomia.
 
