@@ -25,11 +25,18 @@ import * as path from "node:path";
 import ts from "typescript";
 import type { RuleExtractor } from "../../app/ports/RuleExtractor.js";
 import { GovernanceError } from "../../domain/shared/errors.js";
-import type { CoverageState, LivingDocsEntry } from "../../domain/living-docs/LivingDocsEntry.js";
+import type {
+  CoverageState,
+  LivingDocsBypass,
+  LivingDocsEntry,
+} from "../../domain/living-docs/LivingDocsEntry.js";
+import { parseBypassDirective } from "../../domain/living-docs/BypassDirective.js";
 
 const RULE_ID_PATTERN = /\[(BR-CLI-[A-Z0-9-]+)\]/;
 const TEST_CALL_NAMES = new Set(["it", "test"]);
 const DESCRIBE_CALL_NAME = "describe";
+/** Guard-id usado nas diretivas que se aplicam a este extractor. */
+const LIVING_DOCS_GUARD_ID = "living-docs";
 
 /** Resultado intermediário do walker antes de virar `LivingDocsEntry`. */
 interface ExtractedCall {
@@ -39,10 +46,30 @@ interface ExtractedCall {
   readonly lineStart: number;
   readonly lineEnd: number;
   readonly tags: readonly string[];
+  readonly bypass?: LivingDocsBypass;
+}
+
+/**
+ * Opções do extractor.
+ *
+ * `todayIso` é obrigatório para uso determinístico (CI/test). Em produção
+ * o use case que orquestra o extractor injeta via `Clock` port. Quando
+ * omitido, o construtor usa `new Date().toISOString()` — útil só para
+ * exploração local.
+ */
+export interface TypeScriptRuleExtractorOptions {
+  readonly todayIso?: string;
 }
 
 export class TypeScriptRuleExtractor implements RuleExtractor {
-  constructor(private readonly repoRoot: string) {}
+  private readonly todayIso: string;
+
+  constructor(
+    private readonly repoRoot: string,
+    options: TypeScriptRuleExtractorOptions = {}
+  ) {
+    this.todayIso = options.todayIso ?? new Date().toISOString();
+  }
 
   extract(files: readonly string[]): readonly LivingDocsEntry[] {
     const entries: LivingDocsEntry[] = [];
@@ -70,6 +97,7 @@ export class TypeScriptRuleExtractor implements RuleExtractor {
           source: { file: relPath, lineStart: call.lineStart, lineEnd: call.lineEnd },
           tags: call.tags,
           coverageState: call.coverageState,
+          ...(call.bypass !== undefined ? { bypass: call.bypass } : {}),
         });
       }
     }
@@ -118,13 +146,15 @@ export class TypeScriptRuleExtractor implements RuleExtractor {
             const match = RULE_ID_PATTERN.exec(fullText);
             if (match !== null) {
               const { lineStart, lineEnd } = this.lineRangeOf(sourceFile, node);
+              const bypass = this.detectBypassDirective(sourceFile, node);
               calls.push({
                 ruleId: match[1],
                 title: fullText.replace(RULE_ID_PATTERN, "").trim(),
-                coverageState: meta.coverageState,
+                coverageState: bypass !== null ? "deprecated" : meta.coverageState,
                 lineStart,
                 lineEnd,
                 tags: [...describeStack],
+                ...(bypass !== null ? { bypass } : {}),
               });
             }
           }
@@ -177,6 +207,30 @@ export class TypeScriptRuleExtractor implements RuleExtractor {
       lineStart: startPos.line + 1,
       lineEnd: endPos.line + 1,
     };
+  }
+
+  /**
+   * Procura diretiva `// living-docs:allow-drift ...` nos comentários
+   * leading do node. Retorna o bloco `bypass` validado ou `null` se
+   * nenhuma diretiva aplicável for encontrada. Repropaga
+   * `GovernanceError` se a diretiva existir mas estiver malformada/expirada.
+   *
+   * ADR 0003 §4: a diretiva é comentário de linha imediatamente antes do
+   * `it`/`test`; outros posicionamentos são ignorados.
+   */
+  private detectBypassDirective(sourceFile: ts.SourceFile, node: ts.Node): LivingDocsBypass | null {
+    const ranges = ts.getLeadingCommentRanges(sourceFile.text, node.getFullStart());
+    if (ranges === undefined) return null;
+
+    for (const range of ranges) {
+      const text = sourceFile.text.slice(range.pos, range.end);
+      const parsed = parseBypassDirective(text, {
+        todayIso: this.todayIso,
+        expectedGuardId: LIVING_DOCS_GUARD_ID,
+      });
+      if (parsed !== null) return parsed.bypass;
+    }
+    return null;
   }
 
   /**
