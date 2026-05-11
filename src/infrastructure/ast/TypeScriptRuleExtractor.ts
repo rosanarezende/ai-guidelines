@@ -29,12 +29,16 @@ import type { CoverageState, LivingDocsEntry } from "../../domain/living-docs/Li
 
 const RULE_ID_PATTERN = /\[(BR-CLI-[A-Z0-9-]+)\]/;
 const TEST_CALL_NAMES = new Set(["it", "test"]);
+const DESCRIBE_CALL_NAME = "describe";
 
 /** Resultado intermediário do walker antes de virar `LivingDocsEntry`. */
 interface ExtractedCall {
   readonly ruleId: string;
   readonly title: string;
   readonly coverageState: CoverageState;
+  readonly lineStart: number;
+  readonly lineEnd: number;
+  readonly tags: readonly string[];
 }
 
 export class TypeScriptRuleExtractor implements RuleExtractor {
@@ -63,8 +67,8 @@ export class TypeScriptRuleExtractor implements RuleExtractor {
           title: call.title,
           boundedContext,
           domain,
-          source: { file: relPath, lineStart: 1, lineEnd: 1 },
-          tags: [],
+          source: { file: relPath, lineStart: call.lineStart, lineEnd: call.lineEnd },
+          tags: call.tags,
           coverageState: call.coverageState,
         });
       }
@@ -96,8 +100,16 @@ export class TypeScriptRuleExtractor implements RuleExtractor {
   private collectTestCalls(sourceFile: ts.SourceFile): ExtractedCall[] {
     const calls: ExtractedCall[] = [];
 
-    const visit = (node: ts.Node): void => {
+    const visit = (node: ts.Node, describeStack: readonly string[]): void => {
       if (ts.isCallExpression(node)) {
+        // describe('Nome', () => { ... }) → empilha 'Nome' para os descendentes
+        const describeName = this.extractDescribeLabel(node);
+        if (describeName !== null) {
+          const nextStack = [...describeStack, describeName];
+          ts.forEachChild(node, (child) => visit(child, nextStack));
+          return;
+        }
+
         const meta = this.classifyTestCall(node);
         if (meta !== null) {
           const titleArg = node.arguments[0];
@@ -105,21 +117,66 @@ export class TypeScriptRuleExtractor implements RuleExtractor {
             const fullText = titleArg.text;
             const match = RULE_ID_PATTERN.exec(fullText);
             if (match !== null) {
-              const ruleId = match[1];
-              const title = fullText.replace(RULE_ID_PATTERN, "").trim();
+              const { lineStart, lineEnd } = this.lineRangeOf(sourceFile, node);
               calls.push({
-                ruleId,
-                title,
+                ruleId: match[1],
+                title: fullText.replace(RULE_ID_PATTERN, "").trim(),
                 coverageState: meta.coverageState,
+                lineStart,
+                lineEnd,
+                tags: [...describeStack],
               });
             }
           }
         }
       }
-      ts.forEachChild(node, visit);
+      ts.forEachChild(node, (child) => visit(child, describeStack));
     };
-    visit(sourceFile);
+
+    visit(sourceFile, []);
     return calls;
+  }
+
+  /**
+   * Se o node é um `describe('Nome', ...)`, retorna 'Nome'. Senão `null`.
+   * Aceita `describe(...)` e `describe.skip(...)` / `describe.only(...)`
+   * — todos têm o nome no primeiro argumento.
+   */
+  private extractDescribeLabel(node: ts.CallExpression): string | null {
+    const expr = node.expression;
+    let isDescribe = false;
+    if (ts.isIdentifier(expr) && expr.text === DESCRIBE_CALL_NAME) {
+      isDescribe = true;
+    } else if (
+      ts.isPropertyAccessExpression(expr) &&
+      ts.isIdentifier(expr.expression) &&
+      expr.expression.text === DESCRIBE_CALL_NAME
+    ) {
+      isDescribe = true;
+    }
+    if (!isDescribe) return null;
+
+    const labelArg = node.arguments[0];
+    if (labelArg !== undefined && ts.isStringLiteralLike(labelArg)) {
+      return labelArg.text;
+    }
+    return null;
+  }
+
+  /**
+   * Linhas 1-indexed, inclusivas. `lineStart` é a linha do call site
+   * inteiro (não da string-argumento); `lineEnd` é a linha do `)` final.
+   */
+  private lineRangeOf(
+    sourceFile: ts.SourceFile,
+    node: ts.CallExpression
+  ): { lineStart: number; lineEnd: number } {
+    const startPos = sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile));
+    const endPos = sourceFile.getLineAndCharacterOfPosition(node.getEnd());
+    return {
+      lineStart: startPos.line + 1,
+      lineEnd: endPos.line + 1,
+    };
   }
 
   /**
