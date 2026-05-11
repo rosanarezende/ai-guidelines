@@ -190,6 +190,6 @@ The root `AGENTS.md` is the runtime artifact. Project-specific content must rema
 
 ### Consumer Bootstrap
 
-Consumer-local ai-guidelines assets live under `.ai-guidelines/`. Templates mirrored by the CLI live in `.ai-guidelines/templates/`. Specs and roadmap remain under `.specify/specs/`.
+Consumer-local ai-guidelines assets live under `.ai-guidelines/` (bridge legado). Templates mirrored by the CLI live in `.ai-guidelines/templates/`. Specs and roadmap remain under `.specify/specs/`. The canonical long-term contract is `.governance/` as the unified consumer root (Spec 0021 PR2/PR3); reservations `intake/`, `handoff/`, `telemetry/` already declared in `src/domain/workspace/MigrationPlan.ts`. The CLI will migrate to `.governance/` when `AdoptWorkspace` is plugged (rastreado em PR4).
 
 </AI_GUIDELINES>

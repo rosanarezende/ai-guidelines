@@ -6,7 +6,7 @@
 >
 > **Regra editorial cravada (5.B3.1.5 / 2026-05-03):** `Instruction (en)` é runtime injetado pelo compiler em B.3.5 — deve ser **imperativa em 1–3 linhas**, sem tabelas, sem blocos de exemplo, sem rationale. Tabelas, exemplos, racional, "why" e "see also" vivem em `Documentação (pt-br)` ou seções dedicadas (docs-only).
 >
-> **Hierarquia de headings cravada:** este arquivo usa `###` no topo e `####` por regra para alinhar com `global-rules.md` / `opt-in/quality-gates.md`. Compiler em B.3.5 deve preservar esta hierarquia (ou rebaixá-la consistentemente) ao injetar no `<AI_GUIDELINES>` do `AGENTS.md` consumidor — `#`/`##` quebram a formatação do destino.
+> **Hierarquia de headings cravada:** este arquivo usa `###` no topo e `####` por regra para alinhar com `top/global-rules.md` / `base/quality/quality-gates.md`. Compiler em B.3.5 deve preservar esta hierarquia (ou rebaixá-la consistentemente) ao injetar no `<AI_GUIDELINES>` do `AGENTS.md` consumidor — `#`/`##` quebram a formatação do destino.
 
 ---
 
@@ -288,7 +288,7 @@ Act only with a formed plan. Use `spec-foundation` for work that must survive se
 
 **Why this matters:** ação sem plano formado = sintoma clássico de AI-slop. A tabela é o critério-teste objetivo entre `spec-foundation` e plano leve.
 
-**See also:** `[CORE-02]` (Agnostic SDD Override). _TODO(B.4): adicionar cross-ref para o ID canônico da regra "Tipo de spec" quando `global-rules.md` migrar para o schema bilíngue + IDs `[GR-NNNN]`._ Hoje a regra vive em [`.core/rules/global-rules.md` § "Workflow com IA"](./global-rules.md#workflow-com-ia).
+**See also:** `[CORE-02]` (Agnostic SDD Override). _TODO(B.4): adicionar cross-ref para o ID canônico da regra "Tipo de spec" quando `global-rules.md` migrar para o schema bilíngue + IDs `[GR-NNNN]`._ Hoje a regra vive em [`.core/rules/top/global-rules.md` § "Workflow com IA"](./global-rules.md#workflow-com-ia).
 
 > **Candidata a docs-only em B.3.5:** a tabela detalhada pode migrar para `.core/process/spec-foundation.md` (já tem seção "Tipos de spec" hoje). O core-runtime mantém só a frase imperativa.
 

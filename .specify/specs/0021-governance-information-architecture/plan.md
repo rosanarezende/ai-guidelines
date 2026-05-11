@@ -23,7 +23,7 @@
 ## 🧭 Estado Pós-Gate
 
 - `[DEC-0021-A01]` confirmou YAML versionado no repositório como base do estado canônico repo-first híbrido.
-- `[DEC-0021-A02]` consolidou os 6 pilares de valor: `spec`, `exploration`, `fix`, `patch`, `incident`, `proposal`.
+- `[DEC-0021-A02]` consolidou os 7 pilares de valor: `spec`, `exploration`, `fix`, `patch`, `incident`, `proposal`, `experiment`.
 - `[DEC-0021-A03]` aprovou `.governance/` como root unificado do consumidor, com `registry.yml` visível na raiz do workspace.
 - `[DEC-0021-B01]` manteve o corte Fases 1–3 agora e 4–5 depois.
 - `[DEC-0021-B02]`, `[B03]`, `[B04]` e `[B05]` fecharam placement documental, modelo híbrido, fronteira foundation/ADR e reorganização de `.core/rules/`.
@@ -40,7 +40,7 @@
 
 A 0021 precisa responder simultaneamente a duas camadas:
 
-1. **Arquitetura de informação do framework**: onde o estado vive, como os gêneros documentais se organizam e como os 6 pilares de valor entram no fluxo repo-first.
+1. **Arquitetura de informação do framework**: onde o estado vive, como os gêneros documentais se organizam e como os 7 pilares de valor entram no fluxo repo-first.
 2. **Fundação técnica do runtime**: como a CLI, os templates, os testes e a documentação executável passam a sustentar esse modelo sem drift.
 
 A implementação deve seguir o princípio **repo-first híbrido** e evitar quatro desvios:
@@ -61,7 +61,7 @@ A implementação deve seguir o princípio **repo-first híbrido** e evitar quat
 **Arquitetura-alvo:**
 
 - `.governance/registry.yml` passa a ser o estado primário versionado do workspace.
-- O modelo de domínio precisa representar explicitamente os 6 pilares de valor, seus IDs, status, relações e regras mínimas de promoção/resolução.
+- O modelo de domínio precisa representar explicitamente os 7 pilares de valor, seus IDs, status, relações e regras mínimas de promoção/resolução.
 - `backlog.md`, `historico.md` e visões futuras passam a ser derivados do estado estruturado, nunca o inverso.
 
 **Decisões executáveis derivadas do gate:**
@@ -203,7 +203,7 @@ A implementação deve seguir o princípio **repo-first híbrido** e evitar quat
 ### Componente [A]
 
 - [ ] `[DEC-0021-A01]` refletido em contrato explícito de estado primário repo-first híbrido.
-- [ ] `[DEC-0021-A02]` refletido em taxonomia concreta dos 6 pilares de valor.
+- [ ] `[DEC-0021-A02]` refletido em taxonomia concreta dos 7 pilares de valor.
 - [ ] Stage 2 prova o modelo com lote pequeno e representativo, não centrado apenas em specs.
 
 ### Componente [B]
@@ -275,6 +275,8 @@ A implementação deve seguir o princípio **repo-first híbrido** e evitar quat
 ## 📐 Decisões revisitadas
 
 - **2026-05-09** — O Stage 2 deixou de ser descrito apenas como materialização do modelo repo-first híbrido e passou a incorporar formalmente a re-arquitetura da CLI, Living Documentation e composição modular. **Motivo:** decisões `[DEC-0021-C01]` e `[DEC-0021-D01]` fecharam que a arquitetura de informação e a fundação técnica da ferramenta são inseparáveis nesta spec.
+
+- **2026-05-10 (sub-bloco 2.C-sanitize)** — Reconciliação editorial da contagem de pilares: o texto deste `plan.md` ainda falava em "6 pilares de valor" em três pontos, mas o 7º pilar (`experiment`) já tinha sido formalmente adicionado em 2026-05-10 — registrado em `spec.md § Origem Editorial`, materializado no domínio (`WORK_ITEM_KINDS`) e exposto em `ARCHITECTURE.md`. **Motivo da revisita:** sincronizar a doc com o estado real do código antes de abrir 2.D, conforme auditoria documentada em [`./audit-2026-05-10-pre-2d-sanitization.md`](./audit-2026-05-10-pre-2d-sanitization.md). Sem reabertura de gate — a expansão para 7 pilares já estava aprovada via justificativa da owner em `[DEC-0021-A02]`; este é um patch de drift textual.
 
 - **2026-05-09 (Sessão de Planejamento da Fase 1)** — Decidida a modernização da stack técnica da CLI, ampliando o escopo da Fase 1 para incluir:
   - **Migração de JavaScript (`.mjs`) para TypeScript (`.ts`)**: Para garantir segurança de tipos na nova arquitetura DDD, melhorar a manutenibilidade e a experiência de desenvolvimento (IntelliSense). A decisão se baseia no fato de que a nova arquitetura se beneficia imensamente de contratos explícitos (interfaces, tipos), e este é o momento ideal para a migração, evitando retrabalho.

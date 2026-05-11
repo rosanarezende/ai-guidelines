@@ -90,7 +90,7 @@ Todo comando aceita `--dry-run` para preview e `--help` para detalhes. Sem argum
 O runtime vive em `AGENTS.md` — fonte única lida por humanos e IAs. A CLI compila esse runtime em zonas temáticas (Primary Directives, Lifecycle, Git Workflow, Engineering Principles) e o distribui para provider entrypoints nativos por meio de dois modos de update:
 
 - **`managed-block`** — atualiza apenas o conteúdo entre marcadores `<!-- ai-guidelines:managed-start -->` e `<!-- ai-guidelines:managed-end -->`. Tudo fora dos marcadores é seu — fica intocado entre updates.
-- **`mirror`** — overwrite total para boilerplates SDD copiados para `.ai-guidelines/templates/`. Seguro porque esses templates não são editados in-place; o trabalho do consumidor vive em `.specify/specs/<slug>/`.
+- **`mirror`** — overwrite total para boilerplates SDD copiados para `.ai-guidelines/templates/` (bridge legado; contrato Governance-Driven em construção pela Spec 0021 migra esse lar para `.governance/` quando a CLI plugar o novo `AdoptWorkspace`). Seguro porque esses templates não são editados in-place; o trabalho do consumidor vive em `.specify/specs/<slug>/`.
 
 Detalhamento técnico em [`docs/cli/ai-guidelines-cli.md`](docs/cli/ai-guidelines-cli.md).
 

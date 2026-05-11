@@ -25,18 +25,55 @@ Foram identificados os seguintes riscos arquiteturais ainda existentes:
 2. Cast as WorkItem em Registry.update. O merge {...current, ...patch} não pode ser provado type-safe pelo TS sobre o union; o cast é deliberado e está documentado no código.
 3. Boundary enforcement por regex. Continua provisório; o ARCHITECTURE.md trata a migração para AST como obrigatória antes de carregamento dinâmico/plugins. Risco baixo no PR1, ativo a partir do PR3.
 4. Glossário "ubíquo" não tem enforcement automático. Convivência entre identificadores no código e definições do §G ainda é convencional. Evolução natural quando o LivingDocumentation (PR3) puder cruzar AST × glossário.
-5. Ausência de testes integrados E2E. Use cases testados com doubles; o cruzamento Application + Infrastructure real só acontece quando o IO chegar (PR2).
+5. ~~Ausência de testes integrados E2E.~~ **Parcialmente mitigado em 2.A** — `NodeWorkspaceIntegration.test.ts` exercita o adapter real do filesystem (mkdir/scope/rollback). Permanece pendente: E2E cruzando Application use cases + adapters reais (chega quando `NodeRegistryStore` existir em 2.B).
 6. ResolutionMode modelado, mas pouco exercitado. Semântica de cleaned-up/kept para experiments perdidos só será coberta no PR2/PR3.
 
 ### Débitos da Fase 2 (Reestruturação Física)
 
-_(A preencher conforme execução)_
+#### Sub-bloco 2.A (GovernanceWorkspace) — registrado em 2026-05-10
+
+1. ~~**2.A.5 — Deprecation plan do legado não definido.**~~ **Resolvido em 2.D (2026-05-10):** o contrato canônico declarado em `ARCHITECTURE.md` §C invariante 12 + §H formaliza `.governance/` como root consumidor e marca `.ai-guidelines/` (atualmente escrito pela CLI mjs) como **bridge legada explícita**. O marco objetivo de retirada do legado é **PR4 / 4.C (cleanup holístico)**, condicionado a plugar `AdoptWorkspace` no engine mjs em PR3/PR4 e atualizar docs distribuídas (README, AGENTS.md do consumidor, help da CLI). Sem warnings de deprecação no CLI por enquanto — a bridge é silenciosa-por-design (não-disruptiva) até o cutover; warnings serão acionados em PR4 quando a migração real começar.
+2. **2.A.8 — Bridge reader não implementado.** O flag `allowExplicitLegacyBridge` existe em `WorkspacePrecedence`, mas nenhum use case lê de `.specify/` ainda. Quando um consumidor pedir essa leitura (provavelmente em PR4 durante consolidação), criar `ReadLegacyArtifact` use case + port `LegacyReader`.
+3. **Race window em `NodeWorkspaceProvisioner.ensureDirectory`.** O pré-check `existedBefore` é separado do `mkdirSync` — outro processo poderia criar o diretório entre os dois. Em runtime single-process da CLI o risco é nulo; documentar no contrato e revisitar se a CLI virar daemon.
+4. **`Isolation.test.ts` segue em skip.** A criação de pasta **por item denso** (`.governance/specs/<id>/`) depende de plugar um adapter real do `WorkspaceStore` (atual port já existente) — fica natural em 2.B quando `NodeRegistryStore` materializar `registry.yml` no mesmo `.governance/`.
+5. **`FileSystemAdapter.test.ts` segue em skip.** Atomicidade de escrita (`tmp + rename`) é exatamente o contrato que 2.B precisa implementar para `registry.yml`. Promover skips a testes reais lá.
+
+#### Sub-bloco 2.B (Registry YAML SSOT) — registrado em 2026-05-10
+
+1. **`FileSystemAdapter.test.ts` resolvido por equivalência.** A atomicidade (`tmp + rename`) está agora coberta por `RegistryRoundTrip.test.ts` ("DADO save falhando ENTÃO arquivo original permanece intacto") sobre o store real. Manter os `it.skip` originais por ora (eles ainda descrevem um adapter genérico de filesystem que não existe como bloco isolado); converter em débito para retirada formal quando — e se — um `FileSystemAdapter` separado for extraído.
+2. **`Isolation.test.ts` segue em skip.** Continua dependendo de plugar adapter real para `WorkspaceStore` (pasta `.governance/specs/<id>/`). Independente de 2.B; é puramente sobre densidade física por item. Resolução natural quando 2.C/2.D ligar `WorkspaceStore` ao IO real do `.governance/`.
+3. **Comment Preservation (2.B.5) implementada (Caminho A) com limitação documentada.** `commentBefore` em yaml@2 está vinculado ao **próximo nó** da seq; ao remover um item, o comentário-cabeça migra para o item seguinte ao invés de sumir. Comportamento é **conservador por design** (jamais destrói texto do usuário) e está documentado em `RegistryCommentPreservation.test.ts`. Evolução opcional: detectar comentários "órfãos" e mover para área neutra (header) — só se a dor real aparecer; abrir ADR específica nesse caso.
+4. **Cobertura do `RegistryService` abaixo do esperado.** Service tem CRUD via DI mas só `add` é exercitado em teste explícito (RoundTrip). `update`/`remove`/`load`/`save` via service ainda só são cobertos indiretamente via `GovernanceRegistryStore`; `autosave: false` (batch) nunca é testado. Aceitar como débito ergonômico — a regra de negócio vive no store; o service é casca fina. _Revisitado em `[2.C-sanitize]` (2026-05-10): mantido como débito; resolução em 2.D quando a CLI plugar o `RegistryService` em fluxo real._
+5. **Não há use case que orquestre `RegistryService` real ainda.** `RegisterWorkItem`/`PromoteWorkItem` seguem com `RegistryStore` injetado (in-memory nos testes). A ligação CLI → `GovernanceRegistryStore` real chega em 2.D / PR4 quando a CLI for plugada no `.governance/` materializado.
+
+#### Sub-bloco 2.C (RulesEngine + Reorg físico Top/Center/Base/Adapters) — registrado em 2026-05-10
+
+1. **Builder mjs continua produzindo o SSOT.** A nova camada DDD em `src/domain/rules/` + `src/app/services/RulesEngine.ts` é leitora-tipada do `rules.json` (consome o artefato já compilado). A migração do parser markdown para TS (AST-first) só fará sentido junto com `RuleExtractor` do PR3 — manter o mjs como SSOT até lá; abrir débito formal para essa transição quando 3.B começar.
+2. **Compatibility ponteiros: scripts/docs externos.** Foram atualizados os comentários em código (`cli/features/opt-in/editorial/test-helpers.mjs`, `cli/features/core/budget-report.mjs`) e o cross-ref interno de `top/agents-core.md`. Specs históricas (`.specify/specs/0008|0015|0016|0017|0018|0019`) ainda referenciam `opt-in/methodologies/` e `opt-in/quality/` no texto — registro como débito **documental** a ser tratado em 2.D / 4.C (cleanup holístico). Não afeta builder/runtime/CI.
+3. **Boundary Lock por regex revisitado.** O novo bounded context não introduz carga dinâmica de módulos. A migração para AST (débito 3 da Fase 1) permanece com gatilho em PR3 conforme `ARCHITECTURE.md` §D — sem urgência adicional.
+4. **`OPT_IN_FEATURE_LAYOUT` é mapa estático.** Toda nova `opt_in_feature` adicionada ao runtime mjs precisa de entry correspondente em `src/domain/rules/ruleZone.ts` antes do build, senão `scopeToZone` lança `RULE_OPT_IN_UNKNOWN_FEATURE`. Aceito como acoplamento intencional (forçar reflexão de zona para cada feature nova); revisitar se passar de 10 entries.
+5. **`RulesCompilation`/`RulesProjection` não consomem `rules.json` real ainda.** Os testes usam `RulesCatalogSource` em memória; `RulesTopologyConsistency.test.ts` é quem amarra ao artefato real lendo `readFileSync` direto (esquiva da DI). Coverage do `JsonRulesCatalogSource` permanece em 0%. Adicionar suite end-to-end fica como follow-up barato. _Revisitado em `[2.C-sanitize]` (2026-05-10): mantido como débito; resolução em 2.D ou PR3 com living-docs._
+
+#### Sub-bloco 2.C-sanitize (Auditoria pré-2.D) — registrado em 2026-05-10
+
+1. **Auditoria DDD executada.** Doc completo em [`./audit-2026-05-10-pre-2d-sanitization.md`](./audit-2026-05-10-pre-2d-sanitization.md). Achado bloqueador (policy virtual incompleta — só `proposal` era validada) corrigido; drift de contagem de pilares (6 → 7) reconciliado em `plan.md` e `decision-brief.md` A02; `tasks.md` 1.C.5 e PR1 PR-MGMT marcados retroativos; `ARCHITECTURE.md` §E.3 ganhou explicação da inversão de ordem `Register`/`Promote`; helper puro `assertRegistryImmutables` extraído para `src/domain/registry/integrity.ts` (consumido por `InMemoryRegistry` e `GovernanceRegistryStore`).
+2. **Pillars.test.ts ganhou suite parametrizada** cobrindo os 3 virtual kinds (`proposal`/`patch`/`fix`) com o novo código `POLICY_VIRTUAL_REJECTS_WORKSPACE`. O código antigo `POLICY_PROPOSAL_MUST_BE_VIRTUAL` deixou de ser emitido (sem release pública dependendo dele — pre-1.0).
+3. **Nenhum débito novo aberto.** Achados pequenos (B5/B6/C-series) ou são oportunismo sem dor real (não tocar agora) ou viraram débitos já existentes atualizados com referência à auditoria.
+
+#### Sub-bloco 2.D (Superfície publicada + contrato `.governance/`) — registrado em 2026-05-10
+
+1. **Débito 2.A.5 fechado.** Deprecation plan formalizado via contrato `.governance/` declarado em `ARCHITECTURE.md` §C invariante 12 + §H reservas canônicas. Cutover técnico para PR4.
+2. **Docs / help legados ainda apontam para `.ai-guidelines/` no consumidor.** Honesto-por-design — a CLI mjs ainda escreve lá. Sites afetados que **descrevem o estado atual**: `cli/cli/args.mjs` `printHelp` (linha `--prune Remove arquivos órfãos em .ai-guidelines/`), `docs/cli/ai-guidelines-cli.md` (BR-CLI-EDITORIAL-02 etc.), `AGENTS.md` § Consumer Bootstrap, `README.md` § modo `mirror`. **Não trocar agora** — viraria mentira. Migração coordenada em PR4 com o cutover da engine.
+3. **Specs históricas referenciam `opt-in/methodologies/` e `opt-in/quality/` no texto** (`.specify/specs/0008|0015|0016|0017|0018|0019`). Débito documental herdado de 2.C; manter no escopo de **4.C (cleanup holístico)** — não é honesto reescrever specs já mergeadas, e elas têm valor histórico.
+4. **`RESERVED_GOVERNANCE_DIRS` ganha drift guard.** `ReservedDirsContract.test.ts` em `src/domain/workspace/` valida o conjunto exato `[intake, handoff, telemetry]`. Alterar o conjunto sem revisar `ARCHITECTURE.md` §H e `docs/cli/ai-guidelines-cli.md` faz o pipeline cair.
+
+### Débitos da Fase 3 (Living Documentation + Engine)
 
 ### Débitos da Fase 3 (Living Documentation + Engine)
 
 _(A preencher conforme execução)_
 
-### Débitos da Fase 4 (Migração)
+### Débitos da Fase 4 (Consolidação)
 
 _(A preencher conforme execução)_
 

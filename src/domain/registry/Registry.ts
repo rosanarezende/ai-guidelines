@@ -1,6 +1,7 @@
 import { GovernanceError } from "../shared/errors.js";
 import { WorkItemId, WORK_ITEM_KINDS } from "../shared/types.js";
 import { WorkItem, WorkItemPatch } from "../work-item/WorkItem.js";
+import { assertRegistryImmutables } from "./integrity.js";
 
 /**
  * Registry em memória, SSOT lógica do PR1.
@@ -33,18 +34,7 @@ export class InMemoryRegistry {
         `Item com id '${id}' não existe no registry.`
       );
     }
-    if (patch.id !== undefined && patch.id !== current.id) {
-      throw new GovernanceError(
-        "REGISTRY_IMMUTABLE_ID",
-        `O campo 'id' é imutável após a criação ('${current.id}').`
-      );
-    }
-    if (patch.createdAt !== undefined && patch.createdAt !== current.createdAt) {
-      throw new GovernanceError(
-        "REGISTRY_IMMUTABLE_CREATED_AT",
-        `O campo 'createdAt' é imutável após a criação.`
-      );
-    }
+    assertRegistryImmutables(current, patch);
     // Merge estrutural; o caller (use case) é responsável por garantir que
     // o resultado satisfaça o discriminated union do WorkItem.
     const next = {

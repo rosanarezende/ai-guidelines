@@ -86,6 +86,8 @@
 
 - **Data / Owner:** 2026-05-09 / @rosanarezende
 
+> **Ressalva 2026-05-10 (drift textual, sem reabrir gate):** a frase introdutória da justificativa fala em "6 pilares MECE" e logo enumera 7 — o 7º (`experiment`) foi acrescentado na mesma sessão por princípios de Growth Engineering e a lista já fica correta. A contagem em texto livre permanece como evidência histórica da expansão; o domínio (`WORK_ITEM_KINDS`) e o `plan.md` já refletem **7 pilares**. Patch documental aplicado em `[2.C-sanitize]` — ver [`./audit-2026-05-10-pre-2d-sanitization.md`](./audit-2026-05-10-pre-2d-sanitization.md).
+
 ### [DEC-0021-A03] Fronteira entre `sdd_dir`, `spec_workspace_dir` e o lar físico do estado
 
 **Pergunta:** como separar formalmente `sdd_dir`, eventual `spec_workspace_dir` e o path físico do estado estruturado sem cristalizar UX errada no consumidor?

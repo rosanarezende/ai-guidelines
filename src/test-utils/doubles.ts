@@ -1,6 +1,8 @@
 import { Clock } from "../app/ports/Clock.js";
+import { FileSystemProbe } from "../app/ports/FileSystemProbe.js";
 import { IdGenerator } from "../app/ports/IdGenerator.js";
 import { RegistryStore } from "../app/ports/RegistryStore.js";
+import { WorkspaceProvisioner } from "../app/ports/WorkspaceProvisioner.js";
 import { WorkspaceStore } from "../app/ports/WorkspaceStore.js";
 import { InMemoryRegistry } from "../domain/registry/Registry.js";
 import { WorkItemId } from "../domain/shared/types.js";
@@ -78,5 +80,67 @@ export class SpyRegistryStore implements RegistryStore {
   }
   list() {
     return this.inner.list();
+  }
+}
+
+/**
+ * Probe in-memory: simula presença de diretórios pelo conjunto declarado.
+ */
+export class FakeFileSystemProbe implements FileSystemProbe {
+  private readonly dirs: Set<string>;
+  constructor(present: Iterable<string> = []) {
+    this.dirs = new Set(present);
+  }
+  add(relPath: string): void {
+    this.dirs.add(relPath);
+  }
+  remove(relPath: string): void {
+    this.dirs.delete(relPath);
+  }
+  directoryExists(relPath: string): boolean {
+    return this.dirs.has(relPath);
+  }
+}
+
+/**
+ * Provisioner in-memory para testar idempotência e rollback.
+ *  - registra cada chamada em `events`
+ *  - mantém set de diretórios "criados"
+ *  - permite injetar falha em um path específico via `failOnEnsure`
+ */
+export class FakeWorkspaceProvisioner implements WorkspaceProvisioner {
+  public readonly events: string[] = [];
+  public failOnEnsure: string | null = null;
+  private readonly dirs = new Set<string>();
+
+  constructor(preExisting: Iterable<string> = []) {
+    for (const p of preExisting) this.dirs.add(p);
+  }
+
+  ensureDirectory(relPath: string): boolean {
+    if (this.failOnEnsure === relPath) {
+      this.events.push(`ensure-fail:${relPath}`);
+      throw new Error(`Falha simulada criando '${relPath}'.`);
+    }
+    if (this.dirs.has(relPath)) {
+      this.events.push(`ensure-noop:${relPath}`);
+      return false;
+    }
+    this.dirs.add(relPath);
+    this.events.push(`ensure-create:${relPath}`);
+    return true;
+  }
+
+  removeDirectoryIfEmpty(relPath: string): void {
+    if (!this.dirs.has(relPath)) {
+      this.events.push(`remove-absent:${relPath}`);
+      return;
+    }
+    this.dirs.delete(relPath);
+    this.events.push(`remove:${relPath}`);
+  }
+
+  has(relPath: string): boolean {
+    return this.dirs.has(relPath);
   }
 }
