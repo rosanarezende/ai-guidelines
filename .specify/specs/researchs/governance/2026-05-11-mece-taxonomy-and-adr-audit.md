@@ -119,6 +119,8 @@ Tamanho estimado da PR de renomeação: <100 LOC (find/replace controlado + ajus
 
 ## Parte 2 — Inventário e auditoria das ADRs legadas
 
+> **⚠️ Status desta Parte 2: PRELIMINAR.** O inventário e as reclassificações abaixo (`Superseded by`, `Parcialmente Superseded`) foram redigidos **antes** do critério editorial "ADR é princípio perene, não revisitação datada" ter sido estabelecido (2026-05-11, durante reescrita das 5 ADRs novas em `.core/governance/adrs/`). À luz desse critério, o problema das ADRs legadas é mais profundo do que "superseded por X": muitas delas foram escritas como **relatórios de execução de uma fase**, citando "Spec 0004 — Vaga E", listando mudanças por nome de arquivo — o que as descaracteriza como ADR. **A auditoria definitiva acontece em PR4 (sub-bloco 4.B.4)**, aplicando o critério: (a) reescrever como princípio se ainda fizer sentido; (b) rebaixar para "nota histórica" não-ADR se for relatório de execução; (c) arquivar como decisão superada por outro princípio. As classificações abaixo permanecem como **insumo inicial**, não como decisão.
+
 ### 2.1 ADRs existentes em `/adrs/` (estado atual)
 
 | #    | Arquivo                                     | Status declarado | Spec ancorada          | Data       | Tamanho    |

@@ -814,10 +814,12 @@ yarn smoke
   - foundation permanece processo vivo e constituição operacional
 
 - [ ] **4.B.3** Atualizar links/cross-refs após renomeação.
-- [ ] **4.B.4** Auditoria das ADRs históricas em `/adrs/` + re-classificação (ancorada em [`../researchs/governance/2026-05-11-mece-taxonomy-and-adr-audit.md`](../../researchs/governance/2026-05-11-mece-taxonomy-and-adr-audit.md) §2):
-  - ADR 0003 (Cobertura+Living Docs): marcar `Parcialmente Superseded by .core/governance/adrs/0002-coverage-state-enum.md` (parte do contrato `[BR-CLI-*]` migrou para Living Docs); parte tática (threshold 95% + lista de exceções por número de linha) **extraída** para `.core/process/coverage-policy.md` como policy operacional viva.
-  - ADR 0004 (Single Responsibility): marcar `Superseded by ADR 0008` (governança monolítica absorveu o problema).
-  - ADRs 0005-0009: confirmadas como Aceitas; nenhuma mudança.
+- [ ] **4.B.4** Auditoria das ADRs históricas em `/adrs/` à luz do critério editorial "ADR é princípio perene, não revisitação datada" (formalizado em `.core/governance/adrs/README.md`):
+  - Para cada ADR legada (0003, 0004, 0005, 0006, 0007, 0008, 0009): aplicar um dos três caminhos:
+    - **(a) Reescrever como princípio.** Se a decisão subjacente ainda é arquiteturalmente relevante mas o documento está escrito como relatório de execução (cita "Spec X — Vaga Y", lista mudanças por arquivo), reescrever o corpo como princípio perene; spec original vira nota histórica de rodapé.
+    - **(b) Rebaixar para nota histórica não-ADR.** Se o documento é primariamente narrativa de execução (ex.: "essas mudanças foram aplicadas"), mover para `.specify/specs/researchs/governance/` como nota histórica datada; remover da numeração de ADRs.
+    - **(c) Arquivar como Superseded.** Se a decisão foi efetivamente substituída por princípio mais abrangente (caso candidato: 0004 absorvida por governança monolítica de 0008), marcar `Superseded by <ID>` com rationale.
+  - Insumo inicial em [`../researchs/governance/2026-05-11-mece-taxonomy-and-adr-audit.md`](../../researchs/governance/2026-05-11-mece-taxonomy-and-adr-audit.md) §2 (marcado como **preliminar** — não decisão).
 - [ ] **4.B.5** Consolidar `/adrs/` na arquitetura de informação:
   - Mover `/adrs/*.md` → `.core/governance/adrs/` (alinha com `.core/governance/ARCHITECTURE*.md`).
   - Atualizar cross-refs em `README.md`, `AGENTS.md`, MEMORY do agente, ADRs internas que se auto-referenciam.
