@@ -172,6 +172,66 @@ describe("Infra — TypeScriptRuleExtractor (source mapping) [BR-CLI-LIVING-DOCS
     });
   });
 
+  describe("Agregação intra-arquivo (3.C.4-prep)", () => {
+    it("DADO N it() com mesmo ruleId no mesmo arquivo ENTÃO 1 entry com evidence[N] ordenada por lineStart [BR-CLI-LIVING-DOCS-SOURCEMAP-10]", () => {
+      const content = [
+        "describe('X', () => {",
+        '  it("[BR-CLI-RULE-01] cenário um", () => {});',
+        '  it("[BR-CLI-RULE-01] cenário dois", () => {});',
+        '  it("[BR-CLI-RULE-01] cenário três", () => {});',
+        "});",
+      ].join("\n");
+      const file = writeFile(root, "src/domain/x/Foo.test.ts", content);
+      const entries = new TypeScriptRuleExtractor(root).extract([file]);
+      expect(entries).toHaveLength(1);
+      expect(entries[0].ruleId).toBe("BR-CLI-RULE-01");
+      expect(entries[0].evidence).toHaveLength(3);
+      expect(entries[0].evidence.map((ev) => ev.testName)).toEqual([
+        "cenário um",
+        "cenário dois",
+        "cenário três",
+      ]);
+      // evidence ordenada por lineStart ascendente
+      const starts = entries[0].evidence.map((ev) => ev.lineStart);
+      for (let i = 0; i < starts.length - 1; i++) {
+        expect(starts[i]).toBeLessThan(starts[i + 1]);
+      }
+    });
+
+    it("DADO mistura de it() e it.skip() para mesmo ruleId ENTÃO evidence preserva coverageState por item [BR-CLI-LIVING-DOCS-SOURCEMAP-11]", () => {
+      const content = [
+        "describe('X', () => {",
+        '  it("[BR-CLI-MIX-01] coberto", () => {});',
+        '  it.skip("[BR-CLI-MIX-01] pendente", () => {});',
+        "});",
+      ].join("\n");
+      const file = writeFile(root, "src/domain/x/Foo.test.ts", content);
+      const entries = new TypeScriptRuleExtractor(root).extract([file]);
+      expect(entries).toHaveLength(1);
+      expect(entries[0].evidence.map((ev) => ev.coverageState)).toEqual(["covered", "pending"]);
+    });
+
+    it("DADO ruleId em describes irmãos no mesmo arquivo ENTÃO evidence.tags absorve união dos describes [BR-CLI-LIVING-DOCS-SOURCEMAP-12]", () => {
+      const file = writeFile(
+        root,
+        "src/domain/x/Foo.test.ts",
+        `
+        describe("Outer", () => {
+          describe("Branch A", () => {
+            it("[BR-CLI-AGG-01] um", () => {});
+          });
+          describe("Branch B", () => {
+            it("[BR-CLI-AGG-01] dois", () => {});
+          });
+        });
+        `
+      );
+      const entries = new TypeScriptRuleExtractor(root).extract([file]);
+      expect(entries).toHaveLength(1);
+      expect(entries[0].tags).toEqual(expect.arrayContaining(["Outer", "Branch A", "Branch B"]));
+    });
+  });
+
   describe("Determinismo do source mapping", () => {
     it("DADO duas extrações do mesmo arquivo ENTÃO produz a mesma saída byte-a-byte [BR-CLI-LIVING-DOCS-SOURCEMAP-09]", () => {
       const file = writeFile(

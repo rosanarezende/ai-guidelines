@@ -88,29 +88,52 @@ export class TypeScriptRuleExtractor implements RuleExtractor {
       const { boundedContext, domain } = this.deriveLocation(relPath);
 
       const calls = this.collectTestCalls(sourceFile);
-      // No passo 1 do sub-bloco 3.C.4-prep: cada call vira uma entry com
-      // `evidence` de cardinalidade 1. Agregação por ruleId dentro do
-      // arquivo entra no passo 3 do `_prep`; até lá, o `canonicalizeArtifact`
-      // (passo 2) é quem agrupa cross-call.
+
+      // Sub-bloco 3.C.4-prep passo 3: o extractor agrupa por ruleId
+      // **dentro de cada arquivo** antes de retornar — cada rule vira uma
+      // entry com evidence[] plural. Cross-file segue sendo
+      // responsabilidade do domain (canonicalizeArtifact dispara
+      // LIVING_DOCS_RULE_CROSS_FILE se a mesma rule aparecer em mais de
+      // um arquivo).
+      const byRuleId = new Map<string, ExtractedCall[]>();
       for (const call of calls) {
-        entries.push({
-          ruleId: call.ruleId,
-          title: call.title,
-          boundedContext,
-          domain,
-          evidence: [
-            {
-              file: relPath,
-              lineStart: call.lineStart,
-              lineEnd: call.lineEnd,
-              testName: call.title,
-              coverageState: call.coverageState,
-              ...(call.bypass !== undefined ? { bypass: call.bypass } : {}),
-            },
-          ],
-          tags: call.tags,
+        const list = byRuleId.get(call.ruleId);
+        if (list === undefined) {
+          byRuleId.set(call.ruleId, [call]);
+        } else {
+          list.push(call);
+        }
+      }
+
+      for (const [ruleId, group] of byRuleId) {
+        const sortedCalls = [...group].sort((a, b) => a.lineStart - b.lineStart);
+        const primary = sortedCalls[0];
+
+        const evidence = sortedCalls.map((call) => ({
+          file: relPath,
+          lineStart: call.lineStart,
+          lineEnd: call.lineEnd,
+          testName: call.title,
           coverageState: call.coverageState,
           ...(call.bypass !== undefined ? { bypass: call.bypass } : {}),
+        }));
+
+        const tagsUnion = new Set<string>();
+        for (const call of sortedCalls) for (const tag of call.tags) tagsUnion.add(tag);
+
+        // coverageState/bypass topo são provisórios — `canonicalizeArtifact`
+        // recomputa via fusão determinística (mergeCoverageState/mergeBypass).
+        // Usar o `primary` evita inconsistência com `assertValidEntry`
+        // (que exige `bypass` só com coverageState='deprecated').
+        entries.push({
+          ruleId,
+          title: primary.title,
+          boundedContext,
+          domain,
+          evidence,
+          tags: [...tagsUnion],
+          coverageState: primary.coverageState,
+          ...(primary.bypass !== undefined ? { bypass: primary.bypass } : {}),
         });
       }
     }
