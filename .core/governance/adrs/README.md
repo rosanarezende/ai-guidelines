@@ -17,6 +17,8 @@ ADRs registram **decisões arquiteturais estáveis, cross-spec**. Constituição
 
 ## Critério editorial — ADR é princípio perene, não revisitação datada
 
+> **Runtime injetado:** este critério tem regra-pointer correspondente em [`.core/rules/top/agents-core.md` `[CORE-15]`](../../rules/top/agents-core.md), que aparece compilada no bloco `<AI_GUIDELINES>` de todo `AGENTS.md` consumidor. A SSOT detalhada (formato, anti-padrões, sintomas de rejeição) vive **aqui**; a regra runtime aponta para cá.
+
 ADRs neste projeto registram **princípios arquiteturais perenes** — não relatórios de execução de uma spec, não revisitação datada do `decision-brief.md`. Quando uma ADR vira lixo no momento em que a fase termina, ela não era ADR; era nota de execução.
 
 |                          | `decision-brief.md`                    | ADR                                                 |

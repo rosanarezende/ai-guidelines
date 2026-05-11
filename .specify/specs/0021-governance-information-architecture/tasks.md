@@ -18,7 +18,7 @@
 **Âncoras:** `[DEC-0021-A01]`, `[DEC-0021-A02]`, `[DEC-0021-A03]`, `[DEC-0021-B01]`, `[DEC-0021-B02]`, `[DEC-0021-B03]`, `[DEC-0021-B04]`, `[DEC-0021-B05]`, `[DEC-0021-C01]`, `[DEC-0021-D01]`
 
 1. **Repo-first híbrido:** YAML versionado no repo como SSOT; Markdown apenas derivado; projeções futuras (DB/dashboard) só como derivados. `[DEC-0021-A01]`
-2. **Pilares MECE como origem de valor:** `spec`, `exploration`, `fix`, `patch`, `incident`, `proposal`, `experiment`. `[DEC-0021-A02]`
+2. **Pilares MECE como origem de valor:** `spec`, `spike`, `fix`, `patch`, `incident`, `proposal`, `experiment`. `[DEC-0021-A02]` (renomeação `exploration` → `spike` em 2026-05-11; ADR `.core/governance/adrs/0001-taxonomy-mece-pillars.md`).
 3. **Root do consumidor:** `.governance/` como root unificado; `registry.yml` visível na raiz. `[DEC-0021-A03]`
 4. **Recorte:** Fases 1–3 entregues; Fases 4–5 apenas mapeadas (sem produto/DB/dashboard). `[DEC-0021-B01]`
 5. **Placement/lar futuro:** reservar lar canônico para intake/PRD, handoff, telemetria. `[DEC-0021-B02]`
@@ -527,11 +527,11 @@ yarn smoke
 
 ### 3.0.A — Renomeação `exploration` → `spike` (ressalva textual a [DEC-0021-A02])
 
-- [ ] **3.0.A.1** Atualizar domínio: `WorkItemKind`, `PILLAR_INVARIANTS`, `assertValidDraft`, `integrity` helpers, todos os tipos derivados. Find/replace controlado.
-- [ ] **3.0.A.2** Atualizar testes: `Pillars.test.ts`, `Promotion.test.ts`, fixtures de registry e qualquer doubles que cite `exploration`.
-- [ ] **3.0.A.3** Atualizar infraestrutura: `registrySchema.ts` (`UNKNOWN_KIND` continua estável; só o conjunto válido muda).
-- [ ] **3.0.A.4** Atualizar docs canônicas: `decision-brief.md` [DEC-0021-A02] com ressalva 2026-05-11 ("validado por pesquisa MECE — `exploration` renomeado para `spike` por colisão com vocabulário Product Discovery AI-first"), `plan.md` linha 25 (lista dos 7 pilares), `ARCHITECTURE.md` §3.1 e §5 glossário, `ARCHITECTURE-REFERENCE.md` §3.1 e §5.
-- [ ] **3.0.A.5** Pipeline verde após renomeação (`yarn format ; yarn check ; yarn test:nova-cli`).
+- [x] **3.0.A.1** Atualizar domínio: `WORK_ITEM_KINDS` em `src/domain/shared/types.ts`, `DenseKind` + `DENSE_KINDS` em `src/domain/work-item/WorkItem.ts`. `assertValidDraft` e helpers de integridade consomem os tipos via referência (sem string hardcoded); não exigiram edição.
+- [x] **3.0.A.2** Atualizar testes: `Pillars.test.ts` (describe + it.each) e `Isolation.test.ts` (textos dos skips de `inicialização do workspace` e `item denso`) refletem o novo nome.
+- [x] **3.0.A.3** Infraestrutura: `registrySchema.ts` consome `WORK_ITEM_KINDS` dinamicamente para construir o conjunto válido; nenhuma edição literal foi necessária. `UNKNOWN_KIND` continua estável.
+- [x] **3.0.A.4** Docs canônicas atualizadas: `decision-brief.md` ganhou ressalva 2026-05-11 logo após a ressalva 2026-05-10 (item 2 da lista numerada preservado como evidência histórica da decisão de 2026-05-09); `plan.md` linha 26, `spec.md` linhas 35 e 55, `tasks.md` invariante #2 (linha 21), `ARCHITECTURE.md` glossário §3, `ARCHITECTURE-REFERENCE.md` §3.1 tabela + §3.1 lista por kind + §5 glossário (`DenseWorkItem`, `Dense item`).
+- [x] **3.0.A.5** Pipeline verde após renomeação: `yarn test:nova-cli` → 130 passed, 15 skipped (zero regressão).
 
 ### 3.0.B — Redigir e revisar ADRs novas (lar canônico em `.core/governance/adrs/`)
 
@@ -545,9 +545,10 @@ yarn smoke
 
 ### 3.0.[DEBT-REVIEW]
 
-- [ ] **3.0.[DEBT-REVIEW]** `NEXT.md`: registrar que renomeação `exploration` → `spike` foi aplicada; cross-ref com pesquisa MECE.
-- [ ] **3.0.[ARCHITECTURE]** `ARCHITECTURE.md` + `ARCHITECTURE-REFERENCE.md`: §3.1 tabela de pilares atualizada (rotulagem `spike`), §5 glossário sincronizado, §F roadmap referencia ADRs `.core/governance/adrs/0001-0005`.
-- [ ] **3.0.[COMMIT]** `refactor(spec-0021): renomeia exploration→spike + ADRs fundacionais do PR3`.
+- [x] **3.0.C — Tornar critério editorial "ADR é princípio perene" agnóstico de agente.** Regra runtime `[CORE-15]` adicionada a `.core/rules/top/agents-core.md` apontando para SSOT detalhada em `.core/governance/adrs/README.md` (cross-ref bidirecional). Memória local do Claude Code (`feedback_adr_as_principle.md`) apagada — repo é fonte canônica.
+- [x] **3.0.[DEBT-REVIEW]** `NEXT.md` atualizado: renomeação `exploration` → `spike` aplicada em 2026-05-11; 5 ADRs Aceitas; `[CORE-15]` formalizada; auditoria preliminar das ADRs legadas marcada como tal. **Débito novo aberto:** auditoria estrutural de `.core/rules/top/` (fronteira `agents-core` vs `global-rules` faz sentido em escopo, mas naming pode confundir) — proposta para PR4 / 4.B.
+- [x] **3.0.[ARCHITECTURE]** `ARCHITECTURE.md` glossário §3 + `ARCHITECTURE-REFERENCE.md` §3.1 tabela e lista, §5 glossário sincronizados com renomeação `spike`. §F roadmap referencia as 5 ADRs em `.core/governance/adrs/` em commit subsequente quando o roadmap for revisitado.
+- [x] **3.0.[COMMIT]** `refactor(spec-0021): consolida sub-bloco 3.0 (exploration→spike, ADRs, CORE-15)`.
 
 ---
 

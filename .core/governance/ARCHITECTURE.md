@@ -87,7 +87,7 @@ Quando você lê código ou docs deste projeto, alguns termos se repetem. Aqui e
 | **Bounded context**           | Um pedaço do código com responsabilidade bem delimitada. Ex: "tudo sobre workspace" vive junto. Permite que duas pessoas mexam em partes diferentes sem se atropelar. |
 | **Port**                      | Uma interface — um "contrato" do que precisa ser feito, sem dizer como. Ex: "preciso saber se este diretório existe".                                                 |
 | **Adapter**                   | A implementação concreta de um port — o "como". Ex: "uso `node:fs` para verificar se o diretório existe".                                                             |
-| **WorkItem**                  | Um item de trabalho registrado. Pode ser uma `spec`, `experiment`, `exploration`, `incident`, `proposal`, `patch` ou `fix`. Sete tipos, mutuamente exclusivos.        |
+| **WorkItem**                  | Um item de trabalho registrado. Pode ser uma `spec`, `experiment`, `spike`, `incident`, `proposal`, `patch` ou `fix`. Sete tipos, mutuamente exclusivos.              |
 | **Policy** (Política)         | Uma função pura que decide se uma ação é válida. Ex: "uma proposta pode virar spec?" → política responde sim ou não, com motivo.                                      |
 | **Registry**                  | O "livro-razão" do projeto — lista todos os WorkItems ativos. Versionado em `.governance/registry.yml`.                                                               |
 | **`.governance/`**            | A pasta canônica onde a CLI armazena o estado estruturado do projeto do usuário. Contém o registry e reservas para futuras adições (intake, handoff, telemetry).      |

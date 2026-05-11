@@ -365,3 +365,34 @@ Ao concluir um sub-bloco, IA fornece **apenas** a mensagem sugerida do commit (`
 **Why this matters:** economiza tokens e impede IA de operar git autonomamente. Honra `[CORE-07]` (push) e `[CORE-08]` (HARNESS LOCK).
 
 **See also:** `[CORE-08]` (HARNESS LOCK), `[CORE-07]` (Nunca execute git push autonomamente).
+
+---
+
+#### [CORE-15] ADR é princípio perene, não revisitação datada
+
+```yaml
+id: CORE-15
+scope: universal
+category: process
+evidence_strength: declared_heuristic
+sources: []
+applicable_languages: ["*"]
+tags: [core, agents, always_injected, governance, adr, editorial]
+```
+
+**Instruction (en):**
+When writing an Architecture Decision Record (ADR), capture a perennial architectural principle — not a phase report, not a revisitation of `decision-brief.md`. The title names the principle; the body must continue to make sense after the originating spec ships. Editorial criteria, format, anti-patterns and rejection signals are canonical at `.core/governance/adrs/README.md`.
+
+**Documentação (pt-br):**
+Ao escrever uma ADR, capture um **princípio arquitetural perene** — não relatório de fase, não revisitação datada do `decision-brief.md`.
+
+- **Título** nomeia o **princípio**, não a transição/feature concreta.
+- **Corpo** continua válido depois que a spec de origem encerra. Spec aparece só na linha de header como "Origem histórica".
+- **Sintomas de ADR mal-escrita** (rejeitar no PR review): título nomeia transição; corpo cita "sub-bloco X.Y" ou "PR N" como cronograma; decisão lista mudanças por arquivo/linha; ADR "vira lixo" quando a fase termina.
+- **Fronteira com `decision-brief.md`:** brief é gate humano da spec específica; ADR é princípio cross-spec.
+
+Critério editorial completo, formato canônico, exemplo de ADRs vigentes e ciclo de promoção (local → global) vivem em [`.core/governance/adrs/README.md`](../../governance/adrs/README.md).
+
+**Why this matters:** ADRs sem princípio perene viram lixo no momento em que a fase encerra. O critério é gate de PR review — ADR mal-escrita é defeito de design, não estilo.
+
+**See also:** `[CORE-02]` (repositório como memória), `[CORE-13]` (artefatos vivos).

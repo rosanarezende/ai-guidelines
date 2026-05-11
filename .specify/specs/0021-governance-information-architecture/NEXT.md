@@ -69,9 +69,15 @@ Foram identificados os seguintes riscos arquiteturais ainda existentes:
 
 ### Débitos da Fase 3 (Living Documentation + Engine)
 
-### Débitos da Fase 3 (Living Documentation + Engine)
+#### Sub-bloco 3.0 (Saneamento de Fundação pré-TDD) — registrado em 2026-05-11
 
-_(A preencher conforme execução)_
+1. **Renomeação `exploration` → `spike` aplicada.** Auditoria MECE pré-PR3 detectou colisão do nome `exploration` com vocabulário Product Discovery AI-first 2026. `spike` é canônico em XP/Scrum desde 1999 e adotado em JIRA/Linear/GitLab/GitHub Issues. Semântica do pilar preservada (investigação técnica time-boxed: PoC, prototype, estudo). Aplicação tocou: domínio (`src/domain/shared/types.ts`, `src/domain/work-item/WorkItem.ts`), testes (`Pillars.test.ts`, `Isolation.test.ts`), e 5 docs canônicas (`decision-brief.md`, `plan.md`, `spec.md`, `tasks.md`, `ARCHITECTURE*.md`). Pipeline 130 passed/15 skipped sem regressão. Pesquisa: [`../researchs/governance/2026-05-11-mece-taxonomy-and-adr-audit.md`](../researchs/governance/2026-05-11-mece-taxonomy-and-adr-audit.md). ADR: [`.core/governance/adrs/0001-taxonomy-mece-pillars.md`](../../../.core/governance/adrs/0001-taxonomy-mece-pillars.md).
+2. **5 ADRs fundacionais Aceitas em `.core/governance/adrs/`.** Lar canônico antecipado (consolidação `/adrs/` → `.core/governance/adrs/` fica para PR4 / 4.B.5). ADRs cobrem: taxonomia MECE de pilares (0001), outcomes como enums fechados (0002), bypass auditável de contratos de CI (0003), análise estática AST como SSOT (0004), separação validação semântica vs estética (0005). Critério editorial "ADR é princípio perene, não revisitação datada" formalizado no README do diretório.
+3. **Auditoria das ADRs legadas em `/adrs/` marcada como preliminar.** Parte 2 do research MECE foi escrita antes do critério editorial; reclassificações finais (caminhos a/b/c por ADR) acontecem em PR4 / 4.B.4 com critério atualizado.
+4. **Critério editorial "ADR é princípio perene" tornou-se runtime agnóstico de agente.** Regra `[CORE-15]` em [`.core/rules/top/agents-core.md`](../../../.core/rules/top/agents-core.md) com pointer para SSOT detalhada em [`.core/governance/adrs/README.md`](../../../.core/governance/adrs/README.md). Cross-ref bidirecional consolidado. Memória local do Claude Code apagada (repo é fonte canônica; sem duplicação por-agente).
+5. **Débito aberto — auditoria estrutural de `.core/rules/top/`.** Durante o saneamento 3.0, observou-se que a fronteira `agents-core.md` (workflow operacional do agente, CORE-\*) vs `global-rules.md` (princípios de engenharia do código, GR-\*) faz sentido em **escopo**, mas o **naming confunde** ("agents-core" pode soar como definição do que é um agente; "global rules" pode parecer "as mais importantes"). Auditoria proposta para PR4 / sub-bloco 4.B (que já trata fronteira foundation/ADR e reescrita do README das ADRs). Escopo: avaliar (a) renomear arquivos para nomes mais auto-explicativos; (b) consolidar README em `.core/rules/top/` documentando a fronteira; (c) avaliar se a zona "top" não deveria ter sub-zonas (operacional vs engenharia vs editorial).
+
+_(A preencher conforme execução do restante da Fase 3)_
 
 ### Débitos da Fase 4 (Consolidação)
 

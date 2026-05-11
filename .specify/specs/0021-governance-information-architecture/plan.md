@@ -23,7 +23,7 @@
 ## 🧭 Estado Pós-Gate
 
 - `[DEC-0021-A01]` confirmou YAML versionado no repositório como base do estado canônico repo-first híbrido.
-- `[DEC-0021-A02]` consolidou os 7 pilares de valor: `spec`, `exploration`, `fix`, `patch`, `incident`, `proposal`, `experiment`.
+- `[DEC-0021-A02]` consolidou os 7 pilares de valor: `spec`, `spike`, `fix`, `patch`, `incident`, `proposal`, `experiment`. _(Renomeação `exploration` → `spike` aplicada em 2026-05-11; ver ressalva no `decision-brief.md` A02 + ADR `.core/governance/adrs/0001-taxonomy-mece-pillars.md`.)_
 - `[DEC-0021-A03]` aprovou `.governance/` como root unificado do consumidor, com `registry.yml` visível na raiz do workspace.
 - `[DEC-0021-B01]` manteve o corte Fases 1–3 agora e 4–5 depois.
 - `[DEC-0021-B02]`, `[B03]`, `[B04]` e `[B05]` fecharam placement documental, modelo híbrido, fronteira foundation/ADR e reorganização de `.core/rules/`.

@@ -32,7 +32,7 @@ Após o gate humano de 2026-05-09, o objetivo da 0021 deixa de ser apenas decidi
 O resultado esperado desta spec é uma arquitetura de informação única e explicável, acompanhada de uma fundação técnica compatível com ela. Ao final, uma pessoa ou LLM deve conseguir responder de forma curta e objetiva:
 
 - onde vive a verdade canônica do framework;
-- como artefatos `spec`, `exploration`, `fix`, `patch`, `incident`, `proposal` e `experiment` entram no fluxo de valor;
+- como artefatos `spec`, `spike`, `fix`, `patch`, `incident`, `proposal` e `experiment` entram no fluxo de valor;
 - como o novo workspace `.governance/` organiza estado, templates, handoffs, telemetria e execução;
 - como a CLI monta, valida e distribui esses artefatos sem drift entre código, testes e documentação.
 
@@ -52,7 +52,7 @@ O resultado esperado desta spec é uma arquitetura de informação única e expl
 ### Dentro do escopo
 
 - Definir o modelo canônico de estado **repo-first híbrido**: registro estruturado versionado no repositório como fonte primária, Markdown derivado para humanos/IA e projeções futuras apenas como derivados.
-- Tratar artefatos não-spec como origem legítima de valor, com taxonomia mínima, relações e regras de promoção/resolução baseadas nos 7 pilares aprovados no gate: `spec`, `exploration`, `fix`, `patch`, `incident`, `proposal` e `experiment`.
+- Tratar artefatos não-spec como origem legítima de valor, com taxonomia mínima, relações e regras de promoção/resolução baseadas nos 7 pilares aprovados no gate: `spec`, `spike`, `fix`, `patch`, `incident`, `proposal` e `experiment`.
 - Formalizar a fronteira entre `sdd_dir`, `spec_workspace_dir` e o lar físico do estado estruturado, consolidando o novo root `.governance/` no lado do consumidor.
 - Reservar o lar canônico para gêneros ainda não implementados, mas já aprovados como necessidade futura: PRD/intake estruturado, handoff/decision logs e telemetria do framework.
 - Decidir e materializar o **carrier canônico** da política de arquitetura de informação: catálogo central, reorganização física direcionada ou modelo híbrido.

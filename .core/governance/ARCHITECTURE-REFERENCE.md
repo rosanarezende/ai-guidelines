@@ -64,16 +64,16 @@ Estas invariantes são contrato; quebrá-las é erro de design, não de estilo. 
 
 Sete `WorkItemKind`, mutuamente exclusivos, exaustivos quanto à intenção de saída — particionados em **duas categorias semânticas**:
 
-| Categoria | Kinds                                           | Workspace físico  | Tipo TS           |
-| --------- | ----------------------------------------------- | ----------------- | ----------------- |
-| Dense     | `spec`, `experiment`, `exploration`, `incident` | Sim (obrigatório) | `DenseWorkItem`   |
-| Virtual   | `proposal`, `patch`, `fix`                      | **Proibido**      | `VirtualWorkItem` |
+| Categoria | Kinds                                     | Workspace físico  | Tipo TS           |
+| --------- | ----------------------------------------- | ----------------- | ----------------- |
+| Dense     | `spec`, `experiment`, `spike`, `incident` | Sim (obrigatório) | `DenseWorkItem`   |
+| Virtual   | `proposal`, `patch`, `fix`                | **Proibido**      | `VirtualWorkItem` |
 
 Invariantes específicas por `kind` (centralizadas em `WorkItemPolicy.assertValidDraft`):
 
 - `spec`: exige `workspacePath` (via `POLICY_DENSE_REQUIRES_WORKSPACE`).
 - `experiment`: exige `hypothesis` (≥10 chars) + ≥1 `successMetrics` + `workspacePath`.
-- `exploration`: exige `workspacePath`; foco em aprendizado/arquivamento.
+- `spike`: exige `workspacePath`; investigação técnica time-boxed (PoC, prototype, estudo); foco em aprendizado/arquivamento.
 - `incident`: exige `severity` + `workspacePath`.
 - `proposal` / `patch` / `fix` (virtuais): rejeitam `workspacePath` (`POLICY_VIRTUAL_REJECTS_WORKSPACE`).
 - `patch`: rejeita campos experimentais (`hypothesis`/`successMetrics`) **e** de incidente (`severity`).
@@ -166,7 +166,7 @@ Termos abaixo têm significado preciso no runtime; usar fora desse significado �
 | Termo                          | Definição operacional                                                                                                                                                                                                                                                                    |
 | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **WorkItem**                   | Entidade central; **discriminated union** `DenseWorkItem \| VirtualWorkItem` discriminada por `kind`.                                                                                                                                                                                    |
-| **DenseWorkItem**              | Variante de WorkItem para `spec \| experiment \| exploration \| incident`. `workspacePath` obrigatório. Tem par físico em `.governance/` (a partir do PR2).                                                                                                                              |
+| **DenseWorkItem**              | Variante de WorkItem para `spec \| experiment \| spike \| incident`. `workspacePath` obrigatório. Tem par físico em `.governance/` (a partir do PR2).                                                                                                                                    |
 | **VirtualWorkItem**            | Variante de WorkItem para `proposal \| patch \| fix`. Sem `workspacePath` por construção; nenhum IO de workspace é gerado.                                                                                                                                                               |
 | **WorkItemDraft**              | DTO de entrada para criação de um `WorkItem`; sem timestamps, sem id obrigatório no input do use case.                                                                                                                                                                                   |
 | **WorkItemPatch**              | Envelope estrutural de mutação consumido por `RegistryStore.update` e produzido por `PromotionPolicy`.                                                                                                                                                                                   |
@@ -194,7 +194,7 @@ Termos abaixo têm significado preciso no runtime; usar fora desse significado �
 | **RuleZone**                   | Eixo de **runtime** que define onde a regra aparece no AGENTS.md compilado: `top \| center \| base \| adapter`. Derivado de `RuleScope` (+ `opt_in_feature` para `opt-in`) via `scopeToZone` puro. Reflete-se na topologia física: `.core/rules/{top,center,base,adapters}/`.            |
 | **`OPT_IN_FEATURE_LAYOUT`**    | Mapa estático em `src/domain/rules/ruleZone.ts` que projeta `opt_in_feature` ∈ {`tdd`, `bdd`, `quality-gates`} para sua zona canônica (`center`/`center`/`base`). Adicionar nova feature exige entry aqui — `scopeToZone` lança `RULE_OPT_IN_UNKNOWN_FEATURE` para forçar reflexão.      |
 | **`RULES_*` errors**           | Família de códigos estáveis emitidos pelo RulesEngine: `RULES_DUPLICATE_ID`, `RULES_CATALOG_INVALID`, `RULES_CATALOG_NOT_FOUND`, `RULES_CATALOG_PARSE_ERROR`, `RULES_INVALID_SCOPE`, `RULE_OPT_IN_MISSING_FEATURE`, `RULE_OPT_IN_UNKNOWN_FEATURE`. Mensagens podem evoluir; códigos não. |
-| **Dense item**                 | Item de pilar denso (`spec \| experiment \| exploration \| incident`); use case cria pasta a partir de `workspacePath`.                                                                                                                                                                  |
+| **Dense item**                 | Item de pilar denso (`spec \| experiment \| spike \| incident`); use case cria pasta a partir de `workspacePath`.                                                                                                                                                                        |
 | **Virtual item**               | Item de pilar virtual (`proposal \| patch \| fix`); use case garante zero IO no workspace.                                                                                                                                                                                               |
 | **Promotion**                  | Transição entre pilares regida pela `PromotionPolicy` (proposal→spec; experiment(won)→spec). Maintenance kinds não promovem.                                                                                                                                                             |
 | **ResolutionMode**             | Modo de fechamento de um experimento perdido/inconclusivo (`cleaned-up \| kept \| pending`). Modelado para uso completo no PR2/PR3.                                                                                                                                                      |

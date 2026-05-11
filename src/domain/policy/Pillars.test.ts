@@ -7,8 +7,8 @@ import { VirtualKind } from "../work-item/WorkItem.js";
 import { assertValidDraft } from "../work-item/WorkItemPolicy.js";
 
 describe("Domínio — Definição dos Pilares [BR-CLI-POLICY]", () => {
-  describe("Pilar denso (spec/experiment/exploration/incident)", () => {
-    it.each(["spec", "exploration"] as const)(
+  describe("Pilar denso (spec/experiment/spike/incident)", () => {
+    it.each(["spec", "spike"] as const)(
       "DADO um item denso '%s' SEM workspacePath ENTÃO POLICY_DENSE_REQUIRES_WORKSPACE [BR-CLI-POLICY-01]",
       (kind) => {
         try {
