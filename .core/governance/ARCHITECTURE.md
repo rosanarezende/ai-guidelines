@@ -2,7 +2,7 @@
 
 > **Para quem é este documento?**
 >
-> - **Você é stakeholder, recrutador ou parte do time não técnico?** Leia as seções 1, 2 e 3. Você vai entender **o que** o sistema faz, **por que** ele existe e **onde** estamos no caminho. Sem precisar abrir código.
+> - **Você é stakeholder ou parte do time não técnico?** Leia as seções 1, 2 e 3. Você vai entender **o que** o sistema faz, **por que** ele existe e **onde** estamos no caminho. Sem precisar abrir código.
 > - **Você é desenvolvedor entrando no projeto?** Adicione as seções 4, 5 e 6. Ganha contexto suficiente para começar a contribuir.
 > - **Você é uma IA ou mantenedor aprofundando?** Comece aqui e siga para [`ARCHITECTURE-REFERENCE.md`](./ARCHITECTURE-REFERENCE.md) — lá vivem o glossário completo, os códigos de erro estáveis, a modelagem detalhada por categoria e as regras de contribuição.
 >
@@ -10,7 +10,7 @@
 
 ---
 
-## 1. O que esta CLI faz, em uma frase?
+## 1. O que esta CLI faz?
 
 A `ai-guidelines` é uma ferramenta de linha de comando que ajuda **times de software a trabalhar com agentes de IA (Claude, GPT, Gemini, Cursor, Copilot…) de forma consistente, governada e auditável**.
 

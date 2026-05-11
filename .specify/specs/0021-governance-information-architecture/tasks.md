@@ -488,20 +488,20 @@ yarn smoke
 - [x] **2.D.N** Pipeline verde: 130 ts + 267 mjs + build:rules sem churn.
 - [x] **2.D.[DEBT-REVIEW]** `NEXT.md`: 2.A.5 (deprecation plan) **fechado** via declaração de contrato em `ARCHITECTURE.md` §C inv. 12 + §H; cutover técnico marcado para PR4. Novos débitos documentais registrados (docs/help legados, specs históricas pré-2.C, drift guard de reservas).
 - [x] **2.D.[ARCHITECTURE]** `ARCHITECTURE.md`: §H ganhou entrada `.governance/{intake,handoff,telemetry}` como reservas canônicas (consumer-side) com cross-ref a especs posteriores; §C ganhou invariante 12 ("smoke = contrato `.governance/`" com bridge legada explícita até PR4); duplicação acidental em §H removida (relíquia das edits 2.C).
-- [ ] **2.D.[COMMIT]** `docs(spec-0021): contrato .governance + reservas canônicas`.
+- [x] **2.D.[COMMIT]** `docs(spec-0021): contrato .governance + reservas canônicas`.
 
 ---
 
 ## Encerramento de PR2 (gate)
 
-- [ ] **2.[READY-FOR-REVIEW]** Só marcar “Ready” quando:
+- [x] **2.[READY-FOR-REVIEW]** Só marcar “Ready” quando:
   - migrations com precedence/idempotência/rollback provados por testes
   - registry YAML com determinismo e schema guard (e decisão sobre comentários)
   - rules reorg atômico com `build:rules` verde
   - docs/smoke alinhados ao contrato `.governance/`
 
-- [ ] **2.[MANDATÓRIO]** Aguardar aprovação humana explícita.
-- [ ] **2.[MERGE]** Merge após gate humano.
+- [x] **2.[MANDATÓRIO]** Aguardar aprovação humana explícita.
+- [x] **2.[MERGE]** Merge após gate humano.
 
 ---
 
@@ -512,7 +512,7 @@ yarn smoke
 
 ## [PR-MGMT] PR3
 
-- [ ] **3.[PR-MGMT.NEW-BRANCH]** Branch: `feat/spec-0021-pr3-executable-intelligence-runtime`.
+- [x] **3.[PR-MGMT.NEW-BRANCH]** Branch: `feat/spec-0021-pr3-executable-intelligence-runtime`.
 - [ ] **3.[PR-MGMT.DESCRIPTION]** (6 seções obrigatórias).
 - [ ] **3.[PR-MGMT.REVIEW-GATE]** Gate humano obrigatório.
 - [ ] **3.[PR-MGMT.MERGE-CHAIN]** `yarn format ; yarn check ; yarn test:nova-cli` (+ comandos novos da fase).
