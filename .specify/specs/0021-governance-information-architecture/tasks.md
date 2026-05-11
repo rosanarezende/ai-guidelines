@@ -168,10 +168,10 @@ yarn smoke
 
 ## [PR-MGMT] PR1
 
-- [ ] **1.[PR-MGMT.NEW-BRANCH]** Branch: `feat/spec-0021-pr1-domain-memory-foundation`.
-- [ ] **1.[PR-MGMT.DESCRIPTION]** (6 seções obrigatórias).
-- [ ] **1.[PR-MGMT.REVIEW-GATE]** Gate humano obrigatório.
-- [ ] **1.[PR-MGMT.MERGE-CHAIN]** `yarn format ; yarn check ; yarn test:nova-cli`.
+- [x] **1.[PR-MGMT.NEW-BRANCH]** Branch: `feat/spec-0021-pr1-domain-memory-foundation`. _PR1 merged via commit `9c1cd19` (2026-05-10) — registro retroativo aplicado em [2.C-sanitize]._
+- [x] **1.[PR-MGMT.DESCRIPTION]** 6 seções obrigatórias (decisões/contextos/invariantes/riscos/rollback/validação) entregues na descrição do PR #11.
+- [x] **1.[PR-MGMT.REVIEW-GATE]** Gate humano obrigatório aprovado antes do merge.
+- [x] **1.[PR-MGMT.MERGE-CHAIN]** `yarn format ; yarn check ; yarn test:nova-cli` verde no merge.
 
 ## Sub-bloco [1.0] — Setup Técnico (TypeScript + Jest) ✅
 
@@ -253,7 +253,7 @@ yarn smoke
   - imutabilidade de `createdAt`
   - `updatedAt` controlado
 - [x] **1.C.4** `Integrity.test.ts` ativo e verde
-- [ ] **1.C.5** Estratégia definitiva para preservação de comentários YAML (adiado para IO real)
+- [x] **1.C.5** Estratégia definitiva para preservação de comentários YAML — _resolvido em **2.B.5** via Caminho A (`parseDocument` + mutação granular em `Document`/`YAMLMap`/`YAMLSeq` do `yaml@2`); load → mutate → save preserva comentários inline e de cabeçalho. Limitação herdada (`commentBefore` migra para o próximo nó em `remove`) documentada como comportamento conservador._
 - [x] **1.C.N** Pipeline verde
 - [x] **1.C.[COMMIT]** `feat(spec-0021): registry SSOT em memória`
 
@@ -434,6 +434,40 @@ yarn smoke
 - [x] **2.C.[DEBT-REVIEW]** `NEXT.md` atualizado 2026-05-10: 5 débitos 2.C registrados (builder mjs como SSOT até PR3, ponteiros documentais legados em specs históricas, Boundary Lock por regex revisitado, mapa estático `OPT_IN_FEATURE_LAYOUT`, suite end-to-end com `JsonRulesCatalogSource` adiada para PR3).
 - [x] **2.C.[ARCHITECTURE]** `ARCHITECTURE.md` atualizado 2026-05-10: `RulesEngine` saiu de §B.2 (reservados) e entrou em §B.1 PR2 com pipelines (parse/build/projection/lookup); §C ganhou invariante 11 (topologia física reflete taxonomia de runtime; paths centralizados em `domain/rules/ruleZone.ts`); §G glossário ganhou `RulesEngine`, `RuleScope`, `RuleZone`, `OPT_IN_FEATURE_LAYOUT`, família `RULES_*` errors; §H convenções ganhou entrada `.core/rules/{top,center,base,adapters,_meta}/`; §F roadmap reflete "2.A/2.B/2.C entregues".
 - [ ] **2.C.[COMMIT]** `refactor(spec-0021): RulesEngine + reorg .core/rules alinhada ao runtime`.
+
+---
+
+## Sub-bloco [2.C-sanitize] — Auditoria DDD + drift cleanup pré-2.D 🧼
+
+> **Âncoras:** `[DEC-0021-A02]`, `[DEC-0021-C01]`
+> **Objetivo:** materializar a auditoria DDD documentada em [`./audit-2026-05-10-pre-2d-sanitization.md`](./audit-2026-05-10-pre-2d-sanitization.md) como sub-bloco atômico antes de iniciar 2.D, eliminando drift entre tipos/validação/docs sem reabrir decisões.
+> **Regra:** sub-bloco fechado em commit único; nenhum item aqui muda contrato decidido — apenas reconcilia código, docs e testes com o gate já fechado.
+
+### Fase 1 — Bug fixes (obrigatórios) 🔴
+
+- [x] **2.C-sanitize.F1.1 [Policy virtual generalizada]** `WorkItemPolicy.assertValidDraft` passa a rejeitar `workspacePath` em **qualquer** virtual kind (proposal/patch/fix) com código `POLICY_VIRTUAL_REJECTS_WORKSPACE`. O antigo `POLICY_PROPOSAL_MUST_BE_VIRTUAL` deixa de ser emitido (pre-1.0; sem release pública dependendo dele). `Pillars.test.ts` ganha suite parametrizada cobrindo os 3 virtuais.
+- [x] **2.C-sanitize.F1.2 [Contagem de pilares reconciliada]** `plan.md` (3 ocorrências) e `decision-brief.md` A02 alinhados a "7 pilares". Entrada nova em `plan.md § 📐 Decisões revisitadas` registra a adição de `experiment` em 2026-05-10. Ressalva pós-it em `decision-brief.md` A02 sincroniza sem reabrir o gate.
+
+### Fase 2 — Drift docs ↔ código 🟡
+
+- [x] **2.C-sanitize.F2.1** `tasks.md` 1.C.5 marcado `[x]` com cross-ref `(resolvido em 2.B.5 via parseDocument + mutação granular)`.
+- [x] **2.C-sanitize.F2.2** PR1 PR-MGMT headers (`1.[PR-MGMT.NEW-BRANCH]`, `.DESCRIPTION`, `.REVIEW-GATE`, `.MERGE-CHAIN`) marcados `[x]` retroativos com nota `PR1 merged 9c1cd19 (2026-05-10)`.
+- [x] **2.C-sanitize.F2.3** `ARCHITECTURE.md` §E.3 ganha linha documentando inversão de ordem `Register` (registry→workspace) vs `Promote` (workspace→registry) e o motivo (evitar estado intermediário com `kind=spec` apontando para pasta inexistente).
+- [x] **2.C-sanitize.F2.4** `RegistryService.ts` linha 4: remover comentário fantasma sobre `RegistryLoader.loadFromPath` (classe inexistente).
+
+### Fase 3 — Cleanup leve 🟢
+
+- [x] **2.C-sanitize.F3.1** `DiscoverWorkspace.execute` itera `LEGACY_SOURCES` em vez de strings literais `.specify`/`.ai-guidelines`.
+- [x] **2.C-sanitize.F3.2** `.gitignore` ganha padrão `*.stackdump` (artefatos do bash Windows).
+- [x] **2.C-sanitize.F3.3** Remover re-export inútil de `RULE_ZONES` em `RulesCatalog.ts` (consumidor real importa de `Rule.ts`).
+- [x] **2.C-sanitize.F3.4** Extrair `assertRegistryImmutables(current, patch)` para `src/domain/registry/integrity.ts`; `InMemoryRegistry.update` e `GovernanceRegistryStore.update` passam a delegar. Helper coberto por teste pequeno em isolamento.
+
+### Validação e fechamento
+
+- [x] **2.C-sanitize.N** Pipeline verde: `yarn format ; yarn check ; yarn test:nova-cli ; yarn test ; yarn build:rules` (120 ts + 267 mjs).
+- [x] **2.C-sanitize.[DEBT-REVIEW]** `NEXT.md`: atualizar débitos 2.B.4 (RegistryService autosave/batch) e 2.C.5 (JsonRulesCatalogSource E2E) com referência à auditoria; registrar item explícito "Auditoria pré-2.D executada em 2026-05-10". Nenhum débito novo.
+- [x] **2.C-sanitize.[ARCHITECTURE]** `ARCHITECTURE.md` atualizado conforme F2.3; nenhum bounded context novo.
+- [x] **2.C-sanitize.[COMMIT]** `chore(spec-0021): sanitização pré-2.D (bug fix policy virtual + drift docs)`.
 
 ---
 

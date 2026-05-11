@@ -16,6 +16,7 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 import { Document, isMap, isSeq, Scalar, YAMLMap, YAMLSeq } from "yaml";
 import { RegistryStore } from "../../app/ports/RegistryStore.js";
+import { assertRegistryImmutables } from "../../domain/registry/integrity.js";
 import { GovernanceError } from "../../domain/shared/errors.js";
 import { WorkItem, WorkItemPatch } from "../../domain/work-item/WorkItem.js";
 import { WorkItemId } from "../../domain/shared/types.js";
@@ -112,18 +113,7 @@ export class GovernanceRegistryStore implements RegistryStore {
         `Item com id '${id}' não existe no registry.`
       );
     }
-    if (patch.id !== undefined && patch.id !== current.id) {
-      throw new GovernanceError(
-        "REGISTRY_IMMUTABLE_ID",
-        `O campo 'id' é imutável após a criação ('${current.id}').`
-      );
-    }
-    if (patch.createdAt !== undefined && patch.createdAt !== current.createdAt) {
-      throw new GovernanceError(
-        "REGISTRY_IMMUTABLE_CREATED_AT",
-        `O campo 'createdAt' é imutável após a criação.`
-      );
-    }
+    assertRegistryImmutables(current, patch);
     const next: WorkItem = {
       ...current,
       ...patch,

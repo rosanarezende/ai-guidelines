@@ -1,6 +1,6 @@
 import { GovernanceError } from "../shared/errors.js";
 import { WorkItemKind, WORK_ITEM_KINDS } from "../shared/types.js";
-import { isDenseKind } from "./WorkItem.js";
+import { isDenseKind, isVirtualKind } from "./WorkItem.js";
 import { WorkItemDraft } from "./WorkItemDraft.js";
 
 /**
@@ -84,11 +84,14 @@ export function assertValidDraft(draft: WorkItemDraft): void {
     );
   }
 
-  // Itens virtuais não admitem workspacePath.
-  if (draft.kind === "proposal" && draft.workspacePath !== undefined) {
+  // Itens virtuais (proposal/patch/fix) NUNCA admitem workspacePath.
+  // O type system já garante isso em compile-time via discriminated union;
+  // a policy bloqueia em runtime para evitar silent-drop em buildWorkItem
+  // (que cairia em `isDenseKind=false` e retornaria um VirtualWorkItem sem o campo).
+  if (isVirtualKind(draft.kind) && draft.workspacePath !== undefined) {
     throw new GovernanceError(
-      "POLICY_PROPOSAL_MUST_BE_VIRTUAL",
-      "Uma 'proposal' é virtual e não pode ter 'workspacePath'."
+      "POLICY_VIRTUAL_REJECTS_WORKSPACE",
+      `Itens virtuais ('${draft.kind}') não admitem 'workspacePath'.`
     );
   }
 }

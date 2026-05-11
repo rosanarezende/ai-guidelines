@@ -1,6 +1,7 @@
 import {
   deriveWorkspaceState,
   GOVERNANCE_ROOT,
+  LEGACY_SOURCES,
   RootsSnapshot,
   WorkspaceState,
 } from "../../domain/workspace/WorkspaceState.js";
@@ -32,10 +33,15 @@ export class DiscoverWorkspace {
 
   execute(opts: PrecedenceOptions = {}): DiscoverWorkspaceResult {
     const { probe } = this.deps;
+    // Roots legados iterados a partir de LEGACY_SOURCES — único ponto de extensão
+    // se um terceiro legado aparecer (evita string literal duplicada).
+    const legacyPresence = new Map(
+      LEGACY_SOURCES.map((src) => [src, probe.directoryExists(src)] as const)
+    );
     const snapshot: RootsSnapshot = {
       hasGovernance: probe.directoryExists(GOVERNANCE_ROOT),
-      hasSpecify: probe.directoryExists(".specify"),
-      hasAiGuidelines: probe.directoryExists(".ai-guidelines"),
+      hasSpecify: legacyPresence.get(".specify") ?? false,
+      hasAiGuidelines: legacyPresence.get(".ai-guidelines") ?? false,
     };
     const state = deriveWorkspaceState(snapshot);
     const resolution = resolvePrecedence(state, opts);

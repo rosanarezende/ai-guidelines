@@ -151,6 +151,13 @@ Decisões de design:
 
 Toda decisão de promoção devolve um `WorkItemPatch` puro; aplicar ao registry e tocar workspace é responsabilidade do use case.
 
+**Ordem de orquestração — `Register` ≠ `Promote`.** A invariante 4 (atomicidade bilateral) cobre os dois sentidos, mas a ordem real é deliberadamente diferente entre os dois use cases:
+
+- `RegisterWorkItem`: **registry primeiro**, workspace depois. Falha em criar workspace ⇒ rollback do `registry.add`. Faz sentido porque o item nasce; é mais barato remover do registry do que apagar pasta recém-criada com conteúdo do template (que ainda não existe no PR1/2.B, mas existirá em PR3).
+- `PromoteWorkItem`: **workspace primeiro** (quando passa a ser denso), registry depois. Falha em `registry.update` ⇒ rollback do `workspace.create`. Isso evita um estado intermediário em que `kind=spec` já está no registry apontando para uma pasta que ainda não existe — pior do que o estado simétrico (pasta vazia sem item correspondente, removida no rollback).
+
+A escolha está documentada em código (`RegisterWorkItem.ts` § comentário "Atomicidade", `PromoteWorkItem.ts` § bloco `try/catch` final). Nenhuma das duas ordens é "regra geral" — cada uma minimiza o estado inválido específico daquele use case.
+
 ### E.4 Patch envelope
 
 `WorkItemPatch` é o **envelope de mutação** consumido pelo registry e produzido pela `PromotionPolicy`. Não é um `WorkItem` válido por si só — é o delta a ser mesclado. Re-validação após merge é responsabilidade do caller. Aceita `id`/`createdAt` apenas para que o teste de imutabilidade do registry os exercite com mensagens determinísticas; valores divergentes do atual sempre lançam.

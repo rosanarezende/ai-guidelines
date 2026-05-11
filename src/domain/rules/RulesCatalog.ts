@@ -5,7 +5,7 @@
  */
 
 import { GovernanceError } from "../shared/errors.js";
-import { Rule, RuleScope, RuleZone, RULE_SCOPES, RULE_ZONES } from "./Rule.js";
+import { Rule, RuleScope, RuleZone, RULE_SCOPES } from "./Rule.js";
 import { scopeToZone } from "./ruleZone.js";
 
 export type RulesByScope = Readonly<Record<RuleScope, ReadonlyArray<string>>>;
@@ -129,5 +129,3 @@ export function projectCatalogMarkdown(
 
   return md;
 }
-
-export { RULE_ZONES };

@@ -3,6 +3,7 @@
  * Regras de intenção de saída e carga operacional conforme [DEC-0021-A02].
  */
 import { GovernanceError } from "../shared/errors.js";
+import { VirtualKind } from "../work-item/WorkItem.js";
 import { assertValidDraft } from "../work-item/WorkItemPolicy.js";
 
 describe("Domínio — Definição dos Pilares [BR-CLI-POLICY]", () => {
@@ -106,19 +107,29 @@ describe("Domínio — Definição dos Pilares [BR-CLI-POLICY]", () => {
     });
   });
 
-  describe("Pilar: Proposal (Sementes de Backlog)", () => {
-    it("DADO uma 'proposal' COM workspacePath ENTÃO falha com POLICY_PROPOSAL_MUST_BE_VIRTUAL [BR-CLI-POLICY-01]", () => {
-      try {
-        assertValidDraft({
-          id: "wi-4",
-          kind: "proposal",
-          title: "Proposta xyz",
-          workspacePath: ".governance/proposals/01",
-        });
-        fail("deveria ter lançado");
-      } catch (e) {
-        expect((e as GovernanceError).code).toBe("POLICY_PROPOSAL_MUST_BE_VIRTUAL");
+  describe("Pilares virtuais (proposal/patch/fix) rejeitam workspacePath", () => {
+    it.each(["proposal", "patch", "fix"] as const satisfies readonly VirtualKind[])(
+      "DADO um item virtual '%s' COM workspacePath ENTÃO falha com POLICY_VIRTUAL_REJECTS_WORKSPACE [BR-CLI-POLICY-01]",
+      (kind) => {
+        try {
+          assertValidDraft({
+            id: `wi-virtual-${kind}`,
+            kind,
+            title: `Virtual ${kind}`,
+            workspacePath: `.governance/${kind}s/01`,
+          });
+          fail("deveria ter lançado");
+        } catch (e) {
+          expect(e).toBeInstanceOf(GovernanceError);
+          expect((e as GovernanceError).code).toBe("POLICY_VIRTUAL_REJECTS_WORKSPACE");
+        }
       }
+    );
+
+    it("DADO uma 'proposal' SEM workspacePath ENTÃO passa", () => {
+      expect(() =>
+        assertValidDraft({ id: "wi-prop-ok", kind: "proposal", title: "Proposta válida" })
+      ).not.toThrow();
     });
   });
 

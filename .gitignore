@@ -29,3 +29,6 @@ logs/
 
 # Arquivos temporários
 .tmp/
+
+# Stack dumps do bash em Windows (Git Bash / MSYS)
+*.stackdump

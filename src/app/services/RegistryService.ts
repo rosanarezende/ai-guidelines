@@ -1,10 +1,11 @@
 /**
- * Coordena ciclo de vida do {@link RegistryStore} concreto.
+ * Coordena ciclo de vida do {@link PersistentRegistryStore} concreto.
  *
  * Responsabilidades:
- *  - Carregar o registry do disco no startup (via `RegistryLoader.loadFromPath`).
- *  - Expor o `RegistryStore` para use cases (que continuam falando só com o port).
- *  - Persistir após cada mutação bem-sucedida (`autosave`) ou em batch (`autosave: false`).
+ *  - Carregar o registry do disco no startup (`store.load()`).
+ *  - Expor um CRUD fino para use cases (que continuam falando só com o port).
+ *  - Persistir após cada mutação bem-sucedida (`autosave: true`) ou deixar
+ *    o caller controlar o `save()` em batch (`autosave: false`).
  *
  * Decisão arquitetural: o `RegistryService` vive na camada `app/` como serviço de
  * orquestração. **Não** importa `infrastructure/` diretamente — recebe o store já
