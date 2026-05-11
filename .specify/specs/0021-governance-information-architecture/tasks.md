@@ -599,31 +599,32 @@ yarn smoke
 
 ### Contratos obrigatórios
 
-- [ ] **3.B.1 [AST-first]** Extrair `[BR-CLI-*]` via AST (TypeScript/Jest), não regex.
-- [ ] **3.B.2 [Source mapping]** Capturar file/linha com consistência (line range quando aplicável).
-- [ ] **3.B.3 [False positives]** Evitar extração de IDs em strings irrelevantes.
-- [ ] **3.B.4 [Coverage semantics]** Definir o que é “covered”: teste ativo vs skip.
+- [x] **3.B.1 [AST-first]** Extração via TypeScript Compiler API raw (sem regex sobre source). Walker reconhece `CallExpression` cujo callee é `Identifier("it"|"test")` ou `PropertyAccessExpression("it.skip"|"test.skip")`; `[BR-CLI-*]` extraído da `arguments[0]` StringLiteralLike. Sem `ts-morph` (uma dependência a menos).
+- [x] **3.B.2 [Source mapping]** `source.file` em path POSIX relativo ao `repoRoot`; `lineStart`/`lineEnd` 1-indexed inclusivos via `sourceFile.getLineAndCharacterOfPosition`. Tags acumulam labels de `describe` ancestrais (top-down).
+- [x] **3.B.3 [False positives]** Filtro **estrutural** por construção (walker só inspeciona `arguments[0]` de `it`/`test` em `.test.ts`). 11 testes negativos congelam a invariante: IDs em JSDoc, comentários inline, strings de produção (`console.log`, atribuição a variável), arquivos `.fixture.ts`/`.ts` comuns, template literals com interpolação, e padrões com prefixos não-canônicos são todos ignorados sem erro.
+- [x] **3.B.4 [Coverage semantics]** `coverageState` derivado sintaticamente: `it`/`test` puro → `covered`; `it.skip`/`test.skip` → `pending`. `deprecated` virá em 3.C com o parser de diretiva de bypass.
 
 ### Implementação
 
-- [ ] **3.B.5** Implementar `RuleExtractor` (bounded context LivingDocumentation):
-  - parse suite
-  - extrai IDs
-  - agrega metadados
-  - escreve artefato determinístico
+- [x] **3.B.5** `RuleExtractor` implementado em duas camadas:
+  - Port `src/app/ports/RuleExtractor.ts` (interface fina).
+  - Adapter `src/infrastructure/ast/TypeScriptRuleExtractor.ts` (TS Compiler API).
+  - Boundary preservado: package `typescript` só importável sob `src/infrastructure/ast/`.
+  - `boundedContext`/`domain` derivados por convenção de path `src/<layer>/<bc>/<File>.test.ts`.
+  - Escrita do artefato fica para 3.C (drift guard) ou infraestrutura YAML quando store ganhar IO.
 
 ### Testes (obrigatórios)
 
-- [ ] **3.B.6** Criar e passar:
-  - `AstRuleExtractor.test.ts`
-  - `RuleExtractorSourceMap.test.ts`
-  - `RuleExtractorFalsePositives.test.ts`
+- [x] **3.B.6** Criados e verdes (32 novos):
+  - `AstRuleExtractor.test.ts` (12) — descoberta de IDs, variants it/test/skip, ordem, convenção de path, erro `LIVING_DOCS_EXTRACTOR_FILE_NOT_FOUND`, output validado pelo `assertValidEntry` do domain.
+  - `RuleExtractorSourceMap.test.ts` (9) — POSIX path, line ranges 1-indexed, multi-linha, tags via describes aninhados, irmãos isolados, determinismo byte-a-byte.
+  - `RuleExtractorFalsePositives.test.ts` (11) — JSDoc, comments inline, strings de produção, atribuição a variável, arquivos não-test, fixtures, template literals com interpolação, padrões não-canônicos, mix realista.
 
-- [ ] **3.B.N** Pipeline verde.
+- [x] **3.B.N** Pipeline verde: `yarn format ; yarn check ; yarn build:rules ; yarn test:nova-cli` → 208 passed (130+46+32), 15 skipped, 0 falhas, 0 regressão.
 
-- [ ] **3.B.[DEBT-REVIEW]** `NEXT.md`: marcar débito 3 (Boundary Lock por regex) como elegível para migração AST agora que TS Compiler API existe; débito 4 (glossário) revisitar se extrator puder cruzar com §G.
-- [ ] **3.B.[ARCHITECTURE]** `ARCHITECTURE.md`: §D Boundary Enforcement atualiza para AST; §B.1 PR3 ganha `RuleExtractor`; glossário ganha `AstRuleExtractor`, `SourceMap`.
-- [ ] **3.B.[COMMIT]** `feat(spec-0021): AST extractor de BR-CLI com source mapping`.
+- [x] **3.B.[DEBT-REVIEW]** `NEXT.md`: débito 3 (Boundary Lock por regex) atualizado — TS Compiler API agora está instanciada, migração natural fica como sub-débito de 4.B; débito 4 (glossário) sem mudança neste sub-bloco (extrator cruza paths, não termos do glossário).
+- [x] **3.B.[ARCHITECTURE]** `ARCHITECTURE-REFERENCE.md`: §1.3 PR3 ganhou `RuleExtractor` (port + adapter); §5 glossário ganhou `RuleExtractor`, `TypeScriptRuleExtractor`, `LIVING_DOCS_EXTRACTOR_FILE_NOT_FOUND`.
+- [x] **3.B.[COMMIT]** `feat(spec-0021): AST extractor de BR-CLI (base + source mapping + false positives guard)`.
 
 ---
 
