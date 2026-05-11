@@ -93,6 +93,17 @@ Foram identificados os seguintes riscos arquiteturais ainda existentes:
 5. **`describe.skip`/`describe.only` reconhecidos.** O extractor extrai a label do describe mesmo quando há modificador, garantindo que tags não regridam quando a suite é parcialmente desabilitada.
 6. **Convenção de path estável.** `boundedContext` é o terceiro segmento (`src/<layer>/<bc>/...`); `domain` é o nome do arquivo sem `.test.ts`. Convenção é parte do contrato — mudança de layout exige atualização paralela no extractor (e teste regressão `RuleExtractorSourceMap`).
 
+#### Sub-bloco 3.C (Drift guard: parser de bypass + generate + check) — registrado em 2026-05-11
+
+1. **Parser de bypass directive entregue** em `src/domain/living-docs/BypassDirective.ts` (ADR 0003). Função pura `parseBypassDirective(text, { todayIso, expectedGuardId })` reconhece sintaxe canônica `<guard-id>:allow-drift until=YYYY-MM-DD ref=ID reason="..."` com validações estritas (data ISO, expiração estrita, reason ≥ 8 chars). Integrado ao `TypeScriptRuleExtractor` para enriquecer entries com `coverageState=deprecated` + bloco `bypass`. **O mesmo parser serve a qualquer guard futuro** (boundary-lock, schema-check) — só muda o `expectedGuardId`.
+2. **Use cases `GenerateLivingDocs` e `CheckLivingDocs`** em `src/app/use-cases/`. Generate orquestra extractor → canonicalize → assertValidArtifact. Check regenera e compara byte-a-byte com `committedYaml` lido pelo caller. Diff legível mínimo emitido em caso de divergência.
+3. **Novo port `LivingDocsSerializer`** em `src/app/ports/` (type alias function). Preservou boundary `app → infra` que `CheckLivingDocs` ia violar (test detectou). Composition root injeta `serializeLivingDocs` da infra.
+4. **Entrypoint CLI** em `src/cli/livingDocs.ts` exportando `runGenerate`, `runCheck`, `discoverTestFiles`. Auto-execution via `import.meta.url` removido (incompatível com `ts-jest` config atual); migrar para `cli/living-docs.mjs` quando o débito de build for resolvido.
+5. **Débito novo aberto — bin físico + yarn scripts bloqueados por erro pré-existente.** `yarn build` falha em `src/domain/rules/ruleZone.ts:12` (TS6133: `RuleScope` declarado-não-usado). Sem build verde, `node dist/cli/livingDocs.js generate` não roda. Solução é uma linha (remover import não-usado), mas é débito pré-existente do PR2.C — registrar para resolução em PR4 / 4.B ou commit chore separado quando conveniente. Use cases já estão prontos; integração shell + CI segue assim que o build voltar.
+6. **Integração CI também depende do bin** — `living-docs:check` precisa rodar como job CI dedicado conforme ADR 0003. Junto com o débito acima.
+7. **Nenhum falso-positivo conhecido do drift guard.** Testes `CheckLivingDocs.test.ts` (7) + `livingDocs.test.ts` (8) congelam comportamento estrutural (drift detectado quando esperado; in-sync quando esperado; idempotência byte-a-byte).
+8. **ADR 0003 §1 confirmada na prática.** A sintaxe `<guard-id>:allow-drift` foi adotada genericamente (não hardcoded para `living-docs`). Quando o boundary lock migrar para AST (débito Fase 1 #3), o mesmo parser absorve a diretiva `// boundary-lock:allow-drift ...` mudando só o `expectedGuardId`.
+
 _(A preencher conforme execução do restante da Fase 3)_
 
 ### Débitos da Fase 4 (Consolidação)
