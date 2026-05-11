@@ -558,35 +558,38 @@ yarn smoke
 
 ### Contratos obrigatórios
 
-- [ ] **3.A.1 [Schema v0]** Definir schema do artefato gerado a partir de testes `[BR-CLI-*]`:
-  - `ruleId`
-  - `title` (ou summary)
-  - `boundedContext`
-  - `domain`
-  - `source` (file + line range)
-  - `tags`
-  - `coverageState` (covered/pending/deprecated)
-  - `schemaVersion`
+- [x] **3.A.1 [Schema v0]** Schema cravado em `src/domain/living-docs/LivingDocsEntry.ts`:
+  - `ruleId` (string não-vazia)
+  - `title` (string não-vazia — derivada do nome do `it`/`test` em 3.B)
+  - `boundedContext` (string não-vazia)
+  - `domain` (string não-vazia)
+  - `source` ({ file, lineStart, lineEnd } com `lineStart <= lineEnd`)
+  - `tags` (array de strings)
+  - `coverageState` (`covered | pending | deprecated` — enum fechado, ADR 0002)
+  - `bypass?` ({ until: YYYY-MM-DD, ref, reason ≥ 8 chars } — só em entries `deprecated`, ADR 0003)
+  - `schemaVersion` (`v0`, enum fechado em `LIVING_DOCS_SUPPORTED_SCHEMA_VERSIONS` frozen)
 
-- [ ] **3.A.2 [Versioning]** Definir evolução: como migrar v0→v1 sem quebrar consumers.
-- [ ] **3.A.3 [Determinismo]** Ordenação e serialização determinísticas:
-  - mesma entrada => mesmo output byte-a-byte
-  - sem timestamps variáveis no arquivo (ou separados)
+- [x] **3.A.2 [Versioning]** Política, não framework de migração. `LIVING_DOCS_SCHEMA_VERSION` cravado como `"v0"`; `LIVING_DOCS_SUPPORTED_SCHEMA_VERSIONS` é frozen (Object.freeze). Adicionar valor exige PR dedicado + ADR de extensão (ADR 0002 §6). Migration utility só nasce quando v1 existir.
+- [x] **3.A.3 [Determinismo]** `canonicalizeArtifact` produz forma estável:
+  - entries ordenadas alfa lexicográfica por `ruleId` (sem locale-sensitive sort)
+  - tags deduplicadas e ordenadas alfa
+  - sem campos temporais (`generatedAt`/`timestamp`/`createdAt`/`updatedAt`) — determinismo absoluto, ADR 0004 §2
+  - idempotência testada (`JSON.stringify(canonicalize(canonicalize(x))) === JSON.stringify(canonicalize(x))`)
 
-- [ ] **3.A.4 [Path]** Definir path canônico dentro de `.governance/` para o artefato (ex.: `.governance/living-docs.yml`).
+- [x] **3.A.4 [Path]** Path canônico já declarado em `decision-brief.md` A03 e ADR 0004: `.governance/living-docs.yml`. Materialização do path entra junto com a serialização YAML em PR3.B/3.C (infrastructure layer).
 
 ### Testes (obrigatórios)
 
-- [ ] **3.A.5** Criar e passar:
-  - `LivingDocsSchema.test.ts`
-  - `LivingDocsDeterminism.test.ts`
-  - `LivingDocsVersioning.test.ts`
+- [x] **3.A.5** Criados e verdes:
+  - `LivingDocsSchema.test.ts` (16 testes — schema + coverageState enum + bypass + duplicate rule id)
+  - `LivingDocsDeterminism.test.ts` (8 testes — ordenação por ruleId, tags, idempotência, ausência de timestamps, estabilidade byte-a-byte)
+  - `LivingDocsVersioning.test.ts` (10 testes — constante v0, conjunto frozen, rejeição de versões fora do conjunto)
 
-- [ ] **3.A.N** Pipeline verde.
+- [x] **3.A.N** Pipeline verde: `yarn format ; yarn check ; yarn test:nova-cli` → 176 passed (130 prévios + 46 novos), 15 skipped, 0 falhas.
 
-- [ ] **3.A.[DEBT-REVIEW]** `NEXT.md`: registrar/resolver débitos relativos a schema versioning e ordem determinística; débito 4 (glossário sem enforcement) revisitar se schema cruzar com glossário.
-- [ ] **3.A.[ARCHITECTURE]** `ARCHITECTURE.md`: §B.1 PR3 ganha `LivingDocumentation`; §G glossário ganha `LivingDocsSchema`, `coverageState`, `schemaVersion`.
-- [ ] **3.A.[COMMIT]** `feat(spec-0021): living docs schema (v0) + determinismo`.
+- [x] **3.A.[DEBT-REVIEW]** `NEXT.md`: registrar implementação do schema v0; nenhum débito novo aberto. Débito 4 (glossário sem enforcement) permanece — schema do living-docs não cruza glossário diretamente; revisar quando AST extractor em 3.B cruzar `boundedContext`/`domain` com termos do ARCHITECTURE-REFERENCE §5.
+- [x] **3.A.[ARCHITECTURE]** `ARCHITECTURE-REFERENCE.md`: §1.3 ganhou tabela "Implementados — PR3" com `LivingDocumentation`; §1.4 mantém `TemplateEngine` como reservado; §2 ganhou invariante 13 (canonicalização + sem timestamps); §5 glossário ganhou `LivingDocsEntry`, `LivingDocsArtifact`, `CoverageState`, família `LIVING_DOCS_*`, constante `LIVING_DOCS_SCHEMA_VERSION`.
+- [x] **3.A.[COMMIT]** `feat(spec-0021): living docs schema v0 + canonicalize determinístico`.
 
 ---
 
