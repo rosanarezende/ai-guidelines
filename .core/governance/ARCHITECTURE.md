@@ -1,257 +1,233 @@
-# Governance Runtime — Architecture Reference
+# Como funciona a CLI ai-guidelines
 
-> **Escopo:** este documento descreve a arquitetura do runtime **governance-driven** entregue pela CLI `ai-guidelines`. Cobre runtime, bounded contexts, invariantes, policy composition, modelagem de domínio e roadmap. Não é "documentação interna do `src/`" — é a referência canônica do contrato governance-driven do projeto.
+> **Para quem é este documento?**
 >
-> **Localização:** `.core/governance/ARCHITECTURE.md`. O arquivo vive ao lado de `.core/process/spec-foundation.md` porque descreve o **runtime de governança** do framework, não detalhes de pasta.
+> - **Você é stakeholder, recrutador ou parte do time não técnico?** Leia as seções 1, 2 e 3. Você vai entender **o que** o sistema faz, **por que** ele existe e **onde** estamos no caminho. Sem precisar abrir código.
+> - **Você é desenvolvedor entrando no projeto?** Adicione as seções 4, 5 e 6. Ganha contexto suficiente para começar a contribuir.
+> - **Você é uma IA ou mantenedor aprofundando?** Comece aqui e siga para [`ARCHITECTURE-REFERENCE.md`](./ARCHITECTURE-REFERENCE.md) — lá vivem o glossário completo, os códigos de erro estáveis, a modelagem detalhada por categoria e as regras de contribuição.
 >
-> **Status:** vivo. Atualizado a cada PR da Spec 0021. Decisões estáveis migram para ADRs; este documento permanece como descrição operacional da arquitetura corrente + roadmap.
->
-> **Âncoras:** `[DEC-0021-A01]`, `[DEC-0021-A02]`, `[DEC-0021-A03]`, `[DEC-0021-C01]`, `[DEC-0021-D01]` (ver `decision-brief.md` da Spec 0021).
+> 📊 **Sobre os diagramas:** este documento usa diagramas Mermaid. O GitHub renderiza nativamente. No VS Code, instale a extensão **"Markdown Preview Mermaid Support"** (Matt Bierner) — sem ela o preview mostra apenas o código.
 
 ---
 
-## A — Visão geral
+## 1. O que esta CLI faz, em uma frase?
 
-O runtime de governança é um motor **policy-first** que materializa, na CLI `ai-guidelines`, o contrato entre os 7 pilares de valor (`spec`, `exploration`, `fix`, `patch`, `incident`, `proposal`, `experiment`) e a topologia física do repositório consumidor.
+A `ai-guidelines` é uma ferramenta de linha de comando que ajuda **times de software a trabalhar com agentes de IA (Claude, GPT, Gemini, Cursor, Copilot…) de forma consistente, governada e auditável**.
 
-Princípios arquiteturais:
+Em vez de cada desenvolvedor combinar regras com sua IA preferida no chat, a CLI cria e mantém:
 
-1. **Governance-driven runtime.** O comportamento da CLI é ditado por políticas explícitas no domínio, não por convenções implícitas em scripts.
-2. **Repo-first.** O repositório é a memória canônica. Não há banco, dashboard ou estado vivo fora do repo `[DEC-0021-A01]`.
-3. **Tests-as-SSOT.** Os testes (`*.test.ts`) são a documentação executável das regras de negócio (`[BR-CLI-*]`); o PR3 derivará deles um artefato `living-docs.yml` versionado.
-4. **DDD + TDD/BDD.** O domínio é puro; aplicação orquestra via ports; infraestrutura só aparece atrás de adaptadores. RED → GREEN → REFACTOR é o fluxo padrão `[DEC-0021-C01]`.
-5. **Policy-first orchestration.** Nenhum side-effect (registry, filesystem) acontece sem que a policy aprove o draft/promoção primeiro.
-6. **Composição atômica.** Templates e topologias são compostos de partials/recipes, não espelhados a partir de monolitos `[DEC-0021-D01]`.
-7. **Composição de policies.** Não existe "God Service" central de governança. `GovernancePolicies` é uma fachada fina que **compõe** funções puras especializadas (uma por eixo de decisão) — adicionar um eixo novo significa criar um módulo novo, não inflar a fachada.
+- um **manual único do projeto** (`AGENTS.md`) que descreve as regras e princípios técnicos;
+- **versões adaptadas desse manual** para cada IA usada — cada uma com seu formato próprio (Claude tem `CLAUDE.md`, Cursor tem `.cursor/rules/...`, Copilot tem `.github/copilot-instructions.md` etc.);
+- um **registro estruturado** (`.governance/registry.yml`) com tudo que está em curso no projeto: specs em andamento, experimentos abertos, correções pendentes, propostas de backlog, incidentes ativos.
 
----
+**Por que isso importa?**
 
-## B — Bounded contexts
-
-### B.1 Implementados
-
-#### PR1 (Fundação Core)
-
-| Contexto           | Pasta                 | Responsabilidade                                                                                                                                                                             | Pode conhecer                         | NÃO pode conhecer                                                 |
-| ------------------ | --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------- | ----------------------------------------------------------------- |
-| **Domain**         | `src/domain/`         | Modelo do mundo: entidade `WorkItem` (discriminated union Dense/Virtual), invariantes por pilar, políticas puras de promoção, registry SSOT em memória. Funções determinísticas, sem efeito. | Apenas outros módulos do `domain/`    | `app/`, `infrastructure/`, Node APIs (`fs`, `path`, `process`)    |
-| **Application**    | `src/app/`            | Orquestração de casos de uso (`RegisterWorkItem`, `PromoteWorkItem`). Garante atomicidade e ordem (policy → registry → workspace). Tudo via ports.                                           | `domain/`, `app/ports/`               | `infrastructure/` direto, qualquer IO concreto                    |
-| **Infrastructure** | `src/infrastructure/` | Adaptadores técnicos (filesystem, YAML, processos). No PR1 apenas blueprints (testes em skip) que congelavam o contrato.                                                                     | `domain/`, ports do `app/`, Node APIs | Conhecer use cases por dentro; chamar outras infras circularmente |
-
-#### PR2 (Topology Migration Layer) — em curso
-
-| Contexto                 | Pasta                                                                                                                                                                                | Responsabilidade                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Estado                                                                                                 |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| **GovernanceWorkspace**  | `src/domain/workspace/` + `src/app/use-cases/{DiscoverWorkspace,AdoptWorkspace}.ts` + `src/infrastructure/filesystem/Node{FileSystemProbe,WorkspaceProvisioner}.ts`                  | Descoberta e adoção do `.governance/` como root unificado. Discriminated union `WorkspaceState` (`pristine \| governance \| legacy \| mixed`), `resolvePrecedence` sem alias mágico, `planAdoption` determinístico com reservas canônicas (`intake/handoff/telemetry`), adoção idempotente e rollback bilateral via port `WorkspaceProvisioner`.                                                                                                                                                                                                                                       | ✅ Implementado em 2.A. Bridge reader (`allowExplicitLegacyBridge`) é flag — use case fica para 2.A.8. |
-| **Registry (YAML SSOT)** | `src/infrastructure/yaml/{registrySchema,GovernanceRegistryStore}.ts` + `src/app/services/RegistryService.ts`                                                                        | Persistência real do registry em `.governance/registry.yml` via `yaml@2` (`parseDocument` + mutação granular em `Document`/`YAMLMap`/`YAMLSeq`). Garante (i) determinismo (ordem alfa por id + ordem canônica de campos via `REGISTRY_FIELD_ORDER`), (ii) atomicidade (`tmp + rename`; falha mid-write deixa o arquivo original intacto), (iii) schema guard com códigos estáveis `REGISTRY_YAML_*`, (iv) imutabilidade de `id`/`createdAt`, (v) preservação de comentários do usuário em load → mutate → save (yaml@2 vincula comentários ao nó; reordenar por id mantém associação). | ✅ Implementado em 2.B. Boundary preservado: `yaml` só importável sob `src/infrastructure/yaml/`.      |
-| **RulesEngine**          | `src/domain/rules/{Rule,ruleZone,RulesCatalog}.ts` + `src/app/ports/RulesCatalogSource.ts` + `src/app/services/RulesEngine.ts` + `src/infrastructure/json/JsonRulesCatalogSource.ts` | Camada DDD em paralelo ao builder mjs (`cli/governance/monolith/rules-builder.mjs` continua SSOT). Quatro pipelines: (1) **parse** lê `rules.json` via port `RulesCatalogSource` e valida shape; (2) **build** agrega `by_scope`/`by_zone`/`by_feature` determinísticos; (3) **projection** renderiza catálogo markdown com zona Top/Center/Base/Adapter; (4) **lookup** consulta por id/scope/zone/tag. Mapa `OPT_IN_FEATURE_LAYOUT` (`tdd`/`bdd`→center, `quality-gates`→base) reflete a topologia física em `.core/rules/{top,center,base,adapters}/`.                              | ✅ Implementado em 2.C. Boundary preservado: `node:fs` só sob `src/infrastructure/json/`.              |
-
-### B.2 Reservados / futuros
-
-| Contexto                | Status    | Quando       | Responsabilidade prevista                                                                              |
-| ----------------------- | --------- | ------------ | ------------------------------------------------------------------------------------------------------ |
-| **LivingDocumentation** | Reservado | PR3 (Fase 3) | Extrair `[BR-CLI-*]` via AST, gerar artefato determinístico, expor drift guard no CI `[DEC-0021-C01]`. |
-| **TemplateEngine**      | Reservado | PR3 (Fase 3) | Recipes + partials, montagem por slots, validação estrutural de Markdown `[DEC-0021-D01]`.             |
-
-Cada contexto futuro deve aparecer como subdiretório explícito quando nascer e ser documentado aqui antes de ganhar IO real.
+Quando uma IA "esquece" o contexto do projeto, gera código que viola convenções, ou quando o time inteiro depende da memória de uma pessoa para saber "qual era a regra mesmo?", o trabalho fica caro e frágil. A `ai-guidelines` resolve isso transformando a governança do projeto em **artefatos versionados** — que tanto humanos quanto IAs leem antes de agir.
 
 ---
 
-## C — Invariantes arquiteturais
+## 2. Cinco princípios que guiam o design
 
-Estas invariantes são contrato; quebrá-las é um erro de design, não de estilo. O Blueprint Integrity Lock (ver §D) detecta as duas primeiras automaticamente.
+Estas são as regras que o código respeita acima de tudo. Cada uma resolve um problema concreto que apareceu na prática:
 
-1. **Domain é puro.** `src/domain/**` jamais importa `src/app/**` nem `src/infrastructure/**`. Nada de `node:fs`, `node:path` ou variáveis de ambiente no domínio.
-2. **Application via ports.** `src/app/**` jamais importa `src/infrastructure/**` direto. Toda comunicação atravessa um port declarado em `src/app/ports/**`.
-3. **Policy-first.** Nenhum use case toca registry ou workspace antes de a policy aprovar o draft/promoção. O caso negativo é parte dos blueprints (`RegisterItem.test.ts`).
-4. **Atomicidade bilateral.** Falha em criar workspace ⇒ rollback do registry. Falha em persistir registry ⇒ rollback do workspace já criado. Blueprints garantem ambos os sentidos.
-5. **Registry é SSOT lógica.** No PR1 vive em memória; no PR2 vira `registry.yml`. Em ambos os modos: IDs únicos, `id` e `createdAt` imutáveis, `updatedAt` controlado pelo Clock, listagem determinística.
-6. **WorkItem é discriminated union.** `WorkItem = DenseWorkItem | VirtualWorkItem`, discriminado por `kind`. Combinações inválidas (ex.: `severity` em `proposal`, `workspacePath` ausente em `spec`) são rejeitadas por construção/policy — não por convenção.
-7. **YAML é SSOT real.** Em 2.B `.governance/registry.yml` virou IO real via `yaml@2` (`parseDocument`). Escrita é determinística (ordem alfa por id + ordem canônica de campos) e atômica (`tmp + rename`). Comentários inline e de cabeçalho do usuário sobrevivem a `load → mutate → save`; comentários do tipo `commentBefore` migram para o próximo nó na seq após `remove` (limitação não-destrutiva, herdada do modelo CST do `yaml@2`).
-8. **Anti-drift é objetivo estrutural.** Tudo que precisa permanecer alinhado entre código e documentação tem (ou terá) um teste que falha quando divergir — boundaries hoje, living docs no PR3.
-9. **Workspace tem precedência explícita.** `.governance/` é SSOT quando presente sozinho; legado puro exige adoção explícita; estado misto falha com código estável `WORKSPACE_AMBIGUOUS_STATE` a menos que o caller opte por bridge explícita. **Sem fallback invisível.**
-10. **Rollback nunca é destrutivo.** `WorkspaceProvisioner.ensureDirectory` retorna `boolean` (criou-agora vs já-existia), e `removeDirectoryIfEmpty` só apaga diretórios vazios. Rollback bilateral reverte apenas o que **este run** criou — conteúdo pré-existente do usuário é inviolável.
-11. **Topologia física `.core/rules/` reflete a taxonomia de runtime.** Após 2.C, todo arquivo `.md` produtivo reside em `top/`, `center/`, `base/` ou `adapters/` (com `_meta/` e `catalog.md` como artefatos do builder). `RulesTopologyConsistency.test.ts` força `scopeToZone(rule) === pathToZone(rule.file)`; uma regra em path inconsistente quebra o pipeline antes do merge. **Paths de regras centralizados em `domain/rules/ruleZone.ts`** — sem hardcoded espalhado em loaders.
-12. **Contrato consumidor é `.governance/` (long-term); smoke valida bridge legada explícita.** A partir de 2.D, a declaração canônica é: o root consumidor é `.governance/` com reservas `intake/`, `handoff/`, `telemetry/` (ver §H). A CLI mjs atual ainda escreve em `.ai-guidelines/` no consumidor — esse caminho funciona como **bridge legada explícita**, não alias mágico. Smoke tests (`tests/smoke/*.test.mjs`) e integration (`tests/integration/cli.integration.test.mjs`) carregam header declarando a bridge testada e referenciando o débito de migração. A migração das asserções smoke para `.governance/` acontece em PR4 quando `AdoptWorkspace` for plugado na engine mjs — antes disso, smoke afirma o que a CLI realmente faz, sem mentir sobre o contrato real.
+1. **Regras de negócio são declaradas, não escondidas.** Cada decisão importante do sistema é um objeto explícito no código — não um `if` perdido em algum script. Trocar uma regra exige editar o lugar certo, e existe um teste que protege a mudança.
+
+2. **O repositório é a memória do projeto.** Tudo que importa — specs, decisões arquiteturais, registros de trabalho — fica versionado no Git. Não há banco de dados externo, dashboard mágico ou cache que se perde. Se está no Git, é verdade. Se não está, não existe.
+
+3. **Os testes são a documentação executável.** Cada regra do sistema (`[BR-CLI-*]`) tem um teste que descreve o comportamento esperado. Quando o teste muda, a doc derivada muda junto. Não existe "documentação desatualizada" porque a documentação **é** o teste.
+
+4. **O código respeita camadas claras.** Três zonas com responsabilidades bem definidas: regras puras na camada mais profunda (Domain), coordenação no meio (Application), integração com o sistema operacional na borda (Infrastructure). Cada camada tem o que pode e o que não pode tocar — isso é verificado automaticamente pelo pipeline de CI.
+
+5. **Nada acontece sem a política aprovar.** A CLI nunca escreve um arquivo ou registra um item antes de a "política" do domínio dar OK. Se a regra de negócio diz "não pode", nenhum efeito colateral acontece. Isso evita o cenário "registrei meio-caminho, agora o estado tá inconsistente".
 
 ---
 
-## D — Boundary enforcement
+## 3. Como o código está organizado
 
-Implementado em `src/test-utils/Boundaries.test.ts`.
+O código fica em `src/`, dividido em **três camadas concêntricas**. Quanto mais "interna" a camada, mais pura ela é — sem chamadas ao disco, à rede ou ao relógio.
 
-**Como funciona hoje (provisório):**
+```mermaid
+graph TB
+    subgraph inf [Camada 3 Infrastructure - integracao real com SO]
+        i1[GovernanceRegistryStore - escreve YAML]
+        i2[NodeFileSystemProbe - le pastas]
+        i3[NodeWorkspaceProvisioner - cria pastas]
+        i4[JsonRulesCatalogSource - le rules.json]
+    end
 
-- Lista todos os `.ts` de produção sob `src/` (testes excluídos).
-- Extrai imports relativos via regex (`import … from "…"`).
-- Resolve cada destino e classifica origem/destino em `domain | app | infra | other`.
-- Falha se houver aresta `domain → app|infra` ou `app → infra`.
+    subgraph app [Camada 2 Application - casos de uso]
+        a1[RegisterWorkItem - registrar um trabalho]
+        a2[PromoteWorkItem - graduar um trabalho]
+        a3[DiscoverWorkspace - descobrir estado]
+        a4[AdoptWorkspace - adotar .governance/]
+        a5[RegistryService - CRUD do registry]
+        a6[RulesEngine - consumir regras compiladas]
+    end
 
-**Limitações conhecidas:**
+    subgraph dom [Camada 1 Domain - modelo puro do mundo]
+        d1[WorkItem - tipos de trabalho]
+        d2[Politicas - validacao pura]
+        d3[Workspace State - estado do projeto]
+        d4[Rule - modelo de regras]
+    end
 
-- Não cobre `import("…")` dinâmico nem `require()`.
-- Não acompanha re-exports indiretos cross-camada.
-- Imports de pacote/stdlib não são classificados (boundaries são entre camadas próprias).
-- Regex pode ter falso-negativo em casos exóticos (multi-linha incomum); o estilo do código mantém os imports dentro do reconhecível.
-
-**Roadmap obrigatório.** Esta verificação **deve** migrar para análise via **TS Compiler API / dependency graph (AST)** **antes** de:
-
-- introdução de extensões/plugins runtime;
-- carregamento dinâmico de módulos (PR3+ quando `TemplateEngine` resolver recipes/partials por path dinâmico);
-- qualquer mecanismo de discovery que monte o grafo de imports em runtime.
-
-Motivo: regex-scan opera sobre o source estático em texto. No momento em que módulos forem carregados dinamicamente (ou re-exportados por barrel files plugáveis), a verificação textual passa a ser **falsamente verde** — a aresta proibida existe em runtime, mas não aparece no source. O dependency graph baseado em AST resolve simbolicamente, capturando o grafo real e fechando essa janela de drift.
-
-A migração natural acontece junto com o pipeline AST do `LivingDocumentation` (PR3), que já vai exigir TS Compiler API instanciada. Antes disso, a regra **não pode** ser desligada nem afrouxada.
-
----
-
-## E — Modelagem de domínio
-
-### E.1 Pilares MECE `[DEC-0021-A02]`
-
-Sete `WorkItemKind`, mutuamente exclusivos, exaustivos quanto à intenção de saída — particionados em **duas categorias semânticas**:
-
-| Categoria | Kinds                                           | Workspace físico  | Tipo TS           |
-| --------- | ----------------------------------------------- | ----------------- | ----------------- |
-| Dense     | `spec`, `experiment`, `exploration`, `incident` | Sim (obrigatório) | `DenseWorkItem`   |
-| Virtual   | `proposal`, `patch`, `fix`                      | **Proibido**      | `VirtualWorkItem` |
-
-Invariantes específicas por `kind` (centralizadas em `WorkItemPolicy.assertValidDraft`):
-
-- `spec`: exige `workspacePath` (via `POLICY_DENSE_REQUIRES_WORKSPACE`).
-- `experiment`: exige `hypothesis` (≥10 chars) + ≥1 `successMetrics` + `workspacePath`.
-- `exploration`: exige `workspacePath`; foco em aprendizado/arquivamento.
-- `incident`: exige `severity` + `workspacePath`.
-- `proposal`: virtual; rejeita `workspacePath`; promoção exige maturidade.
-- `patch`: virtual; rejeita campos experimentais (`hypothesis`/`successMetrics`) **e** de incidente (`severity`).
-- `fix`: virtual; manutenção rastreada sem burocracia de spec.
-
-Constantes de medida (`TITLE_MIN`, `HYPOTHESIS_MIN`) vivem em `WorkItemPolicy.PILLAR_INVARIANTS`.
-
-### E.2 Por que discriminated union (e não inheritance OO)
-
-A entidade central é uma **discriminated union** sobre `kind`:
-
-```ts
-type WorkItem = DenseWorkItem | VirtualWorkItem;
+    app -->|usa o modelo de| dom
+    app -->|chama via ports| inf
 ```
 
-Decisões de design:
+### Glossário rápido (linguagem do projeto)
 
-- **`workspacePath` é obrigatório em `DenseWorkItem`** — a categoria carrega a promessa de par físico; um `spec` sem `workspacePath` não é um `spec` defeituoso, é um item que não devia existir.
-- **`VirtualWorkItem` não declara campos densos.** Não é só "policy diz que não pode" — o tipo simplesmente não tem `workspacePath`/`severity`/`hypothesis`. A combinação é typed-out por construção.
-- **Campos "nicho" (hypothesis, severity, ...) seguem opcionais em `DenseWorkItem`** porque seriam exigidos só em alguns dense kinds (`experiment` exige hypothesis; `incident` exige severity). A política tightening fica em `WorkItemPolicy`, não no tipo — explodir em quatro subtipos densos seria abstração vazia neste estágio.
-- **Sem hierarquia OO** — sem classe abstrata, sem herança. Type guards (`isDenseItem`, `isVirtualItem`) bastam para narrowing; o ganho de rigor vem do union, não de inheritance.
+Quando você lê código ou docs deste projeto, alguns termos se repetem. Aqui estão os essenciais traduzidos em português direto:
 
-### E.3 Promotion semantics
-
-- `proposal → spec`: requer `status ∈ {review, done}` e `workspacePath` definido. Patch resultante: `kind = spec`, `status = in-progress`.
-- `experiment → spec` (Shape-up): requer `outcome === 'won'` e `workspacePath`. A nova spec **herda** `hypothesis` e `successMetrics` para preservar linhagem.
-- `patch | fix | incident`: ciclo fechado. Nenhuma promoção é permitida (`POLICY_MAINTENANCE_NOT_PROMOTABLE`).
-
-Toda decisão de promoção devolve um `WorkItemPatch` puro; aplicar ao registry e tocar workspace é responsabilidade do use case.
-
-**Ordem de orquestração — `Register` ≠ `Promote`.** A invariante 4 (atomicidade bilateral) cobre os dois sentidos, mas a ordem real é deliberadamente diferente entre os dois use cases:
-
-- `RegisterWorkItem`: **registry primeiro**, workspace depois. Falha em criar workspace ⇒ rollback do `registry.add`. Faz sentido porque o item nasce; é mais barato remover do registry do que apagar pasta recém-criada com conteúdo do template (que ainda não existe no PR1/2.B, mas existirá em PR3).
-- `PromoteWorkItem`: **workspace primeiro** (quando passa a ser denso), registry depois. Falha em `registry.update` ⇒ rollback do `workspace.create`. Isso evita um estado intermediário em que `kind=spec` já está no registry apontando para uma pasta que ainda não existe — pior do que o estado simétrico (pasta vazia sem item correspondente, removida no rollback).
-
-A escolha está documentada em código (`RegisterWorkItem.ts` § comentário "Atomicidade", `PromoteWorkItem.ts` § bloco `try/catch` final). Nenhuma das duas ordens é "regra geral" — cada uma minimiza o estado inválido específico daquele use case.
-
-### E.4 Patch envelope
-
-`WorkItemPatch` é o **envelope de mutação** consumido pelo registry e produzido pela `PromotionPolicy`. Não é um `WorkItem` válido por si só — é o delta a ser mesclado. Re-validação após merge é responsabilidade do caller. Aceita `id`/`createdAt` apenas para que o teste de imutabilidade do registry os exercite com mensagens determinísticas; valores divergentes do atual sempre lançam.
-
-### E.5 Riscos de modelagem (vigilância)
-
-| Risco                                       | Mitigação atual                                                                                                                                  |
-| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------- |
-| **God Entity** em `WorkItem`                | Particionada em `DenseWorkItem                                                                                                                   | VirtualWorkItem`; campos cruzados são impossíveis na variante errada. |
-| **God Service** em `GovernancePolicies`     | Hoje é fachada fina (delega para `WorkItemPolicy.assertValidDraft` + `PromotionPolicy.promote`); o nome no plural reforça a regra de composição. |
-| **Acoplamento por campos opcionais densos** | Validação por pilar (`assertValidDraft`) rejeita campos cruzados e exige presença mandatória; cada `code` tem teste dedicado.                    |
-| **Drift de invariantes**                    | Constantes em `PILLAR_INVARIANTS`; mensagens carregam o número, blueprints conferem.                                                             |
-| **Patch envelope wide**                     | Documentado como envelope de mutação; merge final é re-tipado para `WorkItem`; futuras tightening ficam no use case/registry.                    |
+| Termo técnico                 | O que significa no projeto                                                                                                                                            |
+| ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Domain** (Camada 1)         | O "modelo do mundo" — conceitos como "o que é um trabalho", "quando uma proposta pode virar spec". Sem disco, sem rede, sem relógio. Funções 100% previsíveis.        |
+| **Application** (Camada 2)    | A camada que coordena os casos de uso (registrar, promover, descobrir, adotar). Não conhece detalhes técnicos.                                                        |
+| **Infrastructure** (Camada 3) | A implementação concreta: aqui mora o código que escreve arquivos YAML, lê o filesystem, etc.                                                                         |
+| **Bounded context**           | Um pedaço do código com responsabilidade bem delimitada. Ex: "tudo sobre workspace" vive junto. Permite que duas pessoas mexam em partes diferentes sem se atropelar. |
+| **Port**                      | Uma interface — um "contrato" do que precisa ser feito, sem dizer como. Ex: "preciso saber se este diretório existe".                                                 |
+| **Adapter**                   | A implementação concreta de um port — o "como". Ex: "uso `node:fs` para verificar se o diretório existe".                                                             |
+| **WorkItem**                  | Um item de trabalho registrado. Pode ser uma `spec`, `experiment`, `exploration`, `incident`, `proposal`, `patch` ou `fix`. Sete tipos, mutuamente exclusivos.        |
+| **Policy** (Política)         | Uma função pura que decide se uma ação é válida. Ex: "uma proposta pode virar spec?" → política responde sim ou não, com motivo.                                      |
+| **Registry**                  | O "livro-razão" do projeto — lista todos os WorkItems ativos. Versionado em `.governance/registry.yml`.                                                               |
+| **`.governance/`**            | A pasta canônica onde a CLI armazena o estado estruturado do projeto do usuário. Contém o registry e reservas para futuras adições (intake, handoff, telemetry).      |
 
 ---
 
-## F — Roadmap arquitetural
+## 4. Os três fluxos principais
 
-| PR  | Fase   | Foco                                                                                                                                                                | Estado                                         |
-| --- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
-| PR0 | Fase 0 | Setup, research, decision-brief, gate humano                                                                                                                        | ✅ Merged                                      |
-| PR1 | Fase 1 | DDD core (domain + policy + registry em memória) + use cases atômicos via ports + Boundary Lock + discriminated union (Dense/Virtual) + façade `GovernancePolicies` | ✅ Merged                                      |
-| PR2 | Fase 2 | `GovernanceWorkspace` (Strangler Fig sobre `.specify/` legado) + `Registry` YAML real + `RulesEngine`                                                               | 🚧 Atual — 2.A/2.B/2.C entregues; 2.D pendente |
-| PR3 | Fase 3 | `LivingDocumentation` (AST + drift guard CI) + `TemplateEngine` (recipes/partials) + validação estrutural de Markdown + **migração do Boundary Lock para AST**      | ⏭️ Pendente                                    |
-| PR4 | Fase 4 | Consolidação: carrier híbrido + foundation/ADR + cleanup de docs/ponteiros + homologação                                                                            | ⏭️ Pendente                                    |
+Estes são os caminhos que o sistema percorre quando o usuário ou a IA pede algo importante.
 
-PR3/PR4 só ganham diretórios em `src/` quando começarem; reservar nomes hoje seria abstração vazia.
+### 4.1 Registrar um trabalho novo
+
+Quando alguém pede "registre uma nova spec X":
+
+```mermaid
+sequenceDiagram
+    participant Quem as Quem pediu
+    participant CLI as RegisterWorkItem
+    participant Pol as Politica
+    participant Reg as Registry
+    participant Pasta as Workspace
+
+    Quem->>CLI: registrar rascunho
+    CLI->>Pol: este rascunho e valido?
+    Pol-->>CLI: sim, ou erro com motivo
+    CLI->>Reg: adiciona o item
+    CLI->>Pasta: cria pasta fisica se for denso
+    Pasta-->>CLI: ok ou falhou
+    Note over CLI,Reg: se a pasta falhar, desfaz o registro
+    CLI-->>Quem: item criado
+```
+
+**Ordem:** **primeiro** o registro lógico, **depois** a pasta física. Se a pasta falhar, desfaz o registro. Garantia: o sistema nunca fica em estado meia-boca (item registrado mas pasta inexistente, ou vice-versa).
+
+### 4.2 Promover um trabalho
+
+Algumas transições são canônicas: uma `proposal` pode virar `spec`, um `experiment` que venceu pode virar `spec`. Outras (como promover um `patch` ou `fix`) são proibidas por design.
+
+```mermaid
+sequenceDiagram
+    participant Quem as Quem pediu
+    participant CLI as PromoteWorkItem
+    participant Reg as Registry
+    participant Pol as Politica
+    participant Pasta as Workspace
+
+    Quem->>CLI: promover id para destino
+    CLI->>Reg: busca o item atual
+    Reg-->>CLI: item ou nao-encontrado
+    CLI->>Pol: pode promover?
+    Pol-->>CLI: sim, ou erro de regra
+    CLI->>Pasta: cria pasta nova se virou denso
+    CLI->>Reg: atualiza o item
+    Note over CLI,Pasta: se a atualizacao falhar, desfaz a pasta
+    CLI-->>Quem: item promovido
+```
+
+**Ordem invertida** comparada ao Register: aqui é **primeiro** a pasta, **depois** o registro. Motivo: se já existe um item marcado como `spec` no registro mas a pasta correspondente não foi criada, fica pior do que o cenário oposto (pasta vazia sem item — fácil de limpar).
+
+Cada caso de uso escolhe a ordem que **minimiza o estado inválido específico dele** — não há "regra única de ordem" que sirva para tudo.
+
+### 4.3 Adotar a estrutura `.governance/` no projeto do usuário
+
+Quando alguém roda `ai-guidelines adopt` em um projeto existente, o sistema precisa primeiro **detectar o estado atual** e então decidir o que fazer:
+
+```mermaid
+stateDiagram-v2
+    direction LR
+    [*] --> Detecta
+    Detecta --> ProjetoVazio: nada existe
+    Detecta --> JaTemGovernance: governance ja existe
+    Detecta --> SoLegado: somente legado
+    Detecta --> Misturado: ambos coexistem
+
+    ProjetoVazio --> Adota
+    SoLegado --> Adota
+    JaTemGovernance --> Adota: idempotente
+    Misturado --> FalhaExplicita: pede decisao
+    Misturado --> Adota: bridge declarada
+
+    Adota --> Cria: governance + intake + handoff + telemetry
+    Cria --> Sucesso
+    Cria --> Desfaz: se falhou no meio
+    Desfaz --> [*]
+    Sucesso --> [*]
+    FalhaExplicita --> [*]
+```
+
+**Sem comportamento mágico.** Se o projeto tem **ao mesmo tempo** as pastas antigas (`.specify/`, `.ai-guidelines/`) e a nova (`.governance/`), o sistema **falha com uma mensagem clara** pedindo decisão explícita — nunca tenta "adivinhar" qual é a SSOT (single source of truth, "fonte única da verdade").
 
 ---
 
-## G — Linguagem ubíqua
+## 5. As 12 garantias do sistema
 
-Termos abaixo têm significado preciso no runtime; usar fora desse significado é divergência a corrigir.
+Estas são propriedades que o pipeline de CI verifica automaticamente. Se alguma é quebrada, o build falha — código não chega no `main`:
 
-| Termo                       | Definição operacional                                                                                                                                                                                                                                                                                                                                                      |
-| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- | -------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| **WorkItem**                | Entidade central; **discriminated union** `DenseWorkItem                                                                                                                                                                                                                                                                                                                   | VirtualWorkItem`discriminada por`kind`. |
-| **DenseWorkItem**           | Variante de WorkItem para `spec                                                                                                                                                                                                                                                                                                                                            | experiment                              | exploration                                                                | incident`. `workspacePath`obrigatório. Tem par físico em`.governance/` (a partir do PR2). |
-| **VirtualWorkItem**         | Variante de WorkItem para `proposal                                                                                                                                                                                                                                                                                                                                        | patch                                   | fix`. Sem `workspacePath` por construção; nenhum IO de workspace é gerado. |
-| **WorkItemDraft**           | DTO de entrada para criação de um `WorkItem`; sem timestamps, sem id obrigatório no input do use case.                                                                                                                                                                                                                                                                     |
-| **WorkItemPatch**           | Envelope estrutural de mutação consumido por `RegistryStore.update` e produzido por `PromotionPolicy`.                                                                                                                                                                                                                                                                     |
-| **WorkItemPolicy**          | Política pura que valida um draft contra os invariantes do seu pilar (`assertValidDraft`).                                                                                                                                                                                                                                                                                 |
-| **PromotionPolicy**         | Política pura que decide se/como um item pode ser promovido entre pilares e devolve o `WorkItemPatch` a aplicar.                                                                                                                                                                                                                                                           |
-| **PromotionPatch**          | Alias semântico de `WorkItemPatch` no contexto de promoção.                                                                                                                                                                                                                                                                                                                |
-| **GovernancePolicies**      | Fachada fina (não-God) que compõe as políticas puras (`validateNewItem`, `promote`). Plural intencional: novos eixos viram módulos plugados aqui.                                                                                                                                                                                                                          |
-| **Registry**                | Coleção SSOT de WorkItems. PR1: `InMemoryRegistry`. PR2: `registry.yml` no `.governance/` do consumidor — IO real entregue em 2.B via `GovernanceRegistryStore`.                                                                                                                                                                                                           |
-| **RegistryStore**           | Port (`src/app/ports/RegistryStore.ts`) através do qual a Application interage com o registry sem depender da implementação.                                                                                                                                                                                                                                               |
-| **PersistentRegistryStore** | Extensão do `RegistryStore` (declarada em `src/app/services/RegistryService.ts`) que adiciona `load()` e `save()`. Implementado por `GovernanceRegistryStore` (2.B). Permite testes continuarem usando `InMemoryRegistry` sem IO.                                                                                                                                          |
-| **GovernanceRegistryStore** | Adapter concreto sob `src/infrastructure/yaml/`. Mantém um `yaml.Document` em memória, aplica mutações granulares preservando comentários, normaliza para forma canônica (ordem alfa + `REGISTRY_FIELD_ORDER`) e persiste via `tmp + rename`.                                                                                                                              |
-| **RegistryService**         | Serviço de orquestração em `src/app/services/`. Recebe `PersistentRegistryStore` via DI; espelha CRUD do port e dispara `save()` automático após mutação (`autosave: true`).                                                                                                                                                                                               |
-| **`REGISTRY_YAML_*`**       | Família de códigos de erro estáveis emitidos pelo schema guard: `PARSE_ERROR`, `INVALID_ROOT`, `INVALID_VERSION`, `INVALID_ITEMS`, `INVALID_ITEM_SHAPE`, `INVALID_FIELD_TYPE`, `MISSING_FIELD`, `UNKNOWN_KIND`, `DENSE_MISSING_WORKSPACE`, `VIRTUAL_HAS_DENSE_FIELD`, `DUPLICATE_ID`. Mensagens podem evoluir; códigos não.                                                |
-| **WorkspaceStore**          | Port para criação/remoção física de pastas de itens densos. Sem implementação real no PR1; doubles em test-utils.                                                                                                                                                                                                                                                          |
-| **WorkspaceProvisioner**    | Port para a **raiz** `.governance/` (distinto de `WorkspaceStore` que cuida de pastas por item). `ensureDirectory` retorna `boolean` para sinalizar criação efetiva; `removeDirectoryIfEmpty` é cláusula de não-destruição em rollback.                                                                                                                                    |
-| **FileSystemProbe**         | Port read-only para inspeção do filesystem. Usado por `DiscoverWorkspace`; intencionalmente separado do provisioner para compor leitura sem permissão de escrita.                                                                                                                                                                                                          |
-| **WorkspaceState**          | Discriminated union pura `pristine \| governance \| legacy \| mixed` derivada de `RootsSnapshot` por `deriveWorkspaceState`. Não decide ações — apenas descreve o filesystem.                                                                                                                                                                                              |
-| **WorkspaceResolution**     | Resultado da política de precedência: `needs-init \| governance-ssot \| needs-adoption \| ambiguous`. `ambiguous` é a forma materializada do "estado misto sem bridge".                                                                                                                                                                                                    |
-| **MigrationPlan**           | Plano determinístico produzido por `planAdoption(state)`. Lista `ensure-directory` para `.governance/` + reservas canônicas (`intake/handoff/telemetry`) e marca `noticedLegacy`. Sem IO embutido.                                                                                                                                                                         |
-| **Clock / IdGenerator**     | Ports utilitários para tempo e IDs determinísticos em testes. Implementações reais entram quando a CLI for ligada (PR2/PR3).                                                                                                                                                                                                                                               |
-| **Dense item**              | Item de pilar denso (`spec                                                                                                                                                                                                                                                                                                                                                 | experiment                              | exploration                                                                | incident`); use case cria pasta a partir de `workspacePath`.                              |
-| **Virtual item**            | Item de pilar virtual (`proposal                                                                                                                                                                                                                                                                                                                                           | patch                                   | fix`); use case garante zero IO no workspace.                              |
-| **Promotion**               | Transição entre pilares regida pela `PromotionPolicy` (proposal→spec; experiment(won)→spec). Maintenance kinds não promovem.                                                                                                                                                                                                                                               |
-| **ResolutionMode**          | Modo de fechamento de um experimento perdido/inconclusivo (`cleaned-up                                                                                                                                                                                                                                                                                                     | kept                                    | pending`). Modelado para uso completo no PR2/PR3.                          |
-| **GovernanceError**         | Erro de domínio com `code` estável (ex.: `POLICY_PROPOSAL_NOT_MATURE`). O `code` é a SSOT de mensagens em testes e UI.                                                                                                                                                                                                                                                     |
-| **`[BR-CLI-*]`**            | Identificador estável de regra de negócio inscrita nos testes; futura entrada de `living-docs.yml` (PR3).                                                                                                                                                                                                                                                                  |
-| **`[DEC-0021-*]`**          | Decisão arquitetural ancorada no `decision-brief.md` da Spec 0021; usada para rastreabilidade em código quando agrega valor documental.                                                                                                                                                                                                                                    |
-| **LivingDocumentation**     | Artefato derivado dos testes (PR3); fonte de verdade legível das `[BR-CLI-*]` ativas, com drift guard no CI.                                                                                                                                                                                                                                                               |
-| **Recipe**                  | Declaração estrutural de um artefato (spec/plan/tasks/...) em termos de `slots` e `partials` (PR3, TemplateEngine).                                                                                                                                                                                                                                                        |
-| **Partial**                 | Fragmento Markdown autossuficiente, slot-addressable, usado por uma `Recipe` para montar um artefato final por composição atômica.                                                                                                                                                                                                                                         |
-| **Composição atômica**      | Princípio: gerar artefatos por agregação determinística de partials, não por espelhamento de templates monolíticos `[DEC-0021-D01]`.                                                                                                                                                                                                                                       |
-| **RulesEngine**             | Bounded context em `src/{domain,app,infrastructure}/rules/` e adjacentes. Consome o `rules.json` produzido pelo builder mjs (`cli/governance/monolith/rules-builder.mjs`) via port `RulesCatalogSource` e expõe pipelines puros (parse/build/projection/lookup) à Application. Não duplica parser markdown — a migração para AST acontece no PR3 junto de `RuleExtractor`. |
-| **RuleScope**               | Eixo de catalogação de uma regra: `universal \| adapter \| opt-in`. Persistido no YAML metadata de cada regra `.md`; replicado em `Rule.scope` no domínio.                                                                                                                                                                                                                 |
-| **RuleZone**                | Eixo de **runtime** que define onde a regra aparece no AGENTS.md compilado: `top \| center \| base \| adapter`. Derivado de `RuleScope` (+ `opt_in_feature` para `opt-in`) via `scopeToZone` puro. Reflete-se na topologia física: `.core/rules/{top,center,base,adapters}/`.                                                                                              |
-| **`OPT_IN_FEATURE_LAYOUT`** | Mapa estático em `src/domain/rules/ruleZone.ts` que projeta `opt_in_feature` ∈ {`tdd`, `bdd`, `quality-gates`} para sua zona canônica (`center`/`center`/`base`). Adicionar nova feature exige entry aqui — `scopeToZone` lança `RULE_OPT_IN_UNKNOWN_FEATURE` para forçar reflexão de zona antes do build.                                                                 |
-| **`RULES_*` errors**        | Família de códigos estáveis emitidos pelo RulesEngine: `RULES_DUPLICATE_ID`, `RULES_CATALOG_INVALID`, `RULES_CATALOG_NOT_FOUND`, `RULES_CATALOG_PARSE_ERROR`, `RULES_INVALID_SCOPE`, `RULE_OPT_IN_MISSING_FEATURE`, `RULE_OPT_IN_UNKNOWN_FEATURE`. Mensagens podem evoluir; códigos não.                                                                                   |
+| #   | Garantia                             | Em palavras simples                                                 |
+| --- | ------------------------------------ | ------------------------------------------------------------------- |
+| 1   | Domain puro                          | A camada 1 nunca chama as camadas 2 ou 3                            |
+| 2   | Application só via ports             | A camada 2 nunca chama a camada 3 diretamente                       |
+| 3   | Policy-first                         | Toda mudança passa pela validação antes de qualquer efeito          |
+| 4   | Atomicidade bilateral                | Se algo falha no meio do processo, desfaz tudo                      |
+| 5   | Registry é fonte de verdade          | IDs são únicos e imutáveis; o tempo é controlado                    |
+| 6   | Tipos de trabalho são MECE           | 7 tipos exclusivos; impossível misturar campos cruzados             |
+| 7   | YAML é o estado real                 | `.governance/registry.yml` é o estado canônico versionado           |
+| 8   | Anti-drift estrutural                | Código e documentação não podem divergir silenciosamente            |
+| 9   | Workspace tem precedência explícita  | Sem alias mágico, sem fallback invisível                            |
+| 10  | Rollback nunca destrói nada          | Desfazer só apaga o que este run criou                              |
+| 11  | Topologia reflete taxonomia          | Regras em `.core/rules/` organizadas em `top/center/base/adapters/` |
+| 12  | Contrato do usuário é `.governance/` | `.ai-guidelines/` é uma "ponte legada" declarada explicitamente     |
+
+Detalhe técnico completo de cada garantia (motivação, contraexemplos, testes que protegem): ver [`ARCHITECTURE-REFERENCE.md`](./ARCHITECTURE-REFERENCE.md) §2.
+
+> **MECE** = Mutuamente Exclusivos e Coletivamente Exaustivos. Significa que cada item se encaixa em **exatamente uma** categoria, e o conjunto das categorias cobre **todos os casos possíveis** — nada cai entre as cadeiras, nada se sobrepõe.
 
 ---
 
-## H — Convenções de topologia
+## 6. Roadmap — onde estamos
 
-- **Diretórios em kebab-case:** `work-item/`, `use-cases/`, `test-utils/`. Pastas existentes que usavam camelCase foram migradas.
-- **Arquivos em PascalCase quando exportam um tipo/classe principal** (`WorkItem.ts`, `PromotionPolicy.ts`, `InMemoryRegistry.ts`). Utilitários e barris ficam em camelCase (`doubles.ts`).
-- **Um conceito por arquivo no domain.** `WorkItem.ts` (entidade union + tipos relacionados) ≠ `WorkItemDraft.ts` (DTO) ≠ `WorkItemPolicy.ts` (validação). Misturar os três é o que originou o God File evitado nas consolidações desta fase.
-- **Sem pastas vazias.** Se uma camada futura ainda não existe, ela não é uma pasta vazia — é uma seção em §B.2 deste documento.
-- **`.core/governance/`** hospeda artefatos de governança transversal (este documento). `src/` hospeda código.
-- **`.core/rules/{top,center,base,adapters,_meta}/`** é a topologia formalizada em 2.C **no repo do mantenedor** (este repositório). `top/` aloja diretivas universais sempre injetadas; `center/methodologies/` aloja regras opt-in metodológicas (TDD/BDD); `base/quality/` aloja regras opt-in táticas (quality gates); `adapters/` hospeda regras específicas de provider (`claude.md`, `codex.md`, `gemini.md`); `_meta/` mantém artefatos derivados do builder (`rules.json`, `agents-core-ledger.md`). `catalog.md` na raiz é projeção determinística — **não editar à mão**.
-- **`.governance/{intake,handoff,telemetry}/`** são as reservas canônicas formalizadas em 2.D **no repo do consumidor**. Declaradas como `RESERVED_GOVERNANCE_DIRS` em `src/domain/workspace/MigrationPlan.ts` e materializadas idempotentemente por `AdoptWorkspace.execute`. Cada reserva tem responsável de domínio futuro `[DEC-0021-B02]`: `intake/` (PRD/intake estruturado, spec posterior `stakeholder-intake-pipeline`); `handoff/` (contratos de handoff/decision logs, spec posterior `handoff-contracts-formalization`); `telemetry/` (telemetria do framework, spec posterior `framework-observability-dashboard`). A criação física hoje é apenas reserva do lar; o conteúdo entra com cada spec futura. **Sem alias mágico** entre `.governance/` e a bridge legada `.ai-guidelines/`: a CLI mjs atual ainda escreve em `.ai-guidelines/` no consumidor; a migração consumer-side para `.governance/` acontece em PR4 quando `AdoptWorkspace` for plugado.
+A Spec 0021 leva o framework do paradigma "Spec-Driven" (centrado em specs formais) para "Governance-Driven" (governança como um todo, com 7 tipos de trabalho de primeira classe). A entrega é fatiada em 5 etapas atômicas:
+
+| Etapa   | Tema                                                                                         | Estado       |
+| ------- | -------------------------------------------------------------------------------------------- | ------------ |
+| **PR0** | Setup do projeto + decisões iniciais aprovadas pela owner                                    | ✅ Concluído |
+| **PR1** | Fundação: modelo de domínio + políticas + registry em memória                                | ✅ Concluído |
+| **PR2** | **Este PR.** Persistência real em disco + camada de migração + reorganização das regras      | ✅ Concluído |
+| **PR3** | Documentação viva derivada dos testes + engine de templates atômicos                         | ⏭️ Próximo   |
+| **PR4** | Cleanup final + migração definitiva `.ai-guidelines/` → `.governance/` no projeto do usuário | ⏭️ Pendente  |
+
+Hoje a CLI **continua escrevendo em `.ai-guidelines/`** no projeto do usuário (compatibilidade preservada). O novo formato `.governance/` é o contrato canônico declarado, materializado no código de domínio — a migração real do **comportamento da CLI** acontece em PR4.
 
 ---
 
-## I — Como contribuir com a arquitetura
+## 7. Para aprofundar
 
-1. **Mudou um invariante de pilar?** Atualize `WorkItemPolicy` + blueprint correspondente + tabela §E.1.
-2. **Adicionou uma promoção nova?** Atualize `PromotionPolicy` + blueprint + tabela §E.3.
-3. **Adicionou um eixo de policy novo (lifecycle, archival, ...)?** Crie um módulo próprio em `domain/policy/`, plugue em `GovernancePolicies` como composição, documente em §B.1 / §G. **Não** infle a fachada com lógica nova.
-4. **Criou um novo bounded context?** Documente em §B antes de criar a pasta; só depois crie o diretório.
-5. **Quebrou intencionalmente um boundary?** Não. Reabra a discussão em decision-brief; este documento descreve o que está garantido, não o que está flexível.
+- **Detalhes técnicos densos** (glossário completo do domínio, códigos de erro estáveis, modelagem por categoria de pilar, justificativa de discriminated union vs herança, boundary enforcement, convenções de topologia, como contribuir com a arquitetura): [`ARCHITECTURE-REFERENCE.md`](./ARCHITECTURE-REFERENCE.md).
+- **Decisões arquiteturais ancoradas** (cada `[DEC-0021-*]` com opções avaliadas e justificativa documentada da owner): `.specify/specs/0021-governance-information-architecture/decision-brief.md`.
+- **Roadmap operacional detalhado** (sub-blocos por PR com critérios de aceite, checklists e dependências): `.specify/specs/0021-governance-information-architecture/tasks.md`.
+- **Auditorias internas e débitos conscientes** (o que foi avaliado, o que ficou para depois, com motivo): `.specify/specs/0021-governance-information-architecture/NEXT.md`.
+
+---
+
+> **Princípio editorial.** Este documento é a **entrada principal** para humanos. Quando uma seção precisaria explicar detalhes técnicos densos (glossário completo, códigos de erro, edge cases), o detalhe vive em `ARCHITECTURE-REFERENCE.md`. Se uma seção aqui cresce mais que ~30 linhas, mova o excedente para o reference.

@@ -2,7 +2,8 @@
  * [BR-CLI-WORKSPACE-RESERVED] Contrato de reservas canônicas em `.governance/`.
  *
  * Drift guard simples: o conjunto exato de reservas (`intake`, `handoff`,
- * `telemetry`) é parte do contrato publicado em `ARCHITECTURE.md` §H e em
+ * `telemetry`) é parte do contrato publicado em `ARCHITECTURE.md` (tabela
+ * de invariantes) + `ARCHITECTURE-REFERENCE.md` §6 e em
  * `docs/cli/ai-guidelines-cli.md`. Alterar o conjunto sem atualizar os docs
  * deve falhar o pipeline. Mantém o domínio TS como SSOT do conjunto.
  */

@@ -165,7 +165,7 @@ ENTÃO devem seguir duas categorias: **Editoriais** (geram blocos `<FEATURE_*>` 
 
 DADO uma feature editorial ativa (ex: `quality-gates`, `tdd`, `bdd`)
 QUANDO executada
-ENTÃO deve injetar o template de `.core/rules/center/methodologies/<feature>.md` (TDD/BDD) ou `.core/rules/base/quality/<feature>.md` (quality-gates) no `AGENTS.md` do consumidor, dentro de uma tag `<FEATURE_*>`, respeitando idioma (`lang`) quando aplicável. A topologia física `.core/rules/{top,center,base,adapters}/` foi formalizada em 2.C — ver `.core/governance/ARCHITECTURE.md` §H.
+ENTÃO deve injetar o template de `.core/rules/center/methodologies/<feature>.md` (TDD/BDD) ou `.core/rules/base/quality/<feature>.md` (quality-gates) no `AGENTS.md` do consumidor, dentro de uma tag `<FEATURE_*>`, respeitando idioma (`lang`) quando aplicável. A topologia física `.core/rules/{top,center,base,adapters}/` foi formalizada em 2.C — ver `.core/governance/ARCHITECTURE-REFERENCE.md` §6.
 
 ### [BR-CLI-EDITORIAL-03] Prune Individual
 
