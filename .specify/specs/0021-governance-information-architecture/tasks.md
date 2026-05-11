@@ -653,7 +653,9 @@ yarn smoke
 - [x] **3.C.3b** Serializador YAML determinístico em `src/infrastructure/yaml/livingDocsSerializer.ts`. Funções puras `serializeLivingDocs` e `parseLivingDocs`.
 - [x] **3.C.3c** Use cases `GenerateLivingDocs` e `CheckLivingDocs` em `src/app/use-cases/`. Port novo `LivingDocsSerializer` em `src/app/ports/` para preservar boundary (Check não importa infra direto).
 - [x] **3.C.3d** Entrypoint CLI em `src/cli/livingDocs.ts` exportando `runGenerate(opts)`, `runCheck(opts)`, `discoverTestFiles(repoRoot)`. Smoke tests garantem contrato observável (exit code, stderr, idempotência).
-- [ ] **3.C.4** Bin `cli/living-docs.mjs` + yarn scripts `living-docs:generate` / `living-docs:check` + integração CI: **PENDENTE** — requer resolver erro pré-existente em `src/domain/rules/ruleZone.ts` (TS6133 sobre `RuleScope` declarado-não-usado) que bloqueia `yarn build`. Caminho: build precisa estar verde para que `node dist/cli/livingDocs.js <cmd>` funcione no shell. Sub-débito registrado no `NEXT.md` da Fase 3.
+- [ ] **3.C.4** Bin `cli/living-docs.mjs` + yarn scripts `living-docs:generate` / `living-docs:check` + integração CI: **PENDENTE — gate de design aberto.** Histórico:
+  - 2026-05-11: bloqueio do `yarn build` resolvido por `chore(spec-0021): remove import nao-usado em ruleZone.ts`. Build verde, `dist/cli/livingDocs.js` materializado.
+  - 2026-05-11 (mesma sessão): primeira execução real de `runGenerate` contra a árvore explodiu com `LIVING_DOCS_DUPLICATE_RULE_ID`. Causa raiz: extractor emite 1 entry por `it`, mas o padrão BDD do repo é 1 rule → N cenários (`BR-CLI-A-01` 31×, `BR-CLI-APP-01` 6×, etc.). Bin + scripts + CI ficam congelados até decidir como o domínio agrega evidências múltiplas por ruleId — débito 9 do sub-bloco 3.C no `NEXT.md`. Sub-bloco 3.C.4-prep deve nascer em sessão própria (TDD começando por teste vermelho no `LivingDocsArtifact` ou `GenerateLivingDocs`).
 
 ### Testes (obrigatórios)
 
