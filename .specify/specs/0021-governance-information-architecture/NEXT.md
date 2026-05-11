@@ -46,6 +46,14 @@ Foram identificados os seguintes riscos arquiteturais ainda existentes:
 4. **Cobertura do `RegistryService` abaixo do esperado.** Service tem CRUD via DI mas só `add` é exercitado em teste explícito (RoundTrip). `update`/`remove`/`load`/`save` via service ainda só são cobertos indiretamente via `GovernanceRegistryStore`. Aceitar como débito ergonômico — a regra de negócio vive no store; o service é casca fina.
 5. **Não há use case que orquestre `RegistryService` real ainda.** `RegisterWorkItem`/`PromoteWorkItem` seguem com `RegistryStore` injetado (in-memory nos testes). A ligação CLI → `GovernanceRegistryStore` real chega em 2.D / PR4 quando a CLI for plugada no `.governance/` materializado.
 
+#### Sub-bloco 2.C (RulesEngine + Reorg físico Top/Center/Base/Adapters) — registrado em 2026-05-10
+
+1. **Builder mjs continua produzindo o SSOT.** A nova camada DDD em `src/domain/rules/` + `src/app/services/RulesEngine.ts` é leitora-tipada do `rules.json` (consome o artefato já compilado). A migração do parser markdown para TS (AST-first) só fará sentido junto com `RuleExtractor` do PR3 — manter o mjs como SSOT até lá; abrir débito formal para essa transição quando 3.B começar.
+2. **Compatibility ponteiros: scripts/docs externos.** Foram atualizados os comentários em código (`cli/features/opt-in/editorial/test-helpers.mjs`, `cli/features/core/budget-report.mjs`) e o cross-ref interno de `top/agents-core.md`. Specs históricas (`.specify/specs/0008|0015|0016|0017|0018|0019`) ainda referenciam `opt-in/methodologies/` e `opt-in/quality/` no texto — registro como débito **documental** a ser tratado em 2.D / 4.C (cleanup holístico). Não afeta builder/runtime/CI.
+3. **Boundary Lock por regex revisitado.** O novo bounded context não introduz carga dinâmica de módulos. A migração para AST (débito 3 da Fase 1) permanece com gatilho em PR3 conforme `ARCHITECTURE.md` §D — sem urgência adicional.
+4. **`OPT_IN_FEATURE_LAYOUT` é mapa estático.** Toda nova `opt_in_feature` adicionada ao runtime mjs precisa de entry correspondente em `src/domain/rules/ruleZone.ts` antes do build, senão `scopeToZone` lança `RULE_OPT_IN_UNKNOWN_FEATURE`. Aceito como acoplamento intencional (forçar reflexão de zona para cada feature nova); revisitar se passar de 10 entries.
+5. **`RulesCompilation`/`RulesProjection` não consomem `rules.json` real ainda.** Os testes usam `RulesCatalogSource` em memória; `RulesTopologyConsistency.test.ts` é quem amarra ao artefato real. Adicionar suite que faça `JsonRulesCatalogSource` ler `.core/rules/_meta/rules.json` end-to-end fica como follow-up barato (poderia ir em 2.D ou ficar pra PR3 com living-docs).
+
 ### Débitos da Fase 3 (Living Documentation + Engine)
 
 ### Débitos da Fase 3 (Living Documentation + Engine)

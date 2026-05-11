@@ -403,20 +403,20 @@ yarn smoke
 
 ### Contratos obrigatórios
 
-- [ ] **2.C.1 [Taxonomia]** Formalizar Top/Center/Base e refletir na topologia física.
-- [ ] **2.C.2 [Determinismo]** Build/projeções determinísticos.
-- [ ] **2.C.3 [Compatibility]** Se houver consumers internos, garantir ponteiros/redirects no mesmo commit.
-- [ ] **2.C.4 [No Hardcoded Paths]** Centralizar resolução de paths no domínio (ou infra adapter único).
+- [x] **2.C.1 [Taxonomia]** Formalizar Top/Center/Base e refletir na topologia física.
+- [x] **2.C.2 [Determinismo]** Build/projeções determinísticos.
+- [x] **2.C.3 [Compatibility]** Se houver consumers internos, garantir ponteiros/redirects no mesmo commit.
+- [x] **2.C.4 [No Hardcoded Paths]** Centralizar resolução de paths no domínio (ou infra adapter único).
 
 ### Implementação
 
-- [ ] **2.C.5** Implementar `RulesEngine` (bounded context):
+- [x] **2.C.5** Implementar `RulesEngine` (bounded context):
   - parser pipeline
   - build pipeline
   - projection pipeline
   - runtime lookup
 
-- [ ] **2.C.6** Reorganizar `.core/rules/` de forma dirigida (um commit atômico) + atualizar:
+- [x] **2.C.6** Reorganizar `.core/rules/` de forma dirigida (um commit atômico) + atualizar:
   - `yarn build:rules` (ou equivalente)
   - loaders/imports
   - docs/pointers
@@ -424,15 +424,15 @@ yarn smoke
 
 ### Testes (obrigatórios)
 
-- [ ] **2.C.7** Criar e passar:
+- [x] **2.C.7** Criar e passar:
   - `RulesCompilation.test.ts`
   - `RulesProjection.test.ts`
   - `RulesTopologyConsistency.test.ts`
 
-- [ ] **2.C.N** Pipeline verde incluindo `yarn build:rules`.
+- [x] **2.C.N** Pipeline verde incluindo `yarn build:rules`.
 
-- [ ] **2.C.[DEBT-REVIEW]** `NEXT.md`: registrar débitos da reorganização física (compat redirects, hardcoded paths remanescentes) e decisão sobre Top/Center/Base; débito 3 (Boundary Lock por regex) revisitar se RulesEngine antecipar carga dinâmica.
-- [ ] **2.C.[ARCHITECTURE]** `ARCHITECTURE.md`: mover `RulesEngine` para §B.1 PR2 com pipelines (parse/build/projection/lookup); §C ganha invariante sobre centralização de paths; glossário ganha `RulesEngine`, `RuleScope` (universal/adapter/opt-in).
+- [x] **2.C.[DEBT-REVIEW]** `NEXT.md` atualizado 2026-05-10: 5 débitos 2.C registrados (builder mjs como SSOT até PR3, ponteiros documentais legados em specs históricas, Boundary Lock por regex revisitado, mapa estático `OPT_IN_FEATURE_LAYOUT`, suite end-to-end com `JsonRulesCatalogSource` adiada para PR3).
+- [x] **2.C.[ARCHITECTURE]** `ARCHITECTURE.md` atualizado 2026-05-10: `RulesEngine` saiu de §B.2 (reservados) e entrou em §B.1 PR2 com pipelines (parse/build/projection/lookup); §C ganhou invariante 11 (topologia física reflete taxonomia de runtime; paths centralizados em `domain/rules/ruleZone.ts`); §G glossário ganhou `RulesEngine`, `RuleScope`, `RuleZone`, `OPT_IN_FEATURE_LAYOUT`, família `RULES_*` errors; §H convenções ganhou entrada `.core/rules/{top,center,base,adapters,_meta}/`; §F roadmap reflete "2.A/2.B/2.C entregues".
 - [ ] **2.C.[COMMIT]** `refactor(spec-0021): RulesEngine + reorg .core/rules alinhada ao runtime`.
 
 ---

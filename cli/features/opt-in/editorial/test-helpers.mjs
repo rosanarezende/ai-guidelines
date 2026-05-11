@@ -34,10 +34,10 @@ export async function fileExists(filePath) {
 
 /**
  * Cria a estrutura de mock do source para testes que precisam de
- * templates em `.core/rules/opt-in/` usando a hierarquia mínima por tema.
+ * templates em `.core/rules/{center,base}/` usando a hierarquia mínima por tema.
  *
  * @param {string} baseDir - Diretório raiz do mock
- * @param {string} sourceFileName - Nome relativo do arquivo fonte (ex: "methodologies/tdd-pt.md")
+ * @param {string} sourceFileName - Nome relativo do arquivo fonte (ex: "center/methodologies/tdd-pt.md")
  * @param {string} content - Conteúdo do arquivo mock
  * @returns {string} caminho do diretório de mock criado
  */
