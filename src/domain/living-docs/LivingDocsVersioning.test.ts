@@ -27,7 +27,15 @@ const baseEntry = {
   title: "exemplo",
   boundedContext: "policy",
   domain: "X",
-  source: { file: "src/x.test.ts", lineStart: 1, lineEnd: 1 },
+  evidence: [
+    {
+      file: "src/x.test.ts",
+      lineStart: 1,
+      lineEnd: 1,
+      testName: "exemplo",
+      coverageState: "covered" as const,
+    },
+  ],
   tags: [],
   coverageState: "covered" as const,
 };

@@ -15,7 +15,7 @@
  *    byte-a-byte; sem timestamps no artefato.
  */
 import { GovernanceError } from "../shared/errors.js";
-import { assertValidEntry, LivingDocsEntry } from "./LivingDocsEntry.js";
+import { assertValidEntry, LivingDocsEntry, LivingDocsSource } from "./LivingDocsEntry.js";
 
 /** Versão corrente do schema. Bump exige ADR de extensão (ADR 0002 §6). */
 export const LIVING_DOCS_SCHEMA_VERSION = "v0" as const;
@@ -113,17 +113,15 @@ function canonicalizeEntry(entry: LivingDocsEntry): LivingDocsEntry {
   );
 
   // Preserva apenas os campos canônicos — qualquer campo extra que tenha
-  // vazado para o objeto fica fora da projeção determinística.
+  // vazado para o objeto fica fora da projeção determinística. Itens de
+  // `evidence` são ordenados por (file, lineStart) para estabilidade
+  // byte-a-byte do artefato a jusante.
   const canonical: LivingDocsEntry = {
     ruleId: entry.ruleId,
     title: entry.title,
     boundedContext: entry.boundedContext,
     domain: entry.domain,
-    source: {
-      file: entry.source.file,
-      lineStart: entry.source.lineStart,
-      lineEnd: entry.source.lineEnd,
-    },
+    evidence: orderEvidence(entry.evidence).map(canonicalizeSource),
     tags: uniqueSortedTags,
     coverageState: entry.coverageState,
     ...(entry.bypass !== undefined
@@ -137,4 +135,31 @@ function canonicalizeEntry(entry: LivingDocsEntry): LivingDocsEntry {
       : {}),
   };
   return canonical;
+}
+
+function orderEvidence(evidence: readonly LivingDocsSource[]): readonly LivingDocsSource[] {
+  return [...evidence].sort((a, b) => {
+    if (a.file !== b.file) return a.file < b.file ? -1 : 1;
+    if (a.lineStart !== b.lineStart) return a.lineStart - b.lineStart;
+    return a.lineEnd - b.lineEnd;
+  });
+}
+
+function canonicalizeSource(source: LivingDocsSource): LivingDocsSource {
+  return {
+    file: source.file,
+    lineStart: source.lineStart,
+    lineEnd: source.lineEnd,
+    testName: source.testName,
+    coverageState: source.coverageState,
+    ...(source.bypass !== undefined
+      ? {
+          bypass: {
+            until: source.bypass.until,
+            ref: source.bypass.ref,
+            reason: source.bypass.reason,
+          },
+        }
+      : {}),
+  };
 }

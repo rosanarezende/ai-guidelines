@@ -88,13 +88,26 @@ export class TypeScriptRuleExtractor implements RuleExtractor {
       const { boundedContext, domain } = this.deriveLocation(relPath);
 
       const calls = this.collectTestCalls(sourceFile);
+      // No passo 1 do sub-bloco 3.C.4-prep: cada call vira uma entry com
+      // `evidence` de cardinalidade 1. Agregação por ruleId dentro do
+      // arquivo entra no passo 3 do `_prep`; até lá, o `canonicalizeArtifact`
+      // (passo 2) é quem agrupa cross-call.
       for (const call of calls) {
         entries.push({
           ruleId: call.ruleId,
           title: call.title,
           boundedContext,
           domain,
-          source: { file: relPath, lineStart: call.lineStart, lineEnd: call.lineEnd },
+          evidence: [
+            {
+              file: relPath,
+              lineStart: call.lineStart,
+              lineEnd: call.lineEnd,
+              testName: call.title,
+              coverageState: call.coverageState,
+              ...(call.bypass !== undefined ? { bypass: call.bypass } : {}),
+            },
+          ],
           tags: call.tags,
           coverageState: call.coverageState,
           ...(call.bypass !== undefined ? { bypass: call.bypass } : {}),

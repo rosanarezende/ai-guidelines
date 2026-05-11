@@ -1,33 +1,116 @@
 /**
  * [BR-CLI-LIVING-DOCS-SCHEMA] Schema do artefato de Living Documentation.
  *
- * Valida o tipo `LivingDocsEntry` e `LivingDocsArtifact` como contrato.
+ * Valida `LivingDocsSource` (item de `evidence[]`), `LivingDocsEntry` (com
+ * `evidence: SourceLocation[]` plural — modelo 1 rule → N evidências) e
+ * `LivingDocsArtifact` como contrato.
+ *
  * Aplica ADR 0002 (.core/governance/adrs/0002-coverage-state-enum.md):
  * coverageState é enum fechado { covered, pending, deprecated } com
  * mensagens determinísticas nomeando o conjunto válido.
  *
- * Schema canônico v0 — qualquer alteração exige incremento de schemaVersion
- * + ADR de extensão (ADR 0002 §6).
+ * Schema canônico v0 — sub-bloco 3.C.4-prep (2026-05-11) evolui v0
+ * in-place ganhando `evidence: SourceLocation[]`. Sem bump v0→v1: o
+ * artefato nunca foi escrito em produção, não há baseline para migrar.
  */
 import { GovernanceError } from "../shared/errors.js";
-import { assertValidEntry } from "./LivingDocsEntry.js";
+import { assertValidEntry, assertValidSource } from "./LivingDocsEntry.js";
 import { assertValidArtifact, LIVING_DOCS_SCHEMA_VERSION } from "./LivingDocsArtifact.js";
+
+const validSource = {
+  file: "src/domain/policy/Pillars.test.ts",
+  lineStart: 11,
+  lineEnd: 22,
+  testName: "Item denso sem workspacePath deve falhar",
+  coverageState: "covered" as const,
+};
 
 const validEntry = {
   ruleId: "BR-CLI-POLICY-01",
   title: "Item denso sem workspacePath deve falhar",
   boundedContext: "policy",
   domain: "WorkItemPolicy",
-  source: {
-    file: "src/domain/policy/Pillars.test.ts",
-    lineStart: 11,
-    lineEnd: 22,
-  },
+  evidence: [validSource],
   tags: ["policy", "dense"],
   coverageState: "covered" as const,
 };
 
-describe("LivingDocs — Schema de entrada [BR-CLI-LIVING-DOCS-SCHEMA]", () => {
+describe("LivingDocs — Schema de evidence item [BR-CLI-LIVING-DOCS-SCHEMA]", () => {
+  describe("LivingDocsSource válida", () => {
+    it("DADO source bem-formada ENTÃO assertValidSource não lança [BR-CLI-LIVING-DOCS-SCHEMA-17]", () => {
+      expect(() => assertValidSource(validSource)).not.toThrow();
+    });
+  });
+
+  describe("Campos obrigatórios de LivingDocsSource", () => {
+    it("DADO source SEM file ENTÃO LIVING_DOCS_INVALID_SOURCE [BR-CLI-LIVING-DOCS-SCHEMA-18]", () => {
+      const { file: _, ...incomplete } = validSource;
+      try {
+        assertValidSource(incomplete);
+        fail("deveria ter lançado");
+      } catch (e) {
+        expect((e as GovernanceError).code).toBe("LIVING_DOCS_INVALID_SOURCE");
+      }
+    });
+
+    it("DADO source SEM testName ENTÃO LIVING_DOCS_INVALID_SOURCE [BR-CLI-LIVING-DOCS-SCHEMA-19]", () => {
+      const { testName: _, ...incomplete } = validSource;
+      try {
+        assertValidSource(incomplete);
+        fail("deveria ter lançado");
+      } catch (e) {
+        expect((e as GovernanceError).code).toBe("LIVING_DOCS_INVALID_SOURCE");
+      }
+    });
+
+    it("DADO source COM lineStart > lineEnd ENTÃO LIVING_DOCS_INVALID_SOURCE [BR-CLI-LIVING-DOCS-SCHEMA-20]", () => {
+      try {
+        assertValidSource({ ...validSource, lineStart: 10, lineEnd: 5 });
+        fail("deveria ter lançado");
+      } catch (e) {
+        expect((e as GovernanceError).code).toBe("LIVING_DOCS_INVALID_SOURCE");
+      }
+    });
+
+    it("DADO source COM coverageState fora do enum ENTÃO LIVING_DOCS_INVALID_COVERAGE_STATE [BR-CLI-LIVING-DOCS-SCHEMA-21]", () => {
+      try {
+        assertValidSource({ ...validSource, coverageState: "wip" });
+        fail("deveria ter lançado");
+      } catch (e) {
+        expect((e as GovernanceError).code).toBe("LIVING_DOCS_INVALID_COVERAGE_STATE");
+      }
+    });
+
+    it("DADO source COM bypass mas coverageState != deprecated ENTÃO LIVING_DOCS_BYPASS_REQUIRES_DEPRECATED [BR-CLI-LIVING-DOCS-SCHEMA-22]", () => {
+      try {
+        assertValidSource({
+          ...validSource,
+          coverageState: "covered",
+          bypass: { until: "2026-12-31", ref: "INC-1", reason: "motivo válido aqui" },
+        });
+        fail("deveria ter lançado");
+      } catch (e) {
+        expect((e as GovernanceError).code).toBe("LIVING_DOCS_BYPASS_REQUIRES_DEPRECATED");
+      }
+    });
+
+    it("DADO source DEPRECATED COM bypass válido ENTÃO aceita [BR-CLI-LIVING-DOCS-SCHEMA-23]", () => {
+      expect(() =>
+        assertValidSource({
+          ...validSource,
+          coverageState: "deprecated",
+          bypass: {
+            until: "2026-12-31",
+            ref: "DEC-0021-C01",
+            reason: "regra em transição para Living Docs",
+          },
+        })
+      ).not.toThrow();
+    });
+  });
+});
+
+describe("LivingDocs — Schema de Entry com evidence[] [BR-CLI-LIVING-DOCS-SCHEMA]", () => {
   describe("Entry válida", () => {
     it("DADO entrada completa e bem-formada ENTÃO valida sem lançar [BR-CLI-LIVING-DOCS-SCHEMA-01]", () => {
       expect(() => assertValidEntry(validEntry)).not.toThrow();
@@ -38,10 +121,25 @@ describe("LivingDocs — Schema de entrada [BR-CLI-LIVING-DOCS-SCHEMA]", () => {
     it.each(["covered", "pending", "deprecated"] as const)(
       "DADO coverageState='%s' ENTÃO aceita [BR-CLI-LIVING-DOCS-SCHEMA-02]",
       (state) => {
+        const evidenceWithState =
+          state === "deprecated"
+            ? [
+                {
+                  ...validSource,
+                  coverageState: state,
+                  bypass: {
+                    until: "2026-12-31",
+                    ref: "INC-20260511-3",
+                    reason: "regra revisada após incidente, aguardando spec",
+                  },
+                },
+              ]
+            : [{ ...validSource, coverageState: state }];
         const entryWithBypass =
           state === "deprecated"
             ? {
                 ...validEntry,
+                evidence: evidenceWithState,
                 coverageState: state,
                 bypass: {
                   until: "2026-12-31",
@@ -49,7 +147,7 @@ describe("LivingDocs — Schema de entrada [BR-CLI-LIVING-DOCS-SCHEMA]", () => {
                   reason: "regra revisada após incidente, aguardando spec",
                 },
               }
-            : { ...validEntry, coverageState: state };
+            : { ...validEntry, evidence: evidenceWithState, coverageState: state };
         expect(() => assertValidEntry(entryWithBypass)).not.toThrow();
       }
     );
@@ -78,7 +176,7 @@ describe("LivingDocs — Schema de entrada [BR-CLI-LIVING-DOCS-SCHEMA]", () => {
       "title",
       "boundedContext",
       "domain",
-      "source",
+      "evidence",
       "tags",
       "coverageState",
     ] as const)(
@@ -98,48 +196,102 @@ describe("LivingDocs — Schema de entrada [BR-CLI-LIVING-DOCS-SCHEMA]", () => {
     );
   });
 
-  describe("source com line range válido", () => {
-    it("DADO source SEM file ENTÃO LIVING_DOCS_INVALID_SOURCE [BR-CLI-LIVING-DOCS-SCHEMA-05]", () => {
+  describe("evidence[] com cardinalidade e items válidos", () => {
+    it("DADO evidence vazio ENTÃO LIVING_DOCS_INVALID_EVIDENCE [BR-CLI-LIVING-DOCS-SCHEMA-24]", () => {
+      try {
+        assertValidEntry({ ...validEntry, evidence: [] });
+        fail("deveria ter lançado");
+      } catch (e) {
+        expect((e as GovernanceError).code).toBe("LIVING_DOCS_INVALID_EVIDENCE");
+      }
+    });
+
+    it("DADO evidence não-array ENTÃO LIVING_DOCS_INVALID_EVIDENCE [BR-CLI-LIVING-DOCS-SCHEMA-25]", () => {
+      try {
+        assertValidEntry({ ...validEntry, evidence: "not an array" });
+        fail("deveria ter lançado");
+      } catch (e) {
+        expect((e as GovernanceError).code).toBe("LIVING_DOCS_INVALID_EVIDENCE");
+      }
+    });
+
+    it("DADO evidence com item malformado ENTÃO LIVING_DOCS_INVALID_SOURCE [BR-CLI-LIVING-DOCS-SCHEMA-26]", () => {
       try {
         assertValidEntry({
           ...validEntry,
-          source: { lineStart: 1, lineEnd: 5 },
+          evidence: [validSource, { file: "x.ts" /* faltando campos */ }],
         });
         fail("deveria ter lançado");
       } catch (e) {
-        expect(e).toBeInstanceOf(GovernanceError);
         expect((e as GovernanceError).code).toBe("LIVING_DOCS_INVALID_SOURCE");
       }
     });
 
-    it("DADO lineStart > lineEnd ENTÃO LIVING_DOCS_INVALID_SOURCE [BR-CLI-LIVING-DOCS-SCHEMA-06]", () => {
-      try {
-        assertValidEntry({
-          ...validEntry,
-          source: { file: "x.test.ts", lineStart: 10, lineEnd: 5 },
-        });
-        fail("deveria ter lançado");
-      } catch (e) {
-        expect(e).toBeInstanceOf(GovernanceError);
-        expect((e as GovernanceError).code).toBe("LIVING_DOCS_INVALID_SOURCE");
-      }
-    });
-
-    it("DADO lineStart === lineEnd ENTÃO aceita (linha única) [BR-CLI-LIVING-DOCS-SCHEMA-07]", () => {
+    it("DADO entry com múltiplas evidências válidas ENTÃO aceita [BR-CLI-LIVING-DOCS-SCHEMA-27]", () => {
       expect(() =>
         assertValidEntry({
           ...validEntry,
-          source: { file: "x.test.ts", lineStart: 12, lineEnd: 12 },
+          evidence: [
+            { ...validSource, testName: "cenário GIVEN", lineStart: 11, lineEnd: 15 },
+            { ...validSource, testName: "cenário WHEN", lineStart: 17, lineEnd: 21 },
+            { ...validSource, testName: "cenário THEN", lineStart: 23, lineEnd: 27 },
+          ],
         })
       ).not.toThrow();
     });
   });
 
-  describe("Bypass declarado (ADR 0003)", () => {
+  describe("evidence inválido (line range, coverageState)", () => {
+    it("DADO evidence[0] SEM file ENTÃO LIVING_DOCS_INVALID_SOURCE [BR-CLI-LIVING-DOCS-SCHEMA-05]", () => {
+      const { file: _, ...incomplete } = validSource;
+      try {
+        assertValidEntry({ ...validEntry, evidence: [incomplete] });
+        fail("deveria ter lançado");
+      } catch (e) {
+        expect(e).toBeInstanceOf(GovernanceError);
+        expect((e as GovernanceError).code).toBe("LIVING_DOCS_INVALID_SOURCE");
+      }
+    });
+
+    it("DADO evidence[0] COM lineStart > lineEnd ENTÃO LIVING_DOCS_INVALID_SOURCE [BR-CLI-LIVING-DOCS-SCHEMA-06]", () => {
+      try {
+        assertValidEntry({
+          ...validEntry,
+          evidence: [{ ...validSource, lineStart: 10, lineEnd: 5 }],
+        });
+        fail("deveria ter lançado");
+      } catch (e) {
+        expect(e).toBeInstanceOf(GovernanceError);
+        expect((e as GovernanceError).code).toBe("LIVING_DOCS_INVALID_SOURCE");
+      }
+    });
+
+    it("DADO evidence[0] COM lineStart === lineEnd ENTÃO aceita (linha única) [BR-CLI-LIVING-DOCS-SCHEMA-07]", () => {
+      expect(() =>
+        assertValidEntry({
+          ...validEntry,
+          evidence: [{ ...validSource, lineStart: 12, lineEnd: 12 }],
+        })
+      ).not.toThrow();
+    });
+  });
+
+  describe("Bypass declarado no topo da entry (ADR 0003)", () => {
     it("DADO coverageState='deprecated' COM bypass válido ENTÃO aceita [BR-CLI-LIVING-DOCS-SCHEMA-08]", () => {
       expect(() =>
         assertValidEntry({
           ...validEntry,
+          evidence: [
+            {
+              ...validSource,
+              coverageState: "deprecated",
+              bypass: {
+                until: "2026-12-31",
+                ref: "DEC-0021-C01",
+                reason: "regra em transição para Living Docs",
+              },
+            },
+          ],
           coverageState: "deprecated",
           bypass: {
             until: "2026-12-31",
@@ -154,6 +306,7 @@ describe("LivingDocs — Schema de entrada [BR-CLI-LIVING-DOCS-SCHEMA]", () => {
       try {
         assertValidEntry({
           ...validEntry,
+          evidence: [{ ...validSource, coverageState: "deprecated" }],
           coverageState: "deprecated",
           bypass: { ref: "DEC-0021-C01", reason: "motivo válido aqui" },
         });
@@ -167,12 +320,9 @@ describe("LivingDocs — Schema de entrada [BR-CLI-LIVING-DOCS-SCHEMA]", () => {
       try {
         assertValidEntry({
           ...validEntry,
+          evidence: [{ ...validSource, coverageState: "deprecated" }],
           coverageState: "deprecated",
-          bypass: {
-            until: "31/12/2026", // não-ISO
-            ref: "DEC-0021-C01",
-            reason: "motivo válido",
-          },
+          bypass: { until: "31/12/2026", ref: "DEC-0021-C01", reason: "motivo válido" },
         });
         fail("deveria ter lançado");
       } catch (e) {
@@ -184,6 +334,7 @@ describe("LivingDocs — Schema de entrada [BR-CLI-LIVING-DOCS-SCHEMA]", () => {
       try {
         assertValidEntry({
           ...validEntry,
+          evidence: [{ ...validSource, coverageState: "deprecated" }],
           coverageState: "deprecated",
           bypass: { until: "2026-12-31", ref: "DEC-0021-C01", reason: "curto" },
         });
@@ -193,7 +344,7 @@ describe("LivingDocs — Schema de entrada [BR-CLI-LIVING-DOCS-SCHEMA]", () => {
       }
     });
 
-    it("DADO bypass em entry com coverageState != 'deprecated' ENTÃO LIVING_DOCS_BYPASS_REQUIRES_DEPRECATED [BR-CLI-LIVING-DOCS-SCHEMA-12]", () => {
+    it("DADO bypass no topo COM coverageState != 'deprecated' ENTÃO LIVING_DOCS_BYPASS_REQUIRES_DEPRECATED [BR-CLI-LIVING-DOCS-SCHEMA-12]", () => {
       try {
         assertValidEntry({
           ...validEntry,
@@ -222,7 +373,13 @@ describe("LivingDocs — Schema do Artifact [BR-CLI-LIVING-DOCS-SCHEMA]", () => 
     expect(() => assertValidArtifact(validArtifact)).not.toThrow();
   });
 
-  it("DADO artifact com entries duplicadas (mesmo ruleId) ENTÃO LIVING_DOCS_DUPLICATE_RULE_ID [BR-CLI-LIVING-DOCS-SCHEMA-14]", () => {
+  it("DADO artifact com entries não-agregadas (mesmo ruleId) ENTÃO LIVING_DOCS_DUPLICATE_RULE_ID — rede de segurança pós-canonicalize [BR-CLI-LIVING-DOCS-SCHEMA-14]", () => {
+    // No modelo agregado o `canonicalizeArtifact` agrupa entries cruas
+    // antes de chegar aqui. Esta asserção continua sendo a rede de
+    // segurança: se um caller injetar entries pré-validate duplicadas
+    // (bug de canonicalize), o erro estável `LIVING_DOCS_DUPLICATE_RULE_ID`
+    // dispara. Operacionalmente, este erro NÃO é mais emitido em fluxo
+    // normal — o canonicalize garante unicidade por construção.
     try {
       assertValidArtifact({
         ...validArtifact,

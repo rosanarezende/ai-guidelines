@@ -46,9 +46,9 @@ describe("Infra — TypeScriptRuleExtractor (source mapping) [BR-CLI-LIVING-DOCS
         `it("[BR-CLI-A-01] x", () => {});`
       );
       const [entry] = new TypeScriptRuleExtractor(root).extract([file]);
-      expect(entry.source.file).toBe("src/domain/policy/Pillars.test.ts");
+      expect(entry.evidence[0].file).toBe("src/domain/policy/Pillars.test.ts");
       // Sem backslash mesmo no Windows:
-      expect(entry.source.file).not.toContain("\\");
+      expect(entry.evidence[0].file).not.toContain("\\");
     });
   });
 
@@ -61,8 +61,8 @@ describe("Infra — TypeScriptRuleExtractor (source mapping) [BR-CLI-LIVING-DOCS
         `// header\nit("[BR-CLI-A-01] x", () => {});\n// trailer\n`
       );
       const [entry] = new TypeScriptRuleExtractor(root).extract([file]);
-      expect(entry.source.lineStart).toBe(2);
-      expect(entry.source.lineEnd).toBe(2);
+      expect(entry.evidence[0].lineStart).toBe(2);
+      expect(entry.evidence[0].lineEnd).toBe(2);
     });
 
     it("DADO it() multi-linha ENTÃO lineStart é a linha do `it` e lineEnd a do `)` [BR-CLI-LIVING-DOCS-SOURCEMAP-03]", () => {
@@ -77,8 +77,8 @@ describe("Infra — TypeScriptRuleExtractor (source mapping) [BR-CLI-LIVING-DOCS
       ].join("\n");
       const file = writeFile(root, "src/domain/x/Foo.test.ts", content);
       const [entry] = new TypeScriptRuleExtractor(root).extract([file]);
-      expect(entry.source.lineStart).toBe(2); // linha do `it(`
-      expect(entry.source.lineEnd).toBe(7); // linha do `);`
+      expect(entry.evidence[0].lineStart).toBe(2); // linha do `it(`
+      expect(entry.evidence[0].lineEnd).toBe(7); // linha do `);`
     });
 
     it("DADO múltiplos it() ENTÃO cada um tem ranges não-sobrepostos e crescentes [BR-CLI-LIVING-DOCS-SOURCEMAP-04]", () => {
@@ -92,12 +92,14 @@ describe("Infra — TypeScriptRuleExtractor (source mapping) [BR-CLI-LIVING-DOCS
       const file = writeFile(root, "src/domain/x/Foo.test.ts", content);
       const entries = new TypeScriptRuleExtractor(root).extract([file]);
       expect(entries).toHaveLength(3);
-      expect(entries[0].source.lineStart).toBe(2);
-      expect(entries[1].source.lineStart).toBe(3);
-      expect(entries[2].source.lineStart).toBe(4);
+      expect(entries[0].evidence[0].lineStart).toBe(2);
+      expect(entries[1].evidence[0].lineStart).toBe(3);
+      expect(entries[2].evidence[0].lineStart).toBe(4);
       // ranges crescentes:
       for (let i = 0; i < entries.length - 1; i++) {
-        expect(entries[i].source.lineEnd).toBeLessThanOrEqual(entries[i + 1].source.lineStart);
+        expect(entries[i].evidence[0].lineEnd).toBeLessThanOrEqual(
+          entries[i + 1].evidence[0].lineStart
+        );
       }
     });
   });

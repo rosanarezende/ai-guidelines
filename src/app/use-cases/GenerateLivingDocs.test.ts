@@ -16,7 +16,15 @@ function makeEntry(ruleId: string, overrides: Partial<LivingDocsEntry> = {}): Li
     title: "x",
     boundedContext: "policy",
     domain: "X",
-    source: { file: "src/x.test.ts", lineStart: 1, lineEnd: 1 },
+    evidence: [
+      {
+        file: "src/x.test.ts",
+        lineStart: 1,
+        lineEnd: 1,
+        testName: "x",
+        coverageState: "covered",
+      },
+    ],
     tags: [],
     coverageState: "covered",
     ...overrides,
@@ -54,6 +62,16 @@ describe("App — GenerateLivingDocs [BR-CLI-LIVING-DOCS-GENERATE]", () => {
     const useCase = new GenerateLivingDocs({
       extractor: new StubExtractor([
         makeEntry("BR-CLI-DEP-01", {
+          evidence: [
+            {
+              file: "src/x.test.ts",
+              lineStart: 1,
+              lineEnd: 1,
+              testName: "deprecated",
+              coverageState: "deprecated",
+              bypass: { until: "2026-12-31", ref: "INC-1", reason: "motivo válido aqui" },
+            },
+          ],
           coverageState: "deprecated",
           bypass: { until: "2026-12-31", ref: "INC-1", reason: "motivo válido aqui" },
         }),

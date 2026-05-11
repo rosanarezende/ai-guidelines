@@ -15,7 +15,15 @@ const baseEntry: LivingDocsEntry = {
   title: "descrição",
   boundedContext: "policy",
   domain: "Pillars",
-  source: { file: "src/domain/policy/Pillars.test.ts", lineStart: 10, lineEnd: 15 },
+  evidence: [
+    {
+      file: "src/domain/policy/Pillars.test.ts",
+      lineStart: 10,
+      lineEnd: 15,
+      testName: "descrição",
+      coverageState: "covered",
+    },
+  ],
   tags: ["policy", "dense"],
   coverageState: "covered",
 };
@@ -39,6 +47,20 @@ describe("Infra — livingDocsSerializer [BR-CLI-LIVING-DOCS-SERIALIZER]", () =>
           {
             ...baseEntry,
             ruleId: "BR-CLI-DEP-01",
+            evidence: [
+              {
+                file: "src/domain/policy/Pillars.test.ts",
+                lineStart: 10,
+                lineEnd: 15,
+                testName: "regra deprecated",
+                coverageState: "deprecated",
+                bypass: {
+                  until: "2026-12-31",
+                  ref: "INC-20260511-3",
+                  reason: "regra em transição",
+                },
+              },
+            ],
             coverageState: "deprecated",
             bypass: {
               until: "2026-12-31",
@@ -122,6 +144,20 @@ describe("Infra — livingDocsSerializer [BR-CLI-LIVING-DOCS-SERIALIZER]", () =>
           {
             ...baseEntry,
             ruleId: "BR-CLI-DEP-01",
+            evidence: [
+              {
+                file: "src/domain/policy/Pillars.test.ts",
+                lineStart: 10,
+                lineEnd: 15,
+                testName: "round trip deprecated",
+                coverageState: "deprecated" as const,
+                bypass: {
+                  until: "2026-12-31",
+                  ref: "DEC-0021-C01",
+                  reason: "motivo válido aqui",
+                },
+              },
+            ],
             coverageState: "deprecated" as const,
             bypass: {
               until: "2026-12-31",

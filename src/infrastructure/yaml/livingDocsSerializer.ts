@@ -50,6 +50,11 @@ export function parseLivingDocs(yamlText: string): LivingDocsArtifact {
  * Projeção para objeto plano com ordem canônica de chaves. O `yaml@2`
  * preserva a ordem de inserção do objeto JS; controlar essa ordem aqui
  * garante saída byte-a-byte estável.
+ *
+ * Ordem canônica do entry: ruleId → title → boundedContext → domain →
+ * evidence → tags → coverageState → bypass (opcional). Cada item de
+ * `evidence` segue: file → lineStart → lineEnd → testName → coverageState
+ * → bypass (opcional).
  */
 function toPlainObject(artifact: LivingDocsArtifact): Record<string, unknown> {
   return {
@@ -60,11 +65,23 @@ function toPlainObject(artifact: LivingDocsArtifact): Record<string, unknown> {
         title: entry.title,
         boundedContext: entry.boundedContext,
         domain: entry.domain,
-        source: {
-          file: entry.source.file,
-          lineStart: entry.source.lineStart,
-          lineEnd: entry.source.lineEnd,
-        },
+        evidence: entry.evidence.map((source) => {
+          const ev: Record<string, unknown> = {
+            file: source.file,
+            lineStart: source.lineStart,
+            lineEnd: source.lineEnd,
+            testName: source.testName,
+            coverageState: source.coverageState,
+          };
+          if (source.bypass !== undefined) {
+            ev.bypass = {
+              until: source.bypass.until,
+              ref: source.bypass.ref,
+              reason: source.bypass.reason,
+            };
+          }
+          return ev;
+        }),
         tags: [...entry.tags],
         coverageState: entry.coverageState,
       };

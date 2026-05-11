@@ -19,7 +19,15 @@ const baseEntry: Omit<LivingDocsEntry, "ruleId" | "tags"> = {
   title: "regra base",
   boundedContext: "policy",
   domain: "WorkItemPolicy",
-  source: { file: "src/x.test.ts", lineStart: 1, lineEnd: 5 },
+  evidence: [
+    {
+      file: "src/x.test.ts",
+      lineStart: 1,
+      lineEnd: 5,
+      testName: "regra base",
+      coverageState: "covered",
+    },
+  ],
   coverageState: "covered",
 };
 
