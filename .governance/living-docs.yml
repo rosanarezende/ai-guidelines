@@ -56,6 +56,146 @@ entries:
     tags:
       - "Aplicação — Caso de Uso: PromoteWorkItem [BR-CLI-APP]"
     coverageState: covered
+  - ruleId: BR-CLI-ASSEMBLE-01
+    title: DADO recipe com 2 slots ENTÃO compõe Markdown na ordem dos slots
+    boundedContext: use-cases
+    domain: AssembleArtifact
+    evidence:
+      - file: src/app/use-cases/AssembleArtifact.test.ts
+        lineStart: 123
+        lineEnd: 137
+        testName: DADO recipe com 2 slots ENTÃO compõe Markdown na ordem dos slots
+        coverageState: covered
+    tags:
+      - AssembleArtifact — composição determinística [BR-CLI-ASSEMBLE]
+      - Happy path
+    coverageState: covered
+  - ruleId: BR-CLI-ASSEMBLE-02
+    title: DADO recipe com 3 slots ENTÃO compõe todos na ordem
+    boundedContext: use-cases
+    domain: AssembleArtifact
+    evidence:
+      - file: src/app/use-cases/AssembleArtifact.test.ts
+        lineStart: 139
+        lineEnd: 159
+        testName: DADO recipe com 3 slots ENTÃO compõe todos na ordem
+        coverageState: covered
+    tags:
+      - AssembleArtifact — composição determinística [BR-CLI-ASSEMBLE]
+      - Happy path
+    coverageState: covered
+  - ruleId: BR-CLI-ASSEMBLE-03
+    title: DADO recipe válida ENTÃO metadata reflete artifactKind, workflowType, language
+    boundedContext: use-cases
+    domain: AssembleArtifact
+    evidence:
+      - file: src/app/use-cases/AssembleArtifact.test.ts
+        lineStart: 161
+        lineEnd: 178
+        testName: DADO recipe válida ENTÃO metadata reflete artifactKind, workflowType, language
+        coverageState: covered
+    tags:
+      - AssembleArtifact — composição determinística [BR-CLI-ASSEMBLE]
+      - Happy path
+    coverageState: covered
+  - ruleId: BR-CLI-ASSEMBLE-04
+    title: DADO slot com múltiplos partials ENTÃO usa o primeiro (Q2 first-wins)
+    boundedContext: use-cases
+    domain: AssembleArtifact
+    evidence:
+      - file: src/app/use-cases/AssembleArtifact.test.ts
+        lineStart: 180
+        lineEnd: 196
+        testName: DADO slot com múltiplos partials ENTÃO usa o primeiro (Q2 first-wins)
+        coverageState: covered
+    tags:
+      - AssembleArtifact — composição determinística [BR-CLI-ASSEMBLE]
+      - Happy path
+    coverageState: covered
+  - ruleId: BR-CLI-ASSEMBLE-05
+    title: DADO mesma recipe e mesmos partials QUANDO executado 2× ENTÃO output idêntico
+    boundedContext: use-cases
+    domain: AssembleArtifact
+    evidence:
+      - file: src/app/use-cases/AssembleArtifact.test.ts
+        lineStart: 200
+        lineEnd: 214
+        testName: DADO mesma recipe e mesmos partials QUANDO executado 2× ENTÃO output idêntico
+        coverageState: covered
+    tags:
+      - AssembleArtifact — composição determinística [BR-CLI-ASSEMBLE]
+      - Determinismo — mesma entrada → mesmo output byte-a-byte
+    coverageState: covered
+  - ruleId: BR-CLI-ASSEMBLE-06
+    title: DADO output ENTÃO termina com newline único (sem trailing extras)
+    boundedContext: use-cases
+    domain: AssembleArtifact
+    evidence:
+      - file: src/app/use-cases/AssembleArtifact.test.ts
+        lineStart: 216
+        lineEnd: 229
+        testName: DADO output ENTÃO termina com newline único (sem trailing extras)
+        coverageState: covered
+    tags:
+      - AssembleArtifact — composição determinística [BR-CLI-ASSEMBLE]
+      - Determinismo — mesma entrada → mesmo output byte-a-byte
+    coverageState: covered
+  - ruleId: BR-CLI-ASSEMBLE-07
+    title: DADO recipe inexistente ENTÃO RECIPE_NOT_FOUND propagado
+    boundedContext: use-cases
+    domain: AssembleArtifact
+    evidence:
+      - file: src/app/use-cases/AssembleArtifact.test.ts
+        lineStart: 233
+        lineEnd: 244
+        testName: DADO recipe inexistente ENTÃO RECIPE_NOT_FOUND propagado
+        coverageState: covered
+    tags:
+      - AssembleArtifact — composição determinística [BR-CLI-ASSEMBLE]
+      - Erros — propagação via ports
+    coverageState: covered
+  - ruleId: BR-CLI-ASSEMBLE-08
+    title: DADO partial inexistente ENTÃO RECIPE_PARTIAL_NOT_FOUND propagado
+    boundedContext: use-cases
+    domain: AssembleArtifact
+    evidence:
+      - file: src/app/use-cases/AssembleArtifact.test.ts
+        lineStart: 246
+        lineEnd: 261
+        testName: DADO partial inexistente ENTÃO RECIPE_PARTIAL_NOT_FOUND propagado
+        coverageState: covered
+    tags:
+      - AssembleArtifact — composição determinística [BR-CLI-ASSEMBLE]
+      - Erros — propagação via ports
+    coverageState: covered
+  - ruleId: BR-CLI-ASSEMBLE-09
+    title: DADO recipe inválida no store ENTÃO assertValidRecipe lança
+    boundedContext: use-cases
+    domain: AssembleArtifact
+    evidence:
+      - file: src/app/use-cases/AssembleArtifact.test.ts
+        lineStart: 263
+        lineEnd: 281
+        testName: DADO recipe inválida no store ENTÃO assertValidRecipe lança
+        coverageState: covered
+    tags:
+      - AssembleArtifact — composição determinística [BR-CLI-ASSEMBLE]
+      - Erros — propagação via ports
+    coverageState: covered
+  - ruleId: BR-CLI-ASSEMBLE-10
+    title: DADO partial com placeholder ENTÃO assertValidPartialMarkdown lança
+    boundedContext: use-cases
+    domain: AssembleArtifact
+    evidence:
+      - file: src/app/use-cases/AssembleArtifact.test.ts
+        lineStart: 283
+        lineEnd: 301
+        testName: DADO partial com placeholder ENTÃO assertValidPartialMarkdown lança
+        coverageState: covered
+    tags:
+      - AssembleArtifact — composição determinística [BR-CLI-ASSEMBLE]
+      - Erros — propagação via ports
+    coverageState: covered
   - ruleId: BR-CLI-LIVING-DOCS-BYPASS-01
     title: DADO comentário canônico ENTÃO findBypassDirective retorna guardId
     boundedContext: living-docs
@@ -2279,7 +2419,7 @@ entries:
     evidence:
       - file: src/domain/templates/Partial.test.ts
         lineStart: 64
-        lineEnd: 68
+        lineEnd: 66
         testName: DADO partial começando com lista ENTÃO aceita
         coverageState: covered
     tags:
@@ -2292,8 +2432,8 @@ entries:
     domain: Partial
     evidence:
       - file: src/domain/templates/Partial.test.ts
-        lineStart: 72
-        lineEnd: 82
+        lineStart: 70
+        lineEnd: 80
         testName: DADO conteúdo vazio ENTÃO RECIPE_PARTIAL_INVALID_MARKDOWN
         coverageState: covered
     tags:
@@ -2306,8 +2446,8 @@ entries:
     domain: Partial
     evidence:
       - file: src/domain/templates/Partial.test.ts
-        lineStart: 84
-        lineEnd: 91
+        lineStart: 82
+        lineEnd: 89
         testName: DADO conteúdo apenas whitespace ENTÃO RECIPE_PARTIAL_INVALID_MARKDOWN
         coverageState: covered
     tags:
@@ -2320,8 +2460,8 @@ entries:
     domain: Partial
     evidence:
       - file: src/domain/templates/Partial.test.ts
-        lineStart: 93
-        lineEnd: 102
+        lineStart: 91
+        lineEnd: 100
         testName: DADO bloco de código não-fechado ENTÃO RECIPE_PARTIAL_INVALID_MARKDOWN
         coverageState: covered
     tags:
@@ -2334,8 +2474,8 @@ entries:
     domain: Partial
     evidence:
       - file: src/domain/templates/Partial.test.ts
-        lineStart: 106
-        lineEnd: 118
+        lineStart: 104
+        lineEnd: 116
         testName: DADO conteúdo com {{variavel}} ENTÃO RECIPE_PARTIAL_HAS_PLACEHOLDER
         coverageState: covered
     tags:
@@ -2348,8 +2488,8 @@ entries:
     domain: Partial
     evidence:
       - file: src/domain/templates/Partial.test.ts
-        lineStart: 120
-        lineEnd: 128
+        lineStart: 118
+        lineEnd: 126
         testName: DADO conteúdo com <%= expr %> ENTÃO RECIPE_PARTIAL_HAS_PLACEHOLDER
         coverageState: covered
     tags:
@@ -2362,8 +2502,8 @@ entries:
     domain: Partial
     evidence:
       - file: src/domain/templates/Partial.test.ts
-        lineStart: 130
-        lineEnd: 138
+        lineStart: 128
+        lineEnd: 136
         testName: DADO conteúdo com ${interpolacao} ENTÃO RECIPE_PARTIAL_HAS_PLACEHOLDER
         coverageState: covered
     tags:
@@ -2376,8 +2516,8 @@ entries:
     domain: Partial
     evidence:
       - file: src/domain/templates/Partial.test.ts
-        lineStart: 140
-        lineEnd: 145
+        lineStart: 138
+        lineEnd: 141
         testName: DADO {{ dentro de bloco de código ENTÃO aceita (código legítimo)
         coverageState: covered
     tags:
@@ -2390,8 +2530,8 @@ entries:
     domain: Partial
     evidence:
       - file: src/domain/templates/Partial.test.ts
-        lineStart: 149
-        lineEnd: 160
+        lineStart: 145
+        lineEnd: 156
         testName: DADO conteúdo com generatedAt ENTÃO RECIPE_PARTIAL_HAS_TIMESTAMP
         coverageState: covered
     tags:
@@ -2404,8 +2544,8 @@ entries:
     domain: Partial
     evidence:
       - file: src/domain/templates/Partial.test.ts
-        lineStart: 162
-        lineEnd: 170
+        lineStart: 158
+        lineEnd: 166
         testName: DADO conteúdo com createdAt ENTÃO RECIPE_PARTIAL_HAS_TIMESTAMP
         coverageState: covered
     tags:
@@ -2418,8 +2558,8 @@ entries:
     domain: Partial
     evidence:
       - file: src/domain/templates/Partial.test.ts
-        lineStart: 172
-        lineEnd: 180
+        lineStart: 168
+        lineEnd: 176
         testName: DADO conteúdo com updatedAt ENTÃO RECIPE_PARTIAL_HAS_TIMESTAMP
         coverageState: covered
     tags:
@@ -2432,8 +2572,8 @@ entries:
     domain: Partial
     evidence:
       - file: src/domain/templates/Partial.test.ts
-        lineStart: 182
-        lineEnd: 188
+        lineStart: 178
+        lineEnd: 181
         testName: DADO timestamp mencionado em texto descritivo (não campo) ENTÃO aceita
         coverageState: covered
     tags:
