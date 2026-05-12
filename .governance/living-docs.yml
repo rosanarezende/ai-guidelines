@@ -1,0 +1,2218 @@
+schemaVersion: v0
+entries:
+  - ruleId: BR-CLI-APP-01
+    title: DADO draft inválido pela policy ENTÃO falha ANTES de tocar registry/filesystem
+    boundedContext: use-cases
+    domain: RegisterItem
+    evidence:
+      - file: src/app/use-cases/RegisterItem.test.ts
+        lineStart: 25
+        lineEnd: 36
+        testName: DADO draft inválido pela policy ENTÃO falha ANTES de tocar registry/filesystem
+        coverageState: covered
+      - file: src/app/use-cases/RegisterItem.test.ts
+        lineStart: 38
+        lineEnd: 47
+        testName: DADO draft válido ENTÃO registry add precede workspace create
+        coverageState: covered
+      - file: src/app/use-cases/RegisterItem.test.ts
+        lineStart: 49
+        lineEnd: 61
+        testName: DADO falha do workspace ENTÃO faz rollback do registry
+        coverageState: covered
+      - file: src/app/use-cases/RegisterItem.test.ts
+        lineStart: 63
+        lineEnd: 74
+        testName: DADO falha do registry ENTÃO NÃO cria workspace
+        coverageState: covered
+      - file: src/app/use-cases/RegisterItem.test.ts
+        lineStart: 76
+        lineEnd: 80
+        testName: DADO item virtual ('proposal') ENTÃO NÃO toca workspace
+        coverageState: covered
+    tags:
+      - "Aplicação — Caso de Uso: RegisterWorkItem [BR-CLI-APP]"
+    coverageState: covered
+  - ruleId: BR-CLI-APP-02
+    title: DADO uma 'proposal' madura QUANDO promovida a 'spec' ENTÃO atualiza metadados E cria workspace
+    boundedContext: use-cases
+    domain: PromoteItem
+    evidence:
+      - file: src/app/use-cases/PromoteItem.test.ts
+        lineStart: 34
+        lineEnd: 55
+        testName: DADO uma 'proposal' madura QUANDO promovida a 'spec' ENTÃO atualiza metadados E cria workspace
+        coverageState: covered
+      - file: src/app/use-cases/PromoteItem.test.ts
+        lineStart: 57
+        lineEnd: 78
+        testName: DADO um 'experiment' won QUANDO promovido a 'spec' ENTÃO herda hypothesis e métricas
+        coverageState: covered
+      - file: src/app/use-cases/PromoteItem.test.ts
+        lineStart: 80
+        lineEnd: 97
+        testName: DADO uma 'proposal' em status inválido ENTÃO aborta com mensagem clara de maturidade
+        coverageState: covered
+    tags:
+      - "Aplicação — Caso de Uso: PromoteWorkItem [BR-CLI-APP]"
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-BYPASS-01
+    title: DADO comentário canônico ENTÃO findBypassDirective retorna guardId
+    boundedContext: living-docs
+    domain: BypassDirective
+    evidence:
+      - file: src/domain/living-docs/BypassDirective.test.ts
+        lineStart: 19
+        lineEnd: 24
+        testName: DADO comentário canônico ENTÃO findBypassDirective retorna guardId
+        coverageState: covered
+    tags:
+      - Domínio — BypassDirective [BR-CLI-LIVING-DOCS-BYPASS]
+      - Reconhecimento da diretiva
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-BYPASS-02
+    title: DADO comentário sem padrão ENTÃO findBypassDirective retorna null
+    boundedContext: living-docs
+    domain: BypassDirective
+    evidence:
+      - file: src/domain/living-docs/BypassDirective.test.ts
+        lineStart: 26
+        lineEnd: 29
+        testName: DADO comentário sem padrão ENTÃO findBypassDirective retorna null
+        coverageState: covered
+    tags:
+      - Domínio — BypassDirective [BR-CLI-LIVING-DOCS-BYPASS]
+      - Reconhecimento da diretiva
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-BYPASS-03
+    title: DADO diretiva de outro guard (boundary-lock) ENTÃO findBypassDirective reconhece o guardId
+    boundedContext: living-docs
+    domain: BypassDirective
+    evidence:
+      - file: src/domain/living-docs/BypassDirective.test.ts
+        lineStart: 31
+        lineEnd: 35
+        testName: DADO diretiva de outro guard (boundary-lock) ENTÃO findBypassDirective reconhece o guardId
+        coverageState: covered
+    tags:
+      - Domínio — BypassDirective [BR-CLI-LIVING-DOCS-BYPASS]
+      - Reconhecimento da diretiva
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-BYPASS-04
+    title: DADO diretiva completa válida ENTÃO retorna bypass tipado
+    boundedContext: living-docs
+    domain: BypassDirective
+    evidence:
+      - file: src/domain/living-docs/BypassDirective.test.ts
+        lineStart: 39
+        lineEnd: 49
+        testName: DADO diretiva completa válida ENTÃO retorna bypass tipado
+        coverageState: covered
+    tags:
+      - Domínio — BypassDirective [BR-CLI-LIVING-DOCS-BYPASS]
+      - Parsing válido
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-BYPASS-05
+    title: DADO diretiva embutida em comentário de linha ENTÃO parseBypassDirective reconhece
+    boundedContext: living-docs
+    domain: BypassDirective
+    evidence:
+      - file: src/domain/living-docs/BypassDirective.test.ts
+        lineStart: 51
+        lineEnd: 55
+        testName: DADO diretiva embutida em comentário de linha ENTÃO parseBypassDirective reconhece
+        coverageState: covered
+    tags:
+      - Domínio — BypassDirective [BR-CLI-LIVING-DOCS-BYPASS]
+      - Parsing válido
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-BYPASS-06
+    title: DADO ausência de diretiva ENTÃO retorna null (não-erro)
+    boundedContext: living-docs
+    domain: BypassDirective
+    evidence:
+      - file: src/domain/living-docs/BypassDirective.test.ts
+        lineStart: 57
+        lineEnd: 59
+        testName: DADO ausência de diretiva ENTÃO retorna null (não-erro)
+        coverageState: covered
+    tags:
+      - Domínio — BypassDirective [BR-CLI-LIVING-DOCS-BYPASS]
+      - Parsing válido
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-BYPASS-07
+    title: DADO diretiva SEM 'until' ENTÃO LIVING_DOCS_BYPASS_MALFORMED
+    boundedContext: living-docs
+    domain: BypassDirective
+    evidence:
+      - file: src/domain/living-docs/BypassDirective.test.ts
+        lineStart: 63
+        lineEnd: 74
+        testName: DADO diretiva SEM 'until' ENTÃO LIVING_DOCS_BYPASS_MALFORMED
+        coverageState: covered
+    tags:
+      - Campos obrigatórios
+      - Domínio — BypassDirective [BR-CLI-LIVING-DOCS-BYPASS]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-BYPASS-08
+    title: DADO diretiva SEM 'ref' ENTÃO LIVING_DOCS_BYPASS_MALFORMED
+    boundedContext: living-docs
+    domain: BypassDirective
+    evidence:
+      - file: src/domain/living-docs/BypassDirective.test.ts
+        lineStart: 76
+        lineEnd: 85
+        testName: DADO diretiva SEM 'ref' ENTÃO LIVING_DOCS_BYPASS_MALFORMED
+        coverageState: covered
+    tags:
+      - Campos obrigatórios
+      - Domínio — BypassDirective [BR-CLI-LIVING-DOCS-BYPASS]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-BYPASS-09
+    title: DADO diretiva SEM 'reason' ENTÃO LIVING_DOCS_BYPASS_MALFORMED
+    boundedContext: living-docs
+    domain: BypassDirective
+    evidence:
+      - file: src/domain/living-docs/BypassDirective.test.ts
+        lineStart: 87
+        lineEnd: 96
+        testName: DADO diretiva SEM 'reason' ENTÃO LIVING_DOCS_BYPASS_MALFORMED
+        coverageState: covered
+    tags:
+      - Campos obrigatórios
+      - Domínio — BypassDirective [BR-CLI-LIVING-DOCS-BYPASS]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-BYPASS-10
+    title: DADO 'reason' < 8 caracteres significativos ENTÃO LIVING_DOCS_BYPASS_MALFORMED
+    boundedContext: living-docs
+    domain: BypassDirective
+    evidence:
+      - file: src/domain/living-docs/BypassDirective.test.ts
+        lineStart: 98
+        lineEnd: 106
+        testName: DADO 'reason' < 8 caracteres significativos ENTÃO LIVING_DOCS_BYPASS_MALFORMED
+        coverageState: covered
+    tags:
+      - Campos obrigatórios
+      - Domínio — BypassDirective [BR-CLI-LIVING-DOCS-BYPASS]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-BYPASS-11
+    title: DADO 'until' com formato não-ISO ENTÃO LIVING_DOCS_BYPASS_MALFORMED
+    boundedContext: living-docs
+    domain: BypassDirective
+    evidence:
+      - file: src/domain/living-docs/BypassDirective.test.ts
+        lineStart: 108
+        lineEnd: 116
+        testName: DADO 'until' com formato não-ISO ENTÃO LIVING_DOCS_BYPASS_MALFORMED
+        coverageState: covered
+    tags:
+      - Campos obrigatórios
+      - Domínio — BypassDirective [BR-CLI-LIVING-DOCS-BYPASS]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-BYPASS-12
+    title: DADO 'until' em data PASSADA ENTÃO LIVING_DOCS_BYPASS_EXPIRED
+    boundedContext: living-docs
+    domain: BypassDirective
+    evidence:
+      - file: src/domain/living-docs/BypassDirective.test.ts
+        lineStart: 120
+        lineEnd: 132
+        testName: DADO 'until' em data PASSADA ENTÃO LIVING_DOCS_BYPASS_EXPIRED
+        coverageState: covered
+    tags:
+      - Domínio — BypassDirective [BR-CLI-LIVING-DOCS-BYPASS]
+      - Expiração
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-BYPASS-13
+    title: DADO 'until' IGUAL ao today ENTÃO LIVING_DOCS_BYPASS_EXPIRED (estritamente futuro)
+    boundedContext: living-docs
+    domain: BypassDirective
+    evidence:
+      - file: src/domain/living-docs/BypassDirective.test.ts
+        lineStart: 134
+        lineEnd: 142
+        testName: DADO 'until' IGUAL ao today ENTÃO LIVING_DOCS_BYPASS_EXPIRED (estritamente futuro)
+        coverageState: covered
+    tags:
+      - Domínio — BypassDirective [BR-CLI-LIVING-DOCS-BYPASS]
+      - Expiração
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-BYPASS-14
+    title: DADO 'until' um dia depois do today ENTÃO aceita
+    boundedContext: living-docs
+    domain: BypassDirective
+    evidence:
+      - file: src/domain/living-docs/BypassDirective.test.ts
+        lineStart: 144
+        lineEnd: 148
+        testName: DADO 'until' um dia depois do today ENTÃO aceita
+        coverageState: covered
+    tags:
+      - Domínio — BypassDirective [BR-CLI-LIVING-DOCS-BYPASS]
+      - Expiração
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-BYPASS-15
+    title: DADO expectedGuardId='living-docs' E diretiva de outro guard ENTÃO retorna null (não-aplica)
+    boundedContext: living-docs
+    domain: BypassDirective
+    evidence:
+      - file: src/domain/living-docs/BypassDirective.test.ts
+        lineStart: 152
+        lineEnd: 159
+        testName: DADO expectedGuardId='living-docs' E diretiva de outro guard ENTÃO retorna null (não-aplica)
+        coverageState: covered
+    tags:
+      - Domínio — BypassDirective [BR-CLI-LIVING-DOCS-BYPASS]
+      - Filtro por guard-id esperado (uso pelo extractor)
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-BYPASS-16
+    title: DADO expectedGuardId='living-docs' E diretiva do mesmo guard ENTÃO parseia normalmente
+    boundedContext: living-docs
+    domain: BypassDirective
+    evidence:
+      - file: src/domain/living-docs/BypassDirective.test.ts
+        lineStart: 161
+        lineEnd: 168
+        testName: DADO expectedGuardId='living-docs' E diretiva do mesmo guard ENTÃO parseia normalmente
+        coverageState: covered
+    tags:
+      - Domínio — BypassDirective [BR-CLI-LIVING-DOCS-BYPASS]
+      - Filtro por guard-id esperado (uso pelo extractor)
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-CHECK-01
+    title: DADO YAML commitado IDÊNTICO ao gerado ENTÃO drift=false
+    boundedContext: use-cases
+    domain: CheckLivingDocs
+    evidence:
+      - file: src/app/use-cases/CheckLivingDocs.test.ts
+        lineStart: 60
+        lineEnd: 70
+        testName: DADO YAML commitado IDÊNTICO ao gerado ENTÃO drift=false
+        coverageState: covered
+    tags:
+      - App — CheckLivingDocs [BR-CLI-LIVING-DOCS-CHECK]
+      - Sem drift (committed == generated)
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-CHECK-02
+    title: DADO regra nova adicionada SEM regenerar o artefato ENTÃO drift=true com mensagem nomeando a regra
+    boundedContext: use-cases
+    domain: CheckLivingDocs
+    evidence:
+      - file: src/app/use-cases/CheckLivingDocs.test.ts
+        lineStart: 74
+        lineEnd: 85
+        testName: DADO regra nova adicionada SEM regenerar o artefato ENTÃO drift=true com mensagem nomeando a regra
+        coverageState: covered
+    tags:
+      - App — CheckLivingDocs [BR-CLI-LIVING-DOCS-CHECK]
+      - Drift detectado (committed != generated)
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-CHECK-03
+    title: DADO regra renomeada SEM regenerar ENTÃO drift=true
+    boundedContext: use-cases
+    domain: CheckLivingDocs
+    evidence:
+      - file: src/app/use-cases/CheckLivingDocs.test.ts
+        lineStart: 87
+        lineEnd: 96
+        testName: DADO regra renomeada SEM regenerar ENTÃO drift=true
+        coverageState: covered
+    tags:
+      - App — CheckLivingDocs [BR-CLI-LIVING-DOCS-CHECK]
+      - Drift detectado (committed != generated)
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-CHECK-04
+    title: DADO arquivo commitado vazio E entries reais ENTÃO drift=true
+    boundedContext: use-cases
+    domain: CheckLivingDocs
+    evidence:
+      - file: src/app/use-cases/CheckLivingDocs.test.ts
+        lineStart: 98
+        lineEnd: 105
+        testName: DADO arquivo commitado vazio E entries reais ENTÃO drift=true
+        coverageState: covered
+    tags:
+      - App — CheckLivingDocs [BR-CLI-LIVING-DOCS-CHECK]
+      - Drift detectado (committed != generated)
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-CHECK-05
+    title: DADO artefato commitado E nenhuma regra extraída ENTÃO drift=true (regra removida do código sem atualizar artefato)
+    boundedContext: use-cases
+    domain: CheckLivingDocs
+    evidence:
+      - file: src/app/use-cases/CheckLivingDocs.test.ts
+        lineStart: 107
+        lineEnd: 115
+        testName: DADO artefato commitado E nenhuma regra extraída ENTÃO drift=true (regra removida do código sem atualizar artefato)
+        coverageState: covered
+    tags:
+      - App — CheckLivingDocs [BR-CLI-LIVING-DOCS-CHECK]
+      - Drift detectado (committed != generated)
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-CHECK-06
+    title: DADO drift ENTÃO o result expõe generatedYaml para fácil regravação
+    boundedContext: use-cases
+    domain: CheckLivingDocs
+    evidence:
+      - file: src/app/use-cases/CheckLivingDocs.test.ts
+        lineStart: 119
+        lineEnd: 130
+        testName: DADO drift ENTÃO o result expõe generatedYaml para fácil regravação
+        coverageState: covered
+    tags:
+      - App — CheckLivingDocs [BR-CLI-LIVING-DOCS-CHECK]
+      - Output enriquecido (generatedYaml acessível para o caller)
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-CHECK-07
+    title: DADO duas execuções de check sobre o mesmo input ENTÃO mesmo result.drift e mesma generatedYaml
+    boundedContext: use-cases
+    domain: CheckLivingDocs
+    evidence:
+      - file: src/app/use-cases/CheckLivingDocs.test.ts
+        lineStart: 134
+        lineEnd: 149
+        testName: DADO duas execuções de check sobre o mesmo input ENTÃO mesmo result.drift e mesma generatedYaml
+        coverageState: covered
+    tags:
+      - App — CheckLivingDocs [BR-CLI-LIVING-DOCS-CHECK]
+      - Determinismo (sem churn artificial)
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-CLI-01
+    title: DADO src/ com vários .test.ts ENTÃO retorna todos em ordem estável
+    boundedContext: cli
+    domain: livingDocs
+    evidence:
+      - file: src/cli/livingDocs.test.ts
+        lineStart: 41
+        lineEnd: 50
+        testName: DADO src/ com vários .test.ts ENTÃO retorna todos em ordem estável
+        coverageState: covered
+    tags:
+      - CLI — livingDocs [BR-CLI-LIVING-DOCS-CLI]
+      - discoverTestFiles
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-CLI-02
+    title: DADO src/ ausente ENTÃO retorna array vazio (sem lançar)
+    boundedContext: cli
+    domain: livingDocs
+    evidence:
+      - file: src/cli/livingDocs.test.ts
+        lineStart: 52
+        lineEnd: 54
+        testName: DADO src/ ausente ENTÃO retorna array vazio (sem lançar)
+        coverageState: covered
+    tags:
+      - CLI — livingDocs [BR-CLI-LIVING-DOCS-CLI]
+      - discoverTestFiles
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-CLI-03
+    title: DADO testes no src/ ENTÃO escreve .governance/living-docs.yml e retorna 0
+    boundedContext: cli
+    domain: livingDocs
+    evidence:
+      - file: src/cli/livingDocs.test.ts
+        lineStart: 58
+        lineEnd: 67
+        testName: DADO testes no src/ ENTÃO escreve .governance/living-docs.yml e retorna 0
+        coverageState: covered
+    tags:
+      - CLI — livingDocs [BR-CLI-LIVING-DOCS-CLI]
+      - runGenerate
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-CLI-04
+    title: DADO 2 generates consecutivos ENTÃO produz o mesmo conteúdo (determinismo)
+    boundedContext: cli
+    domain: livingDocs
+    evidence:
+      - file: src/cli/livingDocs.test.ts
+        lineStart: 69
+        lineEnd: 77
+        testName: DADO 2 generates consecutivos ENTÃO produz o mesmo conteúdo (determinismo)
+        coverageState: covered
+    tags:
+      - CLI — livingDocs [BR-CLI-LIVING-DOCS-CLI]
+      - runGenerate
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-CLI-05
+    title: DADO artifact commitado idêntico ao gerado ENTÃO retorna 0
+    boundedContext: cli
+    domain: livingDocs
+    evidence:
+      - file: src/cli/livingDocs.test.ts
+        lineStart: 81
+        lineEnd: 88
+        testName: DADO artifact commitado idêntico ao gerado ENTÃO retorna 0
+        coverageState: covered
+    tags:
+      - CLI — livingDocs [BR-CLI-LIVING-DOCS-CLI]
+      - runCheck
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-CLI-06
+    title: DADO artifact commitado divergente do gerado ENTÃO retorna 1 com diff em stderr
+    boundedContext: cli
+    domain: livingDocs
+    evidence:
+      - file: src/cli/livingDocs.test.ts
+        lineStart: 90
+        lineEnd: 109
+        testName: DADO artifact commitado divergente do gerado ENTÃO retorna 1 com diff em stderr
+        coverageState: covered
+    tags:
+      - CLI — livingDocs [BR-CLI-LIVING-DOCS-CLI]
+      - runCheck
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-CLI-07
+    title: DADO artifact AUSENTE no disco E entries no código ENTÃO drift=true, retorna 1
+    boundedContext: cli
+    domain: livingDocs
+    evidence:
+      - file: src/cli/livingDocs.test.ts
+        lineStart: 111
+        lineEnd: 116
+        testName: DADO artifact AUSENTE no disco E entries no código ENTÃO drift=true, retorna 1
+        coverageState: covered
+    tags:
+      - CLI — livingDocs [BR-CLI-LIVING-DOCS-CLI]
+      - runCheck
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-CLI-08
+    title: DADO artifact AUSENTE no disco E nenhum teste no código ENTÃO drift=false (ambos vazios)
+    boundedContext: cli
+    domain: livingDocs
+    evidence:
+      - file: src/cli/livingDocs.test.ts
+        lineStart: 118
+        lineEnd: 124
+        testName: DADO artifact AUSENTE no disco E nenhum teste no código ENTÃO drift=false (ambos vazios)
+        coverageState: covered
+    tags:
+      - CLI — livingDocs [BR-CLI-LIVING-DOCS-CLI]
+      - runCheck
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-DETERMINISM-01
+    title: DADO entries em ordem aleatória ENTÃO canonicalize ordena alfa por ruleId
+    boundedContext: living-docs
+    domain: LivingDocsDeterminism
+    evidence:
+      - file: src/domain/living-docs/LivingDocsDeterminism.test.ts
+        lineStart: 36
+        lineEnd: 47
+        testName: DADO entries em ordem aleatória ENTÃO canonicalize ordena alfa por ruleId
+        coverageState: covered
+    tags:
+      - LivingDocs — Canonicalização determinística [BR-CLI-LIVING-DOCS-DETERMINISM]
+      - Ordenação alfabética por ruleId
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-DETERMINISM-02
+    title: DADO ruleIds com sufixos numéricos ENTÃO ordenação é lexicográfica estável (POLICY-1 antes de POLICY-10 antes de POLICY-2)
+    boundedContext: living-docs
+    domain: LivingDocsDeterminism
+    evidence:
+      - file: src/domain/living-docs/LivingDocsDeterminism.test.ts
+        lineStart: 49
+        lineEnd: 62
+        testName: DADO ruleIds com sufixos numéricos ENTÃO ordenação é lexicográfica estável (POLICY-1 antes de POLICY-10 antes de POLICY-2)
+        coverageState: covered
+    tags:
+      - LivingDocs — Canonicalização determinística [BR-CLI-LIVING-DOCS-DETERMINISM]
+      - Ordenação alfabética por ruleId
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-DETERMINISM-03
+    title: DADO entry com tags em ordem aleatória ENTÃO canonicalize ordena alfa
+    boundedContext: living-docs
+    domain: LivingDocsDeterminism
+    evidence:
+      - file: src/domain/living-docs/LivingDocsDeterminism.test.ts
+        lineStart: 66
+        lineEnd: 78
+        testName: DADO entry com tags em ordem aleatória ENTÃO canonicalize ordena alfa
+        coverageState: covered
+    tags:
+      - LivingDocs — Canonicalização determinística [BR-CLI-LIVING-DOCS-DETERMINISM]
+      - Ordenação alfabética de tags por entry
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-DETERMINISM-04
+    title: DADO tags vazias ENTÃO canonicalize preserva array vazio
+    boundedContext: living-docs
+    domain: LivingDocsDeterminism
+    evidence:
+      - file: src/domain/living-docs/LivingDocsDeterminism.test.ts
+        lineStart: 80
+        lineEnd: 86
+        testName: DADO tags vazias ENTÃO canonicalize preserva array vazio
+        coverageState: covered
+    tags:
+      - LivingDocs — Canonicalização determinística [BR-CLI-LIVING-DOCS-DETERMINISM]
+      - Ordenação alfabética de tags por entry
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-DETERMINISM-05
+    title: DADO tags duplicadas ENTÃO canonicalize deduplica preservando alfa
+    boundedContext: living-docs
+    domain: LivingDocsDeterminism
+    evidence:
+      - file: src/domain/living-docs/LivingDocsDeterminism.test.ts
+        lineStart: 88
+        lineEnd: 100
+        testName: DADO tags duplicadas ENTÃO canonicalize deduplica preservando alfa
+        coverageState: covered
+    tags:
+      - LivingDocs — Canonicalização determinística [BR-CLI-LIVING-DOCS-DETERMINISM]
+      - Ordenação alfabética de tags por entry
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-DETERMINISM-06
+    title: DADO canonicalize aplicado duas vezes ENTÃO resultado é idêntico
+    boundedContext: living-docs
+    domain: LivingDocsDeterminism
+    evidence:
+      - file: src/domain/living-docs/LivingDocsDeterminism.test.ts
+        lineStart: 104
+        lineEnd: 115
+        testName: DADO canonicalize aplicado duas vezes ENTÃO resultado é idêntico
+        coverageState: covered
+    tags:
+      - Idempotência
+      - LivingDocs — Canonicalização determinística [BR-CLI-LIVING-DOCS-DETERMINISM]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-DETERMINISM-07
+    title: DADO canonicalize ENTÃO o artifact NÃO contém campos temporais (generatedAt, timestamp, etc)
+    boundedContext: living-docs
+    domain: LivingDocsDeterminism
+    evidence:
+      - file: src/domain/living-docs/LivingDocsDeterminism.test.ts
+        lineStart: 119
+        lineEnd: 129
+        testName: DADO canonicalize ENTÃO o artifact NÃO contém campos temporais (generatedAt, timestamp, etc)
+        coverageState: covered
+    tags:
+      - Ausência de timestamps (ADR 0004 §2)
+      - LivingDocs — Canonicalização determinística [BR-CLI-LIVING-DOCS-DETERMINISM]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-DETERMINISM-08
+    title: DADO duas execuções com mesma entrada ENTÃO JSON.stringify produz a mesma string
+    boundedContext: living-docs
+    domain: LivingDocsDeterminism
+    evidence:
+      - file: src/domain/living-docs/LivingDocsDeterminism.test.ts
+        lineStart: 133
+        lineEnd: 144
+        testName: DADO duas execuções com mesma entrada ENTÃO JSON.stringify produz a mesma string
+        coverageState: covered
+    tags:
+      - Estabilidade byte-a-byte
+      - LivingDocs — Canonicalização determinística [BR-CLI-LIVING-DOCS-DETERMINISM]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-DETERMINISM-09
+    title: DADO 3 entries com mesmo ruleId/mesmo file ENTÃO 1 entry com evidence[]=3 e tags união
+    boundedContext: living-docs
+    domain: LivingDocsDeterminism
+    evidence:
+      - file: src/domain/living-docs/LivingDocsDeterminism.test.ts
+        lineStart: 164
+        lineEnd: 194
+        testName: DADO 3 entries com mesmo ruleId/mesmo file ENTÃO 1 entry com evidence[]=3 e tags união
+        coverageState: covered
+    tags:
+      - Agregação cross-entry mesmo ruleId/mesmo file
+      - LivingDocs — Agregação por ruleId [BR-CLI-LIVING-DOCS-DETERMINISM]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-DETERMINISM-10
+    title: DADO entries com evidence duplicada (mesmo file+lineStart+lineEnd+testName) ENTÃO dedup preserva 1
+    boundedContext: living-docs
+    domain: LivingDocsDeterminism
+    evidence:
+      - file: src/domain/living-docs/LivingDocsDeterminism.test.ts
+        lineStart: 196
+        lineEnd: 207
+        testName: DADO entries com evidence duplicada (mesmo file+lineStart+lineEnd+testName) ENTÃO dedup preserva 1
+        coverageState: covered
+    tags:
+      - Agregação cross-entry mesmo ruleId/mesmo file
+      - LivingDocs — Agregação por ruleId [BR-CLI-LIVING-DOCS-DETERMINISM]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-DETERMINISM-11
+    title: DADO ruleId em files diferentes ENTÃO LIVING_DOCS_RULE_CROSS_FILE
+    boundedContext: living-docs
+    domain: LivingDocsDeterminism
+    evidence:
+      - file: src/domain/living-docs/LivingDocsDeterminism.test.ts
+        lineStart: 209
+        lineEnd: 232
+        testName: DADO ruleId em files diferentes ENTÃO LIVING_DOCS_RULE_CROSS_FILE
+        coverageState: covered
+    tags:
+      - Agregação cross-entry mesmo ruleId/mesmo file
+      - LivingDocs — Agregação por ruleId [BR-CLI-LIVING-DOCS-DETERMINISM]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-DETERMINISM-12
+    title: DADO todas evidence='covered' ENTÃO entry.coverageState='covered'
+    boundedContext: living-docs
+    domain: LivingDocsDeterminism
+    evidence:
+      - file: src/domain/living-docs/LivingDocsDeterminism.test.ts
+        lineStart: 249
+        lineEnd: 251
+        testName: DADO todas evidence='covered' ENTÃO entry.coverageState='covered'
+        coverageState: covered
+    tags:
+      - Fusão de coverageState (matriz)
+      - LivingDocs — Agregação por ruleId [BR-CLI-LIVING-DOCS-DETERMINISM]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-DETERMINISM-13
+    title: DADO todas evidence='pending' ENTÃO entry.coverageState='pending'
+    boundedContext: living-docs
+    domain: LivingDocsDeterminism
+    evidence:
+      - file: src/domain/living-docs/LivingDocsDeterminism.test.ts
+        lineStart: 253
+        lineEnd: 255
+        testName: DADO todas evidence='pending' ENTÃO entry.coverageState='pending'
+        coverageState: covered
+    tags:
+      - Fusão de coverageState (matriz)
+      - LivingDocs — Agregação por ruleId [BR-CLI-LIVING-DOCS-DETERMINISM]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-DETERMINISM-14
+    title: DADO mistura covered+pending ENTÃO entry.coverageState='covered' (cobertura existe, mesmo parcial)
+    boundedContext: living-docs
+    domain: LivingDocsDeterminism
+    evidence:
+      - file: src/domain/living-docs/LivingDocsDeterminism.test.ts
+        lineStart: 257
+        lineEnd: 259
+        testName: DADO mistura covered+pending ENTÃO entry.coverageState='covered' (cobertura existe, mesmo parcial)
+        coverageState: covered
+    tags:
+      - Fusão de coverageState (matriz)
+      - LivingDocs — Agregação por ruleId [BR-CLI-LIVING-DOCS-DETERMINISM]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-DETERMINISM-15
+    title: DADO mistura deprecated+covered ENTÃO LIVING_DOCS_INCONSISTENT_DEPRECATION
+    boundedContext: living-docs
+    domain: LivingDocsDeterminism
+    evidence:
+      - file: src/domain/living-docs/LivingDocsDeterminism.test.ts
+        lineStart: 261
+        lineEnd: 268
+        testName: DADO mistura deprecated+covered ENTÃO LIVING_DOCS_INCONSISTENT_DEPRECATION
+        coverageState: covered
+    tags:
+      - Fusão de coverageState (matriz)
+      - LivingDocs — Agregação por ruleId [BR-CLI-LIVING-DOCS-DETERMINISM]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-DETERMINISM-16
+    title: DADO todas evidence deprecated COM bypass idêntico ENTÃO entry.bypass = bypass único
+    boundedContext: living-docs
+    domain: LivingDocsDeterminism
+    evidence:
+      - file: src/domain/living-docs/LivingDocsDeterminism.test.ts
+        lineStart: 298
+        lineEnd: 303
+        testName: DADO todas evidence deprecated COM bypass idêntico ENTÃO entry.bypass = bypass único
+        coverageState: covered
+    tags:
+      - Bypass convergente vs divergente
+      - LivingDocs — Agregação por ruleId [BR-CLI-LIVING-DOCS-DETERMINISM]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-DETERMINISM-17
+    title: DADO bypass divergente entre evidence ENTÃO LIVING_DOCS_BYPASS_DIVERGENT
+    boundedContext: living-docs
+    domain: LivingDocsDeterminism
+    evidence:
+      - file: src/domain/living-docs/LivingDocsDeterminism.test.ts
+        lineStart: 305
+        lineEnd: 315
+        testName: DADO bypass divergente entre evidence ENTÃO LIVING_DOCS_BYPASS_DIVERGENT
+        coverageState: covered
+    tags:
+      - Bypass convergente vs divergente
+      - LivingDocs — Agregação por ruleId [BR-CLI-LIVING-DOCS-DETERMINISM]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-DETERMINISM-18
+    title: DADO bypass declarado em parte das evidence ENTÃO LIVING_DOCS_BYPASS_DIVERGENT
+    boundedContext: living-docs
+    domain: LivingDocsDeterminism
+    evidence:
+      - file: src/domain/living-docs/LivingDocsDeterminism.test.ts
+        lineStart: 317
+        lineEnd: 324
+        testName: DADO bypass declarado em parte das evidence ENTÃO LIVING_DOCS_BYPASS_DIVERGENT
+        coverageState: covered
+    tags:
+      - Bypass convergente vs divergente
+      - LivingDocs — Agregação por ruleId [BR-CLI-LIVING-DOCS-DETERMINISM]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-DETERMINISM-19
+    title: DADO todas evidence deprecated SEM bypass ENTÃO entry.bypass omitido
+    boundedContext: living-docs
+    domain: LivingDocsDeterminism
+    evidence:
+      - file: src/domain/living-docs/LivingDocsDeterminism.test.ts
+        lineStart: 326
+        lineEnd: 330
+        testName: DADO todas evidence deprecated SEM bypass ENTÃO entry.bypass omitido
+        coverageState: covered
+    tags:
+      - Bypass convergente vs divergente
+      - LivingDocs — Agregação por ruleId [BR-CLI-LIVING-DOCS-DETERMINISM]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-EXTRACTOR-01
+    title: DADO arquivo .test.ts com it('<fixture-id> desc') ENTÃO retorna 1 entry coverageState='covered'
+    boundedContext: ast
+    domain: AstRuleExtractor
+    evidence:
+      - file: src/infrastructure/ast/AstRuleExtractor.test.ts
+        lineStart: 41
+        lineEnd: 61
+        testName: DADO arquivo .test.ts com it('<fixture-id> desc') ENTÃO retorna 1 entry coverageState='covered'
+        coverageState: covered
+    tags:
+      - Descoberta básica de IDs
+      - Infra — TypeScriptRuleExtractor (descoberta) [BR-CLI-LIVING-DOCS-EXTRACTOR]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-EXTRACTOR-02
+    title: DADO it.skip('<fixture-id>') ENTÃO coverageState='pending'
+    boundedContext: ast
+    domain: AstRuleExtractor
+    evidence:
+      - file: src/infrastructure/ast/AstRuleExtractor.test.ts
+        lineStart: 63
+        lineEnd: 77
+        testName: DADO it.skip('<fixture-id>') ENTÃO coverageState='pending'
+        coverageState: covered
+    tags:
+      - Descoberta básica de IDs
+      - Infra — TypeScriptRuleExtractor (descoberta) [BR-CLI-LIVING-DOCS-EXTRACTOR]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-EXTRACTOR-03
+    title: DADO test('<fixture-id>') ENTÃO reconhece igual a 'it'
+    boundedContext: ast
+    domain: AstRuleExtractor
+    evidence:
+      - file: src/infrastructure/ast/AstRuleExtractor.test.ts
+        lineStart: 79
+        lineEnd: 91
+        testName: DADO test('<fixture-id>') ENTÃO reconhece igual a 'it'
+        coverageState: covered
+    tags:
+      - Descoberta básica de IDs
+      - Infra — TypeScriptRuleExtractor (descoberta) [BR-CLI-LIVING-DOCS-EXTRACTOR]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-EXTRACTOR-04
+    title: DADO test.skip('<fixture-id>') ENTÃO pending
+    boundedContext: ast
+    domain: AstRuleExtractor
+    evidence:
+      - file: src/infrastructure/ast/AstRuleExtractor.test.ts
+        lineStart: 93
+        lineEnd: 103
+        testName: DADO test.skip('<fixture-id>') ENTÃO pending
+        coverageState: covered
+    tags:
+      - Descoberta básica de IDs
+      - Infra — TypeScriptRuleExtractor (descoberta) [BR-CLI-LIVING-DOCS-EXTRACTOR]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-EXTRACTOR-05
+    title: DADO arquivo sem [BR-CLI-*] ENTÃO retorna array vazio
+    boundedContext: ast
+    domain: AstRuleExtractor
+    evidence:
+      - file: src/infrastructure/ast/AstRuleExtractor.test.ts
+        lineStart: 105
+        lineEnd: 117
+        testName: DADO arquivo sem [BR-CLI-*] ENTÃO retorna array vazio
+        coverageState: covered
+    tags:
+      - Descoberta básica de IDs
+      - Infra — TypeScriptRuleExtractor (descoberta) [BR-CLI-LIVING-DOCS-EXTRACTOR]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-EXTRACTOR-06
+    title: DADO múltiplos it() com IDs ENTÃO retorna todos em ordem de aparição
+    boundedContext: ast
+    domain: AstRuleExtractor
+    evidence:
+      - file: src/infrastructure/ast/AstRuleExtractor.test.ts
+        lineStart: 119
+        lineEnd: 134
+        testName: DADO múltiplos it() com IDs ENTÃO retorna todos em ordem de aparição
+        coverageState: covered
+    tags:
+      - Descoberta básica de IDs
+      - Infra — TypeScriptRuleExtractor (descoberta) [BR-CLI-LIVING-DOCS-EXTRACTOR]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-EXTRACTOR-07
+    title: DADO arquivo em src/domain/policy/Pillars.test.ts ENTÃO boundedContext='policy', domain='Pillars'
+    boundedContext: ast
+    domain: AstRuleExtractor
+    evidence:
+      - file: src/infrastructure/ast/AstRuleExtractor.test.ts
+        lineStart: 138
+        lineEnd: 147
+        testName: DADO arquivo em src/domain/policy/Pillars.test.ts ENTÃO boundedContext='policy', domain='Pillars'
+        coverageState: covered
+    tags:
+      - Convenção de path → boundedContext/domain
+      - Infra — TypeScriptRuleExtractor (descoberta) [BR-CLI-LIVING-DOCS-EXTRACTOR]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-EXTRACTOR-08
+    title: DADO arquivo em src/infrastructure/yaml/Foo.test.ts ENTÃO boundedContext='yaml', domain='Foo'
+    boundedContext: ast
+    domain: AstRuleExtractor
+    evidence:
+      - file: src/infrastructure/ast/AstRuleExtractor.test.ts
+        lineStart: 149
+        lineEnd: 158
+        testName: DADO arquivo em src/infrastructure/yaml/Foo.test.ts ENTÃO boundedContext='yaml', domain='Foo'
+        coverageState: covered
+    tags:
+      - Convenção de path → boundedContext/domain
+      - Infra — TypeScriptRuleExtractor (descoberta) [BR-CLI-LIVING-DOCS-EXTRACTOR]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-EXTRACTOR-09
+    title: DADO arquivo em src/app/use-cases/Foo.test.ts ENTÃO boundedContext='use-cases', domain='Foo'
+    boundedContext: ast
+    domain: AstRuleExtractor
+    evidence:
+      - file: src/infrastructure/ast/AstRuleExtractor.test.ts
+        lineStart: 160
+        lineEnd: 169
+        testName: DADO arquivo em src/app/use-cases/Foo.test.ts ENTÃO boundedContext='use-cases', domain='Foo'
+        coverageState: covered
+    tags:
+      - Convenção de path → boundedContext/domain
+      - Infra — TypeScriptRuleExtractor (descoberta) [BR-CLI-LIVING-DOCS-EXTRACTOR]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-EXTRACTOR-10
+    title: DADO arquivo inexistente ENTÃO LIVING_DOCS_EXTRACTOR_FILE_NOT_FOUND
+    boundedContext: ast
+    domain: AstRuleExtractor
+    evidence:
+      - file: src/infrastructure/ast/AstRuleExtractor.test.ts
+        lineStart: 173
+        lineEnd: 182
+        testName: DADO arquivo inexistente ENTÃO LIVING_DOCS_EXTRACTOR_FILE_NOT_FOUND
+        coverageState: covered
+    tags:
+      - Erros determinísticos
+      - Infra — TypeScriptRuleExtractor (descoberta) [BR-CLI-LIVING-DOCS-EXTRACTOR]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-EXTRACTOR-11
+    title: DADO arquivo que não termina em .test.ts ENTÃO é IGNORADO (não-erro, simplesmente vazio)
+    boundedContext: ast
+    domain: AstRuleExtractor
+    evidence:
+      - file: src/infrastructure/ast/AstRuleExtractor.test.ts
+        lineStart: 184
+        lineEnd: 188
+        testName: DADO arquivo que não termina em .test.ts ENTÃO é IGNORADO (não-erro, simplesmente vazio)
+        coverageState: covered
+    tags:
+      - Erros determinísticos
+      - Infra — TypeScriptRuleExtractor (descoberta) [BR-CLI-LIVING-DOCS-EXTRACTOR]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-EXTRACTOR-12
+    title: DADO entries produzidas ENTÃO cada uma passa assertValidEntry
+    boundedContext: ast
+    domain: AstRuleExtractor
+    evidence:
+      - file: src/infrastructure/ast/AstRuleExtractor.test.ts
+        lineStart: 192
+        lineEnd: 205
+        testName: DADO entries produzidas ENTÃO cada uma passa assertValidEntry
+        coverageState: covered
+    tags:
+      - Infra — TypeScriptRuleExtractor (descoberta) [BR-CLI-LIVING-DOCS-EXTRACTOR]
+      - Output validado contra schema do domain
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-EXTRACTOR-13
+    title: DADO título com 2 tags [BR-CLI-*] ENTÃO LIVING_DOCS_AMBIGUOUS_RULE_ID com mensagem listando os IDs
+    boundedContext: ast
+    domain: AstRuleExtractor
+    evidence:
+      - file: src/infrastructure/ast/AstRuleExtractor.test.ts
+        lineStart: 242
+        lineEnd: 258
+        testName: DADO título com 2 tags [BR-CLI-*] ENTÃO LIVING_DOCS_AMBIGUOUS_RULE_ID com mensagem listando os IDs
+        coverageState: covered
+    tags:
+      - Infra — TypeScriptRuleExtractor (descoberta) [BR-CLI-LIVING-DOCS-EXTRACTOR]
+      - "Invariante: 1 it/test = exatamente 1 rule (ADR 0002 §4 + ADR 0004 §3)"
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-EXTRACTOR-14
+    title: DADO título com 3+ tags [BR-CLI-*] ENTÃO LIVING_DOCS_AMBIGUOUS_RULE_ID listando todos
+    boundedContext: ast
+    domain: AstRuleExtractor
+    evidence:
+      - file: src/infrastructure/ast/AstRuleExtractor.test.ts
+        lineStart: 260
+        lineEnd: 272
+        testName: DADO título com 3+ tags [BR-CLI-*] ENTÃO LIVING_DOCS_AMBIGUOUS_RULE_ID listando todos
+        coverageState: covered
+    tags:
+      - Infra — TypeScriptRuleExtractor (descoberta) [BR-CLI-LIVING-DOCS-EXTRACTOR]
+      - "Invariante: 1 it/test = exatamente 1 rule (ADR 0002 §4 + ADR 0004 §3)"
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-EXTRACTOR-15
+    title: DADO it.each([...])(title, fn) ENTÃO reconhece ruleId como covered
+    boundedContext: ast
+    domain: AstRuleExtractor
+    evidence:
+      - file: src/infrastructure/ast/AstRuleExtractor.test.ts
+        lineStart: 209
+        lineEnd: 224
+        testName: DADO it.each([...])(title, fn) ENTÃO reconhece ruleId como covered
+        coverageState: covered
+    tags:
+      - Infra — TypeScriptRuleExtractor (descoberta) [BR-CLI-LIVING-DOCS-EXTRACTOR]
+      - Reconhecimento de testes parametrizados (it.each/test.each)
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-EXTRACTOR-16
+    title: DADO test.each([...])(title, fn) ENTÃO reconhece ruleId como covered
+    boundedContext: ast
+    domain: AstRuleExtractor
+    evidence:
+      - file: src/infrastructure/ast/AstRuleExtractor.test.ts
+        lineStart: 226
+        lineEnd: 238
+        testName: DADO test.each([...])(title, fn) ENTÃO reconhece ruleId como covered
+        coverageState: covered
+    tags:
+      - Infra — TypeScriptRuleExtractor (descoberta) [BR-CLI-LIVING-DOCS-EXTRACTOR]
+      - Reconhecimento de testes parametrizados (it.each/test.each)
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-EXTRACTOR-BYPASS-01
+    title: DADO it.skip COM diretiva válida ENTÃO coverageState='deprecated'
+    boundedContext: ast
+    domain: RuleExtractorBypass
+    evidence:
+      - file: src/infrastructure/ast/RuleExtractorBypass.test.ts
+        lineStart: 41
+        lineEnd: 60
+        testName: DADO it.skip COM diretiva válida ENTÃO coverageState='deprecated'
+        coverageState: covered
+    tags:
+      - Diretiva válida → coverageState=deprecated + bypass block
+      - Infra — TypeScriptRuleExtractor (bypass) [BR-CLI-LIVING-DOCS-EXTRACTOR-BYPASS]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-EXTRACTOR-BYPASS-02
+    title: DADO it COM diretiva ENTÃO coverageState='deprecated' (sobrescreve 'covered')
+    boundedContext: ast
+    domain: RuleExtractorBypass
+    evidence:
+      - file: src/infrastructure/ast/RuleExtractorBypass.test.ts
+        lineStart: 62
+        lineEnd: 73
+        testName: DADO it COM diretiva ENTÃO coverageState='deprecated' (sobrescreve 'covered')
+        coverageState: covered
+    tags:
+      - Diretiva válida → coverageState=deprecated + bypass block
+      - Infra — TypeScriptRuleExtractor (bypass) [BR-CLI-LIVING-DOCS-EXTRACTOR-BYPASS]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-EXTRACTOR-BYPASS-03
+    title: DADO diretiva em JSDoc precedente ENTÃO reconhece
+    boundedContext: ast
+    domain: RuleExtractorBypass
+    evidence:
+      - file: src/infrastructure/ast/RuleExtractorBypass.test.ts
+        lineStart: 75
+        lineEnd: 87
+        testName: DADO diretiva em JSDoc precedente ENTÃO reconhece
+        coverageState: covered
+    tags:
+      - Diretiva válida → coverageState=deprecated + bypass block
+      - Infra — TypeScriptRuleExtractor (bypass) [BR-CLI-LIVING-DOCS-EXTRACTOR-BYPASS]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-EXTRACTOR-BYPASS-04
+    title: DADO it() SEM diretiva ENTÃO coverageState='covered' (sem bypass)
+    boundedContext: ast
+    domain: RuleExtractorBypass
+    evidence:
+      - file: src/infrastructure/ast/RuleExtractorBypass.test.ts
+        lineStart: 91
+        lineEnd: 96
+        testName: DADO it() SEM diretiva ENTÃO coverageState='covered' (sem bypass)
+        coverageState: covered
+    tags:
+      - Diretiva ausente → comportamento default preservado
+      - Infra — TypeScriptRuleExtractor (bypass) [BR-CLI-LIVING-DOCS-EXTRACTOR-BYPASS]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-EXTRACTOR-BYPASS-05
+    title: DADO it.skip() SEM diretiva ENTÃO coverageState='pending' (sem bypass)
+    boundedContext: ast
+    domain: RuleExtractorBypass
+    evidence:
+      - file: src/infrastructure/ast/RuleExtractorBypass.test.ts
+        lineStart: 98
+        lineEnd: 107
+        testName: DADO it.skip() SEM diretiva ENTÃO coverageState='pending' (sem bypass)
+        coverageState: covered
+    tags:
+      - Diretiva ausente → comportamento default preservado
+      - Infra — TypeScriptRuleExtractor (bypass) [BR-CLI-LIVING-DOCS-EXTRACTOR-BYPASS]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-EXTRACTOR-BYPASS-06
+    title: DADO diretiva COM 'until' EXPIRADA ENTÃO LIVING_DOCS_BYPASS_EXPIRED
+    boundedContext: ast
+    domain: RuleExtractorBypass
+    evidence:
+      - file: src/infrastructure/ast/RuleExtractorBypass.test.ts
+        lineStart: 111
+        lineEnd: 127
+        testName: DADO diretiva COM 'until' EXPIRADA ENTÃO LIVING_DOCS_BYPASS_EXPIRED
+        coverageState: covered
+    tags:
+      - Diretivas inválidas → erros estáveis
+      - Infra — TypeScriptRuleExtractor (bypass) [BR-CLI-LIVING-DOCS-EXTRACTOR-BYPASS]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-EXTRACTOR-BYPASS-07
+    title: DADO diretiva MALFORMADA (sem until) ENTÃO LIVING_DOCS_BYPASS_MALFORMED
+    boundedContext: ast
+    domain: RuleExtractorBypass
+    evidence:
+      - file: src/infrastructure/ast/RuleExtractorBypass.test.ts
+        lineStart: 129
+        lineEnd: 144
+        testName: DADO diretiva MALFORMADA (sem until) ENTÃO LIVING_DOCS_BYPASS_MALFORMED
+        coverageState: covered
+    tags:
+      - Diretivas inválidas → erros estáveis
+      - Infra — TypeScriptRuleExtractor (bypass) [BR-CLI-LIVING-DOCS-EXTRACTOR-BYPASS]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-EXTRACTOR-BYPASS-08
+    title: DADO diretiva 'boundary-lock:allow-drift' ENTÃO extractor ignora (não-aplica ao living-docs)
+    boundedContext: ast
+    domain: RuleExtractorBypass
+    evidence:
+      - file: src/infrastructure/ast/RuleExtractorBypass.test.ts
+        lineStart: 148
+        lineEnd: 160
+        testName: DADO diretiva 'boundary-lock:allow-drift' ENTÃO extractor ignora (não-aplica ao living-docs)
+        coverageState: covered
+    tags:
+      - Infra — TypeScriptRuleExtractor (bypass) [BR-CLI-LIVING-DOCS-EXTRACTOR-BYPASS]
+      - Outros guard-ids → ignorados pelo living-docs extractor
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-EXTRACTOR-BYPASS-09
+    title: DADO bypass válido produzido pelo extractor ENTÃO assertValidEntry aceita
+    boundedContext: ast
+    domain: RuleExtractorBypass
+    evidence:
+      - file: src/infrastructure/ast/RuleExtractorBypass.test.ts
+        lineStart: 164
+        lineEnd: 175
+        testName: DADO bypass válido produzido pelo extractor ENTÃO assertValidEntry aceita
+        coverageState: covered
+    tags:
+      - Entry com bypass passa pelo schema do domain
+      - Infra — TypeScriptRuleExtractor (bypass) [BR-CLI-LIVING-DOCS-EXTRACTOR-BYPASS]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-FALSE-POSITIVES-01
+    title: DADO ID em comentário JSDoc ENTÃO NÃO vira entry
+    boundedContext: ast
+    domain: RuleExtractorFalsePositives
+    evidence:
+      - file: src/infrastructure/ast/RuleExtractorFalsePositives.test.ts
+        lineStart: 56
+        lineEnd: 70
+        testName: DADO ID em comentário JSDoc ENTÃO NÃO vira entry
+        coverageState: covered
+    tags:
+      - IDs em comentários (JSDoc e linha)
+      - Infra — TypeScriptRuleExtractor (false positives) [BR-CLI-LIVING-DOCS-FALSE-POSITIVES]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-FALSE-POSITIVES-02
+    title: DADO ID em comentário inline ENTÃO NÃO vira entry
+    boundedContext: ast
+    domain: RuleExtractorFalsePositives
+    evidence:
+      - file: src/infrastructure/ast/RuleExtractorFalsePositives.test.ts
+        lineStart: 72
+        lineEnd: 83
+        testName: DADO ID em comentário inline ENTÃO NÃO vira entry
+        coverageState: covered
+    tags:
+      - IDs em comentários (JSDoc e linha)
+      - Infra — TypeScriptRuleExtractor (false positives) [BR-CLI-LIVING-DOCS-FALSE-POSITIVES]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-FALSE-POSITIVES-03
+    title: DADO ID em comentário JSDoc COM it() válido logo abaixo ENTÃO só o it() vira entry
+    boundedContext: ast
+    domain: RuleExtractorFalsePositives
+    evidence:
+      - file: src/infrastructure/ast/RuleExtractorFalsePositives.test.ts
+        lineStart: 85
+        lineEnd: 97
+        testName: DADO ID em comentário JSDoc COM it() válido logo abaixo ENTÃO só o it() vira entry
+        coverageState: covered
+    tags:
+      - IDs em comentários (JSDoc e linha)
+      - Infra — TypeScriptRuleExtractor (false positives) [BR-CLI-LIVING-DOCS-FALSE-POSITIVES]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-FALSE-POSITIVES-04
+    title: DADO ID em string passada a outra função (não it/test) ENTÃO NÃO vira entry
+    boundedContext: ast
+    domain: RuleExtractorFalsePositives
+    evidence:
+      - file: src/infrastructure/ast/RuleExtractorFalsePositives.test.ts
+        lineStart: 101
+        lineEnd: 113
+        testName: DADO ID em string passada a outra função (não it/test) ENTÃO NÃO vira entry
+        coverageState: covered
+    tags:
+      - IDs em strings de produção (não-test)
+      - Infra — TypeScriptRuleExtractor (false positives) [BR-CLI-LIVING-DOCS-FALSE-POSITIVES]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-FALSE-POSITIVES-05
+    title: DADO ID em variável atribuída a string ENTÃO NÃO vira entry
+    boundedContext: ast
+    domain: RuleExtractorFalsePositives
+    evidence:
+      - file: src/infrastructure/ast/RuleExtractorFalsePositives.test.ts
+        lineStart: 115
+        lineEnd: 126
+        testName: DADO ID em variável atribuída a string ENTÃO NÃO vira entry
+        coverageState: covered
+    tags:
+      - IDs em strings de produção (não-test)
+      - Infra — TypeScriptRuleExtractor (false positives) [BR-CLI-LIVING-DOCS-FALSE-POSITIVES]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-FALSE-POSITIVES-06
+    title: DADO ID em arquivo .ts comum (não-test) ENTÃO arquivo é IGNORADO inteiro
+    boundedContext: ast
+    domain: RuleExtractorFalsePositives
+    evidence:
+      - file: src/infrastructure/ast/RuleExtractorFalsePositives.test.ts
+        lineStart: 130
+        lineEnd: 143
+        testName: DADO ID em arquivo .ts comum (não-test) ENTÃO arquivo é IGNORADO inteiro
+        coverageState: covered
+    tags:
+      - IDs em arquivos fora .test.ts
+      - Infra — TypeScriptRuleExtractor (false positives) [BR-CLI-LIVING-DOCS-FALSE-POSITIVES]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-FALSE-POSITIVES-07
+    title: DADO ID em arquivo .fixture.ts ENTÃO IGNORADO
+    boundedContext: ast
+    domain: RuleExtractorFalsePositives
+    evidence:
+      - file: src/infrastructure/ast/RuleExtractorFalsePositives.test.ts
+        lineStart: 145
+        lineEnd: 155
+        testName: DADO ID em arquivo .fixture.ts ENTÃO IGNORADO
+        coverageState: covered
+    tags:
+      - IDs em arquivos fora .test.ts
+      - Infra — TypeScriptRuleExtractor (false positives) [BR-CLI-LIVING-DOCS-FALSE-POSITIVES]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-FALSE-POSITIVES-08
+    title: DADO it() com template literal SEM interpolação (ainda assim string-like) ENTÃO reconhece
+    boundedContext: ast
+    domain: RuleExtractorFalsePositives
+    evidence:
+      - file: src/infrastructure/ast/RuleExtractorFalsePositives.test.ts
+        lineStart: 159
+        lineEnd: 168
+        testName: DADO it() com template literal SEM interpolação (ainda assim string-like) ENTÃO reconhece
+        coverageState: covered
+    tags:
+      - Infra — TypeScriptRuleExtractor (false positives) [BR-CLI-LIVING-DOCS-FALSE-POSITIVES]
+      - Template literals com interpolação
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-FALSE-POSITIVES-09
+    title: DADO it() com template literal COM interpolação ENTÃO ignorado (não-resolvido estaticamente)
+    boundedContext: ast
+    domain: RuleExtractorFalsePositives
+    evidence:
+      - file: src/infrastructure/ast/RuleExtractorFalsePositives.test.ts
+        lineStart: 170
+        lineEnd: 182
+        testName: DADO it() com template literal COM interpolação ENTÃO ignorado (não-resolvido estaticamente)
+        coverageState: covered
+    tags:
+      - Infra — TypeScriptRuleExtractor (false positives) [BR-CLI-LIVING-DOCS-FALSE-POSITIVES]
+      - Template literals com interpolação
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-FALSE-POSITIVES-10
+    title: DADO string parecida mas SEM o formato canônico (sem 'BR-CLI-') ENTÃO ignorado
+    boundedContext: ast
+    domain: RuleExtractorFalsePositives
+    evidence:
+      - file: src/infrastructure/ast/RuleExtractorFalsePositives.test.ts
+        lineStart: 186
+        lineEnd: 198
+        testName: DADO string parecida mas SEM o formato canônico (sem 'BR-CLI-') ENTÃO ignorado
+        coverageState: covered
+    tags:
+      - Infra — TypeScriptRuleExtractor (false positives) [BR-CLI-LIVING-DOCS-FALSE-POSITIVES]
+      - Padrão de ID malformado
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-FALSE-POSITIVES-11
+    title: DADO arquivo com comentários + strings de produção + it() válidos ENTÃO só os it() válidos viram entries
+    boundedContext: ast
+    domain: RuleExtractorFalsePositives
+    evidence:
+      - file: src/infrastructure/ast/RuleExtractorFalsePositives.test.ts
+        lineStart: 202
+        lineEnd: 226
+        testName: DADO arquivo com comentários + strings de produção + it() válidos ENTÃO só os it() válidos viram entries
+        coverageState: covered
+    tags:
+      - Infra — TypeScriptRuleExtractor (false positives) [BR-CLI-LIVING-DOCS-FALSE-POSITIVES]
+      - Mix realista (cobertura combinada)
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-GENERATE-01
+    title: DADO 0 entries ENTÃO produz artifact com schemaVersion canônico e entries=[]
+    boundedContext: use-cases
+    domain: GenerateLivingDocs
+    evidence:
+      - file: src/app/use-cases/GenerateLivingDocs.test.ts
+        lineStart: 42
+        lineEnd: 47
+        testName: DADO 0 entries ENTÃO produz artifact com schemaVersion canônico e entries=[]
+        coverageState: covered
+    tags:
+      - App — GenerateLivingDocs [BR-CLI-LIVING-DOCS-GENERATE]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-GENERATE-02
+    title: DADO entries fora de ordem ENTÃO output está canonicalizado (alfa por ruleId)
+    boundedContext: use-cases
+    domain: GenerateLivingDocs
+    evidence:
+      - file: src/app/use-cases/GenerateLivingDocs.test.ts
+        lineStart: 49
+        lineEnd: 59
+        testName: DADO entries fora de ordem ENTÃO output está canonicalizado (alfa por ruleId)
+        coverageState: covered
+    tags:
+      - App — GenerateLivingDocs [BR-CLI-LIVING-DOCS-GENERATE]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-GENERATE-03
+    title: DADO entry com bypass ENTÃO preserva bypass block no artifact
+    boundedContext: use-cases
+    domain: GenerateLivingDocs
+    evidence:
+      - file: src/app/use-cases/GenerateLivingDocs.test.ts
+        lineStart: 61
+        lineEnd: 86
+        testName: DADO entry com bypass ENTÃO preserva bypass block no artifact
+        coverageState: covered
+    tags:
+      - App — GenerateLivingDocs [BR-CLI-LIVING-DOCS-GENERATE]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-GENERATE-04
+    title: DADO entries cruas com mesmo ruleId/mesmo file ENTÃO agrega em 1 entry (1 rule → N evidências)
+    boundedContext: use-cases
+    domain: GenerateLivingDocs
+    evidence:
+      - file: src/app/use-cases/GenerateLivingDocs.test.ts
+        lineStart: 88
+        lineEnd: 126
+        testName: DADO entries cruas com mesmo ruleId/mesmo file ENTÃO agrega em 1 entry (1 rule → N evidências)
+        coverageState: covered
+    tags:
+      - App — GenerateLivingDocs [BR-CLI-LIVING-DOCS-GENERATE]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-GENERATE-05
+    title: DADO duas execuções ENTÃO artifact é byte-a-byte idêntico (determinismo)
+    boundedContext: use-cases
+    domain: GenerateLivingDocs
+    evidence:
+      - file: src/app/use-cases/GenerateLivingDocs.test.ts
+        lineStart: 160
+        lineEnd: 170
+        testName: DADO duas execuções ENTÃO artifact é byte-a-byte idêntico (determinismo)
+        coverageState: covered
+    tags:
+      - App — GenerateLivingDocs [BR-CLI-LIVING-DOCS-GENERATE]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-GENERATE-06
+    title: DADO entries cruas com mesmo ruleId em arquivos diferentes ENTÃO LIVING_DOCS_RULE_CROSS_FILE
+    boundedContext: use-cases
+    domain: GenerateLivingDocs
+    evidence:
+      - file: src/app/use-cases/GenerateLivingDocs.test.ts
+        lineStart: 128
+        lineEnd: 158
+        testName: DADO entries cruas com mesmo ruleId em arquivos diferentes ENTÃO LIVING_DOCS_RULE_CROSS_FILE
+        coverageState: covered
+    tags:
+      - App — GenerateLivingDocs [BR-CLI-LIVING-DOCS-GENERATE]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-SCHEMA-01
+    title: DADO entrada completa e bem-formada ENTÃO valida sem lançar
+    boundedContext: living-docs
+    domain: LivingDocsSchema
+    evidence:
+      - file: src/domain/living-docs/LivingDocsSchema.test.ts
+        lineStart: 115
+        lineEnd: 117
+        testName: DADO entrada completa e bem-formada ENTÃO valida sem lançar
+        coverageState: covered
+    tags:
+      - Entry válida
+      - LivingDocs — Schema de Entry com evidence[] [BR-CLI-LIVING-DOCS-SCHEMA]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-SCHEMA-02
+    title: DADO coverageState='%s' ENTÃO aceita
+    boundedContext: living-docs
+    domain: LivingDocsSchema
+    evidence:
+      - file: src/domain/living-docs/LivingDocsSchema.test.ts
+        lineStart: 121
+        lineEnd: 153
+        testName: DADO coverageState='%s' ENTÃO aceita
+        coverageState: covered
+    tags:
+      - LivingDocs — Schema de Entry com evidence[] [BR-CLI-LIVING-DOCS-SCHEMA]
+      - coverageState como enum fechado (ADR 0002)
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-SCHEMA-03
+    title: DADO coverageState='%s' (fora do enum) ENTÃO LIVING_DOCS_INVALID_COVERAGE_STATE com mensagem nomeando o conjunto
+    boundedContext: living-docs
+    domain: LivingDocsSchema
+    evidence:
+      - file: src/domain/living-docs/LivingDocsSchema.test.ts
+        lineStart: 155
+        lineEnd: 170
+        testName: DADO coverageState='%s' (fora do enum) ENTÃO LIVING_DOCS_INVALID_COVERAGE_STATE com mensagem nomeando o conjunto
+        coverageState: covered
+    tags:
+      - LivingDocs — Schema de Entry com evidence[] [BR-CLI-LIVING-DOCS-SCHEMA]
+      - coverageState como enum fechado (ADR 0002)
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-SCHEMA-04
+    title: DADO entry SEM '%s' ENTÃO LIVING_DOCS_MISSING_FIELD
+    boundedContext: living-docs
+    domain: LivingDocsSchema
+    evidence:
+      - file: src/domain/living-docs/LivingDocsSchema.test.ts
+        lineStart: 174
+        lineEnd: 196
+        testName: DADO entry SEM '%s' ENTÃO LIVING_DOCS_MISSING_FIELD
+        coverageState: covered
+    tags:
+      - Campos obrigatórios
+      - LivingDocs — Schema de Entry com evidence[] [BR-CLI-LIVING-DOCS-SCHEMA]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-SCHEMA-05
+    title: DADO evidence[0] SEM file ENTÃO LIVING_DOCS_INVALID_SOURCE
+    boundedContext: living-docs
+    domain: LivingDocsSchema
+    evidence:
+      - file: src/domain/living-docs/LivingDocsSchema.test.ts
+        lineStart: 245
+        lineEnd: 254
+        testName: DADO evidence[0] SEM file ENTÃO LIVING_DOCS_INVALID_SOURCE
+        coverageState: covered
+    tags:
+      - LivingDocs — Schema de Entry com evidence[] [BR-CLI-LIVING-DOCS-SCHEMA]
+      - evidence inválido (line range, coverageState)
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-SCHEMA-06
+    title: DADO evidence[0] COM lineStart > lineEnd ENTÃO LIVING_DOCS_INVALID_SOURCE
+    boundedContext: living-docs
+    domain: LivingDocsSchema
+    evidence:
+      - file: src/domain/living-docs/LivingDocsSchema.test.ts
+        lineStart: 256
+        lineEnd: 267
+        testName: DADO evidence[0] COM lineStart > lineEnd ENTÃO LIVING_DOCS_INVALID_SOURCE
+        coverageState: covered
+    tags:
+      - LivingDocs — Schema de Entry com evidence[] [BR-CLI-LIVING-DOCS-SCHEMA]
+      - evidence inválido (line range, coverageState)
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-SCHEMA-07
+    title: DADO evidence[0] COM lineStart === lineEnd ENTÃO aceita (linha única)
+    boundedContext: living-docs
+    domain: LivingDocsSchema
+    evidence:
+      - file: src/domain/living-docs/LivingDocsSchema.test.ts
+        lineStart: 269
+        lineEnd: 276
+        testName: DADO evidence[0] COM lineStart === lineEnd ENTÃO aceita (linha única)
+        coverageState: covered
+    tags:
+      - LivingDocs — Schema de Entry com evidence[] [BR-CLI-LIVING-DOCS-SCHEMA]
+      - evidence inválido (line range, coverageState)
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-SCHEMA-08
+    title: DADO coverageState='deprecated' COM bypass válido ENTÃO aceita
+    boundedContext: living-docs
+    domain: LivingDocsSchema
+    evidence:
+      - file: src/domain/living-docs/LivingDocsSchema.test.ts
+        lineStart: 280
+        lineEnd: 303
+        testName: DADO coverageState='deprecated' COM bypass válido ENTÃO aceita
+        coverageState: covered
+    tags:
+      - Bypass declarado no topo da entry (ADR 0003)
+      - LivingDocs — Schema de Entry com evidence[] [BR-CLI-LIVING-DOCS-SCHEMA]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-SCHEMA-09
+    title: DADO bypass SEM 'until' ENTÃO LIVING_DOCS_BYPASS_MALFORMED
+    boundedContext: living-docs
+    domain: LivingDocsSchema
+    evidence:
+      - file: src/domain/living-docs/LivingDocsSchema.test.ts
+        lineStart: 305
+        lineEnd: 317
+        testName: DADO bypass SEM 'until' ENTÃO LIVING_DOCS_BYPASS_MALFORMED
+        coverageState: covered
+    tags:
+      - Bypass declarado no topo da entry (ADR 0003)
+      - LivingDocs — Schema de Entry com evidence[] [BR-CLI-LIVING-DOCS-SCHEMA]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-SCHEMA-10
+    title: DADO bypass COM 'until' em formato inválido ENTÃO LIVING_DOCS_BYPASS_MALFORMED
+    boundedContext: living-docs
+    domain: LivingDocsSchema
+    evidence:
+      - file: src/domain/living-docs/LivingDocsSchema.test.ts
+        lineStart: 319
+        lineEnd: 331
+        testName: DADO bypass COM 'until' em formato inválido ENTÃO LIVING_DOCS_BYPASS_MALFORMED
+        coverageState: covered
+    tags:
+      - Bypass declarado no topo da entry (ADR 0003)
+      - LivingDocs — Schema de Entry com evidence[] [BR-CLI-LIVING-DOCS-SCHEMA]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-SCHEMA-11
+    title: DADO bypass COM 'reason' curto demais ENTÃO LIVING_DOCS_BYPASS_MALFORMED
+    boundedContext: living-docs
+    domain: LivingDocsSchema
+    evidence:
+      - file: src/domain/living-docs/LivingDocsSchema.test.ts
+        lineStart: 333
+        lineEnd: 345
+        testName: DADO bypass COM 'reason' curto demais ENTÃO LIVING_DOCS_BYPASS_MALFORMED
+        coverageState: covered
+    tags:
+      - Bypass declarado no topo da entry (ADR 0003)
+      - LivingDocs — Schema de Entry com evidence[] [BR-CLI-LIVING-DOCS-SCHEMA]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-SCHEMA-12
+    title: DADO bypass no topo COM coverageState != 'deprecated' ENTÃO LIVING_DOCS_BYPASS_REQUIRES_DEPRECATED
+    boundedContext: living-docs
+    domain: LivingDocsSchema
+    evidence:
+      - file: src/domain/living-docs/LivingDocsSchema.test.ts
+        lineStart: 347
+        lineEnd: 362
+        testName: DADO bypass no topo COM coverageState != 'deprecated' ENTÃO LIVING_DOCS_BYPASS_REQUIRES_DEPRECATED
+        coverageState: covered
+    tags:
+      - Bypass declarado no topo da entry (ADR 0003)
+      - LivingDocs — Schema de Entry com evidence[] [BR-CLI-LIVING-DOCS-SCHEMA]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-SCHEMA-13
+    title: DADO artifact válido ENTÃO aceita
+    boundedContext: living-docs
+    domain: LivingDocsSchema
+    evidence:
+      - file: src/domain/living-docs/LivingDocsSchema.test.ts
+        lineStart: 372
+        lineEnd: 374
+        testName: DADO artifact válido ENTÃO aceita
+        coverageState: covered
+    tags:
+      - LivingDocs — Schema do Artifact [BR-CLI-LIVING-DOCS-SCHEMA]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-SCHEMA-14
+    title: DADO artifact com entries não-agregadas (mesmo ruleId) ENTÃO LIVING_DOCS_DUPLICATE_RULE_ID — rede de segurança pós-canonicalize
+    boundedContext: living-docs
+    domain: LivingDocsSchema
+    evidence:
+      - file: src/domain/living-docs/LivingDocsSchema.test.ts
+        lineStart: 376
+        lineEnd: 393
+        testName: DADO artifact com entries não-agregadas (mesmo ruleId) ENTÃO LIVING_DOCS_DUPLICATE_RULE_ID — rede de segurança pós-canonicalize
+        coverageState: covered
+    tags:
+      - LivingDocs — Schema do Artifact [BR-CLI-LIVING-DOCS-SCHEMA]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-SCHEMA-15
+    title: DADO artifact com entries não-array ENTÃO LIVING_DOCS_INVALID_ENTRIES
+    boundedContext: living-docs
+    domain: LivingDocsSchema
+    evidence:
+      - file: src/domain/living-docs/LivingDocsSchema.test.ts
+        lineStart: 395
+        lineEnd: 405
+        testName: DADO artifact com entries não-array ENTÃO LIVING_DOCS_INVALID_ENTRIES
+        coverageState: covered
+    tags:
+      - LivingDocs — Schema do Artifact [BR-CLI-LIVING-DOCS-SCHEMA]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-SCHEMA-16
+    title: DADO artifact SEM schemaVersion ENTÃO LIVING_DOCS_MISSING_FIELD
+    boundedContext: living-docs
+    domain: LivingDocsSchema
+    evidence:
+      - file: src/domain/living-docs/LivingDocsSchema.test.ts
+        lineStart: 407
+        lineEnd: 415
+        testName: DADO artifact SEM schemaVersion ENTÃO LIVING_DOCS_MISSING_FIELD
+        coverageState: covered
+    tags:
+      - LivingDocs — Schema do Artifact [BR-CLI-LIVING-DOCS-SCHEMA]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-SCHEMA-17
+    title: DADO source bem-formada ENTÃO assertValidSource não lança
+    boundedContext: living-docs
+    domain: LivingDocsSchema
+    evidence:
+      - file: src/domain/living-docs/LivingDocsSchema.test.ts
+        lineStart: 40
+        lineEnd: 42
+        testName: DADO source bem-formada ENTÃO assertValidSource não lança
+        coverageState: covered
+    tags:
+      - LivingDocs — Schema de evidence item [BR-CLI-LIVING-DOCS-SCHEMA]
+      - LivingDocsSource válida
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-SCHEMA-18
+    title: DADO source SEM file ENTÃO LIVING_DOCS_INVALID_SOURCE
+    boundedContext: living-docs
+    domain: LivingDocsSchema
+    evidence:
+      - file: src/domain/living-docs/LivingDocsSchema.test.ts
+        lineStart: 46
+        lineEnd: 54
+        testName: DADO source SEM file ENTÃO LIVING_DOCS_INVALID_SOURCE
+        coverageState: covered
+    tags:
+      - Campos obrigatórios de LivingDocsSource
+      - LivingDocs — Schema de evidence item [BR-CLI-LIVING-DOCS-SCHEMA]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-SCHEMA-19
+    title: DADO source SEM testName ENTÃO LIVING_DOCS_INVALID_SOURCE
+    boundedContext: living-docs
+    domain: LivingDocsSchema
+    evidence:
+      - file: src/domain/living-docs/LivingDocsSchema.test.ts
+        lineStart: 56
+        lineEnd: 64
+        testName: DADO source SEM testName ENTÃO LIVING_DOCS_INVALID_SOURCE
+        coverageState: covered
+    tags:
+      - Campos obrigatórios de LivingDocsSource
+      - LivingDocs — Schema de evidence item [BR-CLI-LIVING-DOCS-SCHEMA]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-SCHEMA-20
+    title: DADO source COM lineStart > lineEnd ENTÃO LIVING_DOCS_INVALID_SOURCE
+    boundedContext: living-docs
+    domain: LivingDocsSchema
+    evidence:
+      - file: src/domain/living-docs/LivingDocsSchema.test.ts
+        lineStart: 66
+        lineEnd: 73
+        testName: DADO source COM lineStart > lineEnd ENTÃO LIVING_DOCS_INVALID_SOURCE
+        coverageState: covered
+    tags:
+      - Campos obrigatórios de LivingDocsSource
+      - LivingDocs — Schema de evidence item [BR-CLI-LIVING-DOCS-SCHEMA]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-SCHEMA-21
+    title: DADO source COM coverageState fora do enum ENTÃO LIVING_DOCS_INVALID_COVERAGE_STATE
+    boundedContext: living-docs
+    domain: LivingDocsSchema
+    evidence:
+      - file: src/domain/living-docs/LivingDocsSchema.test.ts
+        lineStart: 75
+        lineEnd: 82
+        testName: DADO source COM coverageState fora do enum ENTÃO LIVING_DOCS_INVALID_COVERAGE_STATE
+        coverageState: covered
+    tags:
+      - Campos obrigatórios de LivingDocsSource
+      - LivingDocs — Schema de evidence item [BR-CLI-LIVING-DOCS-SCHEMA]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-SCHEMA-22
+    title: DADO source COM bypass mas coverageState != deprecated ENTÃO LIVING_DOCS_BYPASS_REQUIRES_DEPRECATED
+    boundedContext: living-docs
+    domain: LivingDocsSchema
+    evidence:
+      - file: src/domain/living-docs/LivingDocsSchema.test.ts
+        lineStart: 84
+        lineEnd: 95
+        testName: DADO source COM bypass mas coverageState != deprecated ENTÃO LIVING_DOCS_BYPASS_REQUIRES_DEPRECATED
+        coverageState: covered
+    tags:
+      - Campos obrigatórios de LivingDocsSource
+      - LivingDocs — Schema de evidence item [BR-CLI-LIVING-DOCS-SCHEMA]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-SCHEMA-23
+    title: DADO source DEPRECATED COM bypass válido ENTÃO aceita
+    boundedContext: living-docs
+    domain: LivingDocsSchema
+    evidence:
+      - file: src/domain/living-docs/LivingDocsSchema.test.ts
+        lineStart: 97
+        lineEnd: 109
+        testName: DADO source DEPRECATED COM bypass válido ENTÃO aceita
+        coverageState: covered
+    tags:
+      - Campos obrigatórios de LivingDocsSource
+      - LivingDocs — Schema de evidence item [BR-CLI-LIVING-DOCS-SCHEMA]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-SCHEMA-24
+    title: DADO evidence vazio ENTÃO LIVING_DOCS_INVALID_EVIDENCE
+    boundedContext: living-docs
+    domain: LivingDocsSchema
+    evidence:
+      - file: src/domain/living-docs/LivingDocsSchema.test.ts
+        lineStart: 200
+        lineEnd: 207
+        testName: DADO evidence vazio ENTÃO LIVING_DOCS_INVALID_EVIDENCE
+        coverageState: covered
+    tags:
+      - LivingDocs — Schema de Entry com evidence[] [BR-CLI-LIVING-DOCS-SCHEMA]
+      - evidence[] com cardinalidade e items válidos
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-SCHEMA-25
+    title: DADO evidence não-array ENTÃO LIVING_DOCS_INVALID_EVIDENCE
+    boundedContext: living-docs
+    domain: LivingDocsSchema
+    evidence:
+      - file: src/domain/living-docs/LivingDocsSchema.test.ts
+        lineStart: 209
+        lineEnd: 216
+        testName: DADO evidence não-array ENTÃO LIVING_DOCS_INVALID_EVIDENCE
+        coverageState: covered
+    tags:
+      - LivingDocs — Schema de Entry com evidence[] [BR-CLI-LIVING-DOCS-SCHEMA]
+      - evidence[] com cardinalidade e items válidos
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-SCHEMA-26
+    title: DADO evidence com item malformado ENTÃO LIVING_DOCS_INVALID_SOURCE
+    boundedContext: living-docs
+    domain: LivingDocsSchema
+    evidence:
+      - file: src/domain/living-docs/LivingDocsSchema.test.ts
+        lineStart: 218
+        lineEnd: 228
+        testName: DADO evidence com item malformado ENTÃO LIVING_DOCS_INVALID_SOURCE
+        coverageState: covered
+    tags:
+      - LivingDocs — Schema de Entry com evidence[] [BR-CLI-LIVING-DOCS-SCHEMA]
+      - evidence[] com cardinalidade e items válidos
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-SCHEMA-27
+    title: DADO entry com múltiplas evidências válidas ENTÃO aceita
+    boundedContext: living-docs
+    domain: LivingDocsSchema
+    evidence:
+      - file: src/domain/living-docs/LivingDocsSchema.test.ts
+        lineStart: 230
+        lineEnd: 241
+        testName: DADO entry com múltiplas evidências válidas ENTÃO aceita
+        coverageState: covered
+    tags:
+      - LivingDocs — Schema de Entry com evidence[] [BR-CLI-LIVING-DOCS-SCHEMA]
+      - evidence[] com cardinalidade e items válidos
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-SERIALIZER-01
+    title: DADO artifact mínimo ENTÃO produz YAML com schemaVersion e entries
+    boundedContext: yaml
+    domain: livingDocsSerializer
+    evidence:
+      - file: src/infrastructure/yaml/livingDocsSerializer.test.ts
+        lineStart: 33
+        lineEnd: 41
+        testName: DADO artifact mínimo ENTÃO produz YAML com schemaVersion e entries
+        coverageState: covered
+    tags:
+      - Infra — livingDocsSerializer [BR-CLI-LIVING-DOCS-SERIALIZER]
+      - Serialização
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-SERIALIZER-02
+    title: DADO artifact com bypass ENTÃO emite bloco bypass na entry
+    boundedContext: yaml
+    domain: livingDocsSerializer
+    evidence:
+      - file: src/infrastructure/yaml/livingDocsSerializer.test.ts
+        lineStart: 43
+        lineEnd: 80
+        testName: DADO artifact com bypass ENTÃO emite bloco bypass na entry
+        coverageState: covered
+    tags:
+      - Infra — livingDocsSerializer [BR-CLI-LIVING-DOCS-SERIALIZER]
+      - Serialização
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-SERIALIZER-03
+    title: DADO duas serializações do mesmo artifact ENTÃO produz a mesma string
+    boundedContext: yaml
+    domain: livingDocsSerializer
+    evidence:
+      - file: src/infrastructure/yaml/livingDocsSerializer.test.ts
+        lineStart: 84
+        lineEnd: 95
+        testName: DADO duas serializações do mesmo artifact ENTÃO produz a mesma string
+        coverageState: covered
+    tags:
+      - Determinismo byte-a-byte (ADR 0004)
+      - Infra — livingDocsSerializer [BR-CLI-LIVING-DOCS-SERIALIZER]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-SERIALIZER-04
+    title: DADO artifact com entries em ordem aleatória ENTÃO serializa em ordem alfa por ruleId
+    boundedContext: yaml
+    domain: livingDocsSerializer
+    evidence:
+      - file: src/infrastructure/yaml/livingDocsSerializer.test.ts
+        lineStart: 97
+        lineEnd: 111
+        testName: DADO artifact com entries em ordem aleatória ENTÃO serializa em ordem alfa por ruleId
+        coverageState: covered
+    tags:
+      - Determinismo byte-a-byte (ADR 0004)
+      - Infra — livingDocsSerializer [BR-CLI-LIVING-DOCS-SERIALIZER]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-SERIALIZER-05
+    title: DADO entries com tags duplicadas/fora de ordem ENTÃO serializa em ordem alfa deduplicada
+    boundedContext: yaml
+    domain: livingDocsSerializer
+    evidence:
+      - file: src/infrastructure/yaml/livingDocsSerializer.test.ts
+        lineStart: 113
+        lineEnd: 125
+        testName: DADO entries com tags duplicadas/fora de ordem ENTÃO serializa em ordem alfa deduplicada
+        coverageState: covered
+    tags:
+      - Determinismo byte-a-byte (ADR 0004)
+      - Infra — livingDocsSerializer [BR-CLI-LIVING-DOCS-SERIALIZER]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-SERIALIZER-06
+    title: DADO artifact serializado ENTÃO NÃO contém campos temporais
+    boundedContext: yaml
+    domain: livingDocsSerializer
+    evidence:
+      - file: src/infrastructure/yaml/livingDocsSerializer.test.ts
+        lineStart: 127
+        lineEnd: 135
+        testName: DADO artifact serializado ENTÃO NÃO contém campos temporais
+        coverageState: covered
+    tags:
+      - Determinismo byte-a-byte (ADR 0004)
+      - Infra — livingDocsSerializer [BR-CLI-LIVING-DOCS-SERIALIZER]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-SERIALIZER-07
+    title: DADO artifact serializado E re-parseado ENTÃO produz objeto estruturalmente igual
+    boundedContext: yaml
+    domain: livingDocsSerializer
+    evidence:
+      - file: src/infrastructure/yaml/livingDocsSerializer.test.ts
+        lineStart: 139
+        lineEnd: 180
+        testName: DADO artifact serializado E re-parseado ENTÃO produz objeto estruturalmente igual
+        coverageState: covered
+    tags:
+      - Infra — livingDocsSerializer [BR-CLI-LIVING-DOCS-SERIALIZER]
+      - Round-trip (serialize → parse)
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-SERIALIZER-08
+    title: DADO YAML inválido sintaticamente ENTÃO LIVING_DOCS_YAML_PARSE_ERROR
+    boundedContext: yaml
+    domain: livingDocsSerializer
+    evidence:
+      - file: src/infrastructure/yaml/livingDocsSerializer.test.ts
+        lineStart: 182
+        lineEnd: 184
+        testName: DADO YAML inválido sintaticamente ENTÃO LIVING_DOCS_YAML_PARSE_ERROR
+        coverageState: covered
+    tags:
+      - Infra — livingDocsSerializer [BR-CLI-LIVING-DOCS-SERIALIZER]
+      - Round-trip (serialize → parse)
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-SERIALIZER-09
+    title: DADO YAML válido mas com schema inválido ENTÃO repropaga erro do assertValidArtifact
+    boundedContext: yaml
+    domain: livingDocsSerializer
+    evidence:
+      - file: src/infrastructure/yaml/livingDocsSerializer.test.ts
+        lineStart: 186
+        lineEnd: 198
+        testName: DADO YAML válido mas com schema inválido ENTÃO repropaga erro do assertValidArtifact
+        coverageState: covered
+    tags:
+      - Infra — livingDocsSerializer [BR-CLI-LIVING-DOCS-SERIALIZER]
+      - Round-trip (serialize → parse)
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-SOURCEMAP-01
+    title: DADO arquivo em src/domain/policy/Pillars.test.ts ENTÃO source.file usa '/' como separador
+    boundedContext: ast
+    domain: RuleExtractorSourceMap
+    evidence:
+      - file: src/infrastructure/ast/RuleExtractorSourceMap.test.ts
+        lineStart: 42
+        lineEnd: 52
+        testName: DADO arquivo em src/domain/policy/Pillars.test.ts ENTÃO source.file usa '/' como separador
+        coverageState: covered
+    tags:
+      - Infra — TypeScriptRuleExtractor (source mapping) [BR-CLI-LIVING-DOCS-SOURCEMAP]
+      - source.file (path relativo POSIX-style)
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-SOURCEMAP-02
+    title: DADO it() em linha única ENTÃO lineStart === lineEnd
+    boundedContext: ast
+    domain: RuleExtractorSourceMap
+    evidence:
+      - file: src/infrastructure/ast/RuleExtractorSourceMap.test.ts
+        lineStart: 56
+        lineEnd: 66
+        testName: DADO it() em linha única ENTÃO lineStart === lineEnd
+        coverageState: covered
+    tags:
+      - Infra — TypeScriptRuleExtractor (source mapping) [BR-CLI-LIVING-DOCS-SOURCEMAP]
+      - source.lineStart / source.lineEnd (1-indexed, inclusivo)
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-SOURCEMAP-03
+    title: DADO it() multi-linha ENTÃO lineStart é a linha do `it` e lineEnd a do `)`
+    boundedContext: ast
+    domain: RuleExtractorSourceMap
+    evidence:
+      - file: src/infrastructure/ast/RuleExtractorSourceMap.test.ts
+        lineStart: 68
+        lineEnd: 82
+        testName: DADO it() multi-linha ENTÃO lineStart é a linha do `it` e lineEnd a do `)`
+        coverageState: covered
+    tags:
+      - Infra — TypeScriptRuleExtractor (source mapping) [BR-CLI-LIVING-DOCS-SOURCEMAP]
+      - source.lineStart / source.lineEnd (1-indexed, inclusivo)
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-SOURCEMAP-04
+    title: DADO múltiplos it() ENTÃO cada um tem ranges não-sobrepostos e crescentes
+    boundedContext: ast
+    domain: RuleExtractorSourceMap
+    evidence:
+      - file: src/infrastructure/ast/RuleExtractorSourceMap.test.ts
+        lineStart: 84
+        lineEnd: 104
+        testName: DADO múltiplos it() ENTÃO cada um tem ranges não-sobrepostos e crescentes
+        coverageState: covered
+    tags:
+      - Infra — TypeScriptRuleExtractor (source mapping) [BR-CLI-LIVING-DOCS-SOURCEMAP]
+      - source.lineStart / source.lineEnd (1-indexed, inclusivo)
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-SOURCEMAP-05
+    title: DADO it() dentro de describe('Categoria X') ENTÃO tags inclui 'Categoria X'
+    boundedContext: ast
+    domain: RuleExtractorSourceMap
+    evidence:
+      - file: src/infrastructure/ast/RuleExtractorSourceMap.test.ts
+        lineStart: 108
+        lineEnd: 120
+        testName: DADO it() dentro de describe('Categoria X') ENTÃO tags inclui 'Categoria X'
+        coverageState: covered
+    tags:
+      - Contexto de describe → tags
+      - Infra — TypeScriptRuleExtractor (source mapping) [BR-CLI-LIVING-DOCS-SOURCEMAP]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-SOURCEMAP-06
+    title: DADO describes aninhados ENTÃO tags inclui todos os nomes (top-down)
+    boundedContext: ast
+    domain: RuleExtractorSourceMap
+    evidence:
+      - file: src/infrastructure/ast/RuleExtractorSourceMap.test.ts
+        lineStart: 122
+        lineEnd: 138
+        testName: DADO describes aninhados ENTÃO tags inclui todos os nomes (top-down)
+        coverageState: covered
+    tags:
+      - Contexto de describe → tags
+      - Infra — TypeScriptRuleExtractor (source mapping) [BR-CLI-LIVING-DOCS-SOURCEMAP]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-SOURCEMAP-07
+    title: DADO it() sem describe envolvente ENTÃO tags vazias
+    boundedContext: ast
+    domain: RuleExtractorSourceMap
+    evidence:
+      - file: src/infrastructure/ast/RuleExtractorSourceMap.test.ts
+        lineStart: 140
+        lineEnd: 148
+        testName: DADO it() sem describe envolvente ENTÃO tags vazias
+        coverageState: covered
+    tags:
+      - Contexto de describe → tags
+      - Infra — TypeScriptRuleExtractor (source mapping) [BR-CLI-LIVING-DOCS-SOURCEMAP]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-SOURCEMAP-08
+    title: DADO IDs em describes irmãos ENTÃO cada entry tem só o describe próprio
+    boundedContext: ast
+    domain: RuleExtractorSourceMap
+    evidence:
+      - file: src/infrastructure/ast/RuleExtractorSourceMap.test.ts
+        lineStart: 150
+        lineEnd: 172
+        testName: DADO IDs em describes irmãos ENTÃO cada entry tem só o describe próprio
+        coverageState: covered
+    tags:
+      - Contexto de describe → tags
+      - Infra — TypeScriptRuleExtractor (source mapping) [BR-CLI-LIVING-DOCS-SOURCEMAP]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-SOURCEMAP-09
+    title: DADO duas extrações do mesmo arquivo ENTÃO produz a mesma saída byte-a-byte
+    boundedContext: ast
+    domain: RuleExtractorSourceMap
+    evidence:
+      - file: src/infrastructure/ast/RuleExtractorSourceMap.test.ts
+        lineStart: 236
+        lineEnd: 251
+        testName: DADO duas extrações do mesmo arquivo ENTÃO produz a mesma saída byte-a-byte
+        coverageState: covered
+    tags:
+      - Determinismo do source mapping
+      - Infra — TypeScriptRuleExtractor (source mapping) [BR-CLI-LIVING-DOCS-SOURCEMAP]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-SOURCEMAP-10
+    title: DADO N it() com mesmo ruleId no mesmo arquivo ENTÃO 1 entry com evidence[N] ordenada por lineStart
+    boundedContext: ast
+    domain: RuleExtractorSourceMap
+    evidence:
+      - file: src/infrastructure/ast/RuleExtractorSourceMap.test.ts
+        lineStart: 176
+        lineEnd: 199
+        testName: DADO N it() com mesmo ruleId no mesmo arquivo ENTÃO 1 entry com evidence[N] ordenada por lineStart
+        coverageState: covered
+    tags:
+      - Agregação intra-arquivo (3.C.4-prep)
+      - Infra — TypeScriptRuleExtractor (source mapping) [BR-CLI-LIVING-DOCS-SOURCEMAP]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-SOURCEMAP-11
+    title: DADO mistura de it() e it.skip() para mesmo ruleId ENTÃO evidence preserva coverageState por item
+    boundedContext: ast
+    domain: RuleExtractorSourceMap
+    evidence:
+      - file: src/infrastructure/ast/RuleExtractorSourceMap.test.ts
+        lineStart: 201
+        lineEnd: 212
+        testName: DADO mistura de it() e it.skip() para mesmo ruleId ENTÃO evidence preserva coverageState por item
+        coverageState: covered
+    tags:
+      - Agregação intra-arquivo (3.C.4-prep)
+      - Infra — TypeScriptRuleExtractor (source mapping) [BR-CLI-LIVING-DOCS-SOURCEMAP]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-SOURCEMAP-12
+    title: DADO ruleId em describes irmãos no mesmo arquivo ENTÃO evidence.tags absorve união dos describes
+    boundedContext: ast
+    domain: RuleExtractorSourceMap
+    evidence:
+      - file: src/infrastructure/ast/RuleExtractorSourceMap.test.ts
+        lineStart: 214
+        lineEnd: 232
+        testName: DADO ruleId em describes irmãos no mesmo arquivo ENTÃO evidence.tags absorve união dos describes
+        coverageState: covered
+    tags:
+      - Agregação intra-arquivo (3.C.4-prep)
+      - Infra — TypeScriptRuleExtractor (source mapping) [BR-CLI-LIVING-DOCS-SOURCEMAP]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-VERSIONING-01
+    title: DADO a versão inicial ENTÃO é exportada como 'v0'
+    boundedContext: living-docs
+    domain: LivingDocsVersioning
+    evidence:
+      - file: src/domain/living-docs/LivingDocsVersioning.test.ts
+        lineStart: 45
+        lineEnd: 47
+        testName: DADO a versão inicial ENTÃO é exportada como 'v0'
+        coverageState: covered
+    tags:
+      - Constante canônica
+      - LivingDocs — Schema version contract [BR-CLI-LIVING-DOCS-VERSIONING]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-VERSIONING-02
+    title: DADO o conjunto de versões suportadas ENTÃO inclui ao menos a versão corrente
+    boundedContext: living-docs
+    domain: LivingDocsVersioning
+    evidence:
+      - file: src/domain/living-docs/LivingDocsVersioning.test.ts
+        lineStart: 49
+        lineEnd: 51
+        testName: DADO o conjunto de versões suportadas ENTÃO inclui ao menos a versão corrente
+        coverageState: covered
+    tags:
+      - Constante canônica
+      - LivingDocs — Schema version contract [BR-CLI-LIVING-DOCS-VERSIONING]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-VERSIONING-03
+    title: DADO o conjunto ENTÃO é imutável em runtime (readonly array)
+    boundedContext: living-docs
+    domain: LivingDocsVersioning
+    evidence:
+      - file: src/domain/living-docs/LivingDocsVersioning.test.ts
+        lineStart: 53
+        lineEnd: 56
+        testName: DADO o conjunto ENTÃO é imutável em runtime (readonly array)
+        coverageState: covered
+    tags:
+      - Constante canônica
+      - LivingDocs — Schema version contract [BR-CLI-LIVING-DOCS-VERSIONING]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-VERSIONING-04
+    title: DADO schemaVersion='%s' (não-suportada) ENTÃO LIVING_DOCS_INVALID_SCHEMA_VERSION
+    boundedContext: living-docs
+    domain: LivingDocsVersioning
+    evidence:
+      - file: src/domain/living-docs/LivingDocsVersioning.test.ts
+        lineStart: 60
+        lineEnd: 77
+        testName: DADO schemaVersion='%s' (não-suportada) ENTÃO LIVING_DOCS_INVALID_SCHEMA_VERSION
+        coverageState: covered
+    tags:
+      - LivingDocs — Schema version contract [BR-CLI-LIVING-DOCS-VERSIONING]
+      - Rejeição de versões fora do conjunto suportado
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-VERSIONING-05
+    title: DADO schemaVersion não-string ENTÃO LIVING_DOCS_INVALID_SCHEMA_VERSION
+    boundedContext: living-docs
+    domain: LivingDocsVersioning
+    evidence:
+      - file: src/domain/living-docs/LivingDocsVersioning.test.ts
+        lineStart: 79
+        lineEnd: 86
+        testName: DADO schemaVersion não-string ENTÃO LIVING_DOCS_INVALID_SCHEMA_VERSION
+        coverageState: covered
+    tags:
+      - LivingDocs — Schema version contract [BR-CLI-LIVING-DOCS-VERSIONING]
+      - Rejeição de versões fora do conjunto suportado
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-VERSIONING-06
+    title: DADO schemaVersion === LIVING_DOCS_SCHEMA_VERSION ENTÃO aceita
+    boundedContext: living-docs
+    domain: LivingDocsVersioning
+    evidence:
+      - file: src/domain/living-docs/LivingDocsVersioning.test.ts
+        lineStart: 90
+        lineEnd: 97
+        testName: DADO schemaVersion === LIVING_DOCS_SCHEMA_VERSION ENTÃO aceita
+        coverageState: covered
+    tags:
+      - Compatibilidade futura (documentada por convenção)
+      - LivingDocs — Schema version contract [BR-CLI-LIVING-DOCS-VERSIONING]
+    coverageState: covered
+  - ruleId: BR-CLI-POLICY-01
+    title: DADO um item denso '%s' SEM workspacePath ENTÃO POLICY_DENSE_REQUIRES_WORKSPACE
+    boundedContext: policy
+    domain: Pillars
+    evidence:
+      - file: src/domain/policy/Pillars.test.ts
+        lineStart: 11
+        lineEnd: 22
+        testName: DADO um item denso '%s' SEM workspacePath ENTÃO POLICY_DENSE_REQUIRES_WORKSPACE
+        coverageState: covered
+    tags:
+      - Domínio — Definição dos Pilares [BR-CLI-POLICY]
+      - Pilar denso (spec/experiment/spike/incident)
+    coverageState: covered
+  - ruleId: BR-CLI-POLICY-02
+    title: DADO um 'incident' SEM severity ENTÃO falha com POLICY_INCIDENT_REQUIRES_SEVERITY
+    boundedContext: policy
+    domain: Pillars
+    evidence:
+      - file: src/domain/policy/Pillars.test.ts
+        lineStart: 83
+        lineEnd: 95
+        testName: DADO um 'incident' SEM severity ENTÃO falha com POLICY_INCIDENT_REQUIRES_SEVERITY
+        coverageState: covered
+    tags:
+      - Domínio — Definição dos Pilares [BR-CLI-POLICY]
+      - "Pilar: Incident (Fricção Crítica)"
+    coverageState: covered
+  - ruleId: BR-CLI-POLICY-03
+    title: DADO um 'experiment' SEM hypothesis ENTÃO falha com POLICY_EXPERIMENT_REQUIRES_HYPOTHESIS
+    boundedContext: policy
+    domain: Pillars
+    evidence:
+      - file: src/domain/policy/Pillars.test.ts
+        lineStart: 37
+        lineEnd: 50
+        testName: DADO um 'experiment' SEM hypothesis ENTÃO falha com POLICY_EXPERIMENT_REQUIRES_HYPOTHESIS
+        coverageState: covered
+    tags:
+      - Domínio — Definição dos Pilares [BR-CLI-POLICY]
+      - "Pilar: Experiment (Growth Engineering)"
+    coverageState: covered
+  - ruleId: BR-CLI-POLICY-04
+    title: DADO um item virtual '%s' COM workspacePath ENTÃO falha com POLICY_VIRTUAL_REJECTS_WORKSPACE
+    boundedContext: policy
+    domain: Pillars
+    evidence:
+      - file: src/domain/policy/Pillars.test.ts
+        lineStart: 111
+        lineEnd: 127
+        testName: DADO um item virtual '%s' COM workspacePath ENTÃO falha com POLICY_VIRTUAL_REJECTS_WORKSPACE
+        coverageState: covered
+    tags:
+      - Domínio — Definição dos Pilares [BR-CLI-POLICY]
+      - Pilares virtuais (proposal/patch/fix) rejeitam workspacePath
+    coverageState: covered
+  - ruleId: BR-CLI-POLICY-05
+    title: DADO um 'patch' COM hypothesis ENTÃO falha com POLICY_PATCH_REJECTS_EXPERIMENT_FIELDS
+    boundedContext: policy
+    domain: Pillars
+    evidence:
+      - file: src/domain/policy/Pillars.test.ts
+        lineStart: 137
+        lineEnd: 149
+        testName: DADO um 'patch' COM hypothesis ENTÃO falha com POLICY_PATCH_REJECTS_EXPERIMENT_FIELDS
+        coverageState: covered
+    tags:
+      - Domínio — Definição dos Pilares [BR-CLI-POLICY]
+      - "Pilares de Manutenção: Fix e Patch"
+    coverageState: covered
+  - ruleId: BR-CLI-POLICY-06
+    title: DADO qualquer item COM título <5 chars ENTÃO falha com POLICY_TITLE_TOO_SHORT
+    boundedContext: policy
+    domain: Pillars
+    evidence:
+      - file: src/domain/policy/Pillars.test.ts
+        lineStart: 173
+        lineEnd: 180
+        testName: DADO qualquer item COM título <5 chars ENTÃO falha com POLICY_TITLE_TOO_SHORT
+        coverageState: covered
+    tags:
+      - Domínio — Definição dos Pilares [BR-CLI-POLICY]
+      - Validações Comuns
+    coverageState: covered
+  - ruleId: BR-CLI-POLICY-07
+    title: DADO uma 'proposal' em status 'draft' QUANDO promovida ENTÃO POLICY_PROPOSAL_NOT_MATURE
+    boundedContext: policy
+    domain: Promotion
+    evidence:
+      - file: src/domain/policy/Promotion.test.ts
+        lineStart: 33
+        lineEnd: 44
+        testName: DADO uma 'proposal' em status 'draft' QUANDO promovida ENTÃO POLICY_PROPOSAL_NOT_MATURE
+        coverageState: covered
+    tags:
+      - Domínio — Promoção e Maturidade [BR-CLI-POLICY]
+      - "Promoção: Proposal -> Spec"
+    coverageState: covered
+  - ruleId: BR-CLI-POLICY-08
+    title: DADO um '%s' QUANDO tentada promoção ENTÃO POLICY_MAINTENANCE_NOT_PROMOTABLE
+    boundedContext: policy
+    domain: Promotion
+    evidence:
+      - file: src/domain/policy/Promotion.test.ts
+        lineStart: 108
+        lineEnd: 125
+        testName: DADO um '%s' QUANDO tentada promoção ENTÃO POLICY_MAINTENANCE_NOT_PROMOTABLE
+        coverageState: covered
+    tags:
+      - Domínio — Promoção e Maturidade [BR-CLI-POLICY]
+      - Imutabilidade de Ciclo Fechado
+    coverageState: covered
+  - ruleId: BR-CLI-POLICY-09
+    title: DADO um 'experiment' com outcome != won ENTÃO POLICY_EXPERIMENT_NOT_WON
+    boundedContext: policy
+    domain: Promotion
+    evidence:
+      - file: src/domain/policy/Promotion.test.ts
+        lineStart: 69
+        lineEnd: 87
+        testName: DADO um 'experiment' com outcome != won ENTÃO POLICY_EXPERIMENT_NOT_WON
+        coverageState: covered
+    tags:
+      - Domínio — Promoção e Maturidade [BR-CLI-POLICY]
+      - "Promoção: Experiment -> Spec (Shape-up)"
+    coverageState: covered

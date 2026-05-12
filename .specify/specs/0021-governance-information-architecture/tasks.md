@@ -799,6 +799,64 @@ yarn smoke
 
 ---
 
+## Sub-bloco [3.C.4] — Bin já materializado: yarn scripts + baseline + CI 🚀
+
+> **Âncora:** `[DEC-0021-C01]` (continuação) · **Predecessores:** `[3.C.4-prep]` e `[3.C.4-prep-fix]` fecharam o gate de design e o ponto cego do `it.each`. Pipeline e bin físico já verdes ponta-a-ponta.
+>
+> **Estado atual em 2026-05-11:**
+>
+> - `cli/living-docs.mjs` materializado (commit `fff329e`), Windows-compatible via `pathToFileURL`.
+> - `node cli/living-docs.mjs generate` → exit 0, 157 entries.
+> - `node cli/living-docs.mjs check` → exit 0 ("in sync").
+> - Idempotência byte-a-byte confirmada (MD5 `4fd426fa...`).
+> - 292 testes passados, 0 regressão.
+>
+> **Falta:** casca operacional (yarn scripts), versionamento do baseline e integração CI dedicada. Trabalho de plumbing — sem decisões arquiteturais novas.
+
+### Tarefas
+
+- [ ] **3.C.4.1 [Yarn scripts]** Adicionar ao `package.json` (seção `scripts`):
+  - `"living-docs:generate": "yarn build && node cli/living-docs.mjs generate"`
+  - `"living-docs:check": "yarn build && node cli/living-docs.mjs check"`
+  - Validar manualmente: `yarn living-docs:generate` produz output `✅ ... written (157 entries).`; `yarn living-docs:check` retorna `✅ ... in sync (157 entries).`.
+  - Justificativa do `yarn build &&`: garante que `dist/cli/livingDocs.js` está em sincronia com o source antes da execução. Em ambiente CI o build já roda separadamente, mas a redundância é barata e protege execução manual local.
+
+- [ ] **3.C.4.2 [Baseline versionado]** Versionar `.governance/living-docs.yml` no repo.
+  - **Decisão técnica fundadora:** sem baseline no git, `check` compara contra string vazia e drift é trivial-sempre — o guard só faz sentido com baseline commitado. Versionar é caminho único.
+  - **Tamanho atual:** 157 entries, ~92KB, ~2200 linhas. Diff em PRs futuros vai incluir mudanças sempre que um teste `[BR-CLI-*]` for adicionado/renomeado/removido — esperado e desejado.
+  - **Localização:** `.governance/living-docs.yml` (já é o path canônico declarado em ADR 0004 e usado por `cli/livingDocs.ts`).
+  - **Header de comentário no YAML?** Hoje o serializer não emite comentários (sortMapEntries:false + plain strings); adicionar header exigiria mudança no serializer. **Decisão:** não adicionar header agora — o arquivo é compreensível pela estrutura (`schemaVersion`/`entries`); evolução cosmética pode entrar em uma sessão de polish futura.
+  - **Aprovação editorial necessária da owner antes do `git add`** (o arquivo é grande e fica visível no diff de toda PR futura).
+
+- [ ] **3.C.4.3 [CI integration]** Adicionar step em `.github/workflows/ai-guidelines-ci.yml`:
+  - Novo step após o `Validate AI-first baseline`: `Validate Living Documentation` rodando `yarn living-docs:check`.
+  - O step usa o mesmo job `ai-guidelines-check` (sem novo job — economiza setup de Node).
+  - O step pressupõe que o baseline está commitado (3.C.4.2 fecha primeiro).
+  - Não há diff específico no `package-lock` / setup; só uma linha nova de step. Validação local: `cat .github/workflows/ai-guidelines-ci.yml` — YAML válido + step na ordem certa.
+
+- [ ] **3.C.4.4 [Fechamento]** Housekeeping:
+  - `tasks.md` 3.C.4 (item no sub-bloco [3.C]) marcado `[x]` com referência aos commits 3.C.4-prep + 3.C.4-prep-fix + este sub-bloco.
+  - `NEXT.md` item 5 e 6: bin físico e CI marcados como ~~resolvidos~~.
+  - `ARCHITECTURE-REFERENCE.md` §1.3 LivingDocsDriftGuard: trocar `"Bin físico materializado; yarn scripts + CI ficam para 3.C.4"` por `"Pipeline operacional completo (yarn scripts + CI integrado)"`.
+  - 1 commit final cobrindo os 3 itens de plumbing + housekeeping (ou 3 commits atômicos se preferir).
+
+### Critério de aceite (Definition of Done)
+
+- `yarn living-docs:generate` e `yarn living-docs:check` rodam com exit 0 a partir do shell local.
+- `.governance/living-docs.yml` versionado no repo após aprovação editorial da owner.
+- Workflow CI executa `yarn living-docs:check` com sucesso em uma run real (verificada via `gh run watch` ou similar — opcional, pode ser via push para PR).
+- Pipeline canônico (`yarn format ; yarn check ; yarn test:nova-cli`) continua 292 passed, 0 regressão.
+- `tasks.md` 3.C.4 fechado; NEXT.md débitos 5 e 6 resolvidos; ARCHITECTURE-REFERENCE atualizado.
+
+### Anti-objetivos (não fazer nesta sessão)
+
+- Não evoluir o serializer para emitir header de comentário, mesmo que tentador (fica para sessão de polish).
+- Não criar um job CI separado para living-docs (custo desnecessário; cabe no job existente).
+- Não consolidar/renumerar IDs no `.governance/living-docs.yml` por estética (essa é decisão do autor do teste, não do drift guard).
+- Não tocar em 3.D — sub-bloco próprio, escopo isolado.
+
+---
+
 ## Sub-bloco [3.D] — TemplateEngine: schema de recipes + partials atômicos 🧩
 
 > **Âncora:** `[DEC-0021-D01]`
