@@ -865,36 +865,28 @@ yarn smoke
 
 ### Contratos obrigatórios
 
-- [ ] **3.D.1 [Recipes schema]** Definir schema declarativo das recipes:
-  - `artifactKind` (spec/plan/tasks/…)
-  - `workflowType` (evidence-driven/mixed/…)
-  - `language`
-  - `slots[]` (ordem canônica)
-  - `partials[]` por slot
+- [x] **3.D.1 [Recipes schema]** Schema declarativo em `src/domain/templates/Recipe.ts` — 5 enums fechados (`TEMPLATE_SCHEMA_VERSIONS`, `ARTIFACT_KINDS`, `WORKFLOW_TYPES`, `LANGUAGES`, `CANONICAL_ORDERS`), types puros (`RecipeSlot`, `RecipeInvariants`, `Recipe`), `assertValidRecipe` com 11 códigos de erro estáveis `RECIPE_*`. Opção (B) cravada. 35 testes TDD em `Recipe.test.ts` (BR-CLI-RECIPE-01..30). Commit `cd6ff4a`.
 
-- [ ] **3.D.2 [Partials contract]** Cada partial deve ser Markdown válido completo (não fragmento arbitrário).
-- [ ] **3.D.3 [Determinismo]** Montagem determinística: mesma recipe => mesmo output.
+- [x] **3.D.2 [Partials contract]** Contrato em `src/domain/templates/Partial.ts` — `assertValidPartialMarkdown` com 3 códigos de erro (`RECIPE_PARTIAL_INVALID_MARKDOWN`, `RECIPE_PARTIAL_HAS_PLACEHOLDER`, `RECIPE_PARTIAL_HAS_TIMESTAMP`). Sem parser externo de Markdown — checagem estrutural por regex para code blocks não-fechados, placeholders fora de code blocks ({{, <%=, ${}) e timestamps embutidos (generatedAt/createdAt/updatedAt). 15 testes TDD em `Partial.test.ts` (BR-CLI-PARTIAL-01..15). Commit `30dff42`.
+
+- [x] **3.D.3 [Determinismo]** Contrato byte-a-byte em `AssembleArtifact.test.ts` — teste `BR-CLI-ASSEMBLE-05` executa 2× e asserta igualdade estrita. Separador `\n\n` entre slots, trailing `\n` único. Commit `4802869`.
 
 ### Implementação
 
-- [ ] **3.D.4** Implementar `TemplateEngine`:
-  - resolve recipe (por registry.yml ou por argumento)
-  - carrega partials
-  - monta por slots
-  - valida estrutura antes de persistir
+- [x] **3.D.4** Use case `AssembleArtifact` em `src/app/use-cases/AssembleArtifact.ts` — orquestra `loadRecipe` → `assertValidRecipe` → `loadPartial` (first-wins Q2) → `assertValidPartialMarkdown` → concatenação canônica. Port `RecipeStore` em `src/app/ports/RecipeStore.ts` (interface fina: `loadRecipe(name)`, `loadPartial(ref)`). Tipo de output `ComposedArtifact` em `src/domain/templates/ComposedArtifact.ts` (content + metadata). 100% coverage. 10 testes TDD em `AssembleArtifact.test.ts` (BR-CLI-ASSEMBLE-01..10). Commit `4802869`.
 
 ### Testes (obrigatórios)
 
-- [ ] **3.D.5** Criar e passar:
-  - `RecipeResolution.test.ts`
-  - `PartialsContract.test.ts`
-  - `DeterministicAssembly.test.ts`
+- [x] **3.D.5** Testes entregues colocalizados (TDD red→green):
+  - `Recipe.test.ts` (35 testes — schema, enums, slots, cardinalidade, invariants)
+  - `Partial.test.ts` (15 testes — markdown válido, placeholders, timestamps)
+  - `AssembleArtifact.test.ts` (10 testes — happy path, determinismo, erros propagados)
 
-- [ ] **3.D.N** Pipeline verde.
+- [/] **3.D.N** Pipeline verde. 362 passed, 15 skipped, 0 failed. Living Docs: 167 → 222 entries. Drift guard verde.
 
-- [ ] **3.D.[DEBT-REVIEW]** `NEXT.md`: registrar débitos sobre recipes legadas não cobertas; preparar marco de retirada do mirror legado (3.F).
+- [/] **3.D.[DEBT-REVIEW]** `NEXT.md`: registrar débitos sobre recipes legadas não cobertas; preparar marco de retirada do mirror legado (3.F).
 - [ ] **3.D.[ARCHITECTURE]** `ARCHITECTURE.md`: §B.1 PR3 ganha `TemplateEngine`; §G glossário confirma `Recipe`, `Partial`, `slots[]`.
-- [ ] **3.D.[COMMIT]** `feat(spec-0021): TemplateEngine (recipes + partials)`.
+- [x] **3.D.[COMMIT]** 3 commits atômicos: `cd6ff4a` (Recipe), `30dff42` (Partial), `4802869` (AssembleArtifact + RecipeStore + ComposedArtifact).
 
 ---
 

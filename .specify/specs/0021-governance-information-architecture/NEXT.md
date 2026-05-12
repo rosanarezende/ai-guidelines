@@ -115,6 +115,15 @@ Foram identificados os seguintes riscos arquiteturais ainda existentes:
     - **`.only` / `.todo` / `.concurrent` ignorados silenciosamente em v0.** Decisão registrada no docstring de `classifyTestCall` + 3 testes regressivos congelando o comportamento. Promover a erro fatal estável `LIVING_DOCS_UNSUPPORTED_CALL_SITE` em v1 (quando `living-docs` schemaVersion subir). `.only` em particular é caso de vazamento de debug local para CI — gate fatal vale ouro.
     - **`buildMinimalDiff` continua "mínimo".** Trocado para diff agrupado por bloco `ruleId:`, mas ainda não é `diff -u` completo (sem janela contextual fora do bloco). Suficiente para PR review identificar a regra alterada; revisitar só se a dor real aparecer.
 
+#### Sub-bloco 3.D (TemplateEngine: recipes + partials atômicos) — registrado em 2026-05-12
+
+1. **`NodeRecipeStore` adapter não implementado.** Port `RecipeStore` (loadRecipe, loadPartial) existe; adapter concreto com yaml@2 + fs fica para sub-bloco futuro ou 3.F quando recipes YAML reais forem criadas em `.core/governance/templates/`. Use case `AssembleArtifact` está 100% testado com stub — integração virá naturalmente.
+2. **Recipes YAML reais não existem em `.core/governance/templates/recipes/`.** O domain valida POJO; a materialização das recipes `tasks-evidence-driven.recipe.yml`, `spec.recipe.yml` etc. depende de decisão de conteúdo (quais slots/partials para cada artifactKind). Naturalmente acoplado ao 3.F (templates legados → composição atômica).
+3. **`ARCHITECTURE.md` §B.1 e §G não atualizados.** Itens `Recipe`, `Partial`, `ComposedArtifact`, `RecipeStore` (port), `AssembleArtifact` (use case) devem ser adicionados ao mapa de bounded contexts e glossário. Fica como item `3.D.[ARCHITECTURE]` no tasks.md.
+4. **Cardinalidade `maxOccurrences` default fixo em 1.** Em v0 suficiente; quando surgir a necessidade de slots com repetição variável (ex.: `phases[]` com N partials), bump de schemaVersion para v1 + ADR de extensão. Decisão intencional documentada no audit Q4.
+5. **Partial validation é regex-only em v0.** Sem parser de Markdown real — suficiente para invariantes estruturais (code blocks fechados, ausência de placeholders/timestamps). Parser real (ex.: remark/unified) só se justifica quando a validação precisar inspecionar AST de headings (3.E). Sem dependência nova por enquanto — conforme Q5.
+6. **First-wins (Q2) sem fallback.** Em v0, quando o slot tem >1 partial na lista, `AssembleArtifact` resolve sempre o primeiro. Estratégia de fallback (tentar segundo se primeiro não encontrado) é candidata a v1. Comportamento atual é determinístico e testado (BR-CLI-ASSEMBLE-04).
+
 _(A preencher conforme execução do restante da Fase 3)_
 
 ### Débitos da Fase 4 (Consolidação)
