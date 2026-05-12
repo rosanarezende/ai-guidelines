@@ -301,8 +301,18 @@ export class TypeScriptRuleExtractor implements RuleExtractor {
 
   /**
    * Classifica a chamada como `it`/`test` (cobertura `covered`),
-   * `it.skip`/`test.skip` (cobertura `pending`), ou retorna `null` se não
-   * é call site de teste reconhecido.
+   * `it.skip`/`test.skip` (cobertura `pending`), `it.each`/`test.each`
+   * (cobertura `covered`), ou retorna `null` se não é call site de teste
+   * reconhecido.
+   *
+   * Formas reconhecidas (ADR 0004 §3 — sem cegueira sintática para
+   * testes parametrizados):
+   *  - `it(title, fn)` / `test(title, fn)` → covered.
+   *  - `it.skip(title, fn)` / `test.skip(title, fn)` → pending.
+   *  - `it.each(table)(title, fn)` / `test.each(table)(title, fn)` → covered.
+   *    Nesse caso `node` é o outer call (cujo `node.expression` é o inner
+   *    `CallExpression` `it.each(table)`); `node.arguments[0]` continua
+   *    sendo o título — o walker que captura `[BR-CLI-*]` opera normalmente.
    */
   private classifyTestCall(node: ts.CallExpression): { coverageState: CoverageState } | null {
     const expr = node.expression;
@@ -318,6 +328,20 @@ export class TypeScriptRuleExtractor implements RuleExtractor {
       const member = expr.name.text;
       if (ts.isIdentifier(root) && TEST_CALL_NAMES.has(root.text) && member === "skip") {
         return { coverageState: "pending" };
+      }
+    }
+
+    // it.each(table)(title, fn) ou test.each(table)(title, fn)
+    // outer = CallExpression(expression=innerCall, args=[title, fn])
+    // inner = CallExpression(expression=PropertyAccessExpression(it.each), args=[table])
+    if (ts.isCallExpression(expr)) {
+      const innerExpr = expr.expression;
+      if (ts.isPropertyAccessExpression(innerExpr)) {
+        const root = innerExpr.expression;
+        const member = innerExpr.name.text;
+        if (ts.isIdentifier(root) && TEST_CALL_NAMES.has(root.text) && member === "each") {
+          return { coverageState: "covered" };
+        }
       }
     }
 

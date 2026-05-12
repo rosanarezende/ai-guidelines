@@ -768,6 +768,37 @@ yarn smoke
 
 ---
 
+## Sub-bloco [3.C.4-prep-fix] — Extractor reconhece it.each/test.each 🔍
+
+> **Âncora:** `[DEC-0021-C01]` (sub-débito do `_prep`)
+>
+> **Motivo:** validação e2e do `_prep` revelou que o extractor não reconhece `it.each([...])(title, fn)` / `test.each([...])(title, fn)` — `node.expression` aí é um `CallExpression` aninhado, não `Identifier` nem `PropertyAccessExpression`. **7 ruleIds reais** (`BR-CLI-LIVING-DOCS-SCHEMA-02/03/04`, `BR-CLI-LIVING-DOCS-VERSIONING-04`, `BR-CLI-POLICY-01/04/08`) ficaram fora do `.governance/living-docs.yml`. SSOT não pode ter cegueira sintática para testes parametrizados. ADR 0004 §3 — "false positive é defeito estrutural, não erro de regex": **omissão estrutural é defeito do walker, não falha do autor**.
+
+### TDD em 2 passos (RED → GREEN, commit único)
+
+- [ ] **3.C.4-prep-fix.1 [RED]** Adicionar testes vermelhos em `AstRuleExtractor.test.ts`:
+  - `EXTRACTOR-15`: `DADO it.each([...])(title, fn) ENTÃO reconhece ruleId como covered`.
+  - `EXTRACTOR-16`: `DADO test.each([...])(title, fn) ENTÃO reconhece ruleId como covered`.
+  - Rodar `yarn test:nova-cli` — esperado **fail** nesses 2 testes.
+
+- [ ] **3.C.4-prep-fix.2 [GREEN]** Extender `classifyTestCall` em `TypeScriptRuleExtractor.ts`:
+  - Reconhecer `CallExpression` cujo `expression` é outro `CallExpression` cujo `expression` interno é `PropertyAccessExpression(it|test, each)`.
+  - `lineRangeOf` continua operando sobre o `outer call` — `getStart()` aponta para `it`/`test`; `getEnd()` para o `)` final.
+  - Rodar `yarn test:nova-cli` — esperado **green** (todos passando).
+
+### Validação e2e
+
+- [ ] **3.C.4-prep-fix.3 [Generate]** `node cli/living-docs.mjs generate` produz `.governance/living-docs.yml` com **≥155 entries** (148 atuais + 7 sites recuperados). Validar inclusão de `BR-CLI-POLICY-01`, `POLICY-04`, `POLICY-08`, `LIVING-DOCS-SCHEMA-02/03/04`, `LIVING-DOCS-VERSIONING-04`.
+- [ ] **3.C.4-prep-fix.4 [Check]** `node cli/living-docs.mjs check` retorna exit 0; idempotência byte-a-byte preservada (MD5 antes/depois de regerar).
+
+### Critério de aceite
+
+- 2 testes novos (RED→GREEN), 0 regressão nos 290 existentes.
+- YAML final com cardinalidade real (~155 entries).
+- 1 commit: `feat(spec-0021): extractor reconhece it.each/test.each (drift guard sem cegueira sintática)`.
+
+---
+
 ## Sub-bloco [3.D] — TemplateEngine: schema de recipes + partials atômicos 🧩
 
 > **Âncora:** `[DEC-0021-D01]`

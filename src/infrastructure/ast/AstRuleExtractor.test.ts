@@ -205,6 +205,39 @@ describe("Infra — TypeScriptRuleExtractor (descoberta) [BR-CLI-LIVING-DOCS-EXT
     });
   });
 
+  describe("Reconhecimento de testes parametrizados (it.each/test.each)", () => {
+    it("DADO it.each([...])(title, fn) ENTÃO reconhece ruleId como covered [BR-CLI-LIVING-DOCS-EXTRACTOR-15]", () => {
+      const file = writeFile(
+        root,
+        "src/domain/foo/Foo.test.ts",
+        `
+        describe("X", () => {
+          it.each(["a", "b", "c"])("DADO kind '%s' ENTÃO algo [BR-CLI-PARAM-01]", (kind) => {});
+        });
+        `
+      );
+      const entries = new TypeScriptRuleExtractor(root).extract([file]);
+      expect(entries).toHaveLength(1);
+      expect(entries[0].ruleId).toBe("BR-CLI-PARAM-01");
+      expect(entries[0].coverageState).toBe("covered");
+      expect(entries[0].evidence).toHaveLength(1);
+    });
+
+    it("DADO test.each([...])(title, fn) ENTÃO reconhece ruleId como covered [BR-CLI-LIVING-DOCS-EXTRACTOR-16]", () => {
+      const file = writeFile(
+        root,
+        "src/domain/foo/Foo.test.ts",
+        `
+        test.each([1, 2, 3])("DADO n '%s' ENTÃO outra coisa [BR-CLI-PARAM-02]", (n) => {});
+        `
+      );
+      const entries = new TypeScriptRuleExtractor(root).extract([file]);
+      expect(entries).toHaveLength(1);
+      expect(entries[0].ruleId).toBe("BR-CLI-PARAM-02");
+      expect(entries[0].coverageState).toBe("covered");
+    });
+  });
+
   describe("Invariante: 1 it/test = exatamente 1 rule (ADR 0002 §4 + ADR 0004 §3)", () => {
     it("DADO título com 2 tags [BR-CLI-*] ENTÃO LIVING_DOCS_AMBIGUOUS_RULE_ID com mensagem listando os IDs [BR-CLI-LIVING-DOCS-EXTRACTOR-13]", () => {
       const file = writeFile(
