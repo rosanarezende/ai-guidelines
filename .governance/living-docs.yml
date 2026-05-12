@@ -756,6 +756,34 @@ entries:
       - Bypass convergente vs divergente
       - LivingDocs — Agregação por ruleId [BR-CLI-LIVING-DOCS-DETERMINISM]
     coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-DETERMINISM-20
+    title: DADO evidence com mesmo (file, lineStart, lineEnd) ENTÃO ordena alfa por testName
+    boundedContext: living-docs
+    domain: LivingDocsDeterminism
+    evidence:
+      - file: src/domain/living-docs/LivingDocsDeterminism.test.ts
+        lineStart: 334
+        lineEnd: 365
+        testName: DADO evidence com mesmo (file, lineStart, lineEnd) ENTÃO ordena alfa por testName
+        coverageState: covered
+    tags:
+      - LivingDocs — Agregação por ruleId [BR-CLI-LIVING-DOCS-DETERMINISM]
+      - orderEvidence usa testName como tiebreak final
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-DETERMINISM-21
+    title: DADO rawEntry com evidence[0] NÃO mínimo ENTÃO primary considera min real de cada rawEntry
+    boundedContext: living-docs
+    domain: LivingDocsDeterminism
+    evidence:
+      - file: src/domain/living-docs/LivingDocsDeterminism.test.ts
+        lineStart: 369
+        lineEnd: 401
+        testName: DADO rawEntry com evidence[0] NÃO mínimo ENTÃO primary considera min real de cada rawEntry
+        coverageState: covered
+    tags:
+      - LivingDocs — Agregação por ruleId [BR-CLI-LIVING-DOCS-DETERMINISM]
+      - pickPrimaryEntry escaneia mínimo dentro de evidence (não evidence[0])
+    coverageState: covered
   - ruleId: BR-CLI-LIVING-DOCS-EXTRACTOR-01
     title: DADO arquivo .test.ts com it('<fixture-id> desc') ENTÃO retorna 1 entry coverageState='covered'
     boundedContext: ast

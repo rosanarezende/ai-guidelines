@@ -201,14 +201,23 @@ function assertSingleFile(ruleId: string, evidence: readonly LivingDocsSource[])
 
 function pickPrimaryEntry(rawEntries: readonly LivingDocsEntry[]): LivingDocsEntry {
   // Entry crua com menor (file, lineStart) — estável e determinística.
-  // Como cross-file já foi rejeitado a montante, todos terão mesmo file
-  // (mas usamos `file` no comparador para o caso de chamada isolada).
+  // Cross-file já foi rejeitado a montante, então todos terão mesmo file
+  // (file no comparador é defesa para chamada isolada). Em vez de assumir
+  // `evidence[0]` mínimo (frágil para extractor futuro), escaneamos o
+  // mínimo dentro de cada rawEntry.evidence — invariante vive no domain.
   return [...rawEntries].sort((a, b) => {
-    const ea = a.evidence[0];
-    const eb = b.evidence[0];
-    if (ea.file !== eb.file) return ea.file < eb.file ? -1 : 1;
-    return ea.lineStart - eb.lineStart;
+    const ma = minEvidence(a.evidence);
+    const mb = minEvidence(b.evidence);
+    if (ma.file !== mb.file) return ma.file < mb.file ? -1 : 1;
+    return ma.lineStart - mb.lineStart;
   })[0];
+}
+
+function minEvidence(evidence: readonly LivingDocsSource[]): LivingDocsSource {
+  return evidence.reduce((acc, ev) => {
+    if (ev.file !== acc.file) return ev.file < acc.file ? ev : acc;
+    return ev.lineStart < acc.lineStart ? ev : acc;
+  });
 }
 
 function mergeCoverageState(ruleId: string, evidence: readonly LivingDocsSource[]): CoverageState {
@@ -295,7 +304,8 @@ function orderEvidence(evidence: readonly LivingDocsSource[]): readonly LivingDo
   return [...evidence].sort((a, b) => {
     if (a.file !== b.file) return a.file < b.file ? -1 : 1;
     if (a.lineStart !== b.lineStart) return a.lineStart - b.lineStart;
-    return a.lineEnd - b.lineEnd;
+    if (a.lineEnd !== b.lineEnd) return a.lineEnd - b.lineEnd;
+    return a.testName < b.testName ? -1 : a.testName > b.testName ? 1 : 0;
   });
 }
 

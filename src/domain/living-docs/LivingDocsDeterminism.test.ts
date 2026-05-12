@@ -329,4 +329,75 @@ describe("LivingDocs — Agregação por ruleId [BR-CLI-LIVING-DOCS-DETERMINISM]
       expect(agg.bypass).toBeUndefined();
     });
   });
+
+  describe("orderEvidence usa testName como tiebreak final", () => {
+    it("DADO evidence com mesmo (file, lineStart, lineEnd) ENTÃO ordena alfa por testName [BR-CLI-LIVING-DOCS-DETERMINISM-20]", () => {
+      // Honra contrato declarado no docstring de canonicalizeArtifact:
+      // "evidence ordenada por (file, lineStart, lineEnd, testName)". Sem
+      // testName no comparador, casos como esse ficavam não-determinísticos
+      // (review PR #13).
+      const same = {
+        file: "src/x.test.ts",
+        lineStart: 10,
+        lineEnd: 10,
+        coverageState: "covered" as const,
+      };
+      const result = canonicalizeArtifact({
+        schemaVersion: LIVING_DOCS_SCHEMA_VERSION,
+        entries: [
+          {
+            ...baseAgg,
+            ruleId: "BR-CLI-TIEBREAK",
+            evidence: [
+              { ...same, testName: "Z scenario" },
+              { ...same, testName: "A scenario" },
+              { ...same, testName: "M scenario" },
+            ],
+            tags: [],
+          },
+        ],
+      });
+      expect(result.entries[0].evidence.map((ev) => ev.testName)).toEqual([
+        "A scenario",
+        "M scenario",
+        "Z scenario",
+      ]);
+    });
+  });
+
+  describe("pickPrimaryEntry escaneia mínimo dentro de evidence (não evidence[0])", () => {
+    it("DADO rawEntry com evidence[0] NÃO mínimo ENTÃO primary considera min real de cada rawEntry [BR-CLI-LIVING-DOCS-DETERMINISM-21]", () => {
+      // Robustez para extractor futuro que não garanta evidence[0] mínimo
+      // (review PR #13). Hoje o extractor pré-ordena, mas a invariante deve
+      // viver no domain — caso contrário um extractor alternativo poderia
+      // mudar silenciosamente qual `title` vence o merge.
+      const file = "src/x.test.ts";
+      const result = canonicalizeArtifact({
+        schemaVersion: LIVING_DOCS_SCHEMA_VERSION,
+        entries: [
+          {
+            ...baseAgg,
+            ruleId: "BR-CLI-PRIMARY-SCAN",
+            title: "primeira entry — min real está em linha 5",
+            evidence: [
+              { file, lineStart: 99, lineEnd: 99, testName: "z", coverageState: "covered" },
+              { file, lineStart: 5, lineEnd: 5, testName: "a", coverageState: "covered" },
+            ],
+            tags: [],
+          },
+          {
+            ...baseAgg,
+            ruleId: "BR-CLI-PRIMARY-SCAN",
+            title: "segunda entry — min é linha 10",
+            evidence: [
+              { file, lineStart: 10, lineEnd: 10, testName: "b", coverageState: "covered" },
+            ],
+            tags: [],
+          },
+        ],
+      });
+      // Min absoluto entre rawEntries é 5 (primeira entry); title vence.
+      expect(result.entries[0].title).toBe("primeira entry — min real está em linha 5");
+    });
+  });
 });
