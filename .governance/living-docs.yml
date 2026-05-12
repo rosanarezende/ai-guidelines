@@ -2230,6 +2230,216 @@ entries:
       - Compatibilidade futura (documentada por convenção)
       - LivingDocs — Schema version contract [BR-CLI-LIVING-DOCS-VERSIONING]
     coverageState: covered
+  - ruleId: BR-CLI-PARTIAL-01
+    title: DADO partial com heading H1 e conteúdo ENTÃO aceita
+    boundedContext: templates
+    domain: Partial
+    evidence:
+      - file: src/domain/templates/Partial.test.ts
+        lineStart: 48
+        lineEnd: 50
+        testName: DADO partial com heading H1 e conteúdo ENTÃO aceita
+        coverageState: covered
+    tags:
+      - Partial válido
+      - Partial — assertValidPartialMarkdown [BR-CLI-PARTIAL]
+    coverageState: covered
+  - ruleId: BR-CLI-PARTIAL-02
+    title: DADO partial com heading H2 ENTÃO aceita
+    boundedContext: templates
+    domain: Partial
+    evidence:
+      - file: src/domain/templates/Partial.test.ts
+        lineStart: 52
+        lineEnd: 56
+        testName: DADO partial com heading H2 ENTÃO aceita
+        coverageState: covered
+    tags:
+      - Partial válido
+      - Partial — assertValidPartialMarkdown [BR-CLI-PARTIAL]
+    coverageState: covered
+  - ruleId: BR-CLI-PARTIAL-03
+    title: DADO partial começando com blockquote ENTÃO aceita
+    boundedContext: templates
+    domain: Partial
+    evidence:
+      - file: src/domain/templates/Partial.test.ts
+        lineStart: 58
+        lineEnd: 62
+        testName: DADO partial começando com blockquote ENTÃO aceita
+        coverageState: covered
+    tags:
+      - Partial válido
+      - Partial — assertValidPartialMarkdown [BR-CLI-PARTIAL]
+    coverageState: covered
+  - ruleId: BR-CLI-PARTIAL-04
+    title: DADO partial começando com lista ENTÃO aceita
+    boundedContext: templates
+    domain: Partial
+    evidence:
+      - file: src/domain/templates/Partial.test.ts
+        lineStart: 64
+        lineEnd: 68
+        testName: DADO partial começando com lista ENTÃO aceita
+        coverageState: covered
+    tags:
+      - Partial válido
+      - Partial — assertValidPartialMarkdown [BR-CLI-PARTIAL]
+    coverageState: covered
+  - ruleId: BR-CLI-PARTIAL-05
+    title: DADO conteúdo vazio ENTÃO RECIPE_PARTIAL_INVALID_MARKDOWN
+    boundedContext: templates
+    domain: Partial
+    evidence:
+      - file: src/domain/templates/Partial.test.ts
+        lineStart: 72
+        lineEnd: 82
+        testName: DADO conteúdo vazio ENTÃO RECIPE_PARTIAL_INVALID_MARKDOWN
+        coverageState: covered
+    tags:
+      - Markdown inválido — RECIPE_PARTIAL_INVALID_MARKDOWN
+      - Partial — assertValidPartialMarkdown [BR-CLI-PARTIAL]
+    coverageState: covered
+  - ruleId: BR-CLI-PARTIAL-06
+    title: DADO conteúdo apenas whitespace ENTÃO RECIPE_PARTIAL_INVALID_MARKDOWN
+    boundedContext: templates
+    domain: Partial
+    evidence:
+      - file: src/domain/templates/Partial.test.ts
+        lineStart: 84
+        lineEnd: 91
+        testName: DADO conteúdo apenas whitespace ENTÃO RECIPE_PARTIAL_INVALID_MARKDOWN
+        coverageState: covered
+    tags:
+      - Markdown inválido — RECIPE_PARTIAL_INVALID_MARKDOWN
+      - Partial — assertValidPartialMarkdown [BR-CLI-PARTIAL]
+    coverageState: covered
+  - ruleId: BR-CLI-PARTIAL-07
+    title: DADO bloco de código não-fechado ENTÃO RECIPE_PARTIAL_INVALID_MARKDOWN
+    boundedContext: templates
+    domain: Partial
+    evidence:
+      - file: src/domain/templates/Partial.test.ts
+        lineStart: 93
+        lineEnd: 102
+        testName: DADO bloco de código não-fechado ENTÃO RECIPE_PARTIAL_INVALID_MARKDOWN
+        coverageState: covered
+    tags:
+      - Markdown inválido — RECIPE_PARTIAL_INVALID_MARKDOWN
+      - Partial — assertValidPartialMarkdown [BR-CLI-PARTIAL]
+    coverageState: covered
+  - ruleId: BR-CLI-PARTIAL-08
+    title: DADO conteúdo com {{variavel}} ENTÃO RECIPE_PARTIAL_HAS_PLACEHOLDER
+    boundedContext: templates
+    domain: Partial
+    evidence:
+      - file: src/domain/templates/Partial.test.ts
+        lineStart: 106
+        lineEnd: 118
+        testName: DADO conteúdo com {{variavel}} ENTÃO RECIPE_PARTIAL_HAS_PLACEHOLDER
+        coverageState: covered
+    tags:
+      - Partial — assertValidPartialMarkdown [BR-CLI-PARTIAL]
+      - Placeholders proibidos — RECIPE_PARTIAL_HAS_PLACEHOLDER
+    coverageState: covered
+  - ruleId: BR-CLI-PARTIAL-09
+    title: DADO conteúdo com <%= expr %> ENTÃO RECIPE_PARTIAL_HAS_PLACEHOLDER
+    boundedContext: templates
+    domain: Partial
+    evidence:
+      - file: src/domain/templates/Partial.test.ts
+        lineStart: 120
+        lineEnd: 128
+        testName: DADO conteúdo com <%= expr %> ENTÃO RECIPE_PARTIAL_HAS_PLACEHOLDER
+        coverageState: covered
+    tags:
+      - Partial — assertValidPartialMarkdown [BR-CLI-PARTIAL]
+      - Placeholders proibidos — RECIPE_PARTIAL_HAS_PLACEHOLDER
+    coverageState: covered
+  - ruleId: BR-CLI-PARTIAL-10
+    title: DADO conteúdo com ${interpolacao} ENTÃO RECIPE_PARTIAL_HAS_PLACEHOLDER
+    boundedContext: templates
+    domain: Partial
+    evidence:
+      - file: src/domain/templates/Partial.test.ts
+        lineStart: 130
+        lineEnd: 138
+        testName: DADO conteúdo com ${interpolacao} ENTÃO RECIPE_PARTIAL_HAS_PLACEHOLDER
+        coverageState: covered
+    tags:
+      - Partial — assertValidPartialMarkdown [BR-CLI-PARTIAL]
+      - Placeholders proibidos — RECIPE_PARTIAL_HAS_PLACEHOLDER
+    coverageState: covered
+  - ruleId: BR-CLI-PARTIAL-11
+    title: DADO {{ dentro de bloco de código ENTÃO aceita (código legítimo)
+    boundedContext: templates
+    domain: Partial
+    evidence:
+      - file: src/domain/templates/Partial.test.ts
+        lineStart: 140
+        lineEnd: 145
+        testName: DADO {{ dentro de bloco de código ENTÃO aceita (código legítimo)
+        coverageState: covered
+    tags:
+      - Partial — assertValidPartialMarkdown [BR-CLI-PARTIAL]
+      - Placeholders proibidos — RECIPE_PARTIAL_HAS_PLACEHOLDER
+    coverageState: covered
+  - ruleId: BR-CLI-PARTIAL-12
+    title: DADO conteúdo com generatedAt ENTÃO RECIPE_PARTIAL_HAS_TIMESTAMP
+    boundedContext: templates
+    domain: Partial
+    evidence:
+      - file: src/domain/templates/Partial.test.ts
+        lineStart: 149
+        lineEnd: 160
+        testName: DADO conteúdo com generatedAt ENTÃO RECIPE_PARTIAL_HAS_TIMESTAMP
+        coverageState: covered
+    tags:
+      - Partial — assertValidPartialMarkdown [BR-CLI-PARTIAL]
+      - Timestamps proibidos — RECIPE_PARTIAL_HAS_TIMESTAMP
+    coverageState: covered
+  - ruleId: BR-CLI-PARTIAL-13
+    title: DADO conteúdo com createdAt ENTÃO RECIPE_PARTIAL_HAS_TIMESTAMP
+    boundedContext: templates
+    domain: Partial
+    evidence:
+      - file: src/domain/templates/Partial.test.ts
+        lineStart: 162
+        lineEnd: 170
+        testName: DADO conteúdo com createdAt ENTÃO RECIPE_PARTIAL_HAS_TIMESTAMP
+        coverageState: covered
+    tags:
+      - Partial — assertValidPartialMarkdown [BR-CLI-PARTIAL]
+      - Timestamps proibidos — RECIPE_PARTIAL_HAS_TIMESTAMP
+    coverageState: covered
+  - ruleId: BR-CLI-PARTIAL-14
+    title: DADO conteúdo com updatedAt ENTÃO RECIPE_PARTIAL_HAS_TIMESTAMP
+    boundedContext: templates
+    domain: Partial
+    evidence:
+      - file: src/domain/templates/Partial.test.ts
+        lineStart: 172
+        lineEnd: 180
+        testName: DADO conteúdo com updatedAt ENTÃO RECIPE_PARTIAL_HAS_TIMESTAMP
+        coverageState: covered
+    tags:
+      - Partial — assertValidPartialMarkdown [BR-CLI-PARTIAL]
+      - Timestamps proibidos — RECIPE_PARTIAL_HAS_TIMESTAMP
+    coverageState: covered
+  - ruleId: BR-CLI-PARTIAL-15
+    title: DADO timestamp mencionado em texto descritivo (não campo) ENTÃO aceita
+    boundedContext: templates
+    domain: Partial
+    evidence:
+      - file: src/domain/templates/Partial.test.ts
+        lineStart: 182
+        lineEnd: 188
+        testName: DADO timestamp mencionado em texto descritivo (não campo) ENTÃO aceita
+        coverageState: covered
+    tags:
+      - Partial — assertValidPartialMarkdown [BR-CLI-PARTIAL]
+      - Timestamps proibidos — RECIPE_PARTIAL_HAS_TIMESTAMP
+    coverageState: covered
   - ruleId: BR-CLI-POLICY-01
     title: DADO um item denso '%s' SEM workspacePath ENTÃO POLICY_DENSE_REQUIRES_WORKSPACE
     boundedContext: policy
