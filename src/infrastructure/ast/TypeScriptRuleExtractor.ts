@@ -68,10 +68,15 @@ interface ExtractedCall {
 /**
  * Opções do extractor.
  *
- * `todayIso` é obrigatório para uso determinístico (CI/test). Em produção
- * o use case que orquestra o extractor injeta via `Clock` port. Quando
- * omitido, o construtor usa `new Date().toISOString()` — útil só para
- * exploração local.
+ * `todayIso` é opcional. Quando informado, fixa "hoje" determinísticamente
+ * (uso CI/test). Quando omitido, o construtor faz fallback para
+ * `new Date().toISOString()` — útil para exploração local. O caller é
+ * responsável por injetar o valor estável em pipelines determinísticos.
+ *
+ * Dívida explícita (NEXT.md): migrar para `Clock` port em
+ * `src/app/ports/Clock.ts` quando o segundo consumidor de "hoje" aparecer
+ * (drift guard de schema, expiração de bypass cross-guard). Não fazer
+ * sozinho — porta sem segundo consumidor é abstração premature (review PR #13).
  */
 export interface TypeScriptRuleExtractorOptions {
   readonly todayIso?: string;
@@ -285,11 +290,12 @@ export class TypeScriptRuleExtractor implements RuleExtractor {
    * `it`/`test`; outros posicionamentos são ignorados.
    */
   private detectBypassDirective(sourceFile: ts.SourceFile, node: ts.Node): LivingDocsBypass | null {
-    const ranges = ts.getLeadingCommentRanges(sourceFile.text, node.getFullStart());
+    const fullText = sourceFile.getFullText();
+    const ranges = ts.getLeadingCommentRanges(fullText, node.getFullStart());
     if (ranges === undefined) return null;
 
     for (const range of ranges) {
-      const text = sourceFile.text.slice(range.pos, range.end);
+      const text = fullText.slice(range.pos, range.end);
       const parsed = parseBypassDirective(text, {
         todayIso: this.todayIso,
         expectedGuardId: LIVING_DOCS_GUARD_ID,
@@ -313,6 +319,17 @@ export class TypeScriptRuleExtractor implements RuleExtractor {
    *    Nesse caso `node` é o outer call (cujo `node.expression` é o inner
    *    `CallExpression` `it.each(table)`); `node.arguments[0]` continua
    *    sendo o título — o walker que captura `[BR-CLI-*]` opera normalmente.
+   *
+   * Formas NÃO suportadas em v0 (decisão review PR #13):
+   *  - `it.only(...)` / `test.only(...)` → ignorado silenciosamente.
+   *  - `it.todo(...)` / `test.todo(...)` → ignorado silenciosamente.
+   *  - `it.concurrent(...)` / `test.concurrent(...)` → ignorado silenciosamente.
+   *
+   * Decisão de design: tags `[BR-CLI-*]` dentro desses call sites não viram
+   * entries no living-docs.yml. Motivação: `.only` é debug local (não deve
+   * vazar para CI); `.todo` é placeholder sem cobertura; `.concurrent` é
+   * vitest-only fora do framework de teste deste repo. NEXT.md registra
+   * dívida para v1: promover a erro fatal estável (`LIVING_DOCS_UNSUPPORTED_CALL_SITE`).
    */
   private classifyTestCall(node: ts.CallExpression): { coverageState: CoverageState } | null {
     const expr = node.expression;

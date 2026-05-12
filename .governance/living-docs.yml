@@ -1008,6 +1008,48 @@ entries:
       - Infra — TypeScriptRuleExtractor (descoberta) [BR-CLI-LIVING-DOCS-EXTRACTOR]
       - Reconhecimento de testes parametrizados (it.each/test.each)
     coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-EXTRACTOR-17
+    title: DADO it.only com [BR-CLI-*] ENTÃO extractor ignora (0 entries)
+    boundedContext: ast
+    domain: AstRuleExtractor
+    evidence:
+      - file: src/infrastructure/ast/AstRuleExtractor.test.ts
+        lineStart: 280
+        lineEnd: 288
+        testName: DADO it.only com [BR-CLI-*] ENTÃO extractor ignora (0 entries)
+        coverageState: covered
+    tags:
+      - Call sites não suportados em v0 → ignorados silenciosamente
+      - Infra — TypeScriptRuleExtractor (descoberta) [BR-CLI-LIVING-DOCS-EXTRACTOR]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-EXTRACTOR-18
+    title: DADO it.todo com [BR-CLI-*] ENTÃO extractor ignora (0 entries)
+    boundedContext: ast
+    domain: AstRuleExtractor
+    evidence:
+      - file: src/infrastructure/ast/AstRuleExtractor.test.ts
+        lineStart: 290
+        lineEnd: 298
+        testName: DADO it.todo com [BR-CLI-*] ENTÃO extractor ignora (0 entries)
+        coverageState: covered
+    tags:
+      - Call sites não suportados em v0 → ignorados silenciosamente
+      - Infra — TypeScriptRuleExtractor (descoberta) [BR-CLI-LIVING-DOCS-EXTRACTOR]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-EXTRACTOR-19
+    title: DADO it.concurrent com [BR-CLI-*] ENTÃO extractor ignora (0 entries)
+    boundedContext: ast
+    domain: AstRuleExtractor
+    evidence:
+      - file: src/infrastructure/ast/AstRuleExtractor.test.ts
+        lineStart: 300
+        lineEnd: 308
+        testName: DADO it.concurrent com [BR-CLI-*] ENTÃO extractor ignora (0 entries)
+        coverageState: covered
+    tags:
+      - Call sites não suportados em v0 → ignorados silenciosamente
+      - Infra — TypeScriptRuleExtractor (descoberta) [BR-CLI-LIVING-DOCS-EXTRACTOR]
+    coverageState: covered
   - ruleId: BR-CLI-LIVING-DOCS-EXTRACTOR-BYPASS-01
     title: DADO it.skip COM diretiva válida ENTÃO coverageState='deprecated'
     boundedContext: ast
@@ -1126,13 +1168,41 @@ entries:
     domain: RuleExtractorBypass
     evidence:
       - file: src/infrastructure/ast/RuleExtractorBypass.test.ts
-        lineStart: 164
-        lineEnd: 175
+        lineStart: 206
+        lineEnd: 217
         testName: DADO bypass válido produzido pelo extractor ENTÃO assertValidEntry aceita
         coverageState: covered
     tags:
       - Entry com bypass passa pelo schema do domain
       - Infra — TypeScriptRuleExtractor (bypass) [BR-CLI-LIVING-DOCS-EXTRACTOR-BYPASS]
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-EXTRACTOR-BYPASS-10
+    title: DADO 3 comentários leading com SÓ UM sendo diretiva living-docs válida ENTÃO reconhece
+    boundedContext: ast
+    domain: RuleExtractorBypass
+    evidence:
+      - file: src/infrastructure/ast/RuleExtractorBypass.test.ts
+        lineStart: 164
+        lineEnd: 184
+        testName: DADO 3 comentários leading com SÓ UM sendo diretiva living-docs válida ENTÃO reconhece
+        coverageState: covered
+    tags:
+      - Infra — TypeScriptRuleExtractor (bypass) [BR-CLI-LIVING-DOCS-EXTRACTOR-BYPASS]
+      - Múltiplos comentários leading → reconhece o match correto
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-EXTRACTOR-BYPASS-11
+    title: DADO comentário com guard-id divergente + diretiva living-docs ENTÃO ignora o divergente e reconhece o living-docs
+    boundedContext: ast
+    domain: RuleExtractorBypass
+    evidence:
+      - file: src/infrastructure/ast/RuleExtractorBypass.test.ts
+        lineStart: 186
+        lineEnd: 202
+        testName: DADO comentário com guard-id divergente + diretiva living-docs ENTÃO ignora o divergente e reconhece o living-docs
+        coverageState: covered
+    tags:
+      - Infra — TypeScriptRuleExtractor (bypass) [BR-CLI-LIVING-DOCS-EXTRACTOR-BYPASS]
+      - Múltiplos comentários leading → reconhece o match correto
     coverageState: covered
   - ruleId: BR-CLI-LIVING-DOCS-FALSE-POSITIVES-01
     title: DADO ID em comentário JSDoc ENTÃO NÃO vira entry

@@ -271,4 +271,40 @@ describe("Infra — TypeScriptRuleExtractor (descoberta) [BR-CLI-LIVING-DOCS-EXT
       }
     });
   });
+
+  describe("Call sites não suportados em v0 → ignorados silenciosamente", () => {
+    // Decisão v0 (review PR #13): it.only/it.todo/it.concurrent não são
+    // classificados como call sites de teste rastreáveis pelo extractor;
+    // ruleIds dentro deles são silenciosamente ignorados. NEXT.md registra
+    // dívida para v1: promover para erro fatal (LIVING_DOCS_UNSUPPORTED_CALL_SITE).
+    it("DADO it.only com [BR-CLI-*] ENTÃO extractor ignora (0 entries) [BR-CLI-LIVING-DOCS-EXTRACTOR-17]", () => {
+      const file = writeFile(
+        root,
+        "src/domain/foo/Foo.test.ts",
+        `it.only("[BR-CLI-IGNORED-01] regra dentro de it.only", () => {});`
+      );
+      const entries = new TypeScriptRuleExtractor(root).extract([file]);
+      expect(entries).toHaveLength(0);
+    });
+
+    it("DADO it.todo com [BR-CLI-*] ENTÃO extractor ignora (0 entries) [BR-CLI-LIVING-DOCS-EXTRACTOR-18]", () => {
+      const file = writeFile(
+        root,
+        "src/domain/foo/Foo.test.ts",
+        `it.todo("[BR-CLI-IGNORED-02] pendente sem fn");`
+      );
+      const entries = new TypeScriptRuleExtractor(root).extract([file]);
+      expect(entries).toHaveLength(0);
+    });
+
+    it("DADO it.concurrent com [BR-CLI-*] ENTÃO extractor ignora (0 entries) [BR-CLI-LIVING-DOCS-EXTRACTOR-19]", () => {
+      const file = writeFile(
+        root,
+        "src/domain/foo/Foo.test.ts",
+        `it.concurrent("[BR-CLI-IGNORED-03] vitest-only", async () => {});`
+      );
+      const entries = new TypeScriptRuleExtractor(root).extract([file]);
+      expect(entries).toHaveLength(0);
+    });
+  });
 });

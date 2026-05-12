@@ -160,6 +160,48 @@ describe("Infra — TypeScriptRuleExtractor (bypass) [BR-CLI-LIVING-DOCS-EXTRACT
     });
   });
 
+  describe("Múltiplos comentários leading → reconhece o match correto", () => {
+    it("DADO 3 comentários leading com SÓ UM sendo diretiva living-docs válida ENTÃO reconhece [BR-CLI-LIVING-DOCS-EXTRACTOR-BYPASS-10]", () => {
+      // Guard contra regressão do scan de leading comments (review PR #13).
+      // O extractor itera *todos* os ranges de comment retornados por
+      // ts.getLeadingCommentRanges; encontrar a diretiva no meio do bloco
+      // (não primeiro nem último) é cenário concreto em código real.
+      const file = writeFile(
+        root,
+        "src/domain/x/Foo.test.ts",
+        `
+        describe("X", () => {
+          // contexto 1: linha solta de comentário
+          // living-docs:allow-drift until=2026-12-31 ref=INC-1 reason="motivo válido"
+          // contexto 2: nota descritiva
+          it.skip("[BR-CLI-A-01] x", () => {});
+        });
+        `
+      );
+      const [entry] = new TypeScriptRuleExtractor(root, { todayIso: TODAY }).extract([file]);
+      expect(entry.coverageState).toBe("deprecated");
+      expect(entry.bypass?.ref).toBe("INC-1");
+    });
+
+    it("DADO comentário com guard-id divergente + diretiva living-docs ENTÃO ignora o divergente e reconhece o living-docs [BR-CLI-LIVING-DOCS-EXTRACTOR-BYPASS-11]", () => {
+      // ADR 0003 §1: cada guard tem sintaxe própria por guard-id. O
+      // extractor de living-docs ignora diretivas de outros guards mesmo
+      // quando coexistem como leading comments do mesmo node.
+      const file = writeFile(
+        root,
+        "src/domain/x/Foo.test.ts",
+        `
+        // boundary-lock:allow-drift until=2026-12-31 ref=X reason="autorizado em outro guard"
+        // living-docs:allow-drift until=2026-12-31 ref=DEC-0021-C01 reason="motivo válido"
+        it("[BR-CLI-A-01] x", () => {});
+        `
+      );
+      const [entry] = new TypeScriptRuleExtractor(root, { todayIso: TODAY }).extract([file]);
+      expect(entry.coverageState).toBe("deprecated");
+      expect(entry.bypass?.ref).toBe("DEC-0021-C01");
+    });
+  });
+
   describe("Entry com bypass passa pelo schema do domain", () => {
     it("DADO bypass válido produzido pelo extractor ENTÃO assertValidEntry aceita [BR-CLI-LIVING-DOCS-EXTRACTOR-BYPASS-09]", () => {
       const file = writeFile(
