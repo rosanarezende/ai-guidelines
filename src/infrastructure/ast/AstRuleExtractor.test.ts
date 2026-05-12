@@ -38,7 +38,7 @@ describe("Infra — TypeScriptRuleExtractor (descoberta) [BR-CLI-LIVING-DOCS-EXT
   });
 
   describe("Descoberta básica de IDs", () => {
-    it("DADO arquivo .test.ts com it('[BR-CLI-X-01] desc') ENTÃO retorna 1 entry coverageState='covered' [BR-CLI-LIVING-DOCS-EXTRACTOR-01]", () => {
+    it("DADO arquivo .test.ts com it('<fixture-id> desc') ENTÃO retorna 1 entry coverageState='covered' [BR-CLI-LIVING-DOCS-EXTRACTOR-01]", () => {
       const file = writeFile(
         root,
         "src/domain/foo/Foo.test.ts",
@@ -60,7 +60,7 @@ describe("Infra — TypeScriptRuleExtractor (descoberta) [BR-CLI-LIVING-DOCS-EXT
       expect(entries[0].title).toBe("valida algo importante");
     });
 
-    it("DADO it.skip('[BR-CLI-Y-01]') ENTÃO coverageState='pending' [BR-CLI-LIVING-DOCS-EXTRACTOR-02]", () => {
+    it("DADO it.skip('<fixture-id>') ENTÃO coverageState='pending' [BR-CLI-LIVING-DOCS-EXTRACTOR-02]", () => {
       const file = writeFile(
         root,
         "src/domain/foo/Foo.test.ts",
@@ -76,7 +76,7 @@ describe("Infra — TypeScriptRuleExtractor (descoberta) [BR-CLI-LIVING-DOCS-EXT
       expect(entries[0].ruleId).toBe("BR-CLI-Y-01");
     });
 
-    it("DADO test('[BR-CLI-Z-01]') ENTÃO reconhece igual a 'it' [BR-CLI-LIVING-DOCS-EXTRACTOR-03]", () => {
+    it("DADO test('<fixture-id>') ENTÃO reconhece igual a 'it' [BR-CLI-LIVING-DOCS-EXTRACTOR-03]", () => {
       const file = writeFile(
         root,
         "src/domain/foo/Foo.test.ts",
@@ -90,7 +90,7 @@ describe("Infra — TypeScriptRuleExtractor (descoberta) [BR-CLI-LIVING-DOCS-EXT
       expect(entries[0].coverageState).toBe("covered");
     });
 
-    it("DADO test.skip('[BR-CLI-W-01]') ENTÃO pending [BR-CLI-LIVING-DOCS-EXTRACTOR-04]", () => {
+    it("DADO test.skip('<fixture-id>') ENTÃO pending [BR-CLI-LIVING-DOCS-EXTRACTOR-04]", () => {
       const file = writeFile(
         root,
         "src/domain/foo/Foo.test.ts",
@@ -201,6 +201,40 @@ describe("Infra — TypeScriptRuleExtractor (descoberta) [BR-CLI-LIVING-DOCS-EXT
       const entries = new TypeScriptRuleExtractor(root).extract([file]);
       for (const entry of entries) {
         expect(() => assertValidEntry(entry)).not.toThrow();
+      }
+    });
+  });
+
+  describe("Invariante: 1 it/test = exatamente 1 rule (ADR 0002 §4 + ADR 0004 §3)", () => {
+    it("DADO título com 2 tags [BR-CLI-*] ENTÃO LIVING_DOCS_AMBIGUOUS_RULE_ID com mensagem listando os IDs [BR-CLI-LIVING-DOCS-EXTRACTOR-13]", () => {
+      const file = writeFile(
+        root,
+        "src/domain/policy/Foo.test.ts",
+        `it("[BR-CLI-OLD-ID] referenciada por [BR-CLI-NEW-ID]", () => {});`
+      );
+      try {
+        new TypeScriptRuleExtractor(root).extract([file]);
+        fail("deveria ter lançado");
+      } catch (e) {
+        expect(e).toBeInstanceOf(GovernanceError);
+        const err = e as GovernanceError;
+        expect(err.code).toBe("LIVING_DOCS_AMBIGUOUS_RULE_ID");
+        expect(err.message).toContain("[BR-CLI-OLD-ID]");
+        expect(err.message).toContain("[BR-CLI-NEW-ID]");
+      }
+    });
+
+    it("DADO título com 3+ tags [BR-CLI-*] ENTÃO LIVING_DOCS_AMBIGUOUS_RULE_ID listando todos [BR-CLI-LIVING-DOCS-EXTRACTOR-14]", () => {
+      const file = writeFile(
+        root,
+        "src/domain/policy/Foo.test.ts",
+        `it("[BR-CLI-A] e [BR-CLI-B] e [BR-CLI-C]", () => {});`
+      );
+      try {
+        new TypeScriptRuleExtractor(root).extract([file]);
+        fail("deveria ter lançado");
+      } catch (e) {
+        expect((e as GovernanceError).code).toBe("LIVING_DOCS_AMBIGUOUS_RULE_ID");
       }
     });
   });

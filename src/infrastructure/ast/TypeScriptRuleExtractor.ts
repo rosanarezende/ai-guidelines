@@ -32,7 +32,23 @@ import type {
 } from "../../domain/living-docs/LivingDocsEntry.js";
 import { parseBypassDirective } from "../../domain/living-docs/BypassDirective.js";
 
-const RULE_ID_PATTERN = /\[(BR-CLI-[A-Z0-9-]+)\]/;
+/**
+ * Padrão de extração de `[BR-CLI-*]`. Global para permitir contagem
+ * (via `matchAll`) e rejeição estrutural de ambiguidade.
+ *
+ * **Invariante (3.C.4-prep):** cada `it/test` declara **exatamente
+ * uma** rule. Título com 0 tags → ignora (não-rule); 1 tag → extrai;
+ * ≥ 2 tags → `LIVING_DOCS_AMBIGUOUS_RULE_ID` fatal. Aplica ADR 0002 §4
+ * (sem fallback silencioso) e ADR 0004 §3 (false positive é defeito
+ * estrutural, não erro de regex).
+ *
+ * Citações de IDs em descrições de teste (típicas em testes do próprio
+ * extractor) devem usar placeholders (ex.: `<fixture-id>`) ou retirar
+ * os colchetes — não há "convenção tácita de ID no fim".
+ */
+const RULE_ID_PATTERN = /\[(BR-CLI-[A-Z0-9-]+)\]/g;
+/** Padrão de remoção da tag BR-CLI ao derivar `title` limpo. */
+const RULE_ID_REMOVAL = /\[BR-CLI-[A-Z0-9-]+\]/g;
 const TEST_CALL_NAMES = new Set(["it", "test"]);
 const DESCRIBE_CALL_NAME = "describe";
 /** Guard-id usado nas diretivas que se aplicam a este extractor. */
@@ -87,7 +103,7 @@ export class TypeScriptRuleExtractor implements RuleExtractor {
       const relPath = path.relative(this.repoRoot, file).split(path.sep).join("/");
       const { boundedContext, domain } = this.deriveLocation(relPath);
 
-      const calls = this.collectTestCalls(sourceFile);
+      const calls = this.collectTestCalls(sourceFile, relPath);
 
       // Sub-bloco 3.C.4-prep passo 3: o extractor agrupa por ruleId
       // **dentro de cada arquivo** antes de retornar — cada rule vira uma
@@ -161,7 +177,7 @@ export class TypeScriptRuleExtractor implements RuleExtractor {
     return { boundedContext: fallbackBc, domain };
   }
 
-  private collectTestCalls(sourceFile: ts.SourceFile): ExtractedCall[] {
+  private collectTestCalls(sourceFile: ts.SourceFile, relPath: string): ExtractedCall[] {
     const calls: ExtractedCall[] = [];
 
     const visit = (node: ts.Node, describeStack: readonly string[]): void => {
@@ -179,13 +195,27 @@ export class TypeScriptRuleExtractor implements RuleExtractor {
           const titleArg = node.arguments[0];
           if (titleArg !== undefined && ts.isStringLiteralLike(titleArg)) {
             const fullText = titleArg.text;
-            const match = RULE_ID_PATTERN.exec(fullText);
-            if (match !== null) {
+            const matches = [...fullText.matchAll(RULE_ID_PATTERN)];
+            if (matches.length >= 2) {
+              // Invariante estrutural (ADR 0002 §4 + ADR 0004 §3): cada
+              // it/test declara exatamente uma rule. Ambiguidade é defeito
+              // de design, não algo a ser silenciosamente "resolvido"
+              // (ex.: pegar a última, pegar a primeira). O autor recebe
+              // erro fatal nomeando os IDs em conflito.
+              const { lineStart } = this.lineRangeOf(sourceFile, node);
+              const ids = matches.map((m) => `[${m[1]}]`).join(", ");
+              throw new GovernanceError(
+                "LIVING_DOCS_AMBIGUOUS_RULE_ID",
+                `Living Docs extractor: título do call site em '${relPath}:${lineStart}' contém ${matches.length} tags BR-CLI: ${ids}. Cada it()/test() deve declarar exatamente uma rule. Use placeholders (ex.: '<fixture-id>') ou remova os colchetes ao citar IDs em texto descritivo.`
+              );
+            }
+            if (matches.length === 1) {
+              const only = matches[0];
               const { lineStart, lineEnd } = this.lineRangeOf(sourceFile, node);
               const bypass = this.detectBypassDirective(sourceFile, node);
               calls.push({
-                ruleId: match[1],
-                title: fullText.replace(RULE_ID_PATTERN, "").trim(),
+                ruleId: only[1],
+                title: fullText.replace(RULE_ID_REMOVAL, "").trim(),
                 coverageState: bypass !== null ? "deprecated" : meta.coverageState,
                 lineStart,
                 lineEnd,
