@@ -66,21 +66,75 @@ export class CheckLivingDocs {
 }
 
 /**
- * Diff mínimo legível: lista linhas presentes em apenas um lado, prefixadas
- * com `-` (commitado) ou `+` (gerado). Não pretende substituir `diff -u`;
- * suficiente para PR review identificar a regra que mudou.
+ * Diff mínimo legível, agrupado por bloco `ruleId` (review PR #13).
+ *
+ * Cada bloco do YAML começa em `  - ruleId: <id>`; tudo entre dois headers
+ * de ruleId (e antes do primeiro) pertence ao bloco anterior. O diff emite
+ * só os blocos que diferem, na ordem lexicográfica do ruleId, com header
+ * `@@ <ruleId>` seguido das linhas `-`/`+` daquele bloco. Drift de cabeçalho
+ * (linhas anteriores ao primeiro `- ruleId:`) aparece sob `@@ <header>`.
+ *
+ * Não substitui `diff -u`; humano consegue bater o olho e achar a regra
+ * alterada sem ler todo o YAML.
  */
 function buildMinimalDiff(committed: string, generated: string): string {
-  const committedLines = new Set(committed.split("\n"));
-  const generatedLines = new Set(generated.split("\n"));
+  const committedBlocks = parseRuleIdBlocks(committed);
+  const generatedBlocks = parseRuleIdBlocks(generated);
+  const allIds = new Set<string>([...committedBlocks.keys(), ...generatedBlocks.keys()]);
 
-  const removed: string[] = [];
-  for (const line of committedLines) {
-    if (line.trim() !== "" && !generatedLines.has(line)) removed.push(`- ${line.trim()}`);
+  const ordered = [...allIds].sort((a, b) => {
+    if (a === HEADER_KEY) return -1;
+    if (b === HEADER_KEY) return 1;
+    return a < b ? -1 : a > b ? 1 : 0;
+  });
+
+  const out: string[] = [];
+  for (const id of ordered) {
+    const c = committedBlocks.get(id) ?? [];
+    const g = generatedBlocks.get(id) ?? [];
+    if (blocksEqual(c, g)) continue;
+
+    const label = id === HEADER_KEY ? "<header>" : id;
+    out.push(`@@ ${label}`);
+
+    const cSet = new Set(c);
+    const gSet = new Set(g);
+    for (const line of c) {
+      if (line.trim() === "") continue;
+      if (!gSet.has(line)) out.push(`- ${line.trimEnd()}`);
+    }
+    for (const line of g) {
+      if (line.trim() === "") continue;
+      if (!cSet.has(line)) out.push(`+ ${line.trimEnd()}`);
+    }
   }
-  const added: string[] = [];
-  for (const line of generatedLines) {
-    if (line.trim() !== "" && !committedLines.has(line)) added.push(`+ ${line.trim()}`);
+  return out.join("\n");
+}
+
+const HEADER_KEY = "__header__";
+const RULE_ID_LINE = /^\s*-\s+ruleId:\s*(\S+)\s*$/;
+
+function parseRuleIdBlocks(yaml: string): Map<string, string[]> {
+  const blocks = new Map<string, string[]>();
+  let currentKey = HEADER_KEY;
+  let currentBlock: string[] = [];
+  blocks.set(currentKey, currentBlock);
+
+  for (const line of yaml.split("\n")) {
+    const match = RULE_ID_LINE.exec(line);
+    if (match !== null) {
+      currentKey = match[1];
+      currentBlock = [line];
+      blocks.set(currentKey, currentBlock);
+    } else {
+      currentBlock.push(line);
+    }
   }
-  return [...removed, ...added].join("\n");
+  return blocks;
+}
+
+function blocksEqual(a: readonly string[], b: readonly string[]): boolean {
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return false;
+  return true;
 }

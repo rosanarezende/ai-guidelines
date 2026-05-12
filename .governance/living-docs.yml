@@ -370,13 +370,55 @@ entries:
     domain: CheckLivingDocs
     evidence:
       - file: src/app/use-cases/CheckLivingDocs.test.ts
-        lineStart: 134
-        lineEnd: 149
+        lineStart: 205
+        lineEnd: 220
         testName: DADO duas execuções de check sobre o mesmo input ENTÃO mesmo result.drift e mesma generatedYaml
         coverageState: covered
     tags:
       - App — CheckLivingDocs [BR-CLI-LIVING-DOCS-CHECK]
       - Determinismo (sem churn artificial)
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-CHECK-08
+    title: DADO 1 entry alterada entre N inalteradas ENTÃO diff agrupa só o bloco da ruleId alterada
+    boundedContext: use-cases
+    domain: CheckLivingDocs
+    evidence:
+      - file: src/app/use-cases/CheckLivingDocs.test.ts
+        lineStart: 134
+        lineEnd: 160
+        testName: DADO 1 entry alterada entre N inalteradas ENTÃO diff agrupa só o bloco da ruleId alterada
+        coverageState: covered
+    tags:
+      - App — CheckLivingDocs [BR-CLI-LIVING-DOCS-CHECK]
+      - "Diff legível por bloco ruleId (review PR #13)"
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-CHECK-09
+    title: DADO 1 entry adicionada + 1 removida ENTÃO diff mostra ambas com marcadores ±
+    boundedContext: use-cases
+    domain: CheckLivingDocs
+    evidence:
+      - file: src/app/use-cases/CheckLivingDocs.test.ts
+        lineStart: 162
+        lineEnd: 176
+        testName: DADO 1 entry adicionada + 1 removida ENTÃO diff mostra ambas com marcadores ±
+        coverageState: covered
+    tags:
+      - App — CheckLivingDocs [BR-CLI-LIVING-DOCS-CHECK]
+      - "Diff legível por bloco ruleId (review PR #13)"
+    coverageState: covered
+  - ruleId: BR-CLI-LIVING-DOCS-CHECK-10
+    title: DADO 2 entries alteradas ENTÃO blocos aparecem em ordem lexicográfica de ruleId (sem embaralhar)
+    boundedContext: use-cases
+    domain: CheckLivingDocs
+    evidence:
+      - file: src/app/use-cases/CheckLivingDocs.test.ts
+        lineStart: 178
+        lineEnd: 201
+        testName: DADO 2 entries alteradas ENTÃO blocos aparecem em ordem lexicográfica de ruleId (sem embaralhar)
+        coverageState: covered
+    tags:
+      - App — CheckLivingDocs [BR-CLI-LIVING-DOCS-CHECK]
+      - "Diff legível por bloco ruleId (review PR #13)"
     coverageState: covered
   - ruleId: BR-CLI-LIVING-DOCS-CLI-01
     title: DADO src/ com vários .test.ts ENTÃO retorna todos em ordem estável
