@@ -28,3 +28,6 @@ jobs:
 
       - name: Validate AI-first baseline
         run: yarn check
+
+      - name: Validate Living Documentation drift guard
+        run: yarn living-docs:check

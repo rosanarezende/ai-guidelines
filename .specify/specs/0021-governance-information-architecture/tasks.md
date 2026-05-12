@@ -653,9 +653,11 @@ yarn smoke
 - [x] **3.C.3b** Serializador YAML determinístico em `src/infrastructure/yaml/livingDocsSerializer.ts`. Funções puras `serializeLivingDocs` e `parseLivingDocs`.
 - [x] **3.C.3c** Use cases `GenerateLivingDocs` e `CheckLivingDocs` em `src/app/use-cases/`. Port novo `LivingDocsSerializer` em `src/app/ports/` para preservar boundary (Check não importa infra direto).
 - [x] **3.C.3d** Entrypoint CLI em `src/cli/livingDocs.ts` exportando `runGenerate(opts)`, `runCheck(opts)`, `discoverTestFiles(repoRoot)`. Smoke tests garantem contrato observável (exit code, stderr, idempotência).
-- [ ] **3.C.4** Bin `cli/living-docs.mjs` + yarn scripts `living-docs:generate` / `living-docs:check` + integração CI: **PENDENTE — gate de design aberto.** Histórico:
-  - 2026-05-11: bloqueio do `yarn build` resolvido por `chore(spec-0021): remove import nao-usado em ruleZone.ts`. Build verde, `dist/cli/livingDocs.js` materializado.
-  - 2026-05-11 (mesma sessão): primeira execução real de `runGenerate` contra a árvore explodiu com `LIVING_DOCS_DUPLICATE_RULE_ID`. Causa raiz: extractor emite 1 entry por `it`, mas o padrão BDD do repo é 1 rule → N cenários (`BR-CLI-A-01` 31×, `BR-CLI-APP-01` 6×, etc.). Bin + scripts + CI ficam congelados até decidir como o domínio agrega evidências múltiplas por ruleId — débito 9 do sub-bloco 3.C no `NEXT.md`. Sub-bloco 3.C.4-prep deve nascer em sessão própria (TDD começando por teste vermelho no `LivingDocsArtifact` ou `GenerateLivingDocs`).
+- [x] **3.C.4** Bin `cli/living-docs.mjs` + yarn scripts `living-docs:generate` / `living-docs:check` + integração CI. **Concluído em 2026-05-11** após resolução completa de todos os gates expostos pela primeira execução e2e (sub-blocos `[3.C.4-prep]` agregação por ruleId, `[3.C.4-prep-fix]` reconhecimento de `it.each`/`test.each`, e `[3.C.4]` plumbing operacional). Estado final:
+  - **Bin físico** materializado em `cli/living-docs.mjs` (commit `fff329e`), Windows-compatible.
+  - **Yarn scripts** `living-docs:generate` / `living-docs:check` em `package.json` (commit `2ade096`).
+  - **Baseline versionado** em `.governance/living-docs.yml` com 157 entries, ~93KB, schema v0 com `evidence[]` plural (commit `2ade096`).
+  - **CI integrado** em `.github/workflows/ai-guidelines-ci.yml` via step `Validate Living Documentation drift guard` no job `ai-guidelines-check` — mesmo job que o baseline `yarn check`, reaproveitando setup. Harness Lock garantido: drift textual, ambiguidade estrutural (5 falhas fatais da invariante 14) ou bypass expirado fazem CI quebrar com mensagem listando o `ruleId` e hint para `yarn living-docs:generate`.
 
 ### Testes (obrigatórios)
 
