@@ -2356,3 +2356,418 @@ entries:
       - Domínio — Promoção e Maturidade [BR-CLI-POLICY]
       - "Promoção: Experiment -> Spec (Shape-up)"
     coverageState: covered
+  - ruleId: BR-CLI-RECIPE-01
+    title: DADO recipe completa e bem-formada ENTÃO assertValidRecipe não lança
+    boundedContext: templates
+    domain: Recipe
+    evidence:
+      - file: src/domain/templates/Recipe.test.ts
+        lineStart: 95
+        lineEnd: 97
+        testName: DADO recipe completa e bem-formada ENTÃO assertValidRecipe não lança
+        coverageState: covered
+    tags:
+      - Recipe válida
+      - Recipe — assertValidRecipe [BR-CLI-RECIPE]
+    coverageState: covered
+  - ruleId: BR-CLI-RECIPE-02
+    title: DADO recipe SEM '%s' ENTÃO RECIPE_MISSING_FIELD com mensagem citando o campo
+    boundedContext: templates
+    domain: Recipe
+    evidence:
+      - file: src/domain/templates/Recipe.test.ts
+        lineStart: 120
+        lineEnd: 141
+        testName: DADO recipe SEM '%s' ENTÃO RECIPE_MISSING_FIELD com mensagem citando o campo
+        coverageState: covered
+    tags:
+      - Campos obrigatórios — RECIPE_MISSING_FIELD
+      - Recipe — assertValidRecipe [BR-CLI-RECIPE]
+    coverageState: covered
+  - ruleId: BR-CLI-RECIPE-03
+    title: DADO schemaVersion fora de TEMPLATE_SCHEMA_VERSIONS ENTÃO RECIPE_INVALID_SCHEMA_VERSION nomeando o conjunto
+    boundedContext: templates
+    domain: Recipe
+    evidence:
+      - file: src/domain/templates/Recipe.test.ts
+        lineStart: 163
+        lineEnd: 173
+        testName: DADO schemaVersion fora de TEMPLATE_SCHEMA_VERSIONS ENTÃO RECIPE_INVALID_SCHEMA_VERSION nomeando o conjunto
+        coverageState: covered
+    tags:
+      - Enums inválidos — códigos estáveis por campo
+      - Recipe — assertValidRecipe [BR-CLI-RECIPE]
+    coverageState: covered
+  - ruleId: BR-CLI-RECIPE-04
+    title: DADO artifactKind fora de ARTIFACT_KINDS ENTÃO RECIPE_INVALID_ARTIFACT_KIND nomeando o conjunto
+    boundedContext: templates
+    domain: Recipe
+    evidence:
+      - file: src/domain/templates/Recipe.test.ts
+        lineStart: 175
+        lineEnd: 186
+        testName: DADO artifactKind fora de ARTIFACT_KINDS ENTÃO RECIPE_INVALID_ARTIFACT_KIND nomeando o conjunto
+        coverageState: covered
+    tags:
+      - Enums inválidos — códigos estáveis por campo
+      - Recipe — assertValidRecipe [BR-CLI-RECIPE]
+    coverageState: covered
+  - ruleId: BR-CLI-RECIPE-05
+    title: DADO workflowType fora de WORKFLOW_TYPES ENTÃO RECIPE_INVALID_WORKFLOW_TYPE nomeando o conjunto
+    boundedContext: templates
+    domain: Recipe
+    evidence:
+      - file: src/domain/templates/Recipe.test.ts
+        lineStart: 188
+        lineEnd: 199
+        testName: DADO workflowType fora de WORKFLOW_TYPES ENTÃO RECIPE_INVALID_WORKFLOW_TYPE nomeando o conjunto
+        coverageState: covered
+    tags:
+      - Enums inválidos — códigos estáveis por campo
+      - Recipe — assertValidRecipe [BR-CLI-RECIPE]
+    coverageState: covered
+  - ruleId: BR-CLI-RECIPE-06
+    title: DADO language fora de LANGUAGES ENTÃO RECIPE_INVALID_LANGUAGE nomeando o conjunto
+    boundedContext: templates
+    domain: Recipe
+    evidence:
+      - file: src/domain/templates/Recipe.test.ts
+        lineStart: 201
+        lineEnd: 212
+        testName: DADO language fora de LANGUAGES ENTÃO RECIPE_INVALID_LANGUAGE nomeando o conjunto
+        coverageState: covered
+    tags:
+      - Enums inválidos — códigos estáveis por campo
+      - Recipe — assertValidRecipe [BR-CLI-RECIPE]
+    coverageState: covered
+  - ruleId: BR-CLI-RECIPE-07
+    title: DADO slots vazio ENTÃO RECIPE_EMPTY_SLOTS
+    boundedContext: templates
+    domain: Recipe
+    evidence:
+      - file: src/domain/templates/Recipe.test.ts
+        lineStart: 231
+        lineEnd: 238
+        testName: DADO slots vazio ENTÃO RECIPE_EMPTY_SLOTS
+        coverageState: covered
+    tags:
+      - Recipe — assertValidRecipe [BR-CLI-RECIPE]
+      - Slots — validação estrutural
+    coverageState: covered
+  - ruleId: BR-CLI-RECIPE-08
+    title: DADO dois slots com mesmo id ENTÃO RECIPE_DUPLICATE_SLOT_ID citando os dois
+    boundedContext: templates
+    domain: Recipe
+    evidence:
+      - file: src/domain/templates/Recipe.test.ts
+        lineStart: 249
+        lineEnd: 262
+        testName: DADO dois slots com mesmo id ENTÃO RECIPE_DUPLICATE_SLOT_ID citando os dois
+        coverageState: covered
+    tags:
+      - Recipe — assertValidRecipe [BR-CLI-RECIPE]
+      - Slots — validação estrutural
+    coverageState: covered
+  - ruleId: BR-CLI-RECIPE-09
+    title: DADO slot com partials vazio ENTÃO RECIPE_SLOT_NO_PARTIAL
+    boundedContext: templates
+    domain: Recipe
+    evidence:
+      - file: src/domain/templates/Recipe.test.ts
+        lineStart: 264
+        lineEnd: 277
+        testName: DADO slot com partials vazio ENTÃO RECIPE_SLOT_NO_PARTIAL
+        coverageState: covered
+    tags:
+      - Recipe — assertValidRecipe [BR-CLI-RECIPE]
+      - Slots — validação estrutural
+    coverageState: covered
+  - ruleId: BR-CLI-RECIPE-10
+    title: DADO minOccurrences > maxOccurrences ENTÃO RECIPE_INVALID_CARDINALITY
+    boundedContext: templates
+    domain: Recipe
+    evidence:
+      - file: src/domain/templates/Recipe.test.ts
+        lineStart: 315
+        lineEnd: 328
+        testName: DADO minOccurrences > maxOccurrences ENTÃO RECIPE_INVALID_CARDINALITY
+        coverageState: covered
+    tags:
+      - Cardinalidade — coerência required/min/max
+      - Recipe — assertValidRecipe [BR-CLI-RECIPE]
+    coverageState: covered
+  - ruleId: BR-CLI-RECIPE-11
+    title: DADO required=true com minOccurrences=0 ENTÃO RECIPE_REQUIRED_INCONSISTENT
+    boundedContext: templates
+    domain: Recipe
+    evidence:
+      - file: src/domain/templates/Recipe.test.ts
+        lineStart: 330
+        lineEnd: 343
+        testName: DADO required=true com minOccurrences=0 ENTÃO RECIPE_REQUIRED_INCONSISTENT
+        coverageState: covered
+    tags:
+      - Cardinalidade — coerência required/min/max
+      - Recipe — assertValidRecipe [BR-CLI-RECIPE]
+    coverageState: covered
+  - ruleId: BR-CLI-RECIPE-12
+    title: DADO canonicalOrder fora de CANONICAL_ORDERS ENTÃO RECIPE_INVALID_CANONICAL_ORDER nomeando o conjunto
+    boundedContext: templates
+    domain: Recipe
+    evidence:
+      - file: src/domain/templates/Recipe.test.ts
+        lineStart: 214
+        lineEnd: 227
+        testName: DADO canonicalOrder fora de CANONICAL_ORDERS ENTÃO RECIPE_INVALID_CANONICAL_ORDER nomeando o conjunto
+        coverageState: covered
+    tags:
+      - Enums inválidos — códigos estáveis por campo
+      - Recipe — assertValidRecipe [BR-CLI-RECIPE]
+    coverageState: covered
+  - ruleId: BR-CLI-RECIPE-13
+    title: DADO TEMPLATE_SCHEMA_VERSIONS ENTÃO contém apenas 'v0' e é readonly
+    boundedContext: templates
+    domain: Recipe
+    evidence:
+      - file: src/domain/templates/Recipe.test.ts
+        lineStart: 59
+        lineEnd: 62
+        testName: DADO TEMPLATE_SCHEMA_VERSIONS ENTÃO contém apenas 'v0' e é readonly
+        coverageState: covered
+    tags:
+      - Recipe — Enums fechados (ADR 0002) [BR-CLI-RECIPE]
+    coverageState: covered
+  - ruleId: BR-CLI-RECIPE-14
+    title: DADO ARTIFACT_KINDS ENTÃO contém 7 valores canônicos e é readonly
+    boundedContext: templates
+    domain: Recipe
+    evidence:
+      - file: src/domain/templates/Recipe.test.ts
+        lineStart: 64
+        lineEnd: 75
+        testName: DADO ARTIFACT_KINDS ENTÃO contém 7 valores canônicos e é readonly
+        coverageState: covered
+    tags:
+      - Recipe — Enums fechados (ADR 0002) [BR-CLI-RECIPE]
+    coverageState: covered
+  - ruleId: BR-CLI-RECIPE-15
+    title: DADO WORKFLOW_TYPES ENTÃO contém 4 valores canônicos incluindo 'n/a' e é readonly
+    boundedContext: templates
+    domain: Recipe
+    evidence:
+      - file: src/domain/templates/Recipe.test.ts
+        lineStart: 77
+        lineEnd: 80
+        testName: DADO WORKFLOW_TYPES ENTÃO contém 4 valores canônicos incluindo 'n/a' e é readonly
+        coverageState: covered
+    tags:
+      - Recipe — Enums fechados (ADR 0002) [BR-CLI-RECIPE]
+    coverageState: covered
+  - ruleId: BR-CLI-RECIPE-16
+    title: DADO LANGUAGES ENTÃO contém 'pt-BR' e 'en-US' e é readonly
+    boundedContext: templates
+    domain: Recipe
+    evidence:
+      - file: src/domain/templates/Recipe.test.ts
+        lineStart: 82
+        lineEnd: 85
+        testName: DADO LANGUAGES ENTÃO contém 'pt-BR' e 'en-US' e é readonly
+        coverageState: covered
+    tags:
+      - Recipe — Enums fechados (ADR 0002) [BR-CLI-RECIPE]
+    coverageState: covered
+  - ruleId: BR-CLI-RECIPE-17
+    title: DADO CANONICAL_ORDERS ENTÃO contém apenas 'slots' e é readonly
+    boundedContext: templates
+    domain: Recipe
+    evidence:
+      - file: src/domain/templates/Recipe.test.ts
+        lineStart: 87
+        lineEnd: 90
+        testName: DADO CANONICAL_ORDERS ENTÃO contém apenas 'slots' e é readonly
+        coverageState: covered
+    tags:
+      - Recipe — Enums fechados (ADR 0002) [BR-CLI-RECIPE]
+    coverageState: covered
+  - ruleId: BR-CLI-RECIPE-18
+    title: DADO recipe com slot sem minOccurrences/maxOccurrences explícitos ENTÃO aceita (defaults implícitos)
+    boundedContext: templates
+    domain: Recipe
+    evidence:
+      - file: src/domain/templates/Recipe.test.ts
+        lineStart: 99
+        lineEnd: 105
+        testName: DADO recipe com slot sem minOccurrences/maxOccurrences explícitos ENTÃO aceita (defaults implícitos)
+        coverageState: covered
+    tags:
+      - Recipe válida
+      - Recipe — assertValidRecipe [BR-CLI-RECIPE]
+    coverageState: covered
+  - ruleId: BR-CLI-RECIPE-19
+    title: DADO recipe com forbiddenHeadings não-vazio ENTÃO aceita
+    boundedContext: templates
+    domain: Recipe
+    evidence:
+      - file: src/domain/templates/Recipe.test.ts
+        lineStart: 107
+        lineEnd: 116
+        testName: DADO recipe com forbiddenHeadings não-vazio ENTÃO aceita
+        coverageState: covered
+    tags:
+      - Recipe válida
+      - Recipe — assertValidRecipe [BR-CLI-RECIPE]
+    coverageState: covered
+  - ruleId: BR-CLI-RECIPE-20
+    title: DADO entrada não-objeto ENTÃO RECIPE_MISSING_FIELD
+    boundedContext: templates
+    domain: Recipe
+    evidence:
+      - file: src/domain/templates/Recipe.test.ts
+        lineStart: 143
+        lineEnd: 150
+        testName: DADO entrada não-objeto ENTÃO RECIPE_MISSING_FIELD
+        coverageState: covered
+    tags:
+      - Campos obrigatórios — RECIPE_MISSING_FIELD
+      - Recipe — assertValidRecipe [BR-CLI-RECIPE]
+    coverageState: covered
+  - ruleId: BR-CLI-RECIPE-21
+    title: DADO entrada null ENTÃO RECIPE_MISSING_FIELD
+    boundedContext: templates
+    domain: Recipe
+    evidence:
+      - file: src/domain/templates/Recipe.test.ts
+        lineStart: 152
+        lineEnd: 159
+        testName: DADO entrada null ENTÃO RECIPE_MISSING_FIELD
+        coverageState: covered
+    tags:
+      - Campos obrigatórios — RECIPE_MISSING_FIELD
+      - Recipe — assertValidRecipe [BR-CLI-RECIPE]
+    coverageState: covered
+  - ruleId: BR-CLI-RECIPE-22
+    title: DADO slots não-array ENTÃO RECIPE_EMPTY_SLOTS
+    boundedContext: templates
+    domain: Recipe
+    evidence:
+      - file: src/domain/templates/Recipe.test.ts
+        lineStart: 240
+        lineEnd: 247
+        testName: DADO slots não-array ENTÃO RECIPE_EMPTY_SLOTS
+        coverageState: covered
+    tags:
+      - Recipe — assertValidRecipe [BR-CLI-RECIPE]
+      - Slots — validação estrutural
+    coverageState: covered
+  - ruleId: BR-CLI-RECIPE-23
+    title: DADO slot com partials não-array ENTÃO RECIPE_SLOT_NO_PARTIAL
+    boundedContext: templates
+    domain: Recipe
+    evidence:
+      - file: src/domain/templates/Recipe.test.ts
+        lineStart: 279
+        lineEnd: 289
+        testName: DADO slot com partials não-array ENTÃO RECIPE_SLOT_NO_PARTIAL
+        coverageState: covered
+    tags:
+      - Recipe — assertValidRecipe [BR-CLI-RECIPE]
+      - Slots — validação estrutural
+    coverageState: covered
+  - ruleId: BR-CLI-RECIPE-24
+    title: DADO slot sem id ENTÃO RECIPE_MISSING_FIELD citando 'slot.id'
+    boundedContext: templates
+    domain: Recipe
+    evidence:
+      - file: src/domain/templates/Recipe.test.ts
+        lineStart: 291
+        lineEnd: 300
+        testName: DADO slot sem id ENTÃO RECIPE_MISSING_FIELD citando 'slot.id'
+        coverageState: covered
+    tags:
+      - Recipe — assertValidRecipe [BR-CLI-RECIPE]
+      - Slots — validação estrutural
+    coverageState: covered
+  - ruleId: BR-CLI-RECIPE-25
+    title: DADO slot sem required ENTÃO RECIPE_MISSING_FIELD citando 'slot.required'
+    boundedContext: templates
+    domain: Recipe
+    evidence:
+      - file: src/domain/templates/Recipe.test.ts
+        lineStart: 302
+        lineEnd: 311
+        testName: DADO slot sem required ENTÃO RECIPE_MISSING_FIELD citando 'slot.required'
+        coverageState: covered
+    tags:
+      - Recipe — assertValidRecipe [BR-CLI-RECIPE]
+      - Slots — validação estrutural
+    coverageState: covered
+  - ruleId: BR-CLI-RECIPE-26
+    title: DADO required=false com minOccurrences=2 ENTÃO RECIPE_REQUIRED_INCONSISTENT
+    boundedContext: templates
+    domain: Recipe
+    evidence:
+      - file: src/domain/templates/Recipe.test.ts
+        lineStart: 345
+        lineEnd: 355
+        testName: DADO required=false com minOccurrences=2 ENTÃO RECIPE_REQUIRED_INCONSISTENT
+        coverageState: covered
+    tags:
+      - Cardinalidade — coerência required/min/max
+      - Recipe — assertValidRecipe [BR-CLI-RECIPE]
+    coverageState: covered
+  - ruleId: BR-CLI-RECIPE-27
+    title: DADO required=true sem minOccurrences explícito ENTÃO default min=1 aceito
+    boundedContext: templates
+    domain: Recipe
+    evidence:
+      - file: src/domain/templates/Recipe.test.ts
+        lineStart: 357
+        lineEnd: 360
+        testName: DADO required=true sem minOccurrences explícito ENTÃO default min=1 aceito
+        coverageState: covered
+    tags:
+      - Cardinalidade — coerência required/min/max
+      - Recipe — assertValidRecipe [BR-CLI-RECIPE]
+    coverageState: covered
+  - ruleId: BR-CLI-RECIPE-28
+    title: DADO required=false sem minOccurrences explícito ENTÃO default min=0 aceito
+    boundedContext: templates
+    domain: Recipe
+    evidence:
+      - file: src/domain/templates/Recipe.test.ts
+        lineStart: 362
+        lineEnd: 365
+        testName: DADO required=false sem minOccurrences explícito ENTÃO default min=0 aceito
+        coverageState: covered
+    tags:
+      - Cardinalidade — coerência required/min/max
+      - Recipe — assertValidRecipe [BR-CLI-RECIPE]
+    coverageState: covered
+  - ruleId: BR-CLI-RECIPE-29
+    title: DADO invariants sem forbiddenHeadings ENTÃO RECIPE_MISSING_FIELD
+    boundedContext: templates
+    domain: Recipe
+    evidence:
+      - file: src/domain/templates/Recipe.test.ts
+        lineStart: 369
+        lineEnd: 380
+        testName: DADO invariants sem forbiddenHeadings ENTÃO RECIPE_MISSING_FIELD
+        coverageState: covered
+    tags:
+      - Invariants — forbiddenHeadings
+      - Recipe — assertValidRecipe [BR-CLI-RECIPE]
+    coverageState: covered
+  - ruleId: BR-CLI-RECIPE-30
+    title: DADO forbiddenHeadings não-array ENTÃO RECIPE_MISSING_FIELD
+    boundedContext: templates
+    domain: Recipe
+    evidence:
+      - file: src/domain/templates/Recipe.test.ts
+        lineStart: 382
+        lineEnd: 393
+        testName: DADO forbiddenHeadings não-array ENTÃO RECIPE_MISSING_FIELD
+        coverageState: covered
+    tags:
+      - Invariants — forbiddenHeadings
+      - Recipe — assertValidRecipe [BR-CLI-RECIPE]
+    coverageState: covered
