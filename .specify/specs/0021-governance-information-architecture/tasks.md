@@ -882,10 +882,10 @@ yarn smoke
   - `Partial.test.ts` (15 testes — markdown válido, placeholders, timestamps)
   - `AssembleArtifact.test.ts` (10 testes — happy path, determinismo, erros propagados)
 
-- [/] **3.D.N** Pipeline verde. 362 passed, 15 skipped, 0 failed. Living Docs: 167 → 222 entries. Drift guard verde.
+- [x] **3.D.N** Pipeline verde. 362 passed, 15 skipped, 0 failed. Living Docs: 167 → 222 entries. Drift guard verde.
 
-- [/] **3.D.[DEBT-REVIEW]** `NEXT.md`: registrar débitos sobre recipes legadas não cobertas; preparar marco de retirada do mirror legado (3.F).
-- [ ] **3.D.[ARCHITECTURE]** `ARCHITECTURE.md`: §B.1 PR3 ganha `TemplateEngine`; §G glossário confirma `Recipe`, `Partial`, `slots[]`.
+- [x] **3.D.[DEBT-REVIEW]** `NEXT.md`: registrar débitos sobre recipes legadas não cobertas; preparar marco de retirada do mirror legado (3.F).
+- [x] **3.D.[ARCHITECTURE]** `ARCHITECTURE.md`: §B.1 PR3 ganha `TemplateEngine`; §G glossário confirma `Recipe`, `Partial`, `slots[]`.
 - [x] **3.D.[COMMIT]** 3 commits atômicos: `cd6ff4a` (Recipe), `30dff42` (Partial), `4802869` (AssembleArtifact + RecipeStore + ComposedArtifact).
 
 ---
@@ -909,10 +909,10 @@ yarn smoke
 
 - [x] **3.E.4** Testes em `src/app/use-cases/StructuralValidation.test.ts` — 12 testes TDD (BR-CLI-STRUCT-01..12). `StructuralValidation.ts` com 100% coverage.
 
-- [/] **3.E.N** Pipeline verde. 374 passed, 15 skipped, 0 failed. Living Docs: 222 → 234 entries.
+- [x] **3.E.N** Pipeline verde. 374 passed, 15 skipped, 0 failed. Living Docs: 222 → 234 entries.
 
-- [/] **3.E.[DEBT-REVIEW]** `NEXT.md`: registrar débitos sobre headings mandatórios e ordem de seções (v1).
-- [ ] **3.E.[ARCHITECTURE]** `ARCHITECTURE.md`: §C ganha invariante sobre validação estrutural por `artifactKind`; §G glossário ganha `StructuralValidation`.
+- [x] **3.E.[DEBT-REVIEW]** `NEXT.md`: registrar débitos sobre headings mandatórios e ordem de seções (v1).
+- [x] **3.E.[ARCHITECTURE]** `ARCHITECTURE.md`: §C ganha invariante sobre validação estrutural por `artifactKind`; §G glossário ganha `StructuralValidation`.
 - [x] **3.E.[COMMIT]** Commit único com implementação + testes.
 
 ---
