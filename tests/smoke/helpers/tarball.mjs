@@ -109,6 +109,10 @@ export async function packLocal() {
         cwd: ROOT_DIR,
         env: {
           npm_config_cache: npmCacheDir,
+          // Desabilita husky explicitamente: no Windows CI, --ignore-scripts
+          // nem sempre impede o lifecycle `prepare` de rodar, e o husky
+          // pode falhar com EBUSY ao copiar seu binário (file locking).
+          HUSKY: "0",
         },
       }
     );
