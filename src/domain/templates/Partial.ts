@@ -5,11 +5,11 @@
  * Domain puro — sem parser externo de Markdown, sem IO, sem filesystem.
  *
  * Invariantes do contrato (audit pré-3.D §"Contrato de Partial"):
- *  1. Markdown sintaticamente válido (não-vazio, sem estruturas abertas).
- *  2. Não-fragmento (começa com heading # ou bloco autocontido).
- *  3. Self-contained (referências internas ou externas, não cross-partial).
- *  4. Determinístico (sem placeholders {{var}}, <%= %>, ${}).
- *  5. Sem timestamps embutidos (generatedAt, createdAt, updatedAt).
+ *  [v0] Markdown sintaticamente válido (não-vazio, sem estruturas abertas).
+ *  [v0] Determinístico (sem placeholders {{var}}, <%= %>, ${}).
+ *  [v0] Sem timestamps embutidos (generatedAt, createdAt, updatedAt).
+ *  [v1] Não-fragmento (começa com heading # ou bloco autocontido).
+ *  [v1] Self-contained (referências internas ou externas, não cross-partial).
  *
  * Aplica ADR 0004 (.core/governance/adrs/0004-ast-only-extraction.md):
  * determinismo como contrato — partial = conteúdo estável byte-a-byte.

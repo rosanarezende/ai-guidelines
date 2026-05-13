@@ -3169,8 +3169,8 @@ entries:
     domain: StructuralValidation
     evidence:
       - file: src/app/use-cases/StructuralValidation.test.ts
-        lineStart: 104
-        lineEnd: 121
+        lineStart: 122
+        lineEnd: 139
         testName: DADO múltiplos headings proibidos encontrados ENTÃO um erro por heading
         coverageState: covered
     tags:
@@ -3183,8 +3183,8 @@ entries:
     domain: StructuralValidation
     evidence:
       - file: src/app/use-cases/StructuralValidation.test.ts
-        lineStart: 123
-        lineEnd: 138
+        lineStart: 141
+        lineEnd: 156
         testName: DADO heading parecido mas não idêntico (case-sensitive) ENTÃO sem erro
         coverageState: covered
     tags:
@@ -3197,8 +3197,8 @@ entries:
     domain: StructuralValidation
     evidence:
       - file: src/app/use-cases/StructuralValidation.test.ts
-        lineStart: 142
-        lineEnd: 156
+        lineStart: 160
+        lineEnd: 174
         testName: DADO slot required ausente dos composedSlots ENTÃO STRUCT_MISSING_SLOT
         coverageState: covered
     tags:
@@ -3211,8 +3211,8 @@ entries:
     domain: StructuralValidation
     evidence:
       - file: src/app/use-cases/StructuralValidation.test.ts
-        lineStart: 158
-        lineEnd: 170
+        lineStart: 176
+        lineEnd: 188
         testName: DADO slot optional ausente ENTÃO sem erro
         coverageState: covered
     tags:
@@ -3225,8 +3225,8 @@ entries:
     domain: StructuralValidation
     evidence:
       - file: src/app/use-cases/StructuralValidation.test.ts
-        lineStart: 172
-        lineEnd: 184
+        lineStart: 190
+        lineEnd: 202
         testName: DADO múltiplos slots required ausentes ENTÃO um erro por slot
         coverageState: covered
     tags:
@@ -3239,8 +3239,8 @@ entries:
     domain: StructuralValidation
     evidence:
       - file: src/app/use-cases/StructuralValidation.test.ts
-        lineStart: 188
-        lineEnd: 204
+        lineStart: 206
+        lineEnd: 222
         testName: DADO artifactKind divergente entre recipe e metadata ENTÃO STRUCT_RECIPE_SELF_INCONSISTENT
         coverageState: covered
     tags:
@@ -3253,8 +3253,8 @@ entries:
     domain: StructuralValidation
     evidence:
       - file: src/app/use-cases/StructuralValidation.test.ts
-        lineStart: 206
-        lineEnd: 221
+        lineStart: 224
+        lineEnd: 239
         testName: DADO workflowType divergente ENTÃO STRUCT_RECIPE_SELF_INCONSISTENT
         coverageState: covered
     tags:
@@ -3267,8 +3267,8 @@ entries:
     domain: StructuralValidation
     evidence:
       - file: src/app/use-cases/StructuralValidation.test.ts
-        lineStart: 223
-        lineEnd: 238
+        lineStart: 241
+        lineEnd: 256
         testName: DADO language divergente ENTÃO STRUCT_RECIPE_SELF_INCONSISTENT
         coverageState: covered
     tags:
@@ -3281,11 +3281,25 @@ entries:
     domain: StructuralValidation
     evidence:
       - file: src/app/use-cases/StructuralValidation.test.ts
-        lineStart: 242
-        lineEnd: 267
+        lineStart: 260
+        lineEnd: 285
         testName: DADO múltiplas violações simultâneas ENTÃO acumula todos os erros
         coverageState: covered
     tags:
       - Acumulação de erros
+      - StructuralValidation — validateComposedArtifact [BR-CLI-STRUCT]
+    coverageState: covered
+  - ruleId: BR-CLI-STRUCT-13
+    title: DADO heading proibido apenas dentro de bloco de código ENTÃO ignora (falso positivo)
+    boundedContext: use-cases
+    domain: StructuralValidation
+    evidence:
+      - file: src/app/use-cases/StructuralValidation.test.ts
+        lineStart: 104
+        lineEnd: 120
+        testName: DADO heading proibido apenas dentro de bloco de código ENTÃO ignora (falso positivo)
+        coverageState: covered
+    tags:
+      - ForbiddenHeadings — STRUCT_FORBIDDEN_SECTION
       - StructuralValidation — validateComposedArtifact [BR-CLI-STRUCT]
     coverageState: covered

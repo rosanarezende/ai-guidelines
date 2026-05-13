@@ -63,9 +63,16 @@ Esse desenho permite que cada camada evolua em seu próprio ritmo, com critério
 
 ## Aplicações
 
+### Escopo v0 (PR3 da spec 0021) vs v1
+
+A ADR define o princípio completo de validação estrutural, mas a implementação inicial focou no subconjunto de maior criticidade e menor risco de _false positives_.
+
+- **Escopo v0 (implementado em PR3 da spec 0021):** Validação de `forbiddenHeadings` (case-sensitive literal), `slot completeness` (slots obrigatórios presentes) e `recipe↔metadata self-consistency`. A extração de headings usa regex simples e ignora código bloqueado.
+- **Escopo v1 (futuro):** Erros de `STRUCT_MISSING_HEADING`, `STRUCT_OUT_OF_ORDER` e headings mandatórios por gênero. Exige bump no `schemaVersion` da Recipe para suportar schema declarativo de headings, e possivelmente um AST extractor de Markdown mais robusto que regex para capturar hierarquia.
+
 ### Aplicação inicial — Template Engine para artefatos de spec
 
-`TemplateEngine` (PR3, sub-bloco 3.E) compõe `spec.md`, `plan.md`, `tasks.md`, `decision-brief.md`, ADRs a partir de recipes + partials atômicas. Cada recipe declara:
+`TemplateEngine` (PR3 da spec 0021, sub-bloco 3.E) compõe `spec.md`, `plan.md`, `tasks.md`, `decision-brief.md`, ADRs a partir de recipes + partials atômicas. Cada recipe declara:
 
 ```yaml
 artifactKind: tasks

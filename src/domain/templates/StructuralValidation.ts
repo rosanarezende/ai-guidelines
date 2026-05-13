@@ -32,9 +32,30 @@ import type { ComposedArtifact } from "./ComposedArtifact.js";
 /** Captura headings ATX: `# Texto`, `## Texto`, etc. */
 const HEADING_PATTERN = /^#{1,6}\s+(.+)$/;
 
+const FENCE = /^(`{3,}|~{3,})/;
+
 function extractHeadings(content: string): string[] {
   const headings: string[] = [];
+  let inCodeBlock = false;
+  let openerChar: string | null = null;
+
   for (const line of content.split("\n")) {
+    const trimmed = line.trim();
+    const fence = trimmed.match(FENCE);
+    if (fence) {
+      const ch = fence[1][0];
+      if (!inCodeBlock) {
+        inCodeBlock = true;
+        openerChar = ch;
+      } else if (openerChar === ch) {
+        inCodeBlock = false;
+        openerChar = null;
+      }
+      continue;
+    }
+
+    if (inCodeBlock) continue;
+
     const match = line.match(HEADING_PATTERN);
     if (match) {
       headings.push(match[1].trim());

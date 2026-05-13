@@ -1,0 +1,17 @@
+schemaVersion: v0
+artifactKind: tasks
+workflowType: evidence-driven
+language: pt-BR
+
+slots:
+  - id: header
+    required: true
+    partials: [tasks/header.md]
+
+  - id: core
+    required: true
+    partials: [tasks/core.md]
+
+invariants:
+  canonicalOrder: slots
+  forbiddenHeadings: []

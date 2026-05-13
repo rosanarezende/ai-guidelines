@@ -98,7 +98,25 @@ describe("StructuralValidation — validateComposedArtifact [BR-CLI-STRUCT]", ()
       expect(errors.length).toBeGreaterThanOrEqual(1);
       expect(errors[0]).toBeInstanceOf(GovernanceError);
       expect(errors[0].code).toBe("STRUCT_FORBIDDEN_SECTION");
-      expect(errors[0].message).toContain("🛰️ Stage 1 / Stage 2");
+      expect(errors[0].message).toContain("heading '🛰️ Stage 1 / Stage 2' é proibido");
+    });
+
+    it("DADO heading proibido apenas dentro de bloco de código ENTÃO ignora (falso positivo) [BR-CLI-STRUCT-13]", () => {
+      const recipe: Recipe = {
+        ...baseRecipe,
+        invariants: {
+          canonicalOrder: "slots",
+          forbiddenHeadings: ["NÃO PODE"],
+        },
+      };
+      const artifact: ComposedArtifact = {
+        content: "# Header\n\n```md\n## NÃO PODE\n```\n",
+        metadata: { ...validArtifact.metadata, composedSlots: ["header", "core"] },
+      };
+
+      const errors = validateComposedArtifact(artifact, recipe);
+      const forbiddenErrors = errors.filter((e) => e.code === "STRUCT_FORBIDDEN_SECTION");
+      expect(forbiddenErrors).toEqual([]);
     });
 
     it("DADO múltiplos headings proibidos encontrados ENTÃO um erro por heading [BR-CLI-STRUCT-04]", () => {
