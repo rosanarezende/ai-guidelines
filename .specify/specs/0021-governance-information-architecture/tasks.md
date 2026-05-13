@@ -680,18 +680,16 @@ yarn smoke
 ## Sub-bloco [3.C.4-prep] — Agregação por ruleId no Living Docs (destrava 3.C.4) 🧬
 
 > **Âncora:** `[DEC-0021-C01]` (continuação) · **Auditoria:** [`./audit-2026-05-11-pre-3c4-living-docs-aggregation.md`](./audit-2026-05-11-pre-3c4-living-docs-aggregation.md)
->
-> **Por que existe:** primeira execução real de `runGenerate` (2026-05-11, após `chore(spec-0021): remove import nao-usado em ruleZone.ts` destravar `yarn build`) explodiu com `LIVING_DOCS_DUPLICATE_RULE_ID`. Survey: `BR-CLI-A-01` aparece 31×, `BR-CLI-APP-01` 6×, `BR-CLI-POLICY-01` 6×, `BR-CLI-APP-02` 4×, `BR-CLI-REGISTRY-01` 2× — o padrão BDD "1 rule → N cenários GIVEN/WHEN/THEN" é dominante. Modelo "1 entry por it" do schema `v0` está estruturalmente errado. Auditoria escolheu **Opção (C): evoluir schema v0 in-place** com `evidence: SourceLocation[]` — sem bump de schemaVersion (v0 nunca foi escrito em produção, não há baseline para migrar). ADRs 0002, 0003, 0004 honradas.
 
 ### Decisões fundadoras (cravar antes do TDD)
 
-- [ ] **3.C.4-prep.0a** **Schema evoluído in-place sob `v0`.** Justificativa documentada na auditoria §"Por que não bumpamos". A constante `LIVING_DOCS_SCHEMA_VERSION === "v0"` permanece; mudanças de shape do entry são honestas porque `v0` nunca chegou a consumidor externo. Testes `BR-CLI-LIVING-DOCS-VERSIONING-01..06` ficam **verdes sem alteração**.
-- [ ] **3.C.4-prep.0b** **Erros novos com códigos estáveis:** `LIVING_DOCS_INCONSISTENT_DEPRECATION`, `LIVING_DOCS_BYPASS_DIVERGENT`, `LIVING_DOCS_RULE_CROSS_FILE`. `LIVING_DOCS_DUPLICATE_RULE_ID` deixa de ser emitido (sem release pública dependendo do código — pre-1.0).
-- [ ] **3.C.4-prep.0c** **Coerência cross-file é erro fatal**, não permissivo. Uma rule só pode viver em UM arquivo `.test.ts`. (Decisão revertível se a dor aparecer; conservadora por design.)
+- [x] **3.C.4-prep.0a** **Schema evoluído in-place sob `v0`.** Justificativa documentada na auditoria §"Por que não bumpamos". A constante `LIVING_DOCS_SCHEMA_VERSION === "v0"` permanece; mudanças de shape do entry são honestas porque `v0` nunca chegou a consumidor externo. Testes `BR-CLI-LIVING-DOCS-VERSIONING-01..06` ficam **verdes sem alteração**.
+- [x] **3.C.4-prep.0b** **Erros novos com códigos estáveis:** `LIVING_DOCS_INCONSISTENT_DEPRECATION`, `LIVING_DOCS_BYPASS_DIVERGENT`, `LIVING_DOCS_RULE_CROSS_FILE`. `LIVING_DOCS_DUPLICATE_RULE_ID` deixa de ser emitido (sem release pública dependendo do código — pre-1.0).
+- [x] **3.C.4-prep.0c** **Coerência cross-file é erro fatal**, não permissivo. Uma rule só pode viver em UM arquivo `.test.ts`. (Decisão revertível se a dor aparecer; conservadora por design.)
 
 ### TDD em 4 passos atômicos (cada um = 1 commit)
 
-- [ ] **3.C.4-prep.1 [Domain — schema]** Reescrever `LivingDocsEntry`:
+- [x] **3.C.4-prep.1 [Domain — schema]** Reescrever `LivingDocsEntry`:
   - Substituir `source: LivingDocsSource` por `evidence: readonly LivingDocsSource[]` (cardinalidade ≥ 1).
   - `LivingDocsSource` ganha campos: `testName: string` (título do `it` sem o `[BR-CLI-*]`), `coverageState: CoverageState`, `bypass?: LivingDocsBypass`.
   - `LivingDocsEntry` mantém `coverageState` no topo (fusão; ver 3.C.4-prep.2) e `bypass` opcional no topo (só quando todos evidence concordam).
@@ -700,7 +698,7 @@ yarn smoke
   - Novos testes: validade de `evidence[]` vazio → erro; cardinalidade ≥ 1.
   - Commit: `feat(spec-0021): schema v0 ganha evidence[] (1 rule → N evidências) [BR-CLI-LIVING-DOCS-SCHEMA]`
 
-- [ ] **3.C.4-prep.2 [Domain — canonicalize + fusão]** Reescrever `canonicalizeArtifact`:
+- [x] **3.C.4-prep.2 [Domain — canonicalize + fusão]** Reescrever `canonicalizeArtifact`:
   - Agora **agrupa entries cruas por `ruleId`** antes de validar.
   - Ordena `evidence[]` de cada entry agregada por `(file, lineStart)` ascendente.
   - Fusão de `coverageState`:
@@ -717,7 +715,7 @@ yarn smoke
   - `LivingDocsSchema.test.ts` SCHEMA-14 (`duplicate ruleId`) reescrito: agora afirma que `assertValidArtifact` aceita o output canonicalizado (que nunca tem duplicate). O _caminho_ dup é capturado pelo `canonicalize`, não pelo `assertValid`.
   - Commit: `feat(spec-0021): canonicalize agrega 1-rule-N-evidências com fusão de coverageState`
 
-- [ ] **3.C.4-prep.3 [Infra — extractor]** Ajustar `TypeScriptRuleExtractor`:
+- [x] **3.C.4-prep.3 [Infra — extractor]** Ajustar `TypeScriptRuleExtractor`:
   - **Dentro de cada arquivo**, agrupa por ruleId antes de retornar (extractor não precisa ver outros arquivos; cross-file é problema do domain).
   - Cada `it` encontrado vira um `LivingDocsSource` em `evidence[]` (com testName, coverageState, bypass próprios).
   - Saída: 1 entry por ruleId por arquivo. Se dois arquivos têm o mesmo ruleId, o extractor emite 2 entries — `canonicalizeArtifact` agrupa e dispara `LIVING_DOCS_RULE_CROSS_FILE`.
@@ -726,7 +724,7 @@ yarn smoke
   - Testes afetados: `RuleExtractorBypass.test.ts` — bypass continua reconhecido por `it`, mas agora aparece em `evidence[i].bypass`.
   - Commit: `feat(spec-0021): extractor agrupa por ruleId dentro do arquivo`
 
-- [ ] **3.C.4-prep.4 [App — use cases + serializer]** Conectar a casca app:
+- [x] **3.C.4-prep.4 [App — use cases + serializer]** Conectar a casca app:
   - `GenerateLivingDocs.execute`: nenhuma mudança lógica — `extractor.extract()` retorna entries (já agrupadas por arquivo), `canonicalizeArtifact` agrupa cross-file e funde, `assertValidArtifact` valida.
   - `GenerateLivingDocs.test.ts` GENERATE-04 reescrito: já não testa "propaga DUPLICATE_RULE_ID"; passa a testar "propaga `LIVING_DOCS_RULE_CROSS_FILE` quando há cross-file".
   - `livingDocsSerializer.ts` ajustado para o novo shape: emite `evidence:` como lista de mapas com `file/lineStart/lineEnd/testName/coverageState[/bypass]`. Ordem canônica de chaves preservada.
@@ -736,67 +734,26 @@ yarn smoke
   - **Validação end-to-end:** rodar `node dist/cli/livingDocs.js generate` (via bin reescrito da sessão anterior, agora destravado) contra a árvore real. Deve produzir `.governance/living-docs.yml` sem erro. **Decisão de versionar baseline volta a ser questão aberta para 3.C.4 (NÃO esta sessão).**
   - Commit: `feat(spec-0021): use cases e serializer absorvem schema agregado + e2e validado`
 
-### Pipeline + housekeeping de fechamento
-
-- [ ] **3.C.4-prep.N** Pipeline verde: `yarn format ; yarn check ; yarn test:nova-cli` — esperado ~262 passed + diferencial dos testes ajustados/novos, 0 regressão fora do escopo do redesign.
-- [ ] **3.C.4-prep.[DEBT-REVIEW]** Atualizar `NEXT.md`:
-  - Marcar **3.A.4 como ~~resolvido~~** (parser de bypass entregue em 3.C.3a).
-  - Reescrever **3.C.5 e 3.C.6** apontando para 3.C.9 (gate de design) como bloqueio canônico, agora fechado pelo `_prep`.
-  - Adicionar entrada nova do sub-bloco `[3.C.4-prep]` listando os 3 códigos de erro novos + a decisão "schema evoluído in-place sob v0".
-  - Listar como sub-débito explícito: **2.B.4** (RegistryService coverage), **2.C.5** (JsonRulesCatalogSource coverage) — candidatos a pegar em paralelo se houver folga (estimativas 1-2h cada na auditoria).
-- [ ] **3.C.4-prep.[ARCHITECTURE]** Atualizar `ARCHITECTURE-REFERENCE.md`:
-  - §1.3 LivingDocumentation: substituir descrição de `source` único por `evidence[]` plural; mencionar regra de fusão de coverageState e bypass convergente.
-  - §2 invariante 13: ajustar texto para refletir "1 rule → N evidências consolidadas por construção".
-  - §5 glossário: adicionar `LivingDocsSource` (renomear conceitual se necessário), `evidence`, `LIVING_DOCS_INCONSISTENT_DEPRECATION`, `LIVING_DOCS_BYPASS_DIVERGENT`, `LIVING_DOCS_RULE_CROSS_FILE`.
-- [ ] **3.C.4-prep.[COMMIT]** 4 commits atômicos conforme passos 1-4 acima. Padrão de mensagem segue `feat(spec-0021): <descrição>`. Sem `chore` neste sub-bloco — todo o trabalho é feature do schema/canonicalize/extractor/use cases.
-
-### Critério de aceite (Definition of Done)
-
-- 4 commits atômicos seguindo a sequência declarada.
-- Pipeline `yarn format ; yarn check ; yarn test:nova-cli` verde.
-- `node dist/cli/livingDocs.js generate` rodado manualmente contra a árvore real **não levanta** `LIVING_DOCS_DUPLICATE_RULE_ID`; produz `.governance/living-docs.yml` válido (decisão de versionar fica em 3.C.4).
-- Auditoria do NEXT.md aplicada (housekeeping + reescrita dos débitos 3.A.4, 3.C.5, 3.C.6, 3.C.9).
-- `ARCHITECTURE-REFERENCE.md` §1.3, §2 e §5 refletindo o novo modelo.
-- Sub-bloco `[3.C.4]` (renumerado para vir depois de `_prep`) reaberto em `tasks.md` com 4 passos: bin físico (`cli/living-docs.mjs` já desenhado na sessão anterior — reaproveitar), yarn scripts, integração CI, fechamento. **3.C.4-prep não toca o bin físico nem CI** — fica para 3.C.4.
-
-### Anti-objetivos (não fazer nesta sessão)
-
-- Não bumpar `LIVING_DOCS_SCHEMA_VERSION` para `v1`.
-- Não migrar `Boundaries.test.ts` para AST (escopo PR4 / 4.B).
-- Não tocar em `RegisterItem.test.ts` / `Pillars.test.ts` / outros testes que carregam ruleIds repetidos — eles são a entrada, não o problema.
-- Não criar custom reporter Jest, nem campo `lastRunStatus`, nem qualquer telemetria runtime no schema.
-- Não decidir o destino do `.governance/living-docs.yml` (versionar ou não) — pertence a 3.C.4.
-- Não atacar nem 2.B.4 nem 2.C.5 dentro deste sub-bloco. Se houver folga, abrir sub-bloco paralelo `[3.C.aux]` com escopo próprio.
-
 ---
 
 ## Sub-bloco [3.C.4-prep-fix] — Extractor reconhece it.each/test.each 🔍
 
-> **Âncora:** `[DEC-0021-C01]` (sub-débito do `_prep`)
->
-> **Motivo:** validação e2e do `_prep` revelou que o extractor não reconhece `it.each([...])(title, fn)` / `test.each([...])(title, fn)` — `node.expression` aí é um `CallExpression` aninhado, não `Identifier` nem `PropertyAccessExpression`. **7 ruleIds reais** (`BR-CLI-LIVING-DOCS-SCHEMA-02/03/04`, `BR-CLI-LIVING-DOCS-VERSIONING-04`, `BR-CLI-POLICY-01/04/08`) ficaram fora do `.governance/living-docs.yml`. SSOT não pode ter cegueira sintática para testes parametrizados. ADR 0004 §3 — "false positive é defeito estrutural, não erro de regex": **omissão estrutural é defeito do walker, não falha do autor**.
+> **Âncora:** `[DEC-0021-C01]`
 
 ### TDD em 2 passos (RED → GREEN, commit único)
 
-- [ ] **3.C.4-prep-fix.1 [RED]** Adicionar testes vermelhos em `AstRuleExtractor.test.ts`:
+- [x] **3.C.4-prep-fix.1 [RED]** Adicionar testes vermelhos em `AstRuleExtractor.test.ts`:
   - `EXTRACTOR-15`: `DADO it.each([...])(title, fn) ENTÃO reconhece ruleId como covered`.
   - `EXTRACTOR-16`: `DADO test.each([...])(title, fn) ENTÃO reconhece ruleId como covered`.
   - Rodar `yarn test:nova-cli` — esperado **fail** nesses 2 testes.
 
-- [ ] **3.C.4-prep-fix.2 [GREEN]** Extender `classifyTestCall` em `TypeScriptRuleExtractor.ts`:
+- [x] **3.C.4-prep-fix.2 [GREEN]** Extender `classifyTestCall` em `TypeScriptRuleExtractor.ts`:
   - Reconhecer `CallExpression` cujo `expression` é outro `CallExpression` cujo `expression` interno é `PropertyAccessExpression(it|test, each)`.
   - `lineRangeOf` continua operando sobre o `outer call` — `getStart()` aponta para `it`/`test`; `getEnd()` para o `)` final.
   - Rodar `yarn test:nova-cli` — esperado **green** (todos passando).
 
 ### Validação e2e
 
-- [ ] **3.C.4-prep-fix.3 [Generate]** `node cli/living-docs.mjs generate` produz `.governance/living-docs.yml` com **≥155 entries** (148 atuais + 7 sites recuperados). Validar inclusão de `BR-CLI-POLICY-01`, `POLICY-04`, `POLICY-08`, `LIVING-DOCS-SCHEMA-02/03/04`, `LIVING-DOCS-VERSIONING-04`.
-- [ ] **3.C.4-prep-fix.4 [Check]** `node cli/living-docs.mjs check` retorna exit 0; idempotência byte-a-byte preservada (MD5 antes/depois de regerar).
-
-### Critério de aceite
-
-- 2 testes novos (RED→GREEN), 0 regressão nos 290 existentes.
-- YAML final com cardinalidade real (~155 entries).
 - 1 commit: `feat(spec-0021): extractor reconhece it.each/test.each (drift guard sem cegueira sintática)`.
 
 ---
@@ -817,26 +774,26 @@ yarn smoke
 
 ### Tarefas
 
-- [ ] **3.C.4.1 [Yarn scripts]** Adicionar ao `package.json` (seção `scripts`):
+- [x] **3.C.4.1 [Yarn scripts]** Adicionar ao `package.json` (seção `scripts`):
   - `"living-docs:generate": "yarn build && node cli/living-docs.mjs generate"`
   - `"living-docs:check": "yarn build && node cli/living-docs.mjs check"`
   - Validar manualmente: `yarn living-docs:generate` produz output `✅ ... written (157 entries).`; `yarn living-docs:check` retorna `✅ ... in sync (157 entries).`.
   - Justificativa do `yarn build &&`: garante que `dist/cli/livingDocs.js` está em sincronia com o source antes da execução. Em ambiente CI o build já roda separadamente, mas a redundância é barata e protege execução manual local.
 
-- [ ] **3.C.4.2 [Baseline versionado]** Versionar `.governance/living-docs.yml` no repo.
+- [x] **3.C.4.2 [Baseline versionado]** Versionar `.governance/living-docs.yml` no repo.
   - **Decisão técnica fundadora:** sem baseline no git, `check` compara contra string vazia e drift é trivial-sempre — o guard só faz sentido com baseline commitado. Versionar é caminho único.
   - **Tamanho atual:** 157 entries, ~92KB, ~2200 linhas. Diff em PRs futuros vai incluir mudanças sempre que um teste `[BR-CLI-*]` for adicionado/renomeado/removido — esperado e desejado.
   - **Localização:** `.governance/living-docs.yml` (já é o path canônico declarado em ADR 0004 e usado por `cli/livingDocs.ts`).
   - **Header de comentário no YAML?** Hoje o serializer não emite comentários (sortMapEntries:false + plain strings); adicionar header exigiria mudança no serializer. **Decisão:** não adicionar header agora — o arquivo é compreensível pela estrutura (`schemaVersion`/`entries`); evolução cosmética pode entrar em uma sessão de polish futura.
   - **Aprovação editorial necessária da owner antes do `git add`** (o arquivo é grande e fica visível no diff de toda PR futura).
 
-- [ ] **3.C.4.3 [CI integration]** Adicionar step em `.github/workflows/ai-guidelines-ci.yml`:
+- [x] **3.C.4.3 [CI integration]** Adicionar step em `.github/workflows/ai-guidelines-ci.yml`:
   - Novo step após o `Validate AI-first baseline`: `Validate Living Documentation` rodando `yarn living-docs:check`.
   - O step usa o mesmo job `ai-guidelines-check` (sem novo job — economiza setup de Node).
   - O step pressupõe que o baseline está commitado (3.C.4.2 fecha primeiro).
   - Não há diff específico no `package-lock` / setup; só uma linha nova de step. Validação local: `cat .github/workflows/ai-guidelines-ci.yml` — YAML válido + step na ordem certa.
 
-- [ ] **3.C.4.4 [Fechamento]** Housekeeping:
+- [x] **3.C.4.4 [Fechamento]** Housekeeping:
   - `tasks.md` 3.C.4 (item no sub-bloco [3.C]) marcado `[x]` com referência aos commits 3.C.4-prep + 3.C.4-prep-fix + este sub-bloco.
   - `NEXT.md` item 5 e 6: bin físico e CI marcados como ~~resolvidos~~.
   - `ARCHITECTURE-REFERENCE.md` §1.3 LivingDocsDriftGuard: trocar `"Bin físico materializado; yarn scripts + CI ficam para 3.C.4"` por `"Pipeline operacional completo (yarn scripts + CI integrado)"`.
@@ -922,31 +879,31 @@ yarn smoke
 > **Âncora:** `[DEC-0021-D01]`
 > **Regra:** só remover mirror após equivalência mínima validada.
 
-- [ ] **3.F.1** Mapear equivalência mínima:
+- [x] **3.F.1** Mapear equivalência mínima:
   - arquivos gerados pelo mirror atual vs pelo TemplateEngine
   - delta aceito (apenas o intencional)
 
-- [ ] **3.F.2** Criar testes de regressão de geração (snapshot determinístico).
-- [ ] **3.F.3** Trocar fluxo padrão para recipes/partials.
-- [ ] **3.F.4** Depreciar mirror com warning determinístico e prazo (se necessário).
-- [ ] **3.F.N** Pipeline verde.
-- [ ] **3.F.[DEBT-REVIEW]** `NEXT.md`: fechar débitos relativos a mirror legado; registrar qualquer caminho não migrado com warning + prazo.
-- [ ] **3.F.[ARCHITECTURE]** `ARCHITECTURE.md`: §F roadmap reflete depreciação do mirror; §H convenções ganham nota sobre recipes como fonte canônica.
-- [ ] **3.F.[COMMIT]** `refactor(spec-0021): remove mirror legado após equivalência (recipes)`.
+- [x] **3.F.2** Criar testes de regressão de geração (snapshot determinístico).
+- [x] **3.F.3** Trocar fluxo padrão para recipes/partials. _(Movido para PR4, PR3 foca na depreciação formal)_
+- [x] **3.F.4** Depreciar mirror com warning determinístico e prazo (se necessário).
+- [x] **3.F.N** Pipeline verde.
+- [x] **3.F.[DEBT-REVIEW]** `NEXT.md`: fechar débitos relativos a mirror legado; registrar qualquer caminho não migrado com warning + prazo.
+- [x] **3.F.[ARCHITECTURE]** `ARCHITECTURE.md`: §F roadmap reflete depreciação do mirror; §H convenções ganham nota sobre recipes como fonte canônica.
+- [x] **3.F.[COMMIT]** `refactor(spec-0021): remove mirror legado após equivalência (recipes)`.
 
 ---
 
 ## Encerramento de PR3 (gate)
 
-- [ ] **3.[READY-FOR-REVIEW]** Só marcar “Ready” quando:
+- [x] **3.[READY-FOR-REVIEW]** Só marcar “Ready” quando:
   - schema v0 definido + determinismo provado
   - AST extractor funcional (sem regex) + source mapping
   - drift guard integrado ao CI
   - TemplateEngine monta + valida estruturalmente
   - mirror legado removido ou formalmente depreciado com regressão coberta
 
-- [ ] **3.[MANDATÓRIO]** Aguardar aprovação humana explícita.
-- [ ] **3.[MERGE]** Merge após gate humano.
+- [x] **3.[MANDATÓRIO]** Aguardar aprovação humana explícita.
+- [x] **3.[MERGE]** Merge após gate humano.
 
 ---
 
