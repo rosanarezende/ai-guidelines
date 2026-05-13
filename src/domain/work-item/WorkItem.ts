@@ -17,10 +17,10 @@ import {
  * o `WorkItem` por discriminator (`kind`) e bloqueia, em compile-time,
  * combinações de campos cruzados (ex.: `severity` em `proposal`).
  */
-export type DenseKind = "spec" | "experiment" | "exploration" | "incident";
+export type DenseKind = "spec" | "experiment" | "spike" | "incident";
 export type VirtualKind = "proposal" | "patch" | "fix";
 
-export const DENSE_KINDS: readonly DenseKind[] = ["spec", "experiment", "exploration", "incident"];
+export const DENSE_KINDS: readonly DenseKind[] = ["spec", "experiment", "spike", "incident"];
 export const VIRTUAL_KINDS: readonly VirtualKind[] = ["proposal", "patch", "fix"];
 
 export function isDenseKind(kind: WorkItemKind): kind is DenseKind {

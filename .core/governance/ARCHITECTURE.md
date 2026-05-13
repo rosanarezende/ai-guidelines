@@ -2,7 +2,7 @@
 
 > **Para quem é este documento?**
 >
-> - **Você é stakeholder, recrutador ou parte do time não técnico?** Leia as seções 1, 2 e 3. Você vai entender **o que** o sistema faz, **por que** ele existe e **onde** estamos no caminho. Sem precisar abrir código.
+> - **Você é stakeholder ou parte do time não técnico?** Leia as seções 1, 2 e 3. Você vai entender **o que** o sistema faz, **por que** ele existe e **onde** estamos no caminho. Sem precisar abrir código.
 > - **Você é desenvolvedor entrando no projeto?** Adicione as seções 4, 5 e 6. Ganha contexto suficiente para começar a contribuir.
 > - **Você é uma IA ou mantenedor aprofundando?** Comece aqui e siga para [`ARCHITECTURE-REFERENCE.md`](./ARCHITECTURE-REFERENCE.md) — lá vivem o glossário completo, os códigos de erro estáveis, a modelagem detalhada por categoria e as regras de contribuição.
 >
@@ -10,7 +10,7 @@
 
 ---
 
-## 1. O que esta CLI faz, em uma frase?
+## 1. O que esta CLI faz?
 
 A `ai-guidelines` é uma ferramenta de linha de comando que ajuda **times de software a trabalhar com agentes de IA (Claude, GPT, Gemini, Cursor, Copilot…) de forma consistente, governada e auditável**.
 
@@ -53,6 +53,8 @@ graph TB
         i2[NodeFileSystemProbe - le pastas]
         i3[NodeWorkspaceProvisioner - cria pastas]
         i4[JsonRulesCatalogSource - le rules.json]
+        i5[TypeScriptRuleExtractor - AST extraction]
+        i6[livingDocsSerializer - serializa YAML]
     end
 
     subgraph app [Camada 2 Application - casos de uso]
@@ -62,6 +64,9 @@ graph TB
         a4[AdoptWorkspace - adotar .governance/]
         a5[RegistryService - CRUD do registry]
         a6[RulesEngine - consumir regras compiladas]
+        a7[GenerateLivingDocs - gerar doc viva]
+        a8[CheckLivingDocs - drift guard]
+        a9[AssembleArtifact - compor artefato por recipe]
     end
 
     subgraph dom [Camada 1 Domain - modelo puro do mundo]
@@ -69,6 +74,9 @@ graph TB
         d2[Politicas - validacao pura]
         d3[Workspace State - estado do projeto]
         d4[Rule - modelo de regras]
+        d5[LivingDocs - schema + bypass]
+        d6[Recipe/Partial - templates atomicos]
+        d7[StructuralValidation - invariantes por recipe]
     end
 
     app -->|usa o modelo de| dom
@@ -79,18 +87,23 @@ graph TB
 
 Quando você lê código ou docs deste projeto, alguns termos se repetem. Aqui estão os essenciais traduzidos em português direto:
 
-| Termo técnico                 | O que significa no projeto                                                                                                                                            |
-| ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Domain** (Camada 1)         | O "modelo do mundo" — conceitos como "o que é um trabalho", "quando uma proposta pode virar spec". Sem disco, sem rede, sem relógio. Funções 100% previsíveis.        |
-| **Application** (Camada 2)    | A camada que coordena os casos de uso (registrar, promover, descobrir, adotar). Não conhece detalhes técnicos.                                                        |
-| **Infrastructure** (Camada 3) | A implementação concreta: aqui mora o código que escreve arquivos YAML, lê o filesystem, etc.                                                                         |
-| **Bounded context**           | Um pedaço do código com responsabilidade bem delimitada. Ex: "tudo sobre workspace" vive junto. Permite que duas pessoas mexam em partes diferentes sem se atropelar. |
-| **Port**                      | Uma interface — um "contrato" do que precisa ser feito, sem dizer como. Ex: "preciso saber se este diretório existe".                                                 |
-| **Adapter**                   | A implementação concreta de um port — o "como". Ex: "uso `node:fs` para verificar se o diretório existe".                                                             |
-| **WorkItem**                  | Um item de trabalho registrado. Pode ser uma `spec`, `experiment`, `exploration`, `incident`, `proposal`, `patch` ou `fix`. Sete tipos, mutuamente exclusivos.        |
-| **Policy** (Política)         | Uma função pura que decide se uma ação é válida. Ex: "uma proposta pode virar spec?" → política responde sim ou não, com motivo.                                      |
-| **Registry**                  | O "livro-razão" do projeto — lista todos os WorkItems ativos. Versionado em `.governance/registry.yml`.                                                               |
-| **`.governance/`**            | A pasta canônica onde a CLI armazena o estado estruturado do projeto do usuário. Contém o registry e reservas para futuras adições (intake, handoff, telemetry).      |
+| Termo técnico                 | O que significa no projeto                                                                                                                                                                         |
+| ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Domain** (Camada 1)         | O "modelo do mundo" — conceitos como "o que é um trabalho", "quando uma proposta pode virar spec". Sem disco, sem rede, sem relógio. Funções 100% previsíveis.                                     |
+| **Application** (Camada 2)    | A camada que coordena os casos de uso (registrar, promover, descobrir, adotar). Não conhece detalhes técnicos.                                                                                     |
+| **Infrastructure** (Camada 3) | A implementação concreta: aqui mora o código que escreve arquivos YAML, lê o filesystem, etc.                                                                                                      |
+| **Bounded context**           | Um pedaço do código com responsabilidade bem delimitada. Ex: "tudo sobre workspace" vive junto. Permite que duas pessoas mexam em partes diferentes sem se atropelar.                              |
+| **Port**                      | Uma interface — um "contrato" do que precisa ser feito, sem dizer como. Ex: "preciso saber se este diretório existe".                                                                              |
+| **Adapter**                   | A implementação concreta de um port — o "como". Ex: "uso `node:fs` para verificar se o diretório existe".                                                                                          |
+| **WorkItem**                  | Um item de trabalho registrado. Pode ser uma `spec`, `experiment`, `spike`, `incident`, `proposal`, `patch` ou `fix`. Sete tipos, mutuamente exclusivos.                                           |
+| **Policy** (Política)         | Uma função pura que decide se uma ação é válida. Ex: "uma proposta pode virar spec?" → política responde sim ou não, com motivo.                                                                   |
+| **Registry**                  | O "livro-razão" do projeto — lista todos os WorkItems ativos. Versionado em `.governance/registry.yml`.                                                                                            |
+| **`.governance/`**            | A pasta canônica onde a CLI armazena o estado estruturado do projeto do usuário. Contém o registry e reservas para futuras adições (intake, handoff, telemetry).                                   |
+| **Recipe**                    | Declaração YAML que descreve como montar um artefato: `artifactKind`, `workflowType`, `language`, `slots[]` com ordem canônica e `forbiddenHeadings`. Recipe é o contrato de validação (ADR 0005). |
+| **Partial**                   | Fragmento Markdown completo e autocontido — sem placeholders de template, sem timestamps embutidos. Cada partial pertence a um slot de uma recipe.                                                 |
+| **ComposedArtifact**          | Output do TemplateEngine: Markdown final (determinístico, byte-a-byte) + metadata de rastreio (artifactKind, workflowType, language, composedSlots).                                               |
+| **StructuralValidation**      | Validação pós-composição que consome a recipe como contrato: forbiddenHeadings, slot completeness, self-consistency recipe↔artefato. Retorna lista de erros.                                       |
+| **Living Documentation**      | Artefato YAML (`.governance/living-docs.yml`) derivado automaticamente dos testes — drift guard que impede código e documentação de divergir silenciosamente.                                      |
 
 ---
 
@@ -184,20 +197,22 @@ stateDiagram-v2
 
 Estas são propriedades que o pipeline de CI verifica automaticamente. Se alguma é quebrada, o build falha — código não chega no `main`:
 
-| #   | Garantia                             | Em palavras simples                                                 |
-| --- | ------------------------------------ | ------------------------------------------------------------------- |
-| 1   | Domain puro                          | A camada 1 nunca chama as camadas 2 ou 3                            |
-| 2   | Application só via ports             | A camada 2 nunca chama a camada 3 diretamente                       |
-| 3   | Policy-first                         | Toda mudança passa pela validação antes de qualquer efeito          |
-| 4   | Atomicidade bilateral                | Se algo falha no meio do processo, desfaz tudo                      |
-| 5   | Registry é fonte de verdade          | IDs são únicos e imutáveis; o tempo é controlado                    |
-| 6   | Tipos de trabalho são MECE           | 7 tipos exclusivos; impossível misturar campos cruzados             |
-| 7   | YAML é o estado real                 | `.governance/registry.yml` é o estado canônico versionado           |
-| 8   | Anti-drift estrutural                | Código e documentação não podem divergir silenciosamente            |
-| 9   | Workspace tem precedência explícita  | Sem alias mágico, sem fallback invisível                            |
-| 10  | Rollback nunca destrói nada          | Desfazer só apaga o que este run criou                              |
-| 11  | Topologia reflete taxonomia          | Regras em `.core/rules/` organizadas em `top/center/base/adapters/` |
-| 12  | Contrato do usuário é `.governance/` | `.ai-guidelines/` é uma "ponte legada" declarada explicitamente     |
+| #   | Garantia                             | Em palavras simples                                                             |
+| --- | ------------------------------------ | ------------------------------------------------------------------------------- |
+| 1   | Domain puro                          | A camada 1 nunca chama as camadas 2 ou 3                                        |
+| 2   | Application só via ports             | A camada 2 nunca chama a camada 3 diretamente                                   |
+| 3   | Policy-first                         | Toda mudança passa pela validação antes de qualquer efeito                      |
+| 4   | Atomicidade bilateral                | Se algo falha no meio do processo, desfaz tudo                                  |
+| 5   | Registry é fonte de verdade          | IDs são únicos e imutáveis; o tempo é controlado                                |
+| 6   | Tipos de trabalho são MECE           | 7 tipos exclusivos; impossível misturar campos cruzados                         |
+| 7   | YAML é o estado real                 | `.governance/registry.yml` é o estado canônico versionado                       |
+| 8   | Anti-drift estrutural                | Código e documentação não podem divergir silenciosamente                        |
+| 9   | Workspace tem precedência explícita  | Sem alias mágico, sem fallback invisível                                        |
+| 10  | Rollback nunca destrói nada          | Desfazer só apaga o que este run criou                                          |
+| 11  | Topologia reflete taxonomia          | Regras em `.core/rules/` organizadas em `top/center/base/adapters/`             |
+| 12  | Contrato do usuário é `.governance/` | `.ai-guidelines/` é uma "ponte legada" declarada explicitamente                 |
+| 13  | Composição é determinística          | Mesma recipe + mesmos partials → mesmo output byte-a-byte (ADR 0004)            |
+| 14  | Recipe é o contrato de validação     | Invariantes estruturais declaradas na recipe, não em código separado (ADR 0005) |
 
 Detalhe técnico completo de cada garantia (motivação, contraexemplos, testes que protegem): ver [`ARCHITECTURE-REFERENCE.md`](./ARCHITECTURE-REFERENCE.md) §2.
 
@@ -213,11 +228,14 @@ A Spec 0021 leva o framework do paradigma "Spec-Driven" (centrado em specs forma
 | ------- | -------------------------------------------------------------------------------------------- | ------------ |
 | **PR0** | Setup do projeto + decisões iniciais aprovadas pela owner                                    | ✅ Concluído |
 | **PR1** | Fundação: modelo de domínio + políticas + registry em memória                                | ✅ Concluído |
-| **PR2** | **Este PR.** Persistência real em disco + camada de migração + reorganização das regras      | ✅ Concluído |
-| **PR3** | Documentação viva derivada dos testes + engine de templates atômicos                         | ⏭️ Próximo   |
+| **PR2** | Persistência real em disco + camada de migração + reorganização das regras                   | ✅ Concluído |
+| **PR3** | **Este PR.** Documentação viva derivada dos testes + engine de templates atômicos            | 🔧 Em curso  |
 | **PR4** | Cleanup final + migração definitiva `.ai-guidelines/` → `.governance/` no projeto do usuário | ⏭️ Pendente  |
 
-Hoje a CLI **continua escrevendo em `.ai-guidelines/`** no projeto do usuário (compatibilidade preservada). O novo formato `.governance/` é o contrato canônico declarado, materializado no código de domínio — a migração real do **comportamento da CLI** acontece em PR4.
+Hoje a CLI **continua escrevendo em `.ai-guidelines/`** no projeto do usuário e copiando os templates de `.specify/templates/` (compatibilidade preservada).
+O novo formato `.governance/` (registry, recipes e partials atômicos) é o contrato canônico declarado e materializado no código de domínio.
+
+> **Aviso:** O mirror legado (`.specify/templates/`) está **formalmente depreciado**. O cutover da CLI para a composição por `recipes` será efetivado na fase PR4/4.C.
 
 ---
 

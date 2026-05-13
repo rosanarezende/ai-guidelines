@@ -2,7 +2,7 @@ export type WorkItemId = string;
 
 export const WORK_ITEM_KINDS = [
   "spec",
-  "exploration",
+  "spike",
   "fix",
   "patch",
   "incident",

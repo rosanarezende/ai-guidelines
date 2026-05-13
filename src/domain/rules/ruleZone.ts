@@ -9,7 +9,7 @@
  */
 
 import { GovernanceError } from "../shared/errors.js";
-import { Rule, RuleScope, RuleZone } from "./Rule.js";
+import { Rule, RuleZone } from "./Rule.js";
 
 /**
  * Diretório de primeiro nível esperado em `.core/rules/` por zona.

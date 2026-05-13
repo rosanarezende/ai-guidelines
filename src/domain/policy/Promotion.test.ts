@@ -30,7 +30,7 @@ function makeItem(over: WorkItemOverrides): WorkItem {
 
 describe("Domínio — Promoção e Maturidade [BR-CLI-POLICY]", () => {
   describe("Promoção: Proposal -> Spec", () => {
-    it("DADO uma 'proposal' em status 'draft' QUANDO promovida ENTÃO POLICY_PROPOSAL_NOT_MATURE [BR-CLI-POLICY-01]", () => {
+    it("DADO uma 'proposal' em status 'draft' QUANDO promovida ENTÃO POLICY_PROPOSAL_NOT_MATURE [BR-CLI-POLICY-07]", () => {
       const item = makeItem({ status: "draft" });
       try {
         policy.promote(item, { target: "spec", workspacePath: ".governance/specs/01" });
@@ -66,7 +66,7 @@ describe("Domínio — Promoção e Maturidade [BR-CLI-POLICY]", () => {
   });
 
   describe("Promoção: Experiment -> Spec (Shape-up)", () => {
-    it("DADO um 'experiment' com outcome != won ENTÃO POLICY_EXPERIMENT_NOT_WON [BR-CLI-POLICY-03]", () => {
+    it("DADO um 'experiment' com outcome != won ENTÃO POLICY_EXPERIMENT_NOT_WON [BR-CLI-POLICY-09]", () => {
       const item = makeItem({
         kind: "experiment",
         status: "done",
@@ -106,7 +106,7 @@ describe("Domínio — Promoção e Maturidade [BR-CLI-POLICY]", () => {
 
   describe("Imutabilidade de Ciclo Fechado", () => {
     it.each(["patch", "fix", "incident"] as const)(
-      "DADO um '%s' QUANDO tentada promoção ENTÃO POLICY_MAINTENANCE_NOT_PROMOTABLE [BR-CLI-POLICY-01]",
+      "DADO um '%s' QUANDO tentada promoção ENTÃO POLICY_MAINTENANCE_NOT_PROMOTABLE [BR-CLI-POLICY-08]",
       (kind) => {
         const item = makeItem({
           kind,

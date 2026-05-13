@@ -23,6 +23,9 @@ coverage/
 *-report.txt
 checks_ai_guidelines.txt
 
+# Build output do tsc (declarado em tsconfig.json `outDir`)
+dist/
+
 # Logs
 logs/
 *.log

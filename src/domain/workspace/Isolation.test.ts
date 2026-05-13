@@ -6,12 +6,12 @@
 describe("Domínio — Isolamento de Workspace [BR-CLI-WORKSPACE]", () => {
   describe("Inicialização do Workspace", () => {
     // [SKIP-REASON: Fase 2 — IO real do filesystem chega no PR2 (GovernanceWorkspace) [DEC-0021-A03]]
-    it.skip("DADO inicialização do workspace ENTÃO cria subpastas canônicas (specs, experiments, explorations, incidents) [DEC-0021-A03]", () => {});
+    it.skip("DADO inicialização do workspace ENTÃO cria subpastas canônicas (specs, experiments, spikes, incidents) [DEC-0021-A03]", () => {});
   });
 
   describe("Mapeamento Físico (Pares de Valor)", () => {
     // [SKIP-REASON: Fase 2 — criação física exige WorkspaceStore real (PR2) [DEC-0021-A03]]
-    it.skip("DADO item denso ('spec', 'experiment', 'exploration', 'incident') QUANDO registrado ENTÃO cria pasta em '.governance/' [DEC-0021-A03]", () => {});
+    it.skip("DADO item denso ('spec', 'experiment', 'spike', 'incident') QUANDO registrado ENTÃO cria pasta em '.governance/' [DEC-0021-A03]", () => {});
     // [SKIP-REASON: Fase 2 — proteção contra IO em itens virtuais é parte do PR2 [DEC-0021-A03]]
     it.skip("DADO item virtual ('proposal', 'patch', 'fix') QUANDO registrado ENTÃO NÃO cria diretórios [DEC-0021-A03]", () => {});
   });

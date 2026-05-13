@@ -7,8 +7,8 @@ import { VirtualKind } from "../work-item/WorkItem.js";
 import { assertValidDraft } from "../work-item/WorkItemPolicy.js";
 
 describe("Domínio — Definição dos Pilares [BR-CLI-POLICY]", () => {
-  describe("Pilar denso (spec/experiment/exploration/incident)", () => {
-    it.each(["spec", "exploration"] as const)(
+  describe("Pilar denso (spec/experiment/spike/incident)", () => {
+    it.each(["spec", "spike"] as const)(
       "DADO um item denso '%s' SEM workspacePath ENTÃO POLICY_DENSE_REQUIRES_WORKSPACE [BR-CLI-POLICY-01]",
       (kind) => {
         try {
@@ -109,7 +109,7 @@ describe("Domínio — Definição dos Pilares [BR-CLI-POLICY]", () => {
 
   describe("Pilares virtuais (proposal/patch/fix) rejeitam workspacePath", () => {
     it.each(["proposal", "patch", "fix"] as const satisfies readonly VirtualKind[])(
-      "DADO um item virtual '%s' COM workspacePath ENTÃO falha com POLICY_VIRTUAL_REJECTS_WORKSPACE [BR-CLI-POLICY-01]",
+      "DADO um item virtual '%s' COM workspacePath ENTÃO falha com POLICY_VIRTUAL_REJECTS_WORKSPACE [BR-CLI-POLICY-04]",
       (kind) => {
         try {
           assertValidDraft({
@@ -134,7 +134,7 @@ describe("Domínio — Definição dos Pilares [BR-CLI-POLICY]", () => {
   });
 
   describe("Pilares de Manutenção: Fix e Patch", () => {
-    it("DADO um 'patch' COM hypothesis ENTÃO falha com POLICY_PATCH_REJECTS_EXPERIMENT_FIELDS [BR-CLI-POLICY-01]", () => {
+    it("DADO um 'patch' COM hypothesis ENTÃO falha com POLICY_PATCH_REJECTS_EXPERIMENT_FIELDS [BR-CLI-POLICY-05]", () => {
       try {
         assertValidDraft({
           id: "wi-5",
@@ -170,7 +170,7 @@ describe("Domínio — Definição dos Pilares [BR-CLI-POLICY]", () => {
   });
 
   describe("Validações Comuns", () => {
-    it("DADO qualquer item COM título <5 chars ENTÃO falha com POLICY_TITLE_TOO_SHORT [BR-CLI-POLICY-01]", () => {
+    it("DADO qualquer item COM título <5 chars ENTÃO falha com POLICY_TITLE_TOO_SHORT [BR-CLI-POLICY-06]", () => {
       try {
         assertValidDraft({ id: "wi-6", kind: "fix", title: "ab" });
         fail("deveria ter lançado");

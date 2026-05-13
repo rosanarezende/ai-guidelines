@@ -55,7 +55,9 @@
     "prepare": "husky",
     "build": "tsc",
     "test:nova-cli": "jest --config ./.jest/jest.config.js",
-    "test:nova-cli:coverage": "jest --config ./.jest/jest.config.js --coverage"
+    "test:nova-cli:coverage": "jest --config ./.jest/jest.config.js --coverage",
+    "living-docs:generate": "yarn build && node cli/living-docs.mjs generate",
+    "living-docs:check": "yarn build && node cli/living-docs.mjs check"
   },
   "devDependencies": {
     "@types/jest": "^30.0.0",
