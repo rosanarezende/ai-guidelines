@@ -62,8 +62,8 @@ entries:
     domain: AssembleArtifact
     evidence:
       - file: src/app/use-cases/AssembleArtifact.test.ts
-        lineStart: 123
-        lineEnd: 137
+        lineStart: 117
+        lineEnd: 129
         testName: DADO recipe com 2 slots ENTÃO compõe Markdown na ordem dos slots
         coverageState: covered
     tags:
@@ -76,8 +76,8 @@ entries:
     domain: AssembleArtifact
     evidence:
       - file: src/app/use-cases/AssembleArtifact.test.ts
-        lineStart: 139
-        lineEnd: 159
+        lineStart: 131
+        lineEnd: 151
         testName: DADO recipe com 3 slots ENTÃO compõe todos na ordem
         coverageState: covered
     tags:
@@ -90,8 +90,8 @@ entries:
     domain: AssembleArtifact
     evidence:
       - file: src/app/use-cases/AssembleArtifact.test.ts
-        lineStart: 161
-        lineEnd: 178
+        lineStart: 153
+        lineEnd: 170
         testName: DADO recipe válida ENTÃO metadata reflete artifactKind, workflowType, language
         coverageState: covered
     tags:
@@ -104,8 +104,8 @@ entries:
     domain: AssembleArtifact
     evidence:
       - file: src/app/use-cases/AssembleArtifact.test.ts
-        lineStart: 180
-        lineEnd: 196
+        lineStart: 172
+        lineEnd: 188
         testName: DADO slot com múltiplos partials ENTÃO usa o primeiro (Q2 first-wins)
         coverageState: covered
     tags:
@@ -118,8 +118,8 @@ entries:
     domain: AssembleArtifact
     evidence:
       - file: src/app/use-cases/AssembleArtifact.test.ts
-        lineStart: 200
-        lineEnd: 214
+        lineStart: 192
+        lineEnd: 206
         testName: DADO mesma recipe e mesmos partials QUANDO executado 2× ENTÃO output idêntico
         coverageState: covered
     tags:
@@ -132,8 +132,8 @@ entries:
     domain: AssembleArtifact
     evidence:
       - file: src/app/use-cases/AssembleArtifact.test.ts
-        lineStart: 216
-        lineEnd: 229
+        lineStart: 208
+        lineEnd: 221
         testName: DADO output ENTÃO termina com newline único (sem trailing extras)
         coverageState: covered
     tags:
@@ -146,8 +146,8 @@ entries:
     domain: AssembleArtifact
     evidence:
       - file: src/app/use-cases/AssembleArtifact.test.ts
-        lineStart: 233
-        lineEnd: 244
+        lineStart: 225
+        lineEnd: 236
         testName: DADO recipe inexistente ENTÃO RECIPE_NOT_FOUND propagado
         coverageState: covered
     tags:
@@ -160,8 +160,8 @@ entries:
     domain: AssembleArtifact
     evidence:
       - file: src/app/use-cases/AssembleArtifact.test.ts
-        lineStart: 246
-        lineEnd: 261
+        lineStart: 238
+        lineEnd: 253
         testName: DADO partial inexistente ENTÃO RECIPE_PARTIAL_NOT_FOUND propagado
         coverageState: covered
     tags:
@@ -174,8 +174,8 @@ entries:
     domain: AssembleArtifact
     evidence:
       - file: src/app/use-cases/AssembleArtifact.test.ts
-        lineStart: 263
-        lineEnd: 281
+        lineStart: 255
+        lineEnd: 273
         testName: DADO recipe inválida no store ENTÃO assertValidRecipe lança
         coverageState: covered
     tags:
@@ -188,8 +188,8 @@ entries:
     domain: AssembleArtifact
     evidence:
       - file: src/app/use-cases/AssembleArtifact.test.ts
-        lineStart: 283
-        lineEnd: 301
+        lineStart: 275
+        lineEnd: 293
         testName: DADO partial com placeholder ENTÃO assertValidPartialMarkdown lança
         coverageState: covered
     tags:
@@ -3120,4 +3120,172 @@ entries:
     tags:
       - Invariants — forbiddenHeadings
       - Recipe — assertValidRecipe [BR-CLI-RECIPE]
+    coverageState: covered
+  - ruleId: BR-CLI-STRUCT-01
+    title: DADO artefato válido com recipe sem forbiddenHeadings ENTÃO retorna vazio
+    boundedContext: use-cases
+    domain: StructuralValidation
+    evidence:
+      - file: src/app/use-cases/StructuralValidation.test.ts
+        lineStart: 70
+        lineEnd: 73
+        testName: DADO artefato válido com recipe sem forbiddenHeadings ENTÃO retorna vazio
+        coverageState: covered
+    tags:
+      - Happy path
+      - StructuralValidation — validateComposedArtifact [BR-CLI-STRUCT]
+    coverageState: covered
+  - ruleId: BR-CLI-STRUCT-02
+    title: DADO artefato com todos os slots required presentes ENTÃO sem erro de completude
+    boundedContext: use-cases
+    domain: StructuralValidation
+    evidence:
+      - file: src/app/use-cases/StructuralValidation.test.ts
+        lineStart: 75
+        lineEnd: 79
+        testName: DADO artefato com todos os slots required presentes ENTÃO sem erro de completude
+        coverageState: covered
+    tags:
+      - Happy path
+      - StructuralValidation — validateComposedArtifact [BR-CLI-STRUCT]
+    coverageState: covered
+  - ruleId: BR-CLI-STRUCT-03
+    title: DADO recipe com forbiddenHeadings e artefato contendo heading proibido ENTÃO STRUCT_FORBIDDEN_SECTION
+    boundedContext: use-cases
+    domain: StructuralValidation
+    evidence:
+      - file: src/app/use-cases/StructuralValidation.test.ts
+        lineStart: 83
+        lineEnd: 101
+        testName: DADO recipe com forbiddenHeadings e artefato contendo heading proibido ENTÃO STRUCT_FORBIDDEN_SECTION
+        coverageState: covered
+    tags:
+      - ForbiddenHeadings — STRUCT_FORBIDDEN_SECTION
+      - StructuralValidation — validateComposedArtifact [BR-CLI-STRUCT]
+    coverageState: covered
+  - ruleId: BR-CLI-STRUCT-04
+    title: DADO múltiplos headings proibidos encontrados ENTÃO um erro por heading
+    boundedContext: use-cases
+    domain: StructuralValidation
+    evidence:
+      - file: src/app/use-cases/StructuralValidation.test.ts
+        lineStart: 103
+        lineEnd: 120
+        testName: DADO múltiplos headings proibidos encontrados ENTÃO um erro por heading
+        coverageState: covered
+    tags:
+      - ForbiddenHeadings — STRUCT_FORBIDDEN_SECTION
+      - StructuralValidation — validateComposedArtifact [BR-CLI-STRUCT]
+    coverageState: covered
+  - ruleId: BR-CLI-STRUCT-05
+    title: DADO heading parecido mas não idêntico (case-sensitive) ENTÃO sem erro
+    boundedContext: use-cases
+    domain: StructuralValidation
+    evidence:
+      - file: src/app/use-cases/StructuralValidation.test.ts
+        lineStart: 122
+        lineEnd: 137
+        testName: DADO heading parecido mas não idêntico (case-sensitive) ENTÃO sem erro
+        coverageState: covered
+    tags:
+      - ForbiddenHeadings — STRUCT_FORBIDDEN_SECTION
+      - StructuralValidation — validateComposedArtifact [BR-CLI-STRUCT]
+    coverageState: covered
+  - ruleId: BR-CLI-STRUCT-06
+    title: DADO slot required ausente dos composedSlots ENTÃO STRUCT_MISSING_SLOT
+    boundedContext: use-cases
+    domain: StructuralValidation
+    evidence:
+      - file: src/app/use-cases/StructuralValidation.test.ts
+        lineStart: 141
+        lineEnd: 155
+        testName: DADO slot required ausente dos composedSlots ENTÃO STRUCT_MISSING_SLOT
+        coverageState: covered
+    tags:
+      - Slot completeness — STRUCT_MISSING_SLOT
+      - StructuralValidation — validateComposedArtifact [BR-CLI-STRUCT]
+    coverageState: covered
+  - ruleId: BR-CLI-STRUCT-07
+    title: DADO slot optional ausente ENTÃO sem erro
+    boundedContext: use-cases
+    domain: StructuralValidation
+    evidence:
+      - file: src/app/use-cases/StructuralValidation.test.ts
+        lineStart: 157
+        lineEnd: 169
+        testName: DADO slot optional ausente ENTÃO sem erro
+        coverageState: covered
+    tags:
+      - Slot completeness — STRUCT_MISSING_SLOT
+      - StructuralValidation — validateComposedArtifact [BR-CLI-STRUCT]
+    coverageState: covered
+  - ruleId: BR-CLI-STRUCT-08
+    title: DADO múltiplos slots required ausentes ENTÃO um erro por slot
+    boundedContext: use-cases
+    domain: StructuralValidation
+    evidence:
+      - file: src/app/use-cases/StructuralValidation.test.ts
+        lineStart: 171
+        lineEnd: 183
+        testName: DADO múltiplos slots required ausentes ENTÃO um erro por slot
+        coverageState: covered
+    tags:
+      - Slot completeness — STRUCT_MISSING_SLOT
+      - StructuralValidation — validateComposedArtifact [BR-CLI-STRUCT]
+    coverageState: covered
+  - ruleId: BR-CLI-STRUCT-09
+    title: DADO artifactKind divergente entre recipe e metadata ENTÃO STRUCT_RECIPE_SELF_INCONSISTENT
+    boundedContext: use-cases
+    domain: StructuralValidation
+    evidence:
+      - file: src/app/use-cases/StructuralValidation.test.ts
+        lineStart: 187
+        lineEnd: 205
+        testName: DADO artifactKind divergente entre recipe e metadata ENTÃO STRUCT_RECIPE_SELF_INCONSISTENT
+        coverageState: covered
+    tags:
+      - Self-consistency — STRUCT_RECIPE_SELF_INCONSISTENT
+      - StructuralValidation — validateComposedArtifact [BR-CLI-STRUCT]
+    coverageState: covered
+  - ruleId: BR-CLI-STRUCT-10
+    title: DADO workflowType divergente ENTÃO STRUCT_RECIPE_SELF_INCONSISTENT
+    boundedContext: use-cases
+    domain: StructuralValidation
+    evidence:
+      - file: src/app/use-cases/StructuralValidation.test.ts
+        lineStart: 207
+        lineEnd: 224
+        testName: DADO workflowType divergente ENTÃO STRUCT_RECIPE_SELF_INCONSISTENT
+        coverageState: covered
+    tags:
+      - Self-consistency — STRUCT_RECIPE_SELF_INCONSISTENT
+      - StructuralValidation — validateComposedArtifact [BR-CLI-STRUCT]
+    coverageState: covered
+  - ruleId: BR-CLI-STRUCT-11
+    title: DADO language divergente ENTÃO STRUCT_RECIPE_SELF_INCONSISTENT
+    boundedContext: use-cases
+    domain: StructuralValidation
+    evidence:
+      - file: src/app/use-cases/StructuralValidation.test.ts
+        lineStart: 226
+        lineEnd: 243
+        testName: DADO language divergente ENTÃO STRUCT_RECIPE_SELF_INCONSISTENT
+        coverageState: covered
+    tags:
+      - Self-consistency — STRUCT_RECIPE_SELF_INCONSISTENT
+      - StructuralValidation — validateComposedArtifact [BR-CLI-STRUCT]
+    coverageState: covered
+  - ruleId: BR-CLI-STRUCT-12
+    title: DADO múltiplas violações simultâneas ENTÃO acumula todos os erros
+    boundedContext: use-cases
+    domain: StructuralValidation
+    evidence:
+      - file: src/app/use-cases/StructuralValidation.test.ts
+        lineStart: 247
+        lineEnd: 272
+        testName: DADO múltiplas violações simultâneas ENTÃO acumula todos os erros
+        coverageState: covered
+    tags:
+      - Acumulação de erros
+      - StructuralValidation — validateComposedArtifact [BR-CLI-STRUCT]
     coverageState: covered

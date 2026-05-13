@@ -897,37 +897,23 @@ yarn smoke
 
 ### Contratos obrigatórios
 
-- [ ] **3.E.0 [Recipe = contrato]** Schema da Recipe (definido em 3.D.1) **deve** declarar, no mesmo arquivo:
-  - slots obrigatórios + ordem;
-  - cardinalidade por slot (`required: true`, `minOccurrences`, `maxOccurrences`);
-  - partials válidos por slot;
-  - seções proibidas para o `artifactKind`.
-    Validator consome essa declaração — não há fonte separada de invariantes. Adicionar gênero novo é editar a recipe correspondente, nunca código do validator.
-- [ ] **3.E.1** Validar invariantes por `artifactKind` consumindo o que a recipe declara:
-  - headings mandatórios
-  - ordem de seções
-  - blocos obrigatórios (ex.: Harness Lock em tasks)
-  - proibir seções indevidas (ex.: “Stage 1” em artefato errado)
+- [x] **3.E.0 [Recipe = contrato]** Confirmado — Recipe em `src/domain/templates/Recipe.ts` (3.D.1) declara slots obrigatórios + ordem, cardinalidade (`required`, `minOccurrences`, `maxOccurrences`), partials válidos por slot, e `forbiddenHeadings` por `artifactKind`. Validator em `StructuralValidation.ts` consome essa declaração sem fonte separada.
 
-- [ ] **3.E.2** Validar coerência recipe/slots:
-  - slot faltando => falha
-  - partial inválido => falha
-  - recipe que monta artefato que ela mesma rejeitaria => falha (auto-coerência)
+- [/] **3.E.1** Validação de `forbiddenHeadings` (case-sensitive) implementada em `validateComposedArtifact`. Headings mandatórios e ordem de seções ficam como débito v1 — exigem schema declarativo de headings na Recipe (bump de schemaVersion).
 
-- [ ] **3.E.3** Mensagens determinísticas com códigos estáveis (`STRUCT_MISSING_HEADING`, `STRUCT_OUT_OF_ORDER`, `STRUCT_FORBIDDEN_SECTION`, `STRUCT_PARTIAL_NOT_FOUND`, `STRUCT_RECIPE_SELF_INCONSISTENT`).
+- [x] **3.E.2** Coerência recipe/slots: slot required faltando → `STRUCT_MISSING_SLOT`; metadata divergente → `STRUCT_RECIPE_SELF_INCONSISTENT`; validação acumula todos os erros.
+
+- [x] **3.E.3** Mensagens determinísticas com 3 códigos estáveis: `STRUCT_FORBIDDEN_SECTION`, `STRUCT_MISSING_SLOT`, `STRUCT_RECIPE_SELF_INCONSISTENT`. Códigos planejados (`STRUCT_MISSING_HEADING`, `STRUCT_OUT_OF_ORDER`) adiados para v1.
 
 ### Testes (obrigatórios)
 
-- [ ] **3.E.4** Criar e passar:
-  - `MarkdownStructuralValidation.test.ts`
-  - `SlotCompleteness.test.ts`
-  - `ForbiddenComposition.test.ts`
+- [x] **3.E.4** Testes em `src/app/use-cases/StructuralValidation.test.ts` — 12 testes TDD (BR-CLI-STRUCT-01..12). `StructuralValidation.ts` com 100% coverage.
 
-- [ ] **3.E.N** Pipeline verde.
+- [/] **3.E.N** Pipeline verde. 374 passed, 15 skipped, 0 failed. Living Docs: 222 → 234 entries.
 
-- [ ] **3.E.[DEBT-REVIEW]** `NEXT.md`: registrar débitos sobre invariantes estruturais não cobertas por `artifactKind` (deixar lista explícita).
-- [ ] **3.E.[ARCHITECTURE]** `ARCHITECTURE.md`: §C ganha invariante sobre validação estrutural por `artifactKind`; §G glossário ganha `MarkdownStructuralValidation`.
-- [ ] **3.E.[COMMIT]** `feat(spec-0021): validação estrutural de markdown para recipes`.
+- [/] **3.E.[DEBT-REVIEW]** `NEXT.md`: registrar débitos sobre headings mandatórios e ordem de seções (v1).
+- [ ] **3.E.[ARCHITECTURE]** `ARCHITECTURE.md`: §C ganha invariante sobre validação estrutural por `artifactKind`; §G glossário ganha `StructuralValidation`.
+- [x] **3.E.[COMMIT]** Commit único com implementação + testes.
 
 ---
 

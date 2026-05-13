@@ -124,6 +124,12 @@ Foram identificados os seguintes riscos arquiteturais ainda existentes:
 5. **Partial validation é regex-only em v0.** Sem parser de Markdown real — suficiente para invariantes estruturais (code blocks fechados, ausência de placeholders/timestamps). Parser real (ex.: remark/unified) só se justifica quando a validação precisar inspecionar AST de headings (3.E). Sem dependência nova por enquanto — conforme Q5.
 6. **First-wins (Q2) sem fallback.** Em v0, quando o slot tem >1 partial na lista, `AssembleArtifact` resolve sempre o primeiro. Estratégia de fallback (tentar segundo se primeiro não encontrado) é candidata a v1. Comportamento atual é determinístico e testado (BR-CLI-ASSEMBLE-04).
 
+#### Sub-bloco 3.E (Validação estrutural do Markdown) — registrado em 2026-05-12
+
+1. **Headings mandatórios por `artifactKind` não implementados em v0.** `validateComposedArtifact` valida `forbiddenHeadings` (case-sensitive) e `slot completeness`, mas não checa se headings específicos **estão presentes** (ex.: "Harness Lock" obrigatório em tasks). Exige schema declarativo de headings na Recipe — candidato a bump `schemaVersion: v1`. Código estável `STRUCT_MISSING_HEADING` reservado.
+2. **Ordem de seções não validada em v0.** `canonicalOrder: "slots"` garante a ordem na composição (`AssembleArtifact`), mas `validateComposedArtifact` não re-verifica a ordem dos headings no output. Para v0 é redundante (composição já garante ordem); para v1 com edição manual pós-composição, a checagem faz sentido. Código estável `STRUCT_OUT_OF_ORDER` reservado.
+3. **`STRUCT_PARTIAL_NOT_FOUND` não emitido pelo validator.** O validator recebe `ComposedArtifact` (já composto); partial não encontrado é erro do `AssembleArtifact` via port `RecipeStore` (`RECIPE_PARTIAL_NOT_FOUND`). Código removido da lista de 3.E por redundância — já coberto em 3.D.
+
 _(A preencher conforme execução do restante da Fase 3)_
 
 ### Débitos da Fase 4 (Consolidação)
