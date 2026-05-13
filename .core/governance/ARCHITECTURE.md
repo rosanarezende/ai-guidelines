@@ -232,7 +232,10 @@ A Spec 0021 leva o framework do paradigma "Spec-Driven" (centrado em specs forma
 | **PR3** | Documentação viva derivada dos testes + engine de templates atômicos                         | 🔧 Em curso  |
 | **PR4** | Cleanup final + migração definitiva `.ai-guidelines/` → `.governance/` no projeto do usuário | ⏭️ Pendente  |
 
-Hoje a CLI **continua escrevendo em `.ai-guidelines/`** no projeto do usuário (compatibilidade preservada). O novo formato `.governance/` é o contrato canônico declarado, materializado no código de domínio — a migração real do **comportamento da CLI** acontece em PR4.
+Hoje a CLI **continua escrevendo em `.ai-guidelines/`** no projeto do usuário e copiando os templates de `.specify/templates/` (compatibilidade preservada).
+O novo formato `.governance/` (registry, recipes e partials atômicos) é o contrato canônico declarado e materializado no código de domínio.
+
+> **Aviso:** O mirror legado (`.specify/templates/`) está **formalmente depreciado**. O cutover da CLI para a composição por `recipes` será efetivado na fase PR4/4.C.
 
 ---
 
