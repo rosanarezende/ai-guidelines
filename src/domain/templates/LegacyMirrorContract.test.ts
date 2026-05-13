@@ -1,7 +1,7 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 
-const ROOT_DIR = path.resolve(__dirname, "..", "..", "..");
+const ROOT_DIR = process.cwd();
 
 describe("Legacy Mirror Contract [3.F]", () => {
   it("DADO mirror legado depreciado QUANDO verificado ENTÃO boilerplates originais não devem ser removidos antes do PR4", () => {

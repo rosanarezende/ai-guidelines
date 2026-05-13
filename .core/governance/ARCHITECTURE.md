@@ -228,8 +228,8 @@ A Spec 0021 leva o framework do paradigma "Spec-Driven" (centrado em specs forma
 | ------- | -------------------------------------------------------------------------------------------- | ------------ |
 | **PR0** | Setup do projeto + decisões iniciais aprovadas pela owner                                    | ✅ Concluído |
 | **PR1** | Fundação: modelo de domínio + políticas + registry em memória                                | ✅ Concluído |
-| **PR2** | **Este PR.** Persistência real em disco + camada de migração + reorganização das regras      | ✅ Concluído |
-| **PR3** | Documentação viva derivada dos testes + engine de templates atômicos                         | 🔧 Em curso  |
+| **PR2** | Persistência real em disco + camada de migração + reorganização das regras                   | ✅ Concluído |
+| **PR3** | **Este PR.** Documentação viva derivada dos testes + engine de templates atômicos            | 🔧 Em curso  |
 | **PR4** | Cleanup final + migração definitiva `.ai-guidelines/` → `.governance/` no projeto do usuário | ⏭️ Pendente  |
 
 Hoje a CLI **continua escrevendo em `.ai-guidelines/`** no projeto do usuário e copiando os templates de `.specify/templates/` (compatibilidade preservada).
