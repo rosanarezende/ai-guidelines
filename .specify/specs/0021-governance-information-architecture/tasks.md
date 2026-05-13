@@ -884,7 +884,7 @@ yarn smoke
   - delta aceito (apenas o intencional)
 
 - [x] **3.F.2** Criar testes de regressão de geração (snapshot determinístico).
-- [x] **3.F.3** Trocar fluxo padrão para recipes/partials. _(Movido para PR4, PR3 foca na depreciação formal)_
+- [-] ~~**3.F.3** Trocar fluxo padrão para recipes/partials.~~ _(Movido para 4.C.0, PR3 foca na depreciação formal)_
 - [x] **3.F.4** Depreciar mirror com warning determinístico e prazo (se necessário).
 - [x] **3.F.N** Pipeline verde.
 - [x] **3.F.[DEBT-REVIEW]** `NEXT.md`: fechar débitos relativos a mirror legado; registrar qualquer caminho não migrado com warning + prazo.
@@ -981,6 +981,10 @@ yarn smoke
 
 > **Âncoras:** `[DEC-0021-B03]`, `[DEC-0021-B04]`
 > **Objetivo:** remover “ilhas órfãs” (ex.: `/docs`) e alinhar todos os ponteiros ao novo contrato.
+
+- [ ] **4.C.0** Efetivar o cutover da CLI para o TemplateEngine:
+  - Migrar os boilerplates legados (`.specify/templates/`) para recipes POJO/YAML + partials atômicos (equivalência 1:1).
+  - Trocar o fluxo padrão da CLI para ler as recipes e parar de copiar os arquivos do mirror legado.
 
 - [ ] **4.C.1** Auditar `/docs` e decidir:
   - migrar conteúdo útil para lar canônico
