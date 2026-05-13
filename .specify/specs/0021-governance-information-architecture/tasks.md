@@ -35,13 +35,13 @@
 > **Rationale:** evitar mega-PR e também evitar micro-PR churn.  
 > **Gate por fase:** cada PR (fase) precisa de branch dedicada, descrição temática, gate humano e cadeia de merge obrigatória.
 
-| PR      | Fase   | Domínios focais                                                            | Status      |
-| ------- | ------ | -------------------------------------------------------------------------- | ----------- |
-| **PR0** | Fase 0 | Setup + Stage 1 (Research/Brief/Gate)                                      | ✅ Merged   |
-| **PR1** | Fase 1 | DDD Core (Domain/Policy/Registry in-memory) + UseCases (sem IO real)       | [/] Active  |
-| **PR2** | Fase 2 | Topology (GovernanceWorkspace Strangler Fig + RulesEngine builder/runtime) | [ ] Pending |
-| **PR3** | Fase 3 | Intelligence (LivingDocumentation AST + TemplateEngine composition)        | [ ] Pending |
-| **PR4** | Fase 4 | Consolidation (carrier/placement + foundation/ADR + legacy cleanup)        | [ ] Pending |
+| PR      | Fase   | Domínios focais                                                            | Status                                                |
+| ------- | ------ | -------------------------------------------------------------------------- | ----------------------------------------------------- |
+| **PR0** | Fase 0 | Setup + Stage 1 (Research/Brief/Gate)                                      | ✅ Merged                                             |
+| **PR1** | Fase 1 | DDD Core (Domain/Policy/Registry in-memory) + UseCases (sem IO real)       | ✅ Merged                                             |
+| **PR2** | Fase 2 | Topology (GovernanceWorkspace Strangler Fig + RulesEngine builder/runtime) | ✅ Merged                                             |
+| **PR3** | Fase 3 | Intelligence (LivingDocumentation AST + TemplateEngine composition)        | [/] Active <!-- mudar para ✅ Merged após o merge --> |
+| **PR4** | Fase 4 | Consolidation (carrier/placement + foundation/ADR + legacy cleanup)        | [ ] Pending                                           |
 
 ---
 
@@ -513,9 +513,9 @@ yarn smoke
 ## [PR-MGMT] PR3
 
 - [x] **3.[PR-MGMT.NEW-BRANCH]** Branch: `feat/spec-0021-pr3-executable-intelligence-runtime`.
-- [ ] **3.[PR-MGMT.DESCRIPTION]** (6 seções obrigatórias).
-- [ ] **3.[PR-MGMT.REVIEW-GATE]** Gate humano obrigatório.
-- [ ] **3.[PR-MGMT.MERGE-CHAIN]** `yarn format ; yarn check ; yarn test:nova-cli` (+ comandos novos da fase).
+- [x] **3.[PR-MGMT.DESCRIPTION]** Descrição do PR preenchida com as 6 seções obrigatórias e PR4 mencionado para cutover + recipes completas + equivalência 1:1.
+- [x] **3.[PR-MGMT.REVIEW-GATE]** Gate humano obrigatório e pipeline verde.
+- [x] **3.[PR-MGMT.MERGE-CHAIN]** Comandos de validação executados: `yarn format`, `yarn check`, `yarn test:nova-cli`, `yarn living-docs:check`.
 
 ---
 
