@@ -856,7 +856,7 @@ yarn smoke
 
 - [x] **3.E.0 [Recipe = contrato]** Confirmado — Recipe em `src/domain/templates/Recipe.ts` (3.D.1) declara slots obrigatórios + ordem, cardinalidade (`required`, `minOccurrences`, `maxOccurrences`), partials válidos por slot, e `forbiddenHeadings` por `artifactKind`. Validator em `StructuralValidation.ts` consome essa declaração sem fonte separada.
 
-- [/] **3.E.1** Validação de `forbiddenHeadings` (case-sensitive) implementada em `validateComposedArtifact`. Headings mandatórios e ordem de seções ficam como débito v1 — exigem schema declarativo de headings na Recipe (bump de schemaVersion).
+- [x] **3.E.1** Validação de `forbiddenHeadings` (case-sensitive) implementada em `validateComposedArtifact`. Headings mandatórios e ordem de seções ficam como débito v1 — exigem schema declarativo de headings na Recipe (bump de schemaVersion).
 
 - [x] **3.E.2** Coerência recipe/slots: slot required faltando → `STRUCT_MISSING_SLOT`; metadata divergente → `STRUCT_RECIPE_SELF_INCONSISTENT`; validação acumula todos os erros.
 
