@@ -926,23 +926,23 @@ yarn smoke
 
 > **Âncoras:** `[DEC-0021-B02]`, `[DEC-0021-B03]`
 
-- [ ] **4.A.1** Criar `GOVERNANCE-CATALOG.md` (ou nome final) como carrier canônico curto:
+- [x] **4.A.1** Criar `GOVERNANCE-CATALOG.md` (ou nome final) como carrier canônico curto:
   - classes/gêneros
   - paths canônicos
   - regras de lookup
   - lifecycle/responsabilidades
 
-- [ ] **4.A.2** Garantir consistência com a topologia real do repo (modelo híbrido):
+- [x] **4.A.2** Garantir consistência com a topologia real do repo (modelo híbrido):
   - se o catálogo diz X, o repo deve expressar X
 
-- [ ] **4.A.3** Reservar explicitamente paths de gêneros futuros em `.governance/`:
+- [x] **4.A.3** Reservar explicitamente paths de gêneros futuros em `.governance/`:
   - `intake/`
   - `handoff/`
   - `telemetry/`
 
-- [ ] **4.A.N** Pipeline verde.
-- [ ] **4.A.[DEBT-REVIEW]** `NEXT.md`: registrar débitos do catálogo (gêneros futuros mapeados mas não implementados).
-- [ ] **4.A.[ARCHITECTURE]** `ARCHITECTURE.md`: §H convenções ganha referência ao `GOVERNANCE-CATALOG.md` como carrier canônico.
+- [x] **4.A.N** Pipeline verde.
+- [x] **4.A.[DEBT-REVIEW]** `NEXT.md`: registrar débitos do catálogo (gêneros futuros mapeados mas não implementados).
+- [x] **4.A.[ARCHITECTURE]** `ARCHITECTURE-REFERENCE.md`: §6 convenções ganha referência ao `GOVERNANCE-CATALOG.md` como carrier canônico.
 - [ ] **4.A.[COMMIT]** `docs(spec-0021): carrier híbrido (catálogo) + reservas de lar`.
 
 ---

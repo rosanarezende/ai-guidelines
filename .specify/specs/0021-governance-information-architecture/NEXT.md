@@ -134,7 +134,8 @@ _(A preencher conforme execução do restante da Fase 3)_
 
 ### Débitos da Fase 4 (Consolidação)
 
-_(A preencher conforme execução)_
+1. **Gêneros futuros documentados mas não implementados no catálogo.** `GOVERNANCE-CATALOG.md` §5 lista `intake/`, `handoff/` e `telemetry/` como reservados. Os paths são criados por `AdoptWorkspace` (RESERVED_GOVERNANCE_DIRS), mas o conteúdo, contratos e fluxos de cada gênero só entram nas specs futuras dedicadas: `stakeholder-intake-pipeline`, `handoff-contracts-formalization`, `framework-observability-dashboard`. Nenhum gap de catálogo — é reserva intencional.
+2. **`spec-foundation.md` ainda com nome legado.** O catálogo aponta para `.core/process/spec-foundation.md` com nota "(renomeado em 4.B)". A renomeação e refatoração do documento ocorrem no sub-bloco 4.B; até lá, o nome cria dissonância cognitiva leve mas não bloqueia o catálogo.
 
 ---
 

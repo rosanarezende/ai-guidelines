@@ -9,7 +9,7 @@
       "sources": [],
       "applicable_languages": ["*"],
       "tags": ["adapter", "claude", "routing"],
-      "file": ".core\\rules\\adapters\\claude.md",
+      "file": ".core/rules/adapters/claude.md",
       "title": "Model Routing",
       "instruction_en": "Use Haiku or Sonnet for scoped, atomic coding tasks. Reserve Opus or Sonnet for architectural planning, multi-file analysis, and complex design decisions.",
       "documentation_pt": "- **Haiku / Sonnet leve:** tarefas atômicas de codificação, formatação, refatoração scoped.\n- **Sonnet / Opus:** planejamento arquitetural, análise de múltiplos arquivos, decisões de design complexas."
@@ -23,7 +23,7 @@
       "sources": [],
       "applicable_languages": ["*"],
       "tags": ["adapter", "claude", "context"],
-      "file": ".core\\rules\\adapters\\claude.md",
+      "file": ".core/rules/adapters/claude.md",
       "title": "Context e Ignore",
       "instruction_en": "Use `.claudeignore` to control context payload. Ensure `AGENTS.md` and the `<AI_GUIDELINES>` block are properly loaded.",
       "documentation_pt": "- Utilize `.claudeignore` na raiz do repositório para controlar quais arquivos a IA carrega no contexto.\n- O formato segue o padrão `.gitignore`.\n- Claude carrega automaticamente o `AGENTS.md` da raiz — garanta que o bloco `<AI_GUIDELINES>` esteja presente."
@@ -37,7 +37,7 @@
       "sources": [],
       "applicable_languages": ["*"],
       "tags": ["adapter", "claude", "behavior"],
-      "file": ".core\\rules\\adapters\\claude.md",
+      "file": ".core/rules/adapters/claude.md",
       "title": "Comportamento Observado",
       "instruction_en": "Be concise to counter Claude's default verbosity. In long sessions, use `/clear` or restart if context drift occurs. Respect `CLAUDE.md` for project-specific instructions.",
       "documentation_pt": "- Claude tende a ser verboso por padrão. As Global Rules já instruem respostas sucintas — reforce se necessário com \"seja conciso\" no prompt.\n- Em sessões longas, Claude pode perder contexto de arquivos lidos no início. Use `/clear` ou reinicie a sessão quando perceber repetição de erros.\n- Claude Code respeita `CLAUDE.md` na raiz — este arquivo pode conter instruções específicas do projeto que complementam o baseline injetado."
@@ -51,7 +51,7 @@
       "sources": [],
       "applicable_languages": ["*"],
       "tags": ["adapter", "codex", "ide"],
-      "file": ".core\\rules\\adapters\\codex.md",
+      "file": ".core/rules/adapters/codex.md",
       "title": "Integração com IDE",
       "instruction_en": "Leverage `.github/copilot-instructions.md` for project instructions in Copilot Chat. Use structured comments and JSDoc to guide inline code completion.",
       "documentation_pt": "- Copilot lê automaticamente o `AGENTS.md` da raiz do repositório.\n- Para instruções específicas do projeto no Copilot Chat, utilize `.github/copilot-instructions.md` — este arquivo é carregado como contexto adicional pelo Copilot.\n- Utilize comentários estruturados e JSDoc para auxiliar a conclusão de código em tempo real."
@@ -65,7 +65,7 @@
       "sources": [],
       "applicable_languages": ["*"],
       "tags": ["adapter", "codex", "context"],
-      "file": ".core\\rules\\adapters\\codex.md",
+      "file": ".core/rules/adapters/codex.md",
       "title": "Contexto e Ignore",
       "instruction_en": "Use `#file` references to refine context in Copilot Chat. Ensure Codex CLI loads `AGENTS.md` properly.",
       "documentation_pt": "- Copilot respeita o `.gitignore` do repositório por padrão.\n- Para refinamentos de contexto no Copilot Chat, utilize referências diretas a arquivos via `#file`.\n- Codex CLI respeita `AGENTS.md` e `.codex/instructions.md` — garanta que o bloco `<AI_GUIDELINES>` esteja presente."
@@ -79,7 +79,7 @@
       "sources": [],
       "applicable_languages": ["*"],
       "tags": ["adapter", "codex", "behavior"],
-      "file": ".core\\rules\\adapters\\codex.md",
+      "file": ".core/rules/adapters/codex.md",
       "title": "Comportamento Observado",
       "instruction_en": "Keep files focused and imports explicit to improve inline suggestions. Strictly follow governance rules (e.g., no autonomous push) when operating autonomously.",
       "documentation_pt": "- Copilot inline tende a completar código baseado no contexto imediato (arquivo aberto + imports). Mantenha arquivos focados e com imports explícitos para melhores sugestões.\n- Codex em modo autônomo segue instruções de `AGENTS.md` rigorosamente — garanta que as regras de governança (ex: não fazer push) estejam claras."
@@ -93,7 +93,7 @@
       "sources": [],
       "applicable_languages": ["*"],
       "tags": ["adapter", "gemini", "cli"],
-      "file": ".core\\rules\\adapters\\gemini.md",
+      "file": ".core/rules/adapters/gemini.md",
       "title": "Integração com CLI",
       "instruction_en": "Load project-specific instructions from `GEMINI.md` and ensure `<AI_GUIDELINES>` in `AGENTS.md` is present.",
       "documentation_pt": "- Gemini CLI carrega automaticamente `GEMINI.md` na raiz e `~/.gemini/GEMINI.md` como config global.\n- Para instruções específicas do projeto, utilize `GEMINI.md` na raiz do repositório.\n- O `AGENTS.md` da raiz também é carregado — garanta que o bloco `<AI_GUIDELINES>` esteja presente."
@@ -107,7 +107,7 @@
       "sources": [],
       "applicable_languages": ["*"],
       "tags": ["adapter", "gemini", "skills"],
-      "file": ".core\\rules\\adapters\\gemini.md",
+      "file": ".core/rules/adapters/gemini.md",
       "title": "Skills Globais",
       "instruction_en": "Manage global skills carefully in `~/.gemini/skills/` and prune unused scripts to prevent token bloat.",
       "documentation_pt": "As skills globais (ferramentas personalizadas) residem em `~/.gemini/skills/`. Periodicamente, remova scripts que não utiliza ativamente, pois eles degradam a performance."
@@ -121,7 +121,7 @@
       "sources": [],
       "applicable_languages": ["*"],
       "tags": ["adapter", "gemini", "context"],
-      "file": ".core\\rules\\adapters\\gemini.md",
+      "file": ".core/rules/adapters/gemini.md",
       "title": "Estratégia de Ignore",
       "instruction_en": "Aggressively use `.geminiignore` to exclude build artifacts, logs, binaries, and dependencies from context, preventing token waste.",
       "documentation_pt": "Utilize o arquivo `.geminiignore` na raiz para evitar que arquivos de build, logs e binários poluam o contexto. Crítico para economia de tokens."
@@ -135,7 +135,7 @@
       "sources": [],
       "applicable_languages": ["*"],
       "tags": ["adapter", "gemini", "behavior"],
-      "file": ".core\\rules\\adapters\\gemini.md",
+      "file": ".core/rules/adapters/gemini.md",
       "title": "Comportamento Observado",
       "instruction_en": "Use checkpoints via artifacts to preserve context in long sessions. Reinforce destructive command constraints, as Gemini tends to be highly proactive.",
       "documentation_pt": "- Em sessões longas, use o conceito de \"checkpoints\" (salvar progresso em artefatos) para evitar perda de contexto.\n- Gemini tende a ser proativo em executar comandos — reforce a proibição de `git push` e tarefas destrutivas."
@@ -156,7 +156,7 @@
       "validated_by_benchmark": true,
       "applicable_languages": ["*"],
       "tags": ["opt-in", "quality-gates", "review"],
-      "file": ".core\\rules\\base\\quality\\quality-gates.md",
+      "file": ".core/rules/base/quality/quality-gates.md",
       "title": "Quality Gates (Checklist)",
       "instruction_en": "Before reporting a task as done, ensure: no circular dependencies, proper teardown for listeners/timers (prevent memory leaks), no unguarded asynchronous state mutations (prevent race conditions), >85% test coverage, >60% mutation kill rate, and no secrets in code/comments. Fix any automated failures before requesting human review.",
       "documentation_pt": "1. **Análise Estática:** Complexidade ciclomática mantida sob controle, ausência de dependências circulares, nomes de variáveis/funções seguem a semântica do projeto.\n2. **Cobertura e Mutação:** Mínimo recomendado de 85% de cobertura, mínimo de 60% de kill rate.\n3. **Sensores de Bugs Típicos de IA:**\n   - **Race Conditions:** Se não houver garantia de atomicidade em blocos assíncronos (transação, lock ou estado local seguro), rejeite o design.\n   - **Memory Leaks:** Sempre implemente a função de limpeza (teardown/dispose) correspondente no ciclo de vida apropriado do framework usado.\n4. **Security & Secrets:** Bloqueio de chaves/tokens; validação de inputs contra injeção.\n\n**See also:** [GR-0001], [GR-0002], [GR-0004], [GR-0005]"
@@ -170,7 +170,7 @@
       "sources": [],
       "applicable_languages": ["*"],
       "tags": ["opt-in", "bdd", "testing"],
-      "file": ".core\\rules\\center\\methodologies\\bdd-en.md",
+      "file": ".core/rules/center/methodologies/bdd-en.md",
       "title": "BDD Test Structure",
       "instruction_en": "All tests MUST use the GIVEN / WHEN / THEN structure. Each `it()` describes exactly one atomic scenario. Prioritize readability over brevity. If a business rule `[BR-*]` is provided, include it in the test name.",
       "documentation_pt": "- **DADO** [cenário inicial / pré-condição / estado do sistema]\n- **QUANDO** [ação executada pelo usuário ou sistema]\n- **ENTÃO** [resultado esperado / asserção]\n\n- **Linguagem Ubíqua:** Testes devem ser legíveis por humanos não-técnicos. Evite jargão de implementação nos nomes.\n- **Documentação Viva:** A suíte de testes serve como documentação executável do sistema. Se o teste não descreve o comportamento com clareza, reescreva-o.\n- **Cenários Atômicos:** Cada `it()` descreve exatamente um cenário. Não combine múltiplos fluxos.\n\n**Exemplo:**\n\n```javascript\nit(\"[BR-CLI-SYNC-01] GIVEN outdated baseline WHEN adopt is executed THEN syncs only changed files\", () => {\n  // ...\n});\n```\n\n**See also:** [OPT-0401], [OPT-0501]"
@@ -184,7 +184,7 @@
       "sources": [],
       "applicable_languages": ["*"],
       "tags": ["opt-in", "bdd", "testing"],
-      "file": ".core\\rules\\center\\methodologies\\bdd-pt.md",
+      "file": ".core/rules/center/methodologies/bdd-pt.md",
       "title": "Estrutura de Teste BDD",
       "instruction_en": "All tests MUST use the GIVEN / WHEN / THEN structure in Brazilian Portuguese (DADO/QUANDO/ENTÃO). Each `it()` describes exactly one atomic scenario. Prioritize readability over brevity. If a business rule `[BR-*]` is provided, include it in the test name.",
       "documentation_pt": "- **DADO** [cenário inicial / pré-condição / estado do sistema]\n- **QUANDO** [ação executada pelo usuário ou sistema]\n- **ENTÃO** [resultado esperado / asserção]\n\n- **Linguagem Ubíqua:** Testes devem ser legíveis por humanos não-técnicos. Evite jargão de implementação nos nomes.\n- **Documentação Viva:** A suíte de testes serve como documentação executável do sistema. Se o teste não descreve o comportamento com clareza, reescreva-o.\n- **Cenários Atômicos:** Cada `it()` descreve exatamente um cenário. Não combine múltiplos fluxos.\n\n**Exemplo:**\n\n```javascript\nit(\"[BR-CLI-SYNC-01] DADO baseline desatualizado QUANDO executado adopt ENTÃO sincroniza apenas arquivos alterados\", () => {\n  // ...\n});\n```\n\n**See also:** [OPT-0401], [OPT-0501]"
@@ -198,7 +198,7 @@
       "sources": [],
       "applicable_languages": ["*"],
       "tags": ["opt-in", "tdd", "testing"],
-      "file": ".core\\rules\\center\\methodologies\\tdd-en.md",
+      "file": ".core/rules/center/methodologies/tdd-en.md",
       "title": "Strict TDD Cycle",
       "instruction_en": "Every new feature or bug fix MUST follow the RED -> GREEN -> REFACTOR cycle. Write a failing test first. Never skip the RED step. Write minimum code to pass. Maintain >85% coverage. Test files must be colocated. Unit tests must be isolated with mocks/stubs.",
       "documentation_pt": "1. **RED:** Escreva um teste que falhe — defina o comportamento esperado antes de qualquer implementação.\n2. **GREEN:** Escreva o código mínimo necessário para fazer o teste passar. Sem otimizações prematuras.\n3. **REFACTOR:** Melhore o código (nomes, estrutura, DRY) mantendo todos os testes verdes.\n\n- **Isolamento:** Testes unitários não devem depender de serviços externos, rede ou banco de dados. Use mocks/stubs.\n- **Colocation:** Arquivos de teste devem ficar no mesmo diretório que o código testado.\n\n**See also:** [OPT-0101], [OPT-0201]"
@@ -212,7 +212,7 @@
       "sources": [],
       "applicable_languages": ["*"],
       "tags": ["opt-in", "tdd", "testing"],
-      "file": ".core\\rules\\center\\methodologies\\tdd-pt.md",
+      "file": ".core/rules/center/methodologies/tdd-pt.md",
       "title": "Ciclo TDD Estrito",
       "instruction_en": "Every new feature or bug fix MUST follow the RED -> GREEN -> REFACTOR cycle. Write a failing test first. Never skip the RED step. Write minimum code to pass. Maintain >85% coverage. Test files must be colocated. Unit tests must be isolated with mocks/stubs. If a business rule `[BR-*]` is provided, include it in the test name.",
       "documentation_pt": "1. **RED:** Escreva um teste que falhe — defina o comportamento esperado antes de qualquer implementação.\n2. **GREEN:** Escreva o código mínimo necessário para fazer o teste passar. Sem otimizações prematuras.\n3. **REFACTOR:** Melhore o código (nomes, estrutura, DRY) mantendo todos os testes verdes.\n\n- **Isolamento:** Testes unitários não devem depender de serviços externos, rede ou banco de dados. Use mocks/stubs para dependências.\n- **Colocation:** Arquivos de teste devem ficar no mesmo diretório que o código testado (ex: `engine.mjs` → `engine.test.mjs`).\n- **Rastreabilidade:** Quando uma regra de negócio tiver identificador `[BR-*]`, o teste que a valida deve carregar o mesmo identificador no nome.\n\n**See also:** [OPT-0101], [OPT-0201]"
@@ -225,7 +225,7 @@
       "sources": [],
       "applicable_languages": ["*"],
       "tags": ["core", "agents", "always_injected", "environment"],
-      "file": ".core\\rules\\top\\agents-core.md",
+      "file": ".core/rules/top/agents-core.md",
       "title": "Environment check antes da primeira ação",
       "instruction_en": "Before the first technical action, identify platform, shell, surface (CLI vs IDE), and model class; adapt commands accordingly.",
       "documentation_pt": "Antes da primeira ação técnica, identifique o contexto situacional:\n\n- Plataforma: Windows / Linux / macOS / WSL.\n- Shell: bash / zsh / PowerShell / cmd.\n- Surface: CLI agent (Claude Code, Gemini CLI) vs IDE (Cursor, Copilot).\n- Modelo: identifique se está operando com um modelo \"Thinking/Reasoning\".\n- Adapte comandos (ex.: `/dev/null` vs `NUL`, forward slashes) a essa matriz.\n\n**Why this matters:** comandos hardcoded para um SO/shell quebram silenciosamente em outro. Falha rápida no início economiza loops de retry.\n\n**See also:** `[CORE-08]` (HARNESS LOCK)."
@@ -238,7 +238,7 @@
       "sources": [],
       "applicable_languages": ["*"],
       "tags": ["core", "agents", "always_injected", "sdd", "inquebrável"],
-      "file": ".core\\rules\\top\\agents-core.md",
+      "file": ".core/rules/top/agents-core.md",
       "title": "Agnostic SDD Override — repositório como memória",
       "instruction_en": "The repository is your memory. Persist plans, progress, debts, knowledge, and roadmap under `.specify/specs/`. Read `.specify/specs/roadmap/backlog.md` at session start. If the platform forces a scratchpad, write only a pointer to the spec file. Planning trapped in agent cache (AI-slop) is unacceptable.",
       "documentation_pt": "**[INQUEBRÁVEL]** O repositório é sua memória, não seus artefatos internos.\n\n- Planejamento → `.specify/specs/<slug>/plan.md`\n- Progresso → `.specify/specs/<slug>/tasks.md`\n- Débitos → `.specify/specs/<slug>/NEXT.md`\n- Conhecimento → `.specify/specs/<slug>/research/`\n- Roadmap → `.specify/specs/roadmap/backlog.md`\n- Bootstrap obrigatório → leia `.specify/specs/roadmap/backlog.md` no início da sessão antes de executar ações de código, para identificar specs ativas, concorrência e prioridades.\n- Se sua plataforma forçar um Artifact ou Scratchpad, escreva nele apenas: `\"→ Ver .specify/specs/<slug>/plan.md\"` (Pointer).\n- \"AI-Slop\" (planejamento preso em cache de agente) é inaceitável.\n\n**Why this matters:** planejamento em cache não sobrevive troca de sessão/agente. SDD repo-first é o que torna o framework agnóstico de IA.\n\n**See also:** `[CORE-13]` (Artefatos vivos), `[CORE-11]` (Plano formado)."
@@ -251,7 +251,7 @@
       "sources": [],
       "applicable_languages": ["*"],
       "tags": ["core", "agents", "always_injected", "pointer"],
-      "file": ".core\\rules\\top\\agents-core.md",
+      "file": ".core/rules/top/agents-core.md",
       "title": "Cross-ref para Regras Globais",
       "instruction_en": "Consult the \"Global Rules\" section injected later in this `<AI_GUIDELINES>` block for engineering principles and AI efficiency.",
       "documentation_pt": "Consulte a seção \"Regras Globais\" injetada neste bloco `<AI_GUIDELINES>` para princípios de engenharia e eficiência de IA.\n\n**Why this matters:** cross-ref interno ao bloco compilado; evita IA pular a seção de regras universais.\n\n> **Candidata a corte em B.3.5:** se o compiler for refatorado para deixar a hierarquia óbvia (core → global → opt-in), este pointer textual vira redundante."
@@ -264,7 +264,7 @@
       "sources": [],
       "applicable_languages": ["*"],
       "tags": ["core", "agents", "always_injected", "git", "branch"],
-      "file": ".core\\rules\\top\\agents-core.md",
+      "file": ".core/rules/top/agents-core.md",
       "title": "Nunca trabalhe direto em main/master",
       "instruction_en": "Never start active modifications on `main` or `master`. Create a synthetic branch (`feat/`, `fix/`, `docs/`) before changing sources of truth.",
       "documentation_pt": "Nunca inicie modificações ativas operando sob a branch `main` ou `master`. Confirme seu estado de _working tree_ ou crie uma branch sintética (`feat/`, `fix/`, `docs/`) antes de alterar fontes de verdade.\n\n**Why this matters:** trabalho direto em main desfaz revisão por PR e arrisca push acidental para upstream protegido."
@@ -277,7 +277,7 @@
       "sources": [],
       "applicable_languages": ["*"],
       "tags": ["core", "agents", "always_injected", "git", "hygiene"],
-      "file": ".core\\rules\\top\\agents-core.md",
+      "file": ".core/rules/top/agents-core.md",
       "title": "Não versione contexto vazado",
       "instruction_en": "Do not version stray context files at the repo root or in working folders (partial payloads, AI scratch). Persistence is for _Release_ only.",
       "documentation_pt": "Não versione arquivos contextuais vazados na raiz ou pastas sujas (payloads parciais, rascunhos operacionais de IA). A persistência é apenas para _Release_.\n\n**Why this matters:** rascunhos da IA poluem o histórico e podem vazar prompts/secrets; pertencem ao scratchpad da ferramenta, não ao repo."
@@ -290,7 +290,7 @@
       "sources": [],
       "applicable_languages": ["*"],
       "tags": ["core", "agents", "always_injected", "git", "commit"],
-      "file": ".core\\rules\\top\\agents-core.md",
+      "file": ".core/rules/top/agents-core.md",
       "title": "Commits incrementais atômicos",
       "instruction_en": "Make atomic incremental commits limited to one logical unit. Split tasks that span design + code + spec.",
       "documentation_pt": "Realize _Commits Incrementais Atômicos_ limitados à sua unidade lógica. Se a tarefa varrer design, código e spec simultaneamente, fracione as ações comissionadas em passos menores.\n\n**Why this matters:** commits monolíticos sabotam `git bisect` e forçam revisão \"tudo ou nada\". Commit atômico = unidade revisável independente."
@@ -303,7 +303,7 @@
       "sources": [],
       "applicable_languages": ["*"],
       "tags": ["core", "agents", "always_injected", "git", "safety", "critical"],
-      "file": ".core\\rules\\top\\agents-core.md",
+      "file": ".core/rules/top/agents-core.md",
       "title": "Nunca execute git push autonomamente",
       "instruction_en": "**[CRITICAL]** Never execute `git push` autonomously. Any remote push requires explicit human approval from the maintainer.",
       "documentation_pt": "**[CRITICAL]** Nunca execute `git push` de forma autônoma. Todo envio de código ao repositório remoto **exige aprovação humana explícita do mantenedor** antes de ser iniciado. Aplica-se a qualquer agente de IA, script automatizado ou hook que não seja o pipeline oficial do repositório.\n\n**Why this matters:** push autônomo escapa do gate de revisão humana e pode publicar código não-validado. Linha cravada como `[CRITICAL]` no template original.\n\n**See also:** `[CORE-08]` (HARNESS LOCK)."
@@ -316,7 +316,7 @@
       "sources": [],
       "applicable_languages": ["*"],
       "tags": ["core", "agents", "always_injected", "git", "commit", "ci", "harness_lock"],
-      "file": ".core\\rules\\top\\agents-core.md",
+      "file": ".core/rules/top/agents-core.md",
       "title": "HARNESS LOCK — cadeia de qualidade obrigatória pré-commit",
       "instruction_en": "**[HARNESS LOCK]** Before any `git commit`, run the project's full validation chain (format, check, lint, test) as declared in `package.json`. The rule is the chain, not the package manager — adapt to project scripts.",
       "documentation_pt": "**[CI Compliance — HARNESS LOCK]** É terminantemente proibido submeter qualquer commit sem validar a cadeia de qualidade do projeto. Antes de `git commit`, execute **todos os scripts de validação** definidos no `package.json` do repositório (ex.: `format`, `check`, `lint`, `test`). O padrão canônico é:\n\n```text\n<format_cmd> ; <check_cmd> ; git add . ; git commit -m \"...\"\n```\n\nSe o repositório define `yarn format` e `yarn check`, o comando concreto é: `yarn format ; yarn check ; git add . ; git commit -m \"...\"`. Adapte aos scripts do projeto — a regra é a **cadeia**, não o gerenciador.\n\n**Why this matters:** o gate local replica o gate de CI. Pular = empurrar o erro para o pipeline e gastar ciclo de revisão humano com algo automatizável.\n\n**Cross-ref:** complementada por `[CORE-14]` (commit message protocol — IA gera apenas o texto sugerido; humano executa a cadeia)."
@@ -329,7 +329,7 @@
       "sources": [],
       "applicable_languages": ["*"],
       "tags": ["core", "agents", "always_injected", "pr", "github"],
-      "file": ".core\\rules\\top\\agents-core.md",
+      "file": ".core/rules/top/agents-core.md",
       "title": "PRs abrem como Draft com matriz oficial",
       "instruction_en": "Open Pull Requests in `Draft` mode using the full `.github/pull_request_template.md` matrix.",
       "documentation_pt": "A submissão de Pull Requests obrigatoriamente se inaugura no modo `Draft`, utilizando integralmente a matriz `.github/pull_request_template.md`.\n\n**Why this matters:** Draft sinaliza WIP e impede que CI/reviewers tratem o PR como pronto antes da hora."
@@ -342,7 +342,7 @@
       "sources": [],
       "applicable_languages": ["*"],
       "tags": ["core", "agents", "always_injected", "pr", "github", "gate"],
-      "file": ".core\\rules\\top\\agents-core.md",
+      "file": ".core/rules/top/agents-core.md",
       "title": "Draft → Ready apenas via revalidação humana",
       "instruction_en": "Convert PRs from `Draft` to `Ready` only after explicit human revalidation.",
       "documentation_pt": "Converta a operação de `Draft` para `Ready` apenas através da revalidação afirmativa Humana.\n\n**Why this matters:** transição Draft→Ready é gate humano explícito; IA não decide sozinha que está pronto."
@@ -355,7 +355,7 @@
       "sources": [],
       "applicable_languages": ["*"],
       "tags": ["core", "agents", "always_injected", "planning"],
-      "file": ".core\\rules\\top\\agents-core.md",
+      "file": ".core/rules/top/agents-core.md",
       "title": "Plano formado antes de ação",
       "instruction_en": "Act only with a formed plan. Use `spec-foundation` for work that must survive session/agent changes; use a tool-scratchpad lightweight plan only for single-session, local, disposable adjustments.",
       "documentation_pt": "**Aja apenas mediante Plano Formado.** Antes de executar qualquer código, escolha a granularidade:\n\n| Critério      | Use `spec-foundation`                 | Use `plano leve`                          |\n| :------------ | :------------------------------------ | :---------------------------------------- |\n| Duração       | > 1 sessão                            | 1 sessão                                  |\n| Escopo        | > 1 arquivo fora de feature isolada   | Ajuste pontual, local                     |\n| Sobrevivência | Precisa sobreviver troca de IA/sessão | Descartável                               |\n| Onde vive     | `.specify/specs/<slug>/` (versionado) | Scratchpad da ferramenta (não versionado) |\n\n**Why this matters:** ação sem plano formado = sintoma clássico de AI-slop. A tabela é o critério-teste objetivo entre `spec-foundation` e plano leve.\n\n**See also:** `[CORE-02]` (Agnostic SDD Override). _TODO(B.4): adicionar cross-ref para o ID canônico da regra \"Tipo de spec\" quando `global-rules.md` migrar para o schema bilíngue + IDs `[GR-NNNN]`._ Hoje a regra vive em [`.core/rules/top/global-rules.md` § \"Workflow com IA\"](./global-rules.md#workflow-com-ia).\n\n> **Candidata a docs-only em B.3.5:** a tabela detalhada pode migrar para `.core/process/spec-foundation.md` (já tem seção \"Tipos de spec\" hoje). O core-runtime mantém só a frase imperativa."
@@ -368,7 +368,7 @@
       "sources": [],
       "applicable_languages": ["*"],
       "tags": ["core", "agents", "always_injected", "checkpoint"],
-      "file": ".core\\rules\\top\\agents-core.md",
+      "file": ".core/rules/top/agents-core.md",
       "title": "Checkpoints antes de ação após contexto extenso",
       "instruction_en": "After absorbing extensive context, return a summary Checkpoint and request human approval before executing Code Actions.",
       "documentation_pt": "**Checkpoints antes de ação.** Após absorver contexto extenso (múltiplos arquivos, specs, pesquisas), retorne um Checkpoint resumido e peça aprovação humana **antes** de executar Code Actions.\n\n**Why this matters:** evita \"IA absorve 50 arquivos e parte direto para edição agressiva\". Checkpoint = oportunidade de o humano corrigir interpretação errada."
@@ -381,7 +381,7 @@
       "sources": [],
       "applicable_languages": ["*"],
       "tags": ["core", "agents", "always_injected", "sdd", "lifecycle"],
-      "file": ".core\\rules\\top\\agents-core.md",
+      "file": ".core/rules/top/agents-core.md",
       "title": "Artefatos vivos durante o trabalho",
       "instruction_en": "Keep SDD artifacts updated continuously: mark `tasks.md` items `[/]` (in progress) or `[x]` (done) as you go; record debts in `NEXT.md`. Never create parallel routing files in the repo.",
       "documentation_pt": "**Artefatos vivos.** Mantenha atualizados os artefatos SDD durante o trabalho:\n\n- `tasks.md` → marque cada item como `[/]` (em progresso) ou `[x]` (concluído) a cada passo.\n- `NEXT.md` → registre débitos, bugs ou insights sem prioridade imediata.\n- **Nunca crie arquivos paralelos de roteirização.** Planos leves vivem na ferramenta, não no repositório.\n\n**Why this matters:** artefatos SDD desatualizados = perda do dogfood do framework. Atualização incremental preserva rastreabilidade.\n\n**See also:** `[CORE-02]` (Agnostic SDD Override)."
@@ -394,7 +394,7 @@
       "sources": [],
       "applicable_languages": ["*"],
       "tags": ["core", "agents", "always_injected", "git", "commit", "safety"],
-      "file": ".core\\rules\\top\\agents-core.md",
+      "file": ".core/rules/top/agents-core.md",
       "title": "Mensagem de commit sugerida: IA fornece apenas a mensagem",
       "instruction_en": "At the end of each sub-block, provide only the commit message suggestion. The human executes the full validation chain (`yarn format ; yarn check ; ...`) and `git commit`.",
       "documentation_pt": "Ao concluir um sub-bloco, IA fornece **apenas** a mensagem sugerida do commit (`feat(spec-XXXX): ...`). O humano executa a cadeia completa de validação (`yarn format ; yarn check ; git add . ; git commit -m \"...\"`).\n\n**Why this matters:** economiza tokens e impede IA de operar git autonomamente. Honra `[CORE-07]` (push) e `[CORE-08]` (HARNESS LOCK).\n\n**See also:** `[CORE-08]` (HARNESS LOCK), `[CORE-07]` (Nunca execute git push autonomamente)."
@@ -407,7 +407,7 @@
       "sources": [],
       "applicable_languages": ["*"],
       "tags": ["core", "agents", "always_injected", "governance", "adr", "editorial"],
-      "file": ".core\\rules\\top\\agents-core.md",
+      "file": ".core/rules/top/agents-core.md",
       "title": "ADR é princípio perene, não revisitação datada",
       "instruction_en": "When writing an Architecture Decision Record (ADR), capture a perennial architectural principle — not a phase report, not a revisitation of `decision-brief.md`. The title names the principle; the body must continue to make sense after the originating spec ships. Editorial criteria, format, anti-patterns and rejection signals are canonical at `.core/governance/adrs/README.md`.",
       "documentation_pt": "Ao escrever uma ADR, capture um **princípio arquitetural perene** — não relatório de fase, não revisitação datada do `decision-brief.md`.\n\n- **Título** nomeia o **princípio**, não a transição/feature concreta.\n- **Corpo** continua válido depois que a spec de origem encerra. Spec aparece só na linha de header como \"Origem histórica\".\n- **Sintomas de ADR mal-escrita** (rejeitar no PR review): título nomeia transição; corpo cita \"sub-bloco X.Y\" ou \"PR N\" como cronograma; decisão lista mudanças por arquivo/linha; ADR \"vira lixo\" quando a fase termina.\n- **Fronteira com `decision-brief.md`:** brief é gate humano da spec específica; ADR é princípio cross-spec.\n\nCritério editorial completo, formato canônico, exemplo de ADRs vigentes e ciclo de promoção (local → global) vivem em [`.core/governance/adrs/README.md`](../../governance/adrs/README.md).\n\n**Why this matters:** ADRs sem princípio perene viram lixo no momento em que a fase encerra. O critério é gate de PR review — ADR mal-escrita é defeito de design, não estilo.\n\n**See also:** `[CORE-02]` (repositório como memória), `[CORE-13]` (artefatos vivos)."
@@ -421,7 +421,7 @@
       "validated_by_benchmark": true,
       "applicable_languages": ["*"],
       "tags": ["engineering", "security"],
-      "file": ".core\\rules\\top\\global-rules.md",
+      "file": ".core/rules/top/global-rules.md",
       "title": "Secure secret handling",
       "instruction_en": "Never expose secrets in frontend code or versioned files. Store them in environment variables and ensure they are ignored by version control.",
       "documentation_pt": "Chaves de API nunca devem transitar pelo frontend ou arquivos versionados.\nUse `.gitignore` e variáveis de ambiente corretamente."
@@ -434,7 +434,7 @@
       "sources": ["CWE-704"],
       "applicable_languages": ["*"],
       "tags": ["engineering", "typing"],
-      "file": ".core\\rules\\top\\global-rules.md",
+      "file": ".core/rules/top/global-rules.md",
       "title": "Strict typing (anti-hacks)",
       "instruction_en": "Do not bypass the type system. Avoid unsafe casts (`any`, `unknown`, prototype manipulation) and use explicit type guards or generics.",
       "documentation_pt": "Evite `any`, `as unknown`, coerções inseguras e manipulação de prototype.\nPrefira type guards e tipagem explícita."
@@ -447,7 +447,7 @@
       "sources": [],
       "applicable_languages": ["*"],
       "tags": ["engineering", "immutability"],
-      "file": ".core\\rules\\top\\global-rules.md",
+      "file": ".core/rules/top/global-rules.md",
       "title": "Immutability over shared mutation",
       "instruction_en": "Use immutable data structures and pure functions. Do not mutate shared state.",
       "documentation_pt": "Prefira estruturas imutáveis e funções puras.\nEvite estado global mutável."
@@ -461,7 +461,7 @@
       "validated_by_benchmark": true,
       "applicable_languages": ["*"],
       "tags": ["engineering", "errors"],
-      "file": ".core\\rules\\top\\global-rules.md",
+      "file": ".core/rules/top/global-rules.md",
       "title": "Fail-fast error handling",
       "instruction_en": "Fail fast and propagate errors explicitly. Do not swallow exceptions or use empty catch blocks.",
       "documentation_pt": "Nunca use try/catch vazio ou que apenas loga.\nErro deve ser propagado ou tratado corretamente."
@@ -475,7 +475,7 @@
       "validated_by_benchmark": true,
       "applicable_languages": ["*"],
       "tags": ["engineering", "concurrency"],
-      "file": ".core\\rules\\top\\global-rules.md",
+      "file": ".core/rules/top/global-rules.md",
       "title": "Explicit async and concurrency intent",
       "instruction_en": "Make concurrency explicit: use `Promise.all` for independent tasks and `await` sequencing for dependent ones. Do not use fire-and-forget without error handling.",
       "documentation_pt": "Use `Promise.all` para paralelo e `await` sequencial para dependências.\nEvite fire-and-forget sem tratamento de erro.\n\n**See also:** [OPT-0301]"
@@ -489,7 +489,7 @@
       "validated_by_benchmark": true,
       "applicable_languages": ["*"],
       "tags": ["engineering", "security", "supply-chain"],
-      "file": ".core\\rules\\top\\global-rules.md",
+      "file": ".core/rules/top/global-rules.md",
       "title": "No autonomous dependency installation (Anti-Slopsquatting)",
       "instruction_en": "Never install, add, or upgrade third-party packages autonomously. When new dependencies are needed, propose the exact package name and version, and wait for explicit human approval before running any install command (`npm install`, `pip install`, `cargo add`, `gem install`, `go get`, etc.). This applies to all package manifests: `package.json`, `requirements.txt`, `Cargo.toml`, `Gemfile`, `go.mod`, and equivalents.",
       "documentation_pt": "Agentes IA alucinam nomes de pacotes inexistentes em até 19,7% das recomendações (USENIX 2025). Atacantes registram esses nomes em npm/PyPI com payloads maliciosos (\"slopsquatting\"). A regra proíbe a instalação autônoma: o agente propõe, o humano valida e executa.\n\n**Why this is an issue / Por que isto é um problema:**\nLLMs geram nomes de pacotes plausíveis mas inexistentes de forma repetível e previsível. Atacantes monitoram esses padrões e registram os nomes fabricados com malware. Como agentes frequentemente sugerem tanto o código quanto o comando de instalação, a confiança cega leva à execução de `npm install pacote-malicioso` sem verificação.\n\n**Noncompliant example:**\n\n```bash\n# Agente executa autonomamente:\nnpm install express-mongoose-validator\n# ↑ Pacote alucinado — pode ser malware registrado por atacante\n```\n\n**Compliant example:**\n\n```markdown\n# Agente propõe no chat:\n\n\"Sugiro instalar `zod@3.23.8` para validação de schemas.\nPor favor, verifique no npm e execute: `npm install zod@3.23.8`\"\n\n# ↑ Humano verifica e executa manualmente\n```\n\n**See also:** [GR-0001]"
@@ -502,7 +502,7 @@
       "sources": [],
       "applicable_languages": ["*"],
       "tags": ["workflow", "spec"],
-      "file": ".core\\rules\\top\\global-rules.md",
+      "file": ".core/rules/top/global-rules.md",
       "title": "Spec type must be declared",
       "instruction_en": "Declare the spec type (evidence-driven, deterministic, or mixed) and require human approval when design depends on unresolved evidence.",
       "documentation_pt": "Specs `evidence-driven` ou `mixed` exigem decision-brief antes da implementação."
@@ -515,7 +515,7 @@
       "sources": [],
       "applicable_languages": ["*"],
       "tags": ["workflow", "spec", "tokens"],
-      "file": ".core\\rules\\top\\global-rules.md",
+      "file": ".core/rules/top/global-rules.md",
       "title": "Token Budget Methodology (Tok-H)",
       "instruction_en": "When measuring the token cost of new guidelines, use the Tok-H heuristic: aggregate characters divided by 3.5. Ensure the resulting payload respects established soft ceilings (6000 aggregate, 1500 universal, 600 adapter, 1200 opt-in).",
       "documentation_pt": "A unidade canônica de orçamento de contexto é o token, medido pela heurística Tok-H (caracteres / 3,5, calibrado para PT-BR/EN). Linhas e quantidade de instruções são derivadas pedagógicas. Respeite os soft ceilings: agregado ≤ 6 K, universal ≤ 1,5 K, adapter ≤ 600, opt-in ≤ 1,2 K."
@@ -528,7 +528,7 @@
       "sources": [],
       "applicable_languages": ["*"],
       "tags": ["owner", "language"],
-      "file": ".core\\rules\\top\\global-rules.md",
+      "file": ".core/rules/top/global-rules.md",
       "title": "Repository language standard",
       "instruction_en": "Always respond using the repository default language.",
       "documentation_pt": "Neste repositório: sempre responder em PT-BR."
@@ -541,7 +541,7 @@
       "sources": [],
       "applicable_languages": ["*"],
       "tags": ["owner", "ai_efficiency"],
-      "file": ".core\\rules\\top\\global-rules.md",
+      "file": ".core/rules/top/global-rules.md",
       "title": "Context noise reduction",
       "instruction_en": "Exclude irrelevant files (logs, builds, dependencies) from the AI context using ignore files.",
       "documentation_pt": "Use `.gitignore`, `.claudeignore`, `.geminiignore` para remover logs,\nbuilds e `node_modules` do contexto."
@@ -554,7 +554,7 @@
       "sources": [],
       "applicable_languages": ["*"],
       "tags": ["owner", "workflow"],
-      "file": ".core\\rules\\top\\global-rules.md",
+      "file": ".core/rules/top/global-rules.md",
       "title": "Collaborative PR description",
       "instruction_en": "Build PR descriptions in three steps: outline topics, get human approval, then generate the final text using the repository template (if available) and perform a final human validation.",
       "documentation_pt": "Fluxo obrigatório:\n\n1. listar tópicos\n2. humano valida\n3. gerar texto final (seguindo template do repositório, se existir)\n4. humano valida novamente"
