@@ -99,7 +99,7 @@ Quando você lê código ou docs deste projeto, alguns termos se repetem. Aqui e
 | **Policy** (Política)         | Uma função pura que decide se uma ação é válida. Ex: "uma proposta pode virar spec?" → política responde sim ou não, com motivo.                                                                   |
 | **Registry**                  | O "livro-razão" do projeto — lista todos os WorkItems ativos. Versionado em `.governance/registry.yml`.                                                                                            |
 | **`.governance/`**            | A pasta canônica onde a CLI armazena o estado estruturado do projeto do usuário. Contém o registry e reservas para futuras adições (intake, handoff, telemetry).                                   |
-| **Recipe**                    | Declaração YAML que descreve como montar um artefato: `artifactKind`, `workflowType`, `language`, `slots[]` com ordem canônica e `forbiddenHeadings`. Recipe é o contrato de validação (ADR 0005). |
+| **Recipe**                    | Declaração YAML que descreve como montar um artefato: `artifactKind`, `workflowType`, `language`, `slots[]` com ordem canônica e `forbiddenHeadings`. Recipe é o contrato de validação (ADR 0014). |
 | **Partial**                   | Fragmento Markdown completo e autocontido — sem placeholders de template, sem timestamps embutidos. Cada partial pertence a um slot de uma recipe.                                                 |
 | **ComposedArtifact**          | Output do TemplateEngine: Markdown final (determinístico, byte-a-byte) + metadata de rastreio (artifactKind, workflowType, language, composedSlots).                                               |
 | **StructuralValidation**      | Validação pós-composição que consome a recipe como contrato: forbiddenHeadings, slot completeness, self-consistency recipe↔artefato. Retorna lista de erros.                                       |
@@ -211,8 +211,8 @@ Estas são propriedades que o pipeline de CI verifica automaticamente. Se alguma
 | 10  | Rollback nunca destrói nada          | Desfazer só apaga o que este run criou                                          |
 | 11  | Topologia reflete taxonomia          | Regras em `.core/rules/` organizadas em `top/center/base/adapters/`             |
 | 12  | Contrato do usuário é `.governance/` | `.ai-guidelines/` é uma "ponte legada" declarada explicitamente                 |
-| 13  | Composição é determinística          | Mesma recipe + mesmos partials → mesmo output byte-a-byte (ADR 0004)            |
-| 14  | Recipe é o contrato de validação     | Invariantes estruturais declaradas na recipe, não em código separado (ADR 0005) |
+| 13  | Composição é determinística          | Mesma recipe + mesmos partials → mesmo output byte-a-byte (ADR 0013)            |
+| 14  | Recipe é o contrato de validação     | Invariantes estruturais declaradas na recipe, não em código separado (ADR 0014) |
 
 Detalhe técnico completo de cada garantia (motivação, contraexemplos, testes que protegem): ver [`ARCHITECTURE-REFERENCE.md`](./ARCHITECTURE-REFERENCE.md) §2.
 

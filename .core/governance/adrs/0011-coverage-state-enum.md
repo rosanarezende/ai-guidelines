@@ -1,4 +1,4 @@
-# ADR 0002 — Outcomes em Artefatos Derivados são Enums Fechados com Mensagem Determinística
+# ADR 0011 — Outcomes em Artefatos Derivados são Enums Fechados com Mensagem Determinística
 
 **Status:** Aceita
 **Data:** 2026-05-11
@@ -64,7 +64,7 @@ O princípio se aplica a qualquer artefato gerado pelo framework para consumidor
 | `WorkspaceResolution` (`needs-init\|governance-ssot\|needs-adoption\|ambiguous`) | Domain — precedência                     | Em uso (PR2.A)    |
 | `coverageState` (`covered\|pending\|deprecated`)                                 | LivingDocumentation — projeção de regras | **Próximo (PR3)** |
 
-A consistência da família é a evidência de que o princípio já é editorial no projeto. ADR 0002 o torna **explícito** para que evoluções futuras (e novos consumidores) não introduzam string livre por hábito.
+A consistência da família é a evidência de que o princípio já é editorial no projeto. ADR 0011 o torna **explícito** para que evoluções futuras (e novos consumidores) não introduzam string livre por hábito.
 
 ## Alternativas avaliadas e rejeitadas
 
@@ -93,4 +93,4 @@ A consistência da família é a evidência de que o princípio já é editorial
 
 ## Nota histórica
 
-O princípio foi formalizado durante o sub-bloco `[3.0]` do PR3 da Spec 0021, ao decidir a forma de `coverageState` no schema do LivingDocumentation. A auditoria revelou que o projeto já praticava o princípio em 7 enums anteriores (tabela acima) sem documentação explícita; ADR 0002 consolida o que era convenção e fixa o caminho para outcomes futuros.
+O princípio foi formalizado durante o sub-bloco `[3.0]` do PR3 da Spec 0021, ao decidir a forma de `coverageState` no schema do LivingDocumentation. A auditoria revelou que o projeto já praticava o princípio em 7 enums anteriores (tabela acima) sem documentação explícita; ADR 0011 consolida o que era convenção e fixa o caminho para outcomes futuros.

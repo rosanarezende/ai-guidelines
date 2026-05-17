@@ -565,18 +565,18 @@ yarn smoke
   - `domain` (string não-vazia)
   - `source` ({ file, lineStart, lineEnd } com `lineStart <= lineEnd`)
   - `tags` (array de strings)
-  - `coverageState` (`covered | pending | deprecated` — enum fechado, ADR 0002)
-  - `bypass?` ({ until: YYYY-MM-DD, ref, reason ≥ 8 chars } — só em entries `deprecated`, ADR 0003)
+  - `coverageState` (`covered | pending | deprecated` — enum fechado, ADR 0011)
+  - `bypass?` ({ until: YYYY-MM-DD, ref, reason ≥ 8 chars } — só em entries `deprecated`, ADR 0012)
   - `schemaVersion` (`v0`, enum fechado em `LIVING_DOCS_SUPPORTED_SCHEMA_VERSIONS` frozen)
 
-- [x] **3.A.2 [Versioning]** Política, não framework de migração. `LIVING_DOCS_SCHEMA_VERSION` cravado como `"v0"`; `LIVING_DOCS_SUPPORTED_SCHEMA_VERSIONS` é frozen (Object.freeze). Adicionar valor exige PR dedicado + ADR de extensão (ADR 0002 §6). Migration utility só nasce quando v1 existir.
+- [x] **3.A.2 [Versioning]** Política, não framework de migração. `LIVING_DOCS_SCHEMA_VERSION` cravado como `"v0"`; `LIVING_DOCS_SUPPORTED_SCHEMA_VERSIONS` é frozen (Object.freeze). Adicionar valor exige PR dedicado + ADR de extensão (ADR 0011 §6). Migration utility só nasce quando v1 existir.
 - [x] **3.A.3 [Determinismo]** `canonicalizeArtifact` produz forma estável:
   - entries ordenadas alfa lexicográfica por `ruleId` (sem locale-sensitive sort)
   - tags deduplicadas e ordenadas alfa
-  - sem campos temporais (`generatedAt`/`timestamp`/`createdAt`/`updatedAt`) — determinismo absoluto, ADR 0004 §2
+  - sem campos temporais (`generatedAt`/`timestamp`/`createdAt`/`updatedAt`) — determinismo absoluto, ADR 0013 §2
   - idempotência testada (`JSON.stringify(canonicalize(canonicalize(x))) === JSON.stringify(canonicalize(x))`)
 
-- [x] **3.A.4 [Path]** Path canônico já declarado em `decision-brief.md` A03 e ADR 0004: `.governance/living-docs.yml`. Materialização do path entra junto com a serialização YAML em PR3.B/3.C (infrastructure layer).
+- [x] **3.A.4 [Path]** Path canônico já declarado em `decision-brief.md` A03 e ADR 0013: `.governance/living-docs.yml`. Materialização do path entra junto com a serialização YAML em PR3.B/3.C (infrastructure layer).
 
 ### Testes (obrigatórios)
 
@@ -645,11 +645,11 @@ yarn smoke
   - `serializeLivingDocs` produz YAML byte-a-byte estável
   - `CheckLivingDocs` compara `serialize(generate())` com `committedYaml` lido; retorna `{ drift, diff, generatedYaml, artifact }`
   - `runCheck` (CLI) traduz drift em exit code 1 + stderr legível + hint para `yarn living-docs:generate`
-  - **Bypass expirado** durante geração lança `LIVING_DOCS_BYPASS_EXPIRED` (ADR 0003) — drift guard nunca passa silencioso sobre bypass vencido.
+  - **Bypass expirado** durante geração lança `LIVING_DOCS_BYPASS_EXPIRED` (ADR 0012) — drift guard nunca passa silencioso sobre bypass vencido.
 
 ### Implementação
 
-- [x] **3.C.3a** Parser de diretiva de bypass `// living-docs:allow-drift until=YYYY-MM-DD ref=ID reason="..."` em `src/domain/living-docs/BypassDirective.ts` (ADR 0003). Integrado ao `TypeScriptRuleExtractor` para enriquecer entries `deprecated`.
+- [x] **3.C.3a** Parser de diretiva de bypass `// living-docs:allow-drift until=YYYY-MM-DD ref=ID reason="..."` em `src/domain/living-docs/BypassDirective.ts` (ADR 0012). Integrado ao `TypeScriptRuleExtractor` para enriquecer entries `deprecated`.
 - [x] **3.C.3b** Serializador YAML determinístico em `src/infrastructure/yaml/livingDocsSerializer.ts`. Funções puras `serializeLivingDocs` e `parseLivingDocs`.
 - [x] **3.C.3c** Use cases `GenerateLivingDocs` e `CheckLivingDocs` em `src/app/use-cases/`. Port novo `LivingDocsSerializer` em `src/app/ports/` para preservar boundary (Check não importa infra direto).
 - [x] **3.C.3d** Entrypoint CLI em `src/cli/livingDocs.ts` exportando `runGenerate(opts)`, `runCheck(opts)`, `discoverTestFiles(repoRoot)`. Smoke tests garantem contrato observável (exit code, stderr, idempotência).
@@ -673,7 +673,7 @@ yarn smoke
 
 - [x] **3.C.[DEBT-REVIEW]** `NEXT.md`: registra (i) bin físico + yarn scripts dependem de saneamento do `ruleZone.ts` (débito pré-existente); (ii) integração CI fica para mesmo passo do bin; (iii) nenhum falso-positivo conhecido do drift guard (testes congelam comportamento estrutural).
 - [x] **3.C.[ARCHITECTURE]** `ARCHITECTURE-REFERENCE.md`: §1.3 PR3 ganha `BypassDirective`, `LivingDocsSerializer` (port + adapter), `GenerateLivingDocs`, `CheckLivingDocs` e `livingDocs` (CLI); §2 ganha invariante 14 sobre drift guard como gate determinístico; §5 glossário ganha família.
-- [x] **3.C.[COMMIT]** Quebrado em 3 commits atômicos: `feat(spec-0021): parser de bypass directive (ADR 0003) + integração extractor`, `feat(spec-0021): living docs serializer YAML + use case GenerateLivingDocs`, `feat(spec-0021): CheckLivingDocs + CLI module (drift guard)`.
+- [x] **3.C.[COMMIT]** Quebrado em 3 commits atômicos: `feat(spec-0021): parser de bypass directive (ADR 0012) + integração extractor`, `feat(spec-0021): living docs serializer YAML + use case GenerateLivingDocs`, `feat(spec-0021): CheckLivingDocs + CLI module (drift guard)`.
 
 ---
 
@@ -783,7 +783,7 @@ yarn smoke
 - [x] **3.C.4.2 [Baseline versionado]** Versionar `.governance/living-docs.yml` no repo.
   - **Decisão técnica fundadora:** sem baseline no git, `check` compara contra string vazia e drift é trivial-sempre — o guard só faz sentido com baseline commitado. Versionar é caminho único.
   - **Tamanho atual:** 157 entries, ~92KB, ~2200 linhas. Diff em PRs futuros vai incluir mudanças sempre que um teste `[BR-CLI-*]` for adicionado/renomeado/removido — esperado e desejado.
-  - **Localização:** `.governance/living-docs.yml` (já é o path canônico declarado em ADR 0004 e usado por `cli/livingDocs.ts`).
+  - **Localização:** `.governance/living-docs.yml` (já é o path canônico declarado em ADR 0013 e usado por `cli/livingDocs.ts`).
   - **Header de comentário no YAML?** Hoje o serializer não emite comentários (sortMapEntries:false + plain strings); adicionar header exigiria mudança no serializer. **Decisão:** não adicionar header agora — o arquivo é compreensível pela estrutura (`schemaVersion`/`entries`); evolução cosmética pode entrar em uma sessão de polish futura.
   - **Aprovação editorial necessária da owner antes do `git add`** (o arquivo é grande e fica visível no diff de toda PR futura).
 
@@ -850,7 +850,7 @@ yarn smoke
 ## Sub-bloco [3.E] — Validação estrutural do Markdown (semântica, não estética) 🧱
 
 > **Âncoras:** `[DEC-0021-D01]`, ADR `.core/governance/adrs/0005-structural-validation.md`
-> **Princípio guia (ADR 0005):** Recipe é o contrato de validação — não objeto auxiliar. A mesma recipe que descreve **como montar** o artefato declara **quais invariantes** ele precisa cumprir. Não há schema de validação separado.
+> **Princípio guia (ADR 0014):** Recipe é o contrato de validação — não objeto auxiliar. A mesma recipe que descreve **como montar** o artefato declara **quais invariantes** ele precisa cumprir. Não há schema de validação separado.
 
 ### Contratos obrigatórios
 
@@ -964,10 +964,12 @@ yarn smoke
     - **(b) Rebaixar para nota histórica não-ADR.** Se o documento é primariamente narrativa de execução (ex.: "essas mudanças foram aplicadas"), mover para `.specify/specs/researchs/governance/` como nota histórica datada; remover da numeração de ADRs.
     - **(c) Arquivar como Superseded.** Se a decisão foi efetivamente substituída por princípio mais abrangente (caso candidato: 0004 absorvida por governança monolítica de 0008), marcar `Superseded by <ID>` com rationale.
   - Insumo inicial em [`../researchs/governance/2026-05-11-mece-taxonomy-and-adr-audit.md`](../../researchs/governance/2026-05-11-mece-taxonomy-and-adr-audit.md) §2 (marcado como **preliminar** — não decisão).
-- [ ] **4.B.5** Consolidar `/adrs/` na arquitetura de informação:
-  - Mover `/adrs/*.md` → `.core/governance/adrs/` (alinha com `.core/governance/ARCHITECTURE*.md`).
-  - Atualizar cross-refs em `README.md`, `AGENTS.md`, MEMORY do agente, ADRs internas que se auto-referenciam.
-  - Numeração legada (0003-0009) preservada para evitar quebra de referências históricas; novas ADRs do PR3 (0001-0005 locais) **renumeradas para 0010-0014** ao serem promovidas para o lar consolidado.
+- [x] **4.B.5** Consolidar `/adrs/` na arquitetura de informação:
+  - ✅ Movido `/adrs/0003–0009.md` → `.core/governance/adrs/` (numeração legada preservada).
+  - ✅ Renumeradas locais PR3: `0001→0010`, `0002→0011`, `0003→0012`, `0004→0013`, `0005→0014`. Self-refs e cross-refs internos atualizados.
+  - ✅ Cross-refs ativos atualizados em `ARCHITECTURE.md`, `ARCHITECTURE-REFERENCE.md`, `tasks.md` (0021), `audit-2026-05-11-pre-3d-template-engine.md`, `audit-2026-05-11-pre-3c4-living-docs-aggregation.md`, `GOVERNANCE-CATALOG.md`.
+  - ✅ `/adrs/` removido (diretório vazio); `/adrs/README.md` deletado.
+  - Refs em CHANGELOG, roadmap/historico.md e specs históricas (0008/0017/0018/0019/0020) preservados como rastro histórico.
 - [ ] **4.B.6** Reescrever `adrs/README.md` (hoje rotulado "ADRs de Prompt Engineering — Micro-Decisões", vocabulário pré-PR1):
   - Reflete fronteira híbrida `[DEC-0021-B04]`: ADR = decisão arquitetural estável cross-spec; foundation/process = constituição operacional viva.
   - Documenta critério de migração foundation→ADR (4.B.2) e ciclo de promoção ADR local→global no encerramento de spec.

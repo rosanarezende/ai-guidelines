@@ -70,7 +70,7 @@ Logo: o gate de design é **real e estrutural**, não cosmético.
 
 ### O que já é byte-a-byte estável
 
-- `canonicalizeArtifact` ordena entries por `ruleId` lexicograficamente, deduplica tags, projeta campos canônicos — ADR 0004 §2 atendido.
+- `canonicalizeArtifact` ordena entries por `ruleId` lexicograficamente, deduplica tags, projeta campos canônicos — ADR 0013 §2 atendido.
 - `serializeLivingDocs` produz YAML determinístico (`lineWidth: 0`, `sortMapEntries: false`).
 - `LivingDocsEntry` carrega **um** `source: { file, lineStart, lineEnd }`.
 - `assertValidArtifact` rejeita `ruleId` duplicado como falha fatal (`LIVING_DOCS_DUPLICATE_RULE_ID`).
@@ -97,13 +97,13 @@ Logo: o gate de design é **real e estrutural**, não cosmético.
 
 ### Por que não bumpamos schemaVersion
 
-O `VERSIONING-01` exige `LIVING_DOCS_SCHEMA_VERSION === "v0"`. ADR 0002 §6 e invariante 13 da `ARCHITECTURE-REFERENCE` dizem que mudar a cardinalidade do schema exige bump. Aqui há um detalhe:
+O `VERSIONING-01` exige `LIVING_DOCS_SCHEMA_VERSION === "v0"`. ADR 0011 §6 e invariante 13 da `ARCHITECTURE-REFERENCE` dizem que mudar a cardinalidade do schema exige bump. Aqui há um detalhe:
 
 - **`coverageState`** continua o mesmo enum fechado `{covered, pending, deprecated}` — cardinalidade preservada.
 - O que muda é o **shape** do entry (`source: SourceLocation` → `evidence: SourceLocation[]`). Em outras palavras: muda a forma do dado, não a cardinalidade de outcomes.
 - O artefato `v0` **nunca foi escrito em produção** — não há baseline para migrar. O ponteiro do drift guard é só este `_prep` antes de escrever pela primeira vez.
 
-Por isso, evoluir `v0` _in-place_ é **honesto, não risco**. ADR 0002 §6 protege a evolução de outcomes; aqui não há outcome novo. Documentaremos a decisão no `tasks.md` do `_prep`, e o `VERSIONING-01..06` continua verde.
+Por isso, evoluir `v0` _in-place_ é **honesto, não risco**. ADR 0011 §6 protege a evolução de outcomes; aqui não há outcome novo. Documentaremos a decisão no `tasks.md` do `_prep`, e o `VERSIONING-01..06` continua verde.
 
 > Se a owner preferir bumpar v0→v1 como sinal cultural ("schema mudou mesmo sem consumidor externo"), o custo extra é ~1 teste novo no `VERSIONING` + atualização da constante. Tradeoff: ganha disciplina ritual; perde simplicidade. Recomendação técnica é **manter v0**, mas a decisão é editorial e pode ser revertida sem custo.
 
@@ -113,7 +113,7 @@ Por isso, evoluir `v0` _in-place_ é **honesto, não risco**. ADR 0002 §6 prote
 
 Quatro caminhos foram considerados para o gap "1 rule → N tests". A tabela compara em 6 eixos; o detalhe vem depois.
 
-| Opção                                                             | Mudança de shape | Quem dedupa | Custo TDD | Honra ADR 0002 | Honra ADR 0003                  | Honra ADR 0004                        |
+| Opção                                                             | Mudança de shape | Quem dedupa | Custo TDD | Honra ADR 0011 | Honra ADR 0012                  | Honra ADR 0013                        |
 | ----------------------------------------------------------------- | ---------------- | ----------- | --------- | -------------- | ------------------------------- | ------------------------------------- |
 | **(A)** Dedup silencioso em `canonicalize` (1ª vence)             | Não              | domain      | Baixo     | OK             | **Frágil** (qual bypass vence?) | OK                                    |
 | **(B)** Pré-agregação no extractor (mantém shape atual)           | Não              | infra       | Médio     | OK             | **Frágil** (mesmo problema)     | **Frágil** (lógica de merge na infra) |
@@ -128,7 +128,7 @@ Quatro caminhos foram considerados para o gap "1 rule → N tests". A tabela com
 
 1. **Perde informação real.** Cenários BDD são GIVEN/WHEN/THEN da _mesma_ rule — descartar 4 deles porque um vence é apagar 80% da documentação viva da regra.
 2. **Bypass fica ambíguo.** Se 3 cenários têm `coverageState: deprecated` (com bypass) e 2 têm `covered`, quem vence? A regra é "covered como um todo" ou "deprecated como um todo"? Não há resposta sintaticamente justificável.
-3. **Drift guard fica frágil.** Reordenar dois `it` irmãos muda qual vence — pequena edição de teste vira diff grande no artefato. Viola ADR 0004 §2 (mesma árvore → mesmo artefato).
+3. **Drift guard fica frágil.** Reordenar dois `it` irmãos muda qual vence — pequena edição de teste vira diff grande no artefato. Viola ADR 0013 §2 (mesma árvore → mesmo artefato).
 4. **Falha silenciosa de cobertura.** Se um cenário covered some por erro, mas outro persiste como covered, a regra continua "covered" — mas a cobertura real diminuiu. O artefato mente.
 
 **Veredito:** ❌ Rejeitada. Honra a forma byte-a-byte, mas mata a semântica do artefato.
@@ -186,12 +186,12 @@ interface SourceLocation {
 | Todos `deprecated`                                      | `deprecated` (entry.bypass = bypass da `evidence[0]` deprecated; ver §"Bypass agregado")                          |
 | Mistura de deprecated e covered/pending                 | Erro fatal `LIVING_DOCS_INCONSISTENT_DEPRECATION` — autor deve marcar todos os cenários como deprecated ou nenhum |
 
-**Bypass agregado:** quando todos cenários são deprecated, cada `evidence[i].bypass` pode ser idêntico ou diferente (autor pode ter posto a mesma diretiva 5 vezes, ou diretivas distintas). Como o entry agregado expõe **um** bloco `bypass` no topo (compatibilidade com ADR 0003 §5), a regra é:
+**Bypass agregado:** quando todos cenários são deprecated, cada `evidence[i].bypass` pode ser idêntico ou diferente (autor pode ter posto a mesma diretiva 5 vezes, ou diretivas distintas). Como o entry agregado expõe **um** bloco `bypass` no topo (compatibilidade com ADR 0012 §5), a regra é:
 
 - Se todas `evidence[*].bypass` coincidirem em `(until, ref, reason)` → entry.bypass = essa diretiva única.
 - Se discordarem → erro fatal `LIVING_DOCS_BYPASS_DIVERGENT` listando os valores.
 
-Isso preserva a invariante "bypass aparece no artefato como evento de primeira classe" (ADR 0003 §5) sem inventar uma fusão arbitrária.
+Isso preserva a invariante "bypass aparece no artefato como evento de primeira classe" (ADR 0012 §5) sem inventar uma fusão arbitrária.
 
 **Coerência de boundedContext/domain:** se `it` com mesmo `ruleId` aparecerem em arquivos diferentes (cross-file BDD), há duas opções:
 
@@ -205,7 +205,7 @@ Recomendação: **(C.1)** — o `boundedContext` é parte da identidade do entry
 1. **Honra a semântica.** Uma rule documentada com N cenários é exatamente o que BDD expressa. O schema reflete o modelo, não a sintaxe do framework de teste.
 2. **Determinismo preservado.** Cada `evidence[i]` é ordenado por (file, lineStart). Tags fundidas por união + dedup. Fusão de coverageState é função pura da entrada.
 3. **Bypass continua de primeira classe.** Regra de divergência impede ambiguidade silenciosa.
-4. **ADR 0004 honrada.** `canonicalizeArtifact` agora agrupa por `ruleId` _no domain_, pulando a infra. Mesma árvore → mesmo agregado.
+4. **ADR 0013 honrada.** `canonicalizeArtifact` agora agrupa por `ruleId` _no domain_, pulando a infra. Mesma árvore → mesmo agregado.
 5. **Navegação melhora.** Consumidor lendo `living-docs.yml` vê os 5 cenários cobertos de `BR-CLI-APP-01`, com nome de cada um — mais útil que "o primeiro it".
 6. **Drift guard fica mais forte.** Adicionar um `it` novo a uma rule existente vira drift legítimo (entry agregado ganha evidence) — captura o evento "cobertura cresceu" como diff explícito.
 
@@ -243,7 +243,7 @@ Implementação em 4 passos TDD, cada um vira commit:
 
 1. **Schema:** evoluir `LivingDocsEntry` para `evidence[]`; adicionar `LivingDocsSource.testName` e `LivingDocsSource.coverageState`/`bypass`. Reescrever `LivingDocsSchema.test.ts` (afetados: SCHEMA-04 a SCHEMA-07; SCHEMA-08 a SCHEMA-12 — bypass agora vive em evidence). Manter `BR-CLI-LIVING-DOCS-SCHEMA-*` IDs (rules estáveis; só fixtures mudam).
 2. **Canonicalização + agregação:** `canonicalizeArtifact` agrupa entries cruas por `ruleId`, ordena `evidence` por (file, lineStart), aplica fusão de coverageState/bypass, valida coerência de boundedContext/domain. Reescrever `LivingDocsDeterminism.test.ts` afetados; novos testes: agregação, fusão, divergência.
-3. **Extractor:** `TypeScriptRuleExtractor` deixa de emitir 1 entry por `it` — passa a emitir N entries cruas que `canonicalizeArtifact` agrupa. Alternativa: extractor agrupa por ruleId _dentro de cada arquivo_ (mantendo dedupe local + cross-file fica para domain). **Decisão técnica:** o extractor agrupa por ruleId apenas _dentro do arquivo_; cross-file é caso de erro fatal tratado pelo domain. Isso preserva o ADR 0004 ("artefato é função pura da AST") sem inflar a infra.
+3. **Extractor:** `TypeScriptRuleExtractor` deixa de emitir 1 entry por `it` — passa a emitir N entries cruas que `canonicalizeArtifact` agrupa. Alternativa: extractor agrupa por ruleId _dentro de cada arquivo_ (mantendo dedupe local + cross-file fica para domain). **Decisão técnica:** o extractor agrupa por ruleId apenas _dentro do arquivo_; cross-file é caso de erro fatal tratado pelo domain. Isso preserva o ADR 0013 ("artefato é função pura da AST") sem inflar a infra.
 4. **Use cases:** `GenerateLivingDocs` deixa de propagar `LIVING_DOCS_DUPLICATE_RULE_ID` (que vira erro impossível pós-agregação); ganha possibilidade de propagar os 3 novos códigos (`LIVING_DOCS_INCONSISTENT_DEPRECATION`, `LIVING_DOCS_BYPASS_DIVERGENT`, `LIVING_DOCS_RULE_CROSS_FILE`). `CheckLivingDocs` não muda — opera sobre o YAML serializado, agnóstico ao shape.
 
 Após os 4 commits, 3.C.4 destrava:
@@ -315,7 +315,7 @@ Quando o sub-bloco `_prep` fechar, registrar:
 Para esta sessão e o `[3.C.4-prep]`, **NÃO** fazer:
 
 1. **Não bumpar `LIVING_DOCS_SCHEMA_VERSION` para `v1`.** Argumentado em §"Por que não bumpamos". Decisão revertível se a owner quiser disciplina ritual.
-2. **Não inventar `coverageHistory` ou `lastRunStatus` no schema.** ADR 0004 §6: telemetria é camada aditiva separada, não pertence ao SSOT estático.
+2. **Não inventar `coverageHistory` ou `lastRunStatus` no schema.** ADR 0013 §6: telemetria é camada aditiva separada, não pertence ao SSOT estático.
 3. **Não migrar `Boundaries.test.ts` para AST nesta sessão.** Mesmo com a tooling AST já em uso, esse trabalho é PR4/4.B — abre escopo demais.
 4. **Não tocar em `RegisterItem.test.ts` / `Pillars.test.ts` / etc. para "consertar" os duplicates.** A solução vai pelo schema, não pelo teste.
 5. **Não criar reporter Jest custom.** Mantém SSOT estática; reporter pode entrar quando alguém pedir `lastRunStatus`.
@@ -334,9 +334,9 @@ Para esta sessão e o `[3.C.4-prep]`, **NÃO** fazer:
 
 ## 🔗 Referências canônicas usadas
 
-- ADR 0002 — Outcomes em artefatos derivados são enums fechados ([`.core/governance/adrs/0002-coverage-state-enum.md`](../../../.core/governance/adrs/0002-coverage-state-enum.md))
-- ADR 0003 — Bypass auditável de contratos de CI ([`.core/governance/adrs/0003-drift-guard-bypass.md`](../../../.core/governance/adrs/0003-drift-guard-bypass.md))
-- ADR 0004 — AST como SSOT para artefatos derivados ([`.core/governance/adrs/0004-ast-only-extraction.md`](../../../.core/governance/adrs/0004-ast-only-extraction.md))
+- ADR 0011 — Outcomes em artefatos derivados são enums fechados ([`.core/governance/adrs/0002-coverage-state-enum.md`](../../../.core/governance/adrs/0002-coverage-state-enum.md))
+- ADR 0012 — Bypass auditável de contratos de CI ([`.core/governance/adrs/0003-drift-guard-bypass.md`](../../../.core/governance/adrs/0003-drift-guard-bypass.md))
+- ADR 0013 — AST como SSOT para artefatos derivados ([`.core/governance/adrs/0004-ast-only-extraction.md`](../../../.core/governance/adrs/0004-ast-only-extraction.md))
 - ARCHITECTURE-REFERENCE.md §1.3 (contextos PR3), §2 invariantes 13 e 14, §5 glossário ([`.core/governance/ARCHITECTURE-REFERENCE.md`](../../../.core/governance/ARCHITECTURE-REFERENCE.md))
 - Auditoria pré-2.D (precedente de formato) ([`./audit-2026-05-10-pre-2d-sanitization.md`](./audit-2026-05-10-pre-2d-sanitization.md))
 - Pesquisa de fundo Living Docs ([`../researchs/governance/2026-05-11-living-docs-and-template-composition-practices.md`](../researchs/governance/2026-05-11-living-docs-and-template-composition-practices.md))
