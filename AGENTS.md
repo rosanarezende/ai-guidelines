@@ -18,6 +18,8 @@ O `AGENTS.md` raiz tem papel duplo:
 
 Conteúdo específico deste repositório deve ficar fora de `<AI_GUIDELINES>`. O bloco compilado não é editado manualmente.
 
+**Onde mora cada coisa?** A topologia canônica (paths, gêneros de trabalho, regras de lookup, lifecycle) está em [`.core/governance/GOVERNANCE-CATALOG.md`](.core/governance/GOVERNANCE-CATALOG.md). Para detalhes técnicos densos (bounded contexts, invariantes, glossário): [`.core/governance/ARCHITECTURE.md`](.core/governance/ARCHITECTURE.md) (lean) e [`ARCHITECTURE-REFERENCE.md`](.core/governance/ARCHITECTURE-REFERENCE.md) (denso).
+
 ## Quickstart Local
 
 Este workspace usa Yarn 4 com Plug'n'Play. Para execução local da CLI, o caminho suportado é `yarn guidelines ...`.

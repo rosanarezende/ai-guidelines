@@ -932,8 +932,9 @@ yarn smoke
   - regras de lookup
   - lifecycle/responsabilidades
 
-- [x] **4.A.2** Garantir consistência com a topologia real do repo (modelo híbrido):
+- [~] **4.A.2** Garantir consistência com a topologia real do repo (modelo híbrido):
   - se o catálogo diz X, o repo deve expressar X
+  - **Status parcial:** o catálogo agora descreve o **destino** explicitamente E o **delta atual** (§6 Débitos de Transição). A consistência total (catálogo = repo sem deltas) só é alcançada quando 4.B.4/4.B.5 (ADRs) e 4.C.0/4.C.1 (cleanup `/docs/`, cutover CLI) fecharem. Item permanece aberto como auditoria final no encerramento do PR4.
 
 - [x] **4.A.3** Reservar explicitamente paths de gêneros futuros em `.governance/`:
   - `intake/`

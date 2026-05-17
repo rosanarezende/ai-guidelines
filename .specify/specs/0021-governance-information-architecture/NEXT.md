@@ -134,8 +134,15 @@ _(A preencher conforme execução do restante da Fase 3)_
 
 ### Débitos da Fase 4 (Consolidação)
 
-1. **Gêneros futuros documentados mas não implementados no catálogo.** `GOVERNANCE-CATALOG.md` §5 lista `intake/`, `handoff/` e `telemetry/` como reservados. Os paths são criados por `AdoptWorkspace` (RESERVED_GOVERNANCE_DIRS), mas o conteúdo, contratos e fluxos de cada gênero só entram nas specs futuras dedicadas: `stakeholder-intake-pipeline`, `handoff-contracts-formalization`, `framework-observability-dashboard`. Nenhum gap de catálogo — é reserva intencional.
-2. **`spec-foundation.md` ainda com nome legado.** O catálogo aponta para `.core/process/spec-foundation.md` com nota "(renomeado em 4.B)". A renomeação e refatoração do documento ocorrem no sub-bloco 4.B; até lá, o nome cria dissonância cognitiva leve mas não bloqueia o catálogo.
+1. **Gêneros futuros documentados mas não implementados no catálogo.** `GOVERNANCE-CATALOG.md` §5 lista `intake/`, `handoff/` e `telemetry/` como reservados. Os paths são criados por `AdoptWorkspace` (RESERVED_GOVERNANCE_DIRS), mas conteúdo, contratos e fluxos de cada gênero só entram nas specs futuras dedicadas: `stakeholder-intake-pipeline`, `handoff-contracts-formalization`, `framework-observability-dashboard`. Não é gap — é reserva intencional `[DEC-0021-B02]`.
+
+2. **`spec-foundation.md` ainda com nome legado** (`/.core/process/spec-foundation.md`). Catálogo aponta para o path com nota "(renomeado em 4.B.1)". Renomeação/refatoração ocorre em 4.B.1; dissonância cognitiva leve mas não bloqueia o catálogo.
+
+3. **4.A.2 fica parcial (`[~]`) — consistência catálogo↔repo só fecha pós-4.B+4.C.** O catálogo §6 declara explicitamente o delta: ADRs em dois lares (`/adrs/` vs `.core/governance/adrs/`), `/docs/` como ilhas órfãs, `cli/` mjs vs `src/` DDD, `.specify/templates/` vs `recipes/`. Cada delta tem sub-bloco resolvedor identificado (4.B.4, 4.B.5, 4.C.0, 4.C.1). Auditoria final de consistência total entra em **4.D.[ARCHITECTURE]** quando todos os deltas tiverem sido fechados ou explicitamente postergados para spec futura.
+
+4. **`docs/process/spec-foundation.md` é stub auto-condenado** ("será removido pela spec governance-information-architecture") — essa é a spec atual. Remoção entra em 4.C.1 quando `/docs/` for auditado.
+
+5. **AGENTS.md agora aponta para o catálogo** (Contexto Local, fora do bloco `<AI_GUIDELINES>`). O bloco `<AI_GUIDELINES>` compilado **não** referencia o catálogo — fica como decisão futura se a regra-pointer para `GOVERNANCE-CATALOG.md` deve virar regra runtime `[CORE-*]` (provável candidata em 4.B junto com a auditoria de `.core/rules/top/`).
 
 ---
 
