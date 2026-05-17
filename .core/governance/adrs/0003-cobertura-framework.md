@@ -1,43 +1,59 @@
-# ADR 0003: Cobertura de Testes e Living Documentation (Paridade BDD/Negócio)
+# ADR 0003 — Rastreabilidade `[BR-CLI-*]` é Contrato; Cobertura é Política Operacional
 
-## Status
+**Status**: Aceita
+**Origem histórica**: Spec 0004 (2026-04-21).
+**Reescrita**: Spec 0021 sub-bloco 4.B.4 (2026-05-17) — corpo original era relatório de execução com números de linha de arquivos específicos; reescrito como princípio perene à luz do critério editorial em `.core/governance/adrs/README.md`. A parte tática (threshold numérico, lista de exceções por linha) migrou para [`.core/process/test-coverage-policy.md`](../../process/test-coverage-policy.md).
 
-Aceito
+---
 
-## Contexto e Premissa
+## Contexto
 
-O motor `baseline-apply.mjs` é o coração da automação SSOT do `ai-guidelines`. Para garantir que nenhuma alteração de comportamento seja introduzida sem validação, adotamos o rito de **BDD-First** (Markdown define a regra, Teste a valida).
+Sistemas que perseguem cobertura técnica como objetivo final tendem a um anti-padrão previsível: testes que existem para o número, não para a regra. Linhas defensivas contra falhas catastróficas de infraestrutura (e.g. `throw` se arquivo do framework sumir) só podem ser cobertas por **test hooks** que poluem o código de produção; ramos de proteção contra estados impossíveis em ambiente saudável geram testes frágeis que medem a si mesmos. A cobertura técnica numérica vira pressão contra a clareza do código.
 
-Contudo, a busca cega pelos 100% de cobertura técnica demonstrou-se prejudicial, forçando a injeção de "test hooks" no código de produção para validar falhas de infraestrutura virtualmente impossíveis em ambiente saudável.
+Em paralelo, o problema **real** que cobertura tenta resolver — "minha mudança quebra uma regra de negócio?" — não é resolvido só por porcentagem de linhas executadas. Sem **vínculo explícito** entre regra de negócio e teste que a protege, dois sintomas aparecem: (a) regras documentadas mas nunca testadas; (b) testes existindo sem corresponder a nenhuma regra rastreável. Cobertura técnica passa, regra fica desprotegida.
 
-## Decisão
+## Princípio
 
-1.  **Threshold Obrigatório em Scripts**: **95%** de cobertura de linhas para o motor principal (`baseline-apply.mjs`).
-2.  **Soberania das Regras de Negócio**: 100% das regras mapeadas em `docs/cli/` DEVEM ser testadas.
-3.  **Exceções Técnicas**: Linhas que tratam de erros catastróficos de sistema (arquivos do framework ausentes) são isentas da meta de cobertura automatizada, pois sua validação exige poluição do código de produção.
+**Rastreabilidade entre regra de negócio e teste é contrato; cobertura técnica é piso operacional.** Cada regra do domínio recebe um identificador imutável (`[BR-CLI-*]`) materializado no teste que a protege. A SSOT da regra é o teste, não a documentação narrativa — Living Documentation (ADR 0010, 0011, 0012, 0013, 0014) deriva artefatos estruturados a partir desses identificadores.
 
-### Lista de Exceções (Baseline Apply)
+Cobertura técnica permanece como guardrail mínimo no pipeline, com exceções **honestas e auditáveis**: módulos cujo único caminho não-coberto é defesa contra estado impossível em ambiente saudável são isentos por escrito, não por hack. Bootstrappers que apenas roteiam para módulos cobertos são testados na integração `smoke`, não com unit threshold.
 
-- **applyAgents.mjs**: Linhas 155-156 (throw se AGENTS.md.tmpl sumir).
-- **applyRules.mjs**: Linhas 246-249 (throw se pasta rules/ sumir).
-- **applyProcessDocs.mjs**: Linhas 260-263 (throw se pasta docs/process/ sumir).
+Três corolários decorrem do princípio:
+
+1. **Paridade BDD/Negócio é threshold semântico de 100%.** Toda regra rotulada `[BR-CLI-*]` em documentação canônica deve mapear para ao menos um `it(...)` em bloco BDD nos testes. A ausência é falha de contrato, não débito de cobertura. Drift guard de Living Documentation (ADR 0012) é o mecanismo de detecção.
+
+2. **Cobertura numérica global é piso, não meta.** Existe um threshold no pipeline (definido em `.core/process/test-coverage-policy.md`) para barrar regressão silenciosa, mas perseguir +5% sobre o piso por si só não é trabalho de valor. Trabalho de valor é fechar regra de negócio sem teste.
+
+3. **Test colocation segue Feature-Sliced Design adaptado.** Testes do framework vivem ao lado dos scripts/módulos que cobrem (`/*.test.mjs` ao lado de `/*.mjs`; `*.test.ts` ao lado de `*.ts`). Não há diretório `tests/` paralelo espelhando a topologia de `src/` — espelhar topologia dobra o custo de mover/renomear.
+
+## Opções avaliadas
+
+| #   | Opção                                                                                  | Trade-off                                                                                                                                                                      |
+| --- | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| A   | Perseguir 100% de cobertura técnica numérica                                           | Garante que toda linha seja executada por teste, mas exige test hooks em código de produção e produz testes que medem ramos defensivos irrelevantes. Pune a clareza do código. |
+| B   | **Rastreabilidade BR-CLI como contrato + cobertura como piso operacional** (escolhida) | Vincula teste à regra que ele protege; cobertura técnica vira guardrail mínimo com exceções honestas; permite código de produção limpo sem perder proteção real.               |
+| C   | Só rastreabilidade BR-CLI, sem threshold numérico nenhum                               | Maximiza clareza mas perde guardrail contra regressão silenciosa em código que escapa da rotulagem BR-CLI (utilitários, infraestrutura).                                       |
+
+## Onde se aplica
+
+Este princípio rege:
+
+- O design da Living Documentation (ADRs 0010–0014, PR3 da Spec 0021): testes com `[BR-CLI-*]` são SSOT; `living-docs.yml` é projeção determinística; drift guard fatal.
+- O contrato do pipeline de CI: threshold global definido em [`.core/process/test-coverage-policy.md`](../../process/test-coverage-policy.md); exceções listadas e justificadas no mesmo arquivo.
+- A política editorial de novas regras: toda regra adicionada à documentação canônica deve nascer com `[BR-CLI-*]` e teste correspondente, ou ser explicitamente classificada como "regra narrativa sem enforcement" (raro, exige justificativa).
+
+Este princípio **não** rege:
+
+- A cobertura específica de pacotes consumidores — o framework distribui ferramental (Quality Gates como opt-in), mas o threshold final é decisão do consumidor.
+- A escolha de framework de testes (Vitest, Jest, node test runner) — operacional, decidida por stack.
 
 ## Consequências
 
-- **Melhoria**: Código de produção mais limpo e legível.
-- **Melhoria**: Suíte de testes mais rápida e menos frágil.
-- **Risco**: Erros nestas linhas específicas só seriam detectados em runtime, mas o impacto é aceitável dado que o framework estaria corrompido de qualquer forma.
+- Código de produção fica **livre de test hooks** para cobertura: defesa contra estado impossível pode ser declarada e isentada.
+- Suíte de testes é **mais rápida e menos frágil**: menos ramos triviais sendo testados pelo próprio teste.
+- Mudanças em regras de negócio são **rastreáveis em duas direções**: do `.md` ao teste pelo `[BR-CLI-*]`; do teste ao `.md` pelo `evidence[]` da Living Documentation.
+- Risco residual: erros em linhas isentas (e.g. throw catastrófico) só seriam detectados em runtime real. **Aceito**: nesses caminhos o framework já estaria corrompido.
 
-## Decisões
+---
 
-1. **Test Colocation:** Mover testes do framework para atuarem ao lado dos scripts nativos (`/*.test.mjs` junto dos `/*.mjs`). Isso engloba os conceitos de _Feature-Sliced Design_ adaptado.
-2. **Threshold Global de 85%**: O node built-in testing evaluator (`--experimental-test-coverage`) monitorará e rejeitará CI's abaixo desse limiar no pacote `cli/` (agregado dos módulos canonizados).
-3. **Isenções Justificadas**: Componentes de infraestrutura pura (`install-runtime.mjs`) e blocos de erro catastróficos são isentos da meta, pois sua validação exige poluição excessiva do código.
-4. **Threshold Semântico de 100% (Business Rules Parity):** Regras de negócio importantes marcadas na documentação central (e.g. `docs/cli/ai-guidelines-cli.md`) receberão identificadores imutáveis (Ex: `[BR-CLI-*]`). Tais identificadores devem mapear obrigatoriamente para `it(...)` em blocos de BDD dos testes.
-5. **Bootstrapper Exception**: O entrypoint base `cli/ai-guidelines-cli.mjs` agirá como um _thin wrapper_ deslogado do teste coberto numérico de unidade, visto que apenas espelha rotas sob um runner `node`. Ele escapa do threshold global mas deve ser testado puramente na integração `smoke`.
-
-## Consequências
-
-- Melhora dramática na leitura do ciclo de vida das funcionalidades: qualquer pessoa sabendo procurar pela string `[BR-CLI` sabe imediatamente onde ela foi definida e onde ela está garantida.
-- Maior velocidade para alteração do código sem se preocupar em cobrir loops/ternários irrelevantes.
-- Mudança na forma de escrever teste: o programador precisa referenciar o `.md` correspondente.
+_Operacionalização (thresholds, lista de exceções, bootstrappers isentos): [`.core/process/test-coverage-policy.md`](../../process/test-coverage-policy.md)._

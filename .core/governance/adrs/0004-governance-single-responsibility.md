@@ -1,8 +1,16 @@
 # ADR 0004 — Governança de Responsabilidade Única
 
-**Status**: Aceita
-**Data**: 2026-04-21
-**Spec**: 0004 — Vaga E (Governance Refactor)
+**Status**: **Superseded by ADR 0008** (Governança Monolítica)
+**Originalmente aceita**: 2026-04-21 (Spec 0004 — Vaga E, Governance Refactor)
+**Superseded**: 2026-05-17 (Spec 0021 sub-bloco 4.B.4)
+
+---
+
+> **Nota de supersessão (2026-05-17):** a decisão original — **Responsabilidade Única por arquivo de governança** — foi efetivamente absorvida por [`ADR 0008 — Governança Monolítica`](./0008-monolithic-runtime-compiler-governance.md), aceita 9 dias depois (2026-04-30).
+>
+> Sob a arquitetura monolítica, a Prime Directive **não vive mais em arquivos separados** que precisam ser coordenados. Ela é compilada in-line no bloco `<AI_GUIDELINES>` do `AGENTS.md` consumidor, garantindo por construção que existe em **exatamente um lugar canônico** — a propriedade-objetivo de 0004 virou consequência emergente do monolítico, não política explícita a ser enforced documento por documento.
+>
+> O documento permanece preservado como **rastro histórico** do caminho da decisão: registra o diagnóstico (Lost-in-the-Middle, contradição entre `~/.gemini/GEMINI.md` e `AGENTS.md`, 5 lugares com formulações divergentes) que motivou tanto este ADR quanto a arquitetura monolítica subsequente. Nenhuma das mudanças aplicadas listadas abaixo precisa ser re-executada — todas foram absorvidas pelo cutover monolítico.
 
 ---
 

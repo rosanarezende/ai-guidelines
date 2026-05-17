@@ -958,21 +958,25 @@ yarn smoke
   - foundation permanece processo vivo e constituição operacional
 
 - [x] **4.B.3** Atualizar links/cross-refs após renomeação. Aplicado em: `AGENTS.md` (via regen do bloco compilado), `.core/rules/top/agents-core.md` (source), `CONTRIBUTING.md`, `docs/rpi-protocol.md`, `docs/process/spec-foundation.md` (stub atualizado para apontar ao novo destino — exclusão final em 4.C.1), `GOVERNANCE-CATALOG.md`, `.specify/templates/*-boilerplate.md` (8 templates), `.ai-guidelines/templates/*-boilerplate.md` (10 templates mirror), `.specify/specs/roadmap/backlog.md`, e referências internas no 0021 spec. Specs históricas (0008, 0015, 0017, 0018, 0019) e `roadmap/historico.md` + `CHANGELOG.md` preservados como rastro histórico.
-- [ ] **4.B.4** Auditoria das ADRs históricas em `/adrs/` à luz do critério editorial "ADR é princípio perene, não revisitação datada" (formalizado em `.core/governance/adrs/README.md`):
-  - Para cada ADR legada (0003, 0004, 0005, 0006, 0007, 0008, 0009): aplicar um dos três caminhos:
-    - **(a) Reescrever como princípio.** Se a decisão subjacente ainda é arquiteturalmente relevante mas o documento está escrito como relatório de execução (cita "Spec X — Vaga Y", lista mudanças por arquivo), reescrever o corpo como princípio perene; spec original vira nota histórica de rodapé.
-    - **(b) Rebaixar para nota histórica não-ADR.** Se o documento é primariamente narrativa de execução (ex.: "essas mudanças foram aplicadas"), mover para `.specify/specs/researchs/governance/` como nota histórica datada; remover da numeração de ADRs.
-    - **(c) Arquivar como Superseded.** Se a decisão foi efetivamente substituída por princípio mais abrangente (caso candidato: 0004 absorvida por governança monolítica de 0008), marcar `Superseded by <ID>` com rationale.
-  - Insumo inicial em [`../researchs/governance/2026-05-11-mece-taxonomy-and-adr-audit.md`](../../researchs/governance/2026-05-11-mece-taxonomy-and-adr-audit.md) §2 (marcado como **preliminar** — não decisão).
+- [x] **4.B.4** Auditoria das ADRs históricas (agora consolidadas em `.core/governance/adrs/`):
+  - **0003** (Cobertura/Living Docs) — caminho **(a) Reescrita como princípio**. Novo título: "Rastreabilidade `[BR-CLI-*]` é Contrato; Cobertura é Política Operacional". Parte tática (threshold 95%, exceções por arquivo/linha) extraída para `.core/process/test-coverage-policy.md`.
+  - **0004** (Governance Single Responsibility) — caminho **(c) Superseded by ADR 0008**. Status atualizado; corpo preservado como rastro histórico com nota explicativa no topo.
+  - **0005, 0006, 0007, 0008, 0009** — caminho **(a) Manter**. Princípios sólidos sem revisitação datada que justifique reescrita; reformatação descartada por não justificar churn.
+  - Nenhuma ADR foi para caminho **(b)** (rebaixar para nota histórica) — todas têm valor arquitetural perene.
 - [x] **4.B.5** Consolidar `/adrs/` na arquitetura de informação:
   - ✅ Movido `/adrs/0003–0009.md` → `.core/governance/adrs/` (numeração legada preservada).
   - ✅ Renumeradas locais PR3: `0001→0010`, `0002→0011`, `0003→0012`, `0004→0013`, `0005→0014`. Self-refs e cross-refs internos atualizados.
   - ✅ Cross-refs ativos atualizados em `ARCHITECTURE.md`, `ARCHITECTURE-REFERENCE.md`, `tasks.md` (0021), `audit-2026-05-11-pre-3d-template-engine.md`, `audit-2026-05-11-pre-3c4-living-docs-aggregation.md`, `GOVERNANCE-CATALOG.md`.
   - ✅ `/adrs/` removido (diretório vazio); `/adrs/README.md` deletado.
   - Refs em CHANGELOG, roadmap/historico.md e specs históricas (0008/0017/0018/0019/0020) preservados como rastro histórico.
-- [ ] **4.B.6** Reescrever `adrs/README.md` (hoje rotulado "ADRs de Prompt Engineering — Micro-Decisões", vocabulário pré-PR1):
-  - Reflete fronteira híbrida `[DEC-0021-B04]`: ADR = decisão arquitetural estável cross-spec; foundation/process = constituição operacional viva.
-  - Documenta critério de migração foundation→ADR (4.B.2) e ciclo de promoção ADR local→global no encerramento de spec.
+- [x] **4.B.6** Reescrever `.core/governance/adrs/README.md` pós-consolidação:
+  - ✅ Header reflete consolidação 4.B.5 (lar canônico único; lacunas 0001-0002 como honest historical artifact).
+  - ✅ Fronteira ADR vs Foundation com critério prático formalizado `[DEC-0021-B04]`.
+  - ✅ Critério editorial "princípio perene" preservado + adicionado pointer para `.core/process/<topic>-policy.md` como destino de operacionalização.
+  - ✅ Ciclo de promoção local→global documentado (regra de colisão estabelecida em 4.B.5).
+  - ✅ Tabela de ADRs ativas com 12 entradas (0003-0009 legadas + 0010-0014 PR3); 0003 rotulada "reescrita em 4.B.4"; 0004 rotulada "Superseded by ADR 0008".
+  - ✅ Histórico de auditoria e supersessões adicionado ao rodapé com timeline.
+  - ✅ Antigo título "ADRs de Prompt Engineering — Micro-Decisões" (do `/adrs/README.md` legado) eliminado pela exclusão do diretório em 4.B.5.
 - [ ] **4.B.N** Pipeline verde.
 - [ ] **4.B.[DEBT-REVIEW]** `NEXT.md`: registrar débitos sobre decisões ainda misturadas entre foundation e ADR; marcar reclassificação 0003/0004 aplicada.
 - [ ] **4.B.[ARCHITECTURE]** `ARCHITECTURE.md`: §I "Como contribuir" ganha entrada sobre critério de migração foundation→ADR; §H ganha referência a `.core/governance/adrs/` como lar canônico consolidado.
