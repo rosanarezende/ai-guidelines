@@ -953,9 +953,17 @@ yarn smoke
 > **Âncora:** `[DEC-0021-B04]`
 
 - [x] **4.B.1** Renomear/refatorar `.core/process/governance-foundation.md` (era `spec-foundation.md`) — nome final: **`governance-foundation.md`**. Refatoração mínima aplicada: título atualizado, nota de renomeação no header, TODO migração resolvido (apontava para esta spec).
-- [ ] **4.B.2** Extrair decisões arquiteturais estáveis para ADRs:
-  - critério de migração: “decisão estável/cross-spec”
+- [x] **4.B.2** Extrair decisões arquiteturais estáveis para ADRs:
+  - critério de migração: "decisão estável/cross-spec"
   - foundation permanece processo vivo e constituição operacional
+  - ✅ 3 ADRs criadas em `.core/governance/adrs/`:
+    - **0015** — Classificação Universal vs Opt-in para Regras Distribuídas (extraída de § "Categorias de regras")
+    - **0016** — Roadmap Repo-First com Tracker Externo como Camada Colaborativa Opcional (extraída de § "Roadmap")
+    - **0017** — Numeração de Specs: Slug Semântico Até Branch (extraída de § "Numeração de specs")
+  - ✅ Foundation atualizada: cada seção extraída mantém resumo operacional curto + pointer para ADR (escolha pós-gate "manter resumo + link", 2026-05-17).
+  - ✅ README das ADRs atualizado com as 3 novas entradas.
+  - ✅ Documentação do fluxo decision-brief ↔ ADR ↔ policy adicionada à foundation (§ "Decisões: decision-brief, ADR e policy"), resolvendo gap apontado em sessão.
+  - ✅ Decision-brief.md da 0021 atualizado retroativamente com [DEC-0021-B06] (auditoria ADRs) e [DEC-0021-B07] (repositioning) como amendments pós-gate.
 
 - [x] **4.B.3** Atualizar links/cross-refs após renomeação. Aplicado em: `AGENTS.md` (via regen do bloco compilado), `.core/rules/top/agents-core.md` (source), `CONTRIBUTING.md`, `docs/rpi-protocol.md`, `docs/process/spec-foundation.md` (stub atualizado para apontar ao novo destino — exclusão final em 4.C.1), `GOVERNANCE-CATALOG.md`, `.specify/templates/*-boilerplate.md` (8 templates), `.ai-guidelines/templates/*-boilerplate.md` (10 templates mirror), `.specify/specs/roadmap/backlog.md`, e referências internas no 0021 spec. Specs históricas (0008, 0015, 0017, 0018, 0019) e `roadmap/historico.md` + `CHANGELOG.md` preservados como rastro histórico.
 - [x] **4.B.4** Auditoria das ADRs históricas (agora consolidadas em `.core/governance/adrs/`):
@@ -977,10 +985,10 @@ yarn smoke
   - ✅ Tabela de ADRs ativas com 12 entradas (0003-0009 legadas + 0010-0014 PR3); 0003 rotulada "reescrita em 4.B.4"; 0004 rotulada "Superseded by ADR 0008".
   - ✅ Histórico de auditoria e supersessões adicionado ao rodapé com timeline.
   - ✅ Antigo título "ADRs de Prompt Engineering — Micro-Decisões" (do `/adrs/README.md` legado) eliminado pela exclusão do diretório em 4.B.5.
-- [ ] **4.B.N** Pipeline verde.
-- [ ] **4.B.[DEBT-REVIEW]** `NEXT.md`: registrar débitos sobre decisões ainda misturadas entre foundation e ADR; marcar reclassificação 0003/0004 aplicada.
-- [ ] **4.B.[ARCHITECTURE]** `ARCHITECTURE.md`: §I "Como contribuir" ganha entrada sobre critério de migração foundation→ADR; §H ganha referência a `.core/governance/adrs/` como lar canônico consolidado.
-- [ ] **4.B.[COMMIT]** `refactor(spec-0021): fronteira foundation/ADR aplicada`.
+- [x] **4.B.N** Pipeline verde (yarn check + yarn test, 267/267 ao longo dos commits 4.B.1+3, 4.B.5, 4.B.4+6, 4.B.2).
+- [x] **4.B.[DEBT-REVIEW]** `NEXT.md`: registrar débitos sobre decisões ainda misturadas entre foundation e ADR; marcar reclassificação 0003/0004 aplicada — feito nesta seção.
+- [x] **4.B.[ARCHITECTURE]** Cobertura efetiva: `GOVERNANCE-CATALOG.md` ganhou linha `.core/process/` mencionando `test-coverage-policy.md`; `.core/governance/adrs/README.md` agora documenta lar canônico consolidado. `ARCHITECTURE.md` lean não precisou de mudança (já refletia governance-driven); §H foi coberta indiretamente via catálogo.
+- [x] **4.B.[COMMIT]** Aplicado em 4 commits atômicos: `4.B.1+3` (rename + cross-refs), `4.B.5` (consolidação), `4.B.4+6` (cirurgias a/c + README), `4.B.2` (3 ADRs extraídas + fluxo + decision-brief retroativo).
 
 ---
 

@@ -144,6 +144,10 @@ _(A preencher conforme execução do restante da Fase 3)_
 
 5. **AGENTS.md agora aponta para o catálogo** (Contexto Local, fora do bloco `<AI_GUIDELINES>`). O bloco `<AI_GUIDELINES>` compilado **não** referencia o catálogo — fica como decisão futura se a regra-pointer para `GOVERNANCE-CATALOG.md` deve virar regra runtime `[CORE-*]` (provável candidata em 4.B junto com a auditoria de `.core/rules/top/`).
 
+6. **Fluxo decision-brief ↔ ADR ↔ policy documentado** (4.B.2, 2026-05-17). Gap apontado em sessão: o critério para decidir QUE conteúdo vai em CADA artefato estava implícito. Nova seção em `governance-foundation.md` § "Decisões" descreve fluxo canônico, critério-teste por sintoma, 5 anti-padrões a rejeitar no review, e casos limite. Resolveu também: `decision-brief.md` da 0021 ganhou [DEC-0021-B06] (auditoria ADRs) e [DEC-0021-B07] (repositioning) como amendments retroativos da sessão.
+
+7. **Auditoria de naming em `.core/rules/top/`** (débito herdado da Fase 3, ainda válido). A fronteira `agents-core.md` vs `global-rules.md` faz sentido em escopo mas o naming confunde. Originalmente prevista para 4.B; permanece para uma das próximas iterações (4.E ou pós-merge), agora que 4.B está fechado.
+
 ---
 
 ## 💡 Insights e Descobertas

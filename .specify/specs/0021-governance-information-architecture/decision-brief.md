@@ -394,20 +394,102 @@
 
 ---
 
+## Bloco E — Amendments pós-gate (2026-05-17)
+
+> **Contexto da expansão.** O gate original (2026-05-09) fechou o escopo da 0021 nos blocos A-D. Durante a execução do PR4 sub-bloco 4.B, duas perguntas novas emergiram que exigiam decisão consciente em vez de improviso: (i) caminhos específicos para a auditoria das 7 ADRs legadas; (ii) reposicionamento de identidade do framework de AI-first para Governance-first. Esta seção captura essas decisões na mesma forma dos blocos originais (opções A/B/C + escolha da owner), preservando a separação entre decision-brief (como chegamos lá) e ADRs (princípio resultante).
+>
+> Ambas decisões foram tomadas em sessão colaborativa humano-agente em 2026-05-17, com a owner respondendo via AskUserQuestion. Status agregado: `Resolvido`.
+
+### [DEC-0021-B06] Auditoria das ADRs legadas — caminho por ADR (a/b/c)
+
+**Pergunta:** como tratar cada uma das 7 ADRs em `/adrs/` (0003-0009) à luz do critério editorial "ADR é princípio perene, não revisitação datada" formalizado em `.core/governance/adrs/README.md`?
+
+**Contexto (research):**
+
+- Auditoria preliminar em [`../researchs/governance/2026-05-11-mece-taxonomy-and-adr-audit.md`](../researchs/governance/2026-05-11-mece-taxonomy-and-adr-audit.md) §2 analisou cada ADR e propôs caminhos provisórios.
+- Critério editorial publicado em `.core/governance/adrs/README.md`: ADR mal-escrita é a que vira lixo quando a fase termina; ADR boa é princípio que faz sentido 2 anos depois.
+- 3 caminhos disponíveis: **(a)** reescrever como princípio perene; **(b)** rebaixar para nota histórica não-ADR em `.specify/specs/researchs/governance/`; **(c)** marcar `Superseded by <ID>`.
+
+**Opções por ADR:**
+
+| ADR  | Diagnóstico                                                                          | Caminhos avaliados                                          | Recomendação inicial |
+| :--- | :----------------------------------------------------------------------------------- | :---------------------------------------------------------- | :------------------- |
+| 0003 | Mistura princípio (`[BR-CLI-*]`) + tática (threshold 95%, linhas específicas)        | (a) reescrever; (c) superseded inteiro                      | (a)                  |
+| 0004 | Decisão de Prime Directive em 1 lugar — absorvida pela Governança Monolítica de 0008 | (a) reescrever; (c) superseded by 0008                      | (c)                  |
+| 0005 | Curadoria público/privado — princípio estável                                        | (a) manter; reformatar levemente                            | (a) manter           |
+| 0006 | Licença Apache-2.0 — decisão fundacional                                             | (a) manter                                                  | (a) manter           |
+| 0007 | Visibilidade pública (fresh repo + snapshot) — estende 0005                          | (a) manter                                                  | (a) manter           |
+| 0008 | Governança Monolítica — princípio arquitetural fundacional                           | (a) manter                                                  | (a) manter           |
+| 0009 | Naming do pacote + registry + auth — três decisões em um doc, mas estáveis           | (a) manter (débito documental "3 em 1" registrado sem ação) | (a) manter           |
+
+**Recomendação inicial agregada:** **0003 → (a) reescrever**; **0004 → (c) superseded by 0008**; **0005-0009 → (a) manter sem reformatação** (não justifica churn). Nenhuma para caminho (b).
+
+**Decisão do Gate Humano (amendment):**
+
+- **Status:** [ ] Pendente | [x] Resolvido
+- **Escolha agregada:** conforme recomendação acima.
+- **Justificativa / Ressalvas:** > A ADR 0003 carrega princípio relevante (rastreabilidade `[BR-CLI-*]`) que sobrevive a refactors, mas estava poluída por números de linha de arquivos específicos — reescrita como princípio + extração da parte tática para `.core/process/test-coverage-policy.md` resolve sem perder o conteúdo de valor. A ADR 0004 estabelece propriedade-objetivo (Prime Directive em 1 lugar) que virou consequência emergente da Governança Monolítica de 0008 — superseder é mais honesto que reescrever (a decisão original tinha valor histórico real). Para 0005-0009, princípios sólidos sem revisitação datada: reformatação cosmética não justifica churn em ADRs já bem-formadas.
+- **Data / Owner:** 2026-05-17 / @rosanarezende (resposta via AskUserQuestion durante execução de 4.B.4)
+
+---
+
+### [DEC-0021-B07] Repositioning Governance-First, AI-as-Channel
+
+**Pergunta:** o framework `ai-guidelines` se propõe a resolver dor de IA (governança de contexto/regras para LLMs) ou dor de governança de engenharia (com integração AI-agnóstica como canal de primeira classe)?
+
+**Contexto (research):**
+
+- Dois docs de pitch externo da owner (Google Drive: Case de Arquitetura e Case de Engenharia, datados de 2025) **já posicionam** o framework como governance-first: as 3 dores reais listadas (padronização, lost-in-the-middle, **SecOps**) são 2/3 puramente de governança; "Governance by Design" é o vocabulário; `POLICY_EXPERIMENT_REQUIRES_HYPOTHESIS` é guardrail de produto, não de IA.
+- O **código** já é governance-first: domínio (`WorkItem`, `Registry`, `GovernanceWorkspace`, `LivingDocumentation`, `TemplateEngine`) é modelo de governança de engenharia puro; 7 pilares MECE não mencionam IA; contrato consumer-side já é `.governance/`, não `.ai-guidelines/`.
+- A **superfície pública** ainda comunica AI-first: tagline "Governança AI-first", `AGENTS.md` como artefato central, `.ai-guidelines/` no consumidor, "ai-first dev" como categoria de mercado.
+- A discrepância entre conteúdo (governance-first) e casca (AI-first) limita ROI: o framework é cobrado como AI tooling enquanto entrega governance machinery.
+
+**Opções:**
+
+| Opção | Descrição                                                                                                                                                          | Pró                                                                                                | Contra                                                                                                                                                            |
+| :---- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A     | **Manter AI-first** (status quo).                                                                                                                                  | Coerência histórica; sem churn.                                                                    | Vende menos valor que o que entrega; evolução natural (intake, telemetry, handoff) é de governança e não cabe no framing AI.                                      |
+| B     | **Expandir escopo da 0021 com sub-bloco 4.E "Repositioning"**: ADR de princípio + reescrita de README + AGENTS.md framing + features.md classifica AI como opt-in. | Reflete código real; abre porta para evolução natural; reposiciona narrativa sem rename do pacote. | Adiciona ~1-2 dias de trabalho ao PR4; expansão de escopo registrada como amendment do gate.                                                                      |
+| C     | **Spec dedicada nova (0022 repositioning)** após fechar 0021 com escopo atual.                                                                                     | PRs menores e mais auditáveis.                                                                     | A 0021 entrega "arquitetura de informação" sem resolver a contradição de framing que existe hoje — ficaria coerente internamente mas desalinhada com a tese real. |
+
+**Sub-decisão acoplada (naming):**
+
+- (i) Continuar com pacote npm `ai-guidelines` (reclaim semântico: "guidelines" já é palavra de governança).
+- (ii) Rename agressivo (`repo-governance`, `eng-governance`).
+- (iii) Dual-publish com alias depreciado.
+
+**Recomendação inicial:** **B + (i)**. A virada de framing é coerente com a evidência (código + docs externos da owner) e o naming admite reclaim semântico sem churn de URLs/imports/badges.
+
+**Decisão do Gate Humano (amendment):**
+
+- **Status:** [ ] Pendente | [x] Resolvido
+- **Escolha (marque com `x`):**
+  - [ ] A
+  - [x] B
+  - [ ] C
+  - **Naming:** [x] (i) continuar `ai-guidelines` | [ ] (ii) rename | [ ] (iii) dual-publish
+- **Justificativa / Ressalvas:** > Os docs de pitch da arquiteta já posicionam o framework como governance-first; o código já é governance-first; só a casca insiste em ser AI-first. Reconciliar a superfície com a substância **agora** é mais coerente que abrir spec separada — a 0021 vira spec verdadeiramente estruturante, não housekeeping de paths. Sobre naming: o questionamento inicial foi se `ai-guidelines` "passava ideia errada distante de governança". Análise honesta mostrou que "guidelines" semanticamente já é palavra de governança — o nome admite duas leituras (`(ai)-guidelines` = "para IA" vs `ai—guidelines` = "que incluem IA como canal"). Reclaim via surface (README, AGENTS.md framing) é mais barato que rename pós-1.0.0 e preserva tração já construída.
+- **Materialização:** ADR 0018 (`governance-first-ai-as-channel`) capturará o princípio perene; este DEC captura a chegada à decisão.
+- **Data / Owner:** 2026-05-17 / @rosanarezende (resposta via AskUserQuestion em sessão colaborativa humano-agente)
+
+---
+
 ## Resumo de status
 
-| ID               | Bloco | Status    |
-| :--------------- | :---- | :-------- |
-| `[DEC-0021-A01]` | A     | Resolvido |
-| `[DEC-0021-A02]` | A     | Resolvido |
-| `[DEC-0021-A03]` | A     | Resolvido |
-| `[DEC-0021-B01]` | B     | Resolvido |
-| `[DEC-0021-B02]` | B     | Resolvido |
-| `[DEC-0021-B03]` | B     | Resolvido |
-| `[DEC-0021-B04]` | B     | Resolvido |
-| `[DEC-0021-B05]` | B     | Resolvido |
-| `[DEC-0021-C01]` | C     | Resolvido |
-| `[DEC-0021-D01]` | D     | Resolvido |
+| ID               | Bloco | Status                           |
+| :--------------- | :---- | :------------------------------- |
+| `[DEC-0021-A01]` | A     | Resolvido                        |
+| `[DEC-0021-A02]` | A     | Resolvido                        |
+| `[DEC-0021-A03]` | A     | Resolvido                        |
+| `[DEC-0021-B01]` | B     | Resolvido                        |
+| `[DEC-0021-B02]` | B     | Resolvido                        |
+| `[DEC-0021-B03]` | B     | Resolvido                        |
+| `[DEC-0021-B04]` | B     | Resolvido                        |
+| `[DEC-0021-B05]` | B     | Resolvido                        |
+| `[DEC-0021-C01]` | C     | Resolvido                        |
+| `[DEC-0021-D01]` | D     | Resolvido                        |
+| `[DEC-0021-B06]` | E     | Resolvido (amendment 2026-05-17) |
+| `[DEC-0021-B07]` | E     | Resolvido (amendment 2026-05-17) |
 
 **Status agregado:** `Resolvido`
 
