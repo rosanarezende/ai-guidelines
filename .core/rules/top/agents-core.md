@@ -274,23 +274,23 @@ tags: [core, agents, always_injected, planning]
 ```
 
 **Instruction (en):**
-Act only with a formed plan. Use `spec-foundation` for work that must survive session/agent changes; use a tool-scratchpad lightweight plan only for single-session, local, disposable adjustments.
+Act only with a formed plan. Use `governance-foundation` for work that must survive session/agent changes; use a tool-scratchpad lightweight plan only for single-session, local, disposable adjustments.
 
 **Documentação (pt-br):**
 **Aja apenas mediante Plano Formado.** Antes de executar qualquer código, escolha a granularidade:
 
-| Critério      | Use `spec-foundation`                 | Use `plano leve`                          |
+| Critério      | Use `governance-foundation`           | Use `plano leve`                          |
 | :------------ | :------------------------------------ | :---------------------------------------- |
 | Duração       | > 1 sessão                            | 1 sessão                                  |
 | Escopo        | > 1 arquivo fora de feature isolada   | Ajuste pontual, local                     |
 | Sobrevivência | Precisa sobreviver troca de IA/sessão | Descartável                               |
 | Onde vive     | `.specify/specs/<slug>/` (versionado) | Scratchpad da ferramenta (não versionado) |
 
-**Why this matters:** ação sem plano formado = sintoma clássico de AI-slop. A tabela é o critério-teste objetivo entre `spec-foundation` e plano leve.
+**Why this matters:** ação sem plano formado = sintoma clássico de AI-slop. A tabela é o critério-teste objetivo entre `governance-foundation` e plano leve.
 
 **See also:** `[CORE-02]` (Agnostic SDD Override). _TODO(B.4): adicionar cross-ref para o ID canônico da regra "Tipo de spec" quando `global-rules.md` migrar para o schema bilíngue + IDs `[GR-NNNN]`._ Hoje a regra vive em [`.core/rules/top/global-rules.md` § "Workflow com IA"](./global-rules.md#workflow-com-ia).
 
-> **Candidata a docs-only em B.3.5:** a tabela detalhada pode migrar para `.core/process/spec-foundation.md` (já tem seção "Tipos de spec" hoje). O core-runtime mantém só a frase imperativa.
+> **Candidata a docs-only em B.3.5:** a tabela detalhada pode migrar para `.core/process/governance-foundation.md` (já tem seção "Tipos de spec" hoje). O core-runtime mantém só a frase imperativa.
 
 ---
 

@@ -6,7 +6,7 @@ Este arquivo é o backlog vivo do repositório. Captura specs em execução, pr�
 
 **Política repo-first, integração-friendly:** o repositório é a memória canônica. Ferramentas externas (GitHub Projects, Jira, Linear, etc.) podem ser camada colaborativa humana via campo opcional `tracker` nas entradas abaixo, mas o resumo mínimo no `backlog.md` é mandatório.
 
-Detalhes de lifecycle em [`.core/process/spec-foundation.md`](../../../.core/process/spec-foundation.md).
+Detalhes de lifecycle em [`.core/process/governance-foundation.md`](../../../.core/process/governance-foundation.md).
 
 ---
 
@@ -20,8 +20,8 @@ Specs atualmente em branch ativa. Formato enxuto.
   - **Histórico de numeração:** era a candidata `0020-governance-information-architecture` até 2026-05-07; foi renumerada para 0021 quando `npm-publication` foi promovida e a branch original da candidata foi reaproveitada pela 0020.
   - **Fonte do insight:** revisão da Spec 0018 (Stage 1, 2026-04-30) + benchmark comparativo externo de 2026-05-07, que reforçou a ausência de PRD/intake estruturado, handoff contracts e telemetria como gêneros com lar canônico explícito.
   - **Foco ativo do Stage 1:** (1) modelo canônico de estado repo-first híbrido; (2) artefatos não-spec como origem de valor; (3) fronteira `sdd_dir` vs `spec_workspace_dir`; (4) recorte Fases 1–3 agora e Fases 4–5 apenas mapeadas.
-  - **Perguntas reincorporadas do backlog original:** catálogo central vs reorganização física vs híbrido; ADRs vs `spec-foundation.md`; reorganização física interna de `.core/rules/` no repo.
-  - **Insumos obrigatórios já lidos na abertura:** `.core/process/spec-foundation.md`, `researchs/architecture/2026-05-08-consumer-bootstrap-frictions.md` e `researchs/architecture/2026-05-08-repo-first-structured-registry.md`.
+  - **Perguntas reincorporadas do backlog original:** catálogo central vs reorganização física vs híbrido; ADRs vs `governance-foundation.md`; reorganização física interna de `.core/rules/` no repo.
+  - **Insumos obrigatórios já lidos na abertura:** `.core/process/governance-foundation.md`, `researchs/architecture/2026-05-08-consumer-bootstrap-frictions.md` e `researchs/architecture/2026-05-08-repo-first-structured-registry.md`.
   - **Cross-ref operacional:** abertura formal aprovada pela owner em 2026-05-08; gate humano de Stage 1 pendente em `.specify/specs/0021-governance-information-architecture/decision-brief.md`. Débito tático herdado: `[DEC-0018-A06]`.
 
 > **Spec 0019** (`bootstrap-consumidor-e-runtime`) concluída e mergeada em 2026-05-07 (PR #5, commit `35af73a`).
@@ -34,7 +34,7 @@ Specs atualmente em branch ativa. Formato enxuto.
 
 Specs ou candidatas priorizadas para iniciar em seguida. Ordem indica prioridade.
 
-- **governance-information-architecture** (spec **0021**) — movida para **Em execução** em 2026-05-08. O escopo ativo agora vive em `.specify/specs/0021-governance-information-architecture/`, com reincorporação das perguntas históricas sobre carrier da política, fronteira ADR vs `spec-foundation.md` e placement interno de `.core/rules/`.
+- **governance-information-architecture** (spec **0021**) — movida para **Em execução** em 2026-05-08. O escopo ativo agora vive em `.specify/specs/0021-governance-information-architecture/`, com reincorporação das perguntas históricas sobre carrier da política, fronteira ADR vs `governance-foundation.md` e placement interno de `.core/rules/`.
 
 - **stakeholder-intake-pipeline** (Pipeline estruturado de PRD/intake → spec)
   - **Fonte do insight:** análise comparativa de frameworks AI-driven externos (2026-05-07) — frameworks maduros formalizam um contrato de entrada (PRD parseável → tasks atômicas com critérios de aceitação). O ai-guidelines hoje vai do chat → backlog → spec sem etapa estruturada antes; o `Ciclo de Fricção` (regra 7 do backlog) reconhece a porta de entrada via tag `friction` mas não define o **shape mínimo** do pedido.
@@ -102,7 +102,7 @@ Specs ou candidatas que entram na fila depois de esgotado o Now. Ordem pode ser 
   - **Escopo potencial:** agente validador separado com contrato "um-a-um"; sensores automáticos obrigatórios (prettier/typecheck/testes como gate, análise estática, mutation kill rate, detecção de bugs típicos de IA, secret scanning); evaluation como gate; integração com `/ultra-review`.
   - **Sub-bloco de modelagem de experimentos (absorvido 2026-05-07):** boilerplate de experimento (hipótese H, métrica M, baseline B, condição de sucesso, número de runs) em `.specify/templates/experiment-boilerplate.md`. Eval-as-gate é o coração da 0009; modelagem de experimento é a estrutura formal sob o gate. Absorvido aqui em vez de spec separada porque o acoplamento é total — eval da 0018 (manual, ad-hoc) vira a referência empírica do que o boilerplate deve capturar.
   - **Custo de adoção:** custo elevado assumido — multi-agent + sensors em cada feature = 2-3× tokens por PR. Compensa apenas quando custo de regressão começar a doer mais que custo de tokens.
-  - **Pré-requisitos:** Spec 0003 mergeada (✓); idealmente Spec 0008 mergeada antes (sub-bloco B canoniza RPI ↔ spec-foundation; sub-bloco E canoniza checklist editorial); baseline da Spec 0018 já concluído.
+  - **Pré-requisitos:** Spec 0003 mergeada (✓); idealmente Spec 0008 mergeada antes (sub-bloco B canoniza RPI ↔ governance-foundation; sub-bloco E canoniza checklist editorial); baseline da Spec 0018 já concluído.
   - **Seed deixada pela 0018:** o eval manual da 0018 vira **baseline-regression**; qualquer mudança futura em `rules` invalida esse baseline e exige re-rodada no harness. Research package congelado em `.specify/specs/researchs/governance/` + `.specify/specs/researchs/architecture/`.
   - **Artefatos preservados no histórico git:** `quality-gates/engine`, `detectors`, `ai-check` e `eval-runner` foram deliberadamente removidos do entregável da 0018, mas ficam como seed arquitetural para a 0009.
   - **Sinal de "está na hora":** um usuário rodar `/clear` esperando continuar uma spec e o agente novo não conseguir retomar com `tasks.md` + git; ou PR precisar de 3+ rounds de correção por causa de coisas que sensor automático pegaria.
@@ -158,7 +158,7 @@ Decisões ou trabalho que bloqueiam múltiplas specs. Cada bloqueador lista as s
 ### 2. ~~Release Sync da Spec 0020 (`ai-guidelines@1.0.0` + `1.0.1`)~~ — **resolvido em 2026-05-08**
 
 - **Resolução:** mini-PR `release/v1.0-sync` (PR #8) atualiza `roadmap/historico.md` com SHAs reais (`9ef875a` para `1.0.0`, `2bd4af3` para `1.0.1`), tags (`v1.0.0`, `v1.0.1`), links do registry e data — fechando o gap entre o PR auto-suficiente da Spec 0020 e o ato pós-merge de release. A remoção deste bloqueador é parte do mesmo PR (princípio de PR auto-suficiente: tudo o que precisa ficar consistente após o merge sai junto).
-- **Padrão de framework cravado:** sequência canônica `merge → checkout main → publish → tag → Mini-PR de Release Sync` documentada em `.core/process/spec-foundation.md` § "Sequência canônica para specs com publish em registry externo", junto com a regra de bloqueio de nova spec enquanto Release Sync estiver pendente. Vale para releases futuras.
+- **Padrão de framework cravado:** sequência canônica `merge → checkout main → publish → tag → Mini-PR de Release Sync` documentada em `.core/process/governance-foundation.md` § "Sequência canônica para specs com publish em registry externo", junto com a regra de bloqueio de nova spec enquanto Release Sync estiver pendente. Vale para releases futuras.
 - **Origem:** padrão nasceu de dor real durante a execução da Spec 0020 — erro de sequência detectado pelo owner antes do publish irreversível, evoluindo para decisão arquitetural em vez de fix tático.
 
 ### 1. ~~Naming decision do package `ai-guidelines`~~ — **resolvido em 2026-05-07**

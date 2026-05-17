@@ -6,14 +6,14 @@
 > Author: [Nome]
 > Date: [YYYY-MM-DD]
 > Owner: [Nome — quem responde por encerramento]
-> Tipo de spec: [evidence-driven | deterministic | mixed] <!-- OBRIGATÓRIO. Sem default — escolha consciente. Ver `.core/process/spec-foundation.md` § "Tipos de spec". -->
+> Tipo de spec: [evidence-driven | deterministic | mixed] <!-- OBRIGATÓRIO. Sem default — escolha consciente. Ver `.core/process/governance-foundation.md` § "Tipos de spec". -->
 > Decision Brief: [`./decision-brief.md`](./decision-brief.md) <!-- OPCIONAL. Obrigatório quando Tipo de spec = `evidence-driven` ou `mixed`. Omitir se `deterministic`. -->
 > Plan: [`./plan.md`](./plan.md)
 
 > **Princípio de imutabilidade:** após status `In Review`, este arquivo só
 > muda por consenso explícito. Decisões em aberto vão para `plan.md` (vivo).
 >
-> **Princípios da Escrita:** ver `.core/process/spec-foundation.md` §
+> **Princípios da Escrita:** ver `.core/process/governance-foundation.md` §
 > "Princípios da Escrita" (agnosticismo humano/IA, BR IDs, contratos).
 
 ---

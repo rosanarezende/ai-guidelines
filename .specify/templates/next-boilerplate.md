@@ -9,7 +9,7 @@
 > **DELETADO no encerramento pré-merge** (fase final do `tasks.md`); itens relevantes
 > migram antes para `.specify/specs/roadmap/backlog.md` ou viram issues.
 >
-> Fonte: `.core/process/spec-foundation.md` — política de NEXT.md.
+> Fonte: `.core/process/governance-foundation.md` — política de NEXT.md.
 
 ---
 

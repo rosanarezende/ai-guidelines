@@ -952,12 +952,12 @@ yarn smoke
 
 > **Âncora:** `[DEC-0021-B04]`
 
-- [ ] **4.B.1** Renomear/refatorar `.core/process/spec-foundation.md` para refletir governança (nome final decidido aqui).
+- [x] **4.B.1** Renomear/refatorar `.core/process/governance-foundation.md` (era `spec-foundation.md`) — nome final: **`governance-foundation.md`**. Refatoração mínima aplicada: título atualizado, nota de renomeação no header, TODO migração resolvido (apontava para esta spec).
 - [ ] **4.B.2** Extrair decisões arquiteturais estáveis para ADRs:
   - critério de migração: “decisão estável/cross-spec”
   - foundation permanece processo vivo e constituição operacional
 
-- [ ] **4.B.3** Atualizar links/cross-refs após renomeação.
+- [x] **4.B.3** Atualizar links/cross-refs após renomeação. Aplicado em: `AGENTS.md` (via regen do bloco compilado), `.core/rules/top/agents-core.md` (source), `CONTRIBUTING.md`, `docs/rpi-protocol.md`, `docs/process/spec-foundation.md` (stub atualizado para apontar ao novo destino — exclusão final em 4.C.1), `GOVERNANCE-CATALOG.md`, `.specify/templates/*-boilerplate.md` (8 templates), `.ai-guidelines/templates/*-boilerplate.md` (10 templates mirror), `.specify/specs/roadmap/backlog.md`, e referências internas no 0021 spec. Specs históricas (0008, 0015, 0017, 0018, 0019) e `roadmap/historico.md` + `CHANGELOG.md` preservados como rastro histórico.
 - [ ] **4.B.4** Auditoria das ADRs históricas em `/adrs/` à luz do critério editorial "ADR é princípio perene, não revisitação datada" (formalizado em `.core/governance/adrs/README.md`):
   - Para cada ADR legada (0003, 0004, 0005, 0006, 0007, 0008, 0009): aplicar um dos três caminhos:
     - **(a) Reescrever como princípio.** Se a decisão subjacente ainda é arquiteturalmente relevante mas o documento está escrito como relatório de execução (cita "Spec X — Vaga Y", lista mudanças por arquivo), reescrever o corpo como princípio perene; spec original vira nota histórica de rodapé.
@@ -1005,6 +1005,26 @@ yarn smoke
 
 ---
 
+## Sub-bloco [4.E] — Repositioning: Governance-First, AI-as-Channel 🧭
+
+> **Âncora nova:** `[DEC-0021-B06]` (Repositioning).
+> **Origem:** sessão de strategy review 2026-05-17 — os docs de pitch externo (Case de Arquitetura e Case de Engenharia) já posicionam o framework como governance-first; o código já é governance-first; só a casca pública (README, AGENTS.md framing, features.md classificação) ainda comunica AI-first. 4.E reconcilia a superfície com a substância sem renomear o pacote npm.
+> **Decisão de naming:** o pacote `ai-guidelines` permanece. "Guidelines" é semanticamente palavra de governança; reclama-se a leitura governance-first via surface, não via rename.
+> **Ordem de execução:** 4.E ocorre **após 4.B** (para que a ADR nova nasça já no lar consolidado `.core/governance/adrs/` numerada como **0015**, após renumeração de 4.B.5).
+
+- [ ] **4.E.1** Criar ADR `.core/governance/adrs/0015-governance-first-ai-as-channel.md` declarando o princípio: core é governança de engenharia repo-first; integração AI-agnóstica é canal opt-in de primeira classe.
+- [ ] **4.E.2** Reescrever `README.md`: tagline e seções "Por que existe" / "O que você ganha" / "Como funciona" lideram com governança; seção "Integrações AI-agnósticas (opt-in)" substitui "Compatibilidade Multi-IA".
+- [ ] **4.E.3** Reescrever abertura textual de `AGENTS.md` (Contexto Local, fora do bloco `<AI_GUIDELINES>` compilado): trocar "AGENTS.md raiz é o runtime artifact" por "AGENTS.md é um dos outputs runtime da governança; SSOT vive em `.governance/`".
+- [ ] **4.E.4** Atualizar `docs/features.md` (após 4.C.1 ter auditado `/docs/`): reclassificar AI provider adapters como **opt-in feature** (igual Prettier/Husky/CI); hoje estão listados como Core.
+- [ ] **4.E.5** Atualizar `GOVERNANCE-CATALOG.md` §1: incluir nota de que os 7 pilares MECE são definidos em termos de engenharia, não de IA — evidência arquitetural de que o core é governance-first.
+- [ ] **4.E.N** Pipeline verde.
+- [ ] **4.E.[DEBT-REVIEW]** `NEXT.md`: registrar débito de eventual rename futuro do pacote npm (não nesta spec) + reposicionamento de superfícies externas (GitHub topics, landing page se houver, badges).
+- [ ] **4.E.[ARCHITECTURE]** `ARCHITECTURE.md` §1 "O que esta CLI faz?": reescrita com framing governance-first; AI fica como canal.
+- [ ] **4.E.[SPEC-AMENDMENT]** `spec.md` da 0021: adicionar adendo "Atualização de escopo 2026-05-17" no rodapé citando expansão pelo sub-bloco 4.E (princípio de imutabilidade preservado — adendo, não revisão).
+- [ ] **4.E.[COMMIT]** `refactor(spec-0021): repositioning governance-first + AI-as-channel`.
+
+---
+
 ## Sub-bloco [4.D] — Homologação final (contrato distribuído) ✅
 
 > **Âncoras:** `[DEC-0021-A03]`, `[DEC-0021-C01]`, `[DEC-0021-D01]`
@@ -1026,6 +1046,7 @@ yarn smoke
   - carrier híbrido publicado
   - foundation/ADR fronteira aplicada
   - docs/ponteiros alinhados
+  - repositioning governance-first aplicado
   - smoke/homologação verde
 
 - [ ] **4.[MANDATÓRIO]** Aguardar aprovação humana explícita.

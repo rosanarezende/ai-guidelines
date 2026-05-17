@@ -9,7 +9,7 @@
 
 > **Progress file vivo.** Atualizar a cada degrau concluído. Quando uma decisão mudar, refletir em `plan.md` na seção 📐 "Decisões revisitadas" e ajustar tasks impactadas. Não retroceder status sem registro.
 
-> **Boilerplate genérico — variante de referência.** Ao instanciar uma spec real, escolha a variante alinhada ao `Tipo de spec` declarado no header da `spec.md` (cf. `.core/process/spec-foundation.md` § "Tipos de spec"):
+> **Boilerplate genérico — variante de referência.** Ao instanciar uma spec real, escolha a variante alinhada ao `Tipo de spec` declarado no header da `spec.md` (cf. `.core/process/governance-foundation.md` § "Tipos de spec"):
 >
 > - `evidence-driven` → [`tasks-evidence-driven-boilerplate.md`](./tasks-evidence-driven-boilerplate.md) — adiciona sub-bloco **Stage 1 (Research)** + **Gate humano via `decision-brief.md`** entre Setup e Implementação A.
 > - `deterministic` → [`tasks-deterministic-boilerplate.md`](./tasks-deterministic-boilerplate.md) — single-pass: Setup → Implementação direta, sem Stage 1.
@@ -23,7 +23,7 @@
 
 > Bootstrap da spec: ler estado do roadmap, classificar a spec, criar branch, instanciar artefatos e travar escopo com humano antes de qualquer implementação.
 
-- [ ] **0.1** **Bootstrap**: ler `roadmap/backlog.md` (spec ativa, prioridades, candidatas absorvidas) e `.core/process/spec-foundation.md` § "Tipos de spec".
+- [ ] **0.1** **Bootstrap**: ler `roadmap/backlog.md` (spec ativa, prioridades, candidatas absorvidas) e `.core/process/governance-foundation.md` § "Tipos de spec".
 - [ ] **0.2** **Tipo de spec** decidido (`evidence-driven` | `deterministic` | `mixed`) — campo obrigatório no header da `spec.md`. Critério-teste: _"o design depende de evidência técnica/pesquisa ainda não coletada?"_
 - [ ] **0.3** **Slug semântico** definido (ex.: `<domínio>-<verbo-curto>`); o **número (NNNN)** só é alocado na criação da branch — candidatas vivem no backlog por slug.
 - [ ] **0.4** Branch `feat/spec-NNNN-<slug>` criada a partir de `main`.
@@ -43,7 +43,7 @@
 
 Decompor por componente/sub-bloco do `plan.md`. Cada task deve ser observável ("o que muda no repo após esta task"), com path concreto quando aplicável.
 
-> **Nota — promoção de regra.** Se a spec promover regra editorial / de processo / de IA, classificar explicitamente como **universal** × **opt-in** (cf. `.core/process/spec-foundation.md` § "Categorias de regras").
+> **Nota — promoção de regra.** Se a spec promover regra editorial / de processo / de IA, classificar explicitamente como **universal** × **opt-in** (cf. `.core/process/governance-foundation.md` § "Categorias de regras").
 
 ### Sub-bloco [A] — [nome do sub-bloco no plan]
 
@@ -96,11 +96,11 @@ Decompor por componente/sub-bloco do `plan.md`. Cada task deve ser observável (
 > **Princípio de PR auto-suficiente:** ao mergear, o agente que vier depois não precisa abrir hotfix nem commit complementar para fechar a spec. Tudo o que a release precisa — status `Done`, histórico, changelog publicado, version bump, índices atualizados, research migrado — já está nesse mesmo PR. Se você precisar perguntar "isso é commit pré-merge ou pós-merge?", a resposta padrão é **pré-merge**.
 
 - [ ] **4.1** `NEXT.md` (se existir): migrar débitos relevantes para `roadmap/backlog.md` (atualizando candidatas existentes ou abrindo novas) e **deletar** o arquivo.
-- [ ] **4.2** Migração de research: cada arquivo significativo renomeado para incluir a data (`YYYY-MM-DD-nome.md`) e movido para a pasta de domínio correta em `.specify/specs/researchs/<domínio>/`. Adicionar link + resumo em `.specify/specs/research-index.md`. Política completa em `.core/process/spec-foundation.md`.
+- [ ] **4.2** Migração de research: cada arquivo significativo renomeado para incluir a data (`YYYY-MM-DD-nome.md`) e movido para a pasta de domínio correta em `.specify/specs/researchs/<domínio>/`. Adicionar link + resumo em `.specify/specs/research-index.md`. Política completa em `.core/process/governance-foundation.md`.
 - [ ] **4.3** `decision-brief.md` (se houver) **permanece** no diretório da spec como artefato histórico — não migra.
 - [ ] **4.4** `spec.md` header: status → `Done (PR #X — YYYY-MM-DD)`.
 - [ ] **4.5** `roadmap/historico.md`: spec movida para "Specs concluídas" com data; entrada removida da seção "Em execução" em `roadmap/backlog.md`.
 - [ ] **4.6** `CHANGELOG.md`: se a spec mudou comportamento publicado, criar **release publicada** (`## [X.Y.Z] — YYYY-MM-DD`) — não deixar em `[Unreleased]`. Bumpar `version` em `package.json` na mesma operação. Refatorações internas e specs puramente documentais dispensam release.
-- [ ] **4.7** **[MANDATÓRIO]** Confirmar que **a sessão atual** não abriu outra spec antes deste encerramento (cf. `.core/process/spec-foundation.md` § "Checklist de fechamento" — _uma sessão, uma spec ativa_, e research da Spec 0017 [`2026-04-29-concurrency-best-practices.md`](../specs/researchs/governance/2026-04-29-concurrency-best-practices.md)). Specs em paralelo conduzidas por outros contribuidores ou outras sessões **são permitidas** em repos OSS — a regra é por sessão de trabalho, não por repositório.
+- [ ] **4.7** **[MANDATÓRIO]** Confirmar que **a sessão atual** não abriu outra spec antes deste encerramento (cf. `.core/process/governance-foundation.md` § "Checklist de fechamento" — _uma sessão, uma spec ativa_, e research da Spec 0017 [`2026-04-29-concurrency-best-practices.md`](../specs/researchs/governance/2026-04-29-concurrency-best-practices.md)). Specs em paralelo conduzidas por outros contribuidores ou outras sessões **são permitidas** em repos OSS — a regra é por sessão de trabalho, não por repositório.
 - [ ] **4.8** **[COMMIT]** `chore(spec-NNNN): encerramento pré-merge — research migrado, NEXT removido, status final`.
 - [ ] **4.9** **[MANDATÓRIO]** Aprovação humana explícita para merge. **Não fazer merge autonomamente.**

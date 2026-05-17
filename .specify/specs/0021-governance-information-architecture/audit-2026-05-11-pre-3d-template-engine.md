@@ -628,4 +628,4 @@ Anti-objetivos do bloco (válidos durante toda a execução): não tocar 3.E (s�
 - ARCHITECTURE §6 ([`.core/governance/ARCHITECTURE.md`](../../../.core/governance/ARCHITECTURE.md))
 - Research: Living Docs and Template Composition Practices §1.7, §2.5, §5 ([`../researchs/governance/2026-05-11-living-docs-and-template-composition-practices.md`](../researchs/governance/2026-05-11-living-docs-and-template-composition-practices.md))
 - Auditoria precedente (formato) ([`./audit-2026-05-11-pre-3c4-living-docs-aggregation.md`](./audit-2026-05-11-pre-3c4-living-docs-aggregation.md))
-- spec-foundation §"Tipos de spec" ([`.core/process/spec-foundation.md`](../../../.core/process/spec-foundation.md))
+- governance-foundation §"Tipos de spec" ([`.core/process/governance-foundation.md`](../../../.core/process/governance-foundation.md))

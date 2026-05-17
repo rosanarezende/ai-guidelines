@@ -66,7 +66,7 @@ Além dos gaps estratégicos, a análise pós-gate revelou riscos de implementa�
 
 ### Risco 2: Inconsistência do Fluxo RPI (Research, Plan, Implement)
 
-- **Gap:** A renomeação e refatoração do `spec-foundation.md` (`DEC-0021-B03`, `B04`) e a introdução dos 6 pilares de valor (`DEC-0021-A02`) tornam os templates atuais de `spec`, `plan` e `tasks` (`.specify/templates/`) obsoletos conceitualmente. Eles ainda operam sob uma visão "spec-cêntrica".
+- **Gap:** A renomeação e refatoração do `governance-foundation.md` (`DEC-0021-B03`, `B04`) e a introdução dos 6 pilares de valor (`DEC-0021-A02`) tornam os templates atuais de `spec`, `plan` e `tasks` (`.specify/templates/`) obsoletos conceitualmente. Eles ainda operam sob uma visão "spec-cêntrica".
 - **Impacto:** Se não atualizarmos os templates que a própria CLI distribui, estaremos entregando uma arquitetura nova (`.governance/` com 6 pilares) com ferramentas que ainda forçam o modelo antigo. Isso geraria confusão imediata no consumidor e invalidaria parte do valor da spec.
 - **Ressalva:** A atualização dos templates de boilerplate em `.ai-guidelines/templates/` (que se tornarão `.governance/templates/`) é uma dependência direta da nova arquitetura.
 

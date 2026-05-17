@@ -1,13 +1,10 @@
 # spec-foundation.md — Stub de Redirect
 
-> **Movido para [`/.core/process/spec-foundation.md`](../../.core/process/spec-foundation.md) pela Spec 0018.**
+> **Movido + renomeado para [`/.core/process/governance-foundation.md`](../../.core/process/governance-foundation.md).**
 >
-> Este arquivo é um stub temporário que preserva links de specs históricas
-> (anteriores à 0018) e da própria 0018 durante a transição. Será **removido**
-> pela próxima spec de governance (`governance-information-architecture`,
-> candidata em [`../../.specify/specs/roadmap/backlog.md`](../../.specify/specs/roadmap/backlog.md)).
+> Histórico:
 >
-> Toda nova referência ao documento canônico deve apontar para o novo path
-> em `.core/process/spec-foundation.md` — `.core/` é o material distribuível
-> aos repos consumidores via CLI; documentação de processo SDD vive lá para
-> ser ofertada como parte da metodologia.
+> - Movido de `docs/process/` para `.core/process/` pela Spec 0018 (`.core/` é o material distribuível aos consumidores via CLI).
+> - Renomeado de `spec-foundation.md` para `governance-foundation.md` pela Spec 0021 sub-bloco 4.B.1 — o conteúdo cobre toda a governança (7 pilares MECE), não apenas specs.
+>
+> Este stub será **removido** pela Spec 0021 sub-bloco 4.C.1 (cleanup holístico de `/docs/`). Toda nova referência deve apontar para `.core/process/governance-foundation.md`.

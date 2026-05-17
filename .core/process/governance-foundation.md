@@ -1,26 +1,37 @@
-# Spec Foundation — Implementação canônica do passo Plan no ciclo RPI
+# Governance Foundation — Manual operacional do ciclo Governance-Driven
+
+> **Renomeação 2026-05-17 (Spec 0021 sub-bloco 4.B.1):** este documento se chamava
+> `spec-foundation.md` até a Spec 0021. O novo nome reflete que a constituição
+> operacional cobre TODA a governança (7 pilares MECE), não apenas specs.
+> Decisões arquiteturais estáveis cross-spec foram extraídas para ADRs
+> em `.core/governance/adrs/` (sub-bloco 4.B.2) — este arquivo permanece como
+> processo vivo: manual de uso do ciclo, lifecycle de artefatos, checklists.
 
 > Este guia é a implementação canônica do passo **Plan** do ciclo RPI
-> (ver `../rpi-protocol.md`). Use spec-foundation quando a iniciativa
-> merecer persistência em repositório; para ajustes pontuais contidos
-> em uma sessão, use plano leve na ferramenta.
+> (ver `../rpi-protocol.md`). Use o ciclo governance-foundation quando a
+> iniciativa merecer persistência em repositório; para ajustes pontuais
+> contidos em uma sessão, use plano leve na ferramenta.
 
-## Quando usar spec-foundation
+## Quando usar governance-foundation
 
-Critério objetivo (**qualquer** verdade → spec-foundation):
+Critério objetivo (**qualquer** verdade → governance-foundation):
 
 - A iniciativa estima **mais de uma sessão** de trabalho.
 - **Toca mais de um arquivo** fora de uma feature isolada.
 - O resultado precisa **sobreviver a troca de IA, sessão ou colaborador**.
 
-Demais casos (**todas** as condições invertidas) → plano leve (scratchpad na ferramenta, não versionado). Referência cruzada em `../rpi-protocol.md` seção "Quando usar spec-foundation vs plano leve".
+Demais casos (**todas** as condições invertidas) → plano leve (scratchpad na ferramenta, não versionado). Referência cruzada em `../rpi-protocol.md` seção "Quando usar governance-foundation vs plano leve".
 
 ---
 
 ## Tipos de spec
 
-> **🚧 TODO — migração arquitetural pendente.** O conteúdo desta seção
-> deverá migrar para a futura spec **`governance-information-architecture`** (já presente em `roadmap/backlog.md`), que reorganizará a arquitetura de informação do framework (gêneros documentais, fronteira entre `docs/`, `adrs/`, `.core/`, `.specify/`). Esta posição é tática — entregar a Spec 0018 sem bloquear a entrega; a migração futura não bloqueia o uso desta seção pelos consumidores enquanto isso.
+> **Nota da Spec 0021 (4.B.1):** a "🚧 TODO migração arquitetural" que existia aqui
+> apontava para a futura spec `governance-information-architecture` — **esta é** essa
+> spec. Decisão de placement: a seção "Tipos de spec" é processo vivo de classificação
+> operacional e permanece neste documento. Decisões arquiteturais estáveis
+> (universal vs opt-in, roadmap repo-first, numeração de specs) foram extraídas
+> para ADRs no sub-bloco 4.B.2.
 
 Toda spec declara seu **tipo** no header da `spec.md`, em **campo obrigatório sem default**. O tipo define qual variante de `tasks.md` governa a execução e se o gate humano via `decision-brief.md` é exigido antes da implementação.
 

@@ -36,11 +36,11 @@ Execução técnica e atômica do plano acordado.
   4. **Estilo**: Refinar formatações de saída.
   5. **Gatilho**: Definir eventos, webhooks ou agendamentos cron.
 
-### Quando usar spec-foundation vs plano leve
+### Quando usar governance-foundation vs plano leve
 
 Critério objetivo de escolha no passo **Plan**:
 
-- Use **spec-foundation** (`.specify/specs/<slug>/`, versionado) quando **qualquer uma** for verdade:
+- Use **governance-foundation** (`.specify/specs/<slug>/`, versionado) quando **qualquer uma** for verdade:
   - A iniciativa estima **mais de uma sessão** de trabalho.
   - **Toca mais de um arquivo** fora de uma feature isolada.
   - O resultado precisa **sobreviver a troca de IA, sessão ou colaborador**.
@@ -50,7 +50,7 @@ Critério objetivo de escolha no passo **Plan**:
   - Escopo **local a um arquivo** ou unidade lógica isolada.
   - Nenhum handoff futuro depende do plano escrito.
 
-Implementação canônica de spec-foundation (lifecycle, templates, checklists de abertura/fechamento): ver `.core/process/spec-foundation.md`.
+Implementação canônica de governance-foundation (lifecycle, templates, checklists de abertura/fechamento): ver `.core/process/governance-foundation.md`.
 
 ---
 
