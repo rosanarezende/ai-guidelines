@@ -50,6 +50,17 @@ export async function syncConsumerTemplates(targetDir, config, options, actions)
     if (engineResult.rendered) {
       outputContent = engineResult.content;
       outputOrigin = "engine";
+    } else if (engineResult.reason === "engine-unavailable") {
+      // Recipe mapeada existe mas dist/ não foi encontrado. Fail-fast em vez de
+      // fallback silencioso para mirror: o pacote npm distribui dist/ via
+      // package.json:files + prepack, então engine-unavailable indica regressão
+      // real (build quebrado, prepack pulado, etc.), não um estado esperado.
+      throw new Error(
+        `Engine indisponível para recipe "${engineResult.recipeName}": ` +
+          `artefatos compilados em dist/ não encontrados. ` +
+          `Se rodando do repo, execute "yarn build" antes; ` +
+          `se instalado via npm, isso indica um pacote quebrado (prepack pulado ou dist/ ausente do tarball).`
+      );
     } else {
       outputContent = await fs.readFile(sourceFilePath, "utf8");
       outputOrigin = "mirror";
