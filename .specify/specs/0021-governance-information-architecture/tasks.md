@@ -1006,19 +1006,26 @@ yarn smoke
   - **Exit gate verde**: yarn test 296/296 (baseline 267 + 29 novos); yarn test:nova-cli 381/381; yarn check verde; smoke manual confirma `[engine]` apenas em tasks-evidence-driven e `diff -u` byte-zero vs legacy.
   - **Out-of-scope** (R2): recipes adicionais (spec, plan, decision-brief, tasks-deterministic/mixed, next, roadmap, research-index, project-config) ficam para PR futuro, isoladas, depois que a engine estiver estabilizada em produção via fallback.
 
-- [ ] **4.C.1** Auditar `/docs` e decidir:
-  - migrar conteúdo útil para lar canônico
-  - depreciar/remover o resto
+- [x] **4.C.1** Audit `/docs` + sanitização per-doc (R3: DELETE/MOVE-AS-IS/SURGICAL-EDITS/STAY apenas):
+  - **DELETE**: `docs/process/spec-foundation.md` (stub pós-4.B.1).
+  - **MOVE-AS-IS** × 3: `docs/rpi-protocol.md`, `docs/tdd-guidelines.md`, `docs/ai-efficiency-guide.md` → `.core/process/` (lar canônico de metodologia de processo). Único ajuste de link interno: `ai-efficiency-guide.md` linha 18 (refere `rpi-protocol.md` como sibling pós-MOVE).
+  - **STAY** × 2: `docs/features.md`, `docs/cli/ai-guidelines-cli.md` (área pública consumer-facing; ADR 0018 e README/CONTRIBUTING/issue templates referenciam).
+  - Tabela de veredito apresentada e aprovada em sessão (gate humano cumprido).
+  - 0 SURGICAL-EDITS necessários; 0 issues separadas.
 
-- [ ] **4.C.2** Atualizar ponteiros públicos e internos:
-  - `README.md`
-  - `CONTRIBUTING.md`
-  - `AGENTS.md`
-  - docs de CLI/help
+- [x] **4.C.2** Sweep mecânico de ponteiros pós-4.C.1:
+  - Path corrections (`docs/rpi-protocol.md` → `.core/process/rpi-protocol.md`): ADR 0004, `.specify/templates/roadmap-boilerplate.md`, `.ai-guidelines/templates/roadmap-boilerplate.md`.
+  - Status flips no `GOVERNANCE-CATALOG.md` (§2.1 + §6 deltas) marcando 2 linhas como ✅ 4.C.1.
+  - `NEXT.md` item #4: strikethrough + nota de resolução.
+  - README/CONTRIBUTING/AGENTS/CLAUDE não tocados (verificado: zero refs aos docs movidos).
 
-- [ ] **4.C.3** Validar que não há referências quebradas a `.specify/`/`.ai-guidelines/` quando o contrato final é `.governance/`.
+- [x] **4.C.3** Validação final + artefatos da spec:
+  - `LegacyMirrorContract.test.ts` ampliado: asserção complementar valida recipe materializada + partials referenciados.
+  - `mirror-equivalence-map.md` atualizado: tabela final com status pós-cutover, política de equivalência (E1–E7), R4 (output naming), engine availability.
+  - `NEXT.md` item #4 fechado em 4.C.2.
+  - Sweep `git grep` confirma zero refs quebradas em live files (3 hits restantes em registros históricos intencionais).
 - [ ] **4.C.N** Pipeline verde.
-- [ ] **4.C.[DEBT-REVIEW]** `NEXT.md`: fechar débitos sobre referências quebradas a `.specify/`/`.ai-guidelines/`; registrar conteúdo de `/docs` que migrou vs foi depreciado.
+- [ ] **4.C.[DEBT-REVIEW]** `NEXT.md`: registrar refs históricas em specs frozen como rastro intencional (não débito).
 - [ ] **4.C.[ARCHITECTURE]** `ARCHITECTURE.md`: §H atualiza para refletir cleanup; remover menções a `/docs` se não for mais lar canônico.
 - [ ] **4.C.[COMMIT]** `docs(spec-0021): cleanup holístico de docs + ponteiros`.
 
