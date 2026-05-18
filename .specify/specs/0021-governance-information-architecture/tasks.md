@@ -1025,8 +1025,8 @@ yarn smoke
   - `NEXT.md` item #4 fechado em 4.C.2.
   - Sweep `git grep` confirma zero refs quebradas em live files (3 hits restantes em registros históricos intencionais).
 - [ ] **4.C.N** Pipeline verde.
-- [ ] **4.C.[DEBT-REVIEW]** `NEXT.md`: registrar refs históricas em specs frozen como rastro intencional (não débito).
-- [ ] **4.C.[ARCHITECTURE]** `ARCHITECTURE.md`: §H atualiza para refletir cleanup; remover menções a `/docs` se não for mais lar canônico.
+- [x] **4.C.[DEBT-REVIEW]** `NEXT.md`: registrar refs históricas em specs frozen como rastro intencional (não débito).
+- [x] **4.C.[ARCHITECTURE]** `ARCHITECTURE.md`: §H (convenções e topologia) explicita `docs/` como superfície pública e `.core/process/` como lar canônico de processo; sem `/docs` como root de metodologia.
 - [ ] **4.C.[COMMIT]** `docs(spec-0021): cleanup holístico de docs + ponteiros`.
 
 ---

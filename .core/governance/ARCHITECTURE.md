@@ -248,4 +248,20 @@ O novo formato `.governance/` (registry, recipes e partials atômicos) é o cont
 
 ---
 
+## 8. Convenções e topologia (referência §H)
+
+> **Por que “§H”?** Algumas specs e auditorias citam esta seção por letra (histórico). O número pode variar; o identificador “§H” é o que deve permanecer estável.
+
+- **No consumidor:**
+  - `.governance/` é o root canônico (SSOT) e contém o estado estruturado (`registry.yml`) e as reservas `intake/`, `handoff/`, `telemetry/`.
+  - `.ai-guidelines/` existe como bridge legada enquanto houver componentes que ainda escrevem nela; **não** é SSOT.
+- **No mantenedor (este repo):**
+  - `.core/` é o baseline canônico (rules, governance, process, templates/recipes).
+  - `docs/` é superfície pública (README/features/assets) e **não** é lar canônico de processos/metodologias — isso vive em `.core/process/`.
+  - `.specify/specs/` e suas auditorias podem conter referências históricas (paths antigos) como rastro intencional; não são fonte de verdade do layout atual.
+
+Quando a topologia canônica mudar, atualize em conjunto: este documento (§H), o help/UX em `docs/cli/ai-guidelines-cli.md` (se aplicável) e os contratos/drift guards que tornam o delta “falha-fatal” em CI.
+
+---
+
 > **Princípio editorial.** Este documento é a **entrada principal** para humanos. Quando uma seção precisaria explicar detalhes técnicos densos (glossário completo, códigos de erro, edge cases), o detalhe vive em `ARCHITECTURE-REFERENCE.md`. Se uma seção aqui cresce mais que ~30 linhas, mova o excedente para o reference.

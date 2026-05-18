@@ -158,6 +158,10 @@ _(A preencher conforme execução do restante da Fase 3)_
 
 ## 💡 Insights e Descobertas
 
+### Rastro histórico em specs congeladas (não débito)
+
+Algumas referências históricas em `.specify/specs/` (paths antigos, “ponteiros” de versões passadas e trechos de auditoria) são **rastro intencional**. Esses trechos não são SSOT do layout atual e **não** devem ser “limpos” quando o resultado for perder rastreabilidade ou contexto de decisão.
+
 ### Evolução do Boilerplate de `tasks.md`: quando e como quebrar em múltiplas PRs (Harness Lock)
 
 **Contexto:** A Spec 0021 mostrou que “uma PR por spec” não escala quando o trabalho altera contratos críticos (paths/root, SSOT, engine/runtime) e exige validação humana por checkpoints. Sem um critério explícito, o repositório tende a dois extremos ruins: **mega-PRs irrevisáveis** ou **micro-PRs com churn**.
