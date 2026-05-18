@@ -153,3 +153,19 @@ O resultado esperado desta spec é uma arquitetura de informação única e expl
 - Specs relacionadas: 0011, 0018, 0019, 0020.
 - Cross-ref: `[DEC-0018-A06]` na decision-brief da Spec 0018.
 - Researches centrais de 2026-05-08 em `.specify/specs/researchs/architecture/`.
+
+---
+
+## 🔄 Atualização de escopo — 2026-05-17
+
+> **Tipo:** Amendment pós-In Review (preservando princípio de imutabilidade — adendo, não revisão do escopo original).
+> **Origem:** sessão colaborativa humano-agente em 2026-05-17 durante execução de PR4 / sub-bloco 4.B.
+> **Decisões formais:** `[DEC-0021-B06]` (auditoria das ADRs legadas) e `[DEC-0021-B07]` (repositioning) em `decision-brief.md` Bloco E.
+
+Durante a execução do PR4, duas perguntas estruturantes emergiram e foram resolvidas:
+
+1. **Auditoria das ADRs legadas (sub-bloco 4.B.4).** Caminhos a/b/c aplicados por ADR: 0003 reescrita como princípio + parte tática extraída para `.core/process/test-coverage-policy.md`; 0004 marcada `Superseded by ADR 0008`; 0005-0009 mantidas. Detalhes operacionais em `decision-brief.md` `[DEC-0021-B06]`.
+
+2. **Repositioning Governance-First / AI-as-Channel (sub-bloco novo 4.E).** Expansão de escopo aprovada: a Spec 0021 deixa de ser apenas "arquitetura de informação" e passa a reconciliar a casca pública do framework (README, AGENTS.md framing, `features.md` classification) com o que o código já é (governance-first). ADR 0018 captura o princípio perene; sub-bloco 4.E aplica concretamente. Pacote npm `ai-guidelines` permanece (reclaim semântico via surface, sem rename). Detalhes em `decision-brief.md` `[DEC-0021-B07]`.
+
+Esses amendments não revisam o escopo original — adicionam dois entregáveis que ficaram visíveis durante a execução. Critério de aceite original (alto-nível, observável) permanece intacto e ganha **uma cláusula extra**: ao final do PR4, a leitura da casca pública (README + AGENTS.md framing + features.md) reflete a substância (código governance-first).

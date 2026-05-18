@@ -146,7 +146,13 @@ _(A preencher conforme execução do restante da Fase 3)_
 
 6. **Fluxo decision-brief ↔ ADR ↔ policy documentado** (4.B.2, 2026-05-17). Gap apontado em sessão: o critério para decidir QUE conteúdo vai em CADA artefato estava implícito. Nova seção em `governance-foundation.md` § "Decisões" descreve fluxo canônico, critério-teste por sintoma, 5 anti-padrões a rejeitar no review, e casos limite. Resolveu também: `decision-brief.md` da 0021 ganhou [DEC-0021-B06] (auditoria ADRs) e [DEC-0021-B07] (repositioning) como amendments retroativos da sessão.
 
-7. **Auditoria de naming em `.core/rules/top/`** (débito herdado da Fase 3, ainda válido). A fronteira `agents-core.md` vs `global-rules.md` faz sentido em escopo mas o naming confunde. Originalmente prevista para 4.B; permanece para uma das próximas iterações (4.E ou pós-merge), agora que 4.B está fechado.
+7. **Auditoria de naming em `.core/rules/top/`** (débito herdado da Fase 3, ainda válido). A fronteira `agents-core.md` vs `global-rules.md` faz sentido em escopo mas o naming confunde. Originalmente prevista para 4.B; permanece para pós-merge agora que 4.B e 4.E estão fechados.
+
+8. **Rename futuro do pacote npm `ai-guidelines`** (registrado como débito formal pelo `[ADR 0018]`/4.E). Decisão atual: manter o nome por reclaim semântico via surface (README, AGENTS.md framing). Se a tração futura pedir rename mais explícito (`repo-governance`, `eng-governance`), abrir spec dedicada — não é princípio arquitetural, é decisão de positioning movida por sinal de mercado.
+
+9. **Reposicionamento de superfícies externas** (4.E pós-merge): GitHub topics, descrição do repo no GitHub, landing page (se houver), badges. Não bloqueia merge da 0021 mas precisa entrar em backlog de release follow-up.
+
+10. **Cutover real da CLI mjs para src/ DDD** (`[ADR 0018]` § "Onde se aplica" e roadmap pós-PR4). Hoje a CLI mjs ainda é o entrypoint em produção; `src/` está paralelo. O sub-bloco 4.C inicia o cutover via TemplateEngine (recipes substituindo mirror); o cutover completo (Registry mjs → GovernanceRegistryStore real, etc.) é trabalho de specs futuras.
 
 ---
 

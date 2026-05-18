@@ -12,17 +12,17 @@
 
 ## 1. O que esta CLI faz?
 
-A `ai-guidelines` é uma ferramenta de linha de comando que ajuda **times de software a trabalhar com agentes de IA (Claude, GPT, Gemini, Cursor, Copilot…) de forma consistente, governada e auditável**.
+A `ai-guidelines` é uma ferramenta de linha de comando que **dá a times de engenharia um framework de governança repo-first** — backlog, specs, decisões arquiteturais, gates humanos, registro estruturado de trabalho em curso — com **integração AI-agnóstica de primeira classe** para quem quer usar agentes (Claude, GPT, Gemini, Cursor, Copilot…) no fluxo. Governance-first, AI-as-channel (`[ADR 0018]`).
 
-Em vez de cada desenvolvedor combinar regras com sua IA preferida no chat, a CLI cria e mantém:
+A CLI cria e mantém três coisas no projeto consumidor:
 
-- um **manual único do projeto** (`AGENTS.md`) que descreve as regras e princípios técnicos;
-- **versões adaptadas desse manual** para cada IA usada — cada uma com seu formato próprio (Claude tem `CLAUDE.md`, Cursor tem `.cursor/rules/...`, Copilot tem `.github/copilot-instructions.md` etc.);
-- um **registro estruturado** (`.governance/registry.yml`) com tudo que está em curso no projeto: specs em andamento, experimentos abertos, correções pendentes, propostas de backlog, incidentes ativos.
+- **Estado canônico de governança** (`.governance/registry.yml`) — tudo que está em curso: specs em andamento, experimentos abertos, correções pendentes, propostas de backlog, incidentes ativos. SSOT estruturado versionado, legível por humanos e agentes igualmente.
+- **Documentação derivada do código** (`living-docs.yml`) — testes com IDs `[BR-CLI-*]` viram artefato estruturado protegido por drift guard fatal. Regras de negócio têm rastreabilidade direta para os testes que as protegem.
+- **Canal de integração AI-agnóstica** (opt-in, mas distribuído por default) — um **manual único do projeto** (`AGENTS.md`) compilado a partir das regras modulares em `.core/rules/`, com **versões adaptadas desse manual** para cada IA usada (Claude tem `CLAUDE.md`, Cursor tem `.cursor/rules/...`, Copilot tem `.github/copilot-instructions.md` etc.).
 
 **Por que isso importa?**
 
-Quando uma IA "esquece" o contexto do projeto, gera código que viola convenções, ou quando o time inteiro depende da memória de uma pessoa para saber "qual era a regra mesmo?", o trabalho fica caro e frágil. A `ai-guidelines` resolve isso transformando a governança do projeto em **artefatos versionados** — que tanto humanos quanto IAs leem antes de agir.
+A dor real do framework é **governança de engenharia que se perde**: backlog vive em ferramenta externa que some na troca de stack; specs viram tribal knowledge na cabeça de uma pessoa; decisões arquiteturais somem em threads do Slack; gates humanos viram aprovações implícitas. O `ai-guidelines` resolve isso transformando a governança em **artefatos versionados no próprio repo** — independentes de tracker, dashboard ou plataforma. IAs se beneficiam (leem o mesmo estado que humanos), mas o valor existiria mesmo num time que não usa IA. Esse é o core; integração AI é o canal.
 
 ---
 

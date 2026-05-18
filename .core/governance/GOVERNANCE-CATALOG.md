@@ -37,6 +37,8 @@ Os 7 pilares são **mutuamente exclusivos e coletivamente exaustivos**. Todo tra
 
 **Por que MECE.** A taxonomia define classes mutuamente exclusivas (`spec` ≠ `incident` ≠ `experiment`) e coletivamente exaustivas (todo trabalho de valor cabe em um dos 7). Quando um item não cabe, a resposta correta é abrir ADR — não criar pilar novo de oportunidade. Critério formalizado em `.core/governance/adrs/0010-taxonomy-mece-pillars.md`.
 
+**Evidência arquitetural governance-first.** Os 7 pilares MECE são definidos estritamente em termos de **intenção de trabalho de engenharia** — `spec` (trabalho formal), `experiment` (hipótese de produto), `spike` (PoC técnico), `incident` (ocorrência operacional), `proposal` (discussão), `patch` (manutenção simples), `fix` (correção rastreada). **Nenhum** menciona IA, agentes, prompts ou modelos. Isso é evidência direta de que o domínio core do framework é governança de engenharia repo-first; integração AI-agnóstica é canal de primeira classe, não core ontológico (`[ADR 0018]`).
+
 ---
 
 ## 2 — Paths canônicos

@@ -62,20 +62,24 @@ A 4.B.5 da Spec 0021 estabeleceu o critério que rege colisões: **legado preser
 
 ## ADRs ativas neste diretório
 
-| #    | Título                                                                    | Princípio                                                                               | Status                             |
-| ---- | ------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- | ---------------------------------- |
-| 0003 | Rastreabilidade `[BR-CLI-*]` é Contrato; Cobertura é Política Operacional | Vínculo regra↔teste é contrato; cobertura técnica é piso, com exceções honestas         | Aceita (reescrita em 4.B.4)        |
-| 0004 | Governança de Responsabilidade Única                                      | Originalmente: 1 arquivo, 1 responsabilidade na governança                              | **Superseded by ADR 0008** (4.B.4) |
-| 0005 | Curadoria Público/Privado                                                 | Taxonomia explícita de o que é público vs restrito; sanitização antes de flip           | Aceita                             |
-| 0006 | Licença Apache-2.0                                                        | Apache-2.0 como licença de framework AI tooling; proteção de patentes (§3)              | Aceita                             |
-| 0007 | Visibilidade Pública: Fresh Repo + Snapshot Curado                        | Tornar repo público via snapshot curado em fresh repo, não publish do histórico interno | Aceita                             |
-| 0008 | Governança Monolítica (Monolithic Runtime Compiler)                       | Regras compiladas in-line no `AGENTS.md` para combater Lost-in-the-Middle               | Aceita                             |
-| 0009 | Naming do pacote npm e estratégia de registry                             | `ai-guidelines` não-scoped; registry público gratuito; GitHub App para Action           | Aceita                             |
-| 0010 | Work Items como Taxonomia MECE de Intenção de Saída                       | Trabalho classificado por intenção de saída, MECE em uma dimensão                       | Aceita                             |
-| 0011 | Outcomes em Artefatos Derivados são Enums Fechados                        | Estados modelados como enum fechado, mensagens nomeando o conjunto válido               | Aceita                             |
-| 0012 | Bypass Auditável de Contratos de CI via Diretivas Declarativas In-Code    | Bypass como diretiva próxima à infração, expirável, com referência rastreável           | Aceita                             |
-| 0013 | Análise Estática AST como SSOT para Artefatos Derivados de Código         | Artefatos derivados são função pura do AST; telemetria runtime é camada aditiva         | Aceita                             |
-| 0014 | Separação entre Validação Semântica e Estética em Artefatos Gerados       | Engine valida semântica de gênero; lint estético em camada separada opcional            | Aceita                             |
+| #    | Título                                                                    | Princípio                                                                               | Status                                   |
+| ---- | ------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- | ---------------------------------------- |
+| 0003 | Rastreabilidade `[BR-CLI-*]` é Contrato; Cobertura é Política Operacional | Vínculo regra↔teste é contrato; cobertura técnica é piso, com exceções honestas         | Aceita (reescrita em 4.B.4)              |
+| 0004 | Governança de Responsabilidade Única                                      | Originalmente: 1 arquivo, 1 responsabilidade na governança                              | **Superseded by ADR 0008** (4.B.4)       |
+| 0005 | Curadoria Público/Privado                                                 | Taxonomia explícita de o que é público vs restrito; sanitização antes de flip           | Aceita                                   |
+| 0006 | Licença Apache-2.0                                                        | Apache-2.0 como licença de framework AI tooling; proteção de patentes (§3)              | Aceita                                   |
+| 0007 | Visibilidade Pública: Fresh Repo + Snapshot Curado                        | Tornar repo público via snapshot curado em fresh repo, não publish do histórico interno | Aceita                                   |
+| 0008 | Governança Monolítica (Monolithic Runtime Compiler)                       | Regras compiladas in-line no `AGENTS.md` para combater Lost-in-the-Middle               | Aceita                                   |
+| 0009 | Naming do pacote npm e estratégia de registry                             | `ai-guidelines` não-scoped; registry público gratuito; GitHub App para Action           | Aceita                                   |
+| 0010 | Work Items como Taxonomia MECE de Intenção de Saída                       | Trabalho classificado por intenção de saída, MECE em uma dimensão                       | Aceita                                   |
+| 0011 | Outcomes em Artefatos Derivados são Enums Fechados                        | Estados modelados como enum fechado, mensagens nomeando o conjunto válido               | Aceita                                   |
+| 0012 | Bypass Auditável de Contratos de CI via Diretivas Declarativas In-Code    | Bypass como diretiva próxima à infração, expirável, com referência rastreável           | Aceita                                   |
+| 0013 | Análise Estática AST como SSOT para Artefatos Derivados de Código         | Artefatos derivados são função pura do AST; telemetria runtime é camada aditiva         | Aceita                                   |
+| 0014 | Separação entre Validação Semântica e Estética em Artefatos Gerados       | Engine valida semântica de gênero; lint estético em camada separada opcional            | Aceita                                   |
+| 0015 | Classificação Universal vs Opt-in para Regras Distribuídas                | Universal vale para qualquer stack; opt-in varia; classe declarada no contrato da regra | Aceita (extraída de foundation em 4.B.2) |
+| 0016 | Roadmap Repo-First com Tracker Externo como Camada Colaborativa Opcional  | Repo é SSOT do roadmap; tracker é espelho opcional, não autoridade delegada             | Aceita (extraída de foundation em 4.B.2) |
+| 0017 | Numeração de Specs: Slug Semântico Até Branch, Sem Reserva Futura         | Slug até branch; número alocado uma vez; imutável após instanciação                     | Aceita (extraída de foundation em 4.B.2) |
+| 0018 | Governance-First, AI-as-Channel                                           | Core é governança de engenharia repo-first; integração AI é canal opt-in de 1ª classe   | Aceita (4.E)                             |
 
 **Operacionalização correlata** (não ADR, vive em `.core/process/`):
 
@@ -90,3 +94,5 @@ A 4.B.5 da Spec 0021 estabeleceu o critério que rege colisões: **legado preser
   - 0004 marcada `Superseded by ADR 0008` (caminho **c**); corpo preservado como rastro histórico.
   - 0005–0009 mantidas como estão — princípios sólidos, sem revisitação datada que justifique reescrita.
 - **2026-05-17 (PR4 / 4.B.5):** consolidação física `/adrs/` → `.core/governance/adrs/`. Numeração: legadas 0003–0009 preservam; locais 0001–0005 renumeram para 0010–0014.
+- **2026-05-17 (PR4 / 4.B.2):** 3 ADRs novas extraídas de `governance-foundation.md` — 0015 (universal vs opt-in), 0016 (roadmap repo-first), 0017 (numeração de specs).
+- **2026-05-17 (PR4 / 4.E):** ADR 0018 (Governance-First, AI-as-Channel) criada para formalizar repositioning aprovado em `[DEC-0021-B07]`. Refina escopo de ADR 0008.

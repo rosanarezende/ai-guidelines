@@ -11,10 +11,12 @@ Este arquivo define o fluxo obrigatório para qualquer IA atuando neste reposit�
 
 Este repositório é o próprio framework `ai-guidelines`, não um consumidor do framework. Aqui vivem o baseline canônico em `.core/` e a CLI em `cli/` que serão distribuídos para outros repositórios via `init`, `adopt` e `providers`.
 
+**O framework é governance-first, AI-as-channel** (`[ADR 0018]`): o core ontológico é governança de engenharia repo-first; a SSOT do estado vive em `.governance/` (no consumidor) e em `.specify/specs/` (no mantenedor, hoje). `AGENTS.md` é **um dos outputs runtime** da governança — o canal de integração AI-agnóstica — não o artefato central do framework. Outros canais (Markdown derivado para humanos, `living-docs.yml` para pipelines) coexistem como projeções da mesma SSOT.
+
 O `AGENTS.md` raiz tem papel duplo:
 
 - documentação operacional local para humanos e agentes que contribuem neste repositório;
-- artefato runtime de exemplo, com o bloco `<AI_GUIDELINES>` compilado pelo próprio framework.
+- artefato runtime de exemplo, com o bloco `<AI_GUIDELINES>` compilado pelo próprio framework — exemplificando o canal AI-agnóstico em ação.
 
 Conteúdo específico deste repositório deve ficar fora de `<AI_GUIDELINES>`. O bloco compilado não é editado manualmente.
 

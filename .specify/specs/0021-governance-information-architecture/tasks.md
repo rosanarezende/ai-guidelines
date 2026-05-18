@@ -1026,16 +1026,16 @@ yarn smoke
 > **Decisão de naming:** o pacote `ai-guidelines` permanece. "Guidelines" é semanticamente palavra de governança; reclama-se a leitura governance-first via surface, não via rename.
 > **Ordem de execução:** 4.E ocorre **após 4.B** (para que a ADR nova nasça já no lar consolidado `.core/governance/adrs/` numerada como **0015**, após renumeração de 4.B.5).
 
-- [ ] **4.E.1** Criar ADR `.core/governance/adrs/0015-governance-first-ai-as-channel.md` declarando o princípio: core é governança de engenharia repo-first; integração AI-agnóstica é canal opt-in de primeira classe.
-- [ ] **4.E.2** Reescrever `README.md`: tagline e seções "Por que existe" / "O que você ganha" / "Como funciona" lideram com governança; seção "Integrações AI-agnósticas (opt-in)" substitui "Compatibilidade Multi-IA".
-- [ ] **4.E.3** Reescrever abertura textual de `AGENTS.md` (Contexto Local, fora do bloco `<AI_GUIDELINES>` compilado): trocar "AGENTS.md raiz é o runtime artifact" por "AGENTS.md é um dos outputs runtime da governança; SSOT vive em `.governance/`".
-- [ ] **4.E.4** Atualizar `docs/features.md` (após 4.C.1 ter auditado `/docs/`): reclassificar AI provider adapters como **opt-in feature** (igual Prettier/Husky/CI); hoje estão listados como Core.
-- [ ] **4.E.5** Atualizar `GOVERNANCE-CATALOG.md` §1: incluir nota de que os 7 pilares MECE são definidos em termos de engenharia, não de IA — evidência arquitetural de que o core é governance-first.
-- [ ] **4.E.N** Pipeline verde.
-- [ ] **4.E.[DEBT-REVIEW]** `NEXT.md`: registrar débito de eventual rename futuro do pacote npm (não nesta spec) + reposicionamento de superfícies externas (GitHub topics, landing page se houver, badges).
-- [ ] **4.E.[ARCHITECTURE]** `ARCHITECTURE.md` §1 "O que esta CLI faz?": reescrita com framing governance-first; AI fica como canal.
-- [ ] **4.E.[SPEC-AMENDMENT]** `spec.md` da 0021: adicionar adendo "Atualização de escopo 2026-05-17" no rodapé citando expansão pelo sub-bloco 4.E (princípio de imutabilidade preservado — adendo, não revisão).
-- [ ] **4.E.[COMMIT]** `refactor(spec-0021): repositioning governance-first + AI-as-channel`.
+- [x] **4.E.1** Criado ADR `.core/governance/adrs/0018-governance-first-ai-as-channel.md` (numerado 0018 após renumeração de 4.B.5 e extração de 4.B.2) declarando o princípio: core é governança de engenharia repo-first; integração AI-agnóstica é canal opt-in de primeira classe.
+- [x] **4.E.2** Reescrever `README.md`: tagline e seções "Por que existe" / "O que você ganha" / "Como funciona" lideram com governança; seção "Integrações AI-agnósticas (opt-in)" substitui "Compatibilidade Multi-IA".
+- [x] **4.E.3** Reescrever abertura textual de `AGENTS.md` (Contexto Local, fora do bloco `<AI_GUIDELINES>` compilado): trocar "AGENTS.md raiz é o runtime artifact" por "AGENTS.md é um dos outputs runtime da governança; SSOT vive em `.governance/`".
+- [x] **4.E.4** Atualizar `docs/features.md` (após 4.C.1 ter auditado `/docs/`): reclassificar AI provider adapters como **opt-in feature** (igual Prettier/Husky/CI); hoje estão listados como Core.
+- [x] **4.E.5** Atualizar `GOVERNANCE-CATALOG.md` §1: incluir nota de que os 7 pilares MECE são definidos em termos de engenharia, não de IA — evidência arquitetural de que o core é governance-first.
+- [x] **4.E.N** Pipeline verde.
+- [x] **4.E.[DEBT-REVIEW]** `NEXT.md`: registrar débito de eventual rename futuro do pacote npm (não nesta spec) + reposicionamento de superfícies externas (GitHub topics, landing page se houver, badges).
+- [x] **4.E.[ARCHITECTURE]** `ARCHITECTURE.md` §1 "O que esta CLI faz?": reescrita com framing governance-first; AI fica como canal.
+- [x] **4.E.[SPEC-AMENDMENT]** `spec.md` da 0021: adicionar adendo "Atualização de escopo 2026-05-17" no rodapé citando expansão pelo sub-bloco 4.E (princípio de imutabilidade preservado — adendo, não revisão).
+- [x] **4.E.[COMMIT]** `refactor(spec-0021): repositioning governance-first + AI-as-channel`.
 
 ---
 
