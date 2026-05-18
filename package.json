@@ -49,7 +49,7 @@
     "test:smoke": "node --experimental-default-config-file --test tests/smoke/*.test.mjs",
     "test:coverage": "node --experimental-default-config-file --experimental-test-coverage --test cli/**/*.test.mjs cli/**/**/*.test.mjs tests/**/*.test.mjs",
     "build:rules": "node cli/governance/monolith/rules-builder.mjs",
-    "check:repo": "yarn install --immutable && yarn check && yarn test:coverage",
+    "check:repo": "yarn install --immutable && yarn check && yarn build && yarn test:coverage",
     "format": "prettier --write .",
     "check": "prettier --check . && yarn build:rules",
     "prepare": "husky",
