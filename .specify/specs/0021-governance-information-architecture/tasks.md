@@ -1024,10 +1024,10 @@ yarn smoke
   - `mirror-equivalence-map.md` atualizado: tabela final com status pós-cutover, política de equivalência (E1–E7), R4 (output naming), engine availability.
   - `NEXT.md` item #4 fechado em 4.C.2.
   - Sweep `git grep` confirma zero refs quebradas em live files (3 hits restantes em registros históricos intencionais).
-- [ ] **4.C.N** Pipeline verde.
+- [x] **4.C.N** Pipeline verde: `d7a93d6` fix(ci): `yarn check:repo` agora chama `yarn build` antes de `yarn test:coverage` — sem o build, `dist/` (gitignored) ausente fazia 3 testes em `recipes.test.mjs`/`pointers.test.mjs` falharem deterministicamente em fresh checkout (root cause apontado por Codex P1). CI #14 final: 8/8 success (guardrails + 6 smoke + ai-guidelines-check).
 - [x] **4.C.[DEBT-REVIEW]** `NEXT.md`: registrar refs históricas em specs frozen como rastro intencional (não débito).
 - [x] **4.C.[ARCHITECTURE]** `ARCHITECTURE.md`: §H (convenções e topologia) explicita `docs/` como superfície pública e `.core/process/` como lar canônico de processo; sem `/docs` como root de metodologia.
-- [ ] **4.C.[COMMIT]** `docs(spec-0021): cleanup holístico de docs + ponteiros`.
+- [x] **4.C.[COMMIT]** Closure realizado em chain de commits: `99c0b50` (prettier) → `5778134` (DELETE spec-foundation) → `29eea66`/`aedd275`/`9679e65` (MOVE-AS-IS rpi/tdd/efficiency) → `0a77ce5` (ponteiros 4.C.2) → `10d48ce` (gate 4.C.3) → `97e41ae` (rastro histórico + §H) → `d7a93d6` (fix CI).
 
 ---
 
