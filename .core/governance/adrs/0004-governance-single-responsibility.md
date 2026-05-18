@@ -28,7 +28,7 @@ A Prime Directive aparecia em **5 locais** com formulações divergentes:
 - `rules/global-rules.md` Regra 14 (cópia com variação)
 - `~/.gemini/GEMINI.md` Regra 11 (**contradição ativa** — instruía
   criação de `implementation_plan.md`)
-- `docs/rpi-protocol.md` §2 (versão explicativa)
+- `.core/process/rpi-protocol.md` §2 (versão explicativa)
 - `user_rules` injetadas por plataformas (3× AGENTS.md + 1× GEMINI.md)
 
 O efeito "Lost in the Middle" fazia os modelos tratarem a regra repetida

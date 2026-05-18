@@ -193,5 +193,5 @@ Projetos que ainda tenham `.specify/specs/ROADMAP.md` (formato pré-Spec 0008) d
 
 Depois deletar `ROADMAP.md` e atualizar referências em `AGENTS.md`,
 `.core/templates/AGENTS-core.md.tmpl`, `README.md`, `CONTRIBUTING.md`,
-`.core/process/governance-foundation.md`, `docs/rpi-protocol.md` e
+`.core/process/governance-foundation.md`, `.core/process/rpi-protocol.md` e
 demais templates SDD que citem o caminho antigo.
