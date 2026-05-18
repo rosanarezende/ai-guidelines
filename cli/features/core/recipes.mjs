@@ -38,14 +38,8 @@ async function loadEngine(repoRoot) {
     return engineCache.get(repoRoot);
   }
 
-  const assembleModulePath = path.resolve(
-    repoRoot,
-    "dist/app/use-cases/AssembleArtifact.js"
-  );
-  const storeModulePath = path.resolve(
-    repoRoot,
-    "dist/infrastructure/yaml/NodeRecipeStore.js"
-  );
+  const assembleModulePath = path.resolve(repoRoot, "dist/app/use-cases/AssembleArtifact.js");
+  const storeModulePath = path.resolve(repoRoot, "dist/infrastructure/yaml/NodeRecipeStore.js");
 
   if (!existsSync(assembleModulePath) || !existsSync(storeModulePath)) {
     engineCache.set(repoRoot, null);

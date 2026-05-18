@@ -4,13 +4,14 @@ import path from "node:path";
 import os from "node:os";
 import { describe, it, before, after } from "node:test";
 
-import {
-  deriveRecipeName,
-  recipeExists,
-  tryRenderViaEngine,
-} from "./recipes.mjs";
+import { deriveRecipeName, recipeExists, tryRenderViaEngine } from "./recipes.mjs";
 
-const REPO_ROOT = path.resolve(import.meta.dirname ?? path.dirname(new URL(import.meta.url).pathname), "..", "..", "..");
+const REPO_ROOT = path.resolve(
+  import.meta.dirname ?? path.dirname(new URL(import.meta.url).pathname),
+  "..",
+  "..",
+  ".."
+);
 
 async function tmpDir(prefix) {
   return fs.mkdtemp(path.join(os.tmpdir(), `ai-test-recipes-${prefix}-`));
