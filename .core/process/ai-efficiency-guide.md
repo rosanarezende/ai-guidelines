@@ -15,7 +15,7 @@ A eficiência começa **antes** do prompt. O ciclo **Research → Plan → Imple
 | **Plan**      | Descrever mudanças antes de executar | Permite revisão humana antes do custo de implementação     |
 | **Implement** | Executar o plano aprovado            | Commits atômicos com contexto claro                        |
 
-> Detalhes do ciclo em [`docs/rpi-protocol.md`](rpi-protocol.md).
+> Detalhes do ciclo em [`rpi-protocol.md`](rpi-protocol.md).
 
 ---
 
