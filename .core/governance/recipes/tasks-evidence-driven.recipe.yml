@@ -6,11 +6,43 @@ language: pt-BR
 slots:
   - id: header
     required: true
-    partials: [tasks/header.md]
+    partials: [tasks-evidence-driven/01-header.md]
 
-  - id: core
+  - id: phase-0-intro
     required: true
-    partials: [tasks/core.md]
+    partials: [tasks-evidence-driven/02-phase-0-intro.md]
+
+  - id: phase-0-setup
+    required: true
+    partials: [tasks-evidence-driven/03-phase-0-setup.md]
+
+  - id: phase-0-research
+    required: true
+    partials: [tasks-evidence-driven/04-phase-0-research.md]
+
+  - id: phase-0-brief
+    required: true
+    partials: [tasks-evidence-driven/05-phase-0-brief.md]
+
+  - id: phase-0-gate
+    required: true
+    partials: [tasks-evidence-driven/06-phase-0-gate.md]
+
+  - id: phase-1
+    required: true
+    partials: [tasks-evidence-driven/07-phase-1.md]
+
+  - id: phase-extra
+    required: true
+    partials: [tasks-evidence-driven/08-phase-extra.md]
+
+  - id: phase-review
+    required: true
+    partials: [tasks-evidence-driven/09-phase-review.md]
+
+  - id: phase-encerramento
+    required: true
+    partials: [tasks-evidence-driven/10-phase-encerramento.md]
 
 invariants:
   canonicalOrder: slots
