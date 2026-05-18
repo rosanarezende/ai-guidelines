@@ -101,6 +101,28 @@ describe("recipes.mjs: tryRenderViaEngine()", () => {
     assert.ok(Array.isArray(result.slots) && result.slots.length > 0);
   });
 
+  it("retorna rendered=false (engine-unavailable) quando dist/ não existe no repoRoot", async () => {
+    const fakeRoot = await tmpDir("no-dist");
+    try {
+      await fs.mkdir(path.join(fakeRoot, ".core", "governance", "recipes"), { recursive: true });
+      await fs.writeFile(
+        path.join(fakeRoot, ".core", "governance", "recipes", "tasks-evidence-driven.recipe.yml"),
+        "stub: true\n",
+        "utf8"
+      );
+      const result = await tryRenderViaEngine({
+        sourceFilename: "tasks-evidence-driven-boilerplate.md",
+        destinationDir: destDir,
+        repoRoot: fakeRoot,
+      });
+      assert.equal(result.rendered, false);
+      assert.equal(result.reason, "engine-unavailable");
+      assert.equal(result.recipeName, "tasks-evidence-driven");
+    } finally {
+      await fs.rm(fakeRoot, { recursive: true, force: true });
+    }
+  });
+
   it("dryRun=true não escreve no disco mas retorna o conteúdo normalizado", async () => {
     const dryDir = await tmpDir("dryrun");
     try {

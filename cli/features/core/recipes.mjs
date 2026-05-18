@@ -31,10 +31,12 @@ const DEFAULT_REPO_ROOT = path.resolve(__dirname, "..", "..", "..");
 const RECIPES_SUBDIR = path.join(".core", "governance", "recipes");
 const BOILERPLATE_SUFFIX = "-boilerplate.md";
 
-let cachedEngine = null;
+const engineCache = new Map();
 
 async function loadEngine(repoRoot) {
-  if (cachedEngine) return cachedEngine;
+  if (engineCache.has(repoRoot)) {
+    return engineCache.get(repoRoot);
+  }
 
   const assembleModulePath = path.resolve(
     repoRoot,
@@ -46,11 +48,8 @@ async function loadEngine(repoRoot) {
   );
 
   if (!existsSync(assembleModulePath) || !existsSync(storeModulePath)) {
-    const error = new Error(
-      `Engine compilada ausente em '${assembleModulePath}' / '${storeModulePath}'. Execute 'yarn build' antes de invocar a engine via CLI.`
-    );
-    error.code = "TEMPLATE_ENGINE_DIST_MISSING";
-    throw error;
+    engineCache.set(repoRoot, null);
+    return null;
   }
 
   const [{ AssembleArtifact }, { NodeRecipeStore }] = await Promise.all([
@@ -58,8 +57,9 @@ async function loadEngine(repoRoot) {
     import(pathToFileURL(storeModulePath).href),
   ]);
 
-  cachedEngine = { AssembleArtifact, NodeRecipeStore };
-  return cachedEngine;
+  const engine = { AssembleArtifact, NodeRecipeStore };
+  engineCache.set(repoRoot, engine);
+  return engine;
 }
 
 export function deriveRecipeName(sourceFilename) {
@@ -90,7 +90,11 @@ export async function tryRenderViaEngine({
     return { rendered: false, reason: "no-recipe", recipeName };
   }
 
-  const { AssembleArtifact, NodeRecipeStore } = await loadEngine(repoRoot);
+  const engine = await loadEngine(repoRoot);
+  if (!engine) {
+    return { rendered: false, reason: "engine-unavailable", recipeName };
+  }
+  const { AssembleArtifact, NodeRecipeStore } = engine;
   const store = new NodeRecipeStore(repoRoot);
   const useCase = new AssembleArtifact({ store });
 

@@ -199,6 +199,58 @@ describe("Feature: Pointers (AGENTS.md Runtime Architecture)", () => {
     );
   });
 
+  it("[DUAL-PATH] Engine renderiza tasks-evidence-driven; mirror copia spec (mesmo filename, R4)", async () => {
+    const subTarget = path.join(targetDir, "dual-path");
+    await fs.mkdir(subTarget, { recursive: true });
+
+    const actions = [];
+    await applyPointers(subTarget, { features: ["pointers"] }, actions);
+
+    const templatesDir = path.join(subTarget, ".ai-guidelines", "templates");
+
+    const engineRendered = path.join(templatesDir, "tasks-evidence-driven-boilerplate.md");
+    const mirrorCopied = path.join(templatesDir, "spec-boilerplate.md");
+    assert.equal(
+      await fs
+        .access(engineRendered)
+        .then(() => true)
+        .catch(() => false),
+      true,
+      "Engine deve gravar tasks-evidence-driven-boilerplate.md (filename do mirror, R4)"
+    );
+    assert.equal(
+      await fs
+        .access(mirrorCopied)
+        .then(() => true)
+        .catch(() => false),
+      true,
+      "Mirror deve copiar spec-boilerplate.md (sem recipe)"
+    );
+
+    const legacyPath = path.join(
+      process.cwd(),
+      ".specify",
+      "templates",
+      "tasks-evidence-driven-boilerplate.md"
+    );
+    const engineContent = await fs.readFile(engineRendered, "utf8");
+    const legacyContent = await fs.readFile(legacyPath, "utf8");
+    assert.equal(
+      engineContent,
+      legacyContent,
+      "Engine output deve ser byte-equivalente ao mirror legado"
+    );
+
+    assert.ok(
+      actions.some((a) => a.includes("[engine]") && a.includes("tasks-evidence-driven")),
+      "Action log deve marcar render via engine para tasks-evidence-driven"
+    );
+    assert.ok(
+      actions.some((a) => a.includes("spec-boilerplate.md") && !a.includes("[engine]")),
+      "Action log deve indicar mirror (sem [engine]) para spec-boilerplate"
+    );
+  });
+
   it("[PROVIDERS] Deve gerar apenas provider entrypoints dos providers selecionados", async () => {
     const subTarget = path.join(targetDir, "providers");
     await fs.mkdir(subTarget, { recursive: true });
