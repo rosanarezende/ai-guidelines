@@ -997,9 +997,14 @@ yarn smoke
 > **Âncoras:** `[DEC-0021-B03]`, `[DEC-0021-B04]`
 > **Objetivo:** remover “ilhas órfãs” (ex.: `/docs`) e alinhar todos os ponteiros ao novo contrato.
 
-- [ ] **4.C.0** Efetivar o cutover da CLI para o TemplateEngine:
-  - Migrar os boilerplates legados (`.specify/templates/`) para recipes POJO/YAML + partials atômicos (equivalência 1:1).
-  - Trocar o fluxo padrão da CLI para ler as recipes e parar de copiar os arquivos do mirror legado.
+- [x] **4.C.0** Engine activation (milestone obrigatória e isolada — ver Plano 4.C, R1+R2+R4):
+  - **4.C.0.0** ✅ Normalizer compartilhado `cli/features/core/template-equivalence.mjs` (E1+E2+E3+E6). 17/17 testes mjs verdes.
+  - **4.C.0.a** ✅ Wrapper `cli/features/core/recipes.mjs` (engine → disco com filename do mirror, R4). 11/11 testes mjs verdes (incluindo engine-unavailable graceful fallback).
+  - **4.C.0.b** ✅ Recipe `tasks-evidence-driven` byte-equivalente (10 partials atômicos, 14055 bytes). Gate `TasksEvidenceDrivenEquivalence.test.ts` (Jest) verde.
+  - **4.C.0.c** ✅ Integração em `syncConsumerTemplates`: fallback per-kind (recipe → engine; else → mirror). Action log marca `[engine]` quando aplicável.
+  - **4.C.0.d** ✅ Dual-path test `pointers.test.mjs [DUAL-PATH]`: engine renderiza tasks-evidence-driven; mirror copia spec-boilerplate; byte-equivalência vs legado.
+  - **Exit gate verde**: yarn test 296/296 (baseline 267 + 29 novos); yarn test:nova-cli 381/381; yarn check verde; smoke manual confirma `[engine]` apenas em tasks-evidence-driven e `diff -u` byte-zero vs legacy.
+  - **Out-of-scope** (R2): recipes adicionais (spec, plan, decision-brief, tasks-deterministic/mixed, next, roadmap, research-index, project-config) ficam para PR futuro, isoladas, depois que a engine estiver estabilizada em produção via fallback.
 
 - [ ] **4.C.1** Auditar `/docs` e decidir:
   - migrar conteúdo útil para lar canônico
