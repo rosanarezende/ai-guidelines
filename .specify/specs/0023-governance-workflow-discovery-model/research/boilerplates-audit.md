@@ -145,7 +145,7 @@ Mesma flexibilidade para `Plan:`. Nada além disso muda no boilerplate.
 
 **Premissa comum aos 5 boilerplates existentes:** todos assumem que **execução começa cedo** e que **research é etapa opcional dentro do tasks**, não artifact independente. Isso materializa epistemologia execution-first.
 
-**Confirmação da H3 do `research.md`:** suporte preliminar **forte**. Cada boilerplate auditado mostra ao menos uma premissa que induz planning prematuro. A H3 deve ser tratada como hipótese **bem-suportada** entrando no `decision-brief.md` futuro.
+**Sinal para a H3 do `research.md`:** suporte preliminar **forte** (cada boilerplate auditado mostra ao menos uma premissa que induz planning prematuro). Isto **sugere** que a H3 entra no `decision-brief.md` futuro como hipótese bem-suportada, mas a decisão sobre como tratá-la pertence ao gate humano, não a esta auditoria.
 
 **Alterações pontuais sugeridas (consolidado):**
 

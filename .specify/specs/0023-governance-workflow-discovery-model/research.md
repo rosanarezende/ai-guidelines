@@ -203,6 +203,20 @@ Cada hipótese é formulada com:
 - Coletar mais evidência interna para H1–H4, especialmente AP3 ("spec como container universal" — citar 2–3 exemplos concretos do repo).
 - Refinar a matriz inicial (§3): cada conceito ganha 1–2 exemplos concretos do repo + ao menos 1 conflito conhecido (onde a categoria não explica completamente o uso real).
 - Completar os anexos [`research/taxonomia-observacoes.md`](./research/taxonomia-observacoes.md) e [`research/boilerplates-audit.md`](./research/boilerplates-audit.md) com detalhamento conforme novos casos forem identificados.
-- **Gate humano de Stage A → Stage B** quando: hipóteses H1–H4 tiverem suporte empírico claro ou falsificação documentada; perguntas abertas (§5) estiverem em estado "prontas para virar pontos `[DEC-0023-*]` no `decision-brief.md`".
 
-A criação de `decision-brief.md` é **o sinal de que o Stage A fechou**. **Não criar antes.**
+---
+
+## 7. Condições para abrir o Gate (Stage A → Stage B)
+
+> **Esta seção NÃO abre o gate.** Apenas define critérios observáveis que indicam quando a investigação está madura o suficiente para o `decision-brief.md` nascer. O gate em si é assinado pela owner em rodada própria, após esta lista estar substancialmente atendida.
+
+Critérios mínimos para considerar Stage A pronto para encerrar:
+
+- [ ] **Hipóteses H1–H4 ancoradas em evidência interna suficiente.** Cada hipótese tem ao menos 2 casos concretos do repo (sob suporte preliminar ou condição de falsificação documentada). Hipóteses sem evidência convergente são rebaixadas para "perguntas abertas" ou descartadas explicitamente em §5.
+- [ ] **Matriz inicial (§3) rascunhada com conflitos.** Cada conceito da matriz tem ao menos 1 exemplo do repo + 1 conflito conhecido onde a categoria não explica completamente. Lacunas (linhas com "TBD") estão fechadas ou justificadas como "investigação remetida ao `decision-brief.md`".
+- [ ] **Principais ambiguidades dos 7 pilares mapeadas por nível.** O anexo [`research/taxonomia-observacoes.md`](./research/taxonomia-observacoes.md) cobre cada um dos 7 pilares com hipótese de nível taxonômico + ao menos 1 conflito conhecido. Pilares ainda "sem hipótese" estão explicitamente listados como tal.
+- [ ] **Lista de perguntas abertas (§5) madura.** As 10 perguntas P1–P10 estão em estado "prontas para virar pontos `[DEC-0023-*]` no `decision-brief.md`" — ou seja: cada uma tem opções candidatas pré-mapeadas, mesmo que sem decisão.
+- [ ] **Sem trechos conclusivos sem marcação de hipótese.** Releitura crítica final do `research.md` e dos anexos confirma que conclusões cravadas não vazaram para Stage A (todo trecho assertivo está explicitamente marcado como hipótese, observação preliminar ou pergunta).
+- [ ] **Aviso editorial alinhado.** O cabeçalho deste `research.md` continua sinalizando que decisões pertencem ao `decision-brief.md` futuro, não a este arquivo.
+
+**Quando todos os critérios acima estiverem substancialmente atendidos**, a owner decide se abre o gate (e materializa `decision-brief.md`) ou se a investigação precisa de mais uma rodada. **A criação de `decision-brief.md` é o sinal de que o Stage A fechou.** **Não criar antes.**
