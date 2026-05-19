@@ -1,6 +1,17 @@
 {
   "sdd_dir": ".ai-guidelines",
-  "providers": ["claude", "gemini", "openai"],
-  "features": ["prettier", "husky", "ci", "quality-gates", "tdd", "bdd"],
+  "providers": [
+    "claude",
+    "gemini",
+    "openai"
+  ],
+  "features": [
+    "prettier",
+    "husky",
+    "ci",
+    "quality-gates",
+    "tdd",
+    "bdd"
+  ],
   "lang": "pt"
 }

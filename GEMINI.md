@@ -1,5 +1,4 @@
 <!-- ai-guidelines:managed-start v=1 -->
-
 # SYSTEM DIRECTIVE: HARD REDIRECT
 
 You are operating inside the Gemini integration for this workspace.
@@ -31,5 +30,4 @@ Aggressively use `.geminiignore` to exclude build artifacts, logs, binaries, and
 ### [ADP-0304]
 
 Use checkpoints via artifacts to preserve context in long sessions. Reinforce destructive command constraints, as Gemini tends to be highly proactive.
-
 <!-- ai-guidelines:managed-end -->
