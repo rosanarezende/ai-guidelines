@@ -19,7 +19,7 @@ Cada hipótese é formulada com:
 
 ### H1 — O problema não é "falta de planning"; é "planning antes de discovery"
 
-**Enunciado:** a causa-raiz do churn observado em specs recentes não é planejamento insuficiente; é planejamento construído sobre premissas implícitas/frágeis que não foram investigadas.
+**Enunciado:** a causa-raiz mais provável do churn observado em specs recentes não é planejamento insuficiente; é planejamento construído sobre premissas implícitas/frágeis que não foram investigadas. **Hipótese a confirmar** — pode haver casos genuínos de planning insuficiente que esta hipótese não cobre.
 
 **Suporte preliminar:**
 
@@ -48,7 +48,7 @@ Cada hipótese é formulada com:
 
 ### H3 — Os boilerplates atuais embutem epistemologia execution-first
 
-**Enunciado:** os arquivos em `.specify/templates/` não são "só templates" — eles materializam um workflow implícito (`spec → decision-brief → plan → tasks` linear) que assume execução iminente e não tem lugar canônico para discovery profunda.
+**Enunciado:** os arquivos em `.specify/templates/` provavelmente são mais do que "só templates" — parecem materializar um workflow implícito (`spec → decision-brief → plan → tasks` linear) que assume execução iminente e não oferece lugar canônico para discovery profunda. **Hipótese a confirmar caso a caso**, não conclusão.
 
 **Suporte preliminar:**
 
@@ -198,11 +198,14 @@ Cada hipótese é formulada com:
 
 ## 6. Próximos passos do Stage A
 
-> **Não são tasks de implementação.** São próximos movimentos de discovery, antes do gate.
+> **Checklist de investigação — NÃO é checklist de implementação.** Verbos esperados: _coletar evidência_, _mapear exemplos_, _validar links_, _refinar hipótese_, _falsificar_. Verbos proibidos nesta seção: _implementar_, _criar boilerplate_, _publicar_, _decidir_, _canonizar_. Quem precisar desses últimos está pulando o gate de Stage A → Stage B.
 
-- Coletar mais evidência interna para H1–H4, especialmente AP3 ("spec como container universal" — citar 2–3 exemplos concretos do repo).
-- Refinar a matriz inicial (§3): cada conceito ganha 1–2 exemplos concretos do repo + ao menos 1 conflito conhecido (onde a categoria não explica completamente o uso real).
-- Completar os anexos [`research/taxonomia-observacoes.md`](./research/taxonomia-observacoes.md) e [`research/boilerplates-audit.md`](./research/boilerplates-audit.md) com detalhamento conforme novos casos forem identificados.
+- [ ] **Coletar evidência adicional para H1–H4.** Cada hipótese precisa de ao menos 2 casos concretos do repo registrados em "Suporte preliminar" — ou contraexemplo registrado em "Falsificação possível".
+- [ ] **Mapear exemplos concretos para AP3 ("spec como container universal").** Citar 2–3 PRs/specs do repo onde o reflexo "abrir spec" gerou overhead desproporcional.
+- [ ] **Refinar a matriz inicial (§3).** Cada conceito recebe 1–2 exemplos concretos do repo + ao menos 1 conflito conhecido onde a categoria não explica completamente o uso real.
+- [ ] **Completar os anexos** [`research/taxonomia-observacoes.md`](./research/taxonomia-observacoes.md) e [`research/boilerplates-audit.md`](./research/boilerplates-audit.md) conforme novos casos forem identificados.
+- [ ] **Validar links relativos.** Toda referência cruzada (0021, 0022, ADRs, anexos locais) deve apontar para arquivo existente no repo, ou ser convertida em referência textual sem hyperlink.
+- [ ] **Releitura crítica final** caçando trechos conclusivos sem marcação de hipótese — ver critério em §7 abaixo.
 
 ---
 
