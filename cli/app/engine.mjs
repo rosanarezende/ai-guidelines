@@ -308,12 +308,38 @@ export async function execute(mode, rawOptions) {
   }
 }
 
+async function dispatchWorkflow(command) {
+  // Bridge para o runtime de workflow compilado em src/ → dist/.
+  // Cf. Spec 0023 (`.governance/specs/0023-workflow-runtime/`):
+  // nenhuma lógica nova de domínio vive em `cli/`; este delegate é o único toque.
+  let mod;
+  try {
+    mod = await import("../../dist/cli/workflow.js");
+  } catch (err) {
+    const reason = err && err.message ? err.message : String(err);
+    console.error(
+      "Erro: runtime de workflow indisponível em dist/. Execute `yarn build` antes (fail-fast intencional, padrão TemplateEngine)."
+    );
+    console.error(`Detalhe: ${reason}`);
+    process.exitCode = 1;
+    return;
+  }
+  const opts = { repoRoot: process.cwd() };
+  const code = await mod.main(command === "continue" ? ["continue"] : [], opts);
+  if (code !== 0) process.exitCode = code;
+}
+
 export async function main(argv = process.argv.slice(2)) {
   try {
     const { command, options } = parseArgs(argv);
 
     if (command === "--help" || command === "-h") {
       printHelp();
+      return;
+    }
+
+    if (command === "workflow" || command === "continue") {
+      await dispatchWorkflow(command);
       return;
     }
 

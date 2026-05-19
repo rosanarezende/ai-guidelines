@@ -4,7 +4,15 @@ import { normalizePackageManager, detectPackageManager } from "#formatters/packa
 import { readTextIfExists } from "#fs/file-system";
 import { DEFAULT_PROVIDERS, getSupportedProviders } from "#features/core/config";
 
-const SUPPORTED_MODES = ["init", "adopt", "providers", "update", "check-budget"];
+const SUPPORTED_MODES = [
+  "init",
+  "adopt",
+  "providers",
+  "update",
+  "check-budget",
+  "workflow",
+  "continue",
+];
 const WIZARD_DEFAULTS = {
   mode: "adopt",
   target: ".",
@@ -75,7 +83,7 @@ export function printHelp() {
   console.log(`ai-guidelines CLI
 
 Uso:
-  yarn guidelines <init|adopt|providers|update> [opcoes]
+  yarn guidelines <init|adopt|providers|update|workflow|continue> [opcoes]
 
 Comandos:
   init           Cria baseline AI-first em projeto novo
@@ -88,6 +96,10 @@ Comandos:
                  de hard-redirect, adapter rules e templates sem reabrir o wizard.
   check-budget   Imprime o relatório de orçamento de tokens (universal, opt-in, AGENTS.md
                  compilado e cada provider entrypoint) com base no rules.json do framework.
+  workflow       Wizard contextual da spec ativa: briefing operacional + menu de ações +
+                 context bundle copy-paste para sessão IA. Lente operacional governance-first
+                 (cf. Spec 0023). Não embute LLM; AI-as-Channel preservado (ADR 0018).
+  continue       Atalho de workflow: imprime briefing + próxima ação registrada em state.yml.
 
 Opções:
   --target <dir>             Diretório alvo (default: diretório atual)
