@@ -19,6 +19,8 @@
 
 > **Disciplina de Stage A (dogfooding intencional):** esta spec inaugura o uso explícito do lifecycle proposto por ela mesma. O setup inicial contém **apenas** `spec.md` + `research.md` + `NEXT.md`. `decision-brief.md`, `plan.md` e `tasks.md` **não existem** e **não devem ser criados** antes do gate humano. Esse vácuo é proposital — é insumo experimental para validar (ou falsificar) que o lifecycle proposto é aplicável a si mesmo.
 
+> ⚠️ **Aviso de leitura — Stage A em curso.** Este `spec.md` declara **objetivo, escopo, critérios de aceite e dependências**. As conclusões concretas sobre lifecycle, taxonomia de workflows, taxonomia de artefatos e contrato de `research.md` **ainda são hipóteses** investigadas em [`./research.md`](./research.md). Só serão cravadas após o gate humano de Stage A → Stage B (que materializa o `decision-brief.md`). Ler este arquivo como **descrição da pergunta** a investigar, não como descrição da resposta a executar.
+
 ---
 
 ## 🎯 Objetivo
