@@ -192,7 +192,7 @@ Já analisado em §2.5 e §3.1. **Limite correto, agora explícito.** Objeto da 
 
 ### 4.2 Auditoria de naming na zona `.core/rules/top/`
 
-Débito identificado em sub-bloco 3.0.5: a fronteira `agents-core.md` (CORE-*) vs `global-rules.md` (GR-*) faz sentido em escopo mas o naming confunde. **Migrado para `roadmap/backlog.md`** durante 4.C.[SANITIZE-NEXT]. **Limite correto.**
+Débito identificado em sub-bloco 3.0.5: a fronteira `agents-core.md` (CORE-_) vs `global-rules.md` (GR-_) faz sentido em escopo mas o naming confunde. **Migrado para `roadmap/backlog.md`** durante 4.C.[SANITIZE-NEXT]. **Limite correto.**
 
 ### 4.3 Rebranding textual completo do produto
 
@@ -293,17 +293,17 @@ A sessão revelou que **o cutover real `cli/` → `src/` DDD** (item #5 acima) e
 
 Lista consolidada (alguns já têm spec ou candidata; outros ainda não):
 
-| Item                                                       | Estado atual            | Destino canônico                     |
-| :--------------------------------------------------------- | :---------------------- | :----------------------------------- |
-| Cutover operacional `cli/` → `src/cli/` (DDD/TDD/BDD)      | Spec 0022 aberta (PR #16, em revisão de framing) | **Spec 0022**                        |
-| Lifecycle metodológico / discovery-first / `research.md`   | Sessão 2026-05-18; candidata identificada        | **Spec 0023** (a abrir)              |
-| Rebranding textual completo do produto                     | Backlog (entrada nova 2026-05-18)                | Spec dedicada (slug futuro)          |
-| Migração completa dos recipes (`spec`, `plan`, etc.)        | Não-promovida; vive implícita no backlog        | **Sugestão: criar entrada no backlog antes do merge da 0021** |
-| Auditoria naming `.core/rules/top/`                        | Backlog                                          | Spec dedicada                        |
-| `next-md-hygiene-rituals` (meta-spec sobre NEXT.md)        | Insight registrado                               | Possivelmente absorvido pela Spec 0023 |
-| `stakeholder-intake-pipeline`                               | Já no "Now" do backlog                           | Spec futura dedicada                 |
-| `framework-observability-dashboard`                         | Já no "Now" do backlog                           | Spec futura dedicada                 |
-| `handoff-contracts-formalization`                           | Já no backlog                                    | Spec futura dedicada                 |
+| Item                                                     | Estado atual                                     | Destino canônico                                              |
+| :------------------------------------------------------- | :----------------------------------------------- | :------------------------------------------------------------ |
+| Cutover operacional `cli/` → `src/cli/` (DDD/TDD/BDD)    | Spec 0022 aberta (PR #16, em revisão de framing) | **Spec 0022**                                                 |
+| Lifecycle metodológico / discovery-first / `research.md` | Sessão 2026-05-18; candidata identificada        | **Spec 0023** (a abrir)                                       |
+| Rebranding textual completo do produto                   | Backlog (entrada nova 2026-05-18)                | Spec dedicada (slug futuro)                                   |
+| Migração completa dos recipes (`spec`, `plan`, etc.)     | Não-promovida; vive implícita no backlog         | **Sugestão: criar entrada no backlog antes do merge da 0021** |
+| Auditoria naming `.core/rules/top/`                      | Backlog                                          | Spec dedicada                                                 |
+| `next-md-hygiene-rituals` (meta-spec sobre NEXT.md)      | Insight registrado                               | Possivelmente absorvido pela Spec 0023                        |
+| `stakeholder-intake-pipeline`                            | Já no "Now" do backlog                           | Spec futura dedicada                                          |
+| `framework-observability-dashboard`                      | Já no "Now" do backlog                           | Spec futura dedicada                                          |
+| `handoff-contracts-formalization`                        | Já no backlog                                    | Spec futura dedicada                                          |
 
 ---
 
@@ -367,7 +367,7 @@ Linhas 1060–1067:
 
 **Recomendação geral para 4.D:** fechar como **homologação operacional**, NÃO como absorção de runtime redesign. A `closure-review.md` (este documento) cobre boa parte do esforço de 4.D.[DEBT-REVIEW] + 4.D.[ARCHITECTURE].
 
-### 9.3 Itens R.* e F.* — Encerramento pós-aprovação humana
+### 9.3 Itens R._ e F._ — Encerramento pós-aprovação humana
 
 Linhas 1073–1112. São gates de aprovação humana e tarefas pós-aprovação (migração de research, deleção do NEXT.md, atualização do CHANGELOG, etc.). **Não executar até gate humano final.**
 
