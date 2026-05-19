@@ -3,10 +3,10 @@
 # Decision Brief — Spec 0023 Workflow Runtime
 
 > Spec: [`./spec.md`](./spec.md)
-> Plan: inline no `spec.md` § Rollout (vira `./plan.md` próprio quando ≥ 4 PRs).
+> Plan: [`./plan.md`](./plan.md) (criado em 2026-05-19 conforme `[DEC-0023-B05]`).
 > Tasks: tasklist da sessão de implementação (PR1).
 > Status agregado: **Resolved**
-> Última atualização: 2026-05-19 — gate Stage A → Stage B fechado; pivot materializado.
+> Última atualização: 2026-05-19 — gate Stage A → Stage B fechado (Bloco A); gate de escopo do PR2 fechado (Bloco B, incluindo B05 sobre plan.md inline vs separado).
 
 > **Artefato canônico do gate humano entre Stage 1 (research) e Stage 2 (design + implementação).** Para esta spec, a Stage 1 é a investigação documentada na pasta legacy `.specify/specs/0023-governance-workflow-discovery-model/` (research.md + anexos). Este brief materializa o gate Stage A → Stage B com 4 decisões cravadas em sessão de design 2026-05-19.
 
@@ -20,6 +20,11 @@
 | `[DEC-0023-A02]` | A     | Resolved |
 | `[DEC-0023-A03]` | A     | Resolved |
 | `[DEC-0023-A04]` | A     | Resolved |
+| `[DEC-0023-B01]` | B     | Resolved |
+| `[DEC-0023-B02]` | B     | Resolved |
+| `[DEC-0023-B03]` | B     | Resolved |
+| `[DEC-0023-B04]` | B     | Resolved |
+| `[DEC-0023-B05]` | B     | Resolved |
 | `[DEC-0023-C01]` | C     | Resolved |
 
 **Status agregado:** Resolved.
@@ -157,6 +162,153 @@
 
 ---
 
+## Bloco B — Escopo do PR2 (DX, docs, onboarding)
+
+> **Sessão de decisão 2026-05-19** após PR1 merged localmente (5 commits em `feat/spec-0023-workflow-runtime`). Owner explicitou que o próximo incremento deve priorizar **experiência operacional e onboarding**, não novas abstrações. Auditoria de release npm produziu lista de gaps; este Bloco B craveia o escopo do PR2.
+
+### [DEC-0023-B01] Escopo do PR2: DX/docs apenas, ou DX/docs + bootstrap?
+
+**Pergunta:** O PR2 inclui apenas DX/docs (clipboard, README, guides, help CLI, integration test, examples), ou inclui também bootstrap (`workflow init` / `workflow upgrade-state`)?
+
+**Contexto:**
+
+- Owner pediu explicitamente "sem novas abstrações" para o próximo incremento.
+- Bootstrap é comando novo — abstração nova com decisão própria (cardinalidade de spec? campos opcionais? interação com state.yml ausente?).
+- Clipboard detection é **acabamento** do bundle UX existente, não comando novo.
+
+**Opções:**
+
+| Opção | Descrição                                              | Pró                                                        | Contra                                                                           |
+| :---- | :----------------------------------------------------- | :--------------------------------------------------------- | :------------------------------------------------------------------------------- |
+| A     | PR2 = docs only; clipboard junto com bootstrap em PR3. | Disciplina absoluta com "sem abstrações novas".            | Bundle UX fica meia-pronto durante todo o PR2; docs precisariam apologizar.      |
+| B     | PR2 = DX/docs com clipboard; bootstrap fica para PR3.  | Bundle UX fica completo; bootstrap recebe decisão própria. | Linha "abstração nova vs acabamento" precisa ser explícita.                      |
+| C     | PR2 = DX/docs + bootstrap.                             | Tudo junto, próximo release tem mais coisa.                | Bootstrap nasce sem decision-brief próprio; risco AP1 (planning antes research). |
+
+**Decisão do Gate Humano:**
+
+- **Status:** [x] Resolvido
+- **Escolha:** [ ] A | [x] B | [ ] C
+- **Justificativa:** Clipboard é acabamento essencial do bundle (heart da experiência AI-as-Channel). Sem ele, o fluxo parece incompleto e a tese principal ("runtime como lente, IA como canal") perde força operacional. Bootstrap é comando novo, merece decisão própria — vai para PR3 com brief próprio.
+- **Data / Owner:** 2026-05-19 / @rosanarezende
+
+---
+
+### [DEC-0023-B02] Tratamento da fragilidade do AssembleBriefing
+
+**Pergunta:** Como tratar o fato de que `extractSpecHeaders` casa convenções específicas do template (`### H1 —`, `### 8.1 ...`) e devolve briefing vazio para specs fora desse padrão?
+
+**Contexto:**
+
+- Owner identificou que parser semântico/heurística agressiva é exatamente o tipo de abstração prematura que a 0023 quer evitar.
+- Convenção atual é razoavelmente seguida pelos boilerplates de `.specify/templates/`.
+
+**Opções:**
+
+| Opção | Descrição                                                                  | Pró                                           | Contra                                                  |
+| :---- | :------------------------------------------------------------------------- | :-------------------------------------------- | :------------------------------------------------------ |
+| A     | Documentar convenção + emitir warning quando extraction devolve vazio.     | Pragmático; transparente; sem abstração nova. | Specs fora do padrão recebem briefing thin.             |
+| B     | Parser semântico mais robusto (NLP-lite, múltiplos formatos de cabeçalho). | Briefing rico para qualquer formato.          | Engenharia prematura; difícil de testar exaustivamente. |
+
+**Decisão do Gate Humano:**
+
+- **Status:** [x] Resolvido
+- **Escolha:** [x] A | [ ] B
+- **Justificativa:** Convenção documentada + warning explícito resolve agora sem virar dívida técnica nova. Se >2 specs externas reportarem briefing thin por formato divergente, reabrir como B02-revisited.
+- **Data / Owner:** 2026-05-19 / @rosanarezende
+
+---
+
+### [DEC-0023-B03] Inclusão de `examples/` no PR2
+
+**Pergunta:** O PR2 inclui pasta `examples/` com spec real mínima, ou só docs textuais?
+
+**Contexto:**
+
+- Owner observou: "contexto concreto reduz carga cognitiva muito mais do que teoria".
+- Examples têm custo de manutenção (drift entre exemplo e runtime real).
+
+**Opções:**
+
+| Opção | Descrição                                                                                         | Pró                                           | Contra                                             |
+| :---- | :------------------------------------------------------------------------------------------------ | :-------------------------------------------- | :------------------------------------------------- |
+| A     | Não incluir; só docs textuais.                                                                    | Zero manutenção.                              | Onboarding fica mais teórico.                      |
+| B     | Incluir `examples/minimal-spec/` (≤ 4 arquivos: spec.md, NEXT.md, state.yml, README explicativo). | Substrato concreto para quem instala via npm. | Custo de manutenção pequeno (≤ 4 arquivos curtos). |
+| C     | Incluir `examples/` rico com múltiplas specs simuladas.                                           | Cobre múltiplos cenários.                     | Custo de manutenção alto; drift garantido.         |
+
+**Decisão do Gate Humano:**
+
+- **Status:** [x] Resolvido
+- **Escolha:** [ ] A | [x] B | [ ] C
+- **Justificativa:** Minimal-spec aceita o custo pequeno em troca de onboarding concreto. Adicionar ao `files` do package.json para o consumidor receber.
+- **Data / Owner:** 2026-05-19 / @rosanarezende
+
+---
+
+### [DEC-0023-B04] Estratégia de release npm: quando lançar workflow runtime?
+
+**Pergunta:** Quando o workflow runtime sai do estado interno (branch only) para release npm público?
+
+**Contexto:**
+
+- Auditoria 2026-05-19 identificou 10 gaps; 5 são blockers de DX no primeiro uso (branch dependency, state.yml ausente sem bootstrap, clipboard ausente, README sem mencionar, CHANGELOG sem entry).
+- PR2 resolve 3 desses 5; PR3 resolve o restante (bootstrap).
+
+**Opções:**
+
+| Opção | Descrição                                                             | Pró                                                            | Contra                                                            |
+| :---- | :-------------------------------------------------------------------- | :------------------------------------------------------------- | :---------------------------------------------------------------- |
+| A     | Lançar preview agora (após merge de PR1).                             | Sinal público rápido.                                          | Usuário encontra blockers no primeiro uso; queima credibilidade.  |
+| B     | Lançar preview após PR2 (docs/DX entregue, bootstrap ainda ausente).  | Discovery (README) e bundle (clipboard) prontos.               | Runtime continua "leitor only"; quem tenta criar spec se vira só. |
+| C     | Lançar preview após PR3 (bootstrap entregue) com CHANGELOG explícito. | Fluxo end-to-end utilizável; preview tag gerencia expectativa. | Mais tempo até feedback externo.                                  |
+| D     | Estável só após N specs externas dogfoodando.                         | Maturidade comprovada.                                         | Pode demorar muito; perde momentum.                               |
+
+**Decisão do Gate Humano:**
+
+- **Status:** [x] Resolvido
+- **Escolha:** [ ] A | [ ] B | [x] C | [ ] D
+- **Justificativa:** Preview após PR3 é o ponto mínimo onde o usuário consegue atravessar um fluxo completo sem se sentir abandonado. Tag `1.1.0-preview.0` ou similar; CHANGELOG explícito "workflow runtime in preview — UX may evolve". Versão estável (1.1.0 sem -preview) só depois de feedback de ≥ 2 consumidores externos. D vira critério de exit do preview, não estratégia de lançamento.
+- **Data / Owner:** 2026-05-19 / @rosanarezende
+
+---
+
+### [DEC-0023-B05] `plan.md` inline em `spec.md` vs `plan.md` separado
+
+**Pergunta:** A 0023 mantém o rollout inline no `spec.md` § Rollout (escolha tácita do PR1) ou cria `plan.md` próprio alinhado com o boilerplate canônico?
+
+**Contexto (decisão emergente detectada):**
+
+- Durante PR1, o `spec.md` pós-pivot foi escrito com `Plan: (inline neste spec.md § "Rollout"; vira plan.md próprio quando o número de PRs ≥ 4)` — escolha do agente, **sem decisão registrada**. Threshold "≥ 4 PRs" foi inventado, não derivado de research.
+- Owner detectou em 2026-05-19: "manter inline sem decisão explícita é exatamente a acreção silenciosa que a 0023 quer evitar". O problema não é o arquivo ausente — é a decisão estrutural emergindo implícita.
+- Boilerplate vigente (`spec-boilerplate.md` + `plan-boilerplate.md`) assume `plan.md` desde o setup. Divergir disso sem rationale registrado contradiz a métrica principal da 0023 (reduzir decisões implícitas).
+- Esta spec já claramente não é pequena: 4 PRs candidatos, rollout duradouro, piloto metodológico.
+
+**Opções:**
+
+| Opção | Descrição                                                                                                                                                                                         | Pró                                                                                         | Contra                                                                                                                          |
+| :---- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :------------------------------------------------------------------------------------------ | :------------------------------------------------------------------------------------------------------------------------------ |
+| A     | **Manter inline** em `spec.md § Rollout`, com decisão explícita + critério objetivo de promoção a `plan.md` (não threshold arbitrário).                                                           | Um arquivo a menos; coerente com AP3 (não criar artifacts por reflexo).                     | Diverge do boilerplate vigente; cria ambiguidade ("isso é o pattern novo?"); aumenta heurística implícita para quem vem depois. |
+| B     | **Criar `plan.md` separado** alinhado com boilerplate canônico (tight, operacional, sem ceremony). Move conteúdo de `spec.md § Rollout` para `plan.md`; mantém pequena summary + link no spec.md. | Consistência estrutural; previsibilidade; menos surpresa; alinha com `spec-boilerplate.md`. | Mais um arquivo; risco residual de virar ceremony (mitigado pela disciplina "sem planejamento excessivo").                      |
+| C     | Tratar como gap dos boilerplates; abrir spec própria de revisão.                                                                                                                                  | Investigação mais profunda.                                                                 | Empurra decisão concreta para depois; **anti-pattern AP1 disfarçado** (decisão importante eternamente adiada).                  |
+
+**Decisão do Gate Humano:**
+
+- **Status:** [x] Resolvido
+- **Escolha:** [ ] A | [x] B | [ ] C
+- **Justificativa:** Consistência estrutural + previsibilidade > economizar um arquivo. O fato de a owner ter perguntado "isso veio do boilerplate?" prova que a ausência de `plan.md` criou ambiguidade operacional. Disciplina explícita: `plan.md` permanece pequeno, operacional, incremental — sem virar ceremony. Critério de revisão de tamanho: se passar de ~150 linhas sem deduplicação com `spec.md`, reavaliar.
+- **Data / Owner:** 2026-05-19 / @rosanarezende
+
+---
+
+### Riscos conscientemente aceitos no PR2
+
+- **Branch name dependency permanece** (`feat|fix|docs|chore|refactor/spec-NNNN-{slug}`). Documentado no README como convenção necessária. Não é prioridade até feedback externo reportar friction.
+- **`AssembleBriefing` continua frágil** (cf. B02). Documentação explica a convenção atual; warning é a primeira linha de defesa.
+- **`state.yml` em spec existente continua manual** (cf. B01). Bootstrap é PR3.
+- **`NodeWorkflowFileSystem` coverage 9%** (sem integration test próprio). Integration test do dispatch (item G) cobre o caminho crítico end-to-end; coverage por arquivo só sobe com fixtures hermeticas em PR3+.
+- **Spec piloto continua viva em branch** até merge para `main`. Examples folder substitui o piloto para consumidores via npm enquanto isso.
+
+---
+
 ## Bloco C — Saúde Técnica e Dívidas Associadas
 
 ### [DEC-0023-C01] Saúde arquitetural e dívidas técnicas
@@ -198,7 +350,7 @@
 
 ---
 
-## ✅ Gate fechado
+## ✅ Gate fechado — Stage A → Stage B (Bloco A)
 
 - **Data:** 2026-05-19
 - **Owner:** @rosanarezende
@@ -211,9 +363,23 @@
 
 ---
 
+## ✅ Gate fechado — Escopo do PR2 (Bloco B)
+
+- **Data:** 2026-05-19
+- **Owner:** @rosanarezende
+- **Pontos resolvidos:**
+  - [x] `[DEC-0023-B01]` — Escopo do PR2: DX/docs com clipboard; bootstrap para PR3 (Opção B)
+  - [x] `[DEC-0023-B02]` — AssembleBriefing frágil: documentar convenção + warning (Opção A)
+  - [x] `[DEC-0023-B03]` — examples/: incluir `examples/minimal-spec/` mínimo (Opção B)
+  - [x] `[DEC-0023-B04]` — Release npm: preview após PR3 com CHANGELOG explícito (Opção C)
+  - [x] `[DEC-0023-B05]` — `plan.md` separado alinhado com boilerplate canônico (Opção B); registra decisão antes implícita
+
+---
+
 ## Checklist pós-gate
 
-- [x] **(1)** `plan.md` inline em `spec.md` § Rollout (4 PRs candidatos; PR1 ativo).
-- [x] **(2)** Tasks operacionais para PR1 criadas (T1–T9 — tasklist da sessão de implementação).
-- [x] **(3)** Status agregado `Resolved` no header e na tabela.
-- [ ] **(4)** Commit atômico marcando o gate: `docs(spec-0023): pivot para workflow-runtime — gate Stage A → Stage B fechado`.
+- [x] **(1)** `plan.md` inline em `spec.md` § Rollout (4 PRs candidatos; PR1 merged, PR2 escopo cravado em Bloco B).
+- [x] **(2)** Tasks operacionais para PR1 criadas (T1–T9, todas completed em `feat/spec-0023-workflow-runtime`).
+- [x] **(3)** Status agregado `Resolved` no header e na tabela (mantido após adição de Bloco B).
+- [x] **(4)** Commit atômico marcando o gate da Stage A: `docs(spec-0023): pivot para workflow-runtime — gate Stage A → Stage B fechado` (`9dedce5`).
+- [ ] **(5)** Commit atômico marcando o gate do Bloco B (PR2): `docs(spec-0023): gate de escopo do PR2 fechado (Bloco B)`.

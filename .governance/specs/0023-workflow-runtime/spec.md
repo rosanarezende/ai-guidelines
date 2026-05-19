@@ -8,7 +8,7 @@
 > Owner: Rosana Rezende
 > Tipo de spec: mixed
 > Decision Brief: [`./decision-brief.md`](./decision-brief.md)
-> Plan: (inline neste spec.md § "Rollout"; vira `plan.md` próprio quando o número de PRs ≥ 4)
+> Plan: [`./plan.md`](./plan.md)
 
 > **Princípio de imutabilidade:** após status `In Review`, este arquivo só
 > muda por consenso explícito. Decisões em aberto vão para `decision-brief.md`.
@@ -81,14 +81,16 @@ Resultado esperado quando esta spec encerrar:
 
 ---
 
-## 🛠️ Rollout (inline; vira plan.md quando ≥ 4 PRs)
+## 🛠️ Rollout
 
-| PR               | Escopo                                                                                                                                                                                                  | Tasks                                    |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
-| **PR1 (este)**   | Pivot formal + state.yml + double-lookup + REPL workflow/continue + bridge entrypoint + ADR 0019 + dogfooding                                                                                           | T1–T9 (ver tasklist da sessão)           |
-| **PR2** (futuro) | Ações de menu: `review-research` (síntese de gaps C1–C7), `gate` (transição assistida com aprovação humana explícita)                                                                                   | TBD em decision-brief novo se necessário |
-| **PR3** (futuro) | `start-spec` (wizard de criação de spec nova em `.governance/specs/`)                                                                                                                                   | TBD                                      |
-| **PR4** (futuro) | Avaliação empírica: 2 specs novas atravessam discovery → decision usando o runtime; coleta de evidência de redução de carga cognitiva (tempo de retomada, leituras evitadas, prompts manuais reduzidos) | TBD                                      |
+| PR               | Escopo                                                                                                                                                                                                                                                                                                                                          | Tasks                                                    |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| **PR1** (merged) | Pivot formal + state.yml + double-lookup + REPL workflow/continue + bridge entrypoint + ADR 0019 + dogfooding                                                                                                                                                                                                                                   | T1–T9 (completed; ver `feat/spec-0023-workflow-runtime`) |
+| **PR2** (ativo)  | DX/docs/onboarding sem novas abstrações (escopo cravado em decision-brief Bloco B): clipboard detection real (xclip/pbcopy/wl-copy), help CLI humano com exemplos, README operacional com seção do runtime, quickstart end-to-end, guia de uso com Claude Code/Cursor, `examples/minimal-spec/`, integration test do dispatch, CHANGELOG entry. | Tasklist do PR2 (criada após gate Bloco B fechado)       |
+| **PR3** (futuro) | Bootstrap: `workflow init` ou `workflow upgrade-state` (cria/migra `state.yml` em spec existente). Critério de exit do release preview.                                                                                                                                                                                                         | TBD em decision-brief Bloco C ou Bloco novo              |
+| **PR4** (futuro) | Avaliação empírica: 2 specs externas atravessam discovery → decision usando o runtime; coleta de evidência de redução de carga cognitiva (tempo de retomada, leituras evitadas, prompts manuais reduzidos). Critério de exit do preview para release estável.                                                                                   | TBD                                                      |
+
+Rollout detalhado (componentes, DoD por PR, riscos arquiteturais ativos) vive em [`./plan.md`](./plan.md), conforme `[DEC-0023-B05]` (alinhamento com boilerplate canônico).
 
 PRs futuros são **candidatos**, não promessa. Cada um precisa de sua própria validação contra a métrica "reduz carga cognitiva?".
 

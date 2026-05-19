@@ -4,5 +4,13 @@ gate:
 focus:
   - workflow-runtime
   - cognitive-load-reduction
+  - dx-and-onboarding
 next:
-  - PR1: implementar workflow + continue + state.yml + double-lookup
+  - PR2: clipboard detection real (xclip/pbcopy/wl-copy)
+  - PR2: integration test do dispatch cli/.mjs → dist/
+  - PR2: examples/minimal-spec/
+  - PR2: help CLI humano com exemplos
+  - PR2: CHANGELOG entry (preview do workflow runtime)
+  - PR2: docs/guides/workflow-quickstart.md (dogfooded)
+  - PR2: docs/guides/workflow-with-ai-agents.md
+  - PR2: README operacional (seção Workflow Runtime)
