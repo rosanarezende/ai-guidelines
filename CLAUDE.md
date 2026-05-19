@@ -1,4 +1,5 @@
 <!-- ai-guidelines:managed-start v=1 -->
+
 # SYSTEM DIRECTIVE: HARD REDIRECT
 
 You are operating inside the Claude Code integration for this workspace.
@@ -26,4 +27,5 @@ Use `.claudeignore` to control context payload. Ensure `AGENTS.md` and the `<AI_
 ### [ADP-0103]
 
 Be concise to counter Claude's default verbosity. In long sessions, use `/clear` or restart if context drift occurs. Respect `CLAUDE.md` for project-specific instructions.
+
 <!-- ai-guidelines:managed-end -->

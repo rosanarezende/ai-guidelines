@@ -29,12 +29,15 @@ Este workspace usa Yarn 4 com Plug'n'Play. Para execução local da CLI, o camin
 ```bash
 yarn install --immutable
 yarn build:rules
+yarn build              # compila src/ → dist/ (necessário antes do CLI; ver nota abaixo)
 yarn format
 yarn check
 yarn test
 yarn check:repo
 yarn guidelines adopt --target . --dry-run
 ```
+
+> **Nota sobre `dist/` (TemplateEngine):** o CLI mjs em `cli/` invoca dinamicamente a TemplateEngine compilada em `dist/` para renderizar recipes mapeadas (sub-bloco 4.C.0 da Spec 0021). Quando uma recipe existe mas `dist/` ainda não foi gerado, o fluxo **falha rapidamente** com mensagem orientada a diagnóstico (em vez de cair silenciosamente no mirror legado — comportamento intencional, ADR-aligned, para evitar regressão silenciosa). **Se estiver rodando o CLI localmente sem `yarn build` prévio**, espere essa falha — execute `yarn build` antes. No pacote publicado via NPM, `prepack: yarn build` garante que `dist/` está sempre presente; `engine-unavailable` em produção indica regressão real de packaging.
 
 <AI_GUIDELINES>
 

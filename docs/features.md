@@ -16,7 +16,7 @@ Estas funcionalidades garantem o piso de governança em qualquer consumidor, ind
 
 - **O que faz**: Compila o runtime de governança dentro da tag `<AI_GUIDELINES>` no `AGENTS.md` da raiz.
 - **Por que**: Materializa o **canal de integração AI-agnóstica** do framework — qualquer IA que leia `AGENTS.md` recebe diretivas, regras globais, adapters e opt-ins em um único artefato topológico, preservando regras próprias do projeto fora da tag.
-- **Classificação**: Hoje distribuído como Core porque é o mecanismo central da CLI mjs. Após a Spec 0021 PR4 (4.C cutover), a SSOT de governança (`registry.yml`, `living-docs.yml`, etc.) ganha distribuição independente; o Runtime AGENTS.md permanece como **canal opt-in primário** para consumidores que querem integração AI ativa.
+- **Classificação**: Hoje distribuído como Core porque é o mecanismo central da CLI mjs. A Spec 0021 PR4 (4.C cutover) **declara e arquiteta** a SSOT de governança (`registry.yml`, `living-docs.yml`, etc.) como distribuição canônica independente; a **distribuição operacional completa** no consumidor (geração real via `cli init`/`adopt`) depende do cutover do runtime (Spec 0022+, ainda em discovery). O Runtime AGENTS.md permanece como **canal opt-in primário** para consumidores que querem integração AI ativa.
 - **Arquivos**: `AGENTS.md`.
 
 ### 2. Rules Compiler

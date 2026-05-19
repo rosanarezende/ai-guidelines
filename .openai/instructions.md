@@ -1,4 +1,5 @@
 <!-- ai-guidelines:managed-start v=1 -->
+
 # SYSTEM DIRECTIVE: HARD REDIRECT
 
 You are operating inside the OpenAI / Codex integration for this workspace.
@@ -26,4 +27,5 @@ Use `#file` references to refine context in Copilot Chat. Ensure Codex CLI loads
 ### [ADP-0203]
 
 Keep files focused and imports explicit to improve inline suggestions. Strictly follow governance rules (e.g., no autonomous push) when operating autonomously.
+
 <!-- ai-guidelines:managed-end -->

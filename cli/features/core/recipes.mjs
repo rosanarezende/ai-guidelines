@@ -17,7 +17,7 @@
  * o domínio TS de src/ permanece puro.
  */
 
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync } from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -33,6 +33,13 @@ const BOILERPLATE_SUFFIX = "-boilerplate.md";
 
 const engineCache = new Map();
 
+// Cache por repoRoot: armazena tanto o engine carregado quanto `null` (sinal
+// de que dist/ não existia em uma chamada anterior). Comportamento esperado:
+// a CLI roda como processo curto-vivido (init/adopt/update terminam após
+// uma rodada); cache não invalida automaticamente. Se `dist/` for criado
+// durante o mesmo processo (cenário só relevante em testes de dev), reiniciar
+// o processo é o caminho. Sem hot-reload por design (regressão silenciosa
+// seria pior que falha explícita).
 async function loadEngine(repoRoot) {
   if (engineCache.has(repoRoot)) {
     return engineCache.get(repoRoot);
