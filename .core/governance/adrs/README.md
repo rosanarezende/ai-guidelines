@@ -80,6 +80,7 @@ A 4.B.5 da Spec 0021 estabeleceu o critério que rege colisões: **legado preser
 | 0016 | Roadmap Repo-First com Tracker Externo como Camada Colaborativa Opcional  | Repo é SSOT do roadmap; tracker é espelho opcional, não autoridade delegada             | Aceita (extraída de foundation em 4.B.2) |
 | 0017 | Numeração de Specs: Slug Semântico Até Branch, Sem Reserva Futura         | Slug até branch; número alocado uma vez; imutável após instanciação                     | Aceita (extraída de foundation em 4.B.2) |
 | 0018 | Governance-First, AI-as-Channel                                           | Core é governança de engenharia repo-first; integração AI é canal opt-in de 1ª classe   | Aceita (4.E)                             |
+| 0019 | `.governance/specs/` como root primária no repositório mantenedor         | Specs novas em `.governance/specs/`; `.specify/` vira bridge sem deprecation timeline   | Aceita (Spec 0023 / DEC-0023-A02)        |
 
 **Operacionalização correlata** (não ADR, vive em `.core/process/`):
 
@@ -96,3 +97,4 @@ A 4.B.5 da Spec 0021 estabeleceu o critério que rege colisões: **legado preser
 - **2026-05-17 (PR4 / 4.B.5):** consolidação física `/adrs/` → `.core/governance/adrs/`. Numeração: legadas 0003–0009 preservam; locais 0001–0005 renumeram para 0010–0014.
 - **2026-05-17 (PR4 / 4.B.2):** 3 ADRs novas extraídas de `governance-foundation.md` — 0015 (universal vs opt-in), 0016 (roadmap repo-first), 0017 (numeração de specs).
 - **2026-05-17 (PR4 / 4.E):** ADR 0018 (Governance-First, AI-as-Channel) criada para formalizar repositioning aprovado em `[DEC-0021-B07]`. Refina escopo de ADR 0008.
+- **2026-05-19 (Spec 0023 / DEC-0023-A02):** ADR 0019 (`.governance/specs/` como root no mantenedor) criada para resolver inconsistência conceitual entre discurso governance-first e UX spec-first. Estende contrato da ADR 0018 ao mantenedor.
