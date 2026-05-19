@@ -1,7 +1,7 @@
 /**
  * Validação estrutural de artefatos compostos.
  *
- * Consome a Recipe como contrato de validação (ADR 0005 §3):
+ * Consome a Recipe como contrato de validação (ADR 0014 §3):
  * a mesma recipe que descreve **como montar** o artefato declara
  * **quais invariantes** ele precisa cumprir.
  *
@@ -16,7 +16,7 @@
  *  3. Self-consistency — metadata do artefato (artifactKind, workflowType,
  *     language) deve coincidir com a recipe que o gerou.
  *
- * Códigos estáveis (ADR 0002):
+ * Códigos estáveis (ADR 0011):
  *  - STRUCT_FORBIDDEN_SECTION
  *  - STRUCT_MISSING_SLOT
  *  - STRUCT_RECIPE_SELF_INCONSISTENT

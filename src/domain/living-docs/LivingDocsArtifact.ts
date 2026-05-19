@@ -7,10 +7,10 @@
  * quando o store ganhar IO (PR3.B+).
  *
  * Princípios canônicos aplicados:
- *  - ADR 0002 (.core/governance/adrs/0002-coverage-state-enum.md):
+ *  - ADR 0011 (.core/governance/adrs/0011-coverage-state-enum.md):
  *    `schemaVersion` é enum fechado; mudar a cardinalidade exige ADR de
  *    extensão e incremento.
- *  - ADR 0004 (.core/governance/adrs/0004-ast-only-extraction.md):
+ *  - ADR 0013 (.core/governance/adrs/0013-ast-only-extraction.md):
  *    determinismo é contrato — `canonicalizeArtifact` produz forma estável
  *    byte-a-byte; sem timestamps no artefato.
  */
@@ -23,7 +23,7 @@ import {
   LivingDocsSource,
 } from "./LivingDocsEntry.js";
 
-/** Versão corrente do schema. Bump exige ADR de extensão (ADR 0002 §6). */
+/** Versão corrente do schema. Bump exige ADR de extensão (ADR 0011 §6). */
 export const LIVING_DOCS_SCHEMA_VERSION = "v0" as const;
 
 /**
@@ -115,7 +115,7 @@ export function assertValidArtifact(input: unknown): asserts input is LivingDocs
  *
  * Idempotente: `canonicalize(canonicalize(x))` produz JSON idêntico a
  * `canonicalize(x)`. Garante o contrato byte-a-byte do drift guard (ADR
- * 0003 + ADR 0004).
+ * 0003 + ADR 0013).
  */
 export function canonicalizeArtifact(input: LivingDocsArtifact): LivingDocsArtifact {
   const groups = new Map<string, LivingDocsEntry[]>();

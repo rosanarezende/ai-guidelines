@@ -4,7 +4,7 @@
  * Testa a orquestração completa: load recipe → validate → load partials →
  * validate → compose na ordem dos slots.
  *
- * Determinismo é contrato (ADR 0004): mesma recipe + mesmos partials
+ * Determinismo é contrato (ADR 0013): mesma recipe + mesmos partials
  * → mesmo output byte-a-byte, verificado por asserção de igualdade estrita.
  *
  * Aplica Q2 (first-wins): quando slot tem >1 partial, usa o primeiro.

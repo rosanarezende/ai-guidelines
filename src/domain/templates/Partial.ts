@@ -11,7 +11,7 @@
  *  [v1] Não-fragmento (começa com heading # ou bloco autocontido).
  *  [v1] Self-contained (referências internas ou externas, não cross-partial).
  *
- * Aplica ADR 0004 (.core/governance/adrs/0004-ast-only-extraction.md):
+ * Aplica ADR 0013 (.core/governance/adrs/0013-ast-only-extraction.md):
  * determinismo como contrato — partial = conteúdo estável byte-a-byte.
  */
 import { GovernanceError } from "../shared/errors.js";
@@ -188,7 +188,7 @@ function assertNoTimestampFields(content: string, ref: string): void {
     if (TIMESTAMP_FIELD_PATTERN.test(lineWithoutInlineCode)) {
       throw new GovernanceError(
         "RECIPE_PARTIAL_HAS_TIMESTAMP",
-        `Partial '${ref}': contém campo de timestamp embutido (generatedAt/createdAt/updatedAt). Partial determinístico não deve conter timestamps (ADR 0004).`
+        `Partial '${ref}': contém campo de timestamp embutido (generatedAt/createdAt/updatedAt). Partial determinístico não deve conter timestamps (ADR 0013).`
       );
     }
   }

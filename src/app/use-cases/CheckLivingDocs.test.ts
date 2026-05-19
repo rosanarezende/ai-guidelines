@@ -2,8 +2,8 @@
  * [BR-CLI-LIVING-DOCS-CHECK] Drift guard: compara artifact gerado vs
  * versão commitada.
  *
- * Aplica ADR 0004 (determinismo): comparação é byte-a-byte estável.
- * Aplica ADR 0003 (bypass auditável): se algum bypass expira durante
+ * Aplica ADR 0013 (determinismo): comparação é byte-a-byte estável.
+ * Aplica ADR 0012 (bypass auditável): se algum bypass expira durante
  * geração, o use case repropaga LIVING_DOCS_BYPASS_EXPIRED — não
  * "passa silencioso".
  *

@@ -6,11 +6,11 @@
  * sem YAML, sem filesystem.
  *
  * Princípios canônicos aplicados:
- *  - ADR 0002 (.core/governance/adrs/0002-coverage-state-enum.md):
+ *  - ADR 0011 (.core/governance/adrs/0011-coverage-state-enum.md):
  *    enums são literal unions fechadas; mensagens nomeiam o conjunto válido.
- *  - ADR 0004 (.core/governance/adrs/0004-ast-only-extraction.md):
+ *  - ADR 0013 (.core/governance/adrs/0013-ast-only-extraction.md):
  *    determinismo como contrato — mesma recipe → mesmo output byte-a-byte.
- *  - ADR 0005 (.core/governance/adrs/0005-structural-validation.md):
+ *  - ADR 0014 (.core/governance/adrs/0014-structural-validation.md):
  *    Recipe é o contrato de validação (slots ricos inline + invariants
  *    global mínimo). Opção (B) cravada no audit pré-3.D.
  *
@@ -19,7 +19,7 @@
 import { GovernanceError } from "../shared/errors.js";
 
 // ---------------------------------------------------------------------------
-// Enums fechados (ADR 0002)
+// Enums fechados (ADR 0011)
 // ---------------------------------------------------------------------------
 
 export const TEMPLATE_SCHEMA_VERSIONS = Object.freeze(["v0"] as const);
@@ -98,7 +98,7 @@ function includes<T>(arr: readonly T[], value: unknown): value is T {
 /**
  * Valida shape de POJO parseado como Recipe.
  *
- * Erros estáveis (ADR 0002):
+ * Erros estáveis (ADR 0011):
  *  - RECIPE_MISSING_FIELD
  *  - RECIPE_INVALID_SCHEMA_VERSION
  *  - RECIPE_INVALID_ARTIFACT_KIND

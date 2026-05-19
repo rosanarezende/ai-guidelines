@@ -1,7 +1,7 @@
 /**
  * [BR-CLI-LIVING-DOCS-BYPASS] Parser da diretiva de bypass auditável.
  *
- * Aplica ADR 0003 (.core/governance/adrs/0003-drift-guard-bypass.md):
+ * Aplica ADR 0012 (.core/governance/adrs/0012-drift-guard-bypass.md):
  * sintaxe canônica `// <guard-id>:allow-drift until=YYYY-MM-DD ref=ID
  * reason="..."`. Campos obrigatórios na ordem; ausência → BYPASS_MALFORMED;
  * `until` no passado → BYPASS_EXPIRED.

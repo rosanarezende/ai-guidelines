@@ -4,10 +4,10 @@
  * Valida `Recipe`, `RecipeSlot`, `RecipeInvariants` e enums fechados como
  * contrato do TemplateEngine.
  *
- * Aplica ADR 0002 (.core/governance/adrs/0002-coverage-state-enum.md):
+ * Aplica ADR 0011 (.core/governance/adrs/0011-coverage-state-enum.md):
  * enums são fechados com mensagens determinísticas nomeando o conjunto válido.
  *
- * Aplica ADR 0005 (.core/governance/adrs/0005-structural-validation.md):
+ * Aplica ADR 0014 (.core/governance/adrs/0014-structural-validation.md):
  * Recipe é o contrato de validação — slots ricos inline + invariants global.
  *
  * Opção (B) cravada no audit pré-3.D (2026-05-11): slots ricos inline +
@@ -55,7 +55,7 @@ const validRecipe = {
 
 // --- Testes ---
 
-describe("Recipe — Enums fechados (ADR 0002) [BR-CLI-RECIPE]", () => {
+describe("Recipe — Enums fechados (ADR 0011) [BR-CLI-RECIPE]", () => {
   it("DADO TEMPLATE_SCHEMA_VERSIONS ENTÃO contém apenas 'v0' e é readonly [BR-CLI-RECIPE-13]", () => {
     expect(TEMPLATE_SCHEMA_VERSIONS).toEqual(["v0"]);
     expect(Object.isFrozen(TEMPLATE_SCHEMA_VERSIONS)).toBe(true);

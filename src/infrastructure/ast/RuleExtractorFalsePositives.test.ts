@@ -21,7 +21,7 @@
  * Tratamento de template literals com interpolação:
  *  - `it(\`[BR-CLI-${var}]\`, ...)` não pode ser resolvido estaticamente.
  *  - O extractor não tenta resolver — só reconhece literal puro.
- *  - ADR 0004 trade-off: convenção editorial proíbe interpolação no
+ *  - ADR 0013 trade-off: convenção editorial proíbe interpolação no
  *    argumento de `it` que carrega o ID; esta suite documenta o
  *    comportamento (ignorado, não-erro).
  */

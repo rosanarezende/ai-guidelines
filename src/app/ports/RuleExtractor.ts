@@ -1,7 +1,7 @@
 /**
  * Port: extrator de regras `[BR-CLI-*]` declaradas em testes.
  *
- * Aplica ADR 0004 (.core/governance/adrs/0004-ast-only-extraction.md):
+ * Aplica ADR 0013 (.core/governance/adrs/0013-ast-only-extraction.md):
  * artefato derivado de código é função pura do AST. A implementação
  * concreta vive em infrastructure (TypeScript Compiler API); este port
  * preserva o boundary domain/app → infrastructure.

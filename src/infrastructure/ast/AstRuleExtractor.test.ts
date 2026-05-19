@@ -1,12 +1,12 @@
 /**
  * [BR-CLI-LIVING-DOCS-EXTRACTOR] Extração estática de regras `[BR-CLI-*]`.
  *
- * Aplica ADR 0004: AST como SSOT. O extractor reconhece `[BR-CLI-*]` em
+ * Aplica ADR 0013: AST como SSOT. O extractor reconhece `[BR-CLI-*]` em
  * argumento string de `it(...)`/`test(...)` em arquivos `.test.ts`, deriva
  * `coverageState` sintaticamente (`it.skip` → `pending`; `it` → `covered`)
  * e popula `boundedContext`/`domain` por convenção de path.
  *
- * Determinismo é contrato (ADR 0004 §2): mesma entrada → mesma saída.
+ * Determinismo é contrato (ADR 0013 §2): mesma entrada → mesma saída.
  */
 import * as fs from "node:fs";
 import * as os from "node:os";
@@ -238,7 +238,7 @@ describe("Infra — TypeScriptRuleExtractor (descoberta) [BR-CLI-LIVING-DOCS-EXT
     });
   });
 
-  describe("Invariante: 1 it/test = exatamente 1 rule (ADR 0002 §4 + ADR 0004 §3)", () => {
+  describe("Invariante: 1 it/test = exatamente 1 rule (ADR 0011 §4 + ADR 0013 §3)", () => {
     it("DADO título com 2 tags [BR-CLI-*] ENTÃO LIVING_DOCS_AMBIGUOUS_RULE_ID com mensagem listando os IDs [BR-CLI-LIVING-DOCS-EXTRACTOR-13]", () => {
       const file = writeFile(
         root,

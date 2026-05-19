@@ -2,7 +2,7 @@
  * Implementação concreta do {@link RuleExtractor} via TypeScript Compiler API.
  *
  * Boundary contract: o package `typescript` só é importável sob este path
- * (`src/infrastructure/ast/`). Aplica ADR 0004 — análise estática AST como
+ * (`src/infrastructure/ast/`). Aplica ADR 0013 — análise estática AST como
  * SSOT de artefatos derivados de código.
  *
  * Algoritmo:
@@ -38,8 +38,8 @@ import { parseBypassDirective } from "../../domain/living-docs/BypassDirective.j
  *
  * **Invariante (3.C.4-prep):** cada `it/test` declara **exatamente
  * uma** rule. Título com 0 tags → ignora (não-rule); 1 tag → extrai;
- * ≥ 2 tags → `LIVING_DOCS_AMBIGUOUS_RULE_ID` fatal. Aplica ADR 0002 §4
- * (sem fallback silencioso) e ADR 0004 §3 (false positive é defeito
+ * ≥ 2 tags → `LIVING_DOCS_AMBIGUOUS_RULE_ID` fatal. Aplica ADR 0011 §4
+ * (sem fallback silencioso) e ADR 0013 §3 (false positive é defeito
  * estrutural, não erro de regex).
  *
  * Citações de IDs em descrições de teste (típicas em testes do próprio
@@ -202,7 +202,7 @@ export class TypeScriptRuleExtractor implements RuleExtractor {
             const fullText = titleArg.text;
             const matches = [...fullText.matchAll(RULE_ID_PATTERN)];
             if (matches.length >= 2) {
-              // Invariante estrutural (ADR 0002 §4 + ADR 0004 §3): cada
+              // Invariante estrutural (ADR 0011 §4 + ADR 0013 §3): cada
               // it/test declara exatamente uma rule. Ambiguidade é defeito
               // de design, não algo a ser silenciosamente "resolvido"
               // (ex.: pegar a última, pegar a primeira). O autor recebe
@@ -286,7 +286,7 @@ export class TypeScriptRuleExtractor implements RuleExtractor {
    * nenhuma diretiva aplicável for encontrada. Repropaga
    * `GovernanceError` se a diretiva existir mas estiver malformada/expirada.
    *
-   * ADR 0003 §4: a diretiva é comentário de linha imediatamente antes do
+   * ADR 0012 §4: a diretiva é comentário de linha imediatamente antes do
    * `it`/`test`; outros posicionamentos são ignorados.
    */
   private detectBypassDirective(sourceFile: ts.SourceFile, node: ts.Node): LivingDocsBypass | null {
@@ -311,7 +311,7 @@ export class TypeScriptRuleExtractor implements RuleExtractor {
    * (cobertura `covered`), ou retorna `null` se não é call site de teste
    * reconhecido.
    *
-   * Formas reconhecidas (ADR 0004 §3 — sem cegueira sintática para
+   * Formas reconhecidas (ADR 0013 §3 — sem cegueira sintática para
    * testes parametrizados):
    *  - `it(title, fn)` / `test(title, fn)` → covered.
    *  - `it.skip(title, fn)` / `test.skip(title, fn)` → pending.
