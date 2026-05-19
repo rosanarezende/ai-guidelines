@@ -1,14 +1,16 @@
 <!-- ai-guidelines-template: spec-boilerplate v=1 -->
 
-# Spec 0023 — Modelo de Workflow de Governança e Descoberta
+# Spec 0023 — Modelo de Workflow de Governança e Descoberta (PIVOTED)
 
-> Status: Draft (Stage A — Discovery)
+> Status: Pivoted (2026-05-19 — ver [`/.governance/specs/0023-workflow-runtime/`](../../../.governance/specs/0023-workflow-runtime/))
 > Author: Claude Code (em sessão com Rosana Rezende, 2026-05-19)
 > Date: 2026-05-19
 > Owner: Rosana Rezende
 > Tipo de spec: evidence-driven
-> Decision Brief: (não criado em Stage A — nasce após `research.md` produzir evidência e o gate humano ser explicitamente aberto)
-> Plan: (não criado em Stage A — nasce após o `decision-brief.md`)
+> Decision Brief: [`/.governance/specs/0023-workflow-runtime/decision-brief.md`](../../../.governance/specs/0023-workflow-runtime/decision-brief.md)
+> Plan: inline em [`/.governance/specs/0023-workflow-runtime/spec.md`](../../../.governance/specs/0023-workflow-runtime/spec.md) § Rollout
+
+> 🔁 **PIVOT CONTROLADO (2026-05-19).** Esta spec original investigou o lifecycle metodológico como "discovery model". O Stage A produziu evidência convergente (H1–H4) de que o problema-raiz é **carga cognitiva operacional**, não falta de metodologia documental. Em sessão de design 2026-05-19 a owner aprovou o pivot para "workflow runtime operacional humano-IA"; o gate Stage A → Stage B foi fechado com 4 decisões cravadas em [`/.governance/specs/0023-workflow-runtime/decision-brief.md`](../../../.governance/specs/0023-workflow-runtime/decision-brief.md). Esta pasta permanece como **trilha histórica** — research.md, anti-patterns e hipóteses são evidência citável; **não migrar conteúdo**. O trabalho ativo vive no novo path.
 
 > **Princípio de imutabilidade:** após status `In Review`, este arquivo só
 > muda por consenso explícito. Decisões em aberto vão para `plan.md` (vivo,

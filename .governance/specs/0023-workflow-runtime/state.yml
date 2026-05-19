@@ -1,0 +1,8 @@
+stage: implementation
+gate:
+  status: closed
+focus:
+  - workflow-runtime
+  - cognitive-load-reduction
+next:
+  - PR1: implementar workflow + continue + state.yml + double-lookup
