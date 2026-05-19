@@ -1,4 +1,4 @@
-<!-- ai-guidelines-template: decision-brief-boilerplate v=1 -->
+<!-- ai-guidelines-template: decision-brief-boilerplate v=2 -->
 
 # Decision Brief — Spec [Número] [Título Curto]
 
@@ -8,7 +8,7 @@
 > Status agregado: **Open** <!-- Open | Pendente | Partial | Resolved -->
 > Última atualização: [YYYY-MM-DD] — [nota curta sobre o que mudou nesta atualização]
 
-> **Artefato canônico do gate humano entre Stage 1 (research) e Stage 2 (design + implementação)** para specs `evidence-driven` ou `mixed` (cf. `.core/process/spec-foundation.md` § "Tipos de spec"). Specs `deterministic` não instanciam este arquivo.
+> **Artefato canônico do gate humano entre Stage 1 (research) e Stage 2 (design + implementação)** para specs `evidence-driven` ou `mixed` (cf. `.core/process/governance-foundation.md` § "Tipos de spec"). Specs `deterministic` não instanciam este arquivo.
 >
 > **O que faz:** apresenta opções com tradeoffs antes do gate humano e registra decisões validadas após o gate. Não substitui ADRs (decisões arquiteturais cross-spec) — é spec-level. **Permanece no diretório da spec após o merge** como artefato histórico (não migra para `researchs/`).
 
@@ -154,6 +154,68 @@ A brief aceita duas formas de estruturar um ponto, escolhidas pelo autor conform
 
 [...]
 
+## Bloco C — Saúde Técnica e Dívidas Associadas
+
+> **Bloco Mandatório.** O objetivo é forçar a análise sobre a saúde da base de código que implementará a spec, prevenindo que dívidas técnicas não-mapeadas comprometam a entrega.
+
+### [DEC-NNNN-C01] Saúde arquitetural e dívidas técnicas
+
+**Pergunta:** Qual é o estado de saúde do componente que implementará esta spec, e quais dívidas técnicas existentes podem impactar o escopo?
+
+**Contexto (research):**
+
+- A análise de saúde técnica é um pré-requisito para um planejamento de implementação realista.
+- Identificar dívidas técnicas relevantes no Stage 1 permite que o escopo da spec seja ajustado (se necessário) para pagá-las, em vez de acumular mais complexidade sobre uma base frágil.
+
+**Eixos a decidir:**
+
+1. **Saúde Arquitetural:** Qual é o diagnóstico do componente principal afetado?
+2. **Dívidas Técnicas:** Existem dívidas pré-existentes que a spec irá exacerbar?
+3. **Estratégia de Validação e Qualidade:** A estratégia de validação do projeto é suficiente para uma refatoração segura?
+
+#### Sub-eixo 1 — Saúde Arquitetural
+
+| Opção | Descrição                                                                                                                                                                                                   |
+| :---- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A     | **Saudável:** A arquitetura do componente é clara, coesa e pronta para absorver as novas funcionalidades sem atritos significativos.                                                                        |
+| B     | **Requer Refatoração:** O componente funciona, mas sua estrutura interna é confusa, acoplada ou carece de padrões claros. A implementação exigirá uma refatoração tática.                                   |
+| C     | **Requer Re-arquitetura:** A fundação do componente é fundamentalmente falha ou inadequada para os novos requisitos. A implementação segura exige um redesenho completo antes da entrega de novas features. |
+
+#### Sub-eixo 2 — Dívidas Técnicas
+
+| Opção | Descrição                                                                                                                                                                                          |
+| :---- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A     | **Nenhuma Dívida Relevante:** Nenhuma dívida técnica existente impacta diretamente o escopo desta spec.                                                                                            |
+| B     | **Dívidas Contidas:** Existem dívidas, mas elas podem ser isoladas ou contornadas. O plano de implementação deve registrá-las.                                                                     |
+| C     | **Dívidas Bloqueadoras:** Dívidas existentes (ex: dependências obsoletas, falta de testes) tornam a implementação insegura ou impraticável. O escopo da spec **deve ser expandido** para pagá-las. |
+
+#### Sub-eixo 3 — Estratégia de Validação e Qualidade
+
+| Opção | Descrição                                                                                                                                                                              |
+| :---- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A     | **Validação Ad-hoc:** A qualidade é garantida principalmente por validação manual e testes não estruturados. Mudanças exigem um ciclo de QA manual extensivo.                          |
+| B     | **Checagens Automatizadas:** O projeto utiliza ferramentas como linters, checagem de tipos e/ou análise estática, mas não possui uma suíte de testes de comportamento.                 |
+| C     | **Suíte de Testes Formal:** Uma suíte de testes automatizados (unitários, integração, etc.) é parte central do fluxo de trabalho, permitindo refatorações com maior grau de segurança. |
+
+**Decisão do Gate Humano:**
+
+- **Status:** [ ] Pendente | [ ] Resolvido
+- **Sub-eixo 1 — Saúde Arquitetural (marque com `x`):**
+  - [ ] A
+  - [ ] B
+  - [ ] C
+- **Sub-eixo 2 — Dívidas Técnicas (marque com `x`):**
+  - [ ] A
+  - [ ] B
+  - [ ] C
+- **Sub-eixo 3 — Estratégia de Validação e Qualidade (marque com `x`):**
+  - [ ] A
+  - [ ] B
+  - [ ] C
+- **Justificativa / Ressalvas:** >
+  [Texto livre cobrindo a composição final das escolhas e o impacto no plano de implementação.]
+- **Data / Owner:** [YYYY-MM-DD] / [@owner]
+
 ---
 
 ## Resumo de status
@@ -165,6 +227,7 @@ A brief aceita duas formas de estruturar um ponto, escolhidas pelo autor conform
 | `[DEC-NNNN-A01]` | A     | Open   |
 | `[DEC-NNNN-A02]` | A     | Open   |
 | `[DEC-NNNN-B01]` | B     | Open   |
+| `[DEC-NNNN-C01]` | C     | Open   |
 
 **Status agregado:** [Open | Pendente | Partial | Resolved] — atualizar conforme o estado consolidado da tabela acima e refletir no campo do header.
 
@@ -180,6 +243,7 @@ A brief aceita duas formas de estruturar um ponto, escolhidas pelo autor conform
   - [ ] `[DEC-NNNN-A01]`
   - [ ] `[DEC-NNNN-A02]`
   - [ ] `[DEC-NNNN-B01]`
+  - [ ] `[DEC-NNNN-C01]`
 
 ---
 

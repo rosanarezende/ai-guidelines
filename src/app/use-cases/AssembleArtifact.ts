@@ -9,7 +9,7 @@
  *  5. Concatena na ordem canônica dos slots (`invariants.canonicalOrder`).
  *  6. Retorna `ComposedArtifact` com conteúdo + metadata.
  *
- * Determinismo (ADR 0004): mesma recipe + mesmos partials → mesmo output
+ * Determinismo (ADR 0013): mesma recipe + mesmos partials → mesmo output
  * byte-a-byte. Separador entre slots é `\n\n` (sem padding extra).
  *
  * Camada: `app/`. Conhece domain + ports; não toca infra direto.

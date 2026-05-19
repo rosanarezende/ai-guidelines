@@ -1,4 +1,4 @@
-# ADR 0003 — Bypass Auditável de Contratos de CI via Diretivas Declarativas In-Code
+# ADR 0012 — Bypass Auditável de Contratos de CI via Diretivas Declarativas In-Code
 
 **Status:** Aceita
 **Data:** 2026-05-11
@@ -108,4 +108,4 @@ Cada novo guard que adotar bypass usa **a mesma sintaxe** — não inventa varia
 
 ## Nota histórica
 
-A sintaxe canônica (`<guard-id>:allow-drift until=… ref=… reason=…`) foi cravada durante revisão da Spec 0021 pela owner, com requisito explícito de "erro fatal em data expirada ou campo ausente". A primeira aplicação concreta é o Living Documentation drift guard no PR3; ADR 0003 generaliza para qualquer guard futuro do framework.
+A sintaxe canônica (`<guard-id>:allow-drift until=… ref=… reason=…`) foi cravada durante revisão da Spec 0021 pela owner, com requisito explícito de "erro fatal em data expirada ou campo ausente". A primeira aplicação concreta é o Living Documentation drift guard no PR3; ADR 0012 generaliza para qualquer guard futuro do framework.

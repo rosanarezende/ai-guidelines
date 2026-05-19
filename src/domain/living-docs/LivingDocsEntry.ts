@@ -15,9 +15,9 @@
  * este módulo valida apenas estrutura.
  *
  * Princípios canônicos aplicados:
- *  - ADR 0002 (.core/governance/adrs/0002-coverage-state-enum.md):
+ *  - ADR 0011 (.core/governance/adrs/0011-coverage-state-enum.md):
  *    `coverageState` é enum fechado; mensagens nomeiam o conjunto válido.
- *  - ADR 0003 (.core/governance/adrs/0003-drift-guard-bypass.md):
+ *  - ADR 0012 (.core/governance/adrs/0012-drift-guard-bypass.md):
  *    bypass declarativo só convive com `coverageState === "deprecated"` —
  *    invariante aplicada tanto no topo quanto em cada item de `evidence`.
  */
@@ -39,7 +39,7 @@ export interface LivingDocsSource {
   readonly bypass?: LivingDocsBypass;
 }
 
-/** Bloco de bypass auditável (ADR 0003), presente apenas em evidence/entries deprecated. */
+/** Bloco de bypass auditável (ADR 0012), presente apenas em evidence/entries deprecated. */
 export interface LivingDocsBypass {
   readonly until: string; // ISO-8601 YYYY-MM-DD
   readonly ref: string;

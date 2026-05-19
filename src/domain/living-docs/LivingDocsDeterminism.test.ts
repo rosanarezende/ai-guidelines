@@ -1,7 +1,7 @@
 /**
  * [BR-CLI-LIVING-DOCS-DETERMINISM] Canonicalização determinística.
  *
- * Aplica ADR 0004 (.core/governance/adrs/0004-ast-only-extraction.md):
+ * Aplica ADR 0013 (.core/governance/adrs/0013-ast-only-extraction.md):
  * mesma árvore + mesma versão do extractor + mesma versão do schema →
  * artefato byte-a-byte idêntico. Domain expõe `canonicalizeArtifact` que
  * normaliza ordem; a serialização YAML literal vive em infrastructure.
@@ -10,7 +10,7 @@
  *  - entries ordenadas alfabeticamente por ruleId
  *  - tags de cada entry ordenadas alfabeticamente
  *  - canonicalize é idempotente (canonicalize(canonicalize(x)) === canonicalize(x))
- *  - sem timestamps no artefato (determinismo absoluto, ADR 0004 §2)
+ *  - sem timestamps no artefato (determinismo absoluto, ADR 0013 §2)
  */
 import { canonicalizeArtifact, LIVING_DOCS_SCHEMA_VERSION } from "./LivingDocsArtifact.js";
 import { LivingDocsEntry } from "./LivingDocsEntry.js";
@@ -115,7 +115,7 @@ describe("LivingDocs — Canonicalização determinística [BR-CLI-LIVING-DOCS-D
     });
   });
 
-  describe("Ausência de timestamps (ADR 0004 §2)", () => {
+  describe("Ausência de timestamps (ADR 0013 §2)", () => {
     it("DADO canonicalize ENTÃO o artifact NÃO contém campos temporais (generatedAt, timestamp, etc) [BR-CLI-LIVING-DOCS-DETERMINISM-07]", () => {
       const result = canonicalizeArtifact({
         schemaVersion: LIVING_DOCS_SCHEMA_VERSION,

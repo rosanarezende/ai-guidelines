@@ -5,7 +5,7 @@
  * `evidence: SourceLocation[]` plural — modelo 1 rule → N evidências) e
  * `LivingDocsArtifact` como contrato.
  *
- * Aplica ADR 0002 (.core/governance/adrs/0002-coverage-state-enum.md):
+ * Aplica ADR 0011 (.core/governance/adrs/0011-coverage-state-enum.md):
  * coverageState é enum fechado { covered, pending, deprecated } com
  * mensagens determinísticas nomeando o conjunto válido.
  *
@@ -117,7 +117,7 @@ describe("LivingDocs — Schema de Entry com evidence[] [BR-CLI-LIVING-DOCS-SCHE
     });
   });
 
-  describe("coverageState como enum fechado (ADR 0002)", () => {
+  describe("coverageState como enum fechado (ADR 0011)", () => {
     it.each(["covered", "pending", "deprecated"] as const)(
       "DADO coverageState='%s' ENTÃO aceita [BR-CLI-LIVING-DOCS-SCHEMA-02]",
       (state) => {
@@ -276,7 +276,7 @@ describe("LivingDocs — Schema de Entry com evidence[] [BR-CLI-LIVING-DOCS-SCHE
     });
   });
 
-  describe("Bypass declarado no topo da entry (ADR 0003)", () => {
+  describe("Bypass declarado no topo da entry (ADR 0012)", () => {
     it("DADO coverageState='deprecated' COM bypass válido ENTÃO aceita [BR-CLI-LIVING-DOCS-SCHEMA-08]", () => {
       expect(() =>
         assertValidEntry({

@@ -126,18 +126,18 @@ chore(ci): atualizar threshold de cobertura para 85%
 
 Cada conteúdo vive em **um único lugar**; outros documentos apenas linkam:
 
-| Conteúdo                          | Vive em                            | Outros docs apenas linkam    |
-| :-------------------------------- | :--------------------------------- | :--------------------------- |
-| Workflow obrigatório do agente IA | `AGENTS.md`                        | README, CONTRIBUTING         |
-| Princípios de engenharia (regras) | `.core/rules/global-rules.md`      | AGENTS, CONTRIBUTING, README |
-| Como contribuir (humano)          | `CONTRIBUTING.md`                  | README                       |
-| Lifecycle de specs                | `.core/process/spec-foundation.md` | AGENTS, CONTRIBUTING         |
-| Visão geral do framework          | `README.md`                        | (raiz, ponto de entrada)     |
+| Conteúdo                          | Vive em                                  | Outros docs apenas linkam    |
+| :-------------------------------- | :--------------------------------------- | :--------------------------- |
+| Workflow obrigatório do agente IA | `AGENTS.md`                              | README, CONTRIBUTING         |
+| Princípios de engenharia (regras) | `.core/rules/global-rules.md`            | AGENTS, CONTRIBUTING, README |
+| Como contribuir (humano)          | `CONTRIBUTING.md`                        | README                       |
+| Lifecycle de specs                | `.core/process/governance-foundation.md` | AGENTS, CONTRIBUTING         |
+| Visão geral do framework          | `README.md`                              | (raiz, ponto de entrada)     |
 
 Antes de começar, leia:
 
 - [`AGENTS.md`](AGENTS.md) — fluxo obrigatório, princípios de engenharia e workflow (humanos e agentes).
-- [`.core/process/spec-foundation.md`](.core/process/spec-foundation.md) — quando abrir spec, como estruturar `spec.md`/`plan.md`/`tasks.md` e como fechar débitos/research.
+- [`.core/process/governance-foundation.md`](.core/process/governance-foundation.md) — quando abrir spec, como estruturar `spec.md`/`plan.md`/`tasks.md` e como fechar débitos/research.
 - [`.specify/specs/roadmap/backlog.md`](.specify/specs/roadmap/backlog.md) — backlog e candidatas.
 
 ---
@@ -218,7 +218,7 @@ Algumas regras locais importam para evitar drift:
 - Ao editar regras em `.core/rules/`, rode `yarn check` para reconstruir `rules.json` e o ledger.
 - Ao editar a CLI, preserve o contrato entre `cli/cli/args.mjs`, `cli/app/engine.mjs` e `docs/cli/ai-guidelines-cli.md`.
 - Features editoriais (`tdd`, `bdd`, `quality-gates`) e de infraestrutura (`prettier`, `husky`, `ci`) têm taxonomias distintas e não devem ser misturadas na documentação nem no wizard.
-- Sequência de release (publish em registry npm) é cravada em [`.core/process/spec-foundation.md`](.core/process/spec-foundation.md) § "Sequência canônica para specs com publish em registry externo" — leia antes de qualquer trabalho que envolva publish.
+- Sequência de release (publish em registry npm) é cravada em [`.core/process/governance-foundation.md`](.core/process/governance-foundation.md) § "Sequência canônica para specs com publish em registry externo" — leia antes de qualquer trabalho que envolva publish.
 
 ---
 

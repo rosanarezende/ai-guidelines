@@ -1,4 +1,4 @@
-# ADR 0004 — Análise Estática AST como SSOT para Artefatos Derivados de Código
+# ADR 0013 — Análise Estática AST como SSOT para Artefatos Derivados de Código
 
 **Status:** Aceita
 **Data:** 2026-05-11
@@ -53,7 +53,7 @@ O `RuleExtractor` (PR3) percorre `.test.ts` files, identifica `it(...)`/`test(..
 
 ### Aplicações previstas
 
-- **Boundary enforcement** (`Boundaries.test.ts`, hoje regex sobre source). Migração para AST está documentada como débito desde a Fase 1; ADR 0004 abre o caminho — o mesmo TS Compiler API instanciada para o RuleExtractor produz também o grafo de imports.
+- **Boundary enforcement** (`Boundaries.test.ts`, hoje regex sobre source). Migração para AST está documentada como débito desde a Fase 1; ADR 0013 abre o caminho — o mesmo TS Compiler API instanciada para o RuleExtractor produz também o grafo de imports.
 - **Glossário cruzado com identificadores de código.** Detectar termos do `ARCHITECTURE-REFERENCE.md` §5 que não têm contraparte em tipos exportados.
 - **Schema check do registry YAML** com referências a tipos do domínio (validar que `kind: spec` casa com o `WorkItemKind` exportado).
 - **Catálogo de exports públicos** do pacote npm (para evitar quebra acidental de API).
@@ -76,7 +76,7 @@ O `RuleExtractor` (PR3) percorre `.test.ts` files, identifica `it(...)`/`test(..
 
 ### Positivas
 
-- **Determinismo total.** Drift guard (ADR 0003) funciona sobre comparação byte-a-byte estável.
+- **Determinismo total.** Drift guard (ADR 0012) funciona sobre comparação byte-a-byte estável.
 - **Velocidade.** Extractor não espera testes; roda em pre-commit hook se desejado.
 - **Independência de runner.** Trocar framework de teste não quebra o artefato.
 - **Investimento composto.** AST tooling instanciada serve múltiplos guards futuros.
@@ -91,4 +91,4 @@ O `RuleExtractor` (PR3) percorre `.test.ts` files, identifica `it(...)`/`test(..
 
 ## Nota histórica
 
-O princípio foi consolidado durante a Spec 0021 ao escolher o caminho técnico do `RuleExtractor` (sub-bloco 3.B). A pesquisa de design comparou AST-only com custom reporter e híbridos; ADR 0004 generaliza a escolha como decisão arquitetural perene — artefatos derivados são estáticos por construção, telemetria é aditiva.
+O princípio foi consolidado durante a Spec 0021 ao escolher o caminho técnico do `RuleExtractor` (sub-bloco 3.B). A pesquisa de design comparou AST-only com custom reporter e híbridos; ADR 0013 generaliza a escolha como decisão arquitetural perene — artefatos derivados são estáticos por construção, telemetria é aditiva.

@@ -767,7 +767,7 @@ entries:
         testName: DADO canonicalize ENTÃO o artifact NÃO contém campos temporais (generatedAt, timestamp, etc)
         coverageState: covered
     tags:
-      - Ausência de timestamps (ADR 0004 §2)
+      - Ausência de timestamps (ADR 0013 §2)
       - LivingDocs — Canonicalização determinística [BR-CLI-LIVING-DOCS-DETERMINISM]
     coverageState: covered
   - ruleId: BR-CLI-LIVING-DOCS-DETERMINISM-08
@@ -1146,7 +1146,7 @@ entries:
         coverageState: covered
     tags:
       - Infra — TypeScriptRuleExtractor (descoberta) [BR-CLI-LIVING-DOCS-EXTRACTOR]
-      - "Invariante: 1 it/test = exatamente 1 rule (ADR 0002 §4 + ADR 0004 §3)"
+      - "Invariante: 1 it/test = exatamente 1 rule (ADR 0011 §4 + ADR 0013 §3)"
     coverageState: covered
   - ruleId: BR-CLI-LIVING-DOCS-EXTRACTOR-14
     title: DADO título com 3+ tags [BR-CLI-*] ENTÃO LIVING_DOCS_AMBIGUOUS_RULE_ID listando todos
@@ -1160,7 +1160,7 @@ entries:
         coverageState: covered
     tags:
       - Infra — TypeScriptRuleExtractor (descoberta) [BR-CLI-LIVING-DOCS-EXTRACTOR]
-      - "Invariante: 1 it/test = exatamente 1 rule (ADR 0002 §4 + ADR 0004 §3)"
+      - "Invariante: 1 it/test = exatamente 1 rule (ADR 0011 §4 + ADR 0013 §3)"
     coverageState: covered
   - ruleId: BR-CLI-LIVING-DOCS-EXTRACTOR-15
     title: DADO it.each([...])(title, fn) ENTÃO reconhece ruleId como covered
@@ -1644,7 +1644,7 @@ entries:
         coverageState: covered
     tags:
       - LivingDocs — Schema de Entry com evidence[] [BR-CLI-LIVING-DOCS-SCHEMA]
-      - coverageState como enum fechado (ADR 0002)
+      - coverageState como enum fechado (ADR 0011)
     coverageState: covered
   - ruleId: BR-CLI-LIVING-DOCS-SCHEMA-03
     title: DADO coverageState='%s' (fora do enum) ENTÃO LIVING_DOCS_INVALID_COVERAGE_STATE com mensagem nomeando o conjunto
@@ -1658,7 +1658,7 @@ entries:
         coverageState: covered
     tags:
       - LivingDocs — Schema de Entry com evidence[] [BR-CLI-LIVING-DOCS-SCHEMA]
-      - coverageState como enum fechado (ADR 0002)
+      - coverageState como enum fechado (ADR 0011)
     coverageState: covered
   - ruleId: BR-CLI-LIVING-DOCS-SCHEMA-04
     title: DADO entry SEM '%s' ENTÃO LIVING_DOCS_MISSING_FIELD
@@ -1727,7 +1727,7 @@ entries:
         testName: DADO coverageState='deprecated' COM bypass válido ENTÃO aceita
         coverageState: covered
     tags:
-      - Bypass declarado no topo da entry (ADR 0003)
+      - Bypass declarado no topo da entry (ADR 0012)
       - LivingDocs — Schema de Entry com evidence[] [BR-CLI-LIVING-DOCS-SCHEMA]
     coverageState: covered
   - ruleId: BR-CLI-LIVING-DOCS-SCHEMA-09
@@ -1741,7 +1741,7 @@ entries:
         testName: DADO bypass SEM 'until' ENTÃO LIVING_DOCS_BYPASS_MALFORMED
         coverageState: covered
     tags:
-      - Bypass declarado no topo da entry (ADR 0003)
+      - Bypass declarado no topo da entry (ADR 0012)
       - LivingDocs — Schema de Entry com evidence[] [BR-CLI-LIVING-DOCS-SCHEMA]
     coverageState: covered
   - ruleId: BR-CLI-LIVING-DOCS-SCHEMA-10
@@ -1755,7 +1755,7 @@ entries:
         testName: DADO bypass COM 'until' em formato inválido ENTÃO LIVING_DOCS_BYPASS_MALFORMED
         coverageState: covered
     tags:
-      - Bypass declarado no topo da entry (ADR 0003)
+      - Bypass declarado no topo da entry (ADR 0012)
       - LivingDocs — Schema de Entry com evidence[] [BR-CLI-LIVING-DOCS-SCHEMA]
     coverageState: covered
   - ruleId: BR-CLI-LIVING-DOCS-SCHEMA-11
@@ -1769,7 +1769,7 @@ entries:
         testName: DADO bypass COM 'reason' curto demais ENTÃO LIVING_DOCS_BYPASS_MALFORMED
         coverageState: covered
     tags:
-      - Bypass declarado no topo da entry (ADR 0003)
+      - Bypass declarado no topo da entry (ADR 0012)
       - LivingDocs — Schema de Entry com evidence[] [BR-CLI-LIVING-DOCS-SCHEMA]
     coverageState: covered
   - ruleId: BR-CLI-LIVING-DOCS-SCHEMA-12
@@ -1783,7 +1783,7 @@ entries:
         testName: DADO bypass no topo COM coverageState != 'deprecated' ENTÃO LIVING_DOCS_BYPASS_REQUIRES_DEPRECATED
         coverageState: covered
     tags:
-      - Bypass declarado no topo da entry (ADR 0003)
+      - Bypass declarado no topo da entry (ADR 0012)
       - LivingDocs — Schema de Entry com evidence[] [BR-CLI-LIVING-DOCS-SCHEMA]
     coverageState: covered
   - ruleId: BR-CLI-LIVING-DOCS-SCHEMA-13
@@ -2031,7 +2031,7 @@ entries:
         testName: DADO duas serializações do mesmo artifact ENTÃO produz a mesma string
         coverageState: covered
     tags:
-      - Determinismo byte-a-byte (ADR 0004)
+      - Determinismo byte-a-byte (ADR 0013)
       - Infra — livingDocsSerializer [BR-CLI-LIVING-DOCS-SERIALIZER]
     coverageState: covered
   - ruleId: BR-CLI-LIVING-DOCS-SERIALIZER-04
@@ -2045,7 +2045,7 @@ entries:
         testName: DADO artifact com entries em ordem aleatória ENTÃO serializa em ordem alfa por ruleId
         coverageState: covered
     tags:
-      - Determinismo byte-a-byte (ADR 0004)
+      - Determinismo byte-a-byte (ADR 0013)
       - Infra — livingDocsSerializer [BR-CLI-LIVING-DOCS-SERIALIZER]
     coverageState: covered
   - ruleId: BR-CLI-LIVING-DOCS-SERIALIZER-05
@@ -2059,7 +2059,7 @@ entries:
         testName: DADO entries com tags duplicadas/fora de ordem ENTÃO serializa em ordem alfa deduplicada
         coverageState: covered
     tags:
-      - Determinismo byte-a-byte (ADR 0004)
+      - Determinismo byte-a-byte (ADR 0013)
       - Infra — livingDocsSerializer [BR-CLI-LIVING-DOCS-SERIALIZER]
     coverageState: covered
   - ruleId: BR-CLI-LIVING-DOCS-SERIALIZER-06
@@ -2073,7 +2073,7 @@ entries:
         testName: DADO artifact serializado ENTÃO NÃO contém campos temporais
         coverageState: covered
     tags:
-      - Determinismo byte-a-byte (ADR 0004)
+      - Determinismo byte-a-byte (ADR 0013)
       - Infra — livingDocsSerializer [BR-CLI-LIVING-DOCS-SERIALIZER]
     coverageState: covered
   - ruleId: BR-CLI-LIVING-DOCS-SERIALIZER-07
@@ -2885,7 +2885,7 @@ entries:
         testName: DADO TEMPLATE_SCHEMA_VERSIONS ENTÃO contém apenas 'v0' e é readonly
         coverageState: covered
     tags:
-      - Recipe — Enums fechados (ADR 0002) [BR-CLI-RECIPE]
+      - Recipe — Enums fechados (ADR 0011) [BR-CLI-RECIPE]
     coverageState: covered
   - ruleId: BR-CLI-RECIPE-14
     title: DADO ARTIFACT_KINDS ENTÃO contém 7 valores canônicos e é readonly
@@ -2898,7 +2898,7 @@ entries:
         testName: DADO ARTIFACT_KINDS ENTÃO contém 7 valores canônicos e é readonly
         coverageState: covered
     tags:
-      - Recipe — Enums fechados (ADR 0002) [BR-CLI-RECIPE]
+      - Recipe — Enums fechados (ADR 0011) [BR-CLI-RECIPE]
     coverageState: covered
   - ruleId: BR-CLI-RECIPE-15
     title: DADO WORKFLOW_TYPES ENTÃO contém 4 valores canônicos incluindo 'n/a' e é readonly
@@ -2911,7 +2911,7 @@ entries:
         testName: DADO WORKFLOW_TYPES ENTÃO contém 4 valores canônicos incluindo 'n/a' e é readonly
         coverageState: covered
     tags:
-      - Recipe — Enums fechados (ADR 0002) [BR-CLI-RECIPE]
+      - Recipe — Enums fechados (ADR 0011) [BR-CLI-RECIPE]
     coverageState: covered
   - ruleId: BR-CLI-RECIPE-16
     title: DADO LANGUAGES ENTÃO contém 'pt-BR' e 'en-US' e é readonly
@@ -2924,7 +2924,7 @@ entries:
         testName: DADO LANGUAGES ENTÃO contém 'pt-BR' e 'en-US' e é readonly
         coverageState: covered
     tags:
-      - Recipe — Enums fechados (ADR 0002) [BR-CLI-RECIPE]
+      - Recipe — Enums fechados (ADR 0011) [BR-CLI-RECIPE]
     coverageState: covered
   - ruleId: BR-CLI-RECIPE-17
     title: DADO CANONICAL_ORDERS ENTÃO contém apenas 'slots' e é readonly
@@ -2937,7 +2937,7 @@ entries:
         testName: DADO CANONICAL_ORDERS ENTÃO contém apenas 'slots' e é readonly
         coverageState: covered
     tags:
-      - Recipe — Enums fechados (ADR 0002) [BR-CLI-RECIPE]
+      - Recipe — Enums fechados (ADR 0011) [BR-CLI-RECIPE]
     coverageState: covered
   - ruleId: BR-CLI-RECIPE-18
     title: DADO recipe com slot sem minOccurrences/maxOccurrences explícitos ENTÃO aceita (defaults implícitos)

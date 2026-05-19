@@ -11,7 +11,7 @@
  *  4. Determinístico (sem placeholders {{var}} / <%= expr %>).
  *  5. Sem timestamps embutidos (generatedAt, createdAt, updatedAt).
  *
- * Aplica ADR 0004 (.core/governance/adrs/0004-ast-only-extraction.md):
+ * Aplica ADR 0013 (.core/governance/adrs/0013-ast-only-extraction.md):
  * determinismo como contrato — partial = conteúdo estável.
  */
 import { GovernanceError } from "../shared/errors.js";

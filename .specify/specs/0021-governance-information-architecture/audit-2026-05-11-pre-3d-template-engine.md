@@ -18,7 +18,7 @@ Mas **uma decisão de design fina ainda não foi tomada**: a forma exata do sche
 1. **Composição** (3.D) — como o engine resolve slots, carrega partials, monta o output.
 2. **Validação** (3.E, sub-bloco seguinte) — quais invariantes o artefato gerado precisa cumprir.
 
-O ADR 0005 §3 cravou que **Recipe é o contrato de validação — não objeto auxiliar**. Não há `RecipeSchema` separado de `ValidationSchema`. A mesma recipe que **monta** declara o que é **aceito**. Errar a forma do schema aqui contamina 3.D, 3.E e 3.F (retirada do mirror legado depende de equivalência).
+O ADR 0014 §3 cravou que **Recipe é o contrato de validação — não objeto auxiliar**. Não há `RecipeSchema` separado de `ValidationSchema`. A mesma recipe que **monta** declara o que é **aceito**. Errar a forma do schema aqui contamina 3.D, 3.E e 3.F (retirada do mirror legado depende de equivalência).
 
 Esta auditoria responde 4 perguntas:
 
@@ -32,7 +32,7 @@ O objetivo é evitar:
 - **Schema rígido demais** — toda variação obriga criar recipe inteira; recipes inflam.
 - **Schema condicional** — reintroduz a complexidade que `[DEC-0021-D01]` rejeitou explicitamente na Opção B (Handlebars/Mustache).
 - **Boundary vazado** — YAML parser invadindo `domain/`; lógica de mocking de filesystem na infra; merge em camada errada (mesmo erro evitado em 3.C.4-prep).
-- **Drift recipe ↔ validator** — o anti-padrão histórico que o ADR 0005 §3 nomeia explicitamente.
+- **Drift recipe ↔ validator** — o anti-padrão histórico que o ADR 0014 §3 nomeia explicitamente.
 
 ---
 
@@ -48,11 +48,11 @@ O objetivo é evitar:
 
 ### ADRs aplicáveis
 
-- **ADR 0001** (taxonomia MECE de pilares) — Recipe NÃO é WorkItem; é instrumento de composição. Mas o `artifactKind` (spec/plan/tasks/decision-brief/next/...) compõe a família de artefatos que materializam o ciclo de vida dos pilares. **Implicação:** o conjunto de `artifactKind` válidos numa recipe é fechado, com critério de extensão análogo ao de pilares (ADR-de-extensão).
-- **ADR 0002** (enums fechados + mensagem determinística) — `artifactKind` e `workflowType` são enums fechados. Mensagens de erro nomeiam o conjunto válido. Nada de "default silencioso". **Implicação direta no schema:** `artifactKind`, `workflowType`, `language`, `canonicalOrder` são literal unions no TS.
-- **ADR 0003** (bypass auditável) — não se aplica diretamente ao schema da Recipe, mas se aplica ao `MarkdownStructuralValidation` (3.E): se um artefato gerado viola uma invariante temporariamente, a diretiva canônica `// structural-check:allow-drift until=... ref=... reason=...` é o caminho legítimo. Não inventar mecanismo paralelo.
-- **ADR 0004** (AST como SSOT) — análoga: a recipe é a SSOT estática da composição. Mesma recipe + mesmos partials → mesmo output byte-a-byte (determinismo, §1.4 do research). Sem "geração condicional baseada em estado de run". **Implicação direta:** sem condicionais em runtime (`when: env.X`), sem injeção de variáveis externas via env var.
-- **ADR 0005** (validação semântica vs estética) — **a ADR-âncora deste sub-bloco**. Princípio: Recipe é o contrato de validação. Schema declara slots + invariants no mesmo arquivo; 3.E lê o bloco `invariants` desta recipe. Sem schema externo.
+- **ADR 0010** (taxonomia MECE de pilares) — Recipe NÃO é WorkItem; é instrumento de composição. Mas o `artifactKind` (spec/plan/tasks/decision-brief/next/...) compõe a família de artefatos que materializam o ciclo de vida dos pilares. **Implicação:** o conjunto de `artifactKind` válidos numa recipe é fechado, com critério de extensão análogo ao de pilares (ADR-de-extensão).
+- **ADR 0011** (enums fechados + mensagem determinística) — `artifactKind` e `workflowType` são enums fechados. Mensagens de erro nomeiam o conjunto válido. Nada de "default silencioso". **Implicação direta no schema:** `artifactKind`, `workflowType`, `language`, `canonicalOrder` são literal unions no TS.
+- **ADR 0012** (bypass auditável) — não se aplica diretamente ao schema da Recipe, mas se aplica ao `MarkdownStructuralValidation` (3.E): se um artefato gerado viola uma invariante temporariamente, a diretiva canônica `// structural-check:allow-drift until=... ref=... reason=...` é o caminho legítimo. Não inventar mecanismo paralelo.
+- **ADR 0013** (AST como SSOT) — análoga: a recipe é a SSOT estática da composição. Mesma recipe + mesmos partials → mesmo output byte-a-byte (determinismo, §1.4 do research). Sem "geração condicional baseada em estado de run". **Implicação direta:** sem condicionais em runtime (`when: env.X`), sem injeção de variáveis externas via env var.
+- **ADR 0014** (validação semântica vs estética) — **a ADR-âncora deste sub-bloco**. Princípio: Recipe é o contrato de validação. Schema declara slots + invariants no mesmo arquivo; 3.E lê o bloco `invariants` desta recipe. Sem schema externo.
 
 ### Research de fundo
 
@@ -79,7 +79,7 @@ O objetivo é evitar:
 | `project-config-boilerplate.md`        | (config — não é doc humano-primeiro)                                                                                         |
 | `roadmap-boilerplate.md`               | header → Em execução → Candidatas → Histórico                                                                                |
 
-**Observação crítica:** as 3 variantes de `tasks-*` compartilham **~70%** dos slots terminais. Stage1/Research/Brief/Gate é o discriminador principal. O ADR 0005 §3 ("Recipe é o contrato") favorece recipes irmãs com partials compartilhados — não 1 recipe parametrizada (que reintroduziria condicionais).
+**Observação crítica:** as 3 variantes de `tasks-*` compartilham **~70%** dos slots terminais. Stage1/Research/Brief/Gate é o discriminador principal. O ADR 0014 §3 ("Recipe é o contrato") favorece recipes irmãs com partials compartilhados — não 1 recipe parametrizada (que reintroduziria condicionais).
 
 ---
 
@@ -87,7 +87,7 @@ O objetivo é evitar:
 
 Quatro caminhos para o schema da Recipe. Tabela comparativa em 7 eixos; detalhe vem a seguir.
 
-| Opção                                                 | Slots inline?                                                | Invariants                                                                        | Variantes (3× tasks)   | Honra ADR 0002 | Honra ADR 0004                     | Honra ADR 0005 §3                        | Cont. condicional? |
+| Opção                                                 | Slots inline?                                                | Invariants                                                                        | Variantes (3× tasks)   | Honra ADR 0011 | Honra ADR 0013                     | Honra ADR 0014 §3                        | Cont. condicional? |
 | :---------------------------------------------------- | :----------------------------------------------------------- | :-------------------------------------------------------------------------------- | :--------------------- | :------------- | :--------------------------------- | :--------------------------------------- | :----------------- |
 | **(A)** Slots planos + invariants externo top-level   | Não (só `id` + `partials`)                                   | Bloco separado com `requiredSlots`/`forbidden` referenciando ids                  | 3 recipes irmãs        | OK             | OK                                 | **Frágil** (2 listas → drift)            | Não                |
 | **(B)** Slots ricos inline + invariants global mínimo | Sim (cada slot carrega `required`, `min`, `max`, `partials`) | Bloco top-level só p/ `forbiddenHeadings` e `canonicalOrder`                      | 3 recipes irmãs        | OK             | OK                                 | **OK forte** (zero drift por construção) | Não                |
@@ -142,7 +142,7 @@ invariants:
 
 - **2 fontes de verdade sobre cada slot** (lista em `slots:` + entrada em `requiredSlots`/`cardinality`). Renomear um slot exige editar 2+ lugares.
 - Adicionar slot novo sem listá-lo em `requiredSlots`/`optionalSlots` é estado válido para o YAML — mas ambíguo. 3.E precisa decidir "default = optional" ou "default = required"; qualquer escolha é arbitrária.
-- ADR 0005 §3 cita literalmente o anti-padrão "recipe + validator desincronizados" — esta opção **convida** a esse drift por construção, mesmo dentro do mesmo arquivo.
+- ADR 0014 §3 cita literalmente o anti-padrão "recipe + validator desincronizados" — esta opção **convida** a esse drift por construção, mesmo dentro do mesmo arquivo.
 - Mensagem de erro fica indireta: "slot X faltando" exige consultar `requiredSlots[]` em outro bloco para entender por quê.
 
 **Veredito.** ❌ Aceitável mas frágil. A separação cosmética não compensa o risco de drift entre as duas listas.
@@ -218,7 +218,7 @@ invariants:
 - **Auto-coerência por construção.** Cada slot declara seu próprio contrato; renomear um slot edita um único objeto. Drift recipe ↔ validator é impossível porque a declaração é a mesma.
 - **Mensagem de erro é direta.** Quando 3.E falha em `STRUCT_MISSING_HEADING` para `fase-0-research`, basta apontar para `slots[2]` da recipe — sem cruzar listas.
 - **TypeScript reflete a forma 1:1.** `RecipeSlot` é objeto com campos próprios; `assertValidRecipe` valida tipo + presença de campos obrigatórios + coerência (`minOccurrences ≤ maxOccurrences`, `partials.length ≥ 1`).
-- **Honra ADR 0005 §3 forte.** Não há dois lugares para o mesmo fato.
+- **Honra ADR 0014 §3 forte.** Não há dois lugares para o mesmo fato.
 - **Reusa partials.** Mesmo `tasks/fase-1-implementacao.md` aparece em todas as 3 variantes de `tasks-*`. Edição em 1 lugar propaga.
 
 **Contra.**
@@ -264,7 +264,7 @@ slots:
 
 **Por que rejeitada.**
 
-- **Viola ADR 0004 §6** ("AST como SSOT, sem condicionais em runtime"). `when:` é exatamente o caminho condicional que SSOT estática rejeita — o output deixa de ser função pura da árvore (recipe + partials) e passa a depender de variável de entrada (`workflowType` selecionado).
+- **Viola ADR 0013 §6** ("AST como SSOT, sem condicionais em runtime"). `when:` é exatamente o caminho condicional que SSOT estática rejeita — o output deixa de ser função pura da árvore (recipe + partials) e passa a depender de variável de entrada (`workflowType` selecionado).
 - **`[DEC-0021-D01]` Opção B rejeitada** descreve literalmente este caminho: "Templates com Lógica Interna — Um único arquivo com condicionais pesadas". A owner rejeitou explicitamente.
 - **Mensagem de erro vira condicional.** "Slot X faltando" precisa explicar "...quando workflowType=evidence-driven, este slot é obrigatório". Composição condicional + mensagem condicional = consumidor confuso.
 - **3.E (validação estrutural) também vira condicional.** Cada invariante precisa ser avaliada sob condições — explosão combinatória.
@@ -418,11 +418,11 @@ export function assertValidRecipe(recipe: unknown): asserts recipe is Recipe {
   // - required=false ↔ minOccurrences === 0 (RECIPE_REQUIRED_INCONSISTENT)
   // - invariants.canonicalOrder ∈ CANONICAL_ORDERS
   // - invariants.forbiddenHeadings: array (pode ser vazio)
-  // Mensagens nomeiam o conjunto válido (ADR 0002).
+  // Mensagens nomeiam o conjunto válido (ADR 0011).
 }
 ```
 
-### Family de erros estáveis (LIVING*DOCS*\* style, ADR 0002)
+### Family de erros estáveis (LIVING*DOCS*\* style, ADR 0011)
 
 | Código                            | Quando                                                                            |
 | :-------------------------------- | :-------------------------------------------------------------------------------- |
@@ -450,7 +450,7 @@ Cada arquivo `.md` em `partials/**/` precisa cumprir:
 2. **Não-fragmento.** Começa com `#` heading **ou** com bloco autocontido (lista, parágrafo, blockquote completo). Não pode terminar no meio de uma estrutura aberta (lista sem fechamento, bloco de código sem fim).
 3. **Self-contained.** Referências internas (ex.: `[texto](#anchor)`) podem apontar para anchors dentro do partial **ou** ser ponteiros externos (`./decision-brief.md`); não dependem de IDs gerados por outros partials.
 4. **Determinístico.** Sem placeholders processados em runtime (`{{var}}`, `<%= expr %>`). Mudança de valor → nova versão do partial (ou substituição direta no autor antes do commit).
-5. **Sem timestamps embutidos.** Mesma regra que ADR 0004 §6 aplicou a Living Docs: artefato determinístico = sem `generatedAt`/`createdAt`/`updatedAt` no conteúdo.
+5. **Sem timestamps embutidos.** Mesma regra que ADR 0013 §6 aplicou a Living Docs: artefato determinístico = sem `generatedAt`/`createdAt`/`updatedAt` no conteúdo.
 
 **Validação concreta:** o teste `PartialsContract.test.ts` (3.D.5) varre `partials/**/*.md` e:
 
@@ -548,7 +548,7 @@ Para o sub-bloco `[3.D]`, **NÃO** fazer:
 
 | Item                   | Entrega após esta auditoria                                                                                                  |
 | :--------------------- | :--------------------------------------------------------------------------------------------------------------------------- |
-| **3.D.1**              | `src/domain/templates/Recipe.ts` com schema (B) + `assertValidRecipe` + family de erros `RECIPE_*` (ADR 0002).               |
+| **3.D.1**              | `src/domain/templates/Recipe.ts` com schema (B) + `assertValidRecipe` + family de erros `RECIPE_*` (ADR 0011).               |
 | **3.D.2**              | `src/domain/templates/Partial.ts` com `assertValidPartialMarkdown` (5 contratos acima).                                      |
 | **3.D.3**              | Determinismo materializado em `AssembleArtifact.ts` (passo §"Determinismo (3.D.3)").                                         |
 | **3.D.4**              | `src/app/use-cases/AssembleArtifact.ts` + port `RecipeStore` + adapter `NodeRecipeStore`. Sem CLI command.                   |
@@ -576,7 +576,7 @@ A owner cravou as decisões abaixo após leitura desta auditoria. Convergência 
 
 Motivação compactada:
 
-- **Auto-coerência por construção** — o schema da Recipe é, simultaneamente, o contrato de validação estrutural consumido por `[3.E]`. Sem duplicação rule↔validator (ADR 0005 §3).
+- **Auto-coerência por construção** — o schema da Recipe é, simultaneamente, o contrato de validação estrutural consumido por `[3.E]`. Sem duplicação rule↔validator (ADR 0014 §3).
 - **Zero drift** entre o que a recipe declara e o que o validator exige: ambos lêem o mesmo TypeScript exportado pelo domain.
 - **Mensagens de erro diretas** — slot ausente → nome do slot + arquivo do partial esperado, sem indirecionamento via tabela auxiliar.
 - **Mapeamento 1:1 ao TypeScript** — `RecipeSlot`/`RecipeInvariants` viram interfaces puras; YAML é só transporte.
@@ -587,9 +587,9 @@ Opções (A), (C), (D) rejeitadas pelas razões já documentadas nas seções re
 
 | Pergunta                                                         | Decisão                                                     | Justificativa curta                                                                                                                                                                                                                                                      |
 | ---------------------------------------------------------------- | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Q1** — `schemaVersion: v0` agora ou só com consumidor externo? | **`v0` agora.**                                             | Mesma política de `LivingDocsArtifact.schemaVersion` (ADR 0002 §6 + frozen set); custo zero, paga em opcionalidade de extensão.                                                                                                                                          |
+| **Q1** — `schemaVersion: v0` agora ou só com consumidor externo? | **`v0` agora.**                                             | Mesma política de `LivingDocsArtifact.schemaVersion` (ADR 0011 §6 + frozen set); custo zero, paga em opcionalidade de extensão.                                                                                                                                          |
 | **Q2** — Múltiplos partials por slot em 3.D ou só em 3.E?        | **Lista no schema em v0; resolver sempre o primeiro item.** | Conforme estrutura definida em [Schema completo da Recipe](#schema-completo-da-recipe-versão-de-domínio). Cardinalidade plural já tipada (`partials: readonly PartialRef[]`), comportamento de seleção fica documentado como "first-wins" até `[3.E]` demandar override. |
-| **Q3** — `forbiddenHeadings` texto exato ou regex/glob?          | **Texto literal (case-sensitive).**                         | Regex em domain é tentação de validar estética — exatamente o que ADR 0005 §4 rejeita. Lint estético separado fica como camada opcional.                                                                                                                                 |
+| **Q3** — `forbiddenHeadings` texto exato ou regex/glob?          | **Texto literal (case-sensitive).**                         | Regex em domain é tentação de validar estética — exatamente o que ADR 0014 §4 rejeita. Lint estético separado fica como camada opcional.                                                                                                                                 |
 | **Q4** — Como expressar "fase repetível por sub-bloco lógico"?   | **No conteúdo do partial; sem `Infinity` no schema v0.**    | Schema fica fechado por valores finitos (`minOccurrences`/`maxOccurrences` numéricos). Sintaxe de marcação livre dentro do partial cobre o caso real. Revisitar só se aparecer regra de governance que precise contar fases.                                             |
 | **Q5** — CLI command para gerar artefato em 3.D.4 ou PR4?        | **Sem CLI agora.**                                          | Primeiro use case + testes; CLI vira camada de carrier em PR4. Anti-escopo creep.                                                                                                                                                                                        |
 
@@ -618,14 +618,14 @@ Anti-objetivos do bloco (válidos durante toda a execução): não tocar 3.E (s�
 
 ## 🔗 Referências canônicas usadas
 
-- ADR 0001 — Work Items como Taxonomia MECE ([`.core/governance/adrs/0001-taxonomy-mece-pillars.md`](../../../.core/governance/adrs/0001-taxonomy-mece-pillars.md))
-- ADR 0002 — Outcomes como Enums Fechados ([`.core/governance/adrs/0002-coverage-state-enum.md`](../../../.core/governance/adrs/0002-coverage-state-enum.md))
-- ADR 0003 — Bypass Auditável ([`.core/governance/adrs/0003-drift-guard-bypass.md`](../../../.core/governance/adrs/0003-drift-guard-bypass.md))
-- ADR 0004 — Análise Estática AST como SSOT ([`.core/governance/adrs/0004-ast-only-extraction.md`](../../../.core/governance/adrs/0004-ast-only-extraction.md))
-- ADR 0005 — Validação Semântica vs Estética ([`.core/governance/adrs/0005-structural-validation.md`](../../../.core/governance/adrs/0005-structural-validation.md))
+- ADR 0010 — Work Items como Taxonomia MECE ([`.core/governance/adrs/0001-taxonomy-mece-pillars.md`](../../../.core/governance/adrs/0001-taxonomy-mece-pillars.md))
+- ADR 0011 — Outcomes como Enums Fechados ([`.core/governance/adrs/0002-coverage-state-enum.md`](../../../.core/governance/adrs/0002-coverage-state-enum.md))
+- ADR 0012 — Bypass Auditável ([`.core/governance/adrs/0003-drift-guard-bypass.md`](../../../.core/governance/adrs/0003-drift-guard-bypass.md))
+- ADR 0013 — Análise Estática AST como SSOT ([`.core/governance/adrs/0004-ast-only-extraction.md`](../../../.core/governance/adrs/0004-ast-only-extraction.md))
+- ADR 0014 — Validação Semântica vs Estética ([`.core/governance/adrs/0005-structural-validation.md`](../../../.core/governance/adrs/0005-structural-validation.md))
 - Decision Brief 0021 § Bloco D ([`./decision-brief.md`](./decision-brief.md))
 - ARCHITECTURE-REFERENCE §1.3, §1.4, §5 ([`.core/governance/ARCHITECTURE-REFERENCE.md`](../../../.core/governance/ARCHITECTURE-REFERENCE.md))
 - ARCHITECTURE §6 ([`.core/governance/ARCHITECTURE.md`](../../../.core/governance/ARCHITECTURE.md))
 - Research: Living Docs and Template Composition Practices §1.7, §2.5, §5 ([`../researchs/governance/2026-05-11-living-docs-and-template-composition-practices.md`](../researchs/governance/2026-05-11-living-docs-and-template-composition-practices.md))
 - Auditoria precedente (formato) ([`./audit-2026-05-11-pre-3c4-living-docs-aggregation.md`](./audit-2026-05-11-pre-3c4-living-docs-aggregation.md))
-- spec-foundation §"Tipos de spec" ([`.core/process/spec-foundation.md`](../../../.core/process/spec-foundation.md))
+- governance-foundation §"Tipos de spec" ([`.core/process/governance-foundation.md`](../../../.core/process/governance-foundation.md))

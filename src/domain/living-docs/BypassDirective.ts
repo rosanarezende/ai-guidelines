@@ -1,12 +1,12 @@
 /**
- * Parser puro da diretiva de bypass auditável (ADR 0003).
+ * Parser puro da diretiva de bypass auditável (ADR 0012).
  *
  * Sintaxe canônica:
  *   `<guard-id>:allow-drift until=YYYY-MM-DD ref=ID reason="texto curto"`
  *
  * Aplicação inicial: Living Documentation drift guard (guard-id =
  * `living-docs`). O mesmo parser serve a qualquer guard futuro que adote a
- * sintaxe (boundary-lock, schema-check, etc.) — ADR 0003 §1.
+ * sintaxe (boundary-lock, schema-check, etc.) — ADR 0012 §1.
  *
  * Função pura: recebe o texto do comentário + `todayIso` injetado para
  * validação de expiração. Sem IO, sem leitura de relógio.

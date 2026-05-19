@@ -8,7 +8,7 @@
 > Status agregado: **Open** <!-- Open | Pendente | Partial | Resolved -->
 > Última atualização: [YYYY-MM-DD] — [nota curta sobre o que mudou nesta atualização]
 
-> **Artefato canônico do gate humano entre Stage 1 (research) e Stage 2 (design + implementação)** para specs `evidence-driven` ou `mixed` (cf. `.core/process/spec-foundation.md` § "Tipos de spec"). Specs `deterministic` não instanciam este arquivo.
+> **Artefato canônico do gate humano entre Stage 1 (research) e Stage 2 (design + implementação)** para specs `evidence-driven` ou `mixed` (cf. `.core/process/governance-foundation.md` § "Tipos de spec"). Specs `deterministic` não instanciam este arquivo.
 >
 > **O que faz:** apresenta opções com tradeoffs antes do gate humano e registra decisões validadas após o gate. Não substitui ADRs (decisões arquiteturais cross-spec) — é spec-level. **Permanece no diretório da spec após o merge** como artefato histórico (não migra para `researchs/`).
 

@@ -6,7 +6,7 @@
  * Implementação concreta (`NodeRecipeStore`) vive em
  * `src/infrastructure/yaml/NodeRecipeStore.ts` (único lugar com yaml@2 e fs).
  *
- * Aplica ADR 0005: Recipe é o contrato de validação — o store carrega
+ * Aplica ADR 0014: Recipe é o contrato de validação — o store carrega
  * a recipe tal qual declarada no YAML; validação fica no domain
  * (`assertValidRecipe`).
  */
