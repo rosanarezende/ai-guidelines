@@ -1,7 +1,7 @@
 /**
  * [BR-CLI-LIVING-DOCS-VERSIONING] Schema version como contrato.
  *
- * Aplica ADR 0002 (.core/governance/adrs/0002-coverage-state-enum.md §6):
+ * Aplica ADR 0011 (.core/governance/adrs/0011-coverage-state-enum.md §6):
  * mudar a cardinalidade do schema exige incremento de schemaVersion +
  * ADR de extensão. Esta suite garante que:
  *
@@ -70,7 +70,7 @@ describe("LivingDocs — Schema version contract [BR-CLI-LIVING-DOCS-VERSIONING]
           expect(e).toBeInstanceOf(GovernanceError);
           const err = e as GovernanceError;
           expect(err.code).toBe("LIVING_DOCS_INVALID_SCHEMA_VERSION");
-          // Mensagem nomeia o conjunto suportado (ADR 0002 §3)
+          // Mensagem nomeia o conjunto suportado (ADR 0011 §3)
           expect(err.message).toContain(LIVING_DOCS_SCHEMA_VERSION);
         }
       }

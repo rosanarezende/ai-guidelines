@@ -1,4 +1,4 @@
-# ADR 0001 — Work Items como Taxonomia MECE de Intenção de Saída
+# ADR 0010 — Work Items como Taxonomia MECE de Intenção de Saída
 
 **Status:** Aceita
 **Data:** 2026-05-11

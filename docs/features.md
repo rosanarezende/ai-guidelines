@@ -1,27 +1,35 @@
 # 🚀 Features do ai-guidelines
 
-O `ai-guidelines` é organizado em módulos de funcionalidade (Features), divididos entre **Core** (essenciais para a governança) e **Opt-in** (ferramental de suporte).
+O `ai-guidelines` é **governance-first com integração AI-agnóstica de primeira classe** (ver [`ADR 0018`](../.core/governance/adrs/0018-governance-first-ai-as-channel.md)): o core ontológico é governança de engenharia repo-first; integração com agentes de IA é canal opt-in importante, mas não o coração do framework.
+
+Features são organizadas em três grupos:
+
+- **Core (mandatórias)** — bootstrap do framework no projeto consumidor; garantem hygiene mínima.
+- **Opt-in Editorial / Infrastructure** — features de engenharia que o consumidor escolhe (TDD, Prettier, Quality Gates, CI).
+- **Opt-in AI Integration** — provider entrypoints sincronizados (Claude, Gemini, Codex, Cursor, etc.). Hoje a maioria dos consumidores ativa, mas tecnicamente é canal opcional — o core de governança funciona sem.
 
 ## 🛠️ Features Core (Mandatórias)
 
-Estas funcionalidades são aplicadas automaticamente para garantir a integridade da governança AI-First.
+Estas funcionalidades garantem o piso de governança em qualquer consumidor, independentemente de stack ou integração com IA.
 
-### 1. Runtime AGENTS.md
+### 1. Runtime AGENTS.md (Canal AI)
 
 - **O que faz**: Compila o runtime de governança dentro da tag `<AI_GUIDELINES>` no `AGENTS.md` da raiz.
-- **Por que**: Garante que qualquer IA que leia `AGENTS.md` receba diretivas, regras globais, adapters e opt-ins em um único artefato topológico, preservando regras próprias do projeto fora da tag.
+- **Por que**: Materializa o **canal de integração AI-agnóstica** do framework — qualquer IA que leia `AGENTS.md` recebe diretivas, regras globais, adapters e opt-ins em um único artefato topológico, preservando regras próprias do projeto fora da tag.
+- **Classificação**: Hoje distribuído como Core porque é o mecanismo central da CLI mjs. A Spec 0021 PR4 (4.C cutover) **declara e arquiteta** a SSOT de governança (`registry.yml`, `living-docs.yml`, etc.) como distribuição canônica independente; a **distribuição operacional completa** no consumidor (geração real via `cli init`/`adopt`) depende do cutover do runtime (Spec 0022+, ainda em discovery). O Runtime AGENTS.md permanece como **canal opt-in primário** para consumidores que querem integração AI ativa.
 - **Arquivos**: `AGENTS.md`.
 
 ### 2. Rules Compiler
 
 - **O que faz**: Lê as regras modulares em `.core/rules/` e as injeta no bloco `<AI_GUIDELINES>`.
 - **Por que**: Mantém modularidade no source do framework sem espalhar arquivos de regras no consumidor.
+- **Classificação**: Acoplado ao Runtime AGENTS.md — mesma trajetória de migração para opt-in pós-cutover.
 - **Arquivos**: `AGENTS.md`.
 
 ### 3. Gitattributes
 
 - **O que faz**: Normaliza o final de linha (EOL) e garante a persistência correta dos arquivos de governança.
-- **Por que**: Evita problemas de diff "fantasma" entre Windows/Linux e garante que as regras sejam versionadas corretamente.
+- **Por que**: Evita problemas de diff "fantasma" entre Windows/Linux e garante que as regras sejam versionadas corretamente. Hygiene de governança, **independente de IA**.
 - **Arquivos**: `.gitattributes`.
 
 ---

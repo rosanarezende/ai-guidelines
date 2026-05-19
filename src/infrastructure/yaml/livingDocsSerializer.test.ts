@@ -80,7 +80,7 @@ describe("Infra — livingDocsSerializer [BR-CLI-LIVING-DOCS-SERIALIZER]", () =>
     });
   });
 
-  describe("Determinismo byte-a-byte (ADR 0004)", () => {
+  describe("Determinismo byte-a-byte (ADR 0013)", () => {
     it("DADO duas serializações do mesmo artifact ENTÃO produz a mesma string [BR-CLI-LIVING-DOCS-SERIALIZER-03]", () => {
       const artifact = {
         schemaVersion: LIVING_DOCS_SCHEMA_VERSION,

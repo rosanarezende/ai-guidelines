@@ -2,14 +2,14 @@
  * [BR-CLI-STRUCT] Validação estrutural de artefatos compostos.
  *
  * Valida que um `ComposedArtifact` respeita as invariantes declaradas
- * na Recipe que o gerou. Recipe = contrato de validação (ADR 0005).
+ * na Recipe que o gerou. Recipe = contrato de validação (ADR 0014).
  *
  * Invariantes validadas:
  *  1. forbiddenHeadings — nenhum heading no output coincide com lista proibida.
  *  2. Slot completeness — slots required presentes na composição.
  *  3. Self-consistency — recipe que monta artefato que ela mesma rejeitaria.
  *
- * Aplica ADR 0005 (.core/governance/adrs/0005-structural-validation.md):
+ * Aplica ADR 0014 (.core/governance/adrs/0014-structural-validation.md):
  * Recipe é o contrato de validação — não objeto auxiliar.
  */
 import { GovernanceError } from "../../domain/shared/errors.js";

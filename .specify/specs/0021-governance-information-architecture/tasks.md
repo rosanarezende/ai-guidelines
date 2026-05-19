@@ -300,9 +300,9 @@ yarn smoke
 ## [PR-MGMT] PR2
 
 - [x] **2.[PR-MGMT.NEW-BRANCH]** Branch: `feat/spec-0021-pr2-topology-migration-layer`.
-- [ ] **2.[PR-MGMT.DESCRIPTION]** (6 seções obrigatórias).
-- [ ] **2.[PR-MGMT.REVIEW-GATE]** Gate humano obrigatório.
-- [ ] **2.[PR-MGMT.MERGE-CHAIN]** `yarn format ; yarn check ; yarn test:nova-cli ; yarn build:rules`.
+- [x] **2.[PR-MGMT.DESCRIPTION]** (6 seções obrigatórias). _(PR2 já mergeada — gap de marcação fechado em 4.D.)_
+- [x] **2.[PR-MGMT.REVIEW-GATE]** Gate humano obrigatório. _(PR2 já mergeada — gap de marcação fechado em 4.D.)_
+- [x] **2.[PR-MGMT.MERGE-CHAIN]** `yarn format ; yarn check ; yarn test:nova-cli ; yarn build:rules`. _(PR2 já mergeada — gap de marcação fechado em 4.D.)_
 
 ---
 
@@ -326,9 +326,7 @@ yarn smoke
   - se criar pasta falhar, rollback do registry
   - se persistir registry falhar, rollback do filesystem (quando aplicável)
 
-- [ ] **2.A.5 [Deprecation Plan]** Definir marco explícito de deprecação:
-  - quando parar de ler `.specify/` / `.ai-guidelines/`
-  - como comunicar (warnings determinísticos)
+- [x] **2.A.5 [Deprecation Plan]** Definir marco explícito de deprecação. _(Fechado em 2.D 2026-05-10: contrato `.governance/` declarado em `ARCHITECTURE.md` §C invariante 12 + §H; `.ai-guidelines/` formalizado como bridge legada explícita; cutover operacional transferido para Spec 0022. Sem warnings ativos por design — bridge silenciosa-por-design.)_
 
 - [x] **2.A.6 [No-Silent-Alias]** Proibir “alias mágico” que masque caminhos antigos como se fossem `.governance/`.
 
@@ -340,8 +338,7 @@ yarn smoke
   - executa migração idempotente
   - expõe “workspace state” para a Application layer
 
-- [ ] **2.A.8** Implementar bridges explícitas (temporárias) para leitura do legado:
-  - ponteiros/control flags, nunca path hardcoded espalhado
+- [~] **2.A.8** Implementar bridges explícitas (temporárias) para leitura do legado. _(Flag `allowExplicitLegacyBridge` existe em `WorkspacePrecedence`, mas use case leitor (`ReadLegacyArtifact` + port `LegacyReader`) não foi implementado — débito transferido. Será criado quando consumidor real pedir. Fora do escopo de fechamento da 0021.)_
 
 ### Testes (obrigatórios)
 
@@ -355,7 +352,7 @@ yarn smoke
 
 - [x] **2.A.[DEBT-REVIEW]** `NEXT.md` atualizado 2026-05-10: débito 5 (E2E) marcado como parcialmente mitigado via `NodeWorkspaceIntegration.test.ts`; novos débitos 2.A.5 (deprecation plan), 2.A.8 (bridge reader), race em `existedBefore`, skips de `Isolation.test.ts` e `FileSystemAdapter.test.ts` registrados.
 - [x] **2.A.[ARCHITECTURE]** `ARCHITECTURE.md` atualizado 2026-05-10: §B.1 ganhou tabela PR2 com `GovernanceWorkspace`; §B.2 removeu-o de "reservado"; §C ganhou invariantes 9 (precedência explícita) e 10 (rollback não-destrutivo); §F roadmap; §G glossário com `WorkspaceProvisioner`, `FileSystemProbe`, `WorkspaceState`, `WorkspaceResolution`, `MigrationPlan`.
-- [ ] **2.A.[COMMIT]** `feat(spec-0021): GovernanceWorkspace (strangler fig operacional)`.
+- [x] **2.A.[COMMIT]** `feat(spec-0021): GovernanceWorkspace (strangler fig operacional)`. _(PR2 já mergeada — gap de marcação fechado em 4.D.)_
 
 ---
 
@@ -391,7 +388,7 @@ yarn smoke
 
 - [x] **2.B.[DEBT-REVIEW]** `NEXT.md` atualizado 2026-05-10: `FileSystemAdapter.test.ts` resolvido por equivalência (atomicidade coberta no novo store); `Isolation.test.ts` segue em skip por dependência de `WorkspaceStore` real (não-2.B); Comment Preservation registrada como implementada com limitação conservadora; cobertura ergonômica do `RegistryService` e ligação CLI→store real documentadas como débitos.
 - [x] **2.B.[ARCHITECTURE]** `ARCHITECTURE.md` atualizado 2026-05-10: `Registry (YAML SSOT)` movido de §B.2 para §B.1 PR2; invariante 7 reescrita ("YAML é SSOT real"); §G ganhou `GovernanceRegistryStore`, `PersistentRegistryStore`, `RegistryService`, família `REGISTRY_YAML_*`; §F roadmap reflete "2.A/2.B entregues".
-- [ ] **2.B.[COMMIT]** `feat(spec-0021): YAML registry SSOT com guardrails (determinístico)`.
+- [x] **2.B.[COMMIT]** `feat(spec-0021): YAML registry SSOT com guardrails (determinístico)`. _(PR2 já mergeada — gap de marcação fechado em 4.D.)_
 
 ---
 
@@ -433,7 +430,7 @@ yarn smoke
 
 - [x] **2.C.[DEBT-REVIEW]** `NEXT.md` atualizado 2026-05-10: 5 débitos 2.C registrados (builder mjs como SSOT até PR3, ponteiros documentais legados em specs históricas, Boundary Lock por regex revisitado, mapa estático `OPT_IN_FEATURE_LAYOUT`, suite end-to-end com `JsonRulesCatalogSource` adiada para PR3).
 - [x] **2.C.[ARCHITECTURE]** `ARCHITECTURE.md` atualizado 2026-05-10: `RulesEngine` saiu de §B.2 (reservados) e entrou em §B.1 PR2 com pipelines (parse/build/projection/lookup); §C ganhou invariante 11 (topologia física reflete taxonomia de runtime; paths centralizados em `domain/rules/ruleZone.ts`); §G glossário ganhou `RulesEngine`, `RuleScope`, `RuleZone`, `OPT_IN_FEATURE_LAYOUT`, família `RULES_*` errors; §H convenções ganhou entrada `.core/rules/{top,center,base,adapters,_meta}/`; §F roadmap reflete "2.A/2.B/2.C entregues".
-- [ ] **2.C.[COMMIT]** `refactor(spec-0021): RulesEngine + reorg .core/rules alinhada ao runtime`.
+- [x] **2.C.[COMMIT]** `refactor(spec-0021): RulesEngine + reorg .core/rules alinhada ao runtime`. _(PR2 já mergeada — gap de marcação fechado em 4.D.)_
 
 ---
 
@@ -565,18 +562,18 @@ yarn smoke
   - `domain` (string não-vazia)
   - `source` ({ file, lineStart, lineEnd } com `lineStart <= lineEnd`)
   - `tags` (array de strings)
-  - `coverageState` (`covered | pending | deprecated` — enum fechado, ADR 0002)
-  - `bypass?` ({ until: YYYY-MM-DD, ref, reason ≥ 8 chars } — só em entries `deprecated`, ADR 0003)
+  - `coverageState` (`covered | pending | deprecated` — enum fechado, ADR 0011)
+  - `bypass?` ({ until: YYYY-MM-DD, ref, reason ≥ 8 chars } — só em entries `deprecated`, ADR 0012)
   - `schemaVersion` (`v0`, enum fechado em `LIVING_DOCS_SUPPORTED_SCHEMA_VERSIONS` frozen)
 
-- [x] **3.A.2 [Versioning]** Política, não framework de migração. `LIVING_DOCS_SCHEMA_VERSION` cravado como `"v0"`; `LIVING_DOCS_SUPPORTED_SCHEMA_VERSIONS` é frozen (Object.freeze). Adicionar valor exige PR dedicado + ADR de extensão (ADR 0002 §6). Migration utility só nasce quando v1 existir.
+- [x] **3.A.2 [Versioning]** Política, não framework de migração. `LIVING_DOCS_SCHEMA_VERSION` cravado como `"v0"`; `LIVING_DOCS_SUPPORTED_SCHEMA_VERSIONS` é frozen (Object.freeze). Adicionar valor exige PR dedicado + ADR de extensão (ADR 0011 §6). Migration utility só nasce quando v1 existir.
 - [x] **3.A.3 [Determinismo]** `canonicalizeArtifact` produz forma estável:
   - entries ordenadas alfa lexicográfica por `ruleId` (sem locale-sensitive sort)
   - tags deduplicadas e ordenadas alfa
-  - sem campos temporais (`generatedAt`/`timestamp`/`createdAt`/`updatedAt`) — determinismo absoluto, ADR 0004 §2
+  - sem campos temporais (`generatedAt`/`timestamp`/`createdAt`/`updatedAt`) — determinismo absoluto, ADR 0013 §2
   - idempotência testada (`JSON.stringify(canonicalize(canonicalize(x))) === JSON.stringify(canonicalize(x))`)
 
-- [x] **3.A.4 [Path]** Path canônico já declarado em `decision-brief.md` A03 e ADR 0004: `.governance/living-docs.yml`. Materialização do path entra junto com a serialização YAML em PR3.B/3.C (infrastructure layer).
+- [x] **3.A.4 [Path]** Path canônico já declarado em `decision-brief.md` A03 e ADR 0013: `.governance/living-docs.yml`. Materialização do path entra junto com a serialização YAML em PR3.B/3.C (infrastructure layer).
 
 ### Testes (obrigatórios)
 
@@ -645,11 +642,11 @@ yarn smoke
   - `serializeLivingDocs` produz YAML byte-a-byte estável
   - `CheckLivingDocs` compara `serialize(generate())` com `committedYaml` lido; retorna `{ drift, diff, generatedYaml, artifact }`
   - `runCheck` (CLI) traduz drift em exit code 1 + stderr legível + hint para `yarn living-docs:generate`
-  - **Bypass expirado** durante geração lança `LIVING_DOCS_BYPASS_EXPIRED` (ADR 0003) — drift guard nunca passa silencioso sobre bypass vencido.
+  - **Bypass expirado** durante geração lança `LIVING_DOCS_BYPASS_EXPIRED` (ADR 0012) — drift guard nunca passa silencioso sobre bypass vencido.
 
 ### Implementação
 
-- [x] **3.C.3a** Parser de diretiva de bypass `// living-docs:allow-drift until=YYYY-MM-DD ref=ID reason="..."` em `src/domain/living-docs/BypassDirective.ts` (ADR 0003). Integrado ao `TypeScriptRuleExtractor` para enriquecer entries `deprecated`.
+- [x] **3.C.3a** Parser de diretiva de bypass `// living-docs:allow-drift until=YYYY-MM-DD ref=ID reason="..."` em `src/domain/living-docs/BypassDirective.ts` (ADR 0012). Integrado ao `TypeScriptRuleExtractor` para enriquecer entries `deprecated`.
 - [x] **3.C.3b** Serializador YAML determinístico em `src/infrastructure/yaml/livingDocsSerializer.ts`. Funções puras `serializeLivingDocs` e `parseLivingDocs`.
 - [x] **3.C.3c** Use cases `GenerateLivingDocs` e `CheckLivingDocs` em `src/app/use-cases/`. Port novo `LivingDocsSerializer` em `src/app/ports/` para preservar boundary (Check não importa infra direto).
 - [x] **3.C.3d** Entrypoint CLI em `src/cli/livingDocs.ts` exportando `runGenerate(opts)`, `runCheck(opts)`, `discoverTestFiles(repoRoot)`. Smoke tests garantem contrato observável (exit code, stderr, idempotência).
@@ -673,7 +670,7 @@ yarn smoke
 
 - [x] **3.C.[DEBT-REVIEW]** `NEXT.md`: registra (i) bin físico + yarn scripts dependem de saneamento do `ruleZone.ts` (débito pré-existente); (ii) integração CI fica para mesmo passo do bin; (iii) nenhum falso-positivo conhecido do drift guard (testes congelam comportamento estrutural).
 - [x] **3.C.[ARCHITECTURE]** `ARCHITECTURE-REFERENCE.md`: §1.3 PR3 ganha `BypassDirective`, `LivingDocsSerializer` (port + adapter), `GenerateLivingDocs`, `CheckLivingDocs` e `livingDocs` (CLI); §2 ganha invariante 14 sobre drift guard como gate determinístico; §5 glossário ganha família.
-- [x] **3.C.[COMMIT]** Quebrado em 3 commits atômicos: `feat(spec-0021): parser de bypass directive (ADR 0003) + integração extractor`, `feat(spec-0021): living docs serializer YAML + use case GenerateLivingDocs`, `feat(spec-0021): CheckLivingDocs + CLI module (drift guard)`.
+- [x] **3.C.[COMMIT]** Quebrado em 3 commits atômicos: `feat(spec-0021): parser de bypass directive (ADR 0012) + integração extractor`, `feat(spec-0021): living docs serializer YAML + use case GenerateLivingDocs`, `feat(spec-0021): CheckLivingDocs + CLI module (drift guard)`.
 
 ---
 
@@ -783,7 +780,7 @@ yarn smoke
 - [x] **3.C.4.2 [Baseline versionado]** Versionar `.governance/living-docs.yml` no repo.
   - **Decisão técnica fundadora:** sem baseline no git, `check` compara contra string vazia e drift é trivial-sempre — o guard só faz sentido com baseline commitado. Versionar é caminho único.
   - **Tamanho atual:** 157 entries, ~92KB, ~2200 linhas. Diff em PRs futuros vai incluir mudanças sempre que um teste `[BR-CLI-*]` for adicionado/renomeado/removido — esperado e desejado.
-  - **Localização:** `.governance/living-docs.yml` (já é o path canônico declarado em ADR 0004 e usado por `cli/livingDocs.ts`).
+  - **Localização:** `.governance/living-docs.yml` (já é o path canônico declarado em ADR 0013 e usado por `cli/livingDocs.ts`).
   - **Header de comentário no YAML?** Hoje o serializer não emite comentários (sortMapEntries:false + plain strings); adicionar header exigiria mudança no serializer. **Decisão:** não adicionar header agora — o arquivo é compreensível pela estrutura (`schemaVersion`/`entries`); evolução cosmética pode entrar em uma sessão de polish futura.
   - **Aprovação editorial necessária da owner antes do `git add`** (o arquivo é grande e fica visível no diff de toda PR futura).
 
@@ -850,7 +847,7 @@ yarn smoke
 ## Sub-bloco [3.E] — Validação estrutural do Markdown (semântica, não estética) 🧱
 
 > **Âncoras:** `[DEC-0021-D01]`, ADR `.core/governance/adrs/0005-structural-validation.md`
-> **Princípio guia (ADR 0005):** Recipe é o contrato de validação — não objeto auxiliar. A mesma recipe que descreve **como montar** o artefato declara **quais invariantes** ele precisa cumprir. Não há schema de validação separado.
+> **Princípio guia (ADR 0014):** Recipe é o contrato de validação — não objeto auxiliar. A mesma recipe que descreve **como montar** o artefato declara **quais invariantes** ele precisa cumprir. Não há schema de validação separado.
 
 ### Contratos obrigatórios
 
@@ -915,10 +912,10 @@ yarn smoke
 
 ## [PR-MGMT] PR4
 
-- [ ] **4.[PR-MGMT.NEW-BRANCH]** Branch: `feat/spec-0021-pr4-governance-consolidation`.
-- [ ] **4.[PR-MGMT.DESCRIPTION]** (6 seções obrigatórias).
-- [ ] **4.[PR-MGMT.REVIEW-GATE]** Gate humano obrigatório.
-- [ ] **4.[PR-MGMT.MERGE-CHAIN]** `yarn format ; yarn check ; yarn test:nova-cli` (+ smoke se aplicável).
+- [x] **4.[PR-MGMT.NEW-BRANCH]** Branch: `feat/spec-0021-pr4-governance-consolidation` (esta branch).
+- [x] **4.[PR-MGMT.DESCRIPTION]** (6 seções obrigatórias). _(PR #14 com template do repositório preenchido.)_
+- [~] **4.[PR-MGMT.REVIEW-GATE]** Gate humano obrigatório. _(Pendente — aguarda aprovação humana final pós-execução deste 4.D.)_
+- [x] **4.[PR-MGMT.MERGE-CHAIN]** `yarn format ; yarn check ; yarn test:nova-cli` (+ smoke). _(Validado em 4.D.N: 296/296 + smoke 4/4 + CI 8/8.)_
 
 ---
 
@@ -926,24 +923,25 @@ yarn smoke
 
 > **Âncoras:** `[DEC-0021-B02]`, `[DEC-0021-B03]`
 
-- [ ] **4.A.1** Criar `GOVERNANCE-CATALOG.md` (ou nome final) como carrier canônico curto:
+- [x] **4.A.1** Criar `GOVERNANCE-CATALOG.md` (ou nome final) como carrier canônico curto:
   - classes/gêneros
   - paths canônicos
   - regras de lookup
   - lifecycle/responsabilidades
 
-- [ ] **4.A.2** Garantir consistência com a topologia real do repo (modelo híbrido):
+- [x] **4.A.2** Garantir consistência com a topologia real do repo (modelo híbrido). _(Fechado em 4.D.[ARCHITECTURE]: 4.B.4/4.B.5 (ADRs) ✅, 4.C.0/4.C.1 (cleanup `/docs/`, engine activation) ✅. Cutover operacional cli/ → src/ DDD transferido para Spec 0022 como limite correto. `ARCHITECTURE.md` §6 atualizada refletindo estado pós-merge.)_
   - se o catálogo diz X, o repo deve expressar X
+  - **Status parcial:** o catálogo agora descreve o **destino** explicitamente E o **delta atual** (§6 Débitos de Transição). A consistência total (catálogo = repo sem deltas) só é alcançada quando 4.B.4/4.B.5 (ADRs) e 4.C.0/4.C.1 (cleanup `/docs/`, cutover CLI) fecharem. Item permanece aberto como auditoria final no encerramento do PR4.
 
-- [ ] **4.A.3** Reservar explicitamente paths de gêneros futuros em `.governance/`:
+- [x] **4.A.3** Reservar explicitamente paths de gêneros futuros em `.governance/`:
   - `intake/`
   - `handoff/`
   - `telemetry/`
 
-- [ ] **4.A.N** Pipeline verde.
-- [ ] **4.A.[DEBT-REVIEW]** `NEXT.md`: registrar débitos do catálogo (gêneros futuros mapeados mas não implementados).
-- [ ] **4.A.[ARCHITECTURE]** `ARCHITECTURE.md`: §H convenções ganha referência ao `GOVERNANCE-CATALOG.md` como carrier canônico.
-- [ ] **4.A.[COMMIT]** `docs(spec-0021): carrier híbrido (catálogo) + reservas de lar`.
+- [x] **4.A.N** Pipeline verde.
+- [x] **4.A.[DEBT-REVIEW]** `NEXT.md`: registrar débitos do catálogo (gêneros futuros mapeados mas não implementados).
+- [x] **4.A.[ARCHITECTURE]** `ARCHITECTURE-REFERENCE.md`: §6 convenções ganha referência ao `GOVERNANCE-CATALOG.md` como carrier canônico.
+- [x] **4.A.[COMMIT]** `docs(spec-0021): carrier híbrido (catálogo) + reservas de lar`. _(Já aplicado em commits do sub-bloco 4.A — gap de marcação fechado em 4.D.)_
 
 ---
 
@@ -951,29 +949,43 @@ yarn smoke
 
 > **Âncora:** `[DEC-0021-B04]`
 
-- [ ] **4.B.1** Renomear/refatorar `.core/process/spec-foundation.md` para refletir governança (nome final decidido aqui).
-- [ ] **4.B.2** Extrair decisões arquiteturais estáveis para ADRs:
-  - critério de migração: “decisão estável/cross-spec”
+- [x] **4.B.1** Renomear/refatorar `.core/process/governance-foundation.md` (era `spec-foundation.md`) — nome final: **`governance-foundation.md`**. Refatoração mínima aplicada: título atualizado, nota de renomeação no header, TODO migração resolvido (apontava para esta spec).
+- [x] **4.B.2** Extrair decisões arquiteturais estáveis para ADRs:
+  - critério de migração: "decisão estável/cross-spec"
   - foundation permanece processo vivo e constituição operacional
+  - ✅ 3 ADRs criadas em `.core/governance/adrs/`:
+    - **0015** — Classificação Universal vs Opt-in para Regras Distribuídas (extraída de § "Categorias de regras")
+    - **0016** — Roadmap Repo-First com Tracker Externo como Camada Colaborativa Opcional (extraída de § "Roadmap")
+    - **0017** — Numeração de Specs: Slug Semântico Até Branch (extraída de § "Numeração de specs")
+  - ✅ Foundation atualizada: cada seção extraída mantém resumo operacional curto + pointer para ADR (escolha pós-gate "manter resumo + link", 2026-05-17).
+  - ✅ README das ADRs atualizado com as 3 novas entradas.
+  - ✅ Documentação do fluxo decision-brief ↔ ADR ↔ policy adicionada à foundation (§ "Decisões: decision-brief, ADR e policy"), resolvendo gap apontado em sessão.
+  - ✅ Decision-brief.md da 0021 atualizado retroativamente com [DEC-0021-B06] (auditoria ADRs) e [DEC-0021-B07] (repositioning) como amendments pós-gate.
 
-- [ ] **4.B.3** Atualizar links/cross-refs após renomeação.
-- [ ] **4.B.4** Auditoria das ADRs históricas em `/adrs/` à luz do critério editorial "ADR é princípio perene, não revisitação datada" (formalizado em `.core/governance/adrs/README.md`):
-  - Para cada ADR legada (0003, 0004, 0005, 0006, 0007, 0008, 0009): aplicar um dos três caminhos:
-    - **(a) Reescrever como princípio.** Se a decisão subjacente ainda é arquiteturalmente relevante mas o documento está escrito como relatório de execução (cita "Spec X — Vaga Y", lista mudanças por arquivo), reescrever o corpo como princípio perene; spec original vira nota histórica de rodapé.
-    - **(b) Rebaixar para nota histórica não-ADR.** Se o documento é primariamente narrativa de execução (ex.: "essas mudanças foram aplicadas"), mover para `.specify/specs/researchs/governance/` como nota histórica datada; remover da numeração de ADRs.
-    - **(c) Arquivar como Superseded.** Se a decisão foi efetivamente substituída por princípio mais abrangente (caso candidato: 0004 absorvida por governança monolítica de 0008), marcar `Superseded by <ID>` com rationale.
-  - Insumo inicial em [`../researchs/governance/2026-05-11-mece-taxonomy-and-adr-audit.md`](../../researchs/governance/2026-05-11-mece-taxonomy-and-adr-audit.md) §2 (marcado como **preliminar** — não decisão).
-- [ ] **4.B.5** Consolidar `/adrs/` na arquitetura de informação:
-  - Mover `/adrs/*.md` → `.core/governance/adrs/` (alinha com `.core/governance/ARCHITECTURE*.md`).
-  - Atualizar cross-refs em `README.md`, `AGENTS.md`, MEMORY do agente, ADRs internas que se auto-referenciam.
-  - Numeração legada (0003-0009) preservada para evitar quebra de referências históricas; novas ADRs do PR3 (0001-0005 locais) **renumeradas para 0010-0014** ao serem promovidas para o lar consolidado.
-- [ ] **4.B.6** Reescrever `adrs/README.md` (hoje rotulado "ADRs de Prompt Engineering — Micro-Decisões", vocabulário pré-PR1):
-  - Reflete fronteira híbrida `[DEC-0021-B04]`: ADR = decisão arquitetural estável cross-spec; foundation/process = constituição operacional viva.
-  - Documenta critério de migração foundation→ADR (4.B.2) e ciclo de promoção ADR local→global no encerramento de spec.
-- [ ] **4.B.N** Pipeline verde.
-- [ ] **4.B.[DEBT-REVIEW]** `NEXT.md`: registrar débitos sobre decisões ainda misturadas entre foundation e ADR; marcar reclassificação 0003/0004 aplicada.
-- [ ] **4.B.[ARCHITECTURE]** `ARCHITECTURE.md`: §I "Como contribuir" ganha entrada sobre critério de migração foundation→ADR; §H ganha referência a `.core/governance/adrs/` como lar canônico consolidado.
-- [ ] **4.B.[COMMIT]** `refactor(spec-0021): fronteira foundation/ADR aplicada`.
+- [x] **4.B.3** Atualizar links/cross-refs após renomeação. Aplicado em: `AGENTS.md` (via regen do bloco compilado), `.core/rules/top/agents-core.md` (source), `CONTRIBUTING.md`, `docs/rpi-protocol.md`, `docs/process/spec-foundation.md` (stub atualizado para apontar ao novo destino — exclusão final em 4.C.1), `GOVERNANCE-CATALOG.md`, `.specify/templates/*-boilerplate.md` (8 templates), `.ai-guidelines/templates/*-boilerplate.md` (10 templates mirror), `.specify/specs/roadmap/backlog.md`, e referências internas no 0021 spec. Specs históricas (0008, 0015, 0017, 0018, 0019) e `roadmap/historico.md` + `CHANGELOG.md` preservados como rastro histórico.
+- [x] **4.B.4** Auditoria das ADRs históricas (agora consolidadas em `.core/governance/adrs/`):
+  - **0003** (Cobertura/Living Docs) — caminho **(a) Reescrita como princípio**. Novo título: "Rastreabilidade `[BR-CLI-*]` é Contrato; Cobertura é Política Operacional". Parte tática (threshold 95%, exceções por arquivo/linha) extraída para `.core/process/test-coverage-policy.md`.
+  - **0004** (Governance Single Responsibility) — caminho **(c) Superseded by ADR 0008**. Status atualizado; corpo preservado como rastro histórico com nota explicativa no topo.
+  - **0005, 0006, 0007, 0008, 0009** — caminho **(a) Manter**. Princípios sólidos sem revisitação datada que justifique reescrita; reformatação descartada por não justificar churn.
+  - Nenhuma ADR foi para caminho **(b)** (rebaixar para nota histórica) — todas têm valor arquitetural perene.
+- [x] **4.B.5** Consolidar `/adrs/` na arquitetura de informação:
+  - ✅ Movido `/adrs/0003–0009.md` → `.core/governance/adrs/` (numeração legada preservada).
+  - ✅ Renumeradas locais PR3: `0001→0010`, `0002→0011`, `0003→0012`, `0004→0013`, `0005→0014`. Self-refs e cross-refs internos atualizados.
+  - ✅ Cross-refs ativos atualizados em `ARCHITECTURE.md`, `ARCHITECTURE-REFERENCE.md`, `tasks.md` (0021), `audit-2026-05-11-pre-3d-template-engine.md`, `audit-2026-05-11-pre-3c4-living-docs-aggregation.md`, `GOVERNANCE-CATALOG.md`.
+  - ✅ `/adrs/` removido (diretório vazio); `/adrs/README.md` deletado.
+  - Refs em CHANGELOG, roadmap/historico.md e specs históricas (0008/0017/0018/0019/0020) preservados como rastro histórico.
+- [x] **4.B.6** Reescrever `.core/governance/adrs/README.md` pós-consolidação:
+  - ✅ Header reflete consolidação 4.B.5 (lar canônico único; lacunas 0001-0002 como honest historical artifact).
+  - ✅ Fronteira ADR vs Foundation com critério prático formalizado `[DEC-0021-B04]`.
+  - ✅ Critério editorial "princípio perene" preservado + adicionado pointer para `.core/process/<topic>-policy.md` como destino de operacionalização.
+  - ✅ Ciclo de promoção local→global documentado (regra de colisão estabelecida em 4.B.5).
+  - ✅ Tabela de ADRs ativas com 12 entradas (0003-0009 legadas + 0010-0014 PR3); 0003 rotulada "reescrita em 4.B.4"; 0004 rotulada "Superseded by ADR 0008".
+  - ✅ Histórico de auditoria e supersessões adicionado ao rodapé com timeline.
+  - ✅ Antigo título "ADRs de Prompt Engineering — Micro-Decisões" (do `/adrs/README.md` legado) eliminado pela exclusão do diretório em 4.B.5.
+- [x] **4.B.N** Pipeline verde (yarn check + yarn test, 267/267 ao longo dos commits 4.B.1+3, 4.B.5, 4.B.4+6, 4.B.2).
+- [x] **4.B.[DEBT-REVIEW]** `NEXT.md`: registrar débitos sobre decisões ainda misturadas entre foundation e ADR; marcar reclassificação 0003/0004 aplicada — feito nesta seção.
+- [x] **4.B.[ARCHITECTURE]** Cobertura efetiva: `GOVERNANCE-CATALOG.md` ganhou linha `.core/process/` mencionando `test-coverage-policy.md`; `.core/governance/adrs/README.md` agora documenta lar canônico consolidado. `ARCHITECTURE.md` lean não precisou de mudança (já refletia governance-driven); §H foi coberta indiretamente via catálogo.
+- [x] **4.B.[COMMIT]** Aplicado em 4 commits atômicos: `4.B.1+3` (rename + cross-refs), `4.B.5` (consolidação), `4.B.4+6` (cirurgias a/c + README), `4.B.2` (3 ADRs extraídas + fluxo + decision-brief retroativo).
 
 ---
 
@@ -982,25 +994,59 @@ yarn smoke
 > **Âncoras:** `[DEC-0021-B03]`, `[DEC-0021-B04]`
 > **Objetivo:** remover “ilhas órfãs” (ex.: `/docs`) e alinhar todos os ponteiros ao novo contrato.
 
-- [ ] **4.C.0** Efetivar o cutover da CLI para o TemplateEngine:
-  - Migrar os boilerplates legados (`.specify/templates/`) para recipes POJO/YAML + partials atômicos (equivalência 1:1).
-  - Trocar o fluxo padrão da CLI para ler as recipes e parar de copiar os arquivos do mirror legado.
+- [x] **4.C.0** Engine activation (milestone obrigatória e isolada — ver Plano 4.C, R1+R2+R4):
+  - **4.C.0.0** ✅ Normalizer compartilhado `cli/features/core/template-equivalence.mjs` (E1+E2+E3+E6). 17/17 testes mjs verdes.
+  - **4.C.0.a** ✅ Wrapper `cli/features/core/recipes.mjs` (engine → disco com filename do mirror, R4). 11/11 testes mjs verdes (incluindo engine-unavailable graceful fallback).
+  - **4.C.0.b** ✅ Recipe `tasks-evidence-driven` byte-equivalente (10 partials atômicos, 14055 bytes). Gate `TasksEvidenceDrivenEquivalence.test.ts` (Jest) verde.
+  - **4.C.0.c** ✅ Integração em `syncConsumerTemplates`: fallback per-kind (recipe → engine; else → mirror). Action log marca `[engine]` quando aplicável.
+  - **4.C.0.d** ✅ Dual-path test `pointers.test.mjs [DUAL-PATH]`: engine renderiza tasks-evidence-driven; mirror copia spec-boilerplate; byte-equivalência vs legado.
+  - **Exit gate verde**: yarn test 296/296 (baseline 267 + 29 novos); yarn test:nova-cli 381/381; yarn check verde; smoke manual confirma `[engine]` apenas em tasks-evidence-driven e `diff -u` byte-zero vs legacy.
+  - **Out-of-scope** (R2): recipes adicionais (spec, plan, decision-brief, tasks-deterministic/mixed, next, roadmap, research-index, project-config) ficam para PR futuro, isoladas, depois que a engine estiver estabilizada em produção via fallback.
 
-- [ ] **4.C.1** Auditar `/docs` e decidir:
-  - migrar conteúdo útil para lar canônico
-  - depreciar/remover o resto
+- [x] **4.C.1** Audit `/docs` + sanitização per-doc (R3: DELETE/MOVE-AS-IS/SURGICAL-EDITS/STAY apenas):
+  - **DELETE**: `docs/process/spec-foundation.md` (stub pós-4.B.1).
+  - **MOVE-AS-IS** × 3: `docs/rpi-protocol.md`, `docs/tdd-guidelines.md`, `docs/ai-efficiency-guide.md` → `.core/process/` (lar canônico de metodologia de processo). Único ajuste de link interno: `ai-efficiency-guide.md` linha 18 (refere `rpi-protocol.md` como sibling pós-MOVE).
+  - **STAY** × 2: `docs/features.md`, `docs/cli/ai-guidelines-cli.md` (área pública consumer-facing; ADR 0018 e README/CONTRIBUTING/issue templates referenciam).
+  - Tabela de veredito apresentada e aprovada em sessão (gate humano cumprido).
+  - 0 SURGICAL-EDITS necessários; 0 issues separadas.
 
-- [ ] **4.C.2** Atualizar ponteiros públicos e internos:
-  - `README.md`
-  - `CONTRIBUTING.md`
-  - `AGENTS.md`
-  - docs de CLI/help
+- [x] **4.C.2** Sweep mecânico de ponteiros pós-4.C.1:
+  - Path corrections (`docs/rpi-protocol.md` → `.core/process/rpi-protocol.md`): ADR 0004, `.specify/templates/roadmap-boilerplate.md`, `.ai-guidelines/templates/roadmap-boilerplate.md`.
+  - Status flips no `GOVERNANCE-CATALOG.md` (§2.1 + §6 deltas) marcando 2 linhas como ✅ 4.C.1.
+  - `NEXT.md` item #4: strikethrough + nota de resolução.
+  - README/CONTRIBUTING/AGENTS/CLAUDE não tocados (verificado: zero refs aos docs movidos).
 
-- [ ] **4.C.3** Validar que não há referências quebradas a `.specify/`/`.ai-guidelines/` quando o contrato final é `.governance/`.
-- [ ] **4.C.N** Pipeline verde.
-- [ ] **4.C.[DEBT-REVIEW]** `NEXT.md`: fechar débitos sobre referências quebradas a `.specify/`/`.ai-guidelines/`; registrar conteúdo de `/docs` que migrou vs foi depreciado.
-- [ ] **4.C.[ARCHITECTURE]** `ARCHITECTURE.md`: §H atualiza para refletir cleanup; remover menções a `/docs` se não for mais lar canônico.
-- [ ] **4.C.[COMMIT]** `docs(spec-0021): cleanup holístico de docs + ponteiros`.
+- [x] **4.C.3** Validação final + artefatos da spec:
+  - `LegacyMirrorContract.test.ts` ampliado: asserção complementar valida recipe materializada + partials referenciados.
+  - `mirror-equivalence-map.md` atualizado: tabela final com status pós-cutover, política de equivalência (E1–E7), R4 (output naming), engine availability.
+  - `NEXT.md` item #4 fechado em 4.C.2.
+  - Sweep `git grep` confirma zero refs quebradas em live files (3 hits restantes em registros históricos intencionais).
+- [x] **4.C.N** Pipeline verde: `d7a93d6` fix(ci): `yarn check:repo` agora chama `yarn build` antes de `yarn test:coverage` — sem o build, `dist/` (gitignored) ausente fazia 3 testes em `recipes.test.mjs`/`pointers.test.mjs` falharem deterministicamente em fresh checkout (root cause apontado por Codex P1). CI #14 final: 8/8 success (guardrails + 6 smoke + ai-guidelines-check).
+- [x] **4.C.[DEBT-REVIEW]** `NEXT.md`: registrar refs históricas em specs frozen como rastro intencional (não débito).
+- [x] **4.C.[ARCHITECTURE]** `ARCHITECTURE.md`: §H (convenções e topologia) explicita `docs/` como superfície pública e `.core/process/` como lar canônico de processo; sem `/docs` como root de metodologia.
+- [x] **4.C.[ENGINE-DIST]** Distribuir `dist/` no tarball npm (resolve Codex P2 review). `package.json:files` += `"dist"` (com excludes de test/**fixtures**); `scripts.prepack = yarn build` garante build automático em `npm pack`/`npm publish`; `scripts.test:smoke` += `yarn build &&` cobre o workflow `smoke-multi-os.yml` (roda isolado, sem `check:repo`); `templates.mjs` fail-fast em `engine-unavailable` (mensagem orientada a diagnóstico: dev → `yarn build`; consumer → pacote quebrado). Tarball pós-fix inclui 104 arquivos `package/dist/`. Reason `no-recipe`/`not-boilerplate` mantém fallback para mirror (contrato inalterado para "recipe não migrada ainda").
+- [x] **4.C.[SANITIZE-NEXT]** `NEXT.md` reduzido de 208 → 32 linhas. Fases 0–3 consolidadas como "todos fechados" (trilha histórica em `tasks.md`+commits). Fase 4 reduzida de 10 → 1 item genuíno (#3 — `4.A.2` parcial até `4.D.[ARCHITECTURE]`). Migrados para `roadmap/backlog.md`: regra-pointer do catálogo (Fase 4 #5), auditoria naming `.core/rules/top/` (Fase 4 #7), rename pacote npm (Fase 4 #8), reposicionamento externo (Fase 4 #9), cutover mjs→DDD (Fase 4 #10), proposta Harness Lock no boilerplate (Insight). Removidos por estarem resolvidos: Fase 4 #2 (rename governance-foundation, feito em 4.B.1), #4 (stub spec-foundation, feito em 4.C.1), #6 (fluxo decision-brief↔ADR, feito em 4.B.2). Removido por ser reserva intencional não-débito: Fase 4 #1 (gêneros futuros).
+- [x] **4.C.[COMMIT]** Closure realizado em chain de commits: `99c0b50` (prettier) → `5778134` (DELETE spec-foundation) → `29eea66`/`aedd275`/`9679e65` (MOVE-AS-IS rpi/tdd/efficiency) → `0a77ce5` (ponteiros 4.C.2) → `10d48ce` (gate 4.C.3) → `97e41ae` (rastro histórico + §H) → `d7a93d6` (fix CI) → `62e2d3c` (ENGINE-DIST) → SANITIZE-NEXT (este commit).
+
+---
+
+## Sub-bloco [4.E] — Repositioning: Governance-First, AI-as-Channel 🧭
+
+> **Âncora nova:** `[DEC-0021-B06]` (Repositioning).
+> **Origem:** sessão de strategy review 2026-05-17 — os docs de pitch externo (Case de Arquitetura e Case de Engenharia) já posicionam o framework como governance-first; o código já é governance-first; só a casca pública (README, AGENTS.md framing, features.md classificação) ainda comunica AI-first. 4.E reconcilia a superfície com a substância sem renomear o pacote npm.
+> **Decisão de naming:** o pacote `ai-guidelines` permanece. "Guidelines" é semanticamente palavra de governança; reclama-se a leitura governance-first via surface, não via rename.
+> **Ordem de execução:** 4.E ocorre **após 4.B** (para que a ADR nova nasça já no lar consolidado `.core/governance/adrs/` numerada como **0015**, após renumeração de 4.B.5).
+
+- [x] **4.E.1** Criado ADR `.core/governance/adrs/0018-governance-first-ai-as-channel.md` (numerado 0018 após renumeração de 4.B.5 e extração de 4.B.2) declarando o princípio: core é governança de engenharia repo-first; integração AI-agnóstica é canal opt-in de primeira classe.
+- [x] **4.E.2** Reescrever `README.md`: tagline e seções "Por que existe" / "O que você ganha" / "Como funciona" lideram com governança; seção "Integrações AI-agnósticas (opt-in)" substitui "Compatibilidade Multi-IA".
+- [x] **4.E.3** Reescrever abertura textual de `AGENTS.md` (Contexto Local, fora do bloco `<AI_GUIDELINES>` compilado): trocar "AGENTS.md raiz é o runtime artifact" por "AGENTS.md é um dos outputs runtime da governança; SSOT vive em `.governance/`".
+- [x] **4.E.4** Atualizar `docs/features.md` (após 4.C.1 ter auditado `/docs/`): reclassificar AI provider adapters como **opt-in feature** (igual Prettier/Husky/CI); hoje estão listados como Core.
+- [x] **4.E.5** Atualizar `GOVERNANCE-CATALOG.md` §1: incluir nota de que os 7 pilares MECE são definidos em termos de engenharia, não de IA — evidência arquitetural de que o core é governance-first.
+- [x] **4.E.N** Pipeline verde.
+- [x] **4.E.[DEBT-REVIEW]** `NEXT.md`: registrar débito de eventual rename futuro do pacote npm (não nesta spec) + reposicionamento de superfícies externas (GitHub topics, landing page se houver, badges).
+- [x] **4.E.[ARCHITECTURE]** `ARCHITECTURE.md` §1 "O que esta CLI faz?": reescrita com framing governance-first; AI fica como canal.
+- [x] **4.E.[SPEC-AMENDMENT]** `spec.md` da 0021: adicionar adendo "Atualização de escopo 2026-05-17" no rodapé citando expansão pelo sub-bloco 4.E (princípio de imutabilidade preservado — adendo, não revisão).
+- [x] **4.E.[COMMIT]** `refactor(spec-0021): repositioning governance-first + AI-as-channel`.
 
 ---
 
@@ -1008,14 +1054,14 @@ yarn smoke
 
 > **Âncoras:** `[DEC-0021-A03]`, `[DEC-0021-C01]`, `[DEC-0021-D01]`
 
-- [ ] **4.D.1** Smoke: validar instalação/execução headless e geração de artefatos sob `.governance/`.
-- [ ] **4.D.2** Validar `registry.yml` como SSOT e markdown derivado coerente.
-- [ ] **4.D.3** Validar living docs (geração + check) e drift guard.
-- [ ] **4.D.4** Validar TemplateEngine (recipes/partials) gerando artefatos válidos.
-- [ ] **4.D.N** Pipeline verde.
-- [ ] **4.D.[DEBT-REVIEW]** `NEXT.md`: revisão final pré-merge — todo débito remanescente migra para `roadmap/backlog.md` ou vira issue (vide F.1).
-- [ ] **4.D.[ARCHITECTURE]** `ARCHITECTURE.md`: snapshot final do roadmap (§F) marcando PR1–PR4 como ✅; estado pós-merge declarado.
-- [ ] **4.D.[COMMIT]** `chore(spec-0021): homologação final (contrato governance-driven)`.
+- [x] **4.D.1** Smoke: `yarn test:smoke` 4/4 verde local (tarball + install + init/adopt/update via tarball real). CI smoke matriz cross-OS (ubuntu/macos/windows × node 22/24) também verde no head atual.
+- [x] **4.D.2** Registry validado como SSOT: `yarn test:nova-cli --testPathPatterns='Registry'` → 41 pass + 4 skipped (skipped são débitos conscientes documentados em audits/NEXT — não bloqueiam). `GovernanceRegistryStore.ts` com 90.47% line cov / 100% function cov. **Limite escopo:** validada **fundação técnica** (round-trip + atomicidade); integração end-to-end com comando CLI real é Spec 0022.
+- [x] **4.D.3** Living docs: `yarn living-docs:check` → `✅ .governance/living-docs.yml in sync (235 entries)`. Drift guard fatal ativo em CI no job `ai-guidelines-check`.
+- [x] **4.D.4** TemplateEngine: `LegacyMirrorContract.test.ts` + `AssembleArtifact.test.ts` → 12/12 pass. `recipes.test.mjs` (cli/) → 11/11 pass. Recipe `tasks-evidence-driven` produz artefato válido com equivalência E1–E7 + R4.
+- [x] **4.D.N** Pipeline verde: `yarn test:coverage` → 296/296 pass local. CI head atual: guardrails ✅ + 6 smoke ✅ + ai-guidelines-check ✅ (8/8 success).
+- [x] **4.D.[DEBT-REVIEW]** `NEXT.md` revisado pré-merge: sanitização principal feita em 4.C.[SANITIZE-NEXT] (208 → 45 linhas). Adicionada entrada explícita ao `roadmap/backlog.md` sobre "migração completa dos recipes restantes" (elevada de débito implícito identificado pela closure-review §6.2). Adicionada entrada sobre "mecanismo de fechamento disciplinado para foundation/convergence specs" (proposta meta-spec; provavelmente parte do escopo da futura Spec 0023). Nenhum problema estrutural profundo encontrado durante a homologação que justifique absorção retroativa pela 0021 — eventuais redesigns vão para Spec 0022+ ou Spec 0023.
+- [x] **4.D.[ARCHITECTURE]** `ARCHITECTURE.md` §6 (Roadmap) atualizado: PR0–PR4 todas marcadas ✅. Estado pós-merge declarado: `.governance/` como root canônico, `.ai-guidelines/` bridge legada explícita até cutover operacional (Spec 0022+), engine ativada para `tasks-evidence-driven`, demais recipes seguem mirror (spec dedicada futura), Living Documentation com 235+ entries protegidas, ADRs consolidadas, `closure-review.md` como trilha de fechamento disciplinada. Limite explícito sobre cutover operacional como Spec 0022 registrado no aviso pós-tabela.
+- [x] **4.D.[COMMIT]** Commit final de homologação aplicado nesta rodada.
 
 ---
 
@@ -1025,6 +1071,7 @@ yarn smoke
   - carrier híbrido publicado
   - foundation/ADR fronteira aplicada
   - docs/ponteiros alinhados
+  - repositioning governance-first aplicado
   - smoke/homologação verde
 
 - [ ] **4.[MANDATÓRIO]** Aguardar aprovação humana explícita.

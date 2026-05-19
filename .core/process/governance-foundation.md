@@ -1,26 +1,37 @@
-# Spec Foundation — Implementação canônica do passo Plan no ciclo RPI
+# Governance Foundation — Manual operacional do ciclo Governance-Driven
+
+> **Renomeação 2026-05-17 (Spec 0021 sub-bloco 4.B.1):** este documento se chamava
+> `spec-foundation.md` até a Spec 0021. O novo nome reflete que a constituição
+> operacional cobre TODA a governança (7 pilares MECE), não apenas specs.
+> Decisões arquiteturais estáveis cross-spec foram extraídas para ADRs
+> em `.core/governance/adrs/` (sub-bloco 4.B.2) — este arquivo permanece como
+> processo vivo: manual de uso do ciclo, lifecycle de artefatos, checklists.
 
 > Este guia é a implementação canônica do passo **Plan** do ciclo RPI
-> (ver `../rpi-protocol.md`). Use spec-foundation quando a iniciativa
-> merecer persistência em repositório; para ajustes pontuais contidos
-> em uma sessão, use plano leve na ferramenta.
+> (ver `../rpi-protocol.md`). Use o ciclo governance-foundation quando a
+> iniciativa merecer persistência em repositório; para ajustes pontuais
+> contidos em uma sessão, use plano leve na ferramenta.
 
-## Quando usar spec-foundation
+## Quando usar governance-foundation
 
-Critério objetivo (**qualquer** verdade → spec-foundation):
+Critério objetivo (**qualquer** verdade → governance-foundation):
 
 - A iniciativa estima **mais de uma sessão** de trabalho.
 - **Toca mais de um arquivo** fora de uma feature isolada.
 - O resultado precisa **sobreviver a troca de IA, sessão ou colaborador**.
 
-Demais casos (**todas** as condições invertidas) → plano leve (scratchpad na ferramenta, não versionado). Referência cruzada em `../rpi-protocol.md` seção "Quando usar spec-foundation vs plano leve".
+Demais casos (**todas** as condições invertidas) → plano leve (scratchpad na ferramenta, não versionado). Referência cruzada em `../rpi-protocol.md` seção "Quando usar governance-foundation vs plano leve".
 
 ---
 
 ## Tipos de spec
 
-> **🚧 TODO — migração arquitetural pendente.** O conteúdo desta seção
-> deverá migrar para a futura spec **`governance-information-architecture`** (já presente em `roadmap/backlog.md`), que reorganizará a arquitetura de informação do framework (gêneros documentais, fronteira entre `docs/`, `adrs/`, `.core/`, `.specify/`). Esta posição é tática — entregar a Spec 0018 sem bloquear a entrega; a migração futura não bloqueia o uso desta seção pelos consumidores enquanto isso.
+> **Nota da Spec 0021 (4.B.1):** a "🚧 TODO migração arquitetural" que existia aqui
+> apontava para a futura spec `governance-information-architecture` — **esta é** essa
+> spec. Decisão de placement: a seção "Tipos de spec" é processo vivo de classificação
+> operacional e permanece neste documento. Decisões arquiteturais estáveis
+> (universal vs opt-in, roadmap repo-first, numeração de specs) foram extraídas
+> para ADRs no sub-bloco 4.B.2.
 
 Toda spec declara seu **tipo** no header da `spec.md`, em **campo obrigatório sem default**. O tipo define qual variante de `tasks.md` governa a execução e se o gate humano via `decision-brief.md` é exigido antes da implementação.
 
@@ -47,17 +58,22 @@ Toda spec declara seu **tipo** no header da `spec.md`, em **campo obrigatório s
 
 ## Categorias de regras: universal vs opt-in de stack
 
-A Spec 0008 canonizou uma distinção explícita para regras publicadas pelo
-baseline. Use esta classificação ao decidir **onde** uma regra nova deve viver:
+> **Princípio canônico:** [`ADR 0015 — Classificação Universal vs Opt-in para Regras Distribuídas`](../governance/adrs/0015-universal-vs-opt-in-rule-classification.md). O ADR captura o porquê da distinção e o critério perene; esta seção captura o como operacional.
 
-| Categoria                                                                          | Destino                                                   | Sincronização ao consumidor       |
-| :--------------------------------------------------------------------------------- | :-------------------------------------------------------- | :-------------------------------- |
-| **Universal de governança IA** (workflow, plan mode, PR collab, environment check) | `.core/rules/global-rules.md` (sempre injetado)           | Mandatory core — sempre vai       |
-| **Opt-in de stack/processo** (Quality Gates, TDD, formatter)                       | `.core/rules/opt-in/<tema>/*.md` + `cli/features/opt-in/` | Wizard pergunta; default sugerido |
+Use esta classificação ao decidir **onde** uma regra nova deve viver:
 
-A distinção **estende a Spec 0005** ("opt-in é exatamente o que varia por
-stack") a regras editoriais. Regras puramente de processo/IA que valem para
-qualquer consumidor (independente de stack) são universais; o resto é opt-in.
+| Categoria                                                                          | Destino                                             | Sincronização ao consumidor       |
+| :--------------------------------------------------------------------------------- | :-------------------------------------------------- | :-------------------------------- |
+| **Universal de governança IA** (workflow, plan mode, PR collab, environment check) | `.core/rules/top/` e `.core/rules/center/`          | Mandatory core — sempre injetado  |
+| **Opt-in de stack/processo** (Quality Gates, TDD, formatter)                       | `.core/rules/base/<tema>/` + `cli/features/opt-in/` | Wizard pergunta; default sugerido |
+| **Opt-in por provider de IA** (Claude, Codex, Gemini, Copilot, Cursor)             | `.core/rules/adapters/`                             | Wizard pergunta; default sugerido |
+
+**Critério-teste para classificar** (do ADR 0015):
+
+> "Esta regra valeria para um projeto X em stack Y com processo Z que **não** compartilha convenções com a minha stack/processo?"
+>
+> - Sim → universal.
+> - Depende → opt-in.
 
 ---
 
@@ -147,11 +163,92 @@ Ao fechar a spec, arquivos com valor reutilizável devem ser:
 
 ---
 
+## Decisões: decision-brief, ADR e policy
+
+Decisões durante a vida de uma spec moram em **três artefatos distintos** com responsabilidades MECE. Confundir um pelo outro produz drift editorial: decision-brief que vira lixo após o gate, ADR que vira relatório de execução, policy que reabre princípio em cada PR.
+
+### O fluxo canônico
+
+```
+Setup da spec → [decision-brief.md instanciado, se evidence-driven/mixed]
+       │
+       ▼
+Stage 1 (research)
+       │
+       │   Pergunta arquitetural emerge
+       │   → [DEC-XXXX-NN] entry no decision-brief (opções A/B/C + recomendação)
+       │
+       ▼
+Gate humano → owner escolhe → entry vira "Resolvido"
+       │
+       │   Se a decisão é princípio cross-spec/perene
+       │   → draft de ADR em `.specify/specs/<id>/adrs/` (lar local)
+       │
+       │   Se a decisão é operacional (threshold, lista, mecanismo)
+       │   → arquivo em `.core/process/<topic>-policy.md`
+       │
+       │   Se a decisão é spec-específica (não vira princípio nem policy)
+       │   → fica só no decision-brief, vive ali pra sempre
+       │
+       ▼
+Execução / Implementação
+       │
+       │   Decisão NOVA emerge mid-spec → amendment no decision-brief
+       │   (nova entry [DEC-XXXX-NN], mesma forma, status "Resolvido (amendment YYYY-MM-DD)")
+       │
+       ▼
+Pré-merge (Fase F)
+       │
+       │   ADRs locais promovidas → `.core/governance/adrs/` com próximo número global
+       │   Policy docs permanecem em `.core/process/` (já são globais)
+       │   decision-brief.md fica no diretório da spec como artefato histórico permanente
+       │
+       ▼
+Merge
+```
+
+### Quando cada um nasce
+
+| Artefato                                   | Quando nasce                                                          | Vive em                     | Sobrevive ao merge?              |
+| :----------------------------------------- | :-------------------------------------------------------------------- | :-------------------------- | :------------------------------- |
+| `decision-brief.md`                        | Setup de spec `evidence-driven`/`mixed`                               | `.specify/specs/<id>/`      | Sim — artefato histórico fixo    |
+| ADR local                                  | Quando princípio cross-spec emerge durante execução                   | `.specify/specs/<id>/adrs/` | Promovida ao lar global no merge |
+| ADR global                                 | Promoção de ADR local OU criação direta para princípios estabelecidos | `.core/governance/adrs/`    | Sim — sobrevive a tudo           |
+| Policy (`.core/process/<topic>-policy.md`) | Quando ADR aceita gera operacionalização tática                       | `.core/process/`            | Sim — evolui sem reabrir ADR     |
+
+### Critério-teste para classificar o conteúdo
+
+| Sintoma do conteúdo                                                 | Artefato correto            |
+| :------------------------------------------------------------------ | :-------------------------- |
+| "Avaliei opções A/B/C e escolhi X em sessão de gate"                | decision-brief              |
+| "Princípio arquitetural que rege N specs futuras independentemente" | ADR                         |
+| "Threshold numérico, lista de exceções, mecanismo configurável"     | Policy em `.core/process/`  |
+| "Mudança concreta aplicada nesta spec específica"                   | commit message + tasks.md   |
+| "Pesquisa de mercado / benchmark / análise comparativa"             | `.specify/specs/researchs/` |
+
+### Anti-padrões a rejeitar no review
+
+1. **ADR que vira lixo no fim da spec.** Sintoma: cita sub-bloco/fase como cronograma. Correção: reescrever como princípio perene ou rebaixar para nota histórica.
+2. **decision-brief que carrega princípio perene.** Sintoma: leitor 2 anos depois precisa do brief para entender por que o sistema é assim. Correção: extrair para ADR; brief mantém apenas "como chegamos lá".
+3. **Policy embutida em ADR.** Sintoma: ADR muda toda vez que threshold muda. Correção: ADR captura princípio (cobertura é piso, não meta); policy captura número.
+4. **Decisão mid-spec sem registro.** Sintoma: mudança de rota só vive no histórico do Git e na memória do agente. Correção: amendment no decision-brief, mesma forma, datado.
+5. **Princípio criado sem evidência.** Sintoma: ADR sem opções avaliadas A/B/C e sem origem em decision-brief. Correção: princípios precisam ter sido considerados frente a alternativas — caso contrário, é dogma, não decisão.
+
+### Casos limites
+
+- **Decisão tomada em sessão colaborativa humano-agente (sem stage 1 formal).** Pode acontecer mid-spec quando emerge nova pergunta. **Tratamento**: amendment no decision-brief (forma idêntica, com `Data / Owner` marcando o momento da sessão e o método — ex. "resposta via AskUserQuestion"). Não pular o registro.
+- **Decisão pequena e operacional (qual flag passar para o build).** **Tratamento**: nem decision-brief nem ADR — só commit message. Critério: se a decisão não tem alternativas reais avaliadas, não é decisão de governança, é escolha técnica.
+- **Princípio já estabelecido em spec anterior, sendo formalizado tardiamente.** **Tratamento**: ADR direta em `.core/governance/adrs/` com nota de origem histórica no header. Não precisa decision-brief retroativo (a "decisão" já foi tomada na spec original; agora só está sendo documentada).
+
+---
+
 ## Roadmap: repo-first, integração-friendly
 
-O repositório é a **memória canônica** do roadmap. Ferramentas externas (GitHub Projects, Jira, Linear, etc.) podem ser **camada colaborativa humana** via campo opcional `tracker` nas entradas de `.specify/specs/roadmap/backlog.md`, mas o **resumo mínimo no `backlog.md` é mandatório** — nunca delegar totalmente ao tracker externo.
+> **Princípio canônico:** [`ADR 0016 — Roadmap Repo-First com Tracker Externo como Camada Colaborativa Opcional`](../governance/adrs/0016-repo-first-roadmap.md). O ADR captura o porquê da escolha (memória portável agnóstica a tracker e a IA); esta seção captura o como operacional.
 
-Motivação: o roadmap precisa ser legível por agentes de IA (sem acesso uniforme a APIs de tracker externo) e sobreviver a mudanças de ferramenta colaborativa. Detalhes do formato (incluindo split `historico.md` × `backlog.md`) em `.specify/templates/roadmap-boilerplate.md`.
+O repositório é a **memória canônica** do roadmap. Trackers externos (GitHub Projects, Jira, Linear) entram via campo opcional `tracker:` nas entradas de `backlog.md` — mas o **resumo mínimo no repo é mandatório**. Se o tracker está presente sem resumo no repo, é falha de contrato.
+
+Detalhes do formato (split `historico.md` × `backlog.md`, campos obrigatórios) em [`.specify/templates/roadmap-boilerplate.md`](../../.specify/templates/roadmap-boilerplate.md).
 
 ---
 
@@ -189,21 +286,14 @@ abertura abaixo).
 
 ## Numeração de specs
 
-Regra canônica (Spec 0008 sub-bloco B):
+> **Princípio canônico:** [`ADR 0017 — Numeração de Specs: Slug Semântico Até Branch, Sem Reserva Futura`](../governance/adrs/0017-spec-numbering-slug-to-branch.md). O ADR captura o porquê (separar identidade de prioridade; estabilidade após instanciação); esta seção captura o como operacional.
 
-- **Candidatas vivem por slug semântico**, sem número. Ex.:
-  `governance-coherence`, `roadmap-adapters`, `quality-harness-engineering`.
-- **Número só é alocado** quando a spec sai de candidata e cria branch
-  (`feat/spec-XXXX-<slug>`). Recebe o **próximo número sequencial
-  disponível**, sem reservar à frente.
-- **Reorganizar prioridade = mover linha entre seções** (Now / Next /
-  Later), não renumerar.
-- **Nunca renumerar** uma spec depois de instanciada. Números em specs
-  concluídas/absorvidas permanecem como rastreabilidade histórica.
+Regra prática:
 
-Motivação: antes da Spec 0008, numeração sequencial fixa forçava
-renumeração quando prioridade mudava (ex.: uma candidata renumerada de
-0011 para 0013 ao adicionar novas candidatas). Churn editorial sem ganho.
+- **Candidatas vivem por slug semântico**, sem número. Ex.: `governance-coherence`, `roadmap-adapters`, `quality-harness-engineering`.
+- **Número alocado uma vez**, no ato de `git checkout -b feat/spec-XXXX-<slug>`. Próximo sequencial disponível, sem reservar à frente.
+- **Reorganizar prioridade = mover linha entre seções** (Now / Next / Later), não renumerar.
+- **Nunca renumerar** após instanciação. Specs concluídas/canceladas/absorvidas mantêm numeração como rastreabilidade histórica; lacunas são honest historical artifact.
 
 ---
 

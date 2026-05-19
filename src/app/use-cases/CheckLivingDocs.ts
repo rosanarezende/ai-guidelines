@@ -6,8 +6,8 @@
  * `drift: true` em qualquer divergência, junto com a versão gerada (para
  * o caller poder regravar) e um diff legível mínimo.
  *
- * Aplica ADR 0004 (determinismo é contrato — comparação byte-a-byte
- * estável) e ADR 0003 (se algum bypass expirar durante a geração, a
+ * Aplica ADR 0013 (determinismo é contrato — comparação byte-a-byte
+ * estável) e ADR 0012 (se algum bypass expirar durante a geração, a
  * exceção do parser é repropagada — drift guard nunca "passa silencioso"
  * sobre bypass vencido).
  *

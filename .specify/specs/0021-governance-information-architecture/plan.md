@@ -74,7 +74,7 @@ A implementação deve seguir o princípio **repo-first híbrido** e evitar quat
 
 **Estado atual do legado:**
 
-- `.core/process/spec-foundation.md` mistura constituição viva, regras de lifecycle e decisões arquiteturais que já merecem outro gênero.
+- `.core/process/governance-foundation.md` mistura constituição viva, regras de lifecycle e decisões arquiteturais que já merecem outro gênero.
 - `docs/`, `adrs/`, `.core/rules/`, `.specify/` e raiz do repo convivem sem uma política final coerente de placement.
 - `.specify/templates/` ainda ocupa um lar tático herdado da 0020 e incompatível com a decisão de composição modular.
 
@@ -251,7 +251,7 @@ A implementação deve seguir o princípio **repo-first híbrido** e evitar quat
 - `.specify/specs/0021-governance-information-architecture/decision-brief.md` — gate Stage 1 já fechado.
 - `.specify/specs/0021-governance-information-architecture/NEXT.md` — débitos conscientes.
 - `.specify/specs/roadmap/backlog.md` — status da spec e eventuais implicações da migração.
-- `.core/process/spec-foundation.md` ou sucessor renomeado — contrato canônico do lifecycle Governance-Driven.
+- `.core/process/governance-foundation.md` ou sucessor renomeado — contrato canônico do lifecycle Governance-Driven.
 - `.specify/specs/research-index.md` — se a reorganização do placement de research exigir ajuste.
 - `.core/rules/**` e artefatos gerados em `_meta/` — reorganização física + alinhamento do builder.
 - `cli/**` — re-arquitetura da CLI e casos de uso do novo workspace.

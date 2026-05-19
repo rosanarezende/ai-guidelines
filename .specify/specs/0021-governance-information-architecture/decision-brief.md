@@ -189,7 +189,7 @@
 
 **Contexto (research):**
 
-- O backlog da 0021 identifica mistura atual entre constituição operacional (`.core/process/spec-foundation.md`), ADRs, runtime rules, docs descritivos, referências e pesquisa.
+- O backlog da 0021 identifica mistura atual entre constituição operacional (`.core/process/governance-foundation.md`), ADRs, runtime rules, docs descritivos, referências e pesquisa.
 - O mesmo backlog aprova explicitamente um sub-bloco antecipatório para reservar lar canônico de PRD/intake, handoff/decision logs e telemetria.
 - A 0020 deixou como insumo herdado a necessidade de tratar o placement canônico de `.specify/templates/`.
 
@@ -243,26 +243,26 @@
   - [ ] B
   - [x] C
 - **Justificativa / Ressalvas:** > A adoção de um modelo híbrido garante que a arquitetura seja autoexplicativa pela própria topologia das pastas (ex: .governance/specs, .governance/incidents), mas com o apoio de um catálogo central escrito que rege o ciclo de vida e resolve ambiguidades.
-  Ressalva Crítica: Conforme apontado no gate, o arquivo .core/process/spec-foundation.md atual carrega um nome obsoleto. Visto que o framework aprovou o modelo de 6 pilares de valor (onde spec é apenas um deles), o termo "spec-foundation" gera dissonância cognitiva. A implementação desta spec exigirá renomear e refatorar este arquivo para refletir a governança como um todo (ex.: governance-foundation.md, workflow-foundation.md, state-lifecycle.md ou information-architecture.md), alinhando o título à sua real responsabilidade arquitetural. Esta mudança é crucial para evitar confusão futura sobre o papel do arquivo e para comunicar claramente que ele é a base de toda a governança, não apenas das specs.
+  Ressalva Crítica: Conforme apontado no gate, o arquivo .core/process/governance-foundation.md atual carrega um nome obsoleto. Visto que o framework aprovou o modelo de 6 pilares de valor (onde spec é apenas um deles), o termo "governance-foundation" gera dissonância cognitiva. A implementação desta spec exigirá renomear e refatorar este arquivo para refletir a governança como um todo (ex.: governance-foundation.md, workflow-foundation.md, state-lifecycle.md ou information-architecture.md), alinhando o título à sua real responsabilidade arquitetural. Esta mudança é crucial para evitar confusão futura sobre o papel do arquivo e para comunicar claramente que ele é a base de toda a governança, não apenas das specs.
 - **Data / Owner:** 2026-05-09 / @rosanarezende
 
-### [DEC-0021-B04] Fronteira entre `spec-foundation.md` e ADRs
+### [DEC-0021-B04] Fronteira entre `governance-foundation.md` e ADRs
 
-**Pergunta:** decisões atômicas hoje embutidas em `.core/process/spec-foundation.md` devem permanecer como constituição/processo vivo, migrar para ADRs formais ou seguir uma fronteira híbrida explícita?
+**Pergunta:** decisões atômicas hoje embutidas em `.core/process/governance-foundation.md` devem permanecer como constituição/processo vivo, migrar para ADRs formais ou seguir uma fronteira híbrida explícita?
 
 **Contexto (research):**
 
-- `[DEC-0018-A06]` capturou o débito tático sobre "onde fica a seção Tipos de spec", mas a raiz do problema é maior: `spec-foundation.md` concentra processo vivo e também decisões arquiteturais que podem merecer outro gênero documental.
-- O backlog original da 0021 já levantava explicitamente a pergunta sobre ADRs absorverem decisões atômicas hoje embutidas em `spec-foundation.md`.
-- A própria `spec-foundation.md` já se autoidentifica como carregando migração arquitetural pendente, o que indica fronteira ainda não resolvida.
+- `[DEC-0018-A06]` capturou o débito tático sobre "onde fica a seção Tipos de spec", mas a raiz do problema é maior: `governance-foundation.md` concentra processo vivo e também decisões arquiteturais que podem merecer outro gênero documental.
+- O backlog original da 0021 já levantava explicitamente a pergunta sobre ADRs absorverem decisões atômicas hoje embutidas em `governance-foundation.md`.
+- A própria `governance-foundation.md` já se autoidentifica como carregando migração arquitetural pendente, o que indica fronteira ainda não resolvida.
 
 **Opções:**
 
-| Opção | Descrição                                                                                                                                                                           | Pró                                                                                        | Contra                                                                             |
-| :---- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------- |
-| A     | **Manter tudo em `spec-foundation.md`**; ADR fica só para decisões maiores não ligadas ao processo                                                                                  | Menor churn e menos dispersão                                                              | Mantém mistura entre constituição viva e decisões arquiteturais específicas        |
-| B     | **Migrar o máximo possível para ADRs**; `spec-foundation.md` vira só manual/processo                                                                                                | ADRs ficam mais completos e rastreáveis                                                    | Pode fragmentar demais a leitura do processo e transformar o fluxo em caça a links |
-| C     | **Fronteira híbrida explícita**: processo vivo e constituição operacional ficam em `spec-foundation.md`; decisões arquiteturais cross-spec, estáveis e justificadas migram para ADR | Mantém leitura operacional curta e dá lar adequado ao que realmente é decisão arquitetural | Exige critério claro para evitar ambiguidade futura                                |
+| Opção | Descrição                                                                                                                                                                                 | Pró                                                                                        | Contra                                                                             |
+| :---- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------- |
+| A     | **Manter tudo em `governance-foundation.md`**; ADR fica só para decisões maiores não ligadas ao processo                                                                                  | Menor churn e menos dispersão                                                              | Mantém mistura entre constituição viva e decisões arquiteturais específicas        |
+| B     | **Migrar o máximo possível para ADRs**; `governance-foundation.md` vira só manual/processo                                                                                                | ADRs ficam mais completos e rastreáveis                                                    | Pode fragmentar demais a leitura do processo e transformar o fluxo em caça a links |
+| C     | **Fronteira híbrida explícita**: processo vivo e constituição operacional ficam em `governance-foundation.md`; decisões arquiteturais cross-spec, estáveis e justificadas migram para ADR | Mantém leitura operacional curta e dá lar adequado ao que realmente é decisão arquitetural | Exige critério claro para evitar ambiguidade futura                                |
 
 **Recomendação inicial (a confirmar pós-gate):** **C**. O débito de `[DEC-0018-A06]` parece ser justamente de fronteira, não de “mover tudo” para um lado só.
 
@@ -273,7 +273,7 @@
   - [ ] A
   - [ ] B
   - [x] C
-- **Justificativa / Ressalvas:** > A adoção de uma fronteira híbrida explícita (Opção C) resolve a sobrecarga cognitiva do atual spec-foundation.md. O documento central (que será renomeado, ex: governance-foundation.md) passa a focar estritamente no "processo vivo", manual de uso e constituição do ciclo de vida (como os 6 novos pilares de entrega definidos no DEC-0021-A02). Decisões técnicas irreversíveis, justificativas de arquitetura ou escolhas de ferramentas estruturais que atualmente poluem o documento devem ser expurgadas e formalizadas como ADRs (Architecture Decision Records). Isto garante uma leitura operacional rápida para o dia a dia e um arquivo histórico adequado para justificativas técnicas.
+- **Justificativa / Ressalvas:** > A adoção de uma fronteira híbrida explícita (Opção C) resolve a sobrecarga cognitiva do atual governance-foundation.md. O documento central (que será renomeado, ex: governance-foundation.md) passa a focar estritamente no "processo vivo", manual de uso e constituição do ciclo de vida (como os 6 novos pilares de entrega definidos no DEC-0021-A02). Decisões técnicas irreversíveis, justificativas de arquitetura ou escolhas de ferramentas estruturais que atualmente poluem o documento devem ser expurgadas e formalizadas como ADRs (Architecture Decision Records). Isto garante uma leitura operacional rápida para o dia a dia e um arquivo histórico adequado para justificativas técnicas.
 - **Data / Owner:** 2026-05-09 / @rosanarezende
 
 ### [DEC-0021-B05] Placement interno de `.core/rules/` no repositório
@@ -394,20 +394,102 @@
 
 ---
 
+## Bloco E — Amendments pós-gate (2026-05-17)
+
+> **Contexto da expansão.** O gate original (2026-05-09) fechou o escopo da 0021 nos blocos A-D. Durante a execução do PR4 sub-bloco 4.B, duas perguntas novas emergiram que exigiam decisão consciente em vez de improviso: (i) caminhos específicos para a auditoria das 7 ADRs legadas; (ii) reposicionamento de identidade do framework de AI-first para Governance-first. Esta seção captura essas decisões na mesma forma dos blocos originais (opções A/B/C + escolha da owner), preservando a separação entre decision-brief (como chegamos lá) e ADRs (princípio resultante).
+>
+> Ambas decisões foram tomadas em sessão colaborativa humano-agente em 2026-05-17, com a owner respondendo via AskUserQuestion. Status agregado: `Resolvido`.
+
+### [DEC-0021-B06] Auditoria das ADRs legadas — caminho por ADR (a/b/c)
+
+**Pergunta:** como tratar cada uma das 7 ADRs em `/adrs/` (0003-0009) à luz do critério editorial "ADR é princípio perene, não revisitação datada" formalizado em `.core/governance/adrs/README.md`?
+
+**Contexto (research):**
+
+- Auditoria preliminar em [`../researchs/governance/2026-05-11-mece-taxonomy-and-adr-audit.md`](../researchs/governance/2026-05-11-mece-taxonomy-and-adr-audit.md) §2 analisou cada ADR e propôs caminhos provisórios.
+- Critério editorial publicado em `.core/governance/adrs/README.md`: ADR mal-escrita é a que vira lixo quando a fase termina; ADR boa é princípio que faz sentido 2 anos depois.
+- 3 caminhos disponíveis: **(a)** reescrever como princípio perene; **(b)** rebaixar para nota histórica não-ADR em `.specify/specs/researchs/governance/`; **(c)** marcar `Superseded by <ID>`.
+
+**Opções por ADR:**
+
+| ADR  | Diagnóstico                                                                          | Caminhos avaliados                                          | Recomendação inicial |
+| :--- | :----------------------------------------------------------------------------------- | :---------------------------------------------------------- | :------------------- |
+| 0003 | Mistura princípio (`[BR-CLI-*]`) + tática (threshold 95%, linhas específicas)        | (a) reescrever; (c) superseded inteiro                      | (a)                  |
+| 0004 | Decisão de Prime Directive em 1 lugar — absorvida pela Governança Monolítica de 0008 | (a) reescrever; (c) superseded by 0008                      | (c)                  |
+| 0005 | Curadoria público/privado — princípio estável                                        | (a) manter; reformatar levemente                            | (a) manter           |
+| 0006 | Licença Apache-2.0 — decisão fundacional                                             | (a) manter                                                  | (a) manter           |
+| 0007 | Visibilidade pública (fresh repo + snapshot) — estende 0005                          | (a) manter                                                  | (a) manter           |
+| 0008 | Governança Monolítica — princípio arquitetural fundacional                           | (a) manter                                                  | (a) manter           |
+| 0009 | Naming do pacote + registry + auth — três decisões em um doc, mas estáveis           | (a) manter (débito documental "3 em 1" registrado sem ação) | (a) manter           |
+
+**Recomendação inicial agregada:** **0003 → (a) reescrever**; **0004 → (c) superseded by 0008**; **0005-0009 → (a) manter sem reformatação** (não justifica churn). Nenhuma para caminho (b).
+
+**Decisão do Gate Humano (amendment):**
+
+- **Status:** [ ] Pendente | [x] Resolvido
+- **Escolha agregada:** conforme recomendação acima.
+- **Justificativa / Ressalvas:** > A ADR 0003 carrega princípio relevante (rastreabilidade `[BR-CLI-*]`) que sobrevive a refactors, mas estava poluída por números de linha de arquivos específicos — reescrita como princípio + extração da parte tática para `.core/process/test-coverage-policy.md` resolve sem perder o conteúdo de valor. A ADR 0004 estabelece propriedade-objetivo (Prime Directive em 1 lugar) que virou consequência emergente da Governança Monolítica de 0008 — superseder é mais honesto que reescrever (a decisão original tinha valor histórico real). Para 0005-0009, princípios sólidos sem revisitação datada: reformatação cosmética não justifica churn em ADRs já bem-formadas.
+- **Data / Owner:** 2026-05-17 / @rosanarezende (resposta via AskUserQuestion durante execução de 4.B.4)
+
+---
+
+### [DEC-0021-B07] Repositioning Governance-First, AI-as-Channel
+
+**Pergunta:** o framework `ai-guidelines` se propõe a resolver dor de IA (governança de contexto/regras para LLMs) ou dor de governança de engenharia (com integração AI-agnóstica como canal de primeira classe)?
+
+**Contexto (research):**
+
+- Dois docs de pitch externo da owner (Google Drive: Case de Arquitetura e Case de Engenharia, datados de 2025) **já posicionam** o framework como governance-first: as 3 dores reais listadas (padronização, lost-in-the-middle, **SecOps**) são 2/3 puramente de governança; "Governance by Design" é o vocabulário; `POLICY_EXPERIMENT_REQUIRES_HYPOTHESIS` é guardrail de produto, não de IA.
+- O **código** já é governance-first: domínio (`WorkItem`, `Registry`, `GovernanceWorkspace`, `LivingDocumentation`, `TemplateEngine`) é modelo de governança de engenharia puro; 7 pilares MECE não mencionam IA; contrato consumer-side já é `.governance/`, não `.ai-guidelines/`.
+- A **superfície pública** ainda comunica AI-first: tagline "Governança AI-first", `AGENTS.md` como artefato central, `.ai-guidelines/` no consumidor, "ai-first dev" como categoria de mercado.
+- A discrepância entre conteúdo (governance-first) e casca (AI-first) limita ROI: o framework é cobrado como AI tooling enquanto entrega governance machinery.
+
+**Opções:**
+
+| Opção | Descrição                                                                                                                                                          | Pró                                                                                                | Contra                                                                                                                                                            |
+| :---- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A     | **Manter AI-first** (status quo).                                                                                                                                  | Coerência histórica; sem churn.                                                                    | Vende menos valor que o que entrega; evolução natural (intake, telemetry, handoff) é de governança e não cabe no framing AI.                                      |
+| B     | **Expandir escopo da 0021 com sub-bloco 4.E "Repositioning"**: ADR de princípio + reescrita de README + AGENTS.md framing + features.md classifica AI como opt-in. | Reflete código real; abre porta para evolução natural; reposiciona narrativa sem rename do pacote. | Adiciona ~1-2 dias de trabalho ao PR4; expansão de escopo registrada como amendment do gate.                                                                      |
+| C     | **Spec dedicada nova (0022 repositioning)** após fechar 0021 com escopo atual.                                                                                     | PRs menores e mais auditáveis.                                                                     | A 0021 entrega "arquitetura de informação" sem resolver a contradição de framing que existe hoje — ficaria coerente internamente mas desalinhada com a tese real. |
+
+**Sub-decisão acoplada (naming):**
+
+- (i) Continuar com pacote npm `ai-guidelines` (reclaim semântico: "guidelines" já é palavra de governança).
+- (ii) Rename agressivo (`repo-governance`, `eng-governance`).
+- (iii) Dual-publish com alias depreciado.
+
+**Recomendação inicial:** **B + (i)**. A virada de framing é coerente com a evidência (código + docs externos da owner) e o naming admite reclaim semântico sem churn de URLs/imports/badges.
+
+**Decisão do Gate Humano (amendment):**
+
+- **Status:** [ ] Pendente | [x] Resolvido
+- **Escolha (marque com `x`):**
+  - [ ] A
+  - [x] B
+  - [ ] C
+  - **Naming:** [x] (i) continuar `ai-guidelines` | [ ] (ii) rename | [ ] (iii) dual-publish
+- **Justificativa / Ressalvas:** > Os docs de pitch da arquiteta já posicionam o framework como governance-first; o código já é governance-first; só a casca insiste em ser AI-first. Reconciliar a superfície com a substância **agora** é mais coerente que abrir spec separada — a 0021 vira spec verdadeiramente estruturante, não housekeeping de paths. Sobre naming: o questionamento inicial foi se `ai-guidelines` "passava ideia errada distante de governança". Análise honesta mostrou que "guidelines" semanticamente já é palavra de governança — o nome admite duas leituras (`(ai)-guidelines` = "para IA" vs `ai—guidelines` = "que incluem IA como canal"). Reclaim via surface (README, AGENTS.md framing) é mais barato que rename pós-1.0.0 e preserva tração já construída.
+- **Materialização:** ADR 0018 (`governance-first-ai-as-channel`) capturará o princípio perene; este DEC captura a chegada à decisão.
+- **Data / Owner:** 2026-05-17 / @rosanarezende (resposta via AskUserQuestion em sessão colaborativa humano-agente)
+
+---
+
 ## Resumo de status
 
-| ID               | Bloco | Status    |
-| :--------------- | :---- | :-------- |
-| `[DEC-0021-A01]` | A     | Resolvido |
-| `[DEC-0021-A02]` | A     | Resolvido |
-| `[DEC-0021-A03]` | A     | Resolvido |
-| `[DEC-0021-B01]` | B     | Resolvido |
-| `[DEC-0021-B02]` | B     | Resolvido |
-| `[DEC-0021-B03]` | B     | Resolvido |
-| `[DEC-0021-B04]` | B     | Resolvido |
-| `[DEC-0021-B05]` | B     | Resolvido |
-| `[DEC-0021-C01]` | C     | Resolvido |
-| `[DEC-0021-D01]` | D     | Resolvido |
+| ID               | Bloco | Status                           |
+| :--------------- | :---- | :------------------------------- |
+| `[DEC-0021-A01]` | A     | Resolvido                        |
+| `[DEC-0021-A02]` | A     | Resolvido                        |
+| `[DEC-0021-A03]` | A     | Resolvido                        |
+| `[DEC-0021-B01]` | B     | Resolvido                        |
+| `[DEC-0021-B02]` | B     | Resolvido                        |
+| `[DEC-0021-B03]` | B     | Resolvido                        |
+| `[DEC-0021-B04]` | B     | Resolvido                        |
+| `[DEC-0021-B05]` | B     | Resolvido                        |
+| `[DEC-0021-C01]` | C     | Resolvido                        |
+| `[DEC-0021-D01]` | D     | Resolvido                        |
+| `[DEC-0021-B06]` | E     | Resolvido (amendment 2026-05-17) |
+| `[DEC-0021-B07]` | E     | Resolvido (amendment 2026-05-17) |
 
 **Status agregado:** `Resolvido`
 

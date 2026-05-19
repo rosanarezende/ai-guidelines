@@ -1,4 +1,4 @@
-# ADR 0005 — Separação entre Validação Semântica e Validação Estética em Artefatos Gerados
+# ADR 0014 — Separação entre Validação Semântica e Validação Estética em Artefatos Gerados
 
 **Status:** Aceita
 **Data:** 2026-05-11
@@ -127,4 +127,4 @@ O validator confere a montagem contra a declaração e falha com erro estável s
 
 ## Nota histórica
 
-O princípio foi explicitado durante o sub-bloco `[3.E]` do PR3 da Spec 0021, ao decidir a forma de `MarkdownStructuralValidation`. A auditoria revelou que o projeto já praticava a separação em 2.B (registry YAML guard valida schema, não formato), sem documentação canônica; ADR 0005 generaliza para qualquer artefato gerado, presente e futuro.
+O princípio foi explicitado durante o sub-bloco `[3.E]` do PR3 da Spec 0021, ao decidir a forma de `MarkdownStructuralValidation`. A auditoria revelou que o projeto já praticava a separação em 2.B (registry YAML guard valida schema, não formato), sem documentação canônica; ADR 0014 generaliza para qualquer artefato gerado, presente e futuro.

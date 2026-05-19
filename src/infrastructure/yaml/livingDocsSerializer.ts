@@ -1,7 +1,7 @@
 /**
  * Serializador YAML determinístico do `LivingDocsArtifact`.
  *
- * Aplica ADR 0002 (schema fechado com mensagens estáveis) e ADR 0004
+ * Aplica ADR 0011 (schema fechado com mensagens estáveis) e ADR 0013
  * (determinismo byte-a-byte; sem campos temporais). A canonicalização
  * (ordem alfa por ruleId, tags dedup+ordenadas) é responsabilidade do
  * domain (`canonicalizeArtifact`) — este módulo só serializa.

@@ -13,14 +13,14 @@
 > **Princípio de imutabilidade:** após status `In Review`, este arquivo só
 > muda por consenso explícito. Decisões em aberto vão para `plan.md` (vivo).
 >
-> **Princípios da Escrita:** ver `.core/process/spec-foundation.md` §
+> **Princípios da Escrita:** ver `.core/process/governance-foundation.md` §
 > "Princípios da Escrita" (agnosticismo humano/IA, BR IDs, contratos).
 
 ---
 
 ## 🎯 Objetivo
 
-O framework já distribui regras, templates, roadmap e pesquisas úteis, mas o estado canônico da governança continua difuso. Hoje `backlog.md` e `historico.md` concentram memória narrativa, `.core/process/spec-foundation.md` mistura constituição viva com débito arquitetural, `.core/rules/`, `docs/`, `adrs/` e `.specify/` coexistem sem uma política explícita de "qual gênero mora onde", e artefatos sem spec formal ainda entram no fluxo de valor de forma ad-hoc.
+O framework já distribui regras, templates, roadmap e pesquisas úteis, mas o estado canônico da governança continua difuso. Hoje `backlog.md` e `historico.md` concentram memória narrativa, `.core/process/governance-foundation.md` mistura constituição viva com débito arquitetural, `.core/rules/`, `docs/`, `adrs/` e `.specify/` coexistem sem uma política explícita de "qual gênero mora onde", e artefatos sem spec formal ainda entram no fluxo de valor de forma ad-hoc.
 
 Após o gate humano de 2026-05-09, o objetivo da 0021 deixa de ser apenas decidir a arquitetura de informação e passa a entregar a transição oficial do framework de **Spec-Driven** para **Governance-Driven**. Isso preserva a tese original da spec e a expande em quatro frentes complementares:
 
@@ -41,7 +41,7 @@ O resultado esperado desta spec é uma arquitetura de informação única e expl
 ## 🧭 Origem Editorial
 
 - **Histórico de numeração:** esta iniciativa era a candidata `0020-governance-information-architecture` até 2026-05-07. Foi renumerada para **0021** quando `npm-publication` foi promovida após a auditoria do `package.json`; a branch original foi reaproveitada pela 0020 e a abertura formal desta spec ficou pendente até o fechamento daquela sequência.
-- **Fonte do insight:** a raiz da spec está no Stage 1 da Spec 0018 (2026-04-30), quando ficou explícito que `.core/process/spec-foundation.md` opera como constituição viva, mas coabita sem fronteira clara com documentos descritivos e com decisões arquiteturais de outra natureza. Esse diagnóstico foi reforçado em 2026-05-07 por benchmark comparativo de frameworks AI-driven, que expôs três gêneros ainda ausentes no framework: PRD/intake estruturado, contratos de handoff e telemetria.
+- **Fonte do insight:** a raiz da spec está no Stage 1 da Spec 0018 (2026-04-30), quando ficou explícito que `.core/process/governance-foundation.md` opera como constituição viva, mas coabita sem fronteira clara com documentos descritivos e com decisões arquiteturais de outra natureza. Esse diagnóstico foi reforçado em 2026-05-07 por benchmark comparativo de frameworks AI-driven, que expôs três gêneros ainda ausentes no framework: PRD/intake estruturado, contratos de handoff e telemetria.
 - **Cross-ref tático que vira pergunta arquitetural:** `[DEC-0018-A06]` capturou o débito imediato sobre onde deveria viver a seção "Tipos de spec"; a 0021 responde esse débito em nível de arquitetura de informação, não como ajuste isolado de redação.
 - **Virada de Stage:** em 2026-05-09 o gate humano fechou `decision-brief.md` em status `Resolvido`, expandindo formalmente o escopo para cobrir re-arquitetura da CLI, Living Documentation, composição modular e adoção de `.governance/` como root unificado. Em 2026-05-10, o 7º pilar (`experiment`) foi adicionado com base em princípios de Growth Engineering (hipótese, métricas e ciclo de vida won/lost/inconclusive).
 
@@ -56,7 +56,7 @@ O resultado esperado desta spec é uma arquitetura de informação única e expl
 - Formalizar a fronteira entre `sdd_dir`, `spec_workspace_dir` e o lar físico do estado estruturado, consolidando o novo root `.governance/` no lado do consumidor.
 - Reservar o lar canônico para gêneros ainda não implementados, mas já aprovados como necessidade futura: PRD/intake estruturado, handoff/decision logs e telemetria do framework.
 - Decidir e materializar o **carrier canônico** da política de arquitetura de informação: catálogo central, reorganização física direcionada ou modelo híbrido.
-- Decidir a fronteira entre constituição operacional viva e decisões arquiteturais formais, incluindo a refatoração/renomeação de `spec-foundation.md` para refletir o novo paradigma Governance-Driven.
+- Decidir a fronteira entre constituição operacional viva e decisões arquiteturais formais, incluindo a refatoração/renomeação de `governance-foundation.md` para refletir o novo paradigma Governance-Driven.
 - Reorganizar fisicamente o próprio `.core/rules/` dentro deste repositório, alinhando topologia, taxonomia e runtime sem confundir esse trabalho com a fragmentação distribuída no consumidor.
 - Tratar explicitamente o placement canônico dos templates distribuídos herdados da Spec 0020 e evoluí-los do espelhamento de boilerplates inteiros para uma arquitetura de composição modular.
 - **Re-arquitetar e refatorar completamente a CLI de governança** (atualmente em `/cli`) sob DDD + TDD/BDD, substituindo a fundação legada por domínios explícitos, linguagem ubíqua e limites de contexto claros.
@@ -153,3 +153,19 @@ O resultado esperado desta spec é uma arquitetura de informação única e expl
 - Specs relacionadas: 0011, 0018, 0019, 0020.
 - Cross-ref: `[DEC-0018-A06]` na decision-brief da Spec 0018.
 - Researches centrais de 2026-05-08 em `.specify/specs/researchs/architecture/`.
+
+---
+
+## 🔄 Atualização de escopo — 2026-05-17
+
+> **Tipo:** Amendment pós-In Review (preservando princípio de imutabilidade — adendo, não revisão do escopo original).
+> **Origem:** sessão colaborativa humano-agente em 2026-05-17 durante execução de PR4 / sub-bloco 4.B.
+> **Decisões formais:** `[DEC-0021-B06]` (auditoria das ADRs legadas) e `[DEC-0021-B07]` (repositioning) em `decision-brief.md` Bloco E.
+
+Durante a execução do PR4, duas perguntas estruturantes emergiram e foram resolvidas:
+
+1. **Auditoria das ADRs legadas (sub-bloco 4.B.4).** Caminhos a/b/c aplicados por ADR: 0003 reescrita como princípio + parte tática extraída para `.core/process/test-coverage-policy.md`; 0004 marcada `Superseded by ADR 0008`; 0005-0009 mantidas. Detalhes operacionais em `decision-brief.md` `[DEC-0021-B06]`.
+
+2. **Repositioning Governance-First / AI-as-Channel (sub-bloco novo 4.E).** Expansão de escopo aprovada: a Spec 0021 deixa de ser apenas "arquitetura de informação" e passa a reconciliar a casca pública do framework (README, AGENTS.md framing, `features.md` classification) com o que o código já é (governance-first). ADR 0018 captura o princípio perene; sub-bloco 4.E aplica concretamente. Pacote npm `ai-guidelines` permanece (reclaim semântico via surface, sem rename). Detalhes em `decision-brief.md` `[DEC-0021-B07]`.
+
+Esses amendments não revisam o escopo original — adicionam dois entregáveis que ficaram visíveis durante a execução. Critério de aceite original (alto-nível, observável) permanece intacto e ganha **uma cláusula extra**: ao final do PR4, a leitura da casca pública (README + AGENTS.md framing + features.md) reflete a substância (código governance-first).

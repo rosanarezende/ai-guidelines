@@ -11,12 +11,16 @@ Este arquivo define o fluxo obrigatório para qualquer IA atuando neste reposit�
 
 Este repositório é o próprio framework `ai-guidelines`, não um consumidor do framework. Aqui vivem o baseline canônico em `.core/` e a CLI em `cli/` que serão distribuídos para outros repositórios via `init`, `adopt` e `providers`.
 
+**O framework é governance-first, AI-as-channel** (`[ADR 0018]`): o core ontológico é governança de engenharia repo-first; a SSOT do estado vive em `.governance/` (no consumidor) e em `.specify/specs/` (no mantenedor, hoje). `AGENTS.md` é **um dos outputs runtime** da governança — o canal de integração AI-agnóstica — não o artefato central do framework. Outros canais (Markdown derivado para humanos, `living-docs.yml` para pipelines) coexistem como projeções da mesma SSOT.
+
 O `AGENTS.md` raiz tem papel duplo:
 
 - documentação operacional local para humanos e agentes que contribuem neste repositório;
-- artefato runtime de exemplo, com o bloco `<AI_GUIDELINES>` compilado pelo próprio framework.
+- artefato runtime de exemplo, com o bloco `<AI_GUIDELINES>` compilado pelo próprio framework — exemplificando o canal AI-agnóstico em ação.
 
 Conteúdo específico deste repositório deve ficar fora de `<AI_GUIDELINES>`. O bloco compilado não é editado manualmente.
+
+**Onde mora cada coisa?** A topologia canônica (paths, gêneros de trabalho, regras de lookup, lifecycle) está em [`.core/governance/GOVERNANCE-CATALOG.md`](.core/governance/GOVERNANCE-CATALOG.md). Para detalhes técnicos densos (bounded contexts, invariantes, glossário): [`.core/governance/ARCHITECTURE.md`](.core/governance/ARCHITECTURE.md) (lean) e [`ARCHITECTURE-REFERENCE.md`](.core/governance/ARCHITECTURE-REFERENCE.md) (denso).
 
 ## Quickstart Local
 
@@ -25,12 +29,15 @@ Este workspace usa Yarn 4 com Plug'n'Play. Para execução local da CLI, o camin
 ```bash
 yarn install --immutable
 yarn build:rules
+yarn build              # compila src/ → dist/ (necessário antes do CLI; ver nota abaixo)
 yarn format
 yarn check
 yarn test
 yarn check:repo
 yarn guidelines adopt --target . --dry-run
 ```
+
+> **Nota sobre `dist/` (TemplateEngine):** o CLI mjs em `cli/` invoca dinamicamente a TemplateEngine compilada em `dist/` para renderizar recipes mapeadas (sub-bloco 4.C.0 da Spec 0021). Quando uma recipe existe mas `dist/` ainda não foi gerado, o fluxo **falha rapidamente** com mensagem orientada a diagnóstico (em vez de cair silenciosamente no mirror legado — comportamento intencional, ADR-aligned, para evitar regressão silenciosa). **Se estiver rodando o CLI localmente sem `yarn build` prévio**, espere essa falha — execute `yarn build` antes. No pacote publicado via NPM, `prepack: yarn build` garante que `dist/` está sempre presente; `engine-unavailable` em produção indica regressão real de packaging.
 
 <AI_GUIDELINES>
 
@@ -43,6 +50,10 @@ Before the first technical action, identify platform, shell, surface (CLI vs IDE
 ### [CORE-03]
 
 Consult the "Global Rules" section injected later in this `<AI_GUIDELINES>` block for engineering principles and AI efficiency.
+
+### [CORE-15]
+
+When writing an Architecture Decision Record (ADR), capture a perennial architectural principle — not a phase report, not a revisitation of `decision-brief.md`. The title names the principle; the body must continue to make sense after the originating spec ships. Editorial criteria, format, anti-patterns and rejection signals are canonical at `.core/governance/adrs/README.md`.
 
 ### [GR-0201]
 
@@ -58,7 +69,7 @@ The repository is your memory. Persist plans, progress, debts, knowledge, and ro
 
 ### [CORE-11]
 
-Act only with a formed plan. Use `spec-foundation` for work that must survive session/agent changes; use a tool-scratchpad lightweight plan only for single-session, local, disposable adjustments.
+Act only with a formed plan. Use `governance-foundation` for work that must survive session/agent changes; use a tool-scratchpad lightweight plan only for single-session, local, disposable adjustments.
 
 ### [CORE-12]
 
@@ -152,6 +163,14 @@ Never install, add, or upgrade third-party packages autonomously. When new depen
 
 ## Center Zone: Opt-in Methodologies
 
+<FEATURE_QUALITY_GATES>
+
+### [OPT-0301]
+
+Before reporting a task as done, ensure: no circular dependencies, proper teardown for listeners/timers (prevent memory leaks), no unguarded asynchronous state mutations (prevent race conditions), >85% test coverage, >60% mutation kill rate, and no secrets in code/comments. Fix any automated failures before requesting human review.
+
+</FEATURE_QUALITY_GATES>
+
 <FEATURE_BDD>
 
 ### [OPT-0201]
@@ -168,14 +187,6 @@ Every new feature or bug fix MUST follow the RED -> GREEN -> REFACTOR cycle. Wri
 
 </FEATURE_TDD>
 
-<FEATURE_QUALITY_GATES>
-
-### [OPT-0301]
-
-Before reporting a task as done, ensure: no circular dependencies, proper teardown for listeners/timers (prevent memory leaks), no unguarded asynchronous state mutations (prevent race conditions), >85% test coverage, >60% mutation kill rate, and no secrets in code/comments. Fix any automated failures before requesting human review.
-
-</FEATURE_QUALITY_GATES>
-
 ---
 
 ## Base Zone: Tactical Context
@@ -190,6 +201,6 @@ The root `AGENTS.md` is the runtime artifact. Project-specific content must rema
 
 ### Consumer Bootstrap
 
-Consumer-local ai-guidelines assets live under `.ai-guidelines/` (bridge legado). Templates mirrored by the CLI live in `.ai-guidelines/templates/`. Specs and roadmap remain under `.specify/specs/`. The canonical long-term contract is `.governance/` as the unified consumer root (Spec 0021 PR2/PR3); reservations `intake/`, `handoff/`, `telemetry/` already declared in `src/domain/workspace/MigrationPlan.ts`. The CLI will migrate to `.governance/` when `AdoptWorkspace` is plugged (rastreado em PR4).
+Consumer-local ai-guidelines assets live under `.ai-guidelines/`. Templates mirrored by the CLI live in `.ai-guidelines/templates/`. Specs and roadmap remain under `.specify/specs/`.
 
 </AI_GUIDELINES>

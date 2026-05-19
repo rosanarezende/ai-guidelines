@@ -1,5 +1,5 @@
 /**
- * [BR-CLI-LIVING-DOCS-EXTRACTOR-BYPASS] Integração extractor × diretiva ADR 0003.
+ * [BR-CLI-LIVING-DOCS-EXTRACTOR-BYPASS] Integração extractor × diretiva ADR 0012.
  *
  * Quando um `it`/`test` carrega `[BR-CLI-*]` e tem comentário leading com
  * `// living-docs:allow-drift until=... ref=... reason="..."`, a entry
@@ -184,7 +184,7 @@ describe("Infra — TypeScriptRuleExtractor (bypass) [BR-CLI-LIVING-DOCS-EXTRACT
     });
 
     it("DADO comentário com guard-id divergente + diretiva living-docs ENTÃO ignora o divergente e reconhece o living-docs [BR-CLI-LIVING-DOCS-EXTRACTOR-BYPASS-11]", () => {
-      // ADR 0003 §1: cada guard tem sintaxe própria por guard-id. O
+      // ADR 0012 §1: cada guard tem sintaxe própria por guard-id. O
       // extractor de living-docs ignora diretivas de outros guards mesmo
       // quando coexistem como leading comments do mesmo node.
       const file = writeFile(

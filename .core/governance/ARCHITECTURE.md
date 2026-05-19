@@ -12,17 +12,17 @@
 
 ## 1. O que esta CLI faz?
 
-A `ai-guidelines` é uma ferramenta de linha de comando que ajuda **times de software a trabalhar com agentes de IA (Claude, GPT, Gemini, Cursor, Copilot…) de forma consistente, governada e auditável**.
+A `ai-guidelines` é uma ferramenta de linha de comando que **dá a times de engenharia um framework de governança repo-first** — backlog, specs, decisões arquiteturais, gates humanos, registro estruturado de trabalho em curso — com **integração AI-agnóstica de primeira classe** para quem quer usar agentes (Claude, GPT, Gemini, Cursor, Copilot…) no fluxo. Governance-first, AI-as-channel (`[ADR 0018]`).
 
-Em vez de cada desenvolvedor combinar regras com sua IA preferida no chat, a CLI cria e mantém:
+A CLI cria e mantém três coisas no projeto consumidor:
 
-- um **manual único do projeto** (`AGENTS.md`) que descreve as regras e princípios técnicos;
-- **versões adaptadas desse manual** para cada IA usada — cada uma com seu formato próprio (Claude tem `CLAUDE.md`, Cursor tem `.cursor/rules/...`, Copilot tem `.github/copilot-instructions.md` etc.);
-- um **registro estruturado** (`.governance/registry.yml`) com tudo que está em curso no projeto: specs em andamento, experimentos abertos, correções pendentes, propostas de backlog, incidentes ativos.
+- **Estado canônico de governança** (`.governance/registry.yml`) — tudo que está em curso: specs em andamento, experimentos abertos, correções pendentes, propostas de backlog, incidentes ativos. SSOT estruturado versionado, legível por humanos e agentes igualmente.
+- **Documentação derivada do código** (`living-docs.yml`) — testes com IDs `[BR-CLI-*]` viram artefato estruturado protegido por drift guard fatal. Regras de negócio têm rastreabilidade direta para os testes que as protegem.
+- **Canal de integração AI-agnóstica** (opt-in, mas distribuído por default) — um **manual único do projeto** (`AGENTS.md`) compilado a partir das regras modulares em `.core/rules/`, com **versões adaptadas desse manual** para cada IA usada (Claude tem `CLAUDE.md`, Cursor tem `.cursor/rules/...`, Copilot tem `.github/copilot-instructions.md` etc.).
 
 **Por que isso importa?**
 
-Quando uma IA "esquece" o contexto do projeto, gera código que viola convenções, ou quando o time inteiro depende da memória de uma pessoa para saber "qual era a regra mesmo?", o trabalho fica caro e frágil. A `ai-guidelines` resolve isso transformando a governança do projeto em **artefatos versionados** — que tanto humanos quanto IAs leem antes de agir.
+A dor real do framework é **governança de engenharia que se perde**: backlog vive em ferramenta externa que some na troca de stack; specs viram tribal knowledge na cabeça de uma pessoa; decisões arquiteturais somem em threads do Slack; gates humanos viram aprovações implícitas. O `ai-guidelines` resolve isso transformando a governança em **artefatos versionados no próprio repo** — independentes de tracker, dashboard ou plataforma. IAs se beneficiam (leem o mesmo estado que humanos), mas o valor existiria mesmo num time que não usa IA. Esse é o core; integração AI é o canal.
 
 ---
 
@@ -99,7 +99,7 @@ Quando você lê código ou docs deste projeto, alguns termos se repetem. Aqui e
 | **Policy** (Política)         | Uma função pura que decide se uma ação é válida. Ex: "uma proposta pode virar spec?" → política responde sim ou não, com motivo.                                                                   |
 | **Registry**                  | O "livro-razão" do projeto — lista todos os WorkItems ativos. Versionado em `.governance/registry.yml`.                                                                                            |
 | **`.governance/`**            | A pasta canônica onde a CLI armazena o estado estruturado do projeto do usuário. Contém o registry e reservas para futuras adições (intake, handoff, telemetry).                                   |
-| **Recipe**                    | Declaração YAML que descreve como montar um artefato: `artifactKind`, `workflowType`, `language`, `slots[]` com ordem canônica e `forbiddenHeadings`. Recipe é o contrato de validação (ADR 0005). |
+| **Recipe**                    | Declaração YAML que descreve como montar um artefato: `artifactKind`, `workflowType`, `language`, `slots[]` com ordem canônica e `forbiddenHeadings`. Recipe é o contrato de validação (ADR 0014). |
 | **Partial**                   | Fragmento Markdown completo e autocontido — sem placeholders de template, sem timestamps embutidos. Cada partial pertence a um slot de uma recipe.                                                 |
 | **ComposedArtifact**          | Output do TemplateEngine: Markdown final (determinístico, byte-a-byte) + metadata de rastreio (artifactKind, workflowType, language, composedSlots).                                               |
 | **StructuralValidation**      | Validação pós-composição que consome a recipe como contrato: forbiddenHeadings, slot completeness, self-consistency recipe↔artefato. Retorna lista de erros.                                       |
@@ -211,8 +211,8 @@ Estas são propriedades que o pipeline de CI verifica automaticamente. Se alguma
 | 10  | Rollback nunca destrói nada          | Desfazer só apaga o que este run criou                                          |
 | 11  | Topologia reflete taxonomia          | Regras em `.core/rules/` organizadas em `top/center/base/adapters/`             |
 | 12  | Contrato do usuário é `.governance/` | `.ai-guidelines/` é uma "ponte legada" declarada explicitamente                 |
-| 13  | Composição é determinística          | Mesma recipe + mesmos partials → mesmo output byte-a-byte (ADR 0004)            |
-| 14  | Recipe é o contrato de validação     | Invariantes estruturais declaradas na recipe, não em código separado (ADR 0005) |
+| 13  | Composição é determinística          | Mesma recipe + mesmos partials → mesmo output byte-a-byte (ADR 0013)            |
+| 14  | Recipe é o contrato de validação     | Invariantes estruturais declaradas na recipe, não em código separado (ADR 0014) |
 
 Detalhe técnico completo de cada garantia (motivação, contraexemplos, testes que protegem): ver [`ARCHITECTURE-REFERENCE.md`](./ARCHITECTURE-REFERENCE.md) §2.
 
@@ -224,18 +224,17 @@ Detalhe técnico completo de cada garantia (motivação, contraexemplos, testes 
 
 A Spec 0021 leva o framework do paradigma "Spec-Driven" (centrado em specs formais) para "Governance-Driven" (governança como um todo, com 7 tipos de trabalho de primeira classe). A entrega é fatiada em 5 etapas atômicas:
 
-| Etapa   | Tema                                                                                         | Estado       |
-| ------- | -------------------------------------------------------------------------------------------- | ------------ |
-| **PR0** | Setup do projeto + decisões iniciais aprovadas pela owner                                    | ✅ Concluído |
-| **PR1** | Fundação: modelo de domínio + políticas + registry em memória                                | ✅ Concluído |
-| **PR2** | Persistência real em disco + camada de migração + reorganização das regras                   | ✅ Concluído |
-| **PR3** | **Este PR.** Documentação viva derivada dos testes + engine de templates atômicos            | 🔧 Em curso  |
-| **PR4** | Cleanup final + migração definitiva `.ai-guidelines/` → `.governance/` no projeto do usuário | ⏭️ Pendente  |
+| Etapa   | Tema                                                                                                     | Estado       |
+| ------- | -------------------------------------------------------------------------------------------------------- | ------------ |
+| **PR0** | Setup do projeto + decisões iniciais aprovadas pela owner                                                | ✅ Concluído |
+| **PR1** | Fundação: modelo de domínio + políticas + registry em memória                                            | ✅ Concluído |
+| **PR2** | Persistência real em disco + camada de migração + reorganização das regras                               | ✅ Concluído |
+| **PR3** | Documentação viva derivada dos testes + engine de templates atômicos                                     | ✅ Concluído |
+| **PR4** | Consolidação governance-driven: carrier híbrido, fronteira foundation/ADR, ponteiros e engine activation | ✅ Concluído |
 
-Hoje a CLI **continua escrevendo em `.ai-guidelines/`** no projeto do usuário e copiando os templates de `.specify/templates/` (compatibilidade preservada).
-O novo formato `.governance/` (registry, recipes e partials atômicos) é o contrato canônico declarado e materializado no código de domínio.
+**Estado pós-merge da 0021:** o framework opera como sistema governance-driven com `.governance/` declarado como root canônico do consumidor, `.ai-guidelines/` mantido como bridge legada explícita até cutover operacional dedicado (Spec 0022+). A engine de templates está ativada para a recipe `tasks-evidence-driven`; demais templates continuam vindo do mirror legado `.specify/templates/` (cutover completo é objeto de spec futura). Living Documentation com drift guard fatal protege as 235+ entries em `.governance/living-docs.yml`. ADRs consolidadas em `.core/governance/adrs/` (8 ativas + repositioning governance-first via ADR 0018). Trilha de fechamento disciplinada em `.specify/specs/0021-governance-information-architecture/closure-review.md`.
 
-> **Aviso:** O mirror legado (`.specify/templates/`) está **formalmente depreciado**. O cutover da CLI para a composição por `recipes` será efetivado na fase PR4/4.C.
+> **Limites corretos pós-merge:** a 0021 entregou a **fundação** governance-driven; o **cutover operacional** do runtime CLI mjs → src/ TS DDD é objeto da Spec 0022 (`feat/spec-0022-cli-runtime-cutover`, em Stage A Discovery, aguardando lifecycle metodológico). O `bin` publicado continua apontando para `cli/ai-guidelines-cli.mjs` por contrato explícito de bridge.
 
 ---
 
@@ -245,6 +244,22 @@ O novo formato `.governance/` (registry, recipes e partials atômicos) é o cont
 - **Decisões arquiteturais ancoradas** (cada `[DEC-0021-*]` com opções avaliadas e justificativa documentada da owner): `.specify/specs/0021-governance-information-architecture/decision-brief.md`.
 - **Roadmap operacional detalhado** (sub-blocos por PR com critérios de aceite, checklists e dependências): `.specify/specs/0021-governance-information-architecture/tasks.md`.
 - **Auditorias internas e débitos conscientes** (o que foi avaliado, o que ficou para depois, com motivo): `.specify/specs/0021-governance-information-architecture/NEXT.md`.
+
+---
+
+## 8. Convenções e topologia (referência §H)
+
+> **Por que “§H”?** Algumas specs e auditorias citam esta seção por letra (histórico). O número pode variar; o identificador “§H” é o que deve permanecer estável.
+
+- **No consumidor:**
+  - `.governance/` é o root canônico (SSOT) e contém o estado estruturado (`registry.yml`) e as reservas `intake/`, `handoff/`, `telemetry/`.
+  - `.ai-guidelines/` existe como bridge legada enquanto houver componentes que ainda escrevem nela; **não** é SSOT.
+- **No mantenedor (este repo):**
+  - `.core/` é o baseline canônico (rules, governance, process, templates/recipes).
+  - `docs/` é superfície pública (README/features/assets) e **não** é lar canônico de processos/metodologias — isso vive em `.core/process/`.
+  - `.specify/specs/` e suas auditorias podem conter referências históricas (paths antigos) como rastro intencional; não são fonte de verdade do layout atual.
+
+Quando a topologia canônica mudar, atualize em conjunto: este documento (§H), o help/UX em `docs/cli/ai-guidelines-cli.md` (se aplicável) e os contratos/drift guards que tornam o delta “falha-fatal” em CI.
 
 ---
 

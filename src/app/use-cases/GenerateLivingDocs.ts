@@ -6,7 +6,7 @@
  *  1. `RuleExtractor.extract(files)` → entries cruas (potencialmente
  *     fora de ordem, com bypass directives já resolvidas).
  *  2. `canonicalizeArtifact` → projeta forma determinística (ordem alfa
- *     por ruleId, tags dedup+ordenadas, sem timestamps — ADR 0004).
+ *     por ruleId, tags dedup+ordenadas, sem timestamps — ADR 0013).
  *  3. `assertValidArtifact` → schema guard final (rede de segurança).
  *
  * Persistência (escrita do YAML em `.governance/living-docs.yml`) NÃO

@@ -6,7 +6,7 @@
  *
  * Domain puro — sem IO, sem serialização.
  *
- * Aplica ADR 0004 (.core/governance/adrs/0004-ast-only-extraction.md):
+ * Aplica ADR 0013 (.core/governance/adrs/0013-ast-only-extraction.md):
  * mesma recipe + mesmos partials → mesmo output byte-a-byte.
  */
 import type { ArtifactKind, WorkflowType, Language } from "./Recipe.js";
