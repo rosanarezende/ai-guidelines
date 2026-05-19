@@ -211,15 +211,68 @@ Cada hipótese é formulada com:
 
 ## 7. Condições para abrir o Gate (Stage A → Stage B)
 
-> **Esta seção NÃO abre o gate.** Apenas define critérios observáveis que indicam quando a investigação está madura o suficiente para o `decision-brief.md` nascer. O gate em si é assinado pela owner em rodada própria, após esta lista estar substancialmente atendida.
+> **Esta seção NÃO abre o gate.** Apenas define critérios observáveis que indicam quando a investigação está madura. O ato do gate em si está descrito em §9. Lacunas vivas (o que falta marcar cada critério) estão em §8.
 
-Critérios mínimos para considerar Stage A pronto para encerrar:
+Cada critério abaixo é verificável com **sim/não** e aponta o local da evidência.
 
-- [ ] **Hipóteses H1–H4 ancoradas em evidência interna suficiente.** Cada hipótese tem ao menos 2 casos concretos do repo (sob suporte preliminar ou condição de falsificação documentada). Hipóteses sem evidência convergente são rebaixadas para "perguntas abertas" ou descartadas explicitamente em §5.
-- [ ] **Matriz inicial (§3) rascunhada com conflitos.** Cada conceito da matriz tem ao menos 1 exemplo do repo + 1 conflito conhecido onde a categoria não explica completamente. Lacunas (linhas com "TBD") estão fechadas ou justificadas como "investigação remetida ao `decision-brief.md`".
-- [ ] **Principais ambiguidades dos 7 pilares mapeadas por nível.** O anexo [`research/taxonomia-observacoes.md`](./research/taxonomia-observacoes.md) cobre cada um dos 7 pilares com hipótese de nível taxonômico + ao menos 1 conflito conhecido. Pilares ainda "sem hipótese" estão explicitamente listados como tal.
-- [ ] **Lista de perguntas abertas (§5) madura.** As 10 perguntas P1–P10 estão em estado "prontas para virar pontos `[DEC-0023-*]` no `decision-brief.md`" — ou seja: cada uma tem opções candidatas pré-mapeadas, mesmo que sem decisão.
-- [ ] **Sem trechos conclusivos sem marcação de hipótese.** Releitura crítica final do `research.md` e dos anexos confirma que conclusões cravadas não vazaram para Stage A (todo trecho assertivo está explicitamente marcado como hipótese, observação preliminar ou pergunta).
-- [ ] **Aviso editorial alinhado.** O cabeçalho deste `research.md` continua sinalizando que decisões pertencem ao `decision-brief.md` futuro, não a este arquivo.
+- [ ] **C1 — H1–H4 ancoradas em ≥2 casos concretos cada.** Evidência em §1 ("Suporte preliminar" de cada hipótese) e §2 ("Evidências internas do repo"). Hipóteses sem evidência convergente são rebaixadas para §5 ou descartadas explicitamente.
+- [ ] **C2 — Matriz §3 completa.** Cada linha tem ≥1 exemplo concreto do repo + ≥1 conflito conhecido. Lacunas atuais em [§8.2](#82-lacunas-na-matriz-3-c2).
+- [ ] **C3 — 7 pilares mapeados por nível.** [`research/taxonomia-observacoes.md`](./research/taxonomia-observacoes.md) cobre cada um dos 7 pilares com hipótese de nível taxonômico + ≥1 conflito conhecido. Pilares sem hipótese estão listados como tal.
+- [ ] **C4 — P1–P10 prontas para virar `[DEC-0023-*]`.** Cada pergunta em §5 tem ≥2 opções candidatas pré-mapeadas (sem decisão). Lacunas em [§8.3](#83-lacunas-em-5--perguntas-p1p10-c4).
+- [ ] **C5 — Releitura crítica sem trechos conclusivos.** Releitura final do `research.md` e anexos confirma que conclusões cravadas não vazaram para Stage A (todo trecho assertivo marcado como hipótese, observação preliminar ou pergunta).
+- [ ] **C6 — Aviso editorial alinhado.** Cabeçalho deste `research.md` continua sinalizando que decisões pertencem ao `decision-brief.md` futuro.
+- [ ] **C7 — Links relativos válidos.** Toda referência cruzada (0021, 0022, ADRs, anexos locais) aponta para arquivo existente ou está convertida em referência textual sem hyperlink.
 
-**Quando todos os critérios acima estiverem substancialmente atendidos**, a owner decide se abre o gate (e materializa `decision-brief.md`) ou se a investigação precisa de mais uma rodada. **A criação de `decision-brief.md` é o sinal de que o Stage A fechou.** **Não criar antes.**
+**Quando os 7 critérios estiverem marcados** (ou cada não-marcado tiver justificativa explícita), a owner executa o ato do gate em §9. **A criação de `decision-brief.md` é o sinal de que o Stage A fechou.** **Não criar antes.**
+
+---
+
+## 8. O que falta para o Gate
+
+> Lacunas vivas — atualizar conforme evidência for sendo coletada. Cada item aqui é um obstáculo verificável para marcar um critério C1–C7 em §7.
+
+### 8.1 Lacunas por hipótese (C1)
+
+- **H1 — "planning antes de discovery":** evidência atual concentra 2 casos na 0022 (PR #15 + PR #16) e 1 na 0021 (expansões 2026-05-09 + amendment 4.E). **Falta:** ≥1 caso fora da 0022 onde planning prematuro causou retrabalho mensurável. Candidatos a investigar nas pastas das specs encerradas (0008/0015/0017/0019/0020). _Se o caso não aparecer, registrar como "evidência convergente apenas em specs recentes — limitação reconhecida"._
+- **H2 — "7 pilares no nível errado":** evidência atual é majoritariamente argumentativa (`incident` parece operational state; `proposal` é pré-decisão). **Falta:** ≥1 caso concreto onde tratar `incident` como WorkItem no mesmo nível de `spec` produziu fricção real no `registry.yml`/lifecycle; idem para `proposal` promovida a `spec`.
+- **H3 — "boilerplates embutem epistemologia execution-first":** evidência atual lista trechos dos boilerplates. **Falta:** ligar cada trecho específico a ≥1 momento concreto de churn (ex.: "header `Plan: [./plan.md]` levou autor X a criar `plan.md` vazio no setup da spec Y").
+- **H4 — "`research.md` resolve sem reescrever lifecycle":** hipótese é inferencial; só pode ser confirmada/falsificada empiricamente pelo dogfooding da própria 0023 + 1–2 specs futuras. **Falta:** registrar critério explícito de avaliação pós-merge — ex.: "se em 2 specs novas o `research.md` foi suficiente sem alterar outros boilerplates, H4 é confirmada".
+
+### 8.2 Lacunas na matriz §3 (C2)
+
+Linhas sem exemplo concreto do repo (precisam de ≥1 cada):
+
+- `fix` — citar PR/issue real do repo classificado como fix; idealmente onde plan/tasks foi criado por reflexo.
+- `patch` — citar exemplo real de patch; mapear se houve `plan.md`/`tasks.md` ou se ficou só em commit/PR direto.
+- `incident` — citar ≥1 evento documentado no repo (ou registrar "não há incident documentado até 2026-05-19 — sintoma a discutir no `decision-brief.md`").
+- `plan.md` / `tasks.md` — citar 1 spec onde o `plan.md` cumpriu sua função integralmente vs 1 spec onde ele virou caixote (similar à AP4).
+
+### 8.3 Lacunas em §5 — Perguntas P1–P10 (C4)
+
+- As 10 perguntas estão formuladas, mas **sem ≥2 opções candidatas pré-mapeadas em forma comparável**. Falta consolidar, para cada uma, ≥2 alternativas registradas (ex.: P5 → "setup compartilhado" vs "setup próprio"; P6 → "não migrar" vs "migrar parcial" vs "migrar tudo"). Sem isso, não viram pontos `[DEC-0023-*]` no `decision-brief.md` futuro.
+
+### 8.4 Lacunas operacionais (C5, C6, C7)
+
+- C5/C6 dependem de uma releitura final dedicada — não há substituto.
+- C7: validar links cruzados após cada merge com `main`; conferir que referências a 0022 (cuja pasta vive em branch dedicada) estão como referência textual, não link quebrado.
+
+---
+
+## 9. Como o gate humano será feito
+
+O gate Stage A → Stage B é assinado pela owner em **um único comentário no PR #17** (este PR), contendo:
+
+1. **link permanente** para o commit que finaliza o Stage A (o commit em que todos os 7 critérios de §7 ficaram marcados, ou cada não-marcado teve justificativa explícita registrada);
+2. **três afirmações curtas** (uma frase cada):
+   - **hipóteses:** quais de H1–H4 estão confirmadas, quais falsificadas, quais permanecem em aberto;
+   - **decisões pendentes:** quais de P1–P10 viram pontos `[DEC-0023-*]` no `decision-brief.md`;
+   - **risco residual:** o maior risco aceito ao avançar para Stage B mesmo assim (ou "nenhum" se aplicável).
+
+Checklist do ato em si:
+
+- [ ] Owner releu §7 e marcou todos os 7 critérios (ou justificou explicitamente os não marcados).
+- [ ] Comentário do gate publicado no PR #17 com as 3 afirmações acima + link para o commit.
+- [ ] Commit que cria `decision-brief.md` aberto **somente depois** do comentário do gate.
+- [ ] Status do `spec.md` muda de "Draft (Stage A — Discovery)" para "Draft (Stage B — Decision)" no mesmo commit que cria o `decision-brief.md`.
+
+**Princípio de dogfooding:** este ato precisa ser **simples o suficiente para realmente acontecer**. Se na execução real ele se mostrar pesado, registrar no `NEXT.md` como evidência crítica de revisão pré-canonização — não esconder.
