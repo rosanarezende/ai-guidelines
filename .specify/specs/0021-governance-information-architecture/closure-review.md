@@ -433,4 +433,44 @@ A 0021 pode fechar com integridade histórica se:
 
 ---
 
-> _Documento criado em 2026-05-18 durante a sessão de design entre Rosana Rezende e Claude Code. Não substitui o `spec.md` (imutável); complementa o fechamento como artefato de boundary review. Precedente para a Spec 0023, que deve formalizar quando uma "closure-review" é um artifact canônico do lifecycle._
+## 12. Pós-execução 4.D (2026-05-19)
+
+Após aprovação da owner para executar o sub-bloco 4.D estritamente como homologação operacional (sem redesign, sem reframing, sem absorção de novo escopo), a execução foi realizada com os seguintes resultados:
+
+**Validações executadas:**
+
+- **4.D.1 Smoke headless**: `yarn test:smoke` → 4/4 pass local (tarball + install + init/adopt/update via tarball real). CI smoke matriz cross-OS (ubuntu/macos/windows × node 22/24): todos verdes no head atual.
+- **4.D.2 Registry como SSOT**: `yarn test:nova-cli --testPathPatterns='Registry'` → 41 pass + 4 skipped (skipped são débitos conscientes documentados nas auditorias; não bloqueiam). `GovernanceRegistryStore.ts` com 90.47% line / 100% function coverage. **Limite respeitado:** validada apenas a fundação técnica (round-trip + atomicidade); integração end-to-end com comando CLI real **não** foi executada (continua como Spec 0022).
+- **4.D.3 Living docs + drift guard**: `yarn living-docs:check` → `✅ .governance/living-docs.yml in sync (235 entries)`. Drift guard fatal ativo em CI no job `ai-guidelines-check`. Idempotência byte-a-byte preservada.
+- **4.D.4 TemplateEngine**: `LegacyMirrorContract.test.ts` + `AssembleArtifact.test.ts` → 12/12 pass. `recipes.test.mjs` (cli/) → 11/11 pass. Recipe `tasks-evidence-driven` produz artefato válido com equivalência E1–E7 + R4.
+- **4.D.N Pipeline verde**: `yarn test:coverage` → 296/296 pass local. CI head atual: guardrails ✅ + 6 smoke ✅ + ai-guidelines-check ✅ (8/8 success).
+
+**Ações de fechamento aplicadas:**
+
+- **4.D.[DEBT-REVIEW]**: revisão final pré-merge do `NEXT.md`. Único débito ativo da Fase 4 (`4.A.2`) fechado em 4.D.[ARCHITECTURE]. Adicionadas duas entradas explícitas ao `roadmap/backlog.md`: (a) "migração completa dos recipes restantes" (elevada de débito implícito identificado por esta closure-review §6.2); (b) "mecanismo de fechamento disciplinado para foundation/convergence specs" (proposta meta-spec). **Nenhum problema estrutural profundo foi descoberto durante a homologação que justificasse absorção retroativa pela 0021** — disciplina preservada.
+- **4.D.[ARCHITECTURE]**: `ARCHITECTURE.md` §6 (Roadmap) atualizado. PR0–PR4 todas marcadas ✅. Estado pós-merge declarado: `.governance/` canônico, `.ai-guidelines/` bridge legada, engine ativada para `tasks-evidence-driven` (demais recipes seguem mirror — spec dedicada futura), Living Documentation com 235+ entries, ADRs consolidadas, `closure-review.md` como trilha de fechamento. Limite explícito sobre cutover operacional (Spec 0022) registrado no aviso pós-tabela.
+- **Gaps de marcação histórica fechados**: 8 itens `[ ]` em sub-blocos de PR2 e PR4 (PR-MGMT, commits) já executados mas nunca marcados foram corrigidos com nota retroativa. Item `[~] 2.A.8` (bridge reader não-implementado) reclassificado como débito transferido.
+
+**Estado final do `tasks.md`:**
+
+- 286 itens `[x]` (concluídos).
+- 2 itens `[~]` (parciais): `2.A.8` (débito transferido — bridge reader sem consumidor real) e `4.[PR-MGMT.REVIEW-GATE]` (aguarda gate humano).
+- 20 itens `[ ]` restantes — **todos** dependem de aprovação humana: `[READY-FOR-REVIEW]`, `[MANDATÓRIO]`, `[MERGE]`, R.1–R.8 (revisão pós-aprovação), F.1–F.9 (encerramento pós-aprovação).
+
+**Disciplina mantida:**
+
+A execução do 4.D **não absorveu** nenhum dos seguintes itens, conforme alinhamento explícito da owner:
+
+- Não foi feita investigação filosófica/taxonômica sobre os 7 pilares.
+- Não foi reaberta discussão sobre MECE, lifecycle, orchestration ou redesign conceitual.
+- Não foi iniciada a Spec 0023.
+- O 4.D **não virou** discovery work.
+- O escopo **não foi expandido**.
+- Nenhuma nova abstração foi introduzida.
+- Nenhum reframing metodológico foi feito.
+
+A 0021 está, neste momento, **operacionalmente pronta para o gate humano final**. Os itens R.\* e F.\* aguardam aprovação explícita da owner para serem executados.
+
+---
+
+> _Documento criado em 2026-05-18 durante a sessão de design entre Rosana Rezende e Claude Code; pós-execução 4.D adicionada em 2026-05-19 após alinhamento explícito de "fechar disciplinadamente, sem reinventar". Não substitui o `spec.md` (imutável); complementa o fechamento como artefato de boundary review. Precedente para a Spec 0023, que deve formalizar quando uma "closure-review" é um artifact canônico do lifecycle._

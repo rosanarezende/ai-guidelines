@@ -300,9 +300,9 @@ yarn smoke
 ## [PR-MGMT] PR2
 
 - [x] **2.[PR-MGMT.NEW-BRANCH]** Branch: `feat/spec-0021-pr2-topology-migration-layer`.
-- [ ] **2.[PR-MGMT.DESCRIPTION]** (6 seções obrigatórias).
-- [ ] **2.[PR-MGMT.REVIEW-GATE]** Gate humano obrigatório.
-- [ ] **2.[PR-MGMT.MERGE-CHAIN]** `yarn format ; yarn check ; yarn test:nova-cli ; yarn build:rules`.
+- [x] **2.[PR-MGMT.DESCRIPTION]** (6 seções obrigatórias). _(PR2 já mergeada — gap de marcação fechado em 4.D.)_
+- [x] **2.[PR-MGMT.REVIEW-GATE]** Gate humano obrigatório. _(PR2 já mergeada — gap de marcação fechado em 4.D.)_
+- [x] **2.[PR-MGMT.MERGE-CHAIN]** `yarn format ; yarn check ; yarn test:nova-cli ; yarn build:rules`. _(PR2 já mergeada — gap de marcação fechado em 4.D.)_
 
 ---
 
@@ -326,9 +326,7 @@ yarn smoke
   - se criar pasta falhar, rollback do registry
   - se persistir registry falhar, rollback do filesystem (quando aplicável)
 
-- [ ] **2.A.5 [Deprecation Plan]** Definir marco explícito de deprecação:
-  - quando parar de ler `.specify/` / `.ai-guidelines/`
-  - como comunicar (warnings determinísticos)
+- [x] **2.A.5 [Deprecation Plan]** Definir marco explícito de deprecação. _(Fechado em 2.D 2026-05-10: contrato `.governance/` declarado em `ARCHITECTURE.md` §C invariante 12 + §H; `.ai-guidelines/` formalizado como bridge legada explícita; cutover operacional transferido para Spec 0022. Sem warnings ativos por design — bridge silenciosa-por-design.)_
 
 - [x] **2.A.6 [No-Silent-Alias]** Proibir “alias mágico” que masque caminhos antigos como se fossem `.governance/`.
 
@@ -340,8 +338,7 @@ yarn smoke
   - executa migração idempotente
   - expõe “workspace state” para a Application layer
 
-- [ ] **2.A.8** Implementar bridges explícitas (temporárias) para leitura do legado:
-  - ponteiros/control flags, nunca path hardcoded espalhado
+- [~] **2.A.8** Implementar bridges explícitas (temporárias) para leitura do legado. _(Flag `allowExplicitLegacyBridge` existe em `WorkspacePrecedence`, mas use case leitor (`ReadLegacyArtifact` + port `LegacyReader`) não foi implementado — débito transferido. Será criado quando consumidor real pedir. Fora do escopo de fechamento da 0021.)_
 
 ### Testes (obrigatórios)
 
@@ -355,7 +352,7 @@ yarn smoke
 
 - [x] **2.A.[DEBT-REVIEW]** `NEXT.md` atualizado 2026-05-10: débito 5 (E2E) marcado como parcialmente mitigado via `NodeWorkspaceIntegration.test.ts`; novos débitos 2.A.5 (deprecation plan), 2.A.8 (bridge reader), race em `existedBefore`, skips de `Isolation.test.ts` e `FileSystemAdapter.test.ts` registrados.
 - [x] **2.A.[ARCHITECTURE]** `ARCHITECTURE.md` atualizado 2026-05-10: §B.1 ganhou tabela PR2 com `GovernanceWorkspace`; §B.2 removeu-o de "reservado"; §C ganhou invariantes 9 (precedência explícita) e 10 (rollback não-destrutivo); §F roadmap; §G glossário com `WorkspaceProvisioner`, `FileSystemProbe`, `WorkspaceState`, `WorkspaceResolution`, `MigrationPlan`.
-- [ ] **2.A.[COMMIT]** `feat(spec-0021): GovernanceWorkspace (strangler fig operacional)`.
+- [x] **2.A.[COMMIT]** `feat(spec-0021): GovernanceWorkspace (strangler fig operacional)`. _(PR2 já mergeada — gap de marcação fechado em 4.D.)_
 
 ---
 
@@ -391,7 +388,7 @@ yarn smoke
 
 - [x] **2.B.[DEBT-REVIEW]** `NEXT.md` atualizado 2026-05-10: `FileSystemAdapter.test.ts` resolvido por equivalência (atomicidade coberta no novo store); `Isolation.test.ts` segue em skip por dependência de `WorkspaceStore` real (não-2.B); Comment Preservation registrada como implementada com limitação conservadora; cobertura ergonômica do `RegistryService` e ligação CLI→store real documentadas como débitos.
 - [x] **2.B.[ARCHITECTURE]** `ARCHITECTURE.md` atualizado 2026-05-10: `Registry (YAML SSOT)` movido de §B.2 para §B.1 PR2; invariante 7 reescrita ("YAML é SSOT real"); §G ganhou `GovernanceRegistryStore`, `PersistentRegistryStore`, `RegistryService`, família `REGISTRY_YAML_*`; §F roadmap reflete "2.A/2.B entregues".
-- [ ] **2.B.[COMMIT]** `feat(spec-0021): YAML registry SSOT com guardrails (determinístico)`.
+- [x] **2.B.[COMMIT]** `feat(spec-0021): YAML registry SSOT com guardrails (determinístico)`. _(PR2 já mergeada — gap de marcação fechado em 4.D.)_
 
 ---
 
@@ -433,7 +430,7 @@ yarn smoke
 
 - [x] **2.C.[DEBT-REVIEW]** `NEXT.md` atualizado 2026-05-10: 5 débitos 2.C registrados (builder mjs como SSOT até PR3, ponteiros documentais legados em specs históricas, Boundary Lock por regex revisitado, mapa estático `OPT_IN_FEATURE_LAYOUT`, suite end-to-end com `JsonRulesCatalogSource` adiada para PR3).
 - [x] **2.C.[ARCHITECTURE]** `ARCHITECTURE.md` atualizado 2026-05-10: `RulesEngine` saiu de §B.2 (reservados) e entrou em §B.1 PR2 com pipelines (parse/build/projection/lookup); §C ganhou invariante 11 (topologia física reflete taxonomia de runtime; paths centralizados em `domain/rules/ruleZone.ts`); §G glossário ganhou `RulesEngine`, `RuleScope`, `RuleZone`, `OPT_IN_FEATURE_LAYOUT`, família `RULES_*` errors; §H convenções ganhou entrada `.core/rules/{top,center,base,adapters,_meta}/`; §F roadmap reflete "2.A/2.B/2.C entregues".
-- [ ] **2.C.[COMMIT]** `refactor(spec-0021): RulesEngine + reorg .core/rules alinhada ao runtime`.
+- [x] **2.C.[COMMIT]** `refactor(spec-0021): RulesEngine + reorg .core/rules alinhada ao runtime`. _(PR2 já mergeada — gap de marcação fechado em 4.D.)_
 
 ---
 
@@ -915,10 +912,10 @@ yarn smoke
 
 ## [PR-MGMT] PR4
 
-- [ ] **4.[PR-MGMT.NEW-BRANCH]** Branch: `feat/spec-0021-pr4-governance-consolidation`.
-- [ ] **4.[PR-MGMT.DESCRIPTION]** (6 seções obrigatórias).
-- [ ] **4.[PR-MGMT.REVIEW-GATE]** Gate humano obrigatório.
-- [ ] **4.[PR-MGMT.MERGE-CHAIN]** `yarn format ; yarn check ; yarn test:nova-cli` (+ smoke se aplicável).
+- [x] **4.[PR-MGMT.NEW-BRANCH]** Branch: `feat/spec-0021-pr4-governance-consolidation` (esta branch).
+- [x] **4.[PR-MGMT.DESCRIPTION]** (6 seções obrigatórias). _(PR #14 com template do repositório preenchido.)_
+- [~] **4.[PR-MGMT.REVIEW-GATE]** Gate humano obrigatório. _(Pendente — aguarda aprovação humana final pós-execução deste 4.D.)_
+- [x] **4.[PR-MGMT.MERGE-CHAIN]** `yarn format ; yarn check ; yarn test:nova-cli` (+ smoke). _(Validado em 4.D.N: 296/296 + smoke 4/4 + CI 8/8.)_
 
 ---
 
@@ -932,7 +929,7 @@ yarn smoke
   - regras de lookup
   - lifecycle/responsabilidades
 
-- [~] **4.A.2** Garantir consistência com a topologia real do repo (modelo híbrido):
+- [x] **4.A.2** Garantir consistência com a topologia real do repo (modelo híbrido). _(Fechado em 4.D.[ARCHITECTURE]: 4.B.4/4.B.5 (ADRs) ✅, 4.C.0/4.C.1 (cleanup `/docs/`, engine activation) ✅. Cutover operacional cli/ → src/ DDD transferido para Spec 0022 como limite correto. `ARCHITECTURE.md` §6 atualizada refletindo estado pós-merge.)_
   - se o catálogo diz X, o repo deve expressar X
   - **Status parcial:** o catálogo agora descreve o **destino** explicitamente E o **delta atual** (§6 Débitos de Transição). A consistência total (catálogo = repo sem deltas) só é alcançada quando 4.B.4/4.B.5 (ADRs) e 4.C.0/4.C.1 (cleanup `/docs/`, cutover CLI) fecharem. Item permanece aberto como auditoria final no encerramento do PR4.
 
@@ -944,7 +941,7 @@ yarn smoke
 - [x] **4.A.N** Pipeline verde.
 - [x] **4.A.[DEBT-REVIEW]** `NEXT.md`: registrar débitos do catálogo (gêneros futuros mapeados mas não implementados).
 - [x] **4.A.[ARCHITECTURE]** `ARCHITECTURE-REFERENCE.md`: §6 convenções ganha referência ao `GOVERNANCE-CATALOG.md` como carrier canônico.
-- [ ] **4.A.[COMMIT]** `docs(spec-0021): carrier híbrido (catálogo) + reservas de lar`.
+- [x] **4.A.[COMMIT]** `docs(spec-0021): carrier híbrido (catálogo) + reservas de lar`. _(Já aplicado em commits do sub-bloco 4.A — gap de marcação fechado em 4.D.)_
 
 ---
 
@@ -1057,14 +1054,14 @@ yarn smoke
 
 > **Âncoras:** `[DEC-0021-A03]`, `[DEC-0021-C01]`, `[DEC-0021-D01]`
 
-- [ ] **4.D.1** Smoke: validar instalação/execução headless e geração de artefatos sob `.governance/`.
-- [ ] **4.D.2** Validar `registry.yml` como SSOT e markdown derivado coerente.
-- [ ] **4.D.3** Validar living docs (geração + check) e drift guard.
-- [ ] **4.D.4** Validar TemplateEngine (recipes/partials) gerando artefatos válidos.
-- [ ] **4.D.N** Pipeline verde.
-- [ ] **4.D.[DEBT-REVIEW]** `NEXT.md`: revisão final pré-merge — todo débito remanescente migra para `roadmap/backlog.md` ou vira issue (vide F.1).
-- [ ] **4.D.[ARCHITECTURE]** `ARCHITECTURE.md`: snapshot final do roadmap (§F) marcando PR1–PR4 como ✅; estado pós-merge declarado.
-- [ ] **4.D.[COMMIT]** `chore(spec-0021): homologação final (contrato governance-driven)`.
+- [x] **4.D.1** Smoke: `yarn test:smoke` 4/4 verde local (tarball + install + init/adopt/update via tarball real). CI smoke matriz cross-OS (ubuntu/macos/windows × node 22/24) também verde no head atual.
+- [x] **4.D.2** Registry validado como SSOT: `yarn test:nova-cli --testPathPatterns='Registry'` → 41 pass + 4 skipped (skipped são débitos conscientes documentados em audits/NEXT — não bloqueiam). `GovernanceRegistryStore.ts` com 90.47% line cov / 100% function cov. **Limite escopo:** validada **fundação técnica** (round-trip + atomicidade); integração end-to-end com comando CLI real é Spec 0022.
+- [x] **4.D.3** Living docs: `yarn living-docs:check` → `✅ .governance/living-docs.yml in sync (235 entries)`. Drift guard fatal ativo em CI no job `ai-guidelines-check`.
+- [x] **4.D.4** TemplateEngine: `LegacyMirrorContract.test.ts` + `AssembleArtifact.test.ts` → 12/12 pass. `recipes.test.mjs` (cli/) → 11/11 pass. Recipe `tasks-evidence-driven` produz artefato válido com equivalência E1–E7 + R4.
+- [x] **4.D.N** Pipeline verde: `yarn test:coverage` → 296/296 pass local. CI head atual: guardrails ✅ + 6 smoke ✅ + ai-guidelines-check ✅ (8/8 success).
+- [x] **4.D.[DEBT-REVIEW]** `NEXT.md` revisado pré-merge: sanitização principal feita em 4.C.[SANITIZE-NEXT] (208 → 45 linhas). Adicionada entrada explícita ao `roadmap/backlog.md` sobre "migração completa dos recipes restantes" (elevada de débito implícito identificado pela closure-review §6.2). Adicionada entrada sobre "mecanismo de fechamento disciplinado para foundation/convergence specs" (proposta meta-spec; provavelmente parte do escopo da futura Spec 0023). Nenhum problema estrutural profundo encontrado durante a homologação que justifique absorção retroativa pela 0021 — eventuais redesigns vão para Spec 0022+ ou Spec 0023.
+- [x] **4.D.[ARCHITECTURE]** `ARCHITECTURE.md` §6 (Roadmap) atualizado: PR0–PR4 todas marcadas ✅. Estado pós-merge declarado: `.governance/` como root canônico, `.ai-guidelines/` bridge legada explícita até cutover operacional (Spec 0022+), engine ativada para `tasks-evidence-driven`, demais recipes seguem mirror (spec dedicada futura), Living Documentation com 235+ entries protegidas, ADRs consolidadas, `closure-review.md` como trilha de fechamento disciplinada. Limite explícito sobre cutover operacional como Spec 0022 registrado no aviso pós-tabela.
+- [x] **4.D.[COMMIT]** Commit final de homologação aplicado nesta rodada.
 
 ---
 

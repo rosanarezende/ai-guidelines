@@ -224,18 +224,17 @@ Detalhe técnico completo de cada garantia (motivação, contraexemplos, testes 
 
 A Spec 0021 leva o framework do paradigma "Spec-Driven" (centrado em specs formais) para "Governance-Driven" (governança como um todo, com 7 tipos de trabalho de primeira classe). A entrega é fatiada em 5 etapas atômicas:
 
-| Etapa   | Tema                                                                                         | Estado       |
-| ------- | -------------------------------------------------------------------------------------------- | ------------ |
-| **PR0** | Setup do projeto + decisões iniciais aprovadas pela owner                                    | ✅ Concluído |
-| **PR1** | Fundação: modelo de domínio + políticas + registry em memória                                | ✅ Concluído |
-| **PR2** | Persistência real em disco + camada de migração + reorganização das regras                   | ✅ Concluído |
-| **PR3** | **Este PR.** Documentação viva derivada dos testes + engine de templates atômicos            | 🔧 Em curso  |
-| **PR4** | Cleanup final + migração definitiva `.ai-guidelines/` → `.governance/` no projeto do usuário | ⏭️ Pendente  |
+| Etapa   | Tema                                                                                                     | Estado       |
+| ------- | -------------------------------------------------------------------------------------------------------- | ------------ |
+| **PR0** | Setup do projeto + decisões iniciais aprovadas pela owner                                                | ✅ Concluído |
+| **PR1** | Fundação: modelo de domínio + políticas + registry em memória                                            | ✅ Concluído |
+| **PR2** | Persistência real em disco + camada de migração + reorganização das regras                               | ✅ Concluído |
+| **PR3** | Documentação viva derivada dos testes + engine de templates atômicos                                     | ✅ Concluído |
+| **PR4** | Consolidação governance-driven: carrier híbrido, fronteira foundation/ADR, ponteiros e engine activation | ✅ Concluído |
 
-Hoje a CLI **continua escrevendo em `.ai-guidelines/`** no projeto do usuário e copiando os templates de `.specify/templates/` (compatibilidade preservada).
-O novo formato `.governance/` (registry, recipes e partials atômicos) é o contrato canônico declarado e materializado no código de domínio.
+**Estado pós-merge da 0021:** o framework opera como sistema governance-driven com `.governance/` declarado como root canônico do consumidor, `.ai-guidelines/` mantido como bridge legada explícita até cutover operacional dedicado (Spec 0022+). A engine de templates está ativada para a recipe `tasks-evidence-driven`; demais templates continuam vindo do mirror legado `.specify/templates/` (cutover completo é objeto de spec futura). Living Documentation com drift guard fatal protege as 235+ entries em `.governance/living-docs.yml`. ADRs consolidadas em `.core/governance/adrs/` (8 ativas + repositioning governance-first via ADR 0018). Trilha de fechamento disciplinada em `.specify/specs/0021-governance-information-architecture/closure-review.md`.
 
-> **Aviso:** O mirror legado (`.specify/templates/`) está **formalmente depreciado**. O cutover da CLI para a composição por `recipes` será efetivado na fase PR4/4.C.
+> **Limites corretos pós-merge:** a 0021 entregou a **fundação** governance-driven; o **cutover operacional** do runtime CLI mjs → src/ TS DDD é objeto da Spec 0022 (`feat/spec-0022-cli-runtime-cutover`, em Stage A Discovery, aguardando lifecycle metodológico). O `bin` publicado continua apontando para `cli/ai-guidelines-cli.mjs` por contrato explícito de bridge.
 
 ---
 

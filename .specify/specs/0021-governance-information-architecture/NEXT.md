@@ -10,7 +10,9 @@
 > migram antes para `.specify/specs/roadmap/backlog.md` ou viram issues.
 
 > **Histórico de saneamentos:**
-> Sanitizado em 4.C.[SANITIZE-NEXT] (2026-05-18): débitos das Fases 0–3 consolidados como "todos fechados"; débitos da Fase 4 reduzidos de 10 itens para 1 genuinamente ativo (Fase 4 #5/7/8/9/10 + Insight "Harness Lock no boilerplate" migrados para `roadmap/backlog.md`; Fase 4 #2/4/6 removidos por estarem resolvidos; Fase 4 #1 removido por ser reserva intencional, não débito).
+>
+> - **4.C.[SANITIZE-NEXT]** (2026-05-18): débitos das Fases 0–3 consolidados como "todos fechados"; débitos da Fase 4 reduzidos de 10 itens para 1 genuinamente ativo (Fase 4 #5/7/8/9/10 + Insight "Harness Lock no boilerplate" migrados para `roadmap/backlog.md`; Fase 4 #2/4/6 removidos por estarem resolvidos; Fase 4 #1 removido por ser reserva intencional, não débito).
+> - **4.D.[DEBT-REVIEW]** (2026-05-19): revisão final pré-merge. O único débito ativo da Fase 4 (`4.A.2`) foi fechado em 4.D.[ARCHITECTURE]. Duas entradas novas adicionadas ao `roadmap/backlog.md`: (a) "migração completa dos recipes restantes" (elevada de débito implícito identificado pela closure-review §6.2); (b) "mecanismo de fechamento disciplinado para foundation/convergence specs" (proposta meta-spec). Nenhum problema estrutural profundo descoberto na homologação justificou absorção retroativa pela 0021 — preservada a disciplina de "fechar como foundation, não como mega-spec".
 
 ---
 
