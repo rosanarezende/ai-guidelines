@@ -47,6 +47,7 @@ Detalhes de lifecycle em [`.core/process/governance-foundation.md`](../../../.co
   - **(b) Arquivo paralelo canônico** (ex.: `.governance/agent-context.md`), lido por qualquer agente que entre no repo, equivalente a `<AI_GUIDELINES>` mas para contexto repo-específico (não-distribuído).
   - **(c) Tag de escopo nas regras existentes**: além de `universal`/`adapter`/`opt-in`, adicionar `repo-internal`. O bloco compilado teria subseção dedicada.
   - **(d) Convenção para memory feedbacks:** toda memory salva localmente deve ter espelho num artifact versionado do projeto, OU declarar explicitamente "este é local-only por razão X".
+  - **(e) Política de migração (obrigatória junto com qualquer das direções acima):** se uma nova camada canônica for criada para contexto repo-interno, **declarar explicitamente** quais trechos atuais fora de `<AI_GUIDELINES>` em AGENTS.md passam a ser **proibidos**, **opcionais** ou **compilados/movidos** para a nova camada. Sem essa política, a solução vira a "4ª camada" sem desativar a 2ª, e o sprawl piora ao invés de fechar. Critério de fechamento: AGENTS.md raiz só pode ter conteúdo fora de `<AI_GUIDELINES>` se cobrir uma categoria explicitamente listada como "permitida" no novo modelo.
 - **Pré-requisitos / cross-ref:**
   - Spec 0023 (`workflow-runtime`) atingir estado estável (lifecycle + enforcement cravados).
   - Spec 0021 (governance information architecture) PR1 mergeada — fornece o lar canônico para artifacts não-spec.
