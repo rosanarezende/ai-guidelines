@@ -81,6 +81,8 @@ A 4.B.5 da Spec 0021 estabeleceu o critério que rege colisões: **legado preser
 | 0017 | Numeração de Specs: Slug Semântico Até Branch, Sem Reserva Futura         | Slug até branch; número alocado uma vez; imutável após instanciação                     | Aceita (extraída de foundation em 4.B.2) |
 | 0018 | Governance-First, AI-as-Channel                                           | Core é governança de engenharia repo-first; integração AI é canal opt-in de 1ª classe   | Aceita (4.E)                             |
 | 0019 | `.governance/specs/` como root primária no repositório mantenedor         | Specs novas em `.governance/specs/`; `.specify/` vira bridge sem deprecation timeline   | Aceita (Spec 0023 / DEC-0023-A02)        |
+| 0020 | Governance precede e protege execução                                     | Lifecycle 4 fases + gates explícitos; tasks.md como boundary; stacked PRs; CI mínimo    | Aceita (Spec 0023 / DEC-0023-D01..D05)   |
+| 0021 | Enforcement estrutural precede consciência comportamental                 | `process awareness is not process enforcement`; L2+L4 mínimo; L3 com critério           | Aceita (Spec 0023 / DEC-0023-E01..E05)   |
 
 **Operacionalização correlata** (não ADR, vive em `.core/process/`):
 
@@ -98,3 +100,5 @@ A 4.B.5 da Spec 0021 estabeleceu o critério que rege colisões: **legado preser
 - **2026-05-17 (PR4 / 4.B.2):** 3 ADRs novas extraídas de `governance-foundation.md` — 0015 (universal vs opt-in), 0016 (roadmap repo-first), 0017 (numeração de specs).
 - **2026-05-17 (PR4 / 4.E):** ADR 0018 (Governance-First, AI-as-Channel) criada para formalizar repositioning aprovado em `[DEC-0021-B07]`. Refina escopo de ADR 0008.
 - **2026-05-19 (Spec 0023 / DEC-0023-A02):** ADR 0019 (`.governance/specs/` como root no mantenedor) criada para resolver inconsistência conceitual entre discurso governance-first e UX spec-first. Estende contrato da ADR 0018 ao mantenedor.
+- **2026-05-19 (Spec 0023 / DEC-0023-D01..D05, sessão Bloco D):** ADR 0020 (Governance precede e protege execução) criada após PR1+PR2 da 0023 revelarem que decisões estruturais emergiam implícita durante implementação. Operacionaliza governance-first no lifecycle de PRs — 4 fases, `tasks.md` como boundary, stacked PRs, CI mínimo. PR2-lifecycle é bootstrap declarado deste modelo.
+- **2026-05-19 (Spec 0023 / DEC-0023-E01..E05, sessão Bloco E):** ADR 0021 (Enforcement estrutural precede consciência comportamental) criada após o agente violar repetidamente o lifecycle que acabou de co-redigir em ADR 0020. Princípio canônico: `process awareness is not process enforcement`. Camadas L1–L4 nomeadas; mínimo viável L2+L4; L3 com critério ≥ 2 casos. Princípio ortogonal a ADR 0020 (lifecycle vs mecanismo).
