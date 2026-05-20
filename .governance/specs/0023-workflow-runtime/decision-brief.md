@@ -5,8 +5,8 @@
 > Spec: [`./spec.md`](./spec.md)
 > Plan: [`./plan.md`](./plan.md) (criado em 2026-05-19 conforme `[DEC-0023-B05]`).
 > Tasks: tasklist da sessão de implementação (PR1).
-> Status agregado: **Resolved**
-> Última atualização: 2026-05-19 — gate Stage A → Stage B fechado (Bloco A); gate de escopo do PR2 fechado (Bloco B, incluindo B05 sobre plan.md inline vs separado); gate de lifecycle metodológico fechado (Bloco D — bootstrap declarado); gate de enforcement estrutural fechado (Bloco E — enforcement estrutural precede consciência comportamental).
+> Status agregado: **Partial** (Bloco F aberto com F01–F05 em status Pendente após research lifecycle-architecture.md fechar; demais Blocos A/B/C/D/E permanecem Resolved)
+> Última atualização: 2026-05-19 — Blocos A/B/C/D/E Resolved; Bloco F aberto com F01–F05 Pendentes derivadas do research `[research/lifecycle-architecture.md]` (taxonomy ↔ lifecycle convergence; 299 linhas; fechado dentro do cap absoluto 300).
 
 > **Artefato canônico do gate humano entre Stage 1 (research) e Stage 2 (design + implementação).** Para esta spec, a Stage 1 é a investigação documentada na pasta legacy `.specify/specs/0023-governance-workflow-discovery-model/` (research.md + anexos). Este brief materializa o gate Stage A → Stage B com 4 decisões cravadas em sessão de design 2026-05-19.
 
@@ -36,8 +36,13 @@
 | `[DEC-0023-E03]` | E     | Resolved |
 | `[DEC-0023-E04]` | E     | Resolved |
 | `[DEC-0023-E05]` | E     | Resolved |
+| `[DEC-0023-F01]` | F     | Pendente |
+| `[DEC-0023-F02]` | F     | Pendente |
+| `[DEC-0023-F03]` | F     | Pendente |
+| `[DEC-0023-F04]` | F     | Pendente |
+| `[DEC-0023-F05]` | F     | Pendente |
 
-**Status agregado:** Resolved.
+**Status agregado:** Partial — Blocos A/B/C/D/E Resolved; Bloco F com 5 pontos Pendentes derivados do research `[research/lifecycle-architecture.md]`.
 
 ---
 
@@ -316,6 +321,148 @@
 - **`state.yml` em spec existente continua manual** (cf. B01). Bootstrap é PR3.
 - **`NodeWorkflowFileSystem` coverage 9%** (sem integration test próprio). Integration test do dispatch (item G) cobre o caminho crítico end-to-end; coverage por arquivo só sobe com fixtures hermeticas em PR3+.
 - **Spec piloto continua viva em branch** até merge para `main`. Examples folder substitui o piloto para consumidores via npm enquanto isso.
+
+---
+
+## Bloco F — Convergência taxonomy ↔ lifecycle (research aprovado 2026-05-19; F01–F05 Pendentes)
+
+> **Origem:** investigação dedicada em [`research/lifecycle-architecture.md`](./research/lifecycle-architecture.md) — fechada em 299 linhas (dentro do cap absoluto 300). Identificou gap estrutural entre lifecycle cravado em Bloco D/E (spec-centric) e taxonomy MECE da Spec 0021 (7 pilares). Research convergiu em **invariantes universais leves** (accountability + traceability + outcome registration) + **lifecycle intent categories** (5 eixos de leitura: decision/learning/execution/operational-response/maintenance) + **runtime taxonomy-aware sem orchestration engine** + **enforcement universal leve**.
+>
+> **Owner aprovou o research em 2026-05-19** e cravou F1–F5 como base para DEC-0023-F\*; F6/F7 permanecem candidates (não promovidos agora). Decisões específicas dentro de cada Fxx ficam **Pendentes** — opções populadas do research §9 + recomendação inicial; gate humano por ponto a ser fechado em sessão dedicada, sem urgência de consumir convergência via expansão arquitetural imediata.
+
+### [DEC-0023-F01] `incident` permanece WorkItem ou vira `OperationalState`?
+
+**Pergunta:** A categoria `incident` (Spec 0021 taxonomy MECE) é WorkItem no mesmo nível operacional que `spec`/`experiment`/etc., ou é operational state emergente que dispara WorkItems de outras classes?
+
+**Contexto (research):**
+
+- Research §3 (H1, hipótese prioritária): incident parece distinto operacionalmente — disparado por evento emergente, coordena resposta via outros pilares, tem `severity` (atributo de estado) ao invés de `outcome` (atributo de execução).
+- Implicação: schema `registry.yml` + domain model `WorkItem.ts` podem precisar separar entity nova.
+
+**Opções:**
+
+| Opção | Descrição                                                                                                                                            | Pró                                                    | Contra                                                                      |
+| :---- | :--------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------- | :-------------------------------------------------------------------------- |
+| A     | **Manter WorkItem com flag especial** (`isOperationalState: true` ou similar)                                                                        | Zero refactor de schema; mudança incremental           | Continua categoria-erro estrutural — incident não se comporta como WorkItem |
+| B     | **Separar como entity nova** (`OperationalState` em domain model)                                                                                    | Honestidade arquitetural; nomeia o gap empiricamente   | Refactor de `WorkItem.ts` + `registry.yml`; cross-spec impact               |
+| C     | **Registry estável + runtime trata diferente** (incident continua em `registry.yml` como categoria; lifecycle/runtime modela como operational state) | Não revoga MECE; ajuste leve no runtime + boilerplates | Bifurcação semântica — registry diz uma coisa, runtime trata diferente      |
+
+**Recomendação inicial (a confirmar pós-gate):** Opção C — preserva taxonomy MECE da Spec 0021 (que não está sendo reaberta), ajusta apenas o tratamento operacional sem revogar categoria. Alinhado com framing anti-recursão (§0.4 do research: taxonomy fica onde está; só operacionalização muda).
+
+**Decisão do Gate Humano:**
+
+- **Status:** [x] Pendente — aguarda escolha do owner
+- **Escolha:** [ ] A | [ ] B | [ ] C
+
+---
+
+### [DEC-0023-F02] Boundary canônico por classe (lifecycle intent)
+
+**Pergunta:** Cada lifecycle intent class tem seu boundary canônico próprio, ou compartilha `tasks.md` como boundary universal?
+
+**Contexto (research):**
+
+- Research §2.2 + §3–§6: cada classe (decision/learning/execution/operational-response/maintenance) tem comportamento distinto; `tasks.md` é boundary apenas da execution class.
+- Anti-recursão guard §8.2: invariantes universais ≠ artifacts universais.
+
+**Opções:**
+
+| Opção | Descrição                                                                                                                                                                   | Pró                                                | Contra                                                       |
+| :---- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------- | :----------------------------------------------------------- |
+| A     | **Universal `tasks.md`** para todas as classes                                                                                                                              | Simples; um único contrato                         | Recria spec-centric drift; viola §8.2; overhead em fix/patch |
+| B     | **Class-specific boundaries** (`spec` → tasks.md; `proposal` → decision-gate; `spike` → timebox; `experiment` → outcome; `fix`/`patch` → PR merge; `incident` → resolution) | Honra invariantes leves; preserva DevEx por classe | Runtime precisa rotear por classe (taxonomy-aware leve)      |
+
+**Recomendação inicial:** Opção B — diretamente derivada da convergência do research §§5–6 e Síntese final. Boundary class-specific é a forma operacional dos invariantes universais sem forçar artifact uniforme.
+
+**Decisão do Gate Humano:**
+
+- **Status:** [x] Pendente
+- **Escolha:** [ ] A | [ ] B
+
+---
+
+### [DEC-0023-F03] Boilerplates: por classe ou universal+slots?
+
+**Pergunta:** Boilerplates adicionais (para os 6 pilares sem boilerplate próprio) nascem como arquivos dedicados por classe, ou como boilerplate universal com seções condicionais?
+
+**Contexto (research):**
+
+- Research §1.1: 6 dos 7 pilares sem boilerplate próprio (gap estrutural ativo).
+- Anti-recursão §0.3: "redesign de boilerplates" está **fora** do escopo desta investigação; alterações pontuais podem decorrer de DEC-F\* aprovadas.
+
+**Opções:**
+
+| Opção | Descrição                                                                                                                                                      | Pró                                                   | Contra                                                           |
+| :---- | :------------------------------------------------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------------- | :--------------------------------------------------------------- |
+| A     | **Boilerplate dedicado por classe** (≥ 5 arquivos novos: proposal, spike, experiment, fix/patch combinado, incident)                                           | Cada classe ganha contrato visível e adaptado         | Mais arquivos para manter; risco de drift entre boilerplates     |
+| B     | **Boilerplate universal com seções condicionais por classe**                                                                                                   | Um único arquivo de referência; consistência forçada  | Arquivo grande; condicionais aumentam carga cognitiva no consumo |
+| C     | **`spec` mantém atual + classes leves (fix/patch/proposal/incident) sem boilerplate formal** (apenas convenções de commit/PR documentadas em `.core/process/`) | Mínimo viável; DevEx-friendly; respeita anti-recursão | Sem template para classes leves; convenção pode ser ignorada     |
+
+**Recomendação inicial:** Opção C — alinhada com §8.4 (enforcement universal leve) + §0.5 (consumer-visible complexity como dívida prioritária). Classes leves não impõem boilerplate ao consumidor; convenção textual em `.core/process/` referenciada pelo runtime.
+
+**Decisão do Gate Humano:**
+
+- **Status:** [x] Pendente
+- **Escolha:** [ ] A | [ ] B | [ ] C
+
+---
+
+### [DEC-0023-F04] Runtime taxonomy-aware: `DetectActiveSpec` → `DetectActiveWorkItem`?
+
+**Pergunta:** A função de detecção de spec ativa do runtime evolui para detectar qualquer pilar ativo, e como?
+
+**Contexto (research):**
+
+- Research §1.3: `DetectActiveSpec` hoje hardcoded em `.governance/specs/` + `.specify/specs/`; não detecta outros pilares.
+- Anti-recursão §8.3: runtime taxonomy-aware **sem** orchestration engine — detecção + roteamento, não orquestração.
+
+**Opções:**
+
+| Opção | Descrição                                                                                                                                        | Pró                                                | Contra                                                |
+| :---- | :----------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------- | :---------------------------------------------------- |
+| A     | **Múltiplos paths** (`.governance/{specs,proposals,spikes,...}/{slug}`)                                                                          | Topologia espelha taxonomy; descoberta literal     | 5+ diretórios novos no consumidor; visibility alta    |
+| B     | **`WorkItem.kind` derivado** de path único `.governance/items/{slug}` + frontmatter declarando kind                                              | Único diretório; visibility leve no consumidor     | Frontmatter parsing adicional; convention obrigatória |
+| C     | **Double-lookup por classe com fallback** (mantém `specs/` + adiciona descoberta opcional por classe quando branch name ou frontmatter sinaliza) | Compatibilidade com estado atual; migração gradual | Lógica de detecção fica mais ramificada               |
+
+**Recomendação inicial:** Opção C — preserva trabalho do PR1 (DetectActiveSpec funcional para `spec`) e adiciona detecção das outras classes incrementalmente. Anti-recursão §8.3 satisfeita: detecta + roteia, sem orquestrar.
+
+**Decisão do Gate Humano:**
+
+- **Status:** [x] Pendente
+- **Escolha:** [ ] A | [ ] B | [ ] C
+
+---
+
+### [DEC-0023-F05] CORE-09/10: ADR formal ou agent rule?
+
+**Pergunta:** As regras CORE-09 (PR Draft) e CORE-10 (Ready após revalidação) ganham ADR perene formal ou permanecem como agent rules em AGENTS.md?
+
+**Contexto (research):**
+
+- Research §7: CORE-09/10 enunciam caso particular de accountability + traceability — princípio estrutural, mas com formato L1 (agent rule) já adequado em alguns contextos.
+- Convergência: permanecem L1 **e** ganham ancoragem em ADR — convivem em camadas.
+
+**Opções:**
+
+| Opção | Descrição                                                                                                                 | Pró                                                  | Contra                                                    |
+| :---- | :------------------------------------------------------------------------------------------------------------------------ | :--------------------------------------------------- | :-------------------------------------------------------- |
+| A     | **ADR 0022 nova** dedicada (princípio formalizado), com cross-ref a ADR 0021                                              | Princípio cravado; cross-ref consistente; auditável  | Mais um ADR para manter                                   |
+| B     | **AGENTS.md + nota ADR no rodapé** (regra continua em AGENTS.md com referência cruzada a ADR 0021)                        | Mínimo possível; aproveita ADR 0021 existente        | Nota é menos visível que ADR dedicada                     |
+| C     | **Regra L1 em AGENTS.md + complemento detalhado em `.core/process/`** (princípio textual + operacionalização documentada) | Distribuição em camadas explícita; clareza por nível | Mais um arquivo em `.core/process/`; risco de redundância |
+
+**Recomendação inicial:** Opção B — minimal; respeita anti-recursão §8.4 (enforcement leve). ADR 0021 já cobre o princípio canônico; cross-ref no rodapé de CORE-09/10 em AGENTS.md fecha o loop sem inflar ADRs.
+
+**Decisão do Gate Humano:**
+
+- **Status:** [x] Pendente
+- **Escolha:** [ ] A | [ ] B | [ ] C
+
+---
+
+### Candidatos não promovidos (mantidos no research §9, não Pendentes em Bloco F)
+
+- **F6 candidate** — visibilidade arquitetural (consumer vs maintainer) como ADR perene. Owner sinalizou interesse explícito mas decidiu manter como candidate (não promover agora). Reabrir quando ≥ 2 decisões F\* invocarem o princípio em conflito.
+- **F7 candidate** — schema do `state.yml` ganha `kind` derivado para não-spec pilares. Dependente de F04 (sem direção definida no runtime, schema é prematuro).
 
 ---
 
