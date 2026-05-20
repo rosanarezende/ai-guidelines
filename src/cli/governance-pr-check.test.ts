@@ -14,18 +14,51 @@ const REPO = "rosanarezende/ai-guidelines";
 
 describe("CLI — governance-pr-check [BR-GOVERNANCE-CI]", () => {
   describe("fast-track bypass", () => {
-    it("DADO PR com label fast-track ENTÃO retorna fast-track sem chamar API", () => {
+    it("DADO PR com label fast-track + rationale inline [fast-track: ...] ENTÃO retorna fast-track sem chamar API", () => {
       const api = new FakeApi(new Map());
       const result = runGovernancePrCheck(
         {
           prNumber: 42,
-          prBody: "Body without depends on",
+          prBody: "Hotfix urgente. [fast-track: prod incident; reviewer assume risco]",
           prLabels: ["fast-track"],
           repo: REPO,
         },
         api
       );
       expect(result.kind).toBe("fast-track");
+    });
+
+    it("DADO PR com label fast-track + seção ## Fast-track Rationale ENTÃO aceita", () => {
+      const api = new FakeApi(new Map());
+      const result = runGovernancePrCheck(
+        {
+          prNumber: 43,
+          prBody:
+            "## Fast-track Rationale\n\nFix mínimo; reviewer humano absorve responsabilidade.",
+          prLabels: ["fast-track"],
+          repo: REPO,
+        },
+        api
+      );
+      expect(result.kind).toBe("fast-track");
+    });
+
+    it("DADO PR com label fast-track MAS sem rationale no body ENTÃO falha (bypass disfarçado)", () => {
+      const api = new FakeApi(new Map());
+      const result = runGovernancePrCheck(
+        {
+          prNumber: 44,
+          prBody: "Body without rationale",
+          prLabels: ["fast-track"],
+          repo: REPO,
+        },
+        api
+      );
+      expect(result.kind).toBe("fail");
+      if (result.kind === "fail") {
+        expect(result.reasons.join(" ")).toMatch(/rationale/i);
+        expect(result.reasons.join(" ")).toMatch(/bypass disfar/i);
+      }
     });
   });
 
@@ -75,7 +108,7 @@ describe("CLI — governance-pr-check [BR-GOVERNANCE-CI]", () => {
       const api = new FakeApi(
         new Map<string, unknown>([
           [`repos/${REPO}/pulls/99`, { state: "closed", merged_at: null }],
-          [`repos/${REPO}/pulls/99/files?per_page=100`, []],
+          [`repos/${REPO}/pulls/99/files?per_page=100&page=1`, []],
         ])
       );
       const result = runGovernancePrCheck(
@@ -101,7 +134,7 @@ describe("CLI — governance-pr-check [BR-GOVERNANCE-CI]", () => {
         new Map<string, unknown>([
           [`repos/${REPO}/pulls/99`, { state: "open", merged_at: null }],
           [
-            `repos/${REPO}/pulls/99/files?per_page=100`,
+            `repos/${REPO}/pulls/99/files?per_page=100&page=1`,
             [
               { filename: ".governance/specs/0023-workflow-runtime/spec.md" },
               { filename: ".governance/specs/0023-workflow-runtime/plan.md" },
@@ -129,7 +162,7 @@ describe("CLI — governance-pr-check [BR-GOVERNANCE-CI]", () => {
         new Map<string, unknown>([
           [`repos/${REPO}/pulls/99`, { state: "closed", merged_at: "2026-05-19T12:00:00Z" }],
           [
-            `repos/${REPO}/pulls/99/files?per_page=100`,
+            `repos/${REPO}/pulls/99/files?per_page=100&page=1`,
             [{ filename: ".governance/specs/0023-workflow-runtime/tasks.md" }],
           ],
         ])
@@ -154,7 +187,7 @@ describe("CLI — governance-pr-check [BR-GOVERNANCE-CI]", () => {
         new Map<string, unknown>([
           [`repos/${REPO}/pulls/77`, { state: "open", merged_at: null }],
           [
-            `repos/${REPO}/pulls/77/files?per_page=100`,
+            `repos/${REPO}/pulls/77/files?per_page=100&page=1`,
             [{ filename: ".specify/specs/0015-foo/tasks.md" }],
           ],
         ])
@@ -169,6 +202,65 @@ describe("CLI — governance-pr-check [BR-GOVERNANCE-CI]", () => {
         api
       );
       expect(result.kind).toBe("ok");
+    });
+  });
+
+  describe("pagination", () => {
+    it("DADO governance PR com >100 arquivos E tasks.md na página 2 ENTÃO pagina e aceita", () => {
+      // Página 1: 100 arquivos sem tasks.md (força paginação a seguir)
+      const page1: ReadonlyArray<{ filename: string }> = Array.from({ length: 100 }, (_, i) => ({
+        filename: `src/file-${i}.ts`,
+      }));
+      // Página 2: contém o tasks.md
+      const page2 = [{ filename: ".governance/specs/0023-workflow-runtime/tasks.md" }];
+      // Página 3 vazia (sinaliza fim)
+      const page3: ReadonlyArray<{ filename: string }> = [];
+
+      const api = new FakeApi(
+        new Map<string, unknown>([
+          [`repos/${REPO}/pulls/55`, { state: "open", merged_at: null }],
+          [`repos/${REPO}/pulls/55/files?per_page=100&page=1`, page1],
+          [`repos/${REPO}/pulls/55/files?per_page=100&page=2`, page2],
+          [`repos/${REPO}/pulls/55/files?per_page=100&page=3`, page3],
+        ])
+      );
+      const result = runGovernancePrCheck(
+        {
+          prNumber: 66,
+          prBody: "Depends on #55 (governance)",
+          prLabels: [],
+          repo: REPO,
+        },
+        api
+      );
+      expect(result.kind).toBe("ok");
+    });
+
+    it("DADO governance PR com exatamente 100 arquivos (todos sem tasks.md) ENTÃO falha sem buscar página 2", () => {
+      // Última página com <PER_PAGE itens encerra a paginação; se for exatamente 100 e nenhum tasks.md, tenta página 2 e ela vazia confirma.
+      const page1: ReadonlyArray<{ filename: string }> = Array.from({ length: 100 }, (_, i) => ({
+        filename: `src/file-${i}.ts`,
+      }));
+      const api = new FakeApi(
+        new Map<string, unknown>([
+          [`repos/${REPO}/pulls/55`, { state: "open", merged_at: null }],
+          [`repos/${REPO}/pulls/55/files?per_page=100&page=1`, page1],
+          [`repos/${REPO}/pulls/55/files?per_page=100&page=2`, []],
+        ])
+      );
+      const result = runGovernancePrCheck(
+        {
+          prNumber: 66,
+          prBody: "Depends on #55 (governance)",
+          prLabels: [],
+          repo: REPO,
+        },
+        api
+      );
+      expect(result.kind).toBe("fail");
+      if (result.kind === "fail") {
+        expect(result.reasons.join(" ")).toMatch(/tasks\.md/);
+      }
     });
   });
 });

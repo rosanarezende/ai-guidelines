@@ -9,9 +9,12 @@
  *   3. Governance PR #N está aberto OU mergeado (não closed sem merge);
  *   4. Governance PR #N inclui `tasks.md` no diff.
  *
- * Fast-track bypass (`[DEC-0023-D05]`): se o PR sob check possui label `fast-track`,
- * a validação devolve sucesso sem rodar — responsabilidade transfere para
- * review humano. Convenção explícita registrada em `state.yml` da spec.
+ * Fast-track (`[DEC-0023-D05]` + `[DEC-0023-E05]`): se o PR sob check
+ * possui label `fast-track` E rationale declarado no body (regex
+ * `[fast-track: ...]` ou seção `## Fast-track Rationale`), a validação
+ * estrutural é bypassada e a responsabilidade transfere para o reviewer
+ * humano. Sem rationale, o check **falha** — fast-track sem accountability
+ * registrada é considerado bypass disfarçado (cf. ADR 0021).
  *
  * NÃO faz: drift semântico, mapping arquivos↔tasks, inferência de
  * cobertura, análise de intent. Expansão de escopo exige decisão própria.
@@ -36,6 +39,9 @@ export type GovernancePrCheckResult =
 
 const DEPENDS_ON_REGEX = /Depends on #(\d+)\s*\(governance\)/i;
 const FAST_TRACK_LABEL = "fast-track";
+const FAST_TRACK_RATIONALE_REGEX = /\[fast-track:\s*[^\]]+\]|##\s*Fast-track\s+Rationale\b/i;
+const FILES_PER_PAGE = 100;
+const FILES_MAX_PAGES = 30;
 
 export interface GitHubApiCaller {
   /**
@@ -75,9 +81,17 @@ export function runGovernancePrCheck(
   api: GitHubApiCaller
 ): GovernancePrCheckResult {
   if (input.prLabels.includes(FAST_TRACK_LABEL)) {
+    if (!FAST_TRACK_RATIONALE_REGEX.test(input.prBody)) {
+      return {
+        kind: "fail",
+        reasons: [
+          `PR #${input.prNumber} possui label "${FAST_TRACK_LABEL}" mas não declara rationale no body. Fast-track é bypass com accountability transferida — não bypass disfarçado (cf. ADR 0021 + DEC-0023-E05). Adicione "[fast-track: <razão curta>]" ou seção "## Fast-track Rationale" no body do PR.`,
+        ],
+      };
+    }
     return {
       kind: "fast-track",
-      note: `PR #${input.prNumber} possui label "${FAST_TRACK_LABEL}" — validação estrutural bypassada por convenção (cf. ADR 0020 + DEC-0023-D05). Responsabilidade transfere para review humano.`,
+      note: `PR #${input.prNumber} possui label "${FAST_TRACK_LABEL}" + rationale declarado — validação estrutural bypassada com accountability transferida ao reviewer humano (cf. ADR 0020 + ADR 0021 + DEC-0023-D05/E05).`,
     };
   }
 
@@ -114,9 +128,7 @@ export function runGovernancePrCheck(
 
   let files: ReadonlyArray<FileShape>;
   try {
-    files = api.call(
-      `repos/${input.repo}/pulls/${governancePrNumber}/files?per_page=100`
-    ) as ReadonlyArray<FileShape>;
+    files = fetchAllPrFiles(api, input.repo, governancePrNumber);
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     reasons.push(`Falha ao listar arquivos do governance PR #${governancePrNumber}: ${message}.`);
@@ -146,6 +158,29 @@ function isCanonicalTasksFile(path: string): boolean {
     /^\.governance\/specs\/[^/]+\/tasks\.md$/.test(path) ||
     /^\.specify\/specs\/[^/]+\/tasks\.md$/.test(path)
   );
+}
+
+/**
+ * Pagina sobre `repos/{repo}/pulls/{n}/files` até esgotar resultados ou
+ * atingir FILES_MAX_PAGES (proteção contra loops infinitos). Sem isso,
+ * governance PRs com >100 arquivos teriam tasks.md fora da primeira
+ * página e o check falharia incorretamente.
+ */
+function fetchAllPrFiles(
+  api: GitHubApiCaller,
+  repo: string,
+  prNumber: number
+): ReadonlyArray<FileShape> {
+  const all: FileShape[] = [];
+  for (let page = 1; page <= FILES_MAX_PAGES; page += 1) {
+    const batch = api.call(
+      `repos/${repo}/pulls/${prNumber}/files?per_page=${FILES_PER_PAGE}&page=${page}`
+    ) as ReadonlyArray<FileShape>;
+    if (!batch || batch.length === 0) break;
+    all.push(...batch);
+    if (batch.length < FILES_PER_PAGE) break;
+  }
+  return all;
 }
 
 export interface RunOptions {
