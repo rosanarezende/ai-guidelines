@@ -76,17 +76,21 @@ _(Sem débitos adiados no momento do gate. Itens emergentes durante PR1 entram a
 
 ### 8. Convenção operacional derivada — PR title
 
-- Documentada em [`.core/process/pr-title-conventions.md`](../../../.core/process/pr-title-conventions.md) + checkboxes no `pull_request_template.md`. Materialização dogfoodada em PR #18 (`[🧭🛠️➜]`, pre-model transitional) e PR #19 (`[🧾🔒]`, governance pareada).
+- Documentada em [`.core/process/pr-title-conventions.md`](../../../.core/process/pr-title-conventions.md) + checkboxes no `pull_request_template.md`. Materialização dogfoodada em PR #18 (`[🛠️➜] [Bootstrap]`) e PR #19 (`[🧾🔒]`).
 - Origem: dor real observada ao revisar a stack #18 ↔ #19 — GitHub native states (Draft/Ready/Merged/Closed) cobrem lifecycle operacional mas **não** capturam o contrato arquitetural "PR não-mergeable isoladamente" que ADR 0020 introduziu.
-- **Refinada em 2026-05-20** após observação de que o PR #18 não encaixava honestamente nem como governance pura nem execution pura. Resultado:
-  - Padrão: `[<emojis>] [Spec NNNN] <título>`
-  - Emojis: 🧾 governance · 🛠️ execution · 🔒 governance contract pendente (só governance) · 1️⃣2️⃣3️⃣ rollout order (só execution) · ➜ downstream pending (só execution) · 🧭 transitional/pre-model (EXCEPCIONAL) · 🚑 fast-track
-  - Governance NÃO usa número (é fundação, não posição); execution usa número + ➜ quando intermediária; ausência de ➜ em execution = terminal.
-  - Anti-DAG guardrail explícito: emojis são sinalização humana L1, não input para automação.
+- **Refinada em 2026-05-20** em duas iterações:
+  - **(i)** Após observação de que PR #18 não encaixava honestamente nem como governance pura nem execution pura. Primeira tentativa: adicionar 🧭 como emoji de "transitional/pre-model". Resultou em `[🧭🛠️➜]` visualmente ambíguo — 3 emojis aglutinados perdiam clareza categórica.
+  - **(ii)** Refinada novamente: **separar tipo (emoji fechado) de nuance (label textual fechada)**. 🧭 removido como emoji; nuances viram brackets textuais separados (`[Bootstrap]`, `[Pre-model]`, `[Hotfix]`). PR #18 hoje: `[🛠️➜] [Bootstrap] [Spec 0023] Workflow runtime`.
+- **Conjuntos fechados:**
+  - Emojis: 🧾 (governance) · 🛠️ (execution) · 🔒 (governance contract) · 1️⃣2️⃣3️⃣ (order) · ➜ (downstream) · 🚑 (fast-track). **Nenhum emoji adicional será introduzido.**
+  - Labels textuais: `[Bootstrap]` · `[Pre-model]` · `[Hotfix]`. **Lista fechada;** nova label exige ≥ 2 casos justificando + cross-ref.
+- **Regras explícitas:** governance NÃO usa número; ausência de ➜ em execution = terminal; ausência de número em execution = isolado; cada bracket carrega uma dimensão semântica (não aglutinar tipo + nuance no mesmo bracket).
+- **Anti-DAG guardrail explícito** reforçado: emojis/números/labels são sinalização humana L1, não input para automação. Qualquer parser, DAG tooling, merge orchestration, CI lint de prefixo → reabrir DEC própria (L4).
 - **Não é nova decisão** (não abre Bloco G, ADR ou DEC). É hygiene visual sobre o lifecycle já cravado. Sem enforcement automático.
 - **Critério de revisita:**
   - se ≥ 3 casos de drift na prática (PRs nascendo sem prefixo ou com prefixo errado), reabrir como DEC própria com enforcement leve no `governance-pr-check`;
-  - se renumeração ocorrer > 2 vezes na mesma stack, sinal de stack instável — reabrir DEC sobre forma de rollout antes de continuar.
+  - se renumeração ocorrer > 2 vezes na mesma stack, sinal de stack instável — reabrir DEC sobre forma de rollout antes de continuar;
+  - se stacks > 4 PRs aparecerem recorrentemente, sinal de scope creep — considerar splitar em specs.
 
 ---
 

@@ -2,13 +2,13 @@
 
 > **Convenção operacional derivada da Spec 0023.** Não é decisão arquitetural — é hygiene visual sobre o lifecycle já cravado em ADR 0020 (governance precede execução) e ADR 0021 (enforcement estrutural em camadas). Sem enforcement automático nesta versão (convenção primeiro; CI valida depois se a prática justificar). Anti-patterns explicitamente rejeitados na seção final.
 >
-> **Refinada em 2026-05-20** após observação empírica de que o PR #18 não encaixava honestamente nem como governance nem como execution; surgiu necessidade de marcadores específicos para (a) ordering de execution stacks, (b) downstream dependencies, e (c) PRs transitional/pre-model.
+> **Refinada em 2026-05-20** em duas iterações: (i) primeira tentativa adicionou 🧭 como emoji de "transitional/pre-model" → ficou visualmente ambíguo (`[🧭🛠️➜]` aglutinava tipo + nuance num único bracket); (ii) refinamento final separa **tipo (emoji, conjunto fechado de 6)** de **nuance (label textual, conjunto fechado de 3)** — `[🛠️➜] [Bootstrap]` em vez de `[🧭🛠️➜]`.
 
 ## Por que existe
 
 Olhar o título de um PR em uma lista do GitHub deve responder três perguntas sem clicar:
 
-1. **Que tipo de PR é este?** Governance/thinking (contrato), execution (implementação), fast-track ou transitional?
+1. **Que tipo de PR é este?** Governance/thinking (contrato), execution (implementação) ou fast-track? Há alguma nuance excepcional (`[Bootstrap]`, `[Pre-model]`, `[Hotfix]`)?
 2. **Esse PR pode ser mergeado isoladamente, ou é parte de uma stack pareada/sequenciada?**
 3. **Se faz parte de stack, qual posição ocupa e há PRs downstream aguardando?**
 
@@ -17,10 +17,10 @@ GitHub native states (Draft / Ready / Merged / Closed) cobrem **lifecycle operac
 ## Padrão de título
 
 ```
-[<emojis>] [Spec <NNNN>] <título curto>
+[<emojis>] [<label-opcional>] [Spec <NNNN>] <título curto>
 ```
 
-Brackets explícitos delimitam grupo de emojis e identificador de spec. Título curto, sem prefixo tipo/escopo redundante (já capturado pelos emojis).
+Brackets explícitos delimitam **dimensões semânticas independentes**: grupo de emojis (tipo + condicionais), label textual opcional para nuance excepcional, identificador de spec. Cada bracket carrega uma dimensão — **não aglutinar tipo com nuance num único bracket**. Título curto, sem prefixo redundante.
 
 ## Emojis canônicos
 
@@ -31,27 +31,42 @@ Brackets explícitos delimitam grupo de emojis e identificador de spec. Título 
 | 🔒       | Governance contract não-mergeable isoladamente | **SÓ governance** (🧾🔒). Aguarda execution PR(s) pareada. Não usar com 🛠️.                                                      |
 | 1️⃣ 2️⃣ 3️⃣ | Rollout order em execution stack               | **SÓ execution**. Posição sequencial. Governance NÃO usa número (é fundação, não posição).                                       |
 | ➜        | Rollout continua downstream                    | Sufixo em execution PRs **não-terminais**. Ausência de ➜ em execution = terminal (sem PR downstream aguardando).                 |
-| 🧭       | Transitional / pre-model / bridge histórica    | **Uso EXCEPCIONAL**. Reservado a PRs que precedem a estabilização metodológica de uma spec. ≤ 1 por spec, idealmente.            |
 | 🚑       | Fast-track                                     | Patch/fix/incident pequeno com accountability transferida ao reviewer humano (cf. ADR 0021 + DEC-0023-E05). Exclusivo (sozinho). |
+
+**Convenção fechada.** Nenhum emoji adicional será introduzido para cobrir nuances (transitional, pre-model, experimental, beta, etc.). Para essas, usar **labels textuais** (próxima seção).
+
+## Labels textuais para nuances excepcionais
+
+Nuances que não cabem nos 4 tipos fixos viram **bracket textual separado** entre o tipo e o identificador da spec. Isso preserva clareza visual (cada bracket carrega uma coisa) e impede emoji creep.
+
+| Label         | Quando usar                                                                                            | Frequência esperada              |
+| :------------ | :----------------------------------------------------------------------------------------------------- | :------------------------------- |
+| `[Bootstrap]` | PR que colapsa governance + execution intencionalmente antes da estabilização metodológica da spec.    | ≤ 1 por spec (primeira iteração) |
+| `[Pre-model]` | PR criado antes do lifecycle/enforcement da spec estar cravado. Sinônimo operacional de `[Bootstrap]`. | ≤ 1 por spec                     |
+| `[Hotfix]`    | PR de fix urgente que precisa indicação visível mas **não** se qualifica como `🚑 fast-track` formal.  | Raro                             |
+
+**Lista é fechada.** Nova label exige decisão registrada (≥ 2 casos justificando + cross-ref em NEXT/ADR). Se aparecer necessidade de `[Experimental]` ou `[Beta]`, isso indica que a categoria não é "PR title hygiene" — provavelmente é decisão de release/spec própria.
 
 ## Combinações canônicas + exemplos
 
-| Padrão    | Semântica                                                                             | Exemplo                                   |
-| :-------- | :------------------------------------------------------------------------------------ | :---------------------------------------- |
-| `[🧾🔒]`  | Governance pareada com execution(s); merge semanticamente inseguro isoladamente.      | `[🧾🔒] [Spec 0023] Lifecycle bootstrap`  |
-| `[🛠️1️⃣➜]` | Execution intermediária — primeira da stack, com PRs downstream.                      | `[🛠️1️⃣➜] [Spec 0023] Enforcement runtime` |
-| `[🛠️2️⃣]`  | Execution terminal — última (ou única depois das anteriores) da stack.                | `[🛠️2️⃣] [Spec 0023] DX execution`         |
-| `[🛠️]`    | Execution isolada — sem stack, sem dependência.                                       | `[🛠️] [Spec 0041] Clipboard hotfix`       |
-| `[🧭🛠️➜]` | Transitional/pre-model — colapsa governance+execution antes da estabilização da spec. | `[🧭🛠️➜] [Spec 0023] Workflow runtime`    |
-| `[🚑]`    | Fast-track excepcional.                                                               | `[🚑] [Incident 0007] Emergency rollback` |
+| Padrão              | Semântica                                                                        | Exemplo                                          |
+| :------------------ | :------------------------------------------------------------------------------- | :----------------------------------------------- |
+| `[🧾🔒]`            | Governance pareada com execution(s); merge semanticamente inseguro isoladamente. | `[🧾🔒] [Spec 0023] Lifecycle bootstrap`         |
+| `[🛠️1️⃣➜]`           | Execution intermediária — primeira da stack, com PRs downstream.                 | `[🛠️1️⃣➜] [Spec 0023] Enforcement runtime`        |
+| `[🛠️2️⃣]`            | Execution terminal — última da stack.                                            | `[🛠️2️⃣] [Spec 0023] DX execution`                |
+| `[🛠️]`              | Execution isolada — sem stack, sem dependência.                                  | `[🛠️] [Spec 0041] Clipboard hotfix`              |
+| `[🛠️➜] [Bootstrap]` | Execution transitional/pre-model + label textual de nuance.                      | `[🛠️➜] [Bootstrap] [Spec 0023] Workflow runtime` |
+| `[🚑]`              | Fast-track excepcional.                                                          | `[🚑] [Incident 0007] Emergency rollback`        |
+
+**Stacks longas (> 4 PRs)** sinalizam scope creep — considerar splitar em specs antes de chegar lá. A convenção não impede mas também não incentiva.
 
 ## Regras explícitas
 
 - **Governance NÃO usa número.** 🧾 é boundary/fundação, não "posição 1 da execução". Números são reservados a execution PRs.
 - **Ausência de ➜ em execution = terminal.** Comunica ao reviewer que este PR pode ser o último mergeado da stack — não há rollout downstream aguardando.
 - **Ausência de número em execution = PR isolado** (sem stack).
-- **🧭 é uso EXCEPCIONAL.** Default: NÃO usar. Se em dúvida, use 🛠️ + nota no body opening explicando excepcionalidade. Idealmente ≤ 1 PR com 🧭 por spec.
-- **🚑 é exclusivo:** não combina com 🧾/🛠️/🔒/números/➜/🧭. Fast-track tem accountability transferida e contorna todos os marcadores estruturais.
+- **Labels textuais separadas dos emojis.** `[🛠️➜] [Bootstrap] [Spec 0023]` é correto; `[🛠️➜Bootstrap]` ou `[🧭🛠️➜]` (emoji para nuance) não. Cada bracket carrega uma dimensão semântica.
+- **🚑 é exclusivo:** não combina com 🧾/🛠️/🔒/números/➜. Fast-track tem accountability transferida e contorna todos os marcadores estruturais.
 
 ## Padrão de opening line do body
 
@@ -103,10 +118,10 @@ ou (raro, sem governance pareada):
 Standalone execution — sem governance pareada. Justificativa: <motivo>.
 ```
 
-### Transitional (`[🧭🛠️➜]`)
+### Transitional / pre-model (`[🛠️➜] [Bootstrap]` ou `[🛠️➜] [Pre-model]`)
 
 ```md
-🧭 Transitional / pre-model PR — colapsa governance + execution intencionalmente antes da estabilização metodológica da spec.
+Bootstrap PR — colapsa governance + execution intencionalmente antes da estabilização metodológica da spec.
 
 Substituído operacionalmente por: PR<M>-<slug> (governance) + stack execution downstream.
 Trilha histórica preservada (sem git surgery retroativa — cf. DEC-0023-D04 análogo).
@@ -129,28 +144,33 @@ Quando um marcador deixa de fazer sentido, **o autor do PR remove via `gh pr edi
   - Se PR mid-stack é cancelado, renumerar PRs subsequentes para manter sequência contígua.
   - Se novo PR entra mid-stack, renumerar — drift garantido aqui é o **trade-off aceito conscientemente** em troca de scan visual mais rico.
   - **Critério de stop:** se renumerar > 2 vezes na mesma spec, stack é instável — reabrir DEC própria sobre forma de rollout antes de continuar.
-- **🧭** — não é removido. PRs transitional permanecem registrados como tal historicamente (parte da trilha de aprendizado da spec).
+- **Labels textuais (`[Bootstrap]`, `[Pre-model]`, `[Hotfix]`)** — não são removidas. Registro histórico permanente do PR.
 - **🚑** — não é removido. Fast-track é registro permanente.
 
 ## Anti-patterns explícitos
 
 - **Não combinar emoji de tipo com emoji de estado.** GitHub já tem Draft/Ready/Merged/Closed. Duplicar via emoji invariavelmente gera drift manual.
-- **Não inventar emojis adicionais.** Convenção atual já cobre os 6 padrões previstos (🧾, 🛠️, 🔒, 1️⃣2️⃣3️⃣, ➜, 🧭, 🚑). Se um PR não couber em nenhum, registrar em comentário do PR — não cunhar emoji novo. Reabrir esta convenção se ≥ 3 casos especiais aparecerem.
+- **Não inventar emojis adicionais.** Conjunto de emojis é fechado: 🧾, 🛠️, 🔒, 1️⃣2️⃣3️⃣, ➜, 🚑. Nuances vão para **labels textuais** (`[Bootstrap]`, `[Pre-model]`, `[Hotfix]`); lista de labels também fechada. Se um PR não couber em nenhuma combinação, registrar em comentário do PR — não cunhar emoji ou label novos.
+- **Não emoji-pack para nuances.** `[🛠️➜] [Bootstrap]` é a forma correta; `[🛠️➜Bootstrap]` ou `[🧭🛠️➜]` (emoji-pack representando nuance) destroem a clareza visual e geram ambiguidade categórica.
 - **Não usar 🔒 em execution PRs.** 🔒 é exclusivo de governance. Execution dependente usa 1️⃣N➜ + body opening listando upstream.
 - **Não usar números em governance.** 🧾 é fundação, não posição. Tentar `[🧾1️⃣]` é categoria-erro.
-- **Não duplicar no body o que já está no título.** O título carrega tipo + lock/posição/downstream; o body opening apenas explicita a stack ou o contrato pareado.
-- **Não usar 🧭 como rota de escape.** Se em dúvida entre 🛠️ e 🧭, default para 🛠️ + nota explicativa. 🧭 é reservado a PRs genuinamente transitional/pre-model.
+- **Não duplicar no body o que já está no título.** O título carrega tipo + lock/posição/downstream + label de nuance; o body opening apenas explicita a stack ou o contrato pareado.
+- **Não usar `[Bootstrap]` ou `[Pre-model]` como rota de escape.** Se em dúvida entre execução normal e bootstrap, default para `[🛠️]` + nota explicativa. Bootstrap/Pre-model são reservados a PRs genuinamente transitional.
+- **Não usar stacks > 4 PRs sem revisão de escopo.** Sinal de scope creep — considerar splitar em specs.
 
 ## Anti-DAG guardrail
 
-🔒, ➜, números (1️⃣2️⃣3️⃣), e 🧭 são **sinalização humana L1** — não input para automação. Se surgir necessidade de:
+🔒, ➜, números (1️⃣2️⃣3️⃣), e labels textuais são **sinalização humana L1** — leitura por olhos humanos em uma lista de PRs. **Não são input para automação**.
 
-- parser automático de números para ordering;
-- DAG tooling para grafo de dependências;
-- merge orchestration baseada em emojis;
-- CI que valida ordem ou completude da stack;
+Se você está pensando em alguma destas opções, **pare e abra DEC**:
 
-isso deve **reabrir DEC própria** (cf. research §8 anti-recursão guards). Convenção é convenção textual humana, não infraestrutura.
+- parser automático que lê emojis/números para ordering;
+- DAG tooling que monta grafo de dependências a partir dos títulos;
+- merge orchestration baseada em emojis ou labels;
+- CI que valida ordem, completude da stack ou presença de prefixo;
+- linter que valida formato exato do título antes de aprovar PR.
+
+Qualquer ferramenta lendo programaticamente esta convenção é território **L4** (cf. research §8 anti-recursão guards) — exige decisão registrada. Convenção L1 é convenção textual humana; viramos infraestrutura no momento em que automatizamos a leitura dela.
 
 ## Enforcement
 

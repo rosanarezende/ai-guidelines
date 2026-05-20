@@ -1,14 +1,17 @@
 <!--
 TÍTULO do PR deve seguir o padrão em .core/process/pr-title-conventions.md:
-  [<emojis>] [Spec <NNNN>] <título curto>
+  [<emojis>] [<label-opcional>] [Spec <NNNN>] <título curto>
 
 Combinações canônicas:
-  [🧾🔒] [Spec 0023] Lifecycle bootstrap            — governance pareada com execution(s)
-  [🛠️1️⃣➜] [Spec 0023] Enforcement runtime          — execution intermediária (com downstream)
-  [🛠️2️⃣] [Spec 0023] DX execution                  — execution terminal
-  [🛠️] [Spec 0041] Clipboard hotfix                — execution isolada
-  [🧭🛠️➜] [Spec 0023] Workflow runtime             — transitional/pre-model (EXCEPCIONAL)
-  [🚑] [Incident 0007] Emergency rollback           — fast-track
+  [🧾🔒] [Spec 0023] Lifecycle bootstrap                          — governance pareada com execution(s)
+  [🛠️1️⃣➜] [Spec 0023] Enforcement runtime                       — execution intermediária (com downstream)
+  [🛠️2️⃣] [Spec 0023] DX execution                                — execution terminal
+  [🛠️] [Spec 0041] Clipboard hotfix                              — execution isolada
+  [🛠️➜] [Bootstrap] [Spec 0023] Workflow runtime                — transitional/pre-model (label textual)
+  [🚑] [Incident 0007] Emergency rollback                        — fast-track
+
+Emojis são conjunto fechado. Nuances usam labels textuais fechadas
+([Bootstrap], [Pre-model], [Hotfix]).
 -->
 
 ## PR Type
@@ -16,7 +19,6 @@ Combinações canônicas:
 - [ ] 🧾 Governance / Thinking — spec/decision-brief/plan/tasks/research/ADR
 - [ ] 🛠️ Execution — código + docs derivados
 - [ ] 🚑 Fast-track — patch/fix/incident pequeno com accountability transferida ao reviewer (cf. ADR 0021)
-- [ ] 🧭 Transitional / pre-model — uso **EXCEPCIONAL**; PR que colapsa governance+execution antes da estabilização metodológica de uma spec
 
 ## Stack Dependencies
 
@@ -24,6 +26,12 @@ Combinações canônicas:
 - [ ] 🔒 Governance contract pendente de execution PR(s) pareada (`[🧾🔒]`; declare execution PRs no body opening)
 - [ ] 🛠️N➜ Execution intermediária — posição N na stack, com PR(s) downstream (declare upstream + downstream no body opening)
 - [ ] 🛠️N Execution terminal — posição N na stack, sem PRs downstream (declare upstream no body opening)
+
+## Label de nuance (opcional)
+
+- [ ] `[Bootstrap]` — PR colapsa governance+execution antes da estabilização metodológica da spec
+- [ ] `[Pre-model]` — PR criado antes do lifecycle/enforcement da spec estar cravado
+- [ ] `[Hotfix]` — fix urgente que precisa visibilidade mas não se qualifica como 🚑 fast-track
 
 ## Resumo
 
