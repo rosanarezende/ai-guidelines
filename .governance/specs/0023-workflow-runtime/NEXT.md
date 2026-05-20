@@ -81,9 +81,11 @@ _(Sem débitos adiados no momento do gate. Itens emergentes durante PR1 entram a
 - **Refinada em 2026-05-20** em duas iterações:
   - **(i)** Após observação de que PR #18 não encaixava honestamente nem como governance pura nem execution pura. Primeira tentativa: adicionar 🧭 como emoji de "transitional/pre-model". Resultou em `[🧭🛠️➜]` visualmente ambíguo — 3 emojis aglutinados perdiam clareza categórica.
   - **(ii)** Refinada novamente: **separar tipo (emoji fechado) de nuance (label textual fechada)**. 🧭 removido como emoji; nuances viram brackets textuais separados (`[Bootstrap]`, `[Pre-model]`, `[Hotfix]`). PR #18 hoje: `[🛠️➜] [Bootstrap] [Spec 0023] Workflow runtime`.
+  - **(iii)** Estendida para suportar **pillar markers no identificador** (ex.: `[🛠️] [fix] ...`) — permite PRs não-spec (fix/patch/spike/incident/experiment/proposal) vinculados diretamente ao `WorkItem.kind` do `registry.yml`. Primeiro uso: PR de reorganização de scripts (fix pillar) como dogfooding.
 - **Conjuntos fechados:**
   - Emojis: 🧾 (governance) · 🛠️ (execution) · 🔒 (governance contract) · 1️⃣2️⃣3️⃣ (order) · ➜ (downstream) · 🚑 (fast-track). **Nenhum emoji adicional será introduzido.**
   - Labels textuais: `[Bootstrap]` · `[Pre-model]` · `[Hotfix]`. **Lista fechada;** nova label exige ≥ 2 casos justificando + cross-ref.
+  - Pillars no identificador: `fix` · `patch` · `incident` · `spike` · `experiment` · `proposal` (alinhados com taxonomia MECE da Spec 0021).
 - **Regras explícitas:** governance NÃO usa número; ausência de ➜ em execution = terminal; ausência de número em execution = isolado; cada bracket carrega uma dimensão semântica (não aglutinar tipo + nuance no mesmo bracket).
 - **Anti-DAG guardrail explícito** reforçado: emojis/números/labels são sinalização humana L1, não input para automação. Qualquer parser, DAG tooling, merge orchestration, CI lint de prefixo → reabrir DEC própria (L4).
 - **Não é nova decisão** (não abre Bloco G, ADR ou DEC). É hygiene visual sobre o lifecycle já cravado. Sem enforcement automático.
