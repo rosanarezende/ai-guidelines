@@ -73,3 +73,10 @@ _(Sem débitos adiados no momento do gate. Itens emergentes durante PR1 entram a
 - 5 perguntas (F1–F5) cravadas como `[DEC-0023-F01..F05]` no Bloco F do decision-brief — status Pendente, opções populadas + recomendação inicial.
 - F6/F7 permanecem candidates no research §9 (não promovidos a DEC para evitar consumir convergência via expansão).
 - **Pós-Bloco F deferido (com critério):** PR3-enforcement-runtime aguarda Bloco F Resolved + estabilização semântica antes de iniciar implementação de runtime profundo.
+
+### 8. Convenção operacional derivada — PR title (🧾/🛠️/🔒/🚑)
+
+- Documentada em [`.core/process/pr-title-conventions.md`](../../../.core/process/pr-title-conventions.md) + checkboxes no `pull_request_template.md`. Materialização dogfoodada em PR #18 (🛠️) e PR #19 (🧾🔒).
+- Origem: dor real observada ao revisar a stack #18 ↔ #19 — GitHub native states (Draft/Ready/Merged/Closed) cobrem lifecycle operacional mas **não** capturam o contrato arquitetural "governance PR não-mergeable isoladamente" que ADR 0020 introduziu.
+- **Não é nova decisão** (não abre Bloco G, ADR ou DEC). É hygiene visual sobre o lifecycle já cravado. Sem enforcement automático nesta versão.
+- **Critério de revisita:** se ≥ 3 casos de drift na prática (PRs nascendo sem prefixo ou com prefixo errado), reabrir como DEC própria com enforcement leve no `governance-pr-check` (validação de prefixo).

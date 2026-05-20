@@ -1,3 +1,22 @@
+<!--
+TÍTULO do PR deve seguir a convenção em .core/process/pr-title-conventions.md:
+  🧾🔒 <título>   — governance PR (não-mergeable isoladamente)
+  🧾 <título>     — governance PR mergeable sozinho (raro)
+  🛠️ <título>    — execution PR
+  🚑 <título>    — fast-track
+-->
+
+## PR Type
+
+- [ ] 🧾 Governance / Thinking — contém spec/decision-brief/plan/tasks/research/ADR
+- [ ] 🛠️ Execution — contém código + docs derivados
+- [ ] 🚑 Fast-track — patch/fix/incident pequeno com accountability transferida ao reviewer (cf. ADR 0021)
+
+## Governance Contract
+
+- [ ] Este PR pode ser mergeado isoladamente
+- [ ] 🔒 Este PR depende de PR(s) de execução relacionados (declare a stack no opening do body)
+
 ## Resumo
 
 <!-- Descreva a mudança de forma objetiva. -->
