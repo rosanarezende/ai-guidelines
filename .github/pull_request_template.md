@@ -1,21 +1,29 @@
 <!--
-TÍTULO do PR deve seguir a convenção em .core/process/pr-title-conventions.md:
-  🧾🔒 <título>   — governance PR (não-mergeable isoladamente)
-  🧾 <título>     — governance PR mergeable sozinho (raro)
-  🛠️ <título>    — execution PR
-  🚑 <título>    — fast-track
+TÍTULO do PR deve seguir o padrão em .core/process/pr-title-conventions.md:
+  [<emojis>] [Spec <NNNN>] <título curto>
+
+Combinações canônicas:
+  [🧾🔒] [Spec 0023] Lifecycle bootstrap            — governance pareada com execution(s)
+  [🛠️1️⃣➜] [Spec 0023] Enforcement runtime          — execution intermediária (com downstream)
+  [🛠️2️⃣] [Spec 0023] DX execution                  — execution terminal
+  [🛠️] [Spec 0041] Clipboard hotfix                — execution isolada
+  [🧭🛠️➜] [Spec 0023] Workflow runtime             — transitional/pre-model (EXCEPCIONAL)
+  [🚑] [Incident 0007] Emergency rollback           — fast-track
 -->
 
 ## PR Type
 
-- [ ] 🧾 Governance / Thinking — contém spec/decision-brief/plan/tasks/research/ADR
-- [ ] 🛠️ Execution — contém código + docs derivados
+- [ ] 🧾 Governance / Thinking — spec/decision-brief/plan/tasks/research/ADR
+- [ ] 🛠️ Execution — código + docs derivados
 - [ ] 🚑 Fast-track — patch/fix/incident pequeno com accountability transferida ao reviewer (cf. ADR 0021)
+- [ ] 🧭 Transitional / pre-model — uso **EXCEPCIONAL**; PR que colapsa governance+execution antes da estabilização metodológica de uma spec
 
-## Governance Contract
+## Stack Dependencies
 
-- [ ] Este PR pode ser mergeado isoladamente
-- [ ] 🔒 Este PR depende de PR(s) de execução relacionados (declare a stack no opening do body)
+- [ ] Este PR pode ser mergeado isoladamente (sem `🔒` nem `➜` no título)
+- [ ] 🔒 Governance contract pendente de execution PR(s) pareada (`[🧾🔒]`; declare execution PRs no body opening)
+- [ ] 🛠️N➜ Execution intermediária — posição N na stack, com PR(s) downstream (declare upstream + downstream no body opening)
+- [ ] 🛠️N Execution terminal — posição N na stack, sem PRs downstream (declare upstream no body opening)
 
 ## Resumo
 

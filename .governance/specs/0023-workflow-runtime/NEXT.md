@@ -74,12 +74,19 @@ _(Sem débitos adiados no momento do gate. Itens emergentes durante PR1 entram a
 - F6/F7 permanecem candidates no research §9 (não promovidos a DEC para evitar consumir convergência via expansão).
 - **Pós-Bloco F deferido (com critério):** PR3-enforcement-runtime aguarda Bloco F Resolved + estabilização semântica antes de iniciar implementação de runtime profundo.
 
-### 8. Convenção operacional derivada — PR title (🧾/🛠️/🔒/🚑)
+### 8. Convenção operacional derivada — PR title
 
-- Documentada em [`.core/process/pr-title-conventions.md`](../../../.core/process/pr-title-conventions.md) + checkboxes no `pull_request_template.md`. Materialização dogfoodada em PR #18 (🛠️) e PR #19 (🧾🔒).
-- Origem: dor real observada ao revisar a stack #18 ↔ #19 — GitHub native states (Draft/Ready/Merged/Closed) cobrem lifecycle operacional mas **não** capturam o contrato arquitetural "governance PR não-mergeable isoladamente" que ADR 0020 introduziu.
-- **Não é nova decisão** (não abre Bloco G, ADR ou DEC). É hygiene visual sobre o lifecycle já cravado. Sem enforcement automático nesta versão.
-- **Critério de revisita:** se ≥ 3 casos de drift na prática (PRs nascendo sem prefixo ou com prefixo errado), reabrir como DEC própria com enforcement leve no `governance-pr-check` (validação de prefixo).
+- Documentada em [`.core/process/pr-title-conventions.md`](../../../.core/process/pr-title-conventions.md) + checkboxes no `pull_request_template.md`. Materialização dogfoodada em PR #18 (`[🧭🛠️➜]`, pre-model transitional) e PR #19 (`[🧾🔒]`, governance pareada).
+- Origem: dor real observada ao revisar a stack #18 ↔ #19 — GitHub native states (Draft/Ready/Merged/Closed) cobrem lifecycle operacional mas **não** capturam o contrato arquitetural "PR não-mergeable isoladamente" que ADR 0020 introduziu.
+- **Refinada em 2026-05-20** após observação de que o PR #18 não encaixava honestamente nem como governance pura nem execution pura. Resultado:
+  - Padrão: `[<emojis>] [Spec NNNN] <título>`
+  - Emojis: 🧾 governance · 🛠️ execution · 🔒 governance contract pendente (só governance) · 1️⃣2️⃣3️⃣ rollout order (só execution) · ➜ downstream pending (só execution) · 🧭 transitional/pre-model (EXCEPCIONAL) · 🚑 fast-track
+  - Governance NÃO usa número (é fundação, não posição); execution usa número + ➜ quando intermediária; ausência de ➜ em execution = terminal.
+  - Anti-DAG guardrail explícito: emojis são sinalização humana L1, não input para automação.
+- **Não é nova decisão** (não abre Bloco G, ADR ou DEC). É hygiene visual sobre o lifecycle já cravado. Sem enforcement automático.
+- **Critério de revisita:**
+  - se ≥ 3 casos de drift na prática (PRs nascendo sem prefixo ou com prefixo errado), reabrir como DEC própria com enforcement leve no `governance-pr-check`;
+  - se renumeração ocorrer > 2 vezes na mesma stack, sinal de stack instável — reabrir DEC sobre forma de rollout antes de continuar.
 
 ---
 
