@@ -25,13 +25,13 @@ Todas as mudanças notáveis neste framework seguem [Semantic Versioning](https:
 - **Extraction de `research.md` é frágil.** `AssembleBriefing` casa cabeçalhos específicos do template canônico (`### H1 —`, `### 8.1 ...`). Specs fora dessa convenção recebem briefing thin com warning explícito.
 - **Drift detection deliberadamente diferido.** `governance-pr-check` valida apenas linkagem estrutural — não detecta divergência semântica entre `tasks.md` declarado e arquivos modificados. Reabrir como spec própria quando padrões de divergência se acumularem.
 - **Stacked PR rebase pain.** Sem ferramenta tipo Graphite/spr, rebase em cadeia é manual. Atrito honesto a ser experimentado.
-- **Clipboard ainda em no-op por default** (substituído por `NodeClipboard` real em PR4-DX-execution stacked).
+- **Clipboard ainda em no-op por default** (substituído por `NodeClipboard` real em PR5-DX-execution stacked).
 - **AI-as-Channel é restrição cravada.** Runtime nunca chama LLM; texto livre vira context bundle. Comportamentos derivados (interpretação de intent, response inteligente) ficam com agente IA externo (Claude Code / Cursor / etc.).
 
 ### Notas metodológicas
 
 - **PR1 da Spec 0023 declaradamente pre-model** (`[DEC-0023-D04]`): atravessou discovery + decision + execution num único PR antes do lifecycle estar cravado. Não é git surgery retroativa — é honestidade histórica.
-- **PR2-lifecycle declaradamente bootstrap**: introduz o modelo, não pode aplicar a si mesmo. Modelo aplica estritamente a partir de PR3-DX-thinking + PR4-DX-execution.
+- **PR2-lifecycle declaradamente bootstrap**: introduz o modelo, não pode aplicar a si mesmo. Modelo aplica estritamente a partir de PR3-enforcement-runtime + PR4-DX-thinking + PR5-DX-execution.
 - **Memory entry**: feedback persistente sobre "decisões estruturais emergindo implícita durante implementação" capturado para sessões futuras de agentes IA — vide `decision-brief.md` Bloco B → B05 corretivo.
 
 ---

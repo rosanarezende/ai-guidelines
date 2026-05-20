@@ -65,7 +65,7 @@ Runtime como **lente contextual** sobre estado existente, não como engine. AI p
 
 **Estado atual:** Spec/decision-brief/plan/state.yml/NEXT/tasks.md em `.governance/specs/0023-workflow-runtime/`. ADRs 0019 e 0020 publicados. Nenhum guia de uso, nenhum exemplo no consumidor.
 
-**Decisão (PR4-DX-execution):** `docs/guides/workflow-quickstart.md` + `docs/guides/workflow-with-ai-agents.md` + `examples/minimal-spec/` (cf. `[DEC-0023-B03]`). `README.md` ganha seção "Workflow Runtime" + repositioning leve (cf. `[DEC-0023-B04]` — preview tag explícito). `examples/` entra em `package.json#files`.
+**Decisão (PR5-DX-execution):** `docs/guides/workflow-quickstart.md` + `docs/guides/workflow-with-ai-agents.md` + `examples/minimal-spec/` (cf. `[DEC-0023-B03]`). `README.md` ganha seção "Workflow Runtime" + repositioning leve (cf. `[DEC-0023-B04]` — preview tag explícito). `examples/` entra em `package.json#files`.
 
 #### [G] CI mínimo de integridade estrutural (governance-pr-check)
 

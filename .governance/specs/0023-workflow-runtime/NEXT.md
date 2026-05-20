@@ -62,7 +62,7 @@ _(Sem débitos adiados no momento do gate. Itens emergentes durante PR1 entram a
 ### 6. PR2-lifecycle é bootstrap auto-violação declarada
 
 - Não dá pra aplicar o modelo à sua própria introdução.
-- Próxima iteração que aplica o modelo estritamente é PR3-DX-thinking + PR4-DX-execution.
+- Próxima iteração que aplica o modelo estritamente é PR3-enforcement-runtime + PR4-DX-thinking + PR5-DX-execution.
 - Trilha de aprendizado preservada em `[DEC-0023-D04]` (PR1 também pre-model declarado por motivo análogo).
 
 ### 7. Convergência research lifecycle-architecture.md (taxonomy ↔ lifecycle)
