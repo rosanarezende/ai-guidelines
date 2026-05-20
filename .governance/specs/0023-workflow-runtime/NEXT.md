@@ -80,3 +80,30 @@ _(Sem débitos adiados no momento do gate. Itens emergentes durante PR1 entram a
 - Origem: dor real observada ao revisar a stack #18 ↔ #19 — GitHub native states (Draft/Ready/Merged/Closed) cobrem lifecycle operacional mas **não** capturam o contrato arquitetural "governance PR não-mergeable isoladamente" que ADR 0020 introduziu.
 - **Não é nova decisão** (não abre Bloco G, ADR ou DEC). É hygiene visual sobre o lifecycle já cravado. Sem enforcement automático nesta versão.
 - **Critério de revisita:** se ≥ 3 casos de drift na prática (PRs nascendo sem prefixo ou com prefixo errado), reabrir como DEC própria com enforcement leve no `governance-pr-check` (validação de prefixo).
+
+---
+
+## 🗺️ Backlog estratégico
+
+### 9. Sanctification cutover (`cli/` → `src/`)
+
+A coexistência bridge-first (`cli/ ↔ src/`) é temporariamente aceita como estratégia de transição e validação incremental — **não como estado arquitetural final desejado**.
+
+O cutover definitivo deverá ser reavaliado após:
+
+- estabilização do lifecycle governance-first;
+- validação empírica dos PRs stacked governance/execution;
+- consolidação do runtime workflow;
+- maturidade suficiente do enforcement estrutural.
+
+Objetivo do cutover futuro:
+
+- consolidar runtime canônico em `src/`;
+- reduzir surface area legado;
+- eliminar bridges transitórias;
+- simplificar manutenção e onboarding;
+- transformar o modelo governance-first em foundation única do projeto.
+
+**Evitar antecipar o cutover** antes da maturidade operacional da governança, para não misturar consolidação arquitetural com investigação metodológica.
+
+**Referência histórica:** PR #16 (Spec 0022 — CLI Runtime Cutover) fechado em 2026-05-20 como **deferred pending governance/runtime stabilization** (não superseded). Trilha histórica da branch `feat/spec-0022-cli-runtime-cutover` preservada via close (sem delete).
