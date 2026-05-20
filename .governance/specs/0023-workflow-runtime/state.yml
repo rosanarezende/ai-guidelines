@@ -1,10 +1,10 @@
 stage: planning
 gate:
-  status: closed
+  status: awaiting-review
 focus:
-  - lifecycle-bootstrap
+  - lifecycle-taxonomy-convergence
   - enforcement-structural
 next:
-  - PR2-lifecycle: aguardando autorização textual explícita do owner para commit + push
-  - PR3-enforcement-runtime: executionAuthorized derivado + workflow continue refuse narrativo
-  - PR4-DX-thinking + PR5-DX-execution: primeira execução real sob enforcement estrutural completo
+  - F01–F05 do Bloco F (Pendentes) — owner picks options em sessão dedicada (sem urgência)
+  - PR3-enforcement-runtime aguarda Bloco F Resolved + estabilização semântica
+  - PR4-DX-thinking + PR5-DX-execution após PR3

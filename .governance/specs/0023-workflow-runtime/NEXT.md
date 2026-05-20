@@ -64,3 +64,12 @@ _(Sem débitos adiados no momento do gate. Itens emergentes durante PR1 entram a
 - Não dá pra aplicar o modelo à sua própria introdução.
 - Próxima iteração que aplica o modelo estritamente é PR3-DX-thinking + PR4-DX-execution.
 - Trilha de aprendizado preservada em `[DEC-0023-D04]` (PR1 também pre-model declarado por motivo análogo).
+
+### 7. Convergência research lifecycle-architecture.md (taxonomy ↔ lifecycle)
+
+- Research dedicado fechou em 299 linhas (cap absoluto 300; +49 sobre primário com justificativa).
+- Convergências cravadas: (a) invariantes universais leves (accountability + traceability + outcome registration); (b) lifecycle intent categories como eixo de leitura (5 classes), não nova taxonomia; (c) runtime taxonomy-aware sem orchestration engine; (d) enforcement universal leve.
+- Princípio canônico: **"governança universal não significa artifacts universais"**.
+- 5 perguntas (F1–F5) cravadas como `[DEC-0023-F01..F05]` no Bloco F do decision-brief — status Pendente, opções populadas + recomendação inicial.
+- F6/F7 permanecem candidates no research §9 (não promovidos a DEC para evitar consumir convergência via expansão).
+- **Pós-Bloco F deferido (com critério):** PR3-enforcement-runtime aguarda Bloco F Resolved + estabilização semântica antes de iniciar implementação de runtime profundo.
