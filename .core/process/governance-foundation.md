@@ -341,7 +341,7 @@ Regra prática:
 Ao concluir uma spec e fazer merge para `main`:
 
 - [ ] Todas as tasks de Fase 1 e Fase 2 (Implementação A e B) marcadas `[x]` em `tasks.md`.
-- [ ] Pipeline de check + test verde, sempre (ex.: `yarn check && yarn test` no `ai-guidelines`; substitua pelo equivalente do stack do consumidor — `npm test`, `pnpm verify`, `cargo test`, `pytest`, etc.).
+- [ ] Pipeline canônico verde, sempre (ex.: `yarn validate` no `ai-guidelines` — agrega format:check + build + test + living-docs:check; substitua pelo equivalente do stack do consumidor — `npm test`, `pnpm verify`, `cargo test`, `pytest`, etc.).
 - [ ] Se `NEXT.md` existir: migrar débitos relevantes para
       `roadmap/backlog.md` (ou para issues/discussões, conforme o caso) e
       **deletar** `NEXT.md`.

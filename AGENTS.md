@@ -1,6 +1,6 @@
 # AGENTS.md
 
-> **[MANDATÓRIO — HARNESS LOCK]** É proibido rodar `git commit` isoladamente. Toda submissão deve obrigatoriamente usar a cadeia: `yarn format ; yarn check ; git add . ; git commit -m "..."`.
+> **[MANDATÓRIO — HARNESS LOCK]** É proibido rodar `git commit` isoladamente. Toda submissão deve obrigatoriamente usar a cadeia: `yarn format ; yarn validate ; git add . ; git commit -m "..."`. `yarn validate` agrega `format:check + build:all + test + living-docs:check`; `yarn ci` adiciona smoke (executado em CI próprio).
 
 Este arquivo define o fluxo obrigatório para qualquer IA atuando neste repositório.
 
@@ -27,15 +27,13 @@ Conteúdo específico deste repositório deve ficar fora de `<AI_GUIDELINES>`. O
 Este workspace usa Yarn 4 com Plug'n'Play. Para execução local da CLI, o caminho suportado é `yarn guidelines ...`.
 
 ```bash
-yarn install --immutable
-yarn build:rules
-yarn build              # compila src/ → dist/ (necessário antes do CLI; ver nota abaixo)
-yarn format
-yarn check
-yarn test
-yarn check:repo
+yarn setup              # = install --immutable + build:all
+yarn format             # prettier --write
+yarn validate           # gate local: format:check + build:all + test + living-docs:check
 yarn guidelines adopt --target . --dry-run
 ```
+
+> **Referência única dos scripts:** [`docs/scripts.md`](docs/scripts.md) tem o mapa completo (categoria, composição, hooks, workflows). Use este Quickstart só para boot rápido; consulte `docs/scripts.md` antes de qualquer dúvida sobre o que cada script faz.
 
 > **Nota sobre `dist/` (TemplateEngine):** o CLI mjs em `cli/` invoca dinamicamente a TemplateEngine compilada em `dist/` para renderizar recipes mapeadas (sub-bloco 4.C.0 da Spec 0021). Quando uma recipe existe mas `dist/` ainda não foi gerado, o fluxo **falha rapidamente** com mensagem orientada a diagnóstico (em vez de cair silenciosamente no mirror legado — comportamento intencional, ADR-aligned, para evitar regressão silenciosa). **Se estiver rodando o CLI localmente sem `yarn build` prévio**, espere essa falha — execute `yarn build` antes. No pacote publicado via NPM, `prepack: yarn build` garante que `dist/` está sempre presente; `engine-unavailable` em produção indica regressão real de packaging.
 
@@ -125,7 +123,7 @@ Convert PRs from `Draft` to `Ready` only after explicit human revalidation.
 
 ### [CORE-14]
 
-At the end of each sub-block, provide only the commit message suggestion. The human executes the full validation chain (`yarn format ; yarn check ; ...`) and `git commit`.
+At the end of each sub-block, provide only the commit message suggestion. The human executes the full validation chain (`yarn format ; yarn validate ; ...`) and `git commit`.
 
 ### [GR-0203]
 
