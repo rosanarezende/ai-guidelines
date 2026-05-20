@@ -1,9 +1,9 @@
 name: Content Guardrails Check
 
 on:
+  # PRs against any base branch (catches stacked PRs that target feature
+  # branches rather than main — required by Spec 0023 lifecycle model).
   pull_request:
-    branches:
-      - main
   push:
     branches:
       - main

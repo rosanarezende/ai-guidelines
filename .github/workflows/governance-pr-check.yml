@@ -18,10 +18,12 @@
 name: Governance PR Check
 
 on:
+  # PRs against any base branch. The job-level `if: endsWith(github.head_ref, '-execution')`
+  # below já filtra para execution PRs; o branches filter aqui era redundante e
+  # excluía stacked PRs de disparar (Spec 0023 lifecycle depende de stacked
+  # governance↔execution pairs).
   pull_request:
     types: [opened, synchronize, reopened, labeled, unlabeled, edited]
-    branches:
-      - main
 
 jobs:
   governance-pr-check:
