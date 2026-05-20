@@ -1,0 +1,70 @@
+# Governance PR Check — CI mínimo de integridade estrutural.
+#
+# Origem: Spec 0023 ADR 0020 + [DEC-0023-D03]. Escopo restrito (não engine):
+# valida apenas linkagem entre execution PR e governance PR + presença de
+# tasks.md no governance PR. Drift detection profundo é projeto separado.
+#
+# Trigger: pull_request contra main que aparenta ser execution PR
+# (branch name termina em "-execution"). Para PRs governance (thinking),
+# este job é skipped — eles não precisam declarar dependência (são a
+# origem da dependência).
+#
+# Fast-track (label "fast-track") bypassa structural linkage checks,
+# NÃO accountability requirements. Responsabilidade transfere do contrato
+# estrutural para o reviewer humano explícito (cf. ADR 0021). Sem
+# rationale presente no PR body, o próprio governance-pr-check rejeita
+# o fast-track como bypass disfarçado.
+
+name: Governance PR Check
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled, edited]
+    branches:
+      - main
+
+jobs:
+  governance-pr-check:
+    runs-on: ubuntu-latest
+    # Roda apenas em execution PRs (convenção: branch termina em "-execution").
+    # Outros PRs são governance/thinking ou ad-hoc — skipped.
+    if: endsWith(github.head_ref, '-execution')
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Build TypeScript
+        run: yarn build
+
+      - name: Run governance PR check
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          node -e "
+            import('./dist/cli/governance-pr-check.js').then(m => {
+              const code = m.main({
+                prNumber: Number(process.env.PR_NUMBER),
+                repo: process.env.REPO,
+              });
+              process.exit(code);
+            }).catch(err => {
+              console.error('Failed to load governance-pr-check:', err.message);
+              process.exit(1);
+            });
+          "
