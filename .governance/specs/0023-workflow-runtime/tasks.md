@@ -193,7 +193,7 @@
 ## Fase de Review (Gate de Homologação)
 
 - [ ] **3.1** `spec.md` header: status → `In Review`.
-- [ ] **3.2** Pipeline canônico: `yarn check:repo` verde.
+- [ ] **3.2** Pipeline canônico: `yarn ci` verde (= `install --immutable` + `validate` + `test:smoke`).
 - [ ] **3.3** Critérios de aceite de `spec.md` confirmados ponto-a-ponto.
 - [ ] **3.4** `decision-brief.md` Blocos A/B/C/D/E todos `Resolved` e refletidos em `plan.md`.
 - [ ] **3.5** Validar em ambiente real: rodar `ai-guidelines workflow` e `continue` em `examples/minimal-spec/` (consumer dogfooding).

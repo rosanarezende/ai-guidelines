@@ -67,7 +67,7 @@ Resultado esperado quando esta spec encerrar:
 - [ ] Nenhuma lógica nova de domínio em `cli/`; bridge no entrypoint é o único toque.
 - [ ] BDD pt-BR (DADO/QUANDO/ENTÃO) cobrindo cada use case novo; coverage ≥ 85%.
 - [ ] ADR 0019 publicado (`.governance/` root + bridge).
-- [ ] Pipeline `yarn format ; yarn check ; yarn test` verde.
+- [ ] Pipeline `yarn format ; yarn validate` verde.
 - [ ] Dogfooding: a 0023 atravessou Stage B → Stage C (implementação) usando o próprio `workflow` para retomar contexto entre commits.
 
 ---
