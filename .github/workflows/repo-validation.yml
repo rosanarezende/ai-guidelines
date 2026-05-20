@@ -1,4 +1,9 @@
-name: AI Governance Check
+name: Repo Validation
+
+# Absorve o que era ai-guidelines-ci.yml + content-guardrails.yml em
+# um workflow único, eliminando duplicação (ai-guidelines-ci rodava
+# `yarn check` que já é subset de `yarn check:repo` rodado aqui).
+# Living docs drift guard preservado como step próprio.
 
 on:
   # PRs against any base branch (catches stacked PRs that target feature
@@ -9,7 +14,7 @@ on:
       - main
 
 jobs:
-  ai-guidelines-check:
+  repo-validation:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -19,15 +24,16 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "24"
+          cache: "yarn"
 
       - name: Enable Corepack
         run: corepack enable
 
-      - name: Install dependencies
+      - name: Install dependencies (immutable)
         run: yarn install --immutable
 
-      - name: Validate AI-first baseline
-        run: yarn check
+      - name: Validate quality gates (Format + Build + Tests + Coverage)
+        run: yarn check:repo
 
       - name: Validate Living Documentation drift guard
         run: yarn living-docs:check

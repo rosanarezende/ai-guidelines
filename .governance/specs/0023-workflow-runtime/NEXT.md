@@ -96,7 +96,18 @@ _(Sem débitos adiados no momento do gate. Itens emergentes durante PR1 entram a
 
 ## 🗺️ Backlog estratégico
 
-### 9. Sanctification cutover (`cli/` → `src/`)
+### 9. Composite action para setup compartilhado dos workflows
+
+**Estado atual (pós-consolidação):** 3 workflows (`repo-validation.yml`, `smoke-multi-os.yml`, `governance-pr-check.yml`) compartilham o mesmo bloco de setup (checkout + setup-node com cache yarn + corepack + install). Boilerplate replicado em ~10 linhas por workflow.
+
+**Deferido com critério:** criar `.github/actions/setup/action.yml` (composite action) para encapsular o setup compartilhado. **Reabrir quando:**
+
+- atingirmos > 5 workflows (atualmente 3); ou
+- a manutenção do boilerplate causar drift entre workflows em ≥ 2 ocasiões.
+
+**Justificativa do deferimento:** em 3 workflows, composite action é arquitetura prematura — overhead de indirection > ganho de DRY. Reavaliar quando volume justificar.
+
+### 10. Sanctification cutover (`cli/` → `src/`)
 
 A coexistência bridge-first (`cli/ ↔ src/`) é temporariamente aceita como estratégia de transição e validação incremental — **não como estado arquitetural final desejado**.
 
