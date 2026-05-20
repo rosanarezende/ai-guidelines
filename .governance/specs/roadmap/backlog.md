@@ -1,6 +1,6 @@
 # Backlog — `.governance/specs/` (canônico)
 
-> **Localização canônica em diante.** Conforme [ADR 0019](../../../adrs/0019-governance-specs-root.md), novas specs e novas entradas de backlog entram aqui. O backlog legado em [`.specify/specs/roadmap/backlog.md`](../../../.specify/specs/roadmap/backlog.md) permanece como referência histórica até cutover caso-a-caso.
+> **Localização canônica em diante.** Conforme [ADR 0019](../../../.core/governance/adrs/0019-governance-specs-root-in-maintainer.md), novas specs e novas entradas de backlog entram aqui. O backlog legado em [`.specify/specs/roadmap/backlog.md`](../../../.specify/specs/roadmap/backlog.md) permanece como referência histórica até cutover caso-a-caso.
 
 > **Regra de ouro.** Nada aqui entra em execução sem nova spec (`.governance/specs/<NNNN>-<slug>/`). Este arquivo é leitura obrigatória antes de abrir spec nova ou fechar uma spec existente.
 
