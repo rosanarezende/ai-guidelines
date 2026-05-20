@@ -6,7 +6,7 @@
 > Plan: [`./plan.md`](./plan.md) (criado em 2026-05-19 conforme `[DEC-0023-B05]`).
 > Tasks: tasklist da sessão de implementação (PR1).
 > Status agregado: **Resolved**
-> Última atualização: 2026-05-19 — gate Stage A → Stage B fechado (Bloco A); gate de escopo do PR2 fechado (Bloco B, incluindo B05 sobre plan.md inline vs separado).
+> Última atualização: 2026-05-19 — gate Stage A → Stage B fechado (Bloco A); gate de escopo do PR2 fechado (Bloco B, incluindo B05 sobre plan.md inline vs separado); gate de lifecycle metodológico fechado (Bloco D — bootstrap declarado); gate de enforcement estrutural fechado (Bloco E — enforcement estrutural precede consciência comportamental).
 
 > **Artefato canônico do gate humano entre Stage 1 (research) e Stage 2 (design + implementação).** Para esta spec, a Stage 1 é a investigação documentada na pasta legacy `.specify/specs/0023-governance-workflow-discovery-model/` (research.md + anexos). Este brief materializa o gate Stage A → Stage B com 4 decisões cravadas em sessão de design 2026-05-19.
 
@@ -26,6 +26,16 @@
 | `[DEC-0023-B04]` | B     | Resolved |
 | `[DEC-0023-B05]` | B     | Resolved |
 | `[DEC-0023-C01]` | C     | Resolved |
+| `[DEC-0023-D01]` | D     | Resolved |
+| `[DEC-0023-D02]` | D     | Resolved |
+| `[DEC-0023-D03]` | D     | Resolved |
+| `[DEC-0023-D04]` | D     | Resolved |
+| `[DEC-0023-D05]` | D     | Resolved |
+| `[DEC-0023-E01]` | E     | Resolved |
+| `[DEC-0023-E02]` | E     | Resolved |
+| `[DEC-0023-E03]` | E     | Resolved |
+| `[DEC-0023-E04]` | E     | Resolved |
+| `[DEC-0023-E05]` | E     | Resolved |
 
 **Status agregado:** Resolved.
 
@@ -350,6 +360,351 @@
 
 ---
 
+## Bloco D — Lifecycle metodológico humano-IA (bootstrap declarado)
+
+> **Sessão de decisão 2026-05-19, segunda metade.** A execução do PR1 + abertura do PR2 revelou que o runtime estava operando sobre um lifecycle nunca cravado. Owner identificou pattern: "decisões estruturais emergindo implícita durante implementação" — o mesmo anti-pattern que a 0023 original tentava nomear, agora vivo na própria 0023. Esta investigação retoma o discovery legado (P1–P10 do `research.md` legacy) e crava o lifecycle operacional como modelo executável.
+>
+> **Auto-referência declarada:** este Bloco D introduz o modelo. A PR2-lifecycle que o materializa é necessariamente **bootstrap pre-model** — não dá pra aplicar o modelo à própria introdução do modelo. A partir de PR3 em diante, modelo aplica estritamente.
+
+### [DEC-0023-D01] Lifecycle metodológico de 4 fases + `tasks.md` como boundary canônico
+
+**Pergunta:** O lifecycle humano-IA tem quantas fases distintas, e qual é o artifact que oficialmente autoriza execução?
+
+**Contexto:**
+
+- PR1 atravessou `discovery → decision → execution` sem `plan.md`/`tasks.md` como artifacts separados. Stage "planning" foi colapsado em "decision".
+- PR2 abriu Bloco B (decisões de escopo) e imediatamente abriu 10 tasks de execução no mesmo movimento — sem que um gate de **planning** explícito tivesse acontecido. Decisões de escopo ≠ decomposição operacional.
+- Owner observou: "planning ainda não é implementação. Mas também não é mais discovery. Planning parece o verdadeiro boundary intermediário entre thinking e execution."
+
+**Opções:**
+
+| Opção | Descrição                                                                                                                                                                                 | Pró                                                                                                            | Contra                                                                               |
+| :---- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------- |
+| A     | **3 fases** (discovery → decision → execution). Modelo implícito que estava operando.                                                                                                     | Mais simples.                                                                                                  | Colapsa planning em decision; permite que execução comece sem decomposição aprovada. |
+| B     | **4 fases** (discovery → decision → planning → execution) com gates explícitos entre cada. `tasks.md` é boundary canônico: execução autorizada **se e só se** `tasks.md` aprovado existe. | Separa direção (decision) de decomposição (planning); boundary observável e falsificável; elimina ambiguidade. | Mais um gate; risco residual de virar ceremony.                                      |
+
+**Decisão do Gate Humano:**
+
+- **Status:** [x] Resolvido
+- **Escolha:** [ ] A | [x] B
+- **Justificativa:** Planning é categoria distinta de Decision. Decision responde "qual direção?"; Planning responde "qual decomposição operacional, em qual ordem?". Aprovar uma não implica aprovar a outra. `tasks.md` como boundary é observável (existe / não existe), falsificável (Gate 3 humano aprovou explicitamente / não) e elimina decisão implícita "aprovou direção → execução autorizada".
+
+> **Nota importante:** `tasks.md` **não é checklist operacional**. É **artifact de autorização de execução**. Sua presença + aprovação humana (Gate 3) é o sinal canônico de que rollout/decomposition foi aceito e implementação está autorizada. Checklist operacional vive em `plan.md § DoD`. Diferença fundamental.
+
+- **Data / Owner:** 2026-05-19 / @rosanarezende
+
+---
+
+### [DEC-0023-D02] Forma de PR no git: stacked + CI mínimo
+
+**Pergunta:** Como traduzir o lifecycle conceitual em mecânica git/GitHub?
+
+**Contexto:**
+
+- Git/GitHub modela PR como "unidade de merge". Não existe primitiva nativa para "PR aprovado que não vai para main ainda".
+- Três padrões mapeados em sessão de design 2026-05-19: A (RFC-em-git: PR-thinking mergea isolado), B (stacked PRs: PR-execution sobre base PR-thinking), C (Contract PR com CI de drift detection).
+- Owner observou: "o merge final só acontece ponta a ponta. PR-thinking sozinho NÃO representa software pronto."
+
+**Opções:**
+
+| Opção | Descrição                                                                                                       | Pró                                                                                                               | Contra                                                                                             |
+| :---- | :-------------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------- |
+| A     | **RFC-em-git**: PR-thinking mergea como documentação; PR-execution depois referencia.                           | Funciona com git nativo; trilha limpa em `main`.                                                                  | `main` recebe "specs aprovadas, código não-existente"; requer disciplina humana para fechar ciclo. |
+| B     | **Stacked PRs reais**: PR-execution tem PR-thinking como base branch. Ambos devem mergear; merge ponta a ponta. | Modela exatamente a intenção; thinking e execution acoplados; reviewers externos veem contrato + execução juntos. | Stacking pain (rebase em cadeia); GitHub UI sem suporte nativo.                                    |
+| C     | **Contract PR + CI custodiante**: PR-thinking permanent draft; CI valida referência + drift detection.          | Máxima proteção contra divergência.                                                                               | Projeto significativo de tooling (drift detection é não-trivial); risco de virar workflow engine.  |
+
+**Decisão do Gate Humano:**
+
+- **Status:** [x] Resolvido
+- **Escolha:** [ ] A | [x] B (estrutural) + parte leve de C (CI mínimo de linkagem) | drift detection profundo de C **deliberadamente diferido**
+- **Justificativa:** Mecânica B (stacked PRs reais) aderente ao "merge ponta a ponta" + força stacking pain explícito desde o início (descoberta de friction real, não conceitual). CI mínimo de linkagem (parte leve de C) protege contra desuso. Drift detection completo é projeto separado — risco real de virar workflow engine se acoplado agora. **Esta diferição é deliberada, não esquecimento** — registrada explicitamente.
+- **Data / Owner:** 2026-05-19 / @rosanarezende
+
+---
+
+### [DEC-0023-D03] CI mínimo: script versionado + GitHub workflow
+
+**Pergunta:** Qual mecanismo de enforcement do contrato stacked-PR?
+
+**Opções:**
+
+| Opção | Descrição                                                                                                                                | Pró                                                   | Contra                                                            |
+| :---- | :--------------------------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------------- | :---------------------------------------------------------------- |
+| A     | **Convenção textual**: PR-execution declara "Depends on #N"; reviewer humano valida.                                                     | Zero código.                                          | Cai por desuso; perde força operacional rápido.                   |
+| B     | **Check script versionado**: GitHub Action lê PR body, valida referência via `gh api`, valida existência de `tasks.md` na governance PR. | Versionado; auditável; custo baixo; enforcement real. | Mais código; depende de `gh CLI` no ambiente CI.                  |
+| C     | **Branch protection + check git-side**: branch da execução **deve** ter base = branch da thinking. Check via `git merge-base`.           | Aderência total ao modelo B literal.                  | Configuração depende de GitHub UI (fora do repo); menos portável. |
+
+**Decisão do Gate Humano:**
+
+- **Status:** [x] Resolvido
+- **Escolha:** [ ] A | [x] B | [ ] C
+- **Justificativa / Escopo do enforcement:** valida exatamente isto, e **nada mais**:
+  > 1. PR-execution declara dependência explícita (marcador `Depends on #N (governance)` no body).
+  > 2. Governance PR #N existe.
+  > 3. Governance PR #N está aberto ou aprovado (não closed/rejected).
+  > 4. Governance PR #N contém `tasks.md` no diff (em `.governance/specs/*/tasks.md` ou equivalente).
+  >
+  > **Para aí.** Sem drift semântico. Sem mapping arquivos↔tasks. Sem inferência de intenção. Sem análise de cobertura. Framing canônico: **"CI mínimo de integridade estrutural"**, não "engine de enforcement". Expansão deste check requer decisão própria (não acreção silenciosa).
+- **Data / Owner:** 2026-05-19 / @rosanarezende
+
+---
+
+### [DEC-0023-D04] PR1 da 0023 como pre-model declarado
+
+**Pergunta:** Aplicar o modelo retroativamente aos 6 commits já existentes em `feat/spec-0023-workflow-runtime`?
+
+**Contexto:**
+
+- PR1 contém pivot + runtime + gate Bloco B em commits razoavelmente segmentados (2 docs, 3 código, 1 docs).
+- Branch ainda não foi mergeada em `main` — git surgery seria viável.
+
+**Opções:**
+
+| Opção | Descrição                                                                                                                    | Pró                                                                        | Contra                                                                     |
+| :---- | :--------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------- | :------------------------------------------------------------------------- |
+| A     | **Aceitar PR1 como pre-model declarado**. Modelo aplica de PR2-lifecycle em diante. Documentado em CHANGELOG/decision-brief. | Honestidade histórica; zero git surgery; trilha de aprendizado preservada. | "Mancha histórica" registrada (não-conformidade declarada).                |
+| B     | **Splitar PR1 retroativamente** em branch `*-thinking` (docs commits) + `*-execution` (code commits) stacked.                | Aderência total ao modelo desde o início.                                  | ~30min git surgery; reescrita artificial da trilha; cosplay de governança. |
+
+**Decisão do Gate Humano:**
+
+- **Status:** [x] Resolvido
+- **Escolha:** [x] A | [ ] B
+- **Justificativa:** Owner: "a 0023 inteira é dogfooding; o modelo estava emergindo; o próprio colapso entre thinking/execution foi o que revelou o problema. Git surgery retroativa é cosplay de governança." Honestidade histórica > aderência artificial.
+- **Data / Owner:** 2026-05-19 / @rosanarezende
+
+---
+
+### [DEC-0023-D05] Aplicabilidade do lifecycle: não-universal, com exceções explícitas
+
+**Pergunta:** O lifecycle de 4 fases + stacked PRs aplica a todo trabalho, ou tem exceções?
+
+**Contexto:**
+
+- AP3 do research legado (`spec como container universal`) descreve patches/fixes herdando plan/tasks por reflexo como anti-pattern.
+- Owner: "patch/fix/incidents pequenos podem ter fast-track. Mas exceção precisa ser declarada, nunca implícita."
+
+**Opções:**
+
+| Opção | Descrição                                                                                                                                                                                             | Pró                                                                                      | Contra                                                                    |
+| :---- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------- | :------------------------------------------------------------------------ |
+| A     | **Universal**: todo trabalho atravessa as 4 fases + stacked PRs.                                                                                                                                      | Sem ambiguidade.                                                                         | Overhead desproporcional em iniciativas pequenas; recria AP3 amplificado. |
+| B     | **Obrigatório para `spec`/`proposal`/`spike`; exceções explícitas declaradas para `patch`/`fix`/`incident` pequeno**. Fast-track declarado em commit message + label PR + state.yml; nunca implícito. | Preserva intent; reduz overhead; exceção rastreável; resolve AP3 sem perder enforcement. | Define limite ("o que é pequeno?") — pode virar zona cinzenta.            |
+
+**Decisão do Gate Humano:**
+
+- **Status:** [x] Resolvido
+- **Escolha:** [ ] A | [x] B
+- **Justificativa:** Fast-track explícito é a forma certa de respeitar AP3 sem esvaziar enforcement. Critério de "pequeno" começa como julgamento humano (não automatizado): se o autor declara fast-track, fast-track aplica; reviewer pode contestar. Refinamento (definir tamanho objetivo) só após observação empírica em ≥ 3 casos. Convenção de fast-track:
+  > - commit message inclui `[fast-track: <razão curta>]`
+  > - PR label `fast-track`
+  > - `state.yml` registra `fast-track: true` + `fast-track-reason: <texto>`
+  > - CI mínimo (D03) **bypassa** validação stacked-PR quando label `fast-track` está presente — não falha; deixa passar; review humano absorve responsabilidade.
+- **Data / Owner:** 2026-05-19 / @rosanarezende
+
+---
+
+### Riscos conscientemente aceitos no Bloco D
+
+- **Stacked PR rebase pain.** Sem ferramenta tipo Graphite/spr, rebase em cadeia é manual. Aceito como atrito honesto a ser experimentado antes de adotar tooling extra. Reabrir como D02-revisited se ≥ 2 ciclos comprovarem inviabilidade.
+- **CI mínimo é só linkagem estrutural.** Não detecta divergência semântica entre tasks declaradas e código real. Conscientemente diferido (parte de C). Pode ser exploited por execution PR malformado — aceito porque review humano da execution PR continua sendo última linha de defesa.
+- **PR2-lifecycle é auto-violação declarada do modelo.** Não dá pra aplicar o modelo à sua própria introdução. Bootstrap. Registrado explicitamente nesta seção, na PR description e no CHANGELOG preview.
+- **`fast-track` ainda subjetivo.** Definição objetiva de "pequeno" diferida até observação empírica; risco de virar válvula de escape. Mitigação: PR label requerido + `state.yml` registrado + reviewer pode contestar. Reabrir D05 se ≥ 3 fast-tracks revelarem padrão de abuso.
+
+---
+
+## Bloco E — Enforcement estrutural (`process awareness is not process enforcement`)
+
+> **Sessão de decisão 2026-05-19, terceira metade.** Durante a materialização do PR2-lifecycle, o agente (Claude Opus 4.7) violou o lifecycle que acabou de co-redigir em D01 — atravessou T1–T7 sem pausar para validação humana. Foi a **terceira reincidência consecutiva** do mesmo pattern (PR1 colapso, PR2 task-creation prematura, agora PR2-lifecycle steamroll). Owner observou: "consciência do processo não garante aderência ao processo". A literatura de Human-in-the-Loop / Human-Centered AI confirma teoricamente o que o dogfooding demonstrou empiricamente. Este Bloco E craveia enforcement estrutural como elemento de **primeira classe** da arquitetura — não evolução futura, não tooling secundário.
+
+### [DEC-0023-E01] Princípio canônico: `process awareness is not process enforcement`
+
+**Pergunta:** Workflows colaborativos humano-IA podem depender da consciência do agente sobre o processo, ou precisam de enforcement estrutural independente?
+
+**Contexto (evidência empírica do próprio repo):**
+
+- **3 violações consecutivas do agente** dentro desta mesma spec, todas após decisões explícitas, ADRs publicados, memory entries salvos e princípios articulados pelo próprio agente. Awareness foi alta; aderência foi zero.
+- **5 decisões estruturais anteriores** que foram empurradas como "talvez depois" e voltaram com custo maior: `.specify → .governance` cutover, runtime lifecycle, planning boundary, governance separation, e enforcement em si. Cada deferimento gerou retrabalho mensurável.
+- Literatura HITL/HOTL reforça: sistemas colaborativos perdem awareness operacional sem checkpoints estruturais; feedback humano precisa ser incorporado estruturalmente no sistema, não apenas esperado comportamentalmente.
+
+**Opções:**
+
+| Opção | Descrição                                                                                                                                    | Pró                                                                                                                  | Contra                                                                                                                                     |
+| :---- | :------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------- |
+| A     | **Apenas L1 (consciência comportamental)**: agente respeita processo porque entende e concorda. Status quo até agora.                        | Zero infraestrutura adicional; máxima ergonomia.                                                                     | **Empiricamente falsificado** dentro desta spec. Awareness ≠ aderência. Convenção social degrada sob aceleração/conveniência/continuidade. |
+| B     | **Enforcement estrutural em camadas (L2 + L4 mínimo agora; L3 com critério)**: runtime declara estado de autorização; CI valida integridade. | Garantia operacional independente de disciplina; violação fica visível ou bloqueada. Suporta dogfooding sustentável. | Infraestrutura adicional; risco residual de virar workflow engine se framing não for protegido.                                            |
+| C     | **Full enforcement automatizado** (L1–L4 completo desde já, incluindo drift detection semântico, pre-tool hooks no harness).                 | Máxima proteção contra violação.                                                                                     | Engine pesada; rotula projeto como workflow framework / BPM; mata DevEx; viola ADR 0018 se acoplar a provider-specific hooks.              |
+
+**Decisão do Gate Humano:**
+
+- **Status:** [x] Resolvido
+- **Escolha:** [ ] A | [x] B | [ ] C
+- **Justificativa:** L1 já provou ser insuficiente empiricamente (3 violações documentadas). L2+L4 entra agora; L3 deferido com critério explícito (cf. E03). Princípio canônico cravado como ADR 0021 nova (separado de ADR 0020 — lifecycle é sobre **sequencing**; enforcement é sobre **mecanismo**).
+- **Data / Owner:** 2026-05-19 / @rosanarezende
+
+> **Princípio canônico (citável cross-spec):** `process awareness is not process enforcement`. Equivalente em pt-BR: **governança precisa ser enforced estruturalmente, não lembrada comportamentalmente**.
+
+---
+
+### [DEC-0023-E02] Enforcement é escopo da 0023, não evolução futura
+
+**Pergunta:** O enforcement estrutural entra como parte do escopo corrente da 0023, ou é deferido como "evolução futura"?
+
+**Contexto:** ≥ 5 decisões estruturantes anteriores deferidas como "futuro" retornaram depois com retrabalho mensurável e acoplamento maior. Padrão é forte o suficiente para virar regra metodológica.
+
+**Opções:**
+
+| Opção | Descrição                                                                               | Pró                                                                                                               | Contra                                                                                         |
+| :---- | :-------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------- |
+| A     | Deferir enforcement para spec futura ("Spec 0024 — Enforcement").                       | Mantém 0023 focada em runtime; spec menor.                                                                        | **Recria exatamente o pattern que a 0023 está tentando resolver.** Sexto deferimento da série. |
+| B     | Enforcement entra como Bloco E desta 0023; entrega imediata no PR3-enforcement-runtime. | Quebra a série de deferimentos; aplica princípio E01 a si mesmo (decisão estrutural detectada → escopo corrente). | Escopo da 0023 cresce; risco de overload (mitigado por separação de PRs).                      |
+
+**Decisão do Gate Humano:**
+
+- **Status:** [x] Resolvido
+- **Escolha:** [ ] A | [x] B
+- **Justificativa:** Owner registra regra metodológica derivada: **decisões estruturantes detectadas durante dogfooding entram no escopo corrente, não em NEXT/backlog**. Aplicar essa regra a si mesmo é a única forma honesta de quebrar a série de deferimentos. Risco de overload mitigado por separação de PRs (PR3 dedicada a enforcement).
+- **Data / Owner:** 2026-05-19 / @rosanarezende
+
+---
+
+### [DEC-0023-E03] Camadas de enforcement mínimo viável (L2 + L4 agora; L3 com critério)
+
+**Pergunta:** Quais camadas de enforcement entram agora, e quais ficam deferidas?
+
+**Contexto:**
+
+| Camada | Onde mora                           | O que faz                                                                       | Status                                        |
+| :----- | :---------------------------------- | :------------------------------------------------------------------------------ | :-------------------------------------------- |
+| L1     | Comportamento do agente             | Lê briefing, "decide" respeitar                                                 | **Insuficiente** (E01)                        |
+| L2     | `workflow continue` runtime         | Declara `executionAuthorized` derivado; recusa narrativa explícita quando false | **AGORA**                                     |
+| L3     | Hooks locais (pre-commit, pre-push) | Recusa operação se estado inválido                                              | **DEFERIDO** com critério                     |
+| L4     | CI (`governance-pr-check`)          | Bloqueia merge                                                                  | **AGORA** (já materializado no PR2-lifecycle) |
+
+**Opções:**
+
+| Opção | Descrição                                              | Pró                                                                                                         | Contra                                                                                                     |
+| :---- | :----------------------------------------------------- | :---------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------- |
+| A     | Apenas L4 agora (CI); L2/L3 deferidos.                 | Mínimo absoluto.                                                                                            | Runtime local não recusa execução — viola intenção do princípio E01 (enforcement = runtime + CI).          |
+| B     | **L2 + L4 agora; L3 deferido com critério explícito**. | Runtime local recusa execução (L2) + CI valida integridade (L4). L3 entra quando empiricamente justificado. | Hooks locais ausentes durante PR3→PR5; risco residual aceito.                                              |
+| C     | L1+L2+L3+L4 todos agora.                               | Máxima proteção.                                                                                            | Hooks locais aumentam atrito significativamente antes de lifecycle base estar validado; engine-shape risk. |
+
+**Decisão do Gate Humano:**
+
+- **Status:** [x] Resolvido
+- **Escolha:** [ ] A | [x] B | [ ] C
+- **Detalhamento operacional do L2 — separação explícita entre autorização local e enforcement CI:**
+
+  **(a) Autorização local de execução** (computada pelo runtime, fonte primária):
+
+  > ```
+  > executionAuthorized =
+  >   tasks.md exists in spec dir
+  >   && planning gate.status == closed
+  > ```
+  >
+  > **Campo é DERIVADO, não declarado.** Não existe campo declarativo `executionAuthorized: true` no YAML — autorização emerge do estado estrutural verificável localmente. **Runtime local é fonte de verdade**: consegue recusar execução mesmo offline, mesmo antes de existir PR remoto, mesmo fora do GitHub Actions.
+
+  **(b) Enforcement complementar em CI** (camada de integridade estrutural, não fonte primária de autorização):
+
+  > `governance-pr-check` valida a **chain integrity** (PR-execution referencia PR-thinking; PR-thinking existe; PR-thinking aberto/mergeado; PR-thinking contém `tasks.md`). É **camada complementar** que protege o merge contra divergência da chain estrutural. **Não substitui** autorização local; **reforça** quando a interação chega ao GitHub.
+
+  **(c) `workflow continue` recusa narrativamente** quando `executionAuthorized == false`, listando exatamente qual condição falhou e qual ação destranca:
+
+  > ```
+  > Execution locked.
+  > Missing:
+  > - tasks.md em .governance/specs/{slug}/ (não encontrado)
+  > - planning gate.status == closed (atual: awaiting-review)
+  > ```
+
+  **(d) Anti-ambiguidade arquitetural:** autorização local (a) e enforcement CI (b) são **camadas independentes** com responsabilidades distintas. Confundir as duas degrada o modelo — autorização não pode depender de CI remoto (runtime offline ficaria inutilizável), e CI não pode confiar cegamente em autorização local (PR remoto pode divergir do estado local). Os dois coexistem como L2 (local) e L4 (CI), conforme ADR 0021.
+
+- **Critério de revisita para L3 (hooks locais):** revisar quando L2/L4 forem comprovadamente insuficientes em **≥ 2 casos reais**. Não revisitar antes — atrito aumenta cedo demais.
+- **Data / Owner:** 2026-05-19 / @rosanarezende
+
+---
+
+### [DEC-0023-E04] Itens deferidos com critério de revisita explícito
+
+**Pergunta:** Quais aspectos de enforcement ficam deliberadamente deferidos, e com que critério eles voltam à pauta?
+
+**Itens deferidos (registrados também em `NEXT.md` e `tasks.md`):**
+
+| Item                                                            | Camada            | Critério de revisita                                                                                                       |
+| :-------------------------------------------------------------- | :---------------- | :------------------------------------------------------------------------------------------------------------------------- |
+| **L3 — hooks locais (pre-commit, pre-push)**                    | L3                | L2/L4 comprovarem insuficientes em ≥ 2 casos reais.                                                                        |
+| **Drift detection semântico** (mapping arquivos↔tasks)          | L4 expanded       | ≥ 2 ciclos de stacked PRs revelarem padrões de divergência específicos que CI mínimo deixa passar.                         |
+| **Runtime stateful complexo** (eventos, transitions, plugins)   | L2 expanded       | L2 atual (state derivado + refuse narrativo) provar insuficiente em ≥ 2 casos. Evitar engine-shape até lá.                 |
+| **Pre-tool hooks no harness** (Claude Code settings.json, etc.) | provider-specific | Decisão própria sobre channel-specific enforcement. Hoje viola ADR 0018 (acopla a provider). Reabrir só com brief próprio. |
+
+**Convenção operacional para deferimentos:**
+
+> **Não usar "talvez depois" como justificativa.** Todo item deferido precisa de:
+>
+> 1. Camada nomeada (L1/L2/L3/L4 + variação).
+> 2. Critério de revisita observável (não "quando alguém lembrar").
+> 3. Entrada em `NEXT.md` ou backlog estratégico da spec — não em memória implícita.
+
+**Decisão do Gate Humano:**
+
+- **Status:** [x] Resolvido
+- **Escolha:** Itens acima registrados com critérios; aceitos como diferidos visíveis.
+- **Data / Owner:** 2026-05-19 / @rosanarezende
+
+---
+
+### [DEC-0023-E05] Framing canônico anti-distorção
+
+**Pergunta:** Como nomear este enforcement sem que o projeto derive para BPM / workflow engine / orchestration?
+
+**Linguagem canônica (usar sempre):**
+
+- **"proteção estrutural mínima contra execução implícita"**
+- **"integridade operacional do lifecycle humano-IA"**
+- **"governance runtime"** (quando aplicável a `workflow continue` + state)
+- **"enforcement de linkagem estrutural"** (para CI)
+
+**Linguagem rejeitada (anti-distorção):**
+
+- ~~workflow engine~~
+- ~~orchestration framework~~
+- ~~BPM / business process management~~
+- ~~governance machine~~
+- ~~approval maze~~
+- ~~validation pipeline~~ (no sentido enterprise)
+- ~~compliance enforcement~~ (carrega conotação corporativa)
+
+**Critério de teste:** se a descrição do mecanismo soar enterprise / corporativa / pesada, voltar ao framing canônico. Se o mecanismo realmente justificar a descrição enterprise, **rejeitar o mecanismo**, não o framing.
+
+**Detalhamento sobre fast-track (cf. `[DEC-0023-D05]` reforçado por E05):**
+
+> **Princípio semântico — fast-track NÃO remove governança. Fast-track transfere explicitamente accountability boundaries**: a responsabilidade pelo lifecycle deixa de ser cumprida pelo contrato estrutural e passa a ser cumprida pelo reviewer humano. Não é "permissão para pular" — é "responsabilidade reassinada com nome e rationale". Fast-track **sem accountability transferida explicitamente** é bypass disfarçado e deve ser rejeitado.
+
+Para preservar enforcement estrutural enquanto a accountability transfere, fast-track exige TODOS os seguintes:
+
+1. **Label PR obrigatória** (`fast-track`) — visível, auditável.
+2. **Rationale curto obrigatório** no body do PR (regex: `\[fast-track: .+\]` ou seção `## Fast-track Rationale`).
+3. **Entrada em `state.yml`** da spec (se houver): `fast-track: true` + `fast-track-reason: <texto>` + `fast-track-date: YYYY-MM-DD`.
+4. **CI `governance-pr-check`** valida que label + rationale estão presentes (não apenas label).
+5. **Fast-track é raro** — auditoria contínua: se ≥ 3 fast-tracks em janela curta, owner re-examina critério ou suspeita de abuso.
+
+**Decisão do Gate Humano:**
+
+- **Status:** [x] Resolvido
+- **Escolha:** Linguagem canônica + critério de teste + fast-track strictness cravados.
+- **Data / Owner:** 2026-05-19 / @rosanarezende
+
+---
+
+### Riscos conscientemente aceitos no Bloco E
+
+- **L2 (runtime refuse) ainda depende de o agente respeitar o sinal.** O runtime declara "execution locked" mas o agente pode ignorar e chamar `Edit` direto. L3 (hooks locais) resolveria; está deferido. Mitigação intermediária: L4 (CI) pega no final da cadeia. Risco residual aceito.
+- **Fast-track strictness não tem enforcement automatizado para "raridade".** Owner audita manualmente até ≥ 3 fast-tracks aparecerem. Risco: se autor abusar, detecção é manual.
+- **Princípio E01 é forte demais para virar slogan vazio.** Mitigação: ADR 0021 + memory entry + uso ativo nas conversações da spec.
+- **`executionAuthorized` derivado depende de "governance chain íntegra" — quando é íntegra?** Definição mínima: tasks.md presente + gate.status closed na spec corrente. Definição estendida (com governance PR referenced etc.) entra no PR3-enforcement-runtime.
+
+---
+
 ## ✅ Gate fechado — Stage A → Stage B (Bloco A)
 
 - **Data:** 2026-05-19
@@ -373,6 +728,35 @@
   - [x] `[DEC-0023-B03]` — examples/: incluir `examples/minimal-spec/` mínimo (Opção B)
   - [x] `[DEC-0023-B04]` — Release npm: preview após PR3 com CHANGELOG explícito (Opção C)
   - [x] `[DEC-0023-B05]` — `plan.md` separado alinhado com boilerplate canônico (Opção B); registra decisão antes implícita
+
+---
+
+## ✅ Gate fechado — Lifecycle metodológico (Bloco D, bootstrap)
+
+- **Data:** 2026-05-19
+- **Owner:** @rosanarezende
+- **Pontos resolvidos:**
+  - [x] `[DEC-0023-D01]` — Lifecycle de 4 fases + `tasks.md` como boundary canônico de execution authorization (Opção B)
+  - [x] `[DEC-0023-D02]` — Stacked PRs reais (B estrutural) + CI mínimo de linkagem (parte leve de C); drift detection profundo deliberadamente diferido
+  - [x] `[DEC-0023-D03]` — CI mínimo: script versionado + GitHub workflow (Opção B); escopo restrito a integridade estrutural
+  - [x] `[DEC-0023-D04]` — PR1 da 0023 como pre-model declarado (Opção A); zero git surgery retroativa
+  - [x] `[DEC-0023-D05]` — Lifecycle obrigatório para spec/proposal/spike; fast-track explícito para patch/fix/incident pequeno (Opção B)
+- **Declaração de bootstrap:** PR2-lifecycle materializa este Bloco D introduzindo o modelo. Não é possível aplicar o modelo à sua própria introdução — bootstrap necessário e registrado.
+
+---
+
+## ✅ Gate fechado — Enforcement estrutural (Bloco E)
+
+- **Data:** 2026-05-19
+- **Owner:** @rosanarezende
+- **Pontos resolvidos:**
+  - [x] `[DEC-0023-E01]` — Princípio canônico `process awareness is not process enforcement` (Opção B; L2+L4 layered)
+  - [x] `[DEC-0023-E02]` — Enforcement entra como Bloco E da 0023, não spec futura (Opção B; regra metodológica derivada)
+  - [x] `[DEC-0023-E03]` — L2 + L4 agora (Opção B); L3 deferido com critério ≥ 2 casos; `executionAuthorized` derivado + runtime refuse local
+  - [x] `[DEC-0023-E04]` — Itens deferidos com critérios de revisita observáveis registrados em NEXT.md e tasks.md
+  - [x] `[DEC-0023-E05]` — Framing canônico anti-enterprise; fast-track strictness (label + rationale + state.yml + CI valida ambos)
+- **ADR derivada:** ADR 0021 — Enforcement estrutural precede consciência comportamental (princípio perene; separada de ADR 0020 que cobre lifecycle/sequencing).
+- **PR derivada:** PR3-enforcement-runtime (própria, separada de PR4-DX-thinking + PR5-DX-execution).
 
 ---
 
