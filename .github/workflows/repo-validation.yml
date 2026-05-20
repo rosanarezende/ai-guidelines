@@ -1,9 +1,10 @@
 name: Repo Validation
 
 # Absorve o que era ai-guidelines-ci.yml + content-guardrails.yml em
-# um workflow único, eliminando duplicação (ai-guidelines-ci rodava
-# `yarn check` que já é subset de `yarn check:repo` rodado aqui).
-# Living docs drift guard preservado como step próprio.
+# um workflow único, eliminando duplicação. Usa `yarn validate` como
+# entry-point unificado (format:check + build:all + test + living-docs:check)
+# alinhado com a convenção de scripts do package.json. `yarn ci` adicionaria
+# smoke tests, mas smoke tem workflow próprio (smoke-multi-os.yml).
 
 on:
   # PRs against any base branch (catches stacked PRs that target feature
@@ -32,8 +33,5 @@ jobs:
       - name: Install dependencies (immutable)
         run: yarn install --immutable
 
-      - name: Validate quality gates (Format + Build + Tests + Coverage)
-        run: yarn check:repo
-
-      - name: Validate Living Documentation drift guard
-        run: yarn living-docs:check
+      - name: Validate quality gates (Format + Build + Tests + Living Docs)
+        run: yarn validate
