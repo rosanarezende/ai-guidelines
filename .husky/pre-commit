@@ -1,1 +1,3 @@
 node .yarn/releases/yarn-4.1.1.cjs format
+node .yarn/releases/yarn-4.1.1.cjs build:all
+node .yarn/releases/yarn-4.1.1.cjs test:unit
