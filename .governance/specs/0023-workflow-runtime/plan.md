@@ -63,20 +63,48 @@ Runtime como **lente contextual** sobre estado existente, não como engine. AI p
 
 #### [F] Documentação e exemplos
 
-**Estado atual:** Spec/decision-brief/plan/state.yml/NEXT em `.governance/specs/0023-workflow-runtime/`. ADR 0019 publicado. Nenhum guia de uso, nenhum exemplo no consumidor.
+**Estado atual:** Spec/decision-brief/plan/state.yml/NEXT/tasks.md em `.governance/specs/0023-workflow-runtime/`. ADRs 0019 e 0020 publicados. Nenhum guia de uso, nenhum exemplo no consumidor.
 
-**Decisão (PR2):** `docs/guides/workflow-quickstart.md` + `docs/guides/workflow-with-ai-agents.md` + `examples/minimal-spec/` (cf. `[DEC-0023-B03]`). `README.md` ganha seção "Workflow Runtime" + repositioning leve (cf. `[DEC-0023-B04]` — preview tag explícito). `examples/` entra em `package.json#files`.
+**Decisão (PR4-DX-execution):** `docs/guides/workflow-quickstart.md` + `docs/guides/workflow-with-ai-agents.md` + `examples/minimal-spec/` (cf. `[DEC-0023-B03]`). `README.md` ganha seção "Workflow Runtime" + repositioning leve (cf. `[DEC-0023-B04]` — preview tag explícito). `examples/` entra em `package.json#files`.
+
+#### [G] CI mínimo de integridade estrutural (governance-pr-check)
+
+**Estado atual (pós-PR2-lifecycle):** `src/cli/governance-pr-check.ts` + tests BDD pt-BR; `.github/workflows/governance-pr-check.yml` rodando em execution PRs (branch terminando em `-execution`).
+
+**Decisão:** Escopo restrito a 4 validações estruturais (cf. `[DEC-0023-D03]`): marcador "Depends on #N (governance)" presente; governance PR existe; governance PR aberto/mergeado; governance PR contém tasks.md no diff. Fast-track via label `fast-track` bypassa. Sem drift semântico. Expansão deste check exige decisão própria.
+
+#### [H] Artifacts de governance (lifecycle metodológico)
+
+**Estado atual (pós-PR2-lifecycle):** Blocos D + E no decision-brief com 10 decisões cravadas; ADRs 0020 + 0021 publicados; `tasks.md` instanciado conforme `tasks-mixed-boilerplate.md` como boundary canônico das execuções subsequentes.
+
+**Decisão:** PR2-lifecycle é bootstrap declarado (`[DEC-0023-D04]` análogo) — não aplicável a si mesmo. **PR3-enforcement-runtime + PR4-DX-thinking + PR5-DX-execution** são as iterações que aplicam o modelo estritamente.
+
+#### [I] Enforcement Runtime — `executionAuthorized` derivado + workflow refuse
+
+**Estado atual:** Apenas declaração arquitetural (Bloco E + ADR 0021). Implementação pendente.
+
+**Decisão (PR3-enforcement-runtime, PR próprio):** Cf. `[DEC-0023-E03]`:
+
+- `executionAuthorized` é **função derivada** computada como `tasks.md exists && gate.status == closed && governance chain íntegra`. **Não há campo declarativo** no `state.yml`.
+- `workflow continue` recusa narrativamente quando `executionAuthorized == false`, listando condições não satisfeitas.
+- Fast-track strictness em `governance-pr-check`: valida label + rationale (não apenas label).
+- L2 é fonte local de verdade — runtime recusa execução mesmo offline / fora de CI.
+
+PR isolado de DX/docs para validar enforcement separadamente.
 
 ---
 
 ## 🛠️ Rollout por PR
 
-| PR               | Escopo                                                                                                                                                                                                                                                                                           | Saída                                                                                                                            |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------- |
-| **PR1** (merged) | Pivot formal + state.yml + double-lookup + REPL workflow/continue + bridge entrypoint + ADR 0019 + dogfooding (cf. `[DEC-0023-A01..A04, C01]`)                                                                                                                                                   | 5 commits em `feat/spec-0023-workflow-runtime` (9dedce5, 2c35999, ca8c408, fbc4f75, 0774348). 431 jest + 296 mjs tests passando. |
-| **PR2** (ativo)  | DX/docs/onboarding sem novas abstrações (cf. `[DEC-0023-B01..B05]`): clipboard real, help CLI humano com exemplos, README operacional, quickstart end-to-end, guia com Claude Code/Cursor, `examples/minimal-spec/`, integration test do dispatch, CHANGELOG entry, warning de extraction vazia. | Tasklist do PR2 criada após gate Bloco B fechado.                                                                                |
-| **PR3** (futuro) | Bootstrap: `workflow init` ou `workflow upgrade-state`. Cria/migra `state.yml` em spec existente. Critério de exit do release preview. Decisão própria em decision-brief Bloco C ou novo bloco.                                                                                                  | TBD.                                                                                                                             |
-| **PR4** (futuro) | Avaliação empírica: 2 specs externas atravessam discovery → decision usando o runtime; evidência de redução de carga cognitiva (tempo de retomada, leituras evitadas, prompts manuais reduzidos). Critério de exit do preview → release estável.                                                 | TBD.                                                                                                                             |
+| PR                                                    | Escopo                                                                                                                                                                                                                                                                                                | Saída                                                                                                                   |
+| ----------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| **PR1** (pre-model, draft #18)                        | Pivot formal + state.yml + double-lookup + REPL workflow/continue + bridge entrypoint + ADR 0019 + dogfooding (cf. `[DEC-0023-A01..A04, B01..B05, C01]`). **Pre-model declarado** (`[DEC-0023-D04]`) — modelo de stacked PRs ainda não aplicado.                                                      | 6 commits em `feat/spec-0023-workflow-runtime`. PR draft aberto em GitHub.                                              |
+| **PR2-lifecycle** (bootstrap)                         | Lifecycle metodológico cravado (Bloco D + ADR 0020) + Enforcement estrutural cravado (Bloco E + ADR 0021) + CI mínimo `governance-pr-check` + GitHub workflow + tasks.md reescrito conforme boilerplate mixed. **Bootstrap declarado** — introduz o modelo, não aplica a si mesmo. Stacked sobre PR1. | Commits em `feat/spec-0023-lifecycle`. Push + abertura de PR draft aguardam autorização explícita do owner (`CORE-07`). |
+| **PR3-enforcement-runtime** (primeiro modelo estrito) | `executionAuthorized` derivado + `workflow continue` refuse narrativo + fast-track strictness em `governance-pr-check` (label + rationale). PR próprio (cf. `[DEC-0023-E03]`) para validar enforcement isolado. Stacked sobre PR2-lifecycle.                                                          | TBD após PR2-lifecycle aprovado.                                                                                        |
+| **PR4-DX-thinking** (modelo estrito)                  | Reler Bloco B + verificar se decomposição em [1.G] do tasks.md permanece válida sob enforcement de PR3. Possivelmente trivialmente pequeno. **Gate 3 (Planning approval) explícito** antes de PR5. Stacked sobre PR3.                                                                                 | TBD após PR3 aprovado.                                                                                                  |
+| **PR5-DX-execution** (modelo estrito)                 | Execução do sub-bloco [1.G] do tasks.md: clipboard real, AssembleBriefing warning, integration test, examples, CLI help, docs/guides, README, CHANGELOG. Stacked sobre PR4. **Primeira execução real sob enforcement estrutural completo.**                                                           | TBD após PR4 aprovado.                                                                                                  |
+| **PR6+** (futuro)                                     | Bootstrap (`workflow init` / `upgrade-state`) — critério de exit do release preview. Decisão própria em bloco futuro do decision-brief.                                                                                                                                                               | TBD.                                                                                                                    |
+| **PR7+** (futuro)                                     | Avaliação empírica externa: 2 specs atravessam o lifecycle completo. Critério de exit do preview → release estável.                                                                                                                                                                                   | TBD.                                                                                                                    |
 
 PRs futuros são **candidatos**, não promessa. Cada um valida sua entrada contra "reduz carga cognitiva?" antes de abrir.
 

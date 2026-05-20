@@ -4,9 +4,35 @@ Todas as mudanças notáveis neste framework seguem [Semantic Versioning](https:
 
 ---
 
-## [Unreleased]
+## [Unreleased] — `1.1.0-preview.0` (workflow runtime preview)
 
-_(Sem mudanças não-publicadas no momento.)_
+> ⚠️ **Preview, UX may evolve.** Esta versão introduz o **workflow runtime humano-IA** (Spec 0023) e o **lifecycle metodológico** com gates explícitos (ADR 0020). Tudo aqui é experimental — comportamentos podem mudar antes do 1.1.0 estável. Não usar como base de runtime de produção sem leitura completa de [`.governance/specs/0023-workflow-runtime/`](.governance/specs/0023-workflow-runtime/).
+
+### Adicionado
+
+- **Workflow runtime CLI** (`ai-guidelines workflow` + `ai-guidelines continue`). REPL contextual sobre a spec ativa: briefing operacional (stage, gate, hipóteses extraídas de `research.md`, próxima ação), menu de ações estruturadas, classificação de texto livre em **context bundle copy-paste-ready** para sessão IA externa. **Não embute LLM** — AI-as-Channel preservado (ADR 0018).
+- **`state.yml` mínimo** 4-chave (`stage`, `gate.status`, `focus`, `next`) como artifact canônico por spec. Schema fechado — chaves extras são rejeitadas em parse.
+- **Double-lookup** `.governance/specs/` → `.specify/specs/` no runtime de detecção de spec ativa. Bridge transparente, sem deprecation timeline.
+- **ADR 0019** — `.governance/specs/` como root primária no repositório mantenedor.
+- **ADR 0020** — Governance precede e protege execução. Operacionaliza governance-first em lifecycle de PRs: 4 fases (discovery → decision → planning → execution), `tasks.md` como boundary canônico de autorização de execução, stacked PRs (PR-thinking + PR-execution), CI mínimo de integridade estrutural.
+- **`governance-pr-check`** (`src/cli/governance-pr-check.ts` + `.github/workflows/governance-pr-check.yml`): CI mínimo que valida apenas (1) execution PR declara dependência via marcador "Depends on #N (governance)"; (2) governance PR existe; (3) governance PR aberto/mergeado; (4) governance PR contém `tasks.md` no diff. Fast-track via label `fast-track` bypassa (cf. `[DEC-0023-D05]`).
+- **Spec 0023** materializada em `.governance/specs/0023-workflow-runtime/` (pivot da 0023 original; trilha histórica preservada em `.specify/specs/0023-governance-workflow-discovery-model/`).
+
+### Limitações conhecidas (preview)
+
+- **Bootstrap de spec ausente.** Não há comando para criar `state.yml` automaticamente em spec existente nem para criar spec nova com a estrutura mínima. Bootstrap entra em release futura (critério de exit do preview).
+- **Convenção de branch obrigatória.** Detecção de spec ativa exige branch nomeada `feat|fix|docs|chore|refactor/spec-NNNN-{slug}`. Branches fora dessa convenção devolvem "spec não detectada". Sem fallback heurístico.
+- **Extraction de `research.md` é frágil.** `AssembleBriefing` casa cabeçalhos específicos do template canônico (`### H1 —`, `### 8.1 ...`). Specs fora dessa convenção recebem briefing thin com warning explícito.
+- **Drift detection deliberadamente diferido.** `governance-pr-check` valida apenas linkagem estrutural — não detecta divergência semântica entre `tasks.md` declarado e arquivos modificados. Reabrir como spec própria quando padrões de divergência se acumularem.
+- **Stacked PR rebase pain.** Sem ferramenta tipo Graphite/spr, rebase em cadeia é manual. Atrito honesto a ser experimentado.
+- **Clipboard ainda em no-op por default** (substituído por `NodeClipboard` real em PR4-DX-execution stacked).
+- **AI-as-Channel é restrição cravada.** Runtime nunca chama LLM; texto livre vira context bundle. Comportamentos derivados (interpretação de intent, response inteligente) ficam com agente IA externo (Claude Code / Cursor / etc.).
+
+### Notas metodológicas
+
+- **PR1 da Spec 0023 declaradamente pre-model** (`[DEC-0023-D04]`): atravessou discovery + decision + execution num único PR antes do lifecycle estar cravado. Não é git surgery retroativa — é honestidade histórica.
+- **PR2-lifecycle declaradamente bootstrap**: introduz o modelo, não pode aplicar a si mesmo. Modelo aplica estritamente a partir de PR3-DX-thinking + PR4-DX-execution.
+- **Memory entry**: feedback persistente sobre "decisões estruturais emergindo implícita durante implementação" capturado para sessões futuras de agentes IA — vide `decision-brief.md` Bloco B → B05 corretivo.
 
 ---
 
