@@ -47,11 +47,11 @@ main → branch dedicada → commit atômico → PR Draft → CI verde → Ready
 Quando: mudança que toca múltiplos arquivos fora de uma feature isolada, ou que precisa sobreviver a troca de IA/sessão para ser concluída.
 
 ```
-backlog.md (candidata) → spec em .specify/specs/<slug>/ → branch → commits → PR Draft → CI → Ready → review
+backlog.md (candidata) → spec em .governance/specs/<NNNN>-<slug>/ → branch → commits → PR Draft → CI → Ready → review
 ```
 
-1. **Registre a intenção** — abra issue com label apropriado, ou proponha entrada em [`.specify/specs/roadmap/backlog.md`](.specify/specs/roadmap/backlog.md).
-2. **Crie a fundação documental** em `.specify/specs/<slug>/` a partir dos templates SDD em [`.specify/templates/`](.specify/templates/):
+1. **Registre a intenção** — abra issue com label apropriado, ou proponha entrada em [`.governance/specs/roadmap/backlog.md`](.governance/specs/roadmap/backlog.md) (nova localização canônica; o legado em [`.specify/specs/roadmap/backlog.md`](.specify/specs/roadmap/backlog.md) permanece como referência histórica).
+2. **Crie a fundação documental** em `.governance/specs/<NNNN>-<slug>/` (conforme [ADR 0019](.core/governance/adrs/0019-governance-specs-root-in-maintainer.md)) a partir dos templates SDD em [`.specify/templates/`](.specify/templates/) — templates seguem nessa localização até cutover próprio:
    - `spec.md` — escopo e critérios de aceite (imutável após `In Review`)
    - `plan.md` — plano de implementação (vivo durante execução)
    - `tasks.md` — checklist de tarefas
@@ -73,7 +73,7 @@ Quando: várias candidatas no backlog tocam o mesmo contrato e fazem mais sentid
 > "Se a entrega de uma altera o contrato da outra, fundir em uma spec única. Caso contrário, manter separadas."
 
 1. Documentar a fusão na própria `spec.md` (seção "Decisão de Fusão").
-2. Atualizar candidatas absorvidas em [`backlog.md`](.specify/specs/roadmap/backlog.md) com cross-ref à spec consolidada.
+2. Atualizar candidatas absorvidas em [`backlog.md`](.governance/specs/roadmap/backlog.md) com cross-ref à spec consolidada (entradas legadas em [`.specify/specs/roadmap/backlog.md`](.specify/specs/roadmap/backlog.md) migram caso-a-caso).
 3. Seguir workflow 2 a partir daí.
 
 ### 4. 🤖 Agente IA com autonomia
@@ -87,6 +87,23 @@ Quando: você está executando trabalho via Claude Code, Gemini CLI, Codex, Curs
    - Só escrever o texto após o humano editar/aprovar a lista;
    - Submeter o texto final para um último check humano antes de criar/editar o PR.
 4. Aprovação humana explícita obrigatória antes de `git push`.
+
+---
+
+## Achados fora de spec ativa
+
+Durante o trabalho aparecem insights, bugs ou débitos que **não** pertencem ao escopo da spec corrente (ou surgem fora de qualquer spec ativa). **Nunca silenciar o achado** — o mínimo é registrar. Use a tabela abaixo para decidir o destino:
+
+| Natureza do achado                                                | Destino canônico                                                                                                                                         |
+| :---------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Trivial e local (typo, wording, ajuste de 1 arquivo)              | PR direto pequeno (pillar `fix`). Sem spec.                                                                                                              |
+| Exige decisão arquitetural ou cruza com spec futura               | Entrada em [`.governance/specs/roadmap/backlog.md`](.governance/specs/roadmap/backlog.md) como candidata, com link de evidência (issue, PR, comentário). |
+| Urgente operacionalmente (build quebrando, bloqueador de release) | Spec rápida (pillar `patch`) ou incident.                                                                                                                |
+| Dentro de spec ativa, mas extrapolando o escopo declarado         | Entrada no `NEXT.md` da spec corrente (débito adiado com critério de revisita).                                                                          |
+
+**Por que isso importa:** sem essa convenção, achados arquiteturais legítimos viram cleanup silencioso dentro da spec errada (e poluem o diff), ou desaparecem completamente entre sessões. A entrada na backlog candidata é o nível mínimo de persistência que garante: (a) o achado sobrevive, (b) tem cross-ref de origem, (c) entra na fila normal de priorização junto às demais candidatas.
+
+> **Localização do backlog:** entradas novas vão em `.governance/specs/roadmap/backlog.md` (canônico em diante, conforme [ADR 0019](.core/governance/adrs/0019-governance-specs-root-in-maintainer.md)). O backlog legado em `.specify/specs/roadmap/backlog.md` permanece como referência histórica; entradas pré-existentes lá serão migradas caso-a-caso.
 
 ---
 
@@ -138,7 +155,7 @@ Antes de começar, leia:
 
 - [`AGENTS.md`](AGENTS.md) — fluxo obrigatório, princípios de engenharia e workflow (humanos e agentes).
 - [`.core/process/governance-foundation.md`](.core/process/governance-foundation.md) — quando abrir spec, como estruturar `spec.md`/`plan.md`/`tasks.md` e como fechar débitos/research.
-- [`.specify/specs/roadmap/backlog.md`](.specify/specs/roadmap/backlog.md) — backlog e candidatas.
+- [`.governance/specs/roadmap/backlog.md`](.governance/specs/roadmap/backlog.md) — backlog e candidatas (canônico). O legado em [`.specify/specs/roadmap/backlog.md`](.specify/specs/roadmap/backlog.md) permanece como referência histórica até cutover caso-a-caso.
 
 ---
 
