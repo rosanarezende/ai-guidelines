@@ -34,6 +34,37 @@ Detalhes de lifecycle em [`.core/process/governance-foundation.md`](../../../.co
 - **Não-objetivo:** não criar template para cada stack — manter um boilerplate por tipo de spec, com exemplos balanceados.
 - **Material reusável:** as edições aplicadas e revertidas estão na branch `fix/package-scripts-reorganization` (revertidas antes do merge); diff de referência via `git log -p`.
 
+### Arquitetura de regras portáveis vs. contexto framework-interno — "como ai-guidelines não vira nova fonte de repetição"
+
+- **Fonte do insight:** sessão de trabalho em 2026-05-20 (PR `fix/package-scripts-reorganization`). Owner observou que, ao longo da conversa, eu (IA) salvei vários _memory feedbacks_ em `~/.claude/projects/.../memory/` — utilizáveis apenas no Claude Code local desta máquina. Para Codex, Gemini, Cursor (ou Claude Code em outra máquina), esse contexto desaparece.
+- **Diagnóstico — o gap dogfooding:** o `ai-guidelines` nasceu para **eliminar a necessidade de repetir instruções para IA**. Mas hoje, contexto que deveria ser "lido por qualquer agente, em qualquer provider, em qualquer máquina" se acumula em três camadas mal definidas:
+  1. **`<AI_GUIDELINES>` em AGENTS.md** — bloco compilado, conteúdo portável e versionado. Funciona para regras universais distribuídas para consumidores. **Não suporta** contexto repo-interno do próprio `ai-guidelines`.
+  2. **Fora do bloco `<AI_GUIDELINES>` em AGENTS.md** — "Contexto Local", "Quickstart Local", notas avulsas. Cresce ad-hoc, sem taxonomia, sprawla. Sintoma observado pelo owner: "tenho inserido informações em AGENTS.md, fora das tags `<AI_GUIDELINES>`, mas isso não é escalável nem me parece a melhor opção".
+  3. **Memória de provider (Claude memory, Codex context, Cursor rules, etc.)** — não-portável, não-versionada, invisível para outros agentes. Sintoma observado: feedbacks que salvei nesta sessão não estarão disponíveis quando owner abrir Codex amanhã.
+- **Princípio violado:** ADR 0018 declara `AGENTS.md` como **output runtime** AI-agnóstico, não como SSOT sprawling. Hoje a SSOT do contexto repo-interno é o próprio AGENTS.md fora do bloco — exatamente o oposto da intenção arquitetural.
+- **Direções a explorar (não decidir agora):**
+  - **(a) Novo bloco compilado em AGENTS.md** (ex.: `<REPO_INTERNAL>`) preenchido por uma SSOT versionada (ex.: `.governance/repo-internal.md`). Mantém AGENTS.md como output mas separa escopos.
+  - **(b) Arquivo paralelo canônico** (ex.: `.governance/agent-context.md`), lido por qualquer agente que entre no repo, equivalente a `<AI_GUIDELINES>` mas para contexto repo-específico (não-distribuído).
+  - **(c) Tag de escopo nas regras existentes**: além de `universal`/`adapter`/`opt-in`, adicionar `repo-internal`. O bloco compilado teria subseção dedicada.
+  - **(d) Convenção para memory feedbacks:** toda memory salva localmente deve ter espelho num artifact versionado do projeto, OU declarar explicitamente "este é local-only por razão X".
+- **Pré-requisitos / cross-ref:**
+  - Spec 0023 (`workflow-runtime`) atingir estado estável (lifecycle + enforcement cravados).
+  - Spec 0021 (governance information architecture) PR1 mergeada — fornece o lar canônico para artifacts não-spec.
+  - ADR 0018 (AGENTS.md como output AI-agnóstico) — premissa a respeitar.
+  - ADR 0019 (`.governance/specs/` como root) — premissa a respeitar.
+- **Sinal de "está na hora":**
+  - Owner observar 2º+ caso de "contexto que eu repeti em outra ferramenta porque não está em lugar canônico".
+  - Primeiro consumidor real ≠ `ai-guidelines` perguntar "onde coloco contexto repo-específico que não cabe no AGENTS.md distribuído?".
+  - Sessão de trabalho com agente em provider ≠ Claude Code expor o gap de forma concreta.
+- **Riscos antecipados:**
+  - Criar uma 4ª camada sem retirar a 2ª (fora do bloco em AGENTS.md) só piora o sprawl.
+  - Excesso de prescrição pode prejudicar a flexibilidade de cada provider (Claude memory, Cursor rules, Codex AGENTS.md têm semantics próprias).
+  - Tornar contexto repo-interno "obrigatório" para qualquer agente lê-lo (ao invés de opt-in) pode vazar ruído para consumidores.
+- **Não-objetivos:**
+  - Reinventar memory engine. A solução é estrutural (onde mora o texto), não computacional.
+  - Forçar todos providers a comportamento uniforme. Cada provider pode ler/honrar a SSOT à sua maneira; o que ai-guidelines garante é a existência da SSOT no repo.
+- **Por que isto importa agora:** sem isso, o próprio `ai-guidelines` falha no seu objetivo fundador — owner segue repetindo contexto entre sessões/providers, e cada nova máquina/agente reinicia o ciclo. Adiar é aceitar que o framework não cumpre sua promessa de raiz.
+
 ---
 
 ## Now (próxima fila, ordem importa)
