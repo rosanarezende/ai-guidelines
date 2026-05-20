@@ -63,7 +63,7 @@ Always respond using the repository default language.
 
 ### [CORE-02]
 
-The repository is your memory. Persist plans, progress, debts, knowledge, and roadmap under `.specify/specs/`. Read `.specify/specs/roadmap/backlog.md` at session start. If the platform forces a scratchpad, write only a pointer to the spec file. Planning trapped in agent cache (AI-slop) is unacceptable.
+The repository is your memory. Persist plans, progress, debts, knowledge, and roadmap under `.governance/specs/` (canonical per ADR 0019). Legacy artifacts under `.specify/specs/` resolve via double-lookup. Read `.governance/specs/roadmap/backlog.md` at session start (fallback to `.specify/specs/roadmap/backlog.md` if the new location is absent). If the platform forces a scratchpad, write only a pointer to the spec file. Planning trapped in agent cache (AI-slop) is unacceptable.
 
 ### [CORE-11]
 

@@ -205,7 +205,7 @@
 
 ## Fase de Encerramento Pré-Merge
 
-- [ ] **4.1** `NEXT.md`: migrar débitos relevantes para `.specify/specs/roadmap/backlog.md` e deletar.
+- [ ] **4.1** `NEXT.md`: migrar débitos relevantes para `.governance/specs/roadmap/backlog.md` (canônico per ADR 0019) e deletar.
 - [ ] **4.2** Research migration: `research.md` legacy (em `.specify/specs/0023-governance-workflow-discovery-model/`) permanece como trilha histórica (cf. `[DEC-0023-D04]`); link em `.specify/specs/research-index.md`.
 - [ ] **4.3** `decision-brief.md` permanece em `.governance/specs/0023-workflow-runtime/` como artefato histórico.
 - [ ] **4.4** `spec.md` header: status → `Done (PR #X-Y — YYYY-MM-DD)`.

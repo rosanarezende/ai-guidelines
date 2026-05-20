@@ -53,18 +53,18 @@ tags: [core, agents, always_injected, sdd, inquebrável]
 ```
 
 **Instruction (en):**
-The repository is your memory. Persist plans, progress, debts, knowledge, and roadmap under `.specify/specs/`. Read `.specify/specs/roadmap/backlog.md` at session start. If the platform forces a scratchpad, write only a pointer to the spec file. Planning trapped in agent cache (AI-slop) is unacceptable.
+The repository is your memory. Persist plans, progress, debts, knowledge, and roadmap under `.governance/specs/` (canonical per ADR 0019). Legacy artifacts under `.specify/specs/` resolve via double-lookup. Read `.governance/specs/roadmap/backlog.md` at session start (fallback to `.specify/specs/roadmap/backlog.md` if the new location is absent). If the platform forces a scratchpad, write only a pointer to the spec file. Planning trapped in agent cache (AI-slop) is unacceptable.
 
 **Documentação (pt-br):**
-**[INQUEBRÁVEL]** O repositório é sua memória, não seus artefatos internos.
+**[INQUEBRÁVEL]** O repositório é sua memória, não seus artefatos internos. Locais canônicos em diante (cf. ADR 0019 — double-lookup com `.specify/specs/` como bridge legada):
 
-- Planejamento → `.specify/specs/<slug>/plan.md`
-- Progresso → `.specify/specs/<slug>/tasks.md`
-- Débitos → `.specify/specs/<slug>/NEXT.md`
-- Conhecimento → `.specify/specs/<slug>/research/`
-- Roadmap → `.specify/specs/roadmap/backlog.md`
-- Bootstrap obrigatório → leia `.specify/specs/roadmap/backlog.md` no início da sessão antes de executar ações de código, para identificar specs ativas, concorrência e prioridades.
-- Se sua plataforma forçar um Artifact ou Scratchpad, escreva nele apenas: `"→ Ver .specify/specs/<slug>/plan.md"` (Pointer).
+- Planejamento → `.governance/specs/<NNNN>-<slug>/plan.md`
+- Progresso → `.governance/specs/<NNNN>-<slug>/tasks.md`
+- Débitos → `.governance/specs/<NNNN>-<slug>/NEXT.md`
+- Conhecimento → `.governance/specs/<NNNN>-<slug>/research/`
+- Roadmap → `.governance/specs/roadmap/backlog.md`
+- Bootstrap obrigatório → leia `.governance/specs/roadmap/backlog.md` no início da sessão antes de executar ações de código, para identificar specs ativas, concorrência e prioridades (fallback `.specify/specs/roadmap/backlog.md` se ausente).
+- Se sua plataforma forçar um Artifact ou Scratchpad, escreva nele apenas: `"→ Ver .governance/specs/<NNNN>-<slug>/plan.md"` (Pointer).
 - "AI-Slop" (planejamento preso em cache de agente) é inaceitável.
 
 **Why this matters:** planejamento em cache não sobrevive troca de sessão/agente. SDD repo-first é o que torna o framework agnóstico de IA.
