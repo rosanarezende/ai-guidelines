@@ -17,10 +17,20 @@ GitHub native states (Draft / Ready / Merged / Closed) cobrem **lifecycle operac
 ## Padrão de título
 
 ```
-[<emojis>] [<label-opcional>] [Spec <NNNN>] <título curto>
+[<emojis>] [<label-opcional>] [<identificador>] <título curto>
 ```
 
-Brackets explícitos delimitam **dimensões semânticas independentes**: grupo de emojis (tipo + condicionais), label textual opcional para nuance excepcional, identificador de spec. Cada bracket carrega uma dimensão — **não aglutinar tipo com nuance num único bracket**. Título curto, sem prefixo redundante.
+Brackets explícitos delimitam **dimensões semânticas independentes**: grupo de emojis (tipo + condicionais), label textual opcional para nuance excepcional, identificador, título. Cada bracket carrega uma dimensão — **não aglutinar tipo com nuance num único bracket**. Título curto, sem prefixo redundante.
+
+**Identificador** aceita dois formatos:
+
+- `[Spec NNNN]` — para PRs vinculados a uma spec (caso mais comum no projeto).
+- `[<pillar>]` — para PRs vinculados a um pilar MECE não-spec (taxonomia da Spec 0021 / `WorkItem.kind`). Pilares aceitos: `fix`, `patch`, `incident`, `spike`, `experiment`, `proposal`.
+
+A distinção visual entre os dois:
+
+- `Spec` é capitalizado (substantivo próprio + número).
+- Pilares são lowercase (alinhados com `WorkItem.kind` no `registry.yml`).
 
 ## Emojis canônicos
 
@@ -55,6 +65,7 @@ Nuances que não cabem nos 4 tipos fixos viram **bracket textual separado** entr
 | `[🛠️1️⃣➜]`           | Execution intermediária — primeira da stack, com PRs downstream.                 | `[🛠️1️⃣➜] [Spec 0023] Enforcement runtime`        |
 | `[🛠️2️⃣]`            | Execution terminal — última da stack.                                            | `[🛠️2️⃣] [Spec 0023] DX execution`                |
 | `[🛠️]`              | Execution isolada — sem stack, sem dependência.                                  | `[🛠️] [Spec 0041] Clipboard hotfix`              |
+| `[🛠️] [<pillar>]`   | Execution isolada vinculada a pilar MECE não-spec (fix/patch/spike/etc.).        | `[🛠️] [fix] Reorganize package.json scripts`     |
 | `[🛠️➜] [Bootstrap]` | Execution transitional/pre-model + label textual de nuance.                      | `[🛠️➜] [Bootstrap] [Spec 0023] Workflow runtime` |
 | `[🚑]`              | Fast-track excepcional.                                                          | `[🚑] [Incident 0007] Emergency rollback`        |
 
@@ -67,6 +78,8 @@ Nuances que não cabem nos 4 tipos fixos viram **bracket textual separado** entr
 - **Ausência de número em execution = PR isolado** (sem stack).
 - **Labels textuais separadas dos emojis.** `[🛠️➜] [Bootstrap] [Spec 0023]` é correto; `[🛠️➜Bootstrap]` ou `[🧭🛠️➜]` (emoji para nuance) não. Cada bracket carrega uma dimensão semântica.
 - **🚑 é exclusivo:** não combina com 🧾/🛠️/🔒/números/➜. Fast-track tem accountability transferida e contorna todos os marcadores estruturais.
+- **Identificador é exclusivo:** um PR é vinculado a `[Spec NNNN]` **ou** a `[<pillar>]`, nunca aos dois. Se um fix surge a partir de uma spec ativa, geralmente ele entra como execution PR da própria spec (`[Spec NNNN]`) e não precisa de pillar marker separado.
+- **Pillars lowercase** (`fix`, `patch`, etc.) — alinhados com `WorkItem.kind` no `registry.yml`. Não capitalizar (`[Fix]`) — quebra alinhamento com a taxonomia MECE da Spec 0021.
 
 ## Padrão de opening line do body
 

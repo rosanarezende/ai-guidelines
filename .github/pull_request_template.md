@@ -1,17 +1,23 @@
 <!--
 TÍTULO do PR deve seguir o padrão em .core/process/pr-title-conventions.md:
-  [<emojis>] [<label-opcional>] [Spec <NNNN>] <título curto>
+  [<emojis>] [<label-opcional>] [<identificador>] <título curto>
+
+Identificador aceita:
+  [Spec NNNN] — PR vinculado a uma spec
+  [<pillar>]  — PR vinculado a pilar MECE não-spec (fix, patch, spike, etc.)
 
 Combinações canônicas:
-  [🧾🔒] [Spec 0023] Lifecycle bootstrap                          — governance pareada com execution(s)
-  [🛠️1️⃣➜] [Spec 0023] Enforcement runtime                       — execution intermediária (com downstream)
+  [🧾🔒] [Spec 0023] Lifecycle bootstrap                          — governance pareada
+  [🛠️1️⃣➜] [Spec 0023] Enforcement runtime                       — execution intermediária
   [🛠️2️⃣] [Spec 0023] DX execution                                — execution terminal
-  [🛠️] [Spec 0041] Clipboard hotfix                              — execution isolada
-  [🛠️➜] [Bootstrap] [Spec 0023] Workflow runtime                — transitional/pre-model (label textual)
+  [🛠️] [Spec 0041] Clipboard hotfix                              — execution isolada (spec)
+  [🛠️] [fix] Reorganize package.json scripts                     — execution isolada (pillar)
+  [🛠️➜] [Bootstrap] [Spec 0023] Workflow runtime                — transitional/pre-model
   [🚑] [Incident 0007] Emergency rollback                        — fast-track
 
 Emojis são conjunto fechado. Nuances usam labels textuais fechadas
-([Bootstrap], [Pre-model], [Hotfix]).
+([Bootstrap], [Pre-model], [Hotfix]). Pillars lowercase, alinhados com
+WorkItem.kind do registry (cf. taxonomia MECE Spec 0021).
 -->
 
 ## PR Type
