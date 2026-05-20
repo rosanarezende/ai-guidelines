@@ -150,7 +150,7 @@ PRs futuros são **candidatos**, não promessa. Cada um valida sua entrada contr
 #### Globais (PR2)
 
 - [ ] `CHANGELOG.md` ganha entry para v1.1.0-preview.0: "workflow runtime — preview, UX may evolve".
-- [ ] Pipeline `yarn format ; yarn check ; yarn test:nova-cli ; yarn test` verde.
+- [ ] Pipeline `yarn format ; yarn validate` verde.
 - [ ] Diff em consumidor real: não aplicável (mudanças são em mantenedor + adições no `files` que apenas incluem `examples/`).
 
 ---

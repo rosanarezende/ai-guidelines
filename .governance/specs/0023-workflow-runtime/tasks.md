@@ -193,7 +193,7 @@
 ## Fase de Review (Gate de Homologação)
 
 - [ ] **3.1** `spec.md` header: status → `In Review`.
-- [ ] **3.2** Pipeline canônico: `yarn check:repo` verde.
+- [ ] **3.2** Pipeline canônico: `yarn ci` verde (= `install --immutable` + `validate` + `test:smoke`).
 - [ ] **3.3** Critérios de aceite de `spec.md` confirmados ponto-a-ponto.
 - [ ] **3.4** `decision-brief.md` Blocos A/B/C/D/E todos `Resolved` e refletidos em `plan.md`.
 - [ ] **3.5** Validar em ambiente real: rodar `ai-guidelines workflow` e `continue` em `examples/minimal-spec/` (consumer dogfooding).
@@ -205,7 +205,7 @@
 
 ## Fase de Encerramento Pré-Merge
 
-- [ ] **4.1** `NEXT.md`: migrar débitos relevantes para `.specify/specs/roadmap/backlog.md` e deletar.
+- [ ] **4.1** `NEXT.md`: migrar débitos relevantes para `.governance/specs/roadmap/backlog.md` (canônico per ADR 0019) e deletar.
 - [ ] **4.2** Research migration: `research.md` legacy (em `.specify/specs/0023-governance-workflow-discovery-model/`) permanece como trilha histórica (cf. `[DEC-0023-D04]`); link em `.specify/specs/research-index.md`.
 - [ ] **4.3** `decision-brief.md` permanece em `.governance/specs/0023-workflow-runtime/` como artefato histórico.
 - [ ] **4.4** `spec.md` header: status → `Done (PR #X-Y — YYYY-MM-DD)`.
