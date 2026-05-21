@@ -19,6 +19,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "24"
+          cache: "yarn"
 
       - name: Enable Corepack
         run: corepack enable
@@ -26,8 +27,5 @@ jobs:
       - name: Install dependencies
         run: yarn install --immutable
 
-      - name: Validate AI-first baseline
-        run: yarn check
-
-      - name: Validate Living Documentation drift guard
-        run: yarn living-docs:check
+      - name: Validate quality gates (format:check + build + test + living-docs:check)
+        run: yarn validate

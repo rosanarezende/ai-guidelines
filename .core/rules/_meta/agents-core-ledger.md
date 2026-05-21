@@ -20,5 +20,5 @@
 | CORE-11 | Plano formado antes de ação                               | process  | declared_heuristic | 0       | 201   | 1     |
 | CORE-12 | Checkpoints antes de ação após contexto extenso           | process  | declared_heuristic | 0       | 120   | 1     |
 | CORE-13 | Artefatos vivos durante o trabalho                        | process  | declared_heuristic | 0       | 185   | 1     |
-| CORE-14 | Mensagem de commit sugerida: IA fornece apenas a mensagem | process  | declared_heuristic | 0       | 171   | 1     |
+| CORE-14 | Mensagem de commit sugerida: IA fornece apenas a mensagem | process  | declared_heuristic | 0       | 174   | 1     |
 | CORE-15 | ADR é princípio perene, não revisitação datada            | process  | declared_heuristic | 0       | 378   | 1     |
