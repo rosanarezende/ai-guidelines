@@ -12,8 +12,15 @@ import {
   main,
   renderActiveSpecsIndex,
   runContinue,
+  runPublishState,
   runWorkflow,
 } from "./workflow.js";
+import { PublishState } from "../app/workflow/PublishState.js";
+import {
+  parseActiveSpecs,
+  stringifyActiveSpecs,
+} from "../infrastructure/yaml/activeSpecsSerializer.js";
+import { parseWorkflowState } from "../infrastructure/yaml/workflowStateSerializer.js";
 
 class CollectingLogger implements Logger {
   readonly lines: string[] = [];
@@ -508,11 +515,13 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
   });
 
   describe("runContinue + identifier (lookup via índice, sem auto-checkout)", () => {
-    function makeIndexResult(opts: {
-      indexAvailable?: boolean;
-      entries?: ListActiveSpecsResult["entries"];
-      warnings?: ListActiveSpecsResult["warnings"];
-    } = {}): ListActiveSpecsResult {
+    function makeIndexResult(
+      opts: {
+        indexAvailable?: boolean;
+        entries?: ListActiveSpecsResult["entries"];
+        warnings?: ListActiveSpecsResult["warnings"];
+      } = {}
+    ): ListActiveSpecsResult {
       return {
         indexAvailable: opts.indexAvailable ?? true,
         entries: opts.entries ?? [],
@@ -632,6 +641,156 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
       });
       expect(code).toBe(0);
       expect(logger.lines.join("\n")).toMatch(/Próxima ação: executar PR1/);
+    });
+  });
+
+  describe("runPublishState — CLI wrapper do PublishState use case", () => {
+    class WritableFakeFs implements WorkflowFileSystem {
+      files: Map<string, string>;
+      dirs: Set<string>;
+      branch: string | null;
+      constructor(files: Map<string, string>, dirs: Set<string>, branch: string | null) {
+        this.files = new Map(files);
+        this.dirs = new Set(dirs);
+        this.branch = branch;
+      }
+      fileExists(p: string): boolean {
+        return this.files.has(p);
+      }
+      directoryExists(p: string): boolean {
+        return this.dirs.has(p);
+      }
+      readTextFile(p: string): string {
+        const c = this.files.get(p);
+        if (c === undefined) throw new Error(`missing ${p}`);
+        return c;
+      }
+      writeTextFile(p: string, contents: string): void {
+        this.files.set(p, contents);
+      }
+      listDirectory(): ReadonlyArray<string> {
+        return [];
+      }
+      currentBranch(): string | null {
+        return this.branch;
+      }
+      resolveAbsolute(p: string): string {
+        return `/repo/${p}`;
+      }
+    }
+
+    function makeWritableFs(): WritableFakeFs {
+      return new WritableFakeFs(
+        new Map([
+          [
+            ".governance/specs/0023-workflow-runtime/state.yml",
+            `stage: implementation\ngate:\n  status: closed\nfocus: []\nnext: []\n`,
+          ],
+        ]),
+        new Set([".governance/specs/0023-workflow-runtime"]),
+        "feat/spec-0023-workflow-runtime"
+      );
+    }
+
+    function buildPublishStateWithFixedNow(now: Date) {
+      return (fs: WorkflowFileSystem) =>
+        new PublishState(fs, parseActiveSpecs, stringifyActiveSpecs, parseWorkflowState, () => now);
+    }
+
+    it("DADO --status ausente QUANDO runPublishState ENTÃO erro narrativo citando [DEC-0023-G04] E retorna 1", async () => {
+      const logger = new CollectingLogger();
+      const code = await runPublishState(
+        { repoRoot: "/repo", logger, fs: makeWritableFs() },
+        { updatedBy: "@x" }
+      );
+      expect(code).toBe(1);
+      expect(logger.lines.join("\n")).toMatch(/--status/);
+      expect(logger.lines.join("\n")).toMatch(/\[DEC-0023-G04\]/);
+    });
+
+    it("DADO --updated-by ausente QUANDO runPublishState ENTÃO erro narrativo distinguindo 'autorizou' E retorna 1", async () => {
+      const logger = new CollectingLogger();
+      const code = await runPublishState(
+        { repoRoot: "/repo", logger, fs: makeWritableFs() },
+        { status: "active" }
+      );
+      expect(code).toBe(1);
+      expect(logger.lines.join("\n")).toMatch(/--updated-by/);
+      expect(logger.lines.join("\n")).toMatch(/autorizou/i);
+    });
+
+    it("DADO args válidos QUANDO runPublishState ENTÃO escreve índice, loga confirmação E retorna 0", async () => {
+      const logger = new CollectingLogger();
+      const fs = makeWritableFs();
+      const code = await runPublishState(
+        {
+          repoRoot: "/repo",
+          logger,
+          fs,
+          buildPublishState: buildPublishStateWithFixedNow(new Date("2026-05-21T10:00:00Z")),
+        },
+        { status: "active", updatedBy: "@rosanarezende" }
+      );
+      expect(code).toBe(0);
+      const out = logger.lines.join("\n");
+      expect(out).toMatch(/Spec 0023 \/ workflow-runtime publicada/);
+      expect(out).toMatch(/stage=implementation/);
+      expect(out).toMatch(/status=active/);
+      expect(fs.fileExists(".governance/runtime/active-specs.yml")).toBe(true);
+    });
+
+    it("DADO publish já tem entry E args válidos QUANDO runPublishState ENTÃO loga 'atualizada' (não 'publicada')", async () => {
+      const logger = new CollectingLogger();
+      const fs = makeWritableFs();
+      // primeiro publish para popular o índice
+      await runPublishState(
+        {
+          repoRoot: "/repo",
+          logger: new CollectingLogger(),
+          fs,
+          buildPublishState: buildPublishStateWithFixedNow(new Date("2026-05-21T10:00:00Z")),
+        },
+        { status: "active", updatedBy: "@x" }
+      );
+      // segundo publish — agora deve ser update
+      await runPublishState(
+        {
+          repoRoot: "/repo",
+          logger,
+          fs,
+          buildPublishState: buildPublishStateWithFixedNow(new Date("2026-05-21T11:00:00Z")),
+        },
+        { status: "blocked", updatedBy: "@x" }
+      );
+      expect(logger.lines.join("\n")).toMatch(/atualizada/);
+    });
+
+    it("DADO PublishStateError lançado pelo use case QUANDO runPublishState ENTÃO loga mensagem do erro E retorna 1 (sem stack trace)", async () => {
+      const logger = new CollectingLogger();
+      const fs = makeWritableFs();
+      fs.branch = "main"; // força DetectActiveSpec a falhar
+      const code = await runPublishState(
+        { repoRoot: "/repo", logger, fs },
+        { status: "active", updatedBy: "@x" }
+      );
+      expect(code).toBe(1);
+      expect(logger.lines.some((l) => l.startsWith("ERR:") && /detectar spec ativa/.test(l))).toBe(
+        true
+      );
+    });
+
+    it("DADO main(['workflow', 'publish-state'], opts com publishStateArgs) QUANDO main ENTÃO encaminha para runPublishState", async () => {
+      const logger = new CollectingLogger();
+      const fs = makeWritableFs();
+      const code = await main(["workflow", "publish-state"], {
+        repoRoot: "/repo",
+        logger,
+        fs,
+        buildPublishState: buildPublishStateWithFixedNow(new Date("2026-05-21T10:00:00Z")),
+        publishStateArgs: { status: "active", updatedBy: "@rosanarezende" },
+      } as Parameters<typeof main>[1]);
+      expect(code).toBe(0);
+      expect(logger.lines.join("\n")).toMatch(/publicada/);
     });
   });
 });

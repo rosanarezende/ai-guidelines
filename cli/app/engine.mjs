@@ -308,12 +308,13 @@ export async function execute(mode, rawOptions) {
   }
 }
 
-async function dispatchWorkflow(command, identifier) {
+async function dispatchWorkflow(command, options = {}) {
   // Bridge para o runtime de workflow compilado em src/ → dist/.
   // Cf. Spec 0023 (`.governance/specs/0023-workflow-runtime/`):
   // nenhuma lógica nova de domínio vive em `cli/`; este delegate é o único toque.
-  // PR3 adiciona positional argv cabling para `continue <slug|id>` — transporte
-  // mínimo de transporte, sem expansão estrutural do entrypoint legado.
+  // PR3 adiciona positional argv cabling para `continue <slug|id>` e para
+  // `workflow publish-state` — transporte mínimo, sem expansão estrutural
+  // do entrypoint legado.
   let mod;
   try {
     mod = await import("../../dist/cli/workflow.js");
@@ -327,12 +328,23 @@ async function dispatchWorkflow(command, identifier) {
     return;
   }
   const opts = { repoRoot: process.cwd() };
-  const argv =
-    command === "continue"
-      ? identifier
-        ? ["continue", identifier]
-        : ["continue"]
-      : [];
+  let argv = [];
+
+  if (command === "continue") {
+    argv = options.identifier ? ["continue", options.identifier] : ["continue"];
+  } else if (command === "workflow" && options.subcommand === "publish-state") {
+    argv = ["workflow", "publish-state"];
+    // Tradução de flags kebab-case (parseArgs) → camelCase (PublishStateArgs).
+    opts.publishStateArgs = {
+      status: options.status,
+      updatedBy: options["updated-by"],
+      ...(options.title !== undefined ? { title: options.title } : {}),
+      ...(options["base-branch"] !== undefined ? { baseBranch: options["base-branch"] } : {}),
+      ...(options["last-sync-commit"] !== undefined
+        ? { lastSyncCommit: options["last-sync-commit"] }
+        : {}),
+    };
+  }
   const code = await mod.main(argv, opts);
   if (code !== 0) process.exitCode = code;
 }
@@ -347,7 +359,7 @@ export async function main(argv = process.argv.slice(2)) {
     }
 
     if (command === "workflow" || command === "continue") {
-      await dispatchWorkflow(command, options.identifier);
+      await dispatchWorkflow(command, options);
       return;
     }
 

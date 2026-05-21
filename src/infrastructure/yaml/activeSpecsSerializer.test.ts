@@ -1,4 +1,9 @@
-import { ActiveSpecsParseError, parseActiveSpecs } from "./activeSpecsSerializer.js";
+import {
+  ActiveSpecsParseError,
+  parseActiveSpecs,
+  stringifyActiveSpecs,
+} from "./activeSpecsSerializer.js";
+import { ActiveSpecsRoot } from "../../domain/workflow/ActiveSpecEntry.js";
 
 /**
  * Tests BDD pt-BR (OPT-0201) — contrato cravado em [DEC-0023-G02] + [DEC-0023-G04].
@@ -328,6 +333,99 @@ active_specs:
       const root = parseActiveSpecs(yaml);
       expect(root.activeSpecs[0].slug).toBe("workflow-runtime");
       expect(root.activeSpecs[0].updatedBy).toBe("@rosanarezende");
+    });
+  });
+
+  describe("stringifyActiveSpecs — round-trip determinístico (entrada do publish-state)", () => {
+    const fullRoot: ActiveSpecsRoot = {
+      version: 1,
+      activeSpecs: [
+        {
+          id: "0023",
+          slug: "workflow-runtime",
+          title: "Workflow Runtime",
+          branch: "feat/spec-0023-runtime-active-state",
+          baseBranch: "feat/spec-0023-lifecycle",
+          stage: "implementation",
+          status: "active",
+          specPath: ".governance/specs/0023-workflow-runtime",
+          sourceStatePath: ".governance/specs/0023-workflow-runtime/state.yml",
+          updatedAt: "2026-05-21T00:00:00Z",
+          updatedBy: "@rosanarezende",
+          lastSyncCommit: "d01a929",
+        },
+      ],
+    };
+
+    it("DADO root com 1 entry obrigatórios-only QUANDO stringify→parse ENTÃO devolve estrutura idêntica", () => {
+      const minimal: ActiveSpecsRoot = {
+        version: 1,
+        activeSpecs: [
+          {
+            id: "0024",
+            slug: "foo",
+            branch: "feat/spec-0024-foo",
+            stage: "discovery",
+            status: "paused",
+            specPath: ".governance/specs/0024-foo",
+            updatedAt: "2026-05-21T12:00:00Z",
+          },
+        ],
+      };
+      const yaml = stringifyActiveSpecs(minimal);
+      const reparsed = parseActiveSpecs(yaml);
+      expect(reparsed).toEqual(minimal);
+    });
+
+    it("DADO root com todos os opcionais QUANDO stringify→parse ENTÃO preserva todos os campos", () => {
+      const yaml = stringifyActiveSpecs(fullRoot);
+      const reparsed = parseActiveSpecs(yaml);
+      expect(reparsed).toEqual(fullRoot);
+    });
+
+    it("DADO root com lista vazia QUANDO stringify→parse ENTÃO devolve lista vazia (estado válido)", () => {
+      const empty: ActiveSpecsRoot = { version: 1, activeSpecs: [] };
+      expect(parseActiveSpecs(stringifyActiveSpecs(empty))).toEqual(empty);
+    });
+
+    it("DADO duas serializações do mesmo root QUANDO comparadas ENTÃO produzem output byte-idêntico (determinismo para diff git limpo)", () => {
+      expect(stringifyActiveSpecs(fullRoot)).toBe(stringifyActiveSpecs(fullRoot));
+    });
+
+    it("DADO opcionais ausentes QUANDO stringify ENTÃO omite as chaves no YAML (não escreve null/empty)", () => {
+      const partial: ActiveSpecsRoot = {
+        version: 1,
+        activeSpecs: [
+          {
+            id: "0024",
+            slug: "foo",
+            branch: "feat/spec-0024-foo",
+            stage: "discovery",
+            status: "paused",
+            specPath: ".governance/specs/0024-foo",
+            updatedAt: "2026-05-21T12:00:00Z",
+          },
+        ],
+      };
+      const yaml = stringifyActiveSpecs(partial);
+      expect(yaml).not.toMatch(/title:/);
+      expect(yaml).not.toMatch(/base_branch:/);
+      expect(yaml).not.toMatch(/updated_by:/);
+      expect(yaml).not.toMatch(/last_sync_commit:/);
+      expect(yaml).not.toMatch(/source_state_path:/);
+    });
+
+    it("DADO ordem canônica das chaves QUANDO stringify ENTÃO id vem antes de slug, stage vem antes de status, updated_at vem antes de updated_by", () => {
+      const yaml = stringifyActiveSpecs(fullRoot);
+      const idIdx = yaml.indexOf("id:");
+      const slugIdx = yaml.indexOf("slug:");
+      const stageIdx = yaml.indexOf("stage:");
+      const statusIdx = yaml.indexOf("status:");
+      const updatedAtIdx = yaml.indexOf("updated_at:");
+      const updatedByIdx = yaml.indexOf("updated_by:");
+      expect(idIdx).toBeLessThan(slugIdx);
+      expect(stageIdx).toBeLessThan(statusIdx);
+      expect(updatedAtIdx).toBeLessThan(updatedByIdx);
     });
   });
 });

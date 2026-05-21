@@ -99,6 +99,11 @@ Comandos:
   workflow       Wizard contextual da spec ativa: briefing operacional + menu de ações +
                  context bundle copy-paste para sessão IA. Lente operacional governance-first
                  (cf. Spec 0023). Não embute LLM; AI-as-Channel preservado (ADR 0018).
+  workflow publish-state --status=<active|blocked|paused|completed> --updated-by=<autorizador>
+                          [--title=<txt>] [--base-branch=<br>] [--last-sync-commit=<sha>]
+                 Projeta state.yml interno da spec corrente → entry no índice operacional
+                 público .governance/runtime/active-specs.yml. Manual-first (cf. Spec 0023
+                 [DEC-0023-G03]); status declarado, sem inferência.
   continue [<slug|id>]
                  Atalho de workflow: imprime briefing + próxima ação registrada em state.yml.
                  Sem argumento → detecta spec via branch. Com <slug|id> → resolve via índice
@@ -150,13 +155,18 @@ export function parseArgs(argv) {
     const token = rest[index];
 
     if (!token.startsWith("-")) {
-      // Exceção fechada: `continue [<slug|id>]` aceita exatamente UM
-      // positional arg (cabling de transporte para o runtime novo,
-      // não expansão estrutural do entrypoint legado — cf. Spec 0023
-      // PR3, plan.md § Componente [E]). Sem reutilização para outros
-      // comandos e sem positional parsing genérico.
+      // Exceções fechadas de positional arg — cabling de transporte para o
+      // runtime novo (cf. Spec 0023 PR3, plan.md § Componente [E]). Cada
+      // exceção é específica a um comando, sem reutilização para outros
+      // e sem positional parsing genérico:
+      //   1. `continue [<slug|id>]` — 1 positional (identifier do índice).
+      //   2. `workflow publish-state` — 1 positional (subcommand fechado).
       if (command === "continue" && index === 0 && options.identifier === undefined) {
         options.identifier = token;
+        continue;
+      }
+      if (command === "workflow" && index === 0 && options.subcommand === undefined) {
+        options.subcommand = token;
         continue;
       }
       throw new Error(`Argumento inesperado: ${token}`);

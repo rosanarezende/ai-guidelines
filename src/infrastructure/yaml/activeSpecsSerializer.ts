@@ -1,4 +1,4 @@
-import { parse } from "yaml";
+import { parse, stringify } from "yaml";
 import {
   ActiveSpecEntry,
   ActiveSpecsRoot,
@@ -214,4 +214,35 @@ function optionalString(
     );
   }
   return { [tsKey]: value };
+}
+
+/**
+ * Serializa `ActiveSpecsRoot` para YAML determinístico round-trippable.
+ *
+ * Ordem canônica das chaves por entry (estável para diff git limpo):
+ *   id, slug, title?, branch, base_branch?, stage, status,
+ *   spec_path, source_state_path?, updated_at, updated_by?, last_sync_commit?
+ *
+ * Opcionais ausentes são **omitidos** do output (não serializa `null`/`""`)
+ * — alinhado com a regra de `optionalString` no parser.
+ */
+export function stringifyActiveSpecs(root: ActiveSpecsRoot): string {
+  const plain = {
+    version: 1,
+    active_specs: root.activeSpecs.map((entry) => {
+      const obj: Record<string, string | number> = { id: entry.id, slug: entry.slug };
+      if (entry.title !== undefined) obj.title = entry.title;
+      obj.branch = entry.branch;
+      if (entry.baseBranch !== undefined) obj.base_branch = entry.baseBranch;
+      obj.stage = entry.stage;
+      obj.status = entry.status;
+      obj.spec_path = entry.specPath;
+      if (entry.sourceStatePath !== undefined) obj.source_state_path = entry.sourceStatePath;
+      obj.updated_at = entry.updatedAt;
+      if (entry.updatedBy !== undefined) obj.updated_by = entry.updatedBy;
+      if (entry.lastSyncCommit !== undefined) obj.last_sync_commit = entry.lastSyncCommit;
+      return obj;
+    }),
+  };
+  return stringify(plain, { indent: 2, lineWidth: 0 });
 }

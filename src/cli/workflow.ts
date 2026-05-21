@@ -19,8 +19,18 @@ import {
   ListActiveSpecsResult,
   ResolvedActiveSpec,
 } from "../app/workflow/ListActiveSpecs.js";
+import {
+  PublishState,
+  PublishStateError,
+  PublishStateInput,
+  PublishStateResult,
+} from "../app/workflow/PublishState.js";
 import { parseWorkflowState } from "../infrastructure/yaml/workflowStateSerializer.js";
-import { parseActiveSpecs } from "../infrastructure/yaml/activeSpecsSerializer.js";
+import {
+  parseActiveSpecs,
+  stringifyActiveSpecs,
+} from "../infrastructure/yaml/activeSpecsSerializer.js";
+import { ActiveSpecStatus } from "../domain/workflow/ActiveSpecEntry.js";
 import {
   SpecHeaders,
   assembleBriefing,
@@ -447,11 +457,94 @@ export async function runContinue(options: RunOptions, identifier?: string): Pro
   return 0;
 }
 
+/**
+ * Argumentos parseados de `yarn workflow publish-state ...`.
+ * Estritamente declarativos — nenhum valor é inferido (nem `updatedBy`
+ * via git config, nem `lastSyncCommit` via HEAD). Cf. memory
+ * `feedback-lookup-not-coordination` — sem inferência de intenção.
+ */
+export interface PublishStateArgs {
+  readonly status?: string;
+  readonly updatedBy?: string;
+  readonly title?: string;
+  readonly baseBranch?: string;
+  readonly lastSyncCommit?: string;
+}
+
+export interface RunPublishStateOptions extends RunOptions {
+  /** Construtor injetável para testabilidade. Default usa parseActiveSpecs + stringifyActiveSpecs reais. */
+  readonly buildPublishState?: (fs: WorkflowFileSystem) => PublishState;
+  /** Args declarados pelo humano via CLI; usado também por main() para dispatch. */
+  readonly publishStateArgs?: PublishStateArgs;
+}
+
+function defaultBuildPublishState(fs: WorkflowFileSystem): PublishState {
+  return new PublishState(fs, parseActiveSpecs, stringifyActiveSpecs, parseWorkflowState);
+}
+
+export async function runPublishState(
+  options: RunPublishStateOptions,
+  args: PublishStateArgs
+): Promise<number> {
+  const logger = options.logger ?? stdoutLogger;
+  const fs = options.fs ?? new NodeWorkflowFileSystem(options.repoRoot);
+
+  if (!args.status || args.status.trim() === "") {
+    logger.error(
+      `Flag --status=<active|blocked|paused|completed> é obrigatória ` +
+        `(per [DEC-0023-G04]; status declarado manualmente, sem fallback).`
+    );
+    return 1;
+  }
+  if (!args.updatedBy || args.updatedBy.trim() === "") {
+    logger.error(
+      `Flag --updated-by=<quem-autorizou> é obrigatória. ` +
+        `Convenção: quem AUTORIZOU a publicação (não quem executou nem qual agente IA rodou).`
+    );
+    return 1;
+  }
+
+  const builder = options.buildPublishState ?? defaultBuildPublishState;
+  const useCase = builder(fs);
+
+  const input: PublishStateInput = {
+    status: args.status as ActiveSpecStatus,
+    updatedBy: args.updatedBy,
+    ...(args.title !== undefined ? { title: args.title } : {}),
+    ...(args.baseBranch !== undefined ? { baseBranch: args.baseBranch } : {}),
+    ...(args.lastSyncCommit !== undefined ? { lastSyncCommit: args.lastSyncCommit } : {}),
+  };
+
+  let result: PublishStateResult;
+  try {
+    result = useCase.run(input);
+  } catch (err) {
+    if (err instanceof PublishStateError) {
+      logger.error(err.message);
+      return 1;
+    }
+    throw err;
+  }
+
+  const verb = result.wasUpdate ? "atualizada" : "publicada";
+  logger.info(
+    `Spec ${result.entry.id} / ${result.entry.slug} ${verb} no índice (${result.indexPath}).`
+  );
+  logger.info(
+    `  stage=${result.entry.stage}  status=${result.entry.status}  updated_at=${result.entry.updatedAt}`
+  );
+  return 0;
+}
+
 export async function main(argv: readonly string[], opts: RunOptions): Promise<number> {
   const sub = argv[0];
   if (sub === "continue") {
     const identifier = argv[1];
     return runContinue(opts, identifier);
+  }
+  if (sub === "workflow" && argv[1] === "publish-state") {
+    const pubOpts = opts as RunPublishStateOptions;
+    return runPublishState(pubOpts, pubOpts.publishStateArgs ?? {});
   }
   return runWorkflow(opts);
 }
