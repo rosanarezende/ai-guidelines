@@ -150,7 +150,7 @@ PRs futuros são **candidatos**, não promessa. Cada um valida sua entrada contr
 #### Globais (PR2)
 
 - [ ] `CHANGELOG.md` ganha entry para v1.1.0-preview.0: "workflow runtime — preview, UX may evolve".
-- [ ] Pipeline `yarn format ; yarn validate` verde.
+- [ ] Pipeline `yarn format ; yarn validate` verde. _Pressupõe [PR #21](https://github.com/rosanarezende/ai-guidelines/pull/21) (scripts reorganization) mergeado em main; antes disso, cadeia legada equivalente._
 - [ ] Diff em consumidor real: não aplicável (mudanças são em mantenedor + adições no `files` que apenas incluem `examples/`).
 
 ---

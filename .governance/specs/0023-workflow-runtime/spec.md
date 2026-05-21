@@ -67,7 +67,7 @@ Resultado esperado quando esta spec encerrar:
 - [ ] Nenhuma lógica nova de domínio em `cli/`; bridge no entrypoint é o único toque.
 - [ ] BDD pt-BR (DADO/QUANDO/ENTÃO) cobrindo cada use case novo; coverage ≥ 85%.
 - [ ] ADR 0019 publicado (`.governance/` root + bridge).
-- [ ] Pipeline `yarn format ; yarn validate` verde.
+- [ ] Pipeline `yarn format ; yarn validate` verde. _Pressupõe scripts reorganizados em main via [PR #21 — `fix/scripts-reorg-main`](https://github.com/rosanarezende/ai-guidelines/pull/21); até #21 mergear, validar com a cadeia legada (`yarn check ; yarn test ; yarn test:nova-cli ; yarn living-docs:check`)._
 - [ ] Dogfooding: a 0023 atravessou Stage B → Stage C (implementação) usando o próprio `workflow` para retomar contexto entre commits.
 
 ---

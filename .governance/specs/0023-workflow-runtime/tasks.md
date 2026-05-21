@@ -193,7 +193,7 @@
 ## Fase de Review (Gate de Homologação)
 
 - [ ] **3.1** `spec.md` header: status → `In Review`.
-- [ ] **3.2** Pipeline canônico: `yarn ci` verde (= `install --immutable` + `validate` + `test:smoke`).
+- [ ] **3.2** Pipeline canônico: `yarn ci` verde (= `install --immutable` + `validate` + `test:smoke`). _Pressupõe [PR #21](https://github.com/rosanarezende/ai-guidelines/pull/21) (scripts reorganization) mergeado em main e absorvido no rebase desta branch sobre main pós-merge de #19; até lá, validar com `yarn check:repo` da cadeia legada._
 - [ ] **3.3** Critérios de aceite de `spec.md` confirmados ponto-a-ponto.
 - [ ] **3.4** `decision-brief.md` Blocos A/B/C/D/E todos `Resolved` e refletidos em `plan.md`.
 - [ ] **3.5** Validar em ambiente real: rodar `ai-guidelines workflow` e `continue` em `examples/minimal-spec/` (consumer dogfooding).
