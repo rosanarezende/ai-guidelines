@@ -96,7 +96,7 @@ PR isolado de DX/docs para validar enforcement separadamente.
 
 **Estado atual:** inexistente em `main`; a spec ativa só é descoberta por branch remota + `git show`, o que falhou no experimento de dogfooding 2026-05-21.
 
-**Decisão (PR3-runtime-state-index):** Cf. `[DEC-0023-G01..G03]`:
+**Decisão (PR3-runtime-state-index):** Cf. `[DEC-0023-G01..G04]`:
 
 - Introduzir `.governance/runtime/active-specs.yml` como **índice operacional público mínimo**, com um arquivo único versionado.
 - **Source of truth** permanece no `state.yml` interno da spec + artifacts normativos da branch ativa.

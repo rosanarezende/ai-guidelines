@@ -34,6 +34,17 @@ Detalhes de lifecycle em [`.core/process/governance-foundation.md`](../../../.co
 - **Não-objetivo:** não criar template para cada stack — manter um boilerplate por tipo de spec, com exemplos balanceados.
 - **Material reusável:** as edições aplicadas e revertidas estão na branch `fix/package-scripts-reorganization` (revertidas antes do merge); diff de referência via `git log -p`.
 
+### Retrofit `tasks-mixed-boilerplate` para honrar `[DEC-0023-D01]` (boundary, não checklist fino)
+
+- **Fonte do insight:** Spec 0023 / PR #23 — auto-violação detectada em 2026-05-21 durante dogfooding do runtime-state-index. Sub-bloco `[1.E]` do `tasks.md` da 0023 herda granularidade fine-grained (`1.X.N`, `1.X.[COMMIT]`) do boilerplate, contradizendo o próprio `[DEC-0023-D01]` que craveia "`tasks.md` é boundary de autorização, NÃO checklist fino" (checklist fino vive em `plan.md § DoD`).
+- **Diagnóstico estrutural:** **templates canônicos são enforcement behavior** — decisões vivem em ADR/DEC, mas comportamento real emerge dos boilerplates. **Enquanto boilerplates permanecerem desalinhados, o lifecycle continuará reproduzindo comportamento legado, mesmo após convergência semântica dos DEC/ADR.** A decisão D01 já está cravada, mas o template ainda gera o anti-pattern, e cada nova spec instanciada a partir dele repete a violação silenciosamente. Sem retrofit, o lifecycle existe no papel e morre na prática.
+- **Sintoma específico:** todo sub-bloco em `tasks-mixed-boilerplate v=3` carrega `[1.X.N]` (pipeline verde), `[1.X.[COMMIT]]` (mensagem de commit literal) — checklist operacional fino, não boundary de autorização.
+- **Princípio a aplicar:** `tasks.md` declara apenas decomposição autorizada + escopo do boundary + gates de autorização (`[REVIEW]`, `[COMMIT]` permanecem; são handoff explícito per ADR 0021). DoD operacional fino (pipeline, mensagem literal de commit, granularidade por arquivo) migra para `plan.md § Critérios de Aceite Detalhados`.
+- **Pré-requisitos / cross-ref:** Spec 0023 estável; mesma família de retrofit que ["Refatorar boilerplates SDD para serem stack-agnostic"](#refatorar-boilerplates-sdd-para-serem-stack-agnostic) — ambas são "boilerplate atrasado em relação à decisão", candidatas a serem absorvidas no mesmo PR de retrofit.
+- **Sinal de "está na hora":** Spec 0023 mergeada OU 2º caso de auto-violação observado em spec nova instanciada a partir do boilerplate.
+- **Riscos antecipados:** retrofit precisa preservar gates explícitos de autorização (`[REVIEW]`, `[COMMIT]`) que ADR 0021 craveia como handoff humano — só "checklist operacional cego" (`[1.X.N]`, mensagem literal) sai; gates ficam. Confundir os dois recriaria o problema oposto (perda de autorização explícita).
+- **Não-objetivo:** redesenhar lifecycle (D01, ADR 0020, ADR 0021 são premissas estáveis); apenas alinhar a forma textual do template canônico ao contrato já cravado.
+
 ### Arquitetura de regras portáveis vs. contexto framework-interno — "como ai-guidelines não vira nova fonte de repetição"
 
 - **Fonte do insight:** sessão de trabalho em 2026-05-20 (PR `fix/package-scripts-reorganization`). Owner observou que, ao longo da conversa, eu (IA) salvei vários _memory feedbacks_ em `~/.claude/projects/.../memory/` — utilizáveis apenas no Claude Code local desta máquina. Para Codex, Gemini, Cursor (ou Claude Code em outra máquina), esse contexto desaparece.
