@@ -83,7 +83,7 @@ export function printHelp() {
   console.log(`ai-guidelines CLI
 
 Uso:
-  yarn guidelines <init|adopt|providers|update|workflow|continue> [opcoes]
+  yarn guidelines <init|adopt|providers|update|check-budget|workflow|continue> [opcoes]
 
 Comandos:
   init           Cria baseline AI-first em projeto novo

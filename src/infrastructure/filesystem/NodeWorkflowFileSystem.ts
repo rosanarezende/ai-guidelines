@@ -7,8 +7,7 @@ import { WorkflowFileSystem } from "../../app/ports/WorkflowFileSystem.js";
  * Implementação Node do {@link WorkflowFileSystem}.
  *
  * - Resolve caminhos relativos contra um `rootDir` fixo (workspace root)
- *   e rejeita paths que escapam dele (segurança defensiva mínima, padrão
- *   da {@link ../filesystem/NodeFileSystemProbe}).
+ *   e rejeita paths que escapam dele (segurança defensiva mínima).
  * - `currentBranch()` usa `git rev-parse --abbrev-ref HEAD`; retorna `null`
  *   se HEAD detached, fora de repo, ou git ausente.
  */
@@ -17,7 +16,15 @@ export class NodeWorkflowFileSystem implements WorkflowFileSystem {
 
   private absolute(relPath: string): string | null {
     const abs = path.resolve(this.rootDir, relPath);
-    if (!abs.startsWith(path.resolve(this.rootDir))) return null;
+
+    // Robust containment check:
+    // - `startsWith(root)` is unsafe: `${root}2/...` would pass.
+    // - `relative` handles normalization cross-platform.
+    const rel = path.relative(this.rootDir, abs);
+    if (rel === "") return abs;
+    const escapes = rel === ".." || rel.startsWith(".." + path.sep) || path.isAbsolute(rel);
+    if (escapes) return null;
+
     return abs;
   }
 
@@ -80,6 +87,9 @@ export class NodeWorkflowFileSystem implements WorkflowFileSystem {
 
   resolveAbsolute(relPath: string): string {
     const abs = this.absolute(relPath);
-    return abs ?? path.resolve(this.rootDir, relPath);
+    if (!abs) {
+      throw new Error(`refusing to resolve outside rootDir: ${relPath}`);
+    }
+    return abs;
   }
 }

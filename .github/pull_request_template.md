@@ -78,7 +78,7 @@ WorkItem.kind do registry (cf. taxonomia MECE Spec 0021).
 - [ ] Commits atômicos (uma unidade lógica por commit, mensagem em PT-BR)
 - [ ] Branch dedicada (nunca direto em `main`)
 - [ ] Executei `yarn format` antes do push
-- [ ] Executei `yarn check` antes do push (testes + cobertura)
+- [ ] Executei `yarn validate` antes do push (format:check + build + test + living-docs:check)
 - [ ] Documentei decisões arquiteturais relevantes em `adrs/`
 - [ ] Atualizei `tasks.md` da spec correspondente (se aplicável)
 - [ ] Revisei risco de contexto pessoal, credenciais ou artefatos operacionais vazados

@@ -1,1 +1,4 @@
-node .yarn/releases/yarn-4.1.1.cjs format
+node .yarn/releases/yarn-4.1.1.cjs lint-staged
+node .yarn/releases/yarn-4.1.1.cjs build:all
+git add .core/rules/_meta/rules.json .core/rules/_meta/agents-core-ledger.md
+node .yarn/releases/yarn-4.1.1.cjs test:unit

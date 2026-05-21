@@ -909,7 +909,7 @@ Para preservar enforcement estrutural enquanto a accountability transfere, fast-
 
 ## Checklist pós-gate
 
-- [x] **(1)** `plan.md` inline em `spec.md` § Rollout (4 PRs candidatos; PR1 merged, PR2 escopo cravado em Bloco B).
+- [x] **(1)** `plan.md` separado em `.governance/specs/0023-workflow-runtime/plan.md` (cf. `[DEC-0023-B05]` Opção B — alinhado com boilerplate canônico; 4 PRs candidatos; PR1 merged, PR2 escopo cravado em Bloco B).
 - [x] **(2)** Tasks operacionais para PR1 criadas (T1–T9, todas completed em `feat/spec-0023-workflow-runtime`).
 - [x] **(3)** Status agregado `Resolved` no header e na tabela (mantido após adição de Bloco B).
 - [x] **(4)** Commit atômico marcando o gate da Stage A: `docs(spec-0023): pivot para workflow-runtime — gate Stage A → Stage B fechado` (`9dedce5`).
