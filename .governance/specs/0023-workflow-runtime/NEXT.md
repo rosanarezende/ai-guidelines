@@ -34,6 +34,8 @@ _(Sem débitos adiados no momento do gate. Itens emergentes durante PR1 entram a
 
 - **`HEAD` unborn dependency.** Descoberta operacional do Passo 7: `git init -b <branch>` sem commit deixa HEAD inválido; `NodeWorkflowFileSystem.currentBranch()` retorna `null` nesse estado. Hoje o runtime trata como caso degradado (orienta o humano). **Critério de revisita:** se ≥ 2 consumidores externos reportarem fricção (init fresh + publish-state imediato), considerar mensagem orientativa mais explícita.
 
+- **`runtime-state becoming source-of-truth creep`** (sinal arquitetural sinalizado pelo owner pós-Passo 8). O índice público ficou forte o suficiente para começar a atrair: coordenação, priorização, ordering, freshness, automação, dashboards, ranking, resolução implícita. **Critério de revisita:** qualquer proposta envolvendo "ordenação automática", "spec mais recente/ativa/relevante", "próxima spec sugerida", "spec stale", "auto continue", "sync inteligente" requer DEC própria — esses ficam **vetados por default** nesta fase. Princípio canônico: o índice é fonte de **descoberta declarada**, não fonte de **decisão derivada**.
+
 ### Pós-Bloco E (enforcement estrutural cravado; visíveis com critério de revisita)
 
 > Convenção operacional: **não usar "talvez depois" como justificativa**. Todo item deferido aqui tem (a) camada nomeada, (b) critério de revisita observável, (c) sem entrada em memória implícita.
