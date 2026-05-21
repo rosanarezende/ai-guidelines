@@ -37,7 +37,7 @@ main → branch dedicada → commit atômico → PR Draft → CI verde → Ready
 1. Crie branch: `fix/descricao-curta` ou `docs/descricao-curta`
 2. Faça o ajuste
 3. Abra PR em **modo Draft** usando o template [`.github/pull_request_template.md`](.github/pull_request_template.md)
-4. Garanta CI verde (`yarn format` + `yarn check`)
+4. Garanta CI verde (`yarn format` + `yarn validate`)
 5. Converta para **Ready** e solicite review de pelo menos 1 owner
 
 **Sem spec necessária.**
@@ -58,10 +58,10 @@ backlog.md (candidata) → spec em .governance/specs/<NNNN>-<slug>/ → branch �
    - `NEXT.md` — débitos adiados (apenas se houver; deletar no encerramento)
 3. Crie **branch dedicada**: `feat/spec-XXXX-<slug>` (número sequencial alocado quando a candidata sai do backlog).
 4. **Commits atômicos** por unidade lógica (não agrupe docs + código + config num commit só).
-5. `yarn format` e `yarn check` antes de qualquer push.
+5. `yarn format` e `yarn validate` antes de qualquer push (o hook `pre-push` roda `yarn validate` automaticamente).
 6. Abra PR em **modo Draft** com matriz preenchida.
 7. Trabalho finalizado + CI verde → converta para **Ready**.
-8. Antes de pedir review, confirme a checklist técnica: spec/plan/tasks atualizados, decisões arquiteturais registradas em ADR quando necessário, `yarn format` + `yarn check` verdes, ausência de contexto pessoal/operacional vazado, e impacto downstream documentado.
+8. Antes de pedir review, confirme a checklist técnica: spec/plan/tasks atualizados, decisões arquiteturais registradas em ADR quando necessário, `yarn format` + `yarn validate` verdes, ausência de contexto pessoal/operacional vazado, e impacto downstream documentado.
 9. Solicite review de pelo menos **1 owner** (ver [CODEOWNERS](.github/CODEOWNERS)).
 
 ### 3. 🧩 Spec consolidada (absorve candidatas relacionadas)
@@ -127,15 +127,15 @@ chore(ci): atualizar threshold de cobertura para 85%
 
 ## Padrões obrigatórios
 
-| Regra                          | Detalhe                            |
-| :----------------------------- | :--------------------------------- |
-| Nunca commitar em `main`       | Toda alteração em branch dedicada  |
-| Commits atômicos               | Uma unidade lógica por commit      |
-| PRs sempre em Draft            | CI verde → Ready → review de owner |
-| `yarn format` antes do push    | CI valida formatação               |
-| `yarn check` antes do push     | CI valida cobertura e testes       |
-| Documentar decisões relevantes | ADR para mudanças arquiteturais    |
-| Approval humano antes de push  | Aplica-se também a agentes IA      |
+| Regra                          | Detalhe                                                                                 |
+| :----------------------------- | :-------------------------------------------------------------------------------------- |
+| Nunca commitar em `main`       | Toda alteração em branch dedicada                                                       |
+| Commits atômicos               | Uma unidade lógica por commit                                                           |
+| PRs sempre em Draft            | CI verde → Ready → review de owner                                                      |
+| `yarn format` antes do push    | CI valida formatação                                                                    |
+| `yarn validate` antes do push  | Cobre format:check + build:all + test + living-docs:check (idêntico ao `pre-push` hook) |
+| Documentar decisões relevantes | ADR para mudanças arquiteturais                                                         |
+| Approval humano antes de push  | Aplica-se também a agentes IA                                                           |
 
 ---
 
@@ -171,12 +171,12 @@ Este repositório é o **framework canônico**, não apenas um exemplo de consum
 ### Comandos canônicos
 
 ```bash
-yarn install --immutable     # restaura node_modules sob PnP
-yarn build:rules             # compila .core/rules/_meta/rules.json + ledger
-yarn check                   # prettier check + build:rules
-yarn test                    # suíte completa (unit + integration + smoke)
-yarn check:repo              # pipeline canônico (install immutable + check + test:coverage)
+yarn setup                   # = install --immutable + build:all
+yarn format                  # prettier --write
+yarn validate                # gate local: format:check + build:all + test + living-docs:check
 ```
+
+> **Referência única dos scripts:** [`docs/scripts.md`](docs/scripts.md) tem o mapa completo — categorias, composição, hooks de git, workflows de CI, cadeia canônica. Não duplicado aqui.
 
 ### Operando a CLI a partir deste repositório
 
@@ -232,7 +232,7 @@ Algumas regras locais importam para evitar drift:
 
 - `AGENTS.md` é ao mesmo tempo documento operacional local **e** artefato runtime de exemplo.
 - O bloco `<AI_GUIDELINES>` em `AGENTS.md` é compilado a partir das regras em `.core/rules/`; contexto local do repositório fica **fora** dele.
-- Ao editar regras em `.core/rules/`, rode `yarn check` para reconstruir `rules.json` e o ledger.
+- Ao editar regras em `.core/rules/`, rode `yarn build:rules` (ou `yarn build:all`) para reconstruir `rules.json` e o ledger.
 - Ao editar a CLI, preserve o contrato entre `cli/cli/args.mjs`, `cli/app/engine.mjs` e `docs/cli/ai-guidelines-cli.md`.
 - Features editoriais (`tdd`, `bdd`, `quality-gates`) e de infraestrutura (`prettier`, `husky`, `ci`) têm taxonomias distintas e não devem ser misturadas na documentação nem no wizard.
 - Sequência de release (publish em registry npm) é cravada em [`.core/process/governance-foundation.md`](.core/process/governance-foundation.md) § "Sequência canônica para specs com publish em registry externo" — leia antes de qualquer trabalho que envolva publish.

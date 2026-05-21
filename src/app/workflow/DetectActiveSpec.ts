@@ -17,7 +17,8 @@ import { WorkflowFileSystem } from "../ports/WorkflowFileSystem.js";
 const GOVERNANCE_ROOT = ".governance/specs";
 const SPECIFY_ROOT = ".specify/specs";
 
-const BRANCH_SLUG_REGEX = /^(?:feat|fix|docs|chore|refactor)\/spec-(\d{4})-(.+)$/;
+// slug é single-segment (`NNNN-slug`); barras são rejeitadas.
+const BRANCH_SLUG_REGEX = /^(?:feat|fix|docs|chore|refactor)\/spec-(\d{4})-([^/]+)$/;
 
 export function deriveSlugFromBranch(branch: string | null): string | null {
   if (!branch) return null;

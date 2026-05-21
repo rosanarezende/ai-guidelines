@@ -3,9 +3,9 @@
  *
  * Comandos:
  *   `ai-guidelines workflow`   — wizard interativo (REPL).
- *   `ai-guidelines continue`   — atalho: imprime briefing e executa
- *                                a primeira ação de `state.next`
- *                                (sem REPL).
+ *   `ai-guidelines continue`   — atalho: imprime briefing e a
+ *                                próxima ação registrada em `state.next`
+ *                                (sem REPL; não executa ações).
  *
  * Princípio (cf. decision-brief.md § DEC-0023-A03):
  *   - texto livre vira **context bundle** copy-paste para sessão IA;
@@ -111,7 +111,7 @@ export function buildMenu(state: WorkflowState): ReadonlyArray<{ key: string; la
   items.push({ key: "1", label: "ver briefing novamente" });
   items.push({ key: "2", label: "ver lacunas do gate (research §8)" });
   if (state.gate.status !== "closed") {
-    items.push({ key: "3", label: "mostrar critérios para fechar o gate" });
+    items.push({ key: "3", label: "ver lacunas e critérios do gate" });
   }
   if (state.next.length > 0) {
     items.push({ key: "4", label: `executar próxima ação (${state.next[0]})` });

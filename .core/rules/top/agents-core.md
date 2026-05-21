@@ -209,7 +209,7 @@ tags: [core, agents, always_injected, git, commit, ci, harness_lock]
 <format_cmd> ; <check_cmd> ; git add . ; git commit -m "..."
 ```
 
-Se o repositório define `yarn format` e `yarn check`, o comando concreto é: `yarn format ; yarn check ; git add . ; git commit -m "..."`. Adapte aos scripts do projeto — a regra é a **cadeia**, não o gerenciador.
+Se o repositório define `yarn format` (write) e `yarn validate` (aggregate: format:check + build + test + living-docs:check, ou equivalente do stack), o comando concreto é: `yarn format ; yarn validate ; git add . ; git commit -m "..."`. Adapte aos scripts do projeto — a regra é a **cadeia**, não o gerenciador. Em stacks sem aggregate, expanda explicitamente: `<format_write> ; <format_check> ; <build> ; <test> ; <docs_check> ; git add . ; git commit -m "..."`.
 
 **Why this matters:** o gate local replica o gate de CI. Pular = empurrar o erro para o pipeline e gastar ciclo de revisão humano com algo automatizável.
 
@@ -357,10 +357,10 @@ tags: [core, agents, always_injected, git, commit, safety]
 ```
 
 **Instruction (en):**
-At the end of each sub-block, provide only the commit message suggestion. The human executes the full validation chain (`yarn format ; yarn check ; ...`) and `git commit`.
+At the end of each sub-block, provide only the commit message suggestion. The human executes the full validation chain (`yarn format ; yarn validate ; ...`) and `git commit`.
 
 **Documentação (pt-br):**
-Ao concluir um sub-bloco, IA fornece **apenas** a mensagem sugerida do commit (`feat(spec-XXXX): ...`). O humano executa a cadeia completa de validação (`yarn format ; yarn check ; git add . ; git commit -m "..."`).
+Ao concluir um sub-bloco, IA fornece **apenas** a mensagem sugerida do commit (`feat(spec-XXXX): ...`). O humano executa a cadeia completa de validação (`yarn format ; yarn validate ; git add . ; git commit -m "..."`).
 
 **Why this matters:** economiza tokens e impede IA de operar git autonomamente. Honra `[CORE-07]` (push) e `[CORE-08]` (HARNESS LOCK).
 

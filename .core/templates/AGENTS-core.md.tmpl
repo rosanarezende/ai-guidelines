@@ -41,7 +41,7 @@ Este arquivo define o fluxo obrigatório para qualquer IA atuando neste reposit�
    <format_cmd> ; <check_cmd> ; git add . ; git commit -m "..."
    ```
 
-   Se o repositório define `yarn format` e `yarn check`, o comando concreto é: `yarn format ; yarn check ; git add . ; git commit -m "..."`. Adapte aos scripts do projeto — a regra é a **cadeia**, não o gerenciador.
+   Se o repositório define `yarn format` (write) e `yarn validate` (aggregate: format:check + build + test + living-docs:check, ou equivalente do stack), o comando concreto é: `yarn format ; yarn validate ; git add . ; git commit -m "..."`. Adapte aos scripts do projeto — a regra é a **cadeia**, não o gerenciador. Em stacks sem aggregate, expanda explicitamente: `<format_write> ; <format_check> ; <build> ; <test> ; <docs_check> ; git add . ; git commit -m "..."`.
 
 3.2. A submissão de Pull Requests obrigatoriamente se inaugura no modo `Draft`, utilizando integralmente a matriz `.github/pull_request_template.md`.
 
@@ -67,6 +67,6 @@ Este arquivo define o fluxo obrigatório para qualquer IA atuando neste reposit�
 
 #### FASE 5: Commit Message Protocol
 
-5.1. **Ao concluir cada sub-bloco, forneça apenas a mensagem sugerida do commit.** O humano executa a cadeia completa de validação (`yarn format ; yarn check ; git add . ; git commit -m "..."`).
+5.1. **Ao concluir cada sub-bloco, forneça apenas a mensagem sugerida do commit.** O humano executa a cadeia completa de validação (`yarn format ; yarn validate ; git add . ; git commit -m "..."`).
 
    **Why this matters:** economiza tokens e impede IA de operar git autonomamente. Honra o protocolo de segurança de push (`[CORE-07]`) e HARNESS LOCK (`[CORE-08]`).
