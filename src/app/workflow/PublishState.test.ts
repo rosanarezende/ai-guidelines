@@ -111,7 +111,8 @@ describe("App — PublishState [BR-WORKFLOW-PUBLISH-STATE]", () => {
       expect(result.entry.branch).toBe("feat/spec-0023-workflow-runtime");
       expect(result.entry.specPath).toBe(SPEC_DIR);
       expect(result.entry.sourceStatePath).toBe(STATE_PATH);
-      expect(result.entry.updatedAt).toBe("2026-05-21T10:00:00.000Z");
+      // now() = 10:00 UTC → emitido como 07:00 em offset -03:00 (mesmo instante).
+      expect(result.entry.updatedAt).toBe("2026-05-21T07:00:00.000-03:00");
       expect(result.entry.updatedBy).toBe("@rosanarezende");
 
       // verifica que o arquivo foi de fato escrito e é parseável
@@ -218,7 +219,8 @@ active_specs:
       const reparsed = parseActiveSpecs(fs.readTextFile(INDEX_PATH));
       expect(reparsed.activeSpecs).toHaveLength(1);
       expect(reparsed.activeSpecs[0].status).toBe("blocked");
-      expect(reparsed.activeSpecs[0].updatedAt).toBe("2026-05-21T11:00:00.000Z");
+      // segunda execução: now() = 11:00 UTC → 08:00 em offset -03:00.
+      expect(reparsed.activeSpecs[0].updatedAt).toBe("2026-05-21T08:00:00.000-03:00");
     });
   });
 

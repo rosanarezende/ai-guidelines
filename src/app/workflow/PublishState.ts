@@ -30,6 +30,32 @@ import { DetectActiveSpec } from "./DetectActiveSpec.js";
 
 const INDEX_PATH = ".governance/runtime/active-specs.yml";
 
+/**
+ * Formata um instante temporal como ISO-8601 com offset literal `-03:00`.
+ *
+ * Nome reflete o que o código faz de fato: deslocamento UTC fixo, sem
+ * consulta a timezone real, sem dependência de `Intl`/`tzdata`, sem
+ * regras de DST. Brasil aboliu horário de verão em 2019, então `-03:00`
+ * é a representação estável do horário local para publishes feitos a
+ * partir do Brasil; aplicações em outros offsets precisariam de função
+ * própria (não-objetivo desta spec).
+ *
+ * Determinismo: `Date.prototype.toISOString()` sempre emite UTC, então
+ * deslocamos o instante por -3h, formatamos como ISO e trocamos o `Z`
+ * final pelo offset literal. Mesmo input → mesmo output em qualquer
+ * runtime, qualquer TZ de máquina/CI.
+ *
+ * Compatibilidade: o parser (`ISO_8601_STRICT` em `activeSpecsSerializer.ts`)
+ * já aceita `Z` E `±HH:MM` — entries históricas continuam válidas; novos
+ * publishes passam a usar offset explícito. Heterogeneidade temporária
+ * dentro do mesmo contrato (não é drift).
+ */
+function formatTimestampUtcMinus3(instant: Date): string {
+  const OFFSET_MS = -3 * 60 * 60 * 1000;
+  const shifted = new Date(instant.getTime() + OFFSET_MS);
+  return shifted.toISOString().replace("Z", "-03:00");
+}
+
 export class PublishStateError extends Error {
   constructor(message: string) {
     super(message);
@@ -88,7 +114,7 @@ export class PublishState {
     //    narrativo. Lookup/translation, não orquestração.
     const detected = new DetectActiveSpec(this.fs).run();
     const location: SpecLocation =
-      detected.location ?? this.resolveLocationViaIndexFallback(detected.reason);
+      detected.location ?? this.resolveLocationFromIndexBranchMatch(detected.reason);
 
     // 3. Derivar id + slug do nome do diretório (convenção 0023-workflow-runtime)
     const dirMatch = /^(\d{4})-(.+)$/.exec(location.slug);
@@ -132,7 +158,7 @@ export class PublishState {
       status: input.status,
       specPath,
       sourceStatePath: statePath,
-      updatedAt: this.now().toISOString(),
+      updatedAt: formatTimestampUtcMinus3(this.now()),
       updatedBy: input.updatedBy,
       ...(input.lastSyncCommit !== undefined ? { lastSyncCommit: input.lastSyncCommit } : {}),
     };
@@ -184,7 +210,7 @@ export class PublishState {
    * (estado do filesystem); o índice é consultado **como tabela de tradução
    * branch→spec**, não como autoridade semântica nem fonte de inferência.
    */
-  private resolveLocationViaIndexFallback(detectReason?: string): SpecLocation {
+  private resolveLocationFromIndexBranchMatch(detectReason?: string): SpecLocation {
     const branch = this.fs.currentBranch();
     if (!branch) {
       throw new PublishStateError(
