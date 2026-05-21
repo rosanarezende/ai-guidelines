@@ -5,6 +5,7 @@ focus:
   - runtime-public-state-index
   - workflow-runtime-dogfooding
 next:
-  - Materializar Bloco G no decision-brief + contrato mínimo de `.governance/runtime/active-specs.yml`
-  - Abrir PR3-runtime-state-index stacked sobre `spec-0023-followup-scripts`
-  - Implementar `yarn workflow publish-state` manual antes de automação/hook
+  - Implementar leitura de `.governance/runtime/active-specs.yml` em `yarn workflow` (descoberta de spec ativa em `main` sem checkout manual)
+  - Implementar `yarn workflow publish-state` manual + drift guard mínimo (paths existem; campos proibidos rejeitados)
+  - Validar workflow ponta-a-ponta usando apenas `active-specs.yml` como descoberta primária (prova operacional real do PR3)
+  - Repetir experimento de troca de máquina sem prompt humano denso

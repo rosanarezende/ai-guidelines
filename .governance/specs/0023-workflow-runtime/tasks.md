@@ -149,13 +149,15 @@
 
 ### Sub-bloco [1.E] — Runtime public state index (`active-specs.yml` + publish-state) `(evidence-driven)` — PR3-runtime-state-index (atual; docs/contrato agora, CLI em seguida)
 
-> Origem: [`plan.md § Componente [J]`](./plan.md) + [`[DEC-0023-G01..G03]`](./decision-brief.md). Este é o primeiro recorte que ataca diretamente a promessa central da 0023: descoberta de spec ativa em `main` sem prompt humano denso.
+> Origem: [`plan.md § Componente [J]`](./plan.md) + [`[DEC-0023-G01..G04]`](./decision-brief.md). Este é o primeiro recorte que ataca diretamente a promessa central da 0023: descoberta de spec ativa em `main` sem prompt humano denso.
 
-- [x] **1.E.1** `decision-brief.md` Bloco G fechado com 3 decisões: separação tripla de gêneros, índice único em `.governance/runtime/active-specs.yml`, sync manual inicial.
+> **Nota transitional (2026-05-21):** este sub-bloco ainda herda granularidade fine-grained do `tasks-mixed-boilerplate v=3`, anterior ao enforcement estrito de `[DEC-0023-D01]` (que craveia `tasks.md` como boundary de autorização, não checklist fino). Retrofit do boilerplate canônico é débito explícito ([`roadmap/backlog.md`](../roadmap/backlog.md)) — **deliberadamente não absorvido** neste PR para evitar expansão recursiva. **A inconsistência foi preservada deliberadamente para evitar retrofits silenciosos divergentes do boilerplate canônico** — corrigir apenas aqui criaria drift sub-bloco vs template, exatamente o anti-pattern que retrofit centralizado deve resolver. Transitional, deferred pending boilerplate refactor.
+
+- [x] **1.E.1** `decision-brief.md` Bloco G fechado com 4 decisões: separação tripla de gêneros, índice único em `.governance/runtime/active-specs.yml`, sync manual inicial, vocabulário canônico stage/status + projection rule (`[DEC-0023-G04]`).
 - [x] **1.E.2** `.governance/runtime/active-specs.yml` criado com schema mínimo e exemplo dogfoodado da própria 0023.
 - [x] **1.E.3** `state.yml` interno da 0023 alinhado ao estágio real da spec para não contradizer o índice público.
-- [ ] **1.E.4** Planejar `workflow` para ler o índice público primeiro; `continue` resolve `branch`/`spec_path` a partir dele antes de ler artifacts densos.
-- [ ] **1.E.5** Planejar `yarn workflow publish-state` explícito (sem hook/CI nesta primeira iteração).
+- [ ] **1.E.4** Implementar leitura do índice público em `workflow` (descoberta primeiro; `continue` resolve `branch`/`spec_path` antes de ler artifacts densos).
+- [ ] **1.E.5** Implementar `yarn workflow publish-state` manual (sem hook/CI nesta primeira iteração).
 - [ ] **1.E.N** Pipeline verde com cadeia legada nesta branch (`yarn check && yarn test && yarn test:nova-cli && yarn living-docs:check`) até rebase sobre `main` com PR #21 absorvido.
 - [ ] **1.E.[REVIEW]** **[MANDATÓRIO]** Owner aprova a expansão de escopo do Bloco G + contrato mínimo antes de tocar código da CLI.
 - [ ] **1.E.[COMMIT]** `docs(spec-0023): Bloco G — índice operacional público mínimo + contrato runtime`.
