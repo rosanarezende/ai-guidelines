@@ -80,7 +80,7 @@ Modificam a infraestrutura (configurações, `package.json`, workflows) do proje
 #### 7. Husky (Automation)
 
 - **O que faz**: Instala e configura Git Hooks para automação local.
-- **Por que**: Garante que scripts de qualidade (como `yarn format` ou `yarn check`) sejam executados obrigatoriamente antes de cada commit.
+- **Por que**: Garante que scripts de qualidade (como `yarn format` / `yarn lint-staged` / `yarn validate`) sejam executados obrigatoriamente antes de cada commit e push.
 
 #### 8. CI (GitHub Actions)
 
