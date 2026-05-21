@@ -18,6 +18,22 @@ _(Sem débitos adiados no momento do gate. Itens emergentes durante PR1 entram a
 - **Definição objetiva de "pequeno" para fast-track** deferida até observação empírica de ≥ 3 fast-tracks reais (`[DEC-0023-D05]` risco aceito).
 - **Drift detection profundo no CI** explicitamente diferido (`[DEC-0023-D02]` C-completo). Reabrir como spec própria quando padrões de divergência se acumularem.
 
+### Pós-PR3 (runtime-state-index entregue; vigilância arquitetural elevada)
+
+> Estes itens NÃO são débitos de código pendentes — são **sinais de vigilância** identificados pelo owner ao aprovar os Passos 5 e 7 do PR #23. Cada um tem critério observável de revisita; sem critério ativo, não acionar.
+
+- **Semântica de `updatedAt` no `ActiveSpecEntry`.** Campo é registro factual de publicação, NÃO sinal operacional. Documentado em jsdoc do `src/domain/workflow/ActiveSpecEntry.ts`. **Critério de revisita:** se aparecer qualquer derivação de `updatedAt` (sorting, freshness flag, staleness, heartbeat, "última ativa"), parar e materializar `[DEC-NNNN-*]` antes de codar. Pressão antecipada pelo owner pós-Passo 5.
+
+- **`title` na fronteira entre estrutural e visual.** Primeiro campo opcional do índice que não é lookup-crítico. **Critério de revisita:** se aparecerem propostas de novos campos de conveniência visual (`summary`, `owner`, `labels`, `tags`, `category`, `priority`), rejeitar ou exigir DEC própria com framing anti-distorção (cf. `[DEC-0023-E05]`). Pressão antecipada pelo owner pós-Passo 5.
+
+- **`PublishState` virando mini-orchestrator.** Hoje aceitável (detecta → lê → projeta → valida → serializa → upsert → escreve). **Critério de revisita:** crescimento por feature (novos campos, regras condicionais, fluxos novos) — refatorar antes de aceitar. Esta classe virou centro operacional do runtime público.
+
+- **`publish-state` continua manual-first.** Hooks/CI/PRs automáticos de state estão deferidos em `[DEC-0023-G03]`. **Critério de revisita:** auto-publicação/sync/atualização requer DEC própria; o nome `publish` é declarativo por design e começa a mentir se o sistema decide publicar sozinho.
+
+- **UX-creep no `renderActiveSpecsIndex`.** Lista negra explícita: stale detection, ordering, upstream/downstream, prioridade, "próxima spec recomendada", status agregados. **Critério de revisita:** qualquer adição requer DEC própria.
+
+- **`HEAD` unborn dependency.** Descoberta operacional do Passo 7: `git init -b <branch>` sem commit deixa HEAD inválido; `NodeWorkflowFileSystem.currentBranch()` retorna `null` nesse estado. Hoje o runtime trata como caso degradado (orienta o humano). **Critério de revisita:** se ≥ 2 consumidores externos reportarem fricção (init fresh + publish-state imediato), considerar mensagem orientativa mais explícita.
+
 ### Pós-Bloco E (enforcement estrutural cravado; visíveis com critério de revisita)
 
 > Convenção operacional: **não usar "talvez depois" como justificativa**. Todo item deferido aqui tem (a) camada nomeada, (b) critério de revisita observável, (c) sem entrada em memória implícita.

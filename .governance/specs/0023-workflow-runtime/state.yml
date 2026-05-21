@@ -5,7 +5,7 @@ focus:
   - runtime-public-state-index
   - workflow-runtime-dogfooding
 next:
-  - Implementar leitura de `.governance/runtime/active-specs.yml` em `yarn workflow` (descoberta de spec ativa em `main` sem checkout manual)
-  - Implementar `yarn workflow publish-state` manual + drift guard mínimo (paths existem; campos proibidos rejeitados)
-  - Validar workflow ponta-a-ponta usando apenas `active-specs.yml` como descoberta primária (prova operacional real do PR3)
-  - Repetir experimento de troca de máquina sem prompt humano denso
+  - PR4-enforcement-runtime — `executionAuthorized` derivado + `workflow continue` recusa narrativa quando inválido + fast-track strictness em governance-pr-check (label + rationale). Cf. `[DEC-0023-E03]` + ADR 0021
+  - PR5-DX-thinking — reler Bloco B sob enforcement de PR4; Gate 3 (planning approval) explícito antes de PR6
+  - PR6-DX-execution — clipboard real + AssembleBriefing warning + integration test + examples/minimal-spec + CLI help + docs/guides + README + CHANGELOG final
+  - Auditoria periódica dos 4 sinais de vigilância do Passo 5 (updated_at semântica; title como fronteira; PublishState mini-orchestrator; publish-state manual-first) e dos guardrails de UX-creep no render do índice (sem stale/ordering/prioridade/próxima-spec/agregados)

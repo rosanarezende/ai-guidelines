@@ -12,8 +12,8 @@ Detalhes de lifecycle em [`.core/process/governance-foundation.md`](../../../.co
 
 ## Em execução
 
-- **spec 0023** — `workflow-runtime` (`.governance/specs/0023-workflow-runtime/`) — **In Progress (Stage B+)** _(branch `feat/spec-0023-governance-workflow-discovery-model`)._
-  - Pivotada de "discovery model" para "operational runtime". Lifecycle metodológico (ADR 0020) + enforcement estrutural (ADR 0021) cravados.
+- **spec 0023** — `workflow-runtime` (`.governance/specs/0023-workflow-runtime/`) — **In Progress (Stage 2)** _(stack ativa em `feat/spec-0023-runtime-active-state`; consulte `.governance/runtime/active-specs.yml` para o estado público corrente — fonte canônica per `[DEC-0023-G02]`)._
+  - Pivotada de "discovery model" para "operational runtime". Lifecycle metodológico (ADR 0020) + enforcement estrutural (ADR 0021) cravados. PR3-runtime-state-index entregou o índice operacional público + `publish-state` manual.
 
 ---
 

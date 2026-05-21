@@ -37,6 +37,23 @@ export interface ActiveSpecEntry {
   readonly stage: WorkflowStage;
   readonly status: ActiveSpecStatus;
   readonly specPath: string;
+  /**
+   * Timestamp ISO-8601 estrito de quando o humano publicou o estado.
+   *
+   * **Semântica deliberadamente restrita** — `updatedAt` é registro factual,
+   * NÃO sinal operacional. Especificamente NÃO representa:
+   *   - progresso da spec;
+   *   - prioridade relativa entre specs;
+   *   - atividade recente do time;
+   *   - saúde operacional;
+   *   - freshness/staleness (não derive "stale", "outdated", "needs-republish").
+   *
+   * Inferências sobre intenção a partir deste campo (sorting, ranking,
+   * heartbeat, sync drift) recriam coordination creep que a Spec 0023
+   * craveia como anti-pattern (cf. `[DEC-0023-A03]` AI-as-Channel +
+   * `[DEC-0023-G03]` manual-first). Qualquer enriquecimento semântico
+   * derivado de `updated_at` exige `[DEC-NNNN-*]` próprio.
+   */
   readonly updatedAt: string;
 
   readonly title?: string;

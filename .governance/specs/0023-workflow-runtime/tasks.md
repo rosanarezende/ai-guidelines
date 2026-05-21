@@ -156,11 +156,18 @@
 - [x] **1.E.1** `decision-brief.md` Bloco G fechado com 4 decisões: separação tripla de gêneros, índice único em `.governance/runtime/active-specs.yml`, sync manual inicial, vocabulário canônico stage/status + projection rule (`[DEC-0023-G04]`).
 - [x] **1.E.2** `.governance/runtime/active-specs.yml` criado com schema mínimo e exemplo dogfoodado da própria 0023.
 - [x] **1.E.3** `state.yml` interno da 0023 alinhado ao estágio real da spec para não contradizer o índice público.
-- [ ] **1.E.4** Implementar leitura do índice público em `workflow` (descoberta primeiro; `continue` resolve `branch`/`spec_path` antes de ler artifacts densos).
-- [ ] **1.E.5** Implementar `yarn workflow publish-state` manual (sem hook/CI nesta primeira iteração).
-- [ ] **1.E.N** Pipeline verde com cadeia legada nesta branch (`yarn check && yarn test && yarn test:nova-cli && yarn living-docs:check`) até rebase sobre `main` com PR #21 absorvido.
-- [ ] **1.E.[REVIEW]** **[MANDATÓRIO]** Owner aprova a expansão de escopo do Bloco G + contrato mínimo antes de tocar código da CLI.
-- [ ] **1.E.[COMMIT]** `docs(spec-0023): Bloco G — índice operacional público mínimo + contrato runtime`.
+- [x] **1.E.4** Implementar leitura do índice público em `workflow` (descoberta primeiro; `continue` resolve `branch`/`spec_path` antes de ler artifacts densos). Entregue em Passo 3 (REPL integra `ListActiveSpecs` + `renderActiveSpecsIndex`) + Passo 4 (`continue <slug|id>` resolve cross-spec via índice, sem auto-checkout, match tri-form em id|slug|id-slug).
+- [x] **1.E.5** Implementar `yarn workflow publish-state` manual (sem hook/CI nesta primeira iteração). Entregue em Passo 5 (`PublishState` use case + CLI wrapper + cabling cirúrgico em `cli/cli/args.mjs` + `cli/app/engine.mjs`; round-trip de validação antes de escrever).
+- [x] **1.E.N** Pipeline verde validado em todos os passos: `yarn build` + `yarn jest` (523 passing) + `yarn test:unit` (292 passing) + `yarn format:check` limpo. Drift guard mínimo satisfeito pela convergência dos Passos 1+2+5 (auditoria Passo 6); integration test end-to-end com filesystem + git reais (Passo 7) revelou e fechou bugs operacionais (HEAD unborn + match tri-form do marker `*`).
+- [x] **1.E.[REVIEW]** Owner aprovou cada passo via "aprovo" / "pode seguir" textual explícito; PR #23 permanece em DRAFT até conversão manual pelo owner.
+- [x] **1.E.[COMMIT]** Sequência de commits incrementais por passo:
+  - `5a2067c feat(spec-0023): schema validator do índice público active-specs.yml`
+  - `c512898 feat(spec-0023): ListActiveSpecs use case + soft drift guard`
+  - `c8c63ae feat(spec-0023): integra leitura do índice público no REPL workflow (lookup-only)` (Passo 3)
+  - `3d128ed feat(spec-0023): continue <slug|id> resolve via índice público (lookup, sem auto-checkout)` (Passo 4)
+  - `8b7a494 feat(spec-0023): publish-state manual — state.yml → active-specs.yml (sem inferência)` (Passo 5)
+  - `7fe63e8 feat(spec-0023): integration tests E2E + correção tri-form de marca corrente` (Passo 7)
+  - Passo 8 (atual): sync de artifacts vivos.
 
 ### Sub-bloco [1.F] — Enforcement Runtime (`executionAuthorized` derivado + workflow refuse) `(evidence-driven)` — PR4-enforcement-runtime (próximo PR; ainda NÃO autorizado)
 
