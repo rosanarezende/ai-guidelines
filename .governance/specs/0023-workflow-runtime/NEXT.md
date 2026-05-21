@@ -114,6 +114,47 @@ _(Sem débitos adiados no momento do gate. Itens emergentes durante PR1 entram a
   - se renumeração ocorrer > 2 vezes na mesma stack, sinal de stack instável — reabrir DEC sobre forma de rollout antes de continuar;
   - se stacks > 4 PRs aparecerem recorrentemente, sinal de scope creep — considerar splitar em specs.
 
+### DX e Narrativa Operacional (insights emergentes, pós-PR3 / 2026-05-21)
+
+> Dois insights de **produto/DX** que emergiram do uso real do PR #23: (a) infográficos pré/pós no body do PR durante review; (b) crescimento da carga cognitiva da CLI textual à medida que o runtime ganha superfície. **Registro deliberado para não desaparecer pós-merge.** Não numerados (estão em incubação, não em backlog formal — promoção a backlog requer ≥ 2 casos adicionais ou pedido explícito do owner).
+
+#### PR narrative artifacts (infográficos por PR)
+
+- **Fonte do insight:** PR #23 — owner anexou infográficos visuais no body do PR antes da implementação (objetivo / problema atual / hipótese arquitetural / guardrails / impacto esperado) e ao final (valor entregue / fluxo novo habilitado / bugs descobertos / trade-offs / impacto operacional). Efeito observado: review mais rápido, onboarding do reviewer encurtado, contexto histórico preservado sem precisar reler diff completo.
+- **Hipótese a confirmar:** o PR deixa de ser apenas "diff de código" e vira "incremento operacional compreensível". Pessoas absorvem arquitetura mais rápido por fluxo visual do que por diff textual — ergonomia diferente de governança.
+- **Família de artefatos candidatos:** `vision.png` (intenção), `value-delivered.png` (valor entregue), `workflow-impact.png` (mudança operacional habilitada).
+- **Caminhos futuros possíveis** (cada um exige decisão própria; não promover automaticamente):
+  - (a) Adicionar slot opcional em `.github/pull_request_template.md` para anexar essas imagens (zero enforcement; convite).
+  - (b) Geração assistida por agente IA (mais ambicioso; cruza ADR 0018 — agente como canal, não engine; viável se permanecer opt-in e copy-paste).
+  - (c) ADR futuro de DX consolidando o padrão se for adotado por ≥ 2 contribuidores diferentes em ≥ 3 PRs.
+- **Não-objetivo:** automação de geração no runtime (`yarn guidelines pr-artifacts`) — premature; geração manual + convite via template é o MVP.
+- **Sinal de "está na hora" de promover a backlog formal:** outro contribuidor adotar o padrão espontaneamente OU ≥ 3 PRs subsequentes usarem a mesma forma.
+
+#### Wizard operacional mínimo
+
+- **Fonte do insight:** owner observou pós-PR3 que conforme o runtime ganha superfície (`workflow`, `continue`, `continue <id>`, `workflow publish-state --status=... --updated-by=...`), a CLI textual cresce em carga cognitiva. Aceitável hoje para uso diário do owner; problemático para reviewers, novos contribuidores, uso casual, branches paralelas, operações recorrentes.
+- **Hipótese arquitetural:** menu guiado declarativo minimalista no boot de `yarn guidelines workflow` reduz atrito operacional **sem violar lookup-only** (cf. memory `feedback-lookup-not-coordination`). Exemplo de superfície proposta:
+
+  ```
+  O que deseja fazer?
+    1. Continuar spec atual
+    2. Continuar outra spec
+    3. Publicar estado
+    4. Ver specs ativas
+    5. Diagnosticar drift
+  ```
+
+- **Por que preserva a filosofia da 0023:**
+  - **Determinístico** — opções fixas, sem priorização, sem ranking, sem ordering por relevância.
+  - **Lookup explícito** — opção 2 ("continuar outra spec") leva a um sub-menu que lista specs do índice (sem inferência de "qual provável").
+  - **Sem inferência forte** — nenhuma opção decide pelo humano; cada uma traduz para um comando que já existe (`continue`, `publish-state`, etc.).
+  - **Sem orquestração** — wizard é shell visual sobre comandos existentes, não nova engine de fluxo.
+- **Risco principal a vigiar** (se algum dia for implementado): wizard virar "auto-detector inteligente de próxima ação" — exatamente o tipo de coordination creep que `feedback-lookup-not-coordination` veta. Implementação eventual exige `[DEC-NNNN-*]` próprio cravando o framing anti-distorção.
+- **Não-objetivo:** REPL conversacional, NLP-lite, sugestão de "próxima ação recomendada", autocomplete fuzzy de slug.
+- **Sinal de "está na hora" de promover a backlog formal:** ≥ 2 reviewers/contribuidores reportarem atrito concreto na CLI textual OU primeiro consumidor externo do framework chegar e reportar fricção operacional.
+
+> **Meta-observação (sem registro formal aqui):** os 2 insights apontam na mesma direção — reduzir custo cognitivo da governança sem perder rigor. PR narrative artifacts atacam o **lado humano-reviewer**; wizard ataca o **lado humano-operador**. Se ≥ 1 deles for adotado e validado, vale considerar consolidação como princípio cross-spec (memory ou ADR de DX), não antes.
+
 ---
 
 ## 🗺️ Backlog estratégico
