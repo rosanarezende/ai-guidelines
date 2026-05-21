@@ -39,7 +39,7 @@ Resultado esperado quando esta spec encerrar:
 - **Runtime CLI mínimo** com 1 comando principal (`workflow`) + 1 atalho (`continue`). REPL interativo. Comandos estruturados internos (`briefing`, `gaps`, `gate`, `next`, `quit`). Texto livre vira context bundle, **não** chamada de LLM.
 - **`state.yml`** com schema 4-chave canônico (`stage`, `gate.status`, `focus`, `next`). Serializer + validador em domínio. Default sensato quando ausente.
 - **Topologia `.governance/specs/`** como root primária no repo do mantenedor (este). Double-lookup runtime: `.governance/specs/{slug}` → fallback `.specify/specs/{slug}`. ADR 0019 registra.
-- **Detecção de spec ativa**: branch name → diretório slug; fallback por arquivos modificados (git).
+- **Detecção de spec ativa**: branch name → diretório slug. Fallback explícito quando o branch não casa ou o diretório não existe: retorna `null` com `reason` descritivo + orienta o humano. **Sem heurística por arquivos modificados** (evita inferência frágil; reabrir em PR futuro se ≥ 2 casos justificarem).
 - **AssembleBriefing**: estado + cabeçalhos do `spec.md` e `research.md` → bloco de 15–25 linhas determinístico.
 - **Código novo exclusivamente em `src/`** (DDD): `domain/workflow/`, `app/workflow/`, `adapters/cli/workflow/`. Bridge mínima no entrypoint `cli/ai-guidelines-cli.mjs` (delegate dinâmico).
 - **Dogfooding**: esta própria spec usa o `state.yml` desde o primeiro commit; testar `ai-guidelines workflow` nela é critério de aceite do PR1.
@@ -59,7 +59,7 @@ Resultado esperado quando esta spec encerrar:
 ## ✅ Critérios de Aceite (alto nível)
 
 - [ ] `ai-guidelines workflow` na branch desta spec mostra briefing contextual coerente com `state.yml` + arquivos da pasta.
-- [ ] `ai-guidelines continue` executa o briefing + a ação marcada em `state.next`.
+- [ ] `ai-guidelines continue` imprime briefing + próxima ação registrada em `state.next` (sem REPL; **não executa ações** — cf. § Comandos no header).
 - [ ] `state.yml` validado por schema (4 chaves; sem campos opcionais explodidos).
 - [ ] Double-lookup funciona: spec resolvida via `.governance/specs/` quando presente, via `.specify/specs/` quando não.
 - [ ] Detecção de spec ativa por branch name funciona para `feat/spec-NNNN-*`; fallback documentado.
