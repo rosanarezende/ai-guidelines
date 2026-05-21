@@ -1,0 +1,14 @@
+version: 1
+
+active_specs:
+  - id: "0023"
+    slug: "workflow-runtime"
+    title: "Workflow Runtime"
+    branch: "feat/spec-0023-runtime-active-state"
+    base_branch: "feat/spec-0023-lifecycle"
+    stage: "C"
+    status: "implementation_in_progress"
+    spec_path: ".governance/specs/0023-workflow-runtime"
+    source_state_path: ".governance/specs/0023-workflow-runtime/state.yml"
+    updated_at: "2026-05-21T00:00:00Z"
+    updated_by: "@rosanarezende"

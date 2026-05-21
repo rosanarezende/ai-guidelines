@@ -1,10 +1,10 @@
-stage: planning
+stage: implementation
 gate:
-  status: awaiting-review
+  status: closed
 focus:
-  - lifecycle-taxonomy-convergence
-  - enforcement-structural
+  - runtime-public-state-index
+  - workflow-runtime-dogfooding
 next:
-  - F01–F05 do Bloco F (Pendentes) — owner picks options em sessão dedicada (sem urgência)
-  - PR3-enforcement-runtime aguarda Bloco F Resolved + estabilização semântica
-  - PR4-DX-thinking + PR5-DX-execution após PR3
+  - Materializar Bloco G no decision-brief + contrato mínimo de `.governance/runtime/active-specs.yml`
+  - Abrir PR3-runtime-state-index stacked sobre `spec-0023-followup-scripts`
+  - Implementar `yarn workflow publish-state` manual antes de automação/hook

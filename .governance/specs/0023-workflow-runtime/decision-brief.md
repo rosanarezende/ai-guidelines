@@ -5,8 +5,8 @@
 > Spec: [`./spec.md`](./spec.md)
 > Plan: [`./plan.md`](./plan.md) (criado em 2026-05-19 conforme `[DEC-0023-B05]`).
 > Tasks: tasklist da sessão de implementação (PR1).
-> Status agregado: **Partial** (Bloco F aberto com F01–F05 em status Pendente após research lifecycle-architecture.md fechar; demais Blocos A/B/C/D/E permanecem Resolved)
-> Última atualização: 2026-05-19 — Blocos A/B/C/D/E Resolved; Bloco F aberto com F01–F05 Pendentes derivadas do research `[research/lifecycle-architecture.md]` (taxonomy ↔ lifecycle convergence; 299 linhas; fechado dentro do cap absoluto 300).
+> Status agregado: **Partial** (Bloco F aberto com F01–F05 em status Pendente; Bloco G Resolved após achado empírico de dogfooding 2026-05-21; Blocos A/B/C/D/E permanecem Resolved)
+> Última atualização: 2026-05-21 — Bloco G Resolved (`state operacional público mínimo`); Bloco F segue aberto com F01–F05 Pendentes derivadas do research `[research/lifecycle-architecture.md]` (taxonomy ↔ lifecycle convergence; 299 linhas; fechado dentro do cap absoluto 300).
 
 > **Artefato canônico do gate humano entre Stage 1 (research) e Stage 2 (design + implementação).** Para esta spec, a Stage 1 é a investigação documentada na pasta legacy `.specify/specs/0023-governance-workflow-discovery-model/` (research.md + anexos). Este brief materializa o gate Stage A → Stage B com 4 decisões cravadas em sessão de design 2026-05-19.
 
@@ -41,8 +41,11 @@
 | `[DEC-0023-F03]` | F     | Pendente |
 | `[DEC-0023-F04]` | F     | Pendente |
 | `[DEC-0023-F05]` | F     | Pendente |
+| `[DEC-0023-G01]` | G     | Resolved |
+| `[DEC-0023-G02]` | G     | Resolved |
+| `[DEC-0023-G03]` | G     | Resolved |
 
-**Status agregado:** Partial — Blocos A/B/C/D/E Resolved; Bloco F com 5 pontos Pendentes derivados do research `[research/lifecycle-architecture.md]`.
+**Status agregado:** Partial — Blocos A/B/C/D/E/G Resolved; Bloco F com 5 pontos Pendentes derivados do research `[research/lifecycle-architecture.md]`.
 
 ---
 
@@ -76,6 +79,8 @@
 - **Justificativa / Ressalvas:**
   > B preserva o rationale produzido e materializa o lifecycle no caso mais difícil (pivot de escopo). Ressalva: spec.md **original** permanece intocada na pasta legacy como trilha histórica; o novo `spec.md` vive em `.governance/specs/0023-workflow-runtime/`. Imutabilidade da original respeitada — não é rewrite, é pivot registrado.
 - **Data / Owner:** 2026-05-19 / @rosanarezende
+
+> **Nota de sequencing (2026-05-21):** o Bloco G inseriu `PR3-runtime-state-index` antes do enforcement. Sempre que Blocos B/E mencionarem `PR3`/`PR4`/`PR5` sem o novo sufixo, leia como **sequenciamento histórico pré-Bloco G**, não como numbering atual da stack.
 
 ---
 
@@ -466,6 +471,109 @@
 
 ---
 
+## Bloco G — Índice operacional público mínimo para continuidade cross-machine
+
+> **Origem:** experimento empírico de 2026-05-21 ao trocar de máquina. A próxima IA, operando em `main`, conseguiu inferir que a Spec 0023 existia apenas enumerando branches remotas e usando `git show` nos artifacts da branch ativa. A pergunta-bússola devolvida pela IA ("`main` ou checkout da branch da spec?") expôs a falha central da promessa da 0023: sem um índice público em `main`, `yarn workflow` não tem como descobrir por conta própria qual spec está ativa, em qual stage está e qual branch deve consultar.
+>
+> **Guardrail central:** este bloco distingue **três gêneros** para evitar shadow-spec em `main`:
+>
+> 1. **Artefato normativo da spec** — `spec.md`, `plan.md`, `tasks.md`, `decision-brief.md`, `NEXT.md`, `research/` (merge atômico no fechamento, cf. ADR 0020).
+> 2. **State operacional efêmero** — presença da spec ativa, branch, stage, status e timestamp público mínimo.
+> 3. **Projeção/runtime derivado** — briefing/menu/output do `workflow`, computado a partir do índice público e enriquecido pela leitura da branch da spec quando necessário.
+>
+> O índice público **não** pode carregar escopo, critérios de aceite, `next[]`, `[DEC-*]`, rationale, checklist fino, debts ou texto livre longo. Se carregar, recria merge incremental da spec por canal lateral e corrói ADR 0020 na prática.
+
+### [DEC-0023-G01] Separação semântica: artefato normativo vs state efêmero vs runtime derivado
+
+**Pergunta:** O achado do dogfooding 2026-05-21 deve ser tratado como ausência de documentação da spec, ou como ausência de um gênero operacional distinto do artefato normativo?
+
+**Contexto:**
+
+- ADR 0020 protege o merge atômico da spec: work-in-progress não deve vazar para `main` como contrato fragmentado.
+- O experimento mostrou que, sem qualquer índice público em `main`, `yarn workflow` não consegue cumprir a promessa de descoberta/continuidade.
+- Se `main` passar a carregar resumo normativo da spec, ADR 0020 apodrece lateralmente: reviewer começa a confiar no state público para entender "o que a spec é", e a branch vira apêndice denso.
+
+**Opções:**
+
+| Opção | Descrição                                                                                           | Pró                                                          | Contra                                                               |
+| :---- | :-------------------------------------------------------------------------------------------------- | :----------------------------------------------------------- | :------------------------------------------------------------------- |
+| A     | **Branch-only**: manter todo estado de trabalho apenas na branch da spec.                           | ADR 0020 permanece simples; zero artefatos novos em `main`.  | `workflow` em `main` continua cego; humano segue repetindo contexto. |
+| B     | **Separar 3 gêneros**: artefato normativo, state operacional efêmero e runtime derivado.            | Resolve descoberta em `main` sem transformar `main` em spec. | Exige contrato explícito e disciplina para não inflar o índice.      |
+| C     | **Publicar a spec incrementalmente** em `main` (state + resumo semântico + checklist de progresso). | `main` fica autoexplicativo para qualquer agente/humano.     | Viola ADR 0020 na prática; recria merge incremental da spec.         |
+
+**Decisão do Gate Humano:**
+
+- **Status:** [x] Resolvido
+- **Escolha:** [ ] A | [x] B | [ ] C
+- **Justificativa:** O problema descoberto não é "mais docs na branch"; é ausência de um índice operacional público mínimo em `main`. A separação tripla preserva ADR 0020 desde que o índice permaneça não-normativo.
+- **Data / Owner:** 2026-05-21 / @rosanarezende
+
+---
+
+### [DEC-0023-G02] Estrutura física e contrato mínimo do índice público
+
+**Pergunta:** Onde o índice operacional público deve viver e com que forma?
+
+**Contexto:**
+
+- O experimento mostrou que o runtime precisa de **descoberta rápida** em `main`, antes de qualquer checkout manual.
+- `living-docs.yml` e `registry.yml` têm vocação mais estável/ontológica; misturar telemetria efêmera ali tende a confundir gêneros.
+- Um diretório por spec (`active-states/<spec>.yml`) espelha o problema atual em menor escala e aumenta churn estrutural.
+
+**Opções:**
+
+| Opção | Descrição                                                                            | Pró                                                       | Contra                                                       |
+| :---- | :----------------------------------------------------------------------------------- | :-------------------------------------------------------- | :----------------------------------------------------------- |
+| A     | **`.governance/active-states/<spec>.yml`** — um arquivo por spec ativa.              | Óbvio de navegar; mutação localizada por spec.            | Mais arquivos/dirs; custo de listagem; mais churn estrutural |
+| B     | **`.governance/runtime/active-specs.yml`** — índice único com lista de specs ativas. | Telemetria concentrada; leitura simples; fácil de validar | Um arquivo compartilhado pode conflitar em specs paralelas   |
+| C     | **Absorver em `living-docs.yml` ou `registry.yml`**.                                 | Reaproveita artefato existente.                           | Mistura ontologia/documentação com telemetria efêmera        |
+
+**Decisão do Gate Humano:**
+
+- **Status:** [x] Resolvido
+- **Escolha:** [ ] A | [x] B | [ ] C
+- **Justificativa:** `.governance/runtime/active-specs.yml` comunica claramente que se trata de artefato operacional executado por código, não de documentação normativa. O contrato mínimo fica fechado a: `id`, `slug`, `branch`, `stage`, `status`, `spec_path`, `updated_at`; campos auxiliares opcionais (`title`, `base_branch`, `source_state_path`, `updated_by`, `last_sync_commit`) são aceitos. Critérios de aceite, `next[]`, `[DEC-*]`, rationale, checklist, debts e texto longo são **proibidos**.
+- **Data / Owner:** 2026-05-21 / @rosanarezende
+
+---
+
+### [DEC-0023-G03] Estratégia de sync: manual primeiro, automação depois
+
+**Pergunta:** Como publicar/atualizar o índice público sem introduzir automação prematura ou drift invisível?
+
+**Contexto:**
+
+- A solução final pode incluir hooks, PRs pequenos de state ou automação por CI, mas isso ainda não foi validado empiricamente.
+- O risco imediato não é falta de automação; é falta de contrato operacional mínimo.
+- O source of truth continua sendo o `state.yml` interno da spec + artifacts normativos da branch ativa.
+
+**Opções:**
+
+| Opção | Descrição                                                                                  | Pró                                               | Contra                                                            |
+| :---- | :----------------------------------------------------------------------------------------- | :------------------------------------------------ | :---------------------------------------------------------------- |
+| A     | **`yarn workflow publish-state` manual primeiro**; automação/hook só após dogfooding real. | Menor custo; valida o contrato antes da automação | Exige disciplina humana explícita; risco inicial de esquecimento  |
+| B     | **PR/commit incremental em `main` a cada transição** já na primeira iteração.              | `main` sempre atualizado de forma visível         | Custo cognitivo alto; dual-track de PRs antes de validar o modelo |
+| C     | **Hook/CI/auto-sync desde o início**.                                                      | Reduz intervenção humana futura                   | Overengineering; difícil depurar antes do primeiro caso real      |
+
+**Decisão do Gate Humano:**
+
+- **Status:** [x] Resolvido
+- **Escolha:** [x] A | [ ] B | [ ] C
+- **Justificativa:** A primeira iteração precisa provar o contrato, não a automação. `publish-state` explícito permite dogfooding controlado; hooks, drift guards automáticos e PRs de state só entram depois que o índice mínimo se mostrar útil na troca real de sessão/máquina.
+- **Data / Owner:** 2026-05-21 / @rosanarezende
+
+---
+
+### Riscos conscientemente aceitos no Bloco G
+
+- **Branch drift:** o índice público pode apontar para branch que foi renomeada/rebased. Mitigação inicial: `last_sync_commit` opcional + publish-state explícito; automação só depois do primeiro dogfood real.
+- **Múltiplas branches da mesma spec:** o índice pode perder qual branch é a "canônica" da spec ativa. Mitigação inicial: contrato mínimo permite apenas uma `branch` pública por spec; casos de stack paralela reabrem decisão própria.
+- **Source-of-truth reverso:** humanos/agentes podem editar `active-specs.yml` manualmente e tratá-lo como verdade. Mitigação: contrato e docs deixam explícito que a verdade segue no `state.yml` interno + artifacts normativos da branch.
+- **Operational spam:** PRs pequenos de state em `main` desde a primeira iteração podem aumentar ruído. Mitigação: rejeitado por `[DEC-0023-G03]`; manual first.
+- **False confidence:** agente pode achar que o índice público basta e pular leitura da branch da spec. Mitigação: runtime futuro deve deixar explícito que o índice serve para descoberta/navegação, não para substituir briefing normativo.
+
+---
+
 ## Bloco C — Saúde Técnica e Dívidas Associadas
 
 ### [DEC-0023-C01] Saúde arquitetural e dívidas técnicas
@@ -848,7 +956,7 @@ Para preservar enforcement estrutural enquanto a accountability transfere, fast-
 - **L2 (runtime refuse) ainda depende de o agente respeitar o sinal.** O runtime declara "execution locked" mas o agente pode ignorar e chamar `Edit` direto. L3 (hooks locais) resolveria; está deferido. Mitigação intermediária: L4 (CI) pega no final da cadeia. Risco residual aceito.
 - **Fast-track strictness não tem enforcement automatizado para "raridade".** Owner audita manualmente até ≥ 3 fast-tracks aparecerem. Risco: se autor abusar, detecção é manual.
 - **Princípio E01 é forte demais para virar slogan vazio.** Mitigação: ADR 0021 + memory entry + uso ativo nas conversações da spec.
-- **`executionAuthorized` derivado depende de "governance chain íntegra" — quando é íntegra?** Definição mínima: tasks.md presente + gate.status closed na spec corrente. Definição estendida (com governance PR referenced etc.) entra no PR3-enforcement-runtime.
+- **`executionAuthorized` derivado depende de "governance chain íntegra" — quando é íntegra?** Definição mínima: tasks.md presente + gate.status closed na spec corrente. Definição estendida (com governance PR referenced etc.) entra no PR4-enforcement-runtime.
 
 ---
 
@@ -903,7 +1011,19 @@ Para preservar enforcement estrutural enquanto a accountability transfere, fast-
   - [x] `[DEC-0023-E04]` — Itens deferidos com critérios de revisita observáveis registrados em NEXT.md e tasks.md
   - [x] `[DEC-0023-E05]` — Framing canônico anti-enterprise; fast-track strictness (label + rationale + state.yml + CI valida ambos)
 - **ADR derivada:** ADR 0021 — Enforcement estrutural precede consciência comportamental (princípio perene; separada de ADR 0020 que cobre lifecycle/sequencing).
-- **PR derivada:** PR3-enforcement-runtime (própria, separada de PR4-DX-thinking + PR5-DX-execution).
+- **PR derivada:** PR4-enforcement-runtime (própria, separada de PR5-DX-thinking + PR6-DX-execution).
+
+---
+
+## ✅ Gate fechado — Índice operacional público mínimo (Bloco G)
+
+- **Data:** 2026-05-21
+- **Owner:** @rosanarezende
+- **Pontos resolvidos:**
+  - [x] `[DEC-0023-G01]` — Separar artefato normativo, state efêmero e runtime derivado (Opção B)
+  - [x] `[DEC-0023-G02]` — `.governance/runtime/active-specs.yml` como índice público mínimo (Opção B)
+  - [x] `[DEC-0023-G03]` — `yarn workflow publish-state` manual primeiro; automação depois (Opção A)
+- **Princípio operativo:** o índice público em `main` existe para descoberta e navegação operacional. Ele **não** define contrato da spec nem substitui a branch ativa como artefato denso.
 
 ---
 

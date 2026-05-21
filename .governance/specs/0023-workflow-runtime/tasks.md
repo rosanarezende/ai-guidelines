@@ -5,7 +5,7 @@
 > Spec: [`./spec.md`](./spec.md)
 > Plan: [`./plan.md`](./plan.md)
 > Decision Brief: [`./decision-brief.md`](./decision-brief.md)
-> Status: In Progress (Stage 2) — PR2-lifecycle materializando bootstrap; PR3-enforcement-runtime na pauta seguinte
+> Status: In Progress (Stage 2) — PR3-runtime-state-index materializando a primeira implementação real da promessa central; enforcement estrutural permanece na pauta seguinte
 
 > **Progress file vivo.** Atualizar a cada degrau concluído. Quando uma decisão mudar, refletir em `plan.md` § "Decisões revisitadas" e ajustar tasks impactadas. Não retroceder status sem registro.
 
@@ -30,7 +30,7 @@
 >
 > DoD operacional fino (granularidade por arquivo, por linha, por commit) vive em `plan.md § ✅ Critérios de Aceite Detalhados`. **Não duplicar aqui.** Este boundary protege o projeto contra derivar para checklist bureaucracy.
 
-> **Particularidade — PR1 e PR2-lifecycle são pre-model declarados.** PR1 colapsou discovery+decision+execution (cf. `[DEC-0023-D04]`); PR2-lifecycle é bootstrap necessário (introduz o modelo). A partir de **PR3-enforcement-runtime / PR4-DX-thinking / PR5-DX-execution**, este arquivo é boundary obrigatório (cf. ADR 0020 + ADR 0021).
+> **Particularidade — PR1 e PR2-lifecycle são pre-model declarados.** PR1 colapsou discovery+decision+execution (cf. `[DEC-0023-D04]`); PR2-lifecycle é bootstrap necessário (introduz o modelo). **PR3-runtime-state-index** expande o escopo com o índice operacional público mínimo em `main`, mas ainda antes de enforcement automático. A partir de **PR4-enforcement-runtime / PR5-DX-thinking / PR6-DX-execution**, este arquivo é boundary obrigatório (cf. ADR 0020 + ADR 0021).
 
 ---
 
@@ -115,9 +115,9 @@
 
 - [x] **1.C.1** `src/cli/workflow.ts` — REPL com classifyInput, buildMenu, buildContextBundle.
 - [x] **1.C.2** Bridge em `cli/cli/args.mjs` (SUPPORTED_MODES) + `cli/app/engine.mjs` (delegate dinâmico).
-- [x] **1.C.3** `printHelp()` mínimo (atualização completa pendente para PR5-DX-execution sub-bloco [1.G]).
+- [x] **1.C.3** `printHelp()` mínimo (atualização completa pendente para PR6-DX-execution sub-bloco [1.H]).
 - [x] **1.C.N** Pipeline verde.
-- [x] **1.C.4** Débitos: `NoopClipboard` por default (real entra em PR5-DX-execution sub-bloco [1.G]).
+- [x] **1.C.4** Débitos: `NoopClipboard` por default (real entra em PR6-DX-execution sub-bloco [1.H]).
 - [x] **1.C.[COMMIT]** `0774348 feat(workflow): REPL workflow + atalho continue + bridge no entrypoint`.
 
 ### Sub-bloco [1.D] — Lifecycle metodológico + CI mínimo + governance artifacts `(evidence-driven)` — PR2-lifecycle (bootstrap, em construção)
@@ -147,46 +147,59 @@
   - `docs(spec-0023): Bloco E — enforcement estrutural + ADR 0021`
   - `chore(spec-0023): tasks.md reescrito conforme boilerplate mixed + state/NEXT/plan atualizados + CHANGELOG preview`
 
-### Sub-bloco [1.E] — Enforcement Runtime (`executionAuthorized` derivado + workflow refuse) `(evidence-driven)` — PR3-enforcement-runtime (próximo PR; ainda NÃO autorizado)
+### Sub-bloco [1.E] — Runtime public state index (`active-specs.yml` + publish-state) `(evidence-driven)` — PR3-runtime-state-index (atual; docs/contrato agora, CLI em seguida)
+
+> Origem: [`plan.md § Componente [J]`](./plan.md) + [`[DEC-0023-G01..G03]`](./decision-brief.md). Este é o primeiro recorte que ataca diretamente a promessa central da 0023: descoberta de spec ativa em `main` sem prompt humano denso.
+
+- [x] **1.E.1** `decision-brief.md` Bloco G fechado com 3 decisões: separação tripla de gêneros, índice único em `.governance/runtime/active-specs.yml`, sync manual inicial.
+- [x] **1.E.2** `.governance/runtime/active-specs.yml` criado com schema mínimo e exemplo dogfoodado da própria 0023.
+- [x] **1.E.3** `state.yml` interno da 0023 alinhado ao estágio real da spec para não contradizer o índice público.
+- [ ] **1.E.4** Planejar `workflow` para ler o índice público primeiro; `continue` resolve `branch`/`spec_path` a partir dele antes de ler artifacts densos.
+- [ ] **1.E.5** Planejar `yarn workflow publish-state` explícito (sem hook/CI nesta primeira iteração).
+- [ ] **1.E.N** Pipeline verde com cadeia legada nesta branch (`yarn check && yarn test && yarn test:nova-cli && yarn living-docs:check`) até rebase sobre `main` com PR #21 absorvido.
+- [ ] **1.E.[REVIEW]** **[MANDATÓRIO]** Owner aprova a expansão de escopo do Bloco G + contrato mínimo antes de tocar código da CLI.
+- [ ] **1.E.[COMMIT]** `docs(spec-0023): Bloco G — índice operacional público mínimo + contrato runtime`.
+
+### Sub-bloco [1.F] — Enforcement Runtime (`executionAuthorized` derivado + workflow refuse) `(evidence-driven)` — PR4-enforcement-runtime (próximo PR; ainda NÃO autorizado)
 
 > Origem: [`plan.md § Componente novo a adicionar`](./plan.md) + [`[DEC-0023-E03]`](./decision-brief.md). **NOVO** — entra como PR próprio, separado de DX, para isolar testabilidade e dogfooding do mecanismo de enforcement.
 
-- [ ] **1.E.1** Domínio: estender `src/domain/workflow/WorkflowState.ts` com computação derivada `executionAuthorized` (não como campo persistido — como função pura sobre estado).
-- [ ] **1.E.2** Use case: `src/app/workflow/CheckExecutionAuthorized.ts` com regras canônicas (`tasks.md exists && gate.status == closed && governance chain íntegra`).
-- [ ] **1.E.3** `src/cli/workflow.ts` `runContinue` recusa narrativamente quando `executionAuthorized == false`, listando condições não satisfeitas.
-- [ ] **1.E.4** Fast-track strictness em `governance-pr-check`: validar label `fast-track` + presença de rationale no body (regex obrigatório); falhar se label sem rationale.
-- [ ] **1.E.5** BDD pt-BR para cada use case + integration test.
-- [ ] **1.E.N** Pipeline verde + integration test exercitando lock/unlock real.
-- [ ] **1.E.6** Débitos: nenhum esperado.
-- [ ] **1.E.[REVIEW]** **[MANDATÓRIO]** Owner aprova PR3 antes de commit/push.
-- [ ] **1.E.[COMMIT]** `feat(workflow): executionAuthorized derivado + runtime refuse narrativo (PR3 enforcement)`.
+- [ ] **1.F.1** Domínio: estender `src/domain/workflow/WorkflowState.ts` com computação derivada `executionAuthorized` (não como campo persistido — como função pura sobre estado).
+- [ ] **1.F.2** Use case: `src/app/workflow/CheckExecutionAuthorized.ts` com regras canônicas (`tasks.md exists && gate.status == closed && governance chain íntegra`).
+- [ ] **1.F.3** `src/cli/workflow.ts` `runContinue` recusa narrativamente quando `executionAuthorized == false`, listando condições não satisfeitas.
+- [ ] **1.F.4** Fast-track strictness em `governance-pr-check`: validar label `fast-track` + presença de rationale no body (regex obrigatório); falhar se label sem rationale.
+- [ ] **1.F.5** BDD pt-BR para cada use case + integration test.
+- [ ] **1.F.N** Pipeline verde + integration test exercitando lock/unlock real.
+- [ ] **1.F.6** Débitos: nenhum esperado.
+- [ ] **1.F.[REVIEW]** **[MANDATÓRIO]** Owner aprova PR4 antes de commit/push.
+- [ ] **1.F.[COMMIT]** `feat(workflow): executionAuthorized derivado + runtime refuse narrativo (PR4 enforcement)`.
 
-### Sub-bloco [1.F] — DX Thinking (refinement) `(deterministic)` — PR4-DX-thinking (próximo PR; aguarda PR3)
+### Sub-bloco [1.G] — DX Thinking (refinement) `(deterministic)` — PR5-DX-thinking (próximo PR; aguarda PR4)
 
 > Origem: [`plan.md § Componente [F]`](./plan.md) + Bloco B já cravado. Pode ser trivialmente pequeno — está OK.
 
-- [ ] **1.F.1** Reler Bloco B do `decision-brief.md`; verificar se decomposição de DX em sub-bloco [1.G] continua válida sob enforcement de PR3.
-- [ ] **1.F.2** Se necessário, abrir Bloco F no decision-brief com ajustes pontuais (não-obrigatório).
-- [ ] **1.F.N** Pipeline verde (mudanças mínimas; apenas tasks.md / plan.md / state.yml).
-- [ ] **1.F.[REVIEW]** **[MANDATÓRIO]** Gate 3 (planning approval) sobre o sub-bloco [1.G] — primeiro Gate 3 estrito da história da spec.
-- [ ] **1.F.[COMMIT]** `docs(spec-0023): planning gate 3 fechado — PR5-DX-execution autorizada`.
+- [ ] **1.G.1** Reler Bloco B do `decision-brief.md`; verificar se decomposição de DX em sub-bloco [1.H] continua válida sob enforcement de PR4.
+- [ ] **1.G.2** Se necessário, abrir Bloco F no decision-brief com ajustes pontuais (não-obrigatório).
+- [ ] **1.G.N** Pipeline verde (mudanças mínimas; apenas tasks.md / plan.md / state.yml).
+- [ ] **1.G.[REVIEW]** **[MANDATÓRIO]** Gate 3 (planning approval) sobre o sub-bloco [1.H] — primeiro Gate 3 estrito da história da spec.
+- [ ] **1.G.[COMMIT]** `docs(spec-0023): planning gate 3 fechado — PR6-DX-execution autorizada`.
 
-### Sub-bloco [1.G] — DX Execution (clipboard + warning + integration + examples + help + docs + README + CHANGELOG) `(deterministic)` — PR5-DX-execution (próximo PR; aguarda PR4)
+### Sub-bloco [1.H] — DX Execution (clipboard + warning + integration + examples + help + docs + README + CHANGELOG) `(deterministic)` — PR6-DX-execution (próximo PR; aguarda PR5)
 
 > Origem: [`plan.md § Componente [F]`](./plan.md) + [`[DEC-0023-B01..B04]`](./decision-brief.md). **Primeira execução sob enforcement estrutural completo** (`executionAuthorized` derivado deve estar `true` antes deste sub-bloco iniciar).
 
-- [ ] **1.G.1** `src/infrastructure/io/NodeClipboard.ts` + tests — detecta wl-copy/xclip/pbcopy; fallback gracioso. Wire em `cli/workflow.ts`. Cf. `[DEC-0023-B01]`.
-- [ ] **1.G.2** `AssembleBriefing` warning para extraction vazia (linha "(convenção do template não detectada; veja docs/guides/workflow-quickstart.md)"). Cf. `[DEC-0023-B02]`.
-- [ ] **1.G.3** Integration test `tests/integration/workflow-dispatch.test.mjs` — exercita `node cli/ai-guidelines-cli.mjs continue` em diretório temp com `git init` + spec fake.
-- [ ] **1.G.4** `examples/minimal-spec/` (≤ 4 arquivos: spec.md, NEXT.md, state.yml, README.md). `examples` em `package.json#files`. Cf. `[DEC-0023-B03]`.
-- [ ] **1.G.5** `cli/cli/args.mjs` `printHelp()` reescrito com exemplos por subcomando + nota de convenção de branch.
-- [ ] **1.G.6** `docs/guides/workflow-quickstart.md` (dogfoodado com outputs reais da 0023).
-- [ ] **1.G.7** `docs/guides/workflow-with-ai-agents.md` (2 padrões: humano cola bundle; agente IA chama `continue` via Bash).
-- [ ] **1.G.8** `README.md` ganha seção "Workflow Runtime (preview)" + repositioning leve. Cf. `[DEC-0023-B04]`.
-- [ ] **1.G.9** `CHANGELOG.md` entry v1.1.0-preview.0 (já incluso parcialmente no PR2-lifecycle; refinar se necessário).
-- [ ] **1.G.N** Pipeline verde + coverage por arquivo respeitado.
-- [ ] **1.G.[REVIEW]** **[MANDATÓRIO]** Aprovação humana para merge ponta-a-ponta (PR1 + PR2-lifecycle + PR3 + PR4 + PR5).
-- [ ] **1.G.[COMMIT]** Commits atômicos por sub-task acima (8 commits incrementais).
+- [ ] **1.H.1** `src/infrastructure/io/NodeClipboard.ts` + tests — detecta wl-copy/xclip/pbcopy; fallback gracioso. Wire em `cli/workflow.ts`. Cf. `[DEC-0023-B01]`.
+- [ ] **1.H.2** `AssembleBriefing` warning para extraction vazia (linha "(convenção do template não detectada; veja docs/guides/workflow-quickstart.md)"). Cf. `[DEC-0023-B02]`.
+- [ ] **1.H.3** Integration test `tests/integration/workflow-dispatch.test.mjs` — exercita `node cli/ai-guidelines-cli.mjs continue` em diretório temp com `git init` + spec fake.
+- [ ] **1.H.4** `examples/minimal-spec/` (≤ 4 arquivos: spec.md, NEXT.md, state.yml, README.md). `examples` em `package.json#files`. Cf. `[DEC-0023-B03]`.
+- [ ] **1.H.5** `cli/cli/args.mjs` `printHelp()` reescrito com exemplos por subcomando + nota de convenção de branch.
+- [ ] **1.H.6** `docs/guides/workflow-quickstart.md` (dogfoodado com outputs reais da 0023).
+- [ ] **1.H.7** `docs/guides/workflow-with-ai-agents.md` (2 padrões: humano cola bundle; agente IA chama `continue` via Bash).
+- [ ] **1.H.8** `README.md` ganha seção "Workflow Runtime (preview)" + repositioning leve. Cf. `[DEC-0023-B04]`.
+- [ ] **1.H.9** `CHANGELOG.md` entry v1.1.0-preview.0 (já incluso parcialmente no PR2-lifecycle; refinar se necessário).
+- [ ] **1.H.N** Pipeline verde + coverage por arquivo respeitado.
+- [ ] **1.H.[REVIEW]** **[MANDATÓRIO]** Aprovação humana para merge ponta-a-ponta (PR1 + PR2-lifecycle + PR3 + PR4 + PR5 + PR6).
+- [ ] **1.H.[COMMIT]** Commits atômicos por sub-task acima (8 commits incrementais).
 
 ---
 
@@ -197,7 +210,7 @@
 - [ ] **3.3** Critérios de aceite de `spec.md` confirmados ponto-a-ponto.
 - [ ] **3.4** `decision-brief.md` Blocos A/B/C/D/E todos `Resolved` e refletidos em `plan.md`.
 - [ ] **3.5** Validar em ambiente real: rodar `ai-guidelines workflow` e `continue` em `examples/minimal-spec/` (consumer dogfooding).
-- [ ] **3.6** PRs (1, 2-lifecycle, 3, 4, 5) atualizados com descrições finais.
+- [ ] **3.6** PRs (1, 2-lifecycle, 3-runtime-state-index, 4, 5, 6) atualizados com descrições finais.
 - [ ] **3.7** **[MANDATÓRIO]** Gate de Review Humano — homologação técnica formal de cada PR da stack.
 - [ ] **3.8** Correções demandadas em loops de review até aprovação.
 
