@@ -262,4 +262,71 @@ active_specs:
       await fsAsync.rm(tempDir, { recursive: true, force: true });
     }
   });
+
+  it("Cenário 4 — DADO branch 'de trabalho' (escopo do PR ≠ slug canônico) E entry no índice referencia essa branch QUANDO publish-state ENTÃO fallback via índice resolve E entry é atualizada (bug revelado pela validação humana do PR #23)", async () => {
+    const tempDir = await fsAsync.mkdtemp(path.join(os.tmpdir(), "ws-e2e-fallback-"));
+    try {
+      // setup inline: branch corrente é "feat/spec-0099-trabalho-x" (nome
+      // reflete escopo do PR), mas o slug canônico da spec é "foo-canonico"
+      // — o diretório é ".governance/specs/0099-foo-canonico". DetectActiveSpec
+      // sozinho falharia (procura ".../0099-trabalho-x" que não existe). O
+      // fallback consulta o índice, encontra match exato em entry.branch e
+      // resolve corretamente.
+      execSync("git init -b feat/spec-0099-trabalho-x", { cwd: tempDir, stdio: "ignore" });
+      execSync("git config user.email test@example.com", { cwd: tempDir, stdio: "ignore" });
+      execSync("git config user.name Test", { cwd: tempDir, stdio: "ignore" });
+      execSync('git commit --allow-empty -m "initial"', { cwd: tempDir, stdio: "ignore" });
+
+      const specDir = path.join(tempDir, ".governance", "specs", "0099-foo-canonico");
+      await fsAsync.mkdir(specDir, { recursive: true });
+      await fsAsync.writeFile(
+        path.join(specDir, "state.yml"),
+        `stage: implementation
+gate:
+  status: closed
+focus: []
+next: []
+`
+      );
+
+      const indexDir = path.join(tempDir, ".governance", "runtime");
+      await fsAsync.mkdir(indexDir, { recursive: true });
+      await fsAsync.writeFile(
+        path.join(indexDir, "active-specs.yml"),
+        `version: 1
+active_specs:
+  - id: "0099"
+    slug: "foo-canonico"
+    branch: "feat/spec-0099-trabalho-x"
+    stage: "decision"
+    status: "paused"
+    spec_path: ".governance/specs/0099-foo-canonico"
+    updated_at: "2026-05-20T00:00:00Z"
+`
+      );
+
+      // execute
+      const logger = new CollectingLogger();
+      const fs = new NodeWorkflowFileSystem(tempDir);
+      const code = await runPublishState(
+        { repoRoot: tempDir, logger, fs },
+        { status: "active", updatedBy: "@rosanarezende" }
+      );
+
+      // assert: publish funcionou via fallback; entry foi atualizada
+      expect(code).toBe(0);
+      const indexYaml = await fsAsync.readFile(path.join(indexDir, "active-specs.yml"), "utf8");
+      const reparsed = parseActiveSpecs(indexYaml);
+      expect(reparsed.activeSpecs).toHaveLength(1);
+      const entry = reparsed.activeSpecs[0];
+      expect(entry.id).toBe("0099");
+      expect(entry.slug).toBe("foo-canonico");
+      expect(entry.branch).toBe("feat/spec-0099-trabalho-x");
+      expect(entry.stage).toBe("implementation"); // projetado do state.yml
+      expect(entry.status).toBe("active"); // declarado pelo humano
+      expect(logger.lines.join("\n")).toMatch(/Spec 0099 \/ foo-canonico atualizada/);
+    } finally {
+      await fsAsync.rm(tempDir, { recursive: true, force: true });
+    }
+  });
 });

@@ -782,15 +782,16 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
     it("DADO PublishStateError lançado pelo use case QUANDO runPublishState ENTÃO loga mensagem do erro E retorna 1 (sem stack trace)", async () => {
       const logger = new CollectingLogger();
       const fs = makeWritableFs();
-      fs.branch = "main"; // força DetectActiveSpec a falhar
+      fs.branch = "main"; // DetectActiveSpec falha; fallback via índice também falha (índice ausente)
       const code = await runPublishState(
         { repoRoot: "/repo", logger, fs },
         { status: "active", updatedBy: "@x" }
       );
       expect(code).toBe(1);
-      expect(logger.lines.some((l) => l.startsWith("ERR:") && /detectar spec ativa/.test(l))).toBe(
-        true
-      );
+      // pós-fallback: mensagem narrativa cita branch + ausência do índice
+      expect(
+        logger.lines.some((l) => l.startsWith("ERR:") && /Branch "main" não casa diretório/.test(l))
+      ).toBe(true);
     });
 
     it("DADO main(['workflow', 'publish-state'], opts com publishStateArgs) QUANDO main ENTÃO encaminha para runPublishState", async () => {
