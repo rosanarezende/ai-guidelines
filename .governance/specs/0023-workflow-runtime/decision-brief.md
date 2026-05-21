@@ -6,7 +6,7 @@
 > Plan: [`./plan.md`](./plan.md) (criado em 2026-05-19 conforme `[DEC-0023-B05]`).
 > Tasks: tasklist da sessão de implementação (PR1).
 > Status agregado: **Partial** (Bloco F aberto com F01–F05 em status Pendente; Bloco G Resolved após achado empírico de dogfooding 2026-05-21; Blocos A/B/C/D/E permanecem Resolved)
-> Última atualização: 2026-05-21 — Bloco G Resolved (`state operacional público mínimo`); Bloco F segue aberto com F01–F05 Pendentes derivadas do research `[research/lifecycle-architecture.md]` (taxonomy ↔ lifecycle convergence; 299 linhas; fechado dentro do cap absoluto 300).
+> Última atualização: 2026-05-21 (II) — Bloco G estendido com `[DEC-0023-G04]` (vocabulário canônico stage/status do índice público + projection rule). Blocos A/B/C/D/E/G Resolved; Bloco F segue aberto com F01–F05 Pendentes derivadas do research `[research/lifecycle-architecture.md]`.
 
 > **Artefato canônico do gate humano entre Stage 1 (research) e Stage 2 (design + implementação).** Para esta spec, a Stage 1 é a investigação documentada na pasta legacy `.specify/specs/0023-governance-workflow-discovery-model/` (research.md + anexos). Este brief materializa o gate Stage A → Stage B com 4 decisões cravadas em sessão de design 2026-05-19.
 
@@ -44,6 +44,7 @@
 | `[DEC-0023-G01]` | G     | Resolved |
 | `[DEC-0023-G02]` | G     | Resolved |
 | `[DEC-0023-G03]` | G     | Resolved |
+| `[DEC-0023-G04]` | G     | Resolved |
 
 **Status agregado:** Partial — Blocos A/B/C/D/E/G Resolved; Bloco F com 5 pontos Pendentes derivados do research `[research/lifecycle-architecture.md]`.
 
@@ -561,6 +562,40 @@
 - **Escolha:** [x] A | [ ] B | [ ] C
 - **Justificativa:** A primeira iteração precisa provar o contrato, não a automação. `publish-state` explícito permite dogfooding controlado; hooks, drift guards automáticos e PRs de state só entram depois que o índice mínimo se mostrar útil na troca real de sessão/máquina.
 - **Data / Owner:** 2026-05-21 / @rosanarezende
+
+---
+
+### [DEC-0023-G04] Vocabulário canônico stage/status do índice público + regra de projeção
+
+**Pergunta:** O primeiro `active-specs.yml` (commit `eab20f9`) introduziu enums locais (`stage: "C"`, `status: "implementation_in_progress"`) sem decisão registrada. Como fechar vocabulário antes que `publish-state` consolide a divergência?
+
+**Contexto:**
+
+- `state.yml` interno usa `stage ∈ {discovery, decision, planning, implementation, closing}` per `[DEC-0023-A04]`.
+- O primeiro `active-specs.yml` adotou letras (`A/B/C`) do narrative do `spec.md` § Stage 1/Stage 2 e cunhou `implementation_in_progress` ad-hoc — acreção silenciosa em campo opcional, exatamente o anti-pattern que `implicit-structural-decisions` craveia como dívida a evitar.
+- Sem vocabulário fechado, `publish-state` (1.E.5) projeta `state.yml` → índice por mapping ambíguo; drift guard mínimo do PR3 não tem o que validar; cada nova spec instanciada pode inventar enum próprio.
+
+**Decisão:**
+
+- **`stage` = posição no lifecycle.** Enum compartilhado com `state.yml.stage` per `[DEC-0023-A04]`: `{discovery, decision, planning, implementation, closing}`. **Projeção direta, sem tradução semântica** — `active-specs.yml.stage` é cópia literal de `state.yml.stage`.
+- **`status` = condição operacional atual.** Enum dedicado do runtime público: `{active, blocked, paused, completed}`. **`stage` e `status` são dimensões independentes** — `status` **não deriva** de `stage`. Exemplo válido: `stage: implementation` + `status: blocked` (implementação iniciada, atualmente bloqueada por decisão externa).
+  - **`status` NÃO representa avanço de lifecycle** — representa apenas condição operacional transitória da spec dentro do `stage` atual.
+  - **Mudanças de `status` NÃO implicam mudança de `stage`.**
+  - **Mudanças de `stage` podem ocorrer sem mudança de `status`.**
+  - Qualquer interpretação futura de que "`status` é subcategoria de `stage`" ou "`status` pode ser inferido de `stage`" é explicitamente rejeitada por esta decisão.
+- **`status` não é projetado de `state.yml`** (não há campo equivalente; `state.yml.gate.status ∈ {open, awaiting-review, closed}` refere ao gate do brief, é conceito distinto). Na primeira iteração, `publish-state` declara `status` manualmente; semântica fechada de cada valor:
+  - `active`: trabalho em andamento na branch da spec.
+  - `blocked`: aguardando decisão externa / dependência não resolvida.
+  - `paused`: deferred conscientemente, com critério de revisita observável.
+  - `completed`: mergeado em `main`; spec encerrada.
+- **`updated_by`:** convenção textual — registra **quem autorizou/publicou** o estado, **não** quem digitou nem qual agente IA executou. Evita pseudo audit-log de agente e mistura de identidade humana com operacional.
+- **Acreção rejeitada:** qualquer campo novo no índice público além do mínimo cravado em `[DEC-0023-G02]` + os enums fechados acima exige decisão própria. Valores como `implementation_in_progress`, `wip`, `in-progress` ou similares são **proibidos** — `status: active` cobre o conceito.
+
+**Decisão do Gate Humano:**
+
+- **Status:** [x] Resolvido
+- **Justificativa:** Vocabulário fechado **antes** de `publish-state` consolidar a divergência. Decisão pequena, cirúrgica, derivada direto de `[DEC-0023-A04]` + `[DEC-0023-G02]` — não abre Bloco H, não expande research, não invalida G01..G03. Separação explícita `stage`/`status` (lifecycle vs condição operacional) impede no nascedouro a interpretação de que `status` poderia ser inferido de `stage`. Convenção de `updated_by` resolve ambiguidade observada no commit `eab20f9` sem virar DEC própria.
+- **Data / Owner:** 2026-05-21 (II) / @rosanarezende
 
 ---
 
