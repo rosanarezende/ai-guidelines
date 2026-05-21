@@ -8,6 +8,8 @@ import {
   buildContextBundle,
   buildMenu,
   classifyInput,
+  findActiveSpecByIdentifier,
+  main,
   renderActiveSpecsIndex,
   runContinue,
   runWorkflow,
@@ -442,17 +444,194 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
       expect(out).toMatch(/publish-state/);
     });
 
-    it("DADO runContinue (atalho) QUANDO há índice com entries ENTÃO NÃO loga seção do índice (atalho focado, lookup cross-spec fica para Passo 4)", async () => {
+    it("DADO runContinue sem identifier QUANDO há índice com entries ENTÃO NÃO loga seção do índice (atalho focado na spec corrente)", async () => {
       const logger = new CollectingLogger();
       await runContinue({
         repoRoot: "/repo",
         logger,
         fs: makeFsWithSpec(),
-        // mesmo se passado, runContinue não invoca (não usa essa opção)
+        // mesmo se passado, runContinue sem identifier não consulta o índice
         loadActiveSpecsIndex: () => indexWithCurrent,
       });
       const out = logger.lines.join("\n");
       expect(out).not.toMatch(/Specs ativas no índice público/);
+    });
+  });
+
+  describe("findActiveSpecByIdentifier — match exato em id | slug | id-slug", () => {
+    const entries = [
+      {
+        entry: {
+          id: "0023",
+          slug: "workflow-runtime",
+          branch: "feat/spec-0023-runtime-active-state",
+          stage: "implementation" as const,
+          status: "active" as const,
+          specPath: ".governance/specs/0023-workflow-runtime",
+          updatedAt: "2026-05-21T00:00:00Z",
+        },
+        specPathExists: true,
+      },
+      {
+        entry: {
+          id: "0099",
+          slug: "foo-bar",
+          branch: "feat/spec-0099-foo-bar",
+          stage: "discovery" as const,
+          status: "paused" as const,
+          specPath: ".governance/specs/0099-foo-bar",
+          updatedAt: "2026-05-01T00:00:00Z",
+        },
+        specPathExists: false,
+      },
+    ];
+
+    it("DADO identifier = id puro QUANDO findActiveSpecByIdentifier ENTÃO retorna a entry correspondente", () => {
+      expect(findActiveSpecByIdentifier(entries, "0023")?.entry.slug).toBe("workflow-runtime");
+      expect(findActiveSpecByIdentifier(entries, "0099")?.entry.slug).toBe("foo-bar");
+    });
+
+    it("DADO identifier = slug puro QUANDO findActiveSpecByIdentifier ENTÃO retorna a entry correspondente", () => {
+      expect(findActiveSpecByIdentifier(entries, "workflow-runtime")?.entry.id).toBe("0023");
+    });
+
+    it("DADO identifier = id-slug (formato de diretório) QUANDO findActiveSpecByIdentifier ENTÃO retorna a entry correspondente", () => {
+      expect(findActiveSpecByIdentifier(entries, "0023-workflow-runtime")?.entry.id).toBe("0023");
+    });
+
+    it("DADO identifier que não casa QUANDO findActiveSpecByIdentifier ENTÃO retorna null (sem fuzzy)", () => {
+      expect(findActiveSpecByIdentifier(entries, "workflow")).toBeNull();
+      expect(findActiveSpecByIdentifier(entries, "WORKFLOW-RUNTIME")).toBeNull();
+      expect(findActiveSpecByIdentifier(entries, "23")).toBeNull();
+      expect(findActiveSpecByIdentifier([], "0023")).toBeNull();
+    });
+  });
+
+  describe("runContinue + identifier (lookup via índice, sem auto-checkout)", () => {
+    function makeIndexResult(opts: {
+      indexAvailable?: boolean;
+      entries?: ListActiveSpecsResult["entries"];
+      warnings?: ListActiveSpecsResult["warnings"];
+    } = {}): ListActiveSpecsResult {
+      return {
+        indexAvailable: opts.indexAvailable ?? true,
+        entries: opts.entries ?? [],
+        warnings: opts.warnings ?? [],
+      };
+    }
+
+    const reachableEntry = {
+      entry: {
+        id: "0023",
+        slug: "workflow-runtime",
+        branch: "feat/spec-0023-runtime-active-state",
+        stage: "implementation" as const,
+        status: "active" as const,
+        specPath: ".governance/specs/0023-workflow-runtime",
+        updatedAt: "2026-05-21T00:00:00Z",
+      },
+      specPathExists: true,
+    };
+
+    const unreachableEntry = {
+      ...reachableEntry,
+      specPathExists: false,
+    };
+
+    it("DADO identifier que casa entry com spec_path existente QUANDO runContinue ENTÃO loga briefing E próxima ação da spec encontrada", async () => {
+      const logger = new CollectingLogger();
+      const code = await runContinue(
+        {
+          repoRoot: "/repo",
+          logger,
+          fs: makeFsWithSpec(),
+          loadActiveSpecsIndex: () => makeIndexResult({ entries: [reachableEntry] }),
+        },
+        "workflow-runtime"
+      );
+      expect(code).toBe(0);
+      const out = logger.lines.join("\n");
+      expect(out).toMatch(/Stage: implementation/);
+      expect(out).toMatch(/Próxima ação: executar PR1/);
+    });
+
+    it("DADO identifier que casa entry mas spec_path NÃO existe localmente QUANDO runContinue ENTÃO erro instrutivo com git checkout + retorna 1 (sem auto-checkout)", async () => {
+      const logger = new CollectingLogger();
+      const code = await runContinue(
+        {
+          repoRoot: "/repo",
+          logger,
+          fs: new StubFs(new Map(), new Set(), null),
+          loadActiveSpecsIndex: () => makeIndexResult({ entries: [unreachableEntry] }),
+        },
+        "0023"
+      );
+      expect(code).toBe(1);
+      const out = logger.lines.join("\n");
+      expect(out).toMatch(/diretório não existe localmente/);
+      expect(out).toMatch(/git fetch origin && git checkout feat\/spec-0023-runtime-active-state/);
+    });
+
+    it("DADO identifier que NÃO casa nenhuma entry QUANDO runContinue ENTÃO erro listando specs disponíveis + retorna 1", async () => {
+      const logger = new CollectingLogger();
+      const code = await runContinue(
+        {
+          repoRoot: "/repo",
+          logger,
+          fs: new StubFs(new Map(), new Set(), null),
+          loadActiveSpecsIndex: () => makeIndexResult({ entries: [reachableEntry] }),
+        },
+        "ghost"
+      );
+      expect(code).toBe(1);
+      const out = logger.lines.join("\n");
+      expect(out).toMatch(/Spec "ghost" não encontrada/);
+      expect(out).toMatch(/Specs disponíveis no índice/);
+      expect(out).toMatch(/0023 \/ workflow-runtime/);
+    });
+
+    it("DADO identifier presente E índice ausente QUANDO runContinue ENTÃO erro com aviso de publish-state + retorna 1", async () => {
+      const logger = new CollectingLogger();
+      const code = await runContinue(
+        {
+          repoRoot: "/repo",
+          logger,
+          fs: new StubFs(new Map(), new Set(), null),
+          loadActiveSpecsIndex: () =>
+            makeIndexResult({
+              indexAvailable: false,
+              warnings: ["Index not found."],
+            }),
+        },
+        "0023"
+      );
+      expect(code).toBe(1);
+      const out = logger.lines.join("\n");
+      expect(out).toMatch(/Índice operacional público.*não encontrado/);
+      expect(out).toMatch(/yarn workflow publish-state/);
+    });
+
+    it("DADO main(['continue', '<identifier>'], opts) QUANDO entry casa E path existe ENTÃO encaminha identifier para runContinue (lookup via índice)", async () => {
+      const logger = new CollectingLogger();
+      const code = await main(["continue", "0023"], {
+        repoRoot: "/repo",
+        logger,
+        fs: makeFsWithSpec(),
+        loadActiveSpecsIndex: () => makeIndexResult({ entries: [reachableEntry] }),
+      });
+      expect(code).toBe(0);
+      expect(logger.lines.join("\n")).toMatch(/Stage: implementation/);
+    });
+
+    it("DADO main(['continue'], opts) sem identifier QUANDO branch detecta spec ENTÃO mantém comportamento legado (detecção via branch)", async () => {
+      const logger = new CollectingLogger();
+      const code = await main(["continue"], {
+        repoRoot: "/repo",
+        logger,
+        fs: makeFsWithSpec(),
+      });
+      expect(code).toBe(0);
+      expect(logger.lines.join("\n")).toMatch(/Próxima ação: executar PR1/);
     });
   });
 });

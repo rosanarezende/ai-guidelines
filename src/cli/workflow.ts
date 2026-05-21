@@ -14,7 +14,11 @@
 import * as readline from "node:readline";
 import { DetectActiveSpec } from "../app/workflow/DetectActiveSpec.js";
 import { ReadWorkflowState } from "../app/workflow/ReadWorkflowState.js";
-import { ListActiveSpecs, ListActiveSpecsResult } from "../app/workflow/ListActiveSpecs.js";
+import {
+  ListActiveSpecs,
+  ListActiveSpecsResult,
+  ResolvedActiveSpec,
+} from "../app/workflow/ListActiveSpecs.js";
 import { parseWorkflowState } from "../infrastructure/yaml/workflowStateSerializer.js";
 import { parseActiveSpecs } from "../infrastructure/yaml/activeSpecsSerializer.js";
 import {
@@ -86,6 +90,20 @@ interface ResolvedContext {
   readonly headers: SpecHeaders;
 }
 
+function resolveContextFromLocation(
+  fs: WorkflowFileSystem,
+  location: SpecLocation
+): ResolvedContext {
+  const reader = new ReadWorkflowState(fs, parseWorkflowState);
+  const { state, defaulted } = reader.run(location);
+  const specPrefix = location.source === "governance" ? ".governance/specs" : ".specify/specs";
+  const specPath = `${specPrefix}/${location.slug}`;
+  const specMd = safeRead(fs, `${specPath}/spec.md`);
+  const researchMd = safeRead(fs, `${specPath}/research.md`);
+  const headers = extractSpecHeaders(specMd, researchMd);
+  return { location, state, defaulted, headers };
+}
+
 function resolveContext(fs: WorkflowFileSystem, logger: Logger): ResolvedContext | null {
   const detect = new DetectActiveSpec(fs);
   const detected = detect.run();
@@ -94,15 +112,53 @@ function resolveContext(fs: WorkflowFileSystem, logger: Logger): ResolvedContext
     logger.error(`Dica: confira o branch (esperado: feat/spec-NNNN-slug) ou a pasta da spec.`);
     return null;
   }
-  const reader = new ReadWorkflowState(fs, parseWorkflowState);
-  const { state, defaulted } = reader.run(detected.location);
-  const specPrefix =
-    detected.location.source === "governance" ? ".governance/specs" : ".specify/specs";
-  const specPath = `${specPrefix}/${detected.location.slug}`;
-  const specMd = safeRead(fs, `${specPath}/spec.md`);
-  const researchMd = safeRead(fs, `${specPath}/research.md`);
-  const headers = extractSpecHeaders(specMd, researchMd);
-  return { location: detected.location, state, defaulted, headers };
+  return resolveContextFromLocation(fs, detected.location);
+}
+
+/**
+ * Procura no índice público uma entry cujo identifier dado case com `id`,
+ * `slug` ou `${id}-${slug}` (três aliases válidos para o mesmo registro).
+ * Match exato; sem fuzzy, sem partial, sem ordenação. Primeiro match ganha.
+ *
+ * **Lookup-only** (cf. memory `feedback-lookup-not-coordination`).
+ */
+export function findActiveSpecByIdentifier(
+  entries: ReadonlyArray<ResolvedActiveSpec>,
+  identifier: string
+): ResolvedActiveSpec | null {
+  for (const resolved of entries) {
+    const e = resolved.entry;
+    if (identifier === e.id || identifier === e.slug || identifier === `${e.id}-${e.slug}`) {
+      return resolved;
+    }
+  }
+  return null;
+}
+
+/**
+ * Reconstrói `ResolvedContext` a partir de uma entry do índice público,
+ * **sem auto-checkout**. Retorna `null` quando o `spec_path` não existe
+ * localmente — caller orienta o humano a fazer checkout da branch.
+ */
+function resolveContextFromIndexEntry(
+  fs: WorkflowFileSystem,
+  resolved: ResolvedActiveSpec
+): ResolvedContext | null {
+  if (!resolved.specPathExists) return null;
+  const source: SpecLocation["source"] = resolved.entry.specPath.startsWith(".governance/")
+    ? "governance"
+    : "specify-legacy";
+  // O slug do SpecLocation é o nome do diretório final do spec_path
+  // (e.g. "0023-workflow-runtime"), distinto do entry.slug do índice
+  // (e.g. "workflow-runtime"). Convenção do filesystem vs convenção
+  // editorial do índice.
+  const dirSlug = resolved.entry.specPath.split("/").pop() ?? resolved.entry.slug;
+  const location: SpecLocation = {
+    slug: dirSlug,
+    absolutePath: fs.resolveAbsolute(resolved.entry.specPath),
+    source,
+  };
+  return resolveContextFromLocation(fs, location);
 }
 
 function safeRead(fs: WorkflowFileSystem, relPath: string): string | null {
@@ -334,11 +390,55 @@ export async function runWorkflow(options: RunOptions): Promise<number> {
   }
 }
 
-export async function runContinue(options: RunOptions): Promise<number> {
+export async function runContinue(options: RunOptions, identifier?: string): Promise<number> {
   const logger = options.logger ?? stdoutLogger;
   const fs = options.fs ?? new NodeWorkflowFileSystem(options.repoRoot);
-  const ctx = resolveContext(fs, logger);
-  if (!ctx) return 1;
+
+  let ctx: ResolvedContext | null;
+
+  if (identifier !== undefined && identifier !== "") {
+    const loadIndex = options.loadActiveSpecsIndex ?? defaultLoadActiveSpecsIndex(fs);
+    const result = loadIndex();
+
+    if (!result.indexAvailable) {
+      logger.error(
+        `Índice operacional público (.governance/runtime/active-specs.yml) não encontrado.`
+      );
+      logger.error(`Dica: rode \`yarn workflow publish-state\` na branch da spec primeiro.`);
+      return 1;
+    }
+
+    const found = findActiveSpecByIdentifier(result.entries, identifier);
+    if (!found) {
+      logger.error(`Spec "${identifier}" não encontrada no índice público.`);
+      if (result.entries.length > 0) {
+        logger.info(`Specs disponíveis no índice:`);
+        for (const r of result.entries) {
+          logger.info(`  - ${r.entry.id} / ${r.entry.slug}  (branch ${r.entry.branch})`);
+        }
+      }
+      return 1;
+    }
+
+    if (!found.specPathExists) {
+      logger.error(
+        `Spec "${found.entry.slug}" declarada no índice em "${found.entry.specPath}", ` +
+          `mas o diretório não existe localmente.`
+      );
+      logger.error(
+        `Dica: \`git fetch origin && git checkout ${found.entry.branch}\` ` +
+          `para carregar o working tree da spec, depois rode \`yarn guidelines continue\` de novo.`
+      );
+      return 1;
+    }
+
+    ctx = resolveContextFromIndexEntry(fs, found);
+    if (!ctx) return 1;
+  } else {
+    ctx = resolveContext(fs, logger);
+    if (!ctx) return 1;
+  }
+
   logger.info(assembleBriefing(ctx));
   if (ctx.state.next.length > 0) {
     logger.info("");
@@ -349,6 +449,9 @@ export async function runContinue(options: RunOptions): Promise<number> {
 
 export async function main(argv: readonly string[], opts: RunOptions): Promise<number> {
   const sub = argv[0];
-  if (sub === "continue") return runContinue(opts);
+  if (sub === "continue") {
+    const identifier = argv[1];
+    return runContinue(opts, identifier);
+  }
   return runWorkflow(opts);
 }

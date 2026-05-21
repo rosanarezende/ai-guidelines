@@ -99,7 +99,11 @@ Comandos:
   workflow       Wizard contextual da spec ativa: briefing operacional + menu de ações +
                  context bundle copy-paste para sessão IA. Lente operacional governance-first
                  (cf. Spec 0023). Não embute LLM; AI-as-Channel preservado (ADR 0018).
-  continue       Atalho de workflow: imprime briefing + próxima ação registrada em state.yml.
+  continue [<slug|id>]
+                 Atalho de workflow: imprime briefing + próxima ação registrada em state.yml.
+                 Sem argumento → detecta spec via branch. Com <slug|id> → resolve via índice
+                 público .governance/runtime/active-specs.yml (match exato em id, slug ou
+                 id-slug; sem auto-checkout).
 
 Opções:
   --target <dir>             Diretório alvo (default: diretório atual)
@@ -146,6 +150,15 @@ export function parseArgs(argv) {
     const token = rest[index];
 
     if (!token.startsWith("-")) {
+      // Exceção fechada: `continue [<slug|id>]` aceita exatamente UM
+      // positional arg (cabling de transporte para o runtime novo,
+      // não expansão estrutural do entrypoint legado — cf. Spec 0023
+      // PR3, plan.md § Componente [E]). Sem reutilização para outros
+      // comandos e sem positional parsing genérico.
+      if (command === "continue" && index === 0 && options.identifier === undefined) {
+        options.identifier = token;
+        continue;
+      }
       throw new Error(`Argumento inesperado: ${token}`);
     }
 
