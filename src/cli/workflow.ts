@@ -247,7 +247,16 @@ export function renderActiveSpecsIndex(
   lines.push("Specs ativas no índice público:");
   for (const resolved of result.entries) {
     const { entry, specPathExists } = resolved;
-    const marker = entry.slug === currentSlug ? "*" : " ";
+    // Match tri-form (id | slug | id-slug) — espelha findActiveSpecByIdentifier.
+    // DetectActiveSpec devolve ctx.location.slug no formato "id-slug" (nome do
+    // diretório); o entry do índice carrega `id` e `slug` separados. Match
+    // robusto aceita as três formas equivalentes.
+    const isCurrent =
+      currentSlug !== undefined &&
+      (entry.id === currentSlug ||
+        entry.slug === currentSlug ||
+        `${entry.id}-${entry.slug}` === currentSlug);
+    const marker = isCurrent ? "*" : " ";
     const presence = specPathExists ? "✓" : "✗";
     lines.push(
       `  ${marker} ${presence} ${entry.slug.padEnd(28)} ` +

@@ -333,6 +333,20 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
       expect(lines.join("\n")).toMatch(/\* ✓ workflow-runtime/);
     });
 
+    it("DADO currentSlug no formato id-slug (nome do diretório de DetectActiveSpec) QUANDO renderActiveSpecsIndex ENTÃO marca corrente — match tri-form (descoberta operacional Passo 7)", () => {
+      // ctx.location.slug = "0023-workflow-runtime" (formato do diretório);
+      // entry.slug do índice = "workflow-runtime" (formato editorial).
+      // Match deve aceitar ambos para que a spec corrente seja sinalizada
+      // corretamente quando o REPL roda na branch dela.
+      const lines = renderActiveSpecsIndex(oneEntryResult, "0023-workflow-runtime");
+      expect(lines.join("\n")).toMatch(/\* ✓ workflow-runtime/);
+    });
+
+    it("DADO currentSlug = id puro QUANDO renderActiveSpecsIndex ENTÃO marca corrente — match tri-form", () => {
+      const lines = renderActiveSpecsIndex(oneEntryResult, "0023");
+      expect(lines.join("\n")).toMatch(/\* ✓ workflow-runtime/);
+    });
+
     it("DADO entry com specPathExists=false QUANDO renderActiveSpecsIndex ENTÃO mostra '✗' E loga linha de drift narrativa", () => {
       const driftResult: ListActiveSpecsResult = {
         indexAvailable: true,
