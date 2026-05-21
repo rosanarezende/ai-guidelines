@@ -14,7 +14,9 @@
 import * as readline from "node:readline";
 import { DetectActiveSpec } from "../app/workflow/DetectActiveSpec.js";
 import { ReadWorkflowState } from "../app/workflow/ReadWorkflowState.js";
+import { ListActiveSpecs, ListActiveSpecsResult } from "../app/workflow/ListActiveSpecs.js";
 import { parseWorkflowState } from "../infrastructure/yaml/workflowStateSerializer.js";
+import { parseActiveSpecs } from "../infrastructure/yaml/activeSpecsSerializer.js";
 import {
   SpecHeaders,
   assembleBriefing,
@@ -69,6 +71,12 @@ export interface RunOptions {
   readonly reader?: InputReader;
   readonly clipboard?: ClipboardWriter;
   readonly fs?: WorkflowFileSystem;
+  /**
+   * Injetável para tests. Default lê
+   * `.governance/runtime/active-specs.yml` via `ListActiveSpecs` com o
+   * parser real.
+   */
+  readonly loadActiveSpecsIndex?: () => ListActiveSpecsResult;
 }
 
 interface ResolvedContext {
@@ -138,6 +146,53 @@ export function buildContextBundle(ctx: ResolvedContext, question: string): stri
   lines.push("");
   lines.push(`────────────────────────────────────────────`);
   return lines.join("\n");
+}
+
+/**
+ * Renderiza a seção "Specs ativas no índice público" como lista de linhas
+ * prontas para `logger.info`. Função pura: recebe o resultado de
+ * `ListActiveSpecs.run()` e o slug da spec corrente (opcional, marca com `*`)
+ * e devolve linhas — sem efeitos colaterais.
+ *
+ * **Lookup-oriented por design** (cf. memory `feedback-lookup-not-coordination`):
+ * nenhuma inferência de "próxima spec", ordenação de rollout, dependência
+ * cross-spec ou freshness automática. Apenas mostra estado descoberto.
+ */
+export function renderActiveSpecsIndex(
+  result: ListActiveSpecsResult,
+  currentSlug?: string,
+  options: { showWhenAbsent?: boolean } = {}
+): ReadonlyArray<string> {
+  const lines: string[] = [];
+
+  if (!result.indexAvailable) {
+    if (!options.showWhenAbsent) return lines;
+    lines.push("");
+    lines.push("Índice operacional público (.governance/runtime/active-specs.yml):");
+    for (const warning of result.warnings) {
+      lines.push(`  (${warning})`);
+    }
+    return lines;
+  }
+
+  if (result.entries.length === 0) return lines;
+
+  lines.push("");
+  lines.push("Specs ativas no índice público:");
+  for (const resolved of result.entries) {
+    const { entry, specPathExists } = resolved;
+    const marker = entry.slug === currentSlug ? "*" : " ";
+    const presence = specPathExists ? "✓" : "✗";
+    lines.push(
+      `  ${marker} ${presence} ${entry.slug.padEnd(28)} ` +
+        `${entry.stage}/${entry.status}`.padEnd(28) +
+        `  ${entry.branch}`
+    );
+  }
+  for (const warning of result.warnings) {
+    lines.push(`  (drift) ${warning}`);
+  }
+  return lines;
 }
 
 export type CommandKind =
@@ -240,19 +295,33 @@ async function runReplOnce(
   return "continue";
 }
 
+function defaultLoadActiveSpecsIndex(fs: WorkflowFileSystem): () => ListActiveSpecsResult {
+  return () => new ListActiveSpecs(fs, parseActiveSpecs).run();
+}
+
 export async function runWorkflow(options: RunOptions): Promise<number> {
   const logger = options.logger ?? stdoutLogger;
   const fs = options.fs ?? new NodeWorkflowFileSystem(options.repoRoot);
   const reader = options.reader ?? new StdinReader();
   const clipboard = options.clipboard ?? new NoopClipboard();
+  const loadIndex = options.loadActiveSpecsIndex ?? defaultLoadActiveSpecsIndex(fs);
 
   const ctx = resolveContext(fs, logger);
   if (!ctx) {
+    // Branch não casa: humano precisa de orientação cross-spec; mostra o
+    // índice mesmo quando ausente (warning informativo do publish-state).
+    for (const line of renderActiveSpecsIndex(loadIndex(), undefined, { showWhenAbsent: true })) {
+      logger.info(line);
+    }
     reader.close();
     return 1;
   }
 
   logger.info(assembleBriefing(ctx));
+  // Branch detectada: índice é sinal secundário; só mostra quando há entries.
+  for (const line of renderActiveSpecsIndex(loadIndex(), ctx.location.slug)) {
+    logger.info(line);
+  }
 
   try {
     let outcome: "continue" | "quit" = "continue";

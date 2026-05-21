@@ -1,5 +1,6 @@
 import { WorkflowState } from "../domain/workflow/WorkflowState.js";
 import { WorkflowFileSystem } from "../app/ports/WorkflowFileSystem.js";
+import { ListActiveSpecsResult } from "../app/workflow/ListActiveSpecs.js";
 import {
   ClipboardWriter,
   InputReader,
@@ -7,6 +8,7 @@ import {
   buildContextBundle,
   buildMenu,
   classifyInput,
+  renderActiveSpecsIndex,
   runContinue,
   runWorkflow,
 } from "./workflow.js";
@@ -259,6 +261,198 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
         fs: new StubFs(new Map(), new Set(), null),
       });
       expect(code).toBe(1);
+    });
+  });
+
+  describe("renderActiveSpecsIndex — helper puro (lookup-only, sem coordination)", () => {
+    const emptyResult: ListActiveSpecsResult = {
+      indexAvailable: true,
+      entries: [],
+      warnings: [],
+    };
+    const absentResult: ListActiveSpecsResult = {
+      indexAvailable: false,
+      entries: [],
+      warnings: ["Index not found. Run yarn workflow publish-state to populate."],
+    };
+    const oneEntryResult: ListActiveSpecsResult = {
+      indexAvailable: true,
+      entries: [
+        {
+          entry: {
+            id: "0023",
+            slug: "workflow-runtime",
+            branch: "feat/spec-0023-runtime-active-state",
+            stage: "implementation",
+            status: "active",
+            specPath: ".governance/specs/0023-workflow-runtime",
+            updatedAt: "2026-05-21T00:00:00Z",
+          },
+          specPathExists: true,
+        },
+      ],
+      warnings: [],
+    };
+
+    it("DADO indexAvailable=false E showWhenAbsent default(false) QUANDO renderActiveSpecsIndex ENTÃO retorna lista vazia (silencioso no bootstrap)", () => {
+      expect(renderActiveSpecsIndex(absentResult)).toEqual([]);
+    });
+
+    it("DADO indexAvailable=false E showWhenAbsent=true QUANDO renderActiveSpecsIndex ENTÃO retorna heading + warning informativo", () => {
+      const lines = renderActiveSpecsIndex(absentResult, undefined, { showWhenAbsent: true });
+      expect(lines.join("\n")).toMatch(/Índice operacional público/);
+      expect(lines.join("\n")).toMatch(/publish-state/);
+    });
+
+    it("DADO indexAvailable=true E entries vazio QUANDO renderActiveSpecsIndex ENTÃO retorna lista vazia (sem heading inútil)", () => {
+      expect(renderActiveSpecsIndex(emptyResult)).toEqual([]);
+    });
+
+    it("DADO 1 entry E currentSlug ausente QUANDO renderActiveSpecsIndex ENTÃO loga linha sem marca de spec corrente", () => {
+      const lines = renderActiveSpecsIndex(oneEntryResult);
+      const out = lines.join("\n");
+      expect(out).toMatch(/Specs ativas no índice público/);
+      expect(out).toMatch(/workflow-runtime/);
+      expect(out).toMatch(/implementation\/active/);
+      expect(out).toMatch(/feat\/spec-0023-runtime-active-state/);
+      // sem asterisco quando currentSlug é undefined
+      expect(out).not.toMatch(/\* ✓ workflow-runtime/);
+    });
+
+    it("DADO entry cujo slug === currentSlug QUANDO renderActiveSpecsIndex ENTÃO marca a entry corrente com '*'", () => {
+      const lines = renderActiveSpecsIndex(oneEntryResult, "workflow-runtime");
+      expect(lines.join("\n")).toMatch(/\* ✓ workflow-runtime/);
+    });
+
+    it("DADO entry com specPathExists=false QUANDO renderActiveSpecsIndex ENTÃO mostra '✗' E loga linha de drift narrativa", () => {
+      const driftResult: ListActiveSpecsResult = {
+        indexAvailable: true,
+        entries: [
+          {
+            entry: oneEntryResult.entries[0].entry,
+            specPathExists: false,
+          },
+        ],
+        warnings: [
+          `Spec "workflow-runtime" declares spec_path "${oneEntryResult.entries[0].entry.specPath}" in the index, but the directory is missing locally.`,
+        ],
+      };
+      const out = renderActiveSpecsIndex(driftResult).join("\n");
+      expect(out).toMatch(/✗ workflow-runtime/);
+      expect(out).toMatch(/\(drift\) Spec "workflow-runtime"/);
+    });
+  });
+
+  describe("runWorkflow + índice operacional público", () => {
+    const indexWithCurrent: ListActiveSpecsResult = {
+      indexAvailable: true,
+      entries: [
+        {
+          entry: {
+            id: "0023",
+            slug: "0023-workflow-runtime",
+            branch: "feat/spec-0023-workflow-runtime",
+            stage: "implementation",
+            status: "active",
+            specPath: ".governance/specs/0023-workflow-runtime",
+            updatedAt: "2026-05-21T00:00:00Z",
+          },
+          specPathExists: true,
+        },
+      ],
+      warnings: [],
+    };
+
+    it("DADO spec local detectada E índice presente com a mesma spec QUANDO runWorkflow ENTÃO loga briefing + seção do índice marcando spec corrente com '*'", async () => {
+      const logger = new CollectingLogger();
+      const reader = new ScriptedReader(["q"]);
+      const code = await runWorkflow({
+        repoRoot: "/repo",
+        logger,
+        reader,
+        clipboard: new FakeClipboard(),
+        fs: makeFsWithSpec(),
+        loadActiveSpecsIndex: () => indexWithCurrent,
+      });
+      const out = logger.lines.join("\n");
+      expect(code).toBe(0);
+      expect(out).toMatch(/Spec: 0023-workflow-runtime/);
+      expect(out).toMatch(/Specs ativas no índice público/);
+      expect(out).toMatch(/\* ✓ 0023-workflow-runtime/);
+    });
+
+    it("DADO spec local detectada E índice ausente QUANDO runWorkflow ENTÃO loga briefing sem seção de índice (silencioso quando branch já orienta)", async () => {
+      const logger = new CollectingLogger();
+      const reader = new ScriptedReader(["q"]);
+      const absent: ListActiveSpecsResult = {
+        indexAvailable: false,
+        entries: [],
+        warnings: ["not found"],
+      };
+      await runWorkflow({
+        repoRoot: "/repo",
+        logger,
+        reader,
+        clipboard: new FakeClipboard(),
+        fs: makeFsWithSpec(),
+        loadActiveSpecsIndex: () => absent,
+      });
+      const out = logger.lines.join("\n");
+      expect(out).not.toMatch(/Índice operacional público/);
+      expect(out).not.toMatch(/Specs ativas no índice público/);
+    });
+
+    it("DADO branch fora do padrão E índice presente com 1 entry QUANDO runWorkflow ENTÃO erro + seção do índice exibida + retorna 1", async () => {
+      const logger = new CollectingLogger();
+      const reader = new ScriptedReader([]);
+      const code = await runWorkflow({
+        repoRoot: "/repo",
+        logger,
+        reader,
+        clipboard: new FakeClipboard(),
+        fs: new StubFs(new Map(), new Set(), "main"),
+        loadActiveSpecsIndex: () => indexWithCurrent,
+      });
+      const out = logger.lines.join("\n");
+      expect(code).toBe(1);
+      expect(logger.lines.some((l) => l.startsWith("ERR:"))).toBe(true);
+      expect(out).toMatch(/Specs ativas no índice público/);
+      expect(out).toMatch(/0023-workflow-runtime/);
+    });
+
+    it("DADO branch fora do padrão E índice ausente QUANDO runWorkflow ENTÃO erro + heading com aviso de publish-state + retorna 1", async () => {
+      const logger = new CollectingLogger();
+      const reader = new ScriptedReader([]);
+      const absent: ListActiveSpecsResult = {
+        indexAvailable: false,
+        entries: [],
+        warnings: ["Index not found. Run yarn workflow publish-state to populate."],
+      };
+      const code = await runWorkflow({
+        repoRoot: "/repo",
+        logger,
+        reader,
+        clipboard: new FakeClipboard(),
+        fs: new StubFs(new Map(), new Set(), "main"),
+        loadActiveSpecsIndex: () => absent,
+      });
+      expect(code).toBe(1);
+      const out = logger.lines.join("\n");
+      expect(out).toMatch(/Índice operacional público/);
+      expect(out).toMatch(/publish-state/);
+    });
+
+    it("DADO runContinue (atalho) QUANDO há índice com entries ENTÃO NÃO loga seção do índice (atalho focado, lookup cross-spec fica para Passo 4)", async () => {
+      const logger = new CollectingLogger();
+      await runContinue({
+        repoRoot: "/repo",
+        logger,
+        fs: makeFsWithSpec(),
+        // mesmo se passado, runContinue não invoca (não usa essa opção)
+        loadActiveSpecsIndex: () => indexWithCurrent,
+      });
+      const out = logger.lines.join("\n");
+      expect(out).not.toMatch(/Specs ativas no índice público/);
     });
   });
 });
