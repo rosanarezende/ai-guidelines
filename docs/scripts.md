@@ -47,7 +47,7 @@ Estrutura:
 | `test:coverage`        | mjs (mesmos globs de `test:unit` — sem smoke) com `--experimental-test-coverage` + `jest --coverage`                            |        não         | manual / análise ad-hoc                                                                          |
 | `living-docs:generate` | `yarn build && node cli/living-docs.mjs generate`                                                                               |        sim²        | manual quando atualizar manifesto                                                                |
 | `living-docs:check`    | `yarn build && node cli/living-docs.mjs check`                                                                                  |        sim²        | dentro de `validate`                                                                             |
-| `validate`             | `yarn format:check && yarn build:all && yarn test && yarn living-docs:check`                                                    |        sim²        | **pre-push hook**; workflow `repo-validation.yml`                                                |
+| `validate`             | `yarn format:check && yarn build:all && yarn test && yarn living-docs:check`                                                    |        sim²        | **pre-push hook**; workflows `ai-guidelines-ci.yml` + `content-guardrails.yml`                   |
 | `ci`                   | `yarn install --immutable && yarn validate && yarn test:smoke`                                                                  |        sim²        | pipeline completo replicável fora do GitHub (ou em workflow externo que queira smoke + validate) |
 | `prepare`              | `husky` (instala hooks `.husky/*` no `.git/hooks/`)                                                                             |        sim         | npm install lifecycle (auto)                                                                     |
 | `prepack`              | `yarn build:all`                                                                                                                |        sim         | npm publish lifecycle (auto, garante `dist/` + `rules.json` no tarball)                          |
@@ -65,13 +65,14 @@ Configurados em [`.husky/`](../.husky/) e instalados automaticamente via `prepar
 ### `pre-commit` (espelhado em `.husky/pre-commit`)
 
 ```bash
-yarn lint-staged    # 1. prettier --write somente nos arquivos staged (re-stage automático)
-yarn build:all      # 2. compila TS (src→dist) + reconstrói rules.json + ledger
-yarn test:unit      # 3. suite mjs (rápida; testes TS ficam para pre-push)
+yarn lint-staged                                                          # 1. prettier --write somente nos staged (re-stage automático)
+yarn build:all                                                            # 2. compila TS (src→dist) + reconstrói rules.json + ledger
+git add .core/rules/_meta/rules.json .core/rules/_meta/agents-core-ledger.md  # 3. re-stage derivados regenerados pelo build:rules
+yarn test:unit                                                            # 4. suite mjs (rápida; testes TS ficam para pre-push)
 ```
 
 **Quando dispara:** `git commit`.
-**Por que esse escopo:** lint-staged garante format incremental (rápido); build:all detecta quebras de TypeScript imediatamente; test:unit pega regressões na camada principal sem o custo de jest. Testes jest (`test:ts`) e living-docs são deixados para o `pre-push`.
+**Por que esse escopo:** lint-staged garante format incremental (rápido); build:all detecta quebras de TypeScript imediatamente; **passo 3 é crítico** — sem ele, edits em `.core/rules/` podem ser commitadas sem que `rules.json`/ledger reflitam o estado real (lint-staged só re-stageia o que ele próprio formatou, e build:all modifica working tree sem stage); test:unit pega regressões na camada principal sem o custo de jest. Testes jest (`test:ts`) e living-docs são deixados para o `pre-push`.
 
 ### `pre-push` (espelhado em `.husky/pre-push`)
 
@@ -80,7 +81,7 @@ yarn validate       # format:check + build:all + test (mjs + jest) + living-docs
 ```
 
 **Quando dispara:** `git push`.
-**Por que esse escopo:** espelha exatamente o que o workflow `repo-validation.yml` roda — se passa local, passa em CI.
+**Por que esse escopo:** espelha exatamente o que os workflows de CI rodam — se passa local, passa em CI.
 
 ---
 
@@ -88,13 +89,13 @@ yarn validate       # format:check + build:all + test (mjs + jest) + living-docs
 
 Configurados em [`.github/workflows/`](../.github/workflows/).
 
-| Workflow                  | Trigger                          | Script principal                                                                      |
-| :------------------------ | :------------------------------- | :------------------------------------------------------------------------------------ |
-| `repo-validation.yml`     | `pull_request`, `push` em `main` | `yarn validate`                                                                       |
-| `smoke-multi-os.yml`      | `pull_request`, `push` em `main` | `yarn test:smoke` (multi-OS)                                                          |
-| `governance-pr-check.yml` | `pull_request`                   | `node dist/cli/governance-pr-check.js` (CI mínimo: label + rationale para fast-track) |
+| Workflow                 | Trigger                          | Script principal             |
+| :----------------------- | :------------------------------- | :--------------------------- |
+| `ai-guidelines-ci.yml`   | `pull_request`, `push` em `main` | `yarn validate`              |
+| `content-guardrails.yml` | `pull_request`, `push` em `main` | `yarn validate`              |
+| `smoke-multi-os.yml`     | `pull_request`, `push` em `main` | `yarn test:smoke` (multi-OS) |
 
-**Filosofia:** os workflows são desacoplados. `repo-validation` cobre quality gates determinísticos; `smoke-multi-os` cobre cross-plataforma; `governance-pr-check` cobre o contrato de PR (Spec 0023, ADR 0020).
+**Filosofia:** os workflows são desacoplados. `ai-guidelines-ci` e `content-guardrails` cobrem quality gates determinísticos (atualmente redundantes — herança histórica que será consolidada em `repo-validation.yml` por uma PR separada — feat/spec-0023-lifecycle); `smoke-multi-os` cobre cross-plataforma. Workflows adicionais (`governance-pr-check.yml` para contrato de PR cf. Spec 0023 + ADR 0020) entram em main via PR stacked sobre este trabalho.
 
 ---
 
