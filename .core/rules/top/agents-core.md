@@ -279,12 +279,12 @@ Act only with a formed plan. Use `governance-foundation` for work that must surv
 **Documentação (pt-br):**
 **Aja apenas mediante Plano Formado.** Antes de executar qualquer código, escolha a granularidade:
 
-| Critério      | Use `governance-foundation`           | Use `plano leve`                          |
-| :------------ | :------------------------------------ | :---------------------------------------- |
-| Duração       | > 1 sessão                            | 1 sessão                                  |
-| Escopo        | > 1 arquivo fora de feature isolada   | Ajuste pontual, local                     |
-| Sobrevivência | Precisa sobreviver troca de IA/sessão | Descartável                               |
-| Onde vive     | `.specify/specs/<slug>/` (versionado) | Scratchpad da ferramenta (não versionado) |
+| Critério      | Use `governance-foundation`                                                                             | Use `plano leve`                          |
+| :------------ | :------------------------------------------------------------------------------------------------------ | :---------------------------------------- |
+| Duração       | > 1 sessão                                                                                              | 1 sessão                                  |
+| Escopo        | > 1 arquivo fora de feature isolada                                                                     | Ajuste pontual, local                     |
+| Sobrevivência | Precisa sobreviver troca de IA/sessão                                                                   | Descartável                               |
+| Onde vive     | `.governance/specs/<NNNN>-<slug>/` (versionado; bridge legada em `.specify/specs/<slug>/` per ADR 0019) | Scratchpad da ferramenta (não versionado) |
 
 **Why this matters:** ação sem plano formado = sintoma clássico de AI-slop. A tabela é o critério-teste objetivo entre `governance-foundation` e plano leve.
 

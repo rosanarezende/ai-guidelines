@@ -2,7 +2,7 @@
 
 # NEXT — Spec 0023 Workflow Runtime
 
-> **Arquivo de acompanhamento contínuo.** Itens aqui são descobertas que **extrapolam o escopo** desta spec e precisam sobreviver até o encerramento. Pendências que serão resolvidas antes do merge vão para a tasklist da sessão de implementação. **DELETADO no encerramento pré-merge**; itens relevantes migram para `.specify/specs/roadmap/backlog.md` ou viram issues.
+> **Arquivo de acompanhamento contínuo.** Itens aqui são descobertas que **extrapolam o escopo** desta spec e precisam sobreviver até o encerramento. Pendências que serão resolvidas antes do merge vão para a tasklist da sessão de implementação. **DELETADO no encerramento pré-merge**; itens relevantes migram para `.governance/specs/roadmap/backlog.md` (canônico per ADR 0019; legacy em `.specify/specs/roadmap/backlog.md` aceito como fallback até cutover) ou viram issues.
 
 ---
 

@@ -11,7 +11,7 @@ Este arquivo define o fluxo obrigatório para qualquer IA atuando neste reposit�
 
 Este repositório é o próprio framework `ai-guidelines`, não um consumidor do framework. Aqui vivem o baseline canônico em `.core/` e a CLI em `cli/` que serão distribuídos para outros repositórios via `init`, `adopt` e `providers`.
 
-**O framework é governance-first, AI-as-channel** (`[ADR 0018]`): o core ontológico é governança de engenharia repo-first; a SSOT do estado vive em `.governance/` (no consumidor) e em `.specify/specs/` (no mantenedor, hoje). `AGENTS.md` é **um dos outputs runtime** da governança — o canal de integração AI-agnóstica — não o artefato central do framework. Outros canais (Markdown derivado para humanos, `living-docs.yml` para pipelines) coexistem como projeções da mesma SSOT.
+**O framework é governance-first, AI-as-channel** (`[ADR 0018]`): o core ontológico é governança de engenharia repo-first; a SSOT do estado vive em `.governance/specs/` (canônico em diante per `[ADR 0019]`), com `.specify/specs/` permanecendo como bridge legada via double-lookup. `AGENTS.md` é **um dos outputs runtime** da governança — o canal de integração AI-agnóstica — não o artefato central do framework. Outros canais (Markdown derivado para humanos, `living-docs.yml` para pipelines) coexistem como projeções da mesma SSOT.
 
 O `AGENTS.md` raiz tem papel duplo:
 
@@ -201,6 +201,6 @@ The root `AGENTS.md` is the runtime artifact. Project-specific content must rema
 
 ### Consumer Bootstrap
 
-Consumer-local ai-guidelines assets live under `.ai-guidelines/`. Templates mirrored by the CLI live in `.ai-guidelines/templates/`. Specs and roadmap remain under `.specify/specs/`.
+Consumer-local ai-guidelines assets live under `.ai-guidelines/`. Templates mirrored by the CLI live in `.ai-guidelines/templates/`. Specs and roadmap live under `.governance/specs/` (canonical per ADR 0019); legacy artifacts under `.specify/specs/` resolve via double-lookup.
 
 </AI_GUIDELINES>
