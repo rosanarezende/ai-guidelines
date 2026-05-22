@@ -160,9 +160,9 @@ active_specs:
 `
       );
 
-      // execute
+      // execute — wizard opção 1 (continuar spec atual) + quit no REPL
       const logger = new CollectingLogger();
-      const reader = new ScriptedReader(["q"]);
+      const reader = new ScriptedReader(["1", "q"]);
       const fs = new NodeWorkflowFileSystem(tempDir);
       const code = await runWorkflow({
         repoRoot: tempDir,

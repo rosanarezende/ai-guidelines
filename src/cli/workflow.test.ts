@@ -213,9 +213,9 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
   });
 
   describe("runWorkflow", () => {
-    it("DADO spec detectada e usuário escolhe sair ENTÃO retorna 0", async () => {
+    it("DADO wizard opção 1 (continuar spec atual) E usuário escolhe sair no REPL ENTÃO retorna 0 com briefing emitido", async () => {
       const logger = new CollectingLogger();
-      const reader = new ScriptedReader(["q"]);
+      const reader = new ScriptedReader(["1", "q"]);
       const code = await runWorkflow({
         repoRoot: "/repo",
         logger,
@@ -228,9 +228,9 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
       expect(logger.lines.join("\n")).toMatch(/Spec: 0023-workflow-runtime/);
     });
 
-    it("DADO texto livre digitado ENTÃO gera context bundle e copia para clipboard", async () => {
+    it("DADO wizard opção 1 + texto livre digitado ENTÃO gera context bundle e copia para clipboard", async () => {
       const logger = new CollectingLogger();
-      const reader = new ScriptedReader(["acho que estamos overengineering", "q"]);
+      const reader = new ScriptedReader(["1", "acho que estamos overengineering", "q"]);
       const clip = new FakeClipboard();
       const code = await runWorkflow({
         repoRoot: "/repo",
@@ -244,9 +244,9 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
       expect(clip.copied!).toMatch(/Pergunta: acho que estamos overengineering/);
     });
 
-    it("DADO branch fora do padrão ENTÃO retorna 1 com mensagem de erro", async () => {
+    it("DADO wizard opção 1 mas branch fora do padrão ENTÃO retorna 1 com mensagem de erro", async () => {
       const logger = new CollectingLogger();
-      const reader = new ScriptedReader([]);
+      const reader = new ScriptedReader(["1"]);
       const fs = new StubFs(new Map(), new Set(), "main");
       const code = await runWorkflow({
         repoRoot: "/repo",
@@ -257,6 +257,50 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
       });
       expect(code).toBe(1);
       expect(logger.lines.some((l) => l.startsWith("ERR:"))).toBe(true);
+    });
+
+    it("DADO wizard opção q (sair) no boot ENTÃO retorna 0 sem invocar briefing nem REPL", async () => {
+      const logger = new CollectingLogger();
+      const reader = new ScriptedReader(["q"]);
+      const code = await runWorkflow({
+        repoRoot: "/repo",
+        logger,
+        reader,
+        clipboard: new FakeClipboard(),
+        fs: makeFsWithSpec(),
+      });
+      expect(code).toBe(0);
+      expect(reader.closed).toBe(true);
+      expect(logger.lines.join("\n")).not.toMatch(/Spec: 0023-workflow-runtime/);
+      expect(logger.lines.join("\n")).toMatch(/Wizard operacional/);
+    });
+
+    it("DADO wizard opção 3 (publish-state help) ENTÃO emite instruções e retorna 0", async () => {
+      const logger = new CollectingLogger();
+      const reader = new ScriptedReader(["3"]);
+      const code = await runWorkflow({
+        repoRoot: "/repo",
+        logger,
+        reader,
+        clipboard: new FakeClipboard(),
+        fs: makeFsWithSpec(),
+      });
+      expect(code).toBe(0);
+      expect(logger.lines.join("\n")).toMatch(/publish-state --status=/);
+    });
+
+    it("DADO wizard opção desconhecida ENTÃO emite erro e retorna 0 (quit gracioso)", async () => {
+      const logger = new CollectingLogger();
+      const reader = new ScriptedReader(["xyz"]);
+      const code = await runWorkflow({
+        repoRoot: "/repo",
+        logger,
+        reader,
+        clipboard: new FakeClipboard(),
+        fs: makeFsWithSpec(),
+      });
+      expect(code).toBe(0);
+      expect(logger.lines.some((l) => l.includes('Opção desconhecida: "xyz"'))).toBe(true);
     });
   });
 
@@ -468,9 +512,9 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
       warnings: [],
     };
 
-    it("DADO spec local detectada E índice presente com a mesma spec QUANDO runWorkflow ENTÃO loga briefing + seção do índice marcando spec corrente com '*'", async () => {
+    it("DADO wizard opção 1 + spec local detectada + índice presente com a mesma spec ENTÃO loga briefing + seção do índice marcando spec corrente com '*'", async () => {
       const logger = new CollectingLogger();
-      const reader = new ScriptedReader(["q"]);
+      const reader = new ScriptedReader(["1", "q"]);
       const code = await runWorkflow({
         repoRoot: "/repo",
         logger,
@@ -486,9 +530,9 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
       expect(out).toMatch(/\* ✓ 0023-workflow-runtime/);
     });
 
-    it("DADO spec local detectada E índice ausente QUANDO runWorkflow ENTÃO loga briefing sem seção de índice (silencioso quando branch já orienta)", async () => {
+    it("DADO wizard opção 1 + spec local detectada + índice ausente ENTÃO loga briefing sem seção de índice (silencioso quando branch já orienta)", async () => {
       const logger = new CollectingLogger();
-      const reader = new ScriptedReader(["q"]);
+      const reader = new ScriptedReader(["1", "q"]);
       const absent: ListActiveSpecsResult = {
         indexAvailable: false,
         entries: [],
@@ -507,9 +551,9 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
       expect(out).not.toMatch(/Specs ativas no índice público/);
     });
 
-    it("DADO branch fora do padrão E índice presente com 1 entry QUANDO runWorkflow ENTÃO erro + seção do índice exibida + retorna 1", async () => {
+    it("DADO wizard opção 1 + branch fora do padrão + índice presente com 1 entry ENTÃO erro + seção do índice exibida + retorna 1", async () => {
       const logger = new CollectingLogger();
-      const reader = new ScriptedReader([]);
+      const reader = new ScriptedReader(["1"]);
       const code = await runWorkflow({
         repoRoot: "/repo",
         logger,
@@ -525,9 +569,9 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
       expect(out).toMatch(/0023-workflow-runtime/);
     });
 
-    it("DADO branch fora do padrão E índice ausente QUANDO runWorkflow ENTÃO erro + heading com aviso de publish-state + retorna 1", async () => {
+    it("DADO wizard opção 1 + branch fora do padrão + índice ausente ENTÃO erro + heading com aviso de publish-state + retorna 1", async () => {
       const logger = new CollectingLogger();
-      const reader = new ScriptedReader([]);
+      const reader = new ScriptedReader(["1"]);
       const absent: ListActiveSpecsResult = {
         indexAvailable: false,
         entries: [],
@@ -545,6 +589,38 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
       const out = logger.lines.join("\n");
       expect(out).toMatch(/Índice operacional público/);
       expect(out).toMatch(/publish-state/);
+    });
+
+    it("DADO wizard opção 4 (ver specs ativas) ENTÃO loga índice e retorna 0 sem invocar briefing", async () => {
+      const logger = new CollectingLogger();
+      const reader = new ScriptedReader(["4"]);
+      const code = await runWorkflow({
+        repoRoot: "/repo",
+        logger,
+        reader,
+        clipboard: new FakeClipboard(),
+        fs: makeFsWithSpec(),
+        loadActiveSpecsIndex: () => indexWithCurrent,
+      });
+      const out = logger.lines.join("\n");
+      expect(code).toBe(0);
+      expect(out).toMatch(/Specs ativas no índice público/);
+      expect(out).not.toMatch(/Stage: implementation/);
+    });
+
+    it("DADO wizard opção 5 (diagnosticar drift) com entries sem drift ENTÃO loga 'Nenhum drift' e retorna 0", async () => {
+      const logger = new CollectingLogger();
+      const reader = new ScriptedReader(["5"]);
+      const code = await runWorkflow({
+        repoRoot: "/repo",
+        logger,
+        reader,
+        clipboard: new FakeClipboard(),
+        fs: makeFsWithSpec(),
+        loadActiveSpecsIndex: () => indexWithCurrent,
+      });
+      expect(code).toBe(0);
+      expect(logger.lines.join("\n")).toMatch(/Nenhum drift detectado/);
     });
 
     it("DADO runContinue sem identifier QUANDO há índice com entries ENTÃO NÃO loga seção do índice (atalho focado na spec corrente)", async () => {

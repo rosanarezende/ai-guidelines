@@ -367,6 +367,75 @@ function defaultLoadActiveSpecsIndex(fs: WorkflowFileSystem): () => ListActiveSp
   return () => new ListActiveSpecs(fs, parseActiveSpecs).run();
 }
 
+/**
+ * Wizard CLI operacional mínimo — menu declarativo no boot de `workflow`.
+ *
+ * Cravado em `[DEC-0023-B06]`: 5 opções fixas, cada uma mapeia 1:1 para
+ * comando existente. Sem ranking, sem ordering, sem inferência de "próxima
+ * ação recomendada" — wizard é shell visual sobre comandos, não engine
+ * de fluxo. Cf. memory `feedback-lookup-not-coordination`.
+ *
+ * Anti-patterns vetados (cf. [DEC-0023-B06]): auto-detecção, NLP-lite,
+ * sugestão de spec mais relevante, autocomplete fuzzy.
+ */
+export type WizardChoice =
+  | { kind: "continue-current" }
+  | { kind: "continue-other"; identifier: string }
+  | { kind: "publish-state-help" }
+  | { kind: "list-active" }
+  | { kind: "diagnose-drift" }
+  | { kind: "quit" };
+
+const WIZARD_OPTIONS: ReadonlyArray<{ key: string; label: string }> = [
+  { key: "1", label: "Continuar spec atual (briefing + REPL)" },
+  { key: "2", label: "Continuar outra spec (por slug ou id)" },
+  { key: "3", label: "Publicar estado (instruções)" },
+  { key: "4", label: "Ver specs ativas (índice público)" },
+  { key: "5", label: "Diagnosticar drift do índice" },
+  { key: "q", label: "Sair" },
+];
+
+export function renderWizardMenu(): ReadonlyArray<string> {
+  const lines: string[] = [];
+  lines.push("");
+  lines.push("─── Wizard operacional (workflow runtime) ───");
+  lines.push("");
+  for (const opt of WIZARD_OPTIONS) {
+    lines.push(`  [${opt.key}] ${opt.label}`);
+  }
+  lines.push("");
+  return lines;
+}
+
+async function runWizard(reader: InputReader, logger: Logger): Promise<WizardChoice> {
+  for (const line of renderWizardMenu()) logger.info(line);
+  const answer = (await reader.question("Escolha: ")).trim();
+  switch (answer) {
+    case "1":
+      return { kind: "continue-current" };
+    case "2": {
+      const identifier = (await reader.question("Slug ou id da spec: ")).trim();
+      if (identifier === "") {
+        logger.error("Identificador vazio — voltando ao menu.");
+        return { kind: "quit" };
+      }
+      return { kind: "continue-other", identifier };
+    }
+    case "3":
+      return { kind: "publish-state-help" };
+    case "4":
+      return { kind: "list-active" };
+    case "5":
+      return { kind: "diagnose-drift" };
+    case "q":
+    case "":
+      return { kind: "quit" };
+    default:
+      logger.error(`Opção desconhecida: "${answer}".`);
+      return { kind: "quit" };
+  }
+}
+
 export async function runWorkflow(options: RunOptions): Promise<number> {
   const logger = options.logger ?? stdoutLogger;
   const fs = options.fs ?? new NodeWorkflowFileSystem(options.repoRoot);
@@ -374,6 +443,74 @@ export async function runWorkflow(options: RunOptions): Promise<number> {
   const clipboard = options.clipboard ?? new NodeClipboard();
   const loadIndex = options.loadActiveSpecsIndex ?? defaultLoadActiveSpecsIndex(fs);
 
+  // Wizard CLI operacional mínimo (cf. [DEC-0023-B06]).
+  // Apresenta 5 opções fixas declarativas no boot do REPL; cada opção
+  // mapeia 1:1 para um comando existente.
+  let choice: WizardChoice;
+  try {
+    choice = await runWizard(reader, logger);
+  } catch (err) {
+    logger.error(`Wizard interrompido: ${err instanceof Error ? err.message : String(err)}`);
+    reader.close();
+    return 1;
+  }
+
+  if (choice.kind === "quit") {
+    reader.close();
+    return 0;
+  }
+
+  if (choice.kind === "list-active") {
+    for (const line of renderActiveSpecsIndex(loadIndex(), undefined, { showWhenAbsent: true })) {
+      logger.info(line);
+    }
+    reader.close();
+    return 0;
+  }
+
+  if (choice.kind === "diagnose-drift") {
+    const result = loadIndex();
+    if (!result.indexAvailable) {
+      logger.info(
+        "Índice operacional público (.governance/runtime/active-specs.yml) não encontrado."
+      );
+      logger.info("Dica: rode `yarn guidelines workflow publish-state` na branch da spec.");
+      reader.close();
+      return 0;
+    }
+    const driftCount = result.entries.filter((e) => !e.specPathExists).length;
+    if (driftCount === 0) {
+      logger.info("Nenhum drift detectado: todos os spec_path existem no filesystem.");
+    } else {
+      logger.info(`${driftCount} entry(ies) com drift:`);
+      for (const resolved of result.entries) {
+        if (!resolved.specPathExists) {
+          logger.info(
+            `  - ${resolved.entry.slug} (${resolved.entry.branch}): spec_path "${resolved.entry.specPath}" inexistente.`
+          );
+        }
+      }
+    }
+    reader.close();
+    return 0;
+  }
+
+  if (choice.kind === "publish-state-help") {
+    logger.info(
+      "Comando: yarn guidelines workflow publish-state --status=<active|blocked|paused|completed> --updated-by=<@autor> [--title=<título>]"
+    );
+    logger.info("Estado da spec corrente é projetado de state.yml para active-specs.yml.");
+    logger.info("Detalhes: .governance/specs/0023-workflow-runtime/decision-brief.md § Bloco G.");
+    reader.close();
+    return 0;
+  }
+
+  if (choice.kind === "continue-other") {
+    reader.close();
+    return runContinue(options, choice.identifier);
+  }
+
+  // choice.kind === "continue-current" — fluxo legado (briefing + REPL interno)
   const ctx = resolveContext(fs, logger);
   if (!ctx) {
     // Branch não casa: humano precisa de orientação cross-spec; mostra o
