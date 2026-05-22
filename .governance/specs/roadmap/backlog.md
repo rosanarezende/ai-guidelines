@@ -88,6 +88,9 @@ Detalhes de lifecycle em [`.core/process/governance-foundation.md`](../../../.co
   - Substituir `workflow continue` resumido — handoff é para boot frio; continue serve continuação dentro de fluxo.
   - Reinventar memory engine. A solução é estrutural (onde mora o texto), não computacional.
   - Forçar todos providers a comportamento uniforme.
+- **Items deferidos da Spec 0023 absorvidos aqui (revisita obrigatória na abertura):**
+  - **Spec 0023 / [1.H.6]** — `docs/guides/workflow-quickstart.md` (também vinculado a `boilerplate-system-modernization`; o guide cobre uso da CLI completa, incluindo escolha entre `continue` resumido e `handoff` completo via wizard).
+  - **Spec 0023 / [1.H.7]** — `docs/guides/workflow-with-ai-agents.md` (escrito pós-handoff materializado; ensina o padrão canônico real, incluindo modelo tri-party se promovido a ADR per 1.H.10).
 - **Slug:** `handoff-as-first-class` (per ADR 0017). Slug definitivo a confirmar quando a spec abrir — pode evoluir para algo mais amplo como `agent-context-distribution-and-handoff` se o escopo absorvido predominar.
 
 ### 3. `boilerplate-system-modernization` (escopo expandido — absorve "stack-agnostic refactor" e "retrofit tasks-mixed-boilerplate D01")
@@ -131,6 +134,9 @@ Detalhes de lifecycle em [`.core/process/governance-foundation.md`](../../../.co
   - Reescrever lifecycle da Spec 0023 (ADR 0020, ADR 0021, DEC-0023-D01, F01–F05 são premissas estáveis).
   - Mover boilerplates para fora do repo (continuam SSOT versionado).
   - Criar template para cada stack — manter um boilerplate por classe, com exemplos balanceados.
+- **Items deferidos da Spec 0023 absorvidos aqui (revisita obrigatória na abertura):**
+  - **Spec 0023 / [1.H.4]** — `examples/minimal-spec/` por classe (per F03+F04: cada classe MECE ganha example próprio, sem reproduzir violação de [DEC-0023-D01] do boilerplate atual).
+  - **Spec 0023 / [1.H.6]** — `docs/guides/workflow-quickstart.md` (dogfoodado com sistema modernizado, não com boilerplate atual). Cobertura: enforcement L2, criação de spec, comandos da CLI, integração com wizard.
 - **Slug:** `boilerplate-system-modernization` (per ADR 0017).
 
 ---

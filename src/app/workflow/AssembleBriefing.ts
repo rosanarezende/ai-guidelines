@@ -111,7 +111,9 @@ export function assembleBriefing(input: BriefingInput): string {
     lines.push(`(spec em .specify/ — bridge legacy, considerar migração caso-a-caso)`);
   }
   if (isExtractionEmpty(input.headers)) {
-    lines.push(`(convenção do template não detectada; veja docs/guides/workflow-quickstart.md)`);
+    lines.push(
+      `(convenção do template não detectada; veja .specify/templates/ para a forma canônica)`
+    );
   }
   lines.push("");
   lines.push(`Stage: ${input.state.stage}    Gate: ${input.state.gate.status}`);

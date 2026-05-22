@@ -117,7 +117,7 @@ describe("App — AssembleBriefing [BR-WORKFLOW-BRIEFING]", () => {
       expect(text.split("\n").length).toBeLessThanOrEqual(25);
     });
 
-    it("DADO extração vazia (spec sem convenção do template) ENTÃO emite warning narrativo apontando docs/guides/workflow-quickstart.md", () => {
+    it("DADO extração vazia (spec sem convenção do template) ENTÃO emite warning narrativo apontando templates canônicos", () => {
       const text = assembleBriefing({
         location,
         state,
@@ -125,7 +125,7 @@ describe("App — AssembleBriefing [BR-WORKFLOW-BRIEFING]", () => {
         headers: extractSpecHeaders(null, null),
       });
       expect(text).toMatch(
-        /\(convenção do template não detectada; veja docs\/guides\/workflow-quickstart\.md\)/
+        /\(convenção do template não detectada; veja \.specify\/templates\/ para a forma canônica\)/
       );
     });
 
