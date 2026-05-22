@@ -23,6 +23,7 @@ Todas as mudanças notáveis neste framework seguem [Semantic Versioning](https:
 - **ADR 0020** — Governance precede e protege execução. Operacionaliza governance-first em lifecycle de PRs: 4 fases (discovery → decision → planning → execution), `tasks.md` como boundary canônico de autorização de execução, stacked PRs (PR-thinking + PR-execution), CI mínimo de integridade estrutural.
 - **`governance-pr-check`** (`src/cli/governance-pr-check.ts` + `.github/workflows/governance-pr-check.yml`): CI mínimo que valida apenas (1) execution PR declara dependência via marcador "Depends on #N (governance)"; (2) governance PR existe; (3) governance PR aberto/mergeado; (4) governance PR contém `tasks.md` no diff. Fast-track via label `fast-track` bypassa (cf. `[DEC-0023-D05]`).
 - **Spec 0023** materializada em `.governance/specs/0023-workflow-runtime/` (pivot da 0023 original; trilha histórica preservada em `.specify/specs/0023-governance-workflow-discovery-model/`).
+- **Enforcement Runtime L2** (PR4-enforcement-runtime, Bloco E do decision-brief). Intercepta e recusa narrativamente a execução no comando `continue` (`runContinue`) quando as condições estruturais não são atendidas (planning gate não concluído ou `tasks.md` ausente), retornando exit code 1. A verificação é isolada no use case `CheckExecutionAuthorized` e delega a decisão para a função pura de domínio `isExecutionAuthorized` (cf. `[DEC-0023-E03]` + ADR 0021). Cobertura BDD pt-BR em domain + app + integration E2E com cenários de dupla e única violação.
 
 ### Limitações conhecidas (preview)
 

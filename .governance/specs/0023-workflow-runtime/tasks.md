@@ -169,19 +169,19 @@
   - `7fe63e8 feat(spec-0023): integration tests E2E + correção tri-form de marca corrente` (Passo 7)
   - Passo 8 (atual): sync de artifacts vivos.
 
-### Sub-bloco [1.F] — Enforcement Runtime (`executionAuthorized` derivado + workflow refuse) `(evidence-driven)` — PR4-enforcement-runtime (próximo PR; ainda NÃO autorizado)
+### Sub-bloco [1.F] — Enforcement Runtime (`executionAuthorized` derivado + workflow refuse) `(evidence-driven)` — PR4-enforcement-runtime (concluído)
 
 > Origem: [`plan.md § Componente novo a adicionar`](./plan.md) + [`[DEC-0023-E03]`](./decision-brief.md). **NOVO** — entra como PR próprio, separado de DX, para isolar testabilidade e dogfooding do mecanismo de enforcement.
 
-- [ ] **1.F.1** Domínio: estender `src/domain/workflow/WorkflowState.ts` com computação derivada `executionAuthorized` (não como campo persistido — como função pura sobre estado).
-- [ ] **1.F.2** Use case: `src/app/workflow/CheckExecutionAuthorized.ts` com regras canônicas (`tasks.md exists && gate.status == closed && governance chain íntegra`).
-- [ ] **1.F.3** `src/cli/workflow.ts` `runContinue` recusa narrativamente quando `executionAuthorized == false`, listando condições não satisfeitas.
-- [ ] **1.F.4** Fast-track strictness em `governance-pr-check`: validar label `fast-track` + presença de rationale no body (regex obrigatório); falhar se label sem rationale.
-- [ ] **1.F.5** BDD pt-BR para cada use case + integration test.
-- [ ] **1.F.N** Pipeline verde + integration test exercitando lock/unlock real.
-- [ ] **1.F.6** Débitos: nenhum esperado.
-- [ ] **1.F.[REVIEW]** **[MANDATÓRIO]** Owner aprova PR4 antes de commit/push.
-- [ ] **1.F.[COMMIT]** `feat(workflow): executionAuthorized derivado + runtime refuse narrativo (PR4 enforcement)`.
+- [x] **1.F.1** Domínio: estender `src/domain/workflow/WorkflowState.ts` com computação derivada `executionAuthorized` (não como campo persistido — como função pura sobre estado).
+- [x] **1.F.2** Use case: `src/app/workflow/CheckExecutionAuthorized.ts` com regras canônicas (`tasks.md exists && gate.status == closed && governance chain íntegra`).
+- [x] **1.F.3** `src/cli/workflow.ts` `runContinue` recusa narrativamente quando `executionAuthorized == false`, listando condições não satisfeitas.
+- [x] **1.F.4** Fast-track strictness em `governance-pr-check`: validar label `fast-track` + presença de rationale no body (regex obrigatório); falhar se label sem rationale.
+- [x] **1.F.5** BDD pt-BR para cada use case + integration test.
+- [x] **1.F.N** Pipeline verde + integration test exercitando lock/unlock real.
+- [x] **1.F.6** Débitos: nenhum esperado.
+- [x] **1.F.[REVIEW]** **[MANDATÓRIO]** Owner aprova PR4 antes de commit/push.
+- [x] **1.F.[COMMIT]** `feat(workflow): executionAuthorized derivado + runtime refuse narrativo (PR4 enforcement)`.
 
 ### Sub-bloco [1.G] — DX Thinking (refinement) `(deterministic)` — PR5-DX-thinking (próximo PR; aguarda PR4)
 
