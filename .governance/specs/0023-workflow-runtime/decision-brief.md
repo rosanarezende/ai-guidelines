@@ -461,8 +461,19 @@
 
 **Decisão do Gate Humano:**
 
-- **Status:** [x] Deferred temporariamente — revisita obrigatória em S5 do PR5 via POC visual neutra
-- **Escolha:** [ ] A | [ ] B | [ ] C
+- **Status:** [x] Resolved (PR5 S5, 2026-05-22, via POC visual neutra)
+- **Escolha:** [x] A | [ ] B | [ ] C
+- **Justificativa:** múltiplos paths por classe é a continuação coerente da tríade arquitetural F01+F02+F03 = B+B+A. Cada classe agora ganha modelo próprio em código (F01), boundary próprio no lifecycle (F02), template próprio (F03) e diretório próprio no consumidor (F04) — F01+F02+F03+F04 = B+B+A+A. Topologia do filesystem espelha a taxonomy MECE; descoberta é literal (o caminho é o tipo) sem necessidade de parsing de frontmatter ou ramificação implícita. A recomendação inicial C apoiava-se em migração gradual e preservação do trabalho do PR1; durante a POC, esses argumentos foram pesados contra a coerência arquitetural completa — C deixa o sistema em estado híbrido permanente (parte por path, parte por sinal lateral), enquanto A entrega topologia consistente.
+- **Custo aceito (visibility alta no consumidor):** consumidor passa a ver 5+ diretórios em `.governance/`. Mitigação pelas mesmas alavancas de F03:
+  - Wizard CLI futuro guia o consumidor para o diretório correto por classe.
+  - Pacote npm via `adopt` cria a topologia automaticamente; usuário não precisa entender estrutura completa para começar.
+  - Diretórios só ganham conteúdo quando uma classe é efetivamente instanciada (vazio é estado válido — não polui mentalmente).
+- **Pré-requisitos cravados para implementação efetiva:**
+  - `DetectActiveSpec` permanece funcional para `spec` no estado atual; estender para detectar outras classes é trabalho da candidata `boilerplate-system-modernization` (que materializa os boilerplates por classe) acoplada à implementação do pilar específico.
+  - Renomeação de `DetectActiveSpec` para `DetectActiveWorkItem` (ou nome equivalente) é decisão de spec futura; F04 fixa o **modelo de descoberta** (múltiplos paths), não o **nome da função**.
+  - Coexistência de `.governance/specs/` (já populado) com novos diretórios é trivial — paths não interferem entre si.
+- **Vínculos cruzados:** candidata `boilerplate-system-modernization` no backlog cobre os pré-requisitos de F03+F04 simultaneamente (boilerplates + paths são duas faces da mesma materialização por classe).
+- **Data / Owner:** 2026-05-22 / @rosanarezende
 
 ---
 
