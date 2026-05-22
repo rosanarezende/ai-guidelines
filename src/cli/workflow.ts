@@ -423,7 +423,9 @@ export async function runContinue(options: RunOptions, identifier?: string): Pro
       logger.error(
         `Índice operacional público (.governance/runtime/active-specs.yml) não encontrado.`
       );
-      logger.error(`Dica: rode \`yarn workflow publish-state\` na branch da spec primeiro.`);
+      logger.error(
+        `Dica: rode \`yarn guidelines workflow publish-state\` na branch da spec primeiro.`
+      );
       return 1;
     }
 
@@ -467,7 +469,7 @@ export async function runContinue(options: RunOptions, identifier?: string): Pro
 }
 
 /**
- * Argumentos parseados de `yarn workflow publish-state ...`.
+ * Argumentos parseados de `yarn guidelines workflow publish-state ...`.
  * Estritamente declarativos — nenhum valor é inferido (nem `updatedBy`
  * via git config, nem `lastSyncCommit` via HEAD). Cf. memory
  * `feedback-lookup-not-coordination` — sem inferência de intenção.
