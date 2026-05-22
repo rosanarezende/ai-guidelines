@@ -22,3 +22,4 @@
 | CORE-13 | Artefatos vivos durante o trabalho                        | process  | declared_heuristic | 0       | 185   | 1     |
 | CORE-14 | Mensagem de commit sugerida: IA fornece apenas a mensagem | process  | declared_heuristic | 0       | 174   | 1     |
 | CORE-15 | ADR é princípio perene, não revisitação datada            | process  | declared_heuristic | 0       | 378   | 1     |
+| CORE-16 | Sync de base ≠ merge atômico ponta-a-ponta                | process  | declared_heuristic | 0       | 598   | 1     |

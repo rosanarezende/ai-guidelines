@@ -396,3 +396,32 @@ Critério editorial completo, formato canônico, exemplo de ADRs vigentes e cicl
 **Why this matters:** ADRs sem princípio perene viram lixo no momento em que a fase encerra. O critério é gate de PR review — ADR mal-escrita é defeito de design, não estilo.
 
 **See also:** `[CORE-02]` (repositório como memória), `[CORE-13]` (artefatos vivos).
+
+---
+
+#### [CORE-16] Sync de base ≠ merge atômico ponta-a-ponta
+
+```yaml
+id: CORE-16
+scope: universal
+category: process
+evidence_strength: declared_heuristic
+sources: []
+applicable_languages: ["*"]
+tags: [core, agents, always_injected, git, merge, safety]
+```
+
+**Instruction (en):**
+Distinguish between **base sync** (routine update of a stacked branch with its base) and **end-to-end atomic merge** (one-shot release of an entire spec stack to `main`). They are NOT the same operation. Base sync is frequent, safe, and reversible — it keeps the stack coherent during work. Atomic merge happens ONCE, only at spec closure, after every PR in the stack is Ready. PRs labeled `MERGEABLE` by GitHub are NOT invitations to merge to `main` — that label only indicates absence of merge conflicts against the PR's base branch. Per ADR 0020, spec-bound PRs are never mergeable in isolation.
+
+**Documentação (pt-br):**
+Diferencie entre **sync com a base** (atualização rotineira de branch stacked com sua base) e **merge atômico ponta-a-ponta** (rito único de fechamento da spec inteira em direção à `main`). **NÃO são a mesma operação.**
+
+- **Sync com a base:** operação **rotineira**, segura, reversível. Quando uma branch upstream avança (rebase, novos commits), as branches stacked sobre ela puxam o avanço. Mantém o stack coerente durante o trabalho.
+- **Merge atômico ponta-a-ponta:** operação **única**, irreversível, **somente no fechamento da spec**, quando **todos** os PRs do stack estão Ready. Conforme ADR 0020, PR vinculado a spec **NÃO é mergeable isoladamente** — o stack inteiro mergeia em sequência atômica.
+
+A label `MERGEABLE` que o GitHub mostra **NÃO é convite para mergear na main** — indica apenas ausência de conflito contra a branch base do PR. Em stack governance-first, `MERGEABLE` é estado normal de PR Ready aguardando fechamento da spec.
+
+**Why this matters:** múltiplas sessões de IA já sugeriram merge antecipado em PRs Ready de stacked PRs, confundindo a label `MERGEABLE` com autorização de fechamento. A confusão custa tempo do humano para esclarecer e arrisca quebrar o contrato governance-first do ADR 0020. Cravar a distinção no `<AI_GUIDELINES>` injetado leva a IA a tropeçar nela antes de sugerir merge prematuro.
+
+**See also:** `[CORE-04]` (Nunca trabalhe direto em main/master), `[CORE-07]` (Nunca execute git push autonomamente), `[CORE-09]` (PRs abrem como Draft), `[CORE-10]` (Draft → Ready apenas via revalidação humana), ADR 0020 (Governance precede e protege execução).

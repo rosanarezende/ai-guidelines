@@ -125,6 +125,10 @@ Convert PRs from `Draft` to `Ready` only after explicit human revalidation.
 
 At the end of each sub-block, provide only the commit message suggestion. The human executes the full validation chain (`yarn format ; yarn validate ; ...`) and `git commit`.
 
+### [CORE-16]
+
+Distinguish **base sync** (routine update of a stacked branch with its base — frequent, safe, reversible) from **end-to-end atomic merge** (one-shot release of an entire spec stack to `main` — single, irreversible, at spec closure). GitHub's `MERGEABLE` label only indicates absence of conflicts against the PR's base branch; per ADR 0020, spec-bound PRs are never mergeable to `main` in isolation.
+
 ### [GR-0203]
 
 Build PR descriptions in three steps: outline topics, get human approval, then generate the final text using the repository template (if available) and perform a final human validation.
