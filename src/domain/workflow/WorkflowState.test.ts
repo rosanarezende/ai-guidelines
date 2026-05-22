@@ -1,7 +1,9 @@
 import {
   GATE_STATUSES,
   WORKFLOW_STAGES,
+  WorkflowState,
   defaultWorkflowState,
+  isExecutionAuthorized,
   isGateStatus,
   isWorkflowStage,
 } from "./WorkflowState.js";
@@ -41,6 +43,48 @@ describe("Domínio — WorkflowState [BR-WORKFLOW-DOMAIN]", () => {
       expect(state.gate.status).toBe("open");
       expect(state.focus).toEqual([]);
       expect(state.next).toEqual([]);
+    });
+  });
+
+  describe("isExecutionAuthorized", () => {
+    it("DADO gate status closed E tasks.md presente QUANDO isExecutionAuthorized ENTÃO retorna true", () => {
+      const state: WorkflowState = {
+        stage: "implementation",
+        gate: { status: "closed" },
+        focus: [],
+        next: [],
+      };
+      expect(isExecutionAuthorized(state, true)).toBe(true);
+    });
+
+    it("DADO gate status closed E tasks.md ausente QUANDO isExecutionAuthorized ENTÃO retorna false", () => {
+      const state: WorkflowState = {
+        stage: "implementation",
+        gate: { status: "closed" },
+        focus: [],
+        next: [],
+      };
+      expect(isExecutionAuthorized(state, false)).toBe(false);
+    });
+
+    it("DADO gate status open E tasks.md presente QUANDO isExecutionAuthorized ENTÃO retorna false", () => {
+      const state: WorkflowState = {
+        stage: "planning",
+        gate: { status: "open" },
+        focus: [],
+        next: [],
+      };
+      expect(isExecutionAuthorized(state, true)).toBe(false);
+    });
+
+    it("DADO gate status awaiting-review E tasks.md ausente QUANDO isExecutionAuthorized ENTÃO retorna false", () => {
+      const state: WorkflowState = {
+        stage: "planning",
+        gate: { status: "awaiting-review" },
+        focus: [],
+        next: [],
+      };
+      expect(isExecutionAuthorized(state, false)).toBe(false);
     });
   });
 });

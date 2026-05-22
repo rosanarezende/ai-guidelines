@@ -42,3 +42,16 @@ export function defaultWorkflowState(): WorkflowState {
     next: [],
   };
 }
+
+/**
+ * Computa se a execução de uma spec está estruturalmente autorizada localmente.
+ *
+ * Conforme DEC-0023-E03, a autorização de execução local (L2) é baseada em:
+ * 1. Presença física do arquivo de tarefas (`tasks.md`) no diretório da spec.
+ * 2. Estado de planejamento concluído (`gate.status === "closed"`).
+ *
+ * É uma função de domínio 100% pura, livre de efeitos colaterais e I/O.
+ */
+export function isExecutionAuthorized(state: WorkflowState, tasksFileExists: boolean): boolean {
+  return tasksFileExists && state.gate.status === "closed";
+}
