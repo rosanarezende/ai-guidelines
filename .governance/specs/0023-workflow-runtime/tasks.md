@@ -198,7 +198,7 @@
 > Origem: [`plan.md § Componente [F]`](./plan.md) + [`[DEC-0023-B01..B04]`](./decision-brief.md). **Primeira execução sob enforcement estrutural completo** (`executionAuthorized` derivado deve estar `true` antes deste sub-bloco iniciar).
 
 - [x] **1.H.1** `src/infrastructure/io/NodeClipboard.ts` + tests — detecta wl-copy/xclip/pbcopy; fallback gracioso. Wire em `src/cli/workflow.ts` (default agora é `NodeClipboard`; `NoopClipboard` removido como redundante). Porta movida para `src/app/ports/ClipboardWriter.ts` (DDD layer fix). Cf. `[DEC-0023-B01]`.
-- [ ] **1.H.2** `AssembleBriefing` warning para extraction vazia (linha "(convenção do template não detectada; veja docs/guides/workflow-quickstart.md)"). Cf. `[DEC-0023-B02]`.
+- [x] **1.H.2** `AssembleBriefing` warning para extraction vazia (linha "(convenção do template não detectada; veja docs/guides/workflow-quickstart.md)"). Função `isExtractionEmpty()` detecta quando todos os campos extraídos são vazios; warning emite após linha de título no briefing. Cf. `[DEC-0023-B02]`.
 - [ ] **1.H.3** Integration test `tests/integration/workflow-dispatch.test.mjs` — exercita `node cli/ai-guidelines-cli.mjs continue` em diretório temp com `git init` + spec fake.
 - [ ] **1.H.4** `examples/minimal-spec/` (≤ 4 arquivos: spec.md, NEXT.md, state.yml, README.md). `examples` em `package.json#files`. Cf. `[DEC-0023-B03]`.
 - [ ] **1.H.5** `cli/cli/args.mjs` `printHelp()` reescrito com exemplos por subcomando + nota de convenção de branch.

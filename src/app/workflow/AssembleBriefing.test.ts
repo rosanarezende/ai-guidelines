@@ -116,5 +116,23 @@ describe("App — AssembleBriefing [BR-WORKFLOW-BRIEFING]", () => {
       const text = assembleBriefing({ location, state, defaulted: false, headers });
       expect(text.split("\n").length).toBeLessThanOrEqual(25);
     });
+
+    it("DADO extração vazia (spec sem convenção do template) ENTÃO emite warning narrativo apontando docs/guides/workflow-quickstart.md", () => {
+      const text = assembleBriefing({
+        location,
+        state,
+        defaulted: false,
+        headers: extractSpecHeaders(null, null),
+      });
+      expect(text).toMatch(
+        /\(convenção do template não detectada; veja docs\/guides\/workflow-quickstart\.md\)/
+      );
+    });
+
+    it("DADO extração com pelo menos title detectado ENTÃO NÃO emite warning de convenção", () => {
+      const headers = extractSpecHeaders(sampleSpec, null);
+      const text = assembleBriefing({ location, state, defaulted: false, headers });
+      expect(text).not.toMatch(/convenção do template não detectada/);
+    });
   });
 });

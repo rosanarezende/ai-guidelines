@@ -86,12 +86,32 @@ export interface BriefingInput {
   readonly headers: SpecHeaders;
 }
 
+/**
+ * Detecta extraction vazia: nenhum cabeçalho foi reconhecido pelos regex
+ * do template canônico, mesmo que os arquivos `spec.md`/`research.md`
+ * existam. Sinaliza convenção divergente.
+ *
+ * Cf. [DEC-0023-B02]: emitir warning narrativo em vez de tentar parser
+ * mais agressivo.
+ */
+function isExtractionEmpty(headers: SpecHeaders): boolean {
+  return (
+    headers.title === null &&
+    headers.status === null &&
+    headers.openHypotheses.length === 0 &&
+    headers.blockers.length === 0
+  );
+}
+
 export function assembleBriefing(input: BriefingInput): string {
   const lines: string[] = [];
   const title = input.headers.title ?? input.location.slug;
   lines.push(`Spec: ${input.location.slug} — ${title}`);
   if (input.location.source === "specify-legacy") {
     lines.push(`(spec em .specify/ — bridge legacy, considerar migração caso-a-caso)`);
+  }
+  if (isExtractionEmpty(input.headers)) {
+    lines.push(`(convenção do template não detectada; veja docs/guides/workflow-quickstart.md)`);
   }
   lines.push("");
   lines.push(`Stage: ${input.state.stage}    Gate: ${input.state.gate.status}`);
