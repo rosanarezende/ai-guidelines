@@ -153,6 +153,38 @@ _(Sem débitos adiados no momento do gate. Itens emergentes durante PR1 entram a
 - **Não-objetivo:** REPL conversacional, NLP-lite, sugestão de "próxima ação recomendada", autocomplete fuzzy de slug.
 - **Sinal de "está na hora" de promover a backlog formal:** ≥ 2 reviewers/contribuidores reportarem atrito concreto na CLI textual OU primeiro consumidor externo do framework chegar e reportar fricção operacional.
 
+#### Caso real — AI-slop em brain folder de ferramenta IA (Antigravity CLI, 2026-05-21)
+
+- **Fonte do insight:** primeira sessão de implementação remota usando o
+  framework (Antigravity CLI como implementador + Claude como revisor
+  paralelo + owner como gate). Antigravity recebeu briefing correto via
+  `yarn guidelines continue 0023` e produziu plano direcionalmente
+  coerente, mas escreveu **plano completo** em
+  `~/.gemini/antigravity-cli/brain/.../implementation_plan.md` —
+  scratchpad próprio da ferramenta, externo ao repo.
+- **Diagnóstico:** caso de AI-slop ferramenta-específico previsto em
+  [CORE-02]. Plano detalhado em brain folder:
+  - não sobrevive a compactação/encerramento da sessão da ferramenta;
+  - não é auditável por revisores externos;
+  - não é versionado (sem histórico git);
+  - duplica conteúdo que deveria viver em `tasks.md` (decomposição
+    autorizada) ou `plan.md § DoD detalhado` (granularidade fina).
+- **Mitigação aplicada nesta sessão:** owner instruiu Antigravity a
+  tratar brain folder como pointer-only (`→ Ver .governance/specs/0023-.../tasks.md`)
+  e usar artefatos vivos da spec como SSOT.
+- **Padrão para futuras sessões com ferramentas IA que tenham scratchpad
+  próprio** (Antigravity, Cursor, Codex CLI, Claude Code memory, etc.):
+  cada owner que instancia o framework precisa orientar a ferramenta
+  específica a respeitar [CORE-02] — pointer no scratchpad, conteúdo
+  normativo nos artefatos vivos.
+- **Cross-ref:** candidata `Arquitetura de regras portáveis vs.
+contexto framework-interno` em `.governance/specs/roadmap/backlog.md` — esse
+  insight é empiricamente o caso de uso que motiva aquela candidata.
+  Quando ela amadurecer, este caso real é evidência.
+- **Critério de "está na hora" de promover a backlog formal:** ≥ 2
+  outras ferramentas (Codex, Cursor, etc.) apresentarem o mesmo padrão
+  de AI-slop em scratchpad próprio durante uso do framework.
+
 > **Meta-observação (sem registro formal aqui):** os 2 insights apontam na mesma direção — reduzir custo cognitivo da governança sem perder rigor. PR narrative artifacts atacam o **lado humano-reviewer**; wizard ataca o **lado humano-operador**. Se ≥ 1 deles for adotado e validado, vale considerar consolidação como princípio cross-spec (memory ou ADR de DX), não antes.
 
 ---
