@@ -81,7 +81,30 @@ Detalhes de lifecycle em [`.core/process/governance-foundation.md`](../../../.co
 
 ## Now (próxima fila, ordem importa)
 
-_(populado conforme novas candidatas amadurecem)_
+### `governance-dashboard-and-visual-artifacts`
+
+> **Vinculação metodológica:** primeira candidata a ser instanciada como spec **imediatamente após Spec 0023 fechar**, antes de qualquer outra coisa. Vínculo explícito com a cláusula anti-paper de [ADR 0023](../../../.core/governance/adrs/0023-meta-artifacts-yaml-with-derivations.md) item 6 — ADR sem materialização rápida vira o anti-pattern (dashboard que nunca saiu do papel desde 2026-05-07) que motivou o ADR.
+
+- **Fonte do insight:** PR5 S3–S4 da Spec 0023 (2026-05-22). Owner reconheceu que o débito de dashboard de governança se arrasta desde a época do `living-docs.yml` e nunca saiu do papel. Combinado com a decisão arquitetural cravada em [ADR 0023](../../../.core/governance/adrs/0023-meta-artifacts-yaml-with-derivations.md) (meta-artefatos como SSOT YAML com derivações JSON+HTML), a candidata materializa o primeiro caso real do padrão.
+- **Princípio guia:** ADR 0023 — meta-artefatos de governança são SSOT em YAML com derivações determinísticas build-time. Derivações **NÃO usam LLM no runtime** (ADR 0018 preservado).
+- **Escopo proposto (a confirmar quando a spec abrir):**
+  - **Backlog convertido** para o padrão YAML SSOT + JSON derivado + HTML derivado. Schema declarado; `yarn build:meta-artifacts` (ou equivalente) regenera derivações; CI drift check garante sincronização.
+  - **HTML dashboard** com visão de estado de governança: specs ativas, candidatas em `Now`/`Next`/`Later`, status de blocos de decisão. Estático na v1 (sem JS interativo).
+  - **Mermaid diagrams** embedded onde fizer sentido (arquitetura, lifecycle, stack de PRs) — renderizado pelo GitHub.
+  - **Prompts versionados** para imagens conceituais em diretório dedicado (ex.: `.governance/visual-prompts/` ou similar). Owner cola prompt em ferramenta externa (Claude/Midjourney/DALL-E/etc.) e retorna imagem; cobre arquitetura ponta a ponta, entrega de valor, andamento. Owner é visualmente orientada — esse débito é DX real.
+- **Pré-requisitos:**
+  - Spec 0023 mergeada (atômico ponta-a-ponta per ADR 0020).
+  - ADR 0023 promovida de `Proposta` para `Aceita` no fechamento da 0023.
+- **Sinal de "está na hora":** Spec 0023 fechar. Sem condição adicional — vinculação metodológica explícita por ADR 0023 item 6.
+- **Riscos antecipados:**
+  - **HTML virar "produto SaaS"** — adicionar JS interativo, autenticação, filtros runtime complexos. Mitigação: framing canônico anti-distorção de ADR 0023 (linguagem rejeitada).
+  - **Prompts visuais perdendo aderência ao estado real** — risco de imagem gerada em momento X ficar obsoleta no momento Y. Mitigação: prompts versionados são instruções para regenerar, não imagens cacheadas; owner regenera quando precisar.
+  - **Padrão YAML+JSON+HTML aplicado a markdown narrativo por engano** — viola ADR 0023 item 5 (aplicabilidade restrita a meta-artefatos). Mitigação: critério de revisão explícito do ADR.
+- **Não-objetivos:**
+  - Reinventar Jira/Linear/Notion no repo. Dashboard é visualização **estática derivada** de SSOT YAML; SSOT continua editável via PR.
+  - Filtros interativos runtime, busca client-side complexa, autenticação. Tudo isso reabre trade-off contra "database + UI custom" (opção 3 rejeitada do ADR 0023).
+  - Geração de imagens via LLM no runtime (viola ADR 0018). Prompts são templates declarativos; geração acontece em ferramenta externa, manualmente, sob comando do humano.
+- **Slug:** `governance-dashboard-and-visual-artifacts` (per [ADR 0017](../../../.core/governance/adrs/0017-spec-numbering-slug-to-branch.md) — número alocado apenas quando o branch for criado).
 
 ---
 
