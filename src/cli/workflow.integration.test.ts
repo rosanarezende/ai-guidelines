@@ -330,4 +330,158 @@ active_specs:
       await fsAsync.rm(tempDir, { recursive: true, force: true });
     }
   });
+
+  it("Cenário 5 — DADO spec com gate aberto e sem tasks.md QUANDO runContinue ENTÃO recusa a execução retornando exit code 1 e narrando dupla violação", async () => {
+    const tempDir = await fsAsync.mkdtemp(path.join(os.tmpdir(), "ws-e2e-lock-both-"));
+    try {
+      execSync("git init -b feat/spec-0025-bar", { cwd: tempDir, stdio: "ignore" });
+      execSync("git config user.email test@example.com", { cwd: tempDir, stdio: "ignore" });
+      execSync("git config user.name Test", { cwd: tempDir, stdio: "ignore" });
+      execSync('git commit --allow-empty -m "initial"', { cwd: tempDir, stdio: "ignore" });
+
+      const specDir = path.join(tempDir, ".governance", "specs", "0025-bar");
+      await fsAsync.mkdir(specDir, { recursive: true });
+      await fsAsync.writeFile(
+        path.join(specDir, "state.yml"),
+        `stage: planning
+gate:
+  status: open
+focus: []
+next: []
+`
+      );
+
+      const indexDir = path.join(tempDir, ".governance", "runtime");
+      await fsAsync.mkdir(indexDir, { recursive: true });
+      await fsAsync.writeFile(
+        path.join(indexDir, "active-specs.yml"),
+        `version: 1
+active_specs:
+  - id: "0025"
+    slug: "bar"
+    branch: "feat/spec-0025-bar"
+    stage: "planning"
+    status: "active"
+    spec_path: ".governance/specs/0025-bar"
+    updated_at: "2026-05-21T10:00:00Z"
+`
+      );
+
+      const logger = new CollectingLogger();
+      const fs = new NodeWorkflowFileSystem(tempDir);
+      const code = await runContinue({ repoRoot: tempDir, logger, fs }, "0025");
+
+      expect(code).toBe(1);
+      const out = logger.lines.join("\n");
+      expect(out).toMatch(/ERR: Execution locked\./);
+      expect(out).toMatch(/ERR: Missing:/);
+      expect(out).toMatch(/ERR: - tasks\.md em .*0025-bar\/tasks\.md \(não encontrado\)/);
+      expect(out).toMatch(/ERR: - planning gate\.status == closed \(atual: open\)/);
+    } finally {
+      await fsAsync.rm(tempDir, { recursive: true, force: true });
+    }
+  });
+
+  it("Cenário 6 — DADO spec com gate fechado e sem tasks.md QUANDO runContinue ENTÃO recusa a execução retornando exit code 1 e narrando falta de tasks.md apenas", async () => {
+    const tempDir = await fsAsync.mkdtemp(path.join(os.tmpdir(), "ws-e2e-lock-tasks-"));
+    try {
+      execSync("git init -b feat/spec-0025-bar", { cwd: tempDir, stdio: "ignore" });
+      execSync("git config user.email test@example.com", { cwd: tempDir, stdio: "ignore" });
+      execSync("git config user.name Test", { cwd: tempDir, stdio: "ignore" });
+      execSync('git commit --allow-empty -m "initial"', { cwd: tempDir, stdio: "ignore" });
+
+      const specDir = path.join(tempDir, ".governance", "specs", "0025-bar");
+      await fsAsync.mkdir(specDir, { recursive: true });
+      await fsAsync.writeFile(
+        path.join(specDir, "state.yml"),
+        `stage: implementation
+gate:
+  status: closed
+focus: []
+next: []
+`
+      );
+
+      const indexDir = path.join(tempDir, ".governance", "runtime");
+      await fsAsync.mkdir(indexDir, { recursive: true });
+      await fsAsync.writeFile(
+        path.join(indexDir, "active-specs.yml"),
+        `version: 1
+active_specs:
+  - id: "0025"
+    slug: "bar"
+    branch: "feat/spec-0025-bar"
+    stage: "implementation"
+    status: "active"
+    spec_path: ".governance/specs/0025-bar"
+    updated_at: "2026-05-21T10:00:00Z"
+`
+      );
+
+      const logger = new CollectingLogger();
+      const fs = new NodeWorkflowFileSystem(tempDir);
+      const code = await runContinue({ repoRoot: tempDir, logger, fs }, "0025");
+
+      expect(code).toBe(1);
+      const out = logger.lines.join("\n");
+      expect(out).toMatch(/ERR: Execution locked\./);
+      expect(out).toMatch(/ERR: Missing:/);
+      expect(out).toMatch(/ERR: - tasks\.md em .*0025-bar\/tasks\.md \(não encontrado\)/);
+      expect(out).not.toMatch(/planning gate\.status == closed/);
+    } finally {
+      await fsAsync.rm(tempDir, { recursive: true, force: true });
+    }
+  });
+
+  it("Cenário 7 — DADO spec com gate aberto e com tasks.md QUANDO runContinue ENTÃO recusa a execução retornando exit code 1 e narrando gate aberto apenas", async () => {
+    const tempDir = await fsAsync.mkdtemp(path.join(os.tmpdir(), "ws-e2e-lock-gate-"));
+    try {
+      execSync("git init -b feat/spec-0025-bar", { cwd: tempDir, stdio: "ignore" });
+      execSync("git config user.email test@example.com", { cwd: tempDir, stdio: "ignore" });
+      execSync("git config user.name Test", { cwd: tempDir, stdio: "ignore" });
+      execSync('git commit --allow-empty -m "initial"', { cwd: tempDir, stdio: "ignore" });
+
+      const specDir = path.join(tempDir, ".governance", "specs", "0025-bar");
+      await fsAsync.mkdir(specDir, { recursive: true });
+      await fsAsync.writeFile(
+        path.join(specDir, "state.yml"),
+        `stage: planning
+gate:
+  status: open
+focus: []
+next: []
+`
+      );
+      await fsAsync.writeFile(path.join(specDir, "tasks.md"), "# Tasks\n- [ ] tarefa 1");
+
+      const indexDir = path.join(tempDir, ".governance", "runtime");
+      await fsAsync.mkdir(indexDir, { recursive: true });
+      await fsAsync.writeFile(
+        path.join(indexDir, "active-specs.yml"),
+        `version: 1
+active_specs:
+  - id: "0025"
+    slug: "bar"
+    branch: "feat/spec-0025-bar"
+    stage: "planning"
+    status: "active"
+    spec_path: ".governance/specs/0025-bar"
+    updated_at: "2026-05-21T10:00:00Z"
+`
+      );
+
+      const logger = new CollectingLogger();
+      const fs = new NodeWorkflowFileSystem(tempDir);
+      const code = await runContinue({ repoRoot: tempDir, logger, fs }, "0025");
+
+      expect(code).toBe(1);
+      const out = logger.lines.join("\n");
+      expect(out).toMatch(/ERR: Execution locked\./);
+      expect(out).toMatch(/ERR: Missing:/);
+      expect(out).not.toMatch(/tasks\.md/);
+      expect(out).toMatch(/ERR: - planning gate\.status == closed \(atual: open\)/);
+    } finally {
+      await fsAsync.rm(tempDir, { recursive: true, force: true });
+    }
+  });
 });
