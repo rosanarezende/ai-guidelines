@@ -4,39 +4,31 @@ Templates de prompts versionados invocados pelo **wizard CLI** (opção "Gerar p
 
 ## Templates atuais
 
-| Slug                                | Variáveis     | Destino primário (onde colar)                                                                 |
-| ----------------------------------- | ------------- | --------------------------------------------------------------------------------------------- |
-| `architecture-end-to-end.prompt.md` | (nenhuma)     | Gerador de imagem direto (Midjourney, DALL-E, Claude com diagram capability)                  |
-| `value-delivered.prompt.md`         | `{{context}}` | IA conversacional com acesso ao repo (Claude com tool use, ChatGPT com browsing, Antigravity) |
+| Slug                                | Variáveis                         | Foco da investigação                                                |
+| ----------------------------------- | --------------------------------- | ------------------------------------------------------------------- |
+| `architecture-end-to-end.prompt.md` | (nenhuma)                         | Estrutura arquitetural do repositório atual (camadas, componentes). |
+| `value-delivered.prompt.md`         | `{{context}}`, `{{localContext}}` | Comparativo antes/depois de um PR ou spec específica.               |
 
-## Fluxos disponíveis
-
-**Direto (arquitetura):**
+## Fluxo (todos os tipos hoje seguem o mesmo padrão: 2 etapas)
 
 ```
-wizard → tipo (a) → wizard imprime o prompt
-       → cole no gerador de imagem
+wizard → escolha o tipo de prompt visual
+       → wizard prepara um briefing dirigido a uma IA conversacional
+         (com acesso ao repositório)
+       → wizard copia o briefing para o clipboard
+       → você cola na sua IA conversacional preferida
+         (Claude com tool use, ChatGPT com browsing, Antigravity,
+          Cursor com o projeto aberto)
+       → a IA investiga o repo e devolve um prompt de imagem JÁ PRONTO
+       → você cola esse prompt no seu gerador de imagem
+         (Midjourney, DALL-E, etc.)
 ```
 
-**Via IA conversacional (valor entregue):**
+Os templates aqui são **briefings dirigidos a IA conversacional**, não prompts diretos para gerador de imagem. A IA é quem investiga e produz o prompt final — o template apenas estrutura o que ela deve fazer e que forma o output deve ter.
 
-```
-wizard → tipo (b) → wizard pergunta contexto (ex.: PR #25)
-       → wizard imprime o prompt
-       → cole na IA conversacional (Claude, ChatGPT, Antigravity)
-       → IA investiga o repo e devolve um prompt de imagem JÁ PRONTO
-       → cole esse prompt no gerador de imagem
-```
+## Modo automático (em breve)
 
-A diferença operacional entre os dois fluxos é apenas **onde a primeira cola vai**. O wizard imprime sempre um prompt único; quem faz o trabalho intermediário (investigação) é a IA conversacional, não o runtime.
-
-**Automático local (em breve):**
-
-```
-wizard → tipo (c) → mensagem "em breve"
-```
-
-Cravado como sub-escopo da candidata `governance-dashboard-and-visual-artifacts` no backlog `Now`: investigação determinística via comandos `git`/`gh` no próprio wizard substituirá o passo manual via IA conversacional.
+Cravado como sub-escopo da candidata [`governance-dashboard-and-visual-artifacts`](../specs/roadmap/backlog.md) no backlog `Now`: investigação determinística local via comandos `git`/`gh` no próprio wizard (sem IA conversacional intermediária). Quando materializar, adicionará variantes `*-auto` ao menu do wizard para fluxo single-stage end-to-end.
 
 ## Convenções
 

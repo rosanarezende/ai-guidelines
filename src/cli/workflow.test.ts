@@ -1,9 +1,9 @@
 import { WorkflowState } from "../domain/workflow/WorkflowState.js";
 import { ClipboardWriter } from "../app/ports/ClipboardWriter.js";
+import { Prompts, SelectOptions, InputOptions } from "../app/ports/Prompts.js";
 import { WorkflowFileSystem } from "../app/ports/WorkflowFileSystem.js";
 import { ListActiveSpecsResult } from "../app/workflow/ListActiveSpecs.js";
 import {
-  InputReader,
   Logger,
   buildContextBundle,
   buildMenu,
@@ -32,17 +32,31 @@ class CollectingLogger implements Logger {
   }
 }
 
-class ScriptedReader implements InputReader {
+/**
+ * Stub de `Prompts` para tests. Cada chamada (`select` ou `input`) consome
+ * a próxima resposta do array. Para `select`, a resposta é o `value` esperado
+ * — se não bater com nenhum choice, lança erro com diagnóstico.
+ */
+class FakePrompts implements Prompts {
   private idx = 0;
-  closed = false;
   constructor(private readonly answers: ReadonlyArray<string>) {}
-  question(): Promise<string> {
+  async select<T = string>(options: SelectOptions<T>): Promise<T> {
     const answer = this.answers[this.idx++];
-    if (answer === undefined) return Promise.resolve("q");
-    return Promise.resolve(answer);
+    if (answer === undefined) {
+      throw new Error(`FakePrompts: select sem resposta restante (message="${options.message}")`);
+    }
+    const choice = options.choices.find((c) => String(c.value) === answer);
+    if (!choice) {
+      throw new Error(
+        `FakePrompts: nenhum choice match para "${answer}" em select "${options.message}". ` +
+          `Choices disponíveis: ${options.choices.map((c) => c.value).join(", ")}`
+      );
+    }
+    return choice.value;
   }
-  close(): void {
-    this.closed = true;
+  async input(_options: InputOptions): Promise<string> {
+    const answer = this.answers[this.idx++];
+    return answer ?? "";
   }
 }
 
@@ -215,27 +229,30 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
   describe("runWorkflow", () => {
     it("DADO wizard opção 1 (continuar spec atual) E usuário escolhe sair no REPL ENTÃO retorna 0 com briefing emitido", async () => {
       const logger = new CollectingLogger();
-      const reader = new ScriptedReader(["1", "q"]);
+      const prompts = new FakePrompts(["continue-current", "q"]);
       const code = await runWorkflow({
         repoRoot: "/repo",
         logger,
-        reader,
+        prompts,
         clipboard: new FakeClipboard(),
         fs: makeFsWithSpec(),
       });
       expect(code).toBe(0);
-      expect(reader.closed).toBe(true);
       expect(logger.lines.join("\n")).toMatch(/Spec: 0023-workflow-runtime/);
     });
 
     it("DADO wizard opção 1 + texto livre digitado ENTÃO gera context bundle e copia para clipboard", async () => {
       const logger = new CollectingLogger();
-      const reader = new ScriptedReader(["1", "acho que estamos overengineering", "q"]);
+      const prompts = new FakePrompts([
+        "continue-current",
+        "acho que estamos overengineering",
+        "q",
+      ]);
       const clip = new FakeClipboard();
       const code = await runWorkflow({
         repoRoot: "/repo",
         logger,
-        reader,
+        prompts,
         clipboard: clip,
         fs: makeFsWithSpec(),
       });
@@ -246,12 +263,12 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
 
     it("DADO wizard opção 1 mas branch fora do padrão ENTÃO retorna 1 com mensagem de erro", async () => {
       const logger = new CollectingLogger();
-      const reader = new ScriptedReader(["1"]);
+      const prompts = new FakePrompts(["continue-current"]);
       const fs = new StubFs(new Map(), new Set(), "main");
       const code = await runWorkflow({
         repoRoot: "/repo",
         logger,
-        reader,
+        prompts,
         clipboard: new FakeClipboard(),
         fs,
       });
@@ -261,27 +278,29 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
 
     it("DADO wizard opção q (sair) no boot ENTÃO retorna 0 sem invocar briefing nem REPL", async () => {
       const logger = new CollectingLogger();
-      const reader = new ScriptedReader(["q"]);
+      const prompts = new FakePrompts(["quit"]);
       const code = await runWorkflow({
         repoRoot: "/repo",
         logger,
-        reader,
+        prompts,
         clipboard: new FakeClipboard(),
         fs: makeFsWithSpec(),
       });
       expect(code).toBe(0);
-      expect(reader.closed).toBe(true);
+      // Quit no wizard NÃO deve disparar briefing nem REPL.
       expect(logger.lines.join("\n")).not.toMatch(/Spec: 0023-workflow-runtime/);
-      expect(logger.lines.join("\n")).toMatch(/Wizard operacional/);
+      // Inquirer renderiza o menu direto no stdout/TTY (não via logger),
+      // então não asseguramos texto "Wizard operacional" no logger — apenas
+      // a ausência de side-effects pós-quit.
     });
 
     it("DADO wizard opção 3 (publish-state help) ENTÃO emite instruções e retorna 0", async () => {
       const logger = new CollectingLogger();
-      const reader = new ScriptedReader(["3"]);
+      const prompts = new FakePrompts(["publish-state-help"]);
       const code = await runWorkflow({
         repoRoot: "/repo",
         logger,
-        reader,
+        prompts,
         clipboard: new FakeClipboard(),
         fs: makeFsWithSpec(),
       });
@@ -289,47 +308,46 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
       expect(logger.lines.join("\n")).toMatch(/publish-state --status=/);
     });
 
-    it("DADO wizard opção desconhecida ENTÃO emite erro e retorna 0 (quit gracioso)", async () => {
-      const logger = new CollectingLogger();
-      const reader = new ScriptedReader(["xyz"]);
-      const code = await runWorkflow({
-        repoRoot: "/repo",
-        logger,
-        reader,
-        clipboard: new FakeClipboard(),
-        fs: makeFsWithSpec(),
-      });
-      expect(code).toBe(0);
-      expect(logger.lines.some((l) => l.includes('Opção desconhecida: "xyz"'))).toBe(true);
-    });
+    // NOTA: o teste antigo "opção desconhecida no wizard" foi removido após migração para
+    // inquirer/select — agora é impossível digitar opção fora da lista (inquirer restringe
+    // navegação às choices declaradas).
 
-    it("DADO wizard opção 6 + tipo 'a' (arquitetura, sem contexto) E template existe ENTÃO imprime prompt com targetLabel de gerador de imagem", async () => {
+    it("DADO wizard opção 6 + tipo 'a' (arquitetura, sem contexto) E template existe ENTÃO copia briefing para clipboard, emite confirmação no logger E NÃO renderiza o prompt", async () => {
       const logger = new CollectingLogger();
-      const reader = new ScriptedReader(["6", "a"]);
+      const prompts = new FakePrompts(["visual-prompt", "architecture"]);
+      const clip = new FakeClipboard();
       const files = new Map<string, string>([
         [
           ".governance/visual-prompts/architecture-end-to-end.prompt.md",
-          "Generate architecture diagram. No variables.\n",
+          "Investigate the current repo and produce a finished image prompt.\n",
         ],
       ]);
       const fs = new StubFs(files, new Set(), "feat/spec-0023-workflow-runtime");
       const code = await runWorkflow({
         repoRoot: "/repo",
         logger,
-        reader,
-        clipboard: new FakeClipboard(),
+        prompts,
+        clipboard: clip,
         fs,
       });
       const out = logger.lines.join("\n");
       expect(code).toBe(0);
-      expect(out).toMatch(/COPIE A PARTIR DAQUI — cola no gerador de imagem/);
-      expect(out).toMatch(/Generate architecture diagram/);
-      expect(out).toMatch(/──── ATÉ AQUI ────/);
+      // Mensagem de copy + instruções aparecem; arquitetura agora vai para IA conversacional
+      // (caminho consistente com value-delivered).
+      expect(out).toMatch(/COMO USAR \(destino: IA conversacional/);
+      expect(out).toMatch(/✓ Prompt copiado para o clipboard/);
+      // O conteúdo do briefing NÃO aparece no terminal (por design — está no clipboard)
+      expect(out).not.toMatch(/Investigate the current repo/);
+      // Mas o conteúdo correto foi para o clipboard
+      expect(clip.copied).toBe(
+        "Investigate the current repo and produce a finished image prompt.\n"
+      );
     });
 
-    it("DADO wizard opção 6 + tipo 'b' (valor) + contexto 'PR #25' ENTÃO substitui {{context}} e imprime prompt com targetLabel de IA conversacional", async () => {
+    it("DADO wizard opção 6 + tipo 'b' (valor) + contexto 'PR #25' ENTÃO substitui {{context}} e envia para clipboard com sucesso", async () => {
       const logger = new CollectingLogger();
-      const reader = new ScriptedReader(["6", "b", "PR #25"]);
+      const prompts = new FakePrompts(["visual-prompt", "value-delivered", "PR #25"]);
+      const clip = new FakeClipboard();
       const files = new Map<string, string>([
         [
           ".governance/visual-prompts/value-delivered.prompt.md",
@@ -340,41 +358,48 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
       const code = await runWorkflow({
         repoRoot: "/repo",
         logger,
-        reader,
-        clipboard: new FakeClipboard(),
+        prompts,
+        clipboard: clip,
         fs,
       });
       const out = logger.lines.join("\n");
       expect(code).toBe(0);
-      expect(out).toMatch(/COPIE A PARTIR DAQUI — cola na IA conversacional/);
-      expect(out).toMatch(/Investigate PR #25 and produce a finished image prompt for PR #25\./);
-      expect(out).not.toMatch(/\{\{context\}\}/);
+      // Instruções de IA conversacional + confirmação de copy
+      expect(out).toMatch(/COMO USAR \(destino: IA conversacional/);
+      expect(out).toMatch(/✓ Prompt copiado para o clipboard/);
+      // Conteúdo enviado ao clipboard tem {{context}} substituído por "PR #25"
+      expect(clip.copied).toBe(
+        "Investigate PR #25 and produce a finished image prompt for PR #25.\n"
+      );
+      expect(clip.copied).not.toMatch(/\{\{context\}\}/);
     });
 
-    it("DADO wizard opção 6 + tipo 'c' (placeholder, em breve) ENTÃO emite mensagem e retorna 0 sem ler templates", async () => {
+    it("DADO wizard opção 6 + tipo 'b' + contexto inválido 'spec' (sem identificador) ENTÃO emite erro narrativo e quit gracioso", async () => {
       const logger = new CollectingLogger();
-      const reader = new ScriptedReader(["6", "c"]);
+      const prompts = new FakePrompts(["visual-prompt", "value-delivered", "spec"]);
       const code = await runWorkflow({
         repoRoot: "/repo",
         logger,
-        reader,
+        prompts,
         clipboard: new FakeClipboard(),
         fs: makeFsWithSpec(),
       });
-      const out = logger.lines.join("\n");
       expect(code).toBe(0);
-      expect(out).toMatch(/Investigação automática local/);
-      expect(out).toMatch(/governance-dashboard-and-visual-artifacts/);
-      expect(out).not.toMatch(/Template/);
+      expect(logger.lines.some((l) => l.includes('Contexto não reconhecido: "spec"'))).toBe(true);
     });
+
+    // NOTA: opção `value-delivered-auto` (placeholder "em breve") removida do
+    // menu — confundia UX expor opção não-funcional. Modo automático fica
+    // como sub-escopo da candidata `governance-dashboard-and-visual-artifacts`
+    // (backlog Now); quando materializar, adicionará variantes ao menu.
 
     it("DADO wizard opção 6 + tipo 'b' SEM contexto fornecido ENTÃO emite erro e quit gracioso", async () => {
       const logger = new CollectingLogger();
-      const reader = new ScriptedReader(["6", "b", ""]);
+      const prompts = new FakePrompts(["visual-prompt", "value-delivered", ""]);
       const code = await runWorkflow({
         repoRoot: "/repo",
         logger,
-        reader,
+        prompts,
         clipboard: new FakeClipboard(),
         fs: makeFsWithSpec(),
       });
@@ -382,27 +407,16 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
       expect(logger.lines.some((l) => l.includes("Contexto vazio"))).toBe(true);
     });
 
-    it("DADO wizard opção 6 + tipo desconhecido ENTÃO emite erro e quit gracioso", async () => {
-      const logger = new CollectingLogger();
-      const reader = new ScriptedReader(["6", "z"]);
-      const code = await runWorkflow({
-        repoRoot: "/repo",
-        logger,
-        reader,
-        clipboard: new FakeClipboard(),
-        fs: makeFsWithSpec(),
-      });
-      expect(code).toBe(0);
-      expect(logger.lines.some((l) => l.includes('Tipo desconhecido: "z"'))).toBe(true);
-    });
+    // NOTA: o teste antigo "tipo desconhecido em visual prompts" foi removido após migração
+    // para inquirer/select — o submenu de tipos restringe escolhas válidas na fonte.
 
     it("DADO wizard opção 6 + tipo válido MAS template ausente no filesystem ENTÃO emite erro e retorna 1", async () => {
       const logger = new CollectingLogger();
-      const reader = new ScriptedReader(["6", "a"]);
+      const prompts = new FakePrompts(["visual-prompt", "architecture"]);
       const code = await runWorkflow({
         repoRoot: "/repo",
         logger,
-        reader,
+        prompts,
         clipboard: new FakeClipboard(),
         fs: makeFsWithSpec(),
       });
@@ -621,11 +635,11 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
 
     it("DADO wizard opção 1 + spec local detectada + índice presente com a mesma spec ENTÃO loga briefing + seção do índice marcando spec corrente com '*'", async () => {
       const logger = new CollectingLogger();
-      const reader = new ScriptedReader(["1", "q"]);
+      const prompts = new FakePrompts(["continue-current", "q"]);
       const code = await runWorkflow({
         repoRoot: "/repo",
         logger,
-        reader,
+        prompts,
         clipboard: new FakeClipboard(),
         fs: makeFsWithSpec(),
         loadActiveSpecsIndex: () => indexWithCurrent,
@@ -639,7 +653,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
 
     it("DADO wizard opção 1 + spec local detectada + índice ausente ENTÃO loga briefing sem seção de índice (silencioso quando branch já orienta)", async () => {
       const logger = new CollectingLogger();
-      const reader = new ScriptedReader(["1", "q"]);
+      const prompts = new FakePrompts(["continue-current", "q"]);
       const absent: ListActiveSpecsResult = {
         indexAvailable: false,
         entries: [],
@@ -648,7 +662,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
       await runWorkflow({
         repoRoot: "/repo",
         logger,
-        reader,
+        prompts,
         clipboard: new FakeClipboard(),
         fs: makeFsWithSpec(),
         loadActiveSpecsIndex: () => absent,
@@ -660,11 +674,11 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
 
     it("DADO wizard opção 1 + branch fora do padrão + índice presente com 1 entry ENTÃO erro + seção do índice exibida + retorna 1", async () => {
       const logger = new CollectingLogger();
-      const reader = new ScriptedReader(["1"]);
+      const prompts = new FakePrompts(["continue-current"]);
       const code = await runWorkflow({
         repoRoot: "/repo",
         logger,
-        reader,
+        prompts,
         clipboard: new FakeClipboard(),
         fs: new StubFs(new Map(), new Set(), "main"),
         loadActiveSpecsIndex: () => indexWithCurrent,
@@ -678,7 +692,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
 
     it("DADO wizard opção 1 + branch fora do padrão + índice ausente ENTÃO erro + heading com aviso de publish-state + retorna 1", async () => {
       const logger = new CollectingLogger();
-      const reader = new ScriptedReader(["1"]);
+      const prompts = new FakePrompts(["continue-current"]);
       const absent: ListActiveSpecsResult = {
         indexAvailable: false,
         entries: [],
@@ -687,7 +701,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
       const code = await runWorkflow({
         repoRoot: "/repo",
         logger,
-        reader,
+        prompts,
         clipboard: new FakeClipboard(),
         fs: new StubFs(new Map(), new Set(), "main"),
         loadActiveSpecsIndex: () => absent,
@@ -700,11 +714,11 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
 
     it("DADO wizard opção 4 (ver specs ativas) ENTÃO loga índice e retorna 0 sem invocar briefing", async () => {
       const logger = new CollectingLogger();
-      const reader = new ScriptedReader(["4"]);
+      const prompts = new FakePrompts(["list-active"]);
       const code = await runWorkflow({
         repoRoot: "/repo",
         logger,
-        reader,
+        prompts,
         clipboard: new FakeClipboard(),
         fs: makeFsWithSpec(),
         loadActiveSpecsIndex: () => indexWithCurrent,
@@ -717,11 +731,11 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
 
     it("DADO wizard opção 5 (diagnosticar drift) com entries sem drift ENTÃO loga 'Nenhum drift' e retorna 0", async () => {
       const logger = new CollectingLogger();
-      const reader = new ScriptedReader(["5"]);
+      const prompts = new FakePrompts(["diagnose-drift"]);
       const code = await runWorkflow({
         repoRoot: "/repo",
         logger,
-        reader,
+        prompts,
         clipboard: new FakeClipboard(),
         fs: makeFsWithSpec(),
         loadActiveSpecsIndex: () => indexWithCurrent,

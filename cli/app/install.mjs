@@ -1,4 +1,3 @@
-import readline from "node:readline";
 import path from "node:path";
 import { spawn } from "node:child_process";
 import { fileExists } from "#fs/file-system";
@@ -40,17 +39,15 @@ export async function runInstall(targetDir, packageManager, { spawnFn = spawn } 
   });
 }
 
-export function promptUser(question, defaultYes = true) {
-  return new Promise((resolve) => {
-    const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-    rl.question(question, (answer) => {
-      rl.close();
-      const normalized = answer.trim().toLowerCase();
-      if (normalized === "") {
-        resolve(defaultYes);
-        return;
-      }
-      resolve(normalized === "s" || normalized === "y");
-    });
-  });
+/**
+ * Confirma instalação de dependências via inquirer (padrão do framework
+ * para input humano — cf. NEXT.md da Spec 0023 § "Convenção operacional —
+ * inquirer em todo input humano").
+ *
+ * Mantém assinatura `promptUser(question, defaultYes)` por
+ * compatibilidade com callers; internamente delega a `@inquirer/prompts.confirm`.
+ */
+export async function promptUser(question, defaultYes = true) {
+  const { confirm } = await import("@inquirer/prompts");
+  return confirm({ message: question, default: defaultYes });
 }

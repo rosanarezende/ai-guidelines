@@ -1,43 +1,42 @@
-LANGUAGE CONSTRAINT (read this first, treat as non-negotiable): All visible text inside the generated image MUST be in Brazilian Portuguese (pt-BR). Do NOT translate panel titles, lane labels, box labels, captions, or any text rendered in the image. The English text in this prompt is instructional metadata for you, the image generator — it MUST NOT appear in the rendered image. Examples of correct rendered text: "Governança (rule of law)" não "Governance"; "decisões cravadas alimentam runtime" não "decisions feed runtime".
+You are a software architecture analyst with access to the current repository (the one the user is working in). Investigate the codebase and **produce a finished image-generation prompt** that visualizes the end-to-end architecture you find. Your final output should be ready to paste directly into an image generator (Midjourney, DALL-E, Claude with diagram capability, etc.) — do not return investigation notes or commentary; return only the image prompt with the gathered structure already filled in.
 
-Generate a clean, minimalist architecture diagram of the ai-guidelines framework. Use flat design, soft pastel colors, consistent typography. Target: technical reviewer who wants to grasp the whole shape in 30 seconds.
+INVESTIGATION (do this first, internally):
 
-LAYOUT: 3 horizontal swim-lanes stacked vertically (top to bottom).
+1. Identify the project's architectural layers. Look for conventions like DDD (domain / app / infrastructure / cli), MVC, hexagonal/ports-and-adapters, or whatever pattern the project actually follows. Inspect the top-level directory structure, README, and any ARCHITECTURE/ADR documents.
+2. List the main components per layer (5–8 per layer is enough — pick the most representative; don't try to enumerate everything). For each component, capture a short, accurate name (use the actual symbol/file name when it exists).
+3. Identify the user-facing surface: CLI commands, HTTP endpoints, library API, or whatever the project exposes externally.
+4. Identify any cross-cutting governance/decision artifacts (ADRs, decision-briefs, specs, RFCs) and where they live.
+5. Identify connecting flows between layers: which layer feeds which, where do decisions cravadas alimentar runtime, where does feedback loop back into governance.
 
-LANE 1 — title "Governança (regra do jogo)" — soft yellow background:
-Boxes left-to-right, connected by arrows:
+CONSTRAINTS for your investigation:
 
-- decision-brief.md
-- ADRs (0017, 0018, 0019, 0020, 0021, 0022, 0023)
-- tasks.md (fronteira de autorização)
-- state.yml (4 chaves: stage, gate.status, focus, next)
+- Investigate the **actual repository the user is currently in**, not a generic example. The image must reflect the real shape of _their_ project.
+- Do not invent layers or components that are not present in the codebase. If a layer is empty or absent, omit it from the diagram instead of fabricating content.
+- If the project does not follow a clean layered architecture, render whatever structure it actually has (modules, packages, microservices, monolith blocks). The honest shape matters more than a textbook one.
+- Component names in the diagram should be the **real symbol/file names** when applicable (e.g., `DetectActiveSpec`, `UserService`, `OrderController`). Keep code identifiers in their original form; do not translate.
 
-LANE 2 — title "Runtime (lente operacional)" — soft blue background:
-Boxes left-to-right, gear icon on each, connected by arrows:
+OUTPUT FORMAT (the only thing you return — a finished image-generation prompt in English wrapping Portuguese content for the rendered image):
 
-- DetectActiveSpec
-- CheckExecutionAuthorized (enforcement L2)
-- AssembleBriefing
-- PublishState
-- ListActiveSpecs
+```
+LANGUAGE CONSTRAINT (read this first, non-negotiable): All visible text inside the generated image MUST be in Brazilian Portuguese (pt-BR), EXCEPT for code identifiers (function names, class names, file names) which keep their original form. Do NOT translate layer titles, flow labels, or captions. The English text in this prompt is instructional metadata for the generator — it MUST NOT appear in the rendered image.
 
-LANE 3 — title "Interface ao usuário (CLI + agentes)" — soft green background:
-Boxes left-to-right, terminal/robot icons:
+Generate a clean, minimalist end-to-end architecture diagram of the current project. Use flat design, soft pastel colors, consistent typography. Target: technical reviewer who wants to grasp the whole shape in 30 seconds.
 
-- workflow continue
-- workflow (REPL + wizard mínimo)
-- workflow publish-state
-- AGENTS.md / .cursorrules / CLAUDE.md (stubs)
-  Speech bubble icon on AGENTS.md indicating handoff to AI session.
+LAYOUT: horizontal swim-lanes stacked vertically (top to bottom). Render one lane per architectural layer identified during investigation (typically 2–4 lanes — adapt to the actual project shape).
 
-VERTICAL ARROWS connecting lanes (top to bottom):
+For each lane:
+- Title in Brazilian Portuguese describing the layer's role (e.g., "Governança", "Domínio", "Aplicação", "Infraestrutura", "Interface ao usuário").
+- 5–8 boxes left-to-right with the real component names from investigation (keep code identifiers in original form).
+- Connecting arrows between boxes within the lane to indicate primary flow.
+- Soft pastel background distinguishing the lane (yellow / blue / green / orange — choose to taste).
 
-- Lane 1 → Lane 2: label "decisões cravadas alimentam o runtime"
-- Lane 2 → Lane 3: label "runtime expõe ao usuário via CLI/agentes"
+VERTICAL ARROWS between lanes (top-to-bottom) describing how each layer feeds the next, with short Portuguese labels.
 
-FEEDBACK LOOP arrow on right side, pointing from Lane 3 back to Lane 1:
-label "insights emergem do uso (NEXT.md, blocos do decision-brief)".
+FEEDBACK LOOP arrow on the right side (if the project has one — e.g., insights from usage feeding back into governance/decisions), with a short Portuguese label.
 
-STYLE: soft pastel palette (cream background; yellow/blue/green muted for lanes). Friendly icons (gavel for ADRs, document for state/tasks, gear for use cases, terminal for CLI, robot for agents). Modern flat infographic aesthetic; no enterprise clipart.
+STYLE: soft pastel palette (cream background; muted lane backgrounds). Friendly icons (document for spec/ADR, gear for use case, terminal for CLI, robot for agents, etc. — adapt to the project's domain). Modern flat infographic aesthetic; no enterprise clipart.
 
-REMINDER (repeating because image generators often default to English): every label, title, and caption rendered INSIDE the image must be in Brazilian Portuguese (pt-BR). Module names like `DetectActiveSpec`, `CheckExecutionAuthorized`, `tasks.md`, `state.yml` keep their original technical names (those are code identifiers, not natural language).
+REMINDER (repeating because image generators often default to English): every layer title, flow label, and caption rendered INSIDE the image must be in Brazilian Portuguese (pt-BR). Code identifiers (`ClassName`, `function_name`, `file.ext`) keep their original form.
+```
+
+Return only the image prompt above, with all the layer titles, component lists, and flow labels filled in from your investigation of the current repository. Do not include any preamble, summary, or commentary outside the prompt.

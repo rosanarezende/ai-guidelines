@@ -67,6 +67,7 @@
     "prepack": "yarn build:all"
   },
   "devDependencies": {
+    "@inquirer/testing": "^3.3.6",
     "@types/jest": "^30.0.0",
     "@types/node": "^25.6.2",
     "@types/yaml": "^1.9.7",

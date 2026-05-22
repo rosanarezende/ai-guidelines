@@ -11,7 +11,6 @@
  *   - texto livre vira **context bundle** copy-paste para sessão IA;
  *   - **não** chamamos LLM internamente; AI-as-Channel preservado.
  */
-import * as readline from "node:readline";
 import { DetectActiveSpec } from "../app/workflow/DetectActiveSpec.js";
 import { ReadWorkflowState } from "../app/workflow/ReadWorkflowState.js";
 import { CheckExecutionAuthorized } from "../app/workflow/CheckExecutionAuthorized.js";
@@ -41,7 +40,9 @@ import { SpecLocation } from "../domain/workflow/SpecLocation.js";
 import { WorkflowState } from "../domain/workflow/WorkflowState.js";
 import { NodeWorkflowFileSystem } from "../infrastructure/filesystem/NodeWorkflowFileSystem.js";
 import { NodeClipboard } from "../infrastructure/io/NodeClipboard.js";
+import { InquirerPrompts } from "../infrastructure/io/InquirerPrompts.js";
 import { ClipboardWriter } from "../app/ports/ClipboardWriter.js";
+import { Prompts } from "../app/ports/Prompts.js";
 import { WorkflowFileSystem } from "../app/ports/WorkflowFileSystem.js";
 import { parseContextTarget } from "./visual-prompts/parseContextTarget.js";
 import { collectLocalContext } from "./visual-prompts/collectLocalContext.js";
@@ -54,67 +55,15 @@ export interface Logger {
   error(msg: string): void;
 }
 
-export interface InputReader {
-  question(prompt: string): Promise<string>;
-  close(): void;
-}
-
 const stdoutLogger: Logger = {
   info: (msg) => process.stdout.write(`${msg}\n`),
   error: (msg) => process.stderr.write(`${msg}\n`),
 };
 
-class StdinReader implements InputReader {
-  private rl: readline.Interface | null = null;
-  private lines: string[] = [];
-  private isClosed = false;
-  private readAllPromise: Promise<void> | null = null;
-
-  constructor() {
-    if (process.stdin.isTTY) {
-      this.rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-      this.rl.on("close", () => {
-        this.isClosed = true;
-      });
-    } else {
-      let data = "";
-      process.stdin.resume();
-      this.readAllPromise = new Promise<void>((resolve) => {
-        process.stdin.on("data", (chunk) => {
-          data += chunk.toString();
-        });
-        process.stdin.on("end", () => {
-          this.lines = data.split(/\r?\n/);
-          if (this.lines.length > 0 && this.lines[this.lines.length - 1] === "") {
-            this.lines.pop();
-          }
-          resolve();
-        });
-      });
-    }
-  }
-
-  async question(prompt: string): Promise<string> {
-    if (this.rl) {
-      if (this.isClosed) return "";
-      return new Promise((resolve) => this.rl!.question(prompt, resolve));
-    }
-
-    if (this.readAllPromise) {
-      await this.readAllPromise;
-    }
-    return this.lines.shift() ?? "";
-  }
-
-  close(): void {
-    this.rl?.close();
-  }
-}
-
 export interface RunOptions {
   readonly repoRoot: string;
   readonly logger?: Logger;
-  readonly reader?: InputReader;
+  readonly prompts?: Prompts;
   readonly clipboard?: ClipboardWriter;
   readonly fs?: WorkflowFileSystem;
   /**
@@ -324,7 +273,7 @@ export function classifyInput(line: string): CommandKind {
 
 async function runReplOnce(
   ctx: ResolvedContext,
-  reader: InputReader,
+  prompts: Prompts,
   logger: Logger,
   clipboard: ClipboardWriter
 ): Promise<"continue" | "quit"> {
@@ -336,7 +285,7 @@ async function runReplOnce(
   }
   logger.info(`  ou digite uma pergunta em texto livre para gerar context bundle.`);
   logger.info("");
-  const line = await reader.question("workflow> ");
+  const line = await prompts.input({ message: "workflow>" });
   const cmd = classifyInput(line);
 
   if (cmd.kind === "menu") {
@@ -425,164 +374,172 @@ export type WizardChoice =
   | { kind: "diagnose-drift" }
   | {
       kind: "visual-prompt";
-      mode: VisualPromptMode;
-      slug?: string;
-      targetLabel?: string;
+      slug: string;
+      targetLabel: string;
+      instructions: ReadonlyArray<string>;
       context: string;
-      placeholderMessage?: string;
     }
   | { kind: "quit" };
-
-const WIZARD_OPTIONS: ReadonlyArray<{ key: string; label: string }> = [
-  { key: "1", label: "Continuar spec atual (briefing + REPL)" },
-  { key: "2", label: "Continuar outra spec (por slug ou id)" },
-  { key: "3", label: "Publicar estado (instruções)" },
-  { key: "4", label: "Ver specs ativas (índice público)" },
-  { key: "5", label: "Diagnosticar drift do índice" },
-  { key: "6", label: "Gerar prompt visual (para gerador de imagem externo)" },
-  { key: "q", label: "Sair" },
-];
 
 /**
  * Templates de prompts visuais disponíveis em `.governance/visual-prompts/`.
  *
- * - `single-stage`: 1 prompt único, cola direto no gerador de imagem.
- * - `two-stage`: 2 prompts consecutivos — etapa 1 vai para IA conversacional
- *   (investigação); etapa 2 vai para gerador de imagem (humano cola síntese
- *   da etapa 1 no `{{summary}}` antes de usar).
+ * - `prompt`: wizard imprime 1 prompt; `targetLabel` descreve onde colar
+ *   (gerador de imagem direto, ou IA conversacional que devolve prompt pronto).
  * - `placeholder`: opção registrada no menu mas ainda não implementada
  *   (sinaliza "em breve" e referencia candidata no backlog).
  *
  * Variáveis `{{nome}}` são substituídas pelo wizard com base nos inputs do
- * usuário; variáveis não fornecidas (ex.: `{{summary}}`) permanecem literais
- * no output e o humano preenche antes de usar.
+ * usuário antes de imprimir o prompt.
  */
-type VisualPromptMode = "prompt" | "placeholder";
+type VisualPromptMode = "prompt";
+type VisualPromptValue = "architecture" | "value-delivered";
 
 interface VisualPromptOption {
-  readonly key: string;
+  readonly value: VisualPromptValue;
   readonly label: string;
   readonly mode: VisualPromptMode;
   /** Slug do arquivo `.prompt.md` em `.governance/visual-prompts/`. */
-  readonly slug?: string;
-  readonly needsContext?: boolean;
-  /** Frase indicando onde colar; renderizada no header do delimitador. */
-  readonly targetLabel?: string;
-  /** Mensagem exibida quando `mode === "placeholder"`. */
-  readonly placeholderMessage?: string;
+  readonly slug: string;
+  readonly needsContext: boolean;
+  /** Destino curto exibido no header (ex.: "IA conversacional..."). */
+  readonly targetLabel: string;
+  /** Linhas de instrução exibidas antes do prompt (numeradas). */
+  readonly instructions: ReadonlyArray<string>;
 }
 
-const VISUAL_PROMPT_TEMPLATES: ReadonlyArray<VisualPromptOption> = [
+/**
+ * Todos os fluxos de prompt visual hoje são **two-stage**: o prompt gerado pelo
+ * wizard vai para uma IA conversacional com acesso ao repo (Claude tool use,
+ * ChatGPT browsing, Antigravity, etc.), que investiga e devolve o prompt de
+ * imagem JÁ PRONTO para colar no gerador (Midjourney, DALL-E, etc.).
+ *
+ * Modo automático determinístico (investigação local via `git`/`gh` sem IA
+ * conversacional intermediária) fica como sub-escopo da candidata
+ * `governance-dashboard-and-visual-artifacts` no backlog `Now` — quando
+ * materializar, adicionará opções `*-auto` aqui.
+ */
+const VISUAL_PROMPT_OPTIONS: ReadonlyArray<VisualPromptOption> = [
   {
-    key: "a",
-    label: "Arquitetura ponta-a-ponta (cola direto no gerador de imagem)",
+    value: "architecture",
+    label: "Arquitetura do framework (visão geral do projeto atual)",
     mode: "prompt",
     slug: "architecture-end-to-end",
     needsContext: false,
-    targetLabel: "cola no gerador de imagem (Midjourney, DALL-E, etc.)",
+    targetLabel: "IA conversacional com acesso ao repositório",
+    instructions: [
+      "1. Abra uma IA conversacional COM ACESSO AO REPO (Claude com tool use,",
+      "   ChatGPT com browsing, Antigravity, Cursor com o projeto aberto).",
+      "2. Cole o conteúdo do clipboard (Ctrl+V / Cmd+V) — o prompt já foi copiado",
+      "   automaticamente. A IA vai investigar a estrutura do repositório atual.",
+      "3. A IA devolverá um prompt de imagem JÁ PRONTO — copie esse output e cole",
+      "   no seu gerador de imagem (Midjourney, DALL-E, etc.).",
+    ],
   },
   {
-    key: "b",
-    label:
-      "Valor entregue — via IA conversacional (Claude, ChatGPT, Antigravity); ela investiga + devolve prompt de imagem pronto",
+    value: "value-delivered",
+    label: "Valor entregue por um PR ou spec (comparativo antes/depois)",
     mode: "prompt",
     slug: "value-delivered",
     needsContext: true,
-    targetLabel:
-      "cola na IA conversacional — ela vai investigar o repo e devolver um prompt de imagem JÁ PRONTO para colar no gerador",
-  },
-  {
-    key: "c",
-    label: "Valor entregue — investigação automática local [em breve, vide candidata no backlog]",
-    mode: "placeholder",
-    placeholderMessage:
-      "Investigação automática local (via git/gh) será implementada como sub-escopo da candidata `governance-dashboard-and-visual-artifacts` no backlog Now. Por enquanto, use a opção [b].",
+    targetLabel: "IA conversacional com acesso ao repositório",
+    instructions: [
+      "1. Abra uma IA conversacional COM ACESSO AO REPO (Claude com tool use,",
+      "   ChatGPT com browsing, Antigravity, Cursor com o projeto aberto).",
+      "2. Cole o conteúdo do clipboard (Ctrl+V / Cmd+V) — o prompt já foi copiado",
+      "   automaticamente. Se o PR/spec tiver descrição esparsa, complemente com",
+      "   o contexto que faltar (a IA não pode adivinhar o que não está nos artifacts).",
+      "3. A IA devolverá um prompt de imagem JÁ PRONTO — copie esse output e cole",
+      "   no seu gerador de imagem (Midjourney, DALL-E, etc.).",
+    ],
   },
 ];
 
-export function renderWizardMenu(): ReadonlyArray<string> {
-  const lines: string[] = [];
-  lines.push("");
-  lines.push("─── Wizard operacional (workflow runtime) ───");
-  lines.push("");
-  for (const opt of WIZARD_OPTIONS) {
-    lines.push(`  [${opt.key}] ${opt.label}`);
-  }
-  lines.push("");
-  return lines;
-}
+type WizardMenuValue =
+  | "continue-current"
+  | "continue-other"
+  | "publish-state-help"
+  | "list-active"
+  | "diagnose-drift"
+  | "visual-prompt"
+  | "quit";
 
-async function runWizard(reader: InputReader, logger: Logger): Promise<WizardChoice> {
-  for (const line of renderWizardMenu()) logger.info(line);
-  const answer = (await reader.question("Escolha: ")).trim();
-  switch (answer) {
-    case "1":
+const WIZARD_MENU: ReadonlyArray<{ name: string; value: WizardMenuValue }> = [
+  { name: "Continuar spec atual (briefing + REPL)", value: "continue-current" },
+  { name: "Continuar outra spec (por slug ou id)", value: "continue-other" },
+  { name: "Publicar estado (instruções)", value: "publish-state-help" },
+  { name: "Ver specs ativas (índice público)", value: "list-active" },
+  { name: "Diagnosticar drift do índice", value: "diagnose-drift" },
+  { name: "Gerar prompt visual (para gerador de imagem externo)", value: "visual-prompt" },
+  { name: "Sair", value: "quit" },
+];
+
+async function runWizard(prompts: Prompts, logger: Logger): Promise<WizardChoice> {
+  const choice = await prompts.select<WizardMenuValue>({
+    message: "Wizard operacional (workflow runtime)",
+    choices: WIZARD_MENU.map((o) => ({ name: o.name, value: o.value })),
+  });
+  switch (choice) {
+    case "continue-current":
       return { kind: "continue-current" };
-    case "2": {
-      const identifier = (await reader.question("Slug ou id da spec: ")).trim();
+    case "continue-other": {
+      const identifier = (await prompts.input({ message: "Slug ou id da spec" })).trim();
       if (identifier === "") {
         logger.error("Identificador vazio — voltando ao menu.");
         return { kind: "quit" };
       }
       return { kind: "continue-other", identifier };
     }
-    case "3":
+    case "publish-state-help":
       return { kind: "publish-state-help" };
-    case "4":
+    case "list-active":
       return { kind: "list-active" };
-    case "5":
+    case "diagnose-drift":
       return { kind: "diagnose-drift" };
-    case "6":
-      return runVisualPromptSubWizard(reader, logger);
-    case "q":
-    case "":
-      return { kind: "quit" };
-    default:
-      logger.error(`Opção desconhecida: "${answer}".`);
+    case "visual-prompt":
+      return runVisualPromptSubWizard(prompts, logger);
+    case "quit":
       return { kind: "quit" };
   }
 }
 
-async function runVisualPromptSubWizard(
-  reader: InputReader,
-  logger: Logger
-): Promise<WizardChoice> {
-  logger.info("");
-  logger.info("Que tipo de imagem?");
-  for (const tpl of VISUAL_PROMPT_TEMPLATES) {
-    logger.info(`  [${tpl.key}] ${tpl.label}`);
-  }
-  logger.info("");
-  const typeAnswer = (await reader.question("Tipo: ")).trim();
-  const template = VISUAL_PROMPT_TEMPLATES.find((t) => t.key === typeAnswer);
+async function runVisualPromptSubWizard(prompts: Prompts, logger: Logger): Promise<WizardChoice> {
+  const value = await prompts.select<VisualPromptValue>({
+    message:
+      "Que tipo de prompt visual? (todos os tipos hoje seguem fluxo em 2 etapas — você cola o prompt em uma IA conversacional com acesso ao repo, ela devolve um prompt de imagem pronto)",
+    choices: VISUAL_PROMPT_OPTIONS.map((o) => ({ name: o.label, value: o.value })),
+  });
+  const template = VISUAL_PROMPT_OPTIONS.find((t) => t.value === value);
   if (!template) {
-    logger.error(`Tipo desconhecido: "${typeAnswer}".`);
+    logger.error(`Tipo desconhecido: "${value}".`);
     return { kind: "quit" };
-  }
-
-  if (template.mode === "placeholder") {
-    return {
-      kind: "visual-prompt",
-      mode: "placeholder",
-      context: "",
-      placeholderMessage: template.placeholderMessage,
-    };
   }
 
   let context = "";
   if (template.needsContext) {
-    context = (await reader.question("Contexto (ex.: PR #25, spec 0023): ")).trim();
+    context = (await prompts.input({ message: "Contexto (ex.: PR #25, spec 0023)" })).trim();
     if (context === "") {
       logger.error("Contexto vazio — voltando ao menu.");
+      return { kind: "quit" };
+    }
+    // Valida formato — parseContextTarget aceita "PR #N", "pr N", "spec <id>"
+    // e o id numérico bruto (ex.: "0023"). Inputs ambíguos como "spec" sem
+    // identificador caem em "unknown" — rejeita aqui antes de gerar prompt
+    // inútil para a IA conversacional.
+    const target = parseContextTarget(context);
+    if (target.kind === "unknown") {
+      logger.error(
+        `Contexto não reconhecido: "${context}". Exemplos válidos: "PR #25", "pr 25", "spec 0023", "0023".`
+      );
       return { kind: "quit" };
     }
   }
 
   return {
     kind: "visual-prompt",
-    mode: template.mode,
     slug: template.slug,
     targetLabel: template.targetLabel,
+    instructions: template.instructions,
     context,
   };
 }
@@ -592,24 +549,22 @@ async function runVisualPromptSubWizard(
 export async function runWorkflow(options: RunOptions): Promise<number> {
   const logger = options.logger ?? stdoutLogger;
   const fs = options.fs ?? new NodeWorkflowFileSystem(options.repoRoot);
-  const reader = options.reader ?? new StdinReader();
+  const prompts = options.prompts ?? new InquirerPrompts();
   const clipboard = options.clipboard ?? new NodeClipboard();
   const loadIndex = options.loadActiveSpecsIndex ?? defaultLoadActiveSpecsIndex(fs);
 
   // Wizard CLI operacional mínimo (cf. [DEC-0023-B06]).
-  // Apresenta 5 opções fixas declarativas no boot do REPL; cada opção
-  // mapeia 1:1 para um comando existente.
+  // Apresenta opções fixas declarativas no boot; cada opção mapeia 1:1
+  // para um comando existente.
   let choice: WizardChoice;
   try {
-    choice = await runWizard(reader, logger);
+    choice = await runWizard(prompts, logger);
   } catch (err) {
     logger.error(`Wizard interrompido: ${err instanceof Error ? err.message : String(err)}`);
-    reader.close();
     return 1;
   }
 
   if (choice.kind === "quit") {
-    reader.close();
     return 0;
   }
 
@@ -617,7 +572,6 @@ export async function runWorkflow(options: RunOptions): Promise<number> {
     for (const line of renderActiveSpecsIndex(loadIndex(), undefined, { showWhenAbsent: true })) {
       logger.info(line);
     }
-    reader.close();
     return 0;
   }
 
@@ -628,7 +582,6 @@ export async function runWorkflow(options: RunOptions): Promise<number> {
         "Índice operacional público (.governance/runtime/active-specs.yml) não encontrado."
       );
       logger.info("Dica: rode `yarn guidelines workflow publish-state` na branch da spec.");
-      reader.close();
       return 0;
     }
     const driftCount = result.entries.filter((e) => !e.specPathExists).length;
@@ -644,7 +597,6 @@ export async function runWorkflow(options: RunOptions): Promise<number> {
         }
       }
     }
-    reader.close();
     return 0;
   }
 
@@ -654,44 +606,60 @@ export async function runWorkflow(options: RunOptions): Promise<number> {
     );
     logger.info("Estado da spec corrente é projetado de state.yml para active-specs.yml.");
     logger.info("Detalhes: .governance/specs/0023-workflow-runtime/decision-brief.md § Bloco G.");
-    reader.close();
     return 0;
   }
 
   if (choice.kind === "visual-prompt") {
-    if (choice.mode === "placeholder") {
-      logger.info("");
-      logger.info(choice.placeholderMessage ?? "Em breve.");
-      logger.info("");
-      reader.close();
-      return 0;
-    }
-
-    // mode === "prompt": imprime 1 prompt; targetLabel descreve onde colar.
-    const slug = choice.slug ?? "";
     let localContext = "";
     if (choice.context) {
       const target = parseContextTarget(choice.context);
       localContext = collectLocalContext(target, { repoRoot: options.repoRoot, fs });
     }
-    const rendered = renderVisualPrompt(fs, slug, { context: choice.context, localContext });
+    const rendered = renderVisualPrompt(fs, choice.slug, {
+      context: choice.context,
+      localContext,
+    });
     if (rendered === null) {
-      logger.error(`Template "${slug}" não encontrado em .governance/visual-prompts/.`);
-      reader.close();
+      logger.error(`Template "${choice.slug}" não encontrado em .governance/visual-prompts/.`);
       return 1;
     }
-    const target = choice.targetLabel ?? "cola no destino apropriado";
+    const target = choice.targetLabel;
+
+    // Tenta copiar automaticamente para o clipboard — elimina o passo
+    // "selecionar manualmente entre os delimitadores + Ctrl+C".
+    const copied = await clipboard.copy(rendered);
+
     logger.info("");
-    logger.info(`──── COPIE A PARTIR DAQUI — ${target} ────`);
-    logger.info(rendered.trimEnd());
-    logger.info("──── ATÉ AQUI ────");
-    logger.info("");
-    reader.close();
+    if (choice.instructions.length > 0) {
+      logger.info(`COMO USAR (destino: ${target}):`);
+      for (const line of choice.instructions) {
+        logger.info(`  ${line}`);
+      }
+      logger.info("");
+    }
+
+    if (copied) {
+      // Por design não imprimimos o prompt completo no terminal quando o
+      // clipboard funcionou — o conteúdo já está disponível para colar.
+      // Mostrar só polui o terminal (prompts são grandes). Se você precisa
+      // ver o conteúdo, cole em qualquer editor após o copy.
+      logger.info(`✓ Prompt copiado para o clipboard (${rendered.length} caracteres).`);
+      logger.info("");
+    } else {
+      // Fallback: clipboard indisponível — mostra o prompt entre delimitadores
+      // para copy manual. Único caso em que renderizamos o conteúdo no logger.
+      logger.info(
+        "(clipboard indisponível — copie manualmente o texto abaixo entre os delimitadores)"
+      );
+      logger.info(`──── PROMPT (destino: ${target}) ────`);
+      logger.info(rendered.trimEnd());
+      logger.info("──── FIM ────");
+      logger.info("");
+    }
     return 0;
   }
 
   if (choice.kind === "continue-other") {
-    reader.close();
     return runContinue(options, choice.identifier);
   }
 
@@ -703,7 +671,6 @@ export async function runWorkflow(options: RunOptions): Promise<number> {
     for (const line of renderActiveSpecsIndex(loadIndex(), undefined, { showWhenAbsent: true })) {
       logger.info(line);
     }
-    reader.close();
     return 1;
   }
 
@@ -713,15 +680,11 @@ export async function runWorkflow(options: RunOptions): Promise<number> {
     logger.info(line);
   }
 
-  try {
-    let outcome: "continue" | "quit" = "continue";
-    while (outcome === "continue") {
-      outcome = await runReplOnce(ctx, reader, logger, clipboard);
-    }
-    return 0;
-  } finally {
-    reader.close();
+  let outcome: "continue" | "quit" = "continue";
+  while (outcome === "continue") {
+    outcome = await runReplOnce(ctx, prompts, logger, clipboard);
   }
+  return 0;
 }
 
 export async function runContinue(options: RunOptions, identifier?: string): Promise<number> {

@@ -6,7 +6,8 @@ import * as path from "node:path";
 import { NodeWorkflowFileSystem } from "../infrastructure/filesystem/NodeWorkflowFileSystem.js";
 import { parseActiveSpecs } from "../infrastructure/yaml/activeSpecsSerializer.js";
 import { ClipboardWriter } from "../app/ports/ClipboardWriter.js";
-import { InputReader, Logger, runContinue, runPublishState, runWorkflow } from "./workflow.js";
+import { Prompts, SelectOptions, InputOptions } from "../app/ports/Prompts.js";
+import { Logger, runContinue, runPublishState, runWorkflow } from "./workflow.js";
 
 /**
  * Integration tests — loop operacional ponta-a-ponta com filesystem + git
@@ -36,16 +37,24 @@ class CollectingLogger implements Logger {
   }
 }
 
-class ScriptedReader implements InputReader {
+class FakePrompts implements Prompts {
   private idx = 0;
-  closed = false;
   constructor(private readonly answers: ReadonlyArray<string>) {}
-  question(): Promise<string> {
+  async select<T = string>(options: SelectOptions<T>): Promise<T> {
     const answer = this.answers[this.idx++];
-    return Promise.resolve(answer ?? "q");
+    if (answer === undefined) {
+      throw new Error(`FakePrompts: select sem resposta restante (message="${options.message}")`);
+    }
+    const choice = options.choices.find((c) => String(c.value) === answer);
+    if (!choice) {
+      throw new Error(
+        `FakePrompts: nenhum choice match para "${answer}" em select "${options.message}".`
+      );
+    }
+    return choice.value;
   }
-  close(): void {
-    this.closed = true;
+  async input(_options: InputOptions): Promise<string> {
+    return this.answers[this.idx++] ?? "";
   }
 }
 
@@ -162,12 +171,12 @@ active_specs:
 
       // execute — wizard opção 1 (continuar spec atual) + quit no REPL
       const logger = new CollectingLogger();
-      const reader = new ScriptedReader(["1", "q"]);
+      const prompts = new FakePrompts(["continue-current", "q"]);
       const fs = new NodeWorkflowFileSystem(tempDir);
       const code = await runWorkflow({
         repoRoot: tempDir,
         logger,
-        reader,
+        prompts,
         clipboard: new NullClipboard(),
         fs,
       });

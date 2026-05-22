@@ -58,7 +58,16 @@ export class NodeClipboard implements ClipboardWriter {
 
     return new Promise((resolve) => {
       try {
-        const proc = spawn(this.cmd!.command, this.cmd!.args.slice());
+        // `detached: true` + `unref()` + `stdio.pipe-ignore-ignore` para
+        // não bloquear o event loop do Node esperando o subprocess morrer.
+        // `wl-copy` e `xclip` permanecem em background como daemons do
+        // clipboard por design — não vamos forçá-los a morrer. Após
+        // `stdin.end()` o conteúdo já foi transferido; não esperamos o
+        // evento `close`.
+        const proc = spawn(this.cmd!.command, this.cmd!.args.slice(), {
+          detached: true,
+          stdio: ["pipe", "ignore", "ignore"],
+        });
         let settled = false;
         const settle = (value: boolean) => {
           if (!settled) {
@@ -67,10 +76,17 @@ export class NodeClipboard implements ClipboardWriter {
           }
         };
         proc.on("error", () => settle(false));
-        proc.on("close", (code) => settle(code === 0));
         proc.stdin.on("error", () => settle(false));
-        proc.stdin.write(text);
-        proc.stdin.end();
+        proc.stdin.write(text, (err) => {
+          if (err) {
+            settle(false);
+            return;
+          }
+          proc.stdin.end(() => {
+            proc.unref();
+            settle(true);
+          });
+        });
       } catch {
         resolve(false);
       }
