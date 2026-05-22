@@ -187,11 +187,11 @@
 
 > Origem: [`plan.md § Componente [F]`](./plan.md) + Bloco B já cravado. Pode ser trivialmente pequeno — está OK.
 
-- [ ] **1.G.1** Reler Bloco B do `decision-brief.md`; verificar se decomposição de DX em sub-bloco [1.H] continua válida sob enforcement de PR4.
-- [ ] **1.G.2** Se necessário, abrir Bloco F no decision-brief com ajustes pontuais (não-obrigatório).
-- [ ] **1.G.N** Pipeline verde (mudanças mínimas; apenas tasks.md / plan.md / state.yml).
-- [ ] **1.G.[REVIEW]** **[MANDATÓRIO]** Gate 3 (planning approval) sobre o sub-bloco [1.H] — primeiro Gate 3 estrito da história da spec.
-- [ ] **1.G.[COMMIT]** `docs(spec-0023): planning gate 3 fechado — PR6-DX-execution autorizada`.
+- [x] **1.G.1** Reler Bloco B do `decision-brief.md`; verificar se decomposição de DX em sub-bloco [1.H] continua válida sob enforcement de PR4. Resultado: pull-forward de docs (1.H.6/1.H.7/1.H.8) cravado em commit `1f61f96` do PR4.
+- [x] **1.G.2** Bloco F do decision-brief revisitado em S5 do PR5 (POC visual neutra): F01–F04 Resolved (B+B+A+A); F05 Deferred com critério estrutural vinculado à abertura de `handoff-as-first-class`. Cross-link na candidata registrado.
+- [x] **1.G.N** Pipeline verde durante toda a esteira S1–S5 (544 tests passing, living-docs sync).
+- [ ] **1.G.[REVIEW]** **[MANDATÓRIO]** Gate 3 (planning approval) sobre o sub-bloco [1.H] — primeiro Gate 3 estrito da história da spec. Absorvido no escopo combinado deste PR5 (cf. correção arquitetural cravada em 2026-05-22: PR governance/thinking puro durante implementação ativa é anti-pattern; [1.G] + [1.H] passam a coexistir no mesmo PR).
+- [ ] **1.G.[COMMIT]** Commit final agregador fechando [1.G] + [1.H] simultaneamente.
 
 ### Sub-bloco [1.H] — DX Execution (clipboard + warning + integration + examples + help + docs + README + CHANGELOG) `(deterministic)` — PR6-DX-execution (próximo PR; aguarda PR5)
 
