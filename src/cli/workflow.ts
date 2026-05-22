@@ -40,6 +40,8 @@ import {
 import { SpecLocation } from "../domain/workflow/SpecLocation.js";
 import { WorkflowState } from "../domain/workflow/WorkflowState.js";
 import { NodeWorkflowFileSystem } from "../infrastructure/filesystem/NodeWorkflowFileSystem.js";
+import { NodeClipboard } from "../infrastructure/io/NodeClipboard.js";
+import { ClipboardWriter } from "../app/ports/ClipboardWriter.js";
 import { WorkflowFileSystem } from "../app/ports/WorkflowFileSystem.js";
 
 export interface Logger {
@@ -50,10 +52,6 @@ export interface Logger {
 export interface InputReader {
   question(prompt: string): Promise<string>;
   close(): void;
-}
-
-export interface ClipboardWriter {
-  copy(text: string): Promise<boolean>;
 }
 
 const stdoutLogger: Logger = {
@@ -71,12 +69,6 @@ class StdinReader implements InputReader {
   }
   close(): void {
     this.rl.close();
-  }
-}
-
-class NoopClipboard implements ClipboardWriter {
-  async copy(): Promise<boolean> {
-    return false;
   }
 }
 
@@ -379,7 +371,7 @@ export async function runWorkflow(options: RunOptions): Promise<number> {
   const logger = options.logger ?? stdoutLogger;
   const fs = options.fs ?? new NodeWorkflowFileSystem(options.repoRoot);
   const reader = options.reader ?? new StdinReader();
-  const clipboard = options.clipboard ?? new NoopClipboard();
+  const clipboard = options.clipboard ?? new NodeClipboard();
   const loadIndex = options.loadActiveSpecsIndex ?? defaultLoadActiveSpecsIndex(fs);
 
   const ctx = resolveContext(fs, logger);

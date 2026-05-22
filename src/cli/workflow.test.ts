@@ -1,8 +1,8 @@
 import { WorkflowState } from "../domain/workflow/WorkflowState.js";
+import { ClipboardWriter } from "../app/ports/ClipboardWriter.js";
 import { WorkflowFileSystem } from "../app/ports/WorkflowFileSystem.js";
 import { ListActiveSpecsResult } from "../app/workflow/ListActiveSpecs.js";
 import {
-  ClipboardWriter,
   InputReader,
   Logger,
   buildContextBundle,

@@ -5,14 +5,8 @@ import * as path from "node:path";
 
 import { NodeWorkflowFileSystem } from "../infrastructure/filesystem/NodeWorkflowFileSystem.js";
 import { parseActiveSpecs } from "../infrastructure/yaml/activeSpecsSerializer.js";
-import {
-  ClipboardWriter,
-  InputReader,
-  Logger,
-  runContinue,
-  runPublishState,
-  runWorkflow,
-} from "./workflow.js";
+import { ClipboardWriter } from "../app/ports/ClipboardWriter.js";
+import { InputReader, Logger, runContinue, runPublishState, runWorkflow } from "./workflow.js";
 
 /**
  * Integration tests — loop operacional ponta-a-ponta com filesystem + git
