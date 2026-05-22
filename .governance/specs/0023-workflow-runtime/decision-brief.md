@@ -25,6 +25,7 @@
 | `[DEC-0023-B03]` | B     | Resolved |
 | `[DEC-0023-B04]` | B     | Resolved |
 | `[DEC-0023-B05]` | B     | Resolved |
+| `[DEC-0023-B06]` | B     | Resolved |
 | `[DEC-0023-C01]` | C     | Resolved |
 | `[DEC-0023-D01]` | D     | Resolved |
 | `[DEC-0023-D02]` | D     | Resolved |
@@ -317,6 +318,45 @@
 - **Escolha:** [ ] A | [x] B | [ ] C
 - **Justificativa:** Consistência estrutural + previsibilidade > economizar um arquivo. O fato de a owner ter perguntado "isso veio do boilerplate?" prova que a ausência de `plan.md` criou ambiguidade operacional. Disciplina explícita: `plan.md` permanece pequeno, operacional, incremental — sem virar ceremony. Critério de revisão de tamanho: se passar de ~150 linhas sem deduplicação com `spec.md`, reavaliar.
 - **Data / Owner:** 2026-05-19 / @rosanarezende
+
+---
+
+### [DEC-0023-B06] Wizard CLI operacional mínimo (promoção de insight em incubação)
+
+**Pergunta:** O insight `Wizard operacional mínimo` (em `NEXT.md § DX e Narrativa Operacional`) deve ser materializado no PR5 da Spec 0023, ou continuar em incubação aguardando outras evidências?
+
+**Contexto:**
+
+- Insight cravado em `NEXT.md` durante PR3 (2026-05-21): conforme o runtime ganha superfície (`workflow`, `continue`, `continue <id>`, `workflow publish-state --status=...`), a CLI textual cresce em carga cognitiva.
+- Critério original de promoção: "≥ 2 reviewers/contribuidores reportarem atrito concreto OU primeiro consumidor externo do framework chegar e reportar fricção".
+- Durante PR5 (2026-05-22), owner mencionou múltiplas vezes que wizard CLI vai entrar na 0023 — sinal direto e repetido. Critério empírico de "promoção inequívoca" atingido pela própria voz do owner.
+- Análise complementar: items 1.H.4/1.H.6/1.H.7 deferidos por incoerência com decisões F03+F04+ADR 0022. Spec 0023 corre risco de fechar com entrega user-facing fina mesmo após ter cravado todo o lifecycle metodológico e enforcement L2. Wizard CLI é a entrega visível significativa coerente com o que está cravado.
+
+**Opções:**
+
+| Opção | Descrição                                                                                        | Pró                                                                                                       | Contra                                                                                                                                                 |
+| :---- | :----------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A     | Materializar wizard CLI mínimo no PR5 (5 opções fixas declarativas no boot do REPL).             | Entrega user-facing visível; valida pattern declarativo lookup-only; reduz carga cognitiva imediatamente. | Promove insight em incubação sem DEC formal prévia (este próprio DEC corrige isso); risco de scope creep se permitir auto-detecção/ranking/inferência. |
+| B     | Manter insight em incubação aguardando mais evidência (≥ 1 consumidor externo reportar fricção). | Respeita princípio "promoção de sinais distribuídos" estritamente.                                        | Spec 0023 fecha sem entrega visível significativa; momentum de modernização da DX se perde.                                                            |
+| C     | Materializar versão mais ambiciosa (wizard com integração handoff + dashboard preview).          | Visão "completa" do que vem.                                                                              | Antecipa candidatas `handoff-as-first-class` e `governance-dashboard-and-visual-artifacts` — escopo creep brutal; PR5 fica gigante.                    |
+
+**Decisão do Gate Humano:**
+
+- **Status:** [x] Resolved (PR5 S5, 2026-05-22)
+- **Escolha:** [x] A | [ ] B | [ ] C
+- **Justificativa:** o critério de promoção do insight (≥ 2 sinais distintos) foi atingido empiricamente — owner mencionou wizard explicitamente em pelo menos 3 turnos desta sessão como entrega esperada da 0023; o sinal não é mais distribuído, é dirigido. Adicionalmente, a deferral de 1.H.4/6/7 deixou a Spec 0023 com entrega user-facing fina — materializar o wizard agora preserva o senso de fechamento real da spec sem antecipar candidatas Now (handoff, dashboard, boilerplates).
+- **Escopo cravado do wizard mínimo:**
+  - 5 opções fixas declarativas exibidas no boot interativo do REPL (`workflow` sem argumentos):
+    1. Continuar spec atual
+    2. Continuar outra spec
+    3. Publicar estado
+    4. Ver specs ativas
+    5. Diagnosticar drift
+  - Cada opção mapeia 1:1 para um comando que já existe (`continue`, `continue <slug>`, `publish-state`, listagem do índice, `publish-state --diagnose` ou similar). Wizard é shell visual sobre comandos existentes, não nova engine de fluxo.
+  - **Anti-patterns explicitamente vetados** (cf. memory `feedback-lookup-not-coordination`): auto-detecção de "próxima ação recomendada", NLP-lite, sugestão de spec mais relevante, ranking/ordering, autocomplete fuzzy de slug, qualquer inferência sobre intenção do humano.
+  - REPL conversacional permanece **fora do escopo** (já cravado no NEXT.md como não-objetivo).
+- **Critério de revisão futura:** se wizard for adotado por contribuidores externos OU se ≥ 1 sub-bloco da Spec 0024+ (qualquer slug) precisar de opção nova no menu, reabrir como DEC própria — decisão atual cobre apenas as 5 opções iniciais.
+- **Data / Owner:** 2026-05-22 / @rosanarezende
 
 ---
 
