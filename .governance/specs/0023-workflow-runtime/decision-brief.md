@@ -391,15 +391,15 @@
 
 - **Status:** [x] Resolved (PR5 S5, 2026-05-22, via POC visual neutra)
 - **Escolha:** [ ] A | [x] B
-- **Justificativa do owner:** "B, mas precisamos de um pouco mais de pesquisa sobre o que é a saída de cada um, pois experiment é bem mais complexo do que vc está explicando acima, mas podemos tratar na implementação em momento adequado". Direção arquitetural cravada (boundary por classe); definição operacional fina de cada boundary fica para o momento de implementação de cada pilar.
-- **Boundaries listados na POC são direcionais, não definitivos:**
+- **Justificativa:** boundary class-specific é a forma operacional dos invariantes universais sem forçar artifact uniforme. Coerente com F01 = B (cada classe ganha modelo próprio em código → cada classe ganha boundary próprio no lifecycle). A definição operacional fina de cada boundary exige research específica antes da implementação — em particular, `experiment` carrega complexidade adicional não capturada na descrição direcional desta decisão. Direção arquitetural cravada agora; definições finas ficam para o momento de implementação de cada pilar.
+- **Boundaries listados são direcionais, não definitivos:**
   - `spec` → `tasks.md` (definição estável; já implementado).
-  - `incident` → resolution (a pesquisar quando incident for implementado — F01 já cravou que vai ser bem definido nesta fase, então a pesquisa específica de boundary entra junto).
-  - `experiment` → outcome + métrica (placeholder; owner sinalizou que é "bem mais complexo" — pesquisa dedicada obrigatória antes da implementação).
-  - `spike` → timebox (placeholder; revisitar quando spike for implementado).
-  - `fix` / `patch` → PR merge (placeholder; pode evoluir).
-  - `proposal` → decision-gate (placeholder; classe Virtual sem workspacePath, talvez não precise de boundary formal).
-- **Pré-requisito para implementação de qualquer classe ≠ spec:** pesquisa específica do boundary daquela classe (research dedicada com critérios + opções avaliadas + decisão).
+  - `incident` → resolution (research específica entra junto com a implementação — F01 já cravou que será bem definido nesta fase).
+  - `experiment` → outcome + métrica (placeholder direcional; research dedicada obrigatória dada a complexidade adicional sinalizada).
+  - `spike` → timebox (placeholder direcional).
+  - `fix` / `patch` → PR merge (placeholder direcional).
+  - `proposal` → decision-gate (placeholder; classe Virtual sem `workspacePath` — pode dispensar boundary formal).
+- **Pré-requisito cravado para implementação de qualquer classe ≠ spec:** research específica do boundary daquela classe (critérios + opções avaliadas + decisão), não inferida de F02.
 - **Data / Owner:** 2026-05-22 / @rosanarezende
 
 ---
