@@ -202,10 +202,11 @@
 - [ ] **1.H.3** Integration test `tests/integration/workflow-dispatch.test.mjs` — exercita `node cli/ai-guidelines-cli.mjs continue` em diretório temp com `git init` + spec fake.
 - [ ] **1.H.4** `examples/minimal-spec/` (≤ 4 arquivos: spec.md, NEXT.md, state.yml, README.md). `examples` em `package.json#files`. Cf. `[DEC-0023-B03]`.
 - [ ] **1.H.5** `cli/cli/args.mjs` `printHelp()` reescrito com exemplos por subcomando + nota de convenção de branch.
-- [ ] **1.H.6** `docs/guides/workflow-quickstart.md` (dogfoodado com outputs reais da 0023).
-- [ ] **1.H.7** `docs/guides/workflow-with-ai-agents.md` (2 padrões: humano cola bundle; agente IA chama `continue` via Bash).
-- [ ] **1.H.8** `README.md` ganha seção "Workflow Runtime (preview)" + repositioning leve. Cf. `[DEC-0023-B04]`.
+- [ ] **1.H.6** `docs/guides/workflow-quickstart.md` (dogfoodado com outputs reais da 0023). **Escopo expandido pós-PR4 (pull-forward):** cobrir enforcement L2 — comportamento de `workflow continue` quando bloqueado, exemplo de mensagem narrativa de dupla/única violação, códigos de saída (0/1). Cross-ref `[DEC-0023-E03]` + ADR 0021.
+- [ ] **1.H.7** `docs/guides/workflow-with-ai-agents.md` (originalmente: 2 padrões — humano cola bundle; agente IA chama `continue` via Bash). **Escopo expandido pós-PR4 (pull-forward):** incluir como 3º padrão o **modelo tri-party** validado no PR #24 (Implementador IA + Revisor IA paralelo + Owner gate), incluindo a direção de evolução para voz crítica calibrada. Cross-ref `NEXT.md § DX e Narrativa Operacional § Validação empírica do modelo tri-party`.
+- [ ] **1.H.8** `README.md` ganha seção "Workflow Runtime (preview)" + repositioning leve. **Escopo expandido pós-PR4 (pull-forward):** cobrir comportamento de enforcement L2 no overview (decisão estrutural, sem flag de bypass por design). Cf. `[DEC-0023-B04]`.
 - [ ] **1.H.9** `CHANGELOG.md` entry v1.1.0-preview.0 (já incluso parcialmente no PR2-lifecycle; refinar se necessário).
+- [ ] **1.H.10** Avaliar promoção do **modelo tri-party** (Implementador IA + Revisor IA + Owner gate) para ADR próprio. **Pré-requisito:** validação em ≥ 2 specs adicionais OU adoção espontânea por contribuidor externo. **Escopo obrigatório do ADR (se promovido):** incluir padrão de voz crítica calibrada do implementador (1 round de questionamento por sub-bloco antes de executar, com anti-padrões vetados — cf. `NEXT.md § DX e Narrativa Operacional § Validação empírica do modelo tri-party § Lacuna observada`), não apenas obediência mecânica. Sem pré-requisitos atingidos, item permanece deferido.
 - [ ] **1.H.N** Pipeline verde + coverage por arquivo respeitado.
 - [ ] **1.H.[REVIEW]** **[MANDATÓRIO]** Aprovação humana para merge ponta-a-ponta (PR1 + PR2-lifecycle + PR3 + PR4 + PR5 + PR6).
 - [ ] **1.H.[COMMIT]** Commits atômicos por sub-task acima (8 commits incrementais).

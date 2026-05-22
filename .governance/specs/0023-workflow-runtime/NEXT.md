@@ -187,6 +187,69 @@ contexto framework-interno` em `.governance/specs/roadmap/backlog.md` — esse
 
 > **Meta-observação (sem registro formal aqui):** os 2 insights apontam na mesma direção — reduzir custo cognitivo da governança sem perder rigor. PR narrative artifacts atacam o **lado humano-reviewer**; wizard ataca o **lado humano-operador**. Se ≥ 1 deles for adotado e validado, vale considerar consolidação como princípio cross-spec (memory ou ADR de DX), não antes.
 
+#### Validação empírica do modelo tri-party (Antigravity + Claude + Owner, 2026-05-22)
+
+- **Fonte do insight:** PR #24 (PR4-enforcement-runtime) — primeira entrega
+  não-trivial sob divisão tripartida com **prova de funcionamento operacional**:
+  Antigravity (Gemini 3 Flash) como implementador autônomo, Claude (Opus 4.7)
+  como revisor crítico paralelo verificando diffs direto no disco, owner como
+  gate humano autorizando cada commit/push/Draft→Ready textualmente. 7 commits,
+  3 camadas DDD, 12 cenários de teste novos, 544 testes verdes.
+- **Hipótese confirmada:** modelo previsto por ADR 0018 (AI-as-Channel)
+  suporta colaboração multi-agente IA + humano sem violar a regra "nenhum LLM
+  embutido no runtime". Cada IA é canal externo; humano é a única fonte de
+  decisão.
+- **Otimização emergente:** Antigravity inicialmente colava diffs completos
+  em mensagens de reporte para o owner copiar pra Claude — gasto duplo de
+  tokens. Owner instruiu: Antigravity reporta apenas (a) resultado de
+  validate, (b) arquivos modificados, (c) sugestão de commit message; Claude
+  verifica direto no disco. Atrito eliminado.
+- **Lacuna observada — implementador obediente desperdiça valor:** Antigravity
+  operou puramente como executor — recebeu plano detalhado de cada commit e
+  implementou sem questionar. Implementadores IA têm capacidade de identificar
+  overengineering, edge cases, acoplamentos suspeitos e bugs latentes antes
+  de codar — usar apenas como "máquina de digitar código" subutiliza o modelo
+  e desperdiça tokens. **Direção de evolução:** implementador deveria ter
+  **voz crítica calibrada** — capacidade de questionar **1 round por
+  sub-bloco** quando detectar (a) overengineering óbvio (ex.: helper usado
+  1 vez), (b) violação de guardrail conhecido (memory de feedback, `[DEC-*]`,
+  ADR), (c) edge case não previsto no plano, (d) custo desproporcional ao
+  valor. **Anti-padrões explicitamente vetados:** debate infinito,
+  questionamento vago ("acho que pode ser melhor"), re-litigation após
+  decisão do owner. **Critério de "fechado":** após 1 round, owner decide
+  e implementador executa sem rediscussão.
+- **Padrão para futuras specs:** divisão tri-party é candidata a ADR
+  próprio se ≥ 2 specs adicionais validarem o modelo. Hoje fica como
+  insight em incubação — promoção a backlog formal exige recorrência
+  observável.
+- **Critério de "está na hora" de promover a backlog/ADR formal:** ≥ 2
+  outras specs usarem o modelo tri-party com avaliação empírica positiva,
+  OU primeiro consumidor externo do framework reportar uso do padrão, OU
+  a lacuna acima (implementador obediente) for endereçada e validada em
+  ≥ 1 sub-bloco real.
+
+#### Gap de documentação user-facing pós-PR4 (achado fora de escopo, 2026-05-22)
+
+- **Fonte do achado:** owner identificou que toda a entrega do workflow
+  runtime (PRs #18→#19→#22→#23→#24) está documentada apenas em
+  `.governance/specs/0023-workflow-runtime/*` (governance interna) e
+  `CHANGELOG.md`. Surfaces user-facing — `README.md`, `AGENTS.md`,
+  `CONTRIBUTING.md`, `docs/cli/ai-guidelines-cli.md`, `docs/features.md`
+  — têm **0 menções** a `workflow continue`, `publish-state`, ou
+  enforcement L2.
+- **Decisão metodológica:** documentar user-facing está **pré-alocado
+  ao sub-bloco [1.H] do PR6-DX-execution** (itens 1.H.6/1.H.7/1.H.8/1.H.9).
+  Não criar PR docs avulso fora de sequência — mantém arquitetura da
+  spec intacta. Pull-forward formal sincronizado em `tasks.md [1.H]`
+  com nota "Escopo expandido pós-PR4 (pull-forward)" em cada item afetado.
+- **Risco aceito:** docs user-facing ausentes durante a janela
+  PR4 mergeado → PR6 entregue. Mitigação parcial: CHANGELOG já tem
+  entry, e `workflow continue --help` (1.H.5) deve apontar para a doc
+  quando existir.
+- **Critério de revisita:** se a janela PR4→PR6 ultrapassar 14 dias
+  OU se houver tentativa de uso externo do framework antes do PR6,
+  reavaliar a decisão e considerar PR docs antecipado.
+
 ---
 
 ## 🗺️ Backlog estratégico
