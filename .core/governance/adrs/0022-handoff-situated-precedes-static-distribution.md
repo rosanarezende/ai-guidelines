@@ -100,7 +100,7 @@ Operacionalmente:
 ## Consequências
 
 - **Imediatas (próxima spec após 0023):**
-  - **Spec 0024 candidata:** materializar `workflow handoff` (ou expansão de `workflow continue` com 2 níveis: resumido / completo). Decisão de comando novo vs expansão fica para a spec.
+  - **Candidata `handoff-as-first-class`** (slug per ADR 0017 — número alocado apenas quando o branch for criado): materializar `workflow handoff` (ou expansão de `workflow continue` com 2 níveis: resumido / completo). Decisão de comando novo vs expansão fica para a spec.
   - **Wizard CLI da Spec 0023** (sub-bloco G ou H, conforme planning) oferece "Iniciar sessão IA nova" como opção que invoca handoff. Esta integração é o vínculo prático entre as duas specs.
   - Geração das duas variantes (simples / híbrida) decidida via flag CLI ou prompt do wizard.
 
