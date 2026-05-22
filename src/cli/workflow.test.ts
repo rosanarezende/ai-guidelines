@@ -111,6 +111,18 @@ function makeFsWithSpec(): StubFs {
   );
 }
 
+function makeFsWithSpecAndTasks(): StubFs {
+  return new StubFs(
+    new Map([
+      [".governance/specs/0023-workflow-runtime/spec.md", sampleSpec],
+      [".governance/specs/0023-workflow-runtime/state.yml", sampleState],
+      [".governance/specs/0023-workflow-runtime/tasks.md", "# Tasks\n- [ ] tarefa 1"],
+    ]),
+    new Set([".governance/specs/0023-workflow-runtime"]),
+    "feat/spec-0023-workflow-runtime"
+  );
+}
+
 describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
   describe("classifyInput", () => {
     it("DADO input vazio ENTÃO trata como 'briefing'", () => {
@@ -254,12 +266,82 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
       const code = await runContinue({
         repoRoot: "/repo",
         logger,
-        fs: makeFsWithSpec(),
+        fs: makeFsWithSpecAndTasks(),
       });
       expect(code).toBe(0);
       const out = logger.lines.join("\n");
       expect(out).toMatch(/Stage: implementation/);
       expect(out).toMatch(/Próxima ação: executar PR1/);
+    });
+
+    it("DADO spec detectada MAS tasks.md ausente QUANDO runContinue ENTÃO recusa narrativamente E retorna 1", async () => {
+      const logger = new CollectingLogger();
+      const code = await runContinue({
+        repoRoot: "/repo",
+        logger,
+        fs: makeFsWithSpec(),
+      });
+      expect(code).toBe(1);
+      const out = logger.lines.join("\n");
+      expect(out).toMatch(/ERR: Execution locked\./);
+      expect(out).toMatch(/ERR: Missing:/);
+      expect(out).toMatch(
+        /ERR: - tasks\.md em \.governance\/specs\/0023-workflow-runtime\/tasks\.md \(não encontrado\)/
+      );
+      expect(out).not.toMatch(/gate\.status/);
+    });
+
+    it("DADO spec detectada MAS gate aberto QUANDO runContinue ENTÃO recusa narrativamente E retorna 1", async () => {
+      const logger = new CollectingLogger();
+      const openState = sampleState.replace("status: closed", "status: open");
+      const fs = new StubFs(
+        new Map([
+          [".governance/specs/0023-workflow-runtime/spec.md", sampleSpec],
+          [".governance/specs/0023-workflow-runtime/state.yml", openState],
+          [".governance/specs/0023-workflow-runtime/tasks.md", "# Tasks"],
+        ]),
+        new Set([".governance/specs/0023-workflow-runtime"]),
+        "feat/spec-0023-workflow-runtime"
+      );
+
+      const code = await runContinue({
+        repoRoot: "/repo",
+        logger,
+        fs,
+      });
+      expect(code).toBe(1);
+      const out = logger.lines.join("\n");
+      expect(out).toMatch(/ERR: Execution locked\./);
+      expect(out).toMatch(/ERR: Missing:/);
+      expect(out).toMatch(/ERR: - planning gate\.status == closed \(atual: open\)/);
+      expect(out).not.toMatch(/tasks\.md/);
+    });
+
+    it("DADO spec detectada MAS tasks.md ausente E gate aberto QUANDO runContinue ENTÃO recusa com ambas as violações E retorna 1", async () => {
+      const logger = new CollectingLogger();
+      const openState = sampleState.replace("status: closed", "status: open");
+      const fs = new StubFs(
+        new Map([
+          [".governance/specs/0023-workflow-runtime/spec.md", sampleSpec],
+          [".governance/specs/0023-workflow-runtime/state.yml", openState],
+        ]),
+        new Set([".governance/specs/0023-workflow-runtime"]),
+        "feat/spec-0023-workflow-runtime"
+      );
+
+      const code = await runContinue({
+        repoRoot: "/repo",
+        logger,
+        fs,
+      });
+      expect(code).toBe(1);
+      const out = logger.lines.join("\n");
+      expect(out).toMatch(/ERR: Execution locked\./);
+      expect(out).toMatch(/ERR: Missing:/);
+      expect(out).toMatch(
+        /ERR: - tasks\.md em \.governance\/specs\/0023-workflow-runtime\/tasks\.md \(não encontrado\)/
+      );
+      expect(out).toMatch(/ERR: - planning gate\.status == closed \(atual: open\)/);
     });
 
     it("DADO spec não detectada ENTÃO retorna 1", async () => {
@@ -567,7 +649,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
         {
           repoRoot: "/repo",
           logger,
-          fs: makeFsWithSpec(),
+          fs: makeFsWithSpecAndTasks(),
           loadActiveSpecsIndex: () => makeIndexResult({ entries: [reachableEntry] }),
         },
         "workflow-runtime"
@@ -639,7 +721,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
       const code = await main(["continue", "0023"], {
         repoRoot: "/repo",
         logger,
-        fs: makeFsWithSpec(),
+        fs: makeFsWithSpecAndTasks(),
         loadActiveSpecsIndex: () => makeIndexResult({ entries: [reachableEntry] }),
       });
       expect(code).toBe(0);
@@ -651,7 +733,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
       const code = await main(["continue"], {
         repoRoot: "/repo",
         logger,
-        fs: makeFsWithSpec(),
+        fs: makeFsWithSpecAndTasks(),
       });
       expect(code).toBe(0);
       expect(logger.lines.join("\n")).toMatch(/Próxima ação: executar PR1/);

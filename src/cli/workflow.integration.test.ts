@@ -226,6 +226,7 @@ next:
   - próxima ação de foo
 `
       );
+      await fsAsync.writeFile(path.join(fooSpecDir, "tasks.md"), `# Tasks\n- [ ] tarefa 1`);
 
       const indexDir = path.join(tempDir, ".governance", "runtime");
       await fsAsync.mkdir(indexDir, { recursive: true });

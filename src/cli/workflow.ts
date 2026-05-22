@@ -14,6 +14,7 @@
 import * as readline from "node:readline";
 import { DetectActiveSpec } from "../app/workflow/DetectActiveSpec.js";
 import { ReadWorkflowState } from "../app/workflow/ReadWorkflowState.js";
+import { CheckExecutionAuthorized } from "../app/workflow/CheckExecutionAuthorized.js";
 import {
   ListActiveSpecs,
   ListActiveSpecsResult,
@@ -458,6 +459,21 @@ export async function runContinue(options: RunOptions, identifier?: string): Pro
   } else {
     ctx = resolveContext(fs, logger);
     if (!ctx) return 1;
+  }
+
+  const checker = new CheckExecutionAuthorized(fs);
+  const checkResult = checker.run(ctx.location, ctx.state);
+
+  if (!checkResult.authorized) {
+    logger.error("Execution locked.");
+    logger.error("Missing:");
+    if (checkResult.missingTasksFile) {
+      logger.error(`- tasks.md em ${checkResult.checkedTasksPath} (não encontrado)`);
+    }
+    if (checkResult.gateNotClosed) {
+      logger.error(`- planning gate.status == closed (atual: ${checkResult.actualGateStatus})`);
+    }
+    return 1;
   }
 
   logger.info(assembleBriefing(ctx));
