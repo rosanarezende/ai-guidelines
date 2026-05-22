@@ -38,9 +38,16 @@ _(Sem débitos adiados no momento do gate. Itens emergentes durante PR1 entram a
 
 - **`runtime-state becoming source-of-truth creep`** (sinal arquitetural sinalizado pelo owner pós-Passo 8). O índice público ficou forte o suficiente para começar a atrair: coordenação, priorização, ordering, freshness, automação, dashboards, ranking, resolução implícita. **Critério de revisita:** qualquer proposta envolvendo "ordenação automática", "spec mais recente/ativa/relevante", "próxima spec sugerida", "spec stale", "auto continue", "sync inteligente" requer DEC própria — esses ficam **vetados por default** nesta fase. Princípio canônico: o índice é fonte de **descoberta declarada**, não fonte de **decisão derivada**.
 
-### Pós-PR5 sanitização (Bloco F deferimento temporário, 2026-05-22)
+### Pós-PR5 sanitização (Bloco F resolvido, 2026-05-22)
 
-- **Bloco F do decision-brief — F01–F05 Deferred temporariamente.** Estavam marcadas como `Pendentes` desde 2026-05-19 sem critério explícito de fechamento (estado "solto" que viola ADR 0021 item 7). PR5 S1 mudou status para `Deferred com critério: revisita obrigatória em S5 do PR5 (este mesmo PR), via POC visual neutra (uma decisão por vez)`. **Critério de revisita:** S5 do PR5 — não empurrar para outro PR; cada Fxx ganha destino final (Resolved / Deferred estrutural / Moved to spec com slug).
+- **Bloco F do decision-brief — destinos finais após S5 do PR5:**
+  - **F01 → Resolved (B)** — `incident` separado como `OperationalState` em domain model. Escopo faseado: spec + incident bem implementados nesta fase; demais pilares com modelagem mínima reservando espaço.
+  - **F02 → Resolved (B)** — boundary canônico por classe; definição fina de cada boundary exige research específica antes da implementação de cada pilar.
+  - **F03 → Resolved (A)** — boilerplate dedicado por classe; materialização cravada como candidata `boilerplate-system-modernization` em backlog `Now`.
+  - **F04 → Resolved (A)** — múltiplos paths por classe (`.governance/{specs,incidents,...}`); topologia espelha taxonomy. Materialização vinculada a `boilerplate-system-modernization`.
+  - **F05 → Deferred com critério estrutural** — onde mora a SSOT do princípio CORE-09/10 fica vinculado à abertura da candidata `handoff-as-first-class`. Sob a lente do ADR 0022 (handoff como canal de entrega de regras situacionais), decidir SSOT antes do canal estar materializado seria escolher forma sem comportamento real.
+- **Tríade arquitetural cravada:** F01+F02+F03+F04 = B+B+A+A. Cada classe MECE ganha modelo próprio em código (F01), boundary próprio no lifecycle (F02), template próprio (F03) e diretório próprio no consumidor (F04). Materialização real fica para spec dedicada (`boilerplate-system-modernization`).
+- **Não-violação de ADR 0021 item 7:** F05 deferimento tem critério estrutural observável ("abertura da spec X"), não "talvez depois". F01–F04 fechados com escolha cravada.
 
 ### Pós-Bloco E (enforcement estrutural cravado; visíveis com critério de revisita)
 

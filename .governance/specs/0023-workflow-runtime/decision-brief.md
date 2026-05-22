@@ -498,8 +498,12 @@
 
 **Decisão do Gate Humano:**
 
-- **Status:** [x] Deferred temporariamente — revisita obrigatória em S5 do PR5 via POC visual neutra
+- **Status:** [x] Deferred com critério estrutural — revisita obrigatória na abertura da candidata `handoff-as-first-class` (cf. backlog `Now`).
 - **Escolha:** [ ] A | [ ] B | [ ] C
+- **Justificativa:** ADR 0022 reposicionou CORE-09/10 como **regras situacionais** — aplicam em momento específico (na hora de abrir PR ou converter Draft→Ready), não como invariantes pré-distribuídas. O handoff (canal de entrega cravado em ADR 0022) tem o papel de apresentar contextualmente essas regras quando o agente está em ponto de PR. Decidir agora onde mora a SSOT do princípio (ADR nova vs nota cruzada vs distribuição em camadas) antes de o canal de entrega estar materializado seria escolher forma sem ter comportamento real para validar contra. O critério de fechamento adia a escolha para o momento em que o handoff for materializado — aí a decisão de SSOT pode ser tomada com evidência de como o canal trata regras situacionais (qual nível de profundidade ele cita, quais fundamentos ele invoca, se uma ADR dedicada agrega ou polui).
+- **Critério estrutural de revisita (observável, não "talvez depois"):** abertura da spec que materializa `handoff-as-first-class` carrega obrigação de revisitar F05 e fechar como Resolved (A/B/C) ou como novo Deferred com critério mais específico. Sem essa abertura, F05 permanece em Deferred estrutural. Conforme ADR 0021 item 7, deferimentos exigem critério observável — esse critério aqui é "abertura da spec X", evento concreto auditável.
+- **Posição enquanto deferred:** CORE-09/10 continuam funcionando como agent rules em AGENTS.md (status quo); ADR 0021 continua sendo fundamento implícito; sem inflar ADRs, sem novo arquivo em `.core/process/`. Equivalente operacional à Opção B até que F05 ganhe destino final.
+- **Data / Owner:** 2026-05-22 / @rosanarezende
 
 ---
 
