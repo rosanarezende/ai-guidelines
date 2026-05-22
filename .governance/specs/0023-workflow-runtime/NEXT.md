@@ -64,6 +64,7 @@ _(Sem débitos adiados no momento do gate. Itens emergentes durante PR1 entram a
   - **F05 → Deferred com critério estrutural** — onde mora a SSOT do princípio CORE-09/10 fica vinculado à abertura da candidata `handoff-as-first-class`. Sob a lente do ADR 0022 (handoff como canal de entrega de regras situacionais), decidir SSOT antes do canal estar materializado seria escolher forma sem comportamento real.
 - **Tríade arquitetural cravada:** F01+F02+F03+F04 = B+B+A+A. Cada classe MECE ganha modelo próprio em código (F01), boundary próprio no lifecycle (F02), template próprio (F03) e diretório próprio no consumidor (F04). Materialização real fica para spec dedicada (`boilerplate-system-modernization`).
 - **Não-violação de ADR 0021 item 7:** F05 deferimento tem critério estrutural observável ("abertura da spec X"), não "talvez depois". F01–F04 fechados com escolha cravada.
+- **Parser permissivo de Spec (tradeoff / débito técnico):** A implementação de prompts visuais aceita o formato numérico isolado (e.g. "0023") como alias de spec para fins de conforto na DX. **Critério de revisita:** se o ecossistema do framework passar a suportar outras entidades com ID puramente numérico que colidam de forma ambígua (e.g. incidentes, experimentos, patches), refatorar o regex do `parseContextTarget` para exigir prefixos explícitos e garantir desambiguação MECE.
 
 ### Pós-Bloco E (enforcement estrutural cravado; visíveis com critério de revisita)
 

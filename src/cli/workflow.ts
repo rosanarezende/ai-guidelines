@@ -43,6 +43,11 @@ import { NodeWorkflowFileSystem } from "../infrastructure/filesystem/NodeWorkflo
 import { NodeClipboard } from "../infrastructure/io/NodeClipboard.js";
 import { ClipboardWriter } from "../app/ports/ClipboardWriter.js";
 import { WorkflowFileSystem } from "../app/ports/WorkflowFileSystem.js";
+import { parseContextTarget } from "./visual-prompts/parseContextTarget.js";
+import { collectLocalContext } from "./visual-prompts/collectLocalContext.js";
+import { renderVisualPrompt } from "./visual-prompts/renderVisualPrompt.js";
+
+export { renderVisualPrompt };
 
 export interface Logger {
   info(msg: string): void;
@@ -60,15 +65,49 @@ const stdoutLogger: Logger = {
 };
 
 class StdinReader implements InputReader {
-  private rl: readline.Interface;
+  private rl: readline.Interface | null = null;
+  private lines: string[] = [];
+  private isClosed = false;
+  private readAllPromise: Promise<void> | null = null;
+
   constructor() {
-    this.rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+    if (process.stdin.isTTY) {
+      this.rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+      this.rl.on("close", () => {
+        this.isClosed = true;
+      });
+    } else {
+      let data = "";
+      process.stdin.resume();
+      this.readAllPromise = new Promise<void>((resolve) => {
+        process.stdin.on("data", (chunk) => {
+          data += chunk.toString();
+        });
+        process.stdin.on("end", () => {
+          this.lines = data.split(/\r?\n/);
+          if (this.lines.length > 0 && this.lines[this.lines.length - 1] === "") {
+            this.lines.pop();
+          }
+          resolve();
+        });
+      });
+    }
   }
-  question(prompt: string): Promise<string> {
-    return new Promise((resolve) => this.rl.question(prompt, resolve));
+
+  async question(prompt: string): Promise<string> {
+    if (this.rl) {
+      if (this.isClosed) return "";
+      return new Promise((resolve) => this.rl!.question(prompt, resolve));
+    }
+
+    if (this.readAllPromise) {
+      await this.readAllPromise;
+    }
+    return this.lines.shift() ?? "";
   }
+
   close(): void {
-    this.rl.close();
+    this.rl?.close();
   }
 }
 
@@ -384,6 +423,14 @@ export type WizardChoice =
   | { kind: "publish-state-help" }
   | { kind: "list-active" }
   | { kind: "diagnose-drift" }
+  | {
+      kind: "visual-prompt";
+      mode: VisualPromptMode;
+      slug?: string;
+      targetLabel?: string;
+      context: string;
+      placeholderMessage?: string;
+    }
   | { kind: "quit" };
 
 const WIZARD_OPTIONS: ReadonlyArray<{ key: string; label: string }> = [
@@ -392,7 +439,65 @@ const WIZARD_OPTIONS: ReadonlyArray<{ key: string; label: string }> = [
   { key: "3", label: "Publicar estado (instruções)" },
   { key: "4", label: "Ver specs ativas (índice público)" },
   { key: "5", label: "Diagnosticar drift do índice" },
+  { key: "6", label: "Gerar prompt visual (para gerador de imagem externo)" },
   { key: "q", label: "Sair" },
+];
+
+/**
+ * Templates de prompts visuais disponíveis em `.governance/visual-prompts/`.
+ *
+ * - `single-stage`: 1 prompt único, cola direto no gerador de imagem.
+ * - `two-stage`: 2 prompts consecutivos — etapa 1 vai para IA conversacional
+ *   (investigação); etapa 2 vai para gerador de imagem (humano cola síntese
+ *   da etapa 1 no `{{summary}}` antes de usar).
+ * - `placeholder`: opção registrada no menu mas ainda não implementada
+ *   (sinaliza "em breve" e referencia candidata no backlog).
+ *
+ * Variáveis `{{nome}}` são substituídas pelo wizard com base nos inputs do
+ * usuário; variáveis não fornecidas (ex.: `{{summary}}`) permanecem literais
+ * no output e o humano preenche antes de usar.
+ */
+type VisualPromptMode = "prompt" | "placeholder";
+
+interface VisualPromptOption {
+  readonly key: string;
+  readonly label: string;
+  readonly mode: VisualPromptMode;
+  /** Slug do arquivo `.prompt.md` em `.governance/visual-prompts/`. */
+  readonly slug?: string;
+  readonly needsContext?: boolean;
+  /** Frase indicando onde colar; renderizada no header do delimitador. */
+  readonly targetLabel?: string;
+  /** Mensagem exibida quando `mode === "placeholder"`. */
+  readonly placeholderMessage?: string;
+}
+
+const VISUAL_PROMPT_TEMPLATES: ReadonlyArray<VisualPromptOption> = [
+  {
+    key: "a",
+    label: "Arquitetura ponta-a-ponta (cola direto no gerador de imagem)",
+    mode: "prompt",
+    slug: "architecture-end-to-end",
+    needsContext: false,
+    targetLabel: "cola no gerador de imagem (Midjourney, DALL-E, etc.)",
+  },
+  {
+    key: "b",
+    label:
+      "Valor entregue — via IA conversacional (Claude, ChatGPT, Antigravity); ela investiga + devolve prompt de imagem pronto",
+    mode: "prompt",
+    slug: "value-delivered",
+    needsContext: true,
+    targetLabel:
+      "cola na IA conversacional — ela vai investigar o repo e devolver um prompt de imagem JÁ PRONTO para colar no gerador",
+  },
+  {
+    key: "c",
+    label: "Valor entregue — investigação automática local [em breve, vide candidata no backlog]",
+    mode: "placeholder",
+    placeholderMessage:
+      "Investigação automática local (via git/gh) será implementada como sub-escopo da candidata `governance-dashboard-and-visual-artifacts` no backlog Now. Por enquanto, use a opção [b].",
+  },
 ];
 
 export function renderWizardMenu(): ReadonlyArray<string> {
@@ -427,6 +532,8 @@ async function runWizard(reader: InputReader, logger: Logger): Promise<WizardCho
       return { kind: "list-active" };
     case "5":
       return { kind: "diagnose-drift" };
+    case "6":
+      return runVisualPromptSubWizard(reader, logger);
     case "q":
     case "":
       return { kind: "quit" };
@@ -435,6 +542,52 @@ async function runWizard(reader: InputReader, logger: Logger): Promise<WizardCho
       return { kind: "quit" };
   }
 }
+
+async function runVisualPromptSubWizard(
+  reader: InputReader,
+  logger: Logger
+): Promise<WizardChoice> {
+  logger.info("");
+  logger.info("Que tipo de imagem?");
+  for (const tpl of VISUAL_PROMPT_TEMPLATES) {
+    logger.info(`  [${tpl.key}] ${tpl.label}`);
+  }
+  logger.info("");
+  const typeAnswer = (await reader.question("Tipo: ")).trim();
+  const template = VISUAL_PROMPT_TEMPLATES.find((t) => t.key === typeAnswer);
+  if (!template) {
+    logger.error(`Tipo desconhecido: "${typeAnswer}".`);
+    return { kind: "quit" };
+  }
+
+  if (template.mode === "placeholder") {
+    return {
+      kind: "visual-prompt",
+      mode: "placeholder",
+      context: "",
+      placeholderMessage: template.placeholderMessage,
+    };
+  }
+
+  let context = "";
+  if (template.needsContext) {
+    context = (await reader.question("Contexto (ex.: PR #25, spec 0023): ")).trim();
+    if (context === "") {
+      logger.error("Contexto vazio — voltando ao menu.");
+      return { kind: "quit" };
+    }
+  }
+
+  return {
+    kind: "visual-prompt",
+    mode: template.mode,
+    slug: template.slug,
+    targetLabel: template.targetLabel,
+    context,
+  };
+}
+
+// A função pura renderVisualPrompt foi migrada para src/cli/visual-prompts/renderVisualPrompt.ts
 
 export async function runWorkflow(options: RunOptions): Promise<number> {
   const logger = options.logger ?? stdoutLogger;
@@ -501,6 +654,38 @@ export async function runWorkflow(options: RunOptions): Promise<number> {
     );
     logger.info("Estado da spec corrente é projetado de state.yml para active-specs.yml.");
     logger.info("Detalhes: .governance/specs/0023-workflow-runtime/decision-brief.md § Bloco G.");
+    reader.close();
+    return 0;
+  }
+
+  if (choice.kind === "visual-prompt") {
+    if (choice.mode === "placeholder") {
+      logger.info("");
+      logger.info(choice.placeholderMessage ?? "Em breve.");
+      logger.info("");
+      reader.close();
+      return 0;
+    }
+
+    // mode === "prompt": imprime 1 prompt; targetLabel descreve onde colar.
+    const slug = choice.slug ?? "";
+    let localContext = "";
+    if (choice.context) {
+      const target = parseContextTarget(choice.context);
+      localContext = collectLocalContext(target, { repoRoot: options.repoRoot, fs });
+    }
+    const rendered = renderVisualPrompt(fs, slug, { context: choice.context, localContext });
+    if (rendered === null) {
+      logger.error(`Template "${slug}" não encontrado em .governance/visual-prompts/.`);
+      reader.close();
+      return 1;
+    }
+    const target = choice.targetLabel ?? "cola no destino apropriado";
+    logger.info("");
+    logger.info(`──── COPIE A PARTIR DAQUI — ${target} ────`);
+    logger.info(rendered.trimEnd());
+    logger.info("──── ATÉ AQUI ────");
+    logger.info("");
     reader.close();
     return 0;
   }

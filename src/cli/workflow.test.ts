@@ -302,6 +302,113 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
       expect(code).toBe(0);
       expect(logger.lines.some((l) => l.includes('Opção desconhecida: "xyz"'))).toBe(true);
     });
+
+    it("DADO wizard opção 6 + tipo 'a' (arquitetura, sem contexto) E template existe ENTÃO imprime prompt com targetLabel de gerador de imagem", async () => {
+      const logger = new CollectingLogger();
+      const reader = new ScriptedReader(["6", "a"]);
+      const files = new Map<string, string>([
+        [
+          ".governance/visual-prompts/architecture-end-to-end.prompt.md",
+          "Generate architecture diagram. No variables.\n",
+        ],
+      ]);
+      const fs = new StubFs(files, new Set(), "feat/spec-0023-workflow-runtime");
+      const code = await runWorkflow({
+        repoRoot: "/repo",
+        logger,
+        reader,
+        clipboard: new FakeClipboard(),
+        fs,
+      });
+      const out = logger.lines.join("\n");
+      expect(code).toBe(0);
+      expect(out).toMatch(/COPIE A PARTIR DAQUI — cola no gerador de imagem/);
+      expect(out).toMatch(/Generate architecture diagram/);
+      expect(out).toMatch(/──── ATÉ AQUI ────/);
+    });
+
+    it("DADO wizard opção 6 + tipo 'b' (valor) + contexto 'PR #25' ENTÃO substitui {{context}} e imprime prompt com targetLabel de IA conversacional", async () => {
+      const logger = new CollectingLogger();
+      const reader = new ScriptedReader(["6", "b", "PR #25"]);
+      const files = new Map<string, string>([
+        [
+          ".governance/visual-prompts/value-delivered.prompt.md",
+          "Investigate {{context}} and produce a finished image prompt for {{context}}.\n",
+        ],
+      ]);
+      const fs = new StubFs(files, new Set(), "feat/spec-0023-workflow-runtime");
+      const code = await runWorkflow({
+        repoRoot: "/repo",
+        logger,
+        reader,
+        clipboard: new FakeClipboard(),
+        fs,
+      });
+      const out = logger.lines.join("\n");
+      expect(code).toBe(0);
+      expect(out).toMatch(/COPIE A PARTIR DAQUI — cola na IA conversacional/);
+      expect(out).toMatch(/Investigate PR #25 and produce a finished image prompt for PR #25\./);
+      expect(out).not.toMatch(/\{\{context\}\}/);
+    });
+
+    it("DADO wizard opção 6 + tipo 'c' (placeholder, em breve) ENTÃO emite mensagem e retorna 0 sem ler templates", async () => {
+      const logger = new CollectingLogger();
+      const reader = new ScriptedReader(["6", "c"]);
+      const code = await runWorkflow({
+        repoRoot: "/repo",
+        logger,
+        reader,
+        clipboard: new FakeClipboard(),
+        fs: makeFsWithSpec(),
+      });
+      const out = logger.lines.join("\n");
+      expect(code).toBe(0);
+      expect(out).toMatch(/Investigação automática local/);
+      expect(out).toMatch(/governance-dashboard-and-visual-artifacts/);
+      expect(out).not.toMatch(/Template/);
+    });
+
+    it("DADO wizard opção 6 + tipo 'b' SEM contexto fornecido ENTÃO emite erro e quit gracioso", async () => {
+      const logger = new CollectingLogger();
+      const reader = new ScriptedReader(["6", "b", ""]);
+      const code = await runWorkflow({
+        repoRoot: "/repo",
+        logger,
+        reader,
+        clipboard: new FakeClipboard(),
+        fs: makeFsWithSpec(),
+      });
+      expect(code).toBe(0);
+      expect(logger.lines.some((l) => l.includes("Contexto vazio"))).toBe(true);
+    });
+
+    it("DADO wizard opção 6 + tipo desconhecido ENTÃO emite erro e quit gracioso", async () => {
+      const logger = new CollectingLogger();
+      const reader = new ScriptedReader(["6", "z"]);
+      const code = await runWorkflow({
+        repoRoot: "/repo",
+        logger,
+        reader,
+        clipboard: new FakeClipboard(),
+        fs: makeFsWithSpec(),
+      });
+      expect(code).toBe(0);
+      expect(logger.lines.some((l) => l.includes('Tipo desconhecido: "z"'))).toBe(true);
+    });
+
+    it("DADO wizard opção 6 + tipo válido MAS template ausente no filesystem ENTÃO emite erro e retorna 1", async () => {
+      const logger = new CollectingLogger();
+      const reader = new ScriptedReader(["6", "a"]);
+      const code = await runWorkflow({
+        repoRoot: "/repo",
+        logger,
+        reader,
+        clipboard: new FakeClipboard(),
+        fs: makeFsWithSpec(),
+      });
+      expect(code).toBe(1);
+      expect(logger.lines.some((l) => l.includes('Template "architecture-end-to-end"'))).toBe(true);
+    });
   });
 
   describe("runContinue", () => {
