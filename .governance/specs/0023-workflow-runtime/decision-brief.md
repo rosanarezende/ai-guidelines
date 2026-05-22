@@ -359,8 +359,11 @@
 
 **Decisão do Gate Humano:**
 
-- **Status:** [x] Deferred temporariamente — revisita obrigatória em S5 do PR5 via POC visual neutra
-- **Escolha:** [ ] A | [ ] B | [ ] C
+- **Status:** [x] Resolved (PR5 S5, 2026-05-22, via POC visual neutra)
+- **Escolha:** [ ] A | [x] B | [ ] C
+- **Justificativa do owner:** "prefiro B, e o ideal seria termos uma modelagem mínima de cada pilar, mas nessa fase deixar spec e incident bem definidos e implementados, mas já prevendo espaço para que realmente os pilares MECE sejam de fato implementados". Direção arquitetural: separar formalmente em código (não viola MECE da Spec 0021 — MECE classifica por intenção de saída, não força modelo único; ADR 0010 já pratica particionamento estrutural Dense/Virtual via discriminated union). Recomendação inicial C foi enfraquecida durante a POC quando owner identificou que (a) MECE não estava em risco com B; (b) a expectativa de implementação pilar a pilar (cada um com ciclo próprio) alinha melhor com modelo estruturalmente honesto agora; (c) C apenas adia decisão estrutural inevitável quando 2º pilar for materializado.
+- **Escopo de B nesta fase (cravado pelo owner):** spec e incident bem definidos e implementados; demais pilares (experiment, spike, fix, patch, proposal) recebem **modelagem mínima reservando espaço**, sem implementação completa agora. Anti-premature-abstraction explícito: forma fica para quando o pilar for materializado de verdade.
+- **Data / Owner:** 2026-05-22 / @rosanarezende
 
 ---
 
