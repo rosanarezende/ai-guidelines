@@ -38,6 +38,10 @@ _(Sem débitos adiados no momento do gate. Itens emergentes durante PR1 entram a
 
 - **`runtime-state becoming source-of-truth creep`** (sinal arquitetural sinalizado pelo owner pós-Passo 8). O índice público ficou forte o suficiente para começar a atrair: coordenação, priorização, ordering, freshness, automação, dashboards, ranking, resolução implícita. **Critério de revisita:** qualquer proposta envolvendo "ordenação automática", "spec mais recente/ativa/relevante", "próxima spec sugerida", "spec stale", "auto continue", "sync inteligente" requer DEC própria — esses ficam **vetados por default** nesta fase. Princípio canônico: o índice é fonte de **descoberta declarada**, não fonte de **decisão derivada**.
 
+### Pós-PR5 sanitização (Bloco F deferimento temporário, 2026-05-22)
+
+- **Bloco F do decision-brief — F01–F05 Deferred temporariamente.** Estavam marcadas como `Pendentes` desde 2026-05-19 sem critério explícito de fechamento (estado "solto" que viola ADR 0021 item 7). PR5 S1 mudou status para `Deferred com critério: revisita obrigatória em S5 do PR5 (este mesmo PR), via POC visual neutra (uma decisão por vez)`. **Critério de revisita:** S5 do PR5 — não empurrar para outro PR; cada Fxx ganha destino final (Resolved / Deferred estrutural / Moved to spec com slug).
+
 ### Pós-Bloco E (enforcement estrutural cravado; visíveis com critério de revisita)
 
 > Convenção operacional: **não usar "talvez depois" como justificativa**. Todo item deferido aqui tem (a) camada nomeada, (b) critério de revisita observável, (c) sem entrada em memória implícita.

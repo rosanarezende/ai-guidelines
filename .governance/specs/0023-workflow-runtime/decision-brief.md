@@ -330,11 +330,13 @@
 
 ---
 
-## Bloco F — Convergência taxonomy ↔ lifecycle (research aprovado 2026-05-19; F01–F05 Pendentes)
+## Bloco F — Convergência taxonomy ↔ lifecycle (research aprovado 2026-05-19; F01–F05 Deferred temporariamente — revisita em S5 do PR5)
 
 > **Origem:** investigação dedicada em [`research/lifecycle-architecture.md`](./research/lifecycle-architecture.md) — fechada em 299 linhas (dentro do cap absoluto 300). Identificou gap estrutural entre lifecycle cravado em Bloco D/E (spec-centric) e taxonomy MECE da Spec 0021 (7 pilares). Research convergiu em **invariantes universais leves** (accountability + traceability + outcome registration) + **lifecycle intent categories** (5 eixos de leitura: decision/learning/execution/operational-response/maintenance) + **runtime taxonomy-aware sem orchestration engine** + **enforcement universal leve**.
 >
 > **Owner aprovou o research em 2026-05-19** e cravou F1–F5 como base para DEC-0023-F\*; F6/F7 permanecem candidates (não promovidos agora). Decisões específicas dentro de cada Fxx ficam **Pendentes** — opções populadas do research §9 + recomendação inicial; gate humano por ponto a ser fechado em sessão dedicada, sem urgência de consumir convergência via expansão arquitetural imediata.
+>
+> **Deferimento temporário cravado em 2026-05-22 (PR5 — S1):** owner identificou que o estado "Pendente solto" desde 2026-05-19 viola o espírito de ADR 0021 item 7 (decisões estruturantes não ficam soltas — fechar, deferir formalmente com critério, ou empurrar para spec própria). F01–F05 estão temporariamente marcadas como `Deferred com critério: revisita obrigatória em S5 do PR5 (este mesmo PR), via POC visual neutra (uma decisão por vez)`. **NÃO empurrar para outro PR.** Após S5 do PR5, cada Fxx terá um destino final (Resolved / Deferred com critério estrutural / Moved to spec com slug).
 
 ### [DEC-0023-F01] `incident` permanece WorkItem ou vira `OperationalState`?
 
@@ -357,7 +359,7 @@
 
 **Decisão do Gate Humano:**
 
-- **Status:** [x] Pendente — aguarda escolha do owner
+- **Status:** [x] Deferred temporariamente — revisita obrigatória em S5 do PR5 via POC visual neutra
 - **Escolha:** [ ] A | [ ] B | [ ] C
 
 ---
@@ -382,7 +384,7 @@
 
 **Decisão do Gate Humano:**
 
-- **Status:** [x] Pendente
+- **Status:** [x] Deferred temporariamente — revisita obrigatória em S5 do PR5 via POC visual neutra
 - **Escolha:** [ ] A | [ ] B
 
 ---
@@ -408,7 +410,7 @@
 
 **Decisão do Gate Humano:**
 
-- **Status:** [x] Pendente
+- **Status:** [x] Deferred temporariamente — revisita obrigatória em S5 do PR5 via POC visual neutra
 - **Escolha:** [ ] A | [ ] B | [ ] C
 
 ---
@@ -434,7 +436,7 @@
 
 **Decisão do Gate Humano:**
 
-- **Status:** [x] Pendente
+- **Status:** [x] Deferred temporariamente — revisita obrigatória em S5 do PR5 via POC visual neutra
 - **Escolha:** [ ] A | [ ] B | [ ] C
 
 ---
@@ -460,7 +462,7 @@
 
 **Decisão do Gate Humano:**
 
-- **Status:** [x] Pendente
+- **Status:** [x] Deferred temporariamente — revisita obrigatória em S5 do PR5 via POC visual neutra
 - **Escolha:** [ ] A | [ ] B | [ ] C
 
 ---
