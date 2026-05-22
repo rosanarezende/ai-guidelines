@@ -361,8 +361,10 @@
 
 - **Status:** [x] Resolved (PR5 S5, 2026-05-22, via POC visual neutra)
 - **Escolha:** [ ] A | [x] B | [ ] C
-- **Justificativa do owner:** "prefiro B, e o ideal seria termos uma modelagem mínima de cada pilar, mas nessa fase deixar spec e incident bem definidos e implementados, mas já prevendo espaço para que realmente os pilares MECE sejam de fato implementados". Direção arquitetural: separar formalmente em código (não viola MECE da Spec 0021 — MECE classifica por intenção de saída, não força modelo único; ADR 0010 já pratica particionamento estrutural Dense/Virtual via discriminated union). Recomendação inicial C foi enfraquecida durante a POC quando owner identificou que (a) MECE não estava em risco com B; (b) a expectativa de implementação pilar a pilar (cada um com ciclo próprio) alinha melhor com modelo estruturalmente honesto agora; (c) C apenas adia decisão estrutural inevitável quando 2º pilar for materializado.
-- **Escopo de B nesta fase (cravado pelo owner):** spec e incident bem definidos e implementados; demais pilares (experiment, spike, fix, patch, proposal) recebem **modelagem mínima reservando espaço**, sem implementação completa agora. Anti-premature-abstraction explícito: forma fica para quando o pilar for materializado de verdade.
+- **Justificativa:** separar `incident` como entity nova (`OperationalState` no domain model) reconhece estruturalmente que classes diferentes têm ciclos de vida diferentes — coerente com a expectativa de implementação pilar a pilar, cada um com modelagem própria. A recomendação inicial C apoiava-se no argumento de que B reabriria a taxonomy MECE da Spec 0021; durante a POC, esse argumento foi corrigido: ADR 0010 estabelece que MECE classifica por **intenção de saída**, não por estrutura única em código — o framework inclusive já pratica particionamento estrutural via discriminated union `Dense | Virtual`. Logo, B estende um padrão existente, não reabre MECE. Argumentos adicionais que pesaram contra C: (a) C adia decisão estrutural inevitável para quando o segundo pilar for materializado; (b) acumula débito implícito de ramificação por `kind` no runtime; (c) honestidade do modelo é menor (registry e runtime divergem semanticamente).
+- **Escopo cravado de B nesta fase (anti-premature-abstraction):**
+  - `spec` e `incident`: bem definidos e implementados.
+  - `experiment`, `spike`, `fix`, `patch`, `proposal`: modelagem mínima reservando espaço, sem implementação completa agora. Forma definitiva de cada um fica para quando o pilar for materializado de verdade.
 - **Data / Owner:** 2026-05-22 / @rosanarezende
 
 ---
@@ -387,8 +389,18 @@
 
 **Decisão do Gate Humano:**
 
-- **Status:** [x] Deferred temporariamente — revisita obrigatória em S5 do PR5 via POC visual neutra
-- **Escolha:** [ ] A | [ ] B
+- **Status:** [x] Resolved (PR5 S5, 2026-05-22, via POC visual neutra)
+- **Escolha:** [ ] A | [x] B
+- **Justificativa do owner:** "B, mas precisamos de um pouco mais de pesquisa sobre o que é a saída de cada um, pois experiment é bem mais complexo do que vc está explicando acima, mas podemos tratar na implementação em momento adequado". Direção arquitetural cravada (boundary por classe); definição operacional fina de cada boundary fica para o momento de implementação de cada pilar.
+- **Boundaries listados na POC são direcionais, não definitivos:**
+  - `spec` → `tasks.md` (definição estável; já implementado).
+  - `incident` → resolution (a pesquisar quando incident for implementado — F01 já cravou que vai ser bem definido nesta fase, então a pesquisa específica de boundary entra junto).
+  - `experiment` → outcome + métrica (placeholder; owner sinalizou que é "bem mais complexo" — pesquisa dedicada obrigatória antes da implementação).
+  - `spike` → timebox (placeholder; revisitar quando spike for implementado).
+  - `fix` / `patch` → PR merge (placeholder; pode evoluir).
+  - `proposal` → decision-gate (placeholder; classe Virtual sem workspacePath, talvez não precise de boundary formal).
+- **Pré-requisito para implementação de qualquer classe ≠ spec:** pesquisa específica do boundary daquela classe (research dedicada com critérios + opções avaliadas + decisão).
+- **Data / Owner:** 2026-05-22 / @rosanarezende
 
 ---
 
