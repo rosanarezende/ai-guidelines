@@ -425,8 +425,18 @@
 
 **Decisão do Gate Humano:**
 
-- **Status:** [x] Deferred temporariamente — revisita obrigatória em S5 do PR5 via POC visual neutra
-- **Escolha:** [ ] A | [ ] B | [ ] C
+- **Status:** [x] Resolved (PR5 S5, 2026-05-22, via POC visual neutra)
+- **Escolha:** [x] A | [ ] B | [ ] C
+- **Justificativa:** boilerplate dedicado por classe é a continuação coerente de F01 = B (modelo próprio em código) e F02 = B (boundary próprio no lifecycle). A tríade arquitetural F01+F02+F03 = B+B+A entrega coerência completa: cada classe tem modelo, boundary e template próprios. A recomendação inicial C estava calibrada para minimizar entrega de artefatos agora, mas três fatores deslocaram a decisão para A:
+  - **(a) Mitigação do risco de drift via core comum.** Research §8.1 identifica invariantes universais leves (accountability + traceability + outcome registration) que podem ser extraídos como núcleo compartilhado entre boilerplates, reduzindo divergência entre instâncias.
+  - **(b) Wizard CLI futuro reduz custo de escolha pelo consumidor.** Spec 0023 já carrega o insight `Wizard operacional mínimo` em `NEXT.md`; quando materializado, o wizard ajuda o consumidor a selecionar o boilerplate adequado por classe — então a coexistência de múltiplos templates deixa de ser "qual usar?".
+  - **(c) Pacote npm permite versionamento explícito.** Boilerplates como artefatos versionados de package facilitam manutenção e propagação de mudanças via `adopt`, em vez de exigir edição manual em cada consumidor.
+- **Pré-requisitos cravados para implementação de A:**
+  - Refresh do boilerplate atual de `spec` — nasceu em contexto anterior à existência do CLI, do workflow runtime e do wizard. Conceitos podem estar desalinhados ao framework atual.
+  - Identificação e extração da parte core comum entre boilerplates (invariantes universais leves do research §8.1).
+  - Estratégia de versionamento de boilerplates pós-npm: como mudanças se propagam para consumidores via `adopt`; semver dos templates; compatibilidade entre versões.
+- **Vínculos cruzados:** estes três pré-requisitos compõem a candidata `boilerplate-system-modernization` no backlog (slug per ADR 0017). Implementação completa de boilerplate por classe depende dessa candidata materializada.
+- **Data / Owner:** 2026-05-22 / @rosanarezende
 
 ---
 

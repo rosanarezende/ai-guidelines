@@ -45,6 +45,28 @@ Detalhes de lifecycle em [`.core/process/governance-foundation.md`](../../../.co
 - **Riscos antecipados:** retrofit precisa preservar gates explícitos de autorização (`[REVIEW]`, `[COMMIT]`) que ADR 0021 craveia como handoff humano — só "checklist operacional cego" (`[1.X.N]`, mensagem literal) sai; gates ficam. Confundir os dois recriaria o problema oposto (perda de autorização explícita).
 - **Não-objetivo:** redesenhar lifecycle (D01, ADR 0020, ADR 0021 são premissas estáveis); apenas alinhar a forma textual do template canônico ao contrato já cravado.
 
+### `boilerplate-system-modernization`
+
+- **Fonte do insight:** [DEC-0023-F03] resolvido em PR5 S5 da Spec 0023 (2026-05-22). Decisão de boilerplate dedicado por classe (opção A) traz três pré-requisitos estruturais que não cabem na Spec 0023 e exigem trabalho dedicado.
+- **Diagnóstico estrutural:** o sistema de boilerplates do framework nasceu em contexto anterior à existência do CLI, do workflow runtime e do wizard operacional. Carrega peso conceitual que pode estar desalinhado ao framework atual. Com a Spec 0023 cravando direção de modelo/boundary/template por classe (F01+F02+F03 = B+B+A), o sistema de boilerplates precisa ser modernizado antes de a coexistência de múltiplos templates ser viável.
+- **Escopo proposto (a confirmar quando a spec abrir):**
+  - **Refresh do boilerplate atual de `spec`** — auditar peso conceitual herdado de contexto pré-CLI/pré-workflow/pré-wizard. Eliminar partes obsoletas; alinhar ao framework atual.
+  - **Extração de core comum entre boilerplates** — identificar invariantes universais leves (accountability + traceability + outcome registration, research §8.1 da 0023) e materializar como núcleo compartilhado. Cada boilerplate por classe importa o core e adiciona partes específicas.
+  - **Estratégia de versionamento de boilerplates pós-npm** — como mudanças se propagam para consumidores via `adopt`; semver dos templates; compatibilidade entre versões; estratégia de migração quando boilerplate evolui.
+  - **Integração com wizard CLI** — wizard ajuda o consumidor a selecionar o boilerplate adequado por classe; lógica de seleção declarativa (cf. insight `Wizard operacional mínimo` em `NEXT.md` da Spec 0023).
+- **Pré-requisitos:**
+  - Spec 0023 mergeada (atômico ponta-a-ponta per ADR 0020).
+  - F01 (modelo por classe) e F02 (boundary por classe) cravados (já resolvidos em PR5 S5).
+- **Sinal de "está na hora":** Spec 0023 fechar OU implementação de qualquer classe ≠ `spec` ser pleiteada (sem o sistema modernizado, implementação leva a divergência de templates).
+- **Riscos antecipados:**
+  - **Refresh do boilerplate de spec quebrar specs ativas que já o consumiram** — mitigação: política de migração explícita; versionamento semver; specs antigas referenciam versão antiga até migração planejada.
+  - **Core comum vira camada de abstração frágil** — mitigação: extração baseada em invariantes empíricos do research §8.1, não em design especulativo. Conexão com [`Refatorar boilerplates SDD para serem stack-agnostic`](#refatorar-boilerplates-sdd-para-serem-stack-agnostic) — ambas tratam do mesmo sistema de templates; podem ser absorvidas como sub-blocos da mesma spec, ou serializadas com critério claro.
+  - **Versionamento de boilerplates introduz overhead operacional** — mitigação: reaproveitar semver já praticado pelo pacote npm; mudança maior só quando uso real exigir.
+- **Não-objetivos:**
+  - Reescrever lifecycle da Spec 0023 (ADR 0020, ADR 0021, F01–F05 são premissas estáveis).
+  - Mover boilerplates para fora do repo (continuam SSOT versionado).
+- **Slug:** `boilerplate-system-modernization` (per ADR 0017).
+
 ### Arquitetura de regras portáveis vs. contexto framework-interno — "como ai-guidelines não vira nova fonte de repetição"
 
 - **Fonte do insight:** sessão de trabalho em 2026-05-20 (PR `fix/package-scripts-reorganization`). Owner observou que, ao longo da conversa, eu (IA) salvei vários _memory feedbacks_ em `~/.claude/projects/.../memory/` — utilizáveis apenas no Claude Code local desta máquina. Para Codex, Gemini, Cursor (ou Claude Code em outra máquina), esse contexto desaparece.
