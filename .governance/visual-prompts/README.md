@@ -9,6 +9,8 @@ Templates de prompts versionados invocados pelo **wizard CLI** (opção "Gerar p
 | `architecture-end-to-end.prompt.md` | (nenhuma)                         | Estrutura arquitetural do repositório atual (camadas, componentes). |
 | `value-delivered.prompt.md`         | `{{context}}`, `{{localContext}}` | Comparativo antes/depois de um PR ou spec específica.               |
 
+> **Prompts editoriais específicos do framework `ai-guidelines`** (capa do README, capas DX) vivem em [`docs/editorial/`](../../docs/editorial/) — gênero distinto (prompts diretos para gerador de imagem, não briefings dirigidos a IA conversacional); não invocáveis via wizard.
+
 ## Fluxo (todos os tipos hoje seguem o mesmo padrão: 2 etapas)
 
 ```
