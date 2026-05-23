@@ -68,8 +68,26 @@ Requer **Node ≥ 22**. Para fixar versão em CI: `npx ai-guidelines@<versão> .
 | `npx ai-guidelines adopt`     | Repositório existente, adoção conservadora (preserva código legado) |
 | `npx ai-guidelines providers` | Adicionar ou remover AI provider entrypoints específicos            |
 | `npx ai-guidelines update`    | Re-aplicar baseline após upgrade da CLI (headless, idempotente)     |
+| `npx ai-guidelines workflow`  | Wizard operacional do runtime (preview — cf. Spec 0023)             |
+| `npx ai-guidelines continue`  | Briefing da spec ativa + enforcement L2 (preview — cf. Spec 0023)   |
 
 Todo comando aceita `--dry-run` para preview e `--help` para detalhes. Sem argumentos, a CLI inicia o wizard.
+
+## Workflow Runtime (preview)
+
+> **Preview — UX may evolve.** Capacidades em validação empírica. Versão estável requer ao menos 1 consumidor externo + materialização das candidatas próximas do backlog.
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/rosanarezende/ai-guidelines/main/docs/assets/ai-guidelines-dx-flow.png" alt="ai-guidelines workflow runtime — sessão típica em 4 momentos: wizard, execução, estado publicado, enforcement" width="880">
+</p>
+
+A partir do `1.1.0-preview`, a CLI ganha um **runtime operacional** que opera sobre o ciclo de governança sem substituí-lo:
+
+- **`npx ai-guidelines workflow`** — wizard com opções declarativas para navegar specs ativas, retomar trabalho, publicar estado e diagnosticar drift.
+- **`npx ai-guidelines continue`** — briefing da spec ativa com enforcement de pré-condições estruturais (recusa narrativamente quando a spec não está pronta para execução).
+- **Estado canônico no repo** — `.governance/runtime/active-specs.yml` lista specs ativas com schema fechado; descoberta cross-machine sem dashboard externo.
+
+Runtime nunca embute LLM: integração com agentes IA acontece via ferramenta externa sob comando humano. Detalhes operacionais e decisões arquiteturais em [`.governance/specs/0023-workflow-runtime/`](.governance/specs/0023-workflow-runtime/).
 
 ## Como funciona (em um minuto)
 
