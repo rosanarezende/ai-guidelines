@@ -46,8 +46,9 @@
 | `[DEC-0023-G02]` | G     | Resolved |
 | `[DEC-0023-G03]` | G     | Resolved |
 | `[DEC-0023-G04]` | G     | Resolved |
+| `[DEC-0023-I01]` | I     | Resolved |
 
-**Status agregado:** Partial — Blocos A/B/C/D/E/G Resolved; Bloco F com 5 pontos Pendentes derivados do research `[research/lifecycle-architecture.md]`.
+**Status agregado:** Partial — Blocos A/B/C/D/E/G/I Resolved; Bloco F com 5 pontos Pendentes derivados do research `[research/lifecycle-architecture.md]`.
 
 ---
 
@@ -1077,6 +1078,65 @@ Para preservar enforcement estrutural enquanto a accountability transfere, fast-
 
 ---
 
+## Bloco I — Modelo de identidade canônica da spec
+
+> **Origem:** bug reportado em 2026-05-23 — `yarn guidelines workflow` na branch `feat/spec-0023-dx-thinking` falha porque `DetectActiveSpec` deriva slug literal `0023-dx-thinking`, que não casa o diretório canônico `0023-workflow-runtime`. Causa-raiz não é regex: é **modelagem incorreta da identidade da spec**. O runtime tratou o **escopo operacional do branch** (`dx-thinking`) como **identificador canônico**. Em arquitetura sem stack isso funciona; em stack multi-PR (já vigente desde Spec 0021/ADR 0020), viola a separação entre identity e coordenação.
+>
+> **Princípio canônico cravado neste bloco (citável cross-spec):**
+> **Branch names são artefatos de coordenação operacional, não identificadores canônicos de spec.** A identidade canônica é o id `NNNN` (4 dígitos zero-padded, único por construção, cravado no nome do diretório `.governance/specs/NNNN-<slug>/`). O branch carrega o id, mas o sufixo após `feat/spec-NNNN-` é livre — pode ser o slug da spec, escopo de PR (`dx-thinking`), ou qualquer recorte operacional.
+
+### [DEC-0023-I01] Resolução de spec ativa por identity canônica (id NNNN), não por branch slug literal
+
+**Pergunta:** Como o runtime resolve qual é a spec ativa quando o sufixo do branch representa **escopo de PR**, não slug canônico da spec?
+
+**Contexto:**
+
+- Bug 2026-05-23 — wizard "Continuar spec atual" na branch `feat/spec-0023-dx-thinking` falha; `DetectActiveSpec` procura `.governance/specs/0023-dx-thinking/`, que não existe.
+- Em PR3 (cf. `[DEC-0023-G02]`), `PublishState` ganhou fallback privado `resolveLocationFromIndexBranchMatch()` que consulta `active-specs.yml` para resolver spec quando branch ≠ slug canônico. Escopo conscientemente restrito a "caller único hoje"; documentado em `NEXT.md` 2026-05-21 como **não-vigilância** ("é resolução").
+- O sinal "caller único" virou "≥ 2 callers com a mesma fricção" quando o wizard `workflow` → "Continuar spec atual" também chamou `DetectActiveSpec` direto. Recorrência inequívoca pela regra de promoção de sinais distribuídos (memory `feedback_lookup_not_coordination`).
+- Fallback via `active-specs.yml` é **arquiteturalmente smell**: acopla resolução **local** à camada de **publication/projection**. Cria dependência temporal indireta — se índice está stale ou nunca foi publicado da branch corrente, resolução local quebra. Viola a separação **detection** (runtime local) vs **publication** (projection layer) cravada em `[DEC-0023-G01]`.
+
+**Opções:**
+
+| Opção | Descrição                                                                                                                                             | Pró                                                                                                                                                                                                                                                                                     | Contra                                                                                                                                                                                             |
+| :---- | :---------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A     | **Cascata de fallbacks** (branch slug literal → id NNNN → `active-specs.yml` branch-match → null narrativo)                                           | Cobre todos os casos atuais; máxima compatibilidade retroativa                                                                                                                                                                                                                          | Heurística escondida; debugging difícil ("por que resolveu essa e não outra?"); acopla local resolution à projection; cresce surface area silenciosamente — exato smell que a 0023 promete impedir |
+| B     | **Identity por id canônico** (regex captura `NNNN`; lookup `.governance/specs/NNNN-*` com 1 match → resolve; 0 → erro narrativo; >1 → erro narrativo) | Single-step, determinístico; identity explícita; sem acoplamento à projection; permite remover `PublishState.resolveLocationFromIndexBranchMatch()` (dead code post-refator); honra `feedback_lookup_not_coordination` (lookup sem inferência); colapsa dois caminhos divergentes em um | Erro narrativo em vez de fuzzy quando branch fora do padrão; identity collision (cenário inválido por construção) vira erro em vez de "escolha mais provável" — aceito como feature, não bug       |
+| C     | **Status quo + documentar convenção** (branch slug DEVE ser igual ao slug da spec; sempre renomear branch ao stackear)                                | Zero código                                                                                                                                                                                                                                                                             | Quebra a realidade do stack multi-PR já vigente; força renomear branches; viola Rule 1 (carga cognitiva — humano coordenando branch naming); abandona o esforço de PR3 sem ganho                   |
+
+**Decisão do Gate Humano:**
+
+- **Status:** [x] Resolvido
+- **Escolha:** [ ] A | [x] B | [ ] C
+- **Justificativa:** Cascata (A) carrega o smell exato que a 0023 inteira tenta impedir — surface area crescendo silenciosamente, fallbacks empilhados, acoplamento temporal indireto entre detection (runtime local) e projection (`active-specs.yml`). B materializa o princípio canônico do header deste bloco: **id é identity; branch é coordenação**. Single-step, determinístico, transparente. Side-effect arquitetural positivo: `PublishState.resolveLocationFromIndexBranchMatch()` vira dead code e é removida no commit de implementação — dois caminhos divergentes (DetectActiveSpec literal + PublishState com índice) colapsam em um canônico.
+- **Vocabulário cravado (citável cross-spec):**
+  - **spec identity** = id `NNNN` (4 dígitos zero-padded; único por construção; cravado no nome do diretório).
+  - **spec slug** = sufixo humano-friendly do nome do diretório (`workflow-runtime`); leitura, não lookup.
+  - **branch scope** = sufixo do branch após `feat/spec-NNNN-`; transitório; livre forma (slug da spec, escopo de PR, recorte operacional).
+  - **identity resolver** = `DetectActiveSpec` — lookup por id NNNN. **Não** consulta projection layer.
+  - **projection layer** = `active-specs.yml` — publicação declarativa do estado público. **Não** é primary resolver de identity local.
+- **Implementação cravada (commit de código separado per [CORE-06]):**
+  - `DetectActiveSpec.ts`: regex captura `NNNN`; lookup determinístico `.governance/specs/NNNN-*` → fallback de root `.specify/specs/NNNN-*`; 1 match → resolve; 0/>1 → erro narrativo orientativo.
+  - `PublishState.ts`: remoção de `resolveLocationFromIndexBranchMatch()` (dead code pós-refator). PublishState passa a usar `DetectActiveSpec` sem fallback paralelo.
+  - Tests BDD pt-BR cobrindo: branch canônico resolve; branch escopo-de-PR resolve via id; branch fora do padrão erro narrativo; identity collision (>1 diretório com mesmo id) erro narrativo expondo bug estrutural.
+- **Não-objetivos cravados (vetados por default; reabrir exige DEC própria):**
+  - Inferir spec por arquivos modificados (frágil; já rejeitado em `[DEC-0023-A04]`).
+  - Consultar `active-specs.yml` para resolução local (projection ≠ primary resolver — cravado neste bloco).
+  - Sugerir "spec mais provável" em ambiguidade (inferência disfarçada).
+  - Cascata de fallbacks (smell explicitamente cravado).
+  - Fuzzy match em branch slug (heurística rejeitada por construção).
+- **Data / Owner:** 2026-05-23 / @rosanarezende
+
+---
+
+### Riscos conscientemente aceitos no Bloco I
+
+- **Erro narrativo em vez de fuzzy-resolve.** Usuário em branch fora do padrão `feat/spec-NNNN-*` (HEAD detached, branch sem prefix, branch antigo sem id) recebe erro orientativo, não tentativa de adivinhar. Aceito: orientação > magic.
+- **Identity collision vira erro narrativo, não auto-resolve.** Múltiplos diretórios com mesmo `NNNN` é cenário inválido por construção (id é único por convenção de numeração); se aparecer, é dívida estrutural a corrigir. Aceito: erro expõe bug em vez de mascarar com heurística.
+- **`branchScope` pode divergir de `spec slug` sem warning forte.** Exemplo: branch `feat/spec-0023-dx-thinking` resolve para diretório `0023-workflow-runtime` silenciosamente. Mitigação opcional no commit de implementação: `DetectActiveSpec` expõe `branchScope` no resultado; `runContinue`/wizard podem exibir nota informativa de transparência ("branch scope: dx-thinking; spec ativa: workflow-runtime"). Decisão de UX no commit de código, não neste DEC.
+
+---
+
 ## ✅ Gate fechado — Stage A → Stage B (Bloco A)
 
 - **Data:** 2026-05-19
@@ -1141,6 +1201,17 @@ Para preservar enforcement estrutural enquanto a accountability transfere, fast-
   - [x] `[DEC-0023-G02]` — `.governance/runtime/active-specs.yml` como índice público mínimo (Opção B)
   - [x] `[DEC-0023-G03]` — `yarn workflow publish-state` manual primeiro; automação depois (Opção A)
 - **Princípio operativo:** o índice público em `main` existe para descoberta e navegação operacional. Ele **não** define contrato da spec nem substitui a branch ativa como artefato denso.
+
+---
+
+## ✅ Gate fechado — Modelo de identidade canônica da spec (Bloco I)
+
+- **Data:** 2026-05-23
+- **Owner:** @rosanarezende
+- **Pontos resolvidos:**
+  - [x] `[DEC-0023-I01]` — Resolução de spec ativa por identity canônica (id NNNN), não por branch slug literal (Opção B); remove `PublishState.resolveLocationFromIndexBranchMatch()` no commit de implementação
+- **Princípio canônico (citável cross-spec):** Branch names são artefatos de coordenação operacional, não identificadores canônicos de spec. Spec identity = id `NNNN`; branch scope = sufixo livre. Detection (runtime local) ≠ projection (`active-specs.yml`).
+- **Commit de código:** separado per `[CORE-06]` — `feat(workflow): resolve active spec by canonical spec id (Bloco I)`.
 
 ---
 
