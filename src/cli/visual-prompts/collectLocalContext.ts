@@ -1,6 +1,14 @@
-import { execSync } from "node:child_process";
+import { execFileSync } from "node:child_process";
 import { WorkflowFileSystem } from "../../app/ports/WorkflowFileSystem.js";
 import { ContextTarget } from "./ContextTarget.js";
+
+/**
+ * Sempre execFileSync com args array — nunca string interpolada via shell.
+ * Refnames vindos de `gh pr view` (controlados pelo upstream do PR) entram
+ * como dados em argv, não como tokens de shell. Fecha CWE-78 (command
+ * injection) mesmo no caminho aparentemente "controlado" — refspec como
+ * `; rm -rf .` numa branch maliciosa não é interpretado.
+ */
 
 export interface CollectContextOptions {
   readonly repoRoot: string;
@@ -40,11 +48,15 @@ function collectPrContext(prNumber: number, options: CollectContextOptions): str
 
   try {
     // Executa gh pr view com timeout de 3 segundos para evitar travamentos
-    const stdout = execSync(`gh pr view ${prNumber} --json title,body,headRefName,baseRefName`, {
-      cwd: options.repoRoot,
-      stdio: ["ignore", "pipe", "ignore"],
-      timeout: 3000,
-    }).toString("utf-8");
+    const stdout = execFileSync(
+      "gh",
+      ["pr", "view", String(prNumber), "--json", "title,body,headRefName,baseRefName"],
+      {
+        cwd: options.repoRoot,
+        stdio: ["ignore", "pipe", "ignore"],
+        timeout: 3000,
+      }
+    ).toString("utf-8");
 
     prData = JSON.parse(stdout);
   } catch {
@@ -62,8 +74,15 @@ function collectPrContext(prNumber: number, options: CollectContextOptions): str
     // Tenta coletar logs do Git usando as branches do PR
     if (prData.headRefName && prData.baseRefName) {
       try {
-        const gitLog = execSync(
-          `git log origin/${prData.baseRefName}..origin/${prData.headRefName} --oneline -n 10`,
+        const gitLog = execFileSync(
+          "git",
+          [
+            "log",
+            `origin/${prData.baseRefName}..origin/${prData.headRefName}`,
+            "--oneline",
+            "-n",
+            "10",
+          ],
           {
             cwd: options.repoRoot,
             stdio: ["ignore", "pipe", "ignore"],
@@ -78,8 +97,9 @@ function collectPrContext(prNumber: number, options: CollectContextOptions): str
       } catch {
         // Tenta localmente sem origin/ se falhar (ex. offline)
         try {
-          const gitLogLocal = execSync(
-            `git log ${prData.baseRefName}..${prData.headRefName} --oneline -n 10`,
+          const gitLogLocal = execFileSync(
+            "git",
+            ["log", `${prData.baseRefName}..${prData.headRefName}`, "--oneline", "-n", "10"],
             {
               cwd: options.repoRoot,
               stdio: ["ignore", "pipe", "ignore"],
@@ -97,8 +117,9 @@ function collectPrContext(prNumber: number, options: CollectContextOptions): str
       }
 
       try {
-        const gitDiff = execSync(
-          `git diff origin/${prData.baseRefName}...origin/${prData.headRefName} --stat`,
+        const gitDiff = execFileSync(
+          "git",
+          ["diff", `origin/${prData.baseRefName}...origin/${prData.headRefName}`, "--stat"],
           {
             cwd: options.repoRoot,
             stdio: ["ignore", "pipe", "ignore"],
@@ -112,8 +133,9 @@ function collectPrContext(prNumber: number, options: CollectContextOptions): str
         }
       } catch {
         try {
-          const gitDiffLocal = execSync(
-            `git diff ${prData.baseRefName}...${prData.headRefName} --stat`,
+          const gitDiffLocal = execFileSync(
+            "git",
+            ["diff", `${prData.baseRefName}...${prData.headRefName}`, "--stat"],
             {
               cwd: options.repoRoot,
               stdio: ["ignore", "pipe", "ignore"],
@@ -134,7 +156,7 @@ function collectPrContext(prNumber: number, options: CollectContextOptions): str
     // Se o gh falhar por completo, tentamos coletar dados locais do HEAD atual como fallback best-effort
     lines.push("(Note: GitHub CLI evidence not available or offline)");
     try {
-      const gitLog = execSync(`git log -n 5 --oneline`, {
+      const gitLog = execFileSync("git", ["log", "-n", "5", "--oneline"], {
         cwd: options.repoRoot,
         stdio: ["ignore", "pipe", "ignore"],
         timeout: 2000,
@@ -147,7 +169,7 @@ function collectPrContext(prNumber: number, options: CollectContextOptions): str
     } catch {}
 
     try {
-      const gitDiff = execSync(`git diff HEAD~1 --stat`, {
+      const gitDiff = execFileSync("git", ["diff", "HEAD~1", "--stat"], {
         cwd: options.repoRoot,
         stdio: ["ignore", "pipe", "ignore"],
         timeout: 2000,
