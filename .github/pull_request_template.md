@@ -38,24 +38,43 @@ de governança na Spec 0023 — não é marketing, é comunicação operacional.
 
 ## Visual de valor entregue (opcional)
 
-<!-- ![valor entregue](URL_DA_IMAGEM) -->
+<!--
+Imagem única:
+  ![valor entregue](URL_DA_IMAGEM)
+
+Before/After side-by-side (sem <form>; só HTML estrutural):
+  <table>
+    <tr>
+      <td align="center"><strong>ANTES</strong><br/><img src="URL_ANTES" width="380"/></td>
+      <td align="center"><strong>DEPOIS</strong><br/><img src="URL_DEPOIS" width="380"/></td>
+    </tr>
+  </table>
+-->
 
 ## Status do ciclo de vida
 
-> **Draft, Ready e Mergeable são estados distintos** (cf. [ADR 0024](../.core/governance/adrs/0024-draft-ready-mergeable-distinct-states.md)).
-> Este PR pode estar `Ready` sem estar pronto para merge — stacks governance-first
-> (cf. [ADR 0020](../.core/governance/adrs/0020-governance-precede-execution.md)) integram em sequência atômica ponta-a-ponta.
+> Lifecycle: <kbd>Draft</kbd> → <kbd>Ready for review</kbd> → <kbd>Authorized to merge</kbd>
+>
+> **Ready ≠ Mergeable** (cf. [ADR 0024](../.core/governance/adrs/0024-draft-ready-mergeable-distinct-states.md)).
+> Em stacks governance-first (cf. [ADR 0020](../.core/governance/adrs/0020-governance-precede-execution.md)), integração ocorre em sequência atômica ponta-a-ponta; conversão `Draft → Ready` **não** autoriza merge.
 
 - [ ] **Draft** — trabalho em andamento; não solicita review ainda
 - [ ] **Ready for review** — operacionalmente concluído; aguarda revisão humana
-- [ ] **Authorized to merge** — owner autorizou; stack inteira pronta (se aplicável)
+
+<!--
+"Authorized to merge" é ato humano explícito — registrado na seção "Merge
+authorization" abaixo como texto, não como checkbox. ADR 0024 separa os
+3 estados para impedir leitura "Ready = mergeable".
+-->
 
 ## PR Type
 
-- [ ] 🧾 Governance — spec/decision-brief/plan/tasks/research/ADR
-- [ ] 🛠️ Execution — código + docs derivados
-- [ ] 🔗 Integration — homologação/convergência final da stack; sem comportamento novo
-- [ ] 🚑 Fast-track — patch/fix/incident pequeno (accountability transferida; cf. [ADR 0021](../.core/governance/adrs/0021-enforcement-precedes-awareness.md))
+Escolha **uma** opção (mova 🔘 para a sua; deixe ⚪ nas outras):
+
+- ⚪ 🧾 **Governance** — spec/decision-brief/plan/tasks/research/ADR
+- ⚪ 🛠️ **Execution** — código + docs derivados
+- ⚪ 🔗 **Integration** — homologação/convergência final da stack; sem comportamento novo
+- ⚪ 🚑 **Fast-track** — patch/fix/incident pequeno (accountability transferida; cf. [ADR 0021](../.core/governance/adrs/0021-enforcement-precedes-awareness.md))
 
 ## Posição na stack
 
@@ -63,9 +82,11 @@ de governança na Spec 0023 — não é marketing, é comunicação operacional.
 - **Upstream (depends on)**: <!-- #prev OU "main" -->
 - **Downstream (followed by)**: <!-- #next OU "terminal" -->
 
-- [ ] Mergeable isoladamente (sem stack governance-first)
-- [ ] Apenas merge atômico ponta-a-ponta da stack (per ADR 0020)
-- [ ] Integration PR — agrega evidência de convergência; não autoriza merge sozinho
+Tipo de merge (escolha **uma**; mova 🔘 para a sua):
+
+- ⚪ **Mergeable isoladamente** — sem stack governance-first
+- ⚪ **Apenas merge atômico ponta-a-ponta** — stack governance-first (per ADR 0020)
+- ⚪ **Integration PR** — agrega evidência de convergência; não autoriza merge sozinho
 
 ## Merge authorization
 
@@ -92,10 +113,25 @@ porque a maioria dos PRs não tem; mas quando tem, é informação crítica.
 ## Test plan
 
 <!--
-Como o reviewer valida? Liste comandos concretos, fluxos a exercitar, observações.
+Resumo curto: como o reviewer valida? Comandos chave + 1-2 observações.
 Para runtime/wizard/UX: explique o caminho de uso real, não apenas "tests green".
 Para governance: cite os artefatos que mudam de estado (DECs, ADRs, status agregado).
 -->
+
+<details>
+<summary><strong>Test plan detalhado (opcional — comandos completos, coverage report, smoke matrix)</strong></summary>
+
+<!--
+Para PRs grandes, cole aqui:
+- comandos completos de validação (yarn ci, smoke multi-OS, etc.)
+- coverage report ou delta vs baseline
+- fluxos exploratórios manuais
+- screenshots/logs relevantes
+
+Para PRs pequenos, pode deletar este bloco — o resumo acima basta.
+-->
+
+</details>
 
 ## Cross-refs
 
@@ -114,7 +150,20 @@ Para governance: cite os artefatos que mudam de estado (DECs, ADRs, status agreg
 ## Disclosure de IA
 
 <!--
-Este PR foi gerado ou co-gerado por IA? Liste agente/modelo + papel.
-Ex: "Implementação: Antigravity (Gemini 3 Flash); Review crítico paralelo:
-Claude Opus 4.7; Decisão final: humano (@rosanarezende)."
+Resumo curto: agentes envolvidos + papel + quem autorizou.
+Ex: "Implementação: Antigravity (Gemini 3 Flash); review paralelo: Claude Opus 4.7;
+decisão final: humano (@rosanarezende)."
 -->
+
+<details>
+<summary><strong>Disclosure detalhada (opcional — múltiplas sessões, divergências, tri-party)</strong></summary>
+
+<!--
+Para PRs com múltiplos agentes IA ou sessões longas, cole aqui:
+- agentes/modelos por sessão + papel (implementação, review, segunda opinião)
+- divergências documentadas (onde escolheu A vs B, citação do raciocínio)
+- gates humanos por commit (CORE-07/14)
+- ferramentas externas usadas (Codex CLI, Antigravity, Cursor, etc.)
+-->
+
+</details>
