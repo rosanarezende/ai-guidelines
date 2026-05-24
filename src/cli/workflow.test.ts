@@ -1,6 +1,6 @@
 import { WorkflowState } from "../domain/workflow/WorkflowState.js";
 import { ClipboardWriter } from "../app/ports/ClipboardWriter.js";
-import { Prompts, SelectOptions, InputOptions } from "../app/ports/Prompts.js";
+import { ConfirmOptions, InputOptions, Prompts, SelectOptions } from "../app/ports/Prompts.js";
 import { WorkflowFileSystem } from "../app/ports/WorkflowFileSystem.js";
 import { ListActiveSpecsResult } from "../app/workflow/ListActiveSpecs.js";
 import {
@@ -33,17 +33,23 @@ class CollectingLogger implements Logger {
 }
 
 /**
- * Stub de `Prompts` para tests. Cada chamada (`select` ou `input`) consome
- * a próxima resposta do array. Para `select`, a resposta é o `value` esperado
- * — se não bater com nenhum choice, lança erro com diagnóstico.
+ * Stub de `Prompts` para tests. Cada chamada (`select` / `input` / `confirm`)
+ * consome a próxima resposta do array unificado. Aceita `string` (para
+ * select/input) e `boolean` (para confirm); tipo é validado por consumidor
+ * para detectar mismatch de script em test fail-fast.
  */
 class FakePrompts implements Prompts {
   private idx = 0;
-  constructor(private readonly answers: ReadonlyArray<string>) {}
+  constructor(private readonly answers: ReadonlyArray<string | boolean>) {}
   async select<T = string>(options: SelectOptions<T>): Promise<T> {
     const answer = this.answers[this.idx++];
     if (answer === undefined) {
       throw new Error(`FakePrompts: select sem resposta restante (message="${options.message}")`);
+    }
+    if (typeof answer !== "string") {
+      throw new Error(
+        `FakePrompts: select esperava string mas recebeu ${typeof answer} (message="${options.message}")`
+      );
     }
     const choice = options.choices.find((c) => String(c.value) === answer);
     if (!choice) {
@@ -56,7 +62,23 @@ class FakePrompts implements Prompts {
   }
   async input(_options: InputOptions): Promise<string> {
     const answer = this.answers[this.idx++];
-    return answer ?? "";
+    if (answer === undefined) return "";
+    if (typeof answer !== "string") {
+      throw new Error(`FakePrompts: input esperava string mas recebeu ${typeof answer}`);
+    }
+    return answer;
+  }
+  async confirm(options: ConfirmOptions): Promise<boolean> {
+    const answer = this.answers[this.idx++];
+    if (answer === undefined) {
+      throw new Error(`FakePrompts: confirm sem resposta restante (message="${options.message}")`);
+    }
+    if (typeof answer !== "boolean") {
+      throw new Error(
+        `FakePrompts: confirm esperava boolean mas recebeu ${typeof answer} (message="${options.message}")`
+      );
+    }
+    return answer;
   }
 }
 
@@ -541,6 +563,9 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
         async input() {
           return "";
         },
+        async confirm() {
+          return false;
+        },
       };
 
       const code = await runWorkflow({
@@ -572,6 +597,202 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
     // NOTA: o teste antigo "opção desconhecida no wizard" foi removido após migração para
     // inquirer/select — agora é impossível digitar opção fora da lista (inquirer restringe
     // navegação às choices declaradas).
+
+    // ─── Wizard options 4 e 5: tier 2 transactional (cf. [DEC-0023-L01]) ───
+    // Estes options têm side-effects via StackOps. Tests usam FakeStackOps
+    // injetado via `options.stack` para registrar chamadas sem invocar `gh`.
+
+    it("DADO wizard opção 4 (open-integration-pr) + integration-pr.md presente + confirmação ENTÃO chama StackOps.createPullRequest e loga URL do PR", async () => {
+      const logger = new CollectingLogger();
+      // ["open-integration-pr", true] = wizard select + confirm "y"
+      const prompts = new FakePrompts(["open-integration-pr", true]);
+      const fs = new StubFs(
+        new Map([
+          [".governance/specs/0023-workflow-runtime/spec.md", sampleSpec],
+          [".governance/specs/0023-workflow-runtime/state.yml", sampleState],
+          [
+            ".governance/specs/0023-workflow-runtime/integration-pr.md",
+            "## Integration PR\n\nHomologação da stack.",
+          ],
+        ]),
+        new Set([".governance/specs/0023-workflow-runtime"]),
+        "feat/spec-0023-workflow-runtime"
+      );
+      const stack: import("../app/ports/StackOps.js").StackOps = {
+        createPullRequest: jest.fn().mockReturnValue({
+          number: 99,
+          title: "irrelevant",
+          body: "",
+          state: "OPEN" as const,
+          isDraft: true,
+          headRefName: "feat/spec-0023-workflow-runtime",
+          baseRefName: "main",
+          labels: [],
+          url: "https://github.com/test/repo/pull/99",
+        }),
+        getPullRequest: jest.fn().mockReturnValue(null),
+        editPullRequestBase: jest.fn(),
+        mergePullRequest: jest.fn(),
+        listOpenPullRequests: jest.fn().mockReturnValue([]),
+      };
+      const code = await runWorkflow({
+        repoRoot: "/repo",
+        logger,
+        prompts,
+        clipboard: new FakeClipboard(),
+        fs,
+        stack,
+      });
+      expect(code).toBe(0);
+      expect(stack.createPullRequest).toHaveBeenCalledTimes(1);
+      expect(logger.lines.join("\n")).toMatch(
+        /PR #99 aberto: https:\/\/github\.com\/test\/repo\/pull\/99/
+      );
+    });
+
+    it("DADO wizard opção 4 + negação da confirmação ENTÃO NÃO chama createPullRequest e loga cancelamento", async () => {
+      const logger = new CollectingLogger();
+      const prompts = new FakePrompts(["open-integration-pr", false]);
+      const fs = new StubFs(
+        new Map([
+          [".governance/specs/0023-workflow-runtime/spec.md", sampleSpec],
+          [".governance/specs/0023-workflow-runtime/state.yml", sampleState],
+          [
+            ".governance/specs/0023-workflow-runtime/integration-pr.md",
+            "## Integration PR\n\nbody",
+          ],
+        ]),
+        new Set([".governance/specs/0023-workflow-runtime"]),
+        "feat/spec-0023-workflow-runtime"
+      );
+      const stack: import("../app/ports/StackOps.js").StackOps = {
+        createPullRequest: jest.fn(),
+        getPullRequest: jest.fn(),
+        editPullRequestBase: jest.fn(),
+        mergePullRequest: jest.fn(),
+        listOpenPullRequests: jest.fn().mockReturnValue([]),
+      };
+      const code = await runWorkflow({
+        repoRoot: "/repo",
+        logger,
+        prompts,
+        clipboard: new FakeClipboard(),
+        fs,
+        stack,
+      });
+      expect(code).toBe(0);
+      expect(stack.createPullRequest).not.toHaveBeenCalled();
+      expect(logger.lines.join("\n")).toMatch(/Abertura cancelada/);
+    });
+
+    it("DADO wizard opção 5 (merge-stack) + stack detectada via title + confirmação ENTÃO mergeia PRs sequencialmente via StackOps", async () => {
+      const logger = new CollectingLogger();
+      const prompts = new FakePrompts(["merge-stack", true]);
+      const fs = makeFsWithSpec();
+      const stackPrs: import("../app/ports/StackOps.js").PullRequestData[] = [
+        {
+          number: 18,
+          title: "[🛠️🔒] [Spec 0023] Workflow runtime",
+          body: "",
+          state: "OPEN" as const,
+          isDraft: false,
+          headRefName: "feat/spec-0023-workflow-runtime",
+          baseRefName: "main",
+          labels: [],
+          url: "https://github.com/test/repo/pull/18",
+        },
+        {
+          number: 19,
+          title: "[🧾🔒] [Spec 0023] Lifecycle",
+          body: "",
+          state: "OPEN" as const,
+          isDraft: false,
+          headRefName: "feat/spec-0023-lifecycle",
+          baseRefName: "feat/spec-0023-workflow-runtime",
+          labels: [],
+          url: "https://github.com/test/repo/pull/19",
+        },
+      ];
+      const stack: import("../app/ports/StackOps.js").StackOps = {
+        createPullRequest: jest.fn(),
+        getPullRequest: jest.fn((n: number) => stackPrs.find((p) => p.number === n) ?? null),
+        editPullRequestBase: jest.fn(),
+        mergePullRequest: jest.fn(),
+        listOpenPullRequests: jest.fn().mockReturnValue(stackPrs),
+      };
+      const code = await runWorkflow({
+        repoRoot: "/repo",
+        logger,
+        prompts,
+        clipboard: new FakeClipboard(),
+        fs,
+        stack,
+      });
+      expect(code).toBe(0);
+      // #18 (base=main) NÃO precisa editBase; #19 precisa
+      expect(stack.editPullRequestBase).toHaveBeenCalledTimes(1);
+      expect(stack.editPullRequestBase).toHaveBeenCalledWith(19, "main");
+      // ambos mergeados em ordem
+      expect(stack.mergePullRequest).toHaveBeenCalledTimes(2);
+      expect(stack.mergePullRequest).toHaveBeenNthCalledWith(1, {
+        number: 18,
+        strategy: "squash",
+        deleteBranch: true,
+      });
+      expect(stack.mergePullRequest).toHaveBeenNthCalledWith(2, {
+        number: 19,
+        strategy: "squash",
+        deleteBranch: true,
+      });
+      expect(logger.lines.join("\n")).toMatch(/Stack atomic merge completo: 2 PRs/);
+    });
+
+    it("DADO wizard opção 5 + negação da confirmação ENTÃO 0 merges executados e loga cancelamento", async () => {
+      const logger = new CollectingLogger();
+      const prompts = new FakePrompts(["merge-stack", false]);
+      const fs = makeFsWithSpec();
+      const stack: import("../app/ports/StackOps.js").StackOps = {
+        createPullRequest: jest.fn(),
+        getPullRequest: jest.fn().mockReturnValue({
+          number: 18,
+          title: "[🛠️🔒] [Spec 0023] Workflow runtime",
+          body: "",
+          state: "OPEN" as const,
+          isDraft: false,
+          headRefName: "feat/spec-0023-workflow-runtime",
+          baseRefName: "main",
+          labels: [],
+          url: "https://github.com/test/repo/pull/18",
+        }),
+        editPullRequestBase: jest.fn(),
+        mergePullRequest: jest.fn(),
+        listOpenPullRequests: jest.fn().mockReturnValue([
+          {
+            number: 18,
+            title: "[🛠️🔒] [Spec 0023] Workflow runtime",
+            body: "",
+            state: "OPEN" as const,
+            isDraft: false,
+            headRefName: "feat/spec-0023-workflow-runtime",
+            baseRefName: "main",
+            labels: [],
+            url: "https://github.com/test/repo/pull/18",
+          },
+        ]),
+      };
+      const code = await runWorkflow({
+        repoRoot: "/repo",
+        logger,
+        prompts,
+        clipboard: new FakeClipboard(),
+        fs,
+        stack,
+      });
+      expect(code).toBe(0);
+      expect(stack.mergePullRequest).not.toHaveBeenCalled();
+      expect(stack.editPullRequestBase).not.toHaveBeenCalled();
+      expect(logger.lines.join("\n")).toMatch(/Merge cancelado/);
+    });
 
     it("DADO wizard opção 6 + tipo 'a' (arquitetura, sem contexto) E template existe ENTÃO copia briefing para clipboard, emite confirmação no logger E NÃO renderiza o prompt", async () => {
       const logger = new CollectingLogger();

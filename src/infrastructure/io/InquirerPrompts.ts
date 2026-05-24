@@ -1,6 +1,10 @@
-import { input as inquirerInput, select as inquirerSelect } from "@inquirer/prompts";
+import {
+  confirm as inquirerConfirm,
+  input as inquirerInput,
+  select as inquirerSelect,
+} from "@inquirer/prompts";
 
-import { InputOptions, Prompts, SelectOptions } from "../../app/ports/Prompts.js";
+import { ConfirmOptions, InputOptions, Prompts, SelectOptions } from "../../app/ports/Prompts.js";
 
 /**
  * Implementação default da porta `Prompts` usando `@inquirer/prompts`.
@@ -25,6 +29,13 @@ export class InquirerPrompts implements Prompts {
     return inquirerInput({
       message: options.message,
       default: options.default,
+    });
+  }
+
+  confirm(options: ConfirmOptions): Promise<boolean> {
+    return inquirerConfirm({
+      message: options.message,
+      default: options.default ?? false,
     });
   }
 }

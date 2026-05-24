@@ -33,7 +33,20 @@ export interface InputOptions {
   readonly default?: string;
 }
 
+export interface ConfirmOptions {
+  readonly message: string;
+  /** Default value se humano apenas pressionar Enter. Default: `false` (segurança). */
+  readonly default?: boolean;
+}
+
 export interface Prompts {
   select<T = string>(options: SelectOptions<T>): Promise<T>;
   input(options: InputOptions): Promise<string>;
+  /**
+   * Prompt y/n. Cravado em `[DEC-0023-L01]` (Bloco L) — necessário para os
+   * wizard options 4/5 (Integration PR + merge-stack) e o standalone
+   * `release-prep` confirmarem side-effects irreversíveis antes de executar.
+   * Default é `false` (segurança): pressionar Enter sem digitar não autoriza.
+   */
+  confirm(options: ConfirmOptions): Promise<boolean>;
 }

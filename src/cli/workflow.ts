@@ -48,6 +48,14 @@ import { InquirerPrompts } from "../infrastructure/io/InquirerPrompts.js";
 import { ClipboardWriter } from "../app/ports/ClipboardWriter.js";
 import { Prompts } from "../app/ports/Prompts.js";
 import { WorkflowFileSystem } from "../app/ports/WorkflowFileSystem.js";
+import { PullRequestData, StackOps } from "../app/ports/StackOps.js";
+import { GhCli } from "../infrastructure/git/GhCli.js";
+import {
+  OpenIntegrationPR,
+  OpenIntegrationPRError,
+  OpenIntegrationPRPlan,
+} from "../app/workflow/OpenIntegrationPR.js";
+import { MergeStack, MergeStackError, MergeStackPlan } from "../app/workflow/MergeStack.js";
 import { parseContextTarget } from "./visual-prompts/parseContextTarget.js";
 import { collectLocalContext } from "./visual-prompts/collectLocalContext.js";
 import { renderVisualPrompt } from "./visual-prompts/renderVisualPrompt.js";
@@ -76,6 +84,12 @@ export interface RunOptions {
    * parser real.
    */
   readonly loadActiveSpecsIndex?: () => ListActiveSpecsResult;
+  /**
+   * Adapter para operações de PR via `gh`. Cravado em `[DEC-0023-L01]`
+   * para suportar wizard options 4 (Integration PR) + 5 (merge-stack).
+   * Default: `GhCli` real (execFileSync). Tests injetam `FakeStackOps`.
+   */
+  readonly stack?: StackOps;
 }
 
 interface ResolvedContext {
@@ -409,6 +423,8 @@ export type WizardChoice =
   | { kind: "continue-current" }
   | { kind: "continue-other"; identifier: string }
   | { kind: "publish-state-help" }
+  | { kind: "open-integration-pr" }
+  | { kind: "merge-stack" }
   | { kind: "list-active" }
   | { kind: "diagnose-drift" }
   | {
@@ -498,18 +514,32 @@ type WizardMenuValue =
   | "continue-current"
   | "continue-other"
   | "publish-state-help"
+  | "open-integration-pr"
+  | "merge-stack"
   | "list-active"
   | "diagnose-drift"
   | "visual-prompt"
   | "quit";
 
+// Ordem cravada em [DEC-0023-L01]:
+//   1-2 (navegação 📍) / 3 (publicar 📡) / 4-5 (governance ops 🔗 🔀)
+//   / 6-7 (inspeção 📋 🔍) / 8 (utilidade 🎨) / q (sair)
+//
+// Anti-patterns vetados (cf. [DEC-0023-B06] + ADR 0024 reafirmados em L01):
+// sem auto-detecção, sem ranking dinâmico, sem inferência de intenção.
+// Agrupamento por posição é implícito (não algorítmico).
 const WIZARD_MENU: ReadonlyArray<{ name: string; value: WizardMenuValue }> = [
-  { name: "Continuar spec atual (briefing + REPL)", value: "continue-current" },
-  { name: "Continuar outra spec (por slug ou id)", value: "continue-other" },
-  { name: "Publicar estado (instruções)", value: "publish-state-help" },
-  { name: "Ver specs ativas (índice público)", value: "list-active" },
-  { name: "Diagnosticar drift do índice", value: "diagnose-drift" },
-  { name: "Gerar prompt visual (para gerador de imagem externo)", value: "visual-prompt" },
+  { name: "📍 Continuar spec atual (briefing + REPL)", value: "continue-current" },
+  { name: "📍 Continuar outra spec (por slug ou id)", value: "continue-other" },
+  { name: "📡 Publicar estado (instruções)", value: "publish-state-help" },
+  { name: "🔗 Abrir Integration PR da spec ativa", value: "open-integration-pr" },
+  { name: "🔀 Executar merge atômico da stack", value: "merge-stack" },
+  { name: "📋 Ver specs ativas (índice público)", value: "list-active" },
+  { name: "🔍 Diagnosticar drift do índice", value: "diagnose-drift" },
+  {
+    name: "🎨 Gerar prompt visual (para gerador de imagem externo)",
+    value: "visual-prompt",
+  },
   { name: "Sair", value: "quit" },
 ];
 
@@ -531,6 +561,10 @@ async function runWizard(prompts: Prompts, logger: Logger): Promise<WizardChoice
     }
     case "publish-state-help":
       return { kind: "publish-state-help" };
+    case "open-integration-pr":
+      return { kind: "open-integration-pr" };
+    case "merge-stack":
+      return { kind: "merge-stack" };
     case "list-active":
       return { kind: "list-active" };
     case "diagnose-drift":
@@ -584,6 +618,265 @@ async function runVisualPromptSubWizard(prompts: Prompts, logger: Logger): Promi
 }
 
 // A função pura renderVisualPrompt foi migrada para src/cli/visual-prompts/renderVisualPrompt.ts
+
+/**
+ * Resolve adapter `StackOps`. Default: `GhCli` real (execFileSync).
+ * Tests injetam via `options.stack`.
+ */
+function resolveStackOps(options: RunOptions): StackOps {
+  return options.stack ?? new GhCli(options.repoRoot);
+}
+
+/**
+ * Topo-sort de PRs por relação base→head, partindo de `mainBranch` como raiz.
+ *
+ * Stack governance-first canônico: linear chain (base=main → base=#1.head →
+ * base=#2.head → …). Cravado em `[DEC-0023-L01]`. Anti-patterns vetados:
+ * sem ranking, sem heurística. Determinístico.
+ *
+ * Edge cases (todos viram erro narrativo):
+ *   - 0 PRs com base=main → sem raiz detectável
+ *   - ≥ 2 PRs com mesma base → stack ambíguo (branching)
+ *   - Chain incompleto vs total de PRs → algum PR fora da chain
+ */
+function topoSortStack(
+  prs: ReadonlyArray<PullRequestData>,
+  mainBranch: string
+): ReadonlyArray<PullRequestData> {
+  if (prs.length === 0) return [];
+
+  const byBase = new Map<string, PullRequestData[]>();
+  for (const pr of prs) {
+    const arr = byBase.get(pr.baseRefName) ?? [];
+    arr.push(pr);
+    byBase.set(pr.baseRefName, arr);
+  }
+
+  const result: PullRequestData[] = [];
+  let currentBase = mainBranch;
+  // Loop bound: max prs.length iterações + 1 safety.
+  for (let safety = 0; safety <= prs.length; safety++) {
+    const next = byBase.get(currentBase) ?? [];
+    if (next.length === 0) break;
+    if (next.length > 1) {
+      const candidates = next.map((p) => `#${p.number}`).join(", ");
+      throw new Error(
+        `Stack ambíguo: ${next.length} PRs com base "${currentBase}" (${candidates}). ` +
+          `Stack governance-first canônico é linear; reconcilie bases antes de merge-stack.`
+      );
+    }
+    result.push(next[0]);
+    currentBase = next[0].headRefName;
+  }
+
+  if (result.length !== prs.length) {
+    const missing = prs.filter((p) => !result.includes(p)).map((p) => `#${p.number}`);
+    throw new Error(
+      `Stack incompleto: ${result.length}/${prs.length} PRs em chain ` +
+        `(fora da chain: ${missing.join(", ")}). Verifique bases dos PRs da spec.`
+    );
+  }
+
+  return result;
+}
+
+/**
+ * Detecta stack governance-first da spec ativa para `merge-stack`.
+ *
+ * Filtra PRs abertos com `[Spec NNNN]` no título (convenção cravada em
+ * `.core/process/pr-title-conventions.md`), excluindo Integration PR
+ * (`[Integration]` na label/título) — Integration é homologation artifact,
+ * não é mergeado na stack atomic per ADR 0024.
+ */
+function detectStackForSpec(
+  prs: ReadonlyArray<PullRequestData>,
+  specId: string,
+  mainBranch: string
+): ReadonlyArray<PullRequestData> {
+  const specPrs = prs.filter(
+    (pr) => pr.title.includes(`[Spec ${specId}]`) && !pr.title.includes("[Integration]")
+  );
+  return topoSortStack(specPrs, mainBranch);
+}
+
+/**
+ * Wizard handler para opção 4 (Abrir Integration PR).
+ *
+ * Flow: detect spec via use case → mostra plan → confirma → executa.
+ * Cravado em `[DEC-0023-L01]`. Side-effect: PR aparece em GitHub.
+ */
+async function runOpenIntegrationPRWizard(opts: {
+  logger: Logger;
+  prompts: Prompts;
+  fs: WorkflowFileSystem;
+  stack: StackOps;
+}): Promise<number> {
+  const { logger, prompts, fs, stack } = opts;
+  const useCase = new OpenIntegrationPR(fs, stack);
+
+  let plan: OpenIntegrationPRPlan;
+  try {
+    plan = useCase.plan();
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    logger.error(msg);
+    return 1;
+  }
+
+  logger.info("");
+  logger.info("🔗 Abrir Integration PR da spec ativa");
+  logger.info("");
+  logger.info(`  Spec:        ${plan.specId}-${plan.specSlug}`);
+  logger.info(`  Title:       ${plan.title}`);
+  logger.info(`  Base:        ${plan.base}`);
+  logger.info(`  Head:        ${plan.head}`);
+  logger.info(`  Draft:       ${plan.draft} (per CORE-09)`);
+  logger.info(`  Body source: ${plan.bodyFilePath} (${plan.body.length} chars)`);
+  logger.info("");
+  logger.info(
+    "Side-effect: PR aparece em GitHub UI. Owner converte Draft→Ready depois (per CORE-10 + ADR 0024)."
+  );
+  logger.info("");
+
+  const confirmed = await prompts.confirm({
+    message: "Confirmar abertura do Integration PR?",
+    default: false,
+  });
+  if (!confirmed) {
+    logger.info("Abertura cancelada.");
+    return 0;
+  }
+
+  try {
+    const pr = useCase.execute(plan);
+    logger.info(`✓ PR #${pr.number} aberto: ${pr.url}`);
+    return 0;
+  } catch (err) {
+    if (err instanceof OpenIntegrationPRError) {
+      logger.error(err.message);
+    } else {
+      logger.error(`Falha ao abrir PR: ${err instanceof Error ? err.message : String(err)}`);
+    }
+    return 1;
+  }
+}
+
+/**
+ * Wizard handler para opção 5 (Executar merge atômico da stack).
+ *
+ * Flow: detecta spec → fetch PRs abertos → filtra+topo-sort → mostra plan →
+ * confirma → executa. Cravado em `[DEC-0023-L01]`. Side-effect: merge atômico
+ * irreversível em main + delete branches.
+ */
+async function runMergeStackWizard(opts: {
+  logger: Logger;
+  prompts: Prompts;
+  fs: WorkflowFileSystem;
+  stack: StackOps;
+}): Promise<number> {
+  const { logger, prompts, fs, stack } = opts;
+
+  // Detectar spec via DetectActiveSpec (per [DEC-0023-I01])
+  const detected = new DetectActiveSpec(fs).run();
+  if (!detected.location) {
+    logger.error(
+      `Não foi possível detectar spec ativa: ${detected.reason ?? "razão desconhecida"}. ` +
+        `Faça checkout de uma branch da stack antes de invocar merge-stack.`
+    );
+    return 1;
+  }
+  const dirMatch = /^(\d{4})-(.+)$/.exec(detected.location.slug);
+  if (!dirMatch) {
+    logger.error(`Slug do diretório "${detected.location.slug}" não segue padrão NNNN-slug.`);
+    return 1;
+  }
+  const [, specId] = dirMatch;
+  const mainBranch = "main";
+
+  // Fetch PRs abertos + detect stack
+  let stackPrs: ReadonlyArray<PullRequestData>;
+  try {
+    const openPrs = stack.listOpenPullRequests();
+    stackPrs = detectStackForSpec(openPrs, specId, mainBranch);
+  } catch (err) {
+    logger.error(`Falha ao detectar stack: ${err instanceof Error ? err.message : String(err)}`);
+    return 1;
+  }
+
+  if (stackPrs.length === 0) {
+    logger.error(
+      `Nenhum PR aberto com "[Spec ${specId}]" no título. Stack já mergeada ou ausente.`
+    );
+    return 1;
+  }
+
+  // Build plan
+  const useCase = new MergeStack(stack);
+  let plan: MergeStackPlan;
+  try {
+    plan = useCase.plan({
+      prNumbers: stackPrs.map((p) => p.number),
+      mainBranch,
+      mergeStrategy: "squash",
+    });
+  } catch (err) {
+    logger.error(err instanceof Error ? err.message : String(err));
+    return 1;
+  }
+
+  logger.info("");
+  logger.info("🔀 Executar merge atômico da stack");
+  logger.info("");
+  logger.info(`  Spec:     ${detected.location.slug} (id ${specId})`);
+  logger.info(`  Target:   ${plan.mainBranch}`);
+  logger.info(`  Strategy: --${plan.mergeStrategy} --delete-branch`);
+  logger.info(`  Stack:    ${plan.items.length} PRs em ordem`);
+  logger.info("");
+  for (let i = 0; i < plan.items.length; i++) {
+    const item = plan.items[i];
+    const baseNote = item.needsBaseEdit
+      ? `(edit-base ${item.currentBase} → ${plan.mainBranch} + merge)`
+      : `(merge direto; base já é ${plan.mainBranch})`;
+    logger.info(`  ${i + 1}. PR #${item.prNumber}: ${item.prTitle}`);
+    logger.info(`     ${baseNote}`);
+  }
+  logger.info("");
+  logger.info("ATENÇÃO: side-effects IRREVERSÍVEIS — merge em main + delete de branches remotas.");
+  logger.info("Falha mid-way: erro narrativo + skipSteps para retomar manualmente.");
+  logger.info("");
+
+  const confirmed = await prompts.confirm({
+    message: "Confirmar e iniciar merge atômico da stack?",
+    default: false,
+  });
+  if (!confirmed) {
+    logger.info("Merge cancelado.");
+    return 0;
+  }
+
+  try {
+    useCase.execute(plan, {
+      onItemStart: (item, i) => {
+        logger.info(`[${i + 1}/${plan.items.length}] Mergeando PR #${item.prNumber}...`);
+      },
+      onItemDone: (item, i) => {
+        logger.info(`[${i + 1}/${plan.items.length}] ✓ PR #${item.prNumber} mergeado.`);
+      },
+    });
+    logger.info("");
+    logger.info(`✓ Stack atomic merge completo: ${plan.items.length} PRs em ${plan.mainBranch}.`);
+    return 0;
+  } catch (err) {
+    if (err instanceof MergeStackError) {
+      logger.error(err.message);
+    } else {
+      logger.error(
+        `Falha inesperada em merge-stack: ${err instanceof Error ? err.message : String(err)}`
+      );
+    }
+    return 1;
+  }
+}
 
 export async function runWorkflow(options: RunOptions): Promise<number> {
   const logger = options.logger ?? stdoutLogger;
@@ -646,6 +939,14 @@ export async function runWorkflow(options: RunOptions): Promise<number> {
     logger.info("Estado da spec corrente é projetado de state.yml para active-specs.yml.");
     logger.info("Detalhes: .governance/specs/0023-workflow-runtime/decision-brief.md § Bloco G.");
     return 0;
+  }
+
+  if (choice.kind === "open-integration-pr") {
+    return runOpenIntegrationPRWizard({ logger, prompts, fs, stack: resolveStackOps(options) });
+  }
+
+  if (choice.kind === "merge-stack") {
+    return runMergeStackWizard({ logger, prompts, fs, stack: resolveStackOps(options) });
   }
 
   if (choice.kind === "visual-prompt") {

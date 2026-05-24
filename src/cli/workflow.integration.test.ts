@@ -6,7 +6,7 @@ import * as path from "node:path";
 import { NodeWorkflowFileSystem } from "../infrastructure/filesystem/NodeWorkflowFileSystem.js";
 import { parseActiveSpecs } from "../infrastructure/yaml/activeSpecsSerializer.js";
 import { ClipboardWriter } from "../app/ports/ClipboardWriter.js";
-import { Prompts, SelectOptions, InputOptions } from "../app/ports/Prompts.js";
+import { ConfirmOptions, InputOptions, Prompts, SelectOptions } from "../app/ports/Prompts.js";
 import { Logger, runContinue, runPublishState, runWorkflow } from "./workflow.js";
 
 /**
@@ -39,11 +39,16 @@ class CollectingLogger implements Logger {
 
 class FakePrompts implements Prompts {
   private idx = 0;
-  constructor(private readonly answers: ReadonlyArray<string>) {}
+  constructor(private readonly answers: ReadonlyArray<string | boolean>) {}
   async select<T = string>(options: SelectOptions<T>): Promise<T> {
     const answer = this.answers[this.idx++];
     if (answer === undefined) {
       throw new Error(`FakePrompts: select sem resposta restante (message="${options.message}")`);
+    }
+    if (typeof answer !== "string") {
+      throw new Error(
+        `FakePrompts: select esperava string mas recebeu ${typeof answer} (message="${options.message}")`
+      );
     }
     const choice = options.choices.find((c) => String(c.value) === answer);
     if (!choice) {
@@ -54,7 +59,24 @@ class FakePrompts implements Prompts {
     return choice.value;
   }
   async input(_options: InputOptions): Promise<string> {
-    return this.answers[this.idx++] ?? "";
+    const answer = this.answers[this.idx++];
+    if (answer === undefined) return "";
+    if (typeof answer !== "string") {
+      throw new Error(`FakePrompts: input esperava string mas recebeu ${typeof answer}`);
+    }
+    return answer;
+  }
+  async confirm(options: ConfirmOptions): Promise<boolean> {
+    const answer = this.answers[this.idx++];
+    if (answer === undefined) {
+      throw new Error(`FakePrompts: confirm sem resposta restante (message="${options.message}")`);
+    }
+    if (typeof answer !== "boolean") {
+      throw new Error(
+        `FakePrompts: confirm esperava boolean mas recebeu ${typeof answer} (message="${options.message}")`
+      );
+    }
+    return answer;
   }
 }
 
