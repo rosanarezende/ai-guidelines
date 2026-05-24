@@ -1,0 +1,103 @@
+# Release — automated npm publish + GitHub release.
+#
+# Origem: Spec 0023 / `[DEC-0023-K01]` (Bloco K — Integration PR) + ADR 0024
+# (Draft/Ready/Mergeable distinct states). Workflow enxuto disparado por push
+# de tag `v*`, sem release engine — apenas o caminho mínimo profissional.
+#
+# Trigger: push de tag `v*` (ex.: v1.1.0-preview.0, v1.1.0).
+# Gate: `yarn ci` (install + validate + smoke) — release gate canônico.
+# Publish: `yarn npm publish` (Yarn 4 com `YARN_NPM_AUTH_TOKEN`).
+# GitHub Release: `gh release create --generate-notes` (notes derivadas de PRs
+# mergeados desde a tag anterior; pre-release marcado como tal).
+#
+# Pré-requisitos operacionais:
+# 1. `package.json#version` deve bater com a tag sem prefixo `v` — gate verifica.
+# 2. Secret `NPM_TOKEN` configurado no repositório (token com escopo `publish`).
+# 3. Tag criada manualmente após merge atômico da stack:
+#      git tag v<version> && git push --tags
+#    Auto-tag é deliberadamente fora do escopo (previne releases acidentais).
+#
+# Convenção dist-tag npm (pré-release ≠ latest):
+# - Stable (ex.: `1.1.0`) → publica como `latest`
+# - Pre-release (ex.: `1.1.0-preview.0`) → publica como `next` (não substitui `latest`)
+#
+# Não-objetivos cravados:
+# - Auto-bump de `package.json#version` (manual; intenção explícita do owner).
+# - Auto-tag pós-merge (manual; previne releases acidentais).
+# - CHANGELOG-driven notes (primeiro ciclo usa `--generate-notes`; iteração futura
+#   pode extrair seção da versão do CHANGELOG.md se a prática justificar).
+# - Provenance/sigstore (deferido até primeira release validada).
+
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # criar GitHub release
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # full history para `gh release create --generate-notes`
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: "yarn"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Verify package.json version matches tag
+        run: |
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          PKG_VERSION=$(node -p "require('./package.json').version")
+          if [ "$TAG_VERSION" != "$PKG_VERSION" ]; then
+            echo "::error::Tag version ($TAG_VERSION) does not match package.json version ($PKG_VERSION). Bump package.json + commit + retag."
+            exit 1
+          fi
+          echo "Version match confirmed: $TAG_VERSION"
+
+      - name: Release gate — yarn ci (install + validate + smoke)
+        run: yarn ci
+
+      - name: Determine npm dist-tag and prerelease flag
+        id: release_meta
+        run: |
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          if [[ "$TAG_VERSION" == *-* ]]; then
+            echo "DIST_TAG=next" >> "$GITHUB_OUTPUT"
+            echo "PRERELEASE=true" >> "$GITHUB_OUTPUT"
+            echo "Pre-release detected ($TAG_VERSION) — publishing to dist-tag 'next', marking as prerelease."
+          else
+            echo "DIST_TAG=latest" >> "$GITHUB_OUTPUT"
+            echo "PRERELEASE=false" >> "$GITHUB_OUTPUT"
+            echo "Stable release ($TAG_VERSION) — publishing to dist-tag 'latest'."
+          fi
+
+      - name: Publish to npm
+        run: yarn npm publish --tag ${{ steps.release_meta.outputs.DIST_TAG }}
+        env:
+          YARN_NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PRERELEASE: ${{ steps.release_meta.outputs.PRERELEASE }}
+        run: |
+          PRERELEASE_FLAG=""
+          if [ "$PRERELEASE" = "true" ]; then
+            PRERELEASE_FLAG="--prerelease"
+          fi
+          gh release create "$GITHUB_REF_NAME" \
+            --title "$GITHUB_REF_NAME" \
+            --generate-notes \
+            $PRERELEASE_FLAG
