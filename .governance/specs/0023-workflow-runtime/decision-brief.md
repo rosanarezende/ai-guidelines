@@ -5,8 +5,8 @@
 > Spec: [`./spec.md`](./spec.md)
 > Plan: [`./plan.md`](./plan.md) (criado em 2026-05-19 conforme `[DEC-0023-B05]`).
 > Tasks: tasklist da sessão de implementação (PR1).
-> Status agregado: **Resolved** — Blocos A/B/C/D/E/F/G/I todos fechados (F01–F04 Resolved em PR5 S5 / 2026-05-22; F05 Deferred com critério estrutural vinculado à abertura de `handoff-as-first-class`; B07 + I01 cravados durante review do PR #25 / 2026-05-23).
-> Última atualização: 2026-05-23 — review final do PR #25: `[DEC-0023-B07]` (opção 6 do wizard) + `[DEC-0023-I01]` (Bloco I — identidade canônica da spec) + reconciliação de drifts colaterais (Resumo de status, Gate fechados B/F/G).
+> Status agregado: **Resolved** — Blocos A/B/C/D/E/F/G/I/J todos fechados (F01–F04 Resolved em PR5 S5 / 2026-05-22; F05 Deferred com critério estrutural vinculado à abertura de `handoff-as-first-class`; B07 + I01 cravados durante review do PR #25 / 2026-05-23; J01 + ADR 0024 cravados na Frente #3 do hardening / 2026-05-23–24).
+> Última atualização: 2026-05-24 — Frente #3 do hardening do PR #25: `[DEC-0023-J01]` (Bloco J — semântica operacional Draft/Ready/Mergeable) + ADR 0024 (princípio perene cross-spec) + redesign do `.github/pull_request_template.md` em Commit B.
 
 > **Artefato canônico do gate humano entre Stage 1 (research) e Stage 2 (design + implementação).** Para esta spec, a Stage 1 é a investigação documentada na pasta legacy `.specify/specs/0023-governance-workflow-discovery-model/` (research.md + anexos). Este brief materializa o gate Stage A → Stage B com 4 decisões cravadas em sessão de design 2026-05-19.
 
@@ -48,8 +48,9 @@
 | `[DEC-0023-G03]` | G     | Resolved |
 | `[DEC-0023-G04]` | G     | Resolved |
 | `[DEC-0023-I01]` | I     | Resolved |
+| `[DEC-0023-J01]` | J     | Resolved |
 
-**Status agregado:** Resolved — Blocos A/B/C/D/E/F/G/I todos fechados. F01–F04 Resolved (tríade arquitetural B+B+A+A cravada em PR5 S5 / 2026-05-22); F05 Deferred com critério estrutural observável (revisita obrigatória na abertura da candidata `handoff-as-first-class`).
+**Status agregado:** Resolved — Blocos A/B/C/D/E/F/G/I/J todos fechados. F01–F04 Resolved (tríade arquitetural B+B+A+A cravada em PR5 S5 / 2026-05-22); F05 Deferred com critério estrutural observável (revisita obrigatória na abertura da candidata `handoff-as-first-class`); J01 cravado na Frente #3 do hardening do PR #25 (2026-05-23/24) com ADR 0024 materializando o modelo de 3 estados Draft/Ready/Mergeable.
 
 ---
 
@@ -1181,6 +1182,70 @@ Para preservar enforcement estrutural enquanto a accountability transfere, fast-
 
 ---
 
+## Bloco J — Semântica operacional de Draft / Ready / Mergeable
+
+> **Origem:** confusão empírica observada em múltiplas sessões de review da stack da Spec 0023 (`#18 → #19 → #22 → #23 → #24 → #25`) durante o hardening final do PR #25 (2026-05-23/24). Codex, Claude e Antigravity trataram PRs convertidos para `Ready` como autorizados para merge mesmo com PRs upstream/downstream pendentes na stack. A label `MERGEABLE` do GitHub reforçou a ambiguidade — só sinaliza ausência de conflito contra a branch base do PR, não diz nada sobre a stack inteira. Não foi hipótese teórica — o atrito apareceu repetidamente em conversas reais.
+>
+> **Princípio canônico cravado neste bloco (citável cross-spec via ADR 0024):**
+> **Em fluxos governance-first com stacked PRs (ADR 0020), Draft, Ready e Mergeable são estados distintos.** Draft = trabalho em andamento (ecosystem natural). Ready = trabalho operacionalmente concluído, aguarda revisão humana — **não** implica autorização de merge. Mergeable = estado terceiro distinto, requer stack inteira `Ready` + autorização explícita do owner para merge atômico ponta-a-ponta.
+
+### [DEC-0023-J01] Materializar Draft/Ready/Mergeable como ADR 0024 + redesign do PR template
+
+**Pergunta:** Durante o ciclo do PR #25 e da stack da 0023, observamos ambiguidade real entre `Draft → Ready` como "gate autorizado para próxima fase" vs significado nativo ("WIP → solicita review"). Como cravar a distinção para evitar reincidência cross-spec, sem invadir `[DEC-0023-F05]` (Deferred — SSOT de CORE-09/10)?
+
+**Contexto:**
+
+- Stack 0023: 6 PRs (`#18 → #19 → #22 → #23 → #24 → #25`), todos passaram por `Draft → Ready` durante o fluxo. Múltiplas revisões trataram `Ready` como mergeable.
+- `[CORE-09]` craveia "PRs abrem como Draft com matriz oficial" — modo, não bloqueio.
+- `[CORE-10]` craveia "Draft → Ready apenas via revalidação humana" — gate humano, mas não diz **o que** Ready significa.
+- `[CORE-16]` craveia "Sync de base ≠ merge atômico" — chega perto da distinção, mas foca em "MERGEABLE label não é convite" (operacional), não no modelo de 3 estados.
+- `ADR 0020` craveia merge atômico ponta-a-ponta — mandate da operação, mas não articula como os estados intermediários se relacionam com ela.
+- Nenhum artefato atual articula explicitamente **Draft ≠ bloqueado** + **Ready ≠ Mergeable** + **Mergeable = stack + autorização**.
+- `[DEC-0023-F05]` Deferred trata de **WHERE** a SSOT de CORE-09/10 vive (vinculado à candidata `handoff-as-first-class`). J01 trata de **WHAT** os estados significam — questão complementar e distinta. **Não há conflito com F05.**
+
+**Opções:**
+
+| Opção | Descrição                                                                                                                                           | Pró                                                                                                                                                                                                                                         | Contra                                                                                                                                                           |
+| :---- | :-------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :--------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A     | **Amendment inline em CORE-09/10/16** clarificando o modelo de 3 estados                                                                            | Mínimo de arquivos novos; concentra a regra em um lugar                                                                                                                                                                                     | Invade `[DEC-0023-F05]` que diferiu **WHERE** o SSOT vive até a candidata `handoff-as-first-class` materializar. Amendment cravaria SSOT prematuramente em CORE. |
+| B     | **ADR 0024 nova (princípio perene cross-spec) + Bloco J no decision-brief 0023 (aprendizado metodológico) + redesign do PR template (operacional)** | Princípio cravado em camada cross-spec (ADR), origem histórica registrada (Bloco J), operacionalização explícita (template). Não conflita com F05 — trata de **WHAT**, não **WHERE**. Materializa o aprendizado real da 0023 sem maquiagem. | Mais um ADR no inventário; template muda forma. Esforço proporcional ao impacto.                                                                                 |
+| C     | **Apenas redesign do template** (sem ADR formal)                                                                                                    | Mínimo absoluto                                                                                                                                                                                                                             | Sem âncora cross-spec — risco de regressão em specs futuras. Template sozinho não tem autoridade textual perene.                                                 |
+
+**Decisão do Gate Humano:**
+
+- **Status:** [x] Resolvido
+- **Escolha:** [ ] A | [x] B | [ ] C
+- **Justificativa:** ADR 0024 ancora o princípio cross-spec sem invadir CORE-09/10 (que F05 mantém em deferimento). Template redesign concretiza a operacionalização. Bloco J registra a origem empírica explicitamente (não foi hipótese — foi atrito observado em conversas reais com Codex/Claude/Antigravity). As três peças se reforçam: ADR é citável; Bloco J é auditável; template é executável. Owner explicitamente cravou: **"o problema não era técnico. Era cognitivo/social: GitHub naturalmente induz Ready = mergeable. Em stack governance-first, review readiness, operational completeness, e merge authorization são estados distintos. Isso precisa ficar impossível de interpretar errado."**
+- **Escopo cravado do redesign do template (Commit B do par governance + implementation):**
+  - Seção "Status do ciclo de vida" no topo com 3 checkboxes distintos: `Draft` / `Ready for review` / `Authorized to merge`
+  - Frase explícita: _"Ready ≠ Mergeable. Stacks governance-first (ADR 0020) integram em sequência atômica ponta-a-ponta."_
+  - Seção "Merge authorization" textual curta (não checklist) — força owner a registrar autorização ou marcar como pendente
+  - Bloco visual opcional no topo (comentário HTML guia + bloco markdown visível só quando preenchido) — institucionaliza narrativa visual como parte do fluxo de governança (aprendizado real da 0023)
+  - Checklist operacional enxuto (4 itens vs 10 do template atual) — remove cosplay burocrático
+  - Remove seção "Tipo de Mudança" (redundante com título), "Label de nuance" como checklist (vive no título per `.core/process/pr-title-conventions.md`), "Spec Path" + "No-Spec Reason" como seções dedicadas (absorvidos em "Cross-refs"; spec path agora `.governance/` per ADR 0019)
+  - Mantém guidance forte em "Resumo" (explique valor entregue + mudança operacional observável) e "Test plan" (preserva como validar, o que observar, qual fluxo exercitar — runtime tem UX/wizard/comportamento narrativo)
+  - "Impacto downstream" não vira seção fixa, mas guidance no Resumo/Test plan
+- **Vínculos cruzados:**
+  - **F05 (deferido)**: J01 trata de **WHAT** os estados significam; F05 trata de **WHERE** a SSOT de CORE-09/10 vive. Quando `handoff-as-first-class` materializar e F05 for revisitado, ADR 0024 fornecerá vocabulário cravado para a decisão de SSOT.
+  - **ADR 0024**: princípio perene complementar a ADR 0020 (lifecycle) + ADR 0021 (enforcement) + ADR 0022 (handoff). Status `Aceita` (não `Proposta`) — empiricamente validado pela própria stack da 0023.
+- **Não-objetivos:**
+  - Não revoga CORE-09/10/16 — complementa.
+  - Não cria novo gate operacional automático — formaliza distinção que ADR 0020 já tangenciava implicitamente.
+  - Não introduz automação de gating (CI lint, bot, etc.) — operacionalização é via template + revisão humana.
+  - Não responde a F05.
+- **Data / Owner:** 2026-05-24 / @rosanarezende
+
+---
+
+### Riscos conscientemente aceitos no Bloco J
+
+- **Modelo de 3 estados depende de leitura ativa do template + ADR.** Sem automação que force a distinção, ainda dá pra mergear isoladamente um PR Ready se o owner não estiver atento. Mitigação: já existe `governance-pr-check` (per `[DEC-0023-D03]`) que valida chain integrity em CI; este ADR não substitui — complementa. Risco residual aceito.
+- **"Authorized to merge" como seção textual (não checklist) pode parecer informal.** Owner explicitamente preferiu vs checklist porque checklist vira performático. Risco: alguns autores podem ignorar ou esquecer de preencher. Aceito — sinaliza atrito honesto, não esconde com cosplay.
+- **Bloco visual opcional pode virar "marketing creep".** Mitigação: comentário HTML guia + bloco markdown só visível quando preenchido. Critério de revisita: se PRs sem mudança real começarem a ter imagens elaboradas como teatro, reabrir como anti-distorção dedicada.
+- **ADR 0024 status `Aceita` (vs `Proposta` de ADR 0022/0023)** — justificado pela validação empírica direta na própria stack da 0023. Risco: outras specs podem adotar e descobrir nuances não previstas. Critério de revisita já cravado no próprio ADR.
+
+---
+
 ## ✅ Gate fechado — Stage A → Stage B (Bloco A)
 
 - **Data:** 2026-05-19
@@ -1274,6 +1339,19 @@ Para preservar enforcement estrutural enquanto a accountability transfere, fast-
   - [x] `[DEC-0023-I01]` — Resolução de spec ativa por identity canônica (id NNNN), não por branch slug literal (Opção B); remove `PublishState.resolveLocationFromIndexBranchMatch()` no commit de implementação
 - **Princípio canônico (citável cross-spec):** Branch names são artefatos de coordenação operacional, não identificadores canônicos de spec. Spec identity = id `NNNN`; branch scope = sufixo livre. Detection (runtime local) ≠ projection (`active-specs.yml`).
 - **Commit de código:** separado per `[CORE-06]` — `feat(workflow): resolve active spec by canonical spec id (Bloco I)`.
+
+---
+
+## ✅ Gate fechado — Semântica operacional de Draft / Ready / Mergeable (Bloco J)
+
+- **Data:** 2026-05-23/24 (Frente #3 do hardening do PR #25)
+- **Owner:** @rosanarezende
+- **Pontos resolvidos:**
+  - [x] `[DEC-0023-J01]` — Materializar Draft/Ready/Mergeable como ADR 0024 (princípio perene) + Bloco J (origem empírica) + redesign do PR template (operacionalização) — Opção B
+- **Princípio canônico (citável cross-spec via ADR 0024):** Em fluxos governance-first com stacked PRs (ADR 0020), Draft (WIP) ≠ Ready (review-ready) ≠ Mergeable (stack inteira Ready + autorização explícita do owner). 3 estados distintos.
+- **ADR derivada:** ADR 0024 — Draft, Ready e Mergeable são estados distintos em PRs governance-first (status `Aceita`; validação empírica na própria stack da 0023).
+- **Commit de implementação:** separado per `[CORE-06]` — `feat(github): redesign do pull_request_template (ADR 0024)`.
+- **Vinculação cruzada com F05:** F05 (Deferred com critério estrutural) trata de **WHERE** a SSOT de CORE-09/10 vive (vinculado à candidata `handoff-as-first-class`). J01 trata de **WHAT** os estados Draft/Ready/Mergeable significam. **Sem conflito.**
 
 ---
 
