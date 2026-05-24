@@ -2,7 +2,7 @@
 
 # Spec 0023 — Workflow Runtime (Operational Lens for Human-AI Governance)
 
-> Status: Draft (Stage B — Decision closed; Stage C — Implementation in progress)
+> Status: In Review (Stage D — Implementation complete; homologation/integration pending)
 > Author: Rosana Rezende + Claude Code (sessão 2026-05-19)
 > Date: 2026-05-19
 > Owner: Rosana Rezende

@@ -5,13 +5,15 @@ TÍTULO do PR — segue `.core/process/pr-title-conventions.md`:
   [<emojis>] [<label-opcional>] [<identificador>] <título curto>
 
 Conjuntos fechados:
-- Emojis: 🧾 (governance) · 🛠️ (execution) · 🔒 (governance contract)
-         · 1️⃣2️⃣3️⃣ (order) · ➜ (downstream) · 🚑 (fast-track)
+- Emojis: 🧾 (governance) · 🛠️ (execution) · 🔗 (integration)
+         · 🔒 (governance contract) · 1️⃣2️⃣3️⃣ (order) · ➜ (downstream)
+         · 🚑 (fast-track)
 - Labels textuais opcionais: [Bootstrap] · [Pre-model] · [Hotfix]
 - Identificador: [Spec NNNN] OU [<pillar>] (fix, patch, spike, incident, etc.)
 
 Exemplos:
   [🛠️4️⃣] [Spec 0023] PR5: hardening final do runtime
+  [🔗] [Integration] [Spec 0023] Homologação final da stack
   [🧾🔒] [Spec 0024] Lifecycle bootstrap
   [🛠️] [fix] Reorganize package.json scripts
 ═════════════════════════════════════════════════════════════════════════════
@@ -52,6 +54,7 @@ de governança na Spec 0023 — não é marketing, é comunicação operacional.
 
 - [ ] 🧾 Governance — spec/decision-brief/plan/tasks/research/ADR
 - [ ] 🛠️ Execution — código + docs derivados
+- [ ] 🔗 Integration — homologação/convergência final da stack; sem comportamento novo
 - [ ] 🚑 Fast-track — patch/fix/incident pequeno (accountability transferida; cf. [ADR 0021](../.core/governance/adrs/0021-enforcement-precedes-awareness.md))
 
 ## Posição na stack
@@ -62,6 +65,7 @@ de governança na Spec 0023 — não é marketing, é comunicação operacional.
 
 - [ ] Mergeable isoladamente (sem stack governance-first)
 - [ ] Apenas merge atômico ponta-a-ponta da stack (per ADR 0020)
+- [ ] Integration PR — agrega evidência de convergência; não autoriza merge sozinho
 
 ## Merge authorization
 

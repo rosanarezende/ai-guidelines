@@ -5,8 +5,8 @@
 > Spec: [`./spec.md`](./spec.md)
 > Plan: [`./plan.md`](./plan.md) (criado em 2026-05-19 conforme `[DEC-0023-B05]`).
 > Tasks: tasklist da sessão de implementação (PR1).
-> Status agregado: **Resolved** — Blocos A/B/C/D/E/F/G/I/J todos fechados (F01–F04 Resolved em PR5 S5 / 2026-05-22; F05 Deferred com critério estrutural vinculado à abertura de `handoff-as-first-class`; B07 + I01 cravados durante review do PR #25 / 2026-05-23; J01 + ADR 0024 cravados na Frente #3 do hardening / 2026-05-23–24).
-> Última atualização: 2026-05-24 — Frente #3 do hardening do PR #25: `[DEC-0023-J01]` (Bloco J — semântica operacional Draft/Ready/Mergeable) + ADR 0024 (princípio perene cross-spec) + redesign do `.github/pull_request_template.md` em Commit B.
+> Status agregado: **Resolved** — Blocos A/B/C/D/E/F/G/I/J/K todos fechados (F01–F04 Resolved em PR5 S5 / 2026-05-22; F05 Deferred com critério estrutural vinculado à abertura de `handoff-as-first-class`; B07 + I01 cravados durante review do PR #25 / 2026-05-23; J01 + ADR 0024 cravados na Frente #3 do hardening / 2026-05-23–24; K01 crava Integration PR como homologação/convergência final da stack).
+> Última atualização: 2026-05-24 — `[DEC-0023-K01]` (Bloco K — Integration PR) dogfoodando PR #26 como PR agregador de homologação/convergência final da stack, sem comportamento novo.
 
 > **Artefato canônico do gate humano entre Stage 1 (research) e Stage 2 (design + implementação).** Para esta spec, a Stage 1 é a investigação documentada na pasta legacy `.specify/specs/0023-governance-workflow-discovery-model/` (research.md + anexos). Este brief materializa o gate Stage A → Stage B com 4 decisões cravadas em sessão de design 2026-05-19.
 
@@ -49,8 +49,9 @@
 | `[DEC-0023-G04]` | G     | Resolved |
 | `[DEC-0023-I01]` | I     | Resolved |
 | `[DEC-0023-J01]` | J     | Resolved |
+| `[DEC-0023-K01]` | K     | Resolved |
 
-**Status agregado:** Resolved — Blocos A/B/C/D/E/F/G/I/J todos fechados. F01–F04 Resolved (tríade arquitetural B+B+A+A cravada em PR5 S5 / 2026-05-22); F05 Deferred com critério estrutural observável (revisita obrigatória na abertura da candidata `handoff-as-first-class`); J01 cravado na Frente #3 do hardening do PR #25 (2026-05-23/24) com ADR 0024 materializando o modelo de 3 estados Draft/Ready/Mergeable.
+**Status agregado:** Resolved — Blocos A/B/C/D/E/F/G/I/J/K todos fechados. F01–F04 Resolved (tríade arquitetural B+B+A+A cravada em PR5 S5 / 2026-05-22); F05 Deferred com critério estrutural observável (revisita obrigatória na abertura da candidata `handoff-as-first-class`); J01 cravado na Frente #3 do hardening do PR #25 (2026-05-23/24) com ADR 0024 materializando o modelo de 3 estados Draft/Ready/Mergeable; K01 crava Integration PR como PR de homologação/convergência final antes da autorização de merge atômico.
 
 ---
 
@@ -1246,6 +1247,53 @@ Para preservar enforcement estrutural enquanto a accountability transfere, fast-
 
 ---
 
+## Bloco K — Integration PR como homologação/convergência final
+
+> **Origem:** decisão da owner durante fechamento operacional da Spec 0023 em 2026-05-24. A stack já tinha PRs Governance e Execution, mas faltava um PR explícito para representar a convergência/homologação final antes da autorização de merge atômico. Este bloco dogfooda o conceito na própria Spec 0023 via PR #26.
+>
+> **Princípio canônico cravado neste bloco:** Integration PR valida convergência da stack aprovada. Ele separa "Ready for review" de "Authorized to merge", não cria comportamento novo, não executa deploy e não vira orchestration engine.
+
+### [DEC-0023-K01] Introduzir Integration PR para homologação/convergência da stack 0023
+
+**Pergunta:** Como representar a fase final de homologação/convergência da stack sem confundir Ready com Mergeable e sem transformar o fechamento da 0023 em novo redesign?
+
+**Contexto:**
+
+- PR #25 está `Ready for review`, mas a stack completa ainda não está autorizada para merge atômico.
+- ADR 0024 separou Draft, Ready e Mergeable; faltava um artefato operacional para registrar a convergência final da stack antes do merge.
+- Owner decidiu dogfoodar o modelo agora na própria 0023, via PR #26, em vez de empurrar para spec futura.
+- Restrições explícitas: não chamar de "deploy PR"; não criar engine; não adicionar automação agentic; não ampliar escopo criativo.
+
+**Opções:**
+
+| Opção | Descrição                                                                                                                   | Pró                                                                                                     | Contra                                                                                           |
+| :---- | :-------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------ | :----------------------------------------------------------------------------------------------- |
+| A     | Deixar a convergência final apenas no body do PR #25 e em comentário de owner                                               | Zero arquivos novos                                                                                     | Mantém ambiguidade Ready/Mergeable; não cria forma reutilizável para stacks futuras              |
+| B     | Introduzir **Integration PR** como tipo operacional mínimo no template + ADR 0024 + convenção de título, e dogfoodar PR #26 | Separa review readiness de merge authorization; cria trilha auditável de homologação; mínimo necessário | Mais uma label/tipo operacional a ensinar                                                        |
+| C     | Criar spec nova para Integration PRs                                                                                        | Isola assunto                                                                                           | Adia aprendizado que a própria 0023 precisa validar; overengineering para fechamento operacional |
+
+**Decisão do Gate Humano:**
+
+- **Status:** [x] Resolvido
+- **Escolha:** [ ] A | [x] B | [ ] C
+- **Justificativa:** Integration PR é a menor forma que expressa a convergência final sem mentir semanticamente. PR #25 pode estar Ready; PR #26 registra homologação ponta-a-ponta e mantém merge authorization pendente até a owner autorizar merge atômico. Isso concretiza ADR 0024 em vez de criar nova arquitetura.
+- **Escopo cravado do Integration PR:**
+  - Nome canônico: **Integration PR**. Sinônimos aceitáveis em texto: "homologação/convergência final"; não usar "deploy PR".
+  - Título recomendado para dogfooding: `[🔗] [Integration] [Spec 0023] Homologação final da stack`.
+  - Tipo no template: `Integration — homologação/convergência final da stack; sem comportamento novo`.
+  - Conteúdo: evidência de CI, smoke/manual test, status lifecycle, lista da stack, pendências explícitas e merge authorization pendente/autorizada.
+  - Limite: não cria comportamento novo; qualquer mudança funcional volta para execution PR ou spec própria.
+- **Artefatos atualizados:** ADR 0024, `.github/pull_request_template.md`, `.core/process/pr-title-conventions.md`, `tasks.md` Phase 3.
+- **Data / Owner:** 2026-05-24 / @rosanarezende
+
+### Riscos conscientemente aceitos no Bloco K
+
+- **Integration PR virar "mega-PR criativo".** Mitigação: template e ADR explicitam "sem comportamento novo"; PR #26 deve ser homologação/convergência, não execução.
+- **Confusão com release/deploy.** Mitigação: linguagem proibida explícita — não chamar de deploy PR; release formal continua em `CHANGELOG`/version bump no encerramento.
+- **Mais uma label no título.** Aceito porque `[Integration]` cobre uma fase real da stack 0023 e restaura significado natural de Draft/Ready sem transformar Ready em bloqueio eterno.
+
+---
+
 ## ✅ Gate fechado — Stage A → Stage B (Bloco A)
 
 - **Data:** 2026-05-19
@@ -1352,6 +1400,17 @@ Para preservar enforcement estrutural enquanto a accountability transfere, fast-
 - **ADR derivada:** ADR 0024 — Draft, Ready e Mergeable são estados distintos em PRs governance-first (status `Aceita`; validação empírica na própria stack da 0023).
 - **Commit de implementação:** separado per `[CORE-06]` — `feat(github): redesign do pull_request_template (ADR 0024)`.
 - **Vinculação cruzada com F05:** F05 (Deferred com critério estrutural) trata de **WHERE** a SSOT de CORE-09/10 vive (vinculado à candidata `handoff-as-first-class`). J01 trata de **WHAT** os estados Draft/Ready/Mergeable significam. **Sem conflito.**
+
+---
+
+## ✅ Gate fechado — Integration PR (Bloco K)
+
+- **Data:** 2026-05-24
+- **Owner:** @rosanarezende
+- **Pontos resolvidos:**
+  - [x] `[DEC-0023-K01]` — Introduzir Integration PR para homologação/convergência final da stack 0023 (Opção B)
+- **Princípio canônico:** Integration PR é PR agregador de homologação/convergência. Não cria comportamento novo, não é deploy PR e não autoriza merge sozinho.
+- **Dogfooding:** PR #26 deve usar o modelo para validar ponta-a-ponta a stack `#18 → #19 → #22 → #23 → #24 → #25` antes da autorização humana de merge atômico.
 
 ---
 

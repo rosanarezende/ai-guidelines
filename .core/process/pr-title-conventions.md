@@ -2,7 +2,7 @@
 
 > **Convenção operacional derivada da Spec 0023.** Não é decisão arquitetural — é hygiene visual sobre o lifecycle já cravado em ADR 0020 (governance precede execução) e ADR 0021 (enforcement estrutural em camadas). Sem enforcement automático nesta versão (convenção primeiro; CI valida depois se a prática justificar). Anti-patterns explicitamente rejeitados na seção final.
 >
-> **Refinada em 2026-05-20** em duas iterações: (i) primeira tentativa adicionou 🧭 como emoji de "transitional/pre-model" → ficou visualmente ambíguo (`[🧭🛠️➜]` aglutinava tipo + nuance num único bracket); (ii) refinamento final separa **tipo (emoji, conjunto fechado de 6)** de **nuance (label textual, conjunto fechado de 3)** — `[🛠️➜] [Bootstrap]` em vez de `[🧭🛠️➜]`.
+> **Refinada em 2026-05-20** em duas iterações: (i) primeira tentativa adicionou 🧭 como emoji de "transitional/pre-model" → ficou visualmente ambíguo (`[🧭🛠️➜]` aglutinava tipo + nuance num único bracket); (ii) refinamento final separa **tipo (emoji, conjunto fechado)** de **nuance (label textual, conjunto fechado)** — `[🛠️➜] [Bootstrap]` em vez de `[🧭🛠️➜]`. A Spec 0023 adicionou `🔗` + `[Integration]` como extensão deliberada para homologação/convergência final de stack.
 
 ## Por que existe
 
@@ -38,36 +38,39 @@ A distinção visual entre os dois:
 | :------- | :--------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------- |
 | 🧾       | Governance / planning / contrato               | PR contém spec/decision-brief/plan/tasks/research/ADR; nada de código de produto.                                                |
 | 🛠️       | Execution / implementação                      | PR contém código + docs derivados; tipicamente depende de governance PR.                                                         |
+| 🔗       | Integration / homologação de stack             | PR terminal de homologação/convergência; agrega evidência ponta-a-ponta sem comportamento novo.                                  |
 | 🔒       | Governance contract não-mergeable isoladamente | **SÓ governance** (🧾🔒). Aguarda execution PR(s) pareada. Não usar com 🛠️.                                                      |
 | 1️⃣ 2️⃣ 3️⃣ | Rollout order em execution stack               | **SÓ execution**. Posição sequencial. Governance NÃO usa número (é fundação, não posição).                                       |
 | ➜        | Rollout continua downstream                    | Sufixo em execution PRs **não-terminais**. Ausência de ➜ em execution = terminal (sem PR downstream aguardando).                 |
 | 🚑       | Fast-track                                     | Patch/fix/incident pequeno com accountability transferida ao reviewer humano (cf. ADR 0021 + DEC-0023-E05). Exclusivo (sozinho). |
 
-**Convenção fechada.** Nenhum emoji adicional será introduzido para cobrir nuances (transitional, pre-model, experimental, beta, etc.). Para essas, usar **labels textuais** (próxima seção).
+**Convenção fechada.** Nenhum emoji adicional será introduzido para cobrir nuances (transitional, pre-model, experimental, beta, etc.). `🔗` foi adicionado pela Spec 0023 para distinguir Integration de execution comum; novas nuances continuam indo para **labels textuais** (próxima seção).
 
 ## Labels textuais para nuances excepcionais
 
 Nuances que não cabem nos 4 tipos fixos viram **bracket textual separado** entre o tipo e o identificador da spec. Isso preserva clareza visual (cada bracket carrega uma coisa) e impede emoji creep.
 
-| Label         | Quando usar                                                                                            | Frequência esperada              |
-| :------------ | :----------------------------------------------------------------------------------------------------- | :------------------------------- |
-| `[Bootstrap]` | PR que colapsa governance + execution intencionalmente antes da estabilização metodológica da spec.    | ≤ 1 por spec (primeira iteração) |
-| `[Pre-model]` | PR criado antes do lifecycle/enforcement da spec estar cravado. Sinônimo operacional de `[Bootstrap]`. | ≤ 1 por spec                     |
-| `[Hotfix]`    | PR de fix urgente que precisa indicação visível mas **não** se qualifica como `🚑 fast-track` formal.  | Raro                             |
+| Label           | Quando usar                                                                                                                     | Frequência esperada              |
+| :-------------- | :------------------------------------------------------------------------------------------------------------------------------ | :------------------------------- |
+| `[Bootstrap]`   | PR que colapsa governance + execution intencionalmente antes da estabilização metodológica da spec.                             | ≤ 1 por spec (primeira iteração) |
+| `[Pre-model]`   | PR criado antes do lifecycle/enforcement da spec estar cravado. Sinônimo operacional de `[Bootstrap]`.                          | ≤ 1 por spec                     |
+| `[Hotfix]`      | PR de fix urgente que precisa indicação visível mas **não** se qualifica como `🚑 fast-track` formal.                           | Raro                             |
+| `[Integration]` | PR de homologação/convergência final de stack governance-first; agrega evidência e valida ponta-a-ponta sem comportamento novo. | Raro; tipicamente terminal       |
 
-**Lista é fechada.** Nova label exige decisão registrada (≥ 2 casos justificando + cross-ref em NEXT/ADR). Se aparecer necessidade de `[Experimental]` ou `[Beta]`, isso indica que a categoria não é "PR title hygiene" — provavelmente é decisão de release/spec própria.
+**Lista é fechada.** Nova label exige decisão registrada (≥ 2 casos justificando + cross-ref em NEXT/ADR). `[Integration]` foi adicionada pela Spec 0023 para dogfooding do fechamento/homologação final via ADR 0024. Se aparecer necessidade de `[Experimental]` ou `[Beta]`, isso indica que a categoria não é "PR title hygiene" — provavelmente é decisão de release/spec própria.
 
 ## Combinações canônicas + exemplos
 
-| Padrão              | Semântica                                                                        | Exemplo                                          |
-| :------------------ | :------------------------------------------------------------------------------- | :----------------------------------------------- |
-| `[🧾🔒]`            | Governance pareada com execution(s); merge semanticamente inseguro isoladamente. | `[🧾🔒] [Spec 0023] Lifecycle bootstrap`         |
-| `[🛠️1️⃣➜]`           | Execution intermediária — primeira da stack, com PRs downstream.                 | `[🛠️1️⃣➜] [Spec 0023] Enforcement runtime`        |
-| `[🛠️2️⃣]`            | Execution terminal — última da stack.                                            | `[🛠️2️⃣] [Spec 0023] DX execution`                |
-| `[🛠️]`              | Execution isolada — sem stack, sem dependência.                                  | `[🛠️] [Spec 0041] Clipboard hotfix`              |
-| `[🛠️] [<pillar>]`   | Execution isolada vinculada a pilar MECE não-spec (fix/patch/spike/etc.).        | `[🛠️] [fix] Reorganize package.json scripts`     |
-| `[🛠️➜] [Bootstrap]` | Execution transitional/pre-model + label textual de nuance.                      | `[🛠️➜] [Bootstrap] [Spec 0023] Workflow runtime` |
-| `[🚑]`              | Fast-track excepcional.                                                          | `[🚑] [Incident 0007] Emergency rollback`        |
+| Padrão               | Semântica                                                                        | Exemplo                                                     |
+| :------------------- | :------------------------------------------------------------------------------- | :---------------------------------------------------------- |
+| `[🧾🔒]`             | Governance pareada com execution(s); merge semanticamente inseguro isoladamente. | `[🧾🔒] [Spec 0023] Lifecycle bootstrap`                    |
+| `[🛠️1️⃣➜]`            | Execution intermediária — primeira da stack, com PRs downstream.                 | `[🛠️1️⃣➜] [Spec 0023] Enforcement runtime`                   |
+| `[🛠️2️⃣]`             | Execution terminal — última da stack.                                            | `[🛠️2️⃣] [Spec 0023] DX execution`                           |
+| `[🛠️]`               | Execution isolada — sem stack, sem dependência.                                  | `[🛠️] [Spec 0041] Clipboard hotfix`                         |
+| `[🔗] [Integration]` | Homologação/convergência final de stack; sem comportamento novo.                 | `[🔗] [Integration] [Spec 0023] Homologação final da stack` |
+| `[🛠️] [<pillar>]`    | Execution isolada vinculada a pilar MECE não-spec (fix/patch/spike/etc.).        | `[🛠️] [fix] Reorganize package.json scripts`                |
+| `[🛠️➜] [Bootstrap]`  | Execution transitional/pre-model + label textual de nuance.                      | `[🛠️➜] [Bootstrap] [Spec 0023] Workflow runtime`            |
+| `[🚑]`               | Fast-track excepcional.                                                          | `[🚑] [Incident 0007] Emergency rollback`                   |
 
 **Stacks longas (> 4 PRs)** sinalizam scope creep — considerar splitar em specs antes de chegar lá. A convenção não impede mas também não incentiva.
 
@@ -131,6 +134,18 @@ ou (raro, sem governance pareada):
 Standalone execution — sem governance pareada. Justificativa: <motivo>.
 ```
 
+### Integration (`[🔗] [Integration]`)
+
+```md
+Integration PR — homologação/convergência final da stack. Não cria comportamento novo.
+
+Stack validada:
+
+- #<N> → #<M> → #<K>
+
+Merge authorization: pendente até owner autorizar merge atômico ponta-a-ponta.
+```
+
 ### Transitional / pre-model (`[🛠️➜] [Bootstrap]` ou `[🛠️➜] [Pre-model]`)
 
 ```md
@@ -157,13 +172,13 @@ Quando um marcador deixa de fazer sentido, **o autor do PR remove via `gh pr edi
   - Se PR mid-stack é cancelado, renumerar PRs subsequentes para manter sequência contígua.
   - Se novo PR entra mid-stack, renumerar — drift garantido aqui é o **trade-off aceito conscientemente** em troca de scan visual mais rico.
   - **Critério de stop:** se renumerar > 2 vezes na mesma spec, stack é instável — reabrir DEC própria sobre forma de rollout antes de continuar.
-- **Labels textuais (`[Bootstrap]`, `[Pre-model]`, `[Hotfix]`)** — não são removidas. Registro histórico permanente do PR.
+- **Labels textuais (`[Bootstrap]`, `[Pre-model]`, `[Hotfix]`, `[Integration]`)** — não são removidas. Registro histórico permanente do PR.
 - **🚑** — não é removido. Fast-track é registro permanente.
 
 ## Anti-patterns explícitos
 
 - **Não combinar emoji de tipo com emoji de estado.** GitHub já tem Draft/Ready/Merged/Closed. Duplicar via emoji invariavelmente gera drift manual.
-- **Não inventar emojis adicionais.** Conjunto de emojis é fechado: 🧾, 🛠️, 🔒, 1️⃣2️⃣3️⃣, ➜, 🚑. Nuances vão para **labels textuais** (`[Bootstrap]`, `[Pre-model]`, `[Hotfix]`); lista de labels também fechada. Se um PR não couber em nenhuma combinação, registrar em comentário do PR — não cunhar emoji ou label novos.
+- **Não inventar emojis adicionais.** Conjunto de emojis é fechado: 🧾, 🛠️, 🔗, 🔒, 1️⃣2️⃣3️⃣, ➜, 🚑. Nuances vão para **labels textuais** (`[Bootstrap]`, `[Pre-model]`, `[Hotfix]`, `[Integration]`); lista de labels também fechada. Se um PR não couber em nenhuma combinação, registrar em comentário do PR — não cunhar emoji ou label novos.
 - **Não emoji-pack para nuances.** `[🛠️➜] [Bootstrap]` é a forma correta; `[🛠️➜Bootstrap]` ou `[🧭🛠️➜]` (emoji-pack representando nuance) destroem a clareza visual e geram ambiguidade categórica.
 - **Não usar 🔒 em execution PRs.** 🔒 é exclusivo de governance. Execution dependente usa 1️⃣N➜ + body opening listando upstream.
 - **Não usar números em governance.** 🧾 é fundação, não posição. Tentar `[🧾1️⃣]` é categoria-erro.

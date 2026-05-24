@@ -62,9 +62,10 @@ class FakePrompts implements Prompts {
 
 class FakeClipboard implements ClipboardWriter {
   copied: string | null = null;
+  constructor(private readonly shouldCopy = true) {}
   async copy(text: string): Promise<boolean> {
     this.copied = text;
-    return true;
+    return this.shouldCopy;
   }
 }
 
@@ -438,6 +439,66 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
       );
     });
 
+    it("DADO structured command 'gate' digitado no REPL ENTÃO mostra o status atual do gate", async () => {
+      const logger = new CollectingLogger();
+      const prompts = new FakePrompts(["continue-current", "gate", "q"]);
+      const code = await runWorkflow({
+        repoRoot: "/repo",
+        logger,
+        prompts,
+        clipboard: new FakeClipboard(),
+        fs: makeFsWithSpec(),
+      });
+
+      expect(code).toBe(0);
+      expect(logger.lines.join("\n")).toMatch(/Gate atual: closed/);
+    });
+
+    it("DADO structured command 'next' digitado no REPL ENTÃO lista state.next sem executar ação", async () => {
+      const logger = new CollectingLogger();
+      const prompts = new FakePrompts(["continue-current", "next", "q"]);
+      const code = await runWorkflow({
+        repoRoot: "/repo",
+        logger,
+        prompts,
+        clipboard: new FakeClipboard(),
+        fs: makeFsWithSpec(),
+      });
+
+      expect(code).toBe(0);
+      expect(logger.lines.join("\n")).toMatch(/executar PR1/);
+    });
+
+    it("DADO structured command 'gaps' digitado no REPL E sem blockers ENTÃO mostra mensagem vazia enxuta", async () => {
+      const logger = new CollectingLogger();
+      const prompts = new FakePrompts(["continue-current", "gaps", "q"]);
+      const code = await runWorkflow({
+        repoRoot: "/repo",
+        logger,
+        prompts,
+        clipboard: new FakeClipboard(),
+        fs: makeFsWithSpec(),
+      });
+
+      expect(code).toBe(0);
+      expect(logger.lines.join("\n")).toMatch(/nenhum blocker extraído/);
+    });
+
+    it("DADO structured command 'quit' digitado no REPL ENTÃO encerra o loop com exit 0", async () => {
+      const logger = new CollectingLogger();
+      const prompts = new FakePrompts(["continue-current", "quit"]);
+      const code = await runWorkflow({
+        repoRoot: "/repo",
+        logger,
+        prompts,
+        clipboard: new FakeClipboard(),
+        fs: makeFsWithSpec(),
+      });
+
+      expect(code).toBe(0);
+      expect(logger.lines.join("\n")).toMatch(/Ações:/);
+    });
+
     it("DADO wizard opção q (sair) no boot ENTÃO retorna 0 sem invocar briefing nem REPL", async () => {
       const logger = new CollectingLogger();
       const prompts = new FakePrompts(["quit"]);
@@ -454,6 +515,44 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
       // Inquirer renderiza o menu direto no stdout/TTY (não via logger),
       // então não asseguramos texto "Wizard operacional" no logger — apenas
       // a ausência de side-effects pós-quit.
+    });
+
+    it("DADO wizard opção 2 MAS identificador vazio ENTÃO encerra com mensagem honesta e retorna 0", async () => {
+      const logger = new CollectingLogger();
+      const prompts = new FakePrompts(["continue-other", ""]);
+      const code = await runWorkflow({
+        repoRoot: "/repo",
+        logger,
+        prompts,
+        clipboard: new FakeClipboard(),
+        fs: makeFsWithSpec(),
+      });
+
+      expect(code).toBe(0);
+      expect(logger.lines.join("\n")).toMatch(/Identificador vazio — encerrando wizard/);
+    });
+
+    it("DADO wizard lança exceção QUANDO runWorkflow captura ENTÃO retorna 1 com erro narrativo", async () => {
+      const logger = new CollectingLogger();
+      const prompts: Prompts = {
+        async select() {
+          throw new Error("prompt abortado");
+        },
+        async input() {
+          return "";
+        },
+      };
+
+      const code = await runWorkflow({
+        repoRoot: "/repo",
+        logger,
+        prompts,
+        clipboard: new FakeClipboard(),
+        fs: makeFsWithSpec(),
+      });
+
+      expect(code).toBe(1);
+      expect(logger.lines.join("\n")).toMatch(/Wizard interrompido: prompt abortado/);
     });
 
     it("DADO wizard opção 3 (publish-state help) ENTÃO emite instruções e retorna 0", async () => {
@@ -504,6 +603,33 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
       expect(clip.copied).toBe(
         "Investigate the current repo and produce a finished image prompt.\n"
       );
+    });
+
+    it("DADO wizard opção 6 E clipboard indisponível ENTÃO imprime prompt entre delimitadores para copy manual", async () => {
+      const logger = new CollectingLogger();
+      const prompts = new FakePrompts(["visual-prompt", "architecture"]);
+      const files = new Map<string, string>([
+        [
+          ".governance/visual-prompts/architecture-end-to-end.prompt.md",
+          "Investigate the current repo and produce a finished image prompt.\n",
+        ],
+      ]);
+      const fs = new StubFs(files, new Set(), "feat/spec-0023-workflow-runtime");
+
+      const code = await runWorkflow({
+        repoRoot: "/repo",
+        logger,
+        prompts,
+        clipboard: new FakeClipboard(false),
+        fs,
+      });
+
+      const out = logger.lines.join("\n");
+      expect(code).toBe(0);
+      expect(out).toMatch(/clipboard indisponível/);
+      expect(out).toMatch(/──── PROMPT/);
+      expect(out).toMatch(/Investigate the current repo/);
+      expect(out).toMatch(/──── FIM/);
     });
 
     it("DADO wizard opção 6 + tipo 'b' (valor) + contexto 'PR #25' ENTÃO substitui {{context}} e envia para clipboard com sucesso", async () => {
@@ -567,6 +693,39 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
       });
       expect(code).toBe(0);
       expect(logger.lines.some((l) => l.includes("Contexto vazio"))).toBe(true);
+    });
+
+    it("DADO wizard opção 2 com identifier válido ENTÃO delega para continue via índice público", async () => {
+      const logger = new CollectingLogger();
+      const prompts = new FakePrompts(["continue-other", "0023"]);
+      const code = await runWorkflow({
+        repoRoot: "/repo",
+        logger,
+        prompts,
+        clipboard: new FakeClipboard(),
+        fs: makeFsWithSpecAndTasks(),
+        loadActiveSpecsIndex: () => ({
+          indexAvailable: true,
+          entries: [
+            {
+              entry: {
+                id: "0023",
+                slug: "workflow-runtime",
+                branch: "feat/spec-0023-workflow-runtime",
+                stage: "implementation",
+                status: "active",
+                specPath: ".governance/specs/0023-workflow-runtime",
+                updatedAt: "2026-05-21T00:00:00Z",
+              },
+              specPathExists: true,
+            },
+          ],
+          warnings: [],
+        }),
+      });
+
+      expect(code).toBe(0);
+      expect(logger.lines.join("\n")).toMatch(/Próxima ação: executar PR1/);
     });
 
     // NOTA: o teste antigo "tipo desconhecido em visual prompts" foi removido após migração
@@ -904,6 +1063,61 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
       });
       expect(code).toBe(0);
       expect(logger.lines.join("\n")).toMatch(/Nenhum drift detectado/);
+    });
+
+    it("DADO wizard opção 5 (diagnosticar drift) sem índice ENTÃO loga dica de publish-state e retorna 0", async () => {
+      const logger = new CollectingLogger();
+      const prompts = new FakePrompts(["diagnose-drift"]);
+      const code = await runWorkflow({
+        repoRoot: "/repo",
+        logger,
+        prompts,
+        clipboard: new FakeClipboard(),
+        fs: makeFsWithSpec(),
+        loadActiveSpecsIndex: () => ({
+          indexAvailable: false,
+          entries: [],
+          warnings: ["not found"],
+        }),
+      });
+
+      expect(code).toBe(0);
+      expect(logger.lines.join("\n")).toMatch(/índice operacional público/i);
+      expect(logger.lines.join("\n")).toMatch(/publish-state/);
+    });
+
+    it("DADO wizard opção 5 (diagnosticar drift) com spec_path ausente ENTÃO lista a entry divergente", async () => {
+      const logger = new CollectingLogger();
+      const prompts = new FakePrompts(["diagnose-drift"]);
+      const code = await runWorkflow({
+        repoRoot: "/repo",
+        logger,
+        prompts,
+        clipboard: new FakeClipboard(),
+        fs: makeFsWithSpec(),
+        loadActiveSpecsIndex: () => ({
+          indexAvailable: true,
+          entries: [
+            {
+              entry: {
+                id: "0023",
+                slug: "workflow-runtime",
+                branch: "feat/spec-0023-workflow-runtime",
+                stage: "implementation",
+                status: "active",
+                specPath: ".governance/specs/0023-workflow-runtime",
+                updatedAt: "2026-05-21T00:00:00Z",
+              },
+              specPathExists: false,
+            },
+          ],
+          warnings: [],
+        }),
+      });
+
+      expect(code).toBe(0);
+      expect(logger.lines.join("\n")).toMatch(/1 entry\(ies\) com drift/);
+      expect(logger.lines.join("\n")).toMatch(/workflow-runtime/);
     });
 
     it("DADO runContinue sem identifier QUANDO há índice com entries ENTÃO NÃO loga seção do índice (atalho focado na spec corrente)", async () => {

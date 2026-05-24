@@ -20,6 +20,17 @@ Em fluxos governance-first com stacked PRs (per ADR 0020), os estados nativos `D
   2. Autorização explícita do owner para merge atômico ponta-a-ponta (per ADR 0020)
   3. Sem espera por validações pendentes (CI, review humano)
 
+## Integration PR
+
+Uma stack governance-first pode usar um **Integration PR** como PR agregador de homologação/convergência antes do merge final. Ele existe para validar que a stack inteira está coerente ponta-a-ponta, não para criar comportamento novo.
+
+Semântica:
+
+- **Integration PR** — homologa a convergência da stack aprovada. Consolida evidência de CI, smoke/manual test, status de lifecycle, PR bodies e pendências explícitas.
+- **Não é "deploy PR"** — não representa publicação, release ou execução de deploy.
+- **Não autoriza merge sozinho** — continua sujeito ao estado terceiro `Mergeable`: stack Ready + autorização explícita do owner + validações concluídas.
+- **Não vira mega-PR criativo** — se surgir comportamento novo, ele volta para execution PR ou spec própria.
+
 ## Por que este ADR existe
 
 A confusão entre `Ready` e `Mergeable` **emergiu empiricamente** durante operação real da stack da Spec 0023 — não foi hipótese teórica. Múltiplas sessões de review (Codex, Claude, Antigravity, owner) trataram PRs convertidos para `Ready` como se já estivessem autorizados para merge, mesmo a stack tendo outros PRs upstream/downstream pendentes. A label `MERGEABLE` do GitHub reforça a ambiguidade porque só sinaliza ausência de conflito contra a branch base do PR — não diz nada sobre a stack inteira.
@@ -48,12 +59,14 @@ O `.github/pull_request_template.md` (redesign cravado em `[DEC-0023-J01]` Commi
 1. Seção "Status do ciclo de vida" no topo, com 3 checkboxes distintos: `Draft` / `Ready for review` / `Authorized to merge`
 2. Frase explícita logo abaixo: _"Ready ≠ Mergeable. Stacks governance-first (ADR 0020) integram em sequência atômica ponta-a-ponta."_
 3. Seção "Merge authorization" textual curta (não checklist) — força owner a registrar autorização ou marcar como pendente
+4. Tipo opcional `Integration` para PRs de homologação/convergência de stack, explicitamente sem comportamento novo
 
 ## Não-objetivos
 
 - Não substitui `[CORE-09]` / `[CORE-10]` / `[CORE-16]` — complementa, articulando o modelo de 3 estados que essas regras tangenciam.
 - Não revoga o uso de `Draft` do GitHub — **restaura** o significado natural ("WIP", não "bloqueado").
 - Não cria novo gate operacional — formaliza distinção que já existia implicitamente em ADR 0020.
+- Não obriga toda stack a ter Integration PR. O padrão é opt-in quando a convergência/homologação final precisa ficar auditável em PR próprio.
 - Não responde **onde** a SSOT de CORE-09/10 vive (questão coberta por `[DEC-0023-F05]`, Deferred com critério estrutural vinculado à abertura da candidata `handoff-as-first-class`). F05 trata de **WHERE**; este ADR trata de **WHAT** os estados significam.
 
 ## Critério de revisão futura

@@ -1,10 +1,11 @@
-stage: implementation
+stage: closing
 gate:
   status: closed
 focus:
-  - 1.H — DX execution
+  - Phase 3 — review/homologation
+  - Integration PR — stack convergence
 next:
-  - 1.H — finalizar Copilot review drift residual ([DEC-0023-B07] opção 6 do wizard; printHelp + wizard text drift; quit messaging; cosméticos de label/JSDoc)
-  - 1.H — review final do PR + cleanup de drifts colaterais (header status agregado, tabela F01–F05, G04 ausente no Gate fechado de G, PR description/tasks)
-  - 1.H — encerramento da 0023 (NEXT/research migration, status final, CHANGELOG release formal)
-  - Auditoria periódica dos 4 sinais de vigilância do Passo 5 + guardrails de UX-creep no render do índice (detalhes em NEXT.md § "Pós-PR3")
+  - "Preparar PR #26 como Integration PR de homologação/convergência da stack 0023"
+  - "Validar ponta-a-ponta: yarn ci + smoke manual do workflow runtime"
+  - "Manter merge authorization pendente até owner autorizar merge atômico da stack completa"
+  - "Encerramento pré-merge após homologação: migrar NEXT, formalizar release e status Done"

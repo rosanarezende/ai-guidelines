@@ -88,6 +88,13 @@ _(Sem débitos adiados no momento do gate. Itens emergentes durante PR1 entram a
 
 - **Vocabulário "Context bundle" → "Contexto da spec" normalizado (hardening final 2026-05-23 II).** Owner antecipou o critério de revisita ("≥ 1 usuário externo perguntar") fazendo a pergunta ele mesmo durante review do PR #25; cleanup completo executado: delimitador do REPL, JSDoc, CHANGELOG, README implícito (já limpo), `spec.md`, `decision-brief.md`, `plan.md`, e este próprio NEXT.md. Termo canônico em diante: **"contexto da spec"** / **"contexto pronto para colar"** / **"colar na sua IA externa"**. **Vocabulário interno legado preservado intencionalmente:** função `buildContextBundle()` em `src/cli/workflow.ts` e variável `bundle` mantidas para evitar churn cosmético no fechamento da spec — rename é candidato a follow-up de PR pequeno pós-merge, não bloqueador. Registrado aqui para evitar "tribal wisdom" sobre por que código interno e governance carregam termos diferentes.
 
+### Dogfooding de fechamento — Integration PR (PR #26 / 2026-05-24)
+
+- **Contexto:** após ADR 0024 separar Draft, Ready e Mergeable, a owner decidiu dogfoodar um terceiro tipo operacional de PR ainda dentro da 0023: **Integration PR**. Ele representa homologação/convergência final da stack, não deploy e não execution criativo.
+- **Decisão cravada:** `[DEC-0023-K01]` no decision-brief. Artefatos mínimos atualizados: ADR 0024, `.github/pull_request_template.md`, `.core/process/pr-title-conventions.md`, `tasks.md` Phase 3 e draft do PR #26 em `integration-pr-26.md`.
+- **Boundary:** Integration PR agrega evidência (CI, smoke manual, lifecycle consistency, PR bodies, pendências explícitas) e mantém merge authorization pendente até autorização textual da owner. Se surgir comportamento novo, sai do Integration PR e volta para execution PR/spec própria.
+- **Critério de revisita:** se ≥ 2 stacks futuras precisarem de Integration PR e ainda houver confusão entre homologação e autorização de merge, reabrir ADR 0024 para avaliar operacionalização adicional. Não adicionar CI/orchestrator agora.
+
 ### Pós-PR5 audit de testes (Frente #2 do hardening / 2026-05-23 III) — dívidas conscientes + nota TDD
 
 > Auditoria proporcional após convergência do hardening de vocabulário. **DDD boundaries limpos** (0 violações cross-layer); **BDD discipline 100% nos tests novos da rodada** (`DetectActiveSpec`, `PublishState`, `workflow`, `visual-prompts`); **gap real do REPL menu dispatch corrigido em commit dedicado** (`briefing`/`blockers`/`execute-next` cases — workflow.ts coverage 82% → 85%). Itens abaixo são dívidas pré-existentes ou fora do escopo proporcional do PR #25 — registrados com critério estrutural per ADR 0021 item 7.
@@ -171,9 +178,10 @@ Padrão dos 12 commits do hardening: **"code + tests em tandem"** — refatores 
   - **(i)** Após observação de que PR #18 não encaixava honestamente nem como governance pura nem execution pura. Primeira tentativa: adicionar 🧭 como emoji de "transitional/pre-model". Resultou em `[🧭🛠️➜]` visualmente ambíguo — 3 emojis aglutinados perdiam clareza categórica.
   - **(ii)** Refinada novamente: **separar tipo (emoji fechado) de nuance (label textual fechada)**. 🧭 removido como emoji; nuances viram brackets textuais separados (`[Bootstrap]`, `[Pre-model]`, `[Hotfix]`). PR #18 hoje: `[🛠️➜] [Bootstrap] [Spec 0023] Workflow runtime`.
   - **(iii)** Estendida para suportar **pillar markers no identificador** (ex.: `[🛠️] [fix] ...`) — permite PRs não-spec (fix/patch/spike/incident/experiment/proposal) vinculados diretamente ao `WorkItem.kind` do `registry.yml`. Primeiro uso: PR de reorganização de scripts (fix pillar) como dogfooding.
+  - **(iv)** Estendida no fechamento da Spec 0023 para `🔗` + `[Integration]`, representando homologação/convergência final da stack sem comportamento novo.
 - **Conjuntos fechados:**
-  - Emojis: 🧾 (governance) · 🛠️ (execution) · 🔒 (governance contract) · 1️⃣2️⃣3️⃣ (order) · ➜ (downstream) · 🚑 (fast-track). **Nenhum emoji adicional será introduzido.**
-  - Labels textuais: `[Bootstrap]` · `[Pre-model]` · `[Hotfix]`. **Lista fechada;** nova label exige ≥ 2 casos justificando + cross-ref.
+  - Emojis: 🧾 (governance) · 🛠️ (execution) · 🔗 (integration) · 🔒 (governance contract) · 1️⃣2️⃣3️⃣ (order) · ➜ (downstream) · 🚑 (fast-track). **Nenhum emoji adicional será introduzido sem decisão registrada.**
+  - Labels textuais: `[Bootstrap]` · `[Pre-model]` · `[Hotfix]` · `[Integration]`. **Lista fechada;** nova label exige ≥ 2 casos justificando + cross-ref.
   - Pillars no identificador: `fix` · `patch` · `incident` · `spike` · `experiment` · `proposal` (alinhados com taxonomia MECE da Spec 0021).
 - **Regras explícitas:** governance NÃO usa número; ausência de ➜ em execution = terminal; ausência de número em execution = isolado; cada bracket carrega uma dimensão semântica (não aglutinar tipo + nuance no mesmo bracket).
 - **Anti-DAG guardrail explícito** reforçado: emojis/números/labels são sinalização humana L1, não input para automação. Qualquer parser, DAG tooling, merge orchestration, CI lint de prefixo → reabrir DEC própria (L4).
