@@ -112,9 +112,9 @@ Uso:
                    [3] Publicar estado (instruções)
                    [4] Ver specs ativas (índice público)
                    [5] Diagnosticar drift do índice
-                   [6] Gerar prompt visual (cola na IA conversacional ou
-                       direto no gerador de imagem)
-                 Cf. [DEC-0023-B06]; não embute LLM (ADR 0018 preservado).
+                   [6] Gerar prompt visual (briefing para IA conversacional
+                       investigar o repo e devolver o prompt de imagem final)
+                 Cf. [DEC-0023-B06] + [DEC-0023-B07]; não embute LLM (ADR 0018 preservado).
 
   continue [<slug|id>]
                  Atalho do workflow: imprime briefing + próxima ação de

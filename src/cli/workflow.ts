@@ -313,7 +313,7 @@ async function runReplOnce(
   for (const item of menu) {
     logger.info(`  ${item.key}. ${item.label}`);
   }
-  logger.info(`  ou digite uma pergunta em texto livre para gerar context bundle.`);
+  logger.info(`  ou digite uma pergunta para gerar contexto pronto para colar na sua IA.`);
   logger.info("");
   const line = await prompts.input({ message: "workflow>" });
   const cmd = classifyInput(line);
