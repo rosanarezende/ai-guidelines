@@ -5,8 +5,8 @@
 > Spec: [`./spec.md`](./spec.md)
 > Plan: [`./plan.md`](./plan.md) (criado em 2026-05-19 conforme `[DEC-0023-B05]`).
 > Tasks: tasklist da sessão de implementação (PR1).
-> Status agregado: **Partial** (Bloco F aberto com F01–F05 em status Pendente; Bloco G Resolved após achado empírico de dogfooding 2026-05-21; Blocos A/B/C/D/E permanecem Resolved)
-> Última atualização: 2026-05-21 (II) — Bloco G estendido com `[DEC-0023-G04]` (vocabulário canônico stage/status do índice público + projection rule). Blocos A/B/C/D/E/G Resolved; Bloco F segue aberto com F01–F05 Pendentes derivadas do research `[research/lifecycle-architecture.md]`.
+> Status agregado: **Resolved** — Blocos A/B/C/D/E/F/G/I todos fechados (F01–F04 Resolved em PR5 S5 / 2026-05-22; F05 Deferred com critério estrutural vinculado à abertura de `handoff-as-first-class`; B07 + I01 cravados durante review do PR #25 / 2026-05-23).
+> Última atualização: 2026-05-23 — review final do PR #25: `[DEC-0023-B07]` (opção 6 do wizard) + `[DEC-0023-I01]` (Bloco I — identidade canônica da spec) + reconciliação de drifts colaterais (Resumo de status, Gate fechados B/F/G).
 
 > **Artefato canônico do gate humano entre Stage 1 (research) e Stage 2 (design + implementação).** Para esta spec, a Stage 1 é a investigação documentada na pasta legacy `.specify/specs/0023-governance-workflow-discovery-model/` (research.md + anexos). Este brief materializa o gate Stage A → Stage B com 4 decisões cravadas em sessão de design 2026-05-19.
 
@@ -38,18 +38,18 @@
 | `[DEC-0023-E03]` | E     | Resolved |
 | `[DEC-0023-E04]` | E     | Resolved |
 | `[DEC-0023-E05]` | E     | Resolved |
-| `[DEC-0023-F01]` | F     | Pendente |
-| `[DEC-0023-F02]` | F     | Pendente |
-| `[DEC-0023-F03]` | F     | Pendente |
-| `[DEC-0023-F04]` | F     | Pendente |
-| `[DEC-0023-F05]` | F     | Pendente |
+| `[DEC-0023-F01]` | F     | Resolved |
+| `[DEC-0023-F02]` | F     | Resolved |
+| `[DEC-0023-F03]` | F     | Resolved |
+| `[DEC-0023-F04]` | F     | Resolved |
+| `[DEC-0023-F05]` | F     | Deferred |
 | `[DEC-0023-G01]` | G     | Resolved |
 | `[DEC-0023-G02]` | G     | Resolved |
 | `[DEC-0023-G03]` | G     | Resolved |
 | `[DEC-0023-G04]` | G     | Resolved |
 | `[DEC-0023-I01]` | I     | Resolved |
 
-**Status agregado:** Partial — Blocos A/B/C/D/E/G/I Resolved; Bloco F com 5 pontos Pendentes derivados do research `[research/lifecycle-architecture.md]`.
+**Status agregado:** Resolved — Blocos A/B/C/D/E/F/G/I todos fechados. F01–F04 Resolved (tríade arquitetural B+B+A+A cravada em PR5 S5 / 2026-05-22); F05 Deferred com critério estrutural observável (revisita obrigatória na abertura da candidata `handoff-as-first-class`).
 
 ---
 
@@ -1196,7 +1196,7 @@ Para preservar enforcement estrutural enquanto a accountability transfere, fast-
 
 ## ✅ Gate fechado — Escopo do PR2 (Bloco B)
 
-- **Data:** 2026-05-19
+- **Data:** 2026-05-19 (B01–B05); estendido em 2026-05-22 (B06); estendido em 2026-05-23 (B07)
 - **Owner:** @rosanarezende
 - **Pontos resolvidos:**
   - [x] `[DEC-0023-B01]` — Escopo do PR2: DX/docs com clipboard; bootstrap para PR3 (Opção B)
@@ -1204,6 +1204,8 @@ Para preservar enforcement estrutural enquanto a accountability transfere, fast-
   - [x] `[DEC-0023-B03]` — examples/: incluir `examples/minimal-spec/` mínimo (Opção B)
   - [x] `[DEC-0023-B04]` — Release npm: preview após PR3 com CHANGELOG explícito (Opção C)
   - [x] `[DEC-0023-B05]` — `plan.md` separado alinhado com boilerplate canônico (Opção B); registra decisão antes implícita
+  - [x] `[DEC-0023-B06]` — Wizard CLI operacional mínimo (5 opções fixas declarativas, lookup-only) — promoção formal do insight em incubação (Opção A; PR5 S5)
+  - [x] `[DEC-0023-B07]` — Opção 6 do wizard (Gerar prompt visual) — entrega declarada do embrião visual; reafirma gate de B06 para próximas opções (Opção B; review do PR #25)
 
 ---
 
@@ -1238,13 +1240,29 @@ Para preservar enforcement estrutural enquanto a accountability transfere, fast-
 
 ## ✅ Gate fechado — Índice operacional público mínimo (Bloco G)
 
-- **Data:** 2026-05-21
+- **Data:** 2026-05-21 (G01–G03); estendido em 2026-05-21 II (G04)
 - **Owner:** @rosanarezende
 - **Pontos resolvidos:**
   - [x] `[DEC-0023-G01]` — Separar artefato normativo, state efêmero e runtime derivado (Opção B)
   - [x] `[DEC-0023-G02]` — `.governance/runtime/active-specs.yml` como índice público mínimo (Opção B)
   - [x] `[DEC-0023-G03]` — `yarn workflow publish-state` manual primeiro; automação depois (Opção A)
+  - [x] `[DEC-0023-G04]` — Vocabulário canônico stage/status do índice público + regra de projeção (`stage` projetado direto de `state.yml.stage`; `status` declarado, dimensões independentes)
 - **Princípio operativo:** o índice público em `main` existe para descoberta e navegação operacional. Ele **não** define contrato da spec nem substitui a branch ativa como artefato denso.
+
+---
+
+## ✅ Gate fechado — Convergência taxonomy ↔ lifecycle (Bloco F)
+
+- **Data:** 2026-05-22 (PR5 S5, via POC visual neutra; deferimento temporário 2026-05-19 → 2026-05-22 cravado em S1)
+- **Owner:** @rosanarezende
+- **Pontos resolvidos:**
+  - [x] `[DEC-0023-F01]` — `incident` separado como entity nova (`OperationalState` em domain model); modelagem mínima para demais pilares (Opção B)
+  - [x] `[DEC-0023-F02]` — Boundary canônico por classe (cada lifecycle intent ganha boundary próprio); definição fina por pilar exige research dedicada (Opção B)
+  - [x] `[DEC-0023-F03]` — Boilerplate dedicado por classe (Opção A); materialização cravada como candidata `boilerplate-system-modernization` no backlog `Now`
+  - [x] `[DEC-0023-F04]` — Múltiplos paths por classe (`.governance/{specs,incidents,...}`); topologia espelha taxonomy MECE (Opção A); vinculado à mesma candidata
+  - [x] `[DEC-0023-F05]` — **Deferred com critério estrutural observável** — destino final da SSOT do princípio CORE-09/10 vinculado à abertura da candidata `handoff-as-first-class`. Não-violação de ADR 0021 item 7: deferimento tem evento concreto auditável (abertura da spec X), não "talvez depois"
+- **Tríade arquitetural cravada:** F01+F02+F03+F04 = B+B+A+A. Cada classe MECE ganha modelo próprio em código (F01), boundary próprio no lifecycle (F02), template próprio (F03) e diretório próprio no consumidor (F04). Materialização real fica para spec dedicada (`boilerplate-system-modernization`).
+- **Princípio operativo:** **"governança universal não significa artifacts universais"** — invariantes universais leves (accountability + traceability + outcome registration) materializam-se em boundaries class-specific, não em artifacts uniformes.
 
 ---
 
