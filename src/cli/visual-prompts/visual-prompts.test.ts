@@ -36,7 +36,7 @@ class StubFs implements WorkflowFileSystem {
   }
 }
 
-describe("Visual Prompts - Suite de Testes BDD", () => {
+describe("CLI — Visual Prompts [BR-WORKFLOW-VISUAL-PROMPTS]", () => {
   describe("parseContextTarget", () => {
     it("DADO um input de PR com cerquilha QUANDO parsear ENTÃO retorna o tipo pr e o número correto", () => {
       const result = parseContextTarget("PR #25");

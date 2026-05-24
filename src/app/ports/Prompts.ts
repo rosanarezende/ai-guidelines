@@ -14,9 +14,9 @@
  * Cross-ref: `cli/cli/args.mjs` (wizard legacy de init/adopt) já usa
  * `@inquirer/prompts` direto. Esta porta padroniza o uso para o
  * runtime novo (`src/cli/workflow.ts`) e qualquer prompt futuro do
- * framework — convenção registrada em `.governance/specs/0023-workflow
- * -runtime/NEXT.md` § "Convenção operacional — inquirer em todo input
- * humano".
+ * framework — convenção registrada em
+ * `.governance/specs/0023-workflow-runtime/NEXT.md` §
+ * "Convenção operacional — inquirer em todo input humano".
  */
 export interface PromptChoice<T = string> {
   readonly name: string;
