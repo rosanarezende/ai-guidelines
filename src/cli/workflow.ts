@@ -161,17 +161,47 @@ function safeRead(fs: WorkflowFileSystem, relPath: string): string | null {
   }
 }
 
-export function buildMenu(state: WorkflowState): ReadonlyArray<{ key: string; label: string }> {
-  const items: { key: string; label: string }[] = [];
-  items.push({ key: "1", label: "ver briefing novamente" });
-  items.push({ key: "2", label: "ver lacunas do gate (research §8)" });
+/**
+ * Ações semânticas do REPL. Estáveis (não dependem da posição do item no menu);
+ * usadas pelo dispatch em vez do `key` literal — `key` é só display posicional.
+ */
+export type MenuAction = "briefing" | "blockers" | "execute-next" | "quit";
+
+export interface MenuItem {
+  /** Display key — número sequencial (1, 2, 3, ...) ou `q`. Posicional, NÃO semântico. */
+  readonly key: string;
+  readonly label: string;
+  /** Identificador semântico estável; usado pelo dispatch. */
+  readonly action: MenuAction;
+}
+
+/**
+ * Monta o menu do REPL. Keys numéricas são **posicionais** (renumeradas
+ * dinamicamente) — quando uma opção opcional é omitida (e.g. critério-3
+ * com gate fechado), as subsequentes são renumeradas para nunca exibir
+ * gaps (1, 2, 4 → 1, 2, 3). Bug fix de integridade UX observado em
+ * runtime ao vivo (2026-05-23): inconsistência posicional destrói
+ * confiança operacional do wizard.
+ */
+export function buildMenu(state: WorkflowState): ReadonlyArray<MenuItem> {
+  const ordered: { label: string; action: MenuAction }[] = [];
+  ordered.push({ label: "ver briefing novamente", action: "briefing" });
+  ordered.push({ label: "ver lacunas do gate (research §8)", action: "blockers" });
   if (state.gate.status !== "closed") {
-    items.push({ key: "3", label: "ver lacunas e critérios do gate" });
+    ordered.push({ label: "ver lacunas e critérios do gate", action: "blockers" });
   }
   if (state.next.length > 0) {
-    items.push({ key: "4", label: `executar próxima ação (${state.next[0]})` });
+    ordered.push({
+      label: `executar próxima ação (${state.next[0]})`,
+      action: "execute-next",
+    });
   }
-  items.push({ key: "q", label: "sair" });
+  const items: MenuItem[] = ordered.map((a, i) => ({
+    key: String(i + 1),
+    label: a.label,
+    action: a.action,
+  }));
+  items.push({ key: "q", label: "sair", action: "quit" });
   return items;
 }
 
@@ -289,30 +319,35 @@ async function runReplOnce(
   const cmd = classifyInput(line);
 
   if (cmd.kind === "menu") {
-    if (cmd.key === "q") return "quit";
-    if (cmd.key === "1") {
-      logger.info(assembleBriefing(ctx));
-      return "continue";
-    }
-    if (cmd.key === "2" || cmd.key === "3") {
-      if (ctx.headers.blockers.length === 0) {
-        logger.info("(nenhum blocker extraído de research §8 — confira manualmente)");
-      } else {
-        logger.info("Lacunas/blockers do gate:");
-        for (const b of ctx.headers.blockers) logger.info(`  - ${b}`);
+    // Dispatch por action semântica (estável), não por key literal
+    // (posicional). Renumeração dinâmica do menu não quebra a lógica.
+    const item = menu.find((m) => m.key === cmd.key);
+    if (item) {
+      switch (item.action) {
+        case "quit":
+          return "quit";
+        case "briefing":
+          logger.info(assembleBriefing(ctx));
+          return "continue";
+        case "blockers":
+          if (ctx.headers.blockers.length === 0) {
+            logger.info("(nenhum blocker extraído de research §8 — confira manualmente)");
+          } else {
+            logger.info("Lacunas/blockers do gate:");
+            for (const b of ctx.headers.blockers) logger.info(`  - ${b}`);
+          }
+          return "continue";
+        case "execute-next":
+          if (ctx.state.next.length === 0) {
+            logger.info("(state.next vazio — atualize state.yml com a próxima ação)");
+          } else {
+            logger.info(`Próxima ação registrada: ${ctx.state.next[0]}`);
+            logger.info(
+              `(execução automática não está no escopo do PR1 — registre o resultado em state.yml manualmente)`
+            );
+          }
+          return "continue";
       }
-      return "continue";
-    }
-    if (cmd.key === "4") {
-      if (ctx.state.next.length === 0) {
-        logger.info("(state.next vazio — atualize state.yml com a próxima ação)");
-      } else {
-        logger.info(`Próxima ação registrada: ${ctx.state.next[0]}`);
-        logger.info(
-          `(execução automática não está no escopo do PR1 — registre o resultado em state.yml manualmente)`
-        );
-      }
-      return "continue";
     }
   }
 

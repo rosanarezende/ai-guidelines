@@ -202,7 +202,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
   });
 
   describe("buildMenu", () => {
-    it("DADO gate fechado ENTÃO não inclui opção 'mostrar critérios para fechar'", () => {
+    it("DADO gate fechado ENTÃO inclui apenas uma opção de 'blockers' (omite a segunda variante)", () => {
       const state: WorkflowState = {
         stage: "implementation",
         gate: { status: "closed" },
@@ -210,10 +210,11 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
         next: ["x"],
       };
       const menu = buildMenu(state);
-      expect(menu.find((m) => m.key === "3")).toBeUndefined();
+      const blockersItems = menu.filter((m) => m.action === "blockers");
+      expect(blockersItems).toHaveLength(1);
     });
 
-    it("DADO gate aberto ENTÃO inclui opção 'mostrar critérios para fechar'", () => {
+    it("DADO gate aberto ENTÃO inclui as duas variantes de 'blockers' (lacunas E critérios)", () => {
       const state: WorkflowState = {
         stage: "discovery",
         gate: { status: "open" },
@@ -221,10 +222,11 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
         next: [],
       };
       const menu = buildMenu(state);
-      expect(menu.find((m) => m.key === "3")).toBeDefined();
+      const blockersItems = menu.filter((m) => m.action === "blockers");
+      expect(blockersItems).toHaveLength(2);
     });
 
-    it("DADO state.next vazio ENTÃO não oferece 'executar próxima ação'", () => {
+    it("DADO state.next vazio ENTÃO não oferece ação 'execute-next'", () => {
       const state: WorkflowState = {
         stage: "discovery",
         gate: { status: "open" },
@@ -232,7 +234,35 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
         next: [],
       };
       const menu = buildMenu(state);
-      expect(menu.find((m) => m.key === "4")).toBeUndefined();
+      expect(menu.find((m) => m.action === "execute-next")).toBeUndefined();
+    });
+
+    it("DADO gate fechado E state.next presente ENTÃO keys numéricas são sequenciais 1,2,3 sem gaps (regressão runtime 2026-05-23)", () => {
+      // Bug observado em runtime: com gate=closed, menu exibia 1,2,4 (pulando
+      // 3 porque key "3" era omitido literal). Fix: renumeração dinâmica
+      // posicional. Inconsistência posicional destrói confiança operacional
+      // do wizard — `key` agora é display puro, dispatch usa `action`.
+      const state: WorkflowState = {
+        stage: "implementation",
+        gate: { status: "closed" },
+        focus: [],
+        next: ["fazer X"],
+      };
+      const menu = buildMenu(state);
+      const numericKeys = menu.filter((m) => m.key !== "q").map((m) => m.key);
+      expect(numericKeys).toEqual(["1", "2", "3"]);
+    });
+
+    it("DADO gate aberto E state.next presente ENTÃO keys numéricas sequenciais 1,2,3,4 (sanity check)", () => {
+      const state: WorkflowState = {
+        stage: "discovery",
+        gate: { status: "open" },
+        focus: [],
+        next: ["fazer X"],
+      };
+      const menu = buildMenu(state);
+      const numericKeys = menu.filter((m) => m.key !== "q").map((m) => m.key);
+      expect(numericKeys).toEqual(["1", "2", "3", "4"]);
     });
   });
 
