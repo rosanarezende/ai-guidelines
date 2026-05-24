@@ -520,7 +520,7 @@ async function runWizard(prompts: Prompts, logger: Logger): Promise<WizardChoice
     case "continue-other": {
       const identifier = (await prompts.input({ message: "Slug ou id da spec" })).trim();
       if (identifier === "") {
-        logger.error("Identificador vazio — voltando ao menu.");
+        logger.error("Identificador vazio — encerrando wizard.");
         return { kind: "quit" };
       }
       return { kind: "continue-other", identifier };
@@ -554,7 +554,7 @@ async function runVisualPromptSubWizard(prompts: Prompts, logger: Logger): Promi
   if (template.needsContext) {
     context = (await prompts.input({ message: "Contexto (ex.: PR #25, spec 0023)" })).trim();
     if (context === "") {
-      logger.error("Contexto vazio — voltando ao menu.");
+      logger.error("Contexto vazio — encerrando wizard.");
       return { kind: "quit" };
     }
     // Valida formato — parseContextTarget aceita "PR #N", "pr N", "spec <id>"
