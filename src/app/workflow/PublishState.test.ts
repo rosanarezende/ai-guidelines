@@ -14,17 +14,20 @@ import { PublishState, PublishStateError } from "./PublishState.js";
 class WritableFakeFs implements WorkflowFileSystem {
   files: Map<string, string>;
   directories: Set<string>;
+  directoryContents: Map<string, ReadonlyArray<string>>;
   branch: string | null;
 
   constructor(
     opts: {
       files?: Map<string, string>;
       directories?: Set<string>;
+      directoryContents?: Map<string, ReadonlyArray<string>>;
       branch?: string | null;
     } = {}
   ) {
     this.files = new Map(opts.files ?? []);
     this.directories = new Set(opts.directories ?? []);
+    this.directoryContents = new Map(opts.directoryContents ?? []);
     this.branch = opts.branch ?? null;
   }
 
@@ -42,8 +45,8 @@ class WritableFakeFs implements WorkflowFileSystem {
   writeTextFile(relPath: string, contents: string): void {
     this.files.set(relPath, contents);
   }
-  listDirectory(): ReadonlyArray<string> {
-    return [];
+  listDirectory(relPath: string): ReadonlyArray<string> {
+    return this.directoryContents.get(relPath) ?? [];
   }
   currentBranch(): string | null {
     return this.branch;
@@ -78,7 +81,10 @@ function makeFs(
   if (opts.withIndex !== undefined) files.set(INDEX_PATH, opts.withIndex);
   return new WritableFakeFs({
     files,
-    directories: new Set([SPEC_DIR]),
+    directories: new Set([SPEC_DIR, ".governance/specs"]),
+    // DetectActiveSpec lookup por id NNNN exige que listDirectory devolva
+    // o conteúdo real do root para resolver `0023-workflow-runtime`.
+    directoryContents: new Map([[".governance/specs", ["0023-workflow-runtime"]]]),
     branch: opts.branch === undefined ? "feat/spec-0023-workflow-runtime" : opts.branch,
   });
 }
@@ -263,17 +269,20 @@ active_specs:
       expect(fs.fileExists(INDEX_PATH)).toBe(false);
     });
 
-    it("DADO branch fora do padrão feat/spec-NNNN-* E índice ausente QUANDO publish ENTÃO erro do fallback orientando branch canônica ou publish prévio E não escreve", () => {
-      // Pós-fallback (proposta aprovada pelo owner pós-validação humana):
-      // branch "main" cai no fallback via índice; se o índice também não
-      // existe, mensagem narrativa orienta as duas saídas possíveis.
+    it("DADO branch fora do padrão feat/spec-NNNN-* QUANDO publish ENTÃO erro narrativo de DetectActiveSpec propagado E não escreve (per [DEC-0023-I01], sem fallback à projection layer)", () => {
+      // Pós-refator [DEC-0023-I01]: branch "main" → DetectActiveSpec falha
+      // por padrão de branch inválido; PublishState propaga o reason sem
+      // consultar active-specs.yml (projection ≠ primary resolver).
       const fs = makeFs({ branch: "main" });
       expect(() =>
         makePublishState(fs).run({ status: "active", updatedBy: "@rosanarezende" })
-      ).toThrow(/Branch "main" não casa diretório/);
+      ).toThrow(PublishStateError);
       expect(() =>
         makePublishState(fs).run({ status: "active", updatedBy: "@rosanarezende" })
-      ).toThrow(/índice público.*também está ausente/);
+      ).toThrow(/Não foi possível detectar spec ativa/);
+      expect(() =>
+        makePublishState(fs).run({ status: "active", updatedBy: "@rosanarezende" })
+      ).toThrow(/branch "main" não segue o padrão/);
       expect(fs.fileExists(INDEX_PATH)).toBe(false);
     });
 
@@ -298,10 +307,12 @@ active_specs:
     });
   });
 
-  describe("Fallback via índice quando branch ≠ slug canônico (lookup/translation, sem orchestration)", () => {
-    // Branch "de trabalho" — nome reflete escopo do PR, não slug canônico
-    // da spec. Convenção comum em stacks de PRs. Antes do fallback, isso
-    // quebrava publish-state mesmo com a entry no índice.
+  describe("Resolução via id canônico — branch escopo-de-PR (per [DEC-0023-I01])", () => {
+    // Pós-refator: branch "de trabalho" (sufixo ≠ slug canônico) resolve
+    // automaticamente via DetectActiveSpec por id NNNN — sem consultar
+    // active-specs.yml. Projection layer ≠ primary resolver de identity.
+    // O describe anterior testava o fallback `resolveLocationFromIndexBranchMatch`
+    // que foi removido como dead code.
     const WORK_BRANCH = "feat/spec-0023-runtime-active-state";
 
     function makeFsWithWorkBranch(
@@ -312,15 +323,14 @@ active_specs:
       if (opts.withIndex !== undefined) files.set(INDEX_PATH, opts.withIndex);
       return new WritableFakeFs({
         files,
-        directories: new Set([SPEC_DIR]),
+        directories: new Set([SPEC_DIR, ".governance/specs"]),
+        directoryContents: new Map([[".governance/specs", ["0023-workflow-runtime"]]]),
         branch: WORK_BRANCH,
       });
     }
 
-    it("DADO branch casa diretório E índice ausente QUANDO publish ENTÃO comportamento atual (sem fallback ativado) — backwards-compat", () => {
-      // Sanity check: a presença do fallback não muda o fluxo quando a
-      // detecção via branch já funciona. Cenário do Cenário 1 do happy path.
-      const fs = makeFs(); // branch="feat/spec-0023-workflow-runtime" casa SPEC_DIR
+    it("DADO branch canônico (sufixo = slug) E índice ausente QUANDO publish ENTÃO sanity-check — comportamento default não muda", () => {
+      const fs = makeFs(); // branch="feat/spec-0023-workflow-runtime"
       const result = makePublishState(fs).run({
         status: "active",
         updatedBy: "@rosanarezende",
@@ -329,19 +339,34 @@ active_specs:
       expect(fs.fileExists(INDEX_PATH)).toBe(true);
     });
 
-    it("DADO branch de trabalho (não casa diretório) E índice tem entry com branch exata QUANDO publish ENTÃO usa fallback, escreve corretamente e a entry atualizada reflete a branch atual", () => {
-      // Reproduz exatamente o cenário do dogfooding do owner: branch
-      // "de trabalho" do PR, mas o índice já tem entry registrando essa
-      // branch como pertencente à spec 0023.
+    it("DADO branch escopo-de-PR (não casa slug literal) E índice ausente QUANDO publish ENTÃO resolve via id E escreve E entry reflete branch atual", () => {
+      // Reproduz o cenário do bug 2026-05-23: na branch
+      // `feat/spec-0023-runtime-active-state`, a spec é resolvida pelo id
+      // `0023` apontando para o diretório canônico `0023-workflow-runtime`,
+      // independente do sufixo do branch. Índice nem precisa existir.
+      const fs = makeFsWithWorkBranch(); // sem índice
+      const result = makePublishState(fs).run({
+        status: "active",
+        updatedBy: "@rosanarezende",
+      });
+
+      expect(result.wasUpdate).toBe(false);
+      expect(result.entry.slug).toBe("workflow-runtime"); // do diretório canônico
+      expect(result.entry.branch).toBe(WORK_BRANCH); // branch corrente, factual
+      expect(result.entry.stage).toBe("implementation"); // projetado do state.yml
+      expect(fs.fileExists(INDEX_PATH)).toBe(true);
+    });
+
+    it("DADO branch escopo-de-PR E índice já existente com entry para id=0023 QUANDO publish ENTÃO atualiza in-place (upsert por id, não por branch)", () => {
       const existingIndex = `version: 1
 active_specs:
   - id: "0023"
     slug: "workflow-runtime"
-    branch: "${WORK_BRANCH}"
-    stage: "implementation"
-    status: "active"
+    branch: "feat/spec-0023-old-branch"
+    stage: "decision"
+    status: "paused"
     spec_path: ".governance/specs/0023-workflow-runtime"
-    updated_at: "2026-05-21T08:00:00Z"
+    updated_at: "2026-05-20T00:00:00Z"
 `;
       const fs = makeFsWithWorkBranch({ withIndex: existingIndex });
       const result = makePublishState(fs).run({
@@ -349,92 +374,35 @@ active_specs:
         updatedBy: "@rosanarezende",
       });
 
+      // Upsert por id: substitui in-place, branch atualiza para WORK_BRANCH.
       expect(result.wasUpdate).toBe(true);
-      expect(result.entry.slug).toBe("workflow-runtime");
       expect(result.entry.branch).toBe(WORK_BRANCH);
-      expect(result.entry.stage).toBe("implementation"); // projetado do state.yml
-      expect(result.entry.status).toBe("blocked"); // declarado pelo humano
-
-      // verifica que o write é round-trippable
+      expect(result.entry.status).toBe("blocked");
       const reparsed = parseActiveSpecs(fs.readTextFile(INDEX_PATH));
       expect(reparsed.activeSpecs).toHaveLength(1);
       expect(reparsed.activeSpecs[0].branch).toBe(WORK_BRANCH);
     });
 
-    it("DADO branch de trabalho E active-specs.yml ausente QUANDO publish ENTÃO erro narrativo orientando branch canônica ou publicar primeiro E não escreve", () => {
-      const fs = makeFsWithWorkBranch(); // sem índice
+    it("DADO branch escopo-de-PR E spec com mesmo id ausente do filesystem QUANDO publish ENTÃO erro narrativo de DetectActiveSpec (id sem diretório)", () => {
+      // Edge case: branch carrega id 9999 que não tem diretório correspondente
+      // — DetectActiveSpec falha narrativamente; PublishState propaga sem
+      // tentar consultar active-specs.yml.
+      const fs = new WritableFakeFs({
+        files: new Map([[STATE_PATH, VALID_STATE_YAML]]),
+        directories: new Set([SPEC_DIR, ".governance/specs"]),
+        directoryContents: new Map([[".governance/specs", ["0023-workflow-runtime"]]]),
+        branch: "feat/spec-9999-nonexistent",
+      });
       expect(() =>
         makePublishState(fs).run({ status: "active", updatedBy: "@rosanarezende" })
       ).toThrow(PublishStateError);
       expect(() =>
         makePublishState(fs).run({ status: "active", updatedBy: "@rosanarezende" })
-      ).toThrow(/Branch "feat\/spec-0023-runtime-active-state" não casa diretório/);
+      ).toThrow(/Não foi possível detectar spec ativa/);
       expect(() =>
         makePublishState(fs).run({ status: "active", updatedBy: "@rosanarezende" })
-      ).toThrow(/índice público .* também está ausente/);
+      ).toThrow(/nenhum diretório com id "9999"/);
       expect(fs.fileExists(INDEX_PATH)).toBe(false);
-    });
-
-    it("DADO branch de trabalho E índice presente E nenhuma entry casa branch atual QUANDO publish ENTÃO erro narrativo com 3 opções E não escreve", () => {
-      const unrelatedIndex = `version: 1
-active_specs:
-  - id: "0099"
-    slug: "outra-spec"
-    branch: "feat/spec-0099-outra-spec"
-    stage: "discovery"
-    status: "paused"
-    spec_path: ".governance/specs/0099-outra-spec"
-    updated_at: "2026-05-19T00:00:00Z"
-`;
-      const fs = makeFsWithWorkBranch({ withIndex: unrelatedIndex });
-      expect(() =>
-        makePublishState(fs).run({ status: "active", updatedBy: "@rosanarezende" })
-      ).toThrow(/nenhuma entry do índice público referencia esta branch/);
-      // mensagem deve listar as 3 opções para orientar o humano
-      expect(() =>
-        makePublishState(fs).run({ status: "active", updatedBy: "@rosanarezende" })
-      ).toThrow(/rode da branch canônica/);
-      // não deve sobrescrever o índice existente
-      expect(fs.readTextFile(INDEX_PATH)).toBe(unrelatedIndex);
-    });
-
-    it("DADO branch de trabalho E ≥2 entries do índice referenciam a mesma branch QUANDO publish ENTÃO erro narrativo listando slugs ambíguos E não escreve", () => {
-      const ambiguousIndex = `version: 1
-active_specs:
-  - id: "0023"
-    slug: "workflow-runtime"
-    branch: "${WORK_BRANCH}"
-    stage: "implementation"
-    status: "active"
-    spec_path: ".governance/specs/0023-workflow-runtime"
-    updated_at: "2026-05-21T08:00:00Z"
-  - id: "0099"
-    slug: "outra"
-    branch: "${WORK_BRANCH}"
-    stage: "discovery"
-    status: "paused"
-    spec_path: ".governance/specs/0099-outra"
-    updated_at: "2026-05-19T00:00:00Z"
-`;
-      const fs = new WritableFakeFs({
-        files: new Map([
-          [STATE_PATH, VALID_STATE_YAML],
-          [INDEX_PATH, ambiguousIndex],
-        ]),
-        directories: new Set([SPEC_DIR]),
-        branch: WORK_BRANCH,
-      });
-      expect(() =>
-        makePublishState(fs).run({ status: "active", updatedBy: "@rosanarezende" })
-      ).toThrow(/referenciada por múltiplas entries/);
-      expect(() =>
-        makePublishState(fs).run({ status: "active", updatedBy: "@rosanarezende" })
-      ).toThrow(/0023\/workflow-runtime/);
-      expect(() =>
-        makePublishState(fs).run({ status: "active", updatedBy: "@rosanarezende" })
-      ).toThrow(/0099\/outra/);
-      // garante que o índice ambíguo NÃO foi alterado
-      expect(fs.readTextFile(INDEX_PATH)).toBe(ambiguousIndex);
     });
   });
 });

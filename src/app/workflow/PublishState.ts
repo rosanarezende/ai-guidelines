@@ -106,15 +106,20 @@ export class PublishState {
       );
     }
 
-    // 2. Detectar spec via branch (factual, não inferência). Quando a branch
-    //    corrente é "de trabalho" (escopo do PR) e não casa o diretório
-    //    canônico da spec, DetectActiveSpec falha. Nesse caso, fallback
-    //    explícito via índice público — match EXATO em entry.branch. Sem
-    //    fuzzy, sem ranking, sem auto-checkout; ambiguidade vira erro
-    //    narrativo. Lookup/translation, não orquestração.
+    // 2. Detectar spec via DetectActiveSpec — lookup por identity canônica
+    //    (id NNNN) per [DEC-0023-I01]. Sem fallback paralelo: branch escopo
+    //    de PR (`feat/spec-0023-dx-thinking`) resolve automaticamente para
+    //    o diretório canônico (`0023-workflow-runtime`) via id. Índice
+    //    público (`active-specs.yml`) NÃO é primary resolver de identity
+    //    (projection layer ≠ detection layer).
     const detected = new DetectActiveSpec(this.fs).run();
-    const location: SpecLocation =
-      detected.location ?? this.resolveLocationFromIndexBranchMatch(detected.reason);
+    if (!detected.location) {
+      throw new PublishStateError(
+        `Não foi possível detectar spec ativa: ${detected.reason ?? "razão desconhecida"}. ` +
+          `publish-state precisa de spec ativa para registrar.`
+      );
+    }
+    const location: SpecLocation = detected.location;
 
     // 3. Derivar id + slug do nome do diretório (convenção 0023-workflow-runtime)
     const dirMatch = /^(\d{4})-(.+)$/.exec(location.slug);
@@ -195,70 +200,5 @@ export class PublishState {
     this.fs.writeTextFile(INDEX_PATH, serialized);
 
     return { indexPath: INDEX_PATH, entry: newEntry, wasUpdate };
-  }
-
-  /**
-   * Fallback de resolução de spec corrente quando `DetectActiveSpec` falha
-   * (branch "de trabalho" cujo slug derivado não casa diretório local).
-   *
-   * Consulta o índice público e procura entry cujo `branch` case **exatamente**
-   * a branch corrente. Determinístico: 0 matches ou >1 matches viram erro
-   * narrativo, nunca "escolha mais provável". Match estrito por igualdade
-   * de string — sem fuzzy, sem prefixo, sem ranking.
-   *
-   * Lookup/translation puro: a branch continua sendo input declarativo
-   * (estado do filesystem); o índice é consultado **como tabela de tradução
-   * branch→spec**, não como autoridade semântica nem fonte de inferência.
-   */
-  private resolveLocationFromIndexBranchMatch(detectReason?: string): SpecLocation {
-    const branch = this.fs.currentBranch();
-    if (!branch) {
-      throw new PublishStateError(
-        `Não foi possível detectar spec ativa: ${detectReason ?? "branch indisponível"}. ` +
-          `publish-state precisa de branch corrente para registrar.`
-      );
-    }
-
-    if (!this.fs.fileExists(INDEX_PATH)) {
-      throw new PublishStateError(
-        `Branch "${branch}" não casa diretório de spec conhecido, ` +
-          `e o índice público "${INDEX_PATH}" também está ausente. ` +
-          `Rode da branch canônica da spec (feat/spec-NNNN-<slug>) ou ` +
-          `publique a entry no índice a partir da branch canônica primeiro.`
-      );
-    }
-
-    const root = this.parseIndex(this.fs.readTextFile(INDEX_PATH));
-    const matches = root.activeSpecs.filter((entry) => entry.branch === branch);
-
-    if (matches.length === 0) {
-      throw new PublishStateError(
-        `Branch "${branch}" não casa diretório de spec conhecido, ` +
-          `e nenhuma entry do índice público referencia esta branch. ` +
-          `Opções: (a) rode da branch canônica da spec; (b) registre esta ` +
-          `branch como "branch" de uma entry existente; (c) publique a ` +
-          `entry inicial a partir da branch canônica.`
-      );
-    }
-
-    if (matches.length > 1) {
-      const conflictList = matches.map((e) => `${e.id}/${e.slug}`).join(", ");
-      throw new PublishStateError(
-        `Branch "${branch}" é referenciada por múltiplas entries no índice ` +
-          `público (${conflictList}). Ambiguidade — qual atualizar? ` +
-          `Reconcilie o índice antes de publicar.`
-      );
-    }
-
-    const entry = matches[0];
-    const source: SpecLocation["source"] = entry.specPath.startsWith(".governance/")
-      ? "governance"
-      : "specify-legacy";
-    const dirSlug = entry.specPath.split("/").pop() ?? `${entry.id}-${entry.slug}`;
-    return {
-      slug: dirSlug,
-      absolutePath: this.fs.resolveAbsolute(entry.specPath),
-      source,
-    };
   }
 }

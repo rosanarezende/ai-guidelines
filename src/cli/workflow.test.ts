@@ -68,17 +68,53 @@ class FakeClipboard implements ClipboardWriter {
   }
 }
 
+/**
+ * Auto-populate dirs Set with all ancestors of each entry, and derive
+ * `listDirectory` listings from it. Mimics real filesystem semantics needed
+ * by `DetectActiveSpec` (id-based lookup per [DEC-0023-I01]): given a dir
+ * `.governance/specs/0023-workflow-runtime`, `directoryExists(".governance/specs")`
+ * must be true and `listDirectory(".governance/specs")` must include
+ * `0023-workflow-runtime`.
+ */
+function expandAncestors(dirs: Set<string>): Set<string> {
+  const expanded = new Set<string>(dirs);
+  for (const d of dirs) {
+    const parts = d.split("/");
+    for (let i = parts.length - 1; i > 0; i--) {
+      const ancestor = parts.slice(0, i).join("/");
+      if (ancestor) expanded.add(ancestor);
+    }
+  }
+  return expanded;
+}
+
+function deriveListing(allDirs: Set<string>, path: string): ReadonlyArray<string> {
+  const prefix = `${path}/`;
+  const children = new Set<string>();
+  for (const d of allDirs) {
+    if (d.startsWith(prefix)) {
+      const firstSeg = d.slice(prefix.length).split("/")[0];
+      if (firstSeg) children.add(firstSeg);
+    }
+  }
+  return [...children];
+}
+
 class StubFs implements WorkflowFileSystem {
+  private readonly allDirs: Set<string>;
+
   constructor(
     private readonly files: Map<string, string>,
-    private readonly dirs: Set<string>,
+    dirs: Set<string>,
     private readonly branch: string | null
-  ) {}
+  ) {
+    this.allDirs = expandAncestors(dirs);
+  }
   fileExists(p: string): boolean {
     return this.files.has(p);
   }
   directoryExists(p: string): boolean {
-    return this.dirs.has(p);
+    return this.allDirs.has(p);
   }
   readTextFile(p: string): string {
     const f = this.files.get(p);
@@ -88,8 +124,8 @@ class StubFs implements WorkflowFileSystem {
   writeTextFile(): void {
     throw new Error("not used");
   }
-  listDirectory(): ReadonlyArray<string> {
-    return [];
+  listDirectory(p: string): ReadonlyArray<string> {
+    return deriveListing(this.allDirs, p);
   }
   currentBranch(): string | null {
     return this.branch;
@@ -944,7 +980,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
       branch: string | null;
       constructor(files: Map<string, string>, dirs: Set<string>, branch: string | null) {
         this.files = new Map(files);
-        this.dirs = new Set(dirs);
+        this.dirs = expandAncestors(dirs);
         this.branch = branch;
       }
       fileExists(p: string): boolean {
@@ -961,8 +997,8 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
       writeTextFile(p: string, contents: string): void {
         this.files.set(p, contents);
       }
-      listDirectory(): ReadonlyArray<string> {
-        return [];
+      listDirectory(p: string): ReadonlyArray<string> {
+        return deriveListing(this.dirs, p);
       }
       currentBranch(): string | null {
         return this.branch;
@@ -1061,15 +1097,21 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
     it("DADO PublishStateError lançado pelo use case QUANDO runPublishState ENTÃO loga mensagem do erro E retorna 1 (sem stack trace)", async () => {
       const logger = new CollectingLogger();
       const fs = makeWritableFs();
-      fs.branch = "main"; // DetectActiveSpec falha; fallback via índice também falha (índice ausente)
+      fs.branch = "main"; // branch fora do padrão → DetectActiveSpec falha narrativamente per [DEC-0023-I01]
       const code = await runPublishState(
         { repoRoot: "/repo", logger, fs },
         { status: "active", updatedBy: "@x" }
       );
       expect(code).toBe(1);
-      // pós-fallback: mensagem narrativa cita branch + ausência do índice
+      // pós-[DEC-0023-I01]: PublishState propaga o reason de DetectActiveSpec
+      // sem consultar projection layer (active-specs.yml).
       expect(
-        logger.lines.some((l) => l.startsWith("ERR:") && /Branch "main" não casa diretório/.test(l))
+        logger.lines.some(
+          (l) =>
+            l.startsWith("ERR:") &&
+            /Não foi possível detectar spec ativa/.test(l) &&
+            /branch "main" não segue o padrão/.test(l)
+        )
       ).toBe(true);
     });
 
