@@ -349,6 +349,36 @@ async function dispatchWorkflow(command, options = {}) {
   if (code !== 0) process.exitCode = code;
 }
 
+async function dispatchReleasePrep(options = {}) {
+  // Bridge para `release-prep` (tier 3, repo-specific) cravado em
+  // `[DEC-0023-L01]`. Mesmo padrão de dispatchWorkflow: importa dist/,
+  // delega para mod.main com opts traduzidas. Tradução de flags
+  // kebab-case (parseArgs) → camelCase (ReleasePrepCliArgs).
+  let mod;
+  try {
+    mod = await import("../../dist/cli/release-prep.js");
+  } catch (err) {
+    const reason = err && err.message ? err.message : String(err);
+    console.error(
+      "Erro: release-prep indisponível em dist/. Execute `yarn build` antes (fail-fast intencional)."
+    );
+    console.error(`Detalhe: ${reason}`);
+    process.exitCode = 1;
+    return;
+  }
+  const opts = {
+    repoRoot: process.cwd(),
+    releasePrepArgs: {
+      ...(options.version !== undefined ? { version: options.version } : {}),
+      ...(options.remote !== undefined ? { remote: options.remote } : {}),
+      ...(options["dry-run"] === true ? { dryRun: true } : {}),
+      ...(options["skip-working-tree-check"] === true ? { skipWorkingTreeCheck: true } : {}),
+    },
+  };
+  const code = await mod.main(["release-prep"], opts);
+  if (code !== 0) process.exitCode = code;
+}
+
 export async function main(argv = process.argv.slice(2)) {
   try {
     const { command, options } = parseArgs(argv);
@@ -360,6 +390,11 @@ export async function main(argv = process.argv.slice(2)) {
 
     if (command === "workflow" || command === "continue") {
       await dispatchWorkflow(command, options);
+      return;
+    }
+
+    if (command === "release-prep") {
+      await dispatchReleasePrep(options);
       return;
     }
 
