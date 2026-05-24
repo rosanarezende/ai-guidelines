@@ -52,14 +52,62 @@ O ADR consolida o aprendizado para impedir recorrência cross-spec.
 - Automação tratando `MERGEABLE` label do GitHub como gate de merge final → bypass do gate humano
 - Bot ou agente IA convertendo PR para `Ready` sem autorização explícita do owner → viola `[CORE-10]`
 
+## Operational CLI commands para transactional governance ops
+
+> **Extensão cravada em `[DEC-0023-L01]`** (Bloco L do decision-brief 0023; Frente C+D do hardening do PR #25, 2026-05-24). Estende o modelo de 3 estados com o **princípio de execução** correspondente: como humano autoriza a transição entre estados sem digitar sequências de `git`/`gh` na hora.
+
+Operações governance-first com side-effects irreversíveis (merge atômico de stack, publicação npm, abertura de Integration PR) **devem viver atrás de CLI helpers transacionais** — não como sequência manual de `git`/`gh` digitada na hora, nem como automação stateful que decide pelo humano.
+
+### Princípio
+
+Um **CLI helper transacional** é **deterministic + human-gated + composable**:
+
+1. **Detecta estado** factual a partir de artifacts vivos (`active-specs.yml`, `tasks.md`, `package.json`, `CHANGELOG.md`, etc.). Nunca infere intenção.
+2. **Mostra plan completo** antes de qualquer side-effect — comandos exatos que serão executados, na ordem que serão executados.
+3. **Aguarda confirmação humana** (prompt `y/n`) antes de iniciar.
+4. **Executa atomicamente** dentro do possível; em falha mid-way, mostra estado parcial + permite retomada (`--continue-from <step>` ou similar).
+5. **Suporta `--dry-run`** mostrando o plan sem executar, para auditoria/teste.
+
+### Distinção de tiers por surface
+
+| Tier                           | Surface                            | Side-effects                                                           | Exemplos                                                          |
+| ------------------------------ | ---------------------------------- | ---------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| **Tier 1 — Lookup**            | Wizard options de leitura/contexto | Nenhum (read-only) ou trivial (clipboard copy)                         | Briefing da spec ativa, listar índice público, diagnosticar drift |
+| **Tier 2 — Coordination**      | Wizard options de governance ops   | Side-effects governance-first cross-spec (com confirmação obrigatória) | Publicar estado, abrir Integration PR, executar merge atômico     |
+| **Tier 3 — Repo-specific ops** | Standalone `yarn guidelines <cmd>` | Side-effects repo-side (npm publish, tag push)                         | `release-prep`                                                    |
+
+**Boundary cravado:**
+
+- Tier 1 (lookup) e Tier 2 (transactional governance) **compartilham wizard surface** — operações cross-spec do framework
+- Tier 3 (repo-specific) vive **standalone** para não poluir consumer repos que não usam aquela operação (ex.: consumer sem npm publish não precisa ver `release-prep` no wizard)
+
+### Anti-patterns reafirmados mesmo em Tier 2/3
+
+Mesmo com side-effects, as restrições de `[DEC-0023-B06]` continuam válidas:
+
+- **Sem auto-detecção** de "próxima ação recomendada" — opções aparecem declarativamente, não em ordem de "prioridade"
+- **Sem ranking/ordering** dinâmico do menu — ordem fixa cravada por DEC
+- **Sem inferência de intenção** — humano escolhe explicitamente; sistema mostra plan + confirma
+- **Sem auto-execução pós-merge** — bumping de versão, tagging, publicação são decisões humanas distintas, cada uma com seu próprio gate
+
 ## Operacionalização
 
-O `.github/pull_request_template.md` (redesign cravado em `[DEC-0023-J01]` Commit B) materializa este ADR com:
+Este ADR é materializado em dois artefatos cravados no PR #25 da Spec 0023:
 
-1. Seção "Status do ciclo de vida" no topo, com 3 checkboxes distintos: `Draft` / `Ready for review` / `Authorized to merge`
-2. Frase explícita logo abaixo: _"Ready ≠ Mergeable. Stacks governance-first (ADR 0020) integram em sequência atômica ponta-a-ponta."_
-3. Seção "Merge authorization" textual curta (não checklist) — força owner a registrar autorização ou marcar como pendente
-4. Tipo opcional `Integration` para PRs de homologação/convergência de stack, explicitamente sem comportamento novo
+**1. PR Template** (`.github/pull_request_template.md`, cravado em `[DEC-0023-J01]`):
+
+- Seção "Status do ciclo de vida" no topo, com 3 estados distintos via `<kbd>`
+- Frase explícita: _"Ready ≠ Mergeable. Stacks governance-first (ADR 0020) integram em sequência atômica ponta-a-ponta."_
+- Seção "Merge authorization" textual curta (não checklist) — força owner a registrar autorização ou marcar como pendente
+- Tipo opcional `Integration` para PRs de homologação/convergência de stack, explicitamente sem comportamento novo
+
+**2. Operational CLI commands** (cravado em `[DEC-0023-L01]`, materializado em commits separados):
+
+- **Wizard tier 2** (`yarn guidelines workflow`, opções 4 e 5):
+  - `4. 🔗 Abrir Integration PR da spec ativa` — cria PR de Integration com body auto-detectado de `<spec>/integration-pr.md`
+  - `5. 🔀 Executar merge atômico da stack` — orquestra sequência `gh pr edit --base main` + `gh pr merge --squash` para cada PR da stack
+- **Standalone tier 3** (`yarn guidelines release-prep`):
+  - Lê versão alvo de `CHANGELOG.md` `[Unreleased]`, mostra plan completo, aguarda confirmação, executa bump + tag + push → dispara `.github/workflows/release.yml`
 
 ## Não-objetivos
 
@@ -67,7 +115,10 @@ O `.github/pull_request_template.md` (redesign cravado em `[DEC-0023-J01]` Commi
 - Não revoga o uso de `Draft` do GitHub — **restaura** o significado natural ("WIP", não "bloqueado").
 - Não cria novo gate operacional — formaliza distinção que já existia implicitamente em ADR 0020.
 - Não obriga toda stack a ter Integration PR. O padrão é opt-in quando a convergência/homologação final precisa ficar auditável em PR próprio.
-- Não responde **onde** a SSOT de CORE-09/10 vive (questão coberta por `[DEC-0023-F05]`, Deferred com critério estrutural vinculado à abertura da candidata `handoff-as-first-class`). F05 trata de **WHERE**; este ADR trata de **WHAT** os estados significam.
+- Não substitui `[DEC-0023-B06]` / `[DEC-0023-B07]` (wizard lookup-only e gate de "nova opção exige DEC") — **refina interpretação**: anti-patterns vetados em B06 eram **inferência** e **ranking**, não side-effects de opções escolhidas explicitamente pelo humano. Tier 2 do wizard preserva o gate (futuras opções 9+ exigem DEC própria).
+- Não substitui `[DEC-0023-G03]` (publish-state manual-first) — **refina interpretação**: G03 protege contra **automação stateful que decide pelo humano**, não contra CLI helpers transacionais com plan + confirmation. CLI helpers que reduzem friction enxergada em advance (sem esperar critério de ≥ 2 casos observados) honram G03 desde que mantenham gate humano explícito.
+- Não automatiza release pós-merge — `release-prep` exige invocação explícita pelo humano; merge da stack não dispara publish.
+- Não responde **onde** a SSOT de CORE-09/10 vive (questão coberta por `[DEC-0023-F05]`, Deferred com critério estrutural vinculado à abertura da candidata `handoff-as-first-class`). F05 trata de **WHERE**; este ADR trata de **WHAT** os estados significam + **HOW** transições são executadas.
 
 ## Critério de revisão futura
 

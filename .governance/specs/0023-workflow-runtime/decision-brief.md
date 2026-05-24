@@ -5,8 +5,8 @@
 > Spec: [`./spec.md`](./spec.md)
 > Plan: [`./plan.md`](./plan.md) (criado em 2026-05-19 conforme `[DEC-0023-B05]`).
 > Tasks: tasklist da sessão de implementação (PR1).
-> Status agregado: **Resolved** — Blocos A/B/C/D/E/F/G/I/J/K todos fechados (F01–F04 Resolved em PR5 S5 / 2026-05-22; F05 Deferred com critério estrutural vinculado à abertura de `handoff-as-first-class`; B07 + I01 cravados durante review do PR #25 / 2026-05-23; J01 + ADR 0024 cravados na Frente #3 do hardening / 2026-05-23–24; K01 crava Integration PR como homologação/convergência final da stack).
-> Última atualização: 2026-05-24 — `[DEC-0023-K01]` (Bloco K — Integration PR) dogfoodando PR #26 como PR agregador de homologação/convergência final da stack, sem comportamento novo.
+> Status agregado: **Resolved** — Blocos A/B/C/D/E/F/G/I/J/K/L todos fechados (F01–F04 Resolved em PR5 S5 / 2026-05-22; F05 Deferred com critério estrutural vinculado à abertura de `handoff-as-first-class`; B07 + I01 cravados durante review do PR #25 / 2026-05-23; J01 + ADR 0024 cravados na Frente #3 do hardening / 2026-05-23–24; K01 cravado no fechamento operacional / 2026-05-24; L01 + ADR 0024 amendment cravados na Frente C+D do hardening / 2026-05-24 II).
+> Última atualização: 2026-05-24 (II) — Frente C+D do hardening do PR #25: `[DEC-0023-L01]` (Bloco L — Operational CLI commands) + ADR 0024 amendment (extensão do modelo de 3 estados com tier model de execução transacional).
 
 > **Artefato canônico do gate humano entre Stage 1 (research) e Stage 2 (design + implementação).** Para esta spec, a Stage 1 é a investigação documentada na pasta legacy `.specify/specs/0023-governance-workflow-discovery-model/` (research.md + anexos). Este brief materializa o gate Stage A → Stage B com 4 decisões cravadas em sessão de design 2026-05-19.
 
@@ -50,6 +50,7 @@
 | `[DEC-0023-I01]` | I     | Resolved |
 | `[DEC-0023-J01]` | J     | Resolved |
 | `[DEC-0023-K01]` | K     | Resolved |
+| `[DEC-0023-L01]` | L     | Resolved |
 
 **Status agregado:** Resolved — Blocos A/B/C/D/E/F/G/I/J/K todos fechados. F01–F04 Resolved (tríade arquitetural B+B+A+A cravada em PR5 S5 / 2026-05-22); F05 Deferred com critério estrutural observável (revisita obrigatória na abertura da candidata `handoff-as-first-class`); J01 cravado na Frente #3 do hardening do PR #25 (2026-05-23/24) com ADR 0024 materializando o modelo de 3 estados Draft/Ready/Mergeable; K01 crava Integration PR como PR de homologação/convergência final antes da autorização de merge atômico.
 
@@ -1294,6 +1295,95 @@ Para preservar enforcement estrutural enquanto a accountability transfere, fast-
 
 ---
 
+## Bloco L — Operational CLI commands materializados no wizard + standalone (PR #25)
+
+> **Origem:** Frente C+D do hardening do PR #25 (2026-05-24). Durante a Frente A (criação de `.github/workflows/release.yml`), owner identificou que aplicar `[DEC-0023-G03]` ("manual primeiro, automação depois") restritivamente quando a friction já é enxergada em advance contradiz o espírito da regra. Auto-crítica explícita registrada na conversação: _"manual via git/UI e manual via CLI com confirmação são dois conceitos diferentes que eu colapsei. CLI transacional preserva 100% da decisão humana via confirm prompt antes de cada side-effect, e remove o overhead de lembrar a sequência exata + sair para terminal/UI"_.
+>
+> **Princípio cravado (citável cross-spec via ADR 0024 amendment):** Operational CLI commands são **transactional helpers** — deterministic + human-gated + composable. Side-effects irreversíveis vivem atrás de plan + confirmation, não atrás de "lembre a sequência de comandos certa".
+>
+> **Insight metodológico:** G03 protege contra **automação stateful que decide pelo humano**, não contra **helpers de execução transacional**. CLI helpers que reduzem friction enxergada em advance NÃO violam G03 desde que mantenham gate humano explícito por side-effect.
+
+### [DEC-0023-L01] Materializar Operational CLI commands no PR #25 — wizard tier 2 + standalone tier 3
+
+**Pergunta:** Onde devem viver `integration-pr`, `merge-stack` e `release-prep`? Como surface compartilhada (wizard), comandos standalone separados, ou mix?
+
+**Contexto:**
+
+- `integration-pr` (abrir PR de Integration para a spec ativa) e `merge-stack` (atomic merge da stack governance-first) são **framework features** — qualquer consumer repo com governance-first stack precisa.
+- `release-prep` (bump + tag + push → dispara `release.yml`) é **repo-specific** do ai-guidelines (consumer repos podem ou não publicar em npm).
+- Wizard hoje (`[DEC-0023-B06]` + `[DEC-0023-B07]`) tem 6 opções fixas; expandir surface exige nova DEC per o próprio gate de B06.
+- Standalone `yarn guidelines <cmd>` fragmenta a UI do framework — consumer repos teriam que aprender comandos separados além do wizard, contra o espírito centralizador do wizard como "lente operacional" do framework.
+
+**Opções:**
+
+| Opção | Descrição                                                                                                                         | Pró                                                                                                                     | Contra                                                                                                                                                               |
+| :---- | :-------------------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A     | 3 comandos standalone (`yarn guidelines integration-pr` / `merge-stack` / `release-prep`)                                         | UI consistente entre framework e repo; cada comando isolado e scriptable                                                | Fragmenta surface; consumer repos descobrem comandos via grep/help, não via wizard; framework features ficam invisíveis na surface principal                         |
+| B     | 3 wizard options (opções 7, 8, 9)                                                                                                 | Centraliza tudo em uma surface                                                                                          | `release-prep` polui menu para 99% dos consumer repos que não publicam em npm; quebra distinção framework/repo                                                       |
+| C     | **Wizard hospeda framework ops (Integration PR + merge-stack como opções 4 e 5); standalone para repo-specific (`release-prep`)** | Distinção clara framework/repo; cada surface tem propósito único; release-prep não polui consumer repos sem npm publish | Renumera opções existentes do wizard (4→6, 5→7, 6→8); exige adaptação muscle memory mas dispatch é por `action` semântica (Item 7.5 do PR #25), não por key numérica |
+
+**Decisão do Gate Humano:**
+
+- **Status:** [x] Resolvido
+- **Escolha:** [ ] A | [ ] B | [x] C
+- **Justificativa:** C respeita a distinção arquitetural que motivou ADR 0018 (framework é governança cross-repo; integração com `ai-guidelines` é canal). Wizard = surface do framework; standalone = surface do repo. `release-prep` não pertence ao wizard porque é gesto que só faz sentido para repos que publicam — incluí-lo no menu polui para consumers que não publicam.
+- **Wizard cravado (opções 4 e 5, com renumeração das existentes):**
+  1. 📍 Continuar spec atual (briefing + REPL) — sem mudança
+  2. 📍 Continuar outra spec (por slug ou id) — sem mudança
+  3. 📡 Publicar estado (instruções) — sem mudança
+  4. 🔗 **Abrir Integration PR da spec ativa** — NOVO (tier 2 transactional)
+  5. 🔀 **Executar merge atômico da stack** — NOVO (tier 2 transactional)
+  6. 📋 Ver specs ativas (índice público) — era 4
+  7. 🔍 Diagnosticar drift do índice — era 5
+  8. 🎨 Gerar prompt visual (para gerador de imagem externo) — era 6
+  - q. Sair
+- **Standalone cravado:** `yarn guidelines release-prep` — lê versão alvo de `CHANGELOG.md` `[Unreleased]`, mostra plan completo, aguarda confirmação humana, executa bump + tag + push → dispara `.github/workflows/release.yml` (cravado em Frente A).
+- **Reuso de iconografia cravada:**
+  - 🔗 já é o emoji canônico de Integration em `.core/process/pr-title-conventions.md` (`[DEC-0023-K01]`). Coerência cross-artifact.
+  - 🔀 é escolha natural para git merge (universal em UIs de git).
+  - Demais ícones (📍 📡 📋 🔍 🎨) categorizam visualmente por gênero (navegação / governance / inspeção / utilidade) sem ranking.
+- **Anti-patterns reafirmados** (mesmo em tier 2/3, B06/B07 continuam válidos):
+  - Sem auto-detecção de "próxima ação recomendada" — ordem fixa cravada nesta DEC
+  - Sem ranking dinâmico — agrupamento por posição (navegação 1-2 / governance 3-5 / inspeção 6-7 / utilidade 8) é implícito, não algorítmico
+  - Sem inferência de intenção — humano escolhe explicitamente; sistema mostra plan + aguarda `y/n`
+  - Sem auto-execução pós-merge — merge da stack não dispara `release-prep`; release é decisão humana independente
+- **Renumeração não é nova opção semântica.** Dispatch interno é por `action` (implementado em PR #25 Item 7.5), não por key numérica posicional. Gates de B06/B07 ("nova opção exige DEC") continuam válidos: futuras opções 9+ exigem DEC própria.
+- **Implementação cravada (commits separados per `[CORE-06]`):**
+  - `feat(workflow): StackOps port + GhCli adapter` (infra layer)
+  - `feat(workflow): OpenIntegrationPR + MergeStack + ReleasePrep use cases + tests` (domain)
+  - `feat(cli): wizard reordenado + icons + opções 4+5 (Integration PR + merge-stack)` (wire wizard)
+  - `feat(cli): release-prep standalone command` (standalone entry)
+  - `docs: rename integration-pr-26.md → integration-pr.md + printHelp + CHANGELOG entry` (cleanup)
+- **Vínculos cruzados:**
+  - **ADR 0024 amendment**: princípio cross-spec cravado na seção "Operational CLI commands para transactional governance ops" (não novo ADR — owner explicitamente cravou: "amend nessa 0024 para evitar criar adrs desnecessárias que nunca são lidas")
+  - **ADR 0018** (AI-as-Channel) preservado — CLI helpers são determinísticos, sem LLM
+  - **ADR 0020** (Governance precede execution) materializado via `merge-stack`
+  - **ADR 0021** (Enforcement) preservado — humano autoriza cada side-effect via prompt
+  - **`[DEC-0023-B06]` / `[DEC-0023-B07]`** gate de "nova opção exige DEC" reafirmado
+  - **`[DEC-0023-G03]`** (manual-first) refinado — protege contra automação stateful que decide pelo humano, não contra helpers transacionais
+  - **`[DEC-0023-K01]`** (Integration PR) ganha materialização via wizard opção 4
+- **Não-objetivos cravados:**
+  - Não implementar auto-bump de versão (release-prep lê CHANGELOG, não infere)
+  - Não implementar auto-tag pós-merge
+  - Não implementar auto-execução de release pós-merge da stack
+  - Não implementar retry inteligente em merge-stack — owner resolve falhas manualmente + rerun com `--continue-from`
+  - Não adicionar opção 9+ ao wizard nesta DEC; futuras exigem DEC própria
+  - Não expor `integration-pr` ou `merge-stack` como standalone (são wizard-only — diferentemente de `release-prep`)
+- **Sinal de vigilância registrado em NEXT.md** (`Pós-PR5 wizard scaling`): wizard cresceu 5 (B06) → 6 (B07) → 8 (L01) em ~3 turnos; critério de revisita observável (≥ 10 opções OU ≥ 2 usuários reportarem confusion) para reabrir redesign de menu como spec dedicada.
+- **Data / Owner:** 2026-05-24 (II) / @rosanarezende
+
+---
+
+### Riscos conscientemente aceitos no Bloco L
+
+- **Wizard scaling:** 5 (B06) → 6 (B07) → 8 (L01). Próximas adições rapidamente viram lista densa. Sinal de vigilância registrado em NEXT.md com critério de revisita observável; mitigação imediata via icons + agrupamento por posição.
+- **Renumeração shift mental:** usuários acostumados com "Gerar prompt visual = 6" precisam reaprender "= 8". Mitigação: dispatch por action (Item 7.5) preserva semantic; teclas posicionais são display only.
+- **`GhCli` adapter depende de `gh` instalado:** erro narrativo se ausente, sem fallback. Aceito (consumer repos já dependem de `gh` via outras integrações governance-first).
+- **Falha mid-way em merge-stack:** humano resolve manualmente + rerun com `--continue-from`. Sem rollback automático. Aceito (rollback de merge atômico é cenário raro; resolução manual é honesta).
+- **Implementação cresce surface do PR #25:** ~5-6 commits adicionais. Owner cravou que isso é dogfooding válido — _"a spec 0023 é dogfooding; não vejo problema em trazermos o aprendizado, dar visibilidade dessa escolha, e implementar agora mesmo no PR 25, assim já vamos para o PR 26 com tudo estabelecido e provando valor real"_. Aceito.
+
+---
+
 ## ✅ Gate fechado — Stage A → Stage B (Bloco A)
 
 - **Data:** 2026-05-19
@@ -1411,6 +1501,23 @@ Para preservar enforcement estrutural enquanto a accountability transfere, fast-
   - [x] `[DEC-0023-K01]` — Introduzir Integration PR para homologação/convergência final da stack 0023 (Opção B)
 - **Princípio canônico:** Integration PR é PR agregador de homologação/convergência. Não cria comportamento novo, não é deploy PR e não autoriza merge sozinho.
 - **Dogfooding:** PR #26 deve usar o modelo para validar ponta-a-ponta a stack `#18 → #19 → #22 → #23 → #24 → #25` antes da autorização humana de merge atômico.
+
+---
+
+## ✅ Gate fechado — Operational CLI commands (Bloco L)
+
+- **Data:** 2026-05-24 (II — Frente C+D do hardening do PR #25)
+- **Owner:** @rosanarezende
+- **Pontos resolvidos:**
+  - [x] `[DEC-0023-L01]` — Materializar `integration-pr` e `merge-stack` como wizard options 4+5 (framework tier 2); `release-prep` standalone tier 3 repo-specific (Opção C)
+- **Princípio canônico (citável cross-spec via ADR 0024 amendment):** Operational CLI commands são **transactional helpers** — deterministic + human-gated + composable. Side-effects irreversíveis vivem atrás de plan + confirmation, não atrás de "lembre a sequência certa de `git`/`gh`".
+- **Tier model cravado:**
+  - **Tier 1 — Lookup** (wizard options 1-2, 6-7): read-only ou trivial (clipboard)
+  - **Tier 2 — Coordination** (wizard options 3-5): governance ops cross-spec com confirmation
+  - **Tier 3 — Repo-specific** (standalone `yarn guidelines <cmd>`): release-prep, repo-side ops
+- **ADR atualizado:** ADR 0024 ganhou seção "Operational CLI commands para transactional governance ops" (amendment, não novo ADR — owner cravou economia editorial).
+- **Commits de implementação:** ~5 commits separados per `[CORE-06]` (StackOps port + use cases + wizard wire + release-prep standalone + docs).
+- **Vinculação cruzada:** `[DEC-0023-G03]` refinado — manual-first protege contra automação stateful, não contra CLI helpers transacionais com plan + confirmation. CLI helpers que reduzem friction enxergada em advance honram G03 desde que mantenham gate humano explícito.
 
 ---
 

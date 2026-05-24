@@ -113,6 +113,19 @@ _(Sem débitos adiados no momento do gate. Itens emergentes durante PR1 entram a
 
 Padrão dos 12 commits do hardening: **"code + tests em tandem"** — refatores de comportamento vieram com tests atualizados/escritos no mesmo commit, capturando intent do design. **Não houve "implementa primeiro, remenda teste depois".** Pico mais próximo de TDD red-first: **menu numbering (Item 7.5)** — regression test (`keys sequenciais 1,2,3 sem gaps`) escrito antes da refatoração dispatch finalizar. Refactors de governance (DEC-I01, B07) não têm teste aplicável; refactors de doc/texto (vocabulário, printHelp, wizard quit) não exigem teste novo. Tests aligned with intent, mas não red-green-refactor formal na maioria dos commits. Registro factual, sem dramatização.
 
+### Pós-PR5 wizard scaling (Frente C+D do hardening / 2026-05-24 II) — sinal de redesign futuro
+
+> Sinal arquitetural detectado após adicionar opções 7+8 (`Abrir Integration PR` + `Executar merge atômico`) ao wizard via `[DEC-0023-L01]`. Wizard cresceu **5 (B06) → 6 (B07) → 8 (L01)** em ~3 turnos de evolução. Em escopo de 1 spec (a própria 0023), o menu flat triplicou de superfície semântica.
+
+- **Wizard flat menu escala bem até ~10 opções.** Hoje 8 opções com icons (📍 📡 🔗 🔀 📋 🔍 🎨) + agrupamento por posição (navegação 1-2 / governance 3-5 / inspeção 6-7 / utilidade 8) resolve. **Mas:** se cada nova spec adicionar 1-2 opções de governance (revert-stack, archive-spec, branch-rebase, etc.), o menu vira lista densa difícil de escanear sem categorização explícita.
+- **Categorias semânticas ficaram implícitas** na reordenação L01 — agrupamento por posição, não cravado como modelo arquitetural. Owner aceitou consciente que "está ficando confuso/poluído"; mitigação imediata foi icons + reorder, mas o sinal arquitetural permanece.
+- **Critério de revisita:** se ≥ 10 opções no wizard OU se ≥ 2 usuários reportarem confusion de navegação OU se uma única spec lifecycle exigir mais de 2-3 visitas ao wizard, reabrir como spec dedicada para redesign do menu. Provável escopo da spec futura:
+  - Separadores explícitos no menu (categorias visíveis)
+  - Multi-step wizard ("categoria → ação")
+  - Estrutura tipo `git`/`gh` (subcomandos: `yarn guidelines workflow lookup`, `yarn guidelines workflow gov`, etc.)
+  - OU split do wizard em wizards específicos por tier (Tier 1 = lookup wizard; Tier 2 = ops wizard)
+- **Vetado por default agora:** auto-ranking de opções, contextual filtering (mostrar só o que faz sentido no stage atual), "próxima ação recomendada" — todos anti-patterns cravados em `[DEC-0023-B06]` e reafirmados em `[DEC-0023-L01]`.
+
 ### Pós-Bloco E (enforcement estrutural cravado; visíveis com critério de revisita)
 
 > Convenção operacional: **não usar "talvez depois" como justificativa**. Todo item deferido aqui tem (a) camada nomeada, (b) critério de revisita observável, (c) sem entrada em memória implícita.
