@@ -86,7 +86,7 @@ _(Sem débitos adiados no momento do gate. Itens emergentes durante PR1 entram a
 
 - **Verbosidade colapsada do briefing — 3 camadas misturadas em `state.yml.next`** — sinal arquitetural para spec futura. Codex (2026-05-23) observou que o briefing mistura: (a) próximos passos operacionais, (b) débitos arquiteturais com critério, (c) sinais de vigilância sistêmica, (d) guardrails históricos. Hoje colapsadas em uma única lista `next:`. _"Ainda aceitável. Mas já mostra pressão de crescimento."_ Sugestão de 3-camada premature agora — exige DEC + escolha de forma + validação empírica de necessidade. **Critério de revisita:** se ≥ 2 specs externas instanciarem o runtime e relatarem fricção com verbosity do briefing OU se uma lista `next:` cravada em spec ativa passar de 6 itens consistentemente, reabrir como spec dedicada (provável escopo: separar `state.yml` em projeções por gênero — operational / architectural / vigilance — mas só com evidência empírica). **Vetado por default:** introduzir 3-camada agora sem critério ativo.
 
-- **Delimiter "Context bundle" sobrevive como jargão interno** — drift residual de Item 6 do review. O delimitador de output (`── Context bundle (copie para sua sessão IA) ──`) ainda carrega o termo "bundle" mesmo após o footer do wizard ter sido reescrito (Item 6, 2026-05-23) com a sugestão Codex `"...para gerar contexto pronto para colar na sua IA"`. Parentética do delimitador compensa parcialmente. **Critério de revisita:** se ≥ 1 usuário externo perguntar "o que é Context bundle?" análogo ao que o owner perguntou sobre o footer (2026-05-23), reabrir como UX hygiene em PR fix pequeno (não exige DEC; troca puro de string). Hoje: deixado conscientemente, drift conhecido e contornado.
+- **Vocabulário "Context bundle" → "Contexto da spec" normalizado (hardening final 2026-05-23 II).** Owner antecipou o critério de revisita ("≥ 1 usuário externo perguntar") fazendo a pergunta ele mesmo durante review do PR #25; cleanup completo executado: delimitador do REPL, JSDoc, CHANGELOG, README implícito (já limpo), `spec.md`, `decision-brief.md`, `plan.md`, e este próprio NEXT.md. Termo canônico em diante: **"contexto da spec"** / **"contexto pronto para colar"** / **"colar na sua IA externa"**. **Vocabulário interno legado preservado intencionalmente:** função `buildContextBundle()` em `src/cli/workflow.ts` e variável `bundle` mantidas para evitar churn cosmético no fechamento da spec — rename é candidato a follow-up de PR pequeno pós-merge, não bloqueador. Registrado aqui para evitar "tribal wisdom" sobre por que código interno e governance carregam termos diferentes.
 
 ### Pós-Bloco E (enforcement estrutural cravado; visíveis com critério de revisita)
 
@@ -113,10 +113,11 @@ _(Sem débitos adiados no momento do gate. Itens emergentes durante PR1 entram a
 - `review-research` (PR2 candidato) só faz sentido depois que PR1 provar o modelo de briefing+menu.
 - Avaliação empírica (PR4 candidato) depende de ≥ 2 specs novas usarem o runtime.
 
-### 3. Context bundle copy-paste é a única "linguagem natural" do runtime
+### 3. Contexto da spec (copy-paste) é a única "linguagem natural" do runtime
 
 - Não embutir LLM. Não tentar interpretar intenção localmente além do trivial.
 - O ganho conversacional vem do agente IA externo (Claude Code, Cursor), não do runtime.
+- Vocabulário canônico (cf. hardening 2026-05-23 II): "contexto da spec", "contexto pronto para colar", "colar na sua IA externa". Termo legado "context bundle" preservado apenas em código interno (`buildContextBundle()`, variável `bundle` em `workflow.ts`) por estabilidade no fechamento — rename é candidato a follow-up cosmético pós-merge.
 
 ### 4. Trilha legacy em `.specify/specs/0023-governance-workflow-discovery-model/` é evidência, não dívida
 

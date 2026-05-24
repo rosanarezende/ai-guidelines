@@ -22,7 +22,7 @@ A 0023 atravessou Stage A (Discovery) na branch legacy + sessão de design 2026-
 
 ### Princípio guia
 
-Runtime como **lente contextual** sobre estado existente, não como engine. AI permanece como **canal** (ADR 0018) — o runtime gera context bundles consumidos por agentes IA externos, não chama LLM. Toda decisão arquitetural passa pelo teste duplo: (a) "reduz carga cognitiva operacional?" e (b) "evita engine genérica/state machine/abstração prematura?". Ambas precisam passar.
+Runtime como **lente contextual** sobre estado existente, não como engine. AI permanece como **canal** (ADR 0018) — o runtime gera contexto da spec pronto para colar em agentes IA externos, não chama LLM. Toda decisão arquitetural passa pelo teste duplo: (a) "reduz carga cognitiva operacional?" e (b) "evita engine genérica/state machine/abstração prematura?". Ambas precisam passar.
 
 ### Componentes
 
@@ -152,7 +152,7 @@ PRs futuros são **candidatos**, não promessa. Cada um valida sua entrada contr
 - [ ] `examples/minimal-spec/` com ≤ 4 arquivos (spec.md curto, NEXT.md, state.yml, README.md explicando como rodar `workflow` ali).
 - [ ] `examples/` adicionado a `package.json#files`.
 - [ ] `docs/guides/workflow-quickstart.md` com outputs **reais** dogfoodados da 0023.
-- [ ] `docs/guides/workflow-with-ai-agents.md` com pelo menos 2 padrões: (1) humano cola bundle no agente IA; (2) agente IA chama `continue` por baixo dos panos.
+- [ ] `docs/guides/workflow-with-ai-agents.md` com pelo menos 2 padrões: (1) humano cola o contexto da spec no agente IA externo; (2) agente IA chama `continue` por baixo dos panos.
 - [ ] README principal ganha seção "Workflow Runtime" + nota "preview — UX may evolve".
 
 #### Componente [E] — CLI help

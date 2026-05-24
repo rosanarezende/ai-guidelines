@@ -132,11 +132,11 @@
 
 **Opções:**
 
-| Opção | Descrição                                                                                                                                                                                     | Pró                                                                                                                         | Contra                                                                                                                   |
-| :---- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------- |
-| A     | **Múltiplos comandos especializados** (start-spec, review-research, etc.)                                                                                                                     | Responsabilidades explícitas.                                                                                               | Cresce a superfície; humano lembra comandos; viola "reduz carga cognitiva".                                              |
-| B     | **Wizard contextual** (`workflow` + atalho `continue`): REPL local, briefing + menu numerado + texto livre que gera **context bundle** copy-paste-ready para sessão IA. **Sem LLM embutido.** | Superfície mínima; AI-as-Channel preservado; runtime offline-friendly; conversação fica onde já é boa (Claude Code/Cursor). | Tradeoff: terminal puro não tem chat; usuário cola bundle no agente IA externo.                                          |
-| C     | **REPL com LLM embutido**: runtime chama Claude/OpenAI API internamente, interpreta intenção, responde.                                                                                       | UX conversacional direta.                                                                                                   | Viola ADR 0018; cria dependência de provider; custo recorrente; concorre com Claude Code/Cursor; framework vira wrapper. |
+| Opção | Descrição                                                                                                                                                                                       | Pró                                                                                                                         | Contra                                                                                                                   |
+| :---- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------- |
+| A     | **Múltiplos comandos especializados** (start-spec, review-research, etc.)                                                                                                                       | Responsabilidades explícitas.                                                                                               | Cresce a superfície; humano lembra comandos; viola "reduz carga cognitiva".                                              |
+| B     | **Wizard contextual** (`workflow` + atalho `continue`): REPL local, briefing + menu numerado + texto livre que gera **contexto da spec pronto para colar** na IA externa. **Sem LLM embutido.** | Superfície mínima; AI-as-Channel preservado; runtime offline-friendly; conversação fica onde já é boa (Claude Code/Cursor). | Tradeoff: terminal puro não tem chat; usuário cola o contexto no agente IA externo.                                      |
+| C     | **REPL com LLM embutido**: runtime chama Claude/OpenAI API internamente, interpreta intenção, responde.                                                                                         | UX conversacional direta.                                                                                                   | Viola ADR 0018; cria dependência de provider; custo recorrente; concorre com Claude Code/Cursor; framework vira wrapper. |
 
 **Recomendação inicial (a confirmar pós-gate):** Opção B — única coerente com ADR 0018 e com a métrica de cognitive load.
 
@@ -148,7 +148,7 @@
   - [x] B
   - [ ] C
 - **Justificativa / Ressalvas:**
-  > B preserva AI-as-Channel, mantém runtime AI-agnóstico, offline-friendly, sem custo de provider. Texto livre vira context bundle copy-paste-ready; quando o humano está dentro de um agente IA, o agente pode chamar `workflow briefing` por baixo e usar o output. **Não embutir LLM no framework** é restrição arquitetural cravada.
+  > B preserva AI-as-Channel, mantém runtime AI-agnóstico, offline-friendly, sem custo de provider. Texto livre vira contexto da spec pronto para colar na IA externa; quando o humano está dentro de um agente IA, o agente pode chamar `workflow briefing` por baixo e usar o output. **Não embutir LLM no framework** é restrição arquitetural cravada.
 - **Data / Owner:** 2026-05-19 / @rosanarezende
 
 ---
@@ -198,21 +198,21 @@
 
 - Owner pediu explicitamente "sem novas abstrações" para o próximo incremento.
 - Bootstrap é comando novo — abstração nova com decisão própria (cardinalidade de spec? campos opcionais? interação com state.yml ausente?).
-- Clipboard detection é **acabamento** do bundle UX existente, não comando novo.
+- Clipboard detection é **acabamento** do UX de contexto copiável existente, não comando novo.
 
 **Opções:**
 
-| Opção | Descrição                                              | Pró                                                        | Contra                                                                           |
-| :---- | :----------------------------------------------------- | :--------------------------------------------------------- | :------------------------------------------------------------------------------- |
-| A     | PR2 = docs only; clipboard junto com bootstrap em PR3. | Disciplina absoluta com "sem abstrações novas".            | Bundle UX fica meia-pronto durante todo o PR2; docs precisariam apologizar.      |
-| B     | PR2 = DX/docs com clipboard; bootstrap fica para PR3.  | Bundle UX fica completo; bootstrap recebe decisão própria. | Linha "abstração nova vs acabamento" precisa ser explícita.                      |
-| C     | PR2 = DX/docs + bootstrap.                             | Tudo junto, próximo release tem mais coisa.                | Bootstrap nasce sem decision-brief próprio; risco AP1 (planning antes research). |
+| Opção | Descrição                                              | Pró                                                                      | Contra                                                                                    |
+| :---- | :----------------------------------------------------- | :----------------------------------------------------------------------- | :---------------------------------------------------------------------------------------- |
+| A     | PR2 = docs only; clipboard junto com bootstrap em PR3. | Disciplina absoluta com "sem abstrações novas".                          | UX de contexto copiável fica meia-pronto durante todo o PR2; docs precisariam apologizar. |
+| B     | PR2 = DX/docs com clipboard; bootstrap fica para PR3.  | UX de contexto copiável fica completo; bootstrap recebe decisão própria. | Linha "abstração nova vs acabamento" precisa ser explícita.                               |
+| C     | PR2 = DX/docs + bootstrap.                             | Tudo junto, próximo release tem mais coisa.                              | Bootstrap nasce sem decision-brief próprio; risco AP1 (planning antes research).          |
 
 **Decisão do Gate Humano:**
 
 - **Status:** [x] Resolvido
 - **Escolha:** [ ] A | [x] B | [ ] C
-- **Justificativa:** Clipboard é acabamento essencial do bundle (heart da experiência AI-as-Channel). Sem ele, o fluxo parece incompleto e a tese principal ("runtime como lente, IA como canal") perde força operacional. Bootstrap é comando novo, merece decisão própria — vai para PR3 com brief próprio.
+- **Justificativa:** Clipboard é acabamento essencial do contexto copiável (heart da experiência AI-as-Channel). Sem ele, o fluxo parece incompleto e a tese principal ("runtime como lente, IA como canal") perde força operacional. Bootstrap é comando novo, merece decisão própria — vai para PR3 com brief próprio.
 - **Data / Owner:** 2026-05-19 / @rosanarezende
 
 ---
@@ -282,7 +282,7 @@
 | Opção | Descrição                                                             | Pró                                                            | Contra                                                            |
 | :---- | :-------------------------------------------------------------------- | :------------------------------------------------------------- | :---------------------------------------------------------------- |
 | A     | Lançar preview agora (após merge de PR1).                             | Sinal público rápido.                                          | Usuário encontra blockers no primeiro uso; queima credibilidade.  |
-| B     | Lançar preview após PR2 (docs/DX entregue, bootstrap ainda ausente).  | Discovery (README) e bundle (clipboard) prontos.               | Runtime continua "leitor only"; quem tenta criar spec se vira só. |
+| B     | Lançar preview após PR2 (docs/DX entregue, bootstrap ainda ausente).  | Discovery (README) e contexto copiável (clipboard) prontos.    | Runtime continua "leitor only"; quem tenta criar spec se vira só. |
 | C     | Lançar preview após PR3 (bootstrap entregue) com CHANGELOG explícito. | Fluxo end-to-end utilizável; preview tag gerencia expectativa. | Mais tempo até feedback externo.                                  |
 | D     | Estável só após N specs externas dogfoodando.                         | Maturidade comprovada.                                         | Pode demorar muito; perde momentum.                               |
 

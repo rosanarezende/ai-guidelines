@@ -307,7 +307,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
       expect(logger.lines.join("\n")).toMatch(/Spec: 0023-workflow-runtime/);
     });
 
-    it("DADO wizard opção 1 + texto livre digitado ENTÃO gera context bundle e copia para clipboard", async () => {
+    it("DADO wizard opção 1 + texto livre digitado ENTÃO gera contexto da spec e copia para clipboard", async () => {
       const logger = new CollectingLogger();
       const prompts = new FakePrompts([
         "continue-current",

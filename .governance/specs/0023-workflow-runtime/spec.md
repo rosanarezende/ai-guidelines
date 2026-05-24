@@ -28,7 +28,7 @@ Resultado esperado quando esta spec encerrar:
 - Comando `ai-guidelines workflow` apresenta briefing contextual (≤ 25 linhas) e menu de ações estruturadas derivadas do estado real da spec ativa.
 - Novas specs nascem em `.governance/specs/`. `.specify/` permanece como bridge sem deprecation timeline.
 - `state.yml` mínimo (4 chaves) reduz reconstrução de estágio/gate/foco/próxima ação.
-- Texto livre no REPL gera context bundle copy-paste-ready para sessão IA — sem embutir LLM no framework.
+- Texto livre no REPL gera contexto da spec pronto para colar na sua IA externa — sem embutir LLM no framework.
 
 ---
 
@@ -36,7 +36,7 @@ Resultado esperado quando esta spec encerrar:
 
 ### Dentro do escopo
 
-- **Runtime CLI mínimo** com 1 comando principal (`workflow`) + 1 atalho (`continue`). REPL interativo. Comandos estruturados internos (`briefing`, `gaps`, `gate`, `next`, `quit`). Texto livre vira context bundle, **não** chamada de LLM.
+- **Runtime CLI mínimo** com 1 comando principal (`workflow`) + 1 atalho (`continue`). REPL interativo. Comandos estruturados internos (`briefing`, `gaps`, `gate`, `next`, `quit`). Texto livre vira contexto da spec pronto para colar, **não** chamada de LLM.
 - **`state.yml`** com schema 4-chave canônico (`stage`, `gate.status`, `focus`, `next`). Serializer + validador em domínio. Default sensato quando ausente.
 - **Topologia `.governance/specs/`** como root primária no repo do mantenedor (este). Double-lookup runtime: `.governance/specs/{slug}` → fallback `.specify/specs/{slug}`. ADR 0019 registra.
 - **Detecção de spec ativa**: branch name → diretório slug. Fallback explícito quando o branch não casa ou o diretório não existe: retorna `null` com `reason` descritivo + orienta o humano. **Sem heurística por arquivos modificados** (evita inferência frágil; reabrir em PR futuro se ≥ 2 casos justificarem).
@@ -63,7 +63,7 @@ Resultado esperado quando esta spec encerrar:
 - [ ] `state.yml` validado por schema (4 chaves; sem campos opcionais explodidos).
 - [ ] Double-lookup funciona: spec resolvida via `.governance/specs/` quando presente, via `.specify/specs/` quando não.
 - [ ] Detecção de spec ativa por branch name funciona para `feat/spec-NNNN-*`; fallback documentado.
-- [ ] Texto livre no REPL gera context bundle (≤ 30 linhas) e copia para clipboard quando possível; fallback stdout.
+- [ ] Texto livre no REPL gera contexto da spec (≤ 30 linhas) e copia para clipboard quando possível; fallback stdout.
 - [ ] Nenhuma lógica nova de domínio em `cli/`; bridge no entrypoint é o único toque.
 - [ ] BDD pt-BR (DADO/QUANDO/ENTÃO) cobrindo cada use case novo; coverage ≥ 85%.
 - [ ] ADR 0019 publicado (`.governance/` root + bridge).

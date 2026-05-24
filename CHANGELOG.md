@@ -10,7 +10,7 @@ Todas as mudanças notáveis neste framework seguem [Semantic Versioning](https:
 
 ### Adicionado
 
-- **Workflow runtime CLI** (`ai-guidelines workflow` + `ai-guidelines continue`). REPL contextual sobre a spec ativa: briefing operacional (stage, gate, hipóteses extraídas de `research.md`, próxima ação), menu de ações estruturadas, classificação de texto livre em **context bundle copy-paste-ready** para sessão IA externa. **Não embute LLM** — AI-as-Channel preservado (ADR 0018).
+- **Workflow runtime CLI** (`ai-guidelines workflow` + `ai-guidelines continue`). REPL contextual sobre a spec ativa: briefing operacional (stage, gate, hipóteses extraídas de `research.md`, próxima ação), menu de ações estruturadas, classificação de texto livre em **contexto da spec pronto para colar** na sua sessão de IA externa. **Não embute LLM** — AI-as-Channel preservado (ADR 0018).
 - **Índice operacional público mínimo** `.governance/runtime/active-specs.yml` (PR3-runtime-state-index, Bloco G do decision-brief). Lista as specs ativas com schema fechado: `id`, `slug`, `branch`, `stage`, `status`, `spec_path`, `updated_at` (obrigatórios); `title`, `base_branch`, `source_state_path`, `updated_by`, `last_sync_commit` (opcionais). Campos normativos (`next[]`, `[DEC-*]`, rationale, checklist, debts, texto longo) são **proibidos** — rejeitados pelo parser com mensagem citando `[DEC-0023-G01]`. `stage` é projeção direta de `state.yml.stage` (mesmo enum); `status ∈ {active, blocked, paused, completed}` é dimensão independente declarada manualmente.
 - **`ai-guidelines workflow`** agora lista specs ativas do índice público no boot (lookup-only, sem ordenação/freshness/prioridade) e marca a spec corrente com `*` (match tri-form `id | slug | id-slug`). Quando branch não casa nenhuma spec, o índice é exibido como hint cross-spec.
 - **`ai-guidelines continue [<slug|id>]`**. Sem argumento, mantém comportamento legado (detecção via branch). Com argumento, resolve a spec via índice público (match exato em `id | slug | id-slug`); orienta `git checkout` por texto quando o `spec_path` não está disponível localmente — **sem auto-checkout**.
@@ -52,7 +52,7 @@ Todas as mudanças notáveis neste framework seguem [Semantic Versioning](https:
   - `docs/guides/workflow-with-ai-agents.md` (1.H.7) → candidata `handoff-as-first-class`
     Razão: executar agora reproduziria forma legacy (boilerplate antigo, padrão pré-handoff); execução pós-modernização garante dogfooding com sistema real.
 - **Mensagem `MERGEABLE` do GitHub continua confundindo.** Cravamos CORE-16 e ADR 0020 explicitando — mas a label do GitHub não muda. Distinção precisa ser ensinada externamente até PRs governance-first virarem padrão.
-- **AI-as-Channel é restrição cravada.** Runtime nunca chama LLM; texto livre vira context bundle. Comportamentos derivados (interpretação de intent, response inteligente) ficam com agente IA externo (Claude Code / Cursor / etc.).
+- **AI-as-Channel é restrição cravada.** Runtime nunca chama LLM; texto livre vira contexto da spec pronto para colar na IA externa. Comportamentos derivados (interpretação de intent, response inteligente) ficam com agente IA externo (Claude Code / Cursor / etc.).
 
 ### Notas metodológicas
 

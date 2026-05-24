@@ -8,8 +8,12 @@
  *                                (sem REPL; não executa ações).
  *
  * Princípio (cf. decision-brief.md § DEC-0023-A03):
- *   - texto livre vira **context bundle** copy-paste para sessão IA;
+ *   - texto livre gera **contexto da spec pronto para colar** na IA externa;
  *   - **não** chamamos LLM internamente; AI-as-Channel preservado.
+ *
+ * Vocabulário interno legado (`buildContextBundle()` + variável `bundle`)
+ * preservado intencionalmente — rename interno é candidato a follow-up
+ * cosmético pós-merge da 0023, não bloqueador. Cf. `NEXT.md § Pós-PR5 review`.
  */
 import { DetectActiveSpec } from "../app/workflow/DetectActiveSpec.js";
 import { ReadWorkflowState } from "../app/workflow/ReadWorkflowState.js";
@@ -207,7 +211,7 @@ export function buildMenu(state: WorkflowState): ReadonlyArray<MenuItem> {
 
 export function buildContextBundle(ctx: ResolvedContext, question: string): string {
   const lines: string[] = [];
-  lines.push(`── Context bundle (copie para sua sessão IA) ──`);
+  lines.push(`── Contexto da spec (pronto para colar na sua IA externa) ──`);
   lines.push("");
   lines.push(`Spec: ${ctx.location.slug}${ctx.headers.title ? ` — ${ctx.headers.title}` : ""}`);
   lines.push(`Stage: ${ctx.state.stage}    Gate: ${ctx.state.gate.status}`);
