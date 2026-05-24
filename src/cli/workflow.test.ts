@@ -342,6 +342,102 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
       expect(logger.lines.some((l) => l.startsWith("ERR:"))).toBe(true);
     });
 
+    // ─── REPL menu dispatch coverage (action-based per Item 7.5) ───
+    // Tests cobrem o switch (item.action) em runReplOnce — os cases
+    // "briefing"/"blockers"/"execute-next" foram impactados pela
+    // refatoração de keys posicionais (separação key ↔ action) e
+    // precisam cobertura proporcional. Cases "quit" e dispatch
+    // posicional via diferentes keys já são exercitados por outros
+    // testes do describe e por buildMenu.
+
+    it("DADO REPL menu input '1' (briefing) ENTÃO chama assembleBriefing novamente — case 'briefing'", async () => {
+      const logger = new CollectingLogger();
+      // ["continue-current", "1", "q"] → wizard → REPL briefing → quit
+      const prompts = new FakePrompts(["continue-current", "1", "q"]);
+      const code = await runWorkflow({
+        repoRoot: "/repo",
+        logger,
+        prompts,
+        clipboard: new FakeClipboard(),
+        fs: makeFsWithSpec(),
+      });
+      expect(code).toBe(0);
+      // Briefing aparece ≥ 2x: na entrada do REPL + ao acionar menu "1".
+      const briefingHits = logger.lines.filter((l) => /Spec: 0023-workflow-runtime/.test(l));
+      expect(briefingHits.length).toBeGreaterThanOrEqual(2);
+    });
+
+    it("DADO REPL menu input '2' (blockers) E research.md ausente ENTÃO mensagem 'nenhum blocker extraído' — case 'blockers' (vazio)", async () => {
+      const logger = new CollectingLogger();
+      const prompts = new FakePrompts(["continue-current", "2", "q"]);
+      const code = await runWorkflow({
+        repoRoot: "/repo",
+        logger,
+        prompts,
+        clipboard: new FakeClipboard(),
+        fs: makeFsWithSpec(), // sem research.md → headers.blockers vazio
+      });
+      expect(code).toBe(0);
+      expect(logger.lines.some((l) => l.includes("nenhum blocker extraído"))).toBe(true);
+    });
+
+    it("DADO REPL menu input '2' (blockers) E research.md COM seção §8 ENTÃO loga 'Lacunas/blockers do gate:' + bullets — case 'blockers' (não-vazio)", async () => {
+      const logger = new CollectingLogger();
+      const prompts = new FakePrompts(["continue-current", "2", "q"]);
+      // research.md no formato esperado por extractBlockers
+      // (regex `### 8.\d+ Lacunas?` + bullets `- **...** `).
+      const sampleResearch = `# Research — Spec 0023
+
+## 8. Lacunas
+
+### 8.1 Lacunas operacionais
+
+- **Bloqueador A**: descrição do bloqueador A
+- **Bloqueador B**: descrição do bloqueador B
+`;
+      const fs = new StubFs(
+        new Map([
+          [".governance/specs/0023-workflow-runtime/spec.md", sampleSpec],
+          [".governance/specs/0023-workflow-runtime/state.yml", sampleState],
+          [".governance/specs/0023-workflow-runtime/research.md", sampleResearch],
+        ]),
+        new Set([".governance/specs/0023-workflow-runtime"]),
+        "feat/spec-0023-workflow-runtime"
+      );
+      const code = await runWorkflow({
+        repoRoot: "/repo",
+        logger,
+        prompts,
+        clipboard: new FakeClipboard(),
+        fs,
+      });
+      expect(code).toBe(0);
+      expect(logger.lines.some((l) => l.includes("Lacunas/blockers do gate:"))).toBe(true);
+      expect(logger.lines.some((l) => l.includes("Bloqueador A"))).toBe(true);
+      expect(logger.lines.some((l) => l.includes("Bloqueador B"))).toBe(true);
+    });
+
+    it("DADO REPL menu input '3' (execute-next; gate fechado + state.next presente) ENTÃO loga 'Próxima ação registrada' + nota execução manual — case 'execute-next'", async () => {
+      const logger = new CollectingLogger();
+      const prompts = new FakePrompts(["continue-current", "3", "q"]);
+      // sampleState tem gate.status='closed' E state.next=['executar PR1']
+      // → menu posicional: 1=briefing, 2=blockers, 3=execute-next, q=quit
+      const code = await runWorkflow({
+        repoRoot: "/repo",
+        logger,
+        prompts,
+        clipboard: new FakeClipboard(),
+        fs: makeFsWithSpec(),
+      });
+      expect(code).toBe(0);
+      expect(logger.lines.some((l) => l.includes("Próxima ação registrada: executar PR1"))).toBe(
+        true
+      );
+      expect(logger.lines.some((l) => l.includes("execução automática não está no escopo"))).toBe(
+        true
+      );
+    });
+
     it("DADO wizard opção q (sair) no boot ENTÃO retorna 0 sem invocar briefing nem REPL", async () => {
       const logger = new CollectingLogger();
       const prompts = new FakePrompts(["quit"]);
