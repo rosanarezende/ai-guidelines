@@ -1,0 +1,159 @@
+import { execFileSync } from "node:child_process";
+import {
+  CreatePullRequestInput,
+  MergePullRequestInput,
+  PullRequestData,
+  PullRequestState,
+  StackOps,
+} from "../../app/ports/StackOps.js";
+
+/**
+ * Adapter `StackOps` que delega para `gh` CLI via `execFileSync` com args array.
+ *
+ * **Sempre args array, nunca string interpolada via shell** — fecha CWE-78
+ * (mesmo padrão cravado em `src/cli/visual-prompts/collectLocalContext.ts`
+ * pós-Copilot review #1). Dados externos (titles, branches, labels) entram
+ * como elementos do argv, não como tokens de shell.
+ *
+ * **Depende de `gh` autenticado** no ambiente (consumer repos governance-first
+ * já dependem de `gh` para `governance-pr-check` workflow). Falha narrativa
+ * via stderr se não autenticado.
+ *
+ * Cravado em `[DEC-0023-L01]`. Cf. ADR 0024 seção "Operational CLI commands".
+ */
+
+const GH_TIMEOUT_MS = 30_000;
+const GH_LIST_LIMIT = "100";
+
+const PR_JSON_FIELDS = [
+  "number",
+  "title",
+  "body",
+  "state",
+  "isDraft",
+  "headRefName",
+  "baseRefName",
+  "labels",
+  "url",
+].join(",");
+
+export class GhCli implements StackOps {
+  constructor(private readonly cwd: string) {}
+
+  createPullRequest(input: CreatePullRequestInput): PullRequestData {
+    const args = [
+      "pr",
+      "create",
+      "--title",
+      input.title,
+      "--body",
+      input.body,
+      "--base",
+      input.base,
+      "--head",
+      input.head,
+    ];
+    if (input.draft) args.push("--draft");
+    if (input.labels && input.labels.length > 0) {
+      for (const label of input.labels) args.push("--label", label);
+    }
+
+    const url = this.exec(args).trim();
+    const numberMatch = /\/pull\/(\d+)\/?$/.exec(url);
+    if (!numberMatch) {
+      throw new Error(`Não foi possível extrair número do PR a partir do output: "${url}"`);
+    }
+    const prNumber = Number(numberMatch[1]);
+
+    const created = this.getPullRequest(prNumber);
+    if (!created) {
+      throw new Error(`PR #${prNumber} criado mas leitura imediata falhou.`);
+    }
+    return created;
+  }
+
+  getPullRequest(number: number): PullRequestData | null {
+    try {
+      const json = this.exec(["pr", "view", String(number), "--json", PR_JSON_FIELDS]);
+      return parsePullRequestData(JSON.parse(json));
+    } catch {
+      return null;
+    }
+  }
+
+  editPullRequestBase(number: number, newBase: string): void {
+    this.exec(["pr", "edit", String(number), "--base", newBase]);
+  }
+
+  mergePullRequest(input: MergePullRequestInput): void {
+    const strategyFlag = `--${input.strategy}`;
+    const args = ["pr", "merge", String(input.number), strategyFlag];
+    if (input.deleteBranch !== false) args.push("--delete-branch");
+    this.exec(args);
+  }
+
+  listOpenPullRequests(): ReadonlyArray<PullRequestData> {
+    const json = this.exec([
+      "pr",
+      "list",
+      "--state",
+      "open",
+      "--json",
+      PR_JSON_FIELDS,
+      "--limit",
+      GH_LIST_LIMIT,
+    ]);
+    const raw = JSON.parse(json);
+    if (!Array.isArray(raw)) {
+      throw new Error(`gh pr list devolveu formato inesperado: ${typeof raw}`);
+    }
+    return raw.map(parsePullRequestData);
+  }
+
+  private exec(args: ReadonlyArray<string>): string {
+    return execFileSync("gh", [...args], {
+      cwd: this.cwd,
+      encoding: "utf-8",
+      timeout: GH_TIMEOUT_MS,
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+  }
+}
+
+/**
+ * Normaliza payload JSON do `gh pr view`/`pr list` para o shape canônico
+ * de `PullRequestData`. `gh` devolve `labels: [{name, ...}]`; normalizamos
+ * para `string[]` (só os nomes — único campo relevante para detecção de
+ * stack governance-first via convenção de title + label).
+ */
+function parsePullRequestData(raw: unknown): PullRequestData {
+  if (typeof raw !== "object" || raw === null) {
+    throw new Error(`PR data inválido: esperava objeto, recebeu ${typeof raw}`);
+  }
+  const r = raw as Record<string, unknown>;
+  return {
+    number: Number(r.number),
+    title: String(r.title ?? ""),
+    body: String(r.body ?? ""),
+    state: normalizeState(r.state),
+    isDraft: Boolean(r.isDraft),
+    headRefName: String(r.headRefName ?? ""),
+    baseRefName: String(r.baseRefName ?? ""),
+    labels: Array.isArray(r.labels)
+      ? r.labels
+          .map((l) =>
+            typeof l === "object" && l !== null && "name" in l
+              ? String((l as { name: unknown }).name)
+              : ""
+          )
+          .filter((name) => name !== "")
+      : [],
+    url: String(r.url ?? ""),
+  };
+}
+
+function normalizeState(value: unknown): PullRequestState {
+  const s = String(value ?? "").toUpperCase();
+  if (s === "OPEN" || s === "CLOSED" || s === "MERGED") return s;
+  throw new Error(`PR state inválido: "${value}"`);
+}
