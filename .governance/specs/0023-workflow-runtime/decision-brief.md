@@ -26,6 +26,7 @@
 | `[DEC-0023-B04]` | B     | Resolved |
 | `[DEC-0023-B05]` | B     | Resolved |
 | `[DEC-0023-B06]` | B     | Resolved |
+| `[DEC-0023-B07]` | B     | Resolved |
 | `[DEC-0023-C01]` | C     | Resolved |
 | `[DEC-0023-D01]` | D     | Resolved |
 | `[DEC-0023-D02]` | D     | Resolved |
@@ -358,6 +359,49 @@
   - REPL conversacional permanece **fora do escopo** (já cravado no NEXT.md como não-objetivo).
 - **Critério de revisão futura:** se wizard for adotado por contribuidores externos OU se ≥ 1 sub-bloco da Spec 0024+ (qualquer slug) precisar de opção nova no menu, reabrir como DEC própria — decisão atual cobre apenas as 5 opções iniciais.
 - **Data / Owner:** 2026-05-22 / @rosanarezende
+
+---
+
+### [DEC-0023-B07] Opção 6 do wizard (Gerar prompt visual) — entrega declarada do embrião visual + reafirmação do gate de B06
+
+**Pergunta:** A opção 6 "Gerar prompt visual (para gerador de imagem externo)" foi adicionada ao wizard CLI durante o sub-bloco 1.H.12 sem reabrir DEC própria, ativando o critério auto-instituído de `[DEC-0023-B06]` ("≥ 1 sub-bloco precisar de opção nova → reabrir como DEC própria"). Como formalizar a adição já feita, honrar o gate de B06, e cravar framing canônico anti-agent-creep?
+
+**Contexto:**
+
+- **B06 cravou** (PR5 S5, 2026-05-22): wizard CLI mínimo = **5 opções fixas declarativas** + critério explícito: "se ≥ 1 sub-bloco precisar de opção nova no menu, reabrir como DEC própria". Anti-patterns vetados: auto-detecção, NLP-lite, ranking, sugestão de spec relevante, autocomplete fuzzy, inferência sobre intenção do humano.
+- **1.H.12 adicionou opção 6 "Gerar prompt visual"** como embrião da candidata `governance-dashboard-and-visual-artifacts` (backlog `Now`). Implementação: wizard pergunta `tipo` (architecture-end-to-end / value-delivered / etc.) + `context` (texto livre); substitui `{{context}}` em template parametrizável de `.governance/visual-prompts/<tipo>.prompt.md`; imprime o prompt pronto entre delimitadores para copy-paste em ferramenta externa (Claude conversacional / Midjourney / DALL-E / Nano Banana / etc.). **Sem LLM no runtime** — geração de imagem acontece em ferramenta externa, manualmente, sob comando do humano (coerente com ADR 0018).
+- **Drift detectado pelo Copilot review do PR #25** (2026-05-23): _"[DEC-0023-B06] define explicitamente 'wizard mínimo' como 5 opções fixas (lista 1–5), mas a implementação/help já expõe 6 opções. Para evitar drift entre governança e execução, ajuste o DEC ou crie um DEC separado para a opção extra e referencie-o."_ Achado correto — a 0023 está provando "governança viva + enforcement + anti-acreção silenciosa"; o sistema precisa obedecer seus próprios mecanismos mesmo quando inconveniente.
+- **Tensão arquitetural identificada na revisão Codex+Claude+owner (2026-05-23):** se a primeira reabertura real do gate vira amendment-inline em B06, o critério vira letra morta — gate auto-instituído destruído no primeiro caso onde ele importa. DEC própria honra o mecanismo que B06 estabeleceu e preserva legitimidade para próximos casos.
+
+**Opções:**
+
+| Opção | Descrição                                                                                                                                                | Pró                                                                                                                                            | Contra                                                                                                                                                                                                  |
+| :---- | :------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| A     | **Amendment-inline em B06** (acrescenta opção 6 + nota sobre embrião)                                                                                    | Mais econômico em arquivos; narrativa mais compacta em um único DEC                                                                            | **Viola auto-prescrição de B06** ("reabrir como DEC própria"); enfraquece o gate exatamente no primeiro caso real onde ele importa; sinaliza que critérios da spec são negociáveis quando inconveniente |
+| B     | **Novo `[DEC-0023-B07]` formal** (este DEC) — reconhece critério hit; crava opção 6 como entrega declarada do embrião; reafirma gate para próximos casos | Honra o mecanismo de B06; rastreabilidade auditável; preserva legitimidade do gate; framing anti-distorção dedicado; coerente com tese da 0023 | Mais um DEC no Bloco B; narrativa cresce um nó                                                                                                                                                          |
+| C     | **Reverter opção 6** (remover do wizard; mover para PR futuro da candidata `governance-dashboard-and-visual-artifacts`)                                  | Disciplina máxima                                                                                                                              | Desperdiça implementação já dogfoodada e validada; ignora que o embrião foi proposital e mapeado à candidata Now                                                                                        |
+
+**Decisão do Gate Humano:**
+
+- **Status:** [x] Resolvido
+- **Escolha:** [ ] A | [x] B | [ ] C
+- **Justificativa:** B é a única forma honesta. A 0023 inteira está provando "governança viva, enforcement, anti-acreção silenciosa"; usar amendment-inline na primeira reabertura real de B06 destruiria o gate exatamente no momento em que ele importa. Acordo Codex+Claude+owner na sessão de revisão do Copilot review (2026-05-23). Reverter (C) seria disciplina vazia — o embrião é coerente com a candidata Now e validado por uso.
+- **Opção 6 cravada como entrega declarada:**
+  - **Item de menu:** `"6. Gerar prompt visual (para gerador de imagem externo)"`
+  - **Comportamento:** wizard pergunta `tipo` + `context` (texto livre opcional); substitui `{{context}}` no template selecionado de `.governance/visual-prompts/<tipo>.prompt.md`; imprime entre delimitadores para copy-paste. **Sem LLM no runtime** — geração da imagem acontece em ferramenta externa, manualmente, sob comando humano.
+  - **Genealogia:** embrião declarado da candidata `governance-dashboard-and-visual-artifacts` no backlog `Now` (cf. ADR 0023 — Meta-artefatos como SSOT YAML com derivações). Materialização completa do pipeline (build de meta-artifacts, dashboard HTML, regeneração determinística) fica para a spec dedicada quando a candidata abrir.
+- **Framing canônico (cf. `[DEC-0023-E05]` anti-distorção):**
+  - **"Embrião declarado"**, não "feature dashboard"; **"prompt parametrizável"**, não "AI-powered generation".
+  - **Linguagem rejeitada:** ~~AI-powered visual generation~~, ~~auto-generated diagrams~~, ~~smart prompt engineering~~, ~~visual pipeline~~ (no sentido de tooling chain runtime), ~~LLM-assisted prompt~~.
+  - **Critério de teste:** se a descrição da opção 6 soar como "feature de produto visual", voltar ao framing "embrião + copy-paste para ferramenta externa".
+- **Gate de B06 reafirmado:**
+  - Adição de qualquer **nova opção** (7+) ou **subitens** dentro de opções existentes continua exigindo DEC própria (`[DEC-0023-B08]` ou superior).
+  - Anti-patterns continuam vetados explicitamente para opção 6: wizard **não infere** qual template visual usar (humano escolhe via prompt); **não autodetecta** contexto (humano fornece em texto livre); **não enriquece** o prompt com inferência (substitui literal de `{{context}}`).
+- **Critério de revisita futura:**
+  - Se wizard ganhar opção 7+, reabrir DEC dedicada.
+  - Se opção 6 ganhar subitens (ex.: "regenerar último prompt", "diff de contexto vs último", "biblioteca de prompts gerados"), reabrir DEC dedicada.
+  - **A 0023 NÃO acomoda opção 7 nesta janela** — qualquer novo item migra para a candidata `governance-dashboard-and-visual-artifacts` quando ela materializar.
+- **Data / Owner:** 2026-05-23 / @rosanarezende
 
 ---
 
