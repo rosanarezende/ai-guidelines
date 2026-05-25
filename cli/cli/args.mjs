@@ -106,15 +106,22 @@ Uso:
 
 ═══ COMANDOS DO WORKFLOW RUNTIME (Spec 0023, preview) ═══
 
-  workflow       Wizard operacional mínimo (6 opções fixas declarativas):
-                   [1] Continuar spec atual (briefing + REPL)
-                   [2] Continuar outra spec (por slug ou id)
-                   [3] Publicar estado (instruções)
-                   [4] Ver specs ativas (índice público)
-                   [5] Diagnosticar drift do índice
-                   [6] Gerar prompt visual (briefing para IA conversacional
+  workflow       Wizard operacional (8 opções fixas declarativas, agrupadas
+                 por gênero via icons):
+                   [1] 📍 Continuar spec atual (briefing + REPL)
+                   [2] 📍 Continuar outra spec (por slug ou id)
+                   [3] 📡 Publicar estado (instruções)
+                   [4] 🔗 Abrir Integration PR da spec ativa (transactional)
+                   [5] 🔀 Executar merge atômico da stack (transactional)
+                   [6] 📋 Ver specs ativas (índice público)
+                   [7] 🔍 Diagnosticar drift do índice
+                   [8] 🎨 Gerar prompt visual (briefing para IA conversacional
                        investigar o repo e devolver o prompt de imagem final)
-                 Cf. [DEC-0023-B06] + [DEC-0023-B07]; não embute LLM (ADR 0018 preservado).
+                 Cf. [DEC-0023-B06] + [DEC-0023-B07] + [DEC-0023-L01];
+                 não embute LLM (ADR 0018 preservado). Opções 4 e 5 (tier 2
+                 transactional) mostram plan + confirmação humana antes de
+                 qualquer side-effect — cf. ADR 0024 seção "Operational CLI
+                 commands".
 
   continue [<slug|id>]
                  Atalho do workflow: imprime briefing + próxima ação de
@@ -133,6 +140,19 @@ Uso:
                  .governance/runtime/active-specs.yml. Manual-first
                  (cf. [DEC-0023-G03]); status declarado, sem inferência.
                  Ex.: yarn guidelines workflow publish-state --status=active --updated-by=@maintainer
+
+  release-prep   [--version <X.Y.Z>] [--remote <name>] [--dry-run]
+                 [--skip-working-tree-check]
+                 Tier 3 standalone (repo-specific, cf. ADR 0024). Lê versão
+                 alvo de CHANGELOG.md [Unreleased], mostra plan completo,
+                 confirma e executa: bump package.json + promove CHANGELOG +
+                 commit + tag + push. Tag push dispara
+                 .github/workflows/release.yml → publish em npm + GitHub
+                 release. Pre-release auto-detectada (versão contém '-')
+                 vai para dist-tag 'next'; estável vai para 'latest'.
+                 Cf. [DEC-0023-L01].
+                 Ex.: yarn guidelines release-prep --dry-run
+                      yarn guidelines release-prep --version 1.1.0-preview.0
 
 ═══ OPÇÕES GERAIS ═══
 

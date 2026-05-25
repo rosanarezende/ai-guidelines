@@ -1,10 +1,8 @@
-# PR #26 — Integration PR draft
+# Integration PR — body source (Spec 0023)
 
-> **Uso:** corpo-base para abrir o PR #26 após a owner commitar/pushar o fechamento operacional. Este arquivo é artifact da Spec 0023, não output runtime. O PR real deve copiar o conteúdo abaixo para o body do GitHub e manter `Owner authorization` como `pendente` até autorização explícita de merge atômico.
-
-## Título sugerido
-
-`[🔗] [Integration] [Spec 0023] Homologação final da stack`
+> **Uso:** body source consumido pelo comando `yarn guidelines workflow` opção 4 (`🔗 Abrir Integration PR da spec ativa`) para criar o Integration PR final da stack via `OpenIntegrationPR` use case (cf. `[DEC-0023-L01]`). Arquivo é artifact da spec, não output runtime. **Convenção cravada em L01:** filename é `integration-pr.md` (sem número de PR — número só é conhecido após `gh pr create`). `OpenIntegrationPR.plan()` auto-detecta este arquivo em `<spec_dir>/integration-pr.md`. Owner mantém `Owner authorization` como `pendente` no body até autorização textual explícita de merge atômico.
+>
+> **Título do PR** é auto-gerado pelo comando como `[🔗] [Integration] [Spec NNNN] Homologação final da stack` (override disponível via `OpenIntegrationPRInput.titleOverride`). Não declarar título neste arquivo — wizard cuida disso.
 
 ## Visual de valor entregue (opcional)
 
