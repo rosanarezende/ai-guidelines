@@ -117,6 +117,8 @@ Progresso operacional. Marca tasks `[x]` a cada degrau. **Espinha dorsal de exec
 - **Fase de Review (Gate de Homologação)**: Empacotamento, pipeline verde, descrição em 3 etapas do PR, **aguardar gate humano formal**.
 - **Fase de Encerramento (Pré-Merge)**: Migra research, consolida e deleta `NEXT.md`, atualiza roadmap, status final.
 
+> **Modelo de 3 boundaries (Spec 0023 — `[DEC-0023-M01]`):** as fases de Review e Encerramento acima estão migrando para artefatos dedicados — **`review.md`** (integration readiness; gates R1–R7, lido pelo runtime) e **`closure.md`** (log de operações pós-merge). O `tasks.md` torna-se **execution-only** (fecha 100% `[x]` ao fim da execução); os boilerplates já refletem isso. A reconciliação completa desta seção e do "Princípio de PR auto-suficiente" abaixo com o modelo (incl. o papel pós-merge do `closure.md`) é débito de fechamento da 0023 — ver `.governance/specs/0023-workflow-runtime/`.
+
 > **Princípio de PR auto-suficiente:** o merge não dispara nenhum trabalho adicional. Antes do merge, o PR já deve conter: status `Done (PR #N — YYYY-MM-DD)` em `spec.md`, entrada completa em `roadmap/historico.md`, remoção de `roadmap/backlog.md§Em execução`, `research-index.md` atualizado com as pesquisas migradas, `CHANGELOG.md` com a release publicada (não em `[Unreleased]`) e bump da `version` em `package.json`. Se o agente encontrar pendências durante o merge ("falta atualizar histórico", "faltou o changelog"), elas eram para ter sido cobertas na Fase 4 — abrir hotfix ou commit pré-merge é uma falha do checklist, não comportamento esperado.
 
 > **Sequência canônica para specs com publish em registry externo (npm, PyPI, Maven, etc.):**
