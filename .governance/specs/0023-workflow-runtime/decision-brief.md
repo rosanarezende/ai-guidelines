@@ -5,7 +5,7 @@
 > Spec: [`./spec.md`](./spec.md)
 > Plan: [`./plan.md`](./plan.md) (criado em 2026-05-19 conforme `[DEC-0023-B05]`).
 > Tasks: tasklist da sessão de implementação (PR1).
-> Status agregado: **Resolved** — Blocos A/B/C/D/E/F/G/I/J/K/L todos fechados (F01–F04 Resolved em PR5 S5 / 2026-05-22; F05 Deferred com critério estrutural vinculado à abertura de `handoff-as-first-class`; B07 + I01 cravados durante review do PR #25 / 2026-05-23; J01 + ADR 0024 cravados na Frente #3 do hardening / 2026-05-23–24; K01 cravado no fechamento operacional / 2026-05-24; L01 + ADR 0024 amendment cravados na Frente C+D do hardening / 2026-05-24 II; G05 cravado no dogfooding de fechamento / 2026-05-24 II — `active-specs.yml` permanece minimal canonical projection, não coordination source-of-truth).
+> Status agregado: **Resolved** — Blocos A/B/C/D/E/F/G/I/J/K/L/M todos fechados (F01–F04 Resolved em PR5 S5 / 2026-05-22; F05 Deferred com critério estrutural vinculado à abertura de `handoff-as-first-class`; B07 + I01 cravados durante review do PR #25 / 2026-05-23; J01 + ADR 0024 cravados na Frente #3 do hardening / 2026-05-23–24; K01 cravado no fechamento operacional / 2026-05-24; L01 + ADR 0024 amendment cravados na Frente C+D do hardening / 2026-05-24 II; G05 cravado no dogfooding de fechamento / 2026-05-24 II — `active-specs.yml` permanece minimal canonical projection, não coordination source-of-truth; M01 cravado no dogfooding final / 2026-05-25 — modelo de 3 boundaries tasks/review/closure).
 > Última atualização: 2026-05-24 (II) — Frente C+D do hardening do PR #25: `[DEC-0023-L01]` (Bloco L — Operational CLI commands) + ADR 0024 amendment (extensão do modelo de 3 estados com tier model de execução transacional).
 
 > **Artefato canônico do gate humano entre Stage 1 (research) e Stage 2 (design + implementação).** Para esta spec, a Stage 1 é a investigação documentada na pasta legacy `.specify/specs/0023-governance-workflow-discovery-model/` (research.md + anexos). Este brief materializa o gate Stage A → Stage B com 4 decisões cravadas em sessão de design 2026-05-19.
@@ -52,6 +52,7 @@
 | `[DEC-0023-J01]` | J     | Resolved |
 | `[DEC-0023-K01]` | K     | Resolved |
 | `[DEC-0023-L01]` | L     | Resolved |
+| `[DEC-0023-M01]` | M     | Resolved |
 
 **Status agregado:** Resolved — Blocos A/B/C/D/E/F/G/I/J/K todos fechados. F01–F04 Resolved (tríade arquitetural B+B+A+A cravada em PR5 S5 / 2026-05-22); F05 Deferred com critério estrutural observável (revisita obrigatória na abertura da candidata `handoff-as-first-class`); J01 cravado na Frente #3 do hardening do PR #25 (2026-05-23/24) com ADR 0024 materializando o modelo de 3 estados Draft/Ready/Mergeable; K01 crava Integration PR como PR de homologação/convergência final antes da autorização de merge atômico.
 
@@ -1410,6 +1411,31 @@ Para preservar enforcement estrutural enquanto a accountability transfere, fast-
 - **`GhCli` adapter depende de `gh` instalado:** erro narrativo se ausente, sem fallback. Aceito (consumer repos já dependem de `gh` via outras integrações governance-first).
 - **Falha mid-way em merge-stack:** humano resolve manualmente + rerun com `--continue-from`. Sem rollback automático. Aceito (rollback de merge atômico é cenário raro; resolução manual é honesta).
 - **Implementação cresce surface do PR #25:** ~5-6 commits adicionais. Owner cravou que isso é dogfooding válido — _"a spec 0023 é dogfooding; não vejo problema em trazermos o aprendizado, dar visibilidade dessa escolha, e implementar agora mesmo no PR 25, assim já vamos para o PR 26 com tudo estabelecido e provando valor real"_. Aceito.
+
+---
+
+## Bloco M — Modelo de artifacts de 3 boundaries (execution / integration-readiness / closure)
+
+### [DEC-0023-M01] Separar `tasks.md` (execution) / `review.md` (integration readiness) / `closure.md` (post-merge ops)
+
+> **Origem:** dogfooding final da 0023 (2026-05-25). Mesmo com o gate determinístico de readiness, o `tasks.md` tinha virado "arquivo de tudo" (execução + homologação Fase 3 + pós-merge Fase 4), criando drift e incentivando o runtime a antecipar o Integration PR. Owner cravou redesign do modelo de artifacts.
+
+**Pergunta:** Como separar execução, prontidão de integração e operações pós-merge de forma que (a) `tasks.md` possa fechar 100% `[x]` ao fim da execução, e (b) o Integration PR (#26) nasça já sobre estado convergido, não para descobrir pendências?
+
+**Decisão:** três boundaries canônicos por spec:
+
+- **`tasks.md` = execution boundary.** Cobre apenas execução/implementação; fecha 100% `[x]` em "execution complete". Não contém gates de homologação nem pós-merge.
+- **`review.md` = integration readiness boundary** (sempre existe). Gates `R1`–`R7`. **R1–R6 `[x]` → o #26 pode ser aberto**; o #26 foca em convergência topológica e conflitos de merge, não em descobrir pendências. **R7 (merge authorization) fecha após a homologação do #26** e é o gate do merge-stack. Migra a antiga Fase 3 + merge auth (ex-1.H.[REVIEW]/4.9).
+- **`closure.md` = post-merge ops log** (registro, não gate). Captura merge atômico, release, ajustes públicos, incidentes — "o que, por quem, quando". Migra a antiga Fase 4.
+
+**Consequências no runtime (determinístico, sem IA):** `CheckIntegrationReadiness` lê `review.md`; gate `integration-pr` exige R1–R6, gate `merge-stack` exige R1–R7. Wizard opção 1 exibe os 3 status (execution/integration/closure) a partir do estado declarado, sem recomendação de próxima ação. Sem nova opção no wizard.
+
+**Decisão do Gate Humano:**
+
+- **Status:** [x] Resolvido
+- **Justificativa:** o Integration PR não deve servir para descobrir pendências (cf. princípio cravado no dogfooding 2026-05-24); separar boundaries permite que `tasks.md` feche 100%, que `review.md` seja a SSOT de prontidão, e que closure registre o pós-merge sem virar gate. Sequenciamento R1–R6 (abre #26) / R7 (libera merge) resolve a inversão "merge auth antes de abrir #26". Relaciona `[DEC-0023-E03]` (L2 enforcement), `[DEC-0023-L01]` (comandos transacionais) e `[DEC-0023-K01]` (Integration PR como homologação).
+- **Data / Owner:** 2026-05-25 / @rosanarezende
+- **Nota:** modelo é ADR-worthy; pode graduar para ADR próprio se adotado por ≥ 2 specs.
 
 ---
 
