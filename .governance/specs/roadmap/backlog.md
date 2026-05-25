@@ -190,6 +190,38 @@ Detalhes de lifecycle em [`.core/process/governance-foundation.md`](../../../.co
   12. **`quota-awareness`** (era spec 0014) — _baixa_ — dashboard de quota opt-in; gatilho por consumidor estourar quota.
 - **Slug:** `runtime-and-template-root-consolidation` (per [ADR 0017](../../../.core/governance/adrs/0017-spec-numbering-slug-to-branch.md); pode evoluir na abertura).
 
+### `coverage-rigor-enforcement`
+
+> **Registrada no PR #25 (2026-05-25) como captura docs-only.** Detalhamento máximo proposital — esta entry precisa carregar todo o contexto para uma LLM futura abrir a spec sem reconstruir o diagnóstico.
+
+- **Contexto:** o framework declara fundação **DDD + BDD + TDD**, mas o próprio repo **não dogfooda 100% desse rigor**. Durante o fechamento da Spec 0023 (review do Copilot no PR #25), surgiram achados que um framework TDD-first não deveria permitir — incluindo inconsistência de texto de help (`release-prep` fora da linha "Uso") e qualidade frágil de teste (`REPO_ROOT` via `.pathname`, `FakePrompts.input` mascarando prompts). A dor é estrutural, não pontual.
+- **Diagnóstico estrutural (causa-raiz):**
+  - O gate de coverage é **≥85% agregado** (cf. critério de aceite da própria 0023). **Agregado esconde o buraco:** uma camada bem-coberta (`src/`, DDD/TS) compensa estatisticamente uma mal-coberta.
+  - A camada **`cli/*.mjs`** (bridge/entrypoint legado, anterior ao DDD) escapa do rigor que `src/` tem. **`cli/cli/args.mjs` (parsing de argumentos da CLI) vive nessa camada** — deveria ser 100%, mas não é. Caso emblemático: a linha "Uso:" desatualizada não seria pega por nenhum teste unitário existente.
+  - **Não é falta de TDD documentado — é falta de _enforcement_.** Mesmo padrão do tri-root (`runtime-and-template-root-consolidation`): o princípio existe, falta a forcing function que o torna inevitável. Um framework TDD-first com piso agregado de 85% e uma camada inteira fora do rigor é a **mesma incoerência de dogfooding** capturada em [[feedback-migration-needs-timeline-and-dogfooding-parity]] (paridade: o mantenedor deve viver o rigor que prega).
+- **Escopo proposto (a confirmar na abertura):**
+  - **Piso por-arquivo/por-camada**, não só agregado: cada arquivo de `src/` e de `cli/` tem mínimo próprio; agregado deixa de poder mascarar regressão local. (jest `coveragePathIgnorePatterns`/`coverageThreshold` por glob + gate equivalente no runner node de `cli/`.)
+  - **100% obrigatório em paths críticos:** parsing de argumentos (`args.mjs`/sucessor), use cases de domínio, serializers/validators de schema, e qualquer código que decida autorização (ex.: `CheckExecutionAuthorized`, `CheckIntegrationReadiness`). Critério: "código que, se quebrar silenciosamente, corrompe estado ou autorização → 100%".
+  - **Cobrir texto/contrato que teste unitário não pega:** gate que valide consistência de help/usage (ex.: snapshot do `printHelp` ou teste que cruza `SUPPORTED_MODES` com a linha "Uso:" e com os blocos de comando). Foi exatamente o gap do review do Copilot.
+  - **Forcing function de CI:** PR que reduz coverage de qualquer arquivo crítico abaixo do piso **falha** (não só o agregado). Estende `governance-pr-check` ou o gate de coverage existente.
+  - **Mutation testing (opcional, escopo de avaliação):** coverage de linha ≠ coverage de asserção. Avaliar mutation testing (ex.: Stryker) em paths críticos para fechar o gap "linha executada mas não assertada" — overlap com `harness-engineering` (sensors/eval-as-gate); decidir se mora aqui ou lá.
+- **Obrigações metodológicas cruzadas (revisita obrigatória na abertura):**
+  - **`cli-mjs-to-src-ddd-cutover`** (item vivo triado) — a camada `cli/*.mjs` é precisamente a que escapa do rigor; o cutover remove a causa. Coordenar: ou esta spec espera o cutover, ou crava piso para `cli/*.mjs` enquanto ele existir. Não duplicar.
+  - **`harness-engineering`** (era spec 0009) — sensors automáticos obrigatórios (typecheck/testes como gate, mutation kill rate, detecção de bugs típicos de IA) materializam "caminho não-testado não pode existir". Mutation testing provavelmente mora lá; esta spec foca no **piso/enforcement de coverage**. Decidir a fronteira na abertura.
+  - **Feature `quality-gates`** (opt-in existente) — esta spec pode endurecer o gate distribuído aos consumidores, não só o do mantenedor (dogfooding: o que exigimos de nós vale para quem adota).
+- **Princípio guia:** **dogfooding de rigor** — o framework exige de si o mesmo nível de teste que prega aos consumidores. Coverage agregado é métrica de vaidade; piso por-arquivo + 100% em paths críticos + forcing function é a versão honesta. Cf. [[feedback-migration-needs-timeline-and-dogfooding-parity]].
+- **Não-objetivos:**
+  - 100% cego em todo o repo (testar getters triviais, re-exports, types) — vira fricção sem valor. O alvo é **paths críticos a 100% + piso saudável no resto**, não cobertura cosmética universal.
+  - Reescrever testes existentes que já cobrem comportamento — o foco é fechar buracos estruturais, não churn.
+  - Embutir LLM no runtime para "gerar testes" (viola ADR 0018). Geração assistida por IA é trabalho do agente no canal, não comportamento do runtime.
+- **Riscos antecipados:**
+  - **Piso alto vira fricção** se aplicado cego — mitigar com a fronteira "crítico=100% / resto=piso saudável" e allowlist explícita de exclusões justificadas.
+  - **Mutation testing infla tempo de CI** — restringir a paths críticos; rodar full em schedule, não em todo PR.
+  - **Overlap com 3 candidatas** (cutover, harness, quality-gates) → risco de specs sobrepostas. Mitigar com a obrigação cruzada acima: decidir fronteiras na abertura, possivelmente abrir como **uma** spec coordenadora.
+- **Evidência empírica (PR #25, 2026-05-25):** review do Copilot pegou o que o gate de 85% agregado deixou passar — prova viva de que o piso atual é insuficiente para a tese TDD-first do framework.
+- **Gatilho de abertura:** após a Spec 0023 fechar. Sinal adicional de urgência: qualquer novo review (humano ou IA) que pegue gap que um gate de coverage por-arquivo teria barrado.
+- **Slug:** `coverage-rigor-enforcement` (per ADR 0017; pode evoluir na abertura, ex.: `test-rigor-and-coverage-floor`).
+
 ---
 
 ## Bloqueadores cross-spec
