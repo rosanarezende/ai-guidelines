@@ -8,4 +8,4 @@ next:
   - "Fase de Review: fechar gates R1–R6 do review.md (R2 verde; R3/R4/R6 em curso; R1 aguarda aprovação humana)"
   - "Abrir PR #26 (Integration) somente quando review.md R1–R6 fecharem"
   - "Manter merge authorization (review.md R7) pendente até autorização textual"
-  - "Encerramento pós-merge via closure.md"
+  - "Encerramento pós-merge via release-log.md"

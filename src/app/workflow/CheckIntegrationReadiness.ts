@@ -43,7 +43,7 @@ const CHECKLIST_LINE = /^\s*-\s*\[([ xX/])\]\s+\*\*(.+?)\*\*/;
 /**
  * Parser puro de checklist markdown: captura cada item na forma
  * `- [ ] **<id>** ...`. Linhas que não casam o padrão são ignoradas.
- * Genérico — serve `review.md`, `tasks.md` e `closure.md`.
+ * Genérico — serve `review.md`, `tasks.md` e `release-log.md`.
  */
 export function parseChecklistGates(md: string): ReadonlyArray<ChecklistGate> {
   const gates: ChecklistGate[] = [];

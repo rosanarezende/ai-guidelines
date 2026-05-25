@@ -807,7 +807,7 @@ function specBoundaryPath(location: SpecLocation, file: string): string {
 /**
  * Sumário determinístico dos 3 boundaries da spec (cf. `[DEC-0023-M01]`):
  * Execution (`tasks.md`) / Integration readiness (`review.md`) / Closure
- * (`closure.md`). Lookup de estado declarado, sem inferência nem recomendação.
+ * (`release-log.md`). Lookup de estado declarado, sem inferência nem recomendação.
  */
 export function summarizeBoundaries(
   fs: WorkflowFileSystem,
@@ -824,7 +824,7 @@ export function summarizeBoundaries(
     execution = gates.length > 0 && open === 0 ? "complete" : `in progress (${open} aberto(s))`;
   }
 
-  // Integration readiness — review.md R1–R6 (gate de abertura do #26).
+  // Integration readiness — review.md R1–R7 (gates de abertura do #26).
   const ir = new CheckIntegrationReadiness(fs).run(location, "integration-pr");
   let integration: string;
   if (ir.missingFile) {
@@ -836,28 +836,28 @@ export function summarizeBoundaries(
     integration = `BLOCKED (${n} item(ns) aberto(s) em review.md)`;
   }
 
-  // Closure — closure.md (registro pós-merge).
-  // closure.md usa checkboxes simples (sem `**id**`), distintos dos gates R*;
-  // conta-os direto para refletir o progresso do log pós-merge.
-  const closurePath = specBoundaryPath(location, "closure.md");
-  let closure: string;
-  if (!fs.fileExists(closurePath)) {
-    closure = "não iniciado";
+  // Release log — release-log.md (registro pós-merge, CONDICIONAL — só existe com
+  // release/operação pós-merge). Usa checkboxes simples (sem `**id**`); conta-os direto.
+  const releaseLogPath = specBoundaryPath(location, "release-log.md");
+  let releaseLog: string;
+  if (!fs.fileExists(releaseLogPath)) {
+    releaseLog = "não iniciado (condicional — só com release/pós-merge)";
   } else {
     const boxes = fs
-      .readTextFile(closurePath)
+      .readTextFile(releaseLogPath)
       .split("\n")
       .filter((l) => /^\s*-\s*\[[ xX/]\]/.test(l));
     const done = boxes.filter((l) => /^\s*-\s*\[[xX]\]/.test(l)).length;
-    if (boxes.length === 0) closure = "registrado (sem checklist)";
-    else closure = done === boxes.length ? "concluído" : `em andamento (${done}/${boxes.length})`;
+    if (boxes.length === 0) releaseLog = "registrado (sem checklist)";
+    else
+      releaseLog = done === boxes.length ? "concluído" : `em andamento (${done}/${boxes.length})`;
   }
 
   return [
     "Boundaries da spec:",
     `  Execution (tasks.md):           ${execution}`,
     `  Integration readiness (review): ${integration}`,
-    `  Closure ops (closure.md):       ${closure}`,
+    `  Release log (release-log.md):   ${releaseLog}`,
   ];
 }
 
@@ -1212,7 +1212,7 @@ export async function runWorkflow(options: RunOptions): Promise<number> {
   }
 
   logger.info(assembleBriefing(ctx));
-  // Status dos 3 boundaries (execution/integration/closure) — estado declarado,
+  // Status dos 3 boundaries (execution/integration/release-log) — estado declarado,
   // sem recomendação de próxima ação (cf. [DEC-0023-M01] + memory lookup-not-coordination).
   logger.info("");
   for (const line of summarizeBoundaries(fs, ctx.location)) {

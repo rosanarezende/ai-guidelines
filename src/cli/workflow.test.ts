@@ -383,7 +383,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
       expect(out).toMatch(/Boundaries da spec:/);
       expect(out).toMatch(/Execution \(tasks\.md\): +complete/);
       expect(out).toMatch(/Integration readiness \(review\): +PASS/);
-      expect(out).toMatch(/Closure ops \(closure\.md\): +não iniciado/);
+      expect(out).toMatch(/Release log \(release-log\.md\): +não iniciado/);
     });
 
     it("DADO opção 1 com tasks.md aberto + review.md ausente ENTÃO mostra Execution=in progress / Integration=BLOCKED", async () => {

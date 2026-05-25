@@ -5,7 +5,7 @@
 > Spec: [`./spec.md`](./spec.md)
 > Plan: [`./plan.md`](./plan.md)
 > Decision Brief: [`./decision-brief.md`](./decision-brief.md)
-> Status: In Review (Stage D) — **execution-only boundary** (cf. `[DEC-0023-M01]`): cobre apenas execução/implementação e fecha 100% `[x]` ao fim da execução. Homologação vive em [`review.md`](./review.md); pós-merge em [`closure.md`](./closure.md). Implementação completa incl. Bloco L. Migração tasks/review/closure cravada em 2026-05-25.
+> Status: In Review (Stage D) — **execution-only boundary** (cf. `[DEC-0023-M01]`): cobre apenas execução/implementação e fecha 100% `[x]` ao fim da execução. Homologação vive em [`review.md`](./review.md); pós-merge em [`release-log.md`](./release-log.md). Implementação completa incl. Bloco L. Migração tasks/review/release-log cravada em 2026-05-25.
 
 > **Progress file vivo.** Atualizar a cada degrau concluído. Quando uma decisão mudar, refletir em `plan.md` § "Decisões revisitadas" e ajustar tasks impactadas. Não retroceder status sem registro.
 
@@ -227,7 +227,7 @@
 - [x] **1.L.3** Wizard reordenado + icons + opções 4 (🔗 Abrir Integration PR) e 5 (🔀 Merge atômico da stack) em `src/cli/workflow.ts`; cabling em `cli/cli/args.mjs` + `cli/app/engine.mjs`.
 - [x] **1.L.4** Comando standalone `release-prep` (tier 3 do modelo transacional do ADR 0024) em `src/cli/release-prep.ts` + tests.
 - [x] **1.L.5** `integration-pr.md` (body source, artifact da spec — sem número de PR no filename, cf. L01) + `printHelp()` atualizado + entry no `CHANGELOG.md`. ADR 0024 amendment + `[DEC-0023-L01]` publicados.
-- [x] **1.L.6** Gate determinístico de Integration readiness (`src/app/workflow/CheckIntegrationReadiness.ts` + tests BDD): opção 🔗 bloqueia até `review.md` R1–R7 `[x]`; opção 🔀 bloqueia até R1–R8 `[x]`. Wizard opção 1 mostra os 3 boundaries (execution/integration/closure). Lookup de estado declarado + output copiável para IA externa; sem IA no runtime. Cf. `[DEC-0023-E03]` (L2 enforcement) + `[DEC-0023-L01]` + `[DEC-0023-M01]`.
+- [x] **1.L.6** Gate determinístico de Integration readiness (`src/app/workflow/CheckIntegrationReadiness.ts` + tests BDD): opção 🔗 bloqueia até `review.md` R1–R7 `[x]`; opção 🔀 bloqueia até R1–R8 `[x]`. Wizard opção 1 mostra os 3 boundaries (execution/integration/release-log). Lookup de estado declarado + output copiável para IA externa; sem IA no runtime. Cf. `[DEC-0023-E03]` (L2 enforcement) + `[DEC-0023-L01]` + `[DEC-0023-M01]`.
 - [x] **1.L.N** Pipeline verde com os tests BDD dos 3 use cases + comando release-prep + integração do wizard + gate de readiness.
 - [x] **1.L.[REVIEW]** Homologação do Bloco L converge no próprio PR #26 (dogfooding de fechamento, cf. NEXT.md § "Dogfooding de fechamento — Integration PR"): a maquinaria de Integration PR é homologada pelo Integration PR que ela cria.
 
@@ -267,10 +267,10 @@
 
 ---
 
-## Fase de Encerramento → migrada para `closure.md`
+## Fase de Encerramento → migrada para `release-log.md`
 
 > **A antiga "Fase de Encerramento Pré-Merge" (4.x) agora vive em
-> [`closure.md`](./closure.md)** (registro operacional pós-merge), exceto: 4.1
+> [`release-log.md`](./release-log.md)** (registro operacional pós-merge), exceto: 4.1
 > (migração do NEXT) virou `review.md` R5 — gate de readiness pré-integration; e 4.9
 > (merge authorization) virou `review.md` R8. Cf. `[DEC-0023-M01]`.
 
