@@ -150,7 +150,45 @@ Detalhes de lifecycle em [`.core/process/governance-foundation.md`](../../../.co
 
 ## Candidatas
 
-_(sem candidatas soltas no momento — todas as candidatas pré-existentes foram consolidadas em `Now` na operação de sanitização do PR5 S5 da Spec 0023, 2026-05-22. Novas candidatas que emergirem devem ser registradas aqui antes de promoção para `Now`, com sinal de "está na hora" observável.)_
+> Novas candidatas que emergirem entram aqui antes de promoção para `Now`, com sinal de "está na hora" observável.
+
+### `runtime-and-template-root-consolidation`
+
+> **Registrada no PR #25 (2026-05-25) como captura docs-only.** NÃO inicia agora — gatilho de abertura abaixo. Esta entry preserva o aprendizado para que o cutover não se perca nem recomece do zero.
+
+- **Contexto:** o framework mantém **tri-root permanente** — `.governance/` (canônico atual), `.specify/` (legado: specs antigas + templates-fonte + backlog/historico não-sanitizados) e `.ai-guidelines/` (legado: `sdd_dir` com config + templates mirror). O custo é real e recorrente: humano e LLM gastam tokens reverse-engineering quem é fonte vs. mirror vs. recipe; cada concern (specs, templates, contrato de consumer) vive em ≥2 lugares; é fonte ativa de confusão e drift. Diagnóstico empírico levantado durante o fechamento da Spec 0023.
+- **Evidências (a direção já foi decidida — faltou execução + forcing function):**
+  - **ADR 0008** — removeu o legado `.ai-guidelines/` (era `rules/` multi-arquivo); ele **ressurgiu** como `sdd_dir` (config + templates mirror).
+  - **ADR 0019** — `.governance/specs/` root no mantenedor, mas declarou `.specify/` bridge **"sem deprecation timeline"** → "sem prazo" é exatamente o que tornou a dualidade permanente.
+  - **Spec 0021** — declarou `.governance/` como **SSOT canônica no consumidor**, e marcou o mirror `.specify/templates/` como **formalmente deprecado** (fallback). Mas o código ainda usa `sdd_dir=.ai-guidelines` e `pointers.mjs` aponta specs para `.specify/specs/`; o cutover do consumer contract (0021 NEXT item 2.D.2) nunca completou.
+  - **Conclusão:** ninguém decidiu manter os legados — três decisões mandaram matá-los/depreciá-los. Faltou (a) terminar o cutover, (b) um prazo, (c) uma forcing function de CI.
+- **Plano faseado (Bucket B — proposta pós-0023, não implementar aqui):**
+  - **Fase 0 — ADR de consolidação** (supersede 0019): crava `.governance/` como root único maintainer+consumer + os 3 invariantes (abaixo) + **prazo de remoção** de `.specify/` e `.ai-guidelines/`.
+  - **Fase 1 — Consumer contract parity:** `sdd_dir` default → `.governance`; `pointers.mjs` → specs em `.governance/specs/`; `adopt`/`init` criam `.governance/` no consumer. (maior ganho/custo — corrige a assimetria que é a causa-raiz)
+  - **Fase 2 — Eliminar o double-lookup do runtime** (≈13 touch-points: `CheckIntegrationReadiness`, `ReadWorkflowState`, `PublishState`, `OpenIntegrationPR`, `CheckExecutionAuthorized`, `workflow.ts`, `AssembleBriefing`, `governance-pr-check`, `DiscoverWorkspace`, `WorkspaceState.LegacySource`, `collectLocalContext`).
+  - **Fase 3 — Specs legadas + backlog/historico:** congelar/mover as 8 specs de `.specify/specs/`; sanitização completa do backlog legado (a triagem mínima abaixo é só o começo).
+  - **Fase 4 — Colapsar templates:** uma fonte só; eliminar o mirror `.specify/templates/`. **Overlap explícito com `boilerplate-system-modernization`** (eixo recipe-vs-flat) — coordenar para não duplicar.
+  - **Fase 5 — Forcing function + remoção:** ligar o check de CI; remover os legados quando o prazo vencer e zero referências restarem.
+- **Princípios (transversais — deliverables da spec futura, não ADR novo agora):**
+  - **Paridade maintainer/consumer (dogfooding):** o mantenedor usa o layout **idêntico** ao que entrega ao consumer; CI falha se divergir. (teria impedido o split `.governance` maintainer vs `.ai-guidelines`/`.specify` consumer)
+  - **Migração sempre com timeline + condição de remoção do antigo** — proibir "sem deprecation timeline".
+  - **Forcing function de CI** — falha se um root legado ganhar conteúdo **novo**, ou se maintainer/consumer divergirem de layout.
+- **Obrigação metodológica cruzada (não pode ser ignorada):** antes de abrir esta spec, **triagem completa** do backlog legado `.specify/specs/roadmap/backlog.md` é obrigatória, e deve produzir atualização do backlog canônico (`Now`/`Next`/`Later`) **com justificativa por item**. A triagem mínima abaixo (PR #25) é o ponto de partida, não a triagem completa.
+- **Gatilho de abertura:** **somente após a Spec 0023 fechar** (stack mergeada + Integration PR #26 resolvido).
+- **Itens vivos detectados no backlog legado (triagem mínima — PR #25):** _(espelha a seção homônima em `.specify/specs/roadmap/backlog.md`; a spec futura não pode ignorar)_
+  1. **`recipes-mirror-to-engine-migration`** — _alta_ — só 1 de 11 recipes migrado; o mirror `.specify/templates/` é o débito que esta consolidação + `boilerplate-system-modernization` precisam fechar.
+  2. **`seguranca-ia-supply-chain`** (era spec 0012) — _alta_ — threat model OAuth de AI tools (governança do operador humano); sem lar; gatilho por incidente provável.
+  3. **`harness-engineering`** (era spec 0009) — _média_ — agente validador separado + eval-as-gate + sensores; combate "falso done"/slop; não entregue.
+  4. **`cli-mjs-to-src-ddd-cutover`** — _média_ — `cli/*.mjs` legado convive com `src/*.ts`; alimenta diretamente a consolidação topológica.
+  5. **`stakeholder-intake-pipeline`** — _média_ — PRD/intake estruturado → spec; sem contrato de entrada, transformar demanda em spec recai toda na mantenedora.
+  6. **`framework-observability-dashboard`** (telemetria) — _média_ — métricas vivas (Tok-H, eval baseline, adoção npm); **overlap parcial com `Now`#1 `governance-dashboard-and-visual-artifacts`** — verificar absorção vs. recorte de telemetria.
+  7. **`pr-curator-action`** — _média_ — `pr-curator` é fantasma (citado em ADR 0009/CHANGELOG, sem código); automação cross-repo.
+  8. **`regra-hierarquia`** (era spec 0011) — _média_ — fragmentação de `AGENTS.md` por subdir no consumidor; gatilho por pressão de tokens.
+  9. **`handoff-contracts-formalization`** — _baixa_ — contratos de handoff stage→release / consumer→maintainer; **overlap parcial com `Now`#2 `handoff-as-first-class`** — verificar absorção.
+  10. **`core-rules-top-naming-audit`** — _baixa_ — fronteira `agents-core.md` (CORE-\*) vs `global-rules.md` (GR-\*) confunde; débito migrado do 0021.
+  11. **`cli-update-notifier`** — _baixa_ — sensor "vX.Y disponível, rode update" pós-npm; infra de update já existe, falta o aviso.
+  12. **`quota-awareness`** (era spec 0014) — _baixa_ — dashboard de quota opt-in; gatilho por consumidor estourar quota.
+- **Slug:** `runtime-and-template-root-consolidation` (per [ADR 0017](../../../.core/governance/adrs/0017-spec-numbering-slug-to-branch.md); pode evoluir na abertura).
 
 ---
 

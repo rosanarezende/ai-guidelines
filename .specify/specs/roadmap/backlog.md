@@ -1,5 +1,33 @@
 # Backlog — ai-guidelines
 
+> # ⚠️ CONGELADO / HISTÓRICO — não adicionar conteúdo novo aqui
+>
+> **Backlog canônico é [`.governance/specs/roadmap/backlog.md`](../../../.governance/specs/roadmap/backlog.md)** (per ADR 0019).
+> Este arquivo é legado e permanece apenas como referência histórica. **Novos itens entram no canônico via PR.**
+> A migração/sanitização completa deste arquivo é Fase 3 da candidata `runtime-and-template-root-consolidation` (backlog canônico) — não fazer ad-hoc.
+> Uma **triagem mínima** dos itens ainda vivos foi executada no PR #25 (ver seção abaixo) e espelhada na candidata canônica.
+
+## Triagem mínima executada no PR #25 (2026-05-25)
+
+> Sinaliza itens **provavelmente vivos** deste backlog legado — não reclassifica tudo. A triagem completa (com reencaixe em `Now`/`Next`/`Later` e justificativa por item) é obrigação metodológica da candidata `runtime-and-template-root-consolidation` antes de sua abertura. Itens não listados aqui são (em geral) specs concluídas (0008–0021), absorvidas/riscadas, ou bloqueadores já resolvidos.
+
+### Itens vivos identificados (triagem mínima)
+
+1. **`recipes-mirror-to-engine-migration`** — _alta_ — só 1 de 11 recipes migrado; mirror `.specify/templates/` é o débito que a consolidação + `boilerplate-system-modernization` precisam fechar.
+2. **`seguranca-ia-supply-chain`** (era spec 0012) — _alta_ — threat model OAuth de AI tools (operador humano); sem lar; gatilho por incidente provável.
+3. **`harness-engineering`** (era spec 0009) — _média_ — agente validador + eval-as-gate + sensores; combate "falso done"/slop; não entregue.
+4. **`cli-mjs-to-src-ddd-cutover`** — _média_ — `cli/*.mjs` legado convive com `src/*.ts`; alimenta a consolidação topológica.
+5. **`stakeholder-intake-pipeline`** — _média_ — PRD/intake estruturado → spec; sem contrato de entrada, transformar demanda recai toda na mantenedora.
+6. **`framework-observability-dashboard`** (telemetria) — _média_ — métricas vivas (Tok-H, eval baseline, adoção npm); overlap parcial com `governance-dashboard-and-visual-artifacts` (canônico `Now`#1) — verificar absorção.
+7. **`pr-curator-action`** — _média_ — `pr-curator` é fantasma (citado em ADR 0009/CHANGELOG, sem código); automação cross-repo.
+8. **`regra-hierarquia`** (era spec 0011) — _média_ — fragmentação de `AGENTS.md` por subdir no consumidor; gatilho por pressão de tokens.
+9. **`handoff-contracts-formalization`** — _baixa_ — contratos de handoff stage→release / consumer→maintainer; overlap parcial com `handoff-as-first-class` (canônico `Now`#2) — verificar absorção.
+10. **`core-rules-top-naming-audit`** — _baixa_ — fronteira `agents-core.md` (CORE-\*) vs `global-rules.md` (GR-\*) confunde; débito do 0021.
+11. **`cli-update-notifier`** — _baixa_ — sensor "vX.Y disponível, rode update" pós-npm; infra de update já existe, falta o aviso.
+12. **`quota-awareness`** (era spec 0014) — _baixa_ — dashboard de quota opt-in; gatilho por consumidor estourar quota.
+
+---
+
 Este arquivo é o backlog vivo do repositório. Captura specs em execução, próximas na fila, candidatas, bloqueadores cross-spec e itens oportunistas.
 
 **Regra de ouro:** nada aqui entra em execução sem nova spec (`.specify/specs/<slug>/`). Este arquivo é leitura obrigatória antes de abrir spec nova ou fechar uma spec existente.
