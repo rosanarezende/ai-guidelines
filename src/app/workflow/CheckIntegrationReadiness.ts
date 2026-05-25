@@ -11,9 +11,9 @@ import { WorkflowFileSystem } from "../ports/WorkflowFileSystem.js";
  * (cf. `[DEC-0023-L01]` + `[DEC-0023-M01]`):
  *
  * - `integration-pr` (opção 4) bloqueia a abertura do #26 enquanto a homologação
- *   (gates `R1`–`R6` de `review.md`) não fecha.
+ *   (gates `R1`–`R7` de `review.md`, incl. `R7` public-facing check) não fecha.
  * - `merge-stack` (opção 5) bloqueia o merge atômico enquanto `review.md` não
- *   estiver 100% fechado, incluindo `R7` (merge authorization).
+ *   estiver 100% fechado, incluindo `R8` (merge authorization).
  *
  * Não inventa gates: consome os IDs `R*` declarados no `review.md`. Se o arquivo
  * não existir, ou um ID exigido faltar, trata como bloqueio fail-safe.
@@ -22,8 +22,8 @@ export type ReadinessKind = "integration-pr" | "merge-stack";
 
 /** IDs de gate exigidos por tipo de readiness, lidos do `review.md`. Cravados. */
 export const READINESS_GATES: Record<ReadinessKind, ReadonlyArray<string>> = {
-  "integration-pr": ["R1", "R2", "R3", "R4", "R5", "R6"],
-  "merge-stack": ["R1", "R2", "R3", "R4", "R5", "R6", "R7"],
+  "integration-pr": ["R1", "R2", "R3", "R4", "R5", "R6", "R7"],
+  "merge-stack": ["R1", "R2", "R3", "R4", "R5", "R6", "R7", "R8"],
 };
 
 /** Item de checklist (`- [ ] **id** ...`) de um boundary markdown. */

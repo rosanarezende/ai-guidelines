@@ -6,7 +6,7 @@
 > quando, e o que aconteceu**.
 >
 > **Não é gate para abrir o Integration PR.** É registro operacional.
-> Merge authorization vive em [`review.md`](./review.md) R7, não aqui.
+> Merge authorization vive em [`review.md`](./review.md) R8, não aqui.
 > Migrado da antiga "Fase de Encerramento Pré-Merge" do [`tasks.md`](./tasks.md).
 > Cf. `[DEC-0023-M01]`.
 

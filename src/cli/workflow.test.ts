@@ -198,7 +198,7 @@ function makeFsWithSpecAndTasks(): StubFs {
   );
 }
 
-// review.md com TODOS os gates de readiness (R1–R7) fechados — permite que as
+// review.md com TODOS os gates de readiness (R1–R8) fechados — permite que as
 // opções 4 e 5 passem do gate determinístico (CheckIntegrationReadiness) para o plan.
 const reviewAllClosed = [
   "# Review",
@@ -209,6 +209,7 @@ const reviewAllClosed = [
   "- [x] **R5** ok",
   "- [x] **R6** ok",
   "- [x] **R7** ok",
+  "- [x] **R8** ok",
 ].join("\n");
 
 function makeFsWithSpecReviewClosed(): StubFs {
@@ -357,7 +358,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
       expect(logger.lines.join("\n")).toMatch(/Spec: 0023-workflow-runtime/);
     });
 
-    it("DADO opção 1 com tasks.md 100% [x] + review.md R1–R6 [x] ENTÃO mostra Execution=complete / Integration=PASS / Closure=não iniciado", async () => {
+    it("DADO opção 1 com tasks.md 100% [x] + review.md R1–R7 [x] ENTÃO mostra Execution=complete / Integration=PASS / Closure=não iniciado", async () => {
       const logger = new CollectingLogger();
       const prompts = new FakePrompts(["continue-current", "q"]);
       const fs = new StubFs(
@@ -885,11 +886,13 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
 
     // ─── Gate determinístico de Integration readiness (closing hardening) ───
 
-    it("DADO wizard opção 4 com R1–R6 ABERTOS no review.md ENTÃO bloqueia (não chama createPullRequest), lista itens abertos e copia contexto", async () => {
+    it("DADO wizard opção 4 com gates de homologação abertos (R1, R3) no review.md ENTÃO bloqueia (não chama createPullRequest), lista itens abertos e copia contexto", async () => {
       const logger = new CollectingLogger();
       const clip = new FakeClipboard();
       // Só o select da opção 4 — bloqueio ocorre ANTES de qualquer confirm.
       const prompts = new FakePrompts(["open-integration-pr"]);
+      // R7 (public-facing) fechado; R8 (merge auth) aberto mas NÃO entra no gate
+      // do #26 (só R1–R7). Open de integração = [R1, R3].
       const reviewOpen = [
         "# Review",
         "- [ ] **R1** Stack reviewed/ready.",
@@ -898,7 +901,8 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
         "- [x] **R4** ok",
         "- [x] **R5** ok",
         "- [x] **R6** ok",
-        "- [ ] **R7** Merge authorization.",
+        "- [x] **R7** Public-facing check (não se aplica).",
+        "- [ ] **R8** Merge authorization.",
       ].join("\n");
       const fs = new StubFs(
         new Map([
@@ -929,17 +933,17 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
       expect(code).toBe(1);
       expect(stack.createPullRequest).not.toHaveBeenCalled();
       expect(out).toMatch(/Integration PR bloqueado/);
-      // Lista os itens abertos detectados (R1, R3), não os fechados nem R7 (gate de merge).
+      // Lista os itens abertos detectados (R1, R3), não os fechados nem R8 (gate de merge).
       expect(out).toMatch(/\*\*R1\*\*/);
       expect(out).toMatch(/\*\*R3\*\*/);
       expect(out).not.toMatch(/\*\*R2\*\*/);
-      expect(out).not.toMatch(/\*\*R7\*\*/);
+      expect(out).not.toMatch(/\*\*R8\*\*/);
       // Bloco copiável foi para o clipboard com contexto da spec + linhas abertas.
       expect(clip.copied).toMatch(/Spec: 0023 \/ workflow-runtime/);
       expect(clip.copied).toMatch(/\*\*R1\*\*/);
     });
 
-    it("DADO wizard opção 4 com R1–R6 FECHADOS ENTÃO prossegue (chama createPullRequest)", async () => {
+    it("DADO wizard opção 4 com R1–R7 FECHADOS ENTÃO prossegue (chama createPullRequest)", async () => {
       const logger = new CollectingLogger();
       const prompts = new FakePrompts(["open-integration-pr", true]);
       const fs = new StubFs(
@@ -986,11 +990,11 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
       expect(logger.lines.join("\n")).not.toMatch(/bloqueado/);
     });
 
-    it("DADO wizard opção 5 com R7 (merge authorization) ABERTO ENTÃO bloqueia merge atômico e copia contexto", async () => {
+    it("DADO wizard opção 5 com R8 (merge authorization) ABERTO ENTÃO bloqueia merge atômico e copia contexto", async () => {
       const logger = new CollectingLogger();
       const clip = new FakeClipboard();
       const prompts = new FakePrompts(["merge-stack"]);
-      // R1–R6 fechados (#26 já poderia abrir), mas R7 aberto bloqueia o merge.
+      // R1–R7 fechados (#26 já poderia abrir), mas R8 aberto bloqueia o merge.
       const reviewOpen = [
         "# Review",
         "- [x] **R1** ok",
@@ -999,7 +1003,8 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
         "- [x] **R4** ok",
         "- [x] **R5** ok",
         "- [x] **R6** ok",
-        "- [ ] **R7** Merge authorization explícita (owner).",
+        "- [x] **R7** ok",
+        "- [ ] **R8** Merge authorization explícita (owner).",
       ].join("\n");
       const fs = new StubFs(
         new Map([
@@ -1031,7 +1036,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
       expect(stack.mergePullRequest).not.toHaveBeenCalled();
       expect(stack.listOpenPullRequests).not.toHaveBeenCalled();
       expect(out).toMatch(/Merge atômico bloqueado/);
-      expect(out).toMatch(/\*\*R7\*\*/);
+      expect(out).toMatch(/\*\*R8\*\*/);
       expect(clip.copied).toMatch(/Gate de readiness: merge-stack/);
     });
 

@@ -1426,15 +1426,15 @@ Para preservar enforcement estrutural enquanto a accountability transfere, fast-
 **Decisão:** três boundaries canônicos por spec:
 
 - **`tasks.md` = execution boundary.** Cobre apenas execução/implementação; fecha 100% `[x]` em "execution complete". Não contém gates de homologação nem pós-merge.
-- **`review.md` = integration readiness boundary** (sempre existe). Gates `R1`–`R7`. **R1–R6 `[x]` → o #26 pode ser aberto**; o #26 foca em convergência topológica e conflitos de merge, não em descobrir pendências. **R7 (merge authorization) fecha após a homologação do #26** e é o gate do merge-stack. Migra a antiga Fase 3 + merge auth (ex-1.H.[REVIEW]/4.9).
+- **`review.md` = integration readiness boundary** (sempre existe). Gates `R1`–`R8`. **R1–R7 `[x]` → o #26 pode ser aberto** (R7 = _public-facing check_: README/imagens — gate binário de "não esquecer"; força a **decisão**, não o trabalho de imagem); o #26 foca em convergência topológica e conflitos de merge, não em descobrir pendências. **R8 (merge authorization) fecha após a homologação do #26** e é o gate do merge-stack. Migra a antiga Fase 3 + merge auth (ex-1.H.[REVIEW]/4.9). _(R7 public-facing adicionado no dogfooding final 2026-05-25 II; merge auth renumerado R7→R8.)_
 - **`closure.md` = post-merge ops log** (registro, não gate). Captura merge atômico, release, ajustes públicos, incidentes — "o que, por quem, quando". Migra a antiga Fase 4.
 
-**Consequências no runtime (determinístico, sem IA):** `CheckIntegrationReadiness` lê `review.md`; gate `integration-pr` exige R1–R6, gate `merge-stack` exige R1–R7. Wizard opção 1 exibe os 3 status (execution/integration/closure) a partir do estado declarado, sem recomendação de próxima ação. Sem nova opção no wizard.
+**Consequências no runtime (determinístico, sem IA):** `CheckIntegrationReadiness` lê `review.md`; gate `integration-pr` exige R1–R7, gate `merge-stack` exige R1–R8. Wizard opção 1 exibe os 3 status (execution/integration/closure) a partir do estado declarado, sem recomendação de próxima ação. Sem nova opção no wizard.
 
 **Decisão do Gate Humano:**
 
 - **Status:** [x] Resolvido
-- **Justificativa:** o Integration PR não deve servir para descobrir pendências (cf. princípio cravado no dogfooding 2026-05-24); separar boundaries permite que `tasks.md` feche 100%, que `review.md` seja a SSOT de prontidão, e que closure registre o pós-merge sem virar gate. Sequenciamento R1–R6 (abre #26) / R7 (libera merge) resolve a inversão "merge auth antes de abrir #26". Relaciona `[DEC-0023-E03]` (L2 enforcement), `[DEC-0023-L01]` (comandos transacionais) e `[DEC-0023-K01]` (Integration PR como homologação).
+- **Justificativa:** o Integration PR não deve servir para descobrir pendências (cf. princípio cravado no dogfooding 2026-05-24); separar boundaries permite que `tasks.md` feche 100%, que `review.md` seja a SSOT de prontidão, e que closure registre o pós-merge sem virar gate. Sequenciamento R1–R7 (abre #26) / R8 (libera merge) resolve a inversão "merge auth antes de abrir #26". Relaciona `[DEC-0023-E03]` (L2 enforcement), `[DEC-0023-L01]` (comandos transacionais) e `[DEC-0023-K01]` (Integration PR como homologação).
 - **Data / Owner:** 2026-05-25 / @rosanarezende
 - **Nota:** modelo é ADR-worthy; pode graduar para ADR próprio se adotado por ≥ 2 specs.
 

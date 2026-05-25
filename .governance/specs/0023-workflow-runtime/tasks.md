@@ -215,7 +215,7 @@
 - [x] **1.H.12** **(NOVO — embrião da candidata `governance-dashboard-and-visual-artifacts`; opção 6 cravada formalmente em `[DEC-0023-B07]` durante review do PR #25 / 2026-05-23)** Diretório `.governance/visual-prompts/` criado com README + 2 prompts parametrizáveis (`architecture-end-to-end.prompt.md` sem variáveis; `value-delivered.prompt.md` com `{{context}}`). Wizard CLI ganhou opção 6 ("Gerar prompt visual") que pergunta tipo + contexto, substitui variáveis e imprime o prompt pronto entre delimitadores para copy-paste em ferramenta externa. `renderVisualPrompt()` é função pura testável. Materialização completa do pipeline visual fica para a candidata `governance-dashboard-and-visual-artifacts`. **Governance closure:** B07 reconheceu retroativamente que 1.H.12 ativou o critério de revisão de B06 ("nova opção → DEC própria") e cravou a opção 6 como entrega declarada + reafirmou o gate para próximos casos.
 - [x] **1.H.13** **(NOVO — calibragem editorial pós-auditoria 2026-05-23)** Diretório `docs/editorial/` criado com README explicativo + 4 prompts editoriais específicos do framework: `readme-cover.prompt.md` (capa principal 4:3 que refresca `docs/assets/ai-guidelines-flow.png`) + 3 variantes de capa DX secundária — `readme-dx-flow.prompt.md` (16:9, fluxo de sessão honesto), `readme-dx-capability.prompt.md` (1:1, 5 comandos primários sem inflar), `readme-dx-before-after.prompt.md` (16:9, contraste de organização do contexto, com 2-3 captions alternativas para escolha na hora de gerar). **Gênero distinto de `.governance/visual-prompts/`** (prompts diretos para gerador de imagem, não briefings dirigidos a IA conversacional; não invocáveis via wizard). **Calibragens cravadas** (corrigem artefatos da sessão anterior): (a) kernel correto = `.governance/registry.yml` + governance core, não AGENTS.md (cf. ADR 0018); (b) handoff renderizado como direcional / em construção (pontilhado, badge "em breve"), não como capacidade entregue (cf. ADR 0022 em Proposta); (c) painel ANTES da variante C não mostra `AGENTS.md`/`CLAUDE.md`/`.cursorrules` como caos — são entregas do framework, incoerência semântica. Cross-ref curta adicionada em `.governance/visual-prompts/README.md` apontando para o gênero distinto. **Iteração visual completa nesta sessão (2 rounds de feedback):** v1 gerada e auditada → refinamentos cravados nos 4 prompts (TECHNICAL HINTs explícitos para gerador: dashed outline; handoff a 60-70% opacidade; densidade DEPOIS 40% menor que ANTES; layout não-linear obrigatório no capability) → v2 regenerada e validada. **Imagens adotadas em produção:** `docs/assets/ai-guidelines-flow.png` (capa hero refreshed via `readme-cover.prompt.md`) + `docs/assets/ai-guidelines-dx-flow.png` (capa DX secundária via `readme-dx-flow.prompt.md`, referenciada inline na seção "Workflow Runtime (preview)" do README). Samples das 2 variantes DX não-escolhidas preservadas em `docs/editorial/sample-dx-capability.png` e `docs/editorial/sample-dx-before-after.png` como referência editorial.
 - [x] **1.H.N** Pipeline verde + coverage por arquivo respeitado. **Validação atual:** `yarn test` verde fora do sandbox (child_process real exigido por `workflow-dispatch`); `workflow.ts` hardened para 95.54% lines em teste focado; coverage agregado permanece acima de 85%.
-  > **1.H.[REVIEW] (merge authorization) — MOVIDO para [`review.md`](./review.md) R7.** A aprovação humana de merge ponta-a-ponta não é execução; saiu daqui para que o `tasks.md` seja execution-only e possa fechar 100% `[x]`. O gate determinístico do merge-stack lê `review.md` R7. Cf. `[DEC-0023-M01]`.
+  > **1.H.[REVIEW] (merge authorization) — MOVIDO para [`review.md`](./review.md) R8.** A aprovação humana de merge ponta-a-ponta não é execução; saiu daqui para que o `tasks.md` seja execution-only e possa fechar 100% `[x]`. O gate determinístico do merge-stack lê `review.md` R8. Cf. `[DEC-0023-M01]` + `[DEC-0023-N01]` (renumeração após o novo R7 public-facing).
 - [x] **1.H.[COMMIT]** Commits atômicos por sub-task acima. **Honestidade operacional:** o número "8 commits incrementais" envelheceu; PR #25 fechou com sequência maior de commits atômicos, incluindo hardening pós-review. Não há dívida por não caber no número original.
 
 ### Sub-bloco [1.L] — Operational CLI commands (Integration PR + merge-stack + release-prep) `(deterministic)` — Bloco L (concluído; convergido retroativamente 2026-05-24)
@@ -227,7 +227,7 @@
 - [x] **1.L.3** Wizard reordenado + icons + opções 4 (🔗 Abrir Integration PR) e 5 (🔀 Merge atômico da stack) em `src/cli/workflow.ts`; cabling em `cli/cli/args.mjs` + `cli/app/engine.mjs`.
 - [x] **1.L.4** Comando standalone `release-prep` (tier 3 do modelo transacional do ADR 0024) em `src/cli/release-prep.ts` + tests.
 - [x] **1.L.5** `integration-pr.md` (body source, artifact da spec — sem número de PR no filename, cf. L01) + `printHelp()` atualizado + entry no `CHANGELOG.md`. ADR 0024 amendment + `[DEC-0023-L01]` publicados.
-- [x] **1.L.6** Gate determinístico de Integration readiness (`src/app/workflow/CheckIntegrationReadiness.ts` + tests BDD): opção 🔗 bloqueia até `review.md` R1–R6 `[x]`; opção 🔀 bloqueia até R1–R7 `[x]`. Wizard opção 1 mostra os 3 boundaries (execution/integration/closure). Lookup de estado declarado + output copiável para IA externa; sem IA no runtime. Cf. `[DEC-0023-E03]` (L2 enforcement) + `[DEC-0023-L01]` + `[DEC-0023-M01]`.
+- [x] **1.L.6** Gate determinístico de Integration readiness (`src/app/workflow/CheckIntegrationReadiness.ts` + tests BDD): opção 🔗 bloqueia até `review.md` R1–R7 `[x]`; opção 🔀 bloqueia até R1–R8 `[x]`. Wizard opção 1 mostra os 3 boundaries (execution/integration/closure). Lookup de estado declarado + output copiável para IA externa; sem IA no runtime. Cf. `[DEC-0023-E03]` (L2 enforcement) + `[DEC-0023-L01]` + `[DEC-0023-M01]`.
 - [x] **1.L.N** Pipeline verde com os tests BDD dos 3 use cases + comando release-prep + integração do wizard + gate de readiness.
 - [x] **1.L.[REVIEW]** Homologação do Bloco L converge no próprio PR #26 (dogfooding de fechamento, cf. NEXT.md § "Dogfooding de fechamento — Integration PR"): a maquinaria de Integration PR é homologada pelo Integration PR que ela cria.
 
@@ -258,8 +258,9 @@
 
 > **A antiga "Fase de Review" (3.x) agora vive em [`review.md`](./review.md)** —
 > boundary de prontidão (homologação) do Integration PR (#26). Mapeamento: 3.2→R2,
-> 3.3/3.4→R6, 3.5→R3, 3.6→R4, 3.7/3.8→R1. Merge authorization (ex-1.H.[REVIEW]/4.9)
-> centralizada em `review.md` R7. O `tasks.md` é **execution-only** (cf. `[DEC-0023-M01]`):
+> 3.3/3.4→R6, 3.5→R3, 3.6→R4, 3.7/3.8→R1; **R7 = public-facing check (README/imagens, novo)**;
+> merge authorization (ex-1.H.[REVIEW]/4.9) centralizada em `review.md` R8. O `tasks.md` é
+> **execution-only** (cf. `[DEC-0023-M01]` + `[DEC-0023-N01]`):
 > não contém gates de homologação nem pós-merge, e fecha 100% `[x]` ao fim da execução.
 > O gate determinístico da opção 🔗 lê `review.md`, não este arquivo.
 
@@ -270,7 +271,7 @@
 > **A antiga "Fase de Encerramento Pré-Merge" (4.x) agora vive em
 > [`closure.md`](./closure.md)** (registro operacional pós-merge), exceto: 4.1
 > (migração do NEXT) virou `review.md` R5 — gate de readiness pré-integration; e 4.9
-> (merge authorization) virou `review.md` R7. Cf. `[DEC-0023-M01]`.
+> (merge authorization) virou `review.md` R8. Cf. `[DEC-0023-M01]`.
 
 ---
 
@@ -295,4 +296,4 @@ Fast-track **não se aplica** a esta 0023 — DX/lifecycle/enforcement não são
 | **Gate 1** (Discovery) | Quando research convergir hipóteses + perguntas claras | Owner em comentário no PR1                    | Comentário em PR + status `decision-brief` movido para "Pendente → opções populadas"                                |
 | **Gate 2** (Decision)  | Quando `decision-brief.md` Resolved em todos os pontos | Owner em "Decisão do Gate Humano" de cada DEC | `decision-brief.md` § "✅ Gate fechado" + Resumo de Status                                                          |
 | **Gate 3** (Planning)  | Quando `tasks.md` decomposição autorizada              | Owner em commit dedicado                      | `tasks.md` § "Gate 3 — Planning approval" (anterior) → agora distribuído por sub-bloco [1.F.REVIEW] e [1.E.REVIEW]. |
-| **Gate de Review**     | Pós-execução, antes do merge                           | Owner + reviewers                             | [`review.md`](./review.md) R1–R7 (homologação + merge auth) + PRs convertidos de Draft para Ready                   |
+| **Gate de Review**     | Pós-execução, antes do merge                           | Owner + reviewers                             | [`review.md`](./review.md) R1–R8 (homologação + public-facing + merge auth) + PRs convertidos de Draft para Ready   |

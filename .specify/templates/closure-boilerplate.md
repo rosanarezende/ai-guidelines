@@ -4,7 +4,7 @@
 
 > Registra operações pós-merge: **o que foi feito, por quem, quando, e o que aconteceu**.
 > **Não é gate** para abrir o Integration PR — é registro operacional.
-> Merge authorization vive em `review.md` R7, não aqui. Modelo: cf. `[DEC-0023-M01]`.
+> Merge authorization vive em `review.md` R8, não aqui. Modelo: cf. `[DEC-0023-M01]`.
 
 ## Linha do tempo
 

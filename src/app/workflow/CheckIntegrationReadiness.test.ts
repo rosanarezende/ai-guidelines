@@ -41,9 +41,9 @@ const LOCATION: SpecLocation = {
 };
 const REVIEW_PATH = ".governance/specs/0023-workflow-runtime/review.md";
 
-/** Monta um review.md com os marcadores dados para R1..R7 (` `=aberto, `x`=fechado). */
+/** Monta um review.md com os marcadores dados para R1..R8 (` `=aberto, `x`=fechado). */
 function review(marks: Partial<Record<string, string>>): string {
-  const ids = ["R1", "R2", "R3", "R4", "R5", "R6", "R7"];
+  const ids = ["R1", "R2", "R3", "R4", "R5", "R6", "R7", "R8"];
   return ["# Review", ...ids.map((id) => `- [${marks[id] ?? " "}] **${id}** gate ${id}`)].join(
     "\n"
   );
@@ -85,19 +85,21 @@ describe("parseChecklistGates [BR-WORKFLOW-READINESS]", () => {
 });
 
 describe("CheckIntegrationReadiness [BR-WORKFLOW-READINESS]", () => {
-  describe("integration-pr (opção 4 — lê review.md, exige R1–R6)", () => {
-    it("DADO R1–R6 abertos QUANDO run ENTÃO ready=false com 6 openGates (R7 não exigido)", () => {
+  describe("integration-pr (opção 4 — lê review.md, exige R1–R7)", () => {
+    it("DADO R1–R7 abertos QUANDO run ENTÃO ready=false com 7 openGates (R8 não exigido)", () => {
       const fs = new FakeFs(new Map([[REVIEW_PATH, review({})]]));
       const result = new CheckIntegrationReadiness(fs).run(LOCATION, "integration-pr");
       expect(result.ready).toBe(false);
-      expect(result.openGates.map((g) => g.id)).toEqual(["R1", "R2", "R3", "R4", "R5", "R6"]);
+      expect(result.openGates.map((g) => g.id)).toEqual(["R1", "R2", "R3", "R4", "R5", "R6", "R7"]);
       expect(result.missingFile).toBe(false);
       expect(result.missingGateIds).toEqual([]);
     });
 
-    it("DADO R1–R6 fechados E R7 ainda aberto QUANDO run ENTÃO ready=true (R7 é gate de merge)", () => {
+    it("DADO R1–R7 fechados E R8 ainda aberto QUANDO run ENTÃO ready=true (R8 é gate de merge)", () => {
       const fs = new FakeFs(
-        new Map([[REVIEW_PATH, review({ R1: "x", R2: "x", R3: "x", R4: "x", R5: "x", R6: "x" })]])
+        new Map([
+          [REVIEW_PATH, review({ R1: "x", R2: "x", R3: "x", R4: "x", R5: "x", R6: "x", R7: "x" })],
+        ])
       );
       const result = new CheckIntegrationReadiness(fs).run(LOCATION, "integration-pr");
       expect(result.ready).toBe(true);
@@ -106,7 +108,7 @@ describe("CheckIntegrationReadiness [BR-WORKFLOW-READINESS]", () => {
 
     it("DADO um único gate aberto (R5) QUANDO run ENTÃO ready=false só com ele", () => {
       const fs = new FakeFs(
-        new Map([[REVIEW_PATH, review({ R1: "x", R2: "x", R3: "x", R4: "x", R6: "x" })]])
+        new Map([[REVIEW_PATH, review({ R1: "x", R2: "x", R3: "x", R4: "x", R6: "x", R7: "x" })]])
       );
       const result = new CheckIntegrationReadiness(fs).run(LOCATION, "integration-pr");
       expect(result.ready).toBe(false);
@@ -125,24 +127,29 @@ describe("CheckIntegrationReadiness [BR-WORKFLOW-READINESS]", () => {
       const fs = new FakeFs(new Map([[REVIEW_PATH, "# Review\n- [x] **R1** ok\n- [x] **R2** ok"]]));
       const result = new CheckIntegrationReadiness(fs).run(LOCATION, "integration-pr");
       expect(result.ready).toBe(false);
-      expect(result.missingGateIds).toEqual(["R3", "R4", "R5", "R6"]);
+      expect(result.missingGateIds).toEqual(["R3", "R4", "R5", "R6", "R7"]);
     });
   });
 
-  describe("merge-stack (opção 5 — lê review.md, exige R1–R7)", () => {
-    it("DADO R1–R6 fechados mas R7 aberto QUANDO run ENTÃO ready=false só com R7", () => {
-      const fs = new FakeFs(
-        new Map([[REVIEW_PATH, review({ R1: "x", R2: "x", R3: "x", R4: "x", R5: "x", R6: "x" })]])
-      );
-      const result = new CheckIntegrationReadiness(fs).run(LOCATION, "merge-stack");
-      expect(result.ready).toBe(false);
-      expect(result.openGates.map((g) => g.id)).toEqual(["R7"]);
-    });
-
-    it("DADO R1–R7 todos fechados QUANDO run ENTÃO ready=true", () => {
+  describe("merge-stack (opção 5 — lê review.md, exige R1–R8)", () => {
+    it("DADO R1–R7 fechados mas R8 aberto QUANDO run ENTÃO ready=false só com R8", () => {
       const fs = new FakeFs(
         new Map([
           [REVIEW_PATH, review({ R1: "x", R2: "x", R3: "x", R4: "x", R5: "x", R6: "x", R7: "x" })],
+        ])
+      );
+      const result = new CheckIntegrationReadiness(fs).run(LOCATION, "merge-stack");
+      expect(result.ready).toBe(false);
+      expect(result.openGates.map((g) => g.id)).toEqual(["R8"]);
+    });
+
+    it("DADO R1–R8 todos fechados QUANDO run ENTÃO ready=true", () => {
+      const fs = new FakeFs(
+        new Map([
+          [
+            REVIEW_PATH,
+            review({ R1: "x", R2: "x", R3: "x", R4: "x", R5: "x", R6: "x", R7: "x", R8: "x" }),
+          ],
         ])
       );
       const result = new CheckIntegrationReadiness(fs).run(LOCATION, "merge-stack");
@@ -151,7 +158,16 @@ describe("CheckIntegrationReadiness [BR-WORKFLOW-READINESS]", () => {
   });
 
   it("READINESS_GATES crava os IDs exatos por tipo (sem inventar gates)", () => {
-    expect(READINESS_GATES["integration-pr"]).toEqual(["R1", "R2", "R3", "R4", "R5", "R6"]);
-    expect(READINESS_GATES["merge-stack"]).toEqual(["R1", "R2", "R3", "R4", "R5", "R6", "R7"]);
+    expect(READINESS_GATES["integration-pr"]).toEqual(["R1", "R2", "R3", "R4", "R5", "R6", "R7"]);
+    expect(READINESS_GATES["merge-stack"]).toEqual([
+      "R1",
+      "R2",
+      "R3",
+      "R4",
+      "R5",
+      "R6",
+      "R7",
+      "R8",
+    ]);
   });
 });
