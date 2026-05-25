@@ -56,6 +56,11 @@ import {
   OpenIntegrationPRPlan,
 } from "../app/workflow/OpenIntegrationPR.js";
 import { MergeStack, MergeStackError, MergeStackPlan } from "../app/workflow/MergeStack.js";
+import {
+  CheckIntegrationReadiness,
+  IntegrationReadinessResult,
+  parseChecklistGates,
+} from "../app/workflow/CheckIntegrationReadiness.js";
 import { parseContextTarget } from "./visual-prompts/parseContextTarget.js";
 import { collectLocalContext } from "./visual-prompts/collectLocalContext.js";
 import { renderVisualPrompt } from "./visual-prompts/renderVisualPrompt.js";
@@ -699,19 +704,190 @@ function detectStackForSpec(
   return topoSortStack(specPrs, mainBranch);
 }
 
+/** Primitivos do contexto da spec usados no bloco de readiness (testável puro). */
+export interface ReadinessContextInput {
+  readonly specId: string;
+  readonly specSlug: string;
+  readonly stage: string;
+  readonly gateStatus: string;
+  readonly branch: string | null;
+}
+
+export interface ReadinessRender {
+  /** Diagnóstico completo para o terminal. */
+  readonly lines: ReadonlyArray<string>;
+  /** Bloco pronto para colar numa IA externa (subconjunto das linhas). */
+  readonly clipboardContext: string;
+}
+
+function readinessContextOf(ctx: ResolvedContext, fs: WorkflowFileSystem): ReadinessContextInput {
+  const m = /^(\d{4})-(.+)$/.exec(ctx.location.slug);
+  return {
+    specId: m ? m[1] : ctx.location.slug,
+    specSlug: m ? m[2] : ctx.location.slug,
+    stage: ctx.state.stage,
+    gateStatus: ctx.state.gate.status,
+    branch: fs.currentBranch(),
+  };
+}
+
+/**
+ * Render narrativo determinístico do bloqueio de readiness — **sem IA**.
+ * Produz (a) diagnóstico para o terminal e (b) contexto copiável para uso
+ * intencional numa IA externa. Cf. `[DEC-0023-L01]` + memory
+ * `feedback-lookup-not-coordination` (descrição de estado declarado, não
+ * inferência de fluxo).
+ */
+export function renderIntegrationReadinessBlock(
+  result: IntegrationReadinessResult,
+  ctx: ReadinessContextInput
+): ReadinessRender {
+  const isIntegration = result.kind === "integration-pr";
+  const header = isIntegration
+    ? "🔒 Integration PR bloqueado — homologação (review.md) ainda aberta."
+    : "🔒 Merge atômico bloqueado — homologação/merge authorization (review.md) ainda aberta.";
+  const nextSteps = result.missingFile
+    ? [
+        `Crie o boundary de homologação em ${result.checkedPath} (gates R1–R7).`,
+        "Veja o boilerplate em review-boundary v=1; o #26 só abre com R1–R6 [x].",
+      ]
+    : isIntegration
+      ? [
+          "Feche os gates R1–R6 no review.md (homologação) e marque-os [x].",
+          "Rode `yarn guidelines workflow` de novo — a opção 4 abre quando R1–R6 fecharem.",
+        ]
+      : [
+          "Feche R1–R7 no review.md, incluindo R7 (merge authorization explícita do owner).",
+          "Só então a opção 5 (merge-stack) prossegue.",
+        ];
+
+  const openLines: string[] = [];
+  if (result.missingFile) {
+    openLines.push(`  - review.md não encontrado em ${result.checkedPath}`);
+  } else {
+    for (const gate of result.openGates) openLines.push(`  ${gate.line}`);
+    for (const id of result.missingGateIds) {
+      openLines.push(`  - **${id}** (gate exigido não encontrado no review.md)`);
+    }
+  }
+
+  const clipboardContext = [
+    `Spec: ${ctx.specId} / ${ctx.specSlug}`,
+    `Stage: ${ctx.stage}    Gate: ${ctx.gateStatus}`,
+    `Branch: ${ctx.branch ?? "(HEAD detached / desconhecida)"}`,
+    `Gate de readiness: ${result.kind}`,
+    `Itens abertos em ${result.checkedPath}:`,
+    ...openLines,
+  ].join("\n");
+
+  const lines = [
+    "",
+    header,
+    "",
+    `Itens abertos detectados em ${result.checkedPath}:`,
+    ...openLines,
+    "",
+    "Próximos passos:",
+    ...nextSteps.map((s) => `  - ${s}`),
+    "",
+    "──── Contexto pronto para colar na sua IA externa ────",
+    clipboardContext,
+    "──── FIM ────",
+    "",
+  ];
+
+  return { lines, clipboardContext };
+}
+
+function specBoundaryPath(location: SpecLocation, file: string): string {
+  const prefix = location.source === "governance" ? ".governance/specs" : ".specify/specs";
+  return `${prefix}/${location.slug}/${file}`;
+}
+
+/**
+ * Sumário determinístico dos 3 boundaries da spec (cf. `[DEC-0023-M01]`):
+ * Execution (`tasks.md`) / Integration readiness (`review.md`) / Closure
+ * (`closure.md`). Lookup de estado declarado, sem inferência nem recomendação.
+ */
+export function summarizeBoundaries(
+  fs: WorkflowFileSystem,
+  location: SpecLocation
+): ReadonlyArray<string> {
+  // Execution — tasks.md 100% [x]?
+  const tasksPath = specBoundaryPath(location, "tasks.md");
+  let execution: string;
+  if (!fs.fileExists(tasksPath)) {
+    execution = "tasks.md ausente";
+  } else {
+    const gates = parseChecklistGates(fs.readTextFile(tasksPath));
+    const open = gates.filter((g) => !g.checked).length;
+    execution = gates.length > 0 && open === 0 ? "complete" : `in progress (${open} aberto(s))`;
+  }
+
+  // Integration readiness — review.md R1–R6 (gate de abertura do #26).
+  const ir = new CheckIntegrationReadiness(fs).run(location, "integration-pr");
+  let integration: string;
+  if (ir.missingFile) {
+    integration = "BLOCKED — review.md ausente (crie-o antes do #26)";
+  } else if (ir.ready) {
+    integration = "PASS — pronto para abrir Integration PR (#26)";
+  } else {
+    const n = ir.openGates.length + ir.missingGateIds.length;
+    integration = `BLOCKED (${n} item(ns) aberto(s) em review.md)`;
+  }
+
+  // Closure — closure.md (registro pós-merge).
+  // closure.md usa checkboxes simples (sem `**id**`), distintos dos gates R*;
+  // conta-os direto para refletir o progresso do log pós-merge.
+  const closurePath = specBoundaryPath(location, "closure.md");
+  let closure: string;
+  if (!fs.fileExists(closurePath)) {
+    closure = "não iniciado";
+  } else {
+    const boxes = fs
+      .readTextFile(closurePath)
+      .split("\n")
+      .filter((l) => /^\s*-\s*\[[ xX/]\]/.test(l));
+    const done = boxes.filter((l) => /^\s*-\s*\[[xX]\]/.test(l)).length;
+    if (boxes.length === 0) closure = "registrado (sem checklist)";
+    else closure = done === boxes.length ? "concluído" : `em andamento (${done}/${boxes.length})`;
+  }
+
+  return [
+    "Boundaries da spec:",
+    `  Execution (tasks.md):           ${execution}`,
+    `  Integration readiness (review): ${integration}`,
+    `  Closure ops (closure.md):       ${closure}`,
+  ];
+}
+
 /**
  * Wizard handler para opção 4 (Abrir Integration PR).
  *
- * Flow: detect spec via use case → mostra plan → confirma → executa.
- * Cravado em `[DEC-0023-L01]`. Side-effect: PR aparece em GitHub.
+ * Flow: gate de readiness (Fase 3) → detect spec via use case → mostra plan →
+ * confirma → executa. Cravado em `[DEC-0023-L01]`. Side-effect: PR aparece em GitHub.
  */
 async function runOpenIntegrationPRWizard(opts: {
   logger: Logger;
   prompts: Prompts;
   fs: WorkflowFileSystem;
   stack: StackOps;
+  clipboard: ClipboardWriter;
 }): Promise<number> {
-  const { logger, prompts, fs, stack } = opts;
+  const { logger, prompts, fs, stack, clipboard } = opts;
+
+  // Gate determinístico de Integration readiness (closing hardening): bloqueia
+  // a abertura do Integration PR enquanto a homologação real (3.3–3.6) não fecha.
+  const gateCtx = resolveContext(fs, logger);
+  if (!gateCtx) return 1;
+  const readiness = new CheckIntegrationReadiness(fs).run(gateCtx.location, "integration-pr");
+  if (!readiness.ready) {
+    const render = renderIntegrationReadinessBlock(readiness, readinessContextOf(gateCtx, fs));
+    for (const line of render.lines) logger.info(line);
+    await clipboard.copy(render.clipboardContext);
+    return 1;
+  }
+
   const useCase = new OpenIntegrationPR(fs, stack);
 
   let plan: OpenIntegrationPRPlan;
@@ -773,21 +949,30 @@ async function runMergeStackWizard(opts: {
   prompts: Prompts;
   fs: WorkflowFileSystem;
   stack: StackOps;
+  clipboard: ClipboardWriter;
 }): Promise<number> {
-  const { logger, prompts, fs, stack } = opts;
+  const { logger, prompts, fs, stack, clipboard } = opts;
 
-  // Detectar spec via DetectActiveSpec (per [DEC-0023-I01])
-  const detected = new DetectActiveSpec(fs).run();
-  if (!detected.location) {
-    logger.error(
-      `Não foi possível detectar spec ativa: ${detected.reason ?? "razão desconhecida"}. ` +
-        `Faça checkout de uma branch da stack antes de invocar merge-stack.`
-    );
+  // Detectar spec (per [DEC-0023-I01]) + estado, para o gate de readiness.
+  const ctx = resolveContext(fs, logger);
+  if (!ctx) {
+    logger.error("Faça checkout de uma branch da stack antes de invocar merge-stack.");
     return 1;
   }
-  const dirMatch = /^(\d{4})-(.+)$/.exec(detected.location.slug);
+
+  // Gate determinístico de merge authorization (closing hardening): bloqueia o
+  // merge atômico enquanto os gates humanos 1.H.[REVIEW] e 4.9 não fecham.
+  const readiness = new CheckIntegrationReadiness(fs).run(ctx.location, "merge-stack");
+  if (!readiness.ready) {
+    const render = renderIntegrationReadinessBlock(readiness, readinessContextOf(ctx, fs));
+    for (const line of render.lines) logger.info(line);
+    await clipboard.copy(render.clipboardContext);
+    return 1;
+  }
+
+  const dirMatch = /^(\d{4})-(.+)$/.exec(ctx.location.slug);
   if (!dirMatch) {
-    logger.error(`Slug do diretório "${detected.location.slug}" não segue padrão NNNN-slug.`);
+    logger.error(`Slug do diretório "${ctx.location.slug}" não segue padrão NNNN-slug.`);
     return 1;
   }
   const [, specId] = dirMatch;
@@ -827,7 +1012,7 @@ async function runMergeStackWizard(opts: {
   logger.info("");
   logger.info("🔀 Executar merge atômico da stack");
   logger.info("");
-  logger.info(`  Spec:     ${detected.location.slug} (id ${specId})`);
+  logger.info(`  Spec:     ${ctx.location.slug} (id ${specId})`);
   logger.info(`  Target:   ${plan.mainBranch}`);
   logger.info(`  Strategy: --${plan.mergeStrategy} --delete-branch`);
   logger.info(`  Stack:    ${plan.items.length} PRs em ordem`);
@@ -942,11 +1127,23 @@ export async function runWorkflow(options: RunOptions): Promise<number> {
   }
 
   if (choice.kind === "open-integration-pr") {
-    return runOpenIntegrationPRWizard({ logger, prompts, fs, stack: resolveStackOps(options) });
+    return runOpenIntegrationPRWizard({
+      logger,
+      prompts,
+      fs,
+      stack: resolveStackOps(options),
+      clipboard,
+    });
   }
 
   if (choice.kind === "merge-stack") {
-    return runMergeStackWizard({ logger, prompts, fs, stack: resolveStackOps(options) });
+    return runMergeStackWizard({
+      logger,
+      prompts,
+      fs,
+      stack: resolveStackOps(options),
+      clipboard,
+    });
   }
 
   if (choice.kind === "visual-prompt") {
@@ -1015,6 +1212,12 @@ export async function runWorkflow(options: RunOptions): Promise<number> {
   }
 
   logger.info(assembleBriefing(ctx));
+  // Status dos 3 boundaries (execution/integration/closure) — estado declarado,
+  // sem recomendação de próxima ação (cf. [DEC-0023-M01] + memory lookup-not-coordination).
+  logger.info("");
+  for (const line of summarizeBoundaries(fs, ctx.location)) {
+    logger.info(line);
+  }
   // Branch detectada: índice é sinal secundário; só mostra quando há entries.
   for (const line of renderActiveSpecsIndex(loadIndex(), ctx.location.slug)) {
     logger.info(line);

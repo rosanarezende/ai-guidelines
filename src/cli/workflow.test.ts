@@ -196,6 +196,31 @@ function makeFsWithSpecAndTasks(): StubFs {
   );
 }
 
+// review.md com TODOS os gates de readiness (R1–R7) fechados — permite que as
+// opções 4 e 5 passem do gate determinístico (CheckIntegrationReadiness) para o plan.
+const reviewAllClosed = [
+  "# Review",
+  "- [x] **R1** ok",
+  "- [x] **R2** ok",
+  "- [x] **R3** ok",
+  "- [x] **R4** ok",
+  "- [x] **R5** ok",
+  "- [x] **R6** ok",
+  "- [x] **R7** ok",
+].join("\n");
+
+function makeFsWithSpecReviewClosed(): StubFs {
+  return new StubFs(
+    new Map([
+      [".governance/specs/0023-workflow-runtime/spec.md", sampleSpec],
+      [".governance/specs/0023-workflow-runtime/state.yml", sampleState],
+      [".governance/specs/0023-workflow-runtime/review.md", reviewAllClosed],
+    ]),
+    new Set([".governance/specs/0023-workflow-runtime"]),
+    "feat/spec-0023-workflow-runtime"
+  );
+}
+
 describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
   describe("classifyInput", () => {
     it("DADO input vazio ENTÃO trata como 'briefing'", () => {
@@ -328,6 +353,62 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
       });
       expect(code).toBe(0);
       expect(logger.lines.join("\n")).toMatch(/Spec: 0023-workflow-runtime/);
+    });
+
+    it("DADO opção 1 com tasks.md 100% [x] + review.md R1–R6 [x] ENTÃO mostra Execution=complete / Integration=PASS / Closure=não iniciado", async () => {
+      const logger = new CollectingLogger();
+      const prompts = new FakePrompts(["continue-current", "q"]);
+      const fs = new StubFs(
+        new Map([
+          [".governance/specs/0023-workflow-runtime/spec.md", sampleSpec],
+          [".governance/specs/0023-workflow-runtime/state.yml", sampleState],
+          [".governance/specs/0023-workflow-runtime/tasks.md", "# Tasks\n- [x] **1.1** feito"],
+          [".governance/specs/0023-workflow-runtime/review.md", reviewAllClosed],
+        ]),
+        new Set([".governance/specs/0023-workflow-runtime"]),
+        "feat/spec-0023-workflow-runtime"
+      );
+      const code = await runWorkflow({
+        repoRoot: "/repo",
+        logger,
+        prompts,
+        clipboard: new FakeClipboard(),
+        fs,
+      });
+      const out = logger.lines.join("\n");
+      expect(code).toBe(0);
+      expect(out).toMatch(/Boundaries da spec:/);
+      expect(out).toMatch(/Execution \(tasks\.md\): +complete/);
+      expect(out).toMatch(/Integration readiness \(review\): +PASS/);
+      expect(out).toMatch(/Closure ops \(closure\.md\): +não iniciado/);
+    });
+
+    it("DADO opção 1 com tasks.md aberto + review.md ausente ENTÃO mostra Execution=in progress / Integration=BLOCKED", async () => {
+      const logger = new CollectingLogger();
+      const prompts = new FakePrompts(["continue-current", "q"]);
+      const fs = new StubFs(
+        new Map([
+          [".governance/specs/0023-workflow-runtime/spec.md", sampleSpec],
+          [".governance/specs/0023-workflow-runtime/state.yml", sampleState],
+          [
+            ".governance/specs/0023-workflow-runtime/tasks.md",
+            "# Tasks\n- [x] **1.1** feito\n- [ ] **1.2** pendente",
+          ],
+        ]),
+        new Set([".governance/specs/0023-workflow-runtime"]),
+        "feat/spec-0023-workflow-runtime"
+      );
+      const code = await runWorkflow({
+        repoRoot: "/repo",
+        logger,
+        prompts,
+        clipboard: new FakeClipboard(),
+        fs,
+      });
+      const out = logger.lines.join("\n");
+      expect(code).toBe(0);
+      expect(out).toMatch(/Execution \(tasks\.md\): +in progress \(1 aberto\(s\)\)/);
+      expect(out).toMatch(/Integration readiness \(review\): +BLOCKED — review\.md ausente/);
     });
 
     it("DADO wizard opção 1 + texto livre digitado ENTÃO gera contexto da spec e copia para clipboard", async () => {
@@ -610,6 +691,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
         new Map([
           [".governance/specs/0023-workflow-runtime/spec.md", sampleSpec],
           [".governance/specs/0023-workflow-runtime/state.yml", sampleState],
+          [".governance/specs/0023-workflow-runtime/review.md", reviewAllClosed],
           [
             ".governance/specs/0023-workflow-runtime/integration-pr.md",
             "## Integration PR\n\nHomologação da stack.",
@@ -657,6 +739,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
         new Map([
           [".governance/specs/0023-workflow-runtime/spec.md", sampleSpec],
           [".governance/specs/0023-workflow-runtime/state.yml", sampleState],
+          [".governance/specs/0023-workflow-runtime/review.md", reviewAllClosed],
           [
             ".governance/specs/0023-workflow-runtime/integration-pr.md",
             "## Integration PR\n\nbody",
@@ -688,7 +771,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
     it("DADO wizard opção 5 (merge-stack) + stack detectada via title + confirmação ENTÃO mergeia PRs sequencialmente via StackOps", async () => {
       const logger = new CollectingLogger();
       const prompts = new FakePrompts(["merge-stack", true]);
-      const fs = makeFsWithSpec();
+      const fs = makeFsWithSpecReviewClosed();
       const stackPrs: import("../app/ports/StackOps.js").PullRequestData[] = [
         {
           number: 18,
@@ -750,7 +833,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
     it("DADO wizard opção 5 + negação da confirmação ENTÃO 0 merges executados e loga cancelamento", async () => {
       const logger = new CollectingLogger();
       const prompts = new FakePrompts(["merge-stack", false]);
-      const fs = makeFsWithSpec();
+      const fs = makeFsWithSpecReviewClosed();
       const stack: import("../app/ports/StackOps.js").StackOps = {
         createPullRequest: jest.fn(),
         getPullRequest: jest.fn().mockReturnValue({
@@ -792,6 +875,155 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
       expect(stack.mergePullRequest).not.toHaveBeenCalled();
       expect(stack.editPullRequestBase).not.toHaveBeenCalled();
       expect(logger.lines.join("\n")).toMatch(/Merge cancelado/);
+    });
+
+    // ─── Gate determinístico de Integration readiness (closing hardening) ───
+
+    it("DADO wizard opção 4 com R1–R6 ABERTOS no review.md ENTÃO bloqueia (não chama createPullRequest), lista itens abertos e copia contexto", async () => {
+      const logger = new CollectingLogger();
+      const clip = new FakeClipboard();
+      // Só o select da opção 4 — bloqueio ocorre ANTES de qualquer confirm.
+      const prompts = new FakePrompts(["open-integration-pr"]);
+      const reviewOpen = [
+        "# Review",
+        "- [ ] **R1** Stack reviewed/ready.",
+        "- [x] **R2** ok",
+        "- [ ] **R3** Runtime smoke.",
+        "- [x] **R4** ok",
+        "- [x] **R5** ok",
+        "- [x] **R6** ok",
+        "- [ ] **R7** Merge authorization.",
+      ].join("\n");
+      const fs = new StubFs(
+        new Map([
+          [".governance/specs/0023-workflow-runtime/spec.md", sampleSpec],
+          [".governance/specs/0023-workflow-runtime/state.yml", sampleState],
+          [".governance/specs/0023-workflow-runtime/review.md", reviewOpen],
+        ]),
+        new Set([".governance/specs/0023-workflow-runtime"]),
+        "feat/spec-0023-workflow-runtime"
+      );
+      const stack: import("../app/ports/StackOps.js").StackOps = {
+        createPullRequest: jest.fn(),
+        getPullRequest: jest.fn(),
+        editPullRequestBase: jest.fn(),
+        mergePullRequest: jest.fn(),
+        listOpenPullRequests: jest.fn().mockReturnValue([]),
+      };
+      const code = await runWorkflow({
+        repoRoot: "/repo",
+        logger,
+        prompts,
+        clipboard: clip,
+        fs,
+        stack,
+      });
+      const out = logger.lines.join("\n");
+      expect(code).toBe(1);
+      expect(stack.createPullRequest).not.toHaveBeenCalled();
+      expect(out).toMatch(/Integration PR bloqueado/);
+      // Lista os itens abertos detectados (R1, R3), não os fechados nem R7 (gate de merge).
+      expect(out).toMatch(/\*\*R1\*\*/);
+      expect(out).toMatch(/\*\*R3\*\*/);
+      expect(out).not.toMatch(/\*\*R2\*\*/);
+      expect(out).not.toMatch(/\*\*R7\*\*/);
+      // Bloco copiável foi para o clipboard com contexto da spec + linhas abertas.
+      expect(clip.copied).toMatch(/Spec: 0023 \/ workflow-runtime/);
+      expect(clip.copied).toMatch(/\*\*R1\*\*/);
+    });
+
+    it("DADO wizard opção 4 com R1–R6 FECHADOS ENTÃO prossegue (chama createPullRequest)", async () => {
+      const logger = new CollectingLogger();
+      const prompts = new FakePrompts(["open-integration-pr", true]);
+      const fs = new StubFs(
+        new Map([
+          [".governance/specs/0023-workflow-runtime/spec.md", sampleSpec],
+          [".governance/specs/0023-workflow-runtime/state.yml", sampleState],
+          [".governance/specs/0023-workflow-runtime/review.md", reviewAllClosed],
+          [
+            ".governance/specs/0023-workflow-runtime/integration-pr.md",
+            "## Integration PR\n\nbody",
+          ],
+        ]),
+        new Set([".governance/specs/0023-workflow-runtime"]),
+        "feat/spec-0023-workflow-runtime"
+      );
+      const stack: import("../app/ports/StackOps.js").StackOps = {
+        createPullRequest: jest.fn().mockReturnValue({
+          number: 26,
+          title: "irrelevant",
+          body: "",
+          state: "OPEN" as const,
+          isDraft: true,
+          headRefName: "feat/spec-0023-workflow-runtime",
+          baseRefName: "main",
+          labels: [],
+          url: "https://github.com/test/repo/pull/26",
+        }),
+        getPullRequest: jest.fn().mockReturnValue(null),
+        editPullRequestBase: jest.fn(),
+        mergePullRequest: jest.fn(),
+        listOpenPullRequests: jest.fn().mockReturnValue([]),
+      };
+      const code = await runWorkflow({
+        repoRoot: "/repo",
+        logger,
+        prompts,
+        clipboard: new FakeClipboard(),
+        fs,
+        stack,
+      });
+      expect(code).toBe(0);
+      expect(stack.createPullRequest).toHaveBeenCalledTimes(1);
+      expect(logger.lines.join("\n")).not.toMatch(/bloqueado/);
+    });
+
+    it("DADO wizard opção 5 com R7 (merge authorization) ABERTO ENTÃO bloqueia merge atômico e copia contexto", async () => {
+      const logger = new CollectingLogger();
+      const clip = new FakeClipboard();
+      const prompts = new FakePrompts(["merge-stack"]);
+      // R1–R6 fechados (#26 já poderia abrir), mas R7 aberto bloqueia o merge.
+      const reviewOpen = [
+        "# Review",
+        "- [x] **R1** ok",
+        "- [x] **R2** ok",
+        "- [x] **R3** ok",
+        "- [x] **R4** ok",
+        "- [x] **R5** ok",
+        "- [x] **R6** ok",
+        "- [ ] **R7** Merge authorization explícita (owner).",
+      ].join("\n");
+      const fs = new StubFs(
+        new Map([
+          [".governance/specs/0023-workflow-runtime/spec.md", sampleSpec],
+          [".governance/specs/0023-workflow-runtime/state.yml", sampleState],
+          [".governance/specs/0023-workflow-runtime/review.md", reviewOpen],
+        ]),
+        new Set([".governance/specs/0023-workflow-runtime"]),
+        "feat/spec-0023-workflow-runtime"
+      );
+      const stack: import("../app/ports/StackOps.js").StackOps = {
+        createPullRequest: jest.fn(),
+        getPullRequest: jest.fn(),
+        editPullRequestBase: jest.fn(),
+        mergePullRequest: jest.fn(),
+        listOpenPullRequests: jest.fn().mockReturnValue([]),
+      };
+      const code = await runWorkflow({
+        repoRoot: "/repo",
+        logger,
+        prompts,
+        clipboard: clip,
+        fs,
+        stack,
+      });
+      const out = logger.lines.join("\n");
+      expect(code).toBe(1);
+      expect(stack.mergePullRequest).not.toHaveBeenCalled();
+      expect(stack.listOpenPullRequests).not.toHaveBeenCalled();
+      expect(out).toMatch(/Merge atômico bloqueado/);
+      expect(out).toMatch(/\*\*R7\*\*/);
+      expect(clip.copied).toMatch(/Gate de readiness: merge-stack/);
     });
 
     it("DADO wizard opção 6 + tipo 'a' (arquitetura, sem contexto) E template existe ENTÃO copia briefing para clipboard, emite confirmação no logger E NÃO renderiza o prompt", async () => {
