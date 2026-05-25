@@ -5,7 +5,8 @@ focus:
   - Phase 3 — review/homologation
   - Integration PR — stack convergence
 next:
-  - "Preparar PR #26 como Integration PR de homologação/convergência da stack 0023"
-  - "Validar ponta-a-ponta: yarn ci + smoke manual do workflow runtime"
-  - "Manter merge authorization pendente até owner autorizar merge atômico da stack completa"
-  - "Encerramento pré-merge após homologação: migrar NEXT, formalizar release e status Done"
+  - "Sanitizar tasks.md: registrar sub-bloco [1.L], reconciliar 3.4/3.5/3.6 e alinhar gates humanos"
+  - "Re-publicar estado após reconciliação semântica"
+  - "Executar homologação final da 0023 via PR #26 Integration"
+  - "Manter merge authorization pendente até aprovação humana explícita"
+  - "Executar encerramento pré-merge e formalização da release"

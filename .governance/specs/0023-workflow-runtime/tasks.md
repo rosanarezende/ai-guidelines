@@ -5,7 +5,7 @@
 > Spec: [`./spec.md`](./spec.md)
 > Plan: [`./plan.md`](./plan.md)
 > Decision Brief: [`./decision-brief.md`](./decision-brief.md)
-> Status: In Progress (Stage 2) — PR3-runtime-state-index materializando a primeira implementação real da promessa central; enforcement estrutural permanece na pauta seguinte
+> Status: In Review (Stage D) — implementação completa incl. Bloco L (Operational CLI commands); homologação/convergência via Integration PR #26 pendente. Merge authorization da stack permanece pendente (gates 1.H.[REVIEW] / 4.9). Reconciliação semântica deste arquivo cravada em 2026-05-24 (sub-bloco [1.L] + Fase de Review realinhada).
 
 > **Progress file vivo.** Atualizar a cada degrau concluído. Quando uma decisão mudar, refletir em `plan.md` § "Decisões revisitadas" e ajustar tasks impactadas. Não retroceder status sem registro.
 
@@ -133,7 +133,7 @@
 - [x] **1.D.7** `tasks.md` (este arquivo) reescrito conforme `tasks-mixed-boilerplate.md`.
 - [x] **1.D.N** Pipeline `yarn format && yarn check && yarn test:nova-cli && yarn test` verde (validado antes de pausa para review humano).
 - [x] **1.D.8** Débitos: itens deferidos (L3 hooks, drift detection, runtime stateful complexo) registrados em `NEXT.md` com critério.
-- [ ] **1.D.[REVIEW]** **[MANDATÓRIO]** Owner revisa artifacts do PR2-lifecycle (Bloco D + ADR 0020 + Bloco E + ADR 0021 + tasks.md reescrito + governance-pr-check + workflow YAML + NEXT.md + plan.md + state.yml + CHANGELOG entry) ANTES de commit.
+- [x] **1.D.[REVIEW]** **[MANDATÓRIO]** Owner revisa artifacts do PR2-lifecycle (Bloco D + ADR 0020 + Bloco E + ADR 0021 + tasks.md reescrito + governance-pr-check + workflow YAML + NEXT.md + plan.md + state.yml + CHANGELOG entry) ANTES de commit.
 
   **Contrato operacional explícito de approval (cf. ADR 0021):**
   - **Review humano ≠ autorização implícita de continuação.** Owner ler os artifacts e discutir não equivale a aprovar commit.
@@ -141,11 +141,15 @@
   - **Continuidade conversacional não equivale a aprovação de gate.** A conversa pode seguir refinamentos sem que isso destrave operação.
   - **Esta linha é o handoff operacional explícito** entre review (Gate humano) e execução (commit). Pulá-la recria o pattern de "execução emergindo implícita do fluxo" que ADR 0021 craveia como insuficiente.
 
-- [ ] **1.D.[COMMIT]** Commits atômicos sugeridos (após aprovação humana):
+  **Reconciliação 2026-05-24:** marcado `[x]` retroativamente — o review e a autorização do PR2-lifecycle ocorreram em 2026-05-19/20; os artifacts estão commitados e PR3/PR4/PR5/Bloco L foram construídos por cima na mesma stack. A pendência era de checkbox, não de gate. O contrato acima permanece como registro canônico do handoff review↔execução.
+
+- [x] **1.D.[COMMIT]** Commits atômicos sugeridos (após aprovação humana):
   - `docs(spec-0023): Bloco D — lifecycle metodológico + ADR 0020`
   - `feat(governance-ci): governance-pr-check + GitHub workflow`
   - `docs(spec-0023): Bloco E — enforcement estrutural + ADR 0021`
   - `chore(spec-0023): tasks.md reescrito conforme boilerplate mixed + state/NEXT/plan atualizados + CHANGELOG preview`
+
+  **Reconciliação 2026-05-24:** marcado `[x]` — os commits do PR2-lifecycle foram realizados e integrados na stack. Honestidade operacional: a granularidade/mensagens finais divergiram da lista sugerida (mesma observação de 1.H.[COMMIT]); não há dívida por isso.
 
 ### Sub-bloco [1.E] — Runtime public state index (`active-specs.yml` + publish-state) `(evidence-driven)` — PR3-runtime-state-index (atual; docs/contrato agora, CLI em seguida)
 
@@ -211,8 +215,30 @@
 - [x] **1.H.12** **(NOVO — embrião da candidata `governance-dashboard-and-visual-artifacts`; opção 6 cravada formalmente em `[DEC-0023-B07]` durante review do PR #25 / 2026-05-23)** Diretório `.governance/visual-prompts/` criado com README + 2 prompts parametrizáveis (`architecture-end-to-end.prompt.md` sem variáveis; `value-delivered.prompt.md` com `{{context}}`). Wizard CLI ganhou opção 6 ("Gerar prompt visual") que pergunta tipo + contexto, substitui variáveis e imprime o prompt pronto entre delimitadores para copy-paste em ferramenta externa. `renderVisualPrompt()` é função pura testável. Materialização completa do pipeline visual fica para a candidata `governance-dashboard-and-visual-artifacts`. **Governance closure:** B07 reconheceu retroativamente que 1.H.12 ativou o critério de revisão de B06 ("nova opção → DEC própria") e cravou a opção 6 como entrega declarada + reafirmou o gate para próximos casos.
 - [x] **1.H.13** **(NOVO — calibragem editorial pós-auditoria 2026-05-23)** Diretório `docs/editorial/` criado com README explicativo + 4 prompts editoriais específicos do framework: `readme-cover.prompt.md` (capa principal 4:3 que refresca `docs/assets/ai-guidelines-flow.png`) + 3 variantes de capa DX secundária — `readme-dx-flow.prompt.md` (16:9, fluxo de sessão honesto), `readme-dx-capability.prompt.md` (1:1, 5 comandos primários sem inflar), `readme-dx-before-after.prompt.md` (16:9, contraste de organização do contexto, com 2-3 captions alternativas para escolha na hora de gerar). **Gênero distinto de `.governance/visual-prompts/`** (prompts diretos para gerador de imagem, não briefings dirigidos a IA conversacional; não invocáveis via wizard). **Calibragens cravadas** (corrigem artefatos da sessão anterior): (a) kernel correto = `.governance/registry.yml` + governance core, não AGENTS.md (cf. ADR 0018); (b) handoff renderizado como direcional / em construção (pontilhado, badge "em breve"), não como capacidade entregue (cf. ADR 0022 em Proposta); (c) painel ANTES da variante C não mostra `AGENTS.md`/`CLAUDE.md`/`.cursorrules` como caos — são entregas do framework, incoerência semântica. Cross-ref curta adicionada em `.governance/visual-prompts/README.md` apontando para o gênero distinto. **Iteração visual completa nesta sessão (2 rounds de feedback):** v1 gerada e auditada → refinamentos cravados nos 4 prompts (TECHNICAL HINTs explícitos para gerador: dashed outline; handoff a 60-70% opacidade; densidade DEPOIS 40% menor que ANTES; layout não-linear obrigatório no capability) → v2 regenerada e validada. **Imagens adotadas em produção:** `docs/assets/ai-guidelines-flow.png` (capa hero refreshed via `readme-cover.prompt.md`) + `docs/assets/ai-guidelines-dx-flow.png` (capa DX secundária via `readme-dx-flow.prompt.md`, referenciada inline na seção "Workflow Runtime (preview)" do README). Samples das 2 variantes DX não-escolhidas preservadas em `docs/editorial/sample-dx-capability.png` e `docs/editorial/sample-dx-before-after.png` como referência editorial.
 - [x] **1.H.N** Pipeline verde + coverage por arquivo respeitado. **Validação atual:** `yarn test` verde fora do sandbox (child_process real exigido por `workflow-dispatch`); `workflow.ts` hardened para 95.54% lines em teste focado; coverage agregado permanece acima de 85%.
-- [ ] **1.H.[REVIEW]** **[MANDATÓRIO]** Aprovação humana para merge ponta-a-ponta (PR1 + PR2-lifecycle + PR3 + PR4 + PR5 + PR6). **Não marcar como concluído ainda:** PR #25 está Ready for review, mas merge authorization da stack completa permanece pendente per ADR 0024.
+- [ ] **1.H.[REVIEW]** **[MANDATÓRIO]** Aprovação humana para merge ponta-a-ponta (PR1 + PR2-lifecycle + PR3 + PR4 + PR5 + PR6 + Bloco L). **Não marcar como concluído ainda:** PR #25 está Ready for review, mas merge authorization da stack completa permanece pendente per ADR 0024. **Mesmo gate semântico que 4.9** (merge authorization) — mantidos os dois por design: este é a _condição_ na Fase 1; 4.9 é o _ato_ na Fase de Encerramento. Fecham juntos.
 - [x] **1.H.[COMMIT]** Commits atômicos por sub-task acima. **Honestidade operacional:** o número "8 commits incrementais" envelheceu; PR #25 fechou com sequência maior de commits atômicos, incluindo hardening pós-review. Não há dívida por não caber no número original.
+
+### Sub-bloco [1.L] — Operational CLI commands (Integration PR + merge-stack + release-prep) `(deterministic)` — Bloco L (concluído; convergido retroativamente 2026-05-24)
+
+> Origem: [`[DEC-0023-L01]`](./decision-brief.md) + ADR 0024 amendment (tier model de execução transacional). **Sub-bloco gravado em reconciliação 2026-05-24:** o Bloco L foi autorizado via `DEC-0023-L01` e executado nos commits abaixo _antes_ de ganhar boundary em `tasks.md` — registrá-lo aqui restaura a integridade de `[DEC-0023-D01]` (tasks.md como boundary de autorização) que o `executionAuthorized` derivado pressupõe. Letra `L` (não `I`) preserva o vínculo direto Bloco L ↔ `DEC-0023-L01` ↔ tasks.md; coerência semântica acima de sequência estética.
+
+- [x] **1.L.1** Ports `src/app/ports/StackOps.ts` + `src/app/ports/GitOps.ts` + extensão `src/app/ports/Prompts.ts`; adapters `src/infrastructure/git/GhCli.ts` + `src/infrastructure/git/NodeGit.ts` + extensão `src/infrastructure/io/InquirerPrompts.ts`.
+- [x] **1.L.2** Use cases `OpenIntegrationPR` + `MergeStack` + `ReleasePrep` (`src/app/workflow/`) com tests BDD pt-BR.
+- [x] **1.L.3** Wizard reordenado + icons + opções 4 (🔗 Abrir Integration PR) e 5 (🔀 Merge atômico da stack) em `src/cli/workflow.ts`; cabling em `cli/cli/args.mjs` + `cli/app/engine.mjs`.
+- [x] **1.L.4** Comando standalone `release-prep` (tier 3 do modelo transacional do ADR 0024) em `src/cli/release-prep.ts` + tests.
+- [x] **1.L.5** `integration-pr.md` (body source, artifact da spec — sem número de PR no filename, cf. L01) + `printHelp()` atualizado + entry no `CHANGELOG.md`. ADR 0024 amendment + `[DEC-0023-L01]` publicados.
+- [x] **1.L.N** Pipeline verde com os tests BDD dos 3 use cases + comando release-prep + integração do wizard.
+- [x] **1.L.[REVIEW]** Homologação do Bloco L converge no próprio PR #26 (dogfooding de fechamento, cf. NEXT.md § "Dogfooding de fechamento — Integration PR"): a maquinaria de Integration PR é homologada pelo Integration PR que ela cria.
+
+  **Reconciliação 2026-05-24:** este item não representa gate independente. A homologação operacional do Bloco L foi explicitamente incorporada ao Integration PR (#26) via `DEC-0023-L01` e ADR 0024 amendment. Os gates humanos reais permanecem 1.H.[REVIEW] e 4.9.
+
+- [x] **1.L.[COMMIT]** Sequência de commits do Bloco L:
+  - `f7913a1 docs(spec-0023): ADR 0024 amendment + [DEC-0023-L01] — Operational CLI commands`
+  - `4d37f91 feat(workflow): StackOps + GitOps ports + GhCli/NodeGit adapters`
+  - `652da9d feat(workflow): OpenIntegrationPR + MergeStack + ReleasePrep use cases + tests BDD`
+  - `21dd78e feat(cli): wizard reordenado + icons + opções 4/5 (Integration PR + merge-stack)`
+  - `29aa84d feat(cli): release-prep standalone command (tier 3, Bloco L)`
+  - `993dcb9 docs(spec-0023): rename integration-pr.md + printHelp + CHANGELOG`
 
 ---
 
@@ -221,9 +247,9 @@
 - [x] **3.1** `spec.md` header: status → `In Review`.
 - [x] **3.2** Pipeline canônico: `yarn ci` verde (= `install --immutable` + `validate` + `test:smoke`). **Validação atual:** 2026-05-24, `yarn ci` passou fora do sandbox com 587 testes Jest/TS verdes, 294 testes Node verdes e 4 smoke tests verdes.
 - [ ] **3.3** Critérios de aceite de `spec.md` confirmados ponto-a-ponto.
-- [ ] **3.4** `decision-brief.md` Blocos A/B/C/D/E todos `Resolved` e refletidos em `plan.md`.
-- [ ] **3.5** Validar em ambiente real: rodar `ai-guidelines workflow` e `continue` em `examples/minimal-spec/` (consumer dogfooding).
-- [ ] **3.6** PRs (1, 2-lifecycle, 3-runtime-state-index, 4, 5, 6) atualizados com descrições finais.
+- [ ] **3.4** `decision-brief.md` Blocos **A–L** todos `Resolved` (F05 `Deferred` com critério estrutural vinculado a `handoff-as-first-class`) e refletidos em `plan.md`. **Nota:** a tabela de status do decision-brief já confirma A/B/C/D/E/F/G/I/J/K/L fechados; este item resta como cross-check do reflexo em `plan.md`.
+- [ ] **3.5** Validar em ambiente real: smoke manual do runtime na **própria 0023** — `ai-guidelines workflow` (wizard) + `continue 0023` (briefing + próxima ação) — como dogfooding canônico. **`examples/minimal-spec/` permanece `Deferred` via 1.H.4** (vinculado a `boilerplate-system-modernization`) e **não é pré-condição** deste item; a redação anterior, dependente desse diretório, era inválida após o deferimento.
+- [ ] **3.6** PRs da stack (#18, #19, #22, #23, #24, #25 e #26 Integration) com descrições finais atualizadas e coerentes ponta-a-ponta, incluindo os commits do Bloco L refletidos nos PRs correspondentes.
 - [/] **3.7** **[MANDATÓRIO]** Gate de Review Humano — homologação técnica formal de cada PR da stack. PR #25 já recebeu Gate de Review humano para Ready; falta homologação/convergência final da stack via Integration PR antes de merge authorization.
 - [ ] **3.8** Correções demandadas em loops de review até aprovação.
 - [/] **3.9** **Integration PR (PR #26)** — criar PR agregador de homologação/convergência final da stack 0023. Escopo: validar ponta-a-ponta, consolidar evidência, separar "Ready for review" de "autorizado para merge atômico". Não cria comportamento novo.
@@ -240,7 +266,7 @@
 - [ ] **4.6** `CHANGELOG.md`: entry `1.1.0-preview.0` formalizada como release (data + version bump).
 - [ ] **4.7** **[MANDATÓRIO]** Confirmar uma-sessão-uma-spec.
 - [ ] **4.8** `[COMMIT]` `chore(spec-0023): encerramento pré-merge — research migrado, NEXT removido, status final`.
-- [ ] **4.9** **[MANDATÓRIO]** Aprovação humana explícita para merge da stack completa. **Não fazer merge autonomamente.**
+- [ ] **4.9** **[MANDATÓRIO]** Aprovação humana explícita para merge da stack completa. **Não fazer merge autonomamente.** **Mesmo gate semântico que 1.H.[REVIEW]** — este é o ato de encerramento; aquele é a condição declarada na Fase 1.
 
 ---
 

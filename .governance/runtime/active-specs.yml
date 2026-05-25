@@ -2,12 +2,10 @@ version: 1
 active_specs:
   - id: "0023"
     slug: workflow-runtime
-    title: Workflow Runtime
     branch: feat/spec-0023-dx-thinking
-    base_branch: feat/spec-0023-enforcement-runtime
     stage: closing
     status: active
     spec_path: .governance/specs/0023-workflow-runtime
     source_state_path: .governance/specs/0023-workflow-runtime/state.yml
-    updated_at: 2026-05-24T12:40:11.405-03:00
+    updated_at: 2026-05-24T22:30:37.454-03:00
     updated_by: "@rosanarezende"
