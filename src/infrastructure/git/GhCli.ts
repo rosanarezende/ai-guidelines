@@ -46,8 +46,10 @@ export class GhCli implements StackOps {
       "create",
       "--title",
       input.title,
-      "--body",
-      input.body,
+      // Body via stdin (`--body-file -`) em vez de `--body <string>`: bodies
+      // grandes (ex.: Integration PR) podem estourar o limite de argv do SO.
+      "--body-file",
+      "-",
       "--base",
       input.base,
       "--head",
@@ -58,7 +60,7 @@ export class GhCli implements StackOps {
       for (const label of input.labels) args.push("--label", label);
     }
 
-    const url = this.exec(args).trim();
+    const url = this.exec(args, { input: input.body }).trim();
     const numberMatch = /\/pull\/(\d+)\/?$/.exec(url);
     if (!numberMatch) {
       throw new Error(`Não foi possível extrair número do PR a partir do output: "${url}"`);
@@ -110,12 +112,15 @@ export class GhCli implements StackOps {
     return raw.map(parsePullRequestData);
   }
 
-  private exec(args: ReadonlyArray<string>): string {
+  private exec(args: ReadonlyArray<string>, opts: { input?: string } = {}): string {
     return execFileSync("gh", [...args], {
       cwd: this.cwd,
       encoding: "utf-8",
       timeout: GH_TIMEOUT_MS,
-      stdio: ["ignore", "pipe", "pipe"],
+      // Quando há `input` (ex.: body via `--body-file -`), stdin precisa ser
+      // pipe para o execFileSync escrever; caso contrário ignoramos stdin.
+      stdio: opts.input !== undefined ? ["pipe", "pipe", "pipe"] : ["ignore", "pipe", "pipe"],
+      ...(opts.input !== undefined ? { input: opts.input } : {}),
     });
   }
 }

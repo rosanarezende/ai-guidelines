@@ -58,9 +58,11 @@ class FakePrompts implements Prompts {
     }
     return choice.value;
   }
-  async input(_options: InputOptions): Promise<string> {
+  async input(options: InputOptions): Promise<string> {
     const answer = this.answers[this.idx++];
-    if (answer === undefined) return "";
+    if (answer === undefined) {
+      throw new Error(`FakePrompts: input sem resposta restante (message="${options.message}")`);
+    }
     if (typeof answer !== "string") {
       throw new Error(`FakePrompts: input esperava string mas recebeu ${typeof answer}`);
     }

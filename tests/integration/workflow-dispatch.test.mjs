@@ -17,10 +17,13 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import os from "node:os";
 import { promisify } from "node:util";
+import { fileURLToPath } from "node:url";
 import { describe, it } from "node:test";
 
 const execFileAsync = promisify(execFile);
-const REPO_ROOT = path.resolve(new URL("../..", import.meta.url).pathname);
+// fileURLToPath (não `.pathname`) para path de filesystem robusto cross-OS:
+// `.pathname` quebra em Windows (`/C:/...`) e com caracteres escapados (`%20`).
+const REPO_ROOT = fileURLToPath(new URL("../..", import.meta.url));
 const CLI_BIN = path.join(REPO_ROOT, "cli", "ai-guidelines-cli.mjs");
 
 /**

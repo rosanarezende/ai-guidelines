@@ -11,7 +11,11 @@ import { GitOps } from "../../app/ports/GitOps.js";
  * Cravado em `[DEC-0023-L01]`. Cf. ADR 0024 seção "Operational CLI commands".
  */
 
+// Operações locais (rev-parse, status, add, commit, tag) são rápidas.
 const GIT_TIMEOUT_MS = 15_000;
+// Operações de rede (push, ls-remote) podem exceder 15s em redes lentas / 2FA /
+// VPN; usam um teto maior para não falhar indevidamente durante o release-prep.
+const GIT_NETWORK_TIMEOUT_MS = 120_000;
 
 export class NodeGit implements GitOps {
   constructor(private readonly cwd: string) {}
@@ -54,7 +58,7 @@ export class NodeGit implements GitOps {
     if (refs.length === 0) {
       throw new Error("NodeGit.push: refs array vazio — especifique o que pushar.");
     }
-    this.exec(["push", remote, ...refs]);
+    this.exec(["push", remote, ...refs], GIT_NETWORK_TIMEOUT_MS);
   }
 
   listTags(): ReadonlyArray<string> {
@@ -68,7 +72,7 @@ export class NodeGit implements GitOps {
 
   listRemoteTags(remote: string): ReadonlyArray<string> {
     try {
-      const out = this.exec(["ls-remote", "--tags", remote]).trim();
+      const out = this.exec(["ls-remote", "--tags", remote], GIT_NETWORK_TIMEOUT_MS).trim();
       if (out === "") return [];
       // Output: "<sha>\trefs/tags/<name>" ou "<sha>\trefs/tags/<name>^{}" (peeled).
       // Normalizamos para nomes únicos (sem peel suffix).
@@ -87,11 +91,11 @@ export class NodeGit implements GitOps {
     }
   }
 
-  private exec(args: ReadonlyArray<string>): string {
+  private exec(args: ReadonlyArray<string>, timeoutMs: number = GIT_TIMEOUT_MS): string {
     return execFileSync("git", [...args], {
       cwd: this.cwd,
       encoding: "utf-8",
-      timeout: GIT_TIMEOUT_MS,
+      timeout: timeoutMs,
       stdio: ["ignore", "pipe", "pipe"],
     });
   }

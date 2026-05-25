@@ -83,7 +83,7 @@ export function printHelp() {
   console.log(`ai-guidelines CLI
 
 Uso:
-  yarn guidelines <init|adopt|providers|update|check-budget|workflow|continue> [opcoes]
+  yarn guidelines <init|adopt|providers|update|check-budget|workflow|continue|release-prep> [opcoes]
 
 ═══ COMANDOS DE BOOTSTRAP / DISTRIBUIÇÃO ═══
 
