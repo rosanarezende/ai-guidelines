@@ -58,17 +58,17 @@ Resultado esperado quando esta spec encerrar:
 
 ## ✅ Critérios de Aceite (alto nível)
 
-- [ ] `ai-guidelines workflow` na branch desta spec mostra briefing contextual coerente com `state.yml` + arquivos da pasta.
-- [ ] `ai-guidelines continue` imprime briefing + próxima ação registrada em `state.next` (sem REPL; **não executa ações** — cf. § Comandos no header).
-- [ ] `state.yml` validado por schema (4 chaves; sem campos opcionais explodidos).
-- [ ] Double-lookup funciona: spec resolvida via `.governance/specs/` quando presente, via `.specify/specs/` quando não.
-- [ ] Detecção de spec ativa por branch name funciona para `feat/spec-NNNN-*`; fallback documentado.
-- [ ] Texto livre no REPL gera contexto da spec (≤ 30 linhas) e copia para clipboard quando possível; fallback stdout.
-- [ ] Nenhuma lógica nova de domínio em `cli/`; bridge no entrypoint é o único toque.
-- [ ] BDD pt-BR (DADO/QUANDO/ENTÃO) cobrindo cada use case novo; coverage ≥ 85%.
-- [ ] ADR 0019 publicado (`.governance/` root + bridge).
-- [ ] Pipeline `yarn format ; yarn validate` verde. _Pressupõe scripts reorganizados em main via [PR #21 — `fix/scripts-reorg-main`](https://github.com/rosanarezende/ai-guidelines/pull/21); até #21 mergear, validar com a cadeia legada (`yarn check ; yarn test ; yarn test:nova-cli ; yarn living-docs:check`)._
-- [ ] Dogfooding: a 0023 atravessou Stage B → Stage C (implementação) usando o próprio `workflow` para retomar contexto entre commits.
+- [x] `ai-guidelines workflow` na branch desta spec mostra briefing contextual coerente com `state.yml` + arquivos da pasta.
+- [x] `ai-guidelines continue` imprime briefing + próxima ação registrada em `state.next` (sem REPL; **não executa ações** — cf. § Comandos no header).
+- [x] `state.yml` validado por schema (4 chaves; sem campos opcionais explodidos).
+- [x] Double-lookup funciona: spec resolvida via `.governance/specs/` quando presente, via `.specify/specs/` quando não.
+- [x] Detecção de spec ativa por branch name funciona para `feat/spec-NNNN-*`; fallback documentado.
+- [x] Texto livre no REPL gera contexto da spec (≤ 30 linhas) e copia para clipboard quando possível; fallback stdout.
+- [x] Nenhuma lógica nova de domínio em `cli/`; bridge no entrypoint é o único toque.
+- [x] BDD pt-BR (DADO/QUANDO/ENTÃO) cobrindo cada use case novo; coverage ≥ 85%.
+- [x] ADR 0019 publicado (`.governance/` root + bridge).
+- [x] Pipeline `yarn format ; yarn validate` verde. _Pressupõe scripts reorganizados em main via [PR #21 — `fix/scripts-reorg-main`](https://github.com/rosanarezende/ai-guidelines/pull/21); até #21 mergear, validar com a cadeia legada (`yarn check ; yarn test ; yarn test:nova-cli ; yarn living-docs:check`)._
+- [x] Dogfooding: a 0023 atravessou Stage B → Stage C (implementação) usando o próprio `workflow` para retomar contexto entre commits.
 
 ---
 

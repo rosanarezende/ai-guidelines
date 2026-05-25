@@ -5,8 +5,7 @@ focus:
   - Phase 3 — review/homologation
   - Integration PR — stack convergence
 next:
-  - "Sanitizar tasks.md: registrar sub-bloco [1.L], reconciliar 3.4/3.5/3.6 e alinhar gates humanos"
-  - "Re-publicar estado após reconciliação semântica"
-  - "Executar homologação final da 0023 via PR #26 Integration"
-  - "Manter merge authorization pendente até aprovação humana explícita"
-  - "Executar encerramento pré-merge e formalização da release"
+  - "Fase de Review: fechar gates R1–R6 do review.md (R2 verde; R3/R4/R6 em curso; R1 aguarda aprovação humana)"
+  - "Abrir PR #26 (Integration) somente quando review.md R1–R6 fecharem"
+  - "Manter merge authorization (review.md R7) pendente até autorização textual"
+  - "Encerramento pós-merge via closure.md"
