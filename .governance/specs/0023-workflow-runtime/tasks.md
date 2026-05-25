@@ -258,9 +258,10 @@
 
 > **A antiga "Fase de Review" (3.x) agora vive em [`review.md`](./review.md)** —
 > boundary de prontidão (homologação) do Integration PR (#26). Mapeamento: 3.2→R2,
-> 3.3/3.4→R6, 3.5→R3, 3.6→R4, 3.7/3.8→R1; **R7 = public-facing check (README/imagens, novo)**;
-> merge authorization (ex-1.H.[REVIEW]/4.9) centralizada em `review.md` R8. O `tasks.md` é
-> **execution-only** (cf. `[DEC-0023-M01]` + `[DEC-0023-N01]`):
+> 3.2→R1, 3.5→R2, 4.1→R3, **R4 = public-facing check (README/imagens, novo)**, 3.3/3.4→R5,
+> 3.6→R6, 3.7/3.8→R7; merge authorization (ex-1.H.[REVIEW]/4.9) centralizada em `review.md` R8.
+> Ordem reflete a cronologia (técnico → conteúdo → bodies → sign-off humano R7 → merge R8).
+> O `tasks.md` é **execution-only** (cf. `[DEC-0023-M01]` + `[DEC-0023-N01]`):
 > não contém gates de homologação nem pós-merge, e fecha 100% `[x]` ao fim da execução.
 > O gate determinístico da opção 🔗 lê `review.md`, não este arquivo.
 

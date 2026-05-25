@@ -895,13 +895,13 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
       // do #26 (só R1–R7). Open de integração = [R1, R3].
       const reviewOpen = [
         "# Review",
-        "- [ ] **R1** Stack reviewed/ready.",
+        "- [ ] **R1** CI canônico verde.",
         "- [x] **R2** ok",
-        "- [ ] **R3** Runtime smoke.",
+        "- [ ] **R3** NEXT → backlog.",
         "- [x] **R4** ok",
         "- [x] **R5** ok",
         "- [x] **R6** ok",
-        "- [x] **R7** Public-facing check (não se aplica).",
+        "- [x] **R7** Stack reviewed/ready (não se aplica).",
         "- [ ] **R8** Merge authorization.",
       ].join("\n");
       const fs = new StubFs(

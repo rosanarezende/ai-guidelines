@@ -17,16 +17,16 @@
 
 ## Gates de prontidão (pré-integration)
 
-- [ ] **R1** — Stack reviewed/ready: todos os PRs da stack (exceto o Integration PR) em **Ready for review (GitHub)** + **aprovação humana explícita** — ≥1 review aprovado **ou** comentário textual do owner aprovando (exceção owner-only aceita e registrada). Evidência: link + status por PR.
-- [ ] **R2** — CI canônico verde na branch da stack (suíte completa + smoke relevante). Evidência: link da run (nomeie o(s) workflow(s) canônico(s) do seu repo).
-- [ ] **R3** — Runtime/feature smoke (manual). Evidência: logs curtos.
+- [ ] **R1** — CI canônico verde na branch da stack (suíte completa + smoke relevante). Evidência: link da run (nomeie o(s) workflow(s) canônico(s) do seu repo).
+- [ ] **R2** — Runtime/feature smoke (manual). Evidência: logs curtos.
   - o runtime/feature foi exercitado manualmente e o comportamento confere;
   - opção 🔗 bloqueia com `review.md` aberto (R1–R7);
   - opção 🔀 bloqueia sem merge authorization (R8).
-- [ ] **R4** — PR bodies coerentes ponta-a-ponta: descrições finais atualizadas, sem drift. Evidência: 1 linha por PR.
-- [ ] **R5** — NEXT migrado para `roadmap/backlog.md` **antes do merge**; a **deleção** do `NEXT.md` acontece no closure (`closure.md`), não aqui. Evidência: commit que migra.
-- [ ] **R6** — Critérios de aceite do `spec.md` confirmados ponto-a-ponto; decisões do `decision-brief.md` (se houver) `Resolved` e refletidas no `plan.md`; `tasks.md` (execution) 100% `[x]`; wording de fechamento do `spec.md` pronto para virar `Done` após merge. **R6 não exige executar o fechamento** — exige que o texto/paths estejam prontos e revisados; a execução acontece no closure.
-- [ ] **R7** — Public-facing check (README + imagens): decidir conscientemente se precisam de atualização. **Binário** — marque `[x]` em **um** dos casos: (a) **não precisa** (registrar "não se aplica" + 1 linha de porquê); ou (b) **precisa → feito** (gerar/atualizar via wizard 🎨 `Gerar prompt visual` + `docs/editorial/`, antes do Integration PR). Não exige trabalho de imagem — exige a **decisão** (gate de "não esquecer"). Execução de fato registrada no `closure.md`. Evidência: a linha marcada + link (se aplicável).
+- [ ] **R3** — NEXT migrado para `roadmap/backlog.md` **antes do merge**; a **deleção** do `NEXT.md` acontece no closure (`closure.md`), não aqui. Evidência: commit que migra.
+- [ ] **R4** — Public-facing check (README + imagens): decidir conscientemente se precisam de atualização. **Binário** — marque `[x]` em **um** dos casos: (a) **não precisa** (registrar "não se aplica" + 1 linha de porquê); ou (b) **precisa → feito** (gerar/atualizar via wizard 🎨 `Gerar prompt visual` + `docs/editorial/`, antes do Integration PR). Não exige trabalho de imagem — exige a **decisão** (gate de "não esquecer"). Execução de fato registrada no `closure.md`. Evidência: a linha marcada + link (se aplicável).
+- [ ] **R5** — Critérios de aceite do `spec.md` confirmados ponto-a-ponto; decisões do `decision-brief.md` (se houver) `Resolved` e refletidas no `plan.md`; `tasks.md` (execution) 100% `[x]`; wording de fechamento do `spec.md` pronto para virar `Done` após merge. **R5 não exige executar o fechamento** — exige que o texto/paths estejam prontos e revisados; a execução acontece no closure.
+- [ ] **R6** — PR bodies coerentes ponta-a-ponta: descrições finais atualizadas, sem drift; descrevem o estado **já convergido** (R3–R5). Evidência: 1 linha por PR.
+- [ ] **R7** — Stack reviewed/ready + aprovação humana: todos os PRs da stack (exceto o Integration PR) em **Ready for review (GitHub)** + **aprovação humana explícita** — ≥1 review aprovado **ou** comentário textual do owner aprovando (exceção owner-only aceita e registrada). **Sign-off holístico, após R1–R6.** Evidência: link + status por PR.
 
 ## Merge authorization (ato humano — gate do merge-stack)
 
