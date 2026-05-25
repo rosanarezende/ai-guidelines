@@ -17,12 +17,16 @@
 
 ## Gates de prontidão (pré-integration)
 
-- [ ] **R1** — Stack reviewed/ready: PRs #18, #19, #22, #23, #24, #25 em Ready for review com Gate de Review humano. Evidência: link + status (Ready/checks) por PR. _(ex-3.7/3.8)_
-- [ ] **R2** — CI canônico verde: `yarn ci` verde na branch da stack (= `install --immutable` + `validate` + `test:smoke`). Evidência: resumo/link da run. _(ex-3.2)_
-- [ ] **R3** — Runtime smoke (manual, TTY): wizard abre e renderiza briefing da 0023; opção 🔗 bloqueia com `review.md` aberto; opção 🔀 bloqueia sem merge authorization; `release-prep --dry-run` coerente com o CHANGELOG (versão alvo + dist-tag). Evidência: logs curtos do terminal. _(ex-3.5)_
+- [ ] **R1** — Stack reviewed/ready: PRs #18, #19, #22, #23, #24, #25 em **Ready for review (GitHub)** + **aprovação humana explícita** — ≥1 review aprovado **ou** comentário textual do owner aprovando (exceção owner-only aceita e registrada). Evidência: link + status por PR. _(ex-3.7/3.8)_
+- [ ] **R2** — CI canônico verde: `yarn ci` verde na branch da stack (= `install --immutable` + `validate` + `test:smoke`); equivale aos workflows **Repo Validation** + **Smoke Tests (multi-OS)** + **Governance PR Check** no GitHub Actions. Evidência: link da run desses workflows. _(ex-3.2)_
+- [ ] **R3** — Runtime smoke (manual, TTY). Evidência: logs curtos do terminal. _(ex-3.5)_
+  - wizard abre e renderiza briefing da 0023;
+  - opção 🔗 bloqueia com `review.md` aberto (R1–R6);
+  - opção 🔀 bloqueia sem merge authorization (R7);
+  - `release-prep --dry-run` coerente com o CHANGELOG (versão alvo + dist-tag).
 - [ ] **R4** — PR bodies coerentes ponta-a-ponta: descrições finais coerentes (especialmente #25); drift "PR6" não existe; Bloco L refletido. Evidência: 1 linha por PR. _(ex-3.6)_
-- [ ] **R5** — NEXT migrado para backlog: débitos e vigilâncias relevantes migrados para `.governance/specs/roadmap/backlog.md`; `NEXT.md` da 0023 fica vazio/deletável no encerramento. Evidência: commit que migra. _(ex-4.1)_
-- [ ] **R6** — Critérios de aceite + spec pronta para Done: critérios de aceite do `spec.md` confirmados ponto-a-ponto; Blocos A–L do `decision-brief.md` `Resolved` (F05 `Deferred` com critério) e refletidos em `plan.md`; `tasks.md` (execution) 100% `[x]`; wording de fechamento do `spec.md` pronto para virar `Done` após merge. Evidência: links/trechos. _(ex-3.3/3.4 + wording de 4.4)_
+- [ ] **R5** — NEXT migrado para backlog: débitos e vigilâncias relevantes migrados para `.governance/specs/roadmap/backlog.md` **antes do merge**; a **deleção** do `NEXT.md` acontece no closure (`closure.md`), não aqui. Evidência: commit que migra. _(ex-4.1)_
+- [ ] **R6** — Critérios de aceite + spec pronta para Done: critérios de aceite do `spec.md` confirmados ponto-a-ponto; Blocos A–L do `decision-brief.md` `Resolved` (F05 `Deferred` com critério) e refletidos em `plan.md`; `tasks.md` (execution) 100% `[x]`; wording de fechamento do `spec.md` pronto para virar `Done` após merge. **R6 não exige executar o fechamento** — exige que o texto/paths estejam prontos e revisados; a execução (status `Done`, etc.) acontece no closure. Evidência: links/trechos. _(ex-3.3/3.4 + wording de 4.4)_
 
 ## Merge authorization (ato humano — gate do merge-stack)
 

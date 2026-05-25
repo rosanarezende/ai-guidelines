@@ -17,12 +17,15 @@
 
 ## Gates de prontidão (pré-integration)
 
-- [ ] **R1** — Stack reviewed/ready: todos os PRs da stack (exceto o Integration PR) em Ready for review com Gate de Review humano. Evidência: link + status por PR.
-- [ ] **R2** — CI canônico verde na branch da stack (suíte completa + smoke relevante). Evidência: resumo/link da run.
-- [ ] **R3** — Runtime/feature smoke (manual): exercitado manualmente e o comportamento confere. Evidência: logs curtos.
+- [ ] **R1** — Stack reviewed/ready: todos os PRs da stack (exceto o Integration PR) em **Ready for review (GitHub)** + **aprovação humana explícita** — ≥1 review aprovado **ou** comentário textual do owner aprovando (exceção owner-only aceita e registrada). Evidência: link + status por PR.
+- [ ] **R2** — CI canônico verde na branch da stack (suíte completa + smoke relevante). Evidência: link da run (nomeie o(s) workflow(s) canônico(s) do seu repo).
+- [ ] **R3** — Runtime/feature smoke (manual). Evidência: logs curtos.
+  - o runtime/feature foi exercitado manualmente e o comportamento confere;
+  - opção 🔗 bloqueia com `review.md` aberto (R1–R6);
+  - opção 🔀 bloqueia sem merge authorization (R7).
 - [ ] **R4** — PR bodies coerentes ponta-a-ponta: descrições finais atualizadas, sem drift. Evidência: 1 linha por PR.
-- [ ] **R5** — NEXT migrado para `roadmap/backlog.md`; `NEXT.md` fica vazio/deletável no encerramento. Evidência: commit que migra.
-- [ ] **R6** — Critérios de aceite do `spec.md` confirmados ponto-a-ponto; decisões do `decision-brief.md` (se houver) `Resolved` e refletidas no `plan.md`; `tasks.md` (execution) 100% `[x]`; wording de fechamento do `spec.md` pronto para virar `Done` após merge.
+- [ ] **R5** — NEXT migrado para `roadmap/backlog.md` **antes do merge**; a **deleção** do `NEXT.md` acontece no closure (`closure.md`), não aqui. Evidência: commit que migra.
+- [ ] **R6** — Critérios de aceite do `spec.md` confirmados ponto-a-ponto; decisões do `decision-brief.md` (se houver) `Resolved` e refletidas no `plan.md`; `tasks.md` (execution) 100% `[x]`; wording de fechamento do `spec.md` pronto para virar `Done` após merge. **R6 não exige executar o fechamento** — exige que o texto/paths estejam prontos e revisados; a execução acontece no closure.
 
 ## Merge authorization (ato humano — gate do merge-stack)
 
