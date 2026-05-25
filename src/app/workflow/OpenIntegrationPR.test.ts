@@ -38,6 +38,9 @@ class FakeStackOps implements StackOps {
   listOpenPullRequests(): ReadonlyArray<PullRequestData> {
     return [];
   }
+  listReviewComments() {
+    return [];
+  }
 }
 
 class FakeFs implements WorkflowFileSystem {

@@ -241,6 +241,17 @@
   - `29aa84d feat(cli): release-prep standalone command (tier 3, Bloco L)`
   - `993dcb9 docs(spec-0023): rename integration-pr.md + printHelp + CHANGELOG`
 
+### Sub-bloco [1.N] — Comando de triagem de review (`review`) `(deterministic)` — Bloco N (dogfooding-born no fechamento, 2026-05-25)
+
+> Origem: [`[DEC-0023-N01]`](./decision-brief.md). Nasceu da dor de tratar 2 reviews do Copilot no PR #25 na mão. **Boundary ADR 0018:** o comando reúne + estrutura (determinístico); análise/classificação/resposta é trabalho do agente, não do runtime.
+
+- [x] **1.N.1** Porta `StackOps.listReviewComments` + tipo `ReviewComment`; adapter `GhCli` via `gh api repos/{owner}/{repo}/pulls/N/comments --paginate`.
+- [x] **1.N.2** Use case `TriageReview` (agrupa sem-resposta × respondidos por thread) + tests BDD pt-BR.
+- [x] **1.N.3** CLI standalone `src/cli/review.ts` (`review [<pr>]`, read-only, render copiável) + cabling em `cli/cli/args.mjs` (positional `<pr>` + help) + `cli/app/engine.mjs` (`dispatchReview`). Detecção de PR pela branch atual ou número explícito.
+- [x] **1.N.4** Fakes de `StackOps` (MergeStack/OpenIntegrationPR/workflow) e o segundo Copilot review (#25, 2026-05-25) tratados na mesma esteira.
+- [x] **1.N.N** Pipeline verde (654 testes) + `Uso:`/help atualizados.
+- [x] **1.N.[COMMIT]** `feat(workflow): comando review — triagem determinística de review comments (Bloco N)`.
+
 ---
 
 ## Fase de Review → migrada para `review.md`

@@ -38,6 +38,9 @@ class FakeStackOps implements StackOps {
   listOpenPullRequests(): ReadonlyArray<PullRequestData> {
     return [...this.prs.values()].filter((p) => p.state === "OPEN");
   }
+  listReviewComments() {
+    return [];
+  }
 }
 
 function pr(

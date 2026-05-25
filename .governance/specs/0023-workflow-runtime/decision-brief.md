@@ -5,7 +5,7 @@
 > Spec: [`./spec.md`](./spec.md)
 > Plan: [`./plan.md`](./plan.md) (criado em 2026-05-19 conforme `[DEC-0023-B05]`).
 > Tasks: tasklist da sessão de implementação (PR1).
-> Status agregado: **Resolved** — Blocos A/B/C/D/E/F/G/I/J/K/L/M todos fechados (F01–F04 Resolved em PR5 S5 / 2026-05-22; F05 Deferred com critério estrutural vinculado à abertura de `handoff-as-first-class`; B07 + I01 cravados durante review do PR #25 / 2026-05-23; J01 + ADR 0024 cravados na Frente #3 do hardening / 2026-05-23–24; K01 cravado no fechamento operacional / 2026-05-24; L01 + ADR 0024 amendment cravados na Frente C+D do hardening / 2026-05-24 II; G05 cravado no dogfooding de fechamento / 2026-05-24 II — `active-specs.yml` permanece minimal canonical projection, não coordination source-of-truth; M01 cravado no dogfooding final / 2026-05-25 — modelo de 3 boundaries tasks/review/closure).
+> Status agregado: **Resolved** — Blocos A/B/C/D/E/F/G/I/J/K/L/M todos fechados (F01–F04 Resolved em PR5 S5 / 2026-05-22; F05 Deferred com critério estrutural vinculado à abertura de `handoff-as-first-class`; B07 + I01 cravados durante review do PR #25 / 2026-05-23; J01 + ADR 0024 cravados na Frente #3 do hardening / 2026-05-23–24; K01 cravado no fechamento operacional / 2026-05-24; L01 + ADR 0024 amendment cravados na Frente C+D do hardening / 2026-05-24 II; G05 cravado no dogfooding de fechamento / 2026-05-24 II — `active-specs.yml` permanece minimal canonical projection, não coordination source-of-truth; M01 cravado no dogfooding final / 2026-05-25 — modelo de 3 boundaries tasks/review/closure; N01 cravado no dogfooding final / 2026-05-25 II — comando `review` de triagem determinística).
 > Última atualização: 2026-05-24 (II) — Frente C+D do hardening do PR #25: `[DEC-0023-L01]` (Bloco L — Operational CLI commands) + ADR 0024 amendment (extensão do modelo de 3 estados com tier model de execução transacional).
 
 > **Artefato canônico do gate humano entre Stage 1 (research) e Stage 2 (design + implementação).** Para esta spec, a Stage 1 é a investigação documentada na pasta legacy `.specify/specs/0023-governance-workflow-discovery-model/` (research.md + anexos). Este brief materializa o gate Stage A → Stage B com 4 decisões cravadas em sessão de design 2026-05-19.
@@ -53,6 +53,7 @@
 | `[DEC-0023-K01]` | K     | Resolved |
 | `[DEC-0023-L01]` | L     | Resolved |
 | `[DEC-0023-M01]` | M     | Resolved |
+| `[DEC-0023-N01]` | N     | Resolved |
 
 **Status agregado:** Resolved — Blocos A/B/C/D/E/F/G/I/J/K todos fechados. F01–F04 Resolved (tríade arquitetural B+B+A+A cravada em PR5 S5 / 2026-05-22); F05 Deferred com critério estrutural observável (revisita obrigatória na abertura da candidata `handoff-as-first-class`); J01 cravado na Frente #3 do hardening do PR #25 (2026-05-23/24) com ADR 0024 materializando o modelo de 3 estados Draft/Ready/Mergeable; K01 crava Integration PR como PR de homologação/convergência final antes da autorização de merge atômico.
 
@@ -1436,6 +1437,31 @@ Para preservar enforcement estrutural enquanto a accountability transfere, fast-
 - **Justificativa:** o Integration PR não deve servir para descobrir pendências (cf. princípio cravado no dogfooding 2026-05-24); separar boundaries permite que `tasks.md` feche 100%, que `review.md` seja a SSOT de prontidão, e que closure registre o pós-merge sem virar gate. Sequenciamento R1–R6 (abre #26) / R7 (libera merge) resolve a inversão "merge auth antes de abrir #26". Relaciona `[DEC-0023-E03]` (L2 enforcement), `[DEC-0023-L01]` (comandos transacionais) e `[DEC-0023-K01]` (Integration PR como homologação).
 - **Data / Owner:** 2026-05-25 / @rosanarezende
 - **Nota:** modelo é ADR-worthy; pode graduar para ADR próprio se adotado por ≥ 2 specs.
+
+---
+
+## Bloco N — Comando de triagem de review (`review`)
+
+### [DEC-0023-N01] Comando `review` — triagem determinística de review comments; análise/resposta ficam no agente
+
+> **Origem:** dor de processo no dogfooding do próprio fechamento da 0023 (PR #25, 2026-05-25). Tratar dois reviews do Copilot exigiu buscar comentários via `gh api` na mão, estruturar, analisar, pedir direção, aplicar e responder. A **metade determinística** (buscar + estruturar) é repetível e merece comando.
+
+**Pergunta:** como dar suporte de runtime ao fluxo de triagem de review sem violar ADR 0018 (sem LLM no runtime)?
+
+**Decisão:** comando standalone `review [<pr>]` (tier-1 inspeção, **read-only**) que busca + estrutura os review comments de um PR (agrupa **sem-resposta × respondidos** por `arquivo:linha`) e produz um bloco copiável para a IA externa. **NÃO analisa, NÃO classifica, NÃO responde.** Boundary cravado:
+
+| Etapa                                                        | Dono                   |
+| :----------------------------------------------------------- | :--------------------- |
+| buscar + estruturar comentários                              | **runtime** (`review`) |
+| analisar / classificar / pedir direção / aplicar / responder | **agente (canal)**     |
+
+**Implementação:** porta `StackOps.listReviewComments` + adapter `GhCli` (via `gh api .../pulls/N/comments --paginate`); use case `TriageReview`; CLI `src/cli/review.ts` + cabling em `cli/cli/args.mjs` + `cli/app/engine.mjs`; detecção de PR pela branch atual ou `<pr>` explícito. Lookup-only (cf. memory `feedback-lookup-not-coordination`).
+
+**Decisão do Gate Humano:**
+
+- **Status:** [x] Resolvido
+- **Justificativa:** materializa o aprendizado do dogfooding (mesmo padrão do Bloco L); preserva ADR 0018 (runtime só reúne estado declarado); standalone tier-1 read-only, sem nova opção de wizard (respeita a vigilância de wizard-scaling).
+- **Data / Owner:** 2026-05-25 / @rosanarezende
 
 ---
 

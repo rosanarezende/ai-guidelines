@@ -83,7 +83,7 @@ export function printHelp() {
   console.log(`ai-guidelines CLI
 
 Uso:
-  yarn guidelines <init|adopt|providers|update|check-budget|workflow|continue|release-prep> [opcoes]
+  yarn guidelines <init|adopt|providers|update|check-budget|workflow|continue|release-prep|review> [opcoes]
 
 ═══ COMANDOS DE BOOTSTRAP / DISTRIBUIÇÃO ═══
 
@@ -153,6 +153,16 @@ Uso:
                  Cf. [DEC-0023-L01].
                  Ex.: yarn guidelines release-prep --dry-run
                       yarn guidelines release-prep --version 1.1.0-preview.0
+
+  review         [<pr>] [--pr <n>]
+                 Tier 1 inspeção (read-only). Reúne e estrutura os review
+                 comments inline de um PR para triagem (sem resposta ×
+                 respondidos) + bloco copiável para colar na IA externa.
+                 Detecta o PR pela branch atual se o número for omitido.
+                 NÃO analisa/responde — isso é trabalho do agente, não do
+                 runtime (ADR 0018). Cf. [DEC-0023-N01].
+                 Ex.: yarn guidelines review
+                      yarn guidelines review 26
 
 ═══ OPÇÕES GERAIS ═══
 
@@ -227,6 +237,11 @@ export function parseArgs(argv) {
       }
       if (command === "workflow" && index === 0 && options.subcommand === undefined) {
         options.subcommand = token;
+        continue;
+      }
+      //   3. `review [<pr>]` — 1 positional (número do PR a triar).
+      if (command === "review" && index === 0 && options.pr === undefined) {
+        options.pr = token;
         continue;
       }
       throw new Error(`Argumento inesperado: ${token}`);

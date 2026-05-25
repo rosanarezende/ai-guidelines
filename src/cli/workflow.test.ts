@@ -716,6 +716,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
         }),
         getPullRequest: jest.fn().mockReturnValue(null),
         editPullRequestBase: jest.fn(),
+        listReviewComments: jest.fn().mockReturnValue([]),
         mergePullRequest: jest.fn(),
         listOpenPullRequests: jest.fn().mockReturnValue([]),
       };
@@ -754,6 +755,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
         createPullRequest: jest.fn(),
         getPullRequest: jest.fn(),
         editPullRequestBase: jest.fn(),
+        listReviewComments: jest.fn().mockReturnValue([]),
         mergePullRequest: jest.fn(),
         listOpenPullRequests: jest.fn().mockReturnValue([]),
       };
@@ -802,6 +804,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
         createPullRequest: jest.fn(),
         getPullRequest: jest.fn((n: number) => stackPrs.find((p) => p.number === n) ?? null),
         editPullRequestBase: jest.fn(),
+        listReviewComments: jest.fn().mockReturnValue([]),
         mergePullRequest: jest.fn(),
         listOpenPullRequests: jest.fn().mockReturnValue(stackPrs),
       };
@@ -850,6 +853,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
           url: "https://github.com/test/repo/pull/18",
         }),
         editPullRequestBase: jest.fn(),
+        listReviewComments: jest.fn().mockReturnValue([]),
         mergePullRequest: jest.fn(),
         listOpenPullRequests: jest.fn().mockReturnValue([
           {
@@ -909,6 +913,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
         createPullRequest: jest.fn(),
         getPullRequest: jest.fn(),
         editPullRequestBase: jest.fn(),
+        listReviewComments: jest.fn().mockReturnValue([]),
         mergePullRequest: jest.fn(),
         listOpenPullRequests: jest.fn().mockReturnValue([]),
       };
@@ -964,6 +969,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
         }),
         getPullRequest: jest.fn().mockReturnValue(null),
         editPullRequestBase: jest.fn(),
+        listReviewComments: jest.fn().mockReturnValue([]),
         mergePullRequest: jest.fn(),
         listOpenPullRequests: jest.fn().mockReturnValue([]),
       };
@@ -1008,6 +1014,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
         createPullRequest: jest.fn(),
         getPullRequest: jest.fn(),
         editPullRequestBase: jest.fn(),
+        listReviewComments: jest.fn().mockReturnValue([]),
         mergePullRequest: jest.fn(),
         listOpenPullRequests: jest.fn().mockReturnValue([]),
       };

@@ -379,6 +379,32 @@ async function dispatchReleasePrep(options = {}) {
   if (code !== 0) process.exitCode = code;
 }
 
+async function dispatchReview(options = {}) {
+  // Bridge para `review` (tier 1 inspeção, read-only) cravado em
+  // `[DEC-0023-N01]`. Mesmo padrão dos demais dispatchers: importa dist/,
+  // delega para mod.main. Boundary ADR 0018 — só reúne + estrutura.
+  let mod;
+  try {
+    mod = await import("../../dist/cli/review.js");
+  } catch (err) {
+    const reason = err && err.message ? err.message : String(err);
+    console.error(
+      "Erro: review indisponível em dist/. Execute `yarn build` antes (fail-fast intencional)."
+    );
+    console.error(`Detalhe: ${reason}`);
+    process.exitCode = 1;
+    return;
+  }
+  const opts = {
+    repoRoot: process.cwd(),
+    reviewArgs: {
+      ...(options.pr !== undefined ? { pr: Number(options.pr) } : {}),
+    },
+  };
+  const code = await mod.main(["review"], opts);
+  if (code !== 0) process.exitCode = code;
+}
+
 export async function main(argv = process.argv.slice(2)) {
   try {
     const { command, options } = parseArgs(argv);
@@ -395,6 +421,11 @@ export async function main(argv = process.argv.slice(2)) {
 
     if (command === "release-prep") {
       await dispatchReleasePrep(options);
+      return;
+    }
+
+    if (command === "review") {
+      await dispatchReview(options);
       return;
     }
 

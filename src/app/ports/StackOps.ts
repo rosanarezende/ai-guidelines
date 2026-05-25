@@ -48,6 +48,23 @@ export interface MergePullRequestInput {
   readonly deleteBranch?: boolean;
 }
 
+/**
+ * Comentário inline de review de um PR. Read-only — consumido pelo comando
+ * `review` (triagem). Cf. `[DEC-0023-N01]`.
+ */
+export interface ReviewComment {
+  readonly id: number;
+  readonly author: string;
+  readonly path: string;
+  /** Linha no diff (`line`); cai para `original_line` se a linha mudou; `null` se outdated. */
+  readonly line: number | null;
+  readonly body: string;
+  /** id do comentário-raiz quando este é uma reply; `null` se é raiz de thread. */
+  readonly inReplyToId: number | null;
+  readonly url: string;
+  readonly createdAt: string;
+}
+
 export interface StackOps {
   /**
    * Cria PR e retorna seus dados (incluindo número atribuído).
@@ -79,4 +96,11 @@ export interface StackOps {
    * governance-first via convenção de title (`[🛠️Nn]`, `[🧾🔒]`, etc.).
    */
   listOpenPullRequests(): ReadonlyArray<PullRequestData>;
+
+  /**
+   * Lista os review comments inline de um PR (`gh api .../pulls/N/comments`).
+   * **Read-only** — consumido pelo comando `review` (triagem determinística).
+   * Retorna `[]` se o PR não tem comentários. Cf. `[DEC-0023-N01]`.
+   */
+  listReviewComments(prNumber: number): ReadonlyArray<ReviewComment>;
 }

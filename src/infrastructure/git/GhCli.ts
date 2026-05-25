@@ -4,6 +4,7 @@ import {
   MergePullRequestInput,
   PullRequestData,
   PullRequestState,
+  ReviewComment,
   StackOps,
 } from "../../app/ports/StackOps.js";
 
@@ -112,6 +113,23 @@ export class GhCli implements StackOps {
     return raw.map(parsePullRequestData);
   }
 
+  listReviewComments(prNumber: number): ReadonlyArray<ReviewComment> {
+    // `gh api ... --paginate` substitui {owner}/{repo} pelo repo corrente e
+    // concatena as páginas num único array JSON. Read-only.
+    const json = this.exec([
+      "api",
+      `repos/{owner}/{repo}/pulls/${prNumber}/comments`,
+      "--paginate",
+    ]).trim();
+    const raw = JSON.parse(json === "" ? "[]" : json);
+    if (!Array.isArray(raw)) {
+      throw new Error(
+        `gh api pulls/${prNumber}/comments devolveu formato inesperado: ${typeof raw}`
+      );
+    }
+    return raw.map(parseReviewComment);
+  }
+
   private exec(args: ReadonlyArray<string>, opts: { input?: string } = {}): string {
     return execFileSync("gh", [...args], {
       cwd: this.cwd,
@@ -123,6 +141,35 @@ export class GhCli implements StackOps {
       ...(opts.input !== undefined ? { input: opts.input } : {}),
     });
   }
+}
+
+/**
+ * Normaliza um review comment do `gh api .../pulls/N/comments` para o shape
+ * canônico de `ReviewComment` (read-only; usado pela triagem do comando `review`).
+ */
+function parseReviewComment(raw: unknown): ReviewComment {
+  if (typeof raw !== "object" || raw === null) {
+    throw new Error(`review comment inválido: esperava objeto, recebeu ${typeof raw}`);
+  }
+  const r = raw as Record<string, unknown>;
+  const user =
+    typeof r.user === "object" && r.user !== null ? (r.user as Record<string, unknown>) : {};
+  const line =
+    typeof r.line === "number"
+      ? r.line
+      : typeof r.original_line === "number"
+        ? r.original_line
+        : null;
+  return {
+    id: Number(r.id),
+    author: String(user.login ?? "unknown"),
+    path: String(r.path ?? ""),
+    line,
+    body: String(r.body ?? ""),
+    inReplyToId: typeof r.in_reply_to_id === "number" ? r.in_reply_to_id : null,
+    url: String(r.html_url ?? ""),
+    createdAt: String(r.created_at ?? ""),
+  };
 }
 
 /**
