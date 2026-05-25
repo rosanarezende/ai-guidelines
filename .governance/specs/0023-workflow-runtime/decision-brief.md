@@ -5,7 +5,7 @@
 > Spec: [`./spec.md`](./spec.md)
 > Plan: [`./plan.md`](./plan.md) (criado em 2026-05-19 conforme `[DEC-0023-B05]`).
 > Tasks: tasklist da sessão de implementação (PR1).
-> Status agregado: **Resolved** — Blocos A/B/C/D/E/F/G/I/J/K/L todos fechados (F01–F04 Resolved em PR5 S5 / 2026-05-22; F05 Deferred com critério estrutural vinculado à abertura de `handoff-as-first-class`; B07 + I01 cravados durante review do PR #25 / 2026-05-23; J01 + ADR 0024 cravados na Frente #3 do hardening / 2026-05-23–24; K01 cravado no fechamento operacional / 2026-05-24; L01 + ADR 0024 amendment cravados na Frente C+D do hardening / 2026-05-24 II).
+> Status agregado: **Resolved** — Blocos A/B/C/D/E/F/G/I/J/K/L todos fechados (F01–F04 Resolved em PR5 S5 / 2026-05-22; F05 Deferred com critério estrutural vinculado à abertura de `handoff-as-first-class`; B07 + I01 cravados durante review do PR #25 / 2026-05-23; J01 + ADR 0024 cravados na Frente #3 do hardening / 2026-05-23–24; K01 cravado no fechamento operacional / 2026-05-24; L01 + ADR 0024 amendment cravados na Frente C+D do hardening / 2026-05-24 II; G05 cravado no dogfooding de fechamento / 2026-05-24 II — `active-specs.yml` permanece minimal canonical projection, não coordination source-of-truth).
 > Última atualização: 2026-05-24 (II) — Frente C+D do hardening do PR #25: `[DEC-0023-L01]` (Bloco L — Operational CLI commands) + ADR 0024 amendment (extensão do modelo de 3 estados com tier model de execução transacional).
 
 > **Artefato canônico do gate humano entre Stage 1 (research) e Stage 2 (design + implementação).** Para esta spec, a Stage 1 é a investigação documentada na pasta legacy `.specify/specs/0023-governance-workflow-discovery-model/` (research.md + anexos). Este brief materializa o gate Stage A → Stage B com 4 decisões cravadas em sessão de design 2026-05-19.
@@ -47,6 +47,7 @@
 | `[DEC-0023-G02]` | G     | Resolved |
 | `[DEC-0023-G03]` | G     | Resolved |
 | `[DEC-0023-G04]` | G     | Resolved |
+| `[DEC-0023-G05]` | G     | Resolved |
 | `[DEC-0023-I01]` | I     | Resolved |
 | `[DEC-0023-J01]` | J     | Resolved |
 | `[DEC-0023-K01]` | K     | Resolved |
@@ -736,6 +737,34 @@
 - **Source-of-truth reverso:** humanos/agentes podem editar `active-specs.yml` manualmente e tratá-lo como verdade. Mitigação: contrato e docs deixam explícito que a verdade segue no `state.yml` interno + artifacts normativos da branch.
 - **Operational spam:** PRs pequenos de state em `main` desde a primeira iteração podem aumentar ruído. Mitigação: rejeitado por `[DEC-0023-G03]`; manual first.
 - **False confidence:** agente pode achar que o índice público basta e pular leitura da branch da spec. Mitigação: runtime futuro deve deixar explícito que o índice serve para descoberta/navegação, não para substituir briefing normativo.
+
+---
+
+### [DEC-0023-G05] Escopo do active-specs.yml: minimal canonical projection, não coordination source-of-truth
+
+> **Origem:** dogfooding de fechamento da 0023 (2026-05-24, reconciliação pré-Integration PR). Ao reconciliar o `tasks.md`, `publish-state` dropou `title` e `base_branch` do `active-specs.yml` — campos injetados manualmente, ausentes do `state.yml` 4-chave. A queda levantou a pergunta arquitetural: o índice virou source-of-truth operacional durante o crescimento do runtime (Bloco L)?
+
+**Pergunta:** O `active-specs.yml` continua oficialmente uma projeção mínima navegável, ou a 0023 formaliza um "operational coordination projection" que persiste topologia de stack (`base_branch`) e metadados (`title`)?
+
+**Contexto:**
+
+- Auditoria de consumo (2026-05-24): nenhum campo além do tier canônico (`id`, `slug`, `branch`, `stage`, `status`, `spec_path`) é lido por lógica de runtime. `renderActiveSpecsIndex` usa `slug`/`branch`/`stage`/`status`; `MergeStack` lê `pr.baseRefName` **via `gh`**, não do índice (detecção de stack é responsabilidade do CLI via PR numbers); `title` é redundante com `slug` (`AssembleBriefing` faz `title ?? slug`).
+- `title`/`base_branch` são **opcionais no schema desde a origem** (`activeSpecsSerializer`); `publish-state` só os escreve a partir de input explícito (manual-first, `[DEC-0023-G03]`).
+- Promover `base_branch` a campo persistido exigiria `publish-state` **inferir topologia de stack** — violando silenciosamente `[DEC-0023-G03]`.
+
+**Decisão:**
+
+- **O `active-specs.yml` permanece minimal canonical projection.** O tier canônico (`id`, `slug`, `branch`, `stage`, `status`, `spec_path`) é o único consumido operacionalmente e o único garantido por `publish-state`.
+- **`title`/`base_branch` permanecem opcionais e NÃO são auto-derivados/persistidos.** Sua queda na republicação é correta — convergência à forma canônica, não regressão. Não há lógica de "preserve on republish": campo não-canônico ausente é o estado esperado.
+- **Source-of-truth operacional da stack é `gh`/git**, consultado pelos use cases (Bloco L) em runtime — não o índice. O índice é projeção de descoberta/navegação, não coordenador de stack.
+
+**Gatilho de revisita → "coordination source-of-truth":** se um use case passar a consumir campos do índice **para tomada de decisão operacional** (e não apenas renderização/display) — ex.: `MergeStack` lendo `base_branch` do índice para ordenar a stack — reabrir como DEC própria. Esse é o limite entre projeção e source-of-truth: persistir o campo passaria a exigir derivação/inferência hoje vetada por `[DEC-0023-G03]`.
+
+**Decisão do Gate Humano:**
+
+- **Status:** [x] Resolvido
+- **Justificativa:** distingue "runtime cresceu operacionalmente" (verdadeiro, Bloco L) de "índice virou source-of-truth operacional" (falso — topologia vem de `gh`/git por design). Mantém `[DEC-0023-G03]` íntegro, evita expansão ad-hoc de schema e nomeia o estado futuro com gatilho observável em vez de deferir informalmente. Estende `[DEC-0023-G04]` (regra de projeção); relaciona `[DEC-0023-L01]` (use cases de stack via `gh`).
+- **Data / Owner:** 2026-05-24 (II) / @rosanarezende
 
 ---
 
@@ -1450,6 +1479,7 @@ Para preservar enforcement estrutural enquanto a accountability transfere, fast-
   - [x] `[DEC-0023-G02]` — `.governance/runtime/active-specs.yml` como índice público mínimo (Opção B)
   - [x] `[DEC-0023-G03]` — `yarn workflow publish-state` manual primeiro; automação depois (Opção A)
   - [x] `[DEC-0023-G04]` — Vocabulário canônico stage/status do índice público + regra de projeção (`stage` projetado direto de `state.yml.stage`; `status` declarado, dimensões independentes)
+  - [x] `[DEC-0023-G05]` — `active-specs.yml` permanece minimal canonical projection, não coordination source-of-truth; `title`/`base_branch` opcionais não-persistidos; gatilho de revisita se índice virar fonte de decisão operacional
 - **Princípio operativo:** o índice público em `main` existe para descoberta e navegação operacional. Ele **não** define contrato da spec nem substitui a branch ativa como artefato denso.
 
 ---
