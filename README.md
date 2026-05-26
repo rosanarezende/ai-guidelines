@@ -62,32 +62,41 @@ Requer **Node ≥ 22**. Para fixar versão em CI: `npx ai-guidelines@<versão> .
 
 ## Comandos essenciais
 
-| Comando                       | Quando usar                                                         |
-| :---------------------------- | :------------------------------------------------------------------ |
-| `npx ai-guidelines init`      | Projeto novo, baseline governance-first via wizard interativo       |
-| `npx ai-guidelines adopt`     | Repositório existente, adoção conservadora (preserva código legado) |
-| `npx ai-guidelines providers` | Adicionar ou remover AI provider entrypoints específicos            |
-| `npx ai-guidelines update`    | Re-aplicar baseline após upgrade da CLI (headless, idempotente)     |
-| `npx ai-guidelines workflow`  | Wizard operacional do runtime (preview — cf. Spec 0023)             |
-| `npx ai-guidelines continue`  | Briefing da spec ativa + enforcement L2 (preview — cf. Spec 0023)   |
+| Comando                       | Quando usar                                                            |
+| :---------------------------- | :--------------------------------------------------------------------- |
+| `npx ai-guidelines init`      | Projeto novo, baseline governance-first via wizard interativo          |
+| `npx ai-guidelines adopt`     | Repositório existente, adoção conservadora (preserva código legado)    |
+| `npx ai-guidelines providers` | Adicionar ou remover AI provider entrypoints específicos               |
+| `npx ai-guidelines update`    | Re-aplicar baseline após upgrade da CLI (headless, idempotente)        |
+| `npx ai-guidelines workflow`  | Wizard operacional do runtime (preview)                                |
+| `npx ai-guidelines continue`  | Briefing da spec ativa + enforcement de pré-condições (preview)        |
+| `npx ai-guidelines review`    | Reúne os comentários de review de um PR para colar na sua IA (preview) |
 
 Todo comando aceita `--dry-run` para preview e `--help` para detalhes. Sem argumentos, a CLI inicia o wizard.
 
 ## Workflow Runtime (preview)
 
-> **Preview — UX may evolve.** Capacidades em validação empírica. Versão estável requer ao menos 1 consumidor externo + materialização das candidatas próximas do backlog.
+> **Preview — a UX pode evoluir.** Capacidades em validação empírica; a versão estável virá após uso real em mais projetos.
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/rosanarezende/ai-guidelines/main/docs/assets/ai-guidelines-dx-flow.png" alt="ai-guidelines workflow runtime — sessão típica em 4 momentos: wizard, execução, estado publicado, enforcement" width="880">
 </p>
 
-A partir do `1.1.0-preview`, a CLI ganha um **runtime operacional** que opera sobre o ciclo de governança sem substituí-lo:
+A partir do `1.1.0-preview`, a CLI ganha um **runtime operacional** que opera sobre o ciclo de governança sem substituí-lo. Três comandos no dia a dia:
 
-- **`npx ai-guidelines workflow`** — wizard com opções declarativas para navegar specs ativas, retomar trabalho, publicar estado e diagnosticar drift.
-- **`npx ai-guidelines continue`** — briefing da spec ativa com enforcement de pré-condições estruturais (recusa narrativamente quando a spec não está pronta para execução).
-- **Estado canônico no repo** — `.governance/runtime/active-specs.yml` lista specs ativas com schema fechado; descoberta cross-machine sem dashboard externo.
+- **`npx ai-guidelines workflow`** — wizard com opções declarativas para navegar specs ativas, retomar trabalho, publicar estado, diagnosticar drift e conduzir as operações de integração da stack (abrir Integration PR, merge atômico). Cada opção mapeia 1:1 para um comando — sem ranking, sem auto-detecção de "próxima ação".
+- **`npx ai-guidelines continue [<id|slug>]`** — briefing da spec ativa (ou da spec que você indicar) com enforcement de pré-condições: recusa narrativamente quando a spec ainda não está pronta para execução.
+- **`npx ai-guidelines workflow publish-state --status=<active|blocked|paused|completed>`** — projeta o estado interno da spec no índice público, para que qualquer máquina descubra o que está em curso sem prompt.
 
-Runtime nunca embute LLM: integração com agentes IA acontece via ferramenta externa sob comando humano. Detalhes operacionais e decisões arquiteturais em [`.governance/specs/0023-workflow-runtime/`](.governance/specs/0023-workflow-runtime/).
+**Contexto pronto para colar na IA externa.** O runtime não embute LLM: ele lê o estado da spec e monta um bloco de contexto estruturado que você **cola na sua IA** (Claude, Cursor, Codex…). A conversa acontece na IA; a CLI só prepara o contexto e aplica os gates determinísticos.
+
+**Três boundaries por spec** organizam o ciclo:
+
+- `tasks.md` — execução (o que está autorizado a implementar);
+- `review.md` — prontidão de integração (gates que liberam abrir o PR de integração e o merge);
+- `release-log.md` — registro pós-merge (release/ajustes públicos, quando houver).
+
+O runtime lê o `review.md` e **bloqueia, de forma determinística**, a abertura do Integration PR e o merge da stack enquanto os gates não fecharem — sempre com confirmação humana. No seu repositório o estado fica versionado: `.governance/registry.yml` é a SSOT estruturada do projeto e `.governance/runtime/active-specs.yml` é o índice derivado de specs ativas (schema fechado, descoberta cross-machine sem dashboard externo). Para repositórios com fluxo de stacked PRs, `npx ai-guidelines release-prep` prepara a release com um plano explícito antes de qualquer efeito colateral (`--dry-run` audita sem aplicar).
 
 ## Como funciona (em um minuto)
 
@@ -102,7 +111,7 @@ A CLI compila projeções desse estado para canais distintos:
 A distribuição usa dois modos de update:
 
 - **`managed-block`** — atualiza apenas o conteúdo entre marcadores `<!-- ai-guidelines:managed-start -->` e `<!-- ai-guidelines:managed-end -->`. Tudo fora dos marcadores é seu — fica intocado entre updates.
-- **`mirror`** — overwrite total para boilerplates SDD (bridge legado em transição para composição modular via recipes, conforme Spec 0021).
+- **`mirror`** — overwrite total para boilerplates SDD (bridge legado em transição para composição modular via recipes).
 
 Detalhamento técnico em [`docs/cli/ai-guidelines-cli.md`](docs/cli/ai-guidelines-cli.md). Topologia canônica em [`.core/governance/GOVERNANCE-CATALOG.md`](.core/governance/GOVERNANCE-CATALOG.md).
 
