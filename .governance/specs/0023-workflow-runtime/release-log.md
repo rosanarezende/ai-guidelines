@@ -12,12 +12,12 @@
 
 ## T0 — Release / merge (registro)
 
-> Informações vêm do Integration PR (#26). Pode ser preenchido por
-> `yarn guidelines release-prep` (evolução: auto-populate a partir do #26).
+> Informações vêm do Integration PR (#27). Pode ser preenchido por
+> `yarn guidelines release-prep` (evolução: auto-populate a partir do #27).
 
 - Data / Owner:
-- Stack mergeada: #18 → #19 → #22 → #23 → #24 → #25 (+ Integration #26)
-- Versão publicada: `1.1.0-preview.0`
+- Stack mergeada: #18 → #19 → #22 → #23 → #24 → #25 → #26 (bootstrap alignment) (+ Integration #27)
+- Versão publicada: `1.1.0`
 - dist-tag / Tag git / GitHub release / run `release.yml`:
 - Resultado: ✅ sucesso / ⚠️ incidente / ❌ falha
 
