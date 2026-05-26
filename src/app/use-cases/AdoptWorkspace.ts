@@ -18,7 +18,10 @@ export interface AdoptWorkspaceInput {
 
 export interface AdoptWorkspaceResult {
   readonly plan: MigrationPlan;
+  /** Diretórios criados neste run (participam do rollback bilateral). */
   readonly applied: ReadonlyArray<string>;
+  /** Arquivos-índice criados neste run (não-destrutivos; fora do rollback). */
+  readonly appliedFiles: ReadonlyArray<string>;
   /** True quando o plano era inteiramente no-op (idempotência em estado `governance`). */
   readonly idempotentNoop: boolean;
 }
@@ -48,15 +51,24 @@ export class AdoptWorkspace {
 
     const plan = planAdoption(input.state);
     const created: string[] = [];
+    const createdFiles: string[] = [];
 
     try {
       for (const step of plan.steps) {
-        const wasCreated = this.deps.provisioner.ensureDirectory(step.path);
-        if (wasCreated) created.push(step.path);
+        if (step.kind === "ensure-directory") {
+          if (this.deps.provisioner.ensureDirectory(step.path)) created.push(step.path);
+        } else {
+          // ensure-file: não-destrutivo e idempotente (escreve só se ausente).
+          // Fora do rollback transacional — re-rodar completa sem corromper.
+          if (this.deps.provisioner.ensureFile(step.path, step.content)) {
+            createdFiles.push(step.path);
+          }
+        }
       }
     } catch (err) {
-      // Rollback determinístico: ordem inversa, removendo apenas o que
-      // ESTE caso de uso criou neste run (não toca pré-existente).
+      // Rollback determinístico dos DIRETÓRIOS: ordem inversa, removendo apenas
+      // o que ESTE caso de uso criou neste run (não toca pré-existente). Os
+      // arquivos-índice não são revertidos — são não-destrutivos e idempotentes.
       for (let i = created.length - 1; i >= 0; i -= 1) {
         try {
           this.deps.provisioner.removeDirectoryIfEmpty(created[i]);
@@ -70,7 +82,8 @@ export class AdoptWorkspace {
     return {
       plan,
       applied: Object.freeze(created.slice()),
-      idempotentNoop: created.length === 0,
+      appliedFiles: Object.freeze(createdFiles.slice()),
+      idempotentNoop: created.length === 0 && createdFiles.length === 0,
     };
   }
 }

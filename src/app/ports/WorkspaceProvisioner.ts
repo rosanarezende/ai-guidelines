@@ -23,4 +23,14 @@ export interface WorkspaceProvisioner {
    * destrói conteúdo do usuário).
    */
   removeDirectoryIfEmpty(relPath: string): void;
+
+  /**
+   * Garante a existência de um arquivo com `content` inicial. **Não-destrutivo
+   * e idempotente:** se o arquivo já existe, é no-op — NUNCA sobrescreve
+   * conteúdo do usuário. Usado para os índices canônicos do scaffold
+   * (`roadmap/backlog.md`, `roadmap/historico.md`, `research-index.md`).
+   *
+   * @returns `true` se o arquivo foi criado **neste call**; `false` se já existia.
+   */
+  ensureFile(relPath: string, content: string): boolean;
 }

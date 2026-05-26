@@ -3,7 +3,11 @@
  * Esta suíte permanece toda em it.skip nesta fase: o IO real do workspace
  * é entregue apenas no PR2 (Topology Migration Layer) [DEC-0021-A03].
  */
-import { GOVERNANCE_SPECS_SCAFFOLD_DIRS, planAdoption } from "./MigrationPlan.js";
+import {
+  GOVERNANCE_SCAFFOLD_FILES,
+  GOVERNANCE_SPECS_SCAFFOLD_DIRS,
+  planAdoption,
+} from "./MigrationPlan.js";
 import { GOVERNANCE_ROOT } from "./WorkspaceState.js";
 
 describe("Domínio — Isolamento de Workspace [BR-CLI-WORKSPACE]", () => {
@@ -17,6 +21,17 @@ describe("Domínio — Isolamento de Workspace [BR-CLI-WORKSPACE]", () => {
 
       for (const sub of GOVERNANCE_SPECS_SCAFFOLD_DIRS) {
         expect(dirs).toContain(`${GOVERNANCE_ROOT}/${sub}`);
+      }
+    });
+
+    it("DADO inicialização do workspace (pristine) ENTÃO o plano cria os índices canônicos via ensure-file (`backlog`, `historico`, `research-index`) com stub não-destrutivo [DEC-0023-O01]", () => {
+      const plan = planAdoption({ kind: "pristine" });
+      const files = plan.steps.filter((s) => s.kind === "ensure-file");
+
+      for (const f of GOVERNANCE_SCAFFOLD_FILES) {
+        const step = files.find((s) => s.path === `${GOVERNANCE_ROOT}/${f.path}`);
+        expect(step).toBeDefined();
+        expect(step?.kind === "ensure-file" && step.content.length).toBeGreaterThan(0);
       }
     });
   });

@@ -10,10 +10,9 @@ import { GOVERNANCE_ROOT, LegacySource, WorkspaceState } from "./WorkspaceState.
  * Idempotência: rodar `planAdoption` duas vezes sobre o mesmo estado produz
  * planos equivalentes — e quando o estado já é `governance`, o plano é vazio.
  */
-export interface MigrationStep {
-  readonly kind: "ensure-directory";
-  readonly path: string;
-}
+export type MigrationStep =
+  | { readonly kind: "ensure-directory"; readonly path: string }
+  | { readonly kind: "ensure-file"; readonly path: string; readonly content: string };
 
 export interface MigrationPlan {
   readonly steps: ReadonlyArray<MigrationStep>;
@@ -47,6 +46,33 @@ export const GOVERNANCE_SPECS_SCAFFOLD_DIRS = [
   "specs/research-library",
 ] as const;
 
+/**
+ * Índices canônicos do scaffold ([DEC-0023-O01]). Criados com stub mínimo
+ * **não-destrutivo** (escreve só se ausente): dão um ponto de partida válido
+ * para abrir/fechar specs. O conteúdo rico é responsabilidade do consumidor;
+ * aqui só garantimos que o arquivo exista com a forma canônica.
+ */
+export const GOVERNANCE_SCAFFOLD_FILES: ReadonlyArray<{
+  readonly path: string;
+  readonly content: string;
+}> = [
+  {
+    path: "specs/roadmap/backlog.md",
+    content:
+      "# Backlog\n\n> Candidatas e specs em execução. Lifecycle em `.core/process/governance-foundation.md`.\n\n## Em execução\n\n## Now\n\n## Candidatas\n",
+  },
+  {
+    path: "specs/roadmap/historico.md",
+    content:
+      "# Histórico\n\n> Specs concluídas (arquivo). Ao fechar uma spec, mova a entrada do backlog para cá.\n\n## Concluídas\n",
+  },
+  {
+    path: "specs/research-index.md",
+    content:
+      "# Research Index\n\n> Base de conhecimento navegável. Pesquisas consolidadas vivem em `research-library/`; ao fechar uma spec, indexe aqui as pesquisas migradas.\n",
+  },
+];
+
 export function planAdoption(state: WorkspaceState): MigrationPlan {
   const ensure: MigrationStep[] = [
     { kind: "ensure-directory", path: GOVERNANCE_ROOT },
@@ -60,6 +86,13 @@ export function planAdoption(state: WorkspaceState): MigrationPlan {
       (sub): MigrationStep => ({
         kind: "ensure-directory",
         path: `${GOVERNANCE_ROOT}/${sub}`,
+      })
+    ),
+    ...GOVERNANCE_SCAFFOLD_FILES.map(
+      (f): MigrationStep => ({
+        kind: "ensure-file",
+        path: `${GOVERNANCE_ROOT}/${f.path}`,
+        content: f.content,
       })
     ),
   ];
