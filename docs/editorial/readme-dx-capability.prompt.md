@@ -106,10 +106,10 @@ Disposição escolhida deve transmitir: editorial premium · contrato fechado ·
 "baseline em repo existente"
 
 `npx ai-guidelines workflow`
-"wizard operacional · preview"
+"menu operacional"
 
 `npx ai-guidelines continue`
-"briefing da spec ativa · enforcement de pré-condições"
+"briefing da spec ativa · governança ativa nas pré-condições"
 
 `npx ai-guidelines update`
 "re-aplica baseline · headless"
@@ -132,7 +132,7 @@ Esses elementos têm 30% do peso visual dos comandos primários. Mostram que exi
 
 **Selo discreto no topo**, em #E5E7EB com baixo contraste:
 
-"ai-guidelines · runtime governado · preview 1.1.0"
+"ai-guidelines · operação governada · 1.1.0"
 
 **Selo discreto na base**, em #E5E7EB com baixo contraste:
 

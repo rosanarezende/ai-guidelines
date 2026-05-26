@@ -37,11 +37,11 @@ DEPOIS panel (situação posterior a {{context}}) — render each item as a stic
 - ...
 
 PIPELINE BOTTOM (5 horizontal chevrons in soft pastel green, left to right):
-[1] Sintoma observado →
-[2] DEC cravado no decision-brief →
+[1] Sintoma observado em uso real →
+[2] Decisão registrada na governança →
 [3] Implementado no runtime →
-[4] Enforcement automático →
-[5] Insight novo emerge do uso
+[4] Gate determinístico aplica →
+[5] Novo insight emerge do uso
 
 BOTTOM CAPTION (small text, one line, in Portuguese): (uma única frase em português, foco no que o usuário consegue fazer agora que não conseguia antes)
 

@@ -55,7 +55,7 @@ Dois painéis lado a lado, mesmo tamanho, mesma moldura, mesma paleta — diverg
 
 **Painel ESQUERDO — "ANTES"**: representação visual de contexto operacional fragmentado e disperso. Instruções avulsas, memory não-portável, decisões esquecidas, contexto reconstruído manualmente a cada sessão.
 
-**Painel DIREITO — "DEPOIS"**: representação visual do mesmo material organizado em torno do repositório como memória canônica. Estado canônico vive em `.governance/`; canais multi-IA distribuem; enforcement protege.
+**Painel DIREITO — "DEPOIS"**: representação visual do mesmo material organizado em torno do repositório como memória canônica. Estado canônico vive em `.governance/`; canais multi-IA distribuem; a governança ativa protege.
 
 Os dois painéis devem dialogar — o leitor entende, em 5 segundos, que **é o mesmo trabalho**, organizado de forma diferente.
 
@@ -176,7 +176,7 @@ ANTES DE ENVIAR ESTE PROMPT À IA DE IMAGEM, escolha 1 das 3 captions abaixo e r
 
 **Alternativa 2 — mais conceitual (recomendada para audiência técnica):**
 
-"do contexto improvisado ao runtime governado"
+"do contexto improvisado à operação governada"
 
 **Alternativa 3 — mais direta sobre a dor (recomendada se a audiência já reconhece o problema):**
 
