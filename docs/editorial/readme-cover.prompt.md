@@ -115,14 +115,14 @@ Plano
 "plan.md (vivo) · decision-brief.md"
 
 Execução
-"tasks.md (boundary) · branch · commits"
+"tasks.md (execução) · branch · commits"
 
 Pull Request
-"managed-block · gates humanos"
+"review.md (prontidão) · gates humanos"
 pequeno cadeado discreto
 
 Merge
-"histórico · próxima spec"
+"release-log.md (pós-merge) · histórico"
 
 Valor entregue
 "feature em produção · auditável"

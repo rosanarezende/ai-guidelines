@@ -70,7 +70,7 @@ Checklist ao alterar o runtime:
 
 - [ ] Contagem/ícones do wizard conferem em `readme-dx-flow` (8 opções) e nas secundárias do `readme-dx-capability`.
 - [ ] Comandos primários/secundários do `readme-dx-capability` refletem a superfície real (`workflow`, `continue`, `review`, `publish-state`, `release-prep`…), sem jargão interno (nada de "L2", `DEC-…`, `ADR-…` no texto visível).
-- [ ] Boundaries da spec (Execução `tasks.md` / Prontidão `review.md` / Pós-merge `release-log.md`) aparecem coerentes em `readme-dx-flow` e `readme-dx-before-after`.
+- [ ] Boundaries da spec (Execução `tasks.md` / Prontidão `review.md` / Pós-merge `release-log.md`) aparecem coerentes em `readme-dx-flow`, `readme-dx-before-after` e nas fases do ciclo em `readme-cover` (Execução/PR/Merge).
 - [ ] Linhas literais de terminal (em `readme-dx-flow`) batem com as strings reais da CLI.
 - [ ] Todo texto renderizável em pt-BR (exceto literais de comando/arquivo em monospace).
 
