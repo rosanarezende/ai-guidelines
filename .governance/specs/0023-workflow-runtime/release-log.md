@@ -17,7 +17,7 @@
 
 - Data / Owner:
 - Stack mergeada: #18 → #19 → #22 → #23 → #24 → #25 (+ Integration #26)
-- Versão publicada: `1.1.0-preview.0`
+- Versão publicada: _(preencher pós-merge / pós-release)_
 - dist-tag / Tag git / GitHub release / run `release.yml`:
 - Resultado: ✅ sucesso / ⚠️ incidente / ❌ falha
 
