@@ -25,10 +25,15 @@ export class NodeWorkspaceProvisioner implements WorkspaceProvisioner {
 
   ensureFile(relPath: string, content: string): boolean {
     const abs = this.resolveScoped(relPath);
-    if (fileExistsAt(abs)) return false;
     fs.mkdirSync(path.dirname(abs), { recursive: true });
-    fs.writeFileSync(abs, content, "utf8");
-    return true;
+    try {
+      fs.writeFileSync(abs, content, { flag: "wx", encoding: "utf8" });
+      return true;
+    } catch (err) {
+      const code = (err as NodeJS.ErrnoException).code;
+      if (code === "EEXIST") return false;
+      throw err;
+    }
   }
 
   removeDirectoryIfEmpty(relPath: string): void {
@@ -61,14 +66,6 @@ export class NodeWorkspaceProvisioner implements WorkspaceProvisioner {
 function directoryExistsAt(abs: string): boolean {
   try {
     return fs.statSync(abs).isDirectory();
-  } catch {
-    return false;
-  }
-}
-
-function fileExistsAt(abs: string): boolean {
-  try {
-    return fs.statSync(abs).isFile();
   } catch {
     return false;
   }
