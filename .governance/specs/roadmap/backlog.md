@@ -219,8 +219,35 @@ Detalhes de lifecycle em [`.core/process/governance-foundation.md`](../../../.co
   - **Mutation testing infla tempo de CI** — restringir a paths críticos; rodar full em schedule, não em todo PR.
   - **Overlap com 3 candidatas** (cutover, harness, quality-gates) → risco de specs sobrepostas. Mitigar com a obrigação cruzada acima: decidir fronteiras na abertura, possivelmente abrir como **uma** spec coordenadora.
 - **Evidência empírica (PR #25, 2026-05-25):** review do Copilot pegou o que o gate de 85% agregado deixou passar — prova viva de que o piso atual é insuficiente para a tese TDD-first do framework.
+- **Débitos de cobertura concretos herdados da Spec 0023 (triados do `NEXT.md` na R3, 2026-05-25 — alvos diretos do piso por-arquivo):**
+  - **REPL structured commands** (`gate`/`gaps`/`next`/`quit` digitados) sem cobertura em `src/cli/workflow.ts` — pré-existentes do REPL (PR1). Escrever 4 tests BDD triviais quando ≥1 uso externo for reportado OU as structured commands forem estendidas.
+  - **`collectLocalContext.ts`** success paths de `gh`/`git` ~65% — **não** expandir via mocks de `execFileSync` (frágil e contraditório ao best-effort); cobrir com integration test (subprocess + fs reais) quando `governance-dashboard-and-visual-artifacts` materializar.
+  - **`governance-pr-check.ts`** ~62% — bloco de validação de chain integrity exercitado só via CI real; cobrir se uma falha de CI revelar gap que unit test teria barrado.
+  - **Adapters de I/O:** `JsonRulesCatalogSource.ts` 0%, `InquirerPrompts.ts` 40%, `NodeClipboard.ts` 71% — nível certo é integration (TTY/clipboard/JSON real); expandir se a porta ganhar tipo novo OU bug em consumidor externo.
+  - **Chore pós-merge:** 10 test files sem label `[BR-*]` (lista preservada no histórico git do `NEXT.md`) — batch `chore(tests): padroniza BR labels`. Não-bloqueador; também listado em `Later`.
 - **Gatilho de abertura:** após a Spec 0023 fechar. Sinal adicional de urgência: qualquer novo review (humano ou IA) que pegue gap que um gate de coverage por-arquivo teria barrado.
 - **Slug:** `coverage-rigor-enforcement` (per ADR 0017; pode evoluir na abertura, ex.: `test-rigor-and-coverage-floor`).
+
+### `wizard-menu-scaling-redesign`
+
+> **Triada do `NEXT.md` da 0023 na R3 (2026-05-25).** Sinal arquitetural com critério observável; não inicia agora.
+
+- **Contexto:** o wizard cresceu **5 (`[DEC-0023-B06]`) → 6 (`B07`) → 8 (`[DEC-0023-L01]`)** opções em ~3 turnos, dentro de uma única spec. Hoje o menu flat com icons (📍 📡 🔗 🔀 📋 🔍 🎨) + agrupamento por posição (navegação / governance / inspeção / utilidade) resolve, mas as categorias semânticas ficaram **implícitas** — não cravadas como modelo. Se cada spec futura adicionar 1–2 ops de governance (revert-stack, archive-spec, branch-rebase), o menu vira lista densa difícil de escanear.
+- **Critério de abertura:** ≥10 opções no wizard **OU** ≥2 usuários reportarem confusão de navegação **OU** uma única spec lifecycle exigir >2–3 visitas ao wizard.
+- **Escopo provável:** separadores/categorias visíveis; multi-step (`categoria → ação`); subcomandos tipo `git`/`gh` (`workflow lookup`, `workflow gov`); OU split por tier (Tier 1 lookup wizard vs Tier 2 ops wizard).
+- **Vetado por default:** auto-ranking de opções, contextual filtering ("mostrar só o que faz sentido no stage"), "próxima ação recomendada" — anti-patterns cravados em `[DEC-0023-B06]`/`[DEC-0023-L01]`; cf. memory `[[feedback_lookup_not_coordination]]`.
+- **Slug:** `wizard-menu-scaling-redesign` (per ADR 0017; pode evoluir na abertura).
+
+---
+
+## Later (follow-ups pós-0023 — não exigem spec dedicada)
+
+> Itens de pillar `fix`/`chore`/`patch` triados do `NEXT.md` da 0023 na R3 (2026-05-25). Executáveis como PRs pequenos pós-merge, sem abrir spec.
+
+- **Composite action para setup compartilhado dos workflows** — `repo-validation.yml`, `smoke-multi-os.yml` e `governance-pr-check.yml` repetem ~10 linhas de setup (checkout + setup-node + cache yarn + corepack + install). Criar `.github/actions/setup/action.yml`. **Reabrir quando** >5 workflows (hoje 3) OU o boilerplate causar drift entre workflows em ≥2 ocasiões. Em 3 workflows é abstração prematura.
+- **Rename cosmético `buildContextBundle()` / variável `bundle`** em `src/cli/workflow.ts` para o vocabulário canônico "contexto" — termo legado "context bundle" foi preservado no código interno no fechamento da 0023 para evitar churn; governance/CHANGELOG/docs já usam "contexto da spec". Follow-up cosmético, não-bloqueador.
+- **`fix(boilerplates)`: realinhar numeração dos pointers de fase-review** nos `tasks-*-boilerplate.md` — citam "R1–R6 liberam abrir o Integration PR; R7 (merge authorization)"; o correto pós-renumeração é **R1–R7 abrem; R8 = merge auth**. Afeta 3 roots (`.core/governance/templates/partials/`, `.specify/templates/`, `.ai-guidelines/templates/`) sob `LegacyMirrorContract` (parity test). Pode ser feito standalone OU dobrado na **Fase 4** de `runtime-and-template-root-consolidation`. _(achado da R4, 2026-05-25.)_
+- **`chore(tests)`: padroniza labels `[BR-*]`** em 10 test files pré-existentes (lista no histórico git do `NEXT.md`). Tests passam; falta só padronização editorial. Também referenciado em `coverage-rigor-enforcement`.
 
 ---
 

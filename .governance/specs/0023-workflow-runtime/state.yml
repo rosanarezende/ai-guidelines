@@ -5,7 +5,7 @@ focus:
   - Phase 3 — review/homologation
   - Integration PR — stack convergence
 next:
-  - "Fase de Review: fechar gates R1–R6 do review.md (R2 verde; R3/R4/R6 em curso; R1 aguarda aprovação humana)"
-  - "Abrir PR #26 (Integration) somente quando review.md R1–R6 fecharem"
-  - "Manter merge authorization (review.md R7) pendente até autorização textual"
-  - "Encerramento pós-merge via release-log.md"
+  - "Fase de Review: fechar gates restantes do review.md — R2 (smoke TTY), R6 (PR bodies coerentes), R7 (stack Ready + aprovação humana); R1/R3/R4/R5 fechados (R1 anexar link da run do GitHub Actions)"
+  - "Abrir PR #26 (Integration) somente quando review.md R1–R7 fecharem (opção 🔗 do wizard)"
+  - "Manter merge authorization (review.md R8) pendente até autorização textual do owner (gate do merge-stack, opção 🔀)"
+  - "Encerramento pós-merge via release-log.md (deleção física do NEXT.md acontece aqui)"
