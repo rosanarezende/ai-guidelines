@@ -97,7 +97,8 @@ describe("Use case — AdoptWorkspace idempotência [BR-CLI-WORKSPACE-IDEMPOTENC
   it("DADO falha em ensure-file ENTÃO diretórios vazios são revertidos (rollback bilateral) E arquivos já criados permanecem", () => {
     const provisioner = new FakeWorkspaceProvisioner();
     const firstFilePath = expectedFilePaths()[0];
-    provisioner.failOnEnsureFile = expectedFilePaths()[1]; // falha no segundo arquivo
+    const failFilePath = expectedFilePaths()[1]; // falha no segundo arquivo (specs/roadmap/historico.md)
+    provisioner.failOnEnsureFile = failFilePath;
 
     expect(() =>
       new AdoptWorkspace({ provisioner }).execute({ state: { kind: "pristine" } })
@@ -105,17 +106,17 @@ describe("Use case — AdoptWorkspace idempotência [BR-CLI-WORKSPACE-IDEMPOTENC
 
     // Primeiro arquivo criado antes da falha permanece (não-destrutivo)
     expect(provisioner.hasFile(firstFilePath)).toBe(true);
+    expect(provisioner.hasFile(failFilePath)).toBe(false);
 
-    // Diretórios que não têm filhos de arquivo são revertidos; os que têm (ex: specs/roadmap)
-    // permanecem porque removeDirectoryIfEmpty não apaga dirs não-vazios.
-    const removedDirs = provisioner.events.filter((e) => e.startsWith("remove:"));
-    const nonEmptyDirs = provisioner.events.filter((e) => e.startsWith("remove-nonempty:"));
-    // Algum dir não-vazio foi preservado e algum dir vazio foi revertido
-    expect(removedDirs.length + nonEmptyDirs.length).toBeGreaterThan(0);
+    // specs/roadmap/ tem um filho de arquivo (backlog.md já foi escrito): NÃO é removido
+    expect(provisioner.events).toContain("remove-nonempty:.governance/specs/roadmap");
 
     // Re-run completa sem corromper (idempotência pós-falha)
     provisioner.failOnEnsureFile = null;
     const result = new AdoptWorkspace({ provisioner }).execute({ state: { kind: "pristine" } });
-    expect(result.appliedFiles).toContain(expectedFilePaths()[1]);
+    // Segundo arquivo (que havia falhado) agora é criado
+    expect(result.appliedFiles).toContain(failFilePath);
+    // Primeiro arquivo (que já existia) não é re-criado
+    expect(result.appliedFiles).not.toContain(firstFilePath);
   });
 });
