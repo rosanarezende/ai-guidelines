@@ -117,7 +117,7 @@ Progresso operacional. Marca tasks `[x]` a cada degrau. **Espinha dorsal de exec
 - **Fase de Review (Gate de Homologação)**: Empacotamento, pipeline verde, descrição em 3 etapas do PR, **aguardar gate humano formal**.
 - **Fase de Encerramento (Pré-Merge)**: Migra research, consolida e deleta `NEXT.md`, atualiza roadmap, status final.
 
-> **Modelo de 3 boundaries (Spec 0023 — `[DEC-0023-M01]`):** as fases de Review e Encerramento acima estão migrando para artefatos dedicados — **`review.md`** (integration readiness; gates R1–R7, lido pelo runtime) e **`closure.md`** (log de operações pós-merge). O `tasks.md` torna-se **execution-only** (fecha 100% `[x]` ao fim da execução); os boilerplates já refletem isso. A reconciliação completa desta seção e do "Princípio de PR auto-suficiente" abaixo com o modelo (incl. o papel pós-merge do `closure.md`) é débito de fechamento da 0023 — ver `.governance/specs/0023-workflow-runtime/`.
+> **Modelo de 3 boundaries (Spec 0023 — `[DEC-0023-M01]`):** as fases de Review e Encerramento acima migraram para artefatos dedicados — **`review.md`** (integration readiness; gates R1–R7, lido pelo runtime) e **`release-log.md`** (log condicional de operações pós-merge). O `tasks.md` torna-se **execution-only** (fecha 100% `[x]` ao fim da execução); os boilerplates já refletem isso. O "Princípio de PR auto-suficiente" abaixo permanece válido (descreve o que o PR deve conter antes do merge); o registro pós-merge propriamente dito vive no `release-log.md`.
 
 > **Princípio de PR auto-suficiente:** o merge não dispara nenhum trabalho adicional. Antes do merge, o PR já deve conter: status `Done (PR #N — YYYY-MM-DD)` em `spec.md`, entrada completa em `roadmap/historico.md`, remoção de `roadmap/backlog.md§Em execução`, `research-index.md` atualizado com as pesquisas migradas, `CHANGELOG.md` com a release publicada (não em `[Unreleased]`) e bump da `version` em `package.json`. Se o agente encontrar pendências durante o merge ("falta atualizar histórico", "faltou o changelog"), elas eram para ter sido cobertas na Fase 4 — abrir hotfix ou commit pré-merge é uma falha do checklist, não comportamento esperado.
 
@@ -159,8 +159,8 @@ Pesquisas, benchmarks, auditorias, transcrições elaboradas durante a execuçã
 Ao fechar a spec, arquivos com valor reutilizável devem ser:
 
 1. Renomeados para incluir a data atual como prefixo: `YYYY-MM-DD-nome-original.md`.
-2. Movidos fisicamente para a pasta central `.specify/specs/researchs/<domínio>/`, onde `<domínio>` deve ser o escopo da pesquisa (ex: `governance/`, `architecture/`, `oss/`). Não crie pastas por spec.
-3. Indexados em `.specify/specs/research-index.md`.
+2. Movidos fisicamente para a **biblioteca central de pesquisas**, no escopo `<domínio>` (ex: `governance/`, `architecture/`, `oss/`). Não crie pastas por spec. **Canônico (ADR 0019):** `.governance/specs/research-library/<domínio>/`. **Legado:** `.specify/specs/researchs/<domínio>/`.
+3. Indexados no `research-index.md` da root correspondente — `.governance/specs/research-index.md` (canônico) ou `.specify/specs/research-index.md` (legado).
    A pasta `research/` local da spec pode ser deletada se não restar nada de útil (ou mantida apenas para rascunhos sem valor histórico).
 
 ---
@@ -347,7 +347,7 @@ Ao concluir uma spec e fazer merge para `main`:
 - [ ] Se `NEXT.md` existir: migrar débitos relevantes para
       `roadmap/backlog.md` (ou para issues/discussões, conforme o caso) e
       **deletar** `NEXT.md`.
-- [ ] `research/`: migrar arquivos de valor seguindo a **Política de Lifecycle** (Seção 4.5): Renomear com prefixo `YYYY-MM-DD-`, mover para `.specify/specs/researchs/<domínio>/` e indexar em `.specify/specs/research-index.md`.
+- [ ] `research/`: migrar arquivos de valor seguindo a **Política de Lifecycle** (Seção 4.5): Renomear com prefixo `YYYY-MM-DD-`, mover para a biblioteca central (`.governance/specs/research-library/<domínio>/` no canônico; `.specify/specs/researchs/<domínio>/` no legado) e indexar no `research-index.md` correspondente.
       Nenhum conhecimento (RAG) deve morrer na pasta da spec fechada.
 - [ ] Mover a entrada da spec para "Concluídas" em `roadmap/historico.md` mantendo o número como histórico.
 - [ ] Remover a entrada da spec da seção "Em execução" em `roadmap/backlog.md`.
