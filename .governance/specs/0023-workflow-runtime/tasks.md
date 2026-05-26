@@ -252,6 +252,18 @@
 - [x] **1.N.N** Pipeline verde (654 testes) + `Uso:`/help atualizados.
 - [x] **1.N.[COMMIT]** `feat(workflow): comando review — triagem determinística de review comments (Bloco N)`.
 
+### Sub-bloco [1.O] — Bootstrap alignment: scaffolding canônico + fechamento estrutural `(deterministic)` — PR terminal (dogfooding-born no fechamento, 2026-05-26)
+
+> Origem: [`[DEC-0023-O01]`](./decision-brief.md). O runtime da 0023 expôs que `init`/`adopt` não materializa a estrutura mínima de `.governance/` (a `[DEC-0021-A03]` está `it.skip`). **Pré-condição estrutural faltante da 0023, não cutover.** Autorização **condicionada ao gate do Bloco O** (decision-brief). Escopo cirúrgico — provisionamento mínimo, sem root consolidation total.
+
+- [ ] **1.O.1** `init`/`adopt` provisiona a estrutura canônica mínima em `.governance/specs/` (`roadmap/backlog.md`, `roadmap/historico.md`, `research-library/`, `research-index.md`) — implementa `[DEC-0021-A03]` no provisioner; `Isolation.test.ts` `it.skip` → teste real.
+- [ ] **1.O.2** Estrutura materializada no próprio mantenedor (este repo): cria `.governance/specs/{research-library/,research-index.md,roadmap/historico.md}` faltantes.
+- [ ] **1.O.3** Research da 0023 **consolidada e indexada** como **primeiro caso real** (`research/lifecycle-architecture.md` + apontar a trilha legada `.specify/…0023-discovery`). Pode copiar/referenciar/indexar — **sem remover a trilha legada** (não é cutover).
+- [ ] **1.O.4** Regras `.governance`-aware: `governance-foundation.md`, `CONTRIBUTING.md`, `GOVERNANCE-CATALOG.md`; corrige drifts (`closure.md`→`release-log.md`; nota 3-boundary).
+- [ ] **1.O.5** Ramificações na stack: `review.md` (sequência + R7 incluem o novo PR) + body do #25 ("terminal" → penúltimo).
+- [ ] **1.O.N** Pipeline verde (`yarn validate`) + smoke do provisioner.
+- [ ] **1.O.[COMMIT]** Commits atômicos por unidade lógica (provisioner+testes / estrutura+research / regras / stack).
+
 ---
 
 ## Fase de Review → migrada para `review.md`

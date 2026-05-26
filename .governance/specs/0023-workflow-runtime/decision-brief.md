@@ -1465,6 +1465,41 @@ Para preservar enforcement estrutural enquanto a accountability transfere, fast-
 
 ---
 
+## Bloco O — Bootstrap provisiona a estrutura canônica mínima de `.governance/`
+
+### [DEC-0023-O01] `init`/`adopt` materializa a estrutura mínima para operar o lifecycle — pré-condição da 0023, não cutover
+
+> **Origem:** o próprio runtime da 0023 expôs o bug no dogfooding de fechamento (2026-05-26). A 0023 declara `.governance/` root canônica (ADR 0019) e o runtime opera nela, mas `init`/`adopt` **não materializa** a estrutura mínima para rodar o lifecycle: `RESERVED_GOVERNANCE_DIRS = ["intake","handoff","telemetry"]`, e o teste de subpastas canônicas (`src/domain/workspace/Isolation.test.ts`) está `it.skip` — `[DEC-0021-A03]` ficou parcialmente materializada. Um consumidor recém-bootstrapado nasce num mundo parcial: não tem onde abrir specs, consolidar research (`researchs/`/`research-index.md`) nem arquivar (`roadmap/historico.md`). Inconsistência estrutural entre ADR 0019, CONTRIBUTING/CORE-02, `governance-foundation`, o workflow runtime e o estado real do consumidor.
+
+**Pergunta:** o que o bootstrap deve provisionar para a promessa operacional da 0023 (`.governance/` canônica + lifecycle completo) ser verdadeira no consumidor — e o consumidor opera no modelo `registry.yml` (estruturado) ou na estrutura narrativa (`researchs`/`research-index`/`historico`)?
+
+**Decisão:** `init`/`adopt` passa a provisionar a **estrutura canônica mínima** em `.governance/specs/` — `roadmap/backlog.md`, `roadmap/historico.md`, `research-library/`, `research-index.md`. A estrutura narrativa **coexiste com `registry.yml`, mas não compete com ele**: `registry.yml` permanece o **SSOT operacional estruturado**; `research-library/`, `research-index.md` e `roadmap/historico.md` são **artifacts narrativos e de consolidação documental** do lifecycle (coexistência ≠ dupla autoridade). **Não é cutover:** `.specify/` permanece bridge; nada removido, nenhum template reescrito, nenhuma root consolidada.
+
+**Naming canônico (decidido antes de provisionar):** a biblioteca central de pesquisas consolidadas adota **`research-library/`** — corrige o typo legado `.specify/specs/researchs/` e desambígua do `research/` **local e efêmero** de cada spec. Decidir agora evita virar migração de filesystem em todos os consumidores depois.
+
+**Distinção crítica de escopo:**
+
+| Categoria                                                               | Natureza                      | Onde                                                        |
+| :---------------------------------------------------------------------- | :---------------------------- | :---------------------------------------------------------- |
+| **Provisionamento canônico mínimo**                                     | pré-condição faltante da 0023 | **este PR terminal** (`feat/spec-0023-bootstrap-alignment`) |
+| **Root consolidation total** (remover `.specify`, cutover de templates) | evolução arquitetural futura  | candidata `runtime-and-template-root-consolidation`         |
+
+**Implementação:**
+
+1. `init`/`adopt` cria a estrutura mínima — implementa `[DEC-0021-A03]` (`it.skip` → teste real no provisioner).
+2. Estrutura criada no próprio mantenedor (este repo).
+3. Research da 0023 consolidada como **primeiro caso real** (prova fechamento/migração/indexação).
+4. Regras `.governance`-aware: `governance-foundation`, `CONTRIBUTING`, `GOVERNANCE-CATALOG`; corrige drifts (`closure.md`→`release-log.md`).
+5. Ramificações na stack: `review.md` (sequência + R7 incluem o novo PR) e body do #25 ("terminal" → penúltimo).
+
+**Decisão do Gate Humano:**
+
+- **Status:** [x] Resolvido
+- **Justificativa:** pré-condição estrutural faltante revelada pelo próprio dogfooding da 0023; corrigir **antes do merge final** valida o processo (a stack ainda aberta permite descoberta incremental, cf. ADR 0020) e evita release nascer inconsistente. Escopo cirúrgico separa provisionamento (agora) de consolidation total (futuro). Naming canônico `research-library/` confirmado antes de provisionar (evita migração de filesystem nos consumidores).
+- **Data / Owner:** 2026-05-26 / @rosanarezende
+
+---
+
 ## ✅ Gate fechado — Stage A → Stage B (Bloco A)
 
 - **Data:** 2026-05-19
