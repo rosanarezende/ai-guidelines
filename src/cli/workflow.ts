@@ -748,16 +748,16 @@ export function renderIntegrationReadinessBlock(
     : "🔒 Merge atômico bloqueado — homologação/merge authorization (review.md) ainda aberta.";
   const nextSteps = result.missingFile
     ? [
-        `Crie o boundary de homologação em ${result.checkedPath} (gates R1–R7).`,
-        "Veja o boilerplate em review-boundary v=1; o #26 só abre com R1–R6 [x].",
+        `Crie o boundary de homologação em ${result.checkedPath} (gates R1–R8).`,
+        "Veja o boilerplate em review-boundary v=1; o #26 abre com R1–R7 [x].",
       ]
     : isIntegration
       ? [
-          "Feche os gates R1–R6 no review.md (homologação) e marque-os [x].",
-          "Rode `yarn guidelines workflow` de novo — a opção 4 abre quando R1–R6 fecharem.",
+          "Feche os gates R1–R7 no review.md (homologação) e marque-os [x].",
+          "Rode `yarn guidelines workflow` de novo — a opção 4 abre quando R1–R7 fecharem.",
         ]
       : [
-          "Feche R1–R7 no review.md, incluindo R7 (merge authorization explícita do owner).",
+          "Feche R1–R8 no review.md, incluindo R8 (merge authorization explícita do owner).",
           "Só então a opção 5 (merge-stack) prossegue.",
         ];
 

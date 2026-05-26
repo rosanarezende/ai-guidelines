@@ -11,7 +11,7 @@ import { WorkflowFileSystem } from "../ports/WorkflowFileSystem.js";
  * (cf. `[DEC-0023-L01]` + `[DEC-0023-M01]`):
  *
  * - `integration-pr` (opção 4) bloqueia a abertura do #26 enquanto a homologação
- *   (gates `R1`–`R7` de `review.md`, incl. `R7` public-facing check) não fecha.
+ *   (gates `R1`–`R7` de `review.md`, incl. `R4` public-facing check) não fecha.
  * - `merge-stack` (opção 5) bloqueia o merge atômico enquanto `review.md` não
  *   estiver 100% fechado, incluindo `R8` (merge authorization).
  *
