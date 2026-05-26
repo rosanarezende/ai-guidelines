@@ -9,12 +9,19 @@
  * Âncora: [DEC-0021-A03].
  */
 import { GovernanceError } from "../../domain/shared/errors.js";
-import { RESERVED_GOVERNANCE_DIRS } from "../../domain/workspace/MigrationPlan.js";
+import {
+  GOVERNANCE_SPECS_SCAFFOLD_DIRS,
+  RESERVED_GOVERNANCE_DIRS,
+} from "../../domain/workspace/MigrationPlan.js";
 import { FakeWorkspaceProvisioner } from "../../test-utils/doubles.js";
 import { AdoptWorkspace } from "./AdoptWorkspace.js";
 
 function expectedPaths(): string[] {
-  return [".governance", ...RESERVED_GOVERNANCE_DIRS.map((d) => `.governance/${d}`)];
+  return [
+    ".governance",
+    ...RESERVED_GOVERNANCE_DIRS.map((d) => `.governance/${d}`),
+    ...GOVERNANCE_SPECS_SCAFFOLD_DIRS.map((d) => `.governance/${d}`),
+  ];
 }
 
 describe("Use case — AdoptWorkspace idempotência [BR-CLI-WORKSPACE-IDEMPOTENCY]", () => {

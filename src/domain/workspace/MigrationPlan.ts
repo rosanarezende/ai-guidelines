@@ -26,10 +26,37 @@ export interface MigrationPlan {
  */
 export const RESERVED_GOVERNANCE_DIRS = ["intake", "handoff", "telemetry"] as const;
 
+/**
+ * Estrutura canônica mínima onde o **lifecycle de spec** opera ([DEC-0023-O01]).
+ * Provisionada no bootstrap para que um consumidor recém-`init`/`adopt` consiga
+ * abrir specs, consolidar pesquisas e arquivar — sem precisar criar pastas à mão.
+ *
+ * - `specs/` — raiz das specs do consumidor;
+ * - `specs/roadmap/` — visão narrativa (`backlog.md` + `historico.md`);
+ * - `specs/research-library/` — biblioteca central de pesquisas consolidadas
+ *   (nome canônico; corrige o typo legado `researchs/` e desambígua do
+ *   `research/` local e efêmero de cada spec).
+ *
+ * Distinto das reservas (`intake`/`handoff`/`telemetry`) e da topologia de
+ * pilares por classe (`specs/experiments/...`, escopo de
+ * `boilerplate-system-modernization`).
+ */
+export const GOVERNANCE_SPECS_SCAFFOLD_DIRS = [
+  "specs",
+  "specs/roadmap",
+  "specs/research-library",
+] as const;
+
 export function planAdoption(state: WorkspaceState): MigrationPlan {
   const ensure: MigrationStep[] = [
     { kind: "ensure-directory", path: GOVERNANCE_ROOT },
     ...RESERVED_GOVERNANCE_DIRS.map(
+      (sub): MigrationStep => ({
+        kind: "ensure-directory",
+        path: `${GOVERNANCE_ROOT}/${sub}`,
+      })
+    ),
+    ...GOVERNANCE_SPECS_SCAFFOLD_DIRS.map(
       (sub): MigrationStep => ({
         kind: "ensure-directory",
         path: `${GOVERNANCE_ROOT}/${sub}`,

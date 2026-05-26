@@ -3,10 +3,22 @@
  * Esta suíte permanece toda em it.skip nesta fase: o IO real do workspace
  * é entregue apenas no PR2 (Topology Migration Layer) [DEC-0021-A03].
  */
+import { GOVERNANCE_SPECS_SCAFFOLD_DIRS, planAdoption } from "./MigrationPlan.js";
+import { GOVERNANCE_ROOT } from "./WorkspaceState.js";
+
 describe("Domínio — Isolamento de Workspace [BR-CLI-WORKSPACE]", () => {
   describe("Inicialização do Workspace", () => {
-    // [SKIP-REASON: Fase 2 — IO real do filesystem chega no PR2 (GovernanceWorkspace) [DEC-0021-A03]]
-    it.skip("DADO inicialização do workspace ENTÃO cria subpastas canônicas (specs, experiments, spikes, incidents) [DEC-0021-A03]", () => {});
+    // [DEC-0023-O01] Bootstrap provisiona a estrutura canônica mínima de fechamento.
+    // (A topologia de pilares por classe — experiments/spikes/incidents — segue
+    // como escopo de `boilerplate-system-modernization`, fora do Bloco O.)
+    it("DADO inicialização do workspace (pristine) ENTÃO o plano cria a estrutura canônica mínima de specs (`specs`, `specs/roadmap`, `specs/research-library`) [DEC-0023-O01]", () => {
+      const plan = planAdoption({ kind: "pristine" });
+      const dirs = plan.steps.filter((s) => s.kind === "ensure-directory").map((s) => s.path);
+
+      for (const sub of GOVERNANCE_SPECS_SCAFFOLD_DIRS) {
+        expect(dirs).toContain(`${GOVERNANCE_ROOT}/${sub}`);
+      }
+    });
   });
 
   describe("Mapeamento Físico (Pares de Valor)", () => {
