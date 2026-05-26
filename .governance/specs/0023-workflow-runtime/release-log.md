@@ -17,7 +17,7 @@
 
 - Data / Owner:
 - Stack mergeada: #18 → #19 → #22 → #23 → #24 → #25 → #26 (bootstrap alignment) (+ Integration #27)
-- Versão publicada: `1.1.0`
+- Versão publicada: `1.1.0` _(alvo; confirmar no pós-release)_
 - dist-tag / Tag git / GitHub release / run `release.yml`:
 - Resultado: ✅ sucesso / ⚠️ incidente / ❌ falha
 

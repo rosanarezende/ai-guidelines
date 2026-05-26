@@ -395,10 +395,20 @@ async function dispatchReview(options = {}) {
     process.exitCode = 1;
     return;
   }
+  let pr;
+  if (options.pr !== undefined) {
+    const parsed = Number(options.pr);
+    if (!Number.isFinite(parsed) || !Number.isInteger(parsed) || parsed <= 0) {
+      console.error("Erro: PR inválido. Use um inteiro positivo.");
+      process.exitCode = 1;
+      return;
+    }
+    pr = parsed;
+  }
   const opts = {
     repoRoot: process.cwd(),
     reviewArgs: {
-      ...(options.pr !== undefined ? { pr: Number(options.pr) } : {}),
+      ...(pr !== undefined ? { pr } : {}),
     },
   };
   const code = await mod.main(["review"], opts);
