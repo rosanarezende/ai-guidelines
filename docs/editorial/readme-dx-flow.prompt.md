@@ -46,10 +46,10 @@ OBJETIVO VISUAL
 
 Mostrar 1 sessão típica com o framework, em **4 momentos honestos do que está entregue**:
 
-1. ABERTURA: terminal com `npx ai-guidelines workflow` — wizard aparece com 6 opções declarativas.
-2. EXECUÇÃO: usuário escolhe uma opção (ex.: continuar spec atual). Runtime lê `state.yml` + `tasks.md` + `decision-brief.md` da spec — representado por linhas finas convergindo no centro.
+1. ABERTURA: terminal com `npx ai-guidelines workflow` — wizard aparece com 8 opções declarativas, cada uma com ícone (📍 📍 📡 🔗 🔀 📋 🔍 🎨).
+2. LEITURA DETERMINÍSTICA (3 boundaries): usuário escolhe uma opção (ex.: continuar spec atual). Runtime lê os artifacts da spec organizados em três boundaries, com rótulos operacionais visíveis na imagem — **Execução** (`tasks.md`), **Prontidão** (`review.md`), **Pós-merge** (`release-log.md`) — representado por linhas finas convergindo no centro. Monta o "contexto pronto para colar" na IA externa.
 3. ESTADO PUBLICADO: `publish-state` projeta o estado interno para `.governance/runtime/active-specs.yml` (índice público). Cross-machine, descoberta zero-prompt.
-4. ENFORCEMENT: quando algo está fora de ordem (gate.status ≠ closed, tasks.md ausente), `continue` recusa narrativamente — não bloqueia silencioso, explica o que falta.
+4. ENFORCEMENT + READINESS GATE: quando algo está fora de ordem, o runtime intercepta narrativamente — `continue` recusa execução (gate de execução não fechado), e as ops transacionais 🔗 (Integration PR) e 🔀 (merge da stack) ficam **bloqueadas** enquanto os gates do `review.md` não fecharem. Não bloqueia silencioso: explica o que falta.
 
 A imagem comunica, em 5 segundos:
 
@@ -92,18 +92,31 @@ COMPOSIÇÃO
 Layout horizontal em 4 momentos com transições orgânicas:
 
 **Momento 1 — esquerda** (~25% da largura):
-Terminal sutil com prompt `> npx ai-guidelines workflow`. Logo abaixo, menu do wizard aparece com 6 opções declarativas curtas (não detalhar todas — sugerir as 3-4 primeiras). Tom: convidativo, não denso. Accent principal #5EEAD4.
+Terminal sutil com prompt `> npx ai-guidelines workflow`. Logo abaixo, menu do wizard aparece com 8 opções declarativas curtas (não detalhar todas — sugerir as 3-4 primeiras). Tom: convidativo, não denso. Accent principal #5EEAD4.
 
 **Momento 2 — centro-esquerda** (~25%):
-A escolha materializa uma ação. Linhas finas e silenciosas convergem dos artifacts da spec (`.governance/specs/<slug>/state.yml`, `tasks.md`, `decision-brief.md`) para o centro do quadro — representação visual de leitura determinística. Sem labels narrativos ("executando…", "carregando…"); a geometria comunica.
+A escolha materializa uma ação. Linhas finas e silenciosas convergem dos artifacts da spec, sutilmente agrupados em **três boundaries** com rótulos operacionais visíveis — **Execução** (`tasks.md`), **Prontidão** (`review.md`), **Pós-merge** (`release-log.md`) — para o centro do quadro, representação visual de leitura determinística. Pode sugerir um pequeno cartão "contexto pronto para colar". Sem labels narrativos ("executando…", "carregando…"); a geometria comunica.
 
 **Momento 3 — centro-direita** (~25%):
 Estado projetado para o índice público `.governance/runtime/active-specs.yml` — pequena tabela esquemática com 2-3 entries (id, slug, branch, stage, status). Selo discreto: "descoberta cross-machine". A força aqui é "main agora sabe o que está ativo".
 
 **Momento 4 — direita** (~25%):
-Enforcement em ação. Um caminho de execução é interceptado pelo runtime (`continue` retorna exit 1) com mensagem narrativa visível (não modal de erro corporativo — texto humano). Glow leve em #5EEAD4. Badge minúsculo: "L2 · runtime refuse".
+Enforcement + readiness gate em ação. Um caminho de execução é interceptado pelo runtime (`continue` retorna exit 1) com mensagem narrativa visível (não modal de erro corporativo — texto humano). Ao lado, as ops transacionais 🔗 e 🔀 aparecem com um pequeno cadeado discreto — bloqueadas enquanto os gates do `review.md` não fecharem. Glow leve em #5EEAD4. Badge minúsculo: "L2 · runtime refuse".
 
 Entre os momentos: respiração orgânica, transições suaves por luz. Nenhuma seta dura. A leitura é por geometria, não por numeração agressiva.
+
+————————————————————
+TEXTO LITERAL DO TERMINAL (renderizar exatamente, sem traduzir)
+————————————————————
+
+Para reduzir alucinação do gerador, use estas linhas reais do runtime nos terminais/cartões (monospace, pt-BR, exatamente como saem na CLI — não inventar outras):
+
+- Momento 1 (prompt): `> npx ai-guidelines workflow`
+- Momento 4 (bloqueio): `🔒 Integration PR bloqueado — homologação (review.md) ainda aberta.`
+- Momento 4 (itens abertos): `Itens abertos detectados em review.md:`
+- Momento 2 (handoff de contexto): `──── Contexto pronto para colar na sua IA externa ────`
+
+NÃO renderizar identificadores internos (`DEC-…`, `ADR-…`, `[1.H]`) no texto visível — usar apenas os rótulos operacionais (**Execução / Prontidão / Pós-merge**) e as linhas literais acima.
 
 ————————————————————
 ELEMENTO DIRECIONAL — HANDOFF EM CONSTRUÇÃO
@@ -154,4 +167,26 @@ A imagem deve transmitir:
 A pessoa que olha precisa sentir, sem ler nada:
 
 "trabalhar aqui é diferente — o contexto sobrevive entre sessões, e o runtime intercepta antes do erro humano custar".
+
+————————————————————
+LÍNGUA (NÃO-NEGOCIÁVEL)
+————————————————————
+
+TODO texto renderizado na imagem deve ser em **Português do Brasil (pt-BR)**. NÃO gerar texto em inglês. A única exceção são identificadores em monospace que são literais de comando/código (`npx ai-guidelines workflow`, `tasks.md`, `review.md`, `release-log.md`, `active-specs.yml`, `continue`) — esses mantêm a forma original. Selos, badges, títulos e legendas: sempre pt-BR.
 </prompt>
+
+---
+
+## Sanity checklist — o que DEVE aparecer na imagem
+
+Use para validar a imagem gerada antes de salvar em `docs/assets/ai-guidelines-dx-flow.png`:
+
+- [ ] **4 momentos** legíveis da esquerda para a direita, conectados por luz/geometria (não por setas duras).
+- [ ] **Momento 1:** prompt `npx ai-guidelines workflow` + wizard com **8 opções** (sugerir as 3-4 primeiras com ícones 📍 📡 🔗 🔀).
+- [ ] **Momento 2:** leitura convergente dos artifacts agrupados nos **3 boundaries** (`tasks.md` / `review.md` / `release-log.md`); pode haver cartão "contexto pronto para colar".
+- [ ] **Momento 3:** projeção para o índice público `active-specs.yml` (mini-tabela id/slug/branch/stage/status) + selo "descoberta cross-machine".
+- [ ] **Momento 4:** enforcement narrativo (`continue` recusa) **+** ops 🔗/🔀 com cadeado (bloqueadas por gates abertos do `review.md`).
+- [ ] **Handoff** aparece SÓ como elemento secundário pontilhado na borda, marcado "em construção" — nunca como protagonista.
+- [ ] **Kernel** `.governance/` discreto na base; **NÃO** colocar `AGENTS.md` como kernel.
+- [ ] **Todo texto em pt-BR** (exceto literais de comando/arquivo em monospace). Zero inglês renderizado.
+- [ ] Dark mode na paleta da Imagem 1; sem aparência de screenshot de IDE / tutorial / SaaS.

@@ -138,7 +138,9 @@ Layout:
 - Em volta, **artifacts vivos**:
   - `.governance/specs/<slug>/spec.md` (imutável após review)
   - `.governance/specs/<slug>/state.yml` (4 chaves)
-  - `.governance/specs/<slug>/tasks.md` (boundary de autorização)
+  - `.governance/specs/<slug>/tasks.md` (execução)
+  - `.governance/specs/<slug>/review.md` (prontidão de integração)
+  - `.governance/specs/<slug>/release-log.md` (registro pós-merge, condicional)
   - `.governance/specs/<slug>/decision-brief.md` (gate humano)
   - `.governance/runtime/active-specs.yml` (índice público)
 - Na periferia, **canais multi-IA** sincronizados, todos partindo do mesmo kernel:

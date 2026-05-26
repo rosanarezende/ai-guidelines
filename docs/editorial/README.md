@@ -62,6 +62,18 @@ Os 4 prompts honram simultaneamente:
 - **Comentário HTML no topo** — histórico de versões, destino do PNG, decisões de design.
 - **Sem PNGs versionados aqui** — apenas em `docs/assets/`. Prompts versionados regeneram representação coerente sob demanda (cf. [ADR 0023](../../.core/governance/adrs/0023-meta-artifacts-yaml-with-derivations.md)).
 
+## Manutenção — manter os prompts sincronizados (como um todo)
+
+Os 4 prompts descrevem o **mesmo runtime** sob ângulos diferentes. Quando o runtime muda (novo comando, mudança no wizard, no modelo de boundaries ou nas mensagens da CLI), **atualize todos os prompts afetados na mesma rodada** — não só o que estava em foco. Drift entre prompts gera imagens que se contradizem.
+
+Checklist ao alterar o runtime:
+
+- [ ] Contagem/ícones do wizard conferem em `readme-dx-flow` (8 opções) e nas secundárias do `readme-dx-capability`.
+- [ ] Comandos primários/secundários do `readme-dx-capability` refletem a superfície real (`workflow`, `continue`, `review`, `publish-state`, `release-prep`…), sem jargão interno (nada de "L2", `DEC-…`, `ADR-…` no texto visível).
+- [ ] Boundaries da spec (Execução `tasks.md` / Prontidão `review.md` / Pós-merge `release-log.md`) aparecem coerentes em `readme-dx-flow` e `readme-dx-before-after`.
+- [ ] Linhas literais de terminal (em `readme-dx-flow`) batem com as strings reais da CLI.
+- [ ] Todo texto renderizável em pt-BR (exceto literais de comando/arquivo em monospace).
+
 ## Anti-objetivos
 
 - LLM no runtime para refinar prompts (humano edita via PR; geração externa).

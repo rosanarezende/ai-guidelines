@@ -109,7 +109,7 @@ Disposição escolhida deve transmitir: editorial premium · contrato fechado ·
 "wizard operacional · preview"
 
 `npx ai-guidelines continue`
-"briefing da spec ativa · enforcement L2"
+"briefing da spec ativa · enforcement de pré-condições"
 
 `npx ai-guidelines update`
 "re-aplica baseline · headless"
@@ -126,7 +126,7 @@ Cada comando:
 
 **Linha de horizonte sutil** abaixo dos comandos, em rgba(148,163,184,0.18), com micro-labels em #A78BFA — capacidades secundárias (citadas como referência opt-in):
 
-`providers` · `check-budget` · `workflow publish-state` · `governance-pr-check`
+`providers` · `review` · `workflow publish-state` · `release-prep`
 
 Esses elementos têm 30% do peso visual dos comandos primários. Mostram que existem, sem competir.
 
