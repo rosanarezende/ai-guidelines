@@ -148,7 +148,7 @@ Detalhamento técnico em [`docs/cli/ai-guidelines-cli.md`](docs/cli/ai-guideline
 - [`docs/`](docs/) — guias técnicos e features
 - [`AGENTS.md`](AGENTS.md) — workflow para humanos e agentes IA neste repositório
 - [`CONTRIBUTING.md`](CONTRIBUTING.md) — como contribuir, setup local, convenções
-- [`.specify/specs/roadmap/backlog.md`](.specify/specs/roadmap/backlog.md) — backlog vivo do framework
+- [`.governance/specs/roadmap/backlog.md`](.governance/specs/roadmap/backlog.md) — backlog vivo do framework (canônico, ADR 0019)
 - [`CHANGELOG.md`](CHANGELOG.md) — histórico de versões
 
 ## Licença
