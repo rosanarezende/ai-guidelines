@@ -159,7 +159,7 @@ Pesquisas, benchmarks, auditorias, transcrições elaboradas durante a execuçã
 Ao fechar a spec, arquivos com valor reutilizável devem ser:
 
 1. Renomeados para incluir a data atual como prefixo: `YYYY-MM-DD-nome-original.md`.
-2. Movidos fisicamente para a **biblioteca central de pesquisas**, no escopo `<domínio>` (ex: `governance/`, `architecture/`, `oss/`). Não crie pastas por spec. **Canônico (ADR 0019):** `.governance/specs/research-library/<domínio>/`. **Legado:** `.specify/specs/researchs/<domínio>/`.
+2. Movidos fisicamente para a **biblioteca central de pesquisas**, no escopo `<domínio>` (ex: `governance/`, `architecture/`, `oss/`). Não crie pastas por spec. **Canônico (ADR 0019):** `.governance/specs/research-library/<domínio>/`. **Legado:** `.specify/specs/researchs/<domínio>/` — **só leitura/migração; research nova nasce no canônico, nunca no legado.**
 3. Indexados no `research-index.md` da root correspondente — `.governance/specs/research-index.md` (canônico) ou `.specify/specs/research-index.md` (legado).
    A pasta `research/` local da spec pode ser deletada se não restar nada de útil (ou mantida apenas para rascunhos sem valor histórico).
 
