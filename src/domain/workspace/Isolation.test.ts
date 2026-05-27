@@ -1,7 +1,9 @@
 /**
  * [BR-CLI-WORKSPACE-01] Isolamento e Mapeamento Físico (root '.governance/').
- * Esta suíte permanece toda em it.skip nesta fase: o IO real do workspace
- * é entregue apenas no PR2 (Topology Migration Layer) [DEC-0021-A03].
+ * Provisionamento do scaffold canônico mínimo já é coberto por testes vivos
+ * (cf. [DEC-0023-O01]). O IO físico real do workspace (criação de pastas por
+ * classe, migração Strangler de '.specify/', composição atômica) permanece em
+ * it.skip — entregue no PR2/PR3 da Spec 0021 [DEC-0021-A03].
  */
 import {
   GOVERNANCE_SCAFFOLD_FILES,
