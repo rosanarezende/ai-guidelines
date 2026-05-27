@@ -1,9 +1,8 @@
 /**
  * [BR-CLI-WORKSPACE-01] Isolamento e Mapeamento Físico (root '.governance/').
- * Provisionamento do scaffold canônico mínimo já é coberto por testes vivos
- * (cf. [DEC-0023-O01]). O IO físico real do workspace (criação de pastas por
- * classe, migração Strangler de '.specify/', composição atômica) permanece em
- * it.skip — entregue no PR2/PR3 da Spec 0021 [DEC-0021-A03].
+ * Cobre o plano de adoção (camada de domínio). O IO físico real e os
+ * comportamentos correlatos são exercitados por testes vivos sob as abstrações
+ * já entregues (cf. mapa de cobertura abaixo e [DEC-0023-O02]).
  */
 import {
   GOVERNANCE_SCAFFOLD_FILES,
@@ -38,24 +37,21 @@ describe("Domínio — Isolamento de Workspace [BR-CLI-WORKSPACE]", () => {
     });
   });
 
-  describe("Mapeamento Físico (Pares de Valor)", () => {
-    // [SKIP-REASON: Fase 2 — criação física exige WorkspaceStore real (PR2) [DEC-0021-A03]]
-    it.skip("DADO item denso ('spec', 'experiment', 'spike', 'incident') QUANDO registrado ENTÃO cria pasta em '.governance/' [DEC-0021-A03]", () => {});
-    // [SKIP-REASON: Fase 2 — proteção contra IO em itens virtuais é parte do PR2 [DEC-0021-A03]]
-    it.skip("DADO item virtual ('proposal', 'patch', 'fix') QUANDO registrado ENTÃO NÃO cria diretórios [DEC-0021-A03]", () => {});
-  });
-
-  describe("Retrocompatibilidade e Migração", () => {
-    // [SKIP-REASON: Fase 2 — Strangler Fig de '.specify/' chega no PR2 [DEC-0021-A03]]
-    it.skip("DADO repositório legado com '.specify/' QUANDO WorkspaceService inicializado ENTÃO sugere migração para '.governance/' [DEC-0021-A03]", () => {});
-    // [SKIP-REASON: Fase 2 — política de precedência é PR2 [DEC-0021-A03]]
-    it.skip("DADO múltiplos roots de governança ENTÃO prioriza '.governance/' [DEC-0021-A03]", () => {});
-  });
-
-  describe("Proteção de Escopo e IO", () => {
-    // [SKIP-REASON: Fase 2 — guard de IO sobre itens virtuais depende do FileSystemAdapter real [DEC-0021-A03]]
-    it.skip("DADO escrita de arquivo em item virtual ENTÃO erro de isolamento de workspace [DEC-0021-A03]", () => {});
-    // [SKIP-REASON: Fase 3 — Composição Atômica é entregue pelo TemplateEngine no PR3 [DEC-0021-D01]]
-    it.skip("DADO criação de 'spec' ENTÃO usa Composição Atômica para boilerplate [DEC-0021-D01]", () => {});
-  });
+  // ── Mapa de cobertura viva (ex-it.skip [DEC-0021-A03]/[DEC-0021-D01]) ──
+  // Os comportamentos abaixo nasceram como it.skip nesta suíte quando o IO real
+  // ainda não existia. Hoje são cobertos pelas abstrações já entregues; os skips
+  // foram removidos para não mascarar gaps inexistentes (cf. [DEC-0023-O02]):
+  //  - item denso cria pasta em '.governance/'
+  //      → infrastructure/filesystem/NodeWorkspaceIntegration.test.ts (ensureDirectory)
+  //  - item virtual NÃO cria diretórios
+  //      → app/use-cases/RegisterItem.test.ts ("item virtual NÃO toca workspace")
+  //  - repositório legado '.specify/' sugere migração para '.governance/'
+  //      → domain/workspace/WorkspaceDiscovery.test.ts + LegacyPrecedence.test.ts
+  //  - múltiplos roots de governança (design evoluiu: 'mixed' → 'ambiguous',
+  //    sem heurística silenciosa de precedência)
+  //      → domain/workspace/WorkspaceDiscovery.test.ts
+  //  - escrita fora do escopo do root → erro de isolamento
+  //      → NodeWorkspaceIntegration.test.ts (WORKSPACE_PATH_OUT_OF_SCOPE)
+  //  - composição atômica de boilerplate (ex-"TemplateEngine")
+  //      → app/use-cases/AssembleArtifact.test.ts [BR-CLI-ASSEMBLE]
 });

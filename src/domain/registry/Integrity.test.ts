@@ -1,6 +1,9 @@
 /**
- * [BR-CLI-REGISTRY-01] Integridade do Registro (camada em memória — Fase 1).
- * IO real (YAML, parsing, comentários) é Fase 2 [DEC-0021-A01].
+ * [BR-CLI-REGISTRY-01] Integridade do Registro (camada em memória).
+ * Comportamento de IO/YAML (parsing com erro estável, preservação de
+ * comentários, ordem de blocos, atomicidade) é testado na camada de
+ * infraestrutura: `infrastructure/yaml/RegistrySchemaGuard.test.ts` e
+ * `infrastructure/yaml/RegistryRoundTrip.test.ts`.
  */
 import { GovernanceError } from "../shared/errors.js";
 import { WorkItem } from "../work-item/WorkItem.js";
@@ -32,8 +35,8 @@ describe("Domínio — Integridade do Registro [BR-CLI-REGISTRY]", () => {
       }
     });
 
-    // [SKIP-REASON: Fase 2 — parsing de YAML real e schema-guard sobre YAML chega no PR2 [DEC-0021-A01]]
-    it.skip("DADO um arquivo 'registry.yml' com sintaxe inválida QUANDO lido ENTÃO erro descritivo de parsing [DEC-0021-A01]", () => {});
+    // Parsing de YAML inválido → erro descritivo: coberto em
+    // infrastructure/yaml/RegistrySchemaGuard.test.ts (REGISTRY_YAML_PARSE_ERROR).
 
     it("DADO um item de 'experiment' completo ENTÃO add() não lança", () => {
       const r = new InMemoryRegistry();
@@ -106,15 +109,48 @@ describe("Domínio — Integridade do Registro [BR-CLI-REGISTRY]", () => {
     });
   });
 
-  describe("Interface Humana (YAML Preservation)", () => {
-    // [SKIP-REASON: Fase 2 — preservação de comentários depende do writer YAML (PR2) [DEC-0021-A01]]
-    it.skip("DADO um 'registry.yml' com comentários humanos QUANDO salvo ENTÃO preserva comentários [DEC-0021-A01]", () => {});
-    // [SKIP-REASON: Fase 2 — estabilidade de bloco no YAML depende do writer (PR2) [DEC-0021-A01]]
-    it.skip("DADO gravação ENTÃO mantém ordem estável dos blocos [DEC-0021-A01]", () => {});
-  });
+  // Preservação de comentários humanos e ordem estável de blocos no YAML são
+  // comportamento do writer (infraestrutura): cobertos em
+  // infrastructure/yaml/RegistryRoundTrip.test.ts.
 
-  describe("Arquivamento (Soft Delete)", () => {
-    // [SKIP-REASON: Fase 2 — soft delete será modelado quando IO/lifecycle for finalizado (PR2) [DEC-0021-A01]]
-    it.skip("DADO deleção de item crítico ('spec', 'incident') ENTÃO arquiva (soft delete) [DEC-0021-A01]", () => {});
+  describe("Arquivamento (Soft Delete) [BR-CLI-REGISTRY-01]", () => {
+    it("DADO archive() de item crítico ('spec') ENTÃO status vira 'archived' e item é preservado [DEC-0021-A01]", () => {
+      const r = new InMemoryRegistry();
+      r.add(make({ id: "wi-spec", kind: "spec", workspacePath: ".governance/specs/01" }));
+
+      const archived = r.archive("wi-spec", "2026-05-27T00:00:00.000Z");
+
+      expect(archived.status).toBe("archived");
+      expect(archived.updatedAt).toBe("2026-05-27T00:00:00.000Z");
+      expect(r.has("wi-spec")).toBe(true);
+      expect(r.find("wi-spec")?.status).toBe("archived");
+    });
+
+    it("DADO archive() de item crítico ('incident') ENTÃO preserva no registry como 'archived' [DEC-0021-A01]", () => {
+      const r = new InMemoryRegistry();
+      r.add(
+        make({
+          id: "wi-inc",
+          kind: "incident",
+          workspacePath: ".governance/incidents/01",
+          severity: "high",
+        })
+      );
+
+      r.archive("wi-inc", "2026-05-27T00:00:00.000Z");
+
+      expect(r.list().map((i) => i.id)).toContain("wi-inc");
+      expect(r.find("wi-inc")?.status).toBe("archived");
+    });
+
+    it("DADO archive() de id inexistente ENTÃO REGISTRY_NOT_FOUND", () => {
+      const r = new InMemoryRegistry();
+      try {
+        r.archive("wi-missing", "2026-05-27T00:00:00.000Z");
+        fail("deveria ter lançado");
+      } catch (e) {
+        expect((e as GovernanceError).code).toBe("REGISTRY_NOT_FOUND");
+      }
+    });
   });
 });

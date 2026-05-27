@@ -124,6 +124,38 @@ describe("Infra YAML — Round-trip [BR-CLI-YAML-ROUNDTRIP]", () => {
     expect(reopened.list().length).toBe(1);
   });
 
+  it("DADO registry.yml com comentário humano QUANDO load → update → save ENTÃO comentário é preservado [DEC-0021-A01]", () => {
+    const store = new GovernanceRegistryStore(filePath);
+    store.load();
+    store.add(SPEC);
+    store.save();
+
+    // Injeta um comentário humano no arquivo já válido e reabre.
+    const COMMENT = "# mantido à mão — não remover";
+    fs.writeFileSync(filePath, `${COMMENT}\n${fs.readFileSync(filePath, "utf8")}`, "utf8");
+
+    const reopened = new GovernanceRegistryStore(filePath);
+    reopened.load();
+    reopened.update("wi-0001", { title: "Spec renomeada" }, "2026-05-11T00:00:00.000Z");
+    reopened.save();
+
+    expect(fs.readFileSync(filePath, "utf8")).toContain(COMMENT);
+  });
+
+  it("DADO inserções fora de ordem QUANDO save ENTÃO blocos no arquivo ficam ordenados por id (ordem estável) [DEC-0021-A01]", () => {
+    const store = new GovernanceRegistryStore(filePath);
+    store.load();
+    store.add(EXPERIMENT); // wi-0003
+    store.add(SPEC); // wi-0001
+    store.add(PROPOSAL); // wi-0002
+    store.save();
+
+    const text = fs.readFileSync(filePath, "utf8");
+    const positions = ["wi-0001", "wi-0002", "wi-0003"].map((id) => text.indexOf(`id: ${id}`));
+    expect(positions.every((p) => p >= 0)).toBe(true);
+    expect(positions).toEqual([...positions].sort((a, b) => a - b));
+  });
+
   it("DADO patch alterando id ENTÃO REGISTRY_IMMUTABLE_ID", () => {
     const store = new GovernanceRegistryStore(filePath);
     store.load();
