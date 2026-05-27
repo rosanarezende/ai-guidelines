@@ -194,13 +194,13 @@ Não use `node cli/ai-guidelines-cli.mjs …` direto — quebra resolução de i
 
 Para conduzir o ciclo de uma spec (não para distribuir baseline), use os comandos do workflow runtime. Todos têm `--help`; o wizard sem argumentos lista as opções.
 
-| Comando                                             | Para quê                                                                                                       |
-| :-------------------------------------------------- | :------------------------------------------------------------------------------------------------------------- |
-| `yarn guidelines workflow`                          | Wizard operacional: navegar specs ativas, retomar, publicar estado, drift, abrir Integration PR, merge atômico |
-| `yarn guidelines continue [<id\|slug>]`             | Briefing da spec ativa + gate de execução (recusa narrativa se não autorizada)                                 |
-| `yarn guidelines review [<pr>]`                     | Reúne/estrutura os comentários de review de um PR (read-only) para colar na IA                                 |
-| `yarn guidelines workflow publish-state --status=…` | Projeta o estado interno da spec no índice público `active-specs.yml`                                          |
-| `yarn guidelines release-prep [--version <v>]`      | Prepara a release da stack com plano explícito (`--dry-run` audita sem aplicar)                                |
+| Comando                                             | Para quê                                                                                                                                                      |
+| :-------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `yarn guidelines workflow`                          | Wizard operacional: navegar specs ativas, retomar, publicar estado, drift, abrir Integration PR, merge atômico (modos `unit`/`sequential` — ver docs/cli §11) |
+| `yarn guidelines continue [<id\|slug>]`             | Briefing da spec ativa + gate de execução (recusa narrativa se não autorizada)                                                                                |
+| `yarn guidelines review [<pr>]`                     | Reúne/estrutura os comentários de review de um PR (read-only) para colar na IA                                                                                |
+| `yarn guidelines workflow publish-state --status=…` | Projeta o estado interno da spec no índice público `active-specs.yml`                                                                                         |
+| `yarn guidelines release-prep [--version <v>]`      | Prepara a release da stack com plano explícito (`--dry-run` audita sem aplicar)                                                                               |
 
 > Referência completa dos comandos e flags: `yarn guidelines --help` e [`docs/cli/ai-guidelines-cli.md`](docs/cli/ai-guidelines-cli.md) §11. Detalhe do ciclo de boundaries (tasks/review/release-log) em [`.core/process/governance-foundation.md`](.core/process/governance-foundation.md).
 

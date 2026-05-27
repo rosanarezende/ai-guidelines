@@ -104,7 +104,9 @@ A partir da `1.1.0`, a CLI ganha um conjunto de comandos para **operar o ciclo d
 - `review.md` — prontidão de integração (gates que liberam abrir o PR de integração e o merge);
 - `release-log.md` — registro pós-merge (release/ajustes públicos, quando houver).
 
-A CLI lê o `review.md` e **bloqueia, de forma determinística**, a abertura do Integration PR e o merge da stack enquanto os gates não fecharem — sempre com confirmação humana. No seu repositório o estado fica versionado: `.governance/registry.yml` é a SSOT estruturada do projeto e `.governance/runtime/active-specs.yml` é o índice derivado de specs ativas (schema fechado, descoberta cross-machine sem dashboard externo). Para repositórios com fluxo de stacked PRs, `npx ai-guidelines release-prep` prepara a release com um plano explícito antes de qualquer efeito colateral (`--dry-run` audita sem aplicar).
+A CLI lê o `review.md` e **bloqueia, de forma determinística**, a abertura do Integration PR e o merge da stack enquanto os gates não fecharem — sempre com confirmação humana. No seu repositório o estado fica versionado: `.governance/registry.yml` é a SSOT estruturada do projeto e `.governance/runtime/active-specs.yml` é o índice derivado de specs ativas (schema fechado, descoberta cross-machine sem dashboard externo).
+
+O **merge atômico** aterrissa a spec como **uma unidade** por default (`unit`): um único commit canônico em `main`, então **rollback é um comando** (`git revert <SHA>`); os PRs da stack são encerrados como _landed-via_ (não rejeitados). Um modo `sequential` opcional aterrissa PR a PR, para fluxos com fatias independentes. Para repositórios com stacked PRs, `npx ai-guidelines release-prep` prepara a release com um plano explícito antes de qualquer efeito colateral (`--dry-run` audita sem aplicar).
 
 ## Como funciona (em um minuto)
 

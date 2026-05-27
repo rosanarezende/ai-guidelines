@@ -290,6 +290,13 @@ Cada spec organiza o ciclo em três arquivos lidos pelo runtime (cf. `[DEC-0023-
 
 Ambos sempre exigem confirmação humana — continuidade conversacional não destrava gate.
 
+**Modos de aterrissagem do 🔀** (escolha explícita, sem inferência — cf. `[DEC-0023-O03]` + ADR 0024 § Modos de aterrissagem):
+
+- **`unit` (default)** — aterrissa a stack como **unidade**: mergeia o **PR terminal de implementação** (veículo; exige stack linear) → **1 SHA canônico** em `main`; os demais PRs e o Integration PR são encerrados via **`landed-via reconciliation`** (fechados com anotação `landed-via: #<veículo> @ <SHA>`, não rejeitados). Rollback: `git revert <SHA>` (1 comando).
+- **`sequential` (override)** — mergeia cada PR de implementação bottom-up. Indicado para fatias reversíveis isoladamente / stack rebase-friendly / deploy train. Rollback granular (atenção a interdependência).
+
+O `plan` imprime modo + veículo + PRs reconciliados + receita de rollback antes de qualquer side-effect. O **Integration PR nunca é veículo** de aterrissagem (é homologação).
+
 ### Exemplos
 
 ```bash
