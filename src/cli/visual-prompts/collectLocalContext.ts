@@ -216,7 +216,7 @@ function collectSpecContext(identifier: string, options: CollectContextOptions):
   lines.push(`### Spec ${slug} Evidence (Deterministic)`);
   lines.push("");
 
-  // Leitura linear de state.yml
+  // 1. state.yml — pequeno; contextualiza stage/gate atual
   const statePath = `${specDir}/state.yml`;
   if (fs.fileExists(statePath)) {
     try {
@@ -231,76 +231,110 @@ function collectSpecContext(identifier: string, options: CollectContextOptions):
     } catch {}
   }
 
-  // Leitura linear de tasks.md
-  const tasksPath = `${specDir}/tasks.md`;
-  if (fs.fileExists(tasksPath)) {
+  // 2. spec.md — objetivo e resultado esperado (narrativa curada, ~40-80 linhas)
+  // Para até a primeira seção de escopo/critérios: concentra o "porquê" da spec.
+  // tasks.md é execução; spec.md é o contrato de valor — muito mais útil para before/after.
+  const specMdPath = `${specDir}/spec.md`;
+  if (fs.fileExists(specMdPath)) {
     try {
-      const tasksContent = fs.readTextFile(tasksPath).trim();
-      if (tasksContent) {
-        lines.push("#### tasks.md");
+      const specMdLines = fs.readTextFile(specMdPath).split(/\r?\n/);
+      // Para antes da primeira seção que não é objetivo/resultado
+      // Para na primeira seção de escopo/critérios — não usar `---` como stop
+      // porque spec.md tem `---` como separador entre metadados e objetivo,
+      // antes da seção de escopo (que é o stop real desejado).
+      const stopPatterns = [/^## 📦/, /^## ✅ Crit/, /^## 🗺/, /^## Rollout/];
+      let endIdx = Math.min(specMdLines.length, 120);
+      for (let i = 5; i < specMdLines.length && i < 140; i++) {
+        if (stopPatterns.some((p) => p.test(specMdLines[i]))) {
+          endIdx = i;
+          break;
+        }
+      }
+      const excerpt = specMdLines.slice(0, endIdx).join("\n").trim();
+      if (excerpt) {
+        lines.push("#### spec.md (objetivo e resultado esperado)");
         lines.push("```markdown");
-        lines.push(tasksContent);
+        lines.push(excerpt);
         lines.push("```");
         lines.push("");
       }
     } catch {}
   }
 
-  // Leitura linear de NEXT.md
-  const nextPath = `${specDir}/NEXT.md`;
-  if (fs.fileExists(nextPath)) {
-    try {
-      const nextContent = fs.readTextFile(nextPath).trim();
-      if (nextContent) {
-        lines.push("#### NEXT.md");
-        lines.push("```markdown");
-        lines.push(nextContent);
-        lines.push("```");
-        lines.push("");
-      }
-    } catch {}
-  }
-
-  // Leitura linear de decision-brief.md (Bruta, linear e direta)
+  // 3. decision-brief.md — apenas seções "✅ Gate fechado" (resumos curados por bloco)
+  // O decision-brief completo tem milhares de linhas de prosa de governança.
+  // As seções Gate fechado são os resumos concisos do que foi entregue — a fonte certa
+  // para extrair sintomas/capacidades antes/depois.
   const dbPath = `${specDir}/decision-brief.md`;
   if (fs.fileExists(dbPath)) {
     try {
-      const dbContent = fs.readTextFile(dbPath).trim();
-      if (dbContent) {
-        lines.push("#### decision-brief.md");
-        lines.push("```markdown");
-        lines.push(dbContent);
-        lines.push("```");
-        lines.push("");
+      const dbLines = fs.readTextFile(dbPath).split(/\r?\n/);
+      // Encontra a primeira seção "✅ Gate fechado"
+      let gateStart = -1;
+      for (let i = 0; i < dbLines.length; i++) {
+        if (dbLines[i].startsWith("## ✅ Gate fechado")) {
+          gateStart = i;
+          break;
+        }
+      }
+      if (gateStart >= 0) {
+        const gateSummary = dbLines
+          .slice(gateStart, gateStart + 250)
+          .join("\n")
+          .trim();
+        if (gateSummary) {
+          lines.push(
+            "#### decision-brief.md (seções ✅ Gate fechado — resumos de entrega por bloco)"
+          );
+          lines.push("```markdown");
+          lines.push(gateSummary);
+          lines.push("```");
+          lines.push("");
+        }
       }
     } catch {}
   }
 
-  // Slicing simples de CHANGELOG.md na raiz do repositório
+  // 4. CHANGELOG.md — seção de versão completa que menciona esta spec
+  // Em vez de linha a linha, extrai o bloco inteiro da versão relevante
+  // para dar contexto das entregas agrupadas.
   const changelogPath = "CHANGELOG.md";
   if (fs.fileExists(changelogPath)) {
     try {
-      const changelogContent = fs.readTextFile(changelogPath);
-      const changelogLines = changelogContent.split(/\r?\n/);
-      // Filtra linhas que contenham o identifier ou slug da spec
-      const matched = changelogLines.filter((l) => {
-        const lower = l.toLowerCase();
-        return lower.includes(identifier) || (slug && lower.includes(slug.toLowerCase()));
-      });
-      if (matched.length > 0) {
-        lines.push("#### CHANGELOG.md Relevant Excerpts");
-        lines.push("```markdown");
-        for (const ml of matched.slice(0, 15)) {
-          lines.push(ml);
+      const changelogLines = fs.readTextFile(changelogPath).split(/\r?\n/);
+      // Mapeia seções de versão [start, end)
+      const sections: Array<{ start: number; end: number }> = [];
+      for (let i = 0; i < changelogLines.length; i++) {
+        if (changelogLines[i].startsWith("## [")) {
+          if (sections.length > 0) sections[sections.length - 1].end = i;
+          sections.push({ start: i, end: changelogLines.length });
         }
-        if (matched.length > 15) {
-          lines.push("...");
+      }
+      // Encontra a primeira seção que menciona o identifier ou slug
+      const idLower = identifier.toLowerCase();
+      const slugLower = slug.toLowerCase();
+      for (const sec of sections) {
+        const sectionText = changelogLines.slice(sec.start, sec.end).join("\n").toLowerCase();
+        if (sectionText.includes(idLower) || (slugLower && sectionText.includes(slugLower))) {
+          const excerpt = changelogLines.slice(sec.start, Math.min(sec.end, sec.start + 80));
+          const excerptText = excerpt.join("\n").trim();
+          if (excerptText) {
+            lines.push("#### CHANGELOG.md (seção da versão que entrega esta spec)");
+            lines.push("```markdown");
+            lines.push(excerptText);
+            if (sec.end - sec.start > 80) lines.push("...");
+            lines.push("```");
+            lines.push("");
+          }
+          break;
         }
-        lines.push("```");
-        lines.push("");
       }
     } catch {}
   }
+
+  // tasks.md e NEXT.md intencionalmente excluídos:
+  // tasks.md = checklist de execução (não é value story)
+  // NEXT.md = trabalho diferido (irrelevante para before/after de valor entregue)
 
   return lines.join("\n").trim();
 }

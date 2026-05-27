@@ -114,19 +114,26 @@ describe("CLI — Visual Prompts [BR-WORKFLOW-VISUAL-PROMPTS]", () => {
       expect(result).toBe("");
     });
 
-    it("DADO uma spec cujas pastas e arquivos existem QUANDO coletar contexto local ENTÃO lê linearmente state, tasks, NEXT e decision-brief", () => {
+    it("DADO uma spec cujas pastas e arquivos existem QUANDO coletar contexto local ENTÃO lê state, spec.md, gate summaries do decision-brief e CHANGELOG (sem tasks/NEXT)", () => {
       const files = new Map<string, string>([
         [
           ".governance/specs/0023-workflow-runtime/state.yml",
           "stage: implementation\ngate:\n  status: closed",
         ],
+        [
+          ".governance/specs/0023-workflow-runtime/spec.md",
+          "# Spec 0023\n\n## 🎯 Objetivo\nReduzir carga cognitiva.\n\nResultado esperado:\n- Comando workflow funciona.\n",
+        ],
         [".governance/specs/0023-workflow-runtime/tasks.md", "- [x] Tarefa 1\n- [/] Tarefa 2"],
         [".governance/specs/0023-workflow-runtime/NEXT.md", "Debts:\n- Corrigir bugs"],
         [
           ".governance/specs/0023-workflow-runtime/decision-brief.md",
-          "# DEC-0023-A01\nAlguma decisão.",
+          "# Decision Brief\n\n## Bloco A\n\nTexto de decisão.\n\n## ✅ Gate fechado — Bloco A\n\n- [x] DEC-0023-A01 — Escopo expandido\n",
         ],
-        ["CHANGELOG.md", "## [0023-workflow-runtime]\n- Mudança 1\n- Mudança 2"],
+        [
+          "CHANGELOG.md",
+          "## [Unreleased]\n\n- Spec 0023 entregue.\n- Wizard operacional.\n\n## [1.0.0]\n\n- Release anterior.",
+        ],
       ]);
       const dirs = new Set<string>([
         ".governance/specs",
@@ -140,16 +147,23 @@ describe("CLI — Visual Prompts [BR-WORKFLOW-VISUAL-PROMPTS]", () => {
       );
 
       expect(result).toContain("### Spec 0023-workflow-runtime Evidence");
+      // state.yml incluído
       expect(result).toContain("#### state.yml");
       expect(result).toContain("stage: implementation");
-      expect(result).toContain("#### tasks.md");
-      expect(result).toContain("- [x] Tarefa 1");
-      expect(result).toContain("#### NEXT.md");
-      expect(result).toContain("- Corrigir bugs");
-      expect(result).toContain("#### decision-brief.md");
-      expect(result).toContain("# DEC-0023-A01");
-      expect(result).toContain("#### CHANGELOG.md Relevant Excerpts");
-      expect(result).toContain("## [0023-workflow-runtime]");
+      // spec.md objetivo incluído
+      expect(result).toContain("#### spec.md");
+      expect(result).toContain("Reduzir carga cognitiva");
+      // decision-brief: apenas seções Gate fechado
+      expect(result).toContain("## ✅ Gate fechado — Bloco A");
+      expect(result).toContain("DEC-0023-A01");
+      expect(result).not.toContain("## Bloco A\n\nTexto de decisão"); // prosa de governança excluída
+      // CHANGELOG: seção completa
+      expect(result).toContain("#### CHANGELOG.md");
+      expect(result).toContain("Spec 0023 entregue");
+      // tasks.md e NEXT.md excluídos intencionalmente (execução/diferidos, não value story)
+      expect(result).not.toContain("#### tasks.md");
+      expect(result).not.toContain("#### NEXT.md");
+      expect(result).not.toContain("Corrigir bugs");
     });
 
     it("DADO uma spec cujos arquivos de especificação não existem QUANDO coletar contexto local ENTÃO retorna apenas cabeçalho ou string vazia de forma resiliente", () => {
