@@ -24,6 +24,9 @@ class FakeStackOps implements StackOps {
   mergePullRequest(): void {
     throw new Error("not used");
   }
+  closePullRequest(): void {
+    throw new Error("not used");
+  }
   listOpenPullRequests(): ReadonlyArray<PullRequestData> {
     throw new Error("not used");
   }

@@ -36,6 +36,7 @@ const PR_JSON_FIELDS = [
   "baseRefName",
   "labels",
   "url",
+  "mergeCommit",
 ].join(",");
 
 export class GhCli implements StackOps {
@@ -92,7 +93,13 @@ export class GhCli implements StackOps {
     const strategyFlag = `--${input.strategy}`;
     const args = ["pr", "merge", String(input.number), strategyFlag];
     if (input.deleteBranch !== false) args.push("--delete-branch");
+    if (input.subject !== undefined) args.push("--subject", input.subject);
+    if (input.body !== undefined) args.push("--body", input.body);
     this.exec(args);
+  }
+
+  closePullRequest(number: number, comment: string): void {
+    this.exec(["pr", "close", String(number), "--comment", comment]);
   }
 
   listOpenPullRequests(): ReadonlyArray<PullRequestData> {
@@ -201,6 +208,10 @@ function parsePullRequestData(raw: unknown): PullRequestData {
           .filter((name) => name !== "")
       : [],
     url: String(r.url ?? ""),
+    mergeCommitSha:
+      typeof r.mergeCommit === "object" && r.mergeCommit !== null && "oid" in r.mergeCommit
+        ? String((r.mergeCommit as { oid: unknown }).oid) || null
+        : null,
   };
 }
 

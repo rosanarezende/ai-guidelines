@@ -55,6 +55,9 @@ class FakeStackOps implements StackOps {
   mergePullRequest(): void {
     throw new Error("not used");
   }
+  closePullRequest(): void {
+    throw new Error("not used");
+  }
 }
 
 class FakeFs implements WorkflowFileSystem {
@@ -93,6 +96,7 @@ function pr(number: number, headRefName: string): PullRequestData {
     baseRefName: "main",
     labels: [],
     url: `https://gh/pr/${number}`,
+    mergeCommitSha: null,
   };
 }
 

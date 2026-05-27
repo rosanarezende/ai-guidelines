@@ -714,11 +714,13 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
           baseRefName: "main",
           labels: [],
           url: "https://github.com/test/repo/pull/99",
+          mergeCommitSha: null,
         }),
         getPullRequest: jest.fn().mockReturnValue(null),
         editPullRequestBase: jest.fn(),
         listReviewComments: jest.fn().mockReturnValue([]),
         mergePullRequest: jest.fn(),
+        closePullRequest: jest.fn(),
         listOpenPullRequests: jest.fn().mockReturnValue([]),
       };
       const code = await runWorkflow({
@@ -758,6 +760,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
         editPullRequestBase: jest.fn(),
         listReviewComments: jest.fn().mockReturnValue([]),
         mergePullRequest: jest.fn(),
+        closePullRequest: jest.fn(),
         listOpenPullRequests: jest.fn().mockReturnValue([]),
       };
       const code = await runWorkflow({
@@ -788,6 +791,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
           baseRefName: "main",
           labels: [],
           url: "https://github.com/test/repo/pull/18",
+          mergeCommitSha: null,
         },
         {
           number: 19,
@@ -799,6 +803,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
           baseRefName: "feat/spec-0023-workflow-runtime",
           labels: [],
           url: "https://github.com/test/repo/pull/19",
+          mergeCommitSha: null,
         },
       ];
       const stack: import("../app/ports/StackOps.js").StackOps = {
@@ -807,6 +812,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
         editPullRequestBase: jest.fn(),
         listReviewComments: jest.fn().mockReturnValue([]),
         mergePullRequest: jest.fn(),
+        closePullRequest: jest.fn(),
         listOpenPullRequests: jest.fn().mockReturnValue(stackPrs),
       };
       const code = await runWorkflow({
@@ -856,6 +862,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
         editPullRequestBase: jest.fn(),
         listReviewComments: jest.fn().mockReturnValue([]),
         mergePullRequest: jest.fn(),
+        closePullRequest: jest.fn(),
         listOpenPullRequests: jest.fn().mockReturnValue([
           {
             number: 18,
@@ -919,6 +926,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
         editPullRequestBase: jest.fn(),
         listReviewComments: jest.fn().mockReturnValue([]),
         mergePullRequest: jest.fn(),
+        closePullRequest: jest.fn(),
         listOpenPullRequests: jest.fn().mockReturnValue([]),
       };
       const code = await runWorkflow({
@@ -975,6 +983,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
         editPullRequestBase: jest.fn(),
         listReviewComments: jest.fn().mockReturnValue([]),
         mergePullRequest: jest.fn(),
+        closePullRequest: jest.fn(),
         listOpenPullRequests: jest.fn().mockReturnValue([]),
       };
       const code = await runWorkflow({
@@ -1021,6 +1030,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
         editPullRequestBase: jest.fn(),
         listReviewComments: jest.fn().mockReturnValue([]),
         mergePullRequest: jest.fn(),
+        closePullRequest: jest.fn(),
         listOpenPullRequests: jest.fn().mockReturnValue([]),
       };
       const code = await runWorkflow({

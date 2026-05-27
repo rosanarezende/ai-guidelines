@@ -10,7 +10,9 @@ class FakeStackOps implements StackOps {
   prs = new Map<number, PullRequestData>();
   mergeCalls: MergePullRequestInput[] = [];
   editBaseCalls: { number: number; newBase: string }[] = [];
+  closeCalls: { number: number; comment: string }[] = [];
   failOnMerge: number | null = null;
+  failOnClose: number | null = null;
 
   seed(pr: PullRequestData): void {
     this.prs.set(pr.number, pr);
@@ -33,7 +35,21 @@ class FakeStackOps implements StackOps {
     }
     this.mergeCalls.push(input);
     const pr = this.prs.get(input.number);
-    if (pr) this.prs.set(input.number, { ...pr, state: "MERGED" });
+    if (pr) {
+      this.prs.set(input.number, {
+        ...pr,
+        state: "MERGED",
+        mergeCommitSha: `sha-${input.number}`,
+      });
+    }
+  }
+  closePullRequest(number: number, comment: string): void {
+    if (this.failOnClose === number) {
+      throw new Error(`Simulated close failure for PR #${number}`);
+    }
+    this.closeCalls.push({ number, comment });
+    const pr = this.prs.get(number);
+    if (pr) this.prs.set(number, { ...pr, state: "CLOSED" });
   }
   listOpenPullRequests(): ReadonlyArray<PullRequestData> {
     return [...this.prs.values()].filter((p) => p.state === "OPEN");
@@ -62,29 +78,12 @@ function pr(
     baseRefName: opts.base ?? "main",
     labels: [],
     url: `https://github.com/test/repo/pull/${number}`,
+    mergeCommitSha: null,
   };
 }
 
 describe("App — MergeStack [BR-WORKFLOW-MERGE-STACK]", () => {
-  describe("plan", () => {
-    it("DADO lista de PRs Ready com bases distintas ENTÃO devolve plan marcando needsBaseEdit corretamente por PR", () => {
-      const stack = new FakeStackOps();
-      stack.seed(pr(18, { base: "main", head: "feat-workflow-runtime" }));
-      stack.seed(pr(19, { base: "feat-workflow-runtime", head: "feat-lifecycle" }));
-      stack.seed(pr(22, { base: "feat-lifecycle", head: "feat-followup" }));
-
-      const plan = new MergeStack(stack).plan({
-        prNumbers: [18, 19, 22],
-        mainBranch: "main",
-        mergeStrategy: "squash",
-      });
-
-      expect(plan.items).toHaveLength(3);
-      expect(plan.items[0]).toMatchObject({ prNumber: 18, needsBaseEdit: false });
-      expect(plan.items[1]).toMatchObject({ prNumber: 19, needsBaseEdit: true });
-      expect(plan.items[2]).toMatchObject({ prNumber: 22, needsBaseEdit: true });
-    });
-
+  describe("plan — validações comuns aos modos", () => {
     it("DADO PR não encontrado ENTÃO MergeStackError com orientação sobre gh auth", () => {
       const stack = new FakeStackOps();
       expect(() =>
@@ -93,26 +92,7 @@ describe("App — MergeStack [BR-WORKFLOW-MERGE-STACK]", () => {
           mainBranch: "main",
           mergeStrategy: "squash",
         })
-      ).toThrow(MergeStackError);
-      expect(() =>
-        new MergeStack(stack).plan({
-          prNumbers: [999],
-          mainBranch: "main",
-          mergeStrategy: "squash",
-        })
       ).toThrow(/não encontrado.*gh auth/);
-    });
-
-    it("DADO PR ainda Draft ENTÃO MergeStackError citando CORE-10 + ADR 0024", () => {
-      const stack = new FakeStackOps();
-      stack.seed(pr(18, { isDraft: true }));
-      expect(() =>
-        new MergeStack(stack).plan({
-          prNumbers: [18],
-          mainBranch: "main",
-          mergeStrategy: "squash",
-        })
-      ).toThrow(/Draft.*CORE-10.*ADR 0024/);
     });
 
     it("DADO PR já MERGED ENTÃO MergeStackError narrativo", () => {
@@ -138,8 +118,42 @@ describe("App — MergeStack [BR-WORKFLOW-MERGE-STACK]", () => {
     });
   });
 
-  describe("execute", () => {
-    it("DADO plan com 3 PRs ENTÃO chama editPullRequestBase apenas para PRs com base != main E mergeia todos em ordem", () => {
+  describe("modo sequential (override)", () => {
+    it("DADO lista de PRs Ready com bases distintas ENTÃO plan marca needsBaseEdit por PR", () => {
+      const stack = new FakeStackOps();
+      stack.seed(pr(18, { base: "main", head: "feat-workflow-runtime" }));
+      stack.seed(pr(19, { base: "feat-workflow-runtime", head: "feat-lifecycle" }));
+      stack.seed(pr(22, { base: "feat-lifecycle", head: "feat-followup" }));
+
+      const plan = new MergeStack(stack).plan({
+        prNumbers: [18, 19, 22],
+        mainBranch: "main",
+        mergeStrategy: "squash",
+        mode: "sequential",
+      });
+
+      expect(plan.mode).toBe("sequential");
+      expect(plan.items).toHaveLength(3);
+      expect(plan.items[0]).toMatchObject({ prNumber: 18, needsBaseEdit: false });
+      expect(plan.items[1]).toMatchObject({ prNumber: 19, needsBaseEdit: true });
+      expect(plan.items[2]).toMatchObject({ prNumber: 22, needsBaseEdit: true });
+      expect(plan.rollbackRecipe).toMatch(/sequential.*ordem inversa/);
+    });
+
+    it("DADO PR ainda Draft ENTÃO MergeStackError citando CORE-10 + ADR 0024", () => {
+      const stack = new FakeStackOps();
+      stack.seed(pr(18, { isDraft: true }));
+      expect(() =>
+        new MergeStack(stack).plan({
+          prNumbers: [18],
+          mainBranch: "main",
+          mergeStrategy: "squash",
+          mode: "sequential",
+        })
+      ).toThrow(/Draft.*CORE-10.*ADR 0024/);
+    });
+
+    it("DADO execute ENTÃO editPullRequestBase só p/ base != main E mergeia todos em ordem", () => {
       const stack = new FakeStackOps();
       stack.seed(pr(18, { base: "main" }));
       stack.seed(pr(19, { base: "feat-workflow-runtime" }));
@@ -150,22 +164,22 @@ describe("App — MergeStack [BR-WORKFLOW-MERGE-STACK]", () => {
         prNumbers: [18, 19, 22],
         mainBranch: "main",
         mergeStrategy: "squash",
+        mode: "sequential",
       });
       useCase.execute(plan);
 
-      // editBase: só para #19 e #22 (não #18, já tem base=main)
       expect(stack.editBaseCalls).toEqual([
         { number: 19, newBase: "main" },
         { number: 22, newBase: "main" },
       ]);
-      // merge: todos em ordem
       expect(stack.mergeCalls.map((m) => m.number)).toEqual([18, 19, 22]);
-      // estratégia + deleteBranch defaults
       expect(stack.mergeCalls.every((m) => m.strategy === "squash")).toBe(true);
       expect(stack.mergeCalls.every((m) => m.deleteBranch === true)).toBe(true);
+      // sequential não fecha nada (landed-via é exclusivo do unit)
+      expect(stack.closeCalls).toEqual([]);
     });
 
-    it("DADO falha mid-way em PR #19 ENTÃO MergeStackError com failedItemIndex correto + orientação de retomada", () => {
+    it("DADO falha mid-way em PR #19 ENTÃO MergeStackError com failedItemIndex + retomada", () => {
       const stack = new FakeStackOps();
       stack.seed(pr(18, { base: "main" }));
       stack.seed(pr(19, { base: "feat-workflow-runtime" }));
@@ -177,27 +191,27 @@ describe("App — MergeStack [BR-WORKFLOW-MERGE-STACK]", () => {
         prNumbers: [18, 19, 22],
         mainBranch: "main",
         mergeStrategy: "squash",
+        mode: "sequential",
       });
 
       try {
         useCase.execute(plan);
         fail("expected MergeStackError");
       } catch (err) {
-        expect(err).toBeInstanceOf(MergeStackError);
         const e = err as MergeStackError;
+        expect(e).toBeInstanceOf(MergeStackError);
         expect(e.failedItemIndex).toBe(1);
         expect(e.message).toMatch(/Falha ao mergear PR #19.*passo 2\/3/);
         expect(e.message).toMatch(/skipSteps=2.*continuar do próximo/);
         expect(e.message).toMatch(/skipSteps=1.*tentar este PR novamente/);
       }
-      // #18 mergeado com sucesso antes da falha
       expect(stack.mergeCalls.map((m) => m.number)).toEqual([18]);
     });
 
     it("DADO skipSteps=1 ENTÃO pula primeiro item e executa do segundo em diante", () => {
       const stack = new FakeStackOps();
       stack.seed(pr(18, { base: "main" }));
-      stack.seed(pr(19, { base: "main" })); // após retomada, já está em main
+      stack.seed(pr(19, { base: "main" }));
       stack.seed(pr(22, { base: "main" }));
 
       const useCase = new MergeStack(stack);
@@ -205,32 +219,147 @@ describe("App — MergeStack [BR-WORKFLOW-MERGE-STACK]", () => {
         prNumbers: [18, 19, 22],
         mainBranch: "main",
         mergeStrategy: "squash",
+        mode: "sequential",
         skipSteps: 1,
       });
       useCase.execute(plan);
 
-      // #18 pulado; só #19 e #22 mergeados
       expect(stack.mergeCalls.map((m) => m.number)).toEqual([19, 22]);
     });
+  });
 
-    it("DADO hooks onItemStart/onItemDone ENTÃO callbacks são invocados por item na ordem", () => {
+  describe("modo unit (default)", () => {
+    it("DADO mode ausente ENTÃO default é unit (veículo = terminal; resto reconciliado)", () => {
       const stack = new FakeStackOps();
       stack.seed(pr(18, { base: "main" }));
-      stack.seed(pr(19, { base: "feat-workflow-runtime" }));
+      stack.seed(pr(19, { base: "feat-18" }));
+      stack.seed(pr(26, { base: "feat-25" }));
 
-      const events: string[] = [];
-      const useCase = new MergeStack(stack);
-      const plan = useCase.plan({
-        prNumbers: [18, 19],
+      const plan = new MergeStack(stack).plan({
+        prNumbers: [18, 19, 26],
         mainBranch: "main",
         mergeStrategy: "squash",
       });
-      useCase.execute(plan, {
-        onItemStart: (item, i) => events.push(`start:${i}:${item.prNumber}`),
-        onItemDone: (item, i) => events.push(`done:${i}:${item.prNumber}`),
+
+      expect(plan.mode).toBe("unit");
+      expect(plan.items).toHaveLength(1);
+      expect(plan.items[0].prNumber).toBe(26); // terminal
+      expect(plan.reconcilePrNumbers).toEqual([18, 19]);
+      expect(plan.rollbackRecipe).toMatch(/unit.*git revert/);
+    });
+
+    it("DADO integrationPrNumber ENTÃO ele entra na reconciliação (nunca é veículo)", () => {
+      const stack = new FakeStackOps();
+      stack.seed(pr(18));
+      stack.seed(pr(26, { base: "feat-25" }));
+      stack.seed(pr(27)); // Integration
+
+      const plan = new MergeStack(stack).plan({
+        prNumbers: [18, 26],
+        mainBranch: "main",
+        mergeStrategy: "squash",
+        integrationPrNumber: 27,
       });
 
-      expect(events).toEqual(["start:0:18", "done:0:18", "start:1:19", "done:1:19"]);
+      expect(plan.items[0].prNumber).toBe(26);
+      expect(plan.reconcilePrNumbers).toEqual([18, 27]);
+    });
+
+    it("DADO execute unit ENTÃO mergeia só o veículo e fecha o resto com landed-via + SHA", () => {
+      const stack = new FakeStackOps();
+      stack.seed(pr(18, { base: "main" }));
+      stack.seed(pr(25, { base: "feat-24" }));
+      stack.seed(pr(26, { base: "feat-25" }));
+      stack.seed(pr(27)); // Integration
+
+      const useCase = new MergeStack(stack);
+      const plan = useCase.plan({
+        prNumbers: [18, 25, 26],
+        mainBranch: "main",
+        mergeStrategy: "squash",
+        integrationPrNumber: 27,
+      });
+      useCase.execute(plan);
+
+      // só o veículo (#26) mergeado; base reescrita
+      expect(stack.mergeCalls.map((m) => m.number)).toEqual([26]);
+      expect(stack.editBaseCalls).toEqual([{ number: 26, newBase: "main" }]);
+      // resto fechado (landed-via reconciliation), não mergeado
+      expect(stack.closeCalls.map((c) => c.number)).toEqual([18, 25, 27]);
+      for (const c of stack.closeCalls) {
+        expect(c.comment).toMatch(/landed-via: #26 @ sha-26/);
+        expect(c.comment).toMatch(/não foi rejeitado/);
+      }
+    });
+
+    it("DADO vehicleCommitMessage ENTÃO o merge do veículo usa subject/body curados", () => {
+      const stack = new FakeStackOps();
+      stack.seed(pr(26, { base: "main" }));
+
+      const useCase = new MergeStack(stack);
+      const plan = useCase.plan({
+        prNumbers: [26],
+        mainBranch: "main",
+        mergeStrategy: "squash",
+        vehicleCommitMessage: { subject: "feat(spec-0023): workflow runtime", body: "detalhe" },
+      });
+      useCase.execute(plan);
+
+      expect(stack.mergeCalls[0]).toMatchObject({
+        number: 26,
+        subject: "feat(spec-0023): workflow runtime",
+        body: "detalhe",
+      });
+    });
+
+    it("DADO veículo Draft ENTÃO MergeStackError citando CORE-10 + ADR 0024", () => {
+      const stack = new FakeStackOps();
+      stack.seed(pr(18));
+      stack.seed(pr(26, { isDraft: true }));
+      expect(() =>
+        new MergeStack(stack).plan({
+          prNumbers: [18, 26],
+          mainBranch: "main",
+          mergeStrategy: "squash",
+        })
+      ).toThrow(/#26 \(veículo\) ainda é Draft.*CORE-10.*ADR 0024/);
+    });
+
+    it("DADO falha ao reconciliar (close) ENTÃO erro narra veículo já mergeado + close manual", () => {
+      const stack = new FakeStackOps();
+      stack.seed(pr(18, { base: "main" }));
+      stack.seed(pr(26, { base: "main" }));
+      stack.failOnClose = 18;
+
+      const useCase = new MergeStack(stack);
+      const plan = useCase.plan({
+        prNumbers: [18, 26],
+        mainBranch: "main",
+        mergeStrategy: "squash",
+      });
+
+      try {
+        useCase.execute(plan);
+        fail("expected MergeStackError");
+      } catch (err) {
+        const e = err as MergeStackError;
+        expect(e).toBeInstanceOf(MergeStackError);
+        expect(e.message).toMatch(/Veículo #26 mergeado.*falha ao reconciliar.*#18/);
+        expect(e.message).toMatch(/Feche manualmente/);
+      }
+      // veículo foi mergeado antes da falha de reconciliação
+      expect(stack.mergeCalls.map((m) => m.number)).toEqual([26]);
+    });
+
+    it("DADO merge-commit strategy ENTÃO rollbackRecipe usa revert -m 1", () => {
+      const stack = new FakeStackOps();
+      stack.seed(pr(26, { base: "main" }));
+      const plan = new MergeStack(stack).plan({
+        prNumbers: [26],
+        mainBranch: "main",
+        mergeStrategy: "merge",
+      });
+      expect(plan.rollbackRecipe).toMatch(/revert -m 1/);
     });
   });
 });

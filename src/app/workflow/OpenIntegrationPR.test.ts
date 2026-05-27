@@ -24,6 +24,7 @@ class FakeStackOps implements StackOps {
       baseRefName: input.base,
       labels: [...(input.labels ?? [])],
       url: `https://github.com/test/repo/pull/${number}`,
+      mergeCommitSha: null,
     };
   }
   getPullRequest(): PullRequestData | null {
@@ -33,6 +34,9 @@ class FakeStackOps implements StackOps {
     throw new Error("not used in OpenIntegrationPR tests");
   }
   mergePullRequest(_input: MergePullRequestInput): void {
+    throw new Error("not used in OpenIntegrationPR tests");
+  }
+  closePullRequest(): void {
     throw new Error("not used in OpenIntegrationPR tests");
   }
   listOpenPullRequests(): ReadonlyArray<PullRequestData> {

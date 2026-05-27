@@ -1003,6 +1003,11 @@ async function runMergeStackWizard(opts: {
       prNumbers: stackPrs.map((p) => p.number),
       mainBranch,
       mergeStrategy: "squash",
+      // Fixado em `sequential` (comportamento atual) até a escolha de modo ser
+      // cabeada no wizard (1.O.7b). O default do use case é `unit` (DEC-0023-O03);
+      // não mudamos o comportamento real desta operação destrutiva sem a escolha
+      // humana explícita do modo.
+      mode: "sequential",
     });
   } catch (err) {
     logger.error(err instanceof Error ? err.message : String(err));

@@ -29,6 +29,8 @@ export interface PullRequestData {
   readonly baseRefName: string;
   readonly labels: ReadonlyArray<string>;
   readonly url: string;
+  /** SHA do commit de merge (`null` enquanto o PR não foi mergeado). */
+  readonly mergeCommitSha: string | null;
 }
 
 export interface CreatePullRequestInput {
@@ -46,6 +48,9 @@ export interface MergePullRequestInput {
   readonly strategy: MergeStrategy;
   /** Deletar branch source após merge. Default: true (cleanup). */
   readonly deleteBranch?: boolean;
+  /** Mensagem curada do commit de merge (modo `unit`). Default: título/body do PR. */
+  readonly subject?: string;
+  readonly body?: string;
 }
 
 /**
@@ -90,6 +95,15 @@ export interface StackOps {
    * recebe os commits e branch source pode ser deletada (default).
    */
   mergePullRequest(input: MergePullRequestInput): void;
+
+  /**
+   * Fecha um PR sem mergear (`gh pr close <N> --comment`), registrando uma
+   * anotação. Usado no modo `unit` para **landed-via reconciliation**: os PRs
+   * da stack que não são o veículo são fechados com `landed-via: #<veículo> @ <SHA>`
+   * — não rejeitados; seus commits já estão em `main` via o veículo. Cf.
+   * `[DEC-0023-O03]` + ADR 0024 § Modos de aterrissagem.
+   */
+  closePullRequest(number: number, comment: string): void;
 
   /**
    * Lista PRs abertos do repo corrente. Usado para detecção de stack
