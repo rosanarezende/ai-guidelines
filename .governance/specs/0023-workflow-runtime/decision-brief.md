@@ -1528,6 +1528,37 @@ Para preservar enforcement estrutural enquanto a accountability transfere, fast-
 
 ---
 
+### [DEC-0023-O03] Modos de aterrissagem da stack: `unit` (default) vs `sequential` (override)
+
+> **Origem:** descoberta de dogfooding ao abrir o Integration PR #27 (2026-05-27). Inspecionar a máquina revelou que `detectStackForSpec` **exclui o Integration PR** do merge e o `MergeStack` **mergeia cada PR de implementação em sequência** (M1), com o Integration PR como evidência fechada. Isso **é fiel ao ADR 0024** (que craveia "`gh pr merge --squash` para cada PR da stack") — mas **diverge da expectativa operacional** que a linguagem "atomic / one-shot / single" do ADR 0020 induz, e do que a owner esperava (a stack entrando como **uma unidade**, com os demais PRs fechados pelo merge canônico). Mesmo padrão estrutural de `[DEC-0023-O01]`/`[DEC-0023-O02]`: promessa conceitual feita, comportamento real diferente, dogfooding expôs.
+
+**Pergunta:** "merge atômico" deve aterrissar como **uma unidade** (1 SHA canônico, rollback de 1 comando) ou como **N fatias sequenciais** — e o framework, sendo adotável por times com fluxos distintos, deve fixar um único modo ou suportar os dois?
+
+**Decisão:** o framework suporta **dois modos de aterrissagem**, com **default seguro + override explícito**, ortogonais à **estratégia de merge** do host (`squash`/`merge-commit`/`rebase`):
+
+- **`unit` (default):** a stack aterrissa como unidade lógica. O **veículo canônico** é o **PR terminal de implementação** — o nó terminal do topo-sort (exige stack **linear**; por linearidade o terminal carrega o diff acumulado **por construção**, não "o PR que contém tudo"). → **um SHA canônico**, rollback de 1 comando.
+- **`sequential` (override explícito, não inferior):** cada PR de implementação aterrissa bottom-up (mecânica original do ADR 0024). Recomendado quando: (a) PRs reversíveis isoladamente, (b) stack rebase-friendly, (c) dependências fracas entre fatias, (d) deploy parcial aceitável (deploy train, iniciativas independentes). O runtime **expõe o tradeoff**; não desencoraja.
+
+**Conceitos cravados:**
+
+- **Integration PR não é veículo de aterrissagem** (em ambos os modos, semântica atual — não proibição ontológica): permanece artefato de homologação (ADR 0024). Em `unit`, a **narrativa** do Integration PR (o que a spec entrega) vira a **mensagem do commit canônico** do veículo — valor operacional real sem ser mergeado.
+- **`landed-via reconciliation`:** PRs da stack que não são o veículo são reconciliados a `Closed` com anotação **`landed-via: #<veículo> @ <SHA>`** — **não rejeitados**; commits já em `main` via o veículo. Estado terminal auditável, distinto de "closed-as-abandoned".
+- **Determinismo (ADR 0018):** modo é **escolha humana explícita** (wizard/flag), nunca auto-detectado. `unit` **recusa** stack não-linear, orientando reconciliação de bases ou `sequential`. O `plan` imprime modo + veículo + PRs reconciliados + SHA canônico + **receita de rollback** antes de qualquer side-effect.
+
+**Semântica operacional do `unit` (referência):** veículo = PR terminal (base→`main`, merge); fechados = demais impl + Integration (`landed-via`); histórico = 1 commit (`squash`) cuja mensagem é curada do body do Integration; SHA canônico = esse commit (tag/rollback/audit); `review.md` = inalterado (boundary de readiness); `release-log.md` T0 = registra modo + SHA + rollback; rollback = `git revert <SHA>`.
+
+**Reconciliação ADR 0020 ↔ 0024:** emenda **substantiva no ADR 0024** (dono da orquestração: adiciona "Modos de aterrissagem" + corrige a linha "para cada PR" para ser mode-aware) + **nota clarificadora no ADR 0020** ponto 4 (a "sequência" descreve ordem de dependência, não obriga N merges; default `unit`).
+
+**Escopo:** PR terminal de fechamento da 0023 (mesma classe de O01/O02 — pré-condição revelada por dogfooding, não feature opcional). **Bounded:** dois modos nomeados mapeando 1:1 para operações `gh` reais — **não** é pipeline engine / DAG / orquestrador / auto-detecção. A própria 0023 dogfooda o `unit` no merge real (R8).
+
+**Decisão do Gate Humano:**
+
+- **Status:** [x] Resolvido
+- **Justificativa:** divergência semântica entre a promessa do ADR 0020 e o comportamento real, revelada pelo dogfooding do #27; `unit` como default honra "one-shot/single" e dá rollback trivial para specs coesas; `sequential` preservado como override legítimo para o cenário "homologa como unidade, aterrissa granular". Escopo cirúrgico e nomeado preserva a regra anti-engine-genérica.
+- **Data / Owner:** 2026-05-27 / @rosanarezende
+
+---
+
 ## ✅ Gate fechado — Stage A → Stage B (Bloco A)
 
 - **Data:** 2026-05-19

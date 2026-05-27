@@ -34,7 +34,7 @@ Operacionalmente:
 
 3. **PRs refletem o boundary**: thinking PR (`feat/spec-NNNN-{slug}`) contém apenas artifacts de governance (spec/decision-brief/plan/tasks/state.yml/research); execution PR (`feat/spec-NNNN-{slug}-execution`) contém apenas código + docs derivados. **PRs são stacked** — execution PR tem thinking PR como base branch.
 
-4. **Merge final é ponta a ponta**. Thinking PR isolado não representa software pronto; representa contrato pendente de execução. A unidade de release é o par thinking+execution mergeado em sequência.
+4. **Merge final é ponta a ponta**. Thinking PR isolado não representa software pronto; representa contrato pendente de execução. A unidade de release é a stack inteira, mergeada como unidade. **Nota (cf. `[DEC-0023-O03]`):** "ponta a ponta" admite **dois modos de aterrissagem** — `unit` (default; 1 SHA canônico, veículo = PR terminal de implementação, demais via `landed-via reconciliation`) e `sequential` (override; cada PR aterrissa bottom-up). A "sequência" aqui descreve **ordem de dependência**, não obriga N merges. Semântica canônica em [`ADR 0024 § Modos de aterrissagem da stack`](./0024-draft-ready-mergeable-distinct-states.md).
 
 5. **CI protege a integridade estrutural** do contrato (mínimo): valida que execution PR referencia explicitamente o thinking PR, que o thinking PR existe e está aberto/aprovado, e que o thinking PR contém `tasks.md` no diff. Drift semântico (mapeamento arquivos↔tasks, análise de cobertura, inferência de intent) é **deliberadamente diferido** — risco real de virar workflow engine.
 

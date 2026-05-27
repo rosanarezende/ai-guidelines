@@ -31,6 +31,21 @@ Semântica:
 - **Não autoriza merge sozinho** — continua sujeito ao estado terceiro `Mergeable`: stack Ready + autorização explícita do owner + validações concluídas.
 - **Não vira mega-PR criativo** — se surgir comportamento novo, ele volta para execution PR ou spec própria.
 
+## Modos de aterrissagem da stack (`unit` / `sequential`)
+
+> **Extensão cravada em `[DEC-0023-O03]`** (descoberta de dogfooding no fechamento da Spec 0023, 2026-05-27). A formulação original do "🔀 merge atômico" especificava **uma única mecânica** — merge sequencial de cada PR. O dogfooding (abertura do Integration PR #27) revelou que "atômico / ponta-a-ponta" admite **dois modos de aterrissagem** com consequências distintas de rollback, histórico e auditoria, e que o default natural induzido pela linguagem "one-shot / single" do ADR 0020 é o modo **`unit`**.
+
+A **aterrissagem** (como a stack vai para `main`) é política com **default + override explícito**, **ortogonal** à estratégia de merge do host (`squash` / `merge-commit` / `rebase`, que o framework parametriza, nunca impõe):
+
+- **`unit` (default).** A stack aterrissa como **uma unidade lógica**. O **veículo canônico** é o **PR terminal de implementação** — o nó terminal do topo-sort da stack. Exige stack **linear**; por essa linearidade o terminal carrega o diff acumulado **por construção** (não "o PR que contém tudo"). Resultado: **um SHA canônico** representa a spec em `main`; rollback é um comando.
+- **`sequential` (override explícito).** Cada PR de implementação aterrissa individualmente, bottom-up (a mecânica original). **Não é inferior** — é a escolha certa quando (a) os PRs são reversíveis isoladamente, (b) a stack é rebase-friendly, (c) as dependências entre fatias são fracas, (d) deploy parcial é aceitável (deploy train, iniciativas independentes empilhadas por conveniência). O runtime **expõe o tradeoff operacional**; não desencoraja.
+
+**Integration PR não é veículo de aterrissagem** (em ambos os modos, na semântica atual): permanece o artefato de homologação descrito acima. Em `unit`, sua **narrativa** (o que a spec entrega) vira a **mensagem do commit canônico** do veículo — o Integration PR tem valor operacional real sem ser mergeado. _(Wording descritivo da política corrente, não proibição ontológica: um repo poderia, por decisão própria, eleger o Integration PR como veículo para preservar approvals/checks/merge-queue — não é o default deste framework.)_
+
+**`landed-via reconciliation`.** Os PRs da stack que **não são o veículo** (implementação não-terminais + Integration PR) são **reconciliados** ao estado `Closed` com a anotação **`landed-via: #<veículo> @ <SHA>`**. **Não são rejeitados** — seus commits estão em `main` via o veículo. Estado terminal **auditável**, distinto de "closed-as-abandoned"; o comentário liga cada PR ao SHA canônico.
+
+**Determinismo (ADR 0018 preservado).** O modo é **escolha humana explícita** (wizard/flag), **nunca** auto-detectado do tipo da stack. `unit` **recusa** stack não-linear, orientando reconciliação de bases ou `sequential`. O `plan` imprime — antes de qualquer side-effect — modo escolhido, veículo, PRs reconciliados, SHA canônico resultante e **receita de rollback** do modo. Detalhe operacional completo em `[DEC-0023-O03]`.
+
 ## Por que este ADR existe
 
 A confusão entre `Ready` e `Mergeable` **emergiu empiricamente** durante operação real da stack da Spec 0023 — não foi hipótese teórica. Múltiplas sessões de review (Codex, Claude, Antigravity, owner) trataram PRs convertidos para `Ready` como se já estivessem autorizados para merge, mesmo a stack tendo outros PRs upstream/downstream pendentes. A label `MERGEABLE` do GitHub reforça a ambiguidade porque só sinaliza ausência de conflito contra a branch base do PR — não diz nada sobre a stack inteira.
@@ -44,6 +59,9 @@ O ADR consolida o aprendizado para impedir recorrência cross-spec.
 - ~~"Draft = bloqueado"~~
 - ~~"Stack inteira Ready = autorização implícita de merge"~~
 - ~~"Conversão Draft→Ready é o gate final"~~
+- ~~"Merge atômico = sempre sequencial (N merges)"~~ (admite `unit`/`sequential` — ver Modos de aterrissagem)
+- ~~"Integration PR é o veículo de aterrissagem por default"~~ (por default é homologação; o veículo é o PR terminal de implementação)
+- ~~"`unit` e `sequential` produzem o mesmo resultado em `main`"~~ (1 SHA canônico vs N commits)
 
 ## Sinais de violação (para PR review)
 
@@ -105,7 +123,7 @@ Este ADR é materializado em dois artefatos cravados no PR #25 da Spec 0023:
 
 - **Wizard tier 2** (`yarn guidelines workflow`, opções 4 e 5):
   - `4. 🔗 Abrir Integration PR da spec ativa` — cria PR de Integration com body auto-detectado de `<spec>/integration-pr.md`
-  - `5. 🔀 Executar merge atômico da stack` — orquestra sequência `gh pr edit --base main` + `gh pr merge --squash` para cada PR da stack
+  - `5. 🔀 Executar merge atômico da stack` — aterrissa conforme o **modo** (ver "Modos de aterrissagem da stack"): `unit` (default) reescreve a base do PR terminal para `main`, mergeia e aplica `landed-via reconciliation` ao resto; `sequential` mergeia cada PR bottom-up. Sempre mostra plan + receita de rollback + confirmação humana
 - **Standalone tier 3** (`yarn guidelines release-prep`):
   - Lê versão alvo de `CHANGELOG.md` `[Unreleased]`, mostra plan completo, aguarda confirmação, executa bump + tag + push → dispara `.github/workflows/release.yml`
 
