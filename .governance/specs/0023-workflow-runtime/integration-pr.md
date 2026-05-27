@@ -1,87 +1,80 @@
-# Integration PR — body source (Spec 0023)
+<!--
+  ARQUIVO DE AUTORIA — body source do Integration PR (Spec 0023).
+  Consumido por `yarn guidelines workflow` → 🔗 (OpenIntegrationPR, DEC-0023-L01):
+  o conteúdo abaixo vira o body do PR literalmente. Comentários como este NÃO
+  aparecem no PR renderizado — são instruções para quem edita o arquivo.
 
-> **Uso:** body source consumido pelo comando `yarn guidelines workflow` opção 4 (`🔗 Abrir Integration PR da spec ativa`) para criar o Integration PR final da stack via `OpenIntegrationPR` use case (cf. `[DEC-0023-L01]`). Arquivo é artifact da spec, não output runtime. **Convenção cravada em L01:** filename é `integration-pr.md` (sem número de PR — número só é conhecido após `gh pr create`). `OpenIntegrationPR.plan()` auto-detecta este arquivo em `<spec_dir>/integration-pr.md`. Owner mantém `Owner authorization` como `pendente` no body até autorização textual explícita de merge atômico.
->
-> **Título do PR** é auto-gerado pelo comando como `[🔗] [Integration] [Spec NNNN] Homologação final da stack` (override disponível via `OpenIntegrationPRInput.titleOverride`). Não declarar título neste arquivo — wizard cuida disso.
+  Convenções (DEC-0023-L01):
+   - filename sem número de PR (só conhecido após `gh pr create`);
+   - título é auto-gerado pelo wizard: "[🔗] [Integration] [Spec NNNN] Homologação final da stack";
+   - mantenha "Owner authorization: pendente" até autorização textual de merge.
+-->
 
-## Visual de valor entregue (opcional)
+# Spec 0023 — Workflow Runtime · Integração da stack
 
-<!-- Reusar imagem do PR #25 ou anexar novo visual de convergência, se houver. -->
+> Este é o **artefato de homologação** da stack (ADR 0024) — consolida a evidência de que a spec está coerente ponta-a-ponta. **Não é veículo de aterrissagem**: no merge atômico, quem entra em `main` é o PR terminal de implementação; este PR é encerrado via `landed-via reconciliation`.
+
+## O que a Spec 0023 entrega
+
+- **Workflow runtime no repositório** — operar o ciclo de uma spec (navegar, retomar, publicar estado, homologar, mergear) sem sair do git, com gates determinísticos e **zero LLM no runtime** (ADR 0018).
+- **Descoberta de spec ativa em `main`** — índice público versionado, sem dashboard externo nem prompt humano denso.
+- **Enforcement de execução** — o runtime recusa execução quando a spec não está autorizada (gate derivado, não campo manual).
+- **Lifecycle de 3 boundaries** — `tasks.md` (execução) · `review.md` (prontidão de integração) · `release-log.md` (pós-merge).
+- **Operações transacionais de stack, human-gated** — abrir Integration PR, merge atômico (modos `unit`/`sequential`), triagem de review.
+
+> **Visual (opcional):** para gerar uma imagem explicativa do valor entregue, rode `yarn guidelines workflow` → opção 🎨 (Gerar prompt visual) e cole o prompt resultante na sua ferramenta de imagem. Prompts versionados em [`.governance/visual-prompts/`](../../../.governance/visual-prompts/).
+
+## PRs integrados por esta stack
+
+No **merge atômico (modo `unit`, default)** o PR terminal de implementação é o **veículo**; os demais — e este Integration PR — são **encerrados via `landed-via reconciliation`** (não rejeitados; seus commits entram em `main` via o veículo). Cf. ADR 0024 § Modos de aterrissagem.
+
+| PR    | Entrega                                                                        |
+| :---- | :----------------------------------------------------------------------------- |
+| `#18` | Bootstrap + workflow runtime                                                   |
+| `#19` | Lifecycle metodológico (ADR 0020/0021)                                         |
+| `#22` | Followup `.governance` (backlog + CORE-02)                                     |
+| `#23` | Runtime state index (`active-specs.yml` + `publish-state`)                     |
+| `#24` | Enforcement runtime (`executionAuthorized` derivado)                           |
+| `#25` | DX (wizard, clipboard, integração) + 3-boundary + comando `review`             |
+| `#26` | Bootstrap alignment (scaffolding `.governance/` + sanitização + landing modes) |
+
+## Validação (CI — não exige revisão manual de teste)
+
+Os gates são **determinísticos e rodam no CI**; nada aqui pede que um humano revise testes à mão:
+
+```bash
+yarn ci   # install --immutable + validate (format + build + testes + living-docs) + smoke multi-OS
+```
+
+Equivale aos workflows **Repo Validation** + **Smoke Tests (multi-OS)** + **Governance PR Check**. Verde = stack íntegra.
+
+## Rollback
+
+- **Modo `unit` (default):** `git revert <SHA-canônico>` — **1 comando** desfaz a spec inteira (o merge do veículo é 1 commit em `main`). Com `merge-commit`: `git revert -m 1 <SHA>`.
+- **Modo `sequential`:** reverter os N commits na ordem inversa; atenção à interdependência entre fatias — para spec coesa, prefira rollback total.
+
+O `plan` do merge-stack imprime a receita exata + o SHA canônico após o merge.
 
 ## Status do ciclo de vida
 
-> **Draft, Ready e Mergeable são estados distintos** (cf. ADR 0024).
-> Este PR de Integration pode estar `Ready` sem estar `Authorized to merge`.
+> `Draft` ≠ `Ready` ≠ `Mergeable` (ADR 0024). Este PR pode estar `Ready` sem estar autorizado.
 
-- [ ] **Draft** — trabalho em andamento; não solicita review ainda
-- [ ] **Ready for review** — homologação/convergência operacional concluída; aguarda revisão humana
-- [ ] **Authorized to merge** — owner autorizou merge atômico da stack completa
-
-## PR Type
-
-- [x] 🔗 Integration — homologação/convergência final da stack; sem comportamento novo
-
-## Posição na stack
-
-- **Stack atual**: Integration PR terminal da Spec 0023 (**#27**)
-- **Upstream (depends on)**: `#26` (bootstrap alignment — tip da stack)
-- **Downstream (followed by)**: terminal — merge atômico ponta-a-ponta após autorização explícita
-
-- [ ] Mergeable isoladamente (sem stack governance-first)
-- [x] Apenas merge atômico ponta-a-ponta da stack (per ADR 0020)
-- [x] Integration PR — agrega evidência de convergência; não autoriza merge sozinho
+- [ ] **Draft** — trabalho em andamento
+- [ ] **Ready for review** — homologação concluída; aguarda revisão humana
+- [ ] **Authorized to merge** — owner autorizou o merge atômico da stack
 
 ## Merge authorization
 
 **Owner authorization**: pendente
 
-## Resumo
-
-Este PR homologa a convergência final da stack da Spec 0023 antes do merge atômico. Ele não cria comportamento novo. Seu papel é consolidar evidência de que a stack `#18 → #19 → #22 → #23 → #24 → #25 → #26` está coerente ponta-a-ponta, com lifecycle consistente, PR bodies atualizados e validações verdes.
-
-Escopo:
-
-- confirmar que PR #25 está operacionalmente encerrado e Ready;
-- validar `yarn ci` e smoke manual do workflow runtime;
-- checar drift final de `spec.md`, `tasks.md`, `state.yml`, `decision-brief.md`, `NEXT.md`, `CHANGELOG.md`, ADR 0024, template de PR e title conventions;
-- manter merge authorization explicitamente pendente até a owner autorizar o merge atômico da stack.
-
-Fora de escopo:
-
-- comportamento novo no runtime;
-- redesign de lifecycle;
-- nova automação de merge/deploy;
-- LLM/agentic orchestration no runtime.
-
-## Test plan
-
-```bash
-yarn ci
-yarn build && yarn guidelines workflow
-yarn guidelines continue 0023
-```
-
-Validação manual esperada:
-
-- `workflow` abre wizard com opções declarativas, sem auto-detecção inteligente;
-- `continue 0023` resolve a spec por id canônico e mostra briefing coerente;
-- PRs upstream (#25, #26) permanecem `Ready for review`, mas sem `Authorized to merge`;
-- este Integration PR (#27) registra homologação/convergência e mantém merge authorization pendente até autorização textual da owner.
+> O merge atômico só ocorre após autorização textual explícita do owner ("autorizo merge atômico" + data) — gate `review.md` R8. Este Integration PR não autoriza merge sozinho.
 
 ## Cross-refs
 
 - **Spec**: `.governance/specs/0023-workflow-runtime/`
-- **ADRs aplicáveis**: ADR 0018, ADR 0020, ADR 0021, ADR 0024
-- **DECs aplicáveis**: DEC-0023-J01, DEC-0023-K01, DEC-0023-L01, DEC-0023-M01, DEC-0023-N01, DEC-0023-O01
-- **Linked issue**: ausente
-
-## Checklist operacional
-
-- [ ] `yarn format ; yarn validate` verde antes do push
-- [ ] `yarn ci` verde antes de pedir autorização de merge
-- [ ] Sem comportamento novo além de homologação/convergência
-- [ ] Merge authorization mantida como pendente até autorização textual da owner
+- **ADRs**: 0018, 0020, 0021, 0024
+- **DECs**: J01, K01, L01, M01, N01, O01, O02, O03
 
 ## Disclosure de IA
 
-Preparação do modelo Integration PR: Codex (GPT-5) atuando como mantenedor operacional; decisão final e autorização de merge permanecem com Rosana Rezende.
+Preparação do modelo assistida por IA (operação multi-agente sob supervisão humana); decisão final e autorização de merge permanecem com Rosana Rezende.
