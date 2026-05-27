@@ -260,8 +260,9 @@
 - [x] **1.O.2** Estrutura materializada no próprio mantenedor: criados `.governance/specs/{research-library/,research-index.md,roadmap/historico.md}` faltantes.
 - [x] **1.O.3** Research da 0023 **consolidada e indexada** como **primeiro caso real**: `research/lifecycle-architecture.md` → `research-library/architecture/2026-05-19-lifecycle-architecture.md` (git mv); `research-index.md` indexa + aponta a trilha legada `.specify/…0023-discovery` (sem remover — não é cutover).
 - [x] **1.O.4** Regras `.governance`-aware: `governance-foundation.md` (§4.5 + Checklist) + `GOVERNANCE-CATALOG.md`; drift `closure.md`→`release-log.md` corrigido. _(CONTRIBUTING.md não tinha refs de research/historico — sem ação.)_
-- [x] **1.O.5** Ramificações na stack: `review.md`/`release-log.md` (sequência + R7 incluem #26) + body do #25; **renumeração** `#26` (bootstrap) / `#27` (Integration) reconciliada nos artefatos vivos (Blocos K/M históricos preservados).
-- [x] **1.O.N** Pipeline verde (`yarn validate` — 656 testes).
+- [x] **1.O.5** Ramificações na stack: `review.md`/`release-log.md` (sequência + R7 incluem #26) + body do #25; **renumeração** `#26` (bootstrap) / `#27` (Integration) reconciliada nos artefatos vivos (Blocos K/M históricos preservados). _(Reconciliação tardia: `integration-pr.md` também alinhado ao #27 — cf. 2026-05-27.)_
+- [x] **1.O.6** Sanitização dos `it.skip [DEC-0021-*]` (`[DEC-0023-O02]`, 2026-05-27): auditoria dos 14 skips → `FileSystemAdapter.test.ts` removido (abstração morta), 9 skips com pointer ao teste vivo, 1 design superado retirado (`[DEC-0021-C01]`), 2 testes reais (comentários + ordem estável), 1 feature implementada (soft-delete `archive()`). Zero skip silencioso com ID de DEC restante. Forcing function anti-skip-silencioso registrada em `coverage-rigor-enforcement`.
+- [x] **1.O.N** Pipeline verde (`yarn validate` — 656 testes). _(Recontagem após 1.O.6: novos testes de archive + round-trip; rodar `yarn validate` para confirmar.)_
 - [x] **1.O.[COMMIT]** Commits atômicos por unidade lógica (governança / provisioner+testes / estrutura+research / regras / stack).
 
 ---

@@ -1502,6 +1502,32 @@ Para preservar enforcement estrutural enquanto a accountability transfere, fast-
 
 ---
 
+### [DEC-0023-O02] Sanitização dos `it.skip [DEC-0021-*]` absorvida no fechamento da 0023 (não diferida)
+
+> **Origem:** auditoria de testes skipped no fechamento da 0023 (2026-05-27), motivada por preocupação da owner ("ainda temos testes skipped e da última vez isso nos custou muito"). Precedente direto: o próprio `[DEC-0023-O01]` nasceu de um `it.skip` (`Isolation.test.ts`, bootstrap não provisionava `.governance/`) que só foi pego quando o runtime da 0023 tropeçou nele — não por gate.
+
+**Pergunta:** os 14 `it.skip` que carregam ID `[DEC-0021-*]` (comportamento da Spec 0021, invisíveis ao living-docs porque o extractor só captura `[BR-CLI-*]`) devem ser diferidos para `coverage-rigor-enforcement` (como registrado na ação inicial de backlog) ou sanitizados agora?
+
+**Decisão:** **sanitizar agora**, revertendo o deferimento. A auditoria por-skip mostrou que **~12 dos 14 eram duplicatas stale** de comportamento já testado vivo sob abstrações refatoradas (não código mal-coberto) — o custo dominante era escopo, não esforço, e mantê-los como skip silencioso reproduz a exata classe de risco do `[DEC-0023-O01]`. Disposição executada:
+
+- **`FileSystemAdapter.test.ts` removido inteiro** — testava uma abstração morta (`FileSystemAdapter` não existe em produção; os adapters reais `NodeWorkflowFileSystem`/`NodeFileSystemProbe`/`NodeWorkspaceProvisioner`/`GovernanceRegistryStore` têm cobertura própria, incl. guard de escopo e atomicidade).
+- **9 skips removidos com pointer** ao teste vivo que cobre cada comportamento (mapa em `Isolation.test.ts` + `Integrity.test.ts` + `RegisterItem.test.ts`).
+- **1 design superado retirado** — "registro aciona extrator" (`[DEC-0021-C01]`): a Living Documentation roda como pipeline desacoplado (`GenerateLivingDocs`/`CheckLivingDocs`), não como efeito colateral do registro.
+- **2 comportamentos parciais viraram teste real** — preservação de comentários humanos + ordem estável de blocos no `registry.yml` (assertados em `RegistryRoundTrip.test.ts`; o writer já implementava, faltava assertion).
+- **1 feature genuína implementada** — soft-delete/archive (`[DEC-0021-A01]`).
+
+**Design do soft-delete (decisão estrutural):** modelado como verbo explícito `InMemoryRegistry.archive(id, archivedAt)` (status → `"archived"`, item preservado), **não** como sobrecarga de `remove()`. Motivo: existe contrato vivo de hard-delete de item crítico (`RegistryRoundTrip.test.ts` remove uma `spec`), e hard-delete permanece válido para limpeza/correção. **Boundary explícito (não dívida silenciosa):** não há use case `ArchiveItem`/`DeleteItem` hoje; o cabeamento de `archive()` através do port + comando CLI é trabalho futuro real, a materializar quando houver consumidor — registrado como follow-up, não como gap.
+
+**Forcing function (permanece escopo de `coverage-rigor-enforcement`):** gate que falhe quando um `it.skip` carregar ID de decisão (`[DEC-*]`/`[ADR-*]`) sem entry correspondente em backlog/spec aberta — fecha a brecha de "skip invisível ao living-docs" na raiz. A candidata de backlog foi reconciliada de "diferir os 14" para "resolvido no PR terminal da 0023; resta a forcing function".
+
+**Decisão do Gate Humano:**
+
+- **Status:** [x] Resolvido
+- **Justificativa:** owner discordou explicitamente de empurrar o débito; a auditoria provou que o custo era baixo (limpeza, não construção) e que skips silenciosos invisíveis a gate são a mesma falha que originou O01. Sanitizar antes do merge fecha a classe de risco e mantém o release honesto com a tese TDD-first do framework.
+- **Data / Owner:** 2026-05-27 / @rosanarezende
+
+---
+
 ## ✅ Gate fechado — Stage A → Stage B (Bloco A)
 
 - **Data:** 2026-05-19
