@@ -38,7 +38,11 @@ function detectClipboardCommand(): ClipboardCommand | null {
       // faz a conversão UTF-8 → UTF-16 corretamente via [Console]::In.ReadToEnd().
       return {
         command: "powershell.exe",
-        args: ["-noprofile", "-command", "Set-Clipboard -Value ([Console]::In.ReadToEnd())"],
+        args: [
+          "-noprofile",
+          "-command",
+          "[Console]::InputEncoding = [System.Text.Encoding]::UTF8; Set-Clipboard -Value ([Console]::In.ReadToEnd())",
+        ],
       };
     }
     if (process.env.WAYLAND_DISPLAY) {
