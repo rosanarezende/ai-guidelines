@@ -23,8 +23,8 @@
 
 ## Posição na stack
 
-- **Stack atual**: Integration PR terminal da Spec 0023
-- **Upstream (depends on)**: `#25`
+- **Stack atual**: Integration PR terminal da Spec 0023 (**#27**)
+- **Upstream (depends on)**: `#26` (bootstrap alignment — tip da stack)
 - **Downstream (followed by)**: terminal — merge atômico ponta-a-ponta após autorização explícita
 
 - [ ] Mergeable isoladamente (sem stack governance-first)
@@ -37,7 +37,7 @@
 
 ## Resumo
 
-Este PR homologa a convergência final da stack da Spec 0023 antes do merge atômico. Ele não cria comportamento novo. Seu papel é consolidar evidência de que a stack `#18 → #19 → #22 → #23 → #24 → #25` está coerente ponta-a-ponta, com lifecycle consistente, PR bodies atualizados e validações verdes.
+Este PR homologa a convergência final da stack da Spec 0023 antes do merge atômico. Ele não cria comportamento novo. Seu papel é consolidar evidência de que a stack `#18 → #19 → #22 → #23 → #24 → #25 → #26` está coerente ponta-a-ponta, com lifecycle consistente, PR bodies atualizados e validações verdes.
 
 Escopo:
 
@@ -65,14 +65,14 @@ Validação manual esperada:
 
 - `workflow` abre wizard com opções declarativas, sem auto-detecção inteligente;
 - `continue 0023` resolve a spec por id canônico e mostra briefing coerente;
-- PR #25 permanece `Ready for review`, mas sem `Authorized to merge`;
-- PR #26 registra homologação/convergência e mantém merge authorization pendente até autorização textual da owner.
+- PRs upstream (#25, #26) permanecem `Ready for review`, mas sem `Authorized to merge`;
+- este Integration PR (#27) registra homologação/convergência e mantém merge authorization pendente até autorização textual da owner.
 
 ## Cross-refs
 
 - **Spec**: `.governance/specs/0023-workflow-runtime/`
 - **ADRs aplicáveis**: ADR 0018, ADR 0020, ADR 0021, ADR 0024
-- **DECs aplicáveis**: DEC-0023-J01, DEC-0023-K01
+- **DECs aplicáveis**: DEC-0023-J01, DEC-0023-K01, DEC-0023-L01, DEC-0023-M01, DEC-0023-N01, DEC-0023-O01
 - **Linked issue**: ausente
 
 ## Checklist operacional

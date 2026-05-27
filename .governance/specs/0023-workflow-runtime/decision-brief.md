@@ -1492,7 +1492,7 @@ Para preservar enforcement estrutural enquanto a accountability transfere, fast-
 4. Regras `.governance`-aware: `governance-foundation`, `CONTRIBUTING`, `GOVERNANCE-CATALOG`; corrige drifts (`closure.md`→`release-log.md`).
 5. Ramificações na stack: `review.md`/`release-log.md` (sequência + R7 incluem o novo PR) e body do #25 ("terminal" → penúltimo).
 
-**Renumeração da stack (2026-05-26):** o PR terminal de bootstrap alignment pegou o **#26**; o **Integration PR passa a ser #27**. As menções a "#26" / "PR #26 Integration" nos **Blocos K e M** acima são registro histórico (numeração planejada na época, antes deste PR existir) — **não reescritas** (cf. princípio do R6: não reescrever registro histórico); referem-se ao Integration PR, hoje **#27**. Artefatos vivos (`review.md`, `release-log.md`, body do #25) foram reconciliados para a numeração real.
+**Renumeração da stack (2026-05-26):** o PR terminal de bootstrap alignment pegou o **#26**; o **Integration PR passa a ser #27**. As menções a "#26" / "PR #26 Integration" nos **Blocos K e M** acima são registro histórico (numeração planejada na época, antes deste PR existir) — **não reescritas** (cf. princípio do R6: não reescrever registro histórico); referem-se ao Integration PR, hoje **#27**. Artefatos vivos (`review.md`, `release-log.md`, body do #25, `integration-pr.md`) foram reconciliados para a numeração real.
 
 **Decisão do Gate Humano:**
 
