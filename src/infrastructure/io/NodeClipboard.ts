@@ -18,7 +18,8 @@ interface ClipboardCommand {
  *
  * Estratégia:
  * - macOS (`darwin`) → `pbcopy` (sempre presente).
- * - Linux/WSL2 (`WSL_DISTRO_NAME` set) → `clip.exe` (sempre presente no PATH do WSL2).
+ * - Linux/WSL2 (`WSL_DISTRO_NAME` set) → `powershell.exe Set-Clipboard` (sempre presente no
+ *   PATH do WSL2; lida corretamente com UTF-8 → UTF-16 — `clip.exe` corrompe acentos).
  * - Linux com Wayland (`WAYLAND_DISPLAY` set) → `wl-copy`.
  * - Linux com X11 (default) → `xclip -selection clipboard`.
  * - Outros → `null` (clipboard indisponível; fallback gracioso).
@@ -32,7 +33,13 @@ function detectClipboardCommand(): ClipboardCommand | null {
   }
   if (process.platform === "linux") {
     if (process.env.WSL_DISTRO_NAME) {
-      return { command: "clip.exe", args: [] };
+      // clip.exe recebe bytes UTF-8 mas interpreta com o code page do Windows
+      // (CP850/1252), corrompendo acentos e caracteres especiais. powershell.exe
+      // faz a conversão UTF-8 → UTF-16 corretamente via [Console]::In.ReadToEnd().
+      return {
+        command: "powershell.exe",
+        args: ["-noprofile", "-command", "Set-Clipboard -Value ([Console]::In.ReadToEnd())"],
+      };
     }
     if (process.env.WAYLAND_DISPLAY) {
       return { command: "wl-copy", args: [] };
