@@ -37,7 +37,7 @@
   - **#24** (PR4-enforcement-runtime) — coerente, sem ação.
   - **#25** — **atualizado via `gh pr edit`**: 4 imagens + seção "Operação do ciclo"; Blocos **M** (3-boundary) e **N** (`review`) no Resumo, em "Entregue neste PR" e nas DECs (`M01`/`N01`); `release-prep` → `1.1.0`/`latest`; item "Migração NEXT→backlog" marcado feito (R3). (Deixou de ser terminal: o **#26** bootstrap alignment é o novo terminal de execução.)
   - **#26** (terminal de execução — este PR, bootstrap alignment) — body criado já coerente (`[DEC-0023-O01]`).
-- [ ] **R7** — Stack reviewed/ready + aprovação humana: PRs #18, #19, #22, #23, #24, #25, #26 em **Ready for review (GitHub)** + **aprovação humana explícita** — ≥1 review aprovado **ou** comentário textual do owner aprovando (exceção owner-only aceita e registrada). **Sign-off holístico, após R1–R6.** Evidência: link + status por PR. _(ex-3.7/3.8)_
+- [x] **R7** — Stack reviewed/ready + aprovação humana: PRs #18, #19, #22, #23, #24, #25, #26 em **Ready for review (GitHub)** + **aprovação humana explícita** — ≥1 review aprovado **ou** comentário textual do owner aprovando (exceção owner-only aceita e registrada). **Sign-off holístico, após R1–R6.** Evidência: link + status por PR. _(ex-3.7/3.8)_ **Fechado 2026-05-27:** stack #18–#26 em Ready for review (GitHub); owner aprovou textualmente ("aprovo" — exceção owner-only registrada). Cobre as adições da sessão de fechamento (soft-delete `archive()` + `[DEC-0023-O02]`/SkipGuard + reconciliação de catálogo/docs). **Pré-condição operacional:** os 2 últimos commits de doc (`97bb8a6`, `27a269a`) ainda precisam subir ao PR antes da abertura do #27. R1–R7 `[x]` → **#27 (Integration) liberado** para abertura via wizard 🔗.
 
 ## Merge authorization (ato humano — gate do merge-stack)
 
