@@ -3121,6 +3121,104 @@ entries:
       - Invariants — forbiddenHeadings
       - Recipe — assertValidRecipe [BR-CLI-RECIPE]
     coverageState: covered
+  - ruleId: BR-CLI-SKIP-GUARD-01
+    title: DADO it.skip com [DEC-NNNN-*] no título ENTÃO detecta
+    boundedContext: ast
+    domain: SkipGuard
+    evidence:
+      - file: src/infrastructure/ast/SkipGuard.test.ts
+        lineStart: 38
+        lineEnd: 49
+        testName: DADO it.skip com [DEC-NNNN-*] no título ENTÃO detecta
+        coverageState: covered
+    tags:
+      - Detecção de skip com ID de decisão
+      - Infra AST — SkipGuard [BR-CLI-SKIP-GUARD]
+    coverageState: covered
+  - ruleId: BR-CLI-SKIP-GUARD-02
+    title: DADO it.skip com [ADR-NNNN] no título ENTÃO detecta
+    boundedContext: ast
+    domain: SkipGuard
+    evidence:
+      - file: src/infrastructure/ast/SkipGuard.test.ts
+        lineStart: 51
+        lineEnd: 62
+        testName: DADO it.skip com [ADR-NNNN] no título ENTÃO detecta
+        coverageState: covered
+    tags:
+      - Detecção de skip com ID de decisão
+      - Infra AST — SkipGuard [BR-CLI-SKIP-GUARD]
+    coverageState: covered
+  - ruleId: BR-CLI-SKIP-GUARD-03
+    title: DADO describe.skip e xit com [DEC-*] ENTÃO detecta ambos
+    boundedContext: ast
+    domain: SkipGuard
+    evidence:
+      - file: src/infrastructure/ast/SkipGuard.test.ts
+        lineStart: 64
+        lineEnd: 77
+        testName: DADO describe.skip e xit com [DEC-*] ENTÃO detecta ambos
+        coverageState: covered
+    tags:
+      - Detecção de skip com ID de decisão
+      - Infra AST — SkipGuard [BR-CLI-SKIP-GUARD]
+    coverageState: covered
+  - ruleId: BR-CLI-SKIP-GUARD-04
+    title: DADO it.skip apenas com [BR-CLI-*] ENTÃO NÃO detecta (BR é rastreado via living-docs)
+    boundedContext: ast
+    domain: SkipGuard
+    evidence:
+      - file: src/infrastructure/ast/SkipGuard.test.ts
+        lineStart: 81
+        lineEnd: 89
+        testName: DADO it.skip apenas com [BR-CLI-*] ENTÃO NÃO detecta (BR é rastreado via living-docs)
+        coverageState: covered
+    tags:
+      - Infra AST — SkipGuard [BR-CLI-SKIP-GUARD]
+      - Não-detecção (negativos estruturais)
+    coverageState: covered
+  - ruleId: BR-CLI-SKIP-GUARD-05
+    title: DADO it() (não-skip) com [DEC-*] ENTÃO NÃO detecta (só skips importam)
+    boundedContext: ast
+    domain: SkipGuard
+    evidence:
+      - file: src/infrastructure/ast/SkipGuard.test.ts
+        lineStart: 91
+        lineEnd: 99
+        testName: DADO it() (não-skip) com [DEC-*] ENTÃO NÃO detecta (só skips importam)
+        coverageState: covered
+    tags:
+      - Infra AST — SkipGuard [BR-CLI-SKIP-GUARD]
+      - Não-detecção (negativos estruturais)
+    coverageState: covered
+  - ruleId: BR-CLI-SKIP-GUARD-06
+    title: DADO [DEC-*] dentro de template string (fixture) ENTÃO NÃO detecta (guard AST, não regex)
+    boundedContext: ast
+    domain: SkipGuard
+    evidence:
+      - file: src/infrastructure/ast/SkipGuard.test.ts
+        lineStart: 101
+        lineEnd: 116
+        testName: DADO [DEC-*] dentro de template string (fixture) ENTÃO NÃO detecta (guard AST, não regex)
+        coverageState: covered
+    tags:
+      - Infra AST — SkipGuard [BR-CLI-SKIP-GUARD]
+      - Não-detecção (negativos estruturais)
+    coverageState: covered
+  - ruleId: BR-CLI-SKIP-GUARD-07
+    title: DADO o src/ real ENTÃO nenhum it.skip carrega ID de decisão [DEC-*]/[ADR-*]
+    boundedContext: ast
+    domain: SkipGuard
+    evidence:
+      - file: src/infrastructure/ast/SkipGuard.test.ts
+        lineStart: 120
+        lineEnd: 127
+        testName: DADO o src/ real ENTÃO nenhum it.skip carrega ID de decisão [DEC-*]/[ADR-*]
+        coverageState: covered
+    tags:
+      - Gate vivo — invariante do repositório
+      - Infra AST — SkipGuard [BR-CLI-SKIP-GUARD]
+    coverageState: covered
   - ruleId: BR-CLI-STRUCT-01
     title: DADO artefato válido com recipe sem forbiddenHeadings ENTÃO retorna vazio
     boundedContext: use-cases
