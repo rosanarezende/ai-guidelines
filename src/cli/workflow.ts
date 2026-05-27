@@ -43,7 +43,7 @@ import {
 import { SpecLocation } from "../domain/workflow/SpecLocation.js";
 import { WorkflowState } from "../domain/workflow/WorkflowState.js";
 import { NodeWorkflowFileSystem } from "../infrastructure/filesystem/NodeWorkflowFileSystem.js";
-import { NodeClipboard } from "../infrastructure/io/NodeClipboard.js";
+import { NodeClipboard, clipboardInstallHint } from "../infrastructure/io/NodeClipboard.js";
 import { InquirerPrompts } from "../infrastructure/io/InquirerPrompts.js";
 import { ClipboardWriter } from "../app/ports/ClipboardWriter.js";
 import { Prompts } from "../app/ports/Prompts.js";
@@ -1249,6 +1249,8 @@ export async function runWorkflow(options: RunOptions): Promise<number> {
       logger.info(
         "(clipboard indisponível — copie manualmente o texto abaixo entre os delimitadores)"
       );
+      const hint = clipboardInstallHint();
+      if (hint) logger.info(hint);
       logger.info(`──── PROMPT (destino: ${target}) ────`);
       logger.info(rendered.trimEnd());
       logger.info("──── FIM ────");

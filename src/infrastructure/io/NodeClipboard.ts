@@ -18,6 +18,7 @@ interface ClipboardCommand {
  *
  * Estratégia:
  * - macOS (`darwin`) → `pbcopy` (sempre presente).
+ * - Linux/WSL2 (`WSL_DISTRO_NAME` set) → `clip.exe` (sempre presente no PATH do WSL2).
  * - Linux com Wayland (`WAYLAND_DISPLAY` set) → `wl-copy`.
  * - Linux com X11 (default) → `xclip -selection clipboard`.
  * - Outros → `null` (clipboard indisponível; fallback gracioso).
@@ -30,12 +31,37 @@ function detectClipboardCommand(): ClipboardCommand | null {
     return { command: "pbcopy", args: [] };
   }
   if (process.platform === "linux") {
+    if (process.env.WSL_DISTRO_NAME) {
+      return { command: "clip.exe", args: [] };
+    }
     if (process.env.WAYLAND_DISPLAY) {
       return { command: "wl-copy", args: [] };
     }
     return { command: "xclip", args: ["-selection", "clipboard"] };
   }
   return null;
+}
+
+/**
+ * Retorna dica de instalação do clipboard para o ambiente atual.
+ * Retorna `null` quando o ambiente já tem suporte nativo (macOS, WSL2, Windows)
+ * ou quando não há recomendação aplicável.
+ */
+export function clipboardInstallHint(): string | null {
+  if (process.platform !== "linux") return null;
+  if (process.env.WSL_DISTRO_NAME) return null;
+  if (process.env.WAYLAND_DISPLAY) {
+    return (
+      "dica: instale wl-clipboard para habilitar clipboard automático\n" +
+      "  sudo apt install wl-clipboard   # Debian/Ubuntu\n" +
+      "  sudo pacman -S wl-clipboard      # Arch"
+    );
+  }
+  return (
+    "dica: instale xclip para habilitar clipboard automático\n" +
+    "  sudo apt install xclip   # Debian/Ubuntu\n" +
+    "  sudo pacman -S xclip      # Arch"
+  );
 }
 
 /**
