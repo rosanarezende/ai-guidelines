@@ -85,21 +85,62 @@ export class GhCli implements StackOps {
     }
   }
 
+  // `editPullRequestBase`/`mergePullRequest`/`closePullRequest` usam o REST API
+  // via `gh api` — NÃO os comandos `gh pr edit/merge/close`. Motivo: nesta faixa
+  // de versões do `gh` (observado em 2.45.0), os `gh pr <x>` que carregam o PR
+  // completo falham com erro fatal de "Projects (classic) deprecation"
+  // (`repository.pullRequest.projectCards`); `gh pr view --json <campos>` escapa,
+  // mas as mutações não têm essa saída. O REST de `pulls`/`issues`/`git/refs` não
+  // toca em Projects classic. CWE-78 preservado (args array, sem shell).
+
   editPullRequestBase(number: number, newBase: string): void {
-    this.exec(["pr", "edit", String(number), "--base", newBase]);
+    this.exec([
+      "api",
+      `repos/{owner}/{repo}/pulls/${number}`,
+      "-X",
+      "PATCH",
+      "-f",
+      `base=${newBase}`,
+    ]);
   }
 
   mergePullRequest(input: MergePullRequestInput): void {
-    const strategyFlag = `--${input.strategy}`;
-    const args = ["pr", "merge", String(input.number), strategyFlag];
-    if (input.deleteBranch !== false) args.push("--delete-branch");
-    if (input.subject !== undefined) args.push("--subject", input.subject);
-    if (input.body !== undefined) args.push("--body", input.body);
+    // Resolve a branch head antes do merge (para deletá-la depois, se pedido).
+    const head =
+      input.deleteBranch !== false ? (this.getPullRequest(input.number)?.headRefName ?? "") : "";
+
+    const args = [
+      "api",
+      `repos/{owner}/{repo}/pulls/${input.number}/merge`,
+      "-X",
+      "PUT",
+      "-f",
+      `merge_method=${input.strategy}`,
+    ];
+    if (input.subject !== undefined) args.push("-f", `commit_title=${input.subject}`);
+    if (input.body !== undefined) args.push("-f", `commit_message=${input.body}`);
     this.exec(args);
+
+    if (head !== "") {
+      try {
+        this.exec(["api", `repos/{owner}/{repo}/git/refs/heads/${head}`, "-X", "DELETE"]);
+      } catch {
+        // Branch já deletada/protegida/default — non-fatal: o merge já ocorreu.
+      }
+    }
   }
 
   closePullRequest(number: number, comment: string): void {
-    this.exec(["pr", "close", String(number), "--comment", comment]);
+    // Comentário primeiro (registra a anotação landed-via), depois fecha.
+    this.exec([
+      "api",
+      `repos/{owner}/{repo}/issues/${number}/comments`,
+      "-X",
+      "POST",
+      "-f",
+      `body=${comment}`,
+    ]);
+    this.exec(["api", `repos/{owner}/{repo}/pulls/${number}`, "-X", "PATCH", "-f", "state=closed"]);
   }
 
   listOpenPullRequests(): ReadonlyArray<PullRequestData> {
