@@ -778,7 +778,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
 
     it("DADO wizard opção 5 (merge-stack) + stack detectada via title + confirmação ENTÃO mergeia PRs sequencialmente via StackOps", async () => {
       const logger = new CollectingLogger();
-      const prompts = new FakePrompts(["merge-stack", true]);
+      const prompts = new FakePrompts(["merge-stack", "sequential", true]);
       const fs = makeFsWithSpecReviewClosed();
       const stackPrs: import("../app/ports/StackOps.js").PullRequestData[] = [
         {
@@ -842,9 +842,82 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
       expect(logger.lines.join("\n")).toMatch(/Stack atomic merge completo: 2 PRs/);
     });
 
+    it("DADO wizard opção 5 modo unit ENTÃO mergeia só o veículo (terminal) e fecha o resto + Integration via landed-via", async () => {
+      const logger = new CollectingLogger();
+      const prompts = new FakePrompts(["merge-stack", "unit", true]);
+      const fs = makeFsWithSpecReviewClosed();
+      const allPrs: import("../app/ports/StackOps.js").PullRequestData[] = [
+        {
+          number: 18,
+          title: "[🛠️🔒] [Spec 0023] Workflow runtime",
+          body: "",
+          state: "OPEN" as const,
+          isDraft: false,
+          headRefName: "feat/spec-0023-workflow-runtime",
+          baseRefName: "main",
+          labels: [],
+          url: "https://github.com/test/repo/pull/18",
+          mergeCommitSha: null,
+        },
+        {
+          number: 19,
+          title: "[🧾🔒] [Spec 0023] Lifecycle",
+          body: "",
+          state: "OPEN" as const,
+          isDraft: false,
+          headRefName: "feat/spec-0023-lifecycle",
+          baseRefName: "feat/spec-0023-workflow-runtime",
+          labels: [],
+          url: "https://github.com/test/repo/pull/19",
+          mergeCommitSha: null,
+        },
+        {
+          number: 27,
+          title: "[🔗] [Integration] [Spec 0023] Homologação final da stack",
+          body: "",
+          state: "OPEN" as const,
+          isDraft: false,
+          headRefName: "feat/spec-0023-lifecycle",
+          baseRefName: "main",
+          labels: [],
+          url: "https://github.com/test/repo/pull/27",
+          mergeCommitSha: null,
+        },
+      ];
+      const stack: import("../app/ports/StackOps.js").StackOps = {
+        createPullRequest: jest.fn(),
+        getPullRequest: jest.fn((n: number) => allPrs.find((p) => p.number === n) ?? null),
+        editPullRequestBase: jest.fn(),
+        listReviewComments: jest.fn().mockReturnValue([]),
+        mergePullRequest: jest.fn(),
+        closePullRequest: jest.fn(),
+        listOpenPullRequests: jest.fn().mockReturnValue(allPrs),
+      };
+      const code = await runWorkflow({
+        repoRoot: "/repo",
+        logger,
+        prompts,
+        clipboard: new FakeClipboard(),
+        fs,
+        stack,
+      });
+      expect(code).toBe(0);
+      // só o veículo (#19, terminal) é mergeado
+      expect(stack.mergePullRequest).toHaveBeenCalledTimes(1);
+      expect(stack.mergePullRequest).toHaveBeenCalledWith(
+        expect.objectContaining({ number: 19, strategy: "squash" })
+      );
+      // resto (#18) + Integration (#27) fechados via landed-via reconciliation
+      expect(stack.closePullRequest).toHaveBeenCalledTimes(2);
+      const closedNumbers = (stack.closePullRequest as jest.Mock).mock.calls.map((c) => c[0]);
+      expect(closedNumbers.sort()).toEqual([18, 27]);
+      expect((stack.closePullRequest as jest.Mock).mock.calls[0][1]).toMatch(/landed-via: #19/);
+      expect(logger.lines.join("\n")).toMatch(/Atomic merge \(unit\) completo: veículo #19/);
+    });
+
     it("DADO wizard opção 5 + negação da confirmação ENTÃO 0 merges executados e loga cancelamento", async () => {
       const logger = new CollectingLogger();
-      const prompts = new FakePrompts(["merge-stack", false]);
+      const prompts = new FakePrompts(["merge-stack", "unit", false]);
       const fs = makeFsWithSpecReviewClosed();
       const stack: import("../app/ports/StackOps.js").StackOps = {
         createPullRequest: jest.fn(),

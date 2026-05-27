@@ -55,7 +55,12 @@ import {
   OpenIntegrationPRError,
   OpenIntegrationPRPlan,
 } from "../app/workflow/OpenIntegrationPR.js";
-import { MergeStack, MergeStackError, MergeStackPlan } from "../app/workflow/MergeStack.js";
+import {
+  LandingMode,
+  MergeStack,
+  MergeStackError,
+  MergeStackPlan,
+} from "../app/workflow/MergeStack.js";
 import {
   CheckIntegrationReadiness,
   IntegrationReadinessResult,
@@ -704,6 +709,21 @@ function detectStackForSpec(
   return topoSortStack(specPrs, mainBranch);
 }
 
+/**
+ * Detecta o Integration PR (homologação) da spec entre os PRs abertos —
+ * `[Spec NNNN]` + `[Integration]` no título. Usado no modo `unit` para
+ * **landed-via reconciliation** (o Integration não é veículo; é fechado).
+ * Retorna `undefined` se não houver (stack sem Integration PR).
+ */
+function detectIntegrationPr(
+  prs: ReadonlyArray<PullRequestData>,
+  specId: string
+): PullRequestData | undefined {
+  return prs.find(
+    (pr) => pr.title.includes(`[Spec ${specId}]`) && pr.title.includes("[Integration]")
+  );
+}
+
 /** Primitivos do contexto da spec usados no bloco de readiness (testável puro). */
 export interface ReadinessContextInput {
   readonly specId: string;
@@ -978,11 +998,13 @@ async function runMergeStackWizard(opts: {
   const [, specId] = dirMatch;
   const mainBranch = "main";
 
-  // Fetch PRs abertos + detect stack
+  // Fetch PRs abertos; detecta a stack de implementação + o Integration PR.
   let stackPrs: ReadonlyArray<PullRequestData>;
+  let integrationPr: PullRequestData | undefined;
   try {
     const openPrs = stack.listOpenPullRequests();
     stackPrs = detectStackForSpec(openPrs, specId, mainBranch);
+    integrationPr = detectIntegrationPr(openPrs, specId);
   } catch (err) {
     logger.error(`Falha ao detectar stack: ${err instanceof Error ? err.message : String(err)}`);
     return 1;
@@ -995,6 +1017,21 @@ async function runMergeStackWizard(opts: {
     return 1;
   }
 
+  // Escolha de modo de aterrissagem — explícita, sem inferência (DEC-0023-O03).
+  const mode = await prompts.select<LandingMode>({
+    message: "Modo de aterrissagem da stack",
+    choices: [
+      {
+        name: "unit (default) — aterrissa como unidade: 1 SHA canônico, rollback de 1 comando",
+        value: "unit",
+      },
+      {
+        name: "sequential — aterrissa cada PR (fatias independentes / deploy train; rollback granular)",
+        value: "sequential",
+      },
+    ],
+  });
+
   // Build plan
   const useCase = new MergeStack(stack);
   let plan: MergeStackPlan;
@@ -1003,11 +1040,8 @@ async function runMergeStackWizard(opts: {
       prNumbers: stackPrs.map((p) => p.number),
       mainBranch,
       mergeStrategy: "squash",
-      // Fixado em `sequential` (comportamento atual) até a escolha de modo ser
-      // cabeada no wizard (1.O.7b). O default do use case é `unit` (DEC-0023-O03);
-      // não mudamos o comportamento real desta operação destrutiva sem a escolha
-      // humana explícita do modo.
-      mode: "sequential",
+      mode,
+      ...(mode === "unit" && integrationPr ? { integrationPrNumber: integrationPr.number } : {}),
     });
   } catch (err) {
     logger.error(err instanceof Error ? err.message : String(err));
@@ -1018,21 +1052,33 @@ async function runMergeStackWizard(opts: {
   logger.info("🔀 Executar merge atômico da stack");
   logger.info("");
   logger.info(`  Spec:     ${ctx.location.slug} (id ${specId})`);
+  logger.info(`  Modo:     ${plan.mode}`);
   logger.info(`  Target:   ${plan.mainBranch}`);
   logger.info(`  Strategy: --${plan.mergeStrategy} --delete-branch`);
-  logger.info(`  Stack:    ${plan.items.length} PRs em ordem`);
   logger.info("");
-  for (let i = 0; i < plan.items.length; i++) {
-    const item = plan.items[i];
-    const baseNote = item.needsBaseEdit
-      ? `(edit-base ${item.currentBase} → ${plan.mainBranch} + merge)`
+  if (plan.mode === "unit") {
+    const vehicle = plan.items[0];
+    const baseNote = vehicle.needsBaseEdit
+      ? `(edit-base ${vehicle.currentBase} → ${plan.mainBranch} + merge)`
       : `(merge direto; base já é ${plan.mainBranch})`;
-    logger.info(`  ${i + 1}. PR #${item.prNumber}: ${item.prTitle}`);
-    logger.info(`     ${baseNote}`);
+    logger.info(`  Veículo:  PR #${vehicle.prNumber}: ${vehicle.prTitle}`);
+    logger.info(`            ${baseNote}`);
+    const reconcile = plan.reconcilePrNumbers.map((n) => `#${n}`).join(", ") || "(nenhum)";
+    logger.info(`  Fecha (landed-via reconciliation): ${reconcile}`);
+  } else {
+    logger.info(`  Stack:    ${plan.items.length} PRs em ordem`);
+    for (let i = 0; i < plan.items.length; i++) {
+      const item = plan.items[i];
+      const baseNote = item.needsBaseEdit
+        ? `(edit-base ${item.currentBase} → ${plan.mainBranch} + merge)`
+        : `(merge direto; base já é ${plan.mainBranch})`;
+      logger.info(`  ${i + 1}. PR #${item.prNumber}: ${item.prTitle}`);
+      logger.info(`     ${baseNote}`);
+    }
   }
   logger.info("");
   logger.info("ATENÇÃO: side-effects IRREVERSÍVEIS — merge em main + delete de branches remotas.");
-  logger.info("Falha mid-way: erro narrativo + skipSteps para retomar manualmente.");
+  logger.info(`  ${plan.rollbackRecipe}`);
   logger.info("");
 
   const confirmed = await prompts.confirm({
@@ -1052,9 +1098,19 @@ async function runMergeStackWizard(opts: {
       onItemDone: (item, i) => {
         logger.info(`[${i + 1}/${plan.items.length}] ✓ PR #${item.prNumber} mergeado.`);
       },
+      onReconcile: (prNumber) => {
+        logger.info(`  ↳ landed-via reconciliation: fechando PR #${prNumber}...`);
+      },
     });
     logger.info("");
-    logger.info(`✓ Stack atomic merge completo: ${plan.items.length} PRs em ${plan.mainBranch}.`);
+    if (plan.mode === "unit") {
+      logger.info(
+        `✓ Atomic merge (unit) completo: veículo #${plan.items[0].prNumber} em ${plan.mainBranch}; ` +
+          `${plan.reconcilePrNumbers.length} PR(s) reconciliado(s) via landed-via.`
+      );
+    } else {
+      logger.info(`✓ Stack atomic merge completo: ${plan.items.length} PRs em ${plan.mainBranch}.`);
+    }
     return 0;
   } catch (err) {
     if (err instanceof MergeStackError) {
