@@ -14,63 +14,27 @@ Detalhes de lifecycle em [`.core/process/governance-foundation.md`](../../../.co
 
 ## Em execução
 
-_(nenhuma spec em execução — Spec 0023 concluída, ver [historico.md](./historico.md))_
+### Spec 0024 — `handoff-as-first-class` (research-first / evidence-driven)
+
+- **Branch:** `feat/spec-0024-handoff-as-first-class`
+- **Instanciada em:** 2026-05-28
+- **Status:** Stage 1 (Research) ativo — decision-brief estruturado pelos 5 eixos (Seleção / Persistência / Promoção / Projeção / Governança); Bloco A pré-populado com 5 observações cravadas; Blocos B-F abertos pendentes de research.
+- **Pré-requisitos atendidos:** Spec 0023 mergeada ✅; ADR 0022 Aceita ✅ (PR #29, 2026-05-28).
+- **Slug provisional:** pode evoluir conforme research consolidar (ex.: `contextual-governance-and-handoff`). Cf. nota no header de `spec.md`.
+- **Implementação CLI do handoff:** **fora do escopo** desta spec — vira spec separada (provavelmente 0025) após Stage 1 fechar.
+- **Detalhes:** [`.governance/specs/0024-handoff-as-first-class/`](../0024-handoff-as-first-class/) (spec + decision-brief + plan + tasks + state + research).
 
 ---
 
 ## Now (próxima fila, ordem importa)
 
-> **Sobre a ordem.** As 3 candidatas em `Now` são instanciáveis após a Spec 0023 fechar. A ordem abaixo segue critério misto (anti-paper urgency + bloqueio downstream + DX). Owner pode reordenar quando o momento da abertura chegar.
+> **Sobre a ordem.** As candidatas em `Now` são instanciáveis após a Spec 0023 fechar (originalmente 3; 1 promovida a spec ativa em 2026-05-28 — ver `Em execução`). A ordem abaixo segue critério misto (anti-paper urgency + bloqueio downstream + DX). Owner pode reordenar quando o momento da abertura chegar.
 
 > **Reordenação aplicada em 2026-05-28.** `handoff-as-first-class` promovida de posição 2 para posição 1 com base em evidência operacional pós-fechamento da Spec 0023: sessão com handoff situado manualmente produziu aderência operacional significativamente superior à sessão iniciada com `AGENTS.md` estático; o problema gera fricção ativa agora; a solução emergiu empiricamente. `governance-dashboard-and-visual-artifacts` passa para posição 2 — permanece relevante como camada de projeção e visualização do estado governado, mas não resolve a fricção operacional imediata de bootstrap situado entre sessões/agentes. ADR 0023 permanece `Proposta` — promoção deferida pendente de esclarecimento da sua primeira materialização após estabilização do runtime de handoff.
 
-### 1. `handoff-as-first-class` (escopo expandido — absorve "arquitetura de regras portáveis vs. contexto framework-interno")
+> **Atualização — 2026-05-28 (mesma data).** `handoff-as-first-class` instanciada formalmente como **Spec 0024 (research-first / evidence-driven)** e movida para `## Em execução`. Now passa a ter 2 candidatas restantes: `governance-dashboard-and-visual-artifacts` (§1) e `boilerplate-system-modernization` (§2). Renumeração refletida abaixo. Nota de reordenação acima preservada como histórico do raciocínio que levou à promoção.
 
-> **Vinculação metodológica:** materializa [ADR 0022 — Handoff situado em estado precede distribuição pré-carregada de regras](../../../.core/governance/adrs/0022-handoff-situated-precedes-static-distribution.md). Sem materialização, ADR 0022 vira "ADR de papel" — repete o anti-pattern de adiar princípios validados empiricamente sem entrega.
->
-> **Consolidação 2026-05-22:** absorve a candidata "Arquitetura de regras portáveis vs. contexto framework-interno" (criada em 2026-05-20 durante PR de reorganização de scripts). Handoff é o **canal de entrega** de contexto situado; portable rules architecture trata da **SSOT do conteúdo** que o handoff apresenta. As duas são lados da mesma moeda — onde mora contexto para IA, e como ele chega ao agente. Manter separadas geraria specs sobrepostas. Escopo absorvido detalhado abaixo.
-
-- **Fonte do insight:**
-  - Validação empírica observada durante PR4 da Spec 0023 (2026-05-22) — sessão de IA iniciada com handoff redigido manualmente alcançou aderência ao processo qualitativamente superior à sessão iniciada apenas com `AGENTS.md` + arquivos por canal. Princípio cravado em ADR 0022.
-  - Observação anterior (2026-05-20, durante PR `fix/package-scripts-reorganization`): memory feedbacks salvos em `~/.claude/projects/.../memory/` são local-only — não viajam entre providers (Codex, Gemini, Cursor) nem entre máquinas. Owner observou o gap como caso recorrente do desafio "contexto que deveria ser portável acumula em camadas mal definidas".
-- **Princípio guia:** ADR 0022 — bootstrap de sessão IA é handoff situado em estado, não distribuição pré-carregada de regras. `AGENTS.md`, `.cursorrules`, `CLAUDE.md`, `.github/copilot-instructions.md` viram stubs orientativos (≤ 10 linhas) apontando para o comando handoff. Conteúdo normativo permanece em SSOT (AGENTS.md compilado, ADRs, decision-briefs).
-- **Escopo proposto — canal de entrega (a confirmar quando a spec abrir):**
-  - **Comando `workflow handoff`** (ou modo expandido de `workflow continue`) — gera contexto situado a partir dos artefatos vivos: estado atual da spec, ordem de leitura prescrita, regras situacionais destacadas, primeiro turno scripted.
-  - **Versão simples (`--simple`)** — handoff puramente determinístico (concatenação ordenada de artefatos relevantes + lista das CORE rules aplicáveis ao próximo passo). Suficiente para boot leve.
-  - **Versão híbrida (`--hybrid`)** — handoff determinístico + slots TODO marcados para humano refinar antes de colar. Sem LLM no runtime (ADR 0018 preservado).
-  - **Stubs canônicos** em cada canal de IA (`AGENTS.md`, `.cursorrules`, `CLAUDE.md`, `.github/copilot-instructions.md`) reduzidos a ≤ 10 linhas apontando para o comando.
-  - **Integração com wizard CLI** — wizard oferece "Continuar trabalho atual" (continue resumido) vs "Iniciar sessão IA nova" (handoff completo). Decisão humana no momento, não automática.
-  - **Cobertura de regras situacionais** (cf. discussão F05 da Spec 0023): regras como CORE-09/10 que se aplicam em momentos específicos são entregues pelo handoff quando contextualmente relevantes, em vez de viverem pré-distribuídas sem contexto de momento.
-- **Escopo absorvido — SSOT do contexto repo-interno (era candidata "Arquitetura de regras portáveis vs. contexto framework-interno"):**
-  - Hoje, contexto que deveria ser "lido por qualquer agente, em qualquer provider, em qualquer máquina" se acumula em 3 camadas mal definidas: (a) bloco `<AI_GUIDELINES>` em `AGENTS.md` (portável, mas não suporta contexto repo-interno); (b) fora de `<AI_GUIDELINES>` no próprio `AGENTS.md` (cresce ad-hoc, sem taxonomia, sprawla); (c) memória de provider (não-portável, não-versionada, invisível para outros agentes).
-  - **Princípio violado:** ADR 0018 declara `AGENTS.md` como output runtime AI-agnóstico, não como SSOT sprawling.
-  - **Direções a explorar:** novo bloco compilado em AGENTS.md (`<REPO_INTERNAL>`) com SSOT em `.governance/repo-internal.md`; arquivo paralelo canônico (`.governance/agent-context.md`); tag de escopo nas regras existentes (`repo-internal` além de `universal`/`adapter`/`opt-in`); convenção para memory feedbacks (espelho em artifact versionado obrigatório).
-  - **Política de migração obrigatória junto com qualquer direção:** declarar explicitamente quais trechos atuais fora de `<AI_GUIDELINES>` em AGENTS.md passam a ser **proibidos**, **opcionais** ou **compilados/movidos** para a nova camada. Sem isso, vira "4ª camada" sem desativar a 2ª.
-- **Obrigações metodológicas cruzadas (revisita obrigatória na abertura desta candidata):**
-  - **[DEC-0023-F05]** (Spec 0023, decision-brief) — decisão sobre SSOT do princípio CORE-09/10 (PRs Draft + Draft→Ready exige revalidação) foi deferida em PR5 S5 da Spec 0023 com critério estrutural vinculado à abertura desta candidata. Sob a lente do ADR 0022, CORE-09/10 são regras situacionais que o handoff entrega contextualmente; o destino final da SSOT do princípio (ADR nova dedicada, nota cruzada para ADR 0021, ou distribuição em camadas) depende do comportamento real do canal de entrega — observável apenas quando este `handoff-as-first-class` materializar. Ao abrir a spec, F05 deve ser revisitada e fechada (Resolved A/B/C, novo Deferred com critério mais específico, ou Moved to spec própria se a discussão amadurecer). Sem essa revisita, F05 permanece em Deferred estrutural e o Bloco F da Spec 0023 fica formalmente incompleto.
-  - **Convenção operacional: inquirer em todo input humano da CLI** (cf. `NEXT.md` da Spec 0023 § "Convenção operacional — inquirer em todo input humano da CLI", 2026-05-22) — quando o handoff materializar, esta convenção deve ser uma das regras situacionais entregues pelo handoff em sessões CLI novas. Pattern: prompt humano novo usa `@inquirer/prompts` via porta `Prompts` em `src/app/ports/Prompts.ts`; tests injetam `FakePrompts`. Se houver violação recorrente observada (manual prompts em código novo), reabrir como ADR formal.
-- **Pré-requisitos:**
-  - Spec 0023 mergeada (atômico ponta-a-ponta per ADR 0020).
-  - ADR 0022 promovida para `Aceita` em 2026-05-28 ✅
-- **Sinal de "está na hora":** Spec 0023 fechar. Sem condição adicional — vinculação metodológica explícita por ADR 0022; gap de portable context já observado empiricamente (memory feedbacks que não viajam).
-- **Riscos antecipados:**
-  - **Versão híbrida virar pretexto para LLM no runtime** ("o LLM ajuda a preencher os TODOs"). Mitigação: critério de revisão de ADR 0022 (gatilho explícito de reabertura).
-  - **Handoff virar nova burocracia** ("mais um ritual antes de qualquer ação"). Mitigação: integração com `workflow continue` existente — não criar verbo novo se possível.
-  - **Stubs canais (.cursorrules etc.) saindo de sincronia** com o conteúdo do handoff. Mitigação: CI drift check (similar ao `living-docs:check`).
-  - **Criar uma 4ª camada de contexto sem retirar a 2ª** (sprawl piora). Mitigação: política de migração obrigatória declarada acima.
-  - **Excesso de prescrição** pode prejudicar flexibilidade de cada provider. Mitigação: cada provider pode ler/honrar a SSOT à sua maneira; o que o framework garante é a existência da SSOT no repo.
-- **Não-objetivos:**
-  - Eliminar `AGENTS.md` ou ADRs como SSOT — handoff é canal de entrega, não autoridade.
-  - LLM no runtime para gerar/refinar handoff (viola ADR 0018).
-  - Substituir `workflow continue` resumido — handoff é para boot frio; continue serve continuação dentro de fluxo.
-  - Reinventar memory engine. A solução é estrutural (onde mora o texto), não computacional.
-  - Forçar todos providers a comportamento uniforme.
-- **Items deferidos da Spec 0023 absorvidos aqui (revisita obrigatória na abertura):**
-  - **Spec 0023 / [1.H.6]** — `docs/guides/workflow-quickstart.md` (também vinculado a `boilerplate-system-modernization`; o guide cobre uso da CLI completa, incluindo escolha entre `continue` resumido e `handoff` completo via wizard).
-  - **Spec 0023 / [1.H.7]** — `docs/guides/workflow-with-ai-agents.md` (escrito pós-handoff materializado; ensina o padrão canônico real, incluindo modelo tri-party se promovido a ADR per 1.H.10).
-- **Slug:** `handoff-as-first-class` (per ADR 0017). Slug definitivo a confirmar quando a spec abrir — pode evoluir para algo mais amplo como `agent-context-distribution-and-handoff` se o escopo absorvido predominar.
-
-### 2. `governance-dashboard-and-visual-artifacts`
+### 1. `governance-dashboard-and-visual-artifacts`
 
 > **Vinculação metodológica:** materializa [ADR 0023 — Meta-artefatos de governança são SSOT YAML com derivações determinísticas](../../../.core/governance/adrs/0023-meta-artifacts-yaml-with-derivations.md). Cláusula anti-paper explícita (item 6) — ADR sem materialização rápida vira o anti-pattern (dashboard que nunca saiu do papel desde 2026-05-07) que motivou o ADR.
 
@@ -101,7 +65,7 @@ _(nenhuma spec em execução — Spec 0023 concluída, ver [historico.md](./hist
   - **Padrão:** maioria dos comandos é `git` puro + leitura de markdown estruturado + `gh` para metadata do PR. Nenhum exige LLM no runtime — geração do prompt final pode acontecer por template + interpolação determinística. Quando contexto local é insuficiente (ex.: PR fechado fora do repo, sem `gh` disponível), wizard cai gracioso para o fluxo (b) (manual via IA conversacional).
 - **Slug:** `governance-dashboard-and-visual-artifacts` (per [ADR 0017](../../../.core/governance/adrs/0017-spec-numbering-slug-to-branch.md)).
 
-### 3. `boilerplate-system-modernization` (escopo expandido — absorve "stack-agnostic refactor" e "retrofit tasks-mixed-boilerplate D01")
+### 2. `boilerplate-system-modernization` (escopo expandido — absorve "stack-agnostic refactor" e "retrofit tasks-mixed-boilerplate D01")
 
 > **Vinculação metodológica:** materializa [DEC-0023-F03](../../../.governance/specs/0023-workflow-runtime/decision-brief.md) (boilerplate dedicado por classe) e [DEC-0023-F04](../../../.governance/specs/0023-workflow-runtime/decision-brief.md) (múltiplos paths por classe). Sem essa modernização, F03+F04 cravados em PR5 S5 ficam no papel — sistema atual de boilerplates não suporta a tríade arquitetural B+B+A+A da Spec 0023.
 >

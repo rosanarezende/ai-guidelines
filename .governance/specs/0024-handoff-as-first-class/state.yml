@@ -1,0 +1,5 @@
+stage: research
+gate:
+  status: open
+focus: "Bloco A (síntese empírica) cravado; Blocos B-G por eixo abertos; research dos 5+ sistemas externos pendente"
+next: "WebFetch spec-kitty + síntese textual + popular Bloco B (Persistência) com primeiras opções"
