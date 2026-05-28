@@ -22,38 +22,9 @@ _(nenhuma spec em execução — Spec 0023 concluída, ver [historico.md](./hist
 
 > **Sobre a ordem.** As 3 candidatas em `Now` são instanciáveis após a Spec 0023 fechar. A ordem abaixo segue critério misto (anti-paper urgency + bloqueio downstream + DX). Owner pode reordenar quando o momento da abertura chegar.
 
-### 1. `governance-dashboard-and-visual-artifacts`
+> **Reordenação aplicada em 2026-05-28.** `handoff-as-first-class` promovida de posição 2 para posição 1 com base em evidência operacional pós-fechamento da Spec 0023: sessão com handoff situado manualmente produziu aderência operacional significativamente superior à sessão iniciada com `AGENTS.md` estático; o problema gera fricção ativa agora; a solução emergiu empiricamente. `governance-dashboard-and-visual-artifacts` passa para posição 2 — permanece relevante como camada de projeção e visualização do estado governado, mas não resolve a fricção operacional imediata de bootstrap situado entre sessões/agentes. ADR 0023 permanece `Proposta` — promoção deferida pending clarificação da sua primeira materialização após estabilização do runtime de handoff.
 
-> **Vinculação metodológica:** materializa [ADR 0023 — Meta-artefatos de governança são SSOT YAML com derivações determinísticas](../../../.core/governance/adrs/0023-meta-artifacts-yaml-with-derivations.md). Cláusula anti-paper explícita (item 6) — ADR sem materialização rápida vira o anti-pattern (dashboard que nunca saiu do papel desde 2026-05-07) que motivou o ADR.
-
-- **Fonte do insight:** PR5 S3–S4 da Spec 0023 (2026-05-22). Débito de dashboard de governança se arrasta desde a época do `living-docs.yml` e nunca saiu do papel. Combinado com a decisão arquitetural cravada em ADR 0023 (meta-artefatos como SSOT YAML com derivações JSON+HTML), a candidata materializa o primeiro caso real do padrão.
-- **Princípio guia:** ADR 0023 — meta-artefatos de governança são SSOT em YAML com derivações determinísticas build-time. Derivações **NÃO usam LLM no runtime** (ADR 0018 preservado).
-- **Escopo proposto (a confirmar quando a spec abrir):**
-  - **Backlog convertido** para o padrão YAML SSOT + JSON derivado + HTML derivado. Schema declarado; `yarn build:meta-artifacts` (ou equivalente) regenera derivações; CI drift check garante sincronização.
-  - **HTML dashboard** com visão de estado de governança: specs ativas, candidatas em `Now`/`Next`/`Later`, status de blocos de decisão. Estático na v1 (sem JS interativo).
-  - **Mermaid diagrams** embedded onde fizer sentido (arquitetura, lifecycle, stack de PRs) — renderizado pelo GitHub.
-  - **Prompts versionados** para imagens conceituais em diretório dedicado (ex.: `.governance/visual-prompts/`). Owner cola prompt em ferramenta externa (Claude/Midjourney/DALL-E/etc.) e retorna imagem; cobre arquitetura ponta a ponta, entrega de valor, andamento. Owner é visualmente orientada — esse débito é DX real.
-- **Pré-requisitos:**
-  - Spec 0023 mergeada (atômico ponta-a-ponta per ADR 0020).
-  - ADR 0023 promovida de `Proposta` para `Aceita` no fechamento da 0023.
-- **Sinal de "está na hora":** Spec 0023 fechar. Sem condição adicional — vinculação metodológica explícita por ADR 0023 item 6.
-- **Riscos antecipados:**
-  - **HTML virar "produto SaaS"** — adicionar JS interativo, autenticação, filtros runtime complexos. Mitigação: framing canônico anti-distorção de ADR 0023 (linguagem rejeitada).
-  - **Prompts visuais perdendo aderência ao estado real** — risco de imagem gerada em momento X ficar obsoleta no momento Y. Mitigação: prompts versionados são instruções para regenerar, não imagens cacheadas.
-  - **Padrão YAML+JSON+HTML aplicado a markdown narrativo por engano** — viola ADR 0023 item 5 (aplicabilidade restrita a meta-artefatos). Mitigação: critério de revisão explícito do ADR.
-- **Não-objetivos:**
-  - Reinventar Jira/Linear/Notion no repo. Dashboard é visualização **estática derivada** de SSOT YAML; SSOT continua editável via PR.
-  - Filtros interativos runtime, busca client-side complexa, autenticação. Tudo isso reabre trade-off contra "database + UI custom" (opção 3 rejeitada do ADR 0023).
-  - Geração de imagens via LLM no runtime (viola ADR 0018). Prompts são templates declarativos; geração acontece em ferramenta externa, manualmente, sob comando do humano.
-- **Sub-escopo cravado em PR5 S5 — investigação automatizada local para prompts visuais:** o wizard CLI (opção 6 do menu, opção `[c]` do submenu) hoje exibe placeholder "em breve" para o caminho automatizado. Implementação: substituir o passo manual de investigação por execução determinística de comandos `git`/`gh` (lê PR body, decision-brief, ADRs, CHANGELOG) no wizard, montando síntese estruturada antes de emitir o prompt de imagem. Preserva ADR 0018 (sem LLM no runtime; só shell determinístico + parsing local). Cf. embrião em `.governance/visual-prompts/` cravado em PR5 1.H.12 e cf. label "[em breve]" no menu do wizard.
-- **Evidência empírica do escopo de investigação automatizada (sessão Antigravity em 2026-05-22 sobre PR #25):** o agente IA conversacional executou ~28 operações para reunir contexto suficiente para o prompt de valor entregue — a maioria reproduzível deterministicamente em runtime sem LLM. Lista observada para informar o protótipo:
-  - **Por PR:** `gh pr view <N> --json title,body,headRefBranch,baseRefBranch,files`; `git log <base>..<head> --oneline`; `git diff <base>...<head> --stat`; `gh pr view <N>` (body markdown).
-  - **Por spec:** listar `.governance/specs/<id>-<slug>/`; ler `state.yml`, `tasks.md`, `decision-brief.md` (filtrar por sub-bloco grep), `NEXT.md`; identificar ADRs referenciadas em `.core/governance/adrs/`.
-  - **Cross-cutting:** `git log --all --grep=<N> --oneline`; `git status`; `git log origin/main..HEAD --oneline`; ler `CHANGELOG.md` (filtrar seção `[Unreleased]`); ler `.governance/specs/roadmap/backlog.md`.
-  - **Padrão:** maioria dos comandos é `git` puro + leitura de markdown estruturado + `gh` para metadata do PR. Nenhum exige LLM no runtime — geração do prompt final pode acontecer por template + interpolação determinística. Quando contexto local é insuficiente (ex.: PR fechado fora do repo, sem `gh` disponível), wizard cai gracioso para o fluxo (b) (manual via IA conversacional).
-- **Slug:** `governance-dashboard-and-visual-artifacts` (per [ADR 0017](../../../.core/governance/adrs/0017-spec-numbering-slug-to-branch.md)).
-
-### 2. `handoff-as-first-class` (escopo expandido — absorve "arquitetura de regras portáveis vs. contexto framework-interno")
+### 1. `handoff-as-first-class` (escopo expandido — absorve "arquitetura de regras portáveis vs. contexto framework-interno")
 
 > **Vinculação metodológica:** materializa [ADR 0022 — Handoff situado em estado precede distribuição pré-carregada de regras](../../../.core/governance/adrs/0022-handoff-situated-precedes-static-distribution.md). Sem materialização, ADR 0022 vira "ADR de papel" — repete o anti-pattern de adiar princípios validados empiricamente sem entrega.
 >
@@ -80,7 +51,7 @@ _(nenhuma spec em execução — Spec 0023 concluída, ver [historico.md](./hist
   - **Convenção operacional: inquirer em todo input humano da CLI** (cf. `NEXT.md` da Spec 0023 § "Convenção operacional — inquirer em todo input humano da CLI", 2026-05-22) — quando o handoff materializar, esta convenção deve ser uma das regras situacionais entregues pelo handoff em sessões CLI novas. Pattern: prompt humano novo usa `@inquirer/prompts` via porta `Prompts` em `src/app/ports/Prompts.ts`; tests injetam `FakePrompts`. Se houver violação recorrente observada (manual prompts em código novo), reabrir como ADR formal.
 - **Pré-requisitos:**
   - Spec 0023 mergeada (atômico ponta-a-ponta per ADR 0020).
-  - ADR 0022 promovida de `Proposta` para `Aceita` no fechamento da 0023.
+  - ADR 0022 promovida para `Aceita` em 2026-05-28 ✅
 - **Sinal de "está na hora":** Spec 0023 fechar. Sem condição adicional — vinculação metodológica explícita por ADR 0022; gap de portable context já observado empiricamente (memory feedbacks que não viajam).
 - **Riscos antecipados:**
   - **Versão híbrida virar pretexto para LLM no runtime** ("o LLM ajuda a preencher os TODOs"). Mitigação: critério de revisão de ADR 0022 (gatilho explícito de reabertura).
@@ -98,6 +69,37 @@ _(nenhuma spec em execução — Spec 0023 concluída, ver [historico.md](./hist
   - **Spec 0023 / [1.H.6]** — `docs/guides/workflow-quickstart.md` (também vinculado a `boilerplate-system-modernization`; o guide cobre uso da CLI completa, incluindo escolha entre `continue` resumido e `handoff` completo via wizard).
   - **Spec 0023 / [1.H.7]** — `docs/guides/workflow-with-ai-agents.md` (escrito pós-handoff materializado; ensina o padrão canônico real, incluindo modelo tri-party se promovido a ADR per 1.H.10).
 - **Slug:** `handoff-as-first-class` (per ADR 0017). Slug definitivo a confirmar quando a spec abrir — pode evoluir para algo mais amplo como `agent-context-distribution-and-handoff` se o escopo absorvido predominar.
+
+### 2. `governance-dashboard-and-visual-artifacts`
+
+> **Vinculação metodológica:** materializa [ADR 0023 — Meta-artefatos de governança são SSOT YAML com derivações determinísticas](../../../.core/governance/adrs/0023-meta-artifacts-yaml-with-derivations.md). Cláusula anti-paper explícita (item 6) — ADR sem materialização rápida vira o anti-pattern (dashboard que nunca saiu do papel desde 2026-05-07) que motivou o ADR.
+
+- **Fonte do insight:** PR5 S3–S4 da Spec 0023 (2026-05-22). Débito de dashboard de governança se arrasta desde a época do `living-docs.yml` e nunca saiu do papel. Combinado com a decisão arquitetural cravada em ADR 0023 (meta-artefatos como SSOT YAML com derivações JSON+HTML), a candidata materializa o primeiro caso real do padrão.
+- **Princípio guia:** ADR 0023 — meta-artefatos de governança são SSOT em YAML com derivações determinísticas build-time. Derivações **NÃO usam LLM no runtime** (ADR 0018 preservado).
+- **Escopo proposto (a confirmar quando a spec abrir):**
+  - **Backlog convertido** para o padrão YAML SSOT + JSON derivado + HTML derivado. Schema declarado; `yarn build:meta-artifacts` (ou equivalente) regenera derivações; CI drift check garante sincronização.
+  - **HTML dashboard** com visão de estado de governança: specs ativas, candidatas em `Now`/`Next`/`Later`, status de blocos de decisão. Estático na v1 (sem JS interativo).
+  - **Mermaid diagrams** embedded onde fizer sentido (arquitetura, lifecycle, stack de PRs) — renderizado pelo GitHub.
+  - **Prompts versionados** para imagens conceituais em diretório dedicado (ex.: `.governance/visual-prompts/`). Owner cola prompt em ferramenta externa (Claude/Midjourney/DALL-E/etc.) e retorna imagem; cobre arquitetura ponta a ponta, entrega de valor, andamento. Owner é visualmente orientada — esse débito é DX real.
+- **Pré-requisitos:**
+  - Spec 0023 mergeada (atômico ponta-a-ponta per ADR 0020).
+  - ADR 0023 permanece `Proposta` — promoção deferida pending clarificação da primeira materialização pós-handoff (ver nota de reordenação 2026-05-28).
+- **Sinal de "está na hora":** `handoff-as-first-class` fechar (ou evidência empírica consolidada de que o primeiro caso de materialização da ADR 0023 continua sendo o dashboard).
+- **Riscos antecipados:**
+  - **HTML virar "produto SaaS"** — adicionar JS interativo, autenticação, filtros runtime complexos. Mitigação: framing canônico anti-distorção de ADR 0023 (linguagem rejeitada).
+  - **Prompts visuais perdendo aderência ao estado real** — risco de imagem gerada em momento X ficar obsoleta no momento Y. Mitigação: prompts versionados são instruções para regenerar, não imagens cacheadas.
+  - **Padrão YAML+JSON+HTML aplicado a markdown narrativo por engano** — viola ADR 0023 item 5 (aplicabilidade restrita a meta-artefatos). Mitigação: critério de revisão explícito do ADR.
+- **Não-objetivos:**
+  - Reinventar Jira/Linear/Notion no repo. Dashboard é visualização **estática derivada** de SSOT YAML; SSOT continua editável via PR.
+  - Filtros interativos runtime, busca client-side complexa, autenticação. Tudo isso reabre trade-off contra "database + UI custom" (opção 3 rejeitada do ADR 0023).
+  - Geração de imagens via LLM no runtime (viola ADR 0018). Prompts são templates declarativos; geração acontece em ferramenta externa, manualmente, sob comando do humano.
+- **Sub-escopo cravado em PR5 S5 — investigação automatizada local para prompts visuais:** o wizard CLI (opção 6 do menu, opção `[c]` do submenu) hoje exibe placeholder "em breve" para o caminho automatizado. Implementação: substituir o passo manual de investigação por execução determinística de comandos `git`/`gh` (lê PR body, decision-brief, ADRs, CHANGELOG) no wizard, montando síntese estruturada antes de emitir o prompt de imagem. Preserva ADR 0018 (sem LLM no runtime; só shell determinístico + parsing local). Cf. embrião em `.governance/visual-prompts/` cravado em PR5 1.H.12 e cf. label "[em breve]" no menu do wizard.
+- **Evidência empírica do escopo de investigação automatizada (sessão Antigravity em 2026-05-22 sobre PR #25):** o agente IA conversacional executou ~28 operações para reunir contexto suficiente para o prompt de valor entregue — a maioria reproduzível deterministicamente em runtime sem LLM. Lista observada para informar o protótipo:
+  - **Por PR:** `gh pr view <N> --json title,body,headRefBranch,baseRefBranch,files`; `git log <base>..<head> --oneline`; `git diff <base>...<head> --stat`; `gh pr view <N>` (body markdown).
+  - **Por spec:** listar `.governance/specs/<id>-<slug>/`; ler `state.yml`, `tasks.md`, `decision-brief.md` (filtrar por sub-bloco grep), `NEXT.md`; identificar ADRs referenciadas em `.core/governance/adrs/`.
+  - **Cross-cutting:** `git log --all --grep=<N> --oneline`; `git status`; `git log origin/main..HEAD --oneline`; ler `CHANGELOG.md` (filtrar seção `[Unreleased]`); ler `.governance/specs/roadmap/backlog.md`.
+  - **Padrão:** maioria dos comandos é `git` puro + leitura de markdown estruturado + `gh` para metadata do PR. Nenhum exige LLM no runtime — geração do prompt final pode acontecer por template + interpolação determinística. Quando contexto local é insuficiente (ex.: PR fechado fora do repo, sem `gh` disponível), wizard cai gracioso para o fluxo (b) (manual via IA conversacional).
+- **Slug:** `governance-dashboard-and-visual-artifacts` (per [ADR 0017](../../../.core/governance/adrs/0017-spec-numbering-slug-to-branch.md)).
 
 ### 3. `boilerplate-system-modernization` (escopo expandido — absorve "stack-agnostic refactor" e "retrofit tasks-mixed-boilerplate D01")
 
