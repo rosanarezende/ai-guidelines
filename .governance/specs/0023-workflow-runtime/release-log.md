@@ -2,12 +2,9 @@
 
 # Release log — Spec 0023 Workflow Runtime (pós-merge, condicional)
 
-> **Existe só quando há operação pós-merge** — tipicamente uma **release npm** e/ou
-> ajuste de superfície pública. Spec puramente interna pode **não ter** este arquivo:
-> o encerramento genérico (spec→Done, `historico.md`, `NEXT.md` removido) é o **commit
-> de encerramento** pós-merge, com prontidão gateada em [`review.md`](./review.md) R5/R7.
+> **Registro operacional da release.** O encerramento da spec (spec→Done, NEXT.md deletado, historico atualizado) acontece na branch antes do merge — não aqui. Este arquivo registra a operação de publish (npm, GitHub Release) que a CI executa após o merge.
 >
-> **Não é gate.** É registro operacional. Merge authorization vive em `review.md` R8.
+> **Não é gate.** Merge authorization vive em `review.md` R8+R9.
 > Cf. `[DEC-0023-M01]` (modelo de boundaries) + `[DEC-0023-N01]`.
 
 ## T0 — Release / merge (registro)
@@ -15,11 +12,11 @@
 > Informações vêm do Integration PR (#27). Pode ser preenchido por
 > `yarn guidelines release-prep` (evolução: auto-populate a partir do #27).
 
-- Data / Owner:
-- Stack mergeada: #18 → #19 → #22 → #23 → #24 → #25 → #26 (bootstrap alignment) (+ Integration #27)
-- Versão publicada: `1.1.0` _(alvo; confirmar no pós-release)_
-- dist-tag / Tag git / GitHub release / run `release.yml`:
-- Resultado: ✅ sucesso / ⚠️ incidente / ❌ falha
+- Data / Owner: 2026-05-27 / Rosana Rezende
+- Stack mergeada: #18 → #19 → #22 → #23 → #24 → #25 → #26 (bootstrap alignment) + Integration #27
+- Versão publicada: `1.1.0`
+- dist-tag / Tag git / GitHub release / run `release.yml`: _(preencher após CI — SHA, tag, link da run)_
+- Resultado: _(confirmar após CI — ✅ sucesso / ⚠️ incidente / ❌ falha)_
 
 ## T1 — Ajustes públicos (excepcional)
 
