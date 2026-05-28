@@ -41,7 +41,7 @@
 
 ## Merge authorization (ato humano — gate do merge-stack)
 
-- [ ] **R8** — Merge authorization explícita (owner): autorização textual explícita registrada ("autorizo merge atômico" + data). Centraliza o gate humano que vivia em `1.H.[REVIEW]`/`4.9` do `tasks.md`. _(ex-1.H.[REVIEW]/4.9)_
+- [x] **R8** — Merge authorization explícita (owner): **"Autorizo o merge atômico da stack da Spec 0023" — Rosana Rezende, 2026-05-27.** _(ex-1.H.[REVIEW]/4.9)_
 
 - [x] **R9** — Branch em estado final: spec.md `Done`, state.yml `done`, NEXT.md deletado, historico.md atualizado, backlog.md limpo, release-log T0 preenchido. O merge não acontece com trabalho pendente na branch. **Fechado 2026-05-27:** todos os itens do checklist de fechamento do `WORKFLOW.md` Estágio 5 concluídos nesta branch antes do merge.
 
