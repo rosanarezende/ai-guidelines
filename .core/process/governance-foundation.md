@@ -117,6 +117,8 @@ Progresso operacional. Marca tasks `[x]` a cada degrau. **Espinha dorsal de exec
 - **Fase de Review (Gate de Homologação)**: Empacotamento, pipeline verde, descrição em 3 etapas do PR, **aguardar gate humano formal**.
 - **Fase de Encerramento (Pré-Merge)**: Migra research, consolida e deleta `NEXT.md`, atualiza roadmap, status final.
 
+> **Modelo de 3 boundaries (Spec 0023 — `[DEC-0023-M01]`):** as fases de Review e Encerramento acima migraram para artefatos dedicados — **`review.md`** (integration readiness; gates R1–R7, lido pelo runtime) e **`release-log.md`** (log condicional de operações pós-merge). O `tasks.md` torna-se **execution-only** (fecha 100% `[x]` ao fim da execução); os boilerplates já refletem isso. O "Princípio de PR auto-suficiente" abaixo permanece válido (descreve o que o PR deve conter antes do merge); o registro pós-merge propriamente dito vive no `release-log.md`.
+
 > **Princípio de PR auto-suficiente:** o merge não dispara nenhum trabalho adicional. Antes do merge, o PR já deve conter: status `Done (PR #N — YYYY-MM-DD)` em `spec.md`, entrada completa em `roadmap/historico.md`, remoção de `roadmap/backlog.md§Em execução`, `research-index.md` atualizado com as pesquisas migradas, `CHANGELOG.md` com a release publicada (não em `[Unreleased]`) e bump da `version` em `package.json`. Se o agente encontrar pendências durante o merge ("falta atualizar histórico", "faltou o changelog"), elas eram para ter sido cobertas na Fase 4 — abrir hotfix ou commit pré-merge é uma falha do checklist, não comportamento esperado.
 
 > **Sequência canônica para specs com publish em registry externo (npm, PyPI, Maven, etc.):**
@@ -157,8 +159,8 @@ Pesquisas, benchmarks, auditorias, transcrições elaboradas durante a execuçã
 Ao fechar a spec, arquivos com valor reutilizável devem ser:
 
 1. Renomeados para incluir a data atual como prefixo: `YYYY-MM-DD-nome-original.md`.
-2. Movidos fisicamente para a pasta central `.specify/specs/researchs/<domínio>/`, onde `<domínio>` deve ser o escopo da pesquisa (ex: `governance/`, `architecture/`, `oss/`). Não crie pastas por spec.
-3. Indexados em `.specify/specs/research-index.md`.
+2. Movidos fisicamente para a **biblioteca central de pesquisas**, no escopo `<domínio>` (ex: `governance/`, `architecture/`, `oss/`). Não crie pastas por spec. **Canônico (ADR 0019):** `.governance/specs/research-library/<domínio>/`. **Legado:** `.specify/specs/researchs/<domínio>/` — **só leitura/migração; research nova nasce no canônico, nunca no legado.**
+3. Indexados no `research-index.md` da root correspondente — `.governance/specs/research-index.md` (canônico) ou `.specify/specs/research-index.md` (legado).
    A pasta `research/` local da spec pode ser deletada se não restar nada de útil (ou mantida apenas para rascunhos sem valor histórico).
 
 ---
@@ -338,16 +340,18 @@ Regra prática:
 
 ## Checklist de fechamento
 
-Ao concluir uma spec e fazer merge para `main`:
+> **Princípio:** tudo abaixo acontece **na branch, antes do merge**. O merge é o ato de encerramento — não existe "commit de encerramento pós-merge" para governança de spec. Um PR autossuficiente chega ao merge já em estado final; `main` nunca recebe trabalho pendente.
+
+Ao concluir uma spec, antes de autorizar o merge (gate R9 do `review.md`):
 
 - [ ] Todas as tasks de Fase 1 e Fase 2 (Implementação A e B) marcadas `[x]` em `tasks.md`.
-- [ ] Pipeline canônico verde, sempre (ex.: `yarn validate` no `ai-guidelines` — agrega format:check + build + test + living-docs:check; substitua pelo equivalente do stack do consumidor — `npm test`, `pnpm verify`, `cargo test`, `pytest`, etc.).
-- [ ] Se `NEXT.md` existir: migrar débitos relevantes para
-      `roadmap/backlog.md` (ou para issues/discussões, conforme o caso) e
-      **deletar** `NEXT.md`.
-- [ ] `research/`: migrar arquivos de valor seguindo a **Política de Lifecycle** (Seção 4.5): Renomear com prefixo `YYYY-MM-DD-`, mover para `.specify/specs/researchs/<domínio>/` e indexar em `.specify/specs/research-index.md`.
-      Nenhum conhecimento (RAG) deve morrer na pasta da spec fechada.
-- [ ] Mover a entrada da spec para "Concluídas" em `roadmap/historico.md` mantendo o número como histórico.
+- [ ] Pipeline canônico verde (ex.: `yarn validate` — agrega format:check + build + test + living-docs:check; substitua pelo equivalente do stack do consumidor).
+- [ ] Se `NEXT.md` existir: migrar débitos relevantes para `roadmap/backlog.md` e **deletar** `NEXT.md` na branch. Não esvaziar, não renomear — deletar.
+- [ ] `research/`: migrar arquivos de valor para `.governance/specs/research-library/<domínio>/` com prefixo `YYYY-MM-DD-` e indexar no `research-index.md`. Nenhum conhecimento deve morrer na pasta da spec fechada.
+- [ ] Mover a entrada da spec para "Concluídas" em `roadmap/historico.md`.
 - [ ] Remover a entrada da spec da seção "Em execução" em `roadmap/backlog.md`.
 - [ ] Status final no `spec.md`: `Done`.
-- [ ] **Fechar antes de abrir uma nova spec** — uma sessão, uma spec ativa.
+- [ ] `state.yml`: `stage: done`, campo `next:` vazio ou ausente.
+- [ ] `release-log.md` T0 preenchido com o que é conhecido antes do merge (data, owner, stack, versão alvo). Campos que dependem do merge (SHA, tag, run URL) ficam para confirmação pós-CI — isso é bookkeeping, não trabalho de spec.
+- [ ] Gate R9 marcado `[x]` no `review.md`: evidência de que a branch está em estado final.
+- [ ] **Fechar antes de abrir uma nova spec** — uma spec ativa por vez.

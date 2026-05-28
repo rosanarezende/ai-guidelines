@@ -9,12 +9,31 @@
  * Âncora: [DEC-0021-A03].
  */
 import { GovernanceError } from "../../domain/shared/errors.js";
-import { RESERVED_GOVERNANCE_DIRS } from "../../domain/workspace/MigrationPlan.js";
+import {
+  GOVERNANCE_SCAFFOLD_FILES,
+  GOVERNANCE_SPECS_SCAFFOLD_DIRS,
+  RESERVED_GOVERNANCE_DIRS,
+} from "../../domain/workspace/MigrationPlan.js";
 import { FakeWorkspaceProvisioner } from "../../test-utils/doubles.js";
 import { AdoptWorkspace } from "./AdoptWorkspace.js";
 
-function expectedPaths(): string[] {
-  return [".governance", ...RESERVED_GOVERNANCE_DIRS.map((d) => `.governance/${d}`)];
+function expectedDirPaths(): string[] {
+  return [
+    ".governance",
+    ...RESERVED_GOVERNANCE_DIRS.map((d) => `.governance/${d}`),
+    ...GOVERNANCE_SPECS_SCAFFOLD_DIRS.map((d) => `.governance/${d}`),
+  ];
+}
+
+function expectedFilePaths(): string[] {
+  return GOVERNANCE_SCAFFOLD_FILES.map((f) => `.governance/${f.path}`);
+}
+
+function expectedCreateEvents(): string[] {
+  return [
+    ...expectedDirPaths().map((p) => `ensure-create:${p}`),
+    ...expectedFilePaths().map((p) => `ensure-file-create:${p}`),
+  ];
 }
 
 describe("Use case — AdoptWorkspace idempotência [BR-CLI-WORKSPACE-IDEMPOTENCY]", () => {
@@ -24,8 +43,9 @@ describe("Use case — AdoptWorkspace idempotência [BR-CLI-WORKSPACE-IDEMPOTENC
       state: { kind: "pristine" },
     });
 
-    expect([...result.applied]).toEqual(expectedPaths());
-    expect(provisioner.events).toEqual(expectedPaths().map((p) => `ensure-create:${p}`));
+    expect([...result.applied]).toEqual(expectedDirPaths());
+    expect([...result.appliedFiles]).toEqual(expectedFilePaths());
+    expect(provisioner.events).toEqual(expectedCreateEvents());
     expect(result.idempotentNoop).toBe(false);
   });
 
@@ -35,17 +55,20 @@ describe("Use case — AdoptWorkspace idempotência [BR-CLI-WORKSPACE-IDEMPOTENC
       state: { kind: "legacy", sources: [".specify"] },
     });
 
-    expect([...result.applied]).toEqual(expectedPaths());
+    expect([...result.applied]).toEqual(expectedDirPaths());
     expect(result.plan.noticedLegacy).toEqual([".specify"]);
   });
 
   it("DADO segunda execução sobre estado 'governance' ENTÃO não cria nada novo (idempotência)", () => {
-    const provisioner = new FakeWorkspaceProvisioner(expectedPaths());
+    const provisioner = new FakeWorkspaceProvisioner(expectedDirPaths(), expectedFilePaths());
     const result = new AdoptWorkspace({ provisioner }).execute({
       state: { kind: "governance" },
     });
 
-    expect(provisioner.events).toEqual(expectedPaths().map((p) => `ensure-noop:${p}`));
+    expect(provisioner.events).toEqual([
+      ...expectedDirPaths().map((p) => `ensure-noop:${p}`),
+      ...expectedFilePaths().map((p) => `ensure-file-noop:${p}`),
+    ]);
     expect(result.idempotentNoop).toBe(true);
   });
 
@@ -66,6 +89,34 @@ describe("Use case — AdoptWorkspace idempotência [BR-CLI-WORKSPACE-IDEMPOTENC
     const eventsAfterFirst = provisioner.events.length;
     uc.execute({ state: { kind: "governance" } });
     const second = provisioner.events.slice(eventsAfterFirst);
-    expect(second.every((e) => e.startsWith("ensure-noop:"))).toBe(true);
+    expect(
+      second.every((e) => e.startsWith("ensure-noop:") || e.startsWith("ensure-file-noop:"))
+    ).toBe(true);
+  });
+
+  it("DADO falha em ensure-file ENTÃO diretórios vazios são revertidos (rollback bilateral) E arquivos já criados permanecem", () => {
+    const provisioner = new FakeWorkspaceProvisioner();
+    const firstFilePath = expectedFilePaths()[0];
+    const failFilePath = expectedFilePaths()[1]; // falha no segundo arquivo (specs/roadmap/historico.md)
+    provisioner.failOnEnsureFile = failFilePath;
+
+    expect(() =>
+      new AdoptWorkspace({ provisioner }).execute({ state: { kind: "pristine" } })
+    ).toThrow();
+
+    // Primeiro arquivo criado antes da falha permanece (não-destrutivo)
+    expect(provisioner.hasFile(firstFilePath)).toBe(true);
+    expect(provisioner.hasFile(failFilePath)).toBe(false);
+
+    // specs/roadmap/ tem um filho de arquivo (backlog.md já foi escrito): NÃO é removido
+    expect(provisioner.events).toContain("remove-nonempty:.governance/specs/roadmap");
+
+    // Re-run completa sem corromper (idempotência pós-falha)
+    provisioner.failOnEnsureFile = null;
+    const result = new AdoptWorkspace({ provisioner }).execute({ state: { kind: "pristine" } });
+    // Segundo arquivo (que havia falhado) agora é criado
+    expect(result.appliedFiles).toContain(failFilePath);
+    // Primeiro arquivo (que já existia) não é re-criado
+    expect(result.appliedFiles).not.toContain(firstFilePath);
   });
 });

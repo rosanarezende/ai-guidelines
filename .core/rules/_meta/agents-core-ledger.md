@@ -8,7 +8,7 @@
 | ID      | Title                                                     | Category | Evidence Strength  | Sources | Chars | Lines |
 | ------- | --------------------------------------------------------- | -------- | ------------------ | ------- | ----- | ----- |
 | CORE-01 | Environment check antes da primeira ação                  | process  | declared_heuristic | 0       | 127   | 1     |
-| CORE-02 | Agnostic SDD Override — repositório como memória          | process  | declared_heuristic | 0       | 304   | 1     |
+| CORE-02 | Agnostic SDD Override — repositório como memória          | process  | declared_heuristic | 0       | 483   | 1     |
 | CORE-03 | Cross-ref para Regras Globais                             | process  | declared_heuristic | 0       | 127   | 1     |
 | CORE-04 | Nunca trabalhe direto em main/master                      | process  | declared_heuristic | 0       | 142   | 1     |
 | CORE-05 | Não versione contexto vazado                              | process  | declared_heuristic | 0       | 140   | 1     |
@@ -22,3 +22,4 @@
 | CORE-13 | Artefatos vivos durante o trabalho                        | process  | declared_heuristic | 0       | 185   | 1     |
 | CORE-14 | Mensagem de commit sugerida: IA fornece apenas a mensagem | process  | declared_heuristic | 0       | 174   | 1     |
 | CORE-15 | ADR é princípio perene, não revisitação datada            | process  | declared_heuristic | 0       | 378   | 1     |
+| CORE-16 | Sync de base ≠ merge atômico ponta-a-ponta                | process  | declared_heuristic | 0       | 598   | 1     |

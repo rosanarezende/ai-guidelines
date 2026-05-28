@@ -1,4 +1,4 @@
-<!-- ai-guidelines-template: tasks-evidence-driven-boilerplate v=3 -->
+<!-- ai-guidelines-template: tasks-evidence-driven-boilerplate v=4 -->
 
 # Tasks — Spec [Número] [Título Curto] — `evidence-driven`
 
@@ -109,33 +109,23 @@
 
 ---
 
-## Fase de Review (Gate de Homologação)
+## Fase de Review → vive em `review.md`
 
-> **Fase exclusiva para empacotamento e homologação.** Nenhuma implementação nova após este ponto, exceto correções demandadas pelo review humano.
-
-- [ ] **3.1** Atualizar header da `spec.md`: status → `In Review`.
-- [ ] **3.2** Pipeline canônico verde: rodar a suíte completa (install bloqueado/immutable + format check + test com coverage). Ex. no `ai-guidelines`: `yarn check:repo`. Em outros stacks: `npm ci && npm run lint && npm test`, `pnpm install --frozen-lockfile && pnpm verify`, ou equivalente.
-- [ ] **3.3** Critérios de aceite de `spec.md` (alto nível) e DoD de `plan.md` (detalhado) confirmados ponto-a-ponto.
-- [ ] **3.4** `decision-brief.md`: validar que todos os pontos `[DEC-NNNN-*]` estão `Resolved` e que cada decisão cravada está refletida no design do `plan.md` v2. Discrepância → bloqueia review.
-- [ ] **3.5** Validar a entrega em **ambiente real** quando aplicável: rodar a feature em consumidor / staging / espelho de prod, revisando regressões. Para specs do `ai-guidelines` que tocam compilador/rules, o canal canônico é `yarn guidelines adopt --target ../<consumidor> --dry-run`. Specs puramente internas (refactor sem mudança de comportamento, ajustes de teste, etc.) podem registrar "não-aplicável" no PR com justificativa.
-- [ ] **3.6** PR atualizado com descrição em 3 etapas (contexto → decisões cravadas com cross-ref ao `decision-brief.md` → impacto cross-spec) conforme regra de PR collab.
-- [ ] **3.7** **[MANDATÓRIO]** Aguardar **Gate de Review Humano** — homologação técnica formal. **Não prosseguir** para Fase 4 sem aprovação explícita.
-- [ ] **3.8** Aplicar correções demandadas em loops de review até aprovação; cada correção é commit incremental rastreável.
+> **Modelo de 3 boundaries (cf. `[DEC-0023-M01]`):** a homologação / prontidão de
+> integração **não vive mais no `tasks.md`**. Ela vive em **`review.md`** (gates
+> R1–R7, instanciado de `review-boilerplate.md`): R1–R6 `[x]` liberam abrir o
+> Integration PR; R7 (merge authorization) libera o merge da stack.
+>
+> `tasks.md` é **execution-only**: cobre apenas execução/implementação e deve poder
+> fechar 100% `[x]` quando a execução termina — sem depender de gates de homologação
+> nem de ações pós-merge. O gate determinístico do runtime lê `review.md`, não este arquivo.
 
 ---
 
-## Fase de Encerramento Pré-Merge
+## Fase de Encerramento → vive em `release-log.md`
 
-> **[MANDATÓRIO]** Esta fase ocorre **na branch do PR, antes do merge**. Nenhuma tarefa pós-merge — o pacote deve estar **100% auto-suficiente** no momento do merge. O merge só ocorre após este checklist completo.
->
-> **Princípio de PR auto-suficiente:** ao mergear, o agente que vier depois não precisa abrir hotfix nem commit complementar para fechar a spec. Tudo o que a release precisa — status `Done`, histórico, changelog publicado, version bump, índices atualizados, research migrado — já está nesse mesmo PR.
-
-- [ ] **4.1** `NEXT.md` (se existir): migrar débitos relevantes para `roadmap/backlog.md` (atualizando candidatas existentes ou abrindo novas) e **deletar** o arquivo.
-- [ ] **4.2** Migração de research: cada arquivo significativo renomeado para `YYYY-MM-DD-nome.md` (se ainda não estiver) e movido para a pasta de domínio correta em `.specify/specs/researchs/<domínio>/`. Adicionar link + resumo em `.specify/specs/research-index.md`. Política completa em `.core/process/governance-foundation.md`.
-- [ ] **4.3** `decision-brief.md` **permanece** no diretório da spec (`.specify/specs/NNNN-<slug>/`) como artefato histórico — **não migra**.
-- [ ] **4.4** `spec.md` header: status → `Done (PR #X — YYYY-MM-DD)`.
-- [ ] **4.5** `roadmap/historico.md`: spec movida para "Specs concluídas" com data; entrada removida de "Em execução" em `roadmap/backlog.md`.
-- [ ] **4.6** `CHANGELOG.md`: se a spec mudou comportamento publicado, criar **release publicada** (`## [X.Y.Z] — YYYY-MM-DD`) — não deixar em `[Unreleased]`. Bumpar `version` em `package.json` na mesma operação. Refatorações internas e specs puramente documentais dispensam release.
-- [ ] **4.7** **[MANDATÓRIO]** Confirmar que **a sessão atual** não abriu outra spec antes deste encerramento (cf. `.core/process/governance-foundation.md` § "Checklist de fechamento" — _uma sessão, uma spec ativa_, e research da Spec 0017 [`2026-04-29-concurrency-best-practices.md`](../specs/researchs/governance/2026-04-29-concurrency-best-practices.md)). Specs em paralelo conduzidas por outros contribuidores ou outras sessões **são permitidas** em repos OSS — a regra é por sessão de trabalho, não por repositório.
-- [ ] **4.8** **[COMMIT]** `chore(spec-NNNN): encerramento pré-merge — research migrado, NEXT removido, status final`.
-- [ ] **4.9** **[MANDATÓRIO]** Aprovação humana explícita para merge. **Não fazer merge autonomamente.**
+> **Operações pós-merge** (migração de research, status `Done`, CHANGELOG/release,
+> `historico.md`, ajustes públicos, incidentes) vivem em **`release-log.md`** (instanciado
+> de `release-log-boilerplate.md`) — registro operacional, **não gate**. Exceções que são
+> gates de readiness e vivem em `review.md`: migração do `NEXT.md` (R5) e merge
+> authorization (R7).

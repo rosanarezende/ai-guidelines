@@ -32,10 +32,14 @@ O `ai-guidelines` cobre os três eixos no mesmo framework:
 - **Taxonomia MECE de 7 pilares de trabalho** — `spec`, `experiment`, `spike`, `incident`, `proposal`, `patch`, `fix`. Tudo que entra no fluxo cabe em exatamente um.
 - **`.governance/` como SSOT** — `registry.yml` estruturado + Markdown derivado + reservas para intake, handoff, telemetria à medida que o framework evolui. Repo é a memória.
 - **Living Documentation** — testes com IDs `[BR-CLI-*]` são a fonte única de verdade das regras de negócio; documentação derivada protegida por drift guard fatal na CI.
-- **Integração AI-agnóstica de primeira classe** — um runtime governado distribui regras para 7+ provider entrypoints sincronizados (`CLAUDE.md`, `GEMINI.md`, `.openai/instructions.md`, `.cursor/rules/`, etc.).
+- **Integração AI-agnóstica de primeira classe** — um sistema governado distribui regras para 7+ provider entrypoints sincronizados (`CLAUDE.md`, `GEMINI.md`, `.openai/instructions.md`, `.cursor/rules/`, etc.).
 - **Política de update auditável** (`managed-block` + `mirror`) que delimita o que a CLI gerencia e o que é do consumidor — sem sobrescrita silenciosa.
 
 Você escreve a regra de governança uma vez. Você abre uma spec uma vez. O framework propaga até o merge — com IA opcional, mas de primeira classe.
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/rosanarezende/ai-guidelines/main/docs/assets/ai-guidelines-before-after.png" alt="ai-guidelines — antes e depois: do contexto reconstruído a cada sessão ao contexto canônico versionado no repositório" width="880">
+</p>
 
 ## Quick start
 
@@ -62,14 +66,47 @@ Requer **Node ≥ 22**. Para fixar versão em CI: `npx ai-guidelines@<versão> .
 
 ## Comandos essenciais
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/rosanarezende/ai-guidelines/main/docs/assets/ai-guidelines-capability.png" alt="ai-guidelines — superfície de comandos: cinco comandos primários e capacidades opt-in" width="520">
+</p>
+
 | Comando                       | Quando usar                                                         |
 | :---------------------------- | :------------------------------------------------------------------ |
 | `npx ai-guidelines init`      | Projeto novo, baseline governance-first via wizard interativo       |
 | `npx ai-guidelines adopt`     | Repositório existente, adoção conservadora (preserva código legado) |
 | `npx ai-guidelines providers` | Adicionar ou remover AI provider entrypoints específicos            |
 | `npx ai-guidelines update`    | Re-aplicar baseline após upgrade da CLI (headless, idempotente)     |
+| `npx ai-guidelines workflow`  | Menu para operar o ciclo da spec ativa                              |
+| `npx ai-guidelines continue`  | Briefing da spec ativa + governança ativa nas pré-condições         |
+| `npx ai-guidelines review`    | Reúne os comentários de review de um PR para colar na sua IA        |
 
 Todo comando aceita `--dry-run` para preview e `--help` para detalhes. Sem argumentos, a CLI inicia o wizard.
+
+## Operação do ciclo
+
+> **Novo na 1.1.0.** As capacidades são aditivas (sem quebra de compatibilidade); a UX ainda pode evoluir em releases minor — feedback é bem-vindo.
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/rosanarezende/ai-guidelines/main/docs/assets/ai-guidelines-dx-flow.png" alt="ai-guidelines · operação do ciclo — sessão típica em 4 momentos: menu, execução, estado publicado, governança ativa" width="880">
+</p>
+
+A partir da `1.1.0`, a CLI ganha um conjunto de comandos para **operar o ciclo de governança** sem substituí-lo. Três comandos no dia a dia:
+
+- **`npx ai-guidelines workflow`** — wizard com opções declarativas para navegar specs ativas, retomar trabalho, publicar estado, diagnosticar drift e conduzir as operações de integração da stack (abrir Integration PR, merge atômico). Cada opção mapeia 1:1 para um comando — sem ranking, sem auto-detecção de "próxima ação".
+- **`npx ai-guidelines continue [<id|slug>]`** — briefing da spec ativa (ou da spec que você indicar) com governança ativa nas pré-condições: recusa narrativamente quando a spec ainda não está pronta para execução.
+- **`npx ai-guidelines workflow publish-state --status=<active|blocked|paused|completed>`** — projeta o estado interno da spec no índice público, para que qualquer máquina descubra o que está em curso sem prompt.
+
+**Contexto pronto para colar na IA externa.** A CLI não embute LLM: ela lê o estado da spec e monta um bloco de contexto estruturado que você **cola na sua IA** (Claude, Cursor, Codex…). A conversa acontece na IA; a CLI só prepara o contexto e aplica os gates determinísticos.
+
+**Três boundaries por spec** organizam o ciclo:
+
+- `tasks.md` — execução (o que está autorizado a implementar);
+- `review.md` — prontidão de integração (gates que liberam abrir o PR de integração e o merge);
+- `release-log.md` — registro pós-merge (release/ajustes públicos, quando houver).
+
+A CLI lê o `review.md` e **bloqueia, de forma determinística**, a abertura do Integration PR e o merge da stack enquanto os gates não fecharem — sempre com confirmação humana. No seu repositório o estado fica versionado: `.governance/registry.yml` é a SSOT estruturada do projeto e `.governance/runtime/active-specs.yml` é o índice derivado de specs ativas (schema fechado, descoberta cross-machine sem dashboard externo).
+
+O **merge atômico** aterrissa a spec como **uma unidade** por default (`unit`): um único commit canônico em `main`, então **rollback é um comando** (`git revert <SHA>`); os PRs da stack são encerrados como _landed-via_ (não rejeitados). Um modo `sequential` opcional aterrissa PR a PR, para fluxos com fatias independentes. Para repositórios com stacked PRs, `npx ai-guidelines release-prep` prepara a release com um plano explícito antes de qualquer efeito colateral (`--dry-run` audita sem aplicar).
 
 ## Como funciona (em um minuto)
 
@@ -84,7 +121,7 @@ A CLI compila projeções desse estado para canais distintos:
 A distribuição usa dois modos de update:
 
 - **`managed-block`** — atualiza apenas o conteúdo entre marcadores `<!-- ai-guidelines:managed-start -->` e `<!-- ai-guidelines:managed-end -->`. Tudo fora dos marcadores é seu — fica intocado entre updates.
-- **`mirror`** — overwrite total para boilerplates SDD (bridge legado em transição para composição modular via recipes, conforme Spec 0021).
+- **`mirror`** — overwrite total para boilerplates SDD (bridge legado em transição para composição modular via recipes).
 
 Detalhamento técnico em [`docs/cli/ai-guidelines-cli.md`](docs/cli/ai-guidelines-cli.md). Topologia canônica em [`.core/governance/GOVERNANCE-CATALOG.md`](.core/governance/GOVERNANCE-CATALOG.md).
 
@@ -112,8 +149,9 @@ Detalhamento técnico em [`docs/cli/ai-guidelines-cli.md`](docs/cli/ai-guideline
 - [`.core/governance/ARCHITECTURE.md`](.core/governance/ARCHITECTURE.md) — arquitetura macro da CLI
 - [`docs/`](docs/) — guias técnicos e features
 - [`AGENTS.md`](AGENTS.md) — workflow para humanos e agentes IA neste repositório
+- [`WORKFLOW.md`](WORKFLOW.md) — ciclo completo de desenvolvimento: do research ao merge, com todos os comandos
 - [`CONTRIBUTING.md`](CONTRIBUTING.md) — como contribuir, setup local, convenções
-- [`.specify/specs/roadmap/backlog.md`](.specify/specs/roadmap/backlog.md) — backlog vivo do framework
+- [`.governance/specs/roadmap/backlog.md`](.governance/specs/roadmap/backlog.md) — backlog vivo do framework (canônico, ADR 0019)
 - [`CHANGELOG.md`](CHANGELOG.md) — histórico de versões
 
 ## Licença

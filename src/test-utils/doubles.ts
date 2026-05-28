@@ -111,10 +111,13 @@ export class FakeFileSystemProbe implements FileSystemProbe {
 export class FakeWorkspaceProvisioner implements WorkspaceProvisioner {
   public readonly events: string[] = [];
   public failOnEnsure: string | null = null;
+  public failOnEnsureFile: string | null = null;
   private readonly dirs = new Set<string>();
+  private readonly files = new Map<string, string>();
 
-  constructor(preExisting: Iterable<string> = []) {
+  constructor(preExisting: Iterable<string> = [], preExistingFiles: Iterable<string> = []) {
     for (const p of preExisting) this.dirs.add(p);
+    for (const p of preExistingFiles) this.files.set(p, "");
   }
 
   ensureDirectory(relPath: string): boolean {
@@ -136,11 +139,34 @@ export class FakeWorkspaceProvisioner implements WorkspaceProvisioner {
       this.events.push(`remove-absent:${relPath}`);
       return;
     }
+    const hasChildren = [...this.files.keys()].some((f) => f.startsWith(relPath + "/"));
+    if (hasChildren) {
+      this.events.push(`remove-nonempty:${relPath}`);
+      return;
+    }
     this.dirs.delete(relPath);
     this.events.push(`remove:${relPath}`);
   }
 
+  ensureFile(relPath: string, content: string): boolean {
+    if (this.failOnEnsureFile === relPath) {
+      this.events.push(`ensure-file-fail:${relPath}`);
+      throw new Error(`Falha simulada criando arquivo '${relPath}'.`);
+    }
+    if (this.files.has(relPath)) {
+      this.events.push(`ensure-file-noop:${relPath}`);
+      return false;
+    }
+    this.files.set(relPath, content);
+    this.events.push(`ensure-file-create:${relPath}`);
+    return true;
+  }
+
   has(relPath: string): boolean {
     return this.dirs.has(relPath);
+  }
+
+  hasFile(relPath: string): boolean {
+    return this.files.has(relPath);
   }
 }

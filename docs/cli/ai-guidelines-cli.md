@@ -259,9 +259,62 @@ ENTÃO deve oferecer ao usuário a opção de instalar as dependências imediata
 
 ---
 
+## 11. Workflow Runtime — operar o ciclo da spec (Spec 0023)
+
+> **Escopo diferente das seções 1–10.** Essas seções mapeiam regras da CLI de _distribuição_ (`init`/`adopt`/`update`), implementadas em `cli/*.mjs`. Os comandos abaixo _operam o ciclo de governança_ de uma spec e vivem na re-arquitetura DDD em `src/` — o contrato canônico e os testes BDD estão na própria spec ([`.governance/specs/0023-workflow-runtime/`](../../.governance/specs/0023-workflow-runtime/)) e nos use cases sob `src/app/workflow/`. Por isso esta seção é **referência de comando**, não um espelho de `[BR-CLI-*]`.
+>
+> **Invariante ADR 0018 (AI-as-Channel):** nenhum desses comandos embute LLM. Eles leem o estado versionado do repositório (markdown + git + `gh`), aplicam **gates determinísticos** e montam um bloco de contexto **para você colar na sua IA externa**. A inteligência vive no canal (agente), não no runtime.
+
+### Modelo de 3 boundaries
+
+Cada spec organiza o ciclo em três arquivos lidos pelo runtime (cf. `[DEC-0023-M01]`):
+
+- `tasks.md` — **execução** (o que está autorizado a implementar);
+- `review.md` — **prontidão de integração** (gates R1–R7 liberam abrir o Integration PR; R8 libera o merge);
+- `release-log.md` — **registro pós-merge** (release/ajustes públicos, quando houver).
+
+### Comandos
+
+| Comando                                                                | Tier         | Resumo                                                                                                                        |
+| :--------------------------------------------------------------------- | :----------- | :---------------------------------------------------------------------------------------------------------------------------- |
+| `workflow`                                                             | Wizard       | Menu operacional com 8 opções fixas declarativas (sem auto-detecção/ranking). Cada opção mapeia 1:1 para um comando.          |
+| `continue [<id\|slug>]`                                                | Atalho       | Briefing da spec ativa (ou a indicada) + gate de execução: **recusa narrativamente** se `executionAuthorized == false`.       |
+| `workflow publish-state --status=<active\|blocked\|paused\|completed>` | Projeção     | Projeta o estado interno (`state.yml`) no índice público `.governance/runtime/active-specs.yml` (descoberta cross-machine).   |
+| `review [<pr>]`                                                        | Inspeção     | Read-only: reúne e agrupa os comentários de review de um PR (via `gh`) em saída copiável. Detecta o PR pela branch ou número. |
+| `release-prep [--version <v>]`                                         | Transacional | Prepara a release da stack com plano explícito antes de qualquer efeito colateral. `--dry-run` audita sem aplicar.            |
+
+**Gates determinísticos do wizard** (sem IA, sem inferência):
+
+- opção 🔗 (Abrir Integration PR) **bloqueia** enquanto `review.md` R1–R7 não estiverem `[x]`;
+- opção 🔀 (merge atômico da stack) **bloqueia** enquanto R1–R8 não estiverem `[x]`.
+
+Ambos sempre exigem confirmação humana — continuidade conversacional não destrava gate.
+
+**Modos de aterrissagem do 🔀** (escolha explícita, sem inferência — cf. `[DEC-0023-O03]` + ADR 0024 § Modos de aterrissagem):
+
+- **`unit` (default)** — aterrissa a stack como **unidade**: mergeia o **PR terminal de implementação** (veículo; exige stack linear) → **1 SHA canônico** em `main`; os demais PRs e o Integration PR são encerrados via **`landed-via reconciliation`** (fechados com anotação `landed-via: #<veículo> @ <SHA>`, não rejeitados). Rollback: `git revert <SHA>` (1 comando).
+- **`sequential` (override)** — mergeia cada PR de implementação bottom-up. Indicado para fatias reversíveis isoladamente / stack rebase-friendly / deploy train. Rollback granular (atenção a interdependência).
+
+O `plan` imprime modo + veículo + PRs reconciliados + receita de rollback antes de qualquer side-effect. O **Integration PR nunca é veículo** de aterrissagem (é homologação).
+
+### Exemplos
+
+```bash
+yarn guidelines workflow                     # abre o wizard
+yarn guidelines continue 0023                # briefing da spec 0023 + gate
+yarn guidelines review 27                    # triagem dos review comments do PR #27
+yarn guidelines workflow publish-state --status=active --updated-by=@maintainer
+yarn guidelines release-prep --version 1.1.0 --dry-run
+```
+
+> Onde fica o estado, no consumidor: `.governance/registry.yml` (SSOT estruturada) e `.governance/runtime/active-specs.yml` (índice derivado, schema fechado). O ciclo de boundaries é canônico em [`.core/process/governance-foundation.md`](../../.core/process/governance-foundation.md).
+
+---
+
 ## Histórico de Versões (Gênese)
 
 - **v0.1.0**: Mapeamento das regras core de sincronização e proteção de framework.
 - **v0.2.0**: Mapeamento da camada de Shell (Input/Wizard/Engine).
 - **v0.3.0**: Taxonomia Editorial/Infraestrutura e business rules de features opt-in.
 - **v0.4.0**: Refatoração Monolítica (Spec 0017): Hierarquia semântica e injeção direta no `AGENTS.md`.
+- **v0.5.0**: Workflow Runtime (Spec 0023): referência dos comandos `workflow`/`continue`/`review`/`publish-state`/`release-prep` e modelo de 3 boundaries.

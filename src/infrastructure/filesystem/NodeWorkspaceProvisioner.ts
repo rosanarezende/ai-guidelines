@@ -23,6 +23,19 @@ export class NodeWorkspaceProvisioner implements WorkspaceProvisioner {
     return !existedBefore;
   }
 
+  ensureFile(relPath: string, content: string): boolean {
+    const abs = this.resolveScoped(relPath);
+    fs.mkdirSync(path.dirname(abs), { recursive: true });
+    try {
+      fs.writeFileSync(abs, content, { flag: "wx", encoding: "utf8" });
+      return true;
+    } catch (err) {
+      const code = (err as NodeJS.ErrnoException).code;
+      if (code === "EEXIST") return false;
+      throw err;
+    }
+  }
+
   removeDirectoryIfEmpty(relPath: string): void {
     const abs = this.resolveScoped(relPath);
     try {

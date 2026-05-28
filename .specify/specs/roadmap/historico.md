@@ -1,5 +1,11 @@
 # Histórico — ai-guidelines
 
+> # ⚠️ CONGELADO / HISTÓRICO — não adicionar conteúdo novo aqui
+>
+> **Roadmap canônico é [`.governance/specs/roadmap/`](../../../.governance/specs/roadmap/)** (per ADR 0019).
+> Este arquivo é legado e permanece apenas como referência histórica. **Novas entradas de histórico entram no canônico via PR.**
+> Consolidação completa é Fase 3 da candidata `runtime-and-template-root-consolidation` — não fazer ad-hoc.
+
 Este arquivo registra specs concluídas e absorvidas. É leitura de contexto
 histórico, não roadmap de execução — o presente e futuro vivem em
 [`backlog.md`](./backlog.md).

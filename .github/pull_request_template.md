@@ -1,92 +1,169 @@
 <!--
-TÍTULO do PR deve seguir o padrão em .core/process/pr-title-conventions.md:
+═════════════════════════════════════════════════════════════════════════════
+TÍTULO do PR — segue `.core/process/pr-title-conventions.md`:
+
   [<emojis>] [<label-opcional>] [<identificador>] <título curto>
 
-Identificador aceita:
-  [Spec NNNN] — PR vinculado a uma spec
-  [<pillar>]  — PR vinculado a pilar MECE não-spec (fix, patch, spike, etc.)
+Conjuntos fechados:
+- Emojis: 🧾 (governance) · 🛠️ (execution) · 🔗 (integration)
+         · 🔒 (governance contract) · 1️⃣2️⃣3️⃣ (order) · ➜ (downstream)
+         · 🚑 (fast-track)
+- Labels textuais opcionais: [Bootstrap] · [Pre-model] · [Hotfix]
+- Identificador: [Spec NNNN] OU [<pillar>] (fix, patch, spike, incident, etc.)
 
-Combinações canônicas:
-  [🧾🔒] [Spec 0023] Lifecycle bootstrap                          — governance pareada
-  [🛠️1️⃣➜] [Spec 0023] Enforcement runtime                       — execution intermediária
-  [🛠️2️⃣] [Spec 0023] DX execution                                — execution terminal
-  [🛠️] [Spec 0041] Clipboard hotfix                              — execution isolada (spec)
-  [🛠️] [fix] Reorganize package.json scripts                     — execution isolada (pillar)
-  [🛠️➜] [Bootstrap] [Spec 0023] Workflow runtime                — transitional/pre-model
-  [🚑] [Incident 0007] Emergency rollback                        — fast-track
+Exemplos:
+  [🛠️4️⃣] [Spec 0023] PR5: hardening final do runtime
+  [🔗] [Integration] [Spec 0023] Homologação final da stack
+  [🧾🔒] [Spec 0024] Lifecycle bootstrap
+  [🛠️] [fix] Reorganize package.json scripts
+═════════════════════════════════════════════════════════════════════════════
+-->
 
-Emojis são conjunto fechado. Nuances usam labels textuais fechadas
-([Bootstrap], [Pre-model], [Hotfix]). Pillars lowercase, alinhados com
-WorkItem.kind do registry (cf. taxonomia MECE Spec 0021).
+<!--
+═════════════════════════════════════════════════════════════════════════════
+VISUAL DE VALOR ENTREGUE (opcional, recomendado para PRs não-triviais)
+
+Como gerar:
+  1. Rode `yarn guidelines workflow` → opção 6 (Gerar prompt visual)
+  2. Cole o briefing em uma IA conversacional COM ACESSO AO REPO
+     (Claude com tool use, ChatGPT com browsing, Antigravity, Cursor)
+  3. A IA investiga o repositório atual e devolve um prompt de imagem
+     pronto para gerador externo (Midjourney, DALL-E, Nano Banana, etc.)
+
+Cole a imagem na seção abaixo quando aplicável (before/after, fluxo
+operacional, valor entregue). Narrativa visual virou parte do fluxo
+de governança na Spec 0023 — não é marketing, é comunicação operacional.
+═════════════════════════════════════════════════════════════════════════════
+-->
+
+## Visual de valor entregue (opcional)
+
+<!--
+Imagem única:
+  ![valor entregue](URL_DA_IMAGEM)
+
+Before/After side-by-side (sem <form>; só HTML estrutural):
+  <table>
+    <tr>
+      <td align="center"><strong>ANTES</strong><br/><img src="URL_ANTES" width="380"/></td>
+      <td align="center"><strong>DEPOIS</strong><br/><img src="URL_DEPOIS" width="380"/></td>
+    </tr>
+  </table>
+-->
+
+## Status do ciclo de vida
+
+> Lifecycle: <kbd>Draft</kbd> → <kbd>Ready for review</kbd> → <kbd>Authorized to merge</kbd>
+>
+> **Ready ≠ Mergeable** (cf. [ADR 0024](../.core/governance/adrs/0024-draft-ready-mergeable-distinct-states.md)).
+> Em stacks governance-first (cf. [ADR 0020](../.core/governance/adrs/0020-governance-precede-execution.md)), integração ocorre em sequência atômica ponta-a-ponta; conversão `Draft → Ready` **não** autoriza merge.
+
+- [ ] **Draft** — trabalho em andamento; não solicita review ainda
+- [ ] **Ready for review** — operacionalmente concluído; aguarda revisão humana
+
+<!--
+"Authorized to merge" é ato humano explícito — registrado na seção "Merge
+authorization" abaixo como texto, não como checkbox. ADR 0024 separa os
+3 estados para impedir leitura "Ready = mergeable".
 -->
 
 ## PR Type
 
-- [ ] 🧾 Governance / Thinking — spec/decision-brief/plan/tasks/research/ADR
-- [ ] 🛠️ Execution — código + docs derivados
-- [ ] 🚑 Fast-track — patch/fix/incident pequeno com accountability transferida ao reviewer (cf. ADR 0021)
+Escolha **uma** opção (mova 🔘 para a sua; deixe ⚪ nas outras):
 
-## Stack Dependencies
+- ⚪ 🧾 **Governance** — spec/decision-brief/plan/tasks/research/ADR
+- ⚪ 🛠️ **Execution** — código + docs derivados
+- ⚪ 🔗 **Integration** — homologação/convergência final da stack; sem comportamento novo
+- ⚪ 🚑 **Fast-track** — patch/fix/incident pequeno (accountability transferida; cf. [ADR 0021](../.core/governance/adrs/0021-enforcement-precedes-awareness.md))
 
-- [ ] Este PR pode ser mergeado isoladamente (sem `🔒` nem `➜` no título)
-- [ ] 🔒 Governance contract pendente de execution PR(s) pareada (`[🧾🔒]`; declare execution PRs no body opening)
-- [ ] 🛠️N➜ Execution intermediária — posição N na stack, com PR(s) downstream (declare upstream + downstream no body opening)
-- [ ] 🛠️N Execution terminal — posição N na stack, sem PRs downstream (declare upstream no body opening)
+## Posição na stack
 
-## Label de nuance (opcional)
+- **Stack atual**: <!-- ex.: "3 de 6 na stack 0023" OU "isolado" -->
+- **Upstream (depends on)**: <!-- #prev OU "main" -->
+- **Downstream (followed by)**: <!-- #next OU "terminal" -->
 
-- [ ] `[Bootstrap]` — PR colapsa governance+execution antes da estabilização metodológica da spec
-- [ ] `[Pre-model]` — PR criado antes do lifecycle/enforcement da spec estar cravado
-- [ ] `[Hotfix]` — fix urgente que precisa visibilidade mas não se qualifica como 🚑 fast-track
+Tipo de merge (escolha **uma**; mova 🔘 para a sua):
+
+- ⚪ **Mergeable isoladamente** — sem stack governance-first
+- ⚪ **Apenas merge atômico ponta-a-ponta** — stack governance-first (per ADR 0020)
+- ⚪ **Integration PR** — agrega evidência de convergência; não autoriza merge sozinho
+
+## Merge authorization
+
+**Owner authorization**: pendente / autorizada em <!-- YYYY-MM-DD -->
+
+<!--
+Owner edita esta linha quando autorizar. Para stacks governance-first (ADR 0020),
+autorização vale para a stack inteira quando todos os PRs estão Ready.
+Antes disso: deixe "pendente". Esta seção é texto, não checklist — `Ready` não
+implica autorização automática (cf. ADR 0024).
+-->
 
 ## Resumo
 
-<!-- Descreva a mudança de forma objetiva. -->
+<!--
+Explique o valor entregue e a mudança operacional observável.
+Não duplique conteúdo de spec.md / decision-brief.md — referencie via Cross-refs.
 
-## Linked Issue
+Se houver impacto downstream (consumidores via `adopt`, breaking changes,
+migração necessária), descreva explicitamente aqui — não há seção dedicada
+porque a maioria dos PRs não tem; mas quando tem, é informação crítica.
+-->
 
-<!-- Use `#123` para a issue principal desta entrega. Se não houver issue, deixe vazio. -->
+## Test plan
 
-## Spec Path
+<!--
+Resumo curto: como o reviewer valida? Comandos chave + 1-2 observações.
+Para runtime/wizard/UX: explique o caminho de uso real, não apenas "tests green".
+Para governance: cite os artefatos que mudam de estado (DECs, ADRs, status agregado).
+-->
 
-<!-- Caminho para a spec em .specify/specs/<slug>/ se houver. Ex: .specify/specs/0004-ai-dev-foundations-public-ready/ -->
+<details>
+<summary><strong>Test plan detalhado (opcional — comandos completos, coverage report, smoke matrix)</strong></summary>
 
-## No-Spec Reason
+<!--
+Para PRs grandes, cole aqui:
+- comandos completos de validação (yarn ci, smoke multi-OS, etc.)
+- coverage report ou delta vs baseline
+- fluxos exploratórios manuais
+- screenshots/logs relevantes
 
-<!-- Se não houver spec, justifique: ajuste rápido (typo, wording, config menor), bugfix urgente, etc. -->
+Para PRs pequenos, pode deletar este bloco — o resumo acima basta.
+-->
 
-## Tipo de Mudança
+</details>
 
-<!-- Marque o que se aplica: -->
+## Cross-refs
 
-- [ ] ✨ Funcionalidade (feat) — nova capacidade no CLI, framework ou docs
-- [ ] 🐛 Correção (fix) — correção de comportamento incorreto
-- [ ] 📄 Documentação (docs) — guias, referências, processos, ADRs
-- [ ] ⚙️ Configuração (chore) — CI, scripts, dependências, estrutura
-- [ ] 🗂️ Refatoração (refactor) — sem mudança de comportamento externo
+- **Spec**: <!-- `.governance/specs/<id-slug>/` OU ausente -->
+- **ADRs aplicáveis**: <!-- ex.: ADR 0020, 0024 OU nenhum -->
+- **DECs aplicáveis**: <!-- ex.: DEC-0023-J01 OU nenhum -->
+- **Linked issue**: <!-- #123 OU ausente -->
 
-## Contexto e Motivação
+## Checklist operacional
 
-<!-- Qual dor, risco ou oportunidade motivou esta mudança? -->
-
-## Impacto Downstream (Breaking Changes)
-
-<!-- Esta mudança afeta repositórios que consomem este framework? Liste instruções de migração se houver quebra de compatibilidade. -->
-
-## Checklist
-
-- [ ] Commits atômicos (uma unidade lógica por commit, mensagem em PT-BR)
-- [ ] Branch dedicada (nunca direto em `main`)
-- [ ] Executei `yarn format` antes do push
-- [ ] Executei `yarn validate` antes do push (format:check + build + test + living-docs:check)
-- [ ] Documentei decisões arquiteturais relevantes em `adrs/`
-- [ ] Atualizei `tasks.md` da spec correspondente (se aplicável)
-- [ ] Revisei risco de contexto pessoal, credenciais ou artefatos operacionais vazados
-- [ ] Confirmei que a mudança segue o contrato arquitetural existente ou documenta a divergência
-- [ ] Verifiquei se a mudança exige atualização manual em repositórios que consomem este framework (via `adopt`)
-- [ ] **Este PR está em modo Draft** (converter para Ready somente após aprovação humana)
+- [ ] `yarn format ; yarn validate` verde antes do push
+- [ ] Commits atômicos por unidade lógica (per `[CORE-06]`); mensagens em pt-BR
+- [ ] Decisões arquiteturais cravadas em ADR ou decision-brief quando cabíveis
+- [ ] Sem credenciais/secrets/contexto pessoal vazado
 
 ## Disclosure de IA
 
-<!-- Este PR foi gerado ou co-gerado por IA? Qual agente/modelo? -->
-<!-- Ex: "Gerado com Gemini 3 Flash via Antigravity, revisado pelo mantenedor humano" -->
+<!--
+Resumo curto: agentes envolvidos + papel + quem autorizou.
+Ex: "Implementação: Antigravity (Gemini 3 Flash); review paralelo: Claude Opus 4.7;
+decisão final: humano (@rosanarezende)."
+-->
+
+<details>
+<summary><strong>Disclosure detalhada (opcional — múltiplas sessões, divergências, tri-party)</strong></summary>
+
+<!--
+Para PRs com múltiplos agentes IA ou sessões longas, cole aqui:
+- agentes/modelos por sessão + papel (implementação, review, segunda opinião)
+- divergências documentadas (onde escolheu A vs B, citação do raciocínio)
+- gates humanos por commit (CORE-07/14)
+- ferramentas externas usadas (Codex CLI, Antigravity, Cursor, etc.)
+-->
+
+</details>

@@ -30,6 +30,7 @@
 | **CORE-13**  | Artefatos vivos durante o trabalho                         | `universal` | `process`         | [Ver](top/agents-core.md#core13)              |
 | **CORE-14**  | Mensagem de commit sugerida: IA fornece apenas a mensagem  | `universal` | `process`         | [Ver](top/agents-core.md#core14)              |
 | **CORE-15**  | ADR é princípio perene, não revisitação datada             | `universal` | `process`         | [Ver](top/agents-core.md#core15)              |
+| **CORE-16**  | Sync de base ≠ merge atômico ponta-a-ponta                 | `universal` | `process`         | [Ver](top/agents-core.md#core16)              |
 | **GR-0001**  | Secure secret handling                                     | `universal` | `security`        | [Ver](top/global-rules.md#gr0001)             |
 | **GR-0002**  | Strict typing (anti-hacks)                                 | `universal` | `correctness`     | [Ver](top/global-rules.md#gr0002)             |
 | **GR-0003**  | Immutability over shared mutation                          | `universal` | `maintainability` | [Ver](top/global-rules.md#gr0003)             |

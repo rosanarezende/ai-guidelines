@@ -4,7 +4,15 @@ import { normalizePackageManager, detectPackageManager } from "#formatters/packa
 import { readTextIfExists } from "#fs/file-system";
 import { DEFAULT_PROVIDERS, getSupportedProviders } from "#features/core/config";
 
-const SUPPORTED_MODES = ["init", "adopt", "providers", "update", "check-budget"];
+const SUPPORTED_MODES = [
+  "init",
+  "adopt",
+  "providers",
+  "update",
+  "check-budget",
+  "workflow",
+  "continue",
+];
 const WIZARD_DEFAULTS = {
   mode: "adopt",
   target: ".",
@@ -75,38 +83,121 @@ export function printHelp() {
   console.log(`ai-guidelines CLI
 
 Uso:
-  yarn guidelines <init|adopt|providers|update> [opcoes]
+  yarn guidelines <init|adopt|providers|update|check-budget|workflow|continue|release-prep|review> [opcoes]
 
-Comandos:
-  init           Cria baseline AI-first em projeto novo
-  adopt          Aplica baseline AI-first em repositório existente
-  providers      Adiciona ou atualiza arquivos nativos de provider (CLAUDE.md, GEMINI.md,
-                 .openai/instructions.md, .cursor/rules/ai-guidelines.mdc, etc.)
-  update         Re-aplica provider entrypoints, templates SDD e recompila AGENTS.md a partir
-                 do .ai-guidelines/config.json existente (idempotente, headless, não modifica
-                 config). Use após atualizar a versão do framework para receber updates
-                 de hard-redirect, adapter rules e templates sem reabrir o wizard.
-  check-budget   Imprime o relatório de orçamento de tokens (universal, opt-in, AGENTS.md
-                 compilado e cada provider entrypoint) com base no rules.json do framework.
+═══ COMANDOS DE BOOTSTRAP / DISTRIBUIÇÃO ═══
 
-Opções:
+  init           Cria baseline AI-first em projeto novo.
+                 Ex.: yarn guidelines init --target ./meu-projeto --lang pt
+
+  adopt          Aplica baseline AI-first em repositório existente.
+                 Ex.: yarn guidelines adopt --providers claude,copilot --force
+
+  providers      Adiciona ou atualiza arquivos nativos de provider (CLAUDE.md,
+                 GEMINI.md, .openai/instructions.md, .cursor/rules/*, etc.).
+
+  update         Re-aplica provider entrypoints, templates SDD e recompila
+                 AGENTS.md a partir do .ai-guidelines/config.json existente
+                 (idempotente, headless). Use após atualizar a versão do
+                 framework para receber updates sem reabrir o wizard.
+
+  check-budget   Imprime o relatório de orçamento de tokens (universal, opt-in,
+                 AGENTS.md compilado e cada provider entrypoint).
+
+═══ COMANDOS DO WORKFLOW RUNTIME (Spec 0023, preview) ═══
+
+  workflow       Wizard operacional (8 opções fixas declarativas, agrupadas
+                 por gênero via icons):
+                   [1] 📍 Continuar spec atual (briefing + REPL)
+                   [2] 📍 Continuar outra spec (por slug ou id)
+                   [3] 📡 Publicar estado (instruções)
+                   [4] 🔗 Abrir Integration PR da spec ativa (transactional)
+                   [5] 🔀 Executar merge atômico da stack (transactional)
+                   [6] 📋 Ver specs ativas (índice público)
+                   [7] 🔍 Diagnosticar drift do índice
+                   [8] 🎨 Gerar prompt visual (briefing para IA conversacional
+                       investigar o repo e devolver o prompt de imagem final)
+                 Cf. [DEC-0023-B06] + [DEC-0023-B07] + [DEC-0023-L01];
+                 não embute LLM (ADR 0018 preservado). Opções 4 e 5 (tier 2
+                 transactional) mostram plan + confirmação humana antes de
+                 qualquer side-effect — cf. ADR 0024 seção "Operational CLI
+                 commands".
+
+  continue [<slug|id>]
+                 Atalho do workflow: imprime briefing + próxima ação de
+                 state.yml. **Recusa narrativamente** (exit 1) quando a spec
+                 não tem tasks.md ou gate.status != closed (enforcement L2,
+                 cf. ADR 0021 + [DEC-0023-E03]).
+                   Sem argumento → detecta spec via branch.
+                   Com <slug|id>  → resolve via índice público sem auto-checkout.
+                 Ex.: yarn guidelines continue 0023
+
+  workflow publish-state --status=<active|blocked|paused|completed>
+                          --updated-by=<autorizador>
+                          [--title=<txt>] [--base-branch=<br>]
+                          [--last-sync-commit=<sha>]
+                 Projeta state.yml interno da spec corrente → entry em
+                 .governance/runtime/active-specs.yml. Manual-first
+                 (cf. [DEC-0023-G03]); status declarado, sem inferência.
+                 Ex.: yarn guidelines workflow publish-state --status=active --updated-by=@maintainer
+
+  release-prep   [--version <X.Y.Z>] [--remote <name>] [--dry-run]
+                 [--skip-working-tree-check]
+                 Tier 3 standalone (repo-specific, cf. ADR 0024). Lê versão
+                 alvo de CHANGELOG.md [Unreleased], mostra plan completo,
+                 confirma e executa: bump package.json + promove CHANGELOG +
+                 commit + tag + push. Tag push dispara
+                 .github/workflows/release.yml → publish em npm + GitHub
+                 release. Pre-release auto-detectada (versão contém '-')
+                 vai para dist-tag 'next'; estável vai para 'latest'.
+                 Cf. [DEC-0023-L01].
+                 Ex.: yarn guidelines release-prep --dry-run
+                      yarn guidelines release-prep --version 1.1.0-preview.0
+
+  review         [<pr>] [--pr <n>]
+                 Tier 1 inspeção (read-only). Reúne e estrutura os review
+                 comments inline de um PR para triagem (sem resposta ×
+                 respondidos) + bloco copiável para colar na IA externa.
+                 Detecta o PR pela branch atual se o número for omitido.
+                 NÃO analisa/responde — isso é trabalho do agente, não do
+                 runtime (ADR 0018). Cf. [DEC-0023-N01].
+                 Ex.: yarn guidelines review
+                      yarn guidelines review 26
+
+═══ OPÇÕES GERAIS ═══
+
   --target <dir>             Diretório alvo (default: diretório atual)
   --name <project_name>      Nome do projeto (default: nome da pasta alvo)
   --package-manager <pm>     npm | pnpm | yarn | yarn@1.22.22 | yarn@4.1.1
   --providers <lista>        claude,cursor,copilot,windsurf,gemini,aider,openai
   --lang <pt|en>             Idioma para features (ex: tdd, bdd). Padrão: pt
   --force                    Sobrescreve arquivos suportados
-  --force-prettier           Força baseline Prettier mesmo com formatter rival detectado
+  --force-prettier           Força baseline Prettier mesmo com formatter rival
   --dry-run                  Mostra ações sem escrever arquivos
   --install                  Instala dependências automaticamente
   --prune                    Remove arquivos órfãos em .ai-guidelines/ (adopt)
   --yes, -y                  Aceita todos os defaults e pula o Wizard
 
-Contrato Governance-Driven (Spec 0021):
-  A CLI atual escreve em .ai-guidelines/ (bridge legado). O contrato canônico
-  de longo prazo é .governance/ como root unificado, com reservas intake/,
-  handoff/ e telemetry/. A migração CLI → GovernanceWorkspace acontece em PR4;
-  nenhum alias mágico é introduzido — adoção é sempre explícita.
+═══ CONVENÇÕES ═══
+
+  Branch para o workflow runtime: feat/spec-NNNN-<slug> (ou fix/docs/chore).
+  Slug numérico curto (0023) e slug completo (0023-workflow-runtime) são
+  aliases válidos no comando continue. Cf. ADR 0017.
+
+  Distinção crítica (cf. CORE-16): "MERGEABLE" do GitHub != autorização para
+  merge atômico ponta-a-ponta. PRs vinculados a spec não mergeiam em main
+  isoladamente; o stack inteiro mergeia em sequência ao fechar a spec
+  (ADR 0020).
+
+═══ CONTRATO ARQUITETURAL ═══
+
+  AI-as-Channel (ADR 0018): nenhum LLM embutido no runtime. Todo prompt/
+  contexto é texto determinístico produzido localmente; a interpretação
+  acontece em ferramenta externa sob comando humano.
+
+  Governance precede execução (ADR 0020 + ADR 0021): decisões estruturais
+  fechadas no decision-brief antes de execution; tasks.md é boundary de
+  autorização (não checklist fino); enforcement L2 + L4 mínimo.
 `);
 }
 
@@ -134,6 +225,25 @@ export function parseArgs(argv) {
     const token = rest[index];
 
     if (!token.startsWith("-")) {
+      // Exceções fechadas de positional arg — cabling de transporte para o
+      // runtime novo (cf. Spec 0023 PR3, plan.md § Componente [E]). Cada
+      // exceção é específica a um comando, sem reutilização para outros
+      // e sem positional parsing genérico:
+      //   1. `continue [<slug|id>]` — 1 positional (identifier do índice).
+      //   2. `workflow publish-state` — 1 positional (subcommand fechado).
+      if (command === "continue" && index === 0 && options.identifier === undefined) {
+        options.identifier = token;
+        continue;
+      }
+      if (command === "workflow" && index === 0 && options.subcommand === undefined) {
+        options.subcommand = token;
+        continue;
+      }
+      //   3. `review [<pr>]` — 1 positional (número do PR a triar).
+      if (command === "review" && index === 0 && options.pr === undefined) {
+        options.pr = token;
+        continue;
+      }
       throw new Error(`Argumento inesperado: ${token}`);
     }
 

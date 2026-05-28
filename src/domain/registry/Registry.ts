@@ -57,6 +57,26 @@ export class InMemoryRegistry {
     }
   }
 
+  /**
+   * Soft-delete: arquiva o item (status → "archived") mantendo-o no registry.
+   * Caminho lifecycle-preserving para itens cujo histórico deve sobreviver à
+   * "deleção" (specs, incidents). Distinto de {@link remove} (hard delete, que
+   * permanece válido para limpeza/correção). Cf. [DEC-0023-O02].
+   */
+  archive(id: WorkItemId, archivedAt: string): WorkItem {
+    const current = this.items.get(id);
+    if (!current) {
+      throw new GovernanceError(
+        "REGISTRY_NOT_FOUND",
+        `Item com id '${id}' não existe no registry.`
+      );
+    }
+    // Só status/updatedAt mudam; o discriminator `kind` é preservado pelo spread.
+    const next = { ...current, status: "archived", updatedAt: archivedAt } as WorkItem;
+    this.items.set(id, next);
+    return next;
+  }
+
   has(id: WorkItemId): boolean {
     return this.items.has(id);
   }

@@ -4,6 +4,8 @@ Obrigado pelo interesse em contribuir com o `ai-guidelines` BR! 🎉
 
 Este repositório é **AI-governed**: humanos e agentes de IA seguem o mesmo fluxo de governança. Se você está usando uma IA para contribuir, oriente-a a ler [`AGENTS.md`](AGENTS.md) antes de qualquer ação.
 
+> **Fluxo completo de desenvolvimento** (do research ao merge, com todos os comandos): [`WORKFLOW.md`](WORKFLOW.md).
+
 Contribuições em PT-BR e EN são bem-vindas.
 
 ---
@@ -47,22 +49,23 @@ main → branch dedicada → commit atômico → PR Draft → CI verde → Ready
 Quando: mudança que toca múltiplos arquivos fora de uma feature isolada, ou que precisa sobreviver a troca de IA/sessão para ser concluída.
 
 ```
-backlog.md (candidata) → spec em .specify/specs/<slug>/ → branch → commits → PR Draft → CI → Ready → review
+backlog.md (candidata) → spec → branch → implementação (stacked PRs) → closure na branch → merge
 ```
 
-1. **Registre a intenção** — abra issue com label apropriado, ou proponha entrada em [`.specify/specs/roadmap/backlog.md`](.specify/specs/roadmap/backlog.md).
-2. **Crie a fundação documental** em `.specify/specs/<slug>/` a partir dos templates SDD em [`.specify/templates/`](.specify/templates/):
+> Fluxo detalhado com todos os comandos: [`WORKFLOW.md`](WORKFLOW.md).
+
+1. **Registre a intenção** — proponha entrada em [`.governance/specs/roadmap/backlog.md`](.governance/specs/roadmap/backlog.md) como candidata.
+2. **Crie a fundação documental** em `.governance/specs/<NNNN>-<slug>/` a partir dos templates em [`.specify/templates/`](.specify/templates/):
    - `spec.md` — escopo e critérios de aceite (imutável após `In Review`)
    - `plan.md` — plano de implementação (vivo durante execução)
    - `tasks.md` — checklist de tarefas
-   - `NEXT.md` — débitos adiados (apenas se houver; deletar no encerramento)
-3. Crie **branch dedicada**: `feat/spec-XXXX-<slug>` (número sequencial alocado quando a candidata sai do backlog).
-4. **Commits atômicos** por unidade lógica (não agrupe docs + código + config num commit só).
-5. `yarn format` e `yarn validate` antes de qualquer push (o hook `pre-push` roda `yarn validate` automaticamente).
-6. Abra PR em **modo Draft** com matriz preenchida.
-7. Trabalho finalizado + CI verde → converta para **Ready**.
-8. Antes de pedir review, confirme a checklist técnica: spec/plan/tasks atualizados, decisões arquiteturais registradas em ADR quando necessário, `yarn format` + `yarn validate` verdes, ausência de contexto pessoal/operacional vazado, e impacto downstream documentado.
-9. Solicite review de pelo menos **1 owner** (ver [CODEOWNERS](.github/CODEOWNERS)).
+   - `NEXT.md` — débitos adiados (apenas se houver; **deletado na branch antes do merge**)
+3. Crie **branch dedicada**: `feat/spec-XXXX-<slug>`.
+4. **Commits atômicos** por unidade lógica.
+5. `yarn validate` antes de qualquer push (hook `pre-push` roda automaticamente).
+6. Abra PRs em **modo Draft**, converta para Ready quando CI verde.
+7. **Feche a branch antes do merge** (Estágio 5 do `WORKFLOW.md`): spec Done, state.yml done, NEXT.md deletado, historico/backlog/research atualizados. O merge não acontece com trabalho pendente na branch.
+8. Solicite review de pelo menos **1 owner** (ver [CODEOWNERS](.github/CODEOWNERS)).
 
 ### 3. 🧩 Spec consolidada (absorve candidatas relacionadas)
 
@@ -73,7 +76,7 @@ Quando: várias candidatas no backlog tocam o mesmo contrato e fazem mais sentid
 > "Se a entrega de uma altera o contrato da outra, fundir em uma spec única. Caso contrário, manter separadas."
 
 1. Documentar a fusão na própria `spec.md` (seção "Decisão de Fusão").
-2. Atualizar candidatas absorvidas em [`backlog.md`](.specify/specs/roadmap/backlog.md) com cross-ref à spec consolidada.
+2. Atualizar candidatas absorvidas em [`backlog.md`](.governance/specs/roadmap/backlog.md) com cross-ref à spec consolidada (entradas legadas em [`.specify/specs/roadmap/backlog.md`](.specify/specs/roadmap/backlog.md) migram caso-a-caso).
 3. Seguir workflow 2 a partir daí.
 
 ### 4. 🤖 Agente IA com autonomia
@@ -87,6 +90,23 @@ Quando: você está executando trabalho via Claude Code, Gemini CLI, Codex, Curs
    - Só escrever o texto após o humano editar/aprovar a lista;
    - Submeter o texto final para um último check humano antes de criar/editar o PR.
 4. Aprovação humana explícita obrigatória antes de `git push`.
+
+---
+
+## Achados fora de spec ativa
+
+Durante o trabalho aparecem insights, bugs ou débitos que **não** pertencem ao escopo da spec corrente (ou surgem fora de qualquer spec ativa). **Nunca silenciar o achado** — o mínimo é registrar. Use a tabela abaixo para decidir o destino:
+
+| Natureza do achado                                                | Destino canônico                                                                                                                                         |
+| :---------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Trivial e local (typo, wording, ajuste de 1 arquivo)              | PR direto pequeno (pillar `fix`). Sem spec.                                                                                                              |
+| Exige decisão arquitetural ou cruza com spec futura               | Entrada em [`.governance/specs/roadmap/backlog.md`](.governance/specs/roadmap/backlog.md) como candidata, com link de evidência (issue, PR, comentário). |
+| Urgente operacionalmente (build quebrando, bloqueador de release) | Spec rápida (pillar `patch`) ou incident.                                                                                                                |
+| Dentro de spec ativa, mas extrapolando o escopo declarado         | Entrada no `NEXT.md` da spec corrente (débito adiado com critério de revisita).                                                                          |
+
+**Por que isso importa:** sem essa convenção, achados arquiteturais legítimos viram cleanup silencioso dentro da spec errada (e poluem o diff), ou desaparecem completamente entre sessões. A entrada na backlog candidata é o nível mínimo de persistência que garante: (a) o achado sobrevive, (b) tem cross-ref de origem, (c) entra na fila normal de priorização junto às demais candidatas.
+
+> **Localização do backlog:** entradas novas vão em `.governance/specs/roadmap/backlog.md` (canônico em diante, conforme [ADR 0019](.core/governance/adrs/0019-governance-specs-root-in-maintainer.md)). O backlog legado em `.specify/specs/roadmap/backlog.md` permanece como referência histórica; entradas pré-existentes lá serão migradas caso-a-caso.
 
 ---
 
@@ -138,7 +158,7 @@ Antes de começar, leia:
 
 - [`AGENTS.md`](AGENTS.md) — fluxo obrigatório, princípios de engenharia e workflow (humanos e agentes).
 - [`.core/process/governance-foundation.md`](.core/process/governance-foundation.md) — quando abrir spec, como estruturar `spec.md`/`plan.md`/`tasks.md` e como fechar débitos/research.
-- [`.specify/specs/roadmap/backlog.md`](.specify/specs/roadmap/backlog.md) — backlog e candidatas.
+- [`.governance/specs/roadmap/backlog.md`](.governance/specs/roadmap/backlog.md) — backlog e candidatas (canônico). O legado em [`.specify/specs/roadmap/backlog.md`](.specify/specs/roadmap/backlog.md) permanece como referência histórica até cutover caso-a-caso.
 
 ---
 
@@ -173,6 +193,20 @@ yarn guidelines update  --target ../repo --dry-run
 
 Não use `node cli/ai-guidelines-cli.mjs …` direto — quebra resolução de imports `#cli/*`, `#features/*`, etc., sob PnP.
 
+### Operando o ciclo da spec (workflow runtime, Spec 0023)
+
+Para conduzir o ciclo de uma spec (não para distribuir baseline), use os comandos do workflow runtime. Todos têm `--help`; o wizard sem argumentos lista as opções.
+
+| Comando                                             | Para quê                                                                                                                                                      |
+| :-------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `yarn guidelines workflow`                          | Wizard operacional: navegar specs ativas, retomar, publicar estado, drift, abrir Integration PR, merge atômico (modos `unit`/`sequential` — ver docs/cli §11) |
+| `yarn guidelines continue [<id\|slug>]`             | Briefing da spec ativa + gate de execução (recusa narrativa se não autorizada)                                                                                |
+| `yarn guidelines review [<pr>]`                     | Reúne/estrutura os comentários de review de um PR (read-only) para colar na IA                                                                                |
+| `yarn guidelines workflow publish-state --status=…` | Projeta o estado interno da spec no índice público `active-specs.yml`                                                                                         |
+| `yarn guidelines release-prep [--version <v>]`      | Prepara a release da stack com plano explícito (`--dry-run` audita sem aplicar)                                                                               |
+
+> Referência completa dos comandos e flags: `yarn guidelines --help` e [`docs/cli/ai-guidelines-cli.md`](docs/cli/ai-guidelines-cli.md) §11. Detalhe do ciclo de boundaries (tasks/review/release-log) em [`.core/process/governance-foundation.md`](.core/process/governance-foundation.md).
+
 ## Estrutura do repositório
 
 ```text
@@ -182,6 +216,8 @@ ai-guidelines/
 │   │   ├── _meta/              # Catálogo compilado (rules.json + ledger)
 │   │   ├── opt-in/             # Regras vinculadas a features opcionais
 │   │   └── catalog.md          # Catálogo navegável (humano)
+│   ├── governance/             # ADRs (adrs/), GOVERNANCE-CATALOG, recipes, partials
+│   ├── process/                # governance-foundation.md (lifecycle canônico)
 │   └── templates/              # Templates injetados pelo init/adopt
 ├── cli/                        # CLI (ai-guidelines-cli.mjs)
 │   ├── app/                    # Engine, orquestração, UI
@@ -198,10 +234,11 @@ ai-guidelines/
 │   │       ├── editorial/      # tdd, bdd, quality-gates
 │   │       └── infrastructure/ # prettier, husky, ci
 │   └── formatters/             # Detecção de PM, formatter rival, monorepo
+├── src/                        # Re-arquitetura DDD da CLI + workflow runtime (Spec 0023)
 ├── docs/                       # Documentação exposta ao consumidor
-├── adrs/                       # Decisões arquiteturais (ADRs)
 ├── tests/                      # Testes (integration + smoke)
-├── .specify/specs/             # Specs SDD em execução + roadmap/
+├── .governance/                # SSOT canônica (ADR 0019): specs/ (+ roadmap/, research-library/), registry.yml, runtime/
+├── .specify/                   # Legado: specs/ (bridge via double-lookup) + templates/ (boilerplates distribuídos)
 ├── AGENTS.md                   # Fluxo obrigatório deste repositório
 ├── CONTRIBUTING.md             # Este arquivo
 ├── LICENSE                     # Apache-2.0

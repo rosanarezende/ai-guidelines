@@ -79,6 +79,8 @@ describe("Aplicação — Caso de Uso: RegisterWorkItem [BR-CLI-APP]", () => {
     expect(workspace.created).toEqual([]);
   });
 
-  // [SKIP-REASON: Living Documentation chega na Fase 3 (PR3) [DEC-0021-C01]]
-  it.skip("DADO registro bem-sucedido ENTÃO aciona extrator de Living Documentation [DEC-0021-C01]", () => {});
+  // [DEC-0021-C01] O acoplamento "registro aciona extrator" foi superado: a Living
+  // Documentation roda como pipeline desacoplado (app/use-cases/GenerateLivingDocs +
+  // CheckLivingDocs, com cobertura própria), não como efeito colateral do registro.
+  // Cf. [DEC-0023-O02].
 });
