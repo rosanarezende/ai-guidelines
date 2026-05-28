@@ -248,11 +248,11 @@ describe("App — MergeStack [BR-WORKFLOW-MERGE-STACK]", () => {
       expect(plan.rollbackRecipe).toMatch(/unit.*git revert/);
     });
 
-    it("DADO integrationPrNumber ENTÃO ele entra na reconciliação (nunca é veículo)", () => {
+    it("DADO integrationPrNumber com base=main ENTÃO Integration é o veículo; stack PRs fecham via landed-via", () => {
       const stack = new FakeStackOps();
-      stack.seed(pr(18));
+      stack.seed(pr(18, { base: "feat-17" }));
       stack.seed(pr(26, { base: "feat-25" }));
-      stack.seed(pr(27)); // Integration
+      stack.seed(pr(27, { base: "main" })); // Integration já aponta para main
 
       const plan = new MergeStack(stack).plan({
         prNumbers: [18, 26],
@@ -261,16 +261,34 @@ describe("App — MergeStack [BR-WORKFLOW-MERGE-STACK]", () => {
         integrationPrNumber: 27,
       });
 
-      expect(plan.items[0].prNumber).toBe(26);
-      expect(plan.reconcilePrNumbers).toEqual([18, 27]);
+      expect(plan.items[0].prNumber).toBe(27); // Integration é o veículo
+      expect(plan.items[0].needsBaseEdit).toBe(false); // já aponta para main
+      expect(plan.reconcilePrNumbers).toEqual([18, 26]); // stack PRs fecham via landed-via
     });
 
-    it("DADO execute unit ENTÃO mergeia só o veículo e fecha o resto com landed-via + SHA", () => {
+    it("DADO integrationPrNumber com base != main ENTÃO Integration entra na reconciliação (não é veículo)", () => {
+      const stack = new FakeStackOps();
+      stack.seed(pr(18, { base: "feat-17" }));
+      stack.seed(pr(26, { base: "feat-25" }));
+      stack.seed(pr(27, { base: "feat-26" })); // Integration NÃO aponta para main
+
+      const plan = new MergeStack(stack).plan({
+        prNumbers: [18, 26],
+        mainBranch: "main",
+        mergeStrategy: "squash",
+        integrationPrNumber: 27,
+      });
+
+      expect(plan.items[0].prNumber).toBe(26); // terminal é o veículo
+      expect(plan.reconcilePrNumbers).toEqual([18, 27]); // Integration fecha via landed-via
+    });
+
+    it("DADO execute unit com Integration PR como veículo ENTÃO mergeia o Integration e fecha stack PRs via landed-via", () => {
       const stack = new FakeStackOps();
       stack.seed(pr(18, { base: "main" }));
       stack.seed(pr(25, { base: "feat-24" }));
       stack.seed(pr(26, { base: "feat-25" }));
-      stack.seed(pr(27)); // Integration
+      stack.seed(pr(27, { base: "main" })); // Integration já aponta para main → veículo
 
       const useCase = new MergeStack(stack);
       const plan = useCase.plan({
@@ -281,14 +299,38 @@ describe("App — MergeStack [BR-WORKFLOW-MERGE-STACK]", () => {
       });
       useCase.execute(plan);
 
-      // só o veículo (#26) mergeado; base reescrita
+      // Integration (#27) mergeado diretamente; sem edit-base
+      expect(stack.mergeCalls.map((m) => m.number)).toEqual([27]);
+      expect(stack.editBaseCalls).toEqual([]);
+      // stack PRs fechados via landed-via
+      expect(stack.closeCalls.map((c) => c.number)).toEqual([18, 25, 26]);
+      for (const c of stack.closeCalls) {
+        expect(c.comment).toMatch(/landed-via: #27 @ sha-27/);
+        expect(c.comment).toMatch(/não foi rejeitado/);
+      }
+    });
+
+    it("DADO execute unit sem Integration PR ENTÃO terminal é o veículo com edit-base e stack fecha via landed-via", () => {
+      const stack = new FakeStackOps();
+      stack.seed(pr(18, { base: "main" }));
+      stack.seed(pr(25, { base: "feat-24" }));
+      stack.seed(pr(26, { base: "feat-25" }));
+
+      const useCase = new MergeStack(stack);
+      const plan = useCase.plan({
+        prNumbers: [18, 25, 26],
+        mainBranch: "main",
+        mergeStrategy: "squash",
+      });
+      useCase.execute(plan);
+
+      // veículo #26 mergeado; base reescrita
       expect(stack.mergeCalls.map((m) => m.number)).toEqual([26]);
       expect(stack.editBaseCalls).toEqual([{ number: 26, newBase: "main" }]);
-      // resto fechado (landed-via reconciliation), não mergeado
-      expect(stack.closeCalls.map((c) => c.number)).toEqual([18, 25, 27]);
+      // stack PRs anteriores fechados via landed-via
+      expect(stack.closeCalls.map((c) => c.number)).toEqual([18, 25]);
       for (const c of stack.closeCalls) {
         expect(c.comment).toMatch(/landed-via: #26 @ sha-26/);
-        expect(c.comment).toMatch(/não foi rejeitado/);
       }
     });
 

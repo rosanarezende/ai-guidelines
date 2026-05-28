@@ -711,8 +711,9 @@ function detectStackForSpec(
 
 /**
  * Detecta o Integration PR (homologação) da spec entre os PRs abertos —
- * `[Spec NNNN]` + `[Integration]` no título. Usado no modo `unit` para
- * **landed-via reconciliation** (o Integration não é veículo; é fechado).
+ * `[Spec NNNN]` + `[Integration]` no título. Usado no modo `unit`: se já
+ * aponta para main, é o **veículo** (evita conflito de edit-base); caso
+ * contrário fecha via landed-via reconciliation.
  * Retorna `undefined` se não houver (stack sem Integration PR).
  */
 function detectIntegrationPr(

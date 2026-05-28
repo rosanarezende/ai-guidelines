@@ -167,18 +167,32 @@ export class MergeStack {
       };
     }
 
-    // unit: veículo = terminal (último de prNumbers); só ele é mergeado + non-Draft.
-    const vehicleNumber = input.prNumbers[input.prNumbers.length - 1];
-    const vehicle = fetched.get(vehicleNumber) as PullRequestData;
+    // unit: se o Integration PR existe e já aponta para main, ele é o veículo natural —
+    // evita o conflito de edit-base (GitHub rejeita PATCH quando já existe PR com o mesmo
+    // head→base). Todos os PRs da stack fecham via landed-via reconciliation.
+    // Sem Integration PR: veículo = terminal da stack (edit-base se necessário).
+    const integrationPrData =
+      input.integrationPrNumber !== undefined ? fetched.get(input.integrationPrNumber) : undefined;
+    const useIntegrationAsVehicle =
+      integrationPrData !== undefined && integrationPrData.baseRefName === input.mainBranch;
+
+    const vehicleNumber = useIntegrationAsVehicle
+      ? input.integrationPrNumber!
+      : input.prNumbers[input.prNumbers.length - 1];
+    const vehicle = (
+      useIntegrationAsVehicle ? integrationPrData : fetched.get(vehicleNumber)
+    ) as PullRequestData;
     if (vehicle.isDraft) {
       throw new MergeStackError(
         `PR #${vehicleNumber} (veículo) ainda é Draft. Converta para Ready primeiro (per CORE-10 + ADR 0024).`
       );
     }
-    const reconcilePrNumbers = [
-      ...input.prNumbers.slice(0, -1),
-      ...(input.integrationPrNumber !== undefined ? [input.integrationPrNumber] : []),
-    ];
+    const reconcilePrNumbers = useIntegrationAsVehicle
+      ? [...input.prNumbers]
+      : [
+          ...input.prNumbers.slice(0, -1),
+          ...(input.integrationPrNumber !== undefined ? [input.integrationPrNumber] : []),
+        ];
     return {
       mode,
       items: [planItemOf(vehicle, input.mainBranch)],
