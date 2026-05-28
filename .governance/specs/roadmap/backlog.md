@@ -83,7 +83,7 @@ _(nenhuma spec em execução — Spec 0023 concluída, ver [historico.md](./hist
   - **Prompts versionados** para imagens conceituais em diretório dedicado (ex.: `.governance/visual-prompts/`). Owner cola prompt em ferramenta externa (Claude/Midjourney/DALL-E/etc.) e retorna imagem; cobre arquitetura ponta a ponta, entrega de valor, andamento. Owner é visualmente orientada — esse débito é DX real.
 - **Pré-requisitos:**
   - Spec 0023 mergeada (atômico ponta-a-ponta per ADR 0020).
-  - ADR 0023 permanece `Proposta` — promoção deferida pending clarificação da primeira materialização pós-handoff (ver nota de reordenação 2026-05-28).
+  - ADR 0023 permanece `Proposta` — promoção deferida pendente de esclarecimento da primeira materialização pós-handoff (ver nota de reordenação 2026-05-28).
 - **Sinal de "está na hora":** `handoff-as-first-class` fechar (ou evidência empírica consolidada de que o primeiro caso de materialização da ADR 0023 continua sendo o dashboard).
 - **Riscos antecipados:**
   - **HTML virar "produto SaaS"** — adicionar JS interativo, autenticação, filtros runtime complexos. Mitigação: framing canônico anti-distorção de ADR 0023 (linguagem rejeitada).
