@@ -842,7 +842,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
       expect(logger.lines.join("\n")).toMatch(/Stack atomic merge completo: 2 PRs/);
     });
 
-    it("DADO wizard opção 5 modo unit ENTÃO mergeia só o veículo (terminal) e fecha o resto + Integration via landed-via", async () => {
+    it("DADO wizard opção 5 modo unit com Integration PR (base=main) ENTÃO Integration é veículo e stack PRs fecham via landed-via", async () => {
       const logger = new CollectingLogger();
       const prompts = new FakePrompts(["merge-stack", "unit", true]);
       const fs = makeFsWithSpecReviewClosed();
@@ -902,17 +902,18 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
         stack,
       });
       expect(code).toBe(0);
-      // só o veículo (#19, terminal) é mergeado
+      // Integration (#27, base=main) é o veículo — mergeado diretamente, sem edit-base
       expect(stack.mergePullRequest).toHaveBeenCalledTimes(1);
       expect(stack.mergePullRequest).toHaveBeenCalledWith(
-        expect.objectContaining({ number: 19, strategy: "squash" })
+        expect.objectContaining({ number: 27, strategy: "squash" })
       );
-      // resto (#18) + Integration (#27) fechados via landed-via reconciliation
+      expect(stack.editPullRequestBase).not.toHaveBeenCalled();
+      // stack PRs (#18, #19) fechados via landed-via reconciliation
       expect(stack.closePullRequest).toHaveBeenCalledTimes(2);
       const closedNumbers = (stack.closePullRequest as jest.Mock).mock.calls.map((c) => c[0]);
-      expect(closedNumbers.sort()).toEqual([18, 27]);
-      expect((stack.closePullRequest as jest.Mock).mock.calls[0][1]).toMatch(/landed-via: #19/);
-      expect(logger.lines.join("\n")).toMatch(/Atomic merge \(unit\) completo: veículo #19/);
+      expect(closedNumbers.sort()).toEqual([18, 19]);
+      expect((stack.closePullRequest as jest.Mock).mock.calls[0][1]).toMatch(/landed-via: #27/);
+      expect(logger.lines.join("\n")).toMatch(/Atomic merge \(unit\) completo: veículo #27/);
     });
 
     it("DADO wizard opção 5 + negação da confirmação ENTÃO 0 merges executados e loga cancelamento", async () => {
