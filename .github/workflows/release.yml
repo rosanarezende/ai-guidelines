@@ -56,6 +56,9 @@ jobs:
       - name: Enable Corepack
         run: corepack enable
 
+      - name: Install dependencies (immutable)
+        run: yarn install --immutable
+
       - name: Verify package.json version matches tag
         run: |
           TAG_VERSION="${GITHUB_REF_NAME#v}"
@@ -66,8 +69,8 @@ jobs:
           fi
           echo "Version match confirmed: $TAG_VERSION"
 
-      - name: Release gate — yarn ci (install + validate + smoke)
-        run: yarn ci
+      - name: Release gate — yarn validate + smoke
+        run: yarn validate && yarn test:smoke
 
       - name: Determine npm dist-tag and prerelease flag
         id: release_meta
