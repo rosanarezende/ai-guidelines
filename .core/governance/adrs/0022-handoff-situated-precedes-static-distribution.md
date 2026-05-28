@@ -1,6 +1,6 @@
 # ADR 0022 — Handoff situado em estado precede distribuição pré-carregada de regras
 
-**Status**: Proposta
+**Status**: Aceita
 **Origem histórica**: Spec 0023 sub-bloco pós-PR4 de validação empírica (2026-05-22, sessão de reflexão sobre handoff vs AGENTS.md).
 **Relaciona-se com**:
 
