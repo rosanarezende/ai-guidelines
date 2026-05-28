@@ -40,7 +40,7 @@ export function parseWorkflowState(yamlText: string): WorkflowState {
 
   if (!isWorkflowStage(obj.stage)) {
     throw new WorkflowStateParseError(
-      `stage must be one of: discovery|decision|planning|implementation|closing`
+      `stage must be one of: discovery|decision|planning|implementation|closing|done`
     );
   }
 

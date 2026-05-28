@@ -5,7 +5,13 @@
  * 4 chaves, nada além. Novas chaves exigem decisão própria.
  */
 
-export type WorkflowStage = "discovery" | "decision" | "planning" | "implementation" | "closing";
+export type WorkflowStage =
+  | "discovery"
+  | "decision"
+  | "planning"
+  | "implementation"
+  | "closing"
+  | "done";
 
 export type GateStatus = "open" | "awaiting-review" | "closed";
 
@@ -15,6 +21,7 @@ export const WORKFLOW_STAGES: readonly WorkflowStage[] = [
   "planning",
   "implementation",
   "closing",
+  "done",
 ];
 
 export const GATE_STATUSES: readonly GateStatus[] = ["open", "awaiting-review", "closed"];

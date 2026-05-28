@@ -150,7 +150,7 @@ function parseEntry(raw: unknown, index: number): ActiveSpecEntry {
 
   if (!isWorkflowStage(entry.stage)) {
     throw new ActiveSpecsParseError(
-      `${where}.stage must be one of: discovery|decision|planning|implementation|closing ` +
+      `${where}.stage must be one of: discovery|decision|planning|implementation|closing|done ` +
         `(per [DEC-0023-A04]; the public index projects state.yml.stage directly, no translation)`
     );
   }
