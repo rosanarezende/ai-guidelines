@@ -4,7 +4,7 @@ Todas as mudanças notáveis neste framework seguem [Semantic Versioning](https:
 
 ---
 
-## [Unreleased] — `1.1.0`
+## [1.1.0] — 2026-05-28
 
 > **Novidade da 1.1.0.** Esta versão introduz a **operação do ciclo humano-IA** pela CLI (Spec 0023) e o **lifecycle metodológico** com gates explícitos (ADR 0020). As capacidades são **aditivas** (sem quebra de compatibilidade); a UX ainda pode evoluir em releases minor — feedback é bem-vindo. Contexto completo em [`.governance/specs/0023-workflow-runtime/`](.governance/specs/0023-workflow-runtime/).
 
