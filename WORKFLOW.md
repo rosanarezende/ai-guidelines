@@ -153,7 +153,7 @@ R8 é o gate humano final. R9 é o gate técnico final. O merge só acontece com
 
 ## Diagrama visual
 
-Um prompt de imagem para gerar a versão visual deste fluxo está em `.governance/visual-prompts/workflow-guide.prompt.md`. Cole em qualquer gerador de imagem (Midjourney, DALL-E, etc.) para obter o diagrama.
+Um prompt de imagem para gerar a versão visual deste fluxo está em `docs/editorial/workflow-guide.prompt.md`. Cole em qualquer gerador de imagem (Midjourney, DALL-E, etc.) para obter o diagrama.
 
 ---
 
