@@ -149,6 +149,7 @@ Detalhamento técnico em [`docs/cli/ai-guidelines-cli.md`](docs/cli/ai-guideline
 - [`.core/governance/ARCHITECTURE.md`](.core/governance/ARCHITECTURE.md) — arquitetura macro da CLI
 - [`docs/`](docs/) — guias técnicos e features
 - [`AGENTS.md`](AGENTS.md) — workflow para humanos e agentes IA neste repositório
+- [`WORKFLOW.md`](WORKFLOW.md) — ciclo completo de desenvolvimento: do research ao merge, com todos os comandos
 - [`CONTRIBUTING.md`](CONTRIBUTING.md) — como contribuir, setup local, convenções
 - [`.governance/specs/roadmap/backlog.md`](.governance/specs/roadmap/backlog.md) — backlog vivo do framework (canônico, ADR 0019)
 - [`CHANGELOG.md`](CHANGELOG.md) — histórico de versões

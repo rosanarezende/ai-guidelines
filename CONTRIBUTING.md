@@ -4,6 +4,8 @@ Obrigado pelo interesse em contribuir com o `ai-guidelines` BR! 🎉
 
 Este repositório é **AI-governed**: humanos e agentes de IA seguem o mesmo fluxo de governança. Se você está usando uma IA para contribuir, oriente-a a ler [`AGENTS.md`](AGENTS.md) antes de qualquer ação.
 
+> **Fluxo completo de desenvolvimento** (do research ao merge, com todos os comandos): [`WORKFLOW.md`](WORKFLOW.md).
+
 Contribuições em PT-BR e EN são bem-vindas.
 
 ---
@@ -47,22 +49,23 @@ main → branch dedicada → commit atômico → PR Draft → CI verde → Ready
 Quando: mudança que toca múltiplos arquivos fora de uma feature isolada, ou que precisa sobreviver a troca de IA/sessão para ser concluída.
 
 ```
-backlog.md (candidata) → spec em .governance/specs/<NNNN>-<slug>/ → branch → commits → PR Draft → CI → Ready → review
+backlog.md (candidata) → spec → branch → implementação (stacked PRs) → closure na branch → merge
 ```
 
-1. **Registre a intenção** — abra issue com label apropriado, ou proponha entrada em [`.governance/specs/roadmap/backlog.md`](.governance/specs/roadmap/backlog.md) (nova localização canônica; o legado em [`.specify/specs/roadmap/backlog.md`](.specify/specs/roadmap/backlog.md) permanece como referência histórica).
-2. **Crie a fundação documental** em `.governance/specs/<NNNN>-<slug>/` (conforme [ADR 0019](.core/governance/adrs/0019-governance-specs-root-in-maintainer.md)) a partir dos templates SDD em [`.specify/templates/`](.specify/templates/) — templates seguem nessa localização até cutover próprio:
+> Fluxo detalhado com todos os comandos: [`WORKFLOW.md`](WORKFLOW.md).
+
+1. **Registre a intenção** — proponha entrada em [`.governance/specs/roadmap/backlog.md`](.governance/specs/roadmap/backlog.md) como candidata.
+2. **Crie a fundação documental** em `.governance/specs/<NNNN>-<slug>/` a partir dos templates em [`.specify/templates/`](.specify/templates/):
    - `spec.md` — escopo e critérios de aceite (imutável após `In Review`)
    - `plan.md` — plano de implementação (vivo durante execução)
    - `tasks.md` — checklist de tarefas
-   - `NEXT.md` — débitos adiados (apenas se houver; deletar no encerramento)
-3. Crie **branch dedicada**: `feat/spec-XXXX-<slug>` (número sequencial alocado quando a candidata sai do backlog).
-4. **Commits atômicos** por unidade lógica (não agrupe docs + código + config num commit só).
-5. `yarn format` e `yarn validate` antes de qualquer push (o hook `pre-push` roda `yarn validate` automaticamente).
-6. Abra PR em **modo Draft** com matriz preenchida.
-7. Trabalho finalizado + CI verde → converta para **Ready**.
-8. Antes de pedir review, confirme a checklist técnica: spec/plan/tasks atualizados, decisões arquiteturais registradas em ADR quando necessário, `yarn format` + `yarn validate` verdes, ausência de contexto pessoal/operacional vazado, e impacto downstream documentado.
-9. Solicite review de pelo menos **1 owner** (ver [CODEOWNERS](.github/CODEOWNERS)).
+   - `NEXT.md` — débitos adiados (apenas se houver; **deletado na branch antes do merge**)
+3. Crie **branch dedicada**: `feat/spec-XXXX-<slug>`.
+4. **Commits atômicos** por unidade lógica.
+5. `yarn validate` antes de qualquer push (hook `pre-push` roda automaticamente).
+6. Abra PRs em **modo Draft**, converta para Ready quando CI verde.
+7. **Feche a branch antes do merge** (Estágio 5 do `WORKFLOW.md`): spec Done, state.yml done, NEXT.md deletado, historico/backlog/research atualizados. O merge não acontece com trabalho pendente na branch.
+8. Solicite review de pelo menos **1 owner** (ver [CODEOWNERS](.github/CODEOWNERS)).
 
 ### 3. 🧩 Spec consolidada (absorve candidatas relacionadas)
 

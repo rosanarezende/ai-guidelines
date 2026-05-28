@@ -340,16 +340,18 @@ Regra prática:
 
 ## Checklist de fechamento
 
-Ao concluir uma spec e fazer merge para `main`:
+> **Princípio:** tudo abaixo acontece **na branch, antes do merge**. O merge é o ato de encerramento — não existe "commit de encerramento pós-merge" para governança de spec. Um PR autossuficiente chega ao merge já em estado final; `main` nunca recebe trabalho pendente.
+
+Ao concluir uma spec, antes de autorizar o merge (gate R9 do `review.md`):
 
 - [ ] Todas as tasks de Fase 1 e Fase 2 (Implementação A e B) marcadas `[x]` em `tasks.md`.
-- [ ] Pipeline canônico verde, sempre (ex.: `yarn validate` no `ai-guidelines` — agrega format:check + build + test + living-docs:check; substitua pelo equivalente do stack do consumidor — `npm test`, `pnpm verify`, `cargo test`, `pytest`, etc.).
-- [ ] Se `NEXT.md` existir: migrar débitos relevantes para
-      `roadmap/backlog.md` (ou para issues/discussões, conforme o caso) e
-      **deletar** `NEXT.md`.
-- [ ] `research/`: migrar arquivos de valor seguindo a **Política de Lifecycle** (Seção 4.5): Renomear com prefixo `YYYY-MM-DD-`, mover para a biblioteca central (`.governance/specs/research-library/<domínio>/` no canônico; `.specify/specs/researchs/<domínio>/` no legado) e indexar no `research-index.md` correspondente.
-      Nenhum conhecimento (RAG) deve morrer na pasta da spec fechada.
-- [ ] Mover a entrada da spec para "Concluídas" em `roadmap/historico.md` mantendo o número como histórico.
+- [ ] Pipeline canônico verde (ex.: `yarn validate` — agrega format:check + build + test + living-docs:check; substitua pelo equivalente do stack do consumidor).
+- [ ] Se `NEXT.md` existir: migrar débitos relevantes para `roadmap/backlog.md` e **deletar** `NEXT.md` na branch. Não esvaziar, não renomear — deletar.
+- [ ] `research/`: migrar arquivos de valor para `.governance/specs/research-library/<domínio>/` com prefixo `YYYY-MM-DD-` e indexar no `research-index.md`. Nenhum conhecimento deve morrer na pasta da spec fechada.
+- [ ] Mover a entrada da spec para "Concluídas" em `roadmap/historico.md`.
 - [ ] Remover a entrada da spec da seção "Em execução" em `roadmap/backlog.md`.
 - [ ] Status final no `spec.md`: `Done`.
-- [ ] **Fechar antes de abrir uma nova spec** — uma sessão, uma spec ativa.
+- [ ] `state.yml`: `stage: done`, campo `next:` vazio ou ausente.
+- [ ] `release-log.md` T0 preenchido com o que é conhecido antes do merge (data, owner, stack, versão alvo). Campos que dependem do merge (SHA, tag, run URL) ficam para confirmação pós-CI — isso é bookkeeping, não trabalho de spec.
+- [ ] Gate R9 marcado `[x]` no `review.md`: evidência de que a branch está em estado final.
+- [ ] **Fechar antes de abrir uma nova spec** — uma spec ativa por vez.
