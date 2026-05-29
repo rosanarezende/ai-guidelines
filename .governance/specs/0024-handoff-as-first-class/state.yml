@@ -2,12 +2,12 @@ stage: discovery
 gate:
   status: open
 focus:
-  - "Preâmbulo do decision-brief (síntese empírica) cravado"
-  - "Blocos A-B-D-E-F por eixo abertos (DECs em status Open)"
-  - "Bloco C (Saúde Técnica, transversal) também aberto"
-  - "Research dos 5+ sistemas externos pendente"
+  - "Elevada a spec fundacional de arquitetura de contexto (2026-05-29)"
+  - "Bloco G — Arquitetura Fundacional aberto (G00 raiz -> G05); eixos A-F preservados"
+  - "Invariante de ordem: nenhuma DEC de A-F estabiliza antes de G00 Resolved"
+  - "Inventário arquitetural Grupo A/B/C cravado (Fonte A); Fonte B externa pendente"
 next:
-  - "WebFetch spec-kitty + extração comparativa"
-  - "Buscar Anthropic Dreaming in Cloud + síntese"
-  - "Localizar repo Hermes Agent + análise de skill loop"
-  - "Popular opções nos DECs do Bloco B (Persistência) como primeiro caso"
+  - "Research G00: unidade primaria (spec/pilar/lifecycle/artefato) com Fonte A + B"
+  - "WebFetch spec-kitty + Hermes + Open Code/Cursor: modelos alternativos de unidade primaria/lifecycle"
+  - "Reconciliar G03 (promotion pipeline) com ADR 0010 + D04"
+  - "Re-escopar backlog (C3) somente apos conjunto de elevacao completo"

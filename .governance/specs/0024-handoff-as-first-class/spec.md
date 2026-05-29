@@ -1,6 +1,6 @@
 <!-- ai-guidelines-template: spec-boilerplate v=1 -->
 
-# Spec 0024 — Handoff as First-Class (Sistema de Seleção Contextual Governado)
+# Spec 0024 — Context Architecture (Arquitetura Canônica de Preservação, Promoção, Seleção e Projeção de Contexto)
 
 > Status: Draft
 > Author: Rosana Rezende + Claude Sonnet 4.6 + ChatGPT (tri-party, sessão 2026-05-28)
@@ -13,26 +13,29 @@
 > **Princípio de imutabilidade:** após status `In Review`, este arquivo só
 > muda por consenso explícito. Decisões em aberto vão para `decision-brief.md`.
 >
-> **Slug provisional.** O nome `handoff-as-first-class` foi herdado da entry de backlog. A formulação que emergiu na sessão de planejamento (2026-05-28) é mais ampla: **sistema de seleção contextual governado, onde handoff é a primeira projeção**. O slug pode evoluir quando a research consolidar (ex.: `contextual-governance-and-handoff`). Mantido por ora para preservar continuidade com backlog e ADR 0022.
+> **Slug em transição.** O diretório/branch ainda usa `handoff-as-first-class` (herdado do backlog) por **continuidade operacional** — o número permanece **0024** e é imutável (ADR 0017). Com a elevação a spec fundacional (2026-05-29), o slug-alvo escolhido é **`context-architecture`**; o rename físico de branch/diretório + retarget do PR #30 é operação deliberada, executada em milestone próprio sob autorização explícita (não embutida aqui para não arriscar mover o diretório no meio do ciclo).
 
 ---
 
 ## 🎯 Objetivo
 
-O framework `ai-guidelines` consolidou-se como **governance-first** (ADR 0018), entregou o runtime operacional (Spec 0023), e absorveu o princípio de **bootstrap situado** (ADR 0022 — Aceita 2026-05-28). Durante o fechamento da Spec 0023 e a sessão de planejamento desta spec, uma formulação mais profunda do problema emergiu da operação real:
+O framework `ai-guidelines` consolidou-se como **governance-first** (ADR 0018), entregou o runtime operacional (Spec 0023), e absorveu o princípio de **bootstrap situado** (ADR 0022 — Aceita 2026-05-28). Durante o fechamento da Spec 0023 e a sessão de planejamento desta spec, uma formulação progressivamente mais profunda do problema emergiu da operação real, em cadeia causal:
 
-> **O problema central não é memória; é seleção contextual.** Memória é mecanismo; seleção é o problema; governança é a restrição; handoff é a projeção.
+> `handoff → o que selecionar → quem decide → como algo vira regra → qual é a unidade promovível → como o lifecycle é modelado → como os boilerplates codificam esse lifecycle`.
 
-Sistemas existentes (Hermes Agent, Cursor SDK, Open Code, Anthropic Dreaming, Spec Kitty) convergem para resolver "como o agente lembra?". O ai-guidelines opera uma camada acima: **como o sistema decide o que merece ser lembrado, projetado e quando**. Essa é a tese a investigar antes de implementar.
+A conclusão (decisão da owner, 2026-05-29): **o objeto da 0024 não é handoff. É a arquitetura canônica de preservação, promoção, seleção e projeção de contexto do `ai-guidelines`.** Handoff é apenas uma das projeções (ao lado de wizard, `AGENTS.md`, dashboard, briefing). O problema central segue sendo **seleção/governança de contexto, não memória** — mas a spec foi elevada de "uma projeção" para **o modelo fundacional do qual as projeções derivam**.
+
+> **Esta é uma spec de implementação orientada por evidências, não research-only.** A pesquisa (Stage 1) é uma **fase** da 0024, não seu produto. Fluxo: `research → decision-brief → gate humano → plan v2 → tasks v2 → implementação (Stage 2)`, **tudo dentro da própria 0024**. Um split estrutural `0024 → 0025` **não é pressuposto**; só seria considerado se a research revelar mudança de direção relevante no problema.
+
+> **Fronteira canônica desta spec — modelo ≠ migração.** A 0024 **decide o modelo** (unidade primária de modelagem, papel dos 7 pilares MECE, taxonomia de specs, contrato mínimo de boilerplate, modelo de projeção, contratos de handoff). A 0024 **não migra o ecossistema** (retrofit de todos os boilerplates, consolidação tri-root, atualização em massa de examples/docs). A migração é faseada: ≥ 1 artefato de referência dentro da 0024 (Stage 2) + execução ampla nas candidatas re-escopadas. **A implementação de referência tem caráter de validação arquitetural — seu objetivo é provar o modelo decidido. Ela NÃO constitui autorização para retrofit em massa do ecossistema nem substitui as candidatas de migração identificadas no Grupo B.** Classificação em [`research/2026-05-29-architectural-inventory.md`](./research/2026-05-29-architectural-inventory.md).
 
 Resultado esperado quando esta spec encerrar:
 
-- Decision-brief com 5 eixos (Seleção / Persistência / Promoção / Projeção / Governança) `Resolved` por evidência empírica + análise comparativa de 5+ sistemas externos.
-- `plan.md` v2 cravando design técnico do **handoff como projeção**, ancorado nas decisões do brief.
-- `tasks.md` v2 com tasks operacionais de Stage 2 (implementação) derivadas do plan v2.
-- Análise comparativa publicada em `research/` mostrando convergências e divergências entre soluções de mercado e a leitura governance-first do ai-guidelines.
-
-O comando `workflow handoff` (implementação) **não é entrega desta spec** — vira spec própria após Stage 1 fechar, com escopo derivado das decisões cravadas aqui.
+- Decision-brief com o **Bloco G — Arquitetura Fundacional** (`G00` unidade primária _(raiz)_, `G01` 7 pilares MECE, `G02` taxonomia de specs, `G03` promotion pipeline, `G04` contrato de boilerplate + _core_, `G05` modelo de projeção) + os 5 eixos (A Seleção / B Persistência / D Promoção / E Projeção / F Governança) `Resolved` por evidência (**Fonte A** auditoria interna + **Fonte B** research externa).
+- `plan.md` v2 cravando o design técnico derivado linearmente das decisões, ancorado em `[DEC-0024-*]`.
+- `tasks.md` v2 com tasks de Stage 2 (implementação dentro da 0024, faseada em PRs como na Spec 0023).
+- **Implementação de referência entregue**: handoff como projeção + ≥ 1 boilerplate/example provando o contrato `G04`.
+- Análise comparativa em `research/` (convergências/divergências entre sistemas externos e a leitura governance-first).
 
 ---
 
@@ -40,36 +43,46 @@ O comando `workflow handoff` (implementação) **não é entrega desta spec** �
 
 ### Dentro do escopo
 
-- **Stage 1 (Research)**: investigação dos 5 eixos via comparação com sistemas existentes (Hermes Agent, OpenCloud/OpenCode, Cursor SDK, Anthropic Dreaming in Cloud, Spec Kitty, e sistemas baseados em grafos quando referência específica for recuperada).
+- **Camada fundacional (Bloco G — Arquitetura Fundacional)**: unidade primária de modelagem (`G00`, raiz), papel dos 7 pilares MECE / ADR 0010 (`G01`), validade da taxonomia de tipos de spec (`G02`), promotion pipeline (`G03`), contrato mínimo de boilerplate + _core_ comum (`G04`), modelo de projeção SSOT→N consumidores (`G05`). **Decisão de modelo, não migração.**
+- **Inventário arquitetural** (`research/2026-05-29-architectural-inventory.md`): classificação do backlog em Grupo A (fundacional, entra) / B (derivado, faseado) / C (independente, fica).
+- **Stage 1 (Research)**: investigação dos eixos via comparação com sistemas existentes (Hermes Agent, OpenCloud/OpenCode, Cursor SDK, Anthropic Dreaming in Cloud, Spec Kitty, e sistemas baseados em grafos quando referência específica for recuperada). O Bloco G exige **Fonte A (auditoria interna) + Fonte B (research externa)**.
 - **Bloco A — Síntese empírica (preâmbulo)**: observações cravadas desta sessão e do fechamento da Spec 0023 como evidência inicial.
-- **Blocos por eixo (Seleção / Persistência / Promoção / Projeção / Governança)**: cada eixo vira bloco de DECs com perguntas abertas no início; opções populadas conforme research consolidar.
-- **Bloco Saúde Técnica (mandatório)**: análise de saúde do componente de runtime que abrigará o handoff (escopo emerge da própria research).
-- **`research/` artifacts**: matriz comparativa sistemas × eixos; análise per-fonte; síntese final.
-- **Critério de saída da research** declarado explicitamente: cada um dos 5 eixos tem ≥ 1 resposta evidence-backed; ≥ 2 sistemas estudados convergem em ≥ 2 dessas respostas; Bloco A consegue cravar ≥ 3 observações empíricas com cross-ref aos artifacts.
+- **Blocos por eixo (Seleção / Persistência / Promoção / Projeção / Governança)**: cada eixo vira bloco de DECs com perguntas abertas no início; opções populadas conforme research consolidar. **Nenhuma DEC de A-F estabiliza enquanto `G00` não estiver `Resolved`** (invariante de ordem).
+- **Bloco Saúde Técnica (mandatório)**: análise de saúde dos componentes de runtime tocados pela implementação derivada (escopo emerge da própria research).
+- **`research/` artifacts**: inventário; matriz comparativa sistemas × eixos; análise per-fonte; síntese final.
+- **Critério de saída da research** declarado: cada eixo (A-F) com ≥ 1 resposta evidence-backed; ≥ 2 sistemas convergem em ≥ 2 respostas; **Bloco G fechado (`G00`-`G05` `Resolved` com Fonte A + B)**; Bloco A com ≥ 3 observações cravadas.
+- **Stage 2 (Design + Implementação), dentro da 0024**: após o gate, `plan.md` v2 + `tasks.md` v2 + a implementação de referência (handoff + boilerplate de referência), faseada em PRs como na Spec 0023.
 - **Gate humano** fecha decision-brief; `plan.md` v2 + `tasks.md` v2 derivam linearmente das decisões cravadas.
 
-### Fora do escopo (vira spinoff ou fica em outra spec)
+### Fora do escopo (migração/execução — faseada ou em outra spec)
 
-- **Implementação do comando `workflow handoff`** — vira spec própria (provavelmente 0025) com escopo derivado das decisões cravadas em 0024. Decisão de design técnico **não cabe** em research-first spec.
+- **Migração do ecossistema (Grupo B do inventário)** — retrofit de todos os boilerplates, consolidação tri-root (execução), atualização em massa de examples/quickstarts/docs, distribuição para providers. A 0024 entrega **só o artefato de referência**; a migração ampla é faseada nas candidatas re-escopadas (`boilerplate-system-modernization`, `runtime-and-template-root-consolidation`). **Fronteira modelo ≠ migração.**
+- **Itens independentes (Grupo C do inventário)** — dashboard, telemetria, coverage-rigor, wizard-scaling, harness etc.: consumidores da arquitetura, não fundação. Nenhum é absorvido.
+- **Split estrutural `0024 → 0025` como pressuposto** — _retirado_ (decisão da owner, 2026-05-29). A implementação é entregue **dentro da 0024** (Stage 2). Abrir uma 0025 só entra em pauta se a research revelar mudança de direção relevante.
+- **Re-modeling de domínio/registry (`WorkItemKind`, schema de persistência)** caso `G00` mude a unidade primária — Grupo B / faseado; a 0024 crava o modelo, não reescreve o domínio no mesmo ciclo.
+- **`AGENTS.md` raiz como projeção** — sua reorganização/fragmentação (`regra-hierarquia`, Grupo B) fica faseada; o _modelo_ de projeção é `G05`.
 - **Cutover dos stubs por canal** (`.cursorrules`, `CLAUDE.md`, `.github/copilot-instructions.md` reduzidos a ≤ 10 linhas): adiamento intencional — exige handoff implementado primeiro. Per ADR 0022, é "consequência de médio prazo".
-- **`AGENTS.md` raiz refactoring** — mantido como SSOT atual; revisita quando handoff materializar.
 - **Memory engine implícito / vector store / graph database** — viola o framing "seleção, não memória"; explicitamente fora.
 - **Auto-promoção de padrões a regras pelo agente** — viola ADR 0018 + ADR 0022 + framing "governança como autoridade".
-- **Dashboard / HTML como SSOT** — escopo de `governance-dashboard-and-visual-artifacts` (backlog Now §2); herda anti-paper de ADR 0023.
+- **Dashboard / HTML como SSOT** — escopo de `governance-dashboard-and-visual-artifacts` (Grupo C); herda anti-paper de ADR 0023.
 - **Substituição do `workflow continue` resumido** — handoff é boot frio; continue é continuação intra-fluxo. São complementares.
 
 ---
 
 ## ✅ Critérios de Aceite (alto nível)
 
-- [ ] `research/` contém ≥ 5 artifacts comparativos cobrindo todos os sistemas declarados em escopo.
+- [ ] Inventário arquitetural (`research/2026-05-29-architectural-inventory.md`) publicado e classificação validada no gate.
+- [ ] **Bloco G — Arquitetura Fundacional `Resolved`** (`G00`-`G05`), cada DEC com evidência **Fonte A + Fonte B**; `G00` resolvida **antes** de estabilizar A-F.
+- [ ] `research/` contém artifacts comparativos cobrindo os sistemas declarados em escopo.
 - [ ] Matriz pressão × sistema preenchida com evidência para cada célula relevante.
-- [ ] Critério de saída da research satisfeito (≥ 1 resposta por eixo; ≥ 2 sistemas convergem em ≥ 2 respostas; Bloco A com ≥ 3 observações cravadas).
-- [ ] `decision-brief.md` `Resolved` em todos os blocos de eixo + Saúde Técnica; Bloco A populado e estável.
-- [ ] `plan.md` v2 publicado: design técnico de handoff derivado linearmente das decisões; cada subseção cita `[DEC-0024-XYZ]` ancorante.
+- [ ] Critério de saída satisfeito (≥ 1 resposta por eixo A-F; ≥ 2 sistemas convergem em ≥ 2 respostas; **Bloco G fechado**; Bloco A com ≥ 3 observações cravadas).
+- [ ] `decision-brief.md` `Resolved` em todos os blocos (G + A-F + Saúde Técnica); Bloco A populado e estável.
+- [ ] `plan.md` v2 publicado: design técnico derivado linearmente das decisões; cada subseção cita `[DEC-0024-XYZ]` ancorante.
 - [ ] `tasks.md` v2 publicado: tasks operacionais Stage 2 derivadas do plan v2.
+- [ ] **Implementação de referência entregue dentro da 0024** (handoff como projeção + ≥ 1 boilerplate/example provando o contrato `G04`); cada decisão fundacional gerou ≥ 1 artefato implementável (guardrail anti-"super ADR").
 - [ ] Pipeline `yarn format ; yarn validate` verde.
 - [ ] PR Draft revisado e aprovado por humano antes de Ready.
+- [ ] **Fronteira modelo ≠ migração** auditada no encerramento: nenhum item Grupo B/C foi executado em massa dentro da 0024.
 - [ ] Não-objetivos cravados continuam respeitados ao longo de todo o ciclo (auditoria final no encerramento).
 
 ---
@@ -88,9 +101,9 @@ O comando `workflow handoff` (implementação) **não é entrega desta spec** �
 
 ## 🧠 Decisão de Fusão
 
-Esta spec **não absorve** outras candidatas formalmente — `handoff-as-first-class` já era entry consolidada do backlog (absorveu "Arquitetura de regras portáveis vs. contexto framework-interno" em 2026-05-22 antes mesmo de virar spec). Continua honrando a consolidação anterior; não há fusão nova.
+`handoff-as-first-class` já era entry consolidada do backlog (absorveu "Arquitetura de regras portáveis vs. contexto framework-interno" em 2026-05-22). Com a elevação a spec fundacional (2026-05-29), a 0024 **absorve as camadas-modelo (Grupo A) de três candidatas parcialmente sobrepostas** — `boilerplate-system-modernization` (taxonomia, contrato + core), `runtime-and-template-root-consolidation` (definição de lar canônico / precedência / ownership) e `handoff-contracts-formalization` (contratos de continuidade) — porque o inventário arquitetural mostrou que parte relevante delas é sintoma da **mesma lacuna fundacional**. As **camadas de execução/migração (Grupo B)** dessas candidatas permanecem nelas, re-escopadas. Cf. [`research/2026-05-29-architectural-inventory.md`](./research/2026-05-29-architectural-inventory.md).
 
-Possível absorção futura (a confirmar quando research consolidar): se a investigação revelar que `governance-dashboard-and-visual-artifacts` (Now §2) tem dependência arquitetural forte sobre o sistema de projeção definido aqui, considerar fusão antes de abrir spec separada.
+`governance-dashboard-and-visual-artifacts` é **Grupo C** (consumidor da arquitetura, não fundação): **poderá consumir os resultados da 0024, mas permanece fora do escopo desta spec salvo reclassificação arquitetural explícita posterior** — não há porta de fusão aberta que contradiga a classificação do inventário.
 
 ---
 
@@ -116,6 +129,6 @@ Detalhamento técnico (riscos por componente, mitigações) emerge no `plan.md` 
 ## 📚 Referências
 
 - Specs relacionadas: **0021** (governance-first foundation), **0023** (runtime operacional).
-- ADRs aplicáveis: **ADR 0018** (AI-as-Channel; restritivo), **ADR 0022** (handoff situado precede distribuição; fundamento), **ADR 0023** (meta-artefatos YAML SSOT; aplicável apenas a projeções tipo dashboard, não ao handoff).
+- ADRs aplicáveis: **ADR 0010** (taxonomia MECE de 7 pilares — fundamento de `G01`), **ADR 0014** (validação estrutural por gênero de artefato), **ADR 0017** (slug semântico até branch; número imutável — base do rename), **ADR 0018** (AI-as-Channel; restritivo), **ADR 0022** (handoff situado precede distribuição; fundamento), **ADR 0023** (meta-artefatos YAML SSOT; aplicável a projeções tipo dashboard). Processo: [`governance-foundation.md` § "Tipos de spec"](../../../.core/process/governance-foundation.md) — fonte da taxonomia que `G02` audita.
 - Evidência empírica externa (vídeos comparativos sobre Hermes Agent, Cursor SDK, Open Code, HTML vs Markdown): URLs canônicas e síntese estruturada em [`./research/2026-05-28-pressure-axes-scope.md § Fontes primárias citáveis`](./research/2026-05-28-pressure-axes-scope.md). Transcrições brutas mantidas localmente em `temp/` durante o ciclo da spec (não-versionadas por copyright; cobertas em `.gitignore`).
 - Sessão de planejamento 2026-05-28 — branch `feat/spec-0024-handoff-as-first-class`, commits desta spec; tri-party Rosana + Claude + ChatGPT registrado em `research/2026-05-28-this-session-as-evidence.md`.

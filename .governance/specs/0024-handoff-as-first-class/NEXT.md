@@ -72,6 +72,23 @@ _(Stage 2 ainda não iniciado — Fase 0 evidence-driven em curso)_
 
 ---
 
+### 6. Elevação da 0024 a spec fundacional de arquitetura de contexto (2026-05-29)
+
+- **O Contexto**: a discussão tri-party (owner + Claude + ChatGPT) desta sessão mostrou que o objeto da 0024 não era handoff, mas a **arquitetura de contexto** inteira. A pergunta da unidade primária de modelagem (`spec` vs `pilar` vs `lifecycle` vs `artefato`) e a validade da taxonomia `deterministic/mixed/evidence-driven` reapareceram em ≥ 2 contextos (cf. obs #7 do preâmbulo do decision-brief).
+- **O Insight**: a 0024 foi elevada (decisão da owner) de "uma projeção (handoff)" para **o modelo fundacional do qual as projeções derivam**. Materializado no **Bloco G** (G00 raiz → G05) + inventário arquitetural (`research/2026-05-29-architectural-inventory.md`). Fronteira cravada: **modelo ≠ migração** — a 0024 decide o modelo; migração ampla é Grupo B, faseada.
+- **Re-escopa de candidatas (pendente — C3, só após o conjunto de elevação completo)**: `boilerplate-system-modernization` e `runtime-and-template-root-consolidation` têm as **camadas-modelo (Grupo A)** absorvidas pela 0024; as **camadas-execução (Grupo B)** permanecem nelas. `handoff-contracts-formalization` (Grupo A) absorvida na research. `governance-dashboard-and-visual-artifacts` e demais permanecem **Grupo C** (independentes). A edição do `backlog.md` registra isso **após** a validação do inventário.
+- **Pressão de rename do slug**: `handoff-as-first-class` ficou estreito. Slug-alvo: **`context-architecture`**. Rename físico de branch/diretório + retarget do PR #30 = milestone próprio sob autorização explícita (não feito agora para não mover o diretório no meio do ciclo). Cf. header do `spec.md`.
+- **Ação Sugerida**: executar a re-escopa do `backlog.md` (C3) após o commit de elevação; agendar o rename de slug como milestone; priorizar a research do Bloco G (`G00` raiz) com Fonte A + B.
+
+### 7. `decision session` — consumidor/processo arquitetural emergente (hipótese, 2026-05-29)
+
+- **O Contexto**: o dogfooding da própria 0024 revelou que o **owner no gate humano** é um consumidor de contexto não modelado. Fluxo recorrente observado: `research → decision-brief → leitor tardio → visualizações → owner decide → plan/tasks`. Cf. obs #8 do preâmbulo + `[DEC-0024-G05]`.
+- **O Insight**: pode existir um processo governado `decision session` (≠ research, ≠ implementação) e uma **família de projeções** derivadas da mesma arquitetura de contexto: `workflow handoff / briefing / decision-session / dashboard / review`. Descoberto por dogfooding real, não especulação — o tipo de achado fundacional que a elevação tornou visível.
+- **Ação Sugerida**: a research do Bloco G (G05) trata o decisor humano como consumidor de primeira classe; **não** cravar `decision session` como DEC antes da research (regra 7 — sinal emergente, ainda não inequívoco). Reavaliar promoção quando ≥ 2 projeções da família forem confirmadas como necessárias.
+- **Lifecycle adicional descoberto (2026-05-29)**: a 0024 revelou, por dogfooding, um ciclo `Research → Decision Session → Reference Implementation → Generalization`. A **implementação de referência (Stage 2) não é só execução — é o mecanismo de validação arquitetural** das decisões do Bloco G: prova que o modelo (G00-G05) consegue ser materializado **antes** da generalização (migração ampla, Grupo B). Reinterpreta Stage 2: não é "construir algo", é "provar que a arquitetura se materializa". Hipótese; promover a lifecycle/ADR formal só com recorrência (regra 7).
+
+---
+
 ## ✂️ Itens descartados deliberadamente
 
 _(Nenhum item descartado ainda — registrar quando research excluir explicitamente alguma direção investigada.)_

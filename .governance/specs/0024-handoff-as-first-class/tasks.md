@@ -37,9 +37,11 @@
 
 > Pesquisa instrumental, externa ou empírica que alimenta os pontos `[DEC-0024-*]`. **Toda research deve alimentar pelo menos um ponto `[DEC-*]`.** Os 5+ sistemas externos enumerados em `spec.md § Pesquisa de contexto` são alvos canônicos. Matriz pressão × sistema vive em `research/2026-05-28-pressure-axes-scope.md`.
 
+- [/] **0.R.0** Inventário arquitetural (`research/2026-05-29-architectural-inventory.md`) — classificação Grupo A/B/C; **Fonte A** concluída e validada (owner, 2026-05-29). Corroboração **Fonte B** (externa) das classes do Grupo A pendente na research.
 - [/] **0.R.1** Perguntas de research listadas em `plan.md § Research lifecycle`, cruzadas com `[DEC-0024-*]`. **Em andamento** — tabela inicial publicada; pode ganhar perguntas conforme research progride.
 - [ ] **0.R.2** Produzir `research/YYYY-MM-DD-<sistema>.md` por sistema externo declarado em escopo (Hermes Agent, Cursor SDK, OpenCloud/OpenCode, Anthropic Dreaming in Cloud, Spec Kitty). Cada arquivo cita fontes (URL, transcrição, repo, paper).
-- [ ] **0.R.3** Validar critério de saída: ≥ 1 resposta evidence-backed por eixo; ≥ 2 sistemas convergem em ≥ 2 respostas; Bloco A cresce para ≥ 8 observações.
+- [ ] **0.R.G** **Research do Bloco G (fundacional, prioritário).** `G00` unidade primária (testar 4 hipóteses: `spec`/`pilar`/`lifecycle`/`artefato` — `lifecycle` é contender sério, obrigação de refutar); `G01` 7 pilares MECE; `G02` taxonomia de specs; `G03` promotion pipeline (reconcilia ADR 0010 + D04); `G04` contrato de boilerplate + core; `G05` modelo de projeção. **Fonte A + Fonte B** obrigatórias. `G00` resolve antes de A-F.
+- [ ] **0.R.3** Validar critério de saída: **Bloco G fechado (`G00`-`G05` `Resolved`, Fonte A + B; G00 antes de A-F)**; ≥ 1 resposta evidence-backed por eixo A-F; ≥ 2 sistemas convergem em ≥ 2 respostas; Bloco A cresce para ≥ 8 observações.
 - [ ] **0.R.4** Atualizar `NEXT.md` com insights secundários conforme emergirem.
 - [ ] **0.R.[COMMIT]** Commits incrementais sugeridos por artifact:
   - `research(spec-0024): spec-kitty pressure analysis`
@@ -74,11 +76,13 @@
 
 ---
 
-## Fase 1 — Implementação A (Stage 2)
+## Fase 1 — Implementação A (Stage 2, dentro da 0024)
 
-> **[PLACEHOLDER]** Tasks operacionais emergem do `plan.md` v2 pós-gate. Por hora, nota arquitetural cravada na sessão de planejamento:
+> **[PLACEHOLDER]** Tasks operacionais de Stage 2 emergem do `plan.md` v2 pós-gate.
 >
-> **Decisão pré-implementação cravada:** a implementação do comando `workflow handoff` **não cabe nesta spec**. Vira spec separada (provavelmente Spec 0025) com escopo derivado das decisões deste decision-brief. Esta Fase 1 desta spec, portanto, pode terminar sendo **vazia** (Stage 2 = "decisões cravadas; passar bastão para spec implementadora"), ou pode conter apenas a abertura formal da spec sucessora.
+> **Framing cravado (owner, 2026-05-29):** a implementação é entregue **dentro desta spec** (Stage 2), derivada do plan v2 — handoff como projeção + ≥ 1 boilerplate/example de **referência** provando o contrato `G04`. O split `0024 → 0025` **não é pressuposto** (só se a research revelar mudança de direção relevante). Cada DEC `Resolved` do Bloco G gera ≥ 1 artefato implementável de referência (guardrail anti-"super ADR"). **Fronteira:** a implementação de referência **não** é autorização para migração em massa (Grupo B). Esta Fase 1 **será populada** com tasks de implementação após o gate, não esvaziada.
+>
+> **Reinterpretação de Stage 2 (2026-05-29):** a implementação de referência é, antes de tudo, **validação arquitetural** — prova que o modelo decidido no Bloco G consegue ser materializado. Não é só "construir"; é "provar que a arquitetura se materializa" antes de generalizar (migração ampla = Grupo B). Cf. NEXT § lifecycle `Research → Decision Session → Reference Implementation → Generalization`.
 
 ### Sub-bloco [A] — [a definir pós-gate]
 
@@ -94,10 +98,10 @@
 
 ## Fase de Review → vive em `review.md`
 
-> **Modelo de 3 boundaries (cf. `[DEC-0023-M01]`):** homologação / prontidão vive em `review.md` (instanciado pós-Stage 2). `tasks.md` é execution-only e fecha 100% `[x]` ao fim da execução. Para spec research-first, o "fim da execução" = gate fechado + plan v2 publicado + (possivelmente) abertura da spec sucessora.
+> **Modelo de 3 boundaries (cf. `[DEC-0023-M01]`):** homologação / prontidão vive em `review.md` (instanciado pós-Stage 2). `tasks.md` é execution-only e fecha 100% `[x]` ao fim da execução. O "fim da execução" = gate fechado + plan v2 + tasks v2 + **implementação de referência (Stage 2) concluída** (100% `[x]`), dentro da própria 0024.
 
 ---
 
 ## Fase de Encerramento → vive em `release-log.md`
 
-> **Operações pós-merge** vivem em `release-log.md` (instanciado pós-Stage 2 se aplicável). Para spec research-first, o encerramento pode ser mais leve (decisões cravadas + transição para spec sucessora; sem necessariamente entregar release/changelog próprio).
+> **Operações pós-merge** vivem em `release-log.md` (instanciado pós-Stage 2 se aplicável). O encerramento cobre as decisões fundacionais cravadas + a implementação de referência entregue dentro da 0024; a **migração ampla (Grupo B)** permanece nas candidatas re-escopadas, não nesta spec.

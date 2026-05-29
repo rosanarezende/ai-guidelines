@@ -10,6 +10,33 @@
 
 A research comparativa desta spec foi calibrada para **investigar pressões arquiteturais recorrentes**, não para catalogar features de ferramentas. A escolha vem da observação (cravada no preâmbulo do decision-brief): sistemas diferentes (Hermes, Cursor, Open Code, Anthropic Dreaming, Spec Kitty) resolvem o mesmo conjunto de pressões com lentes diferentes; o que importa para o ai-guidelines não é "como o Hermes faz X" mas "qual pressão X representa e onde mora a resposta governance-first dela".
 
+## Camada fundacional — Bloco G (precede os eixos de pressão)
+
+> Adicionada 2026-05-29 com a elevação da 0024 a spec fundacional de arquitetura de contexto. O Bloco G define _o que existe / como evolui / como se relaciona_; os 5 eixos abaixo operam **sobre** o que G decidir. `G00` é a **raiz** — nenhum eixo A-F estabiliza antes de G00.
+
+**`G00` — unidade primária de modelagem.** A research **não** trata `pilar = unidade primária` como "direção provável", e sim como **uma entre hipóteses competitivas sérias**. As quatro candidatas são testadas em pé de igualdade, com obrigação explícita de **refutar**:
+
+| Hipótese                           | Leitura                                                                                    | Sinal a buscar (Fonte B)                            |
+| :--------------------------------- | :----------------------------------------------------------------------------------------- | :-------------------------------------------------- |
+| `spec = unidade primária`          | status quo implícito                                                                       | o sistema organiza tudo por "spec/projeto"?         |
+| `pilar = unidade primária`         | work-item kind (ADR 0010) como raiz                                                        | classifica por intenção de saída antes do artefato? |
+| **`lifecycle = unidade primária`** | **contender forte** — muitos sistemas externos são lifecycle-centric, não artifact-centric | Hermes/Cursor/Spec Kitty modelam por estágio/fluxo? |
+| `artefato = unidade primária`      | o documento como átomo                                                                     | é doc-driven puro?                                  |
+
+**Disciplina de falsificação (anti-fechamento-prematuro de G00).** Existe uma hipótese favorita emergente (`unidade → pilares → taxonomia → pipeline → contrato → projeções`). Justamente por G00 ser tão fundacional — pode reinterpretar até G01-G05 —, a research **não pode virar validação da hipótese dominante**:
+
+- As candidatas são testadas em pé de igualdade, e a lista das 4 **não é assumida exaustiva**: manter aberta a 5ª possibilidade — _unidade primária = categoria ainda não identificada_.
+- **Fonte B tem papel ativo de tentar derrubar a favorita**, não de confirmá-la. G00 fecha por **sobrevivência à refutação**, não por acúmulo de confirmações.
+- A research é **incompleta** se não tiver seriamente tentado refutar a favorita com ≥ 1 modelo externo alternativo (ex.: lifecycle-centric — vários sistemas externos o são).
+
+**Risco dominante da spec (atualizado):** deixou de ser "escopo excessivo" e passou a ser **fechamento prematuro de G00**.
+
+**Alimenta:** `[DEC-0024-G00]` (raiz), `G01` (7 pilares), `G02` (taxonomia de specs), `G03` (promotion pipeline), `G04` (contrato de boilerplate + core), `G05` (modelo de projeção).
+
+**Duas fontes obrigatórias:** Fonte A (auditoria interna — artefatos/histórico + inventário) + Fonte B (research externa). Nenhuma DEC de G fecha só com Fonte A (anti-viés-de-confirmação).
+
+---
+
 ## Os 5 eixos de pressão
 
 Estrutura derivada da sessão de planejamento 2026-05-28 (refinamento via tri-party Rosana + Claude + ChatGPT sobre as 8 perguntas-pressão iniciais). Cada eixo agrupa perguntas que se reforçam mutuamente.
@@ -69,7 +96,8 @@ Estrutura derivada da sessão de planejamento 2026-05-28 (refinamento via tri-pa
 
 Para evitar drift / paralysis-by-analysis, a research desta spec fecha quando **todas** as condições abaixo forem satisfeitas:
 
-1. **Cobertura mínima por eixo:** cada um dos 5 eixos tem ≥ 1 resposta evidence-backed nos artifacts.
+0. **Bloco G fechado (precede tudo):** `G00`-`G05` `Resolved` no gate, cada uma com evidência **Fonte A + Fonte B**; `G00` resolvida **antes** de estabilizar qualquer DEC de A-F (invariante de ordem). G00 testou seriamente as 4 hipóteses de unidade primária (incl. `lifecycle`).
+1. **Cobertura mínima por eixo:** cada um dos 5 eixos (A-F) tem ≥ 1 resposta evidence-backed nos artifacts.
 2. **Convergência observável:** ≥ 2 sistemas estudados convergem em ≥ 2 dessas respostas (sinal de pressão arquitetural recorrente real, não idiossincrasia de um sistema).
 3. **Preâmbulo robusto:** Bloco A do decision-brief cresce para ≥ 8 observações cravadas (já 5 na instanciação; ≥ 3 adicionais durante research).
 
