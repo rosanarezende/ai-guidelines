@@ -26,11 +26,11 @@ _(Stage 2 ainda não iniciado — Fase 0 evidence-driven em curso)_
 - **O Insight**: Hermes faz `task completion → pattern extraction → skill creation → skill refinement`. ai-guidelines faz `observação → backlog → spec → decision-brief → ADR/regra`. Mesma forma estrutural (pipeline de promoção); Hermes opera em agent skills, ai-guidelines em governance. Implicação: handoff = projeção/lookup; aprendizado vive no lifecycle existente; conflar viola ADR 0018.
 - **Ação Sugerida**: alimentar Bloco D (Promoção) do decision-brief; pode virar DEC explícita `[DEC-0024-D02]` cravando "handoff não promove autonomamente".
 
-### 2. Tri-party humano + Claude + ChatGPT emergiu naturalmente na sessão de planejamento
+### 2. Tri-party humano + Claude + ChatGPT iterou em 3 turnos durante a sessão de planejamento
 
-- **O Contexto**: a sessão de abertura desta spec usou tri-party sem ritual prévio — ChatGPT como segunda opinião sobre tensão da cláusula anti-paper da ADR 0023, Claude como implementador + análise, owner como decisão final. Esse foi o segundo caso documentado de tri-party (primeiro: Spec 0023 PR5/PR #25).
-- **O Insight**: o item `[1.H.10]` da Spec 0023 (avaliar promoção do modelo tri-party a ADR próprio) tinha critério "≥ 2 specs adicionais OU adoção espontânea". Esta sessão pode contar como segundo caso de uso espontâneo em PR não-trivial.
-- **Ação Sugerida**: registrar como ponto de observação do Bloco A; se um terceiro caso emergir naturalmente durante a research desta spec, considerar promoção formal a ADR no encerramento.
+- **O Contexto**: a sessão de abertura desta spec usou tri-party em 3 turnos distintos sem ritual prévio: (1) ChatGPT como segunda opinião sobre tensão da cláusula anti-paper da ADR 0023; (2) ChatGPT estruturando os 5 eixos de pressão; (3) ChatGPT como reviewer atrasado dos artifacts do PR #30 — turno que identificou o gap "unidade promovível" e cravou `[DEC-0024-D04]`. Claude como implementador + análise estrutural em todos os turnos; owner como decisão final.
+- **O Insight**: o item `[1.H.10]` da Spec 0023 (avaliar promoção do modelo tri-party a ADR próprio) tinha critério "≥ 2 specs adicionais OU adoção espontânea". Esta sessão fornece **3 casos documentados** de tri-party (cf. evidence artifact § "Continuação tri-party — 3º turno"). Padrão observado: cada turno revela gap que turnos anteriores não viam — não é só "dupla opinião + decisão", é iteração refinada com reviewer atrasado funcionando como "leitor que não estava na construção".
+- **Ação Sugerida**: considerar promoção formal a ADR já no encerramento da Stage 1 desta spec, dado que critério de [1.H.10] está próximo de saturar (3 turnos numa sessão + 1 caso anterior da Spec 0023). ADR proposta cobriria: papel de cada agente; quando convocar reviewer atrasado vs second opinion no fluxo; antipattern de "consenso prematuro" (turno único).
 
 ### 3. Gate de CI faltante para validar `state.yml` schema globalmente
 

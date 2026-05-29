@@ -66,6 +66,46 @@ Nenhum sistema externo estudado tem essa categoria de regras como invariante de 
 
 ---
 
+## Continuação tri-party — 3º turno (review do ChatGPT do PR #30)
+
+> Após o bootstrap do PR #30 ter sido aberto, ChatGPT executou um terceiro turno de revisão estruturada — lendo os artifacts da spec antes mesmo do review do Copilot. Esse turno produziu insight que o handoff inicial + a sessão de planejamento + o próprio Copilot **não tinham gerado isoladamente**. Registrado aqui como evidência operacional de que tri-party itera e refina, não converge prematuramente.
+
+### Obs 6 — Pipeline de promoção tem unidade nomeada faltando
+
+**Evidência:** ChatGPT leu o decision-brief inteiro e identificou um buraco estrutural no Bloco D — Promoção. Citação direta da análise:
+
+> Existe uma pergunta escondida que ainda não foi explicitada: **qual é a unidade promovível?** Hoje aparecem conceitos como observação, padrão, regra situacional, skill, insight, comportamento. Mas ainda não existe uma taxonomia clara entre eles. E sem isso, fica difícil responder: quando algo sobe de nível?
+
+Essa pergunta **não emergiu** durante o handoff inicial nem durante a sessão de design da spec. Emergiu apenas quando um terceiro agente (ChatGPT) revisou os artifacts produzidos com olhar de "leitor que não estava na construção".
+
+**Hipótese cravada (a confirmar via research):** pode existir cadeia tipo `observação → sinal recorrente → regra situacional → regra formal → ADR`, com critérios de elevação em cada degrau. Formalização emerge da research dos sistemas externos (Hermes nomeia "skill"; ai-guidelines nomeia "ADR", "CORE", "GR", "DEC", "regra situacional"; vocabulários precisam ser mapeados).
+
+**Implicação imediata:** `[DEC-0024-D04]` cravada no decision-brief como **pré-requisito** para D01-D03 (todas pressupõem unidade nomeada). Sem D04, perguntas de promoção continuam mal-formuladas.
+
+**Implicação metodológica:** tri-party não é só "duas opiniões + decisão humana". É **iteração contínua** onde cada turno pode revelar gaps que turnos anteriores não viram. ChatGPT como reviewer atrasado funcionou aqui porque ele veio sem o context da construção — apenas com os artifacts finais.
+
+### Obs 7 — "Spec sobre handoff" foi recategorizada como "spec sobre governança de contexto"
+
+**Evidência:** ChatGPT articulou em uma linha o que vinha emergindo nos turnos anteriores sem ser nomeado:
+
+> O verdadeiro objeto da spec não é handoff. É **projeção governada**. O handoff virou apenas o primeiro consumidor.
+
+Essa reformulação **não muda o conteúdo da spec** (já cravado: "seleção é o problema; governança é a restrição; handoff é a projeção"), mas crava nominalmente o que o slug `handoff-as-first-class` esconde. Mantemos o slug por cautela anti-rebranding-precoce; o spec.md já sinaliza que o slug pode evoluir para algo como `contextual-governance-and-handoff`.
+
+**Implicação para Bloco E:** ChatGPT identificou Bloco E (Projeção) como "o melhor bloco" da brief porque captura o pivot conceitual (uma SSOT → múltiplos consumidores → múltiplas projeções: wizard, briefing, handoff, dashboard, agentes, humanos). Bloco E ganhou peso interpretativo sem mudança textual.
+
+### Padrão metodológico observado neste 3º turno
+
+ChatGPT validou afirmativamente vários pontos já cravados (research artifact como mais forte; evidence artifact com honestidade epistêmica; DECs com direção implícita evitando falsa neutralidade). Mas o **valor incremental** veio de:
+
+1. **Identificar o gap não-falado** (unidade promovível) que nenhum turno anterior nomeou.
+2. **Articular nominalmente o pivot conceitual** (governance of context vs handoff).
+3. **Apontar que o risco principal não é mais escopo, é modelagem** — a research precisa cravar D04 antes de derivar implementação, ou seleção/projeção/governança ficam definidas mas o lifecycle continua sem objeto formal para promover.
+
+Esse padrão (reviewer atrasado lê artifacts e revela gap não-falado) é exatamente o tipo de iteração que tri-party formaliza. Conta como **terceiro caso documentado** após Spec 0023 PR5/PR #25 e a sessão de planejamento desta spec — critério de [1.H.10] da 0023 ("≥ 2 specs adicionais OU adoção espontânea") está cada vez mais próximo de ser satisfeito.
+
+---
+
 ## Limitações desta evidência (honestidade epistêmica)
 
 - **N = 1 sessão.** Sem replicação ainda. Precisamos observar mais sessões antes de generalizar. Esta é a primeira sessão deliberadamente observada com este framing.

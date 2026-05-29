@@ -6,7 +6,7 @@
 > Plan: [`./plan.md`](./plan.md)
 > Tasks: [`./tasks.md`](./tasks.md)
 > Status agregado: **Open**
-> Última atualização: 2026-05-28 — instanciação inicial; Bloco A populado com síntese empírica da sessão de planejamento; Blocos por eixo (A-F) abertos sem opções (research pendente).
+> Última atualização: 2026-05-28 (2ª iteração do dia) — instanciação inicial + integração do 3º turno tri-party (review do ChatGPT do PR #30): adiciona obs #6 ao preâmbulo + cria `[DEC-0024-D04]` ("unidade canônica de promoção") como pré-requisito de D01-D03.
 
 > **Artefato canônico do gate humano entre Stage 1 (research) e Stage 2 (design + implementação).** Esta spec é `evidence-driven`. Apresenta opções com tradeoffs antes do gate humano e registra decisões validadas após o gate. **Permanece no diretório da spec após o merge** como artefato histórico.
 
@@ -27,6 +27,8 @@
 4. **Tri-party humano + Claude + ChatGPT emergiu sem ritual** (sessão 2026-05-28, segundo caso documentado após Spec 0023 PR5/PR #25). ChatGPT como segunda opinião sobre tensão da cláusula anti-paper da ADR 0023; Claude como implementador + análise; owner como decisão final. Cf. item `[1.H.10]` da 0023 (avaliação de promoção a ADR pendente; critério "≥ 2 specs adicionais OU adoção espontânea").
 
 5. **Lifecycle de spec/decision-brief/ADR já É pipeline de promoção** (insight crystalized 2026-05-28). Hermes faz `task completion → pattern extraction → skill creation → skill refinement` em agent runtime. ai-guidelines faz `observação → backlog → spec → decision-brief → ADR/regra` em governance lifecycle. Mesma forma estrutural. Implicação: handoff = projeção/lookup; aprendizado vive no lifecycle humano-curado existente. Conflar viola ADR 0018.
+
+6. **Pipeline de promoção tem unidade nomeada faltando** (insight crystalized via review do ChatGPT do PR #30 — 3º turno tri-party da sessão / 2026-05-28). Embora o lifecycle exista (obs #5), o framework usa termos diversos sem hierarquia formal: _observação, padrão, sinal recorrente, regra situacional, regra formal, skill, insight, comportamento, ADR_. Sem taxonomia clara, perguntas de Bloco D ficam indefinidas (não há resposta operacional para "quando algo sobe de nível?"). Hipótese inicial: pode existir cadeia tipo `observação → sinal recorrente → regra situacional → regra formal → ADR`, mas forma exata emerge da research dos sistemas externos. Cravado como `[DEC-0024-D04]` (pré-requisito para D01-D03). Cf. seção "Continuação tri-party — 3º turno" em `research/2026-05-28-this-session-as-evidence.md`.
 
 **Convergências observadas em sistemas externos** (síntese rápida; detalhada em `research/`):
 
@@ -200,6 +202,21 @@ Pontos iniciais entram como `Open` com pergunta cravada e contexto pendente. Op�
 ## Bloco D — Promoção
 
 > Como observações viram regras. Onde mora a curadoria humana. Crítico — protege o diferencial governance-first.
+>
+> **Nota de leitura:** `[DEC-0024-D04]` é **pré-requisito** para `D01-D03`. Sem taxonomia clara da _unidade promovível_, perguntas sobre "como sobe de nível?" / "quem promove?" / "onde mora a curadoria?" ficam indefinidas. Research deve cravar D04 primeiro (ou em paralelo) e usar as respostas para ancorar D01-D03.
+
+### [DEC-0024-D04] Qual é a unidade canônica de promoção contextual?
+
+**Pergunta:** Antes de responder D01-D03, qual é a **taxonomia das unidades promovíveis**? Hoje o framework usa termos diversos sem hierarquia formal: _observação, padrão, sinal recorrente, regra situacional, regra formal, skill, insight, comportamento, ADR_. Sem nomeação clara, fica difícil responder operacionalmente "quando algo sobe de nível?".
+
+**Contexto (research):**
+
+- **Origem:** insight cravado via review do ChatGPT do PR #30 (3º turno tri-party desta sessão / 2026-05-28). Cf. preâmbulo § obs #6 + `research/2026-05-28-this-session-as-evidence.md` § "Continuação tri-party — 3º turno".
+- **Hipótese inicial a investigar** (não confirmada — emerge da research): pode existir cadeia tipo `observação → sinal recorrente → regra situacional → regra formal → ADR`, com critérios de elevação cravados em cada degrau (ex.: ≥ N casos sem fechamento = sinal recorrente; sinal recorrente + ≥ 1 sessão de design = regra situacional; ≥ 2 specs validando = regra formal; etc.).
+- **Vocabulário existente a mapear:** ai-guidelines tem `ADR`, `CORE`, `GR`, `opt-in`, `DEC`, `regra situacional` (mencionada em [DEC-0023-F05]); Hermes tem `skill`; Cursor tem peças do `harness`; Open Code não tem unidade promovível (stateless por design). Cada vocabulário deve ser mapeado contra a hipótese.
+- **Conexão estrutural:** sem D04 resolvido, `D01` (como observações viram regras?), `D02` (handoff promove autonomamente?) e `D03` (onde mora a curadoria?) ficam mal-formuladas — todas pressupõem uma unidade nomeada que ainda não existe.
+
+**Status:** Open
 
 ### [DEC-0024-D01] Como observações viram regras situacionais?
 
@@ -324,6 +341,7 @@ Pontos iniciais entram como `Open` com pergunta cravada e contexto pendente. Op�
 | `[DEC-0024-D01]` | D     | Open   |
 | `[DEC-0024-D02]` | D     | Open   |
 | `[DEC-0024-D03]` | D     | Open   |
+| `[DEC-0024-D04]` | D     | Open   |
 | `[DEC-0024-E01]` | E     | Open   |
 | `[DEC-0024-E02]` | E     | Open   |
 | `[DEC-0024-E03]` | E     | Open   |
