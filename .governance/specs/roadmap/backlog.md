@@ -14,14 +14,14 @@ Detalhes de lifecycle em [`.core/process/governance-foundation.md`](../../../.co
 
 ## Em execução
 
-### Spec 0024 — `handoff-as-first-class` (research-first / evidence-driven)
+### Spec 0024 — Context Architecture (spec fundacional de arquitetura de contexto, evidence-driven)
 
-- **Branch:** `feat/spec-0024-handoff-as-first-class`
-- **Instanciada em:** 2026-05-28
-- **Status:** Stage 1 (Research) ativo — decision-brief estruturado pelos 5 eixos (Seleção / Persistência / Promoção / Projeção / Governança); Bloco A pré-populado com 5 observações cravadas; Blocos B-F abertos pendentes de research.
+- **Branch:** `feat/spec-0024-handoff-as-first-class` (slug-alvo: `context-architecture`; rename físico em milestone próprio — cf. header de `spec.md`).
+- **Instanciada em:** 2026-05-28 · **Elevada a spec fundacional em:** 2026-05-29.
+- **Status:** Stage 1 (Research) ativo. **Elevada** de "handoff-as-first-class" para a **arquitetura canônica de preservação, promoção, seleção e projeção de contexto**; handoff é uma das projeções. Decision-brief ganhou o **Bloco G — Arquitetura Fundacional** (`G00` raiz → `G05`) acima dos 5 eixos (A-F); invariante de ordem "A-F não estabiliza até `G00 Resolved`".
 - **Pré-requisitos atendidos:** Spec 0023 mergeada ✅; ADR 0022 Aceita ✅ (PR #29, 2026-05-28).
-- **Slug provisional:** pode evoluir conforme research consolidar (ex.: `contextual-governance-and-handoff`). Cf. nota no header de `spec.md`.
-- **Implementação CLI do handoff:** **fora do escopo** desta spec — vira spec separada (provavelmente 0025) após Stage 1 fechar.
+- **Camadas-modelo absorvidas (Grupo A do inventário):** taxonomia de specs + contrato/core de boilerplate (de `boilerplate-system-modernization`); definição de lar canônico/precedência/ownership (de `runtime-and-template-root-consolidation`); contratos de handoff (`handoff-contracts-formalization`). **Camadas-execução (Grupo B) permanecem nas candidatas.** Fronteira: **modelo ≠ migração**. Cf. [`research/2026-05-29-architectural-inventory.md`](../0024-handoff-as-first-class/research/2026-05-29-architectural-inventory.md).
+- **Implementação:** entregue **dentro desta spec** (Stage 2, faseada como na 0023) — handoff + boilerplate de referência. O split `0024 → 0025` **não é pressuposto** (só se a research revelar mudança de direção relevante).
 - **Detalhes:** [`.governance/specs/0024-handoff-as-first-class/`](../0024-handoff-as-first-class/) (spec + decision-brief + plan + tasks + state + research).
 
 ---
@@ -35,6 +35,8 @@ Detalhes de lifecycle em [`.core/process/governance-foundation.md`](../../../.co
 > **Atualização — 2026-05-28 (mesma data).** `handoff-as-first-class` instanciada formalmente como **Spec 0024 (research-first / evidence-driven)** e movida para `## Em execução`. Now passa a ter 2 candidatas restantes: `governance-dashboard-and-visual-artifacts` (§1) e `boilerplate-system-modernization` (§2). Renumeração refletida abaixo. Nota de reordenação acima preservada como histórico do raciocínio que levou à promoção.
 
 ### 1. `governance-dashboard-and-visual-artifacts`
+
+> **Classificação 2026-05-29 (inventário da Spec 0024): Grupo C — consumidor, não fundação.** O _modelo_ de projeção (uma SSOT → N projeções) vive na 0024 (`[DEC-0024-G05]`); este dashboard é uma **instância de projeção** que consome esse modelo. Permanece candidata independente; **não absorvida**.
 
 > **Vinculação metodológica:** materializa [ADR 0023 — Meta-artefatos de governança são SSOT YAML com derivações determinísticas](../../../.core/governance/adrs/0023-meta-artifacts-yaml-with-derivations.md). Cláusula anti-paper explícita (item 6) — ADR sem materialização rápida vira o anti-pattern (dashboard que nunca saiu do papel desde 2026-05-07) que motivou o ADR.
 
@@ -66,6 +68,8 @@ Detalhes de lifecycle em [`.core/process/governance-foundation.md`](../../../.co
 - **Slug:** `governance-dashboard-and-visual-artifacts` (per [ADR 0017](../../../.core/governance/adrs/0017-spec-numbering-slug-to-branch.md)).
 
 ### 2. `boilerplate-system-modernization` (escopo expandido — absorve "stack-agnostic refactor" e "retrofit tasks-mixed-boilerplate D01")
+
+> **Re-escopa 2026-05-29 (elevação da Spec 0024).** A **camada-modelo** desta candidata — validade/substituição da taxonomia de tipos de spec + **contrato mínimo de boilerplate + extração do core comum** — foi **absorvida pela Spec 0024** (Grupo A do inventário; `[DEC-0024-G02]`/`G04`). Esta candidata permanece como a **camada-execução (Grupo B)**: migração/retrofit dos boilerplates por classe, versionamento, stack-agnostic, examples, quickstart, paths — executada **dado o contrato que a 0024 cravar**. Fronteira modelo ≠ migração. Cf. [`inventário da 0024`](../0024-handoff-as-first-class/research/2026-05-29-architectural-inventory.md).
 
 > **Vinculação metodológica:** materializa [DEC-0023-F03](../../../.governance/specs/0023-workflow-runtime/decision-brief.md) (boilerplate dedicado por classe) e [DEC-0023-F04](../../../.governance/specs/0023-workflow-runtime/decision-brief.md) (múltiplos paths por classe). Sem essa modernização, F03+F04 cravados em PR5 S5 ficam no papel — sistema atual de boilerplates não suporta a tríade arquitetural B+B+A+A da Spec 0023.
 >
@@ -119,6 +123,8 @@ Detalhes de lifecycle em [`.core/process/governance-foundation.md`](../../../.co
 
 ### `runtime-and-template-root-consolidation`
 
+> **Re-escopa 2026-05-29 (elevação da Spec 0024).** A **definição** do lar canônico / precedência / ownership dos artefatos (o _princípio_ de topologia) foi **absorvida pela Spec 0024** (Grupo A do inventário; liga Bloco F / `[DEC-0024-G05]`). Esta candidata permanece como a **execução (Grupo B)**: cutover dos ~13 touch-points, remoção dos roots legados, mover specs legadas, colapsar templates (Fase 4). Cf. inventário arquitetural da 0024.
+
 > **Registrada no PR #25 (2026-05-25) como captura docs-only.** NÃO inicia agora — gatilho de abertura abaixo. Esta entry preserva o aprendizado para que o cutover não se perca nem recomece do zero.
 
 - **Contexto:** o framework mantém **tri-root permanente** — `.governance/` (canônico atual), `.specify/` (legado: specs antigas + templates-fonte + backlog/historico não-sanitizados) e `.ai-guidelines/` (legado: `sdd_dir` com config + templates mirror). O custo é real e recorrente: humano e LLM gastam tokens reverse-engineering quem é fonte vs. mirror vs. recipe; cada concern (specs, templates, contrato de consumer) vive em ≥2 lugares; é fonte ativa de confusão e drift. Diagnóstico empírico levantado durante o fechamento da Spec 0023.
@@ -149,7 +155,7 @@ Detalhes de lifecycle em [`.core/process/governance-foundation.md`](../../../.co
   6. **`framework-observability-dashboard`** (telemetria) — _média_ — métricas vivas (Tok-H, eval baseline, adoção npm); **overlap parcial com `Now`#1 `governance-dashboard-and-visual-artifacts`** — verificar absorção vs. recorte de telemetria.
   7. **`pr-curator-action`** — _média_ — `pr-curator` é fantasma (citado em ADR 0009/CHANGELOG, sem código); automação cross-repo.
   8. **`regra-hierarquia`** (era spec 0011) — _média_ — fragmentação de `AGENTS.md` por subdir no consumidor; gatilho por pressão de tokens.
-  9. **`handoff-contracts-formalization`** — _baixa_ — contratos de handoff stage→release / consumer→maintainer; **overlap parcial com `Now`#2 `handoff-as-first-class`** — verificar absorção.
+  9. **`handoff-contracts-formalization`** — **absorvida (Grupo A) pela Spec 0024** (2026-05-29) — contratos de handoff stage→release / consumer→maintainer entram na research fundacional (Bloco G / `[DEC-0024-G05]`). Item da triagem fechado por absorção; cf. inventário arquitetural da 0024.
   10. **`core-rules-top-naming-audit`** — _baixa_ — fronteira `agents-core.md` (CORE-\*) vs `global-rules.md` (GR-\*) confunde; débito migrado do 0021.
   11. **`cli-update-notifier`** — _baixa_ — sensor "vX.Y disponível, rode update" pós-npm; infra de update já existe, falta o aviso.
   12. **`quota-awareness`** (era spec 0014) — _baixa_ — dashboard de quota opt-in; gatilho por consumidor estourar quota.
