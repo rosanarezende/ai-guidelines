@@ -117,5 +117,5 @@ Detalhamento técnico (riscos por componente, mitigações) emerge no `plan.md` 
 
 - Specs relacionadas: **0021** (governance-first foundation), **0023** (runtime operacional).
 - ADRs aplicáveis: **ADR 0018** (AI-as-Channel; restritivo), **ADR 0022** (handoff situado precede distribuição; fundamento), **ADR 0023** (meta-artefatos YAML SSOT; aplicável apenas a projeções tipo dashboard, não ao handoff).
-- Evidência empírica externa: transcrições em `temp/transcricoes.md` (mantidas até encerramento da 0025; cobertas em `.gitignore`).
+- Evidência empírica externa (vídeos comparativos sobre Hermes Agent, Cursor SDK, Open Code, HTML vs Markdown): URLs canônicas e síntese estruturada em [`./research/2026-05-28-pressure-axes-scope.md § Fontes primárias citáveis`](./research/2026-05-28-pressure-axes-scope.md). Transcrições brutas mantidas localmente em `temp/` durante o ciclo da spec (não-versionadas por copyright; cobertas em `.gitignore`).
 - Sessão de planejamento 2026-05-28 — branch `feat/spec-0024-handoff-as-first-class`, commits desta spec; tri-party Rosana + Claude + ChatGPT registrado em `research/2026-05-28-this-session-as-evidence.md`.

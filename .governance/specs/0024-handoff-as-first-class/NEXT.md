@@ -32,6 +32,12 @@ _(Stage 2 ainda não iniciado — Fase 0 evidence-driven em curso)_
 - **O Insight**: o item `[1.H.10]` da Spec 0023 (avaliar promoção do modelo tri-party a ADR próprio) tinha critério "≥ 2 specs adicionais OU adoção espontânea". Esta sessão pode contar como segundo caso de uso espontâneo em PR não-trivial.
 - **Ação Sugerida**: registrar como ponto de observação do Bloco A; se um terceiro caso emergir naturalmente durante a research desta spec, considerar promoção formal a ADR no encerramento.
 
+### 3. Gate de CI faltante para validar `state.yml` schema globalmente
+
+- **O Contexto**: descoberto via review do Copilot no PR #30 (2026-05-28). O `state.yml` inicial desta spec foi commitado com `stage: research` (inválido — schema canônico aceita apenas `discovery|decision|planning|implementation|closing|done`) e `focus`/`next` como strings escalares (inválido — schema exige `ReadonlyArray<string>`). `yarn validate` **não pegou** o bug porque o `parseWorkflowState()` é invocado apenas em runtime (quando comando `workflow continue` lê o `state.yml` da spec ativa), não no validate global.
+- **O Insight**: existe pressão real para um gate de CI que valide TODOS os `state.yml` do repo contra o schema canônico (`src/domain/workflow/WorkflowState.ts` + `src/infrastructure/yaml/workflowStateSerializer.ts`). Sem isso, qualquer spec pode commitar `state.yml` quebrado e descobrir só quando alguém roda o runtime contra ela. Pattern análogo: `governance-pr-check` (cf. ADR 0021) é precisamente esse tipo de gate determinístico que move enforcement do agente para o sistema.
+- **Ação Sugerida**: registrar como candidata derivada para a entry de backlog `coverage-rigor-enforcement` (já existe; cobre exatamente "PR que reduz coverage de qualquer arquivo crítico abaixo do piso falha"). Quando essa spec abrir, adicionar item "gate CI que valida schema de TODOS os `state.yml` do repo" como parte do escopo. Não-urgente neste momento (caso emergiu durante a 0024 e já foi corrigido); sinal para promoção quando ≥ 1 caso adicional aparecer OU quando `coverage-rigor-enforcement` for instanciada.
+
 ---
 
 ## ✂️ Itens descartados deliberadamente

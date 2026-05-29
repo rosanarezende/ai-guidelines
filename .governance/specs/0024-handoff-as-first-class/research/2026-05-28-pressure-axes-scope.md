@@ -122,8 +122,27 @@ A linha **ai-guidelines (baseline atual)** já está preenchida porque é estado
 
 ## Fontes primárias citáveis (até a data de instanciação)
 
-- **Transcrições de vídeo** em `temp/transcricoes.md` (Lucas Montano + Attekita Dev sobre Hermes, Cursor SDK, Open Code, HTML vs Markdown). Mantidas até encerramento da Spec 0025 (cobertas em `.gitignore`).
-- **spec-kitty repo:** https://github.com/Priivacy-ai/spec-kitty (a fazer WebFetch).
+**Vídeos comparativos** (URLs canônicas — fontes públicas auditáveis):
+
+- **HTML é melhor que Markdown** (Lucas Montano): https://youtu.be/q1Sa7lNrhGU — argumento de projeções especializadas por consumidor (Markdown como SSOT vs HTML como projeção visual densa).
+- **Hermes Agent: eu testei e não é só hype!** (Attekita Dev / Carol Tequita): https://youtu.be/6CrmA1Ll5gM — análise de skill auto-creation, 3-tier memory (session/persistent/skill), multi-model selection per task.
+- **open code ta virando moda** (Lucas Montano): https://youtu.be/BfgBdef0Bmc — pressão econômica de custo de inferência; provider-agnosticism como diferencial estratégico (caso Microsoft cancelando Cloud Code).
+- **por que eu migrei pro Cursor** (Lucas Montano): https://youtu.be/9YIClGLXIs4 — harness como produto ("modelo = 20%, harness = 80%"); sessões paralelas + context management; Cursor SDK anatomy.
+- **por que todo mundo ta falando do Hermes** (Lucas Montano): https://youtu.be/7R-LAADt6rY — closed-loop skill learning system (5 etapas: task completion → pattern extraction → skill creation → skill refinement → periodic nudge); 3 camadas de memória; FTS5 (SQLite) para skill indexing.
+
+**Repos a investigar via WebFetch:**
+
+- **spec-kitty:** https://github.com/Priivacy-ai/spec-kitty (autorização web-fetch pre-aprovada).
+- **Hermes Agent repo:** a localizar (NOS Research — confirmado pelas fontes acima).
+
+**Buscas pendentes:**
+
 - **Anthropic Dreaming in Cloud:** sem URL canônica conhecida (a buscar via WebSearch).
-- **Hermes Agent repo:** a buscar (NOS Research — confirmado por Carol Tequita / Attekita Dev).
-- **Sessão de planejamento 2026-05-28:** branch `feat/spec-0024-handoff-as-first-class`, este commit + commits seguintes; tri-party Rosana + Claude Sonnet 4.6 + ChatGPT registrado em `research/2026-05-28-this-session-as-evidence.md`.
+
+**Material de trabalho local** (não-citável diretamente em artefatos versionados):
+
+- Transcrições brutas dos 5 vídeos em `temp/transcricoes.md` — mantidas para conferência durante o ciclo da spec (até encerramento da 0025); **não-versionadas por copyright** (vídeos do YouTube). Síntese estruturada e citações específicas migram para artifacts dedicados em `research/` per-sistema conforme research progride.
+
+**Evidência da própria sessão de planejamento:**
+
+- **Sessão 2026-05-28:** branch `feat/spec-0024-handoff-as-first-class`; tri-party Rosana Rezende + Claude Sonnet 4.6 + ChatGPT documentado em [`./2026-05-28-this-session-as-evidence.md`](./2026-05-28-this-session-as-evidence.md).

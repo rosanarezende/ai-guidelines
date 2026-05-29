@@ -1,5 +1,13 @@
-stage: research
+stage: discovery
 gate:
   status: open
-focus: "Bloco A (síntese empírica) cravado; Blocos B-G por eixo abertos; research dos 5+ sistemas externos pendente"
-next: "WebFetch spec-kitty + síntese textual + popular Bloco B (Persistência) com primeiras opções"
+focus:
+  - "Preâmbulo do decision-brief (síntese empírica) cravado"
+  - "Blocos A-B-D-E-F por eixo abertos (DECs em status Open)"
+  - "Bloco C (Saúde Técnica, transversal) também aberto"
+  - "Research dos 5+ sistemas externos pendente"
+next:
+  - "WebFetch spec-kitty + extração comparativa"
+  - "Buscar Anthropic Dreaming in Cloud + síntese"
+  - "Localizar repo Hermes Agent + análise de skill loop"
+  - "Popular opções nos DECs do Bloco B (Persistência) como primeiro caso"

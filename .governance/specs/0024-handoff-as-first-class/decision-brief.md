@@ -64,14 +64,14 @@ Nenhum dos sistemas estudados trata **governança do próprio processo** como ei
 
 ## Estrutura dos blocos
 
-Cada bloco mapeia para um **eixo de pressão arquitetural** (per síntese 2026-05-28 / cf. `research/2026-05-28-pressure-axes-scope.md`):
+Os blocos **A, B, D, E, F** mapeiam um-para-um aos **5 eixos de pressão arquitetural** (per síntese 2026-05-28 / cf. [`research/2026-05-28-pressure-axes-scope.md`](./research/2026-05-28-pressure-axes-scope.md)). O **Bloco C — Saúde Técnica** é bloco **transversal mandatório** do template canônico de decision-brief (cf. [`.ai-guidelines/templates/decision-brief-boilerplate.md`](../../../.ai-guidelines/templates/decision-brief-boilerplate.md) § "Bloco C") — **não** um sexto eixo de pressão.
 
-- **Bloco A** — Seleção
-- **Bloco B** — Persistência
-- **Bloco C** — Saúde Técnica (template mandatório)
-- **Bloco D** — Promoção
-- **Bloco E** — Projeção
-- **Bloco F** — Governança
+- **Bloco A** — Seleção _(eixo de pressão)_
+- **Bloco B** — Persistência _(eixo de pressão)_
+- **Bloco C** — Saúde Técnica _(transversal mandatório — template)_
+- **Bloco D** — Promoção _(eixo de pressão)_
+- **Bloco E** — Projeção _(eixo de pressão)_
+- **Bloco F** — Governança _(eixo de pressão)_
 
 Pontos iniciais entram como `Open` com pergunta cravada e contexto pendente. Opções emergem da research dos sistemas externos enumerados em `spec.md § Pesquisa de contexto`.
 
