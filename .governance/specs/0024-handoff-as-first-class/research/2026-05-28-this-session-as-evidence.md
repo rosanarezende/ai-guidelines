@@ -66,9 +66,9 @@ Nenhum sistema externo estudado tem essa categoria de regras como invariante de 
 
 ---
 
-## Continuação tri-party — 3º turno (review do ChatGPT do PR #30)
+## Continuação tri-party — 3º turno e seguintes (reviews tardios do ChatGPT)
 
-> Após o bootstrap do PR #30 ter sido aberto, ChatGPT executou um terceiro turno de revisão estruturada — lendo os artifacts da spec antes mesmo do review do Copilot. Esse turno produziu insight que o handoff inicial + a sessão de planejamento + o próprio Copilot **não tinham gerado isoladamente**. Registrado aqui como evidência operacional de que tri-party itera e refina, não converge prematuramente.
+> Após o bootstrap do PR #30 ter sido aberto, ChatGPT executou múltiplos turnos de revisão estruturada lendo os artifacts cristalizados — primeiro do PR #30 (3º turno), depois da iteração D04/obs#6 (4º turno), depois do PR #31 (5º turno). Esses turnos produziram insights que o handoff inicial + a sessão de planejamento + o próprio Copilot **não tinham gerado isoladamente**. Registrado aqui como evidência operacional de que tri-party itera e refina, não converge prematuramente.
 
 ### Obs 6 — Pipeline de promoção tem unidade nomeada faltando
 
@@ -102,7 +102,51 @@ ChatGPT validou afirmativamente vários pontos já cravados (research artifact c
 2. **Articular nominalmente o pivot conceitual** (governance of context vs handoff).
 3. **Apontar que o risco principal não é mais escopo, é modelagem** — a research precisa cravar D04 antes de derivar implementação, ou seleção/projeção/governança ficam definidas mas o lifecycle continua sem objeto formal para promover.
 
-Esse padrão (reviewer atrasado lê artifacts e revela gap não-falado) é exatamente o tipo de iteração que tri-party formaliza. Conta como **terceiro caso documentado** após Spec 0023 PR5/PR #25 e a sessão de planejamento desta spec — critério de [1.H.10] da 0023 ("≥ 2 specs adicionais OU adoção espontânea") está cada vez mais próximo de ser satisfeito.
+### 4º turno — ChatGPT review da iteração D04/obs#6
+
+Logo após o commit de integração (`f0cd562`), ChatGPT revisou o resultado. Pontos novos:
+
+- **Sub-questão dupla em D04:** a DEC pergunta "qual é a unidade?" mas implicitamente carrega "qual o mecanismo de transição entre níveis?". Sem (b), taxonomia vira classificação estática, não lifecycle operacional. Registrado como bullet expansivo do contexto de `[DEC-0024-D04]` (não fragmentado em D05 — research pode confirmar se split vale).
+- **Reading hierárquico emergente:** os 5 eixos podem ter ordem de dependência (`Unidades → Promoção → Seleção → Projeção → Governança`) — D04 não seria apenas DEC dentro de Bloco D, mas decisão central da spec inteira. Registrado como **observação** em NEXT.md sem ação estrutural (defere a research; reestruturação prematura violaria "não congelar ontologia").
+
+### 5º turno — ChatGPT review do PR #31 (CI gate `state-yml:check`)
+
+Após PR #31 ser mergeado, ChatGPT revisou o gate. Pontos novos:
+
+- **PR #31 é micro-caso real dos eixos da 0024:** "estado → seleção → validação → gate → enforcement". O sistema deixa de depender da memória do operador; passa a depender de seleção determinística + autoridade central. **Bug encontrado em artefato da 0024, mas correção já demonstra um dos princípios que a 0024 está tentando formalizar.**
+- **Pergunta derivada estrutural:** _"state.yml é apenas o primeiro artefato governado que sofre deste problema? Quais artefatos possuem invariantes estruturais que ainda dependem de comportamento humano em vez de enforcement sistêmico?"_ Esta pergunta generaliza o caso state.yml para meta-pergunta sobre governance enforcement. Cravada como `[DEC-0024-F04]` no Bloco F.
+
+### Mecanismo cognitivo nomeável — "leitor tardio" vs "construtor"
+
+Os turnos 3, 4 e 5 compartilham propriedade que merece nome formal. Não é "tri-party genérico" (qualquer 2ª opinião + decisão humana). É um **mecanismo cognitivo específico** — refinamento via ChatGPT 4º turno:
+
+```text
+construtor          → defende decisões tomadas durante a construção
+construtor refinado → ajusta com nova informação, mas mantém context da construção
+leitor tardio       → vê apenas artefatos cristalizados, sem context da construção
+```
+
+O **leitor tardio** tende a expor:
+
+- **pressupostos ocultos** (premissas que ficaram implícitas durante a construção)
+- **unidades não nomeadas** (objetos sem taxonomia formal — ex.: "unidade promovível" do D04)
+- **saltos ontológicos** (mudanças de framing não-articuladas — ex.: "spec sobre handoff" → "spec sobre governança de contexto")
+- **inconsistências de modelagem** (artefatos que descrevem coisas diferentes usando o mesmo vocabulário)
+- **invariantes não-enforced** (regras dependentes de comportamento humano — ex.: schema state.yml validado só em runtime)
+
+Essa distinção entre construtor e leitor tardio **não é redutível a "duas IAs revisarem"** — é diferente de posição cognitiva (defender vs ler frio). Padrão pode acabar sendo mais importante que "tri-party" como termo. Registrar aqui sem promover a ADR ainda; aguardar 1+ caso adicional fora desta sessão (per regra 7 de promoção).
+
+### Contagem atualizada e implicação para `[1.H.10]` da 0023
+
+Esta sessão já registra **5 turnos tri-party distintos** (não mais 3):
+
+1. ChatGPT como 2ª opinião sobre cláusula anti-paper da ADR 0023 (reordenação do backlog)
+2. ChatGPT estruturando os 5 eixos de pressão para a research
+3. ChatGPT como **leitor tardio** dos artifacts do PR #30 (identificou unidade promovível → D04)
+4. ChatGPT como **leitor tardio** da iteração D04 (refinou: 2 sub-questões em D04 + reading hierárquico)
+5. ChatGPT como **leitor tardio** do PR #31 (generalizou: F04 — quais outros artefatos têm o mesmo padrão)
+
+Turnos 3-5 são todos do mesmo padrão ("leitor tardio"). Critério de `[1.H.10]` da Spec 0023 ("≥ 2 specs adicionais OU adoção espontânea") já estaria satisfeito pela própria contagem. A pergunta para encerramento de Stage 1 deixa de ser "quando promover tri-party a ADR?" e passa a ser **"qual a formulação correta?"** — provavelmente cobre construtor/leitor-tardio como mecanismo central, não tri-party genérico.
 
 ---
 

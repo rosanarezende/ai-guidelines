@@ -6,7 +6,7 @@
 > Plan: [`./plan.md`](./plan.md)
 > Tasks: [`./tasks.md`](./tasks.md)
 > Status agregado: **Open**
-> Última atualização: 2026-05-28 (2ª iteração do dia) — instanciação inicial + integração do 3º turno tri-party (review do ChatGPT do PR #30): adiciona obs #6 ao preâmbulo + cria `[DEC-0024-D04]` ("unidade canônica de promoção") como pré-requisito de D01-D03.
+> Última atualização: 2026-05-28 (3ª iteração do dia) — integração dos turnos tri-party 4 e 5 (ChatGPT review da iteração D04 + ChatGPT review do PR #31 já mergeado): expansão de D04 com sub-questão "critérios de elevação" + nova `[DEC-0024-F04]` ("invariantes estruturais sob enforcement sistêmico vs humano") no Bloco F. Cf. obs #6 do preâmbulo (cravada na 2ª iteração) e seção "Continuação tri-party — 3º turno e seguintes" em `research/2026-05-28-this-session-as-evidence.md`.
 
 > **Artefato canônico do gate humano entre Stage 1 (research) e Stage 2 (design + implementação).** Esta spec é `evidence-driven`. Apresenta opções com tradeoffs antes do gate humano e registra decisões validadas após o gate. **Permanece no diretório da spec após o merge** como artefato histórico.
 
@@ -215,6 +215,7 @@ Pontos iniciais entram como `Open` com pergunta cravada e contexto pendente. Op�
 - **Hipótese inicial a investigar** (não confirmada — emerge da research): pode existir cadeia tipo `observação → sinal recorrente → regra situacional → regra formal → ADR`, com critérios de elevação cravados em cada degrau (ex.: ≥ N casos sem fechamento = sinal recorrente; sinal recorrente + ≥ 1 sessão de design = regra situacional; ≥ 2 specs validando = regra formal; etc.).
 - **Vocabulário existente a mapear:** ai-guidelines tem `ADR`, `CORE`, `GR`, `opt-in`, `DEC`, `regra situacional` (mencionada em [DEC-0023-F05]); Hermes tem `skill`; Cursor tem peças do `harness`; Open Code não tem unidade promovível (stateless por design). Cada vocabulário deve ser mapeado contra a hipótese.
 - **Conexão estrutural:** sem D04 resolvido, `D01` (como observações viram regras?), `D02` (handoff promove autonomamente?) e `D03` (onde mora a curadoria?) ficam mal-formuladas — todas pressupõem uma unidade nomeada que ainda não existe.
+- **Sub-questão dupla — taxonomia + transições** (refinamento via ChatGPT 4º turno, 2026-05-28): D04 carrega de fato 2 perguntas distintas convivendo: **(a) qual é a unidade promovível?** (a cadeia em si) e **(b) qual o mecanismo de transição entre níveis?** (critérios de elevação). Sem (b), a taxonomia vira classificação estática, não lifecycle operacional. Research deve cobrir as duas; se a separação se mostrar útil durante a investigação, considerar split em D04 (taxonomia) + D05 (critérios) — não-cravado agora para evitar fragmentação prematura.
 
 **Status:** Open
 
@@ -326,6 +327,30 @@ Pontos iniciais entram como `Open` com pergunta cravada e contexto pendente. Op�
 
 **Status:** Open
 
+### [DEC-0024-F04] Quais artefatos governados têm invariantes estruturais sob enforcement sistêmico vs comportamento humano?
+
+**Pergunta:** O caso `state.yml` (descoberto e fechado via PR #31) é o primeiro artefato governado a sofrer do padrão "invariante existe → sistema não enforce → agente precisa lembrar → drift". Quais outros artefatos do framework carregam invariantes estruturais que **ainda dependem de revisão humana** em vez de enforcement sistêmico determinístico? Quais merecem gates equivalentes a `state-yml:check` / `living-docs:check` / `governance-pr-check`?
+
+**Contexto (research):**
+
+- **Origem:** insight cravado via review do ChatGPT do PR #31 (5º turno tri-party desta sessão / 2026-05-28). Cf. `research/2026-05-28-this-session-as-evidence.md` § "Continuação tri-party — 3º turno e seguintes".
+- **Padrão estrutural a investigar** (não restrito a YAML schema):
+  ```text
+  invariante existe → sistema não enforce → agente precisa lembrar → drift
+  ```
+  PR #31 fechou esse padrão para `state.yml` movendo enforcement para o validate global. F04 pergunta: quais outros artefatos comportam-se assim hoje?
+- **Candidatos óbvios a investigar** (lista inicial — research pode expandir/refinar):
+  - **`decision-brief.md`** — estrutura de blocos, IDs `[DEC-NNNN-XYZ]`, contrato form B vs C, drift entre headers individuais e tabela "Resumo de status" (template explicitamente nota: "drift bloqueia o gate; coerência é responsabilidade humana — não há script de geração nesta versão").
+  - **`tasks.md`** — sub-block IDs (`1.X.N`/`1.X.[COMMIT]`/`1.X.[REVIEW]`), state machine de checkboxes (`[ ]` / `[/]` / `[x]`), marker `[COMMIT]` ausente em commits reais (per `[DEC-0023-D01]` boundary).
+  - **`backlog.md`** — estrutura de entries (Em execução / Now / Candidatas / Later); contrato de campos obrigatórios por entry (Fonte, Princípio, Escopo, Pré-requisitos, Slug).
+  - **ADRs** — estados (`Proposta` / `Aceita` / `Superseded`); formato canônico do header; cross-refs sempre bidirecionais.
+  - **Meta-artefatos YAML futuros** (per ADR 0023) — cada um nasceria com gate equivalente como pré-condição (anti-paper).
+- **Conexão arquitetural com Bloco F:** F01 (autoridade), F02 (auditabilidade), F03 (governance-first invariante) cobrem _quem decide_ e _como fica registrado_. F04 cobre _quais invariantes são enforceable hoje vs dependem de humano_ — completa o quadro de governança auditável.
+- **Conexão com backlog `coverage-rigor-enforcement`:** essa candidata (backlog `Candidatas`) já trata de pisos por arquivo + 100% em paths críticos + forcing function de CI. F04 fornece a **lista de invariantes** que aquela spec implementadora deveria cobrir; pode virar input direto quando essa candidata abrir.
+- **Não-objetivo (preservado):** F04 NÃO propõe que o framework valide tudo automaticamente. A pergunta é qual o **subconjunto que se beneficia** de enforcement sistêmico — alguns invariantes seguem sendo melhor curados por humano (decisões editoriais, narrative coherence). Critério proposto a investigar: "se um agente pode introduzir drift sem perceber, e o drift é mecanicamente detectável, então é candidato a gate".
+
+**Status:** Open
+
 ---
 
 ## Resumo de status
@@ -348,6 +373,7 @@ Pontos iniciais entram como `Open` com pergunta cravada e contexto pendente. Op�
 | `[DEC-0024-F01]` | F     | Open   |
 | `[DEC-0024-F02]` | F     | Open   |
 | `[DEC-0024-F03]` | F     | Open   |
+| `[DEC-0024-F04]` | F     | Open   |
 
 **Status agregado:** `Open` — research em curso, opções pendentes.
 
