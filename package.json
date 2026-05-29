@@ -61,7 +61,8 @@
     "test:coverage": "node --experimental-default-config-file --experimental-test-coverage --test cli/**/*.test.mjs cli/**/**/*.test.mjs tests/integration/**/*.test.mjs && jest --config ./.jest/jest.config.js --coverage",
     "living-docs:generate": "yarn build && node cli/living-docs.mjs generate",
     "living-docs:check": "yarn build && node cli/living-docs.mjs check",
-    "validate": "yarn format:check && yarn build:all && yarn test && yarn living-docs:check",
+    "state-yml:check": "yarn build && node cli/state-yml-check.mjs",
+    "validate": "yarn format:check && yarn build:all && yarn test && yarn living-docs:check && yarn state-yml:check",
     "ci": "yarn install --immutable && yarn validate && yarn test:smoke",
     "prepare": "husky",
     "prepack": "yarn build:all"
