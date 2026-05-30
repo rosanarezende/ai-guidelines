@@ -2,12 +2,12 @@ stage: discovery
 gate:
   status: open
 focus:
-  - "Elevada a spec fundacional de arquitetura de contexto (2026-05-29)"
-  - "Bloco G — Arquitetura Fundacional aberto (G00 raiz -> G05); eixos A-F preservados"
+  - "Spec fundacional de arquitetura de contexto; Bloco G aberto (G00 raiz -> G05)"
+  - "Round de research do G00 completo e commitado (b69522a) - 6 artefatos"
+  - "G00 NEAR-CLOSEABLE: criterio de fechamento definido; falta a lente 'tipo de responsabilidade' (Cursor/Open Code) ou deferir a G01-G05"
   - "Invariante de ordem: nenhuma DEC de A-F estabiliza antes de G00 Resolved"
-  - "Inventário arquitetural Grupo A/B/C cravado (Fonte A); Fonte B externa pendente"
 next:
-  - "Research G00: unidade primaria (spec/pilar/lifecycle/artefato) com Fonte A + B"
-  - "WebFetch spec-kitty + Hermes + Open Code/Cursor: modelos alternativos de unidade primaria/lifecycle"
-  - "Reconciliar G03 (promotion pipeline) com ADR 0010 + D04"
-  - "Re-escopar backlog (C3) somente apos conjunto de elevacao completo"
+  - "LER o handoff de retomada: research/2026-05-29-handoff-next-session.md"
+  - "Fonte B final: Cursor + Open Code com a lente 'qual responsabilidade cruza a fronteira humano->sistema?' (sem teoria nova)"
+  - "Decidir perguntas abertas que deferem a G01-G05; cristalizar G00 no decision-brief"
+  - "Depois: G01-G05 (provavel colapso em facetas do mesmo modelo)"
