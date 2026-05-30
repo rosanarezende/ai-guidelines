@@ -87,6 +87,13 @@ _(Stage 2 ainda não iniciado — Fase 0 evidence-driven em curso)_
 - **Ação Sugerida**: a research do Bloco G (G05) trata o decisor humano como consumidor de primeira classe; **não** cravar `decision session` como DEC antes da research (regra 7 — sinal emergente, ainda não inequívoco). Reavaliar promoção quando ≥ 2 projeções da família forem confirmadas como necessárias.
 - **Lifecycle adicional descoberto (2026-05-29)**: a 0024 revelou, por dogfooding, um ciclo `Research → Decision Session → Reference Implementation → Generalization`. A **implementação de referência (Stage 2) não é só execução — é o mecanismo de validação arquitetural** das decisões do Bloco G: prova que o modelo (G00-G05) consegue ser materializado **antes** da generalização (migração ampla, Grupo B). Reinterpreta Stage 2: não é "construir algo", é "provar que a arquitetura se materializa". Hipótese; promover a lifecycle/ADR formal só com recorrência (regra 7).
 
+### 8. Fronteira humano→sistema é multi-seam (grounded) + `terminus` como hipótese forte deferida (2026-05-29)
+
+- **O Contexto**: round de Fonte B final (Cursor + opencode) para G00, sob a lente fechada "qual tipo de responsabilidade cruza a fronteira?". Cf. `research/2026-05-29-cursor-opencode.md`.
+- **O Insight (grounded, load-bearing)**: a fronteira humano→sistema **não é única** — há ≥2 seams (regras + execução) que se comportam independentemente; "espessura" é **por-seam, não escalar**. "Julgamento cristalizado em governança versionada" no seam de regras é **convenção cross-tool** (`.cursor/rules` / `AGENTS.md` / `CLAUDE.md`) — logo **não separa** governance-first de harness. Isso fechou as perguntas abertas #1 e #2 de G00 e fortaleceu o critério §4.3 (5 sistemas externos).
+- **Hipótese forte DEFERIDA (não coroar)**: o separador de classe real _talvez_ seja o **`terminus`** do cruzamento no seam de regras — _artefato governado executável_ (governance-first, sem LLM no runtime, ADR 0018) vs _steering para geração autônoma_ (harness) vs _auto-aprendizado_ (autônomo). É Camada 3 (atraente, grounded-ish, **não falsificada**). **Disciplina (correção tri-party do owner, 2026-05-29)**: não substituir a hipótese elegante anterior (transformação/espessura) por uma nova hipótese elegante (terminus). **Não reabre G00.**
+- **Ação Sugerida**: tratar `terminus` como candidata de **G01** (identidade/facetas). Falsificar com: _existe sistema governance-first cujo cruzamento termina em geração autônoma? existe harness cujo cruzamento termina em artefato governado sem LLM?_ O achado multi-seam alimenta G01 (identidade) e G03 (promoção). **Não** cravar como descoberta até falsificação por contraste.
+
 ---
 
 ## ✂️ Itens descartados deliberadamente
