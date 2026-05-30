@@ -1,4 +1,4 @@
-<!-- ai-guidelines-template: tasks-evidence-driven-boilerplate v=4 -->
+<!-- ai-guidelines-template: tasks-evidence-driven-boilerplate v=5 -->
 
 # Tasks — Spec [Número] [Título Curto] — `evidence-driven`
 
@@ -41,6 +41,8 @@
 ### Sub-bloco [0.Research] — Stage 1: produzir researches
 
 > Pesquisa instrumental, externa ou empírica que alimenta os pontos `[DEC-NNNN-*]` do `decision-brief.md`. **Toda research deve alimentar pelo menos um ponto `[DEC-*]`** — research que não alimenta está fora de escopo.
+>
+> **Critério de parada (ver `governance-foundation.md` § "Contrato da cadeia"):** a research **para quando há material suficiente para decidir**, não quando resta uma única resposta. Decidir é proibido à research — ela entrega **opções vivas e comparáveis** (simetria informacional: mesmo conjunto mínimo de perguntas por opção, inclusive "quando NÃO escolher") ao decision-brief, declarando o `Modo de gate` (`escolha`/`aceitação`); não entrega uma conclusão. **Torna comparável, não convence.**
 
 - [ ] **0.R.1** Listar perguntas de research a responder (uma linha por arquivo) em `plan.md` § Research lifecycle, cada pergunta cruzada com o ponto `[DEC-*]` correspondente.
 - [ ] **0.R.2** Produzir `research/YYYY-MM-DD-<tema>.md` por pergunta. Cada arquivo cita fontes (URL + ID externo quando aplicável: CWE-NNN, paper, benchmark publicado, transcrição).
@@ -63,7 +65,7 @@
 > **[MANDATÓRIO]** Stage 2 (Fase 1+) só inicia após este gate fechar. Pontos podem resolver em rodada única ou em múltiplas rodadas; status `Partial` é estado válido enquanto algumas decisões esperam mais research.
 
 - [ ] **0.G.1** Owner revisa `decision-brief.md` com todos os pontos `[DEC-NNNN-*]` em status `Pendente` e opções preenchidas.
-- [ ] **0.G.2** Para cada ponto: owner escolhe opção (ou propõe nova), preenche bloco "Decisão do Gate Humano" com escolha + justificativa + data; status muda para `Resolved`.
+- [ ] **0.G.2** Para cada ponto, conforme o **`Modo de gate`** (`escolha` = owner arbitra entre opções vivas; `aceitação` = owner aceita / rejeita / reenquadra um finding convergido — ver `governance-foundation.md` § "Contrato da cadeia"): owner crava o ato + justificativa + data no bloco "Decisão do Gate Humano"; status muda para `Resolved`.
 - [ ] **0.G.3** Pontos que demandem mais research voltam para [0.Research] com tarefa derivada. Iterar até zero pontos `Pendente`/`Partial`.
 - [ ] **0.G.4** Status agregado do `decision-brief.md` mudado para `Resolved` (data + owner). Bloco final "✅ Gate fechado" assinado.
 - [ ] **0.G.5** `plan.md` v2 publicado: seções de design técnico derivadas das decisões cravadas. Cada subseção referencia o `[DEC-NNNN-*]` correspondente. Stage 2 deixa de ser placeholder.

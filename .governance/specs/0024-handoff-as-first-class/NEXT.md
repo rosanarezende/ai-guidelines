@@ -94,6 +94,21 @@ _(Stage 2 ainda não iniciado — Fase 0 evidence-driven em curso)_
 - **Hipótese forte DEFERIDA (não coroar)**: o separador de classe real _talvez_ seja o **`terminus`** do cruzamento no seam de regras — _artefato governado executável_ (governance-first, sem LLM no runtime, ADR 0018) vs _steering para geração autônoma_ (harness) vs _auto-aprendizado_ (autônomo). É Camada 3 (atraente, grounded-ish, **não falsificada**). **Disciplina (correção tri-party do owner, 2026-05-29)**: não substituir a hipótese elegante anterior (transformação/espessura) por uma nova hipótese elegante (terminus). **Não reabre G00.**
 - **Ação Sugerida**: tratar `terminus` como candidata de **G01** (identidade/facetas). Falsificar com: _existe sistema governance-first cujo cruzamento termina em geração autônoma? existe harness cujo cruzamento termina em artefato governado sem LLM?_ O achado multi-seam alimenta G01 (identidade) e G03 (promoção). **Não** cravar como descoberta até falsificação por contraste.
 
+### 9. O contrato da cadeia é CAMADA 2 (declarativo); CAMADA 1 (enforcement) é o maior deferral — nomeado (2026-05-30)
+
+- **O Contexto**: revisão tri-party do contrato cravado (`governance-foundation.md` § "Contrato da cadeia") sob a lente da imagem-norte (`Automação Estrutural → Governança Operacional → Julgamento Humano`; princípio: "a automação não substitui o humano — protege o espaço de decisão humana").
+- **O Insight**: o contrato recém-cristalizado é um artefato de **CAMADA 2 (Governança Operacional — regras e contratos)**. Ele articula a arquitetura da imagem para o pipeline de **decisão** (cada fase produz só sua saída, escala em vez de absorver; comparabilidade protege o _input_ do julgamento), mas é **declarativo**: não há **CAMADA 1** que o force. A Spec 0023 já entregou CAMADA 1 para a higiene de **execução** (drift gate, living-docs, `state-yml:check`, `governance-pr-check`) — falta CAMADA 1 para o **contrato de decisão**. Sem ela, o humano/agente ainda carrega a carga de **lembrar e aplicar** o contrato.
+- **Mapa dos deferrals nomeados** (todos conscientes, com casa):
+  - **Enforcement do contrato da cadeia** (CAMADA 1 p/ decisão) → **deferido**; promotável a ADR no fechamento (cf. `[DEC-0024-G06]`; a constituição diz "sem enforcement, declarativo").
+    - **Primeiro candidato nomeado (não desenhado): `decision-trace:check`** — _o `plan.md` v2 só contém design rastreável a uma `[DEC]` `Resolved`_ (cada subseção cita um `[DEC-NNNN-XYZ]` cujo status no "Resumo de status" é `Resolved`). **Maior ROI como 1º experimento:** determinístico (regex/AST sobre `plan.md` × tabela do brief), **reusa a infra de checks** (`living-docs:check` / `state-yml:check` / `governance-pr-check`) e **formaliza regra já declarada** (Checklist pós-gate, item 1). Protege o seam **gate→plano**.
+    - **Runner-up:** proxy de comparabilidade — _toda opção, inclusive a recomendada, tem "quando NÃO escolher" não-vazio_ (ataca direto a falha do G00; check de presença determinístico, porém mais difícil pela estrutura variável das opções — tabela vs lista).
+    - **Não-primeiros:** simetria semântica plena (resiste a mecanização → fica disciplina CAMADA 2 + leitor tardio até surgir proxy checkável); ordem-de-gate (mais spec-específica).
+  - **Interação de decisão / "decision-walk"** (projeção _gate-ready_ que reduz a carga de parsear um brief denso) → obs #10 + `[DEC-0024-G05]`.
+  - **Consolidação tri-root de templates** (carga mecânica de editar ≥ 4 cópias, vivida nesta sessão) → `[DEC-0024-G04]` (modelo) + `runtime-and-template-root-consolidation` (execução).
+  - **Drift enforcement** (tabela "Resumo de status", coerência header↔tabela) → `[DEC-0024-F04]`.
+  - **Taxonomia de promoção** ("quando algo vira regra") → `[DEC-0024-D04]` / `G03`.
+- **Ação Sugerida**: tratar a CAMADA 1 do contrato de decisão como trabalho explícito pós-0024 (ADR do contrato + forcing functions), não como pressuposto. **Não construir enforcement agora** (dogfood-first cravado). Sinal de maturidade p/ promover: o contrato sobreviver a uso real antes de virar gate mecânico.
+
 ---
 
 ## ✂️ Itens descartados deliberadamente

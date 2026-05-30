@@ -14,6 +14,8 @@ O agente deve mapear o estado atual antes de qualquer ação destrutiva.
 - **Cursor/VS Code**: Use `@workspace` e indexação de arquivos.
 - **Copilot**: Use `#file` para restringir o contexto ao problema real.
 
+**Contrato de saída (ver `governance-foundation.md` § "Contrato da cadeia").** A research produz **opções e entendimento suficientes para tornar uma decisão possível** — e **para aí**. **Decidir é proibido à research** (é saída do gate humano): não continua até restar uma única resposta — quando a pesquisa colapsa em um sobrevivente, a decisão acontece antes do gate e a seta `humano → sistema` (ADR 0018) inverte. O objetivo é _tornar a decisão possível_, não _descobrir a verdade_.
+
 ### 📋 Plan (Planejamento)
 
 Transformar a pesquisa em uma estratégia técnica aprovada.

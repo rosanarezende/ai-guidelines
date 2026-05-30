@@ -10,6 +10,11 @@
 > este arquivo é atualizado conforme o entendimento técnico evolui. Decisões
 > revisitadas devem registrar a anterior em nota, não apagar o histórico.
 
+> **Contrato de entrada (ver `governance-foundation.md` § "Contrato da cadeia"):** o plano codifica
+> **apenas decisões `Resolved`** do decision-brief — não reabre nem inventa decisões. Se uma decisão
+> `Resolved` se mostrar inviável, **escala** (amendment / nova `[DEC]`) e registra em "Decisões
+> revisitadas"; não decide por conta.
+
 ---
 
 ## 🛰️ Stage 1 / Stage 2

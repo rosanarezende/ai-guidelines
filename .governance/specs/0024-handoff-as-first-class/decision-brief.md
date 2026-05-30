@@ -40,6 +40,10 @@
 
 9. **Handoff reinstala contexto de trabalho, mas não contexto operacional** (descoberto por dogfooding na retomada 2026-05-29). O handoff de retomada (`research/2026-05-29-handoff-next-session.md`) preservou com alta fidelidade o **contexto de trabalho** (artefatos, hipóteses, refutações, critérios de fechamento, próximos passos) — a sessão retomou a investigação sem re-derivar premissas. Mas **não reinstalou o contexto operacional** (idioma de resposta, convenções de saída, disciplina de falsificação como modo ativo, modo tri-party): a evidência é que o agente retomou **respondendo em inglês**, violando `[GR-0201]` (default pt-BR), apesar de o handoff §2 condensar as 7 regras do projeto — que **omitiram o idioma**. **Distinção cravada:** _contexto de trabalho_ (o quê / onde está a investigação) ≠ _contexto operacional_ (como se opera: idioma, convenções, disciplinas, papéis). Um handoff de primeira classe deve reinstalar **ambos explicitamente**; o atual cobre muito melhor o primeiro. **Fato observado, não-decisional**; alimenta `[DEC-0024-G05]` (o handoff é uma projeção que precisa carregar operational context), **ADR 0022** (handoff situado) e o contrato de handoff. Cf. `research/2026-05-28-this-session-as-evidence.md` (mesmo gênero: a própria sessão como dado).
 
+10. **A decision-brief define a ESTRUTURA da decisão, não a INTERAÇÃO de decisão** (descoberto por dogfooding 2026-05-29, na revisão do gate de G00). Dois fatos: (a) o G00 foi redigido inicialmente **fora do boilerplate** (`decision-brief-boilerplate v=2`, Forma B/C: tabela de Opções com Pró/Contra + bloco "Decisão do Gate Humano"), o que **dificultou a análise da owner** — lapso de **contexto operacional** (obs #9: seguir convenções é parte do _como se opera_; corrigido no mesmo dia, reformatando G00 para Forma B). (b) Mesmo com o boilerplate respeitado, a owner levantou que **o framework não define como o decisor é conduzido a decidir cada DEC quando a research fecha** — o boilerplate entrega a **estrutura estática** (tabela + gate block), não a **interação** (sequência entre DECs, dependências, facilitação, projeção _gate-ready_ por decisão, sobretudo para a raiz densa). **Distinção cravada:** _estrutura da decisão_ (Forma B/C) ≠ _interação de decisão_ (como o decisor é guiado pela brief pronta até cravar). **Fato observado, não-decisional**; alimenta `[DEC-0024-G05]` (o decisor humano é consumidor de 1ª classe — obs #8; a `decision session` precisa de uma **projeção gate-ready**, não do brief cru) e tem a forma de obs #9 (processo falha → falha observável → explicação estrutural → candidato a invariante).
+
+11. **A fronteira `research → decision-brief` não estava modelada** (exposto por leitor tardio — ChatGPT, 2026-05-30, na revisão do gate de G00). A research não tinha **critério de parada**: elimina alternativas sucessivamente até restar uma, e nesse instante entrega ao brief uma _conclusão_ (resposta única), não o _resultado_ (opções vivas) — `research → decisão`, curto-circuitando `research → decision-brief → decisão`. O gate recebeu uma decisão já cristalizada (ratificação, não autoria; seta `humano → sistema` invertida, ADR 0018). **Distinção cravada:** _entendimento suficiente para decidir_ ≠ _resposta única sobrevivente_; o objetivo da research é **tornar a decisão possível**, não _descobrir a verdade_. **Fato observado, não-decisional**; preservado em `research/2026-05-30-research-output-contract.md` (output do ChatGPT como evidência-origem). Alimenta `[DEC-0024-G06]` e o contrato da cadeia em `governance-foundation.md` § "Contrato da cadeia".
+
 **Convergências observadas em sistemas externos** (síntese rápida; detalhada em `research/`):
 
 - Markdown vence como SSOT (Hermes, Cursor, Open Code, ai-guidelines — todos).
@@ -106,6 +110,8 @@ Pontos iniciais entram como `Open` com pergunta cravada e contexto pendente. Op�
 
 **Pergunta:** O framework modela o trabalho primariamente por `spec`, por `pilar` (work-item kind, ADR 0010), por `lifecycle`, por `artefato`, ou por uma **categoria ainda não identificada**? Hoje assume-se implicitamente `spec = unidade primária`.
 
+**Modo de gate:** `aceitação` <!-- a research convergiu numa identidade (Opção C); o gate aceita/rejeita/reenquadra, não escolhe entre A/B/C refutadas. Cf. obs #11 + governance-foundation § "Modos de gate". -->
+
 **Contexto (research):**
 
 - **Hipótese a investigar (recomendação inicial, NÃO veredito):** `pilar = unidade primária`, e a `spec` é apenas uma _projeção organizacional_ de um work-item do pilar `spec`. Se verdadeiro, explica a erosão de `deterministic/mixed/evidence-driven`, o reaparecimento dos mesmos artefatos, o desconforto com boilerplates e a própria necessidade de handoff.
@@ -114,18 +120,29 @@ Pontos iniciais entram como `Open` com pergunta cravada e contexto pendente. Op�
 - **Disciplina de falsificação (anti-fechamento-prematuro):** o risco dominante da spec passou de "escopo" para **fechar G00 cedo demais**. Fonte B tem papel **ativo de refutar** a hipótese favorita; G00 fecha por sobrevivência à refutação, não por confirmação. Lista de candidatas não-exaustiva (manter aberta "categoria não identificada"). Cf. `research/2026-05-28-pressure-axes-scope.md § Camada fundacional`.
 - **Dependentes:** G01-G05 e DECs `Open` de A-F dependem do resultado (invariante de ordem).
 
-**Síntese da research (Fontes A + B — 6 sistemas: interno + Spec Kitty, Hermes, Multica, Cursor, opencode).** Sobreviveu a múltiplas rodadas de falsificação (cf. `research/2026-05-29-g00-research-state.md` e `research/2026-05-29-cursor-opencode.md`):
+**Síntese da research (Fontes A + B — 6 sistemas: interno + Spec Kitty, Hermes, Multica, Cursor, opencode)** — sobreviveu a múltiplas rodadas de falsificação (cf. `research/2026-05-29-g00-research-state.md` e `research/2026-05-29-cursor-opencode.md`):
 
-- **Refutado:** unidade = objeto único (`WorkItem` / `spec` / `artefato` / `pilar`) — o framework é multi-entidade grounded e cada "objeto-raiz" proposto entra em regresso infinito (o nível seguinte o dissolve). Refutado também: transformação **universal** (Multica/Hermes são object-centric/autônomos).
-- **Grounded (load-bearing deste round):** a **fronteira humano→sistema não é única** — há ≥2 seams (regras + execução) que se comportam independentemente; "espessura" é **por-seam, não escalar**. "Julgamento cristalizado em governança versionada" no seam de regras é **convenção cross-tool** (`.cursor/rules` / `AGENTS.md` / `CLAUDE.md`), logo **não** é, sozinho, o separador de classe.
+- **Refutado:** unidade = objeto único — framework é multi-entidade grounded; cada "objeto-raiz" entra em regresso infinito (o nível acima o dissolve). Refutado também: transformação **universal** (Multica/Hermes são object-centric/autônomos).
+- **Grounded (load-bearing):** a **fronteira humano→sistema não é única** — ≥2 seams (regras + execução) independentes; "espessura" é **por-seam**. "Julgamento cristalizado em governança versionada" é **convenção cross-tool** (`.cursor/rules` / `AGENTS.md` / `CLAUDE.md`), logo não é, sozinho, o separador de classe.
 
-**Formulação que sobreviveu (identidade bounded · grounded · falsificável):**
+**Opções:**
+
+| Opção                 | Descrição                                                                                                                                                                                       | Pró                                                                                             | Contra                                                                                                         |
+| :-------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------- |
+| **A**                 | **Objeto único** — a unidade é um objeto de 1ª classe (`spec` / `pilar`-`WorkItemKind` / `artefato`)                                                                                            | familiar; ADR 0010 já tem `WorkItemKind` MECE                                                   | **Refutada** — multi-entidade grounded; regresso infinito (cada raiz dissolve no nível acima)                  |
+| **B**                 | **Transformação universal** — toda governança/agente é a mesma transformação                                                                                                                    | unifica todos os sistemas                                                                       | **Refutada** — Multica/Hermes são object-centric/autônomos; não-universal                                      |
+| **C** _(recomendada)_ | **Transformação governada + fronteira multi-seam tipada** — `contexto humano → governança executável`; assinatura da classe governance-first (ADR 0018); objetos de 1ª classe = fases/projeções | grounded (refutações + 5 sistemas + ADR 0018); bounded; falsificável; **mecanismo, não objeto** | exige aceitar "raiz = mecanismo, não substantivo"; o separador **fino** de classe fica aberto (deferido a G01) |
+| **D**                 | **Categoria ainda não identificada** — manter G00 aberto                                                                                                                                        | honesto sob incerteza                                                                           | sem evidência que sustente após 6 sistemas; reabrir só com refutação nova                                      |
+
+**Recomendação inicial (a confirmar pós-gate):** **Opção C** — única que sobrevive a Fonte A + 5 sistemas externos sendo grounded · bounded · falsificável · mecanismo-não-objeto; critério §4 (handoff) atendido 4/4. **Ressalva (ajuste do leitor tardio, 2026-05-29): _critérios atendidos ≠ G00 encerrado_.** O estado real é `research concluída · critérios atendidos · gate pendente` — quem crava é o bloco **Decisão do Gate Humano** abaixo, não esta recomendação.
+
+**Formulação exata de C (citável pós-gate):**
 
 > A unidade primária do ai-guidelines **não é um objeto nem uma transformação universal**. É a **transformação governada de `contexto humano → governança executável`**, cuja **assinatura de classe** (governance-first; ADR 0018) é uma **fronteira humano→sistema multi-seam e tipada** (no mínimo: _seam de regras_ — julgamento cristalizado em governança versionada — e _seam de execução_ — gate/política). Os objetos de 1ª classe (`Rule`, `Registry`, `Recipe`, `WorkItem`, `ADR`, `Promotion`, `Handoff`) são **fases / estruturas / produtos / projeções** dessa transformação — não a raiz.
 >
 > **Falsificável por:** um sistema governance-first com fronteira de seam único; ou a transformação falhando em explicar a órbita da 0024 (handoff / boilerplates / taxonomia / decision-session / promotion).
 
-**Dispositions das perguntas abertas (research-state §Camada 2) — critério de fechamento §4.2:**
+**Dispositions das perguntas abertas (research-state §Camada 2) — atende ao critério §4.2:**
 
 - **#1** lente "tipo de responsabilidade" (julgamento/aprovação/delegação/aprendizado): **overlay descritivo, não separador** (julgamento aparece nos harnesses) → taxonomia fina **defere a G01**.
 - **#2** Cursor/Open Code engrossam ou afinam: **respondida** — afinam execução, engrossam regras (fronteira por-seam); **bound** a formulação, não refutam.
@@ -135,9 +152,17 @@ Pontos iniciais entram como `Open` com pergunta cravada e contexto pendente. Op�
 
 **Hipótese forte registrada e DEFERIDA (não coroar):** o **`terminus`** do cruzamento no seam de regras (_artefato governado executável, sem LLM no runtime_ vs _steering para geração autônoma_) pode ser o separador de classe real. É Camada 3 (atraente, grounded-ish, **não falsificada** por contraste suficiente). **Não reabre G00** — vai para `NEXT.md` (#8) como candidata de **G01**. Disciplina (correção tri-party do owner, 2026-05-29): não substituir a hipótese elegante anterior por uma nova hipótese elegante.
 
-**Critério de fechamento (handoff §4):** §4.1 ✅ listas estáveis · §4.2 ✅ perguntas respondidas/deferidas · §4.3 ✅ formulação sobrevive (grounded · bounded por 5 sistemas externos · mecanismo, não objeto) · §4.4 ✅ resposta como identidade. **Os quatro atingidos.**
+**Decisão do Gate Humano:**
 
-**Status:** Pendente — opções populadas; aguardando o **gate humano** (cravar `Resolved` exige data + owner). Recomendação: cravar `Resolved` — o risco dominante migrou de "fechar cedo demais" para "refinar indefinidamente / responder G01-G05 dentro de G00", e o material está no limiar de identidade bounded. Ao cravar, disparar a cascata do invariante: A-F podem estabilizar; G01-G05 provavelmente colapsam em **facetas de um mesmo modelo** (identidade / lifecycle / promoção / contrato / projeção).
+- **Modo de gate:** `aceitação` — a research convergiu numa identidade (Opção C); o ato do gate é **aceitar / rejeitar / reenquadrar**, não escolher entre A/B/C com as demais já refutadas (cf. obs #11 + governance-foundation § "Modos de gate").
+- **Status:** [x] Pendente | [ ] Resolvido
+- **Ato do gate (marque com `x`):**
+  - [ ] **Aceitar** a identidade C — transformação governada + fronteira multi-seam tipada
+  - [ ] **Rejeitar** — a formulação não se sustenta (registrar o que falhou; reabre research)
+  - [ ] **Reenquadrar** — aceitar com ajuste de fronteira/escopo (registrar o ajuste)
+- **Justificativa / Ressalvas:** >
+  [owner preenche no gate. Cobrir: (a) aceitar/rejeitar/reenquadrar C; (b) autorização para disparar a cascata do invariante — A-F estabilizam, G01-G05 colapsam em facetas; (c) destino de `terminus` (G01).]
+- **Data / Owner:** **\_\_\_\_** / @rosana
 
 ### [DEC-0024-G01] Os 7 pilares MECE (ADR 0010) são a estrutura primária?
 
@@ -184,6 +209,7 @@ Pontos iniciais entram como `Open` com pergunta cravada e contexto pendente. Op�
 - **Modelo, não migração:** G04 define o _core_ + contrato e prova com **1 boilerplate de referência**. O retrofit dos 6 boilerplates por classe + versionamento + stack-agnostic é Grupo B (`boilerplate-system-modernization`).
 - Liga `[DEC-0024-F04]` (invariantes sob enforcement) — o contrato declara quais invariantes são enforced sistemicamente vs humanos.
 - Fonte A: research §8.1 da 0023 (invariantes universais: accountability + traceability + outcome registration); boilerplates atuais.
+- **Casa canônica dos templates (topologia de fonte) — decisão obrigatória nesta DEC:** o framework mantém **tri-root** de templates — `.core/governance/templates/` (recipe-source novo; só `tasks-evidence-driven` migrado, 1 de 11), `.specify/templates/` (fonte-legada **deprecada**, ainda lida pela CLI) e `.ai-guidelines/templates/` (mirror-consumidor). A duplicação é **hand-maintained** (não há render que regenere o flat a partir dos partials; o `LegacyMirrorContract` só checa existência) → **fonte ativa de drift e erro**, dogfooded nesta sessão (o contrato da cadeia precisou ser editado em ≥ 4 cópias). G04 (modelo) **deve cravar a fonte única canônica + precedência + ownership**; a execução (cutover, eliminar mirrors, terminar a migração de recipes) é Grupo B (`runtime-and-template-root-consolidation`, "Fase 4 — colapsar templates"). **G04 não fecha sem decidir a casa única.** Liga `[DEC-0024-G05]` (projeções) e Bloco F (ownership/governança). Cf. backlog § `runtime-and-template-root-consolidation` + `research/2026-05-29-architectural-inventory.md`.
 
 **Status:** Open
 
@@ -197,12 +223,30 @@ Pontos iniciais entram como `Open` com pergunta cravada e contexto pendente. Op�
 - Liga ADR 0023 (meta-artefatos YAML SSOT + derivações determinísticas; **sem LLM no runtime** — ADR 0018).
 - Fonte B: Cursor (session restore), Open Code (provider-agnostic), Anthropic Dreaming (curated review).
 - **Consumidor de primeira classe ainda não modelado — o decisor humano no gate.** Hipótese emergente (dogfooding 2026-05-29, cf. obs #8 do preâmbulo): existe um processo governado **`decision session`** — distinto de research e de implementação — em que o owner transforma opções abertas em decisões confiáveis. Perguntas abertas: o `decision-brief` sozinho basta, ou há projeções complementares que apoiam a decisão (diagramas, comparações, leitor tardio, dashboards, simulações)? A resposta final da 0024 pode ser uma **família** de projeções (`handoff`, `briefing`, `decision-session`, `dashboard`, `review`), não só `handoff`. Sem DEC própria por ora — pergunta aberta dentro de G05 (regra 7: sinal emergente).
+- **Sub-pergunta concreta (obs #10, 2026-05-29): _interação_ de decisão, não só estrutura.** O boilerplate entrega a estrutura **estática** da decisão (Forma B/C: Opções + gate block); falta o **como** o decisor é conduzido a decidir cada DEC quando a research fecha — sequência entre DECs, dependências, e uma **projeção _gate-ready_ por DEC** (candidata: a "decision walk" — Pergunta + Opções lado-a-lado com Pró/Contra + recomendação com força de evidência + a única pergunta a responder + os campos de gate vazios). Candidata a ser a **primeira projeção concreta da `decision session`**, testável por dogfooding na própria 0024. **Não cravar mecanismo antes da research de G05** (regra 7).
 
 **Status:** Open
 
 ### Critério de saída do Bloco G
 
 G fecha **somente** quando `G00`-`G05` estão `Resolved` no gate, cada uma com evidência **Fonte A + Fonte B**. `G00` resolve-se **antes** de estabilizar A-F. G parcialmente aberto bloqueia o fechamento do Stage 1.
+
+### [DEC-0024-G06] Contrato da cadeia `research → … → implementação` (decisão de processo)
+
+**Pergunta:** O que protege a autoria humana (seta `humano → sistema`, ADR 0018) em cada seam da cadeia — não só no seam `research → decision-brief` que falhou no G00?
+
+**Modo de gate:** `aceitação` <!-- decisão de processo em sessão colaborativa humano-agente, 2026-05-29/30; cf. governance-foundation "Casos limites". -->
+
+**Contexto (research):**
+
+- Origem: a falha do gate de G00 (obs #10/#11) + leitura tardia do ChatGPT preservada em `research/2026-05-30-research-output-contract.md`. A fronteira `research → decision-brief` não estava modelada (research sem critério de parada; falsificação consumindo a decisão; gate recebendo conclusão cristalizada).
+- Generalização acordada: o G00 foi a **primeira** invasão de uma fase na fase seguinte; o contrato vale para toda a cadeia (plano não reabre decisão; tasks não mudam estratégia; implementação não expande escopo).
+
+**Decisão (Resolved):** cravar em `governance-foundation.md` § "Contrato da cadeia" o contrato de I/O de cada fase em **três eixos** — _produz · proibido de produzir · escala para_ —, o **critério de parada da research** (para quando a decisão é possível; modos de gate `escolha`/`aceitação`), os **mecanismos de escalonamento** (roteamento por classe de descoberta, reusando primitivos existentes) e o **anti-padrão #6**. Boilerplates (`decision-brief`, `plan`) e `rpi-protocol.md` **refletem** o contrato; a constituição é SSOT. **Sem enforcement mecânico** (dogfood primeiro). Evidência-origem: `research/2026-05-30-research-output-contract.md`.
+
+**Nota de ordem:** é decisão de **governança-processo**, ortogonal ao _conteúdo_ de G00 — **não viola o invariante de ordem** (que rege A-F / G01-G05 dependentes do conteúdo de G00). G00 permanece `Pendente`. **Promotável a ADR no fechamento da spec.**
+
+**Status:** Resolved (2026-05-30) / @rosana — decisão de processo colaborativa.
 
 ---
 
@@ -494,6 +538,7 @@ G fecha **somente** quando `G00`-`G05` estão `Resolved` no gate, cada uma com e
 | `[DEC-0024-G03]` | G          | Open     |
 | `[DEC-0024-G04]` | G          | Open     |
 | `[DEC-0024-G05]` | G          | Open     |
+| `[DEC-0024-G06]` | G          | Resolved |
 | `[DEC-0024-A01]` | A          | Open     |
 | `[DEC-0024-A02]` | A          | Open     |
 | `[DEC-0024-A03]` | A          | Open     |
@@ -512,7 +557,7 @@ G fecha **somente** quando `G00`-`G05` estão `Resolved` no gate, cada uma com e
 | `[DEC-0024-F03]` | F          | Open     |
 | `[DEC-0024-F04]` | F          | Open     |
 
-**Status agregado:** `Open` — research em curso, opções pendentes. **Ordem de fechamento:** `G00` (raiz) → demais G → A-F. Nenhuma DEC de A-F estabiliza antes de `G00 Resolved` (invariante de ordem).
+**Status agregado:** `Open` — research em curso, opções pendentes. **Ordem de fechamento:** `G00` (raiz) → demais G → A-F. Nenhuma DEC de A-F estabiliza antes de `G00 Resolved` (invariante de ordem). **Exceção:** `[DEC-0024-G06]` é decisão de **governança-processo** (Resolved 2026-05-30), ortogonal ao conteúdo de G00 — não participa do invariante de ordem.
 
 ---
 
@@ -523,7 +568,7 @@ G fecha **somente** quando `G00`-`G05` estão `Resolved` no gate, cada uma com e
 - **Data:** [pendente]
 - **Owner:** [pendente]
 - **Pontos resolvidos:**
-  - [ ] `[DEC-0024-G00]` (raiz) ... `[DEC-0024-G05]` · `[DEC-0024-A01]` ... `[DEC-0024-F04]`
+  - [ ] `[DEC-0024-G00]` (raiz) ... `[DEC-0024-G06]` · `[DEC-0024-A01]` ... `[DEC-0024-F04]`
 
 ---
 

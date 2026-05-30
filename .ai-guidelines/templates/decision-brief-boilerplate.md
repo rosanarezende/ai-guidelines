@@ -14,6 +14,21 @@
 
 ---
 
+## Contrato research · decision-brief · gate
+
+> **[MANDATÓRIO]** Fonte canônica: `governance-foundation.md` § "Contrato da cadeia". Este boilerplate **reflete** o contrato; em caso de divergência, a constituição vence. Regra-mãe: **cada fase é proibida de produzir a saída da fase seguinte** — a research **não decide**; o brief **não julga**; o julgamento só nasce no gate.
+>
+> Nasceu de uma falha real (Spec 0024, 2026-05-29): uma DEC foundational chegou ao gate com as alternativas já refutadas pela própria research — o humano ratificaria, não decidiria.
+
+1. **Entrada do brief = opções vivas, não uma decisão.** Se a research chegou com alternativas já refutadas (`A/B impossíveis · C sobreviveu`), ela produziu uma _decisão_ (proibido) e o contrato foi violado **a montante** (fronteira `research → decision-brief`): pare e reabra as opções sobreviventes com **simetria informacional** (mesmo conjunto mínimo de perguntas) antes do gate.
+2. **Comparabilidade, não advocacy — o brief torna o espaço de decisão visível, não convence.** Sem alternativas reais avaliadas, não é decisão — é dogma (governance-foundation, anti-padrão #5). Cada DEC apresenta as opções sobreviventes com **simetria informacional**: todas respondem ao **mesmo conjunto mínimo de perguntas** (_problema que resolve · benefícios · tradeoffs · riscos · quando escolher · **quando NÃO escolher**_, inclusive a recomendada). Assimetria (uma opção rica, outra pobre) **já é a decisão tomada** — proibida.
+3. **A recomendação inicial não colapsa a decisão.** É _bounded_, marcada "a confirmar pós-gate", e **deve nomear o que tornaria uma alternativa certa** (sob qual evidência/objetivo a owner escolheria outra coisa). Recomendação ≠ veredito.
+4. **A seta de autoria é `humano → sistema` (ADR 0018).** O julgamento é AUTORADO pelo humano no gate. Sinal de inversão (research autora → humano ratifica): **pare e reabra a decisão.**
+5. **Declare o `Modo de gate`:** `escolha` (tradeoffs reais → humano arbitra) | `aceitação` (research convergiu num finding → humano aceita / rejeita / reenquadra). Nomear o modo evita "aceitação disfarçada de escolha".
+6. **Descoberta fora da alçada → escala, não absorve.** Se mid-spec emergir algo que exige julgamento (ex.: decisão `Resolved` que se mostra inviável), abrir **amendment / nova `[DEC]`** (mesma forma, datada) — nunca reabrir ou decidir por conta. Rota canônica em `governance-foundation.md` § "Mecanismos de escalonamento".
+
+---
+
 ## Legenda canônica de status
 
 | Status     | Significado                                                                                                        |
@@ -51,6 +66,8 @@ A brief aceita duas formas de estruturar um ponto, escolhidas pelo autor conform
 
 **Pergunta:** [pergunta única que o ponto responde].
 
+**Modo de gate:** `escolha` | `aceitação` <!-- `escolha` = tradeoffs reais, humano arbitra; `aceitação` = research convergiu num finding, humano aceita/rejeita/reenquadra. Ver Contrato §5. -->
+
 **Contexto (research):**
 
 - [Cross-ref para o(s) research(es) que alimentam o ponto, com § específico quando aplicável.]
@@ -63,11 +80,11 @@ A brief aceita duas formas de estruturar um ponto, escolhidas pelo autor conform
 | A     | [...]     | [...] | [...]  |
 | B     | [...]     | [...] | [...]  |
 
-<!-- Alternativa em vez da tabela: lista bulleted (autor escolhe — D9.C). Use tabela para ≥ 3 opções; lista quando há 2 opções (tabela superdimensiona). -->
+<!-- Alternativa em vez da tabela: lista bulleted (autor escolhe — D9.C). Use tabela para ≥ 3 opções; lista quando há 2 opções (tabela superdimensiona). Toda opção responde às MESMAS colunas com SIMETRIA informacional — inclua "quando NÃO escolher" para cada uma, inclusive a recomendada (Contrato §2). Assimetria = decisão já tomada. -->
 
-**Recomendação inicial (a confirmar pós-gate):** [Opção X — justificativa baseada em evidência convergente em ≥ 1 research].
+**Recomendação inicial (a confirmar pós-gate):** [Opção X — justificativa baseada em evidência convergente em ≥ 1 research]. **O que tornaria outra opção certa:** [sob qual evidência/objetivo a owner escolheria diferente — Contrato §3].
 
-<!-- Opcional — incluir apenas quando há evidência convergente em ≥ 1 research que aponte para uma opção dominante. Sem evidência convergente, omitir esta linha. -->
+<!-- Opcional — incluir apenas quando há evidência convergente em ≥ 1 research que aponte para uma opção dominante. Sem evidência convergente, omitir esta linha. Recomendação ≠ veredito (Contrato §3). -->
 
 **Decisão do Gate Humano:**
 
@@ -86,6 +103,8 @@ A brief aceita duas formas de estruturar um ponto, escolhidas pelo autor conform
 ### [DEC-NNNN-XYZ] [Título curto da decisão]
 
 **Pergunta:** [pergunta meta que o ponto responde].
+
+**Modo de gate:** `escolha` | `aceitação` <!-- por sub-eixo se divergirem; ver Contrato §5. -->
 
 **Contexto (research):**
 

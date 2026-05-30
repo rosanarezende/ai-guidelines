@@ -56,6 +56,54 @@ Toda spec declara seu **tipo** no header da `spec.md`, em **campo obrigatório s
 
 ---
 
+## Contrato da cadeia: research → decision-brief → gate → plano → tasks → implementação
+
+> **Invariante (ADR 0018).** A seta de autoria é `humano → sistema`. Cada fase tem uma **responsabilidade exclusiva**: o contrato define **o que ela entrega**, **o que está proibida de entregar** e **para onde escala** quando descobre algo da alçada de outra fase. Uma fase produzir a saída da fase seguinte é **violação de contrato** — foi exatamente isso no G00 (a research entregou uma _decisão já tomada_, saída do decision-brief). O **julgamento tem um único lugar de autoria: o gate humano.**
+
+| Etapa            | Produz (responsabilidade exclusiva)                                                                                                         | Proibido de produzir                                            | Se descobrir algo fora da alçada → escala para                                                                                                                   |
+| :--------------- | :------------------------------------------------------------------------------------------------------------------------------------------ | :-------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `spec`           | perguntas + escopo (dentro/fora) + critérios de aceite alto-nível                                                                           | solução / design                                                | descoberta de design vira **pergunta nova**, não resposta                                                                                                        |
+| `research`       | entendimento + opções vivas _suficientes para decidir_                                                                                      | **decisão** (conclusão / resposta única)                        | evidência que "elimina tudo" → devolve ao **gate** como `Modo de gate: aceitação` (mostra **por que** as alternativas falham + **o que reabriria**); não decide  |
+| `decision-brief` | **comparabilidade** — o espaço de decisão visível: cada opção sobrevivente no **mesmo conjunto mínimo de perguntas** + recomendação bounded | **julgamento** (veredito) **e advocacy** (defender / convencer) | apresenta ao **gate**; nunca crava no lugar do humano                                                                                                            |
+| `gate humano`    | **julgamento autorado** (segue ou não a research; vira registro)                                                                            | — _(único lugar de autoria)_                                    | — _(é a autoria; nada a escalar)_                                                                                                                                |
+| `plano`          | execução: **como** entregar o que foi aprovado                                                                                              | decisões (reabrir / inventar)                                   | DEC `Resolved` que se mostra inviável → **amendment / nova `[DEC]`** no brief (micro-gate) + nota em "Decisões revisitadas"                                      |
+| `tasks`          | trabalho derivado do plano                                                                                                                  | estratégia                                                      | mudança de estratégia → devolve ao **plano** (e este à **DEC** se necessário)                                                                                    |
+| `implementação`  | código que executa as tasks                                                                                                                 | governança / expansão de escopo                                 | roteia **por classe** (ver tabela abaixo): premissa caiu → **plano**; decisão inviável → **amendment/DEC**; escopo novo → `NEXT.md`; fato arquitetural → **obs** |
+
+**Perguntas que o contrato responde de imediato:** a research pode decidir? **não.** o plano pode reabrir decisão? **não.** as tasks podem alterar estratégia? **não.** a implementação pode expandir escopo? **não.** quem produz julgamento? **o gate humano.** E quando uma fase descobre algo da alçada de outra? **escala — devolve à fase dona; não bloqueia nem absorve.**
+
+### Mecanismos de escalonamento (devolver, não bloquear nem absorver)
+
+Quando uma fase descobre algo que pertence a outra, a energia **flui de volta à fase dona**, com a evidência junto. O humano é puxado **só onde há julgamento** (gate/DEC) — é assim que o resto da cadeia se auto-organiza sem perder governança. O destino **não depende da fase de origem, e sim da classe da descoberta** — a tabela por fase diz _quem_ escala; esta diz _para onde_. **Reusa primitivos já existentes — não cria artefato novo:**
+
+| Classe da descoberta                                  | Destino canônico (primitivo já existente)                                          | Julgamento humano?    |
+| :---------------------------------------------------- | :--------------------------------------------------------------------------------- | :-------------------- |
+| Fato arquitetural **não-decisional** (nada a decidir) | **obs** no preâmbulo do brief                                                      | não                   |
+| **Premissa de plano caiu** (sem tocar decisão)        | devolve ao **plano** → registra em `plan.md` § "Decisões revisitadas"              | não (plano reexecuta) |
+| **Escopo novo** além do aprovado                      | **`NEXT.md`** (débito), até a migração no fechamento                               | não (só registra)     |
+| **Falta uma decisão** que nunca foi tomada            | **nova `[DEC-XXXX-NN]`** no decision-brief                                         | sim (micro-gate)      |
+| Decisão **`Resolved` existente ficou inviável**       | **amendment** na DEC existente (mesma entry, `(amendment YYYY-MM-DD)`)             | sim (micro-gate)      |
+| Evidência que **muda a própria pergunta** (research)  | devolve à **`spec`** (reabre a pergunta); se só muda um finding → gate `aceitação` | sim (muda escopo)     |
+
+> **Regra de altitude:** vence o **destino legítimo mais barato** — só sobe a julgamento (nova DEC / amendment / spec) quando há **julgamento ausente**; caso contrário fica em obs / "Decisões revisitadas" / `NEXT.md`. Distinção-chave: _decisão que nunca existiu_ → **nova DEC**; _decisão `Resolved` que caiu_ → **amendment** (cf. § "O fluxo canônico" + anti-padrão #4).
+>
+> **Sem enforcement automático (declarativo):** aqui só **declaramos as rotas** — não há gatilho automatizado nem taxonomia de escalonamento. Se as rotas começarem a ganhar sub-tipos por fase, parar e revisar (guard anti-recursão). O comportamento desejado quando isso virar governança executável é **ESCALAR, não BLOQUEAR**.
+
+### Critério de saída da fase de research (a fronteira `research → decision-brief`)
+
+A research **para quando há material suficiente para uma decisão** — não continua até restar uma única resposta. O objetivo não é _descobrir a verdade_; é **tornar uma decisão possível**.
+
+- A falsificação (refutar alternativas) é ótima para entender, mas, levada ao limite, **consome o espaço de decisão**: quando a research entrega `A = impossível · B = impossível · C = sobreviveu`, a decisão já aconteceu antes do brief existir, e o gate vira ratificação (seta invertida).
+- Disciplina — **comparabilidade, não advocacy** (o papel do brief é tornar o espaço de decisão **visível**, não convencer): ao refutar, a research **reapresenta cada opção sobrevivente com simetria informacional** — todas respondem ao **mesmo conjunto mínimo de perguntas** (_problema que resolve · benefícios · tradeoffs · riscos · quando escolher · **quando NÃO escolher**_, inclusive a recomendada) — e separa "o que a evidência mostra" de "o que o humano precisa decidir". **Assimetria informacional** (uma opção rica, outra pobre) **já é a decisão tomada** — proibida. Falsificação produz entendimento; o gate produz a decisão.
+- **Modos de gate** (a research declara qual entrega ao brief):
+  - **`escolha`** — tradeoffs reais sem resposta certa → o humano **arbitra** entre opções vivas.
+  - **`aceitação`** — a research convergiu numa identidade/finding → o humano **aceita / rejeita / reenquadra** (não "escolhe entre A/B/C"). Honesto sobre o que está sendo pedido; evita "aceitação disfarçada de escolha" (opções-teatro com todas menos uma já refutadas).
+  - _Comparabilidade por modo:_ em **`escolha`**, as opções vivas vão com **simetria** (mesmo conjunto mínimo) para serem comparáveis; em **`aceitação`**, não se força simetria sobre alternativas refutadas — mostra-se **por que falham** e **o que reabriria** (falsificabilidade). Em nenhum modo o espaço de decisão fica invisível.
+
+> Coerência: esta seção **não conflita** com `### O fluxo canônico`, que descreve o _lifecycle dos artefatos de decisão_ (decision-brief/ADR/policy). Esta descreve o **contrato de I/O entre fases** — e precede a discussão de artefatos.
+
+---
+
 ## Categorias de regras: universal vs opt-in de stack
 
 > **Princípio canônico:** [`ADR 0015 — Classificação Universal vs Opt-in para Regras Distribuídas`](../governance/adrs/0015-universal-vs-opt-in-rule-classification.md). O ADR captura o porquê da distinção e o critério perene; esta seção captura o como operacional.
@@ -235,6 +283,7 @@ Merge
 3. **Policy embutida em ADR.** Sintoma: ADR muda toda vez que threshold muda. Correção: ADR captura princípio (cobertura é piso, não meta); policy captura número.
 4. **Decisão mid-spec sem registro.** Sintoma: mudança de rota só vive no histórico do Git e na memória do agente. Correção: amendment no decision-brief, mesma forma, datado.
 5. **Princípio criado sem evidência.** Sintoma: ADR sem opções avaliadas A/B/C e sem origem em decision-brief. Correção: princípios precisam ter sido considerados frente a alternativas — caso contrário, é dogma, não decisão.
+6. **Uma fase invade a responsabilidade da fase seguinte.** Forma geral da falha do G00: a research entregou uma _decisão_ (saída do decision-brief), não _opções_; o gate ratificou em vez de decidir (seta `humano → sistema` invertida). O mesmo invariante vale por toda a cadeia: plano que reabre decisão, tasks que mudam estratégia, implementação que expande escopo. Correção: cada fase entrega **só sua saída**; ao descobrir algo da alçada de outra, **escala (devolve à fase dona), não absorve nem bloqueia** (ver § "Contrato da cadeia" → "Mecanismos de escalonamento"). Sintoma canônico na fronteira `research → decision-brief`: research que elimina alternativas até restar uma — ela **para quando a decisão é possível**, não quando resta uma resposta; reabrir as sobreviventes com **simetria informacional** (mesmo conjunto mínimo de perguntas, inclusive "quando NÃO escolher") e declarar o modo de gate (`escolha`/`aceitação`); o brief **torna comparável, não convence**.
 
 ### Casos limites
 

@@ -1,6 +1,8 @@
 ### Sub-bloco [0.Research] — Stage 1: produzir researches
 
 > Pesquisa instrumental, externa ou empírica que alimenta os pontos `[DEC-NNNN-*]` do `decision-brief.md`. **Toda research deve alimentar pelo menos um ponto `[DEC-*]`** — research que não alimenta está fora de escopo.
+>
+> **Critério de parada (ver `governance-foundation.md` § "Contrato da cadeia"):** a research **para quando há material suficiente para decidir**, não quando resta uma única resposta. Decidir é proibido à research — ela entrega **opções vivas e comparáveis** (simetria informacional: mesmo conjunto mínimo de perguntas por opção, inclusive "quando NÃO escolher") ao decision-brief, declarando o `Modo de gate` (`escolha`/`aceitação`); não entrega uma conclusão. **Torna comparável, não convence.**
 
 - [ ] **0.R.1** Listar perguntas de research a responder (uma linha por arquivo) em `plan.md` § Research lifecycle, cada pergunta cruzada com o ponto `[DEC-*]` correspondente.
 - [ ] **0.R.2** Produzir `research/YYYY-MM-DD-<tema>.md` por pergunta. Cada arquivo cita fontes (URL + ID externo quando aplicável: CWE-NNN, paper, benchmark publicado, transcrição).
