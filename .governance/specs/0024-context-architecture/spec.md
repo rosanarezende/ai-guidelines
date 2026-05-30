@@ -13,7 +13,21 @@
 > **Princípio de imutabilidade:** após status `In Review`, este arquivo só
 > muda por consenso explícito. Decisões em aberto vão para `decision-brief.md`.
 >
-> **Slug em transição.** O diretório/branch ainda usa `handoff-as-first-class` (herdado do backlog) por **continuidade operacional** — o número permanece **0024** e é imutável (ADR 0017). Com a elevação a spec fundacional (2026-05-29), o slug-alvo escolhido é **`context-architecture`**; o rename físico de branch/diretório + retarget do PR #30 é operação deliberada, executada em milestone próprio sob autorização explícita (não embutida aqui para não arriscar mover o diretório no meio do ciclo).
+> **Slug renomeado (2026-05-30).** O diretório e a branch foram migrados de `0024-handoff-as-first-class` para **`0024-context-architecture`** (operação deliberada, sob autorização explícita da owner) — refletindo que a 0024 deixou de ser sobre handoff e passou a ser a **arquitetura de contexto**. O **número 0024 é imutável** (ADR 0017); apenas o slug mudou. O retarget do PR #30 acompanha o rename remoto da branch.
+
+---
+
+## 🧭 Visão arquitetural (norte)
+
+![Visão: Automação Estrutural → Governança Operacional → Julgamento Humano](./assets/vision-three-layers.png)
+
+> **Norte arquitetural — não é requisito nem evidência.** Esta imagem representa o **estado-alvo** que a 0024 viabiliza e serve de lente para futuras decisões. Três camadas:
+>
+> - **CAMADA 1 — Automação Estrutural** (CI + runtime + scripts): absorve o trabalho mecânico (drift, living-docs, gates determinísticos).
+> - **CAMADA 2 — Governança Operacional** (regras e **contratos** do framework): organiza responsabilidade — _é onde vive o contrato da cadeia `research → … → implementação` cravado por esta spec._
+> - **CAMADA 3 — Julgamento Humano**: o humano atua **apenas onde existe julgamento**.
+>
+> **Princípio central:** _a automação não substitui o humano; ela protege o espaço de decisão humana._ O contrato da cadeia (CAMADA 2) é pré-requisito da CAMADA 1 de decisão — você não automatiza o que ainda não foi definido (cf. `NEXT.md #9`: 1º candidato de CAMADA 1 = `decision-trace:check`).
 
 ---
 
@@ -131,4 +145,4 @@ Detalhamento técnico (riscos por componente, mitigações) emerge no `plan.md` 
 - Specs relacionadas: **0021** (governance-first foundation), **0023** (runtime operacional).
 - ADRs aplicáveis: **ADR 0010** (taxonomia MECE de 7 pilares — fundamento de `G01`), **ADR 0014** (validação estrutural por gênero de artefato), **ADR 0017** (slug semântico até branch; número imutável — base do rename), **ADR 0018** (AI-as-Channel; restritivo), **ADR 0022** (handoff situado precede distribuição; fundamento), **ADR 0023** (meta-artefatos YAML SSOT; aplicável a projeções tipo dashboard). Processo: [`governance-foundation.md` § "Tipos de spec"](../../../.core/process/governance-foundation.md) — fonte da taxonomia que `G02` audita.
 - Evidência empírica externa (vídeos comparativos sobre Hermes Agent, Cursor SDK, Open Code, HTML vs Markdown): URLs canônicas e síntese estruturada em [`./research/2026-05-28-pressure-axes-scope.md § Fontes primárias citáveis`](./research/2026-05-28-pressure-axes-scope.md). Transcrições brutas mantidas localmente em `temp/` durante o ciclo da spec (não-versionadas por copyright; cobertas em `.gitignore`).
-- Sessão de planejamento 2026-05-28 — branch `feat/spec-0024-handoff-as-first-class`, commits desta spec; tri-party Rosana + Claude + ChatGPT registrado em `research/2026-05-28-this-session-as-evidence.md`.
+- Sessão de planejamento 2026-05-28 — branch `feat/spec-0024-context-architecture`, commits desta spec; tri-party Rosana + Claude + ChatGPT registrado em `research/2026-05-28-this-session-as-evidence.md`.

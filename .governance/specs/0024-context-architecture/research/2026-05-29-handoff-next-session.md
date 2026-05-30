@@ -71,7 +71,7 @@ G00 está suficientemente resolvido quando:
 
 ## 7. Pré-condições a verificar
 
-- `git status` limpo · HEAD = `b69522a` · `yarn validate` verde · branch `feat/spec-0024-handoff-as-first-class`.
+- `git status` limpo · HEAD = `b69522a` · `yarn validate` verde · branch `feat/spec-0024-context-architecture`.
 
 ## 8. Itens operacionais parkados (precisam de autorização textual do owner)
 

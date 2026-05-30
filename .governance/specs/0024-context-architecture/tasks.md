@@ -20,7 +20,7 @@
 - [x] **0.1** Bootstrap: `roadmap/backlog.md` + `.core/process/governance-foundation.md` § "Tipos de spec" lidos na sessão de planejamento (2026-05-28).
 - [x] **0.2** Tipo de spec confirmado: `evidence-driven` no header de `spec.md`. Critério: design depende de evidência ainda não coletada (análise comparativa de 5+ sistemas externos). **Sim.**
 - [x] **0.3** Slug semântico: `handoff-as-first-class` (provisional — slug pode evoluir conforme research consolidar, conforme nota no spec.md header).
-- [x] **0.4** Branch `feat/spec-0024-handoff-as-first-class` criada a partir de `main`.
+- [x] **0.4** Branch `feat/spec-0024-context-architecture` criada a partir de `main`.
 - [x] **0.5** `spec.md` instanciado com `Tipo de spec: evidence-driven` e campo `Decision Brief` apontando para `./decision-brief.md`.
 - [ ] **0.6** **[MANDATÓRIO]** Validação Humana inicial: owner aprova problema e escopo definidos no `spec.md` **antes** de avançar para Stage 1. _(Pendente — aguarda autorização textual da owner após revisão dos scaffolds neste PR.)_
 - [x] **0.7** `plan.md` instanciado com bloco Stage 1 / Stage 2 placeholder.

@@ -173,4 +173,4 @@ A linha **ai-guidelines (baseline atual)** já está preenchida porque é estado
 
 **Evidência da própria sessão de planejamento:**
 
-- **Sessão 2026-05-28:** branch `feat/spec-0024-handoff-as-first-class`; tri-party Rosana Rezende + Claude Sonnet 4.6 + ChatGPT documentado em [`./2026-05-28-this-session-as-evidence.md`](./2026-05-28-this-session-as-evidence.md).
+- **Sessão 2026-05-28:** branch `feat/spec-0024-context-architecture`; tri-party Rosana Rezende + Claude Sonnet 4.6 + ChatGPT documentado em [`./2026-05-28-this-session-as-evidence.md`](./2026-05-28-this-session-as-evidence.md).

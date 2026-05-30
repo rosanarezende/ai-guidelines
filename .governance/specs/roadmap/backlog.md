@@ -16,13 +16,13 @@ Detalhes de lifecycle em [`.core/process/governance-foundation.md`](../../../.co
 
 ### Spec 0024 — Context Architecture (spec fundacional de arquitetura de contexto, evidence-driven)
 
-- **Branch:** `feat/spec-0024-handoff-as-first-class` (slug-alvo: `context-architecture`; rename físico em milestone próprio — cf. header de `spec.md`).
+- **Branch:** `feat/spec-0024-context-architecture` (renomeada de `…-handoff-as-first-class` em 2026-05-30; cf. header de `spec.md`).
 - **Instanciada em:** 2026-05-28 · **Elevada a spec fundacional em:** 2026-05-29.
 - **Status:** Stage 1 (Research) ativo. **Elevada** de "handoff-as-first-class" para a **arquitetura canônica de preservação, promoção, seleção e projeção de contexto**; handoff é uma das projeções. Decision-brief ganhou o **Bloco G — Arquitetura Fundacional** (`G00` raiz → `G05`) acima dos 5 eixos (A-F); invariante de ordem "A-F não estabiliza até `G00 Resolved`".
 - **Pré-requisitos atendidos:** Spec 0023 mergeada ✅; ADR 0022 Aceita ✅ (PR #29, 2026-05-28).
-- **Camadas-modelo absorvidas (Grupo A do inventário):** taxonomia de specs + contrato/core de boilerplate (de `boilerplate-system-modernization`); definição de lar canônico/precedência/ownership (de `runtime-and-template-root-consolidation`); contratos de handoff (`handoff-contracts-formalization`). **Camadas-execução (Grupo B) permanecem nas candidatas.** Fronteira: **modelo ≠ migração**. Cf. [`research/2026-05-29-architectural-inventory.md`](../0024-handoff-as-first-class/research/2026-05-29-architectural-inventory.md).
+- **Camadas-modelo absorvidas (Grupo A do inventário):** taxonomia de specs + contrato/core de boilerplate (de `boilerplate-system-modernization`); definição de lar canônico/precedência/ownership (de `runtime-and-template-root-consolidation`); contratos de handoff (`handoff-contracts-formalization`). **Camadas-execução (Grupo B) permanecem nas candidatas.** Fronteira: **modelo ≠ migração**. Cf. [`research/2026-05-29-architectural-inventory.md`](../0024-context-architecture/research/2026-05-29-architectural-inventory.md).
 - **Implementação:** entregue **dentro desta spec** (Stage 2, faseada como na 0023) — handoff + boilerplate de referência. O split `0024 → 0025` **não é pressuposto** (só se a research revelar mudança de direção relevante).
-- **Detalhes:** [`.governance/specs/0024-handoff-as-first-class/`](../0024-handoff-as-first-class/) (spec + decision-brief + plan + tasks + state + research).
+- **Detalhes:** [`.governance/specs/0024-context-architecture/`](../0024-context-architecture/) (spec + decision-brief + plan + tasks + state + research).
 
 ---
 
@@ -69,7 +69,7 @@ Detalhes de lifecycle em [`.core/process/governance-foundation.md`](../../../.co
 
 ### 2. `boilerplate-system-modernization` (escopo expandido — absorve "stack-agnostic refactor" e "retrofit tasks-mixed-boilerplate D01")
 
-> **Re-escopa 2026-05-29 (elevação da Spec 0024).** A **camada-modelo** desta candidata — validade/substituição da taxonomia de tipos de spec + **contrato mínimo de boilerplate + extração do core comum** — foi **absorvida pela Spec 0024** (Grupo A do inventário; `[DEC-0024-G02]`/`G04`). Esta candidata permanece como a **camada-execução (Grupo B)**: migração/retrofit dos boilerplates por classe, versionamento, stack-agnostic, examples, quickstart, paths — executada **dado o contrato que a 0024 cravar**. Fronteira modelo ≠ migração. Cf. [`inventário da 0024`](../0024-handoff-as-first-class/research/2026-05-29-architectural-inventory.md).
+> **Re-escopa 2026-05-29 (elevação da Spec 0024).** A **camada-modelo** desta candidata — validade/substituição da taxonomia de tipos de spec + **contrato mínimo de boilerplate + extração do core comum** — foi **absorvida pela Spec 0024** (Grupo A do inventário; `[DEC-0024-G02]`/`G04`). Esta candidata permanece como a **camada-execução (Grupo B)**: migração/retrofit dos boilerplates por classe, versionamento, stack-agnostic, examples, quickstart, paths — executada **dado o contrato que a 0024 cravar**. Fronteira modelo ≠ migração. Cf. [`inventário da 0024`](../0024-context-architecture/research/2026-05-29-architectural-inventory.md).
 
 > **Vinculação metodológica:** materializa [DEC-0023-F03](../../../.governance/specs/0023-workflow-runtime/decision-brief.md) (boilerplate dedicado por classe) e [DEC-0023-F04](../../../.governance/specs/0023-workflow-runtime/decision-brief.md) (múltiplos paths por classe). Sem essa modernização, F03+F04 cravados em PR5 S5 ficam no papel — sistema atual de boilerplates não suporta a tríade arquitetural B+B+A+A da Spec 0023.
 >

@@ -95,13 +95,13 @@
 
 ### Stage 1 (atual)
 
-- `.governance/specs/0024-handoff-as-first-class/spec.md` — instanciação inicial.
-- `.governance/specs/0024-handoff-as-first-class/decision-brief.md` — DECs `Open` → opções populadas → `Resolved` via gate.
-- `.governance/specs/0024-handoff-as-first-class/plan.md` — placeholder Stage 2 → v2 pós-gate.
-- `.governance/specs/0024-handoff-as-first-class/tasks.md` — Fase 0 (Setup + Research + Brief + Gate); Fases 1+ pós-gate.
-- `.governance/specs/0024-handoff-as-first-class/state.yml` — schema 4-chave canônico.
-- `.governance/specs/0024-handoff-as-first-class/NEXT.md` — débitos e insights.
-- `.governance/specs/0024-handoff-as-first-class/research/*.md` — artifacts comparativos.
+- `.governance/specs/0024-context-architecture/spec.md` — instanciação inicial.
+- `.governance/specs/0024-context-architecture/decision-brief.md` — DECs `Open` → opções populadas → `Resolved` via gate.
+- `.governance/specs/0024-context-architecture/plan.md` — placeholder Stage 2 → v2 pós-gate.
+- `.governance/specs/0024-context-architecture/tasks.md` — Fase 0 (Setup + Research + Brief + Gate); Fases 1+ pós-gate.
+- `.governance/specs/0024-context-architecture/state.yml` — schema 4-chave canônico.
+- `.governance/specs/0024-context-architecture/NEXT.md` — débitos e insights.
+- `.governance/specs/0024-context-architecture/research/*.md` — artifacts comparativos.
 - `.governance/specs/roadmap/backlog.md` — move handoff de Now §1 para Em execução.
 - `.gitignore` — adiciona `temp/` para suportar artefatos de pesquisa locais.
 
