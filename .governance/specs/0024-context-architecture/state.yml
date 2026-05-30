@@ -2,12 +2,13 @@ stage: discovery
 gate:
   status: open
 focus:
-  - "Spec fundacional de arquitetura de contexto; Bloco G aberto (G00 raiz -> G05)"
-  - "Round de research do G00 completo e commitado (b69522a) - 6 artefatos"
-  - "G00 NEAR-CLOSEABLE: criterio de fechamento definido; falta a lente 'tipo de responsabilidade' (Cursor/Open Code) ou deferir a G01-G05"
-  - "Invariante de ordem: nenhuma DEC de A-F estabiliza antes de G00 Resolved"
+  - "Spec renomeada para context-architecture (era handoff-as-first-class); PR vivo #32 (Draft), #30 fechado pelo rename"
+  - "Contrato da cadeia research->...->impl CRISTALIZADO em governance-foundation.md (CAMADA 2, declarativo) - entregavel central, commit 2ddf339"
+  - "G00 em Pendente, modo de gate 'aceitacao' (aceitar/rejeitar/reenquadrar a identidade C) - criterio 4/4 atingido, falta o ato do gate da owner"
+  - "Invariante de ordem: nenhuma DEC de A-F/G01-G05 estabiliza antes de G00 Resolved (G06 e processo, fora do invariante)"
 next:
-  - "LER o handoff de retomada: research/2026-05-29-handoff-next-session.md"
-  - "Fonte B final: Cursor + Open Code com a lente 'qual responsabilidade cruza a fronteira humano->sistema?' (sem teoria nova)"
-  - "Decidir perguntas abertas que deferem a G01-G05; cristalizar G00 no decision-brief"
-  - "Depois: G01-G05 (provavel colapso em facetas do mesmo modelo)"
+  - "LER o handoff de retomada: research/2026-05-30-handoff-next-session.md (reinstala contexto OPERACIONAL + de trabalho)"
+  - "Owner crava o gate de G00 (aceitacao); se Aceitar -> Resolved + cascata (A-F estabilizam; G01-G05 colapsam em facetas)"
+  - "Depois: G01-G05 (facetas do mesmo modelo); terminus deferido a G01 (NEXT #8), nao coroar"
+  - "Deferrals nomeados (NEXT #9): CAMADA 1 enforcement (1o decision-trace:check), decision-walk (G05), consolidacao templates (G04), drift (F04), promocao (D04/G03)"
+  - "Risco dominante: refinar indefinidamente algo ja cristalizado - parar quando utilizavel"
