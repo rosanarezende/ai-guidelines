@@ -54,7 +54,7 @@
 
 > Cristalizar o que research mostra como **opções com tradeoffs**, sem cravar decisão. Recomendação inicial é opcional (incluir quando há evidência convergente em ≥ 1 research). Opções divergentes ficam abertas para o gate.
 
-- [ ] **0.B.1** Para cada `[DEC-NNNN-*]`: registrar Pergunta + Contexto (research) + Opções (com Pró/Contra) + Recomendação inicial (opcional). Pontos complexos podem ser decompostos em sub-eixos.
+- [ ] **0.B.1** Para cada `[DEC-NNNN-*]`: registrar Pergunta + **Modo de gate** + Contexto (research) + **ou** Opções no **conjunto mínimo** (Problema · Benefícios · Tradeoffs · Riscos · Quando escolher · Quando NÃO escolher — **nunca Pró/Contra**; Formas B/C, modo `escolha`) **ou** o finding convergido (Forma D, modo `aceitação`). Recomendação inicial **só em `escolha`** e _bounded_. Pontos complexos podem ser decompostos em sub-eixos.
 - [ ] **0.B.2** Cross-refs entre pontos: pontos com dependência mútua explicitam o vínculo (ex.: "redação final depende de `[DEC-NNNN-AYY]`").
 - [ ] **0.B.3** Tabela "Resumo de status" no fim do brief com todos os pontos em `Pendente`.
 - [ ] **0.B.4** Análise de débitos: atualizar `NEXT.md`.

@@ -22,7 +22,7 @@
 
 1. **Entrada do brief = opções vivas, não uma decisão.** Se a research chegou com alternativas já refutadas (`A/B impossíveis · C sobreviveu`), ela produziu uma _decisão_ (proibido) e o contrato foi violado **a montante** (fronteira `research → decision-brief`): pare e reabra as opções sobreviventes com **simetria informacional** (mesmo conjunto mínimo de perguntas) antes do gate.
 2. **Comparabilidade, não advocacy — o brief torna o espaço de decisão visível, não convence.** Sem alternativas reais avaliadas, não é decisão — é dogma (governance-foundation, anti-padrão #5). Cada DEC apresenta as opções sobreviventes com **simetria informacional**: todas respondem ao **mesmo conjunto mínimo de perguntas** (_problema que resolve · benefícios · tradeoffs · riscos · quando escolher · **quando NÃO escolher**_, inclusive a recomendada). Assimetria (uma opção rica, outra pobre) **já é a decisão tomada** — proibida.
-3. **A recomendação inicial não colapsa a decisão.** É _bounded_, marcada "a confirmar pós-gate", e **deve nomear o que tornaria uma alternativa certa** (sob qual evidência/objetivo a owner escolheria outra coisa). Recomendação ≠ veredito.
+3. **A recomendação inicial não colapsa a decisão.** É _bounded_, marcada "a confirmar pós-gate", e **deve nomear o que tornaria uma alternativa certa** (sob qual evidência/objetivo a owner escolheria outra coisa). Recomendação ≠ veredito. **Em modo `aceitação`, a recomendação bounded colapsa no próprio finding** — não se adiciona linha "Recomendação inicial" (seria advocacy-para-aceitação); use a **Forma D**.
 4. **A seta de autoria é `humano → sistema` (ADR 0018).** O julgamento é AUTORADO pelo humano no gate. Sinal de inversão (research autora → humano ratifica): **pare e reabra a decisão.**
 5. **Declare o `Modo de gate`:** `escolha` (tradeoffs reais → humano arbitra) | `aceitação` (research convergiu num finding → humano aceita / rejeita / reenquadra). Nomear o modo evita "aceitação disfarçada de escolha".
 6. **Descoberta fora da alçada → escala, não absorve.** Se mid-spec emergir algo que exige julgamento (ex.: decisão `Resolved` que se mostra inviável), abrir **amendment / nova `[DEC]`** (mesma forma, datada) — nunca reabrir ou decidir por conta. Rota canônica em `governance-foundation.md` § "Mecanismos de escalonamento".
@@ -73,14 +73,22 @@ A brief aceita duas formas de estruturar um ponto, escolhidas pelo autor conform
 - [Cross-ref para o(s) research(es) que alimentam o ponto, com § específico quando aplicável.]
 - [Observação editorial relevante, se houver.]
 
-**Opções:**
+**Opções (modo `escolha`)** — cada opção sobrevivente responde ao **mesmo conjunto mínimo** (simetria informacional; Contrato §2). Assimetria = decisão já tomada.
 
-| Opção | Descrição | Pró   | Contra |
-| :---- | :-------- | :---- | :----- |
-| A     | [...]     | [...] | [...]  |
-| B     | [...]     | [...] | [...]  |
+#### Opção A — [nome]
 
-<!-- Alternativa em vez da tabela: lista bulleted (autor escolhe — D9.C). Use tabela para ≥ 3 opções; lista quando há 2 opções (tabela superdimensiona). Toda opção responde às MESMAS colunas com SIMETRIA informacional — inclua "quando NÃO escolher" para cada uma, inclusive a recomendada (Contrato §2). Assimetria = decisão já tomada. -->
+- **Problema que resolve:** [...]
+- **Benefícios:** [...]
+- **Tradeoffs:** [...]
+- **Riscos:** [...]
+- **Quando escolher:** [...]
+- **Quando NÃO escolher:** [...] <!-- obrigatório, inclusive na opção recomendada -->
+
+#### Opção B — [nome]
+
+[mesmo conjunto mínimo — os 6 campos acima]
+
+<!-- Forma compacta opcional p/ decisões simples: tabela com colunas = conjunto mínimo (Problema · Benefícios · Tradeoffs · Riscos · Quando escolher · Quando NÃO escolher). NUNCA Pró/Contra — 2 dimensões omitem "quando NÃO escolher", o mecanismo anti-advocacy do contrato. -->
 
 **Recomendação inicial (a confirmar pós-gate):** [Opção X — justificativa baseada em evidência convergente em ≥ 1 research]. **O que tornaria outra opção certa:** [sob qual evidência/objetivo a owner escolheria diferente — Contrato §3].
 
@@ -120,10 +128,7 @@ A brief aceita duas formas de estruturar um ponto, escolhidas pelo autor conform
 
 #### Sub-eixo 1 — [nome]
 
-| Opção | Descrição | Pró   | Contra |
-| :---- | :-------- | :---- | :----- |
-| A     | [...]     | [...] | [...]  |
-| B     | [...]     | [...] | [...]  |
+[Opções no **conjunto mínimo** do Contrato §2 — Problema · Benefícios · Tradeoffs · Riscos · Quando escolher · Quando NÃO escolher — uma por opção. **Nunca Pró/Contra.**]
 
 **Recomendação inicial (a confirmar pós-gate):** [Opção X — justificativa]. _Opcional, mesma regra da forma B._
 
@@ -145,7 +150,44 @@ A brief aceita duas formas de estruturar um ponto, escolhidas pelo autor conform
 - **Data / Owner:** [YYYY-MM-DD] / [@owner]
 ```
 
-**Diretriz para escolher entre B e C:** use **B** quando o ponto tem uma única dimensão de escolha; use **C** quando o ponto se decompõe em decisões **independentes** que podem ser resolvidas em momentos diferentes (status do ponto pode ficar `Partial` enquanto algumas sub-decisões aguardam mais research).
+### Forma D (convergência) — para pontos em modo `aceitação`
+
+Use quando a research **convergiu num finding** (uma identidade/conclusão sobreviveu à falsificação) e o gate **aceita / rejeita / reenquadra** — não escolhe entre opções vivas. Em `aceitação` **não há "Recomendação inicial"**: o finding É a convergência; recomendá-lo seria advocacy-para-aceitação (Contrato §3 + `governance-foundation.md` § "Modos de gate"). As alternativas refutadas **não vão a tabela de simetria** — mostra-se **por que falham** e **o que reabriria** (falsificabilidade).
+
+```markdown
+### [DEC-NNNN-XYZ] [Título curto da decisão]
+
+**Pergunta:** [pergunta que o ponto responde].
+
+**Modo de gate:** `aceitação`
+
+**O finding (o que se pede para aceitar):**
+
+> [formulação exata, citável, do que convergiu]
+
+**O que está sendo aceito (bounded):** [os limites positivos do finding]
+
+**O que NÃO está sendo aceito:** [o que fica fora / deferido — evita aceitar tacitamente mais do que o finding]
+
+**Por que as alternativas falham + o que reabriria** (falsificabilidade — NÃO Pró/Contra):
+
+- **[Alternativa A]:** refutada porque [...]. _Reabre se:_ [...].
+- **[Alternativa B]:** refutada porque [...]. _Reabre se:_ [...].
+- **[finding] falsificável por:** [...].
+
+**Decisão do Gate Humano (`aceitação`):**
+
+- **Status:** [ ] Pendente | [ ] Resolvido
+- **Ato (marque um):**
+  - [ ] **Aceitar** — [o finding]
+  - [ ] **Rejeitar** — registrar o que falhou (reabre research)
+  - [ ] **Reenquadrar** — aceitar com ajuste (registrar o ajuste)
+- **Justificativa / Ressalvas:** >
+  [owner registra a razão + ressalvas relevantes para Stage 2.]
+- **Data / Owner:** [YYYY-MM-DD] / [@owner]
+```
+
+**Diretriz para escolher a forma:** **B** = uma dimensão de escolha (modo `escolha`); **C** = múltiplas decisões **independentes** (modo `escolha`; status pode ficar `Partial`); **D** = a research **convergiu** e o gate é de `aceitação` (não há opções vivas a arbitrar — há um finding a aceitar/rejeitar/reenquadrar).
 
 ---
 

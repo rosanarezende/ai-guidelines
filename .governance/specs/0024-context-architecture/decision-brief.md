@@ -125,16 +125,28 @@ Pontos iniciais entram como `Open` com pergunta cravada e contexto pendente. Op�
 - **Refutado:** unidade = objeto único — framework é multi-entidade grounded; cada "objeto-raiz" entra em regresso infinito (o nível acima o dissolve). Refutado também: transformação **universal** (Multica/Hermes são object-centric/autônomos).
 - **Grounded (load-bearing):** a **fronteira humano→sistema não é única** — ≥2 seams (regras + execução) independentes; "espessura" é **por-seam**. "Julgamento cristalizado em governança versionada" é **convenção cross-tool** (`.cursor/rules` / `AGENTS.md` / `CLAUDE.md`), logo não é, sozinho, o separador de classe.
 
-**Opções:**
+<!-- Forma D (modo `aceitação`): finding convergido — sem tabela Pró/Contra (seria teatro de escolha) e sem "Recomendação inicial" (seria advocacy-para-aceitação). Reescrito 2026-05-30 para dogfoodar o próprio contrato da cadeia. -->
 
-| Opção                 | Descrição                                                                                                                                                                                       | Pró                                                                                             | Contra                                                                                                         |
-| :-------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------- |
-| **A**                 | **Objeto único** — a unidade é um objeto de 1ª classe (`spec` / `pilar`-`WorkItemKind` / `artefato`)                                                                                            | familiar; ADR 0010 já tem `WorkItemKind` MECE                                                   | **Refutada** — multi-entidade grounded; regresso infinito (cada raiz dissolve no nível acima)                  |
-| **B**                 | **Transformação universal** — toda governança/agente é a mesma transformação                                                                                                                    | unifica todos os sistemas                                                                       | **Refutada** — Multica/Hermes são object-centric/autônomos; não-universal                                      |
-| **C** _(recomendada)_ | **Transformação governada + fronteira multi-seam tipada** — `contexto humano → governança executável`; assinatura da classe governance-first (ADR 0018); objetos de 1ª classe = fases/projeções | grounded (refutações + 5 sistemas + ADR 0018); bounded; falsificável; **mecanismo, não objeto** | exige aceitar "raiz = mecanismo, não substantivo"; o separador **fino** de classe fica aberto (deferido a G01) |
-| **D**                 | **Categoria ainda não identificada** — manter G00 aberto                                                                                                                                        | honesto sob incerteza                                                                           | sem evidência que sustente após 6 sistemas; reabrir só com refutação nova                                      |
+**O que está sendo aceito (bounded):**
 
-**Recomendação inicial (a confirmar pós-gate):** **Opção C** — única que sobrevive a Fonte A + 5 sistemas externos sendo grounded · bounded · falsificável · mecanismo-não-objeto; critério §4 (handoff) atendido 4/4. **Ressalva (ajuste do leitor tardio, 2026-05-29): _critérios atendidos ≠ G00 encerrado_.** O estado real é `research concluída · critérios atendidos · gate pendente` — quem crava é o bloco **Decisão do Gate Humano** abaixo, não esta recomendação.
+- a raiz é um **mecanismo** (transformação governada), não um objeto nem uma transformação universal;
+- a **assinatura de classe** é uma fronteira humano→sistema **multi-seam e tipada** (mín.: seam de regras + seam de execução);
+- os objetos de 1ª classe (`Rule`, `Registry`, `Recipe`, `WorkItem`, `ADR`, `Promotion`, `Handoff`) são **fases / projeções**, não a raiz.
+
+**O que NÃO está sendo aceito (limites explícitos):**
+
+- o **separador fino** de classe (o `terminus`) — **deferido a G01**, não cravado aqui;
+- a gramática formal (pilares / taxonomia / pipeline / projeções) — é **G01-G05**;
+- C é **assinatura de classe**, não ontologia completa.
+
+**Por que as alternativas falham + o que reabriria** (falsificabilidade — substitui a tabela Pró/Contra):
+
+- **A — objeto único** (`spec`/`pilar`-`WorkItemKind`/`artefato`): refutada — multi-entidade grounded; cada raiz regride (o nível acima a dissolve). _Reabre se:_ surgir um objeto que não regrida sob nenhum nível superior.
+- **B — transformação universal**: refutada — Multica/Hermes são object-centric/autônomos; não-universal. _Reabre se:_ um modelo unificar todos os sistemas sem perder poder explicativo.
+- **D — categoria não identificada**: sem sustentação após 6 sistemas. _Reabre só_ com refutação nova de C.
+- **C falsificável por:** um sistema governance-first com fronteira de seam único; ou C falhando em explicar a órbita da 0024 (handoff / boilerplates / taxonomia / decision-session / promotion).
+
+**Ressalva (leitor tardio, 2026-05-29):** _critérios atendidos ≠ G00 encerrado_. Estado real: `research concluída · critérios atendidos · gate pendente`. Quem crava é o bloco **Decisão do Gate Humano** abaixo.
 
 **Formulação exata de C (citável pós-gate):**
 
@@ -175,18 +187,34 @@ Pontos iniciais entram como `Open` com pergunta cravada e contexto pendente. Op�
 
 **Status:** Open
 
-### [DEC-0024-G02] A taxonomia `deterministic/mixed/evidence-driven` é entidade de primeira classe ou sintoma?
+### [DEC-0024-G02] Taxonomia `deterministic/mixed/evidence-driven` → removida; substituída por bloco + propriedade `exige-julgamento`
 
-**Pergunta:** Os tipos de spec (`governance-foundation.md § "Tipos de spec"` + GR-0101, materializados nos boilerplates `tasks-deterministic/mixed/evidence-driven`) são classificação de primeira classe, ou **consequência emergente** de (pilar + certeza-de-design + artefatos necessários)?
+**Direção decidida (owner, 2026-05-30):** a taxonomia dos 3 tipos **será removida** — decisão de produto, no nível de direção. G02 **não investiga mais _se_ a taxonomia cai**; o trabalho é **projetar o modelo substituto, avaliar impacto e preservar invariantes**. Permanece `Pendente` apenas pelo **ato formal do gate** (cristalizar o desenho + ordem do invariante com G00); a **remoção física** vem depois (plano de migração). Boilerplates vivos já foram corrigidos ao contrato (consistência constitucional).
 
-**Contexto (research):**
+**Modo de gate:** `aceitação` — o gate aceita/reenquadra **o modelo substituto** (não "se a taxonomia é sintoma" — isso está decidido).
 
-- **Hipótese (owner, recomendação inicial, NÃO veredito):** é sintoma, não entidade. Evidência Fonte A: spec "deterministic" carregando `decision-brief.md` (backlog `boilerplate-system-modernization` linha 78); fronteiras borradas (obs #7 do preâmbulo).
-- **Não tem ADR própria** (vive em doc de processo + GR-0101) → mais maleável que ADR 0010, **mas** está assada no engine de recipes/boilerplates → mudá-la tem ripple no template system (Grupo B / `boilerplate-system-modernization`).
-- Depende de G00/G01. Fonte B: sistemas externos usam classificação equivalente? Por quê / por quê não?
-- **Atenção de esforço (research):** se `G01` resolver como `pilar → artefatos → lifecycle`, G02 pode tornar-se **parcialmente trivial** (G01 responde a maior parte). Não superinvestir em G02 antes de G01 fechar.
+**O modelo substituto (o que se cristaliza):**
 
-**Status:** Open
+> A entidade de 1ª classe é **o bloco**. **`exige julgamento?`** é uma **propriedade** dele (derivada de "há incerteza relevante") — **não um tipo de bloco** (guard anti-taxonomia: determinístico / exige-julgamento são _valores de propriedade_, não classes). Um bloco passa pelo crivo de pesquisa/gate **se e somente se exige julgamento**; o **gate** é onde o julgamento acontece; o `[DEC]` **registra** o resultado (Camada 2 da imagem das 3 camadas) — não é gatilho nem unidade. A taxonomia era **projeção** disso (`deterministic` = nenhum bloco exige julgamento; `mixed` = alguns; `evidence-driven` = todos) — por isso é removida.
+
+**O que está sendo aceito (bounded):** a propriedade primária migra de **spec-level** (`tipo`) para **bloco-level** (`exige julgamento?`); `mixed` deixa de existir (caso degenerado); a degeneração para single-pass é automática (zero blocos que exigem julgamento ⟹ sem gate/brief).
+
+**O que NÃO está sendo aceito ainda:** a **remoção física** (plano de migração, pós-cristalização); o mecanismo legível exato de declaração do bloco (marcador vs derivação — ver desenho); nada que dependa de G00 estabiliza aqui.
+
+**Por que a taxonomia caiu (justificativa da direção — settled):** exigia sincronização manual de 3 modelos paralelos (drift recorrente: `mixed` sempre atrás); fronteiras borradas (obs #7); a única diferença real entre os tipos era presença/ausência de julgamento. Runtime/registry/ADR **não dependem** dela (footprint = enum `WorkflowType` + recipe/partials [G04] + doc). _Só reabriria_ se G01 revelasse invariante próprio de um tipo.
+
+**Evidência / desenho:** `research/2026-05-30-unified-tasks-model.md` (modelo substituto + impacto por classe + plano de migração) · `research/2026-05-30-g02-taxonomy-elimination.md` (invariantes a preservar + impacto grounded) · `research/2026-05-30-projection-vs-entity-lens.md` (padrão; fixpoint = contexto).
+
+**Reflexo:** reenquadra `[DEC-0024-G01]` (a propriedade primária é bloco + `exige-julgamento`, não tipo-de-spec) — alimenta, não decide.
+
+**Dependência de G00 (explícita):** este modelo substituto **assume a identidade C atualmente convergida em G00** (`contexto humano → governança executável`; a cadeia `incerteza → julgamento → gate → DEC registra` nasce dela). **Se G00 for reenquadrado materialmente no gate, o substituto de G02 deve ser reavaliado.** Distinção: a **direção** (remover a taxonomia) é robusta a isso — sobrevive porque a única diferença real entre os tipos é presença/ausência de julgamento; o **desenho do substituto** não necessariamente.
+
+**Decisão do Gate Humano (`aceitação`):**
+
+- **Status:** [x] Pendente | [ ] Resolvido <!-- direção cravada; ato formal aguarda cristalização do desenho + ordem do invariante (G00). -->
+- **Ato (no gate):** [ ] Aceitar o modelo substituto + autorizar a migração · [ ] Reenquadrar (ajustar o substituto / mecanismo de declaração) · [ ] **Rejeitar o desenho** — _não a direção_: o substituto/migração não preserva algum invariante, ou o mecanismo `exige-julgamento` falha → volta ao desenho; a remoção da taxonomia segue de pé
+- **Justificativa / Ressalvas:** > [owner crava no gate de G02]
+- **Data / Owner:** **\_\_** / @rosana
 
 ### [DEC-0024-G03] Qual é o promotion pipeline canônico?
 
@@ -534,7 +562,7 @@ G fecha **somente** quando `G00`-`G05` estão `Resolved` no gate, cada uma com e
 | :--------------- | :--------- | :------- |
 | `[DEC-0024-G00]` | G _(raiz)_ | Pendente |
 | `[DEC-0024-G01]` | G          | Open     |
-| `[DEC-0024-G02]` | G          | Open     |
+| `[DEC-0024-G02]` | G          | Pendente |
 | `[DEC-0024-G03]` | G          | Open     |
 | `[DEC-0024-G04]` | G          | Open     |
 | `[DEC-0024-G05]` | G          | Open     |
