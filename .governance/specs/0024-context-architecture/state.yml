@@ -2,14 +2,14 @@ stage: discovery
 gate:
   status: open
 focus:
-  - "G00 RESOLVED + ACEITO (2026-05-31, @rosana): a unidade arquitetural primaria do ai-guidelines e a transformacao de contexto humano -> governanca executavel. Aceito como IDENTIDADE, nao explicacao universal. NAO reabrir salvo evidencia nova que invalide diretamente a afirmacao."
-  - "Invariante de ordem CUMPRIDO (G00 Resolved) -> G01+ destravado. Aceitar G00 NAO resolve G01+ (instrucao do gate)."
-  - "Reforma do decision-brief CONCLUIDA: brief = so DECs Pendente/Resolved (589->112 linhas); perguntas abertas + preambulo migrados para findings.md. AINDA NAO generalizada aos boilerplates (decision-brief-boilerplate ainda lista 'Open' = inconsistente)."
-  - "DECs: G00 Resolved; G06 Resolved (processo); G02 Pendente (direcao decidida: remover taxonomia; substituto desenhado; aguarda gate formal). G01/G03/G04/G05 + A-F = findings abertos (G01+)."
-  - "Risco dominante: refinar indefinidamente algo ja cristalizado. Retomar em EXECUCAO, sem reabrir discussoes encerradas."
+  - "0024 SAIU do Stage 1 de pesquisa: decisoes-nucleo Resolved (G00 identidade, G02 taxonomia, G06 contrato da cadeia). Foco agora = ABSORCAO operacional (converter aprendizado cristalizado em enforcement), NAO mais pesquisa. Criterio: se ja foi decidido, absorver no sistema; reduzir divergencia aprendizado<->codigo."
+  - "decision-brief REESTRUTURADO por estado (Decidido / Aberto / Virou regra / Virou enforcement). Numeracao G00-G06 APOSENTADA como eixo de leitura (vira ancora estavel + mapa de rastreabilidade). NAO reorganizar de volta por numero."
+  - "G02 RESOLVED (2026-05-31, @rosana): taxonomia deterministic/mixed/evidence-driven removida; modelo = bloco + propriedade exige-julgamento (nao um tipo); marcador explicito (julgamento)/(deterministico). DEC registra julgamento; gate e onde ele acontece. NAO reabrir; migracao fisica e execucao derivada, nao julgamento pendente."
+  - "Pesquisa aberta restante (UNICA coisa ainda em investigacao, alternativas vivas): G01/F-AG01 (estrutura/gramatica; estados>entidade; terminus), F-AG03 (promotion pipeline), F-AG05 residuo (projecoes), F-014 (explicacao nao-linear; opcional/baixa prioridade). Todo o resto e execucao."
+  - "Risco dominante deslocado: NAO e mais 'refinar indefinidamente' — e 'continuar pesquisando o que ja foi decidido'. Tri-party: owner decide / Claude constroi / ChatGPT leitor tardio."
 next:
-  - "LER o handoff: research/2026-05-31-handoff-next-session.md (reinstala contexto OPERACIONAL + de trabalho; supersede 2026-05-30). Verificar git status/log: reforma+gate podem estar NAO-commitados."
-  - "PRIORIDADE 1 - G02: modelo unificado de tasks + remocao da taxonomia. Desenho em research/2026-05-30-unified-tasks-model.md; falta gate formal de G02 + plano de migracao (Fase 1 feita; Fases 2-5 pendentes)."
-  - "PRIORIDADE 2 - consistencia dos boilerplates: remover 'DEC Open' da legenda + cravar 'DEC nasce Pendente; pergunta aberta vive em findings.md' (generalizar a reforma; x3 roots)."
-  - "PRIORIDADE 3 - formalizar Finding->DEC: finding convergido + exige julgamento -> DEC Pendente; senao referencia/ADR."
-  - "SO DEPOIS: reavaliar G01 (estrutura/gramatica; reframe estados>entidade) + G03/G04/G05 + eixos A-F + lente C-1..C-6 + explicacao de F-014. NAO abrir novas pesquisas na retomada - retomar em execucao."
+  - "PRIORIDADE 1 - Migrar WorkflowType -> modelo unico: aposentar/derivar enum (Recipe.ts:39-44) + retargetar consumidores (AssembleArtifact:65, ComposedArtifact:23, StructuralValidation:147); promover tasks-boilerplate generico a canonico (Stage 1 condicional). Testes verdes. Desenho: research/2026-05-30-unified-tasks-model.md (Fases 2-5)."
+  - "PRIORIDADE 2 - Boilerplates fonte unica + consistencia: remover 'Open' da legenda do decision-brief-boilerplate (.ai-guidelines + .specify) + cravar 'DEC nasce Pendente; pergunta aberta vive em findings.md'; drift-guard tri-root (check falha se roots divergem). Deletar variantes tasks-{evidence-driven,deterministic,mixed} apos modelo unico estavel."
+  - "PRIORIDADE 3 - Avancar cutover .specify -> .governance (ADR 0019): hard-stop em escrita nova no .specify (drift-guard = passo 1), depois migracao de conteudo. Eliminar pontos que aumentam custo de migracao por PR."
+  - "PRIORIDADE 4 - GG-0001 (teste de decidibilidade de gate) como enforcement: regra em rules.json (fonte DOGFOOD-*) + subconjunto mecanico como check estrutural projetado no seam do gate. Dogfoodar; ajustar com uso real. NAO tratar como novo eixo de pesquisa."
+  - "SO ABERTO onde ha alternativa viva competindo: G01, F-AG03, F-AG05 residuo, F-014 (opcional). Nao empurrar coisa decidida para 'aberto'."
