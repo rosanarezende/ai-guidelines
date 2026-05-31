@@ -36,7 +36,6 @@ const partialOptional = `## Fase Extra
 const validRecipe = {
   schemaVersion: "v0" as const,
   artifactKind: "tasks" as const,
-  workflowType: "evidence-driven" as const,
   language: "pt-BR" as const,
   slots: [
     {
@@ -150,7 +149,7 @@ describe("AssembleArtifact — composição determinística [BR-CLI-ASSEMBLE]", 
       expect(result.content).toBe(expected);
     });
 
-    it("DADO recipe válida ENTÃO metadata reflete artifactKind, workflowType, language [BR-CLI-ASSEMBLE-03]", () => {
+    it("DADO recipe válida ENTÃO metadata reflete artifactKind, language [BR-CLI-ASSEMBLE-03]", () => {
       const store = createStubStore(
         { recipe: validRecipe },
         {
@@ -163,7 +162,6 @@ describe("AssembleArtifact — composição determinística [BR-CLI-ASSEMBLE]", 
 
       expect(result.metadata).toEqual({
         artifactKind: "tasks",
-        workflowType: "evidence-driven",
         language: "pt-BR",
         composedSlots: ["header", "core"],
       });

@@ -22,7 +22,6 @@ describe("NodeRecipeStore (integration)", () => {
 
     const recipeYaml = `schemaVersion: v0
 artifactKind: tasks
-workflowType: evidence-driven
 language: pt-BR
 slots:
   - id: header
@@ -57,7 +56,6 @@ Linha 2
     expect(result.content).toBe(header.trimEnd() + "\n\n" + core.trimEnd() + "\n");
     expect(result.metadata).toEqual({
       artifactKind: "tasks",
-      workflowType: "evidence-driven",
       language: "pt-BR",
       composedSlots: ["header", "core"],
     });
@@ -83,7 +81,6 @@ Linha 2
     const recipePath = path.join(root, ".core/governance/recipes/tasks-evidence-driven.recipe.yml");
     const recipeYaml = `schemaVersion: v0
 artifactKind: tasks
-workflowType: evidence-driven
 language: pt-BR
 slots:
   - id: header

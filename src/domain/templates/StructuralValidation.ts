@@ -13,8 +13,8 @@
  *     com a lista proibida da recipe.
  *  2. Slot completeness — todos os slots `required: true` devem estar
  *     presentes em `composedSlots` do artefato.
- *  3. Self-consistency — metadata do artefato (artifactKind, workflowType,
- *     language) deve coincidir com a recipe que o gerou.
+ *  3. Self-consistency — metadata do artefato (artifactKind, language)
+ *     deve coincidir com a recipe que o gerou.
  *
  * Códigos estáveis (ADR 0011):
  *  - STRUCT_FORBIDDEN_SECTION
@@ -142,11 +142,6 @@ function checkSelfConsistency(
       field: "artifactKind",
       recipeVal: recipe.artifactKind,
       artifactVal: artifact.metadata.artifactKind,
-    },
-    {
-      field: "workflowType",
-      recipeVal: recipe.workflowType,
-      artifactVal: artifact.metadata.workflowType,
     },
     {
       field: "language",

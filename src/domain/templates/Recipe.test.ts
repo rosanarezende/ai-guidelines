@@ -18,7 +18,6 @@ import {
   assertValidRecipe,
   TEMPLATE_SCHEMA_VERSIONS,
   ARTIFACT_KINDS,
-  WORKFLOW_TYPES,
   LANGUAGES,
   CANONICAL_ORDERS,
 } from "./Recipe.js";
@@ -44,7 +43,6 @@ const validOptionalSlot = {
 const validRecipe = {
   schemaVersion: "v0",
   artifactKind: "tasks",
-  workflowType: "evidence-driven",
   language: "pt-BR",
   slots: [validSlot, validOptionalSlot],
   invariants: {
@@ -72,11 +70,6 @@ describe("Recipe — Enums fechados (ADR 0011) [BR-CLI-RECIPE]", () => {
       "roadmap",
     ]);
     expect(Object.isFrozen(ARTIFACT_KINDS)).toBe(true);
-  });
-
-  it("DADO WORKFLOW_TYPES ENTÃO contém 4 valores canônicos incluindo 'n/a' e é readonly [BR-CLI-RECIPE-15]", () => {
-    expect(WORKFLOW_TYPES).toEqual(["evidence-driven", "deterministic", "mixed", "n/a"]);
-    expect(Object.isFrozen(WORKFLOW_TYPES)).toBe(true);
   });
 
   it("DADO LANGUAGES ENTÃO contém 'pt-BR' e 'en-US' e é readonly [BR-CLI-RECIPE-16]", () => {
@@ -117,14 +110,7 @@ describe("Recipe — assertValidRecipe [BR-CLI-RECIPE]", () => {
   });
 
   describe("Campos obrigatórios — RECIPE_MISSING_FIELD", () => {
-    it.each([
-      "schemaVersion",
-      "artifactKind",
-      "workflowType",
-      "language",
-      "slots",
-      "invariants",
-    ] as const)(
+    it.each(["schemaVersion", "artifactKind", "language", "slots", "invariants"] as const)(
       "DADO recipe SEM '%s' ENTÃO RECIPE_MISSING_FIELD com mensagem citando o campo [BR-CLI-RECIPE-02]",
       (field) => {
         const { [field]: _omitted, ...incomplete } = validRecipe;
@@ -182,19 +168,6 @@ describe("Recipe — assertValidRecipe [BR-CLI-RECIPE]", () => {
         expect(err.code).toBe("RECIPE_INVALID_ARTIFACT_KIND");
         expect(err.message).toContain("spec");
         expect(err.message).toContain("tasks");
-      }
-    });
-
-    it("DADO workflowType fora de WORKFLOW_TYPES ENTÃO RECIPE_INVALID_WORKFLOW_TYPE nomeando o conjunto [BR-CLI-RECIPE-05]", () => {
-      try {
-        assertValidRecipe({ ...validRecipe, workflowType: "agile" });
-        fail("deveria ter lançado");
-      } catch (e) {
-        expect(e).toBeInstanceOf(GovernanceError);
-        const err = e as GovernanceError;
-        expect(err.code).toBe("RECIPE_INVALID_WORKFLOW_TYPE");
-        expect(err.message).toContain("evidence-driven");
-        expect(err.message).toContain("n/a");
       }
     });
 

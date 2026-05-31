@@ -22,7 +22,6 @@ import type { ComposedArtifact } from "../../domain/templates/ComposedArtifact.j
 const baseRecipe: Recipe = {
   schemaVersion: "v0",
   artifactKind: "tasks",
-  workflowType: "evidence-driven",
   language: "pt-BR",
   slots: [
     {
@@ -58,7 +57,6 @@ const validArtifact: ComposedArtifact = {
     "# Fase 0 — Setup\n\n- Tarefa 1\n\n## Fase 1 — Core\n\n- Tarefa 2\n\n## Extras\n\n- Item\n",
   metadata: {
     artifactKind: "tasks",
-    workflowType: "evidence-driven",
     language: "pt-BR",
     composedSlots: ["header", "core", "extra"],
   },
@@ -208,7 +206,6 @@ describe("StructuralValidation — validateComposedArtifact [BR-CLI-STRUCT]", ()
         content: "# Header\n\n## Core\n\nOk.\n",
         metadata: {
           artifactKind: "spec", // recipe diz "tasks"
-          workflowType: "evidence-driven",
           language: "pt-BR",
           composedSlots: ["header", "core"],
         },
@@ -221,29 +218,11 @@ describe("StructuralValidation — validateComposedArtifact [BR-CLI-STRUCT]", ()
       expect(inconsistent[0].message).toContain("artifactKind");
     });
 
-    it("DADO workflowType divergente ENTÃO STRUCT_RECIPE_SELF_INCONSISTENT [BR-CLI-STRUCT-10]", () => {
-      const artifact: ComposedArtifact = {
-        content: "# Header\n\n## Core\n\nOk.\n",
-        metadata: {
-          artifactKind: "tasks",
-          workflowType: "deterministic", // recipe diz "evidence-driven"
-          language: "pt-BR",
-          composedSlots: ["header", "core"],
-        },
-      };
-
-      const errors = validateComposedArtifact(artifact, baseRecipe);
-      const inconsistent = errors.filter((e) => e.code === "STRUCT_RECIPE_SELF_INCONSISTENT");
-      expect(inconsistent).toHaveLength(1);
-      expect(inconsistent[0].message).toContain("workflowType");
-    });
-
     it("DADO language divergente ENTÃO STRUCT_RECIPE_SELF_INCONSISTENT [BR-CLI-STRUCT-11]", () => {
       const artifact: ComposedArtifact = {
         content: "# Header\n\n## Core\n\nOk.\n",
         metadata: {
           artifactKind: "tasks",
-          workflowType: "evidence-driven",
           language: "en-US", // recipe diz "pt-BR"
           composedSlots: ["header", "core"],
         },
@@ -269,7 +248,6 @@ describe("StructuralValidation — validateComposedArtifact [BR-CLI-STRUCT]", ()
         content: "# Header\n\n## Proibido\n\nConteúdo.\n",
         metadata: {
           artifactKind: "spec", // divergente
-          workflowType: "evidence-driven",
           language: "pt-BR",
           composedSlots: ["header"], // falta "core"
         },
