@@ -33,11 +33,12 @@
 
 > **Reforma 2026-05-31 (DOGFOOD-0024 / GG-0001):** `Open` foi **abolido** — pergunta aberta **não é decisão**. Um `[DEC]` **nasce `Pendente`** (já decidível); enquanto não converge + exige julgamento, a pergunta vive em `research/findings.md`, **não** como DEC.
 
-| Status     | Significado                                                                                                        |
-| :--------- | :----------------------------------------------------------------------------------------------------------------- |
-| `Pendente` | DEC decidível, aguardando o gate humano (ver checklist GG-0001 abaixo).                                            |
-| `Partial`  | Algumas sub-decisões cravadas, outras abertas. Aplica-se apenas a pontos com sub-eixos.                            |
-| `Resolved` | Escolha cravada com data + owner. **Imutável** — mudanças posteriores vão para `plan.md` § "Decisões revisitadas". |
+| Status     | Significado                                                                                                                                                                                      |
+| :--------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Pendente` | DEC decidível, aguardando o gate humano (ver checklist GG-0001 abaixo).                                                                                                                          |
+| `Partial`  | Algumas sub-decisões cravadas, outras abertas. Aplica-se apenas a pontos com sub-eixos.                                                                                                          |
+| `Resolved` | Escolha cravada com data + owner. **Imutável** — mudanças posteriores vão para `plan.md` § "Decisões revisitadas".                                                                               |
+| `Deferred` | Decisão **conscientemente adiada** com **critério de revisita observável** (o gate agiu: optou por não decidir agora). Não é `Open` nem `Pendente`. Isenta do gate-decidability como `Resolved`. |
 
 **Status agregado da brief** (campo no header):
 
@@ -49,7 +50,7 @@
 
 ## Checklist de decidibilidade do gate (GG-0001)
 
-> **[MANDATÓRIO antes do gate]** Guardrail dogfoodado (`DOGFOOD-0024`; regra [`.core/rules/base/governance/gate-decidability.md`](../../.core/rules/base/governance/gate-decidability.md)). Antes de discutir o **mérito** de um `[DEC]` não-resolvido, confirme que ele é **decidível**. O subconjunto mecânico é enforced por `yarn gate-decidability:check` (agregado em `yarn validate`): itens 🤖 **falham o check**; itens 👁 são julgamento humano projetado aqui.
+> **[MANDATÓRIO antes do gate]** Guardrail dogfoodado interno (`DOGFOOD-0024`; SSOT [`governance-foundation.md` § "Guardrails dogfoodados"](../../.core/process/governance-foundation.md)). Antes de discutir o **mérito** de um `[DEC]` não-resolvido, confirme que ele é **decidível**. O subconjunto mecânico é enforced por `yarn gate-decidability:check` (agregado em `yarn validate`): itens 🤖 **falham o check**; itens 👁 são julgamento humano projetado aqui.
 
 - [ ] 👁 **Afirmação única** — o DEC pede para aceitar **uma** coisa (não um feixe de asserções).
 - [ ] 🤖 **"O que está sendo aceito"** — presente e _bounded_.

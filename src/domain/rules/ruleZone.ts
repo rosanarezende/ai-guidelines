@@ -42,7 +42,6 @@ export const OPT_IN_FEATURE_LAYOUT: Readonly<Record<string, RuleZone>> = {
   tdd: "center",
   bdd: "center",
   "quality-gates": "base",
-  "governance-gates": "base",
 };
 
 export function scopeToZone(rule: Pick<Rule, "scope" | "opt_in_feature">): RuleZone {

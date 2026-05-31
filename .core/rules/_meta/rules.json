@@ -141,20 +141,6 @@
       "documentation_pt": "- Em sessões longas, use o conceito de \"checkpoints\" (salvar progresso em artefatos) para evitar perda de contexto.\n- Gemini tende a ser proativo em executar comandos — reforce a proibição de `git push` e tarefas destrutivas."
     },
     {
-      "id": "GG-0001",
-      "scope": "opt-in",
-      "category": "process",
-      "evidence_strength": "emerging",
-      "sources": ["DOGFOOD-0024-G00", "DOGFOOD-0024-G02"],
-      "opt_in_feature": "governance-gates",
-      "applicable_languages": ["*"],
-      "tags": ["governance", "gate", "guardrail"],
-      "file": ".core/rules/base/governance/gate-decidability.md",
-      "title": "Gate decidability before merit",
-      "instruction_en": "Before debating a decision's merit, verify the gate is decidable. A non-resolved `[DEC]` is gate-ready only if it has all of: a single assertion; an explicit \"what is being accepted\"; an explicit \"what is NOT being accepted\"; the competitors considered (why the alternatives fail); architecture separated from implementation; exactly one gate act; and no `Open` status (a DEC is born `Pendente`). If any is missing, the gate is not ready — fix the decision's form before its merit.",
-      "documentation_pt": "Antes de discutir o mérito de uma decisão, verifique se o gate é **decidível**. Um `[DEC]` não-resolvido só está pronto para o gate se tiver, todos: uma afirmação única; \"o que está sendo aceito\"; \"o que NÃO está sendo aceito\"; os concorrentes considerados (por que as alternativas falham); arquitetura separada de implementação; exatamente um ato de gate; e nenhum status `Open` (o DEC nasce `Pendente`). Faltando qualquer um, o gate não está pronto — corrija a **forma** da decisão antes do **mérito**. Origem: aprendizado recorrente da reforma de `[DEC-0024-G00]` e `[DEC-0024-G02]` (dogfooding da Spec 0024)."
-    },
-    {
       "id": "OPT-0301",
       "scope": "opt-in",
       "opt_in_feature": "quality-gates",
@@ -629,10 +615,9 @@
       "ADP-0303",
       "ADP-0304"
     ],
-    "opt-in": ["GG-0001", "OPT-0301", "OPT-0101", "OPT-0201", "OPT-0401", "OPT-0501"]
+    "opt-in": ["OPT-0301", "OPT-0101", "OPT-0201", "OPT-0401", "OPT-0501"]
   },
   "by_feature": {
-    "governance-gates": ["GG-0001"],
     "quality-gates": ["OPT-0301"],
     "bdd": ["OPT-0101", "OPT-0201"],
     "tdd": ["OPT-0401", "OPT-0501"]

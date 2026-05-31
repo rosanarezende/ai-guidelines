@@ -3,7 +3,8 @@
  * GG-0001 — Gate Decidability Check (enforcement do guardrail homônimo).
  *
  * Origem: DOGFOOD-0024 (reforma de [DEC-0024-G00] e [DEC-0024-G02], 2026-05-31).
- * Regra (SSOT): `.core/rules/base/governance/gate-decidability.md`.
+ * Regra (SSOT): `.core/process/governance-foundation.md` § "Guardrails dogfoodados (GG-*)".
+ * GG-0001 é guardrail INTERNO (dogfooding) — não é projetado a consumidores (não vive em rules.json).
  *
  * Converte o aprendizado recorrente "antes de discutir o mérito, verifique se o gate
  * é decidível" em enforcement estrutural (ADR 0021 — awareness não basta). Falha

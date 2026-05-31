@@ -357,6 +357,30 @@ Regra prática:
 - **Contratos**: defina interfaces de input/output antes de escrever
   qualquer código.
 
+## Guardrails dogfoodados (`GG-*`)
+
+> **Guardrail** = regra operacional descoberta por **dogfooding** que reduz trabalho humano recorrente e é aplicada automaticamente por um **check que pode falhar** (ADR 0021: enforcement > awareness). Origem empírica: fonte `DOGFOOD-*` (`.core/rules/_meta/sources-taxonomy.md`).
+>
+> **Estado: INTERNO (experimento da Spec 0024).** Guardrails **não** são projetados a consumidores — não vivem em `rules.json`/`AGENTS.md`; vivem **aqui** (constituição) + um check em `cli/`. Promoção a consumer-facing é decisão futura, condicionada a o mecanismo provar valor ao longo dos PRs.
+
+### [GG-0001] Decidibilidade de gate antes do mérito
+
+**Origem:** `DOGFOOD-0024` (reforma de `[DEC-0024-G00]` e `[DEC-0024-G02]`, 2026-05-31). **Enforcement:** `cli/governance/gate-decidability-check.mjs` (gate `gate-decidability:check`, agregado em `yarn validate`). **Projeção (seam):** checklist no `decision-brief-boilerplate.md`.
+
+Antes de discutir o **mérito** de uma decisão, verifique se o gate é **decidível**. Um `[DEC]` não-resolvido só está pronto para o gate se tiver, **todos**:
+
+1. uma **afirmação única** (não um feixe de asserções); _(👁 julgamento)_
+2. **"o que está sendo aceito"**; _(🤖 check)_
+3. **"o que NÃO está sendo aceito"**; _(🤖)_
+4. **concorrentes considerados** — por que as alternativas falham + o que reabriria; _(🤖)_
+5. **arquitetura separada de implementação** (a decisão não embute migração/execução); _(👁 heurístico)_
+6. **exatamente um ato de gate** (sem "aceitar X + autorizar a migração"); _(🤖)_
+7. **nenhum status `Open`** (o DEC nasce `Pendente`). _(🤖)_
+
+Itens 🤖 falham o check mecanicamente; 👁 são heurísticos/julgamento humano, projetados como checklist no seam do gate. Faltando qualquer um, o gate **não está pronto** — corrija a **forma** antes do **mérito**. Benchmark vivo: o `G02` pré-reforma falha (sem concorrentes; ato combinado); o `G00`/`G02` reformados passam.
+
+---
+
 ## SDD Guardrails
 
 - **Validação Humana Obrigatória**: Agentes de IA devem **obrigatoriamente** exigir validação humana do `spec.md` ANTES de gerar o `plan.md` e `tasks.md`. Isso impede decisões de design arquitetural unilaterais não supervisionadas.

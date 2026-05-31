@@ -1,15 +1,14 @@
-stage: discovery
+stage: implementation
 gate:
-  status: open
+  status: closed
 focus:
-  - "0024 SAIU do Stage 1 de pesquisa: decisoes-nucleo Resolved (G00 identidade, G02 taxonomia, G06 contrato da cadeia). Foco agora = ABSORCAO operacional (converter aprendizado cristalizado em enforcement), NAO mais pesquisa. Criterio: se ja foi decidido, absorver no sistema; reduzir divergencia aprendizado<->codigo."
-  - "decision-brief REESTRUTURADO por estado (Decidido / Aberto / Virou regra / Virou enforcement). Numeracao G00-G06 APOSENTADA como eixo de leitura (vira ancora estavel + mapa de rastreabilidade). NAO reorganizar de volta por numero."
-  - "G02 RESOLVED (2026-05-31, @rosana): taxonomia deterministic/mixed/evidence-driven removida; modelo = bloco + propriedade exige-julgamento (nao um tipo); marcador explicito (julgamento)/(deterministico). DEC registra julgamento; gate e onde ele acontece. NAO reabrir; migracao fisica e execucao derivada, nao julgamento pendente."
-  - "Pesquisa aberta restante (UNICA coisa ainda em investigacao, alternativas vivas): G01/F-AG01 (estrutura/gramatica; estados>entidade; terminus), F-AG03 (promotion pipeline), F-AG05 residuo (projecoes), F-014 (explicacao nao-linear; opcional/baixa prioridade). Todo o resto e execucao."
-  - "Risco dominante deslocado: NAO e mais 'refinar indefinidamente' — e 'continuar pesquisando o que ja foi decidido'. Tri-party: owner decide / Claude constroi / ChatGPT leitor tardio."
+  - "0024 em ABSORCAO OPERACIONAL (nao mais discovery). Decisoes-nucleo Resolved: G00 (identidade), G02 (taxonomia removida -> bloco + propriedade exige-julgamento; marcador explicito), G06 (contrato da cadeia). gate=closed: nao ha DEC Pendente. Stage 1 de pesquisa ENCERRADO."
+  - "Mecanismo de guardrails dogfoodado: GG-0001 (decidibilidade de gate) = guardrail INTERNO (governance-foundation + check em cli/), NAO consumer-facing, NAO em rules.json. Fluxo de checkpoint adotado: Claude implementa -> Codex audita -> ChatGPT revisa -> Rosana decide -> Claude continua (para mudancas estruturais)."
+  - "decision-brief organizado por estado (Decidido/Aberto/Virou regra/Virou enforcement); numeracao G00-G06 = ancora + mapa, nao eixo. Status Open ABOLIDO; Deferred = status canonico (adiamento consciente com criterio). NAO reorganizar por numero, NAO reabrir G02."
+  - "Pesquisa aberta restante (UNICA em investigacao, alternativas vivas): G01/F-AG01 (estrutura/gramatica), F-AG03 (promotion pipeline), F-AG05 residuo (projecoes), F-014 (opcional). Todo o resto e execucao/absorcao."
+  - "Tri-party: owner decide / Claude constroi / Codex auditoria tecnica / ChatGPT revisao arquitetural (leitores tardios). Criterio: aprendizado decidido -> absorver em enforcement; nao re-pesquisar."
 next:
-  - "PRIORIDADE 1 - Migrar WorkflowType -> modelo unico: aposentar/derivar enum (Recipe.ts:39-44) + retargetar consumidores (AssembleArtifact:65, ComposedArtifact:23, StructuralValidation:147); promover tasks-boilerplate generico a canonico (Stage 1 condicional). Testes verdes. Desenho: research/2026-05-30-unified-tasks-model.md (Fases 2-5)."
-  - "PRIORIDADE 2 - Boilerplates fonte unica + consistencia: remover 'Open' da legenda do decision-brief-boilerplate (.ai-guidelines + .specify) + cravar 'DEC nasce Pendente; pergunta aberta vive em findings.md'; drift-guard tri-root (check falha se roots divergem). Deletar variantes tasks-{evidence-driven,deterministic,mixed} apos modelo unico estavel."
-  - "PRIORIDADE 3 - Avancar cutover .specify -> .governance (ADR 0019): hard-stop em escrita nova no .specify (drift-guard = passo 1), depois migracao de conteudo. Eliminar pontos que aumentam custo de migracao por PR."
-  - "PRIORIDADE 4 - GG-0001 (teste de decidibilidade de gate) como enforcement: regra em rules.json (fonte DOGFOOD-*) + subconjunto mecanico como check estrutural projetado no seam do gate. Dogfoodar; ajustar com uso real. NAO tratar como novo eixo de pesquisa."
-  - "SO ABERTO onde ha alternativa viva competindo: G01, F-AG03, F-AG05 residuo, F-014 (opcional). Nao empurrar coisa decidida para 'aberto'."
+  - "CHECKPOINT ATUAL (pos-lote de achados do Codex): absorvidos #3 (Deferred canonico), #4 (GG-0001 interno), #2-parcial (state.yml). PENDENTE de checkpoint estrutural: #1 (eliminar taxonomia de governance-foundation, GR-0101/AGENTS.md, spec-boilerplate) + #2-restante (tasks.md/spec.md reframe para absorcao) - sao mudancas de runtime/regra/projecao/doutrina."
+  - "BLOQUEIO TECNICO a resolver no checkpoint: AGENTS.md tem bloco <AI_GUIDELINES> COMPILADO (nao editavel a mao) mas SEM comando de regeneracao exposto em package.json nem gate de sync no validate. Definir como regenerar (CLI adopt/merge) antes de reescrever GR-0101, senao AGENTS.md fica stale vs rules.json."
+  - "Depois do checkpoint: proxima etapa de migracao estrutural = WorkflowType residual + tri-root dos boilerplates (deletar tasks-{evidence-driven,deterministic,mixed} x2 roots + promover generico + rename recipe/partials) + cutover .specify->.governance (drift-guard primeiro). Itens da coluna 'Cresce' do decision-brief."
+  - "Commits desta fase de absorcao: c2a9ef9 (brief+G02), 41db912 (GG-0001), 055b1b9 (WorkflowType), + commit atual (achados Codex). Branch feat/spec-0024-context-architecture, sem push."
