@@ -2,13 +2,14 @@ stage: discovery
 gate:
   status: open
 focus:
-  - "Spec renomeada para context-architecture (era handoff-as-first-class); PR vivo #32 (Draft), #30 fechado pelo rename"
-  - "Contrato da cadeia research->...->impl CRISTALIZADO em governance-foundation.md (CAMADA 2, declarativo) - entregavel central, commit 2ddf339"
-  - "G00 em Pendente, modo de gate 'aceitacao' (aceitar/rejeitar/reenquadrar a identidade C) - criterio 4/4 atingido, falta o ato do gate da owner"
-  - "Invariante de ordem: nenhuma DEC de A-F/G01-G05 estabiliza antes de G00 Resolved (G06 e processo, fora do invariante)"
+  - "G00 RESOLVED + ACEITO (2026-05-31, @rosana): a unidade arquitetural primaria do ai-guidelines e a transformacao de contexto humano -> governanca executavel. Aceito como IDENTIDADE, nao explicacao universal. NAO reabrir salvo evidencia nova que invalide diretamente a afirmacao."
+  - "Invariante de ordem CUMPRIDO (G00 Resolved) -> G01+ destravado. Aceitar G00 NAO resolve G01+ (instrucao do gate)."
+  - "Reforma do decision-brief CONCLUIDA: brief = so DECs Pendente/Resolved (589->112 linhas); perguntas abertas + preambulo migrados para findings.md. AINDA NAO generalizada aos boilerplates (decision-brief-boilerplate ainda lista 'Open' = inconsistente)."
+  - "DECs: G00 Resolved; G06 Resolved (processo); G02 Pendente (direcao decidida: remover taxonomia; substituto desenhado; aguarda gate formal). G01/G03/G04/G05 + A-F = findings abertos (G01+)."
+  - "Risco dominante: refinar indefinidamente algo ja cristalizado. Retomar em EXECUCAO, sem reabrir discussoes encerradas."
 next:
-  - "LER o handoff de retomada: research/2026-05-30-handoff-next-session.md (reinstala contexto OPERACIONAL + de trabalho)"
-  - "Owner crava o gate de G00 (aceitacao); se Aceitar -> Resolved + cascata (A-F estabilizam; G01-G05 colapsam em facetas)"
-  - "Depois: G01-G05 (facetas do mesmo modelo); terminus deferido a G01 (NEXT #8), nao coroar"
-  - "Deferrals nomeados (NEXT #9): CAMADA 1 enforcement (1o decision-trace:check), decision-walk (G05), consolidacao templates (G04), drift (F04), promocao (D04/G03)"
-  - "Risco dominante: refinar indefinidamente algo ja cristalizado - parar quando utilizavel"
+  - "LER o handoff: research/2026-05-31-handoff-next-session.md (reinstala contexto OPERACIONAL + de trabalho; supersede 2026-05-30). Verificar git status/log: reforma+gate podem estar NAO-commitados."
+  - "PRIORIDADE 1 - G02: modelo unificado de tasks + remocao da taxonomia. Desenho em research/2026-05-30-unified-tasks-model.md; falta gate formal de G02 + plano de migracao (Fase 1 feita; Fases 2-5 pendentes)."
+  - "PRIORIDADE 2 - consistencia dos boilerplates: remover 'DEC Open' da legenda + cravar 'DEC nasce Pendente; pergunta aberta vive em findings.md' (generalizar a reforma; x3 roots)."
+  - "PRIORIDADE 3 - formalizar Finding->DEC: finding convergido + exige julgamento -> DEC Pendente; senao referencia/ADR."
+  - "SO DEPOIS: reavaliar G01 (estrutura/gramatica; reframe estados>entidade) + G03/G04/G05 + eixos A-F + lente C-1..C-6 + explicacao de F-014. NAO abrir novas pesquisas na retomada - retomar em execucao."
