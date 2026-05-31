@@ -5,7 +5,7 @@
 > Spec: [`./spec.md`](./spec.md)
 > Plan: [`./plan.md`](./plan.md)
 > Tasks: [`./tasks.md`](./tasks.md)
-> Status agregado: **Open** <!-- Open | Pendente | Partial | Resolved -->
+> Status agregado: **Pendente** <!-- Pendente | Partial | Resolved -->
 > Última atualização: [YYYY-MM-DD] — [nota curta sobre o que mudou nesta atualização]
 
 > **Artefato canônico do gate humano entre Stage 1 (research) e Stage 2 (design + implementação)** para specs `evidence-driven` ou `mixed` (cf. `.core/process/governance-foundation.md` § "Tipos de spec"). Specs `deterministic` não instanciam este arquivo.
@@ -31,18 +31,35 @@
 
 ## Legenda canônica de status
 
+> **Reforma 2026-05-31 (DOGFOOD-0024 / GG-0001):** `Open` foi **abolido** — pergunta aberta **não é decisão**. Um `[DEC]` **nasce `Pendente`** (já decidível); enquanto não converge + exige julgamento, a pergunta vive em `research/findings.md`, **não** como DEC.
+
 | Status     | Significado                                                                                                        |
 | :--------- | :----------------------------------------------------------------------------------------------------------------- |
-| `Open`     | Ponto criado, sem opções populadas (ainda em research).                                                            |
-| `Pendente` | Opções populadas com tradeoffs, aguardando o gate humano.                                                          |
+| `Pendente` | DEC decidível, aguardando o gate humano (ver checklist GG-0001 abaixo).                                            |
 | `Partial`  | Algumas sub-decisões cravadas, outras abertas. Aplica-se apenas a pontos com sub-eixos.                            |
 | `Resolved` | Escolha cravada com data + owner. **Imutável** — mudanças posteriores vão para `plan.md` § "Decisões revisitadas". |
 
 **Status agregado da brief** (campo no header):
 
-- `Open` enquanto nenhum ponto saiu de `Open`/`Pendente`.
+- `Pendente` enquanto nenhum ponto saiu de `Pendente`.
 - `Partial` quando ≥ 1 ponto está `Resolved` mas há outros não-resolvidos.
 - `Resolved` quando **todos** os pontos estão `Resolved` — gatilho do checklist pós-gate.
+
+---
+
+## Checklist de decidibilidade do gate (GG-0001)
+
+> **[MANDATÓRIO antes do gate]** Guardrail dogfoodado (`DOGFOOD-0024`; regra [`.core/rules/base/governance/gate-decidability.md`](../../.core/rules/base/governance/gate-decidability.md)). Antes de discutir o **mérito** de um `[DEC]` não-resolvido, confirme que ele é **decidível**. O subconjunto mecânico é enforced por `yarn gate-decidability:check` (agregado em `yarn validate`): itens 🤖 **falham o check**; itens 👁 são julgamento humano projetado aqui.
+
+- [ ] 👁 **Afirmação única** — o DEC pede para aceitar **uma** coisa (não um feixe de asserções).
+- [ ] 🤖 **"O que está sendo aceito"** — presente e _bounded_.
+- [ ] 🤖 **"O que NÃO está sendo aceito"** — presente.
+- [ ] 🤖 **Concorrentes considerados** — por que cada alternativa falha + o que reabriria.
+- [ ] 👁 **Arquitetura separada de implementação** — a decisão não embute migração/execução.
+- [ ] 🤖 **Um único ato de gate** — sem "aceitar X **+** autorizar a migração" (dois atos colados).
+- [ ] 🤖 **Sem status `Open`** — o DEC nasce `Pendente`.
+
+Se algum item falha, o gate **não está pronto**: corrija a **forma** da decisão antes do **mérito**.
 
 ---
 
@@ -283,14 +300,14 @@ Use quando a research **convergiu num finding** (uma identidade/conclusão sobre
 
 > Tabela manual mantida pelo autor. Atualizar a cada mudança de status. **Drift entre headers individuais e esta tabela bloqueia o gate** — a coerência é responsabilidade humana (não há script de geração nesta versão).
 
-| ID               | Bloco | Status |
-| :--------------- | :---- | :----- |
-| `[DEC-NNNN-A01]` | A     | Open   |
-| `[DEC-NNNN-A02]` | A     | Open   |
-| `[DEC-NNNN-B01]` | B     | Open   |
-| `[DEC-NNNN-C01]` | C     | Open   |
+| ID               | Bloco | Status   |
+| :--------------- | :---- | :------- |
+| `[DEC-NNNN-A01]` | A     | Pendente |
+| `[DEC-NNNN-A02]` | A     | Pendente |
+| `[DEC-NNNN-B01]` | B     | Pendente |
+| `[DEC-NNNN-C01]` | C     | Pendente |
 
-**Status agregado:** [Open | Pendente | Partial | Resolved] — atualizar conforme o estado consolidado da tabela acima e refletir no campo do header.
+**Status agregado:** [Pendente | Partial | Resolved] — atualizar conforme o estado consolidado da tabela acima e refletir no campo do header.
 
 ---
 
