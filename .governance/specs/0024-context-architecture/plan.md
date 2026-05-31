@@ -1,134 +1,142 @@
 <!-- ai-guidelines-template: plan-boilerplate v=1 -->
 
-# Plan — Spec 0024 Handoff as First-Class
+# Plan — Spec 0024 Context Architecture
 
 > Spec: [`./spec.md`](./spec.md)
 > Decision Brief: [`./decision-brief.md`](./decision-brief.md)
+> Tasks: [`./tasks.md`](./tasks.md)
 > Status: Draft
 
 > **Vive durante a execução.** Diferente da `spec.md` (imutável após In Review),
 > este arquivo é atualizado conforme o entendimento técnico evolui.
 
----
-
-## 🛰️ Stage 1 / Stage 2
-
-> **Stage 1 (Research → opções).** Coletar evidência via análise comparativa dos 5+ sistemas externos enumerados em `spec.md § Pesquisa de contexto`. Preencher `decision-brief.md` com opções por DEC `[DEC-0024-XYZ]`. Termina no **Gate humano** que marca cada ponto `Resolved`.
+> ## 🔁 Nota de fase — ABSORÇÃO OPERACIONAL (2026-05-31, PR-2)
 >
-> **Stage 2 (Design + Implementação).** Cada subseção do "Design e Arquitetura" abaixo (atualmente em **placeholder**) deriva linearmente das decisões cravadas no brief. Stage 2 só inicia após o gate fechar.
+> **Stage 1 (research → decision-brief → gate) encerrou.** As decisões estão `Resolved` (`[DEC-0024-G00]`/`G02`/`G06`); o gate está **fechado**; `state.yml` = `implementation`/`closed`. A 0024 está em **absorção operacional**: fazer o sistema refletir decisões já tomadas, removendo divergências decisão↔código **uma a uma**.
 >
-> **Esta spec é research-first.** A implementação do comando `workflow handoff` está **fora do escopo** desta spec (vira spec separada — provavelmente 0025 — após Stage 1 fechar).
-
----
-
-## 🔬 Research lifecycle (Stage 1 ativo)
-
-> Lista canônica de perguntas de research a responder. Cada pergunta cruza-se com pontos `[DEC-0024-*]` do decision-brief.
-
-| Pergunta de research                                                                  | DEC alimentado(s)                              |
-| :------------------------------------------------------------------------------------ | :--------------------------------------------- |
-| Como Hermes Agent resolve seleção/persistência/promoção?                              | A01, A02, B01, B02, D01, D02                   |
-| Como Cursor SDK estrutura harness (sandbox + context mgmt + session)?                 | A01, A02, A03, B01                             |
-| Como Open Code mantém provider-agnosticism estrutural?                                | A01, F01, F03                                  |
-| Como Anthropic Dreaming faz curadoria de memória?                                     | B02, D01, D02, D03                             |
-| Como Spec Kitty estrutura missions/work packages/agent loops?                         | A01, B01, D01, E02                             |
-| O que sistemas baseados em grafos (LangGraph/AutoGen/GraphRAG) revelam sobre seleção? | A01, A03, E01 (dependente de fonte recuperada) |
-| Qual a matriz consumidor × formato ideal observada empiricamente?                     | E01, E02, E03                                  |
-| Qual o ponto comum (se algum) que TODOS os sistemas externos perdem vs ai-guidelines? | F01, F02, F03                                  |
-
-**Critério de saída da research** (cf. `spec.md § Critérios de Aceite`):
-
-1. Cada um dos 5 eixos (Seleção / Persistência / Promoção / Projeção / Governança) tem ≥ 1 resposta evidence-backed nos artifacts.
-2. ≥ 2 sistemas estudados convergem em ≥ 2 dessas respostas (sinal de pressão arquitetural recorrente real, não idiossincrasia).
-3. Bloco A (preâmbulo do decision-brief) cresce para ≥ 3 observações cravadas adicionais com cross-ref aos artifacts (já 5 cravadas na instanciação; ≥ 8 ao gate).
+> Este PR-2 **dobra a sequência de PRs de absorção para dentro deste arquivo** (§ "Sequência de PRs"), aposentando a dependência do plano local efêmero (`~/.claude/plans/`, que não sobrevive a troca de máquina/agente). **A partir daqui, o plano executável canônico da 0024 é este `plan.md`.** O backlog de divergências é o **relatório de auditoria do Codex** (referência decisão↔código).
+>
+> As seções research-first abaixo foram **colapsadas para sumário histórico** (Stage 1 — encerrado). A pesquisa estrutural ainda aberta vive em [`research/findings.md`](./research/findings.md) e **não bloqueia** a absorção.
 
 ---
 
-## 🏗️ Design e Arquitetura
+## 🛰️ Stage 1 — ENCERRADO (sumário histórico)
 
-### Princípio guia
-
-[Placeholder até gate fechar.] O "como" estrutural emerge das decisões do decision-brief. Hipótese atual (não cravada):
-
-- Handoff = projeção determinística sobre SSOT existente.
-- Lifecycle de promoção = governance lifecycle atual (sem mudança).
-- Multi-consumidor = generalização cuidadosa de ADR 0023.
-- Governance-first = invariante a preservar (possível ADR no encerramento).
-
-### Componentes ou Sub-blocos
-
-> [Placeholder até gate fechar.] Componentes específicos emergem das decisões `[DEC-0024-XYZ]`. Por enquanto, áreas-alvo prováveis (cf. `decision-brief.md § Bloco C`):
+> **Stage 1 (Research → opções → Gate).** Coletou evidência via análise comparativa de sistemas externos (Hermes, Cursor, opencode, Spec Kitty, Multica) + auditoria interna; consolidou findings convergidos em [`research/findings.md`](./research/findings.md); cravou as decisões no [`decision-brief.md`](./decision-brief.md) (reestruturado **por estado** em 2026-05-31). **Termina no gate humano** — fechado em 2026-05-31.
 >
-> - `src/cli/workflow.ts` — adição de modo "handoff" como projeção alternativa ao briefing
-> - `src/app/workflow/*` — novo use case (provável: `AssembleHandoff`)
-> - `src/app/ports/*` — possível porta nova para projection rendering
-> - `AGENTS.md` — possível redução para stub (consequência médio prazo per ADR 0022)
+> **Resultado cravado (gate):** `[DEC-0024-G00]` identidade (a unidade primária é a transformação `contexto humano → governança executável`) · `[DEC-0024-G02]` taxonomia `deterministic/mixed/evidence-driven` **removida** (→ bloco + propriedade `exige-julgamento`, marcador `(julgamento)`/`(determinístico)`) · `[DEC-0024-G06]` contrato da cadeia `research → … → implementação`. Todas `Resolved`.
 >
-> Detalhamento técnico se materializa apenas no `plan.md` v2 pós-gate.
+> **Pesquisa estrutural ainda aberta** (ex-`G01` estrutura/gramática, ex-`G03` promotion pipeline, ex-`G04` casa única de boilerplate, ex-`G05` projeções, + eixos de pressão A/B/D/E/F): migrou para `research/findings.md` como **findings abertos**. Não é ponto de gate; só retorna ao brief como `[DEC] Pendente` ao convergir + exigir julgamento. **Aceitar `G00` não as resolve** (instrução explícita do gate).
+
+> **Correção de framing (2026-05-31).** O texto pré-absorção dizia "esta spec é research-first; a implementação vira spec separada (0025)". **Isso foi superado:** a implementação é entregue **dentro da 0024** (decisão da owner, 2026-05-29), agora como **absorção operacional** das decisões cravadas — não como pesquisa nem como spec futura.
+
+---
+
+## 🧱 Sequência de PRs — CONGELADA (plano executável canônico)
+
+> **SSOT do plano de absorção.** Cada PR: **atômico, mergeável, reversível**, com checkpoint `Claude implementa → Codex audita (técnica) → ChatGPT revisa (arquitetural) → owner decide`. **1 PR por vez**, parar no checkpoint quando o commit estiver pronto. Backlog = relatório de auditoria do Codex (códigos `A#/B#/C#/D#/P#` abaixo referenciam esse relatório).
+
+| PR         | Objetivo                                                                                                                                                                                                                                                                                                                                                                                               | Deps        | Status                                       |
+| :--------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :---------- | :------------------------------------------- |
+| **PR-1**   | `active-specs.yml` lista a 0024 (Codex A3) — publica a spec no índice público via `workflow publish-state`                                                                                                                                                                                                                                                                                             | —           | ✅ feito + gated (`87865ca`)                 |
+| **PR-2**   | reframe `tasks/plan/NEXT/spec` → absorção (Codex A2/P1/P2); `spec.md` via nota datada sem apagar histórico; **dobrar esta sequência no `plan.md`**                                                                                                                                                                                                                                                     | —           | 🔄 **EM EXECUÇÃO**                           |
+| **PR-3**   | **GG-0003 Consistency Projection Check** — estritamente mecânico: `state.yml` é fonte de verdade + lista FIXA de marcadores literais contraditórios (`"Stage 1 ativo"`, `"gate aberto"`, brief `Pendente`…). **Sem parsing semântico.**                                                                                                                                                                | PR-2        | pendente                                     |
+| **PR-4A**  | **Workflow Provenance · storage** — `.governance/runtime/provenance.yml` (append-only, runtime-scoped). Campos: `spec`(obrig.)/`actor`/`role`/`at`/`ref`, `model?` opcional. **`role` = string LIVRE** (novos papéis sem schema). **Espinha** `implementation`+`human_gate` = sempre DERIVADA (git/active-specs), não persistida, nunca bloqueia. **Opcionais** persistidos (audit/review/security/…). | PR-1/2      | pendente _(protótipo em stash — referência)_ |
+| **PR-4B**  | **Workflow Provenance · projeção** no `workflow continue`: impl (derivada) + `Auditorias/revisões registradas:` (lista de tamanho variável) + gate (derivado) + `Revisão independente: PENDENTE/OK`. Mostra **fatos/pendências**, NUNCA prescrição (DEC-0023-B06 lookup-not-coordination). **Provenance = projeção, NÃO compliance/bloqueio/lifecycle.**                                               | PR-4A       | pendente                                     |
+| **PR-5**   | **AGENTS sync** — `agents:build` (recompila bloco `<AI_GUIDELINES>` de `rules.json`) + `agents:check` (gate no `validate`). Destrava PR-7.                                                                                                                                                                                                                                                             | —           | pendente                                     |
+| **PR-6**   | **GG-0002 mecanismo** — `banned-concept-check` + registro `banned-by-dec.yml` (sem termo live ainda) + fixture. **Antes** da remoção (instala o guard sem janela de regressão).                                                                                                                                                                                                                        | —           | pendente                                     |
+| **PR-7**   | **CRÍTICO (Codex A1/P0)** — remover taxonomia `evidence-driven/deterministic/mixed` de `GR-0101`→`AGENTS.md`, `governance-foundation §"Tipos de spec"→"Propriedades de bloco"`, `spec-boilerplate` ×2; **registrar o ban no mesmo commit** (sem janela de regressão).                                                                                                                                  | PR-5 + PR-6 | pendente                                     |
+| **PR-8**   | corrigir path morto na msg do `gate-decidability-check` (→ `governance-foundation § Guardrails`) (Codex B1)                                                                                                                                                                                                                                                                                            | — (flex)    | pendente                                     |
+| **PR-9**   | desacoplar existência do `decision-brief` de `evidence-driven/mixed` (Codex B3)                                                                                                                                                                                                                                                                                                                        | PR-7        | pendente                                     |
+| **PR-10**  | tasks boilerplate **único**; aposentar 3 variantes; renomear recipe/partials `tasks-evidence-driven`→genérico (Codex C2/C3)                                                                                                                                                                                                                                                                            | PR-7        | pendente                                     |
+| **PR-11A** | drift-guard do legado `.specify/templates` (estanca a hemorragia) (Codex C1)                                                                                                                                                                                                                                                                                                                           | PR-10       | pendente                                     |
+| **PR-11B** | trocar fonte ativa → root canônico (⚠️ **micro-decisão da owner:** `.core/templates` vs `.ai-guidelines/templates`)                                                                                                                                                                                                                                                                                    | PR-11A      | pendente                                     |
+| **PR-11C** | remover legado `.specify/templates` após 11B estável                                                                                                                                                                                                                                                                                                                                                   | PR-11B      | pendente                                     |
+| **PR-12**  | limpar docs arquiteturais de `workflowType` (ARCHITECTURE.md, ADR 0014 nota histórica) (Codex B2/D1)                                                                                                                                                                                                                                                                                                   | —           | pendente                                     |
+
+**Ordem de valor:** PR-1 ✅ → **PR-2** → (PR-3 consistência + PR-4A/B proveniência: barreiras novas **antes** da migração) → PR-5 + PR-6 → **PR-7 (o crítico, protegido)** → PR-9/10 → PR-11A/B/C → PR-8/PR-12 (flex).
+
+> ⚠️ **Protótipo do PR-4A em `git stash`** (sessão 2026-05-31): interrompido por **ordem de execução** (não rejeição). Material de **referência** apenas. Quando a sequência chegar ao PR-4A, inspecionar e decidir o que reaproveitar. **Não** misturar ao PR-2 nem antecipar Provenance.
+
+---
+
+## 🏗️ Princípios de absorção (lente para cada PR)
+
+> O "como" de cada PR deriva das decisões cravadas. Estes princípios — extraídos do uso real da stack na 0024 — governam as escolhas de design ao longo da sequência:
+
+- **Toda aresta SSOT→projeção precisa de um gate de sync, ou diverge em silêncio.** Drift silencioso SSOT→projeção é o padrão recorrente nº 1 (apareceu 4×: `state.yml`↔`active-specs`, `rules.json`↔`AGENTS.md`, `state.yml`↔`tasks/plan/NEXT/brief`, código↔`ARCHITECTURE.md`). PR-3 (consistência) e PR-5 (AGENTS sync) são instâncias.
+- **Enforcement previne a classe, não só o sintoma.** O guard entra **antes/junto** da correção, sem janela de regressão (PR-6 antes de PR-7).
+- **Validação mecânica vs semântica por guardrail.** Todo guardrail declara seu subconjunto 🤖 (check falha) e 👁 (julgamento humano), como GG-0001. Checks de absorção são **estritamente mecânicos** (lista fixa de marcadores literais; sem parsing semântico — PR-3).
+- **Projeção, não governança.** Proveniência (PR-4A/B) é **projeção** (fatos/pendências num olhar), nunca compliance/bloqueio/lifecycle. A espinha (impl+gate) é **derivada**, não persistida.
+- **Anti-taxonomia em todos os níveis.** Ao remover uma taxonomia fechada, não recriá-la um nível acima; preferir **propriedade livre + papéis reconhecidos (hints de projeção)** a enum fechado (`role` livre na proveniência; `exige-julgamento` por bloco em G02).
+- **Clean-clone/smoke gateia distribuição.** `test:smoke` deve gatear PRs que afetam o que o consumidor recebe (notadamente PR-11A/B/C).
 
 ---
 
 ## ✅ Critérios de Aceite Detalhados (DoD operacional)
 
-### Stage 1 (research em curso)
+### Por PR de absorção
 
-- [ ] Research artifact por sistema externo declarado em escopo (≥ 5 artifacts).
-- [ ] Matriz pressão × sistema preenchida em `research/2026-05-28-pressure-axes-scope.md`.
-- [ ] Bloco A do decision-brief cresce para ≥ 8 observações cravadas.
-- [ ] Cada DEC `[DEC-0024-XYZ]` tem opções populadas com Pró/Contra.
+- [ ] Atômico, mergeável, reversível — uma divergência decisão↔código por PR (ou um bloco coeso).
+- [ ] Mudança estrutural (runtime/regra/projeção/doutrina/migração) ⟹ passa pelo checkpoint Codex→ChatGPT→owner **antes** de avançar. Correção local pequena não espera.
+- [ ] `yarn format ; yarn validate` verde (build:rules + suíte + living-docs + state-yml + gate-decidability).
+- [ ] PR que instala/altera guardrail carrega **check + fixture** no mesmo commit; PR que afeta distribuição roda `test:smoke`.
+- [ ] Sem reabrir decisão `Resolved` (G00/G02/G06) nem re-modelar arquitetura congelada.
 
 ### Globais (toda a spec)
 
 - [ ] Pipeline `yarn format ; yarn validate` verde.
-- [ ] Não-objetivos cravados em `spec.md` continuam respeitados ao longo do ciclo (auditoria final).
+- [ ] Não-objetivos cravados em `spec.md` continuam respeitados (auditoria final).
+- [ ] **Fronteira modelo ≠ migração:** absorção entrega enforcement + artefato de referência; migração ampla do ecossistema (Grupo B) permanece nas candidatas re-escopadas.
 - [ ] PR Draft revisado e aprovado por humano antes de Ready.
 
 ---
 
 ## 🧪 Estratégia de Testes
 
-> [Placeholder até Stage 2.] Esta spec é research-first; não há código de produto novo. Testes emergem na spec implementadora (0025+) com base nas decisões cravadas no gate.
+> A fase de absorção **produz código** (checks, guardrails, projeções) — diferente do framing research-first anterior. Cada PR estrutural carrega seus próprios testes:
+
+- **Checks/guardrails** (PR-3 GG-0003, PR-6 GG-0002, PR-8): fixture determinística (caso que falha + caso que passa); integração no chain `yarn validate`.
+- **Proveniência** (PR-4A storage, PR-4B projeção): testes de serialização append-only + derivação da espinha (impl/gate) sem persistência; projeção mostra fatos/pendências, nunca prescrição.
+- **AGENTS sync** (PR-5): `agents:check` falha quando `<AI_GUIDELINES>` diverge de `rules.json`.
+- **Migração `.specify`** (PR-11A/B/C): `test:smoke`/clean-clone valida o que o consumidor recebe.
+- **Regressão da remoção** (PR-7): o ban (`banned-concept-check`, PR-6) falha se a taxonomia reaparecer.
 
 ---
 
 ## 🛠️ Arquivos modificados (esperado)
 
-### Stage 1 (atual)
+### Stage 1 (encerrado — registro)
 
-- `.governance/specs/0024-context-architecture/spec.md` — instanciação inicial.
-- `.governance/specs/0024-context-architecture/decision-brief.md` — DECs `Open` → opções populadas → `Resolved` via gate.
-- `.governance/specs/0024-context-architecture/plan.md` — placeholder Stage 2 → v2 pós-gate.
-- `.governance/specs/0024-context-architecture/tasks.md` — Fase 0 (Setup + Research + Brief + Gate); Fases 1+ pós-gate.
-- `.governance/specs/0024-context-architecture/state.yml` — schema 4-chave canônico.
-- `.governance/specs/0024-context-architecture/NEXT.md` — débitos e insights.
-- `.governance/specs/0024-context-architecture/research/*.md` — artifacts comparativos.
-- `.governance/specs/roadmap/backlog.md` — move handoff de Now §1 para Em execução.
-- `.gitignore` — adiciona `temp/` para suportar artefatos de pesquisa locais.
+- `spec.md` (instanciação + nota de fase) · `decision-brief.md` (DECs → `Resolved`, reestruturado por estado) · `research/*.md` + `research/findings.md` · `state.yml` (→ `implementation`/`closed`) · `roadmap/backlog.md` · `.gitignore` (`temp/`).
 
-### Stage 2 (futuro — escopo da spec derivada, não desta)
+### Absorção (em curso — por PR; cf. tabela § "Sequência de PRs")
 
-[Emerge do plan.md v2.]
+- **PR-2 (este):** `spec.md`, `plan.md`, `tasks.md`, `NEXT.md`.
+- **PR-3+:** runtime/checks (`cli/governance/*`), boilerplates (`.core/templates/*`, recipes/partials), doutrina (`.core/process/governance-foundation.md`), `AGENTS.md`, `.governance/runtime/provenance.yml`, docs arquiteturais — escopados por PR.
 
 ---
 
 ## ⚠️ Riscos técnicos (concretos)
 
-| Risco                                                                                                      | Mitigação                                                                                                                        |
-| :--------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------- |
-| Research deriva para benchmarking superficial ("como funciona feature X").                                 | Critério de saída cravado em pressões arquiteturais, não em features. Matriz pressão × sistema obriga o eixo correto.            |
-| Spec congela ontologia cedo demais (promove "rules-as-catalog" / "selection cost" a ADR antes de validar). | DECs começam `Open` sem opções pré-formuladas; recomendação inicial opcional somente quando ≥ 1 research convergente.            |
-| Spec drift para memory engine (viola não-objetivo).                                                        | Bloco B (Persistência) explicitamente investiga "o que persiste", não "como persistir". Auditoria contínua em revisões da brief. |
-| ADR 0018 violado por research que prescreve learning loop autonomous.                                      | DEC-0024-D02 cravada como ponto defensivo explícito (recomendação inicial = "NÃO autônomo").                                     |
-| Slug provisional `handoff-as-first-class` engana sobre escopo real.                                        | Nota explícita no header de spec.md; re-slug aceito quando research consolidar.                                                  |
+| Risco                                                                         | Mitigação                                                                                                                 |
+| :---------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------ |
+| Voltar a re-modelar em vez de remover divergências (risco dominante da fase). | Critério cravado: _"já foi validado empiricamente na 0024?" → absorver/enforçar/executar._ Não re-pesquisar o `Resolved`. |
+| Encadear vários PRs estruturais sem checkpoint.                               | 1 PR atômico por vez; parar no checkpoint quando o commit estiver pronto (Codex→ChatGPT→owner).                           |
+| Remover taxonomia abrindo janela de regressão.                                | PR-6 (guard `banned-concept-check`) **antes/junto** da remoção (PR-7); ban ativado no mesmo commit.                       |
+| Proveniência virar compliance/bloqueio/lifecycle.                             | Projeção, não governança; espinha derivada; `role` livre; nunca bloqueia (DEC-0023-B06 lookup-not-coordination).          |
+| Migração `.specify` quebra o que o consumidor recebe.                         | Drift-guard (PR-11A) estanca antes do cutover; `test:smoke`/clean-clone gateia PR-11B/C.                                  |
+| Plano voltar a depender de estado local efêmero.                              | Sequência embutida neste `plan.md` (SSOT no repo); `~/.claude/plans/` aposentado como dependência.                        |
 
 ---
 
 ## 📐 Decisões revisitadas
 
-_(Nenhuma decisão revisitada ainda — preencher conforme research expor reversões de hipóteses.)_
+- **2026-05-31 — framing research-first → absorção operacional.** O plano dizia "research-first; implementação vira 0025". Revertido: implementação entregue **dentro da 0024**, agora como absorção das decisões cravadas. Stage 1 encerrado no gate; placeholder Stage 2 substituído pela sequência de PRs acima.
+- **2026-05-31 — dependência de plano local → SSOT no repo.** A sequência executável vivia em `~/.claude/plans/` (efêmero). Dobrada neste `plan.md` (PR-2).
 
 ---
 
 ## 📎 Anexo — Conteúdo candidato pré-research
 
-_(Não-aplicável — esta spec nasce pós-Spec 0023 sem rascunho herdado a reconciliar.)_
+_(Não-aplicável — esta spec nasceu pós-Spec 0023 sem rascunho herdado a reconciliar.)_

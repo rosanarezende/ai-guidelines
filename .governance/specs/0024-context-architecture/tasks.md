@@ -1,107 +1,82 @@
 <!-- ai-guidelines-template: tasks-evidence-driven-boilerplate v=4 -->
 
-# Tasks — Spec 0024 Handoff as First-Class — `evidence-driven`
+# Tasks — Spec 0024 Context Architecture
 
 > Spec: [`./spec.md`](./spec.md)
 > Plan: [`./plan.md`](./plan.md)
 > Decision Brief: [`./decision-brief.md`](./decision-brief.md)
-> Status: In Progress (Stage 1)
+> Status: In Progress — **Absorção operacional** (Stage 1 encerrado; gate fechado)
 
 > **Progress file vivo.** Atualizar a cada degrau concluído. Quando uma decisão mudar, refletir em `plan.md § Decisões revisitadas` e ajustar tasks impactadas.
 
-> **Variante `evidence-driven`.** A Fase 0 estende o Setup canônico com **Stage 1** (Research → Decision-Brief → Gate humano). **Nenhum design técnico cravado pré-research.** Stage 2 (Fase 1+) só inicia após o gate fechar.
+> ## 🔁 Nota de fase — ABSORÇÃO OPERACIONAL (2026-05-31, PR-2)
+>
+> **Stage 1 (research → decision-brief → gate) encerrou** com as decisões `Resolved` (`[DEC-0024-G00]`/`G02`/`G06`) e o **gate fechado**. A execução agora é a **sequência de PRs de absorção** (SSOT em [`plan.md` § "Sequência de PRs"](./plan.md)), não mais o scaffold research-first.
+>
+> A **Fase 0** abaixo é **registro histórico** do bootstrap + Stage 1. O sub-bloco de marcador de template (`tasks-evidence-driven-boilerplate`) e o rótulo `evidence-driven` são **legados** — a taxonomia foi removida por `[DEC-0024-G02]`; sua eliminação do recipe/partials é **execução derivada** (PR-10), não ocorre aqui. A execução viva está na **Fase de Absorção**.
 
 ---
 
-## Fase 0 — Setup + Stage 1 (Research → Decision-Brief → Gate humano)
+## Fase 0 — Setup + Stage 1 (Research → Decision-Brief → Gate) — ✅ ENCERRADA
 
-### Sub-bloco [0.Setup] — Bootstrap e instanciação
+> **Resultado (gate fechado, 2026-05-31):** decisões cravadas `[DEC-0024-G00]` (identidade = transformação `contexto humano → governança executável`), `[DEC-0024-G02]` (taxonomia de tipos removida → bloco + propriedade `exige-julgamento`), `[DEC-0024-G06]` (contrato da cadeia) — todas `Resolved`. Pesquisa estrutural ainda aberta migrou para `research/findings.md` (não bloqueia).
 
-- [x] **0.1** Bootstrap: `roadmap/backlog.md` + `.core/process/governance-foundation.md` § "Tipos de spec" lidos na sessão de planejamento (2026-05-28).
-- [x] **0.2** Tipo de spec confirmado: `evidence-driven` no header de `spec.md`. Critério: design depende de evidência ainda não coletada (análise comparativa de 5+ sistemas externos). **Sim.**
-- [x] **0.3** Slug semântico: `handoff-as-first-class` (provisional — slug pode evoluir conforme research consolidar, conforme nota no spec.md header).
+### Sub-bloco [0.Setup] — Bootstrap e instanciação ✅
+
+- [x] **0.1** Bootstrap: `roadmap/backlog.md` + `governance-foundation.md § "Tipos de spec"` lidos na sessão de planejamento (2026-05-28).
+- [x] **0.2** Tipo de spec confirmado na instanciação: `evidence-driven` (research-first). _Nota: rótulo hoje legado — taxonomia removida por `[DEC-0024-G02]`._
+- [x] **0.3** Slug semântico: instanciado como `handoff-as-first-class`; **renomeado para `context-architecture`** (2026-05-30, autorização da owner; nº 0024 imutável, ADR 0017).
 - [x] **0.4** Branch `feat/spec-0024-context-architecture` criada a partir de `main`.
-- [x] **0.5** `spec.md` instanciado com `Tipo de spec: evidence-driven` e campo `Decision Brief` apontando para `./decision-brief.md`.
-- [ ] **0.6** **[MANDATÓRIO]** Validação Humana inicial: owner aprova problema e escopo definidos no `spec.md` **antes** de avançar para Stage 1. _(Pendente — aguarda autorização textual da owner após revisão dos scaffolds neste PR.)_
-- [x] **0.7** `plan.md` instanciado com bloco Stage 1 / Stage 2 placeholder.
-- [x] **0.8** `tasks.md` (este arquivo) instanciado da variante `evidence-driven`.
-- [x] **0.9** `decision-brief.md` instanciado com DECs `[DEC-0024-A01..F03]` em status `Open`, sem opções (opções entram no sub-bloco [0.Brief]). Preâmbulo "Síntese empírica" populado com 5 observações cravadas da sessão de planejamento.
-- [x] **0.10** `roadmap/backlog.md` atualizado: `handoff-as-first-class` movida de `Now §1` para `Em execução` com cross-ref para a branch.
+- [x] **0.5** `spec.md` instanciado; campo `Decision Brief` aponta para `./decision-brief.md`.
+- [x] **0.6** Validação humana inicial de problema/escopo — **coberta pelo gate fechado** (decisões `Resolved` em `decision-brief.md`).
+- [x] **0.7** `plan.md` instanciado (Stage 1/Stage 2 placeholder → **dobrado na sequência de PRs**, PR-2).
+- [x] **0.8** `tasks.md` (este arquivo) instanciado.
+- [x] **0.9** `decision-brief.md` instanciado; depois **reestruturado por estado** (2026-05-31), DECs `Resolved`.
+- [x] **0.10** `roadmap/backlog.md` atualizado (handoff → `Em execução`).
 - [x] **0.11** `NEXT.md` instanciado.
-- [ ] **0.12** Pull Request Draft criado usando `.github/pull_request_template.md`. _(Pendente — próxima ação operacional após [0.6].)_
-- [x] **0.[COMMIT]** Commits da sessão de instanciação:
-  - `chore(gitignore): adiciona temp/ (artefatos locais de pesquisa)` — separado por atomicidade.
-  - `[🧾🔒] [Spec 0024] Bootstrap research-first — scaffold + decision-brief 5-eixos + Bloco A` — bootstrap principal.
+- [x] **0.12** Pull Request Draft **#32** criado (vivo).
+- [x] **0.[COMMIT]** Commits da sessão de instanciação registrados (git).
 
-### Sub-bloco [0.Research] — Stage 1: produzir researches
+### Sub-bloco [0.Research → 0.Gate] — Stage 1: research → opções → gate ✅ (superado pela reforma do brief)
 
-> Pesquisa instrumental, externa ou empírica que alimenta os pontos `[DEC-0024-*]`. **Toda research deve alimentar pelo menos um ponto `[DEC-*]`.** Os 5+ sistemas externos enumerados em `spec.md § Pesquisa de contexto` são alvos canônicos. Matriz pressão × sistema vive em `research/2026-05-28-pressure-axes-scope.md`.
+> O scaffold granular research-first (`0.R.*` / `0.B.*` / `0.G.*`) foi **superado pela reforma por estado** do `decision-brief.md` (2026-05-31): perguntas abertas migraram para `research/findings.md` (findings abertos) e as decisões convergidas foram cravadas `Resolved`. Histórico verbatim: **git** + research datadas.
 
-- [/] **0.R.0** Inventário arquitetural (`research/2026-05-29-architectural-inventory.md`) — classificação Grupo A/B/C; **Fonte A** concluída e validada (owner, 2026-05-29). Corroboração **Fonte B** (externa) das classes do Grupo A pendente na research.
-- [/] **0.R.1** Perguntas de research listadas em `plan.md § Research lifecycle`, cruzadas com `[DEC-0024-*]`. **Em andamento** — tabela inicial publicada; pode ganhar perguntas conforme research progride.
-- [ ] **0.R.2** Produzir `research/YYYY-MM-DD-<sistema>.md` por sistema externo declarado em escopo (Hermes Agent, Cursor SDK, OpenCloud/OpenCode, Anthropic Dreaming in Cloud, Spec Kitty). Cada arquivo cita fontes (URL, transcrição, repo, paper).
-- [ ] **0.R.G** **Research do Bloco G (fundacional, prioritário).** `G00` unidade primária (testar 4 hipóteses: `spec`/`pilar`/`lifecycle`/`artefato` — `lifecycle` é contender sério, obrigação de refutar); `G01` 7 pilares MECE; `G02` taxonomia de specs; `G03` promotion pipeline (reconcilia ADR 0010 + D04); `G04` contrato de boilerplate + core; `G05` modelo de projeção. **Fonte A + Fonte B** obrigatórias. `G00` resolve antes de A-F.
-- [ ] **0.R.3** Validar critério de saída: **Bloco G fechado (`G00`-`G05` `Resolved`, Fonte A + B; G00 antes de A-F)**; ≥ 1 resposta evidence-backed por eixo A-F; ≥ 2 sistemas convergem em ≥ 2 respostas; Bloco A cresce para ≥ 8 observações.
-- [ ] **0.R.4** Atualizar `NEXT.md` com insights secundários conforme emergirem.
-- [ ] **0.R.[COMMIT]** Commits incrementais sugeridos por artifact:
-  - `research(spec-0024): spec-kitty pressure analysis`
-  - `research(spec-0024): hermes agent skill loop + memory tiers`
-  - `research(spec-0024): cursor SDK harness anatomy`
-  - `research(spec-0024): anthropic dreaming in cloud — curated memory`
-  - `research(spec-0024): open code provider-agnostic patterns`
-  - (opcional) `research(spec-0024): graph-based orchestration systems`
-
-### Sub-bloco [0.Brief] — Stage 1: popular `decision-brief.md` com opções
-
-> Cristalizar o que research mostra como **opções com tradeoffs**, sem cravar decisão. Recomendação inicial opcional (incluir quando evidência convergente em ≥ 1 research).
-
-- [ ] **0.B.1** Para cada `[DEC-0024-XYZ]`: registrar Pergunta + Contexto (research) + Opções (com Pró/Contra) + Recomendação inicial (opcional). Pontos complexos decompostos em sub-eixos (Forma C).
-- [ ] **0.B.2** Cross-refs entre pontos: pontos com dependência mútua explicitam vínculo.
-- [ ] **0.B.3** Atualizar tabela "Resumo de status" — todos os pontos em `Pendente` (saíram de `Open`).
-- [ ] **0.B.4** Atualizar `NEXT.md`.
-- [ ] **0.B.[COMMIT]** `docs(spec-0024): decision-brief populado com opções Stage 1`.
-
-### Sub-bloco [0.Gate] — Gate humano (decision-brief → Resolved)
-
-> **[MANDATÓRIO]** Stage 2 (Fase 1+) só inicia após este gate fechar.
-
-- [ ] **0.G.1** Owner revisa `decision-brief.md` com todos os pontos `[DEC-0024-XYZ]` em `Pendente` e opções preenchidas.
-- [ ] **0.G.2** Para cada ponto: owner escolhe opção (ou propõe nova), preenche bloco "Decisão do Gate Humano" + data + justificativa; status → `Resolved`.
-- [ ] **0.G.3** Pontos que demandem mais research voltam para [0.Research] com task derivada. Iterar até zero pontos `Pendente`/`Partial`.
-- [ ] **0.G.4** Status agregado do `decision-brief.md` mudado para `Resolved`. Bloco "✅ Gate fechado" assinado.
-- [ ] **0.G.5** `plan.md` v2 publicado: design técnico derivado das decisões cravadas. Cada subseção referencia `[DEC-0024-XYZ]` ancorante. Stage 2 deixa de ser placeholder.
-- [ ] **0.G.6** `tasks.md` v2: Fases 1–4 abaixo passam de placeholder para tasks operacionais. Status atualizado para `In Progress (Stage 2)`.
-- [ ] **0.G.7** Atualizar `NEXT.md`.
-- [ ] **0.G.[COMMIT]** `docs(spec-0024): gate humano fechado — plan v2 + tasks v2 publicados`.
+- [x] **Stage 1 — research produzida:** inventário arquitetural + comparativos (Hermes, Cursor, opencode, Spec Kitty, Multica) + findings convergidos (`F-001..F-014`) em `research/findings.md`.
+- [x] **Stage 1 — decisões cravadas:** `[DEC-0024-G00]` / `[DEC-0024-G02]` / `[DEC-0024-G06]` `Resolved`; brief reestruturado por estado.
+- [x] **Gate humano fechado** (2026-05-31, @rosanarezende): `decision-brief.md § Gate — assinaturas`.
+- [x] **`state.yml`** atualizado para `stage: implementation` / `gate.status: closed`.
+- [/] **plan.md / tasks.md "v2"** = reframe de absorção + sequência de PRs (este **PR-2**, em curso).
 
 ---
 
-## Fase 1 — Implementação A (Stage 2, dentro da 0024)
+## Fase de Absorção — execução da sequência de PRs (Stage 2, dentro da 0024)
 
-> **[PLACEHOLDER]** Tasks operacionais de Stage 2 emergem do `plan.md` v2 pós-gate.
->
-> **Framing cravado (owner, 2026-05-29):** a implementação é entregue **dentro desta spec** (Stage 2), derivada do plan v2 — handoff como projeção + ≥ 1 boilerplate/example de **referência** provando o contrato `G04`. O split `0024 → 0025` **não é pressuposto** (só se a research revelar mudança de direção relevante). Cada DEC `Resolved` do Bloco G gera ≥ 1 artefato implementável de referência (guardrail anti-"super ADR"). **Fronteira:** a implementação de referência **não** é autorização para migração em massa (Grupo B). Esta Fase 1 **será populada** com tasks de implementação após o gate, não esvaziada.
->
-> **Reinterpretação de Stage 2 (2026-05-29):** a implementação de referência é, antes de tudo, **validação arquitetural** — prova que o modelo decidido no Bloco G consegue ser materializado. Não é só "construir"; é "provar que a arquitetura se materializa" antes de generalizar (migração ampla = Grupo B). Cf. NEXT § lifecycle `Research → Decision Session → Reference Implementation → Generalization`.
+> **Execução viva.** Remover divergências decisão↔código uma a uma. Detalhe canônico de cada PR (objetivo, deps, ordem de valor, princípios) em [`plan.md` § "Sequência de PRs"](./plan.md). Cada PR estrutural: atômico/reversível + checkpoint Codex→ChatGPT→owner + `yarn validate` verde. **1 PR por vez; parar no checkpoint.**
 
-### Sub-bloco [A] — [a definir pós-gate]
-
-- [ ] **1.A.1** [pendente — emerge do plan v2]
-
----
-
-## Fase Extra Condicional (Implementação B, Migração, etc.)
-
-> **[PLACEHOLDER]** Tipicamente não-aplicável a spec research-first. Definido pós-gate se necessário.
+- [x] **PR-1** — `active-specs.yml` lista a 0024 (Codex A3). ✅ feito + gated (`87865ca`); checkpoint completo no PR #32.
+- [/] **PR-2** — reframe `spec/plan/tasks/NEXT` → absorção + dobrar a sequência de PRs no `plan.md` (Codex A2/P1/P2). **EM EXECUÇÃO** (este commit); checkpoint ao fim.
+- [ ] **PR-3** — GG-0003 Consistency Projection Check (mecânico, lista fixa de marcadores). _(dep: PR-2)_
+- [ ] **PR-4A** — Workflow Provenance · storage (`provenance.yml` append-only, `role` livre, espinha derivada). _(dep: PR-1/2; protótipo em `git stash` = referência)_
+- [ ] **PR-4B** — Workflow Provenance · projeção no `workflow continue` (fatos/pendências, não prescrição). _(dep: PR-4A)_
+- [ ] **PR-5** — AGENTS sync (`agents:build` + `agents:check` no `validate`). _(destrava PR-7)_
+- [ ] **PR-6** — GG-0002 mecanismo (`banned-concept-check` + `banned-by-dec.yml` + fixture). _(antes da remoção)_
+- [ ] **PR-7** — **CRÍTICO**: remover taxonomia do runtime/doutrina/boilerplate + ativar ban no mesmo commit. _(dep: PR-5 + PR-6)_
+- [ ] **PR-8** — corrigir path morto na msg do `gate-decidability-check`. _(flex)_
+- [ ] **PR-9** — desacoplar existência do `decision-brief` de `evidence-driven/mixed`. _(dep: PR-7)_
+- [ ] **PR-10** — tasks boilerplate único; renomear recipe/partials `tasks-evidence-driven`→genérico. _(dep: PR-7)_
+- [ ] **PR-11A** — drift-guard do legado `.specify/templates`. _(dep: PR-10)_
+- [ ] **PR-11B** — trocar fonte ativa → root canônico (⚠️ micro-decisão da owner). _(dep: PR-11A)_
+- [ ] **PR-11C** — remover legado `.specify/templates`. _(dep: PR-11B)_
+- [ ] **PR-12** — limpar docs arquiteturais de `workflowType`. _(flex)_
 
 ---
 
 ## Fase de Review → vive em `review.md`
 
-> **Modelo de 3 boundaries (cf. `[DEC-0023-M01]`):** homologação / prontidão vive em `review.md` (instanciado pós-Stage 2). `tasks.md` é execution-only e fecha 100% `[x]` ao fim da execução. O "fim da execução" = gate fechado + plan v2 + tasks v2 + **implementação de referência (Stage 2) concluída** (100% `[x]`), dentro da própria 0024.
+> **Modelo de 3 boundaries (`[DEC-0023-M01]`):** homologação/prontidão vive em `review.md` (instanciado quando a absorção amadurecer). `tasks.md` é execution-only e fecha 100% `[x]` ao fim da execução = sequência de PRs de absorção concluída (PR-1…PR-12, dentro da própria 0024).
 
 ---
 
 ## Fase de Encerramento → vive em `release-log.md`
 
-> **Operações pós-merge** vivem em `release-log.md` (instanciado pós-Stage 2 se aplicável). O encerramento cobre as decisões fundacionais cravadas + a implementação de referência entregue dentro da 0024; a **migração ampla (Grupo B)** permanece nas candidatas re-escopadas, não nesta spec.
+> **Operações pós-merge** vivem em `release-log.md`. O encerramento cobre as decisões fundacionais cravadas + a absorção entregue dentro da 0024; a **migração ampla do ecossistema (Grupo B)** permanece nas candidatas re-escopadas, não nesta spec (fronteira modelo ≠ migração).
