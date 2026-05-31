@@ -1,195 +1,84 @@
 <!-- ai-guidelines-template: decision-brief-boilerplate v=2 -->
 
-# Decision Brief — Spec 0024 Handoff as First-Class
+# Decision Brief — Spec 0024 Context Architecture
 
 > Spec: [`./spec.md`](./spec.md)
 > Plan: [`./plan.md`](./plan.md)
 > Tasks: [`./tasks.md`](./tasks.md)
-> Status agregado: **Open**
-> Última atualização: 2026-05-28 (3ª iteração do dia) — integração dos turnos tri-party 4 e 5 (ChatGPT review da iteração D04 + ChatGPT review do PR #31 já mergeado): expansão de D04 com sub-questão "critérios de elevação" + nova `[DEC-0024-F04]` ("invariantes estruturais sob enforcement sistêmico vs humano") no Bloco F. Cf. obs #6 do preâmbulo (cravada na 2ª iteração) e seção "Continuação tri-party — 3º turno e seguintes" em `research/2026-05-28-this-session-as-evidence.md`.
->
-> **2026-05-29 (elevação) —** a 0024 foi elevada a **spec fundacional de arquitetura de contexto** (decisão da owner). Adicionado **Bloco G — Arquitetura Fundacional** (`G00`-`G05`; `G00` = unidade primária, **raiz**); invariante de ordem **"nenhuma DEC de A-F estabiliza até `G00 Resolved`"**; reconciliação **`evidence-driven ≠ research-only`** (implementação dentro da 0024). Cf. `spec.md`, `research/2026-05-29-architectural-inventory.md` e obs #7 abaixo.
->
-> **2026-05-29 (G00 near-closeable) —** round de Fonte B final (Cursor + opencode) cumpriu o critério de fechamento de G00 (§4 do handoff): `[DEC-0024-G00]` → **`Pendente`**. Identidade bounded: _transformação governada de contexto humano → governança executável_ com **fronteira humano→sistema multi-seam tipada** (achado grounded: "a fronteira não é única" — seam de regras + seam de execução). `terminus` registrado como hipótese forte **deferida a G01** (NEXT #8), não coroada. Aguarda gate humano para `Resolved`. Cf. `research/2026-05-29-cursor-opencode.md`.
 
-> **Artefato canônico do gate humano entre Stage 1 (research) e Stage 2 (design + implementação).** Esta spec é `evidence-driven`. Apresenta opções com tradeoffs antes do gate humano e registra decisões validadas após o gate. **Permanece no diretório da spec após o merge** como artefato histórico.
+> **Artefato exclusivo de decisão humana** (reforma 2026-05-31). Contém **apenas** `[DEC]` em estado `Pendente` ou `Resolvido` — nada que não exija julgamento humano.
+>
+> - Perguntas abertas / evidência / síntese / achados convergidos → [`research/findings.md`](./research/findings.md).
+> - Convenções (legenda de status, convenção de IDs, formas B/C/D, checklist pós-gate, critério de saída) → `decision-brief-boilerplate.md` + `.core/process/governance-foundation.md`. A instância **não repete a constituição**.
+> - Histórico / cronologia / notas de atualização → **git**.
+>
+> **Critério de sucesso:** se um conteúdo aqui não exige **aceitar / rejeitar / reenquadrar**, ele está no artefato errado.
+
+## Decisões desta spec
+
+| ID               | Estado                    |
+| :--------------- | :------------------------ |
+| `[DEC-0024-G00]` | **Resolved (2026-05-31)** |
+| `[DEC-0024-G02]` | Pendente                  |
+| `[DEC-0024-G06]` | Resolved (2026-05-30)     |
+
+> Perguntas ainda não convergidas (ex-`G01/G03/G04/G05` e os blocos de pressão `A`–`F`) **não são decisões** — vivem como **findings abertos** em [`research/findings.md`](./research/findings.md) e só retornam aqui como `[DEC] Pendente` quando convergirem e exigirem julgamento. **(2026-05-31 — `G00` Resolved: o invariante de ordem cumpriu-se; G01+ está destravado para investigação estrutural, mas aceitar G00 não resolve esses temas.)**
 
 ---
 
-## Preâmbulo — Síntese empírica observada (não-decisional, cravada)
+### [DEC-0024-G00] (RAIZ) Unidade arquitetural primária do framework
 
-> Este preâmbulo registra **fatos operacionais observados** que motivam a spec, não decisões a serem tomadas. Cravado para impedir que research re-derive premissas já validadas. Cresce conforme novas observações empíricas emergirem (com cross-ref a research artifacts).
+> **A unidade arquitetural primária do ai-guidelines é a transformação de `contexto humano → governança executável`.**
 
-**Observações cravadas:**
+**A única pergunta do gate:** _concordo ou não concordo com a afirmação acima?_
 
-1. **Handoff situado > distribuição estática** (Spec 0023 PR4 / 2026-05-22 + sessão de planejamento desta spec / 2026-05-28). Sessão IA iniciada com handoff redigido manualmente alcançou aderência ao processo qualitativamente superior à sessão iniciada apenas com `AGENTS.md` + arquivos por canal. Diferença não-marginal, de classe operacional. Princípio cravado em ADR 0022.
+**O que está sendo aceito:**
 
-2. **Memory feedbacks de provider não viajam** (observação 2026-05-20). Salvos em `~/.claude/projects/.../memory/` são local-only — não viajam entre providers nem entre máquinas. Gap estrutural: contexto que deveria ser portável acumula em camada não-portável.
+- a unidade primária é uma **transformação** (`contexto humano → governança executável`);
+- é o que o framework modela na raiz — o ponto de partida do qual o resto deriva.
 
-3. **Pressão "consciência ≠ aderência" é universal, não única do projeto** (síntese de transcrições 2026-05-28). Lucas Montano abre vídeo Hermes literalmente com "quantas vezes essa semana tu teve que explicar a mesma coisa pro cloud?" — exatamente a formulação do ai-guidelines. Diferencial do framework: leitura **governance-first** da pressão (não memory-first como Hermes/OpenCloud, não harness-first como Cursor SDK).
+**O que NÃO está sendo aceito:**
 
-4. **Tri-party humano + Claude + ChatGPT emergiu sem ritual** (sessão 2026-05-28, segundo caso documentado após Spec 0023 PR5/PR #25). ChatGPT como segunda opinião sobre tensão da cláusula anti-paper da ADR 0023; Claude como implementador + análise; owner como decisão final. Cf. item `[1.H.10]` da 0023 (avaliação de promoção a ADR pendente; critério "≥ 2 specs adicionais OU adoção espontânea").
+- **não** é a afirmação de que isto "explica tudo" no framework — é **identidade arquitetural**, não explicação universal;
+- **não** decide a estrutura/gramática (pilares, taxonomia, pipeline, projeções) — isso é **G01-G05**;
+- **não** crava a fronteira fina que distingue esta classe de outros sistemas governados (o `terminus`) — deferido a G01.
 
-5. **Lifecycle de spec/decision-brief/ADR já É pipeline de promoção** (insight crystalized 2026-05-28). Hermes faz `task completion → pattern extraction → skill creation → skill refinement` em agent runtime. ai-guidelines faz `observação → backlog → spec → decision-brief → ADR/regra` em governance lifecycle. Mesma forma estrutural. Implicação: handoff = projeção/lookup; aprendizado vive no lifecycle humano-curado existente. Conflar viola ADR 0018.
+**Concorrentes considerados** (por que nenhum é a unidade _primária_):
 
-6. **Pipeline de promoção tem unidade nomeada faltando** (insight crystalized via review do ChatGPT do PR #30 — 3º turno tri-party da sessão / 2026-05-28). Embora o lifecycle exista (obs #5), o framework usa termos diversos sem hierarquia formal: _observação, padrão, sinal recorrente, regra situacional, regra formal, skill, insight, comportamento, ADR_. Sem taxonomia clara, perguntas de Bloco D ficam indefinidas (não há resposta operacional para "quando algo sobe de nível?"). Hipótese inicial: pode existir cadeia tipo `observação → sinal recorrente → regra situacional → regra formal → ADR`, mas forma exata emerge da research dos sistemas externos. Cravado como `[DEC-0024-D04]` (pré-requisito para D01-D03). Cf. seção "Continuação tri-party — 3º turno" em `research/2026-05-28-this-session-as-evidence.md`.
+- **spec** — é um agrupamento/projeção de trabalho; o framework também modela o que não é spec (regras, ADRs, handoffs). Não é a raiz.
+- **task** — é unidade de **execução** derivada do plano (a ponta do fluxo); só existe depois da decisão. Não gera o resto.
+- **decision** — é um **momento** dentro da transformação (o ponto de julgamento); a transformação a contém, não o contrário.
+- **finding** — é um **estado intermediário** (conhecimento convergido); insumo da transformação, não a transformação.
+- **artifact** — é **produto/projeção** da transformação (saída por estado/consumidor); o que ela emite, não a raiz.
+- **workflow** — é a **sequência observável** em que a transformação se manifesta no tempo; descreve o fluxo, não a unidade modelada.
 
-7. **A pergunta da unidade primária de modelagem é load-bearing e recorrente** (observado 2026-05-22 → 2026-05-29). O sinal "as fronteiras `deterministic/mixed/evidence-driven` estão borradas" apareceu em ≥ 2 contextos independentes: (a) backlog `boilerplate-system-modernization` linha 78 (2026-05-22 — spec "deterministic" carregando `decision-brief.md`); (b) esta sessão (reconciliação `evidence-driven ≠ research-only` + inconsistência observada entre `spec.md` e `decision-brief` sobre Stage 2). **Observação operacional (não-decisional):** a taxonomia de tipos de spec e a unidade primária de modelagem influenciam diretamente seleção/promoção/projeção/handoff. A **decisão** decorrente — elevar a 0024 a spec fundacional + abrir o Bloco G — está cravada em `spec.md` e no inventário arquitetural (`research/2026-05-29-architectural-inventory.md`); aqui registra-se apenas o **fato observado** que a motivou.
+**Escopo da decisão:**
 
-8. **O decisor humano é um consumidor de contexto ainda não modelado** (observado por dogfooding nesta sessão, 2026-05-29). A tomada de decisão da própria 0024 seguiu um fluxo recorrente: `research produz opções → decision-brief organiza tensões → leitor tardio (ChatGPT) expõe pressupostos ocultos → visualizações (overview.png/v2) constroem modelos mentais → owner decide → plan/tasks derivam`. Esse fluxo **consolida mecanismos já observados isoladamente** — leitor tardio (NEXT #2 + evidence artifact), curadoria via prompts estruturados, artefatos visuais — num processo governado distinto de research e de implementação. **Fato observado, não-decisional**; a hipótese arquitetural decorrente (`decision session`) vive em `[DEC-0024-G05]`.
+- **G00 responde à identidade arquitetural** (_qual é a unidade primária_).
+- **G01 permanece aberto** para estrutura/gramática (_como ela se organiza_).
+- **Aceitar G00 não resolve G01.**
 
-9. **Handoff reinstala contexto de trabalho, mas não contexto operacional** (descoberto por dogfooding na retomada 2026-05-29). O handoff de retomada (`research/2026-05-29-handoff-next-session.md`) preservou com alta fidelidade o **contexto de trabalho** (artefatos, hipóteses, refutações, critérios de fechamento, próximos passos) — a sessão retomou a investigação sem re-derivar premissas. Mas **não reinstalou o contexto operacional** (idioma de resposta, convenções de saída, disciplina de falsificação como modo ativo, modo tri-party): a evidência é que o agente retomou **respondendo em inglês**, violando `[GR-0201]` (default pt-BR), apesar de o handoff §2 condensar as 7 regras do projeto — que **omitiram o idioma**. **Distinção cravada:** _contexto de trabalho_ (o quê / onde está a investigação) ≠ _contexto operacional_ (como se opera: idioma, convenções, disciplinas, papéis). Um handoff de primeira classe deve reinstalar **ambos explicitamente**; o atual cobre muito melhor o primeiro. **Fato observado, não-decisional**; alimenta `[DEC-0024-G05]` (o handoff é uma projeção que precisa carregar operational context), **ADR 0022** (handoff situado) e o contrato de handoff. Cf. `research/2026-05-28-this-session-as-evidence.md` (mesmo gênero: a própria sessão como dado).
+**Decisão do Gate Humano (`aceitação`):**
 
-10. **A decision-brief define a ESTRUTURA da decisão, não a INTERAÇÃO de decisão** (descoberto por dogfooding 2026-05-29, na revisão do gate de G00). Dois fatos: (a) o G00 foi redigido inicialmente **fora do boilerplate** (`decision-brief-boilerplate v=2`, Forma B/C: tabela de Opções com Pró/Contra + bloco "Decisão do Gate Humano"), o que **dificultou a análise da owner** — lapso de **contexto operacional** (obs #9: seguir convenções é parte do _como se opera_; corrigido no mesmo dia, reformatando G00 para Forma B). (b) Mesmo com o boilerplate respeitado, a owner levantou que **o framework não define como o decisor é conduzido a decidir cada DEC quando a research fecha** — o boilerplate entrega a **estrutura estática** (tabela + gate block), não a **interação** (sequência entre DECs, dependências, facilitação, projeção _gate-ready_ por decisão, sobretudo para a raiz densa). **Distinção cravada:** _estrutura da decisão_ (Forma B/C) ≠ _interação de decisão_ (como o decisor é guiado pela brief pronta até cravar). **Fato observado, não-decisional**; alimenta `[DEC-0024-G05]` (o decisor humano é consumidor de 1ª classe — obs #8; a `decision session` precisa de uma **projeção gate-ready**, não do brief cru) e tem a forma de obs #9 (processo falha → falha observável → explicação estrutural → candidato a invariante).
-
-11. **A fronteira `research → decision-brief` não estava modelada** (exposto por leitor tardio — ChatGPT, 2026-05-30, na revisão do gate de G00). A research não tinha **critério de parada**: elimina alternativas sucessivamente até restar uma, e nesse instante entrega ao brief uma _conclusão_ (resposta única), não o _resultado_ (opções vivas) — `research → decisão`, curto-circuitando `research → decision-brief → decisão`. O gate recebeu uma decisão já cristalizada (ratificação, não autoria; seta `humano → sistema` invertida, ADR 0018). **Distinção cravada:** _entendimento suficiente para decidir_ ≠ _resposta única sobrevivente_; o objetivo da research é **tornar a decisão possível**, não _descobrir a verdade_. **Fato observado, não-decisional**; preservado em `research/2026-05-30-research-output-contract.md` (output do ChatGPT como evidência-origem). Alimenta `[DEC-0024-G06]` e o contrato da cadeia em `governance-foundation.md` § "Contrato da cadeia".
-
-**Convergências observadas em sistemas externos** (síntese rápida; detalhada em `research/`):
-
-- Markdown vence como SSOT (Hermes, Cursor, Open Code, ai-guidelines — todos).
-- Harness é o produto, modelo é commodity (Lucas Montano "modelo = 20%, harness = 80%"; Cursor SDK valida).
-- Provider-agnosticism é diferencial econômico (Open Code; Microsoft cancellation do Cloud Code valida pressão de custo).
-- Skill-as-procedure (Hermes) e tasks-as-boundary (ai-guidelines) são leituras diferentes da mesma pressão.
-
-**Lacuna observada (diferencial governance-first do ai-guidelines):**
-
-Nenhum dos sistemas estudados trata **governança do próprio processo** como eixo de primeira classe. Hermes governa skills; Cursor governa código; Open Code é stateless; ai-guidelines governa o processo spec/decision/execution. Esse é o nicho que esta spec precisa preservar e investigar.
-
----
-
-## Legenda canônica de status
-
-| Status     | Significado                                                                                                        |
-| :--------- | :----------------------------------------------------------------------------------------------------------------- |
-| `Open`     | Ponto criado, sem opções populadas (ainda em research).                                                            |
-| `Pendente` | Opções populadas com tradeoffs, aguardando o gate humano.                                                          |
-| `Partial`  | Algumas sub-decisões cravadas, outras abertas. Aplica-se apenas a pontos com sub-eixos.                            |
-| `Resolved` | Escolha cravada com data + owner. **Imutável** — mudanças posteriores vão para `plan.md` § "Decisões revisitadas". |
-
-**Status agregado da brief:** `Open` enquanto nenhum ponto saiu de `Open`/`Pendente`. `Partial` quando ≥ 1 ponto está `Resolved` mas há outros não-resolvidos. `Resolved` quando todos os pontos estão `Resolved` — gatilho do checklist pós-gate.
+- **Status:** [ ] Pendente | [x] **Resolvido**
+- **Ato do gate:**
+  - [x] **Aceitar** — concordo com a afirmação.
+  - [ ] **Rejeitar**
+  - [ ] **Reenquadrar**
+- **Justificativa (owner):**
+  - A investigação convergiu para uma **única candidata estável** sob todos os testes realizados.
+  - Nenhum concorrente (`spec`, `task`, `decision`, `finding`, `artifact`, `workflow`) demonstrou poder explicativo superior nem ocupou legitimamente o papel de unidade arquitetural primária.
+  - As rodadas posteriores passaram a discutir estrutura, gramática, estados, artefatos, governança, trilhos e comportamento do sistema — temas **fora do escopo de G00** (pertencem a **G01+**).
+  - **Não há lacuna de evidência** bloqueando a decisão; o risco dominante neste ponto é **refinar indefinidamente** algo já suficientemente delimitado.
+  - A aceitação **não implica** aceitar explicações causais, gramática estrutural, taxonomia final, modelo de estados, promotion pipeline, mecanismo Finding→DEC ou qualquer tema em investigação.
+  - Aceita-se **exclusivamente** a afirmação: _a unidade arquitetural primária do ai-guidelines é a transformação de `contexto humano → governança executável`._
+- **Data / Owner:** 2026-05-31 / @rosana
 
 ---
-
-## Convenção de IDs
-
-- **Formato:** `[DEC-0024-XYZ]` — `X` = letra do bloco (A, B, …); `YZ` = sequência ordinal de 2 dígitos.
-- **Pontos derivados** durante research: abrir novo ponto com nota de origem; manter sequência sem reusar gaps.
-- Após `Resolved`, **nunca editar retroativamente** — mudanças vão para `plan.md` § "Decisões revisitadas".
-
----
-
-## Estrutura dos blocos
-
-O **Bloco G — Arquitetura Fundacional** (adicionado 2026-05-29 com a elevação da spec) é a **camada-base**: precede A-F e define _o que existe / como evolui / como se relaciona_. **`G00` é a DEC RAIZ** (unidade primária de modelagem). **Invariante de ordem: nenhuma DEC dos blocos A-F é estruturalmente estável — nem `Resolved` no gate — enquanto `G00` não estiver `Resolved`.** G00 pode reinterpretar DECs `Open` de A-F.
-
-Os blocos **A, B, D, E, F** mapeiam um-para-um aos **5 eixos de pressão arquitetural** (per síntese 2026-05-28 / cf. [`research/2026-05-28-pressure-axes-scope.md`](./research/2026-05-28-pressure-axes-scope.md)). O **Bloco C — Saúde Técnica** é bloco **transversal mandatório** do template canônico de decision-brief (cf. [`.ai-guidelines/templates/decision-brief-boilerplate.md`](../../../.ai-guidelines/templates/decision-brief-boilerplate.md) § "Bloco C") — **não** um sexto eixo de pressão.
-
-- **Bloco G** — Arquitetura Fundacional _(camada-base; precede A-F; `G00` raiz)_
-- **Bloco A** — Seleção _(eixo de pressão)_
-- **Bloco B** — Persistência _(eixo de pressão)_
-- **Bloco C** — Saúde Técnica _(transversal mandatório — template)_
-- **Bloco D** — Promoção _(eixo de pressão)_
-- **Bloco E** — Projeção _(eixo de pressão)_
-- **Bloco F** — Governança _(eixo de pressão)_
-
-Pontos iniciais entram como `Open` com pergunta cravada e contexto pendente. Opções emergem da research (**Fonte A** interna + **Fonte B** externa) dos sistemas enumerados em `spec.md § Pesquisa de contexto`.
-
----
-
-## Bloco G — Arquitetura Fundacional
-
-> **Camada-base (precede A-F; adicionada 2026-05-29 com a elevação da spec).** Define _o que existe / como evolui / como se relaciona_ no framework. `G00` é a **DEC RAIZ**; G01-G05 dependem dela. Espinha arquitetural: `G00 unidade → G01 pilares → G02 taxonomia → G03 promotion pipeline → G04 contrato materializável → G05 projeções`.
->
-> **Invariante de ordem:** nenhuma DEC de A-F é estruturalmente estável (nem `Resolved` no gate) enquanto `G00` não estiver `Resolved`. G00 pode reinterpretar DECs `Open` de A-F (D04, E01-E03, F01-F04, A01-A03).
->
-> **Base de evidência (DUAS fontes obrigatórias):** **Fonte A** — auditoria estrutural interna (artefatos/histórico + inventário arquitetural); **Fonte B** — research externa (Hermes, Spec Kitty, Open Code, Cursor, Anthropic) para revelar **modelos alternativos** e evitar viés de confirmação. **Nenhuma DEC de G fecha só com Fonte A.**
->
-> **Fronteira modelo ≠ migração:** G decide o _modelo_ (taxonomia, contrato, core, projeção). A _migração/execução_ (retrofit, cutover, re-modeling de domínio) é Grupo B do inventário — faseada, fora desta camada. Cf. [`research/2026-05-29-architectural-inventory.md`](./research/2026-05-29-architectural-inventory.md).
-
-### [DEC-0024-G00] (RAIZ) Qual é a unidade primária de modelagem do framework?
-
-**Pergunta:** O framework modela o trabalho primariamente por `spec`, por `pilar` (work-item kind, ADR 0010), por `lifecycle`, por `artefato`, ou por uma **categoria ainda não identificada**? Hoje assume-se implicitamente `spec = unidade primária`.
-
-**Modo de gate:** `aceitação` <!-- a research convergiu numa identidade (Opção C); o gate aceita/rejeita/reenquadra, não escolhe entre A/B/C refutadas. Cf. obs #11 + governance-foundation § "Modos de gate". -->
-
-**Contexto (research):**
-
-- **Hipótese a investigar (recomendação inicial, NÃO veredito):** `pilar = unidade primária`, e a `spec` é apenas uma _projeção organizacional_ de um work-item do pilar `spec`. Se verdadeiro, explica a erosão de `deterministic/mixed/evidence-driven`, o reaparecimento dos mesmos artefatos, o desconforto com boilerplates e a própria necessidade de handoff.
-- **Fonte A:** ADR 0010 já estabelece `WorkItemKind` (7 pilares) como classificação MECE no domínio; o lifecycle e os boilerplates, porém, são hoje spec-cêntricos. Há tensão a auditar.
-- **Fonte B (obrigatória):** como Hermes/Cursor/Open Code/Spec Kitty modelam a unidade primária (task? skill? session? spec?) — revela modelos alternativos.
-- **Disciplina de falsificação (anti-fechamento-prematuro):** o risco dominante da spec passou de "escopo" para **fechar G00 cedo demais**. Fonte B tem papel **ativo de refutar** a hipótese favorita; G00 fecha por sobrevivência à refutação, não por confirmação. Lista de candidatas não-exaustiva (manter aberta "categoria não identificada"). Cf. `research/2026-05-28-pressure-axes-scope.md § Camada fundacional`.
-- **Dependentes:** G01-G05 e DECs `Open` de A-F dependem do resultado (invariante de ordem).
-
-**Síntese da research (Fontes A + B — 6 sistemas: interno + Spec Kitty, Hermes, Multica, Cursor, opencode)** — sobreviveu a múltiplas rodadas de falsificação (cf. `research/2026-05-29-g00-research-state.md` e `research/2026-05-29-cursor-opencode.md`):
-
-- **Refutado:** unidade = objeto único — framework é multi-entidade grounded; cada "objeto-raiz" entra em regresso infinito (o nível acima o dissolve). Refutado também: transformação **universal** (Multica/Hermes são object-centric/autônomos).
-- **Grounded (load-bearing):** a **fronteira humano→sistema não é única** — ≥2 seams (regras + execução) independentes; "espessura" é **por-seam**. "Julgamento cristalizado em governança versionada" é **convenção cross-tool** (`.cursor/rules` / `AGENTS.md` / `CLAUDE.md`), logo não é, sozinho, o separador de classe.
-
-<!-- Forma D (modo `aceitação`): finding convergido — sem tabela Pró/Contra (seria teatro de escolha) e sem "Recomendação inicial" (seria advocacy-para-aceitação). Reescrito 2026-05-30 para dogfoodar o próprio contrato da cadeia. -->
-
-**O que está sendo aceito (bounded):**
-
-- a raiz é um **mecanismo** (transformação governada), não um objeto nem uma transformação universal;
-- a **assinatura de classe** é uma fronteira humano→sistema **multi-seam e tipada** (mín.: seam de regras + seam de execução);
-- os objetos de 1ª classe (`Rule`, `Registry`, `Recipe`, `WorkItem`, `ADR`, `Promotion`, `Handoff`) são **fases / projeções**, não a raiz.
-
-**O que NÃO está sendo aceito (limites explícitos):**
-
-- o **separador fino** de classe (o `terminus`) — **deferido a G01**, não cravado aqui;
-- a gramática formal (pilares / taxonomia / pipeline / projeções) — é **G01-G05**;
-- C é **assinatura de classe**, não ontologia completa.
-
-**Por que as alternativas falham + o que reabriria** (falsificabilidade — substitui a tabela Pró/Contra):
-
-- **A — objeto único** (`spec`/`pilar`-`WorkItemKind`/`artefato`): refutada — multi-entidade grounded; cada raiz regride (o nível acima a dissolve). _Reabre se:_ surgir um objeto que não regrida sob nenhum nível superior.
-- **B — transformação universal**: refutada — Multica/Hermes são object-centric/autônomos; não-universal. _Reabre se:_ um modelo unificar todos os sistemas sem perder poder explicativo.
-- **D — categoria não identificada**: sem sustentação após 6 sistemas. _Reabre só_ com refutação nova de C.
-- **C falsificável por:** um sistema governance-first com fronteira de seam único; ou C falhando em explicar a órbita da 0024 (handoff / boilerplates / taxonomia / decision-session / promotion).
-
-**Ressalva (leitor tardio, 2026-05-29):** _critérios atendidos ≠ G00 encerrado_. Estado real: `research concluída · critérios atendidos · gate pendente`. Quem crava é o bloco **Decisão do Gate Humano** abaixo.
-
-**Formulação exata de C (citável pós-gate):**
-
-> A unidade primária do ai-guidelines **não é um objeto nem uma transformação universal**. É a **transformação governada de `contexto humano → governança executável`**, cuja **assinatura de classe** (governance-first; ADR 0018) é uma **fronteira humano→sistema multi-seam e tipada** (no mínimo: _seam de regras_ — julgamento cristalizado em governança versionada — e _seam de execução_ — gate/política). Os objetos de 1ª classe (`Rule`, `Registry`, `Recipe`, `WorkItem`, `ADR`, `Promotion`, `Handoff`) são **fases / estruturas / produtos / projeções** dessa transformação — não a raiz.
->
-> **Falsificável por:** um sistema governance-first com fronteira de seam único; ou a transformação falhando em explicar a órbita da 0024 (handoff / boilerplates / taxonomia / decision-session / promotion).
-
-**Dispositions das perguntas abertas (research-state §Camada 2) — atende ao critério §4.2:**
-
-- **#1** lente "tipo de responsabilidade" (julgamento/aprovação/delegação/aprendizado): **overlay descritivo, não separador** (julgamento aparece nos harnesses) → taxonomia fina **defere a G01**.
-- **#2** Cursor/Open Code engrossam ou afinam: **respondida** — afinam execução, engrossam regras (fronteira por-seam); **bound** a formulação, não refutam.
-- **#3** `Decision → Rule` runtime vs processo → **defere a G03**.
-- **#4** formulação bounded basta vs gramática → **basta como assinatura de classe** em G00; formalização é **G01-G05**.
-- **#5** `status` (WorkItem) vs `stage` (WorkflowState) — 1 ou 2 eixos → **defere a G01/G03**.
-
-**Hipótese forte registrada e DEFERIDA (não coroar):** o **`terminus`** do cruzamento no seam de regras (_artefato governado executável, sem LLM no runtime_ vs _steering para geração autônoma_) pode ser o separador de classe real. É Camada 3 (atraente, grounded-ish, **não falsificada** por contraste suficiente). **Não reabre G00** — vai para `NEXT.md` (#8) como candidata de **G01**. Disciplina (correção tri-party do owner, 2026-05-29): não substituir a hipótese elegante anterior por uma nova hipótese elegante.
-
-**Decisão do Gate Humano:**
-
-- **Modo de gate:** `aceitação` — a research convergiu numa identidade (Opção C); o ato do gate é **aceitar / rejeitar / reenquadrar**, não escolher entre A/B/C com as demais já refutadas (cf. obs #11 + governance-foundation § "Modos de gate").
-- **Status:** [x] Pendente | [ ] Resolvido
-- **Ato do gate (marque com `x`):**
-  - [ ] **Aceitar** a identidade C — transformação governada + fronteira multi-seam tipada
-  - [ ] **Rejeitar** — a formulação não se sustenta (registrar o que falhou; reabre research)
-  - [ ] **Reenquadrar** — aceitar com ajuste de fronteira/escopo (registrar o ajuste)
-- **Justificativa / Ressalvas:** >
-  [owner preenche no gate. Cobrir: (a) aceitar/rejeitar/reenquadrar C; (b) autorização para disparar a cascata do invariante — A-F estabilizam, G01-G05 colapsam em facetas; (c) destino de `terminus` (G01).]
-- **Data / Owner:** **\_\_\_\_** / @rosana
-
-### [DEC-0024-G01] Os 7 pilares MECE (ADR 0010) são a estrutura primária?
-
-**Pergunta:** A relação canônica é `tipo da spec → artefatos → lifecycle` (modelo atual implícito) ou a inversão `7 pilares → artefatos necessários → lifecycle → tipo percebido da spec`?
-
-**Contexto (research):**
-
-- ADR 0010 (Aceita) crava os 7 pilares (`spec/experiment/spike/incident` Dense + `fix/patch/proposal` Virtual) por intenção de saída, com política de promoção (`proposal→spec`, `experiment→spec`). **A taxonomia MECE não está em questão** — investiga-se se ela é a **raiz da modelagem** (e da arquitetura de contexto), em vez de subordinada à `spec`.
-- Depende de G00. Se `pilar = unidade primária`, esta inversão é provavelmente confirmada.
-
-**Status:** Open
 
 ### [DEC-0024-G02] Taxonomia `deterministic/mixed/evidence-driven` → removida; substituída por bloco + propriedade `exige-julgamento`
 
-**Direção decidida (owner, 2026-05-30):** a taxonomia dos 3 tipos **será removida** — decisão de produto, no nível de direção. G02 **não investiga mais _se_ a taxonomia cai**; o trabalho é **projetar o modelo substituto, avaliar impacto e preservar invariantes**. Permanece `Pendente` apenas pelo **ato formal do gate** (cristalizar o desenho + ordem do invariante com G00); a **remoção física** vem depois (plano de migração). Boilerplates vivos já foram corrigidos ao contrato (consistência constitucional).
+**Direção decidida (owner, 2026-05-30):** a taxonomia dos 3 tipos **será removida** — decisão de produto, no nível de direção. G02 **não investiga mais _se_ a taxonomia cai**; o trabalho é **projetar o modelo substituto, avaliar impacto e preservar invariantes**. Permanece `Pendente` apenas pelo **ato formal do gate** (cristalizar o desenho + ordem do invariante com G00); a **remoção física** vem depois (plano de migração).
 
 **Modo de gate:** `aceitação` — o gate aceita/reenquadra **o modelo substituto** (não "se a taxonomia é sintoma" — isso está decidido).
 
@@ -201,13 +90,11 @@ Pontos iniciais entram como `Open` com pergunta cravada e contexto pendente. Op�
 
 **O que NÃO está sendo aceito ainda:** a **remoção física** (plano de migração, pós-cristalização); o mecanismo legível exato de declaração do bloco (marcador vs derivação — ver desenho); nada que dependa de G00 estabiliza aqui.
 
-**Por que a taxonomia caiu (justificativa da direção — settled):** exigia sincronização manual de 3 modelos paralelos (drift recorrente: `mixed` sempre atrás); fronteiras borradas (obs #7); a única diferença real entre os tipos era presença/ausência de julgamento. Runtime/registry/ADR **não dependem** dela (footprint = enum `WorkflowType` + recipe/partials [G04] + doc). _Só reabriria_ se G01 revelasse invariante próprio de um tipo.
+**Por que a taxonomia caiu (justificativa da direção — settled):** exigia sincronização manual de 3 modelos paralelos (drift recorrente: `mixed` sempre atrás); fronteiras borradas; a única diferença real entre os tipos era presença/ausência de julgamento. Runtime/registry/ADR **não dependem** dela (footprint = enum `WorkflowType` + recipe/partials [G04] + doc). _Só reabriria_ se G01 revelasse invariante próprio de um tipo.
 
-**Evidência / desenho:** `research/2026-05-30-unified-tasks-model.md` (modelo substituto + impacto por classe + plano de migração) · `research/2026-05-30-g02-taxonomy-elimination.md` (invariantes a preservar + impacto grounded) · `research/2026-05-30-projection-vs-entity-lens.md` (padrão; fixpoint = contexto).
+**Evidências** (consolidadas em [`research/findings.md`](./research/findings.md)): **F-004** (taxonomia = projeção do crivo de julgamento; impacto grounded), **F-005** (DEC = registro, não gatilho). **Desenho:** `research/2026-05-30-unified-tasks-model.md` (modelo substituto + impacto por classe + plano de migração).
 
-**Reflexo:** reenquadra `[DEC-0024-G01]` (a propriedade primária é bloco + `exige-julgamento`, não tipo-de-spec) — alimenta, não decide.
-
-**Dependência de G00 (explícita):** este modelo substituto **assume a identidade C atualmente convergida em G00** (`contexto humano → governança executável`; a cadeia `incerteza → julgamento → gate → DEC registra` nasce dela). **Se G00 for reenquadrado materialmente no gate, o substituto de G02 deve ser reavaliado.** Distinção: a **direção** (remover a taxonomia) é robusta a isso — sobrevive porque a única diferença real entre os tipos é presença/ausência de julgamento; o **desenho do substituto** não necessariamente.
+**Dependência de G00 (explícita):** este modelo substituto **assume a identidade C atualmente convergida em G00** (`contexto humano → governança executável`; a cadeia `incerteza → julgamento → gate → DEC registra` nasce dela). **Se G00 for reenquadrado materialmente no gate, o substituto de G02 deve ser reavaliado.** Distinção: a **direção** (remover a taxonomia) é robusta a isso; o **desenho do substituto** não necessariamente. **(2026-05-31 — G00 Resolved: C foi _aceito_, não reenquadrado → a premissa do substituto está confirmada e a ressalva não disparou. G02 segue `Pendente` pelo seu próprio gate.)**
 
 **Decisão do Gate Humano (`aceitação`):**
 
@@ -216,48 +103,7 @@ Pontos iniciais entram como `Open` com pergunta cravada e contexto pendente. Op�
 - **Justificativa / Ressalvas:** > [owner crava no gate de G02]
 - **Data / Owner:** **\_\_** / @rosana
 
-### [DEC-0024-G03] Qual é o promotion pipeline canônico?
-
-**Pergunta:** Como unidades evoluem? Reconciliar a **promoção de work-item** (ADR 0010: `proposal→spec`, `experiment→spec`) com a **cadeia de promoção contextual** (`observação→sinal→regra situacional→regra formal→ADR`, cf. D01-D04). São o mesmo pipeline em níveis diferentes, ou dois pipelines distintos?
-
-**Contexto (research):**
-
-- **Reconcilia `[DEC-0024-D04]`** ("unidade canônica de promoção contextual"), que passa a ser **consequência** de G00/G03, não DEC isolada do Bloco D.
-- Fonte A: ADR 0010 § promoção + os DECs D01-D04. Fonte B: Hermes (skill loop), Spec Kitty (coordenação spec-driven).
-
-**Status:** Open
-
-### [DEC-0024-G04] Qual é o contrato mínimo de boilerplate + o core comum?
-
-**Pergunta:** Qual é o **núcleo compartilhado** que todo boilerplate (por pilar/tipo) instancia, e o **contrato mínimo** que impede uma nova spec de reproduzir o lifecycle antigo (ex.: a inversão `[DEC-0023-D01]`)?
-
-**Contexto (research):**
-
-- **Posição arquitetural (núcleo, NÃO consequência operacional):** após a elevação, G04 é a **camada de materialização física** do modelo decidido em G00-G03 — onde a ontologia (`unidade → pilares → taxonomia → pipeline`) vira artefato instanciável. Não é "apenas contrato de boilerplate"; é o ponto em que o núcleo arquitetural se torna concreto.
-- **Modelo, não migração:** G04 define o _core_ + contrato e prova com **1 boilerplate de referência**. O retrofit dos 6 boilerplates por classe + versionamento + stack-agnostic é Grupo B (`boilerplate-system-modernization`).
-- Liga `[DEC-0024-F04]` (invariantes sob enforcement) — o contrato declara quais invariantes são enforced sistemicamente vs humanos.
-- Fonte A: research §8.1 da 0023 (invariantes universais: accountability + traceability + outcome registration); boilerplates atuais.
-- **Casa canônica dos templates (topologia de fonte) — decisão obrigatória nesta DEC:** o framework mantém **tri-root** de templates — `.core/governance/templates/` (recipe-source novo; só `tasks-evidence-driven` migrado, 1 de 11), `.specify/templates/` (fonte-legada **deprecada**, ainda lida pela CLI) e `.ai-guidelines/templates/` (mirror-consumidor). A duplicação é **hand-maintained** (não há render que regenere o flat a partir dos partials; o `LegacyMirrorContract` só checa existência) → **fonte ativa de drift e erro**, dogfooded nesta sessão (o contrato da cadeia precisou ser editado em ≥ 4 cópias). G04 (modelo) **deve cravar a fonte única canônica + precedência + ownership**; a execução (cutover, eliminar mirrors, terminar a migração de recipes) é Grupo B (`runtime-and-template-root-consolidation`, "Fase 4 — colapsar templates"). **G04 não fecha sem decidir a casa única.** Liga `[DEC-0024-G05]` (projeções) e Bloco F (ownership/governança). Cf. backlog § `runtime-and-template-root-consolidation` + `research/2026-05-29-architectural-inventory.md`.
-
-**Status:** Open
-
-### [DEC-0024-G05] Quais projeções derivam da mesma SSOT, e como cada consumidor a recebe?
-
-**Pergunta:** Uma SSOT (state + tasks + decision-brief + ADRs + registry) gera N projeções determinísticas por consumidor (handoff, wizard, `AGENTS.md`, briefing, dashboard). Qual o modelo canônico de projeção (formato + densidade + gatilho por consumidor)?
-
-**Contexto (research):**
-
-- **Eleva e consolida o Bloco E** (E01-E03 passam a ser instâncias deste modelo). Handoff = uma projeção; dashboard = Grupo C consumidor.
-- Liga ADR 0023 (meta-artefatos YAML SSOT + derivações determinísticas; **sem LLM no runtime** — ADR 0018).
-- Fonte B: Cursor (session restore), Open Code (provider-agnostic), Anthropic Dreaming (curated review).
-- **Consumidor de primeira classe ainda não modelado — o decisor humano no gate.** Hipótese emergente (dogfooding 2026-05-29, cf. obs #8 do preâmbulo): existe um processo governado **`decision session`** — distinto de research e de implementação — em que o owner transforma opções abertas em decisões confiáveis. Perguntas abertas: o `decision-brief` sozinho basta, ou há projeções complementares que apoiam a decisão (diagramas, comparações, leitor tardio, dashboards, simulações)? A resposta final da 0024 pode ser uma **família** de projeções (`handoff`, `briefing`, `decision-session`, `dashboard`, `review`), não só `handoff`. Sem DEC própria por ora — pergunta aberta dentro de G05 (regra 7: sinal emergente).
-- **Sub-pergunta concreta (obs #10, 2026-05-29): _interação_ de decisão, não só estrutura.** O boilerplate entrega a estrutura **estática** da decisão (Forma B/C: Opções + gate block); falta o **como** o decisor é conduzido a decidir cada DEC quando a research fecha — sequência entre DECs, dependências, e uma **projeção _gate-ready_ por DEC** (candidata: a "decision walk" — Pergunta + Opções lado-a-lado com Pró/Contra + recomendação com força de evidência + a única pergunta a responder + os campos de gate vazios). Candidata a ser a **primeira projeção concreta da `decision session`**, testável por dogfooding na própria 0024. **Não cravar mecanismo antes da research de G05** (regra 7).
-
-**Status:** Open
-
-### Critério de saída do Bloco G
-
-G fecha **somente** quando `G00`-`G05` estão `Resolved` no gate, cada uma com evidência **Fonte A + Fonte B**. `G00` resolve-se **antes** de estabilizar A-F. G parcialmente aberto bloqueia o fechamento do Stage 1.
+---
 
 ### [DEC-0024-G06] Contrato da cadeia `research → … → implementação` (decisão de processo)
 
@@ -265,346 +111,8 @@ G fecha **somente** quando `G00`-`G05` estão `Resolved` no gate, cada uma com e
 
 **Modo de gate:** `aceitação` <!-- decisão de processo em sessão colaborativa humano-agente, 2026-05-29/30; cf. governance-foundation "Casos limites". -->
 
-**Contexto (research):**
+**Decisão (Resolved):** cravar em `governance-foundation.md` § "Contrato da cadeia" o contrato de I/O de cada fase em **três eixos** — _produz · proibido de produzir · escala para_ —, o **critério de parada da research** (para quando a decisão é possível; modos de gate `escolha`/`aceitação`), os **mecanismos de escalonamento** (roteamento por classe de descoberta, reusando primitivos existentes) e o **anti-padrão #6**. Boilerplates (`decision-brief`, `plan`) e `rpi-protocol.md` **refletem** o contrato; a constituição é SSOT. **Sem enforcement mecânico** (dogfood primeiro). Evidência-origem: `research/2026-05-30-research-output-contract.md` (+ findings `F-005`).
 
-- Origem: a falha do gate de G00 (obs #10/#11) + leitura tardia do ChatGPT preservada em `research/2026-05-30-research-output-contract.md`. A fronteira `research → decision-brief` não estava modelada (research sem critério de parada; falsificação consumindo a decisão; gate recebendo conclusão cristalizada).
-- Generalização acordada: o G00 foi a **primeira** invasão de uma fase na fase seguinte; o contrato vale para toda a cadeia (plano não reabre decisão; tasks não mudam estratégia; implementação não expande escopo).
-
-**Decisão (Resolved):** cravar em `governance-foundation.md` § "Contrato da cadeia" o contrato de I/O de cada fase em **três eixos** — _produz · proibido de produzir · escala para_ —, o **critério de parada da research** (para quando a decisão é possível; modos de gate `escolha`/`aceitação`), os **mecanismos de escalonamento** (roteamento por classe de descoberta, reusando primitivos existentes) e o **anti-padrão #6**. Boilerplates (`decision-brief`, `plan`) e `rpi-protocol.md` **refletem** o contrato; a constituição é SSOT. **Sem enforcement mecânico** (dogfood primeiro). Evidência-origem: `research/2026-05-30-research-output-contract.md`.
-
-**Nota de ordem:** é decisão de **governança-processo**, ortogonal ao _conteúdo_ de G00 — **não viola o invariante de ordem** (que rege A-F / G01-G05 dependentes do conteúdo de G00). G00 permanece `Pendente`. **Promotável a ADR no fechamento da spec.**
+**Nota de ordem:** é decisão de **governança-processo**, ortogonal ao _conteúdo_ de G00 — **não viola o invariante de ordem**. G00 permanece `Pendente`. **Promotável a ADR no fechamento da spec.**
 
 **Status:** Resolved (2026-05-30) / @rosana — decisão de processo colaborativa.
-
----
-
-## Bloco A — Seleção
-
-> Quem seleciona contexto, quando e quanto. Eixo central per síntese empírica ("seleção é o problema").
-
-### [DEC-0024-A01] Quem faz seleção contextual?
-
-**Pergunta:** A seleção de contexto operacional (regras situacionais, slice de estado, ordem de leitura) é feita pelo **agente** (inferência por turno), pelo **sistema** (lookup determinístico), ou pelo **humano** (curadoria explícita)? Mais provavelmente: qual combinação?
-
-**Contexto (research):**
-
-- Pendente — alimentado por análise comparativa (Hermes/Cursor/Open Code/Anthropic/Spec Kitty).
-- Hipótese a investigar: ai-guidelines convergente para "sistema seleciona, humano cura, agente consome" (per ADR 0021 + 0022). Confirmar via convergência com sistemas externos.
-
-**Status:** Open
-
-### [DEC-0024-A02] Quando a seleção acontece?
-
-**Pergunta:** Boot único de sessão (handoff), per-turno (re-seleção contínua), per-task (intermediário), on-demand (sob comando humano), ou múltiplos pontos? Custo amortizável vs recorrente.
-
-**Contexto (research):**
-
-- Pendente. Pressão empírica: per-turno é caro; boot é o sweet-spot mas perde contexto novo dentro da sessão; on-demand cobre intermediário mas exige saber quando pedir.
-
-**Status:** Open
-
-### [DEC-0024-A03] Quanto contexto é descartado?
-
-**Pergunta:** Qual o critério para incluir vs excluir contexto na projeção entregue? Como evitar "carregar AGENTS.md inteiro" (rules-as-payload) e "perder regra crítica" (rules-as-catalog underdelivery)?
-
-**Contexto (research):**
-
-- Pendente. Conecta com formulação "custo de seleção" cravada na sessão 2026-05-28 — eixo da decisão entre payload mode e catalog mode.
-
-**Status:** Open
-
----
-
-## Bloco B — Persistência
-
-> O que persiste vs o que é situado/efêmero. Quem tem autoridade sobre persistência.
-
-### [DEC-0024-B01] O que persiste vs o que expira?
-
-**Pergunta:** Quais categorias de informação são SSOT persistente (regras, decisões, ADRs, state.yml) vs derivações situadas (handoff projetado, wizard menu, briefing) vs ephemeral (memória de provider, transcripts de sessão)?
-
-**Contexto (research):**
-
-- Hermes: 3 camadas (session / persistent / skill); Cursor: session vs codebase index.
-- Hipótese: ai-guidelines já tem clareza forte aqui (SSOT em git, projeções derivadas, memory de provider banida da governança). Investigar se sistemas externos têm pressão que o framework ainda não modelou.
-
-**Status:** Open
-
-### [DEC-0024-B02] Quem tem autoridade sobre persistência?
-
-**Pergunta:** Sistema decide automaticamente o que persiste (skill auto-creation tipo Hermes), humano decide via PR (modelo atual), ou modelo híbrido (sistema sugere, humano promove)?
-
-**Contexto (research):**
-
-- Hermes opera modelo automático. ai-guidelines opera modelo humano-curado.
-- Pressão a verificar: o modelo automático escala melhor em volume mas perde governança; o modelo curado escala melhor em qualidade mas tem custo cognitivo. Há ponto ótimo intermediário?
-
-**Status:** Open
-
----
-
-## Bloco C — Saúde Técnica e Dívidas Associadas
-
-> **Bloco Mandatório.** Adaptado para spec research-first: o componente que implementará a spec **não existe ainda** — emerge das decisões de eixo. Análise restrita ao que é observável em Stage 1.
-
-### [DEC-0024-C01] Saúde arquitetural e dívidas técnicas (research-first scope)
-
-**Pergunta:** Qual é o estado de saúde dos componentes existentes que **serão tocados pela implementação derivada desta spec** (Stage 2, spec separada), e quais dívidas técnicas já mapeadas podem impactar o escopo?
-
-**Contexto (research):**
-
-- Para uma spec research-first, este bloco mapeia componentes-alvo prováveis: `src/cli/workflow.ts` (runtime atual), `src/app/workflow/*` (use cases), `src/app/ports/*` (porta de prompts), `cli/` (entrypoint legado), `AGENTS.md` raiz (SSOT).
-- Dívidas conhecidas: `cli-mjs-to-src-ddd-cutover` (item vivo do backlog); `coverage-rigor-enforcement` (Now §3 indireto).
-
-**Eixos a decidir:**
-
-1. **Saúde Arquitetural:** Qual é o diagnóstico do runtime existente que abrigará o handoff?
-2. **Dívidas Técnicas:** As dívidas conhecidas (cli legado, coverage rigor) bloqueiam a implementação derivada?
-3. **Estratégia de Validação e Qualidade:** A suíte atual (682 testes, BDD pt-BR) é suficiente para a implementação derivada?
-
-#### Sub-eixo 1 — Saúde Arquitetural
-
-| Opção | Descrição                                                                                                               |
-| :---- | :---------------------------------------------------------------------------------------------------------------------- |
-| A     | **Saudável:** runtime atual (Spec 0023) é coeso o suficiente para absorver handoff como nova projeção sem refactor.     |
-| B     | **Requer Refatoração:** integração do handoff exige refactor tático (ex.: extrair "projection layer" de `workflow.ts`). |
-| C     | **Requer Re-arquitetura:** runtime atual não suporta múltiplas projeções; precisa redesign antes da implementação.      |
-
-#### Sub-eixo 2 — Dívidas Técnicas
-
-| Opção | Descrição                                                                                                                                            |
-| :---- | :--------------------------------------------------------------------------------------------------------------------------------------------------- |
-| A     | **Nenhuma Dívida Relevante:** dívidas conhecidas (cli legado, coverage) não impactam handoff.                                                        |
-| B     | **Dívidas Contidas:** dívidas podem ser isoladas; plan de implementação registra mas não expande escopo.                                             |
-| C     | **Dívidas Bloqueadoras:** cli legado e/ou coverage gap bloqueiam handoff seguro; escopo da spec implementadora **deve ser expandido** para pagá-las. |
-
-#### Sub-eixo 3 — Estratégia de Validação e Qualidade
-
-| Opção | Descrição                                                                                                                                         |
-| :---- | :------------------------------------------------------------------------------------------------------------------------------------------------ |
-| A     | **Suficiente:** suíte atual (BDD pt-BR + integration tests + smoke) cobre testes do handoff sem expansão metodológica.                            |
-| B     | **Requer Extensão:** handoff precisa de categoria nova de testes (ex.: snapshot de projeção, validação de slice selection); plan v2 declara.      |
-| C     | **Requer Reforma:** validation strategy atual é insuficiente (cf. backlog `coverage-rigor-enforcement`); spec depende da reforma fechar primeiro. |
-
-**Decisão do Gate Humano:**
-
-- **Status:** [ ] Pendente | [ ] Resolvido
-- **Sub-eixo 1 — Saúde Arquitetural:** [ ] A [ ] B [ ] C
-- **Sub-eixo 2 — Dívidas Técnicas:** [ ] A [ ] B [ ] C
-- **Sub-eixo 3 — Estratégia de Validação e Qualidade:** [ ] A [ ] B [ ] C
-- **Justificativa / Ressalvas:** >
-  [Pendente até research consolidar análise dos componentes-alvo prováveis.]
-- **Data / Owner:** [pendente] / [pendente]
-
----
-
-## Bloco D — Promoção
-
-> Como observações viram regras. Onde mora a curadoria humana. Crítico — protege o diferencial governance-first.
->
-> **Nota de leitura:** `[DEC-0024-D04]` é **pré-requisito** para `D01-D03`. Sem taxonomia clara da _unidade promovível_, perguntas sobre "como sobe de nível?" / "quem promove?" / "onde mora a curadoria?" ficam indefinidas. Research deve cravar D04 primeiro (ou em paralelo) e usar as respostas para ancorar D01-D03.
->
-> **Reenquadramento (2026-05-29):** com a elevação da spec, `[DEC-0024-D04]` passa a ser **consequência de `[DEC-0024-G00]`/`[DEC-0024-G03]`** (unidade primária + promotion pipeline). D04 **não fecha antes de G00**. Mantido no Bloco D por continuidade de numeração; sua resolução deriva do Bloco G.
-
-### [DEC-0024-D04] Qual é a unidade canônica de promoção contextual?
-
-**Pergunta:** Antes de responder D01-D03, qual é a **taxonomia das unidades promovíveis**? Hoje o framework usa termos diversos sem hierarquia formal: _observação, padrão, sinal recorrente, regra situacional, regra formal, skill, insight, comportamento, ADR_. Sem nomeação clara, fica difícil responder operacionalmente "quando algo sobe de nível?".
-
-> **Reenquadramento (2026-05-29):** a research principal desta questão vive em `[DEC-0024-G03]` (promotion pipeline canônico). **D04 documenta as implicações operacionais de G03 — não cresce como pergunta independente** e não fecha antes de G00/G03.
-
-**Contexto (research):**
-
-- **Origem:** insight cravado via review do ChatGPT do PR #30 (3º turno tri-party desta sessão / 2026-05-28). Cf. preâmbulo § obs #6 + `research/2026-05-28-this-session-as-evidence.md` § "Continuação tri-party — 3º turno".
-- **Hipótese inicial a investigar** (não confirmada — emerge da research): pode existir cadeia tipo `observação → sinal recorrente → regra situacional → regra formal → ADR`, com critérios de elevação cravados em cada degrau (ex.: ≥ N casos sem fechamento = sinal recorrente; sinal recorrente + ≥ 1 sessão de design = regra situacional; ≥ 2 specs validando = regra formal; etc.).
-- **Vocabulário existente a mapear:** ai-guidelines tem `ADR`, `CORE`, `GR`, `opt-in`, `DEC`, `regra situacional` (mencionada em [DEC-0023-F05]); Hermes tem `skill`; Cursor tem peças do `harness`; Open Code não tem unidade promovível (stateless por design). Cada vocabulário deve ser mapeado contra a hipótese.
-- **Conexão estrutural:** sem D04 resolvido, `D01` (como observações viram regras?), `D02` (handoff promove autonomamente?) e `D03` (onde mora a curadoria?) ficam mal-formuladas — todas pressupõem uma unidade nomeada que ainda não existe.
-- **Sub-questão dupla — taxonomia + transições** (refinamento via ChatGPT 4º turno, 2026-05-28): D04 carrega de fato 2 perguntas distintas convivendo: **(a) qual é a unidade promovível?** (a cadeia em si) e **(b) qual o mecanismo de transição entre níveis?** (critérios de elevação). Sem (b), a taxonomia vira classificação estática, não lifecycle operacional. Research deve cobrir as duas; se a separação se mostrar útil durante a investigação, considerar split em D04 (taxonomia) + D05 (critérios) — não-cravado agora para evitar fragmentação prematura.
-
-**Status:** Open
-
-### [DEC-0024-D01] Como observações viram regras situacionais?
-
-**Pergunta:** O pipeline atual (observação → backlog → spec → decision-brief → ADR/regra) é suficiente para promover padrões a regras situacionais entregues pelo handoff, ou precisa de etapa intermediária ("candidate situational rule" antes de virar CORE/GR formal)?
-
-**Contexto (research):**
-
-- Hipótese cravada na sessão 2026-05-28: o lifecycle existente JÁ é o pipeline de promoção; handoff só projeta o que o lifecycle promoveu. Não há aprendizado novo no handoff.
-- A verificar: regras situacionais (tipo `CORE-09/10` per `[DEC-0023-F05]`) precisam de promoção tradicional via ADR, ou cabem como categoria intermediária ("situational" entre `universal` e `opt-in`)?
-
-**Status:** Open
-
-### [DEC-0024-D02] Handoff promove autonomamente?
-
-**Pergunta:** O handoff (runtime determinístico) pode promover padrões observados em sessões a skills/regras automaticamente, ou toda promoção exige ato humano explícito?
-
-**Contexto (research):**
-
-- **Resposta provavelmente já cravada** por ADR 0018 + ADR 0022: NÃO. Handoff é projeção; aprendizado humano-no-loop.
-- Mantido como DEC explícita para registro defensivo — impede que research deriva para Hermes-style learning loop.
-- Hermes resolve via runtime separado que CHAMA LLM para extrair pattern; ai-guidelines não tem esse runtime nem o terá (ADR 0018).
-
-**Status:** Open (recomendação inicial: cravar como "NÃO" — formaliza não-objetivo de spec.md)
-
-### [DEC-0024-D03] Onde mora a curadoria humana?
-
-**Pergunta:** Em que momento operacional o humano cura padrões observados em regras (PR? wizard? comando explícito? hook?)? Existe overhead que pode ser reduzido sem perder a curadoria?
-
-**Contexto (research):**
-
-- Pendente — emerge da análise comparativa (Hermes hooks, Cursor session management, Anthropic dreaming review).
-
-**Status:** Open
-
----
-
-## Bloco E — Projeção
-
-> Mesma SSOT, múltiplas projeções por consumidor. Conecta com ADR 0023 generalizada (com freio anti-paper).
-
-### [DEC-0024-E01] Mesma SSOT gera múltiplas projeções?
-
-**Pergunta:** O conjunto SSOT (state.yml + tasks.md + decision-brief + ADRs vigentes + AGENTS.md) deve gerar N projeções determinísticas por consumidor (handoff completo, wizard menu, briefing curto, dashboard HTML, etc.), ou cada projeção é decisão independente?
-
-**Contexto (research):**
-
-- ADR 0023 generaliza "SSOT + derivações" para meta-artefatos. Esta DEC investiga se a generalização vale para o handoff também (estendendo o princípio) ou se handoff é caso à parte.
-- Matriz por consumidor (Humano/Agente/Git/Dashboard/Busca → Markdown/HTML/handoff/índice/visualização) emergiu na síntese da sessão 2026-05-28.
-
-**Status:** Open
-
-### [DEC-0024-E02] Como cada consumidor recebe contexto?
-
-**Pergunta:** Para cada consumidor identificado (sessão IA fresca, sessão IA continuando, humano operador via wizard, humano lendo PR, etc.), qual o formato e densidade ótimos?
-
-**Contexto (research):**
-
-- Pendente — alimentado por análise de Hermes (skill/memory render), Cursor (session restore), Open Code (provider-agnostic formato).
-
-**Status:** Open
-
-### [DEC-0024-E03] Formato canônico por consumidor?
-
-**Pergunta:** Markdown vence como SSOT (convergência observada). Mas para projeção, o formato ótimo varia: HTML para humano denso? Markdown estruturado para agente? Slice YAML para script? Critério de escolha?
-
-**Contexto (research):**
-
-- Vídeo 1 (Lucas Montano HTML vs MD) trata exatamente disso, mas em superfície. Argumento real: projeções especializadas por consumidor. Vale conectar com ADR 0023.
-
-**Status:** Open
-
----
-
-## Bloco F — Governança
-
-> Quem tem autoridade final. Trilha auditável. Diferencial governance-first vs outros sistemas. Eixo único do ai-guidelines.
-
-### [DEC-0024-F01] Quem tem autoridade sobre o que merece ser lembrado?
-
-**Pergunta:** O sistema (handoff/runtime) tem autoridade para decidir o que projetar? O humano (via comando explícito)? A combinação (sistema sugere ranking, humano confirma)?
-
-**Contexto (research):**
-
-- Conecta com governance-pr-check + wizard atual: sistema enforces, humano autoriza. Provável que handoff siga mesmo padrão.
-- Eixo único do ai-guidelines — nenhum dos sistemas externos trata autoridade governada como pergunta de primeira classe.
-
-**Status:** Open
-
-### [DEC-0024-F02] Trilha auditável de projeções?
-
-**Pergunta:** Cada projeção entregue (handoff de sessão X, briefing de sessão Y) deve deixar trilha auditável (log/artifact versionado) ou é efêmera por design?
-
-**Contexto (research):**
-
-- Pendente — investigar tensão entre "auditabilidade" (governance) e "low-overhead" (DX).
-
-**Status:** Open
-
-### [DEC-0024-F03] Diferencial governance-first como invariante?
-
-**Pergunta:** O posicionamento "governança do próprio processo como eixo de primeira classe" deve virar invariante declarado (ADR nova?) ou continuar como leitura emergente do conjunto ADR 0018 + 0020 + 0021 + 0022?
-
-**Contexto (research):**
-
-- Síntese 2026-05-28: nenhum sistema externo estudado tem governance-as-first-class. Esse é o nicho diferenciador.
-- Decisão depende de quanto sinal a research consolidar — se for forte, vira ADR; se ambíguo, fica como leitura distribuída.
-
-**Status:** Open
-
-### [DEC-0024-F04] Quais artefatos governados têm invariantes estruturais sob enforcement sistêmico vs comportamento humano?
-
-**Pergunta:** O caso `state.yml` (descoberto e fechado via PR #31) é o primeiro artefato governado a sofrer do padrão "invariante existe → sistema não enforce → agente precisa lembrar → drift". Quais outros artefatos do framework carregam invariantes estruturais que **ainda dependem de revisão humana** em vez de enforcement sistêmico determinístico? Quais merecem gates equivalentes a `state-yml:check` / `living-docs:check` / `governance-pr-check`?
-
-**Contexto (research):**
-
-- **Origem:** insight cravado via review do ChatGPT do PR #31 (5º turno tri-party desta sessão / 2026-05-28). Cf. `research/2026-05-28-this-session-as-evidence.md` § "Continuação tri-party — 3º turno e seguintes".
-- **Padrão estrutural a investigar** (não restrito a YAML schema):
-  ```text
-  invariante existe → sistema não enforce → agente precisa lembrar → drift
-  ```
-  PR #31 fechou esse padrão para `state.yml` movendo enforcement para o validate global. F04 pergunta: quais outros artefatos comportam-se assim hoje?
-- **Candidatos óbvios a investigar** (lista inicial — research pode expandir/refinar):
-  - **`decision-brief.md`** — estrutura de blocos, IDs `[DEC-NNNN-XYZ]`, contrato form B vs C, drift entre headers individuais e tabela "Resumo de status" (template explicitamente nota: "drift bloqueia o gate; coerência é responsabilidade humana — não há script de geração nesta versão").
-  - **`tasks.md`** — sub-block IDs (`1.X.N`/`1.X.[COMMIT]`/`1.X.[REVIEW]`), state machine de checkboxes (`[ ]` / `[/]` / `[x]`), marker `[COMMIT]` ausente em commits reais (per `[DEC-0023-D01]` boundary).
-  - **`backlog.md`** — estrutura de entries (Em execução / Now / Candidatas / Later); contrato de campos obrigatórios por entry (Fonte, Princípio, Escopo, Pré-requisitos, Slug).
-  - **ADRs** — estados (`Proposta` / `Aceita` / `Superseded`); formato canônico do header; cross-refs sempre bidirecionais.
-  - **Meta-artefatos YAML futuros** (per ADR 0023) — cada um nasceria com gate equivalente como pré-condição (anti-paper).
-- **Conexão arquitetural com Bloco F:** F01 (autoridade), F02 (auditabilidade), F03 (governance-first invariante) cobrem _quem decide_ e _como fica registrado_. F04 cobre _quais invariantes são enforceable hoje vs dependem de humano_ — completa o quadro de governança auditável.
-- **Conexão com backlog `coverage-rigor-enforcement`:** essa candidata (backlog `Candidatas`) já trata de pisos por arquivo + 100% em paths críticos + forcing function de CI. F04 fornece a **lista de invariantes** que aquela spec implementadora deveria cobrir; pode virar input direto quando essa candidata abrir.
-- **Não-objetivo (preservado):** F04 NÃO propõe que o framework valide tudo automaticamente. A pergunta é qual o **subconjunto que se beneficia** de enforcement sistêmico — alguns invariantes seguem sendo melhor curados por humano (decisões editoriais, narrative coherence). Critério proposto a investigar: "se um agente pode introduzir drift sem perceber, e o drift é mecanicamente detectável, então é candidato a gate".
-
-**Status:** Open
-
----
-
-## Resumo de status
-
-| ID               | Bloco      | Status   |
-| :--------------- | :--------- | :------- |
-| `[DEC-0024-G00]` | G _(raiz)_ | Pendente |
-| `[DEC-0024-G01]` | G          | Open     |
-| `[DEC-0024-G02]` | G          | Pendente |
-| `[DEC-0024-G03]` | G          | Open     |
-| `[DEC-0024-G04]` | G          | Open     |
-| `[DEC-0024-G05]` | G          | Open     |
-| `[DEC-0024-G06]` | G          | Resolved |
-| `[DEC-0024-A01]` | A          | Open     |
-| `[DEC-0024-A02]` | A          | Open     |
-| `[DEC-0024-A03]` | A          | Open     |
-| `[DEC-0024-B01]` | B          | Open     |
-| `[DEC-0024-B02]` | B          | Open     |
-| `[DEC-0024-C01]` | C          | Open     |
-| `[DEC-0024-D01]` | D          | Open     |
-| `[DEC-0024-D02]` | D          | Open     |
-| `[DEC-0024-D03]` | D          | Open     |
-| `[DEC-0024-D04]` | D          | Open     |
-| `[DEC-0024-E01]` | E          | Open     |
-| `[DEC-0024-E02]` | E          | Open     |
-| `[DEC-0024-E03]` | E          | Open     |
-| `[DEC-0024-F01]` | F          | Open     |
-| `[DEC-0024-F02]` | F          | Open     |
-| `[DEC-0024-F03]` | F          | Open     |
-| `[DEC-0024-F04]` | F          | Open     |
-
-**Status agregado:** `Open` — research em curso, opções pendentes. **Ordem de fechamento:** `G00` (raiz) → demais G → A-F. Nenhuma DEC de A-F estabiliza antes de `G00 Resolved` (invariante de ordem). **Exceção:** `[DEC-0024-G06]` é decisão de **governança-processo** (Resolved 2026-05-30), ortogonal ao conteúdo de G00 — não participa do invariante de ordem.
-
----
-
-## ✅ Gate fechado
-
-> Bloco final assinado pelo owner quando **todos** os pontos estão `Resolved`. **Não preencher** antes disso.
-
-- **Data:** [pendente]
-- **Owner:** [pendente]
-- **Pontos resolvidos:**
-  - [ ] `[DEC-0024-G00]` (raiz) ... `[DEC-0024-G06]` · `[DEC-0024-A01]` ... `[DEC-0024-F04]`
-
----
-
-## Checklist pós-gate
-
-> **[MANDATÓRIO]** Após assinatura do gate, executar os 4 passos abaixo de forma atômica.
-
-- [ ] **(1)** `plan.md` v2 publicado: cada subseção de design técnico deriva de um `[DEC-0024-XYZ]` e referencia o ponto.
-- [ ] **(2)** `tasks.md` v2 publicado: placeholder de Stage 2 substituído por tasks operacionais.
-- [ ] **(3)** Status agregado desta brief mudado para `Resolved`.
-- [ ] **(4)** Commit atômico marcando o gate (`docs(spec-0024): gate humano fechado — plan v2 + tasks v2 publicados`).

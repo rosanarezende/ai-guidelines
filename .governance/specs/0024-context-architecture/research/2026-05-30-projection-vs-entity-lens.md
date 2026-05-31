@@ -16,6 +16,18 @@
 
 ---
 
+## O princípio mais fundo (síntese da sessão — ChatGPT, 2026-05-30): **estados de conhecimento > containers**
+
+> A descoberta mais **geral** da sessão não é G00, G02 nem a taxonomia. É que tudo o que a lente persegue são **conflações de estágio-de-conhecimento com container**. O modelo estável não organiza por container (`DEC`, `research`, `brief`) e sim por **estado**:
+>
+> `research/* → finding (aberto | convergido) → decision (pendente | resolved) → execution`
+>
+> **`status` deixa de ser propriedade do _arquivo_ e passa a ser propriedade do _estágio de conhecimento_.** Evidência prática já no repo: `F-003 Status: Aberto` **soa natural** (findings podem estar abertos), mas `DEC Status: Open` **soa errado** — porque `DEC` significa _pronto para decidir_. A assimetria é o tell.
+>
+> **Conexão com G00/G01:** se a unidade primária é a transformação governada (identidade C), então `research → finding → decision → execution` são os **estágios** dessa transformação e os artefatos são **projeções de estágio**. Candidato à **gramática estrutural de C** → alimenta **`[DEC-0024-G01]`** (estrutura primária) e é mais uma evidência de que C é load-bearing. **Registrar, não cravar.**
+
+---
+
 ## Instâncias CONFIRMADAS (já viradas finding/decisão)
 
 | Instância                                           | Projeção de quê?                                                                                                                                                                        | Onde                                                                                         |
@@ -41,6 +53,12 @@
   - **Fixpoint (guard anti-regresso):** rodada após rodada as entidades caem (handoff, taxonomia, DEC, talvez Stage/gate) **mas `contexto` sobrevive a todas**. E contexto é exatamente (a) a raiz que o **G00 já nomeou** (`contexto humano → governança executável`) e (b) o **nome da própria spec** (`context-architecture`). Logo o regresso da lente **não é infinito: converge em contexto.** C-5 é menos "novo candidato" e mais **confirmação de que o piso do regresso = a raiz do G00** — o que, por sua vez, é evidência adicional para aceitar a identidade C no gate de G00.
 
 ---
+
+- **C-6 — `Open` DEC como projeção de uma pergunta de research** _(ChatGPT/owner, 2026-05-30 — registrar; é a intuição original da owner sobre "A-F parecem DECs enquanto pesquisam")_: um `[DEC]` em `Status: Open` é, **pela própria legenda do brief**, _"ainda em research"_ — logo **não é decisão; é pergunta de investigação vestida de DEC**. A entidade real é a pergunta (research/finding aberto, como F-003); o `[DEC]` deveria **nascer `Pendente`** (convergido → exige julgamento). _Critério operacional:_ passa — o decision-brief deixa de ler como "mapa de investigação" e vira "caderno de decisões". _Liga a G03_ (pipeline: pergunta → finding aberto → finding convergido → DEC `Pendente`).
+  - **Dois problemas distintos (correção ChatGPT, 2026-05-30) — não conflar:**
+    - **(A) Volume — depende de G00:** muitos `Open` (G01-G05, A-F) são Open _porque G00 não foi cravado_ (invariante de ordem). Cravar G00 colapsa G01-G05 em facetas e estabiliza A-F → **reduz o volume** do "mapa de investigação".
+    - **(B) Estrutural — independe de G00:** `DEC Open ≠ DEC` é defeito do artefato e **persiste mesmo com G00 `Resolved`** (G01/A01 seguiriam Open). Resolver G00 **não elimina** C-6 — só reduz o volume.
+  - **Teste diagnóstico (pós-G00):** se, com G00 resolvido, o `decision-brief` **ainda** parecer "mapa de investigação", então C-6 é **defeito estrutural** (não sintoma de G00) → a próxima evolução é o modelo de **estados > containers** acima. Casa do grafo de dependências, se os `Open` saírem do brief: spec/plan, **não** DEC. **Restruturar só depois do gate de G00.**
 
 ## Disciplina (anti-elegância — correção tri-party da owner)
 
