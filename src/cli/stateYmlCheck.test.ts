@@ -14,7 +14,7 @@ topology:
   prs:
     active:
       - id: pr-1
-        github_pr: null
+        github_pr: 1
         role: execution
         terminal: true
         sequence: 1

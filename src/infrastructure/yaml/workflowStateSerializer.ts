@@ -255,6 +255,41 @@ function parseTopology(raw: unknown): WorkflowTopology {
     }
   }
 
+  // Invariantes de lifecycle-coerência (Checkpoint 2.3b). Guard local
+  // determinístico que torna a SSOT confiável o suficiente para o
+  // `governance-pr-check` enforçar projeções (sustenta a promoção a `required`,
+  // `[DEC-0024-G07]` / O5). NÃO confere o PR no GitHub (isso é hardening de API,
+  // fora de escopo) — apenas a coerência interna grupo↔existência-de-PR:
+  //   github_pr presente  ⟺  nó ∈ {active, concluded}  (PR real já aberto)
+  //   github_pr ausente    ⟺  nó ∈ {planned}            (PR ainda não aberto)
+  // Fecha a classe do nó-fantasma (active/concluded com github_pr null).
+  for (const node of [...concluded, ...active]) {
+    if (node.github_pr === null) {
+      throw new WorkflowStateParseError(
+        `node "${node.id}" está em concluded/active mas tem github_pr: null — ` +
+          `nós nesses grupos representam um PR real aberto (use planned para PR ainda não aberto)`
+      );
+    }
+  }
+  for (const node of planned) {
+    if (node.github_pr !== null) {
+      throw new WorkflowStateParseError(
+        `node "${node.id}" está em planned mas tem github_pr: ${node.github_pr} — ` +
+          `planned é para PR ainda não aberto (mova para active/concluded ao abrir o PR)`
+      );
+    }
+  }
+  // Unicidade de github_pr (cada PR real pertence a no máximo um nó).
+  const prNumbers = allTopologyNodes.map((n) => n.github_pr).filter((p): p is number => p !== null);
+  if (new Set(prNumbers).size !== prNumbers.length) {
+    throw new WorkflowStateParseError(
+      `topology has a duplicate github_pr; cada PR real pertence a no máximo um nó (got ${prNumbers
+        .slice()
+        .sort((a, b) => a - b)
+        .join(", ")})`
+    );
+  }
+
   return {
     cursor: {
       pr: cursorObj.pr,

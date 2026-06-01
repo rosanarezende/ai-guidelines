@@ -224,5 +224,90 @@ topology:
           - cp-2`);
       expect(() => parseWorkflowState(yaml)).toThrow(/must be contiguous/);
     });
+
+    // === Lifecycle-coerência [Checkpoint 2.3b] — guard local que sustenta O5 ===
+
+    it("REGRESSÃO do nó-fantasma: nó em active com github_pr null ENTÃO rejeita", () => {
+      // Exatamente o defeito do 2.3 (checkpoint-2.3 era active + github_pr null).
+      const yaml = withNodes(`      - id: pr-1
+        github_pr: null
+        role: execution
+        terminal: false
+        sequence: 1
+        checkpoints:
+          - cp-1`);
+      expect(() => parseWorkflowState(yaml)).toThrow(/github_pr: null/);
+    });
+
+    it("DADO nó em planned com github_pr não-nulo ENTÃO rejeita", () => {
+      const yaml = `stage: implementation
+gate:
+  status: closed
+focus: []
+next: []
+topology:
+  cursor:
+    pr: pr-1
+    checkpoint: cp-1
+  prs:
+    concluded: []
+    active:
+      - id: pr-1
+        github_pr: 33
+        role: execution
+        terminal: false
+        sequence: 1
+        checkpoints:
+          - cp-1
+    planned:
+      - id: term
+        github_pr: 99
+        role: integration
+        terminal: true
+        sequence: null
+        checkpoints:
+          - cp-term
+`;
+      expect(() => parseWorkflowState(yaml)).toThrow(/planned mas tem github_pr/);
+    });
+
+    it("DADO github_pr duplicado entre nós ENTÃO rejeita (1 PR ↔ no máximo 1 nó)", () => {
+      const yaml = `stage: implementation
+gate:
+  status: closed
+focus: []
+next: []
+topology:
+  cursor:
+    pr: pr-1
+    checkpoint: cp-1
+  prs:
+    concluded:
+      - id: gov
+        github_pr: 33
+        role: governance
+        terminal: false
+        sequence: null
+        checkpoints:
+          - cp-gov
+    active:
+      - id: pr-1
+        github_pr: 33
+        role: execution
+        terminal: false
+        sequence: 1
+        checkpoints:
+          - cp-1
+    planned:
+      - id: term
+        github_pr: null
+        role: integration
+        terminal: true
+        sequence: null
+        checkpoints:
+          - cp-term
+`;
+      expect(() => parseWorkflowState(yaml)).toThrow(/duplicate github_pr/);
+    });
   });
 });
