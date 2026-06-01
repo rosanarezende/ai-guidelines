@@ -5,13 +5,13 @@
 > **Objetivo:** retomar em **EXECUÇÃO de PRs de absorção**. A pesquisa acabou; o trabalho é fazer o sistema refletir decisões já tomadas.
 > **Meta (dogfooding):** este handoff é também evidência do que um handoff precisa preservar para sobreviver à troca de sessão/contexto/agente — ver §8.
 
-> ## ⚠️ ERRATA de vocabulário (2026-05-31, Checkpoint 2.1) — ler antes do §4
+> ## ⚠️ ERRATA de vocabulário (2026-05-31, Checkpoint 2.1; topologia corrigida no 2.1a) — ler antes do §4
 >
 > Este handoff usa **"PR-1 … PR-12"** para unidades de implementação — **isso era drift** (conflita com Pull Request real do GitHub; a 0023 já diagnosticara em `review.md` R6: _"drift 'PR6' não existe"_). **Corrigido em `plan.md`**, que é a **SSOT do plano** a partir de agora. Releia o §4 com esta tradução:
 >
 > - **PR-N → Checkpoint N** (unidade de implementação da spec). **PR / `#N`** passa a significar exclusivamente Pull Request real do GitHub.
 > - **ritual de checkpoint → Gate**: `Technical Audit Gate` (Codex) → `Architectural Review Gate` (ChatGPT) → `Human Gate` (owner).
-> - **Topologia (alinhada à 0023):** `#32` = **PR de governança/bootstrap** (Checkpoint 1 + 2 + 2.1) e **encerra** (mergeia em `main`). **Checkpoint 3 em diante = Pull Requests reais independentes** off `main` (modo `sequential`, ADR 0024). **Integration PR** terminal + `review.md` no encerramento.
+> - **Topologia (CANÔNICA da 0023 — corrigida no Checkpoint 2.1a; a versão `sequential`/off-`main` cravada no 2.1 era INCORRETA):** `#32` = **PR de governança/bootstrap + linha de integração** da spec (**NÃO mergeia cedo** — é a base da stack). **Checkpoint 3 em diante = Pull Requests reais próprios _stacked_** sobre a linha da spec (não off-`main`). **Modo `unit`** (ADR 0024): merge em `main` é **evento único ao fim** (veículo = PR terminal; demais via `landed-via reconciliation`), após `review.md` R8. **Integration PR** = homologação **antes** do merge + `review.md`.
 > - **Proveniência:** `ref: #<PR> @ <sha>` · `checkpoint: <N>` · `role: <papel>`.
 >
 > O §4 abaixo (tabela "PLANO DE PRs") fica **preservado verbatim como trilha datada**; a versão viva e correta é `plan.md § "Sequência de Checkpoints"` + `§ "Topologia operacional"`.
@@ -21,6 +21,12 @@
 > **Se você só ler uma coisa:** leia [`plan.md`](../plan.md) § **"Glossário operacional"** + § **"Topologia operacional"** — é a **SSOT do plano**.
 >
 > **Qualquer ocorrência de `PR-1 … PR-12`** no corpo abaixo (notadamente §0 e §4) é **histórica** e deve ser lida como **`Checkpoint 1 … Checkpoint 12`**. Da mesma forma, "EXECUÇÃO de PRs de absorção" (objetivo, topo) lê-se "execução de **Checkpoints** de absorção". Este handoff foi escrito **antes** da correção de vocabulário (Checkpoint 2.1); permanece **preservado verbatim como trilha datada**, mas **não é operacional**. O estado vivo e correto está em `plan.md` / `tasks.md` / `state.yml`.
+
+> ## 🔎 Observação — causa-raiz do drift de topologia (Checkpoint 2.1a, 2026-06-01)
+>
+> O Checkpoint 2.1 chegou a cravar uma topologia de PRs **errada** (`#32` mergeando cedo; Checkpoint 3+ off-`main`; `sequential`). **Por quê foi difícil pegar:** a topologia canônica da 0023 (_stacked_ + `unit` + Integration PR + merge único) vivia só em **ADR 0020 + ADR 0024 + na instância da 0023** — **nunca foi projetada** para o **manual operacional** (`governance-foundation.md`) nem para o **`plan-boilerplate`**, que são os artefatos consultados ao planejar. Quem (re)escreve um plano não tinha a doutrina à mão e re-derivou errado.
+>
+> **Antes de planejar PRs de qualquer spec:** leia **`governance-foundation § "Topologia de PRs da spec"`** (SSOT, criado no 2.1a) — default = **`unit`/_stacked_/merge único ao fim**; `sequential` é override justificado. **Princípio cravado (NEXT #10.9):** _absorção exige projeção ao ponto de consumo_ — uma decisão só está absorvida quando aparece onde a próxima decisão é tomada, não só na fonte histórica.
 
 ---
 

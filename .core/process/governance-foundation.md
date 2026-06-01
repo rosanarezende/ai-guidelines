@@ -213,6 +213,20 @@ Ao fechar a spec, arquivos com valor reutilizável devem ser:
 
 ---
 
+## Topologia de PRs da spec (stack · landing · integração)
+
+> **Como os PRs de uma spec se organizam e aterrissam.** Consolida [`ADR 0020`](../governance/adrs/0020-governance-precede-execution.md) (governança precede execução; PRs _stacked_; merge ponta a ponta), [`ADR 0024`](../governance/adrs/0024-draft-ready-mergeable-distinct-states.md) (Draft≠Ready≠Mergeable; modos de aterrissagem) e `[DEC-0023-M01]` (modelo de 3 fronteiras). **Não decide nada novo** — projeta doutrina já ratificada para o ponto onde o `plan.md` é escrito. (Esta seção nasceu da própria causa-raiz que diagnosticou sua ausência: ver `0024 § Topologia operacional`.)
+
+- **Unidade de implementação ≠ veículo GitHub.** A unidade de trabalho da spec é o **checkpoint** (ou fase); o **PR / `#N`** é o veículo do GitHub. Um checkpoint pode virar um PR próprio; checkpoints coesos podem caber num PR. **Nunca** rotular unidade interna como "PR-N" (conflita com Pull Request real — cf. `review.md` R6 da 0023).
+- **PRs são _stacked_, não independentes.** Os PRs de uma spec formam uma **stack linear**: cada PR de execução tem o anterior (ou o PR de governança/bootstrap) como **base branch** (ADR 0020 §3). Não se abrem PRs independentes off-`main` para a mesma spec.
+- **Default de aterrissagem = `unit`** (ADR 0024). No fim, o **PR terminal de implementação** é o veículo (carrega o diff acumulado por construção); os demais — e o Integration PR — são encerrados via **`landed-via reconciliation`** (Closed com `landed-via: #<veículo> @ <SHA>`, não rejeitados). Resultado: **um SHA canônico** em `main`; rollback = 1 `git revert`.
+- **`sequential` é override de escolha humana explícita** — só quando os PRs são reversíveis isoladamente, deps fracas, deploy parcial aceitável. **Nunca default, nunca auto-detectado** do tipo da stack.
+- **Merge em `main` = evento único ao fim.** Nenhum PR da stack — **nem o bootstrap** — mergeia isoladamente antes do fim. _"Thinking PR isolado não representa software pronto; representa contrato pendente de execução; a unidade de release é a stack inteira, mergeada como unidade"_ (ADR 0020).
+- **3 fronteiras (`[DEC-0023-M01]`):** `tasks.md` = execução (execution-only) · `review.md` = prontidão de integração (gates **R1–R7** liberam o **Integration PR**; **R8** = merge authorization explícita do owner para a stack inteira) · `release-log.md` = pós-merge. O **Integration PR** (`[🔗] [Integration]`) **homologa a convergência _antes_ do merge único — não é veículo de aterrissagem.**
+- **O Gate humano de um PR decide o próximo movimento** (tipicamente: avançar / abrir o próximo PR _stacked_), **não** é merge em `main`. O merge é o evento único do fim, sob R8.
+
+---
+
 ## Decisões: decision-brief, ADR e policy
 
 Decisões durante a vida de uma spec moram em **três artefatos distintos** com responsabilidades MECE. Confundir um pelo outro produz drift editorial: decision-brief que vira lixo após o gate, ADR que vira relatório de execução, policy que reabre princípio em cada PR.

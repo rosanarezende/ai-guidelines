@@ -57,24 +57,25 @@
 
 > **Execução viva.** Remover divergências decisão↔código uma a uma. Detalhe canônico de cada checkpoint (objetivo, deps, ordem de valor, PR real, princípios) em [`plan.md` § "Sequência de Checkpoints"](./plan.md). Cada checkpoint estrutural: atômico/reversível + **Gate** completo (Technical Audit → Architectural Review → Human) + `yarn validate` verde. **1 checkpoint por vez; parar no Gate.**
 >
-> **Topologia (cf. `plan.md § Topologia operacional`):** **#32 = PR de governança/bootstrap** (Checkpoint 1 + 2 + 2.1) → encerra (mergeia em `main`). **Checkpoint 3 em diante abre PR real próprio** (off `main`, `feat/0024-cpNN-<slug>`, Draft → Gate → merge sequencial).
+> **Topologia (cf. `plan.md § Topologia operacional` — CANÔNICA / 0023, corrigida no Checkpoint 2.1a):** **#32 = PR de governança/bootstrap + linha de integração da spec** (acumula Checkpoint 1 + 2 + 2.1 + 2.1a) — **NÃO mergeia cedo**; é a **base da stack**. **Checkpoint 3 em diante = PR real próprio _stacked_** sobre a linha da spec (não off-`main`), Draft → Gate → **avançar**. **Merge em `main` = evento único ao fim** (modo `unit`; veículo = PR terminal; demais via `landed-via reconciliation`), após `review.md` R8.
 
 - [x] **Checkpoint 1** — `active-specs.yml` lista a 0024 (Codex A3). ✅ feito + gated (`87865ca`); Gate completo no **#32**.
-- [/] **Checkpoint 2** — reframe `spec/plan/tasks/NEXT` → absorção + dobrar a sequência no `plan.md` (Codex A2/P1/P2). Implementado (`8b0eec6`); Gate de encerramento do #32 pendente (junto com 2.1).
-- [/] **Checkpoint 2.1** — correção de vocabulário (PR-N → Checkpoint N; ritual → Gate) + alinhamento à 0023; fecha o escopo do **#32**. **EM EXECUÇÃO** (este commit). #32 encerra após o Gate.
-- [ ] **Checkpoint 3** — GG-0003 Consistency Projection Check (mecânico, lista fixa de marcadores). **PR próprio off `main`.** _(dep: Checkpoint 2)_
-- [ ] **Checkpoint 4A** — Workflow Provenance · storage (`provenance.yml` append-only, `role` livre, espinha derivada). **PR próprio.** _(dep: Checkpoint 1/2; protótipo em `git stash` = referência)_
-- [ ] **Checkpoint 4B** — Workflow Provenance · projeção no `workflow continue` (fatos/pendências, não prescrição). **PR próprio.** _(dep: Checkpoint 4A)_
-- [ ] **Checkpoint 5** — AGENTS sync (`agents:build` + `agents:check` no `validate`). **PR próprio.** _(destrava Checkpoint 7)_
-- [ ] **Checkpoint 6** — GG-0002 mecanismo (`banned-concept-check` + `banned-by-dec.yml` + fixture). **PR próprio.** _(antes da remoção)_
-- [ ] **Checkpoint 7** — **CRÍTICO**: remover taxonomia do runtime/doutrina/boilerplate + ativar ban no mesmo commit. **PR próprio.** _(dep: Checkpoint 5 + 6)_
-- [ ] **Checkpoint 8** — corrigir path morto na msg do `gate-decidability-check`. **PR próprio.** _(flex)_
-- [ ] **Checkpoint 9** — desacoplar existência do `decision-brief` de `evidence-driven/mixed`. **PR próprio.** _(dep: Checkpoint 7)_
-- [ ] **Checkpoint 10** — tasks boilerplate único; renomear recipe/partials `tasks-evidence-driven`→genérico. **PR próprio.** _(dep: Checkpoint 7)_
-- [ ] **Checkpoint 11A** — drift-guard do legado `.specify/templates`. **PR próprio.** _(dep: Checkpoint 10)_
-- [ ] **Checkpoint 11B** — trocar fonte ativa → root canônico (⚠️ micro-decisão da owner). **PR próprio.** _(dep: Checkpoint 11A)_
-- [ ] **Checkpoint 11C** — remover legado `.specify/templates`. **PR próprio.** _(dep: Checkpoint 11B)_
-- [ ] **Checkpoint 12** — limpar docs arquiteturais de `workflowType`. **PR próprio.** _(flex)_
+- [/] **Checkpoint 2** — reframe `spec/plan/tasks/NEXT` → absorção + dobrar a sequência no `plan.md` (Codex A2/P1/P2). Implementado (`8b0eec6`).
+- [/] **Checkpoint 2.1** — correção de vocabulário (PR-N → Checkpoint N; ritual → Gate) + alinhamento à 0023. Implementado (`d686d4b`).
+- [/] **Checkpoint 2.1a** — **correção arquitetural pós-dogfooding**: substitui a topologia incorreta do 2.1 pela canônica da 0023 (`unit`/_stacked_/merge único ao fim; #32 não mergeia cedo). **EM EXECUÇÃO** (este commit). Gate de encerramento do #32 cobre Checkpoint 2 + 2.1 + 2.1a.
+- [ ] **Checkpoint 3** — GG-0003 Consistency Projection Check (mecânico, lista fixa de marcadores). **PR próprio _stacked_.** _(dep: Checkpoint 2)_
+- [ ] **Checkpoint 4A** — Workflow Provenance · storage (`provenance.yml` append-only, `role` livre, espinha derivada). **PR próprio _stacked_.** _(dep: Checkpoint 1/2; protótipo em `git stash` = referência)_
+- [ ] **Checkpoint 4B** — Workflow Provenance · projeção no `workflow continue` (fatos/pendências, não prescrição). **PR próprio _stacked_.** _(dep: Checkpoint 4A)_
+- [ ] **Checkpoint 5** — AGENTS sync (`agents:build` + `agents:check` no `validate`). **PR próprio _stacked_.** _(destrava Checkpoint 7)_
+- [ ] **Checkpoint 6** — GG-0002 mecanismo (`banned-concept-check` + `banned-by-dec.yml` + fixture). **PR próprio _stacked_.** _(antes da remoção)_
+- [ ] **Checkpoint 7** — **CRÍTICO**: remover taxonomia do runtime/doutrina/boilerplate + ativar ban no mesmo commit. **PR próprio _stacked_.** _(dep: Checkpoint 5 + 6)_
+- [ ] **Checkpoint 8** — corrigir path morto na msg do `gate-decidability-check`. **PR próprio _stacked_.** _(flex)_
+- [ ] **Checkpoint 9** — desacoplar existência do `decision-brief` de `evidence-driven/mixed`. **PR próprio _stacked_.** _(dep: Checkpoint 7)_
+- [ ] **Checkpoint 10** — tasks boilerplate único; renomear recipe/partials `tasks-evidence-driven`→genérico. **PR próprio _stacked_.** _(dep: Checkpoint 7)_
+- [ ] **Checkpoint 11A** — drift-guard do legado `.specify/templates`. **PR próprio _stacked_.** _(dep: Checkpoint 10)_
+- [ ] **Checkpoint 11B** — trocar fonte ativa → root canônico (⚠️ micro-decisão da owner). **PR próprio _stacked_.** _(dep: Checkpoint 11A)_
+- [ ] **Checkpoint 11C** — remover legado `.specify/templates`. **PR próprio _stacked_.** _(dep: Checkpoint 11B)_
+- [ ] **Checkpoint 12** — limpar docs arquiteturais de `workflowType`. **PR próprio _stacked_.** _(flex)_
 
 ---
 
@@ -86,4 +87,4 @@
 
 ## Fase de Encerramento → vive em `release-log.md` + Integration PR
 
-> **Integration PR (`[🔗] [Integration]`) nasce no fim** (após o último checkpoint mergeado + `review.md` R1–R7): homologa a 0024 ponta-a-ponta e carrega o commit de encerramento (spec→`Done`, `state.yml`→`done`, `NEXT.md` deletado, `release-log.md` T0). A **migração ampla do ecossistema (Grupo B)** permanece nas candidatas re-escopadas, não nesta spec (fronteira modelo ≠ migração).
+> **Integration PR (`[🔗] [Integration]`) nasce no fim** (após o último checkpoint + `review.md` R1–R7 fechados): homologa a 0024 ponta-a-ponta — **boundary de revisão + pré-condição do merge final, não veículo de aterrissagem** (ADR 0024). O commit de encerramento (spec→`Done`, `state.yml`→`done`, `NEXT.md` deletado, `release-log.md` T0) entra na linha da spec **antes** do **merge único** (modo `unit`: veículo = PR terminal de implementação; #32 + intermediários + Integration PR via `landed-via reconciliation`; 1 SHA canônico), após `review.md` R8. A **migração ampla do ecossistema (Grupo B)** permanece nas candidatas re-escopadas, não nesta spec (fronteira modelo ≠ migração).
