@@ -5,6 +5,17 @@
 > **Objetivo:** retomar em **EXECUÇÃO de PRs de absorção**. A pesquisa acabou; o trabalho é fazer o sistema refletir decisões já tomadas.
 > **Meta (dogfooding):** este handoff é também evidência do que um handoff precisa preservar para sobreviver à troca de sessão/contexto/agente — ver §8.
 
+> ## ⚠️ ERRATA de vocabulário (2026-05-31, Checkpoint 2.1) — ler antes do §4
+>
+> Este handoff usa **"PR-1 … PR-12"** para unidades de implementação — **isso era drift** (conflita com Pull Request real do GitHub; a 0023 já diagnosticara em `review.md` R6: _"drift 'PR6' não existe"_). **Corrigido em `plan.md`**, que é a **SSOT do plano** a partir de agora. Releia o §4 com esta tradução:
+>
+> - **PR-N → Checkpoint N** (unidade de implementação da spec). **PR / `#N`** passa a significar exclusivamente Pull Request real do GitHub.
+> - **ritual de checkpoint → Gate**: `Technical Audit Gate` (Codex) → `Architectural Review Gate` (ChatGPT) → `Human Gate` (owner).
+> - **Topologia (alinhada à 0023):** `#32` = **PR de governança/bootstrap** (Checkpoint 1 + 2 + 2.1) e **encerra** (mergeia em `main`). **Checkpoint 3 em diante = Pull Requests reais independentes** off `main` (modo `sequential`, ADR 0024). **Integration PR** terminal + `review.md` no encerramento.
+> - **Proveniência:** `ref: #<PR> @ <sha>` · `checkpoint: <N>` · `role: <papel>`.
+>
+> O §4 abaixo (tabela "PLANO DE PRs") fica **preservado verbatim como trilha datada**; a versão viva e correta é `plan.md § "Sequência de Checkpoints"` + `§ "Topologia operacional"`.
+
 ---
 
 ## 0. O que mudou nesta sessão (executivo)

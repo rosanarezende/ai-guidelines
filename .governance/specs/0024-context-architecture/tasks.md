@@ -5,15 +5,19 @@
 > Spec: [`./spec.md`](./spec.md)
 > Plan: [`./plan.md`](./plan.md)
 > Decision Brief: [`./decision-brief.md`](./decision-brief.md)
-> Status: In Progress — **Absorção operacional** (Stage 1 encerrado; gate fechado)
+> Status: In Progress — **Absorção operacional** (Stage 1 encerrado; gate de research fechado)
 
 > **Progress file vivo.** Atualizar a cada degrau concluído. Quando uma decisão mudar, refletir em `plan.md § Decisões revisitadas` e ajustar tasks impactadas.
 
-> ## 🔁 Nota de fase — ABSORÇÃO OPERACIONAL (2026-05-31, PR-2)
+> ## 📖 Vocabulário (cf. `plan.md § Glossário operacional`)
 >
-> **Stage 1 (research → decision-brief → gate) encerrou** com as decisões `Resolved` (`[DEC-0024-G00]`/`G02`/`G06`) e o **gate fechado**. A execução agora é a **sequência de PRs de absorção** (SSOT em [`plan.md` § "Sequência de PRs"](./plan.md)), não mais o scaffold research-first.
+> **PR / `#N`** = Pull Request real do GitHub · **Checkpoint N** = unidade de implementação da spec · **Gate** = ritual de validação (`Technical Audit Gate` → `Architectural Review Gate` → `Human Gate`). _"PR-N" foi aposentado (Checkpoint 2.1) — conflitava com Pull Request real; a 0023 já diagnosticara (review R6)._
+
+> ## 🔁 Nota de fase — ABSORÇÃO OPERACIONAL (2026-05-31, Checkpoint 2)
 >
-> A **Fase 0** abaixo é **registro histórico** do bootstrap + Stage 1. O sub-bloco de marcador de template (`tasks-evidence-driven-boilerplate`) e o rótulo `evidence-driven` são **legados** — a taxonomia foi removida por `[DEC-0024-G02]`; sua eliminação do recipe/partials é **execução derivada** (PR-10), não ocorre aqui. A execução viva está na **Fase de Absorção**.
+> **Stage 1 (research → decision-brief → gate) encerrou** com as decisões `Resolved` (`[DEC-0024-G00]`/`G02`/`G06`) e o **gate fechado**. A execução agora é a **sequência de Checkpoints de absorção** (SSOT em [`plan.md` § "Sequência de Checkpoints"](./plan.md)), não mais o scaffold research-first.
+>
+> A **Fase 0** abaixo é **registro histórico** do bootstrap + Stage 1. O marcador de template (`tasks-evidence-driven-boilerplate`) e o rótulo `evidence-driven` são **legados** — a taxonomia foi removida por `[DEC-0024-G02]`; sua eliminação do recipe/partials é **execução derivada** (Checkpoint 10), não ocorre aqui. A execução viva está na **Fase de Absorção**.
 
 ---
 
@@ -29,12 +33,12 @@
 - [x] **0.4** Branch `feat/spec-0024-context-architecture` criada a partir de `main`.
 - [x] **0.5** `spec.md` instanciado; campo `Decision Brief` aponta para `./decision-brief.md`.
 - [x] **0.6** Validação humana inicial de problema/escopo — **coberta pelo gate fechado** (decisões `Resolved` em `decision-brief.md`).
-- [x] **0.7** `plan.md` instanciado (Stage 1/Stage 2 placeholder → **dobrado na sequência de PRs**, PR-2).
+- [x] **0.7** `plan.md` instanciado (Stage 1/Stage 2 placeholder → **dobrado na sequência de Checkpoints**, Checkpoint 2).
 - [x] **0.8** `tasks.md` (este arquivo) instanciado.
 - [x] **0.9** `decision-brief.md` instanciado; depois **reestruturado por estado** (2026-05-31), DECs `Resolved`.
 - [x] **0.10** `roadmap/backlog.md` atualizado (handoff → `Em execução`).
 - [x] **0.11** `NEXT.md` instanciado.
-- [x] **0.12** Pull Request Draft **#32** criado (vivo).
+- [x] **0.12** Pull Request **#32** criado (PR de governança/bootstrap da 0024).
 - [x] **0.[COMMIT]** Commits da sessão de instanciação registrados (git).
 
 ### Sub-bloco [0.Research → 0.Gate] — Stage 1: research → opções → gate ✅ (superado pela reforma do brief)
@@ -43,40 +47,43 @@
 
 - [x] **Stage 1 — research produzida:** inventário arquitetural + comparativos (Hermes, Cursor, opencode, Spec Kitty, Multica) + findings convergidos (`F-001..F-014`) em `research/findings.md`.
 - [x] **Stage 1 — decisões cravadas:** `[DEC-0024-G00]` / `[DEC-0024-G02]` / `[DEC-0024-G06]` `Resolved`; brief reestruturado por estado.
-- [x] **Gate humano fechado** (2026-05-31, @rosanarezende): `decision-brief.md § Gate — assinaturas`.
+- [x] **Gate humano de research fechado** (2026-05-31, @rosanarezende): `decision-brief.md § Gate — assinaturas`.
 - [x] **`state.yml`** atualizado para `stage: implementation` / `gate.status: closed`.
-- [/] **plan.md / tasks.md "v2"** = reframe de absorção + sequência de PRs (este **PR-2**, em curso).
+- [x] **plan.md / tasks.md "v2"** = reframe de absorção + sequência de Checkpoints (Checkpoint 2) + correção de vocabulário (Checkpoint 2.1).
 
 ---
 
-## Fase de Absorção — execução da sequência de PRs (Stage 2, dentro da 0024)
+## Fase de Absorção — execução da sequência de Checkpoints (Stage 2, dentro da 0024)
 
-> **Execução viva.** Remover divergências decisão↔código uma a uma. Detalhe canônico de cada PR (objetivo, deps, ordem de valor, princípios) em [`plan.md` § "Sequência de PRs"](./plan.md). Cada PR estrutural: atômico/reversível + checkpoint Codex→ChatGPT→owner + `yarn validate` verde. **1 PR por vez; parar no checkpoint.**
+> **Execução viva.** Remover divergências decisão↔código uma a uma. Detalhe canônico de cada checkpoint (objetivo, deps, ordem de valor, PR real, princípios) em [`plan.md` § "Sequência de Checkpoints"](./plan.md). Cada checkpoint estrutural: atômico/reversível + **Gate** completo (Technical Audit → Architectural Review → Human) + `yarn validate` verde. **1 checkpoint por vez; parar no Gate.**
+>
+> **Topologia (cf. `plan.md § Topologia operacional`):** **#32 = PR de governança/bootstrap** (Checkpoint 1 + 2 + 2.1) → encerra (mergeia em `main`). **Checkpoint 3 em diante abre PR real próprio** (off `main`, `feat/0024-cpNN-<slug>`, Draft → Gate → merge sequencial).
 
-- [x] **PR-1** — `active-specs.yml` lista a 0024 (Codex A3). ✅ feito + gated (`87865ca`); checkpoint completo no PR #32.
-- [/] **PR-2** — reframe `spec/plan/tasks/NEXT` → absorção + dobrar a sequência de PRs no `plan.md` (Codex A2/P1/P2). **EM EXECUÇÃO** (este commit); checkpoint ao fim.
-- [ ] **PR-3** — GG-0003 Consistency Projection Check (mecânico, lista fixa de marcadores). _(dep: PR-2)_
-- [ ] **PR-4A** — Workflow Provenance · storage (`provenance.yml` append-only, `role` livre, espinha derivada). _(dep: PR-1/2; protótipo em `git stash` = referência)_
-- [ ] **PR-4B** — Workflow Provenance · projeção no `workflow continue` (fatos/pendências, não prescrição). _(dep: PR-4A)_
-- [ ] **PR-5** — AGENTS sync (`agents:build` + `agents:check` no `validate`). _(destrava PR-7)_
-- [ ] **PR-6** — GG-0002 mecanismo (`banned-concept-check` + `banned-by-dec.yml` + fixture). _(antes da remoção)_
-- [ ] **PR-7** — **CRÍTICO**: remover taxonomia do runtime/doutrina/boilerplate + ativar ban no mesmo commit. _(dep: PR-5 + PR-6)_
-- [ ] **PR-8** — corrigir path morto na msg do `gate-decidability-check`. _(flex)_
-- [ ] **PR-9** — desacoplar existência do `decision-brief` de `evidence-driven/mixed`. _(dep: PR-7)_
-- [ ] **PR-10** — tasks boilerplate único; renomear recipe/partials `tasks-evidence-driven`→genérico. _(dep: PR-7)_
-- [ ] **PR-11A** — drift-guard do legado `.specify/templates`. _(dep: PR-10)_
-- [ ] **PR-11B** — trocar fonte ativa → root canônico (⚠️ micro-decisão da owner). _(dep: PR-11A)_
-- [ ] **PR-11C** — remover legado `.specify/templates`. _(dep: PR-11B)_
-- [ ] **PR-12** — limpar docs arquiteturais de `workflowType`. _(flex)_
+- [x] **Checkpoint 1** — `active-specs.yml` lista a 0024 (Codex A3). ✅ feito + gated (`87865ca`); Gate completo no **#32**.
+- [/] **Checkpoint 2** — reframe `spec/plan/tasks/NEXT` → absorção + dobrar a sequência no `plan.md` (Codex A2/P1/P2). Implementado (`8b0eec6`); Gate de encerramento do #32 pendente (junto com 2.1).
+- [/] **Checkpoint 2.1** — correção de vocabulário (PR-N → Checkpoint N; ritual → Gate) + alinhamento à 0023; fecha o escopo do **#32**. **EM EXECUÇÃO** (este commit). #32 encerra após o Gate.
+- [ ] **Checkpoint 3** — GG-0003 Consistency Projection Check (mecânico, lista fixa de marcadores). **PR próprio off `main`.** _(dep: Checkpoint 2)_
+- [ ] **Checkpoint 4A** — Workflow Provenance · storage (`provenance.yml` append-only, `role` livre, espinha derivada). **PR próprio.** _(dep: Checkpoint 1/2; protótipo em `git stash` = referência)_
+- [ ] **Checkpoint 4B** — Workflow Provenance · projeção no `workflow continue` (fatos/pendências, não prescrição). **PR próprio.** _(dep: Checkpoint 4A)_
+- [ ] **Checkpoint 5** — AGENTS sync (`agents:build` + `agents:check` no `validate`). **PR próprio.** _(destrava Checkpoint 7)_
+- [ ] **Checkpoint 6** — GG-0002 mecanismo (`banned-concept-check` + `banned-by-dec.yml` + fixture). **PR próprio.** _(antes da remoção)_
+- [ ] **Checkpoint 7** — **CRÍTICO**: remover taxonomia do runtime/doutrina/boilerplate + ativar ban no mesmo commit. **PR próprio.** _(dep: Checkpoint 5 + 6)_
+- [ ] **Checkpoint 8** — corrigir path morto na msg do `gate-decidability-check`. **PR próprio.** _(flex)_
+- [ ] **Checkpoint 9** — desacoplar existência do `decision-brief` de `evidence-driven/mixed`. **PR próprio.** _(dep: Checkpoint 7)_
+- [ ] **Checkpoint 10** — tasks boilerplate único; renomear recipe/partials `tasks-evidence-driven`→genérico. **PR próprio.** _(dep: Checkpoint 7)_
+- [ ] **Checkpoint 11A** — drift-guard do legado `.specify/templates`. **PR próprio.** _(dep: Checkpoint 10)_
+- [ ] **Checkpoint 11B** — trocar fonte ativa → root canônico (⚠️ micro-decisão da owner). **PR próprio.** _(dep: Checkpoint 11A)_
+- [ ] **Checkpoint 11C** — remover legado `.specify/templates`. **PR próprio.** _(dep: Checkpoint 11B)_
+- [ ] **Checkpoint 12** — limpar docs arquiteturais de `workflowType`. **PR próprio.** _(flex)_
 
 ---
 
 ## Fase de Review → vive em `review.md`
 
-> **Modelo de 3 boundaries (`[DEC-0023-M01]`):** homologação/prontidão vive em `review.md` (instanciado quando a absorção amadurecer). `tasks.md` é execution-only e fecha 100% `[x]` ao fim da execução = sequência de PRs de absorção concluída (PR-1…PR-12, dentro da própria 0024).
+> **Modelo de 3 boundaries (`[DEC-0023-M01]`):** o **Gate por checkpoint** (4 papéis, em cada PR) é a revisão da implementação daquele PR. A **prontidão de integração da spec** vive em `review.md` (gates R1–R9), **instanciado no encerramento** — agrega/confirma que o conjunto de checkpoints landou coerente, gateia o Integration PR (R1–R7) e o merge de encerramento (R8). `tasks.md` é execution-only e fecha 100% `[x]` ao fim da execução = sequência de Checkpoints (1…12) concluída, dentro da própria 0024.
 
 ---
 
-## Fase de Encerramento → vive em `release-log.md`
+## Fase de Encerramento → vive em `release-log.md` + Integration PR
 
-> **Operações pós-merge** vivem em `release-log.md`. O encerramento cobre as decisões fundacionais cravadas + a absorção entregue dentro da 0024; a **migração ampla do ecossistema (Grupo B)** permanece nas candidatas re-escopadas, não nesta spec (fronteira modelo ≠ migração).
+> **Integration PR (`[🔗] [Integration]`) nasce no fim** (após o último checkpoint mergeado + `review.md` R1–R7): homologa a 0024 ponta-a-ponta e carrega o commit de encerramento (spec→`Done`, `state.yml`→`done`, `NEXT.md` deletado, `release-log.md` T0). A **migração ampla do ecossistema (Grupo B)** permanece nas candidatas re-escopadas, não nesta spec (fronteira modelo ≠ migração).

@@ -4,9 +4,9 @@
 
 > **Arquivo de acompanhamento contínuo.** Instanciado no setup. Registra itens que extrapolem o escopo da 0024 e precisem sobreviver até o encerramento. **DELETADO no encerramento pré-merge**; itens relevantes migram para `.governance/specs/roadmap/backlog.md`.
 
-> ## 🔁 Nota de fase — ABSORÇÃO OPERACIONAL (2026-05-31, PR-2)
+> ## 🔁 Nota de fase — ABSORÇÃO OPERACIONAL (2026-05-31, Checkpoint 2 / Checkpoint 2.1)
 >
-> A 0024 está em absorção (Stage 1 encerrado; gate fechado). Insights #1–#9 abaixo são da fase de pesquisa (registro). Os aprendizados da fase de absorção entram no **#10** — _candidatos a absorção, ainda não formalizados, a triar numa próxima sessão (não over-modelar)._
+> A 0024 está em absorção (Stage 1 encerrado; gate fechado). Vocabulário canônico (Checkpoint 2.1): **PR/`#N`** = Pull Request real · **Checkpoint N** = unidade de implementação · **Gate** = ritual de validação (cf. `plan.md § Glossário`). Insights #1–#9 abaixo são da fase de pesquisa (registro). Os aprendizados da fase de absorção entram no **#10** — _candidatos a absorção, ainda não formalizados, a triar numa próxima sessão (não over-modelar)._
 
 ---
 
@@ -19,8 +19,9 @@ _(Nenhum débito registrado ainda)_
 ### Débitos da Fase de Absorção (Stage 2)
 
 - **Enforcement do contrato da cadeia (`[DEC-0024-G06]`)** — CAMADA 1 deferida; promotável a ADR no fechamento (cf. insight #9). 1º candidato nomeado: `decision-trace:check`. **Não construir agora** (dogfood-first).
-- **Casa única dos templates (`F-AG04`)** — micro-decisão da owner pendente em PR-11B (`.core/templates` vs `.ai-guidelines/templates`).
-- **Protótipo do PR-4A (Workflow Provenance)** — preservado em `git stash` (interrompido por ordem de execução, não rejeição). Reaproveitar como referência **somente** quando a sequência chegar ao PR-4A; não antecipar.
+- **Casa única dos templates (`F-AG04`)** — micro-decisão da owner pendente em Checkpoint 11B (`.core/templates` vs `.ai-guidelines/templates`).
+- **Protótipo do Checkpoint 4A (Workflow Provenance)** — preservado em `git stash` (interrompido por ordem de execução, não rejeição). Reaproveitar como referência **somente** quando a sequência chegar ao Checkpoint 4A; não antecipar.
+- **Promover o glossário Checkpoint/Gate/PR a convenção framework-wide** — hoje cravado spec-local (`plan.md`). Candidato a refletir em `pr-title-conventions.md` / `governance-foundation.md` numa unidade própria (consumer-facing → exige Gate próprio). **Não** bundlado no Checkpoint 2.1.
 
 ---
 
@@ -119,15 +120,16 @@ _(Nenhum débito registrado ainda)_
 
 ### 10. Aprendizados da fase de absorção (2026-05-31) — candidatos a absorção (não formalizados)
 
-> Surgiram do uso real da stack durante os PRs de absorção. **Triar numa próxima sessão:** alguns viram guardrail/check, outros finding, outros só nota. **Não over-modelar.**
+> Surgiram do uso real da stack durante os checkpoints de absorção. **Triar numa próxima sessão:** alguns viram guardrail/check, outros finding, outros só nota. **Não over-modelar.**
 
-1. **Drift silencioso SSOT→projeção é o padrão recorrente nº 1.** A mesma forma apareceu 4×: `state.yml`↔`active-specs` (A3), `rules.json`↔`AGENTS.md` (C4), `state.yml`↔`tasks/plan/NEXT/brief` (A2), código↔`ARCHITECTURE.md` (B2). **Sinal:** _toda aresta SSOT→projeção precisa de um gate de sync, ou diverge em silêncio._ PR-3/PR-5 são instâncias; vale generalizar (candidato a guardrail-classe ou princípio).
-2. **Validação mecânica vs semântica** — todo guardrail deveria declarar seu subconjunto 🤖 (check falha) e 👁 (julgamento humano), como GG-0001. Candidato a regra de autoria de guardrails. _Clean-clone/smoke é o complemento para o que `yarn validate` não pega (correção de distribuição — ex.: PR-11): `test:smoke` deveria gatear PRs que afetam o que o consumidor recebe._
+1. **Drift silencioso SSOT→projeção é o padrão recorrente nº 1.** A mesma forma apareceu 4×: `state.yml`↔`active-specs` (A3), `rules.json`↔`AGENTS.md` (C4), `state.yml`↔`tasks/plan/NEXT/brief` (A2), código↔`ARCHITECTURE.md` (B2). **Sinal:** _toda aresta SSOT→projeção precisa de um gate de sync, ou diverge em silêncio._ Checkpoint 3/Checkpoint 5 são instâncias; vale generalizar (candidato a guardrail-classe ou princípio).
+2. **Validação mecânica vs semântica** — todo guardrail deveria declarar seu subconjunto 🤖 (check falha) e 👁 (julgamento humano), como GG-0001. Candidato a regra de autoria de guardrails. _Clean-clone/smoke é o complemento para o que `yarn validate` não pega (correção de distribuição — ex.: Checkpoint 11): `test:smoke` deveria gatear PRs reais que afetam o que o consumidor recebe._
 3. **Simplificação cognitiva do gate humano à medida que a automação cresce** — observado ao vivo: o `gate-decidability-check` achou os 4 defeitos do G02 _no lugar do_ owner reler tudo; o gate encolheu para "ratificar a afirmação única / dizer go". **Pattern:** enforcement absorve a parte mecânica do julgamento, deixando ao humano só o julgamento irredutível (coerente com ADR 0021 + imagem das 3 camadas; ainda não nomeado).
-4. **Handoff/plano não pode depender de estado local.** O plano executável viveu em `~/.claude/plans/` (efêmero) — não sobrevive a troca de sessão/máquina/agente. **Lição:** carregar sequência + decisões no **repo** (por isso PR-2 dobra a sequência no `plan.md`). Reforça F-007/ADR 0022.
+4. **Handoff/plano não pode depender de estado local.** O plano executável viveu em `~/.claude/plans/` (efêmero) — não sobrevive a troca de sessão/máquina/agente. **Lição:** carregar sequência + decisões no **repo** (por isso o Checkpoint 2 dobra a sequência no `plan.md`). Reforça F-007/ADR 0022.
 5. **Anti-taxonomia é recorrente em todos os níveis** — apareceu em G02 (tipos de spec), guardrails (família GG-\*), e roles de proveniência. **Disciplina:** ao remover uma taxonomia fechada, resistir a recriá-la um nível acima; preferir _propriedade livre + papéis reconhecidos (hints de projeção)_, não enum fechado.
-6. **DX do `workflow continue`** projeta branch/spec/estado, mas não a cadeia operacional (quem implementou/auditou/decidiu) — gap que motivou PR-4. Operador quer "onde estamos + quem tocou + o que está pendente" num olhar.
+6. **DX do `workflow continue`** projeta branch/spec/estado, mas não a cadeia operacional (quem implementou/auditou/decidiu) — gap que motivou o Checkpoint 4. Operador quer "onde estamos + quem tocou + o que está pendente" num olhar.
 7. **"Enforcement previne a classe, não o sintoma"** — GG-0002 protege contra reintrodução do conceito banido, não só corrige o caso atual; o guard entra **antes/junto** da correção (sem janela de regressão).
+8. **Reusar "PR" para unidade de implementação foi drift de vocabulário** (Checkpoint 2.1). Chamamos blocos internos de "PR-1…PR-12" enquanto só existe um Pull Request real (`#32`) — colapsando implementação/revisão/integração que a 0023 já separara (`[DEC-0023-M01]`; `review.md` R6: _"drift 'PR6' não existe"_). **Correção:** `PR/#N` = GitHub; `Checkpoint N` = unidade; `Gate` = ritual. **Lição:** ao nomear unidades de trabalho, não sobrecarregar termos do host (PR/branch/issue); reusar linguagem natural sem criar sigla nova. Candidato a nota em `pr-title-conventions.md`.
 
 ---
 

@@ -15,16 +15,17 @@
 >
 > **Slug renomeado (2026-05-30).** O diretório e a branch foram migrados de `0024-handoff-as-first-class` para **`0024-context-architecture`** (operação deliberada, sob autorização explícita da owner) — refletindo que a 0024 deixou de ser sobre handoff e passou a ser a **arquitetura de contexto**. O **número 0024 é imutável** (ADR 0017); apenas o slug mudou. O retarget do PR #30 acompanha o rename remoto da branch.
 
-> ## 🔁 Nota de fase — ABSORÇÃO OPERACIONAL (2026-05-31, PR-2)
+> ## 🔁 Nota de fase — ABSORÇÃO OPERACIONAL (2026-05-31, Checkpoint 2 · vocabulário no Checkpoint 2.1)
 >
 > **Esta nota reposiciona a spec sem reescrever o corpo abaixo.** Tudo a partir de _"Visão arquitetural"_ é **registro histórico** do enquadramento research-first (2026-05-28/29) e é preservado verbatim (princípio de imutabilidade + `sem apagar histórico`). O **estado vigente** é o desta nota.
 >
 > - **A pesquisa (Stage 1) encerrou; a 0024 entrou em absorção operacional.** Conclusão-raiz: _o problema não é falta de decisão — é falta de absorção._ As decisões convergidas ainda não alteraram o comportamento do sistema ("a arquitetura converge enquanto o código diverge"). O trabalho agora é **remover divergências decisão↔código uma a uma**, não re-modelar.
 > - **Decisões cravadas (`decision-brief.md`, reestruturado por estado):** `[DEC-0024-G00]` identidade (transformação `contexto humano → governança executável`), `[DEC-0024-G02]` taxonomia de tipos removida (→ bloco + propriedade `exige-julgamento`), `[DEC-0024-G06]` contrato da cadeia — todas **`Resolved`**. **Gate fechado.** `state.yml` = `stage: implementation` / `gate.status: closed`.
 > - **Pesquisa estrutural ainda aberta** (ex-`G01`/`G03`/`G04`/`G05` + eixos de pressão) **não bloqueia** — migrou para [`research/findings.md`](./research/findings.md) como _findings abertos_; só retorna ao brief como `[DEC] Pendente` ao convergir + exigir julgamento.
-> - **Plano executável = `plan.md`.** A sequência de PRs de absorção (backlog = relatório de auditoria do Codex) foi **dobrada no [`plan.md`](./plan.md)** neste PR-2, aposentando a dependência de arquivo local efêmero. Cada PR é atômico/reversível, com checkpoint Codex→ChatGPT→owner.
-> - **Sobre `Tipo de spec: evidence-driven` (header abaixo):** é **metadado histórico**. A própria taxonomia `deterministic/mixed/evidence-driven` foi **removida** por `[DEC-0024-G02]`; sua eliminação do runtime/boilerplate é **execução derivada** (PRs de absorção, ex.: PR-7/PR-10), **não** ocorre nesta nota. O rótulo é preservado como registro, não como classificação ativa.
-> - **Critérios de Aceite (alto nível) abaixo:** redigidos para o ciclo research-first; o ciclo de absorção é regido pelo DoD operacional do [`plan.md`](./plan.md) e pelo checklist de PRs do [`tasks.md`](./tasks.md). Permanecem válidos como registro do que a fase de pesquisa exigiu.
+> - **Vocabulário (Checkpoint 2.1):** **PR/`#N`** = Pull Request real do GitHub · **Checkpoint N** = unidade de implementação da spec · **Gate** = ritual de validação (Technical Audit → Architectural Review → Human). Glossário canônico em [`plan.md § Glossário`](./plan.md).
+> - **Plano executável = `plan.md`.** A sequência de Checkpoints de absorção (backlog = relatório de auditoria do Codex) foi **dobrada no [`plan.md`](./plan.md)** no Checkpoint 2, aposentando a dependência de arquivo local efêmero. Cada Checkpoint é atômico/reversível, fechado por um **Gate** (Technical Audit → Architectural Review → Human). **Topologia:** `#32` é o PR de governança/bootstrap (Checkpoint 1/2/2.1) e encerra; do **Checkpoint 3** em diante, cada um abre **PR real próprio** (sequential, ADR 0024).
+> - **Sobre `Tipo de spec: evidence-driven` (header abaixo):** é **metadado histórico**. A própria taxonomia `deterministic/mixed/evidence-driven` foi **removida** por `[DEC-0024-G02]`; sua eliminação do runtime/boilerplate é **execução derivada** (Checkpoints de absorção, ex.: Checkpoint 7/Checkpoint 10), **não** ocorre nesta nota. O rótulo é preservado como registro, não como classificação ativa.
+> - **Critérios de Aceite (alto nível) abaixo:** redigidos para o ciclo research-first; o ciclo de absorção é regido pelo DoD operacional do [`plan.md`](./plan.md) e pelo checklist de Checkpoints do [`tasks.md`](./tasks.md). Permanecem válidos como registro do que a fase de pesquisa exigiu.
 
 ---
 
