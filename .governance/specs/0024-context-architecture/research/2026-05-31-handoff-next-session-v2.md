@@ -16,6 +16,12 @@
 >
 > O §4 abaixo (tabela "PLANO DE PRs") fica **preservado verbatim como trilha datada**; a versão viva e correta é `plan.md § "Sequência de Checkpoints"` + `§ "Topologia operacional"`.
 
+> ## ⚠️ Histórico (não operacional) — tudo abaixo é registro datado
+>
+> **Se você só ler uma coisa:** leia [`plan.md`](../plan.md) § **"Glossário operacional"** + § **"Topologia operacional"** — é a **SSOT do plano**.
+>
+> **Qualquer ocorrência de `PR-1 … PR-12`** no corpo abaixo (notadamente §0 e §4) é **histórica** e deve ser lida como **`Checkpoint 1 … Checkpoint 12`**. Da mesma forma, "EXECUÇÃO de PRs de absorção" (objetivo, topo) lê-se "execução de **Checkpoints** de absorção". Este handoff foi escrito **antes** da correção de vocabulário (Checkpoint 2.1); permanece **preservado verbatim como trilha datada**, mas **não é operacional**. O estado vivo e correto está em `plan.md` / `tasks.md` / `state.yml`.
+
 ---
 
 ## 0. O que mudou nesta sessão (executivo)

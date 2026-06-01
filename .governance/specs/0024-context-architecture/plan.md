@@ -18,7 +18,7 @@
 > - **Checkpoint N** — uma **unidade de implementação** da spec (ex.: Checkpoint 3). Substitui o antigo e ambíguo "PR-N". A enumeração `Checkpoint 1…12` é a trilha de absorção.
 > - **Gate** — o **ritual de validação** que fecha um checkpoint, em três etapas nomeadas: **Technical Audit Gate** (Codex) → **Architectural Review Gate** (ChatGPT) → **Human Gate** (owner). O Human Gate de um checkpoint = autorização de merge do PR correspondente.
 >
-> **Proveniência** (comentários nos PRs): `ref: #<PR> @ <sha>` · `checkpoint: <N>` · `role: <implementation|technical_audit|architectural_review|human_gate>`.
+> **Proveniência** (comentários nos PRs): `ref: #<PR> @ <sha>` · `checkpoint: <N>` · `role: <implementation|technical_audit|architectural_review|human_gate>`. **Template canônico do comentário de checkpoint:** [`.core/process/checkpoint-comment-template.md`](../../../.core/process/checkpoint-comment-template.md).
 
 > ## 🔁 Nota de fase — ABSORÇÃO OPERACIONAL (2026-05-31, Checkpoint 2)
 >
