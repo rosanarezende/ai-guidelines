@@ -31,6 +31,7 @@ import {
   parseWorkflowChecks,
   WorkflowChecks,
   MatrixProducer,
+  StableProducer,
 } from "../infrastructure/yaml/workflowChecksReader.js";
 
 export interface Logger {
@@ -109,7 +110,7 @@ export function parseRuleset(jsonContent: string): RulesetModel {
 
 export interface ProducibilityViolation {
   readonly context: string;
-  readonly reason: "no-producer" | "matrix-only";
+  readonly reason: "no-producer" | "matrix-only" | "missing-trigger";
   readonly hint: string;
 }
 
@@ -122,18 +123,40 @@ export interface ProducibilityResult {
 
 export function checkProducibility(
   required: readonly RequiredCheck[],
-  workflows: readonly WorkflowChecks[]
+  workflows: readonly WorkflowChecks[],
+  externalProducers: readonly string[] = []
 ): ProducibilityResult {
-  const stableNames = new Set<string>();
+  const stableMap = new Map<string, StableProducer>();
   const matrixProducers: MatrixProducer[] = [];
   for (const wf of workflows) {
-    for (const s of wf.stable) stableNames.add(s.context);
+    for (const s of wf.stable) stableMap.set(s.context, s);
     for (const m of wf.matrix) matrixProducers.push(m);
   }
 
   const violations: ProducibilityViolation[] = [];
+  const externalSet = new Set(externalProducers);
+
   for (const rc of required) {
-    if (stableNames.has(rc.context)) continue;
+    if (externalSet.has(rc.context)) continue;
+
+    const stableHit = stableMap.get(rc.context);
+    if (stableHit) {
+      const hasTrigger = stableHit.triggers.some(
+        (t) => t === "pull_request" || t === "pull_request_target" || t === "push"
+      );
+      if (!hasTrigger) {
+        violations.push({
+          context: rc.context,
+          reason: "missing-trigger",
+          hint:
+            `produtor encontrado (job "${stableHit.job}" em ${stableHit.workflow}), mas ele não ` +
+            `declara eventos de CI/CD base compatíveis na raiz (pull_request, push). Gatilhos ` +
+            `atuais: ${stableHit.triggers.join(", ") || "(nenhum)"}. Filtros internos são ignorados.`,
+        });
+      }
+      continue;
+    }
+
     const matrixHit = matrixProducers.find(
       (m) => m.staticPrefix.length > 0 && rc.context.startsWith(m.staticPrefix)
     );
@@ -147,11 +170,11 @@ export function checkProducibility(
           `exija um job agregador (ex.: \`needs: [<matriz>]\`), não a expansão.`,
       });
     } else {
-      const available = [...stableNames].sort().join(", ") || "(nenhum)";
+      const available = [...stableMap.keys(), ...externalSet].sort().join(", ") || "(nenhum)";
       violations.push({
         context: rc.context,
         reason: "no-producer",
-        hint: `nenhum workflow produz este context. Produtores estáveis: ${available}.`,
+        hint: `nenhum workflow produz este context. Produtores estáveis/externos: ${available}.`,
       });
     }
   }
@@ -159,7 +182,7 @@ export function checkProducibility(
   return {
     ok: violations.length === 0,
     required: required.map((r) => r.context),
-    stableProducers: [...stableNames].sort(),
+    stableProducers: [...stableMap.keys()].sort(),
     violations,
   };
 }
@@ -231,6 +254,8 @@ export interface MainOptions {
   readonly logger?: Logger;
   /** Caminho do snapshot do ruleset vivo (modo paridade). */
   readonly livePath?: string;
+  /** Lista de provedores externos autorizados. */
+  readonly externalProducers?: readonly string[];
 }
 
 function readWorkflows(repoRoot: string): WorkflowChecks[] {
@@ -267,7 +292,11 @@ export function main(repoRoot: string, options: MainOptions): number {
   }
 
   if (options.mode === "producibility") {
-    const result = checkProducibility(versioned.requiredContexts, readWorkflows(repoRoot));
+    const result = checkProducibility(
+      versioned.requiredContexts,
+      readWorkflows(repoRoot),
+      options.externalProducers
+    );
     if (result.ok) {
       logger.info(
         `✅ ruleset:check (PRIMÁRIO/producibilidade) — ${result.required.length} required ` +

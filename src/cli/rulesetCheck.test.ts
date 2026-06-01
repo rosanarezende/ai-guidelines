@@ -7,8 +7,13 @@ import {
 } from "./rulesetCheck.js";
 import { WorkflowChecks } from "../infrastructure/yaml/workflowChecksReader.js";
 
-function stable(context: string, workflow = "wf.yml", job = context): WorkflowChecks {
-  return { stable: [{ context, workflow, job }], matrix: [] };
+function stable(
+  context: string,
+  workflow = "wf.yml",
+  job = context,
+  triggers = ["pull_request"]
+): WorkflowChecks {
+  return { stable: [{ context, workflow, job, triggers }], matrix: [] };
 }
 
 function rulesetJson(contexts: string[]): string {
@@ -66,6 +71,25 @@ describe("checkProducibility (PRIMÁRIO) [Checkpoint 2.2]", () => {
     expect(result.violations[0].hint).toContain("repo-validation");
   });
 
+  it("FALHA quando o produtor existe mas não declara gatilhos base válidos na raiz do on: (o achado do Codex no PR #33)", () => {
+    // Ex: job existe, mas workflow só roda em workflow_dispatch ou release
+    const result = checkProducibility(req("repo-validation"), [
+      stable("repo-validation", "wf.yml", "repo-validation", ["workflow_dispatch", "release"]),
+    ]);
+    expect(result.ok).toBe(false);
+    expect(result.violations).toEqual([
+      expect.objectContaining({ context: "repo-validation", reason: "missing-trigger" }),
+    ]);
+    expect(result.violations[0].hint).toContain("não declara eventos de CI/CD base");
+  });
+
+  it("PASSA se for provedor externo autorizado, mesmo sem workflow correspondente", () => {
+    // Vercel ou Codecov injetados por fora
+    const result = checkProducibility(req("vercel/preview"), [], ["vercel/preview"]);
+    expect(result.ok).toBe(true);
+    expect(result.violations).toHaveLength(0);
+  });
+
   it("FALHA quando o required depende de expansão de matriz (codifica a lição)", () => {
     const matrixWf: WorkflowChecks = {
       stable: [],
@@ -75,6 +99,7 @@ describe("checkProducibility (PRIMÁRIO) [Checkpoint 2.2]", () => {
           staticPrefix: "smoke / ",
           workflow: "smoke-multi-os.yml",
           job: "smoke",
+          triggers: ["pull_request"],
         },
       ],
     };
