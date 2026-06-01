@@ -30,11 +30,14 @@ export interface GovernancePrCheckInput {
   readonly prLabels: ReadonlyArray<string>;
   /** Repo no formato "owner/name". */
   readonly repo: string;
+  /** Branch base do PR (ex.: feat/spec-0024-execution). */
+  readonly prBranch: string;
 }
 
 export type GovernancePrCheckResult =
   | { readonly kind: "ok"; readonly governancePrNumber: number; readonly note?: string }
   | { readonly kind: "fast-track"; readonly note: string }
+  | { readonly kind: "exempt"; readonly note: string }
   | { readonly kind: "fail"; readonly reasons: ReadonlyArray<string> };
 
 const DEPENDS_ON_REGEX = /Depends on #(\d+)\s*\(governance\)/i;
@@ -80,6 +83,13 @@ export function runGovernancePrCheck(
   input: GovernancePrCheckInput,
   api: GitHubApiCaller
 ): GovernancePrCheckResult {
+  if (!input.prBranch.endsWith("-execution")) {
+    return {
+      kind: "exempt",
+      note: `PR branch "${input.prBranch}" não termina com "-execution". Isento de dependência estrutural (não é execution PR).`,
+    };
+  }
+
   if (input.prLabels.includes(FAST_TRACK_LABEL)) {
     if (!FAST_TRACK_RATIONALE_REGEX.test(input.prBody)) {
       return {
@@ -203,7 +213,7 @@ export function main(opts: RunOptions): number {
   const logger = opts.logger ?? stdoutLogger;
   const api = opts.api ?? new CliGitHubApiCaller();
 
-  let pr: { body: string | null; labels: ReadonlyArray<{ name: string }> };
+  let pr: { body: string | null; labels: ReadonlyArray<{ name: string }>; head: { ref: string } };
   try {
     pr = api.call(`repos/${opts.repo}/pulls/${opts.prNumber}`) as typeof pr;
   } catch (err) {
@@ -218,6 +228,7 @@ export function main(opts: RunOptions): number {
       prBody: pr.body ?? "",
       prLabels: pr.labels.map((l) => l.name),
       repo: opts.repo,
+      prBranch: pr.head.ref,
     },
     api
   );
@@ -228,6 +239,10 @@ export function main(opts: RunOptions): number {
   }
   if (result.kind === "fast-track") {
     logger.info(`⚠️  ${result.note}`);
+    return 0;
+  }
+  if (result.kind === "exempt") {
+    logger.info(`✅ ${result.note}`);
     return 0;
   }
   logger.error(`❌ Governance PR check falhou para PR #${opts.prNumber}:`);

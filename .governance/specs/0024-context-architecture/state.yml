@@ -10,7 +10,133 @@ focus:
   - "Criterio: 'ja foi validado empiricamente na 0024?' -> absorver/enforcar/executar. NAO re-modelar, NAO re-pesquisar o decidido. Risco dominante: voltar a modelar em vez de remover divergencias uma a uma."
 next:
   - "#32 GATED: Checkpoints 2 (8b0eec6) + 2.1 (d686d4b) + 2.1a (fa2c0ae) fechados. #32 permanece como linha de integracao -- NAO mergeia."
-  - "Checkpoint 2.2 + 2.2b EM EXECUCAO na branch stacked feat/spec-0024-ruleset-producibility: ruleset:check (producibilidade PRIMARIO no validate + paridade SECUNDARIO detect-only no ruleset-drift.yml) + ruleset-as-code + agregador estavel smoke. O 2.2b acrescentou limite mecanico (achado Codex PR #33): exige extracao de gatilhos-base (pull_request/push) sem interpretar fluxo interno (if/paths), e inclui suporte a externalProducers. yarn validate verde. Fecha a classe do guardrails orfao e previne orfaos absolutos."
-  - "PROXIMO: aguardando Technical Audit Gate (Codex) do Checkpoint 2.2b no PR stacked. Apos fechamento total do Gate (-> ChatGPT -> Owner), avancar para Checkpoint 3."
+  - "Checkpoint 2.3 EM EXECUCAO na branch stacked feat/spec-0024-topology: transforma a topologia do PR em dado estruturado para resolver ambiguidade visual do CI. Atualizacao do state.yml e stateYmlCheck."
+  - "PROXIMO: aguardando Technical Audit Gate do Checkpoint 2.3. Apos fechamento total do Gate, avancar para Checkpoint 3."
   - "Encerramento: instanciar review.md (gates R1-R7) -> abrir Integration PR (tipo Integration, homologacao) -> commit de encerramento (spec->Done, state->done, NEXT deletado, release-log T0) na linha da spec -> review.md R8 -> MERGE UNICO em main (modo unit, veiculo = PR terminal). spec->Done so no fim."
   - "LER antes de qualquer acao: plan.md (SSOT do plano + glossario + topologia) e o handoff v2 (research/2026-05-31-handoff-next-session-v2.md, com nota de errata + secao Historico no topo). Verificar git limpo + yarn validate verde."
+topology:
+  cursor:
+    pr: checkpoint-2.3
+    checkpoint: checkpoint-2.3
+  prs:
+    concluded:
+      - id: base-governance
+        github_pr: 32
+        role: governance
+        terminal: false
+        sequence: null
+        checkpoints:
+          - checkpoint-1
+          - checkpoint-2
+          - checkpoint-2.1
+          - checkpoint-2.1a
+
+    active:
+      - id: ruleset-producibility
+        github_pr: 33
+        role: execution
+        terminal: false
+        sequence: 1
+        checkpoints:
+          - checkpoint-2.2
+          - checkpoint-2.2b
+
+      - id: checkpoint-2.3
+        github_pr: null
+        role: execution
+        terminal: false
+        sequence: 2
+        checkpoints:
+          - checkpoint-2.3
+
+    planned:
+      - id: checkpoint-3
+        github_pr: null
+        role: execution
+        terminal: false
+        sequence: 3
+        checkpoints:
+          - checkpoint-3
+
+      - id: checkpoint-4
+        github_pr: null
+        role: execution
+        terminal: false
+        sequence: 4
+        checkpoints:
+          - checkpoint-4a
+          - checkpoint-4b
+
+      - id: checkpoint-5
+        github_pr: null
+        role: execution
+        terminal: false
+        sequence: 5
+        checkpoints:
+          - checkpoint-5
+
+      - id: checkpoint-6
+        github_pr: null
+        role: execution
+        terminal: false
+        sequence: 6
+        checkpoints:
+          - checkpoint-6
+
+      - id: checkpoint-7
+        github_pr: null
+        role: execution
+        terminal: false
+        sequence: 7
+        checkpoints:
+          - checkpoint-7
+
+      - id: checkpoint-8
+        github_pr: null
+        role: execution
+        terminal: false
+        sequence: 8
+        checkpoints:
+          - checkpoint-8
+
+      - id: checkpoint-9
+        github_pr: null
+        role: execution
+        terminal: false
+        sequence: 9
+        checkpoints:
+          - checkpoint-9
+
+      - id: checkpoint-10
+        github_pr: null
+        role: execution
+        terminal: false
+        sequence: 10
+        checkpoints:
+          - checkpoint-10
+
+      - id: checkpoint-11
+        github_pr: null
+        role: execution
+        terminal: false
+        sequence: 11
+        checkpoints:
+          - checkpoint-11a
+          - checkpoint-11b
+          - checkpoint-11c
+
+      - id: checkpoint-12
+        github_pr: null
+        role: execution
+        terminal: false
+        sequence: 12
+        checkpoints:
+          - checkpoint-12
+
+      - id: integration-final
+        github_pr: null
+        role: integration
+        terminal: true
+        sequence: null
+        checkpoints:
+          - review-and-merge

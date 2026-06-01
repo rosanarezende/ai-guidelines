@@ -13,6 +13,23 @@ class FakeApi implements GitHubApiCaller {
 const REPO = "rosanarezende/ai-guidelines";
 
 describe("CLI — governance-pr-check [BR-GOVERNANCE-CI]", () => {
+  describe("skip/exempt", () => {
+    it("DADO PR branch não terminada em -execution ENTÃO retorna exempt", () => {
+      const api = new FakeApi(new Map());
+      const result = runGovernancePrCheck(
+        {
+          prNumber: 42,
+          prBody: "Does not matter",
+          prLabels: [],
+          repo: REPO,
+          prBranch: "feat/spec-0024-topology",
+        },
+        api
+      );
+      expect(result.kind).toBe("exempt");
+    });
+  });
+
   describe("fast-track bypass", () => {
     it("DADO PR com label fast-track + rationale inline [fast-track: ...] ENTÃO retorna fast-track sem chamar API", () => {
       const api = new FakeApi(new Map());
@@ -22,6 +39,7 @@ describe("CLI — governance-pr-check [BR-GOVERNANCE-CI]", () => {
           prBody: "Hotfix urgente. [fast-track: prod incident; reviewer assume risco]",
           prLabels: ["fast-track"],
           repo: REPO,
+          prBranch: "feat/spec-0024-execution",
         },
         api
       );
@@ -37,6 +55,7 @@ describe("CLI — governance-pr-check [BR-GOVERNANCE-CI]", () => {
             "## Fast-track Rationale\n\nFix mínimo; reviewer humano absorve responsabilidade.",
           prLabels: ["fast-track"],
           repo: REPO,
+          prBranch: "feat/spec-0024-execution",
         },
         api
       );
@@ -51,6 +70,7 @@ describe("CLI — governance-pr-check [BR-GOVERNANCE-CI]", () => {
           prBody: "Body without rationale",
           prLabels: ["fast-track"],
           repo: REPO,
+          prBranch: "feat/spec-0024-execution",
         },
         api
       );
@@ -71,6 +91,7 @@ describe("CLI — governance-pr-check [BR-GOVERNANCE-CI]", () => {
           prBody: "Just an execution PR.",
           prLabels: [],
           repo: REPO,
+          prBranch: "feat/spec-0024-execution",
         },
         api
       );
@@ -95,6 +116,7 @@ describe("CLI — governance-pr-check [BR-GOVERNANCE-CI]", () => {
           prBody: "Depends on #99 (governance)",
           prLabels: [],
           repo: REPO,
+          prBranch: "feat/spec-0024-execution",
         },
         api
       );
@@ -117,6 +139,7 @@ describe("CLI — governance-pr-check [BR-GOVERNANCE-CI]", () => {
           prBody: "Depends on #99 (governance)",
           prLabels: [],
           repo: REPO,
+          prBranch: "feat/spec-0024-execution",
         },
         api
       );
@@ -148,6 +171,7 @@ describe("CLI — governance-pr-check [BR-GOVERNANCE-CI]", () => {
           prBody: "Depends on #99 (governance)",
           prLabels: [],
           repo: REPO,
+          prBranch: "feat/spec-0024-execution",
         },
         api
       );
@@ -173,6 +197,7 @@ describe("CLI — governance-pr-check [BR-GOVERNANCE-CI]", () => {
           prBody: "Depends on #99 (governance)",
           prLabels: [],
           repo: REPO,
+          prBranch: "feat/spec-0024-execution",
         },
         api
       );
@@ -198,6 +223,7 @@ describe("CLI — governance-pr-check [BR-GOVERNANCE-CI]", () => {
           prBody: "Depends on #77 (governance)",
           prLabels: [],
           repo: REPO,
+          prBranch: "feat/spec-0024-execution",
         },
         api
       );
@@ -230,6 +256,7 @@ describe("CLI — governance-pr-check [BR-GOVERNANCE-CI]", () => {
           prBody: "Depends on #55 (governance)",
           prLabels: [],
           repo: REPO,
+          prBranch: "feat/spec-0024-execution",
         },
         api
       );
@@ -254,6 +281,7 @@ describe("CLI — governance-pr-check [BR-GOVERNANCE-CI]", () => {
           prBody: "Depends on #55 (governance)",
           prLabels: [],
           repo: REPO,
+          prBranch: "feat/spec-0024-execution",
         },
         api
       );
