@@ -12,7 +12,7 @@ Olhar o título de um PR em uma lista do GitHub deve responder três perguntas s
 2. **Esse PR pode ser mergeado isoladamente, ou é parte de uma stack pareada/sequenciada?**
 3. **Se faz parte de stack, qual posição ocupa e há PRs downstream aguardando?**
 
-GitHub native states (Draft / Ready / Merged / Closed) cobrem **lifecycle operacional** mas não cobrem **contrato arquitetural** — especificamente, não distinguem governance contract pendente, posição em rollout sequencial, ou execution dependente. É essa lacuna que esta convenção fecha.
+O enforcement disso agora é feito em L4 pelo `governance-pr-check`, que usa a topologia declarada no `state.yml` (SSOT) para validar se o título projetado está correto.
 
 ## Padrão de título
 
@@ -188,21 +188,22 @@ Quando um marcador deixa de fazer sentido, **o autor do PR remove via `gh pr edi
 
 ## Anti-DAG guardrail
 
-🔒, ➜, números (1️⃣2️⃣3️⃣), e labels textuais são **sinalização humana L1** — leitura por olhos humanos em uma lista de PRs. **Não são input para automação**.
+🔒, ➜, números (1️⃣2️⃣3️⃣), e labels textuais são **sinalização humana L1** — leitura por olhos humanos em uma lista de PRs. **Eles SÃO projeções validadas pelo CI, mas NUNCA a fonte de verdade**.
 
 Se você está pensando em alguma destas opções, **pare e abra DEC**:
 
-- parser automático que lê emojis/números para ordering;
+- parser automático que lê emojis/números para ordering ou inferir topologia;
 - DAG tooling que monta grafo de dependências a partir dos títulos;
-- merge orchestration baseada em emojis ou labels;
-- CI que valida ordem, completude da stack ou presença de prefixo;
-- linter que valida formato exato do título antes de aprovar PR.
+- merge orchestration baseada em emojis ou labels.
 
-Qualquer ferramenta lendo programaticamente esta convenção é território **L4** (cf. research §8 anti-recursão guards) — exige decisão registrada. Convenção L1 é convenção textual humana; viramos infraestrutura no momento em que automatizamos a leitura dela.
+A topologia vive em `state.yml`. O CI lê a topologia e valida se o título é uma projeção fiel dela. Nunca o inverso. O título não comanda o CI; a topologia comanda o CI e o título.
 
 ## Enforcement
 
-Esta convenção é **L1 (convenção textual)** apenas. `governance-pr-check` (L4 CI) **não** valida prefixos de título nesta versão. Reabrir como decisão própria em DEC futura se ≥ 2 casos de drift aparecerem na prática (PRs nascendo sem prefixo ou com prefixo errado).
+Esta convenção é **enforced** pelo `governance-pr-check` (L4 CI). O CI carrega a topologia do `state.yml` associado à spec ativa e verifica se:
+
+1. O título do PR começa com os emojis corretos (tipo, sequence, terminality) e o identificador correto (`[Spec NNNN]`).
+2. O template de body utilizado é o adequado e preenchido corretamente de acordo com a posição da stack.
 
 ## Cross-refs
 
