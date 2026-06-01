@@ -180,4 +180,72 @@ topology:
       expect(result.reasons[0]).toMatch(/não declara rationale no body/);
     }
   });
+
+  // === Robustez O2 (Checkpoint 2.3a) — header ancorado a linha + stack tolerante ===
+
+  it("DADO seção citada inline (não header de linha própria), ENTÃO falha (fecha falso-negativo de substring)", () => {
+    const input = {
+      ...baseInput,
+      prBody: `
+## Status do ciclo de vida
+## PR Type
+## Posição na stack
+- **Stack atual**: 1
+## Merge authorization
+## Resumo
+## Test plan
+## Cross-refs
+## Checklist operacional
+> mencionei a ## Disclosure de IA do outro PR, mas não é um header aqui
+`,
+    };
+    const result = runGovernancePrCheck(input, fs);
+    expect(result.kind).toBe("fail");
+    if (result.kind === "fail") {
+      expect(result.reasons.some((r) => r.includes("## Disclosure de IA"))).toBe(true);
+    }
+  });
+
+  it("DADO variação de formatação na linha 'Stack atual' (espaços, ':' fora do bold), ENTÃO ainda passa", () => {
+    const input = {
+      ...baseInput,
+      prBody: `
+## Status do ciclo de vida
+## PR Type
+## Posição na stack
+-  **Stack atual** :  1
+## Merge authorization
+## Resumo
+## Test plan
+## Cross-refs
+## Checklist operacional
+## Disclosure de IA
+`,
+    };
+    const result = runGovernancePrCheck(input, fs);
+    expect(result.kind).toBe("ok");
+  });
+
+  it("DADO número de stack errado (2 quando sequence=1), ENTÃO falha (word-boundary preserva o contrato)", () => {
+    const input = {
+      ...baseInput,
+      prBody: `
+## Status do ciclo de vida
+## PR Type
+## Posição na stack
+- **Stack atual**: 2
+## Merge authorization
+## Resumo
+## Test plan
+## Cross-refs
+## Checklist operacional
+## Disclosure de IA
+`,
+    };
+    const result = runGovernancePrCheck(input, fs);
+    expect(result.kind).toBe("fail");
+    if (result.kind === "fail") {
+      expect(result.reasons.some((r) => r.includes("Coerência de stack"))).toBe(true);
+    }
+  });
 });

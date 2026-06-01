@@ -22,6 +22,20 @@ export type GovernancePrCheckResult =
 const FAST_TRACK_LABEL = "fast-track";
 const FAST_TRACK_RATIONALE_REGEX = /\[fast-track:\s*[^\]]+\]|##\s*Fast-track\s+Rationale\b/i;
 
+/**
+ * Robustez (Checkpoint 2.3a / O2): a seção obrigatória precisa ser um HEADER
+ * markdown em linha própria — não basta o texto aparecer em qualquer lugar do
+ * body (ex.: dentro de citação ou cross-ref a outro PR, que geraria
+ * falso-negativo com `includes`). Tolera nível de heading (`##`..`######`),
+ * indentação leve e espaços à direita (reduz falso-positivo por formatação).
+ * Ancoragem de linha apenas — NÃO é parser de markdown.
+ */
+function hasSectionHeader(body: string, headerLine: string): boolean {
+  const title = headerLine.replace(/^#+\s*/, "");
+  const escaped = title.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return new RegExp(`^\\s{0,3}#{2,6}\\s+${escaped}\\s*$`, "m").test(body);
+}
+
 export interface GitHubApiCaller {
   call(endpoint: string): unknown;
 }
@@ -160,10 +174,13 @@ export function runGovernancePrCheck(
     }
 
     if (node.sequence !== null) {
-      const expectedStackText = `- **Stack atual**: ${node.sequence}`;
-      if (!input.prBody.includes(expectedStackText)) {
+      // Robustez (O2): linha tolerante a formatação (espaços, markers `**`, `:`),
+      // exigindo o número de sequence exato na MESMA linha de "Stack atual".
+      // Word-boundary evita casar `1` dentro de `12`. Sem parser de markdown.
+      const stackLineRe = new RegExp(`^.*stack atual.*?\\b${node.sequence}\\b.*$`, "im");
+      if (!stackLineRe.test(input.prBody)) {
         reasons.push(
-          `Coerência de stack falhou. A topologia define sequence=${node.sequence}, mas não foi encontrado "${expectedStackText}" no body do PR.`
+          `Coerência de stack falhou. A topologia define sequence=${node.sequence}, mas nenhuma linha "Stack atual" com a posição ${node.sequence} foi encontrada no body do PR.`
         );
       }
     }
@@ -182,8 +199,10 @@ export function runGovernancePrCheck(
   ];
 
   for (const section of mandatorySections) {
-    if (!input.prBody.includes(section)) {
-      reasons.push(`Template incompleto: seção obrigatória "${section}" não encontrada.`);
+    if (!hasSectionHeader(input.prBody, section)) {
+      reasons.push(
+        `Template incompleto: seção obrigatória "${section}" não encontrada (precisa ser um header markdown em linha própria).`
+      );
     }
   }
 

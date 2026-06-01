@@ -200,15 +200,18 @@ A topologia vive em `state.yml`. O CI lê a topologia e valida se o título é u
 
 ## Enforcement
 
-Esta convenção é **enforced** pelo `governance-pr-check` (L4 CI). O CI carrega a topologia do `state.yml` associado à spec ativa e verifica se:
+Esta convenção é **validada** pelo `governance-pr-check` (L4 CI), que carrega a topologia do `state.yml` (SSOT) da spec ativa e verifica se:
 
-1. O título do PR começa com os emojis corretos (tipo, sequence, terminality) e o identificador correto (`[Spec NNNN]`).
-2. O template de body utilizado é o adequado e preenchido corretamente de acordo com a posição da stack.
+1. O título do PR começa com os emojis corretos (tipo, `sequence`, terminality) e o identificador (`[Spec NNNN]`), **derivados da topologia**.
+2. As seções obrigatórias do template de body estão presentes (headers em linha própria) e a posição na stack confere com `sequence`.
+
+**Postura atual — advisory, não bloqueante (`[DEC-0024-G07]`):** o `governance-pr-check` **não** é um _required status check_ do branch default. Ele torna o desvio **visível** (verde/vermelho no PR), mas **não bloqueia merge**. Motivo: a topologia em `state.yml` é hoje mantida à mão, **sem guard inverso** que a confronte com a realidade git (PRs/branches/commits). Enforçar projeções contra uma SSOT ainda não-guardada poderia **bloquear merge por erro da própria SSOT** — e o escape seria admin-bypass, recriando o mascaramento que a Spec 0024 combate. **Promoção a `required`** fica **condicionada** à existência desse guard inverso (`topology:check`, análogo à producibilidade do ruleset — Checkpoint 2.2 / F1).
 
 ## Cross-refs
 
 - ADR 0020 — Governance precede e protege execução.
 - ADR 0021 — Enforcement estrutural precede consciência comportamental.
+- DEC-0024-G07 — topologia como dado (`state.yml` SSOT) + enforcement L4 de projeções (advisory até o guard inverso).
 - DEC-0023-D04 — PR pre-model declarado (precedente para uso de 🧭).
 - DEC-0023-E05 — Fast-track strictness.
 - `.github/pull_request_template.md` — checkboxes operacionais que materializam a convenção no fluxo de criação de PR.

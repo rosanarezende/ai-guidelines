@@ -131,6 +131,27 @@
 
 ---
 
+### [DEC-0024-G07] Topologia como dado (`state.yml` = SSOT) + enforcement L4 de projeções de PR
+
+**Pergunta:** Onde vive a topologia de PRs de uma spec (qual PR, papel, posição no stack, quais checkpoints embarca) e o que impede os artefatos visuais (título, template de PR) de divergirem dela em silêncio?
+
+**Modo de gate:** `aceitação` <!-- decisão de processo/arquitetura, sessão colaborativa 2026-06-01; descoberta pelo Architectural Review Gate do Checkpoint 2.3, absorvida no 2.3a. -->
+
+**Decisão (Resolved):**
+
+- A topologia vive como **dado estruturado** em `state.yml § topology` (`cursor` + `prs.{concluded,active,planned}`; campos `id/github_pr/role/terminal/sequence/checkpoints`). É a **SSOT** da topologia, validada por schema em `workflowStateSerializer` (gate `state-yml:check`), incluindo invariantes de `sequence` — **única, contígua `1..K`, presente sse `role: execution`** (Checkpoint 2.3a / O6).
+- Título de PR e seções do template são **projeções** derivadas dessa SSOT. O `governance-pr-check` (L4 CI) **valida** as projeções contra a SSOT — **nunca o inverso** (não lê verdade de título/emoji). **Supersede** a postura anti-recursão do Anti-DAG (`pr-title-conventions.md`), que vedava CI validar formato/ordem de título _"sem DEC registrada"_: **esta é a DEC**.
+- **Hierarquia de SSOT (O1):** `state.yml` é a fonte estrutural única. O `plan.md` contém uma **projeção derivada explícita** (rotulada como tal), nunca uma fonte paralela; em divergência, `state.yml` vence. **Sem** sincronização automática (repo é memória; humano reconcilia).
+- **Postura de enforcement (O5):** `governance-pr-check` é **advisory** (sinal de CI; **não** é required status check) **enquanto não existir o guard inverso topologia↔realidade git** (deferido — `topology:check`, análogo à producibilidade do 2.2). Promoção a `required` é **condicionada** a esse guard. Racional: enforçar projeções contra uma SSOT ainda não-guardada poderia **bloquear merge por erro da própria SSOT** (o 2.3 nasceu com um nó-fantasma) — recriaria o mascaramento por admin-bypass que a 0024 combate.
+
+**O que NÃO está sendo decidido:** ler topologia a partir de títulos; montar DAG a partir de títulos; auto-sync `plan.md`↔`state.yml`; construir o `topology:check` completo agora (deferido); promover o check a `required` antes do guard inverso.
+
+**Trade-off cravado:** a SSOT é mantida à mão → pode divergir do git (o próprio 2.3 divergiu; corrigido no 2.3a/B1). Mitigação atual: revisão humana + invariantes internos do schema; mitigação estrutural futura: `topology:check` (guard inverso).
+
+**Status:** Resolved (2026-06-01) / @rosanarezende — absorvido no Checkpoint 2.3a (Architectural Review → Human).
+
+---
+
 ## 2 · Aberto — pesquisa genuína (única coisa ainda em investigação)
 
 > Estes **não são decisões** — são findings com **alternativas reais ainda competindo**. Vivem em [`research/findings.md`](./research/findings.md); aqui só o ponteiro. Só retornam como `[DEC] Pendente` ao **convergir + exigir julgamento**. **Critério (2026-05-31):** se não há alternativa viva competindo, **não pertence aqui** — é decisão (§ 1) ou trabalho (§ 4).
@@ -165,13 +186,14 @@
 
 > Camada L2/L4 do ADR 0021: onde o aprendizado deixa de depender de memória e passa a **falhar mecanicamente** se violado, ou onde o **código passa a refletir** a decisão. É aqui que _"reduzir divergência entre aprendizado e código"_ acontece. **Status:** 🟢 feito · 🔜 em absorção nesta spec.
 
-| Decisão                                   | Enforcement / migração                                                          | Status                       |
-| :---------------------------------------- | :------------------------------------------------------------------------------ | :--------------------------- |
-| `G02` — taxonomia removida                | `WorkflowType` → modelo único; 3 `tasks-*` boilerplates → genérico; wizard; doc | 🔜 migrar `WorkflowType`     |
-| DEC sem status `Open`                     | check rejeita `Open` em `decision-brief`; legenda corrigida (roots)             | 🔜 consistência boilerplates |
-| boilerplates tri-root divergem (`F-AG04`) | drift-guard: check falha se roots divergem — passo 1 da fonte única             | 🔜 boilerplates fonte única  |
-| `.specify` é legado (ADR 0019)            | hard-stop em escrita nova (drift-guard) → cutover p/ `.governance`              | 🔜 cutover `.specify`        |
-| `GG-0001` (subconjunto mecânico)          | check estrutural de decidibilidade projetado no seam do gate                    | 🔜 implementar GG-0001       |
+| Decisão                                   | Enforcement / migração                                                                                                  | Status                       |
+| :---------------------------------------- | :---------------------------------------------------------------------------------------------------------------------- | :--------------------------- |
+| `G02` — taxonomia removida                | `WorkflowType` → modelo único; 3 `tasks-*` boilerplates → genérico; wizard; doc                                         | 🔜 migrar `WorkflowType`     |
+| DEC sem status `Open`                     | check rejeita `Open` em `decision-brief`; legenda corrigida (roots)                                                     | 🔜 consistência boilerplates |
+| boilerplates tri-root divergem (`F-AG04`) | drift-guard: check falha se roots divergem — passo 1 da fonte única                                                     | 🔜 boilerplates fonte única  |
+| `.specify` é legado (ADR 0019)            | hard-stop em escrita nova (drift-guard) → cutover p/ `.governance`                                                      | 🔜 cutover `.specify`        |
+| `GG-0001` (subconjunto mecânico)          | check estrutural de decidibilidade projetado no seam do gate                                                            | 🔜 implementar GG-0001       |
+| `G07` — topologia-as-data + projeção      | `state.yml` schema (invariantes de `sequence`) + `governance-pr-check` (advisory, valida título/template contra a SSOT) | 🟢 feito (2.3/2.3a)          |
 
 ---
 
@@ -179,15 +201,16 @@
 
 > Os IDs `[DEC-0024-G##]` permanecem **âncoras estáveis** (citados em findings, ADRs, git, handoffs) — mas **não organizam mais a leitura**. Mapa de equivalência:
 
-| ID histórico | Tema                                 | Estado atual                                                 |
-| :----------- | :----------------------------------- | :----------------------------------------------------------- |
-| `G00`        | identidade (transformação)           | **Decidido** — § 1 (Resolved 2026-05-31)                     |
-| `G01`        | estrutura/gramática                  | **Aberto** — § 2 (`F-AG01`)                                  |
-| `G02`        | taxonomia → bloco + propriedade      | **Decidido** — § 1 (Resolved 2026-05-31) → migração em § 4   |
-| `G03`        | promotion pipeline                   | **Aberto** — § 2 (`F-AG03`)                                  |
-| `G04`        | contrato de boilerplate / casa única | **Aberto** — § 2 (`F-AG04`); drift-guard → § 4               |
-| `G05`        | projeções / decision-session         | **Aberto** — § 2 (`F-AG05` resíduo); gate-ready → GG-0001    |
-| `G06`        | contrato da cadeia                   | **Decidido** — § 1 (Resolved 2026-05-30) → ADR no fechamento |
+| ID histórico | Tema                                 | Estado atual                                                  |
+| :----------- | :----------------------------------- | :------------------------------------------------------------ |
+| `G00`        | identidade (transformação)           | **Decidido** — § 1 (Resolved 2026-05-31)                      |
+| `G01`        | estrutura/gramática                  | **Aberto** — § 2 (`F-AG01`)                                   |
+| `G02`        | taxonomia → bloco + propriedade      | **Decidido** — § 1 (Resolved 2026-05-31) → migração em § 4    |
+| `G03`        | promotion pipeline                   | **Aberto** — § 2 (`F-AG03`)                                   |
+| `G04`        | contrato de boilerplate / casa única | **Aberto** — § 2 (`F-AG04`); drift-guard → § 4                |
+| `G05`        | projeções / decision-session         | **Aberto** — § 2 (`F-AG05` resíduo); gate-ready → GG-0001     |
+| `G06`        | contrato da cadeia                   | **Decidido** — § 1 (Resolved 2026-05-30) → ADR no fechamento  |
+| `G07`        | topologia-as-data + enforcement L4   | **Decidido** — § 1 (Resolved 2026-06-01) → enforcement em § 4 |
 
 ---
 
@@ -198,3 +221,4 @@
 - [x] `[DEC-0024-G00]` — Resolved 2026-05-31 / @rosanarezende
 - [x] `[DEC-0024-G02]` — Resolved 2026-05-31 / @rosanarezende
 - [x] `[DEC-0024-G06]` — Resolved 2026-05-30 / @rosanarezende
+- [x] `[DEC-0024-G07]` — Resolved 2026-06-01 / @rosanarezende

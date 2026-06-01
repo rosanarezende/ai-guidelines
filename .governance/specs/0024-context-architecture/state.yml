@@ -10,14 +10,15 @@ focus:
   - "Criterio: 'ja foi validado empiricamente na 0024?' -> absorver/enforcar/executar. NAO re-modelar, NAO re-pesquisar o decidido. Risco dominante: voltar a modelar em vez de remover divergencias uma a uma."
 next:
   - "#32 GATED: Checkpoints 2 (8b0eec6) + 2.1 (d686d4b) + 2.1a (fa2c0ae) fechados. #32 permanece como linha de integracao -- NAO mergeia."
-  - "Checkpoint 2.3 EM EXECUCAO na branch stacked feat/spec-0024-topology: transforma a topologia do PR em dado estruturado para resolver ambiguidade visual do CI. Atualizacao do state.yml e stateYmlCheck."
-  - "PROXIMO: aguardando Technical Audit Gate do Checkpoint 2.3. Apos fechamento total do Gate, avancar para Checkpoint 3."
-  - "Encerramento: instanciar review.md (gates R1-R7) -> abrir Integration PR (tipo Integration, homologacao) -> commit de encerramento (spec->Done, state->done, NEXT deletado, release-log T0) na linha da spec -> review.md R8 -> MERGE UNICO em main (modo unit, veiculo = PR terminal). spec->Done so no fim."
-  - "LER antes de qualquer acao: plan.md (SSOT do plano + glossario + topologia) e o handoff v2 (research/2026-05-31-handoff-next-session-v2.md, com nota de errata + secao Historico no topo). Verificar git limpo + yarn validate verde."
+  - "#33 (branch feat/spec-0024-ruleset-producibility) = unico PR de execucao stacked aberto (sequence 1); embarca os Checkpoints 2.2, 2.2b, 2.3 e 2.3a. NAO existe branch feat/spec-0024-topology (corrigido no 2.3a: o no-fantasma checkpoint-2.3 foi dobrado em #33)."
+  - "Checkpoint 2.3a EM EXECUCAO: reconcilia topologia<->realidade (B1), registra [DEC-0024-G07] (B2), elimina dual-SSOT do plan.md (O1 -- projecao derivada), invariantes de sequence (O6), robustez do governance-pr-check (O2). state.yml = SSOT estrutural; governance-pr-check = advisory (O5, ver DEC-0024-G07)."
+  - "PROXIMO: fechar o Gate do #33 (Technical Audit -> Architectural Review -> Human) cobrindo Checkpoints 2.2..2.3a. Apos o Gate, avancar para Checkpoint 3 (sequence 2)."
+  - "Encerramento: instanciar review.md (gates R1-R7) -> abrir Integration PR (homologacao) -> commit de encerramento (spec->Done, state->done, NEXT deletado, release-log T0) -> review.md R8 -> MERGE UNICO em main (modo unit). spec->Done so no fim."
+  - "LER antes de qualquer acao: state.yml § topology (SSOT estrutural) + plan.md (objetivos + projecao derivada) + handoff v2. Verificar git limpo + yarn validate verde."
 topology:
   cursor:
-    pr: checkpoint-2.3
-    checkpoint: checkpoint-2.3
+    pr: ruleset-producibility
+    checkpoint: checkpoint-2.3a
   prs:
     concluded:
       - id: base-governance
@@ -40,21 +41,17 @@ topology:
         checkpoints:
           - checkpoint-2.2
           - checkpoint-2.2b
-
-      - id: checkpoint-2.3
-        github_pr: null
-        role: execution
-        terminal: false
-        sequence: 2
-        checkpoints:
           - checkpoint-2.3
+          - checkpoint-2.3a
 
     planned:
+      # `sequence` = posicao no STACK de execucao (1..K, contigua), NAO o numero
+      # do checkpoint. Renumerada no 2.3a apos remover o no-fantasma checkpoint-2.3.
       - id: checkpoint-3
         github_pr: null
         role: execution
         terminal: false
-        sequence: 3
+        sequence: 2
         checkpoints:
           - checkpoint-3
 
@@ -62,7 +59,7 @@ topology:
         github_pr: null
         role: execution
         terminal: false
-        sequence: 4
+        sequence: 3
         checkpoints:
           - checkpoint-4a
           - checkpoint-4b
@@ -71,7 +68,7 @@ topology:
         github_pr: null
         role: execution
         terminal: false
-        sequence: 5
+        sequence: 4
         checkpoints:
           - checkpoint-5
 
@@ -79,7 +76,7 @@ topology:
         github_pr: null
         role: execution
         terminal: false
-        sequence: 6
+        sequence: 5
         checkpoints:
           - checkpoint-6
 
@@ -87,7 +84,7 @@ topology:
         github_pr: null
         role: execution
         terminal: false
-        sequence: 7
+        sequence: 6
         checkpoints:
           - checkpoint-7
 
@@ -95,7 +92,7 @@ topology:
         github_pr: null
         role: execution
         terminal: false
-        sequence: 8
+        sequence: 7
         checkpoints:
           - checkpoint-8
 
@@ -103,7 +100,7 @@ topology:
         github_pr: null
         role: execution
         terminal: false
-        sequence: 9
+        sequence: 8
         checkpoints:
           - checkpoint-9
 
@@ -111,7 +108,7 @@ topology:
         github_pr: null
         role: execution
         terminal: false
-        sequence: 10
+        sequence: 9
         checkpoints:
           - checkpoint-10
 
@@ -119,7 +116,7 @@ topology:
         github_pr: null
         role: execution
         terminal: false
-        sequence: 11
+        sequence: 10
         checkpoints:
           - checkpoint-11a
           - checkpoint-11b
@@ -129,7 +126,7 @@ topology:
         github_pr: null
         role: execution
         terminal: false
-        sequence: 12
+        sequence: 11
         checkpoints:
           - checkpoint-12
 

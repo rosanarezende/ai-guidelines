@@ -107,4 +107,122 @@ gate:
       expect(serializeWorkflowState(state)).toBe(serializeWorkflowState(state));
     });
   });
+
+  describe("topology — invariantes de sequence [Checkpoint 2.3a / O6]", () => {
+    const withNodes = (active: string): string => `stage: implementation
+gate:
+  status: closed
+focus: []
+next: []
+topology:
+  cursor:
+    pr: pr-1
+    checkpoint: cp-1
+  prs:
+    concluded: []
+    active:
+${active}
+    planned:
+      - id: integration-final
+        github_pr: null
+        role: integration
+        terminal: true
+        sequence: null
+        checkpoints:
+          - review-and-merge
+`;
+
+    it("DADO topologia válida (execution contígua + 1 terminal) ENTÃO parseia", () => {
+      const yaml = withNodes(`      - id: pr-1
+        github_pr: 33
+        role: execution
+        terminal: false
+        sequence: 1
+        checkpoints:
+          - cp-1`);
+      const state = parseWorkflowState(yaml);
+      expect(state.topology?.cursor.pr).toBe("pr-1");
+      expect(state.topology?.prs.active[0].sequence).toBe(1);
+    });
+
+    it("DADO nó execution com sequence null ENTÃO rejeita", () => {
+      const yaml = withNodes(`      - id: pr-1
+        github_pr: 33
+        role: execution
+        terminal: false
+        sequence: null
+        checkpoints:
+          - cp-1`);
+      expect(() => parseWorkflowState(yaml)).toThrow(/must have a non-null sequence/);
+    });
+
+    it("DADO nó NÃO-execution com sequence não-null ENTÃO rejeita", () => {
+      // node governance com sequence preenchida — só execution ocupa posição de stack
+      const yaml = `stage: implementation
+gate:
+  status: closed
+focus: []
+next: []
+topology:
+  cursor:
+    pr: gov
+    checkpoint: cp-1
+  prs:
+    concluded:
+      - id: gov
+        github_pr: 32
+        role: governance
+        terminal: false
+        sequence: 2
+        checkpoints:
+          - cp-1
+    active: []
+    planned:
+      - id: term
+        github_pr: null
+        role: integration
+        terminal: true
+        sequence: null
+        checkpoints:
+          - cp-term
+`;
+      expect(() => parseWorkflowState(yaml)).toThrow(/only execution nodes occupy stack positions/);
+    });
+
+    it("DADO sequence de execution duplicada ENTÃO rejeita (colisão)", () => {
+      const yaml = withNodes(`      - id: pr-1
+        github_pr: 33
+        role: execution
+        terminal: false
+        sequence: 1
+        checkpoints:
+          - cp-1
+      - id: pr-2
+        github_pr: 34
+        role: execution
+        terminal: false
+        sequence: 1
+        checkpoints:
+          - cp-2`);
+      expect(() => parseWorkflowState(yaml)).toThrow(/duplicate execution sequence/);
+    });
+
+    it("DADO buraco na sequência de execution (1,3) ENTÃO rejeita (não-contígua)", () => {
+      const yaml = withNodes(`      - id: pr-1
+        github_pr: 33
+        role: execution
+        terminal: false
+        sequence: 1
+        checkpoints:
+          - cp-1
+      - id: pr-2
+        github_pr: 34
+        role: execution
+        terminal: false
+        sequence: 3
+        checkpoints:
+          - cp-2`);
+      expect(() => parseWorkflowState(yaml)).toThrow(/must be contiguous/);
+    });
+  });
 });

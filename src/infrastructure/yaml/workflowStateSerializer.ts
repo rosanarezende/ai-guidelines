@@ -217,6 +217,44 @@ function parseTopology(raw: unknown): WorkflowTopology {
     );
   }
 
+  // Invariantes de `sequence` (Checkpoint 2.3a / O6). `sequence` = posição no
+  // stack de execução: existe sse-e-somente-se o nó é `execution`, é única, e
+  // o conjunto forma 1..K contíguo (sem buracos nem colisão). Previne a classe
+  // do nó-fantasma (sequence sem slot real) corrigida em B1.
+  const allTopologyNodes = [...concluded, ...active, ...planned];
+  const executionSequences: number[] = [];
+  for (const node of allTopologyNodes) {
+    if (node.role === "execution") {
+      if (node.sequence === null) {
+        throw new WorkflowStateParseError(
+          `execution node "${node.id}" must have a non-null sequence (sequence = stack position)`
+        );
+      }
+      executionSequences.push(node.sequence);
+    } else if (node.sequence !== null) {
+      throw new WorkflowStateParseError(
+        `node "${node.id}" (role ${node.role}) must have sequence: null — only execution nodes occupy stack positions`
+      );
+    }
+  }
+  const seqSet = new Set(executionSequences);
+  if (seqSet.size !== executionSequences.length) {
+    throw new WorkflowStateParseError(
+      `topology has a duplicate execution sequence; stack positions must be unique (got ${executionSequences
+        .slice()
+        .sort((a, b) => a - b)
+        .join(", ")})`
+    );
+  }
+  for (let pos = 1; pos <= executionSequences.length; pos++) {
+    if (!seqSet.has(pos)) {
+      throw new WorkflowStateParseError(
+        `execution sequences must be contiguous 1..${executionSequences.length} (missing ${pos}); ` +
+          `got ${[...seqSet].sort((a, b) => a - b).join(", ")}`
+      );
+    }
+  }
+
   return {
     cursor: {
       pr: cursorObj.pr,
