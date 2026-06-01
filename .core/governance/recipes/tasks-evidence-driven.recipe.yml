@@ -1,6 +1,5 @@
 schemaVersion: v0
 artifactKind: tasks
-workflowType: evidence-driven
 language: pt-BR
 
 slots:

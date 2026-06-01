@@ -5,7 +5,7 @@
 > Spec: [`./spec.md`](./spec.md)
 > Plan: [`./plan.md`](./plan.md)
 > Tasks: [`./tasks.md`](./tasks.md)
-> Status agregado: **Open** <!-- Open | Pendente | Partial | Resolved -->
+> Status agregado: **Pendente** <!-- Pendente | Partial | Resolved -->
 > Última atualização: [YYYY-MM-DD] — [nota curta sobre o que mudou nesta atualização]
 
 > **Artefato canônico do gate humano entre Stage 1 (research) e Stage 2 (design + implementação)** para specs `evidence-driven` ou `mixed` (cf. `.core/process/governance-foundation.md` § "Tipos de spec"). Specs `deterministic` não instanciam este arquivo.
@@ -14,20 +14,53 @@
 
 ---
 
+## Contrato research · decision-brief · gate
+
+> **[MANDATÓRIO]** Fonte canônica: `governance-foundation.md` § "Contrato da cadeia". Este boilerplate **reflete** o contrato; em caso de divergência, a constituição vence. Regra-mãe: **cada fase é proibida de produzir a saída da fase seguinte** — a research **não decide**; o brief **não julga**; o julgamento só nasce no gate.
+>
+> Nasceu de uma falha real (Spec 0024, 2026-05-29): uma DEC foundational chegou ao gate com as alternativas já refutadas pela própria research — o humano ratificaria, não decidiria.
+
+1. **Entrada do brief = opções vivas, não uma decisão.** Se a research chegou com alternativas já refutadas (`A/B impossíveis · C sobreviveu`), ela produziu uma _decisão_ (proibido) e o contrato foi violado **a montante** (fronteira `research → decision-brief`): pare e reabra as opções sobreviventes com **simetria informacional** (mesmo conjunto mínimo de perguntas) antes do gate.
+2. **Comparabilidade, não advocacy — o brief torna o espaço de decisão visível, não convence.** Sem alternativas reais avaliadas, não é decisão — é dogma (governance-foundation, anti-padrão #5). Cada DEC apresenta as opções sobreviventes com **simetria informacional**: todas respondem ao **mesmo conjunto mínimo de perguntas** (_problema que resolve · benefícios · tradeoffs · riscos · quando escolher · **quando NÃO escolher**_, inclusive a recomendada). Assimetria (uma opção rica, outra pobre) **já é a decisão tomada** — proibida.
+3. **A recomendação inicial não colapsa a decisão.** É _bounded_, marcada "a confirmar pós-gate", e **deve nomear o que tornaria uma alternativa certa** (sob qual evidência/objetivo a owner escolheria outra coisa). Recomendação ≠ veredito. **Em modo `aceitação`, a recomendação bounded colapsa no próprio finding** — não se adiciona linha "Recomendação inicial" (seria advocacy-para-aceitação); use a **Forma D**.
+4. **A seta de autoria é `humano → sistema` (ADR 0018).** O julgamento é AUTORADO pelo humano no gate. Sinal de inversão (research autora → humano ratifica): **pare e reabra a decisão.**
+5. **Declare o `Modo de gate`:** `escolha` (tradeoffs reais → humano arbitra) | `aceitação` (research convergiu num finding → humano aceita / rejeita / reenquadra). Nomear o modo evita "aceitação disfarçada de escolha".
+6. **Descoberta fora da alçada → escala, não absorve.** Se mid-spec emergir algo que exige julgamento (ex.: decisão `Resolved` que se mostra inviável), abrir **amendment / nova `[DEC]`** (mesma forma, datada) — nunca reabrir ou decidir por conta. Rota canônica em `governance-foundation.md` § "Mecanismos de escalonamento".
+
+---
+
 ## Legenda canônica de status
 
-| Status     | Significado                                                                                                        |
-| :--------- | :----------------------------------------------------------------------------------------------------------------- |
-| `Open`     | Ponto criado, sem opções populadas (ainda em research).                                                            |
-| `Pendente` | Opções populadas com tradeoffs, aguardando o gate humano.                                                          |
-| `Partial`  | Algumas sub-decisões cravadas, outras abertas. Aplica-se apenas a pontos com sub-eixos.                            |
-| `Resolved` | Escolha cravada com data + owner. **Imutável** — mudanças posteriores vão para `plan.md` § "Decisões revisitadas". |
+> **Reforma 2026-05-31 (DOGFOOD-0024 / GG-0001):** `Open` foi **abolido** — pergunta aberta **não é decisão**. Um `[DEC]` **nasce `Pendente`** (já decidível); enquanto não converge + exige julgamento, a pergunta vive em `research/findings.md`, **não** como DEC.
+
+| Status     | Significado                                                                                                                                                                                      |
+| :--------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Pendente` | DEC decidível, aguardando o gate humano (ver checklist GG-0001 abaixo).                                                                                                                          |
+| `Partial`  | Algumas sub-decisões cravadas, outras abertas. Aplica-se apenas a pontos com sub-eixos.                                                                                                          |
+| `Resolved` | Escolha cravada com data + owner. **Imutável** — mudanças posteriores vão para `plan.md` § "Decisões revisitadas".                                                                               |
+| `Deferred` | Decisão **conscientemente adiada** com **critério de revisita observável** (o gate agiu: optou por não decidir agora). Não é `Open` nem `Pendente`. Isenta do gate-decidability como `Resolved`. |
 
 **Status agregado da brief** (campo no header):
 
-- `Open` enquanto nenhum ponto saiu de `Open`/`Pendente`.
+- `Pendente` enquanto nenhum ponto saiu de `Pendente`.
 - `Partial` quando ≥ 1 ponto está `Resolved` mas há outros não-resolvidos.
 - `Resolved` quando **todos** os pontos estão `Resolved` — gatilho do checklist pós-gate.
+
+---
+
+## Checklist de decidibilidade do gate (GG-0001)
+
+> **[MANDATÓRIO antes do gate]** Guardrail dogfoodado interno (`DOGFOOD-0024`; SSOT [`governance-foundation.md` § "Guardrails dogfoodados"](../../.core/process/governance-foundation.md)). Antes de discutir o **mérito** de um `[DEC]` não-resolvido, confirme que ele é **decidível**. O subconjunto mecânico é enforced por `yarn gate-decidability:check` (agregado em `yarn validate`): itens 🤖 **falham o check**; itens 👁 são julgamento humano projetado aqui.
+
+- [ ] 👁 **Afirmação única** — o DEC pede para aceitar **uma** coisa (não um feixe de asserções).
+- [ ] 🤖 **"O que está sendo aceito"** — presente e _bounded_.
+- [ ] 🤖 **"O que NÃO está sendo aceito"** — presente.
+- [ ] 🤖 **Concorrentes considerados** — por que cada alternativa falha + o que reabriria.
+- [ ] 👁 **Arquitetura separada de implementação** — a decisão não embute migração/execução.
+- [ ] 🤖 **Um único ato de gate** — sem "aceitar X **+** autorizar a migração" (dois atos colados).
+- [ ] 🤖 **Sem status `Open`** — o DEC nasce `Pendente`.
+
+Se algum item falha, o gate **não está pronto**: corrija a **forma** da decisão antes do **mérito**.
 
 ---
 
@@ -51,23 +84,33 @@ A brief aceita duas formas de estruturar um ponto, escolhidas pelo autor conform
 
 **Pergunta:** [pergunta única que o ponto responde].
 
+**Modo de gate:** `escolha` | `aceitação` <!-- `escolha` = tradeoffs reais, humano arbitra; `aceitação` = research convergiu num finding, humano aceita/rejeita/reenquadra. Ver Contrato §5. -->
+
 **Contexto (research):**
 
 - [Cross-ref para o(s) research(es) que alimentam o ponto, com § específico quando aplicável.]
 - [Observação editorial relevante, se houver.]
 
-**Opções:**
+**Opções (modo `escolha`)** — cada opção sobrevivente responde ao **mesmo conjunto mínimo** (simetria informacional; Contrato §2). Assimetria = decisão já tomada.
 
-| Opção | Descrição | Pró   | Contra |
-| :---- | :-------- | :---- | :----- |
-| A     | [...]     | [...] | [...]  |
-| B     | [...]     | [...] | [...]  |
+#### Opção A — [nome]
 
-<!-- Alternativa em vez da tabela: lista bulleted (autor escolhe — D9.C). Use tabela para ≥ 3 opções; lista quando há 2 opções (tabela superdimensiona). -->
+- **Problema que resolve:** [...]
+- **Benefícios:** [...]
+- **Tradeoffs:** [...]
+- **Riscos:** [...]
+- **Quando escolher:** [...]
+- **Quando NÃO escolher:** [...] <!-- obrigatório, inclusive na opção recomendada -->
 
-**Recomendação inicial (a confirmar pós-gate):** [Opção X — justificativa baseada em evidência convergente em ≥ 1 research].
+#### Opção B — [nome]
 
-<!-- Opcional — incluir apenas quando há evidência convergente em ≥ 1 research que aponte para uma opção dominante. Sem evidência convergente, omitir esta linha. -->
+[mesmo conjunto mínimo — os 6 campos acima]
+
+<!-- Forma compacta opcional p/ decisões simples: tabela com colunas = conjunto mínimo (Problema · Benefícios · Tradeoffs · Riscos · Quando escolher · Quando NÃO escolher). NUNCA Pró/Contra — 2 dimensões omitem "quando NÃO escolher", o mecanismo anti-advocacy do contrato. -->
+
+**Recomendação inicial (a confirmar pós-gate):** [Opção X — justificativa baseada em evidência convergente em ≥ 1 research]. **O que tornaria outra opção certa:** [sob qual evidência/objetivo a owner escolheria diferente — Contrato §3].
+
+<!-- Opcional — incluir apenas quando há evidência convergente em ≥ 1 research que aponte para uma opção dominante. Sem evidência convergente, omitir esta linha. Recomendação ≠ veredito (Contrato §3). -->
 
 **Decisão do Gate Humano:**
 
@@ -87,6 +130,8 @@ A brief aceita duas formas de estruturar um ponto, escolhidas pelo autor conform
 
 **Pergunta:** [pergunta meta que o ponto responde].
 
+**Modo de gate:** `escolha` | `aceitação` <!-- por sub-eixo se divergirem; ver Contrato §5. -->
+
 **Contexto (research):**
 
 - [Cross-refs aos research(es) relevantes.]
@@ -101,10 +146,7 @@ A brief aceita duas formas de estruturar um ponto, escolhidas pelo autor conform
 
 #### Sub-eixo 1 — [nome]
 
-| Opção | Descrição | Pró   | Contra |
-| :---- | :-------- | :---- | :----- |
-| A     | [...]     | [...] | [...]  |
-| B     | [...]     | [...] | [...]  |
+[Opções no **conjunto mínimo** do Contrato §2 — Problema · Benefícios · Tradeoffs · Riscos · Quando escolher · Quando NÃO escolher — uma por opção. **Nunca Pró/Contra.**]
 
 **Recomendação inicial (a confirmar pós-gate):** [Opção X — justificativa]. _Opcional, mesma regra da forma B._
 
@@ -126,7 +168,44 @@ A brief aceita duas formas de estruturar um ponto, escolhidas pelo autor conform
 - **Data / Owner:** [YYYY-MM-DD] / [@owner]
 ```
 
-**Diretriz para escolher entre B e C:** use **B** quando o ponto tem uma única dimensão de escolha; use **C** quando o ponto se decompõe em decisões **independentes** que podem ser resolvidas em momentos diferentes (status do ponto pode ficar `Partial` enquanto algumas sub-decisões aguardam mais research).
+### Forma D (convergência) — para pontos em modo `aceitação`
+
+Use quando a research **convergiu num finding** (uma identidade/conclusão sobreviveu à falsificação) e o gate **aceita / rejeita / reenquadra** — não escolhe entre opções vivas. Em `aceitação` **não há "Recomendação inicial"**: o finding É a convergência; recomendá-lo seria advocacy-para-aceitação (Contrato §3 + `governance-foundation.md` § "Modos de gate"). As alternativas refutadas **não vão a tabela de simetria** — mostra-se **por que falham** e **o que reabriria** (falsificabilidade).
+
+```markdown
+### [DEC-NNNN-XYZ] [Título curto da decisão]
+
+**Pergunta:** [pergunta que o ponto responde].
+
+**Modo de gate:** `aceitação`
+
+**O finding (o que se pede para aceitar):**
+
+> [formulação exata, citável, do que convergiu]
+
+**O que está sendo aceito (bounded):** [os limites positivos do finding]
+
+**O que NÃO está sendo aceito:** [o que fica fora / deferido — evita aceitar tacitamente mais do que o finding]
+
+**Por que as alternativas falham + o que reabriria** (falsificabilidade — NÃO Pró/Contra):
+
+- **[Alternativa A]:** refutada porque [...]. _Reabre se:_ [...].
+- **[Alternativa B]:** refutada porque [...]. _Reabre se:_ [...].
+- **[finding] falsificável por:** [...].
+
+**Decisão do Gate Humano (`aceitação`):**
+
+- **Status:** [ ] Pendente | [ ] Resolvido
+- **Ato (marque um):**
+  - [ ] **Aceitar** — [o finding]
+  - [ ] **Rejeitar** — registrar o que falhou (reabre research)
+  - [ ] **Reenquadrar** — aceitar com ajuste (registrar o ajuste)
+- **Justificativa / Ressalvas:** >
+  [owner registra a razão + ressalvas relevantes para Stage 2.]
+- **Data / Owner:** [YYYY-MM-DD] / [@owner]
+```
+
+**Diretriz para escolher a forma:** **B** = uma dimensão de escolha (modo `escolha`); **C** = múltiplas decisões **independentes** (modo `escolha`; status pode ficar `Partial`); **D** = a research **convergiu** e o gate é de `aceitação` (não há opções vivas a arbitrar — há um finding a aceitar/rejeitar/reenquadrar).
 
 ---
 
@@ -222,14 +301,14 @@ A brief aceita duas formas de estruturar um ponto, escolhidas pelo autor conform
 
 > Tabela manual mantida pelo autor. Atualizar a cada mudança de status. **Drift entre headers individuais e esta tabela bloqueia o gate** — a coerência é responsabilidade humana (não há script de geração nesta versão).
 
-| ID               | Bloco | Status |
-| :--------------- | :---- | :----- |
-| `[DEC-NNNN-A01]` | A     | Open   |
-| `[DEC-NNNN-A02]` | A     | Open   |
-| `[DEC-NNNN-B01]` | B     | Open   |
-| `[DEC-NNNN-C01]` | C     | Open   |
+| ID               | Bloco | Status   |
+| :--------------- | :---- | :------- |
+| `[DEC-NNNN-A01]` | A     | Pendente |
+| `[DEC-NNNN-A02]` | A     | Pendente |
+| `[DEC-NNNN-B01]` | B     | Pendente |
+| `[DEC-NNNN-C01]` | C     | Pendente |
 
-**Status agregado:** [Open | Pendente | Partial | Resolved] — atualizar conforme o estado consolidado da tabela acima e refletir no campo do header.
+**Status agregado:** [Pendente | Partial | Resolved] — atualizar conforme o estado consolidado da tabela acima e refletir no campo do header.
 
 ---
 

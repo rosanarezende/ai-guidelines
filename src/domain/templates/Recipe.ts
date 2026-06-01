@@ -36,14 +36,6 @@ export const ARTIFACT_KINDS = Object.freeze([
 ] as const);
 export type ArtifactKind = (typeof ARTIFACT_KINDS)[number];
 
-export const WORKFLOW_TYPES = Object.freeze([
-  "evidence-driven",
-  "deterministic",
-  "mixed",
-  "n/a",
-] as const);
-export type WorkflowType = (typeof WORKFLOW_TYPES)[number];
-
 export const LANGUAGES = Object.freeze(["pt-BR", "en-US"] as const);
 export type Language = (typeof LANGUAGES)[number];
 
@@ -73,7 +65,6 @@ export interface RecipeInvariants {
 export interface Recipe {
   readonly schemaVersion: TemplateSchemaVersion;
   readonly artifactKind: ArtifactKind;
-  readonly workflowType: WorkflowType;
   readonly language: Language;
   readonly slots: readonly RecipeSlot[];
   readonly invariants: RecipeInvariants;
@@ -102,7 +93,6 @@ function includes<T>(arr: readonly T[], value: unknown): value is T {
  *  - RECIPE_MISSING_FIELD
  *  - RECIPE_INVALID_SCHEMA_VERSION
  *  - RECIPE_INVALID_ARTIFACT_KIND
- *  - RECIPE_INVALID_WORKFLOW_TYPE
  *  - RECIPE_INVALID_LANGUAGE
  *  - RECIPE_EMPTY_SLOTS
  *  - RECIPE_DUPLICATE_SLOT_ID
@@ -115,7 +105,7 @@ export function assertValidRecipe(input: unknown): asserts input is Recipe {
   if (!isPlainObject(input)) {
     throw new GovernanceError(
       "RECIPE_MISSING_FIELD",
-      "Recipe: entrada deve ser objeto com { schemaVersion, artifactKind, workflowType, language, slots, invariants }."
+      "Recipe: entrada deve ser objeto com { schemaVersion, artifactKind, language, slots, invariants }."
     );
   }
 
@@ -125,7 +115,6 @@ export function assertValidRecipe(input: unknown): asserts input is Recipe {
   const requiredTopFields = [
     "schemaVersion",
     "artifactKind",
-    "workflowType",
     "language",
     "slots",
     "invariants",
@@ -152,13 +141,6 @@ export function assertValidRecipe(input: unknown): asserts input is Recipe {
     throw new GovernanceError(
       "RECIPE_INVALID_ARTIFACT_KIND",
       `Recipe: 'artifactKind' deve ser um de [${ARTIFACT_KINDS.join(", ")}]; recebido '${String(rec.artifactKind)}'.`
-    );
-  }
-
-  if (!includes(WORKFLOW_TYPES, rec.workflowType)) {
-    throw new GovernanceError(
-      "RECIPE_INVALID_WORKFLOW_TYPE",
-      `Recipe: 'workflowType' deve ser um de [${WORKFLOW_TYPES.join(", ")}]; recebido '${String(rec.workflowType)}'.`
     );
   }
 

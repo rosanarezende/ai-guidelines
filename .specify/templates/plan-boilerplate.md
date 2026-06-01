@@ -10,6 +10,16 @@
 > este arquivo é atualizado conforme o entendimento técnico evolui. Decisões
 > revisitadas devem registrar a anterior em nota, não apagar o histórico.
 
+> **Contrato de entrada (ver `governance-foundation.md` § "Contrato da cadeia"):** o plano codifica
+> **apenas decisões `Resolved`** do decision-brief — não reabre nem inventa decisões. Se uma decisão
+> `Resolved` se mostrar inviável, **escala** (amendment / nova `[DEC]`) e registra em "Decisões
+> revisitadas"; não decide por conta.
+>
+> **O plano não arbitra alternativas que emergem durante a execução.** Uma opção nova frente a uma
+> decisão `Resolved` ainda viável é uma **escolha** — pertence ao gate: devolve via nova `[DEC]` /
+> amendment (micro-gate), nunca decide por conta. As `tasks`, idem, não mudam estratégia — devolvem
+> ao plano (e este à `[DEC]` se necessário). Cada fase entrega **só a própria saída**.
+
 ---
 
 ## 🛰️ Stage 1 / Stage 2

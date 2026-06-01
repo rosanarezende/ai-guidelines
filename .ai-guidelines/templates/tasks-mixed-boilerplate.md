@@ -44,6 +44,8 @@
 ### Sub-bloco [0.Research] — Stage 1: produzir researches
 
 > Foco exclusivo nos sub-blocos marcados como `(evidence-driven)`. Toda research deve alimentar pelo menos um ponto `[DEC-*]` do referencial `evidence-driven`.
+>
+> **Critério de parada (ver `governance-foundation.md` § "Contrato da cadeia"):** a research **para quando há material suficiente para decidir**, não quando resta uma única resposta. Decidir é proibido à research — ela entrega **opções vivas e comparáveis** (simetria informacional) ou um **finding convergido**, declarando o `Modo de gate`; **torna comparável, não convence**.
 
 - [ ] **0.R.1** Listar perguntas de research a responder (uma linha por arquivo) em `plan.md` § Research lifecycle, cada pergunta cruzada com o ponto `[DEC-*]` correspondente.
 - [ ] **0.R.2** Produzir `research/YYYY-MM-DD-<tema>.md` por pergunta. Cada arquivo cita fontes (URL + ID externo quando aplicável: CWE-NNN, paper, benchmark publicado, transcrição).
@@ -55,7 +57,7 @@
 
 > Cristalizar o que research mostra como **opções com tradeoffs** para os pontos `[DEC-NNNN-*]` dos sub-blocos `(evidence-driven)`.
 
-- [ ] **0.B.1** Para cada `[DEC-NNNN-*]`: registrar Pergunta + Contexto (research) + Opções (com Pró/Contra) + Recomendação inicial (opcional). Pontos complexos podem ser decompostos em sub-eixos.
+- [ ] **0.B.1** Para cada `[DEC-NNNN-*]`: registrar Pergunta + **Modo de gate** + Contexto (research) + **ou** Opções no **conjunto mínimo** (Problema · Benefícios · Tradeoffs · Riscos · Quando escolher · Quando NÃO escolher — **nunca Pró/Contra**; Formas B/C, modo `escolha`) **ou** o finding convergido (Forma D, modo `aceitação`). Recomendação inicial **só em `escolha`** e _bounded_. Pontos complexos podem ser decompostos em sub-eixos.
 - [ ] **0.B.2** Cross-refs entre pontos: pontos com dependência mútua explicitam o vínculo (ex.: "redação final depende de `[DEC-NNNN-AYY]`").
 - [ ] **0.B.3** Tabela "Resumo de status" no fim do brief com todos os pontos em `Pendente`.
 - [ ] **0.B.4** Análise de débitos: atualizar `NEXT.md`.
@@ -66,7 +68,7 @@
 > **[MANDATÓRIO]** A implementação dos sub-blocos `(evidence-driven)` (Stage 2) só inicia após este gate fechar.
 
 - [ ] **0.G.1** Owner revisa `decision-brief.md` com todos os pontos `[DEC-NNNN-*]` em status `Pendente` e opções preenchidas.
-- [ ] **0.G.2** Para cada ponto: owner escolhe opção (ou propõe nova), preenche bloco "Decisão do Gate Humano" com escolha + justificativa + data; status muda para `Resolved`.
+- [ ] **0.G.2** Para cada ponto, conforme o **`Modo de gate`** (`escolha` = owner arbitra entre opções vivas; `aceitação` = owner aceita / rejeita / reenquadra um finding convergido — ver `governance-foundation.md` § "Contrato da cadeia"): owner crava o ato + justificativa + data no bloco "Decisão do Gate Humano"; status muda para `Resolved`.
 - [ ] **0.G.3** Pontos que demandem mais research voltam para [0.Research] com tarefa derivada. Iterar até zero pontos `Pendente`/`Partial`.
 - [ ] **0.G.4** Status agregado do `decision-brief.md` mudado para `Resolved` (data + owner). Bloco final "✅ Gate fechado" assinado.
 - [ ] **0.G.5** `plan.md` v2 publicado: seções de design técnico `(evidence-driven)` derivadas das decisões cravadas. Cada subseção referencia o `[DEC-NNNN-*]` correspondente. Stage 2 deixa de ser placeholder.

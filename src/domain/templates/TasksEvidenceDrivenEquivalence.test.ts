@@ -52,14 +52,13 @@ describe("TasksEvidenceDriven Engine Equivalence [4.C.0.b]", () => {
     expect(engineOutput).toEqual(legacyContent);
   });
 
-  it("DADO recipe tasks-evidence-driven QUANDO assembled ENTÃO metadata reflete artifactKind/workflowType corretos", () => {
+  it("DADO recipe tasks-evidence-driven QUANDO assembled ENTÃO metadata reflete artifactKind/language corretos", () => {
     const store = new NodeRecipeStore(ROOT_DIR);
     const useCase = new AssembleArtifact({ store });
 
     const composed = useCase.execute({ recipeName: "tasks-evidence-driven" });
 
     expect(composed.metadata.artifactKind).toBe("tasks");
-    expect(composed.metadata.workflowType).toBe("evidence-driven");
     expect(composed.metadata.language).toBe("pt-BR");
     expect(composed.metadata.composedSlots).toHaveLength(10);
   });

@@ -6,12 +6,17 @@
 
 ## Categorias de Fontes
 
-| Prefixo         | Categoria           | O que representa                        | Exemplo          |
-| :-------------- | :------------------ | :-------------------------------------- | :--------------- |
-| `CWE-*`         | **Normativo**       | Vulnerabilidade catalogada (MITRE CWE)  | `CWE-703`        |
-| `OWASP-*`       | **Normativo**       | Risco catalogado (OWASP Top 10)         | `OWASP-A2`       |
-| `EXT-*`         | **Empírico**        | Benchmark, estudo ou ferramenta externa | `EXT-AKITA-2026` |
-| _(sem prefixo)_ | **Acadêmico/Livre** | Papers, artigos, conferências           | `CONCUR 2025`    |
+| Prefixo         | Categoria            | O que representa                                                                                                              | Exemplo            |
+| :-------------- | :------------------- | :---------------------------------------------------------------------------------------------------------------------------- | :----------------- |
+| `CWE-*`         | **Normativo**        | Vulnerabilidade catalogada (MITRE CWE)                                                                                        | `CWE-703`          |
+| `OWASP-*`       | **Normativo**        | Risco catalogado (OWASP Top 10)                                                                                               | `OWASP-A2`         |
+| `EXT-*`         | **Empírico**         | Benchmark, estudo ou ferramenta externa                                                                                       | `EXT-AKITA-2026`   |
+| `DOGFOOD-*`     | **Empírico-interno** | Aprendizado recorrente observado no dogfooding do próprio framework (guardrails `GG-*`); o sufixo cita a spec/ponto de origem | `DOGFOOD-0024-G02` |
+| _(sem prefixo)_ | **Acadêmico/Livre**  | Papers, artigos, conferências                                                                                                 | `CONCUR 2025`      |
+
+> **`DOGFOOD-*` (guardrails).** Um guardrail (`GG-*`) é uma regra cuja origem é **observação recorrente no uso do próprio framework** — não um normativo externo nem um benchmark. Critério para a fonte valer: o aprendizado **apareceu em ≥ 1 spec/ponto citável** (o sufixo registra quais — ex.: `DOGFOOD-0024-G00`) **e** está ligado a um check que pode falhar (senão é só texto). É o análogo interno de `EXT-*`: empírico, mas de dogfooding.
+>
+> **Guardrails são INTERNOS** (experimento da Spec 0024): vivem na constituição (`.core/process/governance-foundation.md` § "Guardrails dogfoodados") + um check em `cli/` — **não** entram em `rules.json` nem são projetados a consumidores. Promoção a consumer-facing é decisão futura. Por isso `DOGFOOD-*` ainda não rotula nenhuma regra do catálogo.
 
 ---
 

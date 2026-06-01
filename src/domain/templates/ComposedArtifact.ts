@@ -9,7 +9,7 @@
  * Aplica ADR 0013 (.core/governance/adrs/0013-ast-only-extraction.md):
  * mesma recipe + mesmos partials → mesmo output byte-a-byte.
  */
-import type { ArtifactKind, WorkflowType, Language } from "./Recipe.js";
+import type { ArtifactKind, Language } from "./Recipe.js";
 
 export interface ComposedArtifact {
   /** Conteúdo Markdown final, pronto para escrita em disco. */
@@ -20,7 +20,6 @@ export interface ComposedArtifact {
 
 export interface ComposedArtifactMetadata {
   readonly artifactKind: ArtifactKind;
-  readonly workflowType: WorkflowType;
   readonly language: Language;
   /** Ids dos slots na ordem em que foram compostos. */
   readonly composedSlots: readonly string[];

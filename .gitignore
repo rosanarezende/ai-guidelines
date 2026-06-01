@@ -33,6 +33,7 @@ logs/
 
 # Arquivos temporários
 .tmp/
+temp/
 
 # Stack dumps do bash em Windows (Git Bash / MSYS)
 *.stackdump

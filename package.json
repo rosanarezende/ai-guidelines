@@ -62,7 +62,8 @@
     "living-docs:generate": "yarn build && node cli/living-docs.mjs generate",
     "living-docs:check": "yarn build && node cli/living-docs.mjs check",
     "state-yml:check": "yarn build && node cli/state-yml-check.mjs",
-    "validate": "yarn format:check && yarn build:all && yarn test && yarn living-docs:check && yarn state-yml:check",
+    "gate-decidability:check": "node cli/governance/gate-decidability-check.mjs",
+    "validate": "yarn format:check && yarn build:all && yarn test && yarn living-docs:check && yarn state-yml:check && yarn gate-decidability:check",
     "ci": "yarn install --immutable && yarn validate && yarn test:smoke",
     "prepare": "husky",
     "prepack": "yarn build:all"

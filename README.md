@@ -4,9 +4,7 @@
 
 <h1 align="center">ai-guidelines</h1>
 
-<p align="center">
-  <strong>Governança de engenharia repo-first. Do backlog ao valor entregue, com integração AI-agnóstica de primeira classe.</strong>
-</p>
+<strong>Automação absorve o mecânico. Governança organiza o sistema. Humanos decidem o que importa.</strong>
 
 <p align="center">
   <a href="https://www.npmjs.com/package/ai-guidelines"><img src="https://img.shields.io/npm/v/ai-guidelines.svg" alt="npm version"></a>
@@ -16,30 +14,89 @@
 
 ---
 
-## Por que existe
+## O princípio central
 
-Times de engenharia sérios enfrentam três fricções estruturais que o ferramental atual não resolve em conjunto:
+A maioria dos frameworks tenta automatizar decisões.
 
-**Processo rastreável do problema ao valor.** Backlog, especificação, decisões arquiteturais, gates humanos, distribuição cross-repo e visibilidade para liderança ficam por conta da disciplina manual — ou se diluem em ferramentas externas (Jira, Linear) que não sobrevivem a troca de stack ou de IA.
+O `ai-guidelines` faz o oposto.
 
-**Estado canônico que mora no repositório, não num dashboard.** Quando a verdade sobre "o que está em curso" vive fora do Git, ela some quando alguém troca de ferramenta. O `ai-guidelines` põe esse estado dentro do repo, versionado, em `.governance/registry.yml`.
+Ele separa três camadas que normalmente aparecem misturadas:
 
-**Coerência quando IAs entram no fluxo.** Cada agente (Claude, Gemini, Codex, Cursor, Copilot, Windsurf, Aider) traz seu próprio formato de regras. Sem governança comum, eles leem instruções divergentes — e o time humano vira árbitro de conflitos.
+- automação estrutural;
+- governança operacional;
+- julgamento humano.
 
-O `ai-guidelines` cobre os três eixos no mesmo framework:
+A automação não substitui o julgamento.
 
-- **Ciclo SDD versionado** — Backlog → Spec → Plano → Execução → PR → Merge → Valor entregue, com gates humanos explícitos onde importa.
-- **Taxonomia MECE de 7 pilares de trabalho** — `spec`, `experiment`, `spike`, `incident`, `proposal`, `patch`, `fix`. Tudo que entra no fluxo cabe em exatamente um.
-- **`.governance/` como SSOT** — `registry.yml` estruturado + Markdown derivado + reservas para intake, handoff, telemetria à medida que o framework evolui. Repo é a memória.
-- **Living Documentation** — testes com IDs `[BR-CLI-*]` são a fonte única de verdade das regras de negócio; documentação derivada protegida por drift guard fatal na CI.
-- **Integração AI-agnóstica de primeira classe** — um sistema governado distribui regras para 7+ provider entrypoints sincronizados (`CLAUDE.md`, `GEMINI.md`, `.openai/instructions.md`, `.cursor/rules/`, etc.).
-- **Política de update auditável** (`managed-block` + `mirror`) que delimita o que a CLI gerencia e o que é do consumidor — sem sobrescrita silenciosa.
+Ela protege o espaço onde o julgamento acontece.
 
-Você escreve a regra de governança uma vez. Você abre uma spec uma vez. O framework propaga até o merge — com IA opcional, mas de primeira classe.
+```mermaid
+flowchart LR
+    A["Automação estrutural"]
+    B["Governança operacional"]
+    C["Julgamento humano"]
+
+    A -->|"remove ruído"| B
+    B -->|"protege espaço de decisão"| C
+```
+
+Na prática, isso muda quem faz o quê.
+
+O objetivo não é automatizar mais decisões.
+
+É remover trabalho mecânico para que o julgamento humano aconteça apenas onde existe incerteza real.
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/rosanarezende/ai-guidelines/main/docs/assets/ai-guidelines-before-after.png" alt="ai-guidelines — antes e depois: do contexto reconstruído a cada sessão ao contexto canônico versionado no repositório" width="880">
+  <img src="https://raw.githubusercontent.com/rosanarezende/ai-guidelines/main/docs/assets/ai-guidelines-governance-layers.png" alt="automação estrutural, governança operacional e julgamento humano" width="880">
 </p>
+
+## Por que existe
+
+A maioria das ferramentas tenta resolver automação, governança e tomada de decisão ao mesmo tempo.
+
+São problemas diferentes.
+
+Quando essas responsabilidades se confundem, o estado do projeto se perde, as regras divergem e a coordenação depende de memória humana.
+
+O `ai-guidelines` separa explicitamente essas camadas.
+
+A adoção de IA aumentou a produtividade local.
+
+Mas também aumentou a necessidade de coordenação.
+
+Quanto mais agentes participam do fluxo, mais importante se torna:
+
+- ter uma fonte única de verdade;
+- tornar decisões rastreáveis;
+- distinguir automação de governança;
+- preservar julgamento humano nos pontos críticos.
+
+O problema deixa de ser gerar código.
+
+O problema passa a ser manter coerência operacional.
+
+O `ai-guidelines` ataca três fricções:
+
+- processo rastreável do problema ao valor;
+- estado canônico vivendo no repositório;
+- coordenação consistente entre humanos e múltiplas IAs.
+
+O framework combina:
+
+- Ciclo SDD versionado com gates humanos.
+- Estado canônico versionado no repositório.
+- Living Documentation protegida por CI.
+- Integração AI-agnóstica sincronizada.
+- Distribuição auditável de governança.
+- Taxonomia única para trabalho de engenharia.
+
+> Você escreve a regra de governança uma vez.
+>
+> Você abre uma spec uma vez.
+>
+> O framework propaga até o merge.
+
+Instalar e começar leva menos de um minuto.
 
 ## Quick start
 
@@ -56,6 +113,7 @@ Requer **Node ≥ 22**. Para fixar versão em CI: `npx ai-guidelines@<versão> .
 
 ## O que você ganha
 
+- **Separação explícita de responsabilidades** — automação cuida do mecânico, governança cuida do processo e humanos permanecem responsáveis pelas decisões.
 - **Governance-by-design** — não tente ensinar devs ou IAs a "fazer bons prompts"; o sistema bloqueia o caminho errado por construção (ex.: `POLICY_EXPERIMENT_REQUIRES_HYPOTHESIS` recusa experimento sem hipótese declarada).
 - **Spec-Driven Development governado** — boilerplates SDD distribuídos e versionados (`spec.md`, `plan.md`, `tasks.md`, `decision-brief.md`) prontos para o ciclo Backlog → Spec → Plano → Execução → PR → Merge.
 - **Gates humanos explícitos** onde importa (passagem de spec para review, merge, release sync), em vez de aprovações implícitas.
@@ -63,6 +121,12 @@ Requer **Node ≥ 22**. Para fixar versão em CI: `npx ai-guidelines@<versão> .
 - **Auditável** — tudo o que a CLI gerencia fica entre marcadores `managed-block`. O resto do seu projeto permanece intocado.
 - **Headless por design** — `update` é idempotente e não-interativo; integra em CI sem prompt.
 - **Modular por opt-in** — escolha no wizard o que adotar (Prettier, Husky, CI, TDD, BDD, Quality Gates, AI agent integration). Sem sobrescrita silenciosa.
+
+Visualmente, a diferença é esta:
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/rosanarezende/ai-guidelines/main/docs/assets/ai-guidelines-before-after.png" alt="ai-guidelines — antes e depois: do contexto reconstruído a cada sessão ao contexto canônico versionado no repositório" width="880">
+</p>
 
 ## Comandos essenciais
 

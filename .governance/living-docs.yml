@@ -62,8 +62,8 @@ entries:
     domain: AssembleArtifact
     evidence:
       - file: src/app/use-cases/AssembleArtifact.test.ts
-        lineStart: 117
-        lineEnd: 129
+        lineStart: 116
+        lineEnd: 128
         testName: DADO recipe com 2 slots ENTÃO compõe Markdown na ordem dos slots
         coverageState: covered
     tags:
@@ -76,8 +76,8 @@ entries:
     domain: AssembleArtifact
     evidence:
       - file: src/app/use-cases/AssembleArtifact.test.ts
-        lineStart: 131
-        lineEnd: 151
+        lineStart: 130
+        lineEnd: 150
         testName: DADO recipe com 3 slots ENTÃO compõe todos na ordem
         coverageState: covered
     tags:
@@ -85,14 +85,14 @@ entries:
       - Happy path
     coverageState: covered
   - ruleId: BR-CLI-ASSEMBLE-03
-    title: DADO recipe válida ENTÃO metadata reflete artifactKind, workflowType, language
+    title: DADO recipe válida ENTÃO metadata reflete artifactKind, language
     boundedContext: use-cases
     domain: AssembleArtifact
     evidence:
       - file: src/app/use-cases/AssembleArtifact.test.ts
-        lineStart: 153
-        lineEnd: 170
-        testName: DADO recipe válida ENTÃO metadata reflete artifactKind, workflowType, language
+        lineStart: 152
+        lineEnd: 168
+        testName: DADO recipe válida ENTÃO metadata reflete artifactKind, language
         coverageState: covered
     tags:
       - AssembleArtifact — composição determinística [BR-CLI-ASSEMBLE]
@@ -104,8 +104,8 @@ entries:
     domain: AssembleArtifact
     evidence:
       - file: src/app/use-cases/AssembleArtifact.test.ts
-        lineStart: 172
-        lineEnd: 188
+        lineStart: 170
+        lineEnd: 186
         testName: DADO slot com múltiplos partials ENTÃO usa o primeiro (Q2 first-wins)
         coverageState: covered
     tags:
@@ -118,8 +118,8 @@ entries:
     domain: AssembleArtifact
     evidence:
       - file: src/app/use-cases/AssembleArtifact.test.ts
-        lineStart: 192
-        lineEnd: 206
+        lineStart: 190
+        lineEnd: 204
         testName: DADO mesma recipe e mesmos partials QUANDO executado 2× ENTÃO output idêntico
         coverageState: covered
     tags:
@@ -132,8 +132,8 @@ entries:
     domain: AssembleArtifact
     evidence:
       - file: src/app/use-cases/AssembleArtifact.test.ts
-        lineStart: 208
-        lineEnd: 221
+        lineStart: 206
+        lineEnd: 219
         testName: DADO output ENTÃO termina com newline único (sem trailing extras)
         coverageState: covered
     tags:
@@ -146,8 +146,8 @@ entries:
     domain: AssembleArtifact
     evidence:
       - file: src/app/use-cases/AssembleArtifact.test.ts
-        lineStart: 225
-        lineEnd: 236
+        lineStart: 223
+        lineEnd: 234
         testName: DADO recipe inexistente ENTÃO RECIPE_NOT_FOUND propagado
         coverageState: covered
     tags:
@@ -160,8 +160,8 @@ entries:
     domain: AssembleArtifact
     evidence:
       - file: src/app/use-cases/AssembleArtifact.test.ts
-        lineStart: 238
-        lineEnd: 253
+        lineStart: 236
+        lineEnd: 251
         testName: DADO partial inexistente ENTÃO RECIPE_PARTIAL_NOT_FOUND propagado
         coverageState: covered
     tags:
@@ -174,8 +174,8 @@ entries:
     domain: AssembleArtifact
     evidence:
       - file: src/app/use-cases/AssembleArtifact.test.ts
-        lineStart: 255
-        lineEnd: 273
+        lineStart: 253
+        lineEnd: 271
         testName: DADO recipe inválida no store ENTÃO assertValidRecipe lança
         coverageState: covered
     tags:
@@ -188,8 +188,8 @@ entries:
     domain: AssembleArtifact
     evidence:
       - file: src/app/use-cases/AssembleArtifact.test.ts
-        lineStart: 275
-        lineEnd: 293
+        lineStart: 273
+        lineEnd: 291
         testName: DADO partial com placeholder ENTÃO assertValidPartialMarkdown lança
         coverageState: covered
     tags:
@@ -2712,8 +2712,8 @@ entries:
     domain: Recipe
     evidence:
       - file: src/domain/templates/Recipe.test.ts
-        lineStart: 95
-        lineEnd: 97
+        lineStart: 88
+        lineEnd: 90
         testName: DADO recipe completa e bem-formada ENTÃO assertValidRecipe não lança
         coverageState: covered
     tags:
@@ -2726,8 +2726,8 @@ entries:
     domain: Recipe
     evidence:
       - file: src/domain/templates/Recipe.test.ts
-        lineStart: 120
-        lineEnd: 141
+        lineStart: 113
+        lineEnd: 127
         testName: DADO recipe SEM '%s' ENTÃO RECIPE_MISSING_FIELD com mensagem citando o campo
         coverageState: covered
     tags:
@@ -2740,8 +2740,8 @@ entries:
     domain: Recipe
     evidence:
       - file: src/domain/templates/Recipe.test.ts
-        lineStart: 163
-        lineEnd: 173
+        lineStart: 149
+        lineEnd: 159
         testName: DADO schemaVersion fora de TEMPLATE_SCHEMA_VERSIONS ENTÃO RECIPE_INVALID_SCHEMA_VERSION nomeando o conjunto
         coverageState: covered
     tags:
@@ -2754,23 +2754,9 @@ entries:
     domain: Recipe
     evidence:
       - file: src/domain/templates/Recipe.test.ts
-        lineStart: 175
-        lineEnd: 186
+        lineStart: 161
+        lineEnd: 172
         testName: DADO artifactKind fora de ARTIFACT_KINDS ENTÃO RECIPE_INVALID_ARTIFACT_KIND nomeando o conjunto
-        coverageState: covered
-    tags:
-      - Enums inválidos — códigos estáveis por campo
-      - Recipe — assertValidRecipe [BR-CLI-RECIPE]
-    coverageState: covered
-  - ruleId: BR-CLI-RECIPE-05
-    title: DADO workflowType fora de WORKFLOW_TYPES ENTÃO RECIPE_INVALID_WORKFLOW_TYPE nomeando o conjunto
-    boundedContext: templates
-    domain: Recipe
-    evidence:
-      - file: src/domain/templates/Recipe.test.ts
-        lineStart: 188
-        lineEnd: 199
-        testName: DADO workflowType fora de WORKFLOW_TYPES ENTÃO RECIPE_INVALID_WORKFLOW_TYPE nomeando o conjunto
         coverageState: covered
     tags:
       - Enums inválidos — códigos estáveis por campo
@@ -2782,8 +2768,8 @@ entries:
     domain: Recipe
     evidence:
       - file: src/domain/templates/Recipe.test.ts
-        lineStart: 201
-        lineEnd: 212
+        lineStart: 174
+        lineEnd: 185
         testName: DADO language fora de LANGUAGES ENTÃO RECIPE_INVALID_LANGUAGE nomeando o conjunto
         coverageState: covered
     tags:
@@ -2796,8 +2782,8 @@ entries:
     domain: Recipe
     evidence:
       - file: src/domain/templates/Recipe.test.ts
-        lineStart: 231
-        lineEnd: 238
+        lineStart: 204
+        lineEnd: 211
         testName: DADO slots vazio ENTÃO RECIPE_EMPTY_SLOTS
         coverageState: covered
     tags:
@@ -2810,8 +2796,8 @@ entries:
     domain: Recipe
     evidence:
       - file: src/domain/templates/Recipe.test.ts
-        lineStart: 249
-        lineEnd: 262
+        lineStart: 222
+        lineEnd: 235
         testName: DADO dois slots com mesmo id ENTÃO RECIPE_DUPLICATE_SLOT_ID citando os dois
         coverageState: covered
     tags:
@@ -2824,8 +2810,8 @@ entries:
     domain: Recipe
     evidence:
       - file: src/domain/templates/Recipe.test.ts
-        lineStart: 264
-        lineEnd: 277
+        lineStart: 237
+        lineEnd: 250
         testName: DADO slot com partials vazio ENTÃO RECIPE_SLOT_NO_PARTIAL
         coverageState: covered
     tags:
@@ -2838,8 +2824,8 @@ entries:
     domain: Recipe
     evidence:
       - file: src/domain/templates/Recipe.test.ts
-        lineStart: 315
-        lineEnd: 328
+        lineStart: 288
+        lineEnd: 301
         testName: DADO minOccurrences > maxOccurrences ENTÃO RECIPE_INVALID_CARDINALITY
         coverageState: covered
     tags:
@@ -2852,8 +2838,8 @@ entries:
     domain: Recipe
     evidence:
       - file: src/domain/templates/Recipe.test.ts
-        lineStart: 330
-        lineEnd: 343
+        lineStart: 303
+        lineEnd: 316
         testName: DADO required=true com minOccurrences=0 ENTÃO RECIPE_REQUIRED_INCONSISTENT
         coverageState: covered
     tags:
@@ -2866,8 +2852,8 @@ entries:
     domain: Recipe
     evidence:
       - file: src/domain/templates/Recipe.test.ts
-        lineStart: 214
-        lineEnd: 227
+        lineStart: 187
+        lineEnd: 200
         testName: DADO canonicalOrder fora de CANONICAL_ORDERS ENTÃO RECIPE_INVALID_CANONICAL_ORDER nomeando o conjunto
         coverageState: covered
     tags:
@@ -2880,8 +2866,8 @@ entries:
     domain: Recipe
     evidence:
       - file: src/domain/templates/Recipe.test.ts
-        lineStart: 59
-        lineEnd: 62
+        lineStart: 57
+        lineEnd: 60
         testName: DADO TEMPLATE_SCHEMA_VERSIONS ENTÃO contém apenas 'v0' e é readonly
         coverageState: covered
     tags:
@@ -2893,22 +2879,9 @@ entries:
     domain: Recipe
     evidence:
       - file: src/domain/templates/Recipe.test.ts
-        lineStart: 64
-        lineEnd: 75
+        lineStart: 62
+        lineEnd: 73
         testName: DADO ARTIFACT_KINDS ENTÃO contém 7 valores canônicos e é readonly
-        coverageState: covered
-    tags:
-      - Recipe — Enums fechados (ADR 0011) [BR-CLI-RECIPE]
-    coverageState: covered
-  - ruleId: BR-CLI-RECIPE-15
-    title: DADO WORKFLOW_TYPES ENTÃO contém 4 valores canônicos incluindo 'n/a' e é readonly
-    boundedContext: templates
-    domain: Recipe
-    evidence:
-      - file: src/domain/templates/Recipe.test.ts
-        lineStart: 77
-        lineEnd: 80
-        testName: DADO WORKFLOW_TYPES ENTÃO contém 4 valores canônicos incluindo 'n/a' e é readonly
         coverageState: covered
     tags:
       - Recipe — Enums fechados (ADR 0011) [BR-CLI-RECIPE]
@@ -2919,8 +2892,8 @@ entries:
     domain: Recipe
     evidence:
       - file: src/domain/templates/Recipe.test.ts
-        lineStart: 82
-        lineEnd: 85
+        lineStart: 75
+        lineEnd: 78
         testName: DADO LANGUAGES ENTÃO contém 'pt-BR' e 'en-US' e é readonly
         coverageState: covered
     tags:
@@ -2932,8 +2905,8 @@ entries:
     domain: Recipe
     evidence:
       - file: src/domain/templates/Recipe.test.ts
-        lineStart: 87
-        lineEnd: 90
+        lineStart: 80
+        lineEnd: 83
         testName: DADO CANONICAL_ORDERS ENTÃO contém apenas 'slots' e é readonly
         coverageState: covered
     tags:
@@ -2945,8 +2918,8 @@ entries:
     domain: Recipe
     evidence:
       - file: src/domain/templates/Recipe.test.ts
-        lineStart: 99
-        lineEnd: 105
+        lineStart: 92
+        lineEnd: 98
         testName: DADO recipe com slot sem minOccurrences/maxOccurrences explícitos ENTÃO aceita (defaults implícitos)
         coverageState: covered
     tags:
@@ -2959,8 +2932,8 @@ entries:
     domain: Recipe
     evidence:
       - file: src/domain/templates/Recipe.test.ts
-        lineStart: 107
-        lineEnd: 116
+        lineStart: 100
+        lineEnd: 109
         testName: DADO recipe com forbiddenHeadings não-vazio ENTÃO aceita
         coverageState: covered
     tags:
@@ -2973,8 +2946,8 @@ entries:
     domain: Recipe
     evidence:
       - file: src/domain/templates/Recipe.test.ts
-        lineStart: 143
-        lineEnd: 150
+        lineStart: 129
+        lineEnd: 136
         testName: DADO entrada não-objeto ENTÃO RECIPE_MISSING_FIELD
         coverageState: covered
     tags:
@@ -2987,8 +2960,8 @@ entries:
     domain: Recipe
     evidence:
       - file: src/domain/templates/Recipe.test.ts
-        lineStart: 152
-        lineEnd: 159
+        lineStart: 138
+        lineEnd: 145
         testName: DADO entrada null ENTÃO RECIPE_MISSING_FIELD
         coverageState: covered
     tags:
@@ -3001,8 +2974,8 @@ entries:
     domain: Recipe
     evidence:
       - file: src/domain/templates/Recipe.test.ts
-        lineStart: 240
-        lineEnd: 247
+        lineStart: 213
+        lineEnd: 220
         testName: DADO slots não-array ENTÃO RECIPE_EMPTY_SLOTS
         coverageState: covered
     tags:
@@ -3015,8 +2988,8 @@ entries:
     domain: Recipe
     evidence:
       - file: src/domain/templates/Recipe.test.ts
-        lineStart: 279
-        lineEnd: 289
+        lineStart: 252
+        lineEnd: 262
         testName: DADO slot com partials não-array ENTÃO RECIPE_SLOT_NO_PARTIAL
         coverageState: covered
     tags:
@@ -3029,8 +3002,8 @@ entries:
     domain: Recipe
     evidence:
       - file: src/domain/templates/Recipe.test.ts
-        lineStart: 291
-        lineEnd: 300
+        lineStart: 264
+        lineEnd: 273
         testName: DADO slot sem id ENTÃO RECIPE_MISSING_FIELD citando 'slot.id'
         coverageState: covered
     tags:
@@ -3043,8 +3016,8 @@ entries:
     domain: Recipe
     evidence:
       - file: src/domain/templates/Recipe.test.ts
-        lineStart: 302
-        lineEnd: 311
+        lineStart: 275
+        lineEnd: 284
         testName: DADO slot sem required ENTÃO RECIPE_MISSING_FIELD citando 'slot.required'
         coverageState: covered
     tags:
@@ -3057,8 +3030,8 @@ entries:
     domain: Recipe
     evidence:
       - file: src/domain/templates/Recipe.test.ts
-        lineStart: 345
-        lineEnd: 355
+        lineStart: 318
+        lineEnd: 328
         testName: DADO required=false com minOccurrences=2 ENTÃO RECIPE_REQUIRED_INCONSISTENT
         coverageState: covered
     tags:
@@ -3071,8 +3044,8 @@ entries:
     domain: Recipe
     evidence:
       - file: src/domain/templates/Recipe.test.ts
-        lineStart: 357
-        lineEnd: 360
+        lineStart: 330
+        lineEnd: 333
         testName: DADO required=true sem minOccurrences explícito ENTÃO default min=1 aceito
         coverageState: covered
     tags:
@@ -3085,8 +3058,8 @@ entries:
     domain: Recipe
     evidence:
       - file: src/domain/templates/Recipe.test.ts
-        lineStart: 362
-        lineEnd: 365
+        lineStart: 335
+        lineEnd: 338
         testName: DADO required=false sem minOccurrences explícito ENTÃO default min=0 aceito
         coverageState: covered
     tags:
@@ -3099,8 +3072,8 @@ entries:
     domain: Recipe
     evidence:
       - file: src/domain/templates/Recipe.test.ts
-        lineStart: 369
-        lineEnd: 380
+        lineStart: 342
+        lineEnd: 353
         testName: DADO invariants sem forbiddenHeadings ENTÃO RECIPE_MISSING_FIELD
         coverageState: covered
     tags:
@@ -3113,8 +3086,8 @@ entries:
     domain: Recipe
     evidence:
       - file: src/domain/templates/Recipe.test.ts
-        lineStart: 382
-        lineEnd: 393
+        lineStart: 355
+        lineEnd: 366
         testName: DADO forbiddenHeadings não-array ENTÃO RECIPE_MISSING_FIELD
         coverageState: covered
     tags:
@@ -3225,8 +3198,8 @@ entries:
     domain: StructuralValidation
     evidence:
       - file: src/app/use-cases/StructuralValidation.test.ts
-        lineStart: 71
-        lineEnd: 74
+        lineStart: 69
+        lineEnd: 72
         testName: DADO artefato válido com recipe sem forbiddenHeadings ENTÃO retorna vazio
         coverageState: covered
     tags:
@@ -3239,8 +3212,8 @@ entries:
     domain: StructuralValidation
     evidence:
       - file: src/app/use-cases/StructuralValidation.test.ts
-        lineStart: 76
-        lineEnd: 80
+        lineStart: 74
+        lineEnd: 78
         testName: DADO artefato com todos os slots required presentes ENTÃO sem erro de completude
         coverageState: covered
     tags:
@@ -3253,8 +3226,8 @@ entries:
     domain: StructuralValidation
     evidence:
       - file: src/app/use-cases/StructuralValidation.test.ts
-        lineStart: 84
-        lineEnd: 102
+        lineStart: 82
+        lineEnd: 100
         testName: DADO recipe com forbiddenHeadings e artefato contendo heading proibido ENTÃO STRUCT_FORBIDDEN_SECTION
         coverageState: covered
     tags:
@@ -3267,8 +3240,8 @@ entries:
     domain: StructuralValidation
     evidence:
       - file: src/app/use-cases/StructuralValidation.test.ts
-        lineStart: 122
-        lineEnd: 139
+        lineStart: 120
+        lineEnd: 137
         testName: DADO múltiplos headings proibidos encontrados ENTÃO um erro por heading
         coverageState: covered
     tags:
@@ -3281,8 +3254,8 @@ entries:
     domain: StructuralValidation
     evidence:
       - file: src/app/use-cases/StructuralValidation.test.ts
-        lineStart: 141
-        lineEnd: 156
+        lineStart: 139
+        lineEnd: 154
         testName: DADO heading parecido mas não idêntico (case-sensitive) ENTÃO sem erro
         coverageState: covered
     tags:
@@ -3295,8 +3268,8 @@ entries:
     domain: StructuralValidation
     evidence:
       - file: src/app/use-cases/StructuralValidation.test.ts
-        lineStart: 160
-        lineEnd: 174
+        lineStart: 158
+        lineEnd: 172
         testName: DADO slot required ausente dos composedSlots ENTÃO STRUCT_MISSING_SLOT
         coverageState: covered
     tags:
@@ -3309,8 +3282,8 @@ entries:
     domain: StructuralValidation
     evidence:
       - file: src/app/use-cases/StructuralValidation.test.ts
-        lineStart: 176
-        lineEnd: 188
+        lineStart: 174
+        lineEnd: 186
         testName: DADO slot optional ausente ENTÃO sem erro
         coverageState: covered
     tags:
@@ -3323,8 +3296,8 @@ entries:
     domain: StructuralValidation
     evidence:
       - file: src/app/use-cases/StructuralValidation.test.ts
-        lineStart: 190
-        lineEnd: 202
+        lineStart: 188
+        lineEnd: 200
         testName: DADO múltiplos slots required ausentes ENTÃO um erro por slot
         coverageState: covered
     tags:
@@ -3337,23 +3310,9 @@ entries:
     domain: StructuralValidation
     evidence:
       - file: src/app/use-cases/StructuralValidation.test.ts
-        lineStart: 206
-        lineEnd: 222
+        lineStart: 204
+        lineEnd: 219
         testName: DADO artifactKind divergente entre recipe e metadata ENTÃO STRUCT_RECIPE_SELF_INCONSISTENT
-        coverageState: covered
-    tags:
-      - Self-consistency — STRUCT_RECIPE_SELF_INCONSISTENT
-      - StructuralValidation — validateComposedArtifact [BR-CLI-STRUCT]
-    coverageState: covered
-  - ruleId: BR-CLI-STRUCT-10
-    title: DADO workflowType divergente ENTÃO STRUCT_RECIPE_SELF_INCONSISTENT
-    boundedContext: use-cases
-    domain: StructuralValidation
-    evidence:
-      - file: src/app/use-cases/StructuralValidation.test.ts
-        lineStart: 224
-        lineEnd: 239
-        testName: DADO workflowType divergente ENTÃO STRUCT_RECIPE_SELF_INCONSISTENT
         coverageState: covered
     tags:
       - Self-consistency — STRUCT_RECIPE_SELF_INCONSISTENT
@@ -3365,8 +3324,8 @@ entries:
     domain: StructuralValidation
     evidence:
       - file: src/app/use-cases/StructuralValidation.test.ts
-        lineStart: 241
-        lineEnd: 256
+        lineStart: 221
+        lineEnd: 235
         testName: DADO language divergente ENTÃO STRUCT_RECIPE_SELF_INCONSISTENT
         coverageState: covered
     tags:
@@ -3379,8 +3338,8 @@ entries:
     domain: StructuralValidation
     evidence:
       - file: src/app/use-cases/StructuralValidation.test.ts
-        lineStart: 260
-        lineEnd: 285
+        lineStart: 239
+        lineEnd: 263
         testName: DADO múltiplas violações simultâneas ENTÃO acumula todos os erros
         coverageState: covered
     tags:
@@ -3393,8 +3352,8 @@ entries:
     domain: StructuralValidation
     evidence:
       - file: src/app/use-cases/StructuralValidation.test.ts
-        lineStart: 104
-        lineEnd: 120
+        lineStart: 102
+        lineEnd: 118
         testName: DADO heading proibido apenas dentro de bloco de código ENTÃO ignora (falso positivo)
         coverageState: covered
     tags:

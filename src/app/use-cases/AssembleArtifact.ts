@@ -62,7 +62,6 @@ export class AssembleArtifact {
 
     const metadata: ComposedArtifactMetadata = {
       artifactKind: recipe.artifactKind,
-      workflowType: recipe.workflowType,
       language: recipe.language,
       composedSlots,
     };
