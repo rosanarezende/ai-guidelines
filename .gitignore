@@ -13,6 +13,9 @@ node_modules/
 # Artefatos do Windows/macOS
 .DS_Store
 Thumbs.db
+# Mark-of-the-Web (Alternate Data Stream) — nome com ':' é path inválido no
+# Windows e quebra `git checkout`/smoke. NUNCA versionar.
+*:Zone.Identifier
 
 # Arquivos de configuração local da IA
 .claude/
