@@ -10,6 +10,7 @@
 - **CI #33:** clean (`mergeState: CLEAN`). `yarn validate` verde. Git limpo.
 - **#33 embarca:** 2.2 · 2.2b · 2.3 · 2.3a · 2.3b · 2.4 · 2.4a · 2.4b · 2.4c · **2.4d**.
 - **Gate do #33:** **FECHADO** — `gates/c2.4d.yml` `approved` (PR INTEIRO, keyado no cursor 2.4d, **não** retroativo por checkpoint). `reviews/c2.4d-architectural_review.yml` (F1/F2 `accepted`, F3 `dismissed`-deferido) + `c2.4d-resolutions.yml`. `review:check` verde. Human Gate ratificado (owner **APPROVED**, 2026-06-02).
+- **Projeções reconciliadas (2026-06-02, pós-gate — commit `15e0ad5`; NÃO re-flaggar):** #33 → Ready; título do #33 → "Checkpoints 2.2→2.4d"; `active-specs.yml` → `branch`=head + `base_branch`=linha de integração; `plan.md` coluna de status → "feito + gated"; corpo do #33 (downstream `checkpoint-3`, disclosure `2.4d`). Correções de **projeção** (princípio "corrigir na hora", sem decisão nova). Hipóteses arquiteturais deixadas em aberto (sem NEXT): índice stale a cada move de head; ausência de verificador mecânico "PR Ready ⟺ gate aprovado" (classe do GG-0003).
 
 ## 2. O que o 2.4d entregou (NÃO reabrir)
 
