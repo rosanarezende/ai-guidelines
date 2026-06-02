@@ -5,8 +5,8 @@
 ## 1. Estado Atual
 
 - **Spec:** `0024-context-architecture`
-- **Branch ativa:** `feat/spec-0024-ruleset-producibility` (= PR **#33**, base da stack)
-- **PR #33:** Draft, **gate APPROVED**. Commits: `90de5ba` (2.4d feat) → `4de3600` (fix A/C) → `af2d88c` (review artifact) → `db244c7` (fechamento do gate).
+- **Branch ativa:** `feat/spec-0024-ruleset-producibility` (= PR **#33**, _sequence_ 1 — primeiro PR de execução; a **base da stack** é #32 / `feat/spec-0024-context-architecture`)
+- **PR #33:** **Ready** (`isDraft: false` — convertido para Ready for review per CORE-10 / ADR 0024), **gate APPROVED**. Commits: `90de5ba` (2.4d feat) → `4de3600` (fix A/C) → `af2d88c` (review artifact) → `db244c7` (fechamento do gate).
 - **CI #33:** clean (`mergeState: CLEAN`). `yarn validate` verde. Git limpo.
 - **#33 embarca:** 2.2 · 2.2b · 2.3 · 2.3a · 2.3b · 2.4 · 2.4a · 2.4b · 2.4c · **2.4d**.
 - **Gate do #33:** **FECHADO** — `gates/c2.4d.yml` `approved` (PR INTEIRO, keyado no cursor 2.4d, **não** retroativo por checkpoint). `reviews/c2.4d-architectural_review.yml` (F1/F2 `accepted`, F3 `dismissed`-deferido) + `c2.4d-resolutions.yml`. `review:check` verde. Human Gate ratificado (owner **APPROVED**, 2026-06-02).
@@ -57,7 +57,7 @@ Leia, nesta ordem:
 - .governance/specs/0024-context-architecture/plan.md  (§ "Sequência de Checkpoints", linha do Checkpoint 3)
 - .governance/specs/0024-context-architecture/reviews/README.md  (modelo review-as-artifact)
 
-Estado: branch feat/spec-0024-ruleset-producibility, PR #33 (Draft) com gate APPROVED
+Estado: branch feat/spec-0024-ruleset-producibility, PR #33 (Ready) com gate APPROVED
 (gates/c2.4d.yml; review:check verde; CI clean). #33 embarca 2.2→2.4d.
 
 Objetivo: abrir o Checkpoint 3 (GG-0003 Consistency Projection Check) como PR stacked
