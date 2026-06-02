@@ -1,0 +1,15 @@
+# Resoluções do implementador para o Gate do PR #33 (c2.4d) — lane SEPARADA da
+# review. PROPÕE `action`; NÃO destrava o gate (só a `disposition` do reviewer
+# destrava). `finding` totalmente qualificado (`<role>#<id>`). Rastreável a commits.
+checkpoint: "2.4d"
+by: claude-cli
+resolutions:
+  - finding: architectural_review#F1
+    action: fixed
+    ref: 4de3600 # cobertura de escopo: approved exige gatedCount === scope.size; senão partial
+  - finding: architectural_review#F2
+    action: fixed
+    ref: 4de3600 # violations do consolidate() agora fatais no main (espelha review:check)
+  - finding: architectural_review#F3
+    action: wontfix
+    ref: NEXT.md # deferido por desenho: disclosure:check (drift) registrado como débito; ancora já no template
