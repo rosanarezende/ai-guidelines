@@ -98,15 +98,51 @@ function str(v: unknown): string | null {
   return typeof v === "string" && v.length > 0 ? v : null;
 }
 
-/** Hash determinístico da CLAIM do finding (exclui `disposition`, que muda). */
+/**
+ * Hash da CLAIM do finding (exclui `disposition`, que muda). Inclui
+ * `checkpoint`+`role` (2.4b) — um bloco transplantado de outra review/checkpoint
+ * não casa o hash recomputado no arquivo de destino (anti-transplante).
+ */
 export function fingerprintOf(parts: {
+  checkpoint: string;
+  role: string;
   id: string;
   severity: string;
   location: string;
   description: string;
 }): string {
   return createHash("sha256")
-    .update([parts.id, parts.severity, parts.location, parts.description].join("\n"))
+    .update(
+      [
+        parts.checkpoint,
+        parts.role,
+        parts.id,
+        parts.severity,
+        parts.location,
+        parts.description,
+      ].join("\n")
+    )
+    .digest("hex")
+    .slice(0, 12);
+}
+
+/**
+ * Selo de ENVELOPE da review (2.4b) — sela o CONJUNTO de findings emitidos
+ * (`checkpoint|role|findings_emitted|<ids>`). Fecha a "poda final": deletar o
+ * último finding + decrementar `findings_emitted` muda este selo → vermelho.
+ * NÃO acopla findings entre si (cada um mantém seu hash próprio); sela apenas
+ * a claim de conjunto, que é do reviewer.
+ */
+export function reviewFingerprintOf(parts: {
+  checkpoint: string;
+  role: string;
+  findingsEmitted: number;
+  ids: readonly string[];
+}): string {
+  return createHash("sha256")
+    .update(
+      [parts.checkpoint, parts.role, String(parts.findingsEmitted), parts.ids.join(",")].join("\n")
+    )
     .digest("hex")
     .slice(0, 12);
 }
@@ -181,7 +217,14 @@ export function parseReview(yamlText: string, file: string): ReviewArtifact {
       );
     }
     const severity = f.severity as FindingSeverity;
-    const expected = fingerprintOf({ id, severity, location, description });
+    const expected = fingerprintOf({
+      checkpoint,
+      role: o.role as ReviewRole,
+      id,
+      severity,
+      location,
+      description,
+    });
     const declared = str(f.fingerprint);
     if (declared !== expected) {
       throw new ReviewArtifactParseError(
@@ -197,6 +240,21 @@ export function parseReview(yamlText: string, file: string): ReviewArtifact {
       disposition: f.disposition as FindingDisposition,
       fingerprint: expected,
     });
+  }
+
+  // Selo de ENVELOPE: fecha a "poda final" (deletar a cauda + decrementar count).
+  const expectedReview = reviewFingerprintOf({
+    checkpoint,
+    role: o.role as ReviewRole,
+    findingsEmitted,
+    ids: findings.map((f) => f.id),
+  });
+  const declaredReview = str(o.review_fingerprint);
+  if (declaredReview !== expectedReview) {
+    throw new ReviewArtifactParseError(
+      `${file}: review_fingerprint inválido (conjunto de findings alterado — poda/inserção sem re-selar?). ` +
+        `esperado: ${expectedReview}${declaredReview ? ` · declarado: ${declaredReview}` : " · ausente"}`
+    );
   }
 
   return {

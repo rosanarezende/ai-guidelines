@@ -1,46 +1,48 @@
-# DOGFOOD (Checkpoint 2.4a): Architectural Review do Checkpoint 2.3 como artefato.
+# DOGFOOD (Checkpoint 2.4a/2.4b): Architectural Review do Checkpoint 2.3 como artefato.
 # Reviewer-owned. `disposition` é o único campo que o gate lê e que muda (não entra
-# no fingerprint). Editar a CLAIM (severity/location/description) sem re-selar →
-# `review:check` vermelho. Resoluções do implementador vivem em c2.3-resolutions.yml.
+# em hash). `fingerprint` (por finding) sela a claim incl. checkpoint+role
+# (anti-transplante). `review_fingerprint` sela o CONJUNTO (anti-poda-final).
+# Resoluções do implementador vivem em c2.3-resolutions.yml.
 checkpoint: "2.3"
 role: architectural_review
 actor: claude
 decision: changes_requested
 findings_emitted: 6
+review_fingerprint: 6516447eb01c
 findings:
   - id: F1
     severity: high
     location: global
     description: "[B1] SSOT (state.yml topology) contradizia a realidade git: no checkpoint-2.3 fantasma (github_pr null)"
     disposition: accepted
-    fingerprint: 617595b7d83c
+    fingerprint: 9cc65f993a7a
   - id: F2
     severity: high
     location: global
     description: "[B2] decisao estrutural (topology-as-data + enforcement L4) sem [DEC]; o Anti-DAG exigia DEC"
     disposition: accepted
-    fingerprint: 827590dc5087
+    fingerprint: 9cb83cc02aee
   - id: F3
     severity: medium
     location: .governance/specs/0024-context-architecture/plan.md
     description: "[O1] dual-SSOT: topologia vivia em state.yml E plan.md sem hierarquia declarada"
     disposition: accepted
-    fingerprint: fbd65a511e25
+    fingerprint: 55211c1408be
   - id: F4
     severity: medium
     location: global
     description: "[O5] governance-pr-check advisory por SSOT nao-guardada; ambiguidade enforcement vs realidade"
     disposition: accepted
-    fingerprint: c14e939cf691
+    fingerprint: 5b78df0fbed5
   - id: F5
     severity: medium
     location: src/infrastructure/yaml/workflowStateSerializer.ts
     description: "[O6] sequence sem invariantes (unicidade/contiguidade) no schema"
     disposition: accepted
-    fingerprint: 1dbe6f9e3d9e
+    fingerprint: 4ed2bcb24231
   - id: F6
     severity: low
     location: src/cli/governance-pr-check.ts
     description: "[O2] governance-pr-check fragil: secoes por substring solta; linha Stack atual exata"
     disposition: accepted
-    fingerprint: a496c87d0820
+    fingerprint: 48b68aceb06c

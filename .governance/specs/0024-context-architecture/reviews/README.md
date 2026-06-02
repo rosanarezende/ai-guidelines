@@ -15,8 +15,9 @@
 
 ## Integridade local (tamper-EVIDENCE, não tamper-proofing — ADR 0021)
 
-- **`fingerprint`** = `sha256(id|severity|location|description)[:12]` sela a **claim**. Reescrever severity/description/location sem re-selar → `review:check` **vermelho**. Re-selar é um diff conspícuo ("a claim selada do reviewer mudou"). _Não entra no hash:_ `disposition` (muda de propósito).
-- **`findings_emitted` + ids contíguos `F1..FN`** → deletar um finding quebra a contagem/contiguidade → vermelho. Deleção deixa de ser silenciosa.
+- **`fingerprint`** (por finding) = `sha256(checkpoint|role|id|severity|location|description)[:12]` sela a **claim**. Reescrever severity/description/location sem re-selar → **vermelho**. Inclui `checkpoint|role` (2.4b) → bloco transplantado de outra review não casa o hash recomputado no destino (**anti-transplante**). _Não entra no hash:_ `disposition` (muda de propósito).
+- **`review_fingerprint`** (envelope, 2.4b) = `sha256(checkpoint|role|findings_emitted|<ids>)[:12]` sela o **CONJUNTO**. Deletar a cauda (`F4`) + decrementar `findings_emitted` muda o envelope → **vermelho** (fecha a "poda final"). Não acopla findings entre si — só sela a claim de conjunto, que é do reviewer.
+- **`findings_emitted` + ids contíguos `F1..FN`** → deletar um finding do meio quebra a contiguidade → vermelho.
 - **Limite honesto:** um check local é **cego a autoria** — não impede criptograficamente um forjador (ele re-sela / edita cross-lane). Ele **eleva a barra** de "edição silenciosa de 1 linha" para "forja explícita, atribuída e detectável". Prevenção plena exigiria CODEOWNERS/assinatura (off-repo/nova camada) — deferido.
 
 ## Respostas diretas

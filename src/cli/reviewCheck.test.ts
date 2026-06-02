@@ -3,6 +3,7 @@ import {
   parseReview,
   parseResolutions,
   fingerprintOf,
+  reviewFingerprintOf,
   ReviewArtifactParseError,
   ReviewArtifact,
   ResolutionArtifact,
@@ -12,7 +13,10 @@ import {
   FindingDisposition,
 } from "../infrastructure/yaml/reviewArtifactsReader.js";
 
-// Constrói uma review YAML válida (fingerprints corretos computados).
+const CP = "3";
+const ROLE = "technical_audit";
+
+// Constrói uma review YAML válida (per-finding + envelope fingerprints corretos).
 function reviewYaml(
   findings: Array<{
     id: string;
@@ -26,10 +30,16 @@ function reviewYaml(
   const body = findings
     .map(
       (f) =>
-        `  - id: ${f.id}\n    severity: ${f.severity}\n    location: "${f.location}"\n    description: "${f.description}"\n    disposition: ${f.disposition}\n    fingerprint: ${fingerprintOf(f)}`
+        `  - id: ${f.id}\n    severity: ${f.severity}\n    location: "${f.location}"\n    description: "${f.description}"\n    disposition: ${f.disposition}\n    fingerprint: ${fingerprintOf({ checkpoint: CP, role: ROLE, ...f })}`
     )
     .join("\n");
-  return `checkpoint: "3"\nrole: technical_audit\nactor: codex-cli\ndecision: changes_requested\nfindings_emitted: ${emitted}\nfindings:\n${body}\n`;
+  const rfp = reviewFingerprintOf({
+    checkpoint: CP,
+    role: ROLE,
+    findingsEmitted: emitted,
+    ids: findings.map((f) => f.id),
+  });
+  return `checkpoint: "${CP}"\nrole: ${ROLE}\nactor: codex-cli\ndecision: changes_requested\nfindings_emitted: ${emitted}\nreview_fingerprint: ${rfp}\nfindings:\n${body}\n`;
 }
 
 const okFinding = {
@@ -71,6 +81,39 @@ describe("reviewArtifactsReader [Checkpoint 2.4a]", () => {
   it("parseReview — disposition inválida → rejeita", () => {
     const yaml = reviewYaml([{ ...okFinding, disposition: "resolved" }]); // 'resolved' não existe mais
     expect(() => parseReview(yaml, "f.yml")).toThrow(/disposition must be one of/);
+  });
+
+  it("PODA FINAL: deletar a cauda + decrementar count (review_fingerprint stale) → rejeita", () => {
+    const f1fp = fingerprintOf({
+      checkpoint: CP,
+      role: ROLE,
+      id: "F1",
+      severity: "high",
+      location: "x",
+      description: "d",
+    });
+    // envelope selado para o conjunto ORIGINAL {F1,F2}; a cauda F2 foi podada e count -> 1
+    const staleEnvelope = reviewFingerprintOf({
+      checkpoint: CP,
+      role: ROLE,
+      findingsEmitted: 2,
+      ids: ["F1", "F2"],
+    });
+    const pruned = `checkpoint: "${CP}"\nrole: ${ROLE}\nactor: a\ndecision: changes_requested\nfindings_emitted: 1\nreview_fingerprint: ${staleEnvelope}\nfindings:\n  - id: F1\n    severity: high\n    location: "x"\n    description: "d"\n    disposition: open\n    fingerprint: ${f1fp}\n`;
+    expect(() => parseReview(pruned, "f.yml")).toThrow(/review_fingerprint inválido/);
+  });
+
+  it("TRANSPLANTE: bloco com fingerprint de outro checkpoint/role → rejeita", () => {
+    const foreignFp = fingerprintOf({
+      checkpoint: "2.1",
+      role: "technical_audit",
+      id: "F1",
+      severity: "high",
+      location: "x",
+      description: "d",
+    });
+    const transplanted = `checkpoint: "${CP}"\nrole: architectural_review\nactor: a\ndecision: changes_requested\nfindings_emitted: 1\nreview_fingerprint: zzz\nfindings:\n  - id: F1\n    severity: high\n    location: "x"\n    description: "d"\n    disposition: open\n    fingerprint: ${foreignFp}\n`;
+    expect(() => parseReview(transplanted, "f.yml")).toThrow(/fingerprint inválido/);
   });
 
   it("parseResolutions — válida + action inválida", () => {
