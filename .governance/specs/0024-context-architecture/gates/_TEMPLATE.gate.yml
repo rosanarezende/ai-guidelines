@@ -1,0 +1,10 @@
+# Artefato de GATE HUMANO (Spec 0024 Checkpoint 2.4 — revisão-como-artefato).
+# Copie para `c<checkpoint>.yml` (ex.: c3.yml). 1 gate por checkpoint.
+# `review:check` ENFORCA: decision=approved exige ZERO findings critical/high `open`
+# nas reviews deste checkpoint (o gate consome o estado consolidado derivado).
+checkpoint: "3"
+actor: "@rosanarezende"
+ref: "#33 @ <sha>" # opcional
+date: "2026-06-02" # opcional
+decision: approved # approved | changes_requested
+note: "uma linha (o veredito vive aqui; o approve nativo do GitHub é só o gatilho de merge)"
