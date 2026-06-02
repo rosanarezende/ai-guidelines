@@ -113,12 +113,26 @@ describe("disclosureRender [Checkpoint 2.4d] — deriveDisclosure (derivação p
     expect(f.gateState).toBe("approved");
   });
 
-  it("gate misto (1 approved + 1 changes_requested) → mixed", () => {
+  it("qualquer gate changes_requested ⇒ changes_requested (não mascara como aprovado)", () => {
     const f = deriveDisclosure(node(["checkpoint-3", "checkpoint-4"]), [
       cp("3", { gate: gate("3", "approved") }),
       cp("4", { gate: gate("4", "changes_requested") }),
     ]);
-    expect(f.gateState).toBe("mixed");
+    expect(f.gateState).toBe("changes_requested");
+  });
+
+  it("Cenário A — gate approved só em PARTE do escopo → partial, NUNCA approved", () => {
+    // node embarca 2.2/2.3/2.4; só 2.2 tem review+gate aprovado; 2.3/2.4 sem artefato.
+    const f = deriveDisclosure(node(["checkpoint-2.2", "checkpoint-2.3", "checkpoint-2.4"]), [
+      cp("2.2", {
+        reviews: [{ role: "technical_audit", decision: "approved" }],
+        closed: 2,
+        gate: gate("2.2", "approved"),
+      }),
+    ]);
+    expect(f.gateState).toBe("partial");
+    expect(f.gatedCount).toBe(1);
+    expect(f.checkpointsInScope.length).toBe(3);
   });
 
   it("role desconhecido passa cru (anti-taxonomia: sem enum fechado)", () => {
@@ -137,6 +151,7 @@ describe("disclosureRender [Checkpoint 2.4d] — renderDisclosure (projeção pu
       findingsEmitted: 0,
       findingsResolved: 0,
       hasHumanGate: false,
+      gatedCount: 0,
       gateState: "pending",
       checkpointsInScope: [],
       ...over,
@@ -206,5 +221,21 @@ describe("disclosureRender [Checkpoint 2.4d] — renderDisclosure (projeção pu
       })
     );
     expect(text).toMatch(/changes requested/);
+  });
+
+  it("gate partial → cobertura honesta, sem alegar validação final", () => {
+    const text = renderDisclosure(
+      facts({
+        reviewCount: 1,
+        findingsEmitted: 2,
+        findingsResolved: 2,
+        hasHumanGate: true,
+        gatedCount: 1,
+        gateState: "partial",
+        checkpointsInScope: ["2.2", "2.3", "2.4"],
+      })
+    );
+    expect(text).toMatch(/parcial — 1 de 3/);
+    expect(text).not.toContain("validação final pelo owner");
   });
 });

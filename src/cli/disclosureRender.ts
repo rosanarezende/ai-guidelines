@@ -49,7 +49,7 @@ const ROLE_LABELS: Record<string, string> = {
   architectural_review: "Architectural Review",
 };
 
-export type GateState = "pending" | "approved" | "changes_requested" | "mixed";
+export type GateState = "pending" | "approved" | "changes_requested" | "partial";
 
 /** Fatos de PROCESSO derivados — o único "modelo de dados" do disclosure,
  * em memória, derivado. Nenhum campo é persistido. */
@@ -59,6 +59,8 @@ export interface DisclosureFacts {
   readonly findingsEmitted: number;
   readonly findingsResolved: number;
   readonly hasHumanGate: boolean;
+  /** Nº de checkpoints do escopo com gate (numerador da cobertura). */
+  readonly gatedCount: number;
   readonly gateState: GateState;
   readonly checkpointsInScope: readonly string[];
 }
@@ -94,12 +96,26 @@ export function deriveDisclosure(
     if (c.gate) gateDecisions.push(c.gate.decision);
   }
 
-  const hasHumanGate = gateDecisions.length > 0;
+  const gatedCount = gateDecisions.length;
+  const hasHumanGate = gatedCount > 0;
+  // (Cenário A) cobertura: o claim de validação total é medido contra o ESCOPO
+  // declarado (`node.checkpoints`, que também é evidência versionada — G07),
+  // não só contra os gates que existem. Regra conservadora, correta sob qualquer
+  // granularidade futura (por-PR/por-checkpoint/híbrida): sem cobertura total do
+  // escopo, NUNCA "approved".
+  const fullyCovered = scope.size > 0 && gatedCount === scope.size;
   let gateState: GateState;
-  if (!hasHumanGate) gateState = "pending";
-  else if (gateDecisions.every((g) => g === "approved")) gateState = "approved";
-  else if (gateDecisions.every((g) => g === "changes_requested")) gateState = "changes_requested";
-  else gateState = "mixed";
+  if (!hasHumanGate) {
+    gateState = "pending";
+  } else if (gateDecisions.some((g) => g === "changes_requested")) {
+    // qualquer gate rejeitado ⇒ não-validado, independente dos demais.
+    gateState = "changes_requested";
+  } else if (fullyCovered && gateDecisions.every((g) => g === "approved")) {
+    gateState = "approved";
+  } else {
+    // aprovado, porém SEM cobrir todo o escopo declarado.
+    gateState = "partial";
+  }
 
   return {
     reviewCount,
@@ -107,6 +123,7 @@ export function deriveDisclosure(
     findingsEmitted,
     findingsResolved,
     hasHumanGate,
+    gatedCount,
     gateState,
     checkpointsInScope: [...scope],
   };
@@ -134,8 +151,11 @@ export function renderDisclosure(facts: DisclosureFacts): string {
     case "changes_requested":
       lines.push("Gate humano: changes requested (pendente de resolução).");
       break;
-    case "mixed":
-      lines.push("Gate humano: parcial — alguns checkpoints aprovados, outros pendentes.");
+    case "partial":
+      lines.push(
+        `Gate humano: parcial — ${facts.gatedCount} de ${facts.checkpointsInScope.length} ` +
+          `checkpoints do escopo com gate; demais pendentes.`
+      );
       break;
     case "pending":
     default:
@@ -280,7 +300,19 @@ export function main(repoRoot: string, opts: MainOptions = {}): number {
     for (const e of errors) logger.error(`  - ${e}`);
   }
 
-  const { byCheckpoint } = consolidate(artifacts);
+  const { byCheckpoint, violations } = consolidate(artifacts);
+  if (violations.length > 0) {
+    // (Cenário C) o consolidator já declarou o estado inválido (ex.: 2 reviews
+    // p/ a mesma role/checkpoint). Não projetar disclosure sobre estado que ele
+    // rejeitou — seria afirmar narrativa válida sobre estado inconsistente.
+    // Espelha o `review:check` (mesma fonte de invariantes).
+    logger.error(
+      `❌ Estado inconsistente: ${violations.length} violação(ões) do consolidator — ` +
+        `disclosure não é projetado sobre estado inválido (resolva via \`yarn review:check\`):`
+    );
+    for (const v of violations) logger.error(`  - ${v}`);
+    return 1;
+  }
   const facts = deriveDisclosure(node, byCheckpoint);
 
   logger.error(
