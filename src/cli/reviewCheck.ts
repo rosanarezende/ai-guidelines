@@ -105,13 +105,17 @@ export function consolidate(artifacts: SpecArtifacts): {
       }
     }
 
-    // Resolução órfã: aponta para um finding que não existe neste checkpoint.
+    // Resolução órfã: o id DEVE ser totalmente qualificado (`<role>#<F-id>`) e
+    // bater EXATAMENTE com um finding (sem `endsWith` — evita colisão cross-role:
+    // `architectural_review#F1` ≠ `technical_audit#F1`). 2.4c.
     for (const res of artifacts.resolutions.filter((r) => r.checkpoint === cp)) {
       for (const r of res.resolutions) {
-        const matches = [...findingIds].some((fid) => fid.endsWith(`#${r.finding}`));
-        if (!matches) {
+        if (!findingIds.has(r.finding)) {
+          const hint = r.finding.includes("#")
+            ? "inexistente nas reviews"
+            : `não-qualificado — use "<role>#${r.finding}" (ex.: technical_audit#${r.finding})`;
           violations.push(
-            `checkpoint ${cp}: resolução em ${res.file} aponta para finding "${r.finding}" inexistente nas reviews.`
+            `checkpoint ${cp}: resolução em ${res.file} aponta para finding "${r.finding}" ${hint}.`
           );
         }
       }

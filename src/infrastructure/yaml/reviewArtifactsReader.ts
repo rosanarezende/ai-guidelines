@@ -111,16 +111,19 @@ export function fingerprintOf(parts: {
   location: string;
   description: string;
 }): string {
+  // Serialização CANÔNICA (JSON array) — não concatenação textual. Elimina a
+  // ambiguidade de delimitador (ex.: `\n` dentro de `location` colidindo com a
+  // separação): cada campo é um elemento isolado e escapado (2.4c).
   return createHash("sha256")
     .update(
-      [
+      JSON.stringify([
         parts.checkpoint,
         parts.role,
         parts.id,
         parts.severity,
         parts.location,
         parts.description,
-      ].join("\n")
+      ])
     )
     .digest("hex")
     .slice(0, 12);
@@ -139,10 +142,10 @@ export function reviewFingerprintOf(parts: {
   findingsEmitted: number;
   ids: readonly string[];
 }): string {
+  // Serialização CANÔNICA (JSON) — `ids` como array, não `join(",")`, para não
+  // colidir com vírgula em um id (2.4c).
   return createHash("sha256")
-    .update(
-      [parts.checkpoint, parts.role, String(parts.findingsEmitted), parts.ids.join(",")].join("\n")
-    )
+    .update(JSON.stringify([parts.checkpoint, parts.role, parts.findingsEmitted, [...parts.ids]]))
     .digest("hex")
     .slice(0, 12);
 }

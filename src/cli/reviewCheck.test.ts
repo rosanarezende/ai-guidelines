@@ -103,6 +103,26 @@ describe("reviewArtifactsReader [Checkpoint 2.4a]", () => {
     expect(() => parseReview(pruned, "f.yml")).toThrow(/review_fingerprint inválido/);
   });
 
+  it("AMBIGUIDADE (2.4c): \\n em location vs description NÃO colide (serialização canônica)", () => {
+    const a = fingerprintOf({
+      checkpoint: CP,
+      role: ROLE,
+      id: "F1",
+      severity: "high",
+      location: "src/file.ts\nCorrigir",
+      description: "aqui",
+    });
+    const b = fingerprintOf({
+      checkpoint: CP,
+      role: ROLE,
+      id: "F1",
+      severity: "high",
+      location: "src/file.ts",
+      description: "Corrigir\naqui",
+    });
+    expect(a).not.toBe(b);
+  });
+
   it("TRANSPLANTE: bloco com fingerprint de outro checkpoint/role → rejeita", () => {
     const foreignFp = fingerprintOf({
       checkpoint: "2.1",
@@ -166,7 +186,7 @@ describe("consolidate (enforcement) [Checkpoint 2.4a]", () => {
   it("ANTI-AUTOAPROVAÇÃO: resolução `fixed` NÃO destrava o gate enquanto disposition=open", () => {
     const a: SpecArtifacts = {
       reviews: [review("technical_audit", [finding("F1", "high", "open")])],
-      resolutions: [resolutions([{ finding: "F1", action: "fixed" }])], // implementador "resolveu"
+      resolutions: [resolutions([{ finding: "technical_audit#F1", action: "fixed" }])], // implementador "resolveu"
       gates: [gate("approved")],
     };
     const { violations } = consolidate(a);
@@ -200,10 +220,27 @@ describe("consolidate (enforcement) [Checkpoint 2.4a]", () => {
   it("resolução órfã (finding inexistente) → VIOLAÇÃO", () => {
     const a: SpecArtifacts = {
       reviews: [review("technical_audit", [finding("F1", "high", "accepted")])],
-      resolutions: [resolutions([{ finding: "F9", action: "fixed" }])],
+      resolutions: [resolutions([{ finding: "technical_audit#F9", action: "fixed" }])],
       gates: [],
     };
-    expect(consolidate(a).violations.join("\n")).toMatch(/finding "F9" inexistente/);
+    expect(consolidate(a).violations.join("\n")).toMatch(/inexistente/);
+  });
+
+  it("COLISÃO CROSS-ROLE (2.4c): resolução qualificada NÃO casa finding de outra role", () => {
+    // só technical_audit tem F1; resolução aponta architectural_review#F1 → órfã (sem endsWith)
+    const a: SpecArtifacts = {
+      reviews: [review("technical_audit", [finding("F1", "high", "accepted")])],
+      resolutions: [resolutions([{ finding: "architectural_review#F1", action: "fixed" }])],
+      gates: [],
+    };
+    expect(consolidate(a).violations.join("\n")).toMatch(/architectural_review#F1.*inexistente/);
+    // a qualificada correta NÃO é órfã
+    const b: SpecArtifacts = {
+      reviews: [review("technical_audit", [finding("F1", "high", "accepted")])],
+      resolutions: [resolutions([{ finding: "technical_audit#F1", action: "fixed" }])],
+      gates: [],
+    };
+    expect(consolidate(b).violations).toHaveLength(0);
   });
 
   it("consolida contagens (open/closed) por checkpoint", () => {

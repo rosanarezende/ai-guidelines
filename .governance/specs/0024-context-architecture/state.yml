@@ -13,14 +13,14 @@ next:
   - "#33 (branch feat/spec-0024-ruleset-producibility) = unico PR de execucao stacked aberto (sequence 1); embarca os Checkpoints 2.2, 2.2b, 2.3, 2.3a e 2.3b. NAO existe branch feat/spec-0024-topology (corrigido no 2.3a: o no-fantasma checkpoint-2.3 foi dobrado em #33)."
   - "Checkpoint 2.3a + 2.3b implementados: 2.3a reconcilia topologia<->realidade (B1), registra [DEC-0024-G07] (B2), elimina dual-SSOT do plan.md (O1), invariantes de sequence (O6), robustez do governance-pr-check (O2). 2.3b adiciona o guard LOCAL de lifecycle-coerencia (github_pr <=> active/concluded + unicidade) e REAVALIA O5: well-formedness e guard local (no state-yml:check/repo-validation, ja required), nao debito de API -> promocao do governance-pr-check a REQUIRED recomendada. So a paridade-API resta como hardening futuro nao-bloqueante (NEXT separado)."
   - "RULESET VIVO ATUALIZADO (2026-06-01, autorizado): required_status_checks = repo-validation + smoke + governance-pr-check (apply consolidado; o smoke do 2.2 nunca fora aplicado -> aterrissado agora). Paridade vivo<->versionado VERDE (.github/rulesets/main-governance.json = SSOT). governance-pr-check agora bloqueia merge."
-  - "Checkpoint 2.4 (revisao-como-artefato MVP) + 2.4a (endurecimento) + 2.4b (fecha bypass da poda final): reviews/gates = ARTEFATOS versionados; consolidado DERIVADO por `review:check` (no validate). 2.4a: FINDING reviewer-owned (disposition destrava o gate) vs RESOLUCAO implementer-owned (NAO destrava) = anti-autoaprovacao; findings_emitted+ids contiguos = anti-delecao-do-meio; location obrigatoria; fingerprint sela a claim. 2.4b: review_fingerprint (envelope checkpoint|role|count|ids) fecha a PODA FINAL (deletar cauda + decrementar count); checkpoint+role no per-finding hash fecha TRANSPLANTE. Limite honesto: tamper-EVIDENCE (forja visivel), nao prevencao (ADR 0021). Dogfood: c2.3-arch.yml + c2.3-resolutions.yml."
+  - "Checkpoint 2.4 (revisao-como-artefato MVP) + 2.4a (endurecimento) + 2.4b (fecha bypass da poda final): reviews/gates = ARTEFATOS versionados; consolidado DERIVADO por `review:check` (no validate). 2.4a: FINDING reviewer-owned (disposition destrava o gate) vs RESOLUCAO implementer-owned (NAO destrava) = anti-autoaprovacao; findings_emitted+ids contiguos = anti-delecao-do-meio; location obrigatoria; fingerprint sela a claim. 2.4b: review_fingerprint (envelope) fecha a PODA FINAL; checkpoint+role no per-finding hash fecha TRANSPLANTE. 2.4c (bugs da auditoria final): fingerprint via JSON.stringify (canonico, fim da ambiguidade de \\n); resolucao aponta finding totalmente qualificado <role>#<id> com match exato (fim do endsWith que colidia cross-role). Limite honesto: tamper-EVIDENCE (forja visivel), nao prevencao (ADR 0021). Dogfood: c2.3-arch.yml + c2.3-resolutions.yml."
   - "PROXIMO: fechar o Gate do #33 (Technical Audit -> Architectural Review -> Human) cobrindo 2.2..2.4 -- JA via artefatos (Codex escreve reviews/c<N>-audit.yml; ChatGPT reviews/c<N>-arch.yml; owner gates/c<N>.yml). Apos o Gate, Checkpoint 3 (sequence 2) nasce dogfoodando o modelo."
   - "Encerramento: instanciar review.md (gates R1-R7) -> abrir Integration PR (homologacao) -> commit de encerramento (spec->Done, state->done, NEXT deletado, release-log T0) -> review.md R8 -> MERGE UNICO em main (modo unit). spec->Done so no fim."
   - "LER antes de qualquer acao: state.yml § topology (SSOT estrutural) + plan.md (objetivos + projecao derivada) + handoff v2. Verificar git limpo + yarn validate verde."
 topology:
   cursor:
     pr: ruleset-producibility
-    checkpoint: checkpoint-2.4b
+    checkpoint: checkpoint-2.4c
   prs:
     concluded:
       - id: base-governance
@@ -49,6 +49,7 @@ topology:
           - checkpoint-2.4
           - checkpoint-2.4a
           - checkpoint-2.4b
+          - checkpoint-2.4c
 
     planned:
       # `sequence` = posicao no STACK de execucao (1..K, contigua), NAO o numero

@@ -1,24 +1,25 @@
-# DOGFOOD (Checkpoint 2.4a): resoluções do implementador para o c2.3 — lane
-# SEPARADA da review. O implementador PROPÕE `action`; NÃO destrava o gate
-# (só a `disposition` do reviewer em c2.3-arch.yml destrava). Rastreável a commits.
+# DOGFOOD (Checkpoint 2.4a/2.4c): resoluções do implementador para o c2.3 — lane
+# SEPARADA da review. PROPÕE `action`; NÃO destrava o gate (só a `disposition` do
+# reviewer destrava). `finding` é TOTALMENTE QUALIFICADO (`<role>#<id>`) — evita
+# colisão cross-role (2.4c). Rastreável a commits.
 checkpoint: "2.3"
 by: claude-cli
 resolutions:
-  - finding: F1
+  - finding: architectural_review#F1
     action: fixed
     ref: d13a406 # 2.3a — remove no-fantasma, reconcilia topologia<->realidade
-  - finding: F2
+  - finding: architectural_review#F2
     action: fixed
     ref: d13a406 # 2.3a — [DEC-0024-G07] registrado
-  - finding: F3
+  - finding: architectural_review#F3
     action: fixed
     ref: d13a406 # 2.3a — plan.md rotulado como projecao derivada
-  - finding: F4
+  - finding: architectural_review#F4
     action: fixed
     ref: 3917d87 # 2.3b — well-formedness local -> promovido a required
-  - finding: F5
+  - finding: architectural_review#F5
     action: fixed
     ref: d13a406 # 2.3a — invariantes de sequence no serializer
-  - finding: F6
+  - finding: architectural_review#F6
     action: fixed
     ref: d13a406 # 2.3a — header ancorado + stack tolerante

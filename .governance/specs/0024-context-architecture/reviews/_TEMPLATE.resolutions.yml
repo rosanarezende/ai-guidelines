@@ -5,6 +5,6 @@
 checkpoint: "3"
 by: claude-cli
 resolutions:
-  - finding: F1 # id de um finding numa review deste checkpoint
+  - finding: technical_audit#F1 # TOTALMENTE QUALIFICADO: <role>#<id> (evita colisão cross-role)
     action: fixed # fixed | wontfix | needs-discussion
     ref: "<sha>" # opcional: commit que tratou

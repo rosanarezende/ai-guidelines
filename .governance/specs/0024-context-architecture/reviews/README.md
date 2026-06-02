@@ -23,7 +23,7 @@
 ## Respostas diretas
 
 - **Onde vivem os findings?** `reviews/c<N>-<role>.yml` (selados). Sem `findings.yml` à mão — consolidado é **derivado**.
-- **Identidade?** `F1..FN` contíguos; global = `<role>#F<n>`. `fingerprint` amarra id↔conteúdo.
+- **Identidade?** `F1..FN` contíguos por arquivo; global = **`<role>#F<n>`** (totalmente qualificado). Resoluções referenciam essa forma exata — sem colisão cross-role (2.4c). `fingerprint` (JSON canônico) amarra id↔conteúdo.
 - **Mudança de estado?** Reviewer muda `disposition`; implementador anexa `resolution` (lane separada). Git = log.
 - **Múltiplas revisões no mesmo lugar?** Não. 1 arquivo por `(checkpoint, role)`.
 - **Gate sabe o consolidado?** `review:check` deriva e enforça (gate `approved` ⟹ 0 bloqueante `open`).
