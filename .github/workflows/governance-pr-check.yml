@@ -28,9 +28,9 @@ on:
 jobs:
   governance-pr-check:
     runs-on: ubuntu-latest
-    # Roda apenas em execution PRs (convenção: branch termina em "-execution").
-    # Outros PRs são governance/thinking ou ad-hoc — skipped.
-    if: endsWith(github.head_ref, '-execution')
+    # A checagem de "-execution" foi movida para o código TypeScript
+    # (src/cli/governance-pr-check.ts) para retornar "Success (Exempt)"
+    # em vez de "Skipped", melhorando a UX no GitHub.
     permissions:
       contents: read
       pull-requests: read

@@ -1,0 +1,76 @@
+# Ruleset Drift (paridade) — invariante SECUNDÁRIO do Checkpoint 2.2 (Spec 0024).
+#
+# Compara o ruleset vivo no GitHub com a fonte da verdade versionada
+# (.github/rulesets/main-governance.json). DETECT-ONLY: nunca aplica — drift
+# falha o job; aplicar é ação humana autorizada (cf. .github/rulesets/README.md).
+#
+# Escopo: roda contra o estado canônico do branch default, não em cada PR de
+# feature (evita falso-drift em estados transitórios de stack). O invariante
+# PRIMÁRIO (producibilidade) já roda em todo PR via `yarn validate`.
+#
+# Degradação graciosa: se o GITHUB_TOKEN não tiver permissão para ler o ruleset
+# vivo, a paridade fica INDETERMINADA (warning, não bloqueia) — a producibilidade
+# segue garantindo o invariante central. Limitação registrada objetivamente.
+
+name: Ruleset Drift (parity)
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  parity:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: "yarn"
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies (immutable)
+        run: yarn install --immutable
+
+      - name: Build TypeScript
+        run: yarn build
+
+      - name: Snapshot live ruleset
+        id: snapshot
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set +e
+          rid=$(gh api "repos/${{ github.repository }}/rulesets" \
+            --jq '.[] | select(.name=="Main Governance") | .id' 2>/dev/null | head -1)
+          if [ -z "$rid" ]; then
+            echo "::warning::Não foi possível listar rulesets (provável limitação de permissão do GITHUB_TOKEN para administration:read). Paridade INDETERMINADA."
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          gh api "repos/${{ github.repository }}/rulesets/$rid" > /tmp/live-ruleset.json 2>/dev/null
+          if [ ! -s /tmp/live-ruleset.json ]; then
+            echo "::warning::Não foi possível ler o ruleset vivo (id=$rid). Paridade INDETERMINADA."
+            echo "available=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "available=true" >> "$GITHUB_OUTPUT"
+
+      - name: Parity check (detect-only)
+        run: |
+          if [ "${{ steps.snapshot.outputs.available }}" != "true" ]; then
+            echo "::warning::Paridade INDETERMINADA — snapshot do ruleset vivo indisponível. Limitação registrada; não bloqueia (invariante PRIMÁRIO segue garantido em yarn validate)."
+            exit 0
+          fi
+          node cli/ruleset-check.mjs --parity --live /tmp/live-ruleset.json

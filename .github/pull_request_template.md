@@ -149,21 +149,37 @@ Para PRs pequenos, pode deletar este bloco — o resumo acima basta.
 
 ## Disclosure de IA
 
+Implementação assistida por IA.
+
 <!--
-Resumo curto: agentes envolvidos + papel + quem autorizou.
-Ex: "Implementação: Antigravity (Gemini 3 Flash); review paralelo: Claude Opus 4.7;
-decisão final: humano (@rosanarezende)."
+DUAS partes, propositalmente separadas (Spec 0024, Checkpoint 2.4d):
+
+1. A linha acima é EDITORIAL — frase padrão do template, editável. Não é dado
+   governado, schema nem check. Se este PR for puro-humano, edite/remova.
+
+2. Os FATOS DE PROCESSO abaixo são DERIVADOS de reviews/gates via topologia
+   (G07), não escritos à mão. Para PRs de spec, gere e cole:
+
+     yarn disclosure
+
+   Responde "como o trabalho foi produzido e validado?" (nº de revisões,
+   categorias, findings emitidos/resolvidos, gate humano) — NÃO "quem
+   participou?". Cole o bloco derivado aqui:
 -->
 
+<!-- fatos-derivados:início -->
+<!-- (cole a saída de `yarn disclosure`; vazio até haver revisão registrada em artefato) -->
+<!-- fatos-derivados:fim -->
+
 <details>
-<summary><strong>Disclosure detalhada (opcional — múltiplas sessões, divergências, tri-party)</strong></summary>
+<summary><strong>Notas qualitativas (opcional — divergências, segunda opinião, nuance)</strong></summary>
 
 <!--
-Para PRs com múltiplos agentes IA ou sessões longas, cole aqui:
-- agentes/modelos por sessão + papel (implementação, review, segunda opinião)
+Só o que a evidência derivada NÃO captura (julgamento humano):
 - divergências documentadas (onde escolheu A vs B, citação do raciocínio)
 - gates humanos por commit (CORE-07/14)
-- ferramentas externas usadas (Codex CLI, Antigravity, Cursor, etc.)
+Participação por ator NÃO vive aqui nem em artefato dedicado — disclosure é
+projeção de processo, não de participantes (decisão do 2.4d).
 -->
 
 </details>

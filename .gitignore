@@ -13,6 +13,9 @@ node_modules/
 # Artefatos do Windows/macOS
 .DS_Store
 Thumbs.db
+# Mark-of-the-Web (Alternate Data Stream) — nome com ':' é path inválido no
+# Windows e quebra `git checkout`/smoke. NUNCA versionar.
+*:Zone.Identifier
 
 # Arquivos de configuração local da IA
 .claude/
@@ -34,6 +37,9 @@ logs/
 # Arquivos temporários
 .tmp/
 temp/
+# Scripts de scratch na raiz (ex.: cálculo ad-hoc de hash) — nunca versionar.
+# O repo usa cli/**/*.test.mjs e src/**/*.test.ts; não há test-*.js de raiz legítimo.
+/test-*.js
 
 # Stack dumps do bash em Windows (Git Bash / MSYS)
 *.stackdump

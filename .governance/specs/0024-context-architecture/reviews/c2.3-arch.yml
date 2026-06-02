@@ -1,0 +1,48 @@
+# DOGFOOD (Checkpoint 2.4a/2.4b/2.4c): Architectural Review do Checkpoint 2.3 como artefato.
+# Reviewer-owned. `disposition` é o único campo que o gate lê e que muda (não entra
+# em hash). `fingerprint` (por finding) sela a claim (checkpoint+role+conteúdo, JSON
+# canônico — anti-transplante/anti-ambiguidade). `review_fingerprint` sela o CONJUNTO
+# (anti-poda-final). Resoluções (qualificadas por role) vivem em c2.3-resolutions.yml.
+checkpoint: "2.3"
+role: architectural_review
+actor: claude
+decision: changes_requested
+findings_emitted: 6
+review_fingerprint: 9f32949e15a0
+findings:
+  - id: F1
+    severity: high
+    location: global
+    description: "[B1] SSOT (state.yml topology) contradizia a realidade git: no checkpoint-2.3 fantasma (github_pr null)"
+    disposition: accepted
+    fingerprint: bf8e4b9bb250
+  - id: F2
+    severity: high
+    location: global
+    description: "[B2] decisao estrutural (topology-as-data + enforcement L4) sem [DEC]; o Anti-DAG exigia DEC"
+    disposition: accepted
+    fingerprint: 277658670f3d
+  - id: F3
+    severity: medium
+    location: .governance/specs/0024-context-architecture/plan.md
+    description: "[O1] dual-SSOT: topologia vivia em state.yml E plan.md sem hierarquia declarada"
+    disposition: accepted
+    fingerprint: 4fb2232840a7
+  - id: F4
+    severity: medium
+    location: global
+    description: "[O5] governance-pr-check advisory por SSOT nao-guardada; ambiguidade enforcement vs realidade"
+    disposition: accepted
+    fingerprint: 34a01d44ed2c
+  - id: F5
+    severity: medium
+    location: src/infrastructure/yaml/workflowStateSerializer.ts
+    description: "[O6] sequence sem invariantes (unicidade/contiguidade) no schema"
+    disposition: accepted
+    fingerprint: c1eed7232a94
+  - id: F6
+    severity: low
+    location: src/cli/governance-pr-check.ts
+    description: "[O2] governance-pr-check fragil: secoes por substring solta; linha Stack atual exata"
+    disposition: accepted
+    fingerprint: a1145faabefe

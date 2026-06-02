@@ -1,0 +1,46 @@
+# Gate do PR #33 (PR INTEIRO) — Architectural Review crystalizada como artefato.
+# Decisão do owner (2026-06-02): fechar via artefatos de revisão do PR inteiro,
+# keyados no cursor (2.4d), NÃO retroativamente checkpoint por checkpoint. O
+# c2.3-* permanece como seed histórico do dogfood; este artefato cobre a revisão
+# consolidada do disclosure (Checkpoint 2.4d) — o trabalho net-new do PR.
+#
+# Reviewer-owned. `disposition` é o único campo que o gate lê e que muda; só o
+# reviewer fecha (accepted/dismissed). Findings emitidos pela falsificação
+# (A/B/C). `actor: chatgpt` = quem conduziu a revisão arquitetural nesta sessão
+# (encaminhada pelo owner); corrigir antes do gate se a atribuição diferir.
+#
+# Disposições fechadas em 2026-06-02 (caminho (a), ratificado pelo owner): F1 e
+# F2 validados pós-fix (4de3600) → accepted; F3 NÃO resolvido — débito
+# conscientemente deferido e não-bloqueante → dismissed com rationale de
+# deferimento (ver comentário em F3). `disposition` não entra no hash → sem
+# re-selagem. `decision` permanece `changes_requested` (verdito de emissão: a
+# review pediu mudanças, que foram feitas); o veredito final é o `gates/c2.4d.yml`.
+checkpoint: "2.4d"
+role: architectural_review
+actor: chatgpt
+decision: changes_requested
+findings_emitted: 3
+review_fingerprint: b9470be7bd0b
+findings:
+  - id: F1
+    severity: high
+    location: src/cli/disclosureRender.ts
+    description: "[Cenário A] gateState 'approved' derivava de .every() sobre os gates existentes, sem cruzar com o escopo declarado (node.checkpoints) — afirmava validação total com escopo incompleto."
+    disposition: accepted # validado pós-fix 4de3600 (cobertura de escopo → partial)
+    fingerprint: 64fbb0c4b686
+  - id: F2
+    severity: medium
+    location: src/cli/disclosureRender.ts
+    description: "[Cenário C] main descartava as violations do consolidate() e projetava disclosure sobre estado declarado inválido (ex.: 2 reviews para a mesma role/checkpoint), com exit 0."
+    disposition: accepted # validado pós-fix 4de3600 (violations fatais no main)
+    fingerprint: 15a1dd758e46
+  - id: F3
+    severity: medium
+    location: global
+    description: "[Cenário B] governance-pr-check valida só a presença do header de disclosure, não a equivalência com a projeção derivada; o PR body vira cache stale sem detector de drift."
+    # dismissed = NÃO resolvido; débito conscientemente deferido e não-bloqueante
+    # para o objetivo do checkpoint. Rationale: categoria distinta de A/C (ausência
+    # de sincronização, não erro atual); fix = `disclosure:check` registrado em
+    # NEXT.md (resolução: wontfix). Reaberto se/quando priorizado.
+    disposition: dismissed
+    fingerprint: a0f0a7f9876a

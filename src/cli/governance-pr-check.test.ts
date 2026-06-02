@@ -1,266 +1,251 @@
-import { GitHubApiCaller, runGovernancePrCheck } from "./governance-pr-check.js";
+import { runGovernancePrCheck, GovernancePrCheckInput } from "./governance-pr-check.js";
+import { WorkflowFileSystem } from "../app/ports/WorkflowFileSystem.js";
 
-class FakeApi implements GitHubApiCaller {
-  constructor(private readonly responses: Map<string, unknown>) {}
-  call(endpoint: string): unknown {
-    if (!this.responses.has(endpoint)) {
-      throw new Error(`not stubbed: ${endpoint}`);
-    }
-    return this.responses.get(endpoint);
+class FakeFileSystem implements WorkflowFileSystem {
+  private readonly dirs = new Map<string, string[]>();
+  private readonly files = new Map<string, string>();
+
+  directoryExists(path: string): boolean {
+    return this.dirs.has(path);
+  }
+
+  listDirectory(path: string): string[] {
+    return this.dirs.get(path) || [];
+  }
+
+  fileExists(path: string): boolean {
+    return this.files.has(path);
+  }
+
+  readTextFile(path: string): string {
+    const content = this.files.get(path);
+    if (content === undefined) throw new Error(`File not found: ${path}`);
+    return content;
+  }
+
+  writeTextFile(path: string, content: string): void {
+    this.files.set(path, content);
+  }
+
+  currentBranch(): string | null {
+    return "feat/spec-0024-ruleset-producibility";
+  }
+
+  resolveAbsolute(path: string): string {
+    return path;
+  }
+
+  addDir(path: string, content: string[]) {
+    this.dirs.set(path, content);
+  }
+
+  addFile(path: string, content: string) {
+    this.files.set(path, content);
   }
 }
 
-const REPO = "rosanarezende/ai-guidelines";
+describe("CLI — governance-pr-check [BR-GOV-PR-CHECK]", () => {
+  let fs: FakeFileSystem;
 
-describe("CLI — governance-pr-check [BR-GOVERNANCE-CI]", () => {
-  describe("fast-track bypass", () => {
-    it("DADO PR com label fast-track + rationale inline [fast-track: ...] ENTÃO retorna fast-track sem chamar API", () => {
-      const api = new FakeApi(new Map());
-      const result = runGovernancePrCheck(
-        {
-          prNumber: 42,
-          prBody: "Hotfix urgente. [fast-track: prod incident; reviewer assume risco]",
-          prLabels: ["fast-track"],
-          repo: REPO,
-        },
-        api
-      );
-      expect(result.kind).toBe("fast-track");
-    });
-
-    it("DADO PR com label fast-track + seção ## Fast-track Rationale ENTÃO aceita", () => {
-      const api = new FakeApi(new Map());
-      const result = runGovernancePrCheck(
-        {
-          prNumber: 43,
-          prBody:
-            "## Fast-track Rationale\n\nFix mínimo; reviewer humano absorve responsabilidade.",
-          prLabels: ["fast-track"],
-          repo: REPO,
-        },
-        api
-      );
-      expect(result.kind).toBe("fast-track");
-    });
-
-    it("DADO PR com label fast-track MAS sem rationale no body ENTÃO falha (bypass disfarçado)", () => {
-      const api = new FakeApi(new Map());
-      const result = runGovernancePrCheck(
-        {
-          prNumber: 44,
-          prBody: "Body without rationale",
-          prLabels: ["fast-track"],
-          repo: REPO,
-        },
-        api
-      );
-      expect(result.kind).toBe("fail");
-      if (result.kind === "fail") {
-        expect(result.reasons.join(" ")).toMatch(/rationale/i);
-        expect(result.reasons.join(" ")).toMatch(/bypass disfar/i);
-      }
-    });
+  beforeEach(() => {
+    fs = new FakeFileSystem();
+    fs.addDir(".governance/specs", ["0024-context-architecture"]);
+    fs.addFile(
+      ".governance/specs/0024-context-architecture/state.yml",
+      `
+stage: implementation
+gate:
+  status: closed
+focus: []
+next: []
+topology:
+  cursor:
+    pr: ruleset-producibility
+    checkpoint: cp-1
+  prs:
+    active:
+      - id: ruleset-producibility
+        github_pr: 33
+        role: execution
+        terminal: false
+        sequence: 1
+        checkpoints:
+          - cp-1
+      - id: another
+        github_pr: 34
+        role: execution
+        terminal: true
+        sequence: 2
+        checkpoints:
+          - cp-2
+    concluded: []
+    planned: []
+`
+    );
   });
 
-  describe("missing marker", () => {
-    it("DADO PR sem 'Depends on #N (governance)' ENTÃO falha com mensagem orientativa", () => {
-      const api = new FakeApi(new Map());
-      const result = runGovernancePrCheck(
-        {
-          prNumber: 42,
-          prBody: "Just an execution PR.",
-          prLabels: [],
-          repo: REPO,
-        },
-        api
-      );
-      expect(result.kind).toBe("fail");
-      if (result.kind === "fail") {
-        expect(result.reasons.join(" ")).toMatch(/Depends on #N \(governance\)/);
-      }
-    });
+  const baseInput: GovernancePrCheckInput = {
+    prNumber: 33,
+    prTitle: "[🛠️1️⃣➜] [Spec 0024] O titulo",
+    prBody: `
+## Status do ciclo de vida
+## PR Type
+## Posição na stack
+- **Stack atual**: 1
+## Merge authorization
+## Resumo
+## Test plan
+## Cross-refs
+## Checklist operacional
+## Disclosure de IA
+`,
+    prLabels: [],
+    repo: "owner/repo",
+    prBranch: "feat/spec-0024-ruleset-producibility",
+  };
+
+  it("DADO um PR de execution válido segundo a topologia SSOT, ENTÃO retorna ok", () => {
+    const result = runGovernancePrCheck(baseInput, fs);
+    expect(result.kind).toBe("ok");
+    if (result.kind === "ok") {
+      expect(result.note).toMatch(/validado contra SSOT/);
+    }
   });
 
-  describe("governance PR inválido", () => {
-    it("DADO governance PR não-existente ENTÃO falha citando o número", () => {
-      const api: GitHubApiCaller = {
-        call: (ep: string) => {
-          if (ep === `repos/${REPO}/pulls/99`) throw new Error("404 Not Found");
-          throw new Error(`not stubbed: ${ep}`);
-        },
-      };
-      const result = runGovernancePrCheck(
-        {
-          prNumber: 100,
-          prBody: "Depends on #99 (governance)",
-          prLabels: [],
-          repo: REPO,
-        },
-        api
-      );
-      expect(result.kind).toBe("fail");
-      if (result.kind === "fail") {
-        expect(result.reasons.join(" ")).toMatch(/Governance PR #99 não encontrado/);
-      }
-    });
-
-    it("DADO governance PR fechado sem merge ENTÃO falha", () => {
-      const api = new FakeApi(
-        new Map<string, unknown>([
-          [`repos/${REPO}/pulls/99`, { state: "closed", merged_at: null }],
-          [`repos/${REPO}/pulls/99/files?per_page=100&page=1`, []],
-        ])
-      );
-      const result = runGovernancePrCheck(
-        {
-          prNumber: 100,
-          prBody: "Depends on #99 (governance)",
-          prLabels: [],
-          repo: REPO,
-        },
-        api
-      );
-      expect(result.kind).toBe("fail");
-      if (result.kind === "fail") {
-        const reasons = result.reasons.join(" ");
-        expect(reasons).toMatch(/estado "closed"/);
-      }
-    });
+  it("DADO um PR com titulo faltando ➜ (terminalidade falsa), ENTÃO falha", () => {
+    const input = { ...baseInput, prTitle: "[🛠️1️⃣] [Spec 0024] titulo errado" };
+    const result = runGovernancePrCheck(input, fs);
+    expect(result.kind).toBe("fail");
+    if (result.kind === "fail") {
+      expect(result.reasons[0]).toContain('o prefixo esperado é: "[🛠️1️⃣➜] [Spec 0024]"');
+    }
   });
 
-  describe("tasks.md missing", () => {
-    it("DADO governance PR aberto SEM tasks.md no diff ENTÃO falha", () => {
-      const api = new FakeApi(
-        new Map<string, unknown>([
-          [`repos/${REPO}/pulls/99`, { state: "open", merged_at: null }],
-          [
-            `repos/${REPO}/pulls/99/files?per_page=100&page=1`,
-            [
-              { filename: ".governance/specs/0023-workflow-runtime/spec.md" },
-              { filename: ".governance/specs/0023-workflow-runtime/plan.md" },
-            ],
-          ],
-        ])
-      );
-      const result = runGovernancePrCheck(
-        {
-          prNumber: 100,
-          prBody: "Depends on #99 (governance)",
-          prLabels: [],
-          repo: REPO,
-        },
-        api
-      );
-      expect(result.kind).toBe("fail");
-      if (result.kind === "fail") {
-        expect(result.reasons.join(" ")).toMatch(/tasks\.md/);
-      }
-    });
-
-    it("DADO governance PR mergeado COM tasks.md em .governance/ ENTÃO retorna ok", () => {
-      const api = new FakeApi(
-        new Map<string, unknown>([
-          [`repos/${REPO}/pulls/99`, { state: "closed", merged_at: "2026-05-19T12:00:00Z" }],
-          [
-            `repos/${REPO}/pulls/99/files?per_page=100&page=1`,
-            [{ filename: ".governance/specs/0023-workflow-runtime/tasks.md" }],
-          ],
-        ])
-      );
-      const result = runGovernancePrCheck(
-        {
-          prNumber: 100,
-          prBody: "Depends on #99 (governance)",
-          prLabels: [],
-          repo: REPO,
-        },
-        api
-      );
-      expect(result.kind).toBe("ok");
-      if (result.kind === "ok") {
-        expect(result.governancePrNumber).toBe(99);
-      }
-    });
-
-    it("DADO governance PR com tasks.md em .specify/ (bridge legacy) ENTÃO aceita", () => {
-      const api = new FakeApi(
-        new Map<string, unknown>([
-          [`repos/${REPO}/pulls/77`, { state: "open", merged_at: null }],
-          [
-            `repos/${REPO}/pulls/77/files?per_page=100&page=1`,
-            [{ filename: ".specify/specs/0015-foo/tasks.md" }],
-          ],
-        ])
-      );
-      const result = runGovernancePrCheck(
-        {
-          prNumber: 88,
-          prBody: "Depends on #77 (governance)",
-          prLabels: [],
-          repo: REPO,
-        },
-        api
-      );
-      expect(result.kind).toBe("ok");
-    });
+  it("DADO um PR terminal (sem ➜) valido na topologia, ENTÃO retorna ok", () => {
+    const input = {
+      ...baseInput,
+      prNumber: 34,
+      prBranch: "feat/spec-0024-another",
+      prTitle: "[🛠️2️⃣] [Spec 0024] terminal",
+      prBody: `
+## Status do ciclo de vida
+## PR Type
+## Posição na stack
+- **Stack atual**: 2
+## Merge authorization
+## Resumo
+## Test plan
+## Cross-refs
+## Checklist operacional
+## Disclosure de IA
+`,
+    };
+    const result = runGovernancePrCheck(input, fs);
+    expect(result.kind).toBe("ok");
   });
 
-  describe("pagination", () => {
-    it("DADO governance PR com >100 arquivos E tasks.md na página 2 ENTÃO pagina e aceita", () => {
-      // Página 1: 100 arquivos sem tasks.md (força paginação a seguir)
-      const page1: ReadonlyArray<{ filename: string }> = Array.from({ length: 100 }, (_, i) => ({
-        filename: `src/file-${i}.ts`,
-      }));
-      // Página 2: contém o tasks.md
-      const page2 = [{ filename: ".governance/specs/0023-workflow-runtime/tasks.md" }];
-      // Página 3 vazia (sinaliza fim)
-      const page3: ReadonlyArray<{ filename: string }> = [];
+  it("DADO um PR não atrelado a nenhuma spec, ENTÃO isenta da SSOT", () => {
+    const input = { ...baseInput, prBranch: "fix/typo" };
+    const result = runGovernancePrCheck(input, fs);
+    expect(result.kind).toBe("exempt");
+    if (result.kind === "exempt") {
+      expect(result.note).toMatch(/não parece pertencer a uma Spec/);
+    }
+  });
 
-      const api = new FakeApi(
-        new Map<string, unknown>([
-          [`repos/${REPO}/pulls/55`, { state: "open", merged_at: null }],
-          [`repos/${REPO}/pulls/55/files?per_page=100&page=1`, page1],
-          [`repos/${REPO}/pulls/55/files?per_page=100&page=2`, page2],
-          [`repos/${REPO}/pulls/55/files?per_page=100&page=3`, page3],
-        ])
-      );
-      const result = runGovernancePrCheck(
-        {
-          prNumber: 66,
-          prBody: "Depends on #55 (governance)",
-          prLabels: [],
-          repo: REPO,
-        },
-        api
-      );
-      expect(result.kind).toBe("ok");
-    });
+  it("DADO um PR cujo ID não está na topologia, ENTÃO falha pedindo mapeamento", () => {
+    const input = { ...baseInput, prBranch: "feat/spec-0024-ghost", prNumber: 99 };
+    const result = runGovernancePrCheck(input, fs);
+    expect(result.kind).toBe("fail");
+    if (result.kind === "fail") {
+      expect(result.reasons[0]).toMatch(/não encontrado na topologia do state.yml/);
+    }
+  });
 
-    it("DADO governance PR com exatamente 100 arquivos (todos sem tasks.md) ENTÃO falha sem buscar página 2", () => {
-      // Última página com <PER_PAGE itens encerra a paginação; se for exatamente 100 e nenhum tasks.md, tenta página 2 e ela vazia confirma.
-      const page1: ReadonlyArray<{ filename: string }> = Array.from({ length: 100 }, (_, i) => ({
-        filename: `src/file-${i}.ts`,
-      }));
-      const api = new FakeApi(
-        new Map<string, unknown>([
-          [`repos/${REPO}/pulls/55`, { state: "open", merged_at: null }],
-          [`repos/${REPO}/pulls/55/files?per_page=100&page=1`, page1],
-          [`repos/${REPO}/pulls/55/files?per_page=100&page=2`, []],
-        ])
-      );
-      const result = runGovernancePrCheck(
-        {
-          prNumber: 66,
-          prBody: "Depends on #55 (governance)",
-          prLabels: [],
-          repo: REPO,
-        },
-        api
-      );
-      expect(result.kind).toBe("fail");
-      if (result.kind === "fail") {
-        expect(result.reasons.join(" ")).toMatch(/tasks\.md/);
-      }
-    });
+  it("DADO fast-track com rationale, ENTÃO bypassa SSOT validation com aviso", () => {
+    const input = {
+      ...baseInput,
+      prLabels: ["fast-track"],
+      prBody: "[fast-track: motivo urgente]",
+    };
+    const result = runGovernancePrCheck(input, fs);
+    expect(result.kind).toBe("fast-track");
+  });
+
+  it("DADO fast-track sem rationale, ENTÃO falha", () => {
+    const input = { ...baseInput, prLabels: ["fast-track"], prBody: "sem rationale" };
+    const result = runGovernancePrCheck(input, fs);
+    expect(result.kind).toBe("fail");
+    if (result.kind === "fail") {
+      expect(result.reasons[0]).toMatch(/não declara rationale no body/);
+    }
+  });
+
+  // === Robustez O2 (Checkpoint 2.3a) — header ancorado a linha + stack tolerante ===
+
+  it("DADO seção citada inline (não header de linha própria), ENTÃO falha (fecha falso-negativo de substring)", () => {
+    const input = {
+      ...baseInput,
+      prBody: `
+## Status do ciclo de vida
+## PR Type
+## Posição na stack
+- **Stack atual**: 1
+## Merge authorization
+## Resumo
+## Test plan
+## Cross-refs
+## Checklist operacional
+> mencionei a ## Disclosure de IA do outro PR, mas não é um header aqui
+`,
+    };
+    const result = runGovernancePrCheck(input, fs);
+    expect(result.kind).toBe("fail");
+    if (result.kind === "fail") {
+      expect(result.reasons.some((r) => r.includes("## Disclosure de IA"))).toBe(true);
+    }
+  });
+
+  it("DADO variação de formatação na linha 'Stack atual' (espaços, ':' fora do bold), ENTÃO ainda passa", () => {
+    const input = {
+      ...baseInput,
+      prBody: `
+## Status do ciclo de vida
+## PR Type
+## Posição na stack
+-  **Stack atual** :  1
+## Merge authorization
+## Resumo
+## Test plan
+## Cross-refs
+## Checklist operacional
+## Disclosure de IA
+`,
+    };
+    const result = runGovernancePrCheck(input, fs);
+    expect(result.kind).toBe("ok");
+  });
+
+  it("DADO número de stack errado (2 quando sequence=1), ENTÃO falha (word-boundary preserva o contrato)", () => {
+    const input = {
+      ...baseInput,
+      prBody: `
+## Status do ciclo de vida
+## PR Type
+## Posição na stack
+- **Stack atual**: 2
+## Merge authorization
+## Resumo
+## Test plan
+## Cross-refs
+## Checklist operacional
+## Disclosure de IA
+`,
+    };
+    const result = runGovernancePrCheck(input, fs);
+    expect(result.kind).toBe("fail");
+    if (result.kind === "fail") {
+      expect(result.reasons.some((r) => r.includes("Coerência de stack"))).toBe(true);
+    }
   });
 });

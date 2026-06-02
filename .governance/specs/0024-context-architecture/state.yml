@@ -9,7 +9,140 @@ focus:
   - "Gate por checkpoint: Claude implementa -> Technical Audit Gate (Codex) -> Architectural Review Gate (ChatGPT) -> Human Gate (owner) -> AVANCA (abre o proximo PR stacked). O Human Gate decide o PROXIMO MOVIMENTO, NAO mergeia em main. 1 checkpoint atomico por vez; parar no Gate quando o commit estiver pronto. Correcao local pequena nao espera; mudanca estrutural sim."
   - "Criterio: 'ja foi validado empiricamente na 0024?' -> absorver/enforcar/executar. NAO re-modelar, NAO re-pesquisar o decidido. Risco dominante: voltar a modelar em vez de remover divergencias uma a uma."
 next:
-  - "Checkpoint 1 feito+gated (87865ca). Checkpoint 2 (8b0eec6) + Checkpoint 2.1 (d686d4b) + Checkpoint 2.1a (correcao de topologia -> unit/stacked da 0023; este commit) implementados no #32. PROXIMO: fechar o Gate de encerramento do #32 (Technical Audit -> Architectural Review -> Human, cobrindo Checkpoint 2 + 2.1 + 2.1a). #32 NAO mergeia agora -- permanece como linha de integracao da spec."
-  - "Depois do Gate do #32: abrir Checkpoint 3 (GG-0003 consistency check, mecanico) como PR real proprio STACKED sobre a branch da spec (base = feat/spec-0024-context-architecture / checkpoint anterior), NAO off-main. Seguir a sequencia: 4A/4B (Provenance) -> 5 (AGENTS sync) + 6 (GG-0002) -> 7 (CRITICO: remover taxonomia + ativar ban) -> 9/10 -> 11A/B/C (.specify cutover) -> 8/12. Cada checkpoint = PR stacked + Gate completo + yarn validate verde; NENHUM mergeia em main isoladamente."
-  - "Encerramento: instanciar review.md (gates R1-R7) -> abrir Integration PR (tipo Integration, homologacao) -> commit de encerramento (spec->Done, state->done, NEXT deletado, release-log T0) na linha da spec -> review.md R8 -> MERGE UNICO em main (modo unit, veiculo = PR terminal). spec->Done so no fim."
-  - "LER antes de qualquer acao: plan.md (SSOT do plano + glossario + topologia) e o handoff v2 (research/2026-05-31-handoff-next-session-v2.md, com nota de errata + secao Historico no topo). Verificar git limpo + yarn validate verde."
+  - "#32 GATED: Checkpoints 2 (8b0eec6) + 2.1 (d686d4b) + 2.1a (fa2c0ae) fechados. #32 permanece como linha de integracao -- NAO mergeia."
+  - "#33 (branch feat/spec-0024-ruleset-producibility) = unico PR de execucao stacked aberto (sequence 1); embarca os Checkpoints 2.2, 2.2b, 2.3, 2.3a, 2.3b, 2.4, 2.4a, 2.4b, 2.4c e 2.4d. NAO existe branch feat/spec-0024-topology (corrigido no 2.3a: o no-fantasma checkpoint-2.3 foi dobrado em #33)."
+  - "Checkpoint 2.3a + 2.3b implementados: 2.3a reconcilia topologia<->realidade (B1), registra [DEC-0024-G07] (B2), elimina dual-SSOT do plan.md (O1), invariantes de sequence (O6), robustez do governance-pr-check (O2). 2.3b adiciona o guard LOCAL de lifecycle-coerencia (github_pr <=> active/concluded + unicidade) e REAVALIA O5: well-formedness e guard local (no state-yml:check/repo-validation, ja required), nao debito de API -> promocao do governance-pr-check a REQUIRED recomendada. So a paridade-API resta como hardening futuro nao-bloqueante (NEXT separado)."
+  - "RULESET VIVO ATUALIZADO (2026-06-01, autorizado): required_status_checks = repo-validation + smoke + governance-pr-check (apply consolidado; o smoke do 2.2 nunca fora aplicado -> aterrissado agora). Paridade vivo<->versionado VERDE (.github/rulesets/main-governance.json = SSOT). governance-pr-check agora bloqueia merge."
+  - "Checkpoint 2.4 (revisao-como-artefato MVP) + 2.4a (endurecimento) + 2.4b (fecha bypass da poda final): reviews/gates = ARTEFATOS versionados; consolidado DERIVADO por `review:check` (no validate). 2.4a: FINDING reviewer-owned (disposition destrava o gate) vs RESOLUCAO implementer-owned (NAO destrava) = anti-autoaprovacao; findings_emitted+ids contiguos = anti-delecao-do-meio; location obrigatoria; fingerprint sela a claim. 2.4b: review_fingerprint (envelope) fecha a PODA FINAL; checkpoint+role no per-finding hash fecha TRANSPLANTE. 2.4c (bugs da auditoria final): fingerprint via JSON.stringify (canonico, fim da ambiguidade de \\n); resolucao aponta finding totalmente qualificado <role>#<id> com match exato (fim do endsWith que colidia cross-role). Limite honesto: tamper-EVIDENCE (forja visivel), nao prevencao (ADR 0021). Dogfood: c2.3-arch.yml + c2.3-resolutions.yml."
+  - "Checkpoint 2.4d (disclosure de IA = projecao de PROCESSO derivada): renderer puro `disclosureRender` (`yarn disclosure`) deriva de consolidate() ∩ checkpoints do PR na topologia -- nº revisoes, categorias, findings emitidos/resolvidos, gate. ZERO artefato/schema novo. REJEITADOS (nao reabrir): Co-Authored-By/git trailers como fonte (autoria != participacao) e participants.yml/contributors.yml/ledger (over-modeling, actor->role nasce falso m:n). Frase 'Implementacao assistida por IA' = editorial do template, nao dado governado. Falsificacao fechou A (cobertura de escopo: approved exige cobertura total, senao partial) + C (violations do consolidate fatais no main); B (disclosure stale, sem detector de drift) DEFERIDO (NEXT.md, disclosure:check)."
+  - "Gate do #33 FECHADO: gates/c2.4d.yml approved (PR INTEIRO, keyado no cursor 2.4d, NAO retroativo por checkpoint) + reviews/c2.4d-architectural_review.yml (F1/F2 accepted, F3 dismissed-deferido) + resolutions; review:check verde; CI clean; Human Gate ratificado (owner APPROVED 2026-06-02). PROXIMO: abrir o Checkpoint 3 (GG-0003 Consistency Projection Check, sequence 2) stacked, nascendo com review-as-artifact + disclosure derivado (sem texto manual). PRIMEIRO passo do 3: alinhar com owner a LISTA FIXA de marcadores (decisao de design; nao cravar sozinho). Ao abrir: #33 -> concluded, checkpoint-3 -> active com github_pr."
+  - "Encerramento: instanciar review.md (gates R1-R7) -> abrir Integration PR (homologacao) -> commit de encerramento (spec->Done, state->done, NEXT deletado, release-log T0) -> review.md R8 -> MERGE UNICO em main (modo unit). spec->Done so no fim."
+  - "LER antes de qualquer acao: research/2026-06-02-handoff-checkpoint-3.md (SSOT da retomada para o Checkpoint 3; supersede o handoff-next-session) + state.yml § topology + plan.md. Verificar git limpo + yarn validate verde + gate do #33 (gates/c2.4d.yml) approved."
+topology:
+  cursor:
+    pr: ruleset-producibility
+    checkpoint: checkpoint-2.4d
+  prs:
+    concluded:
+      - id: base-governance
+        github_pr: 32
+        role: governance
+        terminal: false
+        sequence: null
+        checkpoints:
+          - checkpoint-1
+          - checkpoint-2
+          - checkpoint-2.1
+          - checkpoint-2.1a
+
+    active:
+      - id: ruleset-producibility
+        github_pr: 33
+        role: execution
+        terminal: false
+        sequence: 1
+        checkpoints:
+          - checkpoint-2.2
+          - checkpoint-2.2b
+          - checkpoint-2.3
+          - checkpoint-2.3a
+          - checkpoint-2.3b
+          - checkpoint-2.4
+          - checkpoint-2.4a
+          - checkpoint-2.4b
+          - checkpoint-2.4c
+          - checkpoint-2.4d
+
+    planned:
+      # `sequence` = posicao no STACK de execucao (1..K, contigua), NAO o numero
+      # do checkpoint. Renumerada no 2.3a apos remover o no-fantasma checkpoint-2.3.
+      - id: checkpoint-3
+        github_pr: null
+        role: execution
+        terminal: false
+        sequence: 2
+        checkpoints:
+          - checkpoint-3
+
+      - id: checkpoint-4
+        github_pr: null
+        role: execution
+        terminal: false
+        sequence: 3
+        checkpoints:
+          - checkpoint-4a
+          - checkpoint-4b
+
+      - id: checkpoint-5
+        github_pr: null
+        role: execution
+        terminal: false
+        sequence: 4
+        checkpoints:
+          - checkpoint-5
+
+      - id: checkpoint-6
+        github_pr: null
+        role: execution
+        terminal: false
+        sequence: 5
+        checkpoints:
+          - checkpoint-6
+
+      - id: checkpoint-7
+        github_pr: null
+        role: execution
+        terminal: false
+        sequence: 6
+        checkpoints:
+          - checkpoint-7
+
+      - id: checkpoint-8
+        github_pr: null
+        role: execution
+        terminal: false
+        sequence: 7
+        checkpoints:
+          - checkpoint-8
+
+      - id: checkpoint-9
+        github_pr: null
+        role: execution
+        terminal: false
+        sequence: 8
+        checkpoints:
+          - checkpoint-9
+
+      - id: checkpoint-10
+        github_pr: null
+        role: execution
+        terminal: false
+        sequence: 9
+        checkpoints:
+          - checkpoint-10
+
+      - id: checkpoint-11
+        github_pr: null
+        role: execution
+        terminal: false
+        sequence: 10
+        checkpoints:
+          - checkpoint-11a
+          - checkpoint-11b
+          - checkpoint-11c
+
+      - id: checkpoint-12
+        github_pr: null
+        role: execution
+        terminal: false
+        sequence: 11
+        checkpoints:
+          - checkpoint-12
+
+      - id: integration-final
+        github_pr: null
+        role: integration
+        terminal: true
+        sequence: null
+        checkpoints:
+          - review-and-merge

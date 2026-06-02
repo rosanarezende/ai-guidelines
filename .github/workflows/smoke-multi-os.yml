@@ -9,7 +9,7 @@ on:
       - main
 
 jobs:
-  smoke:
+  smoke-matrix:
     name: smoke / ${{ matrix.os }} / node ${{ matrix.node }}
     runs-on: ${{ matrix.os }}
     strategy:
@@ -35,3 +35,23 @@ jobs:
 
       - name: Run smoke suite (npm pack + install + init/update over tarball)
         run: yarn test:smoke
+
+  # Agregador estável (Spec 0024 Checkpoint 2.2): expõe UM context fixo `smoke`
+  # como required check do ruleset, em vez dos 6 nomes expandidos pela matriz
+  # (`smoke / ubuntu-latest / node 24.x` …). Required contexts acoplados à matriz
+  # são o vetor de drift que este checkpoint elimina (cf. .github/rulesets/README.md).
+  smoke:
+    name: smoke
+    needs: [smoke-matrix]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Gate on smoke matrix result
+        run: |
+          result="${{ needs.smoke-matrix.result }}"
+          echo "smoke-matrix result: ${result}"
+          if [ "${result}" != "success" ]; then
+            echo "::error::Smoke matrix did not succeed (${result})."
+            exit 1
+          fi
+          echo "All smoke matrix combinations passed."

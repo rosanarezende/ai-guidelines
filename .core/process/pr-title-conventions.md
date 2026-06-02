@@ -12,7 +12,7 @@ Olhar o título de um PR em uma lista do GitHub deve responder três perguntas s
 2. **Esse PR pode ser mergeado isoladamente, ou é parte de uma stack pareada/sequenciada?**
 3. **Se faz parte de stack, qual posição ocupa e há PRs downstream aguardando?**
 
-GitHub native states (Draft / Ready / Merged / Closed) cobrem **lifecycle operacional** mas não cobrem **contrato arquitetural** — especificamente, não distinguem governance contract pendente, posição em rollout sequencial, ou execution dependente. É essa lacuna que esta convenção fecha.
+O enforcement disso agora é feito em L4 pelo `governance-pr-check`, que usa a topologia declarada no `state.yml` (SSOT) para validar se o título projetado está correto.
 
 ## Padrão de título
 
@@ -188,26 +188,30 @@ Quando um marcador deixa de fazer sentido, **o autor do PR remove via `gh pr edi
 
 ## Anti-DAG guardrail
 
-🔒, ➜, números (1️⃣2️⃣3️⃣), e labels textuais são **sinalização humana L1** — leitura por olhos humanos em uma lista de PRs. **Não são input para automação**.
+🔒, ➜, números (1️⃣2️⃣3️⃣), e labels textuais são **sinalização humana L1** — leitura por olhos humanos em uma lista de PRs. **Eles SÃO projeções validadas pelo CI, mas NUNCA a fonte de verdade**.
 
 Se você está pensando em alguma destas opções, **pare e abra DEC**:
 
-- parser automático que lê emojis/números para ordering;
+- parser automático que lê emojis/números para ordering ou inferir topologia;
 - DAG tooling que monta grafo de dependências a partir dos títulos;
-- merge orchestration baseada em emojis ou labels;
-- CI que valida ordem, completude da stack ou presença de prefixo;
-- linter que valida formato exato do título antes de aprovar PR.
+- merge orchestration baseada em emojis ou labels.
 
-Qualquer ferramenta lendo programaticamente esta convenção é território **L4** (cf. research §8 anti-recursão guards) — exige decisão registrada. Convenção L1 é convenção textual humana; viramos infraestrutura no momento em que automatizamos a leitura dela.
+A topologia vive em `state.yml`. O CI lê a topologia e valida se o título é uma projeção fiel dela. Nunca o inverso. O título não comanda o CI; a topologia comanda o CI e o título.
 
 ## Enforcement
 
-Esta convenção é **L1 (convenção textual)** apenas. `governance-pr-check` (L4 CI) **não** valida prefixos de título nesta versão. Reabrir como decisão própria em DEC futura se ≥ 2 casos de drift aparecerem na prática (PRs nascendo sem prefixo ou com prefixo errado).
+Esta convenção é **validada** pelo `governance-pr-check` (L4 CI), que carrega a topologia do `state.yml` (SSOT) da spec ativa e verifica se:
+
+1. O título do PR começa com os emojis corretos (tipo, `sequence`, terminality) e o identificador (`[Spec NNNN]`), **derivados da topologia**.
+2. As seções obrigatórias do template de body estão presentes (headers em linha própria) e a posição na stack confere com `sequence`.
+
+**Postura — reavaliada no Checkpoint 2.3b (`[DEC-0024-G07]`):** enforçar projeções exige uma SSOT confiável. Essa confiança divide-se em **(i) well-formedness** (coerência interna + lifecycle) e **(ii) paridade com a realidade GitHub**. A parte **(i) é guard local determinístico**, já no `state-yml:check`/`repo-validation` (**required**): `github_pr` ⟺ `active`/`concluded`, unicidade de `github_pr`, `sequence` única/contígua/`execution`-only — uma SSOT malformada **falha o merge antes** de qualquer enforcement de projeção. Com (i) satisfeita, **o `governance-pr-check` foi promovido a _required_** (apply consolidado em 2026-06-01: `required_status_checks` = `repo-validation` + `smoke` + `governance-pr-check`; paridade vivo↔versionado verde). A parte **(ii)** — verificar via API que cada `github_pr` aponta a um PR real/aberto — permanece **hardening futuro NÃO-bloqueante** (não é pré-condição), análoga à paridade do ruleset (Checkpoint 2.2) vs. sua producibilidade local.
 
 ## Cross-refs
 
 - ADR 0020 — Governance precede e protege execução.
 - ADR 0021 — Enforcement estrutural precede consciência comportamental.
+- DEC-0024-G07 — topologia como dado (`state.yml` SSOT) + enforcement L4 de projeções (`required` desde 2026-06-01; well-formedness por guard local — paridade-API é hardening não-bloqueante).
 - DEC-0023-D04 — PR pre-model declarado (precedente para uso de 🧭).
 - DEC-0023-E05 — Fast-track strictness.
 - `.github/pull_request_template.md` — checkboxes operacionais que materializam a convenção no fluxo de criação de PR.

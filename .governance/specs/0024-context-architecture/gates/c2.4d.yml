@@ -1,0 +1,17 @@
+# Gate humano do PR #33 (PR INTEIRO), keyado no cursor 2.4d.
+# Escrito sob instrução EXPLÍCITA do owner nesta sessão (2026-06-02, caminho (a),
+# disciplina do modelo mantida): F1/F2 → accepted (validados pós-fix 4de3600);
+# F3 → dismissed (débito conscientemente deferido, não-bloqueante; `disclosure:check`
+# em NEXT.md). `review:check` ENFORCA: approved exige zero finding critical/high
+# `open` — satisfeito (F1 high está accepted).
+#
+# VALIDAÇÃO FINAL HUMANA pendente: a confirmação do owner + o Approve nativo do
+# GitHub no #33 são o gatilho. O Human Gate decide o PRÓXIMO MOVIMENTO (abrir o
+# Checkpoint 3 stacked) — NÃO autoriza merge em main (modo unit; merge único ao
+# fim via review.md R8).
+checkpoint: "2.4d"
+actor: "@rosanarezende"
+ref: "#33"
+date: "2026-06-02"
+decision: approved
+note: "PR #33 (disclosure-como-projeção 2.4d + topologia-as-data + review-as-artifact) aprovado para AVANÇAR; A/C corrigidos, B deferido como débito. Decide o próximo movimento (Checkpoint 3), não merge em main."
