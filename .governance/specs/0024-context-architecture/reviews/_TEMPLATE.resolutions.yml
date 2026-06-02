@@ -1,0 +1,10 @@
+# Artefato de RESOLUÇÃO (Checkpoint 2.4a). Copie para `c<checkpoint>-resolutions.yml`.
+# Implementer-owned, lane SEPARADA da review. PROPÕE `action`; NÃO destrava o gate
+# (só a `disposition` do reviewer destrava). `review:check` exige que cada `finding`
+# referencie um id existente nas reviews do checkpoint.
+checkpoint: "3"
+by: claude-cli
+resolutions:
+  - finding: F1 # id de um finding numa review deste checkpoint
+    action: fixed # fixed | wontfix | needs-discussion
+    ref: "<sha>" # opcional: commit que tratou

@@ -1,15 +1,16 @@
 /**
  * CLI entrypoint para o gate `review:check` — "revisão-como-artefato" (Spec 0024
- * Checkpoint 2.4). Torna os artefatos de governança load-bearing em vez de
- * comentários de PR (memória volátil).
+ * Checkpoint 2.4/2.4a). Torna artefatos de governança load-bearing em vez de
+ * comentários de PR (memória volátil). Determinístico, sem rede.
  *
- * O que faz (determinístico, sem rede):
- *   1. Descobre reviews/gates sob `.governance/specs/<spec>/{reviews,gates}/*.yml`;
- *   2. valida o schema (severidade/status/decisão; ids de finding únicos);
- *   3. DERIVA o estado consolidado por checkpoint (nunca um arquivo à mão);
- *   4. ENFORCA: um gate `approved` exige ZERO findings bloqueantes (critical/high)
- *      `open` nas reviews daquele checkpoint — o gate consome o estado consolidado;
- *   5. imprime o consolidado (vira a projeção mínima do PR).
+ *   1. Descobre reviews/resolutions/gates sob `.governance/specs/<spec>/{reviews,gates}/`;
+ *   2. valida schema + integridade (fingerprint da claim; findings_emitted+contiguidade);
+ *   3. DERIVA o consolidado por checkpoint (nunca arquivo à mão);
+ *   4. ENFORCA: gate `approved` ⟹ zero finding bloqueante (critical/high) com
+ *      `disposition: open`. O gate lê `disposition` (reviewer-owned) — a resolução
+ *      do implementador NÃO destrava (anti-autoaprovação estrutural);
+ *   5. resolução órfã (aponta finding inexistente) → violação;
+ *   6. imprime o consolidado (projeção mínima do PR).
  *
  * Exit codes: 0 ok · 1 violação/erro de schema · 2 uso inválido (no bin).
  */
@@ -17,8 +18,10 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 import {
   parseReview,
+  parseResolutions,
   parseGate,
   ReviewArtifact,
+  ResolutionArtifact,
   GateArtifact,
   Finding,
   BLOCKING_SEVERITIES,
@@ -38,6 +41,7 @@ const SPEC_ROOTS = [".governance/specs", ".specify/specs"] as const;
 
 export interface SpecArtifacts {
   readonly reviews: readonly ReviewArtifact[];
+  readonly resolutions: readonly ResolutionArtifact[];
   readonly gates: readonly GateArtifact[];
 }
 
@@ -52,21 +56,21 @@ function listYml(dir: string): string[] {
 
 export interface ConsolidatedCheckpoint {
   readonly checkpoint: string;
-  readonly reviewDecisions: ReadonlyArray<{ role: string; actor: string; decision: string }>;
-  readonly openByseverity: Readonly<Record<string, number>>;
+  readonly reviewDecisions: ReadonlyArray<{ role: string; decision: string }>;
   readonly openBlocking: readonly Finding[];
   readonly totalOpen: number;
-  readonly totalResolved: number;
+  readonly totalClosed: number;
   readonly gate?: GateArtifact;
 }
 
-/** Pure: consolida por checkpoint e detecta violações de gate. */
+/** Pure: consolida por checkpoint e detecta violações. */
 export function consolidate(artifacts: SpecArtifacts): {
   byCheckpoint: ConsolidatedCheckpoint[];
   violations: string[];
 } {
   const checkpoints = new Set<string>();
   for (const r of artifacts.reviews) checkpoints.add(r.checkpoint);
+  for (const r of artifacts.resolutions) checkpoints.add(r.checkpoint);
   for (const g of artifacts.gates) checkpoints.add(g.checkpoint);
 
   const violations: string[] = [];
@@ -75,29 +79,40 @@ export function consolidate(artifacts: SpecArtifacts): {
   for (const cp of [...checkpoints].sort()) {
     const reviews = artifacts.reviews.filter((r) => r.checkpoint === cp);
 
-    // No máximo 1 review por (checkpoint, role) — re-reviews editam o mesmo arquivo.
     const byRole = new Map<string, ReviewArtifact>();
     for (const r of reviews) {
       if (byRole.has(r.role)) {
         violations.push(
-          `checkpoint ${cp}: múltiplos arquivos de review para role "${r.role}" (${byRole.get(r.role)!.file}, ${r.file}). Use 1 arquivo por (checkpoint, role); re-reviews editam-no.`
+          `checkpoint ${cp}: múltiplos arquivos de review para role "${r.role}" (${byRole.get(r.role)!.file}, ${r.file}). 1 arquivo por (checkpoint, role).`
         );
       }
       byRole.set(r.role, r);
     }
 
-    const openByseverity: Record<string, number> = {};
+    const findingIds = new Set<string>();
     const openBlocking: Finding[] = [];
     let totalOpen = 0;
-    let totalResolved = 0;
+    let totalClosed = 0;
     for (const r of reviews) {
       for (const f of r.findings) {
-        if (f.status === "open") {
+        findingIds.add(`${r.role}#${f.id}`);
+        if (f.disposition === "open") {
           totalOpen++;
-          openByseverity[f.severity] = (openByseverity[f.severity] ?? 0) + 1;
           if ((BLOCKING_SEVERITIES as readonly string[]).includes(f.severity)) openBlocking.push(f);
-        } else if (f.status === "resolved") {
-          totalResolved++;
+        } else {
+          totalClosed++;
+        }
+      }
+    }
+
+    // Resolução órfã: aponta para um finding que não existe neste checkpoint.
+    for (const res of artifacts.resolutions.filter((r) => r.checkpoint === cp)) {
+      for (const r of res.resolutions) {
+        const matches = [...findingIds].some((fid) => fid.endsWith(`#${r.finding}`));
+        if (!matches) {
+          violations.push(
+            `checkpoint ${cp}: resolução em ${res.file} aponta para finding "${r.finding}" inexistente nas reviews.`
+          );
         }
       }
     }
@@ -110,22 +125,23 @@ export function consolidate(artifacts: SpecArtifacts): {
     }
     const gate = gates[0];
 
-    // ENFORCEMENT central: gate approved ⟹ nenhum finding bloqueante aberto.
+    // ENFORCEMENT: gate approved ⟹ nenhum bloqueante com disposition: open.
     if (gate && gate.decision === "approved" && openBlocking.length > 0) {
       violations.push(
-        `checkpoint ${cp}: gate em ${gate.file} é "approved", mas há ${openBlocking.length} finding(s) bloqueante(s) (critical/high) ainda \`open\`: ${openBlocking
+        `checkpoint ${cp}: gate em ${gate.file} é "approved", mas há ${openBlocking.length} finding(s) bloqueante(s) (critical/high) com disposition: open: ${openBlocking
           .map((f) => f.id)
-          .join(", ")}. Resolva/aceite/dismisse antes de aprovar.`
+          .join(
+            ", "
+          )}. Só o reviewer fecha (accepted/dismissed) — resolução do implementador não destrava.`
       );
     }
 
     byCheckpoint.push({
       checkpoint: cp,
-      reviewDecisions: reviews.map((r) => ({ role: r.role, actor: r.actor, decision: r.decision })),
-      openByseverity,
+      reviewDecisions: reviews.map((r) => ({ role: r.role, decision: r.decision })),
       openBlocking,
       totalOpen,
-      totalResolved,
+      totalClosed,
       ...(gate ? { gate } : {}),
     });
   }
@@ -135,6 +151,7 @@ export function consolidate(artifacts: SpecArtifacts): {
 
 function discover(repoRoot: string): { artifacts: SpecArtifacts; errors: string[] } {
   const reviews: ReviewArtifact[] = [];
+  const resolutions: ResolutionArtifact[] = [];
   const gates: GateArtifact[] = [];
   const errors: string[] = [];
   for (const rootRel of SPEC_ROOTS) {
@@ -144,8 +161,13 @@ function discover(repoRoot: string): { artifacts: SpecArtifacts; errors: string[
       if (!entry.isDirectory()) continue;
       const specDir = path.join(root, entry.name);
       for (const file of listYml(path.join(specDir, "reviews"))) {
+        const rel = path.relative(repoRoot, file);
         try {
-          reviews.push(parseReview(fs.readFileSync(file, "utf-8"), path.relative(repoRoot, file)));
+          if (path.basename(file).endsWith("-resolutions.yml")) {
+            resolutions.push(parseResolutions(fs.readFileSync(file, "utf-8"), rel));
+          } else {
+            reviews.push(parseReview(fs.readFileSync(file, "utf-8"), rel));
+          }
         } catch (e) {
           errors.push((e as Error).message);
         }
@@ -159,32 +181,35 @@ function discover(repoRoot: string): { artifacts: SpecArtifacts; errors: string[
       }
     }
   }
-  return { artifacts: { reviews, gates }, errors };
+  return { artifacts: { reviews, resolutions, gates }, errors };
 }
 
 export function main(repoRoot: string, logger: Logger = defaultLogger): number {
   const { artifacts, errors } = discover(repoRoot);
 
   if (errors.length > 0) {
-    logger.error(`❌ review:check — ${errors.length} erro(s) de schema em artefatos de revisão:`);
+    logger.error(`❌ review:check — ${errors.length} erro(s) de schema/integridade:`);
     for (const e of errors) logger.error(`  - ${e}`);
     return 1;
   }
 
-  if (artifacts.reviews.length === 0 && artifacts.gates.length === 0) {
-    logger.info(`ℹ review:check — nenhum artefato de revisão (reviews/ ou gates/). Estado válido.`);
+  if (
+    artifacts.reviews.length === 0 &&
+    artifacts.resolutions.length === 0 &&
+    artifacts.gates.length === 0
+  ) {
+    logger.info(`ℹ review:check — nenhum artefato de revisão. Estado válido.`);
     return 0;
   }
 
   const { byCheckpoint, violations } = consolidate(artifacts);
 
-  // Projeção consolidada (vira o status mínimo do PR).
   for (const c of byCheckpoint) {
     const decs =
       c.reviewDecisions.map((d) => `${d.role}=${d.decision}`).join(" · ") || "(sem reviews)";
     const gate = c.gate ? c.gate.decision : "pending";
     logger.info(
-      `• checkpoint ${c.checkpoint}: reviews [${decs}] · findings ${c.totalOpen} open / ${c.totalResolved} resolved · gate ${gate}`
+      `• checkpoint ${c.checkpoint}: reviews [${decs}] · findings ${c.totalOpen} open / ${c.totalClosed} closed · gate ${gate}`
     );
   }
 
@@ -195,7 +220,7 @@ export function main(repoRoot: string, logger: Logger = defaultLogger): number {
   }
 
   logger.info(
-    `✅ review:check — ${artifacts.reviews.length} review(s) + ${artifacts.gates.length} gate(s); schema ok; nenhum gate aprovado com bloqueante aberto.`
+    `✅ review:check — ${artifacts.reviews.length} review(s) + ${artifacts.resolutions.length} resolução(ões) + ${artifacts.gates.length} gate(s); integridade ok; nenhum gate aprovado com bloqueante aberto.`
   );
   return 0;
 }

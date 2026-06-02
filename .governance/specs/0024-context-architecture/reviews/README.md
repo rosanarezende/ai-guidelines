@@ -1,32 +1,38 @@
-# Revisão-como-artefato (Spec 0024 · Checkpoint 2.4 — MVP dogfood)
+# Revisão-como-artefato (Spec 0024 · Checkpoints 2.4 + 2.4a)
 
-> O comentário de PR **não é memória do processo** — é interface operacional. A memória vive aqui, versionada. Gate `review:check` (no `yarn validate`) torna estes artefatos load-bearing.
+> O comentário de PR **não é memória do processo** — é interface operacional. A memória vive aqui, versionada. `review:check` (no `yarn validate`, ∴ em `repo-validation` required) torna estes artefatos load-bearing.
 
-## Onde vive o quê
+## Lanes de propriedade (2.4a — o ponto central)
 
-| Papel                              | Artefato versionado                                          | Comentário no PR                                    |
-| :--------------------------------- | :----------------------------------------------------------- | :-------------------------------------------------- |
-| **Implementação**                  | o **commit/diff** + checkboxes em `tasks.md` (já versionado) | —                                                   |
-| **Technical Audit** (Codex)        | `reviews/c<N>-audit.yml` (findings embutidos)                | —                                                   |
-| **Architectural Review** (ChatGPT) | `reviews/c<N>-arch.yml` (findings embutidos)                 | —                                                   |
-| **Gate humano** (owner)            | `gates/c<N>.yml` + o _Approve_ nativo do GitHub              | —                                                   |
-| **Projeção**                       | —                                                            | **1 comentário de status** (editado, não acumulado) |
+| Lane                       | Arquivo                        | Dono                     | O gate lê?                  |
+| :------------------------- | :----------------------------- | :----------------------- | :-------------------------- |
+| **Finding** (a claim)      | `reviews/c<N>-<role>.yml`      | reviewer (Codex/ChatGPT) | **sim** — via `disposition` |
+| **Resolução** (a resposta) | `reviews/c<N>-resolutions.yml` | implementer (Claude)     | **não**                     |
+| **Gate** (o veredito)      | `gates/c<N>.yml`               | owner                    | é o gate                    |
+| **Projeção**               | 1 comentário de status no PR   | —                        | —                           |
+
+**Anti-autoaprovação estrutural:** o gate bloqueia em finding bloqueante (`critical/high`) com `disposition: open`. **Só o reviewer fecha** (`accepted`/`dismissed`). O implementador escreve resolução noutra lane — que **não destrava o gate**. Para autoaprovar, teria de editar a `disposition` no arquivo do reviewer: um **diff cross-lane visível e atribuível**.
+
+## Integridade local (tamper-EVIDENCE, não tamper-proofing — ADR 0021)
+
+- **`fingerprint`** = `sha256(id|severity|location|description)[:12]` sela a **claim**. Reescrever severity/description/location sem re-selar → `review:check` **vermelho**. Re-selar é um diff conspícuo ("a claim selada do reviewer mudou"). _Não entra no hash:_ `disposition` (muda de propósito).
+- **`findings_emitted` + ids contíguos `F1..FN`** → deletar um finding quebra a contagem/contiguidade → vermelho. Deleção deixa de ser silenciosa.
+- **Limite honesto:** um check local é **cego a autoria** — não impede criptograficamente um forjador (ele re-sela / edita cross-lane). Ele **eleva a barra** de "edição silenciosa de 1 linha" para "forja explícita, atribuída e detectável". Prevenção plena exigiria CODEOWNERS/assinatura (off-repo/nova camada) — deferido.
 
 ## Respostas diretas
 
-- **Onde vivem os findings?** Embutidos na review (`reviews/c<N>-<role>.yml`). Sem arquivo `findings.yml` à mão — seria mais uma projeção que dói por drift; o consolidado é **derivado**.
-- **Como são identificados?** `id` local à review (`F1`, `F2`…); globalmente é `c<N>-<role>#F1`. Único por arquivo (validado).
-- **Como mudam de estado?** Edita-se o `status` no YAML (`open → resolved | accepted | dismissed`); o **git** é o log de quem/quando.
-- **Como múltiplas revisões escrevem no mesmo lugar?** **Não escrevem.** 1 arquivo por `(checkpoint, role)`. Re-review **edita** o seu próprio arquivo. Sem contenção.
-- **Como o gate sabe o consolidado?** `review:check` **deriva** por checkpoint (open por severidade, decisões) e **enforça**: gate `approved` ⇒ zero `critical/high` `open`. O owner lê a saída do check; o `gate.yml` registra o veredito.
-- **Qual comentário sobra no PR?** **Um** comentário de status (projeção): `reviews [...] · findings X open / Y resolved · gate <estado>`. Mais o _Approve_/checks nativos.
-- **Quais comentários somem já?** Os 4 comentões de proveniência (`implementation` / `technical_audit` / `architectural_review` / `human_gate`) — viram artefatos. Implementação → commit; audit/review → `reviews/`; gate → `gates/`.
+- **Onde vivem os findings?** `reviews/c<N>-<role>.yml` (selados). Sem `findings.yml` à mão — consolidado é **derivado**.
+- **Identidade?** `F1..FN` contíguos; global = `<role>#F<n>`. `fingerprint` amarra id↔conteúdo.
+- **Mudança de estado?** Reviewer muda `disposition`; implementador anexa `resolution` (lane separada). Git = log.
+- **Múltiplas revisões no mesmo lugar?** Não. 1 arquivo por `(checkpoint, role)`.
+- **Gate sabe o consolidado?** `review:check` deriva e enforça (gate `approved` ⟹ 0 bloqueante `open`).
+- **Comentário que sobra?** 1 de status. **Some:** os 4 comentões de proveniência → viram artefatos.
 
-## Como o próximo PR (Checkpoint N) funciona
+## Fluxo do próximo PR (Checkpoint N)
 
-1. **Claude implementa** → commit + `tasks.md`; **1 comentário de status** no PR (sem proveniência longa).
-2. **Codex audita** → escreve `reviews/c<N>-audit.yml` (findings + `decision`); edita o status do PR.
-3. **ChatGPT revisa** → escreve `reviews/c<N>-arch.yml`.
-4. **Iteração:** Claude corrige; marca `status: resolved` nos findings tratados (mesmos arquivos).
-5. **Gate humano:** owner roda `yarn review:check` (lê consolidado), cria `gates/c<N>.yml` (`approved`) e clica _Approve_. O check **barra** aprovar com bloqueante aberto.
-6. **`yarn validate`** (já required via `repo-validation`) roda `review:check` → o estado vivo do PR passa a depender dos artefatos, não de comentários.
+1. **Claude** implementa → commit + 1 comentário de status.
+2. **Codex** → `reviews/c<N>-audit.yml` (findings selados, `disposition: open`).
+3. **ChatGPT** → `reviews/c<N>-arch.yml`.
+4. **Claude** corrige → `reviews/c<N>-resolutions.yml` (`action: fixed`, `ref: <sha>`). **Não fecha findings.**
+5. **Reviewer** valida e fecha (`disposition: accepted/dismissed`) — re-selando se mudou a claim.
+6. **Owner** → `gates/c<N>.yml` (`approved`) + Approve nativo. `review:check` barra aprovar com bloqueante `open`.

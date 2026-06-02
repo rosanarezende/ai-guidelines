@@ -1,21 +1,17 @@
-# Artefato de REVISÃO (Spec 0024 Checkpoint 2.4 — revisão-como-artefato).
-# Copie para `c<checkpoint>-<role>.yml` (ex.: c3-audit.yml, c3-arch.yml).
-# 1 arquivo por (checkpoint, role); re-reviews EDITAM este arquivo (git = histórico).
-# Findings vivem aqui (embutidos). O estado consolidado é DERIVADO por `review:check`.
+# Artefato de REVISÃO (Checkpoint 2.4a). Copie para `c<checkpoint>-<role>.yml`.
+# Reviewer-owned. `disposition` é o ÚNICO campo que o gate lê e que muda (open ->
+# accepted/dismissed). A CLAIM (severity/location/description) é selada por
+# `fingerprint`; editá-la sem re-selar → `review:check` vermelho.
+# Dica: deixe `fingerprint: x` e rode `yarn review:check` — ele imprime o esperado.
 checkpoint: "3"
 role: technical_audit # technical_audit | architectural_review
 actor: codex-cli
-model: GPT-5 Codex # opcional
-ref: "#33 @ <sha>" # opcional
-date: "2026-06-02" # opcional (string)
 decision: changes_requested # approved | changes_requested | blocked
-summary: "uma linha"
+findings_emitted: 1 # = nº de findings abaixo (anti-deleção)
 findings:
-  - id: F1
+  - id: F1 # contíguo: F1, F2, F3…
     severity: high # critical | high | medium | low
-    status: open # open | resolved | accepted | dismissed
-    description: "o achado, em uma linha"
-  # - id: F2
-  #   severity: low
-  #   status: resolved
-  #   description: "..."
+    location: "src/x.ts#L10-L20" # "<path>#L<a>-<b>" OU "global" (arquitetural) — obrigatório
+    description: "o achado em uma linha"
+    disposition: open # open | accepted | dismissed — SÓ o reviewer fecha
+    fingerprint: x # sha256(id|severity|location|description)[:12]; `review:check` valida

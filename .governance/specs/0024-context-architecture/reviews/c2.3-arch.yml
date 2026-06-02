@@ -1,35 +1,46 @@
-# DOGFOOD (Checkpoint 2.4): a Architectural Review do Checkpoint 2.3 — antes um
-# comentário longo no PR #33 — agora vive aqui como artefato versionado.
+# DOGFOOD (Checkpoint 2.4a): Architectural Review do Checkpoint 2.3 como artefato.
+# Reviewer-owned. `disposition` é o único campo que o gate lê e que muda (não entra
+# no fingerprint). Editar a CLAIM (severity/location/description) sem re-selar →
+# `review:check` vermelho. Resoluções do implementador vivem em c2.3-resolutions.yml.
 checkpoint: "2.3"
 role: architectural_review
 actor: claude
-model: opus-4.8
-ref: "#33 @ 63670bb"
-date: "2026-06-01"
 decision: changes_requested
-summary: "Topology-as-data correto, mas SSOT contradizia o git e faltava DEC; absorvido em 2.3a/2.3b."
+findings_emitted: 6
 findings:
-  - id: B1
+  - id: F1
     severity: high
-    status: resolved # 2.3a: removeu nó-fantasma, dobrou em #33, reconciliou
-    description: "SSOT (state.yml topology) contradizia a realidade git (nó checkpoint-2.3 fantasma, github_pr null)."
-  - id: B2
+    location: global
+    description: "[B1] SSOT (state.yml topology) contradizia a realidade git: no checkpoint-2.3 fantasma (github_pr null)"
+    disposition: accepted
+    fingerprint: 617595b7d83c
+  - id: F2
     severity: high
-    status: resolved # 2.3a: [DEC-0024-G07] registrado
-    description: "Decisão estrutural (topology-as-data + enforcement L4) sem [DEC] — o Anti-DAG exigia DEC."
-  - id: O1
+    location: global
+    description: "[B2] decisao estrutural (topology-as-data + enforcement L4) sem [DEC]; o Anti-DAG exigia DEC"
+    disposition: accepted
+    fingerprint: 827590dc5087
+  - id: F3
     severity: medium
-    status: resolved # 2.3a: plan.md rotulado como projeção derivada
-    description: "Dual-SSOT: topologia vivia em state.yml E plan.md sem hierarquia declarada."
-  - id: O5
+    location: .governance/specs/0024-context-architecture/plan.md
+    description: "[O1] dual-SSOT: topologia vivia em state.yml E plan.md sem hierarquia declarada"
+    disposition: accepted
+    fingerprint: fbd65a511e25
+  - id: F4
     severity: medium
-    status: resolved # 2.3b: well-formedness local -> promovido a required
-    description: "governance-pr-check advisory por SSOT não-guardada; ambiguidade enforcement vs realidade."
-  - id: O6
+    location: global
+    description: "[O5] governance-pr-check advisory por SSOT nao-guardada; ambiguidade enforcement vs realidade"
+    disposition: accepted
+    fingerprint: c14e939cf691
+  - id: F5
     severity: medium
-    status: resolved # 2.3a: invariantes de sequence no serializer
-    description: "sequence sem invariantes (unicidade/contiguidade) no schema."
-  - id: O2
+    location: src/infrastructure/yaml/workflowStateSerializer.ts
+    description: "[O6] sequence sem invariantes (unicidade/contiguidade) no schema"
+    disposition: accepted
+    fingerprint: 1dbe6f9e3d9e
+  - id: F6
     severity: low
-    status: resolved # 2.3a: header ancorado + stack tolerante
-    description: "governance-pr-check frágil: seções por substring solta; linha 'Stack atual' exata."
+    location: src/cli/governance-pr-check.ts
+    description: "[O2] governance-pr-check fragil: secoes por substring solta; linha Stack atual exata"
+    disposition: accepted
+    fingerprint: a496c87d0820
