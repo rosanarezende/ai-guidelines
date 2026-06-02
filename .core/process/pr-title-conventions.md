@@ -211,7 +211,7 @@ Esta convenção é **validada** pelo `governance-pr-check` (L4 CI), que carrega
 
 - ADR 0020 — Governance precede e protege execução.
 - ADR 0021 — Enforcement estrutural precede consciência comportamental.
-- DEC-0024-G07 — topologia como dado (`state.yml` SSOT) + enforcement L4 de projeções (advisory até o guard inverso).
+- DEC-0024-G07 — topologia como dado (`state.yml` SSOT) + enforcement L4 de projeções (`required` desde 2026-06-01; well-formedness por guard local — paridade-API é hardening não-bloqueante).
 - DEC-0023-D04 — PR pre-model declarado (precedente para uso de 🧭).
 - DEC-0023-E05 — Fast-track strictness.
 - `.github/pull_request_template.md` — checkboxes operacionais que materializam a convenção no fluxo de criação de PR.
