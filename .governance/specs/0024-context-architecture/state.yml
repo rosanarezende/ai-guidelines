@@ -20,7 +20,7 @@ next:
 topology:
   cursor:
     pr: ruleset-producibility
-    checkpoint: checkpoint-2.4c
+    checkpoint: checkpoint-2.4d
   prs:
     concluded:
       - id: base-governance
@@ -50,6 +50,7 @@ topology:
           - checkpoint-2.4a
           - checkpoint-2.4b
           - checkpoint-2.4c
+          - checkpoint-2.4d
 
     planned:
       # `sequence` = posicao no STACK de execucao (1..K, contigua), NAO o numero
