@@ -20,6 +20,17 @@
 >
 > **Proveniência** (comentários nos PRs): `ref: #<PR> @ <sha>` · `checkpoint: <N>` · `role: <implementation|technical_audit|architectural_review|human_gate>`. **Template canônico do comentário de checkpoint:** [`.core/process/checkpoint-comment-template.md`](../../../.core/process/checkpoint-comment-template.md).
 
+> ## 🔁 Nota de fase — ABSORÇÃO + MODELAGEM REABERTA / TRILHA DE CONVERGÊNCIA (2026-06-03, `[DEC-0024-G08]`) — _vigente_
+>
+> Os eixos `G03/G04/G05` foram **reabertos para modelagem** (ver `spec.md § nota de fase` + `decision-brief § [DEC-0024-G08]`). A **trilha de execução** deixou de ser a sequência de absorção 3–12 isolada e passou a ser o **programa de convergência orientado a grafo** — a **SSOT estrutural é `state.yml § topology`** (que já reconcilia: `#33` concluído, `#34` ativo, e a trilha planejada). Os checkpoints de absorção originais (3–12) foram **dobrados** nos PRs de convergência onde se sobrepõem (mapeamento nos comentários de cada nó da topologia).
+>
+> **Trilha de convergência (SSOT = `state.yml § topology`):**
+> `#34 insights-in-flight` (ativo — capability Insights + kernel Knowledge + KnowledgeGraph núcleo) → `pr-cli-cutover` → `pr-doctrine` (+doc-cleanup) → `pr-decision` (+decouple-brief; dissolve NEXT) → `pr-rule-guardrail` (+GG-0003/GG-0002/taxonomy-removal) → `pr-projection-split` (+AGENTS-sync) → `pr-workitem-registry` (+provenance) → `pr-dualroot-collapse` (+.specify migration) → `integration-final`.
+>
+> A tabela "Sequência de Checkpoints" abaixo é **registro histórico** do plano de absorção pré-reabertura; vale como referência do _quê/por quê_ de cada item absorvido, mas a **ordem e o veículo** vivem na topologia.
+>
+> ---
+>
 > ## 🔁 Nota de fase — ABSORÇÃO OPERACIONAL (2026-05-31, Checkpoint 2)
 >
 > **Stage 1 (research → decision-brief → gate) encerrou.** As decisões estão `Resolved` (`[DEC-0024-G00]`/`G02`/`G06`); o gate de research está **fechado**; `state.yml` = `implementation`/`closed`. A 0024 está em **absorção operacional**: fazer o sistema refletir decisões já tomadas, removendo divergências decisão↔código **uma a uma**.

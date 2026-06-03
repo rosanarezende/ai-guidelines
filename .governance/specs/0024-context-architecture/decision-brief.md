@@ -204,16 +204,17 @@
 
 > Os IDs `[DEC-0024-G##]` permanecem **âncoras estáveis** (citados em findings, ADRs, git, handoffs) — mas **não organizam mais a leitura**. Mapa de equivalência:
 
-| ID histórico | Tema                                 | Estado atual                                                  |
-| :----------- | :----------------------------------- | :------------------------------------------------------------ |
-| `G00`        | identidade (transformação)           | **Decidido** — § 1 (Resolved 2026-05-31)                      |
-| `G01`        | estrutura/gramática                  | **Aberto** — § 2 (`F-AG01`)                                   |
-| `G02`        | taxonomia → bloco + propriedade      | **Decidido** — § 1 (Resolved 2026-05-31) → migração em § 4    |
-| `G03`        | promotion pipeline                   | **Aberto** — § 2 (`F-AG03`)                                   |
-| `G04`        | contrato de boilerplate / casa única | **Aberto** — § 2 (`F-AG04`); drift-guard → § 4                |
-| `G05`        | projeções / decision-session         | **Aberto** — § 2 (`F-AG05` resíduo); gate-ready → GG-0001     |
-| `G06`        | contrato da cadeia                   | **Decidido** — § 1 (Resolved 2026-05-30) → ADR no fechamento  |
-| `G07`        | topologia-as-data + enforcement L4   | **Decidido** — § 1 (Resolved 2026-06-01) → enforcement em § 4 |
+| ID histórico | Tema                                                  | Estado atual                                                                                                 |
+| :----------- | :---------------------------------------------------- | :----------------------------------------------------------------------------------------------------------- |
+| `G00`        | identidade (transformação)                            | **Decidido** — § 1 (Resolved 2026-05-31)                                                                     |
+| `G01`        | estrutura/gramática                                   | **Aberto** — § 2 (`F-AG01`)                                                                                  |
+| `G02`        | taxonomia → bloco + propriedade                       | **Decidido** — § 1 (Resolved 2026-05-31) → migração em § 4                                                   |
+| `G03`        | promotion pipeline                                    | **Reaberto (modelagem)** — `[DEC-0024-G08]` 2026-06-03; pipeline `insight→decision→rule\|guardrail→doctrine` |
+| `G04`        | contrato de boilerplate / casa única                  | **Reaberto (modelagem)** — `[DEC-0024-G08]`; casa única / tri-root → SSOT na trilha de convergência          |
+| `G05`        | projeções / decision-session                          | **Reaberto (modelagem)** — `[DEC-0024-G08]`; projeções derivadas (fonte↔projeção) + KnowledgeGraph           |
+| `G06`        | contrato da cadeia                                    | **Decidido** — § 1 (Resolved 2026-05-30) → ADR no fechamento                                                 |
+| `G07`        | topologia-as-data + enforcement L4                    | **Decidido** — § 1 (Resolved 2026-06-01) → enforcement em § 4                                                |
+| `G08`        | reabertura de G03/G04/G05 + direção orientada a grafo | **Decidido** — Resolved 2026-06-03 (owner); a modelagem fica DENTRO da 0024; NÃO há 0025 independente        |
 
 ---
 
@@ -225,3 +226,18 @@
 - [x] `[DEC-0024-G02]` — Resolved 2026-05-31 / @rosanarezende
 - [x] `[DEC-0024-G06]` — Resolved 2026-05-30 / @rosanarezende
 - [x] `[DEC-0024-G07]` — Resolved 2026-06-01 / @rosanarezende
+- [x] `[DEC-0024-G08]` — Resolved 2026-06-03 / @rosanarezende
+
+---
+
+### `[DEC-0024-G08]` Reabertura de G03/G04/G05 + direção arquitetural orientada a grafo
+
+**Status:** Resolved (2026-06-03, owner).
+
+**O que está sendo aceito:** os eixos `G03` (promotion pipeline), `G04` (casa única / tri-root→SSOT) e `G05` (projeções), deixados **abertos** no Stage 1, são **reabertos para modelagem deliberada DENTRO da 0024**, porque se mostraram necessários para problemas reais observados no uso (mis-binding da retomada; recuperabilidade; "a resposta estava num ADR esquecido"). A **direção assumida** é arquitetura **orientada a grafo**: entidades (`Insight→Decision→Rule/Guardrail→Doctrine`) + relações navegáveis (`KnowledgeRef`) + projeções derivadas (`KnowledgeGraph`, fonte↔projeção). O objetivo passa a ser **convergir o repositório** para esse modelo.
+
+**O que NÃO está sendo aceito:** (i) reabrir `G00/G02/G06/G07` (seguem cravados); (ii) que tenha surgido uma **spec 0025 independente** — a evidência (brief: G03/G04/G05 são eixos da própria 0024; `plan.md` §41: split 0025 superado; inventário 2026-05-29: candidatas Grupo B já catalogadas) mostra que **não** nasceu domínio independente: é a modelagem deferida da 0024 ressurgindo + candidatas de migração já identificadas.
+
+**Concorrentes refutados:** "isto é a 0025" (refutado: split absorvido na 0024); "isto é drift de absorção a estancar" (refutado pelo owner: a reabertura é decisão, os eixos eram necessários). **O que reabriria:** evidência de que a direção a grafo não resolve a recuperabilidade observada.
+
+**Consequência:** a disciplina "NÃO re-modelar" passa a valer **só para os eixos resolvidos**; em G03/G04/G05 a modelagem é a direção. Trilha de execução = programa de convergência (ver `plan.md § Trilha de convergência` + `state.yml § topology`).

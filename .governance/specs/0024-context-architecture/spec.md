@@ -15,9 +15,19 @@
 >
 > **Slug renomeado (2026-05-30).** O diretório e a branch foram migrados de `0024-handoff-as-first-class` para **`0024-context-architecture`** (operação deliberada, sob autorização explícita da owner) — refletindo que a 0024 deixou de ser sobre handoff e passou a ser a **arquitetura de contexto**. O **número 0024 é imutável** (ADR 0017); apenas o slug mudou. O retarget do PR #30 acompanha o rename remoto da branch.
 
+> ## 🔁 Nota de fase — ABSORÇÃO + MODELAGEM REABERTA (2026-06-03, `[DEC-0024-G08]`) — _estado vigente_
+>
+> **Reposiciona a spec sem reescrever o histórico.** Durante a absorção, os eixos `G03` (promotion pipeline), `G04` (casa única / tri-root→SSOT) e `G05` (projeções) — deixados **abertos** no Stage 1 — mostraram-se **necessários para problemas reais observados no uso** (mis-binding da retomada; recuperabilidade; "a resposta estava num ADR esquecido"). Decisão do owner (`[DEC-0024-G08]`): **reabri-los para modelagem deliberada, DENTRO da 0024**, com **direção arquitetural orientada a grafo** (entidades `Insight→Decision→Rule/Guardrail→Doctrine` + relações navegáveis `KnowledgeRef` + projeções derivadas / `KnowledgeGraph`).
+>
+> - **Não há 0025 independente** — a evidência (G03/G04/G05 são eixos desta spec; `plan.md` §41: split 0025 superado; inventário 2026-05-29: candidatas Grupo B) mostra que é a **modelagem deferida da 0024 ressurgindo**, não um domínio novo.
+> - **Reconciliação dos não-objetivos abaixo:** os itens antes deferidos como "fora de escopo / faseado" que pertencem a G03/G04/G05 (re-modelagem do registry como `WorkItem`, casa única / consolidação tri-root, modelo de projeção) **entram agora na trilha de convergência** como direção de execução. Os limites "modelo ≠ migração" e "graph database / memory engine fora" permanecem na intenção: o grafo é **read-model derivado** (não DB/memória); a migração é faseada por checkpoint, não retrofit em massa.
+> - **Trilha de execução** = programa de convergência: `cli-cutover → doctrine → decision → rule/guardrail → projection-split → workitem-registry → dualroot-collapse` (ver `plan.md § Trilha de convergência` + `state.yml § topology`). Já materializado (PR #34): capability Insights + kernel Knowledge + KnowledgeGraph núcleo.
+>
+> ---
+>
 > ## 🔁 Nota de fase — ABSORÇÃO OPERACIONAL (2026-05-31, Checkpoint 2 · vocabulário no 2.1 · topologia canônica no 2.1a)
 >
-> **Esta nota reposiciona a spec sem reescrever o corpo abaixo.** Tudo a partir de _"Visão arquitetural"_ é **registro histórico** do enquadramento research-first (2026-05-28/29) e é preservado verbatim (princípio de imutabilidade + `sem apagar histórico`). O **estado vigente** é o desta nota.
+> **Esta nota reposiciona a spec sem reescrever o corpo abaixo.** Tudo a partir de _"Visão arquitetural"_ é **registro histórico** do enquadramento research-first (2026-05-28/29) e é preservado verbatim (princípio de imutabilidade + `sem apagar histórico`). O **estado vigente** é o da nota acima (2026-06-03).
 >
 > - **A pesquisa (Stage 1) encerrou; a 0024 entrou em absorção operacional.** Conclusão-raiz: _o problema não é falta de decisão — é falta de absorção._ As decisões convergidas ainda não alteraram o comportamento do sistema ("a arquitetura converge enquanto o código diverge"). O trabalho agora é **remover divergências decisão↔código uma a uma**, não re-modelar.
 > - **Decisões cravadas (`decision-brief.md`, reestruturado por estado):** `[DEC-0024-G00]` identidade (transformação `contexto humano → governança executável`), `[DEC-0024-G02]` taxonomia de tipos removida (→ bloco + propriedade `exige-julgamento`), `[DEC-0024-G06]` contrato da cadeia — todas **`Resolved`**. **Gate fechado.** `state.yml` = `stage: implementation` / `gate.status: closed`.
