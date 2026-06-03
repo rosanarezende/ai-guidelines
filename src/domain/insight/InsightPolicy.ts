@@ -75,29 +75,6 @@ export function assertOccurrence(occ: unknown, where: string): void {
 export function assertCaptureDraft(draft: CaptureDraft): void {
   assertValidText(draft.text);
   assertValidOrigin(draft.origin, "captura");
-  if (draft.links) assertValidLinks(draft.links, null);
-}
-
-function assertValidLinks(links: ReadonlyArray<unknown>, selfId: string | null): void {
-  const seen = new Set<string>();
-  for (const link of links) {
-    if (!isInsightId(link)) {
-      throw new GovernanceError(
-        "INSIGHT_LINK_MALFORMED",
-        `Link "${String(link)}" não é um InsightId válido (esperado PIT-NNNN).`
-      );
-    }
-    if (selfId !== null && link === selfId) {
-      throw new GovernanceError(
-        "INSIGHT_LINK_SELF_REFERENCE",
-        `A percepção ${selfId} não pode referenciar a si mesma em links.`
-      );
-    }
-    if (seen.has(link)) {
-      throw new GovernanceError("INSIGHT_LINK_DUPLICATE", `Link duplicado: "${link}".`);
-    }
-    seen.add(link);
-  }
 }
 
 /**
@@ -142,18 +119,45 @@ export function assertInsightInvariants(insight: Insight): void {
     );
   }
 
-  assertValidLinks(insight.links, insight.id);
   assertStatusFields(insight);
+}
+
+/**
+ * Metadados obrigatórios de uma transição terminal: `resolvedAt` (ISO, sempre)
+ * + `resolvedBy` (opcional — só quando o humano declara; nunca inferido).
+ */
+function assertTerminalMeta(insight: Insight): void {
+  if (insight.resolvedAt === undefined) {
+    throw new GovernanceError(
+      "INSIGHT_TERMINAL_REQUIRES_TIMESTAMP",
+      `A percepção ${insight.id} é terminal ('${insight.status}') mas falta 'resolvedAt'.`
+    );
+  }
+  assertValidIso(insight.resolvedAt, `${insight.id}.resolvedAt`);
+  if (
+    insight.resolvedBy !== undefined &&
+    (typeof insight.resolvedBy !== "string" || insight.resolvedBy.trim() === "")
+  ) {
+    throw new GovernanceError(
+      "INSIGHT_RESOLVED_BY_INVALID",
+      `${insight.id}.resolvedBy, quando presente, deve ser uma string não-vazia (omita a chave).`
+    );
+  }
 }
 
 /** Coerência entre `status` e os campos de resolução (anti-estado inválido). */
 export function assertStatusFields(insight: Insight): void {
   switch (insight.status) {
     case "open":
-      if (insight.promotion !== undefined || insight.discardReason !== undefined) {
+      if (
+        insight.promotion !== undefined ||
+        insight.discardReason !== undefined ||
+        insight.resolvedAt !== undefined ||
+        insight.resolvedBy !== undefined
+      ) {
         throw new GovernanceError(
           "INSIGHT_OPEN_WITH_RESOLUTION",
-          `A percepção ${insight.id} está 'open' mas carrega resolução — estado inválido.`
+          `A percepção ${insight.id} está 'open' mas carrega metadados de resolução — estado inválido.`
         );
       }
       return;
@@ -175,6 +179,7 @@ export function assertStatusFields(insight: Insight): void {
           `A percepção ${insight.id} está 'promoted' mas falta um alvo válido (kind + ref).`
         );
       }
+      assertTerminalMeta(insight);
       return;
     case "discarded":
       if (insight.promotion !== undefined) {
@@ -189,6 +194,7 @@ export function assertStatusFields(insight: Insight): void {
           `A percepção ${insight.id} está 'discarded' mas falta um motivo (discardReason).`
         );
       }
+      assertTerminalMeta(insight);
       return;
     default:
       throw new GovernanceError(

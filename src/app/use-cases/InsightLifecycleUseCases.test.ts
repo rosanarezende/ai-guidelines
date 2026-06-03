@@ -4,6 +4,7 @@ import {
   parseInsightsLedger,
   stringifyInsightsLedger,
 } from "../../infrastructure/yaml/insightsLedgerSerializer.js";
+import { Clock } from "../ports/Clock.js";
 import { InsightStore } from "../ports/InsightStore.js";
 import { DiscardInsight } from "./DiscardInsight.js";
 import { PromoteInsight } from "./PromoteInsight.js";
@@ -19,6 +20,7 @@ class InMemoryInsightStore implements InsightStore {
 }
 
 const ORIGIN: OriginContext = { spec: "0024", cursor: "checkpoint-2.4d" };
+const clock: Clock = { nowIso: () => "2026-06-25T12:00:00.000Z" };
 
 function storeSeededWith(text: string): { store: InsightStore; id: string } {
   const store = new InMemoryInsightStore();
@@ -31,11 +33,12 @@ function storeSeededWith(text: string): { store: InsightStore; id: string } {
 describe("PromoteInsight (use case — fachada sobre o domínio)", () => {
   it("gradua a percepção e a retira da fila viva, persistindo o alvo", () => {
     const { store, id } = storeSeededWith("percepção que vai graduar a guardrail");
-    const promoted = new PromoteInsight({ store }).execute({
+    const promoted = new PromoteInsight({ store, clock }).execute({
       id,
       target: { kind: "guardrail", ref: "GG-0004" },
     });
     expect(promoted.status).toBe("promoted");
+    expect(promoted.resolvedAt).toBe("2026-06-25T12:00:00.000Z");
     expect(store.load().find(id)?.promotion).toEqual({ kind: "guardrail", ref: "GG-0004" });
     expect(store.load().open()).toHaveLength(0);
   });
@@ -43,7 +46,7 @@ describe("PromoteInsight (use case — fachada sobre o domínio)", () => {
   it("propaga erro de domínio para id inexistente", () => {
     const { store } = storeSeededWith("percepção qualquer longa");
     expect(() =>
-      new PromoteInsight({ store }).execute({
+      new PromoteInsight({ store, clock }).execute({
         id: "PIT-9999",
         target: { kind: "adr", ref: "ADR-1" },
       })
@@ -54,7 +57,10 @@ describe("PromoteInsight (use case — fachada sobre o domínio)", () => {
 describe("DiscardInsight (use case — fachada sobre o domínio)", () => {
   it("descarta com motivo e a retira da fila viva", () => {
     const { store, id } = storeSeededWith("percepção que vai ser descartada");
-    const discarded = new DiscardInsight({ store }).execute({ id, reason: "não se sustentou" });
+    const discarded = new DiscardInsight({ store, clock }).execute({
+      id,
+      reason: "não se sustentou",
+    });
     expect(discarded.status).toBe("discarded");
     expect(store.load().find(id)?.discardReason).toBe("não se sustentou");
     expect(store.load().open()).toHaveLength(0);
@@ -62,6 +68,8 @@ describe("DiscardInsight (use case — fachada sobre o domínio)", () => {
 
   it("propaga erro de domínio ao descartar sem motivo", () => {
     const { store, id } = storeSeededWith("percepção qualquer longa");
-    expect(() => new DiscardInsight({ store }).execute({ id, reason: "   " })).toThrow(/motivo/);
+    expect(() => new DiscardInsight({ store, clock }).execute({ id, reason: "   " })).toThrow(
+      /motivo/
+    );
   });
 });

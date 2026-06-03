@@ -72,14 +72,14 @@ export class InsightLedger {
     return next;
   }
 
-  promote(id: InsightId, target: PromotionTarget): Insight {
-    const next = promoteInsight(this.require(id), target);
+  promote(id: InsightId, target: PromotionTarget, at: string, by?: string): Insight {
+    const next = promoteInsight(this.require(id), target, at, by);
     this.items.set(id, next);
     return next;
   }
 
-  discard(id: InsightId, reason: string): Insight {
-    const next = discardInsight(this.require(id), reason);
+  discard(id: InsightId, reason: string, at: string, by?: string): Insight {
+    const next = discardInsight(this.require(id), reason, at, by);
     this.items.set(id, next);
     return next;
   }

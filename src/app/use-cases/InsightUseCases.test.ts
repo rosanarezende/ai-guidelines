@@ -81,7 +81,7 @@ describe("ListOpenInsights (use case)", () => {
       { text: "percepção que vai graduar", origin: ORIGIN },
       "2026-06-03T10:00:00.000Z"
     );
-    ledger.promote(b.id, { kind: "guardrail", ref: "GG-0004" });
+    ledger.promote(b.id, { kind: "guardrail", ref: "GG-0004" }, "2026-06-04T10:00:00.000Z");
     store.save(ledger);
 
     const open = new ListOpenInsights({ store }).execute();

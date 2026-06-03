@@ -2,11 +2,11 @@
  * CLI do tier "Percepções em Trânsito".
  *
  * Comandos:
- *   `ai-guidelines insight add "<texto>" [--note ...] [--link PIT-NNNN]`
+ *   `ai-guidelines insight add "<texto>" [--note ...]`
  *   `ai-guidelines insight saw <PIT-NNNN> [--note ...]`
  *   `ai-guidelines insight list`
- *   `ai-guidelines insight promote <PIT-NNNN> --to <backlog|adr|guardrail|dec> --ref <ID>`
- *   `ai-guidelines insight discard <PIT-NNNN> --reason "<motivo>"`
+ *   `ai-guidelines insight promote <PIT-NNNN> --to <backlog|adr|guardrail|dec> --ref <ID> [--by @actor]`
+ *   `ai-guidelines insight discard <PIT-NNNN> --reason "<motivo>" [--by @actor]`
  *
  * Composition root: monta FileInsightStore + SystemClock + use-cases e deriva
  * a origem (spec/cursor) da spec ativa. Fachada fina sobre os casos de uso —
@@ -91,11 +91,6 @@ function flagValue(parsed: ParsedArgs, name: string): string | undefined {
   return last.trim() === "" ? undefined : last;
 }
 
-/** Todos os valores não-vazios de um flag repetível (ex.: `--link`). */
-function flagValues(parsed: ParsedArgs, name: string): ReadonlyArray<string> {
-  return (parsed.flags.get(name) ?? []).filter((value) => value.trim() !== "");
-}
-
 function buildFs(options: InsightRunOptions): WorkflowFileSystem {
   return options.fs ?? new NodeWorkflowFileSystem(options.repoRoot);
 }
@@ -106,13 +101,13 @@ function buildStore(options: InsightRunOptions, fs: WorkflowFileSystem): Insight
 
 function resolveOrigin(fs: WorkflowFileSystem, logger: Logger): OriginContext | null {
   const detected = new DetectActiveSpec(fs).run();
-  if (!detected.location) {
+  if (!detected.location || detected.specId === undefined) {
     logger.error(`Não foi possível detectar spec ativa: ${detected.reason}`);
     logger.error(`Dica: confira o branch (esperado: feat/spec-NNNN-slug).`);
     return null;
   }
   const { state } = new ReadWorkflowState(fs, parseWorkflowState).run(detected.location);
-  return deriveOrigin(detected.location, state);
+  return deriveOrigin(detected.specId, state);
 }
 
 function reportError(err: unknown, logger: Logger): number {
@@ -128,11 +123,10 @@ function runAdd(rest: ReadonlyArray<string>, options: InsightRunOptions, logger:
   const parsed = parseInsightArgs(rest);
   const text = parsed.positionals.join(" ").trim();
   if (!text) {
-    logger.error(`Uso: ai-guidelines insight add "<texto>" [--note "..."] [--link PIT-NNNN]`);
+    logger.error(`Uso: ai-guidelines insight add "<texto>" [--note "..."]`);
     return 2;
   }
   const note = flagValue(parsed, "note");
-  const links = flagValues(parsed, "link");
   const fs = buildFs(options);
   const store = buildStore(options, fs);
   const clock = options.clock ?? new SystemClock();
@@ -143,7 +137,6 @@ function runAdd(rest: ReadonlyArray<string>, options: InsightRunOptions, logger:
       text,
       origin,
       ...(note !== undefined ? { note } : {}),
-      ...(links.length > 0 ? { links } : {}),
     });
     logger.info(
       `Capturada ${insight.id} (spec ${origin.spec}${origin.cursor ? ` / ${origin.cursor}` : ""}).`
@@ -199,12 +192,18 @@ function runPromote(
     logger.error(`--to inválido: "${kind}" (use: ${PROMOTION_KINDS.join(" | ")}).`);
     return 2;
   }
-  const fs = buildFs(options);
-  const store = buildStore(options, fs);
+  const by = flagValue(parsed, "by");
+  const store = buildStore(options, buildFs(options));
+  const clock = options.clock ?? new SystemClock();
   try {
-    const promoted = new PromoteInsight({ store }).execute({ id, target: { kind, ref } });
+    const promoted = new PromoteInsight({ store, clock }).execute({
+      id,
+      target: { kind, ref },
+      ...(by !== undefined ? { by } : {}),
+    });
     logger.info(
-      `Promovida ${promoted.id} → ${promoted.promotion?.kind} ${promoted.promotion?.ref}.`
+      `Promovida ${promoted.id} → ${promoted.promotion?.kind} ${promoted.promotion?.ref}` +
+        `${promoted.resolvedBy ? ` (por ${promoted.resolvedBy})` : ""}.`
     );
     return 0;
   } catch (err) {
@@ -221,14 +220,22 @@ function runDiscard(
   const id = parsed.positionals[0];
   const reason = flagValue(parsed, "reason");
   if (!id || !reason) {
-    logger.error(`Uso: ai-guidelines insight discard <PIT-NNNN> --reason "<motivo>"`);
+    logger.error(`Uso: ai-guidelines insight discard <PIT-NNNN> --reason "<motivo>" [--by @actor]`);
     return 2;
   }
-  const fs = buildFs(options);
-  const store = buildStore(options, fs);
+  const by = flagValue(parsed, "by");
+  const store = buildStore(options, buildFs(options));
+  const clock = options.clock ?? new SystemClock();
   try {
-    const discarded = new DiscardInsight({ store }).execute({ id, reason });
-    logger.info(`Descartada ${discarded.id} (${discarded.discardReason}).`);
+    const discarded = new DiscardInsight({ store, clock }).execute({
+      id,
+      reason,
+      ...(by !== undefined ? { by } : {}),
+    });
+    logger.info(
+      `Descartada ${discarded.id} (${discarded.discardReason})` +
+        `${discarded.resolvedBy ? ` (por ${discarded.resolvedBy})` : ""}.`
+    );
     return 0;
   } catch (err) {
     return reportError(err, logger);

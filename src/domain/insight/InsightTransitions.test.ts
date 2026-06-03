@@ -11,6 +11,7 @@ const ORIGIN_0024: OriginContext = { spec: "0024", cursor: "checkpoint-2.4d" };
 const ORIGIN_0025: OriginContext = { spec: "0025", cursor: null };
 const T1 = "2026-06-03T10:00:00Z";
 const T2 = "2026-06-20T09:00:00Z";
+const TR = "2026-06-25T12:00:00Z"; // instante da transição terminal
 
 function captured() {
   return captureInsight(
@@ -70,32 +71,43 @@ describe("recorrência (acumulação cross-spec)", () => {
   });
 
   it("não registra recorrência em percepção terminal", () => {
-    const promoted = promoteInsight(captured(), { kind: "guardrail", ref: "GG-0004" });
+    const promoted = promoteInsight(captured(), { kind: "guardrail", ref: "GG-0004" }, TR);
     expect(() => recordOccurrence(promoted, ORIGIN_0025, T2)).toThrow(/terminal/);
   });
 });
 
 describe("promoção (graduação) e descarte — terminais", () => {
-  it("promove para um artefato governado", () => {
-    const i = promoteInsight(captured(), { kind: "guardrail", ref: " GG-0004 " });
+  it("promove para um artefato governado, carimbando quando (e quem, se declarado)", () => {
+    const i = promoteInsight(captured(), { kind: "guardrail", ref: " GG-0004 " }, TR, " @rosana ");
     expect(i.status).toBe("promoted");
     expect(i.promotion).toEqual({ kind: "guardrail", ref: "GG-0004" });
+    expect(i.resolvedAt).toBe(TR);
+    expect(i.resolvedBy).toBe("@rosana");
     expect(i.discardReason).toBeUndefined();
   });
 
-  it("descarta com motivo (anti-recaptura)", () => {
-    const i = discardInsight(captured(), "não se sustentou");
+  it("promove sem autor declarado — resolvedBy omitido (sem inferência)", () => {
+    const i = promoteInsight(captured(), { kind: "adr", ref: "ADR-0025" }, TR);
+    expect(i.resolvedAt).toBe(TR);
+    expect(i.resolvedBy).toBeUndefined();
+  });
+
+  it("descarta com motivo (anti-recaptura), carimbando quando", () => {
+    const i = discardInsight(captured(), "não se sustentou", TR);
     expect(i.status).toBe("discarded");
     expect(i.discardReason).toBe("não se sustentou");
+    expect(i.resolvedAt).toBe(TR);
     expect(i.promotion).toBeUndefined();
   });
 
   it("rejeita descarte sem motivo", () => {
-    expect(() => discardInsight(captured(), "   ")).toThrow(/motivo/);
+    expect(() => discardInsight(captured(), "   ", TR)).toThrow(/motivo/);
   });
 
   it("não promove uma percepção já terminal (imutabilidade)", () => {
-    const discarded = discardInsight(captured(), "ruído");
-    expect(() => promoteInsight(discarded, { kind: "adr", ref: "ADR-0025" })).toThrow(/terminal/);
+    const discarded = discardInsight(captured(), "ruído", TR);
+    expect(() => promoteInsight(discarded, { kind: "adr", ref: "ADR-0025" }, TR)).toThrow(
+      /terminal/
+    );
   });
 });

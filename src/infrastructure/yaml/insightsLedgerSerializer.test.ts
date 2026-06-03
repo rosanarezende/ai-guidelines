@@ -18,9 +18,9 @@ function seeded(): InsightLedger {
   );
   ledger.recordOccurrence(a.id, { spec: "0025", cursor: null }, T2, "reapareceu no provenance");
   const b = ledger.capture({ text: "segunda percepção a graduar", origin: ORIGIN }, T1);
-  ledger.promote(b.id, { kind: "guardrail", ref: "GG-0004" });
+  ledger.promote(b.id, { kind: "guardrail", ref: "GG-0004" }, T2, "@rosana");
   const c = ledger.capture({ text: "terceira percepção descartável", origin: ORIGIN }, T1);
-  ledger.discard(c.id, "não se sustentou");
+  ledger.discard(c.id, "não se sustentou", T2);
   return ledger;
 }
 
@@ -37,7 +37,10 @@ describe("insightsLedgerSerializer (round-trip)", () => {
     expect(a?.occurrences).toHaveLength(2);
     expect(a?.occurrences[1].origin).toEqual({ spec: "0025", cursor: null });
     expect(reparsed.find("PIT-0002")?.promotion).toEqual({ kind: "guardrail", ref: "GG-0004" });
+    expect(reparsed.find("PIT-0002")?.resolvedAt).toBe(T2);
+    expect(reparsed.find("PIT-0002")?.resolvedBy).toBe("@rosana");
     expect(reparsed.find("PIT-0003")?.discardReason).toBe("não se sustentou");
+    expect(reparsed.find("PIT-0003")?.resolvedAt).toBe(T2);
   });
 
   it("omite cursor null e links vazios do YAML", () => {

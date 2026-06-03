@@ -51,7 +51,6 @@ export function captureInsight(draft: CaptureDraft, id: InsightId, at: string): 
     status: "open",
     capturedAt: at,
     occurrences: [buildOccurrence(at, draft.origin, draft.note)],
-    links: draft.links ? [...draft.links] : [],
   };
   assertInsightInvariants(insight);
   return insight;
@@ -75,25 +74,42 @@ export function recordOccurrence(
   return next;
 }
 
-/** Promove (gradua) a percepção para um artefato governado — terminal. */
-export function promoteInsight(insight: Insight, target: PromotionTarget): Insight {
+/**
+ * Promove (gradua) a percepção para um artefato governado — terminal.
+ * Registra o instante (`at`) e, se DECLARADO, o autor (`by`). Sem inferência.
+ */
+export function promoteInsight(
+  insight: Insight,
+  target: PromotionTarget,
+  at: string,
+  by?: string
+): Insight {
   ensureOpen(insight, "INSIGHT_PROMOTE_ON_TERMINAL", "promover");
+  assertValidIso(at, "resolvedAt");
   const next: Insight = {
     ...insight,
     status: "promoted",
     promotion: { kind: target.kind, ref: target.ref.trim() },
+    resolvedAt: at,
+    ...(by?.trim() ? { resolvedBy: by.trim() } : {}),
   };
   assertInsightInvariants(next);
   return next;
 }
 
-/** Descarta conscientemente a percepção (anti-recaptura) — terminal. */
-export function discardInsight(insight: Insight, reason: string): Insight {
+/**
+ * Descarta conscientemente a percepção (anti-recaptura) — terminal.
+ * Registra o instante (`at`) e, se DECLARADO, o autor (`by`).
+ */
+export function discardInsight(insight: Insight, reason: string, at: string, by?: string): Insight {
   ensureOpen(insight, "INSIGHT_DISCARD_ON_TERMINAL", "descartar");
+  assertValidIso(at, "resolvedAt");
   const next: Insight = {
     ...insight,
     status: "discarded",
     discardReason: typeof reason === "string" ? reason.trim() : reason,
+    resolvedAt: at,
+    ...(by?.trim() ? { resolvedBy: by.trim() } : {}),
   };
   assertInsightInvariants(next);
   return next;

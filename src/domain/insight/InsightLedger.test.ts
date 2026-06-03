@@ -29,7 +29,7 @@ describe("InsightLedger (coleção-agregado)", () => {
     const ledger = InsightLedger.empty();
     const a = ledger.capture({ text: "percepção que vai graduar", origin: ORIGIN }, T1);
     ledger.capture({ text: "percepção que segue aberta", origin: ORIGIN }, T2);
-    ledger.promote(a.id, { kind: "guardrail", ref: "GG-0004" });
+    ledger.promote(a.id, { kind: "guardrail", ref: "GG-0004" }, T2);
     expect(ledger.open().map((i) => i.id)).toEqual(["PIT-0002"]);
     expect(ledger.all()).toHaveLength(2); // histórico preservado
   });
@@ -37,7 +37,9 @@ describe("InsightLedger (coleção-agregado)", () => {
   it("lança em recorrência/promoção de id inexistente", () => {
     const ledger = InsightLedger.empty();
     expect(() => ledger.recordOccurrence("PIT-9999", ORIGIN, T1)).toThrow(/não existe/);
-    expect(() => ledger.promote("PIT-9999", { kind: "adr", ref: "ADR-1" })).toThrow(/não existe/);
+    expect(() => ledger.promote("PIT-9999", { kind: "adr", ref: "ADR-1" }, T1)).toThrow(
+      /não existe/
+    );
   });
 
   it("fromArray revalida e rejeita ids duplicados", () => {

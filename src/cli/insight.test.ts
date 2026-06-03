@@ -135,15 +135,26 @@ describe("ai-guidelines insight (CLI, ponta-a-ponta)", () => {
     });
     const { logger, out } = makeLogger();
     const code = await main(
-      ["insight", "promote", "PIT-0001", "--to", "guardrail", "--ref", "GG-0004"],
+      [
+        "insight",
+        "promote",
+        "PIT-0001",
+        "--to",
+        "guardrail",
+        "--ref",
+        "GG-0004",
+        "--by",
+        "@rosana",
+      ],
       {
         repoRoot: "/r",
         fs,
+        clock: new StubClock("2026-06-25T12:00:00.000Z"),
         logger,
       }
     );
     expect(code).toBe(0);
-    expect(out.join("\n")).toMatch(/Promovida PIT-0001 → guardrail GG-0004/);
+    expect(out.join("\n")).toMatch(/Promovida PIT-0001 → guardrail GG-0004 \(por @rosana\)/);
 
     const after = makeLogger();
     await main(["insight", "list"], { repoRoot: "/r", fs, logger: after.logger });

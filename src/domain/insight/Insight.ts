@@ -56,10 +56,9 @@ export type InsightStatus = "open" | "promoted" | "discarded";
  * Invariantes (ver {@link InsightPolicy}):
  * - `occurrences` é não-vazio e cronologicamente não-decrescente;
  * - `capturedAt` === `occurrences[0].at` (imutável);
- * - `open` ⇒ sem `promotion`/`discardReason`;
- * - `promoted` ⇒ `promotion` presente, sem `discardReason`;
- * - `discarded` ⇒ `discardReason` presente, sem `promotion`;
- * - `links` sem auto-referência nem duplicatas.
+ * - `open` ⇒ sem `promotion`/`discardReason`/`resolvedAt`/`resolvedBy`;
+ * - `promoted` ⇒ `promotion` + `resolvedAt` presentes, sem `discardReason`;
+ * - `discarded` ⇒ `discardReason` + `resolvedAt` presentes, sem `promotion`.
  */
 export interface Insight {
   readonly id: InsightId;
@@ -67,9 +66,12 @@ export interface Insight {
   readonly status: InsightStatus;
   readonly capturedAt: string;
   readonly occurrences: ReadonlyArray<Occurrence>;
-  readonly links: ReadonlyArray<InsightId>;
   readonly promotion?: PromotionTarget;
   readonly discardReason?: string;
+  /** Instante (ISO) da transição terminal — presente sse promoted/discarded. */
+  readonly resolvedAt?: string;
+  /** Quem decidiu a transição terminal; só quando DECLARADO (sem inferência de git). */
+  readonly resolvedBy?: string;
 }
 
 /** DTO de captura — sem id/timestamp (alocados pelo serviço/use case via Clock). */
@@ -77,7 +79,6 @@ export interface CaptureDraft {
   readonly text: string;
   readonly origin: OriginContext;
   readonly note?: string;
-  readonly links?: ReadonlyArray<InsightId>;
 }
 
 // ── Derivações puras ────────────────────────────────────────────────────────

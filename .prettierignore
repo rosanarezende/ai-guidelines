@@ -25,3 +25,8 @@ node_modules/
 
 # Monorepo outputs
 packages/*/dist/
+
+# Ledger de Percepções em Trânsito: a forma é OWNED pelo serializer do domínio
+# (insightsLedgerSerializer) e gateada por `insights:check` (forma canônica).
+# Deixar o prettier reformatar quebraria a paridade raw↔canônica.
+.governance/runtime/insights.yml

@@ -1,21 +1,23 @@
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { InsightLedger } from "../domain/insight/InsightLedger.js";
+import { stringifyInsightsLedger } from "../infrastructure/yaml/insightsLedgerSerializer.js";
 import { main } from "./insightsCheck.js";
 
-const VALID = `version: 1
-insights:
-  - id: PIT-0001
-    text: percepção válida suficientemente longa
-    status: open
-    captured_at: 2026-06-03T10:00:00.000Z
-    occurrences:
-      - { at: 2026-06-03T10:00:00.000Z, spec: "0024" }
-`;
+/** YAML canônico (forma que o serializer produz) — o que a CLI grava. */
+function canonicalLedgerYaml(): string {
+  const ledger = InsightLedger.empty();
+  ledger.capture(
+    { text: "percepção canônica suficientemente longa", origin: { spec: "0024", cursor: null } },
+    "2026-06-03T10:00:00.000Z"
+  );
+  return stringifyInsightsLedger(ledger);
+}
 
 // 'promoted' sem alvo viola uma invariante DE DOMÍNIO — o check não tem regra
 // própria; ele apenas força o parse, que delega a assertInsightInvariants.
-const INVALID = `version: 1
+const INVALID_INVARIANT = `version: 1
 insights:
   - id: PIT-0001
     text: percepção válida suficientemente longa
@@ -35,6 +37,16 @@ function writeLedger(root: string, yaml: string): void {
   writeFileSync(join(dir, "insights.yml"), yaml, "utf-8");
 }
 
+function withRepo(yaml: string | null, run: (root: string) => void): void {
+  const root = tmpRepo();
+  try {
+    if (yaml !== null) writeLedger(root, yaml);
+    run(root);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+}
+
 describe("insights:check (gate)", () => {
   let outSpy: jest.SpyInstance;
   let errSpy: jest.SpyInstance;
@@ -48,31 +60,19 @@ describe("insights:check (gate)", () => {
   });
 
   it("retorna 0 quando o ledger está ausente (vazio é válido)", () => {
-    const root = tmpRepo();
-    try {
-      expect(main(root)).toBe(0);
-    } finally {
-      rmSync(root, { recursive: true, force: true });
-    }
+    withRepo(null, (root) => expect(main(root)).toBe(0));
   });
 
-  it("retorna 0 para um ledger conforme as invariantes", () => {
-    const root = tmpRepo();
-    try {
-      writeLedger(root, VALID);
-      expect(main(root)).toBe(0);
-    } finally {
-      rmSync(root, { recursive: true, force: true });
-    }
+  it("retorna 0 para um ledger canônico e conforme", () => {
+    withRepo(canonicalLedgerYaml(), (root) => expect(main(root)).toBe(0));
   });
 
   it("retorna 1 quando uma invariante de domínio é violada no YAML", () => {
-    const root = tmpRepo();
-    try {
-      writeLedger(root, INVALID);
-      expect(main(root)).toBe(1);
-    } finally {
-      rmSync(root, { recursive: true, force: true });
-    }
+    withRepo(INVALID_INVARIANT, (root) => expect(main(root)).toBe(1));
+  });
+
+  it("retorna 1 para YAML parseável mas NÃO canônico (edição manual)", () => {
+    // Mesma percepção, forma perturbada (linha em branco extra ao fim).
+    withRepo(canonicalLedgerYaml() + "\n", (root) => expect(main(root)).toBe(1));
   });
 });

@@ -39,9 +39,10 @@ const ALLOWED_INSIGHT_KEYS: ReadonlySet<string> = new Set([
   "status",
   "captured_at",
   "occurrences",
-  "links",
   "promotion",
   "discard_reason",
+  "resolved_at",
+  "resolved_by",
 ]);
 
 const ALLOWED_OCCURRENCE_KEYS: ReadonlySet<string> = new Set(["at", "spec", "cursor", "note"]);
@@ -107,20 +108,23 @@ function parseInsight(raw: unknown, index: number): Insight {
     parseOccurrence(occ, `${where}.occurrences[${i}]`)
   );
 
-  const links = parseLinks(entry.links, `${where}.links`);
-
   const insight: Insight = {
     id,
     text,
     status: status as InsightStatus,
     capturedAt,
     occurrences,
-    links,
     ...(entry.promotion !== undefined
       ? { promotion: parsePromotion(entry.promotion, `${where}.promotion`) }
       : {}),
     ...(entry.discard_reason !== undefined
       ? { discardReason: requireNonEmptyString(entry.discard_reason, `${where}.discard_reason`) }
+      : {}),
+    ...(entry.resolved_at !== undefined
+      ? { resolvedAt: requireNonEmptyString(entry.resolved_at, `${where}.resolved_at`) }
+      : {}),
+    ...(entry.resolved_by !== undefined
+      ? { resolvedBy: requireNonEmptyString(entry.resolved_by, `${where}.resolved_by`) }
       : {}),
   };
   return insight;
@@ -146,14 +150,6 @@ function parsePromotion(raw: unknown, where: string): PromotionTarget {
   const ref = requireNonEmptyString(entry.ref, `${where}.ref`);
   // `kind` é validado contra o enum de domínio em assertInsightInvariants (fromArray).
   return { kind: kind as PromotionTarget["kind"], ref };
-}
-
-function parseLinks(raw: unknown, where: string): ReadonlyArray<string> {
-  if (raw === undefined) return [];
-  if (!Array.isArray(raw)) {
-    throw new InsightsLedgerParseError(`${where} must be a list when present`);
-  }
-  return raw.map((link, i) => requireNonEmptyString(link, `${where}[${i}]`));
 }
 
 // ── helpers estruturais ─────────────────────────────────────────────────────
@@ -204,8 +200,8 @@ function parseOptionalString(value: unknown, where: string): string | undefined 
  * Serializa o ledger para YAML determinístico round-trippable.
  *
  * Ordem canônica por registro: id, text, status, captured_at, occurrences,
- * links?, promotion?, discard_reason?. Por ocorrência: at, spec, cursor?, note?.
- * Opcionais ausentes (incluindo `links` vazio e `cursor` null) são omitidos.
+ * promotion?, discard_reason?, resolved_at?, resolved_by?. Por ocorrência:
+ * at, spec, cursor?, note?. Opcionais ausentes (incluindo `cursor` null) são omitidos.
  */
 export function stringifyInsightsLedger(ledger: InsightLedger): string {
   const plain = {
@@ -218,11 +214,12 @@ export function stringifyInsightsLedger(ledger: InsightLedger): string {
         captured_at: insight.capturedAt,
         occurrences: insight.occurrences.map((occ) => serializeOccurrence(occ)),
       };
-      if (insight.links.length > 0) obj.links = [...insight.links];
       if (insight.promotion !== undefined) {
         obj.promotion = { kind: insight.promotion.kind, ref: insight.promotion.ref };
       }
       if (insight.discardReason !== undefined) obj.discard_reason = insight.discardReason;
+      if (insight.resolvedAt !== undefined) obj.resolved_at = insight.resolvedAt;
+      if (insight.resolvedBy !== undefined) obj.resolved_by = insight.resolvedBy;
       return obj;
     }),
   };
