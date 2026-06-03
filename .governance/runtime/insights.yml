@@ -1,0 +1,31 @@
+version: 1
+insights:
+  - id: PIT-0001
+    text: "mis-binding: a retomada lê next[]/focus declarado e ignora a topology já derivável"
+    status: open
+    captured_at: 2026-06-03T03:25:37.947Z
+    occurrences:
+      - at: 2026-06-03T03:25:37.947Z
+        spec: "0024"
+        cursor: checkpoint-2.4d
+        note: "Caso 5: continue apontava a ação errada"
+      - at: 2026-06-03T03:25:38.287Z
+        spec: "0024"
+        cursor: checkpoint-2.4d
+        note: reapareceu ao auditar a derivabilidade da retomada
+  - id: PIT-0002
+    text: "handoff carrega ~30% sem substituto governado: a fila de absorção em trânsito"
+    status: open
+    captured_at: 2026-06-03T03:25:38.057Z
+    occurrences:
+      - at: 2026-06-03T03:25:38.057Z
+        spec: "0024"
+        cursor: checkpoint-2.4d
+  - id: PIT-0003
+    text: AGENTS/ADR só guardam o já-formalizado; não cobrem conhecimento em maturação
+    status: open
+    captured_at: 2026-06-03T03:25:38.171Z
+    occurrences:
+      - at: 2026-06-03T03:25:38.171Z
+        spec: "0024"
+        cursor: checkpoint-2.4d

@@ -415,6 +415,26 @@ async function dispatchReview(options = {}) {
   if (code !== 0) process.exitCode = code;
 }
 
+async function dispatchInsight(argv) {
+  // Bridge para o tier "Percepções em Trânsito" (src/ → dist/). Mesmo padrão
+  // dos demais dispatchers: importa dist/, repassa o argv cru (argv[0]==="insight")
+  // e delega para mod.main. Nenhuma lógica de domínio vive em cli/.
+  let mod;
+  try {
+    mod = await import("../../dist/cli/insight.js");
+  } catch (err) {
+    const reason = err && err.message ? err.message : String(err);
+    console.error(
+      "Erro: runtime de insight indisponível em dist/. Execute `yarn build` antes (fail-fast intencional)."
+    );
+    console.error(`Detalhe: ${reason}`);
+    process.exitCode = 1;
+    return;
+  }
+  const code = await mod.main(argv, { repoRoot: process.cwd() });
+  if (code !== 0) process.exitCode = code;
+}
+
 export async function main(argv = process.argv.slice(2)) {
   try {
     const { command, options } = parseArgs(argv);
@@ -436,6 +456,11 @@ export async function main(argv = process.argv.slice(2)) {
 
     if (command === "review") {
       await dispatchReview(options);
+      return;
+    }
+
+    if (command === "insight") {
+      await dispatchInsight(argv);
       return;
     }
 
