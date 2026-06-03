@@ -5,18 +5,28 @@
  *   `ai-guidelines insight add "<texto>" [--note ...] [--link PIT-NNNN]`
  *   `ai-guidelines insight saw <PIT-NNNN> [--note ...]`
  *   `ai-guidelines insight list`
+ *   `ai-guidelines insight promote <PIT-NNNN> --to <backlog|adr|guardrail|dec> --ref <ID>`
+ *   `ai-guidelines insight discard <PIT-NNNN> --reason "<motivo>"`
  *
  * Composition root: monta FileInsightStore + SystemClock + use-cases e deriva
- * a origem (spec/cursor) da spec ativa. Nenhuma lógica de domínio vive aqui.
+ * a origem (spec/cursor) da spec ativa. Fachada fina sobre os casos de uso —
+ * nenhuma regra de domínio é reimplementada aqui.
  */
 import { OriginContext } from "../domain/insight/Insight.js";
-import { recurrenceOf, specsTouched } from "../domain/insight/Insight.js";
+import {
+  isPromotionKind,
+  PROMOTION_KINDS,
+  recurrenceOf,
+  specsTouched,
+} from "../domain/insight/Insight.js";
 import { GovernanceError } from "../domain/shared/errors.js";
 import { Clock } from "../app/ports/Clock.js";
 import { InsightStore } from "../app/ports/InsightStore.js";
 import { WorkflowFileSystem } from "../app/ports/WorkflowFileSystem.js";
 import { CaptureInsight } from "../app/use-cases/CaptureInsight.js";
+import { DiscardInsight } from "../app/use-cases/DiscardInsight.js";
 import { ListOpenInsights } from "../app/use-cases/ListOpenInsights.js";
+import { PromoteInsight } from "../app/use-cases/PromoteInsight.js";
 import { RecordRecurrence } from "../app/use-cases/RecordRecurrence.js";
 import { DetectActiveSpec } from "../app/workflow/DetectActiveSpec.js";
 import { ReadWorkflowState } from "../app/workflow/ReadWorkflowState.js";
@@ -47,25 +57,43 @@ export interface InsightRunOptions {
 
 interface ParsedArgs {
   readonly positionals: ReadonlyArray<string>;
-  readonly note?: string;
-  readonly links: ReadonlyArray<string>;
+  readonly flags: ReadonlyMap<string, ReadonlyArray<string>>;
 }
 
+/**
+ * Parser genérico: positionais + flags `--key value` / `--key=value`
+ * (repetíveis). O parse fino por subcomando usa {@link flagValue}/{@link flagValues}.
+ */
 function parseInsightArgs(args: ReadonlyArray<string>): ParsedArgs {
   const positionals: string[] = [];
-  const links: string[] = [];
-  let note: string | undefined;
+  const flags = new Map<string, string[]>();
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
-    if (arg === "--note") note = args[++i];
-    else if (arg.startsWith("--note=")) note = arg.slice("--note=".length);
-    else if (arg === "--link") {
-      const value = args[++i];
-      if (value) links.push(value);
-    } else if (arg.startsWith("--link=")) links.push(arg.slice("--link=".length));
-    else positionals.push(arg);
+    if (arg.startsWith("--")) {
+      const eq = arg.indexOf("=");
+      const key = eq >= 0 ? arg.slice(2, eq) : arg.slice(2);
+      const value = eq >= 0 ? arg.slice(eq + 1) : (args[++i] ?? "");
+      const bucket = flags.get(key) ?? [];
+      bucket.push(value);
+      flags.set(key, bucket);
+    } else {
+      positionals.push(arg);
+    }
   }
-  return { positionals, note, links };
+  return { positionals, flags };
+}
+
+/** Último valor não-vazio de um flag; `undefined` se ausente/vazio. */
+function flagValue(parsed: ParsedArgs, name: string): string | undefined {
+  const bucket = parsed.flags.get(name);
+  if (!bucket || bucket.length === 0) return undefined;
+  const last = bucket[bucket.length - 1];
+  return last.trim() === "" ? undefined : last;
+}
+
+/** Todos os valores não-vazios de um flag repetível (ex.: `--link`). */
+function flagValues(parsed: ParsedArgs, name: string): ReadonlyArray<string> {
+  return (parsed.flags.get(name) ?? []).filter((value) => value.trim() !== "");
 }
 
 function buildFs(options: InsightRunOptions): WorkflowFileSystem {
@@ -97,12 +125,14 @@ function reportError(err: unknown, logger: Logger): number {
 }
 
 function runAdd(rest: ReadonlyArray<string>, options: InsightRunOptions, logger: Logger): number {
-  const { positionals, note, links } = parseInsightArgs(rest);
-  const text = positionals.join(" ").trim();
+  const parsed = parseInsightArgs(rest);
+  const text = parsed.positionals.join(" ").trim();
   if (!text) {
     logger.error(`Uso: ai-guidelines insight add "<texto>" [--note "..."] [--link PIT-NNNN]`);
     return 2;
   }
+  const note = flagValue(parsed, "note");
+  const links = flagValues(parsed, "link");
   const fs = buildFs(options);
   const store = buildStore(options, fs);
   const clock = options.clock ?? new SystemClock();
@@ -125,12 +155,13 @@ function runAdd(rest: ReadonlyArray<string>, options: InsightRunOptions, logger:
 }
 
 function runSaw(rest: ReadonlyArray<string>, options: InsightRunOptions, logger: Logger): number {
-  const { positionals, note } = parseInsightArgs(rest);
-  const id = positionals[0];
+  const parsed = parseInsightArgs(rest);
+  const id = parsed.positionals[0];
   if (!id) {
     logger.error(`Uso: ai-guidelines insight saw <PIT-NNNN> [--note "..."]`);
     return 2;
   }
+  const note = flagValue(parsed, "note");
   const fs = buildFs(options);
   const store = buildStore(options, fs);
   const clock = options.clock ?? new SystemClock();
@@ -143,6 +174,61 @@ function runSaw(rest: ReadonlyArray<string>, options: InsightRunOptions, logger:
       ...(note !== undefined ? { note } : {}),
     });
     logger.info(`Recorrência registrada em ${updated.id} (visto ${updated.occurrences.length}×).`);
+    return 0;
+  } catch (err) {
+    return reportError(err, logger);
+  }
+}
+
+function runPromote(
+  rest: ReadonlyArray<string>,
+  options: InsightRunOptions,
+  logger: Logger
+): number {
+  const parsed = parseInsightArgs(rest);
+  const id = parsed.positionals[0];
+  const kind = flagValue(parsed, "to");
+  const ref = flagValue(parsed, "ref");
+  if (!id || !kind || !ref) {
+    logger.error(
+      `Uso: ai-guidelines insight promote <PIT-NNNN> --to <${PROMOTION_KINDS.join("|")}> --ref <ID>`
+    );
+    return 2;
+  }
+  if (!isPromotionKind(kind)) {
+    logger.error(`--to inválido: "${kind}" (use: ${PROMOTION_KINDS.join(" | ")}).`);
+    return 2;
+  }
+  const fs = buildFs(options);
+  const store = buildStore(options, fs);
+  try {
+    const promoted = new PromoteInsight({ store }).execute({ id, target: { kind, ref } });
+    logger.info(
+      `Promovida ${promoted.id} → ${promoted.promotion?.kind} ${promoted.promotion?.ref}.`
+    );
+    return 0;
+  } catch (err) {
+    return reportError(err, logger);
+  }
+}
+
+function runDiscard(
+  rest: ReadonlyArray<string>,
+  options: InsightRunOptions,
+  logger: Logger
+): number {
+  const parsed = parseInsightArgs(rest);
+  const id = parsed.positionals[0];
+  const reason = flagValue(parsed, "reason");
+  if (!id || !reason) {
+    logger.error(`Uso: ai-guidelines insight discard <PIT-NNNN> --reason "<motivo>"`);
+    return 2;
+  }
+  const fs = buildFs(options);
+  const store = buildStore(options, fs);
+  try {
+    const discarded = new DiscardInsight({ store }).execute({ id, reason });
+    logger.info(`Descartada ${discarded.id} (${discarded.discardReason}).`);
     return 0;
   } catch (err) {
     return reportError(err, logger);
@@ -184,8 +270,14 @@ export async function main(
       return runSaw(rest, options, logger);
     case "list":
       return runList(options, logger);
+    case "promote":
+      return runPromote(rest, options, logger);
+    case "discard":
+      return runDiscard(rest, options, logger);
     default:
-      logger.error(`Subcomando desconhecido: ${sub ?? "(vazio)"} (use: add | saw | list).`);
+      logger.error(
+        `Subcomando desconhecido: ${sub ?? "(vazio)"} (use: add | saw | list | promote | discard).`
+      );
       return 2;
   }
 }

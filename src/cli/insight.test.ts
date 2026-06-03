@@ -124,4 +124,67 @@ describe("ai-guidelines insight (CLI, ponta-a-ponta)", () => {
     expect(code).toBe(1);
     expect(err.join("\n")).toMatch(/\[INSIGHT_NOT_FOUND\]/);
   });
+
+  it("promote gradua e remove da fila viva (sem YAML manual)", async () => {
+    const fs = new FakeFs();
+    await main(["insight", "add", "percepção que vai graduar"], {
+      repoRoot: "/r",
+      fs,
+      clock: new StubClock("2026-06-03T10:00:00.000Z"),
+      logger: makeLogger().logger,
+    });
+    const { logger, out } = makeLogger();
+    const code = await main(
+      ["insight", "promote", "PIT-0001", "--to", "guardrail", "--ref", "GG-0004"],
+      {
+        repoRoot: "/r",
+        fs,
+        logger,
+      }
+    );
+    expect(code).toBe(0);
+    expect(out.join("\n")).toMatch(/Promovida PIT-0001 → guardrail GG-0004/);
+
+    const after = makeLogger();
+    await main(["insight", "list"], { repoRoot: "/r", fs, logger: after.logger });
+    expect(after.out.join("\n")).toMatch(/Nenhuma percepção viva/);
+  });
+
+  it("discard descarta com motivo e remove da fila viva", async () => {
+    const fs = new FakeFs();
+    await main(["insight", "add", "percepção a descartar"], {
+      repoRoot: "/r",
+      fs,
+      clock: new StubClock("2026-06-03T10:00:00.000Z"),
+      logger: makeLogger().logger,
+    });
+    const { logger, out } = makeLogger();
+    const code = await main(["insight", "discard", "PIT-0001", "--reason", "ruído"], {
+      repoRoot: "/r",
+      fs,
+      logger,
+    });
+    expect(code).toBe(0);
+    expect(out.join("\n")).toMatch(/Descartada PIT-0001/);
+  });
+
+  it("promote com --to inválido retorna exit 2", async () => {
+    const { logger } = makeLogger();
+    const code = await main(["insight", "promote", "PIT-0001", "--to", "bogus", "--ref", "X"], {
+      repoRoot: "/r",
+      fs: new FakeFs(),
+      logger,
+    });
+    expect(code).toBe(2);
+  });
+
+  it("promote sem --ref retorna exit 2 (uso)", async () => {
+    const { logger } = makeLogger();
+    const code = await main(["insight", "promote", "PIT-0001", "--to", "guardrail"], {
+      repoRoot: "/r",
+      fs: new FakeFs(),
+      logger,
+    });
+    expect(code).toBe(2);
+  });
 });
