@@ -1,0 +1,79 @@
+stage: planning
+gate:
+  status: open
+focus:
+  - "PROGRAMA DE CONVERGÊNCIA ARQUITETURAL. Materializar o domínio Knowledge (pipeline Insight→Decision→Rule/Guardrail→Doctrine, kernel já mergeado na 0024) E reorganizar o repositório, A⊕B avançando JUNTOS (strangler-fig): cada PR constrói uma entidade/superfície E dissolve a fusão/legado que ela torna redundante. Objetivo = redução radical de carga cognitiva (recuperabilidade, navegabilidade, dedup), não adicionar entidades por si."
+  - "MOTIVAÇÃO persistida como Knowledge no ledger operacional (.governance/runtime/insights.yml): PIT-0004 (grafo = read-model/produto primário, cada entidade adiciona arestas navegáveis imediatas), PIT-0005 (costura de dispatch da CLI cobra imposto por-comando; cutover acelera o cockpit), PIT-0006 (navegabilidade vem de entidades+grafo, não de mover diretórios). NÃO re-investigar; consultar via `insight list`."
+  - "REORDENAÇÃO confirmada pelas duas reavaliações: o grafo (read-model) e o cutover da costura saíram do fim para a frente; o payoff de recuperabilidade começa no PR de cada entidade, não num PR-grafo final. Relocar .core/ está FORA do escopo (estética de baixo valor — as entidades tornam a localização física irrelevante para navegação)."
+next:
+  - "Programa persistido (esta state.yml = topology dos 8 PRs; motivação = PIT-0004..0006). PRÓXIMO: implementar o item de sequência 1 — pr-graph-core (KnowledgeGraph núcleo + ag graph/why sobre as arestas de Insight já existentes)."
+topology:
+  cursor:
+    pr: pr-graph-core
+    checkpoint: cp-graph-core
+  prs:
+    concluded: []
+    active: []
+    planned:
+      # sequence = ordem de execução do programa (1..8, contígua). deps = stack
+      # (cada PR sobre o anterior). github_pr null = ainda não aberto.
+      # checkpoints[] = o que NASCE (builds); o que cada PR DISSOLVE está no
+      # objetivo abaixo (campo livre não cabe na topology — fica no checkpoint id
+      # + nas notas de PIT-0004..0006). Detalhe completo: a deliberação git desta
+      # branch + os Insights.
+      - id: pr-graph-core
+        github_pr: null
+        role: execution
+        terminal: false
+        sequence: 1
+        checkpoints:
+          - cp-graph-core # nasce: app/projections/KnowledgeGraph + ag graph/why + graph:check. valor: read-model vivo sobre arestas de Insight; recuperabilidade começa já.
+      - id: pr-cli-cutover
+        github_pr: null
+        role: execution
+        terminal: false
+        sequence: 2
+        checkpoints:
+          - cp-dispatch-registry # nasce: registry de comandos em src/ + parser genérico. dissolve: engine.mjs dispatcher + allowlist de args.mjs. valor: verbo novo = 1 registro, zero imposto legado.
+      - id: pr-doctrine
+        github_pr: null
+        role: execution
+        terminal: false
+        sequence: 3
+        checkpoints:
+          - cp-doctrine # nasce: domain/knowledge/Doctrine + DoctrineGraph + doctrine:check; arestas supersedes/grounds entram no grafo. dissolve: pilha-plana de ADRs como grep; retira .agents/. valor: "a resposta estava num ADR" vira navegação.
+      - id: pr-decision
+        github_pr: null
+        role: execution
+        terminal: false
+        sequence: 4
+        checkpoints:
+          - cp-decision # nasce: domain/knowledge/Decision + decision:check (absorve GG-0001); aresta generalizedTo→Doctrine. dissolve: NEXT.md (insights→Insight feito; débitos→Decision-Deferred/WorkItem). valor: decisões/débitos navegáveis.
+      - id: pr-rule-guardrail
+        github_pr: null
+        role: execution
+        terminal: false
+        sequence: 5
+        checkpoints:
+          - cp-rule-guardrail # nasce: Rule+Guardrail (enforcedBy/groundedIn) + rule:check. dissolve: seção GG e lifecycle do governance-foundation; CORE-*/GR-*→atributo scope. valor: "qual check enforça isto?" navegável.
+      - id: pr-projection-split
+        github_pr: null
+        role: execution
+        terminal: false
+        sequence: 6
+        checkpoints:
+          - cp-projection-split # nasce: árvore projections/ derivada + projection:check (paridade). muda papel: AGENTS/active-specs/disclosure/briefing saem de projections/. valor: fonte vs derivado fisicamente separados.
+      - id: pr-workitem-registry
+        github_pr: null
+        role: execution
+        terminal: false
+        sequence: 7
+        checkpoints:
+          - cp-workitem-registry # nasce: persistência do WorkItem registry (já existe em src/) + backlog=WorkItem(proposal) via PromoteWorkItem. dissolve: backlog .specify congelado; BacklogItem/Spec colapsam em kinds. valor: backlog queryável.
+      - id: pr-dualroot-collapse
+        github_pr: null
+        role: execution
+        terminal: true
+        sequence: 8
+        checkpoints:
+          - cp-dualroot-collapse # dissolve: .specify como root de runtime (branch specify-legacy em ~10 arquivos); relocação das 9 specs concluídas p/ archive. DEP REAL (por isso último): ~10 consumidores + citações de ADR→.specify/researchs. valor: uma árvore (118 arq/2M) a menos no mapa.

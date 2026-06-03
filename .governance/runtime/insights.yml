@@ -29,3 +29,30 @@ insights:
       - at: 2026-06-03T03:25:38.171Z
         spec: "0024"
         cursor: checkpoint-2.4d
+  - id: PIT-0004
+    text: O KnowledgeGraph é o read-model/produto primário do domínio (não projeção tardia); cada entidade que nasce deve adicionar arestas navegáveis imediatas — não esperar um PR final
+    status: open
+    captured_at: 2026-06-03T16:45:56.957Z
+    occurrences:
+      - at: 2026-06-03T16:45:56.957Z
+        spec: "0024"
+        cursor: checkpoint-2.4d
+        note: "Ask 2 da convergência: CQRS read-side é o produto"
+  - id: PIT-0005
+    text: A costura de dispatch da CLI (engine.mjs+args.mjs) cobra imposto por-comando (double-edit+parse duplicado+2 runners); cutover dessa costura acelera todo verbo novo do cockpit
+    status: open
+    captured_at: 2026-06-03T16:45:57.073Z
+    occurrences:
+      - at: 2026-06-03T16:45:57.073Z
+        spec: "0024"
+        cursor: checkpoint-2.4d
+        note: "Ask 1: pago nesta sessão ao add insight"
+  - id: PIT-0006
+    text: Navegabilidade vem de entidades+grafo, não de mover diretórios; relocar .core é estética de baixo valor — a convergência avança A(domínio)⊕B(reorg) juntos, cada PR dissolvendo a fusão que sua entidade torna redundante
+    status: open
+    captured_at: 2026-06-03T16:45:57.184Z
+    occurrences:
+      - at: 2026-06-03T16:45:57.184Z
+        spec: "0024"
+        cursor: checkpoint-2.4d
+        note: re-avaliação da árvore alvo
