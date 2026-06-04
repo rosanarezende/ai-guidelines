@@ -1,3 +1,5 @@
+> ⚠️ **SUPERSEDIDO (2026-06-04)** por `research/2026-06-04-checkpoint-human-gate-pr34.md` — use **aquele** como SSOT de retomada (cobre até o Human Gate do #34: contratos 2.4e→2.4g, technical_audit + architectural_review approved). Este arquivo é mantido como **histórico**.
+
 # Handoff — Spec 0024, retomada pós-reabertura de G03/G04/G05 (sessão nova)
 
 > **Documento de RETOMADA situado** (ADR 0022), não resumo histórico. Assume zero acesso à conversa anterior. Objetivo: continuar a **trilha de convergência orientada a grafo** sem reabrir investigações já encerradas. **Supersede** `2026-06-02-handoff-checkpoint-3.md`.
