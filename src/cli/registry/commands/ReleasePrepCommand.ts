@@ -22,7 +22,7 @@ export class ReleasePrepCommand implements Command<ReleasePrepCliArgs> {
   constructor(private readonly releasePrepMainFn: ReleasePrepMainFn = releasePrepMain) {}
 
   parse(argv: readonly string[]): ReleasePrepCliArgs {
-    const { flags } = parseFlags(argv);
+    const { flags } = parseFlags(argv, { booleans: ["dry-run", "skip-working-tree-check"] });
     const args: {
       version?: string;
       remote?: string;

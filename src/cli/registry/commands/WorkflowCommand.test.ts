@@ -38,6 +38,21 @@ describe("WorkflowCommand", () => {
       });
     });
 
+    it("DADO publish-state com flags na forma com ESPAÇO QUANDO parse ENTÃO consome os valores (regressão corrigida)", () => {
+      expect(
+        new WorkflowCommand().parse([
+          "publish-state",
+          "--status",
+          "active",
+          "--updated-by",
+          "@rosana",
+        ])
+      ).toEqual({
+        kind: "publish-state",
+        args: { status: "active", updatedBy: "@rosana" },
+      });
+    });
+
     it("DADO posicional desconhecido QUANDO parse ENTÃO cai no wizard (não publish-state)", () => {
       expect(new WorkflowCommand().parse(["algo"])).toEqual({ kind: "wizard" });
     });

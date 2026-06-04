@@ -35,6 +35,13 @@ describe("ReleasePrepCommand", () => {
     it("DADO só --version QUANDO parse ENTÃO só version (booleans ausentes não viram false explícito)", () => {
       expect(new ReleasePrepCommand().parse(["--version=1.0.0"])).toEqual({ version: "1.0.0" });
     });
+
+    it("DADO --version na forma com ESPAÇO + boolean QUANDO parse ENTÃO consome valor certo (regressão corrigida)", () => {
+      expect(new ReleasePrepCommand().parse(["--version", "9.9.9", "--dry-run"])).toEqual({
+        version: "9.9.9",
+        dryRun: true,
+      });
+    });
   });
 
   describe("run", () => {
