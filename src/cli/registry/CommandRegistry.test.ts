@@ -110,6 +110,46 @@ describe("CommandRegistry", () => {
     expect(errors.join("\n")).toMatch(/comando/i);
   });
 
+  it("DADO um comando cujo parse lança QUANDO dispatch ENTÃO captura, loga a mensagem e devolve exitCode 1", async () => {
+    const reg = new CommandRegistry();
+    const throwing: Command<void> = {
+      name: "boom",
+      parse() {
+        throw new Error("input inválido");
+      },
+      async run() {
+        return { exitCode: 0 };
+      },
+    };
+    reg.register(throwing);
+    const { logger, errors } = fakeLogger();
+
+    const result = await reg.dispatch(["boom", "x"], fakeContext(logger));
+
+    expect(result.exitCode).toBe(1);
+    expect(errors.join("\n")).toContain("input inválido");
+  });
+
+  it("DADO um comando cujo run lança QUANDO dispatch ENTÃO captura e devolve exitCode 1", async () => {
+    const reg = new CommandRegistry();
+    const throwing: Command<void> = {
+      name: "boom",
+      parse() {
+        return undefined;
+      },
+      async run() {
+        throw new Error("falha de execução");
+      },
+    };
+    reg.register(throwing);
+    const { logger, errors } = fakeLogger();
+
+    const result = await reg.dispatch(["boom"], fakeContext(logger));
+
+    expect(result.exitCode).toBe(1);
+    expect(errors.join("\n")).toContain("falha de execução");
+  });
+
   it("DADO comandos registrados QUANDO commandNames ENTÃO devolve só os nomes canônicos, ordenados, sem aliases", () => {
     const reg = new CommandRegistry();
     reg.register(spyCommand("why"));

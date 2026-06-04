@@ -68,7 +68,15 @@ export class CommandRegistry {
       return { exitCode: 1 };
     }
 
-    const options = command.parse(rest);
-    return command.run(options, context);
+    try {
+      const options = command.parse(rest);
+      return await command.run(options, context);
+    } catch (err) {
+      // Erro de input (parse) ou de execução (run) vira exitCode 1 com mensagem
+      // narrativa — nunca stack trace cru ao usuário. Cada comando lança Error
+      // com mensagem orientada (ex.: "PR inválido").
+      context.logger.error(err instanceof Error ? err.message : String(err));
+      return { exitCode: 1 };
+    }
   }
 }

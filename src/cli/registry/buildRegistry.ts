@@ -1,5 +1,7 @@
 import { CommandRegistry } from "./CommandRegistry.js";
 import { ContinueCommand } from "./commands/ContinueCommand.js";
+import { InsightCommand } from "./commands/InsightCommand.js";
+import { TriageCommand } from "./commands/TriageCommand.js";
 
 /**
  * Ponto ÚNICO de registro dos comandos da CLI (Spec 0024, pr-cli-cutover).
@@ -12,5 +14,7 @@ import { ContinueCommand } from "./commands/ContinueCommand.js";
 export function buildRegistry(): CommandRegistry {
   const registry = new CommandRegistry();
   registry.register(new ContinueCommand());
+  registry.register(new InsightCommand());
+  registry.register(new TriageCommand()); // name "triage" + alias transitório "review"
   return registry;
 }
