@@ -21,8 +21,8 @@ next:
   - "LER antes de qualquer acao: research/2026-06-02-handoff-checkpoint-3.md (SSOT da retomada para o Checkpoint 3; supersede o handoff-next-session) + state.yml § topology + plan.md. Verificar git limpo + yarn validate verde + gate do #33 (gates/c2.4d.yml) approved."
 topology:
   cursor:
-    pr: insights-in-flight
-    checkpoint: checkpoint-graph-core
+    pr: pr-cli-cutover
+    checkpoint: checkpoint-cli-cutover
   prs:
     concluded:
       - id: base-governance
@@ -53,10 +53,8 @@ topology:
           - checkpoint-2.4c
           - checkpoint-2.4d
 
-    active:
-      # #34 = linha de execucao ativa apos a reabertura de G03/G04/G05 ([DEC-0024-G08]).
-      # Embarca a modelagem ja materializada: capability Insights + kernel Knowledge
-      # (pipeline insight->decision->rule|guardrail->doctrine) + KnowledgeGraph nucleo.
+      # #34 concluido apos Human Gate graph-core approved (gates/c-graph-core.yml, 2026-06-04).
+      # Embarcou: capability Insights + kernel Knowledge + KnowledgeGraph nucleo.
       - id: insights-in-flight
         github_pr: 34
         role: execution
@@ -67,6 +65,19 @@ topology:
           - checkpoint-knowledge-kernel
           - checkpoint-graph-core
 
+    active:
+      # pr-cli-cutover (#35) = linha de execucao ativa, aberta CONTEINER-PRIMEIRO
+      # (ADR 0025, 1a instancia): Draft criado no inicio do desenvolvimento para a
+      # topology refletir o trabalho em tempo real. Trabalho: registry de comandos
+      # em src/ (dissolve costura engine.mjs/args.mjs; destrava ag graph/why).
+      - id: pr-cli-cutover
+        github_pr: 35
+        role: execution
+        terminal: false
+        sequence: 3
+        checkpoints:
+          - checkpoint-cli-cutover # registry de comandos em src/ (dissolve costura engine.mjs/args.mjs); destrava verbos baratos (ag graph/why)
+
     planned:
       # `sequence` = posicao no STACK de execucao (1..K, contigua), NAO o numero
       # do checkpoint. TRILHA RECONCILIADA em 2026-06-03 ([DEC-0024-G08]): apos a
@@ -74,14 +85,6 @@ topology:
       # CONVERGENCIA orientado a grafo. Os checkpoints de absorcao originais (3-12)
       # foram DOBRADOS nos PRs de convergencia onde se sobrepoem (mapeamento em
       # plan.md). github_pr null = ainda nao aberto.
-      - id: pr-cli-cutover
-        github_pr: null
-        role: execution
-        terminal: false
-        sequence: 3
-        checkpoints:
-          - checkpoint-cli-cutover # registry de comandos em src/ (dissolve costura engine.mjs/args.mjs); destrava verbos baratos (ag graph/why)
-
       - id: pr-doctrine
         github_pr: null
         role: execution
