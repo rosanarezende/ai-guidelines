@@ -32,9 +32,8 @@ findings:
 #
 # ── APROVAÇÃO LIMPA (findings_emitted: 0) ──────────────────────────────────────
 # A evidência NÃO são os findings (não há) → `audit_evidence` é OBRIGATÓRIA e
-# SELADA. Estruturada (scope + basis), não narrativa. PROIBIDA quando há findings.
-# Recuperabilidade: meses depois, só pelo YAML, responde "o que foi auditado /
-# por que aprovou / quem executou". Forma:
+# SELADA. PROIBIDA quando há findings. Recuperabilidade + queryabilidade: meses
+# depois, só pelo YAML, responde "o que foi auditado / ONDE / por que / quem". Forma:
 #
 # checkpoint: "3"
 # role: technical_audit
@@ -44,6 +43,9 @@ findings:
 # decision: approved
 # findings_emitted: 0
 # audit_evidence:
-#   scope: "o que foi inspecionado — áreas/invariantes; pode referenciar o dossiê"
-#   basis: "por que aprovou — incl. riscos ponderados; sem issue impeditiva"
-# review_fingerprint: x # rode `yarn review:check` (sela audit_evidence + executor)
+#   coverage: # 2.4g — o "onde" ESTRUTURADO: caminhos auditados (queryável; NÃO prosa)
+#     - src/domain/insight
+#     - src/app/projections/KnowledgeGraph.ts
+#   scope: "o que/como foi inspecionado — narrativa (texto)"
+#   basis: "por que aprovou — incl. riscos ponderados; sem issue impeditiva (texto)"
+# review_fingerprint: x # rode `yarn review:check` (sela coverage + scope + basis + executor)

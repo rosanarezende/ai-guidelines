@@ -265,19 +265,22 @@ describe("consolidate (enforcement) [Checkpoint 2.4a]", () => {
 // `audit_evidence` (caso inválido). `actor`/`decision` parametrizáveis.
 function cleanReviewYaml(
   evidence: { scope: string; basis: string } | null,
-  opts: { decision?: string; actor?: string } = {}
+  opts: { decision?: string; actor?: string; coverage?: string[] } = {}
 ): string {
   const decision = opts.decision ?? "approved";
   const actor = opts.actor ?? "gemini-3-pro-high";
+  const coverage = opts.coverage ?? ["src/domain/knowledge"];
+  const auditEvidence = evidence ? { ...evidence, coverage } : undefined;
   const rfp = reviewFingerprintOf({
     checkpoint: CP,
     role: ROLE,
     findingsEmitted: 0,
     ids: [],
-    ...(evidence ? { auditEvidence: evidence } : {}),
+    ...(auditEvidence ? { auditEvidence } : {}),
   });
+  const covBlock = coverage.map((c) => `    - ${c}`).join("\n");
   const ev = evidence
-    ? `\naudit_evidence:\n  scope: "${evidence.scope}"\n  basis: "${evidence.basis}"`
+    ? `\naudit_evidence:\n  coverage:\n${covBlock}\n  scope: "${evidence.scope}"\n  basis: "${evidence.basis}"`
     : "";
   return `checkpoint: "${CP}"\nrole: ${ROLE}\nactor: ${actor}\ndecision: ${decision}\nfindings_emitted: 0\nreview_fingerprint: ${rfp}${ev}\n`;
 }
@@ -292,7 +295,8 @@ describe("audit_evidence — aprovação limpa [2.4e]", () => {
     const r = parseReview(cleanReviewYaml(ev), "reviews/c-x-technical_audit.yml");
     expect(r.findingsEmitted).toBe(0);
     expect(r.findings).toHaveLength(0);
-    expect(r.auditEvidence).toEqual(ev);
+    expect(r.auditEvidence).toMatchObject(ev);
+    expect(r.auditEvidence?.coverage).toEqual(["src/domain/knowledge"]);
   });
 
   it("0 findings SEM audit_evidence → rejeita (review cego para recuperabilidade)", () => {
@@ -336,7 +340,11 @@ function execCleanYaml(
   executor: { platform: string; model: string } | null,
   opts: { alsoActor?: string } = {}
 ): string {
-  const evidence = { scope: "domain/knowledge", basis: "invariantes ok; sem issue" };
+  const evidence = {
+    coverage: ["src/domain/knowledge"],
+    scope: "domain/knowledge",
+    basis: "invariantes ok; sem issue",
+  };
   const rfp = reviewFingerprintOf({
     checkpoint: CP,
     role: ROLE,
@@ -349,7 +357,7 @@ function execCleanYaml(
     ? `executor:\n  platform: ${executor.platform}\n  model: ${executor.model}\n`
     : "";
   const actorBlock = opts.alsoActor ? `actor: ${opts.alsoActor}\n` : "";
-  return `checkpoint: "${CP}"\nrole: ${ROLE}\n${execBlock}${actorBlock}decision: approved\nfindings_emitted: 0\naudit_evidence:\n  scope: "${evidence.scope}"\n  basis: "${evidence.basis}"\nreview_fingerprint: ${rfp}\n`;
+  return `checkpoint: "${CP}"\nrole: ${ROLE}\n${execBlock}${actorBlock}decision: approved\nfindings_emitted: 0\naudit_evidence:\n  coverage:\n    - src/domain/knowledge\n  scope: "${evidence.scope}"\n  basis: "${evidence.basis}"\nreview_fingerprint: ${rfp}\n`;
 }
 
 describe("executor — proveniência estruturada [2.4f]", () => {
@@ -406,5 +414,46 @@ describe("executor — proveniência estruturada [2.4f]", () => {
     const r = parseReview(cleanReviewYaml({ scope: "x", basis: "y" }), "f.yml");
     expect(r.actor).toBe("gemini-3-pro-high");
     expect(r.executor).toBeUndefined();
+  });
+});
+
+describe("coverage — o 'onde' estruturado [2.4g]", () => {
+  const ev = { scope: "narrativa do que/como", basis: "por que aprovou" };
+
+  it("coverage (lista de caminhos) → parseia e sela; scope/basis seguem texto", () => {
+    const r = parseReview(
+      cleanReviewYaml(ev, {
+        coverage: ["src/domain/insight", "src/app/projections/KnowledgeGraph.ts"],
+      }),
+      "reviews/c-x-technical_audit.yml"
+    );
+    expect(r.auditEvidence?.coverage).toEqual([
+      "src/domain/insight",
+      "src/app/projections/KnowledgeGraph.ts",
+    ]);
+    expect(r.auditEvidence?.scope).toBe(ev.scope);
+  });
+
+  it("coverage ausente → rejeita (cobertura não-queryável)", () => {
+    const noCov = `checkpoint: "${CP}"\nrole: ${ROLE}\nactor: a\ndecision: approved\nfindings_emitted: 0\naudit_evidence:\n  scope: "x"\n  basis: "y"\nreview_fingerprint: zzz\n`;
+    expect(() => parseReview(noCov, "f.yml")).toThrow(/coverage/);
+  });
+
+  it("coverage lista vazia → rejeita", () => {
+    const emptyCov = `checkpoint: "${CP}"\nrole: ${ROLE}\nactor: a\ndecision: approved\nfindings_emitted: 0\naudit_evidence:\n  coverage: []\n  scope: "x"\n  basis: "y"\nreview_fingerprint: zzz\n`;
+    expect(() => parseReview(emptyCov, "f.yml")).toThrow(/NÃO-vazia/);
+  });
+
+  it("coverage com prosa (espaço) → rejeita (queryabilidade exige tokens de caminho)", () => {
+    const y = cleanReviewYaml(ev, {
+      coverage: ["src/domain/insight", "domain/insight (transições, serializer)"],
+    });
+    expect(() => parseReview(y, "f.yml")).toThrow(/espaço/);
+  });
+
+  it("TAMPER: trocar um caminho de coverage sem re-selar → review_fingerprint inválido", () => {
+    const y = cleanReviewYaml(ev, { coverage: ["src/domain/insight"] });
+    const tampered = y.replace("src/domain/insight", "src/domain/knowledge");
+    expect(() => parseReview(tampered, "f.yml")).toThrow(/review_fingerprint inválido/);
   });
 });

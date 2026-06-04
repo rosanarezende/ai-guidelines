@@ -59,18 +59,28 @@ export interface Finding {
 }
 
 /**
- * Evidência de cobertura de um review SEM findings (2.4e). Quando
+ * Evidência de cobertura de um review SEM findings (2.4e + 2.4g). Quando
  * `findings_emitted === 0` os findings não existem para carregar a evidência —
- * então a aprovação limpa precisa ATESTAR, de forma selada, o que foi inspecionado
- * (`scope`) e por que foi aprovada (`basis`). Recuperabilidade: meses depois, só
- * pelo YAML, responde "o que foi auditado / por que aprovou". Estruturado (2 campos
- * curtos), não narrativa livre. Existe SE-E-SOMENTE-SE `findings_emitted === 0`
- * (proibido quando há findings — lá a evidência são os próprios findings).
+ * então a aprovação limpa precisa ATESTAR, de forma selada: o "onde" queryável
+ * (`coverage`: caminhos auditados, 2.4g), o que/como (`scope`) e o porquê (`basis`).
+ * Recuperabilidade + queryabilidade: meses depois, só pelo YAML, responde "o que
+ * foi auditado / onde / por que aprovou". Existe SE-E-SOMENTE-SE
+ * `findings_emitted === 0` (proibido quando há findings — lá a evidência são os
+ * próprios findings; `coverage` é o dual de `finding.location`).
  */
 export interface AuditEvidence {
-  /** O que foi inspecionado — áreas/invariantes; pode referenciar o brief/dossiê. */
+  /**
+   * O "onde" ESTRUTURADO (2.4g): caminhos auditados — a dimensão **enumerável** que
+   * vivia escondida na prosa do `scope`. Simétrica a `finding.location` (o "onde"
+   * dos problemas); torna a cobertura **queryável** sem parsing (heatmap de áreas,
+   * área×modelo). Lista NÃO-vazia de tokens de caminho (forma lenient, como
+   * `KnowledgeRef`: sem checar existência). NÃO é `{area, note}` nem registry nem
+   * nó — só a lista; o "Area node / dashboard" é projeção derivada.
+   */
+  readonly coverage: readonly string[];
+  /** O que/como foi inspecionado (narrativa). PERMANECE texto. */
   readonly scope: string;
-  /** Por que a aprovação foi concedida — incl. riscos ponderados. */
+  /** Por que a aprovação foi concedida — incl. riscos ponderados (narrativa). PERMANECE texto. */
   readonly basis: string;
 }
 
@@ -137,6 +147,40 @@ function str(v: unknown): string | null {
 }
 
 /**
+ * `audit_evidence.coverage` (2.4g): lista NÃO-vazia de tokens de CAMINHO. Forma
+ * lenient (não checa existência, como `KnowledgeRef`), mas rejeita espaço em branco
+ * — coverage é o "onde" queryável, não prosa (a narrativa fica em `scope`).
+ */
+function parseCoverage(raw: unknown, file: string): string[] {
+  if (raw === undefined || raw === null) {
+    throw new ReviewArtifactParseError(
+      `${file}: audit_evidence.coverage é obrigatório (lista de caminhos auditados — o "onde" queryável, simétrico a finding.location).`
+    );
+  }
+  if (!Array.isArray(raw) || raw.length === 0) {
+    throw new ReviewArtifactParseError(
+      `${file}: audit_evidence.coverage deve ser uma lista NÃO-vazia de caminhos.`
+    );
+  }
+  const paths: string[] = [];
+  for (const [i, item] of raw.entries()) {
+    const p = str(item);
+    if (!p) {
+      throw new ReviewArtifactParseError(
+        `${file}: audit_evidence.coverage[${i}] deve ser um caminho não-vazio.`
+      );
+    }
+    if (/\s/.test(p)) {
+      throw new ReviewArtifactParseError(
+        `${file}: audit_evidence.coverage[${i}] ("${p}") contém espaço — coverage é lista de CAMINHOS (queryável), não prosa. A narrativa fica em scope.`
+      );
+    }
+    paths.push(p);
+  }
+  return paths;
+}
+
+/**
  * Hash da CLAIM do finding (exclui `disposition`, que muda). Inclui
  * `checkpoint`+`role` (2.4b) — um bloco transplantado de outra review/checkpoint
  * não casa o hash recomputado no arquivo de destino (anti-transplante).
@@ -191,7 +235,11 @@ export function reviewFingerprintOf(parts: {
   const envelope: unknown[] = [parts.checkpoint, parts.role, parts.findingsEmitted, [...parts.ids]];
   const extensions: Array<[string, unknown]> = [];
   if (parts.auditEvidence) {
-    extensions.push(["audit_evidence", [parts.auditEvidence.scope, parts.auditEvidence.basis]]);
+    // tupla FIXA [scope, basis, coverage] — os 3 sempre presentes juntos (2.4e+2.4g).
+    extensions.push([
+      "audit_evidence",
+      [parts.auditEvidence.scope, parts.auditEvidence.basis, [...parts.auditEvidence.coverage]],
+    ]);
   }
   if (parts.executor) {
     extensions.push(["executor", [parts.executor.platform, parts.executor.model]]);
@@ -345,15 +393,17 @@ export function parseReview(yamlText: string, file: string): ReviewArtifact {
   if (findingsEmitted === 0) {
     if (!rawEvidence || typeof rawEvidence !== "object" || Array.isArray(rawEvidence)) {
       throw new ReviewArtifactParseError(
-        `${file}: review com 0 findings exige "audit_evidence" (scope + basis) — ` +
+        `${file}: review com 0 findings exige "audit_evidence" (coverage + scope + basis) — ` +
           `evidência selada de cobertura para recuperabilidade futura.`
       );
     }
     const ev = rawEvidence as Record<string, unknown>;
+    // coverage (2.4g): o "onde" estruturado e queryável; scope/basis seguem texto.
+    const coverage = parseCoverage(ev.coverage, file);
     const scope = str(ev.scope);
     if (!scope) {
       throw new ReviewArtifactParseError(
-        `${file}: audit_evidence.scope é obrigatório (o que foi inspecionado — áreas/invariantes).`
+        `${file}: audit_evidence.scope é obrigatório (o que/como foi inspecionado — narrativa).`
       );
     }
     const basis = str(ev.basis);
@@ -362,7 +412,7 @@ export function parseReview(yamlText: string, file: string): ReviewArtifact {
         `${file}: audit_evidence.basis é obrigatório (por que a aprovação foi concedida).`
       );
     }
-    auditEvidence = { scope, basis };
+    auditEvidence = { coverage, scope, basis };
   } else if (rawEvidence !== undefined && rawEvidence !== null) {
     throw new ReviewArtifactParseError(
       `${file}: "audit_evidence" é proibido quando há findings — a evidência são os próprios findings. Remova-o.`
