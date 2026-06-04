@@ -1,0 +1,30 @@
+checkpoint: "graph-core"
+role: technical_audit
+
+executor:
+  platform: antigravity
+  model: gemini-3.1-pro-high
+
+decision: approved
+findings_emitted: 0
+
+audit_evidence:
+  coverage:
+    - src/domain/insight
+    - src/domain/knowledge
+    - src/app/projections/KnowledgeGraph.ts
+    - src/app/projections/knowledgeSources.ts
+    - src/cli/insight.ts
+    - src/cli/insightsCheck.ts
+    - src/infrastructure/yaml/insightsLedgerSerializer.ts
+  scope: >
+    Invariantes restritas de transições e relógio no domínio Insight e parse/stringify canônico.
+    Espinha de maturação (stageOrder) e integridade de formato do KnowledgeRef (domain/knowledge).
+    Grafo (CQRS) projetado from sources (KnowledgeGraph e adapters).
+    Interface da CLI ponta-a-ponta e validação no validate.
+  basis: >
+    Todos os invariantes previstos no §3 do dossiê foram rigorosamente atestados em análise de código.
+    Os testes estão no verde (yarn validate 100%). O modelo CQRS está puro e a base sustenta as
+    operações planejadas. Débitos mapeados no §5 são isentos de block.
+
+review_fingerprint: 4b995794f65d
