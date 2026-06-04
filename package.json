@@ -66,8 +66,9 @@
     "ruleset:check": "yarn build && node cli/ruleset-check.mjs",
     "review:check": "yarn build && node cli/review-check.mjs",
     "insights:check": "yarn build && node cli/insights-check.mjs",
+    "intent:check": "yarn build && node cli/intent-check.mjs",
     "disclosure": "yarn build && node cli/disclosure-render.mjs",
-    "validate": "yarn format:check && yarn build:all && yarn test && yarn living-docs:check && yarn state-yml:check && yarn gate-decidability:check && yarn ruleset:check && yarn review:check && yarn insights:check",
+    "validate": "yarn format:check && yarn build:all && yarn test && yarn living-docs:check && yarn state-yml:check && yarn gate-decidability:check && yarn ruleset:check && yarn review:check && yarn insights:check && yarn intent:check",
     "ci": "yarn install --immutable && yarn validate && yarn test:smoke",
     "prepare": "husky",
     "prepack": "yarn build:all"
