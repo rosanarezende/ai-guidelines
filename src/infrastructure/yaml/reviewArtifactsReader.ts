@@ -58,13 +58,33 @@ export interface Finding {
   readonly fingerprint: string;
 }
 
+/**
+ * Evidência de cobertura de um review SEM findings (2.4e). Quando
+ * `findings_emitted === 0` os findings não existem para carregar a evidência —
+ * então a aprovação limpa precisa ATESTAR, de forma selada, o que foi inspecionado
+ * (`scope`) e por que foi aprovada (`basis`). Recuperabilidade: meses depois, só
+ * pelo YAML, responde "o que foi auditado / por que aprovou". Estruturado (2 campos
+ * curtos), não narrativa livre. Existe SE-E-SOMENTE-SE `findings_emitted === 0`
+ * (proibido quando há findings — lá a evidência são os próprios findings).
+ */
+export interface AuditEvidence {
+  /** O que foi inspecionado — áreas/invariantes; pode referenciar o brief/dossiê. */
+  readonly scope: string;
+  /** Por que a aprovação foi concedida — incl. riscos ponderados. */
+  readonly basis: string;
+}
+
 export interface ReviewArtifact {
   readonly checkpoint: string;
   readonly role: ReviewRole;
+  /** O EXECUTOR REAL da auditoria (ex.: `gemini-3-pro-high`, `codex-cli`,
+   *  `gpt-oss-...`) — distinto da `role` (a lane). Sem default assumido. */
   readonly actor: string;
   readonly decision: ReviewDecision;
   readonly findingsEmitted: number;
   readonly findings: readonly Finding[];
+  /** Presente ⟺ `findingsEmitted === 0` (evidência de aprovação limpa, selada). */
+  readonly auditEvidence?: AuditEvidence;
   readonly file: string;
 }
 
@@ -141,13 +161,17 @@ export function reviewFingerprintOf(parts: {
   role: string;
   findingsEmitted: number;
   ids: readonly string[];
+  auditEvidence?: AuditEvidence;
 }): string {
   // Serialização CANÔNICA (JSON) — `ids` como array, não `join(",")`, para não
-  // colidir com vírgula em um id (2.4c).
-  return createHash("sha256")
-    .update(JSON.stringify([parts.checkpoint, parts.role, parts.findingsEmitted, [...parts.ids]]))
-    .digest("hex")
-    .slice(0, 12);
+  // colidir com vírgula em um id (2.4c). A `auditEvidence` (2.4e) entra no selo
+  // SÓ quando presente (review sem findings): assim o envelope dos reviews COM
+  // findings é byte-idêntico ao histórico — seals anteriores preservados.
+  const envelope: unknown[] = [parts.checkpoint, parts.role, parts.findingsEmitted, [...parts.ids]];
+  if (parts.auditEvidence) {
+    envelope.push([parts.auditEvidence.scope, parts.auditEvidence.basis]);
+  }
+  return createHash("sha256").update(JSON.stringify(envelope)).digest("hex").slice(0, 12);
 }
 
 export function parseReview(yamlText: string, file: string): ReviewArtifact {
@@ -245,12 +269,48 @@ export function parseReview(yamlText: string, file: string): ReviewArtifact {
     });
   }
 
+  // EVIDÊNCIA DE COBERTURA (2.4e): existe SE-E-SOMENTE-SE findings_emitted === 0.
+  // Sem isto, um review sem findings é enforcement-válido mas cego para
+  // recuperabilidade ("o que foi auditado / por que aprovou"). Estruturado
+  // (scope + basis), OBRIGATÓRIO quando 0 findings, PROIBIDO quando há findings
+  // (lá a evidência são os próprios findings) — nunca um campo opcional arbitrário.
+  const rawEvidence = o.audit_evidence;
+  let auditEvidence: AuditEvidence | undefined;
+  if (findingsEmitted === 0) {
+    if (!rawEvidence || typeof rawEvidence !== "object" || Array.isArray(rawEvidence)) {
+      throw new ReviewArtifactParseError(
+        `${file}: review com 0 findings exige "audit_evidence" (scope + basis) — ` +
+          `evidência selada de cobertura para recuperabilidade futura.`
+      );
+    }
+    const ev = rawEvidence as Record<string, unknown>;
+    const scope = str(ev.scope);
+    if (!scope) {
+      throw new ReviewArtifactParseError(
+        `${file}: audit_evidence.scope é obrigatório (o que foi inspecionado — áreas/invariantes).`
+      );
+    }
+    const basis = str(ev.basis);
+    if (!basis) {
+      throw new ReviewArtifactParseError(
+        `${file}: audit_evidence.basis é obrigatório (por que a aprovação foi concedida).`
+      );
+    }
+    auditEvidence = { scope, basis };
+  } else if (rawEvidence !== undefined && rawEvidence !== null) {
+    throw new ReviewArtifactParseError(
+      `${file}: "audit_evidence" é proibido quando há findings — a evidência são os próprios findings. Remova-o.`
+    );
+  }
+
   // Selo de ENVELOPE: fecha a "poda final" (deletar a cauda + decrementar count).
+  // Inclui a auditEvidence quando presente (sela a atestação de aprovação limpa).
   const expectedReview = reviewFingerprintOf({
     checkpoint,
     role: o.role as ReviewRole,
     findingsEmitted,
     ids: findings.map((f) => f.id),
+    ...(auditEvidence ? { auditEvidence } : {}),
   });
   const declaredReview = str(o.review_fingerprint);
   if (declaredReview !== expectedReview) {
@@ -267,6 +327,7 @@ export function parseReview(yamlText: string, file: string): ReviewArtifact {
     decision: o.decision as ReviewDecision,
     findingsEmitted,
     findings,
+    ...(auditEvidence ? { auditEvidence } : {}),
     file,
   };
 }

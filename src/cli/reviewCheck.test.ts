@@ -260,3 +260,69 @@ describe("consolidate (enforcement) [Checkpoint 2.4a]", () => {
     expect(c.openBlocking.map((f) => f.id)).toEqual(["F1"]);
   });
 });
+
+// Constrói uma review SEM findings (aprovação limpa). `evidence: null` omite a
+// `audit_evidence` (caso inválido). `actor`/`decision` parametrizáveis.
+function cleanReviewYaml(
+  evidence: { scope: string; basis: string } | null,
+  opts: { decision?: string; actor?: string } = {}
+): string {
+  const decision = opts.decision ?? "approved";
+  const actor = opts.actor ?? "gemini-3-pro-high";
+  const rfp = reviewFingerprintOf({
+    checkpoint: CP,
+    role: ROLE,
+    findingsEmitted: 0,
+    ids: [],
+    ...(evidence ? { auditEvidence: evidence } : {}),
+  });
+  const ev = evidence
+    ? `\naudit_evidence:\n  scope: "${evidence.scope}"\n  basis: "${evidence.basis}"`
+    : "";
+  return `checkpoint: "${CP}"\nrole: ${ROLE}\nactor: ${actor}\ndecision: ${decision}\nfindings_emitted: 0\nreview_fingerprint: ${rfp}${ev}\n`;
+}
+
+describe("audit_evidence — aprovação limpa [2.4e]", () => {
+  const ev = {
+    scope: "domain/knowledge, app/projections — invariantes §3",
+    basis: "invariantes sustentados; débitos §5 isentos; sem issue impeditiva",
+  };
+
+  it("0 findings COM audit_evidence (scope+basis) → parseia e expõe a evidência selada", () => {
+    const r = parseReview(cleanReviewYaml(ev), "reviews/c-x-technical_audit.yml");
+    expect(r.findingsEmitted).toBe(0);
+    expect(r.findings).toHaveLength(0);
+    expect(r.auditEvidence).toEqual(ev);
+  });
+
+  it("0 findings SEM audit_evidence → rejeita (review cego para recuperabilidade)", () => {
+    expect(() => parseReview(cleanReviewYaml(null), "f.yml")).toThrow(/audit_evidence/);
+  });
+
+  it("0 findings com scope vazio → rejeita", () => {
+    expect(() => parseReview(cleanReviewYaml({ scope: "", basis: "x" }), "f.yml")).toThrow(/scope/);
+  });
+
+  it("0 findings com basis vazio → rejeita", () => {
+    expect(() => parseReview(cleanReviewYaml({ scope: "x", basis: "" }), "f.yml")).toThrow(/basis/);
+  });
+
+  it("audit_evidence PROIBIDA quando há findings (lá a evidência são os findings) → rejeita", () => {
+    const withFindings = reviewYaml([okFinding]) + `audit_evidence:\n  scope: "x"\n  basis: "y"\n`;
+    expect(() => parseReview(withFindings, "f.yml")).toThrow(/proibido quando há findings/);
+  });
+
+  it("TAMPER: editar a base da aprovação sem re-selar → review_fingerprint inválido", () => {
+    const tampered = cleanReviewYaml(ev).replace(ev.basis, "aprovado sem checar nada");
+    expect(() => parseReview(tampered, "f.yml")).toThrow(/review_fingerprint inválido/);
+  });
+
+  it("PROVENIÊNCIA: `actor` é o executor real (sem default codex-cli assumido)", () => {
+    expect(parseReview(cleanReviewYaml(ev, { actor: "codex-cli" }), "f.yml").actor).toBe(
+      "codex-cli"
+    );
+    expect(parseReview(cleanReviewYaml(ev, { actor: "gpt-oss-120b" }), "f.yml").actor).toBe(
+      "gpt-oss-120b"
+    );
+  });
+});

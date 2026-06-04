@@ -64,15 +64,16 @@ Verificação de **corretude e invariantes** (não estética). Por camada:
 
 **1 review por role + 1 gate**, keyados no **cursor de #34 = `graph-core`** (cobrem o **PR inteiro**, não retroativo por checkpoint — espelha o `c2.4d` do #33). _(Convenção; o owner pode trocar a chave, ex.: `pr34`.)_
 
-| Lane                        | Arquivo                                         | Dono    |
-| --------------------------- | ----------------------------------------------- | ------- |
-| **Finding** (technical)     | `reviews/c-graph-core-technical_audit.yml`      | Codex   |
-| **Finding** (architectural) | `reviews/c-graph-core-architectural_review.yml` | ChatGPT |
-| **Resolução**               | `reviews/c-graph-core-resolutions.yml`          | Claude  |
-| **Gate**                    | `gates/c-graph-core.yml`                        | owner   |
+| Lane                        | Arquivo                                         | Dono                     |
+| --------------------------- | ----------------------------------------------- | ------------------------ |
+| **Finding** (technical)     | `reviews/c-graph-core-technical_audit.yml`      | reviewer (executor real) |
+| **Finding** (architectural) | `reviews/c-graph-core-architectural_review.yml` | reviewer (executor real) |
+| **Resolução**               | `reviews/c-graph-core-resolutions.yml`          | Claude                   |
+| **Gate**                    | `gates/c-graph-core.yml`                        | owner                    |
 
-- `checkpoint: "graph-core"` em todos. Roles: `technical_audit` | `architectural_review`. Reviewer emite findings com `disposition: open`.
-- **Fingerprints:** deixe `fingerprint: x` / `review_fingerprint: x` e rode **`yarn review:check`** — ele imprime o hash esperado (JSON-canônico). Ids contíguos `F1..FN`; `findings_emitted` = nº de blocos.
+- `checkpoint: "graph-core"` em todos. **Proveniência:** `role` = a lane (`technical_audit` | `architectural_review`); **`actor` = o executor real** (`gemini-3-pro-high`, `codex-cli`, `gpt-oss-…`) — sem default assumido.
+- **Evidência de cobertura (2.4e):** numa **aprovação limpa** (`findings_emitted: 0`) a `audit_evidence: { scope, basis }` é **obrigatória e selada** (proibida quando há findings). `scope` = o que foi inspecionado (pode referenciar §3/§5 deste dossiê); `basis` = por que aprovou. Sem isto, o review é cego para recuperabilidade.
+- **Fingerprints:** deixe `fingerprint: x` / `review_fingerprint: x` e rode **`yarn review:check`** — ele imprime o hash esperado (JSON-canônico; inclui `audit_evidence` quando presente). Ids contíguos `F1..FN`; `findings_emitted` = nº de blocos.
 - **Resolução** referencia `<role>#Fn` totalmente qualificado; **NÃO destrava** o gate (só a `disposition` do reviewer destrava — anti-autoaprovação).
 - **Enforcement** (`review:check`, no `validate` → required): gate `approved` ⟹ **ZERO** finding `critical/high` com `disposition: open`.
 - Disciplina completa: `reviews/README.md`.
