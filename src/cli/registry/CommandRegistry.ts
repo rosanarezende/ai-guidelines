@@ -46,9 +46,15 @@ export class CommandRegistry {
   }
 
   /**
-   * Roteia `argv` (o nome do comando em `argv[0]`) para o comando resolvido:
-   * `command.run(command.parse(argv.slice(1)), context)`. Comando ausente ou
-   * desconhecido → `exitCode 1` com mensagem narrativa (lista os disponíveis).
+   * Roteia `argv` (o nome do comando em `argv[0]`) para o comando resolvido.
+   * Comando ausente ou desconhecido → `exitCode 1` com mensagem narrativa.
+   *
+   * **Seleção do produtor de input** (um `run`, dois produtores): usa
+   * `command.prompt(context)` SSE `context.prompts` existe E o comando define
+   * `prompt` — caminho da superfície HUMANA (wizard). Caso contrário usa
+   * `command.parse(rest)` — caminho da CLI direta (sem `prompts` no contexto).
+   * Ambos produzem as mesmas options tipadas e fluem ao MESMO `run`. Em modo
+   * `prompt`, os posicionais de `argv` são ignorados (o humano fornece o input).
    */
   async dispatch(argv: readonly string[], context: CommandContext): Promise<CommandResult> {
     const [name, ...rest] = argv;
@@ -69,7 +75,8 @@ export class CommandRegistry {
     }
 
     try {
-      const options = command.parse(rest);
+      const options =
+        context.prompts && command.prompt ? await command.prompt(context) : command.parse(rest);
       return await command.run(options, context);
     } catch (err) {
       // Erro de input (parse) ou de execução (run) vira exitCode 1 com mensagem

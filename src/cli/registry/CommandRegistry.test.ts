@@ -156,4 +156,99 @@ describe("CommandRegistry", () => {
     reg.register(spyCommand("graph", { aliases: ["g"] }));
     expect(reg.commandNames()).toEqual(["graph", "why"]);
   });
+
+  // ── Seleção de produtor de input no dispatch (etapa 3 do #35) ──
+  // Um único `run`, dois produtores: `parse(argv)` (CLI) e `prompt(ctx)` (wizard).
+  // O dispatch escolhe `prompt` SSE `ctx.prompts` existe E o comando define `prompt`.
+
+  /** Spy com os DOIS produtores: regista qual foi usado e o que chegou ao run. */
+  function spyDualCommand(name: string): Command<{ source: "parse" | "prompt" }> & {
+    ranWith: { source: "parse" | "prompt" }[];
+  } {
+    const ranWith: { source: "parse" | "prompt" }[] = [];
+    return {
+      name,
+      ranWith,
+      parse: () => ({ source: "parse" as const }),
+      prompt: async () => ({ source: "prompt" as const }),
+      async run(options): Promise<CommandResult> {
+        ranWith.push(options);
+        return { exitCode: 0 };
+      },
+    };
+  }
+
+  function fakePrompts(): CommandContext["prompts"] {
+    return {
+      async select<T>(o: { choices: ReadonlyArray<{ value: T }> }) {
+        return o.choices[0].value;
+      },
+      async input() {
+        return "";
+      },
+      async confirm() {
+        return false;
+      },
+    };
+  }
+
+  it("DADO comando com prompt() E ctx com prompts QUANDO dispatch ENTÃO usa prompt() (não parse) e roteia ao mesmo run", async () => {
+    const reg = new CommandRegistry();
+    const cmd = spyDualCommand("visual");
+    reg.register(cmd);
+    const { logger } = fakeLogger();
+
+    await reg.dispatch(["visual", "ignorado"], {
+      repoRoot: "/repo",
+      logger,
+      prompts: fakePrompts(),
+    });
+
+    expect(cmd.ranWith).toEqual([{ source: "prompt" }]);
+  });
+
+  it("DADO comando com prompt() MAS ctx SEM prompts QUANDO dispatch ENTÃO cai em parse() (CLI direta)", async () => {
+    const reg = new CommandRegistry();
+    const cmd = spyDualCommand("visual");
+    reg.register(cmd);
+    const { logger } = fakeLogger();
+
+    await reg.dispatch(["visual"], fakeContext(logger));
+
+    expect(cmd.ranWith).toEqual([{ source: "parse" }]);
+  });
+
+  it("DADO comando SEM prompt() E ctx COM prompts QUANDO dispatch ENTÃO usa parse() (read-only no wizard)", async () => {
+    const reg = new CommandRegistry();
+    const cmd = spyCommand("specs");
+    reg.register(cmd);
+    const { logger } = fakeLogger();
+
+    await reg.dispatch(["specs", "x"], { repoRoot: "/repo", logger, prompts: fakePrompts() });
+
+    expect(cmd.ranWith).toEqual([{ rest: ["x"] }]); // parse recebeu o argv sem o nome
+  });
+
+  it("DADO prompt() que lança QUANDO dispatch ENTÃO captura, loga e devolve exitCode 1 (mesmo tratamento de parse)", async () => {
+    const reg = new CommandRegistry();
+    const throwing: Command<void> = {
+      name: "boom",
+      parse: () => undefined,
+      prompt: async () => {
+        throw new Error("prompt abortado");
+      },
+      run: async () => ({ exitCode: 0 }),
+    };
+    reg.register(throwing);
+    const { logger, errors } = fakeLogger();
+
+    const result = await reg.dispatch(["boom"], {
+      repoRoot: "/repo",
+      logger,
+      prompts: fakePrompts(),
+    });
+
+    expect(result.exitCode).toBe(1);
+    expect(errors.join("\n")).toContain("prompt abortado");
+  });
 });

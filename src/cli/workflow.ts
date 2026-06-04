@@ -1206,7 +1206,9 @@ async function runIntent(
   const registry =
     options.registry ?? (await import("./registry/buildRegistry.js")).buildRegistry();
   const argv = [action.command, ...(action.args ?? [])];
-  const result = await registry.dispatch(argv, { repoRoot: options.repoRoot, logger });
+  // Injeta `prompts` no contexto: comandos interativos (com `prompt`) usam a
+  // superfície humana; read-only ignoram. A seleção do produtor é do dispatch.
+  const result = await registry.dispatch(argv, { repoRoot: options.repoRoot, logger, prompts });
   return result.exitCode;
 }
 
