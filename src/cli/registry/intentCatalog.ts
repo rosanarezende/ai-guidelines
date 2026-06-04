@@ -37,7 +37,10 @@ export const INTENT_CATALOG: readonly Intent[] = [
   {
     id: "inspecionar-specs-ativas",
     title: "Inspecionar specs ativas",
-    actions: [{ command: "specs", label: "Ver specs ativas (índice público)" }],
+    actions: [
+      { command: "specs", label: "Ver specs ativas (índice público)" },
+      { command: "drift", label: "Diagnosticar drift do índice" },
+    ],
   },
 ];
 
