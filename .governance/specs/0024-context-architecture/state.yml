@@ -91,8 +91,10 @@ topology:
       # rules-builder, rules-parser, rules-loader, token-budget) e invocado pelo
       # build:rules, NAO pelo dispatch — colaborador do bootstrap, nao parte do
       # roteamento (eixos ortogonais; ADR 0008/0023 vs ADR 0025). Migra para
-      # TS/src em no proprio. Adjacente ao cutover para nao deixar o motor .mjs
-      # pendurado sob a CLI ja em TS.
+      # TS/src em no proprio. SUBORDINADO a conclusao do #35: sucessor IMEDIATO e
+      # OBRIGATORIO (sequence 4; NAO backlog opcional). A interop TS->.mjs do
+      # bootstrap, introduzida no #35, e ponte TRANSITORIA que ESTE no fecha — o
+      # cutover so esta plenamente absorvido quando este no aterrissa.
       - id: pr-compiler-ts
         github_pr: null
         role: execution
