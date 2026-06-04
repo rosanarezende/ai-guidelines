@@ -10,6 +10,7 @@ describe("buildRegistry", () => {
     expect(registry.resolve("workflow")?.name).toBe("workflow");
     expect(registry.resolve("specs")?.name).toBe("specs");
     expect(registry.resolve("drift")?.name).toBe("drift");
+    expect(registry.resolve("visual-prompt")?.name).toBe("visual-prompt");
   });
 
   it("DADO o alias transitório 'review' QUANDO resolve ENTÃO cai no comando 'triage'", () => {
@@ -29,6 +30,7 @@ describe("buildRegistry", () => {
         "workflow",
         "specs",
         "drift",
+        "visual-prompt",
       ])
     );
     expect(names).not.toContain("review");

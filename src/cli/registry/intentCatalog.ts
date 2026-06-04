@@ -42,6 +42,16 @@ export const INTENT_CATALOG: readonly Intent[] = [
       { command: "drift", label: "Diagnosticar drift do índice" },
     ],
   },
+  {
+    id: "gerar-prompt-visual",
+    title: "Gerar um prompt visual",
+    actions: [
+      {
+        command: "visual-prompt",
+        label: "Gerar prompt visual (para gerador de imagem externo)",
+      },
+    ],
+  },
 ];
 
 /**
