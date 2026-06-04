@@ -435,8 +435,50 @@ async function dispatchInsight(argv) {
   if (code !== 0) process.exitCode = code;
 }
 
+/**
+ * PONTE (transitória) para o registry de comandos (src/cli/registry). Carrega o
+ * registry compilado de dist/. Comandos já migrados roteiam por ele; o resto cai
+ * no fallback legado. DONE do #35 (pr-cli-cutover): quando TODOS migrarem, este
+ * vira o único dispatch e o fallback (parseArgs + if/else) é REMOVIDO — registry
+ * roteador único, SEM fallback, com engine.mjs/args.mjs dissolvidos (ADR 0025).
+ */
+async function loadRegistry() {
+  try {
+    const mod = await import("../../dist/cli/registry/buildRegistry.js");
+    return mod.buildRegistry();
+  } catch {
+    // dist/ ausente (ex.: pré-build) → null cai no legado. Transitório.
+    return null;
+  }
+}
+
+const registryLogger = {
+  info: (msg) => process.stdout.write(`${msg}\n`),
+  error: (msg) => process.stderr.write(`${msg}\n`),
+};
+
 export async function main(argv = process.argv.slice(2)) {
   try {
+    const commandName = argv[0];
+
+    // ── PONTE (transitória) — comandos migrados roteiam pelo registry ──
+    // Bypassa o parseArgs legado: cada comando faz o próprio parse (dissolve
+    // args.mjs para os migrados). Quando o registry cobrir todos os comandos,
+    // o fallback legado abaixo é REMOVIDO (DONE do #35: roteador único, sem
+    // fallback). Hoje resolve: `continue`.
+    if (commandName && commandName !== "--help" && commandName !== "-h") {
+      const registry = await loadRegistry();
+      if (registry && registry.resolve(commandName)) {
+        const result = await registry.dispatch(argv, {
+          repoRoot: process.cwd(),
+          logger: registryLogger,
+        });
+        if (result.exitCode !== 0) process.exitCode = result.exitCode;
+        return;
+      }
+    }
+
+    // ── FALLBACK LEGADO (transitório; removido no DONE do #35) ──
     const { command, options } = parseArgs(argv);
 
     if (command === "--help" || command === "-h") {
