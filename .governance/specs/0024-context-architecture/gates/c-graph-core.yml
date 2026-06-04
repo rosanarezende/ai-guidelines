@@ -1,0 +1,14 @@
+# Gate humano do PR #34 (PR INTEIRO), keyado no cursor graph-core.
+# Escrito sob instrução EXPLÍCITA do owner nesta sessão (2026-06-04, "gate aprovado,
+# segue"; mesma disciplina do c2.4d.yml). As 2 lanes do checkpoint graph-core estão
+# approved com 0 findings: technical_audit (antigravity/gemini-3.1-pro-high, selo
+# 4b995794f65d) + architectural_review (chatgpt/gpt-5.5, selo 185d897a1708).
+# `review:check` ENFORCA: approved exige zero finding critical/high `open` — satisfeito
+# (0 findings emitidos). O Human Gate decide o PRÓXIMO MOVIMENTO (abrir pr-cli-cutover
+# stacked) — NÃO autoriza merge em main (modo unit; merge único ao fim via review.md R8).
+checkpoint: "graph-core"
+actor: "@rosanarezende"
+ref: "#34"
+date: "2026-06-04"
+decision: approved
+note: "PR #34 (Knowledge kernel + KnowledgeGraph + contrato 2.4e→2.4g) aprovado para AVANÇAR; 2 lanes approved, 0 findings. Decide o próximo movimento (pr-cli-cutover), não merge."

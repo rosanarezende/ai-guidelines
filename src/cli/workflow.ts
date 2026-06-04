@@ -42,6 +42,11 @@ import {
 } from "../app/workflow/AssembleBriefing.js";
 import { SpecLocation } from "../domain/workflow/SpecLocation.js";
 import { WorkflowState } from "../domain/workflow/WorkflowState.js";
+import {
+  buildInsightsProjection,
+  renderResumptionInsights,
+} from "../app/workflow/InsightsProjection.js";
+import { FileInsightStore } from "../infrastructure/yaml/FileInsightStore.js";
 import { NodeWorkflowFileSystem } from "../infrastructure/filesystem/NodeWorkflowFileSystem.js";
 import { NodeClipboard, clipboardInstallHint } from "../infrastructure/io/NodeClipboard.js";
 import { InquirerPrompts } from "../infrastructure/io/InquirerPrompts.js";
@@ -1365,7 +1370,24 @@ export async function runContinue(options: RunOptions, identifier?: string): Pro
     logger.info("");
     logger.info(`Próxima ação: ${ctx.state.next[0]}`);
   }
+  projectInsights(fs, logger);
   return 0;
+}
+
+/**
+ * Projeta a fila viva de "Percepções em Trânsito" na retomada (derivada, situada).
+ * Degrada graciosamente: um ledger corrompido emite aviso e NÃO derruba o briefing.
+ */
+function projectInsights(fs: WorkflowFileSystem, logger: Logger): void {
+  try {
+    const open = new FileInsightStore(fs).load().open();
+    const block = renderResumptionInsights(buildInsightsProjection(open));
+    if (block) logger.info(block);
+  } catch (err) {
+    logger.error(
+      `(aviso: ledger de percepções ilegível — ${err instanceof Error ? err.message : String(err)})`
+    );
+  }
 }
 
 /**

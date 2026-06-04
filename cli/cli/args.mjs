@@ -244,6 +244,12 @@ export function parseArgs(argv) {
         options.pr = token;
         continue;
       }
+      //   4. `insight <sub> [args...]` — subcomando + positionais livres; o
+      //      runtime (src/cli/insight.ts) faz o parse fino do argv cru, então
+      //      aqui apenas toleramos os positionais sem throw.
+      if (command === "insight") {
+        continue;
+      }
       throw new Error(`Argumento inesperado: ${token}`);
     }
 

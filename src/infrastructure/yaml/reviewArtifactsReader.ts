@@ -58,13 +58,61 @@ export interface Finding {
   readonly fingerprint: string;
 }
 
+/**
+ * Evidência de cobertura de um review SEM findings (2.4e + 2.4g). Quando
+ * `findings_emitted === 0` os findings não existem para carregar a evidência —
+ * então a aprovação limpa precisa ATESTAR, de forma selada: o "onde" queryável
+ * (`coverage`: caminhos auditados, 2.4g), o que/como (`scope`) e o porquê (`basis`).
+ * Recuperabilidade + queryabilidade: meses depois, só pelo YAML, responde "o que
+ * foi auditado / onde / por que aprovou". Existe SE-E-SOMENTE-SE
+ * `findings_emitted === 0` (proibido quando há findings — lá a evidência são os
+ * próprios findings; `coverage` é o dual de `finding.location`).
+ */
+export interface AuditEvidence {
+  /**
+   * O "onde" ESTRUTURADO (2.4g): caminhos auditados — a dimensão **enumerável** que
+   * vivia escondida na prosa do `scope`. Simétrica a `finding.location` (o "onde"
+   * dos problemas); torna a cobertura **queryável** sem parsing (heatmap de áreas,
+   * área×modelo). Lista NÃO-vazia de tokens de caminho (forma lenient, como
+   * `KnowledgeRef`: sem checar existência). NÃO é `{area, note}` nem registry nem
+   * nó — só a lista; o "Area node / dashboard" é projeção derivada.
+   */
+  readonly coverage: readonly string[];
+  /** O que/como foi inspecionado (narrativa). PERMANECE texto. */
+  readonly scope: string;
+  /** Por que a aprovação foi concedida — incl. riscos ponderados (narrativa). PERMANECE texto. */
+  readonly basis: string;
+}
+
+/**
+ * Proveniência ESTRUTURADA do executor de um review (2.4f). Diferente do `actor`
+ * do Gate (decisor HUMANO, identidade social), o executor de uma auditoria é um
+ * AGENTE COMPUTACIONAL — duas dimensões ORTOGONAIS (m:n entre si):
+ *   - `platform`: o harness/produto que rodou (antigravity, codex-cli, claude-code, local).
+ *   - `model`: o LLM totalmente-qualificado (gemini-3.1-pro-high, claude-opus-4-8, qwen3-235b).
+ * VO (sem identidade própria; comparável por valor), SELADO no `review_fingerprint`
+ * → proveniência tamper-evidente. O "uso de modelos/plataformas" é uma PROJEÇÃO
+ * derivada sobre os reviews (CQRS) — NÃO um registry `Agent` persistido (isso
+ * repetiria o over-modeling de participação m:n já rejeitado; cf. disclosureRender).
+ */
+export interface ExecutorProvenance {
+  readonly platform: string;
+  readonly model: string;
+}
+
 export interface ReviewArtifact {
   readonly checkpoint: string;
   readonly role: ReviewRole;
-  readonly actor: string;
+  /** Proveniência LEGADA (string) — reviews históricos já selados (c2.3/c2.4d),
+   *  NÃO-selada. Reviews novos usam `executor`. Exatamente um dos dois. */
+  readonly actor?: string;
+  /** Proveniência ESTRUTURADA do executor (2.4f), SELADA. Canônica para reviews novos. */
+  readonly executor?: ExecutorProvenance;
   readonly decision: ReviewDecision;
   readonly findingsEmitted: number;
   readonly findings: readonly Finding[];
+  /** Presente ⟺ `findingsEmitted === 0` (evidência de aprovação limpa, selada). */
+  readonly auditEvidence?: AuditEvidence;
   readonly file: string;
 }
 
@@ -96,6 +144,40 @@ export class ReviewArtifactParseError extends Error {
 
 function str(v: unknown): string | null {
   return typeof v === "string" && v.length > 0 ? v : null;
+}
+
+/**
+ * `audit_evidence.coverage` (2.4g): lista NÃO-vazia de tokens de CAMINHO. Forma
+ * lenient (não checa existência, como `KnowledgeRef`), mas rejeita espaço em branco
+ * — coverage é o "onde" queryável, não prosa (a narrativa fica em `scope`).
+ */
+function parseCoverage(raw: unknown, file: string): string[] {
+  if (raw === undefined || raw === null) {
+    throw new ReviewArtifactParseError(
+      `${file}: audit_evidence.coverage é obrigatório (lista de caminhos auditados — o "onde" queryável, simétrico a finding.location).`
+    );
+  }
+  if (!Array.isArray(raw) || raw.length === 0) {
+    throw new ReviewArtifactParseError(
+      `${file}: audit_evidence.coverage deve ser uma lista NÃO-vazia de caminhos.`
+    );
+  }
+  const paths: string[] = [];
+  for (const [i, item] of raw.entries()) {
+    const p = str(item);
+    if (!p) {
+      throw new ReviewArtifactParseError(
+        `${file}: audit_evidence.coverage[${i}] deve ser um caminho não-vazio.`
+      );
+    }
+    if (/\s/.test(p)) {
+      throw new ReviewArtifactParseError(
+        `${file}: audit_evidence.coverage[${i}] ("${p}") contém espaço — coverage é lista de CAMINHOS (queryável), não prosa. A narrativa fica em scope.`
+      );
+    }
+    paths.push(p);
+  }
+  return paths;
 }
 
 /**
@@ -141,13 +223,29 @@ export function reviewFingerprintOf(parts: {
   role: string;
   findingsEmitted: number;
   ids: readonly string[];
+  auditEvidence?: AuditEvidence;
+  executor?: ExecutorProvenance;
 }): string {
-  // Serialização CANÔNICA (JSON) — `ids` como array, não `join(",")`, para não
-  // colidir com vírgula em um id (2.4c).
-  return createHash("sha256")
-    .update(JSON.stringify([parts.checkpoint, parts.role, parts.findingsEmitted, [...parts.ids]]))
-    .digest("hex")
-    .slice(0, 12);
+  // Base de 4 elementos (checkpoint|role|count|ids) — serialização CANÔNICA (JSON,
+  // `ids` como array, não `join(",")`; 2.4c). Selos históricos SEM extensões ficam
+  // byte-idênticos. As extensões OPCIONAIS (audit_evidence 2.4e, executor 2.4f)
+  // entram como pares [chave, valor] TAGUEADOS em ordem fixa, num único elemento
+  // final, SÓ quando há alguma → cada extensão é inequívoca (sem ambiguidade
+  // posicional) e o conjunto cresce sem colidir com o passado.
+  const envelope: unknown[] = [parts.checkpoint, parts.role, parts.findingsEmitted, [...parts.ids]];
+  const extensions: Array<[string, unknown]> = [];
+  if (parts.auditEvidence) {
+    // tupla FIXA [scope, basis, coverage] — os 3 sempre presentes juntos (2.4e+2.4g).
+    extensions.push([
+      "audit_evidence",
+      [parts.auditEvidence.scope, parts.auditEvidence.basis, [...parts.auditEvidence.coverage]],
+    ]);
+  }
+  if (parts.executor) {
+    extensions.push(["executor", [parts.executor.platform, parts.executor.model]]);
+  }
+  if (extensions.length > 0) envelope.push(extensions);
+  return createHash("sha256").update(JSON.stringify(envelope)).digest("hex").slice(0, 12);
 }
 
 export function parseReview(yamlText: string, file: string): ReviewArtifact {
@@ -159,8 +257,48 @@ export function parseReview(yamlText: string, file: string): ReviewArtifact {
 
   const checkpoint = str(o.checkpoint) ?? String(o.checkpoint ?? "");
   if (!checkpoint) throw new ReviewArtifactParseError(`${file}: "checkpoint" is required`);
-  const actor = str(o.actor);
-  if (!actor) throw new ReviewArtifactParseError(`${file}: "actor" is required`);
+
+  // PROVENIÊNCIA (2.4f): EXATAMENTE UMA de
+  //   - `executor: { platform, model }` — canônica; agente computacional; SELADA;
+  //   - `actor: <string>` — legado (reviews históricos já selados); NÃO-selada.
+  // O Gate mantém `actor` (decisor humano) noutro parser.
+  const rawExecutor = o.executor;
+  let actor: string | undefined;
+  let executor: ExecutorProvenance | undefined;
+  if (rawExecutor !== undefined && rawExecutor !== null) {
+    if (typeof rawExecutor !== "object" || Array.isArray(rawExecutor)) {
+      throw new ReviewArtifactParseError(
+        `${file}: "executor" deve ser um mapping { platform, model }.`
+      );
+    }
+    if (o.actor !== undefined && o.actor !== null) {
+      throw new ReviewArtifactParseError(
+        `${file}: use "executor" (canônico) OU "actor" (legado), não ambos.`
+      );
+    }
+    const ex = rawExecutor as Record<string, unknown>;
+    const platform = str(ex.platform);
+    if (!platform) {
+      throw new ReviewArtifactParseError(
+        `${file}: executor.platform é obrigatório (harness/produto: antigravity | codex-cli | claude-code | local).`
+      );
+    }
+    const model = str(ex.model);
+    if (!model) {
+      throw new ReviewArtifactParseError(
+        `${file}: executor.model é obrigatório (LLM totalmente-qualificado: ex. gemini-3.1-pro-high).`
+      );
+    }
+    executor = { platform, model };
+  } else {
+    actor = str(o.actor) ?? undefined;
+    if (!actor) {
+      throw new ReviewArtifactParseError(
+        `${file}: proveniência obrigatória — "executor" { platform, model } (canônico) ou "actor" (legado).`
+      );
+    }
+  }
+
   if (!(REVIEW_ROLES as readonly string[]).includes(o.role as string)) {
     throw new ReviewArtifactParseError(`${file}: "role" must be one of ${REVIEW_ROLES.join("|")}`);
   }
@@ -245,12 +383,52 @@ export function parseReview(yamlText: string, file: string): ReviewArtifact {
     });
   }
 
+  // EVIDÊNCIA DE COBERTURA (2.4e): existe SE-E-SOMENTE-SE findings_emitted === 0.
+  // Sem isto, um review sem findings é enforcement-válido mas cego para
+  // recuperabilidade ("o que foi auditado / por que aprovou"). Estruturado
+  // (scope + basis), OBRIGATÓRIO quando 0 findings, PROIBIDO quando há findings
+  // (lá a evidência são os próprios findings) — nunca um campo opcional arbitrário.
+  const rawEvidence = o.audit_evidence;
+  let auditEvidence: AuditEvidence | undefined;
+  if (findingsEmitted === 0) {
+    if (!rawEvidence || typeof rawEvidence !== "object" || Array.isArray(rawEvidence)) {
+      throw new ReviewArtifactParseError(
+        `${file}: review com 0 findings exige "audit_evidence" (coverage + scope + basis) — ` +
+          `evidência selada de cobertura para recuperabilidade futura.`
+      );
+    }
+    const ev = rawEvidence as Record<string, unknown>;
+    // coverage (2.4g): o "onde" estruturado e queryável; scope/basis seguem texto.
+    const coverage = parseCoverage(ev.coverage, file);
+    const scope = str(ev.scope);
+    if (!scope) {
+      throw new ReviewArtifactParseError(
+        `${file}: audit_evidence.scope é obrigatório (o que/como foi inspecionado — narrativa).`
+      );
+    }
+    const basis = str(ev.basis);
+    if (!basis) {
+      throw new ReviewArtifactParseError(
+        `${file}: audit_evidence.basis é obrigatório (por que a aprovação foi concedida).`
+      );
+    }
+    auditEvidence = { coverage, scope, basis };
+  } else if (rawEvidence !== undefined && rawEvidence !== null) {
+    throw new ReviewArtifactParseError(
+      `${file}: "audit_evidence" é proibido quando há findings — a evidência são os próprios findings. Remova-o.`
+    );
+  }
+
   // Selo de ENVELOPE: fecha a "poda final" (deletar a cauda + decrementar count).
+  // Sela também as extensões presentes — auditEvidence (aprovação limpa) e
+  // executor (proveniência estruturada) → ambas tamper-evidentes.
   const expectedReview = reviewFingerprintOf({
     checkpoint,
     role: o.role as ReviewRole,
     findingsEmitted,
     ids: findings.map((f) => f.id),
+    ...(auditEvidence ? { auditEvidence } : {}),
+    ...(executor ? { executor } : {}),
   });
   const declaredReview = str(o.review_fingerprint);
   if (declaredReview !== expectedReview) {
@@ -263,10 +441,12 @@ export function parseReview(yamlText: string, file: string): ReviewArtifact {
   return {
     checkpoint,
     role: o.role as ReviewRole,
-    actor,
+    ...(actor ? { actor } : {}),
+    ...(executor ? { executor } : {}),
     decision: o.decision as ReviewDecision,
     findingsEmitted,
     findings,
+    ...(auditEvidence ? { auditEvidence } : {}),
     file,
   };
 }

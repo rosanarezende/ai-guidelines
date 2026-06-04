@@ -60,6 +60,12 @@ export function parseSpecBranch(branch: string | null): BranchParseResult | null
 export interface DetectActiveSpecResult {
   readonly location: SpecLocation | null;
   /**
+   * Id canônico `NNNN` extraído do branch — a fonte autoritativa de identidade
+   * (per [DEC-0023-I01]). Presente sempre que o branch parseou (mesmo sem dir).
+   * Consumidores devem usar ISTO em vez de re-derivar do slug do diretório.
+   */
+  readonly specId?: string;
+  /**
    * Sufixo do branch após `NNNN-`. Informativo (transparência); pode
    * diferir do slug do diretório resolvido em stacks multi-PR.
    */
@@ -99,12 +105,14 @@ export class DetectActiveSpec {
           absolutePath: this.fs.resolveAbsolute(`${GOVERNANCE_ROOT}/${dirName}`),
           source: "governance",
         },
+        specId,
         branchScope,
       };
     }
     if (governanceMatches.length > 1) {
       return {
         location: null,
+        specId,
         branchScope,
         reason:
           `múltiplos diretórios com id "${specId}" em ${GOVERNANCE_ROOT}/: ` +
@@ -122,12 +130,14 @@ export class DetectActiveSpec {
           absolutePath: this.fs.resolveAbsolute(`${SPECIFY_ROOT}/${dirName}`),
           source: "specify-legacy",
         },
+        specId,
         branchScope,
       };
     }
     if (specifyMatches.length > 1) {
       return {
         location: null,
+        specId,
         branchScope,
         reason:
           `múltiplos diretórios com id "${specId}" em ${SPECIFY_ROOT}/: ` +

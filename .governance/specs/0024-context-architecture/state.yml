@@ -2,12 +2,13 @@ stage: implementation
 gate:
   status: closed
 focus:
+  - "RECONCILIACAO 2026-06-03 ([DEC-0024-G08], owner): G03 (promotion pipeline) / G04 (casa unica/tri-root) / G05 (projecoes) foram REABERTOS. Os eixos deixados em aberto no Stage 1 mostraram-se necessarios para problemas reais observados no uso (mis-binding da retomada, recuperabilidade, 'a resposta estava num ADR esquecido'). A 0024 VOLTOU A TRATAR MODELAGEM nesses eixos -- isto e DECISAO, nao drift. Direcao assumida: arquitetura orientada a grafo (entidades + relacoes navegaveis KnowledgeRef + projecoes derivadas). NAO ha 0025 independente (o split foi superado no Checkpoint 2; o trabalho mapeia em G03/G04/G05 + candidatas Grupo B). O kernel Knowledge + KnowledgeGraph nucleo + capability Insights JA materializados (PR #34). Motivacao persistida como Insights (PIT-0004..0006)."
   - "0024 em ABSORCAO OPERACIONAL (pesquisa encerrada). Problema = falta de absorcao, nao falta de decisao: decisoes convergidas ainda nao alteraram o comportamento do sistema ('arquitetura converge enquanto codigo diverge'). Backlog = relatorio de auditoria do Codex (divergencias decisao<->codigo)."
   - "Plano executavel CANONICO no repo: plan.md secoes 'Sequencia de Checkpoints' + 'Topologia operacional'. VOCABULARIO (Checkpoint 2.1): PR/#N = Pull Request real do GitHub; Checkpoint N = unidade de implementacao da spec; Gate = ritual de validacao (Technical Audit -> Architectural Review -> Human)."
   - "TOPOLOGIA CANONICA (corrigida no Checkpoint 2.1a; modelo da 0023 / ADR 0020 + 0024 / DEC-0023-M01): #32 = PR de governanca/bootstrap + LINHA DE INTEGRACAO da spec; NAO mergeia cedo, e a BASE DA STACK. Checkpoint 3+ = PR real proprio STACKED sobre a linha da spec (NAO off-main, NAO independente). Modo UNIT: merge em main e evento UNICO ao fim (veiculo = PR terminal de implementacao; #32 + intermediarios + Integration PR via landed-via reconciliation; 1 SHA canonico), apos review.md R8. Integration PR = homologacao antes do merge (NAO veiculo)."
   - "Decisoes cravadas (NAO reabrir): G00/G02/G06; Open abolido/DEC nasce Pendente/Deferred canonico; brief por estado; GG-0001 interno (DOGFOOD-*); WorkflowType removido; proveniencia runtime-scoped (role livre, espinha impl+gate derivada, projecao NAO governanca); GG-0002 antes da remocao."
   - "Gate por checkpoint: Claude implementa -> Technical Audit Gate (Codex) -> Architectural Review Gate (ChatGPT) -> Human Gate (owner) -> AVANCA (abre o proximo PR stacked). O Human Gate decide o PROXIMO MOVIMENTO, NAO mergeia em main. 1 checkpoint atomico por vez; parar no Gate quando o commit estiver pronto. Correcao local pequena nao espera; mudanca estrutural sim."
-  - "Criterio: 'ja foi validado empiricamente na 0024?' -> absorver/enforcar/executar. NAO re-modelar, NAO re-pesquisar o decidido. Risco dominante: voltar a modelar em vez de remover divergencias uma a uma."
+  - "Criterio (RESSALVADO em 2026-06-03 por [DEC-0024-G08]): 'ja foi validado empiricamente na 0024?' -> absorver/enforcar/executar. NAO re-modelar o DECIDIDO (G00/G02/G06/G07 seguem cravados). EXCECAO assumida: G03/G04/G05 foram reabertos para modelagem deliberada (orientada a grafo) -- nesses eixos, modelar e a direcao, nao o risco. O 'risco dominante' original (modelar em vez de absorver) vale para os eixos resolvidos; nos reabertos, a modelagem e o trabalho."
 next:
   - "#32 GATED: Checkpoints 2 (8b0eec6) + 2.1 (d686d4b) + 2.1a (fa2c0ae) fechados. #32 permanece como linha de integracao -- NAO mergeia."
   - "#33 (branch feat/spec-0024-ruleset-producibility) = unico PR de execucao stacked aberto (sequence 1); embarca os Checkpoints 2.2, 2.2b, 2.3, 2.3a, 2.3b, 2.4, 2.4a, 2.4b, 2.4c e 2.4d. NAO existe branch feat/spec-0024-topology (corrigido no 2.3a: o no-fantasma checkpoint-2.3 foi dobrado em #33)."
@@ -20,8 +21,8 @@ next:
   - "LER antes de qualquer acao: research/2026-06-02-handoff-checkpoint-3.md (SSOT da retomada para o Checkpoint 3; supersede o handoff-next-session) + state.yml § topology + plan.md. Verificar git limpo + yarn validate verde + gate do #33 (gates/c2.4d.yml) approved."
 topology:
   cursor:
-    pr: ruleset-producibility
-    checkpoint: checkpoint-2.4d
+    pr: insights-in-flight
+    checkpoint: checkpoint-graph-core
   prs:
     concluded:
       - id: base-governance
@@ -35,7 +36,6 @@ topology:
           - checkpoint-2.1
           - checkpoint-2.1a
 
-    active:
       - id: ruleset-producibility
         github_pr: 33
         role: execution
@@ -53,91 +53,89 @@ topology:
           - checkpoint-2.4c
           - checkpoint-2.4d
 
-    planned:
-      # `sequence` = posicao no STACK de execucao (1..K, contigua), NAO o numero
-      # do checkpoint. Renumerada no 2.3a apos remover o no-fantasma checkpoint-2.3.
-      - id: checkpoint-3
-        github_pr: null
+    active:
+      # #34 = linha de execucao ativa apos a reabertura de G03/G04/G05 ([DEC-0024-G08]).
+      # Embarca a modelagem ja materializada: capability Insights + kernel Knowledge
+      # (pipeline insight->decision->rule|guardrail->doctrine) + KnowledgeGraph nucleo.
+      - id: insights-in-flight
+        github_pr: 34
         role: execution
         terminal: false
         sequence: 2
         checkpoints:
-          - checkpoint-3
+          - checkpoint-insights
+          - checkpoint-knowledge-kernel
+          - checkpoint-graph-core
 
-      - id: checkpoint-4
+    planned:
+      # `sequence` = posicao no STACK de execucao (1..K, contigua), NAO o numero
+      # do checkpoint. TRILHA RECONCILIADA em 2026-06-03 ([DEC-0024-G08]): apos a
+      # reabertura de G03/G04/G05, a direcao de execucao e o PROGRAMA DE
+      # CONVERGENCIA orientado a grafo. Os checkpoints de absorcao originais (3-12)
+      # foram DOBRADOS nos PRs de convergencia onde se sobrepoem (mapeamento em
+      # plan.md). github_pr null = ainda nao aberto.
+      - id: pr-cli-cutover
         github_pr: null
         role: execution
         terminal: false
         sequence: 3
         checkpoints:
-          - checkpoint-4a
-          - checkpoint-4b
+          - checkpoint-cli-cutover # registry de comandos em src/ (dissolve costura engine.mjs/args.mjs); destrava verbos baratos (ag graph/why)
 
-      - id: checkpoint-5
+      - id: pr-doctrine
         github_pr: null
         role: execution
         terminal: false
         sequence: 4
         checkpoints:
-          - checkpoint-5
+          - checkpoint-doctrine # Doctrine (ADRs navegaveis) + DoctrineGraph + doctrine:check
+          - checkpoint-doc-cleanup # absorve ex-checkpoint-12 (limpar docs arquiteturais)
 
-      - id: checkpoint-6
+      - id: pr-decision
         github_pr: null
         role: execution
         terminal: false
         sequence: 5
         checkpoints:
-          - checkpoint-6
+          - checkpoint-decision # Decision entity + decision:check (absorve GG-0001); dissolve NEXT.md
+          - checkpoint-decouple-brief # absorve ex-checkpoint-9 (desacoplar decision-brief de evidence-driven)
 
-      - id: checkpoint-7
+      - id: pr-rule-guardrail
         github_pr: null
         role: execution
         terminal: false
         sequence: 6
         checkpoints:
-          - checkpoint-7
+          - checkpoint-rule-guardrail # Rule/Guardrail (enforcedBy/groundedIn); CORE-*/GR-*->scope
+          - checkpoint-gg-0003 # absorve ex-checkpoint-3 (GG-0003 consistency)
+          - checkpoint-gg-0002 # absorve ex-checkpoint-6 (GG-0002 banned-concept)
+          - checkpoint-taxonomy-removal # absorve ex-checkpoint-7 (CRITICO: remover taxonomia evidence-driven/...) + ex-10 (tasks boilerplate)
 
-      - id: checkpoint-8
+      - id: pr-projection-split
         github_pr: null
         role: execution
         terminal: false
         sequence: 7
         checkpoints:
-          - checkpoint-8
+          - checkpoint-projection-split # arvore projections/ derivada + projection:check (G05)
+          - checkpoint-agents-sync # absorve ex-checkpoint-5 (AGENTS sync)
 
-      - id: checkpoint-9
+      - id: pr-workitem-registry
         github_pr: null
         role: execution
         terminal: false
         sequence: 8
         checkpoints:
-          - checkpoint-9
+          - checkpoint-workitem-registry # WorkItem registry persistido (G01/ADR 0010); backlog=WorkItem(proposal)
+          - checkpoint-provenance # absorve ex-checkpoint-4A/4B (workflow provenance)
 
-      - id: checkpoint-10
+      - id: pr-dualroot-collapse
         github_pr: null
         role: execution
         terminal: false
         sequence: 9
         checkpoints:
-          - checkpoint-10
-
-      - id: checkpoint-11
-        github_pr: null
-        role: execution
-        terminal: false
-        sequence: 10
-        checkpoints:
-          - checkpoint-11a
-          - checkpoint-11b
-          - checkpoint-11c
-
-      - id: checkpoint-12
-        github_pr: null
-        role: execution
-        terminal: false
-        sequence: 11
-        checkpoints:
-          - checkpoint-12
+          - checkpoint-dualroot-collapse # colapso do dual-root; absorve ex-checkpoint-11A/B/C (migracao .specify)
 
       - id: integration-final
         github_pr: null

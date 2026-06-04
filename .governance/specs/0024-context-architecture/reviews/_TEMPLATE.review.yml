@@ -1,18 +1,51 @@
-# Artefato de REVISÃO (Checkpoint 2.4a). Copie para `c<checkpoint>-<role>.yml`.
-# Reviewer-owned. `disposition` é o ÚNICO campo que o gate lê e que muda (open ->
-# accepted/dismissed). A CLAIM (severity/location/description) é selada por
-# `fingerprint`; editá-la sem re-selar → `review:check` vermelho.
-# Dica: deixe `fingerprint: x` e rode `yarn review:check` — ele imprime o esperado.
+# Artefato de REVISÃO (2.4a; evidência de cobertura 2.4e; proveniência 2.4f).
+# Copie para `c<checkpoint>-<role>.yml`. Reviewer-owned.
+#
+# PROVENIÊNCIA: `role` = a LANE (technical_audit | architectural_review).
+# `executor` = o AGENTE que rodou a auditoria, ESTRUTURADO e SELADO:
+#   executor:
+#     platform: <harness/produto: antigravity | codex-cli | claude-code | local>
+#     model:    <LLM totalmente-qualificado: gemini-3.1-pro-high | claude-opus-4-8 | qwen3-235b>
+# (O `actor: <string>` é LEGADO — só reviews históricos já selados. O Gate mantém
+#  `actor` para o decisor HUMANO. Use EXATAMENTE um: executor OU actor.)
+#
+# `disposition` é o ÚNICO campo que o gate lê e que muda (open -> accepted/dismissed).
+# A CLAIM (severity/location/description) é selada por `fingerprint`; editá-la sem
+# re-selar → `review:check` vermelho.
+# Dica: deixe `fingerprint: x` / `review_fingerprint: x` e rode `yarn review:check`
+# — ele imprime os hashes esperados.
 checkpoint: "3"
-role: technical_audit # technical_audit | architectural_review
-actor: codex-cli
+role: technical_audit # technical_audit | architectural_review (a LANE)
+executor:
+  platform: claude-code
+  model: claude-opus-4-8
 decision: changes_requested # approved | changes_requested | blocked
 findings_emitted: 1 # = nº de findings abaixo (anti-deleção)
-review_fingerprint: x # sela o CONJUNTO (checkpoint|role|count|ids) — anti-poda-final; `review:check` valida
+review_fingerprint: x # sela CONJUNTO + extensões (audit_evidence|executor) — `review:check` valida
 findings:
   - id: F1 # contíguo: F1, F2, F3…
     severity: high # critical | high | medium | low
     location: "src/x.ts#L10-L20" # "<path>#L<a>-<b>" OU "global" (arquitetural) — obrigatório
     description: "o achado em uma linha"
     disposition: open # open | accepted | dismissed — SÓ o reviewer fecha
-    fingerprint: x # sha256(id|severity|location|description)[:12]; `review:check` valida
+    fingerprint: x # sha256(checkpoint|role|id|severity|location|description)[:12]; `review:check` valida
+#
+# ── APROVAÇÃO LIMPA (findings_emitted: 0) ──────────────────────────────────────
+# A evidência NÃO são os findings (não há) → `audit_evidence` é OBRIGATÓRIA e
+# SELADA. PROIBIDA quando há findings. Recuperabilidade + queryabilidade: meses
+# depois, só pelo YAML, responde "o que foi auditado / ONDE / por que / quem". Forma:
+#
+# checkpoint: "3"
+# role: technical_audit
+# executor:
+#   platform: antigravity
+#   model: gemini-3.1-pro-high
+# decision: approved
+# findings_emitted: 0
+# audit_evidence:
+#   coverage: # 2.4g — o "onde" ESTRUTURADO: caminhos auditados (queryável; NÃO prosa)
+#     - src/domain/insight
+#     - src/app/projections/KnowledgeGraph.ts
+#   scope: "o que/como foi inspecionado — narrativa (texto)"
+#   basis: "por que aprovou — incl. riscos ponderados; sem issue impeditiva (texto)"
+# review_fingerprint: x # rode `yarn review:check` (sela coverage + scope + basis + executor)
