@@ -85,11 +85,27 @@ topology:
       # CONVERGENCIA orientado a grafo. Os checkpoints de absorcao originais (3-12)
       # foram DOBRADOS nos PRs de convergencia onde se sobrepoem (mapeamento em
       # plan.md). github_pr null = ainda nao aberto.
-      - id: pr-doctrine
+      #
+      # pr-compiler-ts: tese SEPARADA do cutover (decisao do owner, 2026-06-04).
+      # O motor de compilacao de regras (cli/governance/monolith: compiler,
+      # rules-builder, rules-parser, rules-loader, token-budget) e invocado pelo
+      # build:rules, NAO pelo dispatch — colaborador do bootstrap, nao parte do
+      # roteamento (eixos ortogonais; ADR 0008/0023 vs ADR 0025). Migra para
+      # TS/src em no proprio. Adjacente ao cutover para nao deixar o motor .mjs
+      # pendurado sob a CLI ja em TS.
+      - id: pr-compiler-ts
         github_pr: null
         role: execution
         terminal: false
         sequence: 4
+        checkpoints:
+          - checkpoint-compiler-ts # motor de compilacao de regras (monolith) -> TS/src; build:rules roda de TS; zero .mjs no motor
+
+      - id: pr-doctrine
+        github_pr: null
+        role: execution
+        terminal: false
+        sequence: 5
         checkpoints:
           - checkpoint-doctrine # Doctrine (ADRs navegaveis) + DoctrineGraph + doctrine:check
           - checkpoint-doc-cleanup # absorve ex-checkpoint-12 (limpar docs arquiteturais)
@@ -98,7 +114,7 @@ topology:
         github_pr: null
         role: execution
         terminal: false
-        sequence: 5
+        sequence: 6
         checkpoints:
           - checkpoint-decision # Decision entity + decision:check (absorve GG-0001); dissolve NEXT.md
           - checkpoint-decouple-brief # absorve ex-checkpoint-9 (desacoplar decision-brief de evidence-driven)
@@ -107,7 +123,7 @@ topology:
         github_pr: null
         role: execution
         terminal: false
-        sequence: 6
+        sequence: 7
         checkpoints:
           - checkpoint-rule-guardrail # Rule/Guardrail (enforcedBy/groundedIn); CORE-*/GR-*->scope
           - checkpoint-gg-0003 # absorve ex-checkpoint-3 (GG-0003 consistency)
@@ -118,7 +134,7 @@ topology:
         github_pr: null
         role: execution
         terminal: false
-        sequence: 7
+        sequence: 8
         checkpoints:
           - checkpoint-projection-split # arvore projections/ derivada + projection:check (G05)
           - checkpoint-agents-sync # absorve ex-checkpoint-5 (AGENTS sync)
@@ -127,7 +143,7 @@ topology:
         github_pr: null
         role: execution
         terminal: false
-        sequence: 8
+        sequence: 9
         checkpoints:
           - checkpoint-workitem-registry # WorkItem registry persistido (G01/ADR 0010); backlog=WorkItem(proposal)
           - checkpoint-provenance # absorve ex-checkpoint-4A/4B (workflow provenance)
@@ -136,7 +152,7 @@ topology:
         github_pr: null
         role: execution
         terminal: false
-        sequence: 9
+        sequence: 10
         checkpoints:
           - checkpoint-dualroot-collapse # colapso do dual-root; absorve ex-checkpoint-11A/B/C (migracao .specify)
 
