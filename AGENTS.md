@@ -115,7 +115,7 @@ Make atomic incremental commits limited to one logical unit. Split tasks that sp
 
 ### [CORE-09]
 
-Open Pull Requests in `Draft` mode using the full `.github/pull_request_template.md` matrix.
+Open Pull Requests in `Draft` mode using the full `.github/pull_request_template.md` matrix. In governed delivery, open the Draft container at the start of development; maintenance/learning work (fix/patch/spike/incident) is code-first by nature (timing + exceptions: ADR 0025).
 
 ### [CORE-10]
 
@@ -127,7 +127,7 @@ At the end of each sub-block, provide only the commit message suggestion. The hu
 
 ### [CORE-16]
 
-Distinguish **base sync** (routine update of a stacked branch with its base — frequent, safe, reversible) from **end-to-end atomic merge** (one-shot release of an entire spec stack to `main` — single, irreversible, at spec closure). GitHub's `MERGEABLE` label only indicates absence of conflicts against the PR's base branch; per ADR 0020, spec-bound PRs are never mergeable to `main` in isolation.
+Distinguish between **base sync** (routine update of a stacked branch with its base) and **end-to-end atomic merge** (one-shot release of an entire spec stack to `main`). They are NOT the same operation. Base sync is frequent, safe, and reversible — it keeps the stack coherent during work. Atomic merge happens ONCE, only at spec closure, after every PR in the stack is Ready. PRs labeled `MERGEABLE` by GitHub are NOT invitations to merge to `main` — that label only indicates absence of merge conflicts against the PR's base branch. Per ADR 0020, spec-bound PRs are never mergeable in isolation.
 
 ### [GR-0203]
 
@@ -203,6 +203,6 @@ The root `AGENTS.md` is the runtime artifact. Project-specific content must rema
 
 ### Consumer Bootstrap
 
-Consumer-local ai-guidelines assets live under `.ai-guidelines/`. Templates mirrored by the CLI live in `.ai-guidelines/templates/`. Specs and roadmap live under `.governance/specs/` (canonical per ADR 0019); legacy artifacts under `.specify/specs/` resolve via double-lookup.
+Consumer-local ai-guidelines assets live under `.ai-guidelines/`. Templates mirrored by the CLI live in `.ai-guidelines/templates/`. Specs and roadmap remain under `.specify/specs/`.
 
 </AI_GUIDELINES>

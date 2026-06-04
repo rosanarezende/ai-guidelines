@@ -331,8 +331,8 @@
       "tags": ["core", "agents", "always_injected", "pr", "github"],
       "file": ".core/rules/top/agents-core.md",
       "title": "PRs abrem como Draft com matriz oficial",
-      "instruction_en": "Open Pull Requests in `Draft` mode using the full `.github/pull_request_template.md` matrix.",
-      "documentation_pt": "A submissão de Pull Requests obrigatoriamente se inaugura no modo `Draft`, utilizando integralmente a matriz `.github/pull_request_template.md`.\n\n**Why this matters:** Draft sinaliza WIP e impede que CI/reviewers tratem o PR como pronto antes da hora."
+      "instruction_en": "Open Pull Requests in `Draft` mode using the full `.github/pull_request_template.md` matrix. In governed delivery, open the Draft container at the start of development; maintenance/learning work (fix/patch/spike/incident) is code-first by nature (timing + exceptions: ADR 0025).",
+      "documentation_pt": "A submissão de Pull Requests obrigatoriamente se inaugura no modo `Draft`, utilizando integralmente a matriz `.github/pull_request_template.md`. Em entrega governada, o contêiner Draft abre no início do desenvolvimento; trabalho de manutenção/aprendizado (fix/patch/spike/incident) é código-primeiro por natureza (timing + exceções: ADR 0025).\n\n**Why this matters:** Draft sinaliza WIP e impede que CI/reviewers tratem o PR como pronto antes da hora. Abrir o contêiner cedo em trabalho governado mantém a topology fiel ao estado real do trabalho (ADR 0025)."
     },
     {
       "id": "CORE-10",
