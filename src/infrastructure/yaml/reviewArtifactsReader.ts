@@ -74,12 +74,30 @@ export interface AuditEvidence {
   readonly basis: string;
 }
 
+/**
+ * Proveniência ESTRUTURADA do executor de um review (2.4f). Diferente do `actor`
+ * do Gate (decisor HUMANO, identidade social), o executor de uma auditoria é um
+ * AGENTE COMPUTACIONAL — duas dimensões ORTOGONAIS (m:n entre si):
+ *   - `platform`: o harness/produto que rodou (antigravity, codex-cli, claude-code, local).
+ *   - `model`: o LLM totalmente-qualificado (gemini-3.1-pro-high, claude-opus-4-8, qwen3-235b).
+ * VO (sem identidade própria; comparável por valor), SELADO no `review_fingerprint`
+ * → proveniência tamper-evidente. O "uso de modelos/plataformas" é uma PROJEÇÃO
+ * derivada sobre os reviews (CQRS) — NÃO um registry `Agent` persistido (isso
+ * repetiria o over-modeling de participação m:n já rejeitado; cf. disclosureRender).
+ */
+export interface ExecutorProvenance {
+  readonly platform: string;
+  readonly model: string;
+}
+
 export interface ReviewArtifact {
   readonly checkpoint: string;
   readonly role: ReviewRole;
-  /** O EXECUTOR REAL da auditoria (ex.: `gemini-3-pro-high`, `codex-cli`,
-   *  `gpt-oss-...`) — distinto da `role` (a lane). Sem default assumido. */
-  readonly actor: string;
+  /** Proveniência LEGADA (string) — reviews históricos já selados (c2.3/c2.4d),
+   *  NÃO-selada. Reviews novos usam `executor`. Exatamente um dos dois. */
+  readonly actor?: string;
+  /** Proveniência ESTRUTURADA do executor (2.4f), SELADA. Canônica para reviews novos. */
+  readonly executor?: ExecutorProvenance;
   readonly decision: ReviewDecision;
   readonly findingsEmitted: number;
   readonly findings: readonly Finding[];
@@ -162,15 +180,23 @@ export function reviewFingerprintOf(parts: {
   findingsEmitted: number;
   ids: readonly string[];
   auditEvidence?: AuditEvidence;
+  executor?: ExecutorProvenance;
 }): string {
-  // Serialização CANÔNICA (JSON) — `ids` como array, não `join(",")`, para não
-  // colidir com vírgula em um id (2.4c). A `auditEvidence` (2.4e) entra no selo
-  // SÓ quando presente (review sem findings): assim o envelope dos reviews COM
-  // findings é byte-idêntico ao histórico — seals anteriores preservados.
+  // Base de 4 elementos (checkpoint|role|count|ids) — serialização CANÔNICA (JSON,
+  // `ids` como array, não `join(",")`; 2.4c). Selos históricos SEM extensões ficam
+  // byte-idênticos. As extensões OPCIONAIS (audit_evidence 2.4e, executor 2.4f)
+  // entram como pares [chave, valor] TAGUEADOS em ordem fixa, num único elemento
+  // final, SÓ quando há alguma → cada extensão é inequívoca (sem ambiguidade
+  // posicional) e o conjunto cresce sem colidir com o passado.
   const envelope: unknown[] = [parts.checkpoint, parts.role, parts.findingsEmitted, [...parts.ids]];
+  const extensions: Array<[string, unknown]> = [];
   if (parts.auditEvidence) {
-    envelope.push([parts.auditEvidence.scope, parts.auditEvidence.basis]);
+    extensions.push(["audit_evidence", [parts.auditEvidence.scope, parts.auditEvidence.basis]]);
   }
+  if (parts.executor) {
+    extensions.push(["executor", [parts.executor.platform, parts.executor.model]]);
+  }
+  if (extensions.length > 0) envelope.push(extensions);
   return createHash("sha256").update(JSON.stringify(envelope)).digest("hex").slice(0, 12);
 }
 
@@ -183,8 +209,48 @@ export function parseReview(yamlText: string, file: string): ReviewArtifact {
 
   const checkpoint = str(o.checkpoint) ?? String(o.checkpoint ?? "");
   if (!checkpoint) throw new ReviewArtifactParseError(`${file}: "checkpoint" is required`);
-  const actor = str(o.actor);
-  if (!actor) throw new ReviewArtifactParseError(`${file}: "actor" is required`);
+
+  // PROVENIÊNCIA (2.4f): EXATAMENTE UMA de
+  //   - `executor: { platform, model }` — canônica; agente computacional; SELADA;
+  //   - `actor: <string>` — legado (reviews históricos já selados); NÃO-selada.
+  // O Gate mantém `actor` (decisor humano) noutro parser.
+  const rawExecutor = o.executor;
+  let actor: string | undefined;
+  let executor: ExecutorProvenance | undefined;
+  if (rawExecutor !== undefined && rawExecutor !== null) {
+    if (typeof rawExecutor !== "object" || Array.isArray(rawExecutor)) {
+      throw new ReviewArtifactParseError(
+        `${file}: "executor" deve ser um mapping { platform, model }.`
+      );
+    }
+    if (o.actor !== undefined && o.actor !== null) {
+      throw new ReviewArtifactParseError(
+        `${file}: use "executor" (canônico) OU "actor" (legado), não ambos.`
+      );
+    }
+    const ex = rawExecutor as Record<string, unknown>;
+    const platform = str(ex.platform);
+    if (!platform) {
+      throw new ReviewArtifactParseError(
+        `${file}: executor.platform é obrigatório (harness/produto: antigravity | codex-cli | claude-code | local).`
+      );
+    }
+    const model = str(ex.model);
+    if (!model) {
+      throw new ReviewArtifactParseError(
+        `${file}: executor.model é obrigatório (LLM totalmente-qualificado: ex. gemini-3.1-pro-high).`
+      );
+    }
+    executor = { platform, model };
+  } else {
+    actor = str(o.actor) ?? undefined;
+    if (!actor) {
+      throw new ReviewArtifactParseError(
+        `${file}: proveniência obrigatória — "executor" { platform, model } (canônico) ou "actor" (legado).`
+      );
+    }
+  }
+
   if (!(REVIEW_ROLES as readonly string[]).includes(o.role as string)) {
     throw new ReviewArtifactParseError(`${file}: "role" must be one of ${REVIEW_ROLES.join("|")}`);
   }
@@ -304,13 +370,15 @@ export function parseReview(yamlText: string, file: string): ReviewArtifact {
   }
 
   // Selo de ENVELOPE: fecha a "poda final" (deletar a cauda + decrementar count).
-  // Inclui a auditEvidence quando presente (sela a atestação de aprovação limpa).
+  // Sela também as extensões presentes — auditEvidence (aprovação limpa) e
+  // executor (proveniência estruturada) → ambas tamper-evidentes.
   const expectedReview = reviewFingerprintOf({
     checkpoint,
     role: o.role as ReviewRole,
     findingsEmitted,
     ids: findings.map((f) => f.id),
     ...(auditEvidence ? { auditEvidence } : {}),
+    ...(executor ? { executor } : {}),
   });
   const declaredReview = str(o.review_fingerprint);
   if (declaredReview !== expectedReview) {
@@ -323,7 +391,8 @@ export function parseReview(yamlText: string, file: string): ReviewArtifact {
   return {
     checkpoint,
     role: o.role as ReviewRole,
-    actor,
+    ...(actor ? { actor } : {}),
+    ...(executor ? { executor } : {}),
     decision: o.decision as ReviewDecision,
     findingsEmitted,
     findings,

@@ -317,12 +317,94 @@ describe("audit_evidence — aprovação limpa [2.4e]", () => {
     expect(() => parseReview(tampered, "f.yml")).toThrow(/review_fingerprint inválido/);
   });
 
-  it("PROVENIÊNCIA: `actor` é o executor real (sem default codex-cli assumido)", () => {
+  it("PROVENIÊNCIA legada: `actor` (string) preservado quando sem executor", () => {
     expect(parseReview(cleanReviewYaml(ev, { actor: "codex-cli" }), "f.yml").actor).toBe(
       "codex-cli"
     );
     expect(parseReview(cleanReviewYaml(ev, { actor: "gpt-oss-120b" }), "f.yml").actor).toBe(
       "gpt-oss-120b"
     );
+  });
+});
+
+const EXEC = { platform: "antigravity", model: "gemini-3.1-pro-high" };
+
+// Aprovação limpa (0 findings) com `executor` estruturado + audit_evidence.
+// `executor: null` omite o bloco (proveniência ausente); `alsoActor` injeta `actor`
+// junto (caso ambíguo proibido).
+function execCleanYaml(
+  executor: { platform: string; model: string } | null,
+  opts: { alsoActor?: string } = {}
+): string {
+  const evidence = { scope: "domain/knowledge", basis: "invariantes ok; sem issue" };
+  const rfp = reviewFingerprintOf({
+    checkpoint: CP,
+    role: ROLE,
+    findingsEmitted: 0,
+    ids: [],
+    auditEvidence: evidence,
+    ...(executor ? { executor } : {}),
+  });
+  const execBlock = executor
+    ? `executor:\n  platform: ${executor.platform}\n  model: ${executor.model}\n`
+    : "";
+  const actorBlock = opts.alsoActor ? `actor: ${opts.alsoActor}\n` : "";
+  return `checkpoint: "${CP}"\nrole: ${ROLE}\n${execBlock}${actorBlock}decision: approved\nfindings_emitted: 0\naudit_evidence:\n  scope: "${evidence.scope}"\n  basis: "${evidence.basis}"\nreview_fingerprint: ${rfp}\n`;
+}
+
+describe("executor — proveniência estruturada [2.4f]", () => {
+  it("executor { platform, model } (+ audit_evidence) → parseia e sela; actor ausente", () => {
+    const r = parseReview(execCleanYaml(EXEC), "reviews/c-x-technical_audit.yml");
+    expect(r.executor).toEqual(EXEC);
+    expect(r.actor).toBeUndefined();
+  });
+
+  it("executor sem platform → rejeita", () => {
+    expect(() => parseReview(execCleanYaml({ platform: "", model: "x" }), "f.yml")).toThrow(
+      /platform/
+    );
+  });
+
+  it("executor sem model → rejeita", () => {
+    expect(() => parseReview(execCleanYaml({ platform: "x", model: "" }), "f.yml")).toThrow(
+      /model/
+    );
+  });
+
+  it("actor E executor juntos → rejeita (proveniência ambígua)", () => {
+    expect(() => parseReview(execCleanYaml(EXEC, { alsoActor: "rosana" }), "f.yml")).toThrow(
+      /não ambos/
+    );
+  });
+
+  it("nem actor nem executor → rejeita (proveniência obrigatória)", () => {
+    expect(() => parseReview(execCleanYaml(null), "f.yml")).toThrow(/proveniência obrigatória/);
+  });
+
+  it("TAMPER: trocar executor.model sem re-selar → review_fingerprint inválido", () => {
+    const tampered = execCleanYaml(EXEC).replace(EXEC.model, "claude-opus-4-8");
+    expect(() => parseReview(tampered, "f.yml")).toThrow(/review_fingerprint inválido/);
+  });
+
+  it("executor com findings (sem audit_evidence) → sela executor na extensão tagueada", () => {
+    const f = okFinding;
+    const ffp = fingerprintOf({ checkpoint: CP, role: ROLE, ...f });
+    const rfp = reviewFingerprintOf({
+      checkpoint: CP,
+      role: ROLE,
+      findingsEmitted: 1,
+      ids: ["F1"],
+      executor: EXEC,
+    });
+    const yaml = `checkpoint: "${CP}"\nrole: ${ROLE}\nexecutor:\n  platform: ${EXEC.platform}\n  model: ${EXEC.model}\ndecision: changes_requested\nfindings_emitted: 1\nreview_fingerprint: ${rfp}\nfindings:\n  - id: F1\n    severity: ${f.severity}\n    location: "${f.location}"\n    description: "${f.description}"\n    disposition: ${f.disposition}\n    fingerprint: ${ffp}\n`;
+    const r = parseReview(yaml, "f.yml");
+    expect(r.executor).toEqual(EXEC);
+    expect(r.findings).toHaveLength(1);
+  });
+
+  it("COMPAT: review legado com actor (string, sem executor) segue válido", () => {
+    const r = parseReview(cleanReviewYaml({ scope: "x", basis: "y" }), "f.yml");
+    expect(r.actor).toBe("gemini-3-pro-high");
+    expect(r.executor).toBeUndefined();
   });
 });

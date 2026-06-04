@@ -11,14 +11,14 @@
 | **Gate** (o veredito)      | `gates/c<N>.yml`               | owner                    | é o gate                    |
 | **Projeção**               | 1 comentário de status no PR   | —                        | —                           |
 
-**Proveniência da lane:** `role` é a **faixa** (`technical_audit` | `architectural_review`); `actor` é o **executor real** da auditoria (`gemini-3-pro-high`, `codex-cli`, `gpt-oss-…`). A lane **não** assume um agente por padrão — `actor` registra quem de fato rodou.
+**Proveniência (2.4f):** `role` é a **faixa** (`technical_audit` | `architectural_review`). Quem executou é um **agente computacional** — estruturado e **selado** como `executor: { platform, model }` (`platform`: antigravity | codex-cli | claude-code | local; `model`: gemini-3.1-pro-high | claude-opus-4-8 | qwen3-235b). São dimensões **ortogonais** (m:n) → string única (ou composta `a/b`) seria lossy e exigiria parsing; o VO é queryável e selável. O **Gate** mantém `actor: <handle>` (decisor **humano**). `actor` num review é **legado** (artefatos históricos já selados, ex. c2.3/c2.4d); novos usam `executor`. O "uso de modelos/plataformas" é **projeção derivada** sobre os reviews — não um registry `Agent` persistido.
 
 **Anti-autoaprovação estrutural:** o gate bloqueia em finding bloqueante (`critical/high`) com `disposition: open`. **Só o reviewer fecha** (`accepted`/`dismissed`). O implementador escreve resolução noutra lane — que **não destrava o gate**. Para autoaprovar, teria de editar a `disposition` no arquivo do reviewer: um **diff cross-lane visível e atribuível**.
 
 ## Integridade local (tamper-EVIDENCE, não tamper-proofing — ADR 0021)
 
 - **`fingerprint`** (por finding) = `sha256(checkpoint|role|id|severity|location|description)[:12]` sela a **claim**. Reescrever severity/description/location sem re-selar → **vermelho**. Inclui `checkpoint|role` (2.4b) → bloco transplantado de outra review não casa o hash recomputado no destino (**anti-transplante**). _Não entra no hash:_ `disposition` (muda de propósito).
-- **`review_fingerprint`** (envelope, 2.4b) = `sha256(checkpoint|role|findings_emitted|<ids>[|audit_evidence])[:12]` sela o **CONJUNTO**. Deletar a cauda (`F4`) + decrementar `findings_emitted` muda o envelope → **vermelho** (fecha a "poda final"). Não acopla findings entre si — só sela a claim de conjunto, que é do reviewer. A `audit_evidence` entra no selo **só quando presente** (aprovação limpa) → o envelope dos reviews **com** findings é byte-idêntico ao histórico (seals anteriores preservados).
+- **`review_fingerprint`** (envelope, 2.4b) sela o **CONJUNTO** = base `[checkpoint, role, findings_emitted, ids]` + **extensões TAGUEADAS** opcionais `[["audit_evidence", …], ["executor", …]]`. Deletar a cauda (`F4`) + decrementar `findings_emitted` muda o envelope → **vermelho** (fecha a "poda final"). As extensões entram **só quando presentes** e são **tagueadas por chave** (sem ambiguidade posicional; lição do 2.4c) → reviews **sem** extensões ficam byte-idênticos ao histórico (c2.3/c2.4d preservados), e `audit_evidence`/`executor` viram **tamper-evidentes**.
 - **`findings_emitted` + ids contíguos `F1..FN`** → deletar um finding do meio quebra a contiguidade → vermelho.
 - **`audit_evidence` (2.4e)** — um review **sem findings** (aprovação limpa) é enforcement-válido mas cego para recuperabilidade. Então é **obrigatória** uma `audit_evidence: { scope, basis }` selada (proibida quando há findings — lá a evidência são os próprios findings). `scope` = o que foi inspecionado (áreas/invariantes, pode referenciar o dossiê); `basis` = por que aprovou (riscos ponderados). Estruturado, **não** narrativa livre.
 - **Limite honesto:** um check local é **cego a autoria** — não impede criptograficamente um forjador (ele re-sela / edita cross-lane). Ele **eleva a barra** de "edição silenciosa de 1 linha" para "forja explícita, atribuída e detectável". Prevenção plena exigiria CODEOWNERS/assinatura (off-repo/nova camada) — deferido.
@@ -35,8 +35,8 @@
 ## Fluxo do próximo PR (Checkpoint N)
 
 1. **Claude** implementa → commit + 1 comentário de status.
-2. **Technical Audit** (executor real → `actor`) → `reviews/c<N>-technical_audit.yml` (findings selados, `disposition: open`; **ou**, aprovação limpa, `findings_emitted: 0` + `audit_evidence`).
-3. **Architectural Review** (executor real → `actor`) → `reviews/c<N>-architectural_review.yml`.
+2. **Technical Audit** (`executor: { platform, model }`) → `reviews/c<N>-technical_audit.yml` (findings selados, `disposition: open`; **ou**, aprovação limpa, `findings_emitted: 0` + `audit_evidence`).
+3. **Architectural Review** (`executor: { platform, model }`) → `reviews/c<N>-architectural_review.yml`.
 4. **Claude** corrige → `reviews/c<N>-resolutions.yml` (`action: fixed`, `ref: <sha>`). **Não fecha findings.**
 5. **Reviewer** valida e fecha (`disposition: accepted/dismissed`) — re-selando se mudou a claim.
 6. **Owner** → `gates/c<N>.yml` (`approved`) + Approve nativo. `review:check` barra aprovar com bloqueante `open`.

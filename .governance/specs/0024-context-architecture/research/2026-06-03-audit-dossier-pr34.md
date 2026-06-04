@@ -71,7 +71,7 @@ Verificação de **corretude e invariantes** (não estética). Por camada:
 | **Resolução**               | `reviews/c-graph-core-resolutions.yml`          | Claude                   |
 | **Gate**                    | `gates/c-graph-core.yml`                        | owner                    |
 
-- `checkpoint: "graph-core"` em todos. **Proveniência:** `role` = a lane (`technical_audit` | `architectural_review`); **`actor` = o executor real** (`gemini-3-pro-high`, `codex-cli`, `gpt-oss-…`) — sem default assumido.
+- `checkpoint: "graph-core"` em todos. **Proveniência (2.4f):** `role` = a lane; **`executor: { platform, model }`** = o agente que rodou (ex.: `platform: antigravity`, `model: gemini-3.1-pro-high`), **estruturado e selado**. Gate mantém `actor` (humano); `actor` em review é legado.
 - **Evidência de cobertura (2.4e):** numa **aprovação limpa** (`findings_emitted: 0`) a `audit_evidence: { scope, basis }` é **obrigatória e selada** (proibida quando há findings). `scope` = o que foi inspecionado (pode referenciar §3/§5 deste dossiê); `basis` = por que aprovou. Sem isto, o review é cego para recuperabilidade.
 - **Fingerprints:** deixe `fingerprint: x` / `review_fingerprint: x` e rode **`yarn review:check`** — ele imprime o hash esperado (JSON-canônico; inclui `audit_evidence` quando presente). Ids contíguos `F1..FN`; `findings_emitted` = nº de blocos.
 - **Resolução** referencia `<role>#Fn` totalmente qualificado; **NÃO destrava** o gate (só a `disposition` do reviewer destrava — anti-autoaprovação).

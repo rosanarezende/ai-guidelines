@@ -1,9 +1,13 @@
-# Artefato de REVISÃO (Checkpoint 2.4a; evidência de cobertura 2.4e).
+# Artefato de REVISÃO (2.4a; evidência de cobertura 2.4e; proveniência 2.4f).
 # Copie para `c<checkpoint>-<role>.yml`. Reviewer-owned.
 #
 # PROVENIÊNCIA: `role` = a LANE (technical_audit | architectural_review).
-# `actor` = o EXECUTOR REAL da auditoria (ex.: gemini-3-pro-high | codex-cli |
-# gpt-oss-...). NÃO assuma um default — registre quem de fato rodou.
+# `executor` = o AGENTE que rodou a auditoria, ESTRUTURADO e SELADO:
+#   executor:
+#     platform: <harness/produto: antigravity | codex-cli | claude-code | local>
+#     model:    <LLM totalmente-qualificado: gemini-3.1-pro-high | claude-opus-4-8 | qwen3-235b>
+# (O `actor: <string>` é LEGADO — só reviews históricos já selados. O Gate mantém
+#  `actor` para o decisor HUMANO. Use EXATAMENTE um: executor OU actor.)
 #
 # `disposition` é o ÚNICO campo que o gate lê e que muda (open -> accepted/dismissed).
 # A CLAIM (severity/location/description) é selada por `fingerprint`; editá-la sem
@@ -12,10 +16,12 @@
 # — ele imprime os hashes esperados.
 checkpoint: "3"
 role: technical_audit # technical_audit | architectural_review (a LANE)
-actor: "<executor real: gemini-3-pro-high | codex-cli | gpt-oss-...>"
+executor:
+  platform: claude-code
+  model: claude-opus-4-8
 decision: changes_requested # approved | changes_requested | blocked
 findings_emitted: 1 # = nº de findings abaixo (anti-deleção)
-review_fingerprint: x # sela o CONJUNTO (checkpoint|role|count|ids[|audit_evidence]) — `review:check` valida
+review_fingerprint: x # sela CONJUNTO + extensões (audit_evidence|executor) — `review:check` valida
 findings:
   - id: F1 # contíguo: F1, F2, F3…
     severity: high # critical | high | medium | low
@@ -26,16 +32,18 @@ findings:
 #
 # ── APROVAÇÃO LIMPA (findings_emitted: 0) ──────────────────────────────────────
 # A evidência NÃO são os findings (não há) → `audit_evidence` é OBRIGATÓRIA e
-# SELADA no review_fingerprint. Estruturada (scope + basis), não narrativa.
-# PROIBIDA quando há findings. Recuperabilidade: meses depois, só pelo YAML,
-# responde "o que foi auditado / por que aprovou". Forma:
+# SELADA. Estruturada (scope + basis), não narrativa. PROIBIDA quando há findings.
+# Recuperabilidade: meses depois, só pelo YAML, responde "o que foi auditado /
+# por que aprovou / quem executou". Forma:
 #
 # checkpoint: "3"
 # role: technical_audit
-# actor: "gemini-3-pro-high"
+# executor:
+#   platform: antigravity
+#   model: gemini-3.1-pro-high
 # decision: approved
 # findings_emitted: 0
 # audit_evidence:
 #   scope: "o que foi inspecionado — áreas/invariantes; pode referenciar o dossiê"
 #   basis: "por que aprovou — incl. riscos ponderados; sem issue impeditiva"
-# review_fingerprint: x # rode `yarn review:check` para o hash (inclui audit_evidence)
+# review_fingerprint: x # rode `yarn review:check` (sela audit_evidence + executor)
