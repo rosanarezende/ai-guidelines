@@ -8,6 +8,7 @@ describe("buildRegistry", () => {
     expect(registry.resolve("triage")?.name).toBe("triage");
     expect(registry.resolve("release-prep")?.name).toBe("release-prep");
     expect(registry.resolve("workflow")?.name).toBe("workflow");
+    expect(registry.resolve("specs")?.name).toBe("specs");
   });
 
   it("DADO o alias transitório 'review' QUANDO resolve ENTÃO cai no comando 'triage'", () => {
@@ -19,7 +20,7 @@ describe("buildRegistry", () => {
     const registry = buildRegistry();
     const names = registry.commandNames();
     expect(names).toEqual(
-      expect.arrayContaining(["continue", "insight", "triage", "release-prep", "workflow"])
+      expect.arrayContaining(["continue", "insight", "triage", "release-prep", "workflow", "specs"])
     );
     expect(names).not.toContain("review");
   });

@@ -34,6 +34,11 @@ export const INTENT_CATALOG: readonly Intent[] = [
     title: "Preparar um release",
     actions: [{ command: "release-prep", label: "Preparar release (bump de versão + tag)" }],
   },
+  {
+    id: "inspecionar-specs-ativas",
+    title: "Inspecionar specs ativas",
+    actions: [{ command: "specs", label: "Ver specs ativas (índice público)" }],
+  },
 ];
 
 /**
