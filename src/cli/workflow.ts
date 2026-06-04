@@ -74,6 +74,9 @@ import {
 import { parseContextTarget } from "./visual-prompts/parseContextTarget.js";
 import { collectLocalContext } from "./visual-prompts/collectLocalContext.js";
 import { renderVisualPrompt } from "./visual-prompts/renderVisualPrompt.js";
+import type { CommandRegistry } from "./registry/CommandRegistry.js";
+import { INTENT_CATALOG } from "./registry/intentCatalog.js";
+import type { Intent, IntentAction } from "./registry/Intent.js";
 
 export { renderVisualPrompt };
 
@@ -105,6 +108,12 @@ export interface RunOptions {
    * Default: `GhCli` real (execFileSync). Tests injetam `FakeStackOps`.
    */
   readonly stack?: StackOps;
+  /**
+   * Registry de comandos para a navegação por Intent do wizard. Injetável p/
+   * teste; default = catálogo real via import dinâmico (quebra o ciclo
+   * workflow↔buildRegistry). Não afeta as superfícies de execução existentes.
+   */
+  readonly registry?: CommandRegistry;
 }
 
 interface ResolvedContext {
@@ -1130,7 +1139,104 @@ async function runMergeStackWizard(opts: {
   }
 }
 
+const ADVANCED_OPS_VALUE = "advanced-ops";
+
+/**
+ * Menu do topo orientado por INTENÇÃO (Spec 0024): projeção do catálogo curado —
+ * cada Intent vira uma entrada + a seção transitória de ops avançadas + sair.
+ * Função pura (testável).
+ */
+export function buildTopMenu(catalog: readonly Intent[]) {
+  return [
+    ...catalog.map((intent) => ({ name: intent.title, value: `intent:${intent.id}` })),
+    {
+      name: "⚙️  Operações avançadas (dívida de convergência #35)",
+      value: ADVANCED_OPS_VALUE,
+    },
+    { name: "Sair", value: "quit" },
+  ];
+}
+
+/**
+ * Superfície humana principal (Spec 0024): navega Intent → Action → Command;
+ * execução SEMPRE via Registry. Sem conceito intermediário novo — o menu é
+ * projeção do catálogo; a seção "Operações avançadas" é a única entrada não-Intent
+ * (transitória, `runAdvancedOps`).
+ */
 export async function runWorkflow(options: RunOptions): Promise<number> {
+  const logger = options.logger ?? stdoutLogger;
+  const prompts = options.prompts ?? new InquirerPrompts();
+
+  let choice: string;
+  try {
+    choice = await prompts.select<string>({
+      message: "O que você quer fazer?",
+      choices: buildTopMenu(INTENT_CATALOG),
+    });
+  } catch (err) {
+    logger.error(`Wizard interrompido: ${err instanceof Error ? err.message : String(err)}`);
+    return 1;
+  }
+
+  if (choice === "quit") return 0;
+  if (choice === ADVANCED_OPS_VALUE) return runAdvancedOps(options);
+
+  const intent = INTENT_CATALOG.find((i) => `intent:${i.id}` === choice);
+  if (!intent) {
+    logger.error(`Intenção desconhecida: ${choice}`);
+    return 1;
+  }
+  return runIntent(intent, options, logger, prompts);
+}
+
+/**
+ * Navega as Actions de uma Intent e delega ao Registry. Intent NUNCA executa —
+ * só referencia; a execução flui por Command → Use Case via `registry.dispatch`.
+ * Registry injetável (`options.registry`) p/ teste; default = catálogo real via
+ * import dinâmico (quebra o ciclo workflow↔buildRegistry).
+ */
+async function runIntent(
+  intent: Intent,
+  options: RunOptions,
+  logger: Logger,
+  prompts: Prompts
+): Promise<number> {
+  const action = await selectIntentAction(intent, prompts);
+  if (!action) return 0;
+  const registry =
+    options.registry ?? (await import("./registry/buildRegistry.js")).buildRegistry();
+  const argv = [action.command, ...(action.args ?? [])];
+  const result = await registry.dispatch(argv, { repoRoot: options.repoRoot, logger });
+  return result.exitCode;
+}
+
+/** Seleção da Action (valor = índice; testável). `undefined` se a Intent não tem ações. */
+async function selectIntentAction(
+  intent: Intent,
+  prompts: Prompts
+): Promise<IntentAction | undefined> {
+  if (intent.actions.length === 0) return undefined;
+  const value = await prompts.select<string>({
+    message: intent.title,
+    choices: intent.actions.map((action, index) => ({
+      name: action.label ?? action.command,
+      value: String(index),
+    })),
+  });
+  const index = Number(value);
+  return Number.isInteger(index) && index >= 0 && index < intent.actions.length
+    ? intent.actions[index]
+    : undefined;
+}
+
+/**
+ * SEÇÃO TRANSITÓRIA — dívida de convergência do #35. Wizard legado das 5 ops
+ * ainda NÃO convergidas a Commands (integration-open, merge-stack, list-active,
+ * diagnose-drift, visual-prompt). Handlers inalterados. Para remover quando elas
+ * virarem Commands+Intents: apague a entrada ADVANCED_OPS_VALUE em buildTopMenu,
+ * o branch em runWorkflow e esta função (+ runWizard e handlers exclusivos dela).
+ */
+export async function runAdvancedOps(options: RunOptions): Promise<number> {
   const logger = options.logger ?? stdoutLogger;
   const fs = options.fs ?? new NodeWorkflowFileSystem(options.repoRoot);
   const prompts = options.prompts ?? new InquirerPrompts();
