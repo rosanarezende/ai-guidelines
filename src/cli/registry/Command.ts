@@ -12,6 +12,8 @@
  * teste), seguindo o padrão já estabelecido em `src/cli/*`.
  */
 
+import { Prompts } from "../../app/ports/Prompts.js";
+
 export interface Logger {
   info(message: string): void;
   error(message: string): void;
@@ -19,13 +21,19 @@ export interface Logger {
 
 /**
  * Contexto comum injetado em todo comando no `dispatch`. Mínimo por design —
- * `repoRoot` + `logger`. Ports específicos (filesystem, clipboard, prompts,
- * stack) continuam resolvidos por cada comando a partir do `repoRoot`,
- * preservando o padrão de injeção-para-teste já usado em `src/cli`.
+ * `repoRoot` + `logger`. Ports específicos (filesystem, clipboard, stack)
+ * continuam resolvidos por cada comando a partir do `repoRoot`, preservando o
+ * padrão de injeção-para-teste já usado em `src/cli`.
  */
 export interface CommandContext {
   readonly repoRoot: string;
   readonly logger: Logger;
+  /**
+   * Porta de prompts interativos — presente apenas na superfície HUMANA (wizard),
+   * que coleta options via `Command.prompt`. A CLI direta (parse→run) não a injeta.
+   * Opcional/aditivo: comandos parse-only ignoram; comandos com `prompt` a exigem.
+   */
+  readonly prompts?: Prompts;
 }
 
 /** Resultado de um comando — `exitCode` 0 = sucesso (espelha o contrato POSIX). */
@@ -45,5 +53,16 @@ export interface Command<TOptions = void> {
   readonly name: string;
   readonly aliases?: readonly string[];
   parse(argv: readonly string[]): TOptions;
+  /**
+   * Produtor INTERATIVO de options — dual opcional de `parse` (que produz a
+   * partir do argv). A superfície humana (wizard) chama `prompt(ctx)→run(...)`;
+   * a CLI direta chama `parse(argv)→run(...)`. Um único `run` (execução
+   * compartilhada), dois produtores de input.
+   *
+   * Aditivo/opcional: comandos read-only/scriptáveis seguem só com `parse`. Quem
+   * implementa `prompt` coleta o input humano via `context.prompts` (que portanto
+   * deve estar presente) — confirmação de side-effect, escolha de modo, contexto.
+   */
+  prompt?(context: CommandContext): Promise<TOptions>;
   run(options: TOptions, context: CommandContext): Promise<CommandResult>;
 }
