@@ -1,0 +1,36 @@
+checkpoint: "graph-core"
+role: architectural_review
+
+executor:
+  platform: chatgpt
+  model: gpt-5.5
+
+decision: approved
+findings_emitted: 0
+
+audit_evidence:
+  coverage:
+    - src/domain/knowledge
+    - src/app/projections/KnowledgeGraph.ts
+    - src/app/projections/knowledgeSources.ts
+    - src/domain/insight/insightKnowledge.ts
+    - src/infrastructure/yaml/reviewArtifactsReader.ts
+  scope: >
+    Direção [DEC-0024-G08]: pipeline Insight → KnowledgeArtifact → KnowledgeRef →
+    KnowledgeGraph, com o grafo como projeção DERIVADA (stateless, reconstruível),
+    não fonte de verdade; separação write-model → projeções → navegação preservada.
+    KnowledgeRef com validação leniente por forma (integridade referencial deferida
+    aos estágios posteriores). Evolução do contrato de auditoria 2.4e→2.4g e a
+    fronteira estruturado (executor, coverage) vs narrativo (scope, basis). Ausência
+    de over-modeling (Agent/Area/Coverage Registry, Review Graph). Coerência com os
+    eixos reabertos G03/G04/G05.
+  basis: >
+    Nenhuma violação arquitetural suficiente para abrir finding. O grafo permanece
+    projeção pura (os artefatos alimentam o grafo; o grafo não alimenta os
+    artefatos), sem estado duplicado nem SSOT concorrente. A fronteira
+    estrutura-vs-narrativa do audit_evidence está correta: só o enumerável foi
+    estruturado, a narrativa segue texto. Aderente a "dados pequenos → projeções
+    ricas", sem novos agregados de domínio. Após a [DEC-0024-G08], o PR é execução
+    explícita dos eixos G03/G04/G05, não drift.
+
+review_fingerprint: 185d897a1708
