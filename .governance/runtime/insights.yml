@@ -56,3 +56,12 @@ insights:
         spec: "0024"
         cursor: checkpoint-2.4d
         note: re-avaliação da árvore alvo
+  - id: PIT-0007
+    text: "Vários subsistemas (topology, PR lifecycle, gates, WorkflowStage, KnowledgeStage, disclosure) não são independentes — parecem instanciações de UM princípio gerador: compromisso epistêmico monotônico gateado por evidência (não afirmar além do que a evidência sustenta)"
+    status: open
+    captured_at: 2026-06-05T02:49:01.823Z
+    occurrences:
+      - at: 2026-06-05T02:49:01.823Z
+        spec: "0024"
+        cursor: checkpoint-cli-cutover
+        note: "Falsificado o 'enum único de estados': o que recorre é o MECANISMO (afirmação→evidência→validação→compromisso), não os estados. KnowledgeStage já o codifica; as outras ladders rimam sem nome. Material preservado em research/2026-06-04-epistemic-commitment-model.md"
