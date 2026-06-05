@@ -62,4 +62,5 @@ export const INTENT_CATALOG: readonly Intent[] = [
  */
 export const NON_NAVIGABLE_COMMANDS: readonly string[] = [
   "workflow", // é o próprio shell humano (entrada), não um destino de Intent
+  "pr-visual", // automação (o agente invoca ao preparar o PR), não navegado por humano
 ];

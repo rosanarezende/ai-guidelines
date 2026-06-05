@@ -24,6 +24,7 @@ class FakeStackOps implements StackOps {
   getPullRequest(number: number): PullRequestData | null {
     return this.prs.get(number) ?? null;
   }
+  setPullRequestBody(): void {}
   editPullRequestBase(number: number, newBase: string): void {
     this.editBaseCalls.push({ number, newBase });
     const pr = this.prs.get(number);

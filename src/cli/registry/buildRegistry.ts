@@ -7,6 +7,7 @@ import { WorkflowCommand } from "./commands/WorkflowCommand.js";
 import { ListActiveSpecsCommand } from "./commands/ListActiveSpecsCommand.js";
 import { DiagnoseDriftCommand } from "./commands/DiagnoseDriftCommand.js";
 import { VisualPromptCommand } from "./commands/VisualPromptCommand.js";
+import { PrVisualCommand } from "./commands/PrVisualCommand.js";
 
 /**
  * Ponto ÚNICO de registro dos comandos da CLI (Spec 0024, pr-cli-cutover).
@@ -26,5 +27,6 @@ export function buildRegistry(): CommandRegistry {
   registry.register(new ListActiveSpecsCommand()); // read-only; migra "list-active-specs" (#35 etapa 2)
   registry.register(new DiagnoseDriftCommand()); // read-only; migra "diagnose-drift" (#35 etapa 2)
   registry.register(new VisualPromptCommand()); // interativo (prompt/parse); migra "visual-prompt" (#35 etapa 3)
+  registry.register(new PrVisualCommand()); // automação: embute prompt visual no body do PR (Draft→Ready)
   return registry;
 }

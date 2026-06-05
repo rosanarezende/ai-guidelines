@@ -84,6 +84,15 @@ export interface StackOps {
   getPullRequest(number: number): PullRequestData | null;
 
   /**
+   * Substitui o body de um PR (`gh api ... PATCH -F body=@-`). Idempotente do
+   * ponto de vista do chamador (passe o body inteiro já montado). Usado pelo
+   * comando `pr-visual` para embutir/atualizar o bloco do prompt visual no body.
+   * Side-effect: descrição do PR muda no GitHub UI. Body via stdin (`@-`) evita
+   * estourar argv com bodies grandes.
+   */
+  setPullRequestBody(number: number, body: string): void;
+
+  /**
    * Atualiza base branch de um PR (`gh pr edit <N> --base <branch>`).
    * Usado em `MergeStack` para reparentar PRs downstream após merge upstream.
    * Side-effect: GitHub recalcula diff + dispara re-run de CI.

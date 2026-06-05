@@ -104,6 +104,15 @@ export class GhCli implements StackOps {
     ]);
   }
 
+  setPullRequestBody(number: number, body: string): void {
+    // REST PATCH (não `gh pr edit`, que falha por Projects-classic nesta faixa
+    // do gh). Body via stdin (`-F body=@-`): tolera bodies grandes + multiline
+    // sem estourar argv nem passar por shell (CWE-78 preservado).
+    this.exec(["api", `repos/{owner}/{repo}/pulls/${number}`, "-X", "PATCH", "-F", "body=@-"], {
+      input: body,
+    });
+  }
+
   mergePullRequest(input: MergePullRequestInput): void {
     // Resolve a branch head antes do merge (para deletá-la depois, se pedido).
     const head =
