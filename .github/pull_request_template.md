@@ -23,41 +23,39 @@ Exemplos:
 ═════════════════════════════════════════════════════════════════════════════
 GOVERNANÇA VISUAL (OBRIGATÓRIA — artefato oficial do ciclo, não anexo)
 
-As imagens são projeções gateadas pelo estado epistêmico da spec. NÃO são
-decorativas: existem para zerar o custo cognitivo de quem revisa e adota.
-`governance-pr-check` FALHA o gate se a imagem exigida faltar (cf. matriz).
+O artefato GATEADO é o PROMPT FINAL autorado (paste-ready), não a imagem — ele é
+produzível pela IA que prepara o PR (AI-as-Channel, ADR 0018) SEM depender de um
+gerador externo. A imagem renderizada é OPCIONAL no Ready e obrigação de
+publicação em R4. Assim o gate nunca bloqueia o Ready por gerador indisponível.
+`governance-pr-check` FALHA se o slot exigido não tiver nem prompt nem imagem.
 
-  Imagem            | Obrigatória em               | Slot
-  ----------------- | ---------------------------- | ----------------------------
+  Artefato            | Prompt obrigatório em        | Slot
+  ------------------- | ---------------------------- | ----------------------------
   #1 Visão pretendida | todo Ready (PR de execução)  | "## Visão pretendida"
   #3 Valor entregue   | todo Ready (PR de execução)  | "## Valor entregue"
   #4 Convergência     | Integration PR               | (no template do Integration)
   #2 Capacidade       | opcional (recomendada)       | "## Capacidade construída"
 
-Quando: a imagem é AUTORADA no marco de máximo contexto (#1 ao abrir o Draft;
-#3 ao levar a Ready) — AI-as-Channel (ADR 0018): a IA que prepara o PR produz o
-prompt FINAL e a imagem é gerada no gerador externo; só a IMAGEM (durável) vive
-aqui. No encerramento, as versões finais são promovidas para `assets/` (gate R4).
+Como preencher (o check aceita o prompt OU a imagem):
+  Prompt final (paste-ready, default):     Imagem (quando gerada):
+  ```text                                  ![visão](URL)
+  <prompt pronto p/ colar no gerador>      <img src="URL" width="760"/>
+  ```
 
-Formato aceito (o check exige `![…](url)` OU `<img … src=…>` dentro da seção):
-  ![visão](URL)   ·   <img src="URL" width="760"/>
-  Before/After:
-  <table><tr>
-    <td align="center"><strong>ANTES</strong><br/><img src="URL_ANTES" width="380"/></td>
-    <td align="center"><strong>DEPOIS</strong><br/><img src="URL_DEPOIS" width="380"/></td>
-  </tr></table>
-
-Draft é isento (intenção em formação): preencha as imagens ANTES de marcar Ready.
+A imagem é a renderização do prompt; gere-a quando puder (no Ready ou depois) e
+cole a URL. Em R4/encerramento as imagens finais são promovidas para `assets/`
+(degradável: se o gerador estiver indisponível, os prompts ficam preservados).
+Draft é isento (intenção em formação): preencha os prompts ANTES de marcar Ready.
 ═════════════════════════════════════════════════════════════════════════════
 -->
 
 ## Visão pretendida
 
-<!-- #1 — o problema + a solução pretendida. Obrigatória em Ready. Cole `![visão](URL)`. -->
+<!-- #1 — o problema + a solução pretendida. Em Ready: cole o prompt final (bloco ```…```) — a imagem entra quando gerada. -->
 
 ## Valor entregue
 
-<!-- #3 — antes/depois do valor deste slice (sintomas→capacidades). Obrigatória em Ready. Cole a imagem.
+<!-- #3 — antes/depois do valor deste slice (sintomas→capacidades). Em Ready: cole o prompt final (bloco ```…```) ou a imagem.
      #2 Capacidade construída (opcional, recomendada) pode entrar aqui como "## Capacidade construída". -->
 
 ## Status do ciclo de vida

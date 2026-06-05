@@ -119,7 +119,7 @@ Open Pull Requests in `Draft` mode using the full `.github/pull_request_template
 
 ### [CORE-10]
 
-Convert PRs from `Draft` to `Ready` only after explicit human revalidation. At `Ready`, the mandatory visual artifacts must already be present — `Visão pretendida` (#1) and `Valor entregue` (#3) for execution PRs, `Convergência da stack` (#4) for Integration PRs; `governance-pr-check` fails the gate when an expected image is missing.
+Convert PRs from `Draft` to `Ready` only after explicit human revalidation. At `Ready`, the gated visual artifact is the FINAL authored image-prompt (paste-ready) in each slot — `Visão pretendida` (#1) and `Valor entregue` (#3) for execution PRs, `Convergência da stack` (#4) for Integration PRs. The rendered image is optional here and is a publication obligation at `R4`; `governance-pr-check` fails only when a slot has neither prompt nor image — never blocking `Ready` on external image-generator availability.
 
 ### [CORE-14]
 

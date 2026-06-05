@@ -37,11 +37,13 @@ function hasSectionHeader(body: string, headerLine: string): boolean {
 }
 
 // ── Governança visual (matriz aprovada) ──────────────────────────────────────
-// Imagens são artefatos OFICIAIS do ciclo de vida, gateados pelo estado
-// epistêmico (não anexos). #1 Problema + #3 Valor obrigatórios em ENTREGA (Ready
-// declarado, execution); #1 + #4 Convergência no Integration PR. #2 Capacidade
-// nunca falha. No Draft (INTENÇÃO em formação) nada é exigido — o gate respeita
-// `afirmação ≤ evidência`: só cobra valor/convergência quando o estado os sustenta.
+// O artefato GATEADO é o **prompt final autorado** (paste-ready) — produzível
+// pelo agente SEM depender de gerador externo. A IMAGEM é sua renderização
+// mecânica: opcional no Ready, obrigação de publicação em R4 (degradável). Assim
+// o gate nunca bloqueia o Ready por indisponibilidade de um serviço externo
+// (extrínseco/ortogonal à prontidão do PR), ao contrário de R1/R7/R8 (evidência
+// intrínseca). #1 Problema + #3 Valor em ENTREGA (Ready, execution); #1 + #4
+// Convergência no Integration PR. #2 nunca falha. Draft é isento.
 const VISUAL_PROBLEMA = "## Visão pretendida";
 const VISUAL_VALOR = "## Valor entregue";
 const VISUAL_CONVERGENCIA = "## Convergência da stack";
@@ -53,6 +55,8 @@ function isReadyForReview(body: string): boolean {
 
 /** Referência de imagem markdown `![alt](url)` ou HTML `<img ... src=...>`. */
 const IMAGE_REF = /!\[[^\]]*\]\([^)]+\)|<img\b[^>]*\bsrc=/i;
+/** Bloco de código cercado (3+ backticks) = o prompt final paste-ready. */
+const PROMPT_BLOCK = /^\s*`{3,}/m;
 
 /** Conteúdo de uma seção: do header até o próximo header de mesmo/maior nível (ou fim). */
 function sectionContent(body: string, header: string): string | null {
@@ -65,10 +69,13 @@ function sectionContent(body: string, header: string): string | null {
   return next ? rest.slice(0, next.index) : rest;
 }
 
-/** A seção existe E contém ao menos uma referência de imagem. */
-function sectionHasImage(body: string, header: string): boolean {
+/**
+ * A seção existe E contém o artefato visual gateado: o **prompt final** (bloco de
+ * código cercado) OU a **imagem** já renderizada (que o satisfaz, sendo ≥ prompt).
+ */
+function sectionHasVisual(body: string, header: string): boolean {
   const content = sectionContent(body, header);
-  return content !== null && IMAGE_REF.test(content);
+  return content !== null && (PROMPT_BLOCK.test(content) || IMAGE_REF.test(content));
 }
 
 export interface GitHubApiCaller {
@@ -241,30 +248,33 @@ export function runGovernancePrCheck(
     }
   }
 
-  // ── Governança visual: imagens obrigatórias por estado epistêmico (matriz aprovada) ──
-  // Só cobra em ENTREGA (Ready declarado) — Draft (intenção em formação) é isento.
-  // fast-track já saiu antes (bypass). #2 Capacidade é opcional (nunca falha).
+  // ── Governança visual: prompt final obrigatório por estado epistêmico (matriz aprovada) ──
+  // Gateia o PROMPT FINAL autorado (bloco ```…```) — ou a imagem, que o satisfaz.
+  // Só cobra em ENTREGA (Ready declarado) — Draft é isento. fast-track já saiu
+  // antes (bypass). #2 Capacidade é opcional (nunca falha). A imagem renderizada
+  // é obrigação posterior de publicação (R4), nunca pré-requisito do Ready.
+  const VISUAL_HINT = "preencha o prompt final autorado (bloco ```…```) ou a imagem renderizada";
   if (isReadyForReview(input.prBody)) {
     if (node.role === "execution") {
-      if (!sectionHasImage(input.prBody, VISUAL_PROBLEMA)) {
+      if (!sectionHasVisual(input.prBody, VISUAL_PROBLEMA)) {
         reasons.push(
-          `Governança visual: imagem obrigatória ausente — a seção "${VISUAL_PROBLEMA}" precisa conter a imagem da visão pretendida (![…] ou <img>). Em Ready, todo PR de execução exige Problema + Valor (artefato oficial, não anexo).`
+          `Governança visual: a seção "${VISUAL_PROBLEMA}" está vazia — ${VISUAL_HINT}. Em Ready, todo PR de execução exige Problema + Valor (artefato oficial, não anexo).`
         );
       }
-      if (!sectionHasImage(input.prBody, VISUAL_VALOR)) {
+      if (!sectionHasVisual(input.prBody, VISUAL_VALOR)) {
         reasons.push(
-          `Governança visual: imagem obrigatória ausente — a seção "${VISUAL_VALOR}" precisa conter a imagem de valor entregue do slice. Em Ready, todo PR de execução exige Problema + Valor.`
+          `Governança visual: a seção "${VISUAL_VALOR}" está vazia — ${VISUAL_HINT}. Em Ready, todo PR de execução exige Problema + Valor.`
         );
       }
     } else if (node.role === "integration") {
-      if (!sectionHasImage(input.prBody, VISUAL_PROBLEMA)) {
+      if (!sectionHasVisual(input.prBody, VISUAL_PROBLEMA)) {
         reasons.push(
-          `Governança visual: imagem obrigatória ausente — a seção "${VISUAL_PROBLEMA}" (backdrop da visão pretendida) no Integration PR.`
+          `Governança visual: a seção "${VISUAL_PROBLEMA}" (backdrop) está vazia no Integration PR — ${VISUAL_HINT}.`
         );
       }
-      if (!sectionHasImage(input.prBody, VISUAL_CONVERGENCIA)) {
+      if (!sectionHasVisual(input.prBody, VISUAL_CONVERGENCIA)) {
         reasons.push(
-          `Governança visual: imagem obrigatória ausente — a seção "${VISUAL_CONVERGENCIA}" precisa conter a imagem de convergência da stack (#4). O Integration PR exige a narrativa visual da convergência.`
+          `Governança visual: a seção "${VISUAL_CONVERGENCIA}" está vazia — ${VISUAL_HINT}. O Integration PR exige a narrativa visual da convergência (#4).`
         );
       }
     }

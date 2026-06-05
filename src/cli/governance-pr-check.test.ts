@@ -296,8 +296,10 @@ topology:
   const READY = "- [x] **Ready for review** — operacionalmente concluído";
   const DRAFT = "- [ ] **Ready for review** — operacionalmente concluído";
   const IMG = "![valor](https://github.com/u/a/img.png)";
+  const PROMPT = "```text\nGere um infográfico antes/depois do valor entregue…\n```";
+  const VAZIO = "<!-- preencher -->";
 
-  function execBody(o: { ready: boolean; problema?: boolean; valor?: boolean }): string {
+  function execBody(o: { ready: boolean; problema?: string; valor?: string }): string {
     return [
       "## Status do ciclo de vida",
       o.ready ? READY : DRAFT,
@@ -305,9 +307,9 @@ topology:
       "## Posição na stack",
       "- **Stack atual**: 1",
       "## Visão pretendida",
-      o.problema ? IMG : "(sem imagem ainda)",
+      o.problema ?? VAZIO,
       "## Valor entregue",
-      o.valor ? IMG : "(sem imagem ainda)",
+      o.valor ?? VAZIO,
       "## Merge authorization",
       "## Resumo",
       "## Test plan",
@@ -326,38 +328,46 @@ topology:
     prBranch: "feat/spec-0024-exec-node",
   });
 
-  it("DADO execution em Ready com #1 e #3 presentes ENTÃO ok", () => {
+  it("DADO execution em Ready com imagens em #1 e #3 ENTÃO ok (imagem satisfaz)", () => {
     const r = runGovernancePrCheck(
-      execInput(execBody({ ready: true, problema: true, valor: true })),
+      execInput(execBody({ ready: true, problema: IMG, valor: IMG })),
       fsWithTopology()
     );
     expect(r.kind).toBe("ok");
   });
 
-  it("DADO execution em Ready SEM imagem de Visão pretendida (#1) ENTÃO falha", () => {
+  it("DADO execution em Ready com PROMPT FINAL (sem imagem) em #1 e #3 ENTÃO ok (o prompt é o artefato gateado)", () => {
     const r = runGovernancePrCheck(
-      execInput(execBody({ ready: true, problema: false, valor: true })),
+      execInput(execBody({ ready: true, problema: PROMPT, valor: PROMPT })),
+      fsWithTopology()
+    );
+    expect(r.kind).toBe("ok");
+  });
+
+  it("DADO execution em Ready com #1 VAZIO (sem prompt nem imagem) ENTÃO falha", () => {
+    const r = runGovernancePrCheck(
+      execInput(execBody({ ready: true, problema: VAZIO, valor: PROMPT })),
       fsWithTopology()
     );
     expect(r.kind).toBe("fail");
     if (r.kind === "fail") expect(r.reasons.some((x) => x.includes("Visão pretendida"))).toBe(true);
   });
 
-  it("DADO execution em Ready SEM imagem de Valor entregue (#3) ENTÃO falha", () => {
+  it("DADO execution em Ready com #3 VAZIO ENTÃO falha", () => {
     const r = runGovernancePrCheck(
-      execInput(execBody({ ready: true, problema: true, valor: false })),
+      execInput(execBody({ ready: true, problema: PROMPT, valor: VAZIO })),
       fsWithTopology()
     );
     expect(r.kind).toBe("fail");
     if (r.kind === "fail") expect(r.reasons.some((x) => x.includes("Valor entregue"))).toBe(true);
   });
 
-  it("DADO execution ainda em Draft SEM imagens ENTÃO NÃO falha por visual (gate só em Ready)", () => {
+  it("DADO execution ainda em Draft com slots vazios ENTÃO NÃO falha por visual (gate só em Ready)", () => {
     const r = runGovernancePrCheck(execInput(execBody({ ready: false })), fsWithTopology());
     expect(r.kind).toBe("ok");
   });
 
-  it("DADO fast-track em Ready SEM imagens ENTÃO bypassa (não falha por visual)", () => {
+  it("DADO fast-track em Ready com slots vazios ENTÃO bypassa (não falha por visual)", () => {
     const input: GovernancePrCheckInput = {
       ...execInput("[fast-track: urgente]\n" + execBody({ ready: true })),
       prLabels: ["fast-track"],
@@ -366,16 +376,16 @@ topology:
     expect(r.kind).toBe("fast-track");
   });
 
-  function integBody(o: { ready: boolean; problema?: boolean; convergencia?: boolean }): string {
+  function integBody(o: { ready: boolean; problema?: string; convergencia?: string }): string {
     return [
       "## Status do ciclo de vida",
       o.ready ? READY : DRAFT,
       "## PR Type",
       "## Posição na stack",
       "## Visão pretendida",
-      o.problema ? IMG : "(sem)",
+      o.problema ?? VAZIO,
       "## Convergência da stack",
-      o.convergencia ? IMG : "(sem)",
+      o.convergencia ?? VAZIO,
       "## Merge authorization",
       "## Resumo",
       "## Test plan",
@@ -394,17 +404,17 @@ topology:
     prBranch: "feat/spec-0024-integ-node",
   });
 
-  it("DADO Integration PR em Ready com #1 e #4 ENTÃO ok", () => {
+  it("DADO Integration PR em Ready com prompt final em #1 e #4 ENTÃO ok", () => {
     const r = runGovernancePrCheck(
-      integInput(integBody({ ready: true, problema: true, convergencia: true })),
+      integInput(integBody({ ready: true, problema: PROMPT, convergencia: PROMPT })),
       fsWithTopology()
     );
     expect(r.kind).toBe("ok");
   });
 
-  it("DADO Integration PR em Ready SEM imagem de Convergência (#4) ENTÃO falha", () => {
+  it("DADO Integration PR em Ready com #4 Convergência VAZIO ENTÃO falha", () => {
     const r = runGovernancePrCheck(
-      integInput(integBody({ ready: true, problema: true, convergencia: false })),
+      integInput(integBody({ ready: true, problema: PROMPT, convergencia: VAZIO })),
       fsWithTopology()
     );
     expect(r.kind).toBe("fail");
