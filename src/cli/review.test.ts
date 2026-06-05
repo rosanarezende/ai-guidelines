@@ -49,7 +49,6 @@ class FakeStackOps implements StackOps {
   getPullRequest(): PullRequestData | null {
     throw new Error("not used");
   }
-  setPullRequestBody(): void {}
   editPullRequestBase(): void {
     throw new Error("not used");
   }

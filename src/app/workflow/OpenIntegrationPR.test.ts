@@ -30,7 +30,6 @@ class FakeStackOps implements StackOps {
   getPullRequest(): PullRequestData | null {
     return null;
   }
-  setPullRequestBody(): void {}
   editPullRequestBase(): void {
     throw new Error("not used in OpenIntegrationPR tests");
   }
