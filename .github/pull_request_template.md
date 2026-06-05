@@ -21,35 +21,44 @@ Exemplos:
 
 <!--
 ═════════════════════════════════════════════════════════════════════════════
-VISUAL DE VALOR ENTREGUE (opcional, recomendado para PRs não-triviais)
+GOVERNANÇA VISUAL (OBRIGATÓRIA — artefato oficial do ciclo, não anexo)
 
-Como gerar:
-  1. Rode `yarn guidelines workflow` → opção 6 (Gerar prompt visual)
-  2. Cole o briefing em uma IA conversacional COM ACESSO AO REPO
-     (Claude com tool use, ChatGPT com browsing, Antigravity, Cursor)
-  3. A IA investiga o repositório atual e devolve um prompt de imagem
-     pronto para gerador externo (Midjourney, DALL-E, Nano Banana, etc.)
+As imagens são projeções gateadas pelo estado epistêmico da spec. NÃO são
+decorativas: existem para zerar o custo cognitivo de quem revisa e adota.
+`governance-pr-check` FALHA o gate se a imagem exigida faltar (cf. matriz).
 
-Cole a imagem na seção abaixo quando aplicável (before/after, fluxo
-operacional, valor entregue). Narrativa visual virou parte do fluxo
-de governança na Spec 0023 — não é marketing, é comunicação operacional.
+  Imagem            | Obrigatória em               | Slot
+  ----------------- | ---------------------------- | ----------------------------
+  #1 Visão pretendida | todo Ready (PR de execução)  | "## Visão pretendida"
+  #3 Valor entregue   | todo Ready (PR de execução)  | "## Valor entregue"
+  #4 Convergência     | Integration PR               | (no template do Integration)
+  #2 Capacidade       | opcional (recomendada)       | "## Capacidade construída"
+
+Quando: a imagem é AUTORADA no marco de máximo contexto (#1 ao abrir o Draft;
+#3 ao levar a Ready) — AI-as-Channel (ADR 0018): a IA que prepara o PR produz o
+prompt FINAL e a imagem é gerada no gerador externo; só a IMAGEM (durável) vive
+aqui. No encerramento, as versões finais são promovidas para `assets/` (gate R4).
+
+Formato aceito (o check exige `![…](url)` OU `<img … src=…>` dentro da seção):
+  ![visão](URL)   ·   <img src="URL" width="760"/>
+  Before/After:
+  <table><tr>
+    <td align="center"><strong>ANTES</strong><br/><img src="URL_ANTES" width="380"/></td>
+    <td align="center"><strong>DEPOIS</strong><br/><img src="URL_DEPOIS" width="380"/></td>
+  </tr></table>
+
+Draft é isento (intenção em formação): preencha as imagens ANTES de marcar Ready.
 ═════════════════════════════════════════════════════════════════════════════
 -->
 
-## Visual de valor entregue (opcional)
+## Visão pretendida
 
-<!--
-Imagem única:
-  ![valor entregue](URL_DA_IMAGEM)
+<!-- #1 — o problema + a solução pretendida. Obrigatória em Ready. Cole `![visão](URL)`. -->
 
-Before/After side-by-side (sem <form>; só HTML estrutural):
-  <table>
-    <tr>
-      <td align="center"><strong>ANTES</strong><br/><img src="URL_ANTES" width="380"/></td>
-      <td align="center"><strong>DEPOIS</strong><br/><img src="URL_DEPOIS" width="380"/></td>
-    </tr>
-  </table>
--->
+## Valor entregue
+
+<!-- #3 — antes/depois do valor deste slice (sintomas→capacidades). Obrigatória em Ready. Cole a imagem.
+     #2 Capacidade construída (opcional, recomendada) pode entrar aqui como "## Capacidade construída". -->
 
 ## Status do ciclo de vida
 

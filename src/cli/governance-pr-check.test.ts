@@ -249,3 +249,166 @@ topology:
     }
   });
 });
+
+// === Governança visual (matriz aprovada) — imagens são artefatos OFICIAIS gateados ===
+// #1 Problema + #3 Valor obrigatórios em Ready (execution); #1 + #4 Convergência no
+// Integration PR. Enforce SÓ no estado ENTREGA (Ready declarado) — nunca no Draft
+// (INTENÇÃO em formação). #2 Capacidade nunca falha. Fast-track bypassa.
+describe("CLI — governance-pr-check · governança visual [BR-GOV-VISUAL]", () => {
+  function fsWithTopology(): FakeFileSystem {
+    const fs = new FakeFileSystem();
+    fs.addDir(".governance/specs", ["0024-context-architecture"]);
+    fs.addFile(
+      ".governance/specs/0024-context-architecture/state.yml",
+      `
+stage: implementation
+gate:
+  status: closed
+focus: []
+next: []
+topology:
+  cursor:
+    pr: exec-node
+    checkpoint: cp-1
+  prs:
+    active:
+      - id: exec-node
+        github_pr: 50
+        role: execution
+        terminal: false
+        sequence: 1
+        checkpoints:
+          - cp-1
+      - id: integ-node
+        github_pr: 51
+        role: integration
+        terminal: true
+        sequence: null
+        checkpoints:
+          - cp-i
+    concluded: []
+    planned: []
+`
+    );
+    return fs;
+  }
+
+  const READY = "- [x] **Ready for review** — operacionalmente concluído";
+  const DRAFT = "- [ ] **Ready for review** — operacionalmente concluído";
+  const IMG = "![valor](https://github.com/u/a/img.png)";
+
+  function execBody(o: { ready: boolean; problema?: boolean; valor?: boolean }): string {
+    return [
+      "## Status do ciclo de vida",
+      o.ready ? READY : DRAFT,
+      "## PR Type",
+      "## Posição na stack",
+      "- **Stack atual**: 1",
+      "## Visão pretendida",
+      o.problema ? IMG : "(sem imagem ainda)",
+      "## Valor entregue",
+      o.valor ? IMG : "(sem imagem ainda)",
+      "## Merge authorization",
+      "## Resumo",
+      "## Test plan",
+      "## Cross-refs",
+      "## Checklist operacional",
+      "## Disclosure de IA",
+    ].join("\n");
+  }
+
+  const execInput = (body: string): GovernancePrCheckInput => ({
+    prNumber: 50,
+    prTitle: "[🛠️1️⃣➜] [Spec 0024] exec",
+    prBody: body,
+    prLabels: [],
+    repo: "o/r",
+    prBranch: "feat/spec-0024-exec-node",
+  });
+
+  it("DADO execution em Ready com #1 e #3 presentes ENTÃO ok", () => {
+    const r = runGovernancePrCheck(
+      execInput(execBody({ ready: true, problema: true, valor: true })),
+      fsWithTopology()
+    );
+    expect(r.kind).toBe("ok");
+  });
+
+  it("DADO execution em Ready SEM imagem de Visão pretendida (#1) ENTÃO falha", () => {
+    const r = runGovernancePrCheck(
+      execInput(execBody({ ready: true, problema: false, valor: true })),
+      fsWithTopology()
+    );
+    expect(r.kind).toBe("fail");
+    if (r.kind === "fail") expect(r.reasons.some((x) => x.includes("Visão pretendida"))).toBe(true);
+  });
+
+  it("DADO execution em Ready SEM imagem de Valor entregue (#3) ENTÃO falha", () => {
+    const r = runGovernancePrCheck(
+      execInput(execBody({ ready: true, problema: true, valor: false })),
+      fsWithTopology()
+    );
+    expect(r.kind).toBe("fail");
+    if (r.kind === "fail") expect(r.reasons.some((x) => x.includes("Valor entregue"))).toBe(true);
+  });
+
+  it("DADO execution ainda em Draft SEM imagens ENTÃO NÃO falha por visual (gate só em Ready)", () => {
+    const r = runGovernancePrCheck(execInput(execBody({ ready: false })), fsWithTopology());
+    expect(r.kind).toBe("ok");
+  });
+
+  it("DADO fast-track em Ready SEM imagens ENTÃO bypassa (não falha por visual)", () => {
+    const input: GovernancePrCheckInput = {
+      ...execInput("[fast-track: urgente]\n" + execBody({ ready: true })),
+      prLabels: ["fast-track"],
+    };
+    const r = runGovernancePrCheck(input, fsWithTopology());
+    expect(r.kind).toBe("fast-track");
+  });
+
+  function integBody(o: { ready: boolean; problema?: boolean; convergencia?: boolean }): string {
+    return [
+      "## Status do ciclo de vida",
+      o.ready ? READY : DRAFT,
+      "## PR Type",
+      "## Posição na stack",
+      "## Visão pretendida",
+      o.problema ? IMG : "(sem)",
+      "## Convergência da stack",
+      o.convergencia ? IMG : "(sem)",
+      "## Merge authorization",
+      "## Resumo",
+      "## Test plan",
+      "## Cross-refs",
+      "## Checklist operacional",
+      "## Disclosure de IA",
+    ].join("\n");
+  }
+
+  const integInput = (body: string): GovernancePrCheckInput => ({
+    prNumber: 51,
+    prTitle: "[🔗] [Integration] [Spec 0024] homologação",
+    prBody: body,
+    prLabels: [],
+    repo: "o/r",
+    prBranch: "feat/spec-0024-integ-node",
+  });
+
+  it("DADO Integration PR em Ready com #1 e #4 ENTÃO ok", () => {
+    const r = runGovernancePrCheck(
+      integInput(integBody({ ready: true, problema: true, convergencia: true })),
+      fsWithTopology()
+    );
+    expect(r.kind).toBe("ok");
+  });
+
+  it("DADO Integration PR em Ready SEM imagem de Convergência (#4) ENTÃO falha", () => {
+    const r = runGovernancePrCheck(
+      integInput(integBody({ ready: true, problema: true, convergencia: false })),
+      fsWithTopology()
+    );
+    expect(r.kind).toBe("fail");
+    if (r.kind === "fail")
+      expect(r.reasons.some((x) => x.includes("Convergência da stack"))).toBe(true);
+  });
+});

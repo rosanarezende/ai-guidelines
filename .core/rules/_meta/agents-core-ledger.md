@@ -16,7 +16,7 @@
 | CORE-07 | Nunca execute git push autonomamente                      | process  | declared_heuristic | 0       | 123   | 1     |
 | CORE-08 | HARNESS LOCK — cadeia de qualidade obrigatória pré-commit | process  | declared_heuristic | 0       | 217   | 1     |
 | CORE-09 | PRs abrem como Draft com matriz oficial                   | process  | declared_heuristic | 0       | 278   | 1     |
-| CORE-10 | Draft → Ready apenas via revalidação humana               | process  | declared_heuristic | 0       | 75    | 1     |
+| CORE-10 | Draft → Ready apenas via revalidação humana               | process  | declared_heuristic | 0       | 335   | 1     |
 | CORE-11 | Plano formado antes de ação                               | process  | declared_heuristic | 0       | 201   | 1     |
 | CORE-12 | Checkpoints antes de ação após contexto extenso           | process  | declared_heuristic | 0       | 120   | 1     |
 | CORE-13 | Artefatos vivos durante o trabalho                        | process  | declared_heuristic | 0       | 185   | 1     |

@@ -119,7 +119,7 @@ Open Pull Requests in `Draft` mode using the full `.github/pull_request_template
 
 ### [CORE-10]
 
-Convert PRs from `Draft` to `Ready` only after explicit human revalidation.
+Convert PRs from `Draft` to `Ready` only after explicit human revalidation. At `Ready`, the mandatory visual artifacts must already be present — `Visão pretendida` (#1) and `Valor entregue` (#3) for execution PRs, `Convergência da stack` (#4) for Integration PRs; `governance-pr-check` fails the gate when an expected image is missing.
 
 ### [CORE-14]
 
@@ -131,7 +131,7 @@ Distinguish between **base sync** (routine update of a stacked branch with its b
 
 ### [GR-0203]
 
-Build PR descriptions in three steps: outline topics, get human approval, then generate the final text using the repository template (if available) and perform a final human validation.
+Build PR descriptions in three steps: outline topics, get human approval, then generate the final text using the repository template (if available) and perform a final human validation. The final text includes the mandatory visual artifacts as authored sections: author the FINAL image-generation prompt (paste-ready for an external generator — not a meta-prompt), at the marco of maximum context, so the image lands in its slot (`Visão pretendida`, `Valor entregue`, `Convergência da stack`).
 
 ---
 

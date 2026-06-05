@@ -235,7 +235,7 @@ Open Pull Requests in `Draft` mode using the full `.github/pull_request_template
 **Documentação (pt-br):**
 A submissão de Pull Requests obrigatoriamente se inaugura no modo `Draft`, utilizando integralmente a matriz `.github/pull_request_template.md`. Em entrega governada, o contêiner Draft abre no início do desenvolvimento; trabalho de manutenção/aprendizado (fix/patch/spike/incident) é código-primeiro por natureza (timing + exceções: ADR 0025).
 
-**Why this matters:** Draft sinaliza WIP e impede que CI/reviewers tratem o PR como pronto antes da hora. Abrir o contêiner cedo em trabalho governado mantém a topology fiel ao estado real do trabalho (ADR 0025).
+**Why this matters:** Draft sinaliza WIP e impede que CI/reviewers tratem o PR como pronto antes da hora. Abrir o contêiner cedo em trabalho governado mantém a topology fiel ao estado real do trabalho (ADR 0025). A matriz inclui os slots visuais oficiais (`Visão pretendida`, `Valor entregue`); no Draft, autore a imagem de intenção (#1) — o único estado epistêmico que ela já sustenta. As imagens obrigatórias passam a ser cobradas no gate de `Ready` (CORE-10).
 
 ---
 
@@ -252,12 +252,12 @@ tags: [core, agents, always_injected, pr, github, gate]
 ```
 
 **Instruction (en):**
-Convert PRs from `Draft` to `Ready` only after explicit human revalidation.
+Convert PRs from `Draft` to `Ready` only after explicit human revalidation. At `Ready`, the mandatory visual artifacts must already be present — `Visão pretendida` (#1) and `Valor entregue` (#3) for execution PRs, `Convergência da stack` (#4) for Integration PRs; `governance-pr-check` fails the gate when an expected image is missing.
 
 **Documentação (pt-br):**
-Converta a operação de `Draft` para `Ready` apenas através da revalidação afirmativa Humana.
+Converta a operação de `Draft` para `Ready` apenas através da revalidação afirmativa Humana. Em `Ready`, as imagens obrigatórias já devem estar presentes — `Visão pretendida` (#1) e `Valor entregue` (#3) em PR de execução; `Convergência da stack` (#4) no Integration PR. São artefatos OFICIAIS gateados pelo estado epistêmico (não anexos): o `governance-pr-check` FALHA quando a imagem exigida falta. `#2 Capacidade construída` é opcional. Draft é isento (intenção em formação).
 
-**Why this matters:** transição Draft→Ready é gate humano explícito; IA não decide sozinha que está pronto.
+**Why this matters:** transição Draft→Ready é gate humano explícito; IA não decide sozinha que está pronto. As imagens reduzem o custo cognitivo de revisão/adoção e nascem no marco de máximo contexto — afirmação ≤ evidência (não há "valor entregue" antes da entrega).
 
 ---
 

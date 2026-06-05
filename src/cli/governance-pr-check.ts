@@ -36,6 +36,41 @@ function hasSectionHeader(body: string, headerLine: string): boolean {
   return new RegExp(`^\\s{0,3}#{2,6}\\s+${escaped}\\s*$`, "m").test(body);
 }
 
+// ── Governança visual (matriz aprovada) ──────────────────────────────────────
+// Imagens são artefatos OFICIAIS do ciclo de vida, gateados pelo estado
+// epistêmico (não anexos). #1 Problema + #3 Valor obrigatórios em ENTREGA (Ready
+// declarado, execution); #1 + #4 Convergência no Integration PR. #2 Capacidade
+// nunca falha. No Draft (INTENÇÃO em formação) nada é exigido — o gate respeita
+// `afirmação ≤ evidência`: só cobra valor/convergência quando o estado os sustenta.
+const VISUAL_PROBLEMA = "## Visão pretendida";
+const VISUAL_VALOR = "## Valor entregue";
+const VISUAL_CONVERGENCIA = "## Convergência da stack";
+
+/** Lifecycle checkbox "Ready for review" marcado `[x]` no body do PR. */
+function isReadyForReview(body: string): boolean {
+  return /^\s*-\s*\[[xX]\]\s+\*\*Ready for review\*\*/m.test(body);
+}
+
+/** Referência de imagem markdown `![alt](url)` ou HTML `<img ... src=...>`. */
+const IMAGE_REF = /!\[[^\]]*\]\([^)]+\)|<img\b[^>]*\bsrc=/i;
+
+/** Conteúdo de uma seção: do header até o próximo header de mesmo/maior nível (ou fim). */
+function sectionContent(body: string, header: string): string | null {
+  const title = header.replace(/^#+\s*/, "");
+  const escaped = title.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const m = new RegExp(`^\\s{0,3}#{2,6}\\s+${escaped}\\s*$`, "m").exec(body);
+  if (!m) return null;
+  const rest = body.slice(m.index + m[0].length);
+  const next = /^\s{0,3}#{2,6}\s+\S/m.exec(rest);
+  return next ? rest.slice(0, next.index) : rest;
+}
+
+/** A seção existe E contém ao menos uma referência de imagem. */
+function sectionHasImage(body: string, header: string): boolean {
+  const content = sectionContent(body, header);
+  return content !== null && IMAGE_REF.test(content);
+}
+
 export interface GitHubApiCaller {
   call(endpoint: string): unknown;
 }
@@ -203,6 +238,35 @@ export function runGovernancePrCheck(
       reasons.push(
         `Template incompleto: seção obrigatória "${section}" não encontrada (precisa ser um header markdown em linha própria).`
       );
+    }
+  }
+
+  // ── Governança visual: imagens obrigatórias por estado epistêmico (matriz aprovada) ──
+  // Só cobra em ENTREGA (Ready declarado) — Draft (intenção em formação) é isento.
+  // fast-track já saiu antes (bypass). #2 Capacidade é opcional (nunca falha).
+  if (isReadyForReview(input.prBody)) {
+    if (node.role === "execution") {
+      if (!sectionHasImage(input.prBody, VISUAL_PROBLEMA)) {
+        reasons.push(
+          `Governança visual: imagem obrigatória ausente — a seção "${VISUAL_PROBLEMA}" precisa conter a imagem da visão pretendida (![…] ou <img>). Em Ready, todo PR de execução exige Problema + Valor (artefato oficial, não anexo).`
+        );
+      }
+      if (!sectionHasImage(input.prBody, VISUAL_VALOR)) {
+        reasons.push(
+          `Governança visual: imagem obrigatória ausente — a seção "${VISUAL_VALOR}" precisa conter a imagem de valor entregue do slice. Em Ready, todo PR de execução exige Problema + Valor.`
+        );
+      }
+    } else if (node.role === "integration") {
+      if (!sectionHasImage(input.prBody, VISUAL_PROBLEMA)) {
+        reasons.push(
+          `Governança visual: imagem obrigatória ausente — a seção "${VISUAL_PROBLEMA}" (backdrop da visão pretendida) no Integration PR.`
+        );
+      }
+      if (!sectionHasImage(input.prBody, VISUAL_CONVERGENCIA)) {
+        reasons.push(
+          `Governança visual: imagem obrigatória ausente — a seção "${VISUAL_CONVERGENCIA}" precisa conter a imagem de convergência da stack (#4). O Integration PR exige a narrativa visual da convergência.`
+        );
+      }
     }
   }
 

@@ -123,19 +123,35 @@ Depois que o CI rodar, você confirma o resultado no release-log (uma linha com 
 
 Antes do merge, o `review.md` da spec registra os gates que foram verificados. Cada gate tem evidência — não é um checkbox de honra.
 
-| Gate   | O que verifica                                                     |
-| ------ | ------------------------------------------------------------------ |
-| R1     | CI verde na branch                                                 |
-| R2     | O wizard funciona corretamente no terminal (smoke test)            |
-| R3     | Débitos do NEXT migrados para o backlog antes de fechar            |
-| R4     | Documentação voltada ao usuário atualizada (README, docs públicos) |
-| R5     | Cada critério de aceite da spec confirmado com evidência           |
-| R6     | Descrições dos PRs da stack refletem o estado final                |
-| R7     | Stack marcada como Ready no GitHub com aprovação do owner          |
-| **R8** | **Autorização explícita do owner para o merge**                    |
-| **R9** | **Branch em estado final** — checklist do Estágio 5 completo       |
+| Gate   | O que verifica                                                                                               |
+| ------ | ------------------------------------------------------------------------------------------------------------ |
+| R1     | CI verde na branch                                                                                           |
+| R2     | O wizard funciona corretamente no terminal (smoke test)                                                      |
+| R3     | Débitos do NEXT migrados para o backlog antes de fechar                                                      |
+| R4     | Governança visual consolidada: imagens obrigatórias da spec promovidas para `assets/` + README/docs públicos |
+| R5     | Cada critério de aceite da spec confirmado com evidência                                                     |
+| R6     | Descrições dos PRs da stack refletem o estado final                                                          |
+| R7     | Stack marcada como Ready no GitHub com aprovação do owner                                                    |
+| **R8** | **Autorização explícita do owner para o merge**                                                              |
+| **R9** | **Branch em estado final** — checklist do Estágio 5 completo                                                 |
 
 R8 é o gate humano final. R9 é o gate técnico final. O merge só acontece com os dois.
+
+---
+
+## Governança visual (imagens obrigatórias)
+
+As imagens são **artefatos oficiais** do ciclo, não anexos. Cada uma nasce no marco onde o estado epistêmico autoriza o que ela afirma — e o gate **falha** se a imagem exigida faltar.
+
+| Imagem                               | Nasce em                 | Obrigatória?      | Gate que falha sem ela                          |
+| ------------------------------------ | ------------------------ | ----------------- | ----------------------------------------------- |
+| **#1 Visão pretendida** (o problema) | abertura do Draft PR     | sim (todo Ready)  | `governance-pr-check` (Ready)                   |
+| **#2 Capacidade construída**         | fechamento de checkpoint | opcional          | nenhum                                          |
+| **#3 Valor entregue** (antes/depois) | Ready for review         | sim (todo Ready)  | `governance-pr-check` (Ready)                   |
+| **#4 Convergência da stack**         | Integration PR           | sim (se há stack) | `governance-pr-check` (Integration) + readiness |
+| consolidação → `assets/`             | encerramento             | sim               | **R4**                                          |
+
+A imagem é autorada no marco de máximo contexto (a IA que prepara o PR gera o prompt final; a imagem vem de um gerador externo — sem LLM em runtime). Draft é isento (intenção em formação): preencha as imagens **antes** de marcar Ready. Experiência mínima garantida a qualquer reviewer: em qualquer PR em Ready vê **Problema + Valor**; no Integration PR, **+ Convergência**.
 
 ---
 
