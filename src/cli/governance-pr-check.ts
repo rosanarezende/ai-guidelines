@@ -11,6 +11,13 @@ export interface GovernancePrCheckInput {
   readonly prLabels: ReadonlyArray<string>;
   readonly repo: string;
   readonly prBranch: string;
+  /**
+   * Estado operacional canônico de Draft/Ready: o flag `draft` da API do GitHub.
+   * **Fonte ÚNICA de verdade** — o MESMO sinal que `MergeStack` consome via
+   * `PullRequestData.isDraft`. O checkbox de lifecycle no body é apenas documental
+   * (pedagógico, ADR 0024); NUNCA é fonte de enforcement (evita state drift).
+   */
+  readonly isDraft: boolean;
 }
 
 export type GovernancePrCheckResult =
@@ -47,11 +54,6 @@ function hasSectionHeader(body: string, headerLine: string): boolean {
 const VISUAL_PROBLEMA = "## Visão pretendida";
 const VISUAL_VALOR = "## Valor entregue";
 const VISUAL_CONVERGENCIA = "## Convergência da stack";
-
-/** Lifecycle checkbox "Ready for review" marcado `[x]` no body do PR. */
-function isReadyForReview(body: string): boolean {
-  return /^\s*-\s*\[[xX]\]\s+\*\*Ready for review\*\*/m.test(body);
-}
 
 /** Referência de imagem markdown `![alt](url)` ou HTML `<img ... src=...>`. */
 const IMAGE_REF = /!\[[^\]]*\]\([^)]+\)|<img\b[^>]*\bsrc=/i;
@@ -254,7 +256,9 @@ export function runGovernancePrCheck(
   // antes (bypass). #2 Capacidade é opcional (nunca falha). A imagem renderizada
   // é obrigação posterior de publicação (R4), nunca pré-requisito do Ready.
   const VISUAL_HINT = "preencha o prompt final autorado (bloco ```…```) ou a imagem renderizada";
-  if (isReadyForReview(input.prBody)) {
+  // Ready/Draft vem do flag canônico do GitHub (`isDraft`), NÃO do checkbox do body —
+  // fonte única de verdade, idêntica à do `MergeStack`. Draft é isento.
+  if (!input.isDraft) {
     if (node.role === "execution") {
       if (!sectionHasVisual(input.prBody, VISUAL_PROBLEMA)) {
         reasons.push(
@@ -313,6 +317,8 @@ export function main(opts: RunOptions): number {
     body: string | null;
     labels: ReadonlyArray<{ name: string }>;
     head: { ref: string };
+    // `draft` é campo nativo da API REST de pulls — a fonte canônica de Draft/Ready.
+    draft?: boolean;
   };
   try {
     pr = api.call(`repos/${opts.repo}/pulls/${opts.prNumber}`) as typeof pr;
@@ -330,6 +336,8 @@ export function main(opts: RunOptions): number {
       prLabels: pr.labels.map((l) => l.name),
       repo: opts.repo,
       prBranch: pr.head.ref,
+      // `draft` ausente → trata como Ready (fail-safe: gate enforça em vez de pular).
+      isDraft: Boolean(pr.draft),
     },
     fs
   );

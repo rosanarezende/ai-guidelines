@@ -69,6 +69,11 @@ Draft é isento (intenção em formação): preencha os prompts ANTES de marcar 
 - [ ] **Ready for review** — operacionalmente concluído; aguarda revisão humana
 
 <!--
+Estes checkboxes são DOCUMENTAIS (pedagógicos). O estado operacional Draft/Ready
+é o flag nativo do GitHub (o botão "Ready for review") — fonte ÚNICA de verdade
+consumida pelo enforcement (governance-pr-check) e pelo merge (MergeStack). Marcar
+o checkbox NÃO converte o PR; use o botão do GitHub.
+
 "Authorized to merge" é ato humano explícito — registrado na seção "Merge
 authorization" abaixo como texto, não como checkbox. ADR 0024 separa os
 3 estados para impedir leitura "Ready = mergeable".
