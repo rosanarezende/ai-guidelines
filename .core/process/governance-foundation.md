@@ -306,6 +306,15 @@ Merge
 - **Decisão pequena e operacional (qual flag passar para o build).** **Tratamento**: nem decision-brief nem ADR — só commit message. Critério: se a decisão não tem alternativas reais avaliadas, não é decisão de governança, é escolha técnica.
 - **Princípio já estabelecido em spec anterior, sendo formalizado tardiamente.** **Tratamento**: ADR direta em `.core/governance/adrs/` com nota de origem histórica no header. Não precisa decision-brief retroativo (a "decisão" já foi tomada na spec original; agora só está sendo documentada).
 
+### Percepção em Trânsito (PIT): a IA oferece, o humano decide
+
+Aprendizado operacional recorrente — heurística reutilizável, falsificação repetida, ou o mesmo erro arquitetural reaparecendo — **não deve depender de o humano lembrar de capturá-lo**. Ao notar recorrência durante o trabalho, a IA **oferece proativamente** registrar uma percepção (`insight add`), com o motivo (nº de ocorrências, falsificações, heurística identificada); **o humano aprova**. Uma vez capturada, o `insights:check` cuida do passo seguinte — sinaliza candidato à graduação ao acumular ocorrências (decisão humana via `insight promote`/`discard`).
+
+Os dois saltos do ciclo de vida têm naturezas diferentes, e isso é deliberado:
+
+- **`PIT → graduação`** é mecanizável (a recorrência está em dados: `occurrences`) → **detector** no `insights:check` (sinaliza, não auto-promove).
+- **`observação → PIT`** **não** é mecanizável: o candidato é latente (sem dados a contar) e a detecção semântica de candidatos é **vetada** (`[DEC-0023-B06]`: sem auto-detecção/NLP/inferência). Logo é **mediado por julgamento** — a IA sinaliza, o humano decide (modelo "quer salvar isto?"). A doutrina **aumenta a probabilidade** do reaparecimento; não a mecaniza. Não é auto-captura nem IA criando governança sozinha.
+
 ---
 
 ## Roadmap: repo-first, integração-friendly
