@@ -349,92 +349,6 @@ async function dispatchWorkflow(command, options = {}) {
   if (code !== 0) process.exitCode = code;
 }
 
-async function dispatchReleasePrep(options = {}) {
-  // Bridge para `release-prep` (tier 3, repo-specific) cravado em
-  // `[DEC-0023-L01]`. Mesmo padrão de dispatchWorkflow: importa dist/,
-  // delega para mod.main com opts traduzidas. Tradução de flags
-  // kebab-case (parseArgs) → camelCase (ReleasePrepCliArgs).
-  let mod;
-  try {
-    mod = await import("../../dist/cli/release-prep.js");
-  } catch (err) {
-    const reason = err && err.message ? err.message : String(err);
-    console.error(
-      "Erro: release-prep indisponível em dist/. Execute `yarn build` antes (fail-fast intencional)."
-    );
-    console.error(`Detalhe: ${reason}`);
-    process.exitCode = 1;
-    return;
-  }
-  const opts = {
-    repoRoot: process.cwd(),
-    releasePrepArgs: {
-      ...(options.version !== undefined ? { version: options.version } : {}),
-      ...(options.remote !== undefined ? { remote: options.remote } : {}),
-      ...(options["dry-run"] === true ? { dryRun: true } : {}),
-      ...(options["skip-working-tree-check"] === true ? { skipWorkingTreeCheck: true } : {}),
-    },
-  };
-  const code = await mod.main(["release-prep"], opts);
-  if (code !== 0) process.exitCode = code;
-}
-
-async function dispatchReview(options = {}) {
-  // Bridge para `review` (tier 1 inspeção, read-only) cravado em
-  // `[DEC-0023-N01]`. Mesmo padrão dos demais dispatchers: importa dist/,
-  // delega para mod.main. Boundary ADR 0018 — só reúne + estrutura.
-  let mod;
-  try {
-    mod = await import("../../dist/cli/review.js");
-  } catch (err) {
-    const reason = err && err.message ? err.message : String(err);
-    console.error(
-      "Erro: review indisponível em dist/. Execute `yarn build` antes (fail-fast intencional)."
-    );
-    console.error(`Detalhe: ${reason}`);
-    process.exitCode = 1;
-    return;
-  }
-  let pr;
-  if (options.pr !== undefined) {
-    const parsed = Number(options.pr);
-    if (!Number.isFinite(parsed) || !Number.isInteger(parsed) || parsed <= 0) {
-      console.error("Erro: PR inválido. Use um inteiro positivo.");
-      process.exitCode = 1;
-      return;
-    }
-    pr = parsed;
-  }
-  const opts = {
-    repoRoot: process.cwd(),
-    reviewArgs: {
-      ...(pr !== undefined ? { pr } : {}),
-    },
-  };
-  const code = await mod.main(["review"], opts);
-  if (code !== 0) process.exitCode = code;
-}
-
-async function dispatchInsight(argv) {
-  // Bridge para o tier "Percepções em Trânsito" (src/ → dist/). Mesmo padrão
-  // dos demais dispatchers: importa dist/, repassa o argv cru (argv[0]==="insight")
-  // e delega para mod.main. Nenhuma lógica de domínio vive em cli/.
-  let mod;
-  try {
-    mod = await import("../../dist/cli/insight.js");
-  } catch (err) {
-    const reason = err && err.message ? err.message : String(err);
-    console.error(
-      "Erro: runtime de insight indisponível em dist/. Execute `yarn build` antes (fail-fast intencional)."
-    );
-    console.error(`Detalhe: ${reason}`);
-    process.exitCode = 1;
-    return;
-  }
-  const code = await mod.main(argv, { repoRoot: process.cwd() });
-  if (code !== 0) process.exitCode = code;
-}
-
 /**
  * PONTE (transitória) para o registry de comandos (src/cli/registry). Carrega o
  * registry compilado de dist/. Comandos já migrados roteiam por ele; o resto cai
@@ -465,7 +379,9 @@ export async function main(argv = process.argv.slice(2)) {
     // Bypassa o parseArgs legado: cada comando faz o próprio parse (dissolve
     // args.mjs para os migrados). Quando o registry cobrir todos os comandos,
     // o fallback legado abaixo é REMOVIDO (DONE do #35: roteador único, sem
-    // fallback). Hoje resolve: `continue`.
+    // fallback). Os verbos migrados resolvem aqui; o fallback abaixo serve só os
+    // bootstrap não-migrados (init/adopt/providers/update/check-budget) e ainda
+    // workflow/continue (cuja saída do fallback aguarda removê-los de SUPPORTED_MODES).
     if (commandName && commandName !== "--help" && commandName !== "-h") {
       const registry = await loadRegistry();
       if (registry && registry.resolve(commandName)) {
@@ -488,21 +404,6 @@ export async function main(argv = process.argv.slice(2)) {
 
     if (command === "workflow" || command === "continue") {
       await dispatchWorkflow(command, options);
-      return;
-    }
-
-    if (command === "release-prep") {
-      await dispatchReleasePrep(options);
-      return;
-    }
-
-    if (command === "review") {
-      await dispatchReview(options);
-      return;
-    }
-
-    if (command === "insight") {
-      await dispatchInsight(argv);
       return;
     }
 

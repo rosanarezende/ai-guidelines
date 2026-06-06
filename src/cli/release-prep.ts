@@ -141,10 +141,9 @@ export async function runReleasePrep(
 }
 
 /**
- * Entrypoint compatível com o padrão `mod.main(argv, opts)` que o
- * bridge `cli/app/engine.mjs:dispatchWorkflow` invoca após carregar
- * `dist/cli/release-prep.js`. argv aqui é `["release-prep"]` (vazio
- * porque flags vêm via `opts.releasePrepArgs`).
+ * Entrypoint compatível com o padrão `mod.main(argv, opts)`. Hoje invocado por
+ * `ReleasePrepCommand` (registry) via `dist/cli/release-prep.js`; argv é ignorado
+ * (vazio) porque as flags vêm via `opts.releasePrepArgs`.
  */
 export async function main(
   _argv: ReadonlyArray<string>,
