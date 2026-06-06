@@ -1,0 +1,78 @@
+# Checkpoint de Retomada — PR #35: CLI cutover + ciclo-de-vida do conhecimento (SSOT)
+
+> **Documento de RETOMADA canônico** (ADR 0022, situado). Assume zero acesso à conversa anterior.
+> **Supersede para retomada** o `2026-06-05-checkpoint-pr35-visual-governance.md` (cujas decisões
+> seguem válidas; o estado avançou 7 commits) e o `2026-06-06-checkpoint-merge-prematuro-encerramento.md`
+> (arco encerrado, não reabrir). Data: 2026-06-06. Consolida o já feito; sem decisões novas.
+
+---
+
+## 1. Estado atual
+
+| Item         | Valor                                                                       |
+| ------------ | --------------------------------------------------------------------------- |
+| Branch       | `feat/spec-0024-pr-cli-cutover` (= PR **#35**, Draft, modo `unit`)          |
+| HEAD         | `0079c5b`                                                                   |
+| Origin       | `bde1709` — **11 commits NÃO pushados** (push exige autorização, CORE-07)   |
+| Working tree | limpo · `yarn validate` **verde** (97 suites / 940 testes + todos os gates) |
+
+**Esta sessão (7 commits sobre `567c46a`):** `e77a87a` (falsifica confirm-in-run) → `d319f61` + `f521310` + `1d53fc7` (cutover) → `e87c4b4` + `7fe645a` + `0079c5b` (ciclo-de-vida do conhecimento).
+
+---
+
+## 2. CLI cutover — feito × restante
+
+**Feito nesta sessão** (o `engine.mjs` não tem mais NENHUM dispatcher por comando; só o **bridge** → registry + `execute()` do bootstrap):
+
+- `d319f61`: removidos `dispatchReleasePrep`/`dispatchReview`/`dispatchInsight` + branches (registry os cobre).
+- `f521310`: removido `dispatchWorkflow` + `workflow`/`continue` de `SUPPORTED_MODES` (eram o único acoplamento que travava a remoção — pré-build agora erra limpo).
+- `1d53fc7`: podadas as exceções mortas de `parseArgs` (review/insight) + teste morto; **rename `review.ts → triage.ts`** (símbolos `Review*→Triage*`, `runReview→runTriage`); argv vestigial enxugado. **Alias CLI `review` PRESERVADO** (contrato publicado v1.1.0; `triage` é o nome canônico no código, sem doc user-facing ainda).
+
+**Restante do #35 (pendência obrigatória — NÃO é o bootstrap):** converger **`integration-open`** e **`merge-stack`** de handlers do wizard (`runOpenIntegrationPRWizard`/`runMergeStackWizard` em `src/cli/workflow.ts`) para **Commands no registry** (confirm **inline**, pois confirm-in-run foi falsificado = sem abstração) + adicionar Intents + **remover a seção transitória** `runAdvancedOps`/`runWizard`. O código se autorrotula `workflow.ts:1080` "⚙️ Operações avançadas (dívida de convergência #35)". É arquiteturalmente contígua (mesmo padrão dos 8 Commands já migrados, sobre use cases que **já existem** em src/). **Cuidado:** `runWizard` também hospeda `continue-other` (continuar outra spec por id) e `publish-state-help`, que **não têm Intent** — preservar como Intents (são "mesma capability, 2 superfícies", ADR 0026 §4), NÃO dropar.
+
+---
+
+## 3. Fronteira de escopo do #35 (decidida e aprovada pela owner)
+
+- **Opção A aprovada:** o #35 fecha após a convergência das ops + os resíduos de cutover. **`bootstrap → registry`** (init/adopt/providers/update/check-budget) é **NÓ PRÓPRIO**, não #35 — é ~4× o código do registry entregue, outro subsistema (.mjs→TS), coeso com `pr-compiler-ts` (sequence 4). A projeção §6c do checkpoint visual-governance que punha bootstrap no DONE do #35 foi **revisada** (medição mostrou que não cabe).
+- `confirm-in-run` **RESOLVIDO**: sem abstração (`runTransactional` over-modeling + `confirmOrAbort` redundante — deny-by-default já single-sourced no port `Prompts.confirm`). Detalhe: `research/2026-06-06-confirm-in-run-falsification.md`.
+
+---
+
+## 4. Ciclo-de-vida do conhecimento (arco desta sessão — bem conectado no repo)
+
+Falha estrutural descoberta: aprendizado recorrente preso em research **nunca entrava no caminho de reaparecimento** (a lente projeção-vs-entidade ficou ~14 instâncias sem graduar e quase reincidimos). Correção (sem nova capability/abstração; reusa a escada `KnowledgeStage` + `occurrences` + `insights:check`):
+
+- **`ADR 0026`** (`0026-projection-distinct-from-first-class-entity`): cristaliza a lente **projeção ≠ entidade de 1ª classe**. Critério decisivo: colapsar só se remove drift/cópia/sync; senão é renomear. Guard anti-elegância (≥2 instâncias). §4: mesma capability em 2 superfícies ≠ reificação.
+- **`PIT-0009`** (`insights.yml`): a lente promovida (graduada → `doctrine:ADR-0026`); backlink no research `2026-05-30-projection-vs-entity-lens.md`.
+- **Detector de maturação** (`src/cli/insightsCheck.ts`): Insight `open` com `occurrences ≥ 3` sem graduação → ⚠️ "candidato à graduação". Mecânico detecta; humano decide; **não auto-promove, não falha o CI** (graduar é evento, não estado — PIT-0008). Fecha o salto `PIT → graduação`.
+- **Captura proativa** (`governance-foundation.md` § "Percepção em Trânsito" + anti-padrão #7): o salto `observação → PIT` é **semântico** = trabalho do **agente** (a IA oferece `insight add` ao notar recorrência; humano aprova). **Distinção cravada (correção de B06):** `[DEC-0023-B06]` veta inferência no **runtime/wizard** (lookup-only), **NÃO** a inferência do agente (AI-as-channel é o valor). O gate é na **DECISÃO** (ADR 0021), não na percepção. **Regra: inferência sugere; humano decide.**
+
+---
+
+## 5. NÃO REABRIR (encerrado/falsificado)
+
+- **Arco merge-prematuro** (enforcement de aterrissagem): encerrado como pesquisa; superfície deferida; commits falsificados na tag `evidence/merge-prematuro-falsified`. Não reabrir status check/R8/review.md/landing_policy/vehicle/GitHub Reviews.
+- **confirm-in-run**: resolvido = sem abstração. Não recriar `runTransactional`/`confirmOrAbort`.
+- **Governança visual** (#35): prompt final gateado, não a imagem; Draft/Ready do flag `isDraft`. Não reabrir.
+- **B06 como ban global de inferência**: é escopado ao wizard/runtime. Não generalizar (erro corrigido em `0079c5b`).
+
+## 6. Próximo ponto de retomada
+
+1. Converger `integration-open` + `merge-stack` → Commands + Intents (confirm inline) + dar Intent a `continue-other`/`publish-state-help` + remover `runAdvancedOps`/`runWizard` (seção transitória). É a pendência obrigatória do #35 (§2).
+2. Depois: bootstrap → registry como **nó próprio** (com `pr-compiler-ts`), fora do #35.
+3. `review` alias: quando publicar a próxima release, migrar docs (README/WORKFLOW/CONTRIBUTING/docs-cli/help) para `triage` primário + `review` como alias depreciado (transição docs-led; manter o alias — contrato v1.1.0).
+
+## 7. Riscos residuais
+
+- **Token budget universal 1709/1500 (114%)** — soft/consultivo (build não falha).
+- **`active-specs.yml` 0024.branch** registra a última `publish-state` (refrescada nesta rodada para `#35`); `active-specs:check` valida `stage`, não `branch` — não é invariante.
+- **`#35` levado a Ready** precisará de governança visual no próprio body (hoje Draft → isento).
+- Convergência das ops avançadas: o ponto delicado é preservar o comportamento (detecção de stack/modo, readiness gate) ao mover a orquestração do wizard para o `run` do Command.
+
+## 8. Cross-refs
+
+- Cutover: `src/cli/registry/buildRegistry.ts` (8 Commands), `cli/app/engine.mjs` (bridge + execute), `src/cli/workflow.ts` (wizard + ops avançadas pendentes).
+- Conhecimento: `ADR 0026` · `PIT-0009` (`insights.yml`) · `src/cli/insightsCheck.ts` (detector) · `governance-foundation.md` (§ PIT + anti-padrão #7) · research `2026-05-30-projection-vs-entity-lens.md`.
+- Irmãs: `PIT-0008` / `2026-06-05-enforcement-surfaces.md` (evento≠estado); `PIT-0007` / `2026-06-04-epistemic-commitment-model.md`.
+- Memórias: [[spec-0024-resumption-ssot]] (aponta aqui), [[merge-prematuro-open-arc]], [[proactively-surface-pit-candidates]], [[spec-0024-checkpoint-flow]].
