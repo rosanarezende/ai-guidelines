@@ -1,6 +1,6 @@
 import { TriageCommand, TriageMainFn } from "./TriageCommand.js";
 import { CommandContext, Logger } from "../Command.js";
-import { ReviewCliArgs, ReviewRunOptions } from "../../review.js";
+import { TriageCliArgs, TriageRunOptions } from "../../triage.js";
 
 function fakeLogger(): Logger {
   return { info: () => {}, error: () => {} };
@@ -37,9 +37,9 @@ describe("TriageCommand", () => {
   });
 
   describe("run", () => {
-    it("DADO pr QUANDO run ENTÃO delega com reviewArgs={pr} e {repoRoot, logger}", async () => {
-      const calls: { opts: ReviewRunOptions & { reviewArgs?: ReviewCliArgs } }[] = [];
-      const fakeMain: TriageMainFn = async (_argv, opts) => {
+    it("DADO pr QUANDO run ENTÃO delega com triageArgs={pr} e {repoRoot, logger}", async () => {
+      const calls: { opts: TriageRunOptions & { triageArgs?: TriageCliArgs } }[] = [];
+      const fakeMain: TriageMainFn = async (opts) => {
         calls.push({ opts });
         return 0;
       };
@@ -49,12 +49,12 @@ describe("TriageCommand", () => {
       const result = await cmd.run({ pr: 35 }, fakeContext(logger));
 
       expect(result.exitCode).toBe(0);
-      expect(calls).toEqual([{ opts: { repoRoot: "/repo", logger, reviewArgs: { pr: 35 } } }]);
+      expect(calls).toEqual([{ opts: { repoRoot: "/repo", logger, triageArgs: { pr: 35 } } }]);
     });
 
-    it("DADO sem pr QUANDO run ENTÃO delega com reviewArgs vazio", async () => {
-      const calls: { opts: ReviewRunOptions & { reviewArgs?: ReviewCliArgs } }[] = [];
-      const fakeMain: TriageMainFn = async (_argv, opts) => {
+    it("DADO sem pr QUANDO run ENTÃO delega com triageArgs vazio", async () => {
+      const calls: { opts: TriageRunOptions & { triageArgs?: TriageCliArgs } }[] = [];
+      const fakeMain: TriageMainFn = async (opts) => {
         calls.push({ opts });
         return 0;
       };
@@ -62,7 +62,7 @@ describe("TriageCommand", () => {
 
       await cmd.run({}, fakeContext());
 
-      expect(calls[0].opts.reviewArgs).toEqual({});
+      expect(calls[0].opts.triageArgs).toEqual({});
     });
   });
 });

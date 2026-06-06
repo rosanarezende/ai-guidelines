@@ -7,7 +7,6 @@ import {
 import { parseFlags, stringFlag, boolFlag } from "../parseFlags.js";
 
 export type ReleasePrepMainFn = (
-  argv: readonly string[],
   opts: ReleasePrepRunOptions & { releasePrepArgs?: ReleasePrepCliArgs }
 ) => Promise<number>;
 
@@ -39,7 +38,7 @@ export class ReleasePrepCommand implements Command<ReleasePrepCliArgs> {
   }
 
   async run(options: ReleasePrepCliArgs, context: CommandContext): Promise<CommandResult> {
-    const code = await this.releasePrepMainFn([], {
+    const code = await this.releasePrepMainFn({
       repoRoot: context.repoRoot,
       logger: context.logger,
       releasePrepArgs: options,

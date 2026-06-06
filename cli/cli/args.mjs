@@ -217,19 +217,9 @@ export function parseArgs(argv) {
     const token = rest[index];
 
     if (!token.startsWith("-")) {
-      // Exceções fechadas de positional arg. continue/workflow migraram ao
-      // registry (parse próprio); review/insight seguem no fallback legado:
-      //   1. `review [<pr>]` — 1 positional (número do PR a triar).
-      if (command === "review" && index === 0 && options.pr === undefined) {
-        options.pr = token;
-        continue;
-      }
-      //   2. `insight <sub> [args...]` — subcomando + positionais livres; o
-      //      runtime (src/cli/insight.ts) faz o parse fino do argv cru, então
-      //      aqui apenas toleramos os positionais sem throw.
-      if (command === "insight") {
-        continue;
-      }
+      // Comandos legados (bootstrap) não aceitam positional. Os verbos migrados
+      // (continue/workflow/review/insight) são interceptados pelo registry antes
+      // deste parser legado — não há mais exceções de positional aqui.
       throw new Error(`Argumento inesperado: ${token}`);
     }
 

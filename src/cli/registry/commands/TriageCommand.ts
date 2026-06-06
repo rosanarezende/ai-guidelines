@@ -1,13 +1,9 @@
 import { Command, CommandContext, CommandResult } from "../Command.js";
-import { ReviewCliArgs, ReviewRunOptions, main as triageMain } from "../../review.js";
+import { TriageCliArgs, TriageRunOptions, main as triageMain } from "../../triage.js";
 
-/**
- * Assinatura injetável do entrypoint de triagem (módulo `review.ts` — rename do
- * módulo p/ `triage.ts` fica para o passo de deleção do legado no DONE do #35).
- */
+/** Assinatura injetável do entrypoint de triagem (módulo `triage.ts`). */
 export type TriageMainFn = (
-  argv: readonly string[],
-  opts: ReviewRunOptions & { reviewArgs?: ReviewCliArgs }
+  opts: TriageRunOptions & { triageArgs?: TriageCliArgs }
 ) => Promise<number>;
 
 export interface TriageOptions {
@@ -42,10 +38,10 @@ export class TriageCommand implements Command<TriageOptions> {
   }
 
   async run(options: TriageOptions, context: CommandContext): Promise<CommandResult> {
-    const code = await this.triageMainFn([], {
+    const code = await this.triageMainFn({
       repoRoot: context.repoRoot,
       logger: context.logger,
-      reviewArgs: options.pr !== undefined ? { pr: options.pr } : {},
+      triageArgs: options.pr !== undefined ? { pr: options.pr } : {},
     });
     return { exitCode: code };
   }

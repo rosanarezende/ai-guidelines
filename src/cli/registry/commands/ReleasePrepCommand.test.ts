@@ -48,7 +48,7 @@ describe("ReleasePrepCommand", () => {
     it("DADO args QUANDO run ENTÃO delega com releasePrepArgs + {repoRoot, logger}", async () => {
       const calls: { opts: ReleasePrepRunOptions & { releasePrepArgs?: ReleasePrepCliArgs } }[] =
         [];
-      const fakeMain: ReleasePrepMainFn = async (_argv, opts) => {
+      const fakeMain: ReleasePrepMainFn = async (opts) => {
         calls.push({ opts });
         return 0;
       };
