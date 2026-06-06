@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { graduationRefOf } from "../domain/insight/insightKnowledge.js";
+import { recurrenceOf } from "../domain/insight/Insight.js";
 import { formatRef, isWellFormedRef } from "../domain/knowledge/KnowledgeRef.js";
 import { INSIGHTS_LEDGER_PATH } from "../infrastructure/yaml/FileInsightStore.js";
 import {
@@ -23,9 +24,25 @@ import {
  *     para o conhecimento (doctrine/decision/guardrail) deve ter uma `ref`
  *     bem-formada para o estágio-alvo (typo de ref falha aqui). Forma, não
  *     existência — integridade referencial é decisão arquitetural futura.
+ *  4. SINALIZA candidatos à graduação (detector de maturação, NÃO-bloqueante):
+ *     Insight `open` com recorrência ≥ `GRADUATION_CANDIDATE_THRESHOLD` sem
+ *     graduação → ⚠️ "decisão humana necessária". Fecha o modo de falha
+ *     "observar para sempre" (aprendizado recorrente preso indefinidamente em
+ *     estado observacional). É DECLARAÇÃO contínua (warn); graduar é EVENTO de
+ *     julgamento humano, então NÃO falha o CI (falhar seria vermelho-cedo-demais,
+ *     cf. PIT-0008). Detecta + delega ao humano; NÃO auto-promove.
  *
- * Exit codes: 0 ok (inclui ledger ausente — vazio é válido) · 1 violação.
+ * Exit codes: 0 ok (ledger ausente é válido; candidatos só avisam) · 1 violação.
  */
+
+/**
+ * Limiar de recorrência que sinaliza um Insight `open` como candidato à
+ * graduação. = 3: a barra da própria lente projeção-vs-entidade (≥2 instâncias
+ * do mesmo mecanismo) + 1 de folga contra ruído. Sinaliza; o julgamento
+ * (graduar vs descartar) permanece humano.
+ */
+const GRADUATION_CANDIDATE_THRESHOLD = 3;
+
 export function main(repoRoot: string): number {
   const path = resolve(repoRoot, INSIGHTS_LEDGER_PATH);
   if (!existsSync(path)) {
@@ -64,11 +81,26 @@ export function main(repoRoot: string): number {
     }
   }
 
+  // Detector de maturação (não-bloqueante): sinaliza Insights `open` recorrentes
+  // que já deveriam graduar. Mecânico detecta; o julgamento (promover/descartar)
+  // é humano — não auto-promove, não falha o CI (graduar é evento, não estado).
+  const candidates = ledger
+    .open()
+    .filter((insight) => recurrenceOf(insight) >= GRADUATION_CANDIDATE_THRESHOLD);
+  for (const candidate of candidates) {
+    process.stdout.write(
+      `⚠️  insights:check — ${candidate.id} acumulou ${recurrenceOf(candidate)} ocorrência(s) ` +
+        `(≥ ${GRADUATION_CANDIDATE_THRESHOLD}) sem graduação — candidato à graduação; ` +
+        `decisão humana necessária (\`insight promote\` ou \`insight discard\`).\n`
+    );
+  }
+
   const total = ledger.all().length;
   const open = ledger.open().length;
   process.stdout.write(
     `✅ insights:check — ${total} percepção(ões) (${open} open); ` +
-      `invariantes + forma canônica + arestas de graduação ok.\n`
+      `invariantes + forma canônica + arestas de graduação ok` +
+      `${candidates.length > 0 ? ` · ${candidates.length} candidato(s) à graduação` : ""}.\n`
   );
   return 0;
 }
