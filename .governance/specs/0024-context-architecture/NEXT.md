@@ -146,4 +146,4 @@ _(Nenhum débito registrado ainda)_
 
 ## ✂️ Itens descartados deliberadamente
 
-_(Nenhum item descartado ainda — registrar quando research excluir explicitamente alguma direção investigada.)_
+- **`confirmOrAbort` / portão transacional compartilhado (`confirm-in-run`) — FALSIFICADO (2026-06-06).** Auditoria adversarial (a pedido) sobre a extração MÍNIMA do padrão `plan → render → confirm → execute`. Falsificador decisivo: o invariante _deny-by-default_ já é single-sourced no port (`InquirerPrompts.confirm`: `default ?? false`), então um helper de call-site não adiciona garantia — só DRY textual de idioma trivial, sem ganho de LOC, no limiar da regra-de-três, com risco de virar o `runTransactional` proibido. **Revertido; os 3 sites seguem inline.** `confirm-in-run` encerra como "sem abstração". Detalhe: [`research/2026-06-06-confirm-in-run-falsification.md`](./research/2026-06-06-confirm-in-run-falsification.md).
