@@ -308,47 +308,6 @@ export async function execute(mode, rawOptions) {
   }
 }
 
-async function dispatchWorkflow(command, options = {}) {
-  // Bridge para o runtime de workflow compilado em src/ → dist/.
-  // Cf. Spec 0023 (`.governance/specs/0023-workflow-runtime/`):
-  // nenhuma lógica nova de domínio vive em `cli/`; este delegate é o único toque.
-  // PR3 adiciona positional argv cabling para `continue <slug|id>` e para
-  // `workflow publish-state` — transporte mínimo, sem expansão estrutural
-  // do entrypoint legado.
-  let mod;
-  try {
-    mod = await import("../../dist/cli/workflow.js");
-  } catch (err) {
-    const reason = err && err.message ? err.message : String(err);
-    console.error(
-      "Erro: runtime de workflow indisponível em dist/. Execute `yarn build` antes (fail-fast intencional, padrão TemplateEngine)."
-    );
-    console.error(`Detalhe: ${reason}`);
-    process.exitCode = 1;
-    return;
-  }
-  const opts = { repoRoot: process.cwd() };
-  let argv = [];
-
-  if (command === "continue") {
-    argv = options.identifier ? ["continue", options.identifier] : ["continue"];
-  } else if (command === "workflow" && options.subcommand === "publish-state") {
-    argv = ["workflow", "publish-state"];
-    // Tradução de flags kebab-case (parseArgs) → camelCase (PublishStateArgs).
-    opts.publishStateArgs = {
-      status: options.status,
-      updatedBy: options["updated-by"],
-      ...(options.title !== undefined ? { title: options.title } : {}),
-      ...(options["base-branch"] !== undefined ? { baseBranch: options["base-branch"] } : {}),
-      ...(options["last-sync-commit"] !== undefined
-        ? { lastSyncCommit: options["last-sync-commit"] }
-        : {}),
-    };
-  }
-  const code = await mod.main(argv, opts);
-  if (code !== 0) process.exitCode = code;
-}
-
 /**
  * PONTE (transitória) para o registry de comandos (src/cli/registry). Carrega o
  * registry compilado de dist/. Comandos já migrados roteiam por ele; o resto cai
@@ -380,8 +339,7 @@ export async function main(argv = process.argv.slice(2)) {
     // args.mjs para os migrados). Quando o registry cobrir todos os comandos,
     // o fallback legado abaixo é REMOVIDO (DONE do #35: roteador único, sem
     // fallback). Os verbos migrados resolvem aqui; o fallback abaixo serve só os
-    // bootstrap não-migrados (init/adopt/providers/update/check-budget) e ainda
-    // workflow/continue (cuja saída do fallback aguarda removê-los de SUPPORTED_MODES).
+    // bootstrap não-migrados (init/adopt/providers/update/check-budget) via execute().
     if (commandName && commandName !== "--help" && commandName !== "-h") {
       const registry = await loadRegistry();
       if (registry && registry.resolve(commandName)) {
@@ -399,11 +357,6 @@ export async function main(argv = process.argv.slice(2)) {
 
     if (command === "--help" || command === "-h") {
       printHelp();
-      return;
-    }
-
-    if (command === "workflow" || command === "continue") {
-      await dispatchWorkflow(command, options);
       return;
     }
 

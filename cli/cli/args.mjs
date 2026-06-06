@@ -4,15 +4,7 @@ import { normalizePackageManager, detectPackageManager } from "#formatters/packa
 import { readTextIfExists } from "#fs/file-system";
 import { DEFAULT_PROVIDERS, getSupportedProviders } from "#features/core/config";
 
-const SUPPORTED_MODES = [
-  "init",
-  "adopt",
-  "providers",
-  "update",
-  "check-budget",
-  "workflow",
-  "continue",
-];
+const SUPPORTED_MODES = ["init", "adopt", "providers", "update", "check-budget"];
 const WIZARD_DEFAULTS = {
   mode: "adopt",
   target: ".",
@@ -225,26 +217,14 @@ export function parseArgs(argv) {
     const token = rest[index];
 
     if (!token.startsWith("-")) {
-      // Exceções fechadas de positional arg — cabling de transporte para o
-      // runtime novo (cf. Spec 0023 PR3, plan.md § Componente [E]). Cada
-      // exceção é específica a um comando, sem reutilização para outros
-      // e sem positional parsing genérico:
-      //   1. `continue [<slug|id>]` — 1 positional (identifier do índice).
-      //   2. `workflow publish-state` — 1 positional (subcommand fechado).
-      if (command === "continue" && index === 0 && options.identifier === undefined) {
-        options.identifier = token;
-        continue;
-      }
-      if (command === "workflow" && index === 0 && options.subcommand === undefined) {
-        options.subcommand = token;
-        continue;
-      }
-      //   3. `review [<pr>]` — 1 positional (número do PR a triar).
+      // Exceções fechadas de positional arg. continue/workflow migraram ao
+      // registry (parse próprio); review/insight seguem no fallback legado:
+      //   1. `review [<pr>]` — 1 positional (número do PR a triar).
       if (command === "review" && index === 0 && options.pr === undefined) {
         options.pr = token;
         continue;
       }
-      //   4. `insight <sub> [args...]` — subcomando + positionais livres; o
+      //   2. `insight <sub> [args...]` — subcomando + positionais livres; o
       //      runtime (src/cli/insight.ts) faz o parse fino do argv cru, então
       //      aqui apenas toleramos os positionais sem throw.
       if (command === "insight") {
