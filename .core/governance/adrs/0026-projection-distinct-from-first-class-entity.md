@@ -45,12 +45,12 @@ Instâncias confirmadas (a lente **removeu** trabalho real — passam o critéri
 
 ## Alternativas avaliadas e rejeitadas
 
-| Opção                                                                     | Por que rejeitada                                                                                                                                                        |
-| ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Manter a lente só como research-collector** (status quo até 2026-06-06) | É o próprio modo de falha "observar para sempre": conhecimento recorrente preso em research nunca reaparece. A barra da própria lente (≥2 instâncias) foi batida ~5×.    |
-| **Auto-promover/auto-aplicar a lente por contagem mecânica**              | Reificar a lente em automação que decide sozinha viola julgamento humano no gate (ADR 0021) e a própria lente (criar uma capability onde basta uma heurística).          |
-| **Codificar a nuance na injeção universal (regra compilada)**             | Nuance reference-grade pertence ao ADR; a injeção carrega só pointer (ADR 0015 + higiene de injeção + orçamento). A projeção operacional vai ao `governance-foundation`. |
-| **Tratar como guardrail mecânico (check)**                                | A lente é heurística de **julgamento** ("remove simplificação operacional?"), não predicado mecânico; mecanizá-la recriaria a inferência banida (`[DEC-0023-B06]`).      |
+| Opção                                                                     | Por que rejeitada                                                                                                                                                                                                                                                                                       |
+| ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Manter a lente só como research-collector** (status quo até 2026-06-06) | É o próprio modo de falha "observar para sempre": conhecimento recorrente preso em research nunca reaparece. A barra da própria lente (≥2 instâncias) foi batida ~5×.                                                                                                                                   |
+| **Auto-promover/auto-aplicar a lente por contagem mecânica**              | Reificar a lente em automação que decide sozinha viola julgamento humano no gate (ADR 0021) e a própria lente (criar uma capability onde basta uma heurística).                                                                                                                                         |
+| **Codificar a nuance na injeção universal (regra compilada)**             | Nuance reference-grade pertence ao ADR; a injeção carrega só pointer (ADR 0015 + higiene de injeção + orçamento). A projeção operacional vai ao `governance-foundation`.                                                                                                                                |
+| **Tratar como guardrail mecânico (check)**                                | A lente é heurística de **julgamento** ("remove simplificação operacional?"), não predicado mecânico; quem a aplica é o **agente** (percebe + sugere, AI-as-channel/ADR 0018), não um check determinístico — o runtime é lookup, sem LLM (ADR 0018). Não por proibir inferência; por ela ser do agente. |
 
 ## Consequências
 
@@ -62,7 +62,7 @@ Instâncias confirmadas (a lente **removeu** trabalho real — passam o critéri
 ### Negativas / Riscos
 
 - A lente é sedutora (regresso infinito) — o guard §3 é parte da decisão, não opcional.
-- O salto **research/percepção → reconhecimento no momento certo** permanece **mediado por agente** (julgamento), não mecanizável — por construção, dado o ban de inferência (`[DEC-0023-B06]`). O ADR + o PIT + o anti-padrão **aumentam a probabilidade** de a lente reaparecer; não a garantem mecanicamente.
+- O salto **percepção → reconhecimento no momento certo** é **do agente** — perceber padrão abstrato é o valor do AI-as-channel (ADR 0018), não um mecanismo determinístico do runtime; por isso não é _garantia_ mecânica, e isso é correto. Não confundir com proibição: `[DEC-0023-B06]` veta inferência **no wizard/runtime** (lookup-only), não a sugestão do agente; o gate é na **decisão** (ADR 0021), não na percepção. O ADR + o PIT + o anti-padrão + a captura proativa **aumentam a probabilidade** do reaparecimento.
 
 ## Nota histórica
 

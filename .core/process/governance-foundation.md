@@ -312,8 +312,8 @@ Aprendizado operacional recorrente — heurística reutilizável, falsificação
 
 Os dois saltos do ciclo de vida têm naturezas diferentes, e isso é deliberado:
 
-- **`PIT → graduação`** é mecanizável (a recorrência está em dados: `occurrences`) → **detector** no `insights:check` (sinaliza, não auto-promove).
-- **`observação → PIT`** **não** é mecanizável: o candidato é latente (sem dados a contar) e a detecção semântica de candidatos é **vetada** (`[DEC-0023-B06]`: sem auto-detecção/NLP/inferência). Logo é **mediado por julgamento** — a IA sinaliza, o humano decide (modelo "quer salvar isto?"). A doutrina **aumenta a probabilidade** do reaparecimento; não a mecaniza. Não é auto-captura nem IA criando governança sozinha.
+- **`PIT → graduação`**: a recorrência está em dados (`occurrences`) → um **detector determinístico** no `insights:check` sinaliza (não auto-promove).
+- **`observação → PIT`** é **semântico**: perceber um padrão abstrato em ocorrências dispersas é trabalho do **agente (canal IA)** — o valor primário do AI-as-channel (ADR 0018), **não** uma exceção a tolerar. A IA **pode e deve inferir e SUGERIR** candidatos proativamente (não esperar o humano lembrar). O que a doutrina barra é distinto e mais estreito: **(a)** o **runtime** inferir (ADR 0018: sem LLM no runtime; `[DEC-0023-B06]` veta auto-detecção/ranking **no wizard**, que é lookup-only — escopado, não global); **(b)** qualquer inferência **decidir** governança sozinha (ADR 0021: gate humano). **Regra única: inferência sugere; humano decide.**
 
 ---
 
