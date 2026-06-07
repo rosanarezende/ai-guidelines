@@ -341,7 +341,10 @@ async function showHelp() {
   printHelp(registry ? registry.renderHelp() : "");
 }
 
-export async function main(argv = process.argv.slice(2)) {
+export async function main(
+  argv = process.argv.slice(2),
+  { loadRegistry: load = loadRegistry } = {}
+) {
   try {
     const commandName = argv[0];
 
@@ -352,14 +355,25 @@ export async function main(argv = process.argv.slice(2)) {
     // fallback). Os verbos migrados resolvem aqui; o fallback abaixo serve só os
     // bootstrap não-migrados (init/adopt/providers/update/check-budget) via execute().
     if (commandName && commandName !== "--help" && commandName !== "-h") {
-      const registry = await loadRegistry();
-      if (registry && registry.resolve(commandName)) {
-        const result = await registry.dispatch(argv, {
-          repoRoot: process.cwd(),
-          logger: registryLogger,
-        });
-        if (result.exitCode !== 0) process.exitCode = result.exitCode;
-        return;
+      const registry = await load();
+      if (registry) {
+        if (registry.resolve(commandName)) {
+          const result = await registry.dispatch(argv, {
+            repoRoot: process.cwd(),
+            logger: registryLogger,
+          });
+          if (result.exitCode !== 0) process.exitCode = result.exitCode;
+          return;
+        }
+      } else if (!isSupportedMode(commandName)) {
+        // dist/ ausente E o comando NÃO é bootstrap → é um verbo do registry sem
+        // build. Falha RÁPIDA com diagnóstico; NUNCA degradar para o wizard de
+        // bootstrap (auditoria #35, achado #3): erro estrutural falha cedo e
+        // explícito, não adivinha a intenção do usuário no wizard.
+        throw new Error(
+          `Comando "${commandName}" requer o registry compilado, mas dist/ não existe. ` +
+            "Rode `yarn build` (ou `yarn validate`) antes de usar a CLI."
+        );
       }
     }
 
