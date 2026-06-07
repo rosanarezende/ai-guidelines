@@ -11,5 +11,5 @@ findings:
     severity: low
     location: "src/cli/reconcileCheck.ts#L130-L137"
     description: "O algoritmo de match 'includes' no next[0] pode admitir falsos negativos em negações textuais."
-    disposition: open
+    disposition: accepted
     fingerprint: dd940c7d5795
