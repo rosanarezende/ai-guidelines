@@ -10,7 +10,7 @@ focus:
   - "Gate por checkpoint: Claude implementa -> Technical Audit Gate (Codex) -> Architectural Review Gate (ChatGPT) -> Human Gate (owner) -> AVANCA (abre o proximo PR stacked). O Human Gate decide o PROXIMO MOVIMENTO, NAO mergeia em main. 1 checkpoint atomico por vez; parar no Gate quando o commit estiver pronto. Correcao local pequena nao espera; mudanca estrutural sim."
   - "Criterio (RESSALVADO em 2026-06-03 por [DEC-0024-G08]): 'ja foi validado empiricamente na 0024?' -> absorver/enforcar/executar. NAO re-modelar o DECIDIDO (G00/G02/G06/G07 seguem cravados). EXCECAO assumida: G03/G04/G05 foram reabertos para modelagem deliberada (orientada a grafo) -- nesses eixos, modelar e a direcao, nao o risco. O 'risco dominante' original (modelar em vez de absorver) vale para os eixos resolvidos; nos reabertos, a modelagem e o trabalho."
 next:
-  - "RETOMADA CANONICA (SSOT) = research/2026-06-07-checkpoint-handoff-co-1.md (+ memoria spec-0024-continuity-operational). #35 CONCLUIDO (Human Gate approved, gates/c-cli-cutover.yml); topologia REESCRITA (Opcao A): a cauda da 0024 e a CONTINUIDADE OPERACIONAL (ver § topology). PROXIMO = iniciar CO-1 (co-reconcile: reconcile:check + contrato de autoridade; mata a classe PIT-0001/conflacao). Gates CO advisory-first; disciplina modelo!=migracao. NAO abrir spec paralela; NAO reabrir #35; NAO iniciar CO-1 sem sessao dedicada. As entradas abaixo sao HISTORICO pre-reframe (estado vivo no handoff)."
+  - "canonical-next: co-knowledge. RETOMADA CANONICA (SSOT) = research/2026-06-07-checkpoint-handoff-co-1.md (+ memoria spec-0024-continuity-operational). #35 CONCLUIDO; CO-1 (co-reconcile) CONCLUIDO — Human Gate approved 2026-06-07 (gates/c-co-reconcile.yml; PR #36; F1 accepted apos o fix c24a47b; reconcile:check advisory-first no validate, com contrato sintatico de marcador). Modo unit: #36 NAO mergeia. PROXIMO = abrir/iniciar CO-2 (co-knowledge: Knowledge tipado + Falsification/fingerprint + aresta constrains; sequence 5) stacked sobre #36 — comecar pelo design fechado (cursor ja em co-knowledge; PR ainda nao aberto). Gates CO advisory-first; disciplina modelo!=migracao. NAO abrir spec paralela; NAO reabrir #35/#36. As entradas abaixo sao HISTORICO pre-reframe (estado vivo no handoff)."
   - "#32 GATED: Checkpoints 2 (8b0eec6) + 2.1 (d686d4b) + 2.1a (fa2c0ae) fechados. #32 permanece como linha de integracao -- NAO mergeia."
   - "#33 (branch feat/spec-0024-ruleset-producibility) = unico PR de execucao stacked aberto (sequence 1); embarca os Checkpoints 2.2, 2.2b, 2.3, 2.3a, 2.3b, 2.4, 2.4a, 2.4b, 2.4c e 2.4d. NAO existe branch feat/spec-0024-topology (corrigido no 2.3a: o no-fantasma checkpoint-2.3 foi dobrado em #33)."
   - "Checkpoint 2.3a + 2.3b implementados: 2.3a reconcilia topologia<->realidade (B1), registra [DEC-0024-G07] (B2), elimina dual-SSOT do plan.md (O1), invariantes de sequence (O6), robustez do governance-pr-check (O2). 2.3b adiciona o guard LOCAL de lifecycle-coerencia (github_pr <=> active/concluded + unicidade) e REAVALIA O5: well-formedness e guard local (no state-yml:check/repo-validation, ja required), nao debito de API -> promocao do governance-pr-check a REQUIRED recomendada. So a paridade-API resta como hardening futuro nao-bloqueante (NEXT separado)."
@@ -22,8 +22,8 @@ next:
   - "LER antes de qualquer acao: research/2026-06-02-handoff-checkpoint-3.md (SSOT da retomada para o Checkpoint 3; supersede o handoff-next-session) + state.yml § topology + plan.md. Verificar git limpo + yarn validate verde + gate do #33 (gates/c2.4d.yml) approved."
 topology:
   cursor:
-    pr: co-reconcile
-    checkpoint: checkpoint-co-reconcile
+    pr: co-knowledge
+    checkpoint: checkpoint-co-knowledge
   prs:
     concluded:
       - id: base-governance
@@ -78,6 +78,18 @@ topology:
         checkpoints:
           - checkpoint-cli-cutover
 
+      # #36 CONCLUIDO apos Human Gate co-reconcile approved (gates/c-co-reconcile.yml,
+      # 2026-06-07; F1 accepted apos o fix c24a47b). CO-1: reconcile:check + contrato de
+      # autoridade (canonical-next: <id>) — 1o guard advisory da Continuidade Operacional.
+      # Modo unit: NAO mergeou em main (concluido na stack).
+      - id: co-reconcile
+        github_pr: 36
+        role: execution
+        terminal: false
+        sequence: 4
+        checkpoints:
+          - checkpoint-co-reconcile # reconcile:check + contrato de autoridade (U1); semente: ex-checkpoint-gg-0003 (consistency)
+
     active: []
 
     planned:
@@ -94,17 +106,6 @@ topology:
       # contexto o mais cedo). `sequence` = posicao no stack (4..K contigua). github_pr
       # null = ainda nao aberto. Objetivo/Deps de cada no: plan.md. Memoria:
       # spec-0024-continuity-operational.
-
-      # CO-1 — mata a classe PIT-0001/conflacao (a dor vivida): reconcilia o estado
-      # ativo (next/decisao/status narrado) contra o canonico DERIVADO; recusa
-      # afirmacao nao-reconciliada como autoridade (INV-1).
-      - id: co-reconcile
-        github_pr: null
-        role: execution
-        terminal: false
-        sequence: 4
-        checkpoints:
-          - checkpoint-co-reconcile # reconcile:check + contrato de autoridade (U1); semente: ex-checkpoint-gg-0003 (consistency)
 
       # CO-2 — Knowledge tipado: Falsification (negativo de 1a classe) + fingerprint +
       # aresta `constrains` (knowledge -> superficie de decisao). Mata "falsificacao

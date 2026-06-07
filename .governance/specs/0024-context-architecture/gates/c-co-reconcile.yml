@@ -1,0 +1,22 @@
+# Human Gate do PR #36 (co-reconcile / CO-1), keyado no checkpoint-co-reconcile.
+# Owner (rosana) 2026-06-07: APROVADO. Lanes: technical_audit (antigravity/gemini —
+# F1 accepted após o fix c24a47b) + architectural_review (codex/gpt-5 — approved, 0
+# findings). review:check ENFORCA: approved exige zero finding critical/high `open`
+# — satisfeito (F1 é low e accepted/closed). O Human Gate decide o PRÓXIMO MOVIMENTO
+# (avançar para CO-2 / co-knowledge), NÃO merge em main (modo unit).
+checkpoint: "checkpoint-co-reconcile"
+actor: "@rosanarezende"
+ref: "#36"
+date: "2026-06-07"
+decision: approved
+note: "CO-1 (reconcile:check + contrato de autoridade canonical-next) APROVADO para AVANÇAR. F1 accepted após o fix c24a47b; arquitetural approved (0 findings). Próximo movimento = abrir/avançar CO-2 (co-knowledge) stacked sobre #36; NÃO autoriza merge isolado em main."
+basis: >
+  Human Gate aprovado para o CO-1 / PR #36. O PR entrega o primeiro guard
+  advisory da Continuidade Operacional: deriva o próximo nó canônico de
+  state.yml topology e reconcilia cursor + state.next[0] via contrato sintático
+  canonical-next: <id>. A auditoria técnica aprovou com F1 accepted após o fix
+  c24a47b, e a revisão arquitetural está approved com 0 findings. Checks do PR
+  estão verdes. A aprovação autoriza avançar para CO-2 (co-knowledge) na stack;
+  não autoriza merge isolado em main.
+next: >
+  Abrir/avançar o próximo PR stacked da Spec 0024: co-knowledge (CO-2).

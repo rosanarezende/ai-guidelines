@@ -1,0 +1,9 @@
+# Resoluções do implementador para o Gate do PR #36 (co-reconcile) — lane SEPARADA
+# da review. PROPÕE `action`; NÃO destrava o gate (só a `disposition` do reviewer
+# destrava). `finding` totalmente qualificado (`<role>#<id>`). Rastreável a commit.
+checkpoint: "checkpoint-co-reconcile"
+by: claude-cli
+resolutions:
+  - finding: technical_audit#F1
+    action: fixed
+    ref: c24a47b # includes -> contrato sintático `canonical-next: <id>` (presença + concordância do marcador); fecha o falso-verde em negação/menção lateral

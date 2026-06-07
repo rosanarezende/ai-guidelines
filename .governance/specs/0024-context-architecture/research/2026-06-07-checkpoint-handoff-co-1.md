@@ -65,6 +65,8 @@ Artefato: `reviews/c-cli-cutover-architectural_review.yml` (`approved`, 0 findin
 
 ## 6. Próximo passo imediato (próxima sessão começa AQUI)
 
+> **ATUALIZAÇÃO 2026-06-07 (pós-autorização do owner):** CO-1 **IMPLEMENTADO** — **PR #36** aberto (stacked sobre #35; modo `unit`, NÃO mergeia), em ciclo de gate. `reconcile:check` advisory-first roda no `validate`; topologia: `co-reconcile` movido para `active` (github_pr 36); `state.yml § next[0]` reescrito. O **estado vivo** está em `state.yml § next/topology` + `git log` (a Regra Zero vence este texto). **Próximo = GATEAR o CO-1** (Technical Audit Codex → Architectural Review ChatGPT → Human Gate). O parágrafo abaixo é o planejamento original do nó — cumprido.
+
 **Iniciar CO-1 = `co-reconcile`** (`reconcile:check` + contrato de autoridade). Ataca a classe **PIT-0001 / conflação** (a retomada lê o _narrado_ em vez do _derivado_). Esboço: derivar o canônico de `state.yml`/topology; detectar divergência contra afirmações narradas (estendendo o padrão do `active-specs:check`); recusar o não-reconciliado como autoridade. **Gates CO entram advisory-first** (padrão `governance-pr-check`). Abrir um PR stacked próprio (ação CORE-07, sob autorização). Ciclo: implementação → Technical Audit (Codex) → Architectural Review (ChatGPT) → Human Gate.
 
 ## 7. NÃO REABRIR (decidido/falsificado)
