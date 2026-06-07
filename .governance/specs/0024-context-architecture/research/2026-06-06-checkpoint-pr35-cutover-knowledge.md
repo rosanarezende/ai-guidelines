@@ -1,5 +1,7 @@
 # Checkpoint de Retomada — PR #35: CLI cutover + ciclo-de-vida do conhecimento (SSOT)
 
+> ⚠️ **SUPERSEDIDO para retomada (2026-06-07) por [`2026-06-07-checkpoint-handoff-co-1.md`](./2026-06-07-checkpoint-handoff-co-1.md)** — #35 foi CONCLUÍDO (Human Gate) e a topologia foi reescrita (cauda = Continuidade Operacional / Opção A). As decisões abaixo seguem válidas como histórico; o **estado de retomada vive no handoff de 2026-06-07**.
+
 > **Documento de RETOMADA canônico** (ADR 0022, situado). Assume zero acesso à conversa anterior.
 > **Supersede para retomada** o `2026-06-05-checkpoint-pr35-visual-governance.md` (cujas decisões
 > seguem válidas; o estado avançou 7 commits) e o `2026-06-06-checkpoint-merge-prematuro-encerramento.md`
