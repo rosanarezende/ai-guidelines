@@ -10,6 +10,7 @@ focus:
   - "Gate por checkpoint: Claude implementa -> Technical Audit Gate (Codex) -> Architectural Review Gate (ChatGPT) -> Human Gate (owner) -> AVANCA (abre o proximo PR stacked). O Human Gate decide o PROXIMO MOVIMENTO, NAO mergeia em main. 1 checkpoint atomico por vez; parar no Gate quando o commit estiver pronto. Correcao local pequena nao espera; mudanca estrutural sim."
   - "Criterio (RESSALVADO em 2026-06-03 por [DEC-0024-G08]): 'ja foi validado empiricamente na 0024?' -> absorver/enforcar/executar. NAO re-modelar o DECIDIDO (G00/G02/G06/G07 seguem cravados). EXCECAO assumida: G03/G04/G05 foram reabertos para modelagem deliberada (orientada a grafo) -- nesses eixos, modelar e a direcao, nao o risco. O 'risco dominante' original (modelar em vez de absorver) vale para os eixos resolvidos; nos reabertos, a modelagem e o trabalho."
 next:
+  - "RETOMADA 2026-06-07 (SSOT): #35 CONCLUIDO (Human Gate cli-cutover approved, gates/c-cli-cutover.yml). Topologia REESCRITA (Opcao A, reframe in-place): a cauda da 0024 e a arquitetura de CONTINUIDADE OPERACIONAL (CO) -- ver § topology + memoria spec-0024-continuity-operational. PROXIMO MOVIMENTO = abrir/implementar CO-1 (co-reconcile: reconcile:check + contrato de autoridade; mata a classe PIT-0001/conflacao). Gates CO advisory-first; disciplina modelo!=migracao. As entradas abaixo sao HISTORICO pre-reframe."
   - "#32 GATED: Checkpoints 2 (8b0eec6) + 2.1 (d686d4b) + 2.1a (fa2c0ae) fechados. #32 permanece como linha de integracao -- NAO mergeia."
   - "#33 (branch feat/spec-0024-ruleset-producibility) = unico PR de execucao stacked aberto (sequence 1); embarca os Checkpoints 2.2, 2.2b, 2.3, 2.3a, 2.3b, 2.4, 2.4a, 2.4b, 2.4c e 2.4d. NAO existe branch feat/spec-0024-topology (corrigido no 2.3a: o no-fantasma checkpoint-2.3 foi dobrado em #33)."
   - "Checkpoint 2.3a + 2.3b implementados: 2.3a reconcilia topologia<->realidade (B1), registra [DEC-0024-G07] (B2), elimina dual-SSOT do plan.md (O1), invariantes de sequence (O6), robustez do governance-pr-check (O2). 2.3b adiciona o guard LOCAL de lifecycle-coerencia (github_pr <=> active/concluded + unicidade) e REAVALIA O5: well-formedness e guard local (no state-yml:check/repo-validation, ja required), nao debito de API -> promocao do governance-pr-check a REQUIRED recomendada. So a paridade-API resta como hardening futuro nao-bloqueante (NEXT separado)."
@@ -21,8 +22,8 @@ next:
   - "LER antes de qualquer acao: research/2026-06-02-handoff-checkpoint-3.md (SSOT da retomada para o Checkpoint 3; supersede o handoff-next-session) + state.yml § topology + plan.md. Verificar git limpo + yarn validate verde + gate do #33 (gates/c2.4d.yml) approved."
 topology:
   cursor:
-    pr: pr-cli-cutover
-    checkpoint: checkpoint-cli-cutover
+    pr: co-reconcile
+    checkpoint: checkpoint-co-reconcile
   prs:
     concluded:
       - id: base-governance
@@ -65,98 +66,141 @@ topology:
           - checkpoint-knowledge-kernel
           - checkpoint-graph-core
 
-    active:
-      # pr-cli-cutover (#35) = linha de execucao ativa, aberta CONTEINER-PRIMEIRO
-      # (ADR 0025, 1a instancia): Draft criado no inicio do desenvolvimento para a
-      # topology refletir o trabalho em tempo real. Trabalho: registry de comandos
-      # em src/ (dissolve costura engine.mjs/args.mjs; destrava ag graph/why).
+      # #35 CONCLUIDO apos Human Gate cli-cutover approved (gates/c-cli-cutover.yml, 2026-06-07).
+      # Cutover CLI -> Command Registry: dispatch+parse dissolvidos; help DERIVADO (o registry e o
+      # SSOT do help); fail-fast quando dist/ ausente. Findings #1/#4 da auditoria transferidos ao
+      # no bootstrap-compiler (seq 6). Modo unit: NAO mergeou em main (concluido na stack).
       - id: pr-cli-cutover
         github_pr: 35
         role: execution
         terminal: false
         sequence: 3
         checkpoints:
-          - checkpoint-cli-cutover # registry de comandos em src/ (dissolve costura engine.mjs/args.mjs); destrava verbos baratos (ag graph/why)
+          - checkpoint-cli-cutover
+
+    active: []
 
     planned:
-      # `sequence` = posicao no STACK de execucao (1..K, contigua), NAO o numero
-      # do checkpoint. TRILHA RECONCILIADA em 2026-06-03 ([DEC-0024-G08]): apos a
-      # reabertura de G03/G04/G05, a direcao de execucao e o PROGRAMA DE
-      # CONVERGENCIA orientado a grafo. Os checkpoints de absorcao originais (3-12)
-      # foram DOBRADOS nos PRs de convergencia onde se sobrepoem (mapeamento em
-      # plan.md). github_pr null = ainda nao aberto.
-      #
-      # pr-compiler-ts: tese SEPARADA do cutover (decisao do owner, 2026-06-04).
-      # O motor de compilacao de regras (cli/governance/monolith: compiler,
-      # rules-builder, rules-parser, rules-loader, token-budget) e invocado pelo
-      # build:rules, NAO pelo dispatch — colaborador do bootstrap, nao parte do
-      # roteamento (eixos ortogonais; ADR 0008/0023 vs ADR 0025). Migra para
-      # TS/src em no proprio. SUBORDINADO a conclusao do #35: sucessor IMEDIATO e
-      # OBRIGATORIO (sequence 4; NAO backlog opcional). A interop TS->.mjs do
-      # bootstrap, introduzida no #35, e ponte TRANSITORIA que ESTE no fecha — o
-      # cutover so esta plenamente absorvido quando este no aterrissa.
-      - id: pr-compiler-ts
+      # CAUDA REESCRITA (2026-06-07, Human Gate #35 / Opcao A — reframe in-place).
+      # A investigacao da 0024 expos que persistir conhecimento NAO basta: falta
+      # absorcao/reconciliacao/projecao/enforcement (o humano virava o reconciliador).
+      # A arquitetura de CONTINUIDADE OPERACIONAL (CO) integra a CAUDA da 0024 — NAO
+      # spec paralela, NAO sucessora (evita o padrao 0025). Os ex-nos 37-41
+      # (doctrine/decision/rule-guardrail/projection-split/workitem-registry) foram
+      # REESCRITOS como o laco CO; a faxina ortogonal SOBREVIVE; bootstrap-compiler
+      # resolve a auditoria #1/#3/#4 do #35. ELIMINADOS por INV-4 (projecao, nao
+      # entidade): workitem-registry persistido como working-set (-> frontier derivada)
+      # e provenance persistida (-> derivada). Ordem = IMPACTO (reduzir dependencia de
+      # contexto o mais cedo). `sequence` = posicao no stack (4..K contigua). github_pr
+      # null = ainda nao aberto. Objetivo/Deps de cada no: plan.md. Memoria:
+      # spec-0024-continuity-operational.
+
+      # CO-1 — mata a classe PIT-0001/conflacao (a dor vivida): reconcilia o estado
+      # ativo (next/decisao/status narrado) contra o canonico DERIVADO; recusa
+      # afirmacao nao-reconciliada como autoridade (INV-1).
+      - id: co-reconcile
         github_pr: null
         role: execution
         terminal: false
         sequence: 4
         checkpoints:
-          - checkpoint-compiler-ts # motor de compilacao de regras (monolith) -> TS/src; build:rules roda de TS; zero .mjs no motor
+          - checkpoint-co-reconcile # reconcile:check + contrato de autoridade (U1); semente: ex-checkpoint-gg-0003 (consistency)
 
-      - id: pr-doctrine
+      # CO-2 — Knowledge tipado: Falsification (negativo de 1a classe) + fingerprint +
+      # aresta `constrains` (knowledge -> superficie de decisao). Mata "falsificacao
+      # esquecida". Absorve ex-doctrine (DoctrineGraph -> nos Lens/ADR) + ex-decision
+      # (Decision como TIPO de no; WorkItem tambem vira tipo de no aqui).
+      - id: co-knowledge
         github_pr: null
         role: execution
         terminal: false
         sequence: 5
         checkpoints:
-          - checkpoint-doctrine # Doctrine (ADRs navegaveis) + DoctrineGraph + doctrine:check
-          - checkpoint-doc-cleanup # absorve ex-checkpoint-12 (limpar docs arquiteturais)
+          - checkpoint-co-knowledge # Knowledge tipado + Falsification/fingerprint + aresta constrains (U2)
 
-      - id: pr-decision
+      # Bootstrap+Compiler — RESOLVE a auditoria do #35 (#1 roteamento, #3 fallback,
+      # #4 parsers): migra bootstrap (init/adopt/providers/update/check-budget) ao
+      # registry; remove fallback legado + parseArgs monolito + a ponte transitoria.
+      # Funde ex-pr-compiler-ts (motor de regras monolith -> TS/src; substrato do
+      # knowledge:compile). O cutover so esta plenamente absorvido quando este aterrissa.
+      - id: bootstrap-compiler
         github_pr: null
         role: execution
         terminal: false
         sequence: 6
         checkpoints:
-          - checkpoint-decision # Decision entity + decision:check (absorve GG-0001); dissolve NEXT.md
-          - checkpoint-decouple-brief # absorve ex-checkpoint-9 (desacoplar decision-brief de evidence-driven)
+          - checkpoint-compiler-ts # motor de compilacao de regras (monolith) -> TS/src; substrato do knowledge:compile
+          - checkpoint-bootstrap-registry # bootstrap -> registry; remove fallback+parseArgs+ponte (fecha auditoria #1/#3/#4)
 
-      - id: pr-rule-guardrail
+      # CO-3 — Absorcao: no de conhecimento -> forma que DISPARA. EnforcementBinding
+      # (declaracao->enforcement por no; PIT-0008 estrutural) + knowledge:compile
+      # (reusa o compilador de regras). Absorve ex-rule-guardrail (Rule/Guardrail ->
+      # Constraint + binding).
+      - id: co-enforcement
         github_pr: null
         role: execution
         terminal: false
         sequence: 7
         checkpoints:
-          - checkpoint-rule-guardrail # Rule/Guardrail (enforcedBy/groundedIn); CORE-*/GR-*->scope
-          - checkpoint-gg-0003 # absorve ex-checkpoint-3 (GG-0003 consistency)
-          - checkpoint-gg-0002 # absorve ex-checkpoint-6 (GG-0002 banned-concept)
-          - checkpoint-taxonomy-removal # absorve ex-checkpoint-7 (CRITICO: remover taxonomia evidence-driven/...) + ex-10 (tasks boilerplate)
+          - checkpoint-co-enforcement # EnforcementBinding + knowledge:compile (U3); absorve ex-rule-guardrail
 
-      - id: pr-projection-split
+      # CO-4 — Projecao no ponto de consumo: handoff situado DERIVADO (ADR 0022, enfim,
+      # sobre conhecimento) + contrato de carga (reconcile-on-load obrigatorio; ADR 0021).
+      # Retomada agnostica de agente. Absorve ex-projection-split (G05; projecoes
+      # derivadas, renderer-puras) + ex-doctrine (grafo navegavel projetado).
+      - id: co-projection
         github_pr: null
         role: execution
         terminal: false
         sequence: 8
         checkpoints:
-          - checkpoint-projection-split # arvore projections/ derivada + projection:check (G05)
-          - checkpoint-agents-sync # absorve ex-checkpoint-5 (AGENTS sync)
+          - checkpoint-co-projection # projetor situado + contrato de carga (U4); absorve ex-projection-split
 
-      - id: pr-workitem-registry
+      # CO-5 — Fecha o laco: captura do em-transito como no na FORMACAO (PIT-0002) +
+      # espinha de ciclo de vida (maturacao/graduacao human-gated). Dissolve NEXT.md
+      # (conhecimento load-bearing nao vive so em prosa; INV-5). Absorve ex-decision
+      # (dissolve NEXT) + ex-provenance (re-derivada como projecao, nao persistida).
+      - id: co-capture
         github_pr: null
         role: execution
         terminal: false
         sequence: 9
         checkpoints:
-          - checkpoint-workitem-registry # WorkItem registry persistido (G01/ADR 0010); backlog=WorkItem(proposal)
-          - checkpoint-provenance # absorve ex-checkpoint-4A/4B (workflow provenance)
+          - checkpoint-co-capture # captura na formacao + espinha de ciclo de vida; dissolve NEXT.md (U5)
 
-      - id: pr-dualroot-collapse
+      # CO-6 — Torna o laco CONTINUO: dispatcher de eventos dispara o pipeline
+      # (absorver/reconciliar/projetar/capturar) nos limites: checkpoint, commit, push,
+      # merge, promocao, retomada. Repo sempre handoff-ready. Gates advisory-first.
+      - id: co-events
         github_pr: null
         role: execution
         terminal: false
         sequence: 10
         checkpoints:
-          - checkpoint-dualroot-collapse # colapso do dual-root; absorve ex-checkpoint-11A/B/C (migracao .specify)
+          - checkpoint-co-events # dispatcher de eventos / disparo automatico (U6)
+
+      # FAXINA ortogonal a CO (SOBREVIVE da trilha de absorcao original; independe da CO).
+      # Pode aterrissar em paralelo; NAO perder o ex-checkpoint-7 (CRITICO/P0).
+      - id: housekeeping
+        github_pr: null
+        role: execution
+        terminal: false
+        sequence: 11
+        checkpoints:
+          - checkpoint-taxonomy-removal # ex-7 (CRITICO/P0): remove taxonomia evidence-driven/deterministic/mixed + ex-10 (tasks boilerplate)
+          - checkpoint-agents-sync # ex-5: AGENTS sync (agents:build + agents:check)
+          - checkpoint-gg-0002 # ex-6: GG-0002 banned-concept
+          - checkpoint-decouple-brief # ex-9: desacopla decision-brief de evidence-driven
+          - checkpoint-doc-cleanup # ex-12: limpa docs arquiteturais (workflowType)
+
+      # Migracao .specify / colapso dual-root (ex-11A/B/C). Ortogonal; reordenado p/ o fim.
+      - id: dualroot-collapse
+        github_pr: null
+        role: execution
+        terminal: false
+        sequence: 12
+        checkpoints:
+          - checkpoint-dualroot-collapse # colapso do dual-root; migracao .specify (test:smoke gateia)
 
       - id: integration-final
         github_pr: null
