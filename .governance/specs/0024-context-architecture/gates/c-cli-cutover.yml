@@ -1,0 +1,12 @@
+# Human Gate do PR #35 (pr-cli-cutover), keyado no cursor cli-cutover. Owner
+# 2026-06-07: APROVADO. Lanes: technical_audit (antigravity/gemini-3.1-pro-high) +
+# architectural_review (chatgpt/gpt-5.5). review:check ENFORCA: approved exige zero
+# finding critical/high `open` — satisfeito (os 4 findings do audit estão accepted).
+# O Human Gate decide o PRÓXIMO MOVIMENTO (reescrever a topologia da 0024 / CO),
+# NÃO merge em main (modo unit; merge único ao fim via review.md R8).
+checkpoint: "cli-cutover"
+actor: "@rosanarezende"
+ref: "#35"
+date: "2026-06-07"
+decision: approved
+note: "PR #35 (cutover CLI -> Command Registry; help derivado; fail-fast) APROVADO para AVANÇAR. Opção A confirmada: CO integra a cauda da 0024. Próximo movimento = reescrever a topologia (não merge)."
