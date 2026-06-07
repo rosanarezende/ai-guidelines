@@ -20,6 +20,7 @@ Thumbs.db
 # Arquivos de configuração local da IA
 .claude/
 .antigravitycli/
+.aider*
 scratch/
 
 # Testes e Linter

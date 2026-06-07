@@ -74,6 +74,10 @@ import {
 import { parseContextTarget } from "./visual-prompts/parseContextTarget.js";
 import { collectLocalContext } from "./visual-prompts/collectLocalContext.js";
 import { renderVisualPrompt } from "./visual-prompts/renderVisualPrompt.js";
+import { VISUAL_PROMPT_OPTIONS, VisualPromptValue } from "./visual-prompts/visualPromptCatalog.js";
+import type { CommandRegistry } from "./registry/CommandRegistry.js";
+import { INTENT_CATALOG } from "./registry/intentCatalog.js";
+import type { Intent, IntentAction } from "./registry/Intent.js";
 
 export { renderVisualPrompt };
 
@@ -105,6 +109,12 @@ export interface RunOptions {
    * Default: `GhCli` real (execFileSync). Tests injetam `FakeStackOps`.
    */
   readonly stack?: StackOps;
+  /**
+   * Registry de comandos para a navegação por Intent do wizard. Injetável p/
+   * teste; default = catálogo real via import dinâmico (quebra o ciclo
+   * workflow↔buildRegistry). Não afeta as superfícies de execução existentes.
+   */
+  readonly registry?: CommandRegistry;
 }
 
 interface ResolvedContext {
@@ -450,80 +460,6 @@ export type WizardChoice =
       context: string;
     }
   | { kind: "quit" };
-
-/**
- * Templates de prompts visuais disponíveis em `.governance/visual-prompts/`.
- *
- * - `prompt`: wizard imprime 1 prompt; `targetLabel` descreve onde colar
- *   (gerador de imagem direto, ou IA conversacional que devolve prompt pronto).
- * - `placeholder`: opção registrada no menu mas ainda não implementada
- *   (sinaliza "em breve" e referencia candidata no backlog).
- *
- * Variáveis `{{nome}}` são substituídas pelo wizard com base nos inputs do
- * usuário antes de imprimir o prompt.
- */
-type VisualPromptMode = "prompt";
-type VisualPromptValue = "architecture" | "value-delivered";
-
-interface VisualPromptOption {
-  readonly value: VisualPromptValue;
-  readonly label: string;
-  readonly mode: VisualPromptMode;
-  /** Slug do arquivo `.prompt.md` em `.governance/visual-prompts/`. */
-  readonly slug: string;
-  readonly needsContext: boolean;
-  /** Destino curto exibido no header (ex.: "IA conversacional..."). */
-  readonly targetLabel: string;
-  /** Linhas de instrução exibidas antes do prompt (numeradas). */
-  readonly instructions: ReadonlyArray<string>;
-}
-
-/**
- * Todos os fluxos de prompt visual hoje são **two-stage**: o prompt gerado pelo
- * wizard vai para uma IA conversacional com acesso ao repo (Claude tool use,
- * ChatGPT browsing, Antigravity, etc.), que investiga e devolve o prompt de
- * imagem JÁ PRONTO para colar no gerador (Midjourney, DALL-E, etc.).
- *
- * Modo automático determinístico (investigação local via `git`/`gh` sem IA
- * conversacional intermediária) fica como sub-escopo da candidata
- * `governance-dashboard-and-visual-artifacts` no backlog `Now` — quando
- * materializar, adicionará opções `*-auto` aqui.
- */
-const VISUAL_PROMPT_OPTIONS: ReadonlyArray<VisualPromptOption> = [
-  {
-    value: "architecture",
-    label: "Arquitetura do framework (visão geral do projeto atual)",
-    mode: "prompt",
-    slug: "architecture-end-to-end",
-    needsContext: false,
-    targetLabel: "IA conversacional com acesso ao repositório",
-    instructions: [
-      "1. Abra uma IA conversacional COM ACESSO AO REPO (Claude com tool use,",
-      "   ChatGPT com browsing, Antigravity, Cursor com o projeto aberto).",
-      "2. Cole o conteúdo do clipboard (Ctrl+V / Cmd+V) — o prompt já foi copiado",
-      "   automaticamente. A IA vai investigar a estrutura do repositório atual.",
-      "3. A IA devolverá um prompt de imagem JÁ PRONTO — copie esse output e cole",
-      "   no seu gerador de imagem (Midjourney, DALL-E, etc.).",
-    ],
-  },
-  {
-    value: "value-delivered",
-    label: "Valor entregue por um PR ou spec (comparativo antes/depois)",
-    mode: "prompt",
-    slug: "value-delivered",
-    needsContext: true,
-    targetLabel: "IA conversacional com acesso ao repositório",
-    instructions: [
-      "1. Abra uma IA conversacional COM ACESSO AO REPO (Claude com tool use,",
-      "   ChatGPT com browsing, Antigravity, Cursor com o projeto aberto).",
-      "2. Cole o conteúdo do clipboard (Ctrl+V / Cmd+V) — o prompt já foi copiado",
-      "   automaticamente. Se o PR/spec tiver descrição esparsa, complemente com",
-      "   o contexto que faltar (a IA não pode adivinhar o que não está nos artifacts).",
-      "3. A IA devolverá um prompt de imagem JÁ PRONTO — copie esse output e cole",
-      "   no seu gerador de imagem (Midjourney, DALL-E, etc.).",
-    ],
-  },
-];
 
 type WizardMenuValue =
   | "continue-current"
@@ -1130,7 +1066,110 @@ async function runMergeStackWizard(opts: {
   }
 }
 
+const ADVANCED_OPS_VALUE = "advanced-ops";
+
+/**
+ * Menu do topo orientado por INTENÇÃO (Spec 0024): projeção do catálogo curado —
+ * cada Intent vira uma entrada + a seção transitória de ops avançadas + sair.
+ * Função pura (testável).
+ */
+export function buildTopMenu(catalog: readonly Intent[]) {
+  return [
+    ...catalog.map((intent) => ({ name: intent.title, value: `intent:${intent.id}` })),
+    {
+      name: "⚙️  Operações avançadas (wizard legado)",
+      value: ADVANCED_OPS_VALUE,
+    },
+    { name: "Sair", value: "quit" },
+  ];
+}
+
+/**
+ * Superfície humana principal (Spec 0024): navega Intent → Action → Command;
+ * execução SEMPRE via Registry. Sem conceito intermediário novo — o menu é
+ * projeção do catálogo; a seção "Operações avançadas" é a única entrada não-Intent
+ * (transitória, `runAdvancedOps`).
+ */
 export async function runWorkflow(options: RunOptions): Promise<number> {
+  const logger = options.logger ?? stdoutLogger;
+  const prompts = options.prompts ?? new InquirerPrompts();
+
+  let choice: string;
+  try {
+    choice = await prompts.select<string>({
+      message: "O que você quer fazer?",
+      choices: buildTopMenu(INTENT_CATALOG),
+    });
+  } catch (err) {
+    logger.error(`Wizard interrompido: ${err instanceof Error ? err.message : String(err)}`);
+    return 1;
+  }
+
+  if (choice === "quit") return 0;
+  if (choice === ADVANCED_OPS_VALUE) return runAdvancedOps(options);
+
+  const intent = INTENT_CATALOG.find((i) => `intent:${i.id}` === choice);
+  if (!intent) {
+    logger.error(`Intenção desconhecida: ${choice}`);
+    return 1;
+  }
+  return runIntent(intent, options, logger, prompts);
+}
+
+/**
+ * Navega as Actions de uma Intent e delega ao Registry. Intent NUNCA executa —
+ * só referencia; a execução flui por Command → Use Case via `registry.dispatch`.
+ * Registry injetável (`options.registry`) p/ teste; default = catálogo real via
+ * import dinâmico (quebra o ciclo workflow↔buildRegistry).
+ */
+async function runIntent(
+  intent: Intent,
+  options: RunOptions,
+  logger: Logger,
+  prompts: Prompts
+): Promise<number> {
+  const action = await selectIntentAction(intent, prompts);
+  if (!action) return 0;
+  const registry =
+    options.registry ?? (await import("./registry/buildRegistry.js")).buildRegistry();
+  const argv = [action.command, ...(action.args ?? [])];
+  // Injeta `prompts` no contexto: comandos interativos (com `prompt`) usam a
+  // superfície humana; read-only ignoram. A seleção do produtor é do dispatch.
+  const result = await registry.dispatch(argv, { repoRoot: options.repoRoot, logger, prompts });
+  return result.exitCode;
+}
+
+/** Seleção da Action (valor = índice; testável). `undefined` se a Intent não tem ações. */
+async function selectIntentAction(
+  intent: Intent,
+  prompts: Prompts
+): Promise<IntentAction | undefined> {
+  if (intent.actions.length === 0) return undefined;
+  const value = await prompts.select<string>({
+    message: intent.title,
+    choices: intent.actions.map((action, index) => ({
+      name: action.label ?? action.command,
+      value: String(index),
+    })),
+  });
+  const index = Number(value);
+  return Number.isInteger(index) && index >= 0 && index < intent.actions.length
+    ? intent.actions[index]
+    : undefined;
+}
+
+/**
+ * SEÇÃO TRANSITÓRIA — wizard legado da 0023 (`runWizard`). Status real após a
+ * falsificação de 2026-06-06 (ADR 0026 — não era "dívida de convergência"):
+ *  - `list-active`/`diagnose-drift`/`visual-prompt` JÁ são Commands+Intents — aqui
+ *    são DUPLICATAS removíveis (o caminho canônico é o Intent).
+ *  - `integration-open`/`merge-stack` NÃO convergem a Commands: são PASSOS do rito
+ *    de encerramento (operações do `workflow`), não capabilities de 1ª classe.
+ *  - `continue-other`/`publish-state-help`: affordances humanas (ADR 0026 §4).
+ * Cleanup OPCIONAL: remover as 3 entradas duplicadas; os ops de encerramento +
+ * affordances permanecem operações do wizard (sua casa legítima).
+ */
+export async function runAdvancedOps(options: RunOptions): Promise<number> {
   const logger = options.logger ?? stdoutLogger;
   const fs = options.fs ?? new NodeWorkflowFileSystem(options.repoRoot);
   const prompts = options.prompts ?? new InquirerPrompts();

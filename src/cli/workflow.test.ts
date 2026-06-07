@@ -7,14 +7,19 @@ import {
   Logger,
   buildContextBundle,
   buildMenu,
+  buildTopMenu,
   classifyInput,
   findActiveSpecByIdentifier,
   main,
   renderActiveSpecsIndex,
+  runAdvancedOps,
   runContinue,
   runPublishState,
   runWorkflow,
 } from "./workflow.js";
+import { INTENT_CATALOG } from "./registry/intentCatalog.js";
+import { CommandRegistry } from "./registry/CommandRegistry.js";
+import { Command } from "./registry/Command.js";
 import { PublishState } from "../app/workflow/PublishState.js";
 import {
   parseActiveSpecs,
@@ -343,11 +348,11 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
     });
   });
 
-  describe("runWorkflow", () => {
+  describe("runAdvancedOps — seção transitória do wizard (dívida #35)", () => {
     it("DADO wizard opção 1 (continuar spec atual) E usuário escolhe sair no REPL ENTÃO retorna 0 com briefing emitido", async () => {
       const logger = new CollectingLogger();
       const prompts = new FakePrompts(["continue-current", "q"]);
-      const code = await runWorkflow({
+      const code = await runAdvancedOps({
         repoRoot: "/repo",
         logger,
         prompts,
@@ -371,7 +376,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
         new Set([".governance/specs/0023-workflow-runtime"]),
         "feat/spec-0023-workflow-runtime"
       );
-      const code = await runWorkflow({
+      const code = await runAdvancedOps({
         repoRoot: "/repo",
         logger,
         prompts,
@@ -401,7 +406,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
         new Set([".governance/specs/0023-workflow-runtime"]),
         "feat/spec-0023-workflow-runtime"
       );
-      const code = await runWorkflow({
+      const code = await runAdvancedOps({
         repoRoot: "/repo",
         logger,
         prompts,
@@ -422,7 +427,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
         "q",
       ]);
       const clip = new FakeClipboard();
-      const code = await runWorkflow({
+      const code = await runAdvancedOps({
         repoRoot: "/repo",
         logger,
         prompts,
@@ -438,7 +443,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
       const logger = new CollectingLogger();
       const prompts = new FakePrompts(["continue-current"]);
       const fs = new StubFs(new Map(), new Set(), "main");
-      const code = await runWorkflow({
+      const code = await runAdvancedOps({
         repoRoot: "/repo",
         logger,
         prompts,
@@ -461,7 +466,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
       const logger = new CollectingLogger();
       // ["continue-current", "1", "q"] → wizard → REPL briefing → quit
       const prompts = new FakePrompts(["continue-current", "1", "q"]);
-      const code = await runWorkflow({
+      const code = await runAdvancedOps({
         repoRoot: "/repo",
         logger,
         prompts,
@@ -477,7 +482,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
     it("DADO REPL menu input '2' (blockers) E research.md ausente ENTÃO mensagem 'nenhum blocker extraído' — case 'blockers' (vazio)", async () => {
       const logger = new CollectingLogger();
       const prompts = new FakePrompts(["continue-current", "2", "q"]);
-      const code = await runWorkflow({
+      const code = await runAdvancedOps({
         repoRoot: "/repo",
         logger,
         prompts,
@@ -511,7 +516,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
         new Set([".governance/specs/0023-workflow-runtime"]),
         "feat/spec-0023-workflow-runtime"
       );
-      const code = await runWorkflow({
+      const code = await runAdvancedOps({
         repoRoot: "/repo",
         logger,
         prompts,
@@ -529,7 +534,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
       const prompts = new FakePrompts(["continue-current", "3", "q"]);
       // sampleState tem gate.status='closed' E state.next=['executar PR1']
       // → menu posicional: 1=briefing, 2=blockers, 3=execute-next, q=quit
-      const code = await runWorkflow({
+      const code = await runAdvancedOps({
         repoRoot: "/repo",
         logger,
         prompts,
@@ -548,7 +553,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
     it("DADO structured command 'gate' digitado no REPL ENTÃO mostra o status atual do gate", async () => {
       const logger = new CollectingLogger();
       const prompts = new FakePrompts(["continue-current", "gate", "q"]);
-      const code = await runWorkflow({
+      const code = await runAdvancedOps({
         repoRoot: "/repo",
         logger,
         prompts,
@@ -563,7 +568,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
     it("DADO structured command 'next' digitado no REPL ENTÃO lista state.next sem executar ação", async () => {
       const logger = new CollectingLogger();
       const prompts = new FakePrompts(["continue-current", "next", "q"]);
-      const code = await runWorkflow({
+      const code = await runAdvancedOps({
         repoRoot: "/repo",
         logger,
         prompts,
@@ -578,7 +583,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
     it("DADO structured command 'gaps' digitado no REPL E sem blockers ENTÃO mostra mensagem vazia enxuta", async () => {
       const logger = new CollectingLogger();
       const prompts = new FakePrompts(["continue-current", "gaps", "q"]);
-      const code = await runWorkflow({
+      const code = await runAdvancedOps({
         repoRoot: "/repo",
         logger,
         prompts,
@@ -593,7 +598,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
     it("DADO structured command 'quit' digitado no REPL ENTÃO encerra o loop com exit 0", async () => {
       const logger = new CollectingLogger();
       const prompts = new FakePrompts(["continue-current", "quit"]);
-      const code = await runWorkflow({
+      const code = await runAdvancedOps({
         repoRoot: "/repo",
         logger,
         prompts,
@@ -608,7 +613,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
     it("DADO wizard opção q (sair) no boot ENTÃO retorna 0 sem invocar briefing nem REPL", async () => {
       const logger = new CollectingLogger();
       const prompts = new FakePrompts(["quit"]);
-      const code = await runWorkflow({
+      const code = await runAdvancedOps({
         repoRoot: "/repo",
         logger,
         prompts,
@@ -626,7 +631,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
     it("DADO wizard opção 2 MAS identificador vazio ENTÃO encerra com mensagem honesta e retorna 0", async () => {
       const logger = new CollectingLogger();
       const prompts = new FakePrompts(["continue-other", ""]);
-      const code = await runWorkflow({
+      const code = await runAdvancedOps({
         repoRoot: "/repo",
         logger,
         prompts,
@@ -652,7 +657,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
         },
       };
 
-      const code = await runWorkflow({
+      const code = await runAdvancedOps({
         repoRoot: "/repo",
         logger,
         prompts,
@@ -667,7 +672,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
     it("DADO wizard opção 3 (publish-state help) ENTÃO emite instruções e retorna 0", async () => {
       const logger = new CollectingLogger();
       const prompts = new FakePrompts(["publish-state-help"]);
-      const code = await runWorkflow({
+      const code = await runAdvancedOps({
         repoRoot: "/repo",
         logger,
         prompts,
@@ -723,7 +728,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
         closePullRequest: jest.fn(),
         listOpenPullRequests: jest.fn().mockReturnValue([]),
       };
-      const code = await runWorkflow({
+      const code = await runAdvancedOps({
         repoRoot: "/repo",
         logger,
         prompts,
@@ -763,7 +768,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
         closePullRequest: jest.fn(),
         listOpenPullRequests: jest.fn().mockReturnValue([]),
       };
-      const code = await runWorkflow({
+      const code = await runAdvancedOps({
         repoRoot: "/repo",
         logger,
         prompts,
@@ -815,7 +820,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
         closePullRequest: jest.fn(),
         listOpenPullRequests: jest.fn().mockReturnValue(stackPrs),
       };
-      const code = await runWorkflow({
+      const code = await runAdvancedOps({
         repoRoot: "/repo",
         logger,
         prompts,
@@ -893,7 +898,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
         closePullRequest: jest.fn(),
         listOpenPullRequests: jest.fn().mockReturnValue(allPrs),
       };
-      const code = await runWorkflow({
+      const code = await runAdvancedOps({
         repoRoot: "/repo",
         logger,
         prompts,
@@ -951,7 +956,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
           },
         ]),
       };
-      const code = await runWorkflow({
+      const code = await runAdvancedOps({
         repoRoot: "/repo",
         logger,
         prompts,
@@ -1003,7 +1008,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
         closePullRequest: jest.fn(),
         listOpenPullRequests: jest.fn().mockReturnValue([]),
       };
-      const code = await runWorkflow({
+      const code = await runAdvancedOps({
         repoRoot: "/repo",
         logger,
         prompts,
@@ -1060,7 +1065,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
         closePullRequest: jest.fn(),
         listOpenPullRequests: jest.fn().mockReturnValue([]),
       };
-      const code = await runWorkflow({
+      const code = await runAdvancedOps({
         repoRoot: "/repo",
         logger,
         prompts,
@@ -1107,7 +1112,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
         closePullRequest: jest.fn(),
         listOpenPullRequests: jest.fn().mockReturnValue([]),
       };
-      const code = await runWorkflow({
+      const code = await runAdvancedOps({
         repoRoot: "/repo",
         logger,
         prompts,
@@ -1135,7 +1140,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
         ],
       ]);
       const fs = new StubFs(files, new Set(), "feat/spec-0023-workflow-runtime");
-      const code = await runWorkflow({
+      const code = await runAdvancedOps({
         repoRoot: "/repo",
         logger,
         prompts,
@@ -1167,7 +1172,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
       ]);
       const fs = new StubFs(files, new Set(), "feat/spec-0023-workflow-runtime");
 
-      const code = await runWorkflow({
+      const code = await runAdvancedOps({
         repoRoot: "/repo",
         logger,
         prompts,
@@ -1194,7 +1199,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
         ],
       ]);
       const fs = new StubFs(files, new Set(), "feat/spec-0023-workflow-runtime");
-      const code = await runWorkflow({
+      const code = await runAdvancedOps({
         repoRoot: "/repo",
         logger,
         prompts,
@@ -1216,7 +1221,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
     it("DADO wizard opção 6 + tipo 'b' + contexto inválido 'spec' (sem identificador) ENTÃO emite erro narrativo e quit gracioso", async () => {
       const logger = new CollectingLogger();
       const prompts = new FakePrompts(["visual-prompt", "value-delivered", "spec"]);
-      const code = await runWorkflow({
+      const code = await runAdvancedOps({
         repoRoot: "/repo",
         logger,
         prompts,
@@ -1235,7 +1240,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
     it("DADO wizard opção 6 + tipo 'b' SEM contexto fornecido ENTÃO emite erro e quit gracioso", async () => {
       const logger = new CollectingLogger();
       const prompts = new FakePrompts(["visual-prompt", "value-delivered", ""]);
-      const code = await runWorkflow({
+      const code = await runAdvancedOps({
         repoRoot: "/repo",
         logger,
         prompts,
@@ -1249,7 +1254,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
     it("DADO wizard opção 2 com identifier válido ENTÃO delega para continue via índice público", async () => {
       const logger = new CollectingLogger();
       const prompts = new FakePrompts(["continue-other", "0023"]);
-      const code = await runWorkflow({
+      const code = await runAdvancedOps({
         repoRoot: "/repo",
         logger,
         prompts,
@@ -1285,7 +1290,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
     it("DADO wizard opção 6 + tipo válido MAS template ausente no filesystem ENTÃO emite erro e retorna 1", async () => {
       const logger = new CollectingLogger();
       const prompts = new FakePrompts(["visual-prompt", "architecture"]);
-      const code = await runWorkflow({
+      const code = await runAdvancedOps({
         repoRoot: "/repo",
         logger,
         prompts,
@@ -1508,7 +1513,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
     it("DADO wizard opção 1 + spec local detectada + índice presente com a mesma spec ENTÃO loga briefing + seção do índice marcando spec corrente com '*'", async () => {
       const logger = new CollectingLogger();
       const prompts = new FakePrompts(["continue-current", "q"]);
-      const code = await runWorkflow({
+      const code = await runAdvancedOps({
         repoRoot: "/repo",
         logger,
         prompts,
@@ -1531,7 +1536,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
         entries: [],
         warnings: ["not found"],
       };
-      await runWorkflow({
+      await runAdvancedOps({
         repoRoot: "/repo",
         logger,
         prompts,
@@ -1547,7 +1552,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
     it("DADO wizard opção 1 + branch fora do padrão + índice presente com 1 entry ENTÃO erro + seção do índice exibida + retorna 1", async () => {
       const logger = new CollectingLogger();
       const prompts = new FakePrompts(["continue-current"]);
-      const code = await runWorkflow({
+      const code = await runAdvancedOps({
         repoRoot: "/repo",
         logger,
         prompts,
@@ -1570,7 +1575,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
         entries: [],
         warnings: ["Index not found. Run yarn guidelines workflow publish-state to populate."],
       };
-      const code = await runWorkflow({
+      const code = await runAdvancedOps({
         repoRoot: "/repo",
         logger,
         prompts,
@@ -1587,7 +1592,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
     it("DADO wizard opção 4 (ver specs ativas) ENTÃO loga índice e retorna 0 sem invocar briefing", async () => {
       const logger = new CollectingLogger();
       const prompts = new FakePrompts(["list-active"]);
-      const code = await runWorkflow({
+      const code = await runAdvancedOps({
         repoRoot: "/repo",
         logger,
         prompts,
@@ -1604,7 +1609,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
     it("DADO wizard opção 5 (diagnosticar drift) com entries sem drift ENTÃO loga 'Nenhum drift' e retorna 0", async () => {
       const logger = new CollectingLogger();
       const prompts = new FakePrompts(["diagnose-drift"]);
-      const code = await runWorkflow({
+      const code = await runAdvancedOps({
         repoRoot: "/repo",
         logger,
         prompts,
@@ -1619,7 +1624,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
     it("DADO wizard opção 5 (diagnosticar drift) sem índice ENTÃO loga dica de publish-state e retorna 0", async () => {
       const logger = new CollectingLogger();
       const prompts = new FakePrompts(["diagnose-drift"]);
-      const code = await runWorkflow({
+      const code = await runAdvancedOps({
         repoRoot: "/repo",
         logger,
         prompts,
@@ -1640,7 +1645,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
     it("DADO wizard opção 5 (diagnosticar drift) com spec_path ausente ENTÃO lista a entry divergente", async () => {
       const logger = new CollectingLogger();
       const prompts = new FakePrompts(["diagnose-drift"]);
-      const code = await runWorkflow({
+      const code = await runAdvancedOps({
         repoRoot: "/repo",
         logger,
         prompts,
@@ -2018,6 +2023,88 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
       } as Parameters<typeof main>[1]);
       expect(code).toBe(0);
       expect(logger.lines.join("\n")).toMatch(/publicada/);
+    });
+  });
+});
+
+describe("CLI — wizard navegação por Intent [BR-WIZARD-INTENT]", () => {
+  /** Registry-espião: registra cada despacho como `[command, ...rest]`. */
+  function spyRegistry(): { registry: CommandRegistry; dispatched: string[][] } {
+    const dispatched: string[][] = [];
+    const registry = new CommandRegistry();
+    for (const name of ["continue", "insight", "triage", "release-prep"]) {
+      const command: Command<readonly string[]> = {
+        name,
+        description: `spy: ${name}`,
+        parse: (argv) => argv,
+        run: async (argv) => {
+          dispatched.push([name, ...argv]);
+          return { exitCode: 0 };
+        },
+      };
+      registry.register(command);
+    }
+    return { registry, dispatched };
+  }
+
+  describe("buildTopMenu", () => {
+    it("DADO o catálogo QUANDO buildTopMenu ENTÃO projeta Intents + ops avançadas + sair (sair por último)", () => {
+      const values = buildTopMenu(INTENT_CATALOG).map((m) => m.value);
+      for (const intent of INTENT_CATALOG) {
+        expect(values).toContain(`intent:${intent.id}`);
+      }
+      expect(values).toContain("advanced-ops");
+      expect(values[values.length - 1]).toBe("quit");
+    });
+  });
+
+  describe("runWorkflow (Intent → Action → Command)", () => {
+    it("DADO Intent → Action com args QUANDO runWorkflow ENTÃO despacha [command, ...args] via Registry", async () => {
+      const { registry, dispatched } = spyRegistry();
+      // retomar-trabalho: action 1 = insight list
+      const prompts = new FakePrompts(["intent:retomar-trabalho", "1"]);
+      const code = await runWorkflow({
+        repoRoot: "/repo",
+        logger: new CollectingLogger(),
+        prompts,
+        registry,
+      });
+      expect(code).toBe(0);
+      expect(dispatched).toEqual([["insight", "list"]]);
+    });
+
+    it("DADO Intent → Action sem args QUANDO runWorkflow ENTÃO despacha só o comando", async () => {
+      const { registry, dispatched } = spyRegistry();
+      // retomar-trabalho: action 0 = continue
+      const prompts = new FakePrompts(["intent:retomar-trabalho", "0"]);
+      await runWorkflow({ repoRoot: "/repo", logger: new CollectingLogger(), prompts, registry });
+      expect(dispatched).toEqual([["continue"]]);
+    });
+
+    it("DADO 'Sair' no menu primário QUANDO runWorkflow ENTÃO retorna 0 sem despachar nada", async () => {
+      const { registry, dispatched } = spyRegistry();
+      const prompts = new FakePrompts(["quit"]);
+      const code = await runWorkflow({
+        repoRoot: "/repo",
+        logger: new CollectingLogger(),
+        prompts,
+        registry,
+      });
+      expect(code).toBe(0);
+      expect(dispatched).toEqual([]);
+    });
+
+    it("DADO 'Operações avançadas' QUANDO runWorkflow ENTÃO delega à seção transitória (runAdvancedOps)", async () => {
+      // advanced-ops → runAdvancedOps → runWizard 'quit' → 0 (preserva as 5 ops)
+      const prompts = new FakePrompts(["advanced-ops", "quit"]);
+      const code = await runWorkflow({
+        repoRoot: "/repo",
+        logger: new CollectingLogger(),
+        prompts,
+        clipboard: new FakeClipboard(),
+        fs: makeFsWithSpec(),
+      });
+      expect(code).toBe(0);
     });
   });
 });

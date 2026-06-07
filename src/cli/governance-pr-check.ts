@@ -11,6 +11,13 @@ export interface GovernancePrCheckInput {
   readonly prLabels: ReadonlyArray<string>;
   readonly repo: string;
   readonly prBranch: string;
+  /**
+   * Estado operacional canônico de Draft/Ready: o flag `draft` da API do GitHub.
+   * **Fonte ÚNICA de verdade** — o MESMO sinal que `MergeStack` consome via
+   * `PullRequestData.isDraft`. O checkbox de lifecycle no body é apenas documental
+   * (pedagógico, ADR 0024); NUNCA é fonte de enforcement (evita state drift).
+   */
+  readonly isDraft: boolean;
 }
 
 export type GovernancePrCheckResult =
@@ -34,6 +41,43 @@ function hasSectionHeader(body: string, headerLine: string): boolean {
   const title = headerLine.replace(/^#+\s*/, "");
   const escaped = title.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   return new RegExp(`^\\s{0,3}#{2,6}\\s+${escaped}\\s*$`, "m").test(body);
+}
+
+// ── Governança visual (matriz aprovada) ──────────────────────────────────────
+// O artefato GATEADO é o **prompt final autorado** (paste-ready) — produzível
+// pelo agente SEM depender de gerador externo. A IMAGEM é sua renderização
+// mecânica: opcional no Ready, obrigação de publicação em R4 (degradável). Assim
+// o gate nunca bloqueia o Ready por indisponibilidade de um serviço externo
+// (extrínseco/ortogonal à prontidão do PR), ao contrário de R1/R7/R8 (evidência
+// intrínseca). #1 Problema + #3 Valor em ENTREGA (Ready, execution); #1 + #4
+// Convergência no Integration PR. #2 nunca falha. Draft é isento.
+const VISUAL_PROBLEMA = "## Visão pretendida";
+const VISUAL_VALOR = "## Valor entregue";
+const VISUAL_CONVERGENCIA = "## Convergência da stack";
+
+/** Referência de imagem markdown `![alt](url)` ou HTML `<img ... src=...>`. */
+const IMAGE_REF = /!\[[^\]]*\]\([^)]+\)|<img\b[^>]*\bsrc=/i;
+/** Bloco de código cercado (3+ backticks) = o prompt final paste-ready. */
+const PROMPT_BLOCK = /^\s*`{3,}/m;
+
+/** Conteúdo de uma seção: do header até o próximo header de mesmo/maior nível (ou fim). */
+function sectionContent(body: string, header: string): string | null {
+  const title = header.replace(/^#+\s*/, "");
+  const escaped = title.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const m = new RegExp(`^\\s{0,3}#{2,6}\\s+${escaped}\\s*$`, "m").exec(body);
+  if (!m) return null;
+  const rest = body.slice(m.index + m[0].length);
+  const next = /^\s{0,3}#{2,6}\s+\S/m.exec(rest);
+  return next ? rest.slice(0, next.index) : rest;
+}
+
+/**
+ * A seção existe E contém o artefato visual gateado: o **prompt final** (bloco de
+ * código cercado) OU a **imagem** já renderizada (que o satisfaz, sendo ≥ prompt).
+ */
+function sectionHasVisual(body: string, header: string): boolean {
+  const content = sectionContent(body, header);
+  return content !== null && (PROMPT_BLOCK.test(content) || IMAGE_REF.test(content));
 }
 
 export interface GitHubApiCaller {
@@ -206,6 +250,40 @@ export function runGovernancePrCheck(
     }
   }
 
+  // ── Governança visual: prompt final obrigatório por estado epistêmico (matriz aprovada) ──
+  // Gateia o PROMPT FINAL autorado (bloco ```…```) — ou a imagem, que o satisfaz.
+  // Só cobra em ENTREGA (Ready declarado) — Draft é isento. fast-track já saiu
+  // antes (bypass). #2 Capacidade é opcional (nunca falha). A imagem renderizada
+  // é obrigação posterior de publicação (R4), nunca pré-requisito do Ready.
+  const VISUAL_HINT = "preencha o prompt final autorado (bloco ```…```) ou a imagem renderizada";
+  // Ready/Draft vem do flag canônico do GitHub (`isDraft`), NÃO do checkbox do body —
+  // fonte única de verdade, idêntica à do `MergeStack`. Draft é isento.
+  if (!input.isDraft) {
+    if (node.role === "execution") {
+      if (!sectionHasVisual(input.prBody, VISUAL_PROBLEMA)) {
+        reasons.push(
+          `Governança visual: a seção "${VISUAL_PROBLEMA}" está vazia — ${VISUAL_HINT}. Em Ready, todo PR de execução exige Problema + Valor (artefato oficial, não anexo).`
+        );
+      }
+      if (!sectionHasVisual(input.prBody, VISUAL_VALOR)) {
+        reasons.push(
+          `Governança visual: a seção "${VISUAL_VALOR}" está vazia — ${VISUAL_HINT}. Em Ready, todo PR de execução exige Problema + Valor.`
+        );
+      }
+    } else if (node.role === "integration") {
+      if (!sectionHasVisual(input.prBody, VISUAL_PROBLEMA)) {
+        reasons.push(
+          `Governança visual: a seção "${VISUAL_PROBLEMA}" (backdrop) está vazia no Integration PR — ${VISUAL_HINT}.`
+        );
+      }
+      if (!sectionHasVisual(input.prBody, VISUAL_CONVERGENCIA)) {
+        reasons.push(
+          `Governança visual: a seção "${VISUAL_CONVERGENCIA}" está vazia — ${VISUAL_HINT}. O Integration PR exige a narrativa visual da convergência (#4).`
+        );
+      }
+    }
+  }
+
   if (reasons.length > 0) {
     return { kind: "fail", reasons };
   }
@@ -239,6 +317,8 @@ export function main(opts: RunOptions): number {
     body: string | null;
     labels: ReadonlyArray<{ name: string }>;
     head: { ref: string };
+    // `draft` é campo nativo da API REST de pulls — a fonte canônica de Draft/Ready.
+    draft?: boolean;
   };
   try {
     pr = api.call(`repos/${opts.repo}/pulls/${opts.prNumber}`) as typeof pr;
@@ -256,6 +336,8 @@ export function main(opts: RunOptions): number {
       prLabels: pr.labels.map((l) => l.name),
       repo: opts.repo,
       prBranch: pr.head.ref,
+      // `draft` ausente → trata como Ready (fail-safe: gate enforça em vez de pular).
+      isDraft: Boolean(pr.draft),
     },
     fs
   );

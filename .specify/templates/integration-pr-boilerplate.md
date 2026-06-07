@@ -27,7 +27,17 @@
 - <entrega 2>
 - <entrega 3>
 
-> **Visual (opcional):** para gerar uma imagem explicativa do valor entregue, use o comando `workflow` → opção 🎨 (Gerar prompt visual) e cole o prompt resultante na sua ferramenta de imagem.
+## Visão pretendida
+
+<!-- GOVERNANÇA VISUAL (OBRIGATÓRIA): #1 — o problema que a spec resolve (backdrop). Cole o
+     PROMPT FINAL (bloco ```…```); a imagem entra quando gerada. `governance-pr-check` FALHA
+     quando este Integration PR está Ready sem prompt nem imagem (a imagem nunca bloqueia). -->
+
+## Convergência da stack
+
+<!-- GOVERNANÇA VISUAL (OBRIGATÓRIA): #4 — a stack convergindo atômica em `main` (projeção da
+     topology; o que já concluiu × o que falta). Cole o PROMPT FINAL (bloco ```…```) ou a
+     imagem. `governance-pr-check` FALHA quando Ready sem nenhum dos dois. -->
 
 ## PRs integrados por esta stack
 

@@ -26,6 +26,18 @@ function malformedGraduationYaml(): string {
   return stringifyInsightsLedger(ledger);
 }
 
+/** Canônico, com um Insight OPEN recorrente (3 ocorrências) — candidato à graduação. */
+function recurrentOpenYaml(): string {
+  const ledger = InsightLedger.empty();
+  const insight = ledger.capture(
+    { text: "percepção recorrente suficientemente longa", origin: { spec: "0024", cursor: null } },
+    "2026-06-03T10:00:00.000Z"
+  );
+  ledger.recordOccurrence(insight.id, { spec: "0024", cursor: null }, "2026-06-04T10:00:00.000Z");
+  ledger.recordOccurrence(insight.id, { spec: "0024", cursor: null }, "2026-06-05T10:00:00.000Z");
+  return stringifyInsightsLedger(ledger);
+}
+
 // 'promoted' sem alvo viola uma invariante DE DOMÍNIO — o check não tem regra
 // própria; ele apenas força o parse, que delega a assertInsightInvariants.
 const INVALID_INVARIANT = `version: 1
@@ -89,5 +101,21 @@ describe("insights:check (gate)", () => {
 
   it("retorna 1 quando a aresta de graduação tem ref malformada para o estágio", () => {
     withRepo(malformedGraduationYaml(), (root) => expect(main(root)).toBe(1));
+  });
+
+  it("sinaliza candidato à graduação (open, ≥3 ocorrências) SEM falhar o gate", () => {
+    withRepo(recurrentOpenYaml(), (root) => {
+      expect(main(root)).toBe(0);
+      const out = outSpy.mock.calls.map((c) => String(c[0])).join("");
+      expect(out).toMatch(/candidato à graduação/);
+    });
+  });
+
+  it("NÃO sinaliza graduação para Insight open com poucas ocorrências (<3)", () => {
+    withRepo(canonicalLedgerYaml(), (root) => {
+      expect(main(root)).toBe(0);
+      const out = outSpy.mock.calls.map((c) => String(c[0])).join("");
+      expect(out).not.toMatch(/candidato à graduação/);
+    });
   });
 });

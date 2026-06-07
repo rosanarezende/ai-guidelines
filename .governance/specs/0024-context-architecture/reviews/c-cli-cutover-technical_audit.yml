@@ -1,0 +1,40 @@
+# Technical Audit do PR #35 (pr-cli-cutover) — lane consolidada (2 rodadas Antigravity).
+# Rodada 1 emitiu #1–#4; rodada 2 (Gemini 3.1 Pro High) revalidou pós-correções.
+# Disposições FECHADAS (todas accepted): #1/#4 = estado transitório aceito →
+# responsabilidade transferida ao nó Bootstrap+Compiler; #2 resolvido (e29a3d2);
+# #3 resolvido (1f1da7a, após a 2ª auditoria pegar o false-fix da 1ª correção).
+# decision=changes_requested = veredito de EMISSÃO (a review pediu mudanças, feitas);
+# o veredito final vive em gates/c-cli-cutover.yml. disposition não entra no hash.
+checkpoint: "cli-cutover"
+role: technical_audit
+executor:
+  platform: antigravity
+  model: gemini-3.1-pro-high
+decision: changes_requested
+findings_emitted: 4
+review_fingerprint: 63c25dda8725
+findings:
+  - id: F1
+    severity: high
+    location: cli/app/engine.mjs
+    description: "Roteamento paralelo: engine.mjs roteia o registry TS e mantém execute() para os 5 comandos de bootstrap (init/adopt/providers/update/check-budget) — dois sistemas de roteamento convivendo."
+    disposition: accepted # estado transitório aceito; bootstrap é domínio do nó Bootstrap+Compiler, fora do escopo do #35
+    fingerprint: e75e9fec509d
+  - id: F2
+    severity: high
+    location: cli/cli/args.mjs
+    description: "Help desacoplado da extensibilidade: printHelp hardcoded em args.mjs era 2ª fonte dos comandos migrados (com drift: alias 'review' em vez do canônico 'triage'; omitia insight/specs/drift/visual-prompt) — a promessa 'uma linha por comando' era falsa."
+    disposition: accepted # resolvido em e29a3d2 (Command.description obrigatório + renderHelp derivado do registry)
+    fingerprint: ef51ad0b46fa
+  - id: F3
+    severity: high
+    location: cli/app/engine.mjs
+    description: "Boundary TS->JS mascarando falhas: com dist/ ausente, loadRegistry retornava null e o comando do registry degradava para o wizard de bootstrap, em vez de falhar com diagnóstico de build."
+    disposition: accepted # resolvido em 1f1da7a (fail-fast: dist ausente + comando não-bootstrap -> erro 'rode yarn build'); a 1ª correção (e29a3d2, só o catch nu) foi false-fix que a 2ª auditoria pegou
+    fingerprint: 4c37bc20e99b
+  - id: F4
+    severity: medium
+    location: cli/cli/args.mjs
+    description: "Parsers duplicados: parseFlags (por comando) e parseArgs (monólito legado) coexistem — o parser monolítico não foi removido."
+    disposition: accepted # estado transitório aceito; consequência direta do F1 (bootstrap no legado) -> nó Bootstrap+Compiler
+    fingerprint: 95403f085aea

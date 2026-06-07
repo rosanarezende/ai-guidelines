@@ -21,35 +21,42 @@ Exemplos:
 
 <!--
 ═════════════════════════════════════════════════════════════════════════════
-VISUAL DE VALOR ENTREGUE (opcional, recomendado para PRs não-triviais)
+GOVERNANÇA VISUAL (OBRIGATÓRIA — artefato oficial do ciclo, não anexo)
 
-Como gerar:
-  1. Rode `yarn guidelines workflow` → opção 6 (Gerar prompt visual)
-  2. Cole o briefing em uma IA conversacional COM ACESSO AO REPO
-     (Claude com tool use, ChatGPT com browsing, Antigravity, Cursor)
-  3. A IA investiga o repositório atual e devolve um prompt de imagem
-     pronto para gerador externo (Midjourney, DALL-E, Nano Banana, etc.)
+O artefato GATEADO é o PROMPT FINAL autorado (paste-ready), não a imagem — ele é
+produzível pela IA que prepara o PR (AI-as-Channel, ADR 0018) SEM depender de um
+gerador externo. A imagem renderizada é OPCIONAL no Ready e obrigação de
+publicação em R4. Assim o gate nunca bloqueia o Ready por gerador indisponível.
+`governance-pr-check` FALHA se o slot exigido não tiver nem prompt nem imagem.
 
-Cole a imagem na seção abaixo quando aplicável (before/after, fluxo
-operacional, valor entregue). Narrativa visual virou parte do fluxo
-de governança na Spec 0023 — não é marketing, é comunicação operacional.
+  Artefato            | Prompt obrigatório em        | Slot
+  ------------------- | ---------------------------- | ----------------------------
+  #1 Visão pretendida | todo Ready (PR de execução)  | "## Visão pretendida"
+  #3 Valor entregue   | todo Ready (PR de execução)  | "## Valor entregue"
+  #4 Convergência     | Integration PR               | (no template do Integration)
+  #2 Capacidade       | opcional (recomendada)       | "## Capacidade construída"
+
+Como preencher (o check aceita o prompt OU a imagem):
+  Prompt final (paste-ready, default):     Imagem (quando gerada):
+  ```text                                  ![visão](URL)
+  <prompt pronto p/ colar no gerador>      <img src="URL" width="760"/>
+  ```
+
+A imagem é a renderização do prompt; gere-a quando puder (no Ready ou depois) e
+cole a URL. Em R4/encerramento as imagens finais são promovidas para `assets/`
+(degradável: se o gerador estiver indisponível, os prompts ficam preservados).
+Draft é isento (intenção em formação): preencha os prompts ANTES de marcar Ready.
 ═════════════════════════════════════════════════════════════════════════════
 -->
 
-## Visual de valor entregue (opcional)
+## Visão pretendida
 
-<!--
-Imagem única:
-  ![valor entregue](URL_DA_IMAGEM)
+<!-- #1 — o problema + a solução pretendida. Em Ready: cole o prompt final (bloco ```…```) — a imagem entra quando gerada. -->
 
-Before/After side-by-side (sem <form>; só HTML estrutural):
-  <table>
-    <tr>
-      <td align="center"><strong>ANTES</strong><br/><img src="URL_ANTES" width="380"/></td>
-      <td align="center"><strong>DEPOIS</strong><br/><img src="URL_DEPOIS" width="380"/></td>
-    </tr>
-  </table>
--->
+## Valor entregue
+
+<!-- #3 — antes/depois do valor deste slice (sintomas→capacidades). Em Ready: cole o prompt final (bloco ```…```) ou a imagem.
+     #2 Capacidade construída (opcional, recomendada) pode entrar aqui como "## Capacidade construída". -->
 
 ## Status do ciclo de vida
 
@@ -62,6 +69,11 @@ Before/After side-by-side (sem <form>; só HTML estrutural):
 - [ ] **Ready for review** — operacionalmente concluído; aguarda revisão humana
 
 <!--
+Estes checkboxes são DOCUMENTAIS (pedagógicos). O estado operacional Draft/Ready
+é o flag nativo do GitHub (o botão "Ready for review") — fonte ÚNICA de verdade
+consumida pelo enforcement (governance-pr-check) e pelo merge (MergeStack). Marcar
+o checkbox NÃO converte o PR; use o botão do GitHub.
+
 "Authorized to merge" é ato humano explícito — registrado na seção "Merge
 authorization" abaixo como texto, não como checkbox. ADR 0024 separa os
 3 estados para impedir leitura "Ready = mergeable".

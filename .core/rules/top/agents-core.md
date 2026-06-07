@@ -230,12 +230,12 @@ tags: [core, agents, always_injected, pr, github]
 ```
 
 **Instruction (en):**
-Open Pull Requests in `Draft` mode using the full `.github/pull_request_template.md` matrix.
+Open Pull Requests in `Draft` mode using the full `.github/pull_request_template.md` matrix. In governed delivery, open the Draft container at the start of development; maintenance/learning work (fix/patch/spike/incident) is code-first by nature (timing + exceptions: ADR 0025).
 
 **Documentação (pt-br):**
-A submissão de Pull Requests obrigatoriamente se inaugura no modo `Draft`, utilizando integralmente a matriz `.github/pull_request_template.md`.
+A submissão de Pull Requests obrigatoriamente se inaugura no modo `Draft`, utilizando integralmente a matriz `.github/pull_request_template.md`. Em entrega governada, o contêiner Draft abre no início do desenvolvimento; trabalho de manutenção/aprendizado (fix/patch/spike/incident) é código-primeiro por natureza (timing + exceções: ADR 0025).
 
-**Why this matters:** Draft sinaliza WIP e impede que CI/reviewers tratem o PR como pronto antes da hora.
+**Why this matters:** Draft sinaliza WIP e impede que CI/reviewers tratem o PR como pronto antes da hora. Abrir o contêiner cedo em trabalho governado mantém a topology fiel ao estado real do trabalho (ADR 0025). A matriz inclui os slots visuais oficiais (`Visão pretendida`, `Valor entregue`); no Draft, autore o prompt final de intenção (#1) — o único estado epistêmico que ele já sustenta. O prompt final passa a ser cobrado no gate de `Ready` (CORE-10); a imagem renderizada é projeção posterior.
 
 ---
 
@@ -252,12 +252,12 @@ tags: [core, agents, always_injected, pr, github, gate]
 ```
 
 **Instruction (en):**
-Convert PRs from `Draft` to `Ready` only after explicit human revalidation.
+Convert PRs from `Draft` to `Ready` only after explicit human revalidation. At `Ready`, the gated visual artifact is the FINAL authored image-prompt (paste-ready) in each slot — `Visão pretendida` (#1) and `Valor entregue` (#3) for execution PRs, `Convergência da stack` (#4) for Integration PRs. The rendered image is optional here and is a publication obligation at `R4`; `governance-pr-check` fails only when a slot has neither prompt nor image — never blocking `Ready` on external image-generator availability.
 
 **Documentação (pt-br):**
-Converta a operação de `Draft` para `Ready` apenas através da revalidação afirmativa Humana.
+Converta a operação de `Draft` para `Ready` apenas através da revalidação afirmativa Humana. Em `Ready`, o artefato GATEADO é o **prompt final autorado** (paste-ready) em cada slot — `Visão pretendida` (#1) e `Valor entregue` (#3) em PR de execução; `Convergência da stack` (#4) no Integration PR. O prompt é produzível pelo agente sem depender de gerador externo; a **imagem renderizada** é opcional no Ready e vira obrigação de publicação em `R4` (degradável). O `governance-pr-check` FALHA só quando o slot não tem nem prompt nem imagem — nunca bloqueia o Ready por indisponibilidade de gerador. `#2 Capacidade construída` é opcional. Draft é isento (intenção em formação).
 
-**Why this matters:** transição Draft→Ready é gate humano explícito; IA não decide sozinha que está pronto.
+**Why this matters:** transição Draft→Ready é gate humano explícito; IA não decide sozinha que está pronto. Gatear a imagem acoplaria o Ready a um serviço externo/extrínseco à prontidão do PR (≠ R1/R7/R8, que são evidência intrínseca); por isso gateia-se o prompt final (artefato de entrega produzível) e a imagem é projeção posterior — afirmação ≤ evidência.
 
 ---
 

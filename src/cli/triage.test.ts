@@ -6,7 +6,7 @@ import {
 } from "../app/ports/StackOps.js";
 import { WorkflowFileSystem } from "../app/ports/WorkflowFileSystem.js";
 import { TriageReview, TriageReviewResult } from "../app/workflow/TriageReview.js";
-import { renderTriage, runReview } from "./review.js";
+import { renderTriage, runTriage } from "./triage.js";
 import { Logger } from "./workflow.js";
 
 class CollectingLogger implements Logger {
@@ -132,11 +132,11 @@ describe("renderTriage [BR-WORKFLOW-REVIEW-TRIAGE]", () => {
   });
 });
 
-describe("runReview [BR-WORKFLOW-REVIEW-TRIAGE]", () => {
-  it("DADO --pr explícito QUANDO runReview ENTÃO triagem do PR dado (exit 0)", async () => {
+describe("runTriage [BR-WORKFLOW-REVIEW-TRIAGE]", () => {
+  it("DADO --pr explícito QUANDO runTriage ENTÃO triagem do PR dado (exit 0)", async () => {
     const logger = new CollectingLogger();
     const stack = new FakeStackOps([reviewComment({ id: 7, body: "ajuste X" })]);
-    const code = await runReview(
+    const code = await runTriage(
       { repoRoot: "/repo", logger, fs: new FakeFs("qualquer"), stack },
       { pr: 42 }
     );
@@ -144,10 +144,10 @@ describe("runReview [BR-WORKFLOW-REVIEW-TRIAGE]", () => {
     expect(logger.lines.join("\n")).toMatch(/PR #42/);
   });
 
-  it("DADO sem --pr E branch casa um PR aberto QUANDO runReview ENTÃO detecta o PR", async () => {
+  it("DADO sem --pr E branch casa um PR aberto QUANDO runTriage ENTÃO detecta o PR", async () => {
     const logger = new CollectingLogger();
     const stack = new FakeStackOps([], [pr(26, "feat/spec-0023-dx-thinking")]);
-    const code = await runReview(
+    const code = await runTriage(
       { repoRoot: "/repo", logger, fs: new FakeFs("feat/spec-0023-dx-thinking"), stack },
       {}
     );
@@ -155,10 +155,10 @@ describe("runReview [BR-WORKFLOW-REVIEW-TRIAGE]", () => {
     expect(logger.lines.join("\n")).toMatch(/PR #26/);
   });
 
-  it("DADO sem --pr E nenhum PR para a branch QUANDO runReview ENTÃO erro narrativo (exit 1)", async () => {
+  it("DADO sem --pr E nenhum PR para a branch QUANDO runTriage ENTÃO erro narrativo (exit 1)", async () => {
     const logger = new CollectingLogger();
     const stack = new FakeStackOps([], []);
-    const code = await runReview(
+    const code = await runTriage(
       { repoRoot: "/repo", logger, fs: new FakeFs("feat/orfa"), stack },
       {}
     );

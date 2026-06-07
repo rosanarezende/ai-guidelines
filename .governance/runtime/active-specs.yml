@@ -3,19 +3,18 @@ active_specs:
   - id: "0023"
     slug: workflow-runtime
     branch: feat/spec-0023-dx-thinking
-    stage: closing
-    status: active
+    stage: done
+    status: completed
     spec_path: .governance/specs/0023-workflow-runtime
     source_state_path: .governance/specs/0023-workflow-runtime/state.yml
-    updated_at: 2026-05-25T12:29:37.876-03:00
+    updated_at: 2026-06-06T00:21:57-03:00
     updated_by: "@rosanarezende"
   - id: "0024"
     slug: context-architecture
-    branch: feat/spec-0024-ruleset-producibility
-    base_branch: feat/spec-0024-context-architecture
+    branch: feat/spec-0024-pr-cli-cutover
     stage: implementation
     status: active
     spec_path: .governance/specs/0024-context-architecture
     source_state_path: .governance/specs/0024-context-architecture/state.yml
-    updated_at: 2026-06-02T17:29:55.750-03:00
+    updated_at: 2026-06-07T14:32:02.494-03:00
     updated_by: "@rosanarezende"

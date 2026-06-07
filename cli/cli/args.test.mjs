@@ -263,11 +263,6 @@ describe("cli/args", () => {
     }, /Argumento inesperado: extra-garbage/);
   });
 
-  it("[BR-CLI-INPUT-07] DADO `insight` com subcomando + positionais QUANDO parseArgs ENTÃO tolera (parse fino no runtime)", () => {
-    const { command } = parseArgs(["insight", "add", "uma percepção longa", "--note", "ctx"]);
-    assert.equal(command, "insight");
-  });
-
   it("[BR-CLI-WIZARD-*] DADO resposta vazia QUANDO campo tem default ENTÃO assume o default", async () => {
     await withTTY(true, async () => {
       const result = await resolveExecutionInput("init", {

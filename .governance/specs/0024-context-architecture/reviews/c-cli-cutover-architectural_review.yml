@@ -1,0 +1,34 @@
+# Architectural Review do PR #35 (pr-cli-cutover) — ChatGPT. Aprovação LIMPA
+# (0 findings): as 3 observações (Bootstrap+Compiler como dívida futura; topologia
+# a reescrever pós-gate; WorkItem-registry-persistido -> frontier derivada) são
+# NOTAS de direção, não findings bloqueantes. decision=approved; veredito final em
+# gates/c-cli-cutover.yml. audit_evidence OBRIGATÓRIA (sem findings) e selada.
+checkpoint: "cli-cutover"
+role: architectural_review
+executor:
+  platform: chatgpt
+  model: gpt-5.5
+decision: approved
+findings_emitted: 0
+audit_evidence:
+  coverage:
+    - cli/app/engine.mjs
+    - cli/cli/args.mjs
+    - src/cli/registry/Command.ts
+    - src/cli/registry/CommandRegistry.ts
+    - src/cli/registry/renderHelp.ts
+    - src/cli/registry/buildRegistry.ts
+  scope: >
+    Cutover da CLI para o Command Registry: o dispatch central legado deixou de
+    governar os comandos migrados; help como projeção derivada do registry
+    (extensibilidade restaurada — adicionar verbo = registrar + description);
+    fail-fast quando dist/ ausente. Fronteira modelo×migração e o enquadramento da
+    Continuidade Operacional como cauda reescrita da 0024 (Opção A).
+  basis: >
+    O cutover atingiu seu objetivo arquitetural; nenhuma pendência justifica manter
+    o #35 aberto. Observações NÃO-bloqueantes registradas: (1) Bootstrap+Compiler
+    permanece dívida futura explícita (findings #1/#4 transferidos a ele); (2) a
+    topologia da 0024 deve ser reescrita após o Human Gate para refletir a CO; (3) o
+    WorkItem Registry persistido segue sob suspeita e deve ceder à frontier derivada
+    (INV-4). PASS técnico + PASS arquitetural com observações.
+review_fingerprint: caf89938a3ca

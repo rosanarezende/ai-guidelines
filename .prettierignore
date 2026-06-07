@@ -30,3 +30,7 @@ packages/*/dist/
 # (insightsLedgerSerializer) e gateada por `insights:check` (forma canônica).
 # Deixar o prettier reformatar quebraria a paridade raw↔canônica.
 .governance/runtime/insights.yml
+
+# Artefatos de ferramentas de IA (aider, etc.) — scratch local, fora de versão e
+# format (CORE-05: não versionar stray context; GR-0202: excluir do contexto).
+.aider*

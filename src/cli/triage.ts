@@ -1,5 +1,6 @@
 /**
- * CLI standalone para `yarn guidelines review [<pr>]` (tier-1 inspeção).
+ * CLI standalone para `yarn guidelines triage [<pr>]` (tier-1 inspeção;
+ * alias transitório: `review`).
  *
  * Reúne e estrutura os review comments de um PR para **triagem** — o passo
  * determinístico que antes era feito na mão via `gh api`. Read-only.
@@ -22,12 +23,12 @@ import { NodeWorkflowFileSystem } from "../infrastructure/filesystem/NodeWorkflo
 import { GhCli } from "../infrastructure/git/GhCli.js";
 import { Logger } from "./workflow.js";
 
-export interface ReviewCliArgs {
+export interface TriageCliArgs {
   /** Número do PR a triar. Se ausente, detecta pelo PR aberto da branch atual. */
   readonly pr?: number;
 }
 
-export interface ReviewRunOptions {
+export interface TriageRunOptions {
   readonly repoRoot: string;
   readonly logger?: Logger;
   readonly fs?: WorkflowFileSystem;
@@ -108,9 +109,9 @@ export function renderTriage(result: TriageReviewResult): {
   return { lines, clipboardContext };
 }
 
-export async function runReview(
-  options: ReviewRunOptions,
-  args: ReviewCliArgs = {}
+export async function runTriage(
+  options: TriageRunOptions,
+  args: TriageCliArgs = {}
 ): Promise<number> {
   const logger = options.logger ?? stdoutLogger;
   const fs = options.fs ?? new NodeWorkflowFileSystem(options.repoRoot);
@@ -156,8 +157,7 @@ export async function runReview(
 }
 
 export async function main(
-  _argv: ReadonlyArray<string>,
-  opts: ReviewRunOptions & { reviewArgs?: ReviewCliArgs }
+  opts: TriageRunOptions & { triageArgs?: TriageCliArgs }
 ): Promise<number> {
-  return runReview(opts, opts.reviewArgs ?? {});
+  return runTriage(opts, opts.triageArgs ?? {});
 }

@@ -272,12 +272,12 @@ tags: [owner, workflow]
 ```
 
 **Instruction (en):**
-Build PR descriptions in three steps: outline topics, get human approval, then generate the final text using the repository template (if available) and perform a final human validation.
+Build PR descriptions in three steps: outline topics, get human approval, then generate the final text using the repository template (if available) and perform a final human validation. The final text includes the mandatory visual artifacts as authored sections: author the FINAL image-generation prompt (paste-ready for an external generator — not a meta-prompt), at the marco of maximum context, so the image lands in its slot (`Visão pretendida`, `Valor entregue`, `Convergência da stack`).
 
 **Documentação (pt-br):**
 Fluxo obrigatório:
 
 1. listar tópicos
 2. humano valida
-3. gerar texto final (seguindo template do repositório, se existir)
+3. gerar texto final (seguindo template do repositório, se existir) — **inclui as imagens obrigatórias como seções autoradas**: autore o prompt FINAL de geração de imagem (pronto para colar num gerador externo, NÃO um meta-prompt), no marco de máximo contexto, e a imagem ocupa seu slot (`Visão pretendida`, `Valor entregue`, `Convergência da stack`)
 4. humano valida novamente

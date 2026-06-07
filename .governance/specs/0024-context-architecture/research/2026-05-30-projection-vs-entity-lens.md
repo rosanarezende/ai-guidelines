@@ -3,6 +3,8 @@
 > **Alimenta:** `[DEC-0024-G01]` (pilares/estrutura primária) e `[DEC-0024-G02]`. **Não é decisão** — é coletor de _candidatos_ a investigar.
 > **Data:** 2026-05-30. **Autoria:** owner (lente) + Claude Opus 4.8 (coleta).
 > **Instrução da owner (2026-05-30):** usar a lente explicitamente ao revisar artefatos da 0024; registrar candidatos como **finding de research, não decisão**. _"Primeiro quero enxergar o padrão completo."_ **Não auto-absorver.**
+>
+> **PROMOVIDA A `PIT-0009` (2026-06-06).** Deixou de viver só aqui — entrou no caminho de reaparecimento (`.governance/runtime/insights.yml`). A barra da própria lente (≥2 instâncias do mesmo mecanismo, §"Disciplina") foi batida ~5× (handoff, taxonomia, DEC, disclosure→participants, landing_policy/vehicle, confirmOrAbort, capability-vs-affordance). O `insights:check` ganhou um **detector de maturação** que sinaliza PITs recorrentes não-graduados — fechando o modo de falha "observar para sempre".
 
 ---
 

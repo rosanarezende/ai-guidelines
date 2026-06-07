@@ -7,7 +7,7 @@ import { NodeWorkflowFileSystem } from "../infrastructure/filesystem/NodeWorkflo
 import { parseActiveSpecs } from "../infrastructure/yaml/activeSpecsSerializer.js";
 import { ClipboardWriter } from "../app/ports/ClipboardWriter.js";
 import { ConfirmOptions, InputOptions, Prompts, SelectOptions } from "../app/ports/Prompts.js";
-import { Logger, runContinue, runPublishState, runWorkflow } from "./workflow.js";
+import { Logger, runAdvancedOps, runContinue, runPublishState } from "./workflow.js";
 
 /**
  * Integration tests — loop operacional ponta-a-ponta com filesystem + git
@@ -197,7 +197,7 @@ active_specs:
       const logger = new CollectingLogger();
       const prompts = new FakePrompts(["continue-current", "q"]);
       const fs = new NodeWorkflowFileSystem(tempDir);
-      const code = await runWorkflow({
+      const code = await runAdvancedOps({
         repoRoot: tempDir,
         logger,
         prompts,

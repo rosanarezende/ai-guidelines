@@ -1,4 +1,5 @@
 import path from "node:path";
+import { existsSync } from "node:fs";
 import { parseArgs, printHelp, resolveExecutionInput, isSupportedMode } from "#cli/args";
 import { fileExists, readTextIfExists } from "#fs/file-system";
 import { collectExistingPaths, ensureTargetDir, readPackageJson } from "#fs/io";
@@ -308,164 +309,84 @@ export async function execute(mode, rawOptions) {
   }
 }
 
-async function dispatchWorkflow(command, options = {}) {
-  // Bridge para o runtime de workflow compilado em src/ → dist/.
-  // Cf. Spec 0023 (`.governance/specs/0023-workflow-runtime/`):
-  // nenhuma lógica nova de domínio vive em `cli/`; este delegate é o único toque.
-  // PR3 adiciona positional argv cabling para `continue <slug|id>` e para
-  // `workflow publish-state` — transporte mínimo, sem expansão estrutural
-  // do entrypoint legado.
-  let mod;
-  try {
-    mod = await import("../../dist/cli/workflow.js");
-  } catch (err) {
-    const reason = err && err.message ? err.message : String(err);
-    console.error(
-      "Erro: runtime de workflow indisponível em dist/. Execute `yarn build` antes (fail-fast intencional, padrão TemplateEngine)."
-    );
-    console.error(`Detalhe: ${reason}`);
-    process.exitCode = 1;
-    return;
-  }
-  const opts = { repoRoot: process.cwd() };
-  let argv = [];
-
-  if (command === "continue") {
-    argv = options.identifier ? ["continue", options.identifier] : ["continue"];
-  } else if (command === "workflow" && options.subcommand === "publish-state") {
-    argv = ["workflow", "publish-state"];
-    // Tradução de flags kebab-case (parseArgs) → camelCase (PublishStateArgs).
-    opts.publishStateArgs = {
-      status: options.status,
-      updatedBy: options["updated-by"],
-      ...(options.title !== undefined ? { title: options.title } : {}),
-      ...(options["base-branch"] !== undefined ? { baseBranch: options["base-branch"] } : {}),
-      ...(options["last-sync-commit"] !== undefined
-        ? { lastSyncCommit: options["last-sync-commit"] }
-        : {}),
-    };
-  }
-  const code = await mod.main(argv, opts);
-  if (code !== 0) process.exitCode = code;
+/**
+ * PONTE (transitória) para o registry de comandos (src/cli/registry). Carrega o
+ * registry compilado de dist/. Comandos já migrados roteiam por ele; o resto cai
+ * no fallback legado. DONE do #35 (pr-cli-cutover): quando TODOS migrarem, este
+ * vira o único dispatch e o fallback (parseArgs + if/else) é REMOVIDO — registry
+ * roteador único, SEM fallback, com engine.mjs/args.mjs dissolvidos (ADR 0025).
+ */
+async function loadRegistry() {
+  const entryUrl = new URL("../../dist/cli/registry/buildRegistry.js", import.meta.url);
+  // dist/ ainda não construído (ex.: pré-build) → null cai no legado. Transitório.
+  // Qualquer OUTRO erro (build quebrado, throw no register) NÃO é mascarado:
+  // propaga e aparece (auditoria #35, achado #3 — fim do fallback silencioso).
+  if (!existsSync(entryUrl)) return null;
+  const mod = await import(entryUrl.href);
+  return mod.buildRegistry();
 }
 
-async function dispatchReleasePrep(options = {}) {
-  // Bridge para `release-prep` (tier 3, repo-specific) cravado em
-  // `[DEC-0023-L01]`. Mesmo padrão de dispatchWorkflow: importa dist/,
-  // delega para mod.main com opts traduzidas. Tradução de flags
-  // kebab-case (parseArgs) → camelCase (ReleasePrepCliArgs).
-  let mod;
-  try {
-    mod = await import("../../dist/cli/release-prep.js");
-  } catch (err) {
-    const reason = err && err.message ? err.message : String(err);
-    console.error(
-      "Erro: release-prep indisponível em dist/. Execute `yarn build` antes (fail-fast intencional)."
-    );
-    console.error(`Detalhe: ${reason}`);
-    process.exitCode = 1;
-    return;
-  }
-  const opts = {
-    repoRoot: process.cwd(),
-    releasePrepArgs: {
-      ...(options.version !== undefined ? { version: options.version } : {}),
-      ...(options.remote !== undefined ? { remote: options.remote } : {}),
-      ...(options["dry-run"] === true ? { dryRun: true } : {}),
-      ...(options["skip-working-tree-check"] === true ? { skipWorkingTreeCheck: true } : {}),
-    },
-  };
-  const code = await mod.main(["release-prep"], opts);
-  if (code !== 0) process.exitCode = code;
+const registryLogger = {
+  info: (msg) => process.stdout.write(`${msg}\n`),
+  error: (msg) => process.stderr.write(`${msg}\n`),
+};
+
+/**
+ * Help da CLI = bootstrap (estático, nó próprio) + comandos do registry
+ * (projeção DERIVADA via `renderHelp`). Sem registry (pré-build), printHelp cai
+ * no aviso de build. Mata a 2ª fonte de help em `args.mjs` (auditoria #35, #2).
+ */
+async function showHelp() {
+  const registry = await loadRegistry();
+  printHelp(registry ? registry.renderHelp() : "");
 }
 
-async function dispatchReview(options = {}) {
-  // Bridge para `review` (tier 1 inspeção, read-only) cravado em
-  // `[DEC-0023-N01]`. Mesmo padrão dos demais dispatchers: importa dist/,
-  // delega para mod.main. Boundary ADR 0018 — só reúne + estrutura.
-  let mod;
+export async function main(
+  argv = process.argv.slice(2),
+  { loadRegistry: load = loadRegistry } = {}
+) {
   try {
-    mod = await import("../../dist/cli/review.js");
-  } catch (err) {
-    const reason = err && err.message ? err.message : String(err);
-    console.error(
-      "Erro: review indisponível em dist/. Execute `yarn build` antes (fail-fast intencional)."
-    );
-    console.error(`Detalhe: ${reason}`);
-    process.exitCode = 1;
-    return;
-  }
-  let pr;
-  if (options.pr !== undefined) {
-    const parsed = Number(options.pr);
-    if (!Number.isFinite(parsed) || !Number.isInteger(parsed) || parsed <= 0) {
-      console.error("Erro: PR inválido. Use um inteiro positivo.");
-      process.exitCode = 1;
-      return;
+    const commandName = argv[0];
+
+    // ── PONTE (transitória) — comandos migrados roteiam pelo registry ──
+    // Bypassa o parseArgs legado: cada comando faz o próprio parse (dissolve
+    // args.mjs para os migrados). Quando o registry cobrir todos os comandos,
+    // o fallback legado abaixo é REMOVIDO (DONE do #35: roteador único, sem
+    // fallback). Os verbos migrados resolvem aqui; o fallback abaixo serve só os
+    // bootstrap não-migrados (init/adopt/providers/update/check-budget) via execute().
+    if (commandName && commandName !== "--help" && commandName !== "-h") {
+      const registry = await load();
+      if (registry) {
+        if (registry.resolve(commandName)) {
+          const result = await registry.dispatch(argv, {
+            repoRoot: process.cwd(),
+            logger: registryLogger,
+          });
+          if (result.exitCode !== 0) process.exitCode = result.exitCode;
+          return;
+        }
+      } else if (!isSupportedMode(commandName)) {
+        // dist/ ausente E o comando NÃO é bootstrap → é um verbo do registry sem
+        // build. Falha RÁPIDA com diagnóstico; NUNCA degradar para o wizard de
+        // bootstrap (auditoria #35, achado #3): erro estrutural falha cedo e
+        // explícito, não adivinha a intenção do usuário no wizard.
+        throw new Error(
+          `Comando "${commandName}" requer o registry compilado, mas dist/ não existe. ` +
+            "Rode `yarn build` (ou `yarn validate`) antes de usar a CLI."
+        );
+      }
     }
-    pr = parsed;
-  }
-  const opts = {
-    repoRoot: process.cwd(),
-    reviewArgs: {
-      ...(pr !== undefined ? { pr } : {}),
-    },
-  };
-  const code = await mod.main(["review"], opts);
-  if (code !== 0) process.exitCode = code;
-}
 
-async function dispatchInsight(argv) {
-  // Bridge para o tier "Percepções em Trânsito" (src/ → dist/). Mesmo padrão
-  // dos demais dispatchers: importa dist/, repassa o argv cru (argv[0]==="insight")
-  // e delega para mod.main. Nenhuma lógica de domínio vive em cli/.
-  let mod;
-  try {
-    mod = await import("../../dist/cli/insight.js");
-  } catch (err) {
-    const reason = err && err.message ? err.message : String(err);
-    console.error(
-      "Erro: runtime de insight indisponível em dist/. Execute `yarn build` antes (fail-fast intencional)."
-    );
-    console.error(`Detalhe: ${reason}`);
-    process.exitCode = 1;
-    return;
-  }
-  const code = await mod.main(argv, { repoRoot: process.cwd() });
-  if (code !== 0) process.exitCode = code;
-}
-
-export async function main(argv = process.argv.slice(2)) {
-  try {
+    // ── FALLBACK LEGADO (transitório; removido no DONE do #35) ──
     const { command, options } = parseArgs(argv);
 
     if (command === "--help" || command === "-h") {
-      printHelp();
-      return;
-    }
-
-    if (command === "workflow" || command === "continue") {
-      await dispatchWorkflow(command, options);
-      return;
-    }
-
-    if (command === "release-prep") {
-      await dispatchReleasePrep(options);
-      return;
-    }
-
-    if (command === "review") {
-      await dispatchReview(options);
-      return;
-    }
-
-    if (command === "insight") {
-      await dispatchInsight(argv);
+      await showHelp();
       return;
     }
 
     if (!command && !process.stdin.isTTY) {
-      printHelp();
+      await showHelp();
       return;
     }
 
