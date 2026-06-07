@@ -6,8 +6,9 @@
  * autoridade quando diverge do canônico DERIVÁVEL da topologia. Este check deriva
  * o "próximo nó canônico" de `topology` (grupos + `sequence` + `cursor`) e
  * reconcilia contra ele tanto o `cursor` quanto a afirmação viva de próximo-passo
- * em `state.next[0]`. Mata a classe PIT-0001/conflação: a retomada que lê o
- * NARRADO e ignora o DERIVÁVEL.
+ * em `state.next[0]` — esta última por CONTRATO SINTÁTICO (marcador estrutural
+ * `canonical-next: <id>`, não substring solta; ver `CANONICAL_NEXT_MARKER`). Mata
+ * a classe PIT-0001/conflação: a retomada que lê o NARRADO e ignora o DERIVÁVEL.
  *
  * **Advisory-first.** O check DETECTA e REPORTA divergência, mas NUNCA falha o
  * build: `main` retorna sempre 0. Promoção a gate bloqueante (`required`) é
@@ -70,6 +71,22 @@ function findNodeById(topology: WorkflowTopology, id: string): PrTopologyNode | 
   );
 }
 
+/**
+ * Marcador estrutural que declara o próximo nó canônico na afirmação viva
+ * (`state.next[0]`). Contrato SINTÁTICO determinístico — `canonical-next: <id>`,
+ * com `<id>` em kebab-case lowercase (forma dos ids da topologia). Substitui a
+ * checagem por substring solta (`includes`), que dava FALSO-VERDE quando a prosa
+ * citava o nó em contexto negativo/contraditório (ex.: "Não iniciar co-reconcile;
+ * próximo é co-knowledge" — cita o id, mas a autoridade narrada é contrária).
+ * Sem NLP, sem semântica, sem LLM: só a presença de um token estrutural.
+ */
+const CANONICAL_NEXT_MARKER = /canonical-next:\s*([a-z0-9][a-z0-9-]*)/g;
+
+/** Ids declarados via marcador `canonical-next: <id>` em `text`, na ordem de ocorrência. */
+export function extractCanonicalNextMarkers(text: string): string[] {
+  return [...text.matchAll(CANONICAL_NEXT_MARKER)].map((m) => m[1]);
+}
+
 export type DivergenceCode =
   | "cursor-not-canonical-next"
   | "cursor-checkpoint-mismatch"
@@ -122,18 +139,32 @@ export function reconcileTopology(state: WorkflowState): SpecReconcileResult {
     });
   }
 
-  // INV-3 (narrado): a afirmação viva de próximo-passo (state.next[0], por
-  // convenção do repo: a 1ª entrada é a VIVA, as demais são histórico) deve
-  // referenciar o nó canônico derivado. Se a narração de "próximo" não cita o
-  // derivado, ela pode estar apontando para um passo stale (PIT-0001). `next`
-  // vazio = sem afirmação narrada → nada a reconciliar.
-  if (canonical && state.next.length > 0 && !state.next[0].includes(canonical.id)) {
-    divergences.push({
-      code: "narrated-next-omits-canonical",
-      message:
-        `a afirmação viva de próximo-passo (state.next[0]) não referencia o nó canônico ` +
-        `"${canonical.id}". A narração pode estar stale; o canônico derivado é a autoridade.`,
-    });
+  // INV-3 (narrado — CONTRATO SINTÁTICO determinístico): a afirmação viva
+  // (state.next[0], por convenção do repo: a 1ª entrada é a VIVA, as demais são
+  // histórico) deve DECLARAR o próximo nó canônico via marcador estrutural
+  // `canonical-next: <id>` — NÃO por menção textual solta. Substring (`includes`)
+  // dá falso-verde quando a prosa cita o id em contexto negativo/lateral (achado
+  // da auditoria do #36). O contrato exige ≥1 marcador E que TODO marcador aponte
+  // o canônico (marcadores stale/conflitantes falham). `next` vazio = sem
+  // afirmação narrada → nada a reconciliar.
+  if (canonical && state.next.length > 0) {
+    const declared = extractCanonicalNextMarkers(state.next[0]);
+    if (declared.length === 0) {
+      divergences.push({
+        code: "narrated-next-omits-canonical",
+        message:
+          `state.next[0] não declara o próximo nó canônico via marcador estrutural ` +
+          `"canonical-next: <id>" (menção textual solta não conta — evita falso-verde em ` +
+          `frase negativa/lateral). Esperado: "canonical-next: ${canonical.id}".`,
+      });
+    } else if (!declared.every((id) => id === canonical.id)) {
+      divergences.push({
+        code: "narrated-next-omits-canonical",
+        message:
+          `state.next[0] declara canonical-next=[${declared.join(", ")}], mas o nó canônico ` +
+          `derivado é "${canonical.id}" (marcador stale ou conflitante). O derivado é a autoridade.`,
+      });
+    }
   }
 
   if (divergences.length > 0) return { kind: "diverge", canonicalNextId, divergences };

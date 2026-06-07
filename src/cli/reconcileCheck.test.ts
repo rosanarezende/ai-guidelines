@@ -2,7 +2,12 @@ import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
 import { parseWorkflowState } from "../infrastructure/yaml/workflowStateSerializer.js";
-import { deriveCanonicalNext, main, reconcileTopology } from "./reconcileCheck.js";
+import {
+  deriveCanonicalNext,
+  extractCanonicalNextMarkers,
+  main,
+  reconcileTopology,
+} from "./reconcileCheck.js";
 
 /**
  * Monta um state.yml com topology. `nextLine` = afirmação viva (next[0]);
@@ -92,9 +97,9 @@ describe("CO-1 — reconcile:check · contrato de autoridade [BR-CO-RECONCILE]",
   });
 
   describe("reconcileTopology", () => {
-    it("DADO cursor e next[0] fiéis ao canônico QUANDO reconcilia ENTÃO ok (caso verde)", () => {
+    it("DADO cursor e next[0] (com marcador canonical-next) fiéis ao canônico QUANDO reconcilia ENTÃO ok (caso verde)", () => {
       const state = parseWorkflowState(
-        stateWithTopology({ nextLine: "PROXIMO = co-reconcile: reconcile:check" })
+        stateWithTopology({ nextLine: "canonical-next: co-reconcile · PROXIMO = gatear o CO-1" })
       );
       const r = reconcileTopology(state);
       expect(r.kind).toBe("ok");
@@ -115,7 +120,7 @@ describe("CO-1 — reconcile:check · contrato de autoridade [BR-CO-RECONCILE]",
     it("DADO cursor apontando para nó concluído QUANDO reconcilia ENTÃO diverge (cursor não-canônico)", () => {
       const state = parseWorkflowState(
         stateWithTopology({
-          nextLine: "PROXIMO = co-reconcile",
+          nextLine: "canonical-next: co-reconcile",
           cursorPr: "done-1",
           cursorCp: "checkpoint-done-1",
         })
@@ -132,7 +137,7 @@ describe("CO-1 — reconcile:check · contrato de autoridade [BR-CO-RECONCILE]",
     it("DADO cursor.checkpoint de outro nó QUANDO reconcilia ENTÃO diverge (checkpoint mismatch)", () => {
       const state = parseWorkflowState(
         stateWithTopology({
-          nextLine: "PROXIMO = co-reconcile",
+          nextLine: "canonical-next: co-reconcile",
           cursorCp: "checkpoint-done-1", // existe, mas não no nó co-reconcile
         })
       );
@@ -159,6 +164,65 @@ describe("CO-1 — reconcile:check · contrato de autoridade [BR-CO-RECONCILE]",
     it("DADO state.yml sem topology QUANDO reconcilia ENTÃO skip (nada estrutural a reconciliar)", () => {
       const state = parseWorkflowState(stateNoTopology());
       expect(reconcileTopology(state).kind).toBe("skip");
+    });
+  });
+
+  // Achado da auditoria do #36: a checagem por substring (`includes`) dava
+  // FALSO-VERDE quando next[0] citava o id em contexto negativo/lateral. O
+  // contrato sintático `canonical-next: <id>` fecha a classe.
+  describe("INV-3 · contrato sintático canonical-next (anti-falso-verde)", () => {
+    const expectDiverge = (nextLine: string) => {
+      const r = reconcileTopology(parseWorkflowState(stateWithTopology({ nextLine })));
+      expect(r.kind).toBe("diverge");
+      if (r.kind === "diverge") {
+        expect(r.divergences.map((d) => d.code)).toContain("narrated-next-omits-canonical");
+      }
+    };
+
+    it("DADO next[0] citando o canônico em FRASE NEGATIVA QUANDO reconcilia ENTÃO diverge (o falso-verde do finding)", () => {
+      // Cita "co-reconcile", mas a autoridade narrada é contrária — includes() passaria.
+      expectDiverge("Não iniciar co-reconcile; próximo é co-knowledge");
+    });
+
+    it("DADO next[0] com DOIS marcadores conflitantes QUANDO reconcilia ENTÃO diverge", () => {
+      expectDiverge("canonical-next: co-reconcile; revisado para canonical-next: co-knowledge");
+    });
+
+    it("DADO next[0] que só cita o nó LATERALMENTE (sem marcador) QUANDO reconcilia ENTÃO diverge", () => {
+      expectDiverge("ver co-reconcile no handoff para contexto; nada decidido aqui");
+    });
+
+    it("DADO marcador canonical-next apontando nó STALE QUANDO reconcilia ENTÃO diverge", () => {
+      expectDiverge("canonical-next: bootstrap-compiler");
+    });
+
+    it("DADO next[0] com marcador canonical-next CORRETO QUANDO reconcilia ENTÃO ok", () => {
+      const r = reconcileTopology(
+        parseWorkflowState(
+          stateWithTopology({ nextLine: "canonical-next: co-reconcile · PROXIMO = gatear" })
+        )
+      );
+      expect(r.kind).toBe("ok");
+    });
+  });
+
+  describe("extractCanonicalNextMarkers", () => {
+    it("extrai o id de um marcador canonical-next", () => {
+      expect(extractCanonicalNextMarkers("canonical-next: co-reconcile · resto")).toEqual([
+        "co-reconcile",
+      ]);
+    });
+
+    it("extrai múltiplos marcadores na ordem de ocorrência", () => {
+      expect(
+        extractCanonicalNextMarkers("canonical-next: co-reconcile e canonical-next: co-knowledge")
+      ).toEqual(["co-reconcile", "co-knowledge"]);
+    });
+
+    it("frase com menção solta do id (sem marcador) não casa", () => {
+      expect(
+        extractCanonicalNextMarkers("Não iniciar co-reconcile; próximo é co-knowledge")
+      ).toEqual([]);
     });
   });
 
@@ -197,7 +261,7 @@ describe("CO-1 — reconcile:check · contrato de autoridade [BR-CO-RECONCILE]",
     });
 
     it("DADO repo reconciliado QUANDO main roda ENTÃO retorna 0 e reporta ✅", () => {
-      writeStateYml(stateWithTopology({ nextLine: "PROXIMO = co-reconcile" }));
+      writeStateYml(stateWithTopology({ nextLine: "canonical-next: co-reconcile" }));
       const { logger, text } = captureLogger();
       const code = main(tmpRoot, logger);
       expect(code).toBe(0);
