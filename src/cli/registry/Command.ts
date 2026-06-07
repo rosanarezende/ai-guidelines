@@ -52,6 +52,14 @@ export interface CommandResult {
 export interface Command<TOptions = void> {
   readonly name: string;
   readonly aliases?: readonly string[];
+  /**
+   * Resumo de UMA linha — fonte única do help, que é projeção derivada do registry
+   * (não 2ª fonte em `args.mjs`). Obrigatório: um comando novo não entra sem se
+   * descrever (fecha o achado #2 da auditoria do #35 — help acoplado à extensibilidade).
+   */
+  readonly description: string;
+  /** Exemplos de invocação (sem o prefixo `yarn guidelines`), opcionais — para o help. */
+  readonly usage?: readonly string[];
   parse(argv: readonly string[]): TOptions;
   /**
    * Produtor INTERATIVO de options — dual opcional de `parse` (que produz a

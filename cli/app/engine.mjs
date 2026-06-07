@@ -1,4 +1,5 @@
 import path from "node:path";
+import { existsSync } from "node:fs";
 import { parseArgs, printHelp, resolveExecutionInput, isSupportedMode } from "#cli/args";
 import { fileExists, readTextIfExists } from "#fs/file-system";
 import { collectExistingPaths, ensureTargetDir, readPackageJson } from "#fs/io";
@@ -316,19 +317,29 @@ export async function execute(mode, rawOptions) {
  * roteador único, SEM fallback, com engine.mjs/args.mjs dissolvidos (ADR 0025).
  */
 async function loadRegistry() {
-  try {
-    const mod = await import("../../dist/cli/registry/buildRegistry.js");
-    return mod.buildRegistry();
-  } catch {
-    // dist/ ausente (ex.: pré-build) → null cai no legado. Transitório.
-    return null;
-  }
+  const entryUrl = new URL("../../dist/cli/registry/buildRegistry.js", import.meta.url);
+  // dist/ ainda não construído (ex.: pré-build) → null cai no legado. Transitório.
+  // Qualquer OUTRO erro (build quebrado, throw no register) NÃO é mascarado:
+  // propaga e aparece (auditoria #35, achado #3 — fim do fallback silencioso).
+  if (!existsSync(entryUrl)) return null;
+  const mod = await import(entryUrl.href);
+  return mod.buildRegistry();
 }
 
 const registryLogger = {
   info: (msg) => process.stdout.write(`${msg}\n`),
   error: (msg) => process.stderr.write(`${msg}\n`),
 };
+
+/**
+ * Help da CLI = bootstrap (estático, nó próprio) + comandos do registry
+ * (projeção DERIVADA via `renderHelp`). Sem registry (pré-build), printHelp cai
+ * no aviso de build. Mata a 2ª fonte de help em `args.mjs` (auditoria #35, #2).
+ */
+async function showHelp() {
+  const registry = await loadRegistry();
+  printHelp(registry ? registry.renderHelp() : "");
+}
 
 export async function main(argv = process.argv.slice(2)) {
   try {
@@ -356,12 +367,12 @@ export async function main(argv = process.argv.slice(2)) {
     const { command, options } = parseArgs(argv);
 
     if (command === "--help" || command === "-h") {
-      printHelp();
+      await showHelp();
       return;
     }
 
     if (!command && !process.stdin.isTTY) {
-      printHelp();
+      await showHelp();
       return;
     }
 

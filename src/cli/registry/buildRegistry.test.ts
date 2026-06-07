@@ -35,4 +35,20 @@ describe("buildRegistry", () => {
     );
     expect(names).not.toContain("review");
   });
+
+  it("DADO o registry QUANDO inspeciona os comandos ENTÃO cada um declara description não-vazia (help derivável; auditoria #35 #2)", () => {
+    const registry = buildRegistry();
+    for (const command of registry.commands()) {
+      expect(command.description.trim().length).toBeGreaterThan(0);
+    }
+  });
+
+  it("DADO o registry QUANDO renderHelp ENTÃO deriva o help com os canônicos + o alias review", () => {
+    const help = buildRegistry().renderHelp();
+    expect(help).toContain("triage");
+    expect(help).toContain("alias: review");
+    expect(help).toContain("specs");
+    expect(help).toContain("visual-prompt");
+    expect(help).toContain("Ex.: yarn guidelines");
+  });
 });

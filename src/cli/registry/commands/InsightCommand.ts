@@ -19,6 +19,9 @@ export interface InsightOptions {
  */
 export class InsightCommand implements Command<InsightOptions> {
   readonly name = "insight";
+  readonly description =
+    "Captura e maturação de percepções recorrentes (PIT): add | saw | list | promote | discard.";
+  readonly usage = ["insight list", "insight add"];
 
   constructor(private readonly insightMainFn: InsightMainFn = insightMain) {}
 

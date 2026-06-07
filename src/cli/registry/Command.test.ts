@@ -53,6 +53,7 @@ interface DemoOptions {
  */
 class DemoCommand implements Command<DemoOptions> {
   readonly name = "demo";
+  readonly description = "comando de demonstração (dual parse/prompt)";
   readonly ranWith: DemoOptions[] = [];
 
   parse(argv: readonly string[]): DemoOptions {
@@ -118,6 +119,7 @@ describe("Command — contrato com prompt() opcional (dual interativo de parse)"
     // Comando parse-only — exatamente a forma dos 5 commands hoje registrados.
     const readOnly: Command<{ id?: string }> = {
       name: "read-only",
+      description: "comando read-only de demonstração",
       parse: (argv) => (argv[0] ? { id: argv[0] } : {}),
       run: async () => ({ exitCode: 0 }),
     };

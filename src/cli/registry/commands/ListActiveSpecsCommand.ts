@@ -17,6 +17,9 @@ import { LoadActiveSpecsIndex, loadActiveSpecsIndex } from "./loadActiveSpecsInd
  */
 export class ListActiveSpecsCommand implements Command<void> {
   readonly name = "specs";
+  readonly description =
+    "Lista as specs ativas do índice operacional público (.governance/runtime/active-specs.yml). Read-only.";
+  readonly usage = ["specs"];
 
   constructor(private readonly loadIndex: LoadActiveSpecsIndex = loadActiveSpecsIndex) {}
 

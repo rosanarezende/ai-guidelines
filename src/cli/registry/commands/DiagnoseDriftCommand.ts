@@ -16,6 +16,9 @@ import { LoadActiveSpecsIndex, loadActiveSpecsIndex } from "./loadActiveSpecsInd
  */
 export class DiagnoseDriftCommand implements Command<void> {
   readonly name = "drift";
+  readonly description =
+    "Diagnostica drift do índice público: spec_path declarado que não existe no filesystem local. Read-only.";
+  readonly usage = ["drift"];
 
   constructor(private readonly loadIndex: LoadActiveSpecsIndex = loadActiveSpecsIndex) {}
 

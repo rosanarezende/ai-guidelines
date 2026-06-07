@@ -24,6 +24,9 @@ export interface TriageOptions {
 export class TriageCommand implements Command<TriageOptions> {
   readonly name = "triage";
   readonly aliases: readonly string[] = ["review"];
+  readonly description =
+    "Triagem read-only dos review comments inline de um PR (sem-resposta × respondidos) + bloco copiável. Não analisa/responde (ADR 0018).";
+  readonly usage = ["triage", "triage 26"];
 
   constructor(private readonly triageMainFn: TriageMainFn = triageMain) {}
 

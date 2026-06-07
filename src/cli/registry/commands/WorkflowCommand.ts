@@ -24,6 +24,9 @@ export type WorkflowOptions =
  */
 export class WorkflowCommand implements Command<WorkflowOptions> {
   readonly name = "workflow";
+  readonly description =
+    "Wizard operacional da spec (briefing/REPL, publish-state, Integration PR, merge da stack, índice, drift, prompt visual). Sem LLM no runtime (ADR 0018).";
+  readonly usage = ["workflow", "workflow publish-state --status=active --updated-by=@maintainer"];
 
   constructor(private readonly workflowMainFn: WorkflowMainFn = workflowMain) {}
 

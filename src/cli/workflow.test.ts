@@ -2035,6 +2035,7 @@ describe("CLI — wizard navegação por Intent [BR-WIZARD-INTENT]", () => {
     for (const name of ["continue", "insight", "triage", "release-prep"]) {
       const command: Command<readonly string[]> = {
         name,
+        description: `spy: ${name}`,
         parse: (argv) => argv,
         run: async (argv) => {
           dispatched.push([name, ...argv]);

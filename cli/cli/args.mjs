@@ -71,11 +71,15 @@ export function isSupportedMode(mode) {
   return SUPPORTED_MODES.includes(mode);
 }
 
-export function printHelp() {
+export function printHelp(commandsSection = "") {
+  const registryBlock =
+    commandsSection.trim().length > 0
+      ? commandsSection
+      : "  (execute `yarn build` para ver os comandos do registry)";
   console.log(`ai-guidelines CLI
 
 Uso:
-  yarn guidelines <init|adopt|providers|update|check-budget|workflow|continue|release-prep|review> [opcoes]
+  yarn guidelines <comando> [opções]   (veja os comandos abaixo)
 
 ═══ COMANDOS DE BOOTSTRAP / DISTRIBUIÇÃO ═══
 
@@ -96,65 +100,9 @@ Uso:
   check-budget   Imprime o relatório de orçamento de tokens (universal, opt-in,
                  AGENTS.md compilado e cada provider entrypoint).
 
-═══ COMANDOS DO WORKFLOW RUNTIME (Spec 0023, preview) ═══
+═══ COMANDOS DO WORKFLOW / GOVERNANÇA (registry) ═══
 
-  workflow       Wizard operacional (8 opções fixas declarativas, agrupadas
-                 por gênero via icons):
-                   [1] 📍 Continuar spec atual (briefing + REPL)
-                   [2] 📍 Continuar outra spec (por slug ou id)
-                   [3] 📡 Publicar estado (instruções)
-                   [4] 🔗 Abrir Integration PR da spec ativa (transactional)
-                   [5] 🔀 Executar merge atômico da stack (transactional)
-                   [6] 📋 Ver specs ativas (índice público)
-                   [7] 🔍 Diagnosticar drift do índice
-                   [8] 🎨 Gerar prompt visual (briefing para IA conversacional
-                       investigar o repo e devolver o prompt de imagem final)
-                 Cf. [DEC-0023-B06] + [DEC-0023-B07] + [DEC-0023-L01];
-                 não embute LLM (ADR 0018 preservado). Opções 4 e 5 (tier 2
-                 transactional) mostram plan + confirmação humana antes de
-                 qualquer side-effect — cf. ADR 0024 seção "Operational CLI
-                 commands".
-
-  continue [<slug|id>]
-                 Atalho do workflow: imprime briefing + próxima ação de
-                 state.yml. **Recusa narrativamente** (exit 1) quando a spec
-                 não tem tasks.md ou gate.status != closed (enforcement L2,
-                 cf. ADR 0021 + [DEC-0023-E03]).
-                   Sem argumento → detecta spec via branch.
-                   Com <slug|id>  → resolve via índice público sem auto-checkout.
-                 Ex.: yarn guidelines continue 0023
-
-  workflow publish-state --status=<active|blocked|paused|completed>
-                          --updated-by=<autorizador>
-                          [--title=<txt>] [--base-branch=<br>]
-                          [--last-sync-commit=<sha>]
-                 Projeta state.yml interno da spec corrente → entry em
-                 .governance/runtime/active-specs.yml. Manual-first
-                 (cf. [DEC-0023-G03]); status declarado, sem inferência.
-                 Ex.: yarn guidelines workflow publish-state --status=active --updated-by=@maintainer
-
-  release-prep   [--version <X.Y.Z>] [--remote <name>] [--dry-run]
-                 [--skip-working-tree-check]
-                 Tier 3 standalone (repo-specific, cf. ADR 0024). Lê versão
-                 alvo de CHANGELOG.md [Unreleased], mostra plan completo,
-                 confirma e executa: bump package.json + promove CHANGELOG +
-                 commit + tag + push. Tag push dispara
-                 .github/workflows/release.yml → publish em npm + GitHub
-                 release. Pre-release auto-detectada (versão contém '-')
-                 vai para dist-tag 'next'; estável vai para 'latest'.
-                 Cf. [DEC-0023-L01].
-                 Ex.: yarn guidelines release-prep --dry-run
-                      yarn guidelines release-prep --version 1.1.0-preview.0
-
-  review         [<pr>] [--pr <n>]
-                 Tier 1 inspeção (read-only). Reúne e estrutura os review
-                 comments inline de um PR para triagem (sem resposta ×
-                 respondidos) + bloco copiável para colar na IA externa.
-                 Detecta o PR pela branch atual se o número for omitido.
-                 NÃO analisa/responde — isso é trabalho do agente, não do
-                 runtime (ADR 0018). Cf. [DEC-0023-N01].
-                 Ex.: yarn guidelines review
-                      yarn guidelines review 26
+${registryBlock}
 
 ═══ OPÇÕES GERAIS ═══
 

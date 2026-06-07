@@ -17,6 +17,9 @@ export type ReleasePrepMainFn = (
  */
 export class ReleasePrepCommand implements Command<ReleasePrepCliArgs> {
   readonly name = "release-prep";
+  readonly description =
+    "Tier 3: lê a versão de CHANGELOG [Unreleased], mostra o plan, confirma e executa bump + tag + push (dispara o release).";
+  readonly usage = ["release-prep --dry-run", "release-prep --version 1.1.0-preview.0"];
 
   constructor(private readonly releasePrepMainFn: ReleasePrepMainFn = releasePrepMain) {}
 

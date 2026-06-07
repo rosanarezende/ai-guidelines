@@ -10,6 +10,7 @@ function registryOf(...names: string[]): CommandRegistry {
   for (const name of names) {
     const command: Command<void> = {
       name,
+      description: `fake: ${name}`,
       parse: () => undefined,
       run: async () => ({ exitCode: 0 }),
     };

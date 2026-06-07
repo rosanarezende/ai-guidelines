@@ -31,6 +31,7 @@ function spyCommand(
   const ranWith: { rest: readonly string[] }[] = [];
   return {
     name,
+    description: `spy: ${name}`,
     aliases: opts.aliases,
     parsedFrom,
     ranWith,
@@ -114,6 +115,7 @@ describe("CommandRegistry", () => {
     const reg = new CommandRegistry();
     const throwing: Command<void> = {
       name: "boom",
+      description: "boom",
       parse() {
         throw new Error("input inválido");
       },
@@ -134,6 +136,7 @@ describe("CommandRegistry", () => {
     const reg = new CommandRegistry();
     const throwing: Command<void> = {
       name: "boom",
+      description: "boom",
       parse() {
         return undefined;
       },
@@ -168,6 +171,7 @@ describe("CommandRegistry", () => {
     const ranWith: { source: "parse" | "prompt" }[] = [];
     return {
       name,
+      description: `dual: ${name}`,
       ranWith,
       parse: () => ({ source: "parse" as const }),
       prompt: async () => ({ source: "prompt" as const }),
@@ -233,6 +237,7 @@ describe("CommandRegistry", () => {
     const reg = new CommandRegistry();
     const throwing: Command<void> = {
       name: "boom",
+      description: "boom",
       parse: () => undefined,
       prompt: async () => {
         throw new Error("prompt abortado");

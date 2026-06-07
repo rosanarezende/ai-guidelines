@@ -17,6 +17,9 @@ export interface ContinueOptions {
  */
 export class ContinueCommand implements Command<ContinueOptions> {
   readonly name = "continue";
+  readonly description =
+    "Briefing + próxima ação da spec (lookup de state.yml); recusa se faltar tasks.md ou gate≠closed. Sem argumento = spec da branch atual.";
+  readonly usage = ["continue", "continue 0023"];
 
   constructor(private readonly runContinueFn: RunContinueFn = runContinue) {}
 

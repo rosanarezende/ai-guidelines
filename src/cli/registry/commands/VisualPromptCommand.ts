@@ -58,6 +58,9 @@ function validTypesList(): string {
  */
 export class VisualPromptCommand implements Command<VisualPromptOptions> {
   readonly name = "visual-prompt";
+  readonly description =
+    "Gera o prompt para um gerador de imagem externo (fluxo em 2 etapas via IA conversacional com acesso ao repo).";
+  readonly usage = ["visual-prompt --type=<tipo>"];
 
   constructor(readonly deps: VisualPromptDeps = DEFAULT_DEPS) {}
 

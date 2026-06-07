@@ -1,4 +1,5 @@
 import { Command, CommandContext, CommandResult } from "./Command.js";
+import { renderCommandsHelp } from "./renderHelp.js";
 
 /**
  * Registry de comandos da CLI — a espinha dorsal extensível que substitui a
@@ -36,13 +37,27 @@ export class CommandRegistry {
     return this.byKey.get(name);
   }
 
+  /** Comandos canônicos (sem aliases), ordenados por nome — base do help e dos erros. */
+  commands(): readonly Command<unknown>[] {
+    const byName = new Map<string, Command<unknown>>();
+    for (const command of this.byKey.values()) {
+      byName.set(command.name, command);
+    }
+    return [...byName.values()].sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));
+  }
+
   /** Nomes canônicos registrados (sem aliases), ordenados — para help e erros. */
   commandNames(): readonly string[] {
-    const canonical = new Set<string>();
-    for (const command of this.byKey.values()) {
-      canonical.add(command.name);
-    }
-    return [...canonical].sort();
+    return this.commands().map((command) => command.name);
+  }
+
+  /**
+   * Help dos comandos do registry — projeção derivada (renderer puro), não 2ª
+   * fonte. É o registry, não o `args.mjs`, que passa a ser o SSOT do help dos
+   * comandos migrados (auditoria do #35, achado #2).
+   */
+  renderHelp(): string {
+    return renderCommandsHelp(this.commands());
   }
 
   /**
