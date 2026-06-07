@@ -60,7 +60,10 @@ Falha estrutural descoberta: aprendizado recorrente preso em research **nunca en
 
 ## 6. Próximo ponto de retomada
 
-1. **#35 substantivamente DONE** (falsificação 2026-06-06: integration-open/merge-stack não convergem — §2). Resíduo só opcional (3 duplicatas no wizard legado). Próximo real = **rito de encerramento** (human-gated): instanciar `review.md` R1–R8 → Integration PR → merge atômico (modo `unit`). Ver `state.yml § next`.
+1. **#35 = NÓ substantivamente concluído** (não a spec; falsificação 2026-06-06: integration-open/merge-stack não convergem — §2). Resíduo só opcional (3 duplicatas no wizard legado). **Próximo passo = GATE do nó #35** (3 etapas): Technical Audit (Codex) → Architectural Review (ChatGPT) → Human Gate (owner). O **Human Gate do #35 decide o próximo movimento = abrir o próximo nó _stacked_** (`pr-compiler-ts`, sequence 4) — **NÃO mergeia em `main`** (`plan.md` § Glossário/Gate). **Integration PR + merge da spec NÃO acontecem aqui:** o rito de encerramento (`review.md` R1–R8 → Integration PR → merge atômico, modo `unit`) é exclusivo do **nó terminal `integration-final`**, só após `pr-dualroot-collapse` (sequence 10). A topologia viva (`state.yml § topology`, SSOT `[DEC-0024-G07]`) tem **6 PRs de execução + 1 Integration PR depois do #35**.
+
+   > ⚠️ **Correção 2026-06-06 (conflação removida):** versões anteriores deste §6 afirmavam que "o próximo passo após o #35 = rito de encerramento → Integration PR → merge atômico". Isso **conflacionava encerramento do NÓ #35 com encerramento da SPEC 0024** — falsificado pelas fontes estruturais (`state.yml § topology` / `plan.md` § Gate / `active-specs.yml` = `implementation`/`active`; base do #35 = `feat/spec-0024-insights-in-flight`, branch do #34, **não** `main`). #35 é **sequence 3 de 10**. A frase chegou a se propagar (memória `spec-0024-resumption-ssot`, corpo do commit `20bc58e`); saneada aqui e na memória.
+
 2. `bootstrap → registry` = **nó próprio** (com `pr-compiler-ts`), fora do #35.
 3. `review` alias: quando publicar a próxima release, migrar docs (README/WORKFLOW/CONTRIBUTING/docs-cli/help) para `triage` primário + `review` como alias depreciado (transição docs-led; manter o alias — contrato v1.1.0).
 
