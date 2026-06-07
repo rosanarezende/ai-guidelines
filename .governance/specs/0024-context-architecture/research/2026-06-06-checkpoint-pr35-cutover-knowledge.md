@@ -28,7 +28,7 @@
 - `f521310`: removido `dispatchWorkflow` + `workflow`/`continue` de `SUPPORTED_MODES` (eram o único acoplamento que travava a remoção — pré-build agora erra limpo).
 - `1d53fc7`: podadas as exceções mortas de `parseArgs` (review/insight) + teste morto; **rename `review.ts → triage.ts`** (símbolos `Review*→Triage*`, `runReview→runTriage`); argv vestigial enxugado. **Alias CLI `review` PRESERVADO** (contrato publicado v1.1.0; `triage` é o nome canônico no código, sem doc user-facing ainda).
 
-**Restante do #35 (pendência obrigatória — NÃO é o bootstrap):** converger **`integration-open`** e **`merge-stack`** de handlers do wizard (`runOpenIntegrationPRWizard`/`runMergeStackWizard` em `src/cli/workflow.ts`) para **Commands no registry** (confirm **inline**, pois confirm-in-run foi falsificado = sem abstração) + adicionar Intents + **remover a seção transitória** `runAdvancedOps`/`runWizard`. O código se autorrotula `workflow.ts:1080` "⚙️ Operações avançadas (dívida de convergência #35)". É arquiteturalmente contígua (mesmo padrão dos 8 Commands já migrados, sobre use cases que **já existem** em src/). **Cuidado:** `runWizard` também hospeda `continue-other` (continuar outra spec por id) e `publish-state-help`, que **não têm Intent** — preservar como Intents (são "mesma capability, 2 superfícies", ADR 0026 §4), NÃO dropar.
+**Resíduo real (após falsificação 2026-06-06, ADR 0026):** `integration-open`/`merge-stack` **NÃO convergem** a Commands — são **passos do rito de encerramento** (operações do `workflow`; "wizard option 4/5" por design, `[DEC-0023-L01]`; único invocador = `workflow.ts`), não capabilities de 1ª classe. Single-homed → promovê-las não removeria drift, só reificaria projeção (a própria "pendência de convergência" era projeção reificada). Os já-migrados (`specs`/`drift`/`visual-prompt`) **estão feitos**; o wizard legado apenas os **duplica**. Então o único resíduo é **OPCIONAL**: remover as 3 entradas duplicadas do `runWizard`/`runAdvancedOps`. Os ops de encerramento + `continue-other`/`publish-state-help` (affordances) permanecem operações do wizard (casa legítima). → **#35 substantivamente DONE.**
 
 ---
 
@@ -56,11 +56,12 @@ Falha estrutural descoberta: aprendizado recorrente preso em research **nunca en
 - **confirm-in-run**: resolvido = sem abstração. Não recriar `runTransactional`/`confirmOrAbort`.
 - **Governança visual** (#35): prompt final gateado, não a imagem; Draft/Ready do flag `isDraft`. Não reabrir.
 - **B06 como ban global de inferência**: é escopado ao wizard/runtime. Não generalizar (erro corrigido em `0079c5b`).
+- **`integration-open`/`merge-stack` como pendência de convergência a Commands**: **FALSIFICADO** (2026-06-06, ADR 0026) — são passos do rito de encerramento (operações do `workflow`), não capabilities. Não tentar convergi-los.
 
 ## 6. Próximo ponto de retomada
 
-1. Converger `integration-open` + `merge-stack` → Commands + Intents (confirm inline) + dar Intent a `continue-other`/`publish-state-help` + remover `runAdvancedOps`/`runWizard` (seção transitória). É a pendência obrigatória do #35 (§2).
-2. Depois: bootstrap → registry como **nó próprio** (com `pr-compiler-ts`), fora do #35.
+1. **#35 substantivamente DONE** (falsificação 2026-06-06: integration-open/merge-stack não convergem — §2). Resíduo só opcional (3 duplicatas no wizard legado). Próximo real = **rito de encerramento** (human-gated): instanciar `review.md` R1–R8 → Integration PR → merge atômico (modo `unit`). Ver `state.yml § next`.
+2. `bootstrap → registry` = **nó próprio** (com `pr-compiler-ts`), fora do #35.
 3. `review` alias: quando publicar a próxima release, migrar docs (README/WORKFLOW/CONTRIBUTING/docs-cli/help) para `triage` primário + `review` como alias depreciado (transição docs-led; manter o alias — contrato v1.1.0).
 
 ## 7. Riscos residuais

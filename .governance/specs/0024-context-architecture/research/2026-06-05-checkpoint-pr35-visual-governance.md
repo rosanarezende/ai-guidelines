@@ -94,6 +94,8 @@
 
 ### 6b. Etapa 3 restante (após 6a)
 
+> **SUPERSEDED (2026-06-06):** `confirm-in-run` resolvido (sem abstração) e a "migração de `integration-open`/`merge-stack` a Commands" **FALSIFICADA** (ADR 0026 — são passos do `workflow`, não capabilities de 1ª classe). SSOT atual: `2026-06-06-checkpoint-pr35-cutover-knowledge.md`.
+
 - Migrar **`integration-open`** + **`merge-stack`** a Commands (consumindo a resolução do `confirm-in-run`).
 - **Reduzir/remover** a seção "⚙️ Operações avançadas" do wizard (entradas paralelas hoje duplicam `specs`/`drift`/`visual-prompt`).
 

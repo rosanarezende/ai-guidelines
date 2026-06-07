@@ -42,6 +42,7 @@ Instâncias confirmadas (a lente **removeu** trabalho real — passam o critéri
 - **Disclosure → `participants.yml`/git-trailers** → rejeitado (autoria ≠ participação); disclosure é renderer/projeção, não entidade governada.
 - **`confirmOrAbort`** → o deny-by-default já era single-sourced no port `Prompts.confirm`; helper de call-site era projeção redundante.
 - **`continue-other` / `publish-state-help`** → affordances humanas de `continue <id>`/`publish-state` (mesma capability, 2 superfícies — §4), não capabilities novas.
+- **`integration-open` / `merge-stack`** (falsificação 2026-06-06) → **passos do rito de encerramento** (operações do `workflow`, "wizard option 4/5" por design em `[DEC-0023-L01]`), não capabilities de 1ª classe. Single-homed (único invocador: `workflow.ts`); promovê-las a Command **não removeria drift** → reificação. A "pendência de convergência do #35" era ela própria uma projeção reificada (meta-instância desta lente).
 
 ## Alternativas avaliadas e rejeitadas
 

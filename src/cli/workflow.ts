@@ -1077,7 +1077,7 @@ export function buildTopMenu(catalog: readonly Intent[]) {
   return [
     ...catalog.map((intent) => ({ name: intent.title, value: `intent:${intent.id}` })),
     {
-      name: "⚙️  Operações avançadas (dívida de convergência #35)",
+      name: "⚙️  Operações avançadas (wizard legado)",
       value: ADVANCED_OPS_VALUE,
     },
     { name: "Sair", value: "quit" },
@@ -1159,11 +1159,15 @@ async function selectIntentAction(
 }
 
 /**
- * SEÇÃO TRANSITÓRIA — dívida de convergência do #35. Wizard legado das 5 ops
- * ainda NÃO convergidas a Commands (integration-open, merge-stack, list-active,
- * diagnose-drift, visual-prompt). Handlers inalterados. Para remover quando elas
- * virarem Commands+Intents: apague a entrada ADVANCED_OPS_VALUE em buildTopMenu,
- * o branch em runWorkflow e esta função (+ runWizard e handlers exclusivos dela).
+ * SEÇÃO TRANSITÓRIA — wizard legado da 0023 (`runWizard`). Status real após a
+ * falsificação de 2026-06-06 (ADR 0026 — não era "dívida de convergência"):
+ *  - `list-active`/`diagnose-drift`/`visual-prompt` JÁ são Commands+Intents — aqui
+ *    são DUPLICATAS removíveis (o caminho canônico é o Intent).
+ *  - `integration-open`/`merge-stack` NÃO convergem a Commands: são PASSOS do rito
+ *    de encerramento (operações do `workflow`), não capabilities de 1ª classe.
+ *  - `continue-other`/`publish-state-help`: affordances humanas (ADR 0026 §4).
+ * Cleanup OPCIONAL: remover as 3 entradas duplicadas; os ops de encerramento +
+ * affordances permanecem operações do wizard (sua casa legítima).
  */
 export async function runAdvancedOps(options: RunOptions): Promise<number> {
   const logger = options.logger ?? stdoutLogger;

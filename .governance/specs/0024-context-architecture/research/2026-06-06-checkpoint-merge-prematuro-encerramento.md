@@ -59,7 +59,7 @@ Também falsificadas (linguagem de superfícies, no research): GitHub Reviews, R
 
 ## 7. Pendências reais (sem reabrir investigação)
 
-- **`confirm-in-run`** (anterior ao arco, ainda pendente): decisão da owner sobre o portão transacional compartilhado — bloqueia a etapa 3 do #35 (integration-open/merge-stack como Commands). É o **próximo passo do #35 mainline**.
+- **`confirm-in-run`** (anterior ao arco, ainda pendente): decisão da owner sobre o portão transacional compartilhado — bloqueia a etapa 3 do #35 (integration-open/merge-stack como Commands). É o **próximo passo do #35 mainline**. _[SUPERSEDED 2026-06-06: confirm-in-run resolvido SEM abstração; integration-open/merge-stack NÃO convergem (falsificado, ADR 0026 — são passos do workflow). SSOT: checkpoint cutover-knowledge.]_
 - **Superfície de enforcement de aterrissagem:** escolher entre merge queue / operação / acesso. Deferido — rodada de modelagem/decisão futura. **Não** voltar para status check.
 - **`active-specs.yml` 0024.branch** ainda aponta `ruleset-producibility` (#33); o cursor é `pr-cli-cutover` (#35). Não é violação de invariante (registra "última publish-state"); refresh = **re-rodar `publish-state` de #35** (não hand-edit). _(O `active-specs:check` checa `stage`, não `branch`.)_
 - **Framing do Integration PR** (homologação em ADR 0024 × veículo de promoção): clarificação doutrinária futura (não redesenhar ADR agora).
