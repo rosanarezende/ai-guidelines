@@ -10,7 +10,7 @@ focus:
   - "Gate por checkpoint: Claude implementa -> Technical Audit Gate (Codex) -> Architectural Review Gate (ChatGPT) -> Human Gate (owner) -> AVANCA (abre o proximo PR stacked). O Human Gate decide o PROXIMO MOVIMENTO, NAO mergeia em main. 1 checkpoint atomico por vez; parar no Gate quando o commit estiver pronto. Correcao local pequena nao espera; mudanca estrutural sim."
   - "Criterio (RESSALVADO em 2026-06-03 por [DEC-0024-G08]): 'ja foi validado empiricamente na 0024?' -> absorver/enforcar/executar. NAO re-modelar o DECIDIDO (G00/G02/G06/G07 seguem cravados). EXCECAO assumida: G03/G04/G05 foram reabertos para modelagem deliberada (orientada a grafo) -- nesses eixos, modelar e a direcao, nao o risco. O 'risco dominante' original (modelar em vez de absorver) vale para os eixos resolvidos; nos reabertos, a modelagem e o trabalho."
 next:
-  - "RETOMADA CANONICA (SSOT) = research/2026-06-07-checkpoint-handoff-co-1.md (+ memoria spec-0024-continuity-operational). #35 CONCLUIDO (Human Gate approved, gates/c-cli-cutover.yml); topologia REESCRITA (Opcao A): a cauda da 0024 e a CONTINUIDADE OPERACIONAL (ver § topology). PROXIMO = iniciar CO-1 (co-reconcile: reconcile:check + contrato de autoridade; mata a classe PIT-0001/conflacao). Gates CO advisory-first; disciplina modelo!=migracao. NAO abrir spec paralela; NAO reabrir #35; NAO iniciar CO-1 sem sessao dedicada. As entradas abaixo sao HISTORICO pre-reframe (estado vivo no handoff)."
+  - "RETOMADA CANONICA (SSOT) = research/2026-06-07-checkpoint-handoff-co-1.md (+ memoria spec-0024-continuity-operational). #35 CONCLUIDO (Human Gate approved, gates/c-cli-cutover.yml); topologia REESCRITA (Opcao A): a cauda da 0024 e a CONTINUIDADE OPERACIONAL (ver § topology). CO-1 (co-reconcile) IMPLEMENTADO + PR #36 ABERTO (stacked sobre #35, modo unit, NAO mergeia); reconcile:check advisory-first roda no validate (cursor + next[0] reconciliados contra o canonico derivado; INV-1). PROXIMO = gatear o CO-1 (Technical Audit Codex -> Architectural Review ChatGPT -> Human Gate); o Human Gate abre o CO-2 (co-knowledge), NAO mergeia em main. Gates CO advisory-first; disciplina modelo!=migracao. NAO abrir spec paralela; NAO reabrir #35. As entradas abaixo sao HISTORICO pre-reframe (estado vivo no handoff)."
   - "#32 GATED: Checkpoints 2 (8b0eec6) + 2.1 (d686d4b) + 2.1a (fa2c0ae) fechados. #32 permanece como linha de integracao -- NAO mergeia."
   - "#33 (branch feat/spec-0024-ruleset-producibility) = unico PR de execucao stacked aberto (sequence 1); embarca os Checkpoints 2.2, 2.2b, 2.3, 2.3a, 2.3b, 2.4, 2.4a, 2.4b, 2.4c e 2.4d. NAO existe branch feat/spec-0024-topology (corrigido no 2.3a: o no-fantasma checkpoint-2.3 foi dobrado em #33)."
   - "Checkpoint 2.3a + 2.3b implementados: 2.3a reconcilia topologia<->realidade (B1), registra [DEC-0024-G07] (B2), elimina dual-SSOT do plan.md (O1), invariantes de sequence (O6), robustez do governance-pr-check (O2). 2.3b adiciona o guard LOCAL de lifecycle-coerencia (github_pr <=> active/concluded + unicidade) e REAVALIA O5: well-formedness e guard local (no state-yml:check/repo-validation, ja required), nao debito de API -> promocao do governance-pr-check a REQUIRED recomendada. So a paridade-API resta como hardening futuro nao-bloqueante (NEXT separado)."
@@ -78,7 +78,19 @@ topology:
         checkpoints:
           - checkpoint-cli-cutover
 
-    active: []
+    active:
+      # CO-1 — EM PROGRESSO (PR #36 aberto 2026-06-07; stacked sobre #35; modo unit,
+      # NAO mergeia). Mata a classe PIT-0001/conflacao: reconcilia o estado narrado
+      # (next/cursor) contra o canonico DERIVADO; recusa o nao-reconciliado como
+      # autoridade (INV-1). reconcile:check advisory-first (sempre exit 0). Em ciclo
+      # de gate (Technical Audit -> Architectural Review -> Human Gate).
+      - id: co-reconcile
+        github_pr: 36
+        role: execution
+        terminal: false
+        sequence: 4
+        checkpoints:
+          - checkpoint-co-reconcile # reconcile:check + contrato de autoridade (U1); semente: ex-checkpoint-gg-0003 (consistency)
 
     planned:
       # CAUDA REESCRITA (2026-06-07, Human Gate #35 / Opcao A — reframe in-place).
@@ -94,17 +106,6 @@ topology:
       # contexto o mais cedo). `sequence` = posicao no stack (4..K contigua). github_pr
       # null = ainda nao aberto. Objetivo/Deps de cada no: plan.md. Memoria:
       # spec-0024-continuity-operational.
-
-      # CO-1 — mata a classe PIT-0001/conflacao (a dor vivida): reconcilia o estado
-      # ativo (next/decisao/status narrado) contra o canonico DERIVADO; recusa
-      # afirmacao nao-reconciliada como autoridade (INV-1).
-      - id: co-reconcile
-        github_pr: null
-        role: execution
-        terminal: false
-        sequence: 4
-        checkpoints:
-          - checkpoint-co-reconcile # reconcile:check + contrato de autoridade (U1); semente: ex-checkpoint-gg-0003 (consistency)
 
       # CO-2 — Knowledge tipado: Falsification (negativo de 1a classe) + fingerprint +
       # aresta `constrains` (knowledge -> superficie de decisao). Mata "falsificacao
