@@ -18,14 +18,16 @@
 
 ## 1. Estado da branch
 
-| Item         | Valor                                                                            |
-| ------------ | -------------------------------------------------------------------------------- |
-| Branch       | `feat/spec-0024-pr-cli-cutover` (= PR **#35**, agora CONCLUÍDO; modo `unit`)     |
-| HEAD         | `c6f5e87`                                                                        |
-| Origin       | `bde1709` — **18 commits NÃO pushados** (push exige autorização, CORE-07)        |
-| Working tree | limpo (exceto `.codex/` untracked = tooling externo) · `yarn validate` **verde** |
+> **Fatos voláteis NÃO são fixados aqui** (dogfood da CO / ADR 0026 — INV-4: fato derivável aponta para a derivação, não é hand-pinned; um checkpoint não cita o próprio SHA sem ficar stale). Reconcilie sempre contra `git`.
 
-**Commits desta rodada (sobre `20bc58e`):** `466d815` (remove conflação nó/spec) → `e29a3d2` (help derivado do registry + hardening do `loadRegistry`) → `1f1da7a` (fail-fast: corrige o _false-fix_ do #3) → `e2a5074` (formaliza o gate do #35 como artefato) → `c6f5e87` (reescreve a topologia = cauda CO).
+| Item         | Valor                                                                                                                                                         |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Branch       | `feat/spec-0024-pr-cli-cutover` (= PR **#35**, CONCLUÍDO; modo `unit`)                                                                                        |
+| HEAD         | último commit desta branch — `git log --oneline -1` (não fixo: vide nota acima)                                                                               |
+| Origin       | sincronizado por push autorizado (2026-06-07) → **origin == HEAD**; confirme `git status` / `git rev-list --count origin/feat/spec-0024-pr-cli-cutover..HEAD` |
+| Working tree | limpo (exceto `.codex/` untracked = tooling externo) · `yarn validate` **verde**                                                                              |
+
+**Sequência de commits desta rodada** (temas; SHAs vivos em `git log --oneline 20bc58e..HEAD`): remove conflação nó/spec → help derivado do registry + hardening do `loadRegistry` → fail-fast (corrige o _false-fix_ do #3) → gate do #35 como artefato → reescreve a topologia (cauda CO) → handoff → reconciliação pós-Codex.
 
 ## 2. Human Gate do #35 — APROVADO (2026-06-07)
 
