@@ -1,0 +1,27 @@
+# Architectural Review do PR #37 (co-knowledge / CO-2) — Codex. Aprovação
+# limpa (0 findings): CO-2 entrega o modelo estrutural completo do eixo
+# negativo sem backfill amplo do acervo e preserva IA como canal de síntese,
+# não runtime/fonte de verdade.
+checkpoint: "checkpoint-co-knowledge"
+role: architectural_review
+executor:
+  platform: codex-desktop
+  model: gpt-5
+decision: approved
+findings_emitted: 0
+audit_evidence:
+  coverage:
+    - src/domain/knowledge/GovernedRef.ts
+    - src/domain/knowledge/Falsification.ts
+    - src/domain/knowledge/typedArtifacts.ts
+    - src/app/projections/KnowledgeGraph.ts
+    - src/infrastructure/yaml/falsificationsSerializer.ts
+    - src/cli/coKnowledgeCheck.ts
+    - cli/co-knowledge-check.mjs
+    - .governance/runtime/falsifications.yml
+    - .governance/specs/0024-context-architecture/reviews/c-co-knowledge-technical_audit.yml
+    - .governance/specs/0024-context-architecture/research/2026-06-07-checkpoint-handoff-co-2.md
+    - .governance/specs/0024-context-architecture/state.yml
+  scope: "CO-2 / co-knowledge como eixo negativo do dominio Knowledge: Falsification de primeira classe, GovernedRef separado de KnowledgeRef, extensao do KnowledgeGraph com arestas falsifies/constrains/crystallizedAs, serializer e co-knowledge:check advisory-first. Revisao contra ADR 0018, ADR 0021, ADR 0026/INV-4, ADR 0010, topologia unit/stacked da Spec 0024 e precisao modelo-completo-sem-backfill."
+  basis: "PASS arquitetural limpo. A entrega reifica a claim falsificada sem transformar Falsification em KnowledgeStage nem criar DecisionSurface persistida; WorkItem permanece fora do pipeline e entra apenas como alvo governado. O fingerprint esta corretamente limitado a identidade/tamper-evidence da claim+refs, sem vender deteccao semantica. F4b fica fora do enforcement mecanico do runtime, mas a mitigacao correta esta explicitada: IA pode apoiar a revisao sugerindo candidatos, enquanto o Human Gate decide e sela estado. A ausencia de backfill amplo de ADRs/DECs/WorkItems e fronteira de escopo, nao debito estrutural, pois o modelo/arestas/serializer/check/dogfood load-bearing estao completos."
+review_fingerprint: 91c0a62b12fb
