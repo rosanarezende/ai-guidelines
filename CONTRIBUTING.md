@@ -83,8 +83,8 @@ Quando: várias candidatas no backlog tocam o mesmo contrato e fazem mais sentid
 
 Quando: você está executando trabalho via Claude Code, Gemini CLI, Codex, Cursor, Antigravity ou similar.
 
-1. Ler [`AGENTS.md`](AGENTS.md) - directive "FASE 1: The Prime Directive" obrigatória (Environment Check e persistência).
-2. Ler [`AGENTS.md`](AGENTS.md) seção **"Regras Globais"** — princípios de engenharia e workflow universais aplicáveis ao agente.
+1. Ler [`AGENTS.md`](AGENTS.md) — bootstrap curto do canal IA e regras locais de autoridade.
+2. Para sessão IA nova, gerar contexto situado com `yarn guidelines handoff [spec]`; regras completas vivem em [`.core/rules/catalog.md`](.core/rules/catalog.md) e nos artefatos apontados pelo handoff.
 3. Seguir **PR description colaborativo (3 etapas)**:
    - Listar tópicos relevantes para validação humana **antes** do texto final;
    - Só escrever o texto após o humano editar/aprovar a lista;
@@ -148,15 +148,16 @@ Cada conteúdo vive em **um único lugar**; outros documentos apenas linkam:
 
 | Conteúdo                          | Vive em                                  | Outros docs apenas linkam    |
 | :-------------------------------- | :--------------------------------------- | :--------------------------- |
-| Workflow obrigatório do agente IA | `AGENTS.md`                              | README, CONTRIBUTING         |
-| Princípios de engenharia (regras) | `.core/rules/global-rules.md`            | AGENTS, CONTRIBUTING, README |
+| Bootstrap do agente IA            | `AGENTS.md`                              | README, CONTRIBUTING         |
+| Princípios de engenharia (regras) | `.core/rules/**` + catálogo              | AGENTS, CONTRIBUTING, README |
 | Como contribuir (humano)          | `CONTRIBUTING.md`                        | README                       |
 | Lifecycle de specs                | `.core/process/governance-foundation.md` | AGENTS, CONTRIBUTING         |
 | Visão geral do framework          | `README.md`                              | (raiz, ponto de entrada)     |
 
 Antes de começar, leia:
 
-- [`AGENTS.md`](AGENTS.md) — fluxo obrigatório, princípios de engenharia e workflow (humanos e agentes).
+- [`AGENTS.md`](AGENTS.md) — bootstrap obrigatório do canal IA; use `yarn guidelines handoff [spec]` para contexto situado.
+- [`.core/rules/catalog.md`](.core/rules/catalog.md) — índice das regras completas.
 - [`.core/process/governance-foundation.md`](.core/process/governance-foundation.md) — quando abrir spec, como estruturar `spec.md`/`plan.md`/`tasks.md` e como fechar débitos/research.
 - [`.governance/specs/roadmap/backlog.md`](.governance/specs/roadmap/backlog.md) — backlog e candidatas (canônico). O legado em [`.specify/specs/roadmap/backlog.md`](.specify/specs/roadmap/backlog.md) permanece como referência histórica até cutover caso-a-caso.
 
@@ -250,9 +251,9 @@ ai-guidelines/
 
 Algumas regras locais importam para evitar drift:
 
-- `AGENTS.md` é ao mesmo tempo documento operacional local **e** artefato runtime de exemplo.
-- O bloco `<AI_GUIDELINES>` em `AGENTS.md` é compilado a partir das regras em `.core/rules/`; contexto local do repositório fica **fora** dele.
-- Ao editar regras em `.core/rules/`, rode `yarn build:rules` (ou `yarn build:all`) para reconstruir `rules.json` e o ledger.
+- `AGENTS.md` é documento operacional local **e** artefato runtime de exemplo, mas seu bloco `<AI_GUIDELINES>` é apenas bootstrap/stub.
+- Regras completas vivem em `.core/rules/**`, `.core/rules/catalog.md`, `.core/rules/_meta/rules.json` e no ledger.
+- Ao editar regras em `.core/rules/`, rode `yarn build:rules` (ou `yarn build:all`) para reconstruir `rules.json`, ledger, catálogo e o stub de `AGENTS.md`.
 - Ao editar a CLI, preserve o contrato entre `cli/cli/args.mjs`, `cli/app/engine.mjs` e `docs/cli/ai-guidelines-cli.md`.
 - Features editoriais (`tdd`, `bdd`, `quality-gates`) e de infraestrutura (`prettier`, `husky`, `ci`) têm taxonomias distintas e não devem ser misturadas na documentação nem no wizard.
 - Sequência de release (publish em registry npm) é cravada em [`.core/process/governance-foundation.md`](.core/process/governance-foundation.md) § "Sequência canônica para specs com publish em registry externo" — leia antes de qualquer trabalho que envolva publish.

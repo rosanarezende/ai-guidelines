@@ -1,12 +1,12 @@
 ### AGENTS-core — Diretivas sempre-injetadas
 
-> **Fonte canônica** das diretivas que o `compiler.mjs` insere no topo do bloco `<AI_GUIDELINES>` em todo `AGENTS.md` distribuído. Cutover aplicado em 5.B3.1.5.5 (2026-05-04): `pointers.mjs` consome `.core/rules/_meta/rules.json` via `compileCoreRulesContent()` filtrando `scope: universal` + `tags: core`. O template `.core/templates/AGENTS-core.md.tmpl` permanece apenas como **fallback** quando o catálogo está ausente/inválido (sem injeção dupla). Remoção definitiva do `.tmpl` é débito de B.7 / `NEXT.md`.
+> **Fonte canônica** das diretivas de bootstrap que o catálogo (`rules.json` + ledger) indexa como Knowledge governado. Desde `checkpoint-runtime-bootstrap-readiness`, `AGENTS.md` não pré-carrega mais estas diretivas integralmente: ele vira stub de entrada e aponta para handoff situado + catálogo. O template `.core/templates/AGENTS-core.md.tmpl` permanece apenas como fallback legado quando o catálogo está ausente/inválido. Remoção definitiva do `.tmpl` é débito de B.7 / `NEXT.md`.
 >
 > **Convenção YAML cravada em 2026-05-03 (alinha com `5.B3.1` no `tasks.md`):** **Opção B — primeiro bloco fenced ` ```yaml ` imediatamente após cada heading de regra** (frontmatter `---` real foi descartado: não sobrevive a Prettier em arquivos multi-regra, pois o tooling padrão só reconhece frontmatter no início absoluto do arquivo). O `rules-parser.mjs` (B.3.2) detecta cada regra pelo padrão "heading de regra → próximo bloco fenced `yaml`". Categoria predominante aqui: `process`. Sources canônicas externas (CWE/CERT/Sonar/OWASP/paper) não se aplicam à maioria — diretivas operacionais ficam com `evidence_strength: declared_heuristic`. O ledger derivado em `.core/rules/_meta/agents-core-ledger.md` (B.3.4) será a interface humana de revisão crítica.
 >
 > **Regra editorial cravada (5.B3.1.5 / 2026-05-03):** `Instruction (en)` é runtime injetado pelo compiler em B.3.5 — deve ser **imperativa em 1–3 linhas**, sem tabelas, sem blocos de exemplo, sem rationale. Tabelas, exemplos, racional, "why" e "see also" vivem em `Documentação (pt-br)` ou seções dedicadas (docs-only).
 >
-> **Hierarquia de headings cravada:** este arquivo usa `###` no topo e `####` por regra para alinhar com `top/global-rules.md` / `base/quality/quality-gates.md`. Compiler em B.3.5 deve preservar esta hierarquia (ou rebaixá-la consistentemente) ao injetar no `<AI_GUIDELINES>` do `AGENTS.md` consumidor — `#`/`##` quebram a formatação do destino.
+> **Hierarquia de headings cravada:** este arquivo usa `###` no topo e `####` por regra para alinhar com `top/global-rules.md` / `base/quality/quality-gates.md`. O parser preserva esta hierarquia para catálogo/ledger; `AGENTS.md` recebe apenas o stub de bootstrap.
 
 ---
 
@@ -73,7 +73,7 @@ The repository is your memory. Persist plans, progress, debts, knowledge, and ro
 
 ---
 
-#### [CORE-03] Cross-ref para Regras Globais
+#### [CORE-03] Cross-ref para catálogo de regras
 
 ```yaml
 id: CORE-03
@@ -86,12 +86,12 @@ tags: [core, agents, always_injected, pointer]
 ```
 
 **Instruction (en):**
-Consult the "Global Rules" section injected later in this `<AI_GUIDELINES>` block for engineering principles and AI efficiency.
+Consult `.core/rules/catalog.md` and `.core/rules/_meta/rules.json` for the full rules catalog; `AGENTS.md` is only the bootstrap stub.
 
 **Documentação (pt-br):**
-Consulte a seção "Regras Globais" injetada neste bloco `<AI_GUIDELINES>` para princípios de engenharia e eficiência de IA.
+Consulte `.core/rules/catalog.md` e `.core/rules/_meta/rules.json` para o catálogo completo de regras; `AGENTS.md` é apenas o stub de bootstrap.
 
-**Why this matters:** cross-ref interno ao bloco compilado; evita IA pular a seção de regras universais.
+**Why this matters:** evita recriar o monólito no canal inicial e mantém as regras completas recuperáveis por fonte governada.
 
 > **Candidata a corte em B.3.5:** se o compiler for refatorado para deixar a hierarquia óbvia (core → global → opt-in), este pointer textual vira redundante.
 

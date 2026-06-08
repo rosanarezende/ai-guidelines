@@ -11,6 +11,7 @@ describe("buildRegistry", () => {
     expect(registry.resolve("specs")?.name).toBe("specs");
     expect(registry.resolve("drift")?.name).toBe("drift");
     expect(registry.resolve("visual-prompt")?.name).toBe("visual-prompt");
+    expect(registry.resolve("handoff")?.name).toBe("handoff");
   });
 
   it("DADO o alias transitório 'review' QUANDO resolve ENTÃO cai no comando 'triage'", () => {
@@ -31,6 +32,7 @@ describe("buildRegistry", () => {
         "specs",
         "drift",
         "visual-prompt",
+        "handoff",
       ])
     );
     expect(names).not.toContain("review");
@@ -49,6 +51,7 @@ describe("buildRegistry", () => {
     expect(help).toContain("alias: review");
     expect(help).toContain("specs");
     expect(help).toContain("visual-prompt");
+    expect(help).toContain("handoff");
     expect(help).toContain("Ex.: yarn guidelines");
   });
 });

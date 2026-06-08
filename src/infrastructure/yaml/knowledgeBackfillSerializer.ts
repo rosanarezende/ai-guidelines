@@ -3,6 +3,7 @@ import {
   KnowledgeBackfillEntry,
   KnowledgeBackfillKind,
   KnowledgeBackfillPriority,
+  KnowledgeBackfillScope,
   KnowledgeBackfillStatus,
 } from "../../domain/knowledge/KnowledgeBackfill.js";
 
@@ -24,6 +25,7 @@ const ALLOWED_ENTRY_KEYS: ReadonlySet<string> = new Set([
   "source",
   "rationale",
   "deadline",
+  "scope",
 ]);
 
 function str(value: unknown): string | undefined {
@@ -81,6 +83,7 @@ function parseOne(item: unknown, index: number): KnowledgeBackfillEntry {
     source: requireStr(o.source, "source", index),
     rationale: requireStr(o.rationale, "rationale", index),
     ...(str(o.deadline) !== undefined ? { deadline: str(o.deadline) } : {}),
+    ...(str(o.scope) !== undefined ? { scope: str(o.scope) as KnowledgeBackfillScope } : {}),
   };
 }
 
@@ -97,6 +100,7 @@ export function serializeKnowledgeBackfill(entries: ReadonlyArray<KnowledgeBackf
         source: entry.source,
         rationale: entry.rationale,
         ...(entry.deadline ? { deadline: entry.deadline } : {}),
+        ...(entry.scope ? { scope: entry.scope } : {}),
       })),
     },
     { indent: 2, lineWidth: 0 }

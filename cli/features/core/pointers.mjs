@@ -5,6 +5,7 @@ import { ROOT_DIR } from "#fs/file-system";
 import { mergeAgentsContent } from "#governance/agents-merge";
 import {
   compileMonolithicAgentsContent,
+  buildAgentsRuntimeStub,
   loadRulesCatalog,
   filterRulesByScope,
   formatRuleInstruction,
@@ -27,11 +28,11 @@ function buildTacticalContext(sddDir) {
   return [
     "> [!IMPORTANT]",
     "> This project uses the **ai-guidelines** framework for AI governance.",
-    "> Operational guidelines and engineering rules are compiled within the `<AI_GUIDELINES>` block in `AGENTS.md`.",
+    "> Operational guidelines and engineering rules are indexed in `.core/rules/**`; `AGENTS.md` is only a short runtime bootstrap.",
     "",
     "### Centralized Governance",
     "",
-    "The root `AGENTS.md` is the runtime artifact. Project-specific content must remain outside of the `<AI_GUIDELINES>` block.",
+    "The root `AGENTS.md` is the channel bootstrap. Project-specific content must remain outside of the `<AI_GUIDELINES>` block.",
     "",
     "### Consumer Bootstrap",
     "",
@@ -112,7 +113,7 @@ async function loadCompiledRules(config) {
 }
 
 /**
- * Aplica o runtime monolítico governado no AGENTS.md da raiz.
+ * Aplica o bootstrap runtime governado no AGENTS.md da raiz.
  * Esta feature é considerada CORE e mandatória para a governança.
  */
 export async function applyPointers(targetDir, options, actions) {
@@ -151,14 +152,7 @@ export async function applyPointers(targetDir, options, actions) {
     // Arquivo não existe, tudo bem
   }
 
-  const monolithicBaseline = compileMonolithicAgentsContent({
-    primaryDirectives: compiled.primaryDirectives,
-    lifecycleRules: compiled.lifecycleRules,
-    gitRules: compiled.gitRules,
-    engineeringRules: compiled.engineeringRules,
-    optInRules: compiled.optInRules,
-    tacticalContext: buildTacticalContext(config.sdd_dir),
-  });
+  const monolithicBaseline = buildAgentsRuntimeStub(config.sdd_dir);
 
   // O mergeAgentsContent injeta/substitui apenas o bloco <AI_GUIDELINES>
   // e preserva regras próprias do consumidor fora dele.

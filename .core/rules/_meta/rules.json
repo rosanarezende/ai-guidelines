@@ -252,9 +252,9 @@
       "applicable_languages": ["*"],
       "tags": ["core", "agents", "always_injected", "pointer"],
       "file": ".core/rules/top/agents-core.md",
-      "title": "Cross-ref para Regras Globais",
-      "instruction_en": "Consult the \"Global Rules\" section injected later in this `<AI_GUIDELINES>` block for engineering principles and AI efficiency.",
-      "documentation_pt": "Consulte a seção \"Regras Globais\" injetada neste bloco `<AI_GUIDELINES>` para princípios de engenharia e eficiência de IA.\n\n**Why this matters:** cross-ref interno ao bloco compilado; evita IA pular a seção de regras universais.\n\n> **Candidata a corte em B.3.5:** se o compiler for refatorado para deixar a hierarquia óbvia (core → global → opt-in), este pointer textual vira redundante."
+      "title": "Cross-ref para catálogo de regras",
+      "instruction_en": "Consult `.core/rules/catalog.md` and `.core/rules/_meta/rules.json` for the full rules catalog; `AGENTS.md` is only the bootstrap stub.",
+      "documentation_pt": "Consulte `.core/rules/catalog.md` e `.core/rules/_meta/rules.json` para o catálogo completo de regras; `AGENTS.md` é apenas o stub de bootstrap.\n\n**Why this matters:** evita recriar o monólito no canal inicial e mantém as regras completas recuperáveis por fonte governada.\n\n> **Candidata a corte em B.3.5:** se o compiler for refatorado para deixar a hierarquia óbvia (core → global → opt-in), este pointer textual vira redundante."
     },
     {
       "id": "CORE-04",

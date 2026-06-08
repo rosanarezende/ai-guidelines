@@ -55,6 +55,30 @@ function generatePackageJson(repoRoot, contract) {
 function renderHook(contract, hookName) {
   const hook = contract.profiles.maintainer.hooks[hookName];
   const lines = [];
+  if (contract.profiles.maintainer.hook_bootstrap?.node_path === "nvm") {
+    lines.push(
+      "#!/bin/sh",
+      "",
+      "if ! command -v node >/dev/null 2>&1; then",
+      '  export NVM_DIR="${NVM_DIR:-${HOME:-}/.nvm}"',
+      '  if [ -s "$NVM_DIR/nvm.sh" ]; then',
+      '    . "$NVM_DIR/nvm.sh"',
+      '    if [ -f ".nvmrc" ]; then',
+      "      nvm use --silent >/dev/null 2>&1 || true",
+      "    else",
+      "      nvm use --silent default >/dev/null 2>&1 || true",
+      "    fi",
+      "  fi",
+      "fi",
+      "",
+      "if ! command -v node >/dev/null 2>&1; then",
+      '  echo "ai-guidelines hook: node não encontrado no PATH e nvm não pôde ser carregado." >&2',
+      '  echo "Restaure o ambiente (ex.: nvm install && nvm use) e rode yarn setup; não use --no-verify." >&2',
+      "  exit 127",
+      "fi",
+      ""
+    );
+  }
   for (const step of hook.steps) {
     if (step.run) {
       lines.push(`node .yarn/releases/yarn-4.1.1.cjs ${step.run}`);
@@ -286,6 +310,11 @@ export function validateContract(contract) {
   const violations = [];
   const names = scriptNames(contract);
   const yarnBuiltIns = new Set(["install", "npm", "node", "run"]);
+  const bootstrap = contract.profiles.maintainer.hook_bootstrap;
+
+  if (bootstrap && bootstrap.node_path !== "nvm") {
+    violations.push(`hook_bootstrap.node_path invalido: ${bootstrap.node_path}`);
+  }
 
   for (const [hookName, hook] of Object.entries(contract.profiles.maintainer.hooks)) {
     for (const step of hook.steps) {

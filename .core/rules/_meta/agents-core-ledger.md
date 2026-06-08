@@ -9,7 +9,7 @@
 | ------- | ---------------------------------------------------------- | -------- | ------------------ | ------- | ----- | ----- |
 | CORE-01 | Environment check antes da primeira ação                   | process  | declared_heuristic | 0       | 127   | 1     |
 | CORE-02 | Agnostic SDD Override — repositório como memória           | process  | declared_heuristic | 0       | 483   | 1     |
-| CORE-03 | Cross-ref para Regras Globais                              | process  | declared_heuristic | 0       | 127   | 1     |
+| CORE-03 | Cross-ref para catálogo de regras                          | process  | declared_heuristic | 0       | 135   | 1     |
 | CORE-04 | Nunca trabalhe direto em main/master                       | process  | declared_heuristic | 0       | 142   | 1     |
 | CORE-05 | Não versione contexto vazado                               | process  | declared_heuristic | 0       | 140   | 1     |
 | CORE-06 | Commits incrementais atômicos                              | process  | declared_heuristic | 0       | 104   | 1     |

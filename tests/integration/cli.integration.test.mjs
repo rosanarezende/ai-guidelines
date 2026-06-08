@@ -30,6 +30,16 @@ async function withTempTarget(prefix, callback) {
   }
 }
 
+function assertRuntimeBootstrap(content) {
+  assert.match(content, /<AI_GUIDELINES>/);
+  assert.match(content, /## Runtime Bootstrap/);
+  assert.match(content, /yarn guidelines handoff \[spec\]/);
+  assert.doesNotMatch(content, /Top Zone: Primary Directives/);
+  assert.doesNotMatch(content, /<FEATURE_QUALITY_GATES>/);
+  assert.doesNotMatch(content, /<FEATURE_TDD>/);
+  assert.doesNotMatch(content, /<FEATURE_BDD>/);
+}
+
 describe("entrypoint", () => {
   it("DADO CLI entrypoint module QUANDO imported ENTÃO exposes execute and main", () => {
     assert.equal(typeof cliEntrypoint.execute, "function");
@@ -37,7 +47,7 @@ describe("entrypoint", () => {
   });
 });
 
-describe("Integration: Runtime Monolítico no AGENTS.md", () => {
+describe("Integration: Runtime Bootstrap no AGENTS.md", () => {
   it("DADO projeto vazio QUANDO adopt com opt-ins ENTÃO cria AGENTS runtime com AI_GUIDELINES e sem .ai-guidelines/rules", async () => {
     await withTempTarget("ai-e2e-empty-", async (targetDir) => {
       await cliEntrypoint.execute("adopt", {
@@ -50,16 +60,7 @@ describe("Integration: Runtime Monolítico no AGENTS.md", () => {
 
       const agentsContent = await fs.readFile(path.join(targetDir, "AGENTS.md"), "utf8");
 
-      assert.match(agentsContent, /<AI_GUIDELINES>/);
-      assert.match(agentsContent, /Top Zone: Primary Directives/);
-      assert.match(agentsContent, /Lifecycle & Spec System/);
-      assert.match(agentsContent, /Git & PR Workflow/);
-      assert.match(agentsContent, /Engineering Principles/);
-      assert.match(agentsContent, /Center Zone: Opt-in Methodologies/);
-      assert.match(agentsContent, /Base Zone: Tactical Context/);
-      assert.match(agentsContent, /<FEATURE_QUALITY_GATES>/);
-      assert.match(agentsContent, /<FEATURE_TDD>/);
-      assert.match(agentsContent, /<FEATURE_BDD>/);
+      assertRuntimeBootstrap(agentsContent);
       assert.equal(await exists(path.join(targetDir, ".ai-guidelines", "rules")), false);
       assert.equal(await exists(path.join(targetDir, ".ai-guidelines", "config.json")), true);
       assert.equal(
@@ -90,8 +91,7 @@ describe("Integration: Runtime Monolítico no AGENTS.md", () => {
       assert.match(agentsContent, /# Projeto consumidor/);
       assert.match(agentsContent, /Regra local antes/);
       assert.match(agentsContent, /Regra local depois/);
-      assert.match(agentsContent, /<AI_GUIDELINES>/);
-      assert.match(agentsContent, /<FEATURE_TDD>/);
+      assertRuntimeBootstrap(agentsContent);
     });
   });
 
@@ -114,9 +114,7 @@ describe("Integration: Runtime Monolítico no AGENTS.md", () => {
 
       const agentsContent = await fs.readFile(path.join(targetDir, "AGENTS.md"), "utf8");
 
-      assert.match(agentsContent, /<AI_GUIDELINES>/);
-      assert.doesNotMatch(agentsContent, /<FEATURE_QUALITY_GATES>/);
-      assert.doesNotMatch(agentsContent, /<FEATURE_TDD>/);
+      assertRuntimeBootstrap(agentsContent);
       assert.equal(await exists(path.join(targetDir, ".ai-guidelines", "rules")), false);
     });
   });
@@ -138,11 +136,11 @@ describe("Integration: Runtime Monolítico no AGENTS.md", () => {
       const secondContent = await fs.readFile(path.join(targetDir, "AGENTS.md"), "utf8");
 
       assert.equal(secondContent, firstContent);
-      assert.match(secondContent, /<FEATURE_BDD>/);
+      assertRuntimeBootstrap(secondContent);
     });
   });
 
-  it("DADO AGENTS com ponteiro legado QUANDO adopt ENTÃO migra para runtime monolítico na raiz", async () => {
+  it("DADO AGENTS com ponteiro legado QUANDO adopt ENTÃO migra para runtime bootstrap na raiz", async () => {
     await withTempTarget("ai-e2e-legacy-", async (targetDir) => {
       const agentsPath = path.join(targetDir, "AGENTS.md");
       await fs.writeFile(
@@ -169,8 +167,7 @@ describe("Integration: Runtime Monolítico no AGENTS.md", () => {
 
       assert.match(agentsContent, /# Projeto legado/);
       assert.match(agentsContent, /Regra local preservada/);
-      assert.match(agentsContent, /<AI_GUIDELINES>/);
-      assert.match(agentsContent, /<FEATURE_QUALITY_GATES>/);
+      assertRuntimeBootstrap(agentsContent);
       assert.doesNotMatch(agentsContent, /ponteiro antigo/);
     });
   });
@@ -215,8 +212,7 @@ describe("Integration: Runtime Monolítico no AGENTS.md", () => {
         await fs.readFile(path.join(targetDir, ".ai-guidelines", "config.json"), "utf8")
       );
 
-      assert.match(agentsContent, /<FEATURE_QUALITY_GATES>/);
-      assert.match(agentsContent, /<FEATURE_TDD>/);
+      assertRuntimeBootstrap(agentsContent);
       assert.equal(await exists(path.join(targetDir, "CLAUDE.md")), true);
       assert.equal(await exists(path.join(targetDir, ".openai", "instructions.md")), true);
       assert.equal(await exists(path.join(targetDir, "GEMINI.md")), true);
@@ -249,7 +245,7 @@ describe("Integration: Runtime Monolítico no AGENTS.md", () => {
         await fs.readFile(path.join(targetDir, ".ai-guidelines", "config.json"), "utf8")
       );
 
-      assert.match(agentsContent, /<FEATURE_BDD>/);
+      assertRuntimeBootstrap(agentsContent);
       assert.equal(await exists(path.join(targetDir, "CLAUDE.md")), true);
       assert.equal(await exists(path.join(targetDir, ".openai", "instructions.md")), false);
       assert.deepEqual(config.providers, ["claude"]);

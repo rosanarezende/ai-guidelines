@@ -2061,8 +2061,8 @@ describe("CLI — wizard navegação por Intent [BR-WIZARD-INTENT]", () => {
   describe("runWorkflow (Intent → Action → Command)", () => {
     it("DADO Intent → Action com args QUANDO runWorkflow ENTÃO despacha [command, ...args] via Registry", async () => {
       const { registry, dispatched } = spyRegistry();
-      // retomar-trabalho: action 1 = insight list
-      const prompts = new FakePrompts(["intent:retomar-trabalho", "1"]);
+      // retomar-trabalho: action 2 = insight list
+      const prompts = new FakePrompts(["intent:retomar-trabalho", "2"]);
       const code = await runWorkflow({
         repoRoot: "/repo",
         logger: new CollectingLogger(),

@@ -55,7 +55,7 @@ describe("Token Budget", () => {
   });
 
   describe("analyzeAgentsMdBudget", () => {
-    it("DADO catálogo QUANDO mede AGENTS.md ENTÃO soma universal + opt-in (sem adapter)", () => {
+    it("DADO catálogo QUANDO mede AGENTS.md ENTÃO mede o stub (sem universal/opt-in)", () => {
       const universalText = "a".repeat(3500); // 1000 tokens
       const optInText = "b".repeat(2800); // 800 tokens
       const adapterText = "c".repeat(1400); // 400 tokens (não conta)
@@ -67,15 +67,13 @@ describe("Token Budget", () => {
         ],
       };
       const result = analyzeAgentsMdBudget(catalog);
-      assert.equal(result.tokens, 1800); // 1000 + 800
+      assert.ok(result.tokens > 0);
+      assert.ok(result.tokens < 500);
       assert.equal(result.limit, 2700);
       assert.equal(result.warnings.length, 0);
     });
 
-    it("DADO AGENTS.md acima de 75% QUANDO mede ENTÃO emite warning específico", () => {
-      // 75% de 2700 = 2025. Vamos meter 2200 entre universal e opt-in.
-      // 7000 chars / 3.5 = 2000 tokens (universal)
-      // 1500 chars / 3.5 = 429 tokens (opt-in) → total 2429
+    it("DADO regras enormes QUANDO mede AGENTS.md ENTÃO não emite warning do stub", () => {
       const catalog = {
         rules: [
           { scope: "universal", instruction_en: "a".repeat(7000) },
@@ -83,9 +81,8 @@ describe("Token Budget", () => {
         ],
       };
       const result = analyzeAgentsMdBudget(catalog);
-      assert.ok(result.tokens >= LIMITS.agentsMd * SOFT_CEILING_RATIO);
-      assert.equal(result.warnings.length, 1);
-      assert.match(result.warnings[0], /AGENTS\.md compilado/);
+      assert.ok(result.tokens < LIMITS.agentsMd * SOFT_CEILING_RATIO);
+      assert.equal(result.warnings.length, 0);
     });
   });
 
@@ -149,7 +146,8 @@ describe("Token Budget", () => {
       const result = analyzeBudget(catalog);
       assert.equal(result.scopes.universal.tokens, 400);
       assert.equal(result.scopes["opt-in"].tokens, 200);
-      assert.equal(result.agentsMd.tokens, 600);
+      assert.ok(result.agentsMd.tokens > 0);
+      assert.ok(result.agentsMd.tokens < 500);
       assert.equal(result.perAdapter.length, 2);
       assert.deepEqual(result.warnings, []);
     });

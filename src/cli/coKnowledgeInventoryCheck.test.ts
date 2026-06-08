@@ -74,6 +74,7 @@ entries:
     priority: P0
     source: x
     rationale: y
+    scope: runtime_bootstrap_p0
   - id: KB-0004
     kind: decision
     ref: decision:DEC-0024-G08
@@ -88,6 +89,7 @@ entries:
     priority: P1
     source: x
     rationale: y
+    scope: runtime_bootstrap_p0
   - id: KB-0006
     kind: rule
     ref: rule:CORE-10
@@ -95,6 +97,7 @@ entries:
     priority: P1
     source: x
     rationale: y
+    scope: runtime_bootstrap_p0
   - id: KB-0007
     kind: guardrail
     ref: guardrail:GG-0001
@@ -102,6 +105,7 @@ entries:
     priority: P1
     source: x
     rationale: y
+    scope: runtime_bootstrap_p0
   - id: KB-0008
     kind: guardrail
     ref: guardrail:GG-0002
@@ -117,6 +121,7 @@ entries:
     priority: P0
     source: x
     rationale: y
+    scope: runtime_bootstrap_p0
   - id: KB-0010
     kind: doctrine
     ref: doctrine:ADR-0026
@@ -138,6 +143,54 @@ entries:
     priority: P0
     source: x
     rationale: y
+  - id: KB-0013
+    kind: rule
+    ref: rule:CORE-02
+    status: done
+    priority: P0
+    source: x
+    rationale: y
+    scope: runtime_bootstrap_p0
+  - id: KB-0014
+    kind: rule
+    ref: rule:CORE-08
+    status: done
+    priority: P0
+    source: x
+    rationale: y
+    scope: runtime_bootstrap_p0
+  - id: KB-0015
+    kind: rule
+    ref: rule:CORE-09
+    status: done
+    priority: P0
+    source: x
+    rationale: y
+    scope: runtime_bootstrap_p0
+  - id: KB-0016
+    kind: rule
+    ref: rule:CORE-14
+    status: done
+    priority: P0
+    source: x
+    rationale: y
+    scope: runtime_bootstrap_p0
+  - id: KB-0017
+    kind: doctrine
+    ref: doctrine:ADR-0021
+    status: done
+    priority: P0
+    source: x
+    rationale: y
+    scope: runtime_bootstrap_p0
+  - id: KB-0018
+    kind: doctrine
+    ref: doctrine:ADR-0022
+    status: done
+    priority: P0
+    source: x
+    rationale: y
+    scope: runtime_bootstrap_p0
 `;
 
 describe("co-knowledge:inventory [BR-CO-KNOWLEDGE-INVENTORY-CHECK]", () => {

@@ -17,7 +17,7 @@
 | **ADP-0304** | Comportamento Observado                                    | `adapter`   | `process`         | [Ver](adapters/gemini.md#adp0304)             |
 | **CORE-01**  | Environment check antes da primeira ação                   | `universal` | `process`         | [Ver](top/agents-core.md#core01)              |
 | **CORE-02**  | Agnostic SDD Override — repositório como memória           | `universal` | `process`         | [Ver](top/agents-core.md#core02)              |
-| **CORE-03**  | Cross-ref para Regras Globais                              | `universal` | `process`         | [Ver](top/agents-core.md#core03)              |
+| **CORE-03**  | Cross-ref para catálogo de regras                          | `universal` | `process`         | [Ver](top/agents-core.md#core03)              |
 | **CORE-04**  | Nunca trabalhe direto em main/master                       | `universal` | `process`         | [Ver](top/agents-core.md#core04)              |
 | **CORE-05**  | Não versione contexto vazado                               | `universal` | `process`         | [Ver](top/agents-core.md#core05)              |
 | **CORE-06**  | Commits incrementais atômicos                              | `universal` | `process`         | [Ver](top/agents-core.md#core06)              |

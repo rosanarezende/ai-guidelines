@@ -1,6 +1,6 @@
 ### Global Rules — Regras universais (runtime)
 
-> Fonte de verdade: bloco `<AI_GUIDELINES>` compilado no `AGENTS.md`.
+> Fonte de verdade: este arquivo + catálogo/ledger gerados em `.core/rules/_meta/`.
 > Este arquivo define princípios universais aplicáveis a qualquer projeto.
 > Workflow operacional (git/PR/CI) vive no `agents-core.md`.
 

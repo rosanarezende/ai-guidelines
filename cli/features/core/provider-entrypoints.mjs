@@ -24,8 +24,8 @@ function buildHardRedirect(providerLabel, sddDir) {
     "# SYSTEM DIRECTIVE: HARD REDIRECT",
     `You are operating inside the ${providerLabel} integration for this workspace.`,
     "Do not rely on your default behavioral assumptions.",
-    "You must read and strictly follow the canonical AGENTS.md file at the repository root.",
-    "Project-specific rules belong in AGENTS.md, not in this native provider file.",
+    "Start from the canonical AGENTS.md file at the repository root, then use the handoff command when you need situated state.",
+    "Full rules belong in the governed catalog (`.core/rules/**`), not in this native provider file.",
     `Consumer-local ai-guidelines assets live under \`${sddDir}/\`.`,
   ].join("\n\n");
 }

@@ -13,6 +13,8 @@
  */
 
 import { parseRulesFromDirectory } from "#governance/monolith/rules-parser";
+import { buildAgentsRuntimeStub } from "#governance/monolith/compiler";
+import { mergeAgentsContent } from "#governance/agents-merge";
 import { writeFileSync, mkdirSync, readFileSync, existsSync } from "node:fs";
 import { dirname, resolve, relative } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -409,9 +411,24 @@ export async function saveCatalogArtifacts(
     errors.push(`[SAVE_ERROR] Failed to write ${catalogPath}: ${err.message}`);
   }
 
+  if (!options.outputDir) {
+    try {
+      const agentsPath = resolve("AGENTS.md");
+      const current = existsSync(agentsPath) ? readFileSync(agentsPath, "utf-8") : "";
+      const next = mergeAgentsContent(current, buildAgentsRuntimeStub());
+      if (current !== next) {
+        writeFileSync(agentsPath, next, "utf-8");
+      }
+    } catch (err) {
+      errors.push(`[SAVE_ERROR] Failed to write AGENTS.md: ${err.message}`);
+    }
+  }
+
   // Auto-format generated artifacts to prevent Prettier check failures
   try {
-    execSync(`yarn prettier --write "${rulesPath}" "${ledgerPath}" "${catalogPath}"`, {
+    const prettierTargets = [`"${rulesPath}"`, `"${ledgerPath}"`, `"${catalogPath}"`];
+    if (!options.outputDir) prettierTargets.push('"AGENTS.md"');
+    execSync(`yarn prettier --write ${prettierTargets.join(" ")}`, {
       stdio: "ignore",
     });
   } catch (err) {

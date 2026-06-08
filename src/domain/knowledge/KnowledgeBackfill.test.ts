@@ -31,6 +31,7 @@ const validEntries: KnowledgeBackfillEntry[] = [
     priority: "P0",
     source: "decision-brief.md",
     rationale: "exemplo",
+    scope: "runtime_bootstrap_p0",
   },
   {
     id: "KB-0004",
@@ -49,6 +50,7 @@ const validEntries: KnowledgeBackfillEntry[] = [
     priority: "P1",
     source: ".core/rules/top/agents-core.md",
     rationale: "exemplo",
+    scope: "runtime_bootstrap_p0",
   },
   {
     id: "KB-0006",
@@ -58,6 +60,47 @@ const validEntries: KnowledgeBackfillEntry[] = [
     priority: "P1",
     source: ".core/rules/top/agents-core.md",
     rationale: "exemplo",
+    scope: "runtime_bootstrap_p0",
+  },
+  {
+    id: "KB-0015",
+    kind: "rule",
+    ref: "rule:CORE-02",
+    status: "done",
+    priority: "P0",
+    source: ".core/rules/top/agents-core.md",
+    rationale: "exemplo",
+    scope: "runtime_bootstrap_p0",
+  },
+  {
+    id: "KB-0016",
+    kind: "rule",
+    ref: "rule:CORE-08",
+    status: "done",
+    priority: "P0",
+    source: ".core/rules/top/agents-core.md",
+    rationale: "exemplo",
+    scope: "runtime_bootstrap_p0",
+  },
+  {
+    id: "KB-0017",
+    kind: "rule",
+    ref: "rule:CORE-09",
+    status: "done",
+    priority: "P0",
+    source: ".core/rules/top/agents-core.md",
+    rationale: "exemplo",
+    scope: "runtime_bootstrap_p0",
+  },
+  {
+    id: "KB-0018",
+    kind: "rule",
+    ref: "rule:CORE-14",
+    status: "done",
+    priority: "P0",
+    source: ".core/rules/top/agents-core.md",
+    rationale: "exemplo",
+    scope: "runtime_bootstrap_p0",
   },
   {
     id: "KB-0013",
@@ -85,6 +128,7 @@ const validEntries: KnowledgeBackfillEntry[] = [
     priority: "P1",
     source: ".core/process/governance-foundation.md",
     rationale: "exemplo",
+    scope: "runtime_bootstrap_p0",
   },
   {
     id: "KB-0008",
@@ -104,6 +148,7 @@ const validEntries: KnowledgeBackfillEntry[] = [
     priority: "P0",
     source: ".core/governance/adrs/0018-governance-first-ai-as-channel.md",
     rationale: "exemplo",
+    scope: "runtime_bootstrap_p0",
   },
   {
     id: "KB-0010",
@@ -113,6 +158,26 @@ const validEntries: KnowledgeBackfillEntry[] = [
     priority: "P0",
     source: ".core/governance/adrs/0026-projection-distinct-from-first-class-entity.md",
     rationale: "exemplo",
+  },
+  {
+    id: "KB-0019",
+    kind: "doctrine",
+    ref: "doctrine:ADR-0021",
+    status: "done",
+    priority: "P0",
+    source: ".core/governance/adrs/0021-enforcement-precedes-awareness.md",
+    rationale: "exemplo",
+    scope: "runtime_bootstrap_p0",
+  },
+  {
+    id: "KB-0020",
+    kind: "doctrine",
+    ref: "doctrine:ADR-0022",
+    status: "done",
+    priority: "P0",
+    source: ".core/governance/adrs/0022-handoff-situated-precedes-static-distribution.md",
+    rationale: "exemplo",
+    scope: "runtime_bootstrap_p0",
   },
   {
     id: "KB-0011",
@@ -143,6 +208,13 @@ describe("KnowledgeBackfill [BR-CO-KNOWLEDGE-BACKFILL]", () => {
     const entries = validEntries.filter((entry) => entry.kind !== "doctrine");
     expect(validateKnowledgeBackfill(entries)).toContainEqual(
       expect.objectContaining({ code: "KB_KIND_UNDERREPRESENTED" })
+    );
+  });
+
+  it("DADO runtime_bootstrap_p0 sem uma ref obrigatória ENTÃO reporta cobertura insuficiente", () => {
+    const entries = validEntries.filter((entry) => entry.ref !== "rule:CORE-08");
+    expect(validateKnowledgeBackfill(entries)).toContainEqual(
+      expect.objectContaining({ code: "KB_RUNTIME_BOOTSTRAP_P0_MISSING" })
     );
   });
 
@@ -189,11 +261,17 @@ describe("KnowledgeBackfill [BR-CO-KNOWLEDGE-BACKFILL]", () => {
       { id: "DEC-0024-G08", stage: "decision" },
       { id: "CORE-07", stage: "rule" },
       { id: "CORE-10", stage: "rule" },
+      { id: "CORE-02", stage: "rule" },
+      { id: "CORE-08", stage: "rule" },
+      { id: "CORE-09", stage: "rule" },
+      { id: "CORE-14", stage: "rule" },
       { id: "OPT-0201", stage: "rule" },
       { id: "ADP-0101", stage: "rule" },
       { id: "GG-0001", stage: "guardrail" },
       { id: "ADR-0018", stage: "doctrine" },
       { id: "ADR-0026", stage: "doctrine" },
+      { id: "ADR-0021", stage: "doctrine" },
+      { id: "ADR-0022", stage: "doctrine" },
     ]);
   });
 });

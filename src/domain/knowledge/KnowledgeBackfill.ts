@@ -6,6 +6,7 @@ import { KnowledgeStage, KNOWLEDGE_STAGES } from "./KnowledgeStage.js";
 export type KnowledgeBackfillKind = KnowledgeStage | "falsification";
 export type KnowledgeBackfillStatus = "done" | "planned" | "needs_decision" | "not_applicable";
 export type KnowledgeBackfillPriority = "P0" | "P1" | "P2";
+export type KnowledgeBackfillScope = "runtime_bootstrap_p0";
 
 export interface KnowledgeBackfillEntry {
   readonly id: string;
@@ -16,6 +17,7 @@ export interface KnowledgeBackfillEntry {
   readonly source: string;
   readonly rationale: string;
   readonly deadline?: string;
+  readonly scope?: KnowledgeBackfillScope;
 }
 
 export const KNOWLEDGE_BACKFILL_KINDS: readonly KnowledgeBackfillKind[] = [
@@ -36,6 +38,20 @@ export const KNOWLEDGE_BACKFILL_PRIORITIES: readonly KnowledgeBackfillPriority[]
   "P2",
 ];
 
+export const RUNTIME_BOOTSTRAP_P0_REFS: readonly string[] = [
+  "decision:DEC-0024-G07",
+  "doctrine:ADR-0018",
+  "doctrine:ADR-0021",
+  "doctrine:ADR-0022",
+  "rule:CORE-02",
+  "rule:CORE-07",
+  "rule:CORE-08",
+  "rule:CORE-09",
+  "rule:CORE-10",
+  "rule:CORE-14",
+  "guardrail:GG-0001",
+];
+
 const ENTRY_ID_PATTERN = /^KB-\d{4,}$/;
 
 export interface KnowledgeBackfillViolation {
@@ -54,6 +70,10 @@ function isStatus(value: string): value is KnowledgeBackfillStatus {
 
 function isPriority(value: string): value is KnowledgeBackfillPriority {
   return (KNOWLEDGE_BACKFILL_PRIORITIES as readonly string[]).includes(value);
+}
+
+function isScope(value: string): value is KnowledgeBackfillScope {
+  return value === "runtime_bootstrap_p0";
 }
 
 export function isFalsificationBackfillRef(value: string): boolean {
@@ -111,6 +131,13 @@ export function validateKnowledgeBackfillEntry(
       code: "KB_PLANNED_WITHOUT_DEADLINE",
       entryId,
       message: "entrada planned precisa de deadline explícito dentro da Spec 0024.",
+    });
+  }
+  if (entry.scope !== undefined && !isScope(entry.scope)) {
+    violations.push({
+      code: "KB_SCOPE_INVALID",
+      entryId,
+      message: `scope "${entry.scope}" inválido.`,
     });
   }
 
@@ -185,6 +212,20 @@ export function validateKnowledgeBackfill(
         code: "KB_DEADLINE_NOT_IN_TOPOLOGY",
         entryId: entry.id,
         message: `deadline "${entry.deadline}" não é um checkpoint declarado em state.yml § topology.`,
+      });
+    }
+  }
+
+  const bootstrapRefs = new Set(
+    entries
+      .filter((entry) => entry.scope === "runtime_bootstrap_p0" && entry.status === "done")
+      .map((entry) => entry.ref)
+  );
+  for (const ref of RUNTIME_BOOTSTRAP_P0_REFS) {
+    if (!bootstrapRefs.has(ref)) {
+      violations.push({
+        code: "KB_RUNTIME_BOOTSTRAP_P0_MISSING",
+        message: `runtime_bootstrap_p0 não cobre "${ref}".`,
       });
     }
   }

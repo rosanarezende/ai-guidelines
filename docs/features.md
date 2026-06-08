@@ -14,17 +14,17 @@ Estas funcionalidades garantem o piso de governança em qualquer consumidor, ind
 
 ### 1. Runtime AGENTS.md (Canal AI)
 
-- **O que faz**: Compila o runtime de governança dentro da tag `<AI_GUIDELINES>` no `AGENTS.md` da raiz.
-- **Por que**: Materializa o **canal de integração AI-agnóstica** do framework — qualquer IA que leia `AGENTS.md` recebe diretivas, regras globais, adapters e opt-ins em um único artefato topológico, preservando regras próprias do projeto fora da tag.
+- **O que faz**: Mantém um bootstrap curto dentro da tag `<AI_GUIDELINES>` no `AGENTS.md` da raiz, apontando para `handoff` situado, script contracts e catálogo de regras.
+- **Por que**: Materializa o **canal de integração AI-agnóstica** sem pré-carregar o kernel inteiro; sessões novas recebem contexto via `yarn guidelines handoff`.
 - **Classificação**: Hoje distribuído como Core porque é o mecanismo central da CLI mjs. A Spec 0021 PR4 (4.C cutover) **declara e arquiteta** a SSOT de governança (`registry.yml`, `living-docs.yml`, etc.) como distribuição canônica independente; a **distribuição operacional completa** no consumidor (geração real via `cli init`/`adopt`) depende do cutover do runtime (Spec 0022+, ainda em discovery). O Runtime AGENTS.md permanece como **canal opt-in primário** para consumidores que querem integração AI ativa.
 - **Arquivos**: `AGENTS.md`.
 
 ### 2. Rules Compiler
 
-- **O que faz**: Lê as regras modulares em `.core/rules/` e as injeta no bloco `<AI_GUIDELINES>`.
-- **Por que**: Mantém modularidade no source do framework sem espalhar arquivos de regras no consumidor.
-- **Classificação**: Acoplado ao Runtime AGENTS.md — mesma trajetória de migração para opt-in pós-cutover.
-- **Arquivos**: `AGENTS.md`.
+- **O que faz**: Lê as regras modulares em `.core/rules/` e gera catálogo, ledger e `rules.json`.
+- **Por que**: Mantém modularidade no source do framework e permite que `AGENTS.md` seja stub em vez de payload monolítico.
+- **Classificação**: Fonte governada consumida por handoff, checks e provider entrypoints.
+- **Arquivos**: `.core/rules/catalog.md`, `.core/rules/_meta/rules.json`, `.core/rules/_meta/agents-core-ledger.md`, `AGENTS.md` (stub).
 
 ### 3. Gitattributes
 
@@ -38,29 +38,29 @@ Estas funcionalidades garantem o piso de governança em qualquer consumidor, ind
 
 Funcionalidades que você pode escolher ativar via Wizard ou flags no `init`/`adopt`. Elas são divididas em **duas categorias arquiteturais**:
 
-| Categoria          | Símbolo | O que fazem                                 | Onde ficam no source  |
-| :----------------- | :------ | :------------------------------------------ | :-------------------- |
-| **Editoriais**     | 📝      | Injetam blocos `<FEATURE_*>` no `AGENTS.md` | `.core/rules/opt-in/` |
-| **Infraestrutura** | ⚡      | Modificam `package.json`, hooks, CI/CD      | `.core/templates/`    |
+| Categoria          | Símbolo | O que fazem                            | Onde ficam no source  |
+| :----------------- | :------ | :------------------------------------- | :-------------------- |
+| **Editoriais**     | 📝      | Alimentam catálogo/ledger de regras    | `.core/rules/opt-in/` |
+| **Infraestrutura** | ⚡      | Modificam `package.json`, hooks, CI/CD | `.core/templates/`    |
 
 > **Nota**: Features de infraestrutura **não geram arquivos de regras**. Elas configuram ferramentas externas (Prettier, Husky, GitHub Actions) no projeto consumidor.
 
 ---
 
-### 📝 Editoriais (injetam regras em tags XML)
+### 📝 Editoriais (alimentam o catálogo de regras)
 
-Arquivos de texto Markdown armazenados internamente em `.core/rules/opt-in/`. O compilador injeta apenas as features ativas dentro do bloco `<AI_GUIDELINES>`, usando tags como `<FEATURE_TDD>`. Quando desativadas via `--prune`, a recompilação remove o bloco XML correspondente sem tocar em conteúdo próprio do projeto.
+Arquivos de texto Markdown armazenados internamente em `.core/rules/opt-in/`. O compilador indexa regras em catálogo/ledger; o canal AI inicial usa `AGENTS.md` como stub e `handoff` para contexto situado.
 
 **CLI source**: `cli/features/opt-in/editorial/`
 
 #### 4. Quality Gates
 
-- **O que faz**: Injeta `<FEATURE_QUALITY_GATES>` no `AGENTS.md`. Define limites objetivos (ex: complexidade ciclomática, test coverage) a serem seguidos pelo LLM.
+- **O que faz**: Registra limites objetivos (ex: complexidade ciclomática, test coverage) como regra opt-in governada.
 - **Por que**: Evita problemas difíceis de rastrear (Memory Leaks, N+1) injetados passivamente por IA.
 
 #### 5. TDD / BDD
 
-- **O que faz**: Injeta `<FEATURE_TDD>` e/ou `<FEATURE_BDD>` no `AGENTS.md`. Estabelece ciclo RED-GREEN-REFACTOR e testes no formato BDD em PT-BR ou EN como padrão imperativo.
+- **O que faz**: Registra ciclo RED-GREEN-REFACTOR e testes no formato BDD em PT-BR ou EN como regra opt-in governada.
 - **Por que**: Reduz dívida técnica em features extensas que precisam de validação estrutural.
 
 ---

@@ -82,7 +82,8 @@ describe("Smoke: tarball init em diretório vazio", () => {
         const claudeContent = await fs.readFile(claudePath, "utf8");
 
         assert.match(agentsContent, /<AI_GUIDELINES>/);
-        assert.match(agentsContent, /Top Zone: Primary Directives/);
+        assert.match(agentsContent, /## Runtime Bootstrap/);
+        assert.doesNotMatch(agentsContent, /Top Zone: Primary Directives/);
         assert.deepEqual(config.providers, ["claude"]);
         assert.deepEqual(config.features, []);
         assert.equal(config.lang, "pt");

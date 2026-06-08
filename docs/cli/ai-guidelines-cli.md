@@ -279,6 +279,7 @@ Cada spec organiza o ciclo em três arquivos lidos pelo runtime (cf. `[DEC-0023-
 | :--------------------------------------------------------------------- | :----------- | :---------------------------------------------------------------------------------------------------------------------------- |
 | `workflow`                                                             | Wizard       | Menu operacional com 8 opções fixas declarativas (sem auto-detecção/ranking). Cada opção mapeia 1:1 para um comando.          |
 | `continue [<id\|slug>]`                                                | Atalho       | Briefing da spec ativa (ou a indicada) + gate de execução: **recusa narrativamente** se `executionAuthorized == false`.       |
+| `handoff [<id\|slug>] [--hybrid]`                                      | Bootstrap    | Handoff situado read-only para iniciar sessão IA nova; monta contexto determinístico e slots humanos opcionais.               |
 | `workflow publish-state --status=<active\|blocked\|paused\|completed>` | Projeção     | Projeta o estado interno (`state.yml`) no índice público `.governance/runtime/active-specs.yml` (descoberta cross-machine).   |
 | `review [<pr>]`                                                        | Inspeção     | Read-only: reúne e agrupa os comentários de review de um PR (via `gh`) em saída copiável. Detecta o PR pela branch ou número. |
 | `release-prep [--version <v>]`                                         | Transacional | Prepara a release da stack com plano explícito antes de qualquer efeito colateral. `--dry-run` audita sem aplicar.            |
@@ -302,6 +303,7 @@ O `plan` imprime modo + veículo + PRs reconciliados + receita de rollback antes
 ```bash
 yarn guidelines workflow                     # abre o wizard
 yarn guidelines continue 0023                # briefing da spec 0023 + gate
+yarn guidelines handoff 0024 --hybrid        # contexto situado para nova sessão IA
 yarn guidelines review 27                    # triagem dos review comments do PR #27
 yarn guidelines workflow publish-state --status=active --updated-by=@maintainer
 yarn guidelines release-prep --version 1.1.0 --dry-run

@@ -1,3 +1,5 @@
+import { buildAgentsRuntimeStub } from "./compiler.mjs";
+
 const TOK_H_RATIO = 3.5;
 
 /**
@@ -20,7 +22,7 @@ export const LIMITS = {
   universal: 1500,
   "opt-in": 1200,
   // Por payload distribuído — protege o que cada IA realmente carrega.
-  agentsMd: 2700, // = universal + opt-in (carga do AGENTS.md compilado)
+  agentsMd: 2700, // carga do AGENTS.md stub (canal bootstrap)
   perAdapter: 800, // hard-redirect + adapter rules (carga do entrypoint nativo do provider)
 };
 
@@ -85,17 +87,17 @@ export function analyzeScopeBudgets(catalog) {
 }
 
 /**
- * Mede a carga estimada do AGENTS.md compilado (universal + opt-in).
+ * Mede a carga estimada do AGENTS.md stub.
  *
- * Desde a Spec 0019, adapter rules vivem nos provider entrypoints, não no
- * AGENTS.md — por isso este orçamento NÃO contabiliza o escopo `adapter`.
+ * Desde `checkpoint-runtime-bootstrap-readiness`, regras completas vivem no
+ * catalogo/ledger/KnowledgeGraph. AGENTS.md carrega apenas o bootstrap situado.
  */
 export function analyzeAgentsMdBudget(catalog) {
   const scopes = analyzeScopeBudgets(catalog);
-  const tokens = scopes.universal.tokens + scopes["opt-in"].tokens;
+  const tokens = calculateTokH(buildAgentsRuntimeStub());
   const bucket = { tokens, limit: LIMITS.agentsMd };
   const warnings = [];
-  emitWarningIfOverSoftCeiling("AGENTS.md compilado", bucket, warnings);
+  emitWarningIfOverSoftCeiling("AGENTS.md stub", bucket, warnings);
   return { ...bucket, warnings, breakdown: scopes };
 }
 
@@ -144,8 +146,8 @@ export function analyzePerAdapterBudgets(catalog) {
 
 /**
  * Análise completa do orçamento de tokens — usada por `yarn build:rules` e
- * pelo comando `check-budget`. Combina escopos do catálogo, AGENTS.md
- * compilado e cada provider entrypoint.
+ * pelo comando `check-budget`. Combina escopos do catálogo, AGENTS.md stub e
+ * cada provider entrypoint.
  */
 export function analyzeBudget(catalog) {
   const scopes = analyzeScopeBudgets(catalog);

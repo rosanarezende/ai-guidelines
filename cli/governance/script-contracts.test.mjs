@@ -58,6 +58,9 @@ function writeContract(repoRoot, overrides = {}) {
           rule_sources: ["AGENTS.md", ".core/rules/top/agents-core.md", "CONTRIBUTING.md"],
           forbidden_phrases: ["cadeia proibida"],
         },
+        hook_bootstrap: {
+          node_path: "nvm",
+        },
       },
       consumer: {
         package_scripts: [
@@ -98,9 +101,12 @@ test("DADO contrato valido QUANDO sync roda ENTÃO package.json, hooks, template
     "yarn format"
   );
   assert.equal(
-    fs.readFileSync(path.join(repoRoot, ".husky", "pre-push"), "utf8"),
-    "node .yarn/releases/yarn-4.1.1.cjs validate\n"
+    fs
+      .readFileSync(path.join(repoRoot, ".husky", "pre-push"), "utf8")
+      .includes("node .yarn/releases/yarn-4.1.1.cjs validate"),
+    true
   );
+  assert.match(fs.readFileSync(path.join(repoRoot, ".husky", "pre-push"), "utf8"), /nvm\.sh/);
   assert.match(
     fs.readFileSync(path.join(repoRoot, "docs", "scripts.md"), "utf8"),
     /script-contracts.yml/

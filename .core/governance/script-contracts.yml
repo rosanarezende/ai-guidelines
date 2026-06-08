@@ -241,6 +241,8 @@ profiles:
               - .core/templates/.github/workflows/ai-guidelines-ci.yml.tmpl
               - .core/rules/_meta/rules.json
               - .core/rules/_meta/agents-core-ledger.md
+              - .core/rules/catalog.md
+              - AGENTS.md
           - run: test:unit
       pre-push:
         steps:
@@ -269,6 +271,9 @@ profiles:
         - CONTRIBUTING.md
       forbidden_phrases:
         - yarn format ; yarn validate ; git add . ; git commit
+
+    hook_bootstrap:
+      node_path: nvm
 
   consumer:
     package_scripts:
