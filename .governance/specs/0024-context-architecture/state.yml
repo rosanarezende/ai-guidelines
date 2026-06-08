@@ -90,7 +90,18 @@ topology:
         checkpoints:
           - checkpoint-co-reconcile # reconcile:check + contrato de autoridade (U1); semente: ex-checkpoint-gg-0003 (consistency)
 
-    active: []
+    active:
+      # CO-2 — EM PROGRESSO (Draft PR #37 aberto 2026-06-07, conteiner-primeiro/ADR 0025;
+      # stacked sobre #36; modo unit, NAO mergeia). Knowledge tipado: Falsification
+      # (negativo de 1a classe) + fingerprint + arestas constrains/falsifies/crystallizedAs.
+      # Design FECHADO (handoff 2026-06-07-checkpoint-handoff-co-2.md); em desenvolvimento.
+      - id: co-knowledge
+        github_pr: 37
+        role: execution
+        terminal: false
+        sequence: 5
+        checkpoints:
+          - checkpoint-co-knowledge # Knowledge tipado + Falsification/fingerprint + aresta constrains (U2)
 
     planned:
       # CAUDA REESCRITA (2026-06-07, Human Gate #35 / Opcao A — reframe in-place).
@@ -106,18 +117,6 @@ topology:
       # contexto o mais cedo). `sequence` = posicao no stack (4..K contigua). github_pr
       # null = ainda nao aberto. Objetivo/Deps de cada no: plan.md. Memoria:
       # spec-0024-continuity-operational.
-
-      # CO-2 — Knowledge tipado: Falsification (negativo de 1a classe) + fingerprint +
-      # aresta `constrains` (knowledge -> superficie de decisao). Mata "falsificacao
-      # esquecida". Absorve ex-doctrine (DoctrineGraph -> nos Lens/ADR) + ex-decision
-      # (Decision como TIPO de no; WorkItem tambem vira tipo de no aqui).
-      - id: co-knowledge
-        github_pr: null
-        role: execution
-        terminal: false
-        sequence: 5
-        checkpoints:
-          - checkpoint-co-knowledge # Knowledge tipado + Falsification/fingerprint + aresta constrains (U2)
 
       # Bootstrap+Compiler — RESOLVE a auditoria do #35 (#1 roteamento, #3 fallback,
       # #4 parsers): migra bootstrap (init/adopt/providers/update/check-budget) ao
