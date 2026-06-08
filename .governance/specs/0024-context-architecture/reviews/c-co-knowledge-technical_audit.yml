@@ -1,0 +1,20 @@
+checkpoint: "checkpoint-co-knowledge"
+role: technical_audit
+executor:
+  platform: antigravity
+  model: gemini-1.5-pro
+decision: approved
+findings_emitted: 0
+audit_evidence:
+  coverage:
+    - src/domain/knowledge/GovernedRef.ts
+    - src/domain/knowledge/Falsification.ts
+    - src/domain/knowledge/typedArtifacts.ts
+    - src/app/projections/KnowledgeGraph.ts
+    - src/infrastructure/yaml/falsificationsSerializer.ts
+    - src/cli/coKnowledgeCheck.ts
+    - cli/co-knowledge-check.mjs
+    - .governance/runtime/falsifications.yml
+  scope: "Análise profunda contra não-determinismo em sha256 fingerprint, blindagem estrutural da union knowledge/work, e segurança da união discriminada para o Grafo sem quebrar consumos preexistentes. Falsificações focadas na exclusão proposital da evidência do selo e tolerância do pipeline (advisory exit 0)."
+  basis: "Implementação pura e estrita das invariantes F1, F2 e F3; e check restrito (e assertivo) F4a. Ausência deliberada de controle semântico (F4b) obedece à ADR 0018. A serialização evita nulls e as propriedades computadas mantêm estabilidade de string/kebab-case."
+review_fingerprint: ab356a6bf6d2
