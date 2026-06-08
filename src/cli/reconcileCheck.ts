@@ -37,7 +37,7 @@ import {
   WorkflowState,
   WorkflowTopology,
 } from "../domain/workflow/WorkflowState.js";
-import { discoverStateYmlFiles } from "./stateYmlCheck.js";
+import { discoverOperationalStateYmlFiles } from "./stateYmlCheck.js";
 
 interface Logger {
   info: (msg: string) => void;
@@ -213,7 +213,7 @@ export function runReconcileCheck(input: ReconcileCheckInput): ReconcileCheckRep
  * SEMPRE retorna 0 (advisory-first).
  */
 export function main(repoRoot: string, logger: Logger = defaultLogger): number {
-  const files = discoverStateYmlFiles(repoRoot);
+  const files = discoverOperationalStateYmlFiles(repoRoot);
   if (files.length === 0) {
     logger.info("ℹ reconcile:check (advisory) — nenhum state.yml encontrado. Nada a reconciliar.");
     return 0;

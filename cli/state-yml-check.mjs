@@ -6,7 +6,7 @@
  * (`dist/cli/stateYmlCheck.js`) e o invoca com o repo root.
  *
  * Exit codes:
- *   0 — sucesso (todos os state.yml conformam ao schema canônico)
+ *   0 — sucesso (state.yml do escopo escolhido conformam ao schema canônico)
  *   1 — schema violation (≥ 1 state.yml não conforma)
  *   2 — uso inválido (módulo compilado ausente)
  *
@@ -36,5 +36,14 @@ if (!existsSync(compiledModule)) {
   process.exit(2);
 }
 
+const args = process.argv.slice(2);
+const invalidArgs = args.filter((arg) => arg !== "--all");
+if (invalidArgs.length > 0) {
+  process.stderr.write(
+    `❌ Uso inválido: ${invalidArgs.join(" ")}\n` + `   Use: yarn state-yml:check [--all]\n`
+  );
+  process.exit(2);
+}
+
 const { main } = await import(pathToFileURL(compiledModule).href);
-process.exit(main(repoRoot));
+process.exit(main(repoRoot, undefined, { scope: args.includes("--all") ? "all" : "operational" }));

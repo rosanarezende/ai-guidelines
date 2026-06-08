@@ -14,16 +14,16 @@ Estrutura:
 
 ## Visão por categoria
 
-| Intenção                  | Scripts                                                                     |
-| :------------------------ | :-------------------------------------------------------------------------- |
-| Setup inicial / build     | `setup`, `build`, `build:rules`, `build:all`                                |
-| Format                    | `format` (write), `format:check` (lint)                                     |
-| Tests                     | `test`, `test:unit`, `test:ts`, `test:smoke`, `test:coverage`               |
-| Living docs (drift guard) | `living-docs:generate`, `living-docs:check`                                 |
-| Guards de governança      | `state-yml:check`, `gate-decidability:check`, `ruleset:check`               |
-| Aggregate (gates)         | `validate` (gate local + pre-push), `ci` (pipeline completo replicável)     |
-| CLI (dogfooding)          | `guidelines`, `guidelines:init`, `guidelines:adopt`, `guidelines:providers` |
-| Lifecycle npm             | `prepare` (auto-install husky), `prepack` (build antes de empacotar)        |
+| Intenção                  | Scripts                                                                              |
+| :------------------------ | :----------------------------------------------------------------------------------- |
+| Setup inicial / build     | `setup`, `build`, `build:rules`, `build:all`                                         |
+| Format                    | `format` (write), `format:check` (lint)                                              |
+| Tests                     | `test`, `test:unit`, `test:ts`, `test:smoke`, `test:coverage`                        |
+| Living docs (drift guard) | `living-docs:generate`, `living-docs:check`                                          |
+| Guards de governança      | `state-yml:check`, `state-yml:check:all`, `gate-decidability:check`, `ruleset:check` |
+| Aggregate (gates)         | `validate` (gate local + pre-push), `ci` (pipeline completo replicável)              |
+| CLI (dogfooding)          | `guidelines`, `guidelines:init`, `guidelines:adopt`, `guidelines:providers`          |
+| Lifecycle npm             | `prepare` (auto-install husky), `prepack` (build antes de empacotar)                 |
 
 ---
 
@@ -48,11 +48,12 @@ Estrutura:
 | `test:coverage`           | mjs (mesmos globs de `test:unit` — sem smoke) com `--experimental-test-coverage` + `jest --coverage`                                                       |        não         | manual / análise ad-hoc                                                                          |
 | `living-docs:generate`    | `yarn build && node cli/living-docs.mjs generate`                                                                                                          |        sim²        | manual quando atualizar manifesto                                                                |
 | `living-docs:check`       | `yarn build && node cli/living-docs.mjs check`                                                                                                             |        sim²        | dentro de `validate`                                                                             |
-| `state-yml:check`         | `yarn build && node cli/state-yml-check.mjs` (valida o schema de todo `state.yml`)                                                                         |        sim²        | dentro de `validate`                                                                             |
+| `state-yml:check`         | `yarn build && node cli/state-yml-check.mjs` (valida o escopo operacional: specs não concluídas em `active-specs.yml` + `state.yml` tocados no diff local) |        sim²        | dentro de `validate`                                                                             |
+| `state-yml:check:all`     | `yarn build && node cli/state-yml-check.mjs --all` (varredura histórica/global de todos os `state.yml`)                                                    |        sim²        | dentro de `ci`; readiness/integration-final                                                      |
 | `gate-decidability:check` | `node cli/governance/gate-decidability-check.mjs` (GG-0001: DECs não-resolvidos são decidíveis)                                                            |        não         | dentro de `validate`                                                                             |
 | `ruleset:check`           | `yarn build && node cli/ruleset-check.mjs` (producibilidade: required contexts do ruleset têm produtor estável; `--parity` p/ drift vivo↔versionado)       |        sim²        | dentro de `validate`; workflow `ruleset-drift.yml` (modo `--parity`)                             |
 | `validate`                | `yarn format:check && yarn build:all && yarn test && yarn living-docs:check && yarn state-yml:check && yarn gate-decidability:check && yarn ruleset:check` |        sim²        | **pre-push hook**; workflow `repo-validation.yml`                                                |
-| `ci`                      | `yarn install --immutable && yarn validate && yarn test:smoke`                                                                                             |        sim²        | pipeline completo replicável fora do GitHub (ou em workflow externo que queira smoke + validate) |
+| `ci`                      | `yarn install --immutable && yarn validate && yarn state-yml:check:all && yarn test:smoke`                                                                 |        sim²        | pipeline completo replicável fora do GitHub (ou em workflow externo que queira smoke + validate) |
 | `prepare`                 | `husky` (instala hooks `.husky/*` no `.git/hooks/`)                                                                                                        |        sim         | npm install lifecycle (auto)                                                                     |
 | `prepack`                 | `yarn build:all`                                                                                                                                           |        sim         | npm publish lifecycle (auto, garante `dist/` + `rules.json` no tarball)                          |
 | `lint-staged`             | binário direto do pacote `lint-staged` (config em `.lintstagedrc.json`)                                                                                    |        sim         | pre-commit hook (passo 1)                                                                        |
@@ -81,7 +82,7 @@ yarn test:unit                                                            # 4. s
 ### `pre-push` (espelhado em `.husky/pre-push`)
 
 ```bash
-yarn validate       # format:check + build:all + test (mjs + jest) + living-docs:check + state-yml:check + gate-decidability:check + ruleset:check
+yarn validate       # format:check + build:all + test (mjs + jest) + living-docs:check + state-yml:check operacional + demais guards
 ```
 
 **Quando dispara:** `git push`.

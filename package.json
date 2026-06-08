@@ -62,6 +62,7 @@
     "living-docs:generate": "yarn build && node cli/living-docs.mjs generate",
     "living-docs:check": "yarn build && node cli/living-docs.mjs check",
     "state-yml:check": "yarn build && node cli/state-yml-check.mjs",
+    "state-yml:check:all": "yarn build && node cli/state-yml-check.mjs --all",
     "active-specs:check": "yarn build && node cli/active-specs-check.mjs",
     "reconcile:check": "yarn build && node cli/reconcile-check.mjs",
     "co-knowledge:check": "yarn build && node cli/co-knowledge-check.mjs",
@@ -73,7 +74,7 @@
     "intent:check": "yarn build && node cli/intent-check.mjs",
     "disclosure": "yarn build && node cli/disclosure-render.mjs",
     "validate": "yarn format:check && yarn build:all && yarn test && yarn living-docs:check && yarn state-yml:check && yarn active-specs:check && yarn reconcile:check && yarn co-knowledge:check && yarn co-knowledge:inventory && yarn gate-decidability:check && yarn ruleset:check && yarn review:check && yarn insights:check && yarn intent:check",
-    "ci": "yarn install --immutable && yarn validate && yarn test:smoke",
+    "ci": "yarn install --immutable && yarn validate && yarn state-yml:check:all && yarn test:smoke",
     "prepare": "husky",
     "prepack": "yarn build:all"
   },
