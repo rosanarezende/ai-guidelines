@@ -1,6 +1,6 @@
 # AGENTS.md
 
-> **[MANDATÓRIO — HARNESS LOCK]** É proibido rodar `git commit` isoladamente. Toda submissão deve obrigatoriamente usar a cadeia: `yarn format ; yarn validate ; git add . ; git commit -m "..."`. `yarn validate` agrega `format:check + build:all + test + living-docs:check`; `yarn ci` adiciona smoke (executado em CI próprio).
+> **[MANDATÓRIO — HARNESS LOCK]** É proibido rodar `git commit --no-verify` ou commitar com hooks/contrato ausentes. Toda submissão deve obedecer ao contrato operacional em `.core/governance/script-contracts.yml`, que projeta `package.json#scripts`, `.husky/*`, templates e `docs/scripts.md`. Se os hooks não estiverem instalados ou o contrato estiver divergente, pare e restaure o setup antes de commitar.
 
 Este arquivo define o fluxo obrigatório para qualquer IA atuando neste repositório.
 
@@ -111,7 +111,7 @@ Make atomic incremental commits limited to one logical unit. Split tasks that sp
 
 ### [CORE-08]
 
-**[HARNESS LOCK]** Before any `git commit`, run the project's full validation chain (format, check, lint, test) as declared in `package.json`. The rule is the chain, not the package manager — adapt to project scripts.
+**[HARNESS LOCK]** Before any `git commit`, rely on the repository's declared script contract and installed git hooks. Never bypass hooks with `--no-verify`; if hooks or generated script surfaces are missing or stale, stop and restore the project setup before committing.
 
 ### [CORE-09]
 
@@ -123,7 +123,7 @@ Convert PRs from `Draft` to `Ready` only after explicit human revalidation. At `
 
 ### [CORE-14]
 
-At the end of each sub-block, provide only the commit message suggestion. The human executes the full validation chain (`yarn format ; yarn validate ; ...`) and `git commit`.
+At the end of each sub-block, provide the commit message suggestion unless the maintainer explicitly authorized the agent to commit. When committing is authorized, use the repository's installed hooks and script contract; never bypass them.
 
 ### [CORE-16]
 

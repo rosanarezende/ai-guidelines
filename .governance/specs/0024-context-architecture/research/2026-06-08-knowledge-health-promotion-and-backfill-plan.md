@@ -2,6 +2,9 @@
 
 > Status: plano arquitetural do PR #37. Este artefato responde aos limites reais
 > do CO-2/CO-2.1 sem transformar julgamento semantico em runtime mecanico.
+> Atualizacao CO-2.2: `script-contracts` foi antecipado para o PR #37 como
+> `checkpoint-script-contracts`; `knowledge-readiness` passa a consumi-lo como
+> capacidade ja materializada, nao como no futuro.
 >
 > Autoridade: `state.yml § topology` vence este documento quando houver divergencia.
 
@@ -149,3 +152,5 @@ O no final so fecha quando:
 - Nao bloquear build por equivalencia semantica.
 - Nao adotar banco externo como fonte primaria.
 - Nao migrar cegamente todo historico sem prioridade.
+- Nao reabrir `script-contracts` como no independente: contrato de scripts foi absorvido
+  no PR #37; o no final apenas usa essa capacidade como insumo de saude operacional.

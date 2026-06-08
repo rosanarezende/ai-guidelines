@@ -1,0 +1,294 @@
+schema_version: 1
+description: >
+  Contrato operacional dos scripts, hooks, workflows e templates do framework.
+  Este arquivo e a SSOT; package.json, docs/scripts.md, hooks locais e templates
+  de consumidor sao projecoes deterministicas.
+
+profiles:
+  maintainer:
+    package_scripts:
+      - name: guidelines
+        command: node cli/ai-guidelines-cli.mjs
+        category: cli
+        mutates: false
+        consumers: [human]
+        description: Invocacao local da CLI.
+      - name: guidelines:init
+        command: node cli/ai-guidelines-cli.mjs init
+        category: cli
+        mutates: true
+        consumers: [human]
+        description: Bootstrap de consumidor via CLI.
+      - name: guidelines:adopt
+        command: node cli/ai-guidelines-cli.mjs adopt
+        category: cli
+        mutates: true
+        consumers: [human]
+        description: Adocao/atualizacao de consumidor existente.
+      - name: guidelines:providers
+        command: node cli/ai-guidelines-cli.mjs providers
+        category: cli
+        mutates: false
+        consumers: [human]
+        description: Lista provider adapters disponiveis.
+      - name: setup
+        command: yarn install --immutable && yarn build:all
+        category: setup
+        mutates: true
+        consumers: [human]
+        description: Primeira instalacao local do repositório.
+      - name: build
+        command: tsc
+        category: build
+        mutates: true
+        consumers: [script]
+        description: Compila TypeScript de src/ para dist/.
+      - name: build:rules
+        command: node cli/governance/monolith/rules-builder.mjs
+        category: build
+        mutates: true
+        consumers: [script, hook]
+        description: Gera rules.json e ledger derivado.
+      - name: build:all
+        command: yarn build && yarn build:rules
+        category: build
+        mutates: true
+        consumers: [script, hook, lifecycle]
+        description: Build completo do runtime e das regras.
+      - name: format
+        command: prettier --write .
+        category: format
+        mutates: true
+        consumers: [human]
+        description: Formata todos os arquivos.
+      - name: format:check
+        command: prettier --check .
+        category: format
+        mutates: false
+        consumers: [script]
+        description: Verifica formatacao sem alterar arquivos.
+      - name: lint-staged
+        command: lint-staged
+        category: format
+        mutates: true
+        consumers: [hook]
+        description: Formata arquivos staged e re-stageia alteracoes.
+      - name: test
+        command: yarn test:unit && yarn test:ts
+        category: test
+        mutates: false
+        consumers: [script]
+        description: Agregado das suites mjs e TypeScript.
+      - name: test:unit
+        command: node --experimental-default-config-file --test cli/**/*.test.mjs cli/**/**/*.test.mjs tests/integration/**/*.test.mjs
+        category: test
+        mutates: false
+        consumers: [script, hook]
+        description: Suite mjs rapida usada no pre-commit.
+      - name: test:ts
+        command: jest --config ./.jest/jest.config.js
+        category: test
+        mutates: false
+        consumers: [script]
+        description: Suite TypeScript/Jest.
+      - name: test:smoke
+        command: yarn build && node --experimental-default-config-file --test tests/smoke/*.test.mjs
+        category: test
+        mutates: true
+        consumers: [script, workflow]
+        description: Smoke cross-plataforma sobre pacote gerado.
+      - name: test:coverage
+        command: node --experimental-default-config-file --experimental-test-coverage --test cli/**/*.test.mjs cli/**/**/*.test.mjs tests/integration/**/*.test.mjs && jest --config ./.jest/jest.config.js --coverage
+        category: test
+        mutates: false
+        consumers: [human]
+        description: Cobertura combinada das suites mjs e Jest.
+      - name: living-docs:generate
+        command: yarn build && node cli/living-docs.mjs generate
+        category: docs
+        mutates: true
+        consumers: [human]
+        description: Regenera living docs.
+      - name: living-docs:check
+        command: yarn build && node cli/living-docs.mjs check
+        category: docs
+        mutates: true
+        consumers: [script]
+        description: Verifica drift dos living docs.
+      - name: state-yml:check
+        command: yarn build && node cli/state-yml-check.mjs
+        category: governance
+        mutates: true
+        consumers: [script]
+        description: Valida state.yml operacionais e tocados no diff local.
+      - name: state-yml:check:all
+        command: yarn build && node cli/state-yml-check.mjs --all
+        category: governance
+        mutates: true
+        consumers: [script, workflow]
+        description: Varredura historica/global de todos os state.yml.
+      - name: active-specs:check
+        command: yarn build && node cli/active-specs-check.mjs
+        category: governance
+        mutates: true
+        consumers: [script]
+        description: Verifica coerencia da projection active-specs.yml.
+      - name: reconcile:check
+        command: yarn build && node cli/reconcile-check.mjs
+        category: governance
+        mutates: true
+        consumers: [script]
+        description: Advisory de continuidade operacional/canonical-next.
+      - name: co-knowledge:check
+        command: yarn build && node cli/co-knowledge-check.mjs
+        category: governance
+        mutates: true
+        consumers: [script]
+        description: Advisory de Falsification/Knowledge.
+      - name: co-knowledge:inventory
+        command: yarn build && node cli/co-knowledge-inventory.mjs
+        category: governance
+        mutates: true
+        consumers: [script]
+        description: Check required do inventario minimo de conhecimento.
+      - name: script-contracts:sync
+        command: node cli/script-contracts.mjs sync
+        category: governance
+        mutates: true
+        consumers: [human, hook]
+        description: Sincroniza package.json, hooks, templates e docs a partir do contrato.
+      - name: script-contracts:check
+        command: node cli/script-contracts.mjs check
+        category: governance
+        mutates: false
+        consumers: [script]
+        description: Falha se scripts, hooks, templates ou docs divergirem do contrato.
+      - name: gate-decidability:check
+        command: node cli/governance/gate-decidability-check.mjs
+        category: governance
+        mutates: false
+        consumers: [script]
+        description: GG-0001; DECs nao-resolvidos precisam ser decidiveis.
+      - name: ruleset:check
+        command: yarn build && node cli/ruleset-check.mjs
+        category: governance
+        mutates: true
+        consumers: [script, workflow]
+        description: Producibilidade dos required contexts; --parity para ruleset vivo.
+      - name: review:check
+        command: yarn build && node cli/review-check.mjs
+        category: governance
+        mutates: true
+        consumers: [script]
+        description: Verifica artefatos de review/gate e fingerprints.
+      - name: insights:check
+        command: yarn build && node cli/insights-check.mjs
+        category: governance
+        mutates: true
+        consumers: [script]
+        description: Valida ledger de insights.
+      - name: intent:check
+        command: yarn build && node cli/intent-check.mjs
+        category: governance
+        mutates: true
+        consumers: [script]
+        description: Verifica intencao/governanca de PR.
+      - name: disclosure
+        command: yarn build && node cli/disclosure-render.mjs
+        category: governance
+        mutates: true
+        consumers: [human]
+        description: Renderiza disclosure de IA derivado.
+      - name: validate
+        command: yarn format:check && yarn build:all && yarn script-contracts:check && yarn test && yarn living-docs:check && yarn state-yml:check && yarn active-specs:check && yarn reconcile:check && yarn co-knowledge:check && yarn co-knowledge:inventory && yarn gate-decidability:check && yarn ruleset:check && yarn review:check && yarn insights:check && yarn intent:check
+        category: aggregate
+        mutates: true
+        consumers: [hook, workflow, human]
+        description: Gate local operacional e pre-push.
+      - name: ci
+        command: yarn install --immutable && yarn validate && yarn state-yml:check:all && yarn test:smoke
+        category: aggregate
+        mutates: true
+        consumers: [workflow, human]
+        description: Pipeline completo replicavel fora do GitHub.
+      - name: prepare
+        command: husky
+        category: lifecycle
+        mutates: true
+        consumers: [lifecycle]
+        description: Instala hooks Husky.
+      - name: prepack
+        command: yarn build:all
+        category: lifecycle
+        mutates: true
+        consumers: [lifecycle]
+        description: Garante dist/ e rules.json antes de empacotar.
+
+    hooks:
+      pre-commit:
+        steps:
+          - run: lint-staged
+          - run: script-contracts:sync
+          - run: build:all
+          - git_add:
+              - package.json
+              - docs/scripts.md
+              - .husky/pre-commit
+              - .husky/pre-push
+              - .core/templates/package.json.fragment.json
+              - .core/templates/.husky/pre-commit.tmpl
+              - .core/templates/.husky/pre-push.tmpl
+              - .core/templates/.github/workflows/ai-guidelines-ci.yml.tmpl
+              - .core/rules/_meta/rules.json
+              - .core/rules/_meta/agents-core-ledger.md
+          - run: test:unit
+      pre-push:
+        steps:
+          - run: validate
+
+    workflows:
+      - file: .github/workflows/repo-validation.yml
+        required_runs:
+          - yarn validate
+          - yarn state-yml:check:all
+      - file: .github/workflows/release.yml
+        required_runs:
+          - yarn ci
+      - file: .github/workflows/smoke-multi-os.yml
+        required_runs:
+          - yarn test:smoke
+      - file: .github/workflows/ruleset-drift.yml
+        required_runs:
+          - node cli/ruleset-check.mjs --parity --live /tmp/live-ruleset.json
+
+    docs:
+      generated_file: docs/scripts.md
+      rule_sources:
+        - AGENTS.md
+        - .core/rules/top/agents-core.md
+        - CONTRIBUTING.md
+      forbidden_phrases:
+        - yarn format ; yarn validate ; git add . ; git commit
+
+  consumer:
+    package_scripts:
+      - name: format
+        command: prettier --write .
+        description: Formata arquivos do consumidor.
+      - name: check
+        command: prettier --check .
+        description: Check minimo de consumidor.
+      - name: prepare
+        command: husky
+        description: Instala hooks Husky no consumidor.
+    dev_dependencies:
+      husky: ^9.1.7
+      prettier: ^3.0.0
+    hooks:
+      pre-commit: "{{package_manager_runner}} {{format_command}}"
+      pre-push: "{{package_manager_runner}} {{check_command}}"
+    workflow:
+      name: "{{ci_workflow_name}}"
+      node_version: "{{node_version}}"
+      install_command: "{{install_command}}"
+      check_command: "{{check_command}}"

@@ -118,7 +118,7 @@ ENTÃO deve adicionar os novos scripts e dependências sem sobrescrever versões
 
 DADO um repositório alvo
 QUANDO a CLI tenta instalar os Git Hooks
-ENTÃO só deve criar o hook `pre-commit` se o script `format` estiver presente, e o `pre-push` se o script `check` estiver presente no `package.json`.
+ENTÃO deve usar o baseline de consumidor projetado por `.core/governance/script-contracts.yml`, criando o hook `pre-commit` para o comando de formatação detectado e o `pre-push` para o comando de check detectado no `package.json`.
 
 ### [BR-CLI-HOOKS-02] Fusão de Conteúdo de Hook
 

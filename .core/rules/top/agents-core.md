@@ -187,7 +187,7 @@ tags: [core, agents, always_injected, git, safety, critical]
 
 ---
 
-#### [CORE-08] HARNESS LOCK — cadeia de qualidade obrigatória pré-commit
+#### [CORE-08] HARNESS LOCK — contrato operacional obrigatório pré-commit
 
 ```yaml
 id: CORE-08
@@ -200,20 +200,22 @@ tags: [core, agents, always_injected, git, commit, ci, harness_lock]
 ```
 
 **Instruction (en):**
-**[HARNESS LOCK]** Before any `git commit`, run the project's full validation chain (format, check, lint, test) as declared in `package.json`. The rule is the chain, not the package manager — adapt to project scripts.
+**[HARNESS LOCK]** Before any `git commit`, rely on the repository's declared script contract and installed git hooks. Never bypass hooks with `--no-verify`; if hooks or generated script surfaces are missing or stale, stop and restore the project setup before committing.
 
 **Documentação (pt-br):**
-**[CI Compliance — HARNESS LOCK]** É terminantemente proibido submeter qualquer commit sem validar a cadeia de qualidade do projeto. Antes de `git commit`, execute **todos os scripts de validação** definidos no `package.json` do repositório (ex.: `format`, `check`, `lint`, `test`). O padrão canônico é:
+**[CI Compliance — HARNESS LOCK]** É terminantemente proibido submeter qualquer commit fora do contrato operacional do repositório. O contrato não é uma linha de comando copiada em instruções soltas: ele vive no artefato versionado `.core/governance/script-contracts.yml`, que projeta `package.json#scripts`, `.husky/*`, templates de consumidor e `docs/scripts.md`.
 
-```text
-<format_cmd> ; <check_cmd> ; git add . ; git commit -m "..."
-```
+Neste repositório, o caminho obrigatório é:
 
-Se o repositório define `yarn format` (write) e `yarn validate` (aggregate: format:check + build + test + living-docs:check, ou equivalente do stack), o comando concreto é: `yarn format ; yarn validate ; git add . ; git commit -m "..."`. Adapte aos scripts do projeto — a regra é a **cadeia**, não o gerenciador. Em stacks sem aggregate, expanda explicitamente: `<format_write> ; <format_check> ; <build> ; <test> ; <docs_check> ; git add . ; git commit -m "..."`.
+- `pre-commit` instalado via Husky executa a sincronização do contrato, build e testes rápidos;
+- `pre-push` executa o gate local `validate`;
+- `script-contracts:check` roda dentro de `validate` e falha se `package.json`, hooks, docs ou templates divergirem da SSOT.
 
-**Why this matters:** o gate local replica o gate de CI. Pular = empurrar o erro para o pipeline e gastar ciclo de revisão humano com algo automatizável.
+Se os hooks não estiverem instalados, se `.husky/*` divergir do contrato, ou se o ambiente não conseguir executar o runner declarado, pare e restaure o setup (`yarn setup` / `yarn prepare`, conforme `docs/scripts.md`). Não use `git commit --no-verify` sem autorização humana explícita. Não invente uma cadeia manual paralela para "substituir" o contrato.
 
-**Cross-ref:** complementada por `[CORE-14]` (commit message protocol — IA gera apenas o texto sugerido; humano executa a cadeia).
+**Why this matters:** scripts, hooks, workflows e docs driftam quando vivem como texto duplicado. O contrato operacional torna a superfície auditável, sincronizável e própria para consumidores de tamanhos diferentes sem depender do tamanho atual do dogfooding.
+
+**Cross-ref:** complementada por `[CORE-14]` (commit message protocol) e por `docs/scripts.md` (projeção humana gerada do contrato).
 
 ---
 
@@ -344,7 +346,7 @@ Keep SDD artifacts updated continuously: mark `tasks.md` items `[/]` (in progres
 
 ---
 
-#### [CORE-14] Mensagem de commit sugerida: IA fornece apenas a mensagem
+#### [CORE-14] Commit sob autorização explícita e contrato instalado
 
 ```yaml
 id: CORE-14
@@ -357,12 +359,12 @@ tags: [core, agents, always_injected, git, commit, safety]
 ```
 
 **Instruction (en):**
-At the end of each sub-block, provide only the commit message suggestion. The human executes the full validation chain (`yarn format ; yarn validate ; ...`) and `git commit`.
+At the end of each sub-block, provide the commit message suggestion unless the maintainer explicitly authorized the agent to commit. When committing is authorized, use the repository's installed hooks and script contract; never bypass them.
 
 **Documentação (pt-br):**
-Ao concluir um sub-bloco, IA fornece **apenas** a mensagem sugerida do commit (`feat(spec-XXXX): ...`). O humano executa a cadeia completa de validação (`yarn format ; yarn validate ; git add . ; git commit -m "..."`).
+Ao concluir um sub-bloco, a IA fornece a mensagem sugerida do commit (`feat(spec-XXXX): ...`) quando não houver autorização explícita para operar Git. Se a mantenedora autorizou o agente a commitar, o commit deve ocorrer com hooks instalados e contrato operacional sincronizado; a IA não pode usar `--no-verify` nem substituir o contrato por uma sequência manual avulsa.
 
-**Why this matters:** economiza tokens e impede IA de operar git autonomamente. Honra `[CORE-07]` (push) e `[CORE-08]` (HARNESS LOCK).
+**Why this matters:** separa autorização humana de execução mecânica. O humano decide se o agente pode commitar; o contrato garante que a submissão passe pelos mesmos gates locais sem duplicar comandos em instruções narrativas.
 
 **See also:** `[CORE-08]` (HARNESS LOCK), `[CORE-07]` (Nunca execute git push autonomamente).
 

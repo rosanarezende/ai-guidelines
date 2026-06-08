@@ -25,7 +25,7 @@
 > Os eixos `G03/G04/G05` foram **reabertos para modelagem** (ver `spec.md § nota de fase` + `decision-brief § [DEC-0024-G08]`). A **trilha de execução** deixou de ser a sequência de absorção 3–12 isolada e passou a ser o **programa de convergência orientado a grafo** — a **SSOT estrutural é `state.yml § topology`** (que já reconcilia: `#32`–`#35` concluídos + a cauda de Continuidade Operacional planejada). Os checkpoints de absorção originais (3–12) foram **dobrados** nos PRs de convergência onde se sobrepõem (mapeamento nos comentários de cada nó da topologia).
 >
 > **Trilha (SSOT = `state.yml § topology`) — cauda REESCRITA como Continuidade Operacional (Opção A / Human Gate #35, 2026-06-07):**
-> **Concluídos:** `#32` → `#33` → `#34` (Knowledge + KnowledgeGraph) → `#35` (cutover CLI→registry; help derivado; fail-fast). **Cauda CO (ordem por impacto):** `co-reconcile` (CO-1: reconcile:check + contrato de autoridade — mata a classe PIT-0001/conflação) → `co-knowledge` (CO-2: Knowledge tipado + Falsification + aresta `constrains`) → `bootstrap-compiler` (migra bootstrap→registry; resolve auditoria #1/#3/#4) → `co-enforcement` (CO-3: EnforcementBinding + knowledge:compile) → `co-projection` (CO-4: projetor situado + contrato de carga) → `co-capture` (CO-5: captura na formação; dissolve NEXT) → `co-events` (CO-6: disparo automático) → `housekeeping` (faxina ortogonal: taxonomy-removal P0/agents-sync/gg-0002/decouple-brief/doc-cleanup) → `dualroot-collapse` → `script-contracts` (contrato package.json/docs/hooks/workflows + scripts:check) → `knowledge-readiness` (nó final: backfill amplo P0/P1 + knowledge:health + decisão de promoção dos checks) → `integration-final`. Ex-nós 37–41 REESCRITOS na CO; **workitem-registry-persistido + provenance-persistida ELIMINADOS** (INV-4 → frontier/projeção derivada).
+> **Concluídos:** `#32` → `#33` → `#34` (Knowledge + KnowledgeGraph) → `#35` (cutover CLI→registry; help derivado; fail-fast). **Cauda CO (ordem por impacto):** `co-reconcile` (CO-1: reconcile:check + contrato de autoridade — mata a classe PIT-0001/conflação) → `co-knowledge` (CO-2: Knowledge tipado + Falsification + aresta `constrains`; CO-2.1: backfill mínimo; CO-2.2: script-contracts dentro do PR #37) → `bootstrap-compiler` (migra bootstrap→registry; resolve auditoria #1/#3/#4) → `co-enforcement` (CO-3: EnforcementBinding + knowledge:compile) → `co-projection` (CO-4: projetor situado + contrato de carga) → `co-capture` (CO-5: captura na formação; dissolve NEXT) → `co-events` (CO-6: disparo automático) → `housekeeping` (faxina ortogonal: taxonomy-removal P0/agents-sync/gg-0002/decouple-brief/doc-cleanup) → `dualroot-collapse` → `knowledge-readiness` (nó final: backfill amplo P0/P1 + knowledge:health + decisão de promoção dos checks, consumindo script-contracts já materializado) → `integration-final`. Ex-nós 37–41 REESCRITOS na CO; **workitem-registry-persistido + provenance-persistida ELIMINADOS** (INV-4 → frontier/projeção derivada).
 >
 > A tabela "Sequência de Checkpoints" abaixo é **registro histórico** do plano de absorção pré-reabertura; vale como referência do _quê/por quê_ de cada item absorvido, mas a **ordem e o veículo** vivem na topologia. **⚠️ A cauda (ex-nós 37–41) foi REESCRITA como Continuidade Operacional (Opção A, Human Gate #35, 2026-06-07): a tabela 3–12 abaixo é PRÉ-CO — o _quê/por quê_ de cada item segue válido, mas a forma final (nós CO + faxina + eliminados por INV-4) vive na `state.yml § topology`.**
 >
@@ -131,14 +131,14 @@
 
 - [ ] Atômico, mergeável, reversível — uma divergência decisão↔código por checkpoint (ou um bloco coeso).
 - [ ] Fecha o **Gate** completo (Technical Audit → Architectural Review → Human) **antes de avançar** para o próximo checkpoint. (O merge em `main` é **único, ao fim** — não por checkpoint.) Correção local pequena não espera; mudança estrutural sim.
-- [ ] `yarn format ; yarn validate` verde (build:rules + suíte + living-docs + state-yml + gate-decidability).
+- [ ] Contrato operacional sincronizado (`script-contracts:check`) e `yarn validate` verde (format:check + build:rules + suíte + living-docs + state-yml + gate-decidability + checks de governança).
 - [ ] Checkpoint que instala/altera guardrail carrega **check + fixture** no mesmo commit; checkpoint que afeta distribuição roda `test:smoke`.
 - [ ] Do Checkpoint 3 em diante: **PR real próprio _stacked_** sobre a linha da spec (Draft → Ready → Human Gate → **avançar**; **sem merge isolado em `main`**), com proveniência no PR (`ref: #N @ sha` · `checkpoint: N` · `role`).
 - [ ] Sem reabrir decisão `Resolved` (G00/G02/G06) nem re-modelar arquitetura congelada.
 
 ### Globais (toda a spec)
 
-- [ ] Pipeline `yarn format ; yarn validate` verde.
+- [ ] Pipeline `yarn validate` verde, com hooks/contrato operacional instalados para commits locais.
 - [ ] Não-objetivos cravados em `spec.md` continuam respeitados (auditoria final).
 - [ ] **Fronteira modelo ≠ migração:** absorção entrega enforcement + artefato de referência; migração ampla do ecossistema (Grupo B) permanece nas candidatas re-escopadas.
 - [ ] `review.md` (R1–R7) + Integration PR + `release-log.md` instanciados no encerramento; spec→`Done` só após o último checkpoint.
@@ -152,7 +152,7 @@
 - **Checks/guardrails** (Checkpoint 3 GG-0003, Checkpoint 6 GG-0002, Checkpoint 8): fixture determinística (caso que falha + caso que passa); integração no chain `yarn validate`.
 - **Proveniência** (Checkpoint 4A storage, 4B projeção): testes de serialização append-only + derivação da espinha (impl/gate) sem persistência; projeção mostra fatos/pendências, nunca prescrição.
 - **AGENTS sync** (Checkpoint 5): `agents:check` falha quando `<AI_GUIDELINES>` diverge de `rules.json`.
-- **Script contracts** (nó próprio pré-readiness): inventário/classificação de scripts (`public`/`internal`/`aggregate`/`lifecycle`/`ci-only`), consumidores reais (workflows/hooks), documentação e `scripts:check` para drift package.json↔docs↔produtores.
+- **Script contracts** (absorvido no PR #37 / `checkpoint-script-contracts`): contrato SSOT para scripts, hooks, workflows, templates e docs; `script-contracts:sync` projeta superfícies; `script-contracts:check` entra no `validate`.
 - **Knowledge readiness** (nó final pré-integração): `knowledge:health` gera dossiê determinístico + prompt para revisão assistida por IA; o Human Gate decide duplicatas/supersessões. `co-knowledge:integrity` só vira required se cumprir critérios de determinismo, escopo estreito, mensagem acionável, evidência de uso, fixtures e aprovação humana.
 - **Migração `.specify`** (Checkpoint 11A/B/C): `test:smoke`/clean-clone valida o que o consumidor recebe.
 - **Regressão da remoção** (Checkpoint 7): o ban (`banned-concept-check`, Checkpoint 6) falha se a taxonomia reaparecer.
@@ -183,7 +183,7 @@
 | Proveniência virar compliance/bloqueio/lifecycle.                             | Projeção, não governança; espinha derivada; `role` livre; nunca bloqueia (DEC-0023-B06 lookup-not-coordination).                                              |
 | F4b semântico depender de memória humana solta.                               | Nó final `knowledge-readiness`: `knowledge:health` produz dossiê + prompt de revisão assistida; humano decide equivalência.                                   |
 | Backfill mínimo virar desculpa para não navegar o histórico.                  | Backfill amplo P0/P1 condicionado como nó final antes de `integration-final`; plano em `research/2026-06-08-knowledge-health-promotion-and-backfill-plan.md`. |
-| Scripts/package.json/docs/workflows divergirem e criarem gates ilusórios.     | Correção factual no PR #37 (`repo-validation` + release gate) e nó próprio `script-contracts` antes de `knowledge-readiness`.                                 |
+| Scripts/package.json/docs/workflows divergirem e criarem gates ilusórios.     | `checkpoint-script-contracts` no PR #37: SSOT `.core/governance/script-contracts.yml`, sync/check determinístico e validação no `validate`.                   |
 | Migração `.specify` quebra o que o consumidor recebe.                         | Drift-guard (Checkpoint 11A) estanca antes do cutover; `test:smoke`/clean-clone gateia 11B/C.                                                                 |
 | Plano voltar a depender de estado local efêmero.                              | Sequência embutida neste `plan.md` (SSOT no repo); `~/.claude/plans/` aposentado como dependência.                                                            |
 

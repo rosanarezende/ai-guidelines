@@ -179,7 +179,7 @@ yarn format                  # prettier --write
 yarn validate                # gate local: format:check + build:all + test + living-docs:check
 ```
 
-> **Referência única dos scripts:** [`docs/scripts.md`](docs/scripts.md) tem o mapa completo — categorias, composição, hooks de git, workflows de CI, cadeia canônica. Não duplicado aqui.
+> **Referência única dos scripts:** [`docs/scripts.md`](docs/scripts.md) é gerado a partir de [`.core/governance/script-contracts.yml`](.core/governance/script-contracts.yml) e traz o mapa completo — categorias, composição, hooks de git, workflows de CI e contrato de commit. Não duplique comandos aqui.
 
 ### Operando a CLI a partir deste repositório
 
