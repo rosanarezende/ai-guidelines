@@ -1,9 +1,14 @@
 # Checkpoint de Handoff — CO-2 (`co-knowledge`) · design FECHADO + go dado (SSOT de retomada)
 
 > **Documento de RETOMADA canônico** (ADR 0022). Assume **zero acesso ao transcript**.
-> Data: 2026-06-07. O **design do CO-2 está FECHADO/aprovado** e a **fatia vertical foi
-> IMPLEMENTADA** (5 camadas, `yarn validate` verde); **Draft PR #37** aberto, aguardando o
-> **Technical Audit Gate**. **Leia este arquivo + reconcilie contra os arquivos/git; os arquivos vencem.**
+> Data original: 2026-06-07. Atualização CO-2.1: 2026-06-08. O **design do CO-2 está
+> FECHADO/aprovado** e a **fatia vertical original foi IMPLEMENTADA e revisada** (Technical
+>
+> - Architectural approved, 0 findings). Por decisão da owner, o mesmo **Draft PR #37**
+>   recebeu o checkpoint complementar `checkpoint-co-knowledge-backfill`: inventário/backfill
+>   mínimo load-bearing + Rules-as-Knowledge (`AGENTS.md` como projeção, `.core/rules` como
+>   fonte) + pesquisa graph-store. **Leia este arquivo + reconcilie contra os arquivos/git;
+>   os arquivos vencem.**
 
 ---
 
@@ -12,14 +17,14 @@
 1. `git status` (`.codex/` untracked = ignore) · `git log --oneline -6`.
 2. Ler **este** handoff + memória `spec-0024-continuity-operational` + `state.yml § topology`.
 3. `yarn validate` deve estar verde. Confirmar `cursor.pr = co-knowledge`, `#36`/`co-reconcile` em `concluded`.
-4. A fatia vertical do CO-2 já está **completa** (§6, todas as camadas commitadas). Próximo = **Technical Audit Gate**, NÃO implementação. **NÃO re-deliberar o design** (§2 travado).
+4. A fatia vertical original do CO-2 já está **completa** (§6, todas as camadas commitadas e revisadas). O trabalho vivo é **CO-2.1** (§9): backfill mínimo + inventário/check + Rules-as-Knowledge + pesquisa graph-store. **NÃO re-deliberar o design base** (§2 travado).
 
 ## 1. Estado (CONFIRME contra git)
 
 - **CO-1 (`co-reconcile`) CONCLUÍDO-NA-STACK** — Human Gate approved (`gates/c-co-reconcile.yml`); **PR #36 permanece ABERTO** (modo `unit`, **sem merge isolado** — merge único no `integration-final`). Entregou `reconcile:check` advisory-first (contrato sintático `canonical-next: <id>`). F1 da auditoria (falso-verde do `includes`) `accepted` após o fix `c24a47b`.
-- Topologia: `co-reconcile` em `concluded` (seq 4, github_pr 36); **cursor em `co-knowledge`** (seq 5); `active: []`.
-- **CO-2 — fatia vertical COMPLETA** (escopo travado). Branch `feat/spec-0024-co-knowledge`, **stacked sobre #36** (base = `feat/spec-0024-co-reconcile`); **Draft PR #37** aberto (ADR 0025 / contêiner-primeiro). `yarn validate` verde (103 suites / 1005 testes); `governance-pr-check` ✅.
-- **Todas as camadas do §6 estão CONCLUÍDAS e commitadas** (domínio + grafo + persistência + check + dogfood). **Nada pendente** no escopo do CO-2. Próximo passo = **Technical Audit Gate** (§8) — não implementação.
+- Topologia: `co-reconcile` em `concluded` (seq 4, github_pr 36); **cursor em `co-knowledge` / `checkpoint-co-knowledge-backfill`** (seq 5).
+- **CO-2 — fatia vertical original COMPLETA** (escopo travado). Branch `feat/spec-0024-co-knowledge`, **stacked sobre #36** (base = `feat/spec-0024-co-reconcile`); **Draft PR #37** aberto (ADR 0025 / contêiner-primeiro). Technical Audit + Architectural Review aprovados, 0 findings.
+- **CO-2.1 — checkpoint complementar em implementação no mesmo PR #37**: inventário/backfill mínimo, `FAL-0002`, `co-knowledge:inventory`, Rules-as-Knowledge (`RulesCatalog` projetado como nós `rule`, inclusive `OPT-*`/`ADP-*`) e research graph-store. Após validar, precisa de **review complementar curto** antes de Ready/Human Gate.
 
 ## 2. Design FECHADO do CO-2 (modelo travado pela owner — NÃO re-deliberar)
 
@@ -44,7 +49,7 @@ Campos (modelo travado):
 
 ### 2.2 `GovernedRef` (✅ já implementado em `GovernedRef.ts`)
 
-`KnowledgeRef` permanece PURO (`insight|decision|rule|guardrail|doctrine`; não estender `ID_PATTERN`). Alvo constrangível =
+`KnowledgeRef` permanece PURO no eixo de estágios (`insight|decision|rule|guardrail|doctrine`; não colocar WorkItem/provider como estágio). No estágio `rule`, os ids válidos incluem `GR-*`, `CORE-*`, `OPT-*` e `ADP-*`: escopo opt-in/provider é metadado de `RulesCatalog`, não `KnowledgeStage`. Alvo constrangível =
 `GovernedRef = { space:"knowledge"; ref: KnowledgeRef } | { space:"work"; id: WorkItemId }`.
 `formatGovernedRef` → `"knowledge:decision:DEC-0024-G07"` | `"work:spec-0024"`. WorkItem entra SÓ por aqui (ADR 0010 preservado).
 
@@ -55,15 +60,17 @@ Campos (modelo travado):
 ### 2.4 Grafo (extensão mínima) + adapters
 
 - `KnowledgeGraph` (`src/app/projections/KnowledgeGraph.ts`): nó vira união `{kind:"artifact", id, stage} | {kind:"falsification", id}`; `KnowledgeEdge.relation` ganha `"falsifies" | "constrains" | "crystallizedAs"` (além de `"graduatedTo"`). Aresta `constrains` aponta `GovernedRef`; as demais, `KnowledgeRef`. Nós-alvo podem não estar materializados (igual ao `graduatedTo` hoje — `incoming` já suporta).
-- Adapters puros `decisionArtifact`/`doctrineArtifact` (Lens = flag de doctrine, mesmo stage) — projetam ref governado como `KnowledgeArtifact` para o grafo ser heterogêneo. **Mínimos**: NÃO ler o acervo de ADRs/DECs (isso é migração — fora).
+- Adapters puros `decisionArtifact`/`ruleArtifact`/`doctrineArtifact` (Lens = flag de doctrine, mesmo stage) — projetam fonte governada como `KnowledgeArtifact` para o grafo ser heterogêneo. **Mínimos**: NÃO ler/backfillar cegamente o acervo inteiro de ADRs/DECs/regras; `RulesCatalog` entra como fonte tipada, e `AGENTS.md` permanece projeção runtime compilada.
 
 ## 3. Escopo IN / OUT
 
 **IN (CO-2):** `Falsification` (domínio + fingerprint + invariantes); `GovernedRef` (✅); arestas `falsifies`/`constrains`/`crystallizedAs` no grafo; adapters `decision`/`doctrine`; persistência `falsifications.yml` + serializer; `co-knowledge:check` advisory; dogfood `FAL-0001`. Modelo de tipos **completo**; fatia vertical **mínima** que prova os invariantes.
 
-**OUT (→ nós posteriores; NÃO abrir):** `EnforcementBinding` + `knowledge:compile` (CO-3); projetor situado / reconcile-on-load (CO-4); captura/frontier (CO-5); dispatcher de eventos (CO-6); **backfill/migração AMPLA** do acervo histórico (converter todo o conjunto de ADRs/DECs/WorkItems existentes em registros/fixtures); promover o check a `required`.
+**IN (CO-2.1):** inventário/backfill mínimo versionado (`knowledge-backfill.yml`) com 2 exemplos por tipo (`insight`, `decision`, `rule`, `guardrail`, `doctrine`, `falsification`); exemplos adicionais `OPT-*`/`ADP-*` para provar `AGENTS.md` como projeção de `.core/rules`; `FAL-0002` para CO-1/PIT-0001; parser/check `co-knowledge:inventory` required no `validate`; montagem mínima do `KnowledgeGraph` a partir do inventário e do `RulesCatalog`; research graph-store (`2026-06-08-graph-store-options.md`) comparando Neo4j/RDF/SQLite/Postgres/Cassandra/Git.
 
-> **Precisão (Architectural Review):** "migração fora de escopo" = **sem backfill amplo** do acervo — **NÃO** modelo incompleto nem dívida estrutural. O CO-2 entrega a capacidade estrutural COMPLETA (`Falsification`, `Decision`, `ADR/Lens`, `WorkItem` como refs/alvos pelo modelo travado) + o dogfood mínimo **load-bearing** (`FAL-0001`). Seria débito se faltasse tipo/aresta/serializer/check/fixture essencial — não falta.
+**OUT (→ nós posteriores; NÃO abrir):** `EnforcementBinding` + `knowledge:compile` (CO-3); projetor situado / reconcile-on-load (CO-4); captura/frontier (CO-5); dispatcher de eventos (CO-6); **backfill/migração AMPLA** do acervo histórico (converter todo o conjunto de ADRs/DECs/WorkItems existentes em registros/fixtures); instalar/adotar banco externo como runtime/SSOT.
+
+> **Precisão CO-2.1:** "migração fora de escopo" agora significa **sem backfill amplo cego**, não ausência de plano. O PR #37 passa a carregar um backfill mínimo load-bearing + inventário com deadlines. O que não migrar agora precisa estar classificado, não escondido como dívida implícita.
 
 ## 4. Invariantes
 
@@ -115,8 +122,19 @@ Início/topologia: `2bca476` (handoff + GovernedRef + cursor) + `caf64da` (plann
 
 ## 8. Próximo passo imediato
 
-A fatia vertical está completa; **nada pendente** no escopo travado. Fluxo de fechamento da 0024 (Draft até o fim):
-**Technical Audit Gate** (auditoria adversarial técnica; findings em artefato; correções podem ocorrer ainda em Draft) → **Architectural Review Gate** (aderência a ADRs/topologia/escopo) → **atualizar body final** (Valor entregue/disclosure/evidências) → **converter para Ready** (a entrega está pronta para decisão humana) → **Human Gate** (owner decide avançar/ajustar/rejeitar; NÃO é merge em main). NÃO re-deliberar (§2); NÃO abrir CO-3+; NÃO migrar acervo; **NÃO marcar Ready antes do Architectural Review fechar**.
+A fatia vertical original está completa e revisada; o trabalho vivo é CO-2.1. Fluxo de fechamento da 0024 (Draft até o fim):
+concluir CO-2.1 → `yarn validate` → **review complementar curto** (Technical/Architectural delta) → **atualizar body final** (Valor entregue/disclosure/evidências) → **converter para Ready** (a entrega está pronta para decisão humana) → **Human Gate** (owner decide avançar/ajustar/rejeitar; NÃO é merge em main). NÃO re-deliberar (§2); NÃO abrir CO-3+; NÃO instalar banco externo neste PR.
+
+## 9. CO-2.1 (`checkpoint-co-knowledge-backfill`) — delta aprovado pela owner
+
+Motivação: a implementação original provava o modelo, mas ainda deixava ambígua a adoção real do grafo. A owner rejeitou deixar a migração como dívida invisível. O delta mínimo aprovado:
+
+- `knowledge-backfill.yml` com 2 exemplos por tipo: `insight`, `decision`, `rule`, `guardrail`, `doctrine`, `falsification`; e exemplos source-side de regra `OPT-*`/`ADP-*` para cobrir o conteúdo que aparece compilado em `AGENTS.md`.
+- `FAL-0002` reifica a falsificação CO-1/PIT-0001: "retomada pode confiar no próximo narrado sem reconciliar contra state.yml topology".
+- `co-knowledge:inventory` valida cobertura mínima e deadlines; entra no `validate`.
+- `knowledgeGraphFromBackfill` monta o read-model mínimo a partir do inventário + ledger de Falsifications.
+- `knowledgeGraphFromRulesCatalog` projeta `RulesCatalog` diretamente como nós `rule`; `AGENTS.md` deixa de ser tratado como fonte conceitual e passa a ser apenas uma projeção compilada do mesmo conhecimento.
+- Research graph-store compara Neo4j/RDF/SQLite/Postgres/Cassandra/Git. Decisão provisória: Neo4j tem maior fit para spike futuro, mas banco externo deve ser projeção derivada reconstruível, não SSOT.
 
 ## 9. Cross-refs
 

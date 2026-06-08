@@ -20,7 +20,9 @@ export interface KnowledgeRef {
 const ID_PATTERN: Record<KnowledgeStage, RegExp> = {
   insight: /^PIT-\d{4,}$/,
   decision: /^DEC-[A-Z0-9-]+$/,
-  rule: /^(GR|CORE)-[A-Z0-9-]+$/,
+  // RulesCatalog projeta regras universais, opt-in e de adapter como o mesmo
+  // estágio Knowledge `rule`; escopo/provider continuam metadados do domínio Rules.
+  rule: /^(ADP|CORE|GR|OPT)-[A-Z0-9-]+$/,
   guardrail: /^GG-\d{4,}$/,
   doctrine: /^ADR-\d{4,}$/,
 };

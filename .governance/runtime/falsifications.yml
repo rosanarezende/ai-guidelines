@@ -17,3 +17,10 @@ falsifications:
       - knowledge:decision:DEC-0024-G07
     evidence: git-tag:evidence/merge-prematuro-falsified
     crystallized_as: insight:PIT-0008
+  - id: FAL-0002
+    claim: retomada pode confiar no próximo narrado sem reconciliar contra state.yml topology
+    fingerprint: 41736fc9dae1
+    constrains:
+      - knowledge:decision:DEC-0024-G07
+    evidence: review:c-co-reconcile-architectural_review.yml + src/cli/reconcileCheck.ts
+    crystallized_as: insight:PIT-0001

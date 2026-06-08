@@ -1,0 +1,121 @@
+import * as fs from "node:fs";
+import * as os from "node:os";
+import * as path from "node:path";
+import { main } from "./coKnowledgeInventoryCheck.js";
+
+function tempRepo(): string {
+  return fs.mkdtempSync(path.join(os.tmpdir(), "co-knowledge-inventory-"));
+}
+
+function writeInventory(repo: string, text: string): void {
+  const dir = path.join(repo, ".governance/specs/0024-context-architecture");
+  fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(path.join(dir, "knowledge-backfill.yml"), text);
+}
+
+const validInventory = `version: 1
+entries:
+  - id: KB-0001
+    kind: insight
+    ref: insight:PIT-0001
+    status: done
+    priority: P0
+    source: x
+    rationale: y
+  - id: KB-0002
+    kind: insight
+    ref: insight:PIT-0008
+    status: done
+    priority: P0
+    source: x
+    rationale: y
+  - id: KB-0003
+    kind: decision
+    ref: decision:DEC-0024-G07
+    status: done
+    priority: P0
+    source: x
+    rationale: y
+  - id: KB-0004
+    kind: decision
+    ref: decision:DEC-0024-G08
+    status: done
+    priority: P0
+    source: x
+    rationale: y
+  - id: KB-0005
+    kind: rule
+    ref: rule:CORE-07
+    status: done
+    priority: P1
+    source: x
+    rationale: y
+  - id: KB-0006
+    kind: rule
+    ref: rule:CORE-10
+    status: done
+    priority: P1
+    source: x
+    rationale: y
+  - id: KB-0007
+    kind: guardrail
+    ref: guardrail:GG-0001
+    status: done
+    priority: P1
+    source: x
+    rationale: y
+  - id: KB-0008
+    kind: guardrail
+    ref: guardrail:GG-0002
+    status: planned
+    priority: P1
+    source: x
+    rationale: y
+    deadline: checkpoint-banned-concept
+  - id: KB-0009
+    kind: doctrine
+    ref: doctrine:ADR-0018
+    status: done
+    priority: P0
+    source: x
+    rationale: y
+  - id: KB-0010
+    kind: doctrine
+    ref: doctrine:ADR-0026
+    status: done
+    priority: P0
+    source: x
+    rationale: y
+  - id: KB-0011
+    kind: falsification
+    ref: falsification:FAL-0001
+    status: done
+    priority: P0
+    source: x
+    rationale: y
+  - id: KB-0012
+    kind: falsification
+    ref: falsification:FAL-0002
+    status: done
+    priority: P0
+    source: x
+    rationale: y
+`;
+
+describe("co-knowledge:inventory [BR-CO-KNOWLEDGE-INVENTORY-CHECK]", () => {
+  it("DADO inventário ausente ENTÃO retorna 1", () => {
+    expect(main(tempRepo(), { info: jest.fn(), error: jest.fn() })).toBe(1);
+  });
+
+  it("DADO inventário válido ENTÃO retorna 0", () => {
+    const repo = tempRepo();
+    writeInventory(repo, validInventory);
+    expect(main(repo, { info: jest.fn(), error: jest.fn() })).toBe(0);
+  });
+
+  it("DADO inventário sem cobertura mínima ENTÃO retorna 1", () => {
+    const repo = tempRepo();
+    writeInventory(repo, validInventory.replace(/kind: doctrine/g, "kind: insight"));
+    expect(main(repo, { info: jest.fn(), error: jest.fn() })).toBe(1);
+  });
+});
