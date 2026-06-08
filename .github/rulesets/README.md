@@ -37,7 +37,8 @@ morto). Por isso a producibilidade é o invariante central e entra no `validate`
 
 ## Required contexts (e por quê são poucos e estáveis)
 
-- **`repo-validation`** — gate de integridade (a cadeia `yarn validate` inteira).
+- **`repo-validation`** — gate de integridade (`yarn validate` + varredura
+  histórica `state-yml:check:all`).
 - **`smoke`** — job **agregador estável** (`needs:` da matriz multi-OS). Exigimos
   o agregador, **nunca** os contextos expandidos por matriz
   (`smoke / ubuntu-latest / node 24.x` …): multiplicar required contexts acoplados

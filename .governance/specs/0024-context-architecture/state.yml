@@ -10,7 +10,7 @@ focus:
   - "Gate por checkpoint: Claude implementa -> Technical Audit Gate (Codex) -> Architectural Review Gate (ChatGPT) -> Human Gate (owner) -> AVANCA (abre o proximo PR stacked). O Human Gate decide o PROXIMO MOVIMENTO, NAO mergeia em main. 1 checkpoint atomico por vez; parar no Gate quando o commit estiver pronto. Correcao local pequena nao espera; mudanca estrutural sim."
   - "Criterio (RESSALVADO em 2026-06-03 por [DEC-0024-G08]): 'ja foi validado empiricamente na 0024?' -> absorver/enforcar/executar. NAO re-modelar o DECIDIDO (G00/G02/G06/G07 seguem cravados). EXCECAO assumida: G03/G04/G05 foram reabertos para modelagem deliberada (orientada a grafo) -- nesses eixos, modelar e a direcao, nao o risco. O 'risco dominante' original (modelar em vez de absorver) vale para os eixos resolvidos; nos reabertos, a modelagem e o trabalho."
 next:
-  - "canonical-next: co-knowledge. RETOMADA CANONICA (SSOT) = research/2026-06-07-checkpoint-handoff-co-2.md (+ memoria spec-0024-continuity-operational). #35 CONCLUIDO; CO-1 (co-reconcile) CONCLUIDO-NA-STACK (Human Gate approved 2026-06-07, gates/c-co-reconcile.yml; PR #36 ABERTO, modo unit, SEM merge isolado). CO-2 (co-knowledge) — fatia vertical original completa e revisada (Technical + Architectural approved, 0 findings). CO-2.1 (checkpoint-co-knowledge-backfill) agora ativo no MESMO Draft PR #37 por decisao da owner: inventario/backfill minimo load-bearing (2 exemplos por tipo), FAL-0002 para CO-1, grafo montavel a partir do inventario, Rules-as-Knowledge (RulesCatalog -> nos rule, AGENTS.md como projecao compilada), co-knowledge:inventory required e research graph-store (Neo4j vs alternativas). Plano adicional no PR #37: research/2026-06-08-knowledge-health-promotion-and-backfill-plan.md define knowledge:health, criterios de promocao e no final knowledge-readiness antes de integration-final. PROXIMO = concluir CO-2.1 -> yarn validate -> review complementar curto (tech/arch) -> atualizar body final -> Ready -> Human Gate. NAO abrir CO-3+; NAO instalar banco externo neste PR; banco futuro deve ser projecao derivada reconstruivel, nao nova SSOT."
+  - "canonical-next: co-knowledge. RETOMADA CANONICA (SSOT) = research/2026-06-07-checkpoint-handoff-co-2.md (+ memoria spec-0024-continuity-operational). #35 CONCLUIDO; CO-1 (co-reconcile) CONCLUIDO-NA-STACK (Human Gate approved 2026-06-07, gates/c-co-reconcile.yml; PR #36 ABERTO, modo unit, SEM merge isolado). CO-2 (co-knowledge) — fatia vertical original completa e revisada (Technical + Architectural approved, 0 findings). CO-2.1 (checkpoint-co-knowledge-backfill) agora ativo no MESMO Draft PR #37 por decisao da owner: inventario/backfill minimo load-bearing (2 exemplos por tipo), FAL-0002 para CO-1, grafo montavel a partir do inventario, Rules-as-Knowledge (RulesCatalog -> nos rule, AGENTS.md como projecao compilada), co-knowledge:inventory required e research graph-store (Neo4j vs alternativas). Plano adicional no PR #37: research/2026-06-08-knowledge-health-promotion-and-backfill-plan.md define knowledge:health, criterios de promocao, no futuro script-contracts (contrato package.json/docs/hooks/workflows) e no final knowledge-readiness antes de integration-final. PROXIMO = concluir CO-2.1 -> yarn validate -> review complementar curto (tech/arch) -> atualizar body final -> Ready -> Human Gate. NAO abrir CO-3+; NAO instalar banco externo neste PR; banco futuro deve ser projecao derivada reconstruivel, nao nova SSOT."
   - "#32 GATED: Checkpoints 2 (8b0eec6) + 2.1 (d686d4b) + 2.1a (fa2c0ae) fechados. #32 permanece como linha de integracao -- NAO mergeia."
   - "#33 (branch feat/spec-0024-ruleset-producibility) = unico PR de execucao stacked aberto (sequence 1); embarca os Checkpoints 2.2, 2.2b, 2.3, 2.3a, 2.3b, 2.4, 2.4a, 2.4b, 2.4c e 2.4d. NAO existe branch feat/spec-0024-topology (corrigido no 2.3a: o no-fantasma checkpoint-2.3 foi dobrado em #33)."
   - "Checkpoint 2.3a + 2.3b implementados: 2.3a reconcilia topologia<->realidade (B1), registra [DEC-0024-G07] (B2), elimina dual-SSOT do plan.md (O1), invariantes de sequence (O6), robustez do governance-pr-check (O2). 2.3b adiciona o guard LOCAL de lifecycle-coerencia (github_pr <=> active/concluded + unicidade) e REAVALIA O5: well-formedness e guard local (no state-yml:check/repo-validation, ja required), nao debito de API -> promocao do governance-pr-check a REQUIRED recomendada. So a paridade-API resta como hardening futuro nao-bloqueante (NEXT separado)."
@@ -203,15 +203,30 @@ topology:
         checkpoints:
           - checkpoint-dualroot-collapse # colapso do dual-root; migracao .specify (test:smoke gateia)
 
-      # Knowledge Readiness — NO FINAL antes do PR de integracao. Fecha a divida
-      # planejada do CO-2.1: backfill amplo P0/P1, knowledge:health (dossie +
-      # prompt de revisao assistida por IA, decisao humana), e decisao de promocao
-      # do co-knowledge:integrity/co-knowledge:check. Nao adota banco como SSOT.
-      - id: knowledge-readiness
+      # Script Contracts — no proprio framework, scripts/package.json, docs, hooks e
+      # workflows sao contrato operacional. Este no cria inventario/classificacao e
+      # check de coerencia para evitar scripts "corretos" sem consumidor real ou
+      # docs/workflows que prometem outro gate. Alimenta knowledge-readiness.
+      - id: script-contracts
         github_pr: null
         role: execution
         terminal: false
         sequence: 13
+        checkpoints:
+          - checkpoint-script-inventory # package.json scripts classificados (public/internal/aggregate/lifecycle/ci-only)
+          - checkpoint-script-consumers # workflows/hooks/docs reconciliados contra consumidores reais
+          - checkpoint-scripts-check # scripts:check ou equivalente no validate, se aprovado
+
+      # Knowledge Readiness — NO FINAL antes do PR de integracao. Fecha a divida
+      # planejada do CO-2.1: backfill amplo P0/P1, knowledge:health (dossie +
+      # prompt de revisao assistida por IA, decisao humana), consome script-contracts
+      # como input de saude operacional, e decide promocao do
+      # co-knowledge:integrity/co-knowledge:check. Nao adota banco como SSOT.
+      - id: knowledge-readiness
+        github_pr: null
+        role: execution
+        terminal: false
+        sequence: 14
         checkpoints:
           - checkpoint-knowledge-health # dossie de saude do grafo + candidatos semanticos p/ decisao humana
           - checkpoint-knowledge-backfill-wide # backfill amplo P0/P1 antes da integracao

@@ -10,8 +10,10 @@
 >   fonte) + pesquisa graph-store. **Leia este arquivo + reconcilie contra os arquivos/git;
 >   os arquivos vencem.**
 >   Atualização complementar: `research/2026-06-08-knowledge-health-promotion-and-backfill-plan.md`
->   registra `knowledge:health`, critérios de promoção e o nó final `knowledge-readiness`
->   antes de `integration-final`.
+>   registra `knowledge:health`, critérios de promoção e o nó final `knowledge-readiness`.
+>   Atualização posterior do PR #37: a investigação dos scripts/workflows inseriu o nó
+>   futuro `script-contracts` antes de `knowledge-readiness`; `knowledge-readiness`
+>   segue como nó final antes de `integration-final`.
 
 ---
 
@@ -71,7 +73,7 @@ Campos (modelo travado):
 
 **IN (CO-2.1):** inventário/backfill mínimo versionado (`knowledge-backfill.yml`) com 2 exemplos por tipo (`insight`, `decision`, `rule`, `guardrail`, `doctrine`, `falsification`); exemplos adicionais `OPT-*`/`ADP-*` para provar `AGENTS.md` como projeção de `.core/rules`; `FAL-0002` para CO-1/PIT-0001; parser/check `co-knowledge:inventory` required no `validate`; montagem mínima do `KnowledgeGraph` a partir do inventário e do `RulesCatalog`; research graph-store (`2026-06-08-graph-store-options.md`) comparando Neo4j/RDF/SQLite/Postgres/Cassandra/Git.
 
-**OUT (→ nós posteriores; NÃO abrir):** `EnforcementBinding` + `knowledge:compile` (CO-3); projetor situado / reconcile-on-load (CO-4); captura/frontier (CO-5); dispatcher de eventos (CO-6); **backfill/migração AMPLA** do acervo histórico (agora condicionado ao nó final `knowledge-readiness`, antes de `integration-final`); instalar/adotar banco externo como runtime/SSOT.
+**OUT (→ nós posteriores; NÃO abrir):** `EnforcementBinding` + `knowledge:compile` (CO-3); projetor situado / reconcile-on-load (CO-4); captura/frontier (CO-5); dispatcher de eventos (CO-6); contrato amplo de scripts/package.json/docs/hooks/workflows (`script-contracts`); **backfill/migração AMPLA** do acervo histórico (agora condicionado ao nó final `knowledge-readiness`, antes de `integration-final`); instalar/adotar banco externo como runtime/SSOT.
 
 > **Precisão CO-2.1:** "migração fora de escopo" agora significa **sem backfill amplo cego**, não ausência de plano. O PR #37 passa a carregar um backfill mínimo load-bearing + inventário com deadlines + plano de readiness final. O que não migrar agora precisa estar classificado, não escondido como dívida implícita.
 
@@ -138,7 +140,7 @@ Motivação: a implementação original provava o modelo, mas ainda deixava amb�
 - `knowledgeGraphFromBackfill` monta o read-model mínimo a partir do inventário + ledger de Falsifications.
 - `knowledgeGraphFromRulesCatalog` projeta `RulesCatalog` diretamente como nós `rule`; `AGENTS.md` deixa de ser tratado como fonte conceitual e passa a ser apenas uma projeção compilada do mesmo conhecimento.
 - Research graph-store compara Neo4j/RDF/SQLite/Postgres/Cassandra/Git. Decisão provisória: Neo4j tem maior fit para spike futuro, mas banco externo deve ser projeção derivada reconstruível, não SSOT.
-- Plano complementar de readiness (`2026-06-08-knowledge-health-promotion-and-backfill-plan.md`): define `knowledge:health` como dossiê determinístico + prompt de revisão assistida por IA (humano decide F4b), critérios de promoção de `co-knowledge:integrity`/`co-knowledge:check`, e condiciona o backfill amplo P0/P1 ao nó final `knowledge-readiness` antes de `integration-final`.
+- Plano complementar de readiness (`2026-06-08-knowledge-health-promotion-and-backfill-plan.md`): define `knowledge:health` como dossiê determinístico + prompt de revisão assistida por IA (humano decide F4b), critérios de promoção de `co-knowledge:integrity`/`co-knowledge:check`, adiciona `script-contracts` como nó futuro para contrato package.json/docs/hooks/workflows, e condiciona o backfill amplo P0/P1 ao nó final `knowledge-readiness` antes de `integration-final`.
 
 ## 9. Cross-refs
 

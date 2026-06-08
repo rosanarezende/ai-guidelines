@@ -69,8 +69,8 @@ jobs:
           fi
           echo "Version match confirmed: $TAG_VERSION"
 
-      - name: Release gate — yarn validate + smoke
-        run: yarn validate && yarn test:smoke
+      - name: Release gate — yarn ci
+        run: yarn ci
 
       - name: Determine npm dist-tag and prerelease flag
         id: release_meta

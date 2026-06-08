@@ -96,13 +96,13 @@ Configurados em [`.github/workflows/`](../.github/workflows/).
 
 | Workflow                  | Trigger                                      | Script principal                                                 |
 | :------------------------ | :------------------------------------------- | :--------------------------------------------------------------- |
-| `repo-validation.yml`     | `pull_request`, `push` em `main`             | `yarn validate`                                                  |
+| `repo-validation.yml`     | `pull_request`, `push` em `main`             | `yarn validate` + `yarn state-yml:check:all`                     |
 | `smoke-multi-os.yml`      | `pull_request`, `push` em `main`             | `yarn test:smoke` (matriz multi-OS) + agregador `smoke`          |
 | `governance-pr-check.yml` | `pull_request` (branch `*-execution`)        | contrato de PR de execução (Spec 0023 + ADR 0020)                |
 | `ruleset-drift.yml`       | `push` em `main`, schedule semanal, dispatch | `ruleset:check --parity` (paridade vivo↔versionado, detect-only) |
-| `release.yml`             | tags `v*`                                    | publicação (cf. ADR 0023)                                        |
+| `release.yml`             | tags `v*`                                    | `yarn ci` + publicação (cf. ADR 0023)                            |
 
-**Filosofia:** os workflows são desacoplados. `repo-validation` é o gate de integridade (a cadeia `yarn validate` inteira — consolidou os antigos `ai-guidelines-ci` + `content-guardrails` em `12a3a28`); `smoke-multi-os` cobre cross-plataforma e expõe o agregador estável `smoke`; `governance-pr-check` valida o contrato de PRs de execução; `ruleset-drift` guarda a paridade entre a política de merge versionada (`.github/rulesets/main-governance.json`) e o ruleset vivo (detect-only). **Required status checks do branch default:** `repo-validation` + `smoke` (cf. [`.github/rulesets/README.md`](../.github/rulesets/README.md)). O invariante de **producibilidade** (`ruleset:check` em `yarn validate`) garante que todo required context tenha produtor estável — fechando a classe de drift que deixou `guardrails` órfão (Spec 0024 Checkpoint 2.2).
+**Filosofia:** os workflows são desacoplados. `repo-validation` é o gate de integridade (a cadeia `yarn validate` inteira + varredura histórica `state-yml:check:all` — consolidou os antigos `ai-guidelines-ci` + `content-guardrails` em `12a3a28`); `smoke-multi-os` cobre cross-plataforma e expõe o agregador estável `smoke`; `governance-pr-check` valida o contrato de PRs de execução; `ruleset-drift` guarda a paridade entre a política de merge versionada (`.github/rulesets/main-governance.json`) e o ruleset vivo (detect-only). **Required status checks do branch default:** `repo-validation` + `smoke` (cf. [`.github/rulesets/README.md`](../.github/rulesets/README.md)). O invariante de **producibilidade** (`ruleset:check` em `yarn validate`) garante que todo required context tenha produtor estável — fechando a classe de drift que deixou `guardrails` órfão (Spec 0024 Checkpoint 2.2).
 
 ---
 
