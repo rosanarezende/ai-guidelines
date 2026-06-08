@@ -7,11 +7,49 @@ function tempRepo(): string {
   return fs.mkdtempSync(path.join(os.tmpdir(), "co-knowledge-inventory-"));
 }
 
+const SPEC_DIR = ".governance/specs/0024-context-architecture";
+
 function writeInventory(repo: string, text: string): void {
-  const dir = path.join(repo, ".governance/specs/0024-context-architecture");
+  const dir = path.join(repo, SPEC_DIR);
   fs.mkdirSync(dir, { recursive: true });
   fs.writeFileSync(path.join(dir, "knowledge-backfill.yml"), text);
 }
+
+function writeState(repo: string, text: string): void {
+  const dir = path.join(repo, SPEC_DIR);
+  fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(path.join(dir, "state.yml"), text);
+}
+
+// state.yml mínimo válido (parseWorkflowState) com o checkpoint do deadline planned.
+const MINIMAL_STATE = `stage: implementation
+gate:
+  status: closed
+focus: []
+next: []
+topology:
+  cursor:
+    pr: n1
+    checkpoint: checkpoint-gg-0002
+  prs:
+    concluded: []
+    active: []
+    planned:
+      - id: n1
+        github_pr: null
+        role: execution
+        terminal: false
+        sequence: 1
+        checkpoints:
+          - checkpoint-gg-0002
+      - id: term
+        github_pr: null
+        role: integration
+        terminal: true
+        sequence: null
+        checkpoints:
+          - review-and-merge
+`;
 
 const validInventory = `version: 1
 entries:
@@ -71,7 +109,7 @@ entries:
     priority: P1
     source: x
     rationale: y
-    deadline: checkpoint-banned-concept
+    deadline: checkpoint-gg-0002
   - id: KB-0009
     kind: doctrine
     ref: doctrine:ADR-0018
@@ -107,10 +145,27 @@ describe("co-knowledge:inventory [BR-CO-KNOWLEDGE-INVENTORY-CHECK]", () => {
     expect(main(tempRepo(), { info: jest.fn(), error: jest.fn() })).toBe(1);
   });
 
-  it("DADO inventário válido ENTÃO retorna 0", () => {
+  it("DADO inventário válido SEM state.yml ENTÃO degrada (não valida deadline↔topologia) e retorna 0", () => {
     const repo = tempRepo();
     writeInventory(repo, validInventory);
     expect(main(repo, { info: jest.fn(), error: jest.fn() })).toBe(0);
+  });
+
+  it("DADO inventário válido + state com o checkpoint do deadline ENTÃO retorna 0", () => {
+    const repo = tempRepo();
+    writeInventory(repo, validInventory);
+    writeState(repo, MINIMAL_STATE);
+    expect(main(repo, { info: jest.fn(), error: jest.fn() })).toBe(0);
+  });
+
+  it("DADO deadline de planned fora da topologia (com state) ENTÃO retorna 1 + KB_DEADLINE_NOT_IN_TOPOLOGY", () => {
+    const repo = tempRepo();
+    writeInventory(repo, validInventory.replace("checkpoint-gg-0002", "checkpoint-fantasma"));
+    writeState(repo, MINIMAL_STATE);
+    const errors: string[] = [];
+    const code = main(repo, { info: jest.fn(), error: (m) => errors.push(m) });
+    expect(code).toBe(1);
+    expect(errors.join("\n")).toContain("KB_DEADLINE_NOT_IN_TOPOLOGY");
   });
 
   it("DADO inventário sem cobertura mínima ENTÃO retorna 1", () => {

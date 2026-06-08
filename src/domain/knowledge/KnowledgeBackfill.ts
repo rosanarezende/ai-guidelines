@@ -153,7 +153,8 @@ export function validateKnowledgeBackfillEntry(
 }
 
 export function validateKnowledgeBackfill(
-  entries: ReadonlyArray<KnowledgeBackfillEntry>
+  entries: ReadonlyArray<KnowledgeBackfillEntry>,
+  validCheckpoints?: ReadonlySet<string>
 ): KnowledgeBackfillViolation[] {
   const violations = entries.flatMap(validateKnowledgeBackfillEntry);
   const byKind = new Map<KnowledgeBackfillKind, number>();
@@ -169,6 +170,23 @@ export function validateKnowledgeBackfill(
     }
     seen.add(entry.id);
     byKind.set(entry.kind, (byKind.get(entry.kind) ?? 0) + 1);
+
+    // Deadline de entrada `planned` deve apontar um checkpoint REAL da topologia
+    // (só verificável quando o composition root fornece o conjunto canônico de
+    // `state.yml § topology`). Fecha o drift "débito nomeado sem amarração" —
+    // F1 da Architectural Review do CO-2.1.
+    if (
+      validCheckpoints &&
+      entry.status === "planned" &&
+      entry.deadline &&
+      !validCheckpoints.has(entry.deadline)
+    ) {
+      violations.push({
+        code: "KB_DEADLINE_NOT_IN_TOPOLOGY",
+        entryId: entry.id,
+        message: `deadline "${entry.deadline}" não é um checkpoint declarado em state.yml § topology.`,
+      });
+    }
   }
 
   for (const kind of KNOWLEDGE_BACKFILL_KINDS) {

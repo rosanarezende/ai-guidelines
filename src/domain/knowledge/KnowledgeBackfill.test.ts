@@ -94,7 +94,7 @@ const validEntries: KnowledgeBackfillEntry[] = [
     priority: "P1",
     source: "state.yml",
     rationale: "exemplo",
-    deadline: "checkpoint-banned-concept",
+    deadline: "checkpoint-gg-0002",
   },
   {
     id: "KB-0009",
@@ -162,6 +162,23 @@ describe("KnowledgeBackfill [BR-CO-KNOWLEDGE-BACKFILL]", () => {
     expect(validateKnowledgeBackfill(entries)).toContainEqual(
       expect.objectContaining({ code: "KB_KIND_REF_MISMATCH", entryId: "KB-0003" })
     );
+  });
+
+  it("DADO validCheckpoints contendo o deadline de planned ENTÃO sem violação (F1)", () => {
+    expect(validateKnowledgeBackfill(validEntries, new Set(["checkpoint-gg-0002"]))).toEqual([]);
+  });
+
+  it("DADO deadline de planned fora da topologia ENTÃO KB_DEADLINE_NOT_IN_TOPOLOGY (F1)", () => {
+    expect(validateKnowledgeBackfill(validEntries, new Set(["checkpoint-outro"]))).toContainEqual(
+      expect.objectContaining({ code: "KB_DEADLINE_NOT_IN_TOPOLOGY", entryId: "KB-0008" })
+    );
+  });
+
+  it("DADO nenhum validCheckpoints ENTÃO não valida deadline-topologia (retrocompat)", () => {
+    const entries = validEntries.map((entry) =>
+      entry.id === "KB-0008" ? { ...entry, deadline: "checkpoint-inexistente" } : entry
+    );
+    expect(validateKnowledgeBackfill(entries)).toEqual([]);
   });
 
   it("DADO backfill ENTÃO só entradas done do pipeline viram KnowledgeArtifact", () => {

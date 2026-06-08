@@ -78,7 +78,7 @@ entries:
     status: planned
     priority: P1
     source: .governance/specs/0024-context-architecture/state.yml
-    deadline: checkpoint-banned-concept
+    deadline: checkpoint-gg-0002
     rationale: Banned-concept check planejado na topologia da Spec 0024.
   - id: KB-0009
     kind: doctrine
