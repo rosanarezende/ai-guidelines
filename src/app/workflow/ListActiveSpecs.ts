@@ -2,7 +2,7 @@ import { ActiveSpecEntry, ActiveSpecsRoot } from "../../domain/workflow/ActiveSp
 import { WorkflowFileSystem } from "../ports/WorkflowFileSystem.js";
 
 /**
- * Lê o índice operacional público (`.governance/runtime/active-specs.yml`) e
+ * Lê o índice operacional público (`.governance/runtime/specs/active.yml`) e
  * resolve cada entry contra o disco local.
  *
  * Responsabilidades:
@@ -16,7 +16,7 @@ import { WorkflowFileSystem } from "../ports/WorkflowFileSystem.js";
  * contrato (schema), que são propagadas pelo parser.
  */
 
-const INDEX_PATH = ".governance/runtime/active-specs.yml";
+const INDEX_PATH = ".governance/runtime/specs/active.yml";
 
 export interface ResolvedActiveSpec {
   readonly entry: ActiveSpecEntry;

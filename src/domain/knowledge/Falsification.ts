@@ -32,7 +32,7 @@ export interface Falsification {
   readonly falsifiesRef?: KnowledgeRef;
   /** A lição positiva cristalizada (ex.: `insight:PIT-0008`) — opcional. */
   readonly crystallizedAs?: KnowledgeRef;
-  /** Quando foi capturada (ISO) — opcional; consistência com `insights.yml`. */
+  /** Quando foi capturada (ISO) — opcional; consistência com ledgers runtime. */
   readonly capturedAt?: string;
 }
 

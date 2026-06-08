@@ -48,7 +48,7 @@ profiles:
         category: build
         mutates: true
         consumers: [script, hook]
-        description: Gera rules.json e ledger derivado.
+        description: Gera rules.json, catalogo e ledger derivado.
       - name: build:all
         command: yarn build && yarn build:rules
         category: build
@@ -132,7 +132,7 @@ profiles:
         category: governance
         mutates: true
         consumers: [script]
-        description: Verifica coerencia da projection active-specs.yml.
+        description: Verifica coerencia da projection specs/active.yml.
       - name: reconcile:check
         command: yarn build && node cli/reconcile-check.mjs
         category: governance
@@ -163,6 +163,18 @@ profiles:
         mutates: false
         consumers: [script]
         description: Falha se scripts, hooks, templates ou docs divergirem do contrato.
+      - name: runtime-bootstrap:sync
+        command: node cli/governance/runtime-bootstrap.mjs sync
+        category: governance
+        mutates: true
+        consumers: [human, hook]
+        description: Sincroniza o stub runtime do AGENTS.md.
+      - name: runtime-bootstrap:check
+        command: node cli/governance/runtime-bootstrap.mjs check
+        category: governance
+        mutates: false
+        consumers: [script]
+        description: Falha se AGENTS.md divergir do stub runtime governado.
       - name: gate-decidability:check
         command: node cli/governance/gate-decidability-check.mjs
         category: governance
@@ -200,7 +212,7 @@ profiles:
         consumers: [human]
         description: Renderiza disclosure de IA derivado.
       - name: validate
-        command: yarn format:check && yarn build:all && yarn script-contracts:check && yarn test && yarn living-docs:check && yarn state-yml:check && yarn active-specs:check && yarn reconcile:check && yarn co-knowledge:check && yarn co-knowledge:inventory && yarn gate-decidability:check && yarn ruleset:check && yarn review:check && yarn insights:check && yarn intent:check
+        command: yarn format:check && yarn build:all && yarn script-contracts:check && yarn runtime-bootstrap:check && yarn test && yarn living-docs:check && yarn state-yml:check && yarn active-specs:check && yarn reconcile:check && yarn co-knowledge:check && yarn co-knowledge:inventory && yarn gate-decidability:check && yarn ruleset:check && yarn review:check && yarn insights:check && yarn intent:check
         category: aggregate
         mutates: true
         consumers: [hook, workflow, human]
@@ -230,6 +242,7 @@ profiles:
           - run: lint-staged
           - run: script-contracts:sync
           - run: build:all
+          - run: runtime-bootstrap:sync
           - git_add:
               - package.json
               - docs/scripts.md

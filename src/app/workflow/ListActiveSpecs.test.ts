@@ -45,7 +45,7 @@ class FakeFileSystem implements WorkflowFileSystem {
   }
 }
 
-const INDEX_PATH = ".governance/runtime/active-specs.yml";
+const INDEX_PATH = ".governance/runtime/specs/active.yml";
 
 const VALID_INDEX_YAML = `version: 1
 active_specs:
@@ -59,7 +59,7 @@ active_specs:
 `;
 
 describe("App — ListActiveSpecs [BR-WORKFLOW-RUNTIME-INDEX]", () => {
-  it("DADO active-specs.yml ausente QUANDO list ENTÃO retorna indexAvailable=false + warning informativo", () => {
+  it("DADO specs/active.yml ausente QUANDO list ENTÃO retorna indexAvailable=false + warning informativo", () => {
     const fs = new FakeFileSystem(new Map(), new Set());
     const result = new ListActiveSpecs(fs, parseActiveSpecs).run();
 

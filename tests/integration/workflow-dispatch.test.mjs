@@ -75,10 +75,10 @@ next:
       );
       await fs.writeFile(path.join(specDir, "tasks.md"), "# Tasks\n- [ ] tarefa 1");
 
-      const indexDir = path.join(tempDir, ".governance", "runtime");
+      const indexDir = path.join(tempDir, ".governance", "runtime", "specs");
       await fs.mkdir(indexDir, { recursive: true });
       await fs.writeFile(
-        path.join(indexDir, "active-specs.yml"),
+        path.join(indexDir, "active.yml"),
         `version: 1
 active_specs:
   - id: "0099"
@@ -123,10 +123,10 @@ next: []
 `
       );
 
-      const indexDir = path.join(tempDir, ".governance", "runtime");
+      const indexDir = path.join(tempDir, ".governance", "runtime", "specs");
       await fs.mkdir(indexDir, { recursive: true });
       await fs.writeFile(
-        path.join(indexDir, "active-specs.yml"),
+        path.join(indexDir, "active.yml"),
         `version: 1
 active_specs:
   - id: "0099"

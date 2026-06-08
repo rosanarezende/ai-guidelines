@@ -3,9 +3,9 @@ import { InsightLedger } from "../../domain/insight/InsightLedger.js";
 /**
  * Porta de persistência do tier "Percepções em Trânsito".
  *
- * Granularidade load/save do arquivo INTEIRO (espelha `PublishState` sobre
- * `active-specs.yml`): o ledger é um único arquivo runtime-scoped, e a
- * mutação atômica é "ler tudo → transicionar → escrever tudo".
+ * Granularidade load/save do ledger INTEIRO: a entidade lógica continua única,
+ * mas adapters podem particionar a persistência física por status para
+ * legibilidade humana.
  */
 export interface InsightStore {
   /** Carrega o ledger; arquivo ausente ⇒ ledger vazio. */

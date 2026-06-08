@@ -69,7 +69,7 @@ describe("co-knowledge:check [BR-CO-KNOWLEDGE-CHECK]", () => {
     });
 
     function write(content: string): void {
-      const abs = path.join(tmp, ".governance/runtime/falsifications.yml");
+      const abs = path.join(tmp, ".governance/runtime/falsifications/ledger.yml");
       fs.mkdirSync(path.dirname(abs), { recursive: true });
       fs.writeFileSync(abs, content, "utf-8");
     }
@@ -81,7 +81,7 @@ describe("co-knowledge:check [BR-CO-KNOWLEDGE-CHECK]", () => {
       };
     }
 
-    it("sem falsifications.yml → exit 0 (nada a checar)", () => {
+    it("sem falsifications/ledger.yml → exit 0 (nada a checar)", () => {
       const { logger, text } = capture();
       expect(main(tmp, logger)).toBe(0);
       expect(text()).toContain("Nada a checar");

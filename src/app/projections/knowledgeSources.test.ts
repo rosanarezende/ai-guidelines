@@ -91,7 +91,7 @@ describe("knowledgeSources (semeia o grafo das fontes operacionais)", () => {
         ref: "falsification:FAL-0001",
         status: "done",
         priority: "P0",
-        source: ".governance/runtime/falsifications.yml",
+        source: ".governance/runtime/falsifications/ledger.yml",
         rationale: "negativo de primeira classe",
       },
     ];

@@ -10,11 +10,11 @@ focus:
   - "Gate por checkpoint: Claude implementa -> Technical Audit Gate (Codex) -> Architectural Review Gate (ChatGPT) -> Human Gate (owner) -> AVANCA (abre o proximo PR stacked). O Human Gate decide o PROXIMO MOVIMENTO, NAO mergeia em main. 1 checkpoint atomico por vez; parar no Gate quando o commit estiver pronto. Correcao local pequena nao espera; mudanca estrutural sim."
   - "Criterio (RESSALVADO em 2026-06-03 por [DEC-0024-G08]): 'ja foi validado empiricamente na 0024?' -> absorver/enforcar/executar. NAO re-modelar o DECIDIDO (G00/G02/G06/G07 seguem cravados). EXCECAO assumida: G03/G04/G05 foram reabertos para modelagem deliberada (orientada a grafo) -- nesses eixos, modelar e a direcao, nao o risco. O 'risco dominante' original (modelar em vez de absorver) vale para os eixos resolvidos; nos reabertos, a modelagem e o trabalho."
 next:
-  - "canonical-next: co-knowledge. RETOMADA CANONICA (SSOT) = research/2026-06-07-checkpoint-handoff-co-2.md (+ memoria spec-0024-continuity-operational). #35 CONCLUIDO; CO-1 (co-reconcile) CONCLUIDO-NA-STACK (Human Gate approved 2026-06-07, gates/c-co-reconcile.yml; PR #36 ABERTO, modo unit, SEM merge isolado). CO-2 (co-knowledge) — fatia vertical original completa e revisada (Technical + Architectural approved, 0 findings). CO-2.1 (checkpoint-co-knowledge-backfill) concluido no MESMO Draft PR #37 por decisao da owner: inventario/backfill minimo load-bearing (2 exemplos por tipo), FAL-0002 para CO-1, grafo montavel a partir do inventario, Rules-as-Knowledge (RulesCatalog -> nos rule), co-knowledge:inventory required e research graph-store (Neo4j vs alternativas). CO-2.2 (checkpoint-script-contracts) concluido no PR #37: contrato operacional SSOT para package.json/docs/hooks/workflows/templates, script-contracts:sync/check e validacao no validate; absorve o no futuro script-contracts. CO-2.3 (checkpoint-runtime-bootstrap-readiness) agora ativo: backfill P0 de runtime bootstrap, `yarn guidelines handoff`, AGENTS.md como stub seguro e bootstrap PATH dos hooks. Plano adicional: research/2026-06-08-knowledge-health-promotion-and-backfill-plan.md define knowledge:health, criterios de promocao e knowledge-readiness final antes de integration-final. PROXIMO = concluir CO-2.3 -> yarn validate -> review complementar curto (tech/arch) -> atualizar body final -> Ready -> Human Gate. NAO abrir CO-3+; NAO instalar banco externo neste PR; banco futuro deve ser projecao derivada reconstruivel, nao nova SSOT."
+  - "canonical-next: co-knowledge. RETOMADA CANONICA (SSOT) = research/2026-06-07-checkpoint-handoff-co-2.md (+ memoria spec-0024-continuity-operational). #35 CONCLUIDO; CO-1 (co-reconcile) CONCLUIDO-NA-STACK (Human Gate approved 2026-06-07, gates/c-co-reconcile.yml; PR #36 ABERTO, modo unit, SEM merge isolado). CO-2 (co-knowledge) — fatia vertical original completa e revisada (Technical + Architectural approved, 0 findings). CO-2.1 (checkpoint-co-knowledge-backfill) concluido no MESMO Draft PR #37 por decisao da owner: inventario/backfill minimo load-bearing (2 exemplos por tipo), FAL-0002 para CO-1, grafo montavel a partir do inventario, Rules-as-Knowledge (RulesCatalog -> nos rule), co-knowledge:inventory required e research graph-store (Neo4j vs alternativas). CO-2.2 (checkpoint-script-contracts) concluido no PR #37: contrato operacional SSOT para package.json/docs/hooks/workflows/templates, script-contracts:sync/check e validacao no validate; absorve o no futuro script-contracts. CO-2.3 (checkpoint-runtime-bootstrap-readiness) ativo: backfill P0 de runtime bootstrap, `yarn guidelines handoff`, AGENTS.md como stub seguro e bootstrap PATH dos hooks. CO-2.4 (checkpoint-runtime-ledger-partition) ativo no mesmo PR: runtime/specs active/history, insights por status e falsifications/ledger para reduzir mistura humana e preparar projeções grafo/DB sem mudar SSOT. Plano adicional: research/2026-06-08-knowledge-health-promotion-and-backfill-plan.md define knowledge:health, criterios de promocao e knowledge-readiness final antes de integration-final. PROXIMO = concluir CO-2.3/CO-2.4 -> yarn validate -> review complementar curto (tech/arch) -> atualizar body final -> Ready -> Human Gate. NAO abrir CO-3+; NAO instalar banco externo neste PR; banco futuro deve ser projecao derivada reconstruivel, nao nova SSOT."
 topology:
   cursor:
     pr: co-knowledge
-    checkpoint: checkpoint-runtime-bootstrap-readiness
+    checkpoint: checkpoint-runtime-ledger-partition
   prs:
     concluded:
       - id: base-governance
@@ -88,6 +88,7 @@ topology:
       # Fatia original aprovada; CO-2.1 adiciona backfill minimo + inventario/check + Rules-as-Knowledge + pesquisa graph-store.
       # CO-2.2 absorve script-contracts no mesmo PR: contrato operacional para scripts/hooks/workflows/docs/templates.
       # CO-2.3 reduz AGENTS.md a stub apos backfill P0 de runtime bootstrap + handoff deterministico.
+      # CO-2.4 particiona ledgers runtime por estado/tipo para legibilidade humana e checks operacionais.
       - id: co-knowledge
         github_pr: 37
         role: execution
@@ -98,6 +99,7 @@ topology:
           - checkpoint-co-knowledge-backfill # CO-2.1: inventario minimo, FAL-0002, grafo por inventario/RulesCatalog, graph-store research
           - checkpoint-script-contracts # CO-2.2: contrato operacional SSOT para package.json/docs/hooks/workflows/templates + script-contracts:check
           - checkpoint-runtime-bootstrap-readiness # CO-2.3: handoff minimo + AGENTS.md stub + P0 runtime_bootstrap_p0 + bootstrap PATH dos hooks
+          - checkpoint-runtime-ledger-partition # CO-2.4: specs active/history + insights por status + falsifications/ledger
 
     planned:
       # CAUDA REESCRITA (2026-06-07, Human Gate #35 / Opcao A — reframe in-place).

@@ -16,14 +16,14 @@ entries:
     ref: insight:PIT-0001
     status: done
     priority: P0
-    source: .governance/runtime/insights.yml
+    source: .governance/runtime/insights/open.yml
     rationale: CO-1; mis-binding entre proximo narrado e topology derivavel.
   - id: KB-0002
     kind: insight
     ref: insight:PIT-0008
     status: done
     priority: P0
-    source: .governance/runtime/insights.yml
+    source: .governance/runtime/insights/open.yml
     rationale: Evento de merge/aterrissagem nao e estado continuo.
   - id: KB-0003
     kind: decision
@@ -154,12 +154,12 @@ entries:
     ref: falsification:FAL-0001
     status: done
     priority: P0
-    source: .governance/runtime/falsifications.yml
+    source: .governance/runtime/falsifications/ledger.yml
     rationale: Merge/landing prematuro; evento nao deve ser enforcado como estado continuo.
   - id: KB-0012
     kind: falsification
     ref: falsification:FAL-0002
     status: done
     priority: P0
-    source: .governance/runtime/falsifications.yml
+    source: .governance/runtime/falsifications/ledger.yml
     rationale: CO-1; proximo narrado nao vence topology derivavel.

@@ -13,7 +13,7 @@ entries:
     ref: insight:PIT-0001
     status: done
     priority: P0
-    source: .governance/runtime/insights.yml
+    source: .governance/runtime/insights/open.yml
     rationale: exemplo
   - id: KB-0002
     kind: guardrail

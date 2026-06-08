@@ -11,7 +11,7 @@ const validEntries: KnowledgeBackfillEntry[] = [
     ref: "insight:PIT-0001",
     status: "done",
     priority: "P0",
-    source: ".governance/runtime/insights.yml",
+    source: ".governance/runtime/insights/open.yml",
     rationale: "exemplo",
   },
   {
@@ -20,7 +20,7 @@ const validEntries: KnowledgeBackfillEntry[] = [
     ref: "insight:PIT-0008",
     status: "done",
     priority: "P0",
-    source: ".governance/runtime/insights.yml",
+    source: ".governance/runtime/insights/open.yml",
     rationale: "exemplo",
   },
   {
@@ -185,7 +185,7 @@ const validEntries: KnowledgeBackfillEntry[] = [
     ref: "falsification:FAL-0001",
     status: "done",
     priority: "P0",
-    source: ".governance/runtime/falsifications.yml",
+    source: ".governance/runtime/falsifications/ledger.yml",
     rationale: "exemplo",
   },
   {
@@ -194,7 +194,7 @@ const validEntries: KnowledgeBackfillEntry[] = [
     ref: "falsification:FAL-0002",
     status: "done",
     priority: "P0",
-    source: ".governance/runtime/falsifications.yml",
+    source: ".governance/runtime/falsifications/ledger.yml",
     rationale: "exemplo",
   },
 ];

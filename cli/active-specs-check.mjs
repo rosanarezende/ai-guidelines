@@ -5,7 +5,7 @@
  * Composition root: importa `main` do módulo compilado
  * (`dist/cli/activeSpecsConsistencyCheck.js`) e o invoca com o repo root.
  *
- * Drift guard: `entry.stage` de `active-specs.yml` deve ser projeção fiel de
+ * Drift guard: `entry.stage` de `specs/active.yml` deve ser projeção fiel de
  * `state.yml.stage` da spec (invariante [DEC-0023-A04]). O serializer valida
  * FORMA; este gate valida CONSISTÊNCIA SSOT→projeção.
  *

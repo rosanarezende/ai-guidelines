@@ -25,7 +25,7 @@ const AUTHORITY_FILES = [
   ".core/governance/script-contracts.yml",
   ".core/rules/catalog.md",
   ".core/rules/_meta/rules.json",
-  ".governance/runtime/active-specs.yml",
+  ".governance/runtime/specs/active.yml",
 ];
 
 const SITUATED_FILES = [
@@ -64,7 +64,7 @@ function listSpecDirs(repoRoot: string): readonly string[] {
 }
 
 function activeSpecs(repoRoot: string): readonly ActiveSpecEntry[] {
-  const text = readIfExists(repoRoot, ".governance/runtime/active-specs.yml");
+  const text = readIfExists(repoRoot, ".governance/runtime/specs/active.yml");
   if (!text) return [];
   try {
     return parseActiveSpecs(text).activeSpecs;

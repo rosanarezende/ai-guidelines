@@ -51,7 +51,7 @@ export interface InsightRunOptions {
   readonly logger?: Logger;
   readonly fs?: WorkflowFileSystem;
   readonly clock?: Clock;
-  /** Injetável para tests; default lê `.governance/runtime/insights.yml`. */
+  /** Injetável para tests; default lê o ledger particionado em `.governance/runtime/insights/`. */
   readonly store?: InsightStore;
 }
 

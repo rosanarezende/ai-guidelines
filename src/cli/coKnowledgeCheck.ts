@@ -1,12 +1,12 @@
 /**
  * CLI entrypoint para o gate `co-knowledge:check` (CO-2 / Spec 0024 — Knowledge tipado).
  *
- * Valida o ledger de {@link Falsification} (`.governance/runtime/falsifications.yml`):
+ * Valida o ledger de {@link Falsification} (`.governance/runtime/falsifications/ledger.yml`):
  * - **F1–F3 + selo F2** (`validateFalsification`): forma + fingerprint que sela a
  *   claim/refs (tamper-evidence). Editar uma falsificação sem re-selar → ⚠️.
  * - **F4a — anti-reabertura por REF** (determinístico): se `falsifiesRef` aponta um
  *   conhecimento que ainda está ATIVO, é possível reabertura silenciosa. A única
- *   fonte de status que existe é `insights.yml` (`open`) — então F4a cobre
+ *   fonte de status que existe é `insights/open.yml` (`open`) — então F4a cobre
  *   `falsifiesRef` de estágio `insight`. decision/doctrine ficam de fora (sem ledger
  *   de status — não fingir). **F4b** (reabertura por paráfrase semântica) NÃO é
  *   decidida pelo runtime — exigiria julgamento semântico. A mitigação correta é
@@ -24,8 +24,9 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 import { Falsification, validateFalsification } from "../domain/knowledge/Falsification.js";
 import { formatRef } from "../domain/knowledge/KnowledgeRef.js";
+import { NodeWorkflowFileSystem } from "../infrastructure/filesystem/NodeWorkflowFileSystem.js";
+import { FileInsightStore } from "../infrastructure/yaml/FileInsightStore.js";
 import { parseFalsifications } from "../infrastructure/yaml/falsificationsSerializer.js";
-import { parseInsightsLedger } from "../infrastructure/yaml/insightsLedgerSerializer.js";
 
 interface Logger {
   info: (msg: string) => void;
@@ -37,8 +38,7 @@ const defaultLogger: Logger = {
   error: (msg) => process.stderr.write(`${msg}\n`),
 };
 
-const FALSIFICATIONS_PATH = ".governance/runtime/falsifications.yml";
-const INSIGHTS_PATH = ".governance/runtime/insights.yml";
+export const FALSIFICATIONS_PATH = ".governance/runtime/falsifications/ledger.yml";
 
 export interface CoKnowledgeFinding {
   readonly falsificationId: string;
@@ -103,14 +103,11 @@ export function main(repoRoot: string, logger: Logger = defaultLogger): number {
   }
 
   let activeInsightIds: ReadonlySet<string> = new Set();
-  const insAbs = path.join(repoRoot, INSIGHTS_PATH);
-  if (fs.existsSync(insAbs)) {
-    try {
-      const ledger = parseInsightsLedger(fs.readFileSync(insAbs, "utf-8"));
-      activeInsightIds = new Set(ledger.open().map((i) => i.id));
-    } catch {
-      /* tolerante: state-yml/insights:check cobre a forma do insights.yml */
-    }
+  try {
+    const ledger = new FileInsightStore(new NodeWorkflowFileSystem(repoRoot)).load();
+    activeInsightIds = new Set(ledger.open().map((i) => i.id));
+  } catch {
+    /* tolerante: state-yml/insights:check cobre a forma dos ledgers de insights */
   }
 
   const result = runCoKnowledgeCheck({ falsifications, activeInsightIds });

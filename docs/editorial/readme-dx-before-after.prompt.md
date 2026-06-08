@@ -142,7 +142,7 @@ Layout:
   - `.governance/specs/<slug>/review.md` (prontidão de integração)
   - `.governance/specs/<slug>/release-log.md` (registro pós-merge, condicional)
   - `.governance/specs/<slug>/decision-brief.md` (gate humano)
-  - `.governance/runtime/active-specs.yml` (índice público)
+  - `.governance/runtime/specs/active.yml` (índice público)
 - Na periferia, **canais multi-IA** sincronizados, todos partindo do mesmo kernel:
   - `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `.openai/instructions.md`, `.cursor/rules/`, `.github/copilot-instructions.md`
 - Ícones das IAs (Claude, ChatGPT, Cursor, Gemini, Copilot) na periferia externa, conectadas ao kernel pela mesma geometria — todas a partir da mesma fonte.

@@ -4,7 +4,7 @@ import { LoadActiveSpecsIndex, loadActiveSpecsIndex } from "./loadActiveSpecsInd
 
 /**
  * Comando `specs` — lista as specs ativas do índice operacional público
- * (`.governance/runtime/active-specs.yml`). Read-only, sem prompts (etapa 2 do
+ * (`.governance/runtime/specs/active.yml`). Read-only, sem prompts (etapa 2 do
  * #35: convergência da op avançada "list-active-specs" para Command + Intent).
  *
  * Reaproveita o renderer puro `renderActiveSpecsIndex` (lookup de estado
@@ -18,7 +18,7 @@ import { LoadActiveSpecsIndex, loadActiveSpecsIndex } from "./loadActiveSpecsInd
 export class ListActiveSpecsCommand implements Command<void> {
   readonly name = "specs";
   readonly description =
-    "Lista as specs ativas do índice operacional público (.governance/runtime/active-specs.yml). Read-only.";
+    "Lista as specs ativas do índice operacional público (.governance/runtime/specs/active.yml). Read-only.";
   readonly usage = ["specs"];
 
   constructor(private readonly loadIndex: LoadActiveSpecsIndex = loadActiveSpecsIndex) {}

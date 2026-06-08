@@ -2,12 +2,13 @@ import { parse, stringify } from "yaml";
 import {
   ActiveSpecEntry,
   ActiveSpecsRoot,
+  SpecsHistoryRoot,
   isActiveSpecStatus,
 } from "../../domain/workflow/ActiveSpecEntry.js";
 import { isWorkflowStage } from "../../domain/workflow/WorkflowState.js";
 
 /**
- * Parser puro do índice operacional público (`.governance/runtime/active-specs.yml`).
+ * Parser puro do índice operacional público (`.governance/runtime/specs/active.yml`).
  *
  * Schema cravado em `decision-brief.md` § [DEC-0023-G02] + [DEC-0023-G04]:
  * - Top-level: `version` (===1), `active_specs` (lista).
@@ -27,12 +28,13 @@ import { isWorkflowStage } from "../../domain/workflow/WorkflowState.js";
 
 export class ActiveSpecsParseError extends Error {
   constructor(message: string) {
-    super(`Invalid active-specs.yml: ${message}`);
+    super(`Invalid specs/active.yml: ${message}`);
     this.name = "ActiveSpecsParseError";
   }
 }
 
 const ALLOWED_ROOT_KEYS = ["version", "active_specs"] as const;
+const ALLOWED_HISTORY_ROOT_KEYS = ["version", "specs_history"] as const;
 
 const REQUIRED_ENTRY_KEYS = [
   "id",
@@ -109,6 +111,43 @@ export function parseActiveSpecs(yamlText: string): ActiveSpecsRoot {
   );
 
   return { version: 1, activeSpecs: entries };
+}
+
+export function parseSpecsHistory(yamlText: string): SpecsHistoryRoot {
+  const raw: unknown = parse(yamlText);
+  if (raw === null || typeof raw !== "object" || Array.isArray(raw)) {
+    throw new ActiveSpecsParseError(
+      "history root must be a mapping with `version` and `specs_history`"
+    );
+  }
+  const obj = raw as Record<string, unknown>;
+
+  for (const key of Object.keys(obj)) {
+    if (!(ALLOWED_HISTORY_ROOT_KEYS as readonly string[]).includes(key)) {
+      throw new ActiveSpecsParseError(
+        `unexpected top-level key "${key}" in specs history ` +
+          `(allowed: ${ALLOWED_HISTORY_ROOT_KEYS.join(", ")})`
+      );
+    }
+  }
+
+  if (obj.version !== 1) {
+    throw new ActiveSpecsParseError(
+      `history version must be 1 (got: ${JSON.stringify(obj.version)})`
+    );
+  }
+
+  if (obj.specs_history === undefined || obj.specs_history === null) {
+    throw new ActiveSpecsParseError("missing required key `specs_history`");
+  }
+  if (!Array.isArray(obj.specs_history)) {
+    throw new ActiveSpecsParseError("`specs_history` must be a list (possibly empty)");
+  }
+
+  return {
+    version: 1,
+    specsHistory: obj.specs_history.map((rawEntry, index) => parseEntry(rawEntry, index)),
+  };
 }
 
 function parseEntry(raw: unknown, index: number): ActiveSpecEntry {
@@ -229,20 +268,30 @@ function optionalString(
 export function stringifyActiveSpecs(root: ActiveSpecsRoot): string {
   const plain = {
     version: 1,
-    active_specs: root.activeSpecs.map((entry) => {
-      const obj: Record<string, string | number> = { id: entry.id, slug: entry.slug };
-      if (entry.title !== undefined) obj.title = entry.title;
-      obj.branch = entry.branch;
-      if (entry.baseBranch !== undefined) obj.base_branch = entry.baseBranch;
-      obj.stage = entry.stage;
-      obj.status = entry.status;
-      obj.spec_path = entry.specPath;
-      if (entry.sourceStatePath !== undefined) obj.source_state_path = entry.sourceStatePath;
-      obj.updated_at = entry.updatedAt;
-      if (entry.updatedBy !== undefined) obj.updated_by = entry.updatedBy;
-      if (entry.lastSyncCommit !== undefined) obj.last_sync_commit = entry.lastSyncCommit;
-      return obj;
-    }),
+    active_specs: root.activeSpecs.map(formatEntry),
   };
   return stringify(plain, { indent: 2, lineWidth: 0 });
+}
+
+export function stringifySpecsHistory(root: SpecsHistoryRoot): string {
+  const plain = {
+    version: 1,
+    specs_history: root.specsHistory.map(formatEntry),
+  };
+  return stringify(plain, { indent: 2, lineWidth: 0 });
+}
+
+function formatEntry(entry: ActiveSpecEntry): Record<string, string | number> {
+  const obj: Record<string, string | number> = { id: entry.id, slug: entry.slug };
+  if (entry.title !== undefined) obj.title = entry.title;
+  obj.branch = entry.branch;
+  if (entry.baseBranch !== undefined) obj.base_branch = entry.baseBranch;
+  obj.stage = entry.stage;
+  obj.status = entry.status;
+  obj.spec_path = entry.specPath;
+  if (entry.sourceStatePath !== undefined) obj.source_state_path = entry.sourceStatePath;
+  obj.updated_at = entry.updatedAt;
+  if (entry.updatedBy !== undefined) obj.updated_by = entry.updatedBy;
+  if (entry.lastSyncCommit !== undefined) obj.last_sync_commit = entry.lastSyncCommit;
+  return obj;
 }

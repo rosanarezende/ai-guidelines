@@ -7,7 +7,7 @@ import { Insight, PromotionKind } from "./Insight.js";
  * Participação do `Insight` no pipeline Knowledge.
  *
  * Adapter PURO — **não** altera o agregado `Insight`, sua persistência
- * (`insights.yml`) nem a CLI. Apenas RECONHECE o Insight como o estágio 0 e
+ * (`insights/{open,promoted,discarded}.yml`) nem a CLI. Apenas RECONHECE o Insight como o estágio 0 e
  * deriva a aresta de graduação a partir do que já é persistido (`promotion`).
  * Direção de dependência: `insight` → `knowledge` (o kernel não conhece Insight).
  */

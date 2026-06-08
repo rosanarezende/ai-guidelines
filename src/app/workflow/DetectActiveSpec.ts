@@ -28,7 +28,7 @@ import { WorkflowFileSystem } from "../ports/WorkflowFileSystem.js";
  *      collision (cenário inválido por construção; id é único na
  *      convenção de numeração).
  *
- * **Não consulta `active-specs.yml`.** Projection layer ≠ primary
+ * **Não consulta `specs/active.yml`.** Projection layer ≠ primary
  * resolver de identity (cf. [DEC-0023-I01] + [DEC-0023-G01]).
  */
 

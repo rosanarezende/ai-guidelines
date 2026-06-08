@@ -4,7 +4,8 @@ import { formatGovernedRef, parseGovernedRef } from "../../domain/knowledge/Gove
 import { formatRef, parseRef } from "../../domain/knowledge/KnowledgeRef.js";
 
 /**
- * Parser/serializer puro do ledger de Falsifications (`.governance/runtime/falsifications.yml`).
+ * Parser/serializer puro do ledger de Falsifications
+ * (`.governance/runtime/falsifications/ledger.yml`).
  *
  * Disciplina herdada de `insightsLedgerSerializer`/`activeSpecsSerializer`:
  * - allowlist estrita de chaves (root e por registro);

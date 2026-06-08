@@ -32,7 +32,7 @@ export class DiagnoseDriftCommand implements Command<void> {
 
     if (!result.indexAvailable) {
       logger.info(
-        "Índice operacional público (.governance/runtime/active-specs.yml) não encontrado."
+        "Índice operacional público (.governance/runtime/specs/active.yml) não encontrado."
       );
       logger.info("Dica: rode `yarn guidelines workflow publish-state` na branch da spec.");
       return { exitCode: 0 };

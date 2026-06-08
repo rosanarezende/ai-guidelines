@@ -1,5 +1,5 @@
 /**
- * Entry tipada do índice operacional público (`.governance/runtime/active-specs.yml`).
+ * Entry tipada do índice operacional público (`.governance/runtime/specs/active.yml`).
  *
  * Contrato cravado em `decision-brief.md` § [DEC-0023-G02] (estrutura + campos
  * permitidos) + [DEC-0023-G04] (vocabulário stage/status + regra de projeção).
@@ -66,4 +66,9 @@ export interface ActiveSpecEntry {
 export interface ActiveSpecsRoot {
   readonly version: 1;
   readonly activeSpecs: ReadonlyArray<ActiveSpecEntry>;
+}
+
+export interface SpecsHistoryRoot {
+  readonly version: 1;
+  readonly specsHistory: ReadonlyArray<ActiveSpecEntry>;
 }

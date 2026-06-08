@@ -8,7 +8,7 @@ function tempRepo(): string {
   const spec = path.join(repo, ".governance", "specs", "0024-context-architecture");
   fs.mkdirSync(path.join(repo, ".core", "governance"), { recursive: true });
   fs.mkdirSync(path.join(repo, ".core", "rules", "_meta"), { recursive: true });
-  fs.mkdirSync(path.join(repo, ".governance", "runtime"), { recursive: true });
+  fs.mkdirSync(path.join(repo, ".governance", "runtime", "specs"), { recursive: true });
   fs.mkdirSync(spec, { recursive: true });
   fs.writeFileSync(path.join(repo, "AGENTS.md"), "# AGENTS\n");
   fs.writeFileSync(path.join(repo, ".core", "governance", "script-contracts.yml"), "x: y\n");
@@ -17,7 +17,7 @@ function tempRepo(): string {
   fs.writeFileSync(path.join(spec, "plan.md"), "# Plan\n");
   fs.writeFileSync(path.join(spec, "knowledge-backfill.yml"), "version: 1\nentries: []\n");
   fs.writeFileSync(
-    path.join(repo, ".governance", "runtime", "active-specs.yml"),
+    path.join(repo, ".governance", "runtime", "specs/active.yml"),
     [
       "version: 1",
       "active_specs:",

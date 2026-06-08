@@ -45,7 +45,9 @@ function makeLogger() {
   return { logger, out, err };
 }
 
-const LEDGER = ".governance/runtime/insights.yml";
+const OPEN_LEDGER = ".governance/runtime/insights/open.yml";
+const PROMOTED_LEDGER = ".governance/runtime/insights/promoted.yml";
+const DISCARDED_LEDGER = ".governance/runtime/insights/discarded.yml";
 
 describe("ai-guidelines insight (CLI, ponta-a-ponta)", () => {
   it("add captura, persiste o ledger e confirma com o id", async () => {
@@ -59,7 +61,9 @@ describe("ai-guidelines insight (CLI, ponta-a-ponta)", () => {
     });
     expect(code).toBe(0);
     expect(out.join("\n")).toMatch(/Capturada PIT-0001 \(spec 0024\)/);
-    expect(fs.files.get(LEDGER)).toContain("PIT-0001");
+    expect(fs.files.get(OPEN_LEDGER)).toContain("PIT-0001");
+    expect(fs.files.get(PROMOTED_LEDGER)).toContain("insights: []");
+    expect(fs.files.get(DISCARDED_LEDGER)).toContain("insights: []");
   });
 
   it("saw registra recorrência cross-stamp e a persiste", async () => {
@@ -155,6 +159,8 @@ describe("ai-guidelines insight (CLI, ponta-a-ponta)", () => {
     );
     expect(code).toBe(0);
     expect(out.join("\n")).toMatch(/Promovida PIT-0001 → guardrail GG-0004 \(por @rosana\)/);
+    expect(fs.files.get(OPEN_LEDGER)).toContain("insights: []");
+    expect(fs.files.get(PROMOTED_LEDGER)).toContain("PIT-0001");
 
     const after = makeLogger();
     await main(["insight", "list"], { repoRoot: "/r", fs, logger: after.logger });

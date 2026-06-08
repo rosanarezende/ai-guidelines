@@ -2,7 +2,7 @@
  * CLI entrypoint para gate `state-yml:check`.
  *
  * Por padrão, valida o escopo operacional: specs publicadas como não concluídas
- * em `.governance/runtime/active-specs.yml` + `state.yml` tocados no diff local.
+ * em `.governance/runtime/specs/active.yml` + `state.yml` tocados no diff local.
  * Use `--all` para varredura histórica completa sob `.governance/specs/*` e
  * `.specify/specs/*` (legacy bridge per ADR 0019).
  *
@@ -31,7 +31,7 @@ const defaultLogger: Logger = {
 };
 
 const SPEC_ROOTS = [".governance/specs", ".specify/specs"] as const;
-const ACTIVE_SPECS_INDEX_PATH = ".governance/runtime/active-specs.yml";
+const ACTIVE_SPECS_INDEX_PATH = ".governance/runtime/specs/active.yml";
 
 export type StateYmlCheckScope = "operational" | "all";
 
