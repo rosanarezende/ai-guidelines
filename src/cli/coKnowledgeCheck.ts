@@ -8,8 +8,10 @@
  *   conhecimento que ainda está ATIVO, é possível reabertura silenciosa. A única
  *   fonte de status que existe é `insights.yml` (`open`) — então F4a cobre
  *   `falsifiesRef` de estágio `insight`. decision/doctrine ficam de fora (sem ledger
- *   de status — não fingir), assim como **F4b** (paráfrase semântica; exigiria
- *   NLP/LLM, proibido — ADR 0018).
+ *   de status — não fingir). **F4b** (reabertura por paráfrase semântica) NÃO é
+ *   decidida pelo runtime — exigiria julgamento semântico. A mitigação correta é
+ *   revisão assistida por IA (sugere candidatos a duplicata) + decisão humana no
+ *   Gate (ADR 0021); preserva ADR 0018 — a IA sugere, não decide nem sela estado.
  *
  * **Advisory-first:** DETECTA e REPORTA, mas NUNCA falha o build — `main` retorna
  * sempre 0. Promoção a `required` é decisão futura. Sem entidade nova além da
@@ -129,8 +131,9 @@ export function main(repoRoot: string, logger: Logger = defaultLogger): number {
     logger.info(`  [${f.code}] ${f.falsificationId}: ${f.message}`);
   for (const f of result.reopened) logger.info(`  [${f.code}] ${f.falsificationId}: ${f.message}`);
   logger.info(
-    "\nAdvisory (CO-2 advisory-first): não bloqueia o build. F4b (paráfrase semântica) " +
-      "NÃO é coberto — sem NLP/LLM no runtime (ADR 0018)."
+    "\nAdvisory (CO-2 advisory-first): não bloqueia o build. Reabertura por paráfrase " +
+      "semântica (F4b) NÃO é decidida pelo runtime — revisão assistida por IA sugere " +
+      "candidatos; o Human Gate decide (ADR 0021/0018)."
   );
   return 0;
 }

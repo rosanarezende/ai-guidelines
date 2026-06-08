@@ -61,7 +61,9 @@ Campos (modelo travado):
 
 **IN (CO-2):** `Falsification` (domínio + fingerprint + invariantes); `GovernedRef` (✅); arestas `falsifies`/`constrains`/`crystallizedAs` no grafo; adapters `decision`/`doctrine`; persistência `falsifications.yml` + serializer; `co-knowledge:check` advisory; dogfood `FAL-0001`. Modelo de tipos **completo**; fatia vertical **mínima** que prova os invariantes.
 
-**OUT (→ nós posteriores; NÃO abrir):** `EnforcementBinding` + `knowledge:compile` (CO-3); projetor situado / reconcile-on-load (CO-4); captura/frontier (CO-5); dispatcher de eventos (CO-6); **migração ampla** do acervo (ADRs/DECs/WorkItems existentes); promover o check a `required`.
+**OUT (→ nós posteriores; NÃO abrir):** `EnforcementBinding` + `knowledge:compile` (CO-3); projetor situado / reconcile-on-load (CO-4); captura/frontier (CO-5); dispatcher de eventos (CO-6); **backfill/migração AMPLA** do acervo histórico (converter todo o conjunto de ADRs/DECs/WorkItems existentes em registros/fixtures); promover o check a `required`.
+
+> **Precisão (Architectural Review):** "migração fora de escopo" = **sem backfill amplo** do acervo — **NÃO** modelo incompleto nem dívida estrutural. O CO-2 entrega a capacidade estrutural COMPLETA (`Falsification`, `Decision`, `ADR/Lens`, `WorkItem` como refs/alvos pelo modelo travado) + o dogfood mínimo **load-bearing** (`FAL-0001`). Seria débito se faltasse tipo/aresta/serializer/check/fixture essencial — não falta.
 
 ## 4. Invariantes
 
@@ -69,7 +71,7 @@ Campos (modelo travado):
 - **F2** — `fingerprint == falsificationFingerprint(f)` (tamper-evidence; editar claim/refs sem re-selar → ⚠️; padrão 2.4c).
 - **F3** — cada `constrains[i]` é `GovernedRef` bem-formado de conhecimento governado existente/**derivável** (FORMA, não existência — existência é advisory).
 - **F4a (anti-reabertura por REF — determinístico, advisory)** — se `falsifiesRef` reaparece como nó **ativo** no grafo (insight `open`, decision/doctrine existente) → ⚠️ "reabrindo conhecimento falsificado". Comparação por igualdade de ref. Único candidate determinístico = o REF do nó (não fingerprint de claim).
-- **F4b (anti-reabertura por paráfrase) — REBAIXADO a risco documentado.** Sem payload determinístico cross-tipo; exigiria NLP/LLM (ADR 0018). **Não fingir enforcement.** Mitigação futura: `supersede` explícito (CO-3+).
+- **F4b (reabertura por paráfrase semântica) — fora do enforcement MECÂNICO do runtime.** O `co-knowledge:check` (determinístico) **não decide** equivalência semântica — isso exigiria julgamento semântico. **NÃO é "o humano resolve sozinho, sem apoio":** a mitigação correta é **revisão assistida por IA** (canal de síntese / adversarial review) que **sugere candidatos** a duplicata, com **decisão final humana no Gate** (ADR 0021). Preserva ADR 0018 — a IA não é runtime nem fonte de verdade; **sugere, não decide nem sela estado**. (Mitigação estrutural opcional futura: `supersede` explícito, CO-3+.)
 
 Tudo **advisory-first**: `co-knowledge:check` `main` retorna sempre 0.
 
