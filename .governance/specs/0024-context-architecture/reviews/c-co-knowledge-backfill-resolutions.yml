@@ -1,0 +1,10 @@
+# Resoluções do implementador para o Architectural Review do CO-2.1
+# (checkpoint-co-knowledge-backfill) — lane SEPARADA da review. PROPÕE `action`; NÃO
+# destrava o gate (só a `disposition` do reviewer/owner destrava). `finding`
+# totalmente qualificado (`<role>#<id>`). Rastreável a commit.
+checkpoint: "checkpoint-co-knowledge-backfill"
+by: claude-cli
+resolutions:
+  - finding: architectural_review#F1
+    action: fixed
+    ref: a74309e # KB-0008.deadline -> checkpoint-gg-0002 + co-knowledge:inventory valida deadline x topology (KB_DEADLINE_NOT_IN_TOPOLOGY)
