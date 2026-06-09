@@ -7,23 +7,14 @@ focus:
   - "Plano executavel CANONICO no repo: plan.md secoes 'Sequencia de Checkpoints' + 'Topologia operacional'. VOCABULARIO (Checkpoint 2.1): PR/#N = Pull Request real do GitHub; Checkpoint N = unidade de implementacao da spec; Gate = ritual de validacao (Technical Audit -> Architectural Review -> Human)."
   - "TOPOLOGIA CANONICA (corrigida no Checkpoint 2.1a; modelo da 0023 / ADR 0020 + 0024 / DEC-0023-M01): #32 = PR de governanca/bootstrap + LINHA DE INTEGRACAO da spec; NAO mergeia cedo, e a BASE DA STACK. Checkpoint 3+ = PR real proprio STACKED sobre a linha da spec (NAO off-main, NAO independente). Modo UNIT: merge em main e evento UNICO ao fim (veiculo = PR terminal de implementacao; #32 + intermediarios + Integration PR via landed-via reconciliation; 1 SHA canonico), apos review.md R8. Integration PR = homologacao antes do merge (NAO veiculo)."
   - "Decisoes cravadas (NAO reabrir): G00/G02/G06; Open abolido/DEC nasce Pendente/Deferred canonico; brief por estado; GG-0001 interno (DOGFOOD-*); WorkflowType removido; proveniencia runtime-scoped (role livre, espinha impl+gate derivada, projecao NAO governanca); GG-0002 antes da remocao."
-  - "Gate por checkpoint: Claude implementa -> Technical Audit Gate (Codex) -> Architectural Review Gate (ChatGPT) -> Human Gate (owner) -> AVANCA (abre o proximo PR stacked). O Human Gate decide o PROXIMO MOVIMENTO, NAO mergeia em main. 1 checkpoint atomico por vez; parar no Gate quando o commit estiver pronto. Correcao local pequena nao espera; mudanca estrutural sim."
+  - "Gate por checkpoint: implementacao -> revisoes exigidas pela .governance/review-policy.yml (quando aplicavel) -> Human Gate (owner) -> AVANCA (abre o proximo PR stacked). Na 0024 usamos Technical Audit + Architectural Review como dogfood intensivo, mas isso NAO e obrigacao universal para todo repositorio. O Human Gate decide o PROXIMO MOVIMENTO, NAO mergeia em main. 1 checkpoint atomico por vez; parar no Gate quando o commit estiver pronto. Correcao local pequena nao espera; mudanca estrutural sim."
   - "Criterio (RESSALVADO em 2026-06-03 por [DEC-0024-G08]): 'ja foi validado empiricamente na 0024?' -> absorver/enforcar/executar. NAO re-modelar o DECIDIDO (G00/G02/G06/G07 seguem cravados). EXCECAO assumida: G03/G04/G05 foram reabertos para modelagem deliberada (orientada a grafo) -- nesses eixos, modelar e a direcao, nao o risco. O 'risco dominante' original (modelar em vez de absorver) vale para os eixos resolvidos; nos reabertos, a modelagem e o trabalho."
 next:
-  - "canonical-next: co-knowledge. RETOMADA CANONICA (SSOT) = research/2026-06-07-checkpoint-handoff-co-1.md (+ memoria spec-0024-continuity-operational). #35 CONCLUIDO; CO-1 (co-reconcile) CONCLUIDO — Human Gate approved 2026-06-07 (gates/c-co-reconcile.yml; PR #36; F1 accepted apos o fix c24a47b; reconcile:check advisory-first no validate, com contrato sintatico de marcador). Modo unit: #36 NAO mergeia. PROXIMO = abrir/iniciar CO-2 (co-knowledge: Knowledge tipado + Falsification/fingerprint + aresta constrains; sequence 5) stacked sobre #36 — comecar pelo design fechado (cursor ja em co-knowledge; PR ainda nao aberto). Gates CO advisory-first; disciplina modelo!=migracao. NAO abrir spec paralela; NAO reabrir #35/#36. As entradas abaixo sao HISTORICO pre-reframe (estado vivo no handoff)."
-  - "#32 GATED: Checkpoints 2 (8b0eec6) + 2.1 (d686d4b) + 2.1a (fa2c0ae) fechados. #32 permanece como linha de integracao -- NAO mergeia."
-  - "#33 (branch feat/spec-0024-ruleset-producibility) = unico PR de execucao stacked aberto (sequence 1); embarca os Checkpoints 2.2, 2.2b, 2.3, 2.3a, 2.3b, 2.4, 2.4a, 2.4b, 2.4c e 2.4d. NAO existe branch feat/spec-0024-topology (corrigido no 2.3a: o no-fantasma checkpoint-2.3 foi dobrado em #33)."
-  - "Checkpoint 2.3a + 2.3b implementados: 2.3a reconcilia topologia<->realidade (B1), registra [DEC-0024-G07] (B2), elimina dual-SSOT do plan.md (O1), invariantes de sequence (O6), robustez do governance-pr-check (O2). 2.3b adiciona o guard LOCAL de lifecycle-coerencia (github_pr <=> active/concluded + unicidade) e REAVALIA O5: well-formedness e guard local (no state-yml:check/repo-validation, ja required), nao debito de API -> promocao do governance-pr-check a REQUIRED recomendada. So a paridade-API resta como hardening futuro nao-bloqueante (NEXT separado)."
-  - "RULESET VIVO ATUALIZADO (2026-06-01, autorizado): required_status_checks = repo-validation + smoke + governance-pr-check (apply consolidado; o smoke do 2.2 nunca fora aplicado -> aterrissado agora). Paridade vivo<->versionado VERDE (.github/rulesets/main-governance.json = SSOT). governance-pr-check agora bloqueia merge."
-  - "Checkpoint 2.4 (revisao-como-artefato MVP) + 2.4a (endurecimento) + 2.4b (fecha bypass da poda final): reviews/gates = ARTEFATOS versionados; consolidado DERIVADO por `review:check` (no validate). 2.4a: FINDING reviewer-owned (disposition destrava o gate) vs RESOLUCAO implementer-owned (NAO destrava) = anti-autoaprovacao; findings_emitted+ids contiguos = anti-delecao-do-meio; location obrigatoria; fingerprint sela a claim. 2.4b: review_fingerprint (envelope) fecha a PODA FINAL; checkpoint+role no per-finding hash fecha TRANSPLANTE. 2.4c (bugs da auditoria final): fingerprint via JSON.stringify (canonico, fim da ambiguidade de \\n); resolucao aponta finding totalmente qualificado <role>#<id> com match exato (fim do endsWith que colidia cross-role). Limite honesto: tamper-EVIDENCE (forja visivel), nao prevencao (ADR 0021). Dogfood: c2.3-arch.yml + c2.3-resolutions.yml."
-  - "Checkpoint 2.4d (disclosure de IA = projecao de PROCESSO derivada): renderer puro `disclosureRender` (`yarn disclosure`) deriva de consolidate() ∩ checkpoints do PR na topologia -- nº revisoes, categorias, findings emitidos/resolvidos, gate. ZERO artefato/schema novo. REJEITADOS (nao reabrir): Co-Authored-By/git trailers como fonte (autoria != participacao) e participants.yml/contributors.yml/ledger (over-modeling, actor->role nasce falso m:n). Frase 'Implementacao assistida por IA' = editorial do template, nao dado governado. Falsificacao fechou A (cobertura de escopo: approved exige cobertura total, senao partial) + C (violations do consolidate fatais no main); B (disclosure stale, sem detector de drift) DEFERIDO (NEXT.md, disclosure:check)."
-  - "Gate do #33 FECHADO: gates/c2.4d.yml approved (PR INTEIRO, keyado no cursor 2.4d, NAO retroativo por checkpoint) + reviews/c2.4d-architectural_review.yml (F1/F2 accepted, F3 dismissed-deferido) + resolutions; review:check verde; CI clean; Human Gate ratificado (owner APPROVED 2026-06-02). PROXIMO: abrir o Checkpoint 3 (GG-0003 Consistency Projection Check, sequence 2) stacked, nascendo com review-as-artifact + disclosure derivado (sem texto manual). PRIMEIRO passo do 3: alinhar com owner a LISTA FIXA de marcadores (decisao de design; nao cravar sozinho). Ao abrir: #33 -> concluded, checkpoint-3 -> active com github_pr."
-  - "Encerramento: instanciar review.md (gates R1-R7) -> abrir Integration PR (homologacao) -> commit de encerramento (spec->Done, state->done, NEXT deletado, release-log T0) -> review.md R8 -> MERGE UNICO em main (modo unit). spec->Done so no fim."
-  - "LER antes de qualquer acao: research/2026-06-02-handoff-checkpoint-3.md (SSOT da retomada para o Checkpoint 3; supersede o handoff-next-session) + state.yml § topology + plan.md. Verificar git limpo + yarn validate verde + gate do #33 (gates/c2.4d.yml) approved."
+  - "canonical-next: co-knowledge. RETOMADA CANONICA (SSOT) = research/2026-06-07-checkpoint-handoff-co-2.md (+ memoria spec-0024-continuity-operational). #35 CONCLUIDO; CO-1 (co-reconcile) CONCLUIDO-NA-STACK (Human Gate approved 2026-06-07, gates/c-co-reconcile.yml; PR #36 ABERTO, modo unit, SEM merge isolado). CO-2 (co-knowledge) — fatia vertical original completa e revisada (Technical + Architectural approved, 0 findings). CO-2.1 (checkpoint-co-knowledge-backfill) concluido no MESMO Draft PR #37 por decisao da owner: inventario/backfill minimo load-bearing (2 exemplos por tipo), FAL-0002 para CO-1, grafo montavel a partir do inventario, Rules-as-Knowledge (RulesCatalog -> nos rule), co-knowledge:inventory required e research graph-store (Neo4j vs alternativas). CO-2.2 (checkpoint-script-contracts) concluido no PR #37: contrato operacional SSOT para package.json/docs/hooks/workflows/templates, script-contracts:sync/check e validacao no validate; absorve o no futuro script-contracts. CO-2.3 (checkpoint-runtime-bootstrap-readiness) implementado no PR #37: backfill P0 de runtime bootstrap, `yarn guidelines handoff`, AGENTS.md como stub seguro e bootstrap PATH dos hooks. CO-2.4 (checkpoint-runtime-ledger-partition) implementado no mesmo PR: runtime/specs active/history, insights por status e falsifications/ledger para reduzir mistura humana e preparar projeções grafo/DB sem mudar SSOT. CO-2.5 (checkpoint-review-policy-events) implementado e revisado neste PR: review policy versionada + ReviewEvent append-only para re-auditorias sem checkpoints artificiais; hardening posterior exige event_id EV1..EVN unico/contiguo por (checkpoint, role). Plano adicional: research/2026-06-08-knowledge-health-promotion-and-backfill-plan.md define knowledge:health, criterios de promocao e knowledge-readiness final antes de integration-final. PROXIMO = atualizar body final -> Ready -> Human Gate. Proximo no apos Human Gate = bootstrap-compiler, que fecha cutover /cli legado -> /src/registry antes de CO-3. NAO abrir CO-3+; NAO instalar banco externo neste PR; banco futuro deve ser projecao derivada reconstruivel, nao nova SSOT."
 topology:
   cursor:
     pr: co-knowledge
-    checkpoint: checkpoint-co-knowledge
+    checkpoint: checkpoint-review-policy-events
   prs:
     concluded:
       - id: base-governance
@@ -90,7 +81,27 @@ topology:
         checkpoints:
           - checkpoint-co-reconcile # reconcile:check + contrato de autoridade (U1); semente: ex-checkpoint-gg-0003 (consistency)
 
-    active: []
+    active:
+      # CO-2 — EM PROGRESSO (Draft PR #37 aberto 2026-06-07, conteiner-primeiro/ADR 0025;
+      # stacked sobre #36; modo unit, NAO mergeia). Knowledge tipado: Falsification
+      # (negativo de 1a classe) + fingerprint + arestas constrains/falsifies/crystallizedAs.
+      # Fatia original aprovada; CO-2.1 adiciona backfill minimo + inventario/check + Rules-as-Knowledge + pesquisa graph-store.
+      # CO-2.2 absorve script-contracts no mesmo PR: contrato operacional para scripts/hooks/workflows/docs/templates.
+      # CO-2.3 reduz AGENTS.md a stub apos backfill P0 de runtime bootstrap + handoff deterministico.
+      # CO-2.4 particiona ledgers runtime por estado/tipo para legibilidade humana e checks operacionais.
+      # CO-2.5 formaliza review-policy e ReviewEvent append-only; re-audit nao cria checkpoint fantasma.
+      - id: co-knowledge
+        github_pr: 37
+        role: execution
+        terminal: false
+        sequence: 5
+        checkpoints:
+          - checkpoint-co-knowledge # Knowledge tipado + Falsification/fingerprint + aresta constrains (U2)
+          - checkpoint-co-knowledge-backfill # CO-2.1: inventario minimo, FAL-0002, grafo por inventario/RulesCatalog, graph-store research
+          - checkpoint-script-contracts # CO-2.2: contrato operacional SSOT para package.json/docs/hooks/workflows/templates + script-contracts:check
+          - checkpoint-runtime-bootstrap-readiness # CO-2.3: handoff minimo + AGENTS.md stub + P0 runtime_bootstrap_p0 + bootstrap PATH dos hooks
+          - checkpoint-runtime-ledger-partition # CO-2.4: specs active/history + insights por status + falsifications/ledger
+          - checkpoint-review-policy-events # CO-2.5: review-policy + eventos append-only de re-auditoria/revalidacao
 
     planned:
       # CAUDA REESCRITA (2026-06-07, Human Gate #35 / Opcao A — reframe in-place).
@@ -107,23 +118,14 @@ topology:
       # null = ainda nao aberto. Objetivo/Deps de cada no: plan.md. Memoria:
       # spec-0024-continuity-operational.
 
-      # CO-2 — Knowledge tipado: Falsification (negativo de 1a classe) + fingerprint +
-      # aresta `constrains` (knowledge -> superficie de decisao). Mata "falsificacao
-      # esquecida". Absorve ex-doctrine (DoctrineGraph -> nos Lens/ADR) + ex-decision
-      # (Decision como TIPO de no; WorkItem tambem vira tipo de no aqui).
-      - id: co-knowledge
-        github_pr: null
-        role: execution
-        terminal: false
-        sequence: 5
-        checkpoints:
-          - checkpoint-co-knowledge # Knowledge tipado + Falsification/fingerprint + aresta constrains (U2)
-
       # Bootstrap+Compiler — RESOLVE a auditoria do #35 (#1 roteamento, #3 fallback,
-      # #4 parsers): migra bootstrap (init/adopt/providers/update/check-budget) ao
-      # registry; remove fallback legado + parseArgs monolito + a ponte transitoria.
-      # Funde ex-pr-compiler-ts (motor de regras monolith -> TS/src; substrato do
-      # knowledge:compile). O cutover so esta plenamente absorvido quando este aterrissa.
+      # #4 parsers) e fecha o cutover incompleto exposto no PR #37: migra bootstrap
+      # (init/adopt/providers/update/check-budget), script-contracts/runtime-bootstrap
+      # e residuos de pointers ao registry/src; remove fallback legado + parseArgs
+      # monolito + ponte transitoria. Funde ex-pr-compiler-ts (motor de regras
+      # monolith -> TS/src; substrato do knowledge:compile). Depois deste no, /cli deve
+      # ser wrapper/compatibilidade; regra governada nova vive em /src. O cutover so
+      # esta plenamente absorvido quando este aterrissa.
       - id: bootstrap-compiler
         github_pr: null
         role: execution
@@ -131,7 +133,7 @@ topology:
         sequence: 6
         checkpoints:
           - checkpoint-compiler-ts # motor de compilacao de regras (monolith) -> TS/src; substrato do knowledge:compile
-          - checkpoint-bootstrap-registry # bootstrap -> registry; remove fallback+parseArgs+ponte (fecha auditoria #1/#3/#4)
+          - checkpoint-bootstrap-registry # bootstrap/script-contracts/runtime-bootstrap -> registry/src; /cli vira wrapper+compat
 
       # CO-3 — Absorcao: no de conhecimento -> forma que DISPARA. EnforcementBinding
       # (declaracao->enforcement por no; PIT-0008 estrutural) + knowledge:compile
@@ -202,6 +204,21 @@ topology:
         sequence: 12
         checkpoints:
           - checkpoint-dualroot-collapse # colapso do dual-root; migracao .specify (test:smoke gateia)
+
+      # Knowledge Readiness — NO FINAL antes do PR de integracao. Fecha a divida
+      # planejada do CO-2.1: backfill amplo P0/P1, knowledge:health (dossie +
+      # prompt de revisao assistida por IA, decisao humana), consome script-contracts
+      # como input de saude operacional, e decide promocao do
+      # co-knowledge:integrity/co-knowledge:check. Nao adota banco como SSOT.
+      - id: knowledge-readiness
+        github_pr: null
+        role: execution
+        terminal: false
+        sequence: 13
+        checkpoints:
+          - checkpoint-knowledge-health # dossie de saude do grafo + candidatos semanticos p/ decisao humana
+          - checkpoint-knowledge-backfill-wide # backfill amplo P0/P1 antes da integracao
+          - checkpoint-co-knowledge-promotion # decide/promove checks estruturais; F4b segue humano-assistido
 
       - id: integration-final
         github_pr: null

@@ -28,6 +28,11 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 import {
+  activeReviewPolicyProfile,
+  parseReviewPolicy,
+  GithubReviewPolicy,
+} from "../infrastructure/yaml/reviewPolicyReader.js";
+import {
   parseWorkflowChecks,
   WorkflowChecks,
   MatrixProducer,
@@ -46,6 +51,7 @@ const defaultLogger: Logger = {
 
 export const RULESET_PATH = ".github/rulesets/main-governance.json";
 export const WORKFLOWS_DIR = ".github/workflows";
+export const REVIEW_POLICY_PATH = ".governance/review-policy.yml";
 
 // ---------------------------------------------------------------------------
 // Modelo declarativo do ruleset
@@ -60,6 +66,14 @@ export interface RulesetModel {
   /** Objeto declarativo completo (para paridade). */
   readonly raw: Record<string, unknown>;
   readonly requiredContexts: readonly RequiredCheck[];
+  readonly pullRequest?: PullRequestRulesetSettings;
+}
+
+export interface PullRequestRulesetSettings {
+  readonly requiredApprovingReviewCount: number;
+  readonly requireCodeOwnerReview: boolean;
+  readonly dismissStaleReviewsOnPush: boolean;
+  readonly requireLastPushApproval: boolean;
 }
 
 export class RulesetParseError extends Error {
@@ -82,9 +96,25 @@ export function parseRuleset(jsonContent: string): RulesetModel {
   const obj = raw as Record<string, unknown>;
   const rules = Array.isArray(obj.rules) ? obj.rules : [];
   const requiredContexts: RequiredCheck[] = [];
+  let pullRequest: PullRequestRulesetSettings | undefined;
   for (const rule of rules) {
     if (!rule || typeof rule !== "object") continue;
     const r = rule as Record<string, unknown>;
+    if (r.type === "pull_request") {
+      const params = r.parameters;
+      if (params && typeof params === "object") {
+        const p = params as Record<string, unknown>;
+        pullRequest = {
+          requiredApprovingReviewCount:
+            typeof p.required_approving_review_count === "number"
+              ? p.required_approving_review_count
+              : 0,
+          requireCodeOwnerReview: p.require_code_owner_review === true,
+          dismissStaleReviewsOnPush: p.dismiss_stale_reviews_on_push === true,
+          requireLastPushApproval: p.require_last_push_approval === true,
+        };
+      }
+    }
     if (r.type !== "required_status_checks") continue;
     const params = r.parameters;
     if (!params || typeof params !== "object") continue;
@@ -101,7 +131,52 @@ export function parseRuleset(jsonContent: string): RulesetModel {
       });
     }
   }
-  return { raw: obj, requiredContexts };
+  return { raw: obj, requiredContexts, ...(pullRequest ? { pullRequest } : {}) };
+}
+
+export function checkGithubReviewPolicy(
+  required: GithubReviewPolicy,
+  actual: PullRequestRulesetSettings | undefined
+): string[] {
+  const violations: string[] = [];
+  if (!actual) {
+    if (
+      required.minimumApprovingReviews > 0 ||
+      required.requireCodeOwnerReview ||
+      required.dismissStaleReviewsOnPush ||
+      required.requireLastPushApproval
+    ) {
+      violations.push(
+        "ruleset não declara regra pull_request, mas review-policy exige proteção GitHub."
+      );
+    }
+    return violations;
+  }
+  if (actual.requiredApprovingReviewCount < required.minimumApprovingReviews) {
+    violations.push(
+      `required_approving_review_count=${actual.requiredApprovingReviewCount} menor que review-policy.minimum_approving_reviews=${required.minimumApprovingReviews}.`
+    );
+  }
+  if (required.requireCodeOwnerReview && !actual.requireCodeOwnerReview) {
+    violations.push("require_code_owner_review=false, mas review-policy exige code owner review.");
+  }
+  if (required.dismissStaleReviewsOnPush && !actual.dismissStaleReviewsOnPush) {
+    violations.push(
+      "dismiss_stale_reviews_on_push=false, mas review-policy exige stale reviews descartadas."
+    );
+  }
+  if (required.requireLastPushApproval && !actual.requireLastPushApproval) {
+    violations.push(
+      "require_last_push_approval=false, mas review-policy exige aprovação do último push."
+    );
+  }
+  return violations;
+}
+
+function readGithubReviewPolicy(repoRoot: string): GithubReviewPolicy | null {
+  const policyPath = path.join(repoRoot, REVIEW_POLICY_PATH);
+  if (!fs.existsSync(policyPath)) return null;
+  return activeReviewPolicyProfile(parseReviewPolicy(fs.readFileSync(policyPath, "utf-8"))).github;
 }
 
 // ---------------------------------------------------------------------------
@@ -292,18 +367,35 @@ export function main(repoRoot: string, options: MainOptions): number {
   }
 
   if (options.mode === "producibility") {
+    let reviewPolicyViolations: string[] = [];
+    try {
+      const githubPolicy = readGithubReviewPolicy(repoRoot);
+      if (githubPolicy) {
+        reviewPolicyViolations = checkGithubReviewPolicy(githubPolicy, versioned.pullRequest);
+      }
+    } catch (e) {
+      logger.error(`❌ ${(e as Error).message}`);
+      return 1;
+    }
     const result = checkProducibility(
       versioned.requiredContexts,
       readWorkflows(repoRoot),
       options.externalProducers
     );
-    if (result.ok) {
+    if (result.ok && reviewPolicyViolations.length === 0) {
       logger.info(
         `✅ ruleset:check (PRIMÁRIO/producibilidade) — ${result.required.length} required ` +
           `context(s) com produtor estável: ${result.required.join(", ") || "(nenhum)"}.`
       );
       return 0;
     }
+    if (reviewPolicyViolations.length > 0) {
+      logger.error(
+        `❌ ruleset:check (review-policy) FALHOU — ruleset versionado menos estrito que ${REVIEW_POLICY_PATH}:`
+      );
+      for (const v of reviewPolicyViolations) logger.error(`  - ${v}`);
+    }
+    if (result.ok) return 1;
     logger.error(
       `❌ ruleset:check (PRIMÁRIO/producibilidade) FALHOU — ` +
         `required context(s) sem produtor estável em ${WORKFLOWS_DIR}:`

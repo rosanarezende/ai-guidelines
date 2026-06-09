@@ -5,21 +5,21 @@
 
 ## Rules Table
 
-| ID      | Title                                                     | Category | Evidence Strength  | Sources | Chars | Lines |
-| ------- | --------------------------------------------------------- | -------- | ------------------ | ------- | ----- | ----- |
-| CORE-01 | Environment check antes da primeira ação                  | process  | declared_heuristic | 0       | 127   | 1     |
-| CORE-02 | Agnostic SDD Override — repositório como memória          | process  | declared_heuristic | 0       | 483   | 1     |
-| CORE-03 | Cross-ref para Regras Globais                             | process  | declared_heuristic | 0       | 127   | 1     |
-| CORE-04 | Nunca trabalhe direto em main/master                      | process  | declared_heuristic | 0       | 142   | 1     |
-| CORE-05 | Não versione contexto vazado                              | process  | declared_heuristic | 0       | 140   | 1     |
-| CORE-06 | Commits incrementais atômicos                             | process  | declared_heuristic | 0       | 104   | 1     |
-| CORE-07 | Nunca execute git push autonomamente                      | process  | declared_heuristic | 0       | 123   | 1     |
-| CORE-08 | HARNESS LOCK — cadeia de qualidade obrigatória pré-commit | process  | declared_heuristic | 0       | 217   | 1     |
-| CORE-09 | PRs abrem como Draft com matriz oficial                   | process  | declared_heuristic | 0       | 278   | 1     |
-| CORE-10 | Draft → Ready apenas via revalidação humana               | process  | declared_heuristic | 0       | 514   | 1     |
-| CORE-11 | Plano formado antes de ação                               | process  | declared_heuristic | 0       | 201   | 1     |
-| CORE-12 | Checkpoints antes de ação após contexto extenso           | process  | declared_heuristic | 0       | 120   | 1     |
-| CORE-13 | Artefatos vivos durante o trabalho                        | process  | declared_heuristic | 0       | 185   | 1     |
-| CORE-14 | Mensagem de commit sugerida: IA fornece apenas a mensagem | process  | declared_heuristic | 0       | 174   | 1     |
-| CORE-15 | ADR é princípio perene, não revisitação datada            | process  | declared_heuristic | 0       | 378   | 1     |
-| CORE-16 | Sync de base ≠ merge atômico ponta-a-ponta                | process  | declared_heuristic | 0       | 598   | 1     |
+| ID      | Title                                                      | Category | Evidence Strength  | Sources | Chars | Lines |
+| ------- | ---------------------------------------------------------- | -------- | ------------------ | ------- | ----- | ----- |
+| CORE-01 | Environment check antes da primeira ação                   | process  | declared_heuristic | 0       | 127   | 1     |
+| CORE-02 | Agnostic SDD Override — repositório como memória           | process  | declared_heuristic | 0       | 483   | 1     |
+| CORE-03 | Cross-ref para catálogo de regras                          | process  | declared_heuristic | 0       | 135   | 1     |
+| CORE-04 | Nunca trabalhe direto em main/master                       | process  | declared_heuristic | 0       | 142   | 1     |
+| CORE-05 | Não versione contexto vazado                               | process  | declared_heuristic | 0       | 140   | 1     |
+| CORE-06 | Commits incrementais atômicos                              | process  | declared_heuristic | 0       | 104   | 1     |
+| CORE-07 | Nunca execute git push autonomamente                       | process  | declared_heuristic | 0       | 123   | 1     |
+| CORE-08 | HARNESS LOCK — contrato operacional obrigatório pré-commit | process  | declared_heuristic | 0       | 271   | 1     |
+| CORE-09 | PRs abrem como Draft com matriz oficial                    | process  | declared_heuristic | 0       | 278   | 1     |
+| CORE-10 | Draft → Ready apenas via revalidação humana                | process  | declared_heuristic | 0       | 514   | 1     |
+| CORE-11 | Plano formado antes de ação                                | process  | declared_heuristic | 0       | 201   | 1     |
+| CORE-12 | Checkpoints antes de ação após contexto extenso            | process  | declared_heuristic | 0       | 120   | 1     |
+| CORE-13 | Artefatos vivos durante o trabalho                         | process  | declared_heuristic | 0       | 185   | 1     |
+| CORE-14 | Commit sob autorização explícita e contrato instalado      | process  | declared_heuristic | 0       | 240   | 1     |
+| CORE-15 | ADR é princípio perene, não revisitação datada             | process  | declared_heuristic | 0       | 378   | 1     |
+| CORE-16 | Sync de base ≠ merge atômico ponta-a-ponta                 | process  | declared_heuristic | 0       | 598   | 1     |

@@ -1,6 +1,6 @@
 # Checkpoint Comment Template — comentários de Gate em PRs governance-first
 
-> **O que é.** Template **copiável** para os comentários de proveniência de um **checkpoint** (unidade de implementação de uma spec) num Pull Request real. Padroniza a rastreabilidade do ritual de **Gate** — `implementation → Technical Audit Gate → Architectural Review Gate → Human Gate` — para que humano, Claude, Codex e ChatGPT postem comentários consistentes (não "crus" demais).
+> **O que é.** Template **copiável** para os comentários de proveniência de um **checkpoint** (unidade de implementação de uma spec) num Pull Request real. Padroniza a rastreabilidade do ritual de **Gate** — `implementation → revisões exigidas pela review-policy → Human Gate` — para que humano e agentes postem comentários consistentes (não "crus" demais).
 >
 > **Vocabulário (cf. `plan.md § Glossário` da spec em curso):** **PR / `#N`** = Pull Request real do GitHub · **Checkpoint N** = unidade de implementação da spec · **Gate** = ritual de validação. **Não usar "PR-N" como unidade interna** — só `Checkpoint N`.
 >

@@ -2,6 +2,7 @@ import {
   ActiveSpecEntry,
   ActiveSpecsRoot,
   ActiveSpecStatus,
+  SpecsHistoryRoot,
   isActiveSpecStatus,
 } from "../../domain/workflow/ActiveSpecEntry.js";
 import { SpecLocation } from "../../domain/workflow/SpecLocation.js";
@@ -11,7 +12,7 @@ import { DetectActiveSpec } from "./DetectActiveSpec.js";
 
 /**
  * Projeta o `state.yml` interno da spec corrente para uma entry do índice
- * operacional público (`.governance/runtime/active-specs.yml`).
+ * operacional público (`.governance/runtime/specs/active.yml`).
  *
  * Regras canônicas (cf. `decision-brief.md` § [DEC-0023-G03] + [DEC-0023-G04]):
  *   - `stage` é projetado **direto** de `state.yml.stage` (sem tradução).
@@ -28,7 +29,8 @@ import { DetectActiveSpec } from "./DetectActiveSpec.js";
  * stale, prioridade, próxima ação, freshness, dependência cross-spec.
  */
 
-const INDEX_PATH = ".governance/runtime/active-specs.yml";
+const INDEX_PATH = ".governance/runtime/specs/active.yml";
+const HISTORY_PATH = ".governance/runtime/specs/history.yml";
 
 /**
  * Formata um instante temporal como ISO-8601 com offset literal `-03:00`.
@@ -73,14 +75,18 @@ export interface PublishStateInput {
 
 export interface PublishStateResult {
   readonly indexPath: string;
+  readonly historyPath?: string;
   readonly entry: ActiveSpecEntry;
   /** True se a entry substituiu uma anterior; false se foi appended. */
   readonly wasUpdate: boolean;
+  readonly archivedToHistory: boolean;
 }
 
 export type WorkflowStateParser = (yamlText: string) => WorkflowState;
 export type ActiveSpecsParser = (yamlText: string) => ActiveSpecsRoot;
 export type ActiveSpecsSerializer = (root: ActiveSpecsRoot) => string;
+export type SpecsHistoryParser = (yamlText: string) => SpecsHistoryRoot;
+export type SpecsHistorySerializer = (root: SpecsHistoryRoot) => string;
 
 export class PublishState {
   constructor(
@@ -88,6 +94,8 @@ export class PublishState {
     private readonly parseIndex: ActiveSpecsParser,
     private readonly serializeIndex: ActiveSpecsSerializer,
     private readonly parseState: WorkflowStateParser,
+    private readonly parseHistory: SpecsHistoryParser,
+    private readonly serializeHistory: SpecsHistorySerializer,
     private readonly now: () => Date = () => new Date()
   ) {}
 
@@ -110,7 +118,7 @@ export class PublishState {
     //    (id NNNN) per [DEC-0023-I01]. Sem fallback paralelo: branch escopo
     //    de PR (`feat/spec-0023-dx-thinking`) resolve automaticamente para
     //    o diretório canônico (`0023-workflow-runtime`) via id. Índice
-    //    público (`active-specs.yml`) NÃO é primary resolver de identity
+    //    público (`specs/active.yml`) NÃO é primary resolver de identity
     //    (projection layer ≠ detection layer).
     const detected = new DetectActiveSpec(this.fs).run();
     if (!detected.location) {
@@ -176,29 +184,62 @@ export class PublishState {
       root = { version: 1, activeSpecs: [] };
     }
 
-    // 8. Upsert por id — atualiza in-place ou append no fim
+    // 8. Upsert por id — active_specs recebe apenas specs operacionais; completed
+    //    é movida para specs/history.yml para manter o índice ativo pequeno e honesto.
     const existingIndex = root.activeSpecs.findIndex((e) => e.id === id);
-    const wasUpdate = existingIndex >= 0;
-    const updatedEntries: ActiveSpecEntry[] = wasUpdate
-      ? root.activeSpecs.map((e, i) => (i === existingIndex ? newEntry : e))
-      : [...root.activeSpecs, newEntry];
+    const historyRoot = this.readHistory();
+    const existingHistoryIndex = historyRoot.specsHistory.findIndex((e) => e.id === id);
+    const archivedToHistory = input.status === "completed";
+    const wasUpdate = existingIndex >= 0 || existingHistoryIndex >= 0;
+
+    const updatedEntries: ActiveSpecEntry[] = archivedToHistory
+      ? root.activeSpecs.filter((e) => e.id !== id)
+      : existingIndex >= 0
+        ? root.activeSpecs.map((e, i) => (i === existingIndex ? newEntry : e))
+        : [...root.activeSpecs, newEntry];
     const updatedRoot: ActiveSpecsRoot = { version: 1, activeSpecs: updatedEntries };
+
+    const updatedHistoryEntries: ActiveSpecEntry[] = archivedToHistory
+      ? existingHistoryIndex >= 0
+        ? historyRoot.specsHistory.map((e, i) => (i === existingHistoryIndex ? newEntry : e))
+        : [...historyRoot.specsHistory, newEntry]
+      : historyRoot.specsHistory.filter((e) => e.id !== id);
+    const updatedHistoryRoot: SpecsHistoryRoot = {
+      version: 1,
+      specsHistory: updatedHistoryEntries,
+    };
 
     // 9. Round-trip de validação — fail-fast se o resultado não bate com o schema
     const serialized = this.serializeIndex(updatedRoot);
+    const serializedHistory = this.serializeHistory(updatedHistoryRoot);
     try {
       this.parseIndex(serialized);
+      this.parseHistory(serializedHistory);
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       throw new PublishStateError(
-        `Inconsistência interna: round-trip do índice falhou pós-serialize. ` +
+        `Inconsistência interna: round-trip dos índices falhou pós-serialize. ` +
           `Detalhe: ${message}. Nada foi escrito.`
       );
     }
 
     // 10. Escrever
     this.fs.writeTextFile(INDEX_PATH, serialized);
+    this.fs.writeTextFile(HISTORY_PATH, serializedHistory);
 
-    return { indexPath: INDEX_PATH, entry: newEntry, wasUpdate };
+    return {
+      indexPath: INDEX_PATH,
+      historyPath: HISTORY_PATH,
+      entry: newEntry,
+      wasUpdate,
+      archivedToHistory,
+    };
+  }
+
+  private readHistory(): SpecsHistoryRoot {
+    if (!this.fs.fileExists(HISTORY_PATH)) {
+      return { version: 1, specsHistory: [] };
+    }
+    return this.parseHistory(this.fs.readTextFile(HISTORY_PATH));
   }
 }

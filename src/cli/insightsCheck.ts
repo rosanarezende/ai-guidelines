@@ -1,9 +1,15 @@
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { InsightStatus } from "../domain/insight/Insight.js";
 import { graduationRefOf } from "../domain/insight/insightKnowledge.js";
 import { recurrenceOf } from "../domain/insight/Insight.js";
+import { InsightLedger } from "../domain/insight/InsightLedger.js";
 import { formatRef, isWellFormedRef } from "../domain/knowledge/KnowledgeRef.js";
-import { INSIGHTS_LEDGER_PATH } from "../infrastructure/yaml/FileInsightStore.js";
+import {
+  INSIGHT_PARTITION_PATHS,
+  INSIGHTS_LEDGER_PATHS,
+  LEGACY_INSIGHTS_LEDGER_PATH,
+} from "../infrastructure/yaml/FileInsightStore.js";
 import {
   parseInsightsLedger,
   stringifyInsightsLedger,
@@ -44,28 +50,61 @@ import {
 const GRADUATION_CANDIDATE_THRESHOLD = 3;
 
 export function main(repoRoot: string): number {
-  const path = resolve(repoRoot, INSIGHTS_LEDGER_PATH);
-  if (!existsSync(path)) {
+  const legacyPath = resolve(repoRoot, LEGACY_INSIGHTS_LEDGER_PATH);
+  if (existsSync(legacyPath)) {
+    process.stderr.write(
+      `❌ insights:check — ledger legado ${LEGACY_INSIGHTS_LEDGER_PATH} encontrado. ` +
+        "Use .governance/runtime/insights/{open,promoted,discarded}.yml.\n"
+    );
+    return 1;
+  }
+
+  if (!INSIGHTS_LEDGER_PATHS.some((p) => existsSync(resolve(repoRoot, p)))) {
     process.stdout.write(`✅ insights:check — ledger ausente (vazio é válido).\n`);
     return 0;
   }
-  let raw: string;
-  let ledger;
+
+  const ledgers: InsightLedger[] = [];
   try {
-    raw = readFileSync(path, "utf-8");
-    ledger = parseInsightsLedger(raw);
+    for (const status of Object.keys(INSIGHT_PARTITION_PATHS) as InsightStatus[]) {
+      const relPath = INSIGHT_PARTITION_PATHS[status];
+      const absPath = resolve(repoRoot, relPath);
+      if (!existsSync(absPath)) continue;
+      const raw = readFileSync(absPath, "utf-8");
+      const partition = parseInsightsLedger(raw);
+      if (raw !== stringifyInsightsLedger(partition)) {
+        process.stderr.write(
+          `❌ insights:check — ${relPath} não está na forma canônica ` +
+            `(edição manual?). Regenere pela CLI (\`ai-guidelines insight …\`).\n`
+        );
+        return 1;
+      }
+      for (const insight of partition.all()) {
+        if (insight.status !== status) {
+          process.stderr.write(
+            `❌ insights:check — ${insight.id} tem status ${insight.status}, ` +
+              `mas está em ${relPath} (esperado: ${status}).\n`
+          );
+          return 1;
+        }
+      }
+      ledgers.push(partition);
+    }
   } catch (err) {
     process.stderr.write(
-      `❌ insights:check — ${INSIGHTS_LEDGER_PATH} inválido: ` +
+      `❌ insights:check — partição de insights inválida: ` +
         `${err instanceof Error ? err.message : String(err)}\n`
     );
     return 1;
   }
 
-  if (raw !== stringifyInsightsLedger(ledger)) {
+  let ledger: InsightLedger;
+  try {
+    ledger = InsightLedger.fromArray(ledgers.flatMap((partition) => partition.all()));
+  } catch (err) {
     process.stderr.write(
-      `❌ insights:check — ${INSIGHTS_LEDGER_PATH} não está na forma canônica ` +
-        `(edição manual?). Regenere pela CLI (\`ai-guidelines insight …\`).\n`
+      `❌ insights:check — ledger particionado inválido: ` +
+        `${err instanceof Error ? err.message : String(err)}\n`
     );
     return 1;
   }

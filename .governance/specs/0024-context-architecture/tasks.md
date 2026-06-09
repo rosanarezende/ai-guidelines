@@ -11,7 +11,7 @@
 
 > ## 📖 Vocabulário (cf. `plan.md § Glossário operacional`)
 >
-> **PR / `#N`** = Pull Request real do GitHub · **Checkpoint N** = unidade de implementação da spec · **Gate** = ritual de validação (`Technical Audit Gate` → `Architectural Review Gate` → `Human Gate`). _"PR-N" foi aposentado (Checkpoint 2.1) — conflitava com Pull Request real; a 0023 já diagnosticara (review R6)._
+> **PR / `#N`** = Pull Request real do GitHub · **Checkpoint N** = unidade de implementação da spec · **Gate** = ritual de validação conforme review-policy + Human Gate. _"PR-N" foi aposentado (Checkpoint 2.1) — conflitava com Pull Request real; a 0023 já diagnosticara (review R6)._
 
 > ## 🔁 Nota de fase — ABSORÇÃO OPERACIONAL (2026-05-31, Checkpoint 2)
 >

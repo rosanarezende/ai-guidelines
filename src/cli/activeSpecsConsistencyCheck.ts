@@ -2,7 +2,7 @@
  * CLI entrypoint para gate `active-specs:check`.
  *
  * **Drift guard de consistência SSOT→projeção.** Para cada entry de
- * `.governance/runtime/active-specs.yml`, verifica que `entry.stage` é projeção
+ * `.governance/runtime/specs/active.yml`, verifica que `entry.stage` é projeção
  * FIEL de `state.yml.stage` da spec — invariante `[DEC-0023-A04]` (stage
  * compartilha o enum e é projeção direta de `state.yml.stage`).
  *
@@ -22,7 +22,10 @@
  */
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { parseActiveSpecs } from "../infrastructure/yaml/activeSpecsSerializer.js";
+import {
+  parseActiveSpecs,
+  parseSpecsHistory,
+} from "../infrastructure/yaml/activeSpecsSerializer.js";
 import { parseWorkflowState } from "../infrastructure/yaml/workflowStateSerializer.js";
 
 interface Logger {
@@ -35,11 +38,14 @@ const defaultLogger: Logger = {
   error: (msg) => process.stderr.write(`${msg}\n`),
 };
 
-const INDEX_PATH = ".governance/runtime/active-specs.yml";
+const INDEX_PATH = ".governance/runtime/specs/active.yml";
+const HISTORY_PATH = ".governance/runtime/specs/history.yml";
 
 export interface ActiveSpecsConsistencyInput {
-  /** Conteúdo bruto de `active-specs.yml`. */
+  /** Conteúdo bruto de `specs/active.yml`. */
   indexText: string;
+  /** Conteúdo bruto opcional de `specs/history.yml`. */
+  historyText?: string;
   /** Lê o `state.yml` de uma entry pelo caminho relativo; `null` se não existe. */
   readStateYml: (relPath: string) => string | null;
 }
@@ -65,37 +71,68 @@ export function runActiveSpecsConsistencyCheck(
   const failures: ConsistencyFailure[] = [];
 
   for (const entry of entries) {
-    const statePath = entry.sourceStatePath ?? `${entry.specPath}/state.yml`;
-    const content = input.readStateYml(statePath);
-    if (content === null) {
-      failures.push({
-        id: entry.id,
-        message: `state.yml não encontrado em "${statePath}" (entry aponta para SSOT inexistente).`,
-      });
-      continue;
-    }
-    let stateStage: string;
-    try {
-      stateStage = parseWorkflowState(content).stage;
-    } catch (e: unknown) {
-      const m = e instanceof Error ? e.message : String(e);
-      failures.push({ id: entry.id, message: `falha ao parsear "${statePath}": ${m}` });
-      continue;
-    }
-    if (entry.stage !== stateStage) {
+    if (entry.status === "completed") {
       failures.push({
         id: entry.id,
         message:
-          `stage stale: active-specs diz "${entry.stage}", mas a SSOT (${statePath}) diz ` +
-          `"${stateStage}". stage é projeção direta — [DEC-0023-A04].`,
+          `status completed não pertence a specs/active.yml; publique com ` +
+          `workflow publish-state --status=completed para mover a entry a ${HISTORY_PATH}.`,
       });
+      continue;
+    }
+    validateEntryStage(entry, "active-specs", input.readStateYml, failures);
+  }
+
+  if (input.historyText !== undefined) {
+    const history = parseSpecsHistory(input.historyText);
+    for (const entry of history.specsHistory) {
+      validateEntryStage(entry, "specs-history", input.readStateYml, failures);
     }
   }
 
   if (failures.length > 0) {
-    return { kind: "fail", failures, total: entries.length };
+    const total =
+      entries.length +
+      (input.historyText ? parseSpecsHistory(input.historyText).specsHistory.length : 0);
+    return { kind: "fail", failures, total };
   }
-  return { kind: "ok", count: entries.length };
+  const historyCount = input.historyText
+    ? parseSpecsHistory(input.historyText).specsHistory.length
+    : 0;
+  return { kind: "ok", count: entries.length + historyCount };
+}
+
+function validateEntryStage(
+  entry: { id: string; specPath: string; sourceStatePath?: string; stage: string },
+  source: string,
+  readStateYml: (relPath: string) => string | null,
+  failures: ConsistencyFailure[]
+): void {
+  const statePath = entry.sourceStatePath ?? `${entry.specPath}/state.yml`;
+  const content = readStateYml(statePath);
+  if (content === null) {
+    failures.push({
+      id: entry.id,
+      message: `state.yml não encontrado em "${statePath}" (${source} aponta para SSOT inexistente).`,
+    });
+    return;
+  }
+  let stateStage: string;
+  try {
+    stateStage = parseWorkflowState(content).stage;
+  } catch (e: unknown) {
+    const m = e instanceof Error ? e.message : String(e);
+    failures.push({ id: entry.id, message: `falha ao parsear "${statePath}": ${m}` });
+    return;
+  }
+  if (entry.stage !== stateStage) {
+    failures.push({
+      id: entry.id,
+      message:
+        `stage stale: ${source} diz "${entry.stage}", mas a SSOT (${statePath}) diz ` +
+        `"${stateStage}". stage é projeção direta — [DEC-0023-A04].`,
+    });
+  }
 }
 
 /** Composition root: lê o índice + injeta readFile + reporta. */
@@ -109,6 +146,9 @@ export function main(repoRoot: string, logger: Logger = defaultLogger): number {
   try {
     result = runActiveSpecsConsistencyCheck({
       indexText: fs.readFileSync(indexAbs, "utf-8"),
+      historyText: fs.existsSync(path.join(repoRoot, HISTORY_PATH))
+        ? fs.readFileSync(path.join(repoRoot, HISTORY_PATH), "utf-8")
+        : undefined,
       readStateYml: (rel) => {
         const abs = path.join(repoRoot, rel);
         return fs.existsSync(abs) ? fs.readFileSync(abs, "utf-8") : null;
@@ -134,7 +174,7 @@ export function main(repoRoot: string, logger: Logger = defaultLogger): number {
     logger.error(`    ${f.message}\n`);
   }
   logger.error(
-    "Corrija a projeção em active-specs.yml (ou rode publish-state). Invariante: entry.stage == state.yml.stage."
+    "Corrija a projeção em specs/active.yml (ou rode publish-state). Invariante: entry.stage == state.yml.stage."
   );
   return 1;
 }

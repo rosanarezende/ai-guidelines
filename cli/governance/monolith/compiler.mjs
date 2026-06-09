@@ -354,6 +354,31 @@ function buildSection(title, buffers, level = 2) {
   return [`${hashes} ${title}`, content].join("\n\n");
 }
 
+export function buildAgentsRuntimeStub(sddDir = ".ai-guidelines") {
+  return [
+    "## Runtime Bootstrap",
+    "",
+    "This file is the AI-channel bootstrap, not the governance kernel.",
+    "",
+    "- Repository state beats transcript, memory, and agent output.",
+    "- For a fresh AI session, run `yarn guidelines handoff [spec]` and follow the emitted reading order.",
+    "- The script contract at `.core/governance/script-contracts.yml` is the operational SSOT for scripts, hooks, workflows, and docs.",
+    "- Full rules remain governed in `.core/rules/**`, `.core/rules/catalog.md`, `.core/rules/_meta/rules.json`, and the rule ledger.",
+    "- Never bypass hooks with `--no-verify`; restore setup if hooks or generated script surfaces are missing.",
+    "- Never push without explicit maintainer authorization.",
+    "- Human Gate decides advancement; Ready is not merge authorization.",
+    "- Runtime commands must not call LLMs; AI is a synthesis/review channel.",
+    "",
+    "### Centralized Governance",
+    "",
+    "The root `AGENTS.md` is the channel bootstrap. Project-specific content must remain outside of the `<AI_GUIDELINES>` block.",
+    "",
+    "### Consumer Bootstrap",
+    "",
+    `Consumer-local ai-guidelines assets live under \`${sddDir}/\`. Templates mirrored by the CLI live in \`${sddDir}/templates/\`. Specs and roadmap remain under \`.specify/specs/\`.`,
+  ].join("\n");
+}
+
 /**
  * Compila o conteúdo do `<AI_GUIDELINES>` no `AGENTS.md` raiz.
  *

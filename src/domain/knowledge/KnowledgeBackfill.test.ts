@@ -1,0 +1,277 @@
+import {
+  knowledgeArtifactsFromBackfill,
+  KnowledgeBackfillEntry,
+  validateKnowledgeBackfill,
+} from "./KnowledgeBackfill.js";
+
+const validEntries: KnowledgeBackfillEntry[] = [
+  {
+    id: "KB-0001",
+    kind: "insight",
+    ref: "insight:PIT-0001",
+    status: "done",
+    priority: "P0",
+    source: ".governance/runtime/insights/open.yml",
+    rationale: "exemplo",
+  },
+  {
+    id: "KB-0002",
+    kind: "insight",
+    ref: "insight:PIT-0008",
+    status: "done",
+    priority: "P0",
+    source: ".governance/runtime/insights/open.yml",
+    rationale: "exemplo",
+  },
+  {
+    id: "KB-0003",
+    kind: "decision",
+    ref: "decision:DEC-0024-G07",
+    status: "done",
+    priority: "P0",
+    source: "decision-brief.md",
+    rationale: "exemplo",
+    scope: "runtime_bootstrap_p0",
+  },
+  {
+    id: "KB-0004",
+    kind: "decision",
+    ref: "decision:DEC-0024-G08",
+    status: "done",
+    priority: "P0",
+    source: "decision-brief.md",
+    rationale: "exemplo",
+  },
+  {
+    id: "KB-0005",
+    kind: "rule",
+    ref: "rule:CORE-07",
+    status: "done",
+    priority: "P1",
+    source: ".core/rules/top/agents-core.md",
+    rationale: "exemplo",
+    scope: "runtime_bootstrap_p0",
+  },
+  {
+    id: "KB-0006",
+    kind: "rule",
+    ref: "rule:CORE-10",
+    status: "done",
+    priority: "P1",
+    source: ".core/rules/top/agents-core.md",
+    rationale: "exemplo",
+    scope: "runtime_bootstrap_p0",
+  },
+  {
+    id: "KB-0015",
+    kind: "rule",
+    ref: "rule:CORE-02",
+    status: "done",
+    priority: "P0",
+    source: ".core/rules/top/agents-core.md",
+    rationale: "exemplo",
+    scope: "runtime_bootstrap_p0",
+  },
+  {
+    id: "KB-0016",
+    kind: "rule",
+    ref: "rule:CORE-08",
+    status: "done",
+    priority: "P0",
+    source: ".core/rules/top/agents-core.md",
+    rationale: "exemplo",
+    scope: "runtime_bootstrap_p0",
+  },
+  {
+    id: "KB-0017",
+    kind: "rule",
+    ref: "rule:CORE-09",
+    status: "done",
+    priority: "P0",
+    source: ".core/rules/top/agents-core.md",
+    rationale: "exemplo",
+    scope: "runtime_bootstrap_p0",
+  },
+  {
+    id: "KB-0018",
+    kind: "rule",
+    ref: "rule:CORE-14",
+    status: "done",
+    priority: "P0",
+    source: ".core/rules/top/agents-core.md",
+    rationale: "exemplo",
+    scope: "runtime_bootstrap_p0",
+  },
+  {
+    id: "KB-0013",
+    kind: "rule",
+    ref: "rule:OPT-0201",
+    status: "done",
+    priority: "P1",
+    source: ".core/rules/center/methodologies/bdd-pt.md",
+    rationale: "exemplo",
+  },
+  {
+    id: "KB-0014",
+    kind: "rule",
+    ref: "rule:ADP-0101",
+    status: "done",
+    priority: "P1",
+    source: ".core/rules/adapters/claude.md",
+    rationale: "exemplo",
+  },
+  {
+    id: "KB-0007",
+    kind: "guardrail",
+    ref: "guardrail:GG-0001",
+    status: "done",
+    priority: "P1",
+    source: ".core/process/governance-foundation.md",
+    rationale: "exemplo",
+    scope: "runtime_bootstrap_p0",
+  },
+  {
+    id: "KB-0008",
+    kind: "guardrail",
+    ref: "guardrail:GG-0002",
+    status: "planned",
+    priority: "P1",
+    source: "state.yml",
+    rationale: "exemplo",
+    deadline: "checkpoint-gg-0002",
+  },
+  {
+    id: "KB-0009",
+    kind: "doctrine",
+    ref: "doctrine:ADR-0018",
+    status: "done",
+    priority: "P0",
+    source: ".core/governance/adrs/0018-governance-first-ai-as-channel.md",
+    rationale: "exemplo",
+    scope: "runtime_bootstrap_p0",
+  },
+  {
+    id: "KB-0010",
+    kind: "doctrine",
+    ref: "doctrine:ADR-0026",
+    status: "done",
+    priority: "P0",
+    source: ".core/governance/adrs/0026-projection-distinct-from-first-class-entity.md",
+    rationale: "exemplo",
+  },
+  {
+    id: "KB-0019",
+    kind: "doctrine",
+    ref: "doctrine:ADR-0021",
+    status: "done",
+    priority: "P0",
+    source: ".core/governance/adrs/0021-enforcement-precedes-awareness.md",
+    rationale: "exemplo",
+    scope: "runtime_bootstrap_p0",
+  },
+  {
+    id: "KB-0020",
+    kind: "doctrine",
+    ref: "doctrine:ADR-0022",
+    status: "done",
+    priority: "P0",
+    source: ".core/governance/adrs/0022-handoff-situated-precedes-static-distribution.md",
+    rationale: "exemplo",
+    scope: "runtime_bootstrap_p0",
+  },
+  {
+    id: "KB-0011",
+    kind: "falsification",
+    ref: "falsification:FAL-0001",
+    status: "done",
+    priority: "P0",
+    source: ".governance/runtime/falsifications/ledger.yml",
+    rationale: "exemplo",
+  },
+  {
+    id: "KB-0012",
+    kind: "falsification",
+    ref: "falsification:FAL-0002",
+    status: "done",
+    priority: "P0",
+    source: ".governance/runtime/falsifications/ledger.yml",
+    rationale: "exemplo",
+  },
+];
+
+describe("KnowledgeBackfill [BR-CO-KNOWLEDGE-BACKFILL]", () => {
+  it("DADO dois exemplos por tipo ENTÃO valida sem violações", () => {
+    expect(validateKnowledgeBackfill(validEntries)).toEqual([]);
+  });
+
+  it("DADO tipo sem dois exemplos ENTÃO reporta cobertura insuficiente", () => {
+    const entries = validEntries.filter((entry) => entry.kind !== "doctrine");
+    expect(validateKnowledgeBackfill(entries)).toContainEqual(
+      expect.objectContaining({ code: "KB_KIND_UNDERREPRESENTED" })
+    );
+  });
+
+  it("DADO runtime_bootstrap_p0 sem uma ref obrigatória ENTÃO reporta cobertura insuficiente", () => {
+    const entries = validEntries.filter((entry) => entry.ref !== "rule:CORE-08");
+    expect(validateKnowledgeBackfill(entries)).toContainEqual(
+      expect.objectContaining({ code: "KB_RUNTIME_BOOTSTRAP_P0_MISSING" })
+    );
+  });
+
+  it("DADO planned sem deadline ENTÃO reporta débito invisível", () => {
+    const entries = validEntries.map((entry) =>
+      entry.id === "KB-0008" ? { ...entry, deadline: undefined } : entry
+    );
+    expect(validateKnowledgeBackfill(entries)).toContainEqual(
+      expect.objectContaining({ code: "KB_PLANNED_WITHOUT_DEADLINE", entryId: "KB-0008" })
+    );
+  });
+
+  it("DADO kind divergente da ref ENTÃO reporta mismatch", () => {
+    const entries = validEntries.map((entry) =>
+      entry.id === "KB-0003" ? { ...entry, kind: "doctrine" as const } : entry
+    );
+    expect(validateKnowledgeBackfill(entries)).toContainEqual(
+      expect.objectContaining({ code: "KB_KIND_REF_MISMATCH", entryId: "KB-0003" })
+    );
+  });
+
+  it("DADO validCheckpoints contendo o deadline de planned ENTÃO sem violação (F1)", () => {
+    expect(validateKnowledgeBackfill(validEntries, new Set(["checkpoint-gg-0002"]))).toEqual([]);
+  });
+
+  it("DADO deadline de planned fora da topologia ENTÃO KB_DEADLINE_NOT_IN_TOPOLOGY (F1)", () => {
+    expect(validateKnowledgeBackfill(validEntries, new Set(["checkpoint-outro"]))).toContainEqual(
+      expect.objectContaining({ code: "KB_DEADLINE_NOT_IN_TOPOLOGY", entryId: "KB-0008" })
+    );
+  });
+
+  it("DADO nenhum validCheckpoints ENTÃO não valida deadline-topologia (retrocompat)", () => {
+    const entries = validEntries.map((entry) =>
+      entry.id === "KB-0008" ? { ...entry, deadline: "checkpoint-inexistente" } : entry
+    );
+    expect(validateKnowledgeBackfill(entries)).toEqual([]);
+  });
+
+  it("DADO backfill ENTÃO só entradas done do pipeline viram KnowledgeArtifact", () => {
+    expect(knowledgeArtifactsFromBackfill(validEntries)).toEqual([
+      { id: "PIT-0001", stage: "insight" },
+      { id: "PIT-0008", stage: "insight" },
+      { id: "DEC-0024-G07", stage: "decision" },
+      { id: "DEC-0024-G08", stage: "decision" },
+      { id: "CORE-07", stage: "rule" },
+      { id: "CORE-10", stage: "rule" },
+      { id: "CORE-02", stage: "rule" },
+      { id: "CORE-08", stage: "rule" },
+      { id: "CORE-09", stage: "rule" },
+      { id: "CORE-14", stage: "rule" },
+      { id: "OPT-0201", stage: "rule" },
+      { id: "ADP-0101", stage: "rule" },
+      { id: "GG-0001", stage: "guardrail" },
+      { id: "ADR-0018", stage: "doctrine" },
+      { id: "ADR-0026", stage: "doctrine" },
+      { id: "ADR-0021", stage: "doctrine" },
+      { id: "ADR-0022", stage: "doctrine" },
+    ]);
+  });
+});

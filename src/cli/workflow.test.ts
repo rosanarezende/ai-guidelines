@@ -23,7 +23,9 @@ import { Command } from "./registry/Command.js";
 import { PublishState } from "../app/workflow/PublishState.js";
 import {
   parseActiveSpecs,
+  parseSpecsHistory,
   stringifyActiveSpecs,
+  stringifySpecsHistory,
 } from "../infrastructure/yaml/activeSpecsSerializer.js";
 import { parseWorkflowState } from "../infrastructure/yaml/workflowStateSerializer.js";
 
@@ -1919,7 +1921,15 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
 
     function buildPublishStateWithFixedNow(now: Date) {
       return (fs: WorkflowFileSystem) =>
-        new PublishState(fs, parseActiveSpecs, stringifyActiveSpecs, parseWorkflowState, () => now);
+        new PublishState(
+          fs,
+          parseActiveSpecs,
+          stringifyActiveSpecs,
+          parseWorkflowState,
+          parseSpecsHistory,
+          stringifySpecsHistory,
+          () => now
+        );
     }
 
     it("DADO --status ausente QUANDO runPublishState ENTÃO erro narrativo citando [DEC-0023-G04] E retorna 1", async () => {
@@ -1961,7 +1971,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
       expect(out).toMatch(/Spec 0023 \/ workflow-runtime publicada/);
       expect(out).toMatch(/stage=implementation/);
       expect(out).toMatch(/status=active/);
-      expect(fs.fileExists(".governance/runtime/active-specs.yml")).toBe(true);
+      expect(fs.fileExists(".governance/runtime/specs/active.yml")).toBe(true);
     });
 
     it("DADO publish já tem entry E args válidos QUANDO runPublishState ENTÃO loga 'atualizada' (não 'publicada')", async () => {
@@ -2000,7 +2010,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
       );
       expect(code).toBe(1);
       // pós-[DEC-0023-I01]: PublishState propaga o reason de DetectActiveSpec
-      // sem consultar projection layer (active-specs.yml).
+      // sem consultar projection layer (specs/active.yml).
       expect(
         logger.lines.some(
           (l) =>
@@ -2061,8 +2071,8 @@ describe("CLI — wizard navegação por Intent [BR-WIZARD-INTENT]", () => {
   describe("runWorkflow (Intent → Action → Command)", () => {
     it("DADO Intent → Action com args QUANDO runWorkflow ENTÃO despacha [command, ...args] via Registry", async () => {
       const { registry, dispatched } = spyRegistry();
-      // retomar-trabalho: action 1 = insight list
-      const prompts = new FakePrompts(["intent:retomar-trabalho", "1"]);
+      // retomar-trabalho: action 2 = insight list
+      const prompts = new FakePrompts(["intent:retomar-trabalho", "2"]);
       const code = await runWorkflow({
         repoRoot: "/repo",
         logger: new CollectingLogger(),

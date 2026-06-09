@@ -7,6 +7,9 @@ describe("KnowledgeRef (aresta navegável do grafo)", () => {
     expect(isWellFormedRef({ stage: "guardrail", id: "GG-0003" })).toBe(true);
     expect(isWellFormedRef({ stage: "decision", id: "DEC-0024-G07" })).toBe(true);
     expect(isWellFormedRef({ stage: "rule", id: "GR-0101" })).toBe(true);
+    expect(isWellFormedRef({ stage: "rule", id: "CORE-07" })).toBe(true);
+    expect(isWellFormedRef({ stage: "rule", id: "OPT-0201" })).toBe(true);
+    expect(isWellFormedRef({ stage: "rule", id: "ADP-0101" })).toBe(true);
     expect(isWellFormedRef({ stage: "insight", id: "PIT-0001" })).toBe(true);
   });
 

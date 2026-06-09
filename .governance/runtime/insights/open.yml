@@ -74,33 +74,3 @@ insights:
         spec: "0024"
         cursor: checkpoint-cli-cutover
         note: "3 tentativas falsificadas em status check (R8/review.md, landing_policy, vehicle-from-topology; a 3ª colidiu com R7). Recorre além de merge: releases, promoções, encerramento, deploys, gates. Mapa + sequência: research-library/architecture/2026-06-05-enforcement-surfaces.md"
-  - id: PIT-0009
-    text: "Projeção/affordance ≠ entidade/capability de 1ª classe. Modo de falha recorrente da 0023/0024: reificar o que é derivável (de topology/port/consolidate/Command existente) como estado-persistido/capability nova → drift + cópia paralela + sync manual. Critério decisivo (research 2026-05-30-projection-vs-entity-lens.md): se colapsar na entidade-mãe NÃO remove drift/cópia/sync-manual, é só renomear — não reificar."
-    status: promoted
-    captured_at: 2026-06-06T20:53:16.121Z
-    occurrences:
-      - at: 2026-06-06T20:53:16.121Z
-        spec: "0024"
-        cursor: checkpoint-cli-cutover
-        note: "Promovida de research (2026-05-30-projection-vs-entity-lens.md), ~14 instâncias acumuladas sem graduar. Confirmadas na lente: handoff→ADR 0022; taxonomia spec→[DEC-0024-G02]; DEC→projeção do julgamento."
-      - at: 2026-06-06T20:53:28.562Z
-        spec: "0024"
-        cursor: checkpoint-cli-cutover
-        note: "disclosure (2.4d): participants.yml/git-trailers rejeitados (autoria≠participação); disclosure é renderer puro/projeção, não entidade governada."
-      - at: 2026-06-06T20:53:29.022Z
-        spec: "0024"
-        cursor: checkpoint-cli-cutover
-        note: "merge-prematuro: landing_policy = 3ª representação da topology já derivável; vehicle-from-topology falsificado (→ PIT-0008)."
-      - at: 2026-06-06T20:53:29.481Z
-        spec: "0024"
-        cursor: checkpoint-cli-cutover
-        note: "confirmOrAbort falsificado: deny-by-default já single-sourced no port Prompts.confirm; helper de call-site = projeção redundante."
-      - at: 2026-06-06T20:53:29.942Z
-        spec: "0024"
-        cursor: checkpoint-cli-cutover
-        note: "capability vs affordance: continue-other/publish-state-help quase modelados como capabilities — são affordances de continue<id>/publish-state (mesma capability, 2 superfícies)."
-    promotion:
-      kind: adr
-      ref: ADR-0026
-    resolved_at: 2026-06-06T21:21:10.322Z
-    resolved_by: "@rosanarezende"

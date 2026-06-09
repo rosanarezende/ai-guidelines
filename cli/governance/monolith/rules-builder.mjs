@@ -411,7 +411,8 @@ export async function saveCatalogArtifacts(
 
   // Auto-format generated artifacts to prevent Prettier check failures
   try {
-    execSync(`yarn prettier --write "${rulesPath}" "${ledgerPath}" "${catalogPath}"`, {
+    const prettierTargets = [`"${rulesPath}"`, `"${ledgerPath}"`, `"${catalogPath}"`];
+    execSync(`yarn prettier --write ${prettierTargets.join(" ")}`, {
       stdio: "ignore",
     });
   } catch (err) {

@@ -55,9 +55,17 @@ function tmpRepo(): string {
 }
 
 function writeLedger(root: string, yaml: string): void {
-  const dir = join(root, ".governance/runtime");
+  const dir = join(root, ".governance/runtime/insights");
   mkdirSync(dir, { recursive: true });
-  writeFileSync(join(dir, "insights.yml"), yaml, "utf-8");
+  writeFileSync(join(dir, "open.yml"), yaml, "utf-8");
+  writeFileSync(join(dir, "promoted.yml"), "version: 1\ninsights: []\n", "utf-8");
+  writeFileSync(join(dir, "discarded.yml"), "version: 1\ninsights: []\n", "utf-8");
+}
+
+function writePartition(root: string, file: string, yaml: string): void {
+  const dir = join(root, ".governance/runtime/insights");
+  mkdirSync(dir, { recursive: true });
+  writeFileSync(join(dir, file), yaml, "utf-8");
 }
 
 function withRepo(yaml: string | null, run: (root: string) => void): void {
@@ -117,5 +125,31 @@ describe("insights:check (gate)", () => {
       const out = outSpy.mock.calls.map((c) => String(c[0])).join("");
       expect(out).not.toMatch(/candidato à graduação/);
     });
+  });
+
+  it("retorna 1 quando o ledger legado insights.yml reaparece", () => {
+    const root = tmpRepo();
+    try {
+      const dir = join(root, ".governance/runtime");
+      mkdirSync(dir, { recursive: true });
+      writeFileSync(join(dir, "insights.yml"), canonicalLedgerYaml(), "utf-8");
+      expect(main(root)).toBe(1);
+      const err = errSpy.mock.calls.map((c) => String(c[0])).join("");
+      expect(err).toMatch(/ledger legado/);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it("retorna 1 quando uma partição contém status incompatível", () => {
+    const root = tmpRepo();
+    try {
+      writePartition(root, "promoted.yml", canonicalLedgerYaml());
+      expect(main(root)).toBe(1);
+      const err = errSpy.mock.calls.map((c) => String(c[0])).join("");
+      expect(err).toMatch(/esperado: promoted/);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
   });
 });

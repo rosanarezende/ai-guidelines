@@ -32,7 +32,9 @@ import {
 import { parseWorkflowState } from "../infrastructure/yaml/workflowStateSerializer.js";
 import {
   parseActiveSpecs,
+  parseSpecsHistory,
   stringifyActiveSpecs,
+  stringifySpecsHistory,
 } from "../infrastructure/yaml/activeSpecsSerializer.js";
 import { ActiveSpecStatus } from "../domain/workflow/ActiveSpecEntry.js";
 import {
@@ -99,7 +101,7 @@ export interface RunOptions {
   readonly fs?: WorkflowFileSystem;
   /**
    * Injetável para tests. Default lê
-   * `.governance/runtime/active-specs.yml` via `ListActiveSpecs` com o
+   * `.governance/runtime/specs/active.yml` via `ListActiveSpecs` com o
    * parser real.
    */
   readonly loadActiveSpecsIndex?: () => ListActiveSpecsResult;
@@ -288,7 +290,7 @@ export function renderActiveSpecsIndex(
   if (!result.indexAvailable) {
     if (!options.showWhenAbsent) return lines;
     lines.push("");
-    lines.push("Índice operacional público (.governance/runtime/active-specs.yml):");
+    lines.push("Índice operacional público (.governance/runtime/specs/active.yml):");
     for (const warning of result.warnings) {
       lines.push(`  (${warning})`);
     }
@@ -1202,7 +1204,7 @@ export async function runAdvancedOps(options: RunOptions): Promise<number> {
     const result = loadIndex();
     if (!result.indexAvailable) {
       logger.info(
-        "Índice operacional público (.governance/runtime/active-specs.yml) não encontrado."
+        "Índice operacional público (.governance/runtime/specs/active.yml) não encontrado."
       );
       logger.info("Dica: rode `yarn guidelines workflow publish-state` na branch da spec.");
       return 0;
@@ -1227,7 +1229,7 @@ export async function runAdvancedOps(options: RunOptions): Promise<number> {
     logger.info(
       "Comando: yarn guidelines workflow publish-state --status=<active|blocked|paused|completed> --updated-by=<@autor> [--title=<título>]"
     );
-    logger.info("Estado da spec corrente é projetado de state.yml para active-specs.yml.");
+    logger.info("Estado da spec corrente é projetado de state.yml para specs/active.yml.");
     logger.info("Detalhes: .governance/specs/0023-workflow-runtime/decision-brief.md § Bloco G.");
     return 0;
   }
@@ -1350,7 +1352,7 @@ export async function runContinue(options: RunOptions, identifier?: string): Pro
 
     if (!result.indexAvailable) {
       logger.error(
-        `Índice operacional público (.governance/runtime/active-specs.yml) não encontrado.`
+        `Índice operacional público (.governance/runtime/specs/active.yml) não encontrado.`
       );
       logger.error(
         `Dica: rode \`yarn guidelines workflow publish-state\` na branch da spec primeiro.`
@@ -1451,7 +1453,14 @@ export interface RunPublishStateOptions extends RunOptions {
 }
 
 function defaultBuildPublishState(fs: WorkflowFileSystem): PublishState {
-  return new PublishState(fs, parseActiveSpecs, stringifyActiveSpecs, parseWorkflowState);
+  return new PublishState(
+    fs,
+    parseActiveSpecs,
+    stringifyActiveSpecs,
+    parseWorkflowState,
+    parseSpecsHistory,
+    stringifySpecsHistory
+  );
 }
 
 export async function runPublishState(

@@ -1,0 +1,26 @@
+# Ledger de Falsifications (CO-2 / co-knowledge) — o NEGATIVO de 1a classe do
+# dominio Knowledge: cada registro reifica uma PROPOSICAO derrubada. Forma/selo +
+# F4a sao validados por `co-knowledge:check` (advisory). O fingerprint sela
+# claim_norm + falsifies_ref|null + constrainsSorted (tamper-evidence, NAO
+# anti-parafrase — ADR 0018).
+#
+# FAL-0001 (merge-prematuro): `falsifies_ref` esta AUSENTE DE PROPOSITO — a claim
+# falsa ("evento de merge e enforcavel em estado continuo") NUNCA foi governada
+# como no antes; so existiam a evidencia (git tag) + a LICAO positiva (PIT-0008).
+# Reifica-la aqui e exatamente a lacuna que o CO-2 fecha (sem F4a: nao ha ref-alvo).
+version: 1
+falsifications:
+  - id: FAL-0001
+    claim: restrição de evento de merge/aterrissagem é enforçável em superfície de estado contínuo (status check/landing_policy/vehicle-from-topology)
+    fingerprint: ad10c2ef8aa2
+    constrains:
+      - knowledge:decision:DEC-0024-G07
+    evidence: git-tag:evidence/merge-prematuro-falsified
+    crystallized_as: insight:PIT-0008
+  - id: FAL-0002
+    claim: retomada pode confiar no próximo narrado sem reconciliar contra state.yml topology
+    fingerprint: 41736fc9dae1
+    constrains:
+      - knowledge:decision:DEC-0024-G07
+    evidence: review:c-co-reconcile-architectural_review.yml + src/cli/reconcileCheck.ts
+    crystallized_as: insight:PIT-0001

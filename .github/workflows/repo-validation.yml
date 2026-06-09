@@ -2,9 +2,9 @@ name: Repo Validation
 
 # Absorve o que era ai-guidelines-ci.yml + content-guardrails.yml em
 # um workflow único, eliminando duplicação. Usa `yarn validate` como
-# entry-point unificado (format:check + build:all + test + living-docs:check)
-# alinhado com a convenção de scripts do package.json. `yarn ci` adicionaria
-# smoke tests, mas smoke tem workflow próprio (smoke-multi-os.yml).
+# entry-point operacional (format:check + build:all + test + living-docs:check)
+# e adiciona a varredura histórica de state.yml. `yarn ci` adicionaria smoke
+# tests, mas smoke tem workflow próprio (smoke-multi-os.yml).
 
 on:
   # PRs against any base branch (catches stacked PRs that target feature
@@ -35,3 +35,6 @@ jobs:
 
       - name: Validate quality gates (Format + Build + Tests + Living Docs)
         run: yarn validate
+
+      - name: Validate historical state.yml files
+        run: yarn state-yml:check:all

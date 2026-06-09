@@ -1,0 +1,165 @@
+# Inventario minimo de backfill Knowledge (CO-2.1 / PR #37).
+#
+# Objetivo: provar que o modelo do CO-2 nao ficou abstrato. Cada tipo de
+# conhecimento tem pelo menos 2 exemplos reais ou planejados com deadline
+# explicito dentro da Spec 0024. Este arquivo e plano governado da spec, nao
+# SSOT runtime universal.
+#
+# AGENTS.md nao e fonte migrada aqui: e projecao runtime compilada. As regras
+# abaixo apontam para as fontes governadas que o compilam (.core/rules/**).
+# `scope: runtime_bootstrap_p0` marca o subconjunto load-bearing que permite
+# reduzir AGENTS.md a stub sem perder o bootstrap operacional dos agentes.
+version: 1
+entries:
+  - id: KB-0001
+    kind: insight
+    ref: insight:PIT-0001
+    status: done
+    priority: P0
+    source: .governance/runtime/insights/open.yml
+    rationale: CO-1; mis-binding entre proximo narrado e topology derivavel.
+  - id: KB-0002
+    kind: insight
+    ref: insight:PIT-0008
+    status: done
+    priority: P0
+    source: .governance/runtime/insights/open.yml
+    rationale: Evento de merge/aterrissagem nao e estado continuo.
+  - id: KB-0003
+    kind: decision
+    ref: decision:DEC-0024-G07
+    status: done
+    priority: P0
+    source: .governance/specs/0024-context-architecture/decision-brief.md
+    rationale: Topologia como dado; ancora CO-1/CO-2.
+    scope: runtime_bootstrap_p0
+  - id: KB-0004
+    kind: decision
+    ref: decision:DEC-0024-G08
+    status: done
+    priority: P0
+    source: .governance/specs/0024-context-architecture/decision-brief.md
+    rationale: Reabertura G03/G04/G05 e direcao orientada a grafo.
+  - id: KB-0005
+    kind: rule
+    ref: rule:CORE-07
+    status: done
+    priority: P1
+    source: .core/rules/top/agents-core.md
+    rationale: Push autonomo proibido; regra runtime injetavel.
+    scope: runtime_bootstrap_p0
+  - id: KB-0006
+    kind: rule
+    ref: rule:CORE-10
+    status: done
+    priority: P1
+    source: .core/rules/top/agents-core.md
+    rationale: Ready somente apos revalidacao humana.
+    scope: runtime_bootstrap_p0
+  - id: KB-0015
+    kind: rule
+    ref: rule:CORE-02
+    status: done
+    priority: P0
+    source: .core/rules/top/agents-core.md
+    rationale: Repo como memoria; substitui payload monolitico por fonte versionada.
+    scope: runtime_bootstrap_p0
+  - id: KB-0016
+    kind: rule
+    ref: rule:CORE-08
+    status: done
+    priority: P0
+    source: .core/rules/top/agents-core.md
+    rationale: Harness Lock via contrato operacional e hooks instalados.
+    scope: runtime_bootstrap_p0
+  - id: KB-0017
+    kind: rule
+    ref: rule:CORE-09
+    status: done
+    priority: P0
+    source: .core/rules/top/agents-core.md
+    rationale: Draft PR como conteiner de desenvolvimento governado.
+    scope: runtime_bootstrap_p0
+  - id: KB-0018
+    kind: rule
+    ref: rule:CORE-14
+    status: done
+    priority: P0
+    source: .core/rules/top/agents-core.md
+    rationale: Commit so sob autorizacao e contrato instalado.
+    scope: runtime_bootstrap_p0
+  - id: KB-0013
+    kind: rule
+    ref: rule:OPT-0201
+    status: done
+    priority: P1
+    source: .core/rules/center/methodologies/bdd-pt.md
+    rationale: Regra opt-in do bloco AI_GUIDELINES; AGENTS.md e projecao, nao SSOT.
+  - id: KB-0014
+    kind: rule
+    ref: rule:ADP-0101
+    status: done
+    priority: P1
+    source: .core/rules/adapters/claude.md
+    rationale: Regra de adapter permanece Knowledge stage rule; provider e metadado.
+  - id: KB-0007
+    kind: guardrail
+    ref: guardrail:GG-0001
+    status: done
+    priority: P1
+    source: .core/process/governance-foundation.md
+    rationale: Decidibilidade de gate antes do merito.
+    scope: runtime_bootstrap_p0
+  - id: KB-0008
+    kind: guardrail
+    ref: guardrail:GG-0002
+    status: planned
+    priority: P1
+    source: .governance/specs/0024-context-architecture/state.yml
+    deadline: checkpoint-gg-0002
+    rationale: Banned-concept check planejado na topologia da Spec 0024.
+  - id: KB-0009
+    kind: doctrine
+    ref: doctrine:ADR-0018
+    status: done
+    priority: P0
+    source: .core/governance/adrs/0018-governance-first-ai-as-channel.md
+    rationale: Runtime sem LLM; IA como canal de sintese.
+    scope: runtime_bootstrap_p0
+  - id: KB-0010
+    kind: doctrine
+    ref: doctrine:ADR-0026
+    status: done
+    priority: P0
+    source: .core/governance/adrs/0026-projection-distinct-from-first-class-entity.md
+    rationale: Projecao derivavel diferente de entidade de primeira classe.
+  - id: KB-0019
+    kind: doctrine
+    ref: doctrine:ADR-0021
+    status: done
+    priority: P0
+    source: .core/governance/adrs/0021-enforcement-precedes-awareness.md
+    rationale: Enforcement estrutural precede consciencia comportamental; Human Gate decide.
+    scope: runtime_bootstrap_p0
+  - id: KB-0020
+    kind: doctrine
+    ref: doctrine:ADR-0022
+    status: done
+    priority: P0
+    source: .core/governance/adrs/0022-handoff-situated-precedes-static-distribution.md
+    rationale: Handoff situado substitui distribuicao pre-carregada de regras.
+    scope: runtime_bootstrap_p0
+  - id: KB-0011
+    kind: falsification
+    ref: falsification:FAL-0001
+    status: done
+    priority: P0
+    source: .governance/runtime/falsifications/ledger.yml
+    rationale: Merge/landing prematuro; evento nao deve ser enforcado como estado continuo.
+  - id: KB-0012
+    kind: falsification
+    ref: falsification:FAL-0002
+    status: done
+    priority: P0
+    source: .governance/runtime/falsifications/ledger.yml
+    rationale: CO-1; proximo narrado nao vence topology derivavel.

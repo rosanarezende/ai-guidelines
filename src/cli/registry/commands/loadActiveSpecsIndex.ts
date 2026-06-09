@@ -10,6 +10,6 @@ import { parseActiveSpecs } from "../../../infrastructure/yaml/activeSpecsSerial
  */
 export type LoadActiveSpecsIndex = (repoRoot: string) => ListActiveSpecsResult;
 
-/** Default real: lê `.governance/runtime/active-specs.yml` via use case + parser reais. */
+/** Default real: lê `.governance/runtime/specs/active.yml` via use case + parser reais. */
 export const loadActiveSpecsIndex: LoadActiveSpecsIndex = (repoRoot) =>
   new ListActiveSpecs(new NodeWorkflowFileSystem(repoRoot), parseActiveSpecs).run();

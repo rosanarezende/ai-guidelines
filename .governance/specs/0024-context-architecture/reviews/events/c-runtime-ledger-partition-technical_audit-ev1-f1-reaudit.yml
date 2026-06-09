@@ -1,0 +1,25 @@
+# ReviewEvent append-only: re-auditoria focal de technical_audit#F1.
+# Nao cria checkpoint novo; checkpoint segue o id real da topology.
+# Nao aprova gate e nao altera implementacao. A disposition e fechada no summary
+# canônico da lane (c-runtime-ledger-partition-technical_audit.yml).
+checkpoint: "checkpoint-runtime-ledger-partition"
+role: technical_audit
+event_id: EV1
+kind: reaudit
+executor:
+  platform: claude-code
+  model: claude-opus-4-8
+decision: approved
+verifies:
+  - technical_audit#F1
+audit_evidence:
+  coverage:
+    - cli/governance/script-contracts.mjs
+    - cli/governance/script-contracts.test.mjs
+    - .github/workflows/repo-validation.yml
+    - .github/workflows/release.yml
+    - .governance/specs/0024-context-architecture/reviews/c-runtime-ledger-partition-technical_audit.yml
+    - .governance/specs/0024-context-architecture/reviews/c-runtime-ledger-partition-resolutions.yml
+  scope: "Re-auditoria focal do fechamento de technical_audit#F1 pelo commit e6268e7: validou que required_run agora e ancorado em passos run reais e que comentarios/name nao satisfazem o contrato."
+  basis: "technical_audit#F1 tecnicamente resolvido: TEST A (comentario com yarn validate sem run real) e TEST C (comentario/name com yarn ci sem run real) retornaram exit 1; blocos run: |/> com comando real continuam aceitos; validate/state-yml:check:all/git diff --check verdes."
+event_fingerprint: ca08d80409ed

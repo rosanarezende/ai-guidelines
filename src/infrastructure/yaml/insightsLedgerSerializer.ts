@@ -9,8 +9,8 @@ import {
 } from "../../domain/insight/Insight.js";
 
 /**
- * Parser/serializer puro do ledger de Percepções em Trânsito
- * (`.governance/runtime/insights.yml`).
+ * Parser/serializer puro de uma partição do ledger de Percepções em Trânsito
+ * (`.governance/runtime/insights/{open,promoted,discarded}.yml`).
  *
  * Disciplina herdada de `activeSpecsSerializer`:
  * - allowlist estrita de chaves (root e por registro);

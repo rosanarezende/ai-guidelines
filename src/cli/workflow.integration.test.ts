@@ -89,7 +89,7 @@ class NullClipboard implements ClipboardWriter {
 }
 
 describe("CLI — workflow integration [BR-WORKFLOW-RUNTIME-INDEX-E2E]", () => {
-  it("Cenário 1 — DADO branch + state.yml reais QUANDO publish-state ENTÃO escreve active-specs.yml parseável com a entry corrente", async () => {
+  it("Cenário 1 — DADO branch + state.yml reais QUANDO publish-state ENTÃO escreve specs/active.yml parseável com a entry corrente", async () => {
     const tempDir = await fsAsync.mkdtemp(path.join(os.tmpdir(), "ws-e2e-publish-"));
     try {
       // setup inline: `git init -b` cria branch unborn; runtime real depende
@@ -124,7 +124,7 @@ next:
 
       // assert
       expect(code).toBe(0);
-      const indexPath = path.join(tempDir, ".governance", "runtime", "active-specs.yml");
+      const indexPath = path.join(tempDir, ".governance", "runtime", "specs/active.yml");
       const indexYaml = await fsAsync.readFile(indexPath, "utf8");
       const reparsed = parseActiveSpecs(indexYaml);
       expect(reparsed.activeSpecs).toHaveLength(1);
@@ -144,7 +144,7 @@ next:
     }
   });
 
-  it("Cenário 2 — DADO active-specs.yml com 2 entries (uma com spec_path existente, outra sem) QUANDO runWorkflow ENTÃO lista entries E narra drift da ausente", async () => {
+  it("Cenário 2 — DADO specs/active.yml com 2 entries (uma com spec_path existente, outra sem) QUANDO runWorkflow ENTÃO lista entries E narra drift da ausente", async () => {
     const tempDir = await fsAsync.mkdtemp(path.join(os.tmpdir(), "ws-e2e-drift-"));
     try {
       // setup inline: branch unborn + commit empty para HEAD válido (cf.
@@ -169,11 +169,11 @@ next: []
 `
       );
 
-      const indexDir = path.join(tempDir, ".governance", "runtime");
+      const indexDir = path.join(tempDir, ".governance", "runtime", "specs");
       await fsAsync.mkdir(indexDir, { recursive: true });
       // entry 0024 com spec_path existente; entry 0099 com spec_path inexistente (drift)
       await fsAsync.writeFile(
-        path.join(indexDir, "active-specs.yml"),
+        path.join(indexDir, "active.yml"),
         `version: 1
 active_specs:
   - id: "0024"
@@ -255,10 +255,10 @@ next:
       );
       await fsAsync.writeFile(path.join(fooSpecDir, "tasks.md"), `# Tasks\n- [ ] tarefa 1`);
 
-      const indexDir = path.join(tempDir, ".governance", "runtime");
+      const indexDir = path.join(tempDir, ".governance", "runtime", "specs");
       await fsAsync.mkdir(indexDir, { recursive: true });
       await fsAsync.writeFile(
-        path.join(indexDir, "active-specs.yml"),
+        path.join(indexDir, "active.yml"),
         `version: 1
 active_specs:
   - id: "0024"
@@ -317,10 +317,10 @@ next: []
 `
       );
 
-      const indexDir = path.join(tempDir, ".governance", "runtime");
+      const indexDir = path.join(tempDir, ".governance", "runtime", "specs");
       await fsAsync.mkdir(indexDir, { recursive: true });
       await fsAsync.writeFile(
-        path.join(indexDir, "active-specs.yml"),
+        path.join(indexDir, "active.yml"),
         `version: 1
 active_specs:
   - id: "0099"
@@ -343,7 +343,7 @@ active_specs:
 
       // assert: publish funcionou via fallback; entry foi atualizada
       expect(code).toBe(0);
-      const indexYaml = await fsAsync.readFile(path.join(indexDir, "active-specs.yml"), "utf8");
+      const indexYaml = await fsAsync.readFile(path.join(indexDir, "active.yml"), "utf8");
       const reparsed = parseActiveSpecs(indexYaml);
       expect(reparsed.activeSpecs).toHaveLength(1);
       const entry = reparsed.activeSpecs[0];
@@ -378,10 +378,10 @@ next: []
 `
       );
 
-      const indexDir = path.join(tempDir, ".governance", "runtime");
+      const indexDir = path.join(tempDir, ".governance", "runtime", "specs");
       await fsAsync.mkdir(indexDir, { recursive: true });
       await fsAsync.writeFile(
-        path.join(indexDir, "active-specs.yml"),
+        path.join(indexDir, "active.yml"),
         `version: 1
 active_specs:
   - id: "0025"
@@ -429,10 +429,10 @@ next: []
 `
       );
 
-      const indexDir = path.join(tempDir, ".governance", "runtime");
+      const indexDir = path.join(tempDir, ".governance", "runtime", "specs");
       await fsAsync.mkdir(indexDir, { recursive: true });
       await fsAsync.writeFile(
-        path.join(indexDir, "active-specs.yml"),
+        path.join(indexDir, "active.yml"),
         `version: 1
 active_specs:
   - id: "0025"
@@ -481,10 +481,10 @@ next: []
       );
       await fsAsync.writeFile(path.join(specDir, "tasks.md"), "# Tasks\n- [ ] tarefa 1");
 
-      const indexDir = path.join(tempDir, ".governance", "runtime");
+      const indexDir = path.join(tempDir, ".governance", "runtime", "specs");
       await fsAsync.mkdir(indexDir, { recursive: true });
       await fsAsync.writeFile(
-        path.join(indexDir, "active-specs.yml"),
+        path.join(indexDir, "active.yml"),
         `version: 1
 active_specs:
   - id: "0025"

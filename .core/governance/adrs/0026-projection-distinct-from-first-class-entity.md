@@ -4,9 +4,9 @@
 **Origem histórica**: Spec 0024 (`context-architecture`). Lente capturada como research em 2026-05-30 (`research/2026-05-30-projection-vs-entity-lens.md`); acumulou ~14 instâncias sem graduar; promovida a `PIT-0009` em 2026-06-06 e graduada a este ADR após reincidência (capability-vs-affordance). Deliberação owner → ChatGPT → Claude.
 **Relaciona-se com**:
 
-- [`PIT-0009`](../../../.governance/runtime/insights.yml) — a percepção que este ADR cristaliza (graduada via `insight promote --to adr`).
+- [`PIT-0009`](../../../.governance/runtime/insights/promoted.yml) — a percepção que este ADR cristaliza (graduada via `insight promote --to adr`).
 - [`ADR 0018`](./0018-governance-first-ai-as-channel.md) (governança-first, AI-as-channel) — esta lente é o **inverso operacional** da identidade-raiz: se a raiz é a _transformação governada_ (mecanismo) e os objetos são projeções, o framework tende a ossificar projeções em pseudo-entidades.
-- [`PIT-0008`](../../../.governance/runtime/insights.yml) / `research/2026-06-05-enforcement-surfaces.md` — lente irmã: **declaração ≠ enforcement** (onde um fato vive ≠ onde é imposto). Esta é sobre **derivável ≠ reificado**.
+- [`PIT-0008`](../../../.governance/runtime/insights/open.yml) / `research/2026-06-05-enforcement-surfaces.md` — lente irmã: **declaração ≠ enforcement** (onde um fato vive ≠ onde é imposto). Esta é sobre **derivável ≠ reificado**.
 - [`CORE-15`](../../rules/top/agents-core.md) (ADR = princípio perene) — critério editorial deste registro.
 - [`governance-foundation.md`](../../process/governance-foundation.md) § "Anti-padrões a rejeitar no review" (#7) — a projeção operacional desta lente para o review.
 

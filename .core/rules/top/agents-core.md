@@ -1,12 +1,12 @@
 ### AGENTS-core — Diretivas sempre-injetadas
 
-> **Fonte canônica** das diretivas que o `compiler.mjs` insere no topo do bloco `<AI_GUIDELINES>` em todo `AGENTS.md` distribuído. Cutover aplicado em 5.B3.1.5.5 (2026-05-04): `pointers.mjs` consome `.core/rules/_meta/rules.json` via `compileCoreRulesContent()` filtrando `scope: universal` + `tags: core`. O template `.core/templates/AGENTS-core.md.tmpl` permanece apenas como **fallback** quando o catálogo está ausente/inválido (sem injeção dupla). Remoção definitiva do `.tmpl` é débito de B.7 / `NEXT.md`.
+> **Fonte canônica** das diretivas de bootstrap que o catálogo (`rules.json` + ledger) indexa como Knowledge governado. Desde `checkpoint-runtime-bootstrap-readiness`, `AGENTS.md` não pré-carrega mais estas diretivas integralmente: ele vira stub de entrada e aponta para handoff situado + catálogo. O template `.core/templates/AGENTS-core.md.tmpl` permanece apenas como fallback legado quando o catálogo está ausente/inválido. Remoção definitiva do `.tmpl` é débito de B.7 / `NEXT.md`.
 >
 > **Convenção YAML cravada em 2026-05-03 (alinha com `5.B3.1` no `tasks.md`):** **Opção B — primeiro bloco fenced ` ```yaml ` imediatamente após cada heading de regra** (frontmatter `---` real foi descartado: não sobrevive a Prettier em arquivos multi-regra, pois o tooling padrão só reconhece frontmatter no início absoluto do arquivo). O `rules-parser.mjs` (B.3.2) detecta cada regra pelo padrão "heading de regra → próximo bloco fenced `yaml`". Categoria predominante aqui: `process`. Sources canônicas externas (CWE/CERT/Sonar/OWASP/paper) não se aplicam à maioria — diretivas operacionais ficam com `evidence_strength: declared_heuristic`. O ledger derivado em `.core/rules/_meta/agents-core-ledger.md` (B.3.4) será a interface humana de revisão crítica.
 >
 > **Regra editorial cravada (5.B3.1.5 / 2026-05-03):** `Instruction (en)` é runtime injetado pelo compiler em B.3.5 — deve ser **imperativa em 1–3 linhas**, sem tabelas, sem blocos de exemplo, sem rationale. Tabelas, exemplos, racional, "why" e "see also" vivem em `Documentação (pt-br)` ou seções dedicadas (docs-only).
 >
-> **Hierarquia de headings cravada:** este arquivo usa `###` no topo e `####` por regra para alinhar com `top/global-rules.md` / `base/quality/quality-gates.md`. Compiler em B.3.5 deve preservar esta hierarquia (ou rebaixá-la consistentemente) ao injetar no `<AI_GUIDELINES>` do `AGENTS.md` consumidor — `#`/`##` quebram a formatação do destino.
+> **Hierarquia de headings cravada:** este arquivo usa `###` no topo e `####` por regra para alinhar com `top/global-rules.md` / `base/quality/quality-gates.md`. O parser preserva esta hierarquia para catálogo/ledger; `AGENTS.md` recebe apenas o stub de bootstrap.
 
 ---
 
@@ -73,7 +73,7 @@ The repository is your memory. Persist plans, progress, debts, knowledge, and ro
 
 ---
 
-#### [CORE-03] Cross-ref para Regras Globais
+#### [CORE-03] Cross-ref para catálogo de regras
 
 ```yaml
 id: CORE-03
@@ -86,12 +86,12 @@ tags: [core, agents, always_injected, pointer]
 ```
 
 **Instruction (en):**
-Consult the "Global Rules" section injected later in this `<AI_GUIDELINES>` block for engineering principles and AI efficiency.
+Consult `.core/rules/catalog.md` and `.core/rules/_meta/rules.json` for the full rules catalog; `AGENTS.md` is only the bootstrap stub.
 
 **Documentação (pt-br):**
-Consulte a seção "Regras Globais" injetada neste bloco `<AI_GUIDELINES>` para princípios de engenharia e eficiência de IA.
+Consulte `.core/rules/catalog.md` e `.core/rules/_meta/rules.json` para o catálogo completo de regras; `AGENTS.md` é apenas o stub de bootstrap.
 
-**Why this matters:** cross-ref interno ao bloco compilado; evita IA pular a seção de regras universais.
+**Why this matters:** evita recriar o monólito no canal inicial e mantém as regras completas recuperáveis por fonte governada.
 
 > **Candidata a corte em B.3.5:** se o compiler for refatorado para deixar a hierarquia óbvia (core → global → opt-in), este pointer textual vira redundante.
 
@@ -187,7 +187,7 @@ tags: [core, agents, always_injected, git, safety, critical]
 
 ---
 
-#### [CORE-08] HARNESS LOCK — cadeia de qualidade obrigatória pré-commit
+#### [CORE-08] HARNESS LOCK — contrato operacional obrigatório pré-commit
 
 ```yaml
 id: CORE-08
@@ -200,20 +200,22 @@ tags: [core, agents, always_injected, git, commit, ci, harness_lock]
 ```
 
 **Instruction (en):**
-**[HARNESS LOCK]** Before any `git commit`, run the project's full validation chain (format, check, lint, test) as declared in `package.json`. The rule is the chain, not the package manager — adapt to project scripts.
+**[HARNESS LOCK]** Before any `git commit`, rely on the repository's declared script contract and installed git hooks. Never bypass hooks with `--no-verify`; if hooks or generated script surfaces are missing or stale, stop and restore the project setup before committing.
 
 **Documentação (pt-br):**
-**[CI Compliance — HARNESS LOCK]** É terminantemente proibido submeter qualquer commit sem validar a cadeia de qualidade do projeto. Antes de `git commit`, execute **todos os scripts de validação** definidos no `package.json` do repositório (ex.: `format`, `check`, `lint`, `test`). O padrão canônico é:
+**[CI Compliance — HARNESS LOCK]** É terminantemente proibido submeter qualquer commit fora do contrato operacional do repositório. O contrato não é uma linha de comando copiada em instruções soltas: ele vive no artefato versionado `.core/governance/script-contracts.yml`, que projeta `package.json#scripts`, `.husky/*`, templates de consumidor e `docs/scripts.md`.
 
-```text
-<format_cmd> ; <check_cmd> ; git add . ; git commit -m "..."
-```
+Neste repositório, o caminho obrigatório é:
 
-Se o repositório define `yarn format` (write) e `yarn validate` (aggregate: format:check + build + test + living-docs:check, ou equivalente do stack), o comando concreto é: `yarn format ; yarn validate ; git add . ; git commit -m "..."`. Adapte aos scripts do projeto — a regra é a **cadeia**, não o gerenciador. Em stacks sem aggregate, expanda explicitamente: `<format_write> ; <format_check> ; <build> ; <test> ; <docs_check> ; git add . ; git commit -m "..."`.
+- `pre-commit` instalado via Husky executa a sincronização do contrato, build e testes rápidos;
+- `pre-push` executa o gate local `validate`;
+- `script-contracts:check` roda dentro de `validate` e falha se `package.json`, hooks, docs ou templates divergirem da SSOT.
 
-**Why this matters:** o gate local replica o gate de CI. Pular = empurrar o erro para o pipeline e gastar ciclo de revisão humano com algo automatizável.
+Se os hooks não estiverem instalados, se `.husky/*` divergir do contrato, ou se o ambiente não conseguir executar o runner declarado, pare e restaure o setup (`yarn setup` / `yarn prepare`, conforme `docs/scripts.md`). Não use `git commit --no-verify` sem autorização humana explícita. Não invente uma cadeia manual paralela para "substituir" o contrato.
 
-**Cross-ref:** complementada por `[CORE-14]` (commit message protocol — IA gera apenas o texto sugerido; humano executa a cadeia).
+**Why this matters:** scripts, hooks, workflows e docs driftam quando vivem como texto duplicado. O contrato operacional torna a superfície auditável, sincronizável e própria para consumidores de tamanhos diferentes sem depender do tamanho atual do dogfooding.
+
+**Cross-ref:** complementada por `[CORE-14]` (commit message protocol) e por `docs/scripts.md` (projeção humana gerada do contrato).
 
 ---
 
@@ -344,7 +346,7 @@ Keep SDD artifacts updated continuously: mark `tasks.md` items `[/]` (in progres
 
 ---
 
-#### [CORE-14] Mensagem de commit sugerida: IA fornece apenas a mensagem
+#### [CORE-14] Commit sob autorização explícita e contrato instalado
 
 ```yaml
 id: CORE-14
@@ -357,12 +359,12 @@ tags: [core, agents, always_injected, git, commit, safety]
 ```
 
 **Instruction (en):**
-At the end of each sub-block, provide only the commit message suggestion. The human executes the full validation chain (`yarn format ; yarn validate ; ...`) and `git commit`.
+At the end of each sub-block, provide the commit message suggestion unless the maintainer explicitly authorized the agent to commit. When committing is authorized, use the repository's installed hooks and script contract; never bypass them.
 
 **Documentação (pt-br):**
-Ao concluir um sub-bloco, IA fornece **apenas** a mensagem sugerida do commit (`feat(spec-XXXX): ...`). O humano executa a cadeia completa de validação (`yarn format ; yarn validate ; git add . ; git commit -m "..."`).
+Ao concluir um sub-bloco, a IA fornece a mensagem sugerida do commit (`feat(spec-XXXX): ...`) quando não houver autorização explícita para operar Git. Se a mantenedora autorizou o agente a commitar, o commit deve ocorrer com hooks instalados e contrato operacional sincronizado; a IA não pode usar `--no-verify` nem substituir o contrato por uma sequência manual avulsa.
 
-**Why this matters:** economiza tokens e impede IA de operar git autonomamente. Honra `[CORE-07]` (push) e `[CORE-08]` (HARNESS LOCK).
+**Why this matters:** separa autorização humana de execução mecânica. O humano decide se o agente pode commitar; o contrato garante que a submissão passe pelos mesmos gates locais sem duplicar comandos em instruções narrativas.
 
 **See also:** `[CORE-08]` (HARNESS LOCK), `[CORE-07]` (Nunca execute git push autonomamente).
 

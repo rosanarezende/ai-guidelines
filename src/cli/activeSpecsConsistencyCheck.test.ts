@@ -16,6 +16,36 @@ active_specs:
 `;
 }
 
+function completedIndex(): string {
+  return `
+version: 1
+active_specs:
+  - id: "0023"
+    slug: workflow-runtime
+    branch: feat/spec-0023-x
+    stage: done
+    status: completed
+    spec_path: .governance/specs/0023-workflow-runtime
+    source_state_path: .governance/specs/0023-workflow-runtime/state.yml
+    updated_at: 2026-06-06T00:00:00.000-03:00
+`;
+}
+
+function historyWith(stage: string): string {
+  return `
+version: 1
+specs_history:
+  - id: "0023"
+    slug: workflow-runtime
+    branch: feat/spec-0023-x
+    stage: ${stage}
+    status: completed
+    spec_path: .governance/specs/0023-workflow-runtime
+    source_state_path: .governance/specs/0023-workflow-runtime/state.yml
+    updated_at: 2026-06-06T00:00:00.000-03:00
+`;
+}
+
 /** state.yml mínimo válido (schema 4-chave) com `stage` dado. */
 function stateWith(stage: string): string {
   return `
@@ -62,5 +92,28 @@ describe("CLI — active-specs:check · consistência stage↔SSOT [BR-ACTIVE-SP
     if (r.kind === "fail") {
       expect(r.failures[0].message).toMatch(/não encontrado/);
     }
+  });
+
+  it("DADO entry completed no índice ativo ENTÃO falha pedindo specs-history", () => {
+    const r = runActiveSpecsConsistencyCheck({
+      indexText: completedIndex(),
+      readStateYml: () => stateWith("done"),
+    });
+    expect(r.kind).toBe("fail");
+    if (r.kind === "fail") {
+      expect(r.failures[0].message).toMatch(/completed não pertence/);
+      expect(r.failures[0].message).toContain("specs/history.yml");
+    }
+  });
+
+  it("DADO histórico com stage fiel à SSOT ENTÃO conta ativo + histórico", () => {
+    const r = runActiveSpecsConsistencyCheck({
+      indexText: indexWith("implementation"),
+      historyText: historyWith("done"),
+      readStateYml: (rel) =>
+        rel.includes("0023-workflow-runtime") ? stateWith("done") : stateWith("implementation"),
+    });
+    expect(r.kind).toBe("ok");
+    if (r.kind === "ok") expect(r.count).toBe(2);
   });
 });

@@ -1,9 +1,11 @@
 import {
   ActiveSpecsParseError,
   parseActiveSpecs,
+  parseSpecsHistory,
   stringifyActiveSpecs,
+  stringifySpecsHistory,
 } from "./activeSpecsSerializer.js";
-import { ActiveSpecsRoot } from "../../domain/workflow/ActiveSpecEntry.js";
+import { ActiveSpecsRoot, SpecsHistoryRoot } from "../../domain/workflow/ActiveSpecEntry.js";
 
 /**
  * Tests BDD pt-BR (OPT-0201) — contrato cravado em [DEC-0023-G02] + [DEC-0023-G04].
@@ -314,7 +316,7 @@ active_specs:
   });
 
   describe("parseActiveSpecs — entry corrente do repo é o próprio fixture", () => {
-    it("DADO o conteúdo atual de .governance/runtime/active-specs.yml QUANDO parseActiveSpecs ENTÃO aceita (dogfood do contrato)", () => {
+    it("DADO o conteúdo atual de .governance/runtime/specs/active.yml QUANDO parseActiveSpecs ENTÃO aceita (dogfood do contrato)", () => {
       const yaml = `version: 1
 
 active_specs:
@@ -426,6 +428,29 @@ active_specs:
       expect(idIdx).toBeLessThan(slugIdx);
       expect(stageIdx).toBeLessThan(statusIdx);
       expect(updatedAtIdx).toBeLessThan(updatedByIdx);
+    });
+  });
+
+  describe("specs/history.yml — round-trip determinístico", () => {
+    it("DADO histórico com spec completed QUANDO stringify→parse ENTÃO preserva a entry", () => {
+      const history: SpecsHistoryRoot = {
+        version: 1,
+        specsHistory: [
+          {
+            id: "0023",
+            slug: "workflow-runtime",
+            branch: "feat/spec-0023-dx-thinking",
+            stage: "done",
+            status: "completed",
+            specPath: ".governance/specs/0023-workflow-runtime",
+            sourceStatePath: ".governance/specs/0023-workflow-runtime/state.yml",
+            updatedAt: "2026-06-06T00:21:57-03:00",
+            updatedBy: "@rosanarezende",
+          },
+        ],
+      };
+
+      expect(parseSpecsHistory(stringifySpecsHistory(history))).toEqual(history);
     });
   });
 });

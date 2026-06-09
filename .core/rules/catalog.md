@@ -17,18 +17,18 @@
 | **ADP-0304** | Comportamento Observado                                    | `adapter`   | `process`         | [Ver](adapters/gemini.md#adp0304)             |
 | **CORE-01**  | Environment check antes da primeira ação                   | `universal` | `process`         | [Ver](top/agents-core.md#core01)              |
 | **CORE-02**  | Agnostic SDD Override — repositório como memória           | `universal` | `process`         | [Ver](top/agents-core.md#core02)              |
-| **CORE-03**  | Cross-ref para Regras Globais                              | `universal` | `process`         | [Ver](top/agents-core.md#core03)              |
+| **CORE-03**  | Cross-ref para catálogo de regras                          | `universal` | `process`         | [Ver](top/agents-core.md#core03)              |
 | **CORE-04**  | Nunca trabalhe direto em main/master                       | `universal` | `process`         | [Ver](top/agents-core.md#core04)              |
 | **CORE-05**  | Não versione contexto vazado                               | `universal` | `process`         | [Ver](top/agents-core.md#core05)              |
 | **CORE-06**  | Commits incrementais atômicos                              | `universal` | `process`         | [Ver](top/agents-core.md#core06)              |
 | **CORE-07**  | Nunca execute git push autonomamente                       | `universal` | `process`         | [Ver](top/agents-core.md#core07)              |
-| **CORE-08**  | HARNESS LOCK — cadeia de qualidade obrigatória pré-commit  | `universal` | `process`         | [Ver](top/agents-core.md#core08)              |
+| **CORE-08**  | HARNESS LOCK — contrato operacional obrigatório pré-commit | `universal` | `process`         | [Ver](top/agents-core.md#core08)              |
 | **CORE-09**  | PRs abrem como Draft com matriz oficial                    | `universal` | `process`         | [Ver](top/agents-core.md#core09)              |
 | **CORE-10**  | Draft → Ready apenas via revalidação humana                | `universal` | `process`         | [Ver](top/agents-core.md#core10)              |
 | **CORE-11**  | Plano formado antes de ação                                | `universal` | `process`         | [Ver](top/agents-core.md#core11)              |
 | **CORE-12**  | Checkpoints antes de ação após contexto extenso            | `universal` | `process`         | [Ver](top/agents-core.md#core12)              |
 | **CORE-13**  | Artefatos vivos durante o trabalho                         | `universal` | `process`         | [Ver](top/agents-core.md#core13)              |
-| **CORE-14**  | Mensagem de commit sugerida: IA fornece apenas a mensagem  | `universal` | `process`         | [Ver](top/agents-core.md#core14)              |
+| **CORE-14**  | Commit sob autorização explícita e contrato instalado      | `universal` | `process`         | [Ver](top/agents-core.md#core14)              |
 | **CORE-15**  | ADR é princípio perene, não revisitação datada             | `universal` | `process`         | [Ver](top/agents-core.md#core15)              |
 | **CORE-16**  | Sync de base ≠ merge atômico ponta-a-ponta                 | `universal` | `process`         | [Ver](top/agents-core.md#core16)              |
 | **GR-0001**  | Secure secret handling                                     | `universal` | `security`        | [Ver](top/global-rules.md#gr0001)             |

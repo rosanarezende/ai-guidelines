@@ -1,6 +1,8 @@
 import {
   parseActiveSpecs,
+  parseSpecsHistory,
   stringifyActiveSpecs,
+  stringifySpecsHistory,
 } from "../../infrastructure/yaml/activeSpecsSerializer.js";
 import { parseWorkflowState } from "../../infrastructure/yaml/workflowStateSerializer.js";
 import { WorkflowFileSystem } from "../ports/WorkflowFileSystem.js";
@@ -58,7 +60,8 @@ class WritableFakeFs implements WorkflowFileSystem {
 
 const SPEC_DIR = ".governance/specs/0023-workflow-runtime";
 const STATE_PATH = `${SPEC_DIR}/state.yml`;
-const INDEX_PATH = ".governance/runtime/active-specs.yml";
+const INDEX_PATH = ".governance/runtime/specs/active.yml";
+const HISTORY_PATH = ".governance/runtime/specs/history.yml";
 
 const VALID_STATE_YAML = `stage: implementation
 gate:
@@ -95,6 +98,8 @@ function makePublishState(fs: WritableFakeFs, now: Date = new Date("2026-05-21T1
     parseActiveSpecs,
     stringifyActiveSpecs,
     parseWorkflowState,
+    parseSpecsHistory,
+    stringifySpecsHistory,
     () => now
   );
 }
@@ -109,7 +114,9 @@ describe("App — PublishState [BR-WORKFLOW-PUBLISH-STATE]", () => {
       });
 
       expect(result.wasUpdate).toBe(false);
+      expect(result.archivedToHistory).toBe(false);
       expect(result.indexPath).toBe(INDEX_PATH);
+      expect(result.historyPath).toBe(HISTORY_PATH);
       expect(result.entry.id).toBe("0023");
       expect(result.entry.slug).toBe("workflow-runtime");
       expect(result.entry.stage).toBe("implementation");
@@ -126,6 +133,7 @@ describe("App — PublishState [BR-WORKFLOW-PUBLISH-STATE]", () => {
       const reparsed = parseActiveSpecs(written);
       expect(reparsed.activeSpecs).toHaveLength(1);
       expect(reparsed.activeSpecs[0]).toEqual(result.entry);
+      expect(parseSpecsHistory(fs.readTextFile(HISTORY_PATH)).specsHistory).toHaveLength(0);
     });
 
     it("DADO opcionais title/baseBranch/lastSyncCommit fornecidos QUANDO publish ENTÃO inclui no entry escrito", () => {
@@ -165,7 +173,7 @@ describe("App — PublishState [BR-WORKFLOW-PUBLISH-STATE]", () => {
   });
 
   describe("Upsert por id — atualização in-place vs append", () => {
-    it("DADO active-specs.yml já tem entry para id=0023 QUANDO publish ENTÃO atualiza in-place E wasUpdate=true", () => {
+    it("DADO specs/active.yml já tem entry para id=0023 QUANDO publish ENTÃO atualiza in-place E wasUpdate=true", () => {
       const existingIndex = `version: 1
 active_specs:
   - id: "0023"
@@ -190,7 +198,7 @@ active_specs:
       expect(reparsed.activeSpecs[0].branch).toBe("feat/spec-0023-workflow-runtime");
     });
 
-    it("DADO active-specs.yml tem outras entries (id diferente) QUANDO publish ENTÃO append no fim sem alterar as outras E wasUpdate=false", () => {
+    it("DADO specs/active.yml tem outras entries (id diferente) QUANDO publish ENTÃO append no fim sem alterar as outras E wasUpdate=false", () => {
       const existingIndex = `version: 1
 active_specs:
   - id: "0099"
@@ -227,6 +235,60 @@ active_specs:
       expect(reparsed.activeSpecs[0].status).toBe("blocked");
       // segunda execução: now() = 11:00 UTC → 08:00 em offset -03:00.
       expect(reparsed.activeSpecs[0].updatedAt).toBe("2026-05-21T08:00:00.000-03:00");
+    });
+
+    it("DADO status=completed QUANDO publish ENTÃO remove do índice ativo e grava no histórico", () => {
+      const existingIndex = `version: 1
+active_specs:
+  - id: "0023"
+    slug: "workflow-runtime"
+    branch: "feat/spec-0023-old"
+    stage: "implementation"
+    status: "active"
+    spec_path: ".governance/specs/0023-workflow-runtime"
+    source_state_path: ".governance/specs/0023-workflow-runtime/state.yml"
+    updated_at: "2026-05-20T00:00:00Z"
+`;
+      const fs = makeFs({ withIndex: existingIndex });
+
+      const result = makePublishState(fs).run({
+        status: "completed",
+        updatedBy: "@rosanarezende",
+      });
+
+      expect(result.wasUpdate).toBe(true);
+      expect(result.archivedToHistory).toBe(true);
+      expect(parseActiveSpecs(fs.readTextFile(INDEX_PATH)).activeSpecs).toHaveLength(0);
+      const history = parseSpecsHistory(fs.readTextFile(HISTORY_PATH));
+      expect(history.specsHistory).toHaveLength(1);
+      expect(history.specsHistory[0].id).toBe("0023");
+      expect(history.specsHistory[0].status).toBe("completed");
+    });
+
+    it("DADO spec no histórico QUANDO publish active ENTÃO remove do histórico e volta ao índice ativo", () => {
+      const history = `version: 1
+specs_history:
+  - id: "0023"
+    slug: "workflow-runtime"
+    branch: "feat/spec-0023-old"
+    stage: "done"
+    status: "completed"
+    spec_path: ".governance/specs/0023-workflow-runtime"
+    source_state_path: ".governance/specs/0023-workflow-runtime/state.yml"
+    updated_at: "2026-05-20T00:00:00Z"
+`;
+      const fs = makeFs();
+      fs.writeTextFile(HISTORY_PATH, history);
+
+      const result = makePublishState(fs).run({
+        status: "active",
+        updatedBy: "@rosanarezende",
+      });
+
+      expect(result.wasUpdate).toBe(true);
+      expect(result.archivedToHistory).toBe(false);
+      expect(parseActiveSpecs(fs.readTextFile(INDEX_PATH)).activeSpecs).toHaveLength(1);
+      expect(parseSpecsHistory(fs.readTextFile(HISTORY_PATH)).specsHistory).toHaveLength(0);
     });
   });
 
@@ -272,7 +334,7 @@ active_specs:
     it("DADO branch fora do padrão feat/spec-NNNN-* QUANDO publish ENTÃO erro narrativo de DetectActiveSpec propagado E não escreve (per [DEC-0023-I01], sem fallback à projection layer)", () => {
       // Pós-refator [DEC-0023-I01]: branch "main" → DetectActiveSpec falha
       // por padrão de branch inválido; PublishState propaga o reason sem
-      // consultar active-specs.yml (projection ≠ primary resolver).
+      // consultar specs/active.yml (projection ≠ primary resolver).
       const fs = makeFs({ branch: "main" });
       expect(() =>
         makePublishState(fs).run({ status: "active", updatedBy: "@rosanarezende" })
@@ -310,7 +372,7 @@ active_specs:
   describe("Resolução via id canônico — branch escopo-de-PR (per [DEC-0023-I01])", () => {
     // Pós-refator: branch "de trabalho" (sufixo ≠ slug canônico) resolve
     // automaticamente via DetectActiveSpec por id NNNN — sem consultar
-    // active-specs.yml. Projection layer ≠ primary resolver de identity.
+    // specs/active.yml. Projection layer ≠ primary resolver de identity.
     // O describe anterior testava o fallback `resolveLocationFromIndexBranchMatch`
     // que foi removido como dead code.
     const WORK_BRANCH = "feat/spec-0023-runtime-active-state";
@@ -386,7 +448,7 @@ active_specs:
     it("DADO branch escopo-de-PR E spec com mesmo id ausente do filesystem QUANDO publish ENTÃO erro narrativo de DetectActiveSpec (id sem diretório)", () => {
       // Edge case: branch carrega id 9999 que não tem diretório correspondente
       // — DetectActiveSpec falha narrativamente; PublishState propaga sem
-      // tentar consultar active-specs.yml.
+      // tentar consultar specs/active.yml.
       const fs = new WritableFakeFs({
         files: new Map([[STATE_PATH, VALID_STATE_YAML]]),
         directories: new Set([SPEC_DIR, ".governance/specs"]),

@@ -20,7 +20,7 @@ describe("Feature: Pointers (AGENTS.md Runtime Architecture)", () => {
     await fs.rm(targetDir, { recursive: true, force: true });
   });
 
-  it("[BEHAVIOR] Deve criar AGENTS.md como runtime monolitico governado", async () => {
+  it("[BEHAVIOR] Deve criar AGENTS.md como stub runtime governado", async () => {
     const subTarget = path.join(targetDir, "normal-flow");
     await fs.mkdir(subTarget, { recursive: true });
 
@@ -29,7 +29,9 @@ describe("Feature: Pointers (AGENTS.md Runtime Architecture)", () => {
 
     const rootContent = await fs.readFile(path.join(subTarget, "AGENTS.md"), "utf8");
     assert.match(rootContent, /<AI_GUIDELINES>/, "Raiz deve conter a tag mãe governada");
-    assert.match(rootContent, /Top Zone: Primary Directives/, "Raiz deve conter o monólito");
+    assert.match(rootContent, /Runtime Bootstrap/, "Raiz deve conter o bootstrap");
+    assert.match(rootContent, /yarn guidelines handoff/, "Raiz deve apontar para handoff");
+    assert.doesNotMatch(rootContent, /### \[CORE-/, "Raiz não deve carregar regras completas");
     assert.equal(
       await fs
         .access(path.join(subTarget, ".ai-guidelines", "config.json"))
@@ -54,7 +56,7 @@ describe("Feature: Pointers (AGENTS.md Runtime Architecture)", () => {
     assert.equal(rulesDirExists, false, "Não deve criar .ai-guidelines/rules no consumidor");
   });
 
-  it("[COMPILER] Deve gerar AGENTS raiz monolitico com regras e opt-ins envelopados", async () => {
+  it("[COMPILER] Deve gerar AGENTS raiz stub sem regras e opt-ins envelopados", async () => {
     const subTarget = path.join(targetDir, "monolithic-core");
     await fs.mkdir(subTarget, { recursive: true });
 
@@ -63,24 +65,11 @@ describe("Feature: Pointers (AGENTS.md Runtime Architecture)", () => {
     const coreContent = await fs.readFile(path.join(subTarget, "AGENTS.md"), "utf8");
 
     assert.match(coreContent, /<AI_GUIDELINES>/);
-    assert.match(coreContent, /Top Zone: Primary Directives/);
-    assert.match(coreContent, /Lifecycle & Spec System/);
-    assert.match(coreContent, /Git & PR Workflow/);
-    assert.match(coreContent, /Engineering Principles/);
-    assert.match(coreContent, /<FEATURE_QUALITY_GATES>/);
-    assert.match(coreContent, /<FEATURE_TDD>/);
-    assert.ok(
-      coreContent.indexOf("Top Zone: Primary Directives") <
-        coreContent.indexOf("Lifecycle & Spec System")
-    );
-    assert.ok(
-      coreContent.indexOf("Engineering Principles") <
-        coreContent.indexOf("Center Zone: Opt-in Methodologies")
-    );
-    assert.ok(
-      coreContent.indexOf("Center Zone: Opt-in Methodologies") <
-        coreContent.indexOf("Base Zone: Tactical Context")
-    );
+    assert.match(coreContent, /Runtime Bootstrap/);
+    assert.match(coreContent, /\.core\/rules\/catalog\.md/);
+    assert.doesNotMatch(coreContent, /Top Zone: Primary Directives/);
+    assert.doesNotMatch(coreContent, /<FEATURE_QUALITY_GATES>/);
+    assert.doesNotMatch(coreContent, /<FEATURE_TDD>/);
   });
 
   it("[PRESERVATION] Deve manter conteúdo do usuário fora do bloco core", async () => {
@@ -184,7 +173,8 @@ describe("Feature: Pointers (AGENTS.md Runtime Architecture)", () => {
     assert.match(content, /# Projeto/);
     assert.match(content, /Regra local/);
     assert.match(content, /<AI_GUIDELINES>/);
-    assert.match(content, /<FEATURE_TDD>/);
+    assert.match(content, /yarn guidelines handoff/);
+    assert.doesNotMatch(content, /<FEATURE_TDD>/);
     assert.doesNotMatch(content, /ponteiro antigo/);
   });
 

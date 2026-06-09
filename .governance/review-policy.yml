@@ -1,0 +1,56 @@
+# Review Policy — camada governada de evidência/review.
+# GitHub continua responsável por enforcement de merge em main; esta política
+# define o mínimo de evidência que o framework espera por tipo de PR/perfil.
+active_profile: solo
+profiles:
+  solo:
+    implementation_pr:
+      required_review_roles: []
+      required_native_approvals: 0
+    integration_pr:
+      required_review_roles: []
+      required_native_approvals: 0
+    accepted_findings:
+      require_resolution: false
+      require_verification_event_for_fixed: false
+    github:
+      minimum_approving_reviews: 1
+      require_code_owner_review: true
+      dismiss_stale_reviews_on_push: true
+      require_last_push_approval: false
+
+  contributor:
+    implementation_pr:
+      required_review_roles: []
+      required_native_approvals: 0
+    integration_pr:
+      required_review_roles:
+        - technical_audit
+      required_native_approvals: 1
+    accepted_findings:
+      require_resolution: true
+      require_verification_event_for_fixed: true
+    github:
+      minimum_approving_reviews: 1
+      require_code_owner_review: true
+      dismiss_stale_reviews_on_push: true
+      require_last_push_approval: false
+
+  team:
+    implementation_pr:
+      required_review_roles:
+        - technical_audit
+      required_native_approvals: 1
+    integration_pr:
+      required_review_roles:
+        - technical_audit
+        - architectural_review
+      required_native_approvals: 2
+    accepted_findings:
+      require_resolution: true
+      require_verification_event_for_fixed: true
+    github:
+      minimum_approving_reviews: 2
+      require_code_owner_review: true
+      dismiss_stale_reviews_on_push: true
+      require_last_push_approval: true

@@ -1,0 +1,23 @@
+# Architectural Review complementar do PR #37 / CO-2.1 (checkpoint-co-knowledge-backfill).
+# Revisor: Claude (claude-opus-4-8), designado pela owner como reviewer arquitetural
+# complementar. decision=approved com 1 finding low (F1). F1 NAO bloqueia o approved
+# (review:check so barra critical/high open). Resolucao implementer-owned em
+# c-co-knowledge-backfill-resolutions.yml (fixed -> a74309e). A disposition final
+# (accepted) cabe ao Human Gate da owner, como no CO-1 (commit 9569e40) — anti-
+# autoaprovacao: o reviewer/implementer da correcao nao sela o proprio finding.
+# audit_evidence ausente por design (so existe quando findings_emitted=0).
+checkpoint: "checkpoint-co-knowledge-backfill"
+role: architectural_review
+executor:
+  platform: claude-code
+  model: claude-opus-4-8
+decision: approved
+findings_emitted: 1
+findings:
+  - id: F1
+    severity: low
+    location: ".governance/specs/0024-context-architecture/knowledge-backfill.yml#L81-L82"
+    description: "KB-0008 (planned) declarava deadline 'checkpoint-banned-concept', que nao e um checkpoint canonico da topologia (id real checkpoint-gg-0002, no housekeeping); co-knowledge:inventory validava presenca do deadline mas nao a amarracao a state.yml topology."
+    disposition: open
+    fingerprint: 91fe086128ac
+review_fingerprint: de79b34f8b81
