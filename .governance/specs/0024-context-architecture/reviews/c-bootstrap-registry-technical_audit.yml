@@ -1,0 +1,55 @@
+# Technical Audit (adversarial) — checkpoint-bootstrap-registry (PR #38, HEAD 4424d0e).
+# Auditoria approved; 7 findings low (F1 + residuais R1-R6), todos NAO-bloqueantes.
+# Resolucoes do implementador em c-bootstrap-registry-resolutions.yml (lane separada).
+# Disposition fica 'open' (so reviewer/owner fecha). Selos via review:check.
+checkpoint: checkpoint-bootstrap-registry
+role: technical_audit
+executor:
+  platform: claude-code
+  model: claude-opus-4-8
+decision: approved
+findings_emitted: 7
+findings:
+  - id: F1
+    severity: low
+    location: cli/app/engine.mjs#L353-L375
+    description: "Roteador main(): com o registry compilado ausente, o ramo if(!isSupportedMode(commandName)) lanca a mesma mensagem do throw seguinte — checagem morta/redundante, residuo do design anterior com fallback legado de bootstrap."
+    disposition: open
+    fingerprint: 220005987f7b
+  - id: F2
+    severity: low
+    location: src/infrastructure/filesystem/MarkdownRulesDirectorySource.ts#L293-L308
+    description: walkDirectory() itera fs.readdir sem ordenacao estavel; a ordem de rules[] em rules.json depende da ordem do filesystem (risco teorico de drift cross-OS/FS no artefato gerado).
+    disposition: open
+    fingerprint: 623bec67ad94
+  - id: F3
+    severity: low
+    location: global
+    description: "Residuo do monolito ainda no caminho operacional fora do escopo migrado: check-budget (budget-report.mjs) usa compiler/token-budget e as features editoriais usam rules-loader, sem classificacao explicita como shim transitorio."
+    disposition: open
+    fingerprint: 3b7c543398e5
+  - id: F4
+    severity: low
+    location: cli/cli/args.mjs#L7
+    description: "Lista de verbos de bootstrap duplicada: SUPPORTED_MODES (args.mjs) e a lista registrada em BOOTSTRAP_COMMANDS (BootstrapCommand.ts) sao duas fontes hardcoded do mesmo conjunto, sem guarda contra drift."
+    disposition: open
+    fingerprint: c514a118374b
+  - id: F5
+    severity: low
+    location: cli/governance/runtime-bootstrap.mjs#L1-L37
+    description: cli/governance/runtime-bootstrap.mjs virou shim orfao apos o cutover (nenhum script/contrato/import o referencia; so o proprio teste o exercita), redundante com cli/runtime-bootstrap.mjs.
+    disposition: open
+    fingerprint: 7d500951c501
+  - id: F6
+    severity: low
+    location: cli/cli/args.mjs#L141
+    description: parseArgs e helpers (normalizeInlineValue/BOOLEAN_FLAGS) ficaram operacionalmente mortos apos o roteamento migrar ao registry (parseFlags por comando); retidos apenas pelos proprios testes, sem contrato.
+    disposition: open
+    fingerprint: 40c4474fab0f
+  - id: F7
+    severity: low
+    location: src/cli/registry/CommandRegistry.ts#L84-L90
+    description: "dispatch() trata flag-sem-verbo (ex.: --target ./x) como comando desconhecido generico; a mensagem nao orienta que falta um verbo antes da opcao (mudanca de UX nao testada/intencionalizada)."
+    disposition: open
+    fingerprint: 8160abe7b1d1
+review_fingerprint: fcd72f7c3b8f
