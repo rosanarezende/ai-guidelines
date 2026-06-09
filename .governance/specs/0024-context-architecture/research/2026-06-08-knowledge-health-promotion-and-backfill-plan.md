@@ -111,7 +111,7 @@ Obrigatorio antes de `integration-final`:
 - todas as DECs da Spec 0024 que sustentam topologia, gates, CO e stack;
 - ADRs load-bearing para a Spec 0024: ADR 0018, 0020, 0021, 0022, 0025, 0026 e outras
   referenciadas por gates ativos;
-- todas as `Falsification` existentes em `.governance/runtime/falsifications.yml`;
+- todas as `Falsification` existentes em `.governance/runtime/falsifications/ledger.yml`;
 - todos os `PIT-*` usados por CO-1/CO-2 e por retomada operacional;
 - regras required/runtime que aparecem em `validate`, PR workflow e `<AI_GUIDELINES>`;
 - guardrails que bloqueiam ou condicionam merge/gate.

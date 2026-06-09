@@ -10,7 +10,7 @@ focus:
   - "Gate por checkpoint: Claude implementa -> Technical Audit Gate (Codex) -> Architectural Review Gate (ChatGPT) -> Human Gate (owner) -> AVANCA (abre o proximo PR stacked). O Human Gate decide o PROXIMO MOVIMENTO, NAO mergeia em main. 1 checkpoint atomico por vez; parar no Gate quando o commit estiver pronto. Correcao local pequena nao espera; mudanca estrutural sim."
   - "Criterio (RESSALVADO em 2026-06-03 por [DEC-0024-G08]): 'ja foi validado empiricamente na 0024?' -> absorver/enforcar/executar. NAO re-modelar o DECIDIDO (G00/G02/G06/G07 seguem cravados). EXCECAO assumida: G03/G04/G05 foram reabertos para modelagem deliberada (orientada a grafo) -- nesses eixos, modelar e a direcao, nao o risco. O 'risco dominante' original (modelar em vez de absorver) vale para os eixos resolvidos; nos reabertos, a modelagem e o trabalho."
 next:
-  - "canonical-next: co-knowledge. RETOMADA CANONICA (SSOT) = research/2026-06-07-checkpoint-handoff-co-2.md (+ memoria spec-0024-continuity-operational). #35 CONCLUIDO; CO-1 (co-reconcile) CONCLUIDO-NA-STACK (Human Gate approved 2026-06-07, gates/c-co-reconcile.yml; PR #36 ABERTO, modo unit, SEM merge isolado). CO-2 (co-knowledge) — fatia vertical original completa e revisada (Technical + Architectural approved, 0 findings). CO-2.1 (checkpoint-co-knowledge-backfill) concluido no MESMO Draft PR #37 por decisao da owner: inventario/backfill minimo load-bearing (2 exemplos por tipo), FAL-0002 para CO-1, grafo montavel a partir do inventario, Rules-as-Knowledge (RulesCatalog -> nos rule), co-knowledge:inventory required e research graph-store (Neo4j vs alternativas). CO-2.2 (checkpoint-script-contracts) concluido no PR #37: contrato operacional SSOT para package.json/docs/hooks/workflows/templates, script-contracts:sync/check e validacao no validate; absorve o no futuro script-contracts. CO-2.3 (checkpoint-runtime-bootstrap-readiness) ativo: backfill P0 de runtime bootstrap, `yarn guidelines handoff`, AGENTS.md como stub seguro e bootstrap PATH dos hooks. CO-2.4 (checkpoint-runtime-ledger-partition) ativo no mesmo PR: runtime/specs active/history, insights por status e falsifications/ledger para reduzir mistura humana e preparar projeções grafo/DB sem mudar SSOT. Plano adicional: research/2026-06-08-knowledge-health-promotion-and-backfill-plan.md define knowledge:health, criterios de promocao e knowledge-readiness final antes de integration-final. PROXIMO = concluir CO-2.3/CO-2.4 -> yarn validate -> review complementar curto (tech/arch) -> atualizar body final -> Ready -> Human Gate. NAO abrir CO-3+; NAO instalar banco externo neste PR; banco futuro deve ser projecao derivada reconstruivel, nao nova SSOT."
+  - "canonical-next: co-knowledge. RETOMADA CANONICA (SSOT) = research/2026-06-07-checkpoint-handoff-co-2.md (+ memoria spec-0024-continuity-operational). #35 CONCLUIDO; CO-1 (co-reconcile) CONCLUIDO-NA-STACK (Human Gate approved 2026-06-07, gates/c-co-reconcile.yml; PR #36 ABERTO, modo unit, SEM merge isolado). CO-2 (co-knowledge) — fatia vertical original completa e revisada (Technical + Architectural approved, 0 findings). CO-2.1 (checkpoint-co-knowledge-backfill) concluido no MESMO Draft PR #37 por decisao da owner: inventario/backfill minimo load-bearing (2 exemplos por tipo), FAL-0002 para CO-1, grafo montavel a partir do inventario, Rules-as-Knowledge (RulesCatalog -> nos rule), co-knowledge:inventory required e research graph-store (Neo4j vs alternativas). CO-2.2 (checkpoint-script-contracts) concluido no PR #37: contrato operacional SSOT para package.json/docs/hooks/workflows/templates, script-contracts:sync/check e validacao no validate; absorve o no futuro script-contracts. CO-2.3 (checkpoint-runtime-bootstrap-readiness) implementado no PR #37: backfill P0 de runtime bootstrap, `yarn guidelines handoff`, AGENTS.md como stub seguro e bootstrap PATH dos hooks. CO-2.4 (checkpoint-runtime-ledger-partition) implementado no mesmo PR: runtime/specs active/history, insights por status e falsifications/ledger para reduzir mistura humana e preparar projeções grafo/DB sem mudar SSOT. Plano adicional: research/2026-06-08-knowledge-health-promotion-and-backfill-plan.md define knowledge:health, criterios de promocao e knowledge-readiness final antes de integration-final. PROXIMO = re-audit focal dos fixes do Technical Audit complementar -> Architectural Review complementar -> atualizar body final -> Ready -> Human Gate. Proximo no apos Human Gate = bootstrap-compiler, que fecha cutover /cli legado -> /src/registry antes de CO-3. NAO abrir CO-3+; NAO instalar banco externo neste PR; banco futuro deve ser projecao derivada reconstruivel, nao nova SSOT."
 topology:
   cursor:
     pr: co-knowledge
@@ -117,10 +117,13 @@ topology:
       # spec-0024-continuity-operational.
 
       # Bootstrap+Compiler — RESOLVE a auditoria do #35 (#1 roteamento, #3 fallback,
-      # #4 parsers): migra bootstrap (init/adopt/providers/update/check-budget) ao
-      # registry; remove fallback legado + parseArgs monolito + a ponte transitoria.
-      # Funde ex-pr-compiler-ts (motor de regras monolith -> TS/src; substrato do
-      # knowledge:compile). O cutover so esta plenamente absorvido quando este aterrissa.
+      # #4 parsers) e fecha o cutover incompleto exposto no PR #37: migra bootstrap
+      # (init/adopt/providers/update/check-budget), script-contracts/runtime-bootstrap
+      # e residuos de pointers ao registry/src; remove fallback legado + parseArgs
+      # monolito + ponte transitoria. Funde ex-pr-compiler-ts (motor de regras
+      # monolith -> TS/src; substrato do knowledge:compile). Depois deste no, /cli deve
+      # ser wrapper/compatibilidade; regra governada nova vive em /src. O cutover so
+      # esta plenamente absorvido quando este aterrissa.
       - id: bootstrap-compiler
         github_pr: null
         role: execution
@@ -128,7 +131,7 @@ topology:
         sequence: 6
         checkpoints:
           - checkpoint-compiler-ts # motor de compilacao de regras (monolith) -> TS/src; substrato do knowledge:compile
-          - checkpoint-bootstrap-registry # bootstrap -> registry; remove fallback+parseArgs+ponte (fecha auditoria #1/#3/#4)
+          - checkpoint-bootstrap-registry # bootstrap/script-contracts/runtime-bootstrap -> registry/src; /cli vira wrapper+compat
 
       # CO-3 — Absorcao: no de conhecimento -> forma que DISPARA. EnforcementBinding
       # (declaracao->enforcement por no; PIT-0008 estrutural) + knowledge:compile

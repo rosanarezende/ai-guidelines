@@ -1,21 +1,14 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { EDITORIAL_FEATURES } from "#cli/args";
 import { ROOT_DIR } from "#fs/file-system";
 import { mergeAgentsContent } from "#governance/agents-merge";
 import {
-  compileMonolithicAgentsContent,
   buildAgentsRuntimeStub,
   loadRulesCatalog,
   filterRulesByScope,
   formatRuleInstruction,
-  groupUniversalRulesByZone,
 } from "#governance/monolith/compiler";
-import {
-  normalizeAdapterSelection,
-  readOptInRules,
-  readRulesByName,
-} from "#governance/monolith/rules-loader";
+import { normalizeAdapterSelection, readRulesByName } from "#governance/monolith/rules-loader";
 import {
   deriveAdaptersFromProviders,
   resolveAiGuidelinesConfig,
@@ -53,11 +46,6 @@ async function loadCompiledRules(config) {
 
   const adapterSelection = normalizeAdapterSelection(deriveAdaptersFromProviders(config.providers));
   const adapterRulesByName = {};
-  const optInRules = [];
-  let primaryDirectives = "";
-  let lifecycleRules = "";
-  let gitRules = "";
-  let engineeringRules = "";
 
   if (catalog) {
     const filtered = filterRulesByScope(catalog.rules, {
@@ -65,11 +53,6 @@ async function loadCompiledRules(config) {
       optInFeatures: config.features,
       lang: config.lang,
     });
-    const grouped = groupUniversalRulesByZone(filtered.universal);
-    primaryDirectives = grouped.primaryDirectives;
-    lifecycleRules = grouped.lifecycleRules;
-    gitRules = grouped.gitRules;
-    engineeringRules = grouped.engineeringRules;
 
     for (const [adapter, rules] of Object.entries(filtered.adapters)) {
       const content = rules.map(formatRuleInstruction).filter(Boolean).join("\n\n");
@@ -77,37 +60,14 @@ async function loadCompiledRules(config) {
         adapterRulesByName[adapter] = `### Adapter: ${adapter}\n\n${content}`;
       }
     }
-
-    for (const [feature, rules] of Object.entries(filtered.optIn)) {
-      const content = rules.map(formatRuleInstruction).filter(Boolean).join("\n\n");
-      if (content) {
-        optInRules.push({ name: feature, content });
-      }
-    }
   } else {
-    primaryDirectives = await fs.readFile(
-      path.join(ROOT_DIR, ".core", "templates", "AGENTS-core.md.tmpl"),
-      "utf8"
-    );
     const fallbackAdapters = await readRulesByName(sourceRulesDir, adapterSelection);
     for (const { name, content } of fallbackAdapters) {
       adapterRulesByName[name] = content;
     }
-    const fallbackOptIn = await readOptInRules({
-      sourceRulesDir,
-      editorialFeatures: EDITORIAL_FEATURES,
-      features: config.features,
-      lang: config.lang,
-    });
-    optInRules.push(...fallbackOptIn);
   }
 
   return {
-    primaryDirectives,
-    lifecycleRules,
-    gitRules,
-    engineeringRules,
-    optInRules,
     adapterRulesByName,
   };
 }

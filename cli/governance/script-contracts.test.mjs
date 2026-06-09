@@ -20,6 +20,11 @@ function tempRepo() {
     path.join(dir, "package.json"),
     JSON.stringify({ name: "tmp", scripts: { stale: "echo stale" } }, null, 2) + "\n"
   );
+  fs.mkdirSync(path.join(dir, ".github", "workflows"), { recursive: true });
+  fs.writeFileSync(
+    path.join(dir, ".github", "workflows", "repo-validation.yml"),
+    "name: repo-validation\njobs:\n  validate:\n    steps:\n      - run: yarn validate\n"
+  );
   return dir;
 }
 
@@ -124,6 +129,33 @@ test("DADO package.json alterado manualmente QUANDO check roda ENTÃO reporta dr
   fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + "\n");
 
   assert.match(check(repoRoot).join("\n"), /package\.json diverge/);
+});
+
+test("DADO workflow sem run contratado QUANDO check roda ENTÃO reporta drift", () => {
+  const repoRoot = tempRepo();
+  writeContract(repoRoot);
+  sync(repoRoot);
+  fs.writeFileSync(
+    path.join(repoRoot, ".github", "workflows", "repo-validation.yml"),
+    "name: repo-validation\njobs:\n  validate:\n    steps:\n      - run: yarn test\n"
+  );
+
+  assert.match(
+    check(repoRoot).join("\n"),
+    /workflow \.github\/workflows\/repo-validation\.yml nao contem run contratado: yarn validate/
+  );
+});
+
+test("DADO workflow ausente QUANDO check roda ENTÃO reporta drift", () => {
+  const repoRoot = tempRepo();
+  writeContract(repoRoot);
+  sync(repoRoot);
+  fs.rmSync(path.join(repoRoot, ".github", "workflows", "repo-validation.yml"));
+
+  assert.match(
+    check(repoRoot).join("\n"),
+    /workflow \.github\/workflows\/repo-validation\.yml nao existe/
+  );
 });
 
 test("DADO hook com script inexistente QUANDO valida contrato ENTÃO retorna violacao", () => {

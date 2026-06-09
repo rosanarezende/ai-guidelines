@@ -4,8 +4,10 @@
 > Nao edite manualmente: rode `yarn script-contracts:sync`.
 
 Este documento e a referencia humana do contrato operacional que tambem projeta
-`package.json#scripts`, `.husky/*` e templates de consumidores. O check
-`yarn script-contracts:check` falha quando alguma projecao diverge.
+`package.json#scripts`, `.husky/*` e templates de consumidores, alem de
+verificar os comandos obrigatorios em workflows reais. O check
+`yarn script-contracts:check` falha quando alguma projecao diverge ou workflow
+perde um run contratado.
 
 ## Visao por categoria
 

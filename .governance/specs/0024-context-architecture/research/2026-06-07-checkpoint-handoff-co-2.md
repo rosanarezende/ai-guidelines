@@ -69,7 +69,7 @@ Campos (modelo travado):
 
 ## 3. Escopo IN / OUT
 
-**IN (CO-2):** `Falsification` (domínio + fingerprint + invariantes); `GovernedRef` (✅); arestas `falsifies`/`constrains`/`crystallizedAs` no grafo; adapters `decision`/`doctrine`; persistência `falsifications.yml` + serializer; `co-knowledge:check` advisory; dogfood `FAL-0001`. Modelo de tipos **completo**; fatia vertical **mínima** que prova os invariantes.
+**IN (CO-2):** `Falsification` (domínio + fingerprint + invariantes); `GovernedRef` (✅); arestas `falsifies`/`constrains`/`crystallizedAs` no grafo; adapters `decision`/`doctrine`; persistência `falsifications/ledger.yml` + serializer; `co-knowledge:check` advisory; dogfood `FAL-0001`. Modelo de tipos **completo**; fatia vertical **mínima** que prova os invariantes.
 
 **IN (CO-2.1):** inventário/backfill mínimo versionado (`knowledge-backfill.yml`) com 2 exemplos por tipo (`insight`, `decision`, `rule`, `guardrail`, `doctrine`, `falsification`); exemplos adicionais `OPT-*`/`ADP-*` para provar `AGENTS.md` como projeção de `.core/rules`; `FAL-0002` para CO-1/PIT-0001; parser/check `co-knowledge:inventory` required no `validate`; montagem mínima do `KnowledgeGraph` a partir do inventário e do `RulesCatalog`; research graph-store (`2026-06-08-graph-store-options.md`) comparando Neo4j/RDF/SQLite/Postgres/Cassandra/Git.
 
@@ -90,7 +90,7 @@ Tudo **advisory-first**: `co-knowledge:check` `main` retorna sempre 0.
 ## 5. Dogfood `FAL-0001` (merge-prematuro)
 
 ```yaml
-# .governance/runtime/falsifications.yml
+# .governance/runtime/falsifications/ledger.yml
 FAL-0001:
   claim: "restrição de evento de merge/aterrissagem é enforçável em superfície de estado contínuo (status check/landing_policy/vehicle-from-topology)"
   # falsifiesRef AUSENTE DE PROPÓSITO: a claim falsa NUNCA foi governada como nó
@@ -112,7 +112,7 @@ Todas as camadas abaixo estão **CONCLUÍDAS e commitadas** na branch (PR #37):
 2. ✅ **Grafo + adapters** — `KnowledgeGraph` nó-união + relations `falsifies`/`constrains`/`crystallizedAs` + `typedArtifacts` (`decision`/`doctrine`) + testes (`564a3fc`).
 3. ✅ **Persistência** — `falsificationsSerializer` (allowlist, round-trip determinístico, opcionais omitidos) + testes (`90a89b9`).
 4. ✅ **Check** — `coKnowledgeCheck.ts` + `co-knowledge-check.mjs` + script `co-knowledge:check` no `validate` (após `reconcile:check`) + testes (F4a + advisory não-bloqueante) (`90a89b9`).
-5. ✅ **Dogfood** — `.governance/runtime/falsifications.yml` (FAL-0001, §5; `falsifies_ref` ausente explícito) (`90a89b9`). `yarn validate` verde (103 suites / 1005 testes).
+5. ✅ **Dogfood** — `.governance/runtime/falsifications/ledger.yml` (FAL-0001, §5; `falsifies_ref` ausente explícito) (`90a89b9`). `yarn validate` verde (103 suites / 1005 testes).
 
 Início/topologia: `2bca476` (handoff + GovernedRef + cursor) + `caf64da` (planned→active, PR #37).
 

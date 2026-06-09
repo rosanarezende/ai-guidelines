@@ -239,8 +239,10 @@ function docsScripts(contract) {
 > Nao edite manualmente: rode \`yarn script-contracts:sync\`.
 
 Este documento e a referencia humana do contrato operacional que tambem projeta
-\`package.json#scripts\`, \`.husky/*\` e templates de consumidores. O check
-\`yarn script-contracts:check\` falha quando alguma projecao diverge.
+\`package.json#scripts\`, \`.husky/*\` e templates de consumidores, alem de
+verificar os comandos obrigatorios em workflows reais. O check
+\`yarn script-contracts:check\` falha quando alguma projecao diverge ou workflow
+perde um run contratado.
 
 ## Visao por categoria
 
@@ -352,11 +354,35 @@ function validateForbiddenPhrases(repoRoot, contract) {
   return violations;
 }
 
+function validateWorkflowRuns(repoRoot, contract) {
+  const violations = [];
+  const workflows = contract.profiles.maintainer.workflows ?? [];
+
+  for (const workflow of workflows) {
+    const workflowPath = workflow.file;
+    const absolutePath = repoPath(repoRoot, workflowPath);
+    if (!fs.existsSync(absolutePath)) {
+      violations.push(`workflow ${workflowPath} nao existe`);
+      continue;
+    }
+
+    const content = readText(repoRoot, workflowPath);
+    for (const requiredRun of workflow.required_runs ?? []) {
+      if (!content.includes(requiredRun)) {
+        violations.push(`workflow ${workflowPath} nao contem run contratado: ${requiredRun}`);
+      }
+    }
+  }
+
+  return violations;
+}
+
 export function check(repoRoot = REPO_ROOT) {
   const contract = parseContract(repoRoot);
   const violations = [
     ...validateContract(contract),
     ...validateForbiddenPhrases(repoRoot, contract),
+    ...validateWorkflowRuns(repoRoot, contract),
   ];
   for (const [relativePath, expected] of generateProjections(repoRoot, contract)) {
     const actual = fs.existsSync(repoPath(repoRoot, relativePath))
@@ -401,7 +427,7 @@ export async function main(argv = [], repoRoot = REPO_ROOT) {
       return 1;
     }
     process.stdout.write(
-      "✅ script-contracts:check — scripts/hooks/docs/templates sincronizados.\n"
+      "✅ script-contracts:check — scripts/hooks/docs/templates sincronizados; workflows verificados.\n"
     );
     return 0;
   }
