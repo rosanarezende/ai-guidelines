@@ -1,3 +1,9 @@
+/**
+ * ⚠️ LEGACY / TRANSITÓRIO (Spec 0024 · bootstrap-compiler) — superfície de
+ * COMPATIBILIDADE, NÃO SSOT operacional. Consumido apenas por `check-budget`
+ * (`cli/features/core/budget-report.mjs`); ainda sem equivalente TypeScript em
+ * `src/` (migração plena = nó futuro CO-3). NÃO adicionar novos consumidores.
+ */
 import { buildAgentsRuntimeStub } from "./compiler.mjs";
 
 const TOK_H_RATIO = 3.5;

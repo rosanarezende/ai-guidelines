@@ -1,4 +1,12 @@
 /**
+ * ⚠️ LEGACY / SUPERSEDED (Spec 0024 · bootstrap-compiler) — o `build:rules`
+ * operacional vive em TypeScript (`src/cli/buildRules.ts` → `RulesCatalogBuilder`).
+ * Este builder monolítico permanece só como referência histórica/testes; NÃO está
+ * mais wired em `package.json` nem em `.core/governance/script-contracts.yml`.
+ * NÃO adicionar novos consumidores deste módulo.
+ */
+
+/**
  * Rules Builder — Catalog Serialization & Ledger Generation
  *
  * Consolidates parser output into structured catalog (rules.json) with 3 indices

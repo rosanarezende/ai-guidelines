@@ -1,3 +1,10 @@
+/**
+ * ⚠️ LEGACY / TRANSITÓRIO (Spec 0024 · bootstrap-compiler) — superfície de
+ * COMPATIBILIDADE, NÃO SSOT operacional. `pointers`/`build:rules` já não dependem
+ * daqui; o resíduo ativo é `getOptInRuleRelativePath`, consumido pelas features
+ * editoriais (`bdd`/`tdd`/`quality-gates`). Migração plena = nó futuro CO-3.
+ * NÃO adicionar novos consumidores deste módulo.
+ */
 import fs from "node:fs/promises";
 import path from "node:path";
 
