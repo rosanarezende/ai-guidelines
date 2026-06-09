@@ -361,13 +361,9 @@ export async function main(
         return;
       }
 
-      if (!isSupportedMode(commandName)) {
-        throw new Error(
-          `Comando "${commandName}" requer o registry compilado, mas dist/ não existe. ` +
-            "Rode `yarn build` (ou `yarn validate`) antes de usar a CLI."
-        );
-      }
-
+      // dist/ ausente → NENHUM verbo nomeado roteia (registry único, sem fallback
+      // de comando). Falha cedo e explícito para QUALQUER comando — inclusive os
+      // de bootstrap, que também passam pelo registry. Sem ramo por verbo aqui.
       throw new Error(
         `Comando "${commandName}" requer o registry compilado, mas dist/ não existe. ` +
           "Rode `yarn build` (ou `yarn validate`) antes de usar a CLI."
