@@ -1,0 +1,29 @@
+# Technical Audit do checkpoint-review-policy-events (CO-2.5, PR #37). HEAD: a465165.
+# Executor: Claude (claude-code / claude-opus-4-8), reviewer adversarial designado pela owner.
+# Aprovacao LIMPA (0 findings): a evidencia selada vive em audit_evidence (coverage+scope+basis).
+# Nao cria checkpoint (id real ja na topology); nao altera implementacao/topologia/gates/PR body;
+# nao marca Human Gate. A disposition do technical_audit#F1 (checkpoint anterior) NAO e tocada aqui.
+checkpoint: "checkpoint-review-policy-events"
+role: technical_audit
+executor:
+  platform: claude-code
+  model: claude-opus-4-8
+decision: approved
+findings_emitted: 0
+audit_evidence:
+  coverage:
+    - .governance/review-policy.yml
+    - src/infrastructure/yaml/reviewPolicyReader.ts
+    - src/infrastructure/yaml/reviewArtifactsReader.ts
+    - src/cli/reviewCheck.ts
+    - src/cli/rulesetCheck.ts
+    - src/cli/reviewCheck.test.ts
+    - src/cli/rulesetCheck.test.ts
+    - .governance/specs/0024-context-architecture/reviews/events/c-runtime-ledger-partition-technical_audit-ev1-f1-reaudit.yml
+    - .governance/specs/0024-context-architecture/reviews/c-runtime-ledger-partition-technical_audit.yml
+    - .github/rulesets/main-governance.json
+    - .governance/specs/0024-context-architecture/state.yml
+    - .governance/specs/0024-context-architecture/reviews/README.md
+  scope: "Auditoria tecnica do CO-2.5: review-policy.yml versionada (perfis solo/contributor/team), ReviewEvent append-only, review:check validando reviews/gates/resolutions/events contra state.yml topology + politica de roles/aceitacao, ruleset:check validando coerencia review-policy.github x main-governance.json, e o dogfood do EV1 re-auditando technical_audit#F1. Metodo: leitura de codigo + testes unitarios (reviewCheck.test.ts, rulesetCheck.test.ts) + execucao de yarn validate, state-yml:check:all e git diff --check."
+  basis: "Aprovacao limpa, 0 findings. (1) Nenhum ReviewEvent cria checkpoint; todo checkpoint de review/event/gate/resolution deve existir em state.yml topology (consolidate L147; teste 'checkpoint fora da topologia'); o checkpoint artificial '-reaudit-f1' foi removido e hoje seria rejeitado. (2) Multiplos events por (checkpoint,role) sem colisao; event que verifica finding inexistente falha (L209; teste F9); event_fingerprint sela checkpoint/role/event_id/kind/decision/verifies/evidence/executor; eventos nao alteram disposition, nao aprovam gate, nao substituem summary. (3) 1 summary por (checkpoint,role) preservado; technical_audit#F1 rastreavel: finding -> resolucao fixed (e6268e7) -> ReviewEvent EV1 approved -> disposition accepted. (4) solo NAO exige TA+AR em PR de implementacao; contributor exige review independente no integration PR; team exige multiplos; roles custom so quando declaradas pela policy; sem hardcode de TA+AR. (5) review:check falha fora da topology, falha em event->finding inexistente, mantem gate bloqueado com critical/high open, e exige resolucao+event approved para accepted-apos-fixed quando a policy ativa pedir (sem falso-verde). (6) ruleset:check compara approvals/codeowners/stale/last-push entre review-policy.github e main-governance.json (solo == ruleset: 1 approval, code owner, dismiss stale) sem confundir GitHub native review com Human Gate ou ReviewEvent. (7) Sem shell, sem path traversal a partir de YAML governado, sem LLM, sem rede no runtime (paridade le snapshot gerado por gh em CI). (8) README e state.yml removem a linguagem de 'TA+AR sempre obrigatorio'; PR body qualifica revisao por review-policy; eventos append-only preservam historico. validate verde (108 suites/1048 testes); ruleset:check + review:check + state-yml:check:all verdes; git diff --check limpo. Residuais nao-bloqueantes: (R1) sem unicidade/contiguidade de event_id por (checkpoint,role); (R2) enforcement de topology degrada se state.yml ausente (allowedCheckpoints vazio)."
+review_fingerprint: ac9baeaf6f21
