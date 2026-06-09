@@ -50,7 +50,7 @@
     "guidelines:providers": "node cli/ai-guidelines-cli.mjs providers",
     "setup": "yarn install --immutable && yarn build:all",
     "build": "tsc",
-    "build:rules": "node cli/governance/monolith/rules-builder.mjs",
+    "build:rules": "node cli/rules-build.mjs",
     "build:all": "yarn build && yarn build:rules",
     "format": "prettier --write .",
     "format:check": "prettier --check .",

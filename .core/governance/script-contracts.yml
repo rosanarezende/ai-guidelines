@@ -44,7 +44,7 @@ profiles:
         consumers: [script]
         description: Compila TypeScript de src/ para dist/.
       - name: build:rules
-        command: node cli/governance/monolith/rules-builder.mjs
+        command: node cli/rules-build.mjs
         category: build
         mutates: true
         consumers: [script, hook]
