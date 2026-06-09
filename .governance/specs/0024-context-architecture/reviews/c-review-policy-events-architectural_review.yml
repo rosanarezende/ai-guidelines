@@ -1,0 +1,32 @@
+# Architectural Review do checkpoint-review-policy-events (CO-2.5, PR #37). HEAD: 745c8aa.
+# Executor: Claude (claude-code / claude-opus-4-8), reviewer arquitetural adversarial designado pela owner.
+# Aprovacao LIMPA (0 findings): evidencia selada em audit_evidence (coverage+scope+basis).
+# Complementa o technical_audit (a465165, approved). Nao cria checkpoint (id real ja na topology);
+# nao altera implementacao/topologia/gates/PR body; nao marca Human Gate; nao toca disposition alheia.
+checkpoint: "checkpoint-review-policy-events"
+role: architectural_review
+executor:
+  platform: claude-code
+  model: claude-opus-4-8
+decision: approved
+findings_emitted: 0
+audit_evidence:
+  coverage:
+    - .governance/review-policy.yml
+    - src/infrastructure/yaml/reviewPolicyReader.ts
+    - src/infrastructure/yaml/reviewArtifactsReader.ts
+    - src/cli/reviewCheck.ts
+    - src/cli/rulesetCheck.ts
+    - .github/rulesets/main-governance.json
+    - .governance/specs/0024-context-architecture/state.yml
+    - .governance/specs/0024-context-architecture/plan.md
+    - .governance/specs/0024-context-architecture/tasks.md
+    - .governance/specs/0024-context-architecture/reviews/README.md
+    - .governance/specs/0024-context-architecture/reviews/c-review-policy-events-technical_audit.yml
+    - .governance/specs/0024-context-architecture/reviews/c-runtime-ledger-partition-technical_audit.yml
+    - .governance/specs/0024-context-architecture/reviews/c-runtime-ledger-partition-resolutions.yml
+    - .governance/specs/0024-context-architecture/reviews/events/c-runtime-ledger-partition-technical_audit-ev1-f1-reaudit.yml
+    - .governance/specs/0024-context-architecture/reviews/_TEMPLATE.review-event.yml
+  scope: "Revisao arquitetural do CO-2.5: aderencia a SSOT/topologia (state.yml como unica fonte de checkpoints; cursor coerente), separacao de lanes Summary/Event/Resolution/Gate, modelo ReviewEvent append-only (1 summary por (checkpoint,role) + N eventos), review-policy versionada orientada a dados (solo/contributor/team) sem hardcode de TA+AR, coerencia declarativa review-policy.github x main-governance.json, e autoridade humana no gate. Metodo: leitura arquitetural do codigo+politica+artefatos+plan/state/README, conferencia contra ADR 0018/0021/0022/0026 e PIT-0001/0008, e execucao de yarn validate + review:check + ruleset:check + state-yml:check:all."
+  basis: "Aprovacao arquitetural limpa, 0 findings. (1) TOPOLOGIA/SSOT: checkpoint-review-policy-events existe como checkpoint real na topology (PR #37/co-knowledge, sequence 5); cursor {pr: co-knowledge, checkpoint: checkpoint-review-policy-events} coerente; nenhum artefato cria checkpoint narrativo — o EV1 ancora no checkpoint real checkpoint-runtime-ledger-partition e o artificial -reaudit-f1 foi removido; discover() deriva allowedCheckpoints SO da state.yml topology (SSOT preservada). (2) SUMMARY vs EVENT: 1 summary por (checkpoint,role) enforcado (byRole), eventos append-only sem dedupe por role; historico preservado (technical_audit#F1 do runtime-ledger: finding selado -> resolucao fixed -> EV1 approved -> disposition accepted, com decision=changes_requested congelado); a unica superficie mutavel (disposition) e explicitamente delimitada (unico campo fora do fingerprint da claim) — PIT-0008 (evento != estado continuo) materializado corretamente. (3) POLITICA: orientada a dados — solo basta Human Gate + GitHub native (0 review roles), contributor exige technical_audit + resolucao + verification event no integration PR, team exige TA+AR + 2 approvals; sem hardcode 'TA+AR sempre' (roles derivam da policy via requiredRolesForNodeRole/allowedReviewRoles). (4) ADRs/PITs: runtime determinístico sem LLM/rede/shell (ADR 0018; executor e proveniencia, nao chamada); decisao no gate owner-owned e resolucao implementer-owned nao destrava (ADR 0021); artefatos versionados, comentario de PR e projecao (ADR 0022); consolidado/uso-de-modelos/Area sao projecoes derivadas, nao entidades persistidas (ADR 0026); cursor/next narrados != topology derivavel (PIT-0001, reconcile:check verde). (5) GATE/AUTORIDADE: ReviewEvent apoia fechamento de finding mas nunca seta gate; requireVerificationEventForFixed e gate ADICIONAL, nao substituto; Human Gate segue decisao final; anti-autoaprovacao preservada por atribuicao cross-lane. (6) RULESET: ruleset:check (no validate) enforca ruleset versionado >= review-policy.github (solo: 1 approval, code owner, dismiss stale, no last-push == main-governance.json) sem confundir native review com Human Gate/ReviewEvent; paridade vivo-vs-versionado e detect-only/CI; perfil solo coerente com o momento (owner unico, PRs stacked Draft, merge unico ao fim). (7) ESCOPO: CO-2.5 pertence legitimamente ao PR #37 (dogfood in-place) e REDUZ debito estrutural (elimina o checkpoint fantasma -reaudit-f1 que motivou o no); nenhum corte arquitetural incompleto bloqueia Ready. (8) PROMESSA vs ENTREGA: plan (L108/L133), state (L10) e README (L19/L34) removem 'TA+AR sempre obrigatorio' e tratam re-auditoria como evento, nao checkpoint — modelo consistente entre as fontes lidas. validate verde (108 suites/1048 testes); review:check + ruleset:check + state-yml:check:all verdes. Residuais NAO-bloqueantes (sob o threat-model declarado de tamper-EVIDENCE, nao tamper-proof): (R1) lane de eventos sem unicidade/contiguidade de event_id por (checkpoint,role) e sem selo de CONJUNTO (nao ha envelope/contagem de eventos analogo a review_fingerprint+findings_emitted) — delecao silenciosa de um evento do trilho append-only nao e detectada por review:check, embora seja diff git visivel/atribuivel; (R2) o guard de topologia degrada fail-open quando allowedCheckpoints fica vazio (state.yml sem topology), mitigado parcialmente pelo caminho de erro fail-closed em state.yml malformado; (R3) perfil solo nao exige resolucao nem verification event para accepted (require_resolution/require_verification_event_for_fixed=false) — deliberado (owner e a ancora de confianca), porem o trilho de evidencia de re-audit fica opcional no perfil ativo; (R4) ReviewRole e string livre — typo em required_review_roles falha-fechado mas com mensagem confusa; (R5) drift entre review-policy.github e o ruleset VIVO so e pego em CI (parity indeterminado local). Nenhum residual representa corte arquitetural incompleto; coerentes com o limite honesto ja declarado no README (autoria off-repo via CODEOWNERS/assinatura deferida)."
+review_fingerprint: e99141ab604a
