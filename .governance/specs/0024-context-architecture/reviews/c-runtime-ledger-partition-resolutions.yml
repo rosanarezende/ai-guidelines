@@ -1,0 +1,10 @@
+# Resoluções do implementador para o Technical Audit do delta final CO-2
+# (checkpoint-runtime-ledger-partition) — lane SEPARADA da review. PROPÕE
+# `action`; NÃO destrava o gate (só a `disposition` do reviewer/owner destrava).
+# `finding` totalmente qualificado (`<role>#<id>`). Rastreável a commit.
+checkpoint: "checkpoint-runtime-ledger-partition"
+by: codex
+resolutions:
+  - finding: technical_audit#F1
+    action: fixed
+    ref: e6268e7 # required_runs agora sao ancorados em passos run reais; comentarios nao satisfazem o contrato
