@@ -294,7 +294,12 @@ async function walkDirectory(
   dirPath: string,
   callback: (filePath: string) => Promise<void>
 ): Promise<void> {
-  const entries = await fs.readdir(dirPath, { withFileTypes: true });
+  // Ordenação estável por nome: `fs.readdir` não garante ordem entre OS/FS, e a
+  // ordem de varredura determina a ordem de `rules[]` em rules.json. Ordenar aqui
+  // torna o artefato gerado byte-determinístico (build reprodutível cross-OS).
+  const entries = (await fs.readdir(dirPath, { withFileTypes: true })).sort((a, b) =>
+    a.name < b.name ? -1 : a.name > b.name ? 1 : 0
+  );
   for (const entry of entries) {
     const fullPath = path.join(dirPath, entry.name);
     if (entry.isDirectory()) {
