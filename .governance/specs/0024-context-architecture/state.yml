@@ -131,7 +131,11 @@ topology:
       # CO-3 — Absorcao: no de conhecimento -> forma que DISPARA. EnforcementBinding
       # (declaracao->enforcement por no; PIT-0008 estrutural) + knowledge:compile
       # (reusa o compilador de regras). Absorve ex-rule-guardrail (Rule/Guardrail ->
-      # Constraint + binding).
+      # Constraint + binding). (AR-2) Herda o residuo legacy-transitorio do monolito
+      # cercado em checkpoint-bootstrap-registry (PR #38): compiler + token-budget (via
+      # check-budget/budget-report.mjs) e rules-loader (via features editoriais
+      # bdd/tdd/quality-gates). A migracao plena desse substrato para o compilador
+      # TS/src acontece AQUI, quando knowledge:compile reusar o motor de regras.
       - id: co-enforcement
         github_pr: null
         role: execution

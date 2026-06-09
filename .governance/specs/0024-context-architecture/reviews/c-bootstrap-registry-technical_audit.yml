@@ -1,7 +1,11 @@
 # Technical Audit (adversarial) — checkpoint-bootstrap-registry (PR #38, HEAD 4424d0e).
-# Auditoria approved; 7 findings low (F1 + residuais R1-R6), todos NAO-bloqueantes.
-# Resolucoes do implementador em c-bootstrap-registry-resolutions.yml (lane separada).
-# Disposition fica 'open' (so reviewer/owner fecha). Selos via review:check.
+# Auditoria approved; 7 findings low (F1-F7), todos NAO-bloqueantes. (AR-3: esquema de
+# id normalizado para F1-F7; o rotulo legado "F1 + R1-R6" foi removido. A normalizacao
+# tocou APENAS este comentario — nenhum campo selado mudou; fingerprints por finding e
+# review_fingerprint permanecem validos.)
+# Resolucoes do implementador em c-bootstrap-registry-resolutions.yml (lane separada),
+# referenciando technical_audit#F1..F7. Disposition fica 'open' (so reviewer/owner
+# fecha). Selos via review:check.
 checkpoint: checkpoint-bootstrap-registry
 role: technical_audit
 executor:

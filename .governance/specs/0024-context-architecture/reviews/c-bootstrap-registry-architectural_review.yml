@@ -1,0 +1,60 @@
+# Architectural Review do PR #38 (bootstrap-compiler · checkpoint-bootstrap-registry).
+# Aprovação LIMPA (0 findings): as observações arquiteturais (AR-1/AR-2/AR-3) são
+# NOTAS de direção/zeladoria, não findings bloqueantes — AR-1 e AR-3 corrigidas nesta
+# consolidação; AR-2 aplicada como nota textual em state.yml. decision=approved;
+# veredito humano final em gates/c-bootstrap-registry.yml (ainda não atingido — PR Draft).
+# audit_evidence OBRIGATÓRIA (sem findings) e selada.
+#
+# SELO PENDENTE: `review_fingerprint: x` é placeholder de autoria. Rode `yarn review:check`
+# — ele imprime o hash esperado (sela coverage + scope + basis + executor); cole-o em x e
+# rode novamente até verde ANTES do commit.
+checkpoint: checkpoint-bootstrap-registry
+role: architectural_review
+executor:
+  platform: claude-code
+  model: claude-opus-4-8
+decision: approved
+findings_emitted: 0
+audit_evidence:
+  coverage:
+    - cli/app/engine.mjs
+    - cli/rules-build.mjs
+    - cli/cli/args.mjs
+    - src/cli/registry/CommandRegistry.ts
+    - src/infrastructure/filesystem/MarkdownRulesDirectorySource.ts
+    - cli/governance/monolith/rules-loader.mjs
+    - cli/features/core/budget-report.mjs
+    - AGENTS.md
+  scope: >
+    Coerência arquitetural do cutover final do bootstrap-compiler contra a tese do
+    checkpoint e a Spec 0024. Inspecionado: (1) registry como FRONTEIRA OPERACIONAL —
+    engine.mjs#main() despacha todo verbo nomeado pelo registry compilado, sem lista de
+    verbos nem fallback por comando; loadRegistry() retorna null só sem dist/ e então
+    falha cedo/explícito para QUALQUER comando (sem fallback silencioso). (2) Help como
+    projeção DERIVADA (registry.renderHelp → renderCommandsHelp); a 2ª fonte de help em
+    args.mjs foi morta. (3) Cutover do motor de regras — build:rules → cli/rules-build.mjs
+    (wrapper cross-OS) → dist/cli/buildRules.js (TS/src), fail-fast sem build;
+    walkDirectory() ordena por nome ⇒ rules.json byte-determinístico (R1/F2). (4) Monólito
+    cercado sob cli/governance/monolith com banner LEGACY/TRANSITÓRIO + guarda "não
+    adicionar novos consumidores"; pointers/build:rules não dependem mais dele. (5) AGENTS.md
+    segue stub/bootstrap (<AI_GUIDELINES> enxuto; regras completas em .core/rules/**). (6)
+    Contrato público UX (init/adopt/providers/update/check-budget; flag-sem-verbo com
+    mensagem orientada; wizard TTY-gated; SUPPORTED_MODES com teste anti-drift). (7)
+    Governança de review (lanes separadas; disposition open; PR Draft).
+  basis: >
+    PASS arquitetural. A arquitetura prometida pelo checkpoint é entregue pelo diff
+    (HEAD 9a26060); 0 findings bloqueantes. Reconcilia o Technical Audit (7 low F1-F7,
+    todos resolvidos nos commits 363638f/65451a9/bf84f74/f367897, verificados na árvore).
+    Observações NÃO-bloqueantes tratadas nesta consolidação: AR-1 (cauda de tasks.md stale
+    → reconciliada ao state.yml § topology, sem inventar topologia) e AR-3 (id do
+    technical_audit normalizado para F1-F7, sem tocar campos selados) CORRIGIDAS; AR-2
+    (nomear token-budget/compiler como resíduo herdado por CO-3) APLICADA como nota textual
+    em state.yml. Risco residual aceito → CO-3: o monólito (compiler/token-budget via
+    check-budget; rules-loader via features editoriais) é substrato transitório, cercado e
+    sem novo consumidor; migração plena pertence a co-enforcement. R2 NÃO reaberto — a
+    falsificação (legacy-transitional, fronteira CO-3) permanece válida, sem evidência nova.
+    Nota de proveniência: Claude (claude-code/claude-opus-4-8) atuou como revisor
+    arquitetural por direção da owner (dogfood); o veredito humano final é o Human Gate em
+    gates/c-bootstrap-registry.yml. Não houve autoaprovação: este artefato não destrava o
+    gate; só o owner o faz.
+review_fingerprint: f5ac871db1f0
