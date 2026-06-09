@@ -1,0 +1,28 @@
+# Resolucoes do implementador para o Technical Audit do checkpoint-bootstrap-registry
+# (PR #38) — lane SEPARADA da review. PROPOE `action`; NAO destrava o gate (so a
+# `disposition` do reviewer/owner destrava). `finding` totalmente qualificado
+# (`<role>#<id>`); rastreavel ao commit que tratou.
+checkpoint: checkpoint-bootstrap-registry
+by: claude-cli
+resolutions:
+  - finding: technical_audit#F1
+    action: fixed
+    ref: 363638f # ramo morto do roteador colapsado em um unico throw (engine.mjs)
+  - finding: technical_audit#F2
+    action: fixed
+    ref: 65451a9 # walkDirectory ordena entradas por nome; rules.json byte-estavel (zero diff)
+  - finding: technical_audit#F3
+    action: fixed
+    ref: f367897 # monolito marcado legacy/transitorio (banners); migracao plena = no CO-3
+  - finding: technical_audit#F4
+    action: fixed
+    ref: bf84f74 # SUPPORTED_MODES exportado + teste anti-drift vs verbos de BOOTSTRAP_COMMANDS
+  - finding: technical_audit#F5
+    action: fixed
+    ref: f367897 # shim orfao cli/governance/runtime-bootstrap.mjs e seu teste removidos
+  - finding: technical_audit#F6
+    action: fixed
+    ref: bf84f74 # parseArgs/normalizeInlineValue/BOOLEAN_FLAGS mortos removidos (+testes)
+  - finding: technical_audit#F7
+    action: fixed
+    ref: bf84f74 # dispatch orienta flag-sem-verbo + teste no CommandRegistry
