@@ -51,7 +51,7 @@ export interface BootstrapCommandDefinition {
 }
 
 async function loadLegacyExecute(): Promise<LegacyExecuteFn> {
-  const legacyPath = path.resolve(process.cwd(), "cli/app/engine.mjs");
+  const legacyPath = path.resolve(__dirname, "../../../../cli/app/engine.mjs");
   const mod = (await import(pathToFileURL(legacyPath).href)) as {
     readonly execute: LegacyExecuteFn;
   };
