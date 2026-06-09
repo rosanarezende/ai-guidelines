@@ -1,0 +1,20 @@
+# Artefato de REVIEW EVENT append-only.
+# Use para re-auditorias/revalidações dentro de um checkpoint REAL da topology.
+# Não altera `disposition`, não aprova gate e não cria checkpoint.
+# Dica: deixe `event_fingerprint: x` e rode `yarn review:check`.
+checkpoint: "checkpoint-example"
+role: technical_audit
+event_id: EV1
+kind: reaudit # reaudit | rereview | verification
+executor:
+  platform: claude-code
+  model: claude-opus-4-8
+decision: approved # approved | changes_requested | blocked
+verifies:
+  - technical_audit#F1
+audit_evidence:
+  coverage:
+    - src/example.ts
+  scope: "o que/como foi revalidado"
+  basis: "por que o evento sustenta a decisão"
+event_fingerprint: x

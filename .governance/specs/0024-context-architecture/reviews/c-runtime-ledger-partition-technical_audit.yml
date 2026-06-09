@@ -2,15 +2,15 @@
 # (checkpoints script-contracts + runtime-bootstrap-readiness + runtime-ledger-partition;
 # cursor em checkpoint-runtime-ledger-partition). HEAD auditado: d051a99.
 # Executor: Claude (claude-code / claude-opus-4-8), reviewer adversarial designado pela owner.
-# decision=changes_requested com 1 finding aberto (F1-R, medium). F2/F3 da auditoria
+# decision=changes_requested com 1 finding emitido (F1-R, medium), agora accepted
+# apos fix e re-auditoria focal append-only. F2/F3 da auditoria
 # anterior foram verificados e estao FECHADOS (F2: docs load-bearing migrados para
 # .governance/runtime/falsifications/ledger.yml; F3: residuo de pointers.mjs removido sem
 # regressao, validate verde). F1-R reabre, com escopo menor, o F1 medium anterior: o fix
 # fecha "workflow ausente" e "run totalmente ausente", mas a verificacao por substring
 # deixa passar a remocao de um run real quando a string sobrevive em comentario.
-# audit_evidence ausente por design (so existe quando findings_emitted=0).
-# F1-R medium NAO bloqueia gate approved (review:check so barra critical/high open); a
-# disposition final cabe ao reviewer/owner — nao auto-fecho o finding que emiti.
+# audit_evidence ausente por design (so existe quando findings_emitted=0). A revalidacao
+# do F1 vive em reviews/events/c-runtime-ledger-partition-technical_audit-ev1-f1-reaudit.yml.
 checkpoint: "checkpoint-runtime-ledger-partition"
 role: technical_audit
 executor:
@@ -24,5 +24,5 @@ findings:
     severity: medium
     location: "cli/governance/script-contracts.mjs#L371"
     description: "F1-R (reabre o F1 medium da auditoria anterior, escopo menor): validateWorkflowRuns (cli/governance/script-contracts.mjs L357-378) usa content.includes(requiredRun) contra o conteudo bruto do arquivo inteiro, sem distinguir um passo 'run:' real de comentario, echo ou nome de job. Reproduzido em d051a99 (patch local, revertido): removendo o 'run: yarn validate' real de .github/workflows/repo-validation.yml e mantendo o comentario que contem 'yarn validate', 'yarn script-contracts:check' retornou exit 0 (falso-verde); o controle removendo 'yarn state-yml:check:all' (sem comentario equivalente) falhou corretamente (exit 1). Mesmo risco vivo para 'yarn ci' em .github/workflows/release.yml (comentario na linha 8 + run na 73). Subfinding (doc): a mensagem de sucesso (L430 'workflows verificados') e o docs/scripts.md gerado (L244-245 'falha quando ... workflow perde um run contratado') prometem acima do que o substring enforca. Esperado: ancorar a verificacao ao passo 'run:' (ou ignorar linhas de comentario antes do includes) e alinhar doc/mensagem ao enforcement real. Nao implementar correcao neste artefato."
-    disposition: open
+    disposition: accepted
     fingerprint: d6838aaa0552

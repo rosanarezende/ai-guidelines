@@ -21,10 +21,11 @@ import { createHash } from "node:crypto";
 
 export type FindingSeverity = "critical" | "high" | "medium" | "low";
 export type FindingDisposition = "open" | "accepted" | "dismissed";
-export type ReviewRole = "technical_audit" | "architectural_review";
+export type ReviewRole = string;
 export type ReviewDecision = "approved" | "changes_requested" | "blocked";
 export type GateDecision = "approved" | "changes_requested";
 export type ResolutionAction = "fixed" | "wontfix" | "needs-discussion";
+export type ReviewEventKind = "reaudit" | "rereview" | "verification";
 
 export const FINDING_SEVERITIES: readonly FindingSeverity[] = ["critical", "high", "medium", "low"];
 export const FINDING_DISPOSITIONS: readonly FindingDisposition[] = [
@@ -43,6 +44,11 @@ export const RESOLUTION_ACTIONS: readonly ResolutionAction[] = [
   "fixed",
   "wontfix",
   "needs-discussion",
+];
+export const REVIEW_EVENT_KINDS: readonly ReviewEventKind[] = [
+  "reaudit",
+  "rereview",
+  "verification",
 ];
 
 /** Severidades que bloqueiam um gate `approved` enquanto `disposition: open`. */
@@ -125,6 +131,18 @@ export interface ResolutionArtifact {
   readonly checkpoint: string;
   readonly by: string;
   readonly resolutions: readonly Resolution[];
+  readonly file: string;
+}
+
+export interface ReviewEventArtifact {
+  readonly checkpoint: string;
+  readonly role: ReviewRole;
+  readonly eventId: string;
+  readonly kind: ReviewEventKind;
+  readonly executor: ExecutorProvenance;
+  readonly decision: ReviewDecision;
+  readonly verifies: readonly string[];
+  readonly auditEvidence: AuditEvidence;
   readonly file: string;
 }
 
@@ -248,6 +266,78 @@ export function reviewFingerprintOf(parts: {
   return createHash("sha256").update(JSON.stringify(envelope)).digest("hex").slice(0, 12);
 }
 
+export function reviewEventFingerprintOf(parts: {
+  checkpoint: string;
+  role: string;
+  eventId: string;
+  kind: string;
+  decision: string;
+  verifies: readonly string[];
+  auditEvidence: AuditEvidence;
+  executor: ExecutorProvenance;
+}): string {
+  return createHash("sha256")
+    .update(
+      JSON.stringify([
+        parts.checkpoint,
+        parts.role,
+        parts.eventId,
+        parts.kind,
+        parts.decision,
+        [...parts.verifies].sort(),
+        [parts.auditEvidence.scope, parts.auditEvidence.basis, [...parts.auditEvidence.coverage]],
+        [parts.executor.platform, parts.executor.model],
+      ])
+    )
+    .digest("hex")
+    .slice(0, 12);
+}
+
+function parseExecutor(rawExecutor: unknown, file: string): ExecutorProvenance {
+  if (!rawExecutor || typeof rawExecutor !== "object" || Array.isArray(rawExecutor)) {
+    throw new ReviewArtifactParseError(
+      `${file}: "executor" deve ser um mapping { platform, model }.`
+    );
+  }
+  const ex = rawExecutor as Record<string, unknown>;
+  const platform = str(ex.platform);
+  if (!platform) {
+    throw new ReviewArtifactParseError(
+      `${file}: executor.platform é obrigatório (harness/produto: antigravity | codex-cli | claude-code | local).`
+    );
+  }
+  const model = str(ex.model);
+  if (!model) {
+    throw new ReviewArtifactParseError(
+      `${file}: executor.model é obrigatório (LLM totalmente-qualificado: ex. gemini-3.1-pro-high).`
+    );
+  }
+  return { platform, model };
+}
+
+function parseAuditEvidence(rawEvidence: unknown, file: string): AuditEvidence {
+  if (!rawEvidence || typeof rawEvidence !== "object" || Array.isArray(rawEvidence)) {
+    throw new ReviewArtifactParseError(
+      `${file}: "audit_evidence" obrigatório (coverage + scope + basis).`
+    );
+  }
+  const ev = rawEvidence as Record<string, unknown>;
+  const coverage = parseCoverage(ev.coverage, file);
+  const scope = str(ev.scope);
+  if (!scope) {
+    throw new ReviewArtifactParseError(
+      `${file}: audit_evidence.scope é obrigatório (o que/como foi inspecionado — narrativa).`
+    );
+  }
+  const basis = str(ev.basis);
+  if (!basis) {
+    throw new ReviewArtifactParseError(
+      `${file}: audit_evidence.basis é obrigatório (por que a aprovação foi concedida).`
+    );
+  }
+  return { coverage, scope, basis };
+}
+
 export function parseReview(yamlText: string, file: string): ReviewArtifact {
   const raw: unknown = parse(yamlText);
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
@@ -266,30 +356,12 @@ export function parseReview(yamlText: string, file: string): ReviewArtifact {
   let actor: string | undefined;
   let executor: ExecutorProvenance | undefined;
   if (rawExecutor !== undefined && rawExecutor !== null) {
-    if (typeof rawExecutor !== "object" || Array.isArray(rawExecutor)) {
-      throw new ReviewArtifactParseError(
-        `${file}: "executor" deve ser um mapping { platform, model }.`
-      );
-    }
     if (o.actor !== undefined && o.actor !== null) {
       throw new ReviewArtifactParseError(
         `${file}: use "executor" (canônico) OU "actor" (legado), não ambos.`
       );
     }
-    const ex = rawExecutor as Record<string, unknown>;
-    const platform = str(ex.platform);
-    if (!platform) {
-      throw new ReviewArtifactParseError(
-        `${file}: executor.platform é obrigatório (harness/produto: antigravity | codex-cli | claude-code | local).`
-      );
-    }
-    const model = str(ex.model);
-    if (!model) {
-      throw new ReviewArtifactParseError(
-        `${file}: executor.model é obrigatório (LLM totalmente-qualificado: ex. gemini-3.1-pro-high).`
-      );
-    }
-    executor = { platform, model };
+    executor = parseExecutor(rawExecutor, file);
   } else {
     actor = str(o.actor) ?? undefined;
     if (!actor) {
@@ -299,9 +371,8 @@ export function parseReview(yamlText: string, file: string): ReviewArtifact {
     }
   }
 
-  if (!(REVIEW_ROLES as readonly string[]).includes(o.role as string)) {
-    throw new ReviewArtifactParseError(`${file}: "role" must be one of ${REVIEW_ROLES.join("|")}`);
-  }
+  const role = str(o.role);
+  if (!role) throw new ReviewArtifactParseError(`${file}: "role" is required`);
   if (!(REVIEW_DECISIONS as readonly string[]).includes(o.decision as string)) {
     throw new ReviewArtifactParseError(
       `${file}: "decision" must be one of ${REVIEW_DECISIONS.join("|")}`
@@ -360,7 +431,7 @@ export function parseReview(yamlText: string, file: string): ReviewArtifact {
     const severity = f.severity as FindingSeverity;
     const expected = fingerprintOf({
       checkpoint,
-      role: o.role as ReviewRole,
+      role,
       id,
       severity,
       location,
@@ -397,22 +468,8 @@ export function parseReview(yamlText: string, file: string): ReviewArtifact {
           `evidência selada de cobertura para recuperabilidade futura.`
       );
     }
-    const ev = rawEvidence as Record<string, unknown>;
     // coverage (2.4g): o "onde" estruturado e queryável; scope/basis seguem texto.
-    const coverage = parseCoverage(ev.coverage, file);
-    const scope = str(ev.scope);
-    if (!scope) {
-      throw new ReviewArtifactParseError(
-        `${file}: audit_evidence.scope é obrigatório (o que/como foi inspecionado — narrativa).`
-      );
-    }
-    const basis = str(ev.basis);
-    if (!basis) {
-      throw new ReviewArtifactParseError(
-        `${file}: audit_evidence.basis é obrigatório (por que a aprovação foi concedida).`
-      );
-    }
-    auditEvidence = { coverage, scope, basis };
+    auditEvidence = parseAuditEvidence(rawEvidence, file);
   } else if (rawEvidence !== undefined && rawEvidence !== null) {
     throw new ReviewArtifactParseError(
       `${file}: "audit_evidence" é proibido quando há findings — a evidência são os próprios findings. Remova-o.`
@@ -424,7 +481,7 @@ export function parseReview(yamlText: string, file: string): ReviewArtifact {
   // executor (proveniência estruturada) → ambas tamper-evidentes.
   const expectedReview = reviewFingerprintOf({
     checkpoint,
-    role: o.role as ReviewRole,
+    role,
     findingsEmitted,
     ids: findings.map((f) => f.id),
     ...(auditEvidence ? { auditEvidence } : {}),
@@ -440,13 +497,83 @@ export function parseReview(yamlText: string, file: string): ReviewArtifact {
 
   return {
     checkpoint,
-    role: o.role as ReviewRole,
+    role,
     ...(actor ? { actor } : {}),
     ...(executor ? { executor } : {}),
     decision: o.decision as ReviewDecision,
     findingsEmitted,
     findings,
     ...(auditEvidence ? { auditEvidence } : {}),
+    file,
+  };
+}
+
+export function parseReviewEvent(yamlText: string, file: string): ReviewEventArtifact {
+  const raw: unknown = parse(yamlText);
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
+    throw new ReviewArtifactParseError(`${file}: root must be a mapping`);
+  }
+  const o = raw as Record<string, unknown>;
+  const checkpoint = str(o.checkpoint) ?? String(o.checkpoint ?? "");
+  if (!checkpoint) throw new ReviewArtifactParseError(`${file}: "checkpoint" is required`);
+  const role = str(o.role);
+  if (!role) throw new ReviewArtifactParseError(`${file}: "role" is required`);
+  const eventId = str(o.event_id);
+  if (!eventId) throw new ReviewArtifactParseError(`${file}: "event_id" is required`);
+  if (!(REVIEW_EVENT_KINDS as readonly string[]).includes(o.kind as string)) {
+    throw new ReviewArtifactParseError(
+      `${file}: "kind" must be one of ${REVIEW_EVENT_KINDS.join("|")}`
+    );
+  }
+  if (!(REVIEW_DECISIONS as readonly string[]).includes(o.decision as string)) {
+    throw new ReviewArtifactParseError(
+      `${file}: "decision" must be one of ${REVIEW_DECISIONS.join("|")}`
+    );
+  }
+  const rawVerifies = o.verifies === undefined || o.verifies === null ? [] : o.verifies;
+  if (!Array.isArray(rawVerifies) || rawVerifies.length === 0) {
+    throw new ReviewArtifactParseError(
+      `${file}: "verifies" deve ser uma lista NÃO-vazia de findings qualificados (<role>#F<n>).`
+    );
+  }
+  const verifies = rawVerifies.map((v, i) => {
+    const ref = str(v);
+    if (!ref) throw new ReviewArtifactParseError(`${file}: verifies[${i}] deve ser string`);
+    if (!ref.includes("#")) {
+      throw new ReviewArtifactParseError(
+        `${file}: verifies[${i}] deve ser totalmente qualificado (<role>#F<n>).`
+      );
+    }
+    return ref;
+  });
+  const executor = parseExecutor(o.executor, file);
+  const auditEvidence = parseAuditEvidence(o.audit_evidence, file);
+  const expected = reviewEventFingerprintOf({
+    checkpoint,
+    role,
+    eventId,
+    kind: o.kind as ReviewEventKind,
+    decision: o.decision as ReviewDecision,
+    verifies,
+    auditEvidence,
+    executor,
+  });
+  const declared = str(o.event_fingerprint);
+  if (declared !== expected) {
+    throw new ReviewArtifactParseError(
+      `${file}: event_fingerprint inválido (evento alterado sem re-selar?). ` +
+        `esperado: ${expected}${declared ? ` · declarado: ${declared}` : " · ausente"}`
+    );
+  }
+  return {
+    checkpoint,
+    role,
+    eventId,
+    kind: o.kind as ReviewEventKind,
+    executor,
+    decision: o.decision as ReviewDecision,
+    verifies,
+    auditEvidence,
     file,
   };
 }

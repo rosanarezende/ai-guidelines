@@ -1,8 +1,10 @@
 import { consolidate, SpecArtifacts } from "./reviewCheck.js";
 import {
   parseReview,
+  parseReviewEvent,
   parseResolutions,
   fingerprintOf,
+  reviewEventFingerprintOf,
   reviewFingerprintOf,
   ReviewArtifactParseError,
   ReviewArtifact,
@@ -182,20 +184,78 @@ function gate(decision: "approved" | "changes_requested"): GateArtifact {
   return { checkpoint: "3", actor: "@owner", decision, file: "gates/c3.yml" };
 }
 
+function reviewEventYaml(verifies: string[]): string {
+  const executor = { platform: "claude-code", model: "claude-opus-4-8" };
+  const auditEvidence = {
+    coverage: ["cli/governance/script-contracts.mjs"],
+    scope: "re-auditoria focal",
+    basis: "finding tecnicamente resolvido",
+  };
+  const eventFingerprint = reviewEventFingerprintOf({
+    checkpoint: CP,
+    role: ROLE,
+    eventId: "EV1",
+    kind: "reaudit",
+    decision: "approved",
+    verifies,
+    auditEvidence,
+    executor,
+  });
+  return `checkpoint: "${CP}"
+role: ${ROLE}
+event_id: EV1
+kind: reaudit
+executor:
+  platform: ${executor.platform}
+  model: ${executor.model}
+decision: approved
+verifies:
+${verifies.map((v) => `  - ${v}`).join("\n")}
+audit_evidence:
+  coverage:
+    - ${auditEvidence.coverage[0]}
+  scope: "${auditEvidence.scope}"
+  basis: "${auditEvidence.basis}"
+event_fingerprint: ${eventFingerprint}
+`;
+}
+
+function artifacts(partial: {
+  reviews?: SpecArtifacts["reviews"];
+  reviewEvents?: SpecArtifacts["reviewEvents"];
+  resolutions?: SpecArtifacts["resolutions"];
+  gates?: SpecArtifacts["gates"];
+  allowedCheckpoints?: string[];
+  requiredReviewRolesByCheckpoint?: SpecArtifacts["requiredReviewRolesByCheckpoint"];
+  policy?: SpecArtifacts["policy"];
+}): SpecArtifacts {
+  return {
+    reviews: partial.reviews ?? [],
+    reviewEvents: partial.reviewEvents ?? [],
+    resolutions: partial.resolutions ?? [],
+    gates: partial.gates ?? [],
+    allowedCheckpoints: partial.allowedCheckpoints ?? ["checkpoint-3"],
+    ...(partial.requiredReviewRolesByCheckpoint
+      ? { requiredReviewRolesByCheckpoint: partial.requiredReviewRolesByCheckpoint }
+      : {}),
+    ...(partial.policy ? { policy: partial.policy } : {}),
+  };
+}
+
 describe("consolidate (enforcement) [Checkpoint 2.4a]", () => {
   it("ANTI-AUTOAPROVAÇÃO: resolução `fixed` NÃO destrava o gate enquanto disposition=open", () => {
-    const a: SpecArtifacts = {
+    const a: SpecArtifacts = artifacts({
       reviews: [review("technical_audit", [finding("F1", "high", "open")])],
       resolutions: [resolutions([{ finding: "technical_audit#F1", action: "fixed" }])], // implementador "resolveu"
       gates: [gate("approved")],
-    };
+    });
     const { violations } = consolidate(a);
     // gate aprovado mas finding bloqueante segue open → VIOLAÇÃO (só o reviewer fecha)
     expect(violations.join("\n")).toMatch(/disposition: open/);
   });
 
   it("gate approved com bloqueantes fechados pelo reviewer (accepted/dismissed) → OK", () => {
-    const a: SpecArtifacts = {
+    const a: SpecArtifacts = artifacts({
       reviews: [
         review("technical_audit", [
           finding("F1", "high", "accepted"),
@@ -204,47 +264,47 @@ describe("consolidate (enforcement) [Checkpoint 2.4a]", () => {
       ],
       resolutions: [],
       gates: [gate("approved")],
-    };
+    });
     expect(consolidate(a).violations).toHaveLength(0);
   });
 
   it("gate approved com só medium/low open → OK (não-bloqueantes)", () => {
-    const a: SpecArtifacts = {
+    const a: SpecArtifacts = artifacts({
       reviews: [review("architectural_review", [finding("F1", "medium", "open")])],
       resolutions: [],
       gates: [gate("approved")],
-    };
+    });
     expect(consolidate(a).violations).toHaveLength(0);
   });
 
   it("resolução órfã (finding inexistente) → VIOLAÇÃO", () => {
-    const a: SpecArtifacts = {
+    const a: SpecArtifacts = artifacts({
       reviews: [review("technical_audit", [finding("F1", "high", "accepted")])],
       resolutions: [resolutions([{ finding: "technical_audit#F9", action: "fixed" }])],
       gates: [],
-    };
+    });
     expect(consolidate(a).violations.join("\n")).toMatch(/inexistente/);
   });
 
   it("COLISÃO CROSS-ROLE (2.4c): resolução qualificada NÃO casa finding de outra role", () => {
     // só technical_audit tem F1; resolução aponta architectural_review#F1 → órfã (sem endsWith)
-    const a: SpecArtifacts = {
+    const a: SpecArtifacts = artifacts({
       reviews: [review("technical_audit", [finding("F1", "high", "accepted")])],
       resolutions: [resolutions([{ finding: "architectural_review#F1", action: "fixed" }])],
       gates: [],
-    };
+    });
     expect(consolidate(a).violations.join("\n")).toMatch(/architectural_review#F1.*inexistente/);
     // a qualificada correta NÃO é órfã
-    const b: SpecArtifacts = {
+    const b: SpecArtifacts = artifacts({
       reviews: [review("technical_audit", [finding("F1", "high", "accepted")])],
       resolutions: [resolutions([{ finding: "technical_audit#F1", action: "fixed" }])],
       gates: [],
-    };
+    });
     expect(consolidate(b).violations).toHaveLength(0);
   });
 
   it("consolida contagens (open/closed) por checkpoint", () => {
-    const a: SpecArtifacts = {
+    const a: SpecArtifacts = artifacts({
       reviews: [
         review("technical_audit", [
           finding("F1", "high", "open"),
@@ -253,11 +313,60 @@ describe("consolidate (enforcement) [Checkpoint 2.4a]", () => {
       ],
       resolutions: [],
       gates: [],
-    };
+    });
     const c = consolidate(a).byCheckpoint[0];
     expect(c.totalOpen).toBe(1);
     expect(c.totalClosed).toBe(1);
     expect(c.openBlocking.map((f) => f.id)).toEqual(["F1"]);
+  });
+
+  it("checkpoint fora da topologia → VIOLAÇÃO", () => {
+    const a = artifacts({
+      reviews: [review("technical_audit", [finding("F1", "low", "open")])],
+      allowedCheckpoints: ["checkpoint-outra-coisa"],
+    });
+    expect(consolidate(a).violations.join("\n")).toMatch(/fora de state\.yml/);
+  });
+
+  it("review-policy exige role ausente no checkpoint → VIOLAÇÃO", () => {
+    const a = artifacts({
+      reviews: [review("technical_audit", [])],
+      requiredReviewRolesByCheckpoint: { "3": ["technical_audit", "architectural_review"] },
+    });
+    expect(consolidate(a).violations.join("\n")).toMatch(/architectural_review/);
+  });
+
+  it("review event aprovado verifica finding existente e destrava política de accepted+fixed", () => {
+    const event = parseReviewEvent(reviewEventYaml(["technical_audit#F1"]), "events/e.yml");
+    const a = artifacts({
+      reviews: [review("technical_audit", [finding("F1", "high", "accepted")])],
+      reviewEvents: [event],
+      resolutions: [resolutions([{ finding: "technical_audit#F1", action: "fixed" }])],
+      policy: {
+        implementationPr: { requiredReviewRoles: [], requiredNativeApprovals: 0 },
+        integrationPr: { requiredReviewRoles: [], requiredNativeApprovals: 0 },
+        acceptedFindings: {
+          requireResolution: true,
+          requireVerificationEventForFixed: true,
+        },
+        github: {
+          minimumApprovingReviews: 0,
+          requireCodeOwnerReview: false,
+          dismissStaleReviewsOnPush: false,
+          requireLastPushApproval: false,
+        },
+      },
+    });
+    expect(consolidate(a).violations).toHaveLength(0);
+  });
+
+  it("review event que referencia finding inexistente → VIOLAÇÃO", () => {
+    const event = parseReviewEvent(reviewEventYaml(["technical_audit#F9"]), "events/e.yml");
+    const a = artifacts({
+      reviews: [review("technical_audit", [finding("F1", "high", "accepted")])],
+      reviewEvents: [event],
+    });
+    expect(consolidate(a).violations.join("\n")).toMatch(/F9.*inexistente/);
   });
 });
 

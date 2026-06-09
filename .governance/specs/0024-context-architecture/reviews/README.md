@@ -4,16 +4,19 @@
 
 ## Lanes de propriedade (2.4a — o ponto central)
 
-| Lane                       | Arquivo                        | Dono                     | O gate lê?                  |
-| :------------------------- | :----------------------------- | :----------------------- | :-------------------------- |
-| **Finding** (a claim)      | `reviews/c<N>-<role>.yml`      | reviewer (executor real) | **sim** — via `disposition` |
-| **Resolução** (a resposta) | `reviews/c<N>-resolutions.yml` | implementer (Claude)     | **não**                     |
-| **Gate** (o veredito)      | `gates/c<N>.yml`               | owner                    | é o gate                    |
-| **Projeção**               | 1 comentário de status no PR   | —                        | —                           |
+| Lane                               | Arquivo                            | Dono                     | O gate lê?                  |
+| :--------------------------------- | :--------------------------------- | :----------------------- | :-------------------------- |
+| **Summary** (estado atual da lane) | `reviews/c<N>-<role>.yml`          | reviewer (executor real) | **sim** — via `disposition` |
+| **Evento** (histórico append-only) | `reviews/events/c<N>-<role>-*.yml` | reviewer/auditor         | **sim** — como evidência    |
+| **Resolução** (a resposta)         | `reviews/c<N>-resolutions.yml`     | implementer (Claude)     | **não**                     |
+| **Gate** (o veredito)              | `gates/c<N>.yml`                   | owner                    | é o gate                    |
+| **Projeção**                       | 1 comentário de status no PR       | —                        | —                           |
 
 **Proveniência (2.4f):** `role` é a **faixa** (`technical_audit` | `architectural_review`). Quem executou é um **agente computacional** — estruturado e **selado** como `executor: { platform, model }` (`platform`: antigravity | codex-cli | claude-code | local; `model`: gemini-3.1-pro-high | claude-opus-4-8 | qwen3-235b). São dimensões **ortogonais** (m:n) → string única (ou composta `a/b`) seria lossy e exigiria parsing; o VO é queryável e selável. O **Gate** mantém `actor: <handle>` (decisor **humano**). `actor` num review é **legado** (artefatos históricos já selados, ex. c2.3/c2.4d); novos usam `executor`. O "uso de modelos/plataformas" é **projeção derivada** sobre os reviews — não um registry `Agent` persistido.
 
-**Anti-autoaprovação estrutural:** o gate bloqueia em finding bloqueante (`critical/high`) com `disposition: open`. **Só o reviewer fecha** (`accepted`/`dismissed`). O implementador escreve resolução noutra lane — que **não destrava o gate**. Para autoaprovar, teria de editar a `disposition` no arquivo do reviewer: um **diff cross-lane visível e atribuível**.
+**Anti-autoaprovação estrutural:** o gate bloqueia em finding bloqueante (`critical/high`) com `disposition: open`. **Só o reviewer/owner fecha** (`accepted`/`dismissed`). O implementador escreve resolução noutra lane — que **não destrava o gate**. Re-auditorias/revalidações viram **eventos append-only** no mesmo checkpoint real; não criam checkpoint. Para autoaprovar, teria de editar a `disposition` no arquivo do reviewer: um **diff cross-lane visível e atribuível**.
+
+**Review Policy:** `.governance/review-policy.yml` define o perfil ativo (`solo`, `contributor`, `team`) e quais evidências são obrigatórias por tipo de PR. Nem todo repositório precisa de Technical Audit + Architectural Review em todo PR. GitHub native reviews continuam sendo enforcement de merge em `main` (approvals, CODEOWNERS, stale reviews, required checks); os artefatos aqui são memória governada e evidência do processo.
 
 ## Integridade local (tamper-EVIDENCE, não tamper-proofing — ADR 0021)
 
@@ -28,15 +31,15 @@
 - **Onde vivem os findings?** `reviews/c<N>-<role>.yml` (selados). Sem `findings.yml` à mão — consolidado é **derivado**.
 - **Identidade?** `F1..FN` contíguos por arquivo; global = **`<role>#F<n>`** (totalmente qualificado). Resoluções referenciam essa forma exata — sem colisão cross-role (2.4c). `fingerprint` (JSON canônico) amarra id↔conteúdo.
 - **Mudança de estado?** Reviewer muda `disposition`; implementador anexa `resolution` (lane separada). Git = log.
-- **Múltiplas revisões no mesmo lugar?** Não. 1 arquivo por `(checkpoint, role)`.
+- **Múltiplas revisões no mesmo lugar?** Sim, como eventos append-only. Continua existindo 1 summary por `(checkpoint, role)`, mas podem existir vários `ReviewEvent` para re-auditorias/revalidações do mesmo checkpoint/role.
 - **Gate sabe o consolidado?** `review:check` deriva e enforça (gate `approved` ⟹ 0 bloqueante `open`).
 - **Comentário que sobra?** 1 de status. **Some:** os 4 comentões de proveniência → viram artefatos.
 
 ## Fluxo do próximo PR (Checkpoint N)
 
 1. **Claude** implementa → commit + 1 comentário de status.
-2. **Technical Audit** (`executor: { platform, model }`) → `reviews/c<N>-technical_audit.yml` (findings selados, `disposition: open`; **ou**, aprovação limpa, `findings_emitted: 0` + `audit_evidence`).
-3. **Architectural Review** (`executor: { platform, model }`) → `reviews/c<N>-architectural_review.yml`.
-4. **Claude** corrige → `reviews/c<N>-resolutions.yml` (`action: fixed`, `ref: <sha>`). **Não fecha findings.**
-5. **Reviewer** valida e fecha (`disposition: accepted/dismissed`) — re-selando se mudou a claim.
-6. **Owner** → `gates/c<N>.yml` (`approved`) + Approve nativo. `review:check` barra aprovar com bloqueante `open`.
+2. Reviews exigidos pela `review-policy` (se houver) → `reviews/c<N>-<role>.yml` (findings selados, `disposition: open`; **ou**, aprovação limpa, `findings_emitted: 0` + `audit_evidence`).
+3. **Claude** corrige → `reviews/c<N>-resolutions.yml` (`action: fixed`, `ref: <sha>`). **Não fecha findings.**
+4. **Reviewer/auditor** revalida → `reviews/events/c<N>-<role>-*.yml` quando a revalidação precisa virar memória histórica.
+5. **Reviewer/owner** fecha (`disposition: accepted/dismissed`) no summary — re-selando só se mudou a claim.
+6. **Owner** → `gates/c<N>.yml` (`approved`) + Approve nativo quando aplicável. `review:check` barra aprovar com bloqueante `open`.

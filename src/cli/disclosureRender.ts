@@ -201,7 +201,10 @@ function discoverSpec(
       errors.push((e as Error).message);
     }
   }
-  return { artifacts: { reviews, resolutions, gates }, errors };
+  return {
+    artifacts: { reviews, reviewEvents: [], resolutions, gates, allowedCheckpoints: [] },
+    errors,
+  };
 }
 
 function resolveSpecDir(repoRoot: string, specId: string, branchScope: string): string | null {

@@ -128,7 +128,7 @@ Início/topologia: `2bca476` (handoff + GovernedRef + cursor) + `caf64da` (plann
 ## 8. Próximo passo imediato
 
 A fatia vertical original está completa e revisada; o trabalho vivo é CO-2.2. Fluxo de fechamento da 0024 (Draft até o fim):
-concluir CO-2.2 → `yarn validate` → **review complementar curto** (Technical/Architectural delta) → **atualizar body final** (Valor entregue/disclosure/evidências) → **converter para Ready** (a entrega está pronta para decisão humana) → **Human Gate** (owner decide avançar/ajustar/rejeitar; NÃO é merge em main). NÃO re-deliberar (§2); NÃO abrir CO-3+; NÃO instalar banco externo neste PR.
+concluir os deltas ativos do PR #37 → `yarn validate` → **revisões complementares conforme `.governance/review-policy.yml`** (na 0024 seguimos usando Technical/Architectural como dogfood intensivo, não como regra universal) → **atualizar body final** (Valor entregue/disclosure/evidências) → **converter para Ready** (a entrega está pronta para decisão humana) → **Human Gate** (owner decide avançar/ajustar/rejeitar; NÃO é merge em main). NÃO re-deliberar (§2); NÃO abrir CO-3+; NÃO instalar banco externo neste PR.
 
 ## 9. CO-2.1 (`checkpoint-co-knowledge-backfill`) — delta aprovado pela owner
 
