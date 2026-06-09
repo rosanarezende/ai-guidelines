@@ -31,6 +31,10 @@ const OPTION_FLAGS = [
   "features",
 ] as const;
 
+// Tupla de tipo dos verbos de bootstrap. A SSOT operacional (lista registrada) é
+// `BOOTSTRAP_COMMANDS` abaixo; a cópia `SUPPORTED_MODES` em `cli/cli/args.mjs` —
+// necessária porque aquele `.mjs` executa pré-build, sem `dist/` — é guardada contra
+// drift pelo teste `cli/cli/args.test.mjs` (BR-CLI-INPUT-07).
 const SUPPORTED_BOOTSTRAP_COMMANDS = [
   "init",
   "adopt",

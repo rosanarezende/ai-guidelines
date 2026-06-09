@@ -83,8 +83,14 @@ export class CommandRegistry {
 
     const command = this.resolve(name);
     if (!command) {
+      // Flag no lugar do verbo (ex.: `--target ./x`): a CLI é registry-first, o
+      // verbo vem ANTES das opções. Mensagem orientada em vez de "não suportado"
+      // genérico — sem reintroduzir wizard implícito a partir de flags soltas.
       context.logger.error(
-        `Comando não suportado: "${name}". Disponíveis: ${this.commandNames().join(", ")}.`
+        name.startsWith("-")
+          ? `"${name}" é uma opção, não um comando. Informe um comando antes das opções ` +
+              `(ex.: ${this.commandNames().join(", ")}). Use \`--help\` para ver todos.`
+          : `Comando não suportado: "${name}". Disponíveis: ${this.commandNames().join(", ")}.`
       );
       return { exitCode: 1 };
     }
