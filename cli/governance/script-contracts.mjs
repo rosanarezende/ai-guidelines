@@ -354,6 +354,59 @@ function validateForbiddenPhrases(repoRoot, contract) {
   return violations;
 }
 
+function countIndent(line) {
+  const match = line.match(/^\s*/);
+  return match ? match[0].length : 0;
+}
+
+function unquoteYamlScalar(value) {
+  const text = value.trim();
+  if (
+    (text.startsWith('"') && text.endsWith('"')) ||
+    (text.startsWith("'") && text.endsWith("'"))
+  ) {
+    return text.slice(1, -1);
+  }
+  return text;
+}
+
+function runLineMatchesRequiredRun(line, requiredRun) {
+  const text = unquoteYamlScalar(line);
+  if (!text || text.startsWith("#")) return false;
+  return (
+    text === requiredRun ||
+    text.startsWith(`${requiredRun} &&`) ||
+    text.startsWith(`${requiredRun} ||`) ||
+    text.startsWith(`${requiredRun};`)
+  );
+}
+
+function workflowDeclaresRun(content, requiredRun) {
+  const lines = content.split(/\r?\n/);
+  for (let index = 0; index < lines.length; index += 1) {
+    const line = lines[index];
+    const match = line.match(/^(\s*)(?:-\s*)?run:\s*(.*)$/);
+    if (!match) continue;
+
+    const indent = match[1].length;
+    const runValue = match[2].trim();
+    if (!runValue) continue;
+
+    if (/^[|>]/.test(runValue)) {
+      for (let blockIndex = index + 1; blockIndex < lines.length; blockIndex += 1) {
+        const blockLine = lines[blockIndex];
+        if (blockLine.trim() && countIndent(blockLine) <= indent) break;
+        if (runLineMatchesRequiredRun(blockLine.trim(), requiredRun)) return true;
+      }
+      continue;
+    }
+
+    if (runLineMatchesRequiredRun(runValue, requiredRun)) return true;
+  }
+
+  return false;
+}
+
 function validateWorkflowRuns(repoRoot, contract) {
   const violations = [];
   const workflows = contract.profiles.maintainer.workflows ?? [];
@@ -368,7 +421,7 @@ function validateWorkflowRuns(repoRoot, contract) {
 
     const content = readText(repoRoot, workflowPath);
     for (const requiredRun of workflow.required_runs ?? []) {
-      if (!content.includes(requiredRun)) {
+      if (!workflowDeclaresRun(content, requiredRun)) {
         violations.push(`workflow ${workflowPath} nao contem run contratado: ${requiredRun}`);
       }
     }

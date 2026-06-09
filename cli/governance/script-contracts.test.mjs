@@ -146,6 +146,45 @@ test("DADO workflow sem run contratado QUANDO check roda ENTÃO reporta drift", 
   );
 });
 
+test("DADO required_run apenas em comentario QUANDO check roda ENTÃO reporta drift", () => {
+  const repoRoot = tempRepo();
+  writeContract(repoRoot);
+  sync(repoRoot);
+  fs.writeFileSync(
+    path.join(repoRoot, ".github", "workflows", "repo-validation.yml"),
+    "# Este workflow deve rodar yarn validate\n" +
+      "name: repo-validation\n" +
+      "jobs:\n" +
+      "  validate:\n" +
+      "    steps:\n" +
+      "      - run: yarn test\n"
+  );
+
+  assert.match(
+    check(repoRoot).join("\n"),
+    /workflow \.github\/workflows\/repo-validation\.yml nao contem run contratado: yarn validate/
+  );
+});
+
+test("DADO required_run em bloco run QUANDO check roda ENTÃO aceita comando real", () => {
+  const repoRoot = tempRepo();
+  writeContract(repoRoot);
+  sync(repoRoot);
+  fs.writeFileSync(
+    path.join(repoRoot, ".github", "workflows", "repo-validation.yml"),
+    "# Comentario tambem menciona yarn validate\n" +
+      "name: repo-validation\n" +
+      "jobs:\n" +
+      "  validate:\n" +
+      "    steps:\n" +
+      "      - run: |\n" +
+      "          # comentario dentro do bloco nao deve contar\n" +
+      "          yarn validate\n"
+  );
+
+  assert.deepEqual(check(repoRoot), []);
+});
+
 test("DADO workflow ausente QUANDO check roda ENTÃO reporta drift", () => {
   const repoRoot = tempRepo();
   writeContract(repoRoot);
