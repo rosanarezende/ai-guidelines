@@ -33,7 +33,7 @@ export async function main(repoRoot = process.cwd()): Promise<number> {
     return 1;
   }
 
-  const saveResult = saveCatalogArtifacts(
+  const saveResult = await saveCatalogArtifacts(
     result.catalogJson,
     result.ledgerMarkdown,
     result.humanCatalogMarkdown,

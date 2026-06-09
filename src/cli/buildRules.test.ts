@@ -4,6 +4,17 @@ import path from "node:path";
 
 import { main } from "./buildRules.js";
 
+// O Prettier 3 carrega seu core ESM via import() dinâmico, o que não é suportado
+// dentro da VM do Jest sem --experimental-vm-modules. Este teste valida o conteúdo
+// gerado (rules.json/ledger/catálogo), não a camada de formatação — então o
+// prettier é mockado com passthrough. A invariável "build:rules → working tree
+// formatada" é coberta pela execução real de build:rules no harness.
+jest.mock("prettier", () => ({
+  __esModule: true,
+  resolveConfig: jest.fn(async () => ({})),
+  format: jest.fn(async (source: string) => source),
+}));
+
 function writeRuleFile(repoRoot: string): void {
   const rulesDir = path.join(repoRoot, ".core/rules/top");
   mkdirSync(rulesDir, { recursive: true });

@@ -1,6 +1,7 @@
-import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
+
+import { format, resolveConfig } from "prettier";
 
 import { RulesCatalogJson } from "../../domain/rules/Rule.js";
 
@@ -49,12 +50,12 @@ export function readPreviousGeneratedAt(rulesPath: string): string | undefined {
   }
 }
 
-export function saveCatalogArtifacts(
+export async function saveCatalogArtifacts(
   catalogJson: RulesCatalogJson,
   ledgerMarkdown: string,
   humanCatalogMarkdown: string,
   paths: RulesArtifactPaths
-): SaveCatalogArtifactsResult {
+): Promise<SaveCatalogArtifactsResult> {
   const errors: string[] = [];
 
   try {
@@ -66,31 +67,38 @@ export function saveCatalogArtifacts(
     };
   }
 
-  writeIfChanged(paths.rulesPath, JSON.stringify(catalogJson, null, 2), errors);
-  writeIfChanged(paths.ledgerPath, ledgerMarkdown, errors);
-  writeIfChanged(paths.catalogPath, humanCatalogMarkdown, errors);
-
-  try {
-    execFileSync(
-      "yarn",
-      ["prettier", "--write", paths.rulesPath, paths.ledgerPath, paths.catalogPath],
-      {
-        stdio: "ignore",
-      }
-    );
-  } catch {
-    // Non-fatal: tests and constrained shells may not have yarn on PATH.
-  }
+  // Os artefatos são escritos JÁ formatados pelo Prettier (API Node, sem spawn de
+  // processo), garantindo que `build:rules` deixe a working tree limpa em qualquer
+  // SO. Formatar via `execFileSync("yarn", ...)` não é portátil no Windows
+  // (resolução de `yarn.cmd` exige shell) e mascarava o drift de formatação.
+  await writeFormatted(paths.rulesPath, JSON.stringify(catalogJson, null, 2), errors);
+  await writeFormatted(paths.ledgerPath, ledgerMarkdown, errors);
+  await writeFormatted(paths.catalogPath, humanCatalogMarkdown, errors);
 
   return { success: errors.length === 0, errors };
 }
 
-function writeIfChanged(filePath: string, content: string, errors: string[]): void {
+async function writeFormatted(
+  filePath: string,
+  rawContent: string,
+  errors: string[]
+): Promise<void> {
+  let formatted: string;
   try {
-    if (existsSync(filePath) && readFileSync(filePath, "utf-8") === content) {
+    const config = await resolveConfig(filePath);
+    formatted = await format(rawContent, { ...config, filepath: filePath });
+  } catch (err) {
+    // Falha de formatação é fatal: o build deve quebrar visivelmente em vez de
+    // gravar artefatos fora do padrão Prettier e sujar a working tree.
+    errors.push(`[FORMAT_ERROR] Failed to format ${filePath}: ${(err as Error).message}`);
+    return;
+  }
+
+  try {
+    if (existsSync(filePath) && readFileSync(filePath, "utf-8") === formatted) {
       return;
     }
-    writeFileSync(filePath, content, "utf-8");
+    writeFileSync(filePath, formatted, "utf-8");
   } catch (err) {
     errors.push(`[SAVE_ERROR] Failed to write ${filePath}: ${(err as Error).message}`);
   }
