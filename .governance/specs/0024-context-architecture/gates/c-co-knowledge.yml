@@ -1,0 +1,24 @@
+# Human Gate do PR #37 (co-knowledge / CO-2), keyado no checkpoint-review-policy-events.
+# Owner (rosana) 2026-06-09: APROVADO. Lanes: technical_audit + architectural_review
+# aprovadas para o delta final; runtime-ledger technical_audit#F1 corrigido, re-auditado
+# por ReviewEvent e accepted. review:check ENFORCA: approved exige zero finding
+# critical/high `open` — satisfeito. O Human Gate decide o PROXIMO MOVIMENTO
+# (avancar para bootstrap-compiler), NAO merge em main (modo unit).
+checkpoint: "checkpoint-review-policy-events"
+actor: "@rosanarezende"
+ref: "#37"
+date: "2026-06-09"
+decision: approved
+note: "PR #37 (co-knowledge: Knowledge tipado, Falsification, backfill minimo, script contracts, runtime bootstrap/ledgers e review-policy/events) APROVADO para AVANCAR. Proximo movimento = abrir bootstrap-compiler stacked sobre #37; NAO autoriza merge isolado em main."
+basis: >
+  Human Gate aprovado para o CO-2 / PR #37. O PR entrega o eixo negativo de
+  Knowledge com Falsification de primeira classe, inventario minimo load-bearing,
+  contratos operacionais, AGENTS.md stub, handoff deterministico, ledgers runtime
+  particionados e review-policy com ReviewEvent append-only. Validacao local e CI
+  remota verdes; Technical Audit e Architectural Review do checkpoint final
+  approved com 0 findings. O hardening posterior fechou a assimetria de event_id
+  (EV1..EVN unico/contiguo por checkpoint/role). A aprovacao autoriza avancar
+  para bootstrap-compiler na stack; nao autoriza merge isolado em main.
+next: >
+  Abrir o proximo PR stacked da Spec 0024: bootstrap-compiler, para fechar o
+  cutover do legado /cli para registry/src antes de CO-3.
