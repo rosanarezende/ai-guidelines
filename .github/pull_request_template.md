@@ -42,6 +42,12 @@ Como preencher (o check aceita o prompt OU a imagem):
   <prompt pronto p/ colar no gerador>      <img src="URL" width="760"/>
   ```
 
+PRs grandes podem usar **prompts complementares** dentro de `<details>`:
+1 prompt/imagem principal sintetiza a entrega; prompts secundários explicam
+frentes específicas (ex.: grafo, bootstrap, runtime, policy). Eles devem se
+complementar — não repetir nem disputar a mesma mensagem. O primeiro prompt do
+slot é o artefato principal que sustenta o Ready.
+
 A imagem é a renderização do prompt; gere-a quando puder (no Ready ou depois) e
 cole a URL. Em R4/encerramento as imagens finais são promovidas para `assets/`
 (degradável: se o gerador estiver indisponível, os prompts ficam preservados).
@@ -53,10 +59,50 @@ Draft é isento (intenção em formação): preencha os prompts ANTES de marcar 
 
 <!-- #1 — o problema + a solução pretendida. Em Ready: cole o prompt final (bloco ```…```) — a imagem entra quando gerada. -->
 
+<!-- Cole a imagem renderizada acima, quando existir. O prompt principal fica colapsado abaixo. -->
+
+<details open>
+<summary><strong>Prompt FINAL da imagem de visão pretendida</strong></summary>
+
+```text
+<prompt pronto p/ colar no gerador>
+```
+
+</details>
+
 ## Valor entregue
 
 <!-- #3 — antes/depois do valor deste slice (sintomas→capacidades). Em Ready: cole o prompt final (bloco ```…```) ou a imagem.
-     #2 Capacidade construída (opcional, recomendada) pode entrar aqui como "## Capacidade construída". -->
+     #2 Capacidade construída (opcional, recomendada) pode entrar aqui como "## Capacidade construída".
+     Se a entrega tiver múltiplas frentes, use UM prompt principal acima e prompts complementares abaixo. -->
+
+<!-- Cole a imagem renderizada acima, quando existir. O prompt principal fica colapsado abaixo. -->
+
+<details open>
+<summary><strong>Prompt FINAL da imagem de valor entregue</strong></summary>
+
+```text
+<prompt pronto p/ colar no gerador>
+```
+
+</details>
+
+<details>
+<summary><strong>Prompts complementares de valor (opcional — só para PRs com múltiplas frentes)</strong></summary>
+
+<!--
+Use quando uma única imagem ficar densa demais. Cada prompt complementar deve ter
+um papel próprio:
+- mapa geral (principal) — síntese antes/depois;
+- detalhe 1 — fluxo/contrato/CLI;
+- detalhe 2 — grafo/runtime/dados;
+- detalhe 3 — gates/reviews/política.
+
+Não duplique o mesmo quadro com palavras diferentes. Se os prompts competirem,
+volte para um único prompt principal.
+-->
+
+</details>
 
 ## Status do ciclo de vida
 
@@ -122,6 +168,19 @@ migração necessária), descreva explicitamente aqui — não há seção dedic
 porque a maioria dos PRs não tem; mas quando tem, é informação crítica.
 -->
 
+<details>
+<summary><strong>Resumo detalhado (opcional — para PRs grandes ou multi-checkpoint)</strong></summary>
+
+<!--
+Use para decompor entregas grandes sem poluir a primeira leitura:
+- checkpoints/frentes entregues;
+- fronteiras preservadas;
+- decisões que mudaram durante o PR;
+- o que continua explicitamente fora de escopo.
+-->
+
+</details>
+
 ## Test plan
 
 <!--
@@ -129,6 +188,20 @@ Resumo curto: como o reviewer valida? Comandos chave + 1-2 observações.
 Para runtime/wizard/UX: explique o caminho de uso real, não apenas "tests green".
 Para governance: cite os artefatos que mudam de estado (DECs, ADRs, status agregado).
 -->
+
+<details>
+<summary><strong>Evidências e gates (opcional — reviews, gates, CI, artefatos versionados)</strong></summary>
+
+<!--
+Use quando houver review-policy/gates/reviews versionados:
+- artefatos de Technical Audit / Architectural Review;
+- ReviewEvents relevantes;
+- gate humano pendente/aprovado;
+- checks remotos relevantes;
+- divergências conhecidas e sua disposição.
+-->
+
+</details>
 
 <details>
 <summary><strong>Test plan detalhado (opcional — comandos completos, coverage report, smoke matrix)</strong></summary>
@@ -179,9 +252,14 @@ DUAS partes, propositalmente separadas (Spec 0024, Checkpoint 2.4d):
    participou?". Cole o bloco derivado aqui:
 -->
 
+<details open>
+<summary><strong>Disclosure derivado (fatos de processo)</strong></summary>
+
 <!-- fatos-derivados:início -->
 <!-- (cole a saída de `yarn disclosure`; vazio até haver revisão registrada em artefato) -->
 <!-- fatos-derivados:fim -->
+
+</details>
 
 <details>
 <summary><strong>Notas qualitativas (opcional — divergências, segunda opinião, nuance)</strong></summary>

@@ -184,7 +184,7 @@ function gate(decision: "approved" | "changes_requested"): GateArtifact {
   return { checkpoint: "3", actor: "@owner", decision, file: "gates/c3.yml" };
 }
 
-function reviewEventYaml(verifies: string[]): string {
+function reviewEventYaml(verifies: string[], eventId = "EV1"): string {
   const executor = { platform: "claude-code", model: "claude-opus-4-8" };
   const auditEvidence = {
     coverage: ["cli/governance/script-contracts.mjs"],
@@ -194,7 +194,7 @@ function reviewEventYaml(verifies: string[]): string {
   const eventFingerprint = reviewEventFingerprintOf({
     checkpoint: CP,
     role: ROLE,
-    eventId: "EV1",
+    eventId,
     kind: "reaudit",
     decision: "approved",
     verifies,
@@ -203,7 +203,7 @@ function reviewEventYaml(verifies: string[]): string {
   });
   return `checkpoint: "${CP}"
 role: ${ROLE}
-event_id: EV1
+event_id: ${eventId}
 kind: reaudit
 executor:
   platform: ${executor.platform}
@@ -367,6 +367,38 @@ describe("consolidate (enforcement) [Checkpoint 2.4a]", () => {
       reviewEvents: [event],
     });
     expect(consolidate(a).violations.join("\n")).toMatch(/F9.*inexistente/);
+  });
+
+  it("review events com event_id duplicado no mesmo checkpoint/role → VIOLAÇÃO", () => {
+    const a = artifacts({
+      reviews: [review("technical_audit", [finding("F1", "high", "accepted")])],
+      reviewEvents: [
+        parseReviewEvent(reviewEventYaml(["technical_audit#F1"], "EV1"), "events/e1.yml"),
+        parseReviewEvent(reviewEventYaml(["technical_audit#F1"], "EV1"), "events/e2.yml"),
+      ],
+    });
+    expect(consolidate(a).violations.join("\n")).toMatch(/duplicado/);
+  });
+
+  it("review events com lacuna na sequência EV1..EVN → VIOLAÇÃO", () => {
+    const a = artifacts({
+      reviews: [review("technical_audit", [finding("F1", "high", "accepted")])],
+      reviewEvents: [
+        parseReviewEvent(reviewEventYaml(["technical_audit#F1"], "EV1"), "events/e1.yml"),
+        parseReviewEvent(reviewEventYaml(["technical_audit#F1"], "EV3"), "events/e3.yml"),
+      ],
+    });
+    expect(consolidate(a).violations.join("\n")).toMatch(/falta EV2/);
+  });
+
+  it("review event com event_id fora do padrão EVN → VIOLAÇÃO", () => {
+    const a = artifacts({
+      reviews: [review("technical_audit", [finding("F1", "high", "accepted")])],
+      reviewEvents: [
+        parseReviewEvent(reviewEventYaml(["technical_audit#F1"], "REAUDIT-1"), "events/e1.yml"),
+      ],
+    });
+    expect(consolidate(a).violations.join("\n")).toMatch(/event_id.*inválido/);
   });
 });
 

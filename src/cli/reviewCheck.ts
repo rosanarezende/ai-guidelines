@@ -112,6 +112,11 @@ function requiredRolesForNodeRole(
     : policy.implementationPr.requiredReviewRoles;
 }
 
+function parseEventSequence(eventId: string): number | undefined {
+  const match = /^EV([1-9]\d*)$/.exec(eventId);
+  return match ? Number(match[1]) : undefined;
+}
+
 export interface ConsolidatedCheckpoint {
   readonly checkpoint: string;
   readonly reviewDecisions: ReadonlyArray<{ role: string; decision: string }>;
@@ -173,6 +178,38 @@ export function consolidate(artifacts: SpecArtifacts): {
         violations.push(
           `checkpoint ${cp}: review event ${e.file} usa role "${e.role}" não declarada na review policy.`
         );
+      }
+    }
+
+    const eventsByRole = new Map<string, ReviewEventArtifact[]>();
+    for (const e of reviewEvents) {
+      eventsByRole.set(e.role, [...(eventsByRole.get(e.role) ?? []), e]);
+    }
+    for (const [role, events] of eventsByRole) {
+      const seen = new Map<number, ReviewEventArtifact>();
+      for (const e of events) {
+        const sequence = parseEventSequence(e.eventId);
+        if (!sequence) {
+          violations.push(
+            `checkpoint ${cp}: review event ${e.file} usa event_id "${e.eventId}" inválido; use EV1..EVN por (checkpoint, role).`
+          );
+          continue;
+        }
+        const previous = seen.get(sequence);
+        if (previous) {
+          violations.push(
+            `checkpoint ${cp}: review event_id "${e.eventId}" duplicado para role "${role}" (${previous.file}, ${e.file}).`
+          );
+        }
+        seen.set(sequence, e);
+      }
+      for (let i = 1; i <= events.length; i++) {
+        if (!seen.has(i)) {
+          violations.push(
+            `checkpoint ${cp}: review events da role "${role}" devem ser contíguos (EV1..EV${events.length}); falta EV${i}.`
+          );
+          break;
+        }
       }
     }
 
