@@ -81,26 +81,7 @@ export function printHelp(commandsSection = "") {
 Uso:
   yarn guidelines <comando> [opções]   (veja os comandos abaixo)
 
-═══ COMANDOS DE BOOTSTRAP / DISTRIBUIÇÃO ═══
-
-  init           Cria baseline AI-first em projeto novo.
-                 Ex.: yarn guidelines init --target ./meu-projeto --lang pt
-
-  adopt          Aplica baseline AI-first em repositório existente.
-                 Ex.: yarn guidelines adopt --providers claude,copilot --force
-
-  providers      Adiciona ou atualiza arquivos nativos de provider (CLAUDE.md,
-                 GEMINI.md, .openai/instructions.md, .cursor/rules/*, etc.).
-
-  update         Re-aplica provider entrypoints, templates SDD e recompila
-                 AGENTS.md a partir do .ai-guidelines/config.json existente
-                 (idempotente, headless). Use após atualizar a versão do
-                 framework para receber updates sem reabrir o wizard.
-
-  check-budget   Imprime o relatório de orçamento de tokens (universal, opt-in,
-                 AGENTS.md compilado e cada provider entrypoint).
-
-═══ COMANDOS DO WORKFLOW / GOVERNANÇA (registry) ═══
+═══ COMANDOS (registry) ═══
 
 ${registryBlock}
 

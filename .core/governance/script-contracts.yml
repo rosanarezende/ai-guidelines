@@ -164,13 +164,13 @@ profiles:
         consumers: [script]
         description: Falha se scripts, hooks, templates ou docs divergirem do contrato.
       - name: runtime-bootstrap:sync
-        command: node cli/governance/runtime-bootstrap.mjs sync
+        command: node cli/runtime-bootstrap.mjs sync
         category: governance
         mutates: true
         consumers: [human, hook]
         description: Sincroniza o stub runtime do AGENTS.md.
       - name: runtime-bootstrap:check
-        command: node cli/governance/runtime-bootstrap.mjs check
+        command: node cli/runtime-bootstrap.mjs check
         category: governance
         mutates: false
         consumers: [script]

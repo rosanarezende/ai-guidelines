@@ -10,26 +10,26 @@ import {
 } from "./runtime-bootstrap.mjs";
 
 describe("runtime-bootstrap", () => {
-  it("DADO conteúdo local QUANDO buildRuntimeBootstrapContent ENTÃO substitui só AI_GUIDELINES por stub", () => {
+  it("DADO conteúdo local QUANDO buildRuntimeBootstrapContent ENTÃO substitui só AI_GUIDELINES por stub", async () => {
     const existing = "# Projeto\n\nRegra local.\n\n<AI_GUIDELINES>\nlegado\n</AI_GUIDELINES>\n";
-    const next = buildRuntimeBootstrapContent(existing);
+    const next = await buildRuntimeBootstrapContent(existing);
 
     assert.match(next, /Regra local/);
     assert.match(next, /## Runtime Bootstrap/);
     assert.doesNotMatch(next, /legado/);
   });
 
-  it("DADO AGENTS divergente QUANDO sync ENTÃO grava o stub e check passa", () => {
+  it("DADO AGENTS divergente QUANDO sync ENTÃO grava o stub e check passa", async () => {
     const dir = mkdtempSync(join(tmpdir(), "runtime-bootstrap-"));
     const agentsPath = join(dir, "AGENTS.md");
     try {
       writeFileSync(agentsPath, "# AGENTS.md\n\n<AI_GUIDELINES>\nvelho\n</AI_GUIDELINES>\n");
 
-      assert.equal(checkRuntimeBootstrap({ agentsPath }).ok, false);
-      const synced = syncRuntimeBootstrap({ agentsPath });
+      assert.equal((await checkRuntimeBootstrap({ agentsPath })).ok, false);
+      const synced = await syncRuntimeBootstrap({ agentsPath });
 
       assert.equal(synced.changed, true);
-      assert.equal(checkRuntimeBootstrap({ agentsPath }).ok, true);
+      assert.equal((await checkRuntimeBootstrap({ agentsPath })).ok, true);
       assert.match(readFileSync(agentsPath, "utf-8"), /yarn guidelines handoff \[spec\]/);
     } finally {
       rmSync(dir, { recursive: true, force: true });

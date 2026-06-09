@@ -1,6 +1,6 @@
 import path from "node:path";
 import { existsSync } from "node:fs";
-import { parseArgs, printHelp, resolveExecutionInput, isSupportedMode } from "#cli/args";
+import { printHelp, resolveExecutionInput, isSupportedMode } from "#cli/args";
 import { fileExists, readTextIfExists } from "#fs/file-system";
 import { collectExistingPaths, ensureTargetDir, readPackageJson } from "#fs/io";
 import {
@@ -310,17 +310,15 @@ export async function execute(mode, rawOptions) {
 }
 
 /**
- * PONTE (transitória) para o registry de comandos (src/cli/registry). Carrega o
- * registry compilado de dist/. Comandos já migrados roteiam por ele; o resto cai
- * no fallback legado. DONE do #35 (pr-cli-cutover): quando TODOS migrarem, este
- * vira o único dispatch e o fallback (parseArgs + if/else) é REMOVIDO — registry
- * roteador único, SEM fallback, com engine.mjs/args.mjs dissolvidos (ADR 0025).
+ * Composition root do registry de comandos (src/cli/registry). Carrega o
+ * registry compilado de dist/. Desde `checkpoint-bootstrap-registry`, todos os
+ * verbos públicos roteiam por ele; `engine.mjs` não mantém fallback por comando.
  */
 async function loadRegistry() {
   const entryUrl = new URL("../../dist/cli/registry/buildRegistry.js", import.meta.url);
-  // dist/ ainda não construído (ex.: pré-build) → null cai no legado. Transitório.
-  // Qualquer OUTRO erro (build quebrado, throw no register) NÃO é mascarado:
-  // propaga e aparece (auditoria #35, achado #3 — fim do fallback silencioso).
+  // dist/ ainda não construído (ex.: pré-build) → null. O chamador falha cedo
+  // para qualquer verbo nomeado; não há fallback de comando fora do registry.
+  // Qualquer OUTRO erro (build quebrado, throw no register) NÃO é mascarado.
   if (!existsSync(entryUrl)) return null;
   const mod = await import(entryUrl.href);
   return mod.buildRegistry();
@@ -332,9 +330,9 @@ const registryLogger = {
 };
 
 /**
- * Help da CLI = bootstrap (estático, nó próprio) + comandos do registry
- * (projeção DERIVADA via `renderHelp`). Sem registry (pré-build), printHelp cai
- * no aviso de build. Mata a 2ª fonte de help em `args.mjs` (auditoria #35, #2).
+ * Help da CLI = projeção DERIVADA do registry via `renderHelp`. Sem registry
+ * (pré-build), printHelp cai no aviso de build. Mata a 2ª fonte de help em
+ * `args.mjs` (auditoria #35, #2).
  */
 async function showHelp() {
   const registry = await loadRegistry();
@@ -348,49 +346,45 @@ export async function main(
   try {
     const commandName = argv[0];
 
-    // ── PONTE (transitória) — comandos migrados roteiam pelo registry ──
-    // Bypassa o parseArgs legado: cada comando faz o próprio parse (dissolve
-    // args.mjs para os migrados). Quando o registry cobrir todos os comandos,
-    // o fallback legado abaixo é REMOVIDO (DONE do #35: roteador único, sem
-    // fallback). Os verbos migrados resolvem aqui; o fallback abaixo serve só os
-    // bootstrap não-migrados (init/adopt/providers/update/check-budget) via execute().
+    // Registry único: cada comando declara parse/run. `engine.mjs` só carrega o
+    // registry compilado e despacha; não mantém lista de verbos nem fallback de
+    // parsing. Os comandos de bootstrap ainda delegam internamente à execução
+    // legada, mas o roteamento central já está fechado no registry.
     if (commandName && commandName !== "--help" && commandName !== "-h") {
       const registry = await load();
       if (registry) {
-        if (registry.resolve(commandName)) {
-          const result = await registry.dispatch(argv, {
-            repoRoot: process.cwd(),
-            logger: registryLogger,
-          });
-          if (result.exitCode !== 0) process.exitCode = result.exitCode;
-          return;
-        }
-      } else if (!isSupportedMode(commandName)) {
-        // dist/ ausente E o comando NÃO é bootstrap → é um verbo do registry sem
-        // build. Falha RÁPIDA com diagnóstico; NUNCA degradar para o wizard de
-        // bootstrap (auditoria #35, achado #3): erro estrutural falha cedo e
-        // explícito, não adivinha a intenção do usuário no wizard.
+        const result = await registry.dispatch(argv, {
+          repoRoot: process.cwd(),
+          logger: registryLogger,
+        });
+        if (result.exitCode !== 0) process.exitCode = result.exitCode;
+        return;
+      }
+
+      if (!isSupportedMode(commandName)) {
         throw new Error(
           `Comando "${commandName}" requer o registry compilado, mas dist/ não existe. ` +
             "Rode `yarn build` (ou `yarn validate`) antes de usar a CLI."
         );
       }
+
+      throw new Error(
+        `Comando "${commandName}" requer o registry compilado, mas dist/ não existe. ` +
+          "Rode `yarn build` (ou `yarn validate`) antes de usar a CLI."
+      );
     }
 
-    // ── FALLBACK LEGADO (transitório; removido no DONE do #35) ──
-    const { command, options } = parseArgs(argv);
-
-    if (command === "--help" || command === "-h") {
+    if (commandName === "--help" || commandName === "-h") {
       await showHelp();
       return;
     }
 
-    if (!command && !process.stdin.isTTY) {
+    if (!commandName && !process.stdin.isTTY) {
       await showHelp();
       return;
     }
 
-    await execute(command, options);
+    await execute(undefined, {});
   } catch (error) {
     console.error(`Erro: ${error.message}`);
     process.exitCode = 1;

@@ -229,11 +229,11 @@ describe("cli/args", () => {
     assert.equal(isSupportedMode("invalid"), false);
   });
 
-  it("[BR-CLI-INPUT-*] DADO printHelp QUANDO chamado ENTÃO exibe o manual de uso", () => {
+  it("[BR-CLI-INPUT-*] DADO printHelp com bloco do registry QUANDO chamado ENTÃO exibe o manual de uso", () => {
     const originalLog = console.log;
     let output = "";
     console.log = (msg) => (output += msg);
-    printHelp();
+    printHelp("  init\n  adopt");
     console.log = originalLog;
     assert.ok(output.includes("ai-guidelines CLI"), "Deveria conter cabeçalho CLI");
     assert.ok(output.includes("init"), "Deveria conter comando init");

@@ -12,6 +12,11 @@ describe("buildRegistry", () => {
     expect(registry.resolve("drift")?.name).toBe("drift");
     expect(registry.resolve("visual-prompt")?.name).toBe("visual-prompt");
     expect(registry.resolve("handoff")?.name).toBe("handoff");
+    expect(registry.resolve("init")?.name).toBe("init");
+    expect(registry.resolve("adopt")?.name).toBe("adopt");
+    expect(registry.resolve("providers")?.name).toBe("providers");
+    expect(registry.resolve("update")?.name).toBe("update");
+    expect(registry.resolve("check-budget")?.name).toBe("check-budget");
   });
 
   it("DADO o alias transitório 'review' QUANDO resolve ENTÃO cai no comando 'triage'", () => {
@@ -33,6 +38,11 @@ describe("buildRegistry", () => {
         "drift",
         "visual-prompt",
         "handoff",
+        "init",
+        "adopt",
+        "providers",
+        "update",
+        "check-budget",
       ])
     );
     expect(names).not.toContain("review");
@@ -52,6 +62,8 @@ describe("buildRegistry", () => {
     expect(help).toContain("specs");
     expect(help).toContain("visual-prompt");
     expect(help).toContain("handoff");
+    expect(help).toContain("init");
+    expect(help).toContain("check-budget");
     expect(help).toContain("Ex.: yarn guidelines");
   });
 });

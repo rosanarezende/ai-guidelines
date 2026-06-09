@@ -1,0 +1,38 @@
+import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import path from "node:path";
+
+import {
+  buildRuntimeBootstrapContent,
+  checkRuntimeBootstrap,
+  main,
+  syncRuntimeBootstrap,
+} from "./runtimeBootstrap.js";
+
+describe("runtimeBootstrap", () => {
+  it("DADO AGENTS sem bloco QUANDO sync ENTÃO escreve stub preservando conteúdo humano", () => {
+    const repo = mkdtempSync(path.join(tmpdir(), "runtime-bootstrap-ts-"));
+    const agentsPath = path.join(repo, "AGENTS.md");
+    writeFileSync(agentsPath, "# AGENTS.md\n\n## Local\n\nTexto local.\n", "utf-8");
+
+    const result = syncRuntimeBootstrap(repo);
+
+    expect(result.changed).toBe(true);
+    const content = readFileSync(agentsPath, "utf-8");
+    expect(content).toContain("Texto local.");
+    expect(content).toContain("<AI_GUIDELINES>");
+    expect(content).toContain("Runtime Bootstrap");
+  });
+
+  it("DADO AGENTS sincronizado QUANDO check ENTÃO retorna ok", () => {
+    const repo = mkdtempSync(path.join(tmpdir(), "runtime-bootstrap-ts-"));
+    const agentsPath = path.join(repo, "AGENTS.md");
+    writeFileSync(agentsPath, buildRuntimeBootstrapContent(""), "utf-8");
+
+    expect(checkRuntimeBootstrap(repo).ok).toBe(true);
+  });
+
+  it("DADO comando desconhecido QUANDO main ENTÃO retorna 2", () => {
+    expect(main(["wat"], process.cwd())).toBe(2);
+  });
+});

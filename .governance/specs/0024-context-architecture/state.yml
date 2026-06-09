@@ -14,7 +14,7 @@ next:
 topology:
   cursor:
     pr: bootstrap-compiler
-    checkpoint: checkpoint-compiler-ts
+    checkpoint: checkpoint-bootstrap-registry
   prs:
     concluded:
       - id: base-governance
