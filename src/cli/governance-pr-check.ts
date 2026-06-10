@@ -14,8 +14,8 @@ export interface GovernancePrCheckInput {
   /**
    * Estado operacional canônico de Draft/Ready: o flag `draft` da API do GitHub.
    * **Fonte ÚNICA de verdade** — o MESMO sinal que `MergeStack` consome via
-   * `PullRequestData.isDraft`. O checkbox de lifecycle no body é apenas documental
-   * (pedagógico, ADR 0024); NUNCA é fonte de enforcement (evita state drift).
+   * `PullRequestData.isDraft`. O Template v3 não duplica lifecycle no corpo
+   * visível (ADR 0024); o flag nativo é o único sinal de enforcement.
    */
   readonly isDraft: boolean;
 }
@@ -57,8 +57,8 @@ const VISUAL_CONVERGENCIA = "## Convergência da stack";
 
 /** Referência de imagem markdown `![alt](url)` ou HTML `<img ... src=...>`. */
 const IMAGE_REF = /!\[[^\]]*\]\([^)]+\)|<img\b[^>]*\bsrc=/i;
-/** Bloco de código cercado (3+ backticks) = o prompt final paste-ready. */
-const PROMPT_BLOCK = /^\s*`{3,}/m;
+/** Linha que é só placeholder do template (`<…>`): não conta como conteúdo autoral. */
+const PLACEHOLDER_LINE = /^<[^<>]*>$/;
 
 /** Conteúdo de uma seção: do header até o próximo header de mesmo/maior nível (ou fim). */
 function sectionContent(body: string, header: string): string | null {
@@ -71,13 +71,54 @@ function sectionContent(body: string, header: string): string | null {
   return next ? rest.slice(0, next.index) : rest;
 }
 
+/** Conteúdos internos dos blocos de código cercados (3+ backticks) da seção. */
+function fencedBlockContents(content: string): string[] {
+  const blocks: string[] = [];
+  const re = /^[ \t]*`{3,}[^\n]*\n([\s\S]*?)^[ \t]*`{3,}[ \t]*$/gm;
+  for (let m = re.exec(content); m !== null; m = re.exec(content)) blocks.push(m[1]);
+  return blocks;
+}
+
+/** O texto tem ao menos uma linha autoral (não vazia e não placeholder `<…>`). */
+function hasAuthoredLine(text: string): boolean {
+  return text.split("\n").some((line) => {
+    const t = line.trim();
+    return t !== "" && !PLACEHOLDER_LINE.test(t);
+  });
+}
+
 /**
- * A seção existe E contém o artefato visual gateado: o **prompt final** (bloco de
- * código cercado) OU a **imagem** já renderizada (que o satisfaz, sendo ≥ prompt).
+ * A seção existe E contém o artefato visual PREENCHIDO: o **prompt final**
+ * (bloco de código cercado com conteúdo autoral — o placeholder `<…>` do
+ * Template v3 NÃO satisfaz) OU a **imagem** já renderizada (que o satisfaz,
+ * sendo ≥ prompt). Comentários HTML do template podem permanecer (são
+ * intencionais — não interferem na detecção).
  */
-function sectionHasVisual(body: string, header: string): boolean {
+function sectionHasFilledVisual(body: string, header: string): boolean {
   const content = sectionContent(body, header);
-  return content !== null && (PROMPT_BLOCK.test(content) || IMAGE_REF.test(content));
+  if (content === null) return false;
+  if (IMAGE_REF.test(content)) return true;
+  return fencedBlockContents(content).some(hasAuthoredLine);
+}
+
+/**
+ * A seção existe E tem conteúdo real além do esqueleto do template: ignora
+ * comentários HTML, tags `details`/`summary`, linhas de fence e placeholders
+ * `<…>`. Usada para exigir "validação real" (Test plan) em Ready.
+ */
+function sectionHasRealContent(body: string, header: string): boolean {
+  const content = sectionContent(body, header);
+  if (content === null) return false;
+  const visible = content.replace(/<!--[\s\S]*?-->/g, "");
+  return visible.split("\n").some((line) => {
+    const t = line.trim();
+    return (
+      t !== "" &&
+      !/^`{3,}/.test(t) &&
+      !PLACEHOLDER_LINE.test(t) &&
+      !/^<\/?(details|summary)\b/i.test(t)
+    );
+  });
 }
 
 export interface GitHubApiCaller {
@@ -216,33 +257,37 @@ export function runGovernancePrCheck(
         `Título incorreto. Pela topologia (sequence=${node.sequence}, terminal=${node.terminal}), o prefixo esperado é: "${expectedPrefix}"`
       );
     }
-
-    if (node.sequence !== null) {
-      // Robustez (O2): linha tolerante a formatação (espaços, markers `**`, `:`),
-      // exigindo o número de sequence exato na MESMA linha de "Stack atual".
-      // Word-boundary evita casar `1` dentro de `12`. Sem parser de markdown.
-      const stackLineRe = new RegExp(`^.*stack atual.*?\\b${node.sequence}\\b.*$`, "im");
-      if (!stackLineRe.test(input.prBody)) {
-        reasons.push(
-          `Coerência de stack falhou. A topologia define sequence=${node.sequence}, mas nenhuma linha "Stack atual" com a posição ${node.sequence} foi encontrada no body do PR.`
-        );
-      }
-    }
+    // A posição na stack NÃO é mais exigida como linha visível no body
+    // (Template v3): ela vive no título (prefixo enforçado acima), em
+    // state.yml § topology e em base/head do PR.
   }
 
-  const mandatorySections = [
-    "## Status do ciclo de vida",
-    "## PR Type",
-    "## Posição na stack",
-    "## Merge authorization",
+  // ── Contrato temporal do PR body (Template v3) ──────────────────────────────
+  // Metadados governados (lifecycle, tipo de PR, posição na stack, autorização
+  // de merge) saíram do corpo visível: vivem no título, em state.yml, em
+  // base/head e nos comentários HTML do template — não são seções exigidas.
+  // Comentários HTML são intencionais e podem permanecer após o preenchimento.
+  // Draft exige INTENÇÃO declarada; Ready exige ENTREGA (Ready ⊇ Draft).
+  // Ready ≠ merge autorizado (ADR 0024); o Human Gate ocorre ao final do
+  // PR/checkpoint.
+  const draftSections = [
+    "## Visão pretendida",
     "## Resumo",
+    "## Escopo",
+    "### Dentro do escopo",
+    "### Fora do escopo",
+  ];
+  const readySections = [
+    "## Valor entregue",
     "## Test plan",
-    "## Cross-refs",
-    "## Checklist operacional",
+    "## Validação, evidências e checklist",
+    "### Evidências e gates",
+    "### Checklist operacional",
     "## Disclosure de IA",
   ];
+  const requiredSections = input.isDraft ? draftSections : [...draftSections, ...readySections];
 
-  for (const section of mandatorySections) {
+  for (const section of requiredSections) {
     if (!hasSectionHeader(input.prBody, section)) {
       reasons.push(
         `Template incompleto: seção obrigatória "${section}" não encontrada (precisa ser um header markdown em linha própria).`
@@ -250,38 +295,47 @@ export function runGovernancePrCheck(
     }
   }
 
-  // ── Governança visual: prompt final obrigatório por estado epistêmico (matriz aprovada) ──
-  // Gateia o PROMPT FINAL autorado (bloco ```…```) — ou a imagem, que o satisfaz.
-  // Só cobra em ENTREGA (Ready declarado) — Draft é isento. fast-track já saiu
-  // antes (bypass). #2 Capacidade é opcional (nunca falha). A imagem renderizada
-  // é obrigação posterior de publicação (R4), nunca pré-requisito do Ready.
+  // ── Governança visual: prompt final obrigatório por estado temporal (Template v3) ──
+  // Gateia o PROMPT FINAL autorado (bloco ```…``` com conteúdo autoral) — ou a
+  // imagem, que o satisfaz. O placeholder `<…>` do template NÃO satisfaz.
+  // Contrato temporal: "Visão pretendida" é preenchida ao abrir o Draft PR
+  // (intenção declarada); "Valor entregue" só em Ready (antes da revisão final /
+  // Human Gate) — em Draft pode permanecer como placeholder do template.
+  // Ready/Draft vem do flag canônico do GitHub (`isDraft`) — fonte única de
+  // verdade, idêntica à do `MergeStack`. fast-track já saiu antes (bypass).
+  // A imagem renderizada é obrigação posterior de publicação (R4), nunca
+  // pré-requisito do Ready.
   const VISUAL_HINT = "preencha o prompt final autorado (bloco ```…```) ou a imagem renderizada";
-  // Ready/Draft vem do flag canônico do GitHub (`isDraft`), NÃO do checkbox do body —
-  // fonte única de verdade, idêntica à do `MergeStack`. Draft é isento.
-  if (!input.isDraft) {
-    if (node.role === "execution") {
-      if (!sectionHasVisual(input.prBody, VISUAL_PROBLEMA)) {
-        reasons.push(
-          `Governança visual: a seção "${VISUAL_PROBLEMA}" está vazia — ${VISUAL_HINT}. Em Ready, todo PR de execução exige Problema + Valor (artefato oficial, não anexo).`
-        );
-      }
-      if (!sectionHasVisual(input.prBody, VISUAL_VALOR)) {
-        reasons.push(
-          `Governança visual: a seção "${VISUAL_VALOR}" está vazia — ${VISUAL_HINT}. Em Ready, todo PR de execução exige Problema + Valor.`
-        );
-      }
-    } else if (node.role === "integration") {
-      if (!sectionHasVisual(input.prBody, VISUAL_PROBLEMA)) {
-        reasons.push(
-          `Governança visual: a seção "${VISUAL_PROBLEMA}" (backdrop) está vazia no Integration PR — ${VISUAL_HINT}.`
-        );
-      }
-      if (!sectionHasVisual(input.prBody, VISUAL_CONVERGENCIA)) {
-        reasons.push(
-          `Governança visual: a seção "${VISUAL_CONVERGENCIA}" está vazia — ${VISUAL_HINT}. O Integration PR exige a narrativa visual da convergência (#4).`
-        );
-      }
+  if (node.role === "execution") {
+    if (!sectionHasFilledVisual(input.prBody, VISUAL_PROBLEMA)) {
+      reasons.push(
+        `Governança visual: a seção "${VISUAL_PROBLEMA}" está vazia ou só com placeholder — ${VISUAL_HINT}. A visão pretendida é preenchida ao abrir o Draft PR.`
+      );
     }
+    if (!input.isDraft && !sectionHasFilledVisual(input.prBody, VISUAL_VALOR)) {
+      reasons.push(
+        `Governança visual: a seção "${VISUAL_VALOR}" está vazia ou só com placeholder — ${VISUAL_HINT}. Em Ready, o valor entregue deve estar preenchido (em Draft pode ficar como placeholder).`
+      );
+    }
+  } else if (node.role === "integration" && !input.isDraft) {
+    if (!sectionHasFilledVisual(input.prBody, VISUAL_PROBLEMA)) {
+      reasons.push(
+        `Governança visual: a seção "${VISUAL_PROBLEMA}" (backdrop) está vazia no Integration PR — ${VISUAL_HINT}.`
+      );
+    }
+    if (!sectionHasFilledVisual(input.prBody, VISUAL_CONVERGENCIA)) {
+      reasons.push(
+        `Governança visual: a seção "${VISUAL_CONVERGENCIA}" está vazia — ${VISUAL_HINT}. O Integration PR exige a narrativa visual da convergência (#4).`
+      );
+    }
+  }
+
+  // Contrato Ready: o Test plan precisa de validação real, não só o esqueleto
+  // do template (fences/placeholders/comentários não contam como conteúdo).
+  if (!input.isDraft && !sectionHasRealContent(input.prBody, "## Test plan")) {
+    reasons.push(
+      `Contrato Ready: a seção "## Test plan" precisa conter validação real (comandos/observações), não apenas o esqueleto do template.`
+    );
   }
 
   if (reasons.length > 0) {

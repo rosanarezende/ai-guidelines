@@ -44,6 +44,57 @@ class FakeFileSystem implements WorkflowFileSystem {
   }
 }
 
+// ── Fixtures do Template v3 ──────────────────────────────────────────────────
+// Prompt autorado (preenchido) vs placeholder `<…>` do template (não conta).
+const PROMPT = "```text\nGere um infográfico antes/depois do valor entregue…\n```";
+const PLACEHOLDER = "```text\n<prompt pronto para colar no gerador>\n```";
+const VAZIO = "<!-- preencher -->";
+
+/** Body v3 no contrato de DRAFT: intenção preenchida; Valor entregue pode ser placeholder. */
+function draftBodyV3(o: { visao?: string; valor?: string } = {}): string {
+  return [
+    "## Visão pretendida",
+    o.visao ?? PROMPT,
+    "## Resumo",
+    "Migra o toolchain para npm puro; reduz fricção de bootstrap para humanos e agentes.",
+    "## Escopo",
+    "### Dentro do escopo",
+    "- migração do package manager",
+    "### Fora do escopo",
+    "- CO-3+",
+    "## Valor entregue",
+    o.valor ?? PLACEHOLDER,
+  ].join("\n");
+}
+
+/** Body v3 no contrato de READY: entrega preenchida (valor, test plan, validação). */
+function readyBodyV3(o: { visao?: string; valor?: string; testPlan?: string } = {}): string {
+  return [
+    "## Visão pretendida",
+    o.visao ?? PROMPT,
+    "## Resumo",
+    "Migra o toolchain para npm puro; reduz fricção de bootstrap para humanos e agentes.",
+    "## Escopo",
+    "### Dentro do escopo",
+    "- migração do package manager",
+    "### Fora do escopo",
+    "- CO-3+",
+    "## Valor entregue",
+    o.valor ?? PROMPT,
+    "## Test plan",
+    o.testPlan ?? "```bash\nyarn validate\n```",
+    "## Validação, evidências e checklist",
+    "### Evidências e gates",
+    "- CI: verde",
+    "### Checklist operacional",
+    "- [x] Formatação verde",
+    "## Cross-refs",
+    "- Spec: 0024",
+    "## Disclosure de IA",
+    "Implementação assistida por IA.",
+  ].join("\n");
+}
+
 describe("CLI — governance-pr-check [BR-GOV-PR-CHECK]", () => {
   let fs: FakeFileSystem;
 
@@ -87,27 +138,16 @@ topology:
   const baseInput: GovernancePrCheckInput = {
     prNumber: 33,
     prTitle: "[🛠️1️⃣➜] [Spec 0024] O titulo",
-    prBody: `
-## Status do ciclo de vida
-## PR Type
-## Posição na stack
-- **Stack atual**: 1
-## Merge authorization
-## Resumo
-## Test plan
-## Cross-refs
-## Checklist operacional
-## Disclosure de IA
-`,
+    prBody: draftBodyV3(),
     prLabels: [],
     repo: "owner/repo",
     prBranch: "feat/spec-0024-ruleset-producibility",
-    // Draft (flag canônico): estes testes cobrem título/seções/stack, não o gate
-    // visual — isentos por serem Draft. O checkbox do body é irrelevante agora.
+    // Draft/Ready vem do flag canônico do GitHub (`isDraft`) — o Template v3
+    // não duplica lifecycle no corpo visível (ADR 0024).
     isDraft: true,
   };
 
-  it("DADO um PR de execution válido segundo a topologia SSOT, ENTÃO retorna ok", () => {
+  it("DADO um PR Draft v3 com intenção preenchida (sem seções de Ready), ENTÃO retorna ok", () => {
     const result = runGovernancePrCheck(baseInput, fs);
     expect(result.kind).toBe("ok");
     if (result.kind === "ok") {
@@ -130,20 +170,16 @@ topology:
       prNumber: 34,
       prBranch: "feat/spec-0024-another",
       prTitle: "[🛠️2️⃣] [Spec 0024] terminal",
-      prBody: `
-## Status do ciclo de vida
-## PR Type
-## Posição na stack
-- **Stack atual**: 2
-## Merge authorization
-## Resumo
-## Test plan
-## Cross-refs
-## Checklist operacional
-## Disclosure de IA
-`,
     };
     const result = runGovernancePrCheck(input, fs);
+    expect(result.kind).toBe("ok");
+  });
+
+  it("DADO body v3 sem linha 'Stack atual', ENTÃO ok (posição na stack vive no título/state.yml/base-head)", () => {
+    const result = runGovernancePrCheck(
+      { ...baseInput, prBody: readyBodyV3(), isDraft: false },
+      fs
+    );
     expect(result.kind).toBe("ok");
   });
 
@@ -184,80 +220,81 @@ topology:
     }
   });
 
-  // === Robustez O2 (Checkpoint 2.3a) — header ancorado a linha + stack tolerante ===
+  // === Robustez O2 (Checkpoint 2.3a) — header ancorado a linha própria ===
 
   it("DADO seção citada inline (não header de linha própria), ENTÃO falha (fecha falso-negativo de substring)", () => {
     const input = {
       ...baseInput,
-      prBody: `
-## Status do ciclo de vida
-## PR Type
-## Posição na stack
-- **Stack atual**: 1
-## Merge authorization
-## Resumo
-## Test plan
-## Cross-refs
-## Checklist operacional
-> mencionei a ## Disclosure de IA do outro PR, mas não é um header aqui
-`,
+      prBody: [
+        "## Visão pretendida",
+        PROMPT,
+        "## Resumo",
+        "resumo",
+        "> mencionei o ## Escopo do outro PR, mas não é um header aqui",
+        "### Dentro do escopo",
+        "- a",
+        "### Fora do escopo",
+        "- b",
+        "## Valor entregue",
+        PLACEHOLDER,
+      ].join("\n"),
     };
     const result = runGovernancePrCheck(input, fs);
     expect(result.kind).toBe("fail");
     if (result.kind === "fail") {
-      expect(result.reasons.some((r) => r.includes("## Disclosure de IA"))).toBe(true);
+      expect(result.reasons.some((r) => r.includes('"## Escopo"'))).toBe(true);
     }
   });
 
-  it("DADO variação de formatação na linha 'Stack atual' (espaços, ':' fora do bold), ENTÃO ainda passa", () => {
-    const input = {
-      ...baseInput,
-      prBody: `
-## Status do ciclo de vida
-## PR Type
-## Posição na stack
--  **Stack atual** :  1
-## Merge authorization
-## Resumo
-## Test plan
-## Cross-refs
-## Checklist operacional
-## Disclosure de IA
-`,
-    };
-    const result = runGovernancePrCheck(input, fs);
+  // === Contrato temporal (Template v3) — Draft exige INTENÇÃO; Ready exige ENTREGA ===
+
+  it("DADO Draft sem '### Fora do escopo', ENTÃO falha (escopo é contrato de Draft)", () => {
+    const body = draftBodyV3().replace("### Fora do escopo", "Fora do escopo (sem header)");
+    const result = runGovernancePrCheck({ ...baseInput, prBody: body }, fs);
+    expect(result.kind).toBe("fail");
+    if (result.kind === "fail") {
+      expect(result.reasons.some((r) => r.includes('"### Fora do escopo"'))).toBe(true);
+    }
+  });
+
+  it("DADO Ready v3 completo, ENTÃO retorna ok", () => {
+    const result = runGovernancePrCheck(
+      { ...baseInput, prBody: readyBodyV3(), isDraft: false },
+      fs
+    );
     expect(result.kind).toBe("ok");
   });
 
-  it("DADO número de stack errado (2 quando sequence=1), ENTÃO falha (word-boundary preserva o contrato)", () => {
-    const input = {
-      ...baseInput,
-      prBody: `
-## Status do ciclo de vida
-## PR Type
-## Posição na stack
-- **Stack atual**: 2
-## Merge authorization
-## Resumo
-## Test plan
-## Cross-refs
-## Checklist operacional
-## Disclosure de IA
-`,
-    };
-    const result = runGovernancePrCheck(input, fs);
+  it("DADO Ready sem '### Evidências e gates', ENTÃO falha (contrato de Ready)", () => {
+    const body = readyBodyV3().replace("### Evidências e gates", "Evidências (sem header)");
+    const result = runGovernancePrCheck({ ...baseInput, prBody: body, isDraft: false }, fs);
     expect(result.kind).toBe("fail");
     if (result.kind === "fail") {
-      expect(result.reasons.some((r) => r.includes("Coerência de stack"))).toBe(true);
+      expect(result.reasons.some((r) => r.includes('"### Evidências e gates"'))).toBe(true);
+    }
+  });
+
+  it("DADO Draft sem '## Validação, evidências e checklist', ENTÃO ok (seção só é exigida em Ready)", () => {
+    const result = runGovernancePrCheck(baseInput, fs);
+    expect(result.kind).toBe("ok");
+  });
+
+  it("DADO Ready com Test plan só com o esqueleto do template, ENTÃO falha (validação real exigida)", () => {
+    const body = readyBodyV3({ testPlan: "```bash\n<comandos de validação>\n```" });
+    const result = runGovernancePrCheck({ ...baseInput, prBody: body, isDraft: false }, fs);
+    expect(result.kind).toBe("fail");
+    if (result.kind === "fail") {
+      expect(result.reasons.some((r) => r.includes("## Test plan"))).toBe(true);
     }
   });
 });
 
-// === Governança visual (matriz aprovada) — prompt final é o artefato gateado ===
-// Estado Draft/Ready vem do flag canônico do GitHub (`isDraft`), NUNCA do checkbox
-// do body (apenas documental) — fonte única, idêntica ao MergeStack. #1 Problema +
-// #3 Valor em execution Ready; #1 + #4 Convergência no Integration PR. Draft é isento.
-// #2 Capacidade nunca falha. Fast-track bypassa.
+// === Governança visual (Template v3) — prompt final é o artefato gateado ===
+// Estado Draft/Ready vem do flag canônico do GitHub (`isDraft`); o Template v3
+// não tem checkbox de lifecycle no body. Contrato temporal: #1 Visão pretendida
+// preenchida desde o Draft; #3 Valor entregue só em Ready; #1 + #4 Convergência
+// no Integration PR (Ready). Placeholder `<…>` do template NÃO satisfaz.
+// Fast-track bypassa.
 describe("CLI — governance-pr-check · governança visual [BR-GOV-VISUAL]", () => {
   function fsWithTopology(): FakeFileSystem {
     const fs = new FakeFileSystem();
@@ -297,37 +334,30 @@ topology:
     return fs;
   }
 
-  // Checkbox de lifecycle no body — DEVE ser ignorado pelo gate (só documental).
-  const CHECKBOX = {
-    ready: "- [x] **Ready for review** — ok",
-    draft: "- [x] **Draft** — ok\n- [ ] **Ready for review** — ok",
-    none: "",
-  } as const;
   const IMG = "![valor](https://github.com/u/a/img.png)";
-  const PROMPT = "```text\nGere um infográfico antes/depois do valor entregue…\n```";
-  const VAZIO = "<!-- preencher -->";
 
-  function execBody(o: {
-    checkbox?: keyof typeof CHECKBOX;
-    problema?: string;
-    valor?: string;
-  }): string {
+  function execBody(o: { problema?: string; valor?: string }): string {
     return [
-      "## Status do ciclo de vida",
-      CHECKBOX[o.checkbox ?? "none"],
-      "## PR Type",
-      "## Posição na stack",
-      "- **Stack atual**: 1",
       "## Visão pretendida",
       o.problema ?? VAZIO,
+      "## Resumo",
+      "Intenção humana do PR.",
+      "## Escopo",
+      "### Dentro do escopo",
+      "- frente A",
+      "### Fora do escopo",
+      "- frente B",
       "## Valor entregue",
       o.valor ?? VAZIO,
-      "## Merge authorization",
-      "## Resumo",
       "## Test plan",
-      "## Cross-refs",
-      "## Checklist operacional",
+      "```bash\nyarn validate\n```",
+      "## Validação, evidências e checklist",
+      "### Evidências e gates",
+      "- CI: verde",
+      "### Checklist operacional",
+      "- [x] Formatação verde",
       "## Disclosure de IA",
+      "Implementação assistida por IA.",
     ].join("\n");
   }
 
@@ -341,41 +371,30 @@ topology:
     isDraft,
   });
 
-  // ── Regressão: estado vem de isDraft (GitHub); o checkbox do body é IGNORADO ──
-  it("DADO GitHub Draft + checkbox Ready (sem visual) ENTÃO ok (Draft isenta; checkbox ignorado)", () => {
-    const r = runGovernancePrCheck(
-      execInput(execBody({ checkbox: "ready" }), true),
-      fsWithTopology()
-    );
-    expect(r.kind).toBe("ok");
+  // ── Contrato temporal: #1 desde o Draft; #3 só em Ready ──
+  it("DADO Draft com Visão pretendida vazia ENTÃO falha (visão é preenchida ao abrir o Draft)", () => {
+    const r = runGovernancePrCheck(execInput(execBody({}), true), fsWithTopology());
+    expect(r.kind).toBe("fail");
+    if (r.kind === "fail") expect(r.reasons.some((x) => x.includes("Visão pretendida"))).toBe(true);
   });
 
-  it("DADO GitHub Ready + checkbox Draft (sem visual) ENTÃO falha (Ready enforça; checkbox ignorado)", () => {
+  it("DADO Draft com Visão = placeholder do template ENTÃO falha (placeholder não satisfaz)", () => {
     const r = runGovernancePrCheck(
-      execInput(execBody({ checkbox: "draft" }), false),
+      execInput(execBody({ problema: PLACEHOLDER }), true),
       fsWithTopology()
     );
     expect(r.kind).toBe("fail");
     if (r.kind === "fail") expect(r.reasons.some((x) => x.includes("Visão pretendida"))).toBe(true);
   });
 
-  it("DADO GitHub Ready + checkbox ausente (sem visual) ENTÃO falha (Ready enforça)", () => {
+  it("DADO Draft com Visão preenchida + Valor placeholder ENTÃO ok (Valor é contrato de Ready)", () => {
     const r = runGovernancePrCheck(
-      execInput(execBody({ checkbox: "none" }), false),
-      fsWithTopology()
-    );
-    expect(r.kind).toBe("fail");
-  });
-
-  it("DADO GitHub Draft + checkbox ausente (sem visual) ENTÃO ok (Draft isenta)", () => {
-    const r = runGovernancePrCheck(
-      execInput(execBody({ checkbox: "none" }), true),
+      execInput(execBody({ problema: PROMPT, valor: PLACEHOLDER }), true),
       fsWithTopology()
     );
     expect(r.kind).toBe("ok");
   });
 
-  // ── Funcional: gate sobre o prompt/imagem quando GitHub Ready (isDraft=false) ──
   it("DADO Ready com PROMPT FINAL (sem imagem) em #1 e #3 ENTÃO ok (prompt é o artefato gateado)", () => {
     const r = runGovernancePrCheck(
       execInput(execBody({ problema: PROMPT, valor: PROMPT }), false),
@@ -401,9 +420,9 @@ topology:
     if (r.kind === "fail") expect(r.reasons.some((x) => x.includes("Visão pretendida"))).toBe(true);
   });
 
-  it("DADO Ready com #3 VAZIO ENTÃO falha", () => {
+  it("DADO Ready com #3 só placeholder ENTÃO falha", () => {
     const r = runGovernancePrCheck(
-      execInput(execBody({ problema: PROMPT, valor: VAZIO }), false),
+      execInput(execBody({ problema: PROMPT, valor: PLACEHOLDER }), false),
       fsWithTopology()
     );
     expect(r.kind).toBe("fail");
@@ -421,19 +440,28 @@ topology:
 
   function integBody(o: { problema?: string; convergencia?: string }): string {
     return [
-      "## Status do ciclo de vida",
-      "## PR Type",
-      "## Posição na stack",
       "## Visão pretendida",
       o.problema ?? VAZIO,
       "## Convergência da stack",
       o.convergencia ?? VAZIO,
-      "## Merge authorization",
       "## Resumo",
+      "Homologação final da stack.",
+      "## Escopo",
+      "### Dentro do escopo",
+      "- convergência",
+      "### Fora do escopo",
+      "- comportamento novo",
+      "## Valor entregue",
+      PLACEHOLDER,
       "## Test plan",
-      "## Cross-refs",
-      "## Checklist operacional",
+      "```bash\nyarn validate\n```",
+      "## Validação, evidências e checklist",
+      "### Evidências e gates",
+      "- CI: verde",
+      "### Checklist operacional",
+      "- [x] ok",
       "## Disclosure de IA",
+      "Implementação assistida por IA.",
     ].join("\n");
   }
 
