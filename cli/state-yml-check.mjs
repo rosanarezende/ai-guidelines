@@ -13,7 +13,7 @@
  * Schema canônico: `src/domain/workflow/WorkflowState.ts`
  * (4 chaves: stage, gate, focus, next).
  *
- * Assume `yarn build` executado. Se `dist/cli/stateYmlCheck.js` não
+ * Assume `npm run build` executado. Se `dist/cli/stateYmlCheck.js` não
  * existir, falha rapidamente com mensagem orientativa.
  *
  * Nota Windows: `await import(absolutePath)` falha com

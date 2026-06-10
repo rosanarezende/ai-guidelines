@@ -12,7 +12,7 @@
  *   PRIMÁRIO  — producibilidade: todo required context do ruleset versionado
  *               tem um produtor ESTÁVEL (não-matriz) em `.github/workflows`.
  *               É o invariante cuja violação CAUSOU o bug. Determinístico,
- *               sem rede — roda em `yarn validate`.
+ *               sem rede — roda em `npm run validate`.
  *
  *   SECUNDÁRIO — paridade: o ruleset vivo no GitHub == o versionado. Pega
  *               edição out-of-band na UI. Detect-only (nunca aplica). Precisa

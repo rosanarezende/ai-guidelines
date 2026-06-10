@@ -178,14 +178,14 @@ Os FATOS DE PROCESSO abaixo são DERIVADOS de reviews/gates via topologia
 (G07), não escritos à mão. Para PRs de spec, gere e cole dentro dos
 marcadores:
 
-  yarn disclosure
+  npm run disclosure
 -->
 
 <details>
 <summary><strong>Disclosure derivado (fatos de processo)</strong></summary>
 
 <!-- fatos-derivados:início -->
-<!-- (cole a saída de `yarn disclosure`; vazio até haver revisão registrada em artefato) -->
+<!-- (cole a saída de `npm run disclosure`; vazio até haver revisão registrada em artefato) -->
 <!-- fatos-derivados:fim -->
 
 </details>

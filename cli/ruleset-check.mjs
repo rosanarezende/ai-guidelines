@@ -16,7 +16,7 @@
  *   2 — uso inválido (módulo compilado ausente | flags inválidas)
  *   3 — paridade indeterminada (snapshot vivo ausente/ilegível)
  *
- * Assume `yarn build` executado. Nota Windows: `await import(absolutePath)`
+ * Assume `npm run build` executado. Nota Windows: `await import(absolutePath)`
  * falha com `ERR_UNSUPPORTED_ESM_URL_SCHEME`; `pathToFileURL` é obrigatório.
  */
 import { existsSync } from "node:fs";

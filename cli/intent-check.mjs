@@ -11,7 +11,7 @@
  *   1 — integridade referencial violada (≥ 1 action aponta comando inexistente)
  *   2 — uso inválido (módulo compilado ausente)
  *
- * Assume `yarn build`. Conversão via `pathToFileURL` obrigatória cross-OS.
+ * Assume `npm run build`. Conversão via `pathToFileURL` obrigatória cross-OS.
  */
 import { existsSync } from "node:fs";
 import { fileURLToPath, pathToFileURL } from "node:url";

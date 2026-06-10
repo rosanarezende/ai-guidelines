@@ -32,7 +32,7 @@ profiles:
         consumers: [human]
         description: Lista provider adapters disponiveis.
       - name: setup
-        command: yarn install --immutable && yarn build:all
+        command: npm ci && npm run build:all
         category: setup
         mutates: true
         consumers: [human]
@@ -50,7 +50,7 @@ profiles:
         consumers: [script, hook]
         description: Gera rules.json, catalogo e ledger derivado.
       - name: build:all
-        command: yarn build && yarn build:rules
+        command: npm run build && npm run build:rules
         category: build
         mutates: true
         consumers: [script, hook, lifecycle]
@@ -74,13 +74,13 @@ profiles:
         consumers: [hook]
         description: Formata arquivos staged e re-stageia alteracoes.
       - name: test
-        command: yarn test:unit && yarn test:ts
+        command: npm run test:unit && npm run test:ts
         category: test
         mutates: false
         consumers: [script]
         description: Agregado das suites mjs e TypeScript.
       - name: test:unit
-        command: node --experimental-default-config-file --test cli/**/*.test.mjs cli/**/**/*.test.mjs tests/integration/**/*.test.mjs
+        command: node --experimental-default-config-file --test "cli/**/*.test.mjs" "tests/integration/**/*.test.mjs"
         category: test
         mutates: false
         consumers: [script, hook]
@@ -92,61 +92,61 @@ profiles:
         consumers: [script]
         description: Suite TypeScript/Jest.
       - name: test:smoke
-        command: yarn build && node --experimental-default-config-file --test tests/smoke/*.test.mjs
+        command: npm run build && node --experimental-default-config-file --test "tests/smoke/*.test.mjs"
         category: test
         mutates: true
         consumers: [script, workflow]
         description: Smoke cross-plataforma sobre pacote gerado.
       - name: test:coverage
-        command: node --experimental-default-config-file --experimental-test-coverage --test cli/**/*.test.mjs cli/**/**/*.test.mjs tests/integration/**/*.test.mjs && jest --config ./.jest/jest.config.js --coverage
+        command: node --experimental-default-config-file --experimental-test-coverage --test "cli/**/*.test.mjs" "tests/integration/**/*.test.mjs" && jest --config ./.jest/jest.config.js --coverage
         category: test
         mutates: false
         consumers: [human]
         description: Cobertura combinada das suites mjs e Jest.
       - name: living-docs:generate
-        command: yarn build && node cli/living-docs.mjs generate
+        command: npm run build && node cli/living-docs.mjs generate
         category: docs
         mutates: true
         consumers: [human]
         description: Regenera living docs.
       - name: living-docs:check
-        command: yarn build && node cli/living-docs.mjs check
+        command: npm run build && node cli/living-docs.mjs check
         category: docs
         mutates: true
         consumers: [script]
         description: Verifica drift dos living docs.
       - name: state-yml:check
-        command: yarn build && node cli/state-yml-check.mjs
+        command: npm run build && node cli/state-yml-check.mjs
         category: governance
         mutates: true
         consumers: [script]
         description: Valida state.yml operacionais e tocados no diff local.
       - name: state-yml:check:all
-        command: yarn build && node cli/state-yml-check.mjs --all
+        command: npm run build && node cli/state-yml-check.mjs --all
         category: governance
         mutates: true
         consumers: [script, workflow]
         description: Varredura historica/global de todos os state.yml.
       - name: active-specs:check
-        command: yarn build && node cli/active-specs-check.mjs
+        command: npm run build && node cli/active-specs-check.mjs
         category: governance
         mutates: true
         consumers: [script]
         description: Verifica coerencia da projection specs/active.yml.
       - name: reconcile:check
-        command: yarn build && node cli/reconcile-check.mjs
+        command: npm run build && node cli/reconcile-check.mjs
         category: governance
         mutates: true
         consumers: [script]
         description: Advisory de continuidade operacional/canonical-next.
       - name: co-knowledge:check
-        command: yarn build && node cli/co-knowledge-check.mjs
+        command: npm run build && node cli/co-knowledge-check.mjs
         category: governance
         mutates: true
         consumers: [script]
         description: Advisory de Falsification/Knowledge.
       - name: co-knowledge:inventory
-        command: yarn build && node cli/co-knowledge-inventory.mjs
+        command: npm run build && node cli/co-knowledge-inventory.mjs
         category: governance
         mutates: true
         consumers: [script]
@@ -182,43 +182,43 @@ profiles:
         consumers: [script]
         description: GG-0001; DECs nao-resolvidos precisam ser decidiveis.
       - name: ruleset:check
-        command: yarn build && node cli/ruleset-check.mjs
+        command: npm run build && node cli/ruleset-check.mjs
         category: governance
         mutates: true
         consumers: [script, workflow]
         description: Producibilidade dos required contexts; --parity para ruleset vivo.
       - name: review:check
-        command: yarn build && node cli/review-check.mjs
+        command: npm run build && node cli/review-check.mjs
         category: governance
         mutates: true
         consumers: [script]
         description: Verifica artefatos de review/gate e fingerprints.
       - name: insights:check
-        command: yarn build && node cli/insights-check.mjs
+        command: npm run build && node cli/insights-check.mjs
         category: governance
         mutates: true
         consumers: [script]
         description: Valida ledger de insights.
       - name: intent:check
-        command: yarn build && node cli/intent-check.mjs
+        command: npm run build && node cli/intent-check.mjs
         category: governance
         mutates: true
         consumers: [script]
         description: Verifica intencao/governanca de PR.
       - name: disclosure
-        command: yarn build && node cli/disclosure-render.mjs
+        command: npm run build && node cli/disclosure-render.mjs
         category: governance
         mutates: true
         consumers: [human]
         description: Renderiza disclosure de IA derivado.
       - name: validate
-        command: yarn format:check && yarn build:all && yarn script-contracts:check && yarn runtime-bootstrap:check && yarn test && yarn living-docs:check && yarn state-yml:check && yarn active-specs:check && yarn reconcile:check && yarn co-knowledge:check && yarn co-knowledge:inventory && yarn gate-decidability:check && yarn ruleset:check && yarn review:check && yarn insights:check && yarn intent:check
+        command: npm run format:check && npm run build:all && npm run script-contracts:check && npm run runtime-bootstrap:check && npm run test && npm run living-docs:check && npm run state-yml:check && npm run active-specs:check && npm run reconcile:check && npm run co-knowledge:check && npm run co-knowledge:inventory && npm run gate-decidability:check && npm run ruleset:check && npm run review:check && npm run insights:check && npm run intent:check
         category: aggregate
         mutates: true
         consumers: [hook, workflow, human]
         description: Gate local operacional e pre-push.
       - name: ci
-        command: yarn install --immutable && yarn validate && yarn state-yml:check:all && yarn test:smoke
+        command: npm ci && npm run validate && npm run state-yml:check:all && npm run test:smoke
         category: aggregate
         mutates: true
         consumers: [workflow, human]
@@ -230,7 +230,7 @@ profiles:
         consumers: [lifecycle]
         description: Instala hooks Husky.
       - name: prepack
-        command: yarn build:all
+        command: npm run build:all
         category: lifecycle
         mutates: true
         consumers: [lifecycle]
@@ -264,14 +264,14 @@ profiles:
     workflows:
       - file: .github/workflows/repo-validation.yml
         required_runs:
-          - yarn validate
-          - yarn state-yml:check:all
+          - npm run validate
+          - npm run state-yml:check:all
       - file: .github/workflows/release.yml
         required_runs:
-          - yarn ci
+          - npm run ci
       - file: .github/workflows/smoke-multi-os.yml
         required_runs:
-          - yarn test:smoke
+          - npm run test:smoke
       - file: .github/workflows/ruleset-drift.yml
         required_runs:
           - node cli/ruleset-check.mjs --parity --live /tmp/live-ruleset.json
@@ -284,6 +284,7 @@ profiles:
         - CONTRIBUTING.md
       forbidden_phrases:
         - yarn format ; yarn validate ; git add . ; git commit
+        - npm run format ; npm run validate ; git add . ; git commit
 
     hook_bootstrap:
       node_path: nvm

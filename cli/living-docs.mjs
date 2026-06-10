@@ -10,7 +10,7 @@
  *   1 — drift detectado (check)
  *   2 — uso inválido (subcomando ausente ou desconhecido)
  *
- * Assume `yarn build` executado. Se `dist/cli/livingDocs.js` não existir
+ * Assume `npm run build` executado. Se `dist/cli/livingDocs.js` não existir
  * (ex.: instalação corrompida ou desenvolvimento sem build), imprime
  * mensagem clara e sai com código 2 — drift guard nunca deve degradar
  * silenciosamente.

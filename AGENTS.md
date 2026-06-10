@@ -24,18 +24,18 @@ Conteúdo específico deste repositório deve ficar fora de `<AI_GUIDELINES>`. O
 
 ## Quickstart Local
 
-Este workspace usa Yarn 4 com Plug'n'Play. Para execução local da CLI, o caminho suportado é `yarn guidelines ...`.
+Este workspace usa npm puro (`package-lock.json` + `npm ci`). Para execução local da CLI, o caminho suportado é `npm run guidelines -- ...`.
 
 ```bash
-yarn setup              # = install --immutable + build:all
-yarn format             # prettier --write
-yarn validate           # gate local: format:check + build:all + test + living-docs:check
-yarn guidelines adopt --target . --dry-run
+npm run setup           # = npm ci + build:all
+npm run format          # prettier --write
+npm run validate        # gate local: format:check + build:all + test + living-docs:check
+npm run guidelines -- adopt --target . --dry-run
 ```
 
 > **Referência única dos scripts:** [`docs/scripts.md`](docs/scripts.md) tem o mapa completo (categoria, composição, hooks, workflows). Use este Quickstart só para boot rápido; consulte `docs/scripts.md` antes de qualquer dúvida sobre o que cada script faz.
 
-> **Nota sobre `dist/` (TemplateEngine):** o CLI mjs em `cli/` invoca dinamicamente a TemplateEngine compilada em `dist/` para renderizar recipes mapeadas (sub-bloco 4.C.0 da Spec 0021). Quando uma recipe existe mas `dist/` ainda não foi gerado, o fluxo **falha rapidamente** com mensagem orientada a diagnóstico (em vez de cair silenciosamente no mirror legado — comportamento intencional, ADR-aligned, para evitar regressão silenciosa). **Se estiver rodando o CLI localmente sem `yarn build` prévio**, espere essa falha — execute `yarn build` (ou `yarn build:all` para também regenerar `rules.json`) antes. No pacote publicado via NPM, `prepack: yarn build:all` garante que tanto `dist/` quanto `rules.json` estão sempre presentes; `engine-unavailable` em produção indica regressão real de packaging.
+> **Nota sobre `dist/` (TemplateEngine):** o CLI mjs em `cli/` invoca dinamicamente a TemplateEngine compilada em `dist/` para renderizar recipes mapeadas (sub-bloco 4.C.0 da Spec 0021). Quando uma recipe existe mas `dist/` ainda não foi gerado, o fluxo **falha rapidamente** com mensagem orientada a diagnóstico (em vez de cair silenciosamente no mirror legado — comportamento intencional, ADR-aligned, para evitar regressão silenciosa). **Se estiver rodando o CLI localmente sem `npm run build` prévio**, espere essa falha — execute `npm run build` (ou `npm run build:all` para também regenerar `rules.json`) antes. No pacote publicado via NPM, `prepack: npm run build:all` garante que tanto `dist/` quanto `rules.json` estão sempre presentes; `engine-unavailable` em produção indica regressão real de packaging.
 
 <AI_GUIDELINES>
 
@@ -44,7 +44,7 @@ yarn guidelines adopt --target . --dry-run
 This file is the AI-channel bootstrap, not the governance kernel.
 
 - Repository state beats transcript, memory, and agent output.
-- For a fresh AI session, run `yarn guidelines handoff [spec]` and follow the emitted reading order.
+- For a fresh AI session, run `npm run guidelines -- handoff [spec]` and follow the emitted reading order.
 - The script contract at `.core/governance/script-contracts.yml` is the operational SSOT for scripts, hooks, workflows, and docs.
 - Full rules remain governed in `.core/rules/**`, `.core/rules/catalog.md`, `.core/rules/_meta/rules.json`, and the rule ledger.
 - Never bypass hooks with `--no-verify`; restore setup if hooks or generated script surfaces are missing.

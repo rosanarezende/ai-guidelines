@@ -30,7 +30,7 @@ describe("Feature: Pointers (AGENTS.md Runtime Architecture)", () => {
     const rootContent = await fs.readFile(path.join(subTarget, "AGENTS.md"), "utf8");
     assert.match(rootContent, /<AI_GUIDELINES>/, "Raiz deve conter a tag mãe governada");
     assert.match(rootContent, /Runtime Bootstrap/, "Raiz deve conter o bootstrap");
-    assert.match(rootContent, /yarn guidelines handoff/, "Raiz deve apontar para handoff");
+    assert.match(rootContent, /npx ai-guidelines handoff/, "Raiz deve apontar para handoff");
     assert.doesNotMatch(rootContent, /### \[CORE-/, "Raiz não deve carregar regras completas");
     assert.equal(
       await fs
@@ -173,7 +173,7 @@ describe("Feature: Pointers (AGENTS.md Runtime Architecture)", () => {
     assert.match(content, /# Projeto/);
     assert.match(content, /Regra local/);
     assert.match(content, /<AI_GUIDELINES>/);
-    assert.match(content, /yarn guidelines handoff/);
+    assert.match(content, /npx ai-guidelines handoff/);
     assert.doesNotMatch(content, /<FEATURE_TDD>/);
     assert.doesNotMatch(content, /ponteiro antigo/);
   });

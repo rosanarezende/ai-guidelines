@@ -6,8 +6,6 @@ coverage/
 
 # Dependencies
 node_modules/
-.pnp
-.yarn/
 
 # Editors
 .vscode/

@@ -1,9 +1,9 @@
 name: Repo Validation
 
 # Absorve o que era ai-guidelines-ci.yml + content-guardrails.yml em
-# um workflow único, eliminando duplicação. Usa `yarn validate` como
+# um workflow único, eliminando duplicação. Usa `npm run validate` como
 # entry-point operacional (format:check + build:all + test + living-docs:check)
-# e adiciona a varredura histórica de state.yml. `yarn ci` adicionaria smoke
+# e adiciona a varredura histórica de state.yml. `npm run ci` adicionaria smoke
 # tests, mas smoke tem workflow próprio (smoke-multi-os.yml).
 
 on:
@@ -25,16 +25,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "24"
-          cache: "yarn"
+          cache: "npm"
 
-      - name: Enable Corepack
-        run: corepack enable
-
-      - name: Install dependencies (immutable)
-        run: yarn install --immutable
+      - name: Install dependencies (npm ci)
+        run: npm ci
 
       - name: Validate quality gates (Format + Build + Tests + Living Docs)
-        run: yarn validate
+        run: npm run validate
 
       - name: Validate historical state.yml files
-        run: yarn state-yml:check:all
+        run: npm run state-yml:check:all

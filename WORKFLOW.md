@@ -49,7 +49,7 @@ A candidata descreve o problema, o escopo proposto e por que vale fazer. Quando 
 Uma **spec** é a documentação da iniciativa antes e durante a execução — o contrato entre quem planejou e quem vai implementar. Não é uma wiki: é um artefato vivo que fecha junto com o trabalho.
 
 ```bash
-yarn guidelines workflow   # use a opção "Nova spec / retomar"
+npm run guidelines -- workflow   # use a opção "Nova spec / retomar"
 ```
 
 Cada spec vive em `.governance/specs/<número>-<nome>/` e tem:
@@ -70,11 +70,11 @@ A branch tem nome `feat/spec-<número>-<nome>`.
 O trabalho acontece em PRs sequenciais na branch da spec — cada PR entrega uma fatia de valor independente e passa no CI antes de avançar.
 
 ```bash
-yarn guidelines continue      # mostra o briefing da spec ativa e verifica se a execução está autorizada
-yarn guidelines workflow      # wizard com opções: ver estado, publicar progresso, abrir PR de integração...
+npm run guidelines -- continue      # mostra o briefing da spec ativa e verifica se a execução está autorizada
+npm run guidelines -- workflow      # wizard com opções: ver estado, publicar progresso, abrir PR de integração...
 ```
 
-`yarn guidelines continue` bloqueia se `tasks.md` não existir ou não tiver tarefas autorizadas. É o mecanismo que impede implementação sem planejamento.
+`npm run guidelines -- continue` bloqueia se `tasks.md` não existir ou não tiver tarefas autorizadas. É o mecanismo que impede implementação sem planejamento.
 
 ### 5. Preparo para o merge (a etapa que mais importa)
 
@@ -96,7 +96,7 @@ O release-log tem dois momentos: o que você preenche antes (data, versão alvo,
 ### 6. Merge
 
 ```bash
-yarn guidelines workflow   # use a opção "Executar merge atômico da stack"
+npm run guidelines -- workflow   # use a opção "Executar merge atômico da stack"
 ```
 
 O merge precisa de autorização explícita do owner registrada no PR (gate R8 do `review.md`). Sem isso, o comando não avança.
@@ -157,13 +157,13 @@ O gate aceita o **prompt** (bloco `…`) **ou** a imagem (que o satisfaz). Draft
 
 ## Comandos de referência rápida
 
-| Comando                                        | Para quê                                             |
-| ---------------------------------------------- | ---------------------------------------------------- |
-| `yarn guidelines workflow`                     | Wizard com todas as opções do ciclo                  |
-| `yarn guidelines continue`                     | Briefing da spec ativa + verificação de autorização  |
-| `yarn guidelines review [<pr>]`                | Coleta e estrutura comentários de um PR para análise |
-| `yarn guidelines release-prep [--version <v>]` | Prepara bump de versão com plano explícito           |
-| `yarn guidelines release-prep --dry-run`       | Audita a release sem aplicar nada                    |
+| Comando                                              | Para quê                                             |
+| ---------------------------------------------------- | ---------------------------------------------------- |
+| `npm run guidelines -- workflow`                     | Wizard com todas as opções do ciclo                  |
+| `npm run guidelines -- continue`                     | Briefing da spec ativa + verificação de autorização  |
+| `npm run guidelines -- review [<pr>]`                | Coleta e estrutura comentários de um PR para análise |
+| `npm run guidelines -- release-prep [--version <v>]` | Prepara bump de versão com plano explícito           |
+| `npm run guidelines -- release-prep --dry-run`       | Audita a release sem aplicar nada                    |
 
 ---
 

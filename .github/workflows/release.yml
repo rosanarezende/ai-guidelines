@@ -5,8 +5,8 @@
 # de tag `v*`, sem release engine — apenas o caminho mínimo profissional.
 #
 # Trigger: push de tag `v*` (ex.: v1.1.0-preview.0, v1.1.0).
-# Gate: `yarn ci` (install + validate + smoke) — release gate canônico.
-# Publish: `yarn npm publish` (Yarn 4 com `YARN_NPM_AUTH_TOKEN`).
+# Gate: `npm run ci` (install + validate + smoke) — release gate canônico.
+# Publish: `npm publish` (npm com `NODE_AUTH_TOKEN` via registry-url do setup-node).
 # GitHub Release: `gh release create --generate-notes` (notes derivadas de PRs
 # mergeados desde a tag anterior; pre-release marcado como tal).
 #
@@ -50,14 +50,11 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "24"
-          cache: "yarn"
+          cache: "npm"
           registry-url: "https://registry.npmjs.org"
 
-      - name: Enable Corepack
-        run: corepack enable
-
-      - name: Install dependencies (immutable)
-        run: yarn install --immutable
+      - name: Install dependencies (npm ci)
+        run: npm ci
 
       - name: Verify package.json version matches tag
         run: |
@@ -69,8 +66,8 @@ jobs:
           fi
           echo "Version match confirmed: $TAG_VERSION"
 
-      - name: Release gate — yarn ci
-        run: yarn ci
+      - name: Release gate — npm run ci
+        run: npm run ci
 
       - name: Determine npm dist-tag and prerelease flag
         id: release_meta
@@ -87,9 +84,9 @@ jobs:
           fi
 
       - name: Publish to npm
-        run: yarn npm publish --tag ${{ steps.release_meta.outputs.DIST_TAG }}
+        run: npm publish --tag ${{ steps.release_meta.outputs.DIST_TAG }}
         env:
-          YARN_NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Create GitHub Release
         env:

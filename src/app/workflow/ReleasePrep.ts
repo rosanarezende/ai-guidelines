@@ -5,7 +5,7 @@ import { WorkflowFileSystem } from "../ports/WorkflowFileSystem.js";
  * Use case tier 3: prepara release publicando versão.
  *
  * Cravado em `[DEC-0023-L01]` (Bloco L). Materializa o comando standalone
- * `yarn guidelines release-prep`. Padrão `plan + execute`.
+ * `npm run guidelines -- release-prep`. Padrão `plan + execute`.
  *
  * Fluxo:
  *   1. Lê versão atual de `package.json`

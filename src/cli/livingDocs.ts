@@ -93,7 +93,7 @@ export function runCheck(options: RunOptions): number {
   logger.error("");
   logger.error(result.diff);
   logger.error("");
-  logger.error(`Hint: run 'yarn living-docs:generate' to regenerate.`);
+  logger.error(`Hint: run 'npm run living-docs:generate' to regenerate.`);
   return 1;
 }
 

@@ -3,7 +3,7 @@
  * Wrapper físico de `runtime-bootstrap:*`.
  *
  * A implementação operacional vive em TypeScript (`src/cli/runtimeBootstrap.ts`)
- * e é consumida de `dist/` após `yarn build`. `cli/` permanece como camada de
+ * e é consumida de `dist/` após `npm run build`. `cli/` permanece como camada de
  * compatibilidade/bin cross-OS.
  */
 import { existsSync } from "node:fs";

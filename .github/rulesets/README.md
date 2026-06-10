@@ -28,7 +28,7 @@ gh api --method PUT repos/<owner>/<repo>/rulesets/<id> --input .github/rulesets/
 
 | Invariante                     | Pergunta                                                                            | Onde roda                                           | Rede?          |
 | :----------------------------- | :---------------------------------------------------------------------------------- | :-------------------------------------------------- | :------------- |
-| **PRIMÁRIO — producibilidade** | todo required context tem produtor **estável** (não-matriz) em `.github/workflows`? | `yarn validate` (`ruleset:check`)                   | não            |
+| **PRIMÁRIO — producibilidade** | todo required context tem produtor **estável** (não-matriz) em `.github/workflows`? | `npm run validate` (`ruleset:check`)                | não            |
 | **SECUNDÁRIO — paridade**      | o ruleset vivo no GitHub == este arquivo?                                           | workflow `ruleset-drift` (`ruleset:check --parity`) | sim (`gh api`) |
 
 O bug real foi de **producibilidade** — a paridade sozinha não o pegaria (um
@@ -37,7 +37,7 @@ morto). Por isso a producibilidade é o invariante central e entra no `validate`
 
 ## Required contexts (e por quê são poucos e estáveis)
 
-- **`repo-validation`** — gate de integridade (`yarn validate` + varredura
+- **`repo-validation`** — gate de integridade (`npm run validate` + varredura
   histórica `state-yml:check:all`).
 - **`smoke`** — job **agregador estável** (`needs:` da matriz multi-OS). Exigimos
   o agregador, **nunca** os contextos expandidos por matriz

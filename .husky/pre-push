@@ -14,8 +14,8 @@ fi
 
 if ! command -v node >/dev/null 2>&1; then
   echo "ai-guidelines hook: node não encontrado no PATH e nvm não pôde ser carregado." >&2
-  echo "Restaure o ambiente (ex.: nvm install && nvm use) e rode yarn setup; não use --no-verify." >&2
+  echo "Restaure o ambiente (ex.: nvm install && nvm use) e rode npm run setup; não use --no-verify." >&2
   exit 127
 fi
 
-node .yarn/releases/yarn-4.1.1.cjs validate
+npm run validate

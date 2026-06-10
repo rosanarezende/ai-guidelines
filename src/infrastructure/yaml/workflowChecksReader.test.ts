@@ -9,7 +9,7 @@ jobs:
   repo-validation:
     runs-on: ubuntu-latest
     steps:
-      - run: yarn validate
+      - run: npm run validate
 `;
     const { stable, matrix } = parseWorkflowChecks(yaml, "repo-validation.yml");
     expect(matrix).toHaveLength(0);
@@ -48,7 +48,7 @@ jobs:
         os: [ubuntu-latest, windows-latest]
         node: ["22.x", "24.x"]
     runs-on: \${{ matrix.os }}
-    steps: [{ run: yarn test:smoke }]
+    steps: [{ run: npm run test:smoke }]
 `;
     const { stable, matrix } = parseWorkflowChecks(yaml, "smoke-multi-os.yml");
     expect(stable).toHaveLength(0);
@@ -68,7 +68,7 @@ jobs:
     name: smoke / \${{ matrix.os }} / node \${{ matrix.node }}
     strategy: { matrix: { os: [ubuntu-latest], node: ["24.x"] } }
     runs-on: \${{ matrix.os }}
-    steps: [{ run: yarn test:smoke }]
+    steps: [{ run: npm run test:smoke }]
   smoke:
     needs: [smoke-matrix]
     runs-on: ubuntu-latest

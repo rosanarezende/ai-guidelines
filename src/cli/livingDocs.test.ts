@@ -105,7 +105,7 @@ describe("CLI — livingDocs [BR-CLI-LIVING-DOCS-CLI]", () => {
       const allErrors = logger.error.mock.calls.map((c: unknown[]) => c[0]).join("\n");
       expect(allErrors).toContain("drift detected");
       expect(allErrors).toContain("BR-CLI-B-NEW");
-      expect(allErrors).toContain("yarn living-docs:generate");
+      expect(allErrors).toContain("npm run living-docs:generate");
     });
 
     it("DADO artifact AUSENTE no disco E entries no código ENTÃO drift=true, retorna 1 [BR-CLI-LIVING-DOCS-CLI-07]", () => {

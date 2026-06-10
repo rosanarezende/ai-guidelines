@@ -3,14 +3,22 @@ import { stripLegacyCoreBlock } from "./LegacyAgentsCoreBlock.js";
 const AI_GUIDELINES_OPEN = "<AI_GUIDELINES>";
 const AI_GUIDELINES_CLOSE = "</AI_GUIDELINES>";
 
-export function buildAgentsRuntimeStub(sddDir = ".ai-guidelines"): string {
+/**
+ * O comando de handoff difere por audiência: consumidores invocam o bin
+ * publicado (`npx ai-guidelines …`, default); o repositório do framework usa o
+ * script local (`npm run guidelines -- …`), passado por runtimeBootstrap.
+ */
+export function buildAgentsRuntimeStub(
+  sddDir = ".ai-guidelines",
+  handoffCommand = "npx ai-guidelines handoff [spec]"
+): string {
   return [
     "## Runtime Bootstrap",
     "",
     "This file is the AI-channel bootstrap, not the governance kernel.",
     "",
     "- Repository state beats transcript, memory, and agent output.",
-    "- For a fresh AI session, run `yarn guidelines handoff [spec]` and follow the emitted reading order.",
+    `- For a fresh AI session, run \`${handoffCommand}\` and follow the emitted reading order.`,
     "- The script contract at `.core/governance/script-contracts.yml` is the operational SSOT for scripts, hooks, workflows, and docs.",
     "- Full rules remain governed in `.core/rules/**`, `.core/rules/catalog.md`, `.core/rules/_meta/rules.json`, and the rule ledger.",
     "- Never bypass hooks with `--no-verify`; restore setup if hooks or generated script surfaces are missing.",
@@ -30,9 +38,12 @@ export function buildAgentsRuntimeStub(sddDir = ".ai-guidelines"): string {
 
 export function buildRuntimeBootstrapContent(
   existingContent = "",
-  options: { readonly sddDir?: string } = {}
+  options: { readonly sddDir?: string; readonly handoffCommand?: string } = {}
 ): string {
-  return mergeAgentsContent(existingContent, buildAgentsRuntimeStub(options.sddDir));
+  return mergeAgentsContent(
+    existingContent,
+    buildAgentsRuntimeStub(options.sddDir, options.handoffCommand)
+  );
 }
 
 export function mergeAgentsContent(existingContent: string, managedContent: string): string {

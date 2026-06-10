@@ -1408,7 +1408,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
     const absentResult: ListActiveSpecsResult = {
       indexAvailable: false,
       entries: [],
-      warnings: ["Index not found. Run yarn guidelines workflow publish-state to populate."],
+      warnings: ["Index not found. Run npm run guidelines -- workflow publish-state to populate."],
     };
     const oneEntryResult: ListActiveSpecsResult = {
       indexAvailable: true,
@@ -1575,7 +1575,9 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
       const absent: ListActiveSpecsResult = {
         indexAvailable: false,
         entries: [],
-        warnings: ["Index not found. Run yarn guidelines workflow publish-state to populate."],
+        warnings: [
+          "Index not found. Run npm run guidelines -- workflow publish-state to populate.",
+        ],
       };
       const code = await runAdvancedOps({
         repoRoot: "/repo",
@@ -1844,7 +1846,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
       expect(code).toBe(1);
       const out = logger.lines.join("\n");
       expect(out).toMatch(/Índice operacional público.*não encontrado/);
-      expect(out).toMatch(/yarn guidelines workflow publish-state/);
+      expect(out).toMatch(/npm run guidelines -- workflow publish-state/);
     });
 
     it("DADO main(['continue', '<identifier>'], opts) QUANDO entry casa E path existe ENTÃO encaminha identifier para runContinue (lookup via índice)", async () => {

@@ -69,11 +69,11 @@ export function printHelp(commandsSection = "") {
   const registryBlock =
     commandsSection.trim().length > 0
       ? commandsSection
-      : "  (execute `yarn build` para ver os comandos do registry)";
+      : "  (execute `npm run build` para ver os comandos do registry)";
   console.log(`ai-guidelines CLI
 
 Uso:
-  yarn guidelines <comando> [opções]   (veja os comandos abaixo)
+  npm run guidelines -- <comando> [opções]   (veja os comandos abaixo)
 
 ═══ COMANDOS (registry) ═══
 

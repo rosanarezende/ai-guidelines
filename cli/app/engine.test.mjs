@@ -19,7 +19,7 @@ describe("app/engine", () => {
       process.exitCode = previousExitCode;
     }
     const output = errors.join("\n");
-    assert.match(output, /yarn build/, "deveria orientar a buildar");
+    assert.match(output, /npm run build/, "deveria orientar a buildar");
     assert.doesNotMatch(
       output,
       /Comando não suportado/,
@@ -39,7 +39,7 @@ describe("app/engine", () => {
       process.exitCode = previousExitCode;
     }
     const output = errors.join("\n");
-    assert.match(output, /yarn build/, "bootstrap também deve depender do registry compilado");
+    assert.match(output, /npm run build/, "bootstrap também deve depender do registry compilado");
     assert.doesNotMatch(output, /Modo:/, "não deveria cair no execute legado");
   });
 });

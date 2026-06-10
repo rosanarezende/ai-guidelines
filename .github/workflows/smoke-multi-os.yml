@@ -25,16 +25,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
-          cache: "yarn"
+          cache: "npm"
 
-      - name: Enable Corepack
-        run: corepack enable
-
-      - name: Install dependencies (immutable)
-        run: yarn install --immutable
+      - name: Install dependencies (npm ci)
+        run: npm ci
 
       - name: Run smoke suite (npm pack + install + init/update over tarball)
-        run: yarn test:smoke
+        run: npm run test:smoke
 
   # Agregador estável (Spec 0024 Checkpoint 2.2): expõe UM context fixo `smoke`
   # como required check do ruleset, em vez dos 6 nomes expandidos pela matriz
