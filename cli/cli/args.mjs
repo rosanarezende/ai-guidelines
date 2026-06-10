@@ -4,7 +4,11 @@ import { normalizePackageManager, detectPackageManager } from "#formatters/packa
 import { readTextIfExists } from "#fs/file-system";
 import { DEFAULT_PROVIDERS, getSupportedProviders } from "#features/core/config";
 
-const SUPPORTED_MODES = ["init", "adopt", "providers", "update", "check-budget"];
+// Verbos de bootstrap suportados pela CLI. SSOT canônica = os verbos registrados por
+// `BOOTSTRAP_COMMANDS` em `src/cli/registry/commands/BootstrapCommand.ts` (registry-first).
+// Esta cópia existe porque `args.mjs` (.mjs, executável pré-build) não importa `dist/`; o
+// teste `args.test.mjs` (BR-CLI-INPUT-07) falha se as duas listas divergirem.
+export const SUPPORTED_MODES = ["init", "adopt", "providers", "update", "check-budget"];
 const WIZARD_DEFAULTS = {
   mode: "adopt",
   target: ".",
@@ -57,16 +61,6 @@ const PROVIDER_DESCRIPTIONS = {
  */
 export const OPT_IN_RULE_FILES = EDITORIAL_FEATURES.map((f) => `${f}.md`);
 
-const BOOLEAN_FLAGS = new Set([
-  "force",
-  "force-prettier",
-  "dry-run",
-  "install",
-  "prune",
-  "yes",
-  "y",
-]);
-
 export function isSupportedMode(mode) {
   return SUPPORTED_MODES.includes(mode);
 }
@@ -81,26 +75,7 @@ export function printHelp(commandsSection = "") {
 Uso:
   yarn guidelines <comando> [opções]   (veja os comandos abaixo)
 
-═══ COMANDOS DE BOOTSTRAP / DISTRIBUIÇÃO ═══
-
-  init           Cria baseline AI-first em projeto novo.
-                 Ex.: yarn guidelines init --target ./meu-projeto --lang pt
-
-  adopt          Aplica baseline AI-first em repositório existente.
-                 Ex.: yarn guidelines adopt --providers claude,copilot --force
-
-  providers      Adiciona ou atualiza arquivos nativos de provider (CLAUDE.md,
-                 GEMINI.md, .openai/instructions.md, .cursor/rules/*, etc.).
-
-  update         Re-aplica provider entrypoints, templates SDD e recompila
-                 AGENTS.md a partir do .ai-guidelines/config.json existente
-                 (idempotente, headless). Use após atualizar a versão do
-                 framework para receber updates sem reabrir o wizard.
-
-  check-budget   Imprime o relatório de orçamento de tokens (universal, opt-in,
-                 AGENTS.md compilado e cada provider entrypoint).
-
-═══ COMANDOS DO WORKFLOW / GOVERNANÇA (registry) ═══
+═══ COMANDOS (registry) ═══
 
 ${registryBlock}
 
@@ -139,61 +114,6 @@ ${registryBlock}
   fechadas no decision-brief antes de execution; tasks.md é boundary de
   autorização (não checklist fino); enforcement L2 + L4 mínimo.
 `);
-}
-
-function normalizeInlineValue(key, value) {
-  if (!BOOLEAN_FLAGS.has(key) && !key.startsWith("skip-")) {
-    return value;
-  }
-
-  const normalized = String(value).trim().toLowerCase();
-  if (["true", "1", "yes", "y", "sim", "s"].includes(normalized)) {
-    return true;
-  }
-  if (["false", "0", "no", "n", "nao", "não"].includes(normalized)) {
-    return false;
-  }
-
-  return value;
-}
-
-export function parseArgs(argv) {
-  const [command, ...rest] = argv;
-  const options = {};
-
-  for (let index = 0; index < rest.length; index += 1) {
-    const token = rest[index];
-
-    if (!token.startsWith("-")) {
-      // Comandos legados (bootstrap) não aceitam positional. Os verbos migrados
-      // (continue/workflow/review/insight) são interceptados pelo registry antes
-      // deste parser legado — não há mais exceções de positional aqui.
-      throw new Error(`Argumento inesperado: ${token}`);
-    }
-
-    const [flag, inlineValue] = token.split("=", 2);
-    const key = flag.replace(/^-+/, "");
-
-    if (inlineValue !== undefined) {
-      options[key] = normalizeInlineValue(key, inlineValue);
-      continue;
-    }
-
-    if (BOOLEAN_FLAGS.has(key) || key.startsWith("skip-")) {
-      options[key] = true;
-      continue;
-    }
-
-    const nextToken = rest[index + 1];
-    if (!nextToken || nextToken.startsWith("-")) {
-      throw new Error(`Valor ausente para --${key}`);
-    }
-
-    options[key] = nextToken;
-    index += 1;
-  }
-
-  return { command, options };
 }
 
 export function sanitizeWizardRawOptions(rawOptions) {

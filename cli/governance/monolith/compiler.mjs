@@ -1,3 +1,12 @@
+/**
+ * ⚠️ LEGACY / TRANSITÓRIO (Spec 0024 · bootstrap-compiler) — superfície de
+ * COMPATIBILIDADE, NÃO SSOT operacional. O caminho governado de `build:rules`,
+ * `runtime-bootstrap` e `pointers` migrou para serviços TypeScript em `src/`
+ * (RulesCatalogBuilder · RulesRuntimeCompiler · AgentsRuntimeBootstrap). O resíduo
+ * ainda consumido aqui é `check-budget` (`cli/features/core/budget-report.mjs`) e
+ * `token-budget.mjs`. Migração plena reusa o compilador de regras no nó futuro CO-3
+ * (`knowledge:compile`). NÃO adicionar novos consumidores deste módulo.
+ */
 import { promises as fs } from "node:fs";
 
 const SECTION_SEPARATOR = "\n\n---\n\n";

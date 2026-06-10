@@ -2,10 +2,10 @@ version: 1
 active_specs:
   - id: "0024"
     slug: context-architecture
-    branch: feat/spec-0024-co-knowledge
+    branch: feat/spec-0024-bootstrap-compiler
     stage: implementation
     status: active
     spec_path: .governance/specs/0024-context-architecture
     source_state_path: .governance/specs/0024-context-architecture/state.yml
-    updated_at: 2026-06-08T15:30:56-03:00
+    updated_at: 2026-06-09T01:58:00-03:00
     updated_by: "@rosanarezende"

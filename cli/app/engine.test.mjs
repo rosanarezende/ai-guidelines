@@ -26,4 +26,20 @@ describe("app/engine", () => {
       "não deveria ter alcançado o execute legado (wizard de bootstrap)"
     );
   });
+
+  it("DADO dist/ ausente E comando bootstrap QUANDO main ENTÃO também falha pedindo build (registry único)", async () => {
+    const errors = [];
+    const originalError = console.error;
+    const previousExitCode = process.exitCode;
+    console.error = (msg) => errors.push(String(msg));
+    try {
+      await main(["init", "--target", "."], { loadRegistry: async () => null });
+    } finally {
+      console.error = originalError;
+      process.exitCode = previousExitCode;
+    }
+    const output = errors.join("\n");
+    assert.match(output, /yarn build/, "bootstrap também deve depender do registry compilado");
+    assert.doesNotMatch(output, /Modo:/, "não deveria cair no execute legado");
+  });
 });

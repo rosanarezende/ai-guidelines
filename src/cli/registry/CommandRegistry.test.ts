@@ -101,6 +101,22 @@ describe("CommandRegistry", () => {
     expect(errors.join("\n")).toContain("why");
   });
 
+  it("DADO uma flag no lugar do verbo QUANDO dispatch ENTÃO orienta que falta um comando antes da opção", async () => {
+    const reg = new CommandRegistry();
+    reg.register(spyCommand("init"));
+    reg.register(spyCommand("adopt"));
+    const { logger, errors } = fakeLogger();
+
+    const result = await reg.dispatch(["--target", "./x"], fakeContext(logger));
+
+    expect(result.exitCode).toBe(1);
+    const out = errors.join("\n");
+    expect(out).toContain("--target");
+    expect(out).toContain("opção"); // mensagem orientada para flag-sem-verbo
+    expect(out).toContain("init"); // lista os comandos disponíveis
+    expect(out).not.toContain("não suportado"); // não cai na mensagem genérica
+  });
+
   it("DADO argv vazio QUANDO dispatch ENTÃO exitCode 1 com erro de comando ausente", async () => {
     const reg = new CommandRegistry();
     const { logger, errors } = fakeLogger();

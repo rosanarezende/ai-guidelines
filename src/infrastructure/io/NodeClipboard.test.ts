@@ -20,10 +20,16 @@ describe("Infrastructure — NodeClipboard [BR-INFRA-CLIPBOARD]", () => {
     expect(result).toBe(false);
   });
 
-  it("DADO detector retornando comando válido (cat como echo no-op) QUANDO copy ENTÃO retorna true", async () => {
+  it("DADO detector retornando comando válido (node consumindo stdin) QUANDO copy ENTÃO retorna true", async () => {
+    // `process.execPath` (o próprio Node) como comando fake cross-platform:
+    // não depende de `cat`/coreutils (ausentes como executável no Windows
+    // nativo — no PowerShell `cat` é alias, não binário visível ao spawn).
     const clipboard = new NodeClipboard(() => ({
-      command: "cat",
-      args: [],
+      command: process.execPath,
+      args: [
+        "-e",
+        "process.stdin.resume(); process.stdin.on('data', () => {}); process.stdin.on('end', () => process.exit(0));",
+      ],
     }));
 
     const result = await clipboard.copy("hello");

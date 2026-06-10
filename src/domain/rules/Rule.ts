@@ -1,6 +1,6 @@
 /**
  * Modelo do domínio de regras (Rules) — espelho tipado de `rules.json` produzido
- * pelo builder mjs. Não importa filesystem nem libs externas; é puramente o
+ * por `build:rules`. Não importa filesystem nem libs externas; é puramente o
  * shape canônico que a Application pode consumir.
  *
  * Camada: domain — sem IO, sem yaml, sem fs.

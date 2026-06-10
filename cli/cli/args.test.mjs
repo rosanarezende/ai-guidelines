@@ -3,8 +3,8 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { describe, it } from "node:test";
 import {
+  SUPPORTED_MODES,
   isSupportedMode,
-  parseArgs,
   printHelp,
   resolveExecutionInput,
   sanitizeWizardRawOptions,
@@ -37,46 +37,16 @@ async function withTTY(value, callback) {
 }
 
 describe("cli/args", () => {
-  it("[BR-CLI-INPUT-01] DADO flags do init QUANDO parseArgs rodar ENTÃO retorna command e options", () => {
-    const parsed = parseArgs([
-      "init",
-      "--target",
-      "./demo",
-      "--name=demo-app",
-      "--package-manager",
-      "npm",
-      "--dry-run",
-    ]);
-
-    assert.equal(parsed.command, "init");
-    assert.equal(parsed.options.target, "./demo");
-    assert.equal(parsed.options.name, "demo-app");
-    assert.equal(parsed.options["package-manager"], "npm");
-    assert.equal(parsed.options["dry-run"], true);
-  });
-
-  it("[BR-CLI-INPUT-04] DADO flag --yes ou -y QUANDO parseArgs rodar ENTÃO as captura corretamente", () => {
-    const parsed1 = parseArgs(["init", "--yes"]);
-    assert.equal(parsed1.options.yes, true);
-
-    const parsed2 = parseArgs(["adopt", "-y"]);
-    assert.equal(parsed2.options.y, true);
-  });
-
-  it("[BR-CLI-INPUT-02] DADO flags de skip QUANDO parseArgs rodar ENTÃO as captura como booleanos", () => {
-    const parsed = parseArgs(["adopt", "--skip-prettier", "--skip-husky"]);
-    assert.equal(parsed.options["skip-prettier"], true);
-    assert.equal(parsed.options["skip-husky"], true);
-  });
-
-  it("[BR-CLI-INPUT-06] DADO flag prune QUANDO parseArgs rodar ENTÃO captura como booleano (inclusive inline)", () => {
-    const parsed = parseArgs(["adopt", "--prune"]);
-    const parsedInline = parseArgs(["adopt", "--prune=true"]);
-    const parsedInlineFalse = parseArgs(["adopt", "--prune=false"]);
-
-    assert.equal(parsed.options.prune, true);
-    assert.equal(parsedInline.options.prune, true);
-    assert.equal(parsedInlineFalse.options.prune, false);
+  it("[BR-CLI-INPUT-07] DADO os verbos de bootstrap QUANDO comparados ao registry ENTÃO SUPPORTED_MODES espelha os verbos registrados (anti-drift)", async () => {
+    const { BOOTSTRAP_COMMANDS } = await import(
+      new URL("../../dist/cli/registry/commands/BootstrapCommand.js", import.meta.url)
+    );
+    const registryVerbs = BOOTSTRAP_COMMANDS.map((definition) => definition.name);
+    assert.deepEqual(
+      [...SUPPORTED_MODES].sort(),
+      [...registryVerbs].sort(),
+      "SUPPORTED_MODES (args.mjs) divergiu dos verbos registrados em BOOTSTRAP_COMMANDS (BootstrapCommand.ts)"
+    );
   });
 
   it("[BR-CLI-INPUT-03] DADO tokens de wizard QUANDO sanitizeWizardRawOptions ENTÃO remove metadados internos", () => {
@@ -219,21 +189,17 @@ describe("cli/args", () => {
     });
   });
 
-  it("[BR-CLI-INPUT-01] DADO flag sem valor QUANDO parser rodar ENTÃO lança erro de parsing", () => {
-    assert.throws(() => parseArgs(["init", "--target"]), /Valor ausente para --target/);
-  });
-
   it("[BR-CLI-INPUT-05] DADO validacao de modos QUANDO isSupportedMode avaliar ENTÃO retorna os limiares corretos booleanos", () => {
     assert.equal(isSupportedMode("init"), true);
     assert.equal(isSupportedMode("adopt"), true);
     assert.equal(isSupportedMode("invalid"), false);
   });
 
-  it("[BR-CLI-INPUT-*] DADO printHelp QUANDO chamado ENTÃO exibe o manual de uso", () => {
+  it("[BR-CLI-INPUT-*] DADO printHelp com bloco do registry QUANDO chamado ENTÃO exibe o manual de uso", () => {
     const originalLog = console.log;
     let output = "";
     console.log = (msg) => (output += msg);
-    printHelp();
+    printHelp("  init\n  adopt");
     console.log = originalLog;
     assert.ok(output.includes("ai-guidelines CLI"), "Deveria conter cabeçalho CLI");
     assert.ok(output.includes("init"), "Deveria conter comando init");
@@ -254,13 +220,6 @@ describe("cli/args", () => {
         "Deveria ter aceitado npm após erro de validação"
       );
     });
-  });
-
-  it("[BR-CLI-INPUT-01] DADO argumentos extras QUANDO parseArgs ENTÃO lança erro explicativo", () => {
-    const args = ["init", "--name", "foo", "extra-garbage"];
-    assert.throws(() => {
-      parseArgs(args);
-    }, /Argumento inesperado: extra-garbage/);
   });
 
   it("[BR-CLI-WIZARD-*] DADO resposta vazia QUANDO campo tem default ENTÃO assume o default", async () => {

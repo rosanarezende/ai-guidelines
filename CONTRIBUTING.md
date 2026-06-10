@@ -172,6 +172,8 @@ Este repositório é o **framework canônico**, não apenas um exemplo de consum
 - **Node ≥ 22** (piso técnico real — scripts de teste usam flags experimentais disponíveis a partir do Node 22).
 - **Yarn 4** com Plug'n'Play (gerenciado via `corepack enable`).
 
+> **Nota de transição (2026-06-09):** a migração para **npm puro** (`package-lock.json` + `npm ci`) está registrada como próximo checkpoint da Spec 0024 (`toolchain-simplification` › `checkpoint-npm-toolchain`); até esse PR aterrissar, Yarn 4/Corepack seguem canônicos. Em **Windows nativo**, a suíte deve passar sem Git Bash/coreutils — testes usam comandos cross-platform (ex.: `process.execPath`), nunca `cat`/`sed`/`grep` como executáveis.
+
 ### Comandos canônicos
 
 ```bash

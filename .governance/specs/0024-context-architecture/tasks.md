@@ -59,6 +59,10 @@
 >
 > **Topologia (cf. `plan.md § Topologia operacional` — CANÔNICA / 0023, corrigida no Checkpoint 2.1a):** **#32 = PR de governança/bootstrap + linha de integração da spec** (acumula Checkpoint 1 + 2 + 2.1 + 2.1a) — **NÃO mergeia cedo**; é a **base da stack**. **Checkpoint 3 em diante = PR real próprio _stacked_** sobre a linha da spec (não off-`main`), Draft → Gate → **avançar**. **Merge em `main` = evento único ao fim** (modo `unit`; veículo = PR terminal; demais via `landed-via reconciliation`), após `review.md` R8.
 
+> ## 🧭 Reconciliação de topologia (2026-06-09 · AR-1) — SSOT = `state.yml § topology`
+>
+> A **sequência viva e autoritativa** de nós/checkpoints é `state.yml § topology` (não esta lista). A cauda original (antigos Checkpoints 3–12: GG-0003, Workflow Provenance, AGENTS sync, GG-0002, remoção de taxonomia, decouple-brief, tasks boilerplate, dual-root, doc cleanup) foi **REESCRITA em 2026-06-07** (Human Gate #35, Opção A) no laço de **Continuidade Operacional (CO)** + **faxina (housekeeping)** + `dualroot-collapse` + `knowledge-readiness` + `integration-final`. O histórico `[x]`/`[/]` abaixo (Checkpoints 1…2.4c) é **registro real** das landings em **#32**/**#33**; em particular, **#33 (`ruleset-producibility`) e seus checkpoints 2.2–2.4c CONCLUÍRAM** (`state.yml § topology.concluded`) — os marcadores `[/]` abaixo são, portanto, históricos. Desde então: **#34** (graph-core), **#35** (cli-cutover), **#36** (co-reconcile), **#37** (co-knowledge) concluídos; **#38** (bootstrap-compiler) ativo.
+
 - [x] **Checkpoint 1** — `active-specs.yml` lista a 0024 (Codex A3). ✅ feito + gated (`87865ca`); Gate completo no **#32**.
 - [x] **Checkpoint 2** — reframe `spec/plan/tasks/NEXT` → absorção + dobrar a sequência no `plan.md` (Codex A2/P1/P2). ✅ feito + gated (`8b0eec6`).
 - [x] **Checkpoint 2.1** — correção de vocabulário (PR-N → Checkpoint N; ritual → Gate) + alinhamento à 0023. ✅ feito + gated (`d686d4b`).
@@ -72,19 +76,25 @@
 - [/] **Checkpoint 2.4a** — **endurecimento da revisão-como-artefato** (achados AGY/ChatGPT): separa **finding** (reviewer-owned, `disposition` destrava o gate) de **resolução** (implementer-owned, NÃO destrava) → anti-autoaprovação estrutural; `findings_emitted` + ids contíguos → anti-deleção; `location` obrigatória (`<path>#L` ou `global`); `fingerprint` sela a claim (severity/location/description) → anti-rewrite silencioso. Limite honesto cravado: tamper-**evidence**, não prevenção (ADR 0021). Dogfood migrado: `c2.3-arch.yml` + `c2.3-resolutions.yml`. Mesmo PR (**#33**). **EM EXECUÇÃO**; `yarn validate` verde. _(dep: Checkpoint 2.4)_
 - [/] **Checkpoint 2.4b** — **fecha o bypass da "poda final"** (achado AGY na rev. do 2.4a): **`review_fingerprint`** (envelope `checkpoint|role|findings_emitted|ids`) sela o CONJUNTO → deletar a cauda + decrementar count → vermelho (sem acoplar findings entre si); **checkpoint+role no per-finding fingerprint** → fecha transplante de bloco entre arquivos. Rejeitados: acoplar `findings_emitted` em cada finding (AGY), camada git-history (ineficaz p/ poda no mesmo PR), `location@<sha>` (usabilidade, não bypass). Mesmo PR (**#33**). **EM EXECUÇÃO**; `yarn validate` verde. _(dep: Checkpoint 2.4a)_
 - [/] **Checkpoint 2.4c** — **2 bugs de implementação da auditoria final**: (1) fingerprint deixa de ser concatenação textual (`join("\n")`, ambíguo a `\n` interno) e passa a **serialização canônica** (`JSON.stringify([...])`) no per-finding e no envelope; (2) resolução passa a apontar finding **totalmente qualificado** (`<role>#<id>`) com matching **exato** (fim do `endsWith` que colidia cross-role). Migra schema/parser/templates/README/dogfood/testes (+ regressões: quebra-de-linha e `architectural_review#F1` ≠ `technical_audit#F1`). Mesmo PR (**#33**). **EM EXECUÇÃO**; `yarn validate` verde. _(dep: Checkpoint 2.4b)_
-- [ ] **Checkpoint 3** — GG-0003 Consistency Projection Check (mecânico, lista fixa de marcadores). **PR próprio _stacked_.** **Nasce dogfoodando a revisão-como-artefato (2.4→2.4c).** _(dep: Checkpoint 2.4c)_
-- [ ] **Checkpoint 4A** — Workflow Provenance · storage (`provenance.yml` append-only, `role` livre, espinha derivada). **PR próprio _stacked_.** _(dep: Checkpoint 1/2; protótipo em `git stash` = referência)_
-- [ ] **Checkpoint 4B** — Workflow Provenance · projeção no `workflow continue` (fatos/pendências, não prescrição). **PR próprio _stacked_.** _(dep: Checkpoint 4A)_
-- [ ] **Checkpoint 5** — AGENTS sync (`agents:build` + `agents:check` no `validate`). **PR próprio _stacked_.** _(destrava Checkpoint 7)_
-- [ ] **Checkpoint 6** — GG-0002 mecanismo (`banned-concept-check` + `banned-by-dec.yml` + fixture). **PR próprio _stacked_.** _(antes da remoção)_
-- [ ] **Checkpoint 7** — **CRÍTICO**: remover taxonomia do runtime/doutrina/boilerplate + ativar ban no mesmo commit. **PR próprio _stacked_.** _(dep: Checkpoint 5 + 6)_
-- [ ] **Checkpoint 8** — corrigir path morto na msg do `gate-decidability-check`. **PR próprio _stacked_.** _(flex)_
-- [ ] **Checkpoint 9** — desacoplar existência do `decision-brief` de `evidence-driven/mixed`. **PR próprio _stacked_.** _(dep: Checkpoint 7)_
-- [ ] **Checkpoint 10** — tasks boilerplate único; renomear recipe/partials `tasks-evidence-driven`→genérico. **PR próprio _stacked_.** _(dep: Checkpoint 7)_
-- [ ] **Checkpoint 11A** — drift-guard do legado `.specify/templates`. **PR próprio _stacked_.** _(dep: Checkpoint 10)_
-- [ ] **Checkpoint 11B** — trocar fonte ativa → root canônico (⚠️ micro-decisão da owner). **PR próprio _stacked_.** _(dep: Checkpoint 11A)_
-- [ ] **Checkpoint 11C** — remover legado `.specify/templates`. **PR próprio _stacked_.** _(dep: Checkpoint 11B)_
-- [ ] **Checkpoint 12** — limpar docs arquiteturais de `workflowType`. **PR próprio _stacked_.** _(flex)_
+
+  > ### ⤵️ Cauda original (Checkpoints 3–12) — SUPERSEDED em 2026-06-07
+  >
+  > Os antigos Checkpoints 3–12 **deixaram de ser a fila viva**; foram reescritos no laço CO + faxina. **Mapa para a topologia vigente (`state.yml § topology` é o SSOT — não duplicar a fila planejada aqui):**
+  >
+  > - **3 · GG-0003 (consistency)** → landou como **#36 `co-reconcile`** (`checkpoint-co-reconcile`; "semente: ex-checkpoint-gg-0003").
+  > - **4A/4B · Workflow Provenance** → reenquadrado como **projeção derivada** (provenance re-derivada, não persistida — INV-4); cai em **CO-5 `co-capture`** / **CO-4 `co-projection`**.
+  > - **5 · AGENTS sync** → **`housekeeping` › `checkpoint-agents-sync`**.
+  > - **6 · GG-0002** → **`housekeeping` › `checkpoint-gg-0002`**.
+  > - **7 · remoção de taxonomia (CRÍTICO/P0)** → **`housekeeping` › `checkpoint-taxonomy-removal`** (inclui ex-10, tasks boilerplate).
+  > - **8 · path morto do `gate-decidability-check`** → resíduo menor; follow-up de `housekeeping`/doc.
+  > - **9 · desacoplar `decision-brief`** → **`housekeeping` › `checkpoint-decouple-brief`**.
+  > - **10 · tasks boilerplate genérico** → absorvido em **`checkpoint-taxonomy-removal`**.
+  > - **11A/B/C · colapso `.specify`/dual-root** → **`dualroot-collapse` › `checkpoint-dualroot-collapse`**.
+  > - **12 · limpeza de docs (`workflowType`)** → **`housekeeping` › `checkpoint-doc-cleanup`**.
+  >
+  > **Forward (autoritativo em `state.yml § topology.planned`):** `toolchain-simplification` (npm puro) → `co-enforcement` (CO-3) → `co-projection` (CO-4) → `co-capture` (CO-5) → `co-events` (CO-6) → `housekeeping` → `dualroot-collapse` → `knowledge-readiness` → `integration-final`. Esta lista é **ponteiro**, não 2ª fonte: em divergência, `state.yml` vence.
+
+- [ ] **Checkpoint npm-toolchain** (nó `toolchain-simplification`, seq 7) — **trabalho futuro imediato, registrado em 2026-06-09 (decisão da owner no preparo do Human Gate do #38); NÃO faz parte do escopo de implementação do PR #38**: migração Yarn/Corepack → npm puro como package manager canônico. Escopo: gerar/versionar `package-lock.json` (`npm ci` = instalação determinística); remover `yarn.lock`; revisar/remover `packageManager`; substituir comandos mantenedores em `script-contracts` (SSOT) + hooks Husky + workflows CI + templates de consumidor + docs públicas; revisar `prepack` (pacote publicado segue com `dist/` + `rules.json`); validar Windows e Linux; preservar build determinístico. PR próprio _stacked_ após o #38. _(dep: `bootstrap-compiler` / Human Gate do #38)_
 
 ---
 

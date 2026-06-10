@@ -1,5 +1,5 @@
 /**
- * Adapter concreto: lê `rules.json` (artefato do builder mjs) do filesystem.
+ * Adapter concreto: lê `rules.json` (artefato de `build:rules`) do filesystem.
  *
  * Boundary: única importação de `node:fs` para catálogo. A Application
  * recebe-o por DI atrás do port {@link RulesCatalogSource}.

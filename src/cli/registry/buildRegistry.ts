@@ -8,17 +8,20 @@ import { ListActiveSpecsCommand } from "./commands/ListActiveSpecsCommand.js";
 import { DiagnoseDriftCommand } from "./commands/DiagnoseDriftCommand.js";
 import { VisualPromptCommand } from "./commands/VisualPromptCommand.js";
 import { HandoffCommand } from "./commands/HandoffCommand.js";
+import { BOOTSTRAP_COMMANDS, BootstrapCommand } from "./commands/BootstrapCommand.js";
 
 /**
  * Ponto ÚNICO de registro dos comandos da CLI (Spec 0024, pr-cli-cutover).
  *
- * Critério de aceite do #35: adicionar um verbo novo (`graph`, `why`, …) deve
+ * Critério de aceite: adicionar um verbo novo (`graph`, `why`, …) deve
  * custar **uma linha aqui** (`registry.register(new XCommand())`) — sem tocar o
- * dispatch central (`engine.mjs`) nem o parser monolítico (`args.mjs`). Quando
- * isso for verdade, o cutover entregou valor arquitetural, não só moveu código.
+ * dispatch central (`engine.mjs`) nem um parser monolítico (`args.mjs`).
  */
 export function buildRegistry(): CommandRegistry {
   const registry = new CommandRegistry();
+  for (const definition of BOOTSTRAP_COMMANDS) {
+    registry.register(new BootstrapCommand(definition));
+  }
   registry.register(new ContinueCommand());
   registry.register(new InsightCommand());
   registry.register(new TriageCommand()); // name "triage" + alias transitório "review"

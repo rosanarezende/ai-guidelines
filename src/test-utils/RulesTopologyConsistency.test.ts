@@ -2,7 +2,7 @@
  * Topology consistency — guarda que o repo-fonte (`.core/rules/`) está
  * fisicamente alinhado com a taxonomia Top/Center/Base/Adapters [DEC-0021-B05].
  *
- * Lê o artefato `rules.json` (SSOT do builder mjs) e classifica cada `file`
+ * Lê o artefato `rules.json` (gerado por `build:rules`) e classifica cada `file`
  * via `pathToZone`. Qualquer arquivo fora de `top|center|base|adapters` falha
  * o teste — esta é a barreira contra drift de topologia.
  */
