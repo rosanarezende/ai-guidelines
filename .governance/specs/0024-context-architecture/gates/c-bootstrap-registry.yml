@@ -1,0 +1,50 @@
+# Human Gate do PR #38 (bootstrap-compiler), keyado no checkpoint-bootstrap-registry.
+# Owner (rosana) 2026-06-09: APROVADO. Lanes: technical_audit (approved; F1–F7 low,
+# resoluções registradas) + architectural_review (approved, 0 findings). review:check
+# ENFORCA: approved exige zero finding critical/high `open` — satisfeito. O Human Gate
+# decide o PRÓXIMO MOVIMENTO (avançar para toolchain-simplification), NÃO merge em
+# main (modo unit). Decisão tomada com o PR já Ready (HEAD final 5c38286a, CI 9/9 verde).
+checkpoint: "checkpoint-bootstrap-registry"
+actor: "@rosanarezende"
+ref: "#38"
+date: "2026-06-09"
+decision: approved
+note: "PR #38 (bootstrap-compiler: registry como fronteira operacional, build:rules via TS/src, help derivado do registry, fallback silencioso removido, AGENTS.md stub/bootstrap, monólito cercado como legacy/transitório, robustez Windows/DX) APROVADO para AVANÇAR. Próximo movimento = abrir toolchain-simplification (checkpoint-npm-toolchain) stacked sobre #38; NÃO autoriza merge isolado em main."
+basis: >
+  Human Gate aprovado para o bootstrap-compiler / PR #38: PR em Ready, não
+  mergeado, HEAD final 5c38286a, CI remoto 9/9 verde no HEAD final
+  (governance-pr-check, repo-validation, smoke ubuntu/macos/windows × node
+  22/24). Technical Audit approved (F1–F7, todos low, não bloqueantes,
+  resoluções registradas) e Architectural Review approved (0 findings). O
+  escopo prometido no PR body corresponde ao diff remoto: registry compilado
+  como fronteira operacional; build:rules via TS/src; help derivado do
+  registry; fallback silencioso removido; AGENTS.md como stub/bootstrap;
+  monólito cercado como legacy/transitório; robustez Windows/DX (clipboard sem
+  dependência de cat; artefatos de regras normalizados via API do Prettier,
+  sem spawn de yarn); próximo checkpoint npm registrado, sem implementar npm
+  neste PR. Riscos residuais explicitamente roteados: resíduo do monólito para
+  CO-3 (co-enforcement); migração Yarn/Corepack → npm puro para o próximo
+  checkpoint (toolchain-simplification). Esta decisão NÃO autoriza merge em
+  main: o merge permanece condicionado ao fechamento atômico da stack (modo
+  unit).
+next: >
+  Abrir o próximo PR stacked da Spec 0024: toolchain-simplification
+  (checkpoint-npm-toolchain, seq 7) — migração Yarn/Corepack → npm puro.
+# Follow-ups obrigatórios de MÉTODO, NÃO bloqueantes para este gate; apenas
+# registrados aqui (não implementar no PR #38).
+followups:
+  - id: FU-1
+    title: "Documentar/automatizar fallback de atualização de PR body"
+    detail: >
+      gh pr edit --body-file falha neste repo por Projects-classic (GraphQL:
+      repository.pullRequest.projectCards). Fallback funcional: gh api -X PATCH
+      repos/rosanarezende/ai-guidelines/pulls/<PR> com body via arquivo
+      (-F body=@<arquivo>) ou variável (-f body="$body"). Deve virar
+      procedimento canônico documentado ou script governado.
+  - id: FU-2
+    title: "Cristalizar sequência operacional de fechamento de PR"
+    detail: >
+      PR body final → CI verde no HEAD final → conversão Draft → Ready →
+      Human Gate → registro do gate → próximo checkpoint. Documentar em
+      WORKFLOW.md, AGENTS.md, template de PR ou comando equivalente do
+      framework.
