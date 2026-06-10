@@ -119,6 +119,30 @@ Depois que o CI rodar, você confirma o resultado no release-log (uma linha com 
 
 ---
 
+## Fechamento de PR (sequência canônica)
+
+Cada PR de execução fecha nesta ordem — as precondições são verificáveis com `npm run pr-ready:check -- --pr <n>` (read-only; não converte nada):
+
+```text
+PR body final (Valor entregue preenchido; Visão pretendida intacta)
+→ CI verde no HEAD final
+→ Draft → Ready (ato da owner; NÃO autoriza merge — ADR 0024)
+→ Human Gate da owner (decide o próximo movimento)
+→ registro do gate artifact (gates/c-<checkpoint>.yml; validar + push)
+→ atualização final do body
+→ abertura do próximo checkpoint/PR
+```
+
+Distinções que a sequência preserva:
+
+- **Draft/Ready é estado nativo do GitHub** — o flag `draft` é a fonte única consumida por `governance-pr-check` (que também roda na conversão, via `ready_for_review`) e pelo merge.
+- **Ready ≠ merge**: a conversão apenas apresenta o PR para decisão humana. Em stack modo `unit`, Human Gate intermediário não mergeia isolado em `main` — o merge é evento único no fim da stack.
+- **O gate artifact nasce DEPOIS da decisão humana** sobre o PR em Ready; registrá-lo antes é inconsistência (o `pr-ready:check` falha).
+- **Atualizações de body** usam `npm run pr-body:update` (preserva `## Visão pretendida` como baseline; `## Valor entregue` só com flag explícita).
+- **O próximo checkpoint/PR só abre após o gate aprovado e registrado** (a narrativa `canonical-next` do `state.yml` é guardada por `reconcile:check`).
+
+---
+
 ## Gates de prontidão (review.md)
 
 Antes do merge, o `review.md` da spec registra os gates que foram verificados. Cada gate tem evidência — não é um checkbox de honra.

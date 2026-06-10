@@ -20,6 +20,8 @@ Lifecycle:
   Draft/Ready é estado nativo do GitHub.
   Não duplicar como checklist visível.
   Ready ≠ merge autorizado (cf. ADR 0024).
+  Antes de converter para Ready: npm run pr-ready:check -- --pr <n>
+  (sequência canônica de fechamento: WORKFLOW.md § "Fechamento de PR").
 
 Merge:
   Se a stack estiver em modo unit, este PR NÃO autoriza merge isolado.
