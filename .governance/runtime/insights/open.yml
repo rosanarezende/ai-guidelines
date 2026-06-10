@@ -74,3 +74,12 @@ insights:
         spec: "0024"
         cursor: checkpoint-cli-cutover
         note: "3 tentativas falsificadas em status check (R8/review.md, landing_policy, vehicle-from-topology; a 3ª colidiu com R7). Recorre além de merge: releases, promoções, encerramento, deploys, gates. Mapa + sequência: research-library/architecture/2026-06-05-enforcement-surfaces.md"
+  - id: PIT-0010
+    text: "Memoria de agente nao e contrato: fluxo que depende de o agente lembrar sequencia/formato/excecao ainda nao tem governanca suficiente — atrito recorrente vira template/comando/checker/schema/CI (contrato executavel), nao instrucao em chat"
+    status: open
+    captured_at: 2026-06-10T18:13:18.876Z
+    occurrences:
+      - at: 2026-06-10T18:13:18.876Z
+        spec: "0024"
+        cursor: checkpoint-npm-toolchain
+        note: "PR #39: (1) body do Draft falhou no governance-pr-check; (2) update de body apagou imagem/baseline de Visao pretendida. Regra de secoes preservadas/mutaveis registrada p/ FU-1. Longo: research/2026-06-10-pit-0010-memoria-de-agente-nao-e-contrato.md"

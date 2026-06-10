@@ -39,10 +39,23 @@ GOVERNANÇA VISUAL
 Visão pretendida:
   Preencher ao abrir o Draft PR.
   Mostra o problema e a solução pretendida.
+  É a BASELINE de intenção do Draft: após preenchida (imagem + prompt),
+  atualizações do PR body durante a implementação devem PRESERVÁ-LA —
+  nunca reescrever/apagar para refletir o estado atual. Ela existe para
+  ser comparada com "Valor entregue" ao final. Se a visão mudar
+  excepcionalmente (decisão da owner), adicione um
+  "Prompt complementar — atualização de visão pretendida" abaixo do
+  baseline, sem apagar o original.
 
 Valor entregue:
   Preencher ao final, antes de entregar para revisão final / Human Gate.
   Mostra o antes/depois real do slice entregue.
+
+Seções por mutabilidade (contrato a ser enforçado pelo FU-1):
+  Preservada por padrão: "Visão pretendida" (baseline do Draft).
+  Atualizáveis na implementação: "Resumo", "Escopo", "Test plan",
+    "Validação, evidências e checklist", "Cross-refs", "Disclosure de IA".
+  Preenchida ao final: "Valor entregue".
 
 Imagens:
   A imagem renderizada é recomendada, mas o prompt final paste-ready é o
@@ -64,6 +77,11 @@ Inclua:
 - prompt final paste-ready.
 
 Objetivo: deixar claro o que este PR pretende entregar antes da implementação.
+
+BASELINE: depois de preenchida, esta seção é preservada até o fim do PR —
+atualizações de body (manuais ou por agente) não devem reescrevê-la nem
+remover a imagem/prompt originais. Mudança excepcional de visão entra como
+"Prompt complementar — atualização de visão pretendida", mantendo o baseline.
 -->
 
 <!-- Cole a imagem principal aqui, quando existir. -->
