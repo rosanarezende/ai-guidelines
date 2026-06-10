@@ -119,6 +119,21 @@ Depois que o CI rodar, você confirma o resultado no release-log (uma linha com 
 
 ---
 
+## Perfis de PR body (contrato-base + perfil por tipo)
+
+O `governance-pr-check` valida o body conforme o **tipo** do PR — derivado do role do nó na topologia (`state.yml § topology`) e da label `fast-track`. Nenhum perfil exige seções de outro; o contrato-base (header em linha própria, placeholder `<…>` não satisfaz, comentários HTML preservados, sem `<details open>`) é comum.
+
+| Perfil         | Template                                                                | Draft exige (intenção)                                                                                                                      | Ready exige ainda (entrega/decisão)                                                                                                                                      |
+| -------------- | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 🛠️ Execution   | `.github/pull_request_template.md` (default)                            | Visão pretendida (baseline) · Resumo · Escopo (dentro/fora)                                                                                 | Valor entregue · Test plan real · Validação/evidências/checklist · Disclosure                                                                                            |
+| 🧾 Governance  | `?template=governance.md`                                               | Visão de valor (baseline da intenção) · Problema · Hipóteses · Escopo                                                                       | Processo decisório · Decisões consolidadas · **Arquitetura pretendida** (baseline da decisão) · Evidências e falsificação · Impactos downstream · Validação · Disclosure |
+| 🔗 Integration | `?template=integration.md` (canônico: `integration-pr.md` via workflow) | Resultado integrado · Componentes/PRs absorvidos · Convergência · Rollback                                                                  | Compatibilidade/conflitos · Evidência de integração real · Validação final da stack · Validação · Disclosure                                                             |
+| 🚑 Fast-track  | `?template=fast-track.md` (requer label `fast-track`)                   | Incidente · Correção · Impacto/risco · Evidência mínima · Rollback · Accountability real · Validação · Cross-refs · Disclosure (fase única) | —                                                                                                                                                                        |
+
+Baselines preservadas pelo `npm run pr-body:update`: `## Visão pretendida` (execution), `## Visão de valor` e `## Arquitetura pretendida` (governance) — mudanças entram como atualização complementar, nunca apagando o original.
+
+---
+
 ## Fechamento de PR (sequência canônica)
 
 Cada PR de execução fecha nesta ordem — as precondições são verificáveis com `npm run pr-ready:check -- --pr <n>` (read-only; não converte nada):

@@ -12,6 +12,13 @@ Tipo do PR:
   - 🔗 integration
   - 🚑 fast-track
 
+Perfis de PR body (contrato-base comum + perfil por tipo):
+  Este arquivo é o perfil EXECUTION (default). Os demais perfis vivem em
+  .github/PULL_REQUEST_TEMPLATE/ e são selecionáveis na criação do PR via
+  query param ?template=governance.md | integration.md | fast-track.md.
+  O governance-pr-check seleciona o contrato pelo tipo (role na topologia
+  do state.yml + label fast-track) — não exige seções de outro perfil.
+
 Stack:
   Refletida no título, branch, base/head e `state.yml § topology`.
   Não liste todas as opções no corpo visível.
