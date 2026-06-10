@@ -5,6 +5,9 @@ name: Repo Validation
 # entry-point operacional (format:check + build:all + test + living-docs:check)
 # e adiciona a varredura histórica de state.yml. `npm run ci` adicionaria smoke
 # tests, mas smoke tem workflow próprio (smoke-multi-os.yml).
+#
+# Roda em Ubuntu + Windows para detectar regressões cross-platform (e.g.
+# coverage contaminada por subprocess externo no Windows — cf. PR #39).
 
 on:
   # PRs against any base branch (catches stacked PRs that target feature
@@ -15,8 +18,12 @@ on:
       - main
 
 jobs:
-  repo-validation:
-    runs-on: ubuntu-latest
+  validate-os:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -35,3 +42,17 @@ jobs:
 
       - name: Validate historical state.yml files
         run: npm run state-yml:check:all
+
+  # Aggregator job: produces the stable "repo-validation" required context
+  # expected by .github/rulesets/main-governance.json.
+  repo-validation:
+    needs: validate-os
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check matrix results
+        run: |
+          if [ "${{ needs.validate-os.result }}" != "success" ]; then
+            echo "::error::validate-os matrix failed or was cancelled"
+            exit 1
+          fi
