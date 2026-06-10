@@ -10,11 +10,11 @@ focus:
   - "Gate por checkpoint: implementacao -> revisoes exigidas pela .governance/review-policy.yml (quando aplicavel) -> Human Gate (owner) -> AVANCA (abre o proximo PR stacked). Na 0024 usamos Technical Audit + Architectural Review como dogfood intensivo, mas isso NAO e obrigacao universal para todo repositorio. O Human Gate decide o PROXIMO MOVIMENTO, NAO mergeia em main. 1 checkpoint atomico por vez; parar no Gate quando o commit estiver pronto. Correcao local pequena nao espera; mudanca estrutural sim."
   - "Criterio (RESSALVADO em 2026-06-03 por [DEC-0024-G08]): 'ja foi validado empiricamente na 0024?' -> absorver/enforcar/executar. NAO re-modelar o DECIDIDO (G00/G02/G06/G07 seguem cravados). EXCECAO assumida: G03/G04/G05 foram reabertos para modelagem deliberada (orientada a grafo) -- nesses eixos, modelar e a direcao, nao o risco. O 'risco dominante' original (modelar em vez de absorver) vale para os eixos resolvidos; nos reabertos, a modelagem e o trabalho."
 next:
-  - "canonical-next: bootstrap-compiler. PR #37 (co-knowledge / CO-2) CONCLUIDO-NA-STACK por Human Gate approved 2026-06-09 (gates/c-co-knowledge.yml; PR #37 Ready; modo unit, SEM merge isolado). Entrega aprovada: Knowledge tipado + Falsification; backfill minimo load-bearing; script-contracts; runtime bootstrap readiness; runtime ledgers particionados; review-policy + ReviewEvent append-only; event_id EV1..EVN unico/contiguo por checkpoint/role. PR #38 ABERTO como Draft stacked sobre #37. Proximo no ativo = bootstrap-compiler (seq 6): fecha cutover /cli legado -> /src/registry antes de CO-3; migra bootstrap (init/adopt/providers/update/check-budget), script-contracts/runtime-bootstrap e residuos de pointers ao registry/src; remove fallback legado + parseArgs monolito + ponte transitoria; funde ex-pr-compiler-ts (motor de regras monolith -> TS/src; substrato do knowledge:compile). NAO abrir CO-3+ neste PR; NAO instalar banco externo; banco futuro deve ser projecao derivada reconstruivel, nao nova SSOT. Proximo no REGISTRADO apos este (2026-06-09, decisao da owner): toolchain-simplification (seq 7, checkpoint-npm-toolchain) — migracao Yarn/Corepack -> npm puro em PR proprio; NAO implementar a migracao npm dentro do #38."
+  - "canonical-next: toolchain-simplification. PR #38 (bootstrap-compiler / seq 6) CONCLUIDO-NA-STACK por Human Gate approved 2026-06-09 (gates/c-bootstrap-registry.yml; PR #38 Ready, HEAD 897c2420, CI 9/9 verde; modo unit, SEM merge isolado). Entrega aprovada: registry compilado como fronteira operacional; build:rules via TS/src (funde ex-pr-compiler-ts); help derivado do registry; fallback silencioso removido; AGENTS.md stub/bootstrap; monolito cercado como legacy/transitorio (residuo compiler+token-budget roteado para CO-3); robustez Windows/DX. Follow-ups de metodo registrados no gate (FU-1 fallback de PR body; FU-2 sequencia de fechamento de PR) — NAO bloqueantes, implementar no proximo no. Proximo no planejado = toolchain-simplification (seq 7, checkpoint-npm-toolchain): migracao Yarn/Corepack -> npm puro (package-lock.json + npm ci; script-contracts SSOT + hooks + workflows + templates + docs; prepack com dist/), FU-1 e FU-2 do gate do #38, e correcao do keying do disclosure do #38. PR proprio stacked sobre #38; NAO abrir CO-3+ neste PR; NAO mergeia isolado em main (modo unit)."
 topology:
   cursor:
-    pr: bootstrap-compiler
-    checkpoint: checkpoint-bootstrap-registry
+    pr: toolchain-simplification
+    checkpoint: checkpoint-npm-toolchain
   prs:
     concluded:
       - id: base-governance
@@ -94,16 +94,15 @@ topology:
           - checkpoint-runtime-ledger-partition # CO-2.4: specs active/history + insights por status + falsifications/ledger
           - checkpoint-review-policy-events # CO-2.5: review-policy + eventos append-only de re-auditoria/revalidacao
 
-    active:
-      # Bootstrap+Compiler — EM PROGRESSO (Draft PR #38 aberto 2026-06-09,
-      # stacked sobre #37; modo unit, NAO mergeia isolado). RESOLVE a auditoria
-      # do #35 (#1 roteamento, #3 fallback, #4 parsers) e fecha o cutover
-      # incompleto exposto no PR #37: migra bootstrap (init/adopt/providers/
-      # update/check-budget), script-contracts/runtime-bootstrap e residuos de
-      # pointers ao registry/src; remove fallback legado + parseArgs monolito +
-      # ponte transitoria. Funde ex-pr-compiler-ts (motor de regras monolith ->
-      # TS/src; substrato do knowledge:compile). Depois deste no, /cli deve ser
-      # wrapper/compatibilidade; regra governada nova vive em /src.
+      # #38 CONCLUIDO apos Human Gate bootstrap-registry approved
+      # (gates/c-bootstrap-registry.yml, 2026-06-09). Resolveu a auditoria do #35
+      # (#1 roteamento, #3 fallback, #4 parsers) e fechou o cutover exposto no #37:
+      # registry compilado como fronteira operacional; build:rules via TS/src (fusao
+      # do ex-pr-compiler-ts ENTREGUE aqui); help derivado do registry; fallback
+      # silencioso removido; AGENTS.md stub/bootstrap; monolito cercado como legacy/
+      # transitorio (residuo compiler+token-budget -> CO-3). /cli agora e wrapper/
+      # compatibilidade; regra governada nova vive em /src. Modo unit: NAO mergeou
+      # em main (concluido na stack).
       - id: bootstrap-compiler
         github_pr: 38
         role: execution
@@ -143,6 +142,7 @@ topology:
       # (pacote publicado segue contendo dist/ + rules.json); validar Windows e
       # Linux; preservar build deterministico. PR proprio: nao misturar mudanca
       # de package manager com o fechamento do registry/bootstrap-compiler.
+      # PROXIMO NO SELECIONADO (cursor): PR ainda nao aberto (github_pr null).
       - id: toolchain-simplification
         github_pr: null
         role: execution
