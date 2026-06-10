@@ -443,7 +443,7 @@ export function check(repoRoot = REPO_ROOT) {
       : null;
     if (actual !== expected) {
       violations.push(
-        `${relativePath} diverge de ${CONTRACT_PATH}; rode yarn script-contracts:sync`
+        `${relativePath} diverge de ${CONTRACT_PATH}; rode npm run script-contracts:sync`
       );
     }
   }

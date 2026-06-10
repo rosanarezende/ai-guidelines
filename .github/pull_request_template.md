@@ -51,7 +51,7 @@ Valor entregue:
   Preencher ao final, antes de entregar para revisão final / Human Gate.
   Mostra o antes/depois real do slice entregue.
 
-Seções por mutabilidade (contrato a ser enforçado pelo FU-1):
+Seções por mutabilidade (enforçado por `npm run pr-body:update` — FU-1):
   Preservada por padrão: "Visão pretendida" (baseline do Draft).
   Atualizáveis na implementação: "Resumo", "Escopo", "Test plan",
     "Validação, evidências e checklist", "Cross-refs", "Disclosure de IA".

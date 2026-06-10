@@ -31,7 +31,7 @@ const compiledModule = resolve(repoRoot, "dist/cli/livingDocs.js");
 if (!existsSync(compiledModule)) {
   process.stderr.write(
     `❌ ${compiledModule} not found.\n` +
-      `   Build artefato ausente. Execute 'yarn build' antes de rodar este bin.\n`
+      `   Build artefato ausente. Execute 'npm run build' antes de rodar este bin.\n`
   );
   process.exit(2);
 }

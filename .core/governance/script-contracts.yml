@@ -211,6 +211,12 @@ profiles:
         mutates: true
         consumers: [human]
         description: Renderiza disclosure de IA derivado.
+      - name: pr-body:update
+        command: npm run build && node cli/pr-body-update.mjs
+        category: governance
+        mutates: false
+        consumers: [human]
+        description: Atualiza PR body preservando secoes baseline (FU-1); fallback gh api PATCH.
       - name: validate
         command: npm run format:check && npm run build:all && npm run script-contracts:check && npm run runtime-bootstrap:check && npm run test && npm run living-docs:check && npm run state-yml:check && npm run active-specs:check && npm run reconcile:check && npm run co-knowledge:check && npm run co-knowledge:inventory && npm run gate-decidability:check && npm run ruleset:check && npm run review:check && npm run insights:check && npm run intent:check
         category: aggregate

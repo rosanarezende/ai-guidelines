@@ -27,7 +27,7 @@ const compiledModule = resolve(repoRoot, "dist/cli/coKnowledgeCheck.js");
 
 if (!existsSync(compiledModule)) {
   process.stderr.write(
-    `❌ Compiled module not found: ${compiledModule}\n` + `   Run \`yarn build\` first.\n`
+    `❌ Compiled module not found: ${compiledModule}\n` + `   Run \`npm run build\` first.\n`
   );
   process.exit(2);
 }

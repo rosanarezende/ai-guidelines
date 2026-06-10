@@ -78,6 +78,7 @@
     "insights:check": "npm run build && node cli/insights-check.mjs",
     "intent:check": "npm run build && node cli/intent-check.mjs",
     "disclosure": "npm run build && node cli/disclosure-render.mjs",
+    "pr-body:update": "npm run build && node cli/pr-body-update.mjs",
     "validate": "npm run format:check && npm run build:all && npm run script-contracts:check && npm run runtime-bootstrap:check && npm run test && npm run living-docs:check && npm run state-yml:check && npm run active-specs:check && npm run reconcile:check && npm run co-knowledge:check && npm run co-knowledge:inventory && npm run gate-decidability:check && npm run ruleset:check && npm run review:check && npm run insights:check && npm run intent:check",
     "ci": "npm ci && npm run validate && npm run state-yml:check:all && npm run test:smoke",
     "prepare": "husky",
