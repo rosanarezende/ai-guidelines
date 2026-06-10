@@ -20,21 +20,75 @@ import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 
-/** Baseline de intenção do Draft — nunca substituída por atualização automática. */
-export const PRESERVED_SECTIONS: ReadonlyArray<string> = ["## Visão pretendida"];
+/**
+ * Seções-baseline por perfil — nunca substituídas por atualização automática:
+ * execution → Visão pretendida (baseline da intenção do Draft);
+ * governance → Visão de valor (baseline da intenção da spec) e
+ *              Arquitetura pretendida (baseline da decisão).
+ * Qualquer uma presente no remoto é protegida (acréscimo que preserva o
+ * baseline como prefixo é aceito; reescrita é bloqueada).
+ */
+export const PRESERVED_SECTIONS: ReadonlyArray<string> = [
+  "## Visão pretendida",
+  "## Visão de valor",
+  "## Arquitetura pretendida",
+];
 
 /** Evidência final — só atualizada com instrução explícita (`--update-valor-entregue`). */
 export const FINAL_SECTION = "## Valor entregue";
 
-/** Seções atualizáveis durante a implementação. */
+/** Seções atualizáveis durante a implementação (todos os perfis). */
 export const MUTABLE_SECTIONS: ReadonlyArray<string> = [
+  // comuns / execution
   "## Resumo",
   "## Escopo",
   "## Test plan",
   "## Validação, evidências e checklist",
   "## Cross-refs",
   "## Disclosure de IA",
+  // governance (baselines ficam fora: Visão de valor / Arquitetura pretendida)
+  "## Problema de governança",
+  "## Hipóteses e perguntas",
+  "## Processo decisório",
+  "## Decisões consolidadas",
+  "## Evidências e falsificação",
+  "## Impactos downstream",
+  // integration
+  "## Resultado integrado",
+  "## Componentes e PRs absorvidos",
+  "## Convergência",
+  "## Compatibilidade e conflitos resolvidos",
+  "## Evidência de integração",
+  "## Validação final da stack",
+  "## Rollback",
+  // fast-track
+  "## Incidente ou falha",
+  "## Correção",
+  "## Impacto e risco",
+  "## Evidência mínima",
+  "## Accountability",
 ];
+
+/**
+ * Baselines exigidas no body remoto, inferidas pelos marcadores do perfil:
+ * perfis com baseline (execution/governance) exigem que ela exista — a
+ * ausência indica baseline perdida (caso PIT-0010) e bloqueia a atualização;
+ * integration/fast-track não têm baseline. Perfil indeterminado → fail-safe
+ * (exige a baseline de execution, comportamento original do FU-1).
+ */
+function requiredBaselines(has: (header: string) => boolean): string[] {
+  if (
+    has("## Visão de valor") ||
+    has("## Arquitetura pretendida") ||
+    has("## Problema de governança") ||
+    has("## Decisões consolidadas")
+  ) {
+    return ["## Visão de valor"];
+  }
+  if (has("## Resultado integrado") || has("## Componentes e PRs absorvidos")) return [];
+  if (has("## Incidente ou falha")) return [];
+  return ["## Visão pretendida"];
+}
 
 const COMPLEMENT_GUIDANCE =
   "para mudar a visão pretendida, mantenha o baseline intacto e ACRESCENTE um bloco `<details><summary><strong>Prompt complementar — atualização de visão pretendida</strong></summary>…</details>` ao final da seção — nunca reescreva/apague o original.";
@@ -130,10 +184,11 @@ export function mergePrBody(
   const remote = splitBody(remoteBody);
   const proposed = splitBody(proposedBody);
 
-  for (const header of PRESERVED_SECTIONS) {
-    if (!remote.sections.some((s) => s.header === header)) {
+  const hasRemote = (header: string): boolean => remote.sections.some((s) => s.header === header);
+  for (const header of requiredBaselines(hasRemote)) {
+    if (!hasRemote(header)) {
       errors.push(
-        `body remoto não contém a seção preservada "${header}" — restaure o baseline (Template v3) antes de atualizar.`
+        `body remoto não contém a seção preservada "${header}" — restaure o baseline (perfil do PR) antes de atualizar.`
       );
     }
   }

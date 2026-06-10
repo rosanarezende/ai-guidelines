@@ -263,3 +263,68 @@ describe("CLI — pr-body:update · aplicação com releitura e fallback [BR-PR-
     expect(gateway.applied).toBeNull();
   });
 });
+
+// === Baselines por perfil (Bloco 6): governance tem dois baselines; integration não tem ===
+describe("CLI — pr-body:update · baselines por perfil [BR-PR-BODY-UPDATE]", () => {
+  const GOV_PROMPT = "```text\nInfográfico de visão de valor da spec…\n```";
+  const ARQ_PROMPT = "```text\nTopologia aprovada: nós, dependências, sequência…\n```";
+
+  function govRemote(): string {
+    return [
+      "## Visão de valor",
+      GOV_PROMPT,
+      "## Problema de governança",
+      "Dor estrutural X.",
+      "## Decisões consolidadas",
+      "- DEC-1",
+      "## Arquitetura pretendida",
+      ARQ_PROMPT,
+      "## Cross-refs",
+      "- Spec: NNNN",
+    ].join("\n");
+  }
+
+  it("DADO body governance QUANDO atualiza seção mutável ENTÃO preserva Visão de valor e Arquitetura pretendida", () => {
+    const result = mergePrBody(
+      govRemote(),
+      ["## Decisões consolidadas", "- DEC-1", "- DEC-2"].join("\n")
+    );
+    expect(result.errors).toEqual([]);
+    expect(result.updatedSections).toEqual(["## Decisões consolidadas"]);
+    expect(result.merged).toContain("Infográfico de visão de valor");
+    expect(result.merged).toContain("Topologia aprovada");
+  });
+
+  it("DADO proposta que reescreve Arquitetura pretendida QUANDO merge ENTÃO falha (baseline da decisão)", () => {
+    const result = mergePrBody(
+      govRemote(),
+      ["## Arquitetura pretendida", "```text", "Outra topologia.", "```"].join("\n")
+    );
+    expect(result.errors.some((e) => e.includes("Arquitetura pretendida"))).toBe(true);
+    expect(result.merged).toBe(govRemote());
+  });
+
+  it("DADO body governance sem Visão de valor QUANDO merge ENTÃO falha exigindo o baseline do perfil", () => {
+    const semBaseline = govRemote().replace("## Visão de valor", "## Visao de valor (renomeada)");
+    const result = mergePrBody(semBaseline, ["## Decisões consolidadas", "- DEC-2"].join("\n"));
+    expect(result.errors.some((e) => e.includes('"## Visão de valor"'))).toBe(true);
+  });
+
+  it("DADO body integration (sem baseline por perfil) QUANDO atualiza seção mutável ENTÃO não exige Visão pretendida", () => {
+    const integRemote = [
+      "## Resultado integrado",
+      "- entrega 1",
+      "## Componentes e PRs absorvidos",
+      "- #1",
+      "## Evidência de integração",
+      "run antiga",
+    ].join("\n");
+    const result = mergePrBody(
+      integRemote,
+      ["## Evidência de integração", "run nova verde"].join("\n")
+    );
+    expect(result.errors).toEqual([]);
+    expect(result.updatedSections).toEqual(["## Evidência de integração"]);
+    expect(result.merged).toContain("run nova verde");
+  });
+});
