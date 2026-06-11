@@ -199,6 +199,8 @@ O gate aceita o **prompt** (bloco `…`) **ou** a imagem (que o satisfaz). Draft
 | Comando                                              | Para quê                                             |
 | ---------------------------------------------------- | ---------------------------------------------------- |
 | `npm run guidelines -- workflow`                     | Wizard com todas as opções do ciclo                  |
+| `npm run guidelines -- handoff [spec]`               | Retomada derivada: fatos + próxima ação única + selo |
+| `npm run handoff:check -- [--spec NNNN]`             | Advisory de freshness da retomada (fontes + selo)    |
 | `npm run guidelines -- continue`                     | Briefing da spec ativa + verificação de autorização  |
 | `npm run guidelines -- review [<pr>]`                | Coleta e estrutura comentários de um PR para análise |
 | `npm run guidelines -- release-prep [--version <v>]` | Prepara bump de versão com plano explícito           |

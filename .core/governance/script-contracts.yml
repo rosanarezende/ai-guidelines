@@ -139,6 +139,12 @@ profiles:
         mutates: true
         consumers: [script]
         description: Advisory de continuidade operacional/canonical-next.
+      - name: handoff:check
+        command: npm run build && node cli/handoff-check.mjs
+        category: governance
+        mutates: true
+        consumers: [script]
+        description: Advisory de freshness da retomada derivada (fontes + selo + proxima acao).
       - name: co-knowledge:check
         command: npm run build && node cli/co-knowledge-check.mjs
         category: governance

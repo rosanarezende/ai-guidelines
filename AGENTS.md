@@ -45,6 +45,7 @@ This file is the AI-channel bootstrap, not the governance kernel.
 
 - Repository state beats transcript, memory, and agent output.
 - For a fresh AI session, run `npm run guidelines -- handoff [spec]` and follow the emitted reading order.
+- To verify the derived resumption (source freshness + seal + next action), run `npm run handoff:check -- [--spec NNNN]`.
 - The script contract at `.core/governance/script-contracts.yml` is the operational SSOT for scripts, hooks, workflows, and docs.
 - Full rules remain governed in `.core/rules/**`, `.core/rules/catalog.md`, `.core/rules/_meta/rules.json`, and the rule ledger.
 - Never bypass hooks with `--no-verify`; restore setup if hooks or generated script surfaces are missing.

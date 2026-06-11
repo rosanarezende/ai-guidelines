@@ -7,10 +7,13 @@ const AI_GUIDELINES_CLOSE = "</AI_GUIDELINES>";
  * O comando de handoff difere por audiência: consumidores invocam o bin
  * publicado (`npx ai-guidelines …`, default); o repositório do framework usa o
  * script local (`npm run guidelines -- …`), passado por runtimeBootstrap.
+ * `handoffCheckCommand` só existe como script npm do framework (não há bin
+ * publicado ainda) — consumidores não recebem o bullet (null, default).
  */
 export function buildAgentsRuntimeStub(
   sddDir = ".ai-guidelines",
-  handoffCommand = "npx ai-guidelines handoff [spec]"
+  handoffCommand = "npx ai-guidelines handoff [spec]",
+  handoffCheckCommand: string | null = null
 ): string {
   return [
     "## Runtime Bootstrap",
@@ -19,6 +22,11 @@ export function buildAgentsRuntimeStub(
     "",
     "- Repository state beats transcript, memory, and agent output.",
     `- For a fresh AI session, run \`${handoffCommand}\` and follow the emitted reading order.`,
+    ...(handoffCheckCommand
+      ? [
+          `- To verify the derived resumption (source freshness + seal + next action), run \`${handoffCheckCommand}\`.`,
+        ]
+      : []),
     "- The script contract at `.core/governance/script-contracts.yml` is the operational SSOT for scripts, hooks, workflows, and docs.",
     "- Full rules remain governed in `.core/rules/**`, `.core/rules/catalog.md`, `.core/rules/_meta/rules.json`, and the rule ledger.",
     "- Never bypass hooks with `--no-verify`; restore setup if hooks or generated script surfaces are missing.",
@@ -38,11 +46,15 @@ export function buildAgentsRuntimeStub(
 
 export function buildRuntimeBootstrapContent(
   existingContent = "",
-  options: { readonly sddDir?: string; readonly handoffCommand?: string } = {}
+  options: {
+    readonly sddDir?: string;
+    readonly handoffCommand?: string;
+    readonly handoffCheckCommand?: string | null;
+  } = {}
 ): string {
   return mergeAgentsContent(
     existingContent,
-    buildAgentsRuntimeStub(options.sddDir, options.handoffCommand)
+    buildAgentsRuntimeStub(options.sddDir, options.handoffCommand, options.handoffCheckCommand)
   );
 }
 

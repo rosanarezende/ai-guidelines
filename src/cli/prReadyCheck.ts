@@ -32,6 +32,8 @@ export interface ReadyCheckPr {
   readonly labels: ReadonlyArray<string>;
   readonly headRefOid: string;
   readonly headRefName: string;
+  /** Branch base do PR (posição na stack). Opcional para compat com snapshots antigos. */
+  readonly baseRefName?: string;
 }
 
 export interface ReadyCheckCheckpoint {
@@ -213,6 +215,7 @@ export class GhSnapshotCollector implements SnapshotCollector {
       body: string | null;
       labels: ReadonlyArray<{ name: string }>;
       head: { sha: string; ref: string };
+      base: { ref: string };
     };
     const pr: ReadyCheckPr = {
       number: raw.number,
@@ -223,6 +226,7 @@ export class GhSnapshotCollector implements SnapshotCollector {
       labels: raw.labels.map((l) => l.name),
       headRefOid: raw.head.sha,
       headRefName: raw.head.ref,
+      baseRefName: raw.base.ref,
     };
 
     // REST check-runs (não GraphQL): funciona em gh antigos (sem `pr checks
@@ -292,7 +296,8 @@ export interface MainOptions {
   readonly repoRoot?: string;
 }
 
-function detectRepo(): string {
+/** `owner/repo` via gh — exportado para reuso (handoff: mesma fonte remota, sem 2º gateway). */
+export function detectRepo(): string {
   return gh(["repo", "view", "--json", "nameWithOwner", "--jq", ".nameWithOwner"]).trim();
 }
 

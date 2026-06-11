@@ -66,6 +66,7 @@
     "state-yml:check:all": "npm run build && node cli/state-yml-check.mjs --all",
     "active-specs:check": "npm run build && node cli/active-specs-check.mjs",
     "reconcile:check": "npm run build && node cli/reconcile-check.mjs",
+    "handoff:check": "npm run build && node cli/handoff-check.mjs",
     "co-knowledge:check": "npm run build && node cli/co-knowledge-check.mjs",
     "co-knowledge:inventory": "npm run build && node cli/co-knowledge-inventory.mjs",
     "script-contracts:sync": "node cli/script-contracts.mjs sync",

@@ -100,8 +100,135 @@ describe("handoff [ADR-0022]", () => {
 
     const text = renderHandoff(repo, { identifier: "0024", hybrid: true }).text;
 
-    expect(text).toContain("## 6. Slots humanos (hybrid)");
+    expect(text).toContain("## 11. Slots humanos (hybrid)");
     expect(text).toContain("[TODO humano]");
+  });
+});
+
+// ── Núcleo CO-4: fatos + freshness + selo + próxima ação no output ──────────
+
+describe("handoff · núcleo derivado [CO-4]", () => {
+  it("DADO repo resolvido ENTÃO output traz saúde das fontes, próxima ação, proibições e selo", () => {
+    const repo = tempRepo();
+    initGitOnBranch(repo, "feat/spec-0024-co-knowledge");
+
+    const text = renderHandoff(repo, { identifier: "0024" }).text;
+
+    expect(text).toContain("## 2. Saúde das fontes");
+    expect(text).toContain("- state.yml · fresh ·");
+    expect(text).toContain("## 4. Próxima ação única (derivada)");
+    expect(text).toContain("- base factual:");
+    expect(text).toContain("## 5. Ações proibidas (derivadas do estado)");
+    expect(text).toContain("## 10. Selo de geração");
+    expect(text).toMatch(/- selo: [0-9a-f]{12} \(contrato v1;/);
+  });
+
+  it("DADO fonte remota não habilitada ENTÃO pull-request é declarado unavailable (nunca inventado)", () => {
+    const repo = tempRepo();
+    initGitOnBranch(repo, "feat/spec-0024-co-knowledge");
+
+    const text = renderHandoff(repo, { identifier: "0024" }).text;
+
+    expect(text).toContain("- pull-request · unavailable ·");
+    expect(text).toContain("PR ativo: #37 (estado remoto NAO observado)");
+    expect(text).not.toMatch(/PR ativo: #37 \(open/i);
+  });
+
+  it("DADO coletor remoto que FALHA (API indisponível) ENTÃO handoff continua com degradação explícita", () => {
+    const repo = tempRepo();
+    initGitOnBranch(repo, "feat/spec-0024-co-knowledge");
+
+    const text = renderHandoff(repo, {
+      identifier: "0024",
+      remote: () => {
+        throw new Error("gh: connection refused");
+      },
+    }).text;
+
+    expect(text).toContain("# Handoff situado");
+    expect(text).toContain("- pull-request · unavailable ·");
+    expect(text).toContain("gh: connection refused");
+  });
+
+  it("DADO coletor remoto injetado ENTÃO PR/CI aparecem na retomada factual", () => {
+    const repo = tempRepo();
+    initGitOnBranch(repo, "feat/spec-0024-co-knowledge");
+
+    const text = renderHandoff(repo, {
+      identifier: "0024",
+      remote: (prNumber) => ({
+        number: prNumber,
+        state: "open",
+        isDraft: true,
+        baseRefName: "feat/spec-0024-base",
+        headRefName: "feat/spec-0024-co-knowledge",
+        headRefOid: "abc1234567890",
+        checks: { pass: 9, fail: 0, pending: 1 },
+        bodyReadyReasons: [],
+      }),
+    }).text;
+
+    expect(text).toContain("- PR ativo: #37 (open, Draft; base feat/spec-0024-base; head abc1234)");
+    expect(text).toContain("- CI: 9 pass · 0 fail · 1 pending");
+    expect(text).toContain("- pull-request · fresh ·");
+  });
+
+  it("DADO duas gerações com as MESMAS fontes ENTÃO o selo é idêntico (determinismo, sem timestamp)", () => {
+    const repo = tempRepo();
+    initGitOnBranch(repo, "feat/spec-0024-co-knowledge");
+
+    const first = renderHandoff(repo, { identifier: "0024" }).text;
+    const second = renderHandoff(repo, { identifier: "0024" }).text;
+
+    const seal = (text: string) => /- selo: ([0-9a-f]{12})/.exec(text)?.[1];
+    expect(seal(first)).toBeDefined();
+    expect(seal(first)).toBe(seal(second));
+  });
+
+  it("DADO mudança em uma fonte (state.yml) ENTÃO o selo muda", () => {
+    const repo = tempRepo();
+    initGitOnBranch(repo, "feat/spec-0024-co-knowledge");
+    const seal = (text: string) => /- selo: ([0-9a-f]{12})/.exec(text)?.[1];
+
+    const before = seal(renderHandoff(repo, { identifier: "0024" }).text);
+    const statePath = path.join(
+      repo,
+      ".governance",
+      "specs",
+      "0024-context-architecture",
+      "state.yml"
+    );
+    fs.appendFileSync(statePath, "\n# comentario novo\n");
+    const after = seal(renderHandoff(repo, { identifier: "0024" }).text);
+
+    expect(before).not.toBe(after);
+  });
+
+  it("DADO geração do handoff ENTÃO NENHUM arquivo é persistido (stdout é a superfície)", () => {
+    const repo = tempRepo();
+    initGitOnBranch(repo, "feat/spec-0024-co-knowledge");
+    const runtimeDir = path.join(repo, ".governance", "runtime");
+    const listAll = (dir: string): string[] =>
+      fs
+        .readdirSync(dir, { withFileTypes: true })
+        .flatMap((e) =>
+          e.isDirectory() ? listAll(path.join(dir, e.name)) : [path.join(dir, e.name)]
+        );
+    const before = listAll(runtimeDir).sort();
+
+    renderHandoff(repo, { identifier: "0024" });
+
+    expect(listAll(runtimeDir).sort()).toEqual(before);
+    expect(fs.existsSync(path.join(runtimeDir, "handoff"))).toBe(false);
+  });
+
+  it("DADO narrativa next[] presente ENTÃO é rotulada como derivada, não fonte", () => {
+    const repo = tempRepo();
+    initGitOnBranch(repo, "feat/spec-0024-co-knowledge");
+
+    const text = renderHandoff(repo, { identifier: "0024" }).text;
+
+    expect(text).toContain("## 7. Narrativa derivada (não é fonte da próxima ação)");
   });
 });
 
