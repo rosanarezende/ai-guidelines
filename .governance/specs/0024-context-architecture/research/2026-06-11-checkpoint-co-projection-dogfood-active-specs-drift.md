@@ -152,6 +152,51 @@ exige nó terminal (contrato do parser de state.yml, descoberto em teste).
 mas a comparação projeção×fatos no MOMENTO da carga do agente segue prosa);
 ahead/behind vs base da STACK (hoje é vs upstream); disparo automático = CO-6.
 
+## Rodada 3 (2026-06-11, mesmo dia) — contrato de carga / reconcile-on-load
+
+**Contrato escolhido.** Não é possível provar que uma LLM _compreendeu_ uma narrativa —
+qualquer tentativa nessa direção viraria teatro de compreensão (quiz, eco, assinatura
+de prosa). O que É provável, e o que o contrato passa a provar:
+
+```text
+- a retomada foi solicitada            (comando executado)
+- as fontes foram reconciliadas        (coleta + diagnósticos no mesmo ato)
+- o handoff derivou de snapshot coerente (coleta única; anti-TOCTOU por HEAD)
+- a sessão recebeu um selo correspondente (selo no stdout == selo no recibo)
+- comandos posteriores detectam staleness (handoff:check: fresh/missing/
+  stale-head/stale-sources/invalid, comparação por HEAD+fingerprints, nunca timestamp)
+```
+
+**Recibo como evidência local efêmera.** `.git/ai-guidelines/handoff-load.json`
+(git-dir real via `rev-parse --absolute-git-dir`; worktree-safe): só fatos operacionais
+(contractVersion, specId, branch, head, sourceSeal, fingerprints por fonte, degradações,
+loadedAt fora do selo, comando de recarga). Não versionado, não-SSOT, apagável e
+reconstruível por nova carga; recibo stale NUNCA é reescrito por check — só a carga
+explícita reescreve.
+
+**UX (sem duplicação).** O ato de carga É o próprio `handoff` (caminho canônico já
+ensinado pelo AGENTS stub); `handoff:check` consulta; `continue` permanece como
+briefing intra-sessão (propósito distinto; nenhum verbo novo `load`). `renderHandoff`
+programático não grava recibo (consulta ≠ carga).
+
+**Resultado do dogfood (PR #41, HEAD `5906666`):** recibo removido → carga → recibo
+criado com selo IDÊNTICO ao do stdout (`eeb61fb9b65d`) → check `fresh — retomada
+reconciliada`. Stale demonstrado: (a) por fonte — carga `--no-remote` + check com
+remoto → `STALE (fontes): pull-request`, com selos carregado×atual e comando de
+recarga; (b) por HEAD/fonte em fixtures (16 casos de teste, sem commit artificial);
+recarga reconcilia. Guarda futura para comandos mutantes: `assertFreshHandoffReceipt`
+(implementada e testada; deliberadamente NÃO conectada — wiring é evolução de
+enforcement/CO-6).
+
+**Hipótese falsificada:** "provar a carga exigiria persistir o handoff (Markdown) ou um
+manifesto governado". Falso: selo determinístico + recibo efêmero fora do versionamento
+bastam — nenhuma superfície governada nova, nenhum estado que possa driftar no repo
+(a Opção A da rodada 1 sobrevive intacta).
+
+**Limites deliberados:** ausência/stale de recibo é advisory (sem bloqueio global);
+nenhum comando mutante consulta o recibo ainda; nada em `.governance/runtime/handoff/`;
+CO-3/CO-6 intactos.
+
 ## Referências
 
 - Commit da correção: `5881a85` (fix(spec-0024): enforca coerencia da projecao de specs ativas)
