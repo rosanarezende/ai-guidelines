@@ -7,7 +7,10 @@
  *   - saúde de cada fonte (fresh/degraded/unavailable + origem + fingerprint);
  *   - próxima ação única derivada;
  *   - comando concreto de reconciliação quando conhecido;
- *   - selo determinístico de geração.
+ *   - selo determinístico de geração;
+ *   - estado do recibo local de carga (fresh/missing/stale-head/stale-sources/
+ *     invalid) — reconcile-on-load consultável; ausência/stale é advisory
+ *     (nunca bloqueio global nesta fase) e este check NUNCA escreve o recibo.
  *
  * Contrato de severidade:
  *   - incoerência factual reconciliável (drift de projeção) → WARNING (exit 0);
@@ -22,6 +25,7 @@
  */
 import { HandoffOptions, collectHandoffFacts, ghRemotePrCollector } from "./handoff.js";
 import { HANDOFF_CONTRACT_VERSION, deriveHandoff } from "./handoffFacts.js";
+import { readReceiptText, reloadCommand, validateLoadReceipt } from "./handoffReceipt.js";
 
 export interface Logger {
   info: (msg: string) => void;
@@ -112,6 +116,45 @@ export function runHandoffCheck(
       "  Cobertura bloqueante composta (não duplicada aqui): active-specs:check (branch/identidade), " +
         "reconcile:check (cursor/narrativa), review:check (reviews/gates)."
     );
+  }
+
+  // Reconcile-on-load: o recibo prova a ÚLTIMA carga; aqui só consultamos —
+  // ausência/stale é advisory (nunca bloqueio global nesta fase), e recibo
+  // stale NUNCA é reescrito por um check (só a carga explícita reescreve).
+  const specId = /^(\d{4})/.exec(facts.spec.label)?.[1] ?? facts.spec.label;
+  const receiptStatus = validateLoadReceipt(readReceiptText(repoRoot), {
+    facts,
+    seal: derived.seal,
+  });
+  logger.info("");
+  switch (receiptStatus.kind) {
+    case "fresh":
+      logger.info(
+        `  recibo de carga: fresh — retomada reconciliada (selo ${receiptStatus.receipt.sourceSeal}, carregado em ${receiptStatus.receipt.loadedAt}).`
+      );
+      break;
+    case "missing":
+      logger.info(
+        `  recibo de carga: ausente — nenhuma carga registrada nesta máquina. Execute: ${reloadCommand(specId)}`
+      );
+      break;
+    case "invalid":
+      logger.info(
+        `  recibo de carga: inválido (${receiptStatus.reason}). Recarregue com: ${reloadCommand(specId)}`
+      );
+      break;
+    case "stale-head":
+      logger.info(
+        `  recibo de carga: STALE (HEAD) — carregado: HEAD ${receiptStatus.receipt.head} / selo ${receiptStatus.receipt.sourceSeal}; ` +
+          `atual: HEAD ${receiptStatus.currentHead} / selo ${receiptStatus.currentSeal}. Recarregue com: ${reloadCommand(specId)}`
+      );
+      break;
+    case "stale-sources":
+      logger.info(
+        `  recibo de carga: STALE (fontes) — selo carregado ${receiptStatus.receipt.sourceSeal} ≠ selo atual ${receiptStatus.currentSeal}; ` +
+          `fontes divergentes: ${receiptStatus.divergentSources.join(", ") || "(agregado)"}. Recarregue com: ${reloadCommand(specId)}`
+      );
+      break;
   }
 
   logger.info("");

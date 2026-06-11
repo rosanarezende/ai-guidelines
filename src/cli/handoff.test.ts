@@ -2,7 +2,7 @@ import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
 import { execFileSync } from "node:child_process";
-import { renderHandoff } from "./handoff.js";
+import { loadHandoff, renderHandoff } from "./handoff.js";
 
 /**
  * Inicializa git real no diretório e aponta HEAD para `branchName` (branch
@@ -229,6 +229,120 @@ describe("handoff · núcleo derivado [CO-4]", () => {
     const text = renderHandoff(repo, { identifier: "0024" }).text;
 
     expect(text).toContain("## 7. Narrativa derivada (não é fonte da próxima ação)");
+  });
+});
+
+// ── Contrato de carga: ato verificável + recibo efêmero ─────────────────────
+
+describe("handoff · loadHandoff (contrato de carga) [CO-4]", () => {
+  it("DADO carga válida ENTÃO recibo criado em .git/ com o MESMO selo exibido no output", () => {
+    const repo = tempRepo();
+    initGitOnBranch(repo, "feat/spec-0024-co-knowledge");
+
+    const result = loadHandoff(repo, { identifier: "0024" });
+
+    expect(result.receiptFile).not.toBeNull();
+    expect(result.receiptFile).toContain(`${path.sep}.git${path.sep}ai-guidelines${path.sep}`);
+    expect(fs.existsSync(result.receiptFile!)).toBe(true);
+    const sealInText = /- selo: ([0-9a-f]{12})/.exec(result.text)?.[1];
+    expect(result.receipt?.sourceSeal).toBe(sealInText);
+    expect(result.receipt?.sourceSeal).toBe(result.seal);
+    expect(result.text).toContain("- recibo de carga:");
+  });
+
+  it("DADO carga repetida com mesmas fontes ENTÃO idempotente (mesmo selo; só loadedAt muda)", () => {
+    const repo = tempRepo();
+    initGitOnBranch(repo, "feat/spec-0024-co-knowledge");
+
+    const first = loadHandoff(repo, { identifier: "0024" });
+    const second = loadHandoff(repo, { identifier: "0024" });
+
+    expect(second.receipt?.sourceSeal).toBe(first.receipt?.sourceSeal);
+    expect(second.receipt?.head).toBe(first.receipt?.head);
+    expect(second.receipt?.sources).toEqual(first.receipt?.sources);
+  });
+
+  it("DADO recibo dentro de .git/ ENTÃO invisível ao git (status não o lista)", () => {
+    const repo = tempRepo();
+    initGitOnBranch(repo, "feat/spec-0024-co-knowledge");
+
+    loadHandoff(repo, { identifier: "0024" });
+
+    const porcelain = execFileSync("git", ["status", "--porcelain"], {
+      cwd: repo,
+      encoding: "utf8",
+    });
+    expect(porcelain).not.toContain("handoff-load.json");
+  });
+
+  it("DADO estado impossível (spec irresolvível) ENTÃO lança E não escreve recibo", () => {
+    const repo = fs.mkdtempSync(path.join(os.tmpdir(), "handoff-vazio-"));
+    initGitOnBranch(repo, "feat/spec-9999-nada");
+
+    expect(() => loadHandoff(repo, { identifier: "9999" })).toThrow();
+    expect(fs.existsSync(path.join(repo, ".git", "ai-guidelines", "handoff-load.json"))).toBe(
+      false
+    );
+  });
+
+  it("DADO fonte remota que falha ENTÃO recibo registra a degradação factual (sem inventar remoto)", () => {
+    const repo = tempRepo();
+    initGitOnBranch(repo, "feat/spec-0024-co-knowledge");
+
+    const result = loadHandoff(repo, {
+      identifier: "0024",
+      remote: () => {
+        throw new Error("gh: connection refused");
+      },
+    });
+
+    expect(result.receipt?.degraded).toContain("pull-request");
+    expect(result.receipt?.sources["pull-request"]).toBe("-");
+  });
+
+  it("DADO recibo escrito ENTÃO sem narrativa nem body de PR (só fatos operacionais)", () => {
+    const repo = tempRepo();
+    initGitOnBranch(repo, "feat/spec-0024-co-knowledge");
+
+    const result = loadHandoff(repo, { identifier: "0024" });
+    const raw = fs.readFileSync(result.receiptFile!, "utf8");
+
+    expect(raw).not.toMatch(/##|canonical-next|Escopo|Visão pretendida/);
+    expect(JSON.parse(raw).command).toBe("npm run guidelines -- handoff 0024");
+  });
+
+  it("DADO uma carga ENTÃO snapshot único — coletor remoto invocado exatamente 1 vez", () => {
+    const repo = tempRepo();
+    initGitOnBranch(repo, "feat/spec-0024-co-knowledge");
+    let calls = 0;
+
+    loadHandoff(repo, {
+      identifier: "0024",
+      remote: (prNumber) => {
+        calls++;
+        return {
+          number: prNumber,
+          state: "open",
+          isDraft: true,
+          baseRefName: "b",
+          headRefName: "h",
+          headRefOid: "abc1234",
+          checks: { pass: 1, fail: 0, pending: 0 },
+          bodyReadyReasons: [],
+        };
+      },
+    });
+
+    expect(calls).toBe(1);
+  });
+
+  it("DADO carga ENTÃO nada é escrito em .governance/runtime/handoff/ (zero Markdown persistido)", () => {
+    const repo = tempRepo();
+    initGitOnBranch(repo, "feat/spec-0024-co-knowledge");
+
+    loadHandoff(repo, { identifier: "0024" });
+
+    expect(fs.existsSync(path.join(repo, ".governance", "runtime", "handoff"))).toBe(false);
   });
 });
 

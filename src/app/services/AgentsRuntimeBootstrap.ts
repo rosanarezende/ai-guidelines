@@ -21,11 +21,9 @@ export function buildAgentsRuntimeStub(
     "This file is the AI-channel bootstrap, not the governance kernel.",
     "",
     "- Repository state beats transcript, memory, and agent output.",
-    `- For a fresh AI session, run \`${handoffCommand}\` and follow the emitted reading order.`,
+    `- For a fresh AI session, run \`${handoffCommand}\` — it reconciles the sources, records the loaded seal locally, and emits the reading order to follow.`,
     ...(handoffCheckCommand
-      ? [
-          `- To verify the derived resumption (source freshness + seal + next action), run \`${handoffCheckCommand}\`.`,
-        ]
+      ? [`- To confirm the resumption is still fresh, run \`${handoffCheckCommand}\`.`]
       : []),
     "- The script contract at `.core/governance/script-contracts.yml` is the operational SSOT for scripts, hooks, workflows, and docs.",
     "- Full rules remain governed in `.core/rules/**`, `.core/rules/catalog.md`, `.core/rules/_meta/rules.json`, and the rule ledger.",

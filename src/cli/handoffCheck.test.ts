@@ -3,6 +3,7 @@ import * as os from "node:os";
 import * as path from "node:path";
 import { execFileSync } from "node:child_process";
 import { parseArgs, runHandoffCheck } from "./handoffCheck.js";
+import { loadHandoff } from "./handoff.js";
 
 function initGitOnBranch(repo: string, branchName: string): void {
   execFileSync("git", ["init", "--quiet"], { cwd: repo, stdio: "ignore" });
@@ -140,5 +141,89 @@ describe("handoff:check · advisory-first [CO-4]", () => {
     expect(runHandoffCheck(repo, { identifier: "0024" }, logger, null)).toBe(0);
     // e continua não existindo depois (zero persistência)
     expect(fs.existsSync(path.join(repo, ".governance", "runtime", "handoff"))).toBe(false);
+  });
+});
+
+// ── Reconcile-on-load: estado do recibo na consulta ─────────────────────────
+
+describe("handoff:check · recibo de carga [CO-4]", () => {
+  it("DADO recibo ausente ENTÃO advisory com comando de recarga (sem bloquear)", () => {
+    const repo = tempRepo();
+    initGitOnBranch(repo, "feat/spec-0024-co-knowledge");
+    const { lines, logger } = fakeLogger();
+
+    const code = runHandoffCheck(repo, { identifier: "0024" }, logger, null);
+
+    expect(code).toBe(0);
+    const out = lines.join("\n");
+    expect(out).toContain("recibo de carga: ausente");
+    expect(out).toContain("npm run guidelines -- handoff 0024");
+  });
+
+  it("DADO carga feita ENTÃO check reporta recibo fresh (retomada reconciliada)", () => {
+    const repo = tempRepo();
+    initGitOnBranch(repo, "feat/spec-0024-co-knowledge");
+    loadHandoff(repo, { identifier: "0024", remote: null });
+    const { lines, logger } = fakeLogger();
+
+    const code = runHandoffCheck(repo, { identifier: "0024" }, logger, null);
+
+    expect(code).toBe(0);
+    expect(lines.join("\n")).toContain("recibo de carga: fresh — retomada reconciliada");
+  });
+
+  it("DADO fonte mudada após a carga ENTÃO check reporta STALE nomeando a fonte (nunca reescreve o recibo)", () => {
+    const repo = tempRepo();
+    initGitOnBranch(repo, "feat/spec-0024-co-knowledge");
+    loadHandoff(repo, { identifier: "0024", remote: null });
+    const receiptFile = path.join(repo, ".git", "ai-guidelines", "handoff-load.json");
+    const before = fs.readFileSync(receiptFile, "utf8");
+    fs.appendFileSync(
+      path.join(repo, ".governance", "specs", "0024-context-architecture", "tasks.md"),
+      "- [ ] **Checkpoint co-knowledge** — nova tarefa.\n"
+    );
+    const { lines, logger } = fakeLogger();
+
+    const code = runHandoffCheck(repo, { identifier: "0024" }, logger, null);
+
+    expect(code).toBe(0);
+    const out = lines.join("\n");
+    expect(out).toContain("recibo de carga: STALE (fontes)");
+    expect(out).toContain("tasks.md");
+    expect(out).toContain("npm run guidelines -- handoff 0024");
+    // recibo stale NUNCA é atualizado silenciosamente por um check
+    expect(fs.readFileSync(receiptFile, "utf8")).toBe(before);
+  });
+
+  it("DADO recibo corrompido ENTÃO check reporta inválido com comando de recarga", () => {
+    const repo = tempRepo();
+    initGitOnBranch(repo, "feat/spec-0024-co-knowledge");
+    const receiptDir = path.join(repo, ".git", "ai-guidelines");
+    fs.mkdirSync(receiptDir, { recursive: true });
+    fs.writeFileSync(path.join(receiptDir, "handoff-load.json"), "{quebrado");
+    const { lines, logger } = fakeLogger();
+
+    const code = runHandoffCheck(repo, { identifier: "0024" }, logger, null);
+
+    expect(code).toBe(0);
+    const out = lines.join("\n");
+    expect(out).toContain("recibo de carga: inválido");
+    expect(out).toContain("npm run guidelines -- handoff 0024");
+  });
+
+  it("DADO recarga após mudança ENTÃO recibo volta a fresh (reconciliação)", () => {
+    const repo = tempRepo();
+    initGitOnBranch(repo, "feat/spec-0024-co-knowledge");
+    loadHandoff(repo, { identifier: "0024", remote: null });
+    fs.appendFileSync(
+      path.join(repo, ".governance", "specs", "0024-context-architecture", "tasks.md"),
+      "- [ ] **Checkpoint co-knowledge** — nova tarefa.\n"
+    );
+    loadHandoff(repo, { identifier: "0024", remote: null });
+    const { lines, logger } = fakeLogger();
+
+    runHandoffCheck(repo, { identifier: "0024" }, logger, null);
+
+    expect(lines.join("\n")).toContain("recibo de carga: fresh");
   });
 });

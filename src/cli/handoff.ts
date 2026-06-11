@@ -40,6 +40,7 @@ import {
   fingerprintSource,
   parseCheckpointTasks,
 } from "./handoffFacts.js";
+import { HandoffLoadReceipt, createLoadReceipt, writeReceipt } from "./handoffReceipt.js";
 
 /** Coletor da fonte remota (PR). Lança em falha; `null` = coleta não habilitada. */
 export type RemotePrCollector = (prNumber: number, repoRoot: string) => HandoffPrFact;
@@ -707,9 +708,13 @@ function renderProhibitions(derived: HandoffDerived, lines: string[]): void {
   lines.push(renderList([...derived.prohibitions], "(nenhuma proibição derivada)"));
 }
 
-export function renderHandoff(repoRoot: string, options: HandoffOptions = {}): HandoffResult {
-  const collected = collectHandoffFacts(repoRoot, options);
-  const derived = deriveHandoff(collected.facts);
+function renderCollected(
+  repoRoot: string,
+  collected: CollectedHandoff,
+  derived: HandoffDerived,
+  options: HandoffOptions,
+  receiptNote: string | null
+): HandoffResult {
   const { facts } = collected;
   const specFiles = existingFiles(
     repoRoot,
@@ -761,8 +766,11 @@ export function renderHandoff(repoRoot: string, options: HandoffOptions = {}): H
     `- selo: ${derived.seal} (contrato v${HANDOFF_CONTRACT_VERSION}; HEAD ${facts.git.head ?? "-"}; ${facts.sources.length} fonte(s))`
   );
   lines.push(
-    "- determinístico: mesmas fontes ⇒ mesmo selo; o selo NÃO é persistido (stdout é a superfície primária)."
+    "- determinístico: mesmas fontes ⇒ mesmo selo; o handoff NÃO é persistido (stdout é a superfície primária)."
   );
+  if (receiptNote) {
+    lines.push(`- recibo de carga: ${receiptNote}`);
+  }
   if (options.hybrid) {
     lines.push("");
     lines.push("## 11. Slots humanos (hybrid)");
@@ -772,6 +780,63 @@ export function renderHandoff(repoRoot: string, options: HandoffOptions = {}): H
   }
 
   return { text: `${lines.join("\n")}\n` };
+}
+
+/** Render SEM ato de carga (sem recibo) — usado em consultas programáticas/testes. */
+export function renderHandoff(repoRoot: string, options: HandoffOptions = {}): HandoffResult {
+  const collected = collectHandoffFacts(repoRoot, options);
+  const derived = deriveHandoff(collected.facts);
+  return renderCollected(repoRoot, collected, derived, options, null);
+}
+
+export interface HandoffLoadResult {
+  readonly text: string;
+  readonly seal: string;
+  /** Recibo escrito; `null` quando fora de repo git ou snapshot incoerente. */
+  readonly receipt: HandoffLoadReceipt | null;
+  readonly receiptFile: string | null;
+  readonly receiptSkippedReason?: string;
+}
+
+/**
+ * ATO VERIFICÁVEL DE CARGA (contrato de carga do CO-4): coleta os fatos UMA
+ * única vez, deriva o handoff DESSE snapshot, registra o recibo local efêmero
+ * com o MESMO selo exibido, e renderiza. Anti-TOCTOU: se o HEAD mudou entre o
+ * início e o fim da coleta, o recibo NÃO é publicado como fresh (snapshot
+ * misturado não vira evidência de carga).
+ */
+export function loadHandoff(repoRoot: string, options: HandoffOptions = {}): HandoffLoadResult {
+  const collected = collectHandoffFacts(repoRoot, options);
+  const derived = deriveHandoff(collected.facts);
+
+  const headNow = git(repoRoot, ["rev-parse", "--short", "HEAD"]);
+  if (
+    collected.facts.git.head !== null &&
+    headNow !== null &&
+    headNow !== collected.facts.git.head
+  ) {
+    const reason = `HEAD mudou durante a coleta (${collected.facts.git.head} → ${headNow}); recibo NÃO publicado — reexecute a carga.`;
+    return {
+      text: renderCollected(repoRoot, collected, derived, options, `NÃO registrado: ${reason}`)
+        .text,
+      seal: derived.seal,
+      receipt: null,
+      receiptFile: null,
+      receiptSkippedReason: reason,
+    };
+  }
+
+  const receipt = createLoadReceipt(collected.facts, derived.seal);
+  const receiptFile = writeReceipt(repoRoot, receipt);
+  const note = receiptFile
+    ? `${receiptFile} (efêmero, fora do versionamento; selo ${receipt.sourceSeal})`
+    : "(fora de repo git — recibo não se aplica)";
+  return {
+    text: renderCollected(repoRoot, collected, derived, options, note).text,
+    seal: derived.seal,
+    receipt: receiptFile ? receipt : null,
+    receiptFile,
+  };
 }
 
 export async function main(
@@ -784,7 +849,7 @@ export async function main(
   const identifier = argv.find((arg) => !arg.startsWith("--"));
   try {
     logger.info(
-      renderHandoff(repoRoot, {
+      loadHandoff(repoRoot, {
         identifier,
         hybrid,
         remote: noRemote ? null : ghRemotePrCollector,
