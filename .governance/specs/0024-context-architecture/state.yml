@@ -10,7 +10,7 @@ focus:
   - "Gate por checkpoint: implementacao -> revisoes exigidas pela .governance/review-policy.yml (quando aplicavel) -> Human Gate (owner) -> AVANCA (abre o proximo PR stacked). Na 0024 usamos Technical Audit + Architectural Review como dogfood intensivo, mas isso NAO e obrigacao universal para todo repositorio. O Human Gate decide o PROXIMO MOVIMENTO, NAO mergeia em main. 1 checkpoint atomico por vez; parar no Gate quando o commit estiver pronto. Correcao local pequena nao espera; mudanca estrutural sim."
   - "Criterio (RESSALVADO em 2026-06-03 por [DEC-0024-G08]): 'ja foi validado empiricamente na 0024?' -> absorver/enforcar/executar. NAO re-modelar o DECIDIDO (G00/G02/G06/G07 seguem cravados). EXCECAO assumida: G03/G04/G05 foram reabertos para modelagem deliberada (orientada a grafo) -- nesses eixos, modelar e a direcao, nao o risco. O 'risco dominante' original (modelar em vez de absorver) vale para os eixos resolvidos; nos reabertos, a modelagem e o trabalho."
 next:
-  - "canonical-next: toolchain-simplification. PR #38 (bootstrap-compiler / seq 6) CONCLUIDO-NA-STACK por Human Gate approved 2026-06-09 (gates/c-bootstrap-registry.yml; PR #38 Ready, HEAD 897c2420, CI 9/9 verde; modo unit, SEM merge isolado). Entrega aprovada: registry compilado como fronteira operacional; build:rules via TS/src (funde ex-pr-compiler-ts); help derivado do registry; fallback silencioso removido; AGENTS.md stub/bootstrap; monolito cercado como legacy/transitorio (residuo compiler+token-budget roteado para CO-3); robustez Windows/DX. Follow-ups de metodo registrados no gate (FU-1 fallback de PR body; FU-2 sequencia de fechamento de PR) — NAO bloqueantes, implementar no proximo no. No ATIVO = toolchain-simplification (seq 7, checkpoint-npm-toolchain; PR #39 ABERTO como Draft 2026-06-10, stacked sobre #38): migracao Yarn/Corepack -> npm puro (package-lock.json + npm ci; script-contracts SSOT + hooks + workflows + templates + docs; prepack com dist/), FU-1 e FU-2 do gate do #38, e correcao do keying do disclosure do #38. NAO abrir CO-3+ neste PR; NAO mergeia isolado em main (modo unit)."
+  - "canonical-next: toolchain-simplification. PR #38 (bootstrap-compiler / seq 6) CONCLUIDO-NA-STACK por Human Gate approved 2026-06-09 (gates/c-bootstrap-registry.yml; PR #38 Ready, HEAD 897c2420, CI 9/9 verde; modo unit, SEM merge isolado). Entrega aprovada: registry compilado como fronteira operacional; build:rules via TS/src (funde ex-pr-compiler-ts); help derivado do registry; fallback silencioso removido; AGENTS.md stub/bootstrap; monolito cercado como legacy/transitorio (residuo compiler+token-budget roteado para CO-3); robustez Windows/DX. Follow-ups de metodo registrados no gate (FU-1 fallback de PR body; FU-2 sequencia de fechamento de PR) — NAO bloqueantes, implementar no proximo no. No ATIVO = toolchain-simplification (seq 7, checkpoint-npm-toolchain; PR #39 ABERTO como Draft 2026-06-10, stacked sobre #38): migracao Yarn/Corepack -> npm puro (package-lock.json + npm ci; script-contracts SSOT + hooks + workflows + templates + docs; prepack com dist/), FU-1 e FU-2 do gate do #38, e correcao do keying do disclosure do #38. Pos-AR (2026-06-11): F1-F4 fixed + resolutions com ref; PIT-0010 graduado a GG-0004; co-projection REORDENADO para seq 8 (antes de co-enforcement; decisao da owner 2026-06-11) — proximo no apos o Human Gate do #39 = co-projection (CO-4). NAO abrir CO-4+/proximos nos neste PR; NAO mergeia isolado em main (modo unit)."
 topology:
   cursor:
     pr: toolchain-simplification
@@ -154,6 +154,25 @@ topology:
       # null = ainda nao aberto. Objetivo/Deps de cada no: plan.md. Memoria:
       # spec-0024-continuity-operational.
 
+      # CO-4 — Projecao no ponto de consumo: handoff situado DERIVADO (ADR 0022, enfim,
+      # sobre conhecimento) + contrato de carga (reconcile-on-load obrigatorio; ADR 0021).
+      # Retomada agnostica de agente. Absorve ex-projection-split (G05; projecoes
+      # derivadas, renderer-puras) + ex-doctrine (grafo navegavel projetado).
+      # REORDENADO antes de CO-3 (decisao da owner, 2026-06-11, durante o PR #39):
+      # sem dependencia tecnica de CO-4 sobre EnforcementBinding (o projetor deriva de
+      # state.yml/git/reviews/knowledge ja materializados — handoff.ts e a prova viva);
+      # evidencia PIT-0010 (5 ocorrencias -> GG-0004) + PIT-0011: cada sessao paga
+      # reconstrucao manual de contexto enquanto a retomada nao for derivada.
+      # Alvo: estender src/cli/handoff.ts (reviews/gates via discover()/consolidate(),
+      # ahead/behind, proxima acao unica, selo de geracao) + handoff:check (freshness).
+      - id: co-projection
+        github_pr: null
+        role: execution
+        terminal: false
+        sequence: 8
+        checkpoints:
+          - checkpoint-co-projection # projetor situado + contrato de carga (U4); absorve ex-projection-split
+
       # CO-3 — Absorcao: no de conhecimento -> forma que DISPARA. EnforcementBinding
       # (declaracao->enforcement por no; PIT-0008 estrutural) + knowledge:compile
       # (reusa o compilador de regras). Absorve ex-rule-guardrail (Rule/Guardrail ->
@@ -166,21 +185,9 @@ topology:
         github_pr: null
         role: execution
         terminal: false
-        sequence: 8
-        checkpoints:
-          - checkpoint-co-enforcement # EnforcementBinding + knowledge:compile (U3); absorve ex-rule-guardrail
-
-      # CO-4 — Projecao no ponto de consumo: handoff situado DERIVADO (ADR 0022, enfim,
-      # sobre conhecimento) + contrato de carga (reconcile-on-load obrigatorio; ADR 0021).
-      # Retomada agnostica de agente. Absorve ex-projection-split (G05; projecoes
-      # derivadas, renderer-puras) + ex-doctrine (grafo navegavel projetado).
-      - id: co-projection
-        github_pr: null
-        role: execution
-        terminal: false
         sequence: 9
         checkpoints:
-          - checkpoint-co-projection # projetor situado + contrato de carga (U4); absorve ex-projection-split
+          - checkpoint-co-enforcement # EnforcementBinding + knowledge:compile (U3); absorve ex-rule-guardrail
 
       # CO-5 — Fecha o laco: captura do em-transito como no na FORMACAO (PIT-0002) +
       # espinha de ciclo de vida (maturacao/graduacao human-gated). Dissolve NEXT.md
