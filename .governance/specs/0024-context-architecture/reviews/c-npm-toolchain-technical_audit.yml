@@ -1,0 +1,26 @@
+checkpoint: "npm-toolchain"
+role: technical_audit
+executor:
+  platform: antigravity
+  model: gemini-3.1-pro-high
+decision: approved
+findings_emitted: 0
+audit_evidence:
+  coverage:
+    - .github/PULL_REQUEST_TEMPLATE
+    - .github/workflows/repo-validation.yml
+    - .github/workflows/smoke-multi-os.yml
+    - .core/governance/script-contracts.yml
+    - .governance/review-policy.yml
+    - .governance/specs/0024-context-architecture/state.yml
+    - .governance/specs/0024-context-architecture/research/2026-06-10-pit-0010-memoria-de-agente-nao-e-contrato.md
+    - .husky/pre-commit
+    - package.json
+    - src/cli/prBodyUpdate.ts
+    - src/cli/prReadyCheck.ts
+    - src/cli/disclosureRender.ts
+    - src/cli/reviewCheck.ts
+    - tests/integration/workflow-dispatch.test.mjs
+  scope: "Inspeção de código para todos os vetores da migração para npm, além de testes unitários, formatação, validação do estado do workspace e verificação do empacotamento via npm pack."
+  basis: "Implementação fiel à especificação de remoção de yarn/corepack, com scripts ajustados e executando corretamente em WSL, testes unitários para a cobertura de pr-body:update e pr-ready:check, sem regressões causadas, passados com sucesso no CI local."
+review_fingerprint: "8da88f88e8f9"
