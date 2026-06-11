@@ -64,6 +64,10 @@ const COMMON_TAIL_FILLED = [
   "## Disclosure de IA",
   "",
   "Implementação assistida por IA.",
+  "",
+  "## Cross-refs",
+  "",
+  "- Vazio",
 ];
 
 /** Body EXECUTION no contrato de DRAFT: intenção preenchida; Valor entregue pode ser placeholder. */
@@ -302,8 +306,6 @@ describe("CLI — governance-pr-check · perfil fast-track [BR-GOV-PR-CHECK]", (
       o.accountability ??
         "[fast-track: registry indisponível] — @rosanarezende responde pela correção.",
       ...COMMON_TAIL_FILLED,
-      "## Cross-refs",
-      "- Issue: #99",
     ];
     return sections.join("\n");
   }

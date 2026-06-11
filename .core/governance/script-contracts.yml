@@ -211,16 +211,22 @@ profiles:
         mutates: true
         consumers: [human]
         description: Renderiza disclosure de IA derivado.
+      - name: review:seal
+        command: node cli/review-seal.mjs
+        category: governance
+        mutates: true
+        consumers: [human]
+        description: Sela automaticamente os fingerprints de findings e review_fingerprint em artefatos YAML.
       - name: pr-body:update
         command: npm run build && node cli/pr-body-update.mjs
         category: governance
-        mutates: false
+        mutates: true
         consumers: [human]
         description: Atualiza PR body preservando secoes baseline (FU-1); fallback gh api PATCH.
       - name: pr-ready:check
         command: npm run build && node cli/pr-ready-check.mjs
         category: governance
-        mutates: false
+        mutates: true
         consumers: [human]
         description: Valida precondicoes da conversao Draft->Ready (FU-2); read-only, nao converte.
       - name: validate

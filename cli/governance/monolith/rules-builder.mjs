@@ -169,7 +169,7 @@ export async function buildRulesCatalog(sourceRulesDir, options = {}) {
 export function generateCatalogMarkdown(rules, baseDir) {
   const sorted = [...rules].sort((a, b) => a.id.localeCompare(b.id));
 
-  let markdown = `# Rules Catalog\n\n> Índice navegável gerado automaticamente.\n> **NÃO EDITE ESTE ARQUIVO** — ele é reconstruído via \`yarn build:rules\`.\n\n| ID | Title | Scope | Category | Link |\n|----|-------|-------|----------|------|\n`;
+  let markdown = `# Rules Catalog\n\n> Índice navegável gerado automaticamente.\n> **NÃO EDITE ESTE ARQUIVO** — ele é reconstruído via \`npm run build:rules\`.\n\n| ID | Title | Scope | Category | Link |\n|----|-------|-------|----------|------|\n`;
 
   for (const rule of sorted) {
     const id = rule.id || "?";
@@ -314,7 +314,7 @@ export function generateCoreAgentsLedger(rules) {
   let markdown = `# Agents Core Ledger
 
 > Automatically generated ledger of CORE rules (tags: core).
-> **DO NOT EDIT MANUALLY** — regenerate via \`yarn build:rules\`.
+> **DO NOT EDIT MANUALLY** — regenerate via \`npm run build:rules\`.
 
 ## Rules Table
 

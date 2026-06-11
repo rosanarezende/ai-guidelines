@@ -1,3 +1,6 @@
+import path from "node:path";
+import { readFileSync } from "node:fs";
+
 import {
   deriveDisclosure,
   renderDisclosure,
@@ -238,5 +241,17 @@ describe("disclosureRender [Checkpoint 2.4d] — renderDisclosure (projeção pu
     );
     expect(text).toMatch(/parcial — 1 de 3/);
     expect(text).not.toContain("validação final pelo owner");
+  });
+});
+
+describe("disclosureRender — no yarn residuals", () => {
+  it("operational messages must use npm-canonical commands, not yarn", () => {
+    // The string literals in disclosureRender.ts should not contain 'yarn '
+    // as an operational instruction. This test reads the source file and
+    // checks for yarn references that aren't in comments or documentation.
+    const source = readFileSync(path.resolve(__dirname, "disclosureRender.ts"), "utf-8");
+    // Match yarn followed by a script name in string literals (inside backticks or quotes)
+    const yarnInstructions = source.match(/['"`].*\byarn\s+\w+.*['"`]/g) || [];
+    expect(yarnInstructions).toEqual([]);
   });
 });

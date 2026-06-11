@@ -64,4 +64,14 @@ describe("RulesCatalogBuilder — compilador TypeScript de rules", () => {
     expect(markdown).not.toContain(process.cwd());
     expect(markdown).not.toContain("../../../../");
   });
+
+  it("generated ledger uses npm-canonical commands, not yarn", async () => {
+    const result = await buildRulesCatalog(sourceFor(CURRENT_RULES_DIR), {
+      baseDir: CURRENT_RULES_DIR,
+      generatedAt: "stable",
+    });
+    expect(result.success).toBe(true);
+    expect(result.ledgerMarkdown).toContain("npm run build:rules");
+    expect(result.ledgerMarkdown).not.toContain("yarn ");
+  });
 });

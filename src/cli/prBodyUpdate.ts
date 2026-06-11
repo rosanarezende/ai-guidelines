@@ -20,54 +20,13 @@ import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 
-/**
- * Seções-baseline por perfil — nunca substituídas por atualização automática:
- * execution → Visão pretendida (baseline da intenção do Draft);
- * governance → Visão de valor (baseline da intenção da spec) e
- *              Arquitetura pretendida (baseline da decisão).
- * Qualquer uma presente no remoto é protegida (acréscimo que preserva o
- * baseline como prefixo é aceito; reescrita é bloqueada).
- */
-export const PRESERVED_SECTIONS: ReadonlyArray<string> = [
-  "## Visão pretendida",
-  "## Visão de valor",
-  "## Arquitetura pretendida",
-];
+import {
+  ALL_PRESERVED_SECTIONS as PRESERVED_SECTIONS,
+  ALL_FINAL_SECTIONS,
+  ALL_MUTABLE_SECTIONS as MUTABLE_SECTIONS,
+} from "../domain/workflow/PrProfileContract.js";
 
-/** Evidência final — só atualizada com instrução explícita (`--update-valor-entregue`). */
-export const FINAL_SECTION = "## Valor entregue";
-
-/** Seções atualizáveis durante a implementação (todos os perfis). */
-export const MUTABLE_SECTIONS: ReadonlyArray<string> = [
-  // comuns / execution
-  "## Resumo",
-  "## Escopo",
-  "## Test plan",
-  "## Validação, evidências e checklist",
-  "## Cross-refs",
-  "## Disclosure de IA",
-  // governance (baselines ficam fora: Visão de valor / Arquitetura pretendida)
-  "## Problema de governança",
-  "## Hipóteses e perguntas",
-  "## Processo decisório",
-  "## Decisões consolidadas",
-  "## Evidências e falsificação",
-  "## Impactos downstream",
-  // integration
-  "## Resultado integrado",
-  "## Componentes e PRs absorvidos",
-  "## Convergência",
-  "## Compatibilidade e conflitos resolvidos",
-  "## Evidência de integração",
-  "## Validação final da stack",
-  "## Rollback",
-  // fast-track
-  "## Incidente ou falha",
-  "## Correção",
-  "## Impacto e risco",
-  "## Evidência mínima",
-  "## Accountability",
-];
+const FINAL_SECTION = ALL_FINAL_SECTIONS[0] || "## Valor entregue";
 
 /**
  * Baselines exigidas no body remoto, inferidas pelos marcadores do perfil:

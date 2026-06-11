@@ -1,0 +1,11 @@
+checkpoint: "npm-toolchain"
+by: "gemini-3.1-pro-high"
+resolutions:
+  - finding: architectural_review#F1
+    action: fixed
+  - finding: architectural_review#F2
+    action: fixed
+  - finding: architectural_review#F3
+    action: fixed
+  - finding: architectural_review#F4
+    action: fixed

@@ -199,7 +199,7 @@ export function generateCoreAgentsLedger(rules: ReadonlyArray<Rule>): string {
   let markdown = `# Agents Core Ledger
 
 > Automatically generated ledger of CORE rules (tags: core).
-> **DO NOT EDIT MANUALLY** — regenerate via \`yarn build:rules\`.
+> **DO NOT EDIT MANUALLY** — regenerate via \`npm run build:rules\`.
 
 ## Rules Table
 

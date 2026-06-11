@@ -151,7 +151,7 @@ export function analyzePerAdapterBudgets(catalog) {
 }
 
 /**
- * Análise completa do orçamento de tokens — usada por `yarn build:rules` e
+ * Análise completa do orçamento de tokens — usada por `npm run build:rules` e
  * pelo comando `check-budget`. Combina escopos do catálogo, AGENTS.md stub e
  * cada provider entrypoint.
  */

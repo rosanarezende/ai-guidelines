@@ -318,7 +318,7 @@ export function main(repoRoot: string, opts: MainOptions = {}): number {
     // Espelha o `review:check` (mesma fonte de invariantes).
     logger.error(
       `❌ Estado inconsistente: ${violations.length} violação(ões) do consolidator — ` +
-        `disclosure não é projetado sobre estado inválido (resolva via \`yarn review:check\`):`
+        `disclosure não é projetado sobre estado inválido (resolva via \`npm run review:check\`):`
     );
     for (const v of violations) logger.error(`  - ${v}`);
     return 1;
