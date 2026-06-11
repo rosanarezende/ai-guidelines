@@ -10,11 +10,11 @@ focus:
   - "Gate por checkpoint: implementacao -> revisoes exigidas pela .governance/review-policy.yml (quando aplicavel) -> Human Gate (owner) -> AVANCA (abre o proximo PR stacked). Na 0024 usamos Technical Audit + Architectural Review como dogfood intensivo, mas isso NAO e obrigacao universal para todo repositorio. O Human Gate decide o PROXIMO MOVIMENTO, NAO mergeia em main. 1 checkpoint atomico por vez; parar no Gate quando o commit estiver pronto. Correcao local pequena nao espera; mudanca estrutural sim."
   - "Criterio (RESSALVADO em 2026-06-03 por [DEC-0024-G08]): 'ja foi validado empiricamente na 0024?' -> absorver/enforcar/executar. NAO re-modelar o DECIDIDO (G00/G02/G06/G07 seguem cravados). EXCECAO assumida: G03/G04/G05 foram reabertos para modelagem deliberada (orientada a grafo) -- nesses eixos, modelar e a direcao, nao o risco. O 'risco dominante' original (modelar em vez de absorver) vale para os eixos resolvidos; nos reabertos, a modelagem e o trabalho."
 next:
-  - "canonical-next: toolchain-simplification. PR #38 (bootstrap-compiler / seq 6) CONCLUIDO-NA-STACK por Human Gate approved 2026-06-09 (gates/c-bootstrap-registry.yml; PR #38 Ready, HEAD 897c2420, CI 9/9 verde; modo unit, SEM merge isolado). Entrega aprovada: registry compilado como fronteira operacional; build:rules via TS/src (funde ex-pr-compiler-ts); help derivado do registry; fallback silencioso removido; AGENTS.md stub/bootstrap; monolito cercado como legacy/transitorio (residuo compiler+token-budget roteado para CO-3); robustez Windows/DX. Follow-ups de metodo registrados no gate (FU-1 fallback de PR body; FU-2 sequencia de fechamento de PR) — NAO bloqueantes, implementar no proximo no. No ATIVO = toolchain-simplification (seq 7, checkpoint-npm-toolchain; PR #39 ABERTO como Draft 2026-06-10, stacked sobre #38): migracao Yarn/Corepack -> npm puro (package-lock.json + npm ci; script-contracts SSOT + hooks + workflows + templates + docs; prepack com dist/), FU-1 e FU-2 do gate do #38, e correcao do keying do disclosure do #38. Pos-AR (2026-06-11): F1-F4 fixed + resolutions com ref; PIT-0010 graduado a GG-0004; co-projection REORDENADO para seq 8 (antes de co-enforcement; decisao da owner 2026-06-11) — proximo no apos o Human Gate do #39 = co-projection (CO-4). NAO abrir CO-4+/proximos nos neste PR; NAO mergeia isolado em main (modo unit)."
+  - "canonical-next: co-projection. PR #39 (toolchain-simplification / seq 7) CONCLUIDO-NA-STACK por Human Gate approved 2026-06-11 (gates/c-npm-toolchain.yml; PR #39 Ready, HEAD d806a835, CI 11/11 verde; modo unit, SEM merge isolado). Entrega aprovada: npm puro como package manager canonico (package-lock.json + npm ci; um unico runner em script-contracts/hooks/CI/release/templates/docs; validate tambem no Windows; multi-PM preservado nos consumidores com Corepack condicional); FU-1 (pr-body:update) + FU-2 (pr-ready:check + sequencia canonica de fechamento); Template v3 + perfis de PR body (PrProfileContract como SSOT); review:seal; PIT-0010 graduado a guardrail GG-0004; PIT-0011 capturado; retomada derivada saneada; co-projection reordenado para seq 8 (decisao da owner 2026-06-11). Proximo no planejado = co-projection (seq 8, checkpoint-co-projection): handoff situado DERIVADO + contrato de carga (estender src/cli/handoff.ts com reviews/gates via discover()/consolidate(), ahead/behind, proxima acao unica, selo de geracao; handoff:check advisory-first; reconcile-on-load — ADR 0022/0021). PR proprio stacked sobre #39; NAO abrir CO-3 (co-enforcement, seq 9) neste PR; NAO mergeia isolado em main (modo unit)."
 topology:
   cursor:
-    pr: toolchain-simplification
-    checkpoint: checkpoint-npm-toolchain
+    pr: co-projection
+    checkpoint: checkpoint-co-projection
   prs:
     concluded:
       - id: base-governance
@@ -112,25 +112,19 @@ topology:
           - checkpoint-compiler-ts # motor de compilacao de regras (monolith) -> TS/src; substrato do knowledge:compile
           - checkpoint-bootstrap-registry # bootstrap/script-contracts/runtime-bootstrap -> registry/src; /cli vira wrapper+compat
 
-    active:
-      # Toolchain simplification — npm como package manager canonico. EM PROGRESSO
-      # (Draft PR #39 aberto 2026-06-10, stacked sobre #38; modo unit, NAO mergeia
-      # isolado). Decisao da owner (2026-06-09, preparo do Human Gate do #38):
-      # reduzir friccao de bootstrap do framework. Node ja traz npm; npm puro com
-      # package-lock.json + `npm ci` basta para instalacao deterministica neste
-      # contexto — Corepack/Yarn resolve versionamento do package manager, mas
-      # adiciona camada operacional que nao compensa para adocao simples,
-      # especialmente em Windows nativo e agentes novos. Escopo: migrar Yarn/
-      # Corepack -> npm puro; gerar/versionar package-lock.json; remover yarn.lock;
-      # revisar/remover packageManager; substituir comandos mantenedores (setup/
-      # validate/test:smoke/state-yml:check:all/disclosure etc.) em script-contracts
-      # (SSOT) + hooks Husky + workflows CI + templates de consumidor + docs
-      # publicas (README/CONTRIBUTING/WORKFLOW/docs/scripts.md); revisar prepack
-      # (pacote publicado segue contendo dist/ + rules.json); validar Windows e
-      # Linux; preservar build deterministico. Inclui FU-1 (fallback de PR body via
-      # gh api PATCH) e FU-2 (sequencia de fechamento de PR) do gate do #38 +
-      # correcao do keying do disclosure do #38. PR proprio: nao misturar mudanca
-      # de package manager com o fechamento do registry/bootstrap-compiler.
+      # #39 CONCLUIDO apos Human Gate npm-toolchain approved
+      # (gates/c-npm-toolchain.yml, 2026-06-11; PR #39 Ready, HEAD d806a835,
+      # CI 11/11 verde). Entrega aprovada: npm puro como package manager
+      # canonico do framework (package-lock.json + npm ci; script-contracts/
+      # hooks/CI/release/templates/docs em um unico runner; validate tambem no
+      # Windows); multi-PM preservado nos consumidores (Corepack condicional);
+      # FU-1 (pr-body:update preservativo) + FU-2 (pr-ready:check + sequencia
+      # canonica); Template v3 + perfis de PR (PrProfileContract como SSOT);
+      # review:seal; PIT-0010 graduado a GG-0004; PIT-0011 capturado; retomada
+      # derivada saneada (handoff renderer sem ponteiros stale); co-projection
+      # reordenado para seq 8. Ciclo de review fechado no proprio PR (TA + AR
+      # approved; F1-F4 accepted via EV1). Modo unit: NAO mergeou em main
+      # (concluido na stack).
       - id: toolchain-simplification
         github_pr: 39
         role: execution
@@ -165,6 +159,7 @@ topology:
       # reconstrucao manual de contexto enquanto a retomada nao for derivada.
       # Alvo: estender src/cli/handoff.ts (reviews/gates via discover()/consolidate(),
       # ahead/behind, proxima acao unica, selo de geracao) + handoff:check (freshness).
+      # PROXIMO NO SELECIONADO (cursor): PR ainda nao aberto (github_pr null).
       - id: co-projection
         github_pr: null
         role: execution
