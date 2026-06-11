@@ -1,7 +1,21 @@
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
+import { execFileSync } from "node:child_process";
 import { renderHandoff } from "./handoff.js";
+
+/**
+ * Inicializa git real no diretório e aponta HEAD para `branchName` (branch
+ * unborn basta para `git branch --show-current`). Cross-platform: execFileSync
+ * com array de args, sem shell.
+ */
+function initGitOnBranch(repo: string, branchName: string): void {
+  execFileSync("git", ["init", "--quiet"], { cwd: repo, stdio: "ignore" });
+  execFileSync("git", ["symbolic-ref", "HEAD", `refs/heads/${branchName}`], {
+    cwd: repo,
+    stdio: "ignore",
+  });
+}
 
 function tempRepo(): string {
   const repo = fs.mkdtempSync(path.join(os.tmpdir(), "handoff-"));
@@ -88,5 +102,80 @@ describe("handoff [ADR-0022]", () => {
 
     expect(text).toContain("## 6. Slots humanos (hybrid)");
     expect(text).toContain("[TODO humano]");
+  });
+});
+
+// Regressão do dogfood CO-4 (2026-06-11): handoff mascarou branch stale do
+// active.yml porque (a) a resolução era projeção-primeiro e (b) os fallbacks
+// eram silenciosos. Contrato cravado aqui: fallback NUNCA silencioso; projeção
+// divergente NUNCA apresentada como íntegra.
+describe("handoff · diagnóstico de projeção [dogfood CO-4]", () => {
+  it("DADO projeção com branch stale e branch factual da mesma spec ENTÃO avisa DIVERGENTE e exige reconciliação", () => {
+    const repo = tempRepo(); // active.yml projeta feat/spec-0024-co-knowledge
+    initGitOnBranch(repo, "feat/spec-0024-co-projection");
+
+    const text = renderHandoff(repo, { identifier: "0024" }).text;
+
+    expect(text).toContain("## ⚠ Aviso de projeção — reconcilie antes de confiar");
+    expect(text).toContain('DIVERGENTE (projeta branch "feat/spec-0024-co-knowledge"');
+    expect(text).toContain("feat/spec-0024-co-projection");
+    expect(text).toContain("workflow publish-state");
+    // disponibilidade preservada: o handoff ainda é gerado por completo
+    expect(text).toContain("## 1. Retomada factual");
+    expect(text).toContain("- spec: 0024-context-architecture");
+  });
+
+  it("DADO projeção reconciliada (branch projetada == factual) ENTÃO sem aviso e linha 'fiel'", () => {
+    const repo = tempRepo();
+    initGitOnBranch(repo, "feat/spec-0024-co-knowledge");
+
+    const text = renderHandoff(repo, { identifier: "0024" }).text;
+
+    expect(text).not.toContain("## ⚠ Aviso de projeção");
+    expect(text).toContain("- projecao specs/active.yml: fiel aos fatos observaveis");
+  });
+
+  it("DADO projeção ausente QUANDO resolve por detecção canônica de branch ENTÃO segue com aviso explícito", () => {
+    const repo = tempRepo();
+    fs.rmSync(path.join(repo, ".governance", "runtime", "specs", "active.yml"));
+    initGitOnBranch(repo, "feat/spec-0024-co-projection");
+
+    const text = renderHandoff(repo).text;
+
+    expect(text).toContain("- spec: 0024-context-architecture");
+    expect(text).toContain("- projecao specs/active.yml: ausente");
+    expect(text).toContain("AUSENTE");
+    expect(text).toContain("workflow publish-state");
+  });
+
+  it("DADO branch fora do padrão canônico resolvida via projeção ENTÃO declara o fallback", () => {
+    const repo = tempRepo();
+    // entry projetada com branch off-pattern; spec só é encontrável pela projeção
+    const indexPath = path.join(repo, ".governance", "runtime", "specs", "active.yml");
+    fs.writeFileSync(
+      indexPath,
+      fs.readFileSync(indexPath, "utf8").replace("feat/spec-0024-co-knowledge", "wip/retomada")
+    );
+    initGitOnBranch(repo, "wip/retomada");
+
+    const text = renderHandoff(repo).text;
+
+    expect(text).toContain("- spec: 0024-context-architecture");
+    expect(text).toContain("resolvida pela PROJEÇÃO");
+  });
+
+  it("DADO branch canônica sem entry na projeção ENTÃO pede publish-state sem bloquear", () => {
+    const repo = tempRepo();
+    fs.writeFileSync(
+      path.join(repo, ".governance", "runtime", "specs", "active.yml"),
+      "version: 1\nactive_specs: []\n"
+    );
+    initGitOnBranch(repo, "feat/spec-0024-co-projection");
+
+    const text = renderHandoff(repo).text;
+
+    expect(text).toContain("- spec: 0024-context-architecture");
+    expect(text).toContain("- projecao specs/active.yml: sem entry para esta spec");
+    expect(text).toContain("workflow publish-state");
   });
 });

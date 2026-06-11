@@ -5,6 +5,7 @@ import { parseActiveSpecs } from "../infrastructure/yaml/activeSpecsSerializer.j
 import { parseWorkflowState } from "../infrastructure/yaml/workflowStateSerializer.js";
 import { ActiveSpecEntry } from "../domain/workflow/ActiveSpecEntry.js";
 import { PrTopologyNode, WorkflowState } from "../domain/workflow/WorkflowState.js";
+import { parseSpecBranch } from "../app/workflow/DetectActiveSpec.js";
 
 export interface HandoffOptions {
   readonly identifier?: string;
@@ -19,6 +20,20 @@ interface ResolvedSpec {
   readonly specPath: string;
   readonly label: string;
 }
+
+/**
+ * Projeção `specs/active.yml` com a distinção que o consumo exige: arquivo
+ * ausente, ilegível e entry inexistente são estados DIFERENTES — colapsá-los
+ * em `[]` foi o que permitiu fallback silencioso (dogfood CO-4, 2026-06-11).
+ */
+interface ProjectionIndex {
+  readonly exists: boolean;
+  readonly entries: readonly ActiveSpecEntry[];
+  readonly parseError?: string;
+}
+
+const RECONCILE_COMMAND =
+  "npm run guidelines -- workflow publish-state --status=<status> --updated-by=<@autor>";
 
 const AUTHORITY_FILES = [
   "AGENTS.md",
@@ -60,13 +75,17 @@ function listSpecDirs(repoRoot: string): readonly string[] {
     .sort();
 }
 
-function activeSpecs(repoRoot: string): readonly ActiveSpecEntry[] {
+function loadProjection(repoRoot: string): ProjectionIndex {
   const text = readIfExists(repoRoot, ".governance/runtime/specs/active.yml");
-  if (!text) return [];
+  if (text === null) return { exists: false, entries: [] };
   try {
-    return parseActiveSpecs(text).activeSpecs;
-  } catch {
-    return [];
+    return { exists: true, entries: parseActiveSpecs(text).activeSpecs };
+  } catch (error) {
+    return {
+      exists: true,
+      entries: [],
+      parseError: error instanceof Error ? error.message : String(error),
+    };
   }
 }
 
@@ -78,28 +97,62 @@ function entryMatches(entry: ActiveSpecEntry, identifier: string): boolean {
   );
 }
 
-function resolveByIdentifier(repoRoot: string, identifier: string): ResolvedSpec | null {
-  const fromIndex = activeSpecs(repoRoot).find((entry) => entryMatches(entry, identifier));
-  if (fromIndex)
-    return { specPath: fromIndex.specPath, label: `${fromIndex.id}-${fromIndex.slug}` };
-
+/**
+ * Resolução canônica primeiro (diretório `NNNN-*` em `.governance/specs/`),
+ * projeção depois. Projection layer ≠ primary resolver de identity
+ * ([DEC-0023-I01]); a ordem invertida (projeção primeiro) foi o que mascarou
+ * o branch stale do active.yml no dogfood CO-4.
+ */
+function resolveByIdentifier(
+  repoRoot: string,
+  projection: ProjectionIndex,
+  identifier: string
+): ResolvedSpec | null {
   const byDir = listSpecDirs(repoRoot).find((specPath) => {
     const name = path.basename(specPath);
     return name === identifier || name.startsWith(`${identifier}-`);
   });
-  return byDir ? { specPath: byDir, label: path.basename(byDir) } : null;
+  if (byDir) return { specPath: byDir, label: path.basename(byDir) };
+
+  const fromIndex = projection.entries.find((entry) => entryMatches(entry, identifier));
+  return fromIndex
+    ? { specPath: fromIndex.specPath, label: `${fromIndex.id}-${fromIndex.slug}` }
+    : null;
 }
 
-function resolveCurrent(repoRoot: string): ResolvedSpec | null {
-  const branch = git(repoRoot, ["branch", "--show-current"]);
-  const indexed = activeSpecs(repoRoot).find((entry) => entry.branch === branch);
-  if (indexed) return { specPath: indexed.specPath, label: `${indexed.id}-${indexed.slug}` };
+interface CurrentResolution {
+  readonly resolved: ResolvedSpec | null;
+  /** Como a spec foi encontrada — fallbacks não-canônicos geram aviso no output. */
+  readonly via: "canonical-branch" | "projection-branch" | "single-dir" | "none";
+}
 
-  const match = branch?.match(/spec-(\d{4})/);
-  if (match) return resolveByIdentifier(repoRoot, match[1]);
+function resolveCurrent(
+  repoRoot: string,
+  projection: ProjectionIndex,
+  branch: string | null
+): CurrentResolution {
+  const parsed = parseSpecBranch(branch);
+  if (parsed) {
+    const resolved = resolveByIdentifier(repoRoot, projection, parsed.specId);
+    if (resolved) return { resolved, via: "canonical-branch" };
+  }
+
+  const indexed = projection.entries.find((entry) => entry.branch === branch);
+  if (indexed) {
+    return {
+      resolved: { specPath: indexed.specPath, label: `${indexed.id}-${indexed.slug}` },
+      via: "projection-branch",
+    };
+  }
 
   const dirs = listSpecDirs(repoRoot);
-  return dirs.length === 1 ? { specPath: dirs[0], label: path.basename(dirs[0]) } : null;
+  if (dirs.length === 1) {
+    return {
+      resolved: { specPath: dirs[0], label: path.basename(dirs[0]) },
+      via: "single-dir",
+    };
+  }
+  return { resolved: null, via: "none" };
 }
 
 function readState(repoRoot: string, specPath: string): WorkflowState {
@@ -127,19 +180,108 @@ function renderList(items: readonly string[], empty = "(nenhum)"): string {
   return items.length === 0 ? `- ${empty}` : items.map((item) => `- ${item}`).join("\n");
 }
 
+/**
+ * Diagnóstico da projeção no ponto de consumo: compara a entry do
+ * `specs/active.yml` com os fatos disponíveis. NUNCA bloqueia o handoff
+ * (disponibilidade preservada), mas degradação de confiança vira aviso
+ * explícito — fallback silencioso é a classe de erro que este código
+ * existe para eliminar (dogfood CO-4, 2026-06-11).
+ */
+function projectionDiagnostics(
+  projection: ProjectionIndex,
+  resolved: ResolvedSpec,
+  via: CurrentResolution["via"] | "identifier",
+  branch: string | null
+): { statusLine: string; warnings: string[] } {
+  const warnings: string[] = [];
+
+  if (via === "projection-branch") {
+    warnings.push(
+      "Spec resolvida pela PROJEÇÃO (match de branch em specs/active.yml), não pela " +
+        "detecção canônica por id de branch — o branch corrente não segue o padrão " +
+        "feat/spec-NNNN-*. Verifique se este é o branch certo para a spec."
+    );
+  }
+  if (via === "single-dir") {
+    warnings.push(
+      "Spec resolvida por fallback de diretório único (.governance/specs/) — nem o branch " +
+        "corrente nem a projeção identificam a spec. Confirme a spec antes de confiar."
+    );
+  }
+
+  if (!projection.exists) {
+    return {
+      statusLine: "ausente (arquivo nao existe; handoff derivado por deteccao canonica)",
+      warnings: [
+        ...warnings,
+        `Projeção specs/active.yml AUSENTE. O handoff foi derivado das fontes canônicas ` +
+          `(diretório da spec + git), mas a projeção precisa ser publicada: ${RECONCILE_COMMAND}.`,
+      ],
+    };
+  }
+  if (projection.parseError) {
+    return {
+      statusLine: "ilegivel (parse falhou)",
+      warnings: [
+        ...warnings,
+        `Projeção specs/active.yml ILEGÍVEL (${projection.parseError}). ` +
+          `Reconcilie com: ${RECONCILE_COMMAND}.`,
+      ],
+    };
+  }
+
+  const specId = /^(\d{4})/.exec(resolved.label)?.[1];
+  const entry = specId ? projection.entries.find((e) => e.id === specId) : undefined;
+  if (!entry) {
+    return {
+      statusLine: "sem entry para esta spec",
+      warnings: [
+        ...warnings,
+        `Spec ${resolved.label} não tem entry na projeção specs/active.yml. ` +
+          `Publique com: ${RECONCILE_COMMAND}.`,
+      ],
+    };
+  }
+
+  const parsedBranch = parseSpecBranch(branch);
+  if (parsedBranch && parsedBranch.specId === entry.id && entry.branch !== branch) {
+    return {
+      statusLine: `DIVERGENTE (projeta branch "${entry.branch}"; fato: "${branch}")`,
+      warnings: [
+        ...warnings,
+        `Branch projetada STALE: specs/active.yml diz "${entry.branch}" (fonte: projeção), ` +
+          `mas o branch factual é "${branch}" (fonte: git). Este handoff NÃO deve ser tratado ` +
+          `como confiável até a projeção ser reconciliada: ${RECONCILE_COMMAND}.`,
+      ],
+    };
+  }
+
+  return { statusLine: "fiel aos fatos observaveis", warnings };
+}
+
 export function renderHandoff(repoRoot: string, options: HandoffOptions = {}): HandoffResult {
-  const resolved = options.identifier
-    ? resolveByIdentifier(repoRoot, options.identifier)
-    : resolveCurrent(repoRoot);
+  const projection = loadProjection(repoRoot);
+  const branch = git(repoRoot, ["branch", "--show-current"]);
+
+  let resolved: ResolvedSpec | null;
+  let via: CurrentResolution["via"] | "identifier";
+  if (options.identifier) {
+    resolved = resolveByIdentifier(repoRoot, projection, options.identifier);
+    via = "identifier";
+  } else {
+    const current = resolveCurrent(repoRoot, projection, branch);
+    resolved = current.resolved;
+    via = current.via;
+  }
   if (!resolved) {
     throw new Error("Nao foi possivel resolver a spec para handoff.");
   }
 
+  const diagnostics = projectionDiagnostics(projection, resolved, via, branch);
   const state = readState(repoRoot, resolved.specPath);
   const node = activeTopologyNode(state);
   const cursor = state.topology?.cursor;
   const head = git(repoRoot, ["rev-parse", "--short", "HEAD"]) ?? "(git indisponivel)";
-  const branch = git(repoRoot, ["branch", "--show-current"]) ?? "(git indisponivel)";
   const status = git(repoRoot, ["status", "--short", "--branch"]) ?? "(git indisponivel)";
   const specFiles = existingFiles(
     repoRoot,
@@ -148,13 +290,21 @@ export function renderHandoff(repoRoot: string, options: HandoffOptions = {}): H
 
   const lines: string[] = [];
   lines.push("# Handoff situado — ai-guidelines");
+  if (diagnostics.warnings.length > 0) {
+    lines.push("");
+    lines.push("## ⚠ Aviso de projeção — reconcilie antes de confiar");
+    for (const warning of diagnostics.warnings) {
+      lines.push(`- ${warning}`);
+    }
+  }
   lines.push("");
   lines.push("## 1. Retomada factual");
   lines.push(`- spec: ${resolved.label}`);
   lines.push(`- path: ${resolved.specPath}`);
-  lines.push(`- branch: ${branch}`);
+  lines.push(`- branch: ${branch ?? "(git indisponivel)"}`);
   lines.push(`- HEAD: ${head}`);
   lines.push(`- git status: ${status.replace(/\n/g, " / ")}`);
+  lines.push(`- projecao specs/active.yml: ${diagnostics.statusLine}`);
   lines.push(`- stage/gate: ${state.stage}/${state.gate.status}`);
   lines.push(`- cursor: ${cursor ? `${cursor.pr} · ${cursor.checkpoint}` : "(sem topology)"}`);
   lines.push(`- PR ativo: ${node?.github_pr ? `#${node.github_pr}` : "(nao declarado)"}`);
