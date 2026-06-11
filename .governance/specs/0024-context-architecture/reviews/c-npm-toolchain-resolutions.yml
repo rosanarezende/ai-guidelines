@@ -3,9 +3,13 @@ by: "gemini-3.1-pro-high"
 resolutions:
   - finding: architectural_review#F1
     action: fixed
+    ref: 819007a # disclosureRender: mensagem passa a instruir `npm run review:check`
   - finding: architectural_review#F2
     action: fixed
+    ref: 819007a # RulesCatalogBuilder: ledger gerado passa a citar `npm run build:rules`
   - finding: architectural_review#F3
     action: fixed
+    ref: 819007a # script-contracts.yml: mutates alinhado ao keying dos irmãos com build
   - finding: architectural_review#F4
     action: fixed
+    ref: 819007a # PrProfileContract.ts vira SSOT das seções; checker e updater derivam dela
