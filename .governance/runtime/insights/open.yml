@@ -74,3 +74,12 @@ insights:
         spec: "0024"
         cursor: checkpoint-cli-cutover
         note: "3 tentativas falsificadas em status check (R8/review.md, landing_policy, vehicle-from-topology; a 3ª colidiu com R7). Recorre além de merge: releases, promoções, encerramento, deploys, gates. Mapa + sequência: research-library/architecture/2026-06-05-enforcement-surfaces.md"
+  - id: PIT-0011
+    text: "Contrato executavel invisivel ainda produz ritual manual: existir template/comando/checker/hook nao basta se o agente nao descobre o contrato no momento da acao — descobribilidade situada e parte do contrato, nao acessorio"
+    status: open
+    captured_at: 2026-06-11T03:46:22.345Z
+    occurrences:
+      - at: 2026-06-11T03:46:22.345Z
+        spec: "0024"
+        cursor: checkpoint-npm-toolchain
+        note: "Evidencias (Spec 0024, PRs #38/#39): hooks ja executavam sync/format/test/validate e agentes seguiram repetindo a cadeia manualmente; troca de sessao sem handoff obrigou reconstrucao por prompts extensos da owner; review:seal so foi criado depois de o agente re-derivar o algoritmo de selagem manualmente; constrains sugeridos: AGENTS/handoff, runtime bootstrap, script-contracts, instrucoes de autoria, CO-4/CO-6"

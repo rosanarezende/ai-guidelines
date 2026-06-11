@@ -58,7 +58,7 @@ export interface Command<TOptions = void> {
    * descrever (fecha o achado #2 da auditoria do #35 — help acoplado à extensibilidade).
    */
   readonly description: string;
-  /** Exemplos de invocação (sem o prefixo `yarn guidelines`), opcionais — para o help. */
+  /** Exemplos de invocação (sem o prefixo `npm run guidelines --`), opcionais — para o help. */
   readonly usage?: readonly string[];
   parse(argv: readonly string[]): TOptions;
   /**

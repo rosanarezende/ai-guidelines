@@ -1,3 +1,8 @@
+> ⚠️ **HISTÓRICO — NÃO USAR PARA RETOMADA (marcado em 2026-06-11).** Snapshot do estado de
+> 2026-06-07 (abertura do CO-1→CO-2). Sucedido na prática por
+> `2026-06-07-checkpoint-handoff-co-2.md` (também histórico). A retomada atual é derivada:
+> `npm run guidelines -- handoff 0024` + reconciliação contra `state.yml § topology` e Git.
+
 # Checkpoint de Handoff — Spec 0024 pós-Human-Gate do #35 → CO-1 (SSOT de retomada)
 
 > **Documento de RETOMADA canônico** (ADR 0022, situado). Assume **zero acesso a este transcript**.

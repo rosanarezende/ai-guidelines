@@ -1,0 +1,51 @@
+# Architectural Review do PR #39 (toolchain-simplification · checkpoint-npm-toolchain).
+# SHA auditado: 409bd31 (HEAD do PR; working tree limpa; ahead/behind 0/0).
+# Entrada técnica: c-npm-toolchain-technical_audit.yml (approved, 0 findings) — não repetida.
+# decision=approved: a tese do checkpoint (clone → npm ci → npm run validate, sem
+# acoplamento indevido; PIT-0010 absorvido como contrato executável) é entregue
+# pelo diff. Findings F1-F4 são LOW (resíduos/drift de projeção) — não bloqueiam;
+# disposition: open (resolução em sessão própria, não nesta).
+# FECHAMENTO (2026-06-11, ato da owner @rosanarezende): F1–F4 → accepted.
+# Cadeia: fixes em 819007a (resolutions com ref) → verificação independente
+# append-only em events/c-npm-toolchain-architectural_review-EV1.yml (approved,
+# HEAD revalidado 5ef15cd, sem regressões) → owner fecha as dispositions aqui.
+# disposition não entra no hash — claims e selos permanecem intactos.
+# Limitação registrada: API GitHub indisponível na rede (timeout em gh pr view/
+# checks); estado Draft/CI verificados por evidência local + audit prévio
+# (CI verde confirmado no technical audit em 409bd31). Transporte SSH funcional.
+# Nota de proveniência: executor real desta sessão é claude-code/claude-fable-5
+# (a instrução previa claude-opus; registrado o executor FACTUAL — proveniência
+# honesta > narrativa). Veredito humano final = Human Gate (ainda não atingido).
+checkpoint: "npm-toolchain"
+role: architectural_review
+executor:
+  platform: claude-code
+  model: claude-fable-5
+decision: approved
+findings_emitted: 4
+review_fingerprint: 8bf8283c3d20
+findings:
+  - id: F1
+    severity: low
+    location: "src/cli/disclosureRender.ts#L318-L322"
+    description: "Mensagem de erro do consolidator ainda instrui `yarn review:check` — comando inoperante após a migração npm puro; o arquivo foi tocado neste PR (keying do gate consolidado) e a projeção de orientação ao usuário ficou stale."
+    disposition: accepted # resolvido em 819007a (mensagem instrui `npm run review:check`); verificado em EV1
+    fingerprint: e61a44fa4619
+  - id: F2
+    severity: low
+    location: "src/app/services/RulesCatalogBuilder.ts#L200-L204"
+    description: "Gerador vivo (fora do monólito cercado) emite 'regenerate via `yarn build:rules`' no artefato gerado .core/rules/_meta/agents-core-ledger.md, distribuído via prepack — projeção gerada contradiz o cânone npm puro do checkpoint."
+    disposition: accepted # resolvido em 819007a (ledger gerado cita `npm run build:rules`); verificado em EV1
+    fingerprint: 44bd479fceab
+  - id: F3
+    severity: low
+    location: ".core/governance/script-contracts.yml#L214-L225"
+    description: "Metadado `mutates: false` de pr-body:update/pr-ready:check diverge do keying dos scripts irmãos com o mesmo prefixo `npm run build &&` (marcados `mutates: true`); a projeção docs/scripts.md herda o rótulo inconsistente da SSOT."
+    disposition: accepted # resolvido em 819007a (mutates alinhado ao keying dos irmãos com build); verificado em EV1
+    fingerprint: c0e4fd38f674
+  - id: F4
+    severity: low
+    location: "global"
+    description: "O contrato de seções dos perfis de PR vive em três superfícies não amarradas (templates .github/, PR_BODY_PROFILES do governance-pr-check, PRESERVED/MUTABLE_SECTIONS do pr-body:update) sem guard de coerência entre elas; o comportamento fail-closed do updater mitiga, mas a aresta SSOT→projeção nasce sem gate de sync (princípio nº 1 do plan.md)."
+    disposition: accepted # resolvido em 819007a (PrProfileContract.ts vira SSOT; checker e updater derivam dela); verificado em EV1
+    fingerprint: 37bad79c9185

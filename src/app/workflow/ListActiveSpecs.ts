@@ -51,7 +51,7 @@ export class ListActiveSpecs {
         indexAvailable: false,
         entries: [],
         warnings: [
-          `Index "${INDEX_PATH}" not found. Run \`yarn guidelines workflow publish-state\` from the spec branch to populate the public index.`,
+          `Index "${INDEX_PATH}" not found. Run \`npm run guidelines -- workflow publish-state\` from the spec branch to populate the public index.`,
         ],
       };
     }

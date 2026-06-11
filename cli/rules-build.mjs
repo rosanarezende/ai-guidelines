@@ -3,7 +3,7 @@
  * Bin físico de `build:rules`.
  *
  * O compilador operacional vive em TypeScript (`src/cli/buildRules.ts`) e é
- * consumido a partir de `dist/` depois de `yarn build`. Este arquivo fica em
+ * consumido a partir de `dist/` depois de `npm run build`. Este arquivo fica em
  * `cli/` apenas como wrapper bootstrap cross-OS.
  */
 import { existsSync } from "node:fs";
@@ -17,7 +17,7 @@ const compiledModule = resolve(repoRoot, "dist/cli/buildRules.js");
 
 if (!existsSync(compiledModule)) {
   process.stderr.write(
-    `❌ Compiled module not found: ${compiledModule}\n` + `   Run \`yarn build\` first.\n`
+    `❌ Compiled module not found: ${compiledModule}\n` + `   Run \`npm run build\` first.\n`
   );
   process.exit(2);
 }

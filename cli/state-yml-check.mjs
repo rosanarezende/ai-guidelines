@@ -13,7 +13,7 @@
  * Schema canônico: `src/domain/workflow/WorkflowState.ts`
  * (4 chaves: stage, gate, focus, next).
  *
- * Assume `yarn build` executado. Se `dist/cli/stateYmlCheck.js` não
+ * Assume `npm run build` executado. Se `dist/cli/stateYmlCheck.js` não
  * existir, falha rapidamente com mensagem orientativa.
  *
  * Nota Windows: `await import(absolutePath)` falha com
@@ -31,7 +31,7 @@ const compiledModule = resolve(repoRoot, "dist/cli/stateYmlCheck.js");
 
 if (!existsSync(compiledModule)) {
   process.stderr.write(
-    `❌ Compiled module not found: ${compiledModule}\n` + `   Run \`yarn build\` first.\n`
+    `❌ Compiled module not found: ${compiledModule}\n` + `   Run \`npm run build\` first.\n`
   );
   process.exit(2);
 }
@@ -40,7 +40,7 @@ const args = process.argv.slice(2);
 const invalidArgs = args.filter((arg) => arg !== "--all");
 if (invalidArgs.length > 0) {
   process.stderr.write(
-    `❌ Uso inválido: ${invalidArgs.join(" ")}\n` + `   Use: yarn state-yml:check [--all]\n`
+    `❌ Uso inválido: ${invalidArgs.join(" ")}\n` + `   Use: npm run state-yml:check [-- --all]\n`
   );
   process.exit(2);
 }

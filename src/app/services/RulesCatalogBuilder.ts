@@ -173,7 +173,7 @@ export function generateCatalogMarkdown(rules: ReadonlyArray<Rule>, baseDir: str
   let markdown =
     "# Rules Catalog\n\n" +
     "> Índice navegável gerado automaticamente.\n" +
-    "> **NÃO EDITE ESTE ARQUIVO** — ele é reconstruído via `yarn build:rules`.\n\n" +
+    "> **NÃO EDITE ESTE ARQUIVO** — ele é reconstruído via `npm run build:rules`.\n\n" +
     "| ID | Title | Scope | Category | Link |\n" +
     "|----|-------|-------|----------|------|\n";
 
@@ -199,7 +199,7 @@ export function generateCoreAgentsLedger(rules: ReadonlyArray<Rule>): string {
   let markdown = `# Agents Core Ledger
 
 > Automatically generated ledger of CORE rules (tags: core).
-> **DO NOT EDIT MANUALLY** — regenerate via \`yarn build:rules\`.
+> **DO NOT EDIT MANUALLY** — regenerate via \`npm run build:rules\`.
 
 ## Rules Table
 

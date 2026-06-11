@@ -434,3 +434,28 @@ describe("Rules Builder", () => {
     });
   });
 });
+
+describe("Rules Builder — structural guards", () => {
+  it("[BR-BUILDER-32] DADO rules-builder.mjs QUANDO ler source ENTÃO não contém invocação de subprocess ou package manager externo", () => {
+    const source = readFileSync(resolve("cli/governance/monolith/rules-builder.mjs"), "utf-8");
+
+    // Nenhuma chamada a subprocess deve existir neste módulo legado.
+    // O formatter operacional usa a API Node do Prettier (RulesCatalogArtifacts.ts).
+    const forbidden = [
+      { pattern: /\bexecSync\b/, label: "execSync" },
+      { pattern: /\bexecFile\b/, label: "execFile" },
+      { pattern: /\bspawnSync\b/, label: "spawnSync" },
+      { pattern: /\bspawn\b/, label: "spawn" },
+      { pattern: /\bfork\b/, label: "fork" },
+      { pattern: /child_process/, label: "child_process import" },
+      { pattern: /yarn\s+prettier/, label: "yarn prettier invocation" },
+    ];
+
+    for (const { pattern, label } of forbidden) {
+      assert.ok(
+        !pattern.test(source),
+        `rules-builder.mjs não deve conter ${label} — use a API Node do Prettier ou npm run format`
+      );
+    }
+  });
+});

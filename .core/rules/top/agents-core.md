@@ -211,7 +211,7 @@ Neste repositório, o caminho obrigatório é:
 - `pre-push` executa o gate local `validate`;
 - `script-contracts:check` roda dentro de `validate` e falha se `package.json`, hooks, docs ou templates divergirem da SSOT.
 
-Se os hooks não estiverem instalados, se `.husky/*` divergir do contrato, ou se o ambiente não conseguir executar o runner declarado, pare e restaure o setup (`yarn setup` / `yarn prepare`, conforme `docs/scripts.md`). Não use `git commit --no-verify` sem autorização humana explícita. Não invente uma cadeia manual paralela para "substituir" o contrato.
+Se os hooks não estiverem instalados, se `.husky/*` divergir do contrato, ou se o ambiente não conseguir executar o runner declarado, pare e restaure o setup (`npm run setup` / `npm run prepare`, conforme `docs/scripts.md`). Não use `git commit --no-verify` sem autorização humana explícita. Não invente uma cadeia manual paralela para "substituir" o contrato.
 
 **Why this matters:** scripts, hooks, workflows e docs driftam quando vivem como texto duplicado. O contrato operacional torna a superfície auditável, sincronizável e própria para consumidores de tamanhos diferentes sem depender do tamanho atual do dogfooding.
 

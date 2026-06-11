@@ -23,7 +23,9 @@ on:
   # excluía stacked PRs de disparar (Spec 0023 lifecycle depende de stacked
   # governance↔execution pairs).
   pull_request:
-    types: [opened, synchronize, reopened, labeled, unlabeled, edited]
+    # ready_for_review: o contrato READY do body (Template v3) é checado no
+    # momento exato da conversão Draft → Ready (FU-2, sequência de fechamento).
+    types: [opened, synchronize, reopened, labeled, unlabeled, edited, ready_for_review]
 
 jobs:
   governance-pr-check:
@@ -42,16 +44,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "24"
-          cache: "yarn"
-
-      - name: Enable Corepack
-        run: corepack enable
+          cache: "npm"
 
       - name: Install dependencies
-        run: yarn install --immutable
+        run: npm ci
 
       - name: Build TypeScript
-        run: yarn build
+        run: npm run build
 
       - name: Run governance PR check
         env:

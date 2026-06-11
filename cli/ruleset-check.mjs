@@ -16,7 +16,7 @@
  *   2 — uso inválido (módulo compilado ausente | flags inválidas)
  *   3 — paridade indeterminada (snapshot vivo ausente/ilegível)
  *
- * Assume `yarn build` executado. Nota Windows: `await import(absolutePath)`
+ * Assume `npm run build` executado. Nota Windows: `await import(absolutePath)`
  * falha com `ERR_UNSUPPORTED_ESM_URL_SCHEME`; `pathToFileURL` é obrigatório.
  */
 import { existsSync } from "node:fs";
@@ -30,7 +30,7 @@ const compiledModule = resolve(repoRoot, "dist/cli/rulesetCheck.js");
 
 if (!existsSync(compiledModule)) {
   process.stderr.write(
-    `❌ Compiled module not found: ${compiledModule}\n` + `   Run \`yarn build\` first.\n`
+    `❌ Compiled module not found: ${compiledModule}\n` + `   Run \`npm run build\` first.\n`
   );
   process.exit(2);
 }

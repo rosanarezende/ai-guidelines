@@ -14,8 +14,8 @@ export interface GovernancePrCheckInput {
   /**
    * Estado operacional canônico de Draft/Ready: o flag `draft` da API do GitHub.
    * **Fonte ÚNICA de verdade** — o MESMO sinal que `MergeStack` consome via
-   * `PullRequestData.isDraft`. O checkbox de lifecycle no body é apenas documental
-   * (pedagógico, ADR 0024); NUNCA é fonte de enforcement (evita state drift).
+   * `PullRequestData.isDraft`. O Template v3 não duplica lifecycle no corpo
+   * visível (ADR 0024); o flag nativo é o único sinal de enforcement.
    */
   readonly isDraft: boolean;
 }
@@ -27,7 +27,8 @@ export type GovernancePrCheckResult =
   | { readonly kind: "fail"; readonly reasons: ReadonlyArray<string> };
 
 const FAST_TRACK_LABEL = "fast-track";
-const FAST_TRACK_RATIONALE_REGEX = /\[fast-track:\s*[^\]]+\]|##\s*Fast-track\s+Rationale\b/i;
+
+import { PrBodyProfile, PR_BODY_PROFILES } from "../domain/workflow/PrProfileContract.js";
 
 /**
  * Robustez (Checkpoint 2.3a / O2): a seção obrigatória precisa ser um HEADER
@@ -43,22 +44,10 @@ function hasSectionHeader(body: string, headerLine: string): boolean {
   return new RegExp(`^\\s{0,3}#{2,6}\\s+${escaped}\\s*$`, "m").test(body);
 }
 
-// ── Governança visual (matriz aprovada) ──────────────────────────────────────
-// O artefato GATEADO é o **prompt final autorado** (paste-ready) — produzível
-// pelo agente SEM depender de gerador externo. A IMAGEM é sua renderização
-// mecânica: opcional no Ready, obrigação de publicação em R4 (degradável). Assim
-// o gate nunca bloqueia o Ready por indisponibilidade de um serviço externo
-// (extrínseco/ortogonal à prontidão do PR), ao contrário de R1/R7/R8 (evidência
-// intrínseca). #1 Problema + #3 Valor em ENTREGA (Ready, execution); #1 + #4
-// Convergência no Integration PR. #2 nunca falha. Draft é isento.
-const VISUAL_PROBLEMA = "## Visão pretendida";
-const VISUAL_VALOR = "## Valor entregue";
-const VISUAL_CONVERGENCIA = "## Convergência da stack";
-
 /** Referência de imagem markdown `![alt](url)` ou HTML `<img ... src=...>`. */
 const IMAGE_REF = /!\[[^\]]*\]\([^)]+\)|<img\b[^>]*\bsrc=/i;
-/** Bloco de código cercado (3+ backticks) = o prompt final paste-ready. */
-const PROMPT_BLOCK = /^\s*`{3,}/m;
+/** Linha que é só placeholder do template (`<…>`): não conta como conteúdo autoral. */
+const PLACEHOLDER_LINE = /^<[^<>]*>$/;
 
 /** Conteúdo de uma seção: do header até o próximo header de mesmo/maior nível (ou fim). */
 function sectionContent(body: string, header: string): string | null {
@@ -71,13 +60,101 @@ function sectionContent(body: string, header: string): string | null {
   return next ? rest.slice(0, next.index) : rest;
 }
 
+/** Conteúdos internos dos blocos de código cercados (3+ backticks) da seção. */
+function fencedBlockContents(content: string): string[] {
+  const blocks: string[] = [];
+  const re = /^[ \t]*`{3,}[^\n]*\n([\s\S]*?)^[ \t]*`{3,}[ \t]*$/gm;
+  for (let m = re.exec(content); m !== null; m = re.exec(content)) blocks.push(m[1]);
+  return blocks;
+}
+
+/** O texto tem ao menos uma linha autoral (não vazia e não placeholder `<…>`). */
+function hasAuthoredLine(text: string): boolean {
+  return text.split("\n").some((line) => {
+    const t = line.trim();
+    return t !== "" && !PLACEHOLDER_LINE.test(t);
+  });
+}
+
 /**
- * A seção existe E contém o artefato visual gateado: o **prompt final** (bloco de
- * código cercado) OU a **imagem** já renderizada (que o satisfaz, sendo ≥ prompt).
+ * A seção existe E contém o artefato visual PREENCHIDO: o **prompt final**
+ * (bloco de código cercado com conteúdo autoral — o placeholder `<…>` do
+ * template não satisfaz) OU a **imagem** já renderizada (que o satisfaz,
+ * sendo ≥ prompt). Comentários HTML do template podem permanecer (são
+ * intencionais — não interferem na detecção).
  */
-function sectionHasVisual(body: string, header: string): boolean {
+function sectionHasFilledVisual(body: string, header: string): boolean {
   const content = sectionContent(body, header);
-  return content !== null && (PROMPT_BLOCK.test(content) || IMAGE_REF.test(content));
+  if (content === null) return false;
+  if (IMAGE_REF.test(content)) return true;
+  return fencedBlockContents(content).some(hasAuthoredLine);
+}
+
+/**
+ * A seção existe E tem conteúdo real além do esqueleto do template: ignora
+ * comentários HTML, tags `details`/`summary`, linhas de fence e placeholders
+ * `<…>`. Usada para exigir conteúdo real (Test plan, Accountability etc.).
+ */
+function sectionHasRealContent(body: string, header: string): boolean {
+  const content = sectionContent(body, header);
+  if (content === null) return false;
+  const visible = content.replace(/<!--[\s\S]*?-->/g, "");
+  return visible.split("\n").some((line) => {
+    const t = line.trim();
+    return (
+      t !== "" &&
+      !/^`{3,}/.test(t) &&
+      !PLACEHOLDER_LINE.test(t) &&
+      !/^<\/?(details|summary)\b/i.test(t)
+    );
+  });
+}
+
+const VISUAL_HINT = "preencha o prompt final autorado (bloco ```…```) ou a imagem renderizada";
+
+/**
+ * Contrato-base comum aplicado com o perfil selecionado: seções por fase
+ * temporal + slots visuais + conteúdo real. As mensagens nomeiam o perfil e a
+ * seção ausente. Comentários HTML nunca invalidam (a detecção é por header em
+ * linha própria); nenhum perfil exige `<details open>`.
+ */
+export function validateProfileBody(
+  profile: PrBodyProfile,
+  body: string,
+  isDraft: boolean
+): string[] {
+  const reasons: string[] = [];
+  const required = isDraft
+    ? profile.draftSections
+    : [...profile.draftSections, ...profile.readySections];
+
+  for (const section of required) {
+    if (!hasSectionHeader(body, section)) {
+      reasons.push(
+        `Template incompleto (perfil ${profile.name}): seção obrigatória "${section}" não encontrada (precisa ser um header markdown em linha própria).`
+      );
+    }
+  }
+
+  for (const visual of profile.visuals) {
+    if (visual.phase === "ready" && isDraft) continue;
+    if (!sectionHasFilledVisual(body, visual.section)) {
+      reasons.push(
+        `Governança visual (perfil ${profile.name}): a seção "${visual.section}" está vazia ou só com placeholder — ${VISUAL_HINT}. ${visual.hint}`
+      );
+    }
+  }
+
+  for (const rc of profile.realContent) {
+    if (rc.phase === "ready" && isDraft) continue;
+    if (!sectionHasRealContent(body, rc.section)) {
+      reasons.push(
+        `Contrato ${rc.phase === "ready" ? "Ready" : "do perfil"} (${profile.name}): a seção "${rc.section}" precisa conter conteúdo real — ${rc.hint}`
+      );
+    }
+  }
+
+  return reasons;
 }
 
 export interface GitHubApiCaller {
@@ -94,22 +171,29 @@ export class CliGitHubApiCaller implements GitHubApiCaller {
   }
 }
 
+/**
+ * 🚑 Fast-track: bypassa o linkage estrutural com a topologia (pode não ser PR
+ * de spec), mas NÃO bypassa accountability (ADR 0021 + DEC-0023-E05) — o perfil
+ * fast-track é curto e rigoroso: incidente, correção, risco, evidência mínima,
+ * rollback, accountability com conteúdo real e rastreabilidade (Cross-refs).
+ */
 function checkFastTrack(input: GovernancePrCheckInput): GovernancePrCheckResult | null {
-  if (input.prLabels.includes(FAST_TRACK_LABEL)) {
-    if (!FAST_TRACK_RATIONALE_REGEX.test(input.prBody)) {
-      return {
-        kind: "fail",
-        reasons: [
-          `PR #${input.prNumber} possui label "${FAST_TRACK_LABEL}" mas não declara rationale no body. Fast-track é bypass com accountability transferida — não bypass disfarçado (cf. ADR 0021 + DEC-0023-E05). Adicione "[fast-track: <razão curta>]" ou seção "## Fast-track Rationale" no body do PR.`,
-        ],
-      };
-    }
+  if (!input.prLabels.includes(FAST_TRACK_LABEL)) return null;
+
+  const reasons = validateProfileBody(PR_BODY_PROFILES["fast-track"], input.prBody, input.isDraft);
+  if (reasons.length > 0) {
     return {
-      kind: "fast-track",
-      note: `PR #${input.prNumber} possui label "${FAST_TRACK_LABEL}" + rationale declarado — validação estrutural bypassada com accountability transferida ao reviewer humano (cf. ADR 0020 + ADR 0021 + DEC-0023-D05/E05).`,
+      kind: "fail",
+      reasons: [
+        `PR #${input.prNumber} possui label "${FAST_TRACK_LABEL}" — fast-track é bypass do linkage estrutural com accountability transferida, não bypass disfarçado (cf. ADR 0021 + DEC-0023-E05). O body deve seguir o perfil fast-track:`,
+        ...reasons,
+      ],
     };
   }
-  return null;
+  return {
+    kind: "fast-track",
+    note: `PR #${input.prNumber} possui label "${FAST_TRACK_LABEL}" + perfil fast-track completo (incidente/correção/risco/evidência/rollback/accountability) — linkage estrutural bypassado com accountability transferida ao reviewer humano (cf. ADR 0020 + ADR 0021 + DEC-0023-D05/E05).`,
+  };
 }
 
 export function runGovernancePrCheck(
@@ -190,6 +274,7 @@ export function runGovernancePrCheck(
 
   const reasons: string[] = [];
 
+  // Título por tipo (mecanismo existente de derivação do tipo: role do nó).
   let expectedPrefix = "";
   if (node.role === "governance") {
     expectedPrefix = `[🧾] [Spec ${specId}]`;
@@ -216,73 +301,24 @@ export function runGovernancePrCheck(
         `Título incorreto. Pela topologia (sequence=${node.sequence}, terminal=${node.terminal}), o prefixo esperado é: "${expectedPrefix}"`
       );
     }
-
-    if (node.sequence !== null) {
-      // Robustez (O2): linha tolerante a formatação (espaços, markers `**`, `:`),
-      // exigindo o número de sequence exato na MESMA linha de "Stack atual".
-      // Word-boundary evita casar `1` dentro de `12`. Sem parser de markdown.
-      const stackLineRe = new RegExp(`^.*stack atual.*?\\b${node.sequence}\\b.*$`, "im");
-      if (!stackLineRe.test(input.prBody)) {
-        reasons.push(
-          `Coerência de stack falhou. A topologia define sequence=${node.sequence}, mas nenhuma linha "Stack atual" com a posição ${node.sequence} foi encontrada no body do PR.`
-        );
-      }
-    }
+    // A posição na stack NÃO é exigida como linha visível no body: ela vive no
+    // título (prefixo enforçado acima), em state.yml § topology e em base/head.
   }
 
-  const mandatorySections = [
-    "## Status do ciclo de vida",
-    "## PR Type",
-    "## Posição na stack",
-    "## Merge authorization",
-    "## Resumo",
-    "## Test plan",
-    "## Cross-refs",
-    "## Checklist operacional",
-    "## Disclosure de IA",
-  ];
+  // ── Perfil de body por tipo (PRBodyContract) ────────────────────────────────
+  // Draft exige INTENÇÃO declarada; Ready exige ENTREGA/DECISÃO (Ready ⊇ Draft).
+  // Ready ≠ merge autorizado (ADR 0024); o Human Gate ocorre ao final do
+  // PR/checkpoint. Metadados governados (lifecycle, tipo, posição na stack,
+  // autorização de merge) não são seções visíveis. Ready/Draft vem do flag
+  // canônico do GitHub (`isDraft`) — fonte única, idêntica à do `MergeStack`.
+  const profile =
+    node.role === "governance"
+      ? PR_BODY_PROFILES.governance
+      : node.role === "integration"
+        ? PR_BODY_PROFILES.integration
+        : PR_BODY_PROFILES.execution;
 
-  for (const section of mandatorySections) {
-    if (!hasSectionHeader(input.prBody, section)) {
-      reasons.push(
-        `Template incompleto: seção obrigatória "${section}" não encontrada (precisa ser um header markdown em linha própria).`
-      );
-    }
-  }
-
-  // ── Governança visual: prompt final obrigatório por estado epistêmico (matriz aprovada) ──
-  // Gateia o PROMPT FINAL autorado (bloco ```…```) — ou a imagem, que o satisfaz.
-  // Só cobra em ENTREGA (Ready declarado) — Draft é isento. fast-track já saiu
-  // antes (bypass). #2 Capacidade é opcional (nunca falha). A imagem renderizada
-  // é obrigação posterior de publicação (R4), nunca pré-requisito do Ready.
-  const VISUAL_HINT = "preencha o prompt final autorado (bloco ```…```) ou a imagem renderizada";
-  // Ready/Draft vem do flag canônico do GitHub (`isDraft`), NÃO do checkbox do body —
-  // fonte única de verdade, idêntica à do `MergeStack`. Draft é isento.
-  if (!input.isDraft) {
-    if (node.role === "execution") {
-      if (!sectionHasVisual(input.prBody, VISUAL_PROBLEMA)) {
-        reasons.push(
-          `Governança visual: a seção "${VISUAL_PROBLEMA}" está vazia — ${VISUAL_HINT}. Em Ready, todo PR de execução exige Problema + Valor (artefato oficial, não anexo).`
-        );
-      }
-      if (!sectionHasVisual(input.prBody, VISUAL_VALOR)) {
-        reasons.push(
-          `Governança visual: a seção "${VISUAL_VALOR}" está vazia — ${VISUAL_HINT}. Em Ready, todo PR de execução exige Problema + Valor.`
-        );
-      }
-    } else if (node.role === "integration") {
-      if (!sectionHasVisual(input.prBody, VISUAL_PROBLEMA)) {
-        reasons.push(
-          `Governança visual: a seção "${VISUAL_PROBLEMA}" (backdrop) está vazia no Integration PR — ${VISUAL_HINT}.`
-        );
-      }
-      if (!sectionHasVisual(input.prBody, VISUAL_CONVERGENCIA)) {
-        reasons.push(
-          `Governança visual: a seção "${VISUAL_CONVERGENCIA}" está vazia — ${VISUAL_HINT}. O Integration PR exige a narrativa visual da convergência (#4).`
-        );
-      }
-    }
-  }
+  reasons.push(...validateProfileBody(profile, input.prBody, input.isDraft));
 
   if (reasons.length > 0) {
     return { kind: "fail", reasons };
@@ -290,7 +326,7 @@ export function runGovernancePrCheck(
 
   return {
     kind: "ok",
-    note: `PR validado contra SSOT da topologia (Spec ${specId}). Prefixo de título e coerência ok.`,
+    note: `PR validado contra SSOT da topologia (Spec ${specId}, perfil ${profile.name}). Prefixo de título e coerência ok.`,
   };
 }
 

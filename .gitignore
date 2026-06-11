@@ -1,14 +1,5 @@
-# Dependências Node / Yarn
+# Dependências Node (npm puro — package-lock.json é versionado)
 node_modules/
-
-# Yarn Berry (v2+)
-.pnp.*
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/sdks
-!.yarn/versions
 
 # Artefatos do Windows/macOS
 .DS_Store

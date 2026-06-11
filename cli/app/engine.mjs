@@ -366,7 +366,7 @@ export async function main(
       // de bootstrap, que também passam pelo registry. Sem ramo por verbo aqui.
       throw new Error(
         `Comando "${commandName}" requer o registry compilado, mas dist/ não existe. ` +
-          "Rode `yarn build` (ou `yarn validate`) antes de usar a CLI."
+          "Rode `npm run build` (ou `npm run validate`) antes de usar a CLI."
       );
     }
 

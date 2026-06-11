@@ -78,7 +78,9 @@ export function deriveDisclosure(
   node: PrTopologyNode,
   byCheckpoint: readonly ConsolidatedCheckpoint[]
 ): DisclosureFacts {
-  const scope = new Set(node.checkpoints.map(normalizeCheckpoint));
+  const scopeArray = node.checkpoints.map(normalizeCheckpoint);
+  const scope = new Set(scopeArray);
+  const terminalCheckpoint = scopeArray.length > 0 ? scopeArray[scopeArray.length - 1] : null;
   const inScope = byCheckpoint.filter((c) => scope.has(normalizeCheckpoint(c.checkpoint)));
 
   let reviewCount = 0;
@@ -86,6 +88,7 @@ export function deriveDisclosure(
   let findingsResolved = 0;
   const categories = new Set<string>();
   const gateDecisions: string[] = [];
+  let terminalGateDecision: string | null = null;
 
   for (const c of inScope) {
     reviewCount += c.reviewDecisions.length;
@@ -93,17 +96,21 @@ export function deriveDisclosure(
     // invariante do schema: findings presentes == findings_emitted.
     findingsEmitted += c.totalOpen + c.totalClosed;
     findingsResolved += c.totalClosed; // disposition accepted/dismissed (lane do reviewer)
-    if (c.gate) gateDecisions.push(c.gate.decision);
+    if (c.gate) {
+      gateDecisions.push(c.gate.decision);
+      if (normalizeCheckpoint(c.checkpoint) === terminalCheckpoint) {
+        terminalGateDecision = c.gate.decision;
+      }
+    }
   }
 
   const gatedCount = gateDecisions.length;
   const hasHumanGate = gatedCount > 0;
-  // (Cenário A) cobertura: o claim de validação total é medido contra o ESCOPO
-  // declarado (`node.checkpoints`, que também é evidência versionada — G07),
-  // não só contra os gates que existem. Regra conservadora, correta sob qualquer
-  // granularidade futura (por-PR/por-checkpoint/híbrida): sem cobertura total do
-  // escopo, NUNCA "approved".
-  const fullyCovered = scope.size > 0 && gatedCount === scope.size;
+  // (Cenário A) cobertura: gate final consolida checkpoints internos do PR.
+  // Se o checkpoint terminal do nó tem gate approved, ele absorve os checkpoints
+  // anteriores do mesmo PR. Se não, exigimos gate em cada checkpoint (gatedCount === scope.size).
+  const fullyCovered =
+    scope.size > 0 && (terminalGateDecision === "approved" || gatedCount === scope.size);
   let gateState: GateState;
   if (!hasHumanGate) {
     gateState = "pending";
@@ -311,7 +318,7 @@ export function main(repoRoot: string, opts: MainOptions = {}): number {
     // Espelha o `review:check` (mesma fonte de invariantes).
     logger.error(
       `❌ Estado inconsistente: ${violations.length} violação(ões) do consolidator — ` +
-        `disclosure não é projetado sobre estado inválido (resolva via \`yarn review:check\`):`
+        `disclosure não é projetado sobre estado inválido (resolva via \`npm run review:check\`):`
     );
     for (const v of violations) logger.error(`  - ${v}`);
     return 1;

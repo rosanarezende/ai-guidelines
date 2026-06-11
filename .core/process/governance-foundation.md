@@ -403,6 +403,18 @@ Antes de discutir o **mérito** de uma decisão, verifique se o gate é **decid�
 
 Itens 🤖 falham o check mecanicamente; 👁 são heurísticos/julgamento humano, projetados como checklist no seam do gate. Faltando qualquer um, o gate **não está pronto** — corrija a **forma** antes do **mérito**. Benchmark vivo: o `G02` pré-reforma falha (sem concorrentes; ato combinado); o `G00`/`G02` reformados passam.
 
+### [GG-0004] Memória de agente não é contrato
+
+**Origem:** `DOGFOOD-0024` (PIT-0010, 5 ocorrências; graduado por decisão da owner em 2026-06-11, PR #39 / `checkpoint-npm-toolchain`). **Enforcement (já materializado):** `governance-pr-check` (perfis de PR body derivados de `src/domain/workflow/PrProfileContract.ts`), `pr-body:update` (mutabilidade por seção; baselines preservadas), `pr-ready:check` (precondições da sequência Draft→Ready), `review:seal` (selagem determinística de fingerprints) — todos agregados direta ou indiretamente em `validate`/CI. **Projeção (seam):** comentários do template de PR + `WORKFLOW.md § Fechamento de PR`.
+
+Quando um fluxo depende de o agente **"lembrar"** a sequência correta, o formato esperado ou a exceção operacional conhecida, o sistema ainda não tem governança suficiente. Instrução verbal, prompt longo e memória de sessão reduzem erro no curto prazo, mas não criam contrato reprodutível:
+
+1. atrito recorrente vira **template, comando, checker, schema ou CI** — não instrução em chat; _(🤖 nos checks acima)_
+2. procedimento que só existe em memória de agente/transcript **não é contrato**; _(👁 identificar novos casos — capturar como ocorrência de PIT)_
+3. a forma executável nasce **junto** da correção do erro, não como débito. _(👁)_
+
+Formulação curta: **memória de agente é canal; contrato governado é fonte de verdade.** Material longo: `.governance/specs/0024-context-architecture/research/2026-06-10-pit-0010-memoria-de-agente-nao-e-contrato.md`.
+
 ---
 
 ## SDD Guardrails

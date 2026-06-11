@@ -1,7 +1,7 @@
 # Rules Catalog
 
 > Índice navegável gerado automaticamente.
-> **NÃO EDITE ESTE ARQUIVO** — ele é reconstruído via `yarn build:rules`.
+> **NÃO EDITE ESTE ARQUIVO** — ele é reconstruído via `npm run build:rules`.
 
 | ID           | Title                                                      | Scope       | Category          | Link                                          |
 | ------------ | ---------------------------------------------------------- | ----------- | ----------------- | --------------------------------------------- |

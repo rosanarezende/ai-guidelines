@@ -1,5 +1,5 @@
 /**
- * CLI standalone para `yarn guidelines release-prep` (tier 3).
+ * CLI standalone para `npm run guidelines -- release-prep` (tier 3).
  *
  * Cravado em `[DEC-0023-L01]` (Bloco L). Repo-specific (não framework):
  * só faz sentido para repos que publicam em npm. Distinção cravada em

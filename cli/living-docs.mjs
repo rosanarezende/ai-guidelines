@@ -10,7 +10,7 @@
  *   1 — drift detectado (check)
  *   2 — uso inválido (subcomando ausente ou desconhecido)
  *
- * Assume `yarn build` executado. Se `dist/cli/livingDocs.js` não existir
+ * Assume `npm run build` executado. Se `dist/cli/livingDocs.js` não existir
  * (ex.: instalação corrompida ou desenvolvimento sem build), imprime
  * mensagem clara e sai com código 2 — drift guard nunca deve degradar
  * silenciosamente.
@@ -31,7 +31,7 @@ const compiledModule = resolve(repoRoot, "dist/cli/livingDocs.js");
 if (!existsSync(compiledModule)) {
   process.stderr.write(
     `❌ ${compiledModule} not found.\n` +
-      `   Build artefato ausente. Execute 'yarn build' antes de rodar este bin.\n`
+      `   Build artefato ausente. Execute 'npm run build' antes de rodar este bin.\n`
   );
   process.exit(2);
 }

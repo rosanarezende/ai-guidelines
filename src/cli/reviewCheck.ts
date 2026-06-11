@@ -328,7 +328,8 @@ export function consolidate(artifacts: SpecArtifacts): {
   return { byCheckpoint, violations };
 }
 
-function discover(repoRoot: string): { artifacts: SpecArtifacts; errors: string[] } {
+/** Carrega reviews/resolutions/gates/policy de todas as specs (reusado por pr-ready:check). */
+export function discover(repoRoot: string): { artifacts: SpecArtifacts; errors: string[] } {
   const reviews: ReviewArtifact[] = [];
   const reviewEvents: ReviewEventArtifact[] = [];
   const resolutions: ResolutionArtifact[] = [];

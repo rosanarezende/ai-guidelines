@@ -73,7 +73,7 @@ function renderHook(contract, hookName) {
       "",
       "if ! command -v node >/dev/null 2>&1; then",
       '  echo "ai-guidelines hook: node não encontrado no PATH e nvm não pôde ser carregado." >&2',
-      '  echo "Restaure o ambiente (ex.: nvm install && nvm use) e rode yarn setup; não use --no-verify." >&2',
+      '  echo "Restaure o ambiente (ex.: nvm install && nvm use) e rode npm run setup; não use --no-verify." >&2',
       "  exit 127",
       "fi",
       ""
@@ -81,7 +81,7 @@ function renderHook(contract, hookName) {
   }
   for (const step of hook.steps) {
     if (step.run) {
-      lines.push(`node .yarn/releases/yarn-4.1.1.cjs ${step.run}`);
+      lines.push(`npm run ${step.run}`);
     } else if (step.git_add) {
       lines.push(`git add ${step.git_add.join(" ")}`);
     } else {
@@ -125,10 +125,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "{{node_version}}"
-
-      - name: Enable Corepack
-        run: corepack enable
-
+{{corepack_step}}
       - name: Install dependencies
         run: {{install_command}}
 
@@ -236,12 +233,12 @@ function docsScripts(contract) {
   return `# Scripts canonicos do \`ai-guidelines\`
 
 > Arquivo gerado por \`.core/governance/script-contracts.yml\`.
-> Nao edite manualmente: rode \`yarn script-contracts:sync\`.
+> Nao edite manualmente: rode \`npm run script-contracts:sync\`.
 
 Este documento e a referencia humana do contrato operacional que tambem projeta
 \`package.json#scripts\`, \`.husky/*\` e templates de consumidores, alem de
 verificar os comandos obrigatorios em workflows reais. O check
-\`yarn script-contracts:check\` falha quando alguma projecao diverge ou workflow
+\`npm run script-contracts:check\` falha quando alguma projecao diverge ou workflow
 perde um run contratado.
 
 ## Visao por categoria
@@ -255,7 +252,7 @@ ${scriptTable(contract)}
 ## Hooks de git
 
 Os hooks versionados em \`.husky/\` sao projecoes do contrato. Eles devem estar
-instalados no clone local via \`yarn setup\` ou \`yarn prepare\`. Se um agente
+instalados no clone local via \`npm run setup\` ou \`npm run prepare\`. Se um agente
 perceber que hooks nao estao instalados, deve parar e restaurar o setup; nao deve
 usar \`--no-verify\` nem inventar uma cadeia manual paralela.
 
@@ -272,15 +269,15 @@ ${workflowTable(contract)}
 O metodo operacional interno e: scripts declarados em
 \`.core/governance/script-contracts.yml\` projetam hooks e docs; o \`pre-commit\`
 executa sincronizacao, build e testes rapidos; o \`pre-push\` executa
-\`yarn validate\`; e o CI acrescenta a varredura historica quando aplicavel.
+\`npm run validate\`; e o CI acrescenta a varredura historica quando aplicavel.
 
 Antes de commitar, nao existe mais uma cadeia textual duplicada para copiar. A
 regra e garantir que os hooks estejam instalados e deixar o contrato rodar. Para
 checagem manual ou diagnostico, use:
 
 \`\`\`bash
-yarn script-contracts:sync
-yarn validate
+npm run script-contracts:sync
+npm run validate
 \`\`\`
 
 ## Consumidores
@@ -311,7 +308,6 @@ export function generateProjections(repoRoot = REPO_ROOT, contract = parseContra
 export function validateContract(contract) {
   const violations = [];
   const names = scriptNames(contract);
-  const yarnBuiltIns = new Set(["install", "npm", "node", "run"]);
   const bootstrap = contract.profiles.maintainer.hook_bootstrap;
 
   if (bootstrap && bootstrap.node_path !== "nvm") {
@@ -327,9 +323,10 @@ export function validateContract(contract) {
   }
 
   for (const script of maintainerScripts(contract)) {
-    const matches = script.command.matchAll(/\byarn\s+([a-zA-Z0-9:_-]+)/g);
+    // `npm run <script>` referencia outro script do contrato; `npm ci`/`npm
+    // install` etc. são builtins do npm e não passam por aqui.
+    const matches = script.command.matchAll(/\bnpm run\s+([a-zA-Z0-9:_-]+)/g);
     for (const match of matches) {
-      if (yarnBuiltIns.has(match[1])) continue;
       if (!names.has(match[1])) {
         violations.push(`script ${script.name} referencia script inexistente: ${match[1]}`);
       }
@@ -443,7 +440,7 @@ export function check(repoRoot = REPO_ROOT) {
       : null;
     if (actual !== expected) {
       violations.push(
-        `${relativePath} diverge de ${CONTRACT_PATH}; rode yarn script-contracts:sync`
+        `${relativePath} diverge de ${CONTRACT_PATH}; rode npm run script-contracts:sync`
       );
     }
   }

@@ -718,7 +718,7 @@ export function renderIntegrationReadinessBlock(
     : isIntegration
       ? [
           "Feche os gates R1–R7 no review.md (homologação) e marque-os [x].",
-          "Rode `yarn guidelines workflow` de novo — a opção 4 abre quando R1–R7 fecharem.",
+          "Rode `npm run guidelines -- workflow` de novo — a opção 4 abre quando R1–R7 fecharem.",
         ]
       : [
           "Feche R1–R8 no review.md, incluindo R8 (merge authorization explícita do owner).",
@@ -1206,7 +1206,7 @@ export async function runAdvancedOps(options: RunOptions): Promise<number> {
       logger.info(
         "Índice operacional público (.governance/runtime/specs/active.yml) não encontrado."
       );
-      logger.info("Dica: rode `yarn guidelines workflow publish-state` na branch da spec.");
+      logger.info("Dica: rode `npm run guidelines -- workflow publish-state` na branch da spec.");
       return 0;
     }
     const driftCount = result.entries.filter((e) => !e.specPathExists).length;
@@ -1227,7 +1227,7 @@ export async function runAdvancedOps(options: RunOptions): Promise<number> {
 
   if (choice.kind === "publish-state-help") {
     logger.info(
-      "Comando: yarn guidelines workflow publish-state --status=<active|blocked|paused|completed> --updated-by=<@autor> [--title=<título>]"
+      "Comando: npm run guidelines -- workflow publish-state --status=<active|blocked|paused|completed> --updated-by=<@autor> [--title=<título>]"
     );
     logger.info("Estado da spec corrente é projetado de state.yml para specs/active.yml.");
     logger.info("Detalhes: .governance/specs/0023-workflow-runtime/decision-brief.md § Bloco G.");
@@ -1355,7 +1355,7 @@ export async function runContinue(options: RunOptions, identifier?: string): Pro
         `Índice operacional público (.governance/runtime/specs/active.yml) não encontrado.`
       );
       logger.error(
-        `Dica: rode \`yarn guidelines workflow publish-state\` na branch da spec primeiro.`
+        `Dica: rode \`npm run guidelines -- workflow publish-state\` na branch da spec primeiro.`
       );
       return 1;
     }
@@ -1379,7 +1379,7 @@ export async function runContinue(options: RunOptions, identifier?: string): Pro
       );
       logger.error(
         `Dica: \`git fetch origin && git checkout ${found.entry.branch}\` ` +
-          `para carregar o working tree da spec, depois rode \`yarn guidelines continue\` de novo.`
+          `para carregar o working tree da spec, depois rode \`npm run guidelines -- continue\` de novo.`
       );
       return 1;
     }
@@ -1432,7 +1432,7 @@ function projectInsights(fs: WorkflowFileSystem, logger: Logger): void {
 }
 
 /**
- * Argumentos parseados de `yarn guidelines workflow publish-state ...`.
+ * Argumentos parseados de `npm run guidelines -- workflow publish-state ...`.
  * Estritamente declarativos — nenhum valor é inferido (nem `updatedBy`
  * via git config, nem `lastSyncCommit` via HEAD). Cf. memory
  * `feedback-lookup-not-coordination` — sem inferência de intenção.

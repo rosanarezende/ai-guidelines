@@ -6,7 +6,7 @@
 #
 # Escopo: roda contra o estado canônico do branch default, não em cada PR de
 # feature (evita falso-drift em estados transitórios de stack). O invariante
-# PRIMÁRIO (producibilidade) já roda em todo PR via `yarn validate`.
+# PRIMÁRIO (producibilidade) já roda em todo PR via `npm run validate`.
 #
 # Degradação graciosa: se o GITHUB_TOKEN não tiver permissão para ler o ruleset
 # vivo, a paridade fica INDETERMINADA (warning, não bloqueia) — a producibilidade
@@ -35,16 +35,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "24"
-          cache: "yarn"
+          cache: "npm"
 
-      - name: Enable Corepack
-        run: corepack enable
-
-      - name: Install dependencies (immutable)
-        run: yarn install --immutable
+      - name: Install dependencies (npm ci)
+        run: npm ci
 
       - name: Build TypeScript
-        run: yarn build
+        run: npm run build
 
       - name: Snapshot live ruleset
         id: snapshot
@@ -70,7 +67,7 @@ jobs:
       - name: Parity check (detect-only)
         run: |
           if [ "${{ steps.snapshot.outputs.available }}" != "true" ]; then
-            echo "::warning::Paridade INDETERMINADA — snapshot do ruleset vivo indisponível. Limitação registrada; não bloqueia (invariante PRIMÁRIO segue garantido em yarn validate)."
+            echo "::warning::Paridade INDETERMINADA — snapshot do ruleset vivo indisponível. Limitação registrada; não bloqueia (invariante PRIMÁRIO segue garantido em npm run validate)."
             exit 0
           fi
           node cli/ruleset-check.mjs --parity --live /tmp/live-ruleset.json

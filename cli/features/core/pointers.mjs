@@ -27,7 +27,7 @@ async function loadCompiledRules(config) {
   const { compiler } = await loadRuntimeModules();
   const catalogText = await fs.readFile(rulesJsonPath, "utf8").catch((error) => {
     throw new Error(
-      `rules.json nao encontrado em ${rulesJsonPath}. Rode \`yarn build:rules\` antes do bootstrap. (${error.message})`
+      `rules.json nao encontrado em ${rulesJsonPath}. Rode \`npm run build:rules\` antes do bootstrap. (${error.message})`
     );
   });
   const catalog = JSON.parse(catalogText);

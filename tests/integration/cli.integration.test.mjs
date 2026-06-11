@@ -33,7 +33,7 @@ async function withTempTarget(prefix, callback) {
 function assertRuntimeBootstrap(content) {
   assert.match(content, /<AI_GUIDELINES>/);
   assert.match(content, /## Runtime Bootstrap/);
-  assert.match(content, /yarn guidelines handoff \[spec\]/);
+  assert.match(content, /npx ai-guidelines handoff \[spec\]/);
   assert.doesNotMatch(content, /Top Zone: Primary Directives/);
   assert.doesNotMatch(content, /<FEATURE_QUALITY_GATES>/);
   assert.doesNotMatch(content, /<FEATURE_TDD>/);

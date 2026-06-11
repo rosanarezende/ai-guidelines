@@ -51,10 +51,15 @@ describe("CLI dispatch — workflow continue [BR-WORKFLOW-DISPATCH]", () => {
     const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "ws-dispatch-ok-"));
     try {
       const { execSync } = await import("node:child_process");
-      execSync("git init -b feat/spec-0099-dispatch", { cwd: tempDir, stdio: "ignore" });
-      execSync("git config user.email test@example.com", { cwd: tempDir, stdio: "ignore" });
-      execSync("git config user.name Test", { cwd: tempDir, stdio: "ignore" });
-      execSync('git commit --allow-empty -m "initial"', { cwd: tempDir, stdio: "ignore" });
+      const execOpts = {
+        cwd: tempDir,
+        stdio: "ignore",
+        env: { ...process.env, GIT_INDEX_FILE: undefined },
+      };
+      execSync("git init -b feat/spec-0099-dispatch", execOpts);
+      execSync("git config user.email test@example.com", execOpts);
+      execSync("git config user.name Test", execOpts);
+      execSync('git commit --allow-empty -m "initial"', execOpts);
 
       const specDir = path.join(tempDir, ".governance", "specs", "0099-dispatch");
       await fs.mkdir(specDir, { recursive: true });
@@ -106,10 +111,15 @@ active_specs:
     const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), "ws-dispatch-locked-"));
     try {
       const { execSync } = await import("node:child_process");
-      execSync("git init -b feat/spec-0099-locked", { cwd: tempDir, stdio: "ignore" });
-      execSync("git config user.email test@example.com", { cwd: tempDir, stdio: "ignore" });
-      execSync("git config user.name Test", { cwd: tempDir, stdio: "ignore" });
-      execSync('git commit --allow-empty -m "initial"', { cwd: tempDir, stdio: "ignore" });
+      const execOpts = {
+        cwd: tempDir,
+        stdio: "ignore",
+        env: { ...process.env, GIT_INDEX_FILE: undefined },
+      };
+      execSync("git init -b feat/spec-0099-locked", execOpts);
+      execSync("git config user.email test@example.com", execOpts);
+      execSync("git config user.name Test", execOpts);
+      execSync('git commit --allow-empty -m "initial"', execOpts);
 
       const specDir = path.join(tempDir, ".governance", "specs", "0099-locked");
       await fs.mkdir(specDir, { recursive: true });

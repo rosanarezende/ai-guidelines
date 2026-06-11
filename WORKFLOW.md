@@ -49,7 +49,7 @@ A candidata descreve o problema, o escopo proposto e por que vale fazer. Quando 
 Uma **spec** é a documentação da iniciativa antes e durante a execução — o contrato entre quem planejou e quem vai implementar. Não é uma wiki: é um artefato vivo que fecha junto com o trabalho.
 
 ```bash
-yarn guidelines workflow   # use a opção "Nova spec / retomar"
+npm run guidelines -- workflow   # use a opção "Nova spec / retomar"
 ```
 
 Cada spec vive em `.governance/specs/<número>-<nome>/` e tem:
@@ -70,11 +70,11 @@ A branch tem nome `feat/spec-<número>-<nome>`.
 O trabalho acontece em PRs sequenciais na branch da spec — cada PR entrega uma fatia de valor independente e passa no CI antes de avançar.
 
 ```bash
-yarn guidelines continue      # mostra o briefing da spec ativa e verifica se a execução está autorizada
-yarn guidelines workflow      # wizard com opções: ver estado, publicar progresso, abrir PR de integração...
+npm run guidelines -- continue      # mostra o briefing da spec ativa e verifica se a execução está autorizada
+npm run guidelines -- workflow      # wizard com opções: ver estado, publicar progresso, abrir PR de integração...
 ```
 
-`yarn guidelines continue` bloqueia se `tasks.md` não existir ou não tiver tarefas autorizadas. É o mecanismo que impede implementação sem planejamento.
+`npm run guidelines -- continue` bloqueia se `tasks.md` não existir ou não tiver tarefas autorizadas. É o mecanismo que impede implementação sem planejamento.
 
 ### 5. Preparo para o merge (a etapa que mais importa)
 
@@ -96,7 +96,7 @@ O release-log tem dois momentos: o que você preenche antes (data, versão alvo,
 ### 6. Merge
 
 ```bash
-yarn guidelines workflow   # use a opção "Executar merge atômico da stack"
+npm run guidelines -- workflow   # use a opção "Executar merge atômico da stack"
 ```
 
 O merge precisa de autorização explícita do owner registrada no PR (gate R8 do `review.md`). Sem isso, o comando não avança.
@@ -116,6 +116,45 @@ Nenhuma dessas ações exige intervenção humana:
 | Criação da GitHub Release                   | CI (`release.yml`) — só specs que publicam no registry |
 
 Depois que o CI rodar, você confirma o resultado no release-log (uma linha com o link da run). Isso é tudo.
+
+---
+
+## Perfis de PR body (contrato-base + perfil por tipo)
+
+O `governance-pr-check` valida o body conforme o **tipo** do PR — derivado do role do nó na topologia (`state.yml § topology`) e da label `fast-track`. Nenhum perfil exige seções de outro; o contrato-base (header em linha própria, placeholder `<…>` não satisfaz, comentários HTML preservados, sem `<details open>`) é comum.
+
+| Perfil         | Template                                                                | Draft exige (intenção)                                                                                                                      | Ready exige ainda (entrega/decisão)                                                                                                                                      |
+| -------------- | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 🛠️ Execution   | `.github/pull_request_template.md` (default)                            | Visão pretendida (baseline) · Resumo · Escopo (dentro/fora)                                                                                 | Valor entregue · Test plan real · Validação/evidências/checklist · Disclosure                                                                                            |
+| 🧾 Governance  | `?template=governance.md`                                               | Visão de valor (baseline da intenção) · Problema · Hipóteses · Escopo                                                                       | Processo decisório · Decisões consolidadas · **Arquitetura pretendida** (baseline da decisão) · Evidências e falsificação · Impactos downstream · Validação · Disclosure |
+| 🔗 Integration | `?template=integration.md` (canônico: `integration-pr.md` via workflow) | Resultado integrado · Componentes/PRs absorvidos · Convergência · Rollback                                                                  | Compatibilidade/conflitos · Evidência de integração real · Validação final da stack · Validação · Disclosure                                                             |
+| 🚑 Fast-track  | `?template=fast-track.md` (requer label `fast-track`)                   | Incidente · Correção · Impacto/risco · Evidência mínima · Rollback · Accountability real · Validação · Cross-refs · Disclosure (fase única) | —                                                                                                                                                                        |
+
+Baselines preservadas pelo `npm run pr-body:update`: `## Visão pretendida` (execution), `## Visão de valor` e `## Arquitetura pretendida` (governance) — mudanças entram como atualização complementar, nunca apagando o original.
+
+---
+
+## Fechamento de PR (sequência canônica)
+
+Cada PR de execução fecha nesta ordem — as precondições são verificáveis com `npm run pr-ready:check -- --pr <n>` (read-only; não converte nada):
+
+```text
+PR body final (Valor entregue preenchido; Visão pretendida intacta)
+→ CI verde no HEAD final
+→ Draft → Ready (ato da owner; NÃO autoriza merge — ADR 0024)
+→ Human Gate da owner (decide o próximo movimento)
+→ registro do gate artifact (gates/c-<checkpoint>.yml; validar + push)
+→ atualização final do body
+→ abertura do próximo checkpoint/PR
+```
+
+Distinções que a sequência preserva:
+
+- **Draft/Ready é estado nativo do GitHub** — o flag `draft` é a fonte única consumida por `governance-pr-check` (que também roda na conversão, via `ready_for_review`) e pelo merge.
+- **Ready ≠ merge**: a conversão apenas apresenta o PR para decisão humana. Em stack modo `unit`, Human Gate intermediário não mergeia isolado em `main` — o merge é evento único no fim da stack.
+- **O gate artifact nasce DEPOIS da decisão humana** sobre o PR em Ready; registrá-lo antes é inconsistência (o `pr-ready:check` falha).
+- **Atualizações de body** usam `npm run pr-body:update` (preserva `## Visão pretendida` como baseline; `## Valor entregue` só com flag explícita).
+- **O próximo checkpoint/PR só abre após o gate aprovado e registrado** (a narrativa `canonical-next` do `state.yml` é guardada por `reconcile:check`).
 
 ---
 
@@ -157,13 +196,13 @@ O gate aceita o **prompt** (bloco `…`) **ou** a imagem (que o satisfaz). Draft
 
 ## Comandos de referência rápida
 
-| Comando                                        | Para quê                                             |
-| ---------------------------------------------- | ---------------------------------------------------- |
-| `yarn guidelines workflow`                     | Wizard com todas as opções do ciclo                  |
-| `yarn guidelines continue`                     | Briefing da spec ativa + verificação de autorização  |
-| `yarn guidelines review [<pr>]`                | Coleta e estrutura comentários de um PR para análise |
-| `yarn guidelines release-prep [--version <v>]` | Prepara bump de versão com plano explícito           |
-| `yarn guidelines release-prep --dry-run`       | Audita a release sem aplicar nada                    |
+| Comando                                              | Para quê                                             |
+| ---------------------------------------------------- | ---------------------------------------------------- |
+| `npm run guidelines -- workflow`                     | Wizard com todas as opções do ciclo                  |
+| `npm run guidelines -- continue`                     | Briefing da spec ativa + verificação de autorização  |
+| `npm run guidelines -- review [<pr>]`                | Coleta e estrutura comentários de um PR para análise |
+| `npm run guidelines -- release-prep [--version <v>]` | Prepara bump de versão com plano explícito           |
+| `npm run guidelines -- release-prep --dry-run`       | Audita a release sem aplicar nada                    |
 
 ---
 

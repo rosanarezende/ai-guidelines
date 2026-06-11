@@ -24,12 +24,16 @@ describe("runtimeBootstrap", () => {
     expect(content).toContain("Runtime Bootstrap");
   });
 
-  it("DADO AGENTS sincronizado QUANDO check ENTÃO retorna ok", () => {
+  it("DADO AGENTS sincronizado QUANDO check ENTÃO retorna ok (forma do mantenedor: script local)", () => {
     const repo = mkdtempSync(path.join(tmpdir(), "runtime-bootstrap-ts-"));
     const agentsPath = path.join(repo, "AGENTS.md");
-    writeFileSync(agentsPath, buildRuntimeBootstrapContent(""), "utf-8");
+    syncRuntimeBootstrap(repo);
 
     expect(checkRuntimeBootstrap(repo).ok).toBe(true);
+    // O stub do mantenedor usa o script local; o default (consumidores via
+    // adopt) usa o bin publicado `npx ai-guidelines …`.
+    expect(readFileSync(agentsPath, "utf-8")).toContain("npm run guidelines -- handoff [spec]");
+    expect(buildRuntimeBootstrapContent("")).toContain("npx ai-guidelines handoff [spec]");
   });
 
   it("DADO comando desconhecido QUANDO main ENTÃO retorna 2", () => {

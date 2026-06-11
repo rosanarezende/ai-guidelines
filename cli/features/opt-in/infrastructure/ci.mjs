@@ -42,6 +42,10 @@ export async function applyCi(targetDir, options, context, actions) {
   const replacements = {
     "{{ci_workflow_name}}": "AI Governance Check",
     "{{node_version}}": "24", // Alinhado com o benchmark de Node 24
+    "{{corepack_step}}":
+      packageManager.id === "npm"
+        ? ""
+        : "\n      - name: Enable Corepack\n        run: corepack enable\n",
     "{{install_command}}": resolveInstallCommand(packageManager),
     "{{check_command}}": `${resolveCiRunner(packageManager)} check`,
   };

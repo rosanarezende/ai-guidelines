@@ -64,6 +64,6 @@ describe("buildRegistry", () => {
     expect(help).toContain("handoff");
     expect(help).toContain("init");
     expect(help).toContain("check-budget");
-    expect(help).toContain("Ex.: yarn guidelines");
+    expect(help).toContain("Ex.: npm run guidelines --");
   });
 });

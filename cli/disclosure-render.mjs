@@ -8,7 +8,7 @@
  * Resolve a spec/nó pela branch atual; aceita PR_NUMBER opcional (env) p/ CI.
  *
  * Exit codes: 0 ok · 1 erro de resolução/parse · 2 módulo compilado ausente.
- * Assume `yarn build`. `pathToFileURL` obrigatório (cross-OS, ESM).
+ * Assume `npm run build`. `pathToFileURL` obrigatório (cross-OS, ESM).
  */
 import { existsSync } from "node:fs";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -21,7 +21,7 @@ const compiledModule = resolve(repoRoot, "dist/cli/disclosureRender.js");
 
 if (!existsSync(compiledModule)) {
   process.stderr.write(
-    `❌ Compiled module not found: ${compiledModule}\n` + `   Run \`yarn build\` first.\n`
+    `❌ Compiled module not found: ${compiledModule}\n` + `   Run \`npm run build\` first.\n`
   );
   process.exit(2);
 }

@@ -2,7 +2,7 @@
 /**
  * Bin físico do gate `co-knowledge:inventory` (CO-2.1 / Spec 0024).
  *
- * Assume `yarn build` executado. Conversão via `pathToFileURL` é obrigatória
+ * Assume `npm run build` executado. Conversão via `pathToFileURL` é obrigatória
  * cross-OS (Windows falha com `ERR_UNSUPPORTED_ESM_URL_SCHEME` em paths `C:\...`).
  */
 import { existsSync } from "node:fs";
@@ -16,7 +16,7 @@ const compiledModule = resolve(repoRoot, "dist/cli/coKnowledgeInventoryCheck.js"
 
 if (!existsSync(compiledModule)) {
   process.stderr.write(
-    `❌ Compiled module not found: ${compiledModule}\n` + `   Run \`yarn build\` first.\n`
+    `❌ Compiled module not found: ${compiledModule}\n` + `   Run \`npm run build\` first.\n`
   );
   process.exit(2);
 }

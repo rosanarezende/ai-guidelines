@@ -3,7 +3,7 @@
  * Wrapper físico de `runtime-bootstrap:*`.
  *
  * A implementação operacional vive em TypeScript (`src/cli/runtimeBootstrap.ts`)
- * e é consumida de `dist/` após `yarn build`. `cli/` permanece como camada de
+ * e é consumida de `dist/` após `npm run build`. `cli/` permanece como camada de
  * compatibilidade/bin cross-OS.
  */
 import { existsSync } from "node:fs";
@@ -17,7 +17,7 @@ const compiledModule = resolve(repoRoot, "dist/cli/runtimeBootstrap.js");
 
 if (!existsSync(compiledModule)) {
   process.stderr.write(
-    `❌ Compiled module not found: ${compiledModule}\n` + `   Run \`yarn build\` first.\n`
+    `❌ Compiled module not found: ${compiledModule}\n` + `   Run \`npm run build\` first.\n`
   );
   process.exit(2);
 }

@@ -14,7 +14,7 @@
  *   0 — SEMPRE (advisory-first; ✅ reconciliado ou ⚠️ divergência reportada)
  *   2 — uso inválido (módulo compilado ausente)
  *
- * Assume `yarn build` executado. Conversão via `pathToFileURL` é obrigatória
+ * Assume `npm run build` executado. Conversão via `pathToFileURL` é obrigatória
  * cross-OS (Windows falha com `ERR_UNSUPPORTED_ESM_URL_SCHEME` em paths `C:\...`).
  */
 import { existsSync } from "node:fs";
@@ -28,7 +28,7 @@ const compiledModule = resolve(repoRoot, "dist/cli/reconcileCheck.js");
 
 if (!existsSync(compiledModule)) {
   process.stderr.write(
-    `❌ Compiled module not found: ${compiledModule}\n` + `   Run \`yarn build\` first.\n`
+    `❌ Compiled module not found: ${compiledModule}\n` + `   Run \`npm run build\` first.\n`
   );
   process.exit(2);
 }

@@ -14,13 +14,13 @@ fi
 
 if ! command -v node >/dev/null 2>&1; then
   echo "ai-guidelines hook: node não encontrado no PATH e nvm não pôde ser carregado." >&2
-  echo "Restaure o ambiente (ex.: nvm install && nvm use) e rode yarn setup; não use --no-verify." >&2
+  echo "Restaure o ambiente (ex.: nvm install && nvm use) e rode npm run setup; não use --no-verify." >&2
   exit 127
 fi
 
-node .yarn/releases/yarn-4.1.1.cjs lint-staged
-node .yarn/releases/yarn-4.1.1.cjs script-contracts:sync
-node .yarn/releases/yarn-4.1.1.cjs build:all
-node .yarn/releases/yarn-4.1.1.cjs runtime-bootstrap:sync
+npm run lint-staged
+npm run script-contracts:sync
+npm run build:all
+npm run runtime-bootstrap:sync
 git add package.json docs/scripts.md .husky/pre-commit .husky/pre-push .core/templates/package.json.fragment.json .core/templates/.husky/pre-commit.tmpl .core/templates/.husky/pre-push.tmpl .core/templates/.github/workflows/ai-guidelines-ci.yml.tmpl .core/rules/_meta/rules.json .core/rules/_meta/agents-core-ledger.md .core/rules/catalog.md AGENTS.md
-node .yarn/releases/yarn-4.1.1.cjs test:unit
+npm run test:unit

@@ -23,7 +23,7 @@ function tempRepo() {
   fs.mkdirSync(path.join(dir, ".github", "workflows"), { recursive: true });
   fs.writeFileSync(
     path.join(dir, ".github", "workflows", "repo-validation.yml"),
-    "name: repo-validation\njobs:\n  validate:\n    steps:\n      - run: yarn validate\n"
+    "name: repo-validation\njobs:\n  validate:\n    steps:\n      - run: npm run validate\n"
   );
   return dir;
 }
@@ -44,7 +44,7 @@ function writeContract(repoRoot, overrides = {}) {
           },
           {
             name: "validate",
-            command: "yarn format",
+            command: "npm run format",
             category: "aggregate",
             mutates: false,
             consumers: ["hook"],
@@ -56,7 +56,7 @@ function writeContract(repoRoot, overrides = {}) {
           "pre-push": { steps: [{ run: "validate" }] },
         },
         workflows: [
-          { file: ".github/workflows/repo-validation.yml", required_runs: ["yarn validate"] },
+          { file: ".github/workflows/repo-validation.yml", required_runs: ["npm run validate"] },
         ],
         docs: {
           generated_file: "docs/scripts.md",
@@ -103,12 +103,10 @@ test("DADO contrato valido QUANDO sync roda ENTÃO package.json, hooks, template
   assert.ok(written.includes("package.json"));
   assert.equal(
     JSON.parse(fs.readFileSync(path.join(repoRoot, "package.json"), "utf8")).scripts.validate,
-    "yarn format"
+    "npm run format"
   );
   assert.equal(
-    fs
-      .readFileSync(path.join(repoRoot, ".husky", "pre-push"), "utf8")
-      .includes("node .yarn/releases/yarn-4.1.1.cjs validate"),
+    fs.readFileSync(path.join(repoRoot, ".husky", "pre-push"), "utf8").includes("npm run validate"),
     true
   );
   assert.match(fs.readFileSync(path.join(repoRoot, ".husky", "pre-push"), "utf8"), /nvm\.sh/);
@@ -137,12 +135,12 @@ test("DADO workflow sem run contratado QUANDO check roda ENTÃO reporta drift", 
   sync(repoRoot);
   fs.writeFileSync(
     path.join(repoRoot, ".github", "workflows", "repo-validation.yml"),
-    "name: repo-validation\njobs:\n  validate:\n    steps:\n      - run: yarn test\n"
+    "name: repo-validation\njobs:\n  validate:\n    steps:\n      - run: npm run test\n"
   );
 
   assert.match(
     check(repoRoot).join("\n"),
-    /workflow \.github\/workflows\/repo-validation\.yml nao contem run contratado: yarn validate/
+    /workflow \.github\/workflows\/repo-validation\.yml nao contem run contratado: npm run validate/
   );
 });
 
@@ -152,17 +150,17 @@ test("DADO required_run apenas em comentario QUANDO check roda ENTÃO reporta dr
   sync(repoRoot);
   fs.writeFileSync(
     path.join(repoRoot, ".github", "workflows", "repo-validation.yml"),
-    "# Este workflow deve rodar yarn validate\n" +
+    "# Este workflow deve rodar npm run validate\n" +
       "name: repo-validation\n" +
       "jobs:\n" +
       "  validate:\n" +
       "    steps:\n" +
-      "      - run: yarn test\n"
+      "      - run: npm run test\n"
   );
 
   assert.match(
     check(repoRoot).join("\n"),
-    /workflow \.github\/workflows\/repo-validation\.yml nao contem run contratado: yarn validate/
+    /workflow \.github\/workflows\/repo-validation\.yml nao contem run contratado: npm run validate/
   );
 });
 
@@ -172,14 +170,14 @@ test("DADO required_run em bloco run QUANDO check roda ENTÃO aceita comando rea
   sync(repoRoot);
   fs.writeFileSync(
     path.join(repoRoot, ".github", "workflows", "repo-validation.yml"),
-    "# Comentario tambem menciona yarn validate\n" +
+    "# Comentario tambem menciona npm run validate\n" +
       "name: repo-validation\n" +
       "jobs:\n" +
       "  validate:\n" +
       "    steps:\n" +
       "      - run: |\n" +
       "          # comentario dentro do bloco nao deve contar\n" +
-      "          yarn validate\n"
+      "          npm run validate\n"
   );
 
   assert.deepEqual(check(repoRoot), []);

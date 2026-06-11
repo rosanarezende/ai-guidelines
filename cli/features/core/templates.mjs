@@ -58,7 +58,7 @@ export async function syncConsumerTemplates(targetDir, config, options, actions)
       throw new Error(
         `Engine indisponível para recipe "${engineResult.recipeName}": ` +
           `artefatos compilados em dist/ não encontrados. ` +
-          `Se rodando do repo, execute "yarn build" antes; ` +
+          `Se rodando do repo, execute "npm run build" antes; ` +
           `se instalado via npm, isso indica um pacote quebrado (prepack pulado ou dist/ ausente do tarball).`
       );
     } else {

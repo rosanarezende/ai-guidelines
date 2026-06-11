@@ -39,7 +39,7 @@ main → branch dedicada → commit atômico → PR Draft → CI verde → Ready
 1. Crie branch: `fix/descricao-curta` ou `docs/descricao-curta`
 2. Faça o ajuste
 3. Abra PR em **modo Draft** usando o template [`.github/pull_request_template.md`](.github/pull_request_template.md)
-4. Garanta CI verde (`yarn format` + `yarn validate`)
+4. Garanta CI verde (`npm run format` + `npm run validate`)
 5. Converta para **Ready** e solicite review de pelo menos 1 owner
 
 **Sem spec necessária.**
@@ -62,7 +62,7 @@ backlog.md (candidata) → spec → branch → implementação (stacked PRs) →
    - `NEXT.md` — débitos adiados (apenas se houver; **deletado na branch antes do merge**)
 3. Crie **branch dedicada**: `feat/spec-XXXX-<slug>`.
 4. **Commits atômicos** por unidade lógica.
-5. `yarn validate` antes de qualquer push (hook `pre-push` roda automaticamente).
+5. `npm run validate` antes de qualquer push (hook `pre-push` roda automaticamente).
 6. Abra PRs em **modo Draft**, converta para Ready quando CI verde.
 7. **Feche a branch antes do merge** (Estágio 5 do `WORKFLOW.md`): spec Done, state.yml done, NEXT.md deletado, historico/backlog/research atualizados. O merge não acontece com trabalho pendente na branch.
 8. Solicite review de pelo menos **1 owner** (ver [CODEOWNERS](.github/CODEOWNERS)).
@@ -84,7 +84,7 @@ Quando: várias candidatas no backlog tocam o mesmo contrato e fazem mais sentid
 Quando: você está executando trabalho via Claude Code, Gemini CLI, Codex, Cursor, Antigravity ou similar.
 
 1. Ler [`AGENTS.md`](AGENTS.md) — bootstrap curto do canal IA e regras locais de autoridade.
-2. Para sessão IA nova, gerar contexto situado com `yarn guidelines handoff [spec]`; regras completas vivem em [`.core/rules/catalog.md`](.core/rules/catalog.md) e nos artefatos apontados pelo handoff.
+2. Para sessão IA nova, gerar contexto situado com `npm run guidelines -- handoff [spec]`; regras completas vivem em [`.core/rules/catalog.md`](.core/rules/catalog.md) e nos artefatos apontados pelo handoff.
 3. Seguir **PR description colaborativo (3 etapas)**:
    - Listar tópicos relevantes para validação humana **antes** do texto final;
    - Só escrever o texto após o humano editar/aprovar a lista;
@@ -130,15 +130,15 @@ chore(ci): atualizar threshold de cobertura para 85%
 
 ## Padrões obrigatórios
 
-| Regra                          | Detalhe                                                                                 |
-| :----------------------------- | :-------------------------------------------------------------------------------------- |
-| Nunca commitar em `main`       | Toda alteração em branch dedicada                                                       |
-| Commits atômicos               | Uma unidade lógica por commit                                                           |
-| PRs sempre em Draft            | CI verde → Ready → review de owner                                                      |
-| `yarn format` antes do push    | CI valida formatação                                                                    |
-| `yarn validate` antes do push  | Cobre format:check + build:all + test + living-docs:check (idêntico ao `pre-push` hook) |
-| Documentar decisões relevantes | ADR para mudanças arquiteturais                                                         |
-| Approval humano antes de push  | Aplica-se também a agentes IA                                                           |
+| Regra                            | Detalhe                                                                                 |
+| :------------------------------- | :-------------------------------------------------------------------------------------- |
+| Nunca commitar em `main`         | Toda alteração em branch dedicada                                                       |
+| Commits atômicos                 | Uma unidade lógica por commit                                                           |
+| PRs sempre em Draft              | CI verde → Ready → review de owner                                                      |
+| `npm run format` antes do push   | CI valida formatação                                                                    |
+| `npm run validate` antes do push | Cobre format:check + build:all + test + living-docs:check (idêntico ao `pre-push` hook) |
+| Documentar decisões relevantes   | ADR para mudanças arquiteturais                                                         |
+| Approval humano antes de push    | Aplica-se também a agentes IA                                                           |
 
 ---
 
@@ -156,7 +156,7 @@ Cada conteúdo vive em **um único lugar**; outros documentos apenas linkam:
 
 Antes de começar, leia:
 
-- [`AGENTS.md`](AGENTS.md) — bootstrap obrigatório do canal IA; use `yarn guidelines handoff [spec]` para contexto situado.
+- [`AGENTS.md`](AGENTS.md) — bootstrap obrigatório do canal IA; use `npm run guidelines -- handoff [spec]` para contexto situado.
 - [`.core/rules/catalog.md`](.core/rules/catalog.md) — índice das regras completas.
 - [`.core/process/governance-foundation.md`](.core/process/governance-foundation.md) — quando abrir spec, como estruturar `spec.md`/`plan.md`/`tasks.md` e como fechar débitos/research.
 - [`.governance/specs/roadmap/backlog.md`](.governance/specs/roadmap/backlog.md) — backlog e candidatas (canônico). O legado em [`.specify/specs/roadmap/backlog.md`](.specify/specs/roadmap/backlog.md) permanece como referência histórica até cutover caso-a-caso.
@@ -169,46 +169,45 @@ Este repositório é o **framework canônico**, não apenas um exemplo de consum
 
 ### Pré-requisitos
 
-- **Node ≥ 22** (piso técnico real — scripts de teste usam flags experimentais disponíveis a partir do Node 22).
-- **Yarn 4** com Plug'n'Play (gerenciado via `corepack enable`).
+- **Node ≥ 22** (piso técnico real — scripts de teste usam flags experimentais disponíveis a partir do Node 22). O npm que acompanha o Node é o package manager canônico — nenhuma camada extra (Corepack/Yarn) é necessária.
 
-> **Nota de transição (2026-06-09):** a migração para **npm puro** (`package-lock.json` + `npm ci`) está registrada como próximo checkpoint da Spec 0024 (`toolchain-simplification` › `checkpoint-npm-toolchain`); até esse PR aterrissar, Yarn 4/Corepack seguem canônicos. Em **Windows nativo**, a suíte deve passar sem Git Bash/coreutils — testes usam comandos cross-platform (ex.: `process.execPath`), nunca `cat`/`sed`/`grep` como executáveis.
+> **Nota (2026-06-10, Spec 0024 › `checkpoint-npm-toolchain`):** o toolchain canônico é **npm puro** (`package-lock.json` versionado + `npm ci`); Yarn 4/Corepack foram descomissionados. Em **Windows nativo**, a suíte deve passar sem Git Bash/coreutils — testes usam comandos cross-platform (ex.: `process.execPath`), nunca `cat`/`sed`/`grep` como executáveis.
 
 ### Comandos canônicos
 
 ```bash
-yarn setup                   # = install --immutable + build:all
-yarn format                  # prettier --write
-yarn validate                # gate local: format:check + build:all + test + living-docs:check
+npm run setup                # = npm ci + build:all
+npm run format               # prettier --write
+npm run validate             # gate local: format:check + build:all + test + living-docs:check
 ```
 
 > **Referência única dos scripts:** [`docs/scripts.md`](docs/scripts.md) é gerado a partir de [`.core/governance/script-contracts.yml`](.core/governance/script-contracts.yml) e traz o mapa completo — categorias, composição, hooks de git, workflows de CI e contrato de commit. Não duplique comandos aqui.
 
 ### Operando a CLI a partir deste repositório
 
-Use **`yarn guidelines …`** em vez de `npx ai-guidelines …`. O Yarn PnP garante que o código em desenvolvimento seja executado com resolução correta de dependências, sem depender do tarball publicado:
+Use **`npm run guidelines -- …`** em vez de `npx ai-guidelines …`. Assim o código em desenvolvimento roda direto do checkout (com `dist/` local quando aplicável), sem depender do tarball publicado:
 
 ```bash
-yarn guidelines init    --target ../meu-projeto --name meu-projeto
-yarn guidelines adopt   --target ../repo-existente --dry-run
-yarn guidelines update  --target ../repo --dry-run
+npm run guidelines -- init    --target ../meu-projeto --name meu-projeto
+npm run guidelines -- adopt   --target ../repo-existente --dry-run
+npm run guidelines -- update  --target ../repo --dry-run
 ```
 
-Não use `node cli/ai-guidelines-cli.mjs …` direto — quebra resolução de imports `#cli/*`, `#features/*`, etc., sob PnP.
+Prefira `npm run guidelines -- …` a invocar `node cli/ai-guidelines-cli.mjs …` direto — o script canônico mantém uma única forma de invocação documentada (e o mesmo entry-point dos hooks/CI).
 
 ### Operando o ciclo da spec (workflow runtime, Spec 0023)
 
 Para conduzir o ciclo de uma spec (não para distribuir baseline), use os comandos do workflow runtime. Todos têm `--help`; o wizard sem argumentos lista as opções.
 
-| Comando                                             | Para quê                                                                                                                                                      |
-| :-------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `yarn guidelines workflow`                          | Wizard operacional: navegar specs ativas, retomar, publicar estado, drift, abrir Integration PR, merge atômico (modos `unit`/`sequential` — ver docs/cli §11) |
-| `yarn guidelines continue [<id\|slug>]`             | Briefing da spec ativa + gate de execução (recusa narrativa se não autorizada)                                                                                |
-| `yarn guidelines review [<pr>]`                     | Reúne/estrutura os comentários de review de um PR (read-only) para colar na IA                                                                                |
-| `yarn guidelines workflow publish-state --status=…` | Projeta o estado interno da spec no índice público `active-specs.yml`                                                                                         |
-| `yarn guidelines release-prep [--version <v>]`      | Prepara a release da stack com plano explícito (`--dry-run` audita sem aplicar)                                                                               |
+| Comando                                                   | Para quê                                                                                                                                                      |
+| :-------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `npm run guidelines -- workflow`                          | Wizard operacional: navegar specs ativas, retomar, publicar estado, drift, abrir Integration PR, merge atômico (modos `unit`/`sequential` — ver docs/cli §11) |
+| `npm run guidelines -- continue [<id\|slug>]`             | Briefing da spec ativa + gate de execução (recusa narrativa se não autorizada)                                                                                |
+| `npm run guidelines -- review [<pr>]`                     | Reúne/estrutura os comentários de review de um PR (read-only) para colar na IA                                                                                |
+| `npm run guidelines -- workflow publish-state --status=…` | Projeta o estado interno da spec no índice público `active-specs.yml`                                                                                         |
+| `npm run guidelines -- release-prep [--version <v>]`      | Prepara a release da stack com plano explícito (`--dry-run` audita sem aplicar)                                                                               |
 
-> Referência completa dos comandos e flags: `yarn guidelines --help` e [`docs/cli/ai-guidelines-cli.md`](docs/cli/ai-guidelines-cli.md) §11. Detalhe do ciclo de boundaries (tasks/review/release-log) em [`.core/process/governance-foundation.md`](.core/process/governance-foundation.md).
+> Referência completa dos comandos e flags: `npm run guidelines -- --help` e [`docs/cli/ai-guidelines-cli.md`](docs/cli/ai-guidelines-cli.md) §11. Detalhe do ciclo de boundaries (tasks/review/release-log) em [`.core/process/governance-foundation.md`](.core/process/governance-foundation.md).
 
 ## Estrutura do repositório
 
@@ -255,7 +254,7 @@ Algumas regras locais importam para evitar drift:
 
 - `AGENTS.md` é documento operacional local **e** artefato runtime de exemplo, mas seu bloco `<AI_GUIDELINES>` é apenas bootstrap/stub.
 - Regras completas vivem em `.core/rules/**`, `.core/rules/catalog.md`, `.core/rules/_meta/rules.json` e no ledger.
-- Ao editar regras em `.core/rules/`, rode `yarn build:rules` (ou `yarn build:all`) para reconstruir `rules.json`, ledger, catálogo e o stub de `AGENTS.md`.
+- Ao editar regras em `.core/rules/`, rode `npm run build:rules` (ou `npm run build:all`) para reconstruir `rules.json`, ledger, catálogo e o stub de `AGENTS.md`.
 - Ao editar a CLI, preserve o contrato entre `cli/cli/args.mjs`, `cli/app/engine.mjs` e `docs/cli/ai-guidelines-cli.md`.
 - Features editoriais (`tdd`, `bdd`, `quality-gates`) e de infraestrutura (`prettier`, `husky`, `ci`) têm taxonomias distintas e não devem ser misturadas na documentação nem no wizard.
 - Sequência de release (publish em registry npm) é cravada em [`.core/process/governance-foundation.md`](.core/process/governance-foundation.md) § "Sequência canônica para specs com publish em registry externo" — leia antes de qualquer trabalho que envolva publish.

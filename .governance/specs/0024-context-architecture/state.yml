@@ -10,11 +10,11 @@ focus:
   - "Gate por checkpoint: implementacao -> revisoes exigidas pela .governance/review-policy.yml (quando aplicavel) -> Human Gate (owner) -> AVANCA (abre o proximo PR stacked). Na 0024 usamos Technical Audit + Architectural Review como dogfood intensivo, mas isso NAO e obrigacao universal para todo repositorio. O Human Gate decide o PROXIMO MOVIMENTO, NAO mergeia em main. 1 checkpoint atomico por vez; parar no Gate quando o commit estiver pronto. Correcao local pequena nao espera; mudanca estrutural sim."
   - "Criterio (RESSALVADO em 2026-06-03 por [DEC-0024-G08]): 'ja foi validado empiricamente na 0024?' -> absorver/enforcar/executar. NAO re-modelar o DECIDIDO (G00/G02/G06/G07 seguem cravados). EXCECAO assumida: G03/G04/G05 foram reabertos para modelagem deliberada (orientada a grafo) -- nesses eixos, modelar e a direcao, nao o risco. O 'risco dominante' original (modelar em vez de absorver) vale para os eixos resolvidos; nos reabertos, a modelagem e o trabalho."
 next:
-  - "canonical-next: bootstrap-compiler. PR #37 (co-knowledge / CO-2) CONCLUIDO-NA-STACK por Human Gate approved 2026-06-09 (gates/c-co-knowledge.yml; PR #37 Ready; modo unit, SEM merge isolado). Entrega aprovada: Knowledge tipado + Falsification; backfill minimo load-bearing; script-contracts; runtime bootstrap readiness; runtime ledgers particionados; review-policy + ReviewEvent append-only; event_id EV1..EVN unico/contiguo por checkpoint/role. PR #38 ABERTO como Draft stacked sobre #37. Proximo no ativo = bootstrap-compiler (seq 6): fecha cutover /cli legado -> /src/registry antes de CO-3; migra bootstrap (init/adopt/providers/update/check-budget), script-contracts/runtime-bootstrap e residuos de pointers ao registry/src; remove fallback legado + parseArgs monolito + ponte transitoria; funde ex-pr-compiler-ts (motor de regras monolith -> TS/src; substrato do knowledge:compile). NAO abrir CO-3+ neste PR; NAO instalar banco externo; banco futuro deve ser projecao derivada reconstruivel, nao nova SSOT. Proximo no REGISTRADO apos este (2026-06-09, decisao da owner): toolchain-simplification (seq 7, checkpoint-npm-toolchain) — migracao Yarn/Corepack -> npm puro em PR proprio; NAO implementar a migracao npm dentro do #38."
+  - "canonical-next: co-projection. PR #39 (toolchain-simplification / seq 7) CONCLUIDO-NA-STACK por Human Gate approved 2026-06-11 (gates/c-npm-toolchain.yml; PR #39 Ready, HEAD d806a835, CI 11/11 verde; modo unit, SEM merge isolado). Entrega aprovada: npm puro como package manager canonico (package-lock.json + npm ci; um unico runner em script-contracts/hooks/CI/release/templates/docs; validate tambem no Windows; multi-PM preservado nos consumidores com Corepack condicional); FU-1 (pr-body:update) + FU-2 (pr-ready:check + sequencia canonica de fechamento); Template v3 + perfis de PR body (PrProfileContract como SSOT); review:seal; PIT-0010 graduado a guardrail GG-0004; PIT-0011 capturado; retomada derivada saneada; co-projection reordenado para seq 8 (decisao da owner 2026-06-11). Proximo no planejado = co-projection (seq 8, checkpoint-co-projection): handoff situado DERIVADO + contrato de carga (estender src/cli/handoff.ts com reviews/gates via discover()/consolidate(), ahead/behind, proxima acao unica, selo de geracao; handoff:check advisory-first; reconcile-on-load — ADR 0022/0021). PR proprio stacked sobre #39; NAO abrir CO-3 (co-enforcement, seq 9) neste PR; NAO mergeia isolado em main (modo unit)."
 topology:
   cursor:
-    pr: bootstrap-compiler
-    checkpoint: checkpoint-bootstrap-registry
+    pr: co-projection
+    checkpoint: checkpoint-co-projection
   prs:
     concluded:
       - id: base-governance
@@ -94,16 +94,15 @@ topology:
           - checkpoint-runtime-ledger-partition # CO-2.4: specs active/history + insights por status + falsifications/ledger
           - checkpoint-review-policy-events # CO-2.5: review-policy + eventos append-only de re-auditoria/revalidacao
 
-    active:
-      # Bootstrap+Compiler — EM PROGRESSO (Draft PR #38 aberto 2026-06-09,
-      # stacked sobre #37; modo unit, NAO mergeia isolado). RESOLVE a auditoria
-      # do #35 (#1 roteamento, #3 fallback, #4 parsers) e fecha o cutover
-      # incompleto exposto no PR #37: migra bootstrap (init/adopt/providers/
-      # update/check-budget), script-contracts/runtime-bootstrap e residuos de
-      # pointers ao registry/src; remove fallback legado + parseArgs monolito +
-      # ponte transitoria. Funde ex-pr-compiler-ts (motor de regras monolith ->
-      # TS/src; substrato do knowledge:compile). Depois deste no, /cli deve ser
-      # wrapper/compatibilidade; regra governada nova vive em /src.
+      # #38 CONCLUIDO apos Human Gate bootstrap-registry approved
+      # (gates/c-bootstrap-registry.yml, 2026-06-09). Resolveu a auditoria do #35
+      # (#1 roteamento, #3 fallback, #4 parsers) e fechou o cutover exposto no #37:
+      # registry compilado como fronteira operacional; build:rules via TS/src (fusao
+      # do ex-pr-compiler-ts ENTREGUE aqui); help derivado do registry; fallback
+      # silencioso removido; AGENTS.md stub/bootstrap; monolito cercado como legacy/
+      # transitorio (residuo compiler+token-budget -> CO-3). /cli agora e wrapper/
+      # compatibilidade; regra governada nova vive em /src. Modo unit: NAO mergeou
+      # em main (concluido na stack).
       - id: bootstrap-compiler
         github_pr: 38
         role: execution
@@ -112,6 +111,27 @@ topology:
         checkpoints:
           - checkpoint-compiler-ts # motor de compilacao de regras (monolith) -> TS/src; substrato do knowledge:compile
           - checkpoint-bootstrap-registry # bootstrap/script-contracts/runtime-bootstrap -> registry/src; /cli vira wrapper+compat
+
+      # #39 CONCLUIDO apos Human Gate npm-toolchain approved
+      # (gates/c-npm-toolchain.yml, 2026-06-11; PR #39 Ready, HEAD d806a835,
+      # CI 11/11 verde). Entrega aprovada: npm puro como package manager
+      # canonico do framework (package-lock.json + npm ci; script-contracts/
+      # hooks/CI/release/templates/docs em um unico runner; validate tambem no
+      # Windows); multi-PM preservado nos consumidores (Corepack condicional);
+      # FU-1 (pr-body:update preservativo) + FU-2 (pr-ready:check + sequencia
+      # canonica); Template v3 + perfis de PR (PrProfileContract como SSOT);
+      # review:seal; PIT-0010 graduado a GG-0004; PIT-0011 capturado; retomada
+      # derivada saneada (handoff renderer sem ponteiros stale); co-projection
+      # reordenado para seq 8. Ciclo de review fechado no proprio PR (TA + AR
+      # approved; F1-F4 accepted via EV1). Modo unit: NAO mergeou em main
+      # (concluido na stack).
+      - id: toolchain-simplification
+        github_pr: 39
+        role: execution
+        terminal: false
+        sequence: 7
+        checkpoints:
+          - checkpoint-npm-toolchain # Yarn/Corepack -> npm puro; package-lock + npm ci; script-contracts/hooks/CI/templates/docs
 
     planned:
       # CAUDA REESCRITA (2026-06-07, Human Gate #35 / Opcao A — reframe in-place).
@@ -128,28 +148,25 @@ topology:
       # null = ainda nao aberto. Objetivo/Deps de cada no: plan.md. Memoria:
       # spec-0024-continuity-operational.
 
-      # Toolchain simplification — npm como package manager canonico. Decisao da
-      # owner (2026-06-09, preparo do Human Gate do #38): reduzir friccao de
-      # bootstrap do framework. Node ja traz npm; npm puro com package-lock.json
-      # + `npm ci` basta para instalacao deterministica neste contexto —
-      # Corepack/Yarn resolve versionamento do package manager, mas adiciona
-      # camada operacional que nao compensa para adocao simples, especialmente
-      # em Windows nativo e agentes novos. Escopo: migrar Yarn/Corepack -> npm
-      # puro; gerar/versionar package-lock.json; remover yarn.lock; revisar/
-      # remover packageManager; substituir comandos mantenedores (setup/validate/
-      # test:smoke/state-yml:check:all/disclosure etc.) em script-contracts
-      # (SSOT) + hooks Husky + workflows CI + templates de consumidor + docs
-      # publicas (README/CONTRIBUTING/WORKFLOW/docs/scripts.md); revisar prepack
-      # (pacote publicado segue contendo dist/ + rules.json); validar Windows e
-      # Linux; preservar build deterministico. PR proprio: nao misturar mudanca
-      # de package manager com o fechamento do registry/bootstrap-compiler.
-      - id: toolchain-simplification
+      # CO-4 — Projecao no ponto de consumo: handoff situado DERIVADO (ADR 0022, enfim,
+      # sobre conhecimento) + contrato de carga (reconcile-on-load obrigatorio; ADR 0021).
+      # Retomada agnostica de agente. Absorve ex-projection-split (G05; projecoes
+      # derivadas, renderer-puras) + ex-doctrine (grafo navegavel projetado).
+      # REORDENADO antes de CO-3 (decisao da owner, 2026-06-11, durante o PR #39):
+      # sem dependencia tecnica de CO-4 sobre EnforcementBinding (o projetor deriva de
+      # state.yml/git/reviews/knowledge ja materializados — handoff.ts e a prova viva);
+      # evidencia PIT-0010 (5 ocorrencias -> GG-0004) + PIT-0011: cada sessao paga
+      # reconstrucao manual de contexto enquanto a retomada nao for derivada.
+      # Alvo: estender src/cli/handoff.ts (reviews/gates via discover()/consolidate(),
+      # ahead/behind, proxima acao unica, selo de geracao) + handoff:check (freshness).
+      # PROXIMO NO SELECIONADO (cursor): PR ainda nao aberto (github_pr null).
+      - id: co-projection
         github_pr: null
         role: execution
         terminal: false
-        sequence: 7
+        sequence: 8
         checkpoints:
-          - checkpoint-npm-toolchain # Yarn/Corepack -> npm puro; package-lock + npm ci; script-contracts/hooks/CI/templates/docs
+          - checkpoint-co-projection # projetor situado + contrato de carga (U4); absorve ex-projection-split
 
       # CO-3 — Absorcao: no de conhecimento -> forma que DISPARA. EnforcementBinding
       # (declaracao->enforcement por no; PIT-0008 estrutural) + knowledge:compile
@@ -163,21 +180,9 @@ topology:
         github_pr: null
         role: execution
         terminal: false
-        sequence: 8
-        checkpoints:
-          - checkpoint-co-enforcement # EnforcementBinding + knowledge:compile (U3); absorve ex-rule-guardrail
-
-      # CO-4 — Projecao no ponto de consumo: handoff situado DERIVADO (ADR 0022, enfim,
-      # sobre conhecimento) + contrato de carga (reconcile-on-load obrigatorio; ADR 0021).
-      # Retomada agnostica de agente. Absorve ex-projection-split (G05; projecoes
-      # derivadas, renderer-puras) + ex-doctrine (grafo navegavel projetado).
-      - id: co-projection
-        github_pr: null
-        role: execution
-        terminal: false
         sequence: 9
         checkpoints:
-          - checkpoint-co-projection # projetor situado + contrato de carga (U4); absorve ex-projection-split
+          - checkpoint-co-enforcement # EnforcementBinding + knowledge:compile (U3); absorve ex-rule-guardrail
 
       # CO-5 — Fecha o laco: captura do em-transito como no na FORMACAO (PIT-0002) +
       # espinha de ciclo de vida (maturacao/graduacao human-gated). Dissolve NEXT.md

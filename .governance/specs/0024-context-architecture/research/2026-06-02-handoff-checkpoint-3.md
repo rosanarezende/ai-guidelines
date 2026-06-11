@@ -1,3 +1,8 @@
+> ⚠️ **HISTÓRICO — NÃO USAR PARA RETOMADA (marcado em 2026-06-11).** Snapshot pós-2.4d;
+> superseded por `2026-06-03-handoff-convergence-reopened.md` (o "Checkpoint 3 (GG-0003)"
+> planejado aqui foi reescrito e landou como #36 `co-reconcile`). Retomada atual:
+> `npm run guidelines -- handoff 0024` + `state.yml § topology`.
+
 # Handoff operacional — Spec 0024, abertura do Checkpoint 3 (sessão nova)
 
 > Documento de **retomada**, não resumo histórico. Assume zero acesso à conversa anterior. Objetivo: abrir o **Checkpoint 3 (GG-0003)** sem reabrir o que já fechou. **Supersede** `2026-06-02-handoff-next-session.md` para o estado pós-2.4d.
