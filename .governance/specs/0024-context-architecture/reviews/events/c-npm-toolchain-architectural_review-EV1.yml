@@ -1,0 +1,31 @@
+checkpoint: "npm-toolchain"
+role: architectural_review
+event_id: EV1
+kind: verification
+executor:
+  platform: antigravity
+  model: gemini-3.1-pro-high
+decision: approved
+verifies:
+  - architectural_review#F1
+  - architectural_review#F2
+  - architectural_review#F3
+  - architectural_review#F4
+audit_evidence:
+  coverage:
+    - src/cli/disclosureRender.ts
+    - src/app/services/RulesCatalogBuilder.ts
+    - cli/governance/monolith/rules-builder.mjs
+    - cli/governance/monolith/token-budget.mjs
+    - .core/governance/script-contracts.yml
+    - src/domain/workflow/PrProfileContract.ts
+    - src/cli/reviewSeal.ts
+  scope: "Revalidação factual read-only do delta posterior ao Technical Audit
+    focado nas correções F1–F4 e comandos/promocões introduzidos."
+  basis: "As resoluções implementam as correções de forma completa e compatível.
+    Todos os testes de unidade, schemas e integração atestaram 100% de
+    coerência. O perfil da review-policy ativa é 'solo', o qual exige 0 roles de
+    review, de modo que o delta técnico novo está dispensado de novo Technical
+    Audit. Deixo o fechamento das dispositions pendente para o owner, pois sou
+    um auditor independente."
+event_fingerprint: 81ebffcfefee
