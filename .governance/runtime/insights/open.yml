@@ -83,3 +83,28 @@ insights:
         spec: "0024"
         cursor: checkpoint-npm-toolchain
         note: "PR #39: (1) body do Draft falhou no governance-pr-check; (2) update de body apagou imagem/baseline de Visao pretendida. Regra de secoes preservadas/mutaveis registrada p/ FU-1. Longo: research/2026-06-10-pit-0010-memoria-de-agente-nao-e-contrato.md"
+      - at: 2026-06-11T03:45:54.511Z
+        spec: "0024"
+        cursor: checkpoint-npm-toolchain
+        note: "pr-body:update implementado e dogfooded no PR #39: contrato de mutabilidade por secao (PrProfileContract) substituiu a dependencia de o agente lembrar quais secoes preservar; o erro original (baseline apagada) nao se repetiu apos o contrato"
+      - at: 2026-06-11T03:46:09.401Z
+        spec: "0024"
+        cursor: checkpoint-npm-toolchain
+        note: "Contrato canonico de perfis (F4 do AR do npm-toolchain): secoes de PR viviam em 3 superficies nao amarradas (templates, governance-pr-check, prBodyUpdate) dependendo de memoria para manter coerencia; virou SSOT unica em src/domain/workflow/PrProfileContract.ts com guard de coerencia"
+      - at: 2026-06-11T03:46:09.630Z
+        spec: "0024"
+        cursor: checkpoint-npm-toolchain
+        note: "review:seal: a selagem de fingerprints era ritual manual (agente computava hashes com script ad-hoc por sessao, reproduzindo o algoritmo de memoria); virou comando deterministico cli/review-seal.mjs que recusa sobrescrever selo divergente"
+      - at: 2026-06-11T03:46:09.854Z
+        spec: "0024"
+        cursor: checkpoint-npm-toolchain
+        note: Retomada entre sessoes/modelos (Claude/Gemini/Antigravity) ainda depende de mega-prompts manuais da owner e de memoria de agente; handoff renderizado existe (src/cli/handoff.ts) mas incompleto e com ponteiros stale hardcoded — a superficie de retomada ainda nao e contrato (motiva CO-4)
+  - id: PIT-0011
+    text: "Contrato executavel invisivel ainda produz ritual manual: existir template/comando/checker/hook nao basta se o agente nao descobre o contrato no momento da acao — descobribilidade situada e parte do contrato, nao acessorio"
+    status: open
+    captured_at: 2026-06-11T03:46:22.345Z
+    occurrences:
+      - at: 2026-06-11T03:46:22.345Z
+        spec: "0024"
+        cursor: checkpoint-npm-toolchain
+        note: "Evidencias (Spec 0024, PRs #38/#39): hooks ja executavam sync/format/test/validate e agentes seguiram repetindo a cadeia manualmente; troca de sessao sem handoff obrigou reconstrucao por prompts extensos da owner; review:seal so foi criado depois de o agente re-derivar o algoritmo de selagem manualmente; constrains sugeridos: AGENTS/handoff, runtime bootstrap, script-contracts, instrucoes de autoria, CO-4/CO-6"
