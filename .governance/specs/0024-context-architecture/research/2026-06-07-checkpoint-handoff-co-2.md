@@ -1,3 +1,10 @@
+> ⚠️ **HISTÓRICO — NÃO USAR PARA RETOMADA (marcado em 2026-06-11).** Snapshot do estado de
+> 2026-06-07/08 (cursor `co-knowledge`, PR #37, comandos Yarn). O estado avançou: #37 e #38
+> concluídos; cursor em `toolchain-simplification` (PR #39); toolchain migrada para npm puro.
+> A retomada atual é **derivada**: `npm run guidelines -- handoff 0024` + reconciliação contra
+> `state.yml § topology` e Git. Handoff datado em `research/` é registro histórico, não SSOT —
+> o rótulo "SSOT de retomada" abaixo está superado (a SSOT é o repo; o handoff é projeção).
+
 # Checkpoint de Handoff — CO-2 (`co-knowledge`) · design FECHADO + go dado (SSOT de retomada)
 
 > **Documento de RETOMADA canônico** (ADR 0022). Assume **zero acesso ao transcript**.
