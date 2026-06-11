@@ -36,19 +36,19 @@ de governança na Spec 0023 — não é marketing, é comunicação operacional.
 ═════════════════════════════════════════════════════════════════════════════
 -->
 
-## Visual de valor entregue (opcional, link-only)
+## Visual de valor entregue (opcional)
 
 <!--
-IMPORTANTE (compatibilidade com job `copilot`):
-  - Não usar embed de imagem no body do PR (`![...]()` ou `<img ...>`).
-  - Registrar apenas links para os assets visuais.
+Imagem única:
+  ![valor entregue](URL_DA_IMAGEM)
 
-Imagem única (link):
-  [valor entregue](URL_DA_IMAGEM)
-
-Before/After side-by-side (link):
-  - [ANTES](URL_ANTES)
-  - [DEPOIS](URL_DEPOIS)
+Before/After side-by-side (sem <form>; só HTML estrutural):
+  <table>
+    <tr>
+      <td align="center"><strong>ANTES</strong><br/><img src="URL_ANTES" width="380"/></td>
+      <td align="center"><strong>DEPOIS</strong><br/><img src="URL_DEPOIS" width="380"/></td>
+    </tr>
+  </table>
 -->
 
 ## Status do ciclo de vida
