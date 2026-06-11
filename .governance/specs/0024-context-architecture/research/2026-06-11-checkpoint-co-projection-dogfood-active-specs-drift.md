@@ -116,6 +116,42 @@ specs/active.yml:` + seção `⚠ Aviso de projeção` com instrução de reconc
   desta rodada torna o drift visível e bloqueante no validate local; o disparo automático
   é assunto do CO-6, não deste nó).
 
+## Rodada 2 (2026-06-11, mesmo dia) — núcleo do CO-4 implementado e dogfoodado
+
+Continuação do mesmo checkpoint: `deriveHandoff`/`deriveNextAction`/freshness/selo +
+`handoff:check` advisory implementados e rodados contra o próprio PR #41.
+
+**O que funcionou (verificado no output real, HEAD `0c796fb`):**
+
+- `handoff 0024` identificou #41 Draft (estado/base/head via gh), cursor
+  `co-projection · checkpoint-co-projection`, ahead/behind 0/0, CI 12 pass;
+- 7 fontes declaradas com origem/status/fingerprint; selo determinístico exibido
+  (rodada com gh vivo: `adb3ff7c0a00` sobre HEAD `0c796fb`; mesmas fontes ⇒ mesmo
+  selo, verificado por dupla geração);
+- próxima ação única derivada das TAREFAS REAIS (tasks.md linha 98), não de
+  `state.next[0]` — narrativa stale comprovadamente não altera a decisão (teste 9);
+- proibições derivadas do estado: sem merge isolado (nó não-terminal/unit), sem
+  Ready (precondições pendentes), sem gate artifact antes da decisão humana, sem
+  abrir co-enforcement, sem sair do checkpoint;
+- fonte remota indisponível (coletor lançando erro, via fixture — sem derrubar a
+  rede real): handoff continua, `pull-request · unavailable` declarado, e quando a
+  decisão depende do remoto a ação vira `reconcile-remote-source` (teste 11);
+- nada persistido: `.governance/runtime/handoff/` não existe antes nem depois
+  (teste de listagem).
+
+**Hipótese falsificada na rodada:** "insights da spec inteira são contexto útil de
+retomada" — falso: os 9 PITs abertos da 0024 viraram ruído; relevância situada =
+ocorrência no checkpoint do CURSOR (após o filtro, só PIT-0011 aparece — o certo).
+
+**Ajustes feitos durante o dogfood:** filtro de insights por cursor (acima);
+`--no-remote` na CLI (offline explícito ≠ falha silenciosa); fixture de topologia
+exige nó terminal (contrato do parser de state.yml, descoberto em teste).
+
+**Próxima lacuna (não implementada nesta rodada):** contrato de carga formalizado
+(reconcile-on-load executável de ponta a ponta — o `handoff:check` cobre freshness,
+mas a comparação projeção×fatos no MOMENTO da carga do agente segue prosa);
+ahead/behind vs base da STACK (hoje é vs upstream); disparo automático = CO-6.
+
 ## Referências
 
 - Commit da correção: `5881a85` (fix(spec-0024): enforca coerencia da projecao de specs ativas)
