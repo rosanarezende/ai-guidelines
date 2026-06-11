@@ -28,13 +28,10 @@ const AUTHORITY_FILES = [
   ".governance/runtime/specs/active.yml",
 ];
 
-const SITUATED_FILES = [
-  "state.yml",
-  "plan.md",
-  "knowledge-backfill.yml",
-  "research/2026-06-07-checkpoint-handoff-co-2.md",
-  "research/2026-06-08-knowledge-health-promotion-and-backfill-plan.md",
-];
+// Apenas superfícies VIVAS da spec — nunca arquivos datados de research/
+// (handoffs datados são registro histórico; apontá-los aqui já produziu
+// retomada guiada por estado de 3 nós atrás — PIT-0010/PIT-0011).
+const SITUATED_FILES = ["state.yml", "plan.md", "tasks.md", "knowledge-backfill.yml"];
 
 function readIfExists(repoRoot: string, relativePath: string): string | null {
   const absolutePath = path.join(repoRoot, relativePath);
