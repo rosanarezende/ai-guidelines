@@ -1,0 +1,41 @@
+# Human Gate do PR #39 (toolchain-simplification), keyado no checkpoint npm-toolchain.
+# Owner (rosana) 2026-06-11: APROVADO PARA AVANÇAR. Manifestação humana publicada no
+# PR: https://github.com/rosanarezende/ai-guidelines/pull/39#issuecomment-4681796578
+# (este artefato é o registro governado; o comentário é a manifestação que o autoriza).
+# Lanes: technical_audit (approved, 0 findings, audit_evidence selada) +
+# architectural_review (approved; F1–F4 low corrigidos em 819007a, resolutions com ref,
+# revalidação independente EV1 approved, dispositions accepted pela owner em d806a83).
+# review:check ENFORCA: approved exige zero finding critical/high `open` — satisfeito
+# (consolidado 0 open / 4 closed). O Human Gate decide o PRÓXIMO MOVIMENTO (avançar
+# para co-projection, seq 8 — reordenado antes de co-enforcement em 2026-06-11), NÃO
+# merge em main (modo unit). Decisão tomada com o PR já Ready (HEAD final d806a8359a78,
+# CI 11/11 verde: governance-pr-check + repo-validation/validate em Ubuntu+Windows +
+# smoke em Ubuntu/macOS/Windows × Node 22/24).
+checkpoint: "npm-toolchain"
+actor: "@rosanarezende"
+ref: "#39"
+date: "2026-06-11"
+decision: approved
+note: "PR #39 (toolchain-simplification: npm puro como package manager canônico do framework — package-lock.json + npm ci; script-contracts/hooks/CI/release/templates/docs em um único runner; multi-PM preservado nos consumidores com Corepack condicional; FU-1 pr-body:update + FU-2 pr-ready:check; Template v3 + perfis de PR; review:seal; PrProfileContract; PIT-0010 → GG-0004; PIT-0011 capturado; retomada derivada saneada; co-projection reordenado para seq 8) APROVADO para AVANÇAR. Próximo movimento = abrir co-projection (checkpoint-co-projection, seq 8) em PR próprio stacked sobre #39; NÃO autoriza merge isolado em main."
+basis: >
+  Human Gate aprovado para o toolchain-simplification / PR #39: PR em Ready,
+  não mergeado, HEAD final d806a8359a78, CI remoto 11/11 verde no HEAD final.
+  Technical Audit approved (0 findings, audit_evidence selada) e Architectural
+  Review approved (F1–F4, todos low): fixes em 819007a, resolutions com
+  ref, revalidação independente EV1 (events/c-npm-toolchain-
+  architectural_review-EV1.yml, approved, sem regressões) e dispositions
+  fechadas como accepted pela owner — consolidado 0 open / 4 closed. Visão
+  pretendida preservada como baseline desde o Draft; Valor entregue preenchido
+  com imagem final e evidências. O escopo prometido corresponde ao diff:
+  npm puro ponta a ponta no repo do framework, capacidade multi-PM intacta nos
+  consumidores, e a governança operacional nascida das dores do próprio fluxo
+  (contratos executáveis no lugar de memória de agente — GG-0004). Esta
+  decisão NÃO autoriza merge em main nem merge isolado do #39: o merge
+  permanece condicionado ao fechamento atômico da stack (modo unit) e ao gate
+  final da stack (review.md R8), que permanece futuro. NÃO autoriza abrir
+  co-enforcement (CO-3, seq 9).
+next: >
+  Abrir o próximo PR stacked da Spec 0024: co-projection
+  (checkpoint-co-projection, seq 8) — handoff situado derivado + contrato de
+  carga (estender o comando handoff com reviews/gates/ahead-behind/próxima
+  ação única + selo de geração; handoff:check advisory-first).
