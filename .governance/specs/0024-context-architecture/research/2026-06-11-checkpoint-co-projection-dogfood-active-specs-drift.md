@@ -303,6 +303,62 @@ arquiteturais da lane; GitHub proibido). Nenhum review realizado nesta rodada
 "faça o Architectural Review" e o agente (via bootstrap do AGENTS) chega ao
 briefing sem mega-prompt. Se ainda precisar de prompt extenso, a correção falhou.
 
+## Rodada 6 (2026-06-12) — briefing descoberto, artefato impossível
+
+**Pedido da owner (uma frase):** "Faça o Technical Audit do checkpoint atual."
+
+**O que funcionou:** o agente revisor descobriu sozinho `guidelines review
+technical-audit` (via bootstrap), inferiu `verification` corretamente, encontrou o
+review original e derivou o path do EV1 — o mega-prompt da rodada 5 NÃO foi
+necessário. A correção da R5 passou no seu critério de falsificação.
+
+**O que falhou (dois bugs estruturais):** (1) `ReviewEvent` exigia `verifies[]` com
+findings EXISTENTES — um review aprovado com `findings_emitted: 0` não tem ref
+legítimo, e o agente inventou `technical_audit#F1` artificial num evento `blocked`;
+(2) `review:seal` só selava reviews — o agente criou `scratch/seal.mjs` reproduzindo
+o algoritmo de fingerprint à mão. Resultado: evento improvisado + commit local que
+não podiam virar review canônico. **Limpeza:** commit `04567a1` (só o evento
+improvisado) preservado em branch local de segurança (`backup/ta-ev1-blocked-04567a1`,
+não publicada); branch de trabalho retornada ao remoto; `scratch/seal.mjs` (untracked)
+removido.
+
+**Hipótese falsificada:** "projetar policy/path/schema/comandos basta para tornar o
+review executável". O contrato foi DESCOBERTO, mas ainda exigiu ritual manual NA
+EXECUÇÃO — evidência distinta das rodadas anteriores (4ª ocorrência do PIT-0011).
+
+**Conclusão:** o contrato situado também precisa garantir que **o artefato prescrito
+seja produzível integralmente pelas ferramentas canônicas**.
+
+**Correção (modelo de dois escopos):**
+
+```text
+scope: findings → revalida findings específicos pós-resolutions
+                  (verifies obrigatório; eventos históricos sem scope = findings)
+scope: review   → revalida o REVIEW INTEIRO contra novo subject
+                  (zero findings incluso; verifies PROIBIDO; review_fingerprint
+                  do original + previous_subject_ref + subject_ref; original
+                  imutável; evento append-only; decisão não reescreve o selado)
+```
+
+- Fingerprint do evento: elemento tagueado `["scope:review", fp, prevRef]` —
+  históricos byte-idênticos; mudar scope/subject muda o selo; algoritmo único
+  (nenhuma cópia).
+- `review:check` valida scope=review: review da lane existe + `review_fingerprint`
+  declarado == selo REAL do original (tamper-evident); consolidado distingue
+  `(N review-verification)`; nenhum finding fechado inventado.
+- `review:seal` POLIMÓRFICO: detecta evento por `event_id` e sela
+  `event_fingerprint` com a mesma UX (`--file`); no-op/tamper preservados;
+  `ReviewArtifact` agora expõe `reviewFingerprint` (selo validado) para referência.
+- Briefing infere o scope (resolutions pendentes → findings; senão → review) e
+  fornece fp real do original, previous subject (`unknown`), subject atual e o
+  comando de seal — **nenhum script manual recomendado**.
+- e2e em fixture: review limpo + HEAD avançado → evento scope=review → seal
+  canônico → check verde.
+
+**Estado:** TA original intacto (`approved`, fp `538f2be5aed1`); EV1 real NÃO criado
+nesta rodada (implementação move o HEAD; o revisor independente executa a
+verification sobre o HEAD final com uma frase).
+
 ## Referências
 
 - Commit da correção: `5881a85` (fix(spec-0024): enforca coerencia da projecao de specs ativas)
