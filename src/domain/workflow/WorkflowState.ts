@@ -34,6 +34,18 @@ export interface TopologyCursor {
   readonly checkpoint: string;
 }
 
+/**
+ * Override SITUADO de requirement de review para um nó específico (CO-4,
+ * rodada 8): a owner ajusta a força de um tipo neste nó sem editar a policy
+ * global. Tightening/relaxation são governados por
+ * `review-policy.yml § review_requirement_overrides`.
+ */
+export interface NodeReviewRequirementOverride {
+  readonly requirement: "disabled" | "optional" | "recommended" | "required";
+  readonly reason?: string;
+  readonly actor?: string;
+}
+
 export interface PrTopologyNode {
   readonly id: string;
   readonly github_pr: number | null;
@@ -41,6 +53,8 @@ export interface PrTopologyNode {
   readonly terminal: boolean;
   readonly sequence: number | null;
   readonly checkpoints: ReadonlyArray<string>;
+  /** Overrides situados por tipo de review (opcional). */
+  readonly review_requirements?: Readonly<Record<string, NodeReviewRequirementOverride>>;
 }
 
 export interface TopologyPrs {

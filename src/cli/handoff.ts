@@ -24,8 +24,10 @@ import { parseInsightsLedger } from "../infrastructure/yaml/insightsLedgerSerial
 import { ActiveSpecEntry } from "../domain/workflow/ActiveSpecEntry.js";
 import { PrTopologyNode, WorkflowState } from "../domain/workflow/WorkflowState.js";
 import { parseSpecBranch } from "../app/workflow/DetectActiveSpec.js";
-import { consolidate, discover } from "./reviewCheck.js";
+import { consolidate, discover, observedReviewStates } from "./reviewCheck.js";
 import { GhSnapshotCollector, detectRepo } from "./prReadyCheck.js";
+import { buildReviewTypeRegistry, deriveEffectiveReviewStatuses } from "./reviewRequirements.js";
+import { collectFunctionalFreshness } from "./reviewFreshness.js";
 import {
   HANDOFF_CONTRACT_VERSION,
   HandoffDerived,
@@ -35,6 +37,7 @@ import {
   HandoffLifecycleFact,
   HandoffNodeFact,
   HandoffPrFact,
+  HandoffReviewStatusFact,
   HandoffSourceFact,
   RepositoryContractFact,
   deriveHandoff,
@@ -364,6 +367,7 @@ export function ghRemotePrCollector(prNumber: number, repoRoot: string): Handoff
     headRefOid: snapshot.pr.headRefOid,
     checks: buckets,
     bodyReadyReasons: snapshot.readyBodyContractReasons,
+    labels: snapshot.pr.labels,
   };
 }
 
@@ -373,23 +377,55 @@ function normalizeCheckpoint(slug: string): string {
 
 function collectLifecycle(
   repoRoot: string,
-  cursor: { pr: string; checkpoint: string }
+  cursor: { pr: string; checkpoint: string },
+  specPath: string,
+  prLabels: readonly string[] | null
 ): { lifecycle: HandoffLifecycleFact; fingerprint: string; errors: string[] } {
   const { artifacts, errors } = discover(repoRoot);
   const { byCheckpoint } = consolidate(artifacts);
   const entry = byCheckpoint.find(
     (cp) => normalizeCheckpoint(cp.checkpoint) === normalizeCheckpoint(cursor.checkpoint)
   );
-  const requiredReviewRoles =
-    artifacts.requiredReviewRolesByCheckpoint?.[cursor.checkpoint] ??
-    artifacts.requiredReviewRolesByCheckpoint?.[normalizeCheckpoint(cursor.checkpoint)] ??
-    [];
   const resolutions = artifacts.resolutions
     .filter((r) => normalizeCheckpoint(r.checkpoint) === normalizeCheckpoint(cursor.checkpoint))
     .reduce((sum, r) => sum + r.resolutions.length, 0);
+
+  // Status efetivo por tipo do catálogo (CO-4, rodada 8): aplicabilidade +
+  // requisito + estado/freshness. Labels vêm do PR quando observadas; changed
+  // paths não são derivados aqui (regras dependentes ficam `unknown`).
+  const nodeCtx =
+    artifacts.topologyByCheckpoint?.[cursor.checkpoint] ??
+    artifacts.topologyByCheckpoint?.[normalizeCheckpoint(cursor.checkpoint)];
+  const freshness = collectFunctionalFreshness(repoRoot, `${specPath}/reviews`);
+  const statuses = deriveEffectiveReviewStatuses({
+    registry: artifacts.registry ?? buildReviewTypeRegistry(null).registry,
+    policy: artifacts.reviewPolicy ?? null,
+    ctx: {
+      prProfile: nodeCtx?.nodeRole ?? null,
+      labels: prLabels,
+      changedPaths: null,
+    },
+    ...(nodeCtx?.overrides ? { nodeOverrides: nodeCtx.overrides } : {}),
+    observed: observedReviewStates(artifacts, cursor.checkpoint),
+    functionalHead: freshness.effectiveFunctionalHead,
+  });
+  for (const s of statuses) for (const e of s.errors) errors.push(e);
+  const reviewStatuses: HandoffReviewStatusFact[] = statuses.map((s) => ({
+    typeId: s.typeId,
+    applicability: s.applicability,
+    requirement: s.requirement,
+    state: s.state,
+    decision: s.decision,
+    blocking: s.blocking,
+    source: s.requirementSource,
+  }));
+
   const lifecycle: HandoffLifecycleFact = {
     reviewDecisions: entry?.reviewDecisions ?? [],
-    requiredReviewRoles,
+    requiredReviewRoles: reviewStatuses
+      .filter((s) => s.requirement === "required")
+      .map((s) => s.typeId),
+    reviewStatuses,
     openFindings: entry?.totalOpen ?? 0,
     openBlocking: entry?.openBlocking.length ?? 0,
     closedFindings: entry?.totalClosed ?? 0,
@@ -680,41 +716,6 @@ export function collectHandoffFacts(
     ...(gitAvailable ? {} : { detail: "git indisponível (não-repo ou erro)" }),
   });
 
-  // Lifecycle (reviews/resolutions/gates) — mesmo leitor do review:check.
-  let lifecycle: HandoffLifecycleFact | null = null;
-  if (cursor) {
-    const collected = collectLifecycle(repoRoot, cursor);
-    lifecycle = collected.lifecycle;
-    sources.push({
-      id: "reviews",
-      origin: `${resolved.specPath}/{reviews,gates}/`,
-      status: collected.errors.length === 0 ? "fresh" : "degraded",
-      fingerprint: collected.fingerprint,
-      ...(collected.errors.length > 0
-        ? { detail: `${collected.errors.length} erro(s) de schema nos artefatos` }
-        : {}),
-    });
-  }
-
-  // Tasks do checkpoint.
-  const tasksOrigin = `${resolved.specPath}/tasks.md`;
-  const tasksText = readIfExists(repoRoot, tasksOrigin);
-  const tasks = cursor && tasksText !== null ? parseCheckpointTasks(tasksText, cursor) : [];
-  sources.push({
-    id: "tasks.md",
-    origin: tasksOrigin,
-    status: tasksText !== null ? "fresh" : "degraded",
-    fingerprint: tasksText !== null ? fingerprintSource(tasksText) : "-",
-    ...(tasksText !== null ? {} : { detail: "arquivo ausente" }),
-  });
-
-  const { insights, source: insightsSource } = collectInsights(
-    repoRoot,
-    specId,
-    cursor?.checkpoint ?? null
-  );
-  sources.push(insightsSource);
-
   // Fonte remota (PR) — nunca inventar estado: falha vira unavailable.
   let pullRequest: HandoffPrFact | null = null;
   if (node?.github_pr) {
@@ -746,6 +747,46 @@ export function collectHandoffFacts(
       });
     }
   }
+
+  // Lifecycle (reviews/resolutions/gates) — mesmo leitor do review:check.
+  let lifecycle: HandoffLifecycleFact | null = null;
+  if (cursor) {
+    const collected = collectLifecycle(
+      repoRoot,
+      cursor,
+      resolved.specPath,
+      pullRequest ? pullRequest.labels : null
+    );
+    lifecycle = collected.lifecycle;
+    sources.push({
+      id: "reviews",
+      origin: `${resolved.specPath}/{reviews,gates}/`,
+      status: collected.errors.length === 0 ? "fresh" : "degraded",
+      fingerprint: collected.fingerprint,
+      ...(collected.errors.length > 0
+        ? { detail: `${collected.errors.length} erro(s) de schema nos artefatos` }
+        : {}),
+    });
+  }
+
+  // Tasks do checkpoint.
+  const tasksOrigin = `${resolved.specPath}/tasks.md`;
+  const tasksText = readIfExists(repoRoot, tasksOrigin);
+  const tasks = cursor && tasksText !== null ? parseCheckpointTasks(tasksText, cursor) : [];
+  sources.push({
+    id: "tasks.md",
+    origin: tasksOrigin,
+    status: tasksText !== null ? "fresh" : "degraded",
+    fingerprint: tasksText !== null ? fingerprintSource(tasksText) : "-",
+    ...(tasksText !== null ? {} : { detail: "arquivo ausente" }),
+  });
+
+  const { insights, source: insightsSource } = collectInsights(
+    repoRoot,
+    specId,
+    cursor?.checkpoint ?? null
+  );
+  sources.push(insightsSource);
 
   const activeNode: HandoffNodeFact | null = node
     ? {
@@ -853,6 +894,19 @@ function renderLifecycle(facts: HandoffFacts, lines: string[]): void {
       lc.requiredReviewRoles.length > 0 ? ` · exigidos: ${lc.requiredReviewRoles.join(", ")}` : ""
     }`
   );
+  if (lc.reviewStatuses.length > 0) {
+    // Catálogo×requisito (CO-4 rodada 8): seção COMPACTA — informa, não obriga.
+    lines.push("- reviews aplicáveis:");
+    for (const s of lc.reviewStatuses) {
+      if (s.applicability === "no") {
+        lines.push(`  - ${s.typeId}: não aplicável`);
+      } else {
+        lines.push(
+          `  - ${s.typeId}: ${s.requirement} · ${s.state}${s.decision ? ` (${s.decision})` : ""} · ${s.blocking ? "BLOQUEIA" : "não bloqueia"}`
+        );
+      }
+    }
+  }
   lines.push(
     `- findings: ${lc.openFindings} open (${lc.openBlocking} bloqueante(s)) / ${lc.closedFindings} closed · resolutions: ${lc.resolutions}`
   );

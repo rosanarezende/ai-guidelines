@@ -2,6 +2,7 @@ import {
   HandoffFacts,
   HandoffLifecycleFact,
   HandoffPrFact,
+  HandoffReviewStatusFact,
   HandoffSourceFact,
   HandoffTaskFact,
   computeSeal,
@@ -24,14 +25,51 @@ const OPEN_TASK: HandoffTaskFact = {
   line: 98,
 };
 
+/** Builder de status efetivo (CO-4 r8): blocking derivado do contrato real. */
+function status(
+  typeId: string,
+  requirement: HandoffReviewStatusFact["requirement"],
+  state: HandoffReviewStatusFact["state"],
+  decision: string | null = null,
+  overrides: Partial<HandoffReviewStatusFact> = {}
+): HandoffReviewStatusFact {
+  return {
+    typeId,
+    applicability: "yes",
+    requirement,
+    state,
+    decision,
+    blocking: requirement === "required" && !(state === "current" && decision === "approved"),
+    source: "repo-default",
+    ...overrides,
+  };
+}
+
 const LIFECYCLE_EMPTY: HandoffLifecycleFact = {
   reviewDecisions: [],
   requiredReviewRoles: ["technical_audit", "architectural_review"],
+  reviewStatuses: [
+    status("technical_audit", "required", "missing"),
+    status("architectural_review", "required", "missing"),
+  ],
   openFindings: 0,
   openBlocking: 0,
   closedFindings: 0,
   resolutions: 0,
   gateDecision: null,
+};
+
+/** Lifecycle com reviews exigidos SATISFEITOS (required + current + approved). */
+const LIFECYCLE_REQUIRED_SATISFIED: HandoffLifecycleFact = {
+  ...LIFECYCLE_EMPTY,
+  reviewDecisions: [
+    { role: "technical_audit", decision: "approved" },
+    { role: "architectural_review", decision: "approved" },
+  ],
+  reviewStatuses: [
+    status("technical_audit", "required", "current", "approved"),
+    status("architectural_review", "required", "current", "approved"),
+  ],
 };
 
 const PR_DRAFT: HandoffPrFact = {
@@ -43,6 +81,7 @@ const PR_DRAFT: HandoffPrFact = {
   headRefOid: "0c796fb0000000",
   checks: { pass: 11, fail: 0, pending: 0 },
   bodyReadyReasons: [],
+  labels: [],
 };
 
 const SOURCES_FRESH: HandoffSourceFact[] = [
@@ -110,32 +149,68 @@ describe("deriveNextAction · precedência [CO-4]", () => {
     expect(action.basis.join(" ")).toContain("3 open / 2 closed");
   });
 
-  it("3 — implementação concluída + review exigido pendente → executar o review", () => {
+  it("3 — implementação concluída + review REQUIRED pendente → executar o review", () => {
     const action = deriveNextAction(
       facts({
         tasks: [{ ...OPEN_TASK, done: true }],
         lifecycle: {
           ...LIFECYCLE_EMPTY,
           reviewDecisions: [{ role: "technical_audit", decision: "approved" }],
+          reviewStatuses: [
+            status("technical_audit", "required", "current", "approved"),
+            status("architectural_review", "required", "missing"),
+          ],
         },
       })
     );
     expect(action.kind).toBe("run-required-review");
     expect(action.description).toContain("architectural_review");
-    expect(action.basis.join(" ")).toContain("review-policy exige");
+    expect(action.basis.join(" ")).toContain("required");
   });
 
-  it("4 — reviews concluídos + Draft + body incompleto → preparar Ready", () => {
+  it("3b — required STALE bloqueia (revalidação obrigatória), required current passa", () => {
+    const action = deriveNextAction(
+      facts({
+        tasks: [{ ...OPEN_TASK, done: true }],
+        lifecycle: {
+          ...LIFECYCLE_REQUIRED_SATISFIED,
+          reviewStatuses: [
+            status("technical_audit", "required", "stale", "approved"),
+            status("architectural_review", "required", "current", "approved"),
+          ],
+        },
+        pullRequest: { ...PR_DRAFT, bodyReadyReasons: [] },
+      })
+    );
+    expect(action.kind).toBe("run-required-review");
+    expect(action.description).toContain("technical_audit (stale)");
+  });
+
+  it("3c — optional/recommended stale NÃO viram próxima ação (freshness ≠ obrigação)", () => {
     const action = deriveNextAction(
       facts({
         tasks: [{ ...OPEN_TASK, done: true }],
         lifecycle: {
           ...LIFECYCLE_EMPTY,
-          reviewDecisions: [
-            { role: "technical_audit", decision: "approved" },
-            { role: "architectural_review", decision: "approved" },
+          reviewStatuses: [
+            status("technical_audit", "optional", "stale", "approved"),
+            status("architectural_review", "recommended", "missing"),
           ],
         },
+        pullRequest: { ...PR_DRAFT, bodyReadyReasons: ["Valor entregue ainda é placeholder"] },
+      })
+    );
+    expect(action.kind).not.toBe("run-required-review");
+    expect(action.kind).toBe("prepare-ready");
+    // recomendação aparece como base citável LATERAL, não como ação.
+    expect(action.basis.join(" ")).toContain("recomendação (não bloqueia): architectural_review");
+  });
+
+  it("4 — reviews obrigatórios satisfeitos + Draft + body incompleto → preparar Ready", () => {
+    const action = deriveNextAction(
+      facts({
+        tasks: [{ ...OPEN_TASK, done: true }],
+        lifecycle: LIFECYCLE_REQUIRED_SATISFIED,
         pullRequest: { ...PR_DRAFT, bodyReadyReasons: ["Valor entregue ainda é placeholder"] },
       })
     );
@@ -143,17 +218,28 @@ describe("deriveNextAction · precedência [CO-4]", () => {
     expect(action.basis.join(" ")).toContain("Valor entregue");
   });
 
-  it("5 — PR Ready + Human Gate ausente → exercer o Human Gate (humano decide)", () => {
+  it("4b — ZERO reviews obrigatórios (todos optional) também libera preparar Ready", () => {
     const action = deriveNextAction(
       facts({
         tasks: [{ ...OPEN_TASK, done: true }],
         lifecycle: {
           ...LIFECYCLE_EMPTY,
-          reviewDecisions: [
-            { role: "technical_audit", decision: "approved" },
-            { role: "architectural_review", decision: "approved" },
+          reviewStatuses: [
+            status("technical_audit", "optional", "missing"),
+            status("architectural_review", "optional", "missing"),
           ],
         },
+        pullRequest: { ...PR_DRAFT, bodyReadyReasons: ["Valor entregue ainda é placeholder"] },
+      })
+    );
+    expect(action.kind).toBe("prepare-ready");
+  });
+
+  it("5 — PR Ready + Human Gate ausente → exercer o Human Gate (humano decide)", () => {
+    const action = deriveNextAction(
+      facts({
+        tasks: [{ ...OPEN_TASK, done: true }],
+        lifecycle: LIFECYCLE_REQUIRED_SATISFIED,
         pullRequest: { ...PR_DRAFT, isDraft: false },
       })
     );
@@ -169,11 +255,7 @@ describe("deriveNextAction · precedência [CO-4]", () => {
       facts({
         tasks: [{ ...OPEN_TASK, done: true }],
         lifecycle: {
-          ...LIFECYCLE_EMPTY,
-          reviewDecisions: [
-            { role: "technical_audit", decision: "approved" },
-            { role: "architectural_review", decision: "approved" },
-          ],
+          ...LIFECYCLE_REQUIRED_SATISFIED,
           gateDecision: "approved",
         },
       })
@@ -220,13 +302,7 @@ describe("deriveNextAction · precedência [CO-4]", () => {
     const action = deriveNextAction(
       facts({
         tasks: [{ ...OPEN_TASK, done: true }],
-        lifecycle: {
-          ...LIFECYCLE_EMPTY,
-          reviewDecisions: [
-            { role: "technical_audit", decision: "approved" },
-            { role: "architectural_review", decision: "approved" },
-          ],
-        },
+        lifecycle: LIFECYCLE_REQUIRED_SATISFIED,
         pullRequest: null,
         sources: [
           ...SOURCES_FRESH.filter((s) => s.id !== "pull-request"),
@@ -311,13 +387,18 @@ describe("deriveProhibitions · derivadas do estado [CO-4]", () => {
   });
 
   it("PR elegível a Ready (reviews ok + body ok) ⇒ não proíbe a conversão", () => {
+    const prohibitions = deriveProhibitions(facts({ lifecycle: LIFECYCLE_REQUIRED_SATISFIED }));
+    expect(prohibitions.join("\n")).not.toContain("NÃO converter o PR #41 para Ready");
+  });
+
+  it("reviews OPTIONAL stale/missing ⇒ Ready NÃO é proibido por eles (freshness ≠ obrigação)", () => {
     const prohibitions = deriveProhibitions(
       facts({
         lifecycle: {
           ...LIFECYCLE_EMPTY,
-          reviewDecisions: [
-            { role: "technical_audit", decision: "approved" },
-            { role: "architectural_review", decision: "approved" },
+          reviewStatuses: [
+            status("technical_audit", "optional", "stale", "approved"),
+            status("architectural_review", "optional", "missing"),
           ],
         },
       })

@@ -144,7 +144,7 @@ describe("handoff · núcleo derivado [CO-4]", () => {
     expect(text).toContain("- base factual:");
     expect(text).toContain("## 6. Ações proibidas (derivadas do estado)");
     expect(text).toContain("## 10. Selo de geração");
-    expect(text).toMatch(/- selo: [0-9a-f]{12} \(contrato v2;/);
+    expect(text).toMatch(/- selo: [0-9a-f]{12} \(contrato v3;/);
   });
 
   it("DADO fonte remota não habilitada ENTÃO pull-request é declarado unavailable (nunca inventado)", () => {
@@ -189,6 +189,7 @@ describe("handoff · núcleo derivado [CO-4]", () => {
         headRefOid: "abc1234567890",
         checks: { pass: 9, fail: 0, pending: 1 },
         bodyReadyReasons: [],
+        labels: [],
       }),
     }).text;
 
@@ -353,6 +354,7 @@ describe("handoff · loadHandoff (contrato de carga) [CO-4]", () => {
           headRefOid: "abc1234",
           checks: { pass: 1, fail: 0, pending: 0 },
           bodyReadyReasons: [],
+          labels: [],
         };
       },
     });

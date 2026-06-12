@@ -14,6 +14,7 @@ import {
   normalizeRole,
   runReviewBrief,
 } from "./reviewBrief.js";
+import { buildReviewTypeRegistry } from "./reviewRequirements.js";
 
 // ── Fixture pura (estado análogo ao PR #41) ──────────────────────────────────
 
@@ -47,10 +48,12 @@ function facts(overrides: Partial<HandoffFacts> = {}): HandoffFacts {
       headRefOid: "b8f18c0aaaaaa",
       checks: { pass: 11, fail: 0, pending: 0 },
       bodyReadyReasons: [],
+      labels: [],
     },
     lifecycle: {
       reviewDecisions: [],
       requiredReviewRoles: [],
+      reviewStatuses: [],
       openFindings: 0,
       openBlocking: 0,
       closedFindings: 0,
@@ -522,11 +525,13 @@ describe("reviewBrief · política e conteúdo [CO-4]", () => {
     expect(brief.lane).toBeNull(); // sem lane → renderer aponta a policy, sem inventar
   });
 
-  it("9/10 — aliases canônicos resolvem; papel inválido é rejeitado", () => {
-    expect(normalizeRole("technical-audit")).toBe("technical_audit");
-    expect(normalizeRole("architectural-review")).toBe("architectural_review");
-    expect(normalizeRole("technical_audit")).toBe("technical_audit");
-    expect(normalizeRole("qualquer-coisa")).toBeNull();
+  it("9/10 — aliases canônicos resolvem via registry; tipo inválido é rejeitado", () => {
+    const { registry } = buildReviewTypeRegistry(null);
+    expect(normalizeRole("technical-audit", registry)).toBe("technical_audit");
+    expect(normalizeRole("architectural-review", registry)).toBe("architectural_review");
+    expect(normalizeRole("technical_audit", registry)).toBe("technical_audit");
+    expect(normalizeRole("auditoria-tecnica", registry)).toBe("technical_audit");
+    expect(normalizeRole("qualquer-coisa", registry)).toBeNull();
   });
 });
 
@@ -662,7 +667,7 @@ describe("reviewBrief · comando integrado [CO-4]", () => {
   it("10 — papel inválido falha com usage (exit 2)", () => {
     const { lines, logger } = fakeLogger();
     expect(runReviewBrief("/tmp", "papel-errado", logger, null)).toBe(2);
-    expect(lines.join("\n")).toContain("technical-audit | architectural-review");
+    expect(lines.join("\n")).toContain("Tipos disponíveis: architectural_review | technical_audit");
   });
 
   it("22 — repo consumidor sem spec ativa falha com diagnóstico (exit 1)", () => {

@@ -26,7 +26,6 @@
  */
 import * as path from "node:path";
 import * as fs from "node:fs";
-import { execFileSync } from "node:child_process";
 import {
   ReviewArtifact,
   ReviewEventArtifact,
@@ -34,9 +33,20 @@ import {
 } from "../infrastructure/yaml/reviewArtifactsReader.js";
 import {
   ReviewLanePolicy,
+  ReviewPolicy,
   ReviewPublicationPolicy,
   parseReviewPolicy,
 } from "../infrastructure/yaml/reviewPolicyReader.js";
+import {
+  EffectiveReviewStatus,
+  ReviewTypeDef,
+  ReviewTypeRegistry,
+  availableTypesLine,
+  buildReviewTypeRegistry,
+  deriveEffectiveReviewStatuses,
+  legacyDeprecationWarnings,
+  resolveReviewType,
+} from "./reviewRequirements.js";
 import { HandoffFacts } from "./handoffFacts.js";
 import {
   HandoffLoadSnapshot,
@@ -44,7 +54,8 @@ import {
   ghRemotePrCollector,
   loadHandoffSnapshot,
 } from "./handoff.js";
-import { discover } from "./reviewCheck.js";
+import { discover, observedReviewStates } from "./reviewCheck.js";
+import { WorkingTreeState, collectFunctionalFreshness } from "./reviewFreshness.js";
 
 export interface Logger {
   info: (msg: string) => void;
@@ -56,16 +67,46 @@ const defaultLogger: Logger = {
   error: (msg) => process.stderr.write(`${msg}\n`),
 };
 
-/** Aliases aceitos na CLI → role canônica dos artefatos. */
-const ROLE_ALIASES: Readonly<Record<string, string>> = {
-  "technical-audit": "technical_audit",
-  technical_audit: "technical_audit",
-  "architectural-review": "architectural_review",
-  architectural_review: "architectural_review",
-};
+/**
+ * Governança de reviews carregada da policy do repositório (CO-4, rodada 8):
+ * catálogo resolvido (framework defaults + tipos do repositório) + policy.
+ * Sem review-policy.yml o catálogo são os defaults distribuídos (TA/AR,
+ * enabled, optional) — consumidores não precisam de arquivo para ter os tipos.
+ */
+export interface ReviewGovernance {
+  readonly policy: ReviewPolicy | null;
+  readonly registry: ReviewTypeRegistry;
+  readonly errors: readonly string[];
+  readonly warnings: readonly string[];
+}
 
-export function normalizeRole(raw: string): string | null {
-  return ROLE_ALIASES[raw] ?? null;
+export function loadReviewGovernance(repoRoot: string): ReviewGovernance {
+  let policy: ReviewPolicy | null = null;
+  const errors: string[] = [];
+  const policyPath = path.join(repoRoot, ".governance/review-policy.yml");
+  if (fs.existsSync(policyPath)) {
+    try {
+      policy = parseReviewPolicy(fs.readFileSync(policyPath, "utf-8"));
+    } catch (e) {
+      errors.push(e instanceof Error ? e.message : String(e));
+    }
+  }
+  const build = buildReviewTypeRegistry(policy);
+  return {
+    policy,
+    registry: build.registry,
+    errors: [...errors, ...build.errors],
+    warnings: [...build.warnings, ...(policy ? legacyDeprecationWarnings(policy) : [])],
+  };
+}
+
+/**
+ * Resolve o argumento da CLI → tipo do catálogo. Mantido o nome legado
+ * `normalizeRole` para compat: agora é registry-driven (tipos customizados
+ * entram pelos aliases declarados na policy, sem mudança no core).
+ */
+export function normalizeRole(raw: string, registry: ReviewTypeRegistry): string | null {
+  return resolveReviewType(registry, raw)?.id ?? null;
 }
 
 export type ReviewBriefMode = "create" | "current" | "verification" | "blocked";
@@ -163,6 +204,10 @@ export interface ReviewBrief {
   readonly events: ReadonlyArray<string>;
   readonly artifact: ReviewArtifactPlan;
   readonly lane: ReviewLanePolicy | null;
+  /** Tipo do catálogo (origem framework|repository, título, template). */
+  readonly typeDef: ReviewTypeDef | null;
+  /** Status efetivo: aplicabilidade × requisito × estado × blocking. */
+  readonly effectiveStatus: EffectiveReviewStatus | null;
   readonly publication: ReviewPublicationPolicy | null;
   readonly allowedActions: ReadonlyArray<string>;
   readonly prohibitedActions: ReadonlyArray<string>;
@@ -175,16 +220,7 @@ export interface ReviewBrief {
   readonly derivedCommitMessage: string | null;
 }
 
-/**
- * Estado da working tree relativo ao objeto AUDITÁVEL (rodada 7):
- *   clean            → nada não-commitado;
- *   review-only      → só artefatos de review (paths canônicos da spec) — caso
- *                      legítimo de criação de artefato em curso; NÃO afirma que
- *                      código funcional mudou;
- *   functional-dirty → mudanças funcionais não commitadas — o objeto real de
- *                      trabalho diverge de QUALQUER commit ⇒ review bloqueado.
- */
-export type WorkingTreeState = "clean" | "review-only" | "functional-dirty" | "unknown";
+export type { WorkingTreeState } from "./reviewFreshness.js";
 
 export interface ReviewBriefInput {
   readonly facts: HandoffFacts;
@@ -193,6 +229,8 @@ export interface ReviewBriefInput {
   readonly roleEvents: ReadonlyArray<ReviewEventArtifact>;
   readonly resolutions: ReadonlyArray<ResolutionArtifact>;
   readonly lane: ReviewLanePolicy | null;
+  readonly typeDef?: ReviewTypeDef | null;
+  readonly effectiveStatus?: EffectiveReviewStatus | null;
   readonly publication: ReviewPublicationPolicy | null;
   /**
    * Último commit que altera algo FORA do diretório canônico de reviews da
@@ -339,7 +377,11 @@ export function deriveReviewBrief(input: ReviewBriefInput): ReviewBrief {
     artifact = {
       path: reviewPath ?? "(n/a)",
       kind: "review",
-      template: `${reviewsDir}/_TEMPLATE.review.yml`,
+      // Template do tipo quando declarado; fallback no genérico (tipos
+      // customizados funcionam sem template próprio).
+      template: input.typeDef?.template
+        ? `${reviewsDir}/${input.typeDef.template}`
+        : `${reviewsDir}/_TEMPLATE.review.yml`,
       nextEventId: null,
       verificationScope: null,
     };
@@ -514,6 +556,8 @@ export function deriveReviewBrief(input: ReviewBriefInput): ReviewBrief {
     events: eventLines,
     artifact,
     lane,
+    typeDef: input.typeDef ?? null,
+    effectiveStatus: input.effectiveStatus ?? null,
     publication,
     allowedActions,
     prohibitedActions,
@@ -530,98 +574,6 @@ export function deriveReviewBrief(input: ReviewBriefInput): ReviewBrief {
 export interface CollectedReviewBrief {
   readonly snapshot: HandoffLoadSnapshot;
   readonly brief: ReviewBrief;
-}
-
-function gitOrNull(repoRoot: string, args: readonly string[]): string | null {
-  try {
-    return execFileSync("git", [...args], {
-      cwd: repoRoot,
-      encoding: "utf8",
-      stdio: ["ignore", "pipe", "ignore"],
-    }).trim();
-  } catch {
-    return null;
-  }
-}
-
-/** `git status --porcelain` SEM trim (o status XY usa o espaço inicial). */
-function gitPorcelain(repoRoot: string): string | null {
-  try {
-    // -uall: lista ARQUIVOS untracked individualmente (sem colapsar diretórios)
-    // — a classificação review-only/functional depende do path completo.
-    return execFileSync("git", ["status", "--porcelain", "--untracked-files=all"], {
-      cwd: repoRoot,
-      encoding: "utf8",
-      stdio: ["ignore", "pipe", "ignore"],
-    });
-  } catch {
-    return null;
-  }
-}
-
-/** Paths de `git status --porcelain` (formato `XY <path>`; lida com rename "a -> b"). */
-function porcelainPaths(porcelain: string): string[] {
-  return porcelain
-    .split(/\r?\n/)
-    .filter((line) => line.length > 3)
-    .map((line) => {
-      const raw = line.slice(3);
-      const arrow = raw.indexOf(" -> ");
-      return (arrow >= 0 ? raw.slice(arrow + 4) : raw).replace(/^"|"$/g, "");
-    });
-}
-
-/**
- * Freshness FUNCIONAL (rodada 7): a cabeça auditável é o último commit que
- * altera algo fora do diretório CANÔNICO de reviews da spec (path governado —
- * não um pathspec genérico), e a working tree é classificada pelos mesmos
- * paths. `git log` ignora o que não foi commitado — por isso a classificação
- * da tree existe: funcional-sujo bloqueia em vez de fingir current.
- */
-function collectFunctionalFreshness(
-  repoRoot: string,
-  reviewsDirRel: string
-): {
-  effectiveFunctionalHead: string | null;
-  workingTreeState: WorkingTreeState;
-  functionalDirtyFiles: string[];
-} {
-  const normalizedReviewsDir = reviewsDirRel.replace(/\\/g, "/").replace(/\/+$/, "") + "/";
-  const isReviewPath = (p: string): boolean =>
-    p.replace(/\\/g, "/").startsWith(normalizedReviewsDir);
-
-  const effectiveFunctionalHead = gitOrNull(repoRoot, [
-    "log",
-    "-n",
-    "1",
-    "--format=%h",
-    "--",
-    ".",
-    `:(exclude)${normalizedReviewsDir}`,
-  ]);
-
-  const porcelain = gitPorcelain(repoRoot);
-  if (porcelain === null) {
-    return {
-      effectiveFunctionalHead: effectiveFunctionalHead || null,
-      workingTreeState: "unknown",
-      functionalDirtyFiles: [],
-    };
-  }
-  if (porcelain.trim() === "") {
-    return {
-      effectiveFunctionalHead: effectiveFunctionalHead || null,
-      workingTreeState: "clean",
-      functionalDirtyFiles: [],
-    };
-  }
-  const paths = porcelainPaths(porcelain);
-  const functionalDirtyFiles = paths.filter((p) => !isReviewPath(p));
-  return {
-    effectiveFunctionalHead: effectiveFunctionalHead || null,
-    workingTreeState: functionalDirtyFiles.length === 0 ? "review-only" : "functional-dirty",
-    functionalDirtyFiles,
-  };
 }
 
 export interface ReviewBriefOptions extends HandoffOptions {
@@ -648,21 +600,39 @@ export function collectReviewBrief(
     .sort((a, b) => a.eventId.localeCompare(b.eventId, undefined, { numeric: true }));
   const resolutions = artifacts.resolutions.filter((r) => matches(r.checkpoint));
 
-  let lane: ReviewLanePolicy | null = null;
-  let publication: ReviewPublicationPolicy | null = null;
-  const policyPath = path.join(repoRoot, ".governance/review-policy.yml");
-  if (fs.existsSync(policyPath)) {
-    try {
-      const policy = parseReviewPolicy(fs.readFileSync(policyPath, "utf-8"));
-      lane = policy.lanes?.[role] ?? null;
-      publication = policy.publication ?? null;
-    } catch {
-      lane = null;
-      publication = null;
-    }
-  }
+  // Catálogo×requisito (CO-4 rodada 8): objetivo/vetores vêm do tipo do
+  // catálogo (review_lanes legado já absorvido no merge do registry).
+  const governance = loadReviewGovernance(repoRoot);
+  const typeDef = resolveReviewType(governance.registry, role);
+  const lane: ReviewLanePolicy | null = typeDef
+    ? { objective: typeDef.objective, vectors: typeDef.vectors }
+    : null;
+  const publication: ReviewPublicationPolicy | null = governance.policy?.publication ?? null;
 
   const freshness = collectFunctionalFreshness(repoRoot, `${facts.spec.path}/reviews`);
+
+  // Status efetivo do tipo no contexto do nó: aplicabilidade, requisito (com
+  // overrides situados do nó) e estado/freshness. Labels do PR quando
+  // observadas; changed paths não derivados aqui (regras dependentes = unknown).
+  let effectiveStatus: EffectiveReviewStatus | null = null;
+  if (cursor) {
+    const nodeCtx =
+      artifacts.topologyByCheckpoint?.[cursor.checkpoint] ??
+      artifacts.topologyByCheckpoint?.[normalizeCheckpoint(cursor.checkpoint)];
+    const statuses = deriveEffectiveReviewStatuses({
+      registry: governance.registry,
+      policy: governance.policy,
+      ctx: {
+        prProfile: nodeCtx?.nodeRole ?? null,
+        labels: facts.pullRequest?.labels ?? null,
+        changedPaths: null,
+      },
+      ...(nodeCtx?.overrides ? { nodeOverrides: nodeCtx.overrides } : {}),
+      observed: observedReviewStates(artifacts, cursor.checkpoint),
+      functionalHead: freshness.effectiveFunctionalHead,
+    });
+    effectiveStatus = statuses.find((s) => s.typeId === role) ?? null;
+  }
 
   const brief = deriveReviewBrief({
     facts,
@@ -671,6 +641,8 @@ export function collectReviewBrief(
     roleEvents,
     resolutions,
     lane,
+    typeDef,
+    effectiveStatus,
     publication,
     effectiveFunctionalHead: freshness.effectiveFunctionalHead,
     workingTreeState: freshness.workingTreeState,
@@ -719,11 +691,31 @@ export function renderReviewBrief(collected: CollectedReviewBrief): string {
   );
   lines.push("");
   lines.push("## 2. Papel e autoridade");
-  lines.push(`- lane: ${brief.role}`);
+  lines.push(
+    `- tipo: ${brief.role}${brief.typeDef ? ` · origem: ${brief.typeDef.source} · ${brief.typeDef.title}` : ""}`
+  );
   if (brief.lane) {
     lines.push(`- objetivo: ${brief.lane.objective}`);
   } else {
-    lines.push("- objetivo: (lane não declarada em review-policy.yml § review_lanes)");
+    lines.push("- objetivo: (tipo não declarado no catálogo — review_types)");
+  }
+  if (brief.effectiveStatus) {
+    const s = brief.effectiveStatus;
+    lines.push(
+      `- política: requirement ${s.requirement} (fonte: ${s.requirementSource}) · aplicabilidade: ${s.applicability} · estado: ${s.state} · ${s.blocking ? "BLOQUEIA Ready/gate" : "não bloqueia Ready/gate"}`
+    );
+    if (s.matchedRuleIds.length > 0) {
+      lines.push(`- regras aplicadas: ${s.matchedRuleIds.join(", ")}`);
+    }
+    for (const note of s.notes) lines.push(`  - ${note}`);
+    if (
+      brief.authorization === null &&
+      (s.requirement === "optional" || s.requirement === "recommended")
+    ) {
+      lines.push(
+        "- pedido explícito da owner EXECUTA este tipo normalmente (optional/recommended não bloqueiam, mas estão disponíveis)."
+      );
+    }
   }
   lines.push(
     "- independência: o revisor NÃO corrige a implementação; findings são reportados, não resolvidos."
@@ -864,13 +856,28 @@ export function runReviewBrief(
   remoteOverride?: HandoffOptions["remote"],
   authorizationArg?: string
 ): number {
-  const role = normalizeRole(roleArg);
-  if (!role) {
+  const governance = loadReviewGovernance(repoRoot);
+  if (governance.errors.length > 0) {
+    logger.error(`❌ review — policy/catálogo inválido:`);
+    for (const e of governance.errors) logger.error(`   - ${e}`);
+    return 1;
+  }
+  const typeDef = resolveReviewType(governance.registry, roleArg);
+  if (!typeDef) {
     logger.error(
-      `❌ papel de review desconhecido: "${roleArg}". Use: technical-audit | architectural-review.`
+      `❌ tipo de review desconhecido: "${roleArg}". Tipos disponíveis: ${availableTypesLine(governance.registry)}. ` +
+        `Tipos customizados são declarados em .governance/review-policy.yml § review_types (ou via \`review type add <slug>\`).`
     );
     return 2;
   }
+  if (!typeDef.enabled) {
+    logger.error(
+      `❌ tipo de review "${typeDef.id}" está DESABILITADO neste repositório (review_types.${typeDef.id}.enabled: false). ` +
+        `Para habilitar: defina enabled: true em .governance/review-policy.yml § review_types.${typeDef.id}. Nada foi executado.`
+    );
+    return 1;
+  }
+  const role = typeDef.id;
   const authorization = parseAuthorization(authorizationArg);
   if (authorization === "invalid") {
     logger.error(
@@ -878,11 +885,20 @@ export function runReviewBrief(
     );
     return 2;
   }
+  for (const w of governance.warnings) logger.error(`⚠️  ${w}`);
   try {
     const collected = collectReviewBrief(repoRoot, role, {
       remote: remoteOverride !== undefined ? remoteOverride : ghRemotePrCollector,
       authorization,
     });
+    const status = collected.brief.effectiveStatus;
+    if (status?.applicability === "no") {
+      logger.error(
+        `❌ tipo "${role}" NÃO é aplicável neste contexto — ${status.applicabilityReasons.join("; ")}. ` +
+          `Aplicabilidade é governada em review-policy.yml § review_applicability.${role}. Nada foi executado.`
+      );
+      return 1;
+    }
     logger.info(renderReviewBrief(collected).trimEnd());
     return 0;
   } catch (error) {

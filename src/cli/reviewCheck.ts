@@ -21,7 +21,6 @@ import {
   parseReviewEvent,
   parseResolutions,
   parseGate,
-  REVIEW_ROLES,
   ReviewArtifact,
   ReviewEventArtifact,
   ResolutionArtifact,
@@ -32,8 +31,18 @@ import {
 import {
   activeReviewPolicyProfile,
   parseReviewPolicy,
+  ReviewPolicy,
   ReviewPolicyProfile,
 } from "../infrastructure/yaml/reviewPolicyReader.js";
+import {
+  ApplicabilityContext,
+  FRAMEWORK_REVIEW_TYPES,
+  NodeReviewOverride,
+  ReviewTypeRegistry,
+  availableTypesLine,
+  buildReviewTypeRegistry,
+  resolveRequirement,
+} from "./reviewRequirements.js";
 import { parseWorkflowState } from "../infrastructure/yaml/workflowStateSerializer.js";
 
 export interface Logger {
@@ -48,20 +57,44 @@ const defaultLogger: Logger = {
 
 const SPEC_ROOTS = [".governance/specs", ".specify/specs"] as const;
 
+/** Contexto do checkpoint na topologia (role do nó + overrides situados). */
+export interface CheckpointTopologyContext {
+  readonly nodeId: string;
+  readonly nodeRole: string;
+  readonly overrides?: Readonly<Record<string, NodeReviewOverride>>;
+}
+
 export interface SpecArtifacts {
   readonly reviews: readonly ReviewArtifact[];
   readonly reviewEvents: readonly ReviewEventArtifact[];
   readonly resolutions: readonly ResolutionArtifact[];
   readonly gates: readonly GateArtifact[];
   readonly allowedCheckpoints: readonly string[];
+  /** Tipos com requirement RESOLVIDO required no contexto do nó (só eles obrigam). */
   readonly requiredReviewRolesByCheckpoint?: Readonly<Record<string, readonly string[]>>;
   readonly policy?: ReviewPolicyProfile;
+  /** Policy completa (catálogo/aplicabilidade/requirements) quando existente. */
+  readonly reviewPolicy?: ReviewPolicy;
+  /** Catálogo resolvido (framework defaults + tipos do repositório). */
+  readonly registry?: ReviewTypeRegistry;
+  /** Contexto topológico por checkpoint — permite re-resolução com labels/paths. */
+  readonly topologyByCheckpoint?: Readonly<Record<string, CheckpointTopologyContext>>;
 }
 
-function allowedReviewRoles(policy?: ReviewPolicyProfile): Set<string> {
-  const roles = new Set<string>(REVIEW_ROLES);
-  for (const role of policy?.implementationPr.requiredReviewRoles ?? []) roles.add(role);
-  for (const role of policy?.integrationPr.requiredReviewRoles ?? []) roles.add(role);
+function allowedReviewRoles(artifacts: SpecArtifacts): Set<string> {
+  // Catálogo (inclui disabled — artefatos históricos de tipo desabilitado
+  // continuam válidos) + roles legadas declaradas em required_review_roles.
+  // Sem registry no input (consumo programático), os nativos do framework
+  // continuam conhecidos — TA/AR existem em qualquer consumidor.
+  const roles = new Set<string>(
+    (artifacts.registry?.types ?? FRAMEWORK_REVIEW_TYPES).map((t) => t.id)
+  );
+  for (const role of artifacts.policy?.implementationPr.requiredReviewRoles ?? []) {
+    roles.add(role);
+  }
+  for (const role of artifacts.policy?.integrationPr.requiredReviewRoles ?? []) {
+    roles.add(role);
+  }
   return roles;
 }
 
@@ -91,25 +124,44 @@ function normalizeCheckpoint(slug: string): string {
   return slug.replace(/^checkpoint-/, "");
 }
 
-function readPolicy(repoRoot: string, errors: string[]): ReviewPolicyProfile | undefined {
+function readPolicy(repoRoot: string, errors: string[]): ReviewPolicy | undefined {
   const policyPath = path.join(repoRoot, ".governance/review-policy.yml");
   if (!fs.existsSync(policyPath)) return undefined;
   try {
-    return activeReviewPolicyProfile(parseReviewPolicy(fs.readFileSync(policyPath, "utf-8")));
+    return parseReviewPolicy(fs.readFileSync(policyPath, "utf-8"));
   } catch (e) {
     errors.push((e as Error).message);
     return undefined;
   }
 }
 
-function requiredRolesForNodeRole(
-  nodeRole: string,
-  policy: ReviewPolicyProfile | undefined
+/**
+ * Tipos com requirement RESOLVIDO `required` para o nó (contexto local: labels
+ * e changed_paths não observáveis aqui ⇒ regras dependentes deles ficam
+ * `unknown` e NÃO escalam — consumidores com acesso ao PR re-resolvem).
+ * Conflitos de policy (mesma prioridade, valores incompatíveis) viram erro.
+ */
+function requiredRolesForNode(
+  node: { role: string; overrides?: Readonly<Record<string, NodeReviewOverride>> },
+  policy: ReviewPolicy | undefined,
+  registry: ReviewTypeRegistry,
+  errors: string[]
 ): readonly string[] {
-  if (!policy) return [];
-  return nodeRole === "integration"
-    ? policy.integrationPr.requiredReviewRoles
-    : policy.implementationPr.requiredReviewRoles;
+  const ctx: ApplicabilityContext = {
+    prProfile: node.role,
+    labels: null,
+    changedPaths: null,
+  };
+  const required: string[] = [];
+  for (const type of registry.types) {
+    if (!type.enabled) continue;
+    const resolved = resolveRequirement(type.id, policy ?? null, ctx, node.overrides?.[type.id]);
+    for (const e of resolved.errors) errors.push(e);
+    if (resolved.errors.length === 0 && resolved.level === "required") {
+      required.push(type.id);
+    }
+  }
+  return required;
 }
 
 function parseEventSequence(eventId: string): number | undefined {
@@ -145,7 +197,10 @@ export function consolidate(artifacts: SpecArtifacts): {
     allowed.add(normalizeCheckpoint(cp));
   }
   const requiredByCheckpoint = artifacts.requiredReviewRolesByCheckpoint ?? {};
-  const roles = allowedReviewRoles(artifacts.policy);
+  const roles = allowedReviewRoles(artifacts);
+  const availableHint = artifacts.registry
+    ? ` Tipos disponíveis: ${availableTypesLine(artifacts.registry)}.`
+    : "";
 
   const violations: string[] = [];
   const byCheckpoint: ConsolidatedCheckpoint[] = [];
@@ -171,14 +226,14 @@ export function consolidate(artifacts: SpecArtifacts): {
     for (const r of reviews) {
       if (!roles.has(r.role)) {
         violations.push(
-          `checkpoint ${cp}: review ${r.file} usa role "${r.role}" não declarada na review policy.`
+          `checkpoint ${cp}: review ${r.file} usa tipo "${r.role}" desconhecido do catálogo.${availableHint}`
         );
       }
     }
     for (const e of reviewEvents) {
       if (!roles.has(e.role)) {
         violations.push(
-          `checkpoint ${cp}: review event ${e.file} usa role "${e.role}" não declarada na review policy.`
+          `checkpoint ${cp}: review event ${e.file} usa tipo "${e.role}" desconhecido do catálogo.${availableHint}`
         );
       }
     }
@@ -350,6 +405,38 @@ export function consolidate(artifacts: SpecArtifacts): {
   return { byCheckpoint, violations };
 }
 
+/**
+ * Estado OBSERVADO por tipo no checkpoint: decisão do review existente +
+ * subject_ref mais recente (último evento com subject_ref vence — o ledger
+ * append-only avança a cobertura; o review original permanece imutável).
+ * Genérico por role string: tipos customizados entram sem mudança aqui.
+ */
+export function observedReviewStates(
+  artifacts: SpecArtifacts,
+  checkpoint: string
+): Record<string, { latestSubjectRef: string | null; decision: string | null }> {
+  const norm = normalizeCheckpoint(checkpoint);
+  const observed: Record<string, { latestSubjectRef: string | null; decision: string | null }> = {};
+  for (const r of artifacts.reviews) {
+    if (normalizeCheckpoint(r.checkpoint) !== norm) continue;
+    observed[r.role] = {
+      latestSubjectRef: r.subjectRef ?? null,
+      decision: r.decision,
+    };
+  }
+  for (const e of [...artifacts.reviewEvents].sort((a, b) =>
+    a.eventId.localeCompare(b.eventId, undefined, { numeric: true })
+  )) {
+    if (normalizeCheckpoint(e.checkpoint) !== norm) continue;
+    if (!e.subjectRef) continue;
+    const current = observed[e.role];
+    if (current) {
+      observed[e.role] = { ...current, latestSubjectRef: e.subjectRef };
+    }
+  }
+  return observed;
+}
+
 /** Carrega reviews/resolutions/gates/policy de todas as specs (reusado por pr-ready:check). */
 export function discover(repoRoot: string): { artifacts: SpecArtifacts; errors: string[] } {
   const reviews: ReviewArtifact[] = [];
@@ -358,8 +445,13 @@ export function discover(repoRoot: string): { artifacts: SpecArtifacts; errors: 
   const gates: GateArtifact[] = [];
   const allowedCheckpoints: string[] = [];
   const requiredReviewRolesByCheckpoint: Record<string, readonly string[]> = {};
+  const topologyByCheckpoint: Record<string, CheckpointTopologyContext> = {};
   const errors: string[] = [];
-  const policy = readPolicy(repoRoot, errors);
+  const reviewPolicy = readPolicy(repoRoot, errors);
+  const policy = reviewPolicy ? activeReviewPolicyProfile(reviewPolicy) : undefined;
+  const registryBuild = buildReviewTypeRegistry(reviewPolicy ?? null);
+  for (const e of registryBuild.errors) errors.push(e);
+  const registry = registryBuild.registry;
   for (const rootRel of SPEC_ROOTS) {
     const root = path.join(repoRoot, rootRel);
     if (!fs.existsSync(root)) continue;
@@ -377,9 +469,21 @@ export function discover(repoRoot: string): { artifacts: SpecArtifacts; errors: 
               ...topology.prs.active,
               ...topology.prs.planned,
             ]) {
-              const requiredRoles = requiredRolesForNodeRole(node.role, policy);
+              const nodeContext: CheckpointTopologyContext = {
+                nodeId: node.id,
+                nodeRole: node.role,
+                ...(node.review_requirements ? { overrides: node.review_requirements } : {}),
+              };
+              const requiredRoles = requiredRolesForNode(
+                { role: node.role, overrides: node.review_requirements },
+                reviewPolicy,
+                registry,
+                errors
+              );
               for (const cp of node.checkpoints) {
                 allowedCheckpoints.push(cp);
+                topologyByCheckpoint[cp] = nodeContext;
+                topologyByCheckpoint[normalizeCheckpoint(cp)] = nodeContext;
                 if (requiredRoles.length > 0) {
                   requiredReviewRolesByCheckpoint[cp] = requiredRoles;
                   requiredReviewRolesByCheckpoint[normalizeCheckpoint(cp)] = requiredRoles;
@@ -428,7 +532,10 @@ export function discover(repoRoot: string): { artifacts: SpecArtifacts; errors: 
       gates,
       allowedCheckpoints,
       requiredReviewRolesByCheckpoint,
+      topologyByCheckpoint,
+      registry,
       ...(policy ? { policy } : {}),
+      ...(reviewPolicy ? { reviewPolicy } : {}),
     },
     errors,
   };

@@ -28,8 +28,11 @@ import { createHash } from "node:crypto";
  * selo) e no recibo (recibo de versão antiga vira `invalid` ⇒ força recarga).
  * v2: cápsula de contrato global (identidade + bootstrap + regras obrigatórias
  * + script-contract) entra no snapshot/fontes.
+ * v3: catálogo×requisito de reviews (CO-4, rodada 8) — lifecycle ganha
+ * `reviewStatuses` (aplicabilidade/requisito/estado por tipo) e o PR ganha
+ * `labels`; a derivação da próxima ação muda (só required bloqueia).
  */
-export const HANDOFF_CONTRACT_VERSION = 2;
+export const HANDOFF_CONTRACT_VERSION = 3;
 
 /** Regra aplicável projetada na cápsula — id+título+fonte; NUNCA o corpo. */
 export interface ApplicableRuleFact {
@@ -104,11 +107,33 @@ export interface HandoffPrFact {
   readonly checks: { readonly pass: number; readonly fail: number; readonly pending: number };
   /** Razões de falha do contrato READY do body (governance-pr-check, isDraft=false). */
   readonly bodyReadyReasons: ReadonlyArray<string>;
+  /** Labels do PR — entrada de aplicabilidade/requirements de reviews. */
+  readonly labels: ReadonlyArray<string>;
+}
+
+/**
+ * Status EFETIVO de um tipo de review no checkpoint (CO-4, rodada 8): quatro
+ * conceitos independentes — catálogo (typeId), aplicabilidade, requisito e
+ * estado/freshness. `blocking` é a ÚNICA dimensão que trava o fluxo
+ * (requirement=required E não satisfeito); stale de optional/recommended é
+ * informação, nunca obrigação.
+ */
+export interface HandoffReviewStatusFact {
+  readonly typeId: string;
+  readonly applicability: "yes" | "no" | "unknown";
+  readonly requirement: "disabled" | "optional" | "recommended" | "required";
+  readonly state: "missing" | "current" | "stale" | "in-progress";
+  readonly decision: string | null;
+  readonly blocking: boolean;
+  /** Origem da decisão de requirement (repo default, rule:<id>, node-override). */
+  readonly source: string;
 }
 
 export interface HandoffLifecycleFact {
   readonly reviewDecisions: ReadonlyArray<{ readonly role: string; readonly decision: string }>;
   readonly requiredReviewRoles: ReadonlyArray<string>;
+  /** Statuses efetivos dos tipos aplicáveis do catálogo. */
+  readonly reviewStatuses: ReadonlyArray<HandoffReviewStatusFact>;
   readonly openFindings: number;
   readonly openBlocking: number;
   readonly closedFindings: number;
@@ -249,11 +274,20 @@ function taskScopeExcerpt(task: HandoffTaskFact): string | null {
   return excerpt.length < match[1].trim().length ? `${excerpt}…` : excerpt;
 }
 
-function pendingRequiredReviews(lifecycle: HandoffLifecycleFact): string[] {
-  const approved = new Set(
-    lifecycle.reviewDecisions.filter((d) => d.decision === "approved").map((d) => d.role)
+/**
+ * Reviews que BLOQUEIAM o fluxo: somente requirement=required não satisfeito
+ * (missing, stale ou decisão ≠ approved). Optional/recommended NUNCA entram
+ * aqui — freshness não cria obrigação.
+ */
+function blockingReviews(lifecycle: HandoffLifecycleFact): HandoffReviewStatusFact[] {
+  return lifecycle.reviewStatuses.filter((s) => s.blocking);
+}
+
+/** Recomendações laterais: recommended não-current — informam, não bloqueiam. */
+function lateralRecommendations(lifecycle: HandoffLifecycleFact): HandoffReviewStatusFact[] {
+  return lifecycle.reviewStatuses.filter(
+    (s) => s.requirement === "recommended" && s.applicability !== "no" && s.state !== "current"
   );
-  return lifecycle.requiredReviewRoles.filter((role) => !approved.has(role));
 }
 
 /**
@@ -301,16 +335,20 @@ export function deriveNextAction(facts: HandoffFacts): NextAction {
     };
   }
 
-  // 3 — implementação concluída mas lane exigida pela review-policy sem approved.
+  // 3 — implementação concluída mas review REQUIRED não satisfeito (missing/
+  // stale/decisão ≠ approved). Optional/recommended NUNCA viram próxima ação
+  // por freshness — só requirement=required obriga (CO-4, rodada 8).
   if (lifecycle && implementationConcluded) {
-    const pending = pendingRequiredReviews(lifecycle);
-    if (pending.length > 0) {
+    const blocking = blockingReviews(lifecycle);
+    if (blocking.length > 0) {
       return {
         kind: "run-required-review",
-        description: `Executar o(s) review(s) exigido(s) pendente(s): ${pending.join(", ")}.`,
+        description: `Executar/revalidar o(s) review(s) OBRIGATÓRIO(s) pendente(s): ${blocking
+          .map((s) => `${s.typeId} (${s.state})`)
+          .join(", ")}.`,
         basis: [
           `tasks do checkpoint concluídas (${facts.tasks.length}/${facts.tasks.length})`,
-          `review-policy exige: ${lifecycle.requiredReviewRoles.join(", ")}`,
+          ...blocking.map((s) => `${s.typeId}: required (${s.source}) · ${s.state}`),
           `decisões presentes: ${lifecycle.reviewDecisions.map((d) => `${d.role}=${d.decision}`).join(", ") || "(nenhuma)"}`,
         ],
         blocking: true,
@@ -318,14 +356,15 @@ export function deriveNextAction(facts: HandoffFacts): NextAction {
     }
   }
 
-  const reviewsConcluded =
-    lifecycle !== null &&
-    lifecycle.requiredReviewRoles.length > 0 &&
-    pendingRequiredReviews(lifecycle).length === 0;
+  // Reviews exigidos satisfeitos — VACUAMENTE verdade quando nenhum tipo é
+  // required (zero review semântico obrigatório é o default do framework).
+  // As regras de fechamento (4/5) também exigem implementação concluída:
+  // sem required reviews, "nada pendente de review" não antecipa o Ready.
+  const reviewsConcluded = lifecycle !== null && blockingReviews(lifecycle).length === 0;
   const prSource = facts.sources.find((s) => s.id === "pull-request");
   const remoteUnavailable = prSource !== undefined && prSource.status !== "fresh";
 
-  if (reviewsConcluded && lifecycle.gateDecision === null) {
+  if (reviewsConcluded && implementationConcluded && lifecycle.gateDecision === null) {
     // 4b — a decisão Ready/gate depende do estado remoto; sem ele, reconciliar a fonte.
     if (facts.pullRequest === null && remoteUnavailable) {
       return {
@@ -334,7 +373,7 @@ export function deriveNextAction(facts: HandoffFacts): NextAction {
           "Restabelecer a fonte remota (PR via gh) para decidir preparação de Ready/Human Gate — não inventar estado remoto.",
         basis: [
           `fonte pull-request: ${prSource.status}${prSource.detail ? ` (${prSource.detail})` : ""}`,
-          "reviews exigidos concluídos; próximo passo depende de Draft/Ready do PR",
+          "nenhum review obrigatório pendente; próximo passo depende de Draft/Ready do PR",
         ],
         blocking: false,
       };
@@ -345,7 +384,10 @@ export function deriveNextAction(facts: HandoffFacts): NextAction {
         kind: "prepare-ready",
         description: `Preparar o PR #${facts.pullRequest.number} para Ready: completar o body (contrato READY) e validar com pr-ready:check.`,
         basis: [
-          "reviews exigidos concluídos (todas as lanes approved)",
+          "nenhum review obrigatório pendente (required satisfeitos ou inexistentes)",
+          ...lateralRecommendations(lifecycle).map(
+            (s) => `recomendação (não bloqueia): ${s.typeId} ${s.state}`
+          ),
           ...facts.pullRequest.bodyReadyReasons.map((r) => `body: ${r}`),
         ],
         blocking: false,
@@ -358,7 +400,10 @@ export function deriveNextAction(facts: HandoffFacts): NextAction {
         description: `Exercer o Human Gate do checkpoint ${facts.cursor?.checkpoint ?? "?"} (decisão da owner; o gate artifact nasce DEPOIS da decisão).`,
         basis: [
           `PR #${facts.pullRequest.number} Ready (não-Draft) no estado ${facts.pullRequest.state}`,
-          "reviews exigidos concluídos; gate artifact ausente",
+          "nenhum review obrigatório pendente; gate artifact ausente",
+          ...lateralRecommendations(lifecycle).map(
+            (s) => `advisory ao gate (não bloqueia): ${s.typeId} ${s.state}`
+          ),
         ],
         blocking: true,
       };
@@ -420,14 +465,15 @@ export function deriveProhibitions(facts: HandoffFacts): string[] {
     );
   }
   if (facts.pullRequest?.isDraft) {
+    // Reviews optional/recommended (mesmo stale) NÃO entram aqui — somente
+    // required não satisfeito e o contrato READY do body condicionam o Ready.
     const readyEligible =
       lifecycle !== null &&
-      lifecycle.requiredReviewRoles.length > 0 &&
-      pendingRequiredReviews(lifecycle).length === 0 &&
+      blockingReviews(lifecycle).length === 0 &&
       facts.pullRequest.bodyReadyReasons.length === 0;
     if (!readyEligible) {
       prohibitions.push(
-        `NÃO converter o PR #${facts.pullRequest.number} para Ready — precondições pendentes (reviews exigidos/contrato READY do body; valide com pr-ready:check).`
+        `NÃO converter o PR #${facts.pullRequest.number} para Ready — precondições pendentes (reviews OBRIGATÓRIOS/contrato READY do body; valide com pr-ready:check).`
       );
     }
   }
