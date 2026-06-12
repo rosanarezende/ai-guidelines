@@ -251,6 +251,58 @@ tem escopo por nó — extensão só se um caso real exigir); enforcement do rec
 desconectado; substituída a seção fixa "Regras situacionais mínimas" pela cápsula
 derivada (texto inventado eliminado do renderer).
 
+## Rodada 5 (2026-06-12) — contrato de review invisível
+
+**Pedido simples da owner:** "faça uma auditoria técnica". **O que foi preciso:** um
+mega-prompt reconstruindo spec/checkpoint ativos, intervalo, papel, path do artefato,
+schema, geração de fingerprints, comandos, ações permitidas/proibidas, formato de
+devolução, commit/push e GitHub. **Mesmo assim** (Technical Audit via Antigravity,
+2026-06-12): (1) o agente publicou comentário redundante no PR porque o prompt citava
+GitHub como projeção opcional — comentário SEM autoridade governada; (2) narrou um
+fingerprint divergente do real do artefato (`538f2be5aed1`); (3) seria preciso um
+segundo prompt extenso só para reconciliar a evidência.
+
+**Hipótese falsificada:** "review-policy + schemas + templates + review:seal +
+review:check bastam para tornar o review operacionalmente descobrível". Falso — o
+contrato EXISTIA no repositório inteiro e não era projetado no momento da ação
+(3ª ocorrência do PIT-0011, registrada via `insight saw`).
+
+**Correção (briefing situado de reviews):** `npm run guidelines -- review
+<technical-audit|architectural-review>` — o verbo `review` passou à governança
+(ReviewCommand; `review [<pr>]` numérico delega ao triage, compat v1.1.0). O comando
+é um ATO DE CARGA (mesmo snapshot do handoff via `loadHandoffSnapshot`; recibo
+atualizado; anti-TOCTOU) e projeta: papel/objetivo/autoridade (lane governada em
+`review-policy.yml § review_lanes` — vetores por papel, nada hardcoded no renderer);
+**modo inferido determinístico** (create / current / verification / blocked, com base
+factual); objeto auditado (base/head/intervalo); artefato-alvo exato (path canônico,
+template, `EV<N>` append-only); findings/resolutions/events da lane; ações
+permitidas/proibidas; comandos de validação; estrutura padronizada do relatório final.
+
+**Proveniência do objeto auditado:** novo campo `subject_ref` (SHA ou `base..head`)
+nos reviews e eventos — backward-compatible (extensão tagueada no
+`review_fingerprint`; elemento condicional no `event_fingerprint`; selos históricos
+byte-idênticos; `review:seal`/`review:check` reconhecem). Reviews históricos sem o
+campo = proveniência `unknown` → NUNCA "fresh" por suposição → modo `verification`
+degradado (revalidar cobertura completa). Templates documentam o campo.
+
+**Política de publicação machine-readable** (`review-policy.yml § publication`):
+artefato na spec = canal canônico; **GitHub forbidden-by-default**; comentário/review
+remoto só com autorização explícita da owner. O briefing exibe; nada é publicado
+automaticamente; sem fallback que comenta porque APPROVE falhou.
+
+**Dogfood no estado real do #41:** `review technical-audit` → TA existente
+(`approved`, fp real `538f2be5aed1` no output) SEM subject_ref → **VERIFICATION
+degradada** (evento `events/c-co-projection-technical_audit-EV1.yml`; revalidar
+cobertura completa até o HEAD final; original preservado). `review
+architectural-review` → nenhum AR → **CREATE**
+(`c-co-projection-architectural_review.yml`; subject = HEAD atual; vetores
+arquiteturais da lane; GitHub proibido). Nenhum review realizado nesta rodada
+(implementar o briefing muda o HEAD — revalidação prévia ficaria stale).
+
+**Critério de falsificação da correção:** numa sessão NOVA, a owner pede apenas
+"faça o Architectural Review" e o agente (via bootstrap do AGENTS) chega ao
+briefing sem mega-prompt. Se ainda precisar de prompt extenso, a correção falhou.
+
 ## Referências
 
 - Commit da correção: `5881a85` (fix(spec-0024): enforca coerencia da projecao de specs ativas)
