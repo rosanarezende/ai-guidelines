@@ -23,8 +23,52 @@
  */
 import { createHash } from "node:crypto";
 
-/** Versão do contrato derivação+renderer — entra no selo (mudou contrato ⇒ muda selo). */
-export const HANDOFF_CONTRACT_VERSION = 1;
+/**
+ * Versão do contrato derivação+renderer — entra no selo (mudou contrato ⇒ muda
+ * selo) e no recibo (recibo de versão antiga vira `invalid` ⇒ força recarga).
+ * v2: cápsula de contrato global (identidade + bootstrap + regras obrigatórias
+ * + script-contract) entra no snapshot/fontes.
+ */
+export const HANDOFF_CONTRACT_VERSION = 2;
+
+/** Regra aplicável projetada na cápsula — id+título+fonte; NUNCA o corpo. */
+export interface ApplicableRuleFact {
+  readonly id: string;
+  readonly title: string;
+  /** "global" = sempre injetada (catálogo); "node" = restrição derivada do estado. */
+  readonly scope: "global" | "node";
+  readonly source: string;
+}
+
+/**
+ * Cápsula compacta do contrato carregado pela sessão (camada 1+2 do handoff:
+ * identidade/contrato global do repositório + seleção aplicável). As regras
+ * COMPLETAS seguem governadas nas fontes canônicas — a cápsula projeta
+ * ids/títulos e aponta a fonte; o handoff NÃO vira SSOT de regras.
+ *
+ * Seleção global = metadados JÁ canônicos do catálogo (`rules.json`:
+ * `scope: universal` + tag `always_injected`) — nenhuma tabela paralela.
+ * Restrições do nó = proibições DERIVADAS de topologia/lifecycle
+ * (`deriveProhibitions`) — distinguíveis por construção das regras globais.
+ * Fingerprints das fontes do contrato vivem em `sources[]` (e portanto no
+ * selo e no recibo), não duplicados aqui.
+ */
+export interface RepositoryContractFact {
+  /** Nome do pacote (package.json) — identidade factual, sem texto inventado. */
+  readonly repositoryId: string;
+  /** "framework (mantenedor)" no repo do framework; "consumidor do framework" nos demais. */
+  readonly repositoryKind: string;
+  /** Descrição do package.json. */
+  readonly summary: string;
+  /** Raiz SSOT estrutural quando existente no repo (fato verificado, não doutrina). */
+  readonly ssotPath: string | null;
+  readonly bootstrapSource: string;
+  readonly rulesSource: string;
+  readonly rulesCatalogPointer: string;
+  readonly scriptContractSource: string;
+  /** Regras globais sempre-injetadas (id+título), na ordem canônica do catálogo. */
+  readonly mandatoryRules: ReadonlyArray<ApplicableRuleFact>;
+}
 
 export type HandoffSourceStatus = "fresh" | "degraded" | "unavailable";
 
@@ -93,6 +137,8 @@ export interface HandoffNodeFact {
 
 export interface HandoffFacts {
   readonly spec: { readonly label: string; readonly path: string };
+  /** Cápsula do contrato global carregado; null = identidade não derivável. */
+  readonly contract: RepositoryContractFact | null;
   readonly stage: string;
   readonly gateStatus: string;
   readonly cursor: { readonly pr: string; readonly checkpoint: string } | null;

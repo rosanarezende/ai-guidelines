@@ -36,10 +36,16 @@ import {
   HandoffNodeFact,
   HandoffPrFact,
   HandoffSourceFact,
+  RepositoryContractFact,
   deriveHandoff,
   fingerprintSource,
   parseCheckpointTasks,
 } from "./handoffFacts.js";
+import {
+  extractAiGuidelinesBlock,
+  parsePackageIdentity,
+  parseRulesContract,
+} from "./handoffContract.js";
 import { HandoffLoadReceipt, createLoadReceipt, writeReceipt } from "./handoffReceipt.js";
 
 /** Coletor da fonte remota (PR). Lança em falha; `null` = coleta não habilitada. */
@@ -446,6 +452,165 @@ function collectInsights(
   }
 }
 
+/** Fontes do contrato global — referenciadas pela guarda de carga e pelo render. */
+const BOOTSTRAP_SOURCE = "AGENTS.md";
+const RULES_SOURCE = ".core/rules/_meta/rules.json";
+const RULES_CATALOG_POINTER = ".core/rules/catalog.md";
+const SCRIPT_CONTRACT_SOURCE = ".core/governance/script-contracts.yml";
+const SSOT_SPECS_DIR = ".governance/specs";
+
+/** Ids de fonte cuja ausência impede recibo FRESH (contrato obrigatório). */
+export const MANDATORY_CONTRACT_SOURCES = ["runtime-bootstrap", "rules-contract"] as const;
+
+interface CollectedContract {
+  readonly contract: RepositoryContractFact | null;
+  readonly sources: HandoffSourceFact[];
+  readonly driftWarnings: string[];
+}
+
+/**
+ * Coleta a camada de identidade + contrato global (package.json, bloco
+ * `<AI_GUIDELINES>`, rules.json, script-contracts.yml). Cada fonte declara
+ * frescor/fingerprint SEMÂNTICO; ausência do bootstrap ou do catálogo
+ * obrigatório vira drift (reconciliar antes de confiar) e bloqueia recibo
+ * fresh. Nenhuma regra é inventada: tudo vem das fontes governadas.
+ */
+function collectContract(repoRoot: string): CollectedContract {
+  const sources: HandoffSourceFact[] = [];
+  const driftWarnings: string[] = [];
+
+  // Identidade (package.json) — genérica: vale para repositórios consumidores.
+  const pkgText = readIfExists(repoRoot, "package.json");
+  let identity: ReturnType<typeof parsePackageIdentity> | null = null;
+  if (pkgText !== null) {
+    try {
+      identity = parsePackageIdentity(pkgText);
+      sources.push({
+        id: "repository-contract",
+        origin: "package.json",
+        status: "fresh",
+        fingerprint: identity.fingerprint,
+      });
+    } catch (e) {
+      sources.push({
+        id: "repository-contract",
+        origin: "package.json",
+        status: "degraded",
+        fingerprint: fingerprintSource(pkgText),
+        detail: e instanceof Error ? e.message : String(e),
+      });
+    }
+  } else {
+    sources.push({
+      id: "repository-contract",
+      origin: "package.json",
+      status: "unavailable",
+      fingerprint: "-",
+      detail: "arquivo ausente",
+    });
+  }
+
+  // Bootstrap obrigatório de agente (bloco compilado <AI_GUIDELINES>).
+  const agentsText = readIfExists(repoRoot, BOOTSTRAP_SOURCE);
+  const block = agentsText !== null ? extractAiGuidelinesBlock(agentsText) : null;
+  if (block !== null) {
+    sources.push({
+      id: "runtime-bootstrap",
+      origin: `${BOOTSTRAP_SOURCE} <AI_GUIDELINES>`,
+      status: "fresh",
+      fingerprint: fingerprintSource(block),
+    });
+  } else {
+    sources.push({
+      id: "runtime-bootstrap",
+      origin: `${BOOTSTRAP_SOURCE} <AI_GUIDELINES>`,
+      status: "unavailable",
+      fingerprint: "-",
+      detail: agentsText === null ? "AGENTS.md ausente" : "bloco <AI_GUIDELINES> ausente",
+    });
+    driftWarnings.push(
+      "Bootstrap obrigatório de agente NÃO carregado (bloco <AI_GUIDELINES> ausente em " +
+        "AGENTS.md). A sessão não recebeu o contrato de comportamento — reconcilie com: " +
+        "npm run runtime-bootstrap:sync."
+    );
+  }
+
+  // Catálogo machine-readable de regras (fingerprint semântico; sem generated_at).
+  const rulesText = readIfExists(repoRoot, RULES_SOURCE);
+  let mandatoryRules: RepositoryContractFact["mandatoryRules"] = [];
+  if (rulesText !== null) {
+    try {
+      const parsed = parseRulesContract(rulesText, RULES_SOURCE);
+      mandatoryRules = parsed.mandatoryRules;
+      sources.push({
+        id: "rules-contract",
+        origin: RULES_SOURCE,
+        status: "fresh",
+        fingerprint: parsed.fingerprint,
+      });
+    } catch (e) {
+      sources.push({
+        id: "rules-contract",
+        origin: RULES_SOURCE,
+        status: "degraded",
+        fingerprint: fingerprintSource(rulesText),
+        detail: e instanceof Error ? e.message : String(e),
+      });
+      driftWarnings.push(
+        `Catálogo obrigatório de regras ILEGÍVEL (${RULES_SOURCE}). Nenhuma regra foi ` +
+          `inventada no lugar — reconcilie com: npm run build:rules.`
+      );
+    }
+  } else {
+    sources.push({
+      id: "rules-contract",
+      origin: RULES_SOURCE,
+      status: "unavailable",
+      fingerprint: "-",
+      detail: "arquivo ausente",
+    });
+    driftWarnings.push(
+      `Catálogo obrigatório de regras AUSENTE (${RULES_SOURCE}). A sessão não recebeu as ` +
+        `regras globais — reconcilie com: npm run build:rules.`
+    );
+  }
+
+  // Contrato operacional de scripts/hooks/workflows.
+  const scriptText = readIfExists(repoRoot, SCRIPT_CONTRACT_SOURCE);
+  sources.push(
+    scriptText !== null
+      ? {
+          id: "script-contract",
+          origin: SCRIPT_CONTRACT_SOURCE,
+          status: "fresh",
+          fingerprint: fingerprintSource(scriptText),
+        }
+      : {
+          id: "script-contract",
+          origin: SCRIPT_CONTRACT_SOURCE,
+          status: "degraded",
+          fingerprint: "-",
+          detail: "arquivo ausente",
+        }
+  );
+
+  const contract: RepositoryContractFact | null = identity
+    ? {
+        repositoryId: identity.repositoryId,
+        repositoryKind: identity.repositoryKind,
+        summary: identity.summary,
+        ssotPath: fs.existsSync(path.join(repoRoot, SSOT_SPECS_DIR)) ? `${SSOT_SPECS_DIR}/` : null,
+        bootstrapSource: `${BOOTSTRAP_SOURCE} <AI_GUIDELINES>`,
+        rulesSource: RULES_SOURCE,
+        rulesCatalogPointer: RULES_CATALOG_POINTER,
+        scriptContractSource: SCRIPT_CONTRACT_SOURCE,
+        mandatoryRules,
+      }
+    : null;
+
+  return { contract, sources, driftWarnings };
+}
+
 export interface CollectedHandoff {
   readonly resolved: ResolvedSpec;
   readonly state: WorkflowState;
@@ -485,7 +650,10 @@ export function collectHandoffFacts(
   const cursor = state.topology?.cursor ?? null;
   const specId = /^(\d{4})/.exec(resolved.label)?.[1];
 
-  const sources: HandoffSourceFact[] = [];
+  // Camada 1+2: identidade + contrato global (bootstrap/regras/scripts).
+  const contractCollected = collectContract(repoRoot);
+
+  const sources: HandoffSourceFact[] = [...contractCollected.sources];
   sources.push({
     id: "state.yml",
     origin: `${resolved.specPath}/state.yml`,
@@ -591,6 +759,7 @@ export function collectHandoffFacts(
 
   const facts: HandoffFacts = {
     spec: { label: resolved.label, path: resolved.specPath },
+    contract: contractCollected.contract,
     stage: state.stage,
     gateStatus: state.gate.status,
     cursor,
@@ -609,7 +778,7 @@ export function collectHandoffFacts(
     lifecycle,
     tasks,
     insights,
-    driftWarnings: diagnostics.warnings,
+    driftWarnings: [...diagnostics.warnings, ...contractCollected.driftWarnings],
     sources,
   };
 
@@ -672,7 +841,7 @@ function renderSources(facts: HandoffFacts, lines: string[]): void {
 }
 
 function renderLifecycle(facts: HandoffFacts, lines: string[]): void {
-  lines.push("## 3. Lifecycle do checkpoint");
+  lines.push("## 4. Lifecycle do checkpoint");
   const lc = facts.lifecycle;
   if (!lc) {
     lines.push("- (sem cursor/topologia — lifecycle nao derivavel)");
@@ -693,8 +862,50 @@ function renderLifecycle(facts: HandoffFacts, lines: string[]): void {
   }
 }
 
+/**
+ * Cápsula COMPACTA do contrato carregado: identidade + fontes do contrato +
+ * obrigações globais (id+título — nunca o corpo) + ponteiro para as regras
+ * completas. Restrições do nó NÃO são duplicadas aqui (vivem na seção de
+ * ações proibidas, derivadas do estado).
+ */
+function renderContract(facts: HandoffFacts, lines: string[]): void {
+  lines.push("## 3. Contrato global carregado");
+  const contract = facts.contract;
+  if (!contract) {
+    lines.push("- identidade do repositório NÃO derivável (package.json ausente/ilegível).");
+    return;
+  }
+  lines.push(
+    `- repositório: ${contract.repositoryId} · ${contract.repositoryKind}${contract.summary ? ` · "${contract.summary}"` : ""}`
+  );
+  if (contract.ssotPath) {
+    lines.push(`- SSOT estrutural: ${contract.ssotPath}`);
+  }
+  const fp = (id: string): string => {
+    const source = facts.sources.find((s) => s.id === id);
+    return source ? `${source.status} · fp ${source.fingerprint}` : "(não coletado)";
+  };
+  lines.push(`- bootstrap: ${contract.bootstrapSource} · ${fp("runtime-bootstrap")}`);
+  lines.push(`- catálogo de regras: ${contract.rulesSource} · ${fp("rules-contract")}`);
+  lines.push(`- contrato de scripts: ${contract.scriptContractSource} · ${fp("script-contract")}`);
+  if (contract.mandatoryRules.length > 0) {
+    lines.push("- obrigações globais (sempre injetadas):");
+    for (const rule of contract.mandatoryRules) {
+      lines.push(`  - [${rule.id}] ${rule.title}`);
+    }
+  } else {
+    lines.push("- obrigações globais: (nenhuma derivável do catálogo — ver Saúde das fontes)");
+  }
+  lines.push(
+    '- restrições do nó: derivadas do estado — ver "Ações proibidas (derivadas do estado)".'
+  );
+  lines.push(
+    `- regras completas: ${contract.rulesCatalogPointer} (o handoff projeta a cápsula; NÃO é SSOT de regras).`
+  );
+}
+
 function renderNextAction(derived: HandoffDerived, lines: string[]): void {
-  lines.push("## 4. Próxima ação única (derivada)");
+  lines.push("## 5. Próxima ação única (derivada)");
   lines.push(`- ${derived.nextAction.description}`);
   lines.push(`- bloqueante: ${derived.nextAction.blocking ? "sim" : "não"}`);
   lines.push("- base factual:");
@@ -704,7 +915,7 @@ function renderNextAction(derived: HandoffDerived, lines: string[]): void {
 }
 
 function renderProhibitions(derived: HandoffDerived, lines: string[]): void {
-  lines.push("## 5. Ações proibidas (derivadas do estado)");
+  lines.push("## 6. Ações proibidas (derivadas do estado)");
   lines.push(renderList([...derived.prohibitions], "(nenhuma proibição derivada)"));
 }
 
@@ -735,26 +946,20 @@ function renderCollected(
   lines.push("");
   renderSources(facts, lines);
   lines.push("");
+  renderContract(facts, lines);
+  lines.push("");
   renderLifecycle(facts, lines);
   lines.push("");
   renderNextAction(derived, lines);
   lines.push("");
   renderProhibitions(derived, lines);
   lines.push("");
-  lines.push("## 6. Autoridade e ordem de leitura");
+  lines.push("## 7. Autoridade e ordem de leitura");
   lines.push(renderList(existingFiles(repoRoot, AUTHORITY_FILES)));
   lines.push(renderList([...specFiles]));
   lines.push("");
-  lines.push("## 7. Narrativa derivada (não é fonte da próxima ação)");
+  lines.push("## 8. Narrativa derivada (não é fonte da próxima ação)");
   lines.push(renderList(collected.state.next.slice(0, 3)));
-  lines.push("");
-  lines.push("## 8. Regras situacionais minimas");
-  lines.push("- O repositorio vence transcript, memoria e output de agente.");
-  lines.push("- state.yml § topology e a SSOT estrutural da spec.");
-  lines.push("- AGENTS.md e canal/stub; regras completas vivem em .core/rules/** e no catalogo.");
-  lines.push("- Runtime local nao chama LLM; IA atua como canal de sintese.");
-  lines.push("- Sem git push sem autorizacao humana explicita; sem --no-verify.");
-  lines.push("- Human Gate decide avanço; Ready nao equivale a merge.");
   lines.push("");
   lines.push("## 9. Primeiro turno recomendado");
   lines.push(
@@ -808,6 +1013,25 @@ export interface HandoffLoadResult {
 export function loadHandoff(repoRoot: string, options: HandoffOptions = {}): HandoffLoadResult {
   const collected = collectHandoffFacts(repoRoot, options);
   const derived = deriveHandoff(collected.facts);
+
+  // Contrato obrigatório ausente ⇒ a sessão NÃO recebeu o contrato de
+  // comportamento — não existe carga "fresh" sem bootstrap/catálogo.
+  const missingMandatory = collected.facts.sources.filter(
+    (s) => (MANDATORY_CONTRACT_SOURCES as readonly string[]).includes(s.id) && s.status !== "fresh"
+  );
+  if (missingMandatory.length > 0) {
+    const reason =
+      `contrato obrigatório não carregado (${missingMandatory.map((s) => s.id).join(", ")}); ` +
+      `recibo NÃO publicado — reconcilie as fontes e reexecute a carga.`;
+    return {
+      text: renderCollected(repoRoot, collected, derived, options, `NÃO registrado: ${reason}`)
+        .text,
+      seal: derived.seal,
+      receipt: null,
+      receiptFile: null,
+      receiptSkippedReason: reason,
+    };
+  }
 
   const headNow = git(repoRoot, ["rev-parse", "--short", "HEAD"]);
   if (

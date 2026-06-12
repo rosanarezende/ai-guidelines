@@ -24,10 +24,33 @@ function tempRepo(): string {
   fs.mkdirSync(path.join(repo, ".core", "rules", "_meta"), { recursive: true });
   fs.mkdirSync(path.join(repo, ".governance", "runtime", "specs"), { recursive: true });
   fs.mkdirSync(spec, { recursive: true });
-  fs.writeFileSync(path.join(repo, "AGENTS.md"), "# AGENTS\n");
   fs.writeFileSync(path.join(repo, ".core", "governance", "script-contracts.yml"), "x: y\n");
   fs.writeFileSync(path.join(repo, ".core", "rules", "catalog.md"), "# Rules\n");
-  fs.writeFileSync(path.join(repo, ".core", "rules", "_meta", "rules.json"), "{}\n");
+  fs.writeFileSync(
+    path.join(repo, "package.json"),
+    JSON.stringify({ name: "fixture-consumer", description: "Repo de teste do handoff" })
+  );
+  fs.writeFileSync(
+    path.join(repo, "AGENTS.md"),
+    "# AGENTS\n\n<AI_GUIDELINES>\n\n## Runtime Bootstrap\n\n- Repository state beats transcript.\n\n</AI_GUIDELINES>\n"
+  );
+  fs.writeFileSync(
+    path.join(repo, ".core", "rules", "_meta", "rules.json"),
+    JSON.stringify({
+      schema_version: "1.0",
+      generated_at: "2026-01-01T00:00:00.000Z",
+      rules: [
+        {
+          id: "CORE-T1",
+          scope: "universal",
+          tags: ["always_injected"],
+          title: "Regra global de teste",
+          file: ".core/rules/top/test.md",
+        },
+        { id: "OPT-T1", scope: "opt-in", tags: [], title: "Regra opcional", file: "x.md" },
+      ],
+    })
+  );
   fs.writeFileSync(path.join(spec, "plan.md"), "# Plan\n");
   fs.writeFileSync(path.join(spec, "knowledge-backfill.yml"), "version: 1\nentries: []\n");
   fs.writeFileSync(
@@ -91,7 +114,8 @@ describe("handoff [ADR-0022]", () => {
     expect(text).toContain("- cursor: co-knowledge · checkpoint-runtime-bootstrap-readiness");
     expect(text).toContain("- PR ativo: #37");
     expect(text).toContain(".core/governance/script-contracts.yml");
-    expect(text).toContain("AGENTS.md e canal/stub");
+    expect(text).toContain("## 3. Contrato global carregado");
+    expect(text).toContain("[CORE-T1] Regra global de teste");
     expect(text).not.toContain("[TODO humano]");
   });
 
@@ -116,11 +140,11 @@ describe("handoff · núcleo derivado [CO-4]", () => {
 
     expect(text).toContain("## 2. Saúde das fontes");
     expect(text).toContain("- state.yml · fresh ·");
-    expect(text).toContain("## 4. Próxima ação única (derivada)");
+    expect(text).toContain("## 5. Próxima ação única (derivada)");
     expect(text).toContain("- base factual:");
-    expect(text).toContain("## 5. Ações proibidas (derivadas do estado)");
+    expect(text).toContain("## 6. Ações proibidas (derivadas do estado)");
     expect(text).toContain("## 10. Selo de geração");
-    expect(text).toMatch(/- selo: [0-9a-f]{12} \(contrato v1;/);
+    expect(text).toMatch(/- selo: [0-9a-f]{12} \(contrato v2;/);
   });
 
   it("DADO fonte remota não habilitada ENTÃO pull-request é declarado unavailable (nunca inventado)", () => {
@@ -228,7 +252,7 @@ describe("handoff · núcleo derivado [CO-4]", () => {
 
     const text = renderHandoff(repo, { identifier: "0024" }).text;
 
-    expect(text).toContain("## 7. Narrativa derivada (não é fonte da próxima ação)");
+    expect(text).toContain("## 8. Narrativa derivada (não é fonte da próxima ação)");
   });
 });
 
@@ -343,6 +367,112 @@ describe("handoff · loadHandoff (contrato de carga) [CO-4]", () => {
     loadHandoff(repo, { identifier: "0024" });
 
     expect(fs.existsSync(path.join(repo, ".governance", "runtime", "handoff"))).toBe(false);
+  });
+});
+
+// ── Contrato global carregado (cápsula) ──────────────────────────────────────
+
+describe("handoff · contrato global carregado [CO-4]", () => {
+  it("DADO repo consumidor ENTÃO cápsula deriva a identidade DELE (sem contexto local do framework)", () => {
+    const repo = tempRepo(); // package.json: fixture-consumer
+    initGitOnBranch(repo, "feat/spec-0024-co-knowledge");
+
+    const text = renderHandoff(repo, { identifier: "0024" }).text;
+
+    expect(text).toContain("- repositório: fixture-consumer · consumidor do framework");
+    expect(text).not.toContain("framework (mantenedor)");
+    // regras vêm do catálogo DELE; nada do CORE real deste repositório vaza
+    expect(text).toContain("[CORE-T1] Regra global de teste");
+    expect(text).not.toContain("CORE-07");
+  });
+
+  it("DADO cápsula ENTÃO compacta: id+título por regra, sem corpos, com ponteiro para o catálogo", () => {
+    const repo = tempRepo();
+    initGitOnBranch(repo, "feat/spec-0024-co-knowledge");
+
+    const text = renderHandoff(repo, { identifier: "0024" }).text;
+    const section = text.split("## 3. Contrato global carregado")[1].split("## 4.")[0];
+
+    expect(section.split("\n").length).toBeLessThan(20);
+    expect(section).toContain("regras completas: .core/rules/catalog.md");
+    expect(section).toContain("restrições do nó: derivadas do estado");
+    expect(section).not.toContain("Always"); // corpo da regra não é despejado
+  });
+
+  it("DADO bootstrap ausente ENTÃO drift + próxima ação prioriza reconciliação + SEM recibo fresh", () => {
+    const repo = tempRepo();
+    fs.writeFileSync(path.join(repo, "AGENTS.md"), "# AGENTS sem bloco\n");
+    initGitOnBranch(repo, "feat/spec-0024-co-knowledge");
+
+    const result = loadHandoff(repo, { identifier: "0024" });
+
+    expect(result.receipt).toBeNull();
+    expect(result.receiptSkippedReason).toContain("runtime-bootstrap");
+    expect(result.text).toContain("## ⚠ Aviso de projeção");
+    expect(result.text).toContain("Bootstrap obrigatório de agente NÃO carregado");
+    expect(result.text).toContain("runtime-bootstrap · unavailable");
+  });
+
+  it("DADO catálogo de regras ilegível ENTÃO degraded + nenhuma regra inventada + SEM recibo fresh", () => {
+    const repo = tempRepo();
+    fs.writeFileSync(path.join(repo, ".core", "rules", "_meta", "rules.json"), "{}");
+    initGitOnBranch(repo, "feat/spec-0024-co-knowledge");
+
+    const result = loadHandoff(repo, { identifier: "0024" });
+
+    expect(result.receipt).toBeNull();
+    expect(result.text).toContain("rules-contract · degraded");
+    expect(result.text).toContain(
+      "- obrigações globais: (nenhuma derivável do catálogo — ver Saúde das fontes)"
+    );
+  });
+
+  it("DADO mudança SEMÂNTICA no catálogo ENTÃO selo muda e recibo anterior vira stale-sources", () => {
+    const repo = tempRepo();
+    initGitOnBranch(repo, "feat/spec-0024-co-knowledge");
+    const first = loadHandoff(repo, { identifier: "0024" });
+
+    const rulesPath = path.join(repo, ".core", "rules", "_meta", "rules.json");
+    const rules = JSON.parse(fs.readFileSync(rulesPath, "utf8"));
+    rules.rules[0].title = "Regra global A — endurecida";
+    fs.writeFileSync(rulesPath, JSON.stringify(rules));
+
+    const second = renderHandoff(repo, { identifier: "0024" }).text;
+    const seal = (t: string) => /- selo: ([0-9a-f]{12})/.exec(t)?.[1];
+    expect(seal(second)).not.toBe(first.seal);
+  });
+
+  it("DADO mudança APENAS volátil (generated_at) ENTÃO selo permanece igual", () => {
+    const repo = tempRepo();
+    initGitOnBranch(repo, "feat/spec-0024-co-knowledge");
+    const first = loadHandoff(repo, { identifier: "0024" });
+
+    const rulesPath = path.join(repo, ".core", "rules", "_meta", "rules.json");
+    const rules = JSON.parse(fs.readFileSync(rulesPath, "utf8"));
+    rules.generated_at = "2099-01-01T00:00:00.000Z";
+    fs.writeFileSync(rulesPath, JSON.stringify(rules));
+
+    const second = loadHandoff(repo, { identifier: "0024" });
+    expect(second.seal).toBe(first.seal);
+  });
+
+  it("DADO recibo escrito ENTÃO cobre as fontes do contrato sem corpos de regras", () => {
+    const repo = tempRepo();
+    initGitOnBranch(repo, "feat/spec-0024-co-knowledge");
+
+    const result = loadHandoff(repo, { identifier: "0024" });
+    const raw = fs.readFileSync(result.receiptFile!, "utf8");
+    const receipt = JSON.parse(raw);
+
+    for (const id of [
+      "repository-contract",
+      "runtime-bootstrap",
+      "rules-contract",
+      "script-contract",
+    ]) {
+      expect(Object.keys(receipt.sources)).toContain(id);
+    }
+    expect(raw).not.toContain("Regra global de teste"); // só fingerprints, nunca conteúdo
   });
 });
 

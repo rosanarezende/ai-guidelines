@@ -18,7 +18,35 @@ function tempRepo(): string {
   const repo = fs.mkdtempSync(path.join(os.tmpdir(), "handoff-check-"));
   const spec = path.join(repo, ".governance", "specs", "0024-context-architecture");
   fs.mkdirSync(path.join(repo, ".governance", "runtime", "specs"), { recursive: true });
+  fs.mkdirSync(path.join(repo, ".core", "rules", "_meta"), { recursive: true });
+  fs.mkdirSync(path.join(repo, ".core", "governance"), { recursive: true });
+  fs.writeFileSync(path.join(repo, ".core", "governance", "script-contracts.yml"), "x: y\n");
   fs.mkdirSync(spec, { recursive: true });
+  fs.writeFileSync(
+    path.join(repo, "package.json"),
+    JSON.stringify({ name: "fixture-consumer", description: "Repo de teste do handoff" })
+  );
+  fs.writeFileSync(
+    path.join(repo, "AGENTS.md"),
+    "# AGENTS\n\n<AI_GUIDELINES>\n\n## Runtime Bootstrap\n\n- Repository state beats transcript.\n\n</AI_GUIDELINES>\n"
+  );
+  fs.writeFileSync(
+    path.join(repo, ".core", "rules", "_meta", "rules.json"),
+    JSON.stringify({
+      schema_version: "1.0",
+      generated_at: "2026-01-01T00:00:00.000Z",
+      rules: [
+        {
+          id: "CORE-T1",
+          scope: "universal",
+          tags: ["always_injected"],
+          title: "Regra global de teste",
+          file: ".core/rules/top/test.md",
+        },
+        { id: "OPT-T1", scope: "opt-in", tags: [], title: "Regra opcional", file: "x.md" },
+      ],
+    })
+  );
   fs.writeFileSync(path.join(spec, "tasks.md"), "- [ ] **Checkpoint co-knowledge** — Escopo: x.\n");
   fs.writeFileSync(
     path.join(repo, ".governance", "runtime", "specs/active.yml"),
@@ -209,6 +237,40 @@ describe("handoff:check · recibo de carga [CO-4]", () => {
     const out = lines.join("\n");
     expect(out).toContain("recibo de carga: inválido");
     expect(out).toContain("npm run guidelines -- handoff 0024");
+  });
+
+  it("DADO bootstrap alterado após a carga ENTÃO check nomeia runtime-bootstrap como divergente", () => {
+    const repo = tempRepo();
+    initGitOnBranch(repo, "feat/spec-0024-co-knowledge");
+    loadHandoff(repo, { identifier: "0024", remote: null });
+    fs.writeFileSync(
+      path.join(repo, "AGENTS.md"),
+      "# AGENTS\n\n<AI_GUIDELINES>\n\n## Runtime Bootstrap v2 — regra nova\n\n</AI_GUIDELINES>\n"
+    );
+    const { lines, logger } = fakeLogger();
+
+    runHandoffCheck(repo, { identifier: "0024" }, logger, null);
+
+    const out = lines.join("\n");
+    expect(out).toContain("recibo de carga: STALE (fontes)");
+    expect(out).toContain("runtime-bootstrap");
+  });
+
+  it("DADO script-contracts alterado após a carga ENTÃO check nomeia script-contract como divergente", () => {
+    const repo = tempRepo();
+    initGitOnBranch(repo, "feat/spec-0024-co-knowledge");
+    loadHandoff(repo, { identifier: "0024", remote: null });
+    fs.writeFileSync(
+      path.join(repo, ".core", "governance", "script-contracts.yml"),
+      "x: y\nnovo-script: z\n"
+    );
+    const { lines, logger } = fakeLogger();
+
+    runHandoffCheck(repo, { identifier: "0024" }, logger, null);
+
+    const out = lines.join("\n");
+    expect(out).toContain("recibo de carga: STALE (fontes)");
+    expect(out).toContain("script-contract");
   });
 
   it("DADO recarga após mudança ENTÃO recibo volta a fresh (reconciliação)", () => {

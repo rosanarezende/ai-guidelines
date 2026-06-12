@@ -61,6 +61,7 @@ function facts(overrides: Partial<HandoffFacts> = {}): HandoffFacts {
       label: "0024-context-architecture",
       path: ".governance/specs/0024-context-architecture",
     },
+    contract: null,
     stage: "implementation",
     gateStatus: "closed",
     cursor: CURSOR,
