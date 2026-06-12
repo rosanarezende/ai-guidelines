@@ -217,6 +217,12 @@ profiles:
         mutates: true
         consumers: [human]
         description: Renderiza disclosure de IA derivado.
+      - name: review:publish
+        command: npm run build && node cli/review-publish.mjs
+        category: governance
+        mutates: true
+        consumers: [human]
+        description: Commit exclusivo + push do artefato de review sob autorizacao capability-scoped (fail-closed; diff review-only).
       - name: review:seal
         command: node cli/review-seal.mjs
         category: governance

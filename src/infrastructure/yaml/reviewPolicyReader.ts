@@ -35,10 +35,19 @@ export interface ReviewLanePolicy {
  * versionado na spec; GitHub é projeção opcional, proibida por default —
  * somente com autorização humana explícita.
  */
+/** Autorização do ciclo do artefato canônico (commit/push review-only). */
+export interface CanonicalArtifactPolicy {
+  readonly commitPolicy: string;
+  readonly pushPolicy: string;
+  readonly mixedDiff: string;
+}
+
 export interface ReviewPublicationPolicy {
   readonly canonical: string;
   readonly githubComments: string;
   readonly githubException?: string;
+  /** Opcional/backward-compatible: ciclo do artefato canônico. */
+  readonly canonicalArtifact?: CanonicalArtifactPolicy;
 }
 
 export interface ReviewPolicy {
@@ -175,12 +184,22 @@ export function parseReviewPolicy(yamlText: string): ReviewPolicy {
   let publication: ReviewPublicationPolicy | undefined;
   if (root.publication !== undefined && root.publication !== null) {
     const rawPub = obj(root.publication, "publication");
+    let canonicalArtifact: CanonicalArtifactPolicy | undefined;
+    if (rawPub.canonical_artifact !== undefined && rawPub.canonical_artifact !== null) {
+      const rawCa = obj(rawPub.canonical_artifact, "publication.canonical_artifact");
+      canonicalArtifact = {
+        commitPolicy: str(rawCa.commit_policy, "publication.canonical_artifact.commit_policy"),
+        pushPolicy: str(rawCa.push_policy, "publication.canonical_artifact.push_policy"),
+        mixedDiff: str(rawCa.mixed_diff, "publication.canonical_artifact.mixed_diff"),
+      };
+    }
     publication = {
       canonical: str(rawPub.canonical, "publication.canonical"),
       githubComments: str(rawPub.github_comments, "publication.github_comments"),
       ...(rawPub.github_exception !== undefined && rawPub.github_exception !== null
         ? { githubException: str(rawPub.github_exception, "publication.github_exception") }
         : {}),
+      ...(canonicalArtifact ? { canonicalArtifact } : {}),
     };
   }
 

@@ -11,6 +11,8 @@ export interface ReviewCommandOptions {
   /** Args originais para delegação ao triage (compat `review [<pr>]`). */
   readonly rest: readonly string[];
   readonly noRemote: boolean;
+  /** Valor bruto de --authorization (validado pelo runner; fail-closed). */
+  readonly authorization?: string;
 }
 
 /**
@@ -30,7 +32,12 @@ export class ReviewCommand implements Command<ReviewCommandOptions> {
   readonly name = "review";
   readonly description =
     "Briefing governado de review por lane (technical-audit | architectural-review); `review [<pr>]` delega ao triage (compat).";
-  readonly usage = ["review technical-audit", "review architectural-review", "review 26"];
+  readonly usage = [
+    "review technical-audit",
+    "review technical-audit --authorization explicit-review-request",
+    "review architectural-review",
+    "review 26",
+  ];
 
   constructor(
     private readonly runBriefFn: RunReviewBriefFn = runReviewBrief,
@@ -38,12 +45,24 @@ export class ReviewCommand implements Command<ReviewCommandOptions> {
   ) {}
 
   parse(argv: readonly string[]): ReviewCommandOptions {
-    const positional = argv.filter((arg) => !arg.startsWith("--"));
+    let authorization: string | undefined;
+    const positional: string[] = [];
+    for (let i = 0; i < argv.length; i++) {
+      const arg = argv[i];
+      if (arg === "--authorization") {
+        authorization = argv[++i];
+      } else if (arg.startsWith("--authorization=")) {
+        authorization = arg.slice("--authorization=".length);
+      } else if (!arg.startsWith("--")) {
+        positional.push(arg);
+      }
+    }
     const role = positional[0] !== undefined ? normalizeRole(positional[0]) : null;
     return {
       ...(role ? { role } : {}),
       rest: argv,
       noRemote: argv.includes("--no-remote"),
+      ...(authorization !== undefined ? { authorization } : {}),
     };
   }
 
@@ -53,7 +72,8 @@ export class ReviewCommand implements Command<ReviewCommandOptions> {
         context.repoRoot,
         options.role,
         context.logger,
-        options.noRemote ? null : undefined
+        options.noRemote ? null : undefined,
+        options.authorization
       );
       return { exitCode };
     }

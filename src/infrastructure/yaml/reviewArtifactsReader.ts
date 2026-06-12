@@ -350,6 +350,15 @@ export function reviewEventFingerprintOf(parts: {
  */
 function parseSubjectRef(raw: unknown, file: string): string | undefined {
   if (raw === undefined || raw === null) return undefined;
+  // SHA curto todo-numérico (ex.: 9433e07 → notação científica; 1234567 →
+  // inteiro) é lido pelo YAML como NÚMERO e perderia precisão na coerção —
+  // exigir aspas é determinístico e fail-closed (bug real: flake ~1/38 SHAs).
+  if (typeof raw === "number") {
+    throw new ReviewArtifactParseError(
+      `${file}: "subject_ref"/"previous_subject_ref" foi lido pelo YAML como NÚMERO ` +
+        `(SHA todo-numérico?). Envolva o valor em aspas: subject_ref: "<sha-ou-intervalo>".`
+    );
+  }
   const value = str(raw);
   if (!value || /\s/.test(value)) {
     throw new ReviewArtifactParseError(

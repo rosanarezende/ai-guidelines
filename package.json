@@ -79,6 +79,7 @@
     "insights:check": "npm run build && node cli/insights-check.mjs",
     "intent:check": "npm run build && node cli/intent-check.mjs",
     "disclosure": "npm run build && node cli/disclosure-render.mjs",
+    "review:publish": "npm run build && node cli/review-publish.mjs",
     "review:seal": "node cli/review-seal.mjs",
     "pr-body:update": "npm run build && node cli/pr-body-update.mjs",
     "pr-ready:check": "npm run build && node cli/pr-ready-check.mjs",

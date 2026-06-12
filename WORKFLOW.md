@@ -196,16 +196,17 @@ O gate aceita o **prompt** (bloco `…`) **ou** a imagem (que o satisfaz). Draft
 
 ## Comandos de referência rápida
 
-| Comando                                              | Para quê                                             |
-| ---------------------------------------------------- | ---------------------------------------------------- |
-| `npm run guidelines -- workflow`                     | Wizard com todas as opções do ciclo                  |
-| `npm run guidelines -- handoff [spec]`               | Retomada derivada: fatos + próxima ação única + selo |
-| `npm run handoff:check -- [--spec NNNN]`             | Advisory de freshness da retomada (fontes + selo)    |
-| `npm run guidelines -- review <papel>`               | Briefing governado de review (TA/AR; modo inferido)  |
-| `npm run guidelines -- continue`                     | Briefing da spec ativa + verificação de autorização  |
-| `npm run guidelines -- review [<pr>]`                | Coleta e estrutura comentários de um PR para análise |
-| `npm run guidelines -- release-prep [--version <v>]` | Prepara bump de versão com plano explícito           |
-| `npm run guidelines -- release-prep --dry-run`       | Audita a release sem aplicar nada                    |
+| Comando                                              | Para quê                                                 |
+| ---------------------------------------------------- | -------------------------------------------------------- |
+| `npm run guidelines -- workflow`                     | Wizard com todas as opções do ciclo                      |
+| `npm run guidelines -- handoff [spec]`               | Retomada derivada: fatos + próxima ação única + selo     |
+| `npm run handoff:check -- [--spec NNNN]`             | Advisory de freshness da retomada (fontes + selo)        |
+| `npm run guidelines -- review <papel>`               | Briefing governado de review (TA/AR; modo inferido)      |
+| `npm run review:publish -- --file <artefato>`        | Commit exclusivo + push do review (autorização escopada) |
+| `npm run guidelines -- continue`                     | Briefing da spec ativa + verificação de autorização      |
+| `npm run guidelines -- review [<pr>]`                | Coleta e estrutura comentários de um PR para análise     |
+| `npm run guidelines -- release-prep [--version <v>]` | Prepara bump de versão com plano explícito               |
+| `npm run guidelines -- release-prep --dry-run`       | Audita a release sem aplicar nada                        |
 
 ---
 

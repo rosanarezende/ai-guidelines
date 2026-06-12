@@ -67,8 +67,8 @@ function reviewScopeEventYaml(opts: {
     "scope: review",
     `review_fingerprint: ${opts.reviewFingerprint}`,
   ];
-  if (opts.previousSubjectRef) lines.push(`previous_subject_ref: ${opts.previousSubjectRef}`);
-  if (opts.subjectRef) lines.push(`subject_ref: ${opts.subjectRef}`);
+  if (opts.previousSubjectRef) lines.push(`previous_subject_ref: "${opts.previousSubjectRef}"`);
+  if (opts.subjectRef) lines.push(`subject_ref: "${opts.subjectRef}"`);
   if (opts.withVerifies) lines.push("verifies:", "  - technical_audit#F1");
   lines.push(
     "audit_evidence:",

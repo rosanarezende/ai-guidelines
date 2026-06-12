@@ -92,5 +92,13 @@ review_lanes:
 # de prompt (2026-06-12). O canal canônico é o ARTEFATO versionado na spec.
 publication:
   canonical: spec-artifact # reviews/<...>.yml versionado na spec
+  # Autorização do ARTEFATO CANÔNICO ≠ autorização de publicação no GitHub.
+  # Pedido humano explícito de review ("Faça o Technical Audit...") = autorização
+  # capability-scoped para o ciclo completo e LIMITADO daquele review: criar o
+  # artefato, selar, validar, commit EXCLUSIVO e push normal — nada além.
+  canonical_artifact:
+    commit_policy: allowed-on-explicit-review-request
+    push_policy: allowed-on-explicit-review-request
+    mixed_diff: block # qualquer path fora do artefato esperado bloqueia
   github_comments: forbidden-by-default
   github_exception: explicit-owner-authorization

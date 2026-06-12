@@ -70,6 +70,38 @@ export function normalizeRole(raw: string): string | null {
 
 export type ReviewBriefMode = "create" | "current" | "verification" | "blocked";
 
+/**
+ * Autorização capability-scoped (rodada 7→8): o PEDIDO HUMANO EXPLÍCITO de um
+ * review ("Faça o Technical Audit do checkpoint atual.") JÁ autoriza o ciclo
+ * governado completo e LIMITADO daquele review — investigar, criar o artefato
+ * canônico, selar, validar, commit EXCLUSIVO e push normal — sem segunda
+ * confirmação. NÃO autoriza: mudança funcional, GitHub, Ready, gate, merge.
+ * O runtime não interpreta linguagem natural: o AGENTS.md ensina o agente a
+ * mapear o pedido explícito para `--authorization explicit-review-request`;
+ * execução espontânea (sem pedido humano) = sem autorização (fail-closed).
+ */
+export type ReviewAuthorization = "explicit-review-request";
+
+export function parseAuthorization(
+  raw: string | undefined
+): ReviewAuthorization | null | "invalid" {
+  if (raw === undefined) return null;
+  return raw === "explicit-review-request" ? "explicit-review-request" : "invalid";
+}
+
+/** Mensagem de commit DERIVADA (determinística) do artefato de review. */
+export function deriveReviewCommitMessage(
+  specId: string,
+  nodeId: string | null,
+  role: string,
+  kind: "review" | "verification-event"
+): string {
+  const roleLabel = role.replace(/_/g, " ");
+  return kind === "verification-event"
+    ? `docs(spec-${specId}): registra verification do ${roleLabel}`
+    : `docs(spec-${specId}): registra ${roleLabel} do ${nodeId ?? "checkpoint"}`;
+}
+
 export interface ReviewSubjectFact {
   /** Branch base do PR (posição na stack), quando observável. */
   readonly baseRef: string | null;
@@ -136,6 +168,11 @@ export interface ReviewBrief {
   readonly prohibitedActions: ReadonlyArray<string>;
   readonly validationCommands: ReadonlyArray<string>;
   readonly finalReportSections: ReadonlyArray<string>;
+  readonly authorization: ReviewAuthorization | null;
+  /** Comando canônico de publicação segura (quando autorizado e há artefato). */
+  readonly publishCommand: string | null;
+  /** Mensagem de commit derivada (o publish a usa; agente não inventa). */
+  readonly derivedCommitMessage: string | null;
 }
 
 /**
@@ -166,6 +203,8 @@ export interface ReviewBriefInput {
   readonly workingTreeState?: WorkingTreeState;
   /** Arquivos funcionais não commitados (diagnóstico do blocked). */
   readonly functionalDirtyFiles?: ReadonlyArray<string>;
+  /** Autorização carregada pelo pedido humano explícito; ausente = só briefing. */
+  readonly authorization?: ReviewAuthorization | null;
 }
 
 function normalizeCheckpoint(slug: string): string {
@@ -414,10 +453,10 @@ export function deriveReviewBrief(input: ReviewBriefInput): ReviewBrief {
     "executar testes e validações locais",
     mode === "verification"
       ? artifact.verificationScope === "review"
-        ? `criar o EVENTO append-only ${artifact.path} (kind: verification; scope: review; review_fingerprint: ${existingReview?.reviewFingerprint ?? "<fp-do-review>"}; previous_subject_ref: ${previousRef ?? "unknown"}; subject_ref: ${subject.refSuggestion ?? "<head>"}; SEM verifies — não invente finding)`
-        : `criar o EVENTO append-only ${artifact.path} (kind: verification; scope: findings; verifies: findings com resolution; subject_ref: ${subject.refSuggestion ?? "<base>..<head>"})`
+        ? `criar o EVENTO append-only ${artifact.path} (kind: verification; scope: review; review_fingerprint: ${existingReview?.reviewFingerprint ?? "<fp-do-review>"}; previous_subject_ref: "${previousRef ?? "unknown"}"; subject_ref: "${subject.refSuggestion ?? "<head>"}" — valores de ref SEMPRE entre aspas; SEM verifies — não invente finding)`
+        : `criar o EVENTO append-only ${artifact.path} (kind: verification; scope: findings; verifies: findings com resolution; subject_ref: "${subject.refSuggestion ?? "<base>..<head>"}")`
       : mode === "create"
-        ? `criar o artefato ${artifact.path} (copie ${artifact.template}; preencha subject_ref: ${subject.refSuggestion ?? "<base>..<head>"})`
+        ? `criar o artefato ${artifact.path} (copie ${artifact.template}; preencha subject_ref: "${subject.refSuggestion ?? "<base>..<head>"}" — entre aspas)`
         : "nenhuma escrita necessária (review atual cobre o HEAD)",
     `selar com \`npm run review:seal -- --file ${artifact.kind === "none" ? "<arquivo>" : artifact.path}\` (sela reviews E eventos) e validar com \`npm run review:check\``,
     "commit EXCLUSIVO do artefato de review (nunca misturar com implementação)",
@@ -442,6 +481,22 @@ export function deriveReviewBrief(input: ReviewBriefInput): ReviewBrief {
     `npm run handoff:check -- --spec ${specId}`,
   ];
 
+  const authorization = input.authorization ?? null;
+  const producesArtifact =
+    (mode === "create" || mode === "verification") && artifact.kind !== "none";
+  const derivedCommitMessage = producesArtifact
+    ? deriveReviewCommitMessage(
+        specId,
+        facts.activeNode?.id ?? facts.cursor?.pr ?? null,
+        role,
+        artifact.kind as "review" | "verification-event"
+      )
+    : null;
+  const publishCommand =
+    authorization && producesArtifact
+      ? `npm run review:publish -- --file ${artifact.path} --authorization ${authorization}`
+      : null;
+
   return {
     specId,
     checkpoint,
@@ -464,6 +519,9 @@ export function deriveReviewBrief(input: ReviewBriefInput): ReviewBrief {
     prohibitedActions,
     validationCommands,
     finalReportSections: [...FINAL_REPORT_SECTIONS],
+    authorization,
+    publishCommand,
+    derivedCommitMessage,
   };
 }
 
@@ -489,7 +547,9 @@ function gitOrNull(repoRoot: string, args: readonly string[]): string | null {
 /** `git status --porcelain` SEM trim (o status XY usa o espaço inicial). */
 function gitPorcelain(repoRoot: string): string | null {
   try {
-    return execFileSync("git", ["status", "--porcelain"], {
+    // -uall: lista ARQUIVOS untracked individualmente (sem colapsar diretórios)
+    // — a classificação review-only/functional depende do path completo.
+    return execFileSync("git", ["status", "--porcelain", "--untracked-files=all"], {
       cwd: repoRoot,
       encoding: "utf8",
       stdio: ["ignore", "pipe", "ignore"],
@@ -564,10 +624,14 @@ function collectFunctionalFreshness(
   };
 }
 
+export interface ReviewBriefOptions extends HandoffOptions {
+  readonly authorization?: ReviewAuthorization | null;
+}
+
 export function collectReviewBrief(
   repoRoot: string,
   role: string,
-  options: HandoffOptions = {}
+  options: ReviewBriefOptions = {}
 ): CollectedReviewBrief {
   const snapshot = loadHandoffSnapshot(repoRoot, options);
   const facts = snapshot.collected.facts;
@@ -611,6 +675,7 @@ export function collectReviewBrief(
     effectiveFunctionalHead: freshness.effectiveFunctionalHead,
     workingTreeState: freshness.workingTreeState,
     functionalDirtyFiles: freshness.functionalDirtyFiles,
+    authorization: options.authorization ?? null,
   });
 
   return { snapshot, brief };
@@ -724,7 +789,7 @@ export function renderReviewBrief(collected: CollectedReviewBrief): string {
       lines.push(`- previous_subject_ref: ${brief.subject.previousRef ?? "unknown"}`);
     }
     lines.push(
-      `- subject_ref OBRIGATÓRIO no artefato: ${brief.subject.refSuggestion ?? "<base>..<head>"} (proveniência machine-readable; selada)`
+      `- subject_ref OBRIGATÓRIO no artefato: "${brief.subject.refSuggestion ?? "<base>..<head>"}" (entre ASPAS — SHA numérico viraria número YAML; proveniência selada)`
     );
     lines.push(
       "- fingerprints: deixe `fingerprint: x`/`review_fingerprint: x` e rode o seal — reporte o fingerprint REAL do arquivo, nunca um narrado."
@@ -738,10 +803,36 @@ export function renderReviewBrief(collected: CollectedReviewBrief): string {
     "(declare review_lanes na review-policy.yml — vetores não derivados)"
   );
   lines.push("");
-  lines.push("## 8. Publicação");
+  lines.push("## 8. Publicação (artefato canônico ≠ GitHub)");
   lines.push("- artefato na spec: obrigatório (canal canônico).");
-  lines.push("- GitHub: proibido por padrão.");
-  lines.push("- comentário/review remoto: somente por autorização explícita da owner.");
+  lines.push(
+    "- GitHub: proibido por padrão; comentário/review remoto só por autorização explícita da owner."
+  );
+  if (brief.authorization) {
+    lines.push("- Autorização capability-scoped: ATIVA");
+    lines.push("  - origem: pedido humano explícito do review;");
+    lines.push(`  - lane: ${brief.role} · checkpoint: ${brief.checkpoint ?? "?"};`);
+    lines.push(
+      "  - permitido: investigar, criar o artefato derivado, selar, validar, commit EXCLUSIVO e push normal desse commit;"
+    );
+    lines.push("  - proibido: qualquer outro diff, mudança funcional, GitHub, Ready, gate, merge.");
+    if (brief.mode === "current") {
+      lines.push(
+        "  - lane CURRENT: a autorização NÃO cria trabalho — nenhum artefato, commit ou push."
+      );
+    } else if (brief.mode === "blocked") {
+      lines.push("  - lane BLOCKED: nenhum artefato, commit ou push até reconciliar.");
+    } else if (brief.publishCommand) {
+      lines.push(`  - publicação segura: \`${brief.publishCommand}\``);
+      lines.push(`  - mensagem de commit derivada: \`${brief.derivedCommitMessage}\``);
+      lines.push("  - após o push do artefato: PARAR (fim do escopo autorizado).");
+    }
+  } else {
+    lines.push(
+      "- Autorização capability-scoped: AUSENTE — briefing informativo; commit/push do artefato NÃO autorizados. " +
+        "Com pedido humano explícito, gere com --authorization explicit-review-request."
+    );
+  }
   lines.push("");
   lines.push("## 9. Ações permitidas");
   renderList(lines, brief.allowedActions);
@@ -770,7 +861,8 @@ export function runReviewBrief(
   repoRoot: string,
   roleArg: string,
   logger: Logger = defaultLogger,
-  remoteOverride?: HandoffOptions["remote"]
+  remoteOverride?: HandoffOptions["remote"],
+  authorizationArg?: string
 ): number {
   const role = normalizeRole(roleArg);
   if (!role) {
@@ -779,9 +871,17 @@ export function runReviewBrief(
     );
     return 2;
   }
+  const authorization = parseAuthorization(authorizationArg);
+  if (authorization === "invalid") {
+    logger.error(
+      `❌ autorização desconhecida: "${authorizationArg}". Única forma válida: explicit-review-request (mapeada de um pedido humano explícito).`
+    );
+    return 2;
+  }
   try {
     const collected = collectReviewBrief(repoRoot, role, {
       remote: remoteOverride !== undefined ? remoteOverride : ghRemotePrCollector,
+      authorization,
     });
     logger.info(renderReviewBrief(collected).trimEnd());
     return 0;

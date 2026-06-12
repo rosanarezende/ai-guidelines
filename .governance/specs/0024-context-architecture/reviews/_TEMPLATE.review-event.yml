@@ -29,7 +29,7 @@ decision: approved # approved | changes_requested | blocked
 scope: findings
 verifies:
   - technical_audit#F1
-subject_ref: x # CO-4: delta REVALIDADO — intervalo base..head (ex.: a1b2c3d..e4f5a6b); SELADO
+subject_ref: "x" # CO-4: delta REVALIDADO — base..head, SEMPRE entre aspas (SHA numérico viraria número YAML); SELADO
 audit_evidence:
   coverage:
     - src/example.ts
@@ -48,8 +48,8 @@ event_fingerprint: x # rode npm run review:seal -- --file <este arquivo>
 # decision: approved
 # scope: review
 # review_fingerprint: 538f2be5aed1 # selo REAL do review original (review:check valida)
-# previous_subject_ref: unknown # ref originalmente auditado; "unknown" se não declarado
-# subject_ref: a1b2c3d # novo HEAD/intervalo efetivamente revalidado; SELADO
+# previous_subject_ref: "unknown" # ref originalmente auditado, entre aspas; "unknown" se não declarado
+# subject_ref: "a1b2c3d" # novo HEAD/intervalo (SEMPRE entre aspas); SELADO
 # audit_evidence:
 #   coverage:
 #     - src/example.ts

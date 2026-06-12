@@ -26,7 +26,7 @@ export function buildAgentsRuntimeStub(
     ...(handoffCheckCommand
       ? [`- To confirm the resumption is still fresh, run \`${handoffCheckCommand}\`.`]
       : []),
-    `- When asked for a Technical Audit, Architectural Review, or revalidation, run \`${reviewBriefCommand}\` BEFORE reviewing — it projects the governed contract (role, mode, target artifact, vectors, prohibitions).`,
+    `- When the human explicitly asks for a Technical Audit, Architectural Review, or revalidation, run \`${reviewBriefCommand}\` with \`--authorization explicit-review-request\` BEFORE reviewing — the explicit request itself authorizes the full LIMITED cycle of that governed artifact (create, seal, validate, exclusive commit, normal push via review:publish); anything beyond the review artifact requires new human authorization.`,
     "- The script contract at `.core/governance/script-contracts.yml` is the operational SSOT for scripts, hooks, workflows, and docs.",
     "- Full rules remain governed in `.core/rules/**`, `.core/rules/catalog.md`, `.core/rules/_meta/rules.json`, and the rule ledger.",
     "- Never bypass hooks with `--no-verify`; restore setup if hooks or generated script surfaces are missing.",
