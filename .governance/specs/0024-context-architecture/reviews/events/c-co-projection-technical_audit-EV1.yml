@@ -1,0 +1,29 @@
+checkpoint: "checkpoint-co-projection"
+role: technical_audit
+event_id: EV1
+kind: verification
+executor:
+  platform: antigravity
+  model: Gemini 3.5 Flash (High)
+decision: approved
+scope: review
+review_fingerprint: "538f2be5aed1"
+previous_subject_ref: unknown
+subject_ref: "a100e7d"
+audit_evidence:
+  coverage:
+    - src/cli/handoff.ts
+    - src/cli/handoffFacts.ts
+    - src/cli/handoffCheck.ts
+    - src/cli/handoffReceipt.ts
+    - src/cli/handoffContract.ts
+    - cli/handoff-check.mjs
+    - cli/active-specs-check.mjs
+    - .governance/specs/0024-context-architecture/state.yml
+    - tests
+  scope: "Revalidação completa do checkpoint co-projection contra o novo HEAD"
+  basis: "Implementação correta e purista do handoff situado e do contrato de
+    carga, sem regressões. Validações locais executadas e passando, e o
+    handoff:check confirmou a saúde de todas as 11 fontes canônicas com recibo
+    de retomada reconciliado."
+event_fingerprint: 91d86f9bd76a
