@@ -91,6 +91,13 @@ export interface ReviewArtifactPlan {
   readonly template: string | null;
   /** Próximo event_id (EV<N>) quando kind = verification-event. */
   readonly nextEventId: string | null;
+  /**
+   * Escopo da verification (kind = verification-event):
+   *   findings = revalida findings específicos pós-resolutions (`verifies`);
+   *   review   = revalida o review INTEIRO contra novo subject (zero findings
+   *              incluso; `review_fingerprint` + `subject_ref`; SEM verifies).
+   */
+  readonly verificationScope: "findings" | "review" | null;
 }
 
 export interface ExistingReviewFact {
@@ -189,7 +196,7 @@ export function deriveReviewBrief(input: ReviewBriefInput): ReviewBrief {
         file: existingReview.file,
         decision: existingReview.decision,
         findingsEmitted: existingReview.findingsEmitted,
-        fingerprint: null, // preenchido pelo coletor a partir do YAML bruto quando disponível
+        fingerprint: existingReview.reviewFingerprint,
         subjectRef: existingReview.subjectRef ?? null,
         executor: existingReview.executor
           ? `${existingReview.executor.platform} · ${existingReview.executor.model}`
@@ -217,6 +224,7 @@ export function deriveReviewBrief(input: ReviewBriefInput): ReviewBrief {
     kind: "none",
     template: null,
     nextEventId: null,
+    verificationScope: null,
   };
 
   // PR/HEAD divergentes só BLOQUEIAM quando o remoto tem commits que o local
@@ -253,6 +261,7 @@ export function deriveReviewBrief(input: ReviewBriefInput): ReviewBrief {
       kind: "review",
       template: `${reviewsDir}/_TEMPLATE.review.yml`,
       nextEventId: null,
+      verificationScope: null,
     };
   } else {
     const subjectRef = existingReview.subjectRef ?? null;
@@ -290,11 +299,17 @@ export function deriveReviewBrief(input: ReviewBriefInput): ReviewBrief {
           `finding(s) open com resolution posterior (${openWithResolution.map((f) => f.id).join(", ")}) — revalide as evidências; o FECHAMENTO (disposition) é autoridade do reviewer/owner, não do implementador.`
         );
       }
+      // scope (rodada 6): findings = revalidar findings específicos após
+      // resolutions; review = revalidar o review INTEIRO (zero findings ou
+      // delta sem resolutions pendentes) — NUNCA finding artificial.
+      const verificationScope: "findings" | "review" =
+        openWithResolution.length > 0 ? "findings" : "review";
       artifact = {
         path: eventPath ?? "(n/a)",
         kind: "verification-event",
         template: `${reviewsDir}/_TEMPLATE.review-event.yml`,
         nextEventId,
+        verificationScope,
       };
     }
   }
@@ -344,11 +359,13 @@ export function deriveReviewBrief(input: ReviewBriefInput): ReviewBrief {
     "investigar o código/artefatos do checkpoint (read-only sobre a implementação)",
     "executar testes e validações locais",
     mode === "verification"
-      ? `criar o EVENTO append-only ${artifact.path} (kind: verification; subject_ref: ${subject.refSuggestion ?? "<base>..<head>"})`
+      ? artifact.verificationScope === "review"
+        ? `criar o EVENTO append-only ${artifact.path} (kind: verification; scope: review; review_fingerprint: ${existingReview?.reviewFingerprint ?? "<fp-do-review>"}; previous_subject_ref: ${previousRef ?? "unknown"}; subject_ref: ${subject.refSuggestion ?? "<head>"}; SEM verifies — não invente finding)`
+        : `criar o EVENTO append-only ${artifact.path} (kind: verification; scope: findings; verifies: findings com resolution; subject_ref: ${subject.refSuggestion ?? "<base>..<head>"})`
       : mode === "create"
         ? `criar o artefato ${artifact.path} (copie ${artifact.template}; preencha subject_ref: ${subject.refSuggestion ?? "<base>..<head>"})`
         : "nenhuma escrita necessária (review atual cobre o HEAD)",
-    "selar com `npm run review:seal -- <arquivo>` e validar com `npm run review:check`",
+    `selar com \`npm run review:seal -- --file ${artifact.kind === "none" ? "<arquivo>" : artifact.path}\` (sela reviews E eventos) e validar com \`npm run review:check\``,
     "commit EXCLUSIVO do artefato de review (nunca misturar com implementação)",
     "push somente com autorização humana explícita",
   ];
@@ -365,7 +382,7 @@ export function deriveReviewBrief(input: ReviewBriefInput): ReviewBrief {
   ];
 
   const validationCommands = [
-    ...(artifact.kind !== "none" ? [`npm run review:seal -- ${artifact.path}`] : []),
+    ...(artifact.kind !== "none" ? [`npm run review:seal -- --file ${artifact.path}`] : []),
     "npm run review:check",
     "npm run validate",
     `npm run handoff:check -- --spec ${specId}`,
@@ -444,21 +461,7 @@ export function collectReviewBrief(
     publication,
   });
 
-  // fingerprint REAL do artefato existente (do YAML bruto — evita o fingerprint
-  // "narrado" divergente que motivou esta capability).
-  let enriched = brief;
-  if (existingReview && brief.existingReview) {
-    const rawText = fs.existsSync(path.join(repoRoot, existingReview.file))
-      ? fs.readFileSync(path.join(repoRoot, existingReview.file), "utf-8")
-      : null;
-    const fp = rawText ? /review_fingerprint:\s*"?([0-9a-f]{12})"?/.exec(rawText)?.[1] : null;
-    enriched = {
-      ...brief,
-      existingReview: { ...brief.existingReview, fingerprint: fp ?? null },
-    };
-  }
-
-  return { snapshot, brief: enriched };
+  return { snapshot, brief };
 }
 
 // ── Renderer (compacto) ──────────────────────────────────────────────────────
@@ -553,9 +556,22 @@ export function renderReviewBrief(collected: CollectedReviewBrief): string {
     lines.push("- nenhum (review atual cobre o HEAD — nova revisão seria duplicada).");
   } else {
     lines.push(`- tipo: ${brief.artifact.kind}`);
+    if (brief.artifact.verificationScope) {
+      lines.push(
+        `- scope: ${brief.artifact.verificationScope}${
+          brief.artifact.verificationScope === "review"
+            ? " (revalida o review INTEIRO; SEM verifies — campos: review_fingerprint do original, previous_subject_ref, subject_ref)"
+            : " (revalida findings específicos pós-resolutions; verifies obrigatório)"
+        }`
+      );
+    }
     lines.push(`- path: ${brief.artifact.path}`);
     lines.push(`- template: ${brief.artifact.template}`);
     if (brief.artifact.nextEventId) lines.push(`- event_id: ${brief.artifact.nextEventId}`);
+    if (brief.artifact.verificationScope === "review" && brief.existingReview) {
+      lines.push(`- review_fingerprint (original, REAL): ${brief.existingReview.fingerprint}`);
+      lines.push(`- previous_subject_ref: ${brief.subject.previousRef ?? "unknown"}`);
+    }
     lines.push(
       `- subject_ref OBRIGATÓRIO no artefato: ${brief.subject.refSuggestion ?? "<base>..<head>"} (proveniência machine-readable; selada)`
     );

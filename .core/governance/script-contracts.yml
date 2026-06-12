@@ -222,7 +222,7 @@ profiles:
         category: governance
         mutates: true
         consumers: [human]
-        description: Sela automaticamente os fingerprints de findings e review_fingerprint em artefatos YAML.
+        description: Sela fingerprints de reviews E eventos (findings/review_fingerprint/event_fingerprint) por deteccao automatica do tipo.
       - name: pr-body:update
         command: npm run build && node cli/pr-body-update.mjs
         category: governance

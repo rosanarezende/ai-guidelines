@@ -167,6 +167,7 @@ function review(
     decision: "changes_requested",
     findingsEmitted: findings.length,
     findings,
+    reviewFingerprint: "abcdef123456",
     file: `reviews/c3-${role}.yml`,
   };
 }

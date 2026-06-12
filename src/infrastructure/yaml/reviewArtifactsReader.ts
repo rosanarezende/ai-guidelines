@@ -126,6 +126,8 @@ export interface ReviewArtifact {
    * SELADO no `review_fingerprint` (extensão tagueada) quando presente.
    */
   readonly subjectRef?: string;
+  /** Selo VALIDADO do review (`review_fingerprint`) — referenciável por eventos scope=review. */
+  readonly reviewFingerprint: string;
   readonly file: string;
 }
 
@@ -148,9 +150,26 @@ export interface ReviewEventArtifact {
   readonly kind: ReviewEventKind;
   readonly executor: ExecutorProvenance;
   readonly decision: ReviewDecision;
+  /**
+   * Escopo da verification (CO-4, rodada 6):
+   *   - "findings": revalida findings ESPECÍFICOS após resolutions (`verifies`
+   *     obrigatório; comportamento histórico — eventos sem `scope` são lidos
+   *     assim);
+   *   - "review": revalida o REVIEW INTEIRO contra um novo HEAD/subject
+   *     (review limpo com `findings_emitted: 0` incluso). `verifies` é
+   *     PROIBIDO (não inventar finding artificial); o review original é
+   *     identificado por checkpoint+role+`review_fingerprint` e permanece
+   *     imutável — o evento é append-only e NÃO reescreve a decisão selada.
+   */
+  readonly scope: "findings" | "review";
+  /** scope=findings: refs verificados. scope=review: vazio por contrato. */
   readonly verifies: readonly string[];
   readonly auditEvidence: AuditEvidence;
-  /** Ref REVALIDADO (`base..head` do delta). Opcional; selado quando presente. */
+  /** scope=review: selo do review ORIGINAL referenciado (12 hex). */
+  readonly reviewFingerprint?: string;
+  /** scope=review: ref originalmente auditado ("unknown" quando o review não declarou). */
+  readonly previousSubjectRef?: string;
+  /** Ref REVALIDADO (`base..head` do delta ou SHA). Selado quando presente. */
   readonly subjectRef?: string;
   readonly file: string;
 }
@@ -291,6 +310,9 @@ export function reviewEventFingerprintOf(parts: {
   auditEvidence: AuditEvidence;
   executor: ExecutorProvenance;
   subjectRef?: string;
+  scope?: "findings" | "review";
+  reviewFingerprint?: string;
+  previousSubjectRef?: string;
 }): string {
   const envelope: unknown[] = [
     parts.checkpoint,
@@ -306,6 +328,16 @@ export function reviewEventFingerprintOf(parts: {
   // mantêm o envelope (e o selo) idênticos ao formato original.
   if (parts.subjectRef) {
     envelope.push(["subject_ref", parts.subjectRef]);
+  }
+  // scope=review (CO-4, rodada 6): identidade do review referenciado + subject
+  // anterior entram no selo — mudar scope/subject muda o fingerprint; eventos
+  // históricos (sem scope ⇒ findings) mantêm o envelope byte-idêntico.
+  if (parts.scope === "review") {
+    envelope.push([
+      "scope:review",
+      parts.reviewFingerprint ?? null,
+      parts.previousSubjectRef ?? null,
+    ]);
   }
   return createHash("sha256").update(JSON.stringify(envelope)).digest("hex").slice(0, 12);
 }
@@ -542,6 +574,7 @@ export function parseReview(yamlText: string, file: string): ReviewArtifact {
     findings,
     ...(auditEvidence ? { auditEvidence } : {}),
     ...(subjectRef ? { subjectRef } : {}),
+    reviewFingerprint: expectedReview,
     file,
   };
 }
@@ -568,25 +601,62 @@ export function parseReviewEvent(yamlText: string, file: string): ReviewEventArt
       `${file}: "decision" must be one of ${REVIEW_DECISIONS.join("|")}`
     );
   }
-  const rawVerifies = o.verifies === undefined || o.verifies === null ? [] : o.verifies;
-  if (!Array.isArray(rawVerifies) || rawVerifies.length === 0) {
-    throw new ReviewArtifactParseError(
-      `${file}: "verifies" deve ser uma lista NÃO-vazia de findings qualificados (<role>#F<n>).`
-    );
+  // scope (CO-4, rodada 6): ausente ⇒ "findings" (eventos históricos).
+  const rawScope = o.scope === undefined || o.scope === null ? "findings" : o.scope;
+  if (rawScope !== "findings" && rawScope !== "review") {
+    throw new ReviewArtifactParseError(`${file}: "scope" must be "findings" or "review"`);
   }
-  const verifies = rawVerifies.map((v, i) => {
-    const ref = str(v);
-    if (!ref) throw new ReviewArtifactParseError(`${file}: verifies[${i}] deve ser string`);
-    if (!ref.includes("#")) {
+  const scope = rawScope as "findings" | "review";
+
+  const rawVerifies = o.verifies === undefined || o.verifies === null ? [] : o.verifies;
+  let verifies: string[];
+  let reviewFingerprint: string | undefined;
+  let previousSubjectRef: string | undefined;
+  if (scope === "findings") {
+    if (!Array.isArray(rawVerifies) || rawVerifies.length === 0) {
       throw new ReviewArtifactParseError(
-        `${file}: verifies[${i}] deve ser totalmente qualificado (<role>#F<n>).`
+        `${file}: "verifies" deve ser uma lista NÃO-vazia de findings qualificados (<role>#F<n>) ` +
+          `em scope=findings. Para revalidar um review SEM findings, use scope: review.`
       );
     }
-    return ref;
-  });
+    verifies = rawVerifies.map((v, i) => {
+      const ref = str(v);
+      if (!ref) throw new ReviewArtifactParseError(`${file}: verifies[${i}] deve ser string`);
+      if (!ref.includes("#")) {
+        throw new ReviewArtifactParseError(
+          `${file}: verifies[${i}] deve ser totalmente qualificado (<role>#F<n>).`
+        );
+      }
+      return ref;
+    });
+  } else {
+    // scope=review: o objeto é o REVIEW inteiro — `verifies` é incoerente
+    // (finding artificial foi exatamente o bug do dogfood rodada 6).
+    if (Array.isArray(rawVerifies) && rawVerifies.length > 0) {
+      throw new ReviewArtifactParseError(
+        `${file}: scope=review NÃO aceita "verifies" (não invente finding artificial — ` +
+          `o evento referencia o review por review_fingerprint).`
+      );
+    }
+    verifies = [];
+    const declaredReviewFp = str(o.review_fingerprint);
+    if (!declaredReviewFp || !/^[0-9a-f]{12}$/i.test(declaredReviewFp)) {
+      throw new ReviewArtifactParseError(
+        `${file}: scope=review exige "review_fingerprint" (12 hex) do review original referenciado.`
+      );
+    }
+    reviewFingerprint = declaredReviewFp.toLowerCase();
+    previousSubjectRef = parseSubjectRef(o.previous_subject_ref, file);
+  }
+
   const executor = parseExecutor(o.executor, file);
   const auditEvidence = parseAuditEvidence(o.audit_evidence, file);
   const subjectRef = parseSubjectRef(o.subject_ref, file);
+  if (scope === "review" && !subjectRef) {
+    throw new ReviewArtifactParseError(
+      `${file}: scope=review exige "subject_ref" (o objeto efetivamente revalidado).`
+    );
+  }
   const expected = reviewEventFingerprintOf({
     checkpoint,
     role,
@@ -597,6 +667,9 @@ export function parseReviewEvent(yamlText: string, file: string): ReviewEventArt
     auditEvidence,
     executor,
     ...(subjectRef ? { subjectRef } : {}),
+    scope,
+    ...(reviewFingerprint ? { reviewFingerprint } : {}),
+    ...(previousSubjectRef ? { previousSubjectRef } : {}),
   });
   const declared = str(o.event_fingerprint);
   if (declared !== expected) {
@@ -612,8 +685,11 @@ export function parseReviewEvent(yamlText: string, file: string): ReviewEventArt
     kind: o.kind as ReviewEventKind,
     executor,
     decision: o.decision as ReviewDecision,
+    scope,
     verifies,
     auditEvidence,
+    ...(reviewFingerprint ? { reviewFingerprint } : {}),
+    ...(previousSubjectRef ? { previousSubjectRef } : {}),
     ...(subjectRef ? { subjectRef } : {}),
     file,
   };

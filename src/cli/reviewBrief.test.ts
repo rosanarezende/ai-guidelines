@@ -76,6 +76,7 @@ function existingTa(overrides: Partial<ReviewArtifact> = {}): ReviewArtifact {
     decision: "approved",
     findingsEmitted: 0,
     findings: [],
+    reviewFingerprint: "538f2be5aed1",
     file: "reviews/c-co-projection-technical_audit.yml",
     ...overrides,
   } as ReviewArtifact;
@@ -170,6 +171,63 @@ describe("reviewBrief · inferência de modo [CO-4]", () => {
     expect(brief.modeBasis.join(" ")).toContain("autoridade do reviewer/owner");
   });
 
+  it("15/23 — TA limpo (0 findings) → verification scope=review com fp real e previous unknown", () => {
+    const brief = deriveReviewBrief(
+      input({ existingReview: existingTa({ reviewFingerprint: "538f2be5aed1" }) })
+    );
+    expect(brief.mode).toBe("verification");
+    expect(brief.artifact.verificationScope).toBe("review");
+    expect(brief.existingReview?.fingerprint).toBe("538f2be5aed1");
+    expect(brief.subject.previousRef).toBeNull();
+    expect(brief.allowedActions.join(" ")).toContain("scope: review");
+    expect(brief.allowedActions.join(" ")).toContain("SEM verifies");
+    expect(brief.validationCommands.join(" ")).toContain("review:seal -- --file");
+  });
+
+  it("16 — findings com resolutions → verification scope=findings", () => {
+    const review = existingTa({
+      subjectRef: "aaa1111..f04c5e8",
+      decision: "changes_requested",
+      findingsEmitted: 1,
+      findings: [
+        {
+          id: "F1",
+          severity: "high",
+          location: "src/x.ts#L1-L2",
+          description: "bug",
+          disposition: "open",
+          fingerprint: "ff",
+        },
+      ],
+    });
+    const resolutions: ResolutionArtifact[] = [
+      {
+        checkpoint: "checkpoint-co-projection",
+        by: "@dev",
+        resolutions: [{ finding: "technical_audit#F1", action: "fixed" }],
+        file: "reviews/c-co-projection-resolutions.yml",
+      } as ResolutionArtifact,
+    ];
+    const brief = deriveReviewBrief(input({ existingReview: review, resolutions }));
+    expect(brief.mode).toBe("verification");
+    expect(brief.artifact.verificationScope).toBe("findings");
+  });
+
+  it("17 — AR limpo posterior também usa scope=review", () => {
+    const brief = deriveReviewBrief(
+      input({
+        role: "architectural_review",
+        existingReview: existingTa({
+          role: "architectural_review",
+          subjectRef: "aaa1111..f04c5e8",
+          reviewFingerprint: "abc123def456",
+        }),
+      })
+    );
+    expect(brief.mode).toBe("verification");
+    expect(brief.artifact.verificationScope).toBe("review");
+  });
+
   it("7 — verification proíbe reescrever o review selado (append-only)", () => {
     const brief = deriveReviewBrief(input({ existingReview: existingTa() }));
     expect(brief.prohibitedActions.join(" ")).toContain("APPEND-ONLY");
@@ -186,6 +244,7 @@ describe("reviewBrief · inferência de modo [CO-4]", () => {
             role: "technical_audit",
             eventId: "EV1",
             kind: "verification",
+            scope: "findings" as const,
             executor: { platform: "x", model: "y" },
             decision: "approved",
             verifies: ["technical_audit#F1"],

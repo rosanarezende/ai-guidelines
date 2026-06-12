@@ -121,6 +121,8 @@ export interface ConsolidatedCheckpoint {
   readonly checkpoint: string;
   readonly reviewDecisions: ReadonlyArray<{ role: string; decision: string }>;
   readonly reviewEventCount: number;
+  /** Eventos scope=review (verification do review inteiro contra novo subject). */
+  readonly reviewScopeVerifications: number;
   readonly openBlocking: readonly Finding[];
   readonly totalOpen: number;
   readonly totalClosed: number;
@@ -241,7 +243,26 @@ export function consolidate(artifacts: SpecArtifacts): {
       }
     }
 
+    let reviewScopeVerifications = 0;
     for (const e of reviewEvents) {
+      if (e.scope === "review") {
+        // scope=review (CO-4, rodada 6): o objeto é o REVIEW INTEIRO — sem
+        // verifies (zero findings incluso). Valida a referência ao original:
+        // existe review da lane no checkpoint E o fingerprint declarado bate
+        // com o selo REAL (anti-referência-fantasma/tamper).
+        reviewScopeVerifications++;
+        const target = byRole.get(e.role);
+        if (!target) {
+          violations.push(
+            `checkpoint ${cp}: event scope=review em ${e.file} referencia review da lane "${e.role}" que não existe neste checkpoint.`
+          );
+        } else if (target.reviewFingerprint !== e.reviewFingerprint) {
+          violations.push(
+            `checkpoint ${cp}: event scope=review em ${e.file} declara review_fingerprint "${e.reviewFingerprint}", mas o review original (${target.file}) tem selo "${target.reviewFingerprint}" — referência divergente.`
+          );
+        }
+        continue;
+      }
       for (const ref of e.verifies) {
         if (!findingIds.has(ref)) {
           violations.push(
@@ -318,6 +339,7 @@ export function consolidate(artifacts: SpecArtifacts): {
       checkpoint: cp,
       reviewDecisions: reviews.map((r) => ({ role: r.role, decision: r.decision })),
       reviewEventCount: reviewEvents.length,
+      reviewScopeVerifications,
       openBlocking,
       totalOpen,
       totalClosed,
@@ -438,7 +460,7 @@ export function main(repoRoot: string, logger: Logger = defaultLogger): number {
       c.reviewDecisions.map((d) => `${d.role}=${d.decision}`).join(" · ") || "(sem reviews)";
     const gate = c.gate ? c.gate.decision : "pending";
     logger.info(
-      `• checkpoint ${c.checkpoint}: reviews [${decs}] · events ${c.reviewEventCount} · findings ${c.totalOpen} open / ${c.totalClosed} closed · gate ${gate}`
+      `• checkpoint ${c.checkpoint}: reviews [${decs}] · events ${c.reviewEventCount}${c.reviewScopeVerifications > 0 ? ` (${c.reviewScopeVerifications} review-verification)` : ""} · findings ${c.totalOpen} open / ${c.totalClosed} closed · gate ${gate}`
     );
   }
 

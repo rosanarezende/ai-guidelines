@@ -28,7 +28,7 @@ try {
 
   if (!values.file) {
     process.stderr.write(
-      `❌ [review:seal] Argumento obrigatório --file ausente.\n   Exemplo: npm run review:seal -- --file .governance/specs/.../reviews/c-foo.yml\n`
+      `❌ [review:seal] Argumento obrigatório --file ausente.\n   Sela reviews E eventos (detecção automática pelo tipo do artefato).\n   Exemplos:\n     npm run review:seal -- --file .governance/specs/.../reviews/c-foo-technical_audit.yml\n     npm run review:seal -- --file .governance/specs/.../reviews/events/c-foo-technical_audit-EV1.yml\n`
     );
     process.exit(2);
   }
