@@ -317,6 +317,184 @@ describe("reviewBrief · inferência de modo [CO-4]", () => {
   });
 });
 
+describe("reviewBrief · freshness funcional [CO-4 rodada 7]", () => {
+  const REVIEW_AT = (head: string) => existingTa({ subjectRef: `aaa1111..${head}` });
+
+  it("1 — review cobre o functional HEAD e tree limpa → CURRENT", () => {
+    const brief = deriveReviewBrief(
+      input({
+        existingReview: REVIEW_AT("b8f18c0"),
+        effectiveFunctionalHead: "b8f18c0",
+        workingTreeState: "clean",
+      })
+    );
+    expect(brief.mode).toBe("current");
+  });
+
+  it("2/7 — commits posteriores SÓ de review (git HEAD avança; functional não) → CURRENT", () => {
+    const brief = deriveReviewBrief(
+      input({
+        existingReview: REVIEW_AT("b8f18c0"),
+        facts: facts({ git: { ...facts().git, head: "ffff111" } }), // git HEAD avançou (EVs)
+        effectiveFunctionalHead: "b8f18c0", // cabeça auditável parada
+        workingTreeState: "clean",
+      })
+    );
+    expect(brief.mode).toBe("current");
+    expect(brief.gitHead).toBe("ffff111");
+    expect(brief.effectiveFunctionalHead).toBe("b8f18c0");
+  });
+
+  it("3/6 — commit funcional (ou misto) posterior ao subject → VERIFICATION", () => {
+    const brief = deriveReviewBrief(
+      input({
+        existingReview: REVIEW_AT("b8f18c0"),
+        facts: facts({ git: { ...facts().git, head: "ffff222" } }),
+        effectiveFunctionalHead: "ffff222",
+        workingTreeState: "clean",
+      })
+    );
+    expect(brief.mode).toBe("verification");
+    expect(brief.subject.range).toBe("b8f18c0..ffff222");
+  });
+
+  it("4 — mudança funcional NÃO commitada → BLOCKED listando os arquivos", () => {
+    const brief = deriveReviewBrief(
+      input({
+        existingReview: REVIEW_AT("b8f18c0"),
+        effectiveFunctionalHead: "b8f18c0",
+        workingTreeState: "functional-dirty",
+        functionalDirtyFiles: ["src/cli/reviewBrief.ts"],
+      })
+    );
+    expect(brief.mode).toBe("blocked");
+    expect(brief.modeBasis.join("\n")).toContain("src/cli/reviewBrief.ts");
+    expect(brief.modeBasis.join(" ")).toContain("MUDANÇAS FUNCIONAIS");
+  });
+
+  it("5 — alteração não commitada APENAS em artefato de review → explícito, sem afirmar mudança funcional", () => {
+    const brief = deriveReviewBrief(
+      input({
+        existingReview: REVIEW_AT("b8f18c0"),
+        effectiveFunctionalHead: "b8f18c0",
+        workingTreeState: "review-only",
+      })
+    );
+    expect(brief.mode).toBe("current"); // não bloqueia; não vira verification
+    expect(brief.degraded.join(" ")).toContain("APENAS artefatos de review");
+    expect(brief.degraded.join(" ")).not.toContain("funcional mudou");
+  });
+
+  it("8 — Architectural Review usa a MESMA cabeça funcional", () => {
+    const common = {
+      effectiveFunctionalHead: "ffff333",
+      workingTreeState: "clean" as const,
+    };
+    const ta = deriveReviewBrief(input({ ...common }));
+    const ar = deriveReviewBrief(input({ ...common, role: "architectural_review" }));
+    expect(ta.effectiveFunctionalHead).toBe("ffff333");
+    expect(ar.effectiveFunctionalHead).toBe("ffff333");
+    expect(ar.subject.headSha).toBe(ta.subject.headSha);
+  });
+
+  it("9 — sem ciclo de self-staleness: EV registrado avança o subject; commit review-only não move a cabeça", () => {
+    const brief = deriveReviewBrief(
+      input({
+        existingReview: existingTa({ subjectRef: "aaa1111..b8f18c0" }),
+        roleEvents: [
+          {
+            checkpoint: "checkpoint-co-projection",
+            role: "technical_audit",
+            eventId: "EV1",
+            kind: "verification",
+            scope: "review" as const,
+            executor: { platform: "x", model: "y" },
+            decision: "approved",
+            verifies: [],
+            auditEvidence: { coverage: ["a"], scope: "s", basis: "b" },
+            reviewFingerprint: "538f2be5aed1",
+            subjectRef: "cccc444",
+            file: "events/ev1.yml",
+          },
+        ],
+        facts: facts({ git: { ...facts().git, head: "dddd555" } }), // commit do EV moveu git HEAD
+        effectiveFunctionalHead: "cccc444", // cabeça funcional auditada pelo EV1
+        workingTreeState: "clean",
+      })
+    );
+    // subject avançou pelo EV1 (cccc444) e a cabeça funcional é a mesma → CURRENT
+    expect(brief.mode).toBe("current");
+  });
+
+  it("10 — output distingue git HEAD de functional HEAD e o estado da tree", () => {
+    const repo = tempRepo();
+    initGitOnBranch(repo, "feat/spec-0024-co-knowledge");
+    commitAll(repo);
+    const { lines, logger } = fakeLogger();
+
+    runReviewBrief(repo, "technical-audit", logger, null);
+
+    const out = lines.join("\n");
+    expect(out).toMatch(/git HEAD: [0-9a-f]{7}/);
+    expect(out).toMatch(/functional HEAD \(auditável\): [0-9a-f]{7}/);
+    expect(out).toContain("working tree: clean");
+  });
+
+  it("integração — classificação real: funcional sujo BLOQUEIA; review-only não", () => {
+    const repo = tempRepo();
+    initGitOnBranch(repo, "feat/spec-0024-co-knowledge");
+    commitAll(repo);
+
+    // funcional sujo (arquivo fora de reviews/)
+    fs.writeFileSync(path.join(repo, "src.ts"), "export {};\n");
+    let collected = collectReviewBrief(repo, "technical_audit", { remote: null });
+    expect(collected.brief.workingTreeState).toBe("functional-dirty");
+    expect(collected.brief.mode).toBe("blocked");
+    fs.rmSync(path.join(repo, "src.ts"));
+
+    // review-only (artefato no diretório canônico da spec)
+    const reviewsDir = path.join(
+      repo,
+      ".governance",
+      "specs",
+      "0024-context-architecture",
+      "reviews"
+    );
+    fs.mkdirSync(reviewsDir, { recursive: true });
+    fs.writeFileSync(path.join(reviewsDir, "rascunho.yml"), "checkpoint: x\n");
+    collected = collectReviewBrief(repo, "technical_audit", { remote: null });
+    expect(collected.brief.workingTreeState).toBe("review-only");
+    expect(collected.brief.mode).toBe("create"); // não bloqueia
+  });
+
+  it("integração — commit review-only NÃO move a cabeça funcional; commit funcional move", () => {
+    const repo = tempRepo();
+    initGitOnBranch(repo, "feat/spec-0024-co-knowledge");
+    const base = commitAll(repo);
+
+    // commit review-only
+    const reviewsDir = path.join(
+      repo,
+      ".governance",
+      "specs",
+      "0024-context-architecture",
+      "reviews"
+    );
+    fs.mkdirSync(reviewsDir, { recursive: true });
+    fs.writeFileSync(path.join(reviewsDir, "nota.yml"), "x: 1\n");
+    commitAll(repo, "review only");
+    let collected = collectReviewBrief(repo, "technical_audit", { remote: null });
+    expect(collected.brief.effectiveFunctionalHead).toBe(base);
+    expect(collected.brief.gitHead).not.toBe(base);
+
+    // commit funcional (misto conta como funcional)
+    fs.writeFileSync(path.join(repo, "novo.ts"), "export {};\n");
+    const funcional = commitAll(repo, "funcional");
+    collected = collectReviewBrief(repo, "technical_audit", { remote: null });
+    expect(collected.brief.effectiveFunctionalHead).toBe(funcional);
+  });
+});
+
 describe("reviewBrief · política e conteúdo [CO-4]", () => {
   it("11/12/13 — GitHub proibido por padrão; ações permitidas/proibidas presentes", () => {
     const brief = deriveReviewBrief(input());
@@ -360,6 +538,20 @@ function initGitOnBranch(repo: string, branchName: string): void {
     cwd: repo,
     stdio: "ignore",
   });
+}
+
+/** Commita TODO o fixture (tree limpa) — classificação de freshness exige commits reais. */
+function commitAll(repo: string, message = "fixture"): string {
+  execFileSync("git", ["add", "-A"], { cwd: repo, stdio: "ignore" });
+  execFileSync(
+    "git",
+    ["-c", "user.email=t@t", "-c", "user.name=T", "commit", "--quiet", "-m", message],
+    { cwd: repo, stdio: "ignore" }
+  );
+  return execFileSync("git", ["rev-parse", "--short", "HEAD"], {
+    cwd: repo,
+    encoding: "utf8",
+  }).trim();
 }
 
 function tempRepo(): string {
@@ -458,6 +650,7 @@ describe("reviewBrief · comando integrado [CO-4]", () => {
   it("18 — o comando É um ato de carga: recibo escrito do MESMO snapshot (anti-TOCTOU)", () => {
     const repo = tempRepo();
     initGitOnBranch(repo, "feat/spec-0024-co-knowledge");
+    commitAll(repo);
 
     const collected = collectReviewBrief(repo, "technical_audit", { remote: null });
 
@@ -484,6 +677,7 @@ describe("reviewBrief · comando integrado [CO-4]", () => {
   it("19 — API indisponível: briefing degradado declarado, nada inventado (exit 0)", () => {
     const repo = tempRepo();
     initGitOnBranch(repo, "feat/spec-0024-co-knowledge");
+    commitAll(repo);
     const { lines, logger } = fakeLogger();
 
     const code = runReviewBrief(repo, "technical-audit", logger, () => {

@@ -26,6 +26,7 @@
  */
 import * as path from "node:path";
 import * as fs from "node:fs";
+import { execFileSync } from "node:child_process";
 import {
   ReviewArtifact,
   ReviewEventArtifact,
@@ -113,6 +114,11 @@ export interface ReviewBrief {
   readonly specId: string;
   readonly checkpoint: string | null;
   readonly role: string;
+  /** HEAD git real (referência) — pode conter commits review-only. */
+  readonly gitHead: string | null;
+  /** Cabeça FUNCIONAL auditável (comparações de freshness usam esta). */
+  readonly effectiveFunctionalHead: string | null;
+  readonly workingTreeState: WorkingTreeState;
   readonly mode: ReviewBriefMode;
   /** Base factual citável da inferência do modo. */
   readonly modeBasis: ReadonlyArray<string>;
@@ -132,6 +138,17 @@ export interface ReviewBrief {
   readonly finalReportSections: ReadonlyArray<string>;
 }
 
+/**
+ * Estado da working tree relativo ao objeto AUDITÁVEL (rodada 7):
+ *   clean            → nada não-commitado;
+ *   review-only      → só artefatos de review (paths canônicos da spec) — caso
+ *                      legítimo de criação de artefato em curso; NÃO afirma que
+ *                      código funcional mudou;
+ *   functional-dirty → mudanças funcionais não commitadas — o objeto real de
+ *                      trabalho diverge de QUALQUER commit ⇒ review bloqueado.
+ */
+export type WorkingTreeState = "clean" | "review-only" | "functional-dirty" | "unknown";
+
 export interface ReviewBriefInput {
   readonly facts: HandoffFacts;
   readonly role: string;
@@ -140,6 +157,15 @@ export interface ReviewBriefInput {
   readonly resolutions: ReadonlyArray<ResolutionArtifact>;
   readonly lane: ReviewLanePolicy | null;
   readonly publication: ReviewPublicationPolicy | null;
+  /**
+   * Último commit que altera algo FORA do diretório canônico de reviews da
+   * spec — a cabeça AUDITÁVEL. Commits review-only (registrar EV, selar) não a
+   * movem ⇒ sem ciclo de self-staleness. Ausente ⇒ usa git HEAD.
+   */
+  readonly effectiveFunctionalHead?: string | null;
+  readonly workingTreeState?: WorkingTreeState;
+  /** Arquivos funcionais não commitados (diagnóstico do blocked). */
+  readonly functionalDirtyFiles?: ReadonlyArray<string>;
 }
 
 function normalizeCheckpoint(slug: string): string {
@@ -180,7 +206,12 @@ export function deriveReviewBrief(input: ReviewBriefInput): ReviewBrief {
   const { facts, role, existingReview, roleEvents, resolutions, lane, publication } = input;
   const specId = /^(\d{4})/.exec(facts.spec.label)?.[1] ?? facts.spec.label;
   const checkpoint = facts.cursor?.checkpoint ?? null;
-  const head = facts.git.head;
+  const gitHead = facts.git.head;
+  const workingTreeState = input.workingTreeState ?? "unknown";
+  // Comparações de freshness usam a cabeça FUNCIONAL (commits review-only não
+  // tornam um review stale — e não tornam um review stale ATUAL falso current,
+  // porque mudança funcional não commitada bloqueia antes; rodada 7).
+  const head = input.effectiveFunctionalHead ?? gitHead;
   const baseRef = facts.pullRequest?.baseRefName ?? null;
   const degraded: string[] = [];
   const modeBasis: string[] = [];
@@ -243,6 +274,16 @@ export function deriveReviewBrief(input: ReviewBriefInput): ReviewBrief {
       "fontes/projeções divergentes ou contrato obrigatório ausente — reconcilie antes de revisar:"
     );
     for (const w of facts.driftWarnings) modeBasis.push(w);
+  } else if (workingTreeState === "functional-dirty") {
+    mode = "blocked";
+    modeBasis.push(
+      "working tree com MUDANÇAS FUNCIONAIS não commitadas — o objeto real de trabalho " +
+        "diverge de qualquer commit; review não pode ser current/create/verification. " +
+        "Commite (ou descarte) antes de pedir review. Arquivos funcionais sujos:"
+    );
+    for (const file of input.functionalDirtyFiles ?? []) {
+      modeBasis.push(`  ${file}`);
+    }
   } else if (prHeadDiverges) {
     mode = "blocked";
     modeBasis.push(
@@ -264,7 +305,11 @@ export function deriveReviewBrief(input: ReviewBriefInput): ReviewBrief {
       verificationScope: null,
     };
   } else {
-    const subjectRef = existingReview.subjectRef ?? null;
+    // O subject auditado AVANÇA com as verifications: o último evento da lane
+    // com subject_ref representa a cobertura mais recente (review original
+    // permanece imutável — quem progride é o ledger append-only).
+    const lastVerifiedRef = [...roleEvents].reverse().find((e) => e.subjectRef)?.subjectRef ?? null;
+    const subjectRef = lastVerifiedRef ?? existingReview.subjectRef ?? null;
     const openWithResolution = (existingReview.findings ?? []).filter(
       (f) =>
         f.disposition === "open" &&
@@ -314,7 +359,10 @@ export function deriveReviewBrief(input: ReviewBriefInput): ReviewBrief {
     }
   }
 
-  const previousRef = existingReview?.subjectRef ?? null;
+  const previousRef =
+    [...roleEvents].reverse().find((e) => e.subjectRef)?.subjectRef ??
+    existingReview?.subjectRef ??
+    null;
   const range =
     mode === "verification" && previousRef && head
       ? `${refHead(previousRef)}..${head}`
@@ -342,6 +390,12 @@ export function deriveReviewBrief(input: ReviewBriefInput): ReviewBrief {
     provenance: existingReview ? (previousRef ? "declared" : "unknown") : "none",
   };
 
+  if (workingTreeState === "review-only") {
+    degraded.push(
+      "working tree contém APENAS artefatos de review não commitados (criação de artefato " +
+        "em curso) — código funcional inalterado; commite o artefato em commit exclusivo."
+    );
+  }
   if (prHeadDiffers && !prHeadDiverges && mode !== "blocked") {
     degraded.push(
       `PR #${facts.pullRequest!.number} head remoto (${facts.pullRequest!.headRefOid.slice(0, 7)}) está atrás do HEAD local ${head} — push pendente; o review cobre o HEAD LOCAL.`
@@ -392,6 +446,9 @@ export function deriveReviewBrief(input: ReviewBriefInput): ReviewBrief {
     specId,
     checkpoint,
     role,
+    gitHead,
+    effectiveFunctionalHead: input.effectiveFunctionalHead ?? gitHead,
+    workingTreeState,
     mode,
     modeBasis,
     degraded,
@@ -415,6 +472,96 @@ export function deriveReviewBrief(input: ReviewBriefInput): ReviewBrief {
 export interface CollectedReviewBrief {
   readonly snapshot: HandoffLoadSnapshot;
   readonly brief: ReviewBrief;
+}
+
+function gitOrNull(repoRoot: string, args: readonly string[]): string | null {
+  try {
+    return execFileSync("git", [...args], {
+      cwd: repoRoot,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    }).trim();
+  } catch {
+    return null;
+  }
+}
+
+/** `git status --porcelain` SEM trim (o status XY usa o espaço inicial). */
+function gitPorcelain(repoRoot: string): string | null {
+  try {
+    return execFileSync("git", ["status", "--porcelain"], {
+      cwd: repoRoot,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    });
+  } catch {
+    return null;
+  }
+}
+
+/** Paths de `git status --porcelain` (formato `XY <path>`; lida com rename "a -> b"). */
+function porcelainPaths(porcelain: string): string[] {
+  return porcelain
+    .split(/\r?\n/)
+    .filter((line) => line.length > 3)
+    .map((line) => {
+      const raw = line.slice(3);
+      const arrow = raw.indexOf(" -> ");
+      return (arrow >= 0 ? raw.slice(arrow + 4) : raw).replace(/^"|"$/g, "");
+    });
+}
+
+/**
+ * Freshness FUNCIONAL (rodada 7): a cabeça auditável é o último commit que
+ * altera algo fora do diretório CANÔNICO de reviews da spec (path governado —
+ * não um pathspec genérico), e a working tree é classificada pelos mesmos
+ * paths. `git log` ignora o que não foi commitado — por isso a classificação
+ * da tree existe: funcional-sujo bloqueia em vez de fingir current.
+ */
+function collectFunctionalFreshness(
+  repoRoot: string,
+  reviewsDirRel: string
+): {
+  effectiveFunctionalHead: string | null;
+  workingTreeState: WorkingTreeState;
+  functionalDirtyFiles: string[];
+} {
+  const normalizedReviewsDir = reviewsDirRel.replace(/\\/g, "/").replace(/\/+$/, "") + "/";
+  const isReviewPath = (p: string): boolean =>
+    p.replace(/\\/g, "/").startsWith(normalizedReviewsDir);
+
+  const effectiveFunctionalHead = gitOrNull(repoRoot, [
+    "log",
+    "-n",
+    "1",
+    "--format=%h",
+    "--",
+    ".",
+    `:(exclude)${normalizedReviewsDir}`,
+  ]);
+
+  const porcelain = gitPorcelain(repoRoot);
+  if (porcelain === null) {
+    return {
+      effectiveFunctionalHead: effectiveFunctionalHead || null,
+      workingTreeState: "unknown",
+      functionalDirtyFiles: [],
+    };
+  }
+  if (porcelain.trim() === "") {
+    return {
+      effectiveFunctionalHead: effectiveFunctionalHead || null,
+      workingTreeState: "clean",
+      functionalDirtyFiles: [],
+    };
+  }
+  const paths = porcelainPaths(porcelain);
+  const functionalDirtyFiles = paths.filter((p) => !isReviewPath(p));
+  return {
+    effectiveFunctionalHead: effectiveFunctionalHead || null,
+    workingTreeState: functionalDirtyFiles.length === 0 ? "review-only" : "functional-dirty",
+    functionalDirtyFiles,
+  };
 }
 
 export function collectReviewBrief(
@@ -451,6 +598,8 @@ export function collectReviewBrief(
     }
   }
 
+  const freshness = collectFunctionalFreshness(repoRoot, `${facts.spec.path}/reviews`);
+
   const brief = deriveReviewBrief({
     facts,
     role,
@@ -459,6 +608,9 @@ export function collectReviewBrief(
     resolutions,
     lane,
     publication,
+    effectiveFunctionalHead: freshness.effectiveFunctionalHead,
+    workingTreeState: freshness.workingTreeState,
+    functionalDirtyFiles: freshness.functionalDirtyFiles,
   });
 
   return { snapshot, brief };
@@ -485,10 +637,9 @@ export function renderReviewBrief(collected: CollectedReviewBrief): string {
   lines.push("## 1. Retomada factual");
   lines.push(`- spec: ${facts.spec.label} · checkpoint: ${brief.checkpoint ?? "(sem cursor)"}`);
   lines.push(
-    `- branch: ${facts.git.branch ?? "?"} · HEAD: ${facts.git.head ?? "?"} · working tree: ${
-      facts.git.workingTreeClean === null ? "?" : facts.git.workingTreeClean ? "limpa" : "SUJA"
-    }`
+    `- branch: ${facts.git.branch ?? "?"} · git HEAD: ${brief.gitHead ?? "?"} · functional HEAD (auditável): ${brief.effectiveFunctionalHead ?? "?"}`
   );
+  lines.push(`- working tree: ${brief.workingTreeState}`);
   lines.push(
     pr
       ? `- PR: #${pr.number} (${pr.state}${pr.isDraft ? ", Draft" : ", Ready"}; base ${pr.baseRefName}; head ${pr.headRefOid.slice(0, 7)}) · CI: ${pr.checks.pass} pass · ${pr.checks.fail} fail · ${pr.checks.pending} pending`
