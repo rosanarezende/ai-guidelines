@@ -1,32 +1,53 @@
 /**
  * CLI entrypoint para gate `active-specs:check`.
  *
- * **Drift guard de consistência SSOT→projeção.** Para cada entry de
- * `.governance/runtime/specs/active.yml`, verifica que `entry.stage` é projeção
- * FIEL de `state.yml.stage` da spec — invariante `[DEC-0023-A04]` (stage
- * compartilha o enum e é projeção direta de `state.yml.stage`).
+ * **Drift guard de consistência fatos→projeção.** Para cada entry de
+ * `.governance/runtime/specs/active.yml`, verifica:
  *
- * Por que existe: o `activeSpecsSerializer` valida deliberadamente só a FORMA
- * (ver seu header: "Drift guard de ambiente é responsabilidade [de outro lugar]").
- * Esse "outro lugar" não existia — e a 0023 ficou listada como `closing/active`
- * ~10 dias após `done` (3ª representação stale do padrão recorrente SSOT→projeção).
- * Este gate fecha a lacuna: o serializer valida FORMA; este valida CONSISTÊNCIA.
+ *   1. `entry.stage` é projeção FIEL de `state.yml.stage` — invariante
+ *      `[DEC-0023-A04]` (stage compartilha o enum e é projeção direta).
+ *   2. `entry.id`/`entry.slug` round-trip com o basename de `entry.specPath`
+ *      (o gerador `publish-state` DERIVA id/slug do nome do diretório; uma
+ *      entry que não round-tripa não pôde ter saído do gerador).
+ *   3. `entry.sourceStatePath`, se presente, é `${specPath}/state.yml`
+ *      (mesma razão: round-trip do gerador).
+ *   4. `entry.branch` é fiel ao branch git corrente QUANDO o branch corrente
+ *      pertence à mesma spec (id canônico extraído via `parseSpecBranch`,
+ *      [DEC-0023-I01]). Fronteira documentada: em HEAD detached (CI de PR),
+ *      em branch fora do padrão `feat/spec-NNNN-*` ou em branch de OUTRA
+ *      spec, o sub-check de branch é SKIPPED — o fato não é observável
+ *      nesses ambientes. O ponto de enforcement determinístico é o validate
+ *      local (pre-push) rodando na branch da spec.
  *
- * Escopo deliberado: só `stage` (projeção direta). `status` é dimensão
- * independente (`[DEC-0023-A04]`) e `branch`/`updatedAt` são registros factuais —
- * NÃO são projeções de `state.yml`, então NÃO entram aqui.
+ * Por que existe: o `activeSpecsSerializer` valida deliberadamente só a FORMA.
+ * A 0023 ficou listada como `closing/active` ~10 dias após `done` (stage stale);
+ * o escopo original deste gate parou em `stage`, tratando `branch` como "registro
+ * factual fora de escopo". A Spec 0024 falsificou esse recorte (dogfood CO-4,
+ * 2026-06-11): `entry.branch` ficou DUAS gerações stale (#38→#41) e o drift foi
+ * mascarado porque o handoff recuperava a spec por fallback canônico — projeção
+ * stale aceita porque um fallback operacional esconde a divergência. `branch`
+ * pode não ser projeção de `state.yml`, mas é projeção de um FATO (git), e
+ * fato→projeção também driftam. Coerência projetada×factual é invariante de
+ * ESTADO CONTÍNUO — superfície de check é a correta (cf. taxonomia de
+ * superfícies de enforcement, research 2026-06-05).
+ *
+ * `status`/`updated_by` seguem dimensões declaradas (humanas) — não derivam de
+ * fato observável, então NÃO entram aqui. `updated_at` segue registro factual
+ * sem semântica de freshness (cf. `ActiveSpecEntry.updatedAt`).
  *
  * Exit codes:
- *   0 — sucesso (todo entry.stage == state.yml.stage; state.yml existe)
- *   1 — ≥ 1 entry diverge da SSOT (stage stale) ou aponta state.yml inexistente
+ *   0 — sucesso (invariantes acima satisfeitas nos ambientes onde observáveis)
+ *   1 — ≥ 1 entry diverge dos fatos (stage/branch/identidade/path stale)
  */
 import * as fs from "node:fs";
 import * as path from "node:path";
+import { execFileSync } from "node:child_process";
 import {
   parseActiveSpecs,
   parseSpecsHistory,
 } from "../infrastructure/yaml/activeSpecsSerializer.js";
 import { parseWorkflowState } from "../infrastructure/yaml/workflowStateSerializer.js";
+import { parseSpecBranch } from "../app/workflow/DetectActiveSpec.js";
 
 interface Logger {
   info: (msg: string) => void;
@@ -48,6 +69,12 @@ export interface ActiveSpecsConsistencyInput {
   historyText?: string;
   /** Lê o `state.yml` de uma entry pelo caminho relativo; `null` se não existe. */
   readStateYml: (relPath: string) => string | null;
+  /**
+   * Branch git corrente factual; `null`/ausente quando não observável
+   * (HEAD detached, não-repo). Sub-check de branch só roda quando o branch
+   * corrente parseia como `feat/spec-NNNN-*` E o id casa com a entry.
+   */
+  currentBranch?: string | null;
 }
 
 export interface ConsistencyFailure {
@@ -59,9 +86,14 @@ export type ConsistencyResult =
   | { kind: "ok"; count: number }
   | { kind: "fail"; failures: ConsistencyFailure[]; total: number };
 
+/** Comando canônico de reconciliação da projeção (única forma governada de escrita). */
+const RECONCILE_COMMAND =
+  "npm run guidelines -- workflow publish-state --status=<status> --updated-by=<@autor>";
+
 /**
- * Pure: parseia o índice + leitor injetado → compara `entry.stage` com
- * `state.yml.stage`. Sem efeitos colaterais (filesystem real fica no `main`).
+ * Pure: parseia o índice + leitor injetado → compara cada entry com os fatos
+ * (state.yml, basename do path, branch git injetado). Sem efeitos colaterais
+ * (filesystem/git reais ficam no `main`).
  */
 export function runActiveSpecsConsistencyCheck(
   input: ActiveSpecsConsistencyInput
@@ -80,12 +112,15 @@ export function runActiveSpecsConsistencyCheck(
       });
       continue;
     }
+    validateEntryIdentity(entry, "active-specs", failures);
     validateEntryStage(entry, "active-specs", input.readStateYml, failures);
+    validateEntryBranch(entry, input.currentBranch ?? null, failures);
   }
 
   if (input.historyText !== undefined) {
     const history = parseSpecsHistory(input.historyText);
     for (const entry of history.specsHistory) {
+      validateEntryIdentity(entry, "specs-history", failures);
       validateEntryStage(entry, "specs-history", input.readStateYml, failures);
     }
   }
@@ -100,6 +135,67 @@ export function runActiveSpecsConsistencyCheck(
     ? parseSpecsHistory(input.historyText).specsHistory.length
     : 0;
   return { kind: "ok", count: entries.length + historyCount };
+}
+
+/**
+ * Round-trip do gerador: `publish-state` deriva id/slug do basename de
+ * `spec_path` e grava `source_state_path = ${spec_path}/state.yml`. Uma entry
+ * que não round-tripa foi editada à mão ou apontada para a spec errada.
+ */
+function validateEntryIdentity(
+  entry: { id: string; slug: string; specPath: string; sourceStatePath?: string },
+  source: string,
+  failures: ConsistencyFailure[]
+): void {
+  const basename = entry.specPath.split("/").filter(Boolean).pop() ?? "";
+  const expected = `${entry.id}-${entry.slug}`;
+  if (basename !== expected) {
+    failures.push({
+      id: entry.id,
+      message:
+        `identidade stale: ${source} projeta id/slug "${expected}", mas spec_path ` +
+        `aponta para "${basename}" (fonte projetada: ${INDEX_PATH}; fonte factual: ` +
+        `basename de spec_path "${entry.specPath}"). Reconcilie com: ${RECONCILE_COMMAND}.`,
+    });
+  }
+  if (
+    entry.sourceStatePath !== undefined &&
+    entry.sourceStatePath !== `${entry.specPath}/state.yml`
+  ) {
+    failures.push({
+      id: entry.id,
+      message:
+        `source_state_path stale: ${source} diz "${entry.sourceStatePath}", mas o gerador ` +
+        `grava "${entry.specPath}/state.yml" (fonte projetada: ${INDEX_PATH}; fonte factual: ` +
+        `spec_path da própria entry). Reconcilie com: ${RECONCILE_COMMAND}.`,
+    });
+  }
+}
+
+/**
+ * Coerência branch projetada × branch factual. Só decide quando o fato é
+ * observável E pertence à mesma spec: branch corrente parseia como
+ * `feat/spec-NNNN-*` ([DEC-0023-I01]) e o id canônico casa com `entry.id`.
+ * Caso contrário (detached HEAD, branch `main`, branch de outra spec) o
+ * sub-check é SKIPPED — ausência de fato não é evidência de coerência.
+ */
+function validateEntryBranch(
+  entry: { id: string; branch: string },
+  currentBranch: string | null,
+  failures: ConsistencyFailure[]
+): void {
+  const parsed = parseSpecBranch(currentBranch);
+  if (!parsed || parsed.specId !== entry.id) return;
+  if (entry.branch !== currentBranch) {
+    failures.push({
+      id: entry.id,
+      message:
+        `branch stale: a projeção diz "${entry.branch}" (fonte: ${INDEX_PATH}), mas o ` +
+        `fato é "${currentBranch}" (fonte: git branch corrente). A spec ${entry.id} está ` +
+        `sendo trabalhada em branch que a projeção desconhece — retomadas que confiarem ` +
+        `na projeção se situam no nó errado. Reconcilie com: ${RECONCILE_COMMAND}.`,
+    });
+  }
 }
 
 function validateEntryStage(
@@ -135,7 +231,21 @@ function validateEntryStage(
   }
 }
 
-/** Composition root: lê o índice + injeta readFile + reporta. */
+/** Branch git corrente factual; `null` em detached HEAD ou fora de repo. */
+function factualCurrentBranch(repoRoot: string): string | null {
+  try {
+    const out = execFileSync("git", ["branch", "--show-current"], {
+      cwd: repoRoot,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+    }).trim();
+    return out === "" ? null : out;
+  } catch {
+    return null;
+  }
+}
+
+/** Composition root: lê o índice + injeta readFile/branch factual + reporta. */
 export function main(repoRoot: string, logger: Logger = defaultLogger): number {
   const indexAbs = path.join(repoRoot, INDEX_PATH);
   if (!fs.existsSync(indexAbs)) {
@@ -153,6 +263,7 @@ export function main(repoRoot: string, logger: Logger = defaultLogger): number {
         const abs = path.join(repoRoot, rel);
         return fs.existsSync(abs) ? fs.readFileSync(abs, "utf-8") : null;
       },
+      currentBranch: factualCurrentBranch(repoRoot),
     });
   } catch (e: unknown) {
     const m = e instanceof Error ? e.message : String(e);
@@ -162,19 +273,19 @@ export function main(repoRoot: string, logger: Logger = defaultLogger): number {
 
   if (result.kind === "ok") {
     logger.info(
-      `✅ active-specs:check — ${result.count} entry(ies); stage fiel à SSOT (state.yml).`
+      `✅ active-specs:check — ${result.count} entry(ies); stage/branch/identidade fiéis aos fatos (state.yml + git + spec_path).`
     );
     return 0;
   }
   logger.error(
-    `❌ active-specs:check — ${result.failures.length} de ${result.total} entry(ies) divergem da SSOT:\n`
+    `❌ active-specs:check — ${result.failures.length} divergência(s) fatos→projeção em ${result.total} entry(ies):\n`
   );
   for (const f of result.failures) {
     logger.error(`  ${f.id}`);
     logger.error(`    ${f.message}\n`);
   }
   logger.error(
-    "Corrija a projeção em specs/active.yml (ou rode publish-state). Invariante: entry.stage == state.yml.stage."
+    `A projeção specs/active.yml não se edita à mão; reconcilie com: ${RECONCILE_COMMAND}.`
   );
   return 1;
 }

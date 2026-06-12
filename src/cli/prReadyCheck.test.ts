@@ -6,6 +6,25 @@ import {
   Logger,
 } from "./prReadyCheck.js";
 
+/** Builder de status efetivo (CO-4 r8): blocking derivado do contrato real. */
+function readyStatus(
+  typeId: string,
+  requirement: "disabled" | "optional" | "recommended" | "required",
+  state: "missing" | "current" | "stale" | "in-progress",
+  decision: string | null = null
+) {
+  return {
+    typeId,
+    applicability: "yes" as const,
+    requirement,
+    state,
+    decision,
+    blocking: requirement === "required" && !(state === "current" && decision === "approved"),
+    source: "repo-default",
+    errors: [] as string[],
+  };
+}
+
 const SHA = "abc1234def5678abc1234def5678abc1234def56";
 
 function validSnapshot(overrides: Partial<ReadyCheckSnapshot> = {}): ReadyCheckSnapshot {
@@ -36,7 +55,10 @@ function validSnapshot(overrides: Partial<ReadyCheckSnapshot> = {}): ReadyCheckS
         { role: "technical_audit", decision: "approved" },
         { role: "architectural_review", decision: "approved" },
       ],
-      requiredReviewRoles: ["technical_audit", "architectural_review"],
+      reviewStatuses: [
+        readyStatus("technical_audit", "required", "current", "approved"),
+        readyStatus("architectural_review", "required", "current", "approved"),
+      ],
     },
     ...overrides,
   };
@@ -114,20 +136,92 @@ describe("CLI — pr-ready:check · precondições de Ready [BR-PR-READY-CHECK]"
     expect(result.failures.some((f) => f.includes("ANTES do Ready"))).toBe(true);
   });
 
-  it("DADO review obrigatória em changes_requested QUANDO avalia ENTÃO falha", () => {
+  it("DADO review obrigatório em changes_requested QUANDO avalia ENTÃO falha", () => {
     const snapshot = validSnapshot();
     const result = evaluateReadyPreconditions({
       ...snapshot,
       checkpoint: {
         ...snapshot.checkpoint!,
-        reviewDecisions: [
-          { role: "technical_audit", decision: "changes_requested" },
-          { role: "architectural_review", decision: "approved" },
+        reviewStatuses: [
+          readyStatus("technical_audit", "required", "current", "changes_requested"),
+          readyStatus("architectural_review", "required", "current", "approved"),
         ],
       },
     });
     expect(result.ok).toBe(false);
     expect(result.failures.some((f) => f.includes('"technical_audit"'))).toBe(true);
+  });
+
+  it("required MISSING e required STALE bloqueiam; required current libera", () => {
+    const snapshot = validSnapshot();
+    const missing = evaluateReadyPreconditions({
+      ...snapshot,
+      checkpoint: {
+        ...snapshot.checkpoint!,
+        reviewStatuses: [readyStatus("security_review", "required", "missing")],
+      },
+    });
+    expect(missing.ok).toBe(false);
+    expect(
+      missing.failures.some((f) => f.includes("security_review") && f.includes("ausente"))
+    ).toBe(true);
+
+    const stale = evaluateReadyPreconditions({
+      ...snapshot,
+      checkpoint: {
+        ...snapshot.checkpoint!,
+        reviewStatuses: [readyStatus("security_review", "required", "stale", "approved")],
+      },
+    });
+    expect(stale.ok).toBe(false);
+    expect(stale.failures.some((f) => f.includes("stale"))).toBe(true);
+
+    const current = evaluateReadyPreconditions({
+      ...snapshot,
+      checkpoint: {
+        ...snapshot.checkpoint!,
+        reviewStatuses: [readyStatus("security_review", "required", "current", "approved")],
+      },
+    });
+    expect(current.ok).toBe(true);
+  });
+
+  it("optional/recommended stale ou missing NÃO bloqueiam Ready; recommended vira advisory", () => {
+    const snapshot = validSnapshot();
+    const result = evaluateReadyPreconditions({
+      ...snapshot,
+      checkpoint: {
+        ...snapshot.checkpoint!,
+        reviewStatuses: [
+          readyStatus("technical_audit", "optional", "stale", "approved"),
+          readyStatus("architectural_review", "optional", "missing"),
+          readyStatus("mece_review", "recommended", "missing"),
+        ],
+      },
+    });
+    expect(result.ok).toBe(true);
+    expect(result.warnings.some((w) => w.includes("mece_review") && w.includes("advisory"))).toBe(
+      true
+    );
+    expect(result.warnings.some((w) => w.includes("technical_audit"))).toBe(false);
+  });
+
+  it("conflito de policy (mesma prioridade) propagado no status FALHA o check", () => {
+    const snapshot = validSnapshot();
+    const result = evaluateReadyPreconditions({
+      ...snapshot,
+      checkpoint: {
+        ...snapshot.checkpoint!,
+        reviewStatuses: [
+          {
+            ...readyStatus("security_review", "optional", "missing"),
+            errors: ['conflito de policy para "security_review": regras de MESMA prioridade'],
+          },
+        ],
+      },
+    });
+    expect(result.ok).toBe(false);
+    expect(result.failures.some((f) => f.includes("policy de reviews inválida"))).toBe(true);
   });
 
   it("DADO HEAD local diferente do HEAD remoto QUANDO avalia ENTÃO falha (body/CI devem cobrir o HEAD final)", () => {

@@ -275,14 +275,17 @@ Cada spec organiza o ciclo em três arquivos lidos pelo runtime (cf. `[DEC-0023-
 
 ### Comandos
 
-| Comando                                                                | Tier         | Resumo                                                                                                                        |
-| :--------------------------------------------------------------------- | :----------- | :---------------------------------------------------------------------------------------------------------------------------- |
-| `workflow`                                                             | Wizard       | Menu operacional com 8 opções fixas declarativas (sem auto-detecção/ranking). Cada opção mapeia 1:1 para um comando.          |
-| `continue [<id\|slug>]`                                                | Atalho       | Briefing da spec ativa (ou a indicada) + gate de execução: **recusa narrativamente** se `executionAuthorized == false`.       |
-| `handoff [<id\|slug>] [--hybrid]`                                      | Bootstrap    | Handoff situado read-only para iniciar sessão IA nova; monta contexto determinístico e slots humanos opcionais.               |
-| `workflow publish-state --status=<active\|blocked\|paused\|completed>` | Projeção     | Projeta o estado interno (`state.yml`) no índice público `.governance/runtime/specs/active.yml` (descoberta cross-machine).   |
-| `review [<pr>]`                                                        | Inspeção     | Read-only: reúne e agrupa os comentários de review de um PR (via `gh`) em saída copiável. Detecta o PR pela branch ou número. |
-| `release-prep [--version <v>]`                                         | Transacional | Prepara a release da stack com plano explícito antes de qualquer efeito colateral. `--dry-run` audita sem aplicar.            |
+| Comando                                                                | Tier         | Resumo                                                                                                                              |
+| :--------------------------------------------------------------------- | :----------- | :---------------------------------------------------------------------------------------------------------------------------------- |
+| `workflow`                                                             | Wizard       | Menu operacional com 8 opções fixas declarativas (sem auto-detecção/ranking). Cada opção mapeia 1:1 para um comando.                |
+| `continue [<id\|slug>]`                                                | Atalho       | Briefing da spec ativa (ou a indicada) + gate de execução: **recusa narrativamente** se `executionAuthorized == false`.             |
+| `handoff [<id\|slug>] [--hybrid]`                                      | Bootstrap    | Handoff situado read-only para iniciar sessão IA nova; monta contexto determinístico e slots humanos opcionais.                     |
+| `workflow publish-state --status=<active\|blocked\|paused\|completed>` | Projeção     | Projeta o estado interno (`state.yml`) no índice público `.governance/runtime/specs/active.yml` (descoberta cross-machine).         |
+| `review <tipo>`                                                        | Inspeção     | Briefing governado situado do tipo de review (nativo OU customizado — catálogo extensível em `review-policy.yml § review_types`).   |
+| `review types` / `review policy`                                       | Inspeção     | Catálogo de tipos (origem/aliases/requirement default) e requirements EFETIVOS no contexto atual (aplicável/força/estado/blocking). |
+| `review type add <slug> --title … --objective … --vector …`            | Configuração | Cria tipo customizado na policy canônica (valida antes de salvar); reconhecido imediatamente pelo briefing — sem mudar o core.      |
+| `review [<pr>]`                                                        | Inspeção     | Read-only: reúne e agrupa os comentários de review de um PR (via `gh`) em saída copiável. Detecta o PR pela branch ou número.       |
+| `release-prep [--version <v>]`                                         | Transacional | Prepara a release da stack com plano explícito antes de qualquer efeito colateral. `--dry-run` audita sem aplicar.                  |
 
 **Gates determinísticos do wizard** (sem IA, sem inferência):
 

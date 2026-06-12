@@ -4,6 +4,7 @@ import {
   isGateStatus,
   isWorkflowStage,
   isTopologyRole,
+  NodeReviewRequirementOverride,
   PrTopologyNode,
   WorkflowTopology,
 } from "../../domain/workflow/WorkflowState.js";
@@ -27,7 +28,54 @@ const ALLOWED_NODE_KEYS = [
   "terminal",
   "sequence",
   "checkpoints",
+  "review_requirements",
 ] as const;
+const ALLOWED_NODE_REVIEW_OVERRIDE_KEYS = ["requirement", "reason", "actor"] as const;
+const REQUIREMENT_LEVELS = ["disabled", "optional", "recommended", "required"] as const;
+
+/** Overrides situados por tipo de review do nó (CO-4, rodada 8). */
+function parseNodeReviewRequirements(
+  raw: unknown,
+  where: string
+): Record<string, NodeReviewRequirementOverride> {
+  if (raw === null || typeof raw !== "object" || Array.isArray(raw)) {
+    throw new WorkflowStateParseError(`${where} must be a mapping of <type_id> overrides`);
+  }
+  const result: Record<string, NodeReviewRequirementOverride> = {};
+  for (const [typeId, value] of Object.entries(raw as Record<string, unknown>)) {
+    if (value === null || typeof value !== "object" || Array.isArray(value)) {
+      throw new WorkflowStateParseError(`${where}.${typeId} must be a mapping`);
+    }
+    const o = value as Record<string, unknown>;
+    for (const key of Object.keys(o)) {
+      if (!(ALLOWED_NODE_REVIEW_OVERRIDE_KEYS as readonly string[]).includes(key)) {
+        throw new WorkflowStateParseError(
+          `${where}.${typeId}: unexpected key "${key}" (allowed: ${ALLOWED_NODE_REVIEW_OVERRIDE_KEYS.join(", ")})`
+        );
+      }
+    }
+    if (
+      typeof o.requirement !== "string" ||
+      !(REQUIREMENT_LEVELS as readonly string[]).includes(o.requirement)
+    ) {
+      throw new WorkflowStateParseError(
+        `${where}.${typeId}.requirement must be one of: ${REQUIREMENT_LEVELS.join("|")}`
+      );
+    }
+    if (o.reason !== undefined && typeof o.reason !== "string") {
+      throw new WorkflowStateParseError(`${where}.${typeId}.reason must be a string`);
+    }
+    if (o.actor !== undefined && typeof o.actor !== "string") {
+      throw new WorkflowStateParseError(`${where}.${typeId}.actor must be a string`);
+    }
+    result[typeId] = {
+      requirement: o.requirement as NodeReviewRequirementOverride["requirement"],
+      ...(o.reason !== undefined ? { reason: o.reason } : {}),
+      ...(o.actor !== undefined ? { actor: o.actor } : {}),
+    };
+  }
+  return result;
+}
 
 export function parseWorkflowState(yamlText: string): WorkflowState {
   const raw: unknown = parse(yamlText);
@@ -182,6 +230,14 @@ function parseTopology(raw: unknown): WorkflowTopology {
         terminalCount++;
       }
 
+      const reviewRequirements =
+        nodeObj.review_requirements !== undefined && nodeObj.review_requirements !== null
+          ? parseNodeReviewRequirements(
+              nodeObj.review_requirements,
+              `topology.prs.${groupName}[${index}].review_requirements`
+            )
+          : undefined;
+
       nodes.push({
         id: nodeObj.id,
         github_pr: nodeObj.github_pr as number | null,
@@ -189,6 +245,7 @@ function parseTopology(raw: unknown): WorkflowTopology {
         terminal: nodeObj.terminal,
         sequence: nodeObj.sequence as number | null,
         checkpoints: nodeCheckpoints,
+        ...(reviewRequirements ? { review_requirements: reviewRequirements } : {}),
       });
     }
     return nodes;
@@ -340,6 +397,7 @@ export function serializeWorkflowState(state: WorkflowState): string {
         terminal: n.terminal,
         sequence: n.sequence,
         checkpoints: [...n.checkpoints],
+        ...(n.review_requirements ? { review_requirements: n.review_requirements } : {}),
       }));
     }
     if (state.topology.prs.active.length > 0) {
@@ -350,6 +408,7 @@ export function serializeWorkflowState(state: WorkflowState): string {
         terminal: n.terminal,
         sequence: n.sequence,
         checkpoints: [...n.checkpoints],
+        ...(n.review_requirements ? { review_requirements: n.review_requirements } : {}),
       }));
     }
     if (state.topology.prs.planned.length > 0) {
@@ -360,6 +419,7 @@ export function serializeWorkflowState(state: WorkflowState): string {
         terminal: n.terminal,
         sequence: n.sequence,
         checkpoints: [...n.checkpoints],
+        ...(n.review_requirements ? { review_requirements: n.review_requirements } : {}),
       }));
     }
   }

@@ -1,14 +1,21 @@
 # Review Policy — camada governada de evidência/review.
-# GitHub continua responsável por enforcement de merge em main; esta política
-# define o mínimo de evidência que o framework espera por tipo de PR/perfil.
+# GitHub continua responsável por enforcement de merge em main.
+#
+# QUATRO conceitos INDEPENDENTES (CO-4, rodada 8 — capacidade ≠ obrigação):
+#   review_types         → catálogo: o que cada review É (identidade/objetivo/vetores)
+#   review_applicability → onde cada tipo FAZ SENTIDO (perfil/labels/paths)
+#   review_requirements  → quando/com qual força é exigido (disabled|optional|recommended|required)
+#   estado/freshness     → derivado dos artefatos (missing|current|stale) — NUNCA cria obrigação
+# Somente requirement=required + estado≠current bloqueia Ready/gate.
+#
+# Perfis de colaboração governam APENAS a camada nativa do GitHub (approvals,
+# code owners, merge) — NÃO impõem reviews semânticos (team ≠ TA obrigatório).
 active_profile: solo
 profiles:
   solo:
     implementation_pr:
-      required_review_roles: []
       required_native_approvals: 0
     integration_pr:
-      required_review_roles: []
       required_native_approvals: 0
     accepted_findings:
       require_resolution: false
@@ -21,11 +28,8 @@ profiles:
 
   contributor:
     implementation_pr:
-      required_review_roles: []
       required_native_approvals: 0
     integration_pr:
-      required_review_roles:
-        - technical_audit
       required_native_approvals: 1
     accepted_findings:
       require_resolution: true
@@ -38,13 +42,8 @@ profiles:
 
   team:
     implementation_pr:
-      required_review_roles:
-        - technical_audit
       required_native_approvals: 1
     integration_pr:
-      required_review_roles:
-        - technical_audit
-        - architectural_review
       required_native_approvals: 2
     accepted_findings:
       require_resolution: true
@@ -54,3 +53,138 @@ profiles:
       require_code_owner_review: true
       dismiss_stale_reviews_on_push: true
       require_last_push_approval: true
+
+# ── Catálogo de tipos de review (CO-4, rodada 8) ─────────────────────────────
+# O framework DISTRIBUI technical_audit e architectural_review (enabled,
+# optional) mesmo sem este arquivo; entries aqui CUSTOMIZAM os nativos
+# (objetivo/vetores) ou declaram tipos do repositório — sem mudar o core.
+review_types:
+  technical_audit:
+    source: framework
+    enabled: true
+    title: Technical Audit
+    aliases:
+      - technical-audit
+      - technical_audit
+      - auditoria-tecnica
+    objective: >
+      Auditoria tecnica independente da implementacao do checkpoint: o codigo
+      faz o que afirma, sem regressao, com evidencia executavel.
+    vectors:
+      - correctness do comportamento implementado vs declarado
+      - testes (cobertura dos caminhos novos; regressoes; determinismo)
+      - seguranca (segredos, injecao, paths, dados sensiveis em artefatos)
+      - cross-platform (Windows/Linux/macOS; sem shell-isms)
+      - packaging/distribuicao (npm pack; dist/; bins)
+      - falhas e fallbacks (degradacao explicita; nada silencioso)
+      - integridade de estado (SSOT vs projecoes; selos/fingerprints)
+      - performance apenas onde houver risco real (sem micro-otimizacao)
+
+  architectural_review:
+    source: framework
+    enabled: true
+    title: Architectural Review
+    aliases:
+      - architectural-review
+      - architectural_review
+      - revisao-arquitetural
+    objective: >
+      Revisao arquitetural independente: a entrega sustenta a tese do nó e nao
+      hipoteca os nós seguintes.
+    vectors:
+      - aderencia a tese do checkpoint e ao plan.md/ADRs aplicaveis
+      - fronteiras (dominio puro vs I/O; gateways; acoplamento)
+      - SSOT vs projecoes (nenhuma segunda fonte de verdade)
+      - abstracoes (nem faltando nem especulativas; nomes honestos)
+      - temporalidade (evento vs estado continuo; staleness detectavel)
+      - lifecycle/governanca (selos, gates, append-only respeitados)
+      - escopo (nada fora do checkpoint; nada do proximo nó antecipado)
+      - integracao com os nós seguintes da topologia (CO-3..CO-6)
+      - riscos e decisoes nao registradas (debito narrativo)
+
+  # Tipo do REPOSITÓRIO (demonstração executável: consumidor declara um tipo
+  # sem alterar o core TypeScript — o briefing o reconhece imediatamente).
+  security_review:
+    source: repository
+    enabled: true
+    title: Security Review
+    aliases:
+      - security-review
+      - security_review
+      - revisao-de-seguranca
+    objective: >
+      Avaliar superficies de ataque, exposicao de dados, autenticacao,
+      autorizacao, supply chain e permissoes.
+    vectors:
+      - secrets e credenciais
+      - autenticacao e autorizacao
+      - dados pessoais e sensiveis
+      - command injection
+      - permissoes
+      - dependencias e supply chain
+      - workflows e infraestrutura
+      - logging e exposicao acidental
+
+# ── Aplicabilidade (onde o tipo faz sentido ≠ obrigatoriedade) ───────────────
+# AUSÊNCIA de entrada = aplicabilidade UNIVERSAL (qualquer perfil de PR), sem
+# depender de fato remoto algum. security_review é deliberadamente ausente:
+# disponível em execution, governance, fast-track e integration.
+review_applicability: {}
+
+# ── Requirements (quando/com qual força cada tipo é exigido) ─────────────────
+# Defaults do framework: nenhum review semântico obrigatório. Stale de
+# optional/recommended é INFORMAÇÃO (a humana decide revalidar); só required
+# + não-current bloqueia.
+#
+# DECISÃO LOCAL deste repositório (não é default do framework; não vaza para
+# consumidores): todo PR de INTEGRAÇÃO exige Security Review — sem depender
+# de labels.
+review_requirements:
+  defaults:
+    technical_audit: optional
+    architectural_review: optional
+    security_review: optional
+  rules:
+    - id: require-security-for-integration
+      priority: 200
+      when:
+        pr_profile: integration
+      set:
+        security_review: required
+    # Capacidade FUTURA (exemplo NÃO ativo): labels podem exigir Security
+    # Review em outros contextos — integração já o exige independentemente.
+    # - id: require-security-for-sensitive-execution
+    #   priority: 210
+    #   when:
+    #     pr_profile: execution
+    #     labels:
+    #       any:
+    #         - security-sensitive
+    #         - handles-secrets
+    #   set:
+    #     security_review: required
+
+# ── Overrides situados (nó/PR em state.yml § topology) ───────────────────────
+# Tightening livre; relaxation só governada (actor + reason) — sem waiver implícito.
+review_requirement_overrides:
+  allow_tightening: true
+  allow_relaxation: true
+  relaxation_requires:
+    - actor
+    - reason
+
+# ── Política de publicação de reviews (CO-4) ─────────────────────────────────
+# Evidência: agente publicou comentário redundante no GitHub por ambiguidade
+# de prompt (2026-06-12). O canal canônico é o ARTEFATO versionado na spec.
+publication:
+  canonical: spec-artifact # reviews/<...>.yml versionado na spec
+  # Autorização do ARTEFATO CANÔNICO ≠ autorização de publicação no GitHub.
+  # Pedido humano explícito de review ("Faça o Technical Audit...") = autorização
+  # capability-scoped para o ciclo completo e LIMITADO daquele review: criar o
+  # artefato, selar, validar, commit EXCLUSIVO e push normal — nada além.
+  canonical_artifact:
+    commit_policy: allowed-on-explicit-review-request
+    push_policy: allowed-on-explicit-review-request
+    mixed_diff: block # qualquer path fora do artefato esperado bloqueia
+  github_comments: forbidden-by-default
+  github_exception: explicit-owner-authorization

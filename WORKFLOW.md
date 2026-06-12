@@ -196,13 +196,20 @@ O gate aceita o **prompt** (bloco `…`) **ou** a imagem (que o satisfaz). Draft
 
 ## Comandos de referência rápida
 
-| Comando                                              | Para quê                                             |
-| ---------------------------------------------------- | ---------------------------------------------------- |
-| `npm run guidelines -- workflow`                     | Wizard com todas as opções do ciclo                  |
-| `npm run guidelines -- continue`                     | Briefing da spec ativa + verificação de autorização  |
-| `npm run guidelines -- review [<pr>]`                | Coleta e estrutura comentários de um PR para análise |
-| `npm run guidelines -- release-prep [--version <v>]` | Prepara bump de versão com plano explícito           |
-| `npm run guidelines -- release-prep --dry-run`       | Audita a release sem aplicar nada                    |
+| Comando                                              | Para quê                                                  |
+| ---------------------------------------------------- | --------------------------------------------------------- |
+| `npm run guidelines -- workflow`                     | Wizard com todas as opções do ciclo                       |
+| `npm run guidelines -- handoff [spec]`               | Retomada derivada: fatos + próxima ação única + selo      |
+| `npm run handoff:check -- [--spec NNNN]`             | Advisory de freshness da retomada (fontes + selo)         |
+| `npm run guidelines -- review <tipo>`                | Briefing governado de review (catálogo extensível)        |
+| `npm run guidelines -- review types`                 | Catálogo de tipos (origem/aliases/requirement default)    |
+| `npm run guidelines -- review policy`                | Requirements efetivos no contexto (força/estado/blocking) |
+| `npm run review:publish -- --file <artefato>`        | Commit exclusivo + push do review (autorização escopada)  |
+| `npm run pr-ready:check -- --pr <n>`                 | Precondições de Ready (etapa de fechamento; read-only)    |
+| `npm run guidelines -- continue`                     | Briefing da spec ativa + verificação de autorização       |
+| `npm run guidelines -- review [<pr>]`                | Coleta e estrutura comentários de um PR para análise      |
+| `npm run guidelines -- release-prep [--version <v>]` | Prepara bump de versão com plano explícito                |
+| `npm run guidelines -- release-prep --dry-run`       | Audita a release sem aplicar nada                         |
 
 ---
 

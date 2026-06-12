@@ -5,13 +5,17 @@
  * Composition root: importa `main` do módulo compilado
  * (`dist/cli/activeSpecsConsistencyCheck.js`) e o invoca com o repo root.
  *
- * Drift guard: `entry.stage` de `specs/active.yml` deve ser projeção fiel de
- * `state.yml.stage` da spec (invariante [DEC-0023-A04]). O serializer valida
- * FORMA; este gate valida CONSISTÊNCIA SSOT→projeção.
+ * Drift guard fatos→projeção de `specs/active.yml`: `stage` fiel a
+ * `state.yml.stage` ([DEC-0023-A04]); `id`/`slug`/`source_state_path`
+ * round-trip com `spec_path` (forma que o gerador publish-state produz);
+ * `branch` fiel ao branch git corrente quando ele pertence à mesma spec
+ * (skipped em detached HEAD/branch fora do padrão — fronteira documentada
+ * no módulo). Escopo ampliado no dogfood CO-4 (2026-06-11): branch stale
+ * mascarado por fallback era invisível ao escopo stage-only original.
  *
  * Exit codes:
- *   0 — sucesso (toda entry.stage == state.yml.stage)
- *   1 — ≥ 1 entry diverge da SSOT (stage stale / state.yml ausente)
+ *   0 — sucesso (invariantes satisfeitas onde observáveis)
+ *   1 — ≥ 1 entry diverge dos fatos (stage/branch/identidade/path stale)
  *   2 — uso inválido (módulo compilado ausente)
  *
  * Assume `npm run build` executado. Conversão via `pathToFileURL` é obrigatória

@@ -11,10 +11,9 @@ function fakeContext(logger: Logger = fakeLogger()): CommandContext {
 }
 
 describe("TriageCommand", () => {
-  it("expõe name 'triage' com alias transitório 'review'", () => {
+  it("expõe name 'triage' (o verbo 'review' migrou para ReviewCommand, que delega p/ cá)", () => {
     const cmd = new TriageCommand();
     expect(cmd.name).toBe("triage");
-    expect(cmd.aliases).toEqual(["review"]);
   });
 
   describe("parse", () => {

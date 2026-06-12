@@ -1,0 +1,48 @@
+# Human Gate do PR #41 (co-projection / CO-4), keyado no checkpoint co-projection.
+# Owner (rosana) 2026-06-12: APROVADO PARA AVANÇAR. Manifestação humana registrada
+# na sessão de implementação de 2026-06-12 (decisão transcrita em `note`/`basis`;
+# este artefato é o registro governado — nasce DEPOIS da decisão, com o PR já Ready).
+# Reviews do checkpoint sob a policy NOVA (catálogo ≠ obrigação, rodada 8):
+# technical_audit optional (review approved + EV1 approved sobre a100e7d; stale
+# INFORMATIVO ante o HEAD final — não obriga revalidação), architectural_review
+# optional (não realizado — não bloqueia), security_review optional em execution.
+# review:check ENFORCA: approved exige zero finding critical/high `open` —
+# satisfeito (consolidado 0 open / 0 closed). O Human Gate decide o PRÓXIMO
+# MOVIMENTO (avançar para co-enforcement, seq 9), NÃO merge em main (modo unit).
+# Decisão tomada com o PR já Ready (HEAD final 46a7ffe7, CI 11/11 verde:
+# governance-pr-check + repo-validation/validate em Ubuntu+Windows + smoke em
+# Ubuntu/macOS/Windows × Node 22/24; pr-ready:check satisfeito).
+# checkpoint usa o MESMO valor raw dos reviews da lane (consolidado em UM grupo).
+checkpoint: "checkpoint-co-projection"
+actor: "@rosanarezende"
+ref: "#41"
+date: "2026-06-12"
+decision: approved
+note: "PR #41 (co-projection / CO-4: handoff como ato de carga situado — deriveHandoff/deriveNextAction determinísticos, selo + recibo efêmero, handoff:check advisory-first, contrato global carregado na cápsula; briefing governado de reviews + review:seal/review:publish + verification de dois escopos; catálogo de reviews SEPARADO de obrigatoriedade — review_types/applicability/requirements/estado, só required+não-current bloqueia; security_review customizado universal e optional fora de integração, required em integration APENAS por regra local do ai-guidelines; entrypoint npm run guidelines descobrível por help/AGENTS) APROVADO para AVANÇAR. Próximo movimento = abrir co-enforcement (checkpoint-co-enforcement, seq 9) em PR próprio stacked sobre #41; NÃO autoriza merge isolado em main."
+basis: >
+  Human Gate aprovado para o co-projection / PR #41: PR em Ready, não mergeado,
+  HEAD final 46a7ffe7, CI remoto 11/11 verde no HEAD final, pr-ready:check
+  satisfeito. A entrega do checkpoint está completa: handoff como ato de carga
+  situado (coleta única anti-TOCTOU; deriveHandoff/deriveNextAction puros;
+  selo determinístico + recibo efêmero; handoff:check advisory-first; contrato
+  global carregado na cápsula); briefing governado de reviews com review:seal,
+  review:publish e verification de reviews; catálogo de reviews separado de
+  obrigatoriedade (capacidade disponível ≠ obrigação — PIT-0012);
+  security_review customizado, universal e opcional fora de integração, com
+  obrigatoriedade em integration apenas por regra local do repositório
+  ai-guidelines (rule:require-security-for-integration · repository-policy);
+  entrypoint `npm run guidelines -- <comando>` descobrível pelo help/AGENTS
+  (interceptação de --help; seção FLUXO SITUADO). Nenhum review semântico
+  adicional é obrigatório neste PR (todos optional na policy; freshness não
+  cria obrigação). 9 rodadas de dogfood registradas em research/. Esta decisão
+  NÃO autoriza merge em main nem merge isolado do #41: o merge permanece
+  condicionado ao fechamento atômico da stack (modo unit) e ao gate final da
+  stack (review.md R8), que permanece futuro.
+next: >
+  Abrir o próximo PR stacked da Spec 0024: co-enforcement
+  (checkpoint-co-enforcement, seq 9 / CO-3) — EnforcementBinding
+  (declaração→enforcement por nó; PIT-0008 estrutural) + knowledge:compile
+  (reusa o compilador de regras); absorve ex-rule-guardrail; herda o resíduo
+  legacy-transitório do monólito cercado (compiler + token-budget +
+  rules-loader); candidato natural ao wiring do recibo de carga
+  (assertFreshHandoffReceipt) em comandos mutantes.

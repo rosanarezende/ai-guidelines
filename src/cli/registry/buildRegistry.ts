@@ -2,6 +2,7 @@ import { CommandRegistry } from "./CommandRegistry.js";
 import { ContinueCommand } from "./commands/ContinueCommand.js";
 import { InsightCommand } from "./commands/InsightCommand.js";
 import { TriageCommand } from "./commands/TriageCommand.js";
+import { ReviewCommand } from "./commands/ReviewCommand.js";
 import { ReleasePrepCommand } from "./commands/ReleasePrepCommand.js";
 import { WorkflowCommand } from "./commands/WorkflowCommand.js";
 import { ListActiveSpecsCommand } from "./commands/ListActiveSpecsCommand.js";
@@ -24,7 +25,8 @@ export function buildRegistry(): CommandRegistry {
   }
   registry.register(new ContinueCommand());
   registry.register(new InsightCommand());
-  registry.register(new TriageCommand()); // name "triage" + alias transitório "review"
+  registry.register(new TriageCommand()); // name "triage" (o verbo "review" migrou p/ ReviewCommand)
+  registry.register(new ReviewCommand()); // name "review": briefing por lane; numérico/vazio delega ao triage
   registry.register(new ReleasePrepCommand());
   registry.register(new WorkflowCommand());
   registry.register(new ListActiveSpecsCommand()); // read-only; migra "list-active-specs" (#35 etapa 2)

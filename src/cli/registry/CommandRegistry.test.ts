@@ -273,3 +273,40 @@ describe("CommandRegistry", () => {
     expect(errors.join("\n")).toContain("prompt abortado");
   });
 });
+
+describe("CommandRegistry — `--help` por comando [CO-4 r9: descoberta situada]", () => {
+  it("DADO `<comando> --help` QUANDO dispatch ENTÃO mostra o help derivado do comando e NÃO executa", async () => {
+    const { logger, infos } = fakeLogger();
+    const spy = spyCommand("handoff");
+    const reg = new CommandRegistry().register(spy);
+
+    const result = await reg.dispatch(["handoff", "--help"], fakeContext(logger));
+
+    expect(result.exitCode).toBe(0);
+    expect(spy.parsedFrom).toHaveLength(0); // nem parse, nem run — zero efeito colateral
+    expect(spy.ranWith).toHaveLength(0);
+    expect(infos.join("\n")).toContain("handoff");
+    expect(infos.join("\n")).toContain("spy: handoff");
+    expect(infos.join("\n")).toContain("npm run guidelines -- --help");
+  });
+
+  it("DADO `-h` curto QUANDO dispatch ENTÃO mesmo comportamento (help, exit 0, sem execução)", async () => {
+    const { logger } = fakeLogger();
+    const spy = spyCommand("review");
+    const reg = new CommandRegistry().register(spy);
+
+    const result = await reg.dispatch(["review", "-h"], fakeContext(logger));
+    expect(result.exitCode).toBe(0);
+    expect(spy.ranWith).toHaveLength(0);
+  });
+
+  it("DADO argv sem --help QUANDO dispatch ENTÃO executa normalmente (interceptação não vaza)", async () => {
+    const { logger } = fakeLogger();
+    const spy = spyCommand("handoff");
+    const reg = new CommandRegistry().register(spy);
+
+    const result = await reg.dispatch(["handoff", "0024", "--no-remote"], fakeContext(logger));
+    expect(result.exitCode).toBe(0);
+    expect(spy.ranWith).toHaveLength(1);
+  });
+});

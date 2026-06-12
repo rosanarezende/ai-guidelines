@@ -95,6 +95,16 @@ export class CommandRegistry {
       return { exitCode: 1 };
     }
 
+    // `--help`/`-h` em QUALQUER comando → help derivado do próprio comando
+    // (description + usage do registry), nunca execução. Sem isto, comandos
+    // com efeito (ex.: handoff grava recibo) rodavam ao pedir ajuda, e o
+    // fallback de outros produzia erro enganoso (dogfood CO-4, rodada 9).
+    if (rest.includes("--help") || rest.includes("-h")) {
+      context.logger.info(renderCommandsHelp([command]));
+      context.logger.info(`\n  Help geral: npm run guidelines -- --help`);
+      return { exitCode: 0 };
+    }
+
     try {
       const options =
         context.prompts && command.prompt ? await command.prompt(context) : command.parse(rest);

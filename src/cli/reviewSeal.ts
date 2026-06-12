@@ -3,6 +3,7 @@ import { parseDocument, parse, YAMLMap, YAMLSeq } from "yaml";
 import {
   fingerprintOf,
   reviewFingerprintOf,
+  reviewEventFingerprintOf,
   AuditEvidence,
   ExecutorProvenance,
 } from "../infrastructure/yaml/reviewArtifactsReader.js";
@@ -49,6 +50,21 @@ export function sealReview(file: string, logger: Logger = defaultLogger): number
 
   const checkpoint = String(raw.checkpoint || "");
   const role = String(raw.role || "");
+
+  // POLIMÓRFICO (CO-4, rodada 6): `event_id` presente ⇒ ReviewEventArtifact
+  // (sela `event_fingerprint`); ausente ⇒ ReviewArtifact (fluxo abaixo).
+  // Antes disto o agente revisor precisou reproduzir o algoritmo num script
+  // temporário — exatamente o ritual manual que o contrato situado proíbe.
+  if (raw.event_id !== undefined && raw.event_id !== null) {
+    return sealEvent(file, raw, doc, checkpoint, role, logger);
+  }
+  if (raw.review_fingerprint === undefined && raw.findings_emitted === undefined) {
+    logger.error(
+      `❌ Artefato desconhecido em ${file}: nem review (findings_emitted/review_fingerprint) nem event (event_id).`
+    );
+    return 1;
+  }
+
   const findings = Array.isArray(raw.findings) ? raw.findings : [];
 
   let changed = false;
@@ -94,6 +110,8 @@ export function sealReview(file: string, logger: Logger = defaultLogger): number
     ids,
     auditEvidence: raw.audit_evidence as AuditEvidence | undefined,
     executor: raw.executor as ExecutorProvenance | undefined,
+    // subject_ref (CO-4): proveniência do objeto auditado — selada quando presente.
+    subjectRef: typeof raw.subject_ref === "string" ? raw.subject_ref : undefined,
   });
 
   const declaredReview = String(raw.review_fingerprint || "");
@@ -113,6 +131,62 @@ export function sealReview(file: string, logger: Logger = defaultLogger): number
     return 0;
   }
 
+  try {
+    writeFileSync(file, String(doc));
+    logger.info(`✅ Arquivo selado com sucesso: ${file}`);
+    return 0;
+  } catch (err) {
+    logger.error(`❌ Falha ao salvar arquivo: ${err}`);
+    return 1;
+  }
+}
+
+/** Sela um ReviewEventArtifact (`event_fingerprint`) — mesma UX/contrato do review. */
+function sealEvent(
+  file: string,
+  raw: any,
+  doc: any,
+  checkpoint: string,
+  role: string,
+  logger: Logger
+): number {
+  const scope = raw.scope === "review" ? "review" : "findings";
+  const verifies: string[] = Array.isArray(raw.verifies) ? raw.verifies.map(String) : [];
+  const auditEvidence = raw.audit_evidence as AuditEvidence | undefined;
+  const executor = raw.executor as ExecutorProvenance | undefined;
+  if (!auditEvidence || !executor) {
+    logger.error(`❌ Evento em ${file} sem audit_evidence/executor — complete antes de selar.`);
+    return 1;
+  }
+  const expected = reviewEventFingerprintOf({
+    checkpoint,
+    role,
+    eventId: String(raw.event_id || ""),
+    kind: String(raw.kind || ""),
+    decision: String(raw.decision || ""),
+    verifies,
+    auditEvidence,
+    executor,
+    subjectRef: typeof raw.subject_ref === "string" ? raw.subject_ref : undefined,
+    scope,
+    reviewFingerprint:
+      typeof raw.review_fingerprint === "string" ? raw.review_fingerprint : undefined,
+    previousSubjectRef:
+      typeof raw.previous_subject_ref === "string" ? raw.previous_subject_ref : undefined,
+  });
+
+  const declared = String(raw.event_fingerprint || "");
+  if (declared === expected) {
+    logger.info(`✅ Selos já estão corretos. Nenhuma alteração em ${file}`);
+    return 0;
+  }
+  if (/^[a-f0-9]{12}$/i.test(declared)) {
+    logger.error(
+      `❌ Divergência no event_fingerprint: selo atual (${declared}) não bate com calculado (${expected}). Não será sobrescrito silenciosamente.`
+    );
+    return 1;
+  }
+  doc.set("event_fingerprint", expected);
   try {
     writeFileSync(file, String(doc));
     logger.info(`✅ Arquivo selado com sucesso: ${file}`);

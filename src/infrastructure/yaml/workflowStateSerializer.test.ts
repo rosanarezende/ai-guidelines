@@ -145,6 +145,57 @@ ${active}
       expect(state.topology?.prs.active[0].sequence).toBe(1);
     });
 
+    it("DADO nó com review_requirements (override situado CO-4 r8) ENTÃO parseia e round-trippa", () => {
+      const yaml = withNodes(`      - id: pr-1
+        github_pr: 33
+        role: execution
+        terminal: false
+        sequence: 1
+        checkpoints:
+          - cp-1
+        review_requirements:
+          security_review:
+            requirement: required
+            reason: "Integração altera autenticação e secrets."
+            actor: "@rosanarezende"`);
+      const state = parseWorkflowState(yaml);
+      const override = state.topology?.prs.active[0].review_requirements?.security_review;
+      expect(override?.requirement).toBe("required");
+      expect(override?.actor).toBe("@rosanarezende");
+      // round-trip preserva o override
+      const reparsed = parseWorkflowState(serializeWorkflowState(state));
+      expect(reparsed.topology?.prs.active[0].review_requirements).toEqual(
+        state.topology?.prs.active[0].review_requirements
+      );
+    });
+
+    it("DADO override com requirement inválido ou chave desconhecida ENTÃO rejeita", () => {
+      const invalidLevel = withNodes(`      - id: pr-1
+        github_pr: 33
+        role: execution
+        terminal: false
+        sequence: 1
+        checkpoints:
+          - cp-1
+        review_requirements:
+          security_review:
+            requirement: mandatory`);
+      expect(() => parseWorkflowState(invalidLevel)).toThrow(/requirement must be one of/);
+
+      const unknownKey = withNodes(`      - id: pr-1
+        github_pr: 33
+        role: execution
+        terminal: false
+        sequence: 1
+        checkpoints:
+          - cp-1
+        review_requirements:
+          security_review:
+            requirement: required
+            waiver: true`);
+      expect(() => parseWorkflowState(unknownKey)).toThrow(/unexpected key "waiver"/);
+    });
+
     it("DADO nó execution com sequence null ENTÃO rejeita", () => {
       const yaml = withNodes(`      - id: pr-1
         github_pr: 33

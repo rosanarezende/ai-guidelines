@@ -1,7 +1,23 @@
 # Artefato de REVIEW EVENT append-only.
 # Use para re-auditorias/revalidações dentro de um checkpoint REAL da topology.
 # Não altera `disposition`, não aprova gate e não cria checkpoint.
-# Dica: deixe `event_fingerprint: x` e rode `yarn review:check`.
+# Dica: deixe `event_fingerprint: x` e rode `npm run review:seal -- --file <este arquivo>`.
+#
+# ── DOIS ESCOPOS (CO-4, rodada 6) ─────────────────────────────────────────────
+# scope: findings  → revalida FINDINGS específicos após resolutions.
+#                    `verifies` OBRIGATÓRIO (refs <role>#F<n> existentes no review).
+#                    Eventos históricos sem `scope` são lidos assim.
+# scope: review    → revalida o REVIEW INTEIRO contra novo HEAD/subject
+#                    (review limpo com findings_emitted: 0 incluso).
+#                    `verifies` PROIBIDO (não invente finding artificial).
+#                    Campos obrigatórios: review_fingerprint (selo REAL do review
+#                    original), subject_ref (objeto revalidado); opcional:
+#                    previous_subject_ref ("unknown" quando o original não declarou).
+#                    O review original permanece IMUTÁVEL; a decisão do evento NÃO
+#                    reescreve o conteúdo selado — o consolidado registra a
+#                    verification contra o novo subject.
+#
+# ── Exemplo scope: findings ───────────────────────────────────────────────────
 checkpoint: "checkpoint-example"
 role: technical_audit
 event_id: EV1
@@ -10,11 +26,33 @@ executor:
   platform: claude-code
   model: claude-opus-4-8
 decision: approved # approved | changes_requested | blocked
+scope: findings
 verifies:
   - technical_audit#F1
+subject_ref: "x" # CO-4: delta REVALIDADO — base..head, SEMPRE entre aspas (SHA numérico viraria número YAML); SELADO
 audit_evidence:
   coverage:
     - src/example.ts
-  scope: "o que/como foi revalidado"
-  basis: "por que o evento sustenta a decisão"
-event_fingerprint: x
+  scope: "o que/como foi revalidado — narrativa"
+  basis: "por que a decisão — narrativa"
+event_fingerprint: x # rode npm run review:seal -- --file <este arquivo>
+#
+# ── Exemplo scope: review (review inteiro; zero findings incluso) ─────────────
+# checkpoint: "checkpoint-example"
+# role: technical_audit
+# event_id: EV1
+# kind: verification
+# executor:
+#   platform: antigravity
+#   model: gemini-3.1-pro-high
+# decision: approved
+# scope: review
+# review_fingerprint: 538f2be5aed1 # selo REAL do review original (review:check valida)
+# previous_subject_ref: "unknown" # ref originalmente auditado, entre aspas; "unknown" se não declarado
+# subject_ref: "a1b2c3d" # novo HEAD/intervalo (SEMPRE entre aspas); SELADO
+# audit_evidence:
+#   coverage:
+#     - src/example.ts
+#   scope: "revalidação completa do checkpoint contra o novo HEAD"
+#   basis: "por que a decisão"
+# event_fingerprint: x

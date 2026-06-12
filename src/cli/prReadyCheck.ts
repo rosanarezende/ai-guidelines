@@ -21,7 +21,9 @@ import { execFileSync } from "node:child_process";
 import { parseSpecBranch } from "../app/workflow/DetectActiveSpec.js";
 import { NodeWorkflowFileSystem } from "../infrastructure/filesystem/NodeWorkflowFileSystem.js";
 import { runGovernancePrCheck } from "./governance-pr-check.js";
-import { consolidate, discover } from "./reviewCheck.js";
+import { consolidate, discover, observedReviewStates } from "./reviewCheck.js";
+import { buildReviewTypeRegistry, deriveEffectiveReviewStatuses } from "./reviewRequirements.js";
+import { collectFunctionalFreshness } from "./reviewFreshness.js";
 
 export interface ReadyCheckPr {
   readonly number: number;
@@ -32,6 +34,25 @@ export interface ReadyCheckPr {
   readonly labels: ReadonlyArray<string>;
   readonly headRefOid: string;
   readonly headRefName: string;
+  /** Branch base do PR (posição na stack). Opcional para compat com snapshots antigos. */
+  readonly baseRefName?: string;
+}
+
+/**
+ * Status efetivo de um tipo de review no checkpoint (CO-4, rodada 8):
+ * catálogo × aplicabilidade × requisito × estado. SOMENTE `blocking`
+ * (required não satisfeito) trava o Ready; recommended vira advisory.
+ */
+export interface ReadyCheckReviewStatus {
+  readonly typeId: string;
+  readonly applicability: "yes" | "no" | "unknown";
+  readonly requirement: "disabled" | "optional" | "recommended" | "required";
+  readonly state: "missing" | "current" | "stale" | "in-progress";
+  readonly decision: string | null;
+  readonly blocking: boolean;
+  readonly source: string;
+  /** Conflitos de policy (mesma prioridade, valores incompatíveis) — falham o check. */
+  readonly errors: ReadonlyArray<string>;
 }
 
 export interface ReadyCheckCheckpoint {
@@ -40,7 +61,7 @@ export interface ReadyCheckCheckpoint {
   readonly gateDecision: "approved" | "changes_requested" | null;
   readonly openBlockingCount: number;
   readonly reviewDecisions: ReadonlyArray<{ readonly role: string; readonly decision: string }>;
-  readonly requiredReviewRoles: ReadonlyArray<string>;
+  readonly reviewStatuses: ReadonlyArray<ReadyCheckReviewStatus>;
 }
 
 export interface ReadyCheckSnapshot {
@@ -131,13 +152,30 @@ export function evaluateReadyPreconditions(snapshot: ReadyCheckSnapshot): ReadyC
         `há ${checkpoint.openBlockingCount} finding(s) bloqueante(s) (critical/high) aberto(s) no checkpoint "${checkpoint.id}".`
       );
     }
-    for (const role of checkpoint.requiredReviewRoles) {
-      const decision = checkpoint.reviewDecisions.find((r) => r.role === role)?.decision;
-      if (decision === undefined) {
-        failures.push(`review obrigatória "${role}" ausente para o checkpoint "${checkpoint.id}".`);
-      } else if (decision !== "approved") {
+    for (const s of checkpoint.reviewStatuses) {
+      for (const e of s.errors) {
+        failures.push(`policy de reviews inválida: ${e}`);
+      }
+      if (s.blocking) {
+        const why =
+          s.state === "missing"
+            ? "ausente"
+            : s.state === "stale"
+              ? "stale (não cobre a cabeça funcional atual)"
+              : s.decision !== "approved"
+                ? `com decisão "${s.decision}" (precisa de approved)`
+                : s.state;
         failures.push(
-          `review obrigatória "${role}" do checkpoint "${checkpoint.id}" está "${decision}" (precisa de approved).`
+          `review OBRIGATÓRIO "${s.typeId}" (${s.source}) ${why} no checkpoint "${checkpoint.id}".`
+        );
+      } else if (
+        s.requirement === "recommended" &&
+        s.applicability !== "no" &&
+        !(s.state === "current" && s.decision === "approved")
+      ) {
+        // Advisory ao Human Gate: informa, NUNCA bloqueia (freshness ≠ obrigação).
+        warnings.push(
+          `review recomendado "${s.typeId}" ${s.state === "missing" ? "não realizado" : s.state} — advisory; não bloqueia Ready/Human Gate.`
         );
       }
     }
@@ -172,7 +210,20 @@ function normalizeCheckpoint(slug: string): string {
   return slug.replace(/^checkpoint-/, "");
 }
 
-function collectCheckpoint(repoRoot: string, headRefName: string): ReadyCheckCheckpoint | null {
+/** Paths alterados base..HEAD; null = base não observável localmente (⇒ unknown). */
+function changedPathsOrNull(repoRoot: string, baseRefName: string | undefined): string[] | null {
+  if (!baseRefName) return null;
+  const out = gitOrNull(repoRoot, ["diff", "--name-only", `origin/${baseRefName}...HEAD`]);
+  if (out === null) return null;
+  return out.split(/\r?\n/).filter((line) => line.length > 0);
+}
+
+function collectCheckpoint(
+  repoRoot: string,
+  headRefName: string,
+  prLabels: readonly string[],
+  baseRefName: string | undefined
+): ReadyCheckCheckpoint | null {
   const parsed = parseSpecBranch(headRefName);
   if (!parsed) return null;
   const fs = new NodeWorkflowFileSystem(repoRoot);
@@ -192,14 +243,41 @@ function collectCheckpoint(repoRoot: string, headRefName: string): ReadyCheckChe
   const entry = byCheckpoint.find(
     (cp) => normalizeCheckpoint(cp.checkpoint) === normalizeCheckpoint(cursor)
   );
-  const requiredReviewRoles = artifacts.requiredReviewRolesByCheckpoint?.[cursor] ?? [];
+
+  // Status efetivo por tipo (CO-4, rodada 8): aqui o contexto é o mais rico —
+  // labels do PR observadas e changed paths deriváveis (base local).
+  const nodeCtx =
+    artifacts.topologyByCheckpoint?.[cursor] ??
+    artifacts.topologyByCheckpoint?.[normalizeCheckpoint(cursor)];
+  const freshness = collectFunctionalFreshness(repoRoot, `.governance/specs/${specDir}/reviews`);
+  const statuses = deriveEffectiveReviewStatuses({
+    registry: artifacts.registry ?? buildReviewTypeRegistry(null).registry,
+    policy: artifacts.reviewPolicy ?? null,
+    ctx: {
+      prProfile: nodeCtx?.nodeRole ?? null,
+      labels: prLabels,
+      changedPaths: changedPathsOrNull(repoRoot, baseRefName),
+    },
+    ...(nodeCtx?.overrides ? { nodeOverrides: nodeCtx.overrides } : {}),
+    observed: observedReviewStates(artifacts, cursor),
+    functionalHead: freshness.effectiveFunctionalHead,
+  });
 
   return {
     id: cursor,
     gateDecision: entry?.gate?.decision ?? null,
     openBlockingCount: entry?.openBlocking.length ?? 0,
     reviewDecisions: entry?.reviewDecisions ?? [],
-    requiredReviewRoles,
+    reviewStatuses: statuses.map((s) => ({
+      typeId: s.typeId,
+      applicability: s.applicability,
+      requirement: s.requirement,
+      state: s.state,
+      decision: s.decision,
+      blocking: s.blocking,
+      source: s.requirementSource,
+      errors: s.errors,
+    })),
   };
 }
 
@@ -213,6 +291,7 @@ export class GhSnapshotCollector implements SnapshotCollector {
       body: string | null;
       labels: ReadonlyArray<{ name: string }>;
       head: { sha: string; ref: string };
+      base: { ref: string };
     };
     const pr: ReadyCheckPr = {
       number: raw.number,
@@ -223,6 +302,7 @@ export class GhSnapshotCollector implements SnapshotCollector {
       labels: raw.labels.map((l) => l.name),
       headRefOid: raw.head.sha,
       headRefName: raw.head.ref,
+      baseRefName: raw.base.ref,
     };
 
     // REST check-runs (não GraphQL): funciona em gh antigos (sem `pr checks
@@ -269,7 +349,7 @@ export class GhSnapshotCollector implements SnapshotCollector {
       readyBodyContractReasons,
       localHeadSha: gitOrNull(repoRoot, ["rev-parse", "HEAD"]),
       workingTreeClean: status === null ? null : status === "",
-      checkpoint: collectCheckpoint(repoRoot, pr.headRefName),
+      checkpoint: collectCheckpoint(repoRoot, pr.headRefName, pr.labels, pr.baseRefName),
     };
   }
 }
@@ -292,7 +372,8 @@ export interface MainOptions {
   readonly repoRoot?: string;
 }
 
-function detectRepo(): string {
+/** `owner/repo` via gh — exportado para reuso (handoff: mesma fonte remota, sem 2º gateway). */
+export function detectRepo(): string {
   return gh(["repo", "view", "--json", "nameWithOwner", "--jq", ".nameWithOwner"]).trim();
 }
 

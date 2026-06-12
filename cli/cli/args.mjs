@@ -79,6 +79,20 @@ Uso:
 
 ${registryBlock}
 
+═══ FLUXO SITUADO (onde procurar cada passo) ═══
+
+  Retomar contexto:        npm run guidelines -- handoff [spec]
+  Verificar frescor:       npm run handoff:check -- [--spec NNNN]
+  Pedir review governado:  npm run guidelines -- review <tipo>
+  Catálogo/policy:         npm run guidelines -- review types | review policy
+  Preparar Ready:          npm run pr-ready:check -- --pr <n>
+  Gate local completo:     npm run validate
+
+  Decisão arquitetural: comandos SITUADOS vivem no registry (acima); CHECKS/
+  GATES permanecem scripts npm (rodam também em hooks/CI). O contrato
+  completo dos scripts está em .core/governance/script-contracts.yml
+  (projeção legível: docs/scripts.md).
+
 ═══ OPÇÕES GERAIS ═══
 
   --target <dir>             Diretório alvo (default: diretório atual)

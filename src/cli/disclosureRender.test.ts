@@ -38,6 +38,7 @@ function cp(
   return {
     checkpoint,
     reviewDecisions: opts.reviews ?? [],
+    reviewScopeVerifications: 0,
     reviewEventCount: 0,
     openBlocking: [],
     totalOpen: opts.open ?? 0,

@@ -139,6 +139,12 @@ profiles:
         mutates: true
         consumers: [script]
         description: Advisory de continuidade operacional/canonical-next.
+      - name: handoff:check
+        command: npm run build && node cli/handoff-check.mjs
+        category: governance
+        mutates: true
+        consumers: [script]
+        description: Advisory de freshness da retomada derivada (fontes + selo + proxima acao).
       - name: co-knowledge:check
         command: npm run build && node cli/co-knowledge-check.mjs
         category: governance
@@ -211,12 +217,18 @@ profiles:
         mutates: true
         consumers: [human]
         description: Renderiza disclosure de IA derivado.
+      - name: review:publish
+        command: npm run build && node cli/review-publish.mjs
+        category: governance
+        mutates: true
+        consumers: [human]
+        description: Commit exclusivo + push do artefato de review sob autorizacao capability-scoped (fail-closed; diff review-only).
       - name: review:seal
         command: node cli/review-seal.mjs
         category: governance
         mutates: true
         consumers: [human]
-        description: Sela automaticamente os fingerprints de findings e review_fingerprint em artefatos YAML.
+        description: Sela fingerprints de reviews E eventos (findings/review_fingerprint/event_fingerprint) por deteccao automatica do tipo.
       - name: pr-body:update
         command: npm run build && node cli/pr-body-update.mjs
         category: governance
