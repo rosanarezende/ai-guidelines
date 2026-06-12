@@ -197,6 +197,60 @@ bastam — nenhuma superfície governada nova, nenhum estado que possa driftar n
 nenhum comando mutante consulta o recibo ainda; nada em `.governance/runtime/handoff/`;
 CO-3/CO-6 intactos.
 
+## Rodada 4 (2026-06-12) — contrato global carregado na cápsula
+
+**Pergunta da owner:** uma sessão nova recebe e consegue verificar QUAL repositório,
+QUAL contrato global de comportamento e QUAIS regras se aplicam — ou só o estado mutável?
+
+**Lacuna encontrada:** o handoff listava `AGENTS.md`/catálogo na ordem de leitura e
+injetava regras mínimas em texto FIXO (inventado no renderer), mas o selo/recibo não
+provavam que bootstrap e catálogo participaram do snapshot — o contrato carregado era
+invisível ao reconcile-on-load.
+
+**Decisão:** três camadas distintas na mesma cápsula compacta — identidade+contrato
+global do repositório / regras aplicáveis / estado operacional mutável — sem copiar
+doutrina, sem segunda SSOT (o handoff projeta ids+títulos e aponta
+`.core/rules/catalog.md`).
+
+**Contrato global carregado (fontes reais, nada inventado):**
+
+- identidade: `package.json` (name+description; "framework (mantenedor)" × "consumidor
+  do framework" pela mesma heurística do runtime bootstrap; versão de release fora do
+  fingerprint) + fato verificado `.governance/specs/` como SSOT estrutural;
+- bootstrap: bloco compilado `<AI_GUIDELINES>` do `AGENTS.md`;
+- regras globais: `rules.json` — seleção pelos metadados JÁ canônicos
+  (`scope: universal` + tag `always_injected` ⇒ 16 CORE neste repo); **nenhuma tabela
+  paralela criada** (a aplicabilidade estruturada por nó não existe no catálogo e NÃO
+  foi inventada);
+- scripts: `script-contracts.yml`.
+
+**Separação global × nó × estado:** regras globais = catálogo (ids+títulos);
+restrições do nó = proibições DERIVADAS de topologia/lifecycle (seção própria,
+referenciada pela cápsula sem duplicação); estado mutável = seções 1/2/4/5.
+
+**Fingerprints adicionados (semânticos):** `repository-contract`, `runtime-bootstrap`,
+`rules-contract` (canônico: exclui `generated_at` e índices derivados; regras/tags
+ordenadas — mudança de título/instrução muda o fp; volátil/ordem não muda),
+`script-contract`. Contrato do handoff v1→v2 (recibos v1 viram `invalid` ⇒ recarga).
+
+**Resultado do dogfood (HEAD `59a059e`):** 11 fontes fresh; cápsula com identidade +
+16 obrigações [CORE-01..16] (id+título; ~28 linhas; output total ~95 linhas); recibo
+fresh selo `23d0c8b4d666` (contrato v2) cobrindo as 4 fontes novas. Fixtures: mudança
+semântica em regra ⇒ selo muda ⇒ recibo stale-sources nomeando `rules-contract`;
+`generated_at`/ordem ⇒ selo estável; bootstrap/script-contracts alterados ⇒ check
+nomeia a fonte; **sem bootstrap ou catálogo obrigatório NÃO existe recibo fresh**
+(carga renderiza degradada, drift prioriza reconciliação); repo consumidor fixture
+recebe a identidade/regras DELE (zero contexto local do framework vazado).
+
+**Fronteira com enforcement (cravada no código):** co-projection prova qual contrato
+foi carregado, reinjeta obrigações e detecta staleness; co-enforcement (CO-3)
+transforma regras/decisões em bindings/checks executáveis adicionais.
+
+**Limites restantes:** seleção por nó continua = derivação operacional (catálogo não
+tem escopo por nó — extensão só se um caso real exigir); enforcement do recibo segue
+desconectado; substituída a seção fixa "Regras situacionais mínimas" pela cápsula
+derivada (texto inventado eliminado do renderer).
+
 ## Referências
 
 - Commit da correção: `5881a85` (fix(spec-0024): enforca coerencia da projecao de specs ativas)
