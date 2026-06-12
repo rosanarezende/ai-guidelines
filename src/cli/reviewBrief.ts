@@ -1,0 +1,627 @@
+/**
+ * `review <papel>` — briefing GOVERNADO e situado de reviews (CO-4).
+ *
+ * Dor absorvida (dogfood 2026-06-12, rodada 5 / PIT-0011): para pedir "faça
+ * uma auditoria técnica" a owner precisava de um mega-prompt reconstruindo
+ * papel/escopo/path/schema/selo/validações/proibições — e mesmo assim o agente
+ * publicou comentário redundante no GitHub e narrou fingerprint divergente.
+ * O contrato (review-policy, schemas, templates, review:seal, review:check)
+ * EXISTIA, mas não era projetado no momento da ação.
+ *
+ * Este comando NÃO realiza julgamento técnico/arquitetural (zero LLM no
+ * runtime — ADR 0018): ele PROJETA o contrato que o agente revisor deve
+ * cumprir, derivado do MESMO snapshot do ato de carga do handoff
+ * (`loadHandoffSnapshot` — anti-TOCTOU; recibo atualizado na mesma execução):
+ *
+ *   review-policy (lanes/publicação) + estado do checkpoint + reviews/
+ *   findings/resolutions/events existentes + Git/PR/HEAD + templates
+ *   → briefing operacional situado (papel, modo inferido, objeto auditado,
+ *     artefato-alvo, vetores, ações permitidas/proibidas, validações,
+ *     formato do relatório final).
+ *
+ * Publicação (política machine-readable em review-policy.yml § publication):
+ * o canal canônico é o ARTEFATO versionado na spec; comentário/review no
+ * GitHub é projeção opcional, PROIBIDA por default — só com autorização
+ * humana explícita. Nenhuma publicação automática aqui.
+ */
+import * as path from "node:path";
+import * as fs from "node:fs";
+import {
+  ReviewArtifact,
+  ReviewEventArtifact,
+  ResolutionArtifact,
+} from "../infrastructure/yaml/reviewArtifactsReader.js";
+import {
+  ReviewLanePolicy,
+  ReviewPublicationPolicy,
+  parseReviewPolicy,
+} from "../infrastructure/yaml/reviewPolicyReader.js";
+import { HandoffFacts } from "./handoffFacts.js";
+import {
+  HandoffLoadSnapshot,
+  HandoffOptions,
+  ghRemotePrCollector,
+  loadHandoffSnapshot,
+} from "./handoff.js";
+import { discover } from "./reviewCheck.js";
+
+export interface Logger {
+  info: (msg: string) => void;
+  error: (msg: string) => void;
+}
+
+const defaultLogger: Logger = {
+  info: (msg) => process.stdout.write(`${msg}\n`),
+  error: (msg) => process.stderr.write(`${msg}\n`),
+};
+
+/** Aliases aceitos na CLI → role canônica dos artefatos. */
+const ROLE_ALIASES: Readonly<Record<string, string>> = {
+  "technical-audit": "technical_audit",
+  technical_audit: "technical_audit",
+  "architectural-review": "architectural_review",
+  architectural_review: "architectural_review",
+};
+
+export function normalizeRole(raw: string): string | null {
+  return ROLE_ALIASES[raw] ?? null;
+}
+
+export type ReviewBriefMode = "create" | "current" | "verification" | "blocked";
+
+export interface ReviewSubjectFact {
+  /** Branch base do PR (posição na stack), quando observável. */
+  readonly baseRef: string | null;
+  /** HEAD atual (objeto a auditar/revalidar). */
+  readonly headSha: string | null;
+  /** Intervalo recomendado (base..head ou delta de revalidação). */
+  readonly range: string | null;
+  /** Token VÁLIDO para preencher subject_ref (sem espaços; SHA quando base desconhecida). */
+  readonly refSuggestion: string | null;
+  /** Ref do review anterior (subject_ref declarado) quando houver. */
+  readonly previousRef: string | null;
+  /** declared = subject_ref machine-readable; unknown = review sem proveniência. */
+  readonly provenance: "declared" | "unknown" | "none";
+}
+
+export interface ReviewArtifactPlan {
+  /** Path exato do artefato a criar (review novo ou evento append-only). */
+  readonly path: string;
+  readonly kind: "review" | "verification-event" | "none";
+  readonly template: string | null;
+  /** Próximo event_id (EV<N>) quando kind = verification-event. */
+  readonly nextEventId: string | null;
+}
+
+export interface ExistingReviewFact {
+  readonly file: string;
+  readonly decision: string;
+  readonly findingsEmitted: number;
+  readonly fingerprint: string | null;
+  readonly subjectRef: string | null;
+  readonly executor: string | null;
+}
+
+export interface ReviewBrief {
+  readonly specId: string;
+  readonly checkpoint: string | null;
+  readonly role: string;
+  readonly mode: ReviewBriefMode;
+  /** Base factual citável da inferência do modo. */
+  readonly modeBasis: ReadonlyArray<string>;
+  /** Degradação declarada (proveniência insuficiente, fonte remota etc.). */
+  readonly degraded: ReadonlyArray<string>;
+  readonly subject: ReviewSubjectFact;
+  readonly existingReview: ExistingReviewFact | null;
+  readonly findings: ReadonlyArray<string>;
+  readonly resolutions: ReadonlyArray<string>;
+  readonly events: ReadonlyArray<string>;
+  readonly artifact: ReviewArtifactPlan;
+  readonly lane: ReviewLanePolicy | null;
+  readonly publication: ReviewPublicationPolicy | null;
+  readonly allowedActions: ReadonlyArray<string>;
+  readonly prohibitedActions: ReadonlyArray<string>;
+  readonly validationCommands: ReadonlyArray<string>;
+  readonly finalReportSections: ReadonlyArray<string>;
+}
+
+export interface ReviewBriefInput {
+  readonly facts: HandoffFacts;
+  readonly role: string;
+  readonly existingReview: ReviewArtifact | null;
+  readonly roleEvents: ReadonlyArray<ReviewEventArtifact>;
+  readonly resolutions: ReadonlyArray<ResolutionArtifact>;
+  readonly lane: ReviewLanePolicy | null;
+  readonly publication: ReviewPublicationPolicy | null;
+}
+
+function normalizeCheckpoint(slug: string): string {
+  return slug.replace(/^checkpoint-/, "");
+}
+
+/** Cabeça de um subject_ref (`base..head` → head; SHA único → ele mesmo). */
+function refHead(subjectRef: string): string {
+  const parts = subjectRef.split("..");
+  return parts[parts.length - 1].replace(/^\.+/, "");
+}
+
+/** SHAs iguais por prefixo (7..40 chars; reviews podem registrar short SHA). */
+function sameSha(a: string, b: string): boolean {
+  const x = a.toLowerCase();
+  const y = b.toLowerCase();
+  return x.startsWith(y) || y.startsWith(x);
+}
+
+const FINAL_REPORT_SECTIONS = [
+  "Retomada factual",
+  "Veredito",
+  "Cobertura",
+  "Findings bloqueantes",
+  "Findings não bloqueantes",
+  "Riscos residuais",
+  "Validações executadas",
+  "Registro governado (path + fingerprint REAL do artefato)",
+  "Estado final (git status/HEAD)",
+  "Próxima ação",
+] as const;
+
+/**
+ * Inferência DETERMINÍSTICA do modo + derivação completa do briefing.
+ * Puro: nenhuma leitura de filesystem/Git/GitHub aqui — tudo vem do snapshot.
+ */
+export function deriveReviewBrief(input: ReviewBriefInput): ReviewBrief {
+  const { facts, role, existingReview, roleEvents, resolutions, lane, publication } = input;
+  const specId = /^(\d{4})/.exec(facts.spec.label)?.[1] ?? facts.spec.label;
+  const checkpoint = facts.cursor?.checkpoint ?? null;
+  const head = facts.git.head;
+  const baseRef = facts.pullRequest?.baseRefName ?? null;
+  const degraded: string[] = [];
+  const modeBasis: string[] = [];
+
+  const reviewsDir = `${facts.spec.path}/reviews`;
+  const norm = checkpoint ? normalizeCheckpoint(checkpoint) : null;
+  const reviewPath = norm ? `${reviewsDir}/c-${norm}-${role}.yml` : null;
+  const nextEventId = `EV${roleEvents.length + 1}`;
+  const eventPath = norm ? `${reviewsDir}/events/c-${norm}-${role}-${nextEventId}.yml` : null;
+
+  const existing: ExistingReviewFact | null = existingReview
+    ? {
+        file: existingReview.file,
+        decision: existingReview.decision,
+        findingsEmitted: existingReview.findingsEmitted,
+        fingerprint: null, // preenchido pelo coletor a partir do YAML bruto quando disponível
+        subjectRef: existingReview.subjectRef ?? null,
+        executor: existingReview.executor
+          ? `${existingReview.executor.platform} · ${existingReview.executor.model}`
+          : (existingReview.actor ?? null),
+      }
+    : null;
+
+  const findings = (existingReview?.findings ?? []).map(
+    (f) => `${f.id} · ${f.severity} · ${f.disposition} · ${f.location} — ${f.description}`
+  );
+  const resolutionLines = resolutions.flatMap((r) =>
+    r.resolutions
+      .filter((res) => res.finding.startsWith(`${role}#`))
+      .map((res) => `${res.finding} → ${res.action} (${r.file})`)
+  );
+  const eventLines = roleEvents.map(
+    (e) =>
+      `${e.eventId} · ${e.kind} · ${e.decision} · verifica ${e.verifies.join(", ")} (${e.file})`
+  );
+
+  // ── Modo (precedência: blocked > create > current/verification) ────────────
+  let mode: ReviewBriefMode;
+  let artifact: ReviewArtifactPlan = {
+    path: "(n/a)",
+    kind: "none",
+    template: null,
+    nextEventId: null,
+  };
+
+  // PR/HEAD divergentes só BLOQUEIAM quando o remoto tem commits que o local
+  // não tem (behind > 0 — pull pendente). Local à frente (push pendente) é
+  // estado normal de review local-first: degrada, não bloqueia.
+  const prHeadDiffers =
+    facts.pullRequest !== null && head !== null && !sameSha(facts.pullRequest.headRefOid, head);
+  const prHeadDiverges = prHeadDiffers && (facts.git.behind ?? 0) > 0;
+
+  if (!checkpoint) {
+    mode = "blocked";
+    modeBasis.push("state.yml sem topology/cursor — não há checkpoint ativo para revisar.");
+  } else if (facts.driftWarnings.length > 0) {
+    mode = "blocked";
+    modeBasis.push(
+      "fontes/projeções divergentes ou contrato obrigatório ausente — reconcilie antes de revisar:"
+    );
+    for (const w of facts.driftWarnings) modeBasis.push(w);
+  } else if (prHeadDiverges) {
+    mode = "blocked";
+    modeBasis.push(
+      `PR/HEAD divergentes com remoto À FRENTE (behind ${facts.git.behind}): PR #${facts.pullRequest!.number} head ${facts.pullRequest!.headRefOid.slice(0, 7)} ≠ HEAD local ${head} — pull/reconcilie antes de revisar.`
+    );
+  } else if (facts.lifecycle?.gateDecision === "approved") {
+    mode = "blocked";
+    modeBasis.push(
+      `gate do checkpoint ${checkpoint} já está approved — review novo após o gate é estado incompatível; confira o cursor (reconcile:check) ou abra o próximo nó.`
+    );
+  } else if (!existingReview) {
+    mode = "create";
+    modeBasis.push(`nenhum review da lane ${role} para o checkpoint ${checkpoint}.`);
+    artifact = {
+      path: reviewPath ?? "(n/a)",
+      kind: "review",
+      template: `${reviewsDir}/_TEMPLATE.review.yml`,
+      nextEventId: null,
+    };
+  } else {
+    const subjectRef = existingReview.subjectRef ?? null;
+    const openWithResolution = (existingReview.findings ?? []).filter(
+      (f) =>
+        f.disposition === "open" &&
+        resolutionLines.some((line) => line.startsWith(`${role}#${f.id} `))
+    );
+    if (
+      subjectRef &&
+      head &&
+      sameSha(refHead(subjectRef), head) &&
+      openWithResolution.length === 0
+    ) {
+      mode = "current";
+      modeBasis.push(
+        `review existente (${existingReview.file}) auditou subject_ref ${subjectRef}, cuja cabeça coincide com o HEAD atual ${head} — nova revisão seria duplicada.`
+      );
+    } else {
+      mode = "verification";
+      if (!subjectRef) {
+        degraded.push(
+          "review existente NÃO declara subject_ref (proveniência unknown) — nunca assumir fresh; revalide a cobertura completa do checkpoint."
+        );
+        modeBasis.push(
+          `review existente (${existingReview.file}) sem proveniência machine-readable do objeto auditado.`
+        );
+      } else {
+        modeBasis.push(
+          `review existente auditou ${subjectRef}; implementação avançou até ${head ?? "?"} — revalidar o delta.`
+        );
+      }
+      if (openWithResolution.length > 0) {
+        modeBasis.push(
+          `finding(s) open com resolution posterior (${openWithResolution.map((f) => f.id).join(", ")}) — revalide as evidências; o FECHAMENTO (disposition) é autoridade do reviewer/owner, não do implementador.`
+        );
+      }
+      artifact = {
+        path: eventPath ?? "(n/a)",
+        kind: "verification-event",
+        template: `${reviewsDir}/_TEMPLATE.review-event.yml`,
+        nextEventId,
+      };
+    }
+  }
+
+  const previousRef = existingReview?.subjectRef ?? null;
+  const range =
+    mode === "verification" && previousRef && head
+      ? `${refHead(previousRef)}..${head}`
+      : mode === "verification" && head
+        ? `(base desconhecida — revalidar cobertura completa)..${head}`
+        : baseRef && head
+          ? `origin/${baseRef}..${head}`
+          : null;
+  // Token válido p/ subject_ref (sem espaços): com base desconhecida, o SHA
+  // auditado basta — a cobertura completa fica narrada em scope/coverage.
+  const refSuggestion =
+    mode === "verification" && previousRef && head
+      ? `${refHead(previousRef)}..${head}`
+      : head
+        ? baseRef && mode === "create"
+          ? `origin/${baseRef}..${head}`
+          : head
+        : null;
+  const subject: ReviewSubjectFact = {
+    baseRef,
+    headSha: head,
+    range,
+    refSuggestion,
+    previousRef,
+    provenance: existingReview ? (previousRef ? "declared" : "unknown") : "none",
+  };
+
+  if (prHeadDiffers && !prHeadDiverges && mode !== "blocked") {
+    degraded.push(
+      `PR #${facts.pullRequest!.number} head remoto (${facts.pullRequest!.headRefOid.slice(0, 7)}) está atrás do HEAD local ${head} — push pendente; o review cobre o HEAD LOCAL.`
+    );
+  }
+
+  const prSource = facts.sources.find((s) => s.id === "pull-request");
+  if (prSource && prSource.status !== "fresh") {
+    degraded.push(
+      `fonte remota (PR) ${prSource.status}${prSource.detail ? ` — ${prSource.detail}` : ""}; fatos de PR/CI não observados (nada foi inventado).`
+    );
+  }
+
+  const allowedActions = [
+    "investigar o código/artefatos do checkpoint (read-only sobre a implementação)",
+    "executar testes e validações locais",
+    mode === "verification"
+      ? `criar o EVENTO append-only ${artifact.path} (kind: verification; subject_ref: ${subject.refSuggestion ?? "<base>..<head>"})`
+      : mode === "create"
+        ? `criar o artefato ${artifact.path} (copie ${artifact.template}; preencha subject_ref: ${subject.refSuggestion ?? "<base>..<head>"})`
+        : "nenhuma escrita necessária (review atual cobre o HEAD)",
+    "selar com `npm run review:seal -- <arquivo>` e validar com `npm run review:check`",
+    "commit EXCLUSIVO do artefato de review (nunca misturar com implementação)",
+    "push somente com autorização humana explícita",
+  ];
+
+  const prohibitedActions = [
+    "corrigir findings/implementação durante o review (papéis separados)",
+    "editar/reescrever review selado (verification é APPEND-ONLY)",
+    "fechar disposition de finding sendo o implementador (autoridade do reviewer/owner)",
+    publication
+      ? `publicar comentário/review no GitHub (${publication.githubComments}; exceção: ${publication.githubException ?? "autorização explícita da owner"})`
+      : "publicar comentário/review no GitHub sem autorização explícita da owner",
+    "converter PR para Ready / exercer Human Gate / criar gate artifact / merge",
+    "abrir o próximo nó da topologia",
+  ];
+
+  const validationCommands = [
+    ...(artifact.kind !== "none" ? [`npm run review:seal -- ${artifact.path}`] : []),
+    "npm run review:check",
+    "npm run validate",
+    `npm run handoff:check -- --spec ${specId}`,
+  ];
+
+  return {
+    specId,
+    checkpoint,
+    role,
+    mode,
+    modeBasis,
+    degraded,
+    subject,
+    existingReview: existing,
+    findings,
+    resolutions: resolutionLines,
+    events: eventLines,
+    artifact,
+    lane,
+    publication,
+    allowedActions,
+    prohibitedActions,
+    validationCommands,
+    finalReportSections: [...FINAL_REPORT_SECTIONS],
+  };
+}
+
+// ── Coleta (I/O) — mesmo snapshot do ato de carga ────────────────────────────
+
+export interface CollectedReviewBrief {
+  readonly snapshot: HandoffLoadSnapshot;
+  readonly brief: ReviewBrief;
+}
+
+export function collectReviewBrief(
+  repoRoot: string,
+  role: string,
+  options: HandoffOptions = {}
+): CollectedReviewBrief {
+  const snapshot = loadHandoffSnapshot(repoRoot, options);
+  const facts = snapshot.collected.facts;
+  const cursor = facts.cursor;
+
+  const { artifacts } = discover(repoRoot);
+  const matches = (cp: string): boolean =>
+    cursor !== null && normalizeCheckpoint(cp) === normalizeCheckpoint(cursor.checkpoint);
+
+  const existingReview =
+    artifacts.reviews.find((r) => r.role === role && matches(r.checkpoint)) ?? null;
+  const roleEvents = artifacts.reviewEvents
+    .filter((e) => e.role === role && matches(e.checkpoint))
+    .sort((a, b) => a.eventId.localeCompare(b.eventId, undefined, { numeric: true }));
+  const resolutions = artifacts.resolutions.filter((r) => matches(r.checkpoint));
+
+  let lane: ReviewLanePolicy | null = null;
+  let publication: ReviewPublicationPolicy | null = null;
+  const policyPath = path.join(repoRoot, ".governance/review-policy.yml");
+  if (fs.existsSync(policyPath)) {
+    try {
+      const policy = parseReviewPolicy(fs.readFileSync(policyPath, "utf-8"));
+      lane = policy.lanes?.[role] ?? null;
+      publication = policy.publication ?? null;
+    } catch {
+      lane = null;
+      publication = null;
+    }
+  }
+
+  const brief = deriveReviewBrief({
+    facts,
+    role,
+    existingReview,
+    roleEvents,
+    resolutions,
+    lane,
+    publication,
+  });
+
+  // fingerprint REAL do artefato existente (do YAML bruto — evita o fingerprint
+  // "narrado" divergente que motivou esta capability).
+  let enriched = brief;
+  if (existingReview && brief.existingReview) {
+    const rawText = fs.existsSync(path.join(repoRoot, existingReview.file))
+      ? fs.readFileSync(path.join(repoRoot, existingReview.file), "utf-8")
+      : null;
+    const fp = rawText ? /review_fingerprint:\s*"?([0-9a-f]{12})"?/.exec(rawText)?.[1] : null;
+    enriched = {
+      ...brief,
+      existingReview: { ...brief.existingReview, fingerprint: fp ?? null },
+    };
+  }
+
+  return { snapshot, brief: enriched };
+}
+
+// ── Renderer (compacto) ──────────────────────────────────────────────────────
+
+function renderList(lines: string[], items: ReadonlyArray<string>, empty = "(nenhum)"): void {
+  if (items.length === 0) {
+    lines.push(`- ${empty}`);
+    return;
+  }
+  for (const item of items) lines.push(`- ${item}`);
+}
+
+export function renderReviewBrief(collected: CollectedReviewBrief): string {
+  const { snapshot, brief } = collected;
+  const facts = snapshot.collected.facts;
+  const lines: string[] = [];
+  const pr = facts.pullRequest;
+
+  lines.push(`# Briefing governado de review — ${brief.role} · ${facts.spec.label}`);
+  lines.push("");
+  lines.push("## 1. Retomada factual");
+  lines.push(`- spec: ${facts.spec.label} · checkpoint: ${brief.checkpoint ?? "(sem cursor)"}`);
+  lines.push(
+    `- branch: ${facts.git.branch ?? "?"} · HEAD: ${facts.git.head ?? "?"} · working tree: ${
+      facts.git.workingTreeClean === null ? "?" : facts.git.workingTreeClean ? "limpa" : "SUJA"
+    }`
+  );
+  lines.push(
+    pr
+      ? `- PR: #${pr.number} (${pr.state}${pr.isDraft ? ", Draft" : ", Ready"}; base ${pr.baseRefName}; head ${pr.headRefOid.slice(0, 7)}) · CI: ${pr.checks.pass} pass · ${pr.checks.fail} fail · ${pr.checks.pending} pending`
+      : `- PR: ${facts.activeNode?.githubPr ? `#${facts.activeNode.githubPr} (estado remoto NÃO observado)` : "(não declarado)"}`
+  );
+  lines.push(
+    `- carga/recibo: ${
+      snapshot.receiptSkippedReason
+        ? `NÃO registrado — ${snapshot.receiptSkippedReason}`
+        : `fresh (selo ${snapshot.derived.seal})`
+    }`
+  );
+  lines.push("");
+  lines.push("## 2. Papel e autoridade");
+  lines.push(`- lane: ${brief.role}`);
+  if (brief.lane) {
+    lines.push(`- objetivo: ${brief.lane.objective}`);
+  } else {
+    lines.push("- objetivo: (lane não declarada em review-policy.yml § review_lanes)");
+  }
+  lines.push(
+    "- independência: o revisor NÃO corrige a implementação; findings são reportados, não resolvidos."
+  );
+  lines.push(
+    "- autoridade: o artefato versionado é reviewer-owned; disposition fecha só por reviewer/owner."
+  );
+  lines.push("");
+  lines.push(`## 3. Modo inferido: ${brief.mode.toUpperCase()}`);
+  lines.push("- base factual:");
+  for (const basis of brief.modeBasis) lines.push(`  - ${basis}`);
+  if (brief.degraded.length > 0) {
+    lines.push("- degradações declaradas:");
+    for (const d of brief.degraded) lines.push(`  - ${d}`);
+  }
+  lines.push("");
+  lines.push("## 4. Objeto auditado");
+  lines.push(`- base: ${brief.subject.baseRef ?? "(não observável)"}`);
+  lines.push(`- head: ${brief.subject.headSha ?? "(não observável)"}`);
+  lines.push(`- intervalo: ${brief.subject.range ?? "(não derivável)"}`);
+  lines.push(
+    `- proveniência do review anterior: ${brief.subject.provenance}${brief.subject.previousRef ? ` (${brief.subject.previousRef})` : ""}`
+  );
+  lines.push("");
+  lines.push("## 5. Estado da lane no checkpoint");
+  if (brief.existingReview) {
+    lines.push(
+      `- review existente: ${brief.existingReview.file} · ${brief.existingReview.decision} · ${brief.existingReview.findingsEmitted} finding(s) · fp ${brief.existingReview.fingerprint ?? "?"} · executor: ${brief.existingReview.executor ?? "?"}`
+    );
+  } else {
+    lines.push("- review existente: (nenhum)");
+  }
+  lines.push("- findings:");
+  renderList(
+    lines,
+    brief.findings.map((f) => `  ${f}`).map((s) => s.trim()),
+    "(nenhum)"
+  );
+  lines.push("- resolutions da lane:");
+  renderList(lines, brief.resolutions, "(nenhuma)");
+  lines.push("- eventos da lane:");
+  renderList(lines, brief.events, "(nenhum)");
+  lines.push("");
+  lines.push("## 6. Artefato a produzir");
+  if (brief.artifact.kind === "none") {
+    lines.push("- nenhum (review atual cobre o HEAD — nova revisão seria duplicada).");
+  } else {
+    lines.push(`- tipo: ${brief.artifact.kind}`);
+    lines.push(`- path: ${brief.artifact.path}`);
+    lines.push(`- template: ${brief.artifact.template}`);
+    if (brief.artifact.nextEventId) lines.push(`- event_id: ${brief.artifact.nextEventId}`);
+    lines.push(
+      `- subject_ref OBRIGATÓRIO no artefato: ${brief.subject.refSuggestion ?? "<base>..<head>"} (proveniência machine-readable; selada)`
+    );
+    lines.push(
+      "- fingerprints: deixe `fingerprint: x`/`review_fingerprint: x` e rode o seal — reporte o fingerprint REAL do arquivo, nunca um narrado."
+    );
+  }
+  lines.push("");
+  lines.push("## 7. Vetores obrigatórios");
+  renderList(
+    lines,
+    brief.lane?.vectors ?? [],
+    "(declare review_lanes na review-policy.yml — vetores não derivados)"
+  );
+  lines.push("");
+  lines.push("## 8. Publicação");
+  lines.push("- artefato na spec: obrigatório (canal canônico).");
+  lines.push("- GitHub: proibido por padrão.");
+  lines.push("- comentário/review remoto: somente por autorização explícita da owner.");
+  lines.push("");
+  lines.push("## 9. Ações permitidas");
+  renderList(lines, brief.allowedActions);
+  lines.push("");
+  lines.push("## 10. Ações proibidas");
+  renderList(lines, brief.prohibitedActions);
+  lines.push("");
+  lines.push("## 11. Validações");
+  renderList(
+    lines,
+    brief.validationCommands.map((c) => `\`${c}\``)
+  );
+  lines.push("");
+  lines.push("## 12. Estrutura do relatório final");
+  renderList(lines, brief.finalReportSections);
+  lines.push("");
+  lines.push(
+    `_Briefing derivado do snapshot da carga (selo ${snapshot.derived.seal}; contrato do handoff). O runtime projeta o contrato; o julgamento é do revisor._`
+  );
+  return `${lines.join("\n")}\n`;
+}
+
+// ── Entrada CLI ──────────────────────────────────────────────────────────────
+
+export function runReviewBrief(
+  repoRoot: string,
+  roleArg: string,
+  logger: Logger = defaultLogger,
+  remoteOverride?: HandoffOptions["remote"]
+): number {
+  const role = normalizeRole(roleArg);
+  if (!role) {
+    logger.error(
+      `❌ papel de review desconhecido: "${roleArg}". Use: technical-audit | architectural-review.`
+    );
+    return 2;
+  }
+  try {
+    const collected = collectReviewBrief(repoRoot, role, {
+      remote: remoteOverride !== undefined ? remoteOverride : ghRemotePrCollector,
+    });
+    logger.info(renderReviewBrief(collected).trimEnd());
+    return 0;
+  } catch (error) {
+    logger.error(
+      `❌ review (briefing) — estado irrecuperável: ${error instanceof Error ? error.message : String(error)}`
+    );
+    return 1;
+  }
+}

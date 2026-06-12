@@ -119,6 +119,13 @@ export interface ReviewArtifact {
   readonly findings: readonly Finding[];
   /** Presente ⟺ `findingsEmitted === 0` (evidência de aprovação limpa, selada). */
   readonly auditEvidence?: AuditEvidence;
+  /**
+   * Ref AUDITADO (proveniência do objeto): SHA único ou intervalo `base..head`.
+   * Opcional/backward-compatible (CO-4): reviews históricos sem o campo têm
+   * proveniência `unknown` — consumidores NÃO devem assumi-los "fresh".
+   * SELADO no `review_fingerprint` (extensão tagueada) quando presente.
+   */
+  readonly subjectRef?: string;
   readonly file: string;
 }
 
@@ -143,6 +150,8 @@ export interface ReviewEventArtifact {
   readonly decision: ReviewDecision;
   readonly verifies: readonly string[];
   readonly auditEvidence: AuditEvidence;
+  /** Ref REVALIDADO (`base..head` do delta). Opcional; selado quando presente. */
+  readonly subjectRef?: string;
   readonly file: string;
 }
 
@@ -243,6 +252,7 @@ export function reviewFingerprintOf(parts: {
   ids: readonly string[];
   auditEvidence?: AuditEvidence;
   executor?: ExecutorProvenance;
+  subjectRef?: string;
 }): string {
   // Base de 4 elementos (checkpoint|role|count|ids) — serialização CANÔNICA (JSON,
   // `ids` como array, não `join(",")`; 2.4c). Selos históricos SEM extensões ficam
@@ -262,6 +272,11 @@ export function reviewFingerprintOf(parts: {
   if (parts.executor) {
     extensions.push(["executor", [parts.executor.platform, parts.executor.model]]);
   }
+  // subject_ref (CO-4): proveniência do objeto auditado. Extensão tagueada —
+  // selos históricos sem o campo permanecem byte-idênticos.
+  if (parts.subjectRef) {
+    extensions.push(["subject_ref", parts.subjectRef]);
+  }
   if (extensions.length > 0) envelope.push(extensions);
   return createHash("sha256").update(JSON.stringify(envelope)).digest("hex").slice(0, 12);
 }
@@ -275,22 +290,41 @@ export function reviewEventFingerprintOf(parts: {
   verifies: readonly string[];
   auditEvidence: AuditEvidence;
   executor: ExecutorProvenance;
+  subjectRef?: string;
 }): string {
-  return createHash("sha256")
-    .update(
-      JSON.stringify([
-        parts.checkpoint,
-        parts.role,
-        parts.eventId,
-        parts.kind,
-        parts.decision,
-        [...parts.verifies].sort(),
-        [parts.auditEvidence.scope, parts.auditEvidence.basis, [...parts.auditEvidence.coverage]],
-        [parts.executor.platform, parts.executor.model],
-      ])
-    )
-    .digest("hex")
-    .slice(0, 12);
+  const envelope: unknown[] = [
+    parts.checkpoint,
+    parts.role,
+    parts.eventId,
+    parts.kind,
+    parts.decision,
+    [...parts.verifies].sort(),
+    [parts.auditEvidence.scope, parts.auditEvidence.basis, [...parts.auditEvidence.coverage]],
+    [parts.executor.platform, parts.executor.model],
+  ];
+  // subject_ref (CO-4): elemento CONDICIONAL — eventos históricos sem o campo
+  // mantêm o envelope (e o selo) idênticos ao formato original.
+  if (parts.subjectRef) {
+    envelope.push(["subject_ref", parts.subjectRef]);
+  }
+  return createHash("sha256").update(JSON.stringify(envelope)).digest("hex").slice(0, 12);
+}
+
+/**
+ * `subject_ref` (CO-4): proveniência do OBJETO auditado — SHA único ou intervalo
+ * `base..head`. Forma lenient (token sem espaço; não valida existência no git —
+ * mesma postura do KnowledgeRef); opcional/backward-compatible: ausente ⇒
+ * proveniência `unknown` para consumidores (nunca "fresh" por suposição).
+ */
+function parseSubjectRef(raw: unknown, file: string): string | undefined {
+  if (raw === undefined || raw === null) return undefined;
+  const value = str(raw);
+  if (!value || /\s/.test(value)) {
+    throw new ReviewArtifactParseError(
+      `${file}: "subject_ref" deve ser um token sem espaços (SHA ou intervalo base..head).`
+    );
+  }
+  return value;
 }
 
 function parseExecutor(rawExecutor: unknown, file: string): ExecutorProvenance {
@@ -479,6 +513,8 @@ export function parseReview(yamlText: string, file: string): ReviewArtifact {
   // Selo de ENVELOPE: fecha a "poda final" (deletar a cauda + decrementar count).
   // Sela também as extensões presentes — auditEvidence (aprovação limpa) e
   // executor (proveniência estruturada) → ambas tamper-evidentes.
+  const subjectRef = parseSubjectRef(o.subject_ref, file);
+
   const expectedReview = reviewFingerprintOf({
     checkpoint,
     role,
@@ -486,6 +522,7 @@ export function parseReview(yamlText: string, file: string): ReviewArtifact {
     ids: findings.map((f) => f.id),
     ...(auditEvidence ? { auditEvidence } : {}),
     ...(executor ? { executor } : {}),
+    ...(subjectRef ? { subjectRef } : {}),
   });
   const declaredReview = str(o.review_fingerprint);
   if (declaredReview !== expectedReview) {
@@ -504,6 +541,7 @@ export function parseReview(yamlText: string, file: string): ReviewArtifact {
     findingsEmitted,
     findings,
     ...(auditEvidence ? { auditEvidence } : {}),
+    ...(subjectRef ? { subjectRef } : {}),
     file,
   };
 }
@@ -548,6 +586,7 @@ export function parseReviewEvent(yamlText: string, file: string): ReviewEventArt
   });
   const executor = parseExecutor(o.executor, file);
   const auditEvidence = parseAuditEvidence(o.audit_evidence, file);
+  const subjectRef = parseSubjectRef(o.subject_ref, file);
   const expected = reviewEventFingerprintOf({
     checkpoint,
     role,
@@ -557,6 +596,7 @@ export function parseReviewEvent(yamlText: string, file: string): ReviewEventArt
     verifies,
     auditEvidence,
     executor,
+    ...(subjectRef ? { subjectRef } : {}),
   });
   const declared = str(o.event_fingerprint);
   if (declared !== expected) {
@@ -574,6 +614,7 @@ export function parseReviewEvent(yamlText: string, file: string): ReviewEventArt
     decision: o.decision as ReviewDecision,
     verifies,
     auditEvidence,
+    ...(subjectRef ? { subjectRef } : {}),
     file,
   };
 }

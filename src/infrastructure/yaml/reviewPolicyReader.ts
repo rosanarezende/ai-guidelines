@@ -24,9 +24,30 @@ export interface ReviewPolicyProfile {
   readonly github: GithubReviewPolicy;
 }
 
+/** Lane de review (CO-4): objetivo + vetores obrigatórios por papel — fonte do briefing situado. */
+export interface ReviewLanePolicy {
+  readonly objective: string;
+  readonly vectors: readonly string[];
+}
+
+/**
+ * Política de PUBLICAÇÃO de reviews (CO-4): o canal canônico é o artefato
+ * versionado na spec; GitHub é projeção opcional, proibida por default —
+ * somente com autorização humana explícita.
+ */
+export interface ReviewPublicationPolicy {
+  readonly canonical: string;
+  readonly githubComments: string;
+  readonly githubException?: string;
+}
+
 export interface ReviewPolicy {
   readonly activeProfile: string;
   readonly profiles: Readonly<Record<string, ReviewPolicyProfile>>;
+  /** Opcional/backward-compatible: lanes governadas por papel. */
+  readonly lanes?: Readonly<Record<string, ReviewLanePolicy>>;
+  /** Opcional/backward-compatible: política de publicação. */
+  readonly publication?: ReviewPublicationPolicy;
 }
 
 export class ReviewPolicyParseError extends Error {
@@ -133,7 +154,42 @@ export function parseReviewPolicy(yamlText: string): ReviewPolicy {
   if (!profiles[activeProfile]) {
     throw new ReviewPolicyParseError(`active_profile "${activeProfile}" is not declared`);
   }
-  return { activeProfile, profiles };
+
+  let lanes: Record<string, ReviewLanePolicy> | undefined;
+  if (root.review_lanes !== undefined && root.review_lanes !== null) {
+    const rawLanes = obj(root.review_lanes, "review_lanes");
+    lanes = {};
+    for (const [name, value] of Object.entries(rawLanes)) {
+      const lane = obj(value, `review_lanes.${name}`);
+      const rawVectors = lane.vectors;
+      if (!Array.isArray(rawVectors) || rawVectors.length === 0) {
+        throw new ReviewPolicyParseError(`review_lanes.${name}.vectors must be a non-empty list`);
+      }
+      lanes[name] = {
+        objective: str(lane.objective, `review_lanes.${name}.objective`).trim(),
+        vectors: rawVectors.map((v, i) => str(v, `review_lanes.${name}.vectors[${i}]`)),
+      };
+    }
+  }
+
+  let publication: ReviewPublicationPolicy | undefined;
+  if (root.publication !== undefined && root.publication !== null) {
+    const rawPub = obj(root.publication, "publication");
+    publication = {
+      canonical: str(rawPub.canonical, "publication.canonical"),
+      githubComments: str(rawPub.github_comments, "publication.github_comments"),
+      ...(rawPub.github_exception !== undefined && rawPub.github_exception !== null
+        ? { githubException: str(rawPub.github_exception, "publication.github_exception") }
+        : {}),
+    };
+  }
+
+  return {
+    activeProfile,
+    profiles,
+    ...(lanes ? { lanes } : {}),
+    ...(publication ? { publication } : {}),
+  };
 }
 
 export function activeReviewPolicyProfile(policy: ReviewPolicy): ReviewPolicyProfile {

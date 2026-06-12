@@ -13,7 +13,8 @@ const AI_GUIDELINES_CLOSE = "</AI_GUIDELINES>";
 export function buildAgentsRuntimeStub(
   sddDir = ".ai-guidelines",
   handoffCommand = "npx ai-guidelines handoff [spec]",
-  handoffCheckCommand: string | null = null
+  handoffCheckCommand: string | null = null,
+  reviewBriefCommand = "npx ai-guidelines review <technical-audit|architectural-review>"
 ): string {
   return [
     "## Runtime Bootstrap",
@@ -25,6 +26,7 @@ export function buildAgentsRuntimeStub(
     ...(handoffCheckCommand
       ? [`- To confirm the resumption is still fresh, run \`${handoffCheckCommand}\`.`]
       : []),
+    `- When asked for a Technical Audit, Architectural Review, or revalidation, run \`${reviewBriefCommand}\` BEFORE reviewing — it projects the governed contract (role, mode, target artifact, vectors, prohibitions).`,
     "- The script contract at `.core/governance/script-contracts.yml` is the operational SSOT for scripts, hooks, workflows, and docs.",
     "- Full rules remain governed in `.core/rules/**`, `.core/rules/catalog.md`, `.core/rules/_meta/rules.json`, and the rule ledger.",
     "- Never bypass hooks with `--no-verify`; restore setup if hooks or generated script surfaces are missing.",
@@ -48,11 +50,17 @@ export function buildRuntimeBootstrapContent(
     readonly sddDir?: string;
     readonly handoffCommand?: string;
     readonly handoffCheckCommand?: string | null;
+    readonly reviewBriefCommand?: string;
   } = {}
 ): string {
   return mergeAgentsContent(
     existingContent,
-    buildAgentsRuntimeStub(options.sddDir, options.handoffCommand, options.handoffCheckCommand)
+    buildAgentsRuntimeStub(
+      options.sddDir,
+      options.handoffCommand,
+      options.handoffCheckCommand,
+      options.reviewBriefCommand
+    )
   );
 }
 

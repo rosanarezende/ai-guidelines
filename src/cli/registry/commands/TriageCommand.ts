@@ -17,13 +17,12 @@ export interface TriageOptions {
  *
  * Renomeado de `review` no cutover (investigação 2026-06-04): o comportamento
  * real é TRIAGEM (use case `TriageReview`, renderer `renderTriage`), e `review`
- * colidia com a linguagem ubíqua de governança (review-as-artifact / lanes
- * technical_audit·architectural_review / `review:check`). `review` permanece
- * como ALIAS transitório (compat) — a arquitetura nova nasce com o nome certo.
+ * colidia com a linguagem ubíqua de governança. Em CO-4 o verbo `review` passou
+ * ao `ReviewCommand` (briefing governado por lane), que DELEGA `review [<pr>]`
+ * para cá — compat do contrato v1.1.0 preservada sem alias duplicado.
  */
 export class TriageCommand implements Command<TriageOptions> {
   readonly name = "triage";
-  readonly aliases: readonly string[] = ["review"];
   readonly description =
     "Triagem read-only dos review comments inline de um PR (sem-resposta × respondidos) + bloco copiável. Não analisa/responde (ADR 0018).";
   readonly usage = ["triage", "triage 26"];

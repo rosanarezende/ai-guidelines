@@ -1003,6 +1003,53 @@ export interface HandoffLoadResult {
   readonly receiptSkippedReason?: string;
 }
 
+export interface HandoffLoadSnapshot {
+  readonly collected: CollectedHandoff;
+  readonly derived: HandoffDerived;
+  readonly receipt: HandoffLoadReceipt | null;
+  readonly receiptFile: string | null;
+  readonly receiptSkippedReason?: string;
+}
+
+/**
+ * ATO DE CARGA reutilizável (CO-4): coleta única + derivação + recibo, SEM
+ * renderizar — consumido pelo `handoff` (que renderiza o handoff) e pelo
+ * `review <papel>` (que deriva o briefing DO MESMO snapshot; anti-TOCTOU).
+ */
+export function loadHandoffSnapshot(
+  repoRoot: string,
+  options: HandoffOptions = {}
+): HandoffLoadSnapshot {
+  const collected = collectHandoffFacts(repoRoot, options);
+  const derived = deriveHandoff(collected.facts);
+
+  // Contrato obrigatório ausente ⇒ não existe carga "fresh" sem bootstrap/catálogo.
+  const missingMandatory = collected.facts.sources.filter(
+    (s) => (MANDATORY_CONTRACT_SOURCES as readonly string[]).includes(s.id) && s.status !== "fresh"
+  );
+  if (missingMandatory.length > 0) {
+    const reason =
+      `contrato obrigatório não carregado (${missingMandatory.map((s) => s.id).join(", ")}); ` +
+      `recibo NÃO publicado — reconcilie as fontes e reexecute a carga.`;
+    return { collected, derived, receipt: null, receiptFile: null, receiptSkippedReason: reason };
+  }
+
+  // Anti-TOCTOU: HEAD mudou durante a coleta ⇒ snapshot misturado não vira evidência.
+  const headNow = git(repoRoot, ["rev-parse", "--short", "HEAD"]);
+  if (
+    collected.facts.git.head !== null &&
+    headNow !== null &&
+    headNow !== collected.facts.git.head
+  ) {
+    const reason = `HEAD mudou durante a coleta (${collected.facts.git.head} → ${headNow}); recibo NÃO publicado — reexecute a carga.`;
+    return { collected, derived, receipt: null, receiptFile: null, receiptSkippedReason: reason };
+  }
+
+  const receipt = createLoadReceipt(collected.facts, derived.seal);
+  const receiptFile = writeReceipt(repoRoot, receipt);
+  return { collected, derived, receipt: receiptFile ? receipt : null, receiptFile };
+}
+
 /**
  * ATO VERIFICÁVEL DE CARGA (contrato de carga do CO-4): coleta os fatos UMA
  * única vez, deriva o handoff DESSE snapshot, registra o recibo local efêmero
@@ -1011,55 +1058,21 @@ export interface HandoffLoadResult {
  * misturado não vira evidência de carga).
  */
 export function loadHandoff(repoRoot: string, options: HandoffOptions = {}): HandoffLoadResult {
-  const collected = collectHandoffFacts(repoRoot, options);
-  const derived = deriveHandoff(collected.facts);
-
-  // Contrato obrigatório ausente ⇒ a sessão NÃO recebeu o contrato de
-  // comportamento — não existe carga "fresh" sem bootstrap/catálogo.
-  const missingMandatory = collected.facts.sources.filter(
-    (s) => (MANDATORY_CONTRACT_SOURCES as readonly string[]).includes(s.id) && s.status !== "fresh"
-  );
-  if (missingMandatory.length > 0) {
-    const reason =
-      `contrato obrigatório não carregado (${missingMandatory.map((s) => s.id).join(", ")}); ` +
-      `recibo NÃO publicado — reconcilie as fontes e reexecute a carga.`;
-    return {
-      text: renderCollected(repoRoot, collected, derived, options, `NÃO registrado: ${reason}`)
-        .text,
-      seal: derived.seal,
-      receipt: null,
-      receiptFile: null,
-      receiptSkippedReason: reason,
-    };
-  }
-
-  const headNow = git(repoRoot, ["rev-parse", "--short", "HEAD"]);
-  if (
-    collected.facts.git.head !== null &&
-    headNow !== null &&
-    headNow !== collected.facts.git.head
-  ) {
-    const reason = `HEAD mudou durante a coleta (${collected.facts.git.head} → ${headNow}); recibo NÃO publicado — reexecute a carga.`;
-    return {
-      text: renderCollected(repoRoot, collected, derived, options, `NÃO registrado: ${reason}`)
-        .text,
-      seal: derived.seal,
-      receipt: null,
-      receiptFile: null,
-      receiptSkippedReason: reason,
-    };
-  }
-
-  const receipt = createLoadReceipt(collected.facts, derived.seal);
-  const receiptFile = writeReceipt(repoRoot, receipt);
-  const note = receiptFile
-    ? `${receiptFile} (efêmero, fora do versionamento; selo ${receipt.sourceSeal})`
-    : "(fora de repo git — recibo não se aplica)";
+  const snapshot = loadHandoffSnapshot(repoRoot, options);
+  const { collected, derived } = snapshot;
+  const note = snapshot.receiptSkippedReason
+    ? `NÃO registrado: ${snapshot.receiptSkippedReason}`
+    : snapshot.receiptFile
+      ? `${snapshot.receiptFile} (efêmero, fora do versionamento; selo ${snapshot.receipt!.sourceSeal})`
+      : "(fora de repo git — recibo não se aplica)";
   return {
     text: renderCollected(repoRoot, collected, derived, options, note).text,
     seal: derived.seal,
-    receipt: receiptFile ? receipt : null,
-    receiptFile,
+    receipt: snapshot.receipt,
+    receiptFile: snapshot.receiptFile,
+    ...(snapshot.receiptSkippedReason
+      ? { receiptSkippedReason: snapshot.receiptSkippedReason }
+      : {}),
   };
 }
 

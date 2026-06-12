@@ -94,6 +94,8 @@ export function sealReview(file: string, logger: Logger = defaultLogger): number
     ids,
     auditEvidence: raw.audit_evidence as AuditEvidence | undefined,
     executor: raw.executor as ExecutorProvenance | undefined,
+    // subject_ref (CO-4): proveniência do objeto auditado — selada quando presente.
+    subjectRef: typeof raw.subject_ref === "string" ? raw.subject_ref : undefined,
   });
 
   const declaredReview = String(raw.review_fingerprint || "");

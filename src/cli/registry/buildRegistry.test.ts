@@ -19,12 +19,12 @@ describe("buildRegistry", () => {
     expect(registry.resolve("check-budget")?.name).toBe("check-budget");
   });
 
-  it("DADO o alias transitório 'review' QUANDO resolve ENTÃO cai no comando 'triage'", () => {
+  it("DADO o verbo 'review' QUANDO resolve ENTÃO cai no ReviewCommand (briefing por lane; numérico delega ao triage)", () => {
     const registry = buildRegistry();
-    expect(registry.resolve("review")?.name).toBe("triage");
+    expect(registry.resolve("review")?.name).toBe("review");
   });
 
-  it("DADO o registry montado QUANDO commandNames ENTÃO lista os canônicos (sem o alias 'review')", () => {
+  it("DADO o registry montado QUANDO commandNames ENTÃO lista os canônicos (review incluso)", () => {
     const registry = buildRegistry();
     const names = registry.commandNames();
     expect(names).toEqual(
@@ -45,7 +45,7 @@ describe("buildRegistry", () => {
         "check-budget",
       ])
     );
-    expect(names).not.toContain("review");
+    expect(names).toContain("review");
   });
 
   it("DADO o registry QUANDO inspeciona os comandos ENTÃO cada um declara description não-vazia (help derivável; auditoria #35 #2)", () => {
@@ -55,10 +55,10 @@ describe("buildRegistry", () => {
     }
   });
 
-  it("DADO o registry QUANDO renderHelp ENTÃO deriva o help com os canônicos + o alias review", () => {
+  it("DADO o registry QUANDO renderHelp ENTÃO deriva o help com os canônicos (review é comando próprio)", () => {
     const help = buildRegistry().renderHelp();
     expect(help).toContain("triage");
-    expect(help).toContain("alias: review");
+    expect(help).toContain("review technical-audit");
     expect(help).toContain("specs");
     expect(help).toContain("visual-prompt");
     expect(help).toContain("handoff");

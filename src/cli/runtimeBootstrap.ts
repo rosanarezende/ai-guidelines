@@ -15,6 +15,9 @@ const MAINTAINER_HANDOFF_COMMAND = "npm run guidelines -- handoff [spec]";
 // publicado ainda, consumidores não recebem este bullet (default null do stub).
 const MAINTAINER_HANDOFF_CHECK_COMMAND = "npm run handoff:check -- [--spec NNNN]";
 
+const MAINTAINER_REVIEW_BRIEF_COMMAND =
+  "npm run guidelines -- review <technical-audit|architectural-review>";
+
 export interface RuntimeBootstrapOptions {
   readonly agentsPath?: string;
   readonly sddDir?: string;
@@ -39,6 +42,7 @@ export function syncRuntimeBootstrap(
     sddDir: options.sddDir,
     handoffCommand: MAINTAINER_HANDOFF_COMMAND,
     handoffCheckCommand: MAINTAINER_HANDOFF_CHECK_COMMAND,
+    reviewBriefCommand: MAINTAINER_REVIEW_BRIEF_COMMAND,
   });
   const changed = current !== next;
 
@@ -60,6 +64,7 @@ export function checkRuntimeBootstrap(
     sddDir: options.sddDir,
     handoffCommand: MAINTAINER_HANDOFF_COMMAND,
     handoffCheckCommand: MAINTAINER_HANDOFF_CHECK_COMMAND,
+    reviewBriefCommand: MAINTAINER_REVIEW_BRIEF_COMMAND,
   });
   return { ok: current === next, agentsPath };
 }

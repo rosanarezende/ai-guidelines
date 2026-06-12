@@ -54,3 +54,43 @@ profiles:
       require_code_owner_review: true
       dismiss_stale_reviews_on_push: true
       require_last_push_approval: true
+
+# ── Lanes de review (CO-4: contrato projetável no briefing situado) ──────────
+# Vetores/objetivo por papel — fonte governada consumida por
+# `guidelines review <papel>`; o runtime PROJETA, não julga (ADR 0018).
+review_lanes:
+  technical_audit:
+    objective: >
+      Auditoria tecnica independente da implementacao do checkpoint: o codigo
+      faz o que afirma, sem regressao, com evidencia executavel.
+    vectors:
+      - correctness do comportamento implementado vs declarado
+      - testes (cobertura dos caminhos novos; regressoes; determinismo)
+      - seguranca (segredos, injecao, paths, dados sensiveis em artefatos)
+      - cross-platform (Windows/Linux/macOS; sem shell-isms)
+      - packaging/distribuicao (npm pack; dist/; bins)
+      - falhas e fallbacks (degradacao explicita; nada silencioso)
+      - integridade de estado (SSOT vs projecoes; selos/fingerprints)
+      - performance apenas onde houver risco real (sem micro-otimizacao)
+  architectural_review:
+    objective: >
+      Revisao arquitetural independente: a entrega sustenta a tese do nó e nao
+      hipoteca os nós seguintes.
+    vectors:
+      - aderencia a tese do checkpoint e ao plan.md/ADRs aplicaveis
+      - fronteiras (dominio puro vs I/O; gateways; acoplamento)
+      - SSOT vs projecoes (nenhuma segunda fonte de verdade)
+      - abstracoes (nem faltando nem especulativas; nomes honestos)
+      - temporalidade (evento vs estado continuo; staleness detectavel)
+      - lifecycle/governanca (selos, gates, append-only respeitados)
+      - escopo (nada fora do checkpoint; nada do proximo nó antecipado)
+      - integracao com os nós seguintes da topologia (CO-3..CO-6)
+      - riscos e decisoes nao registradas (debito narrativo)
+
+# ── Política de publicação de reviews (CO-4) ─────────────────────────────────
+# Evidência: agente publicou comentário redundante no GitHub por ambiguidade
+# de prompt (2026-06-12). O canal canônico é o ARTEFATO versionado na spec.
+publication:
+  canonical: spec-artifact # reviews/<...>.yml versionado na spec
+  github_comments: forbidden-by-default
+  github_exception: explicit-owner-authorization

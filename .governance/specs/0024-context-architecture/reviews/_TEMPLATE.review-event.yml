@@ -12,6 +12,7 @@ executor:
 decision: approved # approved | changes_requested | blocked
 verifies:
   - technical_audit#F1
+subject_ref: x # CO-4: delta REVALIDADO — intervalo base..head (ex.: a1b2c3d..e4f5a6b); SELADO
 audit_evidence:
   coverage:
     - src/example.ts
