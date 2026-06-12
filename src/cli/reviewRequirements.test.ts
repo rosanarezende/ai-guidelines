@@ -172,7 +172,7 @@ review_requirements:
     const p = policy(RULES);
     const r = resolveRequirement("architectural_review", p, { ...CTX, prProfile: "governance" });
     expect(r.level).toBe("required");
-    expect(r.source).toBe("rule:require-architecture-for-governance-high");
+    expect(r.source).toBe("rule:require-architecture-for-governance-high · repository-policy");
     expect(r.matchedRuleIds).toContain("recommend-architecture-for-governance");
   });
 
@@ -507,5 +507,208 @@ review_requirements:
     const sec = statuses.find((s) => s.typeId === "security_review")!;
     expect(sec.applicability).toBe("no");
     expect(sec.blocking).toBe(false);
+  });
+});
+
+describe("security review universal × requirement por perfil [CO-4 r8 — clarificação da owner]", () => {
+  /** Policy ATIVA do ai-guidelines (espelho): tipo sem applicability + regra por perfil. */
+  const AI_GUIDELINES_LIKE = `
+review_types:
+  security_review:
+    source: repository
+    enabled: true
+    title: Security Review
+    objective: Avaliar superficies de ataque e exposicao de dados.
+    vectors: [secrets, supply chain]
+review_requirements:
+  defaults:
+    technical_audit: optional
+    architectural_review: optional
+    security_review: optional
+  rules:
+    - id: require-security-for-integration
+      priority: 200
+      when:
+        pr_profile: integration
+      set:
+        security_review: required
+`;
+  const ALL_PROFILES = ["execution", "governance", "fast-track", "integration"] as const;
+
+  it("1/2-5/23 — sem applicability configurada: applicable=yes em TODOS os perfis, NUNCA unknown (mesmo sem labels/paths observáveis)", () => {
+    const p = policy(AI_GUIDELINES_LIKE);
+    for (const profile of ALL_PROFILES) {
+      const r = evaluateApplicability("security_review", p.applicability, {
+        prProfile: profile,
+        labels: null, // fato remoto NÃO observado — irrelevante sem regra configurada
+        changedPaths: null,
+      });
+      expect(r.value).toBe("yes");
+    }
+  });
+
+  it("6-9 — requirement por perfil: execution/governance/fast-track optional; integration required", () => {
+    const p = policy(AI_GUIDELINES_LIKE);
+    for (const profile of ["execution", "governance", "fast-track"]) {
+      const r = resolveRequirement("security_review", p, { ...CTX, prProfile: profile });
+      expect(r.level).toBe("optional");
+      expect(r.source).toBe("repo-default");
+    }
+    const integration = resolveRequirement("security_review", p, {
+      ...CTX,
+      prProfile: "integration",
+    });
+    expect(integration.level).toBe("required");
+    expect(integration.source).toBe("rule:require-security-for-integration · repository-policy");
+  });
+
+  it("10/11 — integration é required SEM labels; labels presentes não mudam a regra nem a origem", () => {
+    const p = policy(AI_GUIDELINES_LIKE);
+    const semLabels = resolveRequirement("security_review", p, {
+      prProfile: "integration",
+      labels: [],
+      changedPaths: [],
+    });
+    const comLabels = resolveRequirement("security_review", p, {
+      prProfile: "integration",
+      labels: ["security-sensitive"],
+      changedPaths: [],
+    });
+    expect(semLabels.level).toBe("required");
+    expect(comLabels.level).toBe("required");
+    expect(comLabels.source).toBe(semLabels.source);
+    // e labels não observáveis tampouco degradam (regra não depende delas):
+    const labelsNull = resolveRequirement("security_review", p, {
+      prProfile: "integration",
+      labels: null,
+      changedPaths: null,
+    });
+    expect(labelsNull.level).toBe("required");
+    expect(labelsNull.notes).toHaveLength(0);
+  });
+
+  it("12-16/27/28 — matriz de blocking: só integration+required não satisfeito bloqueia; current+approved libera", () => {
+    const p = policy(AI_GUIDELINES_LIKE);
+    const { registry } = buildReviewTypeRegistry(p);
+    const statusesFor = (
+      profile: string,
+      observed: Record<string, { latestSubjectRef: string | null; decision: string | null }>
+    ) =>
+      deriveEffectiveReviewStatuses({
+        registry,
+        policy: p,
+        ctx: { prProfile: profile, labels: [], changedPaths: [] },
+        observed,
+        functionalHead: "abc1234",
+      });
+
+    // execution/governance/fast-track: missing E stale não bloqueiam (optional)
+    for (const profile of ["execution", "governance", "fast-track"]) {
+      const missing = statusesFor(profile, {}).find((s) => s.typeId === "security_review")!;
+      expect(missing.applicability).toBe("yes");
+      expect(missing.requirement).toBe("optional");
+      expect(missing.blocking).toBe(false);
+      const stale = statusesFor(profile, {
+        security_review: { latestSubjectRef: "a..old9999", decision: "approved" },
+      }).find((s) => s.typeId === "security_review")!;
+      expect(stale.state).toBe("stale");
+      expect(stale.blocking).toBe(false);
+    }
+
+    // integration fixture: missing bloqueia; stale bloqueia; current+approved libera
+    const missing = statusesFor("integration", {}).find((s) => s.typeId === "security_review")!;
+    expect(missing.requirement).toBe("required");
+    expect(missing.blocking).toBe(true);
+    expect(missing.requirementSource).toContain("rule:require-security-for-integration");
+    expect(missing.requirementSource).toContain("repository-policy");
+
+    const stale = statusesFor("integration", {
+      security_review: { latestSubjectRef: "a..old9999", decision: "approved" },
+    }).find((s) => s.typeId === "security_review")!;
+    expect(stale.blocking).toBe(true);
+
+    const current = statusesFor("integration", {
+      security_review: { latestSubjectRef: "a..abc1234", decision: "approved" },
+    }).find((s) => s.typeId === "security_review")!;
+    expect(current.blocking).toBe(false);
+  });
+
+  it("24 — override situado pode apertar um PR execution específico para required", () => {
+    const p = policy(AI_GUIDELINES_LIKE);
+    const r = resolveRequirement(
+      "security_review",
+      p,
+      { ...CTX, prProfile: "execution" },
+      {
+        requirement: "required",
+        actor: "@rosanarezende",
+        reason: "Execution altera autenticação e secrets.",
+      }
+    );
+    expect(r.errors).toHaveLength(0);
+    expect(r.level).toBe("required");
+    expect(r.source).toContain("node-override");
+  });
+
+  it("31-33 — consumidores escolhem livremente: sem regra=optional; recommended; required", () => {
+    const base = `
+review_types:
+  security_review:
+    objective: x
+    vectors: [a]
+`;
+    // Consumidor A: sem regra → optional em integration (a regra do
+    // ai-guidelines é LOCAL e não vaza).
+    const a = policy(base);
+    expect(
+      resolveRequirement("security_review", a, { ...CTX, prProfile: "integration" }).level
+    ).toBe("optional");
+
+    // Consumidor B: recommended em integration.
+    const b = policy(
+      base +
+        `
+review_requirements:
+  rules:
+    - id: recommend-security-for-integration
+      priority: 100
+      when:
+        pr_profile: integration
+      set:
+        security_review: recommended
+`
+    );
+    expect(
+      resolveRequirement("security_review", b, { ...CTX, prProfile: "integration" }).level
+    ).toBe("recommended");
+
+    // Consumidor C: required em integration.
+    const c = policy(
+      base +
+        `
+review_requirements:
+  rules:
+    - id: require-security-for-integration
+      priority: 200
+      when:
+        pr_profile: integration
+      set:
+        security_review: required
+`
+    );
+    expect(
+      resolveRequirement("security_review", c, { ...CTX, prProfile: "integration" }).level
+    ).toBe("required");
+  });
+
+  it("34 — o framework NÃO distribui security_review nem a regra local: defaults são só TA/AR optional", () => {
+    const { registry } = buildReviewTypeRegistry(null);
+    expect(registry.types.map((t) => t.id)).toEqual(["architectural_review", "technical_audit"]);
+    expect(
+      resolveRequirement("technical_audit", null, { ...CTX, prProfile: "integration" }).level
+    ).toBe("optional");
+    expect(
+      resolveRequirement("architectural_review", null, { ...CTX, prProfile: "integration" }).level
+    ).toBe("optional");
   });
 });

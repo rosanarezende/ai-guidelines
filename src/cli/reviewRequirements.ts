@@ -492,7 +492,10 @@ export function resolveRequirement(
       );
     } else {
       level = winners[0].set[typeId]!;
-      source = `rule:${winners[0].id}`;
+      // Regras vivem na policy do REPOSITÓRIO — a origem é sempre citável como
+      // repository-policy (nunca framework-default): remover/alterar a regra
+      // muda o comportamento sem tocar no core.
+      source = `rule:${winners[0].id} · repository-policy`;
     }
   }
 

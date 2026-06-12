@@ -126,35 +126,43 @@ review_types:
       - logging e exposicao acidental
 
 # ── Aplicabilidade (onde o tipo faz sentido ≠ obrigatoriedade) ───────────────
-review_applicability:
-  security_review:
-    any:
-      - pr_profile: integration
-      - labels:
-          any:
-            - security-sensitive
-            - handles-secrets
+# AUSÊNCIA de entrada = aplicabilidade UNIVERSAL (qualquer perfil de PR), sem
+# depender de fato remoto algum. security_review é deliberadamente ausente:
+# disponível em execution, governance, fast-track e integration.
+review_applicability: {}
 
 # ── Requirements (quando/com qual força cada tipo é exigido) ─────────────────
 # Defaults do framework: nenhum review semântico obrigatório. Stale de
 # optional/recommended é INFORMAÇÃO (a humana decide revalidar); só required
 # + não-current bloqueia.
+#
+# DECISÃO LOCAL deste repositório (não é default do framework; não vaza para
+# consumidores): todo PR de INTEGRAÇÃO exige Security Review — sem depender
+# de labels.
 review_requirements:
   defaults:
     technical_audit: optional
     architectural_review: optional
     security_review: optional
   rules:
-    - id: require-security-for-sensitive-integration
+    - id: require-security-for-integration
       priority: 200
       when:
         pr_profile: integration
-        labels:
-          any:
-            - security-sensitive
-            - handles-secrets
       set:
         security_review: required
+    # Capacidade FUTURA (exemplo NÃO ativo): labels podem exigir Security
+    # Review em outros contextos — integração já o exige independentemente.
+    # - id: require-security-for-sensitive-execution
+    #   priority: 210
+    #   when:
+    #     pr_profile: execution
+    #     labels:
+    #       any:
+    #         - security-sensitive
+    #         - handles-secrets
+    #   set:
+    #     security_review: required
 
 # ── Overrides situados (nó/PR em state.yml § topology) ───────────────────────
 # Tightening livre; relaxation só governada (actor + reason) — sem waiver implícito.

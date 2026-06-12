@@ -338,3 +338,120 @@ describe("`review type add` — criação declarativa na policy canônica [CO-4 
     );
   });
 });
+
+describe("security universal no consumidor — briefing por perfil [CO-4 r8 clarificação]", () => {
+  /** Policy com security SEM applicability (universal) + required em integration. */
+  const UNIVERSAL_SECURITY_POLICY = `
+active_profile: solo
+profiles:
+  solo:
+    implementation_pr:
+      required_native_approvals: 0
+    integration_pr:
+      required_native_approvals: 0
+    accepted_findings:
+      require_resolution: false
+      require_verification_event_for_fixed: false
+    github:
+      minimum_approving_reviews: 1
+      require_code_owner_review: false
+      dismiss_stale_reviews_on_push: false
+      require_last_push_approval: false
+
+review_types:
+  security_review:
+    source: repository
+    enabled: true
+    title: Security Review
+    aliases: [security-review]
+    objective: Avaliar superficies de ataque e exposicao de dados.
+    vectors:
+      - secrets e credenciais
+      - supply chain
+
+review_requirements:
+  defaults:
+    security_review: optional
+  rules:
+    - id: require-security-for-integration
+      priority: 200
+      when:
+        pr_profile: integration
+      set:
+        security_review: required
+`;
+
+  function repoWithNodeRole(role: "execution" | "governance" | "integration"): string {
+    const repo = consumerRepo();
+    const statePath = path.join(repo, ".governance", "specs", "0007-minha-feature", "state.yml");
+    fs.writeFileSync(
+      statePath,
+      [
+        "stage: implementation",
+        "gate:",
+        "  status: closed",
+        "focus: []",
+        "next: []",
+        "topology:",
+        "  cursor:",
+        "    pr: entrega",
+        "    checkpoint: checkpoint-entrega",
+        "  prs:",
+        "    concluded: []",
+        "    active:",
+        "      - id: entrega",
+        "        github_pr: 7",
+        `        role: ${role}`,
+        "        terminal: true",
+        `        sequence: ${role === "execution" ? "1" : "null"}`,
+        "        checkpoints:",
+        "          - checkpoint-entrega",
+      ].join("\n")
+    );
+    fs.writeFileSync(
+      path.join(repo, ".governance", "review-policy.yml"),
+      UNIVERSAL_SECURITY_POLICY
+    );
+    initGitOnBranch(repo, "feat/spec-0007-entrega");
+    commitAll(repo);
+    return repo;
+  }
+
+  it("17/18 — pedido explícito em execution/governance gera briefing: applicable yes · optional · não bloqueia", () => {
+    for (const role of ["execution", "governance"] as const) {
+      const repo = repoWithNodeRole(role);
+      const { lines, logger } = fakeLogger();
+      expect(runReviewBrief(repo, "security-review", logger, null)).toBe(0);
+      const out = lines.join("\n");
+      expect(out).toContain("Modo inferido: CREATE");
+      expect(out).toContain("requirement optional");
+      expect(out).toContain("aplicabilidade: yes");
+      expect(out).toContain("não bloqueia Ready/gate");
+      expect(out).not.toContain("NÃO é aplicável");
+      expect(out).not.toContain("DESABILITADO");
+    }
+  });
+
+  it("20 — pedido explícito em integration gera briefing: required (rule, repository-policy) · BLOQUEIA enquanto missing", () => {
+    const repo = repoWithNodeRole("integration");
+    const { lines, logger } = fakeLogger();
+    expect(runReviewBrief(repo, "security-review", logger, null)).toBe(0);
+    const out = lines.join("\n");
+    expect(out).toContain("Modo inferido: CREATE");
+    expect(out).toContain("requirement required");
+    expect(out).toContain("rule:require-security-for-integration · repository-policy");
+    expect(out).toContain("BLOQUEIA Ready/gate");
+  });
+
+  it("25/29 — universal sem applicability: handoff-level statuses do consumidor não bloqueiam em execution", () => {
+    const repo = repoWithNodeRole("execution");
+    const { lines, logger } = fakeLogger();
+    expect(runReviewPolicy(repo, logger)).toBe(0);
+    const out = lines.join("\n");
+    expect(out).toContain("security_review");
+    expect(out).toContain("- applicable: yes");
+    expect(out).toContain("- requirement: optional (fonte: repo-default)");
+    expect(out).toContain("- blocking: no");
+    expect(out).not.toContain("unknown");
+  });
+});
