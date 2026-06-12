@@ -150,7 +150,7 @@ function sealedReviewYaml(opts: {
       '    location: "global"',
       '    description: "achado"',
       "    disposition: open",
-      `    fingerprint: ${findingFp}`,
+      `    fingerprint: "${findingFp}"`,
       `subject_ref: "${opts.subjectRef}"`,
       "review_fingerprint: x",
     ];
@@ -181,7 +181,7 @@ function sealedReviewYaml(opts: {
     `  scope: "${EVIDENCE.scope}"`,
     `  basis: "${EVIDENCE.basis}"`,
     `subject_ref: "${opts.subjectRef}"`,
-    `review_fingerprint: ${fp}`,
+    `review_fingerprint: "${fp}"`,
   ].join("\n");
 }
 
@@ -318,9 +318,9 @@ describe("review:publish · ciclo completo autorizado [CO-4 rodada 8]", () => {
       '    location: "global"',
       '    description: "achado"',
       "    disposition: open",
-      `    fingerprint: ${findingFp}`,
+      `    fingerprint: "${findingFp}"`,
       `subject_ref: "${head}"`,
-      `review_fingerprint: ${reviewFp}`,
+      `review_fingerprint: "${reviewFp}"`,
     ].join("\n");
     fs.writeFileSync(path.join(repo, REVIEW_PATH), yaml);
     const { lines, logger } = fakeLogger();
@@ -386,7 +386,7 @@ describe("review:publish · ciclo completo autorizado [CO-4 rodada 8]", () => {
         `  model: ${EXECUTOR.model}`,
         "decision: approved",
         "scope: review",
-        `review_fingerprint: ${reviewFp}`,
+        `review_fingerprint: "${reviewFp}"`,
         `previous_subject_ref: "${oldHead}"`,
         `subject_ref: "${oldHead}..${newHead}"`,
         "audit_evidence:",
@@ -394,7 +394,7 @@ describe("review:publish · ciclo completo autorizado [CO-4 rodada 8]", () => {
         `    - ${EVIDENCE.coverage[0]}`,
         `  scope: "${EVIDENCE.scope}"`,
         `  basis: "${EVIDENCE.basis}"`,
-        `event_fingerprint: ${eventFp}`,
+        `event_fingerprint: "${eventFp}"`,
       ].join("\n")
     );
     const { lines, logger } = fakeLogger();
@@ -535,7 +535,7 @@ describe("review:publish · guard de diff e pré-condições [CO-4 rodada 8]", (
         `    - ${EVIDENCE.coverage[0]}`,
         `  scope: "${EVIDENCE.scope}"`,
         `  basis: "${EVIDENCE.basis}"`,
-        `event_fingerprint: ${eventFp}`,
+        `event_fingerprint: "${eventFp}"`,
       ].join("\n")
     );
     const { lines, logger } = fakeLogger();

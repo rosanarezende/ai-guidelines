@@ -88,9 +88,9 @@ findings:
     severity: low
     location: global
     description: Test finding
-    fingerprint: ${findingHash}
+    fingerprint: "${findingHash}"
     disposition: open
-review_fingerprint: ${reviewHash}
+review_fingerprint: "${reviewHash}"
 `;
     writeFileSync(tmpFile, yaml);
 

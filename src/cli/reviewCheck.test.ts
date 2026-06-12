@@ -32,7 +32,7 @@ function reviewYaml(
   const body = findings
     .map(
       (f) =>
-        `  - id: ${f.id}\n    severity: ${f.severity}\n    location: "${f.location}"\n    description: "${f.description}"\n    disposition: ${f.disposition}\n    fingerprint: ${fingerprintOf({ checkpoint: CP, role: ROLE, ...f })}`
+        `  - id: ${f.id}\n    severity: ${f.severity}\n    location: "${f.location}"\n    description: "${f.description}"\n    disposition: ${f.disposition}\n    fingerprint: "${fingerprintOf({ checkpoint: CP, role: ROLE, ...f })}"`
     )
     .join("\n");
   const rfp = reviewFingerprintOf({
@@ -41,7 +41,7 @@ function reviewYaml(
     findingsEmitted: emitted,
     ids: findings.map((f) => f.id),
   });
-  return `checkpoint: "${CP}"\nrole: ${ROLE}\nactor: codex-cli\ndecision: changes_requested\nfindings_emitted: ${emitted}\nreview_fingerprint: ${rfp}\nfindings:\n${body}\n`;
+  return `checkpoint: "${CP}"\nrole: ${ROLE}\nactor: codex-cli\ndecision: changes_requested\nfindings_emitted: ${emitted}\nreview_fingerprint: "${rfp}"\nfindings:\n${body}\n`;
 }
 
 const okFinding = {
@@ -101,7 +101,7 @@ describe("reviewArtifactsReader [Checkpoint 2.4a]", () => {
       findingsEmitted: 2,
       ids: ["F1", "F2"],
     });
-    const pruned = `checkpoint: "${CP}"\nrole: ${ROLE}\nactor: a\ndecision: changes_requested\nfindings_emitted: 1\nreview_fingerprint: ${staleEnvelope}\nfindings:\n  - id: F1\n    severity: high\n    location: "x"\n    description: "d"\n    disposition: open\n    fingerprint: ${f1fp}\n`;
+    const pruned = `checkpoint: "${CP}"\nrole: ${ROLE}\nactor: a\ndecision: changes_requested\nfindings_emitted: 1\nreview_fingerprint: "${staleEnvelope}"\nfindings:\n  - id: F1\n    severity: high\n    location: "x"\n    description: "d"\n    disposition: open\n    fingerprint: "${f1fp}"\n`;
     expect(() => parseReview(pruned, "f.yml")).toThrow(/review_fingerprint inválido/);
   });
 
@@ -134,7 +134,7 @@ describe("reviewArtifactsReader [Checkpoint 2.4a]", () => {
       location: "x",
       description: "d",
     });
-    const transplanted = `checkpoint: "${CP}"\nrole: architectural_review\nactor: a\ndecision: changes_requested\nfindings_emitted: 1\nreview_fingerprint: zzz\nfindings:\n  - id: F1\n    severity: high\n    location: "x"\n    description: "d"\n    disposition: open\n    fingerprint: ${foreignFp}\n`;
+    const transplanted = `checkpoint: "${CP}"\nrole: architectural_review\nactor: a\ndecision: changes_requested\nfindings_emitted: 1\nreview_fingerprint: zzz\nfindings:\n  - id: F1\n    severity: high\n    location: "x"\n    description: "d"\n    disposition: open\n    fingerprint: "${foreignFp}"\n`;
     expect(() => parseReview(transplanted, "f.yml")).toThrow(/fingerprint inválido/);
   });
 
@@ -217,7 +217,7 @@ audit_evidence:
     - ${auditEvidence.coverage[0]}
   scope: "${auditEvidence.scope}"
   basis: "${auditEvidence.basis}"
-event_fingerprint: ${eventFingerprint}
+event_fingerprint: "${eventFingerprint}"
 `;
 }
 
@@ -242,6 +242,20 @@ function artifacts(partial: {
     ...(partial.policy ? { policy: partial.policy } : {}),
   };
 }
+
+describe("fingerprint numérico sem aspas — classe do flake de CI [CO-4 r8]", () => {
+  it("review_fingerprint todo-decimal lido como NÚMERO → erro orientativo (aspas/seal), nunca 'ausente'", () => {
+    // 12 dígitos decimais sem aspas: YAML lê como número (~1/270 selos reais).
+    const yaml = `checkpoint: "${CP}"\nrole: ${ROLE}\nactor: a\ndecision: changes_requested\nfindings_emitted: 1\nreview_fingerprint: 989111422848\nfindings:\n  - id: F1\n    severity: high\n    location: "x"\n    description: "d"\n    disposition: open\n    fingerprint: "${fingerprintOf({ checkpoint: CP, role: ROLE, id: "F1", severity: "high", location: "x", description: "d" })}"\n`;
+    expect(() => parseReview(yaml, "r.yml")).toThrow(/lido pelo YAML como NÚMERO/);
+    expect(() => parseReview(yaml, "r.yml")).toThrow(/review:seal/);
+  });
+
+  it("fingerprint de finding todo-decimal sem aspas → mesma orientação", () => {
+    const yaml = `checkpoint: "${CP}"\nrole: ${ROLE}\nactor: a\ndecision: changes_requested\nfindings_emitted: 1\nreview_fingerprint: x\nfindings:\n  - id: F1\n    severity: high\n    location: "x"\n    description: "d"\n    disposition: open\n    fingerprint: 123456789012\n`;
+    expect(() => parseReview(yaml, "r.yml")).toThrow(/F1.fingerprint.*NÚMERO/);
+  });
+});
 
 describe("consolidate (enforcement) [Checkpoint 2.4a]", () => {
   it("ANTI-AUTOAPROVAÇÃO: resolução `fixed` NÃO destrava o gate enquanto disposition=open", () => {
@@ -424,7 +438,7 @@ function cleanReviewYaml(
   const ev = evidence
     ? `\naudit_evidence:\n  coverage:\n${covBlock}\n  scope: "${evidence.scope}"\n  basis: "${evidence.basis}"`
     : "";
-  return `checkpoint: "${CP}"\nrole: ${ROLE}\nactor: ${actor}\ndecision: ${decision}\nfindings_emitted: 0\nreview_fingerprint: ${rfp}${ev}\n`;
+  return `checkpoint: "${CP}"\nrole: ${ROLE}\nactor: ${actor}\ndecision: ${decision}\nfindings_emitted: 0\nreview_fingerprint: "${rfp}"${ev}\n`;
 }
 
 describe("audit_evidence — aprovação limpa [2.4e]", () => {
@@ -499,7 +513,7 @@ function execCleanYaml(
     ? `executor:\n  platform: ${executor.platform}\n  model: ${executor.model}\n`
     : "";
   const actorBlock = opts.alsoActor ? `actor: ${opts.alsoActor}\n` : "";
-  return `checkpoint: "${CP}"\nrole: ${ROLE}\n${execBlock}${actorBlock}decision: approved\nfindings_emitted: 0\naudit_evidence:\n  coverage:\n    - src/domain/knowledge\n  scope: "${evidence.scope}"\n  basis: "${evidence.basis}"\nreview_fingerprint: ${rfp}\n`;
+  return `checkpoint: "${CP}"\nrole: ${ROLE}\n${execBlock}${actorBlock}decision: approved\nfindings_emitted: 0\naudit_evidence:\n  coverage:\n    - src/domain/knowledge\n  scope: "${evidence.scope}"\n  basis: "${evidence.basis}"\nreview_fingerprint: "${rfp}"\n`;
 }
 
 describe("executor — proveniência estruturada [2.4f]", () => {
@@ -546,7 +560,7 @@ describe("executor — proveniência estruturada [2.4f]", () => {
       ids: ["F1"],
       executor: EXEC,
     });
-    const yaml = `checkpoint: "${CP}"\nrole: ${ROLE}\nexecutor:\n  platform: ${EXEC.platform}\n  model: ${EXEC.model}\ndecision: changes_requested\nfindings_emitted: 1\nreview_fingerprint: ${rfp}\nfindings:\n  - id: F1\n    severity: ${f.severity}\n    location: "${f.location}"\n    description: "${f.description}"\n    disposition: ${f.disposition}\n    fingerprint: ${ffp}\n`;
+    const yaml = `checkpoint: "${CP}"\nrole: ${ROLE}\nexecutor:\n  platform: ${EXEC.platform}\n  model: ${EXEC.model}\ndecision: changes_requested\nfindings_emitted: 1\nreview_fingerprint: "${rfp}"\nfindings:\n  - id: F1\n    severity: ${f.severity}\n    location: "${f.location}"\n    description: "${f.description}"\n    disposition: ${f.disposition}\n    fingerprint: "${ffp}"\n`;
     const r = parseReview(yaml, "f.yml");
     expect(r.executor).toEqual(EXEC);
     expect(r.findings).toHaveLength(1);

@@ -42,7 +42,7 @@ function cleanReviewYaml(checkpoint = "checkpoint-co-projection"): string {
     `    - ${EVIDENCE.coverage[0]}`,
     `  scope: "${EVIDENCE.scope}"`,
     `  basis: "${EVIDENCE.basis}"`,
-    `review_fingerprint: ${fp}`,
+    `review_fingerprint: "${fp}"`,
   ].join("\n");
 }
 
@@ -65,7 +65,7 @@ function reviewScopeEventYaml(opts: {
     `  model: ${EXECUTOR.model}`,
     "decision: approved",
     "scope: review",
-    `review_fingerprint: ${opts.reviewFingerprint}`,
+    `review_fingerprint: "${opts.reviewFingerprint}"`,
   ];
   if (opts.previousSubjectRef) lines.push(`previous_subject_ref: "${opts.previousSubjectRef}"`);
   if (opts.subjectRef) lines.push(`subject_ref: "${opts.subjectRef}"`);
@@ -76,7 +76,7 @@ function reviewScopeEventYaml(opts: {
     `    - ${EVIDENCE.coverage[0]}`,
     `  scope: "${EVIDENCE.scope}"`,
     `  basis: "${EVIDENCE.basis}"`,
-    `event_fingerprint: ${opts.fingerprint ?? expectedEventFp(opts, checkpoint)}`
+    `event_fingerprint: "${opts.fingerprint ?? expectedEventFp(opts, checkpoint)}"`
   );
   return lines.join("\n");
 }
@@ -287,7 +287,7 @@ describe("review:seal polimórfico [CO-4 rodada 6]", () => {
     expect(sealReview(file, log)).toBe(0);
     const sealed = fs.readFileSync(file, "utf-8");
     expect(sealed).toContain("# comentário preservado"); // 14
-    const sealedFp = /event_fingerprint: ([0-9a-f]{12})/.exec(sealed)?.[1];
+    const sealedFp = /event_fingerprint: "?([0-9a-f]{12})"?/.exec(sealed)?.[1];
     expect(sealedFp).toBe(
       expectedEventFp(
         {
@@ -336,7 +336,7 @@ describe("review:seal polimórfico [CO-4 rodada 6]", () => {
     const { logger: log } = logger();
 
     expect(sealReview(file, log)).toBe(0);
-    expect(fs.readFileSync(file, "utf-8")).toContain(`event_fingerprint: ${fp}`);
+    expect(fs.readFileSync(file, "utf-8")).toMatch(new RegExp(`event_fingerprint: "?${fp}"?`));
   });
 
   it("11/12 — review normal continua selando; selo correto é no-op", () => {
@@ -361,7 +361,7 @@ describe("review:seal polimórfico [CO-4 rodada 6]", () => {
 
     expect(sealReview(file, log)).toBe(1);
     expect(lines.join("\n")).toContain("Não será sobrescrito");
-    expect(fs.readFileSync(file, "utf-8")).toContain("event_fingerprint: aaaaaaaaaaaa");
+    expect(fs.readFileSync(file, "utf-8")).toContain('event_fingerprint: "aaaaaaaaaaaa"');
   });
 
   it("artefato desconhecido → erro explícito", () => {

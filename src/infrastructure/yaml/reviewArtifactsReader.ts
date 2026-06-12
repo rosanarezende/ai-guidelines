@@ -368,6 +368,21 @@ function parseSubjectRef(raw: unknown, file: string): string | undefined {
   return value;
 }
 
+/**
+ * Fingerprint TODO-NUMÉRICO sem aspas é lido pelo YAML como NÚMERO (mesma
+ * classe do bug do subject_ref, rodada 7: ~1/270 selos são 12 dígitos
+ * decimais — flake real de CI). `String(...)` não recupera com segurança
+ * (zero à esquerda perde precisão) — rejeição determinística e orientativa.
+ */
+function rejectNumericFingerprint(raw: unknown, file: string, field: string): void {
+  if (typeof raw === "number") {
+    throw new ReviewArtifactParseError(
+      `${file}: "${field}" foi lido pelo YAML como NÚMERO (fingerprint todo-numérico sem aspas). ` +
+        `Envolva o valor em aspas — ou deixe "x" e re-rode: npm run review:seal -- --file ${file}.`
+    );
+  }
+}
+
 function parseExecutor(rawExecutor: unknown, file: string): ExecutorProvenance {
   if (!rawExecutor || typeof rawExecutor !== "object" || Array.isArray(rawExecutor)) {
     throw new ReviewArtifactParseError(
@@ -512,6 +527,7 @@ export function parseReview(yamlText: string, file: string): ReviewArtifact {
       location,
       description,
     });
+    rejectNumericFingerprint(f.fingerprint, file, `${id}.fingerprint`);
     const declared = str(f.fingerprint);
     if (declared !== expected) {
       throw new ReviewArtifactParseError(
@@ -565,6 +581,7 @@ export function parseReview(yamlText: string, file: string): ReviewArtifact {
     ...(executor ? { executor } : {}),
     ...(subjectRef ? { subjectRef } : {}),
   });
+  rejectNumericFingerprint(o.review_fingerprint, file, "review_fingerprint");
   const declaredReview = str(o.review_fingerprint);
   if (declaredReview !== expectedReview) {
     throw new ReviewArtifactParseError(
@@ -648,6 +665,7 @@ export function parseReviewEvent(yamlText: string, file: string): ReviewEventArt
       );
     }
     verifies = [];
+    rejectNumericFingerprint(o.review_fingerprint, file, "review_fingerprint");
     const declaredReviewFp = str(o.review_fingerprint);
     if (!declaredReviewFp || !/^[0-9a-f]{12}$/i.test(declaredReviewFp)) {
       throw new ReviewArtifactParseError(
@@ -680,6 +698,7 @@ export function parseReviewEvent(yamlText: string, file: string): ReviewEventArt
     ...(reviewFingerprint ? { reviewFingerprint } : {}),
     ...(previousSubjectRef ? { previousSubjectRef } : {}),
   });
+  rejectNumericFingerprint(o.event_fingerprint, file, "event_fingerprint");
   const declared = str(o.event_fingerprint);
   if (declared !== expected) {
     throw new ReviewArtifactParseError(
