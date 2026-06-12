@@ -411,10 +411,64 @@ refs SEMPRE entre aspas.
 review pedido em uma frase termina PUBLICADO (commit exclusivo + push) sem segunda
 interação humana.
 
+## Rodada 8 (2026-06-12) — catálogo de review virou obrigação implícita
+
+**Dúvida da owner:** selecionar um perfil de colaboração não deveria tornar tipos de
+review obrigatórios. O perfil `team` associava automaticamente Technical Audit a PRs
+de implementação e TA+AR a PRs de integração (`required_review_roles`), e o briefing
+inferia VERIFICATION para review stale como se a revalidação fosse devida. A intenção
+do framework é outra: **o framework OFERECE tipos de review ≠ o framework OBRIGA esses
+reviews**.
+
+**Dois erros de modelagem distintos:**
+
+1. **Perfil de colaboração ⊃ review semântico.** `team` governa a camada NATIVA
+   (approvals, code owners, merge) — não deveria carregar lanes semânticas. Quem decide
+   força/escopo de cada tipo é o repositório, explicitamente.
+2. **Freshness × requirement colapsados.** Review stale significa apenas "este artefato
+   não cobre a cabeça funcional atual" — informação, nunca obrigação. Só uma política
+   `required` pode transformar não-current em bloqueio.
+
+**Decisão (executável, ponta a ponta):** governança refatorada em QUATRO conceitos
+independentes — catálogo (`review_types`), aplicabilidade (`review_applicability`),
+requisito (`review_requirements`: disabled|optional|recommended|required) e
+estado/freshness (missing|current|stale). Somente `required` + não-current bloqueia
+Ready/gate/fechamento (`pr-ready:check`, `deriveNextAction`, proibições do handoff).
+
+- **Tipos customizados por repositório** sem mudança no core: `security_review` real na
+  policy deste repo (aplicável a integration ou labels security-sensitive/handles-secrets;
+  optional por default; required via regra com label); `mece_review` provado em fixture
+  de consumidor; `review type add <slug>` cria declarativamente na policy canônica.
+- **Aplicabilidade ≠ obrigatoriedade:** seletores por pr_profile/labels/changed_paths;
+  dado não observável ⇒ `unknown/degraded`, nunca `false` silencioso.
+- **Conflito de regras de mesma prioridade = erro de policy** (nunca "mais restritivo
+  vence" silencioso). Maior prioridade vence; resultado cita regra/origem/fatos.
+- **Overrides situados** no nó (`state.yml § topology … review_requirements`): tightening
+  livre; relaxation só com `allow_relaxation` + actor + reason — sem waiver implícito.
+- **Perfis desacoplados:** `required_review_roles` virou LEGADO (parse preservado,
+  warning de depreciação, tradução interna para regras required — comportamento de repos
+  existentes inalterado); templates novos usam só `required_native_approvals`.
+- **Autonomia humana preservada:** pedido explícito executa qualquer tipo aplicável
+  (optional incluso); `recommended` aparece como advisory (handoff/pr-ready), nunca
+  como próxima ação bloqueante; `disabled` informa como habilitar.
+
+**Dogfood neste repo (PR #41):** TA `optional · stale (approved) · não bloqueia`; AR
+`optional · missing · não bloqueia`; handoff segue derivando a tarefa aberta como
+próxima ação (nenhum review por obrigação inexistente); `pr-ready:check` não bloqueia
+por TA/AR; `review policy` projeta o contexto em uma tela.
+
+**Critério de falsificação:** se um repo com perfil `team` e policy sem
+`review_requirements` voltar a exigir TA/AR, ou se um review optional stale voltar a
+aparecer como próxima ação obrigatória, a correção falhou.
+
+**Insight:** PIT-0012 — "capacidade disponível não é obrigação" (1ª ocorrência, este
+dogfood). Diferente do PIT-0011 (descobribilidade do contrato): aqui o contrato era
+descobrível, mas MODELAVA a oferta como imposição.
+
 ## Referências
 
 - Commit da correção: `5881a85` (fix(spec-0024): enforca coerencia da projecao de specs ativas)
-- Insight: PIT-0011 (2ª ocorrência, `insight saw`, 2026-06-11)
+- Insight: PIT-0011 (2ª ocorrência, `insight saw`, 2026-06-11); PIT-0012 (rodada 8, `insight add`, 2026-06-12)
 - PIT-0010 → GG-0004 (classe irmã: ponteiro de retomada stale em Markdown)
 - ADR 0021 (reconcile-on-load), ADR 0022 (handoff situado), ADR 0026 (projeção ≠ entidade)
 - research-library/architecture/2026-06-05-enforcement-surfaces.md (estado contínuo × evento)

@@ -99,3 +99,12 @@ insights:
         spec: "0024"
         cursor: checkpoint-co-projection
         note: "Rodada 7 (review executado, publicacao exigia segundo pedido): owner pediu TA em uma frase; agente descobriu o comando, executou o review completo, criou/selou/validou o EV1 e identificou o commit exclusivo — mas PAROU pedindo 'autorize o commit e o push', forcando segunda interacao humana so para publicar o artefato que ela mesma solicitou. Falsifica: 'briefing completo elimina a friccao do review'. Conclusao: o pedido explicito precisa CARREGAR autorizacao operacional capability-scoped ate a publicacao do artefato canonico. Correcao: --authorization explicit-review-request (fail-closed; ensinada pelo AGENTS) + review:publish (guard executavel: diff EXATAMENTE review-only no path canonico, mensagem derivada, push normal; GitHub segue proibido). Bonus do dogfood: descoberto bug real de contrato — SHA todo-numerico vira NUMERO no YAML e invalidava subject_ref (~1/38); corrigido com erro orientativo + aspas obrigatorias nos templates/briefing."
+  - id: PIT-0012
+    text: "Capacidade disponivel nao e obrigacao: catalogo de tipos de review e policy de exigencia precisam ser independentes (tipo/aplicabilidade/requisito/estado) para preservar autoridade humana — acoplar perfil de colaboracao ou freshness a obrigatoriedade transforma oferta em imposicao"
+    status: open
+    captured_at: 2026-06-12T17:16:40.681Z
+    occurrences:
+      - at: 2026-06-12T17:16:40.681Z
+        spec: "0024"
+        cursor: checkpoint-co-projection
+        note: "Dogfood CO-4 rodada 8: perfil team impunha TA/AR; review stale era lido como revalidacao obrigatoria; correcao separou review_types de review_requirements (so required+nao-current bloqueia)"
