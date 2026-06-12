@@ -436,9 +436,27 @@ estado/freshness (missing|current|stale). Somente `required` + não-current bloq
 Ready/gate/fechamento (`pr-ready:check`, `deriveNextAction`, proibições do handoff).
 
 - **Tipos customizados por repositório** sem mudança no core: `security_review` real na
-  policy deste repo (aplicável a integration ou labels security-sensitive/handles-secrets;
-  optional por default; required via regra com label); `mece_review` provado em fixture
-  de consumidor; `review type add <slug>` cria declarativamente na policy canônica.
+  policy deste repo; `mece_review` provado em fixture de consumidor; `review type add
+<slug>` cria declarativamente na policy canônica.
+- **Refinamento (mesma decisão, clarificação da owner, 2026-06-12):** a primeira versão
+  restringia a APLICABILIDADE do `security_review` (integration ou labels) e condicionava
+  o required a labels — contradizia a intenção. Corrigido: **ausência de entrada em
+  `review_applicability` = aplicabilidade UNIVERSAL** (semântica genérica, sem `unknown`
+  — não depende de fato remoto algum); `security_review` fica disponível em QUALQUER
+  perfil; a obrigatoriedade é decisão LOCAL deste repositório (não default do framework,
+  não vaza a consumidores): `rule:require-security-for-integration` (priority 200, sem
+  labels) torna-o required em TODO PR de integração. Labels seguem capacidade futura
+  (exemplo comentado na policy), não regra ativa. Matriz final:
+  | Perfil | Security Review |
+  | --- | --- |
+  | execution | aplicável · optional · não bloqueia |
+  | governance | aplicável · optional · não bloqueia |
+  | fast-track | aplicável · optional · não bloqueia |
+  | integration | aplicável · required · bloqueia se missing/stale/não aprovado |
+
+  Origem citável: `rule:require-security-for-integration · repository-policy` (nunca
+  framework-default); remover a regra na policy muda o comportamento sem tocar no core.
+
 - **Aplicabilidade ≠ obrigatoriedade:** seletores por pr_profile/labels/changed_paths;
   dado não observável ⇒ `unknown/degraded`, nunca `false` silencioso.
 - **Conflito de regras de mesma prioridade = erro de policy** (nunca "mais restritivo
