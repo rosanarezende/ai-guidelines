@@ -359,6 +359,58 @@ scope: review   → revalida o REVIEW INTEIRO contra novo subject
 nesta rodada (implementação move o HEAD; o revisor independente executa a
 verification sobre o HEAD final com uma frase).
 
+## Rodada 7 (2026-06-12) — review executado, publicação ainda exigia segundo pedido
+
+**O que aconteceu:** a owner pediu o TA em UMA frase; o agente revisor (sessão
+independente) descobriu o comando, inferiu `verification scope=review`, criou o EV1,
+selou (`review:seal` polimórfico), validou (`review:check` verde) e identificou
+corretamente que o commit deveria ser exclusivo — e então **parou**: "Autorize o
+commit e o push do review." A owner precisou de uma SEGUNDA interação só para
+publicar o artefato que ela mesma havia solicitado.
+
+**Hipótese falsificada:** "briefing completo elimina a fricção do review". O briefing
+resolveu descoberta e execução, mas não carregava a AUTORIDADE da publicação
+(5ª ocorrência do PIT-0011 — evidência distinta: contrato descoberto e executável,
+mas sem autorização operacional embutida).
+
+**Conclusão:** o pedido explícito precisa carregar **autorização operacional
+capability-scoped até a publicação do artefato canônico** — explícita, limitada ao
+review solicitado, verificável, fail-closed e incapaz de publicar qualquer outro diff.
+
+**Correção (não é instrução textual — é contrato executável):**
+
+- **Política machine-readable** (`review-policy.yml § publication.canonical_artifact`):
+  `commit_policy`/`push_policy: allowed-on-explicit-review-request`; `mixed_diff: block`.
+  Autorização do artefato canônico ≠ autorização GitHub (que segue
+  forbidden-by-default).
+- **Autorização escopada no comando:** `review <papel> --authorization
+explicit-review-request` — o AGENTS ensina o agente a mapear o pedido humano
+  explícito para a flag; execução espontânea = sem autorização (briefing funciona;
+  publicação bloqueada). Valor inválido = rejeitado.
+- **`review:publish`** (guard executável): pré-condições (branch/upstream/behind=0;
+  artefato no path CANÔNICO da lane/checkpoint do cursor; selo válido por parse —
+  seal no-op; `review:check` composto verde; o artefato no disco fecha a lane ⇒
+  briefing `CURRENT`, senão o subject não cobre a cabeça funcional); **diff
+  EXATAMENTE review-only** (qualquer outro path — funcional, docs, segundo artefato,
+  untracked extra — bloqueia ANTES do commit listando os inesperados); mensagem de
+  commit **derivada** (`docs(spec-NNNN): registra <lane> do <nó>` / `registra
+verification do <lane>`); push normal (nunca force, nunca --no-verify; hooks
+  preservados — validate roda no pre-push); push falho preserva o commit local com
+  erro claro. `changes_requested` também publica (a autorização cobre o julgamento).
+- **Modos:** `current` e `blocked` ⇒ a autorização não cria trabalho (nenhum
+  commit/push).
+
+**Bônus do dogfood (bug real de contrato):** flake de ~25% nos testes revelou que um
+SHA curto TODO-NUMÉRICO (ex.: `9433e07` em notação científica) é lido pelo YAML como
+NÚMERO, invalidando `subject_ref` (~1/38 dos SHAs). Corrigido: parser rejeita com
+mensagem orientativa ("envolva em aspas"); templates/briefing/fixtures passam a citar
+refs SEMPRE entre aspas.
+
+**Estado:** TA encerrado e `CURRENT` (review `approved` + EV1 `approved` sobre
+`a100e7d`); AR `CREATE` pronto. **Critério de falsificação da correção:** o próximo
+review pedido em uma frase termina PUBLICADO (commit exclusivo + push) sem segunda
+interação humana.
+
 ## Referências
 
 - Commit da correção: `5881a85` (fix(spec-0024): enforca coerencia da projecao de specs ativas)
