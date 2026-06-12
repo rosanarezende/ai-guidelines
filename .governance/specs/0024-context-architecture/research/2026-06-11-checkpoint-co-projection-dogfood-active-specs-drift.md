@@ -483,6 +483,48 @@ aparecer como próxima ação obrigatória, a correção falhou.
 dogfood). Diferente do PIT-0011 (descobribilidade do contrato): aqui o contrato era
 descobrível, mas MODELAVA a oferta como imposição.
 
+## Rodada 9 (2026-06-12) — entrypoint e wizard ainda podem esconder contratos
+
+**Dúvida da owner:** o ponto de entrada operacional está realmente unificado em
+`npm run guidelines`, ou o fluxo continua espalhado entre comandos e scripts que o
+agente/humano precisa descobrir manualmente?
+
+**Comandos investigados:** `guidelines` (sem args, `--help`), `guidelines -- workflow|
+handoff|review [--help]`, `handoff:check`, `review:check`, `pr-ready:check`,
+`npm run workflow` (não existe), `npm run guidelines workflow` (npm encaminha igual).
+
+**Diagnóstico (categoria B — drift pequeno de descoberta):** o roteamento JÁ era
+unificado — registry único (`CommandRegistry`), help principal DERIVADO do registry,
+wizard `workflow` é comando do registry (não superfície paralela; PIT-0005 dissolvido
+no cutover do #35), AGENTS stub ensina handoff/handoff:check/review, WORKFLOW.md e
+script-contracts cobrem os scripts. Quatro gaps reais:
+
+1. **`<comando> --help` não existia**: `handoff --help` EXECUTAVA o handoff inteiro
+   (com efeito colateral — gravava recibo de carga); `review --help` caía no fallback
+   de triage com erro enganoso ("PR inválido: --help").
+2. O help principal não apontava os CHECKS npm (`handoff:check`, `pr-ready:check`,
+   `validate`) nem explicava a decisão registry×scripts.
+3. O próprio `intent:check` flaggava `review` fora da navegação humana (warning vivo
+   desde a criação do comando).
+4. WORKFLOW.md sem `review types/policy` e `pr-ready:check` na referência rápida.
+
+**Corrigido (proporcional, sem capability nova):** interceptação central de
+`--help`/`-h` no `CommandRegistry.dispatch` (help derivado do próprio comando, exit 0,
+zero execução — vale para TODOS os comandos presentes e futuros); seção
+"FLUXO SITUADO" no help principal (retomar → frescor → review → types/policy →
+pr-ready → validate) com a decisão arquitetural EXPLÍCITA: comandos situados vivem no
+registry; checks/gates permanecem scripts npm (rodam em hooks/CI) com contrato em
+`script-contracts.yml`; Intent `pedir-review-governado` (types/policy) fecha o warning
+do intent:check; WORKFLOW.md atualizado.
+
+**Fora de escopo (consciente):** transformar checks em subcomandos do registry — a
+decisão é mantê-los como scripts (são gates de hook/CI); o help agora ENSINA onde
+procurar. Nenhuma necessidade de próximo checkpoint: não há previsão pendente de
+unificação do wizard em plan/tasks/state (o cutover já aconteceu no #35).
+
+**PIT-0011:** mesma classe (descobribilidade situada do contrato), evidência de
+refinamento — SEM nova ocorrência registrada.
+
 ## Referências
 
 - Commit da correção: `5881a85` (fix(spec-0024): enforca coerencia da projecao de specs ativas)

@@ -23,6 +23,18 @@ export const INTENT_CATALOG: readonly Intent[] = [
     actions: [{ command: "triage", label: "Triar comentários de review do PR" }],
   },
   {
+    id: "pedir-review-governado",
+    title: "Pedir um review governado",
+    actions: [
+      { command: "review", args: ["types"], label: "Ver o catálogo de tipos de review" },
+      {
+        command: "review",
+        args: ["policy"],
+        label: "Ver requirements efetivos no contexto atual (aplicável/força/estado)",
+      },
+    ],
+  },
+  {
     id: "registrar-percepcao",
     title: "Registrar uma percepção em trânsito",
     actions: [
