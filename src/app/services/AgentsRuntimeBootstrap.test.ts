@@ -42,4 +42,13 @@ describe("AgentsRuntimeBootstrap", () => {
     expect(stub).toContain("Runtime Bootstrap");
     expect(stub).not.toContain("### [CORE-01]");
   });
+
+  it("[work-33] DADO stub ENTÃO ensina o briefing governado de trabalho (work) e a autorização escopada", () => {
+    const stub = buildAgentsRuntimeStub();
+    expect(stub).toContain("governed work briefing");
+    expect(stub).toContain("ai-guidelines work");
+    expect(stub).toContain("explicit-work-request");
+    // consumidor recebe o bin publicado por default (não o script do mantenedor)
+    expect(stub).toContain("npx ai-guidelines work");
+  });
 });
