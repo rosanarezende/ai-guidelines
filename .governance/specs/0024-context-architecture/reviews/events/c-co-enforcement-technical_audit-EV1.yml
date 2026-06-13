@@ -1,0 +1,57 @@
+checkpoint: "checkpoint-co-enforcement"
+role: technical_audit
+event_id: EV1
+kind: verification
+executor:
+  platform: codex-cli
+  model: gpt-5
+decision: approved
+scope: findings
+verifies:
+  - technical_audit#F1
+  - technical_audit#F2
+  - technical_audit#F3
+subject_ref: "25b29eb..e2c98d6"
+audit_evidence:
+  coverage:
+    - src/cli/constraintsCheck.ts
+    - src/cli/constraintsCheck.test.ts
+    - src/domain/constraints/SourceAnchorValidator.ts
+    - src/domain/constraints/SourceAnchorValidator.test.ts
+    - src/infrastructure/filesystem/governedSourceRef.ts
+    - src/infrastructure/filesystem/governedSourceRef.test.ts
+    - src/cli/workBrief.ts
+    - src/cli/workBrief.test.ts
+    - src/cli/registry/commands/WorkCommand.ts
+    - src/cli/registry/commands/WorkCommand.test.ts
+    - src/infrastructure/yaml/workPolicyReader.ts
+    - src/infrastructure/yaml/workPolicyReader.test.ts
+    - .core/governance/work-policy.yml
+    - cli/constraints-check.mjs
+    - AGENTS.md
+    - WORKFLOW.md
+  scope: >
+    Revalidacao independente dos findings F1-F3 contra o functional HEAD
+    e2c98d6, cobrindo o delta 25b29eb..e2c98d6, o briefing governado guidelines
+    work, a policy de modos, a autoridade escopada, o report contract e o
+    dogfood real em await_revalidation.
+  basis: >
+    A resolucao de F1 esta implementada por duas raizes explicitas
+    (packageRoot/consumerRoot), com core carregado do pacote e overlay opcional
+    do consumidor, sem exigir .core local no consumidor. A resolucao de F2
+    rejeita source_ref absoluto, vazio, com segmento .. ou symlink para fora
+    antes da leitura do alvo externo, e resolve refs contra a raiz da propria
+    fonte. A resolucao de F3 valida a ancora estrutural por origin.kind e nivel
+    de heading canonico, rejeitando mencao em corpo, fenced code, comentario
+    HTML e duplicata ambigua. O comando real `npm run guidelines -- work
+    --authorization explicit-work-request` emitiu AWAIT_REVALIDATION para
+    e2c98d6, com F1-F3 open/fixed, proibindo novas resolutions, fechamento de
+    dispositions, CO-3.2, Ready, gate e merge; o report contract veio de
+    work-policy.yml. Testes focados passaram (6 suites, 88 testes),
+    constraints:check passou e npm pack --dry-run confirmou a distribuicao de
+    .core/governance/work-policy.yml, dist/cli/workBrief.* e WorkCommand.*.
+    Risco residual nao bloqueante: ha um byte NUL literal em
+    src/cli/constraintsCheck.ts usado como separador de chave de cache; os gates
+    executados aceitaram o arquivo, mas git diff trata esse arquivo como
+    binario, reduzindo reviewability futura.
+event_fingerprint: 1a88d432efad
