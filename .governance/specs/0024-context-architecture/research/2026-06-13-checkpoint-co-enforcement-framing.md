@@ -1,0 +1,309 @@
+# Framing — checkpoint co-enforcement (CO-3 / seq 9 / PR #42)
+
+> **Data:** 2026-06-13 · **Nó:** `co-enforcement` (seq 9, CO-3) · **PR:** #42 (Draft, stacked sobre #41) · **HEAD na investigação:** `703d72f`
+> **Status:** investigação/enquadramento — **sem implementação**. Etapa **Claude** do fluxo de checkpoint estrutural (Claude→Codex→ChatGPT→owner).
+> **Autorização:** Human Gate do #41 (`gates/c-co-projection.yml`, 2026-06-12).
+> **Escopo deste documento:** consolidar as decisões arquiteturais abertas antes de tocar código. NÃO altera `state.yml`/`tasks.md`/código funcional/body do PR.
+
+---
+
+## 0. Mandato e restrições
+
+Investigar e propor (não implementar): inventário do motor TS; mapa do substrato legacy + consumidores; modelo do grafo + placement do binding sem nova SSOT; schema mínimo de `EnforcementBinding`; quatro sub-checkpoints com critérios de saída/falsificação; 1–2 comandos mutantes para dogfood do recibo.
+
+**Inclinações cravadas pela owner (orientam, não reabrem):**
+
+- **D1.** `Constraint` **não** é entidade nova: é o **colapso canônico** de `rule | guardrail`, com a origem virando **metadado** e **compatibilidade de leitura** para artefatos antigos.
+- **D2.** `EnforcementBinding` é **dado mínimo declarado** (escolher a superfície é decisão humana). Existência da superfície, paridade com a implementação, sincronização e artefatos runtime são **projeções/verificações derivadas**.
+- **D3.** `knowledge:compile` **reutiliza e orquestra** o compilador TS existente — não cria outro motor. Investigar o destino de `build:rules` (alvo interno / alias compatível / subcomando).
+- **D4.** A migração plena do substrato legacy **pertence ao CO-3**, em **sub-checkpoint próprio** dentro do PR #42.
+- **D5.** O recibo é conectado **minimamente** no CO-3, **advisory-first**, em **1–2 comandos mutantes** escolhidos por risco. O dispatcher amplo permanece no CO-6.
+
+---
+
+## 1. Inventário factual
+
+### 1.1 Motor de regras em TypeScript (`src/`) — o alvo de reuso
+
+| Componente                                               | Entradas                                                         | Saídas                                                                        | Contrato / side effects                                                   | Testes                                                |
+| :------------------------------------------------------- | :--------------------------------------------------------------- | :---------------------------------------------------------------------------- | :------------------------------------------------------------------------ | :---------------------------------------------------- |
+| `RulesEngine` (`app/services/RulesEngine.ts`)            | `RulesCatalogSource` (porta)                                     | `RulesCatalogJson` / `BuiltCatalog` / markdown / lookups                      | **Puro**, app-layer; 4 pipelines (parse/build/projection/lookup); sem I/O | `RulesProjection.test.ts`, `RulesCompilation.test.ts` |
+| `RulesCatalogBuilder.buildRulesCatalog` (`app/services`) | `RulesMarkdownSource` + `{baseDir, generatedAt, tags?, scopes?}` | `{catalogJson, ledgerMarkdown, humanCatalogMarkdown}` + `validateBuildOutput` | Determinístico; valida ids únicos + coerência `by_scope`/`by_feature`     | `RulesCatalogBuilder.test.ts`                         |
+| `RulesRuntimeCompiler` (`app/services`)                  | `RulesCatalogJson` + `{includeAdapters, optInFeatures, lang}`    | `compileAdapterRulesByName` / `formatRuleInstruction` / `filterRulesByScope`  | **Puro**; é o **port TS do `compileRulesContent` legacy**                 | `RulesRuntimeCompiler.test.ts`                        |
+| `AgentsRuntimeBootstrap` (`app/services`)                | stub args + conteúdo AGENTS existente                            | `<AI_GUIDELINES>` stub + merge idempotente                                    | **Puro**; valida bloco único/bem-formado; **é o stub vivo** do AGENTS.md  | `AgentsRuntimeBootstrap.test.ts`                      |
+| `src/cli/buildRules.ts` (`build:rules`)                  | `repoRoot`                                                       | escreve `rules.json` + `catalog.md` + ledger                                  | **I/O** (composition root); delega ao Builder                             | `buildRules.test.ts`                                  |
+| AST: `TypeScriptRuleExtractor` (`infrastructure/ast`)    | fontes TS                                                        | regras extraídas                                                              | base do `ruleset:check` (producibilidade)                                 | vários `infrastructure/ast/*.test.ts`                 |
+
+**Achado-chave (D3):** o caminho **vivo** de compilação de regras já é TS. `pointers.mjs` (provider entrypoints) importa **dinamicamente** `dist/app/services/RulesRuntimeCompiler.js` e chama `compileAdapterRulesByName` (`cli/features/core/pointers.mjs:17-34`). Ou seja, **o `RulesRuntimeCompiler` TS é o compilador de adapter-rules de produção** — o `compileRulesContent` do monólito é cópia legada **morta**. `knowledge:compile` orquestra **estes** componentes; não há motor novo a construir.
+
+### 1.2 Substrato legacy (`cli/governance/monolith/`) + grafo exato de consumidores
+
+Contagem de importadores **não-teste** (medida no HEAD `703d72f`):
+
+| Módulo              | Importadores vivos (não-teste)                                     | Símbolo realmente consumido                               | Veredito                                                                                                                                                                                  |
+| :------------------ | :----------------------------------------------------------------- | :-------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `compiler.mjs`      | `governance/index.mjs` (barrel), `features/core/budget-report.mjs` | só `loadRulesCatalog` (em budget-report)                  | re-export do barrel é **morto** (engine.mjs só usa `agents-merge`); `compile*`/`groupUniversal*`/`buildAgentsRuntimeStub` legacy **mortos** (superados por RRC/AgentsRuntimeBootstrap TS) |
+| `rules-loader.mjs`  | barrel + `bdd.mjs` + `tdd.mjs` + `quality-gates.mjs`               | só `getOptInRuleRelativePath` (mapa de 3 entradas)        | resíduo **trivial**; `normalizeAdapterSelection`/`readRulesByName`/`readOptInRules` mortos                                                                                                |
+| `token-budget.mjs`  | `budget-report.mjs`                                                | `analyzeBudget` (+ `LIMITS`, `calculateTokH`, `analyze*`) | **único resíduo substantivo**: SEM equivalente TS (`grep` em `src/` = nada). Heurística Tok-H (`chars/3.5`) + limites por scope/payload                                                   |
+| `rules-builder.mjs` | **0** vivos (só `rules-builder.test.mjs`)                          | —                                                         | **morto** (superado por `RulesCatalogBuilder` TS)                                                                                                                                         |
+| `rules-parser.mjs`  | só `rules-builder.mjs` (que é test-only)                           | —                                                         | **morto transitivamente**                                                                                                                                                                 |
+| `diagnose.mjs`      | **0**                                                              | —                                                         | **morto**                                                                                                                                                                                 |
+
+**Consumidor de saída do token-budget:** `budget-report.mjs` → comando `check-budget` (`cli/cli/args.mjs:11` `SUPPORTED_MODES`; headless por contrato em `args.mjs:305-307`). É um modo da CLI **legacy** (`cli/`), não do registry TS.
+
+**Conclusão da migração (D4):** a "migração plena" é **menor do que o nome sugere**. O único port não-trivial é `token-budget` → TS. Os demais são deleção + re-fiação de 3 features editoriais (mapa de paths) + remoção do barrel. Isso torna CO-3.3 tratável e atômico.
+
+### 1.3 Modelo do grafo de conhecimento — onde o binding se ancora (D2)
+
+- **`KnowledgeGraph`** (`app/projections/KnowledgeGraph.ts`): **read-model puro**, recomputa-se das fontes. Nós = `artifact` (com `stage`) | `falsification`. **`EdgeRelation = "graduatedTo" | "falsifies" | "constrains" | "crystallizedAs"`**. Aresta `to` pode ser `KnowledgeRef` **ou** `GovernedRef`.
+- **A aresta `constrains` JÁ EXISTE** — hoje sai de uma `Falsification` para um `GovernedRef` (`KnowledgeGraph.ts:74`). Semântica atual: "esta falsificação restringe esta superfície governada".
+- **`GovernedRef`** (`domain/knowledge/GovernedRef.ts`): união discriminada por `space` (`knowledge | work`), **explicitamente extensível a "futuros espaços governados, sem `DecisionSurface` persistida (INV-4/ADR 0026): o alvo é sempre uma ref existente/derivável"**. ← Este é o gancho exato para o binding sem nova entidade.
+- **`KnowledgeStage`** (`domain/knowledge/KnowledgeStage.ts`): `insight→decision→rule|guardrail→doctrine`. O comentário do próprio arquivo já declara: **"`rule` e `guardrail` são o mesmo nível de cristalização (norma enforçada); diferem só na origem (`guardrail` = dogfood/interna)"** e `stageOrder` empata os dois em 2. ← D1 já está meio-feito na doutrina; falta executar o colapso.
+- **`knowledge-backfill.yml`** (validado por `KnowledgeBackfill.ts` + `co-knowledge:inventory`): declara `rule`/`guardrail`/`decision`/`doctrine`/`insight`/`falsification` como entradas `KB-*` com `ref`, `priority`, `scope: runtime_bootstrap_p0`. **É plano governado DA SPEC 0024, não SSOT runtime universal** (cabeçalho do próprio arquivo). Invariante relevante: **≥2 exemplos por `kind`** (`KB_KIND_UNDERREPRESENTED`).
+- **Origem já é derivável do ID:** `GG-*` = guardrail/interno; `CORE-*`/`GR-*`/`OPT-*`/`ADP-*` = rule/externo. O prefixo do ID **já codifica a origem** — "mover origem para metadado" pode ser "derivar do namespace do ID", sem campo novo.
+
+**Heterogeneidade de fonte (risco de D2):** rules vivem em `.core/rules/**` (com front-matter compilável); **guardrails NÃO** — `GG-0001` vive em `.core/process/governance-foundation.md` (cf. `knowledge-backfill.yml` KB-0007). Logo, "binding no front-matter da fonte da constraint" não cobre guardrails uniformemente. Isto é o nó górdio do placement (ver §3/§6).
+
+### 1.4 Superfícies de enforcement (`script-contracts.yml`) + recibo de carga
+
+- **`.core/governance/script-contracts.yml`** é a **SSOT operacional** de scripts/hooks/workflows/templates. Cada entrada tem `name`, `command`, `category`, **`mutates: true|false`**, `consumers: [human|script|hook|lifecycle]`, `description`. **Já é o registro de superfícies de enforcement** — e o campo `mutates` resolve D5 de brinde (filtro objetivo de comandos mutantes).
+- **Recibo** (`src/cli/handoffReceipt.ts`, CO-4): `createLoadReceipt`/`validateLoadReceipt` (puros) + `assertFreshHandoffReceipt` (lança) + I/O em `.git/ai-guidelines/handoff-load.json` (worktree-safe, fora do versionamento). O próprio código (`handoffReceipt.ts:176-181`) declara: _"o wiring amplo é evolução de enforcement/CO-6 — deliberadamente NÃO conectado agora"_. `assertFreshHandoffReceipt` **lança** (hard) — **incompatível com advisory-first**; CO-3.4 precisa de um caminho que **avisa, não interrompe** (espelhando `handoff:check`).
+
+---
+
+## 2. Opções consideradas
+
+### D1 — rótulo do colapso `rule|guardrail` → `Constraint`
+
+- **(1a) Estágio único `constraint`** substituindo `rule`/`guardrail` no enum; aceitar `rule`/`guardrail` como **alias de leitura**; origem **derivada do prefixo do ID** (GG=interno).
+- **(1b) Manter `rule` como guarda-chuva** e tratar `guardrail` como alias/metadado (sem introduzir o termo `constraint` no código).
+- **(1c) Campo `origin` explícito** no artefato, além do colapso de estágio.
+
+### D2 — casa e direção do binding (sem nova SSOT)
+
+- **(2a) Front-matter da constraint** (`.core/rules/**`): cada regra ganha `enforced_by`/`surface_class` opcional, compilado ao `rules.json`. **Problema:** não cobre guardrails (fonte heterogênea).
+- **(2b) Lado-superfície em `script-contracts.yml`**: cada superfície lista `enforces: [<constraint-ref>...]`. Direção invertida (superfície→constraint), mas usa SSOT existente.
+- **(2c) Aresta derivada `enforces` no grafo + declaração mínima por-ID** numa seção governada existente, com alvo = **novo `GovernedRef` space `surface`** (id = nome da entrada em `script-contracts.yml`, ref existente/derivável). A declaração NÃO cria arquivo novo; a aresta e a verificação são derivadas.
+- **(2d) Sidecar novo** `.core/governance/enforcement-bindings.yml`. **Rejeitada de saída:** é exatamente a "nova SSOT" que a owner vetou.
+
+### D3 — destino de `build:rules`
+
+- **(3a) Alias compatível:** `build:rules` permanece (hooks/`build:all`/script-contracts dependem dele); `knowledge:compile` é superset que o invoca internamente.
+- **(3b) Subcomando:** `knowledge compile --rules-only`.
+- **(3c) Alvo interno:** `build:rules` vira passo privado de `knowledge:compile`.
+
+### D5 — comandos para dogfood do recibo
+
+- Candidatos `mutates: true` de maior risco em sessão retomada: `workflow publish-state` (escreve `state.yml`/`active.yml` — **a exata superfície que ficou stale no PIT-0011**), `review:publish` (sela + **faz push** — outward-facing), `pr-body:update` (muta PR), `merge`/`integration` (terminal).
+
+---
+
+## 3. Proposta recomendada
+
+### 3.1 Constraint (D1) → **opção (1a) + origem derivada do ID**
+
+Colapsar `rule|guardrail` num único estágio **`constraint`**; `stageOrder` colapsa 2; **`rule`/`guardrail` aceitos na leitura** (alias) para artefatos antigos; **origem derivada do prefixo do ID** (`GG-*`⇒interno) — sem campo novo (anti-taxonomia, `plan.md §123`). Superfícies tocadas: `KnowledgeStage` (+`stageOrder`/`KNOWLEDGE_STAGES`), `KnowledgeRef.ID_PATTERN`, `typedArtifacts.ruleArtifact`, `KnowledgeBackfill.KNOWLEDGE_BACKFILL_KINDS` (cuidar do invariante ≥2-por-kind), `KnowledgeStage.test.ts`. **Read-compat é requisito de saída.**
+
+### 3.2 EnforcementBinding (D2) → **opção (2c): aresta `enforces` derivada + declaração mínima + `GovernedRef` space `surface`**
+
+- **Schema mínimo declarado** (o que o humano escreve — apenas o que NÃO é derivável):
+
+  ```
+  enforces:                      # bloco opcional na declaração da constraint
+    surface: <script-contract-name | workflow-id | hook-id>   # ref EXISTENTE
+    surface_class: event | state                              # PIT-0008
+  ```
+
+  Apenas dois campos: **qual** superfície e **classe** evento/estado. Tudo o mais é derivado.
+
+- **`GovernedRef` ganha `space: "surface"`** (`{ space: "surface"; id: <surface-name> }`), `id` = nome de uma entrada existente em `script-contracts.yml` — honra o contrato "ref existente/derivável, sem entidade persistida".
+- **Aresta `enforces`** adicionada a `EdgeRelation`; derivada por `knowledge:compile` (Constraint → `GovernedRef{surface}`).
+- **Derivado/verificado (não declarado):** (i) a superfície existe em `script-contracts.yml`; (ii) paridade `mutates`/`category` coerente com `surface_class` (PIT-0008: `event`⇏superfície de estado contínuo); (iii) sincronização. Tudo **advisory-first**, espelhando `co-knowledge:check`.
+- **Casa da declaração:** recomendo **começar pelas rules** (front-matter `.core/rules/**`, compilado pelo Builder existente) e **deferir guardrails** (fonte heterogênea — `governance-foundation.md`) como **pergunta aberta Q3**, para não inflar o sub-checkpoint. Isso entrega ≥2 bindings reais (dogfood) sem resolver a heterogeneidade de fonte agora.
+
+### 3.3 knowledge:compile (D3) → **orquestrador + alias compatível (3a)**
+
+`knowledge:compile` = composition root que **orquestra peças existentes**: (1) `buildRulesCatalog` (rules.json), (2) `KnowledgeGraph.from(...)` agora com arestas `enforces`, (3) verificação derivada do binding (§3.2). **`build:rules` permanece como alias compatível** (hooks + `build:all` + `script-contracts.yml` o referenciam — renomear quebraria o contrato operacional). O **port TS de `token-budget`** é dobrado na migração legacy (§3.4), não aqui.
+
+### 3.4 Recibo (D5) → **`workflow publish-state` (#1) + `review:publish` (#2), advisory-first**
+
+`publish-state` é o alvo mais justificado pela própria dor da spec (drift de `active.yml` no PIT-0011 ocorreu numa transição de nó com retomada stale). `review:publish` adiciona cobertura outward-facing (push). **Advisory-first exige um caminho não-lançante** (ex.: `checkHandoffReceipt(...)` que retorna aviso + comando de recarga) — **não** usar `assertFreshHandoffReceipt` (que lança) no wiring. O dispatcher amplo fica no CO-6.
+
+---
+
+## 4. Riscos
+
+| #   | Risco                                                                                    | Mitigação                                                                                                                  |
+| :-- | :--------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------- |
+| R1  | Colapso D1 trinca o invariante `≥2-por-kind` do backfill (`guardrail` deixa de ser kind) | Read-compat + remapear `kind` no backfill no mesmo commit; teste de regressão com artefato `guardrail` legado              |
+| R2  | **Placement do binding** vira nova SSOT ou acopla direção errada (risco dominante)       | Aresta **derivada** + declaração mínima em fonte existente + `GovernedRef{surface}` (ref existente); sidecar (2d) proibido |
+| R3  | Heterogeneidade de fonte (guardrails fora de `.core/rules/**`)                           | Escopar CO-3.2 a **rules primeiro**; guardrails = Q3 (decisão explícita), não improviso                                    |
+| R4  | Port TS de `token-budget` desvia warnings (Tok-H/limites)                                | **Teste de paridade** TS↔mjs sobre o catálogo atual antes de deletar o monólito                                            |
+| R5  | Deleção do monólito quebra `check-budget`/features editoriais silenciosamente            | Critério de saída `grep monolith` = 0 consumidores vivos + `test:smoke` (prova consumidor intacto)                         |
+| R6  | Recibo lançante quebra CI/automação que roda comando mutante sem retomada                | **Advisory-first** (avisa, não interrompe); limite honesto: aviso pode ser ignorado (PIT-0011)                             |
+| R7  | Escopo do CO-3 é grande (5 frentes, 4 slots)                                             | Disciplina de 4 sub-checkpoints, cada um verde isolado, **Gate único ao fim** (modo unit)                                  |
+
+---
+
+## 5. Decisões suficientemente fechadas
+
+> Convergência owner (2026-06-13). NÃO reabrir o conceitual; o **formato/schema exato** segue para revisão adversarial (§6).
+
+### D1 — Constraint
+
+- `constraint` é o **conceito canônico** do estágio hoje representado por `rule | guardrail`.
+- **Não** criar `constraint` como **sexto estágio** ao lado de ambos — é o colapso dos dois.
+- Leitores antigos **continuam aceitando** `rule` e `guardrail` (read-compat).
+- O **modelo normalizado expõe `constraint`**.
+- A **origem não deve depender silenciosamente apenas do prefixo do ID** — precisa de metadado explícito (formato a refinar com o schema; conceito fechado).
+
+### D2 — Natureza do EnforcementBinding
+
+- O binding é **dado mínimo declarado**.
+- **Escolher a superfície é decisão humana.**
+- **Existência da superfície, paridade, sincronização e implementação são verificações derivadas.**
+- **Não** criar sidecar runtime como **nova SSOT**.
+- O **schema exato** ainda será revisado pelo Codex (Q1).
+
+### D3 — knowledge:compile
+
+- É **orquestrador** do compilador TS existente; **não** cria motor paralelo.
+- Deve compilar **conhecimento, constraints, bindings e projeções**.
+- `build:rules` **permanece temporariamente** como alias/entrada compatível para hooks e automações existentes.
+- Entrypoint humano desejado: **`npm run guidelines -- knowledge compile`**, se compatível com o registry.
+
+### D4 — Fatiamento
+
+Um PR #42, **quatro sub-checkpoints**, um Human Gate final (modo unit):
+
+```text
+CO-3.1 — Constraint + EnforcementBinding
+CO-3.2 — knowledge:compile + manifesto/paridade
+CO-3.3 — migração e remoção do substrato legacy
+CO-3.4 — dogfood do enforcement e recibo
+```
+
+### D5 — Primeiro dogfood do recibo
+
+- Superfícies selecionadas: **`workflow publish-state`** e **`review:publish`**.
+- Motivos: são **mutantes**, **participaram de dores observadas**, operar com **contexto stale** tem impacto real, e têm **fronteira de evento clara**.
+- Modo inicial: **advisory-first** — **não** usar diretamente o guard lançante como comportamento inicial.
+
+---
+
+## 6. Questões técnicas ainda abertas para revisão adversarial
+
+> Pacote reduzido a **três** questões para o Codex (lente técnica/implementabilidade) → ChatGPT (lente arquitetural) → owner (decisão).
+
+### Q1 — Schema e placement do binding
+
+Avaliar o **menor contrato** que represente honestamente:
+
+```text
+qual constraint
+qual superfície
+classe event | state
+qual mecanismo/check executa
+força advisory | required
+```
+
+- Dois campos (`surface`, `surface_class`) **bastam**, ou falta representar `enforcement`/handler e `mode`?
+- `enforcement`/handler precisa ser **explícito** (ou é derivável de `script-contracts.yml`)?
+- `mode` (advisory|required) pertence ao **binding** ou à **policy**?
+- Como usar `GovernedRef` + aresta do grafo **sem duplicar** `script-contracts.yml`?
+- Qual arquivo é a **fonte canônica** da declaração?
+- Como **impedir binding para superfície inexistente**?
+
+### Q2 — Guardrails como fonte executável
+
+O checkpoint precisa absorver **rules e guardrails**. Investigar:
+
+- Como **normalizar** `.core/rules/**` (estruturado) e guardrails hoje documentados em `governance-foundation.md` (prosa doutrinária).
+- Se a **fonte atual de guardrails é estruturada o bastante** para ser compilável.
+- Como **evitar um sidecar concorrente**.
+- Se é necessário **promover uma representação machine-readable já governada** dos guardrails.
+- Como **preservar o texto doutrinário** sem usá-lo como parser frágil.
+- Como **consumidores** definem constraints próprias.
+
+### Q3 — Migração do legado
+
+Definir **ordem segura** para:
+
+- Remover partes mortas de `compiler.mjs`.
+- Substituir o mapa trivial de `rules-loader.mjs`.
+- Portar `token-budget.mjs` para TS.
+- Reconciliar `budget-report.mjs` / `check-budget`.
+- Reconectar `bdd`/`tdd`/`quality-gates`.
+- **Provar paridade** de warnings, tokens, paths, packaging e cross-platform.
+- **Apagar o monólito apenas quando não houver consumidor vivo.**
+
+---
+
+## 7. Plano dos sub-checkpoints (dentro do PR #42; Gate único ao fim, modo unit)
+
+> Fronteiras conforme **D4 (fechado)**. Ordem por dependência: modelo+binding → compilador+manifesto → migração legacy → enforcement+recibo. Cada sub-checkpoint: atômico, `validate` verde, sem merge isolado.
+
+### CO-3.1 — Constraint + EnforcementBinding (modelo + declaração)
+
+- **Entrega:** estágio único `constraint` (alias de leitura `rule`/`guardrail`; **origem como metadado normalizado**, não só prefixo de ID); `EnforcementBinding` como **schema mínimo declarado** + alvo `GovernedRef{space:"surface"}` (ref existente) + aresta `enforces` no grafo; **≥2 bindings reais** de rules declarados (dogfood). Superfícies tocadas: `KnowledgeStage`/`KnowledgeRef`/`typedArtifacts`/`KNOWLEDGE_BACKFILL_KINDS`/`GovernedRef`/`KnowledgeGraph` + testes.
+- **Saída:** grafo recompõe do backfill+falsifications atuais; artefatos legados `rule`/`guardrail` **carregam como constraint**; modelo normalizado **expõe `constraint`**; **nenhum arquivo SSOT novo**; `co-knowledge:*` + `validate` verdes.
+- **Falsificação:** fixture com artefato estágio `guardrail` (legado) carrega e grafa como constraint (remover o alias **quebra**); binding declarado para superfície **inexistente** é **detectável**.
+
+### CO-3.2 — knowledge:compile + manifesto/paridade
+
+- **Entrega:** comando `knowledge:compile` (entrypoint humano **`npm run guidelines -- knowledge compile`**, se compatível com o registry) orquestrando `buildRulesCatalog` + `KnowledgeGraph` (com `enforces`) → **manifesto compilado** (conhecimento + constraints + bindings + projeções) + **verificação de paridade derivada** (existência da superfície / coerência `event|state` / sincronização), **advisory-first**; `build:rules` permanece como **alias compatível**.
+- **Saída:** **zero motor novo** (reusa o motor TS); manifesto **determinístico**; paridade verde; `build:rules`/hooks intactos.
+- **Falsificação:** binding `surface_class: event` apontando superfície de **estado contínuo** ⇒ advisory sinaliza (PIT-0008); manifesto **não-determinístico** (duas execuções divergem) ⇒ falha.
+
+### CO-3.3 — Migração e remoção do substrato legacy (sub-checkpoint próprio — D4)
+
+- **Entrega:** port TS de `token-budget` (`analyzeBudget`/`LIMITS`/Tok-H) + reconectar `budget-report`/`check-budget`; port de `getOptInRuleRelativePath` + reconectar `bdd`/`tdd`/`quality-gates`; substituir `loadRulesCatalog` por leitura TS; **deletar** `monolith/{compiler,rules-loader,token-budget,rules-builder,rules-parser,diagnose}.mjs` + barrel `governance/index.mjs` (re-exports mortos) + testes legados.
+- **Saída:** `grep monolith` = **0** consumidores vivos; `check-budget` funciona via TS; **teste de paridade** (warnings/tokens/paths/packaging/cross-platform) verde; `validate` + `test:smoke` verdes.
+- **Falsificação:** remover o monólito **sem** quebrar `check-budget`/features editoriais (smoke prova consumidor intacto); o port de budget reproduz os **mesmos warnings** do catálogo atual.
+
+### CO-3.4 — Dogfood do enforcement e recibo (advisory-first — D5)
+
+- **Entrega:** caminho **não-lançante** de verificação do recibo conectado em `workflow publish-state` (+ `review:publish`), emitindo aviso + comando de recarga quando stale; **sem** alterar comportamento quando fresh; dispatcher amplo permanece no CO-6.
+- **Saída:** comando **avisa** em retomada stale; **silencioso** quando fresh; `assertFreshHandoffReceipt` (lançante) **não** é usado no wiring.
+- **Falsificação:** rodar `publish-state` com recibo de HEAD divergente **emite** o advisory de recarga; com recibo fresh, **silêncio**.
+
+---
+
+## 8. Apêndice factual para revisão independente
+
+> Cada linha aponta o **arquivo/consumidor** que a sustenta (medido no HEAD `703d72f`). `status`: vivo | trivial | morto | sem-equivalente-TS.
+
+### Motor TS (alvo de reuso)
+
+- **`RulesEngine`** — `src/app/services/RulesEngine.ts`. **entrada:** `RulesCatalogSource` (porta). **saída:** `RulesCatalogJson`/`BuiltCatalog`/markdown/lookups. **efeito:** nenhum (puro, app-layer; 4 pipelines parse/build/projection/lookup). **consumidores vivos:** núcleo de pipeline (sem importador de produção direto encontrado em `src/` além de testes/`RulesProjection`). **testes:** `RulesProjection.test.ts`, `RulesCompilation.test.ts`. **status:** vivo (núcleo).
+- **`RulesCatalogBuilder.buildRulesCatalog`** — `src/app/services/RulesCatalogBuilder.ts`. **entrada:** `RulesMarkdownSource` + `{baseDir, generatedAt?, tags?, scopes?}`. **saída:** `{catalogJson, ledgerMarkdown, humanCatalogMarkdown}` + `validateBuildOutput`. **efeito:** nenhum (puro). **consumidores vivos:** `src/cli/buildRules.ts` (`build:rules`). **testes:** `RulesCatalogBuilder.test.ts`. **status:** vivo.
+- **`RulesRuntimeCompiler`** — `src/app/services/RulesRuntimeCompiler.ts`. **entrada:** `RulesCatalogJson` + `{includeAdapters, optInFeatures, lang}`. **saída:** `compileAdapterRulesByName`/`formatRuleInstruction`/`filterRulesByScope`. **efeito:** nenhum (puro). **consumidores vivos:** `cli/features/core/pointers.mjs:17-34` (import dinâmico de `dist/app/services/RulesRuntimeCompiler.js`). **testes:** `RulesRuntimeCompiler.test.ts`. **status:** vivo (compilador de adapter-rules de produção).
+- **`KnowledgeGraph`** — `src/app/projections/KnowledgeGraph.ts`. **entrada:** `KnowledgeArtifact[]` + `Falsification[]`. **saída:** nós/arestas tipadas; `EdgeRelation = graduatedTo|falsifies|constrains|crystallizedAs`. **efeito:** nenhum (read-model puro, recomputável). **consumidores vivos:** projeções/checks de conhecimento + testes. **testes:** `KnowledgeGraph.test.ts`. **status:** vivo (gancho do binding: aresta `constrains` + `GovernedRef`).
+- **`script-contracts.yml`** — `.core/governance/script-contracts.yml`. **entrada:** declaração SSOT de scripts/hooks/workflows/templates (`name`/`command`/`category`/**`mutates`**/`consumers`). **saída:** projeta `package.json`/docs/hooks. **efeito:** SSOT (fonte). **consumidores vivos:** `script-contracts:sync`/`check`. **status:** vivo (registro de superfícies de enforcement; `mutates` filtra comandos do recibo).
+
+### Substrato legacy (`cli/governance/monolith/`)
+
+- **`compiler.mjs`** — **saída:** `loadRulesCatalog` (JSON.parse) + `compile*`/`groupUniversal*`/`buildAgentsRuntimeStub` (legacy). **consumidores vivos:** `budget-report.mjs` (**só** `loadRulesCatalog`); `governance/index.mjs` (barrel, re-export **não consumido** — `engine.mjs` usa só `agents-merge`). **testes:** `compiler.test.mjs`. **status:** parcialmente morto (só `loadRulesCatalog` vivo; trivial).
+- **`rules-loader.mjs`** — **saída:** `getOptInRuleRelativePath` (mapa de 3 entradas) + `normalizeAdapterSelection`/`readRulesByName`/`readOptInRules`. **consumidores vivos:** `bdd.mjs`/`tdd.mjs`/`quality-gates.mjs` (**só** `getOptInRuleRelativePath`); barrel. **testes:** `rules-loader.test.mjs`. **status:** trivial (resíduo = mapa de paths; resto morto).
+- **`token-budget.mjs`** — **entrada:** catálogo. **saída:** `analyzeBudget`/`analyzeScopeBudgets`/`analyzeAgentsMdBudget`/`analyzePerAdapterBudgets`/`calculateTokH`/`LIMITS` (Tok-H = `chars/3.5`). **efeito:** nenhum (puro). **consumidores vivos:** `budget-report.mjs`. **testes:** `token-budget.test.mjs`. **status:** **sem-equivalente-TS** (único port substantivo).
+- **`rules-builder.mjs`** — **consumidores vivos:** 0 (só `rules-builder.test.mjs`). **status:** morto (superado por `RulesCatalogBuilder`).
+- **`rules-parser.mjs`** — **consumidores vivos:** só `rules-builder.mjs` (test-only). **status:** morto transitivamente.
+- **`diagnose.mjs`** — **consumidores vivos:** 0. **status:** morto.
+
+### Consumidores do legacy
+
+- **`budget-report.mjs`** — `cli/features/core/budget-report.mjs`. **entrada:** `rulesJsonPath` (default `.core/rules/_meta/rules.json`). **saída:** relatório no stdout. **efeito:** `process.exitCode=1` em erro de leitura. **importa:** `loadRulesCatalog` + `analyzeBudget` do monólito. **status:** vivo (consumidor do token-budget).
+- **`check-budget`** — `cli/cli/args.mjs:11` (`SUPPORTED_MODES`), headless por contrato (`args.mjs:305-307`). **saída:** delega a `runBudgetReport`. **status:** vivo (modo da CLI legacy `cli/`, não do registry TS).
+- **`bdd`/`tdd`/`quality-gates`** — `cli/features/opt-in/editorial/{bdd,tdd,quality-gates}.mjs`. **entrada:** `targetDir`/`options`. **saída:** sync de `.ai-guidelines/rules/<feature>.md`. **efeito:** escreve/`unlink` arquivos no target (I/O). **importa:** `getOptInRuleRelativePath`. **status:** vivo (consumidores do rules-loader).
+
+### Recibo + superfícies de dogfood
+
+- **`handoffReceipt.ts`** — `src/cli/handoffReceipt.ts`. **entrada:** `HandoffFacts` + selo (puros) / texto persistido. **saída:** `HandoffLoadReceipt`/`ReceiptStatus`. **efeito:** I/O em `.git/ai-guidelines/handoff-load.json` (worktree-safe, fora do versionamento). **nota:** `assertFreshHandoffReceipt` **lança** (`:181-193`); o próprio arquivo (`:176-181`) declara wiring amplo deferido p/ CO-6. **testes:** `handoffReceipt.test.ts`. **status:** vivo (guard pronto, não conectado).
+- **`workflow publish-state`** — `src/cli/registry/commands/WorkflowCommand.ts:35-63` → `workflow.ts`/`PublishState.ts`. **efeito:** projeta/escreve estado da spec (`state.yml`/`active.yml`). **status:** vivo; **`mutates: true`**; alvo #1 do recibo (superfície que ficou stale no PIT-0011).
+- **`review:publish`** — `cli/review-publish.mjs` (script `review:publish`). **efeito:** sela + publica artefato de review + **push** (outward-facing). **status:** vivo; **`mutates: true`**; alvo #2 do recibo.
+
+---
+
+## 9. Roteamento
+
+Este é o enquadramento **Claude**. Próximo: rotear as **três questões abertas (§6, Q1–Q3)** a **Codex** (lente técnica/implementabilidade) → **ChatGPT** (lente arquitetural) → **owner** (decisão), conforme o fluxo de checkpoint estrutural. Só então o primeiro sub-checkpoint (CO-3.1) entra em implementação. Nada em `state.yml`/`tasks.md`/código/PR foi alterado nesta sessão.
