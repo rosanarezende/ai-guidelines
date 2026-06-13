@@ -401,3 +401,31 @@ Corrija os findings atuais.
 **7. Limite.** O briefing PROJETA o contrato; **não executa** trabalho (zero LLM no runtime — ADR 0018): não edita arquivos, não commita, não faz push, não aplica patch. O agente continua sendo canal; o humano decide.
 
 **8. Dogfood do próprio estado.** Com F1–F3 `open` mas com resolutions `fixed` (refs válidas), `guidelines work` deve inferir **`await_revalidation`** (e NÃO `resolve_findings` como o handoff cru ainda deriva) — próxima ação = revalidação independente por reviewer/owner; nenhuma nova resolution para F1–F3; CO-3.2 proibido. É a distinção que o handoff não fazia (ele retorna `resolve-findings` por `openFindings>0`, sem olhar resolutions).
+
+---
+
+## Dogfood operacional — publicação prospectiva de verification
+
+> **Data:** 2026-06-13 · **Contexto:** revalidação independente do CO-3.1 (EV1) pelo Codex.
+
+**1. Sintoma.** O EV1 (verification approved dos findings F1–F3) era um artefato VÁLIDO e SELADO, mas **não pôde ser publicado pelo comando canônico** `review:publish`. O Codex teve de recorrer a commit/push manual seguro.
+
+**2. Causa — circularidade.** A derivação de modo do `reviewBrief` mantinha a lane em `VERIFICATION` enquanto houvesse finding open com resolution — e a disposition de F1–F3 permanece `open` por contrato (só reviewer/owner fecha). `review:publish` exigia lane `CURRENT` antes do commit. Logo:
+
+```text
+o evento precisa estar publicado para a lane virar CURRENT
+↓
+review:publish exige CURRENT
+↓
+o evento que TORNARIA a lane CURRENT não pode ser publicado
+```
+
+**3. git HEAD × functional HEAD.** O EV1 é um commit **review-only** (vive em `<spec>/reviews/`): ele avança o git HEAD mas NÃO o functional HEAD (último commit fora de `reviews/`). O subject auditável é o functional HEAD — por isso o commit do próprio evento não pode tornar a lane stale.
+
+**4. Correção — avaliação prospectiva.** (a) Findings já REVALIDADOS por um evento que cobre o functional HEAD não mantêm a lane em `verification` (o ledger append-only que cobre o HEAD já a torna `current`). (b) `review:publish` ganhou `evaluateProspectiveReviewPublication`: avalia o estado PROSPECTIVO (o candidato já em disco fecha a lane como `current`?) + diff review-only + branch/path/checkpoint/role canônicos + `review:check`, sem exigir o evento commitado e sem alterar seu fingerprint.
+
+**5. Resultado do dogfood.** Fixture bare-remote prova o ciclo completo `VERIFICATION (findings open+resolution) → seal → review:publish → commit exclusivo → push → CURRENT`, com o functional HEAD inalterado pelo commit review-only.
+
+**6. Limites preservados.** fail-closed sem autorização; GitHub forbidden-by-default (nenhum comentário remoto); push normal (nunca `--force`/`--no-verify`); o review original e o EV1 permanecem intactos; dispositions seguem `open` (fechamento é do reviewer/owner); nenhuma resolution nova para F1–F3.
+
+**7. PIT-0011 (ocorrência distinta).** O contrato era DESCOBERTO (`review:publish` canônico) e o artefato PRODUZÍVEL (EV1 selado), mas a **automação de publicação não conseguia concluir o próprio fluxo canônico** (pré-condição circular). É a evolução da classe ("descoberto ≠ executável") para "produzível ≠ publicável pela ferramenta canônica". Registrado em PIT-0011; não promovido.
