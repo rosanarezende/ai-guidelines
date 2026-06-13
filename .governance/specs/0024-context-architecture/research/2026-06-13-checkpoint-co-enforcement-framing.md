@@ -375,3 +375,29 @@ Todos rejeitados **deterministicamente**. Cobertura: 68 testes focados (schema/s
 ### Limite honesto
 
 A **classe observável** de `npm-script` não é derivável de `script-contracts.yml` (`mutates`/`category` não a determinam): a classe declarada é validada apenas contra o mecanismo, não contra a superfície (limitação declarada, sem inventar certeza). Já `registry-command` deriva `event` da natureza de invocação — daí a incompatibilidade da falsificação #6.
+
+---
+
+## Dogfood operacional — briefing de implementação ainda reconstruído manualmente
+
+> **Data:** 2026-06-13 · **Contexto:** sessão de correção do Technical Audit (F1–F3) do CO-3.1.
+
+**1. Contexto.** Para corrigir F1–F3 o repositório já projetava a RETOMADA (`guidelines handoff`) e o contrato de REVIEW (`guidelines review <tipo>`). Mesmo assim, a **execução do trabalho funcional** dependeu de um mega-prompt humano.
+
+**2. Pedido humano que deveria bastar.**
+
+```text
+Corrija os findings atuais.
+```
+
+**3. Informação repetida no mega-prompt (toda derivável do repo).** branch, PR, checkpoint e HEAD esperados; review e findings; ações permitidas; ações proibidas; regras de autoridade; necessidade de resolutions; comandos de validação; política de commit/push; critério de parada; formato detalhado da resposta final.
+
+**4. Hipótese falsificada.** `handoff + review briefing + policy` **não** tornam automaticamente o contrato de **implementação e de entrega do relatório** descobrível. O contrato de review já era descobrível; o de TRABALHO (escopo/autoridade/validações/parada/relatório) ainda vivia no prompt humano. (PIT-0011, 3ª classe de ocorrência — agora sobre o ato de IMPLEMENTAR/ENTREGAR, não retomar/revisar.)
+
+**5. Impacto.** custo de contexto (mega-prompt a cada sessão); risco de autoridade excessiva (agente assume permissões não concedidas); comandos/validações esquecidos; relatórios finais inconsistentes entre sessões.
+
+**6. Decisão.** Criar `guidelines work` — briefing GOVERNADO de trabalho, sibling do `review` brief: `contrato permanente do repositório (work-policy.yml) + estado situado derivado (mesmo snapshot do handoff) + pedido humano curto → briefing completo`. Modo inferido por precedência determinística (`blocked → resolve_findings → await_revalidation → implement_checkpoint → prepare_close → current`), reusando `deriveNextAction` + consolidação de findings/resolutions; report contract por modo na fonte governada (NÃO hardcoded em prompt nem em TS). Autorização capability-scoped derivada do pedido explícito (`--authorization explicit-work-request`).
+
+**7. Limite.** O briefing PROJETA o contrato; **não executa** trabalho (zero LLM no runtime — ADR 0018): não edita arquivos, não commita, não faz push, não aplica patch. O agente continua sendo canal; o humano decide.
+
+**8. Dogfood do próprio estado.** Com F1–F3 `open` mas com resolutions `fixed` (refs válidas), `guidelines work` deve inferir **`await_revalidation`** (e NÃO `resolve_findings` como o handoff cru ainda deriva) — próxima ação = revalidação independente por reviewer/owner; nenhuma nova resolution para F1–F3; CO-3.2 proibido. É a distinção que o handoff não fazia (ele retorna `resolve-findings` por `openFindings>0`, sem olhar resolutions).
