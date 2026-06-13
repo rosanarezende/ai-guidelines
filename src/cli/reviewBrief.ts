@@ -396,15 +396,32 @@ export function deriveReviewBrief(input: ReviewBriefInput): ReviewBrief {
         f.disposition === "open" &&
         resolutionLines.some((line) => line.startsWith(`${role}#${f.id} `))
     );
+    // Findings já REVALIDADOS por um evento que cobre o HEAD funcional atual NÃO
+    // mantêm a lane em `verification` — senão um EV de verification jamais fecha
+    // a própria lane (a disposition `open` permanece; só reviewer/owner fecha) e
+    // `review:publish` (que exige `current`) entra em circularidade: o evento
+    // precisa estar publicado para a lane virar current, mas publish exige
+    // current. O ledger append-only que cobre o HEAD JÁ torna a lane current.
+    const verifiedAtHead = new Set<string>();
+    for (const e of roleEvents) {
+      if (e.subjectRef && head && sameSha(refHead(e.subjectRef), head)) {
+        for (const v of e.verifies) verifiedAtHead.add(v);
+      }
+    }
+    const openNeedingVerification = openWithResolution.filter(
+      (f) => !verifiedAtHead.has(`${role}#${f.id}`)
+    );
     if (
       subjectRef &&
       head &&
       sameSha(refHead(subjectRef), head) &&
-      openWithResolution.length === 0
+      openNeedingVerification.length === 0
     ) {
       mode = "current";
       modeBasis.push(
-        `review existente (${existingReview.file}) auditou subject_ref ${subjectRef}, cuja cabeça coincide com o HEAD atual ${head} — nova revisão seria duplicada.`
+        verifiedAtHead.size > 0 && openWithResolution.length > 0
+          ? `review existente (${existingReview.file}) com finding(s) open já REVALIDADOS por evento cobrindo o HEAD ${head} (subject_ref ${subjectRef}); o FECHAMENTO da disposition é do reviewer/owner — a lane está current.`
+          : `review existente (${existingReview.file}) auditou subject_ref ${subjectRef}, cuja cabeça coincide com o HEAD atual ${head} — nova revisão seria duplicada.`
       );
     } else {
       mode = "verification";
@@ -420,16 +437,16 @@ export function deriveReviewBrief(input: ReviewBriefInput): ReviewBrief {
           `review existente auditou ${subjectRef}; implementação avançou até ${head ?? "?"} — revalidar o delta.`
         );
       }
-      if (openWithResolution.length > 0) {
+      if (openNeedingVerification.length > 0) {
         modeBasis.push(
-          `finding(s) open com resolution posterior (${openWithResolution.map((f) => f.id).join(", ")}) — revalide as evidências; o FECHAMENTO (disposition) é autoridade do reviewer/owner, não do implementador.`
+          `finding(s) open com resolution posterior (${openNeedingVerification.map((f) => f.id).join(", ")}) — revalide as evidências; o FECHAMENTO (disposition) é autoridade do reviewer/owner, não do implementador.`
         );
       }
       // scope (rodada 6): findings = revalidar findings específicos após
       // resolutions; review = revalidar o review INTEIRO (zero findings ou
       // delta sem resolutions pendentes) — NUNCA finding artificial.
       const verificationScope: "findings" | "review" =
-        openWithResolution.length > 0 ? "findings" : "review";
+        openNeedingVerification.length > 0 ? "findings" : "review";
       artifact = {
         path: eventPath ?? "(n/a)",
         kind: "verification-event",
