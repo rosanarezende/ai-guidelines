@@ -258,7 +258,7 @@ export function compileConstraints(input: CompileInput): CompileResult {
       }
 
       // Unicidade da tupla (constraint_ref, surface, enforcement).
-      const tuple = [constraint.id, binding.surface, binding.enforcement].join(" ");
+      const tuple = JSON.stringify([constraint.id, binding.surface, binding.enforcement]);
       if (seenTuples.has(tuple)) {
         pushB(
           "BINDING_DUPLICATE",
