@@ -1,0 +1,61 @@
+# Resoluções do implementador para o Technical Audit do checkpoint-co-enforcement
+# (PR #42 / CO-3.1) — lane SEPARADA da review. PROPÕE `action`; NÃO destrava o
+# gate nem fecha `disposition` (só reviewer/owner fecha, após revalidação). Cada
+# `finding` é totalmente qualificado (`<role>#<id>`) e rastreável ao commit
+# funcional que tratou a causa raiz. O Technical Audit original permanece intacto;
+# os findings seguem `open` até a revalidação independente.
+checkpoint: checkpoint-co-enforcement
+by: claude-cli
+resolutions:
+  - finding: technical_audit#F1
+    action: fixed
+    ref: 5ad592a
+    fingerprint: 284894d6b794
+    evidence: >
+      Overlay de consumidor wired end-to-end por modelo de DUAS raízes
+      (ConstraintRoots{packageRoot, consumerRoot}), reusando o mesmo mecanismo
+      de package/repository context do bootstrap (ROOT_DIR em
+      cli/fs/file-system.mjs): core `.core/constraints/constraints.yml` carrega
+      do packageRoot (framework distribuído via package.json#files — `npm pack`
+      inclui o arquivo), overlay `.governance/constraints.yml` do consumerRoot.
+      Consumidor SÓ com overlay governado compila (core vem do pacote, sem exigir
+      `.core/` local); ausência de core no packageRoot segue falhando (exit 2,
+      fonte governada do próprio framework). Sem path hardcoded do mantenedor; id
+      duplicado core×overlay segue erro sem override. No mantenedor as raízes
+      coincidem (real verde inalterado).
+    tests:
+      - "src/cli/constraintsCheck.test.ts :: [F1.1]–[F1.10] (mantenedor pass/fail, consumidor overlay-only, defaults, composição, id duplicado, sem raiz do mantenedor, packageRoot≠cwd, aninhado, packaging)"
+  - finding: technical_audit#F2
+    action: fixed
+    ref: 5ad592a
+    fingerprint: bad9a10cd59b
+    evidence: >
+      `source_ref` deixa de escapar do repo: checkParity resolve cada ref contra
+      a raiz da SUA fonte (sources[].root) via `resolveGovernedSourcePath`
+      (mecanismo introduzido em b5f7918) — normaliza separadores Windows, rejeita
+      vazio/absoluto/`..` antes de qualquer I/O e reconfere por realpath após
+      symlink (link interno→externo rejeitado sem ler o alvo). Ref que escapa
+      vira PARITY_SOURCE_OUTSIDE com mensagem nomeando constraint, source_ref e
+      repo root, sem expor conteúdo externo. Containment canônico (path.relative),
+      nunca `startsWith`.
+    tests:
+      - "src/infrastructure/filesystem/governedSourceRef.test.ts :: [F2.1]–[F2.10] (interno, ../, absoluto, drive-letter, prefixo semelhante, symlink in→in / in→out, separador Windows, vazio, sem-leitura-antes-da-rejeição)"
+      - "src/cli/constraintsCheck.test.ts :: [F2-int] (source_ref do overlay→raiz do consumidor; ../escape rejeitado; source_ref do core→raiz do pacote)"
+      - "src/app/constraints/compileConstraints.test.ts :: source_ref que escapa a raiz governada falha [F2] (PARITY_SOURCE_OUTSIDE + mensagem)"
+  - finding: technical_audit#F3
+    action: fixed
+    ref: 5ad592a
+    fingerprint: fcc4f1136709
+    evidence: >
+      Âncora validada por estrutura canônica, não por `includes`:
+      `SourceAnchorValidator` (introduzido em b5f7918) reconhece SOMENTE o heading
+      canônico por origin.kind — `#### [ID] TÍTULO` (rule, mesma forma do parser
+      de rules) e `### [ID] TÍTULO` (guardrail, governance-foundation). Seleção
+      por origin.kind (nunca pelo prefixo do ID). Menção em corpo/exemplo/fenced/
+      comentário HTML e ID prefixado/sufixado não contam (PARITY_ANCHOR_MISSING);
+      heading duplicado vira PARITY_ANCHOR_AMBIGUOUS. Real verde: GG-0001
+      (`### [GG-0001]`) e CORE-08 (`#### [CORE-08]`).
+    tests:
+      - "src/domain/constraints/SourceAnchorValidator.test.ts :: [F3.1]–[F3.10] (heading canônico rule/guardrail, menção em corpo/fenced/HTML, prefixo/sufixo, sem título, duplicado ambíguo, seleção por origin.kind, edição fora do heading)"
+      - "src/cli/constraintsCheck.test.ts :: [F3-int] (anchorIsCanonical exige heading; menção em code falha — fs real)"
+      - "src/app/constraints/compileConstraints.test.ts :: âncora com heading canônico duplicado é diagnosticada [F3] (PARITY_ANCHOR_AMBIGUOUS)"
