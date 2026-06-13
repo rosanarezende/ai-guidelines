@@ -307,3 +307,71 @@ Definir **ordem segura** para:
 ## 9. Roteamento
 
 Este é o enquadramento **Claude**. Próximo: rotear as **três questões abertas (§6, Q1–Q3)** a **Codex** (lente técnica/implementabilidade) → **ChatGPT** (lente arquitetural) → **owner** (decisão), conforme o fluxo de checkpoint estrutural. Só então o primeiro sub-checkpoint (CO-3.1) entra em implementação. Nada em `state.yml`/`tasks.md`/código/PR foi alterado nesta sessão.
+
+---
+
+## 10. Decisão da owner (2026-06-13) — entrada do CO-3.1
+
+> Após a revisão adversarial (`research/2026-06-13-checkpoint-co-enforcement-codex-review.md`), a owner fechou o contrato de entrada do **CO-3.1**. Esta seção é o registro vivo da decisão; o schema conceitual **não reabre** sem contradição factual concreta.
+
+- **Schema de quatro campos por binding** (Codex Q1, schema C): `surface` (namespaced) · `surface_class` (`event|state`) · `enforcement` (mecanismo) · `mode` (`advisory|required`). Dois campos foram falsificados como insuficientes (não distinguem aplicabilidade de enforcement real). A constraint é implícita pelo item; no manifesto normalizado aparece como `constraint_ref`.
+- **Fonte estruturada canônica:** `.core/constraints/constraints.yml` (identidade executável + origem explícita + bindings). Overlay **opcional** de consumidor: `.governance/constraints.yml`. **Sem** `.ai-guidelines/constraints.yml` nesta sessão (ponte legada deferida). O Markdown (rules em `.core/rules/**`, guardrails em `governance-foundation.md`) permanece **doutrina/corpo humano** referenciado por `source_ref` — **não** é parseado semanticamente (B2 destino, sem B1).
+- **Origem explícita, não por prefixo:** `origin.kind: rule|guardrail` é declarado e **verificado** contra o catálogo real (rules.json / foundation), nunca inferido só do prefixo do ID.
+- **Namespaces iniciais:** `npm-script:<nome>` e `registry-command:<comando>/<subcomando>`. Demais namespaces (hook, workflow, state-file, gate, fs, api) são **recusados** como não-suportados nesta sessão.
+- **Resolvers:** `npm-script` resolve por `.core/governance/script-contracts.yml` (deriva command/category/mutates/consumers); `registry-command` resolve pelo `CommandRegistry` real (introspecção read-only via descriptor `subcommands`), reconhecendo no mínimo `registry-command:workflow/publish-state` — que **não** existe em `script-contracts.yml` (prova de que o resolver de registry é necessário).
+- **Mecanismos registrados (CO-3.1):** `gate-decidability-check` (implemented) e `script-contracts-check` (implemented); `handoff-receipt` reconhecido **estruturalmente** como `planned` (não conectado). Binding `required` **não** pode apontar mecanismo `planned`; classe incompatível falha.
+- **Dados reais:** `GG-0001` → `npm-script:gate-decidability:check` / `gate-decidability-check` / `event` / `required`; `CORE-08` (HARNESS LOCK — cita "declared script contract / generated script surfaces stale") → `npm-script:script-contracts:check` / `script-contracts-check` / `event` / `required`. Ambos mecanismos `implemented` e presentes no `validate`.
+- **Grafo:** `GovernedRef` ganha `space: "surface"` (id = ref namespaced, sem entidade `Surface` persistida); aresta projetada é `constrains` (Constraint → SurfaceRef). **Não** se cria aresta `enforces`; `enforcement/mode/surface_class` vivem no binding/manifesto.
+- **Manifesto runtime persistido:** **deferido para CO-3.2.** No CO-3.1 o manifesto é **somente em memória** (determinístico, serializável). `knowledge:compile` (entrypoint público) também é CO-3.2.
+
+Ver `## Dogfood CO-3.1 — modelo e resolução` (abaixo, registrada na implementação) para as evidências de falsificação e os comandos verdes no repo real.
+
+---
+
+## Dogfood CO-3.1 — modelo e resolução
+
+> Implementação de CO-3.1 (2026-06-13). Fatia vertical mínima e real, dos artefatos versionados ao manifesto em memória. `knowledge:compile`, manifesto runtime persistido, GG-0004, wiring do recibo, token-budget e remoção do monólito permanecem **intocados** (CO-3.2+).
+
+### Superfícies novas
+
+- **Fonte estruturada:** `.core/constraints/constraints.yml` (core) + leitura opcional de `.governance/constraints.yml` (overlay). **Nenhum** `.ai-guidelines/constraints.yml`.
+- **Modelo:** `src/domain/constraints/{Constraint,SurfaceRef,EnforcementMechanism}.ts`; `GovernedRef` ganhou `space: "surface"`.
+- **App:** `src/app/constraints/{SurfaceResolver,NpmScriptSurfaceResolver,RegistryCommandSurfaceResolver,compileConstraints}.ts`.
+- **Reader:** `src/infrastructure/yaml/constraintsSourceReader.ts`.
+- **Check:** `cli/constraints-check.mjs` → `src/cli/constraintsCheck.ts`; `constraints:check` integrado ao `validate` (após `co-knowledge:inventory`).
+- **Introspecção read-only do registry:** `Command.subcommands` + `src/cli/registry/describeCommands.ts` (sem segundo catálogo manual; `WorkflowCommand` declara `["publish-state"]`).
+
+### Constraints reais compiladas (manifesto em memória, determinístico)
+
+```text
+CORE-08 (rule)      --constrains--> surface:npm-script:script-contracts:check   [event · script-contracts-check · required · implemented]
+GG-0001 (guardrail) --constrains--> surface:npm-script:gate-decidability:check  [event · gate-decidability-check · required · implemented]
+```
+
+`constraints:check` no repo real:
+
+```text
+✅ constraints:check — 2 constraints · 2 bindings · 2 superfícies resolvidas · paridade íntegra
+```
+
+Determinismo: duas execuções de `runConstraintsCheck` produzem manifesto **byte-idêntico**; `provenance.sources[]` sela o sha256 da fonte core.
+
+### Falsificações rejeitadas (mutações controladas sobre as fontes/fixtures)
+
+| #   | Mutação                                                                       | Veredito                                                                    |
+| :-- | :---------------------------------------------------------------------------- | :-------------------------------------------------------------------------- |
+| 1   | superfície inexistente (`npm-script:nao-existe`)                              | `SURFACE_NOT_FOUND`                                                         |
+| 2   | mecanismo inexistente (`enforcement: fantasma`)                               | `MECHANISM_UNKNOWN`                                                         |
+| 3   | `mode: required` apontando mecanismo `planned` (`handoff-receipt`)            | `MECHANISM_PLANNED_REQUIRED`                                                |
+| 4   | `source_ref` quebrado (arquivo inexistente)                                   | `PARITY_SOURCE_MISSING`                                                     |
+| 5   | binding duplicado (mesma tupla)                                               | `BINDING_DUPLICATE`                                                         |
+| 6   | `registry-command:workflow/publish-state` + `surface_class: state`            | `SURFACE_CLASS_INCOMPATIBLE`                                                |
+| 7   | overlay duplicando ID do core                                                 | `ConstraintsParseError` (sem override implícito)                            |
+| 8   | `registry-command:workflow/publish-state` resolvido só por `script-contracts` | `SURFACE_RESOLVER_ABSENT` (prova que o resolver de registry é necessário)   |
+| 9   | origem `GG-*` declarada como `rule`                                           | `PARITY_RULE_UNKNOWN` (origem confrontada com o catálogo, não pelo prefixo) |
+
+Todos rejeitados **deterministicamente**. Cobertura: 68 testes focados (schema/sources/surfaces/mechanisms/manifesto/grafo/consumer) — `GovernedRef{space:"surface"}` round-trip, aresta `constrains`, ausência de nó `Surface` persistido, `handoff-receipt` advisory reconhecido estruturalmente.
+
+### Limite honesto
+
+A **classe observável** de `npm-script` não é derivável de `script-contracts.yml` (`mutates`/`category` não a determinam): a classe declarada é validada apenas contra o mecanismo, não contra a superfície (limitação declarada, sem inventar certeza). Já `registry-command` deriva `event` da natureza de invocação — daí a incompatibilidade da falsificação #6.
