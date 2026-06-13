@@ -51,8 +51,8 @@ function compile(constraints: Constraint[], facts?: ConstraintSourceFacts) {
 }
 
 const okFacts: ConstraintSourceFacts = {
-  fileExists: () => true,
-  anchorExists: () => true,
+  resolveSource: () => ({ contained: true, exists: true, root: "/repo" }),
+  anchorIsCanonical: () => ({ ok: true, ambiguous: false }),
   isKnownRuleId: (id) => ["CORE-08", "CORE-09"].includes(id),
   isKnownGuardrailId: (id) => ["GG-0001", "GG-0004"].includes(id),
 };
@@ -122,13 +122,40 @@ describe("compileConstraints · classe de superfície [BR-CO-ENFORCEMENT-CLASS]"
 
 describe("compileConstraints · paridade com a fonte humana [BR-CO-ENFORCEMENT-PARITY]", () => {
   it("[13] source_ref aponta arquivo inexistente falha", () => {
-    const facts: ConstraintSourceFacts = { ...okFacts, fileExists: () => false };
+    const facts: ConstraintSourceFacts = {
+      ...okFacts,
+      resolveSource: () => ({ contained: true, exists: false, root: "/repo" }),
+    };
     expect(codes(compile([constraint()], facts).violations)).toEqual(["PARITY_SOURCE_MISSING"]);
   });
 
+  it("source_ref que escapa a raiz governada falha [F2]", () => {
+    const facts: ConstraintSourceFacts = {
+      ...okFacts,
+      resolveSource: () => ({ contained: false, exists: false, root: "/repo" }),
+    };
+    const { violations } = compile([constraint()], facts);
+    expect(codes(violations)).toEqual(["PARITY_SOURCE_OUTSIDE"]);
+    // mensagem nomeia a constraint e o source_ref recebido + repo root
+    expect(violations[0].message).toContain("GG-0001");
+    expect(violations[0].message).toContain(".core/process/governance-foundation.md#GG-0001");
+    expect(violations[0].message).toContain("/repo");
+  });
+
   it("âncora inexistente no arquivo falha", () => {
-    const facts: ConstraintSourceFacts = { ...okFacts, anchorExists: () => false };
+    const facts: ConstraintSourceFacts = {
+      ...okFacts,
+      anchorIsCanonical: () => ({ ok: false, ambiguous: false }),
+    };
     expect(codes(compile([constraint()], facts).violations)).toEqual(["PARITY_ANCHOR_MISSING"]);
+  });
+
+  it("âncora com heading canônico duplicado é diagnosticada [F3]", () => {
+    const facts: ConstraintSourceFacts = {
+      ...okFacts,
+      anchorIsCanonical: () => ({ ok: false, ambiguous: true }),
+    };
+    expect(codes(compile([constraint()], facts).violations)).toEqual(["PARITY_ANCHOR_AMBIGUOUS"]);
   });
 
   it("[14] rule ID inexistente no catálogo falha", () => {

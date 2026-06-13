@@ -22,7 +22,8 @@ constraints:
 `;
 
 function source(path: string, text: string): ConstraintSource {
-  return { path, text, constraints: parseConstraints(text) };
+  // `root` é irrelevante para os testes de merge (a fusão usa só `constraints`).
+  return { path, text, constraints: parseConstraints(text), root: `/tmp/${path}` };
 }
 
 describe("constraintsSourceReader · schema [BR-CO-ENFORCEMENT-SCHEMA]", () => {

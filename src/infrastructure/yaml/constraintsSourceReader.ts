@@ -156,6 +156,12 @@ export interface ConstraintSource {
   /** Texto bruto (para fingerprint de proveniência). */
   readonly text: string;
   readonly constraints: readonly Constraint[];
+  /**
+   * Raiz governada ABSOLUTA contra a qual os `source_ref` desta fonte resolvem
+   * (core → raiz do pacote/framework; overlay → raiz do consumidor). Define o
+   * containment de `source_ref` (F2) e a procedência por origem (F1).
+   */
+  readonly root: string;
 }
 
 /**

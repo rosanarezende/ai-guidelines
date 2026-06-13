@@ -35,4 +35,9 @@ if (!existsSync(compiledModule)) {
 }
 
 const { main } = await import(pathToFileURL(compiledModule).href);
-process.exit(main(repoRoot));
+
+// Duas raízes (mesmo mecanismo do ROOT_DIR do bootstrap): os assets `.core/**`
+// vivem na raiz do PACOTE (derivada da localização do bin); o overlay
+// `.governance/constraints.yml` vive na raiz do CONSUMIDOR (cwd). No mantenedor
+// as duas coincidem (npm roda o script a partir da raiz do repo).
+process.exit(main({ packageRoot: repoRoot, consumerRoot: process.cwd() }));

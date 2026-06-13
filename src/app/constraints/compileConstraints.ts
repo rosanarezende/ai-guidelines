@@ -90,8 +90,25 @@ export interface CompileResult {
 
 /** Fatos de PARIDADE com a fonte humana — injetados (fs/catálogos resolvidos pelo composition root). */
 export interface ConstraintSourceFacts {
-  fileExists(path: string): boolean;
-  anchorExists(path: string, anchor: string): boolean;
+  /**
+   * Resolve o `source_ref` contra a raiz governada da fonte da `constraint`
+   * (F1: core→raiz do pacote, overlay→raiz do consumidor) com containment
+   * canônico (F2). `contained=false` ⟹ o ref escapa a raiz; `root` é a raiz
+   * resolvida (para diagnóstico).
+   */
+  resolveSource(
+    constraint: Constraint,
+    sourcePath: string
+  ): { readonly contained: boolean; readonly exists: boolean; readonly root: string };
+  /**
+   * A fonte DECLARA a âncora como heading canônico do `origin.kind` (F3)?
+   * `ambiguous=true` ⟹ heading canônico duplicado.
+   */
+  anchorIsCanonical(
+    constraint: Constraint,
+    sourcePath: string,
+    anchor: string
+  ): { readonly ok: boolean; readonly ambiguous: boolean };
   isKnownRuleId(id: string): boolean;
   isKnownGuardrailId(id: string): boolean;
 }
@@ -135,15 +152,30 @@ function checkParity(
     );
     return;
   }
-  const path = sourceRef.slice(0, hash);
+  const sourcePath = sourceRef.slice(0, hash);
   const anchor = sourceRef.slice(hash + 1);
-  if (!facts.fileExists(path)) {
-    push("PARITY_SOURCE_MISSING", `source_ref aponta arquivo inexistente: ${path}.`);
-  } else if (!facts.anchorExists(path, anchor)) {
+  const source = facts.resolveSource(constraint, sourcePath);
+  if (!source.contained) {
     push(
-      "PARITY_ANCHOR_MISSING",
-      `âncora "[${anchor}]" não encontrada em ${path} (esperada como heading do corpo humano).`
+      "PARITY_SOURCE_OUTSIDE",
+      `source_ref "${sourceRef}" escapa a raiz governada (constraint=${constraint.id}, ` +
+        `repo_root=${source.root}) — fonte deve viver dentro da raiz do repositório correspondente.`
     );
+  } else if (!source.exists) {
+    push("PARITY_SOURCE_MISSING", `source_ref aponta arquivo inexistente: ${sourcePath}.`);
+  } else {
+    const anchorVerdict = facts.anchorIsCanonical(constraint, sourcePath, anchor);
+    if (anchorVerdict.ambiguous) {
+      push(
+        "PARITY_ANCHOR_AMBIGUOUS",
+        `âncora "[${anchor}]" tem heading canônico duplicado em ${sourcePath} — declaração ambígua.`
+      );
+    } else if (!anchorVerdict.ok) {
+      push(
+        "PARITY_ANCHOR_MISSING",
+        `âncora "[${anchor}]" não declarada como heading canônico (${kind}) em ${sourcePath}.`
+      );
+    }
   }
   if (kind === "rule" && !facts.isKnownRuleId(constraint.id)) {
     push(
