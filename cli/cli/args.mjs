@@ -83,6 +83,7 @@ ${registryBlock}
 
   Retomar contexto:        npm run guidelines -- handoff [spec]
   Verificar frescor:       npm run handoff:check -- [--spec NNNN]
+  Briefing de trabalho:    npm run guidelines -- work [--authorization explicit-work-request]
   Pedir review governado:  npm run guidelines -- review <tipo>
   Catálogo/policy:         npm run guidelines -- review types | review policy
   Preparar Ready:          npm run pr-ready:check -- --pr <n>

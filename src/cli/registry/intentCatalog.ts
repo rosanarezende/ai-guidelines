@@ -23,6 +23,22 @@ export const INTENT_CATALOG: readonly Intent[] = [
     actions: [{ command: "triage", label: "Triar comentários de review do PR" }],
   },
   {
+    id: "executar-trabalho-governado",
+    title: "Executar o trabalho situado (implementação/correção)",
+    actions: [
+      {
+        command: "work",
+        label:
+          "Briefing governado de trabalho (modo + escopo/autoridade/validações/parada/relatório)",
+      },
+      {
+        command: "work",
+        args: ["--authorization", "explicit-work-request"],
+        label: "Autorizar commit/push no objeto inferido (pedido humano explícito)",
+      },
+    ],
+  },
+  {
     id: "pedir-review-governado",
     title: "Pedir um review governado",
     actions: [

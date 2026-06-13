@@ -134,6 +134,8 @@ export interface ReviewArtifact {
 export interface Resolution {
   readonly finding: string;
   readonly action: ResolutionAction;
+  /** Commit funcional que tratou o finding (opcional; `<sha>`). Usado por `work` para validar a resolução contra o histórico. */
+  readonly ref?: string;
 }
 
 export interface ResolutionArtifact {
@@ -751,7 +753,12 @@ export function parseResolutions(yamlText: string, file: string): ResolutionArti
         `${file}: resolutions[${i}].action must be one of ${RESOLUTION_ACTIONS.join("|")}`
       );
     }
-    resolutions.push({ finding, action: r.action as ResolutionAction });
+    const ref = str(r.ref);
+    resolutions.push({
+      finding,
+      action: r.action as ResolutionAction,
+      ...(ref ? { ref } : {}),
+    });
   }
   return { checkpoint, by, resolutions, file };
 }
