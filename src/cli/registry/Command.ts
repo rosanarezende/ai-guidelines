@@ -60,6 +60,13 @@ export interface Command<TOptions = void> {
   readonly description: string;
   /** Exemplos de invocação (sem o prefixo `npm run guidelines --`), opcionais — para o help. */
   readonly usage?: readonly string[];
+  /**
+   * Subcomandos declarados (descriptor-only, read-only). Permite **introspecção
+   * sem executar** — ex.: o resolver de superfície `registry-command:<cmd>/<sub>`
+   * (CO-3) precisa saber que `workflow` aceita `publish-state` sem rodar o
+   * comando. Comandos sem subcomandos omitem o campo.
+   */
+  readonly subcommands?: readonly string[];
   parse(argv: readonly string[]): TOptions;
   /**
    * Produtor INTERATIVO de options — dual opcional de `parse` (que produz a

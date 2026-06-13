@@ -1,0 +1,44 @@
+# Fonte estruturada canônica de Constraints (CO-3 / Spec 0024).
+#
+# SSOT da identidade EXECUTÁVEL de cada constraint: id, origem (explícita,
+# verificada contra o catálogo real — NÃO inferida pelo prefixo do ID) e
+# bindings de enforcement (4 campos). NÃO copia o texto humano das rules/
+# guardrails — o corpo doutrinário permanece no Markdown referenciado por
+# `origin.source_ref` (`.core/rules/**`, `governance-foundation.md`).
+#
+# Compilada em memória por `constraints:check` (integrado ao `validate`). O
+# manifesto runtime persistido e o entrypoint `knowledge:compile` são CO-3.2.
+#
+# Consumidores estendem por overlay opcional em `.governance/constraints.yml`
+# (sem editar este arquivo; sem override implícito de IDs).
+version: 1
+
+constraints:
+  # Guardrail INTERNO (dogfood) — não vive em rules.json; enforcement materializado
+  # em cli/governance/gate-decidability-check.mjs, agregado pelo `validate`.
+  - id: GG-0001
+    kind: constraint
+    origin:
+      kind: guardrail
+      source_ref: .core/process/governance-foundation.md#GG-0001
+      sources:
+        - DOGFOOD-0024
+    bindings:
+      - surface: npm-script:gate-decidability:check
+        surface_class: event
+        enforcement: gate-decidability-check
+        mode: required
+
+  # Rule universal CORE-08 (HARNESS LOCK): exige que as superfícies de script
+  # geradas não estejam stale — exatamente o que `script-contracts:check`
+  # enforça (falha se scripts/hooks/templates/docs divergirem do contrato).
+  - id: CORE-08
+    kind: constraint
+    origin:
+      kind: rule
+      source_ref: .core/rules/top/agents-core.md#CORE-08
+    bindings:
+      - surface: npm-script:script-contracts:check
+        surface_class: event
+        enforcement: script-contracts-check
+        mode: required

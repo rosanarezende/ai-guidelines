@@ -69,6 +69,7 @@
     "handoff:check": "npm run build && node cli/handoff-check.mjs",
     "co-knowledge:check": "npm run build && node cli/co-knowledge-check.mjs",
     "co-knowledge:inventory": "npm run build && node cli/co-knowledge-inventory.mjs",
+    "constraints:check": "npm run build && node cli/constraints-check.mjs",
     "script-contracts:sync": "node cli/script-contracts.mjs sync",
     "script-contracts:check": "node cli/script-contracts.mjs check",
     "runtime-bootstrap:sync": "node cli/runtime-bootstrap.mjs sync",
@@ -83,7 +84,7 @@
     "review:seal": "node cli/review-seal.mjs",
     "pr-body:update": "npm run build && node cli/pr-body-update.mjs",
     "pr-ready:check": "npm run build && node cli/pr-ready-check.mjs",
-    "validate": "npm run format:check && npm run build:all && npm run script-contracts:check && npm run runtime-bootstrap:check && npm run test && npm run living-docs:check && npm run state-yml:check && npm run active-specs:check && npm run reconcile:check && npm run co-knowledge:check && npm run co-knowledge:inventory && npm run gate-decidability:check && npm run ruleset:check && npm run review:check && npm run insights:check && npm run intent:check",
+    "validate": "npm run format:check && npm run build:all && npm run script-contracts:check && npm run runtime-bootstrap:check && npm run test && npm run living-docs:check && npm run state-yml:check && npm run active-specs:check && npm run reconcile:check && npm run co-knowledge:check && npm run co-knowledge:inventory && npm run constraints:check && npm run gate-decidability:check && npm run ruleset:check && npm run review:check && npm run insights:check && npm run intent:check",
     "ci": "npm ci && npm run validate && npm run state-yml:check:all && npm run test:smoke",
     "prepare": "husky",
     "prepack": "npm run build:all"
