@@ -7,5 +7,5 @@ active_specs:
     status: active
     spec_path: .governance/specs/0024-context-architecture
     source_state_path: .governance/specs/0024-context-architecture/state.yml
-    updated_at: 2026-06-12T20:41:03.541-03:00
+    updated_at: 2026-06-12T23:50:37.995-03:00
     updated_by: "@rosanarezende"
