@@ -276,13 +276,13 @@ describe("constraints:check · repo real [BR-CO-ENFORCEMENT-GREEN]", () => {
     expect(logs.join("\n")).toMatch(/✅ constraints:check — 2 constraints · 2 bindings/);
   });
 
-  it("[50] nenhum artefato runtime persistido do CO-3.2", () => {
+  it("[50] constraints:check é in-memory: não persiste nem modifica o manifesto do CO-3.2", () => {
+    // Separação cravada: o artefato runtime é OWNED por `knowledge:compile` (CO-3.2);
+    // `constraints:check` (CO-3.1) compila só em memória e nunca toca no arquivo.
+    const manifestPath = path.join(repoRoot, ".governance/runtime/constraints/manifest.json");
+    const before = fs.existsSync(manifestPath) ? fs.readFileSync(manifestPath, "utf-8") : null;
     main(repoRoot, { info: () => {}, error: () => {} });
-    expect(fs.existsSync(path.join(repoRoot, ".governance/runtime/constraints"))).toBe(false);
-  });
-
-  it("CO-3.2 não antecipado: sem script knowledge:compile no package.json", () => {
-    const pkg = JSON.parse(fs.readFileSync(path.join(repoRoot, "package.json"), "utf-8"));
-    expect(pkg.scripts["knowledge:compile"]).toBeUndefined();
+    const after = fs.existsSync(manifestPath) ? fs.readFileSync(manifestPath, "utf-8") : null;
+    expect(after).toBe(before);
   });
 });

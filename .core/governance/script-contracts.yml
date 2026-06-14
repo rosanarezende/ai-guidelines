@@ -163,6 +163,18 @@ profiles:
         mutates: true
         consumers: [script]
         description: CO-3.1; compila constraints (schema/paridade/superficies/mecanismos) em memoria.
+      - name: knowledge:compile
+        command: npm run build && node cli/knowledge-compile.mjs compile
+        category: build
+        mutates: true
+        consumers: [human]
+        description: CO-3.2; persiste o manifesto runtime de constraints e orquestra build:rules (guarda-chuva).
+      - name: knowledge:check
+        command: npm run build && node cli/knowledge-compile.mjs check
+        category: governance
+        mutates: true
+        consumers: [script]
+        description: CO-3.2; paridade derivada do manifesto persistido (existencia/classe/sync).
       - name: script-contracts:sync
         command: node cli/script-contracts.mjs sync
         category: governance
@@ -248,7 +260,7 @@ profiles:
         consumers: [human]
         description: Valida precondicoes da conversao Draft->Ready (FU-2); read-only, nao converte.
       - name: validate
-        command: npm run format:check && npm run build:all && npm run script-contracts:check && npm run runtime-bootstrap:check && npm run test && npm run living-docs:check && npm run state-yml:check && npm run active-specs:check && npm run reconcile:check && npm run co-knowledge:check && npm run co-knowledge:inventory && npm run constraints:check && npm run gate-decidability:check && npm run ruleset:check && npm run review:check && npm run insights:check && npm run intent:check
+        command: npm run format:check && npm run build:all && npm run script-contracts:check && npm run runtime-bootstrap:check && npm run test && npm run living-docs:check && npm run state-yml:check && npm run active-specs:check && npm run reconcile:check && npm run co-knowledge:check && npm run co-knowledge:inventory && npm run constraints:check && npm run knowledge:check && npm run gate-decidability:check && npm run ruleset:check && npm run review:check && npm run insights:check && npm run intent:check
         category: aggregate
         mutates: true
         consumers: [hook, workflow, human]
