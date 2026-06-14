@@ -148,6 +148,21 @@ export interface HandoffTaskFact {
   readonly line: number;
 }
 
+/**
+ * Sub-checkpoint (CO-x.y) aninhado sob o checkpoint do cursor em tasks.md. A
+ * granularidade real de TRABALHO de um checkpoint composto vive aqui: o
+ * checkpoint-pai é container, os sub-checkpoints é que carregam o objeto
+ * executável. Três estados (espelham os marcadores do tasks.md):
+ * `pending` (`[ ]`), `in-progress` (`[/]`), `done` (`[x]`).
+ */
+export interface HandoffSubCheckpoint {
+  readonly id: string;
+  readonly title: string;
+  readonly state: "pending" | "in-progress" | "done";
+  /** Linha (1-based) em tasks.md — base factual citável. */
+  readonly line: number;
+}
+
 export interface HandoffInsightFact {
   readonly id: string;
   readonly excerpt: string;
@@ -178,6 +193,8 @@ export interface HandoffFacts {
   readonly lifecycle: HandoffLifecycleFact | null;
   /** Tarefas de tasks.md pertencentes ao checkpoint do cursor. */
   readonly tasks: ReadonlyArray<HandoffTaskFact>;
+  /** Sub-checkpoints (CO-x.y) aninhados sob o checkpoint do cursor em tasks.md. */
+  readonly subCheckpoints: ReadonlyArray<HandoffSubCheckpoint>;
   readonly insights: ReadonlyArray<HandoffInsightFact>;
   /** Drift de projeção detectado na coleta (specs/active.yml etc.). */
   readonly driftWarnings: ReadonlyArray<string>;
@@ -258,6 +275,31 @@ export function parseCheckpointTasks(
     tasks.push({ text, done: match[1] !== " ", line: i + 1 });
   }
   return tasks;
+}
+
+/**
+ * Extrai os sub-checkpoints (CO-x.y) aninhados sob o checkpoint do cursor. Lê a
+ * fonte CANÔNICA (tasks.md): ancora na linha `**Checkpoint <normalizado>**` e
+ * coleta os itens de checkbox subsequentes até o próximo checkpoint de topo.
+ * Reconhece os três estados — `[ ]` pending, `[/]` in-progress, `[x]` done — e
+ * SÓ sub-checkpoints `CO-N.M` (o checkpoint-pai `CO-N` não entra). Conservador:
+ * mencionar um sub-checkpoint em prosa de outro bloco NÃO cria pertencimento.
+ */
+export function parseSubCheckpoints(tasksMd: string, checkpoint: string): HandoffSubCheckpoint[] {
+  const normalized = checkpoint.replace(/^checkpoint-/, "");
+  const lines = tasksMd.split(/\r?\n/);
+  const anchor = lines.findIndex((l) => l.includes(`**Checkpoint ${normalized}**`));
+  if (anchor < 0) return [];
+  const out: HandoffSubCheckpoint[] = [];
+  for (let i = anchor + 1; i < lines.length; i++) {
+    if (/\*\*Checkpoint /.test(lines[i])) break; // próximo checkpoint de topo
+    const m = /^\s*-\s*\[([ xX/])\]\s*\*\*(CO-\d+\.\d+)\b\s*[—-]?\s*(.*?)\*\*/.exec(lines[i]);
+    if (!m) continue;
+    const mark = m[1];
+    const state = mark === " " ? "pending" : mark === "/" ? "in-progress" : "done";
+    out.push({ id: m[2], title: m[3].trim(), state, line: i + 1 });
+  }
+  return out;
 }
 
 /** Título legível de uma tarefa: primeiro span em negrito, senão prefixo do texto. */

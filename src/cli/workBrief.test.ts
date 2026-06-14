@@ -7,7 +7,9 @@ import {
   deriveWorkBrief,
   parseWorkAuthorization,
   renderWorkBrief,
+  resolveSubCheckpointWork,
 } from "./workBrief.js";
+import { HandoffSubCheckpoint } from "./handoffFacts.js";
 import { WorkMode, WorkPolicy, parseWorkPolicy } from "../infrastructure/yaml/workPolicyReader.js";
 
 const POLICY: WorkPolicy = parseWorkPolicy(
@@ -57,6 +59,7 @@ function facts(over: Partial<HandoffFacts> = {}): HandoffFacts {
       gateDecision: null,
     },
     tasks: [],
+    subCheckpoints: [],
     insights: [],
     driftWarnings: [],
     sources: [{ id: "pull-request", origin: "gh", status: "fresh", fingerprint: "x" }],
@@ -273,10 +276,22 @@ describe("workBrief · report contract governado [work]", () => {
     "blocked",
     "resolve_findings",
     "await_revalidation",
+    "prepare_subcheckpoint_transition",
     "implement_checkpoint",
     "prepare_close",
     "current",
   ];
+
+  const AUDIT_SETTLED = {
+    reviewDecisions: [],
+    requiredReviewRoles: [],
+    reviewStatuses: [],
+    openFindings: 0,
+    openBlocking: 0,
+    closedFindings: 3,
+    resolutions: 3,
+    gateDecision: null,
+  } as const;
 
   function briefForMode(mode: WorkMode) {
     switch (mode) {
@@ -289,6 +304,17 @@ describe("workBrief · report contract governado [work]", () => {
         });
       case "await_revalidation":
         return derive({ nextAction: nextAction("resolve-findings"), findings: [finding()] });
+      case "prepare_subcheckpoint_transition":
+        return derive({
+          nextAction: nextAction("investigate-checkpoint"),
+          facts: facts({
+            lifecycle: { ...AUDIT_SETTLED },
+            subCheckpoints: [
+              { id: "CO-3.1", title: "x", state: "in-progress", line: 1 },
+              { id: "CO-3.2", title: "y", state: "pending", line: 2 },
+            ],
+          }),
+        });
       case "implement_checkpoint":
         return derive({ nextAction: nextAction("execute-task") });
       case "prepare_close":
@@ -474,5 +500,128 @@ describe("workBrief · distribuição e read-only [work]", () => {
 
   it("[37] o briefing não persiste artefato (sem .governance/runtime/work)", () => {
     expect(fs.existsSync(path.join(process.cwd(), ".governance/runtime/work"))).toBe(false);
+  });
+});
+
+// ── Bug 1: PR-sync usa git HEAD, não functional HEAD ─────────────────────────
+describe("workBrief · sincronização do PR usa git HEAD [work]", () => {
+  it("git HEAD == PR head com functional HEAD atrás (commit review-only) NÃO gera falso drift", () => {
+    const b = derive({
+      facts: facts({
+        git: { ...facts().git, head: "c933438", behind: 0 },
+        pullRequest: { ...facts().pullRequest!, headRefOid: "c933438" },
+      }),
+      effectiveFunctionalHead: "f3b4ee3",
+      nextAction: nextAction("investigate-checkpoint"),
+    });
+    expect(b.degraded.join(" ")).not.toMatch(/atrás/);
+  });
+
+  it("PR head remoto ≠ git HEAD (push pendente) é degradação declarada com o git HEAD", () => {
+    const b = derive({
+      facts: facts({
+        git: { ...facts().git, head: "f3b4ee3", behind: 0 },
+        pullRequest: { ...facts().pullRequest!, headRefOid: "c933438" },
+        subCheckpoints: [{ id: "CO-3.2", title: "y", state: "in-progress", line: 2 }],
+      }),
+      nextAction: nextAction("investigate-checkpoint"),
+    });
+    expect(b.mode).toBe("implement_checkpoint");
+    expect(b.degraded.join(" ")).toMatch(/git HEAD local f3b4ee3/);
+  });
+});
+
+// ── Bug 2/4: sub-checkpoints, transição e fail-closed ────────────────────────
+describe("workBrief · sub-checkpoints e transição [work]", () => {
+  const subs = (over: Partial<HandoffSubCheckpoint>[] = []): HandoffSubCheckpoint[] =>
+    over.map((o, i) => ({
+      id: o.id ?? `CO-3.${i + 1}`,
+      title: o.title ?? "t",
+      state: o.state ?? "pending",
+      line: o.line ?? i + 1,
+    }));
+  const settled = {
+    reviewDecisions: [],
+    requiredReviewRoles: [],
+    reviewStatuses: [],
+    openFindings: 0,
+    openBlocking: 0,
+    closedFindings: 3,
+    resolutions: 3,
+    gateDecision: null,
+  } as const;
+
+  it("estado real (CO-3.1 [/], CO-3.2-3.4 [ ], auditoria fechada) ⇒ transição CO-3.1→CO-3.2", () => {
+    const r = resolveSubCheckpointWork(
+      facts({
+        lifecycle: { ...settled },
+        subCheckpoints: subs([
+          { id: "CO-3.1", state: "in-progress" },
+          { id: "CO-3.2", state: "pending" },
+          { id: "CO-3.3", state: "pending" },
+          { id: "CO-3.4", state: "pending" },
+        ]),
+      })
+    );
+    expect(r.kind).toBe("transition");
+    if (r.kind === "transition") {
+      expect(r.transition.conclude?.id).toBe("CO-3.1");
+      expect(r.transition.activate.id).toBe("CO-3.2");
+    }
+  });
+
+  it("após a transição (CO-3.1 [x], CO-3.2 [/]) ⇒ implement com objeto CO-3.2", () => {
+    const r = resolveSubCheckpointWork(
+      facts({
+        lifecycle: { ...settled },
+        subCheckpoints: subs([
+          { id: "CO-3.1", state: "done" },
+          { id: "CO-3.2", state: "in-progress" },
+          { id: "CO-3.3", state: "pending" },
+        ]),
+      })
+    );
+    expect(r.kind).toBe("implement");
+    if (r.kind === "implement") expect(r.subCheckpoint.id).toBe("CO-3.2");
+  });
+
+  it("deriveWorkBrief: estado real ⇒ modo prepare_subcheckpoint_transition com objeto", () => {
+    const b = derive({
+      nextAction: nextAction("investigate-checkpoint"),
+      facts: facts({
+        lifecycle: { ...settled },
+        subCheckpoints: subs([
+          { id: "CO-3.1", state: "in-progress" },
+          { id: "CO-3.2", state: "pending" },
+        ]),
+      }),
+    });
+    expect(b.mode).toBe("prepare_subcheckpoint_transition");
+    expect(b.object.transition?.conclude?.id).toBe("CO-3.1");
+    expect(b.object.transition?.activate.id).toBe("CO-3.2");
+  });
+
+  it("deriveWorkBrief: pós-transição ⇒ implement_checkpoint com sub-checkpoint concreto", () => {
+    const b = derive({
+      nextAction: nextAction("investigate-checkpoint"),
+      facts: facts({
+        lifecycle: { ...settled },
+        subCheckpoints: subs([
+          { id: "CO-3.1", state: "done" },
+          { id: "CO-3.2", state: "in-progress" },
+        ]),
+      }),
+    });
+    expect(b.mode).toBe("implement_checkpoint");
+    expect(b.object.subCheckpoint?.id).toBe("CO-3.2");
+  });
+
+  it("FAIL-CLOSED: sem tarefa de topo e sem sub-checkpoint ativo ⇒ NUNCA implement_checkpoint", () => {
+    const b = derive({
+      nextAction: nextAction("investigate-checkpoint"),
+      facts: facts({ subCheckpoints: [] }),
+    });
+    expect(b.mode).not.toBe("implement_checkpoint");
+    expect(b.mode).toBe("blocked");
   });
 });

@@ -43,6 +43,7 @@ import {
   deriveHandoff,
   fingerprintSource,
   parseCheckpointTasks,
+  parseSubCheckpoints,
 } from "./handoffFacts.js";
 import {
   extractAiGuidelinesBlock,
@@ -773,6 +774,8 @@ export function collectHandoffFacts(
   const tasksOrigin = `${resolved.specPath}/tasks.md`;
   const tasksText = readIfExists(repoRoot, tasksOrigin);
   const tasks = cursor && tasksText !== null ? parseCheckpointTasks(tasksText, cursor) : [];
+  const subCheckpoints =
+    cursor && tasksText !== null ? parseSubCheckpoints(tasksText, cursor.checkpoint) : [];
   sources.push({
     id: "tasks.md",
     origin: tasksOrigin,
@@ -818,6 +821,7 @@ export function collectHandoffFacts(
     pullRequest,
     lifecycle,
     tasks,
+    subCheckpoints,
     insights,
     driftWarnings: [...diagnostics.warnings, ...contractCollected.driftWarnings],
     sources,

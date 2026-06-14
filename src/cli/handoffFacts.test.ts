@@ -118,6 +118,7 @@ function facts(overrides: Partial<HandoffFacts> = {}): HandoffFacts {
     pullRequest: PR_DRAFT,
     lifecycle: LIFECYCLE_EMPTY,
     tasks: [OPEN_TASK],
+    subCheckpoints: [],
     insights: [{ id: "PIT-0011", excerpt: "Contrato executavel invisivel…" }],
     driftWarnings: [],
     sources: SOURCES_FRESH,

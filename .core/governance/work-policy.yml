@@ -137,6 +137,46 @@ modes:
       - Estado da lane
       - Próxima ação
 
+  prepare_subcheckpoint_transition:
+    purpose: >
+      Um sub-checkpoint terminou (auditoria fechada/verificada, sem trabalho
+      executável aberto) mas o tasks.md ainda não reflete a transição. NÃO há
+      objeto de implementação até a transição ser registrada. A conclusão de um
+      sub-checkpoint e a ativação do próximo são um ATO OPERACIONAL EXPLÍCITO e
+      VISÍVEL em tasks.md — nunca um efeito colateral silencioso de fechar
+      dispositions. Marque o sub-checkpoint concluído e ative o próximo; só então
+      o modo vira implement_checkpoint com objeto concreto.
+    allowed_actions:
+      - mark-subcheckpoint-done
+      - activate-next-subcheckpoint
+      - update-pr-body
+      - reconcile-docs
+    forbidden_actions:
+      - modify-functional-files
+      - create-resolutions
+      - close-dispositions
+      - run-review
+      - ready
+      - human-gate
+      - merge
+    publication:
+      commit: explicit-work-request
+      push: explicit-work-request
+      mixed_scope: forbidden
+    validations:
+      - git diff --check
+      - npm run reconcile:check
+    expects_resolutions: false
+    pr_body_editable: true
+    stop_conditions:
+      - tasks.md registra o sub-checkpoint concluído e o próximo ativado (ato visível)
+      - nenhuma implementação funcional iniciada antes da transição
+    report_sections:
+      - Retomada
+      - Sub-checkpoint concluído
+      - Próximo sub-checkpoint ativado
+      - Próxima ação
+
   implement_checkpoint:
     purpose: >
       Sem finding bloqueante pendente; há tarefa aberta no checkpoint autorizado e

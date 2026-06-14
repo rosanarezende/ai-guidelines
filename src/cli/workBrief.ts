@@ -97,12 +97,25 @@ export interface WorkTaskRef {
   readonly line: number;
 }
 
+export interface WorkSubCheckpointRef {
+  readonly id: string;
+  readonly title: string;
+  readonly line: number;
+}
+
 export interface WorkObject {
   readonly checkpoint: string | null;
   readonly task?: WorkTaskRef;
   readonly findings?: readonly WorkFinding[];
   /** Lane de review pendente (quando o trabalho aponta um review, não implementação). */
   readonly reviewLane?: string;
+  /** Sub-checkpoint ATIVO (objeto concreto do implement_checkpoint). */
+  readonly subCheckpoint?: WorkSubCheckpointRef;
+  /** Transição de sub-checkpoint pendente (concluir um, ativar o próximo). */
+  readonly transition?: {
+    readonly conclude: WorkSubCheckpointRef | null;
+    readonly activate: WorkSubCheckpointRef;
+  };
 }
 
 export interface WorkValidation {
@@ -187,6 +200,71 @@ function derivedValidations(specId: string, object: WorkObject): WorkValidation[
   return out;
 }
 
+type SubCheckpointResolution =
+  | { kind: "implement"; subCheckpoint: WorkSubCheckpointRef; basis: string[] }
+  | {
+      kind: "transition";
+      transition: { conclude: WorkSubCheckpointRef | null; activate: WorkSubCheckpointRef };
+      basis: string[];
+    }
+  | { kind: "none"; basis: string[] };
+
+/**
+ * Resolve o OBJETO de trabalho a partir dos sub-checkpoints (CO-x.y) + auditoria,
+ * quando não há tarefa de topo executável. Fail-closed: nunca devolve `implement`
+ * sem um sub-checkpoint ATIVO concreto.
+ *
+ * Transição (one-shot): um sub-checkpoint `[/]` terminou (auditoria fechada e
+ * verificada) mas o tasks.md ainda não o concluiu, e há um próximo pendente. O
+ * guard `done.length === 0` impede re-disparo: ao concluir o atual (`[x]`) e
+ * ativar o próximo (`[/]`), o próximo vira OBJETO de implement, não nova
+ * transição. Concluir/ativar é ATO VISÍVEL em tasks.md, não efeito colateral.
+ */
+export function resolveSubCheckpointWork(facts: HandoffFacts): SubCheckpointResolution {
+  const subs = facts.subCheckpoints;
+  if (subs.length === 0) return { kind: "none", basis: [] };
+  const ref = (s: { id: string; title: string; line: number }): WorkSubCheckpointRef => ({
+    id: s.id,
+    title: s.title,
+    line: s.line,
+  });
+  const inProgress = subs.filter((s) => s.state === "in-progress");
+  const pending = subs.filter((s) => s.state === "pending");
+  const done = subs.filter((s) => s.state === "done");
+  const lc = facts.lifecycle;
+  const auditSettled = lc !== null && lc.openFindings === 0 && lc.closedFindings > 0;
+
+  if (inProgress.length >= 1 && pending.length >= 1 && auditSettled && done.length === 0) {
+    return {
+      kind: "transition",
+      transition: { conclude: ref(inProgress[0]), activate: ref(pending[0]) },
+      basis: [
+        `${inProgress[0].id} concluído (auditoria fechada e verificada) mas ainda marcado [/] em tasks.md;`,
+        `próximo pendente: ${pending[0].id} — ${pending[0].title}.`,
+        "concluir e ativar é ato VISÍVEL em tasks.md (não efeito colateral do fechamento de dispositions).",
+      ],
+    };
+  }
+  if (inProgress.length >= 1) {
+    const s = inProgress[0];
+    return {
+      kind: "implement",
+      subCheckpoint: ref(s),
+      basis: [`sub-checkpoint ativo: ${s.id} — ${s.title} (tasks.md linha ${s.line}).`],
+    };
+  }
+  if (pending.length >= 1) {
+    return {
+      kind: "transition",
+      transition: { conclude: null, activate: ref(pending[0]) },
+      basis: [
+        `nenhum sub-checkpoint ativo; ative o próximo pendente: ${pending[0].id} — ${pending[0].title} (ato visível em tasks.md).`,
+      ],
+    };
+  }
+  return { kind: "none", basis: [] };
+}
+
 /**
  * Inferência DETERMINÍSTICA do modo + projeção do contrato. Puro: nenhuma leitura
  * de fs/Git/GitHub — tudo vem do snapshot e da policy injetados.
@@ -201,6 +279,9 @@ export function deriveWorkBrief(input: WorkBriefInput): WorkBrief {
   const workingTreeState = input.workingTreeState;
   const modeBasis: string[] = [];
   const degraded: string[] = [];
+  // Objeto resolvido por sub-checkpoint (preenchido nos casos sem tarefa de topo).
+  let subObject: WorkSubCheckpointRef | undefined;
+  let transitionObject: WorkObject["transition"] | undefined;
 
   const openFindings = findings.filter((f) => f.disposition === "open");
   const allOpenResolved =
@@ -209,8 +290,15 @@ export function deriveWorkBrief(input: WorkBriefInput): WorkBrief {
   const reqPending = requiredReviewsPending(facts);
 
   // ── Condições de BLOQUEIO (precedência máxima) ──────────────────────────────
+  // SINCRONIZAÇÃO de branch (PR head remoto ↔ git HEAD): é uma relação de COMMITS
+  // do branch, não de freshness. O functional HEAD (último commit fora de reviews/)
+  // serve para freshness de implementação/review — NUNCA para ahead/behind do PR.
+  // Usar o functional HEAD aqui produzia "falso drift" quando o git HEAD == PR head
+  // mas havia commits review-only à frente do functional HEAD.
   const prHeadDiffers =
-    facts.pullRequest !== null && head !== null && !sameSha(facts.pullRequest.headRefOid, head);
+    facts.pullRequest !== null &&
+    gitHead !== null &&
+    !sameSha(facts.pullRequest.headRefOid, gitHead);
   const prHeadDiverges = prHeadDiffers && (facts.git.behind ?? 0) > 0;
 
   let mode: WorkMode | null = null;
@@ -293,14 +381,34 @@ export function deriveWorkBrief(input: WorkBriefInput): WorkBrief {
         modeBasis.push(nextAction.description, ...nextAction.basis.map((b) => `  ${b}`));
         break;
       case "execute-task":
+        // Tarefa de topo aberta = objeto concreto → implementa.
         mode = "implement_checkpoint";
         modeBasis.push(nextAction.description, ...nextAction.basis.map((b) => `  ${b}`));
         break;
       case "investigate-checkpoint":
-      default:
-        mode = "implement_checkpoint";
-        modeBasis.push(nextAction.description, ...nextAction.basis.map((b) => `  ${b}`));
+      default: {
+        // Sem tarefa de topo executável: consulta os sub-checkpoints. FAIL-CLOSED —
+        // IMPLEMENT_CHECKPOINT exige um objeto concreto (sub-checkpoint ATIVO);
+        // sem objeto, nunca autoriza modificar código.
+        const sub = resolveSubCheckpointWork(facts);
+        if (sub.kind === "transition") {
+          mode = "prepare_subcheckpoint_transition";
+          transitionObject = sub.transition;
+          modeBasis.push(...sub.basis);
+        } else if (sub.kind === "implement") {
+          mode = "implement_checkpoint";
+          subObject = sub.subCheckpoint;
+          modeBasis.push(...sub.basis);
+        } else {
+          mode = "blocked";
+          modeBasis.push(
+            "nenhum objeto executável materializado (sem tarefa de topo nem sub-checkpoint ativo) — " +
+              "materialize uma tarefa/sub-checkpoint em tasks.md antes de implementar. " +
+              "IMPLEMENT_CHECKPOINT sem objeto é estado inválido (fail-closed)."
+          );
+        }
         break;
+      }
     }
   }
 
@@ -312,7 +420,7 @@ export function deriveWorkBrief(input: WorkBriefInput): WorkBrief {
   }
   if (prHeadDiffers && !prHeadDiverges && mode !== "blocked") {
     degraded.push(
-      `PR head remoto (${facts.pullRequest!.headRefOid.slice(0, 7)}) atrás do HEAD local ${head} — push pendente; o briefing cobre o HEAD LOCAL.`
+      `PR head remoto (${facts.pullRequest!.headRefOid.slice(0, 7)}) atrás do git HEAD local ${gitHead} — push pendente.`
     );
   }
   const prSource = facts.sources.find((s) => s.id === "pull-request");
@@ -346,6 +454,12 @@ export function deriveWorkBrief(input: WorkBriefInput): WorkBrief {
       : {}),
     ...(mode === "await_revalidation" && reqPending.length > 0
       ? { reviewLane: reqPending[0] }
+      : {}),
+    ...(mode === "implement_checkpoint" && !firstOpenTask && subObject
+      ? { subCheckpoint: subObject }
+      : {}),
+    ...(mode === "prepare_subcheckpoint_transition" && transitionObject
+      ? { transition: transitionObject }
       : {}),
   };
 
@@ -389,6 +503,26 @@ export function deriveWorkBrief(input: WorkBriefInput): WorkBrief {
     next = {
       description: "Nenhuma ação de implementação/fechamento pendente — não inventar tarefa.",
       basis: nextAction.basis,
+    };
+  } else if (mode === "prepare_subcheckpoint_transition" && object.transition) {
+    const t = object.transition;
+    next = {
+      description: t.conclude
+        ? `Registrar a transição em tasks.md: concluir ${t.conclude.id} (→ [x]) e ativar ${t.activate.id} (→ [/]). Só depois implementar.`
+        : `Ativar ${t.activate.id} em tasks.md (→ [/]) antes de implementar.`,
+      basis: [
+        ...(t.conclude
+          ? [`concluir: ${t.conclude.id} — ${t.conclude.title} (linha ${t.conclude.line})`]
+          : []),
+        `ativar: ${t.activate.id} — ${t.activate.title} (linha ${t.activate.line})`,
+        "ato VISÍVEL e separado; o fechamento das dispositions não altera tasks.md silenciosamente.",
+      ],
+    };
+  } else if (mode === "implement_checkpoint" && object.subCheckpoint) {
+    const s = object.subCheckpoint;
+    next = {
+      description: `Implementar o sub-checkpoint ativo ${s.id} — ${s.title}.`,
+      basis: [`tasks.md linha ${s.line} (sub-checkpoint [/] em progresso)`],
     };
   } else {
     next = { description: nextAction.description, basis: nextAction.basis };
@@ -572,6 +706,21 @@ export function renderWorkBrief(collected: CollectedWorkBrief): string {
   if (brief.object.reviewLane) {
     lines.push(`- lane de review pendente: ${brief.object.reviewLane}`);
   }
+  if (brief.object.subCheckpoint) {
+    const s = brief.object.subCheckpoint;
+    lines.push(`- sub-checkpoint ativo: ${s.id} — ${s.title} (tasks.md linha ${s.line})`);
+  }
+  if (brief.object.transition) {
+    const t = brief.object.transition;
+    if (t.conclude) {
+      lines.push(
+        `- concluir: ${t.conclude.id} — ${t.conclude.title} (tasks.md linha ${t.conclude.line})`
+      );
+    }
+    lines.push(
+      `- ativar: ${t.activate.id} — ${t.activate.title} (tasks.md linha ${t.activate.line})`
+    );
+  }
   if (brief.object.findings && brief.object.findings.length > 0) {
     lines.push("- findings:");
     for (const f of brief.object.findings) {
@@ -584,7 +733,13 @@ export function renderWorkBrief(collected: CollectedWorkBrief): string {
       );
     }
   }
-  if (!brief.object.task && !brief.object.findings && !brief.object.reviewLane) {
+  if (
+    !brief.object.task &&
+    !brief.object.findings &&
+    !brief.object.reviewLane &&
+    !brief.object.subCheckpoint &&
+    !brief.object.transition
+  ) {
     lines.push("- (nenhum objeto materializado para este modo)");
   }
   lines.push("");

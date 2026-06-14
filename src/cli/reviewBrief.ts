@@ -338,8 +338,13 @@ export function deriveReviewBrief(input: ReviewBriefInput): ReviewBrief {
   // PR/HEAD divergentes só BLOQUEIAM quando o remoto tem commits que o local
   // não tem (behind > 0 — pull pendente). Local à frente (push pendente) é
   // estado normal de review local-first: degrada, não bloqueia.
+  // SINCRONIZAÇÃO usa o git HEAD (relação de commits do branch), NUNCA o
+  // functional HEAD (que é só freshness) — senão um commit review-only à frente
+  // do functional HEAD produz "falso drift" com o PR head == git HEAD.
   const prHeadDiffers =
-    facts.pullRequest !== null && head !== null && !sameSha(facts.pullRequest.headRefOid, head);
+    facts.pullRequest !== null &&
+    gitHead !== null &&
+    !sameSha(facts.pullRequest.headRefOid, gitHead);
   const prHeadDiverges = prHeadDiffers && (facts.git.behind ?? 0) > 0;
 
   if (!checkpoint) {
@@ -364,7 +369,7 @@ export function deriveReviewBrief(input: ReviewBriefInput): ReviewBrief {
   } else if (prHeadDiverges) {
     mode = "blocked";
     modeBasis.push(
-      `PR/HEAD divergentes com remoto À FRENTE (behind ${facts.git.behind}): PR #${facts.pullRequest!.number} head ${facts.pullRequest!.headRefOid.slice(0, 7)} ≠ HEAD local ${head} — pull/reconcilie antes de revisar.`
+      `PR/HEAD divergentes com remoto À FRENTE (behind ${facts.git.behind}): PR #${facts.pullRequest!.number} head ${facts.pullRequest!.headRefOid.slice(0, 7)} ≠ git HEAD local ${gitHead} — pull/reconcilie antes de revisar.`
     );
   } else if (facts.lifecycle?.gateDecision === "approved") {
     mode = "blocked";
@@ -496,7 +501,7 @@ export function deriveReviewBrief(input: ReviewBriefInput): ReviewBrief {
   }
   if (prHeadDiffers && !prHeadDiverges && mode !== "blocked") {
     degraded.push(
-      `PR #${facts.pullRequest!.number} head remoto (${facts.pullRequest!.headRefOid.slice(0, 7)}) está atrás do HEAD local ${head} — push pendente; o review cobre o HEAD LOCAL.`
+      `PR #${facts.pullRequest!.number} head remoto (${facts.pullRequest!.headRefOid.slice(0, 7)}) está atrás do git HEAD local ${gitHead} — push pendente; o review cobre o HEAD LOCAL.`
     );
   }
 
