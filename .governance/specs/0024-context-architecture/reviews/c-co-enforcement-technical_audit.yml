@@ -15,7 +15,7 @@ findings:
       .core/constraints/constraints.yml no repoRoot e, em fixture apenas com
       .governance/constraints.yml, retorna fonte core ausente em vez de carregar
       o overlay do consumidor."
-    disposition: open
+    disposition: accepted
     fingerprint: 284894d6b794
   - id: F2
     severity: medium
@@ -23,7 +23,7 @@ findings:
     description: "source_ref pode escapar do repoRoot via segmentos como
       ../outside.md; a paridade aceita arquivo externo se ele existir e contiver
       a ancora, vazando a fronteira canonica do repositorio/consumidor."
-    disposition: open
+    disposition: accepted
     fingerprint: bad9a10cd59b
   - id: F3
     severity: medium
@@ -31,5 +31,5 @@ findings:
     description: "Validacao de ancora nao prova heading canonico: anchorExists usa
       text.includes('[anchor]'), entao mencao em corpo ou code block gera
       falso-verde para source_ref."
-    disposition: open
+    disposition: accepted
     fingerprint: fcc4f1136709
