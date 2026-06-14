@@ -154,3 +154,50 @@ script (resolução de superfície) ou registry (metadados de comando) muda os b
   build:rules; não persiste sob violação; core ausente ⇒ exit 2; propaga falha do build:rules;
   e os três eixos de paridade do `check` (existência / classe / sync / não-reproduzível /
   dispatcher).
+
+---
+
+## Parte 3 — Refinamento do dogfood: a “Próxima ação” não mostrava comandos governados
+
+### Fato observado
+
+Ao retomar o CO-3.2 por `guidelines work`, a seção §11 “Próxima ação” dizia O QUE deve
+acontecer ("Implementar o sub-checkpoint ativo CO-3.2") mas **não mostrava quais comandos
+governados** estão disponíveis para EXECUTAR ou apenas INSPECIONAR essa ação. O humano sabia
+o destino, não o trajeto governado — exatamente o tipo de contrato executável invisível que o
+laço CO combate (PIT-0011).
+
+### Correção (next_action estruturada, derivada do estado)
+
+`WorkBrief.nextAction` deixou de ser `{ description, basis }` e passou a `WorkNextAction`:
+resumo humano + **comandos governados** (papel `reconcile`/`recommended`/`read-only`/`after`,
+rótulo pt-BR, comando) + **ações que continuam proibidas**. Os comandos são **derivados do
+TIPO de decisão pendente** (`--type <tipo> --brief-only` interpola o tipo; nunca texto livre),
+projetados por `deriveWorkNextAction(mode, object, facts, …)`:
+
+- **advance-subcheckpoint** (implement com sub ativo + próximo pendente, ou transição): resumo
+  "Concluir CO-3.2 e ativar CO-3.3"; recomendado `npm run guidelines -- decide`; somente leitura
+  `… decide --type advance-subcheckpoint --brief-only`; depois `… work --authorization
+explicit-work-request`; ainda proibido: Human Gate, Ready, merge, próximo PR.
+- **close-dispositions** (await_revalidation): a owner encerra os problemas revalidados.
+- **human-gate** (prepare_close/current): exercível só com Ready + CI verde + reviews
+  satisfeitos; **bloqueado** (ex.: PR Draft) ⇒ SÓ a inspeção read-only (não sugere o wizard
+  interativo — comando incompatível com o estado).
+
+Regras honradas: no **máximo 3 comandos**; **estados sem decisão não inventam `decide`**
+(`resolve_findings`/tarefa de topo ⇒ zero comando); **estados bloqueados mostram a
+reconciliação PRIMEIRO** (`reconcile:check`/`git status`/`git pull --ff-only` conforme o
+motivo); a **mesma** `next_action` alimenta o renderer (§11) e o contrato do relatório final
+(uma fonte só). `stillForbidden` é curado por tipo a partir do `not_authorized` de
+`human-decision-policy.yml`.
+
+### Falsificação (live + unit)
+
+- **Live:** com este próprio trabalho não-commitado, `guidelines work` infere **`blocked`**
+  (working tree funcional suja) e a §11 projeta **primeiro** `Reconciliar … : git status` —
+  zero `decide`. Prova viva da regra "bloqueado ⇒ reconciliação primeiro, nunca inventa
+  decide".
+- **Unit `[38]`–`[46]`:** estado real ⇒ "Concluir CO-3.2 e ativar CO-3.3" com os 3 comandos
+  exatos + proibições; transição; close-dispositions; human-gate bloqueado (1 comando
+  read-only, sem recomendado) e exercível (3 comandos); resolve_findings e tarefa de topo sem
+  `decide`; drift ⇒ `reconcile:check` primeiro; renderer projeta a mesma next_action.

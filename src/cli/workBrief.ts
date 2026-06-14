@@ -123,6 +123,31 @@ export interface WorkValidation {
   readonly level: "obrigatório" | "recomendado";
 }
 
+/** Papel de um comando governado projetado na próxima ação (determina a ordem). */
+export type WorkCommandRole = "reconcile" | "recommended" | "read-only" | "after";
+
+export interface WorkNextActionCommand {
+  readonly role: WorkCommandRole;
+  /** Rótulo humano pt-BR (o que o comando faz). */
+  readonly label: string;
+  readonly command: string;
+}
+
+/**
+ * Próxima ação ESTRUTURADA: além do resumo humano, projeta os comandos
+ * governados disponíveis para EXECUTAR ou apenas INSPECIONAR a ação, derivados do
+ * TIPO de decisão pendente (não texto livre), e as ações que continuam proibidas.
+ * É a MESMA fonte consumida pelo renderer (§11) e pelo relatório final.
+ */
+export interface WorkNextAction {
+  readonly description: string;
+  readonly basis: readonly string[];
+  /** Comandos governados (≤ 3), em ordem de precedência (reconcile primeiro quando bloqueado). */
+  readonly commands: readonly WorkNextActionCommand[];
+  /** Ações que permanecem proibidas mesmo após a decisão pendente. */
+  readonly stillForbidden: readonly string[];
+}
+
 export interface WorkBrief {
   readonly specId: string;
   readonly checkpoint: string | null;
@@ -143,7 +168,7 @@ export interface WorkBrief {
   readonly prBodyEditable: boolean;
   readonly stopConditions: readonly string[];
   readonly reportSections: readonly string[];
-  readonly nextAction: { readonly description: string; readonly basis: readonly string[] };
+  readonly nextAction: WorkNextAction;
 }
 
 export interface WorkBriefInput {
@@ -265,6 +290,256 @@ export function resolveSubCheckpointWork(facts: HandoffFacts): SubCheckpointReso
   return { kind: "none", basis: [] };
 }
 
+// ── Próxima ação estruturada: comandos derivados do TIPO de decisão pendente ──
+
+/** Tipos de decisão reservados ao humano (espelham `human-decision-policy.yml`). */
+type DecisionType = "advance-subcheckpoint" | "close-dispositions" | "human-gate";
+
+const DECIDE_WIZARD_COMMAND = "npm run guidelines -- decide";
+const WORK_RELOAD_COMMAND = "npm run guidelines -- work --authorization explicit-work-request";
+
+/** Comando read-only DERIVADO do tipo (briefing da decisão, zero escrita). */
+function decideBriefCommand(type: DecisionType): string {
+  return `npm run guidelines -- decide --type ${type} --brief-only`;
+}
+
+/**
+ * Proibições que PERMANECEM mesmo após a decisão pendente, por tipo — curadas em
+ * pt-BR a partir do `not_authorized` de cada decisão em `human-decision-policy.yml`.
+ * Derivadas do TIPO (lookup determinístico), não texto livre montado por estado.
+ */
+const DECISION_STILL_FORBIDDEN: Record<DecisionType, readonly string[]> = {
+  "advance-subcheckpoint": [
+    "Exercer o Human Gate",
+    "Converter o PR para Ready",
+    "Fazer merge",
+    "Abrir o próximo PR",
+  ],
+  "close-dispositions": [
+    "Converter o PR para Ready",
+    "Exercer o Human Gate",
+    "Criar o gate artifact",
+    "Fazer merge",
+  ],
+  "human-gate": [
+    "Fazer merge",
+    "Alterar a topologia (state.yml) automaticamente",
+    "Abrir o próximo PR automaticamente",
+  ],
+};
+
+/**
+ * Comandos governados de uma decisão (≤ 3): quando exercível, recomendado
+ * (interativo) → somente leitura → depois da conclusão; quando bloqueada, SÓ a
+ * inspeção read-only (não sugerir o wizard nem o reload — incompatíveis com o
+ * estado). Os comandos são DERIVADOS do tipo, nunca hardcoded como texto livre.
+ */
+function decisionCommands(type: DecisionType, available: boolean): WorkNextActionCommand[] {
+  if (!available) {
+    return [
+      {
+        role: "read-only",
+        label: "Inspecionar por que a decisão ainda está bloqueada (zero escrita)",
+        command: decideBriefCommand(type),
+      },
+    ];
+  }
+  return [
+    {
+      role: "recommended",
+      label: "Decidir interativamente (wizard governado)",
+      command: DECIDE_WIZARD_COMMAND,
+    },
+    {
+      role: "read-only",
+      label: "Inspecionar a decisão sem escrever nada",
+      command: decideBriefCommand(type),
+    },
+    {
+      role: "after",
+      label: "Após a decisão, recarregar o contrato de trabalho",
+      command: WORK_RELOAD_COMMAND,
+    },
+  ];
+}
+
+function decisionNextAction(
+  type: DecisionType,
+  available: boolean,
+  description: string,
+  basis: readonly string[]
+): WorkNextAction {
+  return {
+    description,
+    basis,
+    commands: decisionCommands(type, available),
+    stillForbidden: DECISION_STILL_FORBIDDEN[type],
+  };
+}
+
+/** Estado BLOQUEADO: o comando de reconciliação vem PRIMEIRO; nunca inventa `decide`. */
+function reconcileNextAction(
+  description: string,
+  basis: readonly string[],
+  command: string
+): WorkNextAction {
+  return {
+    description,
+    basis,
+    commands: [
+      {
+        role: "reconcile",
+        label: "Reconciliar antes de qualquer decisão ou trabalho",
+        command,
+      },
+    ],
+    stillForbidden: [
+      "Decidir (`decide`) sobre estado divergente",
+      "Converter o PR para Ready",
+      "Exercer o Human Gate",
+      "Fazer merge",
+    ],
+  };
+}
+
+/** Estado SEM decisão pendente: descreve a ação do agente; NÃO inventa `decide`. */
+function plainNextAction(description: string, basis: readonly string[]): WorkNextAction {
+  return { description, basis, commands: [], stillForbidden: [] };
+}
+
+/**
+ * Projeta a PRÓXIMA AÇÃO estruturada a partir do modo já inferido + objeto +
+ * fatos. O tipo de decisão pendente é DERIVADO do estado; os comandos, do tipo.
+ * Estados sem decisão não inventam `decide`; estados bloqueados mostram a
+ * reconciliação primeiro.
+ */
+export function deriveWorkNextAction(
+  mode: WorkMode,
+  object: WorkObject,
+  facts: HandoffFacts,
+  rawNext: NextAction,
+  ctx: { readonly workingTreeState: WorkingTreeState; readonly prHeadDiverges: boolean }
+): WorkNextAction {
+  // BLOQUEADO → reconciliação primeiro (gate approved é abertura do próximo nó).
+  if (mode === "blocked") {
+    if (facts.lifecycle?.gateDecision === "approved") {
+      return plainNextAction(
+        `Gate do checkpoint ${object.checkpoint ?? "?"} já approved — confirmar o cursor e abrir o próximo nó (transição autorizada por gate).`,
+        ["nenhuma decisão reservada pendente neste nó; não inventar `decide`."]
+      );
+    }
+    const command =
+      ctx.workingTreeState === "functional-dirty"
+        ? "git status"
+        : ctx.prHeadDiverges
+          ? "git pull --ff-only"
+          : "npm run reconcile:check";
+    return reconcileNextAction(
+      "Reconciliar fontes/projeções/working tree antes de qualquer trabalho ou decisão.",
+      [rawNext.description, ...rawNext.basis],
+      command
+    );
+  }
+
+  // TRANSIÇÃO pendente (sub-checkpoint sem ativo, ou ativo concluído) → advance.
+  if (mode === "prepare_subcheckpoint_transition" && object.transition) {
+    const t = object.transition;
+    return decisionNextAction(
+      "advance-subcheckpoint",
+      true,
+      t.conclude
+        ? `Concluir ${t.conclude.id} e ativar ${t.activate.id}.`
+        : `Ativar ${t.activate.id}.`,
+      [
+        ...(t.conclude
+          ? [`concluir: ${t.conclude.id} — ${t.conclude.title} (tasks.md linha ${t.conclude.line})`]
+          : []),
+        `ativar: ${t.activate.id} — ${t.activate.title} (tasks.md linha ${t.activate.line})`,
+        "transição é decisão GOVERNADA da owner (não edição manual de tasks.md).",
+      ]
+    );
+  }
+
+  // IMPLEMENT com sub-checkpoint ativo → olha à frente para a transição governada.
+  if (mode === "implement_checkpoint" && object.subCheckpoint) {
+    const active = object.subCheckpoint;
+    const nextPending = facts.subCheckpoints.find((s) => s.state === "pending");
+    if (nextPending) {
+      return decisionNextAction(
+        "advance-subcheckpoint",
+        true,
+        `Concluir ${active.id} e ativar ${nextPending.id}.`,
+        [
+          `ativo: ${active.id} — ${active.title} (tasks.md linha ${active.line})`,
+          `próximo: ${nextPending.id} — ${nextPending.title} (tasks.md linha ${nextPending.line})`,
+          "ao satisfazer os critérios de saída, a transição é decisão GOVERNADA da owner.",
+        ]
+      );
+    }
+    return plainNextAction(
+      `Concluir ${active.id} (último sub-checkpoint do nó) — o avanço passa ao Human Gate, fora deste modo.`,
+      [`ativo: ${active.id} — ${active.title} (tasks.md linha ${active.line})`]
+    );
+  }
+
+  // AWAIT_REVALIDATION → close-dispositions (decisão da owner pós-revalidação).
+  if (mode === "await_revalidation") {
+    const open = object.findings ?? [];
+    const reviewPending = requiredReviewsPending(facts).length > 0;
+    return decisionNextAction(
+      "close-dispositions",
+      !reviewPending,
+      "Após a revalidação independente, a owner encerra os problemas revalidados da auditoria técnica (close-dispositions).",
+      [
+        ...open.map(
+          (f) => `${f.qualified}: ${f.disposition} · resolution fixed (ref ${f.ref ?? "?"})`
+        ),
+        ...(reviewPending
+          ? ["review obrigatório pendente — a revalidação independente precede o encerramento."]
+          : []),
+        "o implementador NÃO fecha disposition; só a owner/reviewer (close-dispositions).",
+      ]
+    );
+  }
+
+  // PREPARE_CLOSE / CURRENT → human-gate (exercível só com precondições satisfeitas).
+  if (mode === "prepare_close" || mode === "current") {
+    const pr = facts.pullRequest;
+    const gateDone = facts.lifecycle?.gateDecision === "approved";
+    const ciGreen = pr ? pr.checks.fail === 0 && pr.checks.pending === 0 : false;
+    const draft = pr ? pr.isDraft : true;
+    const reviewPending = requiredReviewsPending(facts).length > 0;
+    const available = pr !== null && !draft && ciGreen && !reviewPending && !gateDone;
+    if (available) {
+      return decisionNextAction(
+        "human-gate",
+        true,
+        `Decidir o avanço do checkpoint ${object.checkpoint ?? "?"} (Human Gate) — decisão da owner.`,
+        ["PR Ready, CI verde e reviews obrigatórios satisfeitos."]
+      );
+    }
+    const reason = gateDone
+      ? "gate já decidido"
+      : draft
+        ? "PR ainda Draft"
+        : !ciGreen
+          ? "CI não está verde"
+          : reviewPending
+            ? "review(s) obrigatório(s) pendente(s)"
+            : "precondições não satisfeitas";
+    return decisionNextAction(
+      "human-gate",
+      false,
+      `Human Gate do checkpoint ${object.checkpoint ?? "?"} ainda BLOQUEADO (${reason}).`,
+      ["satisfaça Ready + CI verde + reviews obrigatórios antes de exercer o gate."]
+    );
+  }
+
+  // RESOLVE_FINDINGS / IMPLEMENT (tarefa de topo) / fallback → trabalho do agente,
+  // sem decisão reservada pendente: não inventa `decide`.
+  return plainNextAction(rawNext.description, rawNext.basis);
+}
+
 /**
  * Inferência DETERMINÍSTICA do modo + projeção do contrato. Puro: nenhuma leitura
  * de fs/Git/GitHub — tudo vem do snapshot e da policy injetados.
@@ -275,7 +550,6 @@ export function deriveWorkBrief(input: WorkBriefInput): WorkBrief {
   const checkpoint = facts.cursor?.checkpoint ?? null;
   const gitHead = facts.git.head;
   const effectiveFunctionalHead = input.effectiveFunctionalHead ?? gitHead;
-  const head = effectiveFunctionalHead;
   const workingTreeState = input.workingTreeState;
   const modeBasis: string[] = [];
   const degraded: string[] = [];
@@ -484,49 +758,11 @@ export function deriveWorkBrief(input: WorkBriefInput): WorkBrief {
     ),
   ];
 
-  // ── Próxima ação por modo ───────────────────────────────────────────────────
-  let next: { description: string; basis: readonly string[] };
-  if (mode === "await_revalidation") {
-    next = {
-      description:
-        "Solicitar revalidação independente por reviewer/owner sobre o functional HEAD " +
-        `${head ?? "?"} — o implementador NÃO cria nova resolution nem fecha disposition.`,
-      basis: [
-        ...openFindings.map(
-          (f) => `${f.qualified}: ${f.disposition} · resolution fixed (ref ${f.ref ?? "?"})`
-        ),
-        ...(object.reviewLane ? [`review obrigatório pendente: ${object.reviewLane}`] : []),
-        "dispositions fecham só por reviewer/owner (review:check)",
-      ],
-    };
-  } else if (mode === "current") {
-    next = {
-      description: "Nenhuma ação de implementação/fechamento pendente — não inventar tarefa.",
-      basis: nextAction.basis,
-    };
-  } else if (mode === "prepare_subcheckpoint_transition" && object.transition) {
-    const t = object.transition;
-    next = {
-      description: t.conclude
-        ? `Registrar a transição em tasks.md: concluir ${t.conclude.id} (→ [x]) e ativar ${t.activate.id} (→ [/]). Só depois implementar.`
-        : `Ativar ${t.activate.id} em tasks.md (→ [/]) antes de implementar.`,
-      basis: [
-        ...(t.conclude
-          ? [`concluir: ${t.conclude.id} — ${t.conclude.title} (linha ${t.conclude.line})`]
-          : []),
-        `ativar: ${t.activate.id} — ${t.activate.title} (linha ${t.activate.line})`,
-        "ato VISÍVEL e separado; o fechamento das dispositions não altera tasks.md silenciosamente.",
-      ],
-    };
-  } else if (mode === "implement_checkpoint" && object.subCheckpoint) {
-    const s = object.subCheckpoint;
-    next = {
-      description: `Implementar o sub-checkpoint ativo ${s.id} — ${s.title}.`,
-      basis: [`tasks.md linha ${s.line} (sub-checkpoint [/] em progresso)`],
-    };
-  } else {
-    next = { description: nextAction.description, basis: nextAction.basis };
-  }
+  // ── Próxima ação ESTRUTURADA (resumo + comandos derivados do tipo de decisão) ─
+  const next = deriveWorkNextAction(mode, object, facts, nextAction, {
+    workingTreeState,
+    prHeadDiverges,
+  });
 
   return {
     specId,
@@ -810,6 +1046,14 @@ export function renderWorkBrief(collected: CollectedWorkBrief): string {
   lines.push("## 11. Próxima ação");
   lines.push(`- ${brief.nextAction.description}`);
   for (const basis of brief.nextAction.basis) lines.push(`  - ${basis}`);
+  if (brief.nextAction.commands.length > 0) {
+    lines.push("- comandos governados disponíveis:");
+    for (const c of brief.nextAction.commands) lines.push(`  - ${c.label}: \`${c.command}\``);
+  }
+  if (brief.nextAction.stillForbidden.length > 0) {
+    lines.push("- continua proibido:");
+    for (const f of brief.nextAction.stillForbidden) lines.push(`  - ${f}`);
+  }
   lines.push("");
   lines.push(
     `_Briefing derivado do snapshot da carga (selo ${snapshot.derived.seal}). O runtime projeta o contrato; a execução é do agente sob autoridade do humano._`
