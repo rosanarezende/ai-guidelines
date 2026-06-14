@@ -40,6 +40,12 @@ import {
   WorkPublicationPolicy,
   parseWorkPolicy,
 } from "../infrastructure/yaml/workPolicyReader.js";
+import {
+  findDecisionType,
+  parseHumanDecisionPolicy,
+} from "../infrastructure/yaml/humanDecisionPolicyReader.js";
+import type { DecisionAvailability } from "./decide/model.js";
+import { ADVANCE_SUBCHECKPOINT_ID, deriveAdvanceEligibility } from "./decide/advanceEligibility.js";
 
 export interface Logger {
   info: (msg: string) => void;
@@ -146,6 +152,13 @@ export interface WorkNextAction {
   readonly commands: readonly WorkNextActionCommand[];
   /** Ações que permanecem proibidas mesmo após a decisão pendente. */
   readonly stillForbidden: readonly string[];
+  /**
+   * Tipo de decisão humana a que esta ação se refere (null quando não há decisão
+   * reservada pendente). INVARIANTE: quando há um comando `recommended`
+   * (executável), este tipo DEVE estar `available` no `DecisionRegistry` —
+   * `work` nunca recomenda como executável uma decisão que `decide` bloqueia.
+   */
+  readonly decisionType: DecisionType | null;
 }
 
 export interface WorkBrief {
@@ -184,6 +197,13 @@ export interface WorkBriefInput {
   readonly functionalDirtyFiles?: readonly string[];
   readonly effectiveFunctionalHead?: string | null;
   readonly authorization: WorkAuthorizationArg | null;
+  /**
+   * Elegibilidade de `advance-subcheckpoint` DERIVADA pela MESMA função que
+   * `decide` usa (`deriveAdvanceEligibility`) sobre o mesmo snapshot factual. O
+   * collector a calcula; testes a injetam. `work` só recomenda a transição como
+   * executável quando esta é `available`.
+   */
+  readonly advanceEligibility: DecisionAvailability;
 }
 
 export interface CollectedWorkBrief {
@@ -374,7 +394,53 @@ function decisionNextAction(
     basis,
     commands: decisionCommands(type, available),
     stillForbidden: DECISION_STILL_FORBIDDEN[type],
+    decisionType: type,
   };
+}
+
+/**
+ * Próxima ação de uma TRANSIÇÃO de sub-checkpoint, derivada da elegibilidade
+ * COMPARTILHADA com `decide` (nunca hardcoded). Available → recomenda o wizard;
+ * blocked → só inspeção read-only com os requisitos NOMEADOS, e `work` NÃO o
+ * recomenda como executável; not-applicable → descreve o trabalho, sem `decide`.
+ */
+function advanceNextAction(
+  availability: DecisionAvailability,
+  conclude: WorkSubCheckpointRef | null,
+  activate: WorkSubCheckpointRef
+): WorkNextAction {
+  const transitionDesc = conclude
+    ? `Concluir ${conclude.id} e ativar ${activate.id}.`
+    : `Ativar ${activate.id}.`;
+  const transitionBasis = [
+    ...(conclude
+      ? [`concluir: ${conclude.id} — ${conclude.title} (tasks.md linha ${conclude.line})`]
+      : []),
+    `ativar: ${activate.id} — ${activate.title} (tasks.md linha ${activate.line})`,
+  ];
+  if (availability.status === "available") {
+    return decisionNextAction("advance-subcheckpoint", true, transitionDesc, [
+      ...transitionBasis,
+      "ao satisfazer os critérios de saída, a transição é decisão GOVERNADA da owner.",
+    ]);
+  }
+  if (availability.status === "blocked") {
+    return decisionNextAction(
+      "advance-subcheckpoint",
+      false,
+      `Avanço ${conclude ? `${conclude.id} → ` : ""}${activate.id} ainda BLOQUEADO — \`decide\` não o classifica como disponível.`,
+      [
+        ...transitionBasis,
+        ...availability.reasons.map((r) => `requisito pendente: ${r}`),
+        "`work` não recomenda como executável uma transição que `decide` bloqueia.",
+      ]
+    );
+  }
+  // not-applicable → não há decisão de transição recomendável; descreve o trabalho.
+  return plainNextAction(transitionDesc, [
+    ...transitionBasis,
+    ...availability.reasons.map((r) => `nota: ${r}`),
+  ]);
 }
 
 /** Estado BLOQUEADO: o comando de reconciliação vem PRIMEIRO; nunca inventa `decide`. */
@@ -399,12 +465,13 @@ function reconcileNextAction(
       "Exercer o Human Gate",
       "Fazer merge",
     ],
+    decisionType: null,
   };
 }
 
 /** Estado SEM decisão pendente: descreve a ação do agente; NÃO inventa `decide`. */
 function plainNextAction(description: string, basis: readonly string[]): WorkNextAction {
-  return { description, basis, commands: [], stillForbidden: [] };
+  return { description, basis, commands: [], stillForbidden: [], decisionType: null };
 }
 
 /**
@@ -418,7 +485,12 @@ export function deriveWorkNextAction(
   object: WorkObject,
   facts: HandoffFacts,
   rawNext: NextAction,
-  ctx: { readonly workingTreeState: WorkingTreeState; readonly prHeadDiverges: boolean }
+  ctx: {
+    readonly workingTreeState: WorkingTreeState;
+    readonly prHeadDiverges: boolean;
+    /** Elegibilidade de advance-subcheckpoint (MESMA derivação de `decide`). */
+    readonly advanceEligibility: DecisionAvailability;
+  }
 ): WorkNextAction {
   // BLOQUEADO → reconciliação primeiro (gate approved é abertura do próximo nó).
   if (mode === "blocked") {
@@ -441,40 +513,24 @@ export function deriveWorkNextAction(
     );
   }
 
-  // TRANSIÇÃO pendente (sub-checkpoint sem ativo, ou ativo concluído) → advance.
+  // TRANSIÇÃO pendente (sub-checkpoint sem ativo, ou ativo concluído) → advance,
+  // recomendável SOMENTE quando `decide` classifica como disponível.
   if (mode === "prepare_subcheckpoint_transition" && object.transition) {
     const t = object.transition;
-    return decisionNextAction(
-      "advance-subcheckpoint",
-      true,
-      t.conclude
-        ? `Concluir ${t.conclude.id} e ativar ${t.activate.id}.`
-        : `Ativar ${t.activate.id}.`,
-      [
-        ...(t.conclude
-          ? [`concluir: ${t.conclude.id} — ${t.conclude.title} (tasks.md linha ${t.conclude.line})`]
-          : []),
-        `ativar: ${t.activate.id} — ${t.activate.title} (tasks.md linha ${t.activate.line})`,
-        "transição é decisão GOVERNADA da owner (não edição manual de tasks.md).",
-      ]
-    );
+    return advanceNextAction(ctx.advanceEligibility, t.conclude, t.activate);
   }
 
-  // IMPLEMENT com sub-checkpoint ativo → olha à frente para a transição governada.
+  // IMPLEMENT com sub-checkpoint ativo → olha à frente para a transição governada
+  // (elegibilidade COMPARTILHADA com `decide`, nunca hardcoded como disponível).
   if (mode === "implement_checkpoint" && object.subCheckpoint) {
     const active = object.subCheckpoint;
     const nextPending = facts.subCheckpoints.find((s) => s.state === "pending");
     if (nextPending) {
-      return decisionNextAction(
-        "advance-subcheckpoint",
-        true,
-        `Concluir ${active.id} e ativar ${nextPending.id}.`,
-        [
-          `ativo: ${active.id} — ${active.title} (tasks.md linha ${active.line})`,
-          `próximo: ${nextPending.id} — ${nextPending.title} (tasks.md linha ${nextPending.line})`,
-          "ao satisfazer os critérios de saída, a transição é decisão GOVERNADA da owner.",
-        ]
-      );
+      return advanceNextAction(ctx.advanceEligibility, active, {
+        id: nextPending.id,
+        title: nextPending.title,
+        line: nextPending.line,
+      });
     }
     return plainNextAction(
       `Concluir ${active.id} (último sub-checkpoint do nó) — o avanço passa ao Human Gate, fora deste modo.`,
@@ -762,6 +818,7 @@ export function deriveWorkBrief(input: WorkBriefInput): WorkBrief {
   const next = deriveWorkNextAction(mode, object, facts, nextAction, {
     workingTreeState,
     prHeadDiverges,
+    advanceEligibility: input.advanceEligibility,
   });
 
   return {
@@ -824,6 +881,55 @@ export function loadWorkPolicy(repoRoot: string): {
   }
 }
 
+const HUMAN_DECISION_POLICY_PATH = ".core/governance/human-decision-policy.yml";
+
+/** O tipo `advance-subcheckpoint` está declarado na human-decision-policy? (fail-closed) */
+function advanceTypeDeclared(repoRoot: string): boolean {
+  const policyPath = path.join(repoRoot, HUMAN_DECISION_POLICY_PATH);
+  try {
+    const policy = parseHumanDecisionPolicy(fs.readFileSync(policyPath, "utf-8"));
+    return findDecisionType(policy, ADVANCE_SUBCHECKPOINT_ID) !== undefined;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Projeta a elegibilidade de `advance-subcheckpoint` do lado do `work`, pela
+ * MESMA função `deriveAdvanceEligibility` que `decide` usa, sobre os mesmos
+ * `HandoffFacts` da carga. Contagens vêm do lifecycle do handoff; os erros de
+ * integridade vêm do mesmo `discover` que alimenta os findings.
+ */
+function collectAdvanceEligibility(
+  facts: HandoffFacts,
+  findings: readonly WorkFinding[],
+  workingTreeState: WorkingTreeState,
+  consolidationErrors: readonly string[],
+  policyDeclared: boolean
+): DecisionAvailability {
+  const lc = facts.lifecycle;
+  const pr = facts.pullRequest;
+  return deriveAdvanceEligibility({
+    subCheckpoints: facts.subCheckpoints,
+    policyDeclared,
+    closedFindings: lc?.closedFindings ?? 0,
+    openFindings: lc?.openFindings ?? 0,
+    openBlocking: lc?.openBlocking ?? 0,
+    someFixAwaitingRevalidation: findings.some(
+      (f) => f.disposition === "open" && f.hasFixedResolution && f.refValid !== false
+    ),
+    blockingReviews: (lc?.reviewStatuses ?? [])
+      .filter((s) => s.blocking)
+      .map((s) => ({ typeId: s.typeId, state: s.state })),
+    consolidationErrors,
+    workingTreeClean: workingTreeState === "clean",
+    behind: facts.git.behind ?? 0,
+    ciFail: pr?.checks.fail ?? 0,
+    ciPending: pr?.checks.pending ?? 0,
+    gateExists: lc?.gateDecision != null,
+  });
+}
+
 export function collectWorkBrief(
   repoRoot: string,
   options: WorkBriefOptions = {}
@@ -834,7 +940,7 @@ export function collectWorkBrief(
   const matches = (cp: string): boolean =>
     cursor !== null && normalizeCheckpoint(cp) === normalizeCheckpoint(cursor.checkpoint);
 
-  const { artifacts } = discover(repoRoot);
+  const { artifacts, errors: discoverErrors } = discover(repoRoot);
   const reviews = artifacts.reviews.filter((r) => matches(r.checkpoint));
   const resolutionArtifacts = artifacts.resolutions.filter((r) => matches(r.checkpoint));
 
@@ -871,6 +977,13 @@ export function collectWorkBrief(
   }
 
   const { policy, error } = loadWorkPolicy(repoRoot);
+  const advanceEligibility = collectAdvanceEligibility(
+    facts,
+    findings,
+    freshness.workingTreeState,
+    discoverErrors.map(String),
+    advanceTypeDeclared(repoRoot)
+  );
   const brief = deriveWorkBrief({
     facts,
     nextAction: snapshot.derived.nextAction,
@@ -883,6 +996,7 @@ export function collectWorkBrief(
     functionalDirtyFiles: freshness.functionalDirtyFiles,
     effectiveFunctionalHead: freshness.effectiveFunctionalHead,
     authorization: options.authorization ?? null,
+    advanceEligibility,
   });
 
   return { snapshot, brief };

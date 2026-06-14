@@ -201,3 +201,81 @@ motivo); a **mesma** `next_action` alimenta o renderer (§11) e o contrato do re
   exatos + proibições; transição; close-dispositions; human-gate bloqueado (1 comando
   read-only, sem recomendado) e exercível (3 comandos); resolve_findings e tarefa de topo sem
   `decide`; drift ⇒ `reconcile:check` primeiro; renderer projeta a mesma next_action.
+
+---
+
+## Parte 4 — Refinamento do dogfood: `work` recomendava uma transição que `decide` ocultava
+
+### Fato observado
+
+Retomando o CO-3.2 com a working tree LIMPA (sem trabalho pendente), os dois comandos
+governados se **contradiziam** sobre a MESMA decisão:
+
+- `guidelines work` §11 recomendava `npm run guidelines -- decide` para **concluir CO-3.2 e
+  ativar CO-3.3** (comando `recommended`, executável);
+- `guidelines decide` mostrava no menu **somente** o Human Gate indisponível e **omitia**
+  `advance-subcheckpoint`;
+- `guidelines decide --type advance-subcheckpoint --brief-only` dizia que a decisão **“não se
+  aplica agora”** porque "o sub-checkpoint CO-3.2 está em andamento; conclua o trabalho antes
+  de avançar".
+
+Estado factual idêntico em ambos: CO-3.1 `[x]`, CO-3.2 `[/]`, CO-3.3 `[ ]`, implementação
+entregue, PR #42 Draft, CI verde, auditoria do CO-3.1 fechada (3/0).
+
+### Causa-raiz (estrutural, não o estado)
+
+A elegibilidade da transição vivia **DUPLICADA em três lugares**, com regras divergentes:
+
+1. `work` (`deriveWorkNextAction`, ramo `implement_checkpoint`): **hardcodava `available =
+true`** sempre que havia sub ativo + próximo pendente — nunca consultava o registry real.
+2. `decide` (`AdvanceSubcheckpointDefinition.detect` / `pair`): um guard `done.length > 0` →
+   **`not-applicable`** (e o menu oculta `not-applicable`). O comentário presumia "já houve um
+   avanço; o atual está em trabalho", mas **ter um sub-checkpoint `[x]` é o caso NORMAL de toda
+   transição depois da primeira** — o guard tornava `advance` permanentemente inaplicável a
+   partir de CO-3.2 → CO-3.3.
+3. `resolveSubCheckpointWork` (forma de transição de `work`, com seu próprio `done.length ===
+0`).
+
+`work` (1) e `decide` (2) respondiam à pergunta "a transição pode ser exercida?" com
+derivações diferentes — por isso a contradição. Corrigir o **estado** (flipar marcadores) ou
+remover só o smell citado mascararia a causa; o conserto é estrutural (GG/feedback: corrija o
+COMPORTAMENTO, não o smell nomeado).
+
+### Correção (derivação ÚNICA de elegibilidade)
+
+Nasce `src/cli/decide/advanceEligibility.ts` — **SSOT** `deriveAdvanceEligibility(facts)` +
+`advanceTransitionPair(subs)`. Tanto `decide` (`detect`/`pair` delegam) quanto `work` (o
+collector projeta os mesmos fatos do MESMO snapshot do handoff e injeta a elegibilidade na
+`next_action`) consomem a MESMA função. Três estados nomeados:
+
+- **not-applicable**: a ESTRUTURA não admite transição (sem sub-checkpoints, nenhum `[/]`, tipo
+  não declarado) — some do menu;
+- **blocked**: estrutura válida + um CRITÉRIO de saída não satisfeito — cada requisito é
+  **NOMEADO** (auditoria, review obrigatório, **CI pendente** [novo], **CI com falha**, working
+  tree suja, branch atrás, gate já registrado) — aparece no menu como indisponível;
+- **available**: estrutura + critérios.
+
+O guard `done.length > 0` → not-applicable **foi removido**: número de `[x]` não é critério.
+`WorkNextAction` ganhou `decisionType`: a INVARIANTE — todo comando `recommended` por
+`work.nextAction` corresponde a uma decisão `available` no `DecisionRegistry`; decisão
+`blocked` NUNCA é recomendada como executável (só inspeção read-only, com o requisito nomeado).
+
+### Falsificação (live + integração)
+
+- **Live (tree suja, este próprio trabalho):** `work` §11 ⇒ `blocked` (reconciliar primeiro);
+  `decide` menu lista `advance-subcheckpoint` como **Indisponível — "A working tree não está
+  limpa"** (não mais omitido); o `--type … --brief-only` **explica blocked** identificando o
+  par "concluir CO-3.2 e ativar CO-3.3" + o requisito. Os três comandos **concordam**.
+- **Integração `advanceConsistency.test.ts` `[1]`–`[10]`:** reproduz EXATAMENTE o estado real
+  (CO-3.2 `[/]`, CO-3.3 `[ ]`, implementação entregue, PR Draft, tree limpa) ⇒ `decide`
+  available + no menu; `work` recomenda o wizard; **INVARIANTE** (comando recomendado ⇒
+  decisão `available` no registry); variante CI pendente ⇒ `decide` blocked com requisito
+  nomeado, `work` não recomenda como executável, **decisão bloqueada não vira recomendação**;
+  preserva CO-3.2 `[/]` e CO-3.3 `[ ]` (teste read-only — nenhuma transição executada).
+
+### Fronteira honrada
+
+A correção é da **inconsistência estrutural**, não da topologia: CO-3.2 permanece `[/]` e
+CO-3.3 permanece `[ ]`. Não se exerceu a transição, não se iniciou o CO-3.3, não se exerceu o
+Human Gate. O avanço de sub-checkpoint segue sendo **decisão governada da owner** — agora
+projetada de forma **consistente** por `work` e `decide`.

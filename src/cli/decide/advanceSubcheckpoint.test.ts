@@ -166,15 +166,40 @@ describe("advance-subcheckpoint · elegibilidade [decide]", () => {
     expect(def.detect(snap({ gateExists: true })).status).toBe("blocked");
   });
 
-  it("pós-transição (CO-3.1 [x], CO-3.2 [/]) ⇒ not-applicable", () => {
+  it("[27] ESTADO REAL pós-transição (CO-3.1 [x], CO-3.2 [/], CO-3.3 [ ], auditoria fechada) ⇒ available", () => {
+    // Regressão do dogfood: ter CO-3.1 já concluído ([x]) é o caso NORMAL de toda
+    // transição após a primeira — NÃO torna `advance` not-applicable (ocultando-o
+    // do menu enquanto `work` o recomendava). Com critérios de saída satisfeitos,
+    // a transição CO-3.2 → CO-3.3 é AVAILABLE.
     const s = snap({
+      subCheckpoints: subs([
+        { id: "CO-3.1", state: "done", line: 101 },
+        { id: "CO-3.2", state: "in-progress", line: 102 },
+        { id: "CO-3.3", state: "pending", line: 103 },
+        { id: "CO-3.4", state: "pending", line: 104 },
+      ]),
+    });
+    const av = def.detect(s);
+    expect(av.status).toBe("available");
+    expect(av.hint).toMatch(/CO-3\.2 concluível; CO-3\.3 é o próximo/);
+  });
+
+  it("[28] pós-transição com CI pendente ⇒ blocked e o requisito é NOMEADO", () => {
+    const facts = makeHandoffFacts({
+      lifecycle: { ...SETTLED },
+      pullRequest: { ...makeHandoffFacts().pullRequest!, checks: { pass: 9, fail: 0, pending: 3 } },
+    });
+    const s = snap({
+      facts,
       subCheckpoints: subs([
         { id: "CO-3.1", state: "done", line: 101 },
         { id: "CO-3.2", state: "in-progress", line: 102 },
         { id: "CO-3.3", state: "pending", line: 103 },
       ]),
     });
-    expect(def.detect(s).status).toBe("not-applicable");
+    const av = def.detect(s);
+    expect(av.status).toBe("blocked");
+    expect(av.reasons.join(" ")).toMatch(/verificação\(ões\) pendente/);
   });
 });
 

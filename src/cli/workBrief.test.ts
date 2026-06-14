@@ -100,6 +100,8 @@ function derive(over: Partial<WorkBriefInput>) {
     policy: POLICY,
     workingTreeState: "clean",
     authorization: null,
+    // Default: transição elegível. Testes de bloqueio sobrescrevem.
+    advanceEligibility: { status: "available", reasons: [] },
     ...over,
   });
 }
@@ -794,5 +796,66 @@ describe("workBrief · próxima ação estruturada [work]", () => {
     expect(out).toContain("npm run guidelines -- decide --type advance-subcheckpoint --brief-only");
     expect(out).toContain("continua proibido:");
     expect(out).toContain("Exercer o Human Gate");
+  });
+
+  it("[47] advance BLOQUEADO ⇒ work NÃO recomenda wizard; só inspeção read-only + requisito nomeado", () => {
+    const b = derive({
+      nextAction: nextAction("investigate-checkpoint"),
+      facts: facts({
+        subCheckpoints: subs([
+          { id: "CO-3.1", state: "done" },
+          { id: "CO-3.2", title: "knowledge:compile", state: "in-progress", line: 2 },
+          { id: "CO-3.3", title: "migração legacy", state: "pending", line: 3 },
+        ]),
+      }),
+      advanceEligibility: {
+        status: "blocked",
+        reasons: [
+          "A integração contínua ainda tem 2 verificação(ões) pendente(s) — aguarde o verde antes de avançar.",
+        ],
+      },
+    });
+    expect(b.mode).toBe("implement_checkpoint");
+    // bloqueado: nenhum comando recomendado (executável); só inspeção read-only.
+    expect(commandOf(b, "recommended")).toBeUndefined();
+    expect(b.nextAction.commands).toHaveLength(1);
+    expect(b.nextAction.commands[0].role).toBe("read-only");
+    expect(commandOf(b, "read-only")).toBe(
+      "npm run guidelines -- decide --type advance-subcheckpoint --brief-only"
+    );
+    expect(b.nextAction.decisionType).toBe("advance-subcheckpoint");
+    expect(b.nextAction.description).toMatch(/BLOQUEADO/);
+    // requisito NOMEADO explicitamente.
+    expect(b.nextAction.basis.join(" ")).toMatch(/verificação\(ões\) pendente/);
+  });
+
+  it("[48] INVARIANTE: comando `recommended` ⇒ decisão available; advance available ⇒ recomenda", () => {
+    const available = derive({
+      nextAction: nextAction("investigate-checkpoint"),
+      facts: facts({
+        subCheckpoints: subs([
+          { id: "CO-3.1", state: "done" },
+          { id: "CO-3.2", state: "in-progress", line: 2 },
+          { id: "CO-3.3", state: "pending", line: 3 },
+        ]),
+      }),
+      advanceEligibility: { status: "available", reasons: [] },
+    });
+    expect(available.nextAction.decisionType).toBe("advance-subcheckpoint");
+    expect(commandOf(available, "recommended")).toBe("npm run guidelines -- decide");
+
+    const blocked = derive({
+      nextAction: nextAction("investigate-checkpoint"),
+      facts: facts({
+        subCheckpoints: subs([
+          { id: "CO-3.1", state: "done" },
+          { id: "CO-3.2", state: "in-progress", line: 2 },
+          { id: "CO-3.3", state: "pending", line: 3 },
+        ]),
+      }),
+      advanceEligibility: { status: "blocked", reasons: ["x"] },
+    });
+    // decisão bloqueada NÃO aparece como recomendada.
+    expect(commandOf(blocked, "recommended")).toBeUndefined();
   });
 });

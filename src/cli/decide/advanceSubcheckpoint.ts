@@ -7,10 +7,11 @@
  * próximo `[ ]→[/]`) por edição ESTRUTURADA (por id + marcador), preservando
  * descrição/indentação/comentários/encoding/line endings e todo o resto.
  *
- * Consistência com `guidelines work`: a elegibilidade reusa `resolveSubCheckpointWork`
- * — `decide advance-subcheckpoint` fica disponível exatamente quando `work` infere
- * `prepare_subcheckpoint_transition`. Antes de escrever, simula o estado projetado
- * e exige que `work` passe a inferir `implement_checkpoint` com o próximo como objeto
+ * Consistência com `guidelines work`: a elegibilidade vem da derivação ÚNICA
+ * `deriveAdvanceEligibility` (advanceEligibility.ts) — a MESMA que `work` consome
+ * sobre o mesmo snapshot factual. `decide` e `work` nunca divergem na pergunta "a
+ * transição pode ser exercida?". Antes de escrever, simula o estado projetado e
+ * exige que `work` passe a inferir `implement_checkpoint` com o próximo como objeto
  * (validação prospectiva). Zero LLM (ADR 0018).
  */
 import * as fs from "node:fs";
@@ -28,14 +29,21 @@ import {
   HumanDecisionTechnicalDetail,
 } from "./model.js";
 import { DecisionSnapshot } from "./snapshot.js";
-import { HandoffFacts, HandoffSubCheckpoint, parseSubCheckpoints } from "../handoffFacts.js";
+import { HandoffFacts, parseSubCheckpoints } from "../handoffFacts.js";
 import { resolveSubCheckpointWork } from "../workBrief.js";
+import {
+  ADVANCE_SUBCHECKPOINT_ID,
+  AdvanceEligibilityFacts,
+  AdvanceTransitionPair,
+  advanceTransitionPair,
+  deriveAdvanceEligibility,
+} from "./advanceEligibility.js";
 import {
   findDecisionType,
   HumanDecisionTypePolicy,
 } from "../../infrastructure/yaml/humanDecisionPolicyReader.js";
 
-export const ADVANCE_SUBCHECKPOINT_ID = "advance-subcheckpoint";
+export { ADVANCE_SUBCHECKPOINT_ID };
 
 interface AdvancePayload {
   readonly tasksFile: string;
@@ -45,11 +53,6 @@ interface AdvancePayload {
   readonly activateTitle: string;
   readonly openFindings: number;
   readonly closedFindings: number;
-}
-
-interface TransitionPair {
-  readonly active: HandoffSubCheckpoint;
-  readonly next: HandoffSubCheckpoint;
 }
 
 function toPosix(p: string): string {
@@ -103,112 +106,40 @@ export class AdvanceSubcheckpointDefinition implements HumanDecisionDefinition {
   }
 
   /** Par (atual, próximo) quando a forma é exatamente uma transição concluir+ativar. */
-  private pair(snapshot: DecisionSnapshot): TransitionPair | null {
-    const subs = snapshot.subCheckpoints;
-    const inProgress = subs.filter((s) => s.state === "in-progress");
-    const done = subs.filter((s) => s.state === "done");
-    if (inProgress.length !== 1 || done.length !== 0) return null;
-    const active = inProgress[0];
-    const pendingAfter = subs.filter((s) => s.state === "pending" && s.line > active.line);
-    const pendingBefore = subs.filter((s) => s.state === "pending" && s.line < active.line);
-    if (pendingAfter.length === 0 || pendingBefore.length > 0) return null;
-    return { active, next: pendingAfter[0] };
+  private pair(snapshot: DecisionSnapshot): AdvanceTransitionPair | null {
+    return advanceTransitionPair(snapshot.subCheckpoints);
+  }
+
+  /**
+   * Projeta os fatos de elegibilidade do snapshot governado. É a ponte para a
+   * derivação ÚNICA `deriveAdvanceEligibility` — a MESMA consumida por `work`.
+   */
+  private eligibilityFacts(snapshot: DecisionSnapshot): AdvanceEligibilityFacts {
+    const lc = snapshot.facts.lifecycle;
+    const pr = snapshot.facts.pullRequest;
+    return {
+      subCheckpoints: snapshot.subCheckpoints,
+      policyDeclared: this.policyOf(snapshot) !== undefined,
+      closedFindings: lc?.closedFindings ?? 0,
+      openFindings: snapshot.openFindings.length,
+      openBlocking: snapshot.openFindings.filter((f) => f.blocking).length,
+      someFixAwaitingRevalidation: snapshot.openFindings.some(
+        (f) => f.resolution?.action === "fixed" && !f.verified
+      ),
+      blockingReviews: (lc?.reviewStatuses ?? [])
+        .filter((s) => s.blocking)
+        .map((s) => ({ typeId: s.typeId, state: s.state })),
+      consolidationErrors: snapshot.consolidation.errors,
+      workingTreeClean: snapshot.workingTreeState === "clean",
+      behind: snapshot.facts.git.behind ?? 0,
+      ciFail: pr?.checks.fail ?? 0,
+      ciPending: pr?.checks.pending ?? 0,
+      gateExists: snapshot.gateExists,
+    };
   }
 
   detect(snapshot: DecisionSnapshot): DecisionAvailability {
-    const policy = this.policyOf(snapshot);
-    if (!policy) {
-      return {
-        status: "not-applicable",
-        reasons: ["Tipo não declarado na human-decision-policy.yml."],
-      };
-    }
-    const subs = snapshot.subCheckpoints;
-    if (subs.length === 0) {
-      return { status: "not-applicable", reasons: ["Este checkpoint não tem sub-checkpoints."] };
-    }
-    const inProgress = subs.filter((s) => s.state === "in-progress");
-    const done = subs.filter((s) => s.state === "done");
-
-    // Forma da ordem (estrutura dos sub-checkpoints).
-    if (inProgress.length === 0) {
-      return {
-        status: "not-applicable",
-        reasons: ["Nenhum sub-checkpoint está em andamento ([/])."],
-      };
-    }
-    if (inProgress.length > 1) {
-      return {
-        status: "blocked",
-        reasons: ["Mais de um sub-checkpoint em andamento ([/]) — ambiguidade na ordem."],
-      };
-    }
-    const active = inProgress[0];
-    if (done.length > 0) {
-      // Já houve um avanço; o atual está em trabalho (ex.: pós-transição CO-3.2 [/]).
-      return {
-        status: "not-applicable",
-        reasons: [
-          `O sub-checkpoint ${active.id} está em andamento; conclua o trabalho antes de avançar.`,
-        ],
-      };
-    }
-    const pendingAfter = subs.filter((s) => s.state === "pending" && s.line > active.line);
-    const pendingBefore = subs.filter((s) => s.state === "pending" && s.line < active.line);
-    if (pendingAfter.length === 0) {
-      return {
-        status: "blocked",
-        reasons: [`Não há próximo sub-checkpoint pendente após ${active.id}.`],
-      };
-    }
-    if (pendingBefore.length > 0) {
-      return {
-        status: "blocked",
-        reasons: [
-          `Ordem ambígua: há sub-checkpoint pendente antes do ativo (${pendingBefore[0].id}).`,
-        ],
-      };
-    }
-
-    // Critérios de saída do atual + guardas operacionais.
-    const reasons: string[] = [];
-    const lc = snapshot.facts.lifecycle;
-    const openBlocking = snapshot.openFindings.filter((f) => f.blocking);
-    if (openBlocking.length > 0) {
-      reasons.push("Há finding bloqueante aberto na auditoria do sub-checkpoint atual.");
-    } else if (snapshot.openFindings.some((f) => f.resolution?.action === "fixed" && !f.verified)) {
-      reasons.push("Há correção aguardando revalidação independente.");
-    } else if (snapshot.openFindings.length > 0) {
-      reasons.push("Há problema aberto na auditoria do sub-checkpoint atual.");
-    } else if (!lc || lc.closedFindings === 0) {
-      reasons.push(`Critérios de saída de ${active.id} não confirmados (sem auditoria fechada).`);
-    }
-    for (const s of lc?.reviewStatuses ?? []) {
-      if (s.blocking) reasons.push(`Review obrigatório pendente: ${s.typeId} (${s.state}).`);
-    }
-    if (snapshot.consolidation.errors.length > 0) {
-      reasons.push(
-        `Integridade dos artefatos de review comprometida: ${snapshot.consolidation.errors[0]}`
-      );
-    }
-    if (snapshot.workingTreeState !== "clean") {
-      reasons.push("A working tree não está limpa.");
-    }
-    if ((snapshot.facts.git.behind ?? 0) > 0) {
-      reasons.push("A branch está atrás do remoto — reconcilie antes de avançar.");
-    }
-    if (snapshot.facts.pullRequest && snapshot.facts.pullRequest.checks.fail > 0) {
-      reasons.push(`A integração contínua tem ${snapshot.facts.pullRequest.checks.fail} falha(s).`);
-    }
-    if (snapshot.gateExists) {
-      reasons.push("O gate do checkpoint já foi registrado — a transição interna não se aplica.");
-    }
-    if (reasons.length > 0) return { status: "blocked", reasons };
-    return {
-      status: "available",
-      reasons: [],
-      hint: `${active.id} concluível; ${pendingAfter[0].id} é o próximo`,
-    };
+    return deriveAdvanceEligibility(this.eligibilityFacts(snapshot));
   }
 
   choices(snapshot: DecisionSnapshot): readonly HumanDecisionChoice[] {
