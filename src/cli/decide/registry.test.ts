@@ -3,8 +3,12 @@ import { CloseDispositionsDefinition } from "./closeDispositions.js";
 import { HumanGateDefinition } from "./humanGate.js";
 
 describe("DecisionRegistry [decide]", () => {
-  it("[1] registry contém os dois tipos obrigatórios", () => {
-    expect(buildDecisionRegistry().ids()).toEqual(["close-dispositions", "human-gate"]);
+  it("[1] registry contém os tipos na ordem do ciclo de vida", () => {
+    expect(buildDecisionRegistry().ids()).toEqual([
+      "close-dispositions",
+      "advance-subcheckpoint",
+      "human-gate",
+    ]);
   });
 
   it("[2] tipo duplicado falha alto e cedo", () => {
@@ -18,7 +22,7 @@ describe("DecisionRegistry [decide]", () => {
       buildDecisionRegistry()
         .definitions()
         .map((d) => d.id)
-    ).toEqual(["close-dispositions", "human-gate"]);
+    ).toEqual(["close-dispositions", "advance-subcheckpoint", "human-gate"]);
   });
 
   it("[3] resolve por id; desconhecido = undefined", () => {

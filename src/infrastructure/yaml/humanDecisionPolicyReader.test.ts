@@ -12,10 +12,14 @@ const REAL = fs.readFileSync(
 );
 
 describe("humanDecisionPolicyReader [decide]", () => {
-  it("[63] parseia a policy real distribuída (.core/**) com os dois tipos", () => {
+  it("[63] parseia a policy real distribuída (.core/**) com os tipos declarados", () => {
     const policy = parseHumanDecisionPolicy(REAL);
     expect(policy.version).toBe(1);
-    expect(policy.decisionTypes.map((t) => t.id)).toEqual(["close-dispositions", "human-gate"]);
+    expect(policy.decisionTypes.map((t) => t.id)).toEqual([
+      "close-dispositions",
+      "advance-subcheckpoint",
+      "human-gate",
+    ]);
     expect(policy.owner.handle).toBe("@rosanarezende");
   });
 
