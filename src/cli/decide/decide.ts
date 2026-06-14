@@ -507,21 +507,21 @@ async function runWizard(
     logger.info(renderBrief(brief, { technical }));
     logger.info("");
 
+    // O wizard RENDERIZA o briefing governado; não injeta escolhas de decisão.
+    // O cancelamento sem efeito já é uma escolha não-mutante do contrato (toda
+    // decisão a declara e ela é sempre `available`), então não há um "Cancelar"
+    // hardcoded além dela — isso geraria duas opções de cancelamento. A única
+    // afordância de UI injetada é o toggle de detalhes técnicos.
     const choiceOptions = [
       ...brief.choices.filter((c) => c.available).map((c) => ({ name: c.label, value: c.id })),
       ...(brief.technicalDetails.length > 0 && !technical
         ? [{ name: "Ver detalhes técnicos", value: TECHNICAL_CHOICE }]
         : []),
-      { name: "Cancelar", value: "__cancel__" },
     ];
     const picked = await io.select<string>({
       message: "O que você decide?",
       choices: choiceOptions,
     });
-    if (picked === "__cancel__") {
-      logger.info("Cancelado. Nada foi alterado.");
-      return 0;
-    }
     if (picked === TECHNICAL_CHOICE) {
       technical = true;
       continue;

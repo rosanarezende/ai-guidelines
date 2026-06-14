@@ -11,7 +11,7 @@ import {
   HumanDecisionDefinition,
 } from "./model.js";
 import { DecisionSnapshot } from "./snapshot.js";
-import { Prompts } from "../../app/ports/Prompts.js";
+import { Prompts, SelectOptions } from "../../app/ports/Prompts.js";
 import { makeDecisionSnapshot } from "../../test-utils/decisionFixtures.js";
 
 // ── Doubles ──────────────────────────────────────────────────────────────────
@@ -81,13 +81,16 @@ class SpyDefinition implements HumanDecisionDefinition {
 
 class FakePrompts implements Prompts {
   log: string[] = [];
+  /** `value`s apresentados em cada `select` (ordem das telas). */
+  presented: string[][] = [];
   constructor(
     private readonly selects: unknown[] = [],
     private readonly confirms: boolean[] = [],
     private readonly inputs: string[] = []
   ) {}
-  select<T = string>(opts: { message: string }): Promise<T> {
+  select<T = string>(opts: SelectOptions<T>): Promise<T> {
     this.log.push(`select:${opts.message}`);
+    this.presented.push(opts.choices.map((c) => String(c.value)));
     return Promise.resolve(this.selects.shift() as T);
   }
   input(opts: { message: string }): Promise<string> {
@@ -343,6 +346,34 @@ describe("runDecide · wizard interativo [decide]", () => {
       });
       expect(spy.applied).toHaveLength(0);
     }
+  });
+
+  it("[73] a tela de escolha não injeta um segundo cancelamento (regressão: duas opções de cancelar)", async () => {
+    // Bug de dogfood (CO-3.2): o wizard mostrava DUAS opções sem efeito —
+    // a `cancel` do contrato governado ("Cancelar (não escreve nada)") E um
+    // "Cancelar" injetado pelo próprio wizard (`__cancel__`). A tela de escolha
+    // deve renderizar EXATAMENTE as escolhas do briefing (+ o toggle técnico),
+    // genérico para todo tipo de decisão — sem segundo cancelamento injetado.
+    const spy = new SpyDefinition();
+    const prompts = new FakePrompts(["spy", "cancel"], []);
+    const { logger: lg } = logger();
+    await runDecide("/x", parseDecideArgs([]), {
+      logger: lg,
+      prompts,
+      registry: regWith(spy),
+      collect,
+      isTTY: true,
+      gitConfig: OWNER_CFG,
+    });
+    // presented[0] = tela 1 (lista); presented[1] = tela de escolha da decisão.
+    const decisionScreen = prompts.presented[1];
+    // Exatamente as escolhas governadas (go, cancel) + o toggle técnico; nada mais.
+    expect(decisionScreen).toEqual(["go", "cancel", "__technical__"]);
+    // Nenhum cancelamento injetado pelo wizard.
+    expect(decisionScreen).not.toContain("__cancel__");
+    // Exatamente UMA escolha de cancelamento sem efeito.
+    expect(decisionScreen.filter((v) => v === "cancel")).toHaveLength(1);
+    expect(spy.applied).toHaveLength(0);
   });
 
   it("[52] snapshot alterado antes da confirmação aborta", async () => {
