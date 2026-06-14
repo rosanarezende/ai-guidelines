@@ -1,0 +1,28 @@
+checkpoint: "checkpoint-co-enforcement"
+role: technical_audit
+event_id: EV2
+kind: verification
+executor:
+  platform: antigravity
+  model: gemini-3.1-pro-high
+decision: approved
+scope: findings
+verifies:
+  - technical_audit#F1
+  - technical_audit#F2
+  - technical_audit#F3
+subject_ref: "e2c98d6..1e95474"
+audit_evidence:
+  coverage:
+    - src/cli/constraintsCheck.ts
+    - src/app/constraints/compileConstraints.ts
+  scope: "Revalidação do intervalo e2c98d6..1e95474 focado nas resolutions de
+    F1–F3, limpeza de bytes NUL, e funcionamento do report prospectivo do
+    briefing de review."
+  basis: "F1–F3 permanecem corrigidos e sem regressões (overlay configurado
+    end-to-end, source_ref não escapa, e âncoras validadas estruturalmente). A
+    remoção de bytes NUL foi verificada via dump byte-level confirmando a
+    natureza textual das fontes. A publicação prospectiva com verification
+    append-only suporta lane CURRENT. Testes de constraints e validations
+    passaram com sucesso."
+event_fingerprint: 648454f32929
