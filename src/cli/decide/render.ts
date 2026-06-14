@@ -34,11 +34,15 @@ export function renderDecisionList(items: readonly DecisionListItem[]): string {
   for (const item of items) {
     lines.push(`${item.index}. ${item.title}`);
     const status = statusLabel(item.availability.status);
-    const reason =
-      item.availability.status !== "available" && item.availability.reasons.length > 0
-        ? ` — ${item.availability.reasons.join(" ")}`
-        : "";
-    lines.push(`   ${status}${reason}`);
+    const suffix =
+      item.availability.status === "available"
+        ? item.availability.hint
+          ? ` — ${item.availability.hint}`
+          : ""
+        : item.availability.reasons.length > 0
+          ? ` — ${item.availability.reasons.join(" ")}`
+          : "";
+    lines.push(`   ${status}${suffix}`);
     lines.push("");
   }
   lines.push("q. Sair");

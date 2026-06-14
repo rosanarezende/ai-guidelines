@@ -209,16 +209,25 @@ export interface DecideDeps {
   readonly isTTY?: boolean;
 }
 
+/**
+ * Itens da lista (Tela 1): oculta decisões `not-applicable` (não pertinentes ao
+ * estado) e renumera 1..n. `available` e `blocked` aparecem (a owner precisa ver
+ * por que algo está bloqueado).
+ */
 function buildListItems(
   registry: DecisionRegistry,
   snapshot: DecisionSnapshot
 ): DecisionListItem[] {
-  return registry.definitions().map((def, i) => ({
-    index: i + 1,
-    id: def.id,
-    title: def.title,
-    availability: def.detect(snapshot),
-  }));
+  return registry
+    .definitions()
+    .map((def) => ({ def, availability: def.detect(snapshot) }))
+    .filter((x) => x.availability.status !== "not-applicable")
+    .map((x, i) => ({
+      index: i + 1,
+      id: x.def.id,
+      title: x.def.title,
+      availability: x.availability,
+    }));
 }
 
 function collectSnapshot(repoRoot: string, deps: DecideDeps, noRemote: boolean): DecisionSnapshot {
@@ -302,7 +311,9 @@ function runBriefOnly(
     return 0;
   }
   logger.info(renderDecisionList(buildListItems(registry, snapshot)));
+  // Briefings só das decisões pertinentes (não-`not-applicable`).
   for (const def of registry.definitions()) {
+    if (def.detect(snapshot).status === "not-applicable") continue;
     logger.info("");
     logger.info("────────────────────────────────────────");
     logger.info("");

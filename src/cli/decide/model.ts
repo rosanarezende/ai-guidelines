@@ -25,6 +25,8 @@ export interface DecisionAvailability {
   readonly status: DecisionStatus;
   /** Motivos legíveis (pt-BR) — explicam blocked/not-applicable em linguagem humana. */
   readonly reasons: readonly string[];
+  /** Nota positiva curta quando `available` (ex.: "CO-3.1 concluível; CO-3.2 é o próximo"). */
+  readonly hint?: string;
 }
 
 /** Uma seção humana do briefing (heading + corpo em frases curtas). */

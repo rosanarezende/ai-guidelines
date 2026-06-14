@@ -92,6 +92,58 @@ decision_types:
     confirmation: required
     technical_details: available
 
+  advance-subcheckpoint:
+    title: Iniciar o próximo sub-checkpoint
+    purpose: >
+      O owner conclui o sub-checkpoint atual e ativa o próximo dentro do MESMO
+      checkpoint. É uma transição de ESTADO INTERNO de execução (tasks.md), NÃO um
+      Human Gate: não conclui o nó, não exerce gate, não mexe na topologia. Aplicar
+      altera EXCLUSIVAMENTE os marcadores de dois sub-checkpoints em tasks.md
+      (atual `[/] → [x]`, próximo `[ ] → [/]`) e nada mais.
+    requires_owner: true
+    sections:
+      - key: completed
+        heading: O que foi concluído?
+      - key: exit_criteria
+        heading: Como sabemos que ele pode ser encerrado?
+      - key: next_starts
+        heading: O que começará agora?
+      - key: consequences
+        heading: O que acontece se você aprovar?
+      - key: not_authorized
+        heading: O que esta decisão NÃO autoriza?
+    choices:
+      - id: advance
+        label: Concluir o sub-checkpoint atual e ativar o próximo
+        mutating: true
+      - id: keep
+        label: Manter o sub-checkpoint atual ativo
+        mutating: false
+      - id: request-explanation
+        label: Solicitar mais esclarecimentos (não escreve nada)
+        mutating: false
+      - id: cancel
+        label: Cancelar (não escreve nada)
+        mutating: false
+    consequences:
+      - O sub-checkpoint atual será marcado como concluído.
+      - O próximo sub-checkpoint será marcado como ativo.
+      - "`guidelines work` passará a apontar o próximo como objeto de implementação."
+    not_authorized:
+      - Implementar o próximo sub-checkpoint automaticamente.
+      - Exercer o Human Gate.
+      - Converter o PR para Ready.
+      - Criar o gate artifact.
+      - Fazer merge.
+      - Abrir outro PR.
+      - Alterar a topologia (state.yml).
+    publication:
+      commit: after-confirmation
+      push: after-confirmation
+      mixed_diff: forbidden
+    confirmation: required
+    technical_details: available
+
   human-gate:
     title: Decidir o avanço do checkpoint (Human Gate)
     purpose: >
