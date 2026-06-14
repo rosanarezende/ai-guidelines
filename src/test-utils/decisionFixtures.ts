@@ -76,6 +76,7 @@ export function makeHandoffFacts(over: Partial<HandoffFacts> = {}): HandoffFacts
       gateDecision: null,
     },
     tasks: [],
+    subCheckpoints: [],
     insights: [],
     driftWarnings: [],
     sources: [{ id: "pull-request", origin: "gh", status: "fresh", fingerprint: "x" }],
@@ -93,12 +94,15 @@ export function makeFinding(over: Partial<DecisionFinding> = {}): DecisionFindin
     location: "src/cli/constraintsCheck.ts#L48-L81",
     description: "Overlay de consumidor nao esta wired end-to-end.",
     fingerprint: "284894d6b794",
+    humanSummary:
+      "Repositórios que usam o framework não conseguiam definir apenas suas próprias constraints.",
     blocking: true,
     resolution: {
       action: "fixed",
       ref: "5ad592a",
       evidence: "Overlay por duas raízes.",
       tests: ["[F1.1]"],
+      humanSummary: "O framework e o consumidor agora usam raízes distintas.",
     },
     refValid: true,
     verified: true,

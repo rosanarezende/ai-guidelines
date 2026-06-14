@@ -44,14 +44,6 @@ function toPosix(p: string): string {
   return p.replace(/\\/g, "/");
 }
 
-/** Recorte humano da prosa técnica: primeira frase, sem ruído de schema. */
-function firstSentence(text: string): string {
-  const clean = text.replace(/\s+/g, " ").trim();
-  const cut = /[.;]\s/.exec(clean);
-  const head = cut ? clean.slice(0, cut.index + 1) : clean;
-  return head.length > 200 ? `${head.slice(0, 197).trimEnd()}…` : head;
-}
-
 function nodeLabel(snapshot: DecisionSnapshot): string {
   return (snapshot.checkpoint ?? "checkpoint").replace(/^checkpoint-/, "");
 }
@@ -155,10 +147,15 @@ export class CloseDispositionsDefinition implements HumanDecisionDefinition {
     const bodyByKey: Record<string, readonly string[]> = {
       decision_summary: [summary],
       why_now: [whyNow],
-      problems: findings.map((f, i) => `${i + 1}. ${firstSentence(f.description)}`),
+      // Linguagem HUMANA primeiro (human_context); sem truncamento. Os detalhes
+      // técnicos (descrição/evidência/IDs) vivem só em --technical.
+      problems: findings.map(
+        (f, i) =>
+          `${i + 1}. ${f.humanSummary ?? "Um problema foi encontrado na auditoria técnica (detalhe técnico em --technical)."}`
+      ),
       changes: findings.map(
         (f, i) =>
-          `${i + 1}. ${f.resolution?.evidence ? firstSentence(f.resolution.evidence) : "Correção registrada pelo implementador."}`
+          `${i + 1}. ${f.resolution?.humanSummary ?? "A correção foi registrada e revalidada (detalhe técnico em --technical)."}`
       ),
       verification: [
         `${verifs.length} verificação(ões) independente(s) aprovaram as correções.`,
@@ -191,6 +188,13 @@ export class CloseDispositionsDefinition implements HumanDecisionDefinition {
             `resolution=${f.resolution?.action ?? "—"} ref=${f.resolution?.ref ?? "—"} · ` +
             `verified=${f.verified}`,
         });
+        technicalDetails.push({ label: `${f.localId} · descrição`, value: f.description });
+        if (f.resolution?.evidence) {
+          technicalDetails.push({
+            label: `${f.localId} · evidência`,
+            value: f.resolution.evidence,
+          });
+        }
       }
       for (const v of verifs) {
         technicalDetails.push({

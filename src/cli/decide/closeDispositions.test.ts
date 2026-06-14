@@ -117,9 +117,36 @@ describe("close-dispositions · briefing humano [decide]", () => {
     expect(brief.sources.length).toBeGreaterThan(0);
   });
 
-  it("[17] narrativa derivada de fontes (a evidência do implementador vira 'o que foi feito')", () => {
+  it("[17] narrativa humana (human_context) — 'o que estava errado' e 'o que foi feito' em linguagem humana", () => {
+    const problems = brief.sections.find((s) => s.key === "problems")!.body.join(" ");
     const changes = brief.sections.find((s) => s.key === "changes")!.body.join(" ");
-    expect(changes).toMatch(/raíz|raiz|Overlay|escapar|heading/i);
+    expect(problems).toMatch(/Repositórios que usam o framework/);
+    expect(changes).toMatch(/raízes distintas/);
+  });
+
+  it("[3-bug] o briefing principal NÃO expõe jargão técnico nem truncamento", () => {
+    const main = JSON.stringify({
+      summary: brief.summary,
+      whyNow: brief.whyNow,
+      sections: brief.sections,
+    });
+    for (const jargon of [
+      "repoRoot",
+      "ConstraintRoots",
+      "source_ref",
+      "includes(",
+      "wired",
+      "anchorExists",
+      "packageRoot",
+    ]) {
+      expect(main).not.toContain(jargon);
+    }
+    expect(main).not.toContain("…"); // sem truncamento no principal
+  });
+
+  it("[3-bug] jargão técnico e descrição completa só em --technical", () => {
+    const tech = JSON.stringify(briefTech.technicalDetails);
+    expect(tech).toMatch(/wired end-to-end|anchorExists|source_ref/);
   });
 });
 

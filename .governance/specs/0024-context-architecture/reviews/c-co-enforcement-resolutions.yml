@@ -11,6 +11,9 @@ resolutions:
     action: fixed
     ref: 5ad592a
     fingerprint: 284894d6b794
+    # Tradução humana para o briefing de `guidelines decide` (não-técnica).
+    human_context:
+      resolution_summary: "O framework e o consumidor agora usam raízes distintas, então cada repositório define só as suas constraints."
     evidence: >
       Overlay de consumidor wired end-to-end por modelo de DUAS raízes
       (ConstraintRoots{packageRoot, consumerRoot}), reusando o mesmo mecanismo
@@ -29,6 +32,8 @@ resolutions:
     action: fixed
     ref: 5ad592a
     fingerprint: bad9a10cd59b
+    human_context:
+      resolution_summary: "As referências agora ficam contidas na raiz governada — nada fora do projeto é alcançável."
     evidence: >
       `source_ref` deixa de escapar do repo: checkParity resolve cada ref contra
       a raiz da SUA fonte (sources[].root) via `resolveGovernedSourcePath`
@@ -46,6 +51,8 @@ resolutions:
     action: fixed
     ref: 5ad592a
     fingerprint: fcc4f1136709
+    human_context:
+      resolution_summary: "Agora só o cabeçalho oficial de uma regra conta; menção em exemplo ou texto não é mais confundida com a regra."
     evidence: >
       Âncora validada por estrutura canônica, não por `includes`:
       `SourceAnchorValidator` (introduzido em b5f7918) reconhece SOMENTE o heading

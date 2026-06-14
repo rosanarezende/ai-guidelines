@@ -17,6 +17,9 @@ findings:
       o overlay do consumidor."
     disposition: accepted
     fingerprint: 284894d6b794
+    # Anotação humana (fora do fingerprint) para o briefing de `guidelines decide`.
+    human_context:
+      summary: "Repositórios que usam o framework não conseguiam definir apenas suas próprias constraints."
   - id: F2
     severity: medium
     location: "src/cli/constraintsCheck.ts#L100-L124"
@@ -25,6 +28,8 @@ findings:
       a ancora, vazando a fronteira canonica do repositorio/consumidor."
     disposition: accepted
     fingerprint: bad9a10cd59b
+    human_context:
+      summary: "Uma referência incorreta poderia acessar arquivos fora do projeto."
   - id: F3
     severity: medium
     location: "src/cli/constraintsCheck.ts#L120-L124"
@@ -33,3 +38,5 @@ findings:
       falso-verde para source_ref."
     disposition: accepted
     fingerprint: fcc4f1136709
+    human_context:
+      summary: "Uma regra citada em um exemplo podia ser confundida com a declaração real da regra."

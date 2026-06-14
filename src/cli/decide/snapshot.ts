@@ -15,7 +15,12 @@
 import * as path from "node:path";
 import * as fs from "node:fs";
 import { execFileSync } from "node:child_process";
-import { HandoffFacts, HandoffNodeFact } from "../handoffFacts.js";
+import {
+  HandoffFacts,
+  HandoffNodeFact,
+  HandoffSubCheckpoint,
+  parseSubCheckpoints,
+} from "../handoffFacts.js";
 import {
   HandoffLoadSnapshot,
   HandoffOptions,
@@ -38,6 +43,8 @@ export interface DecisionResolution {
   readonly ref: string | null;
   readonly evidence: string | null;
   readonly tests: readonly string[];
+  /** Tradução humana opcional ("o que foi feito") — fonte primária do briefing. */
+  readonly humanSummary: string | null;
 }
 
 /** Finding consolidado com proveniência da resolução e estado de verificação. */
@@ -50,6 +57,8 @@ export interface DecisionFinding {
   readonly location: string;
   readonly description: string;
   readonly fingerprint: string;
+  /** Tradução humana opcional ("o que estava errado") — fonte primária do briefing. */
+  readonly humanSummary: string | null;
   readonly blocking: boolean;
   readonly resolution: DecisionResolution | null;
   /** Ref da resolução existe no histórico E é ancestral do HEAD funcional. */
@@ -84,12 +93,8 @@ export interface DecisionReviewLane {
   readonly approvedVerifications: readonly DecisionVerification[];
 }
 
-export interface DecisionSubCheckpoint {
-  readonly id: string;
-  readonly title: string;
-  readonly state: "pending" | "in-progress" | "done";
-  readonly line: number;
-}
+/** Sub-checkpoint do checkpoint do cursor (fonte única: HandoffFacts/tasks.md). */
+export type DecisionSubCheckpoint = HandoffSubCheckpoint;
 
 export interface ExternalCheckResult {
   readonly ok: boolean;
@@ -186,31 +191,9 @@ function loadPolicy(repoRoot: string): {
   }
 }
 
-/**
- * Sub-checkpoints (CO-x.y) aninhados sob o checkpoint do cursor em tasks.md.
- * Lê a fonte CANÔNICA (tasks.md), não prosa arbitrária: localiza a linha-âncora
- * `**Checkpoint <normalized>**` e coleta os itens de checkbox subsequentes até o
- * próximo checkpoint de topo. `[ ]`=pending, `[/]`=in-progress, `[x]`=done.
- */
-export function parseSubCheckpoints(tasksMd: string, checkpoint: string): DecisionSubCheckpoint[] {
-  const normalized = normalizeCheckpoint(checkpoint);
-  const lines = tasksMd.split(/\r?\n/);
-  const anchor = lines.findIndex((l) => l.includes(`**Checkpoint ${normalized}**`));
-  if (anchor < 0) return [];
-  const out: DecisionSubCheckpoint[] = [];
-  for (let i = anchor + 1; i < lines.length; i++) {
-    const line = lines[i];
-    if (/\*\*Checkpoint /.test(line)) break; // próximo checkpoint de topo
-    const m = /^\s*-\s*\[([ xX/])\]\s*\*\*(CO-[\d.]+)\b\s*[—-]?\s*(.*?)\*\*/.exec(line);
-    if (!m) continue;
-    // Só sub-checkpoints (CO-N.M); o checkpoint-pai (CO-N) não entra.
-    if (!/^CO-\d+\.\d+$/.test(m[2])) continue;
-    const mark = m[1];
-    const state = mark === " " ? "pending" : mark === "/" ? "in-progress" : "done";
-    out.push({ id: m[2], title: m[3].trim(), state, line: i + 1 });
-  }
-  return out;
-}
+// Sub-checkpoints: fonte única em handoffFacts (`facts.subCheckpoints`); o parser
+// canônico (`parseSubCheckpoints`) é re-exportado para compat de testes.
+export { parseSubCheckpoints };
 
 /** Runner real dos checks externos (node scripts) — usado só quando PR Ready. */
 function defaultExternalChecks(repoRoot: string): {
@@ -260,7 +243,10 @@ export function collectDecisionSnapshot(
   // do arquivo para a narrativa humana ("o que foi feito"). Degrada sem erro.
   const resByFinding = new Map<string, DecisionResolution>();
   for (const artifact of resolutionArtifacts) {
-    const extras = new Map<string, { evidence: string | null; tests: string[] }>();
+    const extras = new Map<
+      string,
+      { evidence: string | null; tests: string[]; humanSummary: string | null }
+    >();
     try {
       const rawDoc = parseYaml(fs.readFileSync(path.join(repoRoot, artifact.file), "utf-8")) as {
         resolutions?: Array<Record<string, unknown>>;
@@ -268,21 +254,25 @@ export function collectDecisionSnapshot(
       for (const r of rawDoc?.resolutions ?? []) {
         const fin = typeof r.finding === "string" ? r.finding : null;
         if (!fin) continue;
+        const hc = r.human_context as { resolution_summary?: unknown } | undefined;
         extras.set(fin, {
           evidence: typeof r.evidence === "string" ? r.evidence.replace(/\s+/g, " ").trim() : null,
           tests: Array.isArray(r.tests) ? r.tests.map(String) : [],
+          humanSummary:
+            typeof hc?.resolution_summary === "string" ? hc.resolution_summary.trim() : null,
         });
       }
     } catch {
       // sem narrativa: a seção "o que foi feito" usa fallback.
     }
     for (const res of artifact.resolutions) {
-      const extra = extras.get(res.finding) ?? { evidence: null, tests: [] };
+      const extra = extras.get(res.finding) ?? { evidence: null, tests: [], humanSummary: null };
       resByFinding.set(res.finding, {
         action: res.action,
         ref: res.ref ?? null,
         evidence: extra.evidence,
         tests: extra.tests,
+        humanSummary: extra.humanSummary,
       });
     }
   }
@@ -333,6 +323,7 @@ export function collectDecisionSnapshot(
         location: f.location,
         description: f.description,
         fingerprint: f.fingerprint,
+        humanSummary: f.humanContext?.summary ?? null,
         blocking: f.severity === "critical" || f.severity === "high",
         resolution,
         refValid,
@@ -379,12 +370,8 @@ export function collectDecisionSnapshot(
     });
   }
 
-  // Sub-checkpoints da fonte canônica (tasks.md).
-  let subCheckpoints: DecisionSubCheckpoint[] = [];
-  const tasksPath = path.join(repoRoot, facts.spec.path, "tasks.md");
-  if (checkpoint && fs.existsSync(tasksPath)) {
-    subCheckpoints = parseSubCheckpoints(fs.readFileSync(tasksPath, "utf-8"), checkpoint);
-  }
+  // Sub-checkpoints: fonte única já coletada nos HandoffFacts (tasks.md).
+  const subCheckpoints = facts.subCheckpoints;
 
   const { policy, error: policyError } = loadPolicy(repoRoot);
 
