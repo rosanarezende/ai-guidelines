@@ -116,3 +116,12 @@ insights:
         spec: "0024"
         cursor: checkpoint-co-projection
         note: "Dogfood CO-4 rodada 8: perfil team impunha TA/AR; review stale era lido como revalidacao obrigatoria; correcao separou review_types de review_requirements (so required+nao-current bloqueia)"
+  - id: PIT-0013
+    text: Uma decisao reservada ao humano continua sendo procedimento tecnico quando o sistema nao traduz contexto, riscos, evidencias e consequencias antes de pedir a escolha — autoridade reservada exige briefing humano-primeiro (o que/por que/o que estava errado/o que foi feito/como foi verificado/riscos/consequencias/o que NAO autoriza) e prévia+confirmacao, nao apenas reservar a permissao
+    status: open
+    captured_at: 2026-06-14T04:12:47.296Z
+    occurrences:
+      - at: 2026-06-14T04:12:47.296Z
+        spec: "0024"
+        cursor: checkpoint-co-enforcement
+        note: "Dogfood CO-3 / PR #42: guidelines decide separa HumanDecisionBrief de HumanDecisionEffect; close-dispositions + human-gate. Distinto de PIT-0011 (descobribilidade) e PIT-0012 (capacidade!=obrigacao)."

@@ -429,3 +429,34 @@ o evento que TORNARIA a lane CURRENT não pode ser publicado
 **6. Limites preservados.** fail-closed sem autorização; GitHub forbidden-by-default (nenhum comentário remoto); push normal (nunca `--force`/`--no-verify`); o review original e o EV1 permanecem intactos; dispositions seguem `open` (fechamento é do reviewer/owner); nenhuma resolution nova para F1–F3.
 
 **7. PIT-0011 (ocorrência distinta).** O contrato era DESCOBERTO (`review:publish` canônico) e o artefato PRODUZÍVEL (EV1 selado), mas a **automação de publicação não conseguia concluir o próprio fluxo canônico** (pré-condição circular). É a evolução da classe ("descoberto ≠ executável") para "produzível ≠ publicável pela ferramenta canônica". Registrado em PIT-0011; não promovido.
+
+## Dogfood humano — decisão reservada à owner ainda mediada por linguagem técnica
+
+**Contexto.** F1–F3 do Technical Audit do CO-3.1 estão **corrigidos** (resolutions `fixed`, ref `5ad592a`) e **revalidados** por DUAS verificações independentes (EV1 codex/gpt-5, EV2 antigravity/gemini, ambas `approved`, cobrindo o functional HEAD `1e95474`). Mesmo assim as **dispositions seguem `open`**: fechá-las é autoridade do reviewer/owner, não do implementador.
+
+**Fricção observada.** O repositório RESERVA a decisão ao humano, mas não a TRADUZ. Antes deste PR:
+
+- não existia comando de **fechamento** de dispositions (só edição manual do YAML do review);
+- não existia comando de **Human Gate** (o gate artifact era escrito à mão);
+- `gate-decidability:check` apenas VERIFICA; `workflow gate`/`pr-ready:check` apenas EXIBEM estado;
+- a owner dependia de um **agente** para (a) ler findings/resolutions/eventos/CI, (b) traduzir em linguagem humana, (c) editar o artefato e (d) commitar/publicar.
+
+O fluxo real era: `review/resolutions/eventos/CI → agente explica tecnicamente → humano responde em conversa → agente edita artefato → agente commita`.
+
+**Hipótese falsificada.** Reservar a AUTORIDADE ao humano NÃO basta se a INTERFACE continua orientada a artefatos técnicos (F1 · SHA · fingerprint · EV2). A reserva de permissão sem tradução de contexto/risco/evidência/consequência transforma a decisão humana em procedimento técnico delegado de volta ao agente.
+
+**Decisão de design.** Separar explicitamente:
+
+- `HumanDecisionBrief` — explica e contextualiza (8 perguntas humanas, pt-BR, frases curtas; IDs/SHAs/fingerprints só em "detalhes técnicos" opcionais);
+- `HumanDecisionDefinition.choices/plan` — coleta a decisão e projeta a prévia exata;
+- `HumanDecisionEffect` (`apply`) — aplica SOMENTE o efeito confirmado (escrita YAML por AST → validação → commit exclusivo → push).
+
+O briefing SEMPRE precede a decisão; a confirmação humana explícita precede QUALQUER escrita. Derivação puramente determinística do snapshot governado (zero LLM no runtime — ADR 0018): a narrativa "o que foi feito" vem do campo `evidence` das resolutions; "como foi verificado" dos eventos `approved`; "o que NÃO autoriza" da `human-decision-policy.yml`.
+
+**Primeiro dogfood (`close-dispositions`).** Sobre F1–F3: elegibilidade = findings open + resolution `fixed` com ref ancestral + verificação `approved` cobrindo o HEAD (sem evento posterior reabrindo) + lane CURRENT + review íntegro. O efeito altera EXCLUSIVAMENTE `disposition: open → accepted` (campo fora do fingerprint ⇒ `review:seal` no-op), preservando claim/severity/descrição/resolutions/eventos. **Não executado nesta sessão** — deixado pronto para a owner.
+
+**Segundo tipo (`human-gate`).** Implementado por completo (briefing/elegibilidade/plano/efeito). No estado atual fica **bloqueado** e explica em linguagem humana: CO-3.2/CO-3.3/CO-3.4 ainda abertos + PR #42 Draft. Registrar o gate NÃO executa transição, merge ou abertura de PR.
+
+**Limite.** A separação Brief/Effect é a estrutura permanente; a policy é o contrato estável; o snapshot é o estado situado. Registrar um Human Gate é um ATO DE REGISTRO, não de execução — a transição permanece posterior e explícita.
+
+**PIT-0013 (ocorrência distinta).** Dor conceitualmente diferente de PIT-0011 (descobribilidade situada) e PIT-0012 (capacidade ≠ obrigação): aqui o comando É descoberto e a autoridade ESTÁ reservada, mas a **interface da decisão era orientada a artefato técnico**, não a briefing humano. Claim: "uma decisão reservada ao humano continua sendo procedimento técnico quando o sistema não traduz contexto, riscos, evidências e consequências antes de pedir a escolha." Registrado em PIT-0013; **não promovido**.
