@@ -460,3 +460,22 @@ O briefing SEMPRE precede a decisão; a confirmação humana explícita precede 
 **Limite.** A separação Brief/Effect é a estrutura permanente; a policy é o contrato estável; o snapshot é o estado situado. Registrar um Human Gate é um ATO DE REGISTRO, não de execução — a transição permanece posterior e explícita.
 
 **PIT-0013 (ocorrência distinta).** Dor conceitualmente diferente de PIT-0011 (descobribilidade situada) e PIT-0012 (capacidade ≠ obrigação): aqui o comando É descoberto e a autoridade ESTÁ reservada, mas a **interface da decisão era orientada a artefato técnico**, não a briefing humano. Claim: "uma decisão reservada ao humano continua sendo procedimento técnico quando o sistema não traduz contexto, riscos, evidências e consequências antes de pedir a escolha." Registrado em PIT-0013; **não promovido**.
+
+## Dogfood humano — transição interna entre sub-checkpoints
+
+**Contexto.** Depois que a owner fechou F1–F3 (close-dispositions), o `guidelines work` passou a inferir corretamente `PREPARE_SUBCHECKPOINT_TRANSITION`: **concluir CO-3.1** e **ativar CO-3.2**.
+
+**Fricção.** O runtime DETECTAVA a transição, mas a única forma de executá-la seria pedir a um agente que editasse `tasks.md` — recriando exatamente o fluxo que `guidelines decide` já corrigira (`decisão humana → conversa → agente interpreta → agente altera artefato`). A transição também **não é um Human Gate**: não conclui o nó, não exerce gate, não mexe na topologia — é uma mudança de **estado interno de execução**.
+
+**Decisão.** `advance-subcheckpoint` foi incorporado ao MESMO registry extensível de decisões (entrada única `guidelines decide`). Ele:
+
+- explica a transição em linguagem humana (o que foi concluído, como sabemos, o que começa, consequências, o que NÃO autoriza);
+- mostra a prévia exata (dois marcadores em `tasks.md`) e exige confirmação;
+- aplica por **edição estruturada** (por id + marcador: `[/]→[x]`, `[ ]→[/]`), preservando descrição/indentação/comentários/encoding/line endings; `state.yml` e topologia ficam intocados;
+- faz **validação prospectiva** antes de escrever: o estado projetado precisa inferir `IMPLEMENT_CHECKPOINT` com CO-3.2 como objeto, senão bloqueia.
+
+**Consistência work↔decide.** A elegibilidade reusa o mesmo `resolveSubCheckpointWork` do `work`: `decide advance-subcheckpoint` fica disponível EXATAMENTE quando `work` infere `PREPARE_SUBCHECKPOINT_TRANSITION`. Após a transição, `work` infere `IMPLEMENT_CHECKPOINT` (objeto CO-3.2) e a decisão vira **não aplicável** (um único `[/]` por vez).
+
+**Limite.** A ativação real permanece com a owner — esta sessão implementou a capacidade e fez dogfood somente em leitura (`--brief-only`/`--technical`); CO-3.1 segue `[/]`, CO-3.2 segue `[ ]`, nenhum arquivo funcional de CO-3.2 foi tocado.
+
+**PIT-0013 (ocorrência adicional, 2×).** Mesma classe da dor original: decisão reservada ao humano mediada por edição técnica de artefato. A transição interna é uma terceira superfície (após close-dispositions e human-gate) que precisava de briefing humano antes da escolha. Registrado em PIT-0013; **não promovido**.

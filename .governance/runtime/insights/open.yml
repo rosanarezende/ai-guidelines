@@ -125,3 +125,7 @@ insights:
         spec: "0024"
         cursor: checkpoint-co-enforcement
         note: "Dogfood CO-3 / PR #42: guidelines decide separa HumanDecisionBrief de HumanDecisionEffect; close-dispositions + human-gate. Distinto de PIT-0011 (descobribilidade) e PIT-0012 (capacidade!=obrigacao)."
+      - at: 2026-06-14T12:52:52.816Z
+        spec: "0024"
+        cursor: checkpoint-co-enforcement
+        note: "Terceira superfície de decisão humana: advance-subcheckpoint. A transição interna entre sub-checkpoints era detectada pelo work mas só executável por agente editando tasks.md — mesma classe da dor original (decisão humana mediada por edição técnica de artefato)."
