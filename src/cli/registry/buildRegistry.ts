@@ -10,6 +10,7 @@ import { DiagnoseDriftCommand } from "./commands/DiagnoseDriftCommand.js";
 import { VisualPromptCommand } from "./commands/VisualPromptCommand.js";
 import { HandoffCommand } from "./commands/HandoffCommand.js";
 import { WorkCommand } from "./commands/WorkCommand.js";
+import { DecideCommand } from "./commands/DecideCommand.js";
 import { BOOTSTRAP_COMMANDS, BootstrapCommand } from "./commands/BootstrapCommand.js";
 
 /**
@@ -35,5 +36,6 @@ export function buildRegistry(): CommandRegistry {
   registry.register(new VisualPromptCommand()); // interativo (prompt/parse); migra "visual-prompt" (#35 etapa 3)
   registry.register(new HandoffCommand()); // read-only; ADR 0022 bootstrap situado
   registry.register(new WorkCommand()); // read-only; briefing governado de trabalho (CO-4 dogfood)
+  registry.register(new DecideCommand()); // decisões reservadas ao humano (CO-3; close-dispositions + human-gate)
   return registry;
 }

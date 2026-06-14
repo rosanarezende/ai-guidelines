@@ -39,6 +39,21 @@ export const INTENT_CATALOG: readonly Intent[] = [
     ],
   },
   {
+    id: "decidir-reservado-humano",
+    title: "🧭 Decisões humanas pendentes",
+    actions: [
+      {
+        command: "decide",
+        label: "Revisar e exercer decisões reservadas à owner (briefing → escolha → confirmação)",
+      },
+      {
+        command: "decide",
+        args: ["--brief-only"],
+        label: "Só ler o briefing das decisões pendentes (zero escrita)",
+      },
+    ],
+  },
+  {
     id: "pedir-review-governado",
     title: "Pedir um review governado",
     actions: [

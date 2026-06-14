@@ -1,0 +1,146 @@
+# Contrato GOVERNADO de DECISÕES RESERVADAS AO HUMANO (CO-3 / PR #42).
+#
+# SSOT machine-readable do contrato de cada DECISÃO que o repositório reserva ao
+# humano (owner/reviewer). Projetado por `guidelines decide`:
+#
+#   contrato permanente (este arquivo: títulos, seções, escolhas, consequências,
+#     limites, elegibilidade, publicação, confirmação)
+#   + snapshot governado situado (findings/resolutions/eventos/CI/PR/gate/tasks)
+#   → briefing humano determinístico → escolha → prévia → confirmação → registro.
+#
+# Categoria PRÓPRIA (não estende `work-policy.yml`): aquela governa o MODO de
+# TRABALHO de um agente implementador; esta governa a AUTORIDADE de DECISÃO
+# humana. Misturá-las seria erro de categoria (um contrato de execução de agente
+# ≠ um contrato de decisão reservada ao humano).
+#
+# Esta policy NÃO duplica fatos derivados (findings, resolutions, CI, reviews,
+# tasks, gate, PR): o briefing os projeta do snapshot. Ela declara o CONTRATO
+# humano estável: o que cada decisão é, o que ela autoriza e o que NÃO autoriza.
+# O runtime apenas PROJETA (zero LLM — ADR 0018): nenhuma narrativa é gerada por
+# modelo; toda frase derivada vem de campos estruturados das fontes governadas.
+#
+# `publication.commit`/`push`:
+#   - after-confirmation → só APÓS confirmação humana explícita (interativa) ou
+#     `--authorization explicit-human-decision` + `--confirm` (modo direto).
+# `publication.mixed_diff: forbidden` é invariante: o commit do efeito governado
+# nunca mistura escopos.
+# `requires_owner: true` exige que o actor resolvido (git identity) seja o `owner`
+# declarado — autoridade não é assumível por flag.
+version: 1
+
+owner:
+  handle: "@rosanarezende"
+  email: rosanarezende.com@gmail.com
+
+decision_types:
+  close-dispositions:
+    title: Encerrar problemas revalidados da auditoria técnica
+    purpose: >
+      O reviewer/owner encerra (disposition open → accepted) os problemas que já
+      foram corrigidos pelo implementador E revalidados por verificação
+      independente. É a única autoridade que destrava o gate sobre findings: o
+      implementador propõe resolution, mas só esta decisão fecha a disposition.
+    requires_owner: true
+    sections:
+      - key: decision_summary
+        heading: O que você está decidindo?
+      - key: why_now
+        heading: Por que esta decisão apareceu agora?
+      - key: problems
+        heading: O que estava errado ou em risco?
+      - key: changes
+        heading: O que foi feito?
+      - key: verification
+        heading: Como sabemos que funcionou?
+      - key: residual_risks
+        heading: O que ainda permanece em risco?
+      - key: consequences
+        heading: O que acontece se você aprovar?
+      - key: not_authorized
+        heading: O que esta decisão NÃO autoriza?
+    choices:
+      - id: accept-all
+        label: Aceitar as correções e encerrar todos os problemas
+        mutating: true
+      - id: review-individually
+        label: Avaliar cada problema separadamente
+        mutating: true
+      - id: request-explanation
+        label: Solicitar mais esclarecimentos (não escreve nada)
+        mutating: false
+      - id: request-changes
+        label: Solicitar novas correções (mantém os problemas abertos)
+        mutating: false
+      - id: cancel
+        label: Cancelar (não escreve nada)
+        mutating: false
+    consequences:
+      - Os problemas deixam de bloquear o avanço.
+      - A auditoria técnica do sub-checkpoint corrigido pode ser encerrada.
+      - O próximo sub-checkpoint passa a ser a tarefa seguinte.
+      - Esta decisão NÃO aprova o PR inteiro.
+    not_authorized:
+      - Converter o PR para Ready.
+      - Exercer o Human Gate do checkpoint.
+      - Criar o gate artifact.
+      - Fazer merge.
+      - Abrir o próximo PR.
+    publication:
+      commit: after-confirmation
+      push: after-confirmation
+      mixed_diff: forbidden
+    confirmation: required
+    technical_details: available
+
+  human-gate:
+    title: Decidir o avanço do checkpoint (Human Gate)
+    purpose: >
+      O owner decide o PRÓXIMO MOVIMENTO do checkpoint quando o PR está pronto:
+      autorizar a conclusão do nó e a preparação da transição. O gate artifact
+      nasce DEPOIS da decisão. Registrar o gate NÃO executa transição, merge nem
+      abertura de PR — esses permanecem atos posteriores e explícitos.
+    requires_owner: true
+    sections:
+      - key: delivered_value
+        heading: O que este checkpoint entregou?
+      - key: experience_change
+        heading: O que muda para quem usa?
+      - key: reviews
+        heading: Quais revisões foram feitas?
+      - key: validation
+        heading: Como foi validado?
+      - key: residual_risks
+        heading: O que ainda permanece em risco?
+      - key: next_node
+        heading: Qual é o próximo passo?
+      - key: consequences
+        heading: O que acontece se você aprovar?
+      - key: not_authorized
+        heading: O que esta decisão NÃO autoriza?
+    choices:
+      - id: approve
+        label: Aprovar o avanço do checkpoint
+        mutating: true
+      - id: request-changes
+        label: Solicitar mudanças antes de aprovar
+        mutating: true
+      - id: reject
+        label: Rejeitar o avanço
+        mutating: true
+      - id: cancel
+        label: Cancelar (não escreve nada)
+        mutating: false
+    consequences:
+      - Autoriza concluir o checkpoint e preparar a próxima transição.
+    not_authorized:
+      - Merge.
+      - Alteração automática da topologia.
+      - Abertura automática do próximo PR.
+      - Mudança de policy.
+      - Fechamento de outro checkpoint.
+    publication:
+      commit: after-confirmation
+      push: after-confirmation
+      mixed_diff: forbidden
+    confirmation: required
+    technical_details: available

@@ -86,6 +86,7 @@ ${registryBlock}
   Briefing de trabalho:    npm run guidelines -- work [--authorization explicit-work-request]
   Pedir review governado:  npm run guidelines -- review <tipo>
   Catálogo/policy:         npm run guidelines -- review types | review policy
+  Decisões do humano:      npm run guidelines -- decide [--brief-only] [--type <tipo>]
   Preparar Ready:          npm run pr-ready:check -- --pr <n>
   Gate local completo:     npm run validate
 
