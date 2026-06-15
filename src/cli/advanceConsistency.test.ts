@@ -130,8 +130,9 @@ describe("consistência work×decide · estado real CO-3.2 [/] (dogfood CO-3.2)"
 
   it("[2] work: recomenda advance-subcheckpoint (concluir CO-3.2 e ativar CO-3.3)", () => {
     const b = workBriefFor(realSnapshot());
-    expect(b.mode).toBe("implement_checkpoint");
-    expect(b.object.subCheckpoint?.id).toBe("CO-3.2");
+    expect(b.mode).toBe("prepare_subcheckpoint_transition");
+    expect(b.object.transition?.conclude?.id).toBe("CO-3.2");
+    expect(b.object.transition?.activate.id).toBe("CO-3.3");
     expect(b.nextAction.description).toBe("Concluir CO-3.2 e ativar CO-3.3.");
     expect(b.nextAction.decisionType).toBe("advance-subcheckpoint");
     expect(b.nextAction.commands.find((c) => c.role === "recommended")?.command).toBe(

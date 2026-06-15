@@ -161,6 +161,12 @@ export interface HandoffSubCheckpoint {
   readonly state: "pending" | "in-progress" | "done";
   /** Linha (1-based) em tasks.md — base factual citável. */
   readonly line: number;
+  /**
+   * Texto BRUTO da linha do marcador (para checagens de coerência
+   * estado↔narrativa). Opcional: só presente quando vem de `parseSubCheckpoints`;
+   * fixtures que constroem o objeto à mão podem omiti-lo.
+   */
+  readonly text?: string;
 }
 
 export interface HandoffInsightFact {
@@ -210,6 +216,8 @@ export type NextActionKind =
   | "exercise-human-gate"
   | "conclude-node-open-next"
   | "execute-task"
+  | "implement-subcheckpoint"
+  | "advance-subcheckpoint-transition"
   | "investigate-checkpoint";
 
 export interface NextAction {
@@ -297,9 +305,124 @@ export function parseSubCheckpoints(tasksMd: string, checkpoint: string): Handof
     if (!m) continue;
     const mark = m[1];
     const state = mark === " " ? "pending" : mark === "/" ? "in-progress" : "done";
-    out.push({ id: m[2], title: m[3].trim(), state, line: i + 1 });
+    out.push({ id: m[2], title: m[3].trim(), state, line: i + 1, text: lines[i].trim() });
   }
   return out;
+}
+
+// ── Resolução compartilhada do OBJETO de sub-checkpoint (handoff ↔ work) ───────
+// Fonte ÚNICA da derivação de sub-checkpoints: o `handoff` (deriveNextAction) e o
+// `work` (deriveWorkBrief) consomem a MESMA função, garantindo que nomeiem o
+// mesmo objeto factual e que nenhum declare "zero tarefas" havendo um `[/]` ativo.
+
+/** Referência mínima a um sub-checkpoint (sem estado/narrativa). */
+export interface SubCheckpointRef {
+  readonly id: string;
+  readonly title: string;
+  readonly line: number;
+}
+
+export type SubCheckpointResolution =
+  | { kind: "implement"; subCheckpoint: SubCheckpointRef; basis: string[] }
+  | {
+      kind: "transition";
+      transition: { conclude: SubCheckpointRef | null; activate: SubCheckpointRef };
+      basis: string[];
+    }
+  | { kind: "none"; basis: string[] };
+
+/**
+ * Resolve o OBJETO de trabalho a partir dos sub-checkpoints (CO-x.y) + auditoria,
+ * quando não há tarefa de topo executável. Fail-closed: nunca devolve `implement`
+ * sem um sub-checkpoint ATIVO concreto.
+ *
+ * Transição (one-shot): um sub-checkpoint `[/]` terminou (auditoria fechada e
+ * verificada) mas o tasks.md ainda não o concluiu, e há um próximo pendente. O
+ * guard `done.length === 0` impede re-disparo: ao concluir o atual (`[x]`) e
+ * ativar o próximo (`[/]`), o próximo vira OBJETO de implement, não nova
+ * transição. Concluir/ativar é ATO VISÍVEL em tasks.md, não efeito colateral.
+ */
+export function resolveSubCheckpointWork(facts: HandoffFacts): SubCheckpointResolution {
+  const subs = facts.subCheckpoints;
+  if (subs.length === 0) return { kind: "none", basis: [] };
+  const ref = (s: { id: string; title: string; line: number }): SubCheckpointRef => ({
+    id: s.id,
+    title: s.title,
+    line: s.line,
+  });
+  const inProgress = subs.filter((s) => s.state === "in-progress");
+  const pending = subs.filter((s) => s.state === "pending");
+  const done = subs.filter((s) => s.state === "done");
+  const lc = facts.lifecycle;
+  const auditSettled = lc !== null && lc.openFindings === 0 && lc.closedFindings > 0;
+  const resolutions = lc?.resolutions ?? 0;
+  if (inProgress.length >= 1 && pending.length >= 1 && auditSettled && resolutions > done.length) {
+    return {
+      kind: "transition",
+      transition: { conclude: ref(inProgress[0]), activate: ref(pending[0]) },
+      basis: [
+        `${inProgress[0].id} concluído (auditoria fechada e verificada) mas ainda marcado [/] em tasks.md;`,
+        `próximo pendente: ${pending[0].id} — ${pending[0].title}.`,
+        "concluir e ativar é ato VISÍVEL em tasks.md (não efeito colateral do fechamento de dispositions).",
+      ],
+    };
+  }
+  if (inProgress.length >= 1) {
+    const s = inProgress[0];
+    return {
+      kind: "implement",
+      subCheckpoint: ref(s),
+      basis: [`sub-checkpoint ativo: ${s.id} — ${s.title} (tasks.md linha ${s.line}).`],
+    };
+  }
+  if (pending.length >= 1) {
+    return {
+      kind: "transition",
+      transition: { conclude: null, activate: ref(pending[0]) },
+      basis: [
+        `nenhum sub-checkpoint ativo; ative o próximo pendente: ${pending[0].id} — ${pending[0].title} (ato visível em tasks.md).`,
+      ],
+    };
+  }
+  return { kind: "none", basis: [] };
+}
+
+/**
+ * Coerência ESTADO↔NARRATIVA dos sub-checkpoints (invariante de estado contínuo).
+ * Reusa o resultado de {@link parseSubCheckpoints} (sem parser paralelo). Regras:
+ *   - no máximo um `[/]` (in-progress) — exatamente um pode estar ativo;
+ *   - `[x]` (done) não pode narrar "em execução/progresso";
+ *   - `[ ]` (pending) não pode narrar "concluído/implementado".
+ * O `[/]` ativo PODE narrar "implementado" (foi implementado mas ainda não
+ * concluído/avançado) — por isso a narrativa "done" só é proibida em `[ ]`.
+ */
+const IN_PROGRESS_NARRATIVE = /\bEM\s+EXECU[ÇC][ÃA]O\b|\bEM\s+PROGRESSO\b/i;
+const DONE_NARRATIVE = /\bCONCLU[ÍI]D[OA]\b|\bIMPLEMENTAD[OA]\b/i;
+
+export function checkSubCheckpointCoherence(subs: ReadonlyArray<HandoffSubCheckpoint>): string[] {
+  const violations: string[] = [];
+  const inProgress = subs.filter((s) => s.state === "in-progress");
+  if (inProgress.length > 1) {
+    violations.push(
+      `mais de um sub-checkpoint [/] ativo (${inProgress
+        .map((s) => `${s.id} (linha ${s.line})`)
+        .join(", ")}); exatamente um pode estar em progresso.`
+    );
+  }
+  for (const s of subs) {
+    const text = s.text ?? "";
+    if (s.state === "done" && IN_PROGRESS_NARRATIVE.test(text)) {
+      violations.push(
+        `${s.id} está [x] (concluído) mas a narrativa diz "em execução/progresso" (tasks.md linha ${s.line}).`
+      );
+    }
+    if (s.state === "pending" && DONE_NARRATIVE.test(text)) {
+      violations.push(
+        `${s.id} está [ ] (pendente) mas a narrativa diz "concluído/implementado" (tasks.md linha ${s.line}).`
+      );
+    }
+  }
+  return violations;
 }
 
 /** Título legível de uma tarefa: primeiro span em negrito, senão prefixo do texto. */
@@ -483,12 +606,41 @@ export function deriveNextAction(facts: HandoffFacts): NextAction {
     };
   }
 
-  // 8 — sem tarefa executável materializada.
+  // 7.5 — sub-checkpoints (CO-x.y) são as unidades executáveis quando o checkpoint
+  // está fatiado. REUSA a MESMA resolução que o `work` consome para o objeto de
+  // trabalho (invariante handoff↔work): se há um `[/]` ativo, o handoff o NOMEIA e
+  // NÃO declara "zero tarefas"; se há transição pendente, aponta o ato humano.
+  const subResolution = resolveSubCheckpointWork(facts);
+  if (subResolution.kind === "implement") {
+    const sc = subResolution.subCheckpoint;
+    return {
+      kind: "implement-subcheckpoint",
+      description: `Implementar o sub-checkpoint ativo ${sc.id} — ${sc.title} (tasks.md linha ${sc.line}).`,
+      basis: [
+        ...subResolution.basis,
+        `cursor: ${facts.cursor ? `${facts.cursor.pr} · ${facts.cursor.checkpoint}` : "(sem topology)"}`,
+      ],
+      blocking: false,
+    };
+  }
+  if (subResolution.kind === "transition") {
+    const { conclude, activate } = subResolution.transition;
+    return {
+      kind: "advance-subcheckpoint-transition",
+      description: conclude
+        ? `Concluir o sub-checkpoint ${conclude.id} e ativar ${activate.id} — ${activate.title} (decisão humana \`advance-subcheckpoint\`; ato visível em tasks.md).`
+        : `Ativar o sub-checkpoint pendente ${activate.id} — ${activate.title} (decisão humana \`advance-subcheckpoint\`; ato visível em tasks.md).`,
+      basis: subResolution.basis,
+      blocking: false,
+    };
+  }
+
+  // 8 — sem tarefa executável materializada (nem tarefa de topo nem sub-checkpoint).
   return {
     kind: "investigate-checkpoint",
     description: `Investigar e planejar o checkpoint ${facts.cursor?.checkpoint ?? "(sem cursor)"} — não há tarefa executável materializada em tasks.md.`,
     basis: [
-      `tasks.md: ${facts.tasks.length} tarefa(s) associada(s) ao checkpoint, 0 abertas executáveis`,
+      `tasks.md: ${facts.tasks.length} tarefa(s) de topo associada(s) ao checkpoint, 0 abertas; 0 sub-checkpoint ativo`,
       `cursor: ${facts.cursor ? `${facts.cursor.pr} · ${facts.cursor.checkpoint}` : "(sem topology)"}`,
     ],
     blocking: false,

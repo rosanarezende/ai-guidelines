@@ -24,7 +24,18 @@
 import * as path from "node:path";
 import * as fs from "node:fs";
 import { execFileSync } from "node:child_process";
-import { HandoffFacts, NextAction } from "./handoffFacts.js";
+import {
+  HandoffFacts,
+  NextAction,
+  SubCheckpointRef,
+  SubCheckpointResolution,
+  resolveSubCheckpointWork,
+} from "./handoffFacts.js";
+
+// Re-export da derivação compartilhada (fonte: handoffFacts) para consumidores
+// que historicamente a importavam de `workBrief` (advanceSubcheckpoint, testes).
+export { resolveSubCheckpointWork };
+export type { SubCheckpointResolution };
 import {
   HandoffLoadSnapshot,
   HandoffOptions,
@@ -103,11 +114,8 @@ export interface WorkTaskRef {
   readonly line: number;
 }
 
-export interface WorkSubCheckpointRef {
-  readonly id: string;
-  readonly title: string;
-  readonly line: number;
-}
+/** Alias do ref compartilhado (definido em handoffFacts) — forma idêntica. */
+export type WorkSubCheckpointRef = SubCheckpointRef;
 
 export interface WorkObject {
   readonly checkpoint: string | null;
@@ -243,71 +251,6 @@ function derivedValidations(specId: string, object: WorkObject): WorkValidation[
   }
   out.push({ command: `npm run handoff:check -- --spec ${specId}`, level: "recomendado" });
   return out;
-}
-
-type SubCheckpointResolution =
-  | { kind: "implement"; subCheckpoint: WorkSubCheckpointRef; basis: string[] }
-  | {
-      kind: "transition";
-      transition: { conclude: WorkSubCheckpointRef | null; activate: WorkSubCheckpointRef };
-      basis: string[];
-    }
-  | { kind: "none"; basis: string[] };
-
-/**
- * Resolve o OBJETO de trabalho a partir dos sub-checkpoints (CO-x.y) + auditoria,
- * quando não há tarefa de topo executável. Fail-closed: nunca devolve `implement`
- * sem um sub-checkpoint ATIVO concreto.
- *
- * Transição (one-shot): um sub-checkpoint `[/]` terminou (auditoria fechada e
- * verificada) mas o tasks.md ainda não o concluiu, e há um próximo pendente. O
- * guard `done.length === 0` impede re-disparo: ao concluir o atual (`[x]`) e
- * ativar o próximo (`[/]`), o próximo vira OBJETO de implement, não nova
- * transição. Concluir/ativar é ATO VISÍVEL em tasks.md, não efeito colateral.
- */
-export function resolveSubCheckpointWork(facts: HandoffFacts): SubCheckpointResolution {
-  const subs = facts.subCheckpoints;
-  if (subs.length === 0) return { kind: "none", basis: [] };
-  const ref = (s: { id: string; title: string; line: number }): WorkSubCheckpointRef => ({
-    id: s.id,
-    title: s.title,
-    line: s.line,
-  });
-  const inProgress = subs.filter((s) => s.state === "in-progress");
-  const pending = subs.filter((s) => s.state === "pending");
-  const done = subs.filter((s) => s.state === "done");
-  const lc = facts.lifecycle;
-  const auditSettled = lc !== null && lc.openFindings === 0 && lc.closedFindings > 0;
-
-  if (inProgress.length >= 1 && pending.length >= 1 && auditSettled && done.length === 0) {
-    return {
-      kind: "transition",
-      transition: { conclude: ref(inProgress[0]), activate: ref(pending[0]) },
-      basis: [
-        `${inProgress[0].id} concluído (auditoria fechada e verificada) mas ainda marcado [/] em tasks.md;`,
-        `próximo pendente: ${pending[0].id} — ${pending[0].title}.`,
-        "concluir e ativar é ato VISÍVEL em tasks.md (não efeito colateral do fechamento de dispositions).",
-      ],
-    };
-  }
-  if (inProgress.length >= 1) {
-    const s = inProgress[0];
-    return {
-      kind: "implement",
-      subCheckpoint: ref(s),
-      basis: [`sub-checkpoint ativo: ${s.id} — ${s.title} (tasks.md linha ${s.line}).`],
-    };
-  }
-  if (pending.length >= 1) {
-    return {
-      kind: "transition",
-      transition: { conclude: null, activate: ref(pending[0]) },
-      basis: [
-        `nenhum sub-checkpoint ativo; ative o próximo pendente: ${pending[0].id} — ${pending[0].title} (ato visível em tasks.md).`,
-      ],
-    };
-  }
-  return { kind: "none", basis: [] };
 }
 
 // ── Próxima ação estruturada: comandos derivados do TIPO de decisão pendente ──
@@ -715,10 +658,14 @@ export function deriveWorkBrief(input: WorkBriefInput): WorkBrief {
         mode = "implement_checkpoint";
         modeBasis.push(nextAction.description, ...nextAction.basis.map((b) => `  ${b}`));
         break;
+      case "implement-subcheckpoint":
+      case "advance-subcheckpoint-transition":
       case "investigate-checkpoint":
       default: {
-        // Sem tarefa de topo executável: consulta os sub-checkpoints. FAIL-CLOSED —
-        // IMPLEMENT_CHECKPOINT exige um objeto concreto (sub-checkpoint ATIVO);
+        // O handoff já nomeia o sub-checkpoint (kinds acima) ou cai no fallback de
+        // investigação. Em todos os casos, RE-DERIVA o objeto pela MESMA função
+        // (resolveSubCheckpointWork) — handoff↔work nomeiam o mesmo objeto.
+        // FAIL-CLOSED: IMPLEMENT_CHECKPOINT exige um sub-checkpoint ATIVO concreto;
         // sem objeto, nunca autoriza modificar código.
         const sub = resolveSubCheckpointWork(facts);
         if (sub.kind === "transition") {

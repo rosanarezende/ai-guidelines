@@ -366,7 +366,7 @@ describe("advance-subcheckpoint · simulação prospectiva [decide]", () => {
         },
         { id: "CO-3.3", title: "c", state: "pending", line: 7 },
       ],
-      lifecycle: { ...SETTLED },
+      lifecycle: { ...SETTLED, resolutions: 0 },
     } as never);
     expect(projected.kind).toBe("implement");
     if (projected.kind === "implement") expect(projected.subCheckpoint.id).toBe("CO-3.2");

@@ -575,7 +575,7 @@ describe("workBrief · sub-checkpoints e transição [work]", () => {
   it("após a transição (CO-3.1 [x], CO-3.2 [/]) ⇒ implement com objeto CO-3.2", () => {
     const r = resolveSubCheckpointWork(
       facts({
-        lifecycle: { ...settled },
+        lifecycle: { ...settled, resolutions: 1 },
         subCheckpoints: subs([
           { id: "CO-3.1", state: "done" },
           { id: "CO-3.2", state: "in-progress" },
@@ -607,7 +607,7 @@ describe("workBrief · sub-checkpoints e transição [work]", () => {
     const b = derive({
       nextAction: nextAction("investigate-checkpoint"),
       facts: facts({
-        lifecycle: { ...settled },
+        lifecycle: { ...settled, resolutions: 1 },
         subCheckpoints: subs([
           { id: "CO-3.1", state: "done" },
           { id: "CO-3.2", state: "in-progress" },

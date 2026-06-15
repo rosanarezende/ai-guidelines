@@ -4,7 +4,9 @@ import {
   HandoffPrFact,
   HandoffReviewStatusFact,
   HandoffSourceFact,
+  HandoffSubCheckpoint,
   HandoffTaskFact,
+  checkSubCheckpointCoherence,
   computeSeal,
   deriveHandoff,
   deriveNextAction,
@@ -449,5 +451,63 @@ describe("deriveHandoff · derivado completo [CO-4]", () => {
     expect(roundTrip.nextAction).toEqual(derived.nextAction);
     expect(roundTrip.seal).toBe(derived.seal);
     expect(derived.prohibitions.length).toBeGreaterThan(0);
+  });
+});
+
+describe("checkSubCheckpointCoherence — estado ↔ narrativa", () => {
+  const sc = (over: Partial<HandoffSubCheckpoint>): HandoffSubCheckpoint => ({
+    id: "CO-3.1",
+    title: "x",
+    state: "done",
+    line: 1,
+    text: "- [x] **CO-3.1 — x**: feito.",
+    ...over,
+  });
+
+  it("DADO marcadores coerentes ENTÃO sem violações", () => {
+    expect(
+      checkSubCheckpointCoherence([
+        sc({ id: "CO-3.1", state: "done", text: "[x] **CO-3.1** concluído." }),
+        sc({ id: "CO-3.2", state: "in-progress", text: "[/] **CO-3.2** em andamento." }),
+        sc({ id: "CO-3.3", state: "pending", text: "[ ] **CO-3.3** a fazer." }),
+      ])
+    ).toEqual([]);
+  });
+
+  it("DADO [x] que diz 'EM EXECUÇÃO' ENTÃO viola", () => {
+    const v = checkSubCheckpointCoherence([
+      sc({ id: "CO-3.1", state: "done", text: "[x] **CO-3.1** ... **EM EXECUÇÃO.**" }),
+    ]);
+    expect(v).toHaveLength(1);
+    expect(v[0]).toMatch(/CO-3\.1.*em execução/i);
+  });
+
+  it("DADO [ ] que diz 'IMPLEMENTADO' ENTÃO viola", () => {
+    const v = checkSubCheckpointCoherence([
+      sc({ id: "CO-3.4", state: "pending", text: "[ ] **CO-3.4** IMPLEMENTADO 2026-06-14." }),
+    ]);
+    expect(v).toHaveLength(1);
+    expect(v[0]).toMatch(/CO-3\.4.*concluído\/implementado/i);
+  });
+
+  it("DADO mais de um [/] ENTÃO viola (exatamente um pode estar ativo)", () => {
+    const v = checkSubCheckpointCoherence([
+      sc({ id: "CO-3.2", state: "in-progress", text: "[/] x" }),
+      sc({ id: "CO-3.3", state: "in-progress", text: "[/] y" }),
+    ]);
+    expect(v.some((m) => /mais de um sub-checkpoint \[\/\] ativo/i.test(m))).toBe(true);
+  });
+
+  it("DADO [/] ATIVO que diz 'Implementado' ENTÃO NÃO viola (foi implementado, falta avançar)", () => {
+    // Caso real do CO-3.3: implementado mas ainda [/] aguardando advance humano.
+    expect(
+      checkSubCheckpointCoherence([
+        sc({
+          id: "CO-3.3",
+          state: "in-progress",
+          text: "[/] **CO-3.3** Implementado 2026-06-14; avanço NÃO exercido.",
+        }),
+      ])
+    ).toEqual([]);
   });
 });
