@@ -1,7 +1,18 @@
+import fs from "node:fs/promises";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 import { ROOT_DIR } from "#fs/file-system";
-import { loadRulesCatalog } from "#governance/monolith/compiler";
-import { analyzeBudget } from "#governance/monolith/token-budget";
+
+/**
+ * O orçamento de tokens vive no compilador TypeScript (`src/app/services/
+ * TokenBudget.ts`) e é consumido a partir de `dist/` depois de `npm run build`
+ * — mesmo padrão de bootstrap cross-OS usado por `pointers.mjs`. Rode
+ * `npm run build` antes de invocar localmente sem build prévio.
+ */
+async function loadTokenBudget() {
+  const url = pathToFileURL(path.join(ROOT_DIR, "dist", "app", "services", "TokenBudget.js")).href;
+  return import(url);
+}
 
 function pct(tokens, limit) {
   if (limit === 0) return 0;
@@ -34,7 +45,7 @@ export async function runBudgetReport({ rulesJsonPath } = {}) {
 
   let catalog;
   try {
-    catalog = await loadRulesCatalog(resolvedPath);
+    catalog = JSON.parse(await fs.readFile(resolvedPath, "utf-8"));
   } catch (error) {
     console.error(`Erro: não consegui ler o catálogo em ${resolvedPath}.`);
     console.error(`  Detalhe: ${error.message}`);
@@ -42,6 +53,7 @@ export async function runBudgetReport({ rulesJsonPath } = {}) {
     return;
   }
 
+  const { analyzeBudget } = await loadTokenBudget();
   const report = analyzeBudget(catalog);
 
   console.log("📊 Token budget report");

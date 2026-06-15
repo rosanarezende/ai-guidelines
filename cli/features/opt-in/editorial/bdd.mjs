@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { ROOT_DIR } from "#fs/file-system";
-import { getOptInRuleRelativePath } from "#governance/monolith/rules-loader";
+import { getOptInRuleRelativePath } from "./opt-in-rule-paths.mjs";
 
 /**
  * Feature Opt-in: BDD
@@ -17,7 +17,7 @@ export async function applyBdd(targetDir, options, context, actions) {
     baseDir,
     ".core",
     "rules",
-    getOptInRuleRelativePath("bdd", lang)
+    await getOptInRuleRelativePath("bdd", lang)
   );
   const targetRulesDir = path.join(targetDir, ".ai-guidelines", "rules");
   const targetRulesPath = path.join(targetRulesDir, "bdd.md");

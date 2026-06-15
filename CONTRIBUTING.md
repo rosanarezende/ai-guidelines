@@ -226,8 +226,7 @@ ai-guidelines/
 │   ├── cli/                    # Parser de args + Wizard
 │   ├── commands/               # Comandos de auditoria (ai-check.mjs)
 │   ├── fs/                     # I/O, file-system, merge-utils
-│   ├── governance/             # Compiladores e motores de análise
-│   │   ├── monolith/           # Rules Builder, Parser, Token Budget
+│   ├── governance/             # agents-merge, script-contracts/gate checks (compilador de regras migrou p/ src/)
 │   │   ├── quality-gates/      # Sensores baseados em rules.json
 │   │   └── evaluation/         # Eval Runner
 │   ├── features/               # Módulos de funcionalidade

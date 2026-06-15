@@ -57,7 +57,7 @@ describe("Feature: Pointers (AGENTS.md Runtime Architecture)", () => {
   });
 
   it("[COMPILER] Deve gerar AGENTS raiz stub sem regras e opt-ins envelopados", async () => {
-    const subTarget = path.join(targetDir, "monolithic-core");
+    const subTarget = path.join(targetDir, "stub-core");
     await fs.mkdir(subTarget, { recursive: true });
 
     await applyPointers(subTarget, { features: ["quality-gates", "tdd"], lang: "pt" }, []);

@@ -3,7 +3,7 @@ import path from "node:path";
 import { MarkdownRulesDirectorySource } from "../../infrastructure/filesystem/MarkdownRulesDirectorySource.js";
 import { buildRulesCatalog, generateCatalogMarkdown } from "./RulesCatalogBuilder.js";
 
-const FIXTURES_DIR = path.resolve("cli/governance/monolith/__fixtures__/rules-builder");
+const FIXTURES_DIR = path.resolve("src/app/services/__fixtures__/rules-builder");
 const CURRENT_RULES_DIR = path.resolve(".core/rules");
 
 function sourceFor(dirPath: string): MarkdownRulesDirectorySource {
