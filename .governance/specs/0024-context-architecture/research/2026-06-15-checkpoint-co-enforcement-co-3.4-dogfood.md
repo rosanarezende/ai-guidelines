@@ -111,3 +111,49 @@ carga indisponível (<erro>)`. Provado por cenário com spec irresolvível (bran
   registrado como decisão governada superada (ver o registro de decisão e
   `plan.md`). Nesta sessão: CO-3.5 nasce `[ ]`, sem início; `/cli` intacto.
 - Nenhum `decide` mutante exercido; sem Ready/gate/merge; PR #42 segue Draft.
+
+## Parte 2 — Prontidão de transição vira sinal EXPLÍCITO (readiness), 2026-06-15
+
+Achado reportado e confirmado como **bug estrutural** (não diferido): a transição
+CO-3.4 → CO-3.5 não era recomendada pelo `work` mesmo com o CO-3.4 implementado.
+
+### F5 — prontidão inferida de contagens de findings ACUMULADOS
+
+`resolveSubCheckpointWork` exigia `auditSettled + resolutions > done.length`;
+`deriveAdvanceEligibility` exigia `closedFindings === 0 ⇒ blocked`. Esses números
+pertencem aos reviews/audit ACUMULADOS do checkpoint (sobretudo o audit do CO-3.1,
+com 3 findings/3 resolutions) e **não provam** que o sub-checkpoint ATIVO terminou.
+Consequências reais: (a) um sub-checkpoint **sem findings** podia ficar bloqueado;
+(b) `resolutions=3` coincidia com `done` crescendo `0,1,2` (CO-3.1→3.3), mas ao
+chegar `done=3` a condição `3 > 3` virou falsa ⇒ CO-3.4 implementado, `work`
+inferindo `IMPLEMENT_CHECKPOINT`; (c) findings históricos podiam liberar uma
+transição indevida.
+
+### Correção — fonte ÚNICA e explícita: `readiness: ready-for-transition`
+
+Sinal INLINE na linha do marcador em tasks.md (code-span humano+machine-readable),
+parseado pelo MESMO `parseSubCheckpoints` (sem 2ª SSOT). `HandoffSubCheckpoint.readiness`
+é consumido IDENTICAMENTE por handoff, `work` (modo + `work.nextAction`) e `decide`
+(`deriveAdvanceEligibility`). Removidos: `resolutions > done.length`,
+`closedFindings === 0` como conclusão, e toda comparação contagem-de-reviews ×
+nº-de-sub-checkpoints. Reviews/findings agora só **bloqueiam** (abertos/required),
+nunca **concluem**.
+
+### Invariantes provados (testes vermelho-primeiro)
+
+- parser extrai readiness do code-span; ausente ⇒ `undefined`;
+- coerência (`active-specs:check`): readiness só no `[/]` ativo; readiness em `[ ]`
+  ou `[x]` ⇒ violação; valor ≠ `ready-for-transition` ⇒ violação;
+- `resolveSubCheckpointWork`: `[/]` + readiness + próximo `[ ]` ⇒ `transition`;
+  `[/]` sem readiness ⇒ `implement`; readiness sem próximo ⇒ `implement`;
+- `deriveAdvanceEligibility`: sem readiness ⇒ `blocked` (critérios não declarados);
+  readiness + ZERO findings ⇒ `available` (findings fechados não são pré-requisito);
+  closedFindings do CO-3.1 NÃO liberam o ativo sem readiness;
+- o apply de `advance` REMOVE o readiness ao concluir (`[x]` nunca o carrega).
+
+### Dogfood real (repo mantenedor)
+
+Com CO-3.4 carregando `readiness: ready-for-transition` em tasks.md e a tree limpa,
+`decide --type advance-subcheckpoint --brief-only` oferece "concluir CO-3.4 e ativar
+CO-3.5" e o único bloqueio possível é OPERACIONAL (tree suja durante a edição → some
+após o commit). CO-3.4 recebeu a readiness canônica SEM ser marcado `[x]`.
