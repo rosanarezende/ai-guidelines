@@ -859,7 +859,6 @@ function collectAdvanceEligibility(
   return deriveAdvanceEligibility({
     subCheckpoints: facts.subCheckpoints,
     policyDeclared,
-    closedFindings: lc?.closedFindings ?? 0,
     openFindings: lc?.openFindings ?? 0,
     openBlocking: lc?.openBlocking ?? 0,
     someFixAwaitingRevalidation: findings.some(

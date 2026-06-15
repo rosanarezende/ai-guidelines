@@ -71,6 +71,10 @@ function escapeRe(s: string): string {
  * Edição ESTRUTURADA dos marcadores: localiza a linha pelo id do sub-checkpoint
  * e troca SOMENTE o caractere do marcador (`/`→`x` no concluído, ` `→`/` no
  * ativado). Não toca newlines (preserva CRLF/LF e bytes do resto da linha).
+ *
+ * Ao CONCLUIR, REMOVE o token `` `readiness: …` `` da linha concluída: readiness
+ * só vale para o `[/]` ativo (invariante de coerência), então um `[x]` jamais o
+ * carrega. O ativado nasce `[/]` SEM readiness (ainda em implementação).
  */
 export function advanceSubCheckpointMarkers(
   tasksMd: string,
@@ -79,6 +83,10 @@ export function advanceSubCheckpointMarkers(
 ): { text: string; ok: boolean; error: string | null } {
   const concludeRe = new RegExp(`(-[ \\t]*\\[)/(\\][ \\t]*\\*\\*${escapeRe(concludeId)}\\b)`);
   const activateRe = new RegExp(`(-[ \\t]*\\[) (\\][ \\t]*\\*\\*${escapeRe(activateId)}\\b)`);
+  // Remove o code-span de readiness logo após o título em negrito do concluído.
+  const stripReadinessRe = new RegExp(
+    `(\\*\\*${escapeRe(concludeId)}\\b[^\\n]*?\\*\\*)[ \\t]*\`readiness:[^\`\\n]*\``
+  );
   if (!concludeRe.test(tasksMd)) {
     return {
       text: tasksMd,
@@ -93,7 +101,10 @@ export function advanceSubCheckpointMarkers(
       error: `não encontrei "${activateId}" como [ ] em tasks.md.`,
     };
   }
-  const text = tasksMd.replace(concludeRe, "$1x$2").replace(activateRe, "$1/$2");
+  const text = tasksMd
+    .replace(concludeRe, "$1x$2")
+    .replace(activateRe, "$1/$2")
+    .replace(stripReadinessRe, "$1");
   return { text, ok: true, error: null };
 }
 
@@ -120,7 +131,6 @@ export class AdvanceSubcheckpointDefinition implements HumanDecisionDefinition {
     return {
       subCheckpoints: snapshot.subCheckpoints,
       policyDeclared: this.policyOf(snapshot) !== undefined,
-      closedFindings: lc?.closedFindings ?? 0,
       openFindings: snapshot.openFindings.length,
       openBlocking: snapshot.openFindings.filter((f) => f.blocking).length,
       someFixAwaitingRevalidation: snapshot.openFindings.some(
@@ -184,10 +194,12 @@ export class AdvanceSubcheckpointDefinition implements HumanDecisionDefinition {
         ? [`O ${active.id} entregou: ${active.title}.`]
         : ["(nenhum sub-checkpoint concluível no estado atual)"],
       exit_criteria: [
-        lc && lc.closedFindings > 0
-          ? "Os problemas encontrados na auditoria foram corrigidos e aceitos."
-          : "Os critérios de saída do sub-checkpoint atual estão satisfeitos.",
-        "As correções foram revalidadas por verificação independente.",
+        active?.readiness === "ready-for-transition"
+          ? `${active.id} declarou seus critérios de saída satisfeitos (readiness em tasks.md).`
+          : `${active?.id ?? "O sub-checkpoint atual"} ainda não declarou seus critérios de saída satisfeitos (readiness).`,
+        lc && lc.openFindings > 0
+          ? "Há problemas abertos na auditoria — resolva antes de avançar."
+          : "Sem findings bloqueantes abertos (findings fechados NÃO concluem o sub-checkpoint).",
         pr && pr.checks.fail === 0 && pr.checks.pending === 0
           ? "Integração contínua e validações estão verdes."
           : "As validações locais estão verdes.",

@@ -32,10 +32,11 @@ function subs(list: Array<Partial<HandoffSubCheckpoint>>): HandoffSubCheckpoint[
     title: o.title ?? "t",
     state: o.state ?? "pending",
     line: o.line ?? 100 + i,
+    ...(o.readiness ? { readiness: o.readiness } : {}),
   }));
 }
 
-/** Estado real esperado: CO-3.1 [/], CO-3.2-3.4 [ ], auditoria fechada, tree limpa. */
+/** Estado real esperado: CO-3.1 [/] com readiness declarada, CO-3.2-3.4 [ ], tree limpa. */
 function snap(over: Partial<DecisionSnapshot> = {}): DecisionSnapshot {
   const facts = makeHandoffFacts({ lifecycle: { ...SETTLED } });
   return makeDecisionSnapshot({
@@ -44,7 +45,13 @@ function snap(over: Partial<DecisionSnapshot> = {}): DecisionSnapshot {
     lanes: [],
     workingTreeState: "clean",
     subCheckpoints: subs([
-      { id: "CO-3.1", title: "Constraint + EnforcementBinding", state: "in-progress", line: 101 },
+      {
+        id: "CO-3.1",
+        title: "Constraint + EnforcementBinding",
+        state: "in-progress",
+        line: 101,
+        readiness: "ready-for-transition",
+      },
       {
         id: "CO-3.2",
         title: "knowledge:compile + manifesto/paridade",
@@ -85,7 +92,7 @@ class FakeGit implements DecisionGitOps {
 }
 
 describe("advance-subcheckpoint · elegibilidade [decide]", () => {
-  it("[1] atual [/] + próximo [ ] (auditoria fechada, tree limpa) ⇒ available", () => {
+  it("[1] atual [/] com readiness + próximo [ ] (tree limpa) ⇒ available", () => {
     const av = def.detect(snap());
     expect(av.status).toBe("available");
     expect(av.hint).toMatch(/CO-3\.1 concluível; CO-3\.2 é o próximo/);
@@ -166,15 +173,15 @@ describe("advance-subcheckpoint · elegibilidade [decide]", () => {
     expect(def.detect(snap({ gateExists: true })).status).toBe("blocked");
   });
 
-  it("[27] ESTADO REAL pós-transição (CO-3.1 [x], CO-3.2 [/], CO-3.3 [ ], auditoria fechada) ⇒ available", () => {
+  it("[27] ESTADO REAL pós-transição (CO-3.1 [x], CO-3.2 [/] ready, CO-3.3 [ ]) ⇒ available", () => {
     // Regressão do dogfood: ter CO-3.1 já concluído ([x]) é o caso NORMAL de toda
     // transição após a primeira — NÃO torna `advance` not-applicable (ocultando-o
-    // do menu enquanto `work` o recomendava). Com critérios de saída satisfeitos,
+    // do menu enquanto `work` o recomendava). Com o ATIVO declarando readiness,
     // a transição CO-3.2 → CO-3.3 é AVAILABLE.
     const s = snap({
       subCheckpoints: subs([
         { id: "CO-3.1", state: "done", line: 101 },
-        { id: "CO-3.2", state: "in-progress", line: 102 },
+        { id: "CO-3.2", state: "in-progress", line: 102, readiness: "ready-for-transition" },
         { id: "CO-3.3", state: "pending", line: 103 },
         { id: "CO-3.4", state: "pending", line: 104 },
       ]),
@@ -182,6 +189,39 @@ describe("advance-subcheckpoint · elegibilidade [decide]", () => {
     const av = def.detect(s);
     expect(av.status).toBe("available");
     expect(av.hint).toMatch(/CO-3\.2 concluível; CO-3\.3 é o próximo/);
+  });
+
+  it("[28] atual [/] SEM readiness ⇒ blocked (critérios de saída não declarados)", () => {
+    const s = snap({
+      subCheckpoints: subs([
+        { id: "CO-3.1", state: "done", line: 101 },
+        { id: "CO-3.2", state: "in-progress", line: 102 }, // sem readiness
+        { id: "CO-3.3", state: "pending", line: 103 },
+      ]),
+    });
+    const av = def.detect(s);
+    expect(av.status).toBe("blocked");
+    expect(av.reasons.join(" ")).toMatch(/CO-3\.2 ainda não declarou seus critérios de saída/);
+  });
+
+  it("[29] readiness + ZERO findings ⇒ available (findings fechados não são pré-requisito)", () => {
+    const facts = makeHandoffFacts({
+      lifecycle: { ...SETTLED, closedFindings: 0, resolutions: 0 },
+    });
+    const av = def.detect(snap({ facts }));
+    expect(av.status).toBe("available"); // antes era bloqueado por closedFindings===0
+  });
+
+  it("[30] findings fechados (do CO-3.1) NÃO liberam o ativo SEM readiness", () => {
+    // closedFindings=3 (audit do CO-3.1) presentes, mas o ativo não declarou readiness.
+    const s = snap({
+      subCheckpoints: subs([
+        { id: "CO-3.1", state: "done", line: 101 },
+        { id: "CO-3.2", state: "in-progress", line: 102 }, // sem readiness
+        { id: "CO-3.3", state: "pending", line: 103 },
+      ]),
+    });
+    expect(def.detect(s).status).toBe("blocked"); // SETTLED tem closedFindings=3
   });
 
   it("[28] pós-transição com CI pendente ⇒ blocked e o requisito é NOMEADO", () => {
@@ -251,6 +291,20 @@ describe("advance-subcheckpoint · plano e marcadores [decide]", () => {
     expect(r.text).toBe(
       ["x", "- [x] **CO-3.1 — A** desc", "- [/] **CO-3.2 — B** desc", "y"].join("\r\n")
     );
+  });
+
+  it("ao concluir, REMOVE o readiness do concluído (invariante: [x] nunca carrega readiness)", () => {
+    const md = [
+      "- [/] **CO-3.4 — dogfood** `readiness: ready-for-transition`: desc",
+      "- [ ] **CO-3.5 — colapso**: desc",
+    ].join("\n");
+    const r = advanceSubCheckpointMarkers(md, "CO-3.4", "CO-3.5");
+    expect(r.ok).toBe(true);
+    expect(r.text).toBe(
+      ["- [x] **CO-3.4 — dogfood**: desc", "- [/] **CO-3.5 — colapso**: desc"].join("\n")
+    );
+    // o concluído [x] não pode mais conter o token
+    expect(r.text).not.toMatch(/\[x\][^\n]*readiness/);
   });
 
   it("[17] marcador ausente ⇒ edição falha (sem escrita)", () => {

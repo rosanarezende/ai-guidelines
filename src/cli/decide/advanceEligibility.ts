@@ -35,7 +35,8 @@ export interface AdvanceEligibilityFacts {
   readonly subCheckpoints: readonly HandoffSubCheckpoint[];
   /** O tipo está declarado em `human-decision-policy.yml`? (false ⇒ not-applicable) */
   readonly policyDeclared: boolean;
-  readonly closedFindings: number;
+  // NB: contagens de findings do checkpoint só BLOQUEIAM (quando abertas); a
+  // CONCLUSÃO vem do sinal de readiness do sub-checkpoint ativo, não delas.
   readonly openFindings: number;
   readonly openBlocking: number;
   /** Há finding aberto com correção `fixed` ainda não revalidada por verificação? */
@@ -125,16 +126,26 @@ export function deriveAdvanceEligibility(f: AdvanceEligibilityFacts): DecisionAv
     };
   }
 
-  // ── Critérios de saída do atual + guardas operacionais (nomeados) ───────────
+  // ── Critério de SAÍDA do atual: READINESS EXPLÍCITA (NUNCA findings) ─────────
+  // Conclusão é DECLARADA pelo sinal de readiness do sub-checkpoint ATIVO. Jamais
+  // inferida de contagens de findings/resolutions: esses números pertencem aos
+  // reviews ACUMULADOS do checkpoint (p.ex. o audit do CO-3.1) e não provam que o
+  // sub-checkpoint atual terminou. Reviews/findings podem BLOQUEAR (logo abaixo,
+  // quando abertos/required), nunca CONCLUIR. Zero findings é válido.
   const reasons: string[] = [];
+  if (active.readiness !== "ready-for-transition") {
+    reasons.push(
+      `${active.id} ainda não declarou seus critérios de saída satisfeitos ` +
+        `(sem readiness "ready-for-transition" em tasks.md).`
+    );
+  }
+  // ── Guardas OPERACIONAIS: findings ABERTOS / reviews required pendentes ──────
   if (f.openBlocking > 0) {
-    reasons.push("Há finding bloqueante aberto na auditoria do sub-checkpoint atual.");
+    reasons.push("Há finding bloqueante aberto na auditoria do checkpoint.");
   } else if (f.someFixAwaitingRevalidation) {
     reasons.push("Há correção aguardando revalidação independente.");
   } else if (f.openFindings > 0) {
-    reasons.push("Há problema aberto na auditoria do sub-checkpoint atual.");
-  } else if (f.closedFindings === 0) {
-    reasons.push(`Critérios de saída de ${active.id} não confirmados (sem auditoria fechada).`);
+    reasons.push("Há problema aberto na auditoria do checkpoint.");
   }
   for (const s of f.blockingReviews) {
     reasons.push(`Review obrigatório pendente: ${s.typeId} (${s.state}).`);

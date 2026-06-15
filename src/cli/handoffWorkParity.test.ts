@@ -3,7 +3,6 @@ import * as path from "node:path";
 
 import {
   HandoffFacts,
-  HandoffLifecycleFact,
   deriveNextAction,
   parseSubCheckpoints,
   resolveSubCheckpointWork,
@@ -167,9 +166,13 @@ describe("Invariante handoff ↔ work (projeção unificada de sub-checkpoint)",
     expect(resolveSubCheckpointWork(f).kind).toBe("none");
   });
 
-  it("DADO o estado real com auditoria do CO-3.3 concluída QUANDO handoff e work derivam ENTÃO recomendam a transição e nomeiam o CO-3.3", () => {
+  it("DADO o CO-3.3 [/] com readiness declarada QUANDO handoff e work derivam ENTÃO recomendam a transição e nomeiam o CO-3.3", () => {
+    const tasksReady = TASKS_MD.replace(
+      "[/] **CO-3.3 — migração e remoção do substrato legacy**",
+      "[/] **CO-3.3 — migração e remoção do substrato legacy** `readiness: ready-for-transition`"
+    );
     const f = facts({
-      lifecycle: { ...facts().lifecycle, resolutions: 3 } as HandoffLifecycleFact,
+      subCheckpoints: parseSubCheckpoints(tasksReady, "checkpoint-co-enforcement"),
     });
 
     // handoff

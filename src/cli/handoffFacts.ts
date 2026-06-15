@@ -162,6 +162,16 @@ export interface HandoffSubCheckpoint {
   /** Linha (1-based) em tasks.md — base factual citável. */
   readonly line: number;
   /**
+   * Sinal EXPLÍCITO de prontidão para transição: presente (`"ready-for-transition"`)
+   * SOMENTE quando o sub-checkpoint ATIVO declarou seus critérios de saída
+   * satisfeitos e aguarda a decisão humana. É a FONTE ÚNICA de "implementação
+   * terminada" — substitui a inferência por contagem de findings/resolutions
+   * (que pertencem aos reviews ACUMULADOS do checkpoint, não ao sub-checkpoint
+   * atual). Vive INLINE na própria linha do marcador (mesma SSOT; mesmo parser).
+   * Ausente/`undefined` ⇒ ainda em implementação.
+   */
+  readonly readiness?: "ready-for-transition";
+  /**
    * Texto BRUTO da linha do marcador (para checagens de coerência
    * estado↔narrativa). Opcional: só presente quando vem de `parseSubCheckpoints`;
    * fixtures que constroem o objeto à mão podem omiti-lo.
@@ -293,6 +303,17 @@ export function parseCheckpointTasks(
  * SÓ sub-checkpoints `CO-N.M` (o checkpoint-pai `CO-N` não entra). Conservador:
  * mencionar um sub-checkpoint em prosa de outro bloco NÃO cria pertencimento.
  */
+/**
+ * Valor canônico do sinal de prontidão de transição (ver `HandoffSubCheckpoint.readiness`).
+ * Representação INLINE em tasks.md: um code-span `` `readiness: ready-for-transition` ``
+ * logo após o título em negrito do sub-checkpoint — humano-legível (renderiza como
+ * código), machine-readable e parseado pelo MESMO parser (sem 2ª SSOT).
+ */
+export const SUBCHECKPOINT_READINESS = "ready-for-transition" as const;
+
+/** Token de readiness na linha do marcador; captura o valor para validação de coerência. */
+export const READINESS_TOKEN_RE = /`readiness:\s*([A-Za-z0-9-]+)`/;
+
 export function parseSubCheckpoints(tasksMd: string, checkpoint: string): HandoffSubCheckpoint[] {
   const normalized = checkpoint.replace(/^checkpoint-/, "");
   const lines = tasksMd.split(/\r?\n/);
@@ -305,7 +326,16 @@ export function parseSubCheckpoints(tasksMd: string, checkpoint: string): Handof
     if (!m) continue;
     const mark = m[1];
     const state = mark === " " ? "pending" : mark === "/" ? "in-progress" : "done";
-    out.push({ id: m[2], title: m[3].trim(), state, line: i + 1, text: lines[i].trim() });
+    const rm = READINESS_TOKEN_RE.exec(lines[i]);
+    const readiness = rm && rm[1] === SUBCHECKPOINT_READINESS ? SUBCHECKPOINT_READINESS : undefined;
+    out.push({
+      id: m[2],
+      title: m[3].trim(),
+      state,
+      line: i + 1,
+      ...(readiness ? { readiness } : {}),
+      text: lines[i].trim(),
+    });
   }
   return out;
 }
@@ -332,15 +362,16 @@ export type SubCheckpointResolution =
   | { kind: "none"; basis: string[] };
 
 /**
- * Resolve o OBJETO de trabalho a partir dos sub-checkpoints (CO-x.y) + auditoria,
- * quando não há tarefa de topo executável. Fail-closed: nunca devolve `implement`
- * sem um sub-checkpoint ATIVO concreto.
+ * Resolve o OBJETO de trabalho a partir dos sub-checkpoints (CO-x.y) quando não há
+ * tarefa de topo executável. Fail-closed: nunca devolve `implement` sem um
+ * sub-checkpoint ATIVO concreto.
  *
- * Transição (one-shot): um sub-checkpoint `[/]` terminou (auditoria fechada e
- * verificada) mas o tasks.md ainda não o concluiu, e há um próximo pendente. O
- * guard `done.length === 0` impede re-disparo: ao concluir o atual (`[x]`) e
- * ativar o próximo (`[/]`), o próximo vira OBJETO de implement, não nova
- * transição. Concluir/ativar é ATO VISÍVEL em tasks.md, não efeito colateral.
+ * Conclusão = READINESS EXPLÍCITA. Um `[/]` ativo só vira `transition` quando ELE
+ * MESMO declarou `readiness: ready-for-transition` em tasks.md (critérios de saída
+ * satisfeitos) E há um pendente adiante. SEM readiness ⇒ ainda em implementação —
+ * independe de findings/resolutions ACUMULADOS do checkpoint (que pertencem aos
+ * reviews — p.ex. o audit do CO-3.1 — e NÃO provam que o sub-checkpoint atual
+ * terminou). Concluir/ativar é ATO VISÍVEL em tasks.md, decisão governada da owner.
  */
 export function resolveSubCheckpointWork(facts: HandoffFacts): SubCheckpointResolution {
   const subs = facts.subCheckpoints;
@@ -352,27 +383,27 @@ export function resolveSubCheckpointWork(facts: HandoffFacts): SubCheckpointReso
   });
   const inProgress = subs.filter((s) => s.state === "in-progress");
   const pending = subs.filter((s) => s.state === "pending");
-  const done = subs.filter((s) => s.state === "done");
-  const lc = facts.lifecycle;
-  const auditSettled = lc !== null && lc.openFindings === 0 && lc.closedFindings > 0;
-  const resolutions = lc?.resolutions ?? 0;
-  if (inProgress.length >= 1 && pending.length >= 1 && auditSettled && resolutions > done.length) {
-    return {
-      kind: "transition",
-      transition: { conclude: ref(inProgress[0]), activate: ref(pending[0]) },
-      basis: [
-        `${inProgress[0].id} concluído (auditoria fechada e verificada) mas ainda marcado [/] em tasks.md;`,
-        `próximo pendente: ${pending[0].id} — ${pending[0].title}.`,
-        "concluir e ativar é ato VISÍVEL em tasks.md (não efeito colateral do fechamento de dispositions).",
-      ],
-    };
-  }
   if (inProgress.length >= 1) {
-    const s = inProgress[0];
+    const active = inProgress[0];
+    const pendingAfter = pending.filter((s) => s.line > active.line);
+    if (active.readiness === SUBCHECKPOINT_READINESS && pendingAfter.length >= 1) {
+      return {
+        kind: "transition",
+        transition: { conclude: ref(active), activate: ref(pendingAfter[0]) },
+        basis: [
+          `${active.id} declarou readiness "${SUBCHECKPOINT_READINESS}" (critérios de saída satisfeitos) mas segue [/] em tasks.md;`,
+          `próximo pendente: ${pendingAfter[0].id} — ${pendingAfter[0].title}.`,
+          "concluir e ativar é ato VISÍVEL em tasks.md (decisão governada da owner).",
+        ],
+      };
+    }
     return {
       kind: "implement",
-      subCheckpoint: ref(s),
-      basis: [`sub-checkpoint ativo: ${s.id} — ${s.title} (tasks.md linha ${s.line}).`],
+      subCheckpoint: ref(active),
+      basis: [
+        `sub-checkpoint ativo: ${active.id} — ${active.title} (tasks.md linha ${active.line})` +
+          (active.readiness ? "." : "; sem readiness declarada (ainda em implementação)."),
+      ],
     };
   }
   if (pending.length >= 1) {
@@ -420,6 +451,21 @@ export function checkSubCheckpointCoherence(subs: ReadonlyArray<HandoffSubCheckp
       violations.push(
         `${s.id} está [ ] (pendente) mas a narrativa diz "concluído/implementado" (tasks.md linha ${s.line}).`
       );
+    }
+    // Invariantes do sinal de readiness (fonte única de "implementação terminada").
+    const rm = READINESS_TOKEN_RE.exec(text);
+    if (rm) {
+      if (rm[1] !== SUBCHECKPOINT_READINESS) {
+        violations.push(
+          `${s.id}: marcador de readiness inválido "${rm[1]}" — único valor aceito é "${SUBCHECKPOINT_READINESS}" (tasks.md linha ${s.line}).`
+        );
+      } else if (s.state !== "in-progress") {
+        violations.push(
+          `${s.id} carrega readiness "${SUBCHECKPOINT_READINESS}" mas está ${
+            s.state === "pending" ? "[ ] (pendente)" : "[x] (concluído)"
+          } — readiness só vale para o sub-checkpoint [/] ATIVO (tasks.md linha ${s.line}).`
+        );
+      }
     }
   }
   return violations;

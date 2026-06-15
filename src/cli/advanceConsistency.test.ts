@@ -62,6 +62,7 @@ function realSubs(): HandoffSubCheckpoint[] {
       title: "knowledge:compile + manifesto/paridade",
       state: "in-progress",
       line: 102,
+      readiness: "ready-for-transition",
     },
     { id: "CO-3.3", title: "migração e remoção do substrato legacy", state: "pending", line: 103 },
     { id: "CO-3.4", title: "dogfood do enforcement e recibo", state: "pending", line: 104 },

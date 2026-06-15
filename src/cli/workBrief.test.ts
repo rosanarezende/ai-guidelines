@@ -541,6 +541,7 @@ describe("workBrief · sub-checkpoints e transição [work]", () => {
       title: o.title ?? "t",
       state: o.state ?? "pending",
       line: o.line ?? i + 1,
+      ...(o.readiness ? { readiness: o.readiness } : {}),
     }));
   const settled = {
     reviewDecisions: [],
@@ -553,12 +554,12 @@ describe("workBrief · sub-checkpoints e transição [work]", () => {
     gateDecision: null,
   } as const;
 
-  it("estado real (CO-3.1 [/], CO-3.2-3.4 [ ], auditoria fechada) ⇒ transição CO-3.1→CO-3.2", () => {
+  it("estado real (CO-3.1 [/] com readiness, CO-3.2-3.4 [ ]) ⇒ transição CO-3.1→CO-3.2", () => {
     const r = resolveSubCheckpointWork(
       facts({
         lifecycle: { ...settled },
         subCheckpoints: subs([
-          { id: "CO-3.1", state: "in-progress" },
+          { id: "CO-3.1", state: "in-progress", readiness: "ready-for-transition" },
           { id: "CO-3.2", state: "pending" },
           { id: "CO-3.3", state: "pending" },
           { id: "CO-3.4", state: "pending" },
@@ -593,7 +594,7 @@ describe("workBrief · sub-checkpoints e transição [work]", () => {
       facts: facts({
         lifecycle: { ...settled },
         subCheckpoints: subs([
-          { id: "CO-3.1", state: "in-progress" },
+          { id: "CO-3.1", state: "in-progress", readiness: "ready-for-transition" },
           { id: "CO-3.2", state: "pending" },
         ]),
       }),
@@ -636,6 +637,7 @@ describe("workBrief · próxima ação estruturada [work]", () => {
       title: o.title ?? "t",
       state: o.state ?? "pending",
       line: o.line ?? i + 1,
+      ...(o.readiness ? { readiness: o.readiness } : {}),
     }));
   const settled = {
     reviewDecisions: [],
@@ -682,13 +684,13 @@ describe("workBrief · próxima ação estruturada [work]", () => {
     );
   });
 
-  it("[39] transição pendente ⇒ advance-subcheckpoint (concluir o ativo, ativar o próximo)", () => {
+  it("[39] transição pendente (ativo com readiness) ⇒ advance-subcheckpoint (concluir o ativo, ativar o próximo)", () => {
     const b = derive({
       nextAction: nextAction("investigate-checkpoint"),
       facts: facts({
         lifecycle: { ...settled },
         subCheckpoints: subs([
-          { id: "CO-3.1", state: "in-progress" },
+          { id: "CO-3.1", state: "in-progress", readiness: "ready-for-transition" },
           { id: "CO-3.2", state: "pending" },
         ]),
       }),
