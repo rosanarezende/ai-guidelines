@@ -12,6 +12,7 @@ import {
 import { ReviewBrief, collectReviewBrief } from "./reviewBrief.js";
 import { discover } from "./reviewCheck.js";
 import { evaluateProspectiveReviewPublication, runReviewPublish } from "./reviewPublish.js";
+import { createLoadReceipt, writeReceipt } from "./handoffReceipt.js";
 
 const EXECUTOR: ExecutorProvenance = { platform: "claude-code", model: "claude-opus-4-8" };
 const EVIDENCE: AuditEvidence = {
@@ -831,5 +832,64 @@ describe("review:publish · guard de diff e pré-condições [CO-4 rodada 8]", (
     // commit preservado
     expect(gitIn(repo, ["rev-parse", "--short", "HEAD"])).not.toBe(head);
     expect(gitIn(repo, ["log", "-1", "--format=%s"])).toContain("registra technical audit");
+  });
+});
+
+describe("review:publish · advisory-first do recibo de carga [CO-3.4]", () => {
+  const AUTH = { authorization: "explicit-review-request" };
+
+  it("missing → advisory 'nenhuma carga registrada' E publicação prossegue (exit 0)", () => {
+    const { repo } = tempRepoWithRemote();
+    const head = gitIn(repo, ["rev-parse", "--short", "HEAD"]);
+    fs.writeFileSync(path.join(repo, REVIEW_PATH), sealedReviewYaml({ subjectRef: head }));
+    const { lines, logger } = fakeLogger();
+
+    const code = runReviewPublish(repo, { file: REVIEW_PATH, ...AUTH }, logger, null);
+
+    expect(code).toBe(0); // advisory-first: recibo ausente NÃO bloqueia review:publish
+    expect(lines.join("\n")).toContain(
+      "⚠️  [advisory] retomada não reconciliada — nenhuma carga registrada"
+    );
+  });
+
+  it("fresh → nenhum advisory emitido, publicação prossegue (exit 0)", () => {
+    const { repo } = tempRepoWithRemote();
+    const head = gitIn(repo, ["rev-parse", "--short", "HEAD"]);
+    fs.writeFileSync(path.join(repo, REVIEW_PATH), sealedReviewYaml({ subjectRef: head }));
+    // recibo genuíno fresh: mesmo snapshot {facts, seal} que o advisory deriva
+    const snap = collectReviewBrief(repo, "technical_audit", {
+      remote: null,
+      authorization: "explicit-review-request",
+    }).snapshot;
+    writeReceipt(repo, createLoadReceipt(snap.collected.facts, snap.derived.seal));
+    const { lines, logger } = fakeLogger();
+
+    const code = runReviewPublish(repo, { file: REVIEW_PATH, ...AUTH }, logger, null);
+
+    expect(code).toBe(0);
+    expect(lines.join("\n")).not.toContain("[advisory]");
+  });
+
+  it("stale-head → advisory de HEAD E publicação prossegue (exit 0)", () => {
+    const { repo } = tempRepoWithRemote();
+    const head = gitIn(repo, ["rev-parse", "--short", "HEAD"]);
+    fs.writeFileSync(path.join(repo, REVIEW_PATH), sealedReviewYaml({ subjectRef: head }));
+    const snap = collectReviewBrief(repo, "technical_audit", {
+      remote: null,
+      authorization: "explicit-review-request",
+    }).snapshot;
+    // recibo carregado num HEAD diferente do atual
+    writeReceipt(repo, {
+      ...createLoadReceipt(snap.collected.facts, snap.derived.seal),
+      head: "0000000",
+    });
+    const { lines, logger } = fakeLogger();
+
+    const code = runReviewPublish(repo, { file: REVIEW_PATH, ...AUTH }, logger, null);
+
+    expect(code).toBe(0);
+    expect(lines.join("\n")).toMatch(
+      /\[advisory\] retomada não reconciliada — recibo stale: HEAD carregado 0000000 ≠ HEAD atual/
+    );
   });
 });

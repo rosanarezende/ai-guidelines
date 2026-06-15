@@ -65,13 +65,18 @@ export function reloadCommand(specId: string): string {
   return `npm run guidelines -- handoff ${specId}`;
 }
 
+/** Extrai o specId numérico do label da spec (ex.: "0024-context-architecture" → "0024"). */
+export function specIdFromLabel(label: string): string {
+  return /^(\d{4})/.exec(label)?.[1] ?? label;
+}
+
 /** Pure: snapshot (fatos + selo) → recibo. `now` injetado (determinismo em teste). */
 export function createLoadReceipt(
   facts: HandoffFacts,
   seal: string,
   now: () => Date = () => new Date()
 ): HandoffLoadReceipt {
-  const specId = /^(\d{4})/.exec(facts.spec.label)?.[1] ?? facts.spec.label;
+  const specId = specIdFromLabel(facts.spec.label);
   const sources: Record<string, string> = {};
   const degraded: string[] = [];
   for (const source of facts.sources) {
@@ -174,22 +179,49 @@ export function validateLoadReceipt(
 }
 
 /**
+ * Razão canônica (única) de um recibo NÃO-fresh. Fonte única consumida tanto
+ * pela guarda lançante (`assertFreshHandoffReceipt`) quanto pelo caminho
+ * advisory-first (`formatReceiptAdvisory`) — sem reimplementar o switch.
+ */
+export function describeReceiptStaleReason(
+  status: Exclude<ReceiptStatus, { kind: "fresh" }>
+): string {
+  switch (status.kind) {
+    case "missing":
+      return "nenhuma carga registrada";
+    case "invalid":
+      return `recibo inválido (${status.reason})`;
+    case "stale-head":
+      return `recibo stale: HEAD carregado ${status.receipt.head} ≠ HEAD atual ${status.currentHead}`;
+    case "stale-sources":
+      return `recibo stale: fontes divergiram (${status.divergentSources.join(", ")})`;
+  }
+}
+
+/**
+ * Linha advisory determinística (advisory-first; NÃO lança) para um recibo
+ * não-fresh; `null` quando fresh. Compartilhada pelas superfícies situadas do
+ * CO-3.4 (`workflow publish-state`, `review:publish`).
+ */
+export function formatReceiptAdvisory(status: ReceiptStatus, specId: string): string | null {
+  if (status.kind === "fresh") return null;
+  return (
+    `⚠️  [advisory] retomada não reconciliada — ${describeReceiptStaleReason(status)}. ` +
+    `Recarregue com: ${reloadCommand(specId)}`
+  );
+}
+
+/**
  * Guarda para comandos MUTANTES futuros (integração mínima; o wiring amplo é
  * evolução de enforcement/CO-6 — deliberadamente NÃO conectado agora). Lança
  * com diagnóstico + comando de recarga quando a retomada não está fresh.
  */
 export function assertFreshHandoffReceipt(status: ReceiptStatus, specId: string): void {
   if (status.kind === "fresh") return;
-  const reload = reloadCommand(specId);
-  const reason =
-    status.kind === "missing"
-      ? "nenhuma carga registrada"
-      : status.kind === "invalid"
-        ? `recibo inválido (${status.reason})`
-        : status.kind === "stale-head"
-          ? `recibo stale: HEAD carregado ${status.receipt.head} ≠ HEAD atual ${status.currentHead}`
-          : `recibo stale: fontes divergiram (${status.divergentSources.join(", ")})`;
-  throw new Error(`retomada não reconciliada — ${reason}. Recarregue com: ${reload}.`);
+  throw new Error(
+    `retomada não reconciliada — ${describeReceiptStaleReason(status)}. ` +
+      `Recarregue com: ${reloadCommand(specId)}.`
+  );
 }
 
 // ── I/O do recibo (fora do domínio puro) ─────────────────────────────────────
@@ -215,6 +247,26 @@ export function readReceiptText(repoRoot: string): string | null {
   const file = receiptPath(repoRoot);
   if (!file || !fs.existsSync(file)) return null;
   return fs.readFileSync(file, "utf8");
+}
+
+/**
+ * Caminho NÃO-LANÇANTE (advisory-first) do recibo de carga para superfícies
+ * mutantes situadas (CO-3.4): lê o recibo persistido, valida contra o snapshot
+ * ATUAL `{facts, seal}` e devolve a linha advisory — ou `null` se fresh.
+ *
+ * Invariante preservado: este caminho NÃO escreve/reescreve o recibo (só uma
+ * carga explícita o faz). Por isso recebe o snapshot já derivado pelo chamador
+ * (que deriva por um caminho sem efeito colateral), em vez de `loadHandoffSnapshot`.
+ */
+export function resolveReceiptAdvisory(
+  repoRoot: string,
+  snapshot: { readonly facts: HandoffFacts; readonly seal: string }
+): string | null {
+  const status = validateLoadReceipt(readReceiptText(repoRoot), {
+    facts: snapshot.facts,
+    seal: snapshot.seal,
+  });
+  return formatReceiptAdvisory(status, specIdFromLabel(snapshot.facts.spec.label));
 }
 
 /** Escreve o recibo (carga EXPLÍCITA — único caminho de escrita). */
