@@ -140,6 +140,61 @@ describe("handoffReceipt · contrato de carga (puro) [CO-4]", () => {
     if (status.kind === "invalid") expect(status.reason).toContain("contractVersion");
   });
 
+  it("ignoreSourceIds: fonte remota volátil (pull-request) NÃO conta como divergência", () => {
+    const loaded = facts({
+      sources: [
+        { id: "state.yml", origin: "x", status: "fresh", fingerprint: "aaa" },
+        { id: "pull-request", origin: "gh", status: "fresh", fingerprint: "PR-LOADED" },
+      ],
+    });
+    const receipt = JSON.stringify(createLoadReceipt(loaded, "seloLoaded", NOW));
+    const current = facts({
+      sources: [
+        { id: "state.yml", origin: "x", status: "fresh", fingerprint: "aaa" }, // igual
+        { id: "pull-request", origin: "gh", status: "unavailable", fingerprint: "-" }, // só o PR "mudou"
+      ],
+    });
+
+    // sem ignore: selo diverge ⇒ stale-sources (falso-positivo do advisory local)
+    expect(validateLoadReceipt(receipt, { facts: current, seal: "seloCurrent" }).kind).toBe(
+      "stale-sources"
+    );
+
+    // com ignore: pull-request excluída ⇒ nenhuma divergência LOCAL ⇒ fresh
+    expect(
+      validateLoadReceipt(
+        receipt,
+        { facts: current, seal: "seloCurrent" },
+        { ignoreSourceIds: ["pull-request"] }
+      ).kind
+    ).toBe("fresh");
+  });
+
+  it("ignoreSourceIds: divergência LOCAL ainda é detectada (ignore não mascara o que importa)", () => {
+    const loaded = facts({
+      sources: [
+        { id: "state.yml", origin: "x", status: "fresh", fingerprint: "aaa" },
+        { id: "pull-request", origin: "gh", status: "fresh", fingerprint: "PR" },
+      ],
+    });
+    const receipt = JSON.stringify(createLoadReceipt(loaded, "selo1", NOW));
+    const current = facts({
+      sources: [
+        { id: "state.yml", origin: "x", status: "fresh", fingerprint: "MUDOU" }, // fonte LOCAL mudou
+        { id: "pull-request", origin: "gh", status: "unavailable", fingerprint: "-" },
+      ],
+    });
+    const status = validateLoadReceipt(
+      receipt,
+      { facts: current, seal: "selo2" },
+      { ignoreSourceIds: ["pull-request"] }
+    );
+    expect(status.kind).toBe("stale-sources");
+    if (status.kind === "stale-sources") {
+      expect(status.divergentSources).toEqual(["state.yml"]); // pull-request NÃO aparece
+    }
+  });
+
   it("assertFreshHandoffReceipt: guarda p/ comandos mutantes futuros lança com comando de recarga", () => {
     expect(() => assertFreshHandoffReceipt({ kind: "missing" }, "0024")).toThrow(
       /npm run guidelines -- handoff 0024/

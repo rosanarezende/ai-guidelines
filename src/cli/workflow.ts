@@ -80,9 +80,8 @@ import { VISUAL_PROMPT_OPTIONS, VisualPromptValue } from "./visual-prompts/visua
 import type { CommandRegistry } from "./registry/CommandRegistry.js";
 import { INTENT_CATALOG } from "./registry/intentCatalog.js";
 import type { Intent, IntentAction } from "./registry/Intent.js";
-import { collectHandoffFacts } from "./handoff.js";
-import { deriveHandoff } from "./handoffFacts.js";
-import { resolveReceiptAdvisory } from "./handoffReceipt.js";
+import { emitReceiptAdvisory } from "./handoff.js";
+import { readReceiptText } from "./handoffReceipt.js";
 
 export { renderVisualPrompt };
 
@@ -1473,26 +1472,11 @@ export async function runPublishState(
   const logger = options.logger ?? stdoutLogger;
   const fs = options.fs ?? new NodeWorkflowFileSystem(options.repoRoot);
 
-  // CO-3.4 — caminho advisory-first do recibo de carga nesta superfície mutante
-  // situada. Deriva o snapshot {facts, seal} por um caminho SEM efeito colateral
-  // (collect + derive puros) — NÃO via loadHandoffSnapshot, que reescreveria o
-  // recibo e mascararia staleness (viola o invariante de não-reescrita silenciosa).
-  try {
-    const collected = collectHandoffFacts(options.repoRoot);
-    const advisory = resolveReceiptAdvisory(options.repoRoot, {
-      facts: collected.facts,
-      seal: deriveHandoff(collected.facts).seal,
-    });
-    if (advisory) logger.info(advisory);
-  } catch (e) {
-    // Degradação diagnosticável (advisory-first NUNCA bloqueia): se o contexto de
-    // carga não está disponível (repo sem contrato/governança, fora de git, etc.),
-    // nomeia o porquê em vez de engolir o erro silenciosamente.
-    logger.info(
-      `ℹ️  [advisory] verificação de recibo de carga ignorada — ` +
-        `contexto de carga indisponível (${e instanceof Error ? e.message : String(e)}).`
-    );
-  }
+  // CO-3.4 — advisory-first do recibo de carga nesta superfície mutante situada.
+  // publish-state NÃO reescreve o recibo antes daqui, então lê-lo agora reflete o
+  // estado da retomada. O helper deriva o snapshot sem escrita, com o default de
+  // remote da carga (selo bate), e degrada de forma diagnosticável.
+  emitReceiptAdvisory(options.repoRoot, readReceiptText(options.repoRoot), logger);
 
   if (!args.status || args.status.trim() === "") {
     logger.error(

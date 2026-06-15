@@ -141,7 +141,8 @@ function parseReceipt(rawText: string): HandoffLoadReceipt | { error: string } {
  */
 export function validateLoadReceipt(
   rawText: string | null,
-  current: { readonly facts: HandoffFacts; readonly seal: string }
+  current: { readonly facts: HandoffFacts; readonly seal: string },
+  options: { readonly ignoreSourceIds?: ReadonlyArray<string> } = {}
 ): ReceiptStatus {
   if (rawText === null) return { kind: "missing" };
   const parsed = parseReceipt(rawText);
@@ -157,17 +158,29 @@ export function validateLoadReceipt(
   if (parsed.head !== currentHead) {
     return { kind: "stale-head", receipt: parsed, currentHead, currentSeal: current.seal };
   }
-  if (parsed.sourceSeal !== current.seal) {
-    const divergent: string[] = [];
-    const currentFps = new Map(current.facts.sources.map((s) => [s.id, s.fingerprint]));
-    const seen = new Set<string>();
-    for (const [id, fp] of Object.entries(parsed.sources)) {
-      seen.add(id);
-      if (currentFps.get(id) !== fp) divergent.push(id);
-    }
-    for (const id of currentFps.keys()) {
-      if (!seen.has(id)) divergent.push(id);
-    }
+
+  // Divergência por-fonte (sempre derivada das fingerprints; `ignoreSourceIds`
+  // exclui fontes que o chamador não pode/não quer verificar localmente — ex.: a
+  // fonte remota `pull-request`, cujo fingerprint exige rede para reproduzir).
+  const ignore = new Set(options.ignoreSourceIds ?? []);
+  const divergent: string[] = [];
+  const currentFps = new Map(current.facts.sources.map((s) => [s.id, s.fingerprint]));
+  const seen = new Set<string>();
+  for (const [id, fp] of Object.entries(parsed.sources)) {
+    seen.add(id);
+    if (ignore.has(id)) continue;
+    if (currentFps.get(id) !== fp) divergent.push(id);
+  }
+  for (const id of currentFps.keys()) {
+    if (ignore.has(id) || seen.has(id)) continue;
+    divergent.push(id);
+  }
+
+  // Gate: SEM ignore, mantém o selo como gate (comportamento idêntico ao anterior;
+  // `handoff:check` e demais chamadores inalterados). COM ignore, gate é a
+  // divergência por-fonte já excluindo as ignoradas.
+  const stale = ignore.size === 0 ? parsed.sourceSeal !== current.seal : divergent.length > 0;
+  if (stale) {
     return {
       kind: "stale-sources",
       receipt: parsed,
@@ -247,26 +260,6 @@ export function readReceiptText(repoRoot: string): string | null {
   const file = receiptPath(repoRoot);
   if (!file || !fs.existsSync(file)) return null;
   return fs.readFileSync(file, "utf8");
-}
-
-/**
- * Caminho NÃO-LANÇANTE (advisory-first) do recibo de carga para superfícies
- * mutantes situadas (CO-3.4): lê o recibo persistido, valida contra o snapshot
- * ATUAL `{facts, seal}` e devolve a linha advisory — ou `null` se fresh.
- *
- * Invariante preservado: este caminho NÃO escreve/reescreve o recibo (só uma
- * carga explícita o faz). Por isso recebe o snapshot já derivado pelo chamador
- * (que deriva por um caminho sem efeito colateral), em vez de `loadHandoffSnapshot`.
- */
-export function resolveReceiptAdvisory(
-  repoRoot: string,
-  snapshot: { readonly facts: HandoffFacts; readonly seal: string }
-): string | null {
-  const status = validateLoadReceipt(readReceiptText(repoRoot), {
-    facts: snapshot.facts,
-    seal: snapshot.seal,
-  });
-  return formatReceiptAdvisory(status, specIdFromLabel(snapshot.facts.spec.label));
 }
 
 /** Escreve o recibo (carga EXPLÍCITA — único caminho de escrita). */

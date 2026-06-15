@@ -30,12 +30,8 @@ import {
   deriveReviewCommitMessage,
   parseAuthorization,
 } from "./reviewBrief.js";
-import {
-  readReceiptText,
-  validateLoadReceipt,
-  formatReceiptAdvisory,
-  specIdFromLabel,
-} from "./handoffReceipt.js";
+import { readReceiptText } from "./handoffReceipt.js";
+import { emitReceiptAdvisory } from "./handoff.js";
 
 export interface Logger {
   info: (msg: string) => void;
@@ -314,12 +310,9 @@ export function runReviewPublish(
   const brief = collected.brief;
   const cursor = facts.cursor;
 
-  // Advisory-first: valida o recibo PRÉVIO contra o snapshot recém-derivado.
-  const receiptAdvisory = formatReceiptAdvisory(
-    validateLoadReceipt(priorReceiptText, { facts, seal: collected.snapshot.derived.seal }),
-    specIdFromLabel(facts.spec.label)
-  );
-  if (receiptAdvisory) logger.info(receiptAdvisory);
+  // Advisory-first do recibo de carga (não-lançante): valida o recibo PRÉVIO
+  // contra um snapshot derivado com o mesmo default de remote da carga.
+  emitReceiptAdvisory(repoRoot, priorReceiptText, logger);
 
   // review:check composto (mesmos leitores; o conjunto descoberto JÁ inclui o
   // candidato em disco — é o estado prospectivo).
