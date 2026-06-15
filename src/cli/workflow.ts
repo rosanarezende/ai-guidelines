@@ -80,6 +80,8 @@ import { VISUAL_PROMPT_OPTIONS, VisualPromptValue } from "./visual-prompts/visua
 import type { CommandRegistry } from "./registry/CommandRegistry.js";
 import { INTENT_CATALOG } from "./registry/intentCatalog.js";
 import type { Intent, IntentAction } from "./registry/Intent.js";
+import { loadHandoffSnapshot } from "./handoff.js";
+import { readReceiptText, validateLoadReceipt, reloadCommand } from "./handoffReceipt.js";
 
 export { renderVisualPrompt };
 
@@ -1469,6 +1471,32 @@ export async function runPublishState(
 ): Promise<number> {
   const logger = options.logger ?? stdoutLogger;
   const fs = options.fs ?? new NodeWorkflowFileSystem(options.repoRoot);
+
+  try {
+    const receiptText = readReceiptText(options.repoRoot);
+    const snap = loadHandoffSnapshot(options.repoRoot);
+    const receiptStatus = validateLoadReceipt(receiptText, {
+      facts: snap.collected.facts,
+      seal: snap.derived.seal,
+    });
+    if (receiptStatus.kind !== "fresh") {
+      const specId =
+        /^(\d{4})/.exec(snap.collected.facts.spec.label)?.[1] ?? snap.collected.facts.spec.label;
+      const reason =
+        receiptStatus.kind === "missing"
+          ? "nenhuma carga registrada"
+          : receiptStatus.kind === "invalid"
+            ? `recibo inválido (${receiptStatus.reason})`
+            : receiptStatus.kind === "stale-head"
+              ? `recibo stale: HEAD carregado ${receiptStatus.receipt.head} ≠ HEAD atual ${receiptStatus.currentHead}`
+              : `recibo stale: fontes divergiram (${receiptStatus.divergentSources.join(", ")})`;
+      logger.info(
+        `⚠️  [advisory] retomada não reconciliada — ${reason}. Recarregue com: ${reloadCommand(specId)}`
+      );
+    }
+  } catch (e) {
+    // Silently ignore or advisory skip if git/repo setup is not available (e.g. in tests)
+  }
 
   if (!args.status || args.status.trim() === "") {
     logger.error(
