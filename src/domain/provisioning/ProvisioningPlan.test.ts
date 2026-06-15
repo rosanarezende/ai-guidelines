@@ -1,5 +1,8 @@
 import {
   configRelPath,
+  guidanceEffects,
+  planGitattributes,
+  planInitGuard,
   planPointers,
   PointersConfig,
   serializeConfig,
@@ -93,5 +96,30 @@ describe("domain/provisioning/ProvisioningPlan.planPointers (paridade com applyP
     );
     expect(mdc).toBeDefined();
     expect(mdc && mdc.kind === "managed-entrypoint" && mdc.cursorFrontmatter).toBe(true);
+  });
+});
+
+describe("domain/provisioning/ProvisioningPlan — efeitos estruturais (2b-1)", () => {
+  it("planGitattributes carrega o baseline como input", () => {
+    expect(planGitattributes("* text=auto eol=lf\n")).toEqual({
+      kind: "merge-gitattributes",
+      relPath: ".gitattributes",
+      baseline: "* text=auto eol=lf\n",
+    });
+  });
+
+  it("planInitGuard carrega conflitos + force", () => {
+    expect(planInitGuard(["AGENTS.md"], false)).toEqual({
+      kind: "assert-init-safe",
+      conflicts: ["AGENTS.md"],
+      force: false,
+    });
+  });
+
+  it("guidanceEffects mapeia linhas para efeitos guidance preservando ordem", () => {
+    expect(guidanceEffects(["a", "b"])).toEqual([
+      { kind: "guidance", message: "a" },
+      { kind: "guidance", message: "b" },
+    ]);
   });
 });

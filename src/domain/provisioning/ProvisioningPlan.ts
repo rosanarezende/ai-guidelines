@@ -33,7 +33,14 @@ export type ProvisioningEffect =
       /** `.mdc` (Cursor) exige frontmatter YAML no topo na primeira criação. */
       readonly cursorFrontmatter: boolean;
     }
-  | { readonly kind: "prune-managed"; readonly relPath: string };
+  | { readonly kind: "prune-managed"; readonly relPath: string }
+  | { readonly kind: "merge-gitattributes"; readonly relPath: string; readonly baseline: string }
+  | {
+      readonly kind: "assert-init-safe";
+      readonly conflicts: readonly string[];
+      readonly force: boolean;
+    }
+  | { readonly kind: "guidance"; readonly message: string };
 
 export interface PointersConfig {
   readonly sdd_dir: string;
@@ -110,4 +117,27 @@ export function planPointers(
   }
 
   return effects;
+}
+
+/**
+ * Efeito de sincronização do `.gitattributes`: `baseline` (conteúdo do template,
+ * lido pela infraestrutura) entra como input; a fusão não-destrutiva acontece na
+ * aplicação, via {@link ./MergePolicies.mergeGitattributesContent}.
+ */
+export function planGitattributes(baseline: string): ProvisioningEffect {
+  return { kind: "merge-gitattributes", relPath: ".gitattributes", baseline };
+}
+
+/**
+ * Efeito conflict guard de init: a lista `conflicts` (paths guardados que já
+ * existem, detectada pela infraestrutura a partir de {@link ./InitGuard.INIT_GUARDED_PATHS})
+ * + `force` entram como input; a asserção roda na aplicação, antes das escritas.
+ */
+export function planInitGuard(conflicts: readonly string[], force: boolean): ProvisioningEffect {
+  return { kind: "assert-init-safe", conflicts, force };
+}
+
+/** Converte linhas de guidance em efeitos `guidance` (repassados ao log na aplicação). */
+export function guidanceEffects(messages: readonly string[]): ProvisioningEffect[] {
+  return messages.map((message) => ({ kind: "guidance", message }));
 }

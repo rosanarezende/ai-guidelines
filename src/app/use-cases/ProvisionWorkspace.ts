@@ -20,6 +20,8 @@ import {
   describeManagedAction,
 } from "../../domain/provisioning/ProviderEntrypoints.js";
 import { applyManagedBlock } from "../../domain/provisioning/ManagedBlock.js";
+import { mergeGitattributesContent } from "../../domain/provisioning/MergePolicies.js";
+import { assertInitSafe } from "../../domain/provisioning/InitGuard.js";
 import {
   PlanPointersOptions,
   PointersConfig,
@@ -69,6 +71,17 @@ export class ProvisionWorkspace {
           break;
         case "prune-managed":
           await this.applyPrune(effect.relPath, actions);
+          break;
+        case "merge-gitattributes":
+          await this.applyMergeGitattributes(effect.relPath, effect.baseline, actions);
+          break;
+        case "assert-init-safe":
+          // Guard de pré-condição: a DECISÃO é pura (domínio); o use case só a
+          // invoca. Lança antes de qualquer escrita quando há conflito sem force.
+          assertInitSafe(effect.conflicts, effect.force);
+          break;
+        case "guidance":
+          actions.push(effect.message);
           break;
       }
     }
@@ -129,6 +142,25 @@ export class ProvisionWorkspace {
     actions.push(`${this.dryRun ? "[dry-run] " : ""}prune ${relPath}`);
     if (!this.dryRun) {
       await this.fs.remove(relPath);
+    }
+  }
+
+  private async applyMergeGitattributes(
+    relPath: string,
+    baseline: string,
+    actions: string[]
+  ): Promise<void> {
+    const current = await this.fs.readText(relPath);
+    const merged = mergeGitattributesContent(current, baseline);
+    if (merged === current) {
+      return;
+    }
+    actions.push(
+      `${this.dryRun ? "[dry-run] " : ""}write ${path.basename(relPath)} (baseline sync)`
+    );
+    if (!this.dryRun) {
+      await this.fs.ensureDir(path.dirname(relPath));
+      await this.fs.writeText(relPath, merged);
     }
   }
 }

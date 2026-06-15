@@ -1,5 +1,14 @@
+import * as os from "node:os";
+import * as nodeFs from "node:fs/promises";
+import * as path from "node:path";
 import { ProvisioningFileSystem } from "../ports/ProvisioningFileSystem.js";
-import { PointersConfig } from "../../domain/provisioning/ProvisioningPlan.js";
+import {
+  guidanceEffects,
+  planGitattributes,
+  planInitGuard,
+  PointersConfig,
+} from "../../domain/provisioning/ProvisioningPlan.js";
+import { NodeProvisioningFileSystem } from "../../infrastructure/filesystem/NodeProvisioningFileSystem.js";
 import { ProvisionWorkspace, ProvisionWorkspaceInput } from "./ProvisionWorkspace.js";
 
 /** Filesystem em memória — fake do port (padrão DDD da casa). */
@@ -106,5 +115,88 @@ describe("app/use-cases/ProvisionWorkspace (plano puro → aplicação via port)
       result.actions.some((a) => a.includes("prepend managed block to existing CLAUDE.md"))
     ).toBe(true);
     expect(fs.files.get("CLAUDE.md")).toContain("minhas regras locais antigas");
+  });
+});
+
+const BASELINE = "* text=auto eol=lf\n*.png binary\n";
+
+describe("app/use-cases/ProvisionWorkspace — efeitos estruturais 2b-1 (fake fs)", () => {
+  it("merge-gitattributes: consumidor pristino ESCREVE o baseline com action de sync", async () => {
+    const fs = new InMemoryFs();
+    const result = await new ProvisionWorkspace(fs, false).applyEffects([
+      planGitattributes(BASELINE),
+    ]);
+    expect(result.actions).toEqual(["write .gitattributes (baseline sync)"]);
+    expect(fs.files.get(".gitattributes")).toBe(BASELINE);
+  });
+
+  it("merge-gitattributes: segunda aplicação é idempotente (no-op)", async () => {
+    const fs = new InMemoryFs();
+    const uc = new ProvisionWorkspace(fs, false);
+    await uc.applyEffects([planGitattributes(BASELINE)]);
+    const second = await uc.applyEffects([planGitattributes(BASELINE)]);
+    expect(second.idempotentNoop).toBe(true);
+    expect(second.actions).toEqual([]);
+  });
+
+  it("merge-gitattributes: conflito — .gitattributes parcial é mesclado NÃO-destrutivamente", async () => {
+    const fs = new InMemoryFs();
+    fs.files.set(".gitattributes", "*.bin binary\n");
+    await new ProvisionWorkspace(fs, false).applyEffects([planGitattributes(BASELINE)]);
+    const merged = fs.files.get(".gitattributes") as string;
+    expect(merged).toContain("*.bin binary"); // conteúdo do consumidor preservado
+    expect(merged).toContain("* text=auto eol=lf"); // baseline anexado
+    expect(merged).toContain("# ai-guidelines baseline");
+  });
+
+  it("merge-gitattributes: dry-run não escreve e prefixa a action", async () => {
+    const fs = new InMemoryFs();
+    const result = await new ProvisionWorkspace(fs, true).applyEffects([
+      planGitattributes(BASELINE),
+    ]);
+    expect(fs.files.has(".gitattributes")).toBe(false);
+    expect(result.actions).toEqual(["[dry-run] write .gitattributes (baseline sync)"]);
+  });
+
+  it("assert-init-safe: lança quando há conflito sem force; ok com force", async () => {
+    const fs = new InMemoryFs();
+    const uc = new ProvisionWorkspace(fs, false);
+    await expect(uc.applyEffects([planInitGuard(["AGENTS.md"], false)])).rejects.toThrow(
+      /já presentes/
+    );
+    await expect(uc.applyEffects([planInitGuard(["AGENTS.md"], true)])).resolves.toMatchObject({
+      idempotentNoop: true,
+    });
+  });
+
+  it("guidance: efeito repassa a mensagem ao log sem tocar no filesystem", async () => {
+    const fs = new InMemoryFs();
+    const result = await new ProvisionWorkspace(fs, false).applyEffects(
+      guidanceEffects(["modo conservador: ..."])
+    );
+    expect(result.actions).toEqual(["modo conservador: ..."]);
+    expect(fs.files.size).toBe(0);
+  });
+});
+
+describe("app/use-cases/ProvisionWorkspace — merge-gitattributes (temp fs real)", () => {
+  let dir: string;
+  beforeEach(async () => {
+    dir = await nodeFs.mkdtemp(path.join(os.tmpdir(), "prov-ga-"));
+  });
+  afterEach(async () => {
+    await nodeFs.rm(dir, { recursive: true, force: true });
+  });
+
+  it("escreve .gitattributes real e relê o conteúdo mesclado", async () => {
+    const fs = new NodeProvisioningFileSystem(dir);
+    await new ProvisionWorkspace(fs, false).applyEffects([planGitattributes(BASELINE)]);
+    const onDisk = await nodeFs.readFile(path.join(dir, ".gitattributes"), "utf8");
+    expect(onDisk).toBe(BASELINE);
+    // idempotência no fs real
+    const again = await new ProvisionWorkspace(fs, false).applyEffects([
+      planGitattributes(BASELINE),
+    ]);
+    expect(again.idempotentNoop).toBe(true);
   });
 });
