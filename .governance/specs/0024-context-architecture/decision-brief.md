@@ -153,6 +153,33 @@
 
 ---
 
+### [DEC-0024-G09] Eliminação integral da árvore-fonte `/cli` — `/dist` como única superfície executável publicada
+
+**Pergunta:** A árvore-fonte `/cli` deve permanecer como "wrapper/compatibilidade" (desenho do nó `bootstrap-compiler`, #38) ou ser **eliminada**, com toda a implementação em `/src` e `/dist` como única superfície executável distribuída?
+
+**Modo de gate:** `aceitação` <!-- decisão de desenho da owner, 2026-06-15, após nova evidência operacional; supersede o desenho narrado em plan.md (nó bootstrap-compiler / #38). -->
+
+**Decisão anterior (SUPERSEDED, não apagada):** o nó `bootstrap-compiler` (#38) cravou que "`/cli` passa a wrapper/compatibilidade" e que a "migração ampla do ecossistema (Grupo B)" ficaria FORA da 0024 (fronteira "modelo ≠ migração", `plan.md`). O cutover de roteamento (#35) migrou o `CommandRegistry` para `/src`, mas **não a execução**.
+
+**Evidência que a falsificou (operacional, 2026-06-15):** `/cli` NÃO virou wrapper fino — ainda contém runtime, wizard (`cli/cli/args.mjs`), provisionamento (`cli/app`, `cli/features`, `cli/fs`, `cli/formatters`), filesystem e ~30 entrypoints de check. `BootstrapCommand` ainda depende de `LegacyExecuteFn`/`loadLegacyExecute` (`cli/app/engine.mjs`); o registry controla o NOME do comando, mas delega ao runtime legado; há lista duplicada de comandos (`SUPPORTED_MODES` × registry); `package.json` `bin`/`files`/`imports` ainda publicam e executam código-fonte de `/cli`. Uma fronteira chamada "compatibilidade" virou a IMPLEMENTAÇÃO REAL — uma 2ª arquitetura executável.
+
+**Decisão (Resolved):**
+
+- A árvore-fonte `/cli` será **eliminada por completo**.
+- Toda implementação (runtime, wizard, provisionamento, features, filesystem, formatters, parsing, comandos, checks) viverá em `/src`.
+- `/dist` é a **única superfície executável publicada** (`package.json#bin → dist/…`; tarball SEM `/cli`).
+- `CommandRegistry` é a única fonte de comandos/help/interação; sem `LegacyExecuteFn`/`loadLegacyExecute` nem lista paralela de verbos.
+
+**Veículo:** sub-checkpoint próprio **CO-3.5 — colapso integral do runtime CLI**, no MESMO nó (`co-enforcement`), MESMO PR (#42) e MESMO Human Gate (modo unit). A **topologia externa** (`state.yml § topology`) é **inalterada** — o nó segue `co-enforcement`; muda só a sequência INTERNA de sub-checkpoints do PR #42. NÃO há spec nova nem nó novo em `state.yml`.
+
+**O que NÃO está sendo decidido:** inflar o significado do CO-3.4 (que segue ESTRITO: advisory do recibo nas 2 superfícies; ver `[DEC]`-livre/CO-3.4); deferir a remoção para outra spec/backlog; alterar a topologia externa; iniciar o CO-3.5 nesta sessão.
+
+**Trade-off cravado:** assume-se uma migração ampla (porte fiel de ~83 `.mjs` para `/src` + guard arquitetural do cutover + revalidação de pacote instalado em consumidor novo/existente) DENTRO da 0024 — revisando a fronteira "modelo ≠ migração" para ESTE runtime especificamente. Racional da owner: a fronteira só se justifica se "compatibilidade" for de fato fina; quando ela é a implementação real, manter `/cli` é manter duas arquiteturas executáveis — o oposto do objetivo da 0024.
+
+**Status:** Resolved (2026-06-15) / @rosanarezende — decisão de desenho da owner.
+
+---
+
 ## 2 · Aberto — pesquisa genuína (única coisa ainda em investigação)
 
 > Estes **não são decisões** — são findings com **alternativas reais ainda competindo**. Vivem em [`research/findings.md`](./research/findings.md); aqui só o ponteiro. Só retornam como `[DEC] Pendente` ao **convergir + exigir julgamento**. **Critério (2026-05-31):** se não há alternativa viva competindo, **não pertence aqui** — é decisão (§ 1) ou trabalho (§ 4).
@@ -215,6 +242,7 @@
 | `G06`        | contrato da cadeia                                    | **Decidido** — § 1 (Resolved 2026-05-30) → ADR no fechamento                                                 |
 | `G07`        | topologia-as-data + enforcement L4                    | **Decidido** — § 1 (Resolved 2026-06-01) → enforcement em § 4                                                |
 | `G08`        | reabertura de G03/G04/G05 + direção orientada a grafo | **Decidido** — Resolved 2026-06-03 (owner); a modelagem fica DENTRO da 0024; NÃO há 0025 independente        |
+| `G09`        | eliminação integral de `/cli` (→ CO-3.5)              | **Decidido** — § 1 (Resolved 2026-06-15, owner); supersede o "wrapper" do #38; topologia externa inalterada  |
 
 ---
 
@@ -227,6 +255,7 @@
 - [x] `[DEC-0024-G06]` — Resolved 2026-05-30 / @rosanarezende
 - [x] `[DEC-0024-G07]` — Resolved 2026-06-01 / @rosanarezende
 - [x] `[DEC-0024-G08]` — Resolved 2026-06-03 / @rosanarezende
+- [x] `[DEC-0024-G09]` — Resolved 2026-06-15 / @rosanarezende
 
 ---
 
