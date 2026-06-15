@@ -4,7 +4,7 @@ import { getOptInRuleRelativePath } from "./OptInRulePaths.js";
 
 /**
  * Paridade (Spec 0024 · CO-3.3) com o mapa do antigo
- * `rules-loader.mjs`.
+ * `cli/governance/monolith/rules-loader.mjs`.
  */
 describe("getOptInRuleRelativePath", () => {
   it("DADO bdd com lang QUANDO resolve ENTÃO honra o idioma", () => {

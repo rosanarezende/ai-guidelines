@@ -2,7 +2,7 @@
  * Resolução de caminho relativo das regras editoriais opt-in
  * (`bdd`/`tdd`/`quality-gates`) dentro de `.core/rules/`.
  *
- * Migrado de `rules-loader.mjs` (Spec 0024 · CO-3.3) —
+ * Migrado de `cli/governance/monolith/rules-loader.mjs` (Spec 0024 · CO-3.3) —
  * último resíduo ativo do monólito, consumido pelas features editoriais ao
  * sincronizar `.ai-guidelines/rules/<feature>.md` no consumidor. As demais
  * exportações do antigo rules-loader já viviam no compilador TS

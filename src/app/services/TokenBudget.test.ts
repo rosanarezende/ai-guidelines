@@ -13,7 +13,7 @@ import {
  * Teste de PARIDADE (Spec 0024 · CO-3.3).
  *
  * Os valores golden abaixo são portados verbatim de
- * `token-budget.test.mjs` (removido junto do substrato legacy):
+ * `cli/governance/monolith/token-budget.test.mjs` (removido junto do monólito):
  * a aritmética do orçamento (Tok-H, somas por escopo, hard-redirect, limites)
  * é preservada bit-a-bit. A única diferença consciente é o stub do AGENTS.md —
  * injetado nos casos abaixo para fixar a math sem depender do tamanho do stub
@@ -162,5 +162,60 @@ describe("Token Budget (paridade com o monólito legacy)", () => {
       expect(result.perAdapter).toHaveLength(2);
       expect(result.warnings).toEqual([]);
     });
+  });
+});
+
+/**
+ * Mudança INTENCIONAL da entrada (Spec 0024 · CO-3.3) — separada da paridade.
+ *
+ * A MATEMÁTICA é preservada (bloco acima). O que MUDOU de propósito é a ENTRADA
+ * do stub do AGENTS.md: o monólito media uma cópia STALE (yarn-era, embutida no
+ * antigo `compiler.mjs`); a migração passa a medir o stub CANÔNICO
+ * (`buildAgentsRuntimeStub`, o mesmo que `pointers.mjs` escreve no AGENTS.md). A
+ * diferença de contagem é ESPERADA e vem do input — não da lógica nem dos limites.
+ */
+describe("Token Budget — mudança intencional da entrada (stub legado → bootstrap canônico)", () => {
+  // Stub "legado-shaped": curto, formato yarn-era (sem bullets work/review/decide).
+  const LEGACY_SHAPED_STUB = [
+    "## Runtime Bootstrap",
+    "",
+    "- For a fresh AI session, run `yarn guidelines handoff [spec]`.",
+  ].join("\n");
+
+  it("o DEFAULT mede o stub CANÔNICO (não um stub legado/stale)", () => {
+    const canonical = buildAgentsRuntimeStub();
+    expect(analyzeAgentsMdBudget({ rules: [] }).tokens).toBe(calculateTokH(canonical));
+    expect(analyzeBudget({ rules: [] }).agentsMd.tokens).toBe(calculateTokH(canonical));
+  });
+
+  it("a MATEMÁTICA não depende do stub: trocar a entrada NÃO muda o breakdown de escopo", () => {
+    const catalog = {
+      rules: [
+        { scope: "universal", instruction_en: "a".repeat(1400) },
+        { scope: "opt-in", instruction_en: "b".repeat(700) },
+      ],
+    };
+    const legacy = analyzeAgentsMdBudget(catalog, LEGACY_SHAPED_STUB);
+    const canonical = analyzeAgentsMdBudget(catalog, buildAgentsRuntimeStub());
+    expect(canonical.breakdown).toEqual(legacy.breakdown);
+  });
+
+  it("a DIFERENÇA de contagem vem do input: canônico > legado-shaped (esperado, dentro do orçamento)", () => {
+    const legacyTokens = calculateTokH(LEGACY_SHAPED_STUB);
+    const canonicalTokens = calculateTokH(buildAgentsRuntimeStub());
+    expect(canonicalTokens).toBeGreaterThan(legacyTokens);
+    // a mudança de entrada NÃO introduz regressão de budget:
+    expect(canonicalTokens).toBeLessThan(LIMITS.agentsMd);
+    expect(analyzeAgentsMdBudget({ rules: [] }).warnings).toEqual([]);
+  });
+
+  it("NENHUM limite mudou silenciosamente ([DEC-0018-B03] + Spec 0019)", () => {
+    expect({ ...LIMITS }).toEqual({
+      universal: 1500,
+      "opt-in": 1200,
+      agentsMd: 2700,
+      perAdapter: 800,
+    });
+    expect(SOFT_CEILING_RATIO).toBe(0.75);
   });
 });

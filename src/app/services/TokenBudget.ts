@@ -1,7 +1,7 @@
 /**
  * Orçamento de tokens do catálogo de regras e dos artefatos distribuídos.
  *
- * Migrado de `token-budget.mjs` (Spec 0024 · CO-3.3) —
+ * Migrado de `cli/governance/monolith/token-budget.mjs` (Spec 0024 · CO-3.3) —
  * o substrato legacy do monólito foi removido e a lógica passou a viver aqui,
  * no compilador TypeScript, ao lado de {@link RulesCatalogBuilder},
  * {@link RulesRuntimeCompiler} e {@link AgentsRuntimeBootstrap}.
