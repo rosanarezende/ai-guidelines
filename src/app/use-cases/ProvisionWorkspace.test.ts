@@ -7,8 +7,10 @@ import {
   planAgentsRuntimeBootstrap,
   planGitattributes,
   planInitGuard,
+  planPrettier,
   planTemplateMirror,
   PointersConfig,
+  PrettierSnapshot,
 } from "../../domain/provisioning/ProvisioningPlan.js";
 import { NodeProvisioningFileSystem } from "../../infrastructure/filesystem/NodeProvisioningFileSystem.js";
 import { buildAgentsRuntimeStub } from "../services/AgentsRuntimeBootstrap.js";
@@ -406,5 +408,131 @@ describe("app/use-cases/ProvisionWorkspace — AGENTS/runtime + templates (temp 
     );
     expect(agents).toContain("## Runtime Bootstrap");
     expect(template).toBe(SPEC_TEMPLATE_V2);
+  });
+});
+
+const PRETTIER_BASELINE = "dist/\nnode_modules/\n";
+
+function prettierSnapshotFromFs(fs: InMemoryFs): PrettierSnapshot {
+  const packageJson = fs.files.has("package.json")
+    ? (JSON.parse(fs.files.get("package.json") as string) as Record<string, unknown>)
+    : null;
+  return {
+    packageJson,
+    prettierIgnoreContent: fs.files.get(".prettierignore") ?? null,
+    prettierIgnoreBaseline: PRETTIER_BASELINE,
+    formatterContext: { rival: null, hasPrettier: false, shouldSkipPrettier: false },
+  };
+}
+
+describe("app/use-cases/ProvisionWorkspace — Prettier (2b-3a)", () => {
+  it("fake fs: aplica plano Prettier e preserva conteúdo existente", async () => {
+    const fs = new InMemoryFs();
+    fs.files.set(
+      "package.json",
+      `${JSON.stringify({ name: "consumer", scripts: { test: "node --test" } })}\n`
+    );
+    fs.files.set(".prettierignore", "coverage/\n");
+
+    const result = await new ProvisionWorkspace(fs, false).applyEffects(
+      planPrettier(prettierSnapshotFromFs(fs), {
+        enabled: true,
+        force: false,
+        forcePrettier: false,
+      })
+    );
+
+    expect(result.actions).toEqual([
+      "novas dependências detectadas: prettier",
+      "write package.json (prettier scripts & deps)",
+      "write .prettierignore (prettier baseline)",
+    ]);
+    expect(JSON.parse(fs.files.get("package.json") as string)).toEqual({
+      name: "consumer",
+      scripts: { test: "node --test", format: "prettier --write ." },
+      devDependencies: { prettier: "^3.0.0" },
+    });
+    expect(fs.files.get(".prettierignore")).toBe(
+      "coverage/\n\n# ai-guidelines prettier baseline\ndist/\nnode_modules/\n"
+    );
+  });
+
+  it("fake fs: segunda aplicação é idempotente", async () => {
+    const fs = new InMemoryFs();
+    fs.files.set("package.json", `${JSON.stringify({ name: "consumer" })}\n`);
+    const uc = new ProvisionWorkspace(fs, false);
+
+    await uc.applyEffects(
+      planPrettier(prettierSnapshotFromFs(fs), {
+        enabled: true,
+        force: false,
+        forcePrettier: false,
+      })
+    );
+    const second = await uc.applyEffects(
+      planPrettier(prettierSnapshotFromFs(fs), {
+        enabled: true,
+        force: false,
+        forcePrettier: false,
+      })
+    );
+
+    expect(second.idempotentNoop).toBe(true);
+    expect(second.actions).toEqual([]);
+  });
+
+  it("fake fs: dry-run registra ações sem persistir", async () => {
+    const fs = new InMemoryFs();
+    fs.files.set("package.json", `${JSON.stringify({ name: "consumer" })}\n`);
+    const before = fs.files.get("package.json");
+
+    const result = await new ProvisionWorkspace(fs, true).applyEffects(
+      planPrettier(prettierSnapshotFromFs(fs), {
+        enabled: true,
+        force: false,
+        forcePrettier: false,
+      })
+    );
+
+    expect(result.actions).toContain("[dry-run] write package.json (prettier scripts & deps)");
+    expect(result.actions).toContain("[dry-run] write .prettierignore (prettier baseline)");
+    expect(fs.files.get("package.json")).toBe(before);
+    expect(fs.files.has(".prettierignore")).toBe(false);
+  });
+});
+
+describe("app/use-cases/ProvisionWorkspace — Prettier (temp fs real)", () => {
+  let dir: string;
+  beforeEach(async () => {
+    dir = await nodeFs.mkdtemp(path.join(os.tmpdir(), "prov-prettier-"));
+  });
+  afterEach(async () => {
+    await nodeFs.rm(dir, { recursive: true, force: true });
+  });
+
+  it("aplica package.json e .prettierignore em filesystem real", async () => {
+    await nodeFs.writeFile(path.join(dir, "package.json"), `${JSON.stringify({ name: "real" })}\n`);
+    const fs = new NodeProvisioningFileSystem(dir);
+    const snapshot: PrettierSnapshot = {
+      packageJson: { name: "real" },
+      prettierIgnoreContent: null,
+      prettierIgnoreBaseline: PRETTIER_BASELINE,
+      formatterContext: { rival: null, hasPrettier: false, shouldSkipPrettier: false },
+    };
+
+    const result = await new ProvisionWorkspace(fs, false).applyEffects(
+      planPrettier(snapshot, { enabled: true, force: false, forcePrettier: false })
+    );
+
+    expect(result.actions).toContain("write package.json (prettier scripts & deps)");
+    expect(JSON.parse(await nodeFs.readFile(path.join(dir, "package.json"), "utf8"))).toMatchObject(
+      {
+        scripts: { format: "prettier --write ." },
+        devDependencies: { prettier: "^3.0.0" },
+      }
+    );
+    expect(await nodeFs.readFile(path.join(dir, ".prettierignore"), "utf8")).toBe(
+      PRETTIER_BASELINE
+    );
   });
 });

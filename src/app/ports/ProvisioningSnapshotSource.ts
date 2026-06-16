@@ -1,4 +1,7 @@
-import type { TemplateMirrorSnapshot } from "../../domain/provisioning/ProvisioningPlan.js";
+import type {
+  PrettierSnapshot,
+  TemplateMirrorSnapshot,
+} from "../../domain/provisioning/ProvisioningPlan.js";
 
 export interface ProvisioningSnapshotInput {
   readonly targetDir: string;
@@ -13,6 +16,7 @@ export interface RuntimeBootstrapSnapshot {
 export interface ProvisioningSnapshot {
   readonly runtime: RuntimeBootstrapSnapshot;
   readonly templates: TemplateMirrorSnapshot;
+  readonly prettier: PrettierSnapshot;
 }
 
 export interface ProvisioningSnapshotSource {

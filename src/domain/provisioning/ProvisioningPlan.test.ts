@@ -4,9 +4,11 @@ import {
   planAgentsRuntimeBootstrap,
   planGitattributes,
   planInitGuard,
+  planPrettier,
   planPointers,
   planTemplateMirror,
   PointersConfig,
+  PrettierSnapshot,
   serializeConfig,
   templateTargetRelPath,
 } from "./ProvisioningPlan.js";
@@ -181,5 +183,109 @@ describe("domain/provisioning/ProvisioningPlan — AGENTS/runtime + template mir
         { prune: true }
       )
     ).toEqual([]);
+  });
+});
+
+const prettierSnapshot: PrettierSnapshot = {
+  packageJson: { name: "consumer" },
+  prettierIgnoreContent: null,
+  prettierIgnoreBaseline: "dist/\nnode_modules/\n",
+  formatterContext: { rival: null, hasPrettier: false, shouldSkipPrettier: false },
+};
+
+describe("domain/provisioning/ProvisioningPlan — Prettier (2b-3a)", () => {
+  it("planPrettier gera guidance + package.json + .prettierignore", () => {
+    expect(
+      planPrettier(prettierSnapshot, { enabled: true, force: false, forcePrettier: false })
+    ).toEqual([
+      { kind: "guidance", message: "novas dependências detectadas: prettier" },
+      {
+        kind: "write-package-json",
+        relPath: "package.json",
+        content: `${JSON.stringify(
+          {
+            name: "consumer",
+            scripts: { format: "prettier --write ." },
+            devDependencies: { prettier: "^3.0.0" },
+          },
+          null,
+          2
+        )}\n`,
+        reason: "prettier scripts & deps",
+      },
+      {
+        kind: "write-prettierignore",
+        relPath: ".prettierignore",
+        content: "dist/\nnode_modules/\n",
+      },
+    ]);
+  });
+
+  it("planPrettier pula quando a feature está desativada", () => {
+    expect(
+      planPrettier(prettierSnapshot, { enabled: false, force: false, forcePrettier: false })
+    ).toEqual([{ kind: "guidance", message: "skip prettier (feature desativada)" }]);
+  });
+
+  it("planPrettier pula formatter rival sem force e não emite escrita", () => {
+    expect(
+      planPrettier(
+        {
+          ...prettierSnapshot,
+          formatterContext: {
+            rival: { id: "biome", label: "Biome" },
+            hasPrettier: false,
+            shouldSkipPrettier: true,
+          },
+        },
+        { enabled: true, force: false, forcePrettier: false }
+      )
+    ).toEqual([{ kind: "guidance", message: "skip prettier (formatter rival detectado: Biome)" }]);
+  });
+
+  it("planPrettier respeita force-prettier contra formatter rival", () => {
+    const effects = planPrettier(
+      {
+        ...prettierSnapshot,
+        formatterContext: {
+          rival: { id: "biome", label: "Biome" },
+          hasPrettier: false,
+          shouldSkipPrettier: true,
+        },
+      },
+      { enabled: true, force: false, forcePrettier: true }
+    );
+
+    expect(effects[0]).toEqual({
+      kind: "guidance",
+      message: "override prettier (formatter rival detectado: Biome; sobrescrita explícita ativa)",
+    });
+    expect(effects.some((effect) => effect.kind === "write-package-json")).toBe(true);
+  });
+
+  it("planPrettier é idempotente quando package e ignore já estão sincronizados", () => {
+    expect(
+      planPrettier(
+        {
+          ...prettierSnapshot,
+          packageJson: {
+            name: "consumer",
+            scripts: { format: "prettier --write ." },
+            devDependencies: { prettier: "^3.0.0" },
+          },
+          prettierIgnoreContent: "dist/\nnode_modules/\n",
+        },
+        { enabled: true, force: false, forcePrettier: false }
+      )
+    ).toEqual([]);
+  });
+
+  it("planPrettier preserva package.json ausente como skip acionável", () => {
+    expect(
+      planPrettier(
+        { ...prettierSnapshot, packageJson: null },
+        { enabled: true, force: false, forcePrettier: false }
+      )
+    ).toEqual([{ kind: "guidance", message: "skip prettier (package.json não encontrado)" }]);
   });
 });

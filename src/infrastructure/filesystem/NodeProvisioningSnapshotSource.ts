@@ -8,9 +8,15 @@ import type {
 } from "../../app/ports/ProvisioningSnapshotSource.js";
 import { buildAgentsRuntimeStub } from "../../app/services/AgentsRuntimeBootstrap.js";
 import type {
+  PrettierSnapshot,
   TemplateMirrorFile,
   TemplateMirrorSnapshot,
 } from "../../domain/provisioning/ProvisioningPlan.js";
+import {
+  detectFormatterContext,
+  FORMATTER_CONTEXT_FILES,
+} from "../../domain/provisioning/FormatterContext.js";
+import type { PackageJsonObject } from "../../domain/provisioning/PackageJson.js";
 import {
   assertRequiredTemplatesPresent,
   DEFAULT_REQUIRED_TEMPLATE_RELATIVE_PATHS,
@@ -140,11 +146,74 @@ export class NodeTemplateMirrorSnapshotSource {
   }
 }
 
+export class NodePrettierSnapshotSource {
+  private readonly prettierIgnoreBaselinePath: string;
+
+  constructor(repoRoot: string) {
+    this.prettierIgnoreBaselinePath = path.join(
+      repoRoot,
+      ".core",
+      "templates",
+      ".prettierignore.tmpl"
+    );
+  }
+
+  async collect(input: ProvisioningSnapshotInput): Promise<PrettierSnapshot> {
+    const packageJson = await this.readPackageJson(input.targetDir);
+    const prettierIgnoreContent = await this.readTextIfExists(
+      path.join(input.targetDir, ".prettierignore")
+    );
+    const prettierIgnoreBaseline = await fs.readFile(this.prettierIgnoreBaselinePath, "utf8");
+    const existingFormatterFiles = await this.collectExistingFormatterFiles(input.targetDir);
+
+    return {
+      packageJson,
+      prettierIgnoreContent,
+      prettierIgnoreBaseline,
+      formatterContext: detectFormatterContext({
+        existingFiles: existingFormatterFiles,
+        packageJson,
+      }),
+    };
+  }
+
+  private async readPackageJson(targetDir: string): Promise<PackageJsonObject | null> {
+    const content = await this.readTextIfExists(path.join(targetDir, "package.json"));
+    if (content === null) {
+      return null;
+    }
+    return JSON.parse(content) as PackageJsonObject;
+  }
+
+  private async readTextIfExists(filePath: string): Promise<string | null> {
+    try {
+      return await fs.readFile(filePath, "utf8");
+    } catch (error) {
+      if (isNotFound(error)) {
+        return null;
+      }
+      throw error;
+    }
+  }
+
+  private async collectExistingFormatterFiles(targetDir: string): Promise<string[]> {
+    const existing: string[] = [];
+    for (const relPath of FORMATTER_CONTEXT_FILES) {
+      if (await pathExists(path.join(targetDir, relPath))) {
+        existing.push(relPath);
+      }
+    }
+    return existing;
+  }
+}
+
 export class NodeProvisioningSnapshotSource implements ProvisioningSnapshotSource {
   private readonly templates: NodeTemplateMirrorSnapshotSource;
+  private readonly prettier: NodePrettierSnapshotSource;
 
   constructor(repoRoot: string) {
     this.templates = new NodeTemplateMirrorSnapshotSource(repoRoot);
+    this.prettier = new NodePrettierSnapshotSource(repoRoot);
   }
 
   async collect(input: ProvisioningSnapshotInput): Promise<ProvisioningSnapshot> {
@@ -152,6 +221,7 @@ export class NodeProvisioningSnapshotSource implements ProvisioningSnapshotSourc
       return {
         runtime: { runtimeStub: buildAgentsRuntimeStub(input.sddDir) },
         templates: await this.templates.collect(input),
+        prettier: await this.prettier.collect(input),
       };
     } catch (error) {
       if (isNotFound(error)) {

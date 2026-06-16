@@ -92,6 +92,12 @@ export class ProvisionWorkspace {
         case "merge-gitattributes":
           await this.applyMergeGitattributes(effect.relPath, effect.baseline, actions);
           break;
+        case "write-package-json":
+          await this.applyWriteText(effect.relPath, effect.content, effect.reason, actions);
+          break;
+        case "write-prettierignore":
+          await this.applyWriteText(effect.relPath, effect.content, "prettier baseline", actions);
+          break;
         case "assert-init-safe":
           // Guard de pré-condição: a DECISÃO é pura (domínio); o use case só a
           // invoca. Lança antes de qualquer escrita quando há conflito sem force.
@@ -221,6 +227,23 @@ export class ProvisionWorkspace {
     if (!this.dryRun) {
       await this.fs.ensureDir(path.dirname(relPath));
       await this.fs.writeText(relPath, merged);
+    }
+  }
+
+  private async applyWriteText(
+    relPath: string,
+    content: string,
+    reason: string,
+    actions: string[]
+  ): Promise<void> {
+    const current = await this.fs.readText(relPath);
+    if (current === content) {
+      return;
+    }
+    actions.push(`${this.dryRun ? "[dry-run] " : ""}write ${relPath} (${reason})`);
+    if (!this.dryRun) {
+      await this.fs.ensureDir(path.dirname(relPath));
+      await this.fs.writeText(relPath, content);
     }
   }
 }

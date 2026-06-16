@@ -18,6 +18,14 @@
  */
 import path from "node:path";
 import { ManagedBlockSyntax, inferSyntaxFromPath } from "./ManagedBlock.js";
+import { mergePrettierIgnoreContent } from "./MergePolicies.js";
+import {
+  detectNewDevDeps,
+  mergePrettierPackageJson,
+  PackageJsonObject,
+  serializePackageJson,
+} from "./PackageJson.js";
+import { FormatterContextSnapshot } from "./FormatterContext.js";
 import { getAllManagedRelativePaths, getProviderEntrypoints } from "./ProviderEntrypoints.js";
 
 export type ProvisioningOperation = "init" | "adopt" | "update";
@@ -49,6 +57,17 @@ export type ProvisioningEffect =
     }
   | { readonly kind: "prune-managed"; readonly relPath: string }
   | { readonly kind: "merge-gitattributes"; readonly relPath: string; readonly baseline: string }
+  | {
+      readonly kind: "write-package-json";
+      readonly relPath: "package.json";
+      readonly content: string;
+      readonly reason: string;
+    }
+  | {
+      readonly kind: "write-prettierignore";
+      readonly relPath: ".prettierignore";
+      readonly content: string;
+    }
   | {
       readonly kind: "assert-init-safe";
       readonly conflicts: readonly string[];
@@ -87,6 +106,19 @@ export interface TemplateMirrorSnapshot {
 
 export interface PlanTemplateMirrorOptions {
   readonly prune: boolean;
+}
+
+export interface PrettierSnapshot {
+  readonly packageJson: PackageJsonObject | null;
+  readonly prettierIgnoreContent: string | null;
+  readonly prettierIgnoreBaseline: string;
+  readonly formatterContext: FormatterContextSnapshot;
+}
+
+export interface PlanPrettierOptions {
+  readonly enabled: boolean;
+  readonly force: boolean;
+  readonly forcePrettier: boolean;
 }
 
 /** Caminho relativo do `config.json` dentro do consumidor. */
@@ -213,6 +245,68 @@ export function planTemplateMirror(
  */
 export function planGitattributes(baseline: string): ProvisioningEffect {
   return { kind: "merge-gitattributes", relPath: ".gitattributes", baseline };
+}
+
+export function planPrettier(
+  snapshot: PrettierSnapshot,
+  options: PlanPrettierOptions
+): ProvisioningEffect[] {
+  if (!options.enabled) {
+    return guidanceEffects(["skip prettier (feature desativada)"]);
+  }
+
+  const forcePrettier = options.force || options.forcePrettier;
+  const rivalLabel = snapshot.formatterContext.rival?.label ?? "Desconhecido";
+  if (snapshot.formatterContext.shouldSkipPrettier && !forcePrettier) {
+    return guidanceEffects([`skip prettier (formatter rival detectado: ${rivalLabel})`]);
+  }
+
+  const effects: ProvisioningEffect[] = [];
+  if (snapshot.formatterContext.shouldSkipPrettier && forcePrettier) {
+    effects.push({
+      kind: "guidance",
+      message: `override prettier (formatter rival detectado: ${rivalLabel}; sobrescrita explícita ativa)`,
+    });
+  }
+
+  if (!snapshot.packageJson) {
+    effects.push({ kind: "guidance", message: "skip prettier (package.json não encontrado)" });
+    return effects;
+  }
+
+  const mergedPackageJson = mergePrettierPackageJson(snapshot.packageJson);
+  const newDeps = detectNewDevDeps(snapshot.packageJson, mergedPackageJson);
+  if (newDeps.length > 0) {
+    effects.push({
+      kind: "guidance",
+      message: `novas dependências detectadas: ${newDeps.join(", ")}`,
+    });
+  }
+
+  const currentPackageJson = serializePackageJson(snapshot.packageJson);
+  const nextPackageJson = serializePackageJson(mergedPackageJson);
+  if (nextPackageJson !== currentPackageJson) {
+    effects.push({
+      kind: "write-package-json",
+      relPath: "package.json",
+      content: nextPackageJson,
+      reason: "prettier scripts & deps",
+    });
+  }
+
+  const nextIgnore = mergePrettierIgnoreContent(
+    snapshot.prettierIgnoreContent,
+    snapshot.prettierIgnoreBaseline
+  );
+  if (nextIgnore !== snapshot.prettierIgnoreContent) {
+    effects.push({
+      kind: "write-prettierignore",
+      relPath: ".prettierignore",
+      content: nextIgnore,
+    });
+  }
+
+  return effects;
 }
 
 /**

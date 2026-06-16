@@ -11,6 +11,7 @@ import { ProvisionWorkspace } from "../../app/use-cases/ProvisionWorkspace.js";
 import { NodeProvisioningFileSystem } from "./NodeProvisioningFileSystem.js";
 import {
   NodeProvisioningSnapshotSource,
+  NodePrettierSnapshotSource,
   NodeTemplateMirrorSnapshotSource,
 } from "./NodeProvisioningSnapshotSource.js";
 
@@ -45,6 +46,10 @@ async function writeRequiredTemplates(repoRoot: string): Promise<void> {
   await write(repoRoot, ".specify/templates/spec-boilerplate.md", "# Spec\n");
   await write(repoRoot, ".specify/templates/plan-boilerplate.md", "# Plan\n");
   await write(repoRoot, ".specify/templates/tasks-boilerplate.md", "# Tasks\n");
+}
+
+async function writePrettierBaseline(repoRoot: string): Promise<void> {
+  await write(repoRoot, ".core/templates/.prettierignore.tmpl", "dist/\nnode_modules/\n");
 }
 
 async function writeRecipe(repoRoot: string): Promise<void> {
@@ -82,6 +87,7 @@ describe("infrastructure/NodeProvisioningSnapshotSource — template/runtime sna
     const targetDir = await mkRoot("prov-snapshot-target-");
     roots.push(repoRoot, targetDir);
     await writeRequiredTemplates(repoRoot);
+    await writePrettierBaseline(repoRoot);
     await write(targetDir, ".ai-guidelines/templates/stale.md", "# Stale\n");
 
     const snapshot = await new NodeProvisioningSnapshotSource(repoRoot).collect({
@@ -100,6 +106,7 @@ describe("infrastructure/NodeProvisioningSnapshotSource — template/runtime sna
     ]);
     expect(snapshot.templates.sourceFiles.every((file) => file.origin === "mirror")).toBe(true);
     expect(snapshot.templates.targetRelativePaths).toEqual(["stale.md"]);
+    expect(snapshot.prettier.prettierIgnoreBaseline).toBe("dist/\nnode_modules/\n");
     expect(await read(targetDir, ".ai-guidelines/templates/stale.md")).toBe("# Stale\n");
   });
 
@@ -239,6 +246,7 @@ describe("infrastructure/NodeProvisioningSnapshotSource — template/runtime sna
     const targetDir = await mkRoot("prov-snapshot-apply-target-");
     roots.push(repoRoot, targetDir);
     await writeRequiredTemplates(repoRoot);
+    await writePrettierBaseline(repoRoot);
     await write(targetDir, ".ai-guidelines/templates/spec-boilerplate.md", "# Local drift\n");
 
     const snapshot = await new NodeProvisioningSnapshotSource(repoRoot).collect({
@@ -261,5 +269,32 @@ describe("infrastructure/NodeProvisioningSnapshotSource — template/runtime sna
     expect(result.actions).toContain("write AGENTS.md (ai-guidelines runtime updated)");
     expect(result.actions).toContain("write .ai-guidelines/templates/spec-boilerplate.md");
     expect(await read(targetDir, ".ai-guidelines/templates/spec-boilerplate.md")).toBe("# Spec\n");
+  });
+
+  it("Prettier snapshot real lê package.json, ignore, baseline e formatter rival sem escrever", async () => {
+    const repoRoot = await mkRoot("prov-prettier-repo-");
+    const targetDir = await mkRoot("prov-prettier-target-");
+    roots.push(repoRoot, targetDir);
+    await writePrettierBaseline(repoRoot);
+    await write(targetDir, "package.json", '{"name":"consumer"}\n');
+    await write(targetDir, ".prettierignore", "coverage/\n");
+    await write(targetDir, "biome.json", "{}\n");
+
+    const snapshot = await new NodePrettierSnapshotSource(repoRoot).collect({
+      targetDir,
+      sddDir: ".ai-guidelines",
+    });
+
+    expect(snapshot).toEqual({
+      packageJson: { name: "consumer" },
+      prettierIgnoreContent: "coverage/\n",
+      prettierIgnoreBaseline: "dist/\nnode_modules/\n",
+      formatterContext: {
+        rival: { id: "biome", label: "Biome" },
+        hasPrettier: true,
+        shouldSkipPrettier: false,
+      },
+    });
+    expect(await read(targetDir, ".prettierignore")).toBe("coverage/\n");
   });
 });
