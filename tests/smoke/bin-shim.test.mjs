@@ -54,6 +54,15 @@ describe("Smoke: bin shim do npm (caminho do consumidor pós-publish)", () => {
     await packed?.cleanup?.();
   });
 
+  it("DADO pacote empacotado ENTÃO tarball não publica /cli e inclui o bin em dist", () => {
+    assert.ok(packed.files.includes("dist/cli/main.js"), "tarball deve conter dist/cli/main.js");
+    assert.equal(
+      packed.files.some((file) => file === "cli" || file.startsWith("cli/")),
+      false,
+      `tarball não deve conter package/cli. Arquivos encontrados:\n${packed.files.join("\n")}`
+    );
+  });
+
   it(
     "DADO pacote instalado QUANDO bin é invocado via shim do npm ENTÃO entrypoint roda e cria artefatos",
     { timeout: SMOKE_TIMEOUT_MS },

@@ -139,9 +139,12 @@ export async function packLocal() {
 
     const tarballPath = path.join(packDir, firstEntry.filename);
     assert.equal(await exists(tarballPath), true, "tarball deve existir após npm pack");
+    const files = (firstEntry.files ?? []).map((entry) => entry.path).sort();
 
     return {
       tarballPath,
+      files,
+      metadata: firstEntry,
       cleanup: async () => {
         await fs.rm(packDir, { recursive: true, force: true });
       },
