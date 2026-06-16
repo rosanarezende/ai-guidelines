@@ -2,7 +2,10 @@ import {
   detectPackageManager,
   normalizePackageManager,
   resolveCiRunner,
+  resolveInstallHint,
   resolveInstallCommand,
+  resolveLocalInstallCommand,
+  resolveYarnBerryReleasePath,
 } from "./PackageManager.js";
 
 describe("domain/provisioning/PackageManager (paridade com package-context legado)", () => {
@@ -49,5 +52,21 @@ describe("domain/provisioning/PackageManager (paridade com package-context legad
     const yarnBerry = normalizePackageManager("yarn@4.1.1");
     expect(resolveInstallCommand(yarnBerry)).toBe("yarn install --immutable");
     expect(resolveCiRunner(yarnBerry)).toBe("yarn");
+  });
+
+  it("resolve comandos locais de install em paridade com cli/app/install.mjs", () => {
+    expect(resolveLocalInstallCommand(normalizePackageManager("npm"))).toBe("npm install");
+    expect(resolveLocalInstallCommand(normalizePackageManager("pnpm"))).toBe("pnpm install");
+    expect(resolveLocalInstallCommand(normalizePackageManager("yarn@1.22.22"))).toBe(
+      "yarn install"
+    );
+
+    const yarnBerry = normalizePackageManager("yarn@4.1.1");
+    expect(resolveYarnBerryReleasePath(yarnBerry)).toBe(".yarn/releases/yarn-4.1.1.cjs");
+    expect(resolveLocalInstallCommand(yarnBerry)).toBe(
+      "node .yarn/releases/yarn-4.1.1.cjs install"
+    );
+    expect(resolveInstallHint(yarnBerry, false)).toBe("corepack enable && yarn install");
+    expect(resolveInstallHint(yarnBerry, true)).toBe("node .yarn/releases/yarn-4.1.1.cjs install");
   });
 });

@@ -9,6 +9,7 @@ import {
   planGitattributes,
   planHusky,
   planInitGuard,
+  planInstall,
   planPrettier,
   planTemplateMirror,
   CiSnapshot,
@@ -16,7 +17,7 @@ import {
   PointersConfig,
   PrettierSnapshot,
 } from "../../domain/provisioning/ProvisioningPlan.js";
-import { ProcessRunner } from "../ports/ProcessRunner.js";
+import { InstallRequest, ProcessRunner } from "../ports/ProcessRunner.js";
 import { NodeProvisioningFileSystem } from "../../infrastructure/filesystem/NodeProvisioningFileSystem.js";
 import { buildAgentsRuntimeStub } from "../services/AgentsRuntimeBootstrap.js";
 import { ProvisionWorkspace, ProvisionWorkspaceInput } from "./ProvisionWorkspace.js";
@@ -47,8 +48,13 @@ class InMemoryFs implements ProvisioningFileSystem {
 
 class SpyProcessRunner implements ProcessRunner {
   readonly markedExecutable: string[] = [];
-  async runInstall(): Promise<void> {
-    throw new Error("not used");
+  readonly installs: InstallRequest[] = [];
+  installError: Error | null = null;
+  async runInstall(request: InstallRequest): Promise<void> {
+    this.installs.push(request);
+    if (this.installError) {
+      throw this.installError;
+    }
   }
   async markExecutable(absolutePath: string): Promise<void> {
     this.markedExecutable.push(absolutePath);
@@ -845,5 +851,130 @@ describe("app/use-cases/ProvisionWorkspace — CI (temp fs real)", () => {
     expect(workflow).toContain("corepack enable");
     expect(workflow).toContain("yarn install --immutable");
     expect(workflow).toContain("yarn check");
+  });
+});
+
+describe("app/use-cases/ProvisionWorkspace — install (2b-4a)", () => {
+  it("executa ProcessRunner.runInstall quando install está habilitado", async () => {
+    const fs = new InMemoryFs();
+    const runner = new SpyProcessRunner();
+
+    const result = await new ProvisionWorkspace(fs, false, runner).applyEffects(
+      planInstall(
+        {
+          packageManager: {
+            id: "npm",
+            label: "npm",
+            runner: "npm run",
+            packageManagerField: null,
+          },
+          yarnBerryReleaseExists: true,
+        },
+        { enabled: true, dependencyNames: ["prettier"] }
+      )
+    );
+
+    expect(result.actions).toEqual(["install prettier (novas dependências detectadas)"]);
+    expect(runner.installs).toEqual([{ cwd: "C:/fake-target/.", command: "npm install" }]);
+  });
+
+  it("dry-run registra install mas não executa processo", async () => {
+    const fs = new InMemoryFs();
+    const runner = new SpyProcessRunner();
+
+    const result = await new ProvisionWorkspace(fs, true, runner).applyEffects(
+      planInstall(
+        {
+          packageManager: {
+            id: "pnpm",
+            label: "pnpm",
+            runner: "pnpm",
+            packageManagerField: null,
+          },
+          yarnBerryReleaseExists: true,
+        },
+        { enabled: true, dependencyNames: ["prettier", "husky"] }
+      )
+    );
+
+    expect(result.actions).toEqual([
+      "[dry-run] install prettier, husky (novas dependências detectadas)",
+    ]);
+    expect(runner.installs).toEqual([]);
+  });
+
+  it("install desabilitado emite guidance manual sem executar processo", async () => {
+    const fs = new InMemoryFs();
+    const runner = new SpyProcessRunner();
+
+    const result = await new ProvisionWorkspace(fs, false, runner).applyEffects(
+      planInstall(
+        {
+          packageManager: {
+            id: "npm",
+            label: "npm",
+            runner: "npm run",
+            packageManagerField: null,
+          },
+          yarnBerryReleaseExists: true,
+        },
+        { enabled: false, dependencyNames: ["prettier"] }
+      )
+    );
+
+    expect(result.actions).toEqual([
+      "Atenção: novas dependências adicionadas (prettier). Execute: npm install",
+    ]);
+    expect(runner.installs).toEqual([]);
+  });
+
+  it("propaga erro de processo com comando e cwd acionáveis", async () => {
+    const fs = new InMemoryFs();
+    const runner = new SpyProcessRunner();
+    runner.installError = new Error("Install falhou com código 1");
+
+    await expect(
+      new ProvisionWorkspace(fs, false, runner).applyEffects(
+        planInstall(
+          {
+            packageManager: {
+              id: "yarn-classic",
+              label: "yarn@1.22.22",
+              runner: "yarn",
+              packageManagerField: "yarn@1.22.22",
+            },
+            yarnBerryReleaseExists: true,
+          },
+          { enabled: true, dependencyNames: ["prettier"] }
+        )
+      )
+    ).rejects.toThrow(
+      /Falha ao executar install \(yarn install\) em C:\/fake-target\/\.: Install falhou com código 1/
+    );
+  });
+
+  it("Yarn Berry sem release local falha com a mesma orientação do legado", async () => {
+    const fs = new InMemoryFs();
+    const runner = new SpyProcessRunner();
+
+    await expect(
+      new ProvisionWorkspace(fs, false, runner).applyEffects(
+        planInstall(
+          {
+            packageManager: {
+              id: "yarn-berry",
+              label: "yarn@4.1.1",
+              runner: "node .yarn/releases/yarn-4.1.1.cjs",
+              packageManagerField: "yarn@4.1.1",
+            },
+            yarnBerryReleaseExists: false,
+          },
+          { enabled: true, dependencyNames: ["prettier"] }
+        )
+      )
+    ).rejects.toThrow(
+      "Arquivo de release do yarn não encontrado em .yarn/releases/yarn-4.1.1.cjs. Execute: corepack enable && yarn install"
+    );
+    expect(runner.installs).toEqual([]);
   });
 });

@@ -33,6 +33,9 @@ import {
   PackageManagerSnapshot,
   resolveCiRunner,
   resolveInstallCommand,
+  resolveInstallHint,
+  resolveLocalInstallCommand,
+  resolveYarnBerryReleasePath,
 } from "./PackageManager.js";
 
 export type ProvisioningOperation = "init" | "adopt" | "update";
@@ -86,6 +89,13 @@ export type ProvisioningEffect =
       readonly kind: "write-ci-workflow";
       readonly relPath: ".github/workflows/ai-guidelines-ci.yml";
       readonly content: string;
+    }
+  | {
+      readonly kind: "install-dependencies";
+      readonly dependencies: readonly string[];
+      readonly command: string;
+      readonly manualCommand: string;
+      readonly blockedReason: string | null;
     }
   | {
       readonly kind: "assert-init-safe";
@@ -165,6 +175,16 @@ export interface CiSnapshot {
 export interface PlanCiOptions {
   readonly enabled: boolean;
   readonly force: boolean;
+}
+
+export interface InstallSnapshot {
+  readonly packageManager: PackageManagerSnapshot;
+  readonly yarnBerryReleaseExists: boolean;
+}
+
+export interface PlanInstallOptions {
+  readonly enabled: boolean;
+  readonly dependencyNames: readonly string[];
 }
 
 /** Caminho relativo do `config.json` dentro do consumidor. */
@@ -441,6 +461,44 @@ export function renderCiWorkflow(template: string, packageManager: PackageManage
     rendered = rendered.replaceAll(key, value);
   }
   return rendered;
+}
+
+export function planInstall(
+  snapshot: InstallSnapshot,
+  options: PlanInstallOptions
+): ProvisioningEffect[] {
+  const dependencies = [...new Set(options.dependencyNames)];
+  if (dependencies.length === 0) {
+    return [];
+  }
+
+  const releasePath = resolveYarnBerryReleasePath(snapshot.packageManager);
+  const blockedReason =
+    snapshot.packageManager.id === "yarn-berry" && !snapshot.yarnBerryReleaseExists
+      ? `Arquivo de release do yarn não encontrado em ${releasePath}. Execute: corepack enable && yarn install`
+      : null;
+  const manualCommand = resolveInstallHint(
+    snapshot.packageManager,
+    snapshot.yarnBerryReleaseExists
+  );
+
+  if (!options.enabled) {
+    return guidanceEffects([
+      `Atenção: novas dependências adicionadas (${dependencies.join(
+        ", "
+      )}). Execute: ${manualCommand}`,
+    ]);
+  }
+
+  return [
+    {
+      kind: "install-dependencies",
+      dependencies,
+      command: resolveLocalInstallCommand(snapshot.packageManager),
+      manualCommand,
+      blockedReason,
+    },
+  ];
 }
 
 /**

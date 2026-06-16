@@ -134,3 +134,50 @@ export function resolveCiRunner(packageManager: PackageManagerSnapshot): string 
       return "yarn";
   }
 }
+
+export interface LocalInstallCommand {
+  readonly cmd: string;
+  readonly args: readonly string[];
+}
+
+export function resolveYarnBerryReleasePath(packageManager: PackageManagerSnapshot): string | null {
+  if (packageManager.id !== "yarn-berry") {
+    return null;
+  }
+
+  const version = parsePackageManagerVersion(packageManager.packageManagerField);
+  return `.yarn/releases/yarn-${version}.cjs`;
+}
+
+export function resolveLocalInstallCommandParts(
+  packageManager: PackageManagerSnapshot
+): LocalInstallCommand {
+  switch (packageManager.id) {
+    case "npm":
+      return { cmd: "npm", args: ["install"] };
+    case "pnpm":
+      return { cmd: "pnpm", args: ["install"] };
+    case "yarn-classic":
+      return { cmd: "yarn", args: ["install"] };
+    case "yarn-berry": {
+      const releasePath = resolveYarnBerryReleasePath(packageManager);
+      return { cmd: "node", args: [releasePath as string, "install"] };
+    }
+  }
+}
+
+export function resolveLocalInstallCommand(packageManager: PackageManagerSnapshot): string {
+  const { cmd, args } = resolveLocalInstallCommandParts(packageManager);
+  return `${cmd} ${args.join(" ")}`;
+}
+
+export function resolveInstallHint(
+  packageManager: PackageManagerSnapshot,
+  yarnBerryReleaseExists: boolean
+): string {
+  if (packageManager.id === "yarn-berry" && !yarnBerryReleaseExists) {
+    return "corepack enable && yarn install";
+  }
+
+  return resolveLocalInstallCommand(packageManager);
+}

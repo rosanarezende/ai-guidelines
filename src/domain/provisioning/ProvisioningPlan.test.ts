@@ -6,6 +6,7 @@ import {
   planGitattributes,
   planHusky,
   planInitGuard,
+  planInstall,
   planPrettier,
   planPointers,
   planTemplateMirror,
@@ -532,5 +533,94 @@ describe("domain/provisioning/ProvisioningPlan — CI (2b-3c)", () => {
         packageManagerField: "yarn@4.1.1",
       })
     ).toContain("run: yarn check");
+  });
+});
+
+describe("domain/provisioning/ProvisioningPlan — install (2b-4a)", () => {
+  it("planInstall não gera efeito quando não há dependências", () => {
+    const snapshot = {
+      packageManager: {
+        id: "npm" as const,
+        label: "npm",
+        runner: "npm run",
+        packageManagerField: null,
+      },
+      yarnBerryReleaseExists: true,
+    };
+
+    expect(planInstall(snapshot, { enabled: true, dependencyNames: [] })).toEqual([]);
+  });
+
+  it("planInstall sem --install gera guidance manual e nenhum efeito de processo", () => {
+    expect(
+      planInstall(
+        {
+          packageManager: {
+            id: "npm",
+            label: "npm",
+            runner: "npm run",
+            packageManagerField: null,
+          },
+          yarnBerryReleaseExists: true,
+        },
+        { enabled: false, dependencyNames: ["prettier"] }
+      )
+    ).toEqual([
+      {
+        kind: "guidance",
+        message: "Atenção: novas dependências adicionadas (prettier). Execute: npm install",
+      },
+    ]);
+  });
+
+  it("planInstall gera efeito explícito com comando e hint local", () => {
+    expect(
+      planInstall(
+        {
+          packageManager: {
+            id: "pnpm",
+            label: "pnpm",
+            runner: "pnpm",
+            packageManagerField: null,
+          },
+          yarnBerryReleaseExists: true,
+        },
+        { enabled: true, dependencyNames: ["prettier", "husky"] }
+      )
+    ).toEqual([
+      {
+        kind: "install-dependencies",
+        dependencies: ["prettier", "husky"],
+        command: "pnpm install",
+        manualCommand: "pnpm install",
+        blockedReason: null,
+      },
+    ]);
+  });
+
+  it("planInstall modela Yarn Berry sem release como erro acionável na aplicação real", () => {
+    expect(
+      planInstall(
+        {
+          packageManager: {
+            id: "yarn-berry",
+            label: "yarn@4.1.1",
+            runner: "node .yarn/releases/yarn-4.1.1.cjs",
+            packageManagerField: "yarn@4.1.1",
+          },
+          yarnBerryReleaseExists: false,
+        },
+        { enabled: true, dependencyNames: ["prettier"] }
+      )
+    ).toEqual([
+      {
+        kind: "install-dependencies",
+        dependencies: ["prettier"],
+        command: "node .yarn/releases/yarn-4.1.1.cjs install",
+        manualCommand: "corepack enable && yarn install",
+        blockedReason:
+          "Arquivo de release do yarn não encontrado em .yarn/releases/yarn-4.1.1.cjs. Execute: corepack enable && yarn install",
+      },
+    ]);
   });
 });

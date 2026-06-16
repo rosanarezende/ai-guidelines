@@ -13,6 +13,7 @@ import { NodeProvisioningFileSystem } from "./NodeProvisioningFileSystem.js";
 import {
   NodeCiSnapshotSource,
   NodeHuskySnapshotSource,
+  NodeInstallSnapshotSource,
   NodeProvisioningSnapshotSource,
   NodePrettierSnapshotSource,
   NodeTemplateMirrorSnapshotSource,
@@ -133,6 +134,8 @@ describe("infrastructure/NodeProvisioningSnapshotSource — template/runtime sna
     expect(snapshot.husky.packageManager.id).toBe("npm");
     expect(snapshot.ci.packageManager.id).toBe("npm");
     expect(snapshot.ci.workflowTemplate).toContain("{{install_command}}");
+    expect(snapshot.install.packageManager.id).toBe("npm");
+    expect(snapshot.install.yarnBerryReleaseExists).toBe(true);
     expect(await read(targetDir, ".ai-guidelines/templates/stale.md")).toBe("# Stale\n");
   });
 
@@ -369,5 +372,28 @@ describe("infrastructure/NodeProvisioningSnapshotSource — template/runtime sna
     expect(snapshot.workflowTemplate).toContain("{{check_command}}");
     expect(snapshot.workflowContent).toBe("custom\n");
     expect(await read(targetDir, ".github/workflows/ai-guidelines-ci.yml")).toBe("custom\n");
+  });
+
+  it("Install snapshot real lê package manager e presença do release Yarn Berry sem escrever", async () => {
+    const targetDir = await mkRoot("prov-install-target-");
+    roots.push(targetDir);
+    await write(targetDir, "package.json", '{"packageManager":"yarn@4.1.1"}\n');
+
+    const missing = await new NodeInstallSnapshotSource().collect({
+      targetDir,
+      sddDir: ".ai-guidelines",
+    });
+
+    expect(missing.packageManager).toMatchObject({ id: "yarn-berry" });
+    expect(missing.yarnBerryReleaseExists).toBe(false);
+
+    await write(targetDir, ".yarn/releases/yarn-4.1.1.cjs", "// yarn\n");
+    const present = await new NodeInstallSnapshotSource().collect({
+      targetDir,
+      sddDir: ".ai-guidelines",
+    });
+
+    expect(present.yarnBerryReleaseExists).toBe(true);
+    expect(await read(targetDir, ".yarn/releases/yarn-4.1.1.cjs")).toBe("// yarn\n");
   });
 });

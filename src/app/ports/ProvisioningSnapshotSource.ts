@@ -1,5 +1,6 @@
 import type {
   CiSnapshot,
+  InstallSnapshot,
   PrettierSnapshot,
   HuskySnapshot,
   TemplateMirrorSnapshot,
@@ -21,6 +22,7 @@ export interface ProvisioningSnapshot {
   readonly prettier: PrettierSnapshot;
   readonly husky: HuskySnapshot;
   readonly ci: CiSnapshot;
+  readonly install: InstallSnapshot;
 }
 
 export interface ProvisioningSnapshotSource {

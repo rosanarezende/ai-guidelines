@@ -114,6 +114,9 @@ export class ProvisionWorkspace {
         case "write-ci-workflow":
           await this.applyWriteText(effect.relPath, effect.content, "CI baseline", actions);
           break;
+        case "install-dependencies":
+          await this.applyInstall(effect, actions);
+          break;
         case "assert-init-safe":
           // Guard de pré-condição: a DECISÃO é pura (domínio); o use case só a
           // invoca. Lança antes de qualquer escrita quando há conflito sem force.
@@ -272,5 +275,34 @@ export class ProvisionWorkspace {
       throw new Error(`ProcessRunner ausente para marcar ${relPath} como executável.`);
     }
     await this.processRunner.markExecutable(this.fs.resolvePath(relPath));
+  }
+
+  private async applyInstall(
+    effect: Extract<ProvisioningEffect, { kind: "install-dependencies" }>,
+    actions: string[]
+  ): Promise<void> {
+    actions.push(
+      `${this.dryRun ? "[dry-run] " : ""}install ${effect.dependencies.join(
+        ", "
+      )} (novas dependências detectadas)`
+    );
+    if (this.dryRun) {
+      return;
+    }
+    if (effect.blockedReason) {
+      throw new Error(effect.blockedReason);
+    }
+    if (!this.processRunner) {
+      throw new Error(`ProcessRunner ausente para executar install: ${effect.command}`);
+    }
+
+    const cwd = this.fs.resolvePath(".");
+    try {
+      await this.processRunner.runInstall({ cwd, command: effect.command });
+    } catch (error) {
+      throw new Error(
+        `Falha ao executar install (${effect.command}) em ${cwd}: ${(error as Error).message}`
+      );
+    }
   }
 }

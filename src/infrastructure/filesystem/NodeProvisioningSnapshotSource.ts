@@ -11,6 +11,7 @@ import type {
   CiSnapshot,
   HuskySnapshot,
   HuskyHookSnapshot,
+  InstallSnapshot,
   PrettierSnapshot,
   TemplateMirrorFile,
   TemplateMirrorSnapshot,
@@ -30,6 +31,7 @@ import {
 } from "../../domain/provisioning/TemplateMirror.js";
 import { NodeRecipeStore } from "../yaml/NodeRecipeStore.js";
 import type { PackageManagerSnapshot } from "../../domain/provisioning/PackageManager.js";
+import { resolveYarnBerryReleasePath } from "../../domain/provisioning/PackageManager.js";
 
 function isNotFound(error: unknown): boolean {
   return (error as NodeJS.ErrnoException | undefined)?.code === "ENOENT";
@@ -272,17 +274,32 @@ export class NodeCiSnapshotSource {
   }
 }
 
+export class NodeInstallSnapshotSource {
+  async collect(input: ProvisioningSnapshotInput): Promise<InstallSnapshot> {
+    const packageJson = await readPackageJson(input.targetDir);
+    const packageManager = await collectPackageManager(input.targetDir, packageJson);
+    const releasePath = resolveYarnBerryReleasePath(packageManager);
+    return {
+      packageManager,
+      yarnBerryReleaseExists:
+        releasePath === null ? true : await pathExists(path.join(input.targetDir, releasePath)),
+    };
+  }
+}
+
 export class NodeProvisioningSnapshotSource implements ProvisioningSnapshotSource {
   private readonly templates: NodeTemplateMirrorSnapshotSource;
   private readonly prettier: NodePrettierSnapshotSource;
   private readonly husky: NodeHuskySnapshotSource;
   private readonly ci: NodeCiSnapshotSource;
+  private readonly install: NodeInstallSnapshotSource;
 
   constructor(repoRoot: string) {
     this.templates = new NodeTemplateMirrorSnapshotSource(repoRoot);
     this.prettier = new NodePrettierSnapshotSource(repoRoot);
     this.husky = new NodeHuskySnapshotSource();
     this.ci = new NodeCiSnapshotSource(repoRoot);
+    this.install = new NodeInstallSnapshotSource();
   }
 
   async collect(input: ProvisioningSnapshotInput): Promise<ProvisioningSnapshot> {
@@ -293,6 +310,7 @@ export class NodeProvisioningSnapshotSource implements ProvisioningSnapshotSourc
         prettier: await this.prettier.collect(input),
         husky: await this.husky.collect(input),
         ci: await this.ci.collect(input),
+        install: await this.install.collect(input),
       };
     } catch (error) {
       if (isNotFound(error)) {
