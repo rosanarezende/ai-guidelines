@@ -354,6 +354,7 @@ export interface SubCheckpointRef {
 
 export type SubCheckpointResolution =
   | { kind: "implement"; subCheckpoint: SubCheckpointRef; basis: string[] }
+  | { kind: "terminal-ready"; subCheckpoint: SubCheckpointRef; basis: string[] }
   | {
       kind: "transition";
       transition: { conclude: SubCheckpointRef | null; activate: SubCheckpointRef };
@@ -368,7 +369,9 @@ export type SubCheckpointResolution =
  *
  * Conclusão = READINESS EXPLÍCITA. Um `[/]` ativo só vira `transition` quando ELE
  * MESMO declarou `readiness: ready-for-transition` em tasks.md (critérios de saída
- * satisfeitos) E há um pendente adiante. SEM readiness ⇒ ainda em implementação —
+ * satisfeitos) E há um pendente adiante. Se não há próximo pendente, a readiness é
+ * terminal: fecha a implementação interna e projeta o checkpoint para Ready/Gate,
+ * sem inventar `advance-subcheckpoint`. SEM readiness ⇒ ainda em implementação —
  * independe de findings/resolutions ACUMULADOS do checkpoint (que pertencem aos
  * reviews — p.ex. o audit do CO-3.1 — e NÃO provam que o sub-checkpoint atual
  * terminou). Concluir/ativar é ATO VISÍVEL em tasks.md, decisão governada da owner.
@@ -394,6 +397,16 @@ export function resolveSubCheckpointWork(facts: HandoffFacts): SubCheckpointReso
           `${active.id} declarou readiness "${SUBCHECKPOINT_READINESS}" (critérios de saída satisfeitos) mas segue [/] em tasks.md;`,
           `próximo pendente: ${pendingAfter[0].id} — ${pendingAfter[0].title}.`,
           "concluir e ativar é ato VISÍVEL em tasks.md (decisão governada da owner).",
+        ],
+      };
+    }
+    if (active.readiness === SUBCHECKPOINT_READINESS && pendingAfter.length === 0) {
+      return {
+        kind: "terminal-ready",
+        subCheckpoint: ref(active),
+        basis: [
+          `${active.id} declarou readiness "${SUBCHECKPOINT_READINESS}" e não há próximo sub-checkpoint pendente.`,
+          "o próximo movimento governado é preparar fechamento do checkpoint/Ready/Human Gate; advance-subcheckpoint não se aplica.",
         ],
       };
     }
@@ -531,7 +544,10 @@ export function deriveNextAction(facts: HandoffFacts): NextAction {
 
   const lifecycle = facts.lifecycle;
   const openTasks = facts.tasks.filter((t) => !t.done);
-  const implementationConcluded = facts.tasks.length > 0 && openTasks.length === 0;
+  const subResolution = resolveSubCheckpointWork(facts);
+  const terminalSubCheckpointReady = subResolution.kind === "terminal-ready";
+  const implementationConcluded =
+    (facts.tasks.length > 0 && openTasks.length === 0) || terminalSubCheckpointReady;
 
   // 2 — findings abertos bloqueiam avanço do nó.
   if (lifecycle && lifecycle.openFindings > 0) {
@@ -558,7 +574,10 @@ export function deriveNextAction(facts: HandoffFacts): NextAction {
           .map((s) => `${s.typeId} (${s.state})`)
           .join(", ")}.`,
         basis: [
-          `tasks do checkpoint concluídas (${facts.tasks.length}/${facts.tasks.length})`,
+          terminalSubCheckpointReady
+            ? `sub-checkpoint terminal pronto: ${subResolution.subCheckpoint.id} — ${subResolution.subCheckpoint.title}`
+            : `tasks do checkpoint concluídas (${facts.tasks.length}/${facts.tasks.length})`,
+          ...(terminalSubCheckpointReady ? subResolution.basis : []),
           ...blocking.map((s) => `${s.typeId}: required (${s.source}) · ${s.state}`),
           `decisões presentes: ${lifecycle.reviewDecisions.map((d) => `${d.role}=${d.decision}`).join(", ") || "(nenhuma)"}`,
         ],
@@ -596,6 +615,7 @@ export function deriveNextAction(facts: HandoffFacts): NextAction {
         description: `Preparar o PR #${facts.pullRequest.number} para Ready: completar o body (contrato READY) e validar com pr-ready:check.`,
         basis: [
           "nenhum review obrigatório pendente (required satisfeitos ou inexistentes)",
+          ...(terminalSubCheckpointReady ? subResolution.basis : []),
           ...lateralRecommendations(lifecycle).map(
             (s) => `recomendação (não bloqueia): ${s.typeId} ${s.state}`
           ),
@@ -612,6 +632,7 @@ export function deriveNextAction(facts: HandoffFacts): NextAction {
         basis: [
           `PR #${facts.pullRequest.number} Ready (não-Draft) no estado ${facts.pullRequest.state}`,
           "nenhum review obrigatório pendente; gate artifact ausente",
+          ...(terminalSubCheckpointReady ? subResolution.basis : []),
           ...lateralRecommendations(lifecycle).map(
             (s) => `advisory ao gate (não bloqueia): ${s.typeId} ${s.state}`
           ),
@@ -656,7 +677,6 @@ export function deriveNextAction(facts: HandoffFacts): NextAction {
   // está fatiado. REUSA a MESMA resolução que o `work` consome para o objeto de
   // trabalho (invariante handoff↔work): se há um `[/]` ativo, o handoff o NOMEIA e
   // NÃO declara "zero tarefas"; se há transição pendente, aponta o ato humano.
-  const subResolution = resolveSubCheckpointWork(facts);
   if (subResolution.kind === "implement") {
     const sc = subResolution.subCheckpoint;
     return {
@@ -676,6 +696,15 @@ export function deriveNextAction(facts: HandoffFacts): NextAction {
       description: conclude
         ? `Concluir o sub-checkpoint ${conclude.id} e ativar ${activate.id} — ${activate.title} (decisão humana \`advance-subcheckpoint\`; ato visível em tasks.md).`
         : `Ativar o sub-checkpoint pendente ${activate.id} — ${activate.title} (decisão humana \`advance-subcheckpoint\`; ato visível em tasks.md).`,
+      basis: subResolution.basis,
+      blocking: false,
+    };
+  }
+  if (subResolution.kind === "terminal-ready") {
+    const sc = subResolution.subCheckpoint;
+    return {
+      kind: "prepare-ready",
+      description: `Preparar o fechamento do checkpoint ${facts.cursor?.checkpoint ?? "?"}: ${sc.id} está pronto e não há próximo sub-checkpoint pendente.`,
       basis: subResolution.basis,
       blocking: false,
     };

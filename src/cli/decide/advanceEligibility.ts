@@ -113,8 +113,10 @@ export function deriveAdvanceEligibility(f: AdvanceEligibilityFacts): DecisionAv
   );
   if (pendingAfter.length === 0) {
     return {
-      status: "blocked",
-      reasons: [`Não há próximo sub-checkpoint pendente após ${active.id}.`],
+      status: "not-applicable",
+      reasons: [
+        `Não há próximo sub-checkpoint pendente após ${active.id}; a transição interna não se aplica ao terminal do checkpoint.`,
+      ],
     };
   }
   if (pendingBefore.length > 0) {

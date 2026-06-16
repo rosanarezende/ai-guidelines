@@ -89,6 +89,15 @@ describe("human-gate · elegibilidade [decide]", () => {
     expect(def.detect(s).status).toBe("blocked");
   });
 
+  it("[34b] sub-checkpoint ativo sem readiness bloqueia o gate", () => {
+    const s = readySnapshot({
+      subCheckpoints: [{ id: "CO-3.5", title: "colapso", state: "in-progress", line: 5 }],
+    });
+    const av = def.detect(s);
+    expect(av.status).toBe("blocked");
+    expect(av.reasons.join(" ")).toMatch(/CO-3\.5 ainda não declarou readiness/);
+  });
+
   it("[35] review obrigatório pendente bloqueia", () => {
     const facts = makeHandoffFacts({
       pullRequest: { ...readySnapshot().facts.pullRequest! },
@@ -151,6 +160,24 @@ describe("human-gate · elegibilidade [decide]", () => {
 
   it("estado elegível ⇒ available", () => {
     expect(def.detect(readySnapshot()).status).toBe("available");
+  });
+
+  it("readiness terminal do último sub-checkpoint ⇒ available para Human Gate", () => {
+    const terminal = readySnapshot({
+      subCheckpoints: [
+        { id: "CO-3.1", title: "base", state: "done", line: 1 },
+        {
+          id: "CO-3.5",
+          title: "colapso integral do runtime CLI",
+          state: "in-progress",
+          line: 5,
+          readiness: "ready-for-transition",
+        },
+      ],
+    });
+    expect(def.detect(terminal).status).toBe("available");
+    const b = def.buildBrief(terminal, { technical: false });
+    expect(JSON.stringify(b.sections)).toMatch(/Pronto para Gate: CO-3\.5/);
   });
 });
 

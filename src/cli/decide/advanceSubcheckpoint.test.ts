@@ -98,12 +98,21 @@ describe("advance-subcheckpoint · elegibilidade [decide]", () => {
     expect(av.hint).toMatch(/CO-3\.1 concluível; CO-3\.2 é o próximo/);
   });
 
-  it("[2] sem próximo bloqueia", () => {
-    expect(
-      def.detect(
-        snap({ subCheckpoints: subs([{ id: "CO-3.1", state: "in-progress", line: 101 }]) })
-      ).status
-    ).toBe("blocked");
+  it("[2] sem próximo não se aplica (terminal do checkpoint)", () => {
+    const av = def.detect(
+      snap({
+        subCheckpoints: subs([
+          {
+            id: "CO-3.1",
+            state: "in-progress",
+            line: 101,
+            readiness: "ready-for-transition",
+          },
+        ]),
+      })
+    );
+    expect(av.status).toBe("not-applicable");
+    expect(av.reasons.join(" ")).toMatch(/Não há próximo sub-checkpoint pendente/);
   });
 
   it("[3] dois atuais ([/]) bloqueiam", () => {
@@ -258,6 +267,21 @@ describe("advance-subcheckpoint · briefing humano [decide]", () => {
     expect(humanOut).not.toMatch(/tasks\.md linha|\.governance\/specs/);
     const techOut = renderBrief(def.buildBrief(snap(), { technical: true }), { technical: true });
     expect(techOut).toMatch(/tasks\.md linha 101/);
+  });
+
+  it("[12b] terminal sem próximo explica que advance-subcheckpoint não se aplica", () => {
+    const b = def.buildBrief(
+      snap({
+        subCheckpoints: subs([
+          { id: "CO-3.4", state: "in-progress", readiness: "ready-for-transition", line: 104 },
+        ]),
+      }),
+      { technical: false }
+    );
+    expect(b.status).toBe("not-applicable");
+    expect(b.summary).toMatch(/não se aplica ao terminal/);
+    expect(b.consequences.join(" ")).toMatch(/Nenhum sub-checkpoint será marcado ou ativado/);
+    expect(b.blockedReasons.join(" ")).toMatch(/Não há próximo sub-checkpoint pendente/);
   });
 });
 

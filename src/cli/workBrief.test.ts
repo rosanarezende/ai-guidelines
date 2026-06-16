@@ -1,6 +1,6 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { HandoffFacts, NextAction, NextActionKind } from "./handoffFacts.js";
+import { HandoffFacts, NextAction, NextActionKind, deriveNextAction } from "./handoffFacts.js";
 import {
   WorkBriefInput,
   WorkFinding,
@@ -699,6 +699,32 @@ describe("workBrief · próxima ação estruturada [work]", () => {
     expect(b.nextAction.description).toBe("Concluir CO-3.1 e ativar CO-3.2.");
     expect(commandOf(b, "read-only")).toBe(
       "npm run guidelines -- decide --type advance-subcheckpoint --brief-only"
+    );
+  });
+
+  it("[39b] readiness terminal (sem próximo pendente) ⇒ prepare_close, sem advance-subcheckpoint", () => {
+    const f = facts({
+      lifecycle: { ...settled },
+      subCheckpoints: subs([
+        { id: "CO-3.1", state: "done" },
+        { id: "CO-3.2", state: "in-progress", readiness: "ready-for-transition" },
+      ]),
+    });
+    const b = derive({
+      nextAction: deriveNextAction(f),
+      facts: f,
+      advanceEligibility: {
+        status: "not-applicable",
+        reasons: ["Não há próximo sub-checkpoint pendente após CO-3.2."],
+      },
+    });
+    expect(b.mode).toBe("prepare_close");
+    expect(b.nextAction.decisionType).toBe("human-gate");
+    expect(commandOf(b, "read-only")).toBe(
+      "npm run guidelines -- decide --type human-gate --brief-only"
+    );
+    expect(b.nextAction.commands.some((c) => c.command.includes("advance-subcheckpoint"))).toBe(
+      false
     );
   });
 

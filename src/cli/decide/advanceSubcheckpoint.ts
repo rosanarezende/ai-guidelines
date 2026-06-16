@@ -169,17 +169,26 @@ export class AdvanceSubcheckpointDefinition implements HumanDecisionDefinition {
     const availability = this.detect(snapshot);
     const node = nodeLabel(snapshot);
     const pair = this.pair(snapshot);
-    const active = pair?.active ?? null;
+    const active =
+      pair?.active ?? snapshot.subCheckpoints.find((s) => s.state === "in-progress") ?? null;
     const next = pair?.next ?? null;
     const lc = snapshot.facts.lifecycle;
     const pr = snapshot.facts.pullRequest;
+    const terminalNoNext =
+      !next &&
+      active !== null &&
+      availability.status === "not-applicable" &&
+      availability.reasons.some((r) => r.includes("Não há próximo sub-checkpoint pendente"));
 
     const summary = next
       ? `Iniciar o próximo sub-checkpoint do ${node}: concluir ${active!.id} e ativar ${next.id}.`
-      : `O ${node} ainda não pode avançar para o próximo sub-checkpoint.`;
-    const whyNow =
-      "O trabalho identifica uma transição interna pendente; ativar o próximo é um ato " +
-      "explícito da owner — não um efeito colateral do fechamento dos problemas.";
+      : terminalNoNext
+        ? `A transição interna de sub-checkpoint não se aplica ao terminal do ${node}.`
+        : `O ${node} ainda não pode avançar para o próximo sub-checkpoint.`;
+    const whyNow = terminalNoNext
+      ? "Não há próximo sub-checkpoint pendente; o próximo movimento governado é fechamento do checkpoint/Ready/Human Gate."
+      : "O trabalho identifica uma transição interna pendente; ativar o próximo é um ato " +
+        "explícito da owner — não um efeito colateral do fechamento dos problemas.";
 
     const consequences = next
       ? [
@@ -187,7 +196,12 @@ export class AdvanceSubcheckpointDefinition implements HumanDecisionDefinition {
           `${next.id} será marcado como ativo.`,
           "`guidelines work` passará a apontá-lo como objeto de implementação.",
         ]
-      : policy.consequences;
+      : terminalNoNext
+        ? [
+            "Nenhum sub-checkpoint será marcado ou ativado por esta decisão.",
+            "Use o fechamento do checkpoint/Ready/Human Gate conforme a política governada.",
+          ]
+        : policy.consequences;
 
     const bodyByKey: Record<string, readonly string[]> = {
       completed: active
@@ -206,7 +220,11 @@ export class AdvanceSubcheckpointDefinition implements HumanDecisionDefinition {
       ],
       next_starts: next
         ? [`Começa o ${next.id} — ${next.title}.`]
-        : ["(nenhum próximo sub-checkpoint pendente)"],
+        : terminalNoNext
+          ? [
+              "(nenhum próximo sub-checkpoint pendente; a próxima ação é fechamento do checkpoint/Ready/Human Gate)",
+            ]
+          : ["(nenhum próximo sub-checkpoint pendente)"],
       consequences,
       not_authorized: policy.notAuthorized,
     };

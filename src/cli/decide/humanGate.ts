@@ -27,6 +27,7 @@ import {
   findDecisionType,
   HumanDecisionTypePolicy,
 } from "../../infrastructure/yaml/humanDecisionPolicyReader.js";
+import { SUBCHECKPOINT_READINESS } from "../handoffFacts.js";
 
 export const HUMAN_GATE_ID = "human-gate";
 
@@ -67,6 +68,19 @@ export class HumanGateDefinition implements HumanDecisionDefinition {
     // Sub-checkpoints pendentes (fonte canônica tasks.md) — em linguagem humana.
     for (const sc of snapshot.subCheckpoints) {
       if (sc.state === "pending") reasons.push(`${sc.id} ainda está aberto.`);
+    }
+    const activeSub = snapshot.subCheckpoints.find((s) => s.state === "in-progress");
+    if (activeSub) {
+      const pendingAfter = snapshot.subCheckpoints.filter(
+        (s) => s.state === "pending" && s.line > activeSub.line
+      );
+      if (activeSub.readiness !== SUBCHECKPOINT_READINESS) {
+        reasons.push(`${activeSub.id} ainda não declarou readiness "${SUBCHECKPOINT_READINESS}".`);
+      } else if (pendingAfter.length > 0) {
+        reasons.push(
+          `${activeSub.id} declarou readiness, mas ${pendingAfter[0].id} ainda precisa ser ativado por advance-subcheckpoint.`
+        );
+      }
     }
     if (snapshot.openFindings.length > 0) {
       reasons.push(
@@ -152,12 +166,24 @@ export class HumanGateDefinition implements HumanDecisionDefinition {
       "o gate é registrado DEPOIS da decisão e não executa transição automática.";
 
     const doneSubs = snapshot.subCheckpoints.filter((s) => s.state === "done");
+    const terminalReadySub = snapshot.subCheckpoints.find((s) => {
+      if (s.state !== "in-progress" || s.readiness !== SUBCHECKPOINT_READINESS) return false;
+      return !snapshot.subCheckpoints.some(
+        (other) => other.state === "pending" && other.line > s.line
+      );
+    });
+    const deliveredSubs = [
+      ...doneSubs.map((s) => `Concluído: ${s.id} — ${s.title}`),
+      ...(terminalReadySub
+        ? [`Pronto para Gate: ${terminalReadySub.id} — ${terminalReadySub.title}`]
+        : []),
+    ];
     const reviewStatuses = snapshot.facts.lifecycle?.reviewStatuses ?? [];
 
     const bodyByKey: Record<string, readonly string[]> = {
       delivered_value:
-        doneSubs.length > 0
-          ? doneSubs.map((s) => `Concluído: ${s.id} — ${s.title}`)
+        deliveredSubs.length > 0
+          ? deliveredSubs
           : ["(o valor entregue é confirmado no corpo do PR — ainda em andamento)"],
       experience_change: [
         "Quem usa passa a contar com a capacidade entregue por este checkpoint.",

@@ -600,14 +600,22 @@ describe("parseSubCheckpoints + resolveSubCheckpointWork — sinal de readiness"
     if (r.kind === "implement") expect(r.subCheckpoint.id).toBe("CO-3.4");
   });
 
-  it("resolve: readiness mas SEM próximo pendente ⇒ implement (último do nó)", () => {
+  it("resolve: readiness mas SEM próximo pendente ⇒ terminal-ready (sem advance)", () => {
     const tasks = [
       "- [/] **Checkpoint co-enforcement** (seq 9 / CO-3)",
       "    - [x] **CO-3.3 — migração**: feito.",
       "    - [/] **CO-3.4 — dogfood** `readiness: ready-for-transition`: advisory-first.",
     ].join("\n");
     const subs = parseSubCheckpoints(tasks, "checkpoint-co-enforcement");
-    const r = resolveSubCheckpointWork(facts({ subCheckpoints: subs }));
-    expect(r.kind).toBe("implement");
+    const f = facts({
+      lifecycle: LIFECYCLE_REQUIRED_SATISFIED,
+      tasks: [],
+      subCheckpoints: subs,
+    });
+    const r = resolveSubCheckpointWork(f);
+    expect(r.kind).toBe("terminal-ready");
+    const next = deriveNextAction(f);
+    expect(next.kind).toBe("prepare-ready");
+    expect(next.description).not.toMatch(/advance-subcheckpoint/);
   });
 });

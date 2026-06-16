@@ -97,6 +97,38 @@ function realSnapshot(over: { ciPending?: number; ciFail?: number } = {}): Decis
   });
 }
 
+function terminalSnapshot(): DecisionSnapshot {
+  const facts = makeHandoffFacts({
+    lifecycle: { ...AUDIT_SETTLED },
+    subCheckpoints: [
+      { id: "CO-3.1", title: "Constraint + EnforcementBinding", state: "done", line: 101 },
+      { id: "CO-3.2", title: "knowledge:compile + manifesto/paridade", state: "done", line: 102 },
+      { id: "CO-3.3", title: "migração e remoção do substrato legacy", state: "done", line: 103 },
+      {
+        id: "CO-3.5",
+        title: "colapso integral do runtime CLI",
+        state: "in-progress",
+        line: 105,
+        readiness: "ready-for-transition",
+      },
+    ],
+    pullRequest: {
+      ...makeHandoffFacts().pullRequest!,
+      isDraft: true,
+      checks: { pass: 12, fail: 0, pending: 0 },
+    },
+  });
+  return makeDecisionSnapshot({
+    facts,
+    openFindings: [],
+    lanes: [],
+    closedFindingsCount: 3,
+    workingTreeState: "clean",
+    gateExists: false,
+    subCheckpoints: facts.subCheckpoints,
+  });
+}
+
 /**
  * Constrói o work brief a partir do MESMO snapshot, derivando a elegibilidade
  * com a MESMA função que `decide` usa (`def.detect`) — espelha `collectWorkBrief`.
@@ -231,5 +263,30 @@ describe("consistência work×decide · transição BLOQUEADA (requisito nomeado
     const out = lines.join("\n");
     expect(out).toMatch(/ainda não pode ser exercida porque/);
     expect(out).toMatch(/verificação\(ões\) pendente/);
+  });
+});
+
+describe("consistência work×decide · terminal do último sub-checkpoint", () => {
+  it("[11] decide menu omite advance-subcheckpoint e mantém Human Gate bloqueado por Draft", async () => {
+    const { lines, logger } = recordingLogger();
+    const code = await runDecide("/x", parseDecideArgs(["--brief-only"]), {
+      logger,
+      registry: buildDecisionRegistry(),
+      collect: () => terminalSnapshot(),
+      remote: null,
+    });
+    expect(code).toBe(0);
+    const out = lines.join("\n");
+    expect(out).not.toMatch(/Iniciar o próximo sub-checkpoint/);
+    expect(out).toMatch(/Human Gate/);
+    expect(out).toMatch(/Draft/);
+  });
+
+  it("[12] work projeta prepare_close, não advance-subcheckpoint", () => {
+    const snapshot = terminalSnapshot();
+    const b = workBriefFor(snapshot);
+    expect(b.mode).toBe("prepare_close");
+    expect(b.nextAction.decisionType).toBe("human-gate");
+    expect(b.nextAction.commands.some((c) => /advance-subcheckpoint/.test(c.command))).toBe(false);
   });
 });
