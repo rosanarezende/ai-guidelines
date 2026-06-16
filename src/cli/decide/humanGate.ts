@@ -160,7 +160,7 @@ export class HumanGateDefinition implements HumanDecisionDefinition {
 
     const summary = blocked
       ? `O avanço do checkpoint ${node} ainda não pode ser decidido.`
-      : `Decidir o avanço do checkpoint ${node}: o trabalho está pronto e validado.`;
+      : `Human Gate disponível para o checkpoint ${node}: o trabalho está pronto e validado.`;
     const whyNow =
       "O Human Gate é a decisão da owner sobre concluir o checkpoint; " +
       "o gate é registrado DEPOIS da decisão e não executa transição automática.";

@@ -354,6 +354,7 @@ describe("human-gate · briefing humano [decide]", () => {
     const b = def.buildBrief(readySnapshot(), { technical: false });
     const text = JSON.stringify(b.sections);
     expect(b.status).toBe("available");
+    expect(b.summary).toContain("Human Gate disponível");
     expect(text).toContain("Integração contínua: 11 ok");
     expect(text).toContain("pr-ready:check: verde");
     expect(text).toContain("Próximo nó planejado: co-flow-convergence.");
