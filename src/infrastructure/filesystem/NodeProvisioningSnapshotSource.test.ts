@@ -3,6 +3,7 @@ import * as nodeFs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
 import {
+  planCi,
   planAgentsRuntimeBootstrap,
   planTemplateMirror,
 } from "../../domain/provisioning/ProvisioningPlan.js";
@@ -10,6 +11,7 @@ import { normalizeTemplateContent } from "../../domain/provisioning/TemplateMirr
 import { ProvisionWorkspace } from "../../app/use-cases/ProvisionWorkspace.js";
 import { NodeProvisioningFileSystem } from "./NodeProvisioningFileSystem.js";
 import {
+  NodeCiSnapshotSource,
   NodeHuskySnapshotSource,
   NodeProvisioningSnapshotSource,
   NodePrettierSnapshotSource,
@@ -53,6 +55,25 @@ async function writePrettierBaseline(repoRoot: string): Promise<void> {
   await write(repoRoot, ".core/templates/.prettierignore.tmpl", "dist/\nnode_modules/\n");
 }
 
+async function writeCiTemplate(repoRoot: string): Promise<void> {
+  await write(
+    repoRoot,
+    ".core/templates/.github/workflows/ai-guidelines-ci.yml.tmpl",
+    [
+      "name: {{ci_workflow_name}}",
+      "",
+      "jobs:",
+      "  ai-guidelines-check:",
+      "    steps:",
+      "      - name: Install dependencies",
+      "        run: {{install_command}}",
+      "      - name: Validate AI-first baseline",
+      "        run: {{check_command}}",
+      "",
+    ].join("\n")
+  );
+}
+
 async function writeRecipe(repoRoot: string): Promise<void> {
   await write(
     repoRoot,
@@ -89,6 +110,7 @@ describe("infrastructure/NodeProvisioningSnapshotSource — template/runtime sna
     roots.push(repoRoot, targetDir);
     await writeRequiredTemplates(repoRoot);
     await writePrettierBaseline(repoRoot);
+    await writeCiTemplate(repoRoot);
     await write(targetDir, ".ai-guidelines/templates/stale.md", "# Stale\n");
 
     const snapshot = await new NodeProvisioningSnapshotSource(repoRoot).collect({
@@ -109,6 +131,8 @@ describe("infrastructure/NodeProvisioningSnapshotSource — template/runtime sna
     expect(snapshot.templates.targetRelativePaths).toEqual(["stale.md"]);
     expect(snapshot.prettier.prettierIgnoreBaseline).toBe("dist/\nnode_modules/\n");
     expect(snapshot.husky.packageManager.id).toBe("npm");
+    expect(snapshot.ci.packageManager.id).toBe("npm");
+    expect(snapshot.ci.workflowTemplate).toContain("{{install_command}}");
     expect(await read(targetDir, ".ai-guidelines/templates/stale.md")).toBe("# Stale\n");
   });
 
@@ -249,6 +273,7 @@ describe("infrastructure/NodeProvisioningSnapshotSource — template/runtime sna
     roots.push(repoRoot, targetDir);
     await writeRequiredTemplates(repoRoot);
     await writePrettierBaseline(repoRoot);
+    await writeCiTemplate(repoRoot);
     await write(targetDir, ".ai-guidelines/templates/spec-boilerplate.md", "# Local drift\n");
 
     const snapshot = await new NodeProvisioningSnapshotSource(repoRoot).collect({
@@ -262,6 +287,7 @@ describe("infrastructure/NodeProvisioningSnapshotSource — template/runtime sna
     const effects = [
       planAgentsRuntimeBootstrap(snapshot.runtime.runtimeStub),
       ...planTemplateMirror(".ai-guidelines", snapshot.templates, { prune: false }),
+      ...planCi(snapshot.ci, { enabled: true, force: false }),
     ];
     const result = await new ProvisionWorkspace(
       new NodeProvisioningFileSystem(targetDir),
@@ -270,7 +296,11 @@ describe("infrastructure/NodeProvisioningSnapshotSource — template/runtime sna
 
     expect(result.actions).toContain("write AGENTS.md (ai-guidelines runtime updated)");
     expect(result.actions).toContain("write .ai-guidelines/templates/spec-boilerplate.md");
+    expect(result.actions).toContain("write .github/workflows/ai-guidelines-ci.yml (CI baseline)");
     expect(await read(targetDir, ".ai-guidelines/templates/spec-boilerplate.md")).toBe("# Spec\n");
+    expect(await read(targetDir, ".github/workflows/ai-guidelines-ci.yml")).toContain(
+      "npm run check"
+    );
   });
 
   it("Prettier snapshot real lê package.json, ignore, baseline e formatter rival sem escrever", async () => {
@@ -320,5 +350,24 @@ describe("infrastructure/NodeProvisioningSnapshotSource — template/runtime sna
       { name: "pre-push", content: null },
     ]);
     expect(await read(targetDir, ".husky/pre-commit")).toBe("echo ok\n");
+  });
+
+  it("CI snapshot real lê template, package manager e workflow existente sem escrever", async () => {
+    const repoRoot = await mkRoot("prov-ci-repo-");
+    const targetDir = await mkRoot("prov-ci-target-");
+    roots.push(repoRoot, targetDir);
+    await writeCiTemplate(repoRoot);
+    await write(targetDir, "package.json", '{"packageManager":"pnpm@9.0.0"}\n');
+    await write(targetDir, ".github/workflows/ai-guidelines-ci.yml", "custom\n");
+
+    const snapshot = await new NodeCiSnapshotSource(repoRoot).collect({
+      targetDir,
+      sddDir: ".ai-guidelines",
+    });
+
+    expect(snapshot.packageManager).toMatchObject({ id: "pnpm", runner: "pnpm" });
+    expect(snapshot.workflowTemplate).toContain("{{check_command}}");
+    expect(snapshot.workflowContent).toBe("custom\n");
+    expect(await read(targetDir, ".github/workflows/ai-guidelines-ci.yml")).toBe("custom\n");
   });
 });

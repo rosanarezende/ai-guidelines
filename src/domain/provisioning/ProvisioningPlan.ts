@@ -29,7 +29,11 @@ import {
 import { FormatterContextSnapshot } from "./FormatterContext.js";
 import { getAllManagedRelativePaths, getProviderEntrypoints } from "./ProviderEntrypoints.js";
 import { mergeHookContent } from "./MergePolicies.js";
-import { PackageManagerSnapshot } from "./PackageManager.js";
+import {
+  PackageManagerSnapshot,
+  resolveCiRunner,
+  resolveInstallCommand,
+} from "./PackageManager.js";
 
 export type ProvisioningOperation = "init" | "adopt" | "update";
 
@@ -78,6 +82,11 @@ export type ProvisioningEffect =
       readonly content: string;
     }
   | { readonly kind: "mark-executable"; readonly relPath: string }
+  | {
+      readonly kind: "write-ci-workflow";
+      readonly relPath: ".github/workflows/ai-guidelines-ci.yml";
+      readonly content: string;
+    }
   | {
       readonly kind: "assert-init-safe";
       readonly conflicts: readonly string[];
@@ -143,6 +152,17 @@ export interface HuskySnapshot {
 }
 
 export interface PlanHuskyOptions {
+  readonly enabled: boolean;
+  readonly force: boolean;
+}
+
+export interface CiSnapshot {
+  readonly packageManager: PackageManagerSnapshot;
+  readonly workflowTemplate: string;
+  readonly workflowContent: string | null;
+}
+
+export interface PlanCiOptions {
   readonly enabled: boolean;
   readonly force: boolean;
 }
@@ -381,6 +401,46 @@ export function planHusky(
   }
 
   return effects;
+}
+
+export function planCi(snapshot: CiSnapshot, options: PlanCiOptions): ProvisioningEffect[] {
+  if (!options.enabled) {
+    return guidanceEffects(["skip ci (feature desativada)"]);
+  }
+
+  const workflow = renderCiWorkflow(snapshot.workflowTemplate, snapshot.packageManager);
+  const relPath = ".github/workflows/ai-guidelines-ci.yml";
+
+  if (snapshot.workflowContent === workflow) {
+    return [];
+  }
+
+  if (snapshot.workflowContent !== null && !options.force) {
+    return guidanceEffects([
+      `skip ${relPath} (desatualizado; use --force ou Wizard para atualizar)`,
+    ]);
+  }
+
+  return [{ kind: "write-ci-workflow", relPath, content: workflow }];
+}
+
+export function renderCiWorkflow(template: string, packageManager: PackageManagerSnapshot): string {
+  const replacements: Readonly<Record<string, string>> = {
+    "{{ci_workflow_name}}": "AI Governance Check",
+    "{{node_version}}": "24",
+    "{{corepack_step}}":
+      packageManager.id === "npm"
+        ? ""
+        : "\n      - name: Enable Corepack\n        run: corepack enable\n",
+    "{{install_command}}": resolveInstallCommand(packageManager),
+    "{{check_command}}": `${resolveCiRunner(packageManager)} check`,
+  };
+
+  let rendered = template;
+  for (const [key, value] of Object.entries(replacements)) {
+    rendered = rendered.replaceAll(key, value);
+  }
+  return rendered;
 }
 
 /**

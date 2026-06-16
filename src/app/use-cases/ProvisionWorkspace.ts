@@ -111,6 +111,9 @@ export class ProvisionWorkspace {
         case "mark-executable":
           await this.applyMarkExecutable(effect.relPath, actions);
           break;
+        case "write-ci-workflow":
+          await this.applyWriteText(effect.relPath, effect.content, "CI baseline", actions);
+          break;
         case "assert-init-safe":
           // Guard de pré-condição: a DECISÃO é pura (domínio); o use case só a
           // invoca. Lança antes de qualquer escrita quando há conflito sem force.

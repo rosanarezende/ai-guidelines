@@ -5,11 +5,13 @@ import { ProvisioningFileSystem } from "../ports/ProvisioningFileSystem.js";
 import {
   guidanceEffects,
   planAgentsRuntimeBootstrap,
+  planCi,
   planGitattributes,
   planHusky,
   planInitGuard,
   planPrettier,
   planTemplateMirror,
+  CiSnapshot,
   HuskySnapshot,
   PointersConfig,
   PrettierSnapshot,
@@ -708,5 +710,140 @@ describe("app/use-cases/ProvisionWorkspace — Husky (temp fs real)", () => {
       path.resolve(dir, ".husky/pre-commit"),
       path.resolve(dir, ".husky/pre-push"),
     ]);
+  });
+});
+
+const CI_TEMPLATE = [
+  "name: {{ci_workflow_name}}",
+  "",
+  "jobs:",
+  "  ai-guidelines-check:",
+  "    steps:",
+  "      - name: Setup Node.js",
+  "        with:",
+  '          node-version: "{{node_version}}"',
+  "{{corepack_step}}",
+  "      - name: Install dependencies",
+  "        run: {{install_command}}",
+  "      - name: Validate AI-first baseline",
+  "        run: {{check_command}}",
+  "",
+].join("\n");
+
+function ciSnapshotFromFs(fs: InMemoryFs): CiSnapshot {
+  return {
+    packageManager: {
+      id: "npm",
+      label: "npm",
+      runner: "npm run",
+      packageManagerField: null,
+    },
+    workflowTemplate: CI_TEMPLATE,
+    workflowContent: fs.files.get(".github/workflows/ai-guidelines-ci.yml") ?? null,
+  };
+}
+
+describe("app/use-cases/ProvisionWorkspace — CI (2b-3c)", () => {
+  it("fake fs: cria workflow ausente", async () => {
+    const fs = new InMemoryFs();
+
+    const result = await new ProvisionWorkspace(fs, false).applyEffects(
+      planCi(ciSnapshotFromFs(fs), { enabled: true, force: false })
+    );
+
+    expect(result.actions).toEqual(["write .github/workflows/ai-guidelines-ci.yml (CI baseline)"]);
+    const workflow = fs.files.get(".github/workflows/ai-guidelines-ci.yml") as string;
+    expect(workflow).toContain("AI Governance Check");
+    expect(workflow).toContain("npm ci");
+    expect(workflow).toContain("npm run check");
+  });
+
+  it("fake fs: preserva workflow existente sem force", async () => {
+    const fs = new InMemoryFs();
+    fs.files.set(".github/workflows/ai-guidelines-ci.yml", "custom\n");
+
+    const result = await new ProvisionWorkspace(fs, false).applyEffects(
+      planCi(ciSnapshotFromFs(fs), { enabled: true, force: false })
+    );
+
+    expect(result.actions).toEqual([
+      "skip .github/workflows/ai-guidelines-ci.yml (desatualizado; use --force ou Wizard para atualizar)",
+    ]);
+    expect(fs.files.get(".github/workflows/ai-guidelines-ci.yml")).toBe("custom\n");
+  });
+
+  it("fake fs: force sobrescreve workflow existente", async () => {
+    const fs = new InMemoryFs();
+    fs.files.set(".github/workflows/ai-guidelines-ci.yml", "custom\n");
+
+    await new ProvisionWorkspace(fs, false).applyEffects(
+      planCi(ciSnapshotFromFs(fs), { enabled: true, force: true })
+    );
+
+    expect(fs.files.get(".github/workflows/ai-guidelines-ci.yml")).toContain("npm run check");
+  });
+
+  it("fake fs: dry-run não escreve workflow", async () => {
+    const fs = new InMemoryFs();
+
+    const result = await new ProvisionWorkspace(fs, true).applyEffects(
+      planCi(ciSnapshotFromFs(fs), { enabled: true, force: false })
+    );
+
+    expect(result.actions).toEqual([
+      "[dry-run] write .github/workflows/ai-guidelines-ci.yml (CI baseline)",
+    ]);
+    expect(fs.files.has(".github/workflows/ai-guidelines-ci.yml")).toBe(false);
+  });
+
+  it("fake fs: segunda aplicação é idempotente", async () => {
+    const fs = new InMemoryFs();
+    const uc = new ProvisionWorkspace(fs, false);
+
+    await uc.applyEffects(planCi(ciSnapshotFromFs(fs), { enabled: true, force: false }));
+    const second = await uc.applyEffects(
+      planCi(ciSnapshotFromFs(fs), { enabled: true, force: false })
+    );
+
+    expect(second.idempotentNoop).toBe(true);
+    expect(second.actions).toEqual([]);
+  });
+});
+
+describe("app/use-cases/ProvisionWorkspace — CI (temp fs real)", () => {
+  let dir: string;
+  beforeEach(async () => {
+    dir = await nodeFs.mkdtemp(path.join(os.tmpdir(), "prov-ci-"));
+  });
+  afterEach(async () => {
+    await nodeFs.rm(dir, { recursive: true, force: true });
+  });
+
+  it("aplica workflow em filesystem real no path canônico", async () => {
+    const fs = new NodeProvisioningFileSystem(dir);
+
+    await new ProvisionWorkspace(fs, false).applyEffects(
+      planCi(
+        {
+          packageManager: {
+            id: "yarn-berry",
+            label: "yarn@4.1.1",
+            runner: "node .yarn/releases/yarn-4.1.1.cjs",
+            packageManagerField: "yarn@4.1.1",
+          },
+          workflowTemplate: CI_TEMPLATE,
+          workflowContent: null,
+        },
+        { enabled: true, force: false }
+      )
+    );
+
+    const workflow = await nodeFs.readFile(
+      path.join(dir, ".github", "workflows", "ai-guidelines-ci.yml"),
+      "utf8"
+    );
+    expect(workflow).toContain("corepack enable");
+    expect(workflow).toContain("yarn install --immutable");
+    expect(workflow).toContain("yarn check");
   });
 });

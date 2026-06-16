@@ -8,6 +8,7 @@ import type {
 } from "../../app/ports/ProvisioningSnapshotSource.js";
 import { buildAgentsRuntimeStub } from "../../app/services/AgentsRuntimeBootstrap.js";
 import type {
+  CiSnapshot,
   HuskySnapshot,
   HuskyHookSnapshot,
   PrettierSnapshot,
@@ -28,6 +29,7 @@ import {
   normalizeTemplateRelativePath,
 } from "../../domain/provisioning/TemplateMirror.js";
 import { NodeRecipeStore } from "../yaml/NodeRecipeStore.js";
+import type { PackageManagerSnapshot } from "../../domain/provisioning/PackageManager.js";
 
 function isNotFound(error: unknown): boolean {
   return (error as NodeJS.ErrnoException | undefined)?.code === "ENOENT";
@@ -90,6 +92,20 @@ async function readPackageJson(targetDir: string): Promise<PackageJsonObject | n
     return null;
   }
   return JSON.parse(content) as PackageJsonObject;
+}
+
+async function collectPackageManager(
+  targetDir: string,
+  packageJson: PackageJsonObject | null
+): Promise<PackageManagerSnapshot> {
+  return detectPackageManager({
+    explicitValue: undefined,
+    packageJson,
+    hasPnpmLock: await pathExists(path.join(targetDir, "pnpm-lock.yaml")),
+    hasPackageLock: await pathExists(path.join(targetDir, "package-lock.json")),
+    yarnLockContent: await readTextIfExists(path.join(targetDir, "yarn.lock")),
+    hasYarnRc: await pathExists(path.join(targetDir, ".yarnrc.yml")),
+  });
 }
 
 export class NodeTemplateMirrorSnapshotSource {
@@ -213,14 +229,7 @@ export class NodePrettierSnapshotSource {
 export class NodeHuskySnapshotSource {
   async collect(input: ProvisioningSnapshotInput): Promise<HuskySnapshot> {
     const packageJson = await readPackageJson(input.targetDir);
-    const packageManager = detectPackageManager({
-      explicitValue: undefined,
-      packageJson,
-      hasPnpmLock: await pathExists(path.join(input.targetDir, "pnpm-lock.yaml")),
-      hasPackageLock: await pathExists(path.join(input.targetDir, "package-lock.json")),
-      yarnLockContent: await readTextIfExists(path.join(input.targetDir, "yarn.lock")),
-      hasYarnRc: await pathExists(path.join(input.targetDir, ".yarnrc.yml")),
-    });
+    const packageManager = await collectPackageManager(input.targetDir, packageJson);
     const hooks: HuskyHookSnapshot[] = [
       {
         name: "pre-commit",
@@ -236,15 +245,44 @@ export class NodeHuskySnapshotSource {
   }
 }
 
+export class NodeCiSnapshotSource {
+  private readonly workflowTemplatePath: string;
+
+  constructor(repoRoot: string) {
+    this.workflowTemplatePath = path.join(
+      repoRoot,
+      ".core",
+      "templates",
+      ".github",
+      "workflows",
+      "ai-guidelines-ci.yml.tmpl"
+    );
+  }
+
+  async collect(input: ProvisioningSnapshotInput): Promise<CiSnapshot> {
+    const packageJson = await readPackageJson(input.targetDir);
+    const packageManager = await collectPackageManager(input.targetDir, packageJson);
+    return {
+      packageManager,
+      workflowTemplate: await fs.readFile(this.workflowTemplatePath, "utf8"),
+      workflowContent: await readTextIfExists(
+        path.join(input.targetDir, ".github", "workflows", "ai-guidelines-ci.yml")
+      ),
+    };
+  }
+}
+
 export class NodeProvisioningSnapshotSource implements ProvisioningSnapshotSource {
   private readonly templates: NodeTemplateMirrorSnapshotSource;
   private readonly prettier: NodePrettierSnapshotSource;
   private readonly husky: NodeHuskySnapshotSource;
+  private readonly ci: NodeCiSnapshotSource;
 
   constructor(repoRoot: string) {
     this.templates = new NodeTemplateMirrorSnapshotSource(repoRoot);
     this.prettier = new NodePrettierSnapshotSource(repoRoot);
     this.husky = new NodeHuskySnapshotSource();
+    this.ci = new NodeCiSnapshotSource(repoRoot);
   }
 
   async collect(input: ProvisioningSnapshotInput): Promise<ProvisioningSnapshot> {
@@ -254,6 +292,7 @@ export class NodeProvisioningSnapshotSource implements ProvisioningSnapshotSourc
         templates: await this.templates.collect(input),
         prettier: await this.prettier.collect(input),
         husky: await this.husky.collect(input),
+        ci: await this.ci.collect(input),
       };
     } catch (error) {
       if (isNotFound(error)) {

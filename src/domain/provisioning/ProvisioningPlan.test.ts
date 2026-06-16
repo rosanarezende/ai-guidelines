@@ -2,12 +2,15 @@ import {
   configRelPath,
   guidanceEffects,
   planAgentsRuntimeBootstrap,
+  planCi,
   planGitattributes,
   planHusky,
   planInitGuard,
   planPrettier,
   planPointers,
   planTemplateMirror,
+  renderCiWorkflow,
+  CiSnapshot,
   PointersConfig,
   PrettierSnapshot,
   serializeConfig,
@@ -434,5 +437,100 @@ describe("domain/provisioning/ProvisioningPlan — Husky (2b-3b)", () => {
     expect(planHusky(snapshot, { enabled: true, force: false })).toEqual([
       { kind: "guidance", message: "skip husky (package.json ausente)" },
     ]);
+  });
+});
+
+const ciTemplate = [
+  "name: {{ci_workflow_name}}",
+  "",
+  "jobs:",
+  "  ai-guidelines-check:",
+  "    steps:",
+  "      - name: Setup Node.js",
+  "        with:",
+  '          node-version: "{{node_version}}"',
+  "{{corepack_step}}",
+  "      - name: Install dependencies",
+  "        run: {{install_command}}",
+  "      - name: Validate AI-first baseline",
+  "        run: {{check_command}}",
+  "",
+].join("\n");
+
+const ciSnapshot: CiSnapshot = {
+  packageManager: {
+    id: "npm",
+    label: "npm",
+    runner: "npm run",
+    packageManagerField: null,
+  },
+  workflowTemplate: ciTemplate,
+  workflowContent: null,
+};
+
+describe("domain/provisioning/ProvisioningPlan — CI (2b-3c)", () => {
+  it("planCi gera workflow no path canônico quando ausente", () => {
+    const effects = planCi(ciSnapshot, { enabled: true, force: false });
+
+    expect(effects).toEqual([
+      {
+        kind: "write-ci-workflow",
+        relPath: ".github/workflows/ai-guidelines-ci.yml",
+        content: renderCiWorkflow(ciTemplate, ciSnapshot.packageManager),
+      },
+    ]);
+    expect(effects[0]?.kind === "write-ci-workflow" ? effects[0].content : "").toContain("npm ci");
+    expect(effects[0]?.kind === "write-ci-workflow" ? effects[0].content : "").toContain(
+      "npm run check"
+    );
+  });
+
+  it("planCi preserva workflow existente diferente sem force", () => {
+    expect(
+      planCi({ ...ciSnapshot, workflowContent: "custom\n" }, { enabled: true, force: false })
+    ).toEqual([
+      {
+        kind: "guidance",
+        message:
+          "skip .github/workflows/ai-guidelines-ci.yml (desatualizado; use --force ou Wizard para atualizar)",
+      },
+    ]);
+  });
+
+  it("planCi sobrescreve workflow existente quando force está ativo", () => {
+    expect(
+      planCi({ ...ciSnapshot, workflowContent: "custom\n" }, { enabled: true, force: true })
+    ).toEqual([
+      {
+        kind: "write-ci-workflow",
+        relPath: ".github/workflows/ai-guidelines-ci.yml",
+        content: renderCiWorkflow(ciTemplate, ciSnapshot.packageManager),
+      },
+    ]);
+  });
+
+  it("planCi é idempotente quando workflow já está sincronizado", () => {
+    const content = renderCiWorkflow(ciTemplate, ciSnapshot.packageManager);
+    expect(
+      planCi({ ...ciSnapshot, workflowContent: content }, { enabled: true, force: false })
+    ).toEqual([]);
+  });
+
+  it("planCi pula quando feature está desativada", () => {
+    expect(planCi(ciSnapshot, { enabled: false, force: false })).toEqual([
+      { kind: "guidance", message: "skip ci (feature desativada)" },
+    ]);
+  });
+
+  it("renderCiWorkflow mantém paridade dos placeholders legados por package manager", () => {
+    expect(renderCiWorkflow(ciTemplate, ciSnapshot.packageManager)).toContain("run: npm run check");
+    expect(
+      renderCiWorkflow(ciTemplate, {
+        id: "yarn-berry",
+        label: "yarn@4.1.1",
+        runner: "node .yarn/releases/yarn-4.1.1.cjs",
+        packageManagerField: "yarn@4.1.1",
+      })
+    ).toContain("run: yarn check");
   });
 });
