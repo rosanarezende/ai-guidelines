@@ -16,7 +16,7 @@ findings:
       mas a rodada pediu cobertura ponta a ponta desde o nascimento da spec ate
       o merge final; nao ha estado/transicao falsificavel para scaffold da spec,
       abertura do primeiro Draft PR e ancoragem inicial da linha da stack."
-    disposition: open
+    disposition: accepted
     fingerprint: 56be768fbe91
   - id: F2
     severity: medium
@@ -26,5 +26,5 @@ findings:
       trazem protocolo reproduzivel por gap com setup, comando e assercao; isso
       ainda impede derivar diretamente testes/checks reais a partir do
       inventario."
-    disposition: open
+    disposition: accepted
     fingerprint: 69ee7b6cd1a1

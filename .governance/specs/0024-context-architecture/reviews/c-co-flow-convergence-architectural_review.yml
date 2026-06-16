@@ -17,7 +17,7 @@ findings:
       agregados/objetos de valor que separam SSOT, projecao, comando, decisao e
       evento; sem essa fronteira, CO-10.2/CO-10.3 podem recriar uma segunda
       fonte de verdade em forma de tabela."
-    disposition: open
+    disposition: accepted
     fingerprint: df68a778dc5f
   - id: F2
     severity: medium
@@ -26,5 +26,5 @@ findings:
       correcao e dogfood, mas nao declara os artefatos de entrada/saida nem
       criterios de aceitacao por fase; isso reduz a capacidade de impedir que
       correcoes comecem antes de o modelo canonico estar estabilizado."
-    disposition: open
+    disposition: accepted
     fingerprint: 76bea423733b

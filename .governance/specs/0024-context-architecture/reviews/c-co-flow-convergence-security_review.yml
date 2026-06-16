@@ -17,7 +17,7 @@ findings:
       Draft, CI pendente/falho, review stale, receipt stale, PR state stale e
       modo offline/degradado; sem esses bloqueios explicitos, CO-5/CO-6 podem
       automatizar um caminho inseguro."
-    disposition: open
+    disposition: accepted
     fingerprint: 2fe4a7c95a46
   - id: F2
     severity: medium
@@ -27,5 +27,5 @@ findings:
       como drifts observados, mas ainda nao ha matriz de fonte canonica e
       validacao fail-closed por ameaca; a revisao de seguranca precisa
       distinguir divergencia acidental de spoofing antes do fluxo mutante."
-    disposition: open
+    disposition: accepted
     fingerprint: 0c54434dcf00
