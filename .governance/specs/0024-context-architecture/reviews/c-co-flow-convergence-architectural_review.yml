@@ -1,0 +1,30 @@
+checkpoint: "checkpoint-co-flow-convergence"
+role: architectural_review
+executor:
+  platform: codex-cli
+  model: gpt-5
+decision: changes_requested
+findings_emitted: 2
+subject_ref: "origin/feat/spec-0024-co-enforcement..0490dc0"
+review_fingerprint: 476fffab760a
+findings:
+  - id: F1
+    severity: high
+    location: ".governance/specs/0024-context-architecture/research/2026-06-16-chec\
+      kpoint-co-flow-convergence-co-10.1-inventory.md#L80-L143"
+    description: "A maquina de estados inicial enumera superficies e transicoes, mas
+      ainda nao define o bounded context de lifecycle/flow nem os
+      agregados/objetos de valor que separam SSOT, projecao, comando, decisao e
+      evento; sem essa fronteira, CO-10.2/CO-10.3 podem recriar uma segunda
+      fonte de verdade em forma de tabela."
+    disposition: open
+    fingerprint: df68a778dc5f
+  - id: F2
+    severity: medium
+    location: ".governance/specs/0024-context-architecture/tasks.md#L110-L113"
+    description: "O particionamento CO-10.2/CO-10.3/CO-10.4 descreve confronto,
+      correcao e dogfood, mas nao declara os artefatos de entrada/saida nem
+      criterios de aceitacao por fase; isso reduz a capacidade de impedir que
+      correcoes comecem antes de o modelo canonico estar estabilizado."
+    disposition: open
+    fingerprint: 76bea423733b
