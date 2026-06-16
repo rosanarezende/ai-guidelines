@@ -14,9 +14,9 @@ describe("buildRegistry", () => {
     expect(registry.resolve("handoff")?.name).toBe("handoff");
     expect(registry.resolve("init")?.name).toBe("init");
     expect(registry.resolve("adopt")?.name).toBe("adopt");
-    expect(registry.resolve("providers")?.name).toBe("providers");
     expect(registry.resolve("update")?.name).toBe("update");
     expect(registry.resolve("check-budget")?.name).toBe("check-budget");
+    expect(registry.resolve("providers")).toBeUndefined();
   });
 
   it("DADO o verbo 'review' QUANDO resolve ENTÃO cai no ReviewCommand (briefing por lane; numérico delega ao triage)", () => {
@@ -40,11 +40,11 @@ describe("buildRegistry", () => {
         "handoff",
         "init",
         "adopt",
-        "providers",
         "update",
         "check-budget",
       ])
     );
+    expect(names).not.toContain("providers");
     expect(names).toContain("review");
   });
 
@@ -63,7 +63,9 @@ describe("buildRegistry", () => {
     expect(help).toContain("visual-prompt");
     expect(help).toContain("handoff");
     expect(help).toContain("init");
+    expect(help).toContain("update --providers claude,openai");
     expect(help).toContain("check-budget");
+    expect(help).not.toMatch(/^\s+providers\s*$/m);
     expect(help).toContain("Ex.: npm run guidelines --");
   });
 });

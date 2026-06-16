@@ -98,6 +98,17 @@ class ScriptedPrompts implements Prompts {
 const REPO_ROOT = path.resolve(".");
 const ALL_FEATURES = "prettier,husky,ci,quality-gates,tdd,bdd";
 const TEMP_ROOTS: string[] = [];
+const LEGACY_PROCESS_SCRIPT = `
+import { execute } from "./cli/app/engine.mjs";
+const mode = process.argv[1];
+const rawOptions = JSON.parse(process.argv[2] ?? "{}");
+try {
+  await execute(mode, rawOptions);
+} catch (error) {
+  console.error(error instanceof Error ? error.message : String(error));
+  process.exitCode = 1;
+}
+`;
 
 describe("bootstrap delivery parity with legacy runtime", () => {
   beforeAll(async () => {
@@ -528,14 +539,24 @@ async function runLegacy(
   rawOptions: LegacyRawOptions
 ): Promise<CapturedRun> {
   const effectiveOptions = { ...rawOptions, target: rawOptions.target ?? targetDir };
-  return runLegacyProcess([mode, ...rawOptionsToArgv(effectiveOptions)]);
+  return runLegacyProcess(mode, effectiveOptions);
 }
 
-async function runLegacyProcess(argv: readonly string[]): Promise<CapturedRun> {
+async function runLegacyProcess(
+  mode: BootstrapMode,
+  rawOptions: LegacyRawOptions
+): Promise<CapturedRun> {
   return new Promise<CapturedRun>((resolve) => {
     const child = spawn(
       process.execPath,
-      ["--experimental-default-config-file", "cli/ai-guidelines-cli.mjs", ...argv],
+      [
+        "--experimental-default-config-file",
+        "--input-type=module",
+        "--eval",
+        LEGACY_PROCESS_SCRIPT,
+        mode,
+        JSON.stringify(rawOptions),
+      ],
       { cwd: REPO_ROOT, env: { ...process.env, NODE_NO_WARNINGS: "1" }, shell: false }
     );
     const stdout: string[] = [];
@@ -550,23 +571,6 @@ async function runLegacyProcess(argv: readonly string[]): Promise<CapturedRun> {
       resolve({ exitCode: code ?? 1, stdout, stderr, error: null });
     });
   });
-}
-
-function rawOptionsToArgv(options: LegacyRawOptions): string[] {
-  const argv: string[] = [];
-  for (const [key, value] of Object.entries(options)) {
-    if (value === undefined || value === null || value === false) {
-      continue;
-    }
-    const flag = `--${key}`;
-    if (value === true) {
-      argv.push(flag);
-      continue;
-    }
-    const serialized = Array.isArray(value) ? value.join(",") : String(value);
-    argv.push(flag, serialized);
-  }
-  return argv;
 }
 
 async function runModern(

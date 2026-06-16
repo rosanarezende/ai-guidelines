@@ -11,8 +11,8 @@
  * grupos de efeitos (AGENTS.md runtime, mirror de templates, gitattributes,
  * features opt-in, install) entram pelo mesmo `applyEffects` no Passo 2.
  *
- * Aditivo: NÃO está conectado ao caminho ativo (BootstrapCommand segue no
- * runtime legado `/cli` até o flip do Passo 4).
+ * O BootstrapCommand ativo chama este use case via delivery TS; a árvore `/cli`
+ * permanece fisicamente no pacote até a remoção controlada do Passo 5.
  */
 import path from "node:path";
 import {

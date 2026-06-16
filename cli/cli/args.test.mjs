@@ -37,16 +37,14 @@ async function withTTY(value, callback) {
 }
 
 describe("cli/args", () => {
-  it("[BR-CLI-INPUT-07] DADO os verbos de bootstrap QUANDO comparados ao registry ENTÃO SUPPORTED_MODES espelha os verbos registrados (anti-drift)", async () => {
+  it("[BR-CLI-INPUT-07] DADO o flip do BootstrapCommand QUANDO comparado ao parser legado ENTÃO providers fica fora do registry ativo", async () => {
     const { BOOTSTRAP_COMMANDS } = await import(
       new URL("../../dist/cli/registry/commands/BootstrapCommand.js", import.meta.url)
     );
     const registryVerbs = BOOTSTRAP_COMMANDS.map((definition) => definition.name);
-    assert.deepEqual(
-      [...SUPPORTED_MODES].sort(),
-      [...registryVerbs].sort(),
-      "SUPPORTED_MODES (args.mjs) divergiu dos verbos registrados em BOOTSTRAP_COMMANDS (BootstrapCommand.ts)"
-    );
+    assert.ok(SUPPORTED_MODES.includes("providers"), "parser legado ainda conhece providers");
+    assert.ok(!registryVerbs.includes("providers"), "registry ativo não deve registrar providers");
+    assert.deepEqual([...registryVerbs].sort(), ["adopt", "check-budget", "init", "update"]);
   });
 
   it("[BR-CLI-INPUT-03] DADO tokens de wizard QUANDO sanitizeWizardRawOptions ENTÃO remove metadados internos", () => {

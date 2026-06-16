@@ -83,6 +83,13 @@ export class CommandRegistry {
 
     const command = this.resolve(name);
     if (!command) {
+      if (name === "providers") {
+        context.logger.error(
+          'Comando não suportado: "providers". Use: guidelines update --providers <lista>.'
+        );
+        return { exitCode: 1 };
+      }
+
       // Flag no lugar do verbo (ex.: `--target ./x`): a CLI é registry-first, o
       // verbo vem ANTES das opções. Mensagem orientada em vez de "não suportado"
       // genérico — sem reintroduzir wizard implícito a partir de flags soltas.

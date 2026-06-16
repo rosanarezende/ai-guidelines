@@ -108,7 +108,6 @@ export const NON_NAVIGABLE_COMMANDS: readonly string[] = [
   "adopt", // bootstrap/distribuição; fica no help operacional, não na navegação de trabalho
   "check-budget", // diagnóstico técnico de orçamento
   "init", // bootstrap/distribuição
-  "providers", // bootstrap/distribuição
   "update", // bootstrap/distribuição headless
   "workflow", // é o próprio shell humano (entrada), não um destino de Intent
 ];
