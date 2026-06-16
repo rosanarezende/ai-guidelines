@@ -7,9 +7,10 @@
  * determinístico: o único IO do legado (ler conteúdo atual p/ estado do bloco
  * gerenciado e escrever) fica no use case {@link ../../app/use-cases/ProvisionWorkspace}.
  *
- * `node:path` é usado só para compor caminhos (puro). As regras compiladas por
- * adapter (`adapterRulesByName`) entram como **input** — são produzidas pela
- * infraestrutura (compilador de regras) antes do plano, no padrão snapshot-in.
+ * `path.posix` é usado só para compor relPaths de consumidor. As regras
+ * compiladas por adapter (`adapterRulesByName`) entram como **input** — são
+ * produzidas pela infraestrutura (compilador de regras) antes do plano, no
+ * padrão snapshot-in.
  */
 import path from "node:path";
 import { getAdaptersForProvider, getSupportedProviders, Provider } from "./ProviderCatalog.js";
@@ -103,9 +104,11 @@ export function getProviderEntrypoints(
       { relPath: ".claudeignore", content: commonContextIgnores },
     ],
     cursor: [
-      { relPath: path.join(".cursor", "rules", "ai-guidelines.mdc"), content: markdownInner },
+      { relPath: path.posix.join(".cursor", "rules", "ai-guidelines.mdc"), content: markdownInner },
     ],
-    copilot: [{ relPath: path.join(".github", "copilot-instructions.md"), content: markdownInner }],
+    copilot: [
+      { relPath: path.posix.join(".github", "copilot-instructions.md"), content: markdownInner },
+    ],
     windsurf: [{ relPath: ".windsurfrules", content: markdownInner }],
     gemini: [
       { relPath: "GEMINI.md", content: markdownInner },
@@ -116,7 +119,7 @@ export function getProviderEntrypoints(
       { relPath: ".aiderignore", content: commonContextIgnores },
     ],
     openai: [
-      { relPath: path.join(".openai", "instructions.md"), content: markdownInner },
+      { relPath: path.posix.join(".openai", "instructions.md"), content: markdownInner },
       { relPath: ".gptignore", content: commonContextIgnores },
     ],
   };

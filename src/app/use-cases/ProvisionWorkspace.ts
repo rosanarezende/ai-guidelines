@@ -23,11 +23,16 @@ import { applyManagedBlock } from "../../domain/provisioning/ManagedBlock.js";
 import { mergeGitattributesContent } from "../../domain/provisioning/MergePolicies.js";
 import { assertInitSafe } from "../../domain/provisioning/InitGuard.js";
 import {
+  describeTemplateTransition,
+  parseTemplateMetadata,
+} from "../../domain/provisioning/TemplateMetadata.js";
+import {
   PlanPointersOptions,
   PointersConfig,
   ProvisioningEffect,
   planPointers,
 } from "../../domain/provisioning/ProvisioningPlan.js";
+import { mergeAgentsContent } from "../services/AgentsRuntimeBootstrap.js";
 import { ProvisioningFileSystem } from "../ports/ProvisioningFileSystem.js";
 
 export interface ProvisionWorkspaceInput {
@@ -66,6 +71,18 @@ export class ProvisionWorkspace {
         case "write-config":
           await this.applyWriteConfig(effect.relPath, effect.content, actions);
           break;
+        case "agents-runtime-bootstrap":
+          await this.applyAgentsRuntimeBootstrap(effect.relPath, effect.runtimeStub, actions);
+          break;
+        case "sync-templates":
+          actions.push(effect.message);
+          break;
+        case "mirror-template":
+          await this.applyMirrorTemplate(effect, actions);
+          break;
+        case "prune-template":
+          await this.applyPrune(effect.relPath, actions);
+          break;
         case "managed-entrypoint":
           await this.applyManagedEntrypoint(effect, actions);
           break;
@@ -102,6 +119,49 @@ export class ProvisionWorkspace {
     if (!this.dryRun) {
       await this.fs.ensureDir(path.dirname(relPath));
       await this.fs.writeText(relPath, content);
+    }
+  }
+
+  private async applyAgentsRuntimeBootstrap(
+    relPath: "AGENTS.md",
+    runtimeStub: string,
+    actions: string[]
+  ): Promise<void> {
+    const current = await this.fs.readText(relPath);
+    const next = mergeAgentsContent(current ?? "", runtimeStub);
+    if (next === current) {
+      return;
+    }
+
+    actions.push(
+      `${this.dryRun ? "[dry-run] " : ""}write ${relPath} (ai-guidelines runtime updated)`
+    );
+    if (!this.dryRun) {
+      await this.fs.ensureDir(path.dirname(relPath));
+      await this.fs.writeText(relPath, next);
+    }
+  }
+
+  private async applyMirrorTemplate(
+    effect: Extract<ProvisioningEffect, { kind: "mirror-template" }>,
+    actions: string[]
+  ): Promise<void> {
+    const current = await this.fs.readText(effect.relPath);
+    if (current === effect.content) {
+      return;
+    }
+
+    const transition = describeTemplateTransition(
+      parseTemplateMetadata(effect.content),
+      parseTemplateMetadata(current)
+    );
+    const originTag = effect.origin === "engine" ? " [engine]" : "";
+    const suffix = transition ? ` (${transition})` : "";
+    actions.push(`${this.dryRun ? "[dry-run] " : ""}write ${effect.relPath}${originTag}${suffix}`);
+
+    if (!this.dryRun) {
+      await this.fs.ensureDir(path.dirname(effect.relPath));
+      await this.fs.writeText(effect.relPath, effect.content);
     }
   }
 

@@ -1,11 +1,14 @@
 import {
   configRelPath,
   guidanceEffects,
+  planAgentsRuntimeBootstrap,
   planGitattributes,
   planInitGuard,
   planPointers,
+  planTemplateMirror,
   PointersConfig,
   serializeConfig,
+  templateTargetRelPath,
 } from "./ProvisioningPlan.js";
 
 const baseConfig: PointersConfig = {
@@ -121,5 +124,62 @@ describe("domain/provisioning/ProvisioningPlan — efeitos estruturais (2b-1)", 
       { kind: "guidance", message: "a" },
       { kind: "guidance", message: "b" },
     ]);
+  });
+});
+
+describe("domain/provisioning/ProvisioningPlan — AGENTS/runtime + template mirror (2b-2)", () => {
+  it("planAgentsRuntimeBootstrap declara o efeito explícito de AGENTS.md", () => {
+    expect(planAgentsRuntimeBootstrap("## Runtime Bootstrap")).toEqual({
+      kind: "agents-runtime-bootstrap",
+      relPath: "AGENTS.md",
+      runtimeStub: "## Runtime Bootstrap",
+    });
+  });
+
+  it("planTemplateMirror declara sync, writes mirror/engine e prune a partir do snapshot", () => {
+    const effects = planTemplateMirror(
+      ".ai-guidelines",
+      {
+        sourceExists: true,
+        sourceFiles: [
+          { relativePath: "spec-boilerplate.md", content: "# Spec\n", origin: "mirror" },
+          { relativePath: "tasks-boilerplate.md", content: "# Tasks\n", origin: "engine" },
+        ],
+        targetRelativePaths: ["spec-boilerplate.md", "stale.md"],
+      },
+      { prune: true }
+    );
+
+    expect(effects).toEqual([
+      { kind: "sync-templates", message: "sync templates -> target" },
+      {
+        kind: "mirror-template",
+        relPath: templateTargetRelPath(".ai-guidelines", "spec-boilerplate.md"),
+        sourceRelPath: "spec-boilerplate.md",
+        content: "# Spec\n",
+        origin: "mirror",
+      },
+      {
+        kind: "mirror-template",
+        relPath: templateTargetRelPath(".ai-guidelines", "tasks-boilerplate.md"),
+        sourceRelPath: "tasks-boilerplate.md",
+        content: "# Tasks\n",
+        origin: "engine",
+      },
+      {
+        kind: "prune-template",
+        relPath: templateTargetRelPath(".ai-guidelines", "stale.md"),
+      },
+    ]);
+  });
+
+  it("planTemplateMirror não emite efeitos quando a origem de templates não existe", () => {
+    expect(
+      planTemplateMirror(
+        ".ai-guidelines",
+        { sourceExists: false, sourceFiles: [], targetRelativePaths: ["stale.md"] },
+        { prune: true }
+      )
+    ).toEqual([]);
   });
 });

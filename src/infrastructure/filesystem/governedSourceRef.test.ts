@@ -13,6 +13,19 @@ function write(root: string, rel: string, content = "x"): void {
   fs.writeFileSync(abs, content);
 }
 
+function createSymlinkOrSkip(target: string, linkPath: string): boolean {
+  try {
+    fs.symlinkSync(target, linkPath);
+    return true;
+  } catch (error) {
+    const code = (error as NodeJS.ErrnoException).code;
+    if (code === "EPERM" || code === "EACCES" || code === "ENOTSUP") {
+      return false;
+    }
+    throw error;
+  }
+}
+
 describe("resolveGovernedSourcePath · containment [F2]", () => {
   it("[F2.1] path relativo interno contido e existente", () => {
     const root = tmpRoot();
@@ -57,7 +70,9 @@ describe("resolveGovernedSourcePath · containment [F2]", () => {
   it("[F2.5] symlink interno → interno é aceito", () => {
     const root = tmpRoot();
     write(root, ".core/real.md", "### [GG-0001] x");
-    fs.symlinkSync(path.join(root, ".core/real.md"), path.join(root, ".core/link.md"));
+    if (!createSymlinkOrSkip(path.join(root, ".core/real.md"), path.join(root, ".core/link.md"))) {
+      return;
+    }
     const r = resolveGovernedSourcePath(root, ".core/link.md");
     expect(r.contained).toBe(true);
     expect(r.exists).toBe(true);
@@ -69,7 +84,9 @@ describe("resolveGovernedSourcePath · containment [F2]", () => {
     fs.mkdirSync(path.join(root, ".core"), { recursive: true });
     const outside = path.join(base, "outside.md");
     fs.writeFileSync(outside, "### [GG-0001] x");
-    fs.symlinkSync(outside, path.join(root, ".core/escape.md"));
+    if (!createSymlinkOrSkip(outside, path.join(root, ".core/escape.md"))) {
+      return;
+    }
     const r = resolveGovernedSourcePath(root, ".core/escape.md");
     expect(r.contained).toBe(false);
     expect(r.reason).toMatch(/symlink/);

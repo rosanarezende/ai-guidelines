@@ -25,6 +25,20 @@ export type ProvisioningOperation = "init" | "adopt" | "update";
 export type ProvisioningEffect =
   | { readonly kind: "write-config"; readonly relPath: string; readonly content: string }
   | {
+      readonly kind: "agents-runtime-bootstrap";
+      readonly relPath: "AGENTS.md";
+      readonly runtimeStub: string;
+    }
+  | { readonly kind: "sync-templates"; readonly message: "sync templates -> target" }
+  | {
+      readonly kind: "mirror-template";
+      readonly relPath: string;
+      readonly sourceRelPath: string;
+      readonly content: string;
+      readonly origin: TemplateMirrorOrigin;
+    }
+  | { readonly kind: "prune-template"; readonly relPath: string }
+  | {
       readonly kind: "managed-entrypoint";
       readonly relPath: string;
       readonly inner: string;
@@ -54,9 +68,30 @@ export interface PlanPointersOptions {
   readonly prune: boolean;
 }
 
+export type TemplateMirrorOrigin = "mirror" | "engine";
+
+export interface TemplateMirrorFile {
+  /** Caminho relativo dentro de `.specify/templates`. */
+  readonly relativePath: string;
+  /** Conteúdo final já materializado (mirror ou engine) pela infraestrutura. */
+  readonly content: string;
+  readonly origin: TemplateMirrorOrigin;
+}
+
+export interface TemplateMirrorSnapshot {
+  readonly sourceExists: boolean;
+  readonly sourceFiles: readonly TemplateMirrorFile[];
+  /** Caminhos relativos dentro de `<sdd_dir>/templates`, usados somente para prune. */
+  readonly targetRelativePaths: readonly string[];
+}
+
+export interface PlanTemplateMirrorOptions {
+  readonly prune: boolean;
+}
+
 /** Caminho relativo do `config.json` dentro do consumidor. */
 export function configRelPath(sddDir: string): string {
-  return path.join(sddDir, "config.json");
+  return path.posix.join(sddDir, "config.json");
 }
 
 /** Serialização canônica do `config.json` (espelha `stringifyJson` do legado). */
@@ -112,6 +147,58 @@ export function planPointers(
     for (const relPath of getAllManagedRelativePaths(config.sdd_dir)) {
       if (!selectedPaths.has(relPath)) {
         effects.push({ kind: "prune-managed", relPath });
+      }
+    }
+  }
+
+  return effects;
+}
+
+export function planAgentsRuntimeBootstrap(runtimeStub: string): ProvisioningEffect {
+  return { kind: "agents-runtime-bootstrap", relPath: "AGENTS.md", runtimeStub };
+}
+
+export function templateTargetRelPath(sddDir: string, relativePath: string): string {
+  return path.posix.join(sddDir, "templates", relativePath);
+}
+
+/**
+ * Computa o mirror de templates do consumidor. A infraestrutura fornece o
+ * snapshot materializado (`sourceFiles`) e os arquivos atuais do alvo usados
+ * para prune; o plano apenas declara os efeitos.
+ */
+export function planTemplateMirror(
+  sddDir: string,
+  snapshot: TemplateMirrorSnapshot,
+  options: PlanTemplateMirrorOptions
+): ProvisioningEffect[] {
+  if (!snapshot.sourceExists) {
+    return [];
+  }
+
+  const effects: ProvisioningEffect[] = [
+    { kind: "sync-templates", message: "sync templates -> target" },
+  ];
+  const sourceRelativeSet = new Set<string>();
+
+  for (const source of snapshot.sourceFiles) {
+    sourceRelativeSet.add(source.relativePath);
+    effects.push({
+      kind: "mirror-template",
+      relPath: templateTargetRelPath(sddDir, source.relativePath),
+      sourceRelPath: source.relativePath,
+      content: source.content,
+      origin: source.origin,
+    });
+  }
+
+  if (options.prune) {
+    for (const targetRelativePath of snapshot.targetRelativePaths) {
+      if (!sourceRelativeSet.has(targetRelativePath)) {
+        effects.push({
+          kind: "prune-template",
+          relPath: templateTargetRelPath(sddDir, targetRelativePath),
+        });
       }
     }
   }
