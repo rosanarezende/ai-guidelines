@@ -4,6 +4,7 @@ import {
   planAgentsRuntimeBootstrap,
   planCi,
   planGitattributes,
+  planFinalGuidance,
   planHusky,
   planInitGuard,
   planInstall,
@@ -620,6 +621,61 @@ describe("domain/provisioning/ProvisioningPlan — install (2b-4a)", () => {
         manualCommand: "corepack enable && yarn install",
         blockedReason:
           "Arquivo de release do yarn não encontrado em .yarn/releases/yarn-4.1.1.cjs. Execute: corepack enable && yarn install",
+      },
+    ]);
+  });
+});
+
+describe("domain/provisioning/ProvisioningPlan — final guidance (2b-4b)", () => {
+  it("planFinalGuidance converte guidance consolidada em efeitos explícitos", () => {
+    expect(
+      planFinalGuidance(
+        {
+          formatterContext: {
+            rival: { id: "biome", label: "Biome" },
+            hasPrettier: true,
+            shouldSkipPrettier: false,
+          },
+          monorepoContext: {
+            detected: true,
+            flavor: "pnpm",
+            source: "pnpm-workspace.yaml",
+          },
+          gitattributes: { content: "*.bin binary\n", baseline: "* text=auto eol=lf\n" },
+          platform: "win32",
+          hasGitRepo: true,
+        },
+        { operation: "adopt", force: false, providersRequested: false }
+      )
+    ).toEqual([
+      {
+        kind: "guidance",
+        message:
+          "modo conservador: sem --force, o adopt adiciona ou mescla baseline sem sobrescrever arquivos existentes",
+      },
+      { kind: "guidance", message: "atenção: estrutura de monorepo detectada (pnpm)" },
+      {
+        kind: "guidance",
+        message: "sugestão: aplique a governança em cada pacote individual se necessário",
+      },
+      { kind: "guidance", message: "atenção: formatador rival detectado (Biome)" },
+      {
+        kind: "guidance",
+        message: "sugestão: considere usar apenas um formatador para evitar conflitos de estilo",
+      },
+      {
+        kind: "guidance",
+        message:
+          "formatter rival detectado (Biome); baseline prettier preservado porque já existe no repositório",
+      },
+      {
+        kind: "guidance",
+        message:
+          "atenção EOL: .gitattributes foi atualizado em ambiente Windows; pode surgir stat-dirty sem diff visível",
+      },
+      {
+        kind: "guidance",
+        message: "sugestão EOL: se isso ocorrer, rode git add --renormalize . e depois git status",
       },
     ]);
   });

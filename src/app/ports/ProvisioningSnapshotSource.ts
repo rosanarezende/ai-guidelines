@@ -5,6 +5,7 @@ import type {
   HuskySnapshot,
   TemplateMirrorSnapshot,
 } from "../../domain/provisioning/ProvisioningPlan.js";
+import type { FinalGuidanceSnapshot } from "../../domain/provisioning/Guidance.js";
 
 export interface ProvisioningSnapshotInput {
   readonly targetDir: string;
@@ -23,6 +24,7 @@ export interface ProvisioningSnapshot {
   readonly husky: HuskySnapshot;
   readonly ci: CiSnapshot;
   readonly install: InstallSnapshot;
+  readonly guidance: FinalGuidanceSnapshot;
 }
 
 export interface ProvisioningSnapshotSource {

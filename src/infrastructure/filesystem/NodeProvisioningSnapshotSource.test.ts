@@ -5,6 +5,7 @@ import * as path from "node:path";
 import {
   planCi,
   planAgentsRuntimeBootstrap,
+  planFinalGuidance,
   planTemplateMirror,
 } from "../../domain/provisioning/ProvisioningPlan.js";
 import { normalizeTemplateContent } from "../../domain/provisioning/TemplateMirror.js";
@@ -12,6 +13,7 @@ import { ProvisionWorkspace } from "../../app/use-cases/ProvisionWorkspace.js";
 import { NodeProvisioningFileSystem } from "./NodeProvisioningFileSystem.js";
 import {
   NodeCiSnapshotSource,
+  NodeGuidanceSnapshotSource,
   NodeHuskySnapshotSource,
   NodeInstallSnapshotSource,
   NodeProvisioningSnapshotSource,
@@ -54,6 +56,10 @@ async function writeRequiredTemplates(repoRoot: string): Promise<void> {
 
 async function writePrettierBaseline(repoRoot: string): Promise<void> {
   await write(repoRoot, ".core/templates/.prettierignore.tmpl", "dist/\nnode_modules/\n");
+}
+
+async function writeGitattributesBaseline(repoRoot: string): Promise<void> {
+  await write(repoRoot, ".core/templates/.gitattributes.tmpl", "* text=auto eol=lf\n");
 }
 
 async function writeCiTemplate(repoRoot: string): Promise<void> {
@@ -111,7 +117,12 @@ describe("infrastructure/NodeProvisioningSnapshotSource — template/runtime sna
     roots.push(repoRoot, targetDir);
     await writeRequiredTemplates(repoRoot);
     await writePrettierBaseline(repoRoot);
+    await writeGitattributesBaseline(repoRoot);
     await writeCiTemplate(repoRoot);
+    await write(targetDir, "package.json", '{"workspaces":["packages/*"]}\n');
+    await write(targetDir, "biome.json", "{}\n");
+    await write(targetDir, ".gitattributes", "*.bin binary\n");
+    await fs.mkdir(path.join(targetDir, ".git"), { recursive: true });
     await write(targetDir, ".ai-guidelines/templates/stale.md", "# Stale\n");
 
     const snapshot = await new NodeProvisioningSnapshotSource(repoRoot).collect({
@@ -136,6 +147,16 @@ describe("infrastructure/NodeProvisioningSnapshotSource — template/runtime sna
     expect(snapshot.ci.workflowTemplate).toContain("{{install_command}}");
     expect(snapshot.install.packageManager.id).toBe("npm");
     expect(snapshot.install.yarnBerryReleaseExists).toBe(true);
+    expect(snapshot.guidance.monorepoContext).toMatchObject({
+      detected: true,
+      flavor: "npm-yarn-bun",
+    });
+    expect(snapshot.guidance.formatterContext.rival?.label).toBe("Biome");
+    expect(snapshot.guidance.gitattributes).toEqual({
+      content: "*.bin binary\n",
+      baseline: "* text=auto eol=lf\n",
+    });
+    expect(snapshot.guidance.hasGitRepo).toBe(true);
     expect(await read(targetDir, ".ai-guidelines/templates/stale.md")).toBe("# Stale\n");
   });
 
@@ -276,6 +297,7 @@ describe("infrastructure/NodeProvisioningSnapshotSource — template/runtime sna
     roots.push(repoRoot, targetDir);
     await writeRequiredTemplates(repoRoot);
     await writePrettierBaseline(repoRoot);
+    await writeGitattributesBaseline(repoRoot);
     await writeCiTemplate(repoRoot);
     await write(targetDir, ".ai-guidelines/templates/spec-boilerplate.md", "# Local drift\n");
 
@@ -288,6 +310,11 @@ describe("infrastructure/NodeProvisioningSnapshotSource — template/runtime sna
     );
 
     const effects = [
+      ...planFinalGuidance(snapshot.guidance, {
+        operation: "adopt",
+        force: false,
+        providersRequested: false,
+      }),
       planAgentsRuntimeBootstrap(snapshot.runtime.runtimeStub),
       ...planTemplateMirror(".ai-guidelines", snapshot.templates, { prune: false }),
       ...planCi(snapshot.ci, { enabled: true, force: false }),
@@ -297,6 +324,9 @@ describe("infrastructure/NodeProvisioningSnapshotSource — template/runtime sna
       false
     ).applyEffects(effects);
 
+    expect(result.actions).toContain(
+      "modo conservador: sem --force, o adopt adiciona ou mescla baseline sem sobrescrever arquivos existentes"
+    );
     expect(result.actions).toContain("write AGENTS.md (ai-guidelines runtime updated)");
     expect(result.actions).toContain("write .ai-guidelines/templates/spec-boilerplate.md");
     expect(result.actions).toContain("write .github/workflows/ai-guidelines-ci.yml (CI baseline)");
@@ -304,6 +334,46 @@ describe("infrastructure/NodeProvisioningSnapshotSource — template/runtime sna
     expect(await read(targetDir, ".github/workflows/ai-guidelines-ci.yml")).toContain(
       "npm run check"
     );
+  });
+
+  it("Guidance snapshot real coleta monorepo, formatter, git e gitattributes sem escrever", async () => {
+    const repoRoot = await mkRoot("prov-guidance-repo-");
+    const targetDir = await mkRoot("prov-guidance-target-");
+    roots.push(repoRoot, targetDir);
+    await writeGitattributesBaseline(repoRoot);
+    await write(
+      targetDir,
+      "package.json",
+      JSON.stringify({
+        name: "demo",
+        devDependencies: { prettier: "3.0.0" },
+        scripts: { format: "biome format ." },
+      })
+    );
+    await write(targetDir, "pnpm-workspace.yaml", "packages:\n  - packages/*\n");
+    await write(targetDir, ".gitattributes", "*.bin binary\n");
+    await fs.mkdir(path.join(targetDir, ".git"), { recursive: true });
+
+    const snapshot = await new NodeGuidanceSnapshotSource(repoRoot).collect({
+      targetDir,
+      sddDir: ".ai-guidelines",
+    });
+
+    expect(snapshot.monorepoContext).toEqual({
+      detected: true,
+      flavor: "pnpm",
+      source: "pnpm-workspace.yaml",
+    });
+    expect(snapshot.formatterContext).toMatchObject({
+      rival: { label: "Biome" },
+      hasPrettier: true,
+    });
+    expect(snapshot.gitattributes).toEqual({
+      content: "*.bin binary\n",
+      baseline: "* text=auto eol=lf\n",
+    });
+    expect(snapshot.hasGitRepo).toBe(true);
+    expect(await read(targetDir, ".gitattributes")).toBe("*.bin binary\n");
   });
 
   it("Prettier snapshot real lê package.json, ignore, baseline e formatter rival sem escrever", async () => {

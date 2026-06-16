@@ -37,6 +37,11 @@ import {
   resolveLocalInstallCommand,
   resolveYarnBerryReleasePath,
 } from "./PackageManager.js";
+import {
+  buildFinalProvisioningGuidance,
+  FinalGuidanceOptions,
+  FinalGuidanceSnapshot,
+} from "./Guidance.js";
 
 export type ProvisioningOperation = "init" | "adopt" | "update";
 
@@ -186,6 +191,8 @@ export interface PlanInstallOptions {
   readonly enabled: boolean;
   readonly dependencyNames: readonly string[];
 }
+
+export type { FinalGuidanceOptions, FinalGuidanceSnapshot } from "./Guidance.js";
 
 /** Caminho relativo do `config.json` dentro do consumidor. */
 export function configRelPath(sddDir: string): string {
@@ -499,6 +506,13 @@ export function planInstall(
       blockedReason,
     },
   ];
+}
+
+export function planFinalGuidance(
+  snapshot: FinalGuidanceSnapshot,
+  options: FinalGuidanceOptions
+): ProvisioningEffect[] {
+  return guidanceEffects(buildFinalProvisioningGuidance(snapshot, options));
 }
 
 /**

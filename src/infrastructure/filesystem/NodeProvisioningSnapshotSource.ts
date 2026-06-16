@@ -22,6 +22,8 @@ import {
 } from "../../domain/provisioning/FormatterContext.js";
 import type { PackageJsonObject } from "../../domain/provisioning/PackageJson.js";
 import { detectPackageManager } from "../../domain/provisioning/PackageManager.js";
+import type { FinalGuidanceSnapshot } from "../../domain/provisioning/Guidance.js";
+import { detectMonorepoContext } from "../../domain/provisioning/MonorepoContext.js";
 import {
   assertRequiredTemplatesPresent,
   DEFAULT_REQUIRED_TEMPLATE_RELATIVE_PATHS,
@@ -287,12 +289,54 @@ export class NodeInstallSnapshotSource {
   }
 }
 
+export class NodeGuidanceSnapshotSource {
+  private readonly gitattributesBaselinePath: string;
+
+  constructor(repoRoot: string) {
+    this.gitattributesBaselinePath = path.join(
+      repoRoot,
+      ".core",
+      "templates",
+      ".gitattributes.tmpl"
+    );
+  }
+
+  async collect(input: ProvisioningSnapshotInput): Promise<FinalGuidanceSnapshot> {
+    const packageJson = await readPackageJson(input.targetDir);
+    const existingFormatterFiles = (
+      await Promise.all(
+        FORMATTER_CONTEXT_FILES.map(async (relPath) =>
+          (await pathExists(path.join(input.targetDir, relPath))) ? relPath : null
+        )
+      )
+    ).filter((relPath): relPath is string => relPath !== null);
+
+    return {
+      formatterContext: detectFormatterContext({
+        existingFiles: existingFormatterFiles,
+        packageJson,
+      }),
+      monorepoContext: detectMonorepoContext({
+        packageJson,
+        hasPnpmWorkspace: await pathExists(path.join(input.targetDir, "pnpm-workspace.yaml")),
+      }),
+      gitattributes: {
+        content: await readTextIfExists(path.join(input.targetDir, ".gitattributes")),
+        baseline: await fs.readFile(this.gitattributesBaselinePath, "utf8"),
+      },
+      platform: process.platform,
+      hasGitRepo: await pathExists(path.join(input.targetDir, ".git")),
+    };
+  }
+}
+
 export class NodeProvisioningSnapshotSource implements ProvisioningSnapshotSource {
   private readonly templates: NodeTemplateMirrorSnapshotSource;
   private readonly prettier: NodePrettierSnapshotSource;
   private readonly husky: NodeHuskySnapshotSource;
   private readonly ci: NodeCiSnapshotSource;
   private readonly install: NodeInstallSnapshotSource;
+  private readonly guidance: NodeGuidanceSnapshotSource;
 
   constructor(repoRoot: string) {
     this.templates = new NodeTemplateMirrorSnapshotSource(repoRoot);
@@ -300,6 +344,7 @@ export class NodeProvisioningSnapshotSource implements ProvisioningSnapshotSourc
     this.husky = new NodeHuskySnapshotSource();
     this.ci = new NodeCiSnapshotSource(repoRoot);
     this.install = new NodeInstallSnapshotSource();
+    this.guidance = new NodeGuidanceSnapshotSource(repoRoot);
   }
 
   async collect(input: ProvisioningSnapshotInput): Promise<ProvisioningSnapshot> {
@@ -311,6 +356,7 @@ export class NodeProvisioningSnapshotSource implements ProvisioningSnapshotSourc
         husky: await this.husky.collect(input),
         ci: await this.ci.collect(input),
         install: await this.install.collect(input),
+        guidance: await this.guidance.collect(input),
       };
     } catch (error) {
       if (isNotFound(error)) {
