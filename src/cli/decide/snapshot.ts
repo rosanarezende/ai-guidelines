@@ -200,17 +200,17 @@ function defaultExternalChecks(repoRoot: string): {
   prReady: ExternalCheckResult | null;
   gateDecidability: ExternalCheckResult | null;
 } {
-  const run = (rel: string): ExternalCheckResult => {
+  const run = (...args: readonly string[]): ExternalCheckResult => {
     try {
-      execFileSync("node", [rel], { cwd: repoRoot, stdio: ["ignore", "ignore", "ignore"] });
+      execFileSync("node", [...args], { cwd: repoRoot, stdio: ["ignore", "ignore", "ignore"] });
       return { ok: true, summary: "verde" };
     } catch (e) {
       return { ok: false, summary: e instanceof Error ? e.message.split("\n")[0] : String(e) };
     }
   };
   return {
-    prReady: run("cli/pr-ready-check.mjs"),
-    gateDecidability: run("cli/governance/gate-decidability-check.mjs"),
+    prReady: run("dist/cli/bin.js", "pr-ready-check"),
+    gateDecidability: run("dist/cli/bin.js", "gate-decidability-check"),
   };
 }
 

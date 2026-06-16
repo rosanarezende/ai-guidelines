@@ -16,7 +16,7 @@ async function runCli(args: readonly string[]): Promise<CliResult> {
   try {
     const { stdout, stderr } = await execFileAsync(
       process.execPath,
-      ["cli/ai-guidelines-cli.mjs", ...args],
+      ["dist/cli/main.js", ...args],
       {
         cwd: process.cwd(),
         env: { ...process.env, NODE_NO_WARNINGS: "1" },
@@ -47,7 +47,7 @@ async function withTempDir<T>(prefix: string, fn: (dir: string) => Promise<T>): 
   }
 }
 
-describe("BootstrapCommand flip — caminho ativo via wrapper fisico", () => {
+describe("BootstrapCommand flip — caminho ativo via dist", () => {
   it("help ativo não lista providers e documenta update --providers", async () => {
     const result = await runCli(["--help"]);
 

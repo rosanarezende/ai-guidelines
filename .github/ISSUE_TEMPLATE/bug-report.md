@@ -16,7 +16,7 @@ assignees: ""
 
 ```bash
 # exemplo: o que você rodou
-node cli/ai-guidelines-cli.mjs adopt --target ../meu-repo --dry-run
+npx ai-guidelines adopt --target ../meu-repo --dry-run
 ```
 
 ## Contexto

@@ -1,11 +1,9 @@
 // [BR-WORKFLOW-DISPATCH] Integration test — dispatcher do entrypoint
-// `cli/ai-guidelines-cli.mjs` para o runtime compilado em `dist/cli/workflow.js`.
+// publicado em `dist/cli/main.js`.
 //
 // Exercita o cabling completo:
-//   parseArgs (cli/cli/args.mjs)
-//     → main (cli/app/engine.mjs)
-//     → dispatchWorkflow
-//     → import("../../dist/cli/workflow.js")
+//   CommandRegistry
+//     → WorkflowCommand
 //     → runContinue (src/cli/workflow.ts compilado)
 //
 // O bloco principal `cli.integration.test.mjs` cobre init/adopt; este
@@ -24,7 +22,7 @@ const execFileAsync = promisify(execFile);
 // fileURLToPath (não `.pathname`) para path de filesystem robusto cross-OS:
 // `.pathname` quebra em Windows (`/C:/...`) e com caracteres escapados (`%20`).
 const REPO_ROOT = fileURLToPath(new URL("../..", import.meta.url));
-const CLI_BIN = path.join(REPO_ROOT, "cli", "ai-guidelines-cli.mjs");
+const CLI_BIN = path.join(REPO_ROOT, "dist", "cli", "main.js");
 
 /**
  * Executa a CLI real em subprocess, capturando stdout/stderr/exitCode.

@@ -101,7 +101,7 @@ export function main(argv = process.argv.slice(2), repoRoot = process.cwd()): nu
     return 1;
   }
 
-  process.stderr.write("Uso: node cli/runtime-bootstrap.mjs <sync|check>\n");
+  process.stderr.write("Uso: node dist/cli/bin.js runtime-bootstrap <sync|check>\n");
   return 2;
 }
 

@@ -31,7 +31,7 @@ assignees: ""
 
 ```bash
 # exemplo de uso esperado
-node cli/ai-guidelines-cli.mjs adopt --with-<feature>
+npx ai-guidelines adopt --with-<feature>
 ```
 
 ## Impacto em consumidores existentes

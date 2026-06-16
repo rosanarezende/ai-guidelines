@@ -1,60 +1,103 @@
-#!/usr/bin/env node
 import fs from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 import YAML from "yaml";
 
-const MODULE_DIR = path.dirname(fileURLToPath(import.meta.url));
-const REPO_ROOT = path.resolve(MODULE_DIR, "..", "..");
 const CONTRACT_PATH = ".core/governance/script-contracts.yml";
 
-function repoPath(repoRoot, relativePath) {
+interface PackageScript {
+  readonly name: string;
+  readonly command: string;
+  readonly category: string;
+  readonly mutates: boolean;
+  readonly consumers?: readonly string[];
+  readonly description: string;
+}
+
+interface HookStep {
+  readonly run?: string;
+  readonly git_add?: readonly string[];
+}
+
+interface WorkflowContract {
+  readonly file: string;
+  readonly required_runs?: readonly string[];
+}
+
+interface MaintainerContract {
+  readonly package_scripts: readonly PackageScript[];
+  readonly hooks: Record<string, { readonly steps: readonly HookStep[] }>;
+  readonly workflows?: readonly WorkflowContract[];
+  readonly docs: {
+    readonly generated_file: string;
+    readonly rule_sources: readonly string[];
+    readonly forbidden_phrases: readonly string[];
+  };
+  readonly hook_bootstrap?: { readonly node_path?: string };
+}
+
+interface ConsumerContract {
+  readonly package_scripts: readonly { readonly name: string; readonly command: string }[];
+  readonly dev_dependencies: Record<string, string>;
+  readonly hooks: Record<string, string>;
+}
+
+interface ScriptContracts {
+  readonly schema_version: 1;
+  readonly profiles: {
+    readonly maintainer: MaintainerContract;
+    readonly consumer: ConsumerContract;
+  };
+}
+
+function repoPath(repoRoot: string, relativePath: string): string {
   return path.join(repoRoot, relativePath);
 }
 
-function readText(repoRoot, relativePath) {
+function readText(repoRoot: string, relativePath: string): string {
   return fs.readFileSync(repoPath(repoRoot, relativePath), "utf8");
 }
 
-function writeText(repoRoot, relativePath, content, mode) {
+function writeText(repoRoot: string, relativePath: string, content: string, mode?: number): void {
   const target = repoPath(repoRoot, relativePath);
   fs.mkdirSync(path.dirname(target), { recursive: true });
   fs.writeFileSync(target, content);
   if (mode) fs.chmodSync(target, mode);
 }
 
-function parseContract(repoRoot = REPO_ROOT) {
-  const contract = YAML.parse(readText(repoRoot, CONTRACT_PATH));
+export function parseContract(repoRoot: string): ScriptContracts {
+  const contract = YAML.parse(readText(repoRoot, CONTRACT_PATH)) as ScriptContracts;
   if (contract?.schema_version !== 1) {
     throw new Error("script-contracts.yml deve declarar schema_version: 1");
   }
   return contract;
 }
 
-function maintainerScripts(contract) {
+function maintainerScripts(contract: ScriptContracts): readonly PackageScript[] {
   return contract.profiles.maintainer.package_scripts;
 }
 
-function scriptNames(contract) {
+function scriptNames(contract: ScriptContracts): Set<string> {
   return new Set(maintainerScripts(contract).map((script) => script.name));
 }
 
-function sortedJson(value) {
-  return JSON.stringify(value, null, 2) + "\n";
+function sortedJson(value: unknown): string {
+  return `${JSON.stringify(value, null, 2)}\n`;
 }
 
-function generatePackageJson(repoRoot, contract) {
-  const current = JSON.parse(readText(repoRoot, "package.json"));
-  const scripts = {};
+function generatePackageJson(repoRoot: string, contract: ScriptContracts): string {
+  const current = JSON.parse(readText(repoRoot, "package.json")) as Record<string, unknown>;
+  const scripts: Record<string, string> = {};
   for (const script of maintainerScripts(contract)) {
     scripts[script.name] = script.command;
   }
   return sortedJson({ ...current, scripts });
 }
 
-function renderHook(contract, hookName) {
+function renderHook(contract: ScriptContracts, hookName: string): string {
   const hook = contract.profiles.maintainer.hooks[hookName];
-  const lines = [];
+  if (!hook) throw new Error(`Hook não declarado: ${hookName}`);
+
+  const lines: string[] = [];
   if (contract.profiles.maintainer.hook_bootstrap?.node_path === "nvm") {
     lines.push(
       "#!/bin/sh",
@@ -79,6 +122,7 @@ function renderHook(contract, hookName) {
       ""
     );
   }
+
   for (const step of hook.steps) {
     if (step.run) {
       lines.push(`npm run ${step.run}`);
@@ -88,12 +132,12 @@ function renderHook(contract, hookName) {
       throw new Error(`Passo invalido em hook ${hookName}`);
     }
   }
-  return lines.join("\n") + "\n";
+  return `${lines.join("\n")}\n`;
 }
 
-function consumerPackageFragment(contract) {
+function consumerPackageFragment(contract: ScriptContracts): string {
   const consumer = contract.profiles.consumer;
-  const scripts = {};
+  const scripts: Record<string, string> = {};
   for (const script of consumer.package_scripts) {
     scripts[script.name] = script.command;
   }
@@ -103,7 +147,7 @@ function consumerPackageFragment(contract) {
   });
 }
 
-function consumerWorkflowTemplate() {
+function consumerWorkflowTemplate(): string {
   return `name: {{ci_workflow_name}}
 
 on:
@@ -134,8 +178,8 @@ jobs:
 `;
 }
 
-function categoryLabel(category) {
-  const labels = {
+function categoryLabel(category: string): string {
+  const labels: Record<string, string> = {
     setup: "Setup inicial / build",
     build: "Setup inicial / build",
     format: "Format",
@@ -149,15 +193,11 @@ function categoryLabel(category) {
   return labels[category] ?? category;
 }
 
-function mutatesLabel(mutates) {
-  return mutates ? "sim" : "nao";
-}
-
-function consumersLabel(consumers = []) {
-  return consumers.map((consumer) => `\`${consumer}\``).join(", ");
-}
-
-function markdownTable(headers, rows, alignments = []) {
+function markdownTable(
+  headers: readonly string[],
+  rows: readonly (readonly string[])[],
+  alignments: readonly string[] = []
+): string {
   const widths = headers.map((header, index) =>
     Math.max(
       header.length,
@@ -165,33 +205,32 @@ function markdownTable(headers, rows, alignments = []) {
       alignments[index] === "center" ? 3 : 2
     )
   );
-  const pad = (value, index) => {
-    const text = String(value);
+  const pad = (value: string, index: number): string => {
     if (alignments[index] === "center") {
-      const total = widths[index] - text.length;
+      const total = widths[index] - value.length;
       const left = Math.floor(total / 2);
       const right = total - left;
-      return `${" ".repeat(left)}${text}${" ".repeat(right)}`;
+      return `${" ".repeat(left)}${value}${" ".repeat(right)}`;
     }
-    return text.padEnd(widths[index], " ");
+    return value.padEnd(widths[index]);
   };
-  const separator = widths.map((width, index) => {
-    if (alignments[index] === "center") {
-      return `:${"-".repeat(Math.max(width - 2, 1))}:`;
-    }
-    return `:${"-".repeat(Math.max(width - 1, 1))}`;
-  });
-  const renderRow = (row) => `| ${row.map((cell, index) => pad(cell, index)).join(" | ")} |`;
+  const separator = widths.map((width, index) =>
+    alignments[index] === "center"
+      ? `:${"-".repeat(Math.max(width - 2, 1))}:`
+      : `:${"-".repeat(Math.max(width - 1, 1))}`
+  );
+  const renderRow = (row: readonly string[]) =>
+    `| ${row.map((cell, index) => pad(String(cell), index)).join(" | ")} |`;
   return [renderRow(headers), renderRow(separator), ...rows.map(renderRow)].join("\n");
 }
 
-function scriptTable(contract) {
+function scriptTable(contract: ScriptContracts): string {
   const rows = maintainerScripts(contract).map((script) => [
     `\`${script.name}\``,
     `\`${script.command}\``,
     categoryLabel(script.category),
-    mutatesLabel(script.mutates),
-    consumersLabel(script.consumers),
+    script.mutates ? "sim" : "nao",
+    (script.consumers ?? []).map((consumer) => `\`${consumer}\``).join(", "),
     script.description,
   ]);
   return markdownTable(
@@ -201,13 +240,11 @@ function scriptTable(contract) {
   );
 }
 
-function categoryTable(contract) {
-  const groups = new Map();
+function categoryTable(contract: ScriptContracts): string {
+  const groups = new Map<string, string[]>();
   for (const script of maintainerScripts(contract)) {
     const label = categoryLabel(script.category);
-    const current = groups.get(label) ?? [];
-    current.push(`\`${script.name}\``);
-    groups.set(label, current);
+    groups.set(label, [...(groups.get(label) ?? []), `\`${script.name}\``]);
   }
   return markdownTable(
     ["Intencao", "Scripts"],
@@ -215,21 +252,21 @@ function categoryTable(contract) {
   );
 }
 
-function hookBlock(contract, hookName) {
+function hookBlock(contract: ScriptContracts, hookName: string): string {
   return `### \`${hookName}\`\n\n\`\`\`bash\n${renderHook(contract, hookName)}\`\`\``;
 }
 
-function workflowTable(contract) {
+function workflowTable(contract: ScriptContracts): string {
   return markdownTable(
     ["Workflow", "Runs contratados"],
-    contract.profiles.maintainer.workflows.map((workflow) => [
+    (contract.profiles.maintainer.workflows ?? []).map((workflow) => [
       `\`${workflow.file}\``,
-      workflow.required_runs.map((run) => `\`${run}\``).join("<br>"),
+      (workflow.required_runs ?? []).map((run) => `\`${run}\``).join("<br>"),
     ])
   );
 }
 
-function docsScripts(contract) {
+function docsScripts(contract: ScriptContracts): string {
   return `# Scripts canonicos do \`ai-guidelines\`
 
 > Arquivo gerado por \`.core/governance/script-contracts.yml\`.
@@ -291,22 +328,25 @@ O baseline de consumidor tambem e projetado daqui:
 `;
 }
 
-export function generateProjections(repoRoot = REPO_ROOT, contract = parseContract(repoRoot)) {
+export function generateProjections(
+  repoRoot: string,
+  contract: ScriptContracts = parseContract(repoRoot)
+): Map<string, string> {
   const consumer = contract.profiles.consumer;
   return new Map([
     ["package.json", generatePackageJson(repoRoot, contract)],
     [".husky/pre-commit", renderHook(contract, "pre-commit")],
     [".husky/pre-push", renderHook(contract, "pre-push")],
     [".core/templates/package.json.fragment.json", consumerPackageFragment(contract)],
-    [".core/templates/.husky/pre-commit.tmpl", consumer.hooks["pre-commit"] + "\n"],
-    [".core/templates/.husky/pre-push.tmpl", consumer.hooks["pre-push"] + "\n"],
+    [".core/templates/.husky/pre-commit.tmpl", `${consumer.hooks["pre-commit"]}\n`],
+    [".core/templates/.husky/pre-push.tmpl", `${consumer.hooks["pre-push"]}\n`],
     [".core/templates/.github/workflows/ai-guidelines-ci.yml.tmpl", consumerWorkflowTemplate()],
     [contract.profiles.maintainer.docs.generated_file, docsScripts(contract)],
   ]);
 }
 
-export function validateContract(contract) {
-  const violations = [];
+export function validateContract(contract: ScriptContracts): readonly string[] {
+  const violations: string[] = [];
   const names = scriptNames(contract);
   const bootstrap = contract.profiles.maintainer.hook_bootstrap;
 
@@ -323,12 +363,11 @@ export function validateContract(contract) {
   }
 
   for (const script of maintainerScripts(contract)) {
-    // `npm run <script>` referencia outro script do contrato; `npm ci`/`npm
-    // install` etc. são builtins do npm e não passam por aqui.
     const matches = script.command.matchAll(/\bnpm run\s+([a-zA-Z0-9:_-]+)/g);
     for (const match of matches) {
-      if (!names.has(match[1])) {
-        violations.push(`script ${script.name} referencia script inexistente: ${match[1]}`);
+      const referenced = match[1];
+      if (referenced && !names.has(referenced)) {
+        violations.push(`script ${script.name} referencia script inexistente: ${referenced}`);
       }
     }
   }
@@ -336,8 +375,8 @@ export function validateContract(contract) {
   return violations;
 }
 
-function validateForbiddenPhrases(repoRoot, contract) {
-  const violations = [];
+function validateForbiddenPhrases(repoRoot: string, contract: ScriptContracts): readonly string[] {
+  const violations: string[] = [];
   const { rule_sources: ruleSources, forbidden_phrases: forbiddenPhrases } =
     contract.profiles.maintainer.docs;
   for (const source of ruleSources) {
@@ -351,12 +390,11 @@ function validateForbiddenPhrases(repoRoot, contract) {
   return violations;
 }
 
-function countIndent(line) {
-  const match = line.match(/^\s*/);
-  return match ? match[0].length : 0;
+function countIndent(line: string): number {
+  return line.match(/^\s*/)?.[0].length ?? 0;
 }
 
-function unquoteYamlScalar(value) {
+function unquoteYamlScalar(value: string): string {
   const text = value.trim();
   if (
     (text.startsWith('"') && text.endsWith('"')) ||
@@ -367,7 +405,7 @@ function unquoteYamlScalar(value) {
   return text;
 }
 
-function runLineMatchesRequiredRun(line, requiredRun) {
+function runLineMatchesRequiredRun(line: string, requiredRun: string): boolean {
   const text = unquoteYamlScalar(line);
   if (!text || text.startsWith("#")) return false;
   return (
@@ -378,20 +416,20 @@ function runLineMatchesRequiredRun(line, requiredRun) {
   );
 }
 
-function workflowDeclaresRun(content, requiredRun) {
+function workflowDeclaresRun(content: string, requiredRun: string): boolean {
   const lines = content.split(/\r?\n/);
   for (let index = 0; index < lines.length; index += 1) {
-    const line = lines[index];
+    const line = lines[index] ?? "";
     const match = line.match(/^(\s*)(?:-\s*)?run:\s*(.*)$/);
     if (!match) continue;
 
-    const indent = match[1].length;
-    const runValue = match[2].trim();
+    const indent = match[1]?.length ?? 0;
+    const runValue = match[2]?.trim() ?? "";
     if (!runValue) continue;
 
     if (/^[|>]/.test(runValue)) {
       for (let blockIndex = index + 1; blockIndex < lines.length; blockIndex += 1) {
-        const blockLine = lines[blockIndex];
+        const blockLine = lines[blockIndex] ?? "";
         if (blockLine.trim() && countIndent(blockLine) <= indent) break;
         if (runLineMatchesRequiredRun(blockLine.trim(), requiredRun)) return true;
       }
@@ -404,8 +442,8 @@ function workflowDeclaresRun(content, requiredRun) {
   return false;
 }
 
-function validateWorkflowRuns(repoRoot, contract) {
-  const violations = [];
+function validateWorkflowRuns(repoRoot: string, contract: ScriptContracts): readonly string[] {
+  const violations: string[] = [];
   const workflows = contract.profiles.maintainer.workflows ?? [];
 
   for (const workflow of workflows) {
@@ -427,7 +465,7 @@ function validateWorkflowRuns(repoRoot, contract) {
   return violations;
 }
 
-export function check(repoRoot = REPO_ROOT) {
+export function check(repoRoot: string): readonly string[] {
   const contract = parseContract(repoRoot);
   const violations = [
     ...validateContract(contract),
@@ -447,7 +485,7 @@ export function check(repoRoot = REPO_ROOT) {
   return violations;
 }
 
-export function sync(repoRoot = REPO_ROOT) {
+export function sync(repoRoot: string): readonly string[] {
   const contract = parseContract(repoRoot);
   const projections = generateProjections(repoRoot, contract);
   for (const [relativePath, content] of projections) {
@@ -457,7 +495,10 @@ export function sync(repoRoot = REPO_ROOT) {
   return [...projections.keys()];
 }
 
-export async function main(argv = [], repoRoot = REPO_ROOT) {
+export async function main(
+  argv: readonly string[] = [],
+  repoRoot = process.cwd()
+): Promise<number> {
   const command = argv[0] ?? "check";
   if (command === "sync") {
     const written = sync(repoRoot);
@@ -481,18 +522,6 @@ export async function main(argv = [], repoRoot = REPO_ROOT) {
     );
     return 0;
   }
-  process.stderr.write("Uso: node cli/script-contracts.mjs [check|sync]\n");
+  process.stderr.write("Uso: node dist/cli/bin.js script-contracts [check|sync]\n");
   return 2;
-}
-
-const isCli = (() => {
-  try {
-    return process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
-  } catch {
-    return false;
-  }
-})();
-
-if (isCli) {
-  process.exit(await main(process.argv.slice(2)));
 }
