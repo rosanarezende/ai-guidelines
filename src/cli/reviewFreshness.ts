@@ -63,14 +63,25 @@ export interface FunctionalFreshness {
   readonly functionalDirtyFiles: string[];
 }
 
+export function isReviewPublicationPath(filePath: string, reviewsDirRel: string): boolean {
+  const normalizedReviewsDir = reviewsDirRel.replace(/\\/g, "/").replace(/\/+$/, "") + "/";
+  return filePath.replace(/\\/g, "/").startsWith(normalizedReviewsDir);
+}
+
+export function isReviewPublicationOnlyDelta(
+  changedFiles: readonly string[],
+  reviewsDirRel: string
+): boolean {
+  return (
+    changedFiles.length > 0 &&
+    changedFiles.every((filePath) => isReviewPublicationPath(filePath, reviewsDirRel))
+  );
+}
+
 export function collectFunctionalFreshness(
   repoRoot: string,
   reviewsDirRel: string
 ): FunctionalFreshness {
-  const normalizedReviewsDir = reviewsDirRel.replace(/\\/g, "/").replace(/\/+$/, "") + "/";
-  const isReviewPath = (p: string): boolean =>
-    p.replace(/\\/g, "/").startsWith(normalizedReviewsDir);
-
   const effectiveFunctionalHead = gitOrNull(repoRoot, [
     "log",
     "-n",
@@ -78,7 +89,7 @@ export function collectFunctionalFreshness(
     "--format=%h",
     "--",
     ".",
-    `:(exclude)${normalizedReviewsDir}`,
+    `:(exclude)${reviewsDirRel.replace(/\\/g, "/").replace(/\/+$/, "")}/`,
   ]);
 
   const porcelain = gitPorcelain(repoRoot);
@@ -97,10 +108,12 @@ export function collectFunctionalFreshness(
     };
   }
   const paths = porcelainPaths(porcelain);
-  const functionalDirtyFiles = paths.filter((p) => !isReviewPath(p));
+  const functionalDirtyFiles = paths.filter((p) => !isReviewPublicationPath(p, reviewsDirRel));
   return {
     effectiveFunctionalHead: effectiveFunctionalHead || null,
-    workingTreeState: functionalDirtyFiles.length === 0 ? "review-only" : "functional-dirty",
+    workingTreeState: isReviewPublicationOnlyDelta(paths, reviewsDirRel)
+      ? "review-only"
+      : "functional-dirty",
     functionalDirtyFiles,
   };
 }

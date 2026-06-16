@@ -359,6 +359,37 @@ describe("human-gate · briefing humano [decide]", () => {
     expect(text).toContain("pr-ready:check: verde");
     expect(text).toContain("Próximo nó planejado: co-flow-convergence.");
   });
+
+  it("Human Gate mostra technical_audit current/approved quando verification aprovada é vigente", () => {
+    const facts = makeHandoffFacts({
+      pullRequest: { ...readySnapshot().facts.pullRequest! },
+      lifecycle: {
+        reviewDecisions: [{ role: "technical_audit", decision: "approved" }],
+        requiredReviewRoles: [],
+        reviewStatuses: [
+          {
+            typeId: "technical_audit",
+            applicability: "yes",
+            requirement: "optional",
+            state: "current",
+            decision: "approved",
+            blocking: false,
+            source: "repo-default",
+          },
+        ],
+        openFindings: 0,
+        openBlocking: 0,
+        closedFindings: 3,
+        resolutions: 3,
+        gateDecision: null,
+      },
+    });
+    const b = def.buildBrief(readySnapshot({ facts }), { technical: false });
+    const text = JSON.stringify(b.sections);
+    expect(b.status).toBe("available");
+    expect(text).toContain("technical_audit: optional · current (approved)");
+    expect(text).not.toContain("technical_audit: optional · current (changes_requested)");
+  });
 });
 
 describe("human-gate · plano e efeito [decide]", () => {
