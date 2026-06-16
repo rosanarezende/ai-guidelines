@@ -92,6 +92,60 @@ decision_types:
     confirmation: required
     technical_details: available
 
+  mark-readiness:
+    title: Declarar readiness do sub-checkpoint ativo
+    purpose: >
+      O owner declara que o sub-checkpoint ativo satisfez seus critérios de
+      saída e está pronto para a decisão de transição. É uma transição de
+      lifecycle em tasks.md, NÃO um avanço: não marca o sub-checkpoint como
+      concluído, não ativa o próximo, não exerce Human Gate e não mexe na
+      topologia. Aplicar altera EXCLUSIVAMENTE a linha do sub-checkpoint ativo em
+      tasks.md, adicionando `readiness: ready-for-transition`.
+    requires_owner: true
+    sections:
+      - key: active_scope
+        heading: O que está pronto?
+      - key: exit_criteria
+        heading: Como sabemos que pode declarar readiness?
+      - key: next_decision
+        heading: O que acontece depois?
+      - key: consequences
+        heading: O que acontece se você aprovar?
+      - key: not_authorized
+        heading: O que esta decisão NÃO autoriza?
+    choices:
+      - id: mark-ready
+        label: Declarar readiness do sub-checkpoint ativo
+        mutating: true
+      - id: keep
+        label: Manter o sub-checkpoint em implementação
+        mutating: false
+      - id: request-explanation
+        label: Solicitar mais esclarecimentos (não escreve nada)
+        mutating: false
+      - id: cancel
+        label: Cancelar (não escreve nada)
+        mutating: false
+    consequences:
+      - O sub-checkpoint ativo continua `[/]`, mas passa a declarar readiness.
+      - "`guidelines work` passará a projetar a próxima decisão governada."
+      - "`advance-subcheckpoint` poderá ser decidido quando houver próximo `[ ]`."
+    not_authorized:
+      - Marcar o sub-checkpoint atual como `[x]`.
+      - Ativar o próximo sub-checkpoint.
+      - Exercer o Human Gate.
+      - Converter o PR para Ready.
+      - Criar gate artifact.
+      - Fazer merge.
+      - Abrir outro PR.
+      - Alterar a topologia (state.yml).
+    publication:
+      commit: after-confirmation
+      push: after-confirmation
+      mixed_diff: forbidden
+    confirmation: required
+    technical_details: available
+
   advance-subcheckpoint:
     title: Iniciar o próximo sub-checkpoint
     purpose: >

@@ -1,9 +1,6 @@
 #!/usr/bin/env node
-import path from "node:path";
-
-import { InquirerPrompts } from "../infrastructure/io/InquirerPrompts.js";
 import { buildRegistry } from "./registry/buildRegistry.js";
-import { createBootstrapDelivery } from "./delivery/bootstrap/composition.js";
+import { runCockpit } from "./cockpit.js";
 
 interface Logger {
   info(message: string): void;
@@ -14,10 +11,6 @@ const logger: Logger = {
   info: (message) => process.stdout.write(`${message}\n`),
   error: (message) => process.stderr.write(`${message}\n`),
 };
-
-function packageRoot(): string {
-  return path.resolve(__dirname, "../..");
-}
 
 function renderHelp(): string {
   return `ai-guidelines CLI
@@ -72,18 +65,7 @@ export async function run(argv: readonly string[] = process.argv.slice(2)): Prom
   }
 
   if (!commandName) {
-    if (!process.stdin.isTTY) {
-      logger.info(renderHelp());
-      return 0;
-    }
-
-    const delivery = createBootstrapDelivery(packageRoot());
-    const result = await delivery.dispatch([], {
-      repoRoot,
-      logger,
-      prompts: new InquirerPrompts(),
-    });
-    return result.exitCode;
+    return runCockpit(repoRoot, logger);
   }
 
   const result = await buildRegistry().dispatch(argv, { repoRoot, logger });

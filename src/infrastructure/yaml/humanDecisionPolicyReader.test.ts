@@ -17,10 +17,21 @@ describe("humanDecisionPolicyReader [decide]", () => {
     expect(policy.version).toBe(1);
     expect(policy.decisionTypes.map((t) => t.id)).toEqual([
       "close-dispositions",
+      "mark-readiness",
       "advance-subcheckpoint",
       "human-gate",
     ]);
     expect(policy.owner.handle).toBe("@rosanarezende");
+  });
+
+  it("mark-readiness declara mutação exclusiva de lifecycle com limites explícitos", () => {
+    const policy = parseHumanDecisionPolicy(REAL);
+    const mr = findDecisionType(policy, "mark-readiness")!;
+    expect(mr.choices.map((c) => c.id)).toContain("mark-ready");
+    expect(mr.notAuthorized.join(" ")).toMatch(/Ativar o próximo sub-checkpoint/);
+    expect(mr.notAuthorized.join(" ")).toMatch(/Human Gate/);
+    expect(mr.publication.mixedDiff).toBe("forbidden");
+    expect(mr.requiresOwner).toBe(true);
   });
 
   it("close-dispositions declara 8 seções humanas + escolhas + limites", () => {

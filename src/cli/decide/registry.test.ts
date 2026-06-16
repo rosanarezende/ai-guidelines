@@ -1,11 +1,13 @@
 import { DecisionRegistry, buildDecisionRegistry } from "./registry.js";
 import { CloseDispositionsDefinition } from "./closeDispositions.js";
+import { MarkReadinessDefinition } from "./markReadiness.js";
 import { HumanGateDefinition } from "./humanGate.js";
 
 describe("DecisionRegistry [decide]", () => {
   it("[1] registry contém os tipos na ordem do ciclo de vida", () => {
     expect(buildDecisionRegistry().ids()).toEqual([
       "close-dispositions",
+      "mark-readiness",
       "advance-subcheckpoint",
       "human-gate",
     ]);
@@ -22,11 +24,12 @@ describe("DecisionRegistry [decide]", () => {
       buildDecisionRegistry()
         .definitions()
         .map((d) => d.id)
-    ).toEqual(["close-dispositions", "advance-subcheckpoint", "human-gate"]);
+    ).toEqual(["close-dispositions", "mark-readiness", "advance-subcheckpoint", "human-gate"]);
   });
 
   it("[3] resolve por id; desconhecido = undefined", () => {
     const r = buildDecisionRegistry();
+    expect(r.resolve("mark-readiness")).toBeInstanceOf(MarkReadinessDefinition);
     expect(r.resolve("human-gate")).toBeInstanceOf(HumanGateDefinition);
     expect(r.resolve("nope")).toBeUndefined();
   });
