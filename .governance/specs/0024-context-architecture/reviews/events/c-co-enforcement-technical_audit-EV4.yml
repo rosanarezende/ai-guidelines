@@ -1,0 +1,26 @@
+checkpoint: "checkpoint-co-enforcement"
+role: technical_audit
+event_id: EV4
+kind: verification
+executor:
+  platform: antigravity
+  model: gemini-3.5-flash-high
+decision: approved
+scope: review
+review_fingerprint: 2c0140608c8a
+previous_subject_ref: "1e95474..17b04f9"
+subject_ref: "17b04f9..c73cb34"
+audit_evidence:
+  coverage:
+    - src/cli/reviewCheck.ts
+    - src/cli/reviewFreshness.ts
+    - src/cli/reviewCheckObserved.test.ts
+    - src/cli/reviewFreshness.test.ts
+  scope: "Revalidação técnica focada do delta pós-EV3 (commit c73cb34) cobrindo
+    freshness de reviews e human-gate."
+  basis: "EV4 aprova apenas o delta c73cb34 / revisão de freshness e human-gate.
+    EV3 continua sendo a auditoria ampla do PR #42. O commit funcional c73cb34
+    corrige a projeção de freshness mantendo as lanes de review current em
+    commits exclusivos de publicação, e stale em commits funcionais. Todos os
+    testes unitários e de integração passam."
+event_fingerprint: 5acbb5f56485
