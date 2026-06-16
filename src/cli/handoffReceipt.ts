@@ -65,13 +65,18 @@ export function reloadCommand(specId: string): string {
   return `npm run guidelines -- handoff ${specId}`;
 }
 
+/** Extrai o specId numérico do label da spec (ex.: "0024-context-architecture" → "0024"). */
+export function specIdFromLabel(label: string): string {
+  return /^(\d{4})/.exec(label)?.[1] ?? label;
+}
+
 /** Pure: snapshot (fatos + selo) → recibo. `now` injetado (determinismo em teste). */
 export function createLoadReceipt(
   facts: HandoffFacts,
   seal: string,
   now: () => Date = () => new Date()
 ): HandoffLoadReceipt {
-  const specId = /^(\d{4})/.exec(facts.spec.label)?.[1] ?? facts.spec.label;
+  const specId = specIdFromLabel(facts.spec.label);
   const sources: Record<string, string> = {};
   const degraded: string[] = [];
   for (const source of facts.sources) {
@@ -136,7 +141,8 @@ function parseReceipt(rawText: string): HandoffLoadReceipt | { error: string } {
  */
 export function validateLoadReceipt(
   rawText: string | null,
-  current: { readonly facts: HandoffFacts; readonly seal: string }
+  current: { readonly facts: HandoffFacts; readonly seal: string },
+  options: { readonly ignoreSourceIds?: ReadonlyArray<string> } = {}
 ): ReceiptStatus {
   if (rawText === null) return { kind: "missing" };
   const parsed = parseReceipt(rawText);
@@ -152,17 +158,29 @@ export function validateLoadReceipt(
   if (parsed.head !== currentHead) {
     return { kind: "stale-head", receipt: parsed, currentHead, currentSeal: current.seal };
   }
-  if (parsed.sourceSeal !== current.seal) {
-    const divergent: string[] = [];
-    const currentFps = new Map(current.facts.sources.map((s) => [s.id, s.fingerprint]));
-    const seen = new Set<string>();
-    for (const [id, fp] of Object.entries(parsed.sources)) {
-      seen.add(id);
-      if (currentFps.get(id) !== fp) divergent.push(id);
-    }
-    for (const id of currentFps.keys()) {
-      if (!seen.has(id)) divergent.push(id);
-    }
+
+  // Divergência por-fonte (sempre derivada das fingerprints; `ignoreSourceIds`
+  // exclui fontes que o chamador não pode/não quer verificar localmente — ex.: a
+  // fonte remota `pull-request`, cujo fingerprint exige rede para reproduzir).
+  const ignore = new Set(options.ignoreSourceIds ?? []);
+  const divergent: string[] = [];
+  const currentFps = new Map(current.facts.sources.map((s) => [s.id, s.fingerprint]));
+  const seen = new Set<string>();
+  for (const [id, fp] of Object.entries(parsed.sources)) {
+    seen.add(id);
+    if (ignore.has(id)) continue;
+    if (currentFps.get(id) !== fp) divergent.push(id);
+  }
+  for (const id of currentFps.keys()) {
+    if (ignore.has(id) || seen.has(id)) continue;
+    divergent.push(id);
+  }
+
+  // Gate: SEM ignore, mantém o selo como gate (comportamento idêntico ao anterior;
+  // `handoff:check` e demais chamadores inalterados). COM ignore, gate é a
+  // divergência por-fonte já excluindo as ignoradas.
+  const stale = ignore.size === 0 ? parsed.sourceSeal !== current.seal : divergent.length > 0;
+  if (stale) {
     return {
       kind: "stale-sources",
       receipt: parsed,
@@ -174,22 +192,49 @@ export function validateLoadReceipt(
 }
 
 /**
+ * Razão canônica (única) de um recibo NÃO-fresh. Fonte única consumida tanto
+ * pela guarda lançante (`assertFreshHandoffReceipt`) quanto pelo caminho
+ * advisory-first (`formatReceiptAdvisory`) — sem reimplementar o switch.
+ */
+export function describeReceiptStaleReason(
+  status: Exclude<ReceiptStatus, { kind: "fresh" }>
+): string {
+  switch (status.kind) {
+    case "missing":
+      return "nenhuma carga registrada";
+    case "invalid":
+      return `recibo inválido (${status.reason})`;
+    case "stale-head":
+      return `recibo stale: HEAD carregado ${status.receipt.head} ≠ HEAD atual ${status.currentHead}`;
+    case "stale-sources":
+      return `recibo stale: fontes divergiram (${status.divergentSources.join(", ")})`;
+  }
+}
+
+/**
+ * Linha advisory determinística (advisory-first; NÃO lança) para um recibo
+ * não-fresh; `null` quando fresh. Compartilhada pelas superfícies situadas do
+ * CO-3.4 (`workflow publish-state`, `review:publish`).
+ */
+export function formatReceiptAdvisory(status: ReceiptStatus, specId: string): string | null {
+  if (status.kind === "fresh") return null;
+  return (
+    `⚠️  [advisory] retomada não reconciliada — ${describeReceiptStaleReason(status)}. ` +
+    `Recarregue com: ${reloadCommand(specId)}`
+  );
+}
+
+/**
  * Guarda para comandos MUTANTES futuros (integração mínima; o wiring amplo é
  * evolução de enforcement/CO-6 — deliberadamente NÃO conectado agora). Lança
  * com diagnóstico + comando de recarga quando a retomada não está fresh.
  */
 export function assertFreshHandoffReceipt(status: ReceiptStatus, specId: string): void {
   if (status.kind === "fresh") return;
-  const reload = reloadCommand(specId);
-  const reason =
-    status.kind === "missing"
-      ? "nenhuma carga registrada"
-      : status.kind === "invalid"
-        ? `recibo inválido (${status.reason})`
-        : status.kind === "stale-head"
-          ? `recibo stale: HEAD carregado ${status.receipt.head} ≠ HEAD atual ${status.currentHead}`
-          : `recibo stale: fontes divergiram (${status.divergentSources.join(", ")})`;
-  throw new Error(`retomada não reconciliada — ${reason}. Recarregue com: ${reload}.`);
+  throw new Error(
+    `retomada não reconciliada — ${describeReceiptStaleReason(status)}. ` +
+      `Recarregue com: ${reloadCommand(specId)}.`
+  );
 }
 
 // ── I/O do recibo (fora do domínio puro) ─────────────────────────────────────

@@ -48,6 +48,7 @@ import {
 } from "../infrastructure/yaml/activeSpecsSerializer.js";
 import { parseWorkflowState } from "../infrastructure/yaml/workflowStateSerializer.js";
 import { parseSpecBranch } from "../app/workflow/DetectActiveSpec.js";
+import { checkSubCheckpointCoherence, parseSubCheckpoints } from "./handoffFacts.js";
 
 interface Logger {
   info: (msg: string) => void;
@@ -115,6 +116,7 @@ export function runActiveSpecsConsistencyCheck(
     validateEntryIdentity(entry, "active-specs", failures);
     validateEntryStage(entry, "active-specs", input.readStateYml, failures);
     validateEntryBranch(entry, input.currentBranch ?? null, failures);
+    validateEntrySubCheckpointCoherence(entry, input.readStateYml, failures);
   }
 
   if (input.historyText !== undefined) {
@@ -231,6 +233,42 @@ function validateEntryStage(
   }
 }
 
+/**
+ * Coerência ESTADO↔NARRATIVA dos sub-checkpoints (CO-x.y) do checkpoint ATIVO da
+ * spec. `branch`/`stage` driftam fato→projeção; a narrativa dos sub-checkpoints é
+ * a mesma classe — um `[x]` que ainda diz "EM EXECUÇÃO" mente para a retomada.
+ * Reusa `parseSubCheckpoints` (parser canônico de handoffFacts) — sem parser
+ * paralelo. O checkpoint ativo vem do cursor da topologia (state.yml). Reusa o
+ * mesmo leitor injetado de `state.yml` para ler também o `tasks.md` da spec.
+ */
+function validateEntrySubCheckpointCoherence(
+  entry: { id: string; specPath: string; sourceStatePath?: string },
+  readSpecFile: (relPath: string) => string | null,
+  failures: ConsistencyFailure[]
+): void {
+  const statePath = entry.sourceStatePath ?? `${entry.specPath}/state.yml`;
+  const stateContent = readSpecFile(statePath);
+  if (stateContent === null) return; // ausência já reportada por validateEntryStage
+  let checkpoint: string | null;
+  try {
+    checkpoint = parseWorkflowState(stateContent).topology?.cursor.checkpoint ?? null;
+  } catch {
+    return; // parse failure já reportado por validateEntryStage
+  }
+  if (!checkpoint) return; // sem cursor/topologia → nada a checar
+  const tasksContent = readSpecFile(`${entry.specPath}/tasks.md`);
+  if (tasksContent === null) return; // tasks.md ausente não é divergência deste gate
+  const subs = parseSubCheckpoints(tasksContent, checkpoint);
+  for (const violation of checkSubCheckpointCoherence(subs)) {
+    failures.push({
+      id: entry.id,
+      message:
+        `coerência de sub-checkpoint (${checkpoint}): ${violation} ` +
+        `A narrativa em tasks.md deve refletir o marcador de estado ([ ]/[/]/[x]).`,
+    });
+  }
+}
+
 /** Branch git corrente factual; `null` em detached HEAD ou fora de repo. */
 function factualCurrentBranch(repoRoot: string): string | null {
   try {
@@ -273,7 +311,7 @@ export function main(repoRoot: string, logger: Logger = defaultLogger): number {
 
   if (result.kind === "ok") {
     logger.info(
-      `✅ active-specs:check — ${result.count} entry(ies); stage/branch/identidade fiéis aos fatos (state.yml + git + spec_path).`
+      `✅ active-specs:check — ${result.count} entry(ies); stage/branch/identidade + coerência de sub-checkpoints fiéis aos fatos (state.yml + git + spec_path + tasks.md).`
     );
     return 0;
   }

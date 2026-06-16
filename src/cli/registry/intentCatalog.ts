@@ -23,6 +23,37 @@ export const INTENT_CATALOG: readonly Intent[] = [
     actions: [{ command: "triage", label: "Triar comentários de review do PR" }],
   },
   {
+    id: "executar-trabalho-governado",
+    title: "Executar o trabalho situado (implementação/correção)",
+    actions: [
+      {
+        command: "work",
+        label:
+          "Briefing governado de trabalho (modo + escopo/autoridade/validações/parada/relatório)",
+      },
+      {
+        command: "work",
+        args: ["--authorization", "explicit-work-request"],
+        label: "Autorizar commit/push no objeto inferido (pedido humano explícito)",
+      },
+    ],
+  },
+  {
+    id: "decidir-reservado-humano",
+    title: "🧭 Decisões humanas pendentes",
+    actions: [
+      {
+        command: "decide",
+        label: "Revisar e exercer decisões reservadas à owner (briefing → escolha → confirmação)",
+      },
+      {
+        command: "decide",
+        args: ["--brief-only"],
+        label: "Só ler o briefing das decisões pendentes (zero escrita)",
+      },
+    ],
+  },
+  {
     id: "pedir-review-governado",
     title: "Pedir um review governado",
     actions: [
@@ -77,7 +108,6 @@ export const NON_NAVIGABLE_COMMANDS: readonly string[] = [
   "adopt", // bootstrap/distribuição; fica no help operacional, não na navegação de trabalho
   "check-budget", // diagnóstico técnico de orçamento
   "init", // bootstrap/distribuição
-  "providers", // bootstrap/distribuição
   "update", // bootstrap/distribuição headless
   "workflow", // é o próprio shell humano (entrada), não um destino de Intent
 ];

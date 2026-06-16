@@ -70,4 +70,4 @@ jobs:
             echo "::warning::Paridade INDETERMINADA — snapshot do ruleset vivo indisponível. Limitação registrada; não bloqueia (invariante PRIMÁRIO segue garantido em npm run validate)."
             exit 0
           fi
-          node cli/ruleset-check.mjs --parity --live /tmp/live-ruleset.json
+          npm run build && node dist/cli/bin.js ruleset-check --parity --live /tmp/live-ruleset.json

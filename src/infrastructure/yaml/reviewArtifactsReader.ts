@@ -54,6 +54,18 @@ export const REVIEW_EVENT_KINDS: readonly ReviewEventKind[] = [
 /** Severidades que bloqueiam um gate `approved` enquanto `disposition: open`. */
 export const BLOCKING_SEVERITIES: readonly FindingSeverity[] = ["critical", "high"];
 
+/**
+ * Contexto HUMANO opcional de um finding (CO-3 / decide): tradução não-técnica
+ * para o briefing de decisão. NÃO entra no fingerprint (é anotação, não claim) —
+ * adicioná-lo a um finding selado preserva o selo. Melhoria explícita; ausente,
+ * o briefing degrada para a descrição técnica.
+ */
+export interface FindingHumanContext {
+  readonly summary?: string;
+  readonly impact?: string;
+  readonly riskIfUnresolved?: string;
+}
+
 export interface Finding {
   readonly id: string;
   readonly severity: FindingSeverity;
@@ -62,6 +74,8 @@ export interface Finding {
   readonly description: string;
   readonly disposition: FindingDisposition;
   readonly fingerprint: string;
+  /** Tradução humana opcional (fora do fingerprint). */
+  readonly humanContext?: FindingHumanContext;
 }
 
 /**
@@ -134,6 +148,8 @@ export interface ReviewArtifact {
 export interface Resolution {
   readonly finding: string;
   readonly action: ResolutionAction;
+  /** Commit funcional que tratou o finding (opcional; `<sha>`). Usado por `work` para validar a resolução contra o histórico. */
+  readonly ref?: string;
 }
 
 export interface ResolutionArtifact {
@@ -428,6 +444,24 @@ function parseAuditEvidence(rawEvidence: unknown, file: string): AuditEvidence {
   return { coverage, scope, basis };
 }
 
+/**
+ * Lê `human_context` opcional (anotação humana, fora do fingerprint). Aceita
+ * apenas strings nos campos conhecidos; campos ausentes são omitidos.
+ */
+function parseFindingHumanContext(raw: unknown): FindingHumanContext | undefined {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return undefined;
+  const o = raw as Record<string, unknown>;
+  const summary = str(o.summary);
+  const impact = str(o.impact);
+  const riskIfUnresolved = str(o.risk_if_unresolved);
+  if (!summary && !impact && !riskIfUnresolved) return undefined;
+  return {
+    ...(summary ? { summary } : {}),
+    ...(impact ? { impact } : {}),
+    ...(riskIfUnresolved ? { riskIfUnresolved } : {}),
+  };
+}
+
 export function parseReview(yamlText: string, file: string): ReviewArtifact {
   const raw: unknown = parse(yamlText);
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
@@ -535,6 +569,7 @@ export function parseReview(yamlText: string, file: string): ReviewArtifact {
           `esperado: ${expected}${declared ? ` · declarado: ${declared}` : " · ausente"}`
       );
     }
+    const humanContext = parseFindingHumanContext(f.human_context);
     findings.push({
       id,
       severity,
@@ -542,6 +577,7 @@ export function parseReview(yamlText: string, file: string): ReviewArtifact {
       description,
       disposition: f.disposition as FindingDisposition,
       fingerprint: expected,
+      ...(humanContext ? { humanContext } : {}),
     });
   }
 
@@ -751,7 +787,12 @@ export function parseResolutions(yamlText: string, file: string): ResolutionArti
         `${file}: resolutions[${i}].action must be one of ${RESOLUTION_ACTIONS.join("|")}`
       );
     }
-    resolutions.push({ finding, action: r.action as ResolutionAction });
+    const ref = str(r.ref);
+    resolutions.push({
+      finding,
+      action: r.action as ResolutionAction,
+      ...(ref ? { ref } : {}),
+    });
   }
   return { checkpoint, by, resolutions, file };
 }

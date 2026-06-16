@@ -1,4 +1,5 @@
 import { execSync } from "node:child_process";
+import * as fs2 from "node:fs";
 import * as fsAsync from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
@@ -8,6 +9,9 @@ import { parseActiveSpecs } from "../infrastructure/yaml/activeSpecsSerializer.j
 import { ClipboardWriter } from "../app/ports/ClipboardWriter.js";
 import { ConfirmOptions, InputOptions, Prompts, SelectOptions } from "../app/ports/Prompts.js";
 import { Logger, runAdvancedOps, runContinue, runPublishState } from "./workflow.js";
+import { collectHandoffFacts } from "./handoff.js";
+import { deriveHandoff } from "./handoffFacts.js";
+import { createLoadReceipt, writeReceipt, receiptPath } from "./handoffReceipt.js";
 
 /**
  * Integration tests — loop operacional ponta-a-ponta com filesystem + git
@@ -507,6 +511,155 @@ active_specs:
       expect(out).toMatch(/ERR: Missing:/);
       expect(out).not.toMatch(/tasks\.md/);
       expect(out).toMatch(/ERR: - planning gate\.status == closed \(atual: open\)/);
+    } finally {
+      await fsAsync.rm(tempDir, { recursive: true, force: true });
+    }
+  });
+});
+
+/**
+ * CO-3.4 — advisory-first do recibo de carga na superfície mutante situada
+ * `workflow publish-state`. Disciplina linear: cada cenário monta seu ambiente
+ * inline (mkdtemp + git + spec + recibo controlado), sem fakes nem helpers
+ * compartilhados. Prova os 5 estados (fresh/missing/stale-head/stale-sources/
+ * invalid), a degradação diagnosticável e — regressão crítica — que o caminho
+ * advisory NÃO reescreve o recibo silenciosamente (bug do `loadHandoffSnapshot`).
+ */
+describe("publish-state · advisory-first do recibo de carga [CO-3.4]", () => {
+  // Monta um repo governado mínimo onde `collectHandoffFacts` RESOLVE a spec
+  // (branch feat/spec-0024-foo + dir da spec), pré-condição p/ o caminho advisory.
+  async function governedRepo(): Promise<string> {
+    const tempDir = await fsAsync.mkdtemp(path.join(os.tmpdir(), "ws-receipt-"));
+    execSync("git init -b feat/spec-0024-foo", { cwd: tempDir, stdio: "ignore" });
+    execSync("git config user.email test@example.com", { cwd: tempDir, stdio: "ignore" });
+    execSync("git config user.name Test", { cwd: tempDir, stdio: "ignore" });
+    execSync('git commit --allow-empty -m "initial"', { cwd: tempDir, stdio: "ignore" });
+    const specDir = path.join(tempDir, ".governance", "specs", "0024-foo");
+    await fsAsync.mkdir(specDir, { recursive: true });
+    await fsAsync.writeFile(
+      path.join(specDir, "state.yml"),
+      "stage: planning\ngate:\n  status: open\nfocus: []\nnext: []\n"
+    );
+    return tempDir;
+  }
+  const PUBLISH = { status: "active", updatedBy: "@rosanarezende", title: "Foo Spec" } as const;
+
+  it("missing → advisory 'nenhuma carga registrada', exit 0, e NÃO escreve recibo (regressão anti-reescrita)", async () => {
+    const tempDir = await governedRepo();
+    try {
+      const logger = new CollectingLogger();
+      const fs = new NodeWorkflowFileSystem(tempDir);
+      const code = await runPublishState({ repoRoot: tempDir, logger, fs }, { ...PUBLISH });
+
+      expect(code).toBe(0); // advisory-first: recibo ausente NÃO bloqueia a publicação
+      expect(logger.lines.join("\n")).toContain(
+        "⚠️  [advisory] retomada não reconciliada — nenhuma carga registrada"
+      );
+      // regressão do bug `loadHandoffSnapshot`: o caminho advisory não cria recibo
+      const rp = receiptPath(tempDir);
+      expect(rp && fs2.existsSync(rp)).toBeFalsy();
+    } finally {
+      await fsAsync.rm(tempDir, { recursive: true, force: true });
+    }
+  });
+
+  it("fresh → nenhum advisory emitido, exit 0", async () => {
+    const tempDir = await governedRepo();
+    try {
+      const facts = collectHandoffFacts(tempDir).facts;
+      writeReceipt(tempDir, createLoadReceipt(facts, deriveHandoff(facts).seal));
+
+      const logger = new CollectingLogger();
+      const fs = new NodeWorkflowFileSystem(tempDir);
+      const code = await runPublishState({ repoRoot: tempDir, logger, fs }, { ...PUBLISH });
+
+      expect(code).toBe(0);
+      expect(logger.lines.join("\n")).not.toContain("[advisory]");
+    } finally {
+      await fsAsync.rm(tempDir, { recursive: true, force: true });
+    }
+  });
+
+  it("stale-head → advisory de HEAD, exit 0, e recibo PERMANECE stale (não reescrito)", async () => {
+    const tempDir = await governedRepo();
+    try {
+      const facts = collectHandoffFacts(tempDir).facts;
+      writeReceipt(tempDir, { ...createLoadReceipt(facts, "qualquer"), head: "0000000" });
+
+      const logger = new CollectingLogger();
+      const fs = new NodeWorkflowFileSystem(tempDir);
+      const code = await runPublishState({ repoRoot: tempDir, logger, fs }, { ...PUBLISH });
+
+      expect(code).toBe(0);
+      expect(logger.lines.join("\n")).toMatch(
+        /\[advisory\] retomada não reconciliada — recibo stale: HEAD carregado 0000000 ≠ HEAD atual/
+      );
+      // regressão: o recibo stale NÃO foi reescrito para fresh pelo caminho advisory
+      const rp = receiptPath(tempDir)!;
+      expect(JSON.parse(fs2.readFileSync(rp, "utf8")).head).toBe("0000000");
+    } finally {
+      await fsAsync.rm(tempDir, { recursive: true, force: true });
+    }
+  });
+
+  it("stale-sources → advisory nomeando fontes divergentes, exit 0", async () => {
+    const tempDir = await governedRepo();
+    try {
+      const facts = collectHandoffFacts(tempDir).facts;
+      // mesmo HEAD, selo divergente + sources vazias ⇒ todas as fontes atuais divergem
+      writeReceipt(tempDir, { ...createLoadReceipt(facts, "selo-divergente"), sources: {} });
+
+      const logger = new CollectingLogger();
+      const fs = new NodeWorkflowFileSystem(tempDir);
+      const code = await runPublishState({ repoRoot: tempDir, logger, fs }, { ...PUBLISH });
+
+      expect(code).toBe(0);
+      expect(logger.lines.join("\n")).toMatch(
+        /\[advisory\] retomada não reconciliada — recibo stale: fontes divergiram \(/
+      );
+    } finally {
+      await fsAsync.rm(tempDir, { recursive: true, force: true });
+    }
+  });
+
+  it("invalid → advisory de recibo inválido, exit 0", async () => {
+    const tempDir = await governedRepo();
+    try {
+      const rp = receiptPath(tempDir)!;
+      await fsAsync.mkdir(path.dirname(rp), { recursive: true });
+      await fsAsync.writeFile(rp, "{ recibo quebrado", "utf8");
+
+      const logger = new CollectingLogger();
+      const fs = new NodeWorkflowFileSystem(tempDir);
+      const code = await runPublishState({ repoRoot: tempDir, logger, fs }, { ...PUBLISH });
+
+      expect(code).toBe(0);
+      expect(logger.lines.join("\n")).toMatch(
+        /\[advisory\] retomada não reconciliada — recibo inválido \(/
+      );
+    } finally {
+      await fsAsync.rm(tempDir, { recursive: true, force: true });
+    }
+  });
+
+  it("degradação diagnosticável → contexto de carga indisponível (spec irresolvível) é NOMEADO, não engolido", async () => {
+    const tempDir = await fsAsync.mkdtemp(path.join(os.tmpdir(), "ws-receipt-degr-"));
+    try {
+      // branch `main` + sem .governance ⇒ collectHandoffFacts lança (spec irresolvível)
+      execSync("git init -b main", { cwd: tempDir, stdio: "ignore" });
+      execSync("git config user.email test@example.com", { cwd: tempDir, stdio: "ignore" });
+      execSync("git config user.name Test", { cwd: tempDir, stdio: "ignore" });
+      execSync('git commit --allow-empty -m "initial"', { cwd: tempDir, stdio: "ignore" });
+
+      const logger = new CollectingLogger();
+      const fs = new NodeWorkflowFileSystem(tempDir);
+      await runPublishState({ repoRoot: tempDir, logger, fs }, { ...PUBLISH });
+
+      const out = logger.lines.join("\n");
+      expect(out).toContain("ℹ️  [advisory] verificação de recibo de carga ignorada");
+      expect(out).toContain("contexto de carga indisponível");
+      // degradação é advisory (ℹ️), NUNCA um erro que bloqueie
+      expect(out).not.toMatch(/ERR:.*recibo de carga/);
     } finally {
       await fsAsync.rm(tempDir, { recursive: true, force: true });
     }

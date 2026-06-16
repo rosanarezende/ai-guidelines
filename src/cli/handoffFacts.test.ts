@@ -4,12 +4,16 @@ import {
   HandoffPrFact,
   HandoffReviewStatusFact,
   HandoffSourceFact,
+  HandoffSubCheckpoint,
   HandoffTaskFact,
+  checkSubCheckpointCoherence,
   computeSeal,
   deriveHandoff,
   deriveNextAction,
   deriveProhibitions,
   parseCheckpointTasks,
+  parseSubCheckpoints,
+  resolveSubCheckpointWork,
 } from "./handoffFacts.js";
 
 // ── Fixtures ─────────────────────────────────────────────────────────────────
@@ -118,6 +122,7 @@ function facts(overrides: Partial<HandoffFacts> = {}): HandoffFacts {
     pullRequest: PR_DRAFT,
     lifecycle: LIFECYCLE_EMPTY,
     tasks: [OPEN_TASK],
+    subCheckpoints: [],
     insights: [{ id: "PIT-0011", excerpt: "Contrato executavel invisivel…" }],
     driftWarnings: [],
     sources: SOURCES_FRESH,
@@ -448,5 +453,169 @@ describe("deriveHandoff · derivado completo [CO-4]", () => {
     expect(roundTrip.nextAction).toEqual(derived.nextAction);
     expect(roundTrip.seal).toBe(derived.seal);
     expect(derived.prohibitions.length).toBeGreaterThan(0);
+  });
+});
+
+describe("checkSubCheckpointCoherence — estado ↔ narrativa", () => {
+  const sc = (over: Partial<HandoffSubCheckpoint>): HandoffSubCheckpoint => ({
+    id: "CO-3.1",
+    title: "x",
+    state: "done",
+    line: 1,
+    text: "- [x] **CO-3.1 — x**: feito.",
+    ...over,
+  });
+
+  it("DADO marcadores coerentes ENTÃO sem violações", () => {
+    expect(
+      checkSubCheckpointCoherence([
+        sc({ id: "CO-3.1", state: "done", text: "[x] **CO-3.1** concluído." }),
+        sc({ id: "CO-3.2", state: "in-progress", text: "[/] **CO-3.2** em andamento." }),
+        sc({ id: "CO-3.3", state: "pending", text: "[ ] **CO-3.3** a fazer." }),
+      ])
+    ).toEqual([]);
+  });
+
+  it("DADO [x] que diz 'EM EXECUÇÃO' ENTÃO viola", () => {
+    const v = checkSubCheckpointCoherence([
+      sc({ id: "CO-3.1", state: "done", text: "[x] **CO-3.1** ... **EM EXECUÇÃO.**" }),
+    ]);
+    expect(v).toHaveLength(1);
+    expect(v[0]).toMatch(/CO-3\.1.*em execução/i);
+  });
+
+  it("DADO [ ] que diz 'IMPLEMENTADO' ENTÃO viola", () => {
+    const v = checkSubCheckpointCoherence([
+      sc({ id: "CO-3.4", state: "pending", text: "[ ] **CO-3.4** IMPLEMENTADO 2026-06-14." }),
+    ]);
+    expect(v).toHaveLength(1);
+    expect(v[0]).toMatch(/CO-3\.4.*concluído\/implementado/i);
+  });
+
+  it("DADO mais de um [/] ENTÃO viola (exatamente um pode estar ativo)", () => {
+    const v = checkSubCheckpointCoherence([
+      sc({ id: "CO-3.2", state: "in-progress", text: "[/] x" }),
+      sc({ id: "CO-3.3", state: "in-progress", text: "[/] y" }),
+    ]);
+    expect(v.some((m) => /mais de um sub-checkpoint \[\/\] ativo/i.test(m))).toBe(true);
+  });
+
+  it("DADO [/] ATIVO que diz 'Implementado' ENTÃO NÃO viola (foi implementado, falta avançar)", () => {
+    // Caso real do CO-3.3: implementado mas ainda [/] aguardando advance humano.
+    expect(
+      checkSubCheckpointCoherence([
+        sc({
+          id: "CO-3.3",
+          state: "in-progress",
+          text: "[/] **CO-3.3** Implementado 2026-06-14; avanço NÃO exercido.",
+        }),
+      ])
+    ).toEqual([]);
+  });
+
+  it("DADO readiness em [/] ativo ENTÃO NÃO viola (lugar canônico do sinal)", () => {
+    expect(
+      checkSubCheckpointCoherence([
+        sc({
+          id: "CO-3.4",
+          state: "in-progress",
+          text: "[/] **CO-3.4 — x** `readiness: ready-for-transition`: pronto.",
+        }),
+      ])
+    ).toEqual([]);
+  });
+
+  it("DADO readiness em [ ] pendente ENTÃO viola", () => {
+    const v = checkSubCheckpointCoherence([
+      sc({
+        id: "CO-3.5",
+        state: "pending",
+        text: "[ ] **CO-3.5 — x** `readiness: ready-for-transition`: x.",
+      }),
+    ]);
+    expect(v.some((m) => /CO-3\.5 carrega readiness.*\[ \] \(pendente\)/.test(m))).toBe(true);
+  });
+
+  it("DADO readiness em [x] concluído ENTÃO viola (deve ser removida ao concluir)", () => {
+    const v = checkSubCheckpointCoherence([
+      sc({
+        id: "CO-3.4",
+        state: "done",
+        text: "[x] **CO-3.4 — x** `readiness: ready-for-transition`: x.",
+      }),
+    ]);
+    expect(v.some((m) => /CO-3\.4 carrega readiness.*\[x\] \(concluído\)/.test(m))).toBe(true);
+  });
+
+  it("DADO valor de readiness inválido ENTÃO viola (único valor aceito)", () => {
+    const v = checkSubCheckpointCoherence([
+      sc({ id: "CO-3.4", state: "in-progress", text: "[/] **CO-3.4 — x** `readiness: done`: x." }),
+    ]);
+    expect(v.some((m) => /marcador de readiness inválido "done"/.test(m))).toBe(true);
+  });
+});
+
+describe("parseSubCheckpoints + resolveSubCheckpointWork — sinal de readiness", () => {
+  const TASKS = (co34: string) =>
+    [
+      "- [/] **Checkpoint co-enforcement** (seq 9 / CO-3)",
+      "    - [x] **CO-3.3 — migração**: feito.",
+      `    - [/] **CO-3.4 — dogfood**${co34}: advisory-first.`,
+      "    - [ ] **CO-3.5 — colapso CLI**: elimina /cli.",
+    ].join("\n");
+
+  it("parser extrai readiness do code-span inline", () => {
+    const subs = parseSubCheckpoints(
+      TASKS(" `readiness: ready-for-transition`"),
+      "checkpoint-co-enforcement"
+    );
+    const co34 = subs.find((s) => s.id === "CO-3.4")!;
+    expect(co34.state).toBe("in-progress");
+    expect(co34.readiness).toBe("ready-for-transition");
+    expect(subs.find((s) => s.id === "CO-3.5")!.readiness).toBeUndefined();
+  });
+
+  it("parser: sem token ⇒ readiness undefined", () => {
+    const subs = parseSubCheckpoints(TASKS(""), "checkpoint-co-enforcement");
+    expect(subs.find((s) => s.id === "CO-3.4")!.readiness).toBeUndefined();
+  });
+
+  it("resolve: [/] ativo COM readiness + próximo [ ] ⇒ transition", () => {
+    const subs = parseSubCheckpoints(
+      TASKS(" `readiness: ready-for-transition`"),
+      "checkpoint-co-enforcement"
+    );
+    const r = resolveSubCheckpointWork(facts({ subCheckpoints: subs }));
+    expect(r.kind).toBe("transition");
+    if (r.kind === "transition") {
+      expect(r.transition.conclude?.id).toBe("CO-3.4");
+      expect(r.transition.activate.id).toBe("CO-3.5");
+    }
+  });
+
+  it("resolve: [/] ativo SEM readiness ⇒ implement (ainda implementando)", () => {
+    const subs = parseSubCheckpoints(TASKS(""), "checkpoint-co-enforcement");
+    const r = resolveSubCheckpointWork(facts({ subCheckpoints: subs }));
+    expect(r.kind).toBe("implement");
+    if (r.kind === "implement") expect(r.subCheckpoint.id).toBe("CO-3.4");
+  });
+
+  it("resolve: readiness mas SEM próximo pendente ⇒ terminal-ready (sem advance)", () => {
+    const tasks = [
+      "- [/] **Checkpoint co-enforcement** (seq 9 / CO-3)",
+      "    - [x] **CO-3.3 — migração**: feito.",
+      "    - [/] **CO-3.4 — dogfood** `readiness: ready-for-transition`: advisory-first.",
+    ].join("\n");
+    const subs = parseSubCheckpoints(tasks, "checkpoint-co-enforcement");
+    const f = facts({
+      lifecycle: LIFECYCLE_REQUIRED_SATISFIED,
+      tasks: [],
+      subCheckpoints: subs,
+    });
+    const r = resolveSubCheckpointWork(f);
+    expect(r.kind).toBe("terminal-ready");
+    const next = deriveNextAction(f);
+    expect(next.kind).toBe("prepare-ready");
+    expect(next.description).not.toMatch(/advance-subcheckpoint/);
   });
 });

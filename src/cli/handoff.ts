@@ -43,13 +43,21 @@ import {
   deriveHandoff,
   fingerprintSource,
   parseCheckpointTasks,
+  parseSubCheckpoints,
 } from "./handoffFacts.js";
 import {
   extractAiGuidelinesBlock,
   parsePackageIdentity,
   parseRulesContract,
 } from "./handoffContract.js";
-import { HandoffLoadReceipt, createLoadReceipt, writeReceipt } from "./handoffReceipt.js";
+import {
+  HandoffLoadReceipt,
+  createLoadReceipt,
+  formatReceiptAdvisory,
+  specIdFromLabel,
+  validateLoadReceipt,
+  writeReceipt,
+} from "./handoffReceipt.js";
 
 /** Coletor da fonte remota (PR). Lança em falha; `null` = coleta não habilitada. */
 export type RemotePrCollector = (prNumber: number, repoRoot: string) => HandoffPrFact;
@@ -773,6 +781,8 @@ export function collectHandoffFacts(
   const tasksOrigin = `${resolved.specPath}/tasks.md`;
   const tasksText = readIfExists(repoRoot, tasksOrigin);
   const tasks = cursor && tasksText !== null ? parseCheckpointTasks(tasksText, cursor) : [];
+  const subCheckpoints =
+    cursor && tasksText !== null ? parseSubCheckpoints(tasksText, cursor.checkpoint) : [];
   sources.push({
     id: "tasks.md",
     origin: tasksOrigin,
@@ -818,6 +828,7 @@ export function collectHandoffFacts(
     pullRequest,
     lifecycle,
     tasks,
+    subCheckpoints,
     insights,
     driftWarnings: [...diagnostics.warnings, ...contractCollected.driftWarnings],
     sources,
@@ -1102,6 +1113,43 @@ export function loadHandoffSnapshot(
   const receipt = createLoadReceipt(collected.facts, derived.seal);
   const receiptFile = writeReceipt(repoRoot, receipt);
   return { collected, derived, receipt: receiptFile ? receipt : null, receiptFile };
+}
+
+/**
+ * Advisory-first do recibo de carga para superfícies MUTANTES situadas (CO-3.4:
+ * `workflow publish-state`, `review:publish`). NÃO lança e NUNCA bloqueia.
+ *
+ * - `priorReceiptText`: o recibo lido ANTES de qualquer ato de carga DA PRÓPRIA
+ *   superfície. Superfícies que reusam `loadHandoffSnapshot`/`collectReviewBrief`
+ *   (que REESCREVEM o recibo) precisam capturá-lo antes; senão o advisory validaria
+ *   contra um recibo recém-atualizado por elas mesmas (código morto).
+ * - O snapshot de comparação é derivado SEM escrita e SEM rede (remote off):
+ *   advisory LOCAL e determinístico, próprio de um comando mutante. A fonte remota
+ *   volátil `pull-request` é IGNORADA na divergência (seu fingerprint exigiria rede
+ *   para reproduzir e mudaria a cada alteração do PR no GitHub); a frescura do PR é
+ *   domínio do `handoff:check`, que faz remote explicitamente.
+ * - Falha de contexto (ex.: spec irresolvível) → linha de degradação diagnosticável.
+ */
+export function emitReceiptAdvisory(
+  repoRoot: string,
+  priorReceiptText: string | null,
+  logger: { readonly info: (msg: string) => void }
+): void {
+  try {
+    const collected = collectHandoffFacts(repoRoot);
+    const status = validateLoadReceipt(
+      priorReceiptText,
+      { facts: collected.facts, seal: deriveHandoff(collected.facts).seal },
+      { ignoreSourceIds: ["pull-request"] }
+    );
+    const line = formatReceiptAdvisory(status, specIdFromLabel(collected.facts.spec.label));
+    if (line) logger.info(line);
+  } catch (e) {
+    logger.info(
+      `ℹ️  [advisory] verificação de recibo de carga ignorada — ` +
+        `contexto de carga indisponível (${e instanceof Error ? e.message : String(e)}).`
+    );
+  }
 }
 
 /**

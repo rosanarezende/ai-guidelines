@@ -1,6 +1,7 @@
 import {
   evaluateReadyPreconditions,
   main,
+  normalizeCheckRuns,
   ReadyCheckSnapshot,
   SnapshotCollector,
   Logger,
@@ -244,6 +245,36 @@ describe("CLI — pr-ready:check · precondições de Ready [BR-PR-READY-CHECK]"
     });
     expect(result.ok).toBe(true);
     expect(result.warnings.some((w) => w.includes("já está Ready"))).toBe(true);
+  });
+});
+
+describe("CLI — pr-ready:check · normalização de checks", () => {
+  it("deduplica check-runs por nome mantendo o run mais recente", () => {
+    const checks = normalizeCheckRuns([
+      {
+        name: "governance-pr-check",
+        status: "completed",
+        conclusion: "failure",
+        started_at: "2026-06-16T12:00:00Z",
+      },
+      {
+        name: "governance-pr-check",
+        status: "completed",
+        conclusion: "success",
+        started_at: "2026-06-16T12:53:00Z",
+      },
+      {
+        name: "repo-validation",
+        status: "completed",
+        conclusion: "success",
+        started_at: "2026-06-16T12:38:00Z",
+      },
+    ]);
+
+    expect(checks).toEqual([
+      { name: "governance-pr-check", bucket: "pass" },
+      { name: "repo-validation", bucket: "pass" },
+    ]);
   });
 });
 

@@ -1,0 +1,29 @@
+checkpoint: "checkpoint-co-enforcement"
+role: technical_audit
+event_id: EV3
+kind: verification
+executor:
+  platform: antigravity
+  model: gemini-3.5-flash-high
+decision: approved
+scope: review
+review_fingerprint: 2c0140608c8a
+previous_subject_ref: "e2c98d6..1e95474"
+subject_ref: "1e95474..17b04f9"
+audit_evidence:
+  coverage:
+    - package.json
+    - src/cli/main.ts
+    - src/cli/bin.ts
+    - src/cli/registry/CommandRegistry.ts
+    - src/cli/prReadyCheck.ts
+    - src/test-utils/CliRuntimeCollapse.test.ts
+    - src/test-utils/NoMonolithResidue.test.ts
+    - tests/smoke/bin-shim.test.mjs
+  scope: "Auditoria final do checkpoint-co-enforcement (CO-3.1 a CO-3.5), cobrindo
+    colapso do runtime CLI, remoção de providers e validação de consumidores."
+  basis: "O colapso do runtime legado em /cli e bin foi validado com sucesso.
+    Todos os testes locais e de fumaça (smoke tests) foram executados e passaram
+    com sucesso no HEAD local atual 17b04f9. Não há resíduos do monólito
+    (LegacyExecuteFn, loadLegacyExecute)."
+event_fingerprint: af1daf4572f0

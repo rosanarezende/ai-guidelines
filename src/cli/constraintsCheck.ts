@@ -1,0 +1,259 @@
+/**
+ * CLI entrypoint do gate `constraints:check` (CO-3.1 / Spec 0024).
+ *
+ * Compila as fontes REAIS de constraints em memória e valida todas as
+ * invariantes do modelo: schema (parser), paridade com a fonte humana,
+ * resolução de superfícies (`npm-script`/`registry-command`), resolução de
+ * mecanismos e determinismo do manifesto. **REQUIRED** (estado contínuo): falha
+ * (exit 1) em qualquer inconsistência — schema/paridade de uma fonte canônica é
+ * invariante de estado, por isso integra o `validate`.
+ *
+ * NÃO é o `knowledge:compile` (entrypoint público + manifesto runtime persistido
+ * = CO-3.2). Aqui o manifesto é SOMENTE em memória. Zero network, zero LLM.
+ *
+ * Exit codes: 0 ok · 1 inconsistência · 2 fonte core ausente/uso inválido.
+ */
+import * as fs from "node:fs";
+import * as path from "node:path";
+import { parse } from "yaml";
+import {
+  compileConstraints,
+  CompileResult,
+  ConstraintSourceFacts,
+} from "../app/constraints/compileConstraints.js";
+import {
+  NpmScriptContract,
+  NpmScriptSurfaceResolver,
+} from "../app/constraints/NpmScriptSurfaceResolver.js";
+import { RegistryCommandSurfaceResolver } from "../app/constraints/RegistryCommandSurfaceResolver.js";
+import { SurfaceResolverRegistry } from "../app/constraints/SurfaceResolver.js";
+import { buildRegistry } from "./registry/buildRegistry.js";
+import { describeRegistryCommands } from "./registry/describeCommands.js";
+import {
+  ConstraintSource,
+  mergeConstraintSources,
+  parseConstraints,
+} from "../infrastructure/yaml/constraintsSourceReader.js";
+import {
+  GovernedSourceResolution,
+  resolveGovernedSourcePath,
+} from "../infrastructure/filesystem/governedSourceRef.js";
+import { validateSourceAnchor } from "../domain/constraints/SourceAnchorValidator.js";
+
+interface Logger {
+  info: (msg: string) => void;
+  error: (msg: string) => void;
+}
+
+const defaultLogger: Logger = {
+  info: (msg) => process.stdout.write(`${msg}\n`),
+  error: (msg) => process.stderr.write(`${msg}\n`),
+};
+
+export const CORE_CONSTRAINTS_PATH = ".core/constraints/constraints.yml";
+export const OVERLAY_CONSTRAINTS_PATH = ".governance/constraints.yml";
+const SCRIPT_CONTRACTS_PATH = ".core/governance/script-contracts.yml";
+const RULES_JSON_PATH = ".core/rules/_meta/rules.json";
+const GOVERNANCE_FOUNDATION_PATH = ".core/process/governance-foundation.md";
+
+/**
+ * Raízes de resolução das fontes de constraints.
+ *
+ * O framework distingue DOIS papéis (mesmo mecanismo do `ROOT_DIR` do bootstrap
+ * em `cli/fs/file-system.mjs`): os assets governados (`.core/**`) vivem na raiz
+ * do PACOTE (mantenedor: raiz do repo; consumidor: `node_modules/ai-guidelines/`,
+ * pois `.core` é distribuído via `package.json#files`), enquanto o overlay
+ * `.governance/constraints.yml` vive na raiz do CONSUMIDOR (cwd). No mantenedor
+ * as duas raízes coincidem.
+ */
+export interface ConstraintRoots {
+  /** Raiz do framework distribuído: constraints core + catálogos (`.core/**`). */
+  readonly packageRoot: string;
+  /** Raiz do consumidor: overlay local opcional (`.governance/constraints.yml`). */
+  readonly consumerRoot: string;
+}
+
+/** Forma `string` ⟹ mantenedor (packageRoot === consumerRoot). */
+export function normalizeConstraintRoots(roots: string | ConstraintRoots): ConstraintRoots {
+  return typeof roots === "string" ? { packageRoot: roots, consumerRoot: roots } : roots;
+}
+
+/**
+ * Carrega as fontes de constraints respeitando os DOIS papéis de raiz:
+ *
+ *   - core `.core/constraints/constraints.yml` ← `packageRoot` (framework
+ *     distribuído). Ausência = fonte governada do próprio framework faltando ⟹
+ *     erro explícito (exit 2). NÃO depende de `.core/` local no consumidor.
+ *   - overlay `.governance/constraints.yml` ← `consumerRoot`. Opcional; ausência
+ *     ≠ erro (o consumidor pode compor só o core distribuído).
+ *
+ * Lê EXCLUSIVAMENTE estes dois paths — nunca `.ai-guidelines/constraints.yml`
+ * (ponte legada deferida). Cada fonte carrega sua `root` ABSOLUTA, que governa o
+ * containment dos `source_ref` (F2) e a procedência por origem (F1).
+ */
+export function loadConstraintSources(roots: string | ConstraintRoots): ConstraintSource[] {
+  const { packageRoot, consumerRoot } = normalizeConstraintRoots(roots);
+  const sources: ConstraintSource[] = [];
+
+  const coreAbs = path.join(packageRoot, CORE_CONSTRAINTS_PATH);
+  if (!fs.existsSync(coreAbs)) {
+    throw new Error(`fonte core ausente: ${CORE_CONSTRAINTS_PATH}.`);
+  }
+  const coreText = fs.readFileSync(coreAbs, "utf-8");
+  sources.push({
+    path: CORE_CONSTRAINTS_PATH,
+    text: coreText,
+    constraints: parseConstraints(coreText),
+    root: path.resolve(packageRoot),
+  });
+
+  const overlayAbs = path.join(consumerRoot, OVERLAY_CONSTRAINTS_PATH);
+  if (fs.existsSync(overlayAbs)) {
+    const overlayText = fs.readFileSync(overlayAbs, "utf-8");
+    sources.push({
+      path: OVERLAY_CONSTRAINTS_PATH,
+      text: overlayText,
+      constraints: parseConstraints(overlayText),
+      root: path.resolve(consumerRoot),
+    });
+  }
+  return sources;
+}
+
+/**
+ * Resolver de superfícies do framework: npm-scripts (script-contracts) +
+ * registry-commands. `script-contracts.yml` é asset governado `.core/**` ⟹ lido
+ * do `packageRoot`.
+ */
+export function createSurfaceResolver(packageRoot: string): SurfaceResolverRegistry {
+  const contract = parse(
+    fs.readFileSync(path.join(packageRoot, SCRIPT_CONTRACTS_PATH), "utf-8")
+  ) as {
+    profiles?: { maintainer?: { package_scripts?: NpmScriptContract[] } };
+  };
+  const scripts = contract.profiles?.maintainer?.package_scripts ?? [];
+  const commands = describeRegistryCommands(buildRegistry());
+  return new SurfaceResolverRegistry([
+    new NpmScriptSurfaceResolver(scripts),
+    new RegistryCommandSurfaceResolver(commands),
+  ]);
+}
+
+/**
+ * Fatos de paridade. Os catálogos (`rules.json`, `governance-foundation.md`) são
+ * assets governados `.core/**` ⟹ lidos do `packageRoot`. Já o `source_ref` de
+ * cada constraint resolve contra a raiz da SUA fonte (`sources[].root`): core →
+ * packageRoot, overlay → consumerRoot. Containment canônico (F2) e âncora
+ * canônica por `origin.kind` (F3) ficam encapsulados aqui.
+ */
+export function createSourceFacts(
+  packageRoot: string,
+  sources: readonly ConstraintSource[]
+): ConstraintSourceFacts {
+  // Procedência por origem: id → raiz governada da fonte (F1).
+  const rootById = new Map<string, string>();
+  for (const source of sources) {
+    for (const constraint of source.constraints) rootById.set(constraint.id, source.root);
+  }
+
+  const resolutionCache = new Map<string, GovernedSourceResolution>();
+  const resolveSourcePath = (constraintId: string, relPath: string): GovernedSourceResolution => {
+    const root = rootById.get(constraintId) ?? path.resolve(packageRoot);
+    const key = JSON.stringify([root, relPath]);
+    let resolution = resolutionCache.get(key);
+    if (!resolution) {
+      resolution = resolveGovernedSourcePath(root, relPath);
+      resolutionCache.set(key, resolution);
+    }
+    return resolution;
+  };
+
+  const textCache = new Map<string, string | null>();
+  const readText = (absPath: string): string | null => {
+    if (!textCache.has(absPath)) {
+      textCache.set(absPath, fs.existsSync(absPath) ? fs.readFileSync(absPath, "utf-8") : null);
+    }
+    return textCache.get(absPath) ?? null;
+  };
+
+  const readPackageAsset = (rel: string): string | null => {
+    const abs = path.join(packageRoot, rel);
+    return fs.existsSync(abs) ? fs.readFileSync(abs, "utf-8") : null;
+  };
+
+  const ruleIds = new Set<string>();
+  try {
+    const json = JSON.parse(readPackageAsset(RULES_JSON_PATH) ?? "{}") as {
+      rules?: { id: string }[];
+    };
+    for (const r of json.rules ?? []) ruleIds.add(r.id);
+  } catch {
+    /* rules.json malformado é coberto por build:rules/ruleset:check */
+  }
+  const guardrailIds = new Set<string>();
+  const foundation = readPackageAsset(GOVERNANCE_FOUNDATION_PATH) ?? "";
+  for (const m of foundation.matchAll(/\[(GG-\d{4,})\]/g)) guardrailIds.add(m[1]);
+
+  return {
+    resolveSource: (constraint, sourcePath) => {
+      const resolution = resolveSourcePath(constraint.id, sourcePath);
+      return { contained: resolution.contained, exists: resolution.exists, root: resolution.root };
+    },
+    anchorIsCanonical: (constraint, sourcePath, anchor) => {
+      const resolution = resolveSourcePath(constraint.id, sourcePath);
+      if (!resolution.contained || !resolution.exists || resolution.absPath === null) {
+        return { ok: false, ambiguous: false };
+      }
+      const text = readText(resolution.absPath);
+      if (text === null) return { ok: false, ambiguous: false };
+      const verdict = validateSourceAnchor(constraint.origin.kind, text, anchor);
+      return { ok: verdict.ok, ambiguous: verdict.ambiguous };
+    },
+    isKnownRuleId: (id) => ruleIds.has(id),
+    isKnownGuardrailId: (id) => guardrailIds.has(id),
+  };
+}
+
+/** Composição pura: fontes já carregadas → resultado da compilação. */
+export function runConstraintsCheck(roots: string | ConstraintRoots): CompileResult {
+  const normalized = normalizeConstraintRoots(roots);
+  const sources = loadConstraintSources(normalized);
+  const constraints = mergeConstraintSources(sources);
+  return compileConstraints({
+    constraints,
+    sources: sources.map((s) => ({ path: s.path, text: s.text })),
+    surfaceResolver: createSurfaceResolver(normalized.packageRoot),
+    facts: createSourceFacts(normalized.packageRoot, sources),
+  });
+}
+
+/** Composition root: lê as fontes reais, compila e reporta. */
+export function main(roots: string | ConstraintRoots, logger: Logger = defaultLogger): number {
+  let result: CompileResult;
+  try {
+    result = runConstraintsCheck(roots);
+  } catch (e: unknown) {
+    logger.error(`❌ constraints:check — ${e instanceof Error ? e.message : String(e)}`);
+    return e instanceof Error && /fonte core ausente/.test(e.message) ? 2 : 1;
+  }
+
+  const { manifest, violations } = result;
+  if (violations.length > 0) {
+    logger.error(
+      `❌ constraints:check — ${violations.length} inconsistência(s) em ` +
+        `${manifest.constraints.length} constraint(s):`
+    );
+    for (const v of violations) {
+      const where = v.surface ? `${v.constraintId} → ${v.surface}` : v.constraintId;
+      logger.error(`  [${v.code}] ${where}: ${v.message}`);
+    }
+    return 1;
+  }
+
+  const surfaces = new Set(manifest.bindings.map((b) => b.surface)).size;
+  logger.info(
+    `✅ constraints:check — ${manifest.constraints.length} constraints · ` +
+      `${manifest.bindings.length} bindings · ${surfaces} superfícies resolvidas · paridade íntegra`
+  );
+  return 0;
+}

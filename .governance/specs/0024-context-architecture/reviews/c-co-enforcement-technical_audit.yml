@@ -1,0 +1,42 @@
+checkpoint: "checkpoint-co-enforcement"
+role: technical_audit
+executor:
+  platform: codex-cli
+  model: gpt-5
+decision: changes_requested
+findings_emitted: 3
+subject_ref: "origin/feat/spec-0024-co-projection..25b29eb"
+review_fingerprint: 2c0140608c8a
+findings:
+  - id: F1
+    severity: high
+    location: "src/cli/constraintsCheck.ts#L48-L81"
+    description: "Overlay de consumidor nao esta wired end-to-end: o check exige
+      .core/constraints/constraints.yml no repoRoot e, em fixture apenas com
+      .governance/constraints.yml, retorna fonte core ausente em vez de carregar
+      o overlay do consumidor."
+    disposition: accepted
+    fingerprint: 284894d6b794
+    # Anotação humana (fora do fingerprint) para o briefing de `guidelines decide`.
+    human_context:
+      summary: "Repositórios que usam o framework não conseguiam definir apenas suas próprias constraints."
+  - id: F2
+    severity: medium
+    location: "src/cli/constraintsCheck.ts#L100-L124"
+    description: "source_ref pode escapar do repoRoot via segmentos como
+      ../outside.md; a paridade aceita arquivo externo se ele existir e contiver
+      a ancora, vazando a fronteira canonica do repositorio/consumidor."
+    disposition: accepted
+    fingerprint: bad9a10cd59b
+    human_context:
+      summary: "Uma referência incorreta poderia acessar arquivos fora do projeto."
+  - id: F3
+    severity: medium
+    location: "src/cli/constraintsCheck.ts#L120-L124"
+    description: "Validacao de ancora nao prova heading canonico: anchorExists usa
+      text.includes('[anchor]'), entao mencao em corpo ou code block gera
+      falso-verde para source_ref."
+    disposition: accepted
+    fingerprint: fcc4f1136709
+    human_context:
+      summary: "Uma regra citada em um exemplo podia ser confundida com a declaração real da regra."

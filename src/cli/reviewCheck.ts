@@ -431,7 +431,11 @@ export function observedReviewStates(
     if (!e.subjectRef) continue;
     const current = observed[e.role];
     if (current) {
-      observed[e.role] = { ...current, latestSubjectRef: e.subjectRef };
+      observed[e.role] = {
+        ...current,
+        latestSubjectRef: e.subjectRef,
+        ...(e.scope === "review" ? { decision: e.decision } : {}),
+      };
     }
   }
   return observed;

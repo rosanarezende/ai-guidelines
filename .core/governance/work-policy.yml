@@ -1,0 +1,280 @@
+# Contrato GOVERNADO de trabalho (CO-4 / dogfood operacional do PR #42).
+#
+# SSOT machine-readable do contrato de IMPLEMENTAÇÃO e de ENTREGA DO RELATÓRIO,
+# por MODO de trabalho. Projetado por `guidelines work`:
+#
+#   contrato permanente (este arquivo)
+#   + estado situado derivado (snapshot do handoff)
+#   + pedido humano curto (+ autorização capability-scoped)
+#   → briefing completo de trabalho.
+#
+# O runtime apenas PROJETA o contrato (zero LLM — ADR 0018): o briefing não edita
+# arquivos, não commita, não faz push, não executa trabalho. As seções do
+# relatório final vivem AQUI (não hardcoded em prompt humano nem em TS): mudar a
+# política muda o briefing, sem duplicação. Distribuído a consumidores via
+# `.core/**` (package.json#files); o estado situado é local de cada repo.
+#
+# `publication.commit`/`push`:
+#   - forbidden               → nunca (mesmo com autorização);
+#   - explicit-work-request   → permitido APENAS sob --authorization explicit-work-request,
+#                               e somente no objeto/escopo inferido do modo.
+# `mixed_scope: forbidden` é invariante: um commit nunca mistura escopos.
+version: 1
+
+modes:
+  blocked:
+    purpose: >
+      Há condição que torna o trabalho inseguro (tree funcional suja, branch atrás
+      do remoto, drift de projeção, fonte governada ausente, gate já aprovado,
+      policy inválida ou objeto ambíguo). Reconciliar antes de qualquer escrita.
+    allowed_actions:
+      - investigate-readonly
+      - reconcile-projection
+    forbidden_actions:
+      - modify-functional-files
+      - create-resolutions
+      - update-pr-body
+      - run-review
+      - ready
+      - human-gate
+      - merge
+    publication:
+      commit: forbidden
+      push: forbidden
+      mixed_scope: forbidden
+    validations:
+      - git diff --check
+      - npm run reconcile:check
+      - npm run active-specs:check
+    expects_resolutions: false
+    pr_body_editable: false
+    stop_conditions:
+      - reconciliação concreta indicada aplicada (ou escalada à owner)
+      - nenhuma escrita funcional realizada
+    report_sections:
+      - Retomada
+      - Bloqueio detectado
+      - Reconciliação necessária
+      - Próxima ação
+
+  resolve_findings:
+    purpose: >
+      Há finding aberto sem resolution `fixed` válida (ou ref ausente/irrelevante
+      ao functional HEAD). Corrigir a causa raiz, falsificar com teste vermelho,
+      registrar resolutions governadas — sem fechar dispositions.
+    allowed_actions:
+      - modify-functional-files
+      - add-regression-tests
+      - create-resolutions
+      - update-pr-body
+    forbidden_actions:
+      - edit-review
+      - close-dispositions
+      - start-next-subcheckpoint
+      - run-review
+      - ready
+      - human-gate
+      - merge
+    publication:
+      commit: explicit-work-request
+      push: explicit-work-request
+      mixed_scope: forbidden
+    validations:
+      - git diff --check
+      - npm run format
+      - npm run review:check
+      - npm run validate
+    expects_resolutions: true
+    pr_body_editable: true
+    stop_conditions:
+      - findings corrigidos com teste de regressão
+      - resolutions registradas com ref ao commit funcional
+      - dispositions ainda open (só reviewer/owner fecha)
+      - CI verde · tree limpa
+    report_sections:
+      - Retomada
+      - Correções por finding
+      - Resolutions
+      - Regressão
+      - Testes
+      - Commits e push
+      - Estado final
+      - Próxima ação
+
+  await_revalidation:
+    purpose: >
+      Todos os findings abertos já possuem resolution `fixed` com ref válida.
+      Nenhuma correção adicional é exigida do implementador: a lane aguarda
+      revalidação independente por reviewer/owner. Só reconciliação factual de
+      documentação, quando necessária.
+    allowed_actions:
+      - investigate-readonly
+      - reconcile-docs
+    forbidden_actions:
+      - modify-functional-files-for-findings
+      - create-resolutions
+      - close-dispositions
+      - start-next-subcheckpoint
+      - run-review
+      - ready
+      - human-gate
+      - merge
+    publication:
+      commit: explicit-work-request
+      push: explicit-work-request
+      mixed_scope: forbidden
+    validations:
+      - npm run review:check
+    expects_resolutions: false
+    pr_body_editable: true
+    stop_conditions:
+      - nenhuma nova resolution para os findings já resolvidos
+      - revalidação independente solicitada ao reviewer/owner
+    report_sections:
+      - Retomada
+      - Findings corrigidos
+      - Resolutions
+      - Estado da lane
+      - Próxima ação
+
+  prepare_subcheckpoint_transition:
+    purpose: >
+      Um sub-checkpoint terminou (auditoria fechada/verificada, sem trabalho
+      executável aberto) mas o tasks.md ainda não reflete a transição. NÃO há
+      objeto de implementação até a transição ser registrada. A conclusão de um
+      sub-checkpoint e a ativação do próximo são um ATO OPERACIONAL EXPLÍCITO e
+      VISÍVEL em tasks.md — nunca um efeito colateral silencioso de fechar
+      dispositions. Marque o sub-checkpoint concluído e ative o próximo; só então
+      o modo vira implement_checkpoint com objeto concreto.
+    allowed_actions:
+      - mark-subcheckpoint-done
+      - activate-next-subcheckpoint
+      - update-pr-body
+      - reconcile-docs
+    forbidden_actions:
+      - modify-functional-files
+      - create-resolutions
+      - close-dispositions
+      - run-review
+      - ready
+      - human-gate
+      - merge
+    publication:
+      commit: explicit-work-request
+      push: explicit-work-request
+      mixed_scope: forbidden
+    validations:
+      - git diff --check
+      - npm run reconcile:check
+    expects_resolutions: false
+    pr_body_editable: true
+    stop_conditions:
+      - tasks.md registra o sub-checkpoint concluído e o próximo ativado (ato visível)
+      - nenhuma implementação funcional iniciada antes da transição
+    report_sections:
+      - Retomada
+      - Sub-checkpoint concluído
+      - Próximo sub-checkpoint ativado
+      - Próxima ação
+
+  implement_checkpoint:
+    purpose: >
+      Sem finding bloqueante pendente; há tarefa aberta no checkpoint autorizado e
+      não se está em fase de fechamento. Implementar a fatia vertical com
+      falsificação e testes.
+    allowed_actions:
+      - modify-functional-files
+      - add-regression-tests
+      - update-pr-body
+    forbidden_actions:
+      - edit-review
+      - close-dispositions
+      - start-next-subcheckpoint
+      - run-review
+      - ready
+      - human-gate
+      - merge
+    publication:
+      commit: explicit-work-request
+      push: explicit-work-request
+      mixed_scope: forbidden
+    validations:
+      - git diff --check
+      - npm run format
+      - npm run validate
+    expects_resolutions: false
+    pr_body_editable: true
+    stop_conditions:
+      - critério de saída da tarefa satisfeito
+      - falsificação registrada · testes verdes
+      - CI verde · tree limpa
+    report_sections:
+      - Retomada
+      - Escopo
+      - Arquitetura implementada
+      - Falsificação
+      - Testes
+      - Dogfood
+      - Commits e push
+      - Estado do PR
+      - Próxima ação
+
+  prepare_close:
+    purpose: >
+      Tarefas do checkpoint concluídas e requirements obrigatórios satisfeitos, mas
+      o PR segue Draft. Preparar o fechamento editorial — sem converter Ready,
+      exercer Human Gate, criar gate artifact ou mergear (atos da owner).
+    allowed_actions:
+      - update-pr-body
+      - reconcile-docs
+    forbidden_actions:
+      - ready
+      - human-gate
+      - gate-artifact
+      - merge
+      - start-next-subcheckpoint
+    publication:
+      commit: explicit-work-request
+      push: explicit-work-request
+      mixed_scope: forbidden
+    validations:
+      - git diff --check
+      - npm run validate
+      - npm run pr-ready:check
+    expects_resolutions: false
+    pr_body_editable: true
+    stop_conditions:
+      - body final aplicado (contrato READY); pr-ready:check verde
+      - decisão de Ready/Human Gate permanece com a owner
+    report_sections:
+      - Retomada
+      - Estado do checkpoint
+      - Pendências de fechamento
+      - Próxima ação
+
+  current:
+    purpose: >
+      Não há trabalho de implementação nem de fechamento a realizar. Não inventar
+      tarefa.
+    allowed_actions:
+      - investigate-readonly
+    forbidden_actions:
+      - modify-functional-files
+      - update-pr-body
+      - run-review
+      - ready
+      - human-gate
+      - merge
+    publication:
+      commit: forbidden
+      push: forbidden
+      mixed_scope: forbidden
+    validations: []
+    expects_resolutions: false
+    pr_body_editable: false
+    stop_conditions:
+      - nenhuma ação de implementação/fechamento pendente
+    report_sections:
+      - Retomada
+      - Estado
+      - Próxima ação

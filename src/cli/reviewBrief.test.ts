@@ -61,6 +61,7 @@ function facts(overrides: Partial<HandoffFacts> = {}): HandoffFacts {
       gateDecision: null,
     },
     tasks: [],
+    subCheckpoints: [],
     insights: [],
     driftWarnings: [],
     sources: [
@@ -212,6 +213,69 @@ describe("reviewBrief · inferência de modo [CO-4]", () => {
       } as ResolutionArtifact,
     ];
     const brief = deriveReviewBrief(input({ existingReview: review, resolutions }));
+    expect(brief.mode).toBe("verification");
+    expect(brief.artifact.verificationScope).toBe("findings");
+  });
+
+  const findingReview = () =>
+    existingTa({
+      subjectRef: "aaa1111..b8f18c0",
+      decision: "changes_requested",
+      findingsEmitted: 1,
+      findings: [
+        {
+          id: "F1",
+          severity: "high",
+          location: "src/x.ts#L1",
+          description: "bug",
+          disposition: "open",
+          fingerprint: "ff",
+        },
+      ],
+    });
+  const f1Resolution = (): ResolutionArtifact =>
+    ({
+      checkpoint: "checkpoint-co-projection",
+      by: "@dev",
+      resolutions: [{ finding: "technical_audit#F1", action: "fixed" }],
+      file: "reviews/c-co-projection-resolutions.yml",
+    }) as ResolutionArtifact;
+  const ev1VerifyingF1 = (subjectRef: string) => ({
+    checkpoint: "checkpoint-co-projection",
+    role: "technical_audit" as const,
+    eventId: "EV1",
+    kind: "verification" as const,
+    scope: "findings" as const,
+    executor: { platform: "x", model: "y" },
+    decision: "approved" as const,
+    verifies: ["technical_audit#F1"],
+    subjectRef,
+    auditEvidence: { coverage: ["a"], scope: "s", basis: "b" },
+    file: "events/c-co-projection-technical_audit-EV1.yml",
+  });
+
+  it("[bug2] finding open com resolution JÁ verificado por evento cobrindo o HEAD → CURRENT", () => {
+    // A circularidade: sem este fix, a lane ficaria VERIFICATION para sempre
+    // (disposition open permanece) e o EV nunca poderia ser publicado.
+    const brief = deriveReviewBrief(
+      input({
+        existingReview: findingReview(),
+        resolutions: [f1Resolution()],
+        roleEvents: [ev1VerifyingF1("aaa1111..b8f18c0")], // cobre o HEAD atual
+      })
+    );
+    expect(brief.mode).toBe("current");
+    expect(brief.modeBasis.join(" ")).toMatch(/REVALIDAD/i);
+  });
+
+  it("[bug2] evento que NÃO cobre o HEAD atual não torna a lane current (verification)", () => {
+    const brief = deriveReviewBrief(
+      input({
+        existingReview: findingReview(),
+        resolutions: [f1Resolution()],
+        roleEvents: [ev1VerifyingF1("aaa1111..f04c5e8")], // cabeça antiga ≠ HEAD
+      })
+    );
     expect(brief.mode).toBe("verification");
     expect(brief.artifact.verificationScope).toBe("findings");
   });

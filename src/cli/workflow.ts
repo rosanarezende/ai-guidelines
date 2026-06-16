@@ -80,6 +80,8 @@ import { VISUAL_PROMPT_OPTIONS, VisualPromptValue } from "./visual-prompts/visua
 import type { CommandRegistry } from "./registry/CommandRegistry.js";
 import { INTENT_CATALOG } from "./registry/intentCatalog.js";
 import type { Intent, IntentAction } from "./registry/Intent.js";
+import { emitReceiptAdvisory } from "./handoff.js";
+import { readReceiptText } from "./handoffReceipt.js";
 
 export { renderVisualPrompt };
 
@@ -1469,6 +1471,12 @@ export async function runPublishState(
 ): Promise<number> {
   const logger = options.logger ?? stdoutLogger;
   const fs = options.fs ?? new NodeWorkflowFileSystem(options.repoRoot);
+
+  // CO-3.4 — advisory-first do recibo de carga nesta superfície mutante situada.
+  // publish-state NÃO reescreve o recibo antes daqui, então lê-lo agora reflete o
+  // estado da retomada. O helper deriva o snapshot sem escrita, com o default de
+  // remote da carga (selo bate), e degrada de forma diagnosticável.
+  emitReceiptAdvisory(options.repoRoot, readReceiptText(options.repoRoot), logger);
 
   if (!args.status || args.status.trim() === "") {
     logger.error(

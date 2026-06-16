@@ -87,6 +87,47 @@ export interface ReadyCheckResult {
 const READY_IS_NOT_MERGE =
   "Ready NÃO autoriza merge (ADR 0024): a conversão apenas apresenta o PR para decisão humana; o Human Gate decide o próximo movimento e, em stack modo unit, não há merge isolado em main.";
 
+export interface ReadyCheckRun {
+  readonly name: string;
+  readonly status: string;
+  readonly conclusion: string | null;
+  readonly started_at?: string | null;
+  readonly completed_at?: string | null;
+}
+
+function runTime(run: ReadyCheckRun): number {
+  const raw = run.started_at ?? run.completed_at ?? null;
+  if (!raw) return 0;
+  const parsed = Date.parse(raw);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function bucketOf(run: ReadyCheckRun): string {
+  if (run.status !== "completed") return "pending";
+  if (run.conclusion === "success") return "pass";
+  if (run.conclusion === "skipped" || run.conclusion === "neutral") return "skipping";
+  return "fail";
+}
+
+/**
+ * GitHub REST `check-runs` can return repeated runs for the same check name on
+ * the same commit. `gh pr checks` presents the current run per name; Ready/Gate
+ * decisions use that same shape instead of counting stale historical retries.
+ */
+export function normalizeCheckRuns(
+  runs: readonly ReadyCheckRun[]
+): Array<{ name: string; bucket: string }> {
+  const latestByName = new Map<string, ReadyCheckRun>();
+  for (const run of runs) {
+    const previous = latestByName.get(run.name);
+    if (!previous || runTime(run) > runTime(previous)) latestByName.set(run.name, run);
+  }
+  return [...latestByName.values()].map((run) => ({
+    name: run.name,
+    bucket: bucketOf(run),
+  }));
+}
+
 /** Pure: avalia as precondições de Ready sobre um snapshot. */
 export function evaluateReadyPreconditions(snapshot: ReadyCheckSnapshot): ReadyCheckResult {
   const failures: string[] = [];
@@ -311,18 +352,8 @@ export class GhSnapshotCollector implements SnapshotCollector {
     try {
       const runs = JSON.parse(
         gh(["api", `repos/${repo}/commits/${raw.head.sha}/check-runs`, "--paginate"])
-      ) as { check_runs: Array<{ name: string; status: string; conclusion: string | null }> };
-      checks = runs.check_runs.map((run) => ({
-        name: run.name,
-        bucket:
-          run.status !== "completed"
-            ? "pending"
-            : run.conclusion === "success"
-              ? "pass"
-              : run.conclusion === "skipped" || run.conclusion === "neutral"
-                ? "skipping"
-                : "fail",
-      }));
+      ) as { check_runs: ReadyCheckRun[] };
+      checks = normalizeCheckRuns(runs.check_runs);
     } catch {
       checks = [];
     }

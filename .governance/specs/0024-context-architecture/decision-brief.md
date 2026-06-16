@@ -6,7 +6,7 @@
 > Plan: [`./plan.md`](./plan.md)
 > Tasks: [`./tasks.md`](./tasks.md)
 > Status agregado: **Resolved (decisões)** — todas as `[DEC]` desta spec estão `Resolved`; a pesquisa estrutural ainda aberta vive em [`research/findings.md`](./research/findings.md), não aqui.
-> Última atualização: 2026-05-31 — **reestruturação por estado** (aposentada a organização G00–G06) + `G02` registrado como `Resolved`.
+> Última atualização: 2026-06-16 — **`[DEC-0024-G10]` registrada**: novo nó planejado `co-flow-convergence` antes de `co-capture`.
 
 > **Artefato exclusivo de decisão humana.** Organizado por **estado**, não por numeração histórica (reestruturação 2026-05-31). Quatro estados respondem, à primeira vista, _o que já foi decidido · o que ainda está aberto · o que virou regra · o que virou enforcement_:
 >
@@ -153,6 +153,102 @@
 
 ---
 
+### [DEC-0024-G09] Eliminação integral da árvore-fonte `/cli` — `/dist` como única superfície executável publicada
+
+**Pergunta:** A árvore-fonte `/cli` deve permanecer como "wrapper/compatibilidade" (desenho do nó `bootstrap-compiler`, #38) ou ser **eliminada**, com toda a implementação em `/src` e `/dist` como única superfície executável distribuída?
+
+**Modo de gate:** `aceitação` <!-- decisão de desenho da owner, 2026-06-15, após nova evidência operacional; supersede o desenho narrado em plan.md (nó bootstrap-compiler / #38). -->
+
+**Decisão anterior (SUPERSEDED, não apagada):** o nó `bootstrap-compiler` (#38) cravou que "`/cli` passa a wrapper/compatibilidade" e que a "migração ampla do ecossistema (Grupo B)" ficaria FORA da 0024 (fronteira "modelo ≠ migração", `plan.md`). O cutover de roteamento (#35) migrou o `CommandRegistry` para `/src`, mas **não a execução**.
+
+**Evidência que a falsificou (operacional, 2026-06-15):** `/cli` NÃO virou wrapper fino — ainda contém runtime, wizard (`cli/cli/args.mjs`), provisionamento (`cli/app`, `cli/features`, `cli/fs`, `cli/formatters`), filesystem e ~30 entrypoints de check. `BootstrapCommand` ainda depende de `LegacyExecuteFn`/`loadLegacyExecute` (`cli/app/engine.mjs`); o registry controla o NOME do comando, mas delega ao runtime legado; há lista duplicada de comandos (`SUPPORTED_MODES` × registry); `package.json` `bin`/`files`/`imports` ainda publicam e executam código-fonte de `/cli`. Uma fronteira chamada "compatibilidade" virou a IMPLEMENTAÇÃO REAL — uma 2ª arquitetura executável.
+
+**Decisão (Resolved):**
+
+- A árvore-fonte `/cli` será **eliminada por completo**.
+- Toda implementação (runtime, wizard, provisionamento, features, filesystem, formatters, parsing, comandos, checks) viverá em `/src`.
+- `/dist` é a **única superfície executável publicada** (`package.json#bin → dist/…`; tarball SEM `/cli`).
+- `CommandRegistry` é a única fonte de comandos/help/interação; sem `LegacyExecuteFn`/`loadLegacyExecute` nem lista paralela de verbos.
+
+**Veículo:** sub-checkpoint próprio **CO-3.5 — colapso integral do runtime CLI**, no MESMO nó (`co-enforcement`), MESMO PR (#42) e MESMO Human Gate (modo unit). A **topologia externa** (`state.yml § topology`) é **inalterada** — o nó segue `co-enforcement`; muda só a sequência INTERNA de sub-checkpoints do PR #42. NÃO há spec nova nem nó novo em `state.yml`.
+
+**O que NÃO está sendo decidido:** inflar o significado do CO-3.4 (que segue ESTRITO: advisory do recibo nas 2 superfícies; ver `[DEC]`-livre/CO-3.4); deferir a remoção para outra spec/backlog; alterar a topologia externa; iniciar o CO-3.5 nesta sessão.
+
+**Trade-off cravado:** assume-se uma migração ampla (porte fiel de ~83 `.mjs` para `/src` + guard arquitetural do cutover + revalidação de pacote instalado em consumidor novo/existente) DENTRO da 0024 — revisando a fronteira "modelo ≠ migração" para ESTE runtime especificamente. Racional da owner: a fronteira só se justifica se "compatibilidade" for de fato fina; quando ela é a implementação real, manter `/cli` é manter duas arquiteturas executáveis — o oposto do objetivo da 0024.
+
+**Status:** Resolved (2026-06-15) / @rosanarezende — decisão de desenho da owner.
+
+---
+
+### [DEC-0024-G10] Inserir `co-flow-convergence` antes de `co-capture` — convergência do fluxo ponta a ponta
+
+**Pergunta:** Depois do fechamento técnico do CO-3.5, a Spec 0024 deve avançar diretamente para `co-capture`/`co-events`, ou precisa de um nó próprio para revisar e corrigir a modelagem ponta a ponta do fluxo governado antes de automatizá-lo?
+
+**Modo de gate:** `aceitação` <!-- decisão topológica da owner, 2026-06-16, antes do Human Gate do co-enforcement / PR #42. -->
+
+**Contexto:** O CO-3.5 ficou tecnicamente pronto (`/cli` inexistente, bin em `dist`, tarball sem `/cli`, consumidores validados, CI remoto verde, `work` projetando `PREPARE_CLOSE`), mas o dogfood da própria 0024 revelou uma classe recorrente de conflito: **dois caminhos tentando explicar o mesmo estado**.
+
+**Evidências observadas durante a Spec 0024:**
+
+- `handoff` × `work`;
+- `work` × `decide`;
+- readiness inferida por findings antigos;
+- registry novo delegando para `/cli`;
+- recibo sendo reescrito pelo próprio fluxo que deveria validá-lo;
+- checks e comandos usando critérios diferentes;
+- rotas antigas e novas convivendo até CO-3.5.
+
+**Decisão (Resolved):**
+
+- Inserir um novo nó planejado na Spec 0024: `co-flow-convergence` — **convergência do fluxo ponta a ponta**.
+- Posição: imediatamente após `co-enforcement` e antes de `co-capture`.
+- Topologia: `co-enforcement` seq 9 → `co-flow-convergence` seq 10 → `co-capture` seq 11 → `co-events` seq 12 → `housekeeping` seq 13 → `dualroot-collapse` seq 14 → `knowledge-readiness` seq 15 → `integration-final` terminal.
+- O nó é PR próprio da stack, antes de CO-5, e permanece dentro da Spec 0024.
+
+**O que o nó deve fazer:**
+
+```text
+inventário real
+→ modelo canônico
+→ confronto modelo × código
+→ correção integral dos gaps
+→ dogfood ponta a ponta
+→ falsificação
+→ Human Gate
+```
+
+**Fluxo a modelar como máquina de estados única:**
+
+```text
+nova sessão
+→ handoff
+→ work
+→ implementação
+→ review
+→ resolution
+→ disposition
+→ avanço de sub-checkpoint
+→ Ready
+→ Human Gate
+→ transição de nó
+→ integração
+→ merge
+```
+
+Cada transição deve declarar: fato de entrada, autoridade, comando, efeito permitido, artefato alterado, validação, próximo estado e ações proibidas.
+
+**Matriz mínima de fontes a produzir:** conceito · SSOT · projeções · consumidores · validações, cobrindo pelo menos nó ativo, sub-checkpoint, reviews, findings/resolutions/dispositions, receipt, readiness, PR Draft/Ready, Human Gate, comandos, scripts, CI e integração final. Qualquer conceito com duas SSOTs vira erro ou decisão explícita.
+
+**Invariantes esperadas:** `work` e `decide` precisam concordar; bloqueio em `decide` não pode ser executável em `work`; um estado não pode ser simultaneamente `IMPLEMENT_CHECKPOINT` e `PREPARE_TRANSITION`; projeção não atualiza a fonte que valida; mutação declara autoridade e efeito; readiness terminal não aciona `advance-subcheckpoint`; zero findings não bloqueia sub-checkpoint concluído; findings antigos não liberam sub-checkpoint novo; registry/help/wizard/scripts não divergem; caminho legado não volta após CO-3.5.
+
+**Jornadas obrigatórias de teste:** sessão nova → implementação; finding → fix → verification → disposition; sub-checkpoint sem findings → transição; sub-checkpoint com findings → bloqueio → correção; último sub-checkpoint → fechamento/prepare close; PR Draft → Ready → Human Gate; consumidor novo → init; consumidor existente → adopt/update; branch/CI/receipt stale; retomada após interrupção; modo offline/degradado.
+
+**O que NÃO está sendo decidido:** implementar o nó agora; preparar Ready; executar Human Gate; abrir novo PR nesta sessão; abrir CO-5; transformar o nó em spec separada ou housekeeping; remover a readiness do CO-3.5; marcar CO-3.5 como `[x]`.
+
+**Status:** Resolved (2026-06-16) / @rosanarezende — decisão topológica da owner, registrada antes do Human Gate do `co-enforcement`.
+
+---
+
 ## 2 · Aberto — pesquisa genuína (única coisa ainda em investigação)
 
 > Estes **não são decisões** — são findings com **alternativas reais ainda competindo**. Vivem em [`research/findings.md`](./research/findings.md); aqui só o ponteiro. Só retornam como `[DEC] Pendente` ao **convergir + exigir julgamento**. **Critério (2026-05-31):** se não há alternativa viva competindo, **não pertence aqui** — é decisão (§ 1) ou trabalho (§ 4).
@@ -215,6 +311,8 @@
 | `G06`        | contrato da cadeia                                    | **Decidido** — § 1 (Resolved 2026-05-30) → ADR no fechamento                                                 |
 | `G07`        | topologia-as-data + enforcement L4                    | **Decidido** — § 1 (Resolved 2026-06-01) → enforcement em § 4                                                |
 | `G08`        | reabertura de G03/G04/G05 + direção orientada a grafo | **Decidido** — Resolved 2026-06-03 (owner); a modelagem fica DENTRO da 0024; NÃO há 0025 independente        |
+| `G09`        | eliminação integral de `/cli` (→ CO-3.5)              | **Decidido** — § 1 (Resolved 2026-06-15, owner); supersede o "wrapper" do #38; topologia externa inalterada  |
+| `G10`        | `co-flow-convergence` antes de `co-capture`           | **Decidido** — § 1 (Resolved 2026-06-16, owner); nó próprio para convergência ponta a ponta do fluxo         |
 
 ---
 
@@ -227,6 +325,8 @@
 - [x] `[DEC-0024-G06]` — Resolved 2026-05-30 / @rosanarezende
 - [x] `[DEC-0024-G07]` — Resolved 2026-06-01 / @rosanarezende
 - [x] `[DEC-0024-G08]` — Resolved 2026-06-03 / @rosanarezende
+- [x] `[DEC-0024-G09]` — Resolved 2026-06-15 / @rosanarezende
+- [x] `[DEC-0024-G10]` — Resolved 2026-06-16 / @rosanarezende
 
 ---
 

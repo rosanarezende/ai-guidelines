@@ -8,29 +8,23 @@ profiles:
   maintainer:
     package_scripts:
       - name: guidelines
-        command: node cli/ai-guidelines-cli.mjs
+        command: node dist/cli/main.js
         category: cli
         mutates: false
         consumers: [human]
         description: Invocacao local da CLI.
       - name: guidelines:init
-        command: node cli/ai-guidelines-cli.mjs init
+        command: node dist/cli/main.js init
         category: cli
         mutates: true
         consumers: [human]
         description: Bootstrap de consumidor via CLI.
       - name: guidelines:adopt
-        command: node cli/ai-guidelines-cli.mjs adopt
+        command: node dist/cli/main.js adopt
         category: cli
         mutates: true
         consumers: [human]
         description: Adocao/atualizacao de consumidor existente.
-      - name: guidelines:providers
-        command: node cli/ai-guidelines-cli.mjs providers
-        category: cli
-        mutates: false
-        consumers: [human]
-        description: Lista provider adapters disponiveis.
       - name: setup
         command: npm ci && npm run build:all
         category: setup
@@ -44,7 +38,7 @@ profiles:
         consumers: [script]
         description: Compila TypeScript de src/ para dist/.
       - name: build:rules
-        command: node cli/rules-build.mjs
+        command: node dist/cli/bin.js build-rules
         category: build
         mutates: true
         consumers: [script, hook]
@@ -80,7 +74,7 @@ profiles:
         consumers: [script]
         description: Agregado das suites mjs e TypeScript.
       - name: test:unit
-        command: node --experimental-default-config-file --test "cli/**/*.test.mjs" "tests/integration/**/*.test.mjs"
+        command: node --experimental-default-config-file --test "tests/integration/**/*.test.mjs"
         category: test
         mutates: false
         consumers: [script, hook]
@@ -98,151 +92,169 @@ profiles:
         consumers: [script, workflow]
         description: Smoke cross-plataforma sobre pacote gerado.
       - name: test:coverage
-        command: node --experimental-default-config-file --experimental-test-coverage --test "cli/**/*.test.mjs" "tests/integration/**/*.test.mjs" && jest --config ./.jest/jest.config.js --coverage
+        command: node --experimental-default-config-file --experimental-test-coverage --test "tests/integration/**/*.test.mjs" && jest --config ./.jest/jest.config.js --coverage
         category: test
         mutates: false
         consumers: [human]
         description: Cobertura combinada das suites mjs e Jest.
       - name: living-docs:generate
-        command: npm run build && node cli/living-docs.mjs generate
+        command: npm run build && node dist/cli/bin.js living-docs generate
         category: docs
         mutates: true
         consumers: [human]
         description: Regenera living docs.
       - name: living-docs:check
-        command: npm run build && node cli/living-docs.mjs check
+        command: npm run build && node dist/cli/bin.js living-docs check
         category: docs
         mutates: true
         consumers: [script]
         description: Verifica drift dos living docs.
       - name: state-yml:check
-        command: npm run build && node cli/state-yml-check.mjs
+        command: npm run build && node dist/cli/bin.js state-yml-check
         category: governance
         mutates: true
         consumers: [script]
         description: Valida state.yml operacionais e tocados no diff local.
       - name: state-yml:check:all
-        command: npm run build && node cli/state-yml-check.mjs --all
+        command: npm run build && node dist/cli/bin.js state-yml-check --all
         category: governance
         mutates: true
         consumers: [script, workflow]
         description: Varredura historica/global de todos os state.yml.
       - name: active-specs:check
-        command: npm run build && node cli/active-specs-check.mjs
+        command: npm run build && node dist/cli/bin.js active-specs-check
         category: governance
         mutates: true
         consumers: [script]
         description: Verifica coerencia da projection specs/active.yml.
       - name: reconcile:check
-        command: npm run build && node cli/reconcile-check.mjs
+        command: npm run build && node dist/cli/bin.js reconcile-check
         category: governance
         mutates: true
         consumers: [script]
         description: Advisory de continuidade operacional/canonical-next.
       - name: handoff:check
-        command: npm run build && node cli/handoff-check.mjs
+        command: npm run build && node dist/cli/bin.js handoff-check
         category: governance
         mutates: true
         consumers: [script]
         description: Advisory de freshness da retomada derivada (fontes + selo + proxima acao).
       - name: co-knowledge:check
-        command: npm run build && node cli/co-knowledge-check.mjs
+        command: npm run build && node dist/cli/bin.js co-knowledge-check
         category: governance
         mutates: true
         consumers: [script]
         description: Advisory de Falsification/Knowledge.
       - name: co-knowledge:inventory
-        command: npm run build && node cli/co-knowledge-inventory.mjs
+        command: npm run build && node dist/cli/bin.js co-knowledge-inventory
         category: governance
         mutates: true
         consumers: [script]
         description: Check required do inventario minimo de conhecimento.
+      - name: constraints:check
+        command: npm run build && node dist/cli/bin.js constraints-check
+        category: governance
+        mutates: true
+        consumers: [script]
+        description: CO-3.1; compila constraints (schema/paridade/superficies/mecanismos) em memoria.
+      - name: knowledge:compile
+        command: npm run build && node dist/cli/bin.js knowledge-compile compile
+        category: build
+        mutates: true
+        consumers: [human]
+        description: CO-3.2; persiste o manifesto runtime de constraints e orquestra build:rules (guarda-chuva).
+      - name: knowledge:check
+        command: npm run build && node dist/cli/bin.js knowledge-compile check
+        category: governance
+        mutates: true
+        consumers: [script]
+        description: CO-3.2; paridade derivada do manifesto persistido (existencia/classe/sync).
       - name: script-contracts:sync
-        command: node cli/script-contracts.mjs sync
+        command: npm run build && node dist/cli/bin.js script-contracts sync
         category: governance
         mutates: true
         consumers: [human, hook]
         description: Sincroniza package.json, hooks, templates e docs a partir do contrato.
       - name: script-contracts:check
-        command: node cli/script-contracts.mjs check
+        command: npm run build && node dist/cli/bin.js script-contracts check
         category: governance
         mutates: false
         consumers: [script]
         description: Falha se scripts, hooks, templates ou docs divergirem do contrato.
       - name: runtime-bootstrap:sync
-        command: node cli/runtime-bootstrap.mjs sync
+        command: npm run build && node dist/cli/bin.js runtime-bootstrap sync
         category: governance
         mutates: true
         consumers: [human, hook]
         description: Sincroniza o stub runtime do AGENTS.md.
       - name: runtime-bootstrap:check
-        command: node cli/runtime-bootstrap.mjs check
+        command: npm run build && node dist/cli/bin.js runtime-bootstrap check
         category: governance
         mutates: false
         consumers: [script]
         description: Falha se AGENTS.md divergir do stub runtime governado.
       - name: gate-decidability:check
-        command: node cli/governance/gate-decidability-check.mjs
+        command: npm run build && node dist/cli/bin.js gate-decidability-check
         category: governance
         mutates: false
         consumers: [script]
         description: GG-0001; DECs nao-resolvidos precisam ser decidiveis.
       - name: ruleset:check
-        command: npm run build && node cli/ruleset-check.mjs
+        command: npm run build && node dist/cli/bin.js ruleset-check
         category: governance
         mutates: true
         consumers: [script, workflow]
         description: Producibilidade dos required contexts; --parity para ruleset vivo.
       - name: review:check
-        command: npm run build && node cli/review-check.mjs
+        command: npm run build && node dist/cli/bin.js review-check
         category: governance
         mutates: true
         consumers: [script]
         description: Verifica artefatos de review/gate e fingerprints.
       - name: insights:check
-        command: npm run build && node cli/insights-check.mjs
+        command: npm run build && node dist/cli/bin.js insights-check
         category: governance
         mutates: true
         consumers: [script]
         description: Valida ledger de insights.
       - name: intent:check
-        command: npm run build && node cli/intent-check.mjs
+        command: npm run build && node dist/cli/bin.js intent-check
         category: governance
         mutates: true
         consumers: [script]
         description: Verifica intencao/governanca de PR.
       - name: disclosure
-        command: npm run build && node cli/disclosure-render.mjs
+        command: npm run build && node dist/cli/bin.js disclosure-render
         category: governance
         mutates: true
         consumers: [human]
         description: Renderiza disclosure de IA derivado.
       - name: review:publish
-        command: npm run build && node cli/review-publish.mjs
+        command: npm run build && node dist/cli/bin.js review-publish
         category: governance
         mutates: true
         consumers: [human]
         description: Commit exclusivo + push do artefato de review sob autorizacao capability-scoped (fail-closed; diff review-only).
       - name: review:seal
-        command: node cli/review-seal.mjs
+        command: npm run build && node dist/cli/bin.js review-seal
         category: governance
         mutates: true
         consumers: [human]
         description: Sela fingerprints de reviews E eventos (findings/review_fingerprint/event_fingerprint) por deteccao automatica do tipo.
       - name: pr-body:update
-        command: npm run build && node cli/pr-body-update.mjs
+        command: npm run build && node dist/cli/bin.js pr-body-update
         category: governance
         mutates: true
         consumers: [human]
         description: Atualiza PR body preservando secoes baseline (FU-1); fallback gh api PATCH.
       - name: pr-ready:check
-        command: npm run build && node cli/pr-ready-check.mjs
+        command: npm run build && node dist/cli/bin.js pr-ready-check
         category: governance
         mutates: true
         consumers: [human]
         description: Valida precondicoes da conversao Draft->Ready (FU-2); read-only, nao converte.
       - name: validate
-        command: npm run format:check && npm run build:all && npm run script-contracts:check && npm run runtime-bootstrap:check && npm run test && npm run living-docs:check && npm run state-yml:check && npm run active-specs:check && npm run reconcile:check && npm run co-knowledge:check && npm run co-knowledge:inventory && npm run gate-decidability:check && npm run ruleset:check && npm run review:check && npm run insights:check && npm run intent:check
+        command: npm run format:check && npm run build:all && npm run script-contracts:check && npm run runtime-bootstrap:check && npm run test && npm run living-docs:check && npm run state-yml:check && npm run active-specs:check && npm run reconcile:check && npm run co-knowledge:check && npm run co-knowledge:inventory && npm run constraints:check && npm run knowledge:check && npm run gate-decidability:check && npm run ruleset:check && npm run review:check && npm run insights:check && npm run intent:check
         category: aggregate
         mutates: true
         consumers: [hook, workflow, human]
@@ -304,7 +316,7 @@ profiles:
           - npm run test:smoke
       - file: .github/workflows/ruleset-drift.yml
         required_runs:
-          - node cli/ruleset-check.mjs --parity --live /tmp/live-ruleset.json
+          - npm run build && node dist/cli/bin.js ruleset-check --parity --live /tmp/live-ruleset.json
 
     docs:
       generated_file: docs/scripts.md

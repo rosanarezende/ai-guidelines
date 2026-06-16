@@ -265,3 +265,129 @@ describe("CLI — active-specs:check · coerência branch/identidade fatos→pro
     expect(r.kind).toBe("ok");
   });
 });
+
+// Coerência ESTADO↔NARRATIVA dos sub-checkpoints (dogfood CO-3.3): um `[x]` que
+// ainda diz "EM EXECUÇÃO" mente para a retomada — mesma classe de drift que
+// stage/branch. O check reusa `parseSubCheckpoints` e lê o cursor da topologia.
+describe("CLI — active-specs:check · coerência ESTADO↔NARRATIVA de sub-checkpoints [dogfood CO-3.3]", () => {
+  /** state.yml com cursor de topologia apontando para o checkpoint dado. */
+  function stateWithCursor(checkpoint: string): string {
+    return [
+      "stage: implementation",
+      "gate:",
+      "  status: closed",
+      "focus: []",
+      "next: []",
+      "topology:",
+      "  cursor:",
+      "    pr: co-enforcement",
+      `    checkpoint: ${checkpoint}`,
+      "  prs:",
+      "    concluded: []",
+      "    active:",
+      "      - id: co-enforcement",
+      "        github_pr: 42",
+      "        role: execution",
+      "        terminal: false",
+      "        sequence: 1",
+      "        checkpoints:",
+      `          - ${checkpoint}`,
+      "    planned:",
+      "      - id: integration-final",
+      "        github_pr: null",
+      "        role: integration",
+      "        terminal: true",
+      "        sequence: null",
+      "        checkpoints:",
+      "          - checkpoint-integration-final",
+      "",
+    ].join("\n");
+  }
+
+  function tasksMd(
+    co31 = "[x]",
+    co31Tail = "Concluído.",
+    co33 = "[/]",
+    co34Tail = "advisory."
+  ): string {
+    return [
+      "## Execução",
+      "",
+      "- [/] **Checkpoint co-enforcement** (nó `co-enforcement`)",
+      `    - ${co31} **CO-3.1 — Constraint + EnforcementBinding**: fatia vertical. ${co31Tail}`,
+      "    - [x] **CO-3.2 — knowledge:compile**: entrypoint humano.",
+      `    - ${co33} **CO-3.3 — migração e remoção do substrato legacy**: port TS.`,
+      `    - [ ] **CO-3.4 — dogfood do enforcement e recibo**: ${co34Tail}`,
+      "",
+    ].join("\n");
+  }
+
+  /** Leitor que despacha por sufixo: state.yml × tasks.md. */
+  function reader(state: string, tasks: string): (rel: string) => string | null {
+    return (rel) => (rel.endsWith("tasks.md") ? tasks : rel.endsWith("state.yml") ? state : null);
+  }
+
+  it("DADO tasks.md coerente QUANDO checa ENTÃO ok", () => {
+    const r = runActiveSpecsConsistencyCheck({
+      indexText: indexOf(entryYaml()),
+      readStateYml: reader(stateWithCursor("checkpoint-co-enforcement"), tasksMd()),
+    });
+    expect(r.kind).toBe("ok");
+  });
+
+  it("DADO um [x] que ainda diz 'EM EXECUÇÃO' QUANDO checa ENTÃO falha citando o sub-checkpoint", () => {
+    const r = runActiveSpecsConsistencyCheck({
+      indexText: indexOf(entryYaml()),
+      readStateYml: reader(
+        stateWithCursor("checkpoint-co-enforcement"),
+        tasksMd("[x]", "EM EXECUÇÃO.")
+      ),
+    });
+    expect(r.kind).toBe("fail");
+    if (r.kind === "fail") {
+      expect(r.failures.some((f) => /CO-3\.1.*em execução/i.test(f.message))).toBe(true);
+    }
+  });
+
+  it("DADO dois sub-checkpoints [/] QUANDO checa ENTÃO falha (exatamente um pode estar ativo)", () => {
+    const r = runActiveSpecsConsistencyCheck({
+      indexText: indexOf(entryYaml()),
+      // CO-3.1 vira [/] também → dois ativos.
+      readStateYml: reader(
+        stateWithCursor("checkpoint-co-enforcement"),
+        tasksMd("[/]", "port TS.", "[/]")
+      ),
+    });
+    expect(r.kind).toBe("fail");
+    if (r.kind === "fail") {
+      expect(
+        r.failures.some((f) => /mais de um sub-checkpoint \[\/\] ativo/i.test(f.message))
+      ).toBe(true);
+    }
+  });
+
+  it("DADO um [ ] que diz 'concluído' QUANDO checa ENTÃO falha", () => {
+    const r = runActiveSpecsConsistencyCheck({
+      indexText: indexOf(entryYaml()),
+      readStateYml: reader(
+        stateWithCursor("checkpoint-co-enforcement"),
+        tasksMd("[x]", "Concluído.", "[/]", "CONCLUÍDO.")
+      ),
+    });
+    expect(r.kind).toBe("fail");
+    if (r.kind === "fail") {
+      expect(r.failures.some((f) => /CO-3\.4.*concluído\/implementado/i.test(f.message))).toBe(
+        true
+      );
+    }
+  });
+
+  it("DADO state.yml sem topologia QUANDO checa ENTÃO coerência é SKIPPED (sem cursor)", () => {
+    const r = runActiveSpecsConsistencyCheck({
+      indexText: indexOf(entryYaml()),
+      // stateWith sem topology + tasks.md incoerente: o check não tem cursor → no-op.
+      readStateYml: reader(stateWith("implementation"), tasksMd("[x]", "EM EXECUÇÃO.")),
+    });
+    expect(r.kind).toBe("ok");
+  });
+});

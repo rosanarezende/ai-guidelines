@@ -99,6 +99,14 @@ insights:
         spec: "0024"
         cursor: checkpoint-co-projection
         note: "Rodada 7 (review executado, publicacao exigia segundo pedido): owner pediu TA em uma frase; agente descobriu o comando, executou o review completo, criou/selou/validou o EV1 e identificou o commit exclusivo — mas PAROU pedindo 'autorize o commit e o push', forcando segunda interacao humana so para publicar o artefato que ela mesma solicitou. Falsifica: 'briefing completo elimina a friccao do review'. Conclusao: o pedido explicito precisa CARREGAR autorizacao operacional capability-scoped ate a publicacao do artefato canonico. Correcao: --authorization explicit-review-request (fail-closed; ensinada pelo AGENTS) + review:publish (guard executavel: diff EXATAMENTE review-only no path canonico, mensagem derivada, push normal; GitHub segue proibido). Bonus do dogfood: descoberto bug real de contrato — SHA todo-numerico vira NUMERO no YAML e invalidava subject_ref (~1/38); corrigido com erro orientativo + aspas obrigatorias nos templates/briefing."
+      - at: 2026-06-13T19:02:53.283Z
+        spec: "0024"
+        cursor: checkpoint-co-enforcement
+        note: "Dogfood operacional (PR #42, CO-3.1): o contrato de RETOMADA (handoff) e de REVIEW (review brief) ja eram descobriveis, mas a EXECUCAO de trabalho funcional (correcao de F1-F3) exigiu da owner um mega-prompt reconstruindo branch/PR/checkpoint/HEAD, review/findings, acoes permitidas/proibidas, autoridade, necessidade de resolutions, comandos de validacao, politica de commit/push, criterio de parada e formato do relatorio final — tudo derivavel do repo. Hipotese falsificada: handoff + review briefing + policy NAO tornam automaticamente o contrato de IMPLEMENTACAO e de ENTREGA DO RELATORIO descobrivel. Correcao: guidelines work (briefing governado de trabalho) + work-policy.yml (report contract governado por modo). Limite: o briefing projeta o contrato, nao executa trabalho."
+      - at: 2026-06-13T22:53:58.549Z
+        spec: "0024"
+        cursor: checkpoint-co-enforcement
+        note: "Dogfood operacional (PR #42, revalidacao EV1 do CO-3.1): o EV1 (verification approved de F1-F3) era valido e selado, mas review:publish NAO conseguiu publica-lo — circularidade (o evento precisava estar publicado para a lane virar CURRENT, mas review:publish exigia CURRENT antes do commit; a disposition open permanece por contrato). Codex caiu em commit/push manual. Classe distinta de PIT-0011: o contrato era DESCOBERTO (review:publish canonico) e o artefato PRODUZIVEL (EV1 selado), mas a automacao de publicacao nao conseguia CONCLUIR o proprio fluxo canonico — evolucao de 'descoberto != executavel' para 'produzivel != publicavel pela ferramenta'. Correcao: avaliacao prospectiva (a lane FECHARIA como current com o candidato em disco?) + findings ja revalidados por evento cobrindo o functional HEAD nao mantem a lane em verification. Limite: git HEAD avanca por commit review-only, functional HEAD nao."
   - id: PIT-0012
     text: "Capacidade disponivel nao e obrigacao: catalogo de tipos de review e policy de exigencia precisam ser independentes (tipo/aplicabilidade/requisito/estado) para preservar autoridade humana — acoplar perfil de colaboracao ou freshness a obrigatoriedade transforma oferta em imposicao"
     status: open
@@ -108,3 +116,16 @@ insights:
         spec: "0024"
         cursor: checkpoint-co-projection
         note: "Dogfood CO-4 rodada 8: perfil team impunha TA/AR; review stale era lido como revalidacao obrigatoria; correcao separou review_types de review_requirements (so required+nao-current bloqueia)"
+  - id: PIT-0013
+    text: Uma decisao reservada ao humano continua sendo procedimento tecnico quando o sistema nao traduz contexto, riscos, evidencias e consequencias antes de pedir a escolha — autoridade reservada exige briefing humano-primeiro (o que/por que/o que estava errado/o que foi feito/como foi verificado/riscos/consequencias/o que NAO autoriza) e prévia+confirmacao, nao apenas reservar a permissao
+    status: open
+    captured_at: 2026-06-14T04:12:47.296Z
+    occurrences:
+      - at: 2026-06-14T04:12:47.296Z
+        spec: "0024"
+        cursor: checkpoint-co-enforcement
+        note: "Dogfood CO-3 / PR #42: guidelines decide separa HumanDecisionBrief de HumanDecisionEffect; close-dispositions + human-gate. Distinto de PIT-0011 (descobribilidade) e PIT-0012 (capacidade!=obrigacao)."
+      - at: 2026-06-14T12:52:52.816Z
+        spec: "0024"
+        cursor: checkpoint-co-enforcement
+        note: "Terceira superfície de decisão humana: advance-subcheckpoint. A transição interna entre sub-checkpoints era detectada pelo work mas só executável por agente editando tasks.md — mesma classe da dor original (decisão humana mediada por edição técnica de artefato)."

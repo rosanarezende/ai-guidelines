@@ -1,0 +1,83 @@
+import * as fs from "node:fs";
+import * as path from "node:path";
+import {
+  HumanDecisionPolicyParseError,
+  findDecisionType,
+  parseHumanDecisionPolicy,
+} from "./humanDecisionPolicyReader.js";
+
+const REAL = fs.readFileSync(
+  path.join(process.cwd(), ".core/governance/human-decision-policy.yml"),
+  "utf-8"
+);
+
+describe("humanDecisionPolicyReader [decide]", () => {
+  it("[63] parseia a policy real distribuída (.core/**) com os tipos declarados", () => {
+    const policy = parseHumanDecisionPolicy(REAL);
+    expect(policy.version).toBe(1);
+    expect(policy.decisionTypes.map((t) => t.id)).toEqual([
+      "close-dispositions",
+      "advance-subcheckpoint",
+      "human-gate",
+    ]);
+    expect(policy.owner.handle).toBe("@rosanarezende");
+  });
+
+  it("close-dispositions declara 8 seções humanas + escolhas + limites", () => {
+    const policy = parseHumanDecisionPolicy(REAL);
+    const cd = findDecisionType(policy, "close-dispositions")!;
+    expect(cd.sections).toHaveLength(8);
+    expect(cd.choices.map((c) => c.id)).toEqual([
+      "accept-all",
+      "review-individually",
+      "request-explanation",
+      "request-changes",
+      "cancel",
+    ]);
+    expect(cd.notAuthorized.length).toBeGreaterThan(0);
+    expect(cd.requiresOwner).toBe(true);
+    expect(cd.publication.mixedDiff).toBe("forbidden");
+  });
+
+  it("rejeita chave desconhecida na raiz", () => {
+    expect(() =>
+      parseHumanDecisionPolicy(
+        "version: 1\nbogus: 1\nowner:\n  handle: a\n  email: b\ndecision_types: {}"
+      )
+    ).toThrow(HumanDecisionPolicyParseError);
+  });
+
+  it("rejeita version != 1", () => {
+    expect(() =>
+      parseHumanDecisionPolicy(
+        "version: 2\nowner:\n  handle: a\n  email: b\ndecision_types:\n  x: {}"
+      )
+    ).toThrow(/version deve ser 1/);
+  });
+
+  it("rejeita mixed_diff != forbidden", () => {
+    // split/join troca TODAS as ocorrências (a 1ª no arquivo está num comentário).
+    const bad = REAL.split("mixed_diff: forbidden").join("mixed_diff: allowed");
+    expect(() => parseHumanDecisionPolicy(bad)).toThrow(/mixed_diff/);
+  });
+
+  it("rejeita choices com id duplicado", () => {
+    const yaml = `version: 1
+owner: { handle: a, email: b }
+decision_types:
+  x:
+    title: T
+    purpose: P
+    requires_owner: true
+    sections: [{ key: k, heading: H }]
+    choices:
+      - { id: dup, label: A, mutating: false }
+      - { id: dup, label: B, mutating: false }
+    consequences: [c]
+    not_authorized: [n]
+    publication: { commit: after-confirmation, push: after-confirmation, mixed_diff: forbidden }
+    confirmation: required
+    technical_details: available`;
+    expect(() => parseHumanDecisionPolicy(yaml)).toThrow(/id duplicado/);
+  });
+});

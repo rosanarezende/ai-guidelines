@@ -17,6 +17,10 @@ const MAINTAINER_HANDOFF_CHECK_COMMAND = "npm run handoff:check -- [--spec NNNN]
 
 const MAINTAINER_REVIEW_BRIEF_COMMAND = "npm run guidelines -- review <type>";
 
+const MAINTAINER_WORK_BRIEF_COMMAND = "npm run guidelines -- work";
+
+const MAINTAINER_DECIDE_COMMAND = "npm run guidelines -- decide";
+
 export interface RuntimeBootstrapOptions {
   readonly agentsPath?: string;
   readonly sddDir?: string;
@@ -42,6 +46,8 @@ export function syncRuntimeBootstrap(
     handoffCommand: MAINTAINER_HANDOFF_COMMAND,
     handoffCheckCommand: MAINTAINER_HANDOFF_CHECK_COMMAND,
     reviewBriefCommand: MAINTAINER_REVIEW_BRIEF_COMMAND,
+    workBriefCommand: MAINTAINER_WORK_BRIEF_COMMAND,
+    decideCommand: MAINTAINER_DECIDE_COMMAND,
   });
   const changed = current !== next;
 
@@ -64,6 +70,8 @@ export function checkRuntimeBootstrap(
     handoffCommand: MAINTAINER_HANDOFF_COMMAND,
     handoffCheckCommand: MAINTAINER_HANDOFF_CHECK_COMMAND,
     reviewBriefCommand: MAINTAINER_REVIEW_BRIEF_COMMAND,
+    workBriefCommand: MAINTAINER_WORK_BRIEF_COMMAND,
+    decideCommand: MAINTAINER_DECIDE_COMMAND,
   });
   return { ok: current === next, agentsPath };
 }
@@ -93,7 +101,7 @@ export function main(argv = process.argv.slice(2), repoRoot = process.cwd()): nu
     return 1;
   }
 
-  process.stderr.write("Uso: node cli/runtime-bootstrap.mjs <sync|check>\n");
+  process.stderr.write("Uso: node dist/cli/bin.js runtime-bootstrap <sync|check>\n");
   return 2;
 }
 

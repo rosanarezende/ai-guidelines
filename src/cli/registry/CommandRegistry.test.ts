@@ -101,6 +101,19 @@ describe("CommandRegistry", () => {
     expect(errors.join("\n")).toContain("why");
   });
 
+  it("DADO comando providers removido QUANDO dispatch ENTÃO falha sem registrar alias e orienta update --providers", async () => {
+    const reg = new CommandRegistry();
+    reg.register(spyCommand("update"));
+    const { logger, errors } = fakeLogger();
+
+    const result = await reg.dispatch(["providers", "--providers", "claude"], fakeContext(logger));
+
+    expect(result.exitCode).toBe(1);
+    expect(reg.resolve("providers")).toBeUndefined();
+    expect(errors.join("\n")).toContain('Comando não suportado: "providers"');
+    expect(errors.join("\n")).toContain("guidelines update --providers <lista>");
+  });
+
   it("DADO uma flag no lugar do verbo QUANDO dispatch ENTÃO orienta que falta um comando antes da opção", async () => {
     const reg = new CommandRegistry();
     reg.register(spyCommand("init"));

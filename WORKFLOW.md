@@ -141,12 +141,20 @@ Cada PR de execução fecha nesta ordem — as precondições são verificáveis
 ```text
 PR body final (Valor entregue preenchido; Visão pretendida intacta)
 → CI verde no HEAD final
+→ encerrar findings revalidados (npm run guidelines -- decide --type close-dispositions)
 → Draft → Ready (ato da owner; NÃO autoriza merge — ADR 0024)
-→ Human Gate da owner (decide o próximo movimento)
+→ Human Gate da owner (npm run guidelines -- decide --type human-gate; decide o próximo movimento)
 → registro do gate artifact (gates/c-<checkpoint>.yml; validar + push)
 → atualização final do body
 → abertura do próximo checkpoint/PR
 ```
+
+As decisões reservadas à owner (encerrar findings, Human Gate) têm uma superfície
+governada própria: `npm run guidelines -- decide` prepara um briefing humano
+(o que/por quê/o que estava errado/o que foi feito/como foi verificado/riscos/
+consequências/o que NÃO autoriza) ANTES de pedir a escolha, mostra a prévia exata
+e exige confirmação antes de registrar o efeito. `--brief-only` só explica (zero
+escrita); `--technical` revela IDs/SHAs/fingerprints. Zero LLM no runtime.
 
 Distinções que a sequência preserva:
 
@@ -196,20 +204,24 @@ O gate aceita o **prompt** (bloco `…`) **ou** a imagem (que o satisfaz). Draft
 
 ## Comandos de referência rápida
 
-| Comando                                              | Para quê                                                  |
-| ---------------------------------------------------- | --------------------------------------------------------- |
-| `npm run guidelines -- workflow`                     | Wizard com todas as opções do ciclo                       |
-| `npm run guidelines -- handoff [spec]`               | Retomada derivada: fatos + próxima ação única + selo      |
-| `npm run handoff:check -- [--spec NNNN]`             | Advisory de freshness da retomada (fontes + selo)         |
-| `npm run guidelines -- review <tipo>`                | Briefing governado de review (catálogo extensível)        |
-| `npm run guidelines -- review types`                 | Catálogo de tipos (origem/aliases/requirement default)    |
-| `npm run guidelines -- review policy`                | Requirements efetivos no contexto (força/estado/blocking) |
-| `npm run review:publish -- --file <artefato>`        | Commit exclusivo + push do review (autorização escopada)  |
-| `npm run pr-ready:check -- --pr <n>`                 | Precondições de Ready (etapa de fechamento; read-only)    |
-| `npm run guidelines -- continue`                     | Briefing da spec ativa + verificação de autorização       |
-| `npm run guidelines -- review [<pr>]`                | Coleta e estrutura comentários de um PR para análise      |
-| `npm run guidelines -- release-prep [--version <v>]` | Prepara bump de versão com plano explícito                |
-| `npm run guidelines -- release-prep --dry-run`       | Audita a release sem aplicar nada                         |
+| Comando                                                            | Para quê                                                                              |
+| ------------------------------------------------------------------ | ------------------------------------------------------------------------------------- |
+| `npm run guidelines -- workflow`                                   | Wizard com todas as opções do ciclo                                                   |
+| `npm run guidelines -- handoff [spec]`                             | Retomada derivada: fatos + próxima ação única + selo                                  |
+| `npm run handoff:check -- [--spec NNNN]`                           | Advisory de freshness da retomada (fontes + selo)                                     |
+| `npm run guidelines -- work`                                       | Briefing governado de TRABALHO (modo + escopo/autoridade/validações/parada/relatório) |
+| `npm run guidelines -- work --authorization explicit-work-request` | Autoriza commit/push no objeto inferido (pedido humano explícito)                     |
+| `npm run guidelines -- review <tipo>`                              | Briefing governado de review (catálogo extensível)                                    |
+| `npm run guidelines -- review types`                               | Catálogo de tipos (origem/aliases/requirement default)                                |
+| `npm run guidelines -- review policy`                              | Requirements efetivos no contexto (força/estado/blocking)                             |
+| `npm run guidelines -- decide`                                     | Decisões reservadas à owner (briefing → escolha → prévia → confirmação → registro)    |
+| `npm run guidelines -- decide --brief-only`                        | Só lê o briefing das decisões pendentes (zero escrita)                                |
+| `npm run review:publish -- --file <artefato>`                      | Commit exclusivo + push do review (autorização escopada)                              |
+| `npm run pr-ready:check -- --pr <n>`                               | Precondições de Ready (etapa de fechamento; read-only)                                |
+| `npm run guidelines -- continue`                                   | Briefing da spec ativa + verificação de autorização                                   |
+| `npm run guidelines -- review [<pr>]`                              | Coleta e estrutura comentários de um PR para análise                                  |
+| `npm run guidelines -- release-prep [--version <v>]`               | Prepara bump de versão com plano explícito                                            |
+| `npm run guidelines -- release-prep --dry-run`                     | Audita a release sem aplicar nada                                                     |
 
 ---
 

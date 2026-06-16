@@ -14,7 +14,9 @@ export function buildAgentsRuntimeStub(
   sddDir = ".ai-guidelines",
   handoffCommand = "npx ai-guidelines handoff [spec]",
   handoffCheckCommand: string | null = null,
-  reviewBriefCommand = "npx ai-guidelines review <type>"
+  reviewBriefCommand = "npx ai-guidelines review <type>",
+  workBriefCommand = "npx ai-guidelines work",
+  decideCommand = "npx ai-guidelines decide"
 ): string {
   return [
     "## Runtime Bootstrap",
@@ -26,7 +28,9 @@ export function buildAgentsRuntimeStub(
     ...(handoffCheckCommand
       ? [`- To confirm the resumption is still fresh, run \`${handoffCheckCommand}\`.`]
       : []),
+    `- For implementation/correction requested by the human ("fix the current findings", "implement the current task"), load the governed work briefing with \`${workBriefCommand}\` — it infers the work mode and projects scope, authority, validations, stop criteria and the final-report contract from \`work-policy.yml\` + the situated snapshot. The explicit request may authorize commit/push ONLY within the inferred object/checkpoint/branch via \`--authorization explicit-work-request\`; it never extends to another finding/checkpoint, the next sub-checkpoint, a review, a disposition, Ready, the gate, merge, force-push or \`--no-verify\`. The briefing projects the contract; it does not execute work.`,
     `- When the human explicitly asks for a governed review (Technical Audit, Architectural Review, or any repository-declared type — see \`review types\`) or a revalidation, run \`${reviewBriefCommand}\` with \`--authorization explicit-review-request\` BEFORE reviewing — the explicit request itself authorizes the full LIMITED cycle of that governed artifact (create, seal, validate, exclusive commit, normal push via review:publish); anything beyond the review artifact requires new human authorization. Review types are a catalog, not an obligation: only \`required\` types block Ready/gate; a stale optional review never forces a revalidation by itself.`,
+    `- For decisions reserved to the human (closing revalidated findings, the Human Gate), run \`${decideCommand}\` — it prepares a human briefing (what/why/what-was-wrong/what-was-done/how-verified/residual-risks/consequences/not-authorized) BEFORE asking for any choice, shows the exact change preview, and requires explicit confirmation before recording the governed effect. Authority is not assumable by flag; nothing is written without confirmation, and recording a Human Gate does not execute any transition, merge or PR.`,
     "- The script contract at `.core/governance/script-contracts.yml` is the operational SSOT for scripts, hooks, workflows, and docs.",
     "- Full rules remain governed in `.core/rules/**`, `.core/rules/catalog.md`, `.core/rules/_meta/rules.json`, and the rule ledger.",
     "- Never bypass hooks with `--no-verify`; restore setup if hooks or generated script surfaces are missing.",
@@ -51,6 +55,8 @@ export function buildRuntimeBootstrapContent(
     readonly handoffCommand?: string;
     readonly handoffCheckCommand?: string | null;
     readonly reviewBriefCommand?: string;
+    readonly workBriefCommand?: string;
+    readonly decideCommand?: string;
   } = {}
 ): string {
   return mergeAgentsContent(
@@ -59,7 +65,9 @@ export function buildRuntimeBootstrapContent(
       options.sddDir,
       options.handoffCommand,
       options.handoffCheckCommand,
-      options.reviewBriefCommand
+      options.reviewBriefCommand,
+      options.workBriefCommand,
+      options.decideCommand
     )
   );
 }

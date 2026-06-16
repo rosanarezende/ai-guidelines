@@ -1,0 +1,84 @@
+{
+  "bindings": [
+    {
+      "constraintRef": "CORE-08",
+      "enforcement": "script-contracts-check",
+      "mechanism": {
+        "id": "script-contracts-check",
+        "status": "implemented"
+      },
+      "mode": "required",
+      "resolved": {
+        "mutates": false,
+        "name": "script-contracts:check",
+        "namespace": "npm-script",
+        "source": ".core/governance/script-contracts.yml"
+      },
+      "surface": "npm-script:script-contracts:check",
+      "surfaceClass": "event"
+    },
+    {
+      "constraintRef": "GG-0001",
+      "enforcement": "gate-decidability-check",
+      "mechanism": {
+        "id": "gate-decidability-check",
+        "status": "implemented"
+      },
+      "mode": "required",
+      "resolved": {
+        "mutates": false,
+        "name": "gate-decidability:check",
+        "namespace": "npm-script",
+        "source": ".core/governance/script-contracts.yml"
+      },
+      "surface": "npm-script:gate-decidability:check",
+      "surfaceClass": "event"
+    }
+  ],
+  "constraints": [
+    {
+      "id": "CORE-08",
+      "origin": {
+        "kind": "rule",
+        "sourceRef": ".core/rules/top/agents-core.md#CORE-08"
+      },
+      "surfaces": [
+        "npm-script:script-contracts:check"
+      ]
+    },
+    {
+      "id": "GG-0001",
+      "origin": {
+        "kind": "guardrail",
+        "sourceRef": ".core/process/governance-foundation.md#GG-0001",
+        "sources": [
+          "DOGFOOD-0024"
+        ]
+      },
+      "surfaces": [
+        "npm-script:gate-decidability:check"
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "from": "CORE-08",
+      "relation": "constrains",
+      "to": "surface:npm-script:script-contracts:check"
+    },
+    {
+      "from": "GG-0001",
+      "relation": "constrains",
+      "to": "surface:npm-script:gate-decidability:check"
+    }
+  ],
+  "provenance": {
+    "sources": [
+      {
+        "path": ".core/constraints/constraints.yml",
+        "sha256": "8efdd8a42fe55fcd96df34a34372b393adc7d8e88428141a99a650a576f01172"
+      }
+    ]
+  },
+  "version": 1
+}

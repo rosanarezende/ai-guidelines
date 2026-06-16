@@ -29,6 +29,11 @@ packages/*/dist/
 # Deixar o prettier reformatar quebraria a paridade raw↔canônica.
 .governance/runtime/insights.yml
 
+# Manifesto compilado de constraints (CO-3.2): forma OWNED pelo serializer
+# canônico (constraintManifest) e gateada por `knowledge:check` (existência/
+# classe/sync). Prettier reformatar quebraria a paridade raw↔canônica.
+.governance/runtime/constraints/manifest.json
+
 # Artefatos de ferramentas de IA (aider, etc.) — scratch local, fora de versão e
 # format (CORE-05: não versionar stray context; GR-0202: excluir do contexto).
 .aider*

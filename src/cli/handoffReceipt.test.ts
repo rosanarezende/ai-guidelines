@@ -2,6 +2,9 @@ import { HandoffFacts } from "./handoffFacts.js";
 import {
   assertFreshHandoffReceipt,
   createLoadReceipt,
+  describeReceiptStaleReason,
+  formatReceiptAdvisory,
+  specIdFromLabel,
   validateLoadReceipt,
 } from "./handoffReceipt.js";
 
@@ -29,6 +32,7 @@ function facts(overrides: Partial<HandoffFacts> = {}): HandoffFacts {
     pullRequest: null,
     lifecycle: null,
     tasks: [],
+    subCheckpoints: [],
     insights: [],
     driftWarnings: [],
     sources: [
@@ -136,6 +140,61 @@ describe("handoffReceipt · contrato de carga (puro) [CO-4]", () => {
     if (status.kind === "invalid") expect(status.reason).toContain("contractVersion");
   });
 
+  it("ignoreSourceIds: fonte remota volátil (pull-request) NÃO conta como divergência", () => {
+    const loaded = facts({
+      sources: [
+        { id: "state.yml", origin: "x", status: "fresh", fingerprint: "aaa" },
+        { id: "pull-request", origin: "gh", status: "fresh", fingerprint: "PR-LOADED" },
+      ],
+    });
+    const receipt = JSON.stringify(createLoadReceipt(loaded, "seloLoaded", NOW));
+    const current = facts({
+      sources: [
+        { id: "state.yml", origin: "x", status: "fresh", fingerprint: "aaa" }, // igual
+        { id: "pull-request", origin: "gh", status: "unavailable", fingerprint: "-" }, // só o PR "mudou"
+      ],
+    });
+
+    // sem ignore: selo diverge ⇒ stale-sources (falso-positivo do advisory local)
+    expect(validateLoadReceipt(receipt, { facts: current, seal: "seloCurrent" }).kind).toBe(
+      "stale-sources"
+    );
+
+    // com ignore: pull-request excluída ⇒ nenhuma divergência LOCAL ⇒ fresh
+    expect(
+      validateLoadReceipt(
+        receipt,
+        { facts: current, seal: "seloCurrent" },
+        { ignoreSourceIds: ["pull-request"] }
+      ).kind
+    ).toBe("fresh");
+  });
+
+  it("ignoreSourceIds: divergência LOCAL ainda é detectada (ignore não mascara o que importa)", () => {
+    const loaded = facts({
+      sources: [
+        { id: "state.yml", origin: "x", status: "fresh", fingerprint: "aaa" },
+        { id: "pull-request", origin: "gh", status: "fresh", fingerprint: "PR" },
+      ],
+    });
+    const receipt = JSON.stringify(createLoadReceipt(loaded, "selo1", NOW));
+    const current = facts({
+      sources: [
+        { id: "state.yml", origin: "x", status: "fresh", fingerprint: "MUDOU" }, // fonte LOCAL mudou
+        { id: "pull-request", origin: "gh", status: "unavailable", fingerprint: "-" },
+      ],
+    });
+    const status = validateLoadReceipt(
+      receipt,
+      { facts: current, seal: "selo2" },
+      { ignoreSourceIds: ["pull-request"] }
+    );
+    expect(status.kind).toBe("stale-sources");
+    if (status.kind === "stale-sources") {
+      expect(status.divergentSources).toEqual(["state.yml"]); // pull-request NÃO aparece
+    }
+  });
+
   it("assertFreshHandoffReceipt: guarda p/ comandos mutantes futuros lança com comando de recarga", () => {
     expect(() => assertFreshHandoffReceipt({ kind: "missing" }, "0024")).toThrow(
       /npm run guidelines -- handoff 0024/
@@ -148,5 +207,63 @@ describe("handoffReceipt · contrato de carga (puro) [CO-4]", () => {
       )
     ).toThrow(/HEAD carregado 5906666/);
     expect(() => assertFreshHandoffReceipt({ kind: "fresh", receipt }, "0024")).not.toThrow();
+  });
+});
+
+describe("formatReceiptAdvisory · advisory-first determinístico (5 estados) [CO-3.4]", () => {
+  const receipt = createLoadReceipt(facts(), "seloX", NOW);
+
+  it("fresh → null (nenhum advisory emitido)", () => {
+    expect(formatReceiptAdvisory({ kind: "fresh", receipt }, "0024")).toBeNull();
+  });
+
+  it("missing → nomeia ausência de carga + comando de recarga", () => {
+    expect(formatReceiptAdvisory({ kind: "missing" }, "0024")).toBe(
+      "⚠️  [advisory] retomada não reconciliada — nenhuma carga registrada. " +
+        "Recarregue com: npm run guidelines -- handoff 0024"
+    );
+  });
+
+  it("invalid → nomeia a razão da invalidez", () => {
+    const line = formatReceiptAdvisory({ kind: "invalid", reason: "JSON ilegível" }, "0024");
+    expect(line).toContain("recibo inválido (JSON ilegível)");
+    expect(line).toContain("Recarregue com: npm run guidelines -- handoff 0024");
+  });
+
+  it("stale-head → diagnostica HEAD carregado × atual", () => {
+    const line = formatReceiptAdvisory(
+      { kind: "stale-head", receipt, currentHead: "abc9999", currentSeal: "s2" },
+      "0024"
+    );
+    expect(line).toContain("recibo stale: HEAD carregado 5906666 ≠ HEAD atual abc9999");
+  });
+
+  it("stale-sources → nomeia as fontes divergentes", () => {
+    const line = formatReceiptAdvisory(
+      { kind: "stale-sources", receipt, currentSeal: "s2", divergentSources: ["state.yml", "git"] },
+      "0024"
+    );
+    expect(line).toContain("recibo stale: fontes divergiram (state.yml, git)");
+  });
+
+  it("advisory e guarda lançante compartilham a MESMA razão (fonte única, sem switch duplicado)", () => {
+    const status = {
+      kind: "stale-head",
+      receipt,
+      currentHead: "abc9999",
+      currentSeal: "s2",
+    } as const;
+    const reason = describeReceiptStaleReason(status);
+    expect(formatReceiptAdvisory(status, "0024")).toContain(reason);
+    expect(() => assertFreshHandoffReceipt(status, "0024")).toThrow(reason);
+  });
+});
+
+describe("specIdFromLabel", () => {
+  it("extrai o NNNN do label da spec", () => {
+    expect(specIdFromLabel("0024-context-architecture")).toBe("0024");
+  });
+  it("devolve o label cru quando não há prefixo numérico de 4 dígitos", () => {
+    expect(specIdFromLabel("foo-bar")).toBe("foo-bar");
   });
 });
