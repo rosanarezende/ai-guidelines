@@ -17,6 +17,7 @@ import * as fs from "node:fs";
 import { execFileSync } from "node:child_process";
 import {
   HandoffFacts,
+  HandoffPrFact,
   HandoffNodeFact,
   HandoffSubCheckpoint,
   parseSubCheckpoints,
@@ -35,6 +36,8 @@ import {
   HumanDecisionPolicy,
   parseHumanDecisionPolicy,
 } from "../../infrastructure/yaml/humanDecisionPolicyReader.js";
+import { MainOptions as PrReadyMainOptions, main as runPrReadyCheck } from "../prReadyCheck.js";
+import { main as runGateDecidabilityCheck } from "../gateDecidabilityCheck.js";
 
 export const HUMAN_DECISION_POLICY_PATH = ".core/governance/human-decision-policy.yml";
 
@@ -101,7 +104,14 @@ export interface ExternalCheckResult {
   readonly summary: string;
 }
 
-export type ExternalChecksCollector = (repoRoot: string) => {
+export interface ExternalChecksContext {
+  readonly pullRequest: HandoffPrFact;
+}
+
+export type ExternalChecksCollector = (
+  repoRoot: string,
+  context: ExternalChecksContext
+) => {
   prReady: ExternalCheckResult | null;
   gateDecidability: ExternalCheckResult | null;
 };
@@ -195,22 +205,57 @@ function loadPolicy(repoRoot: string): {
 // canônico (`parseSubCheckpoints`) é re-exportado para compat de testes.
 export { parseSubCheckpoints };
 
-/** Runner real dos checks externos (node scripts) — usado só quando PR Ready. */
-function defaultExternalChecks(repoRoot: string): {
+type PrReadyMainRunner = (argv: readonly string[], options: PrReadyMainOptions) => number;
+type GateDecidabilityRunner = (repoRoot: string) => number;
+
+function resultFromExit(code: number, lines: readonly string[]): ExternalCheckResult {
+  if (code === 0) return { ok: true, summary: "verde" };
+  return {
+    ok: false,
+    summary: lines.find((line) => line.trim().length > 0) ?? `exit ${code}`,
+  };
+}
+
+export function runPrReadyExternalCheck(
+  repoRoot: string,
+  prNumber: number,
+  runner: PrReadyMainRunner = runPrReadyCheck
+): ExternalCheckResult {
+  const lines: string[] = [];
+  try {
+    const code = runner(["--pr", String(prNumber)], {
+      repoRoot,
+      logger: { info: (m) => lines.push(m), error: (m) => lines.push(m) },
+    });
+    return resultFromExit(code, lines);
+  } catch (e) {
+    return { ok: false, summary: e instanceof Error ? e.message.split("\n")[0] : String(e) };
+  }
+}
+
+export function runGateDecidabilityExternalCheck(
+  repoRoot: string,
+  runner: GateDecidabilityRunner = runGateDecidabilityCheck
+): ExternalCheckResult {
+  try {
+    const code = runner(repoRoot);
+    return resultFromExit(code, []);
+  } catch (e) {
+    return { ok: false, summary: e instanceof Error ? e.message.split("\n")[0] : String(e) };
+  }
+}
+
+/** Runner real dos checks externos — reusa os mesmos módulos dos checks canônicos. */
+function defaultExternalChecks(
+  repoRoot: string,
+  context: ExternalChecksContext
+): {
   prReady: ExternalCheckResult | null;
   gateDecidability: ExternalCheckResult | null;
 } {
-  const run = (...args: readonly string[]): ExternalCheckResult => {
-    try {
-      execFileSync("node", [...args], { cwd: repoRoot, stdio: ["ignore", "ignore", "ignore"] });
-      return { ok: true, summary: "verde" };
-    } catch (e) {
-      return { ok: false, summary: e instanceof Error ? e.message.split("\n")[0] : String(e) };
-    }
-  };
   return {
-    prReady: run("dist/cli/bin.js", "pr-ready-check"),
-    gateDecidability: run("dist/cli/bin.js", "gate-decidability-check"),
+    prReady: runPrReadyExternalCheck(repoRoot, context.pullRequest.number),
+    gateDecidability: runGateDecidabilityExternalCheck(repoRoot),
   };
 }
 
@@ -376,10 +421,12 @@ export function collectDecisionSnapshot(
   const { policy, error: policyError } = loadPolicy(repoRoot);
 
   // Checks externos: só quando o gate é plausível (PR Ready); caro/inútil em Draft.
-  const prReadyPlausible = facts.pullRequest !== null && !facts.pullRequest.isDraft;
-  const external = prReadyPlausible
-    ? (options.externalChecks ?? defaultExternalChecks)(repoRoot)
-    : { prReady: null, gateDecidability: null };
+  const external =
+    facts.pullRequest !== null && !facts.pullRequest.isDraft
+      ? (options.externalChecks ?? defaultExternalChecks)(repoRoot, {
+          pullRequest: facts.pullRequest,
+        })
+      : { prReady: null, gateDecidability: null };
 
   return {
     repoRoot,

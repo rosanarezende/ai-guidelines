@@ -34,7 +34,12 @@ export function makeHandoffFacts(over: Partial<HandoffFacts> = {}): HandoffFacts
     gateStatus: "pending",
     cursor: { pr: "co-enforcement", checkpoint: "checkpoint-co-enforcement" },
     activeNode: { id: "co-enforcement", githubPr: 42, sequence: 9, terminal: false },
-    nextPlannedNode: { id: "co-capture", githubPr: null, sequence: 10, terminal: false },
+    nextPlannedNode: {
+      id: "co-flow-convergence",
+      githubPr: null,
+      sequence: 10,
+      terminal: false,
+    },
     narrativeNextHead: null,
     git: {
       branch: "feat/spec-0024-co-enforcement",

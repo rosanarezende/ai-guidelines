@@ -1,4 +1,4 @@
-import { parseSubCheckpoints } from "./snapshot.js";
+import { parseSubCheckpoints, runPrReadyExternalCheck } from "./snapshot.js";
 
 const TASKS = `
 - [x] **Checkpoint co-projection** (nó \`co-projection\`) — concluído.
@@ -30,5 +30,23 @@ describe("parseSubCheckpoints [decide]", () => {
 
   it("checkpoint inexistente → vazio", () => {
     expect(parseSubCheckpoints(TASKS, "checkpoint-inexistente")).toEqual([]);
+  });
+});
+
+describe("external checks [decide]", () => {
+  it("human-gate reusa pr-ready:check com o PR factual do snapshot", () => {
+    const calls: Array<{ argv: readonly string[]; repoRoot: string | undefined }> = [];
+    const result = runPrReadyExternalCheck("/repo", 42, (argv, options) => {
+      calls.push({ argv, repoRoot: options.repoRoot });
+      return 0;
+    });
+
+    expect(result.ok).toBe(true);
+    expect(calls).toEqual([{ argv: ["--pr", "42"], repoRoot: "/repo" }]);
+  });
+
+  it("pr-ready:check verde vira resultado externo verde para o briefing", () => {
+    const result = runPrReadyExternalCheck("/repo", 42, () => 0);
+    expect(result).toEqual({ ok: true, summary: "verde" });
   });
 });
