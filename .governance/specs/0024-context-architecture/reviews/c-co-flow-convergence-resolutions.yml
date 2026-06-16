@@ -1,0 +1,85 @@
+# Resolucoes do implementador para as revisoes do checkpoint-co-flow-convergence
+# (PR #43 / CO-10.1) — lane SEPARADA da review. PROPOE `action`; NAO destrava o
+# gate nem fecha `disposition` (só reviewer/owner fecha, apos revalidacao).
+checkpoint: checkpoint-co-flow-convergence
+by: codex-cli
+resolutions:
+  - finding: technical_audit#F1
+    action: fixed
+    ref: 6697763
+    fingerprint: 56be768fbe91
+    human_context:
+      resolution_summary: "O inventario agora cobre o nascimento da spec e o primeiro Draft PR antes da sessao operacional."
+    evidence: >
+      O inventario passou a modelar estados S-3, S-2 e S-1 e as transicoes T-3,
+      T-2 e T-1, cobrindo demanda inicial, scaffold da spec, primeiro Draft PR,
+      ancoragem de stack e entrada em handoff/work.
+    tests:
+      - "research/2026-06-16-checkpoint-co-flow-convergence-co-10.1-inventory.md :: Jornada 1 especifica aceite e teste de integracao para spec inexistente -> scaffold -> primeiro Draft PR -> handoff."
+
+  - finding: technical_audit#F2
+    action: fixed
+    ref: 6697763
+    fingerprint: 69ee7b6cd1a1
+    human_context:
+      resolution_summary: "Cada gap CFG-001..CFG-009 agora tem protocolo reproduzivel, impacto, SSOT, teste esperado e criterio de falsificacao."
+    evidence: >
+      A secao de protocolos reproduziveis por gap detalha setup/comando/assertion,
+      impacto, fonte SSOT, superficie afetada, correcao proposta, teste/invariante,
+      etapa responsavel e criterio de falsificacao para CFG-001..CFG-009.
+    tests:
+      - "research/2026-06-16-checkpoint-co-flow-convergence-co-10.1-inventory.md :: Protocolos reproduziveis por gap CFG-001..CFG-009."
+
+  - finding: architectural_review#F1
+    action: fixed
+    ref: 6697763
+    fingerprint: df68a778dc5f
+    human_context:
+      resolution_summary: "O fluxo ganhou um bounded context explicito para evitar que tabelas virem uma segunda fonte de verdade."
+    evidence: >
+      O inventario define o bounded context GovernedLifecycleFlow com entidades,
+      value objects, policies, domain service, ports/adapters e contratos de
+      mantenibilidade que separam SSOT, projecao, comando, decisao e evento.
+    tests:
+      - "research/2026-06-16-checkpoint-co-flow-convergence-co-10.1-inventory.md :: Bounded context proposto — GovernedLifecycleFlow."
+
+  - finding: architectural_review#F2
+    action: fixed
+    ref: 6697763
+    fingerprint: 76bea423733b
+    human_context:
+      resolution_summary: "CO-10.2, CO-10.3 e CO-10.4 agora declaram entradas, saidas e aceite esperados."
+    evidence: >
+      O inventario e tasks.md passaram a declarar contratos de entrada, saida e
+      aceite para confronto modelo x codigo, correcao dos gaps e dogfood/falsificacao,
+      preservando CO-10.1 como inventario e sem iniciar CO-10.2.
+    tests:
+      - "research/2026-06-16-checkpoint-co-flow-convergence-co-10.1-inventory.md :: Contratos dos proximos sub-checkpoints."
+      - "tasks.md :: CO-10.2/CO-10.3/CO-10.4 detalham inputs/outputs antes de implementacao."
+
+  - finding: security_review#F1
+    action: fixed
+    ref: 6697763
+    fingerprint: 2fe4a7c95a46
+    human_context:
+      resolution_summary: "Estados negativos de seguranca agora sao parte do modelo fail-closed."
+    evidence: >
+      O inventario acrescenta estados negativos N1..N8 para PR Draft, CI nao
+      verde, receipt stale, review stale, PR state stale, offline/degraded, gate ja
+      aprovado e tentativa indevida de merge/transicao.
+    tests:
+      - "research/2026-06-16-checkpoint-co-flow-convergence-co-10.1-inventory.md :: Estados negativos e comportamento fail-closed."
+      - "research/2026-06-16-checkpoint-co-flow-convergence-co-10.1-inventory.md :: Jornadas 11 e 13 cobrem stale/offline/degraded."
+
+  - finding: security_review#F2
+    action: fixed
+    ref: 6697763
+    fingerprint: 0c54434dcf00
+    human_context:
+      resolution_summary: "Spoofing de PR body/title/topologia/github_pr agora tem fonte canonica e validacao fail-closed."
+    evidence: >
+      A matriz de ameacas e spoofing mapeia PR body, titulo/token, github_pr
+      inferido, active.yml manual, review stale, CI stale, receipt stale, gate
+      repetido e merge intermediario contra fontes canonicas, validacoes e bloqueios.
+    tests:
+      - "research/2026-06-16-checkpoint-co-flow-convergence-co-10.1-inventory.md :: Matriz de ameacas e spoofing."
