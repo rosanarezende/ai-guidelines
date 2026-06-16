@@ -305,15 +305,67 @@ npm run guidelines -- decide --type human-gate --brief-only
 npm run guidelines -- review policy
 ```
 
-Resultado sintetico: o repo esta coerente para implementar CO-10.1; `advance` e
-Human Gate seguem bloqueados corretamente; PR #43 segue Draft; `co-capture` e CO-5
-nao foram iniciados.
+Resultado sintetico inicial: o repo estava coerente para implementar CO-10.1;
+`advance` e Human Gate seguiam bloqueados corretamente; PR #43 seguia Draft;
+`co-capture` e CO-5 nao foram iniciados.
+
+## Dogfood adicional — cockpit situado + readiness governada de CO-10.1
+
+O dogfood pos-revalidacao mostrou um novo gap antes de avancar para CO-10.2:
+apos fechar as dispositions das 6 findings, `work` voltou para
+`IMPLEMENT_CHECKPOINT` porque CO-10.1 seguia sem readiness; a proxima acao real
+seria editar `tasks.md` manualmente. Isso repetiria a classe de problema que
+este no existe para eliminar.
+
+Correcao modelada nesta fatia:
+
+1. `npm run guidelines` sem subcomando passou a renderizar cockpit situado
+   read-only, derivado de `work` + `decide` + snapshot remoto de PR/CI.
+2. `mark-readiness` foi adicionado como decisao humana governada em
+   `human-decision-policy.yml` e `DecisionRegistry`.
+3. O comando mutante canonico e:
+   `npm run guidelines -- decide --type mark-readiness --decision mark-ready --authorization explicit-human-decision --confirm`.
+4. A mutacao permitida e exclusivamente adicionar
+   `` `readiness: ready-for-transition` `` no sub-checkpoint `[/]` ativo em
+   `tasks.md`.
+5. O comando bloqueia findings abertos, CI pendente/falho, working tree suja,
+   branch behind, PR head remoto que nao cobre o HEAD local, gate ja aprovado,
+   ausencia/multiplicidade de `[/]` e readiness em `[ ]`/`[x]`.
+
+Evidencia executada no estado real do PR #43:
+
+```bash
+npm run guidelines
+npm run guidelines -- decide --type mark-readiness --brief-only
+npm run guidelines -- decide --type mark-readiness --decision mark-ready --authorization explicit-human-decision --confirm
+```
+
+Antes:
+
+- `CO-10.1` ativo `[/]`, sem readiness;
+- `CO-10.2` pendente `[ ]`;
+- reviews revalidadas: 0 open / 6 closed;
+- PR #43 Draft, CI remoto verde;
+- cockpit recomendou `mark-readiness`;
+- `advance-subcheckpoint` permaneceu bloqueado por falta de readiness.
+
+Depois:
+
+- commit `ef4edb0` (`docs(spec-0024): declara readiness de CO-10.1`) criado
+  pelo proprio fluxo governado;
+- `tasks.md` foi o unico artefato alterado pelo fluxo de readiness;
+- `CO-10.1` continua `[/]`, agora com
+  `` `readiness: ready-for-transition` ``;
+- `CO-10.2` continua `[ ]`;
+- nenhum `advance-subcheckpoint`, Ready, Human Gate, gate artifact, merge ou
+  CO-5 foi executado.
 
 ## Fronteira desta fatia
 
 - Nao corrige ainda `CFG-*`; isso pertence a CO-10.2/CO-10.3.
-- Nao marca `CO-10.1` com readiness.
-- Nao executa `decide` mutante.
+- A readiness de `CO-10.1` foi marcada somente pelo fluxo governado
+  `mark-readiness`, nao por edicao manual.
+- Nao executa `advance-subcheckpoint`.
 - Nao converte PR #43 para Ready.
 - Nao executa Human Gate.
 - Nao abre CO-5.
