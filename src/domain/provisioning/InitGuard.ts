@@ -8,15 +8,13 @@
  * decisão. Modelado como efeito `assert-init-safe` no plano — o adapter apenas
  * executa a asserção, não decide.
  */
-import path from "node:path";
-
 export const INIT_GUARDED_PATHS: readonly string[] = [
   "AGENTS.md",
   ".gitattributes",
   ".prettierignore",
   ".husky",
   "package.json",
-  path.join(".github", "workflows", "ai-guidelines-ci.yml"),
+  ".github/workflows/ai-guidelines-ci.yml",
 ];
 
 export function assertInitSafe(conflicts: readonly string[], force: boolean): void {

@@ -192,6 +192,41 @@ export interface PlanInstallOptions {
   readonly dependencyNames: readonly string[];
 }
 
+export interface RuntimeBootstrapSnapshot {
+  readonly runtimeStub: string;
+}
+
+export interface InitGuardSnapshot {
+  readonly conflicts: readonly string[];
+}
+
+export interface ProvisioningOperationSnapshot {
+  readonly initGuard: InitGuardSnapshot;
+  readonly runtime: RuntimeBootstrapSnapshot;
+  readonly templates: TemplateMirrorSnapshot;
+  readonly prettier: PrettierSnapshot;
+  readonly husky: HuskySnapshot;
+  readonly ci: CiSnapshot;
+  readonly install: InstallSnapshot;
+  readonly guidance: FinalGuidanceSnapshot;
+}
+
+export interface ProvisioningOperationContext {
+  readonly targetDir: string;
+  readonly projectName: string;
+  readonly config: PointersConfig;
+  readonly adapterRulesByName: Readonly<Record<string, string>>;
+}
+
+export interface PlanProvisioningOperationOptions {
+  readonly operation: ProvisioningOperation;
+  readonly force: boolean;
+  readonly forcePrettier: boolean;
+  readonly prune: boolean;
+  readonly install: boolean;
+  readonly providersRequested: boolean;
+}
+
 export type { FinalGuidanceOptions, FinalGuidanceSnapshot } from "./Guidance.js";
 
 /** Caminho relativo do `config.json` dentro do consumidor. */
@@ -515,6 +550,45 @@ export function planFinalGuidance(
   return guidanceEffects(buildFinalProvisioningGuidance(snapshot, options));
 }
 
+export function planProvisioningOperation(
+  context: ProvisioningOperationContext,
+  snapshot: ProvisioningOperationSnapshot,
+  options: PlanProvisioningOperationOptions
+): ProvisioningEffect[] {
+  const effects: ProvisioningEffect[] = [];
+
+  if (options.operation === "init") {
+    effects.push(planInitGuard(snapshot.initGuard.conflicts, options.force));
+  }
+
+  effects.push(
+    ...planFinalGuidance(snapshot.guidance, {
+      operation: options.operation,
+      force: options.force,
+      providersRequested: options.providersRequested,
+    })
+  );
+
+  effects.push(
+    ...planCoreProvisioning(context.config, context.adapterRulesByName, snapshot, {
+      force: options.force,
+      prune: options.prune,
+    })
+  );
+
+  if (options.operation !== "update") {
+    effects.push(
+      ...planAdoptInitInfrastructure(context.config, snapshot, {
+        force: options.force,
+        forcePrettier: options.forcePrettier,
+        install: options.install,
+      })
+    );
+  }
+
+  return effects;
+}
+
 /**
  * Efeito conflict guard de init: a lista `conflicts` (paths guardados que já
  * existem, detectada pela infraestrutura a partir de {@link ./InitGuard.INIT_GUARDED_PATHS})
@@ -527,4 +601,97 @@ export function planInitGuard(conflicts: readonly string[], force: boolean): Pro
 /** Converte linhas de guidance em efeitos `guidance` (repassados ao log na aplicação). */
 export function guidanceEffects(messages: readonly string[]): ProvisioningEffect[] {
   return messages.map((message) => ({ kind: "guidance", message }));
+}
+
+function planCoreProvisioning(
+  config: PointersConfig,
+  adapterRulesByName: Readonly<Record<string, string>>,
+  snapshot: ProvisioningOperationSnapshot,
+  options: PlanPointersOptions
+): ProvisioningEffect[] {
+  const pointerEffects = planPointers(config, adapterRulesByName, options);
+  const [configEffect, ...providerEffects] = pointerEffects;
+  return [
+    configEffect,
+    ...planTemplateMirror(config.sdd_dir, snapshot.templates, { prune: options.prune }),
+    ...providerEffects,
+    planAgentsRuntimeBootstrap(snapshot.runtime.runtimeStub),
+  ];
+}
+
+function planAdoptInitInfrastructure(
+  config: PointersConfig,
+  snapshot: ProvisioningOperationSnapshot,
+  options: Pick<PlanProvisioningOperationOptions, "force" | "forcePrettier" | "install">
+): ProvisioningEffect[] {
+  const prettierOptions: PlanPrettierOptions = {
+    enabled: config.features.includes("prettier"),
+    force: options.force,
+    forcePrettier: options.forcePrettier,
+  };
+  const huskyOptions: PlanHuskyOptions = {
+    enabled: config.features.includes("husky"),
+    force: options.force,
+  };
+
+  const effects: ProvisioningEffect[] = [
+    planGitattributes(snapshot.guidance.gitattributes.baseline),
+    ...planPrettier(snapshot.prettier, prettierOptions),
+    ...planHusky(snapshot.husky, huskyOptions),
+    ...planCi(snapshot.ci, {
+      enabled: config.features.includes("ci"),
+      force: options.force,
+    }),
+  ];
+
+  effects.push(
+    ...planInstall(snapshot.install, {
+      enabled: options.install,
+      dependencyNames: collectInstallDependencyNames(snapshot, {
+        prettier: prettierOptions,
+        husky: huskyOptions,
+      }),
+    })
+  );
+
+  return effects;
+}
+
+function collectInstallDependencyNames(
+  snapshot: ProvisioningOperationSnapshot,
+  options: { readonly prettier: PlanPrettierOptions; readonly husky: PlanHuskyOptions }
+): string[] {
+  const dependencies: string[] = [];
+
+  if (shouldApplyPrettierBaseline(snapshot.prettier, options.prettier)) {
+    dependencies.push(
+      ...detectNewDevDeps(
+        snapshot.prettier.packageJson,
+        mergePrettierPackageJson(snapshot.prettier.packageJson)
+      )
+    );
+  }
+
+  if (options.husky.enabled && snapshot.husky.packageJson) {
+    dependencies.push(
+      ...detectNewDevDeps(
+        snapshot.husky.packageJson,
+        mergeHuskyPackageJson(snapshot.husky.packageJson)
+      )
+    );
+  }
+
+  return [...new Set(dependencies)];
+}
+
+function shouldApplyPrettierBaseline(
+  snapshot: PrettierSnapshot,
+  options: PlanPrettierOptions
+): snapshot is PrettierSnapshot & { readonly packageJson: PackageJsonObject } {
+  if (!options.enabled || !snapshot.packageJson) {
+    return false;
+  }
+
+  const forcePrettier = options.force || options.forcePrettier;
+  return !snapshot.formatterContext.shouldSkipPrettier || forcePrettier;
 }

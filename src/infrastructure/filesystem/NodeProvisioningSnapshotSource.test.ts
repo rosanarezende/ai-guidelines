@@ -2,12 +2,7 @@ import * as fs from "node:fs/promises";
 import * as nodeFs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import {
-  planCi,
-  planAgentsRuntimeBootstrap,
-  planFinalGuidance,
-  planTemplateMirror,
-} from "../../domain/provisioning/ProvisioningPlan.js";
+import { planProvisioningOperation } from "../../domain/provisioning/ProvisioningPlan.js";
 import { normalizeTemplateContent } from "../../domain/provisioning/TemplateMirror.js";
 import { ProvisionWorkspace } from "../../app/use-cases/ProvisionWorkspace.js";
 import { NodeProvisioningFileSystem } from "./NodeProvisioningFileSystem.js";
@@ -15,6 +10,7 @@ import {
   NodeCiSnapshotSource,
   NodeGuidanceSnapshotSource,
   NodeHuskySnapshotSource,
+  NodeInitGuardSnapshotSource,
   NodeInstallSnapshotSource,
   NodeProvisioningSnapshotSource,
   NodePrettierSnapshotSource,
@@ -133,6 +129,7 @@ describe("infrastructure/NodeProvisioningSnapshotSource — template/runtime sna
     expect(snapshot.runtime.runtimeStub).toContain(
       "Consumer-local ai-guidelines assets live under `.ai-guidelines/`"
     );
+    expect(snapshot.initGuard.conflicts).toEqual([".gitattributes", "package.json"]);
     expect(snapshot.templates.sourceExists).toBe(true);
     expect(snapshot.templates.sourceFiles.map((file) => file.relativePath)).toEqual([
       "plan-boilerplate.md",
@@ -158,6 +155,43 @@ describe("infrastructure/NodeProvisioningSnapshotSource — template/runtime sna
     });
     expect(snapshot.guidance.hasGitRepo).toBe(true);
     expect(await read(targetDir, ".ai-guidelines/templates/stale.md")).toBe("# Stale\n");
+  });
+
+  it("InitGuard snapshot real coleta conflitos com paths POSIX sem escrever", async () => {
+    const targetDir = await mkRoot("prov-init-guard-target-");
+    roots.push(targetDir);
+    await write(targetDir, "AGENTS.md", "# Local\n");
+    await write(targetDir, ".github/workflows/ai-guidelines-ci.yml", "name: custom\n");
+
+    const snapshot = await new NodeInitGuardSnapshotSource().collect({
+      targetDir,
+      sddDir: ".ai-guidelines",
+    });
+
+    expect(snapshot.conflicts).toEqual(["AGENTS.md", ".github/workflows/ai-guidelines-ci.yml"]);
+    expect(snapshot.conflicts.every((relPath) => !relPath.includes("\\"))).toBe(true);
+    expect(await read(targetDir, "AGENTS.md")).toBe("# Local\n");
+  });
+
+  it("package manager explícito alimenta Husky, CI e install no snapshot agregado", async () => {
+    const repoRoot = await mkRoot("prov-pm-repo-");
+    const targetDir = await mkRoot("prov-pm-target-");
+    roots.push(repoRoot, targetDir);
+    await writeRequiredTemplates(repoRoot);
+    await writePrettierBaseline(repoRoot);
+    await writeGitattributesBaseline(repoRoot);
+    await writeCiTemplate(repoRoot);
+    await write(targetDir, "package.json", '{"name":"consumer"}\n');
+
+    const snapshot = await new NodeProvisioningSnapshotSource(repoRoot).collect({
+      targetDir,
+      sddDir: ".ai-guidelines",
+      packageManager: "pnpm@9.0.0",
+    });
+
+    expect(snapshot.husky.packageManager).toMatchObject({ id: "pnpm", runner: "pnpm" });
+    expect(snapshot.ci.packageManager).toMatchObject({ id: "pnpm", runner: "pnpm" });
+    expect(snapshot.install.packageManager).toMatchObject({ id: "pnpm", runner: "pnpm" });
   });
 
   it("template obrigatório ausente lança erro acionável", async () => {
@@ -309,16 +343,28 @@ describe("infrastructure/NodeProvisioningSnapshotSource — template/runtime sna
       "# Local drift\n"
     );
 
-    const effects = [
-      ...planFinalGuidance(snapshot.guidance, {
+    const effects = planProvisioningOperation(
+      {
+        targetDir,
+        projectName: "consumer",
+        config: {
+          sdd_dir: ".ai-guidelines",
+          providers: ["claude"],
+          features: ["ci"],
+          lang: "pt",
+        },
+        adapterRulesByName: { claude: "RULES-CLAUDE" },
+      },
+      snapshot,
+      {
         operation: "adopt",
         force: false,
+        forcePrettier: false,
+        prune: false,
+        install: false,
         providersRequested: false,
-      }),
-      planAgentsRuntimeBootstrap(snapshot.runtime.runtimeStub),
-      ...planTemplateMirror(".ai-guidelines", snapshot.templates, { prune: false }),
-      ...planCi(snapshot.ci, { enabled: true, force: false }),
-    ];
+      }
+    );
     const result = await new ProvisionWorkspace(
       new NodeProvisioningFileSystem(targetDir),
       false
@@ -329,6 +375,8 @@ describe("infrastructure/NodeProvisioningSnapshotSource — template/runtime sna
     );
     expect(result.actions).toContain("write AGENTS.md (ai-guidelines runtime updated)");
     expect(result.actions).toContain("write .ai-guidelines/templates/spec-boilerplate.md");
+    expect(result.actions).toContain("write CLAUDE.md");
+    expect(result.actions).toContain("write .gitattributes (baseline sync)");
     expect(result.actions).toContain("write .github/workflows/ai-guidelines-ci.yml (CI baseline)");
     expect(await read(targetDir, ".ai-guidelines/templates/spec-boilerplate.md")).toBe("# Spec\n");
     expect(await read(targetDir, ".github/workflows/ai-guidelines-ci.yml")).toContain(

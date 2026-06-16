@@ -16,6 +16,7 @@ import {
   HuskySnapshot,
   PointersConfig,
   PrettierSnapshot,
+  ProvisioningOperationSnapshot,
 } from "../../domain/provisioning/ProvisioningPlan.js";
 import { InstallRequest, ProcessRunner } from "../ports/ProcessRunner.js";
 import { NodeProvisioningFileSystem } from "../../infrastructure/filesystem/NodeProvisioningFileSystem.js";
@@ -975,6 +976,167 @@ describe("app/use-cases/ProvisionWorkspace — install (2b-4a)", () => {
     ).rejects.toThrow(
       "Arquivo de release do yarn não encontrado em .yarn/releases/yarn-4.1.1.cjs. Execute: corepack enable && yarn install"
     );
+    expect(runner.installs).toEqual([]);
+  });
+});
+
+function operationSnapshot(
+  overrides: Partial<ProvisioningOperationSnapshot> = {}
+): ProvisioningOperationSnapshot {
+  const packageManager = {
+    id: "npm" as const,
+    label: "npm",
+    runner: "npm run",
+    packageManagerField: null,
+  };
+
+  const snapshot: ProvisioningOperationSnapshot = {
+    initGuard: { conflicts: [] },
+    runtime: { runtimeStub: buildAgentsRuntimeStub(".ai-guidelines") },
+    templates: {
+      sourceExists: true,
+      sourceFiles: [{ relativePath: "spec-boilerplate.md", content: "# Spec\n", origin: "mirror" }],
+      targetRelativePaths: [],
+    },
+    prettier: {
+      packageJson: { name: "consumer" },
+      prettierIgnoreContent: null,
+      prettierIgnoreBaseline: "dist/\nnode_modules/\n",
+      formatterContext: { rival: null, hasPrettier: false, shouldSkipPrettier: false },
+    },
+    husky: {
+      packageJson: { name: "consumer" },
+      packageManager,
+      hooks: [
+        { name: "pre-commit", content: null },
+        { name: "pre-push", content: null },
+      ],
+    },
+    ci: {
+      packageManager,
+      workflowTemplate: CI_TEMPLATE,
+      workflowContent: null,
+    },
+    install: { packageManager, yarnBerryReleaseExists: true },
+    guidance: {
+      formatterContext: { rival: null, hasPrettier: false, shouldSkipPrettier: false },
+      monorepoContext: { detected: false, flavor: null, source: null },
+      gitattributes: { content: null, baseline: "* text=auto eol=lf\n" },
+      platform: "linux",
+      hasGitRepo: false,
+    },
+  };
+
+  return { ...snapshot, ...overrides };
+}
+
+describe("app/use-cases/ProvisionWorkspace — operações completas (2b-4c)", () => {
+  it("init aplica plano completo via fake fs", async () => {
+    const fs = new InMemoryFs();
+    const runner = new SpyProcessRunner();
+    const result = await new ProvisionWorkspace(fs, false, runner).executeOperation({
+      operation: "init",
+      targetDir: "C:/fake-target",
+      projectName: "consumer",
+      config: {
+        sdd_dir: ".ai-guidelines",
+        providers: ["claude"],
+        features: ["prettier", "husky", "ci"],
+        lang: "pt",
+      },
+      adapterRulesByName: { claude: "RULES-CLAUDE" },
+      snapshot: operationSnapshot(),
+      force: false,
+      forcePrettier: false,
+      prune: false,
+      install: true,
+      providersRequested: false,
+    });
+
+    expect(result.actions).toEqual(
+      expect.arrayContaining([
+        "write .ai-guidelines/config.json",
+        "write .ai-guidelines/templates/spec-boilerplate.md",
+        "write CLAUDE.md",
+        "write AGENTS.md (ai-guidelines runtime updated)",
+        "write .gitattributes (baseline sync)",
+        "write package.json (prettier scripts & deps)",
+        "write .prettierignore (prettier baseline)",
+        "write .husky/pre-commit (husky pre-commit)",
+        "mark executable .husky/pre-commit",
+        "write .github/workflows/ai-guidelines-ci.yml (CI baseline)",
+        "install prettier, husky (novas dependências detectadas)",
+      ])
+    );
+    expect(runner.installs).toEqual([{ cwd: "C:/fake-target/.", command: "npm install" }]);
+    expect(fs.files.get(".ai-guidelines/templates/spec-boilerplate.md")).toBe("# Spec\n");
+  });
+
+  it("dry-run de adopt preserva filesystem e não executa install/chmod", async () => {
+    const fs = new InMemoryFs();
+    fs.files.set("package.json", `${JSON.stringify({ name: "consumer" })}\n`);
+    const before = new Map(fs.files);
+    const runner = new SpyProcessRunner();
+
+    const result = await new ProvisionWorkspace(fs, true, runner).executeOperation({
+      operation: "adopt",
+      targetDir: "C:/fake-target",
+      projectName: "consumer",
+      config: {
+        sdd_dir: ".ai-guidelines",
+        providers: ["claude"],
+        features: ["prettier", "husky"],
+        lang: "pt",
+      },
+      adapterRulesByName: { claude: "RULES-CLAUDE" },
+      snapshot: operationSnapshot(),
+      force: false,
+      forcePrettier: false,
+      prune: false,
+      install: true,
+      providersRequested: false,
+    });
+
+    expect(result.actions).toContain("[dry-run] write .ai-guidelines/config.json");
+    expect(result.actions).toContain("[dry-run] mark executable .husky/pre-commit");
+    expect(result.actions).toContain(
+      "[dry-run] install prettier, husky (novas dependências detectadas)"
+    );
+    expect(fs.files).toEqual(before);
+    expect(runner.installs).toEqual([]);
+    expect(runner.markedExecutable).toEqual([]);
+  });
+
+  it("update --providers aplica core/pointers sem infra escondida", async () => {
+    const fs = new InMemoryFs();
+    const runner = new SpyProcessRunner();
+
+    const result = await new ProvisionWorkspace(fs, false, runner).executeOperation({
+      operation: "update",
+      targetDir: "C:/fake-target",
+      projectName: "consumer",
+      config: {
+        sdd_dir: ".ai-guidelines",
+        providers: ["claude", "gemini"],
+        features: ["prettier", "husky", "ci"],
+        lang: "pt",
+      },
+      adapterRulesByName: { claude: "RULES-CLAUDE", gemini: "RULES-GEMINI" },
+      snapshot: operationSnapshot(),
+      force: false,
+      forcePrettier: false,
+      prune: false,
+      install: true,
+      providersRequested: true,
+    });
+
+    expect(result.actions).toContain(
+      "modo update --providers: provider entrypoints são atualizados pelo update; o comando providers legado foi absorvido pelo modelo novo"
+    );
+    expect(result.actions).toContain("write GEMINI.md");
+    expect(fs.files.has("package.json")).toBe(false);
+    expect(fs.files.has(".gitattributes")).toBe(false);
+    expect(fs.files.has(".github/workflows/ai-guidelines-ci.yml")).toBe(false);
     expect(runner.installs).toEqual([]);
   });
 });

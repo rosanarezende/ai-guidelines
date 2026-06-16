@@ -11,6 +11,7 @@ import type {
   CiSnapshot,
   HuskySnapshot,
   HuskyHookSnapshot,
+  InitGuardSnapshot,
   InstallSnapshot,
   PrettierSnapshot,
   TemplateMirrorFile,
@@ -23,6 +24,7 @@ import {
 import type { PackageJsonObject } from "../../domain/provisioning/PackageJson.js";
 import { detectPackageManager } from "../../domain/provisioning/PackageManager.js";
 import type { FinalGuidanceSnapshot } from "../../domain/provisioning/Guidance.js";
+import { INIT_GUARDED_PATHS } from "../../domain/provisioning/InitGuard.js";
 import { detectMonorepoContext } from "../../domain/provisioning/MonorepoContext.js";
 import {
   assertRequiredTemplatesPresent,
@@ -100,16 +102,29 @@ async function readPackageJson(targetDir: string): Promise<PackageJsonObject | n
 
 async function collectPackageManager(
   targetDir: string,
-  packageJson: PackageJsonObject | null
+  packageJson: PackageJsonObject | null,
+  explicitValue?: string
 ): Promise<PackageManagerSnapshot> {
   return detectPackageManager({
-    explicitValue: undefined,
+    explicitValue,
     packageJson,
     hasPnpmLock: await pathExists(path.join(targetDir, "pnpm-lock.yaml")),
     hasPackageLock: await pathExists(path.join(targetDir, "package-lock.json")),
     yarnLockContent: await readTextIfExists(path.join(targetDir, "yarn.lock")),
     hasYarnRc: await pathExists(path.join(targetDir, ".yarnrc.yml")),
   });
+}
+
+export class NodeInitGuardSnapshotSource {
+  async collect(input: ProvisioningSnapshotInput): Promise<InitGuardSnapshot> {
+    const conflicts: string[] = [];
+    for (const relPath of INIT_GUARDED_PATHS) {
+      if (await pathExists(path.join(input.targetDir, relPath))) {
+        conflicts.push(relPath);
+      }
+    }
+    return { conflicts };
+  }
 }
 
 export class NodeTemplateMirrorSnapshotSource {
@@ -233,7 +248,11 @@ export class NodePrettierSnapshotSource {
 export class NodeHuskySnapshotSource {
   async collect(input: ProvisioningSnapshotInput): Promise<HuskySnapshot> {
     const packageJson = await readPackageJson(input.targetDir);
-    const packageManager = await collectPackageManager(input.targetDir, packageJson);
+    const packageManager = await collectPackageManager(
+      input.targetDir,
+      packageJson,
+      input.packageManager
+    );
     const hooks: HuskyHookSnapshot[] = [
       {
         name: "pre-commit",
@@ -265,7 +284,11 @@ export class NodeCiSnapshotSource {
 
   async collect(input: ProvisioningSnapshotInput): Promise<CiSnapshot> {
     const packageJson = await readPackageJson(input.targetDir);
-    const packageManager = await collectPackageManager(input.targetDir, packageJson);
+    const packageManager = await collectPackageManager(
+      input.targetDir,
+      packageJson,
+      input.packageManager
+    );
     return {
       packageManager,
       workflowTemplate: await fs.readFile(this.workflowTemplatePath, "utf8"),
@@ -279,7 +302,11 @@ export class NodeCiSnapshotSource {
 export class NodeInstallSnapshotSource {
   async collect(input: ProvisioningSnapshotInput): Promise<InstallSnapshot> {
     const packageJson = await readPackageJson(input.targetDir);
-    const packageManager = await collectPackageManager(input.targetDir, packageJson);
+    const packageManager = await collectPackageManager(
+      input.targetDir,
+      packageJson,
+      input.packageManager
+    );
     const releasePath = resolveYarnBerryReleasePath(packageManager);
     return {
       packageManager,
@@ -331,6 +358,7 @@ export class NodeGuidanceSnapshotSource {
 }
 
 export class NodeProvisioningSnapshotSource implements ProvisioningSnapshotSource {
+  private readonly initGuard: NodeInitGuardSnapshotSource;
   private readonly templates: NodeTemplateMirrorSnapshotSource;
   private readonly prettier: NodePrettierSnapshotSource;
   private readonly husky: NodeHuskySnapshotSource;
@@ -339,6 +367,7 @@ export class NodeProvisioningSnapshotSource implements ProvisioningSnapshotSourc
   private readonly guidance: NodeGuidanceSnapshotSource;
 
   constructor(repoRoot: string) {
+    this.initGuard = new NodeInitGuardSnapshotSource();
     this.templates = new NodeTemplateMirrorSnapshotSource(repoRoot);
     this.prettier = new NodePrettierSnapshotSource(repoRoot);
     this.husky = new NodeHuskySnapshotSource();
@@ -350,6 +379,7 @@ export class NodeProvisioningSnapshotSource implements ProvisioningSnapshotSourc
   async collect(input: ProvisioningSnapshotInput): Promise<ProvisioningSnapshot> {
     try {
       return {
+        initGuard: await this.initGuard.collect(input),
         runtime: { runtimeStub: buildAgentsRuntimeStub(input.sddDir) },
         templates: await this.templates.collect(input),
         prettier: await this.prettier.collect(input),

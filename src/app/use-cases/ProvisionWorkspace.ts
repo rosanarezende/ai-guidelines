@@ -30,7 +30,11 @@ import {
   PlanPointersOptions,
   PointersConfig,
   ProvisioningEffect,
+  ProvisioningOperation,
+  ProvisioningOperationSnapshot,
+  PlanProvisioningOperationOptions,
   planPointers,
+  planProvisioningOperation,
 } from "../../domain/provisioning/ProvisioningPlan.js";
 import { mergeAgentsContent } from "../services/AgentsRuntimeBootstrap.js";
 import { ProvisioningFileSystem } from "../ports/ProvisioningFileSystem.js";
@@ -42,6 +46,21 @@ export interface ProvisionWorkspaceInput {
   readonly adapterRulesByName: Readonly<Record<string, string>>;
   readonly force: boolean;
   readonly prune: boolean;
+}
+
+export interface ProvisionWorkspaceOperationInput {
+  readonly operation: ProvisioningOperation;
+  readonly targetDir: string;
+  readonly projectName: string;
+  readonly config: PointersConfig;
+  /** Regras compiladas por adapter (produzidas pela infraestrutura). */
+  readonly adapterRulesByName: Readonly<Record<string, string>>;
+  readonly snapshot: ProvisioningOperationSnapshot;
+  readonly force: boolean;
+  readonly forcePrettier: boolean;
+  readonly prune: boolean;
+  readonly install: boolean;
+  readonly providersRequested: boolean;
 }
 
 export interface ProvisionResult {
@@ -61,6 +80,28 @@ export class ProvisionWorkspace {
   async execute(input: ProvisionWorkspaceInput): Promise<ProvisionResult> {
     const options: PlanPointersOptions = { force: input.force, prune: input.prune };
     const effects = planPointers(input.config, input.adapterRulesByName, options);
+    return this.applyEffects(effects);
+  }
+
+  async executeOperation(input: ProvisionWorkspaceOperationInput): Promise<ProvisionResult> {
+    const options: PlanProvisioningOperationOptions = {
+      operation: input.operation,
+      force: input.force,
+      forcePrettier: input.forcePrettier,
+      prune: input.prune,
+      install: input.install,
+      providersRequested: input.providersRequested,
+    };
+    const effects = planProvisioningOperation(
+      {
+        targetDir: input.targetDir,
+        projectName: input.projectName,
+        config: input.config,
+        adapterRulesByName: input.adapterRulesByName,
+      },
+      input.snapshot,
+      options
+    );
     return this.applyEffects(effects);
   }
 

@@ -8,6 +8,7 @@ import {
   planHusky,
   planInitGuard,
   planInstall,
+  planProvisioningOperation,
   planPrettier,
   planPointers,
   planTemplateMirror,
@@ -15,6 +16,7 @@ import {
   CiSnapshot,
   PointersConfig,
   PrettierSnapshot,
+  ProvisioningOperationSnapshot,
   serializeConfig,
   templateTargetRelPath,
 } from "./ProvisioningPlan.js";
@@ -678,5 +680,194 @@ describe("domain/provisioning/ProvisioningPlan — final guidance (2b-4b)", () =
         message: "sugestão EOL: se isso ocorrer, rode git add --renormalize . e depois git status",
       },
     ]);
+  });
+});
+
+function operationSnapshot(
+  overrides: Partial<ProvisioningOperationSnapshot> = {}
+): ProvisioningOperationSnapshot {
+  const packageManager = {
+    id: "npm" as const,
+    label: "npm",
+    runner: "npm run",
+    packageManagerField: null,
+  };
+
+  const snapshot: ProvisioningOperationSnapshot = {
+    initGuard: { conflicts: [] },
+    runtime: { runtimeStub: "## Runtime Bootstrap\n" },
+    templates: {
+      sourceExists: true,
+      sourceFiles: [
+        {
+          relativePath: "spec-boilerplate.md",
+          content: "# Spec\n",
+          origin: "mirror",
+        },
+      ],
+      targetRelativePaths: ["stale.md"],
+    },
+    prettier: {
+      packageJson: { name: "consumer" },
+      prettierIgnoreContent: null,
+      prettierIgnoreBaseline: "dist/\nnode_modules/\n",
+      formatterContext: { rival: null, hasPrettier: false, shouldSkipPrettier: false },
+    },
+    husky: {
+      packageJson: { name: "consumer" },
+      packageManager,
+      hooks: [
+        { name: "pre-commit", content: null },
+        { name: "pre-push", content: null },
+      ],
+    },
+    ci: { ...ciSnapshot, packageManager },
+    install: { packageManager, yarnBerryReleaseExists: true },
+    guidance: {
+      formatterContext: { rival: null, hasPrettier: false, shouldSkipPrettier: false },
+      monorepoContext: { detected: false, flavor: null, source: null },
+      gitattributes: { content: null, baseline: "* text=auto eol=lf\n" },
+      platform: "linux",
+      hasGitRepo: false,
+    },
+  };
+
+  return { ...snapshot, ...overrides };
+}
+
+const fullConfig: PointersConfig = {
+  sdd_dir: ".ai-guidelines",
+  providers: ["claude"],
+  features: ["prettier", "husky", "ci", "tdd"],
+  lang: "pt",
+};
+
+describe("domain/provisioning/ProvisioningPlan — operações completas (2b-4c)", () => {
+  it("init gera plano completo com guard, baseline core, infra, install e guidance", () => {
+    const effects = planProvisioningOperation(
+      {
+        targetDir: "/repo",
+        projectName: "consumer",
+        config: fullConfig,
+        adapterRulesByName: { claude: "RULES-CLAUDE" },
+      },
+      operationSnapshot({ initGuard: { conflicts: ["AGENTS.md"] } }),
+      {
+        operation: "init",
+        force: true,
+        forcePrettier: false,
+        prune: true,
+        install: true,
+        providersRequested: false,
+      }
+    );
+
+    expect(effects[0]).toEqual({
+      kind: "assert-init-safe",
+      conflicts: ["AGENTS.md"],
+      force: true,
+    });
+    expect(effects.map((effect) => effect.kind)).toEqual(
+      expect.arrayContaining([
+        "guidance",
+        "write-config",
+        "sync-templates",
+        "mirror-template",
+        "prune-template",
+        "managed-entrypoint",
+        "agents-runtime-bootstrap",
+        "merge-gitattributes",
+        "write-package-json",
+        "write-prettierignore",
+        "write-husky-hook",
+        "mark-executable",
+        "write-ci-workflow",
+        "install-dependencies",
+      ])
+    );
+    const install = effects.find((effect) => effect.kind === "install-dependencies");
+    expect(install).toMatchObject({
+      kind: "install-dependencies",
+      dependencies: ["prettier", "husky"],
+      command: "npm install",
+    });
+  });
+
+  it("adopt gera plano completo sem guard de init e com merge conservador", () => {
+    const effects = planProvisioningOperation(
+      {
+        targetDir: "/repo",
+        projectName: "consumer",
+        config: fullConfig,
+        adapterRulesByName: { claude: "RULES-CLAUDE" },
+      },
+      operationSnapshot(),
+      {
+        operation: "adopt",
+        force: false,
+        forcePrettier: false,
+        prune: true,
+        install: false,
+        providersRequested: false,
+      }
+    );
+
+    expect(effects.some((effect) => effect.kind === "assert-init-safe")).toBe(false);
+    expect(effects[0]).toEqual({
+      kind: "guidance",
+      message:
+        "modo conservador: sem --force, o adopt adiciona ou mescla baseline sem sobrescrever arquivos existentes",
+    });
+    expect(effects.map((effect) => effect.kind)).toEqual(
+      expect.arrayContaining([
+        "write-config",
+        "sync-templates",
+        "managed-entrypoint",
+        "agents-runtime-bootstrap",
+        "merge-gitattributes",
+        "write-package-json",
+        "write-husky-hook",
+        "write-ci-workflow",
+        "guidance",
+      ])
+    );
+    expect(effects).toContainEqual({
+      kind: "guidance",
+      message: "Atenção: novas dependências adicionadas (prettier, husky). Execute: npm install",
+    });
+  });
+
+  it("update gera plano de config, templates, runtime e provider entrypoints sem infra de init/adopt", () => {
+    const effects = planProvisioningOperation(
+      {
+        targetDir: "/repo",
+        projectName: "consumer",
+        config: { ...baseConfig, providers: ["claude", "gemini"] },
+        adapterRulesByName: { claude: "RULES-CLAUDE", gemini: "RULES-GEMINI" },
+      },
+      operationSnapshot(),
+      {
+        operation: "update",
+        force: false,
+        forcePrettier: false,
+        prune: true,
+        install: true,
+        providersRequested: true,
+      }
+    );
+
+    expect(effects).toContainEqual({
+      kind: "guidance",
+      message:
+        "modo update --providers: provider entrypoints são atualizados pelo update; o comando providers legado foi absorvido pelo modelo novo",
+    });
+    expect(effects.some((effect) => effect.kind === "merge-gitattributes")).toBe(false);
+    expect(effects.some((effect) => effect.kind === "write-package-json")).toBe(false);
+    expect(effects.some((effect) => effect.kind === "install-dependencies")).toBe(false);
+    expect(
+      effects.some(
+        (effect) => effect.kind === "managed-entrypoint" && effect.relPath === "GEMINI.md"
+      )
+    ).toBe(true);
   });
 });

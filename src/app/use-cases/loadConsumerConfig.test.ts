@@ -49,4 +49,21 @@ describe("app/use-cases/loadConsumerConfig (leitura via port + resolução pura)
     expect(cfg.sdd_dir).toBe(".custom");
     expect(cfg.providers).toEqual(["gemini"]);
   });
+
+  it("DADO update --providers ENTÃO preserva config existente e adiciona providers selecionados", async () => {
+    const fs = new FakeFs({
+      ".ai-guidelines/config.json": JSON.stringify({
+        providers: ["claude"],
+        features: ["tdd"],
+        lang: "pt",
+      }),
+    });
+    const cfg = await loadConsumerConfig(fs, { mode: "update", providers: "gemini" }, "/repo");
+    expect(cfg).toEqual({
+      sdd_dir: ".ai-guidelines",
+      providers: ["claude", "gemini"],
+      features: ["tdd"],
+      lang: "pt",
+    });
+  });
 });

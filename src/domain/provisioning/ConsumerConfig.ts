@@ -26,7 +26,7 @@ export interface ResolveConfigOptions {
   readonly provider?: unknown;
   readonly features?: unknown;
   readonly lang?: string;
-  /** Modo legado: `init`/`adopt`/`update`/`providers`. O append é exclusivo de `providers`. */
+  /** Modo público: `init`/`adopt`/`update`; `providers` permanece só como ponte legada pré-flip. */
   readonly mode?: string;
   readonly prune?: boolean;
 }
@@ -64,13 +64,15 @@ export function resolveConfig(
     selectedProvidersInput ?? discovered?.providers
   );
 
-  const providers =
-    options.mode === "providers" &&
+  const shouldAppendProviders =
+    (options.mode === "providers" || options.mode === "update") &&
     selectedProvidersInput !== undefined &&
     !options.prune &&
-    Array.isArray(discovered?.providers)
-      ? unique([...(discovered.providers as string[]), ...selectedProviders])
-      : selectedProviders;
+    Array.isArray(discovered?.providers);
+
+  const providers = shouldAppendProviders
+    ? unique([...(discovered.providers as string[]), ...selectedProviders])
+    : selectedProviders;
 
   const features = normalizeSelectedFeatures(options.features ?? discovered?.features);
   const lang = options.lang ?? discovered?.lang ?? "pt";

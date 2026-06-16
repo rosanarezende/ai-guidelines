@@ -20,6 +20,7 @@ describe("domain/provisioning/InitGuard (paridade com assertSafeInitTarget)", ()
     expect(INIT_GUARDED_PATHS).toContain("AGENTS.md");
     expect(INIT_GUARDED_PATHS).toContain(".gitattributes");
     expect(INIT_GUARDED_PATHS).toContain("package.json");
-    expect(INIT_GUARDED_PATHS.some((p) => p.includes("ai-guidelines-ci.yml"))).toBe(true);
+    expect(INIT_GUARDED_PATHS).toContain(".github/workflows/ai-guidelines-ci.yml");
+    expect(INIT_GUARDED_PATHS.every((p) => !p.includes("\\"))).toBe(true);
   });
 });

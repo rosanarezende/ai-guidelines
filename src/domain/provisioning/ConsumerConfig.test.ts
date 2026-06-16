@@ -47,10 +47,19 @@ describe("domain/provisioning/ConsumerConfig (paridade com resolveAiGuidelinesCo
       expect(resolved.providers).toEqual(["claude", "gemini"]);
     });
 
-    it("DADO modo update com --providers ENTÃO substitui (NÃO faz append)", () => {
+    it("DADO modo update com --providers ENTÃO absorve o antigo providers com append conservador", () => {
       const resolved = resolveConfig(
         { providers: ["claude"] },
         { mode: "update", providers: "gemini" },
+        target
+      );
+      expect(resolved.providers).toEqual(["claude", "gemini"]);
+    });
+
+    it("DADO modo update com --providers e --prune ENTÃO substitui de forma autoritativa", () => {
+      const resolved = resolveConfig(
+        { providers: ["claude"] },
+        { mode: "update", providers: "gemini", prune: true },
         target
       );
       expect(resolved.providers).toEqual(["gemini"]);
