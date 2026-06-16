@@ -12,6 +12,9 @@ class FakeFs implements ProvisioningFileSystem {
   }
   async ensureDir(): Promise<void> {}
   async remove(): Promise<void> {}
+  resolvePath(relPath: string): string {
+    return relPath;
+  }
 }
 
 describe("app/use-cases/loadConsumerConfig (leitura via port + resolução pura)", () => {

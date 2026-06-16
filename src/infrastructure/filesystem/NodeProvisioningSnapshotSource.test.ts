@@ -10,6 +10,7 @@ import { normalizeTemplateContent } from "../../domain/provisioning/TemplateMirr
 import { ProvisionWorkspace } from "../../app/use-cases/ProvisionWorkspace.js";
 import { NodeProvisioningFileSystem } from "./NodeProvisioningFileSystem.js";
 import {
+  NodeHuskySnapshotSource,
   NodeProvisioningSnapshotSource,
   NodePrettierSnapshotSource,
   NodeTemplateMirrorSnapshotSource,
@@ -107,6 +108,7 @@ describe("infrastructure/NodeProvisioningSnapshotSource — template/runtime sna
     expect(snapshot.templates.sourceFiles.every((file) => file.origin === "mirror")).toBe(true);
     expect(snapshot.templates.targetRelativePaths).toEqual(["stale.md"]);
     expect(snapshot.prettier.prettierIgnoreBaseline).toBe("dist/\nnode_modules/\n");
+    expect(snapshot.husky.packageManager.id).toBe("npm");
     expect(await read(targetDir, ".ai-guidelines/templates/stale.md")).toBe("# Stale\n");
   });
 
@@ -296,5 +298,27 @@ describe("infrastructure/NodeProvisioningSnapshotSource — template/runtime sna
       },
     });
     expect(await read(targetDir, ".prettierignore")).toBe("coverage/\n");
+  });
+
+  it("Husky snapshot real lê package manager e hooks existentes sem escrever", async () => {
+    const targetDir = await mkRoot("prov-husky-target-");
+    roots.push(targetDir);
+    await write(targetDir, "package.json", '{"packageManager":"yarn@1.22.22"}\n');
+    await write(targetDir, ".husky/pre-commit", "echo ok\n");
+
+    const snapshot = await new NodeHuskySnapshotSource().collect({
+      targetDir,
+      sddDir: ".ai-guidelines",
+    });
+
+    expect(snapshot.packageManager).toMatchObject({
+      id: "yarn-classic",
+      runner: "yarn",
+    });
+    expect(snapshot.hooks).toEqual([
+      { name: "pre-commit", content: "echo ok\n" },
+      { name: "pre-push", content: null },
+    ]);
+    expect(await read(targetDir, ".husky/pre-commit")).toBe("echo ok\n");
   });
 });

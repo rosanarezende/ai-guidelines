@@ -49,4 +49,9 @@ describe("infrastructure/NodeProvisioningFileSystem (filesystem temporário real
     expect(await sut.exists("GEMINI.md")).toBe(false);
     await expect(sut.remove("GEMINI.md")).resolves.toBeUndefined();
   });
+
+  it("resolvePath expõe path absoluto sob targetDir", () => {
+    const sut = new NodeProvisioningFileSystem(dir);
+    expect(sut.resolvePath(".husky/pre-commit")).toBe(path.resolve(dir, ".husky/pre-commit"));
+  });
 });

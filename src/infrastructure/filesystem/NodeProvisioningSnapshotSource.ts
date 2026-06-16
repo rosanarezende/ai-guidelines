@@ -8,6 +8,8 @@ import type {
 } from "../../app/ports/ProvisioningSnapshotSource.js";
 import { buildAgentsRuntimeStub } from "../../app/services/AgentsRuntimeBootstrap.js";
 import type {
+  HuskySnapshot,
+  HuskyHookSnapshot,
   PrettierSnapshot,
   TemplateMirrorFile,
   TemplateMirrorSnapshot,
@@ -17,6 +19,7 @@ import {
   FORMATTER_CONTEXT_FILES,
 } from "../../domain/provisioning/FormatterContext.js";
 import type { PackageJsonObject } from "../../domain/provisioning/PackageJson.js";
+import { detectPackageManager } from "../../domain/provisioning/PackageManager.js";
 import {
   assertRequiredTemplatesPresent,
   DEFAULT_REQUIRED_TEMPLATE_RELATIVE_PATHS,
@@ -68,6 +71,25 @@ async function listFilesRecursive(rootDir: string): Promise<string[]> {
 
 function toSourceRelativePath(sourceDir: string, absolutePath: string): string {
   return normalizeTemplateRelativePath(path.relative(sourceDir, absolutePath));
+}
+
+async function readTextIfExists(filePath: string): Promise<string | null> {
+  try {
+    return await fs.readFile(filePath, "utf8");
+  } catch (error) {
+    if (isNotFound(error)) {
+      return null;
+    }
+    throw error;
+  }
+}
+
+async function readPackageJson(targetDir: string): Promise<PackageJsonObject | null> {
+  const content = await readTextIfExists(path.join(targetDir, "package.json"));
+  if (content === null) {
+    return null;
+  }
+  return JSON.parse(content) as PackageJsonObject;
 }
 
 export class NodeTemplateMirrorSnapshotSource {
@@ -159,8 +181,8 @@ export class NodePrettierSnapshotSource {
   }
 
   async collect(input: ProvisioningSnapshotInput): Promise<PrettierSnapshot> {
-    const packageJson = await this.readPackageJson(input.targetDir);
-    const prettierIgnoreContent = await this.readTextIfExists(
+    const packageJson = await readPackageJson(input.targetDir);
+    const prettierIgnoreContent = await readTextIfExists(
       path.join(input.targetDir, ".prettierignore")
     );
     const prettierIgnoreBaseline = await fs.readFile(this.prettierIgnoreBaselinePath, "utf8");
@@ -177,25 +199,6 @@ export class NodePrettierSnapshotSource {
     };
   }
 
-  private async readPackageJson(targetDir: string): Promise<PackageJsonObject | null> {
-    const content = await this.readTextIfExists(path.join(targetDir, "package.json"));
-    if (content === null) {
-      return null;
-    }
-    return JSON.parse(content) as PackageJsonObject;
-  }
-
-  private async readTextIfExists(filePath: string): Promise<string | null> {
-    try {
-      return await fs.readFile(filePath, "utf8");
-    } catch (error) {
-      if (isNotFound(error)) {
-        return null;
-      }
-      throw error;
-    }
-  }
-
   private async collectExistingFormatterFiles(targetDir: string): Promise<string[]> {
     const existing: string[] = [];
     for (const relPath of FORMATTER_CONTEXT_FILES) {
@@ -207,13 +210,41 @@ export class NodePrettierSnapshotSource {
   }
 }
 
+export class NodeHuskySnapshotSource {
+  async collect(input: ProvisioningSnapshotInput): Promise<HuskySnapshot> {
+    const packageJson = await readPackageJson(input.targetDir);
+    const packageManager = detectPackageManager({
+      explicitValue: undefined,
+      packageJson,
+      hasPnpmLock: await pathExists(path.join(input.targetDir, "pnpm-lock.yaml")),
+      hasPackageLock: await pathExists(path.join(input.targetDir, "package-lock.json")),
+      yarnLockContent: await readTextIfExists(path.join(input.targetDir, "yarn.lock")),
+      hasYarnRc: await pathExists(path.join(input.targetDir, ".yarnrc.yml")),
+    });
+    const hooks: HuskyHookSnapshot[] = [
+      {
+        name: "pre-commit",
+        content: await readTextIfExists(path.join(input.targetDir, ".husky", "pre-commit")),
+      },
+      {
+        name: "pre-push",
+        content: await readTextIfExists(path.join(input.targetDir, ".husky", "pre-push")),
+      },
+    ];
+
+    return { packageJson, packageManager, hooks };
+  }
+}
+
 export class NodeProvisioningSnapshotSource implements ProvisioningSnapshotSource {
   private readonly templates: NodeTemplateMirrorSnapshotSource;
   private readonly prettier: NodePrettierSnapshotSource;
+  private readonly husky: NodeHuskySnapshotSource;
 
   constructor(repoRoot: string) {
     this.templates = new NodeTemplateMirrorSnapshotSource(repoRoot);
     this.prettier = new NodePrettierSnapshotSource(repoRoot);
+    this.husky = new NodeHuskySnapshotSource();
   }
 
   async collect(input: ProvisioningSnapshotInput): Promise<ProvisioningSnapshot> {
@@ -222,6 +253,7 @@ export class NodeProvisioningSnapshotSource implements ProvisioningSnapshotSourc
         runtime: { runtimeStub: buildAgentsRuntimeStub(input.sddDir) },
         templates: await this.templates.collect(input),
         prettier: await this.prettier.collect(input),
+        husky: await this.husky.collect(input),
       };
     } catch (error) {
       if (isNotFound(error)) {

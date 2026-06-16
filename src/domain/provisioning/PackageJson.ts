@@ -53,6 +53,23 @@ export function mergePrettierPackageJson(
   return packageJson;
 }
 
+export function mergeHuskyPackageJson(existingPackageJson: PackageJsonObject): PackageJsonObject {
+  const packageJson: PackageJsonObject = { ...existingPackageJson };
+  const scripts = asObject(packageJson.scripts);
+  const devDependencies = asObject(packageJson.devDependencies);
+
+  if (!scripts.prepare) {
+    scripts.prepare = "husky";
+  }
+  if (!devDependencies.husky) {
+    devDependencies.husky = "^9.0.0";
+  }
+
+  packageJson.scripts = scripts;
+  packageJson.devDependencies = devDependencies;
+  return packageJson;
+}
+
 export function detectNewDevDeps(
   existingPackageJson: PackageJsonObject,
   mergedPackageJson: PackageJsonObject

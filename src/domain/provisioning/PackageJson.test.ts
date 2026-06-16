@@ -2,6 +2,7 @@ import {
   detectNewDevDeps,
   hasDependency,
   hasScriptToken,
+  mergeHuskyPackageJson,
   mergePrettierPackageJson,
   serializePackageJson,
 } from "./PackageJson.js";
@@ -26,6 +27,18 @@ describe("domain/provisioning/PackageJson (paridade com package-context legado)"
     expect(merged).toEqual({
       scripts: { test: "node --test", format: "custom format" },
       devDependencies: { prettier: "^3.2.0", jest: "^30.0.0" },
+    });
+  });
+
+  it("mergeHuskyPackageJson injeta prepare e devDependency husky preservando existentes", () => {
+    const merged = mergeHuskyPackageJson({
+      scripts: { test: "node --test" },
+      devDependencies: { prettier: "^3.0.0" },
+    });
+
+    expect(merged).toEqual({
+      scripts: { test: "node --test", prepare: "husky" },
+      devDependencies: { prettier: "^3.0.0", husky: "^9.0.0" },
     });
   });
 

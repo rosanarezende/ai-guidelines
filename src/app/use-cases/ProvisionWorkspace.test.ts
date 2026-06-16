@@ -6,12 +6,15 @@ import {
   guidanceEffects,
   planAgentsRuntimeBootstrap,
   planGitattributes,
+  planHusky,
   planInitGuard,
   planPrettier,
   planTemplateMirror,
+  HuskySnapshot,
   PointersConfig,
   PrettierSnapshot,
 } from "../../domain/provisioning/ProvisioningPlan.js";
+import { ProcessRunner } from "../ports/ProcessRunner.js";
 import { NodeProvisioningFileSystem } from "../../infrastructure/filesystem/NodeProvisioningFileSystem.js";
 import { buildAgentsRuntimeStub } from "../services/AgentsRuntimeBootstrap.js";
 import { ProvisionWorkspace, ProvisionWorkspaceInput } from "./ProvisionWorkspace.js";
@@ -34,6 +37,19 @@ class InMemoryFs implements ProvisioningFileSystem {
   }
   async remove(relPath: string): Promise<void> {
     this.files.delete(relPath);
+  }
+  resolvePath(relPath: string): string {
+    return `C:/fake-target/${relPath}`;
+  }
+}
+
+class SpyProcessRunner implements ProcessRunner {
+  readonly markedExecutable: string[] = [];
+  async runInstall(): Promise<void> {
+    throw new Error("not used");
+  }
+  async markExecutable(absolutePath: string): Promise<void> {
+    this.markedExecutable.push(absolutePath);
   }
 }
 
@@ -534,5 +550,163 @@ describe("app/use-cases/ProvisionWorkspace — Prettier (temp fs real)", () => {
     expect(await nodeFs.readFile(path.join(dir, ".prettierignore"), "utf8")).toBe(
       PRETTIER_BASELINE
     );
+  });
+});
+
+function huskySnapshotFromFs(fs: InMemoryFs): HuskySnapshot {
+  const packageJson = fs.files.has("package.json")
+    ? (JSON.parse(fs.files.get("package.json") as string) as Record<string, unknown>)
+    : null;
+  return {
+    packageJson,
+    packageManager: {
+      id: "npm",
+      label: "npm",
+      runner: "npm run",
+      packageManagerField: null,
+    },
+    hooks: [
+      { name: "pre-commit", content: fs.files.get(".husky/pre-commit") ?? null },
+      { name: "pre-push", content: fs.files.get(".husky/pre-push") ?? null },
+    ],
+  };
+}
+
+describe("app/use-cases/ProvisionWorkspace — Husky (2b-3b)", () => {
+  it("fake fs: cria hooks ausentes e executa markExecutable via ProcessRunner", async () => {
+    const fs = new InMemoryFs();
+    const runner = new SpyProcessRunner();
+    fs.files.set("package.json", `${JSON.stringify({ name: "consumer" })}\n`);
+
+    const result = await new ProvisionWorkspace(fs, false, runner).applyEffects(
+      planHusky(huskySnapshotFromFs(fs), { enabled: true, force: false })
+    );
+
+    expect(result.actions).toEqual([
+      "write package.json (husky prepare script)",
+      "write .husky/pre-commit (husky pre-commit)",
+      "mark executable .husky/pre-commit",
+      "write .husky/pre-push (husky pre-push)",
+      "mark executable .husky/pre-push",
+    ]);
+    expect(JSON.parse(fs.files.get("package.json") as string)).toEqual({
+      name: "consumer",
+      scripts: { prepare: "husky" },
+      devDependencies: { husky: "^9.0.0" },
+    });
+    expect(fs.files.get(".husky/pre-commit")).toBe("npm run format\n");
+    expect(fs.files.get(".husky/pre-push")).toBe("npm run check\n");
+    expect(runner.markedExecutable).toEqual([
+      "C:/fake-target/.husky/pre-commit",
+      "C:/fake-target/.husky/pre-push",
+    ]);
+  });
+
+  it("fake fs: mescla hook existente suportado preservando conteúdo", async () => {
+    const fs = new InMemoryFs();
+    const runner = new SpyProcessRunner();
+    fs.files.set("package.json", `${JSON.stringify({ scripts: { test: "node --test" } })}\n`);
+    fs.files.set(".husky/pre-commit", "echo ok\n");
+
+    await new ProvisionWorkspace(fs, false, runner).applyEffects(
+      planHusky(
+        {
+          ...huskySnapshotFromFs(fs),
+          packageManager: {
+            id: "yarn-classic",
+            label: "yarn@1.22.22",
+            runner: "yarn",
+            packageManagerField: "yarn@1.22.22",
+          },
+        },
+        { enabled: true, force: false }
+      )
+    );
+
+    expect(fs.files.get(".husky/pre-commit")).toBe("echo ok\nyarn format\n");
+  });
+
+  it("fake fs: formato não suportado falha antes de escrever", async () => {
+    const fs = new InMemoryFs();
+    fs.files.set("package.json", `${JSON.stringify({ name: "consumer" })}\n`);
+    fs.files.set(".husky/pre-push", '#!/bin/sh\nif [ -n "$CI" ]; then\nfi\n');
+
+    expect(() => planHusky(huskySnapshotFromFs(fs), { enabled: true, force: false })).toThrow(
+      /shape não suportado/
+    );
+    expect(fs.files.get("package.json")).toBe(`${JSON.stringify({ name: "consumer" })}\n`);
+  });
+
+  it("fake fs: dry-run não escreve nem executa markExecutable", async () => {
+    const fs = new InMemoryFs();
+    const runner = new SpyProcessRunner();
+    fs.files.set("package.json", `${JSON.stringify({ name: "consumer" })}\n`);
+
+    const result = await new ProvisionWorkspace(fs, true, runner).applyEffects(
+      planHusky(huskySnapshotFromFs(fs), { enabled: true, force: false })
+    );
+
+    expect(result.actions).toContain("[dry-run] mark executable .husky/pre-commit");
+    expect(fs.files.has(".husky/pre-commit")).toBe(false);
+    expect(runner.markedExecutable).toEqual([]);
+  });
+
+  it("fake fs: segunda aplicação é idempotente", async () => {
+    const fs = new InMemoryFs();
+    const runner = new SpyProcessRunner();
+    fs.files.set("package.json", `${JSON.stringify({ name: "consumer" })}\n`);
+    const uc = new ProvisionWorkspace(fs, false, runner);
+
+    await uc.applyEffects(planHusky(huskySnapshotFromFs(fs), { enabled: true, force: false }));
+    const second = await uc.applyEffects(
+      planHusky(huskySnapshotFromFs(fs), { enabled: true, force: false })
+    );
+
+    expect(second.idempotentNoop).toBe(true);
+    expect(second.actions).toEqual([]);
+  });
+});
+
+describe("app/use-cases/ProvisionWorkspace — Husky (temp fs real)", () => {
+  let dir: string;
+  beforeEach(async () => {
+    dir = await nodeFs.mkdtemp(path.join(os.tmpdir(), "prov-husky-"));
+  });
+  afterEach(async () => {
+    await nodeFs.rm(dir, { recursive: true, force: true });
+  });
+
+  it("aplica hooks em filesystem real e chama ProcessRunner com paths absolutos", async () => {
+    await nodeFs.writeFile(path.join(dir, "package.json"), `${JSON.stringify({ name: "real" })}\n`);
+    const fs = new NodeProvisioningFileSystem(dir);
+    const runner = new SpyProcessRunner();
+
+    const result = await new ProvisionWorkspace(fs, false, runner).applyEffects(
+      planHusky(
+        {
+          packageJson: { name: "real" },
+          packageManager: {
+            id: "npm",
+            label: "npm",
+            runner: "npm run",
+            packageManagerField: null,
+          },
+          hooks: [
+            { name: "pre-commit", content: null },
+            { name: "pre-push", content: null },
+          ],
+        },
+        { enabled: true, force: false }
+      )
+    );
+
+    expect(result.actions).toContain("write .husky/pre-commit (husky pre-commit)");
+    expect(await nodeFs.readFile(path.join(dir, ".husky", "pre-commit"), "utf8")).toBe(
+      "npm run format\n"
+    );
+    expect(runner.markedExecutable).toEqual([
+      path.resolve(dir, ".husky/pre-commit"),
+      path.resolve(dir, ".husky/pre-push"),
+    ]);
   });
 });

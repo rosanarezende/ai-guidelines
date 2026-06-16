@@ -34,6 +34,7 @@ import {
 } from "../../domain/provisioning/ProvisioningPlan.js";
 import { mergeAgentsContent } from "../services/AgentsRuntimeBootstrap.js";
 import { ProvisioningFileSystem } from "../ports/ProvisioningFileSystem.js";
+import { ProcessRunner } from "../ports/ProcessRunner.js";
 
 export interface ProvisionWorkspaceInput {
   readonly config: PointersConfig;
@@ -53,7 +54,8 @@ export interface ProvisionResult {
 export class ProvisionWorkspace {
   constructor(
     private readonly fs: ProvisioningFileSystem,
-    private readonly dryRun: boolean
+    private readonly dryRun: boolean,
+    private readonly processRunner: ProcessRunner | null = null
   ) {}
 
   async execute(input: ProvisionWorkspaceInput): Promise<ProvisionResult> {
@@ -97,6 +99,17 @@ export class ProvisionWorkspace {
           break;
         case "write-prettierignore":
           await this.applyWriteText(effect.relPath, effect.content, "prettier baseline", actions);
+          break;
+        case "write-husky-hook":
+          await this.applyWriteText(
+            effect.relPath,
+            effect.content,
+            `husky ${effect.hookName}`,
+            actions
+          );
+          break;
+        case "mark-executable":
+          await this.applyMarkExecutable(effect.relPath, actions);
           break;
         case "assert-init-safe":
           // Guard de pré-condição: a DECISÃO é pura (domínio); o use case só a
@@ -245,5 +258,16 @@ export class ProvisionWorkspace {
       await this.fs.ensureDir(path.dirname(relPath));
       await this.fs.writeText(relPath, content);
     }
+  }
+
+  private async applyMarkExecutable(relPath: string, actions: string[]): Promise<void> {
+    actions.push(`${this.dryRun ? "[dry-run] " : ""}mark executable ${relPath}`);
+    if (this.dryRun) {
+      return;
+    }
+    if (!this.processRunner) {
+      throw new Error(`ProcessRunner ausente para marcar ${relPath} como executável.`);
+    }
+    await this.processRunner.markExecutable(this.fs.resolvePath(relPath));
   }
 }

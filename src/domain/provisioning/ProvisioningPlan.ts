@@ -21,12 +21,15 @@ import { ManagedBlockSyntax, inferSyntaxFromPath } from "./ManagedBlock.js";
 import { mergePrettierIgnoreContent } from "./MergePolicies.js";
 import {
   detectNewDevDeps,
+  mergeHuskyPackageJson,
   mergePrettierPackageJson,
   PackageJsonObject,
   serializePackageJson,
 } from "./PackageJson.js";
 import { FormatterContextSnapshot } from "./FormatterContext.js";
 import { getAllManagedRelativePaths, getProviderEntrypoints } from "./ProviderEntrypoints.js";
+import { mergeHookContent } from "./MergePolicies.js";
+import { PackageManagerSnapshot } from "./PackageManager.js";
 
 export type ProvisioningOperation = "init" | "adopt" | "update";
 
@@ -68,6 +71,13 @@ export type ProvisioningEffect =
       readonly relPath: ".prettierignore";
       readonly content: string;
     }
+  | {
+      readonly kind: "write-husky-hook";
+      readonly relPath: `.husky/${string}`;
+      readonly hookName: string;
+      readonly content: string;
+    }
+  | { readonly kind: "mark-executable"; readonly relPath: string }
   | {
       readonly kind: "assert-init-safe";
       readonly conflicts: readonly string[];
@@ -119,6 +129,22 @@ export interface PlanPrettierOptions {
   readonly enabled: boolean;
   readonly force: boolean;
   readonly forcePrettier: boolean;
+}
+
+export interface HuskyHookSnapshot {
+  readonly name: "pre-commit" | "pre-push";
+  readonly content: string | null;
+}
+
+export interface HuskySnapshot {
+  readonly packageJson: PackageJsonObject | null;
+  readonly packageManager: PackageManagerSnapshot;
+  readonly hooks: readonly HuskyHookSnapshot[];
+}
+
+export interface PlanHuskyOptions {
+  readonly enabled: boolean;
+  readonly force: boolean;
 }
 
 /** Caminho relativo do `config.json` dentro do consumidor. */
@@ -304,6 +330,54 @@ export function planPrettier(
       relPath: ".prettierignore",
       content: nextIgnore,
     });
+  }
+
+  return effects;
+}
+
+export function planHusky(
+  snapshot: HuskySnapshot,
+  options: PlanHuskyOptions
+): ProvisioningEffect[] {
+  if (!options.enabled) {
+    return guidanceEffects(["skip husky (feature desativada)"]);
+  }
+
+  if (!snapshot.packageJson) {
+    return guidanceEffects(["skip husky (package.json ausente)"]);
+  }
+
+  const effects: ProvisioningEffect[] = [];
+  const mergedPackageJson = mergeHuskyPackageJson(snapshot.packageJson);
+  const currentPackageJson = serializePackageJson(snapshot.packageJson);
+  const nextPackageJson = serializePackageJson(mergedPackageJson);
+  if (nextPackageJson !== currentPackageJson) {
+    effects.push({
+      kind: "write-package-json",
+      relPath: "package.json",
+      content: nextPackageJson,
+      reason: "husky prepare script",
+    });
+  }
+
+  const desiredHooks: Readonly<Record<HuskyHookSnapshot["name"], string>> = {
+    "pre-commit": `${snapshot.packageManager.runner} format`,
+    "pre-push": `${snapshot.packageManager.runner} check`,
+  };
+
+  for (const hook of snapshot.hooks) {
+    const desiredCommand = desiredHooks[hook.name];
+    const mergedHook = mergeHookContent(hook.content, desiredCommand, options.force, hook.name);
+    if (mergedHook !== hook.content) {
+      const relPath = `.husky/${hook.name}` as const;
+      effects.push({
+        kind: "write-husky-hook",
+        relPath,
+        hookName: hook.name,
+        content: mergedHook,
+      });
+      effects.push({ kind: "mark-executable", relPath });
+    }
   }
 
   return effects;

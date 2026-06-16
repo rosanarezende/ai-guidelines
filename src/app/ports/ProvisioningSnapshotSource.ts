@@ -1,5 +1,6 @@
 import type {
   PrettierSnapshot,
+  HuskySnapshot,
   TemplateMirrorSnapshot,
 } from "../../domain/provisioning/ProvisioningPlan.js";
 
@@ -17,6 +18,7 @@ export interface ProvisioningSnapshot {
   readonly runtime: RuntimeBootstrapSnapshot;
   readonly templates: TemplateMirrorSnapshot;
   readonly prettier: PrettierSnapshot;
+  readonly husky: HuskySnapshot;
 }
 
 export interface ProvisioningSnapshotSource {

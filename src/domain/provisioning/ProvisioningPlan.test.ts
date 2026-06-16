@@ -3,6 +3,7 @@ import {
   guidanceEffects,
   planAgentsRuntimeBootstrap,
   planGitattributes,
+  planHusky,
   planInitGuard,
   planPrettier,
   planPointers,
@@ -287,5 +288,151 @@ describe("domain/provisioning/ProvisioningPlan — Prettier (2b-3a)", () => {
         { enabled: true, force: false, forcePrettier: false }
       )
     ).toEqual([{ kind: "guidance", message: "skip prettier (package.json não encontrado)" }]);
+  });
+});
+
+describe("domain/provisioning/ProvisioningPlan — Husky (2b-3b)", () => {
+  it("planHusky gera package.json, hooks e markExecutable", () => {
+    expect(
+      planHusky(
+        {
+          packageJson: { name: "consumer" },
+          packageManager: {
+            id: "npm",
+            label: "npm",
+            runner: "npm run",
+            packageManagerField: null,
+          },
+          hooks: [
+            { name: "pre-commit", content: null },
+            { name: "pre-push", content: null },
+          ],
+        },
+        { enabled: true, force: false }
+      )
+    ).toEqual([
+      {
+        kind: "write-package-json",
+        relPath: "package.json",
+        content: `${JSON.stringify(
+          {
+            name: "consumer",
+            scripts: { prepare: "husky" },
+            devDependencies: { husky: "^9.0.0" },
+          },
+          null,
+          2
+        )}\n`,
+        reason: "husky prepare script",
+      },
+      {
+        kind: "write-husky-hook",
+        relPath: ".husky/pre-commit",
+        hookName: "pre-commit",
+        content: "npm run format\n",
+      },
+      { kind: "mark-executable", relPath: ".husky/pre-commit" },
+      {
+        kind: "write-husky-hook",
+        relPath: ".husky/pre-push",
+        hookName: "pre-push",
+        content: "npm run check\n",
+      },
+      { kind: "mark-executable", relPath: ".husky/pre-push" },
+    ]);
+  });
+
+  it("planHusky preserva hook existente suportado", () => {
+    const effects = planHusky(
+      {
+        packageJson: { scripts: { prepare: "husky" }, devDependencies: { husky: "^9.0.0" } },
+        packageManager: {
+          id: "yarn-classic",
+          label: "yarn@1.22.22",
+          runner: "yarn",
+          packageManagerField: "yarn@1.22.22",
+        },
+        hooks: [
+          { name: "pre-commit", content: "echo ok\n" },
+          { name: "pre-push", content: "yarn check\n" },
+        ],
+      },
+      { enabled: true, force: false }
+    );
+
+    expect(effects).toEqual([
+      {
+        kind: "write-husky-hook",
+        relPath: ".husky/pre-commit",
+        hookName: "pre-commit",
+        content: "echo ok\nyarn format\n",
+      },
+      { kind: "mark-executable", relPath: ".husky/pre-commit" },
+    ]);
+  });
+
+  it("planHusky rejeita hook com formato não suportado sem force", () => {
+    expect(() =>
+      planHusky(
+        {
+          packageJson: { name: "consumer" },
+          packageManager: {
+            id: "npm",
+            label: "npm",
+            runner: "npm run",
+            packageManagerField: null,
+          },
+          hooks: [
+            { name: "pre-commit", content: '#!/bin/sh\nif [ -n "$CI" ]; then\nfi\n' },
+            { name: "pre-push", content: null },
+          ],
+        },
+        { enabled: true, force: false }
+      )
+    ).toThrow(/shape não suportado/);
+  });
+
+  it("planHusky é idempotente quando package e hooks já estão sincronizados", () => {
+    expect(
+      planHusky(
+        {
+          packageJson: { scripts: { prepare: "husky" }, devDependencies: { husky: "^9.0.0" } },
+          packageManager: {
+            id: "npm",
+            label: "npm",
+            runner: "npm run",
+            packageManagerField: null,
+          },
+          hooks: [
+            { name: "pre-commit", content: "npm run format\n" },
+            { name: "pre-push", content: "npm run check\n" },
+          ],
+        },
+        { enabled: true, force: false }
+      )
+    ).toEqual([]);
+  });
+
+  it("planHusky pula quando feature desativada ou package.json ausente", () => {
+    const snapshot = {
+      packageJson: null,
+      packageManager: {
+        id: "npm" as const,
+        label: "npm",
+        runner: "npm run",
+        packageManagerField: null,
+      },
+      hooks: [
+        { name: "pre-commit" as const, content: null },
+        { name: "pre-push" as const, content: null },
+      ],
+    };
+
+    expect(planHusky(snapshot, { enabled: false, force: false })).toEqual([
+      { kind: "guidance", message: "skip husky (feature desativada)" },
+    ]);
+    expect(planHusky(snapshot, { enabled: true, force: false })).toEqual([
+      { kind: "guidance", message: "skip husky (package.json ausente)" },
+    ]);
   });
 });

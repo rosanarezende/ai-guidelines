@@ -22,4 +22,6 @@ export interface ProvisioningFileSystem {
   ensureDir(relPathDir: string): Promise<void>;
   /** Remove o arquivo. Idempotente: no-op se ausente. */
   remove(relPath: string): Promise<void>;
+  /** Resolve um caminho relativo para a raiz alvo do consumidor. */
+  resolvePath(relPath: string): string;
 }

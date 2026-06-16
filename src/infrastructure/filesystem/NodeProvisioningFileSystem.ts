@@ -17,13 +17,13 @@ function isNotFound(error: unknown): boolean {
 export class NodeProvisioningFileSystem implements ProvisioningFileSystem {
   constructor(private readonly targetDir: string) {}
 
-  private resolve(relPath: string): string {
+  resolvePath(relPath: string): string {
     return path.resolve(this.targetDir, relPath);
   }
 
   async readText(relPath: string): Promise<string | null> {
     try {
-      return await fs.readFile(this.resolve(relPath), "utf8");
+      return await fs.readFile(this.resolvePath(relPath), "utf8");
     } catch (error) {
       if (isNotFound(error)) {
         return null;
@@ -33,12 +33,12 @@ export class NodeProvisioningFileSystem implements ProvisioningFileSystem {
   }
 
   async writeText(relPath: string, content: string): Promise<void> {
-    await fs.writeFile(this.resolve(relPath), content, "utf8");
+    await fs.writeFile(this.resolvePath(relPath), content, "utf8");
   }
 
   async exists(relPath: string): Promise<boolean> {
     try {
-      await fs.access(this.resolve(relPath));
+      await fs.access(this.resolvePath(relPath));
       return true;
     } catch {
       return false;
@@ -46,12 +46,12 @@ export class NodeProvisioningFileSystem implements ProvisioningFileSystem {
   }
 
   async ensureDir(relPathDir: string): Promise<void> {
-    await fs.mkdir(this.resolve(relPathDir), { recursive: true });
+    await fs.mkdir(this.resolvePath(relPathDir), { recursive: true });
   }
 
   async remove(relPath: string): Promise<void> {
     try {
-      await fs.unlink(this.resolve(relPath));
+      await fs.unlink(this.resolvePath(relPath));
     } catch (error) {
       if (!isNotFound(error)) {
         throw error;
