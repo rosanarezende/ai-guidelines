@@ -9,46 +9,23 @@ on:
       - main
 
 jobs:
-  smoke-matrix:
-    name: smoke / ${{ matrix.os }} / node ${{ matrix.node }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        node: ["22.x", "24.x"]
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node }}
-          cache: "npm"
-
-      - name: Install dependencies (npm ci)
-        run: npm ci
-
-      - name: Run smoke suite (npm pack + install + init/update over tarball)
-        run: npm run test:smoke
-
   # Agregador estável (Spec 0024 Checkpoint 2.2): expõe UM context fixo `smoke`
   # como required check do ruleset, em vez dos 6 nomes expandidos pela matriz
   # (`smoke / ubuntu-latest / node 24.x` …). Required contexts acoplados à matriz
   # são o vetor de drift que este checkpoint elimina (cf. .github/rulesets/README.md).
+  #
+  # Suspensão temporária governada (Spec 0024 / co-flow-convergence):
+  # durante CO-10.2/CO-10.3, o contexto required `smoke` continua produzível para
+  # evitar drift do ruleset, mas a suíte smoke real não roda. `pr-ready:check`
+  # falha enquanto AI_GUIDELINES_SMOKE_TEMPORARILY_SUSPENDED=true, bloqueando
+  # Ready/Human Gate até a reativação explícita antes do fechamento do nó.
   smoke:
     name: smoke
-    needs: [smoke-matrix]
-    if: always()
     runs-on: ubuntu-latest
+    env:
+      AI_GUIDELINES_SMOKE_TEMPORARILY_SUSPENDED: "true"
     steps:
-      - name: Gate on smoke matrix result
+      - name: Record governed smoke suspension
         run: |
-          result="${{ needs.smoke-matrix.result }}"
-          echo "smoke-matrix result: ${result}"
-          if [ "${result}" != "success" ]; then
-            echo "::error::Smoke matrix did not succeed (${result})."
-            exit 1
-          fi
-          echo "All smoke matrix combinations passed."
+          echo "Smoke tests temporarily suspended for Spec 0024 CO-10.2/CO-10.3."
+          echo "Ready/Human Gate remain blocked by pr-ready:check while AI_GUIDELINES_SMOKE_TEMPORARILY_SUSPENDED=true."

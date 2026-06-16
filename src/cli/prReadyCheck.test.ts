@@ -2,10 +2,14 @@ import {
   evaluateReadyPreconditions,
   main,
   normalizeCheckRuns,
+  detectSmokeTestsSuspended,
   ReadyCheckSnapshot,
   SnapshotCollector,
   Logger,
 } from "./prReadyCheck.js";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
 
 /** Builder de status efetivo (CO-4 r8): blocking derivado do contrato real. */
 function readyStatus(
@@ -48,6 +52,7 @@ function validSnapshot(overrides: Partial<ReadyCheckSnapshot> = {}): ReadyCheckS
     readyBodyContractReasons: [],
     localHeadSha: SHA,
     workingTreeClean: true,
+    smokeTestsSuspended: false,
     checkpoint: {
       id: "checkpoint-exemplo",
       gateDecision: null,
@@ -115,6 +120,14 @@ describe("CLI — pr-ready:check · precondições de Ready [BR-PR-READY-CHECK]"
     );
     expect(result.ok).toBe(false);
     expect(result.failures.some((f) => f.includes("pendente"))).toBe(true);
+  });
+
+  it("DADO smoke temporariamente suspenso QUANDO avalia ENTÃO bloqueia Ready/Human Gate", () => {
+    const result = evaluateReadyPreconditions(validSnapshot({ smokeTestsSuspended: true }));
+    expect(result.ok).toBe(false);
+    expect(
+      result.failures.some((f) => f.includes("smoke tests estão temporariamente suspensos"))
+    ).toBe(true);
   });
 
   it("DADO finding bloqueante aberto QUANDO avalia ENTÃO falha", () => {
@@ -275,6 +288,29 @@ describe("CLI — pr-ready:check · normalização de checks", () => {
       { name: "governance-pr-check", bucket: "pass" },
       { name: "repo-validation", bucket: "pass" },
     ]);
+  });
+});
+
+describe("CLI — pr-ready:check · suspensão temporária de smoke", () => {
+  it("detecta a suspensão governada pelo marcador do workflow smoke", () => {
+    const repo = fs.mkdtempSync(path.join(os.tmpdir(), "ai-guidelines-smoke-suspended-"));
+    const workflow = path.join(repo, ".github", "workflows");
+    fs.mkdirSync(workflow, { recursive: true });
+    fs.writeFileSync(
+      path.join(workflow, "smoke-multi-os.yml"),
+      'env:\n  AI_GUIDELINES_SMOKE_TEMPORARILY_SUSPENDED: "true"\n'
+    );
+
+    expect(detectSmokeTestsSuspended(repo)).toBe(true);
+  });
+
+  it("não marca suspensão quando o workflow smoke não declara o marcador", () => {
+    const repo = fs.mkdtempSync(path.join(os.tmpdir(), "ai-guidelines-smoke-active-"));
+    const workflow = path.join(repo, ".github", "workflows");
+    fs.mkdirSync(workflow, { recursive: true });
+    fs.writeFileSync(path.join(workflow, "smoke-multi-os.yml"), "jobs:\n  smoke:\n");
+
+    expect(detectSmokeTestsSuspended(repo)).toBe(false);
   });
 });
 

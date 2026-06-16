@@ -29,6 +29,7 @@ logs/
 
 # Arquivos temporários
 .tmp/
+.temp/
 temp/
 # Scripts de scratch na raiz (ex.: cálculo ad-hoc de hash) — nunca versionar.
 # O repo usa cli/**/*.test.mjs e src/**/*.test.ts; não há test-*.js de raiz legítimo.

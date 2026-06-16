@@ -6,7 +6,7 @@
 > Plan: [`./plan.md`](./plan.md)
 > Tasks: [`./tasks.md`](./tasks.md)
 > Status agregado: **Resolved (decisões)** — todas as `[DEC]` desta spec estão `Resolved`; a pesquisa estrutural ainda aberta vive em [`research/findings.md`](./research/findings.md), não aqui.
-> Última atualização: 2026-06-16 — **`[DEC-0024-G10]` registrada**: novo nó planejado `co-flow-convergence` antes de `co-capture`.
+> Última atualização: 2026-06-16 — **`[DEC-0024-G11]` registrada**: suspensão temporária governada dos smoke tests durante `co-flow-convergence`, com bloqueio de Ready/Human Gate até reativação.
 
 > **Artefato exclusivo de decisão humana.** Organizado por **estado**, não por numeração histórica (reestruturação 2026-05-31). Quatro estados respondem, à primeira vista, _o que já foi decidido · o que ainda está aberto · o que virou regra · o que virou enforcement_:
 >
@@ -249,6 +249,30 @@ Cada transição deve declarar: fato de entrada, autoridade, comando, efeito per
 
 ---
 
+### [DEC-0024-G11] Suspender temporariamente smoke tests durante `co-flow-convergence`, sem liberar Ready/Human Gate
+
+**Pergunta:** Durante a migração/convergência do fluxo governado no PR #43, os smoke tests remotos devem continuar rodando a cada push, ou podem ser suspensos temporariamente para reduzir atrito operacional enquanto a arquitetura do fluxo é confrontada e corrigida?
+
+**Modo de gate:** `aceitação` <!-- decisão operacional da owner, 2026-06-16, durante CO-10.2. -->
+
+**Contexto:** O nó `co-flow-convergence` precisa alterar e testar o próprio lifecycle do framework. Os smoke tests multi-OS/tarball são valiosos como gate final de distribuição, mas são caros e pouco informativos durante a fase intermediária CO-10.2/CO-10.3, antes da reativação final do fluxo. Ao mesmo tempo, remover silenciosamente o required context `smoke` ou permitir Ready/Human Gate sem smoke real recriaria drift entre validação, ruleset e decisão humana.
+
+**Decisão (Resolved):**
+
+- Suspender temporariamente a execução real dos smoke tests remotos durante CO-10.2/CO-10.3.
+- Preservar o contexto required estável `smoke` como produtor explícito no workflow, evitando required context órfão e drift de ruleset.
+- Manter `npm run validate`, testes TypeScript/unitários e guards governados como validação obrigatória local/CI.
+- Bloquear `pr-ready:check`, Ready e Human Gate enquanto a suspensão estiver ativa.
+- Reativar smoke real antes da readiness final do nó e antes de qualquer Human Gate do PR #43.
+
+**O que NÃO está sendo decidido:** remover definitivamente smoke; enfraquecer o gate final do nó; alterar o ruleset para deixar de exigir `smoke`; autorizar Ready/Human Gate com smoke suspenso; pular validação local; aplicar a suspensão fora do escopo de CO-10.2/CO-10.3.
+
+**Critério de reversão obrigatório:** antes do fechamento do nó `co-flow-convergence`, o workflow `smoke-multi-os.yml` deve voltar a executar `npm run test:smoke`, `npm run ci` deve voltar a incluir smoke, `pr-ready:check` deve deixar de detectar suspensão, e o PR deve validar smoke real antes de Ready/Human Gate.
+
+**Status:** Resolved (2026-06-16) / @rosanarezende — decisão operacional temporária com enforcement de bloqueio em `pr-ready:check`.
+
+---
+
 ## 2 · Aberto — pesquisa genuína (única coisa ainda em investigação)
 
 > Estes **não são decisões** — são findings com **alternativas reais ainda competindo**. Vivem em [`research/findings.md`](./research/findings.md); aqui só o ponteiro. Só retornam como `[DEC] Pendente` ao **convergir + exigir julgamento**. **Critério (2026-05-31):** se não há alternativa viva competindo, **não pertence aqui** — é decisão (§ 1) ou trabalho (§ 4).
@@ -313,6 +337,7 @@ Cada transição deve declarar: fato de entrada, autoridade, comando, efeito per
 | `G08`        | reabertura de G03/G04/G05 + direção orientada a grafo | **Decidido** — Resolved 2026-06-03 (owner); a modelagem fica DENTRO da 0024; NÃO há 0025 independente        |
 | `G09`        | eliminação integral de `/cli` (→ CO-3.5)              | **Decidido** — § 1 (Resolved 2026-06-15, owner); supersede o "wrapper" do #38; topologia externa inalterada  |
 | `G10`        | `co-flow-convergence` antes de `co-capture`           | **Decidido** — § 1 (Resolved 2026-06-16, owner); nó próprio para convergência ponta a ponta do fluxo         |
+| `G11`        | suspensão temporária de smoke durante co-flow         | **Decidido** — § 1 (Resolved 2026-06-16, owner); bloqueia Ready/Human Gate até reativação                    |
 
 ---
 
@@ -327,6 +352,7 @@ Cada transição deve declarar: fato de entrada, autoridade, comando, efeito per
 - [x] `[DEC-0024-G08]` — Resolved 2026-06-03 / @rosanarezende
 - [x] `[DEC-0024-G09]` — Resolved 2026-06-15 / @rosanarezende
 - [x] `[DEC-0024-G10]` — Resolved 2026-06-16 / @rosanarezende
+- [x] `[DEC-0024-G11]` — Resolved 2026-06-16 / @rosanarezende
 
 ---
 

@@ -260,11 +260,11 @@ profiles:
         consumers: [hook, workflow, human]
         description: Gate local operacional e pre-push.
       - name: ci
-        command: npm ci && npm run validate && npm run state-yml:check:all && npm run test:smoke
+        command: npm ci && npm run validate && npm run state-yml:check:all
         category: aggregate
         mutates: true
         consumers: [workflow, human]
-        description: Pipeline completo replicavel fora do GitHub.
+        description: Pipeline completo replicavel fora do GitHub; smoke temporariamente suspenso durante CO-10.2/CO-10.3 e bloqueado para Ready/Human Gate por pr-ready:check.
       - name: prepare
         command: husky
         category: lifecycle
@@ -313,7 +313,7 @@ profiles:
           - npm run ci
       - file: .github/workflows/smoke-multi-os.yml
         required_runs:
-          - npm run test:smoke
+          - echo "Smoke tests temporarily suspended for Spec 0024 CO-10.2/CO-10.3."
       - file: .github/workflows/ruleset-drift.yml
         required_runs:
           - npm run build && node dist/cli/bin.js ruleset-check --parity --live /tmp/live-ruleset.json

@@ -17,6 +17,8 @@
  *   - Em stack modo `unit`, Human Gate intermediário não mergeia em `main`.
  */
 import { execFileSync } from "node:child_process";
+import fs from "node:fs";
+import path from "node:path";
 
 import { parseSpecBranch } from "../app/workflow/DetectActiveSpec.js";
 import { NodeWorkflowFileSystem } from "../infrastructure/filesystem/NodeWorkflowFileSystem.js";
@@ -76,6 +78,8 @@ export interface ReadyCheckSnapshot {
   readonly workingTreeClean: boolean | null;
   /** Estado de reviews/gate do checkpoint do cursor (null = PR fora de spec/topologia). */
   readonly checkpoint: ReadyCheckCheckpoint | null;
+  /** Suspensão temporária governada dos smoke tests; bloqueia Ready/Human Gate. */
+  readonly smokeTestsSuspended?: boolean;
 }
 
 export interface ReadyCheckResult {
@@ -145,6 +149,12 @@ export function evaluateReadyPreconditions(snapshot: ReadyCheckSnapshot): ReadyC
 
   for (const reason of snapshot.readyBodyContractReasons) {
     failures.push(`contrato Ready do body: ${reason}`);
+  }
+
+  if (snapshot.smokeTestsSuspended === true) {
+    failures.push(
+      "smoke tests estão temporariamente suspensos — reative `npm run test:smoke` no workflow/ci antes de Ready/Human Gate."
+    );
   }
 
   if (snapshot.checks.length === 0) {
@@ -322,6 +332,13 @@ function collectCheckpoint(
   };
 }
 
+export function detectSmokeTestsSuspended(repoRoot: string): boolean {
+  const workflowPath = path.join(repoRoot, ".github", "workflows", "smoke-multi-os.yml");
+  if (!fs.existsSync(workflowPath)) return false;
+  const content = fs.readFileSync(workflowPath, "utf-8");
+  return /AI_GUIDELINES_SMOKE_TEMPORARILY_SUSPENDED:\s*["']?true["']?/i.test(content);
+}
+
 export class GhSnapshotCollector implements SnapshotCollector {
   collect(prNumber: number, repo: string, repoRoot: string): ReadyCheckSnapshot {
     const raw = JSON.parse(gh(["api", `repos/${repo}/pulls/${prNumber}`])) as {
@@ -381,6 +398,7 @@ export class GhSnapshotCollector implements SnapshotCollector {
       localHeadSha: gitOrNull(repoRoot, ["rev-parse", "HEAD"]),
       workingTreeClean: status === null ? null : status === "",
       checkpoint: collectCheckpoint(repoRoot, pr.headRefName, pr.labels, pr.baseRefName),
+      smokeTestsSuspended: detectSmokeTestsSuspended(repoRoot),
     };
   }
 }
