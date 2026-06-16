@@ -1,0 +1,31 @@
+checkpoint: "checkpoint-co-flow-convergence"
+role: security_review
+executor:
+  platform: codex-cli
+  model: gpt-5
+decision: changes_requested
+findings_emitted: 2
+subject_ref: "origin/feat/spec-0024-co-enforcement..0490dc0"
+review_fingerprint: ccb9be06db30
+findings:
+  - id: F1
+    severity: high
+    location: ".governance/specs/0024-context-architecture/research/2026-06-16-chec\
+      kpoint-co-flow-convergence-co-10.1-inventory.md#L103-L143"
+    description: "As transicoes Ready/Human Gate/pos-Gate declaram autoridades e
+      acoes proibidas, mas ainda nao modelam estados negativos de seguranca para
+      Draft, CI pendente/falho, review stale, receipt stale, PR state stale e
+      modo offline/degradado; sem esses bloqueios explicitos, CO-5/CO-6 podem
+      automatizar um caminho inseguro."
+    disposition: open
+    fingerprint: 2fe4a7c95a46
+  - id: F2
+    severity: medium
+    location: ".governance/specs/0024-context-architecture/research/2026-06-16-chec\
+      kpoint-co-flow-convergence-co-10.1-inventory.md#L62-L72"
+    description: "Riscos de spoofing em PR body/title/topology/github_pr aparecem
+      como drifts observados, mas ainda nao ha matriz de fonte canonica e
+      validacao fail-closed por ameaca; a revisao de seguranca precisa
+      distinguir divergencia acidental de spoofing antes do fluxo mutante."
+    disposition: open
+    fingerprint: 0c54434dcf00
