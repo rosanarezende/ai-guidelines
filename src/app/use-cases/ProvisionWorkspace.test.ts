@@ -1070,6 +1070,10 @@ describe("app/use-cases/ProvisionWorkspace — operações completas (2b-4c)", (
     );
     expect(runner.installs).toEqual([{ cwd: "C:/fake-target/.", command: "npm install" }]);
     expect(fs.files.get(".ai-guidelines/templates/spec-boilerplate.md")).toBe("# Spec\n");
+    expect(JSON.parse(fs.files.get("package.json") ?? "{}")).toMatchObject({
+      scripts: { format: "prettier --write .", prepare: "husky" },
+      devDependencies: { prettier: "^3.0.0", husky: "^9.0.0" },
+    });
   });
 
   it("dry-run de adopt preserva filesystem e não executa install/chmod", async () => {

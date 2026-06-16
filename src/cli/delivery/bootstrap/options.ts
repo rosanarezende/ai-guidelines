@@ -1,6 +1,7 @@
 import * as path from "node:path";
 import { boolFlag, parseFlags, stringFlag } from "../../registry/parseFlags.js";
 import { ProvisioningOperation } from "../../../domain/provisioning/ProvisioningPlan.js";
+import { FEATURE_OPTIONS } from "../../../domain/provisioning/FeatureCatalog.js";
 
 export type BootstrapDeliveryCommandName = ProvisioningOperation | "check-budget";
 
@@ -99,7 +100,12 @@ export function parseProvisioningCommandOptions(
   }
 
   const skippedFeatures = collectSkippedFeatures(flags);
-  const features = removeSkippedFeatures(listFlag(flags, "features"), skippedFeatures);
+  const explicitFeatures = listFlag(flags, "features");
+  const defaultFeatures = operation === "update" ? undefined : FEATURE_OPTIONS;
+  const requestedFeatures = explicitFeatures ?? defaultFeatures;
+  const features = requestedFeatures
+    ? removeSkippedFeatures(requestedFeatures, skippedFeatures)
+    : undefined;
 
   return {
     operation,
@@ -196,12 +202,9 @@ function collectSkippedFeatures(flags: ReadonlyMap<string, string | true>): read
 }
 
 function removeSkippedFeatures(
-  features: readonly string[] | undefined,
+  features: readonly string[],
   skippedFeatures: readonly string[]
-): readonly string[] | undefined {
-  if (!features) {
-    return undefined;
-  }
+): readonly string[] {
   const skipped = new Set(skippedFeatures);
   return features.filter((feature) => !skipped.has(feature));
 }

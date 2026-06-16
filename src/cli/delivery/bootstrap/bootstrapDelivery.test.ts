@@ -370,7 +370,7 @@ describe("bootstrap delivery 2c — wizard", () => {
       projectName: path.basename(path.resolve("repo")),
       config: {
         providers: ["claude", "gemini", "openai"],
-        features: ["prettier", "husky", "ci"],
+        features: ["prettier", "husky", "ci", "quality-gates", "tdd", "bdd"],
       },
     });
   });

@@ -633,11 +633,17 @@ function planAdoptInitInfrastructure(
     enabled: config.features.includes("husky"),
     force: options.force,
   };
+  const huskySnapshot: HuskySnapshot = {
+    ...snapshot.husky,
+    packageJson: shouldApplyPrettierBaseline(snapshot.prettier, prettierOptions)
+      ? mergePrettierPackageJson(snapshot.prettier.packageJson)
+      : snapshot.husky.packageJson,
+  };
 
   const effects: ProvisioningEffect[] = [
     planGitattributes(snapshot.guidance.gitattributes.baseline),
     ...planPrettier(snapshot.prettier, prettierOptions),
-    ...planHusky(snapshot.husky, huskyOptions),
+    ...planHusky(huskySnapshot, huskyOptions),
     ...planCi(snapshot.ci, {
       enabled: config.features.includes("ci"),
       force: options.force,

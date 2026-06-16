@@ -55,7 +55,10 @@ abstract class ProvisioningDeliveryCommand implements BootstrapDeliveryCommand<P
       DEFAULT_PROVIDERS.join(","),
       getSupportedProviders()
     );
-    const features = await promptList(prompts, "Features", "prettier,husky,ci", FEATURE_OPTIONS);
+    const features =
+      this.name === "update"
+        ? undefined
+        : await promptList(prompts, "Features", FEATURE_OPTIONS.join(","), FEATURE_OPTIONS);
     const packageManager = await prompts.select<string>({
       message: "Package manager",
       choices: [
