@@ -13,6 +13,9 @@ import { collectHandoffFacts } from "./handoff.js";
 import { deriveHandoff } from "./handoffFacts.js";
 import { createLoadReceipt, writeReceipt, receiptPath } from "./handoffReceipt.js";
 
+const WORKFLOW_INTEGRATION_TIMEOUT_MS = 30_000;
+jest.setTimeout(WORKFLOW_INTEGRATION_TIMEOUT_MS);
+
 /**
  * Integration tests — loop operacional ponta-a-ponta com filesystem + git
  * reais, sem fakes nem mocks. Exercita a composição entre `src/cli/workflow.ts`,
