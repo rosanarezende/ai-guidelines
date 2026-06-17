@@ -13,6 +13,7 @@ import { WorkCommand } from "./commands/WorkCommand.js";
 import { DecideCommand } from "./commands/DecideCommand.js";
 import { BOOTSTRAP_COMMANDS, BootstrapCommand } from "./commands/BootstrapCommand.js";
 import { CockpitCommand } from "./commands/CockpitCommand.js";
+import { ValidateCommand } from "./commands/ValidateCommand.js";
 
 /**
  * Ponto ÚNICO de registro dos comandos da CLI (Spec 0024, pr-cli-cutover).
@@ -27,6 +28,7 @@ export function buildRegistry(): CommandRegistry {
     registry.register(new BootstrapCommand(definition));
   }
   registry.register(new CockpitCommand());
+  registry.register(new ValidateCommand());
   registry.register(new ContinueCommand());
   registry.register(new InsightCommand());
   registry.register(new TriageCommand()); // name "triage" (o verbo "review" migrou p/ ReviewCommand)

@@ -46,6 +46,7 @@ ${buildRegistry().renderHelp()}
   Pedir review governado:  npm run flow -- review <tipo>
   Catálogo/policy:         npm run flow -- review types | review policy
   Decisões do humano:      npm run flow -- decide [--brief-only] [--type <tipo>]
+  Validação intermediária: npm run flow -- validate changed [--fix]
   Preparar Ready:          npm run pr-ready:check -- --pr <n>
   Gate local completo:     npm run validate
 

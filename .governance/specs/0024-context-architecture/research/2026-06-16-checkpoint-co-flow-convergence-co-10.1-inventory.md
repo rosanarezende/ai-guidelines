@@ -758,3 +758,61 @@ Estado de seguranca:
   `npm publish`;
 - nenhum Ready, Human Gate, gate artifact, merge ou abertura de novo PR foi
   executado por esta mudanca.
+
+## Dogfood CO-10.4 — validacao intermediaria deve ser barata e orientada ao diff
+
+Friccao observada durante o acompanhamento do PR #43:
+
+- o workflow `repo-validation` rodava `npm run validate` completo em todo PR,
+  inclusive enquanto o PR estava Draft e ainda em implementacao;
+- isso fazia cada push intermediario pagar o custo de formatacao global, build
+  completo, testes completos e checks historicos;
+- ao mesmo tempo, remover validacao intermediaria seria inseguro, porque erros
+  simples de formatacao, TypeScript ou contrato poderiam acumular ate o Human
+  Gate.
+
+Correcao aplicada em CO-10.4:
+
+1. `npm run flow -- validate changed` foi adicionado como comando governado de
+   validacao intermediaria.
+2. O comando coleta os arquivos alterados por Git e executa:
+   - `git diff --check`;
+   - Prettier somente nos arquivos alterados formataveis;
+   - `npm run build` quando o diff toca TypeScript/package;
+   - checks especificos quando o diff toca contratos, workflows, state,
+     projections, reviews ou gates.
+3. `--fix` permite formatar somente os arquivos alterados em uso local.
+4. `npm run validate:changed` foi projetado no contrato de scripts para CI e
+   humanos.
+5. O workflow `repo-validation` passou a ter duas fases:
+   - PR Draft: `validate-changed`, rapido e orientado ao diff;
+   - PR Ready/main: `validate-os`, com `npm run validate` completo e varredura
+     historica de state.
+6. O contexto required `repo-validation` permanece estavel; o que muda e o
+   conteudo validado conforme a fase do PR.
+7. O cockpit passou a mostrar explicitamente:
+   - validacao intermediaria: `npm run flow -- validate changed`;
+   - validacao completa para decisao: `npm run validate`.
+
+Falsificacao adicionada:
+
+- testes provam que arquivos formataveis do diff sao enviados ao Prettier;
+- testes provam que `--fix` usa `prettier --write`;
+- testes provam que TypeScript/package acionam build;
+- testes provam que contrato/workflow/docs acionam `script-contracts:check`;
+- testes provam que state/projection acionam `state-yml:check` e
+  `active-specs:check`;
+- testes provam que reviews/gates acionam `review:check`;
+- teste prova que o contrato de workflow aceita comando contratado com
+  argumentos, como `npm run validate:changed -- --base ...`, sem aceitar comando
+  apenas parecido;
+- dogfood real executou `npm run validate:changed` no diff desta implementacao.
+
+Estado de seguranca:
+
+- `npm run validate` continua existindo e continua sendo o gate completo antes
+  de Ready/Human Gate;
+- PR Ready e `main` continuam rodando a validacao completa em CI;
+- a validacao intermediaria nao executa Ready, Human Gate, gate artifact, merge
+  ou transicao de sub-checkpoint;
+- CO-10.5 nao foi iniciado por esta mudanca.

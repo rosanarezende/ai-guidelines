@@ -24,6 +24,22 @@ export const INTENT_CATALOG: readonly Intent[] = [
     actions: [{ command: "triage", label: "Triar comentários de review do PR" }],
   },
   {
+    id: "validar-mudancas",
+    title: "Validar mudanças antes de enviar",
+    actions: [
+      {
+        command: "validate",
+        args: ["changed"],
+        label: "Rodar validação intermediária só nos arquivos alterados",
+      },
+      {
+        command: "validate",
+        args: ["changed", "--fix"],
+        label: "Formatar somente arquivos alterados e validar o diff",
+      },
+    ],
+  },
+  {
     id: "executar-trabalho-governado",
     title: "Executar o trabalho situado (implementação/correção)",
     actions: [

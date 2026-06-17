@@ -405,11 +405,12 @@ function unquoteYamlScalar(value: string): string {
   return text;
 }
 
-function runLineMatchesRequiredRun(line: string, requiredRun: string): boolean {
+export function runLineMatchesRequiredRun(line: string, requiredRun: string): boolean {
   const text = unquoteYamlScalar(line);
   if (!text || text.startsWith("#")) return false;
   return (
     text === requiredRun ||
+    text.startsWith(`${requiredRun} `) ||
     text.startsWith(`${requiredRun} &&`) ||
     text.startsWith(`${requiredRun} ||`) ||
     text.startsWith(`${requiredRun};`)

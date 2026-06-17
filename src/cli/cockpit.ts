@@ -205,7 +205,8 @@ export function renderCockpit(model: CockpitModel): string {
   lines.push("- handoff: `npm run flow -- handoff 0024`");
   lines.push("- trabalho: `npm run flow -- work --authorization explicit-work-request`");
   lines.push("- decisões: `npm run flow -- decide --brief-only`");
-  lines.push("- validação local: `npm run validate`");
+  lines.push("- validação intermediária: `npm run flow -- validate changed`");
+  lines.push("- validação completa para decisão: `npm run validate`");
   return `${lines.join("\n")}\n`;
 }
 
