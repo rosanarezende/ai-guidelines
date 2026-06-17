@@ -3,6 +3,7 @@ import { deriveGovernedFlow, derivePrReadyFlow } from "./GovernedFlow.js";
 import { MarkReadinessDefinition } from "../decide/markReadiness.js";
 import { AdvanceSubcheckpointDefinition } from "../decide/advanceSubcheckpoint.js";
 import { HumanGateDefinition } from "../decide/humanGate.js";
+import { OpenNextNodeDefinition } from "../decide/openNextNode.js";
 import { makeDecisionSnapshot, makeHandoffFacts } from "../../test-utils/decisionFixtures.js";
 import { parseWorkPolicy } from "../../infrastructure/yaml/workPolicyReader.js";
 import { deriveNextAction } from "../handoffFacts.js";
@@ -335,5 +336,47 @@ describe("GovernedFlow", () => {
 
     expect(new AdvanceSubcheckpointDefinition().detect(snapshot).status).toBe("not-applicable");
     expect(deriveGovernedFlow(snapshot).recommended?.id).not.toBe("advance-subcheckpoint");
+  });
+
+  it("pós-Human Gate recomenda open-next-node pela mesma fonte que decide", () => {
+    const facts = coFlowFacts({
+      lifecycle: { ...GREEN, gateDecision: "approved" },
+      pullRequest: {
+        ...makeHandoffFacts().pullRequest!,
+        number: 43,
+        isDraft: false,
+        checks: { pass: 11, fail: 0, pending: 0 },
+        headRefOid: "abc1234",
+        headRefName: "feat/spec-0024-co-flow-convergence",
+        baseRefName: "feat/spec-0024-co-enforcement",
+      },
+      nextPlannedNode: {
+        id: "co-capture",
+        githubPr: null,
+        sequence: 11,
+        terminal: false,
+      },
+      subCheckpoints: [
+        { id: "CO-10.1", title: "inventário", state: "done", line: 100 },
+        { id: "CO-10.2", title: "confronto", state: "done", line: 101 },
+        { id: "CO-10.3", title: "correções", state: "done", line: 102 },
+      ],
+    });
+    const snapshot = makeDecisionSnapshot({
+      facts,
+      checkpoint: "checkpoint-co-flow-convergence",
+      openFindings: [],
+      lanes: [],
+      subCheckpoints: facts.subCheckpoints,
+      gateExists: true,
+      workingTreeState: "clean",
+    });
+
+    const flow = deriveGovernedFlow(snapshot);
+    const decide = new OpenNextNodeDefinition().detect(snapshot);
+
+    expect(decide.status).toBe("available");
+    expect(flow.recommended?.id).toBe("open-next-node");
+    expect(flow.recommended?.availability).toEqual(decide);
   });
 });

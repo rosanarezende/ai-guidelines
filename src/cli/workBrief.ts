@@ -57,7 +57,10 @@ import {
 } from "../infrastructure/yaml/humanDecisionPolicyReader.js";
 import type { DecisionAvailability } from "./decide/model.js";
 import { ADVANCE_SUBCHECKPOINT_ID, deriveAdvanceEligibility } from "./decide/advanceEligibility.js";
-import { deriveMarkReadinessAvailability } from "./flow/GovernedFlow.js";
+import {
+  deriveMarkReadinessAvailability,
+  deriveOpenNextNodeAvailability,
+} from "./flow/GovernedFlow.js";
 import {
   collectSubCheckpointDeliveryEvidence,
   SubCheckpointDeliveryEvidence,
@@ -266,7 +269,8 @@ type DecisionType =
   | "advance-subcheckpoint"
   | "close-dispositions"
   | "mark-readiness"
-  | "human-gate";
+  | "human-gate"
+  | "open-next-node";
 
 const DECIDE_WIZARD_COMMAND = "npm run flow -- decide";
 const WORK_RELOAD_COMMAND = "npm run flow -- work --authorization explicit-work-request";
@@ -304,6 +308,12 @@ const DECISION_STILL_FORBIDDEN: Record<DecisionType, readonly string[]> = {
     "Fazer merge",
     "Alterar a topologia (state.yml) automaticamente",
     "Abrir o próximo PR automaticamente",
+  ],
+  "open-next-node": [
+    "Fazer merge",
+    "Alterar main",
+    "Executar Human Gate",
+    "Implementar o próximo nó",
   ],
 };
 
@@ -456,9 +466,47 @@ export function deriveWorkNextAction(
   // BLOQUEADO → reconciliação primeiro (gate approved é abertura do próximo nó).
   if (mode === "blocked") {
     if (facts.lifecycle?.gateDecision === "approved") {
-      return plainNextAction(
-        `Gate do checkpoint ${object.checkpoint ?? "?"} já approved — confirmar o cursor e abrir o próximo nó (transição autorizada por gate).`,
-        ["nenhuma decisão reservada pendente neste nó; não inventar `decide`."]
+      const availability = deriveOpenNextNodeAvailability({
+        policyDeclared: true,
+        gateApproved: true,
+        activeNode: facts.activeNode
+          ? {
+              id: facts.activeNode.id,
+              sequence: facts.activeNode.sequence,
+              terminal: facts.activeNode.terminal,
+              githubPr: facts.activeNode.githubPr,
+            }
+          : null,
+        nextNode: facts.nextPlannedNode
+          ? {
+              id: facts.nextPlannedNode.id,
+              sequence: facts.nextPlannedNode.sequence,
+              terminal: facts.nextPlannedNode.terminal,
+              githubPr: facts.nextPlannedNode.githubPr,
+            }
+          : null,
+        prObserved: facts.pullRequest !== null,
+        prDraft: facts.pullRequest?.isDraft ?? true,
+        ciFail: facts.pullRequest?.checks.fail ?? 0,
+        ciPending: facts.pullRequest?.checks.pending ?? 0,
+        workingTreeClean: ctx.workingTreeState === "clean",
+        behind: facts.git.behind ?? 0,
+      });
+      return decisionNextAction(
+        "open-next-node",
+        availability.status === "available",
+        availability.status === "available"
+          ? `Preparar a abertura do próximo nó planejado: ${facts.activeNode?.id ?? "nó atual"} → ${facts.nextPlannedNode?.id ?? "próximo nó"}.`
+          : `Abertura do próximo nó ainda BLOQUEADA — \`decide\` não a classifica como disponível.`,
+        [
+          `gate do checkpoint ${object.checkpoint ?? "?"} = approved`,
+          ...(facts.nextPlannedNode
+            ? [
+                `próximo nó planejado: ${facts.nextPlannedNode.id} (seq ${facts.nextPlannedNode.sequence ?? "?"})`,
+              ]
+            : ["não há próximo nó planejado"]),
+          ...availability.reasons.map((r) => `requisito pendente: ${r}`),
+        ]
       );
     }
     const command =

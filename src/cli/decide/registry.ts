@@ -12,6 +12,7 @@ import { CloseDispositionsDefinition } from "./closeDispositions.js";
 import { MarkReadinessDefinition } from "./markReadiness.js";
 import { AdvanceSubcheckpointDefinition } from "./advanceSubcheckpoint.js";
 import { HumanGateDefinition } from "./humanGate.js";
+import { OpenNextNodeDefinition } from "./openNextNode.js";
 
 export class DecisionRegistry {
   private readonly byId = new Map<string, HumanDecisionDefinition>();
@@ -43,7 +44,7 @@ export class DecisionRegistry {
 /**
  * Ponto ÚNICO de registro das decisões da CLI (CO-3 / PR #42).
  * Ordem = ciclo de vida do checkpoint: encerrar findings → declarar readiness →
- * avançar sub-checkpoint → Human Gate. O wizard oculta as decisões
+ * avançar sub-checkpoint → Human Gate → transição de nó. O wizard oculta as decisões
  * `not-applicable` e renumera.
  */
 export function buildDecisionRegistry(): DecisionRegistry {
@@ -52,5 +53,6 @@ export function buildDecisionRegistry(): DecisionRegistry {
   registry.register(new MarkReadinessDefinition());
   registry.register(new AdvanceSubcheckpointDefinition());
   registry.register(new HumanGateDefinition());
+  registry.register(new OpenNextNodeDefinition());
   return registry;
 }

@@ -22,7 +22,7 @@ export type RunDecideFn = typeof runDecide;
 export class DecideCommand implements Command<DecideArgs> {
   readonly name = "decide";
   readonly description =
-    "Decisões reservadas ao humano (close-dispositions, mark-readiness, advance-subcheckpoint, human-gate): briefing humano → escolha → prévia → confirmação → registro governado. Zero LLM.";
+    "Decisões reservadas ao humano (close-dispositions, mark-readiness, advance-subcheckpoint, human-gate, open-next-node): briefing humano → escolha → prévia → confirmação → registro governado. Zero LLM.";
   readonly usage = [
     "decide",
     "decide --brief-only",
@@ -30,6 +30,7 @@ export class DecideCommand implements Command<DecideArgs> {
     "decide --type close-dispositions --brief-only",
     "decide --type advance-subcheckpoint --brief-only",
     "decide --type human-gate --brief-only",
+    "decide --type open-next-node --brief-only",
     "decide --type close-dispositions --technical",
     "decide --type mark-readiness --decision mark-ready --authorization explicit-human-decision --confirm",
     "decide --type close-dispositions --decision accept-all --authorization explicit-human-decision --confirm",

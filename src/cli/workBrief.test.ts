@@ -156,14 +156,29 @@ describe("workBrief · inferência de modo [work]", () => {
     expect(b.mode).toBe("prepare_close");
   });
 
-  it("[7] gate aprovado → blocked (sem nova implementação)", () => {
+  it("[7] gate aprovado → blocked, mas com decisão governada open-next-node", () => {
     const b = derive({
       facts: facts({
         lifecycle: { ...facts().lifecycle!, gateDecision: "approved" },
+        nextPlannedNode: {
+          id: "co-flow-convergence",
+          githubPr: null,
+          sequence: 10,
+          terminal: false,
+        },
+        pullRequest: {
+          ...facts().pullRequest!,
+          isDraft: false,
+          checks: { pass: 11, fail: 0, pending: 0 },
+        },
       }),
       nextAction: nextAction("execute-task"),
     });
     expect(b.mode).toBe("blocked");
+    expect(b.nextAction.decisionType).toBe("open-next-node");
+    expect(b.nextAction.description).toContain("co-enforcement → co-flow-convergence");
+    expect(b.nextAction.commands.some((c) => c.role === "recommended")).toBe(true);
+    expect(b.nextAction.commands.some((c) => c.command.includes("open-next-node"))).toBe(true);
   });
 
   it("[8] review opcional stale não cria trabalho (task → implement_checkpoint)", () => {

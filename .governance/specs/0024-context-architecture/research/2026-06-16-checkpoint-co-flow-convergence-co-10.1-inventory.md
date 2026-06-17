@@ -543,3 +543,55 @@ Fronteira preservada:
   esta correcao;
 - depois que esta propria correcao for commitada, ela passa a ser o primeiro
   commit de entrega de CO-10.3.
+
+## Dogfood CO-10.3 — pos-Gate tambem precisa ser decisao modelada
+
+Falha observada no proprio historico do PR #43:
+
+- apos o Human Gate aprovado do PR #42, `work` projetou corretamente que o
+  proximo ato era concluir `co-enforcement` e abrir `co-flow-convergence`;
+- mas `decide` ainda nao tinha um tipo de decisao correspondente;
+- a abertura do PR #43 exigiu agente orquestrando manualmente branch, `state.yml`,
+  `tasks.md`, `active.yml`, PR Draft, titulo canonico e materializacao dos
+  sub-checkpoints;
+- isso reproduzia `CFG-001` e `CFG-006`: `work` sabia narrar a proxima acao,
+  mas o runtime nao oferecia uma superficie governada para inspeciona-la.
+
+Correcao aplicada em CO-10.3:
+
+1. `GovernedFlow` ganhou a acao canonica `open-next-node`.
+2. `human-decision-policy.yml` ganhou o tipo `open-next-node` como
+   briefing/preflight governado da transicao pos-Gate.
+3. `DecisionRegistry` registra `OpenNextNodeDefinition`.
+4. `work` passa a derivar a acao pos-Gate pela mesma disponibilidade usada por
+   `decide`, em vez de emitir apenas uma frase sem comando canonico.
+5. O briefing nomeia o no concluido, o proximo no planejado, a branch pretendida,
+   os efeitos esperados e as acoes que continuam proibidas.
+
+Limite deliberado desta fatia:
+
+- `open-next-node` ainda e briefing/preflight nao-mutante;
+- ele nao cria branch, nao cria PR, nao escreve `state.yml`, nao regenera
+  `active.yml` e nao materializa `tasks.md`;
+- esses efeitos precisam entrar como transacao governada propria antes do Human
+  Gate deste PR, para que uma futura transicao de no nao volte a depender de
+  orquestracao informal.
+
+Falsificacao adicionada:
+
+- teste prova que, apos Human Gate aprovado, PR Ready, CI verde e proximo no
+  planejado sem PR, `open-next-node` fica disponivel;
+- teste prova bloqueios por PR Draft/CI pendente e por proximo no que ja declara
+  PR;
+- teste prova que o plano `prepare-plan` e nao-mutante e preserva
+  `state.yml`, `tasks.md`, `active.yml`, branch e PR;
+- teste de `GovernedFlow` prova que o recomendado pos-Gate e `open-next-node`;
+- teste de `work` prova que gate aprovado nao fica mais sem decisao governada.
+
+Estado de seguranca:
+
+- nenhum Human Gate, Ready, merge, advance-subcheckpoint ou abertura de novo PR
+  foi executado por esta correcao;
+- `open-next-node` nao autoriza implementacao do proximo no;
+- o comando so fecha a divergencia work/decide/cockpit para a leitura e
+  preparacao da transicao pos-Gate.

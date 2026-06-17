@@ -20,6 +20,7 @@ describe("humanDecisionPolicyReader [decide]", () => {
       "mark-readiness",
       "advance-subcheckpoint",
       "human-gate",
+      "open-next-node",
     ]);
     expect(policy.owner.handle).toBe("@rosanarezende");
   });

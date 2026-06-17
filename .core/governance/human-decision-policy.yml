@@ -250,3 +250,59 @@ decision_types:
       mixed_diff: forbidden
     confirmation: required
     technical_details: available
+
+  open-next-node:
+    title: Preparar abertura do próximo nó
+    purpose: >
+      Após Human Gate aprovado em um nó não-terminal, a owner prepara a
+      transição para o próximo PR stacked planejado. Esta decisão cobre o
+      briefing/preflight governado da abertura do próximo nó: qual nó será
+      aberto, qual branch/base/head serão usados, quais artefatos precisarão ser
+      atualizados e quais comandos humanos continuam proibidos. Nesta fase ela
+      não executa merge, não abre CO-5 fora da topologia, não altera main e não
+      cria Human Gate.
+    requires_owner: true
+    sections:
+      - key: completed_node
+        heading: Qual nó foi aprovado?
+      - key: next_node
+        heading: Qual nó será aberto?
+      - key: preflight
+        heading: O que precisa estar verdadeiro antes da abertura?
+      - key: planned_effects
+        heading: Quais efeitos a transição governada deverá produzir?
+      - key: consequences
+        heading: O que acontece se você aprovar?
+      - key: not_authorized
+        heading: O que esta decisão NÃO autoriza?
+    choices:
+      - id: prepare-plan
+        label: Preparar plano de abertura do próximo nó
+        mutating: false
+      - id: keep
+        label: Manter o nó atual como ativo por enquanto
+        mutating: false
+      - id: request-explanation
+        label: Solicitar mais esclarecimentos (não escreve nada)
+        mutating: false
+      - id: cancel
+        label: Cancelar (não escreve nada)
+        mutating: false
+    consequences:
+      - O sistema passa a oferecer uma superfície governada para a transição pós-Gate.
+      - A abertura efetiva do próximo PR continua exigindo comando/autoridade explícitos.
+      - "`work`, `decide` e cockpit deixam de divergir quando o gate já está aprovado."
+    not_authorized:
+      - Fazer merge.
+      - Alterar main.
+      - Abrir nó fora da topologia planejada.
+      - Executar Human Gate.
+      - Converter PR para Ready.
+      - Implementar o próximo nó.
+      - Inferir número de PR sem confirmação factual do GitHub.
+    publication:
+      commit: after-confirmation
+      push: after-confirmation
+      mixed_diff: forbidden
+    confirmation: required
+    technical_details: available

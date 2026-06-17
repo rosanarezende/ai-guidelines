@@ -16,7 +16,8 @@ export type GovernedFlowActionId =
   | "mark-readiness"
   | "advance-subcheckpoint"
   | "pr-ready"
-  | "human-gate";
+  | "human-gate"
+  | "open-next-node";
 
 export interface GovernedFlowAction {
   readonly id: GovernedFlowActionId;
@@ -70,6 +71,29 @@ export interface HumanGateFacts {
   readonly gateDecidabilityOk: boolean | null;
 }
 
+export interface OpenNextNodeFacts {
+  readonly policyDeclared: boolean;
+  readonly gateApproved: boolean;
+  readonly activeNode: {
+    readonly id: string;
+    readonly sequence: number | null;
+    readonly terminal: boolean;
+    readonly githubPr: number | null;
+  } | null;
+  readonly nextNode: {
+    readonly id: string;
+    readonly sequence: number | null;
+    readonly terminal: boolean;
+    readonly githubPr: number | null;
+  } | null;
+  readonly prObserved: boolean;
+  readonly prDraft: boolean;
+  readonly ciFail: number;
+  readonly ciPending: number;
+  readonly workingTreeClean: boolean;
+  readonly behind: number;
+}
+
 export interface PrReadyFlowFacts {
   readonly prNumber: number;
   readonly prState: string;
@@ -104,6 +128,7 @@ export interface PrReadyFlowResult {
 
 const MARK_READINESS_ID = "mark-readiness";
 const HUMAN_GATE_ID = "human-gate";
+export const OPEN_NEXT_NODE_ID = "open-next-node";
 
 function sameSha(a: string, b: string): boolean {
   const x = a.toLowerCase();
@@ -267,6 +292,42 @@ export function humanGateFactsFromDecisionSnapshot(snapshot: DecisionSnapshot): 
   };
 }
 
+export function openNextNodeFactsFromDecisionSnapshot(
+  snapshot: DecisionSnapshot
+): OpenNextNodeFacts {
+  const pr = snapshot.facts.pullRequest;
+  const active = snapshot.facts.activeNode;
+  const next = snapshot.facts.nextPlannedNode;
+  return {
+    policyDeclared:
+      snapshot.policy !== null &&
+      findDecisionType(snapshot.policy, OPEN_NEXT_NODE_ID) !== undefined,
+    gateApproved: snapshot.facts.lifecycle?.gateDecision === "approved",
+    activeNode: active
+      ? {
+          id: active.id,
+          sequence: active.sequence,
+          terminal: active.terminal,
+          githubPr: active.githubPr,
+        }
+      : null,
+    nextNode: next
+      ? {
+          id: next.id,
+          sequence: next.sequence,
+          terminal: next.terminal,
+          githubPr: next.githubPr,
+        }
+      : null,
+    prObserved: pr !== null,
+    prDraft: pr?.isDraft ?? true,
+    ciFail: pr?.checks.fail ?? 0,
+    ciPending: pr?.checks.pending ?? 0,
+    workingTreeClean: snapshot.workingTreeState === "clean",
+    behind: snapshot.facts.git.behind ?? 0,
+  };
+}
+
 export function deriveHumanGateAvailability(f: HumanGateFacts): DecisionAvailability {
   if (!f.policyDeclared) {
     return {
@@ -322,6 +383,66 @@ export function deriveHumanGateAvailability(f: HumanGateFacts): DecisionAvailabi
     }
   }
   return reasons.length > 0 ? { status: "blocked", reasons } : { status: "available", reasons: [] };
+}
+
+export function deriveOpenNextNodeAvailability(f: OpenNextNodeFacts): DecisionAvailability {
+  if (!f.policyDeclared) {
+    return {
+      status: "not-applicable",
+      reasons: ["Tipo não declarado na human-decision-policy.yml."],
+    };
+  }
+  if (!f.gateApproved) {
+    return {
+      status: "not-applicable",
+      reasons: ["O Human Gate do checkpoint ainda não foi aprovado."],
+    };
+  }
+  if (!f.activeNode) {
+    return {
+      status: "blocked",
+      reasons: ["Não há nó ativo inequívoco na topologia."],
+    };
+  }
+  if (f.activeNode.terminal) {
+    return {
+      status: "not-applicable",
+      reasons: ["O nó ativo é terminal; a próxima etapa é integração/merge, não abrir outro nó."],
+    };
+  }
+  if (!f.nextNode) {
+    return {
+      status: "not-applicable",
+      reasons: ["Não há próximo nó planejado na topologia."],
+    };
+  }
+
+  const reasons: string[] = [];
+  if (f.nextNode.githubPr !== null) {
+    reasons.push(`O próximo nó ${f.nextNode.id} já declara PR #${f.nextNode.githubPr}.`);
+  }
+  if (!f.prObserved) {
+    reasons.push("Estado do PR atual não observado — não é seguro abrir o próximo nó.");
+  } else {
+    if (f.prDraft) {
+      reasons.push("O PR atual ainda está Draft; o Human Gate aprovado pressupõe PR Ready.");
+    }
+    if (f.ciFail > 0) reasons.push(`A integração contínua tem ${f.ciFail} falha(s).`);
+    if (f.ciPending > 0) {
+      reasons.push(`A integração contínua ainda tem ${f.ciPending} verificação(ões) pendente(s).`);
+    }
+  }
+  if (!f.workingTreeClean) reasons.push("A working tree não está limpa.");
+  if (f.behind > 0) {
+    reasons.push("A branch está atrás do remoto — reconcilie antes de abrir o próximo nó.");
+  }
+  return reasons.length > 0
+    ? { status: "blocked", reasons }
+    : {
+        status: "available",
+        reasons: [],
+        hint: `${f.activeNode.id} pode transicionar para ${f.nextNode.id}`,
+      };
 }
 
 export function prReadyFlowFactsFromReadySnapshot(snapshot: ReadyCheckSnapshot): PrReadyFlowFacts {
@@ -452,7 +573,9 @@ function action(
     title,
     availability,
     command: commandFor(id, false),
-    ...(id !== "pr-ready" ? { mutatingCommand: commandFor(id, true) } : {}),
+    ...(id !== "pr-ready" && id !== "open-next-node"
+      ? { mutatingCommand: commandFor(id, true) }
+      : {}),
     effect,
   };
 }
@@ -461,6 +584,9 @@ export function deriveGovernedFlow(snapshot: DecisionSnapshot): GovernedFlow {
   const mark = deriveMarkReadinessAvailability(markReadinessFactsFromDecisionSnapshot(snapshot));
   const advance = deriveAdvanceEligibility(advanceEligibilityFactsFromDecisionSnapshot(snapshot));
   const humanGate = deriveHumanGateAvailability(humanGateFactsFromDecisionSnapshot(snapshot));
+  const openNextNode = deriveOpenNextNodeAvailability(
+    openNextNodeFactsFromDecisionSnapshot(snapshot)
+  );
   const closeDispositions: DecisionAvailability =
     snapshot.openFindings.length > 0 &&
     snapshot.openFindings.every(
@@ -489,12 +615,17 @@ export function deriveGovernedFlow(snapshot: DecisionSnapshot): GovernedFlow {
       "cria gate artifact após decisão humana",
       "não executa merge nem transição automática",
     ]),
+    action("open-next-node", "Preparar abertura do próximo nó", openNextNode, [
+      "prepara a transição governada pós-Gate",
+      "não executa merge",
+    ]),
   ];
   const priority: GovernedFlowActionId[] = [
     "close-dispositions",
     "mark-readiness",
     "advance-subcheckpoint",
     "human-gate",
+    "open-next-node",
   ];
   const available = actions.filter((a) => a.availability.status === "available");
   const blocked = actions.filter((a) => a.availability.status === "blocked");
@@ -507,6 +638,7 @@ export function deriveGovernedFlow(snapshot: DecisionSnapshot): GovernedFlow {
       ? []
       : ["Avançar sub-checkpoint enquanto advance-subcheckpoint estiver bloqueado"]),
     ...(humanGate.status === "available" ? [] : ["Executar Human Gate antes dos critérios"]),
+    ...(openNextNode.status === "available" ? [] : ["Abrir próximo nó fora do fluxo governado"]),
     "Converter PR para Ready fora do fluxo governado",
     "Fazer merge",
   ];
