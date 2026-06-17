@@ -199,6 +199,8 @@ Prefira `npm run flow -- …` a invocar `node dist/cli/main.js …` direto — o
 
 Para conduzir o ciclo de uma spec (não para distribuir baseline), use os comandos do workflow runtime. Todos têm `--help`; o wizard sem argumentos lista as opções.
 
+Para visualizar a experiência ponta a ponta antes de operar o ciclo, abra [`FLOW.html`](FLOW.html). Ele mostra o wizard governado, cockpit textual, readiness, bloqueios e ações proibidas.
+
 | Comando                                             | Para quê                                                                                                                          |
 | :-------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------- |
 | `npm run flow`                                      | Wizard governado situado; em non-TTY renderiza o cockpit textual                                                                  |

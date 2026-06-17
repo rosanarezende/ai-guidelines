@@ -1,0 +1,859 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Flow - ai-guidelines</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f6f3ee;
+        --panel: #fffdf8;
+        --panel-strong: #ffffff;
+        --ink: #1f2933;
+        --muted: #61707f;
+        --line: #d9d2c7;
+        --accent: #0f766e;
+        --accent-strong: #0b5f59;
+        --blue: #2563eb;
+        --amber: #b45309;
+        --red: #b42318;
+        --green: #047857;
+        --code: #17212b;
+        --code-muted: #97a7b7;
+        --shadow: 0 24px 60px rgba(35, 31, 25, 0.12);
+        --radius: 8px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        background:
+          radial-gradient(circle at 20% 0%, rgba(15, 118, 110, 0.12), transparent 28rem),
+          linear-gradient(180deg, #fffaf1 0, var(--bg) 42rem);
+        color: var(--ink);
+        font:
+          16px/1.55 Inter,
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+      }
+
+      a {
+        color: var(--accent-strong);
+        font-weight: 700;
+      }
+
+      code {
+        border: 1px solid rgba(23, 33, 43, 0.1);
+        border-radius: 6px;
+        background: rgba(23, 33, 43, 0.06);
+        padding: 0.12rem 0.34rem;
+        font:
+          0.92em/1.35 "SFMono-Regular",
+          Consolas,
+          "Liberation Mono",
+          monospace;
+      }
+
+      .page {
+        min-height: 100vh;
+      }
+
+      .hero {
+        display: grid;
+        grid-template-columns: minmax(0, 1.04fr) minmax(340px, 0.96fr);
+        gap: clamp(1.2rem, 4vw, 3rem);
+        align-items: center;
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: clamp(2rem, 7vw, 5rem) clamp(1rem, 4vw, 2rem) 2rem;
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.55rem;
+        margin: 0 0 1rem;
+        color: var(--accent-strong);
+        font-weight: 800;
+        letter-spacing: 0;
+        text-transform: uppercase;
+        font-size: 0.78rem;
+      }
+
+      .eyebrow::before {
+        width: 0.65rem;
+        height: 0.65rem;
+        border-radius: 99px;
+        background: var(--accent);
+        content: "";
+      }
+
+      h1,
+      h2,
+      h3 {
+        line-height: 1.08;
+        letter-spacing: 0;
+      }
+
+      h1 {
+        margin: 0;
+        max-width: 11ch;
+        font-size: clamp(3.5rem, 13vw, 8.4rem);
+      }
+
+      .hero p {
+        max-width: 66ch;
+        margin: 1.2rem 0 0;
+        color: var(--muted);
+        font-size: clamp(1.04rem, 2vw, 1.22rem);
+      }
+
+      .hero-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        margin-top: 1.6rem;
+      }
+
+      .button {
+        display: inline-flex;
+        align-items: center;
+        min-height: 2.55rem;
+        border: 1px solid var(--accent);
+        border-radius: 8px;
+        padding: 0.66rem 0.92rem;
+        background: var(--accent);
+        color: white;
+        text-decoration: none;
+        font-weight: 800;
+      }
+
+      .button.secondary {
+        background: transparent;
+        color: var(--accent-strong);
+      }
+
+      .shell {
+        border: 1px solid rgba(23, 33, 43, 0.14);
+        border-radius: var(--radius);
+        background: var(--code);
+        box-shadow: var(--shadow);
+        color: #e9f2f1;
+        overflow: hidden;
+      }
+
+      .shell-head {
+        display: flex;
+        align-items: center;
+        gap: 0.44rem;
+        min-height: 2.4rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        padding: 0 0.86rem;
+        background: rgba(255, 255, 255, 0.04);
+        color: var(--code-muted);
+        font:
+          0.8rem/1.4 "SFMono-Regular",
+          Consolas,
+          "Liberation Mono",
+          monospace;
+      }
+
+      .dot {
+        width: 0.66rem;
+        height: 0.66rem;
+        border-radius: 99px;
+        background: #ef4444;
+      }
+
+      .dot:nth-child(2) {
+        background: #f59e0b;
+      }
+
+      .dot:nth-child(3) {
+        background: #10b981;
+      }
+
+      .shell-body {
+        padding: 1rem;
+        font:
+          0.9rem/1.58 "SFMono-Regular",
+          Consolas,
+          "Liberation Mono",
+          monospace;
+      }
+
+      .prompt-line {
+        display: block;
+        color: #a9f2df;
+      }
+
+      .dim {
+        color: var(--code-muted);
+      }
+
+      .choice {
+        display: grid;
+        grid-template-columns: 1.25rem 1fr;
+        gap: 0.35rem;
+        margin: 0.32rem 0;
+      }
+
+      .choice.active {
+        color: #f7f3d2;
+      }
+
+      .choice.disabled {
+        color: #718293;
+      }
+
+      main {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 0 clamp(1rem, 4vw, 2rem) 4rem;
+      }
+
+      .nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.55rem;
+        margin: 1.5rem 0 2.4rem;
+      }
+
+      .nav a {
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.58);
+        padding: 0.44rem 0.72rem;
+        color: var(--ink);
+        text-decoration: none;
+        font-size: 0.92rem;
+      }
+
+      section {
+        margin-top: clamp(2rem, 6vw, 4rem);
+      }
+
+      .section-title {
+        display: grid;
+        gap: 0.55rem;
+        max-width: 860px;
+        margin-bottom: 1rem;
+      }
+
+      .section-title h2 {
+        margin: 0;
+        font-size: clamp(1.8rem, 4vw, 3rem);
+      }
+
+      .section-title p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 1.04rem;
+      }
+
+      .grid {
+        display: grid;
+        gap: 1rem;
+      }
+
+      .grid.two {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .grid.three {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .card {
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: rgba(255, 253, 248, 0.82);
+        padding: 1rem;
+      }
+
+      .card.strong {
+        background: var(--panel-strong);
+        box-shadow: 0 12px 30px rgba(35, 31, 25, 0.07);
+      }
+
+      .card h3 {
+        margin: 0 0 0.5rem;
+        font-size: 1.15rem;
+      }
+
+      .card p,
+      .card ul {
+        margin: 0;
+        color: var(--muted);
+      }
+
+      .card ul {
+        padding-left: 1.1rem;
+      }
+
+      .status {
+        display: inline-flex;
+        align-items: center;
+        min-height: 1.6rem;
+        border-radius: 999px;
+        padding: 0.18rem 0.58rem;
+        font-size: 0.82rem;
+        font-weight: 800;
+      }
+
+      .status.available {
+        background: rgba(4, 120, 87, 0.12);
+        color: var(--green);
+      }
+
+      .status.blocked {
+        background: rgba(180, 83, 9, 0.14);
+        color: var(--amber);
+      }
+
+      .status.forbidden {
+        background: rgba(180, 35, 24, 0.12);
+        color: var(--red);
+      }
+
+      .flowline {
+        display: grid;
+        grid-template-columns: repeat(7, minmax(110px, 1fr));
+        gap: 0.55rem;
+        overflow-x: auto;
+        padding-bottom: 0.4rem;
+      }
+
+      .step {
+        position: relative;
+        min-height: 8.5rem;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--panel);
+        padding: 0.85rem;
+      }
+
+      .step strong {
+        display: block;
+        margin: 0.35rem 0;
+      }
+
+      .step small {
+        color: var(--muted);
+      }
+
+      .num {
+        display: inline-grid;
+        width: 1.9rem;
+        height: 1.9rem;
+        place-items: center;
+        border-radius: 99px;
+        background: var(--accent);
+        color: white;
+        font-weight: 900;
+      }
+
+      .matrix {
+        width: 100%;
+        border-collapse: collapse;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--panel-strong);
+      }
+
+      .matrix th,
+      .matrix td {
+        border-bottom: 1px solid var(--line);
+        padding: 0.76rem;
+        text-align: left;
+        vertical-align: top;
+      }
+
+      .matrix th {
+        background: #eee7da;
+        font-size: 0.86rem;
+        text-transform: uppercase;
+      }
+
+      .matrix tr:last-child td {
+        border-bottom: 0;
+      }
+
+      .callout {
+        border-left: 4px solid var(--accent);
+        border-radius: 0 var(--radius) var(--radius) 0;
+        background: rgba(15, 118, 110, 0.09);
+        padding: 1rem;
+      }
+
+      .callout.warning {
+        border-left-color: var(--amber);
+        background: rgba(180, 83, 9, 0.1);
+      }
+
+      .split {
+        display: grid;
+        grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+        gap: 1rem;
+        align-items: start;
+      }
+
+      .kbd {
+        display: inline-flex;
+        align-items: center;
+        min-height: 1.7rem;
+        border: 1px solid rgba(23, 33, 43, 0.18);
+        border-bottom-width: 2px;
+        border-radius: 6px;
+        background: white;
+        padding: 0.12rem 0.48rem;
+        font-weight: 800;
+      }
+
+      .footer {
+        margin-top: 4rem;
+        border-top: 1px solid var(--line);
+        padding-top: 1.4rem;
+        color: var(--muted);
+      }
+
+      @media (max-width: 880px) {
+        .hero,
+        .split,
+        .grid.two,
+        .grid.three {
+          grid-template-columns: 1fr;
+        }
+
+        h1 {
+          max-width: none;
+        }
+
+        .flowline {
+          grid-template-columns: repeat(7, minmax(160px, 1fr));
+        }
+      }
+
+      @media (max-width: 560px) {
+        body {
+          font-size: 15px;
+        }
+
+        .hero {
+          padding-top: 1.4rem;
+        }
+
+        .hero-actions {
+          flex-direction: column;
+        }
+
+        .button {
+          justify-content: center;
+          width: 100%;
+        }
+
+        .matrix {
+          display: block;
+          overflow-x: auto;
+          white-space: nowrap;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <header class="hero">
+        <div>
+          <p class="eyebrow">ai-guidelines local flow</p>
+          <h1>Flow</h1>
+          <p>
+            The governed human entrypoint for this repository. In a terminal, it opens the
+            interactive wizard. In automation, it prints the same situated cockpit without trying to
+            prompt.
+          </p>
+          <div class="hero-actions" aria-label="Atalhos do guia">
+            <a class="button" href="#wizard">See the wizard</a>
+            <a class="button secondary" href="#model">Understand the model</a>
+          </div>
+        </div>
+
+        <aside class="shell" aria-label="Simulacao do comando npm run flow">
+          <div class="shell-head">
+            <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+            <span>npm run flow</span>
+          </div>
+          <div class="shell-body">
+            <span class="prompt-line">◇ ai-guidelines flow</span>
+            <span class="dim">│ situated snapshot loaded</span><br />
+            <span class="choice active"
+              ><span>◆</span><span>Continue recommended action</span></span
+            >
+            <span class="choice"><span>◇</span><span>View cockpit</span></span>
+            <span class="choice"><span>◇</span><span>View decisions</span></span>
+            <span class="choice"><span>◇</span><span>Understand blockers</span></span>
+            <span class="choice"><span>◇</span><span>Configure/adopt/update repository</span></span>
+            <span class="choice disabled"
+              ><span>◇</span><span>Human Gate disabled until ready</span></span
+            >
+            <br />
+            <span class="dim">No mutation runs without briefing, preview, and confirmation.</span>
+          </div>
+        </aside>
+      </header>
+
+      <main>
+        <nav class="nav" aria-label="Mapa da pagina">
+          <a href="#start">Start</a>
+          <a href="#model">Model</a>
+          <a href="#wizard">Wizard</a>
+          <a href="#cockpit">Cockpit</a>
+          <a href="#readiness">Readiness</a>
+          <a href="#provisioning">Init/adopt/update</a>
+          <a href="#safety">Safety</a>
+          <a href="#commands">Commands</a>
+        </nav>
+
+        <section id="start">
+          <div class="section-title">
+            <h2>Start from one local command</h2>
+            <p>
+              <code>npm run flow</code> is the canonical local surface for humans working inside
+              this checkout. The public package still exposes <code>npx ai-guidelines</code>.
+            </p>
+          </div>
+
+          <div class="grid three">
+            <article class="card strong">
+              <span class="status available">TTY</span>
+              <h3>Interactive terminal</h3>
+              <p>Opens the Clack wizard. The first screen is a human menu, not a wall of text.</p>
+            </article>
+            <article class="card strong">
+              <span class="status available">non-TTY</span>
+              <h3>Automation or redirected output</h3>
+              <p>
+                Prints the textual cockpit. It never attempts interactive prompts in CI or pipes.
+              </p>
+            </article>
+            <article class="card strong">
+              <span class="status available">direct</span>
+              <h3>Registry command</h3>
+              <p>
+                <code>npm run flow -- work</code>, <code>decide</code>, <code>init</code>,
+                <code>adopt</code>, and <code>update</code> route through the same registry.
+              </p>
+            </article>
+          </div>
+        </section>
+
+        <section id="model">
+          <div class="section-title">
+            <h2>The mental model</h2>
+            <p>
+              Flow is not a second rules engine. It is a projection of the governed state already
+              used by cockpit, work, decide, pr-ready, and Human Gate briefing.
+            </p>
+          </div>
+
+          <div class="flowline" aria-label="Snapshot to governed effect">
+            <div class="step">
+              <span class="num">1</span>
+              <strong>Snapshot</strong>
+              <small>Spec, node, checkpoint, reviews, PR, CI, branch, tree, gate.</small>
+            </div>
+            <div class="step">
+              <span class="num">2</span>
+              <strong>Derive actions</strong>
+              <small>Available, blocked, forbidden, and recommended next action.</small>
+            </div>
+            <div class="step">
+              <span class="num">3</span>
+              <strong>Briefing</strong>
+              <small>What, why, evidence, authority, validation, and consequences.</small>
+            </div>
+            <div class="step">
+              <span class="num">4</span>
+              <strong>Preview</strong>
+              <small>Exact files and effects before anything writes.</small>
+            </div>
+            <div class="step">
+              <span class="num">5</span>
+              <strong>Confirm</strong>
+              <small>Explicit human confirmation for every governed mutation.</small>
+            </div>
+            <div class="step">
+              <span class="num">6</span>
+              <strong>Apply</strong>
+              <small>Narrow write. No hidden gate, Ready, merge, or transition.</small>
+            </div>
+            <div class="step">
+              <span class="num">7</span>
+              <strong>Next state</strong>
+              <small>Work and decide re-read the same state after the effect.</small>
+            </div>
+          </div>
+        </section>
+
+        <section id="wizard">
+          <div class="section-title">
+            <h2>Wizard as a governed projection</h2>
+            <p>
+              The wizard is the friendly surface. The rules stay in the governed model. This keeps
+              <code>flow</code>, cockpit, <code>work</code>, and <code>decide</code> from
+              disagreeing about what is safe.
+            </p>
+          </div>
+
+          <div class="split">
+            <div class="card">
+              <h3>Main menu</h3>
+              <ul>
+                <li>View cockpit complete.</li>
+                <li>Continue recommended action.</li>
+                <li>View available decisions.</li>
+                <li>Understand blockers.</li>
+                <li>Run work briefing.</li>
+                <li>Prepare governed review.</li>
+                <li>Configure, adopt, or update repository.</li>
+                <li>Open advanced operations.</li>
+              </ul>
+            </div>
+
+            <aside class="shell" aria-label="Menu principal do wizard">
+              <div class="shell-head">
+                <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                <span>interactive flow</span>
+              </div>
+              <div class="shell-body">
+                <span class="prompt-line">◇ Current state</span><br />
+                <span class="dim">CO-10.2 active · PR #43 Draft · CI observed</span><br /><br />
+                <span class="prompt-line">◆ What do you want to do?</span>
+                <span class="choice active"
+                  ><span>●</span><span>Continue recommended action</span></span
+                >
+                <span class="choice"><span>○</span><span>View cockpit complete</span></span>
+                <span class="choice"><span>○</span><span>View governed decisions</span></span>
+                <span class="choice"
+                  ><span>○</span><span>Configure/adopt/update repository</span></span
+                >
+                <span class="choice disabled"><span>○</span><span>Human Gate - blocked</span></span>
+              </div>
+            </aside>
+          </div>
+        </section>
+
+        <section id="cockpit">
+          <div class="section-title">
+            <h2>Cockpit when prompts are not appropriate</h2>
+            <p>
+              In non-interactive contexts, the same entrypoint prints a cockpit. It tells the human
+              what is happening and which command is canonical.
+            </p>
+          </div>
+
+          <div class="grid three">
+            <article class="card strong">
+              <h3>State</h3>
+              <p>Active spec, node, checkpoint, PR state, CI, reviews, findings, and tree.</p>
+            </article>
+            <article class="card strong">
+              <h3>Next action</h3>
+              <p>One recommended action, with the exact command to inspect or execute it.</p>
+            </article>
+            <article class="card strong">
+              <h3>Boundaries</h3>
+              <p>Available, blocked, and forbidden actions are shown separately.</p>
+            </article>
+          </div>
+        </section>
+
+        <section id="readiness">
+          <div class="section-title">
+            <h2>Readiness is a lifecycle transition</h2>
+            <p>
+              Readiness is not manual editing of <code>tasks.md</code>. It is a governed action with
+              briefing, preview, confirmation, and a narrow effect.
+            </p>
+          </div>
+
+          <table class="matrix">
+            <thead>
+              <tr>
+                <th>Moment</th>
+                <th>Allowed</th>
+                <th>Blocked</th>
+                <th>Effect</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Active sub-checkpoint <code>[/]</code> without readiness</td>
+                <td>Implement, validate, inspect readiness decision.</td>
+                <td>Advance, Human Gate, Ready, merge.</td>
+                <td>No write.</td>
+              </tr>
+              <tr>
+                <td>Criteria satisfied</td>
+                <td>Declare readiness through <code>decide</code>.</td>
+                <td>Starting the next sub-checkpoint automatically.</td>
+                <td>
+                  Only <code>tasks.md</code> receives <code>readiness: ready-for-transition</code>.
+                </td>
+              </tr>
+              <tr>
+                <td>After readiness</td>
+                <td>Inspect or decide advance-subcheckpoint.</td>
+                <td>Human Gate until all sub-checkpoints close and PR policy passes.</td>
+                <td>No hidden transition.</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section id="provisioning">
+          <div class="section-title">
+            <h2>Provisioning stays available</h2>
+            <p>
+              <code>init</code>, <code>adopt</code>, and <code>update</code> remain first-class.
+              Provider selection happens inside those operations.
+            </p>
+          </div>
+
+          <div class="grid three">
+            <article class="card">
+              <span class="status available">init</span>
+              <h3>New repository</h3>
+              <p>
+                Creates the governed baseline for an empty target, with provider and feature
+                selection.
+              </p>
+            </article>
+            <article class="card">
+              <span class="status available">adopt</span>
+              <h3>Existing repository</h3>
+              <p>Conservative adoption that preserves existing project files and managed blocks.</p>
+            </article>
+            <article class="card">
+              <span class="status available">update</span>
+              <h3>Re-apply baseline</h3>
+              <p>Updates templates/runtime and accepts <code>--providers claude,openai</code>.</p>
+            </article>
+          </div>
+
+          <div class="callout warning" style="margin-top: 1rem">
+            <strong>No providers command.</strong>
+            <span>
+              The old <code>providers</code> verb does not exist in the new runtime. Use
+              <code>npm run flow -- update --providers claude,openai</code>.
+            </span>
+          </div>
+        </section>
+
+        <section id="safety">
+          <div class="section-title">
+            <h2>Safety rules are visible</h2>
+            <p>
+              The flow is designed to make unsafe actions obvious before the human can choose them.
+            </p>
+          </div>
+
+          <div class="grid three">
+            <article class="card">
+              <span class="status available">Available</span>
+              <h3>Executable now</h3>
+              <p>Shown with command, authority, and expected effect.</p>
+            </article>
+            <article class="card">
+              <span class="status blocked">Blocked</span>
+              <h3>Not yet executable</h3>
+              <p>
+                Shown with factual blockers such as CI pending, Draft PR, stale review, or dirty
+                tree.
+              </p>
+            </article>
+            <article class="card">
+              <span class="status forbidden">Forbidden</span>
+              <h3>Not authorized here</h3>
+              <p>
+                Ready, Human Gate, merge, gate artifact, and node transition stay out unless the
+                governed state allows them.
+              </p>
+            </article>
+          </div>
+        </section>
+
+        <section id="commands">
+          <div class="section-title">
+            <h2>Command map</h2>
+            <p>Use these commands when you want the direct path instead of the wizard.</p>
+          </div>
+
+          <table class="matrix">
+            <thead>
+              <tr>
+                <th>Need</th>
+                <th>Command</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Open wizard or textual cockpit</td>
+                <td><code>npm run flow</code></td>
+              </tr>
+              <tr>
+                <td>Force textual cockpit</td>
+                <td><code>npm run flow -- cockpit</code></td>
+              </tr>
+              <tr>
+                <td>Resume a spec session</td>
+                <td><code>npm run flow -- handoff 0024</code></td>
+              </tr>
+              <tr>
+                <td>Load implementation contract</td>
+                <td><code>npm run flow -- work --authorization explicit-work-request</code></td>
+              </tr>
+              <tr>
+                <td>Inspect human decisions</td>
+                <td><code>npm run flow -- decide --brief-only</code></td>
+              </tr>
+              <tr>
+                <td>Provision a repository</td>
+                <td>
+                  <code>npm run flow -- init</code>, <code>adopt</code>, or <code>update</code>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section>
+          <div class="callout">
+            <strong>Canonical rule:</strong>
+            this page explains the experience. The executable truth remains the repository state,
+            the command registry, and the governed flow derivation used by the runtime.
+          </div>
+        </section>
+
+        <footer class="footer">
+          <p>
+            Root guide for the local governed flow. Public package users can still run
+            <code>npx ai-guidelines</code>; repository contributors use <code>npm run flow</code>.
+          </p>
+        </footer>
+      </main>
+    </div>
+  </body>
+</html>

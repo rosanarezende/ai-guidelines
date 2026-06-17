@@ -435,6 +435,34 @@ Correcao aplicada nesta fatia:
    adapter interativo.
 7. O wizard nao calcula readiness/Human Gate por conta propria: ele consome o
    modelo comum do cockpit/GovernedFlow e delega mutacoes ao registry.
+
+## Dogfood CO-10.2 — guia visual raiz do fluxo
+
+Nova necessidade observada durante a validacao humana do wizard:
+
+- uma documentacao Markdown em `docs/` explicaria o fluxo, mas nao mostraria a
+  experiencia operacional;
+- no celular, diagramas Mermaid nao eram suficientes para visualizar o modelo;
+- a documentacao do fluxo humano nao deveria ficar escondida em `docs/`, porque
+  `npm run flow` e a entrada principal do mantenedor no repo.
+
+Correcao aplicada nesta fatia:
+
+1. Criado `FLOW.html` na raiz como guia visual autocontido do fluxo governado.
+2. O guia mostra TTY vs non-TTY, wizard Clack, cockpit textual, readiness,
+   provisioning (`init`/`adopt`/`update`), acoes disponiveis/bloqueadas/proibidas
+   e comandos canonicos.
+3. `README.md`, `CONTRIBUTING.md` e `AGENTS.md` passaram a apontar para o guia.
+4. `package.json#files` inclui `FLOW.html`, mantendo o link do README valido no
+   pacote publicado.
+
+Fronteira preservada:
+
+- `FLOW.html` e explicativo; a fonte executavel continua sendo o snapshot
+  governado + registry + derivacao comum do runtime.
+- Nenhum Ready, Human Gate, merge, readiness ou advance-subcheckpoint foi
+  executado por esta documentacao.
+
 8. `init`, `adopt` e `update` aparecem na secao de provisioning; `providers`
    nao aparece como comando nem como opcao de menu.
 

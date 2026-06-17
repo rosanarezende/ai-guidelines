@@ -149,6 +149,8 @@ Todo comando aceita `--dry-run` para preview e `--help` para detalhes. Sem argum
 
 > **Novo na 1.1.0.** As capacidades são aditivas (sem quebra de compatibilidade); a UX ainda pode evoluir em releases minor — feedback é bem-vindo.
 
+Para ver o fluxo completo como experiência, abra [`FLOW.html`](FLOW.html): ele mostra o wizard, cockpit, readiness, bloqueios e mutações governadas.
+
 <p align="center">
   <img src="https://raw.githubusercontent.com/rosanarezende/ai-guidelines/main/docs/assets/ai-guidelines-dx-flow.png" alt="ai-guidelines · operação do ciclo — sessão típica em 4 momentos: menu, execução, estado publicado, governança ativa" width="880">
 </p>
@@ -210,6 +212,7 @@ Detalhamento técnico em [`docs/cli/ai-guidelines-cli.md`](docs/cli/ai-guideline
 
 - [`.core/governance/GOVERNANCE-CATALOG.md`](.core/governance/GOVERNANCE-CATALOG.md) — topologia canônica (paths, gêneros, lookup)
 - [`.core/governance/ARCHITECTURE.md`](.core/governance/ARCHITECTURE.md) — arquitetura macro da CLI
+- [`FLOW.html`](FLOW.html) — guia visual do wizard governado, cockpit e fluxo de decisões
 - [`docs/`](docs/) — guias técnicos e features
 - [`AGENTS.md`](AGENTS.md) — workflow para humanos e agentes IA neste repositório
 - [`WORKFLOW.md`](WORKFLOW.md) — ciclo completo de desenvolvimento: do research ao merge, com todos os comandos
