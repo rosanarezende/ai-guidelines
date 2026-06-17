@@ -160,6 +160,25 @@ describe("CLI — pr-ready:check · precondições de Ready [BR-PR-READY-CHECK]"
     expect(result.warnings.join(" ")).toContain("smoke real temporariamente suspenso");
   });
 
+  it("DADO smoke suspenso em PR intermediário com mudança de pacote QUANDO avalia ENTÃO avisa sem bloquear", () => {
+    const result = evaluateReadyPreconditions(
+      validSnapshot({
+        smokeTestsSuspended: true,
+        smokePolicy: {
+          suspended: true,
+          required: false,
+          reason:
+            "PR intermediário com mudança de pacote/runtime consumidor (package.json); smoke real fica adiado para o fechamento final da spec e para o release",
+          changedPaths: ["package.json"],
+          triggerPaths: ["package.json"],
+        },
+      })
+    );
+    expect(result.ok).toBe(true);
+    expect(result.failures.join(" ")).not.toContain("smoke");
+    expect(result.warnings.join(" ")).toContain("smoke real temporariamente suspenso");
+  });
+
   it("DADO smoke obrigatório ausente QUANDO avalia ENTÃO falha", () => {
     const result = evaluateReadyPreconditions(
       validSnapshot({
@@ -330,6 +349,19 @@ describe("CLI — pr-ready:check · política de smoke real", () => {
 
     expect(policy.required).toBe(false);
     expect(policy.suspended).toBe(true);
+  });
+
+  it("mantém mudança de pacote como aviso em PR intermediário, não como bloqueio", () => {
+    const policy = deriveSmokeReadinessPolicy({
+      suspended: true,
+      changedPaths: ["package.json", "package-lock.json"],
+      activeNode: { id: "co-flow-convergence", role: "execution", terminal: false },
+      nextNode: { id: "co-capture", role: "execution", terminal: false },
+    });
+
+    expect(policy.required).toBe(false);
+    expect(policy.triggerPaths).toEqual(["package.json", "package-lock.json"]);
+    expect(policy.reason).toContain("PR intermediário");
   });
 
   it("exige smoke real no último nó antes da integração", () => {

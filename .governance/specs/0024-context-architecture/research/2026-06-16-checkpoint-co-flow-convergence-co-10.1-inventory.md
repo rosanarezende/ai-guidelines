@@ -727,22 +727,23 @@ Correcao aplicada em CO-10.4:
    topologia e do diff do PR.
 2. Smoke real fica **adiado** quando o PR e intermediario e nao muda superficie
    de pacote/consumidor.
-3. Smoke real fica **obrigatorio** quando:
+3. Mudanca de pacote/runtime consumidor em PR intermediario vira aviso
+   explicito, nao bloqueio: a suite real volta a bloquear no fechamento final da
+   spec e no release.
+4. Smoke real fica **obrigatorio** quando:
    - o PR e o ultimo no antes de `integration-final`;
-   - o diff altera pacote, suite smoke, binario publicado, runtime
-     `init/adopt/update`, provisionamento, adapters usados por consumidor ou
-     templates publicados;
    - o diff nao pode ser classificado com seguranca.
-4. O workflow `smoke` continua produzindo o contexto required para evitar drift
+5. O workflow `smoke` continua produzindo o contexto required para evitar drift
    do ruleset, mas a decisao de bloqueio fica em `pr-ready:check`.
-5. O workflow de release agora roda `npm run test:smoke` explicitamente antes
+6. O workflow de release agora roda `npm run test:smoke` explicitamente antes
    de `npm publish`.
 
 Falsificacao adicionada:
 
 - teste prova que smoke suspenso em PR intermediario sem impacto de pacote vira
   aviso, nao bloqueio;
-- teste prova que smoke suspenso com pacote/runtime consumidor alterado bloqueia;
+- teste prova que pacote/runtime consumidor alterado em PR intermediario nao
+  bloqueia smoke real, mas permanece classificado;
 - teste prova que o ultimo no antes da integracao exige smoke real;
 - teste prova que diff desconhecido falha fechado e exige smoke real;
 - teste prova que, quando smoke e obrigatorio, ausencia do check `smoke` falha.
@@ -751,7 +752,9 @@ Estado de seguranca:
 
 - smoke nao foi removido;
 - publicacao npm continua protegida por smoke real;
-- Ready/Human Gate continuam bloqueados quando o PR altera pacote/consumidor ou
-  quando a spec esta no fechamento final;
+- Ready/Human Gate continuam bloqueados quando a spec esta no fechamento final
+  ou quando o diff nao pode ser classificado com seguranca;
+- o release por tag continua bloqueado por `npm run test:smoke` antes do
+  `npm publish`;
 - nenhum Ready, Human Gate, gate artifact, merge ou abertura de novo PR foi
   executado por esta mudanca.

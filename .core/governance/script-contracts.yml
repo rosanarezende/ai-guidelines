@@ -252,7 +252,7 @@ profiles:
         category: aggregate
         mutates: true
         consumers: [workflow, human]
-        description: Pipeline completo replicavel fora do GitHub; smoke real e exigido por pr-ready:check somente em mudanca de pacote/runtime consumidor ou no fechamento final da spec.
+        description: Pipeline completo replicavel fora do GitHub; smoke real bloqueia Ready no fechamento final da spec, em diff nao classificavel, e antes de release/npm publish.
       - name: prepare
         command: husky
         category: lifecycle

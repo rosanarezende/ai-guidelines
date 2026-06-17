@@ -16,10 +16,11 @@ jobs:
   #
   # Suspensão governada em nós intermediários (Spec 0024 / co-flow-convergence):
   # o contexto required `smoke` continua produzível para evitar drift do ruleset,
-  # mas a suíte smoke real não roda em PRs intermediários sem impacto de pacote.
+  # mas a suíte smoke real não roda como pedágio de PR intermediário.
   # `pr-ready:check` decide, a partir da topologia e do diff do PR, quando smoke
-  # real volta a ser obrigatório: último nó antes da integração final ou mudança
-  # em pacote/runtime consumidor.
+  # real volta a ser obrigatório: fechamento final da spec, diff não
+  # classificável, e release/npm publish. Mudança de pacote/runtime em PR
+  # intermediário vira aviso explícito, não bloqueio.
   smoke:
     name: smoke
     runs-on: ubuntu-latest
@@ -29,4 +30,4 @@ jobs:
       - name: Record governed smoke suspension
         run: |
           echo "Smoke tests are governed by pr-ready:check."
-          echo "Real smoke is required for package/runtime changes and before final integration."
+          echo "Real smoke is required before final integration and npm release."

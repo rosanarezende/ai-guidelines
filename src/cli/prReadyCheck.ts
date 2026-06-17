@@ -294,15 +294,6 @@ export function deriveSmokeReadinessPolicy(input: {
     };
   }
   const triggerPaths = smokeRelevantChangedPaths(input.changedPaths);
-  if (triggerPaths.length > 0) {
-    return {
-      suspended: input.suspended,
-      required: true,
-      reason: `mudanças afetam pacote/runtime consumidor (${triggerPaths.slice(0, 3).join(", ")})`,
-      changedPaths: input.changedPaths.map(normalizeChangedPath),
-      triggerPaths,
-    };
-  }
   if (
     input.activeNode?.terminal ||
     input.nextNode?.terminal ||
@@ -314,6 +305,15 @@ export function deriveSmokeReadinessPolicy(input: {
       reason: "último nó antes da integração final exige validação real do pacote",
       changedPaths: input.changedPaths.map(normalizeChangedPath),
       triggerPaths: [],
+    };
+  }
+  if (triggerPaths.length > 0) {
+    return {
+      suspended: input.suspended,
+      required: false,
+      reason: `PR intermediário com mudança de pacote/runtime consumidor (${triggerPaths.slice(0, 3).join(", ")}); smoke real fica adiado para o fechamento final da spec e para o release`,
+      changedPaths: input.changedPaths.map(normalizeChangedPath),
+      triggerPaths,
     };
   }
   return {
