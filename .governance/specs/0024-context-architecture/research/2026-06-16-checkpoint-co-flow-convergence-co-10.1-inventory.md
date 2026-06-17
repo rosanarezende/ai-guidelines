@@ -615,3 +615,39 @@ Estado de seguranca:
 - o comando fecha a divergencia work/decide/cockpit para leitura e execucao
   governada da transicao pos-Gate, mas continua exigindo confirmacao humana
   explicita para qualquer mutacao real.
+
+## Dogfood CO-10.3 — resumo humano tambem deve ser projecao governada
+
+Falha observada durante o acompanhamento pelo celular:
+
+- o runtime ja sabia projetar o estado tecnico em `cockpit`, `work` e `decide`;
+- mas a compreensao operacional ainda dependia do agente traduzir manualmente:
+  "o que esta pronto", "o que falta", "qual comando olhar" e "o que nao fazer";
+- essa traducao era util para a owner, mas se permanecesse apenas na memoria do
+  agente viraria mais uma heuristica paralela ao fluxo governado.
+
+Correcao aplicada em CO-10.3:
+
+1. `GovernedFlow` passou a derivar `HumanSummary` junto das acoes
+   disponiveis, bloqueadas, proibidas e recomendadas.
+2. O resumo simples e produzido pela mesma fonte que decide a proxima acao; ele
+   nao recalcula readiness, Human Gate, CI, findings ou proibicoes por conta
+   propria.
+3. `cockpit` renderiza o `HumanSummary` antes dos detalhes tecnicos.
+4. O wizard Clack usa o mesmo `HumanSummary` como nota inicial do fluxo.
+
+Falsificacao adicionada:
+
+- teste de `GovernedFlow` prova que, quando `mark-readiness` e a proxima acao,
+  o resumo humano mostra readiness como falta e lista CI/tree/findings como ok;
+- teste de `cockpit` prova que o bloco `Resumo simples` aparece antes do estado
+  tecnico;
+- teste de wizard prova que a nota inicial vem do `HumanSummary` comum.
+
+Estado de seguranca:
+
+- o resumo simples e read-only;
+- nenhuma readiness, advance-subcheckpoint, Ready, Human Gate, merge ou abertura
+  de PR foi executada por esta correcao;
+- o objetivo e reduzir dependencia de interpretacao do agente sem criar uma nova
+  autoridade.

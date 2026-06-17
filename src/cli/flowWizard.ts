@@ -2,7 +2,7 @@ import { existsSync } from "node:fs";
 import path from "node:path";
 
 import { isPromptCancelled, Prompts } from "../app/ports/Prompts.js";
-import { CockpitModel, collectCockpitModel, renderCockpit } from "./cockpit.js";
+import { CockpitModel, collectCockpitModel, renderCockpit, renderHumanSummary } from "./cockpit.js";
 import { CommandRegistry } from "./registry/CommandRegistry.js";
 import { CommandContext, Logger } from "./registry/Command.js";
 
@@ -47,6 +47,8 @@ export function buildFlowMenu(model: CockpitModel): ReadonlyArray<{
 }
 
 export function renderFlowSummary(model: CockpitModel): string {
+  if (model.flow?.humanSummary) return renderHumanSummary(model.flow.humanSummary);
+
   const facts = model.work.snapshot.collected.facts;
   const pr = facts.pullRequest;
   const active = model.work.brief.object.subCheckpoint;

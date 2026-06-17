@@ -140,6 +140,18 @@ function model(): CockpitModel {
           "npm run flow -- decide --type mark-readiness --decision mark-ready --authorization explicit-human-decision --confirm",
         effect: ["altera somente tasks.md"],
       },
+      humanSummary: {
+        state: [
+          "Estamos em checkpoint-co-flow-convergence.",
+          "Objeto atual: CO-10.2 — confronto modelo x codigo.",
+          "PR #43 Draft; CI 5 ok, 0 falha(s), 0 pendente(s).",
+        ],
+        ready: ["Os findings do checkpoint estao fechados.", "A CI esta verde."],
+        missing: ["Falta declarar readiness do sub-checkpoint ativo."],
+        nextAction: "Declarar readiness do sub-checkpoint ativo",
+        command: "npm run flow -- decide --type mark-readiness --brief-only",
+        forbidden: ["Fazer merge"],
+      },
     },
   };
 }
@@ -166,6 +178,20 @@ describe("flow wizard", () => {
 
     expect(code).toBe(0);
     expect(decide.calls).toEqual([[]]);
+  });
+
+  it("resumo inicial do wizard vem do HumanSummary comum", async () => {
+    const prompts = new ScriptedPrompts(["quit"]);
+
+    const code = await runFlowWizard("/repo", new CollectingLogger(), {
+      prompts,
+      registry: registryWith(),
+      collectModel: () => model(),
+    });
+
+    expect(code).toBe(0);
+    expect(prompts.notes[0]).toContain("## Resumo simples");
+    expect(prompts.notes[0]).toContain("Falta declarar readiness do sub-checkpoint ativo.");
   });
 
   it("provisioning mostra init/adopt/update e não oferece providers", async () => {

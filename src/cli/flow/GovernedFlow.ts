@@ -34,6 +34,16 @@ export interface GovernedFlow {
   readonly blocked: readonly GovernedFlowAction[];
   readonly forbidden: readonly string[];
   readonly recommended: GovernedFlowAction | null;
+  readonly humanSummary: HumanSummary;
+}
+
+export interface HumanSummary {
+  readonly state: readonly string[];
+  readonly ready: readonly string[];
+  readonly missing: readonly string[];
+  readonly nextAction: string;
+  readonly command: string | null;
+  readonly forbidden: readonly string[];
 }
 
 export interface MarkReadinessFacts {
@@ -580,6 +590,79 @@ function action(
   };
 }
 
+function currentCheckpointLabel(snapshot: DecisionSnapshot): string {
+  return snapshot.checkpoint ?? snapshot.facts.cursor?.checkpoint ?? "checkpoint nao identificado";
+}
+
+function currentSubCheckpointLabel(snapshot: DecisionSnapshot): string {
+  const active = activeSubCheckpoint(snapshot.subCheckpoints);
+  if (active) return `${active.id} — ${active.title}`;
+  const pending = snapshot.subCheckpoints.filter((s) => s.state === "pending");
+  if (pending.length > 0) return `sem ativo; proximo pendente: ${pending[0].id}`;
+  return "sem sub-checkpoint ativo";
+}
+
+function ciLine(snapshot: DecisionSnapshot): string {
+  const pr = snapshot.facts.pullRequest;
+  if (!pr) return "PR remoto nao observado.";
+  return `PR #${pr.number} ${pr.isDraft ? "Draft" : "Ready"}; CI ${pr.checks.pass} ok, ${pr.checks.fail} falha(s), ${pr.checks.pending} pendente(s).`;
+}
+
+function deriveHumanSummary(
+  snapshot: DecisionSnapshot,
+  flow: Omit<GovernedFlow, "humanSummary">
+): HumanSummary {
+  const pr = snapshot.facts.pullRequest;
+  const ready: string[] = [];
+  const missing: string[] = [];
+
+  if (snapshot.openFindings.length === 0) ready.push("Os findings do checkpoint estao fechados.");
+  else missing.push(`Ainda ha ${snapshot.openFindings.length} finding(s) aberto(s).`);
+
+  if (snapshot.workingTreeState === "clean") ready.push("A working tree esta limpa.");
+  else missing.push("Ha mudancas locais nao finalizadas.");
+
+  if (pr) {
+    if (pr.checks.fail === 0 && pr.checks.pending === 0) ready.push("A CI esta verde.");
+    else {
+      if (pr.checks.fail > 0) missing.push(`A CI tem ${pr.checks.fail} falha(s).`);
+      if (pr.checks.pending > 0)
+        missing.push(`A CI tem ${pr.checks.pending} check(s) pendente(s).`);
+    }
+  } else {
+    missing.push("O PR remoto nao foi observado.");
+  }
+
+  if (flow.recommended?.id === "mark-readiness") {
+    missing.push("Falta declarar readiness do sub-checkpoint ativo.");
+  } else if (flow.recommended?.id === "advance-subcheckpoint") {
+    missing.push("Falta decidir o avanco para o proximo sub-checkpoint.");
+  } else if (flow.recommended?.id === "human-gate") {
+    missing.push("Falta decisao humana de Human Gate.");
+  } else if (flow.recommended?.id === "open-next-node") {
+    missing.push("Falta abrir governadamente o proximo no planejado.");
+  } else if (flow.recommended?.id === "close-dispositions") {
+    missing.push("Falta fechar findings revalidados.");
+  } else if (flow.blocked.length > 0) {
+    missing.push(...flow.blocked.slice(0, 2).flatMap((a) => a.availability.reasons.slice(0, 2)));
+  }
+
+  return {
+    state: [
+      `Estamos em ${currentCheckpointLabel(snapshot)}.`,
+      `Objeto atual: ${currentSubCheckpointLabel(snapshot)}.`,
+      ciLine(snapshot),
+    ],
+    ready,
+    missing: [...new Set(missing)],
+    nextAction: flow.recommended
+      ? flow.recommended.title
+      : "Nenhuma decisao mutante esta disponivel agora.",
+    command: flow.recommended?.command ?? null,
+    forbidden: flow.forbidden.slice(0, 5),
+  };
+}
+
 export function deriveGovernedFlow(snapshot: DecisionSnapshot): GovernedFlow {
   const mark = deriveMarkReadinessAvailability(markReadinessFactsFromDecisionSnapshot(snapshot));
   const advance = deriveAdvanceEligibility(advanceEligibilityFactsFromDecisionSnapshot(snapshot));
@@ -642,5 +725,6 @@ export function deriveGovernedFlow(snapshot: DecisionSnapshot): GovernedFlow {
     "Converter PR para Ready fora do fluxo governado",
     "Fazer merge",
   ];
-  return { actions, available, blocked, forbidden, recommended };
+  const flow = { actions, available, blocked, forbidden, recommended };
+  return { ...flow, humanSummary: deriveHumanSummary(snapshot, flow) };
 }

@@ -19,7 +19,12 @@ import {
 import { ghRemotePrCollector } from "./handoff.js";
 import { DecisionRegistry, buildDecisionRegistry } from "./decide/registry.js";
 import { DecisionAvailability } from "./decide/model.js";
-import { deriveGovernedFlow, GovernedFlow, GovernedFlowAction } from "./flow/GovernedFlow.js";
+import {
+  deriveGovernedFlow,
+  GovernedFlow,
+  GovernedFlowAction,
+  HumanSummary,
+} from "./flow/GovernedFlow.js";
 
 export interface Logger {
   info(message: string): void;
@@ -76,6 +81,27 @@ function renderCommandList(lines: string[], commands: readonly WorkNextActionCom
   }
 }
 
+export function renderHumanSummary(summary: HumanSummary): string {
+  const lines: string[] = [];
+  lines.push("## Resumo simples");
+  for (const item of summary.state) lines.push(`- ${item}`);
+  lines.push(`- Proximo passo: ${summary.nextAction}`);
+  if (summary.command) lines.push(`- Para entender antes de aplicar: \`${summary.command}\``);
+  if (summary.ready.length > 0) {
+    lines.push("- Ja esta ok:");
+    for (const item of summary.ready) lines.push(`  - ${item}`);
+  }
+  if (summary.missing.length > 0) {
+    lines.push("- Ainda falta:");
+    for (const item of summary.missing) lines.push(`  - ${item}`);
+  }
+  if (summary.forbidden.length > 0) {
+    lines.push("- Nao fazer agora:");
+    for (const item of summary.forbidden) lines.push(`  - ${item}`);
+  }
+  return lines.join("\n");
+}
+
 export function renderCockpit(model: CockpitModel): string {
   const { work } = model;
   const facts = work.snapshot.collected.facts;
@@ -88,6 +114,10 @@ export function renderCockpit(model: CockpitModel): string {
   const lines: string[] = [];
   lines.push(`# Cockpit situado — ${facts.spec.label}`);
   lines.push("");
+  if (model.flow?.humanSummary) {
+    lines.push(renderHumanSummary(model.flow.humanSummary));
+    lines.push("");
+  }
   lines.push("## Estado atual");
   lines.push(`- branch: ${facts.git.branch ?? "?"} · HEAD: ${facts.git.head ?? "?"}`);
   lines.push(`- checkpoint: ${brief.checkpoint ?? "(sem cursor)"} · modo: ${brief.mode}`);

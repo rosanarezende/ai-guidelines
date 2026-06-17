@@ -120,6 +120,33 @@ describe("cockpit situado", () => {
     );
   });
 
+  it("renderiza HumanSummary antes dos detalhes técnicos", () => {
+    const out = renderCockpit({
+      work: workBrief(),
+      decisions: [],
+      flow: {
+        actions: [],
+        available: [],
+        blocked: [],
+        forbidden: ["Fazer merge"],
+        recommended: null,
+        humanSummary: {
+          state: ["Estamos em checkpoint-co-flow-convergence."],
+          ready: ["A CI esta verde."],
+          missing: ["Falta declarar readiness do sub-checkpoint ativo."],
+          nextAction: "Declarar readiness do sub-checkpoint ativo",
+          command: "npm run flow -- decide --type mark-readiness --brief-only",
+          forbidden: ["Fazer merge"],
+        },
+      },
+    });
+
+    expect(out).toMatch(/## Resumo simples\n- Estamos em checkpoint-co-flow-convergence\./);
+    expect(out).toContain("- Proximo passo: Declarar readiness do sub-checkpoint ativo");
+    expect(out).toContain("Falta declarar readiness do sub-checkpoint ativo.");
+    expect(out.indexOf("## Resumo simples")).toBeLessThan(out.indexOf("## Estado atual"));
+  });
+
   it("mostra CI pending como bloqueio e não sugere readiness executável", () => {
     const out = renderCockpit({
       work: workBrief(),

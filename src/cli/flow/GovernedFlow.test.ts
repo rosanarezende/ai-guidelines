@@ -178,6 +178,17 @@ describe("GovernedFlow", () => {
     });
 
     expect(flow.recommended?.id).toBe("mark-readiness");
+    expect(flow.humanSummary.nextAction).toBe("Declarar readiness do sub-checkpoint ativo");
+    expect(flow.humanSummary.missing).toContain(
+      "Falta declarar readiness do sub-checkpoint ativo."
+    );
+    expect(flow.humanSummary.ready).toEqual(
+      expect.arrayContaining([
+        "Os findings do checkpoint estao fechados.",
+        "A working tree esta limpa.",
+        "A CI esta verde.",
+      ])
+    );
     expect(work.nextAction.decisionType).toBe("mark-readiness");
     expect(new MarkReadinessDefinition().detect(snapshot).status).toBe("available");
     expect(new AdvanceSubcheckpointDefinition().detect(snapshot).status).toBe("blocked");
