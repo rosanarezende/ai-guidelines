@@ -446,7 +446,7 @@ Nova necessidade observada durante a validacao humana do wizard:
 - a documentacao do fluxo humano nao deveria ficar escondida em `docs/`, porque
   `npm run flow` e a entrada principal do mantenedor no repo.
 
-Correcao aplicada nesta fatia:
+Correcao aplicada nesta fatia inicial:
 
 1. Criado `FLOW.html` na raiz como guia visual autocontido do fluxo governado.
 2. O guia mostra TTY vs non-TTY, wizard Clack, cockpit textual, readiness,
@@ -463,8 +463,26 @@ Fronteira preservada:
 - Nenhum Ready, Human Gate, merge, readiness ou advance-subcheckpoint foi
   executado por esta documentacao.
 
-8. `init`, `adopt` e `update` aparecem na secao de provisioning; `providers`
+Dogfood posterior da experiencia humana:
+
+- a primeira versao do `FLOW.html` ainda estava em ingles, apesar de a
+  experiencia governada deste repo ser operada em portugues;
+- a pagina explicava o wizard, mas nao simulava o que acontece quando a pessoa
+  seleciona cada opcao do menu principal;
+- isso deixava a modelagem visual incompleta para uso em celular e para revisao
+  humana sem executar o terminal.
+
+Correcao aplicada nesta fatia:
+
+1. `FLOW.html` foi localizado para `pt-BR`.
+2. O guia passou a ter um simulador/carrossel do wizard com cada opcao do menu
+   principal.
+3. Cada opcao mostra comando canonico, passos esperados e uma saida textual
+   simulada.
+4. `init`, `adopt` e `update` aparecem na secao de provisioning; `providers`
    nao aparece como comando nem como opcao de menu.
+5. A fronteira arquitetural continua explicita: a pagina e demonstrativa, e a
+   verdade executavel segue no snapshot governado + registry + derivacao comum.
 
 Falsificacao adicionada:
 
