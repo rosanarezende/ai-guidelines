@@ -59,6 +59,8 @@ import type { DecisionAvailability } from "./decide/model.js";
 import { ADVANCE_SUBCHECKPOINT_ID, deriveAdvanceEligibility } from "./decide/advanceEligibility.js";
 import {
   deriveMarkReadinessAvailability,
+  deriveFinishSubcheckpointAvailability,
+  FINISH_SUBCHECKPOINT_ID,
   deriveOpenNextNodeAvailability,
 } from "./flow/GovernedFlow.js";
 import {
@@ -220,6 +222,7 @@ export interface WorkBriefInput {
    * executável quando esta é `available`.
    */
   readonly advanceEligibility: DecisionAvailability;
+  readonly finishSubcheckpointEligibility?: DecisionAvailability;
   readonly markReadinessEligibility?: DecisionAvailability;
 }
 
@@ -268,6 +271,7 @@ function derivedValidations(specId: string, object: WorkObject): WorkValidation[
 type DecisionType =
   | "advance-subcheckpoint"
   | "close-dispositions"
+  | "finish-subcheckpoint"
   | "mark-readiness"
   | "human-gate"
   | "open-next-node";
@@ -286,6 +290,12 @@ function decideBriefCommand(type: DecisionType): string {
  * Derivadas do TIPO (lookup determinístico), não texto livre montado por estado.
  */
 const DECISION_STILL_FORBIDDEN: Record<DecisionType, readonly string[]> = {
+  "finish-subcheckpoint": [
+    "Implementar o próximo sub-checkpoint automaticamente",
+    "Exercer o Human Gate",
+    "Converter o PR para Ready",
+    "Fazer merge",
+  ],
   "mark-readiness": [
     "Avançar sub-checkpoint",
     "Exercer o Human Gate",
@@ -459,6 +469,8 @@ export function deriveWorkNextAction(
     readonly prHeadDiverges: boolean;
     /** Elegibilidade de advance-subcheckpoint (MESMA derivação de `decide`). */
     readonly advanceEligibility: DecisionAvailability;
+    /** Elegibilidade de finish-subcheckpoint (MESMA derivação de `decide`). */
+    readonly finishSubcheckpointEligibility: DecisionAvailability;
     /** Elegibilidade de mark-readiness (MESMA derivação de `decide`). */
     readonly markReadinessEligibility: DecisionAvailability;
   }
@@ -533,11 +545,38 @@ export function deriveWorkNextAction(
   // (elegibilidade COMPARTILHADA com `decide`, nunca hardcoded como disponível).
   if (mode === "implement_checkpoint" && object.subCheckpoint) {
     const active = object.subCheckpoint;
+    if (ctx.finishSubcheckpointEligibility.status === "available") {
+      return decisionNextAction(
+        "finish-subcheckpoint",
+        true,
+        `Concluir ${active.id} e iniciar o próximo sub-checkpoint em uma única decisão governada.`,
+        [
+          `ativo: ${active.id} — ${active.title} (tasks.md linha ${active.line})`,
+          "readiness é validada como critério, mas não vira uma autorização/commit separado.",
+          "o efeito autorizado altera somente marcadores de sub-checkpoints em tasks.md.",
+        ]
+      );
+    }
+    if (
+      ctx.finishSubcheckpointEligibility.status === "blocked" &&
+      ctx.markReadinessEligibility.status === "available"
+    ) {
+      return decisionNextAction(
+        "finish-subcheckpoint",
+        false,
+        `Conclusão de ${active.id} ainda BLOQUEADA — \`decide\` não a classifica como disponível.`,
+        [
+          `ativo: ${active.id} — ${active.title} (tasks.md linha ${active.line})`,
+          ...ctx.finishSubcheckpointEligibility.reasons.map((r) => `requisito pendente: ${r}`),
+          "`work` não recomenda readiness isolada quando a conclusão em passo único é a transição aplicável.",
+        ]
+      );
+    }
     if (ctx.markReadinessEligibility.status === "available") {
       return decisionNextAction(
         "mark-readiness",
         true,
-        `Declarar readiness de ${active.id} — critérios de saída satisfeitos; o próximo passo é registrar o sinal governado antes de qualquer avanço.`,
+        `Declarar readiness de ${active.id} — critérios de saída satisfeitos; este é o caminho terminal ou fallback explícito.`,
         [
           `ativo: ${active.id} — ${active.title} (tasks.md linha ${active.line})`,
           "readiness altera somente tasks.md e não ativa o próximo sub-checkpoint.",
@@ -843,6 +882,10 @@ export function deriveWorkBrief(input: WorkBriefInput): WorkBrief {
     workingTreeState,
     prHeadDiverges,
     advanceEligibility: input.advanceEligibility,
+    finishSubcheckpointEligibility: input.finishSubcheckpointEligibility ?? {
+      status: "not-applicable",
+      reasons: ["finish-subcheckpoint não foi projetado para este snapshot."],
+    },
     markReadinessEligibility: input.markReadinessEligibility ?? {
       status: "not-applicable",
       reasons: ["mark-readiness não foi projetado para este snapshot."],
@@ -911,12 +954,12 @@ export function loadWorkPolicy(repoRoot: string): {
 
 const HUMAN_DECISION_POLICY_PATH = ".core/governance/human-decision-policy.yml";
 
-/** O tipo `advance-subcheckpoint` está declarado na human-decision-policy? (fail-closed) */
-function advanceTypeDeclared(repoRoot: string): boolean {
+/** Um tipo de decisão está declarado na human-decision-policy? (fail-closed) */
+function decisionTypeDeclared(repoRoot: string, typeId: string): boolean {
   const policyPath = path.join(repoRoot, HUMAN_DECISION_POLICY_PATH);
   try {
     const policy = parseHumanDecisionPolicy(fs.readFileSync(policyPath, "utf-8"));
-    return findDecisionType(policy, ADVANCE_SUBCHECKPOINT_ID) !== undefined;
+    return findDecisionType(policy, typeId) !== undefined;
   } catch {
     return false;
   }
@@ -1048,7 +1091,7 @@ export function collectWorkBrief(
     findings,
     freshness.workingTreeState,
     discoverErrors.map(String),
-    advanceTypeDeclared(repoRoot)
+    decisionTypeDeclared(repoRoot, ADVANCE_SUBCHECKPOINT_ID)
   );
   const activeSubCheckpoints = facts.subCheckpoints.filter((s) => s.state === "in-progress");
   const deliveryEvidence =
@@ -1069,9 +1112,15 @@ export function collectWorkBrief(
     findings,
     freshness.workingTreeState,
     discoverErrors.map(String),
-    advanceTypeDeclared(repoRoot),
+    decisionTypeDeclared(repoRoot, "mark-readiness"),
     deliveryEvidence
   );
+  const finishSubcheckpointEligibility = deriveFinishSubcheckpointAvailability({
+    policyDeclared: decisionTypeDeclared(repoRoot, FINISH_SUBCHECKPOINT_ID),
+    subCheckpoints: facts.subCheckpoints,
+    markReadiness: markReadinessEligibility,
+    advanceSubcheckpoint: advanceEligibility,
+  });
   const brief = deriveWorkBrief({
     facts,
     nextAction: snapshot.derived.nextAction,
@@ -1085,6 +1134,7 @@ export function collectWorkBrief(
     effectiveFunctionalHead: freshness.effectiveFunctionalHead,
     authorization: options.authorization ?? null,
     advanceEligibility,
+    finishSubcheckpointEligibility,
     markReadinessEligibility,
   });
 

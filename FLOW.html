@@ -794,10 +794,10 @@
 
       <section id="readiness">
         <div class="section-title">
-          <h2>Readiness é transição de lifecycle</h2>
+          <h2>Conclusão de sub-checkpoint é uma decisão única</h2>
           <p>
-            Readiness não é edição manual de <code>tasks.md</code>. Ela tem briefing, prévia,
-            confirmação e efeito estreito.
+            No caso comum, a pessoa não precisa aprovar readiness e depois aprovar advance. O fluxo
+            valida os critérios de saída e oferece uma única decisão governada.
           </p>
         </div>
 
@@ -813,23 +813,24 @@
           <tbody>
             <tr>
               <td>Sub-checkpoint ativo <code>[/]</code> sem readiness</td>
-              <td>Implementar, validar e inspecionar readiness.</td>
+              <td>Implementar, validar e inspecionar o próximo ato.</td>
               <td>Avanço, Human Gate, Ready e merge.</td>
               <td>Nenhuma escrita.</td>
             </tr>
             <tr>
-              <td>Critérios satisfeitos</td>
-              <td>Declarar readiness via <code>decide</code>.</td>
-              <td>Ativar o próximo sub-checkpoint automaticamente.</td>
+              <td>Critérios satisfeitos e há próximo <code>[ ]</code></td>
+              <td>Decidir <code>finish-subcheckpoint</code>.</td>
+              <td>Implementar o próximo sub-checkpoint automaticamente.</td>
               <td>
-                Somente <code>tasks.md</code> recebe <code>readiness: ready-for-transition</code>.
+                Somente <code>tasks.md</code>: atual <code>[/] → [x]</code> e próximo
+                <code>[ ] → [/]</code>.
               </td>
             </tr>
             <tr>
-              <td>Depois da readiness</td>
-              <td>Inspecionar ou decidir <code>advance-subcheckpoint</code>.</td>
-              <td>Human Gate até todos os sub-checkpoints e a política do PR passarem.</td>
-              <td>Nenhuma transição escondida.</td>
+              <td>Último sub-checkpoint</td>
+              <td>Usar readiness terminal e preparar fechamento do checkpoint.</td>
+              <td><code>advance-subcheckpoint</code> indevido.</td>
+              <td>Human Gate continua separado e exige Ready/CI/política.</td>
             </tr>
           </tbody>
         </table>
@@ -978,8 +979,8 @@
           terminal: [
             "# Cockpit situado - 0024-context-architecture",
             "Estado: CO-10.2 ativo, PR #43 Draft, tree clean",
-            "Próxima ação: declarar readiness quando critérios estiverem verdes",
-            "Ações bloqueadas: advance, Human Gate, Ready, merge",
+            "Próxima ação: concluir ponto atual e iniciar o próximo",
+            "Ações bloqueadas/proibidas: Human Gate, Ready, merge",
           ],
         },
         {
@@ -993,9 +994,9 @@
             "Só aplica algo depois de prévia e confirmação explícita.",
           ],
           terminal: [
-            "Decisão recomendada: mark-readiness",
-            "Briefing: readiness altera somente tasks.md",
-            "Preview: CO-10.2 continua [/], adiciona readiness",
+            "Decisão recomendada: finish-subcheckpoint",
+            "Briefing: critérios de saída validados pelo mesmo modelo",
+            "Preview: CO-10.2 [/] -> [x], CO-10.3 [ ] -> [/]",
             "Confirmar? sim/nao",
           ],
         },
@@ -1010,8 +1011,8 @@
             "Explica por que cada decisão está disponível ou bloqueada.",
           ],
           terminal: [
-            "1. Declarar readiness do sub-checkpoint ativo",
-            "2. Iniciar próximo sub-checkpoint - bloqueado sem readiness",
+            "1. Concluir ponto atual e iniciar o próximo",
+            "2. Declarar readiness - fallback/terminal",
             "3. Human Gate - bloqueado enquanto PR estiver Draft",
           ],
         },

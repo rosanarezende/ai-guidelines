@@ -109,11 +109,11 @@ function model(): CockpitModel {
           subCheckpoint: { id: "CO-10.2", title: "confronto modelo x codigo", line: 110 },
         },
         nextAction: {
-          description: "Declarar readiness de CO-10.2",
+          description: "Concluir CO-10.2 e iniciar CO-10.3",
           basis: [],
           commands: [],
           stillForbidden: [],
-          decisionType: "mark-readiness",
+          decisionType: "finish-subcheckpoint",
         },
       } as never,
     },
@@ -132,12 +132,12 @@ function model(): CockpitModel {
       ],
       forbidden: ["Fazer merge"],
       recommended: {
-        id: "mark-readiness",
-        title: "Declarar readiness do sub-checkpoint ativo",
+        id: "finish-subcheckpoint",
+        title: "Concluir ponto atual e iniciar o próximo",
         availability: { status: "available", reasons: [] },
-        command: "npm run flow -- decide --type mark-readiness --brief-only",
+        command: "npm run flow -- decide --type finish-subcheckpoint --brief-only",
         mutatingCommand:
-          "npm run flow -- decide --type mark-readiness --decision mark-ready --authorization explicit-human-decision --confirm",
+          "npm run flow -- decide --type finish-subcheckpoint --decision finish --authorization explicit-human-decision --confirm",
         effect: ["altera somente tasks.md"],
       },
       humanSummary: {
@@ -147,9 +147,9 @@ function model(): CockpitModel {
           "PR #43 Draft; CI 5 ok, 0 falha(s), 0 pendente(s).",
         ],
         ready: ["Os findings do checkpoint estao fechados.", "A CI esta verde."],
-        missing: ["Falta declarar readiness do sub-checkpoint ativo."],
-        nextAction: "Declarar readiness do sub-checkpoint ativo",
-        command: "npm run flow -- decide --type mark-readiness --brief-only",
+        missing: ["Falta uma decisão única para concluir este ponto e iniciar o próximo."],
+        nextAction: "Concluir ponto atual e iniciar o próximo",
+        command: "npm run flow -- decide --type finish-subcheckpoint --brief-only",
         forbidden: ["Fazer merge"],
       },
     },
@@ -191,7 +191,9 @@ describe("flow wizard", () => {
 
     expect(code).toBe(0);
     expect(prompts.notes[0]).toContain("## Resumo simples");
-    expect(prompts.notes[0]).toContain("Falta declarar readiness do sub-checkpoint ativo.");
+    expect(prompts.notes[0]).toContain(
+      "Falta uma decisão única para concluir este ponto e iniciar o próximo."
+    );
   });
 
   it("provisioning mostra init/adopt/update e não oferece providers", async () => {

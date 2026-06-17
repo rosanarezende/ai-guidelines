@@ -651,3 +651,58 @@ Estado de seguranca:
   de PR foi executada por esta correcao;
 - o objetivo e reduzir dependencia de interpretacao do agente sem criar uma nova
   autoridade.
+
+## Dogfood CO-10.4 — fim de sub-checkpoint nao deve exigir duas autorizacoes
+
+Falha observada ao tentar encerrar os pontos internos de `co-flow-convergence`:
+
+- o fluxo passou a ter readiness governada, mas o caso comum ainda exigia duas
+  decisoes humanas separadas:
+  1. `mark-readiness` para adicionar `readiness: ready-for-transition`;
+  2. `advance-subcheckpoint` para marcar o atual `[x]` e abrir o proximo `[/]`;
+- para a owner, isso parecia excesso de autorizacao para uma unica intencao:
+  "terminei este ponto, pode abrir o proximo";
+- se a traducao ficasse a cargo do agente, o proprio CO-10.4 criaria outra
+  heuristica informal: decidir quando readiness isolada e quando advance
+  separado seriam necessarios.
+
+Correcao aplicada em CO-10.4:
+
+1. `finish-subcheckpoint` foi adicionado como decisao humana governada para o
+   caso interno nao-terminal.
+2. A nova decisao usa o mesmo snapshot e as mesmas derivacoes de
+   `mark-readiness` e `advance-subcheckpoint`:
+   - sem readiness persistida, mas criterios satisfeitos -> disponivel;
+   - com readiness ja persistida e `advance` disponivel -> disponivel;
+   - terminal sem proximo `[ ]` -> nao se aplica.
+3. O efeito permitido continua estreito: somente `tasks.md`, trocando os
+   marcadores `[/] -> [x]` e `[ ] -> [/]`.
+4. `work`, `cockpit`, wizard e `decide` passam a recomendar a mesma acao
+   preferencial: `finish-subcheckpoint`.
+5. `mark-readiness` e `advance-subcheckpoint` permanecem como caminhos
+   explicitos para terminal/fallback, mas deixam de ser a experiencia principal
+   do fim normal de sub-checkpoint.
+
+Falsificacao adicionada:
+
+- teste de `finish-subcheckpoint` prova disponibilidade sem readiness
+  persistida quando os criterios estao satisfeitos;
+- teste prova disponibilidade tambem quando readiness ja existia;
+- teste prova bloqueio por CI pendente;
+- teste prova que terminal sem proximo pendente nao usa `finish-subcheckpoint`;
+- teste de apply prova commit exclusivo de `tasks.md`, com `CO-10.4 [/] -> [x]`
+  e `CO-10.5 [ ] -> [/]`, sem alterar `state.yml`;
+- teste de `GovernedFlow` prova que cockpit/work/decide concordam sobre
+  `finish-subcheckpoint` como proxima acao interna;
+- teste de cockpit prova que `finish-subcheckpoint` tem prioridade sobre
+  `mark-readiness`;
+- teste de wizard prova que a nota e a proxima acao vêm do mesmo `HumanSummary`.
+
+Estado de seguranca:
+
+- nenhum `finish-subcheckpoint` mutante foi executado no estado real durante esta
+  implementacao;
+- CO-10.4 continua ativo enquanto a owner nao exercer a decisao;
+- CO-10.5 nao foi iniciado;
+- nenhum Ready, Human Gate, gate artifact, merge ou abertura de novo PR foi
+  executado.

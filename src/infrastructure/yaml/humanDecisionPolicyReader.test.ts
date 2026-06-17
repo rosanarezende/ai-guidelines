@@ -17,12 +17,25 @@ describe("humanDecisionPolicyReader [decide]", () => {
     expect(policy.version).toBe(1);
     expect(policy.decisionTypes.map((t) => t.id)).toEqual([
       "close-dispositions",
+      "finish-subcheckpoint",
       "mark-readiness",
       "advance-subcheckpoint",
       "human-gate",
       "open-next-node",
     ]);
     expect(policy.owner.handle).toBe("@rosanarezende");
+  });
+
+  it("finish-subcheckpoint declara conclusão interna em passo único sem autorizar gate/merge", () => {
+    const policy = parseHumanDecisionPolicy(REAL);
+    const finish = findDecisionType(policy, "finish-subcheckpoint")!;
+    expect(finish.choices.map((c) => [c.id, c.mutating])).toContainEqual(["finish", true]);
+    expect(finish.consequences.join(" ")).toMatch(/próximo sub-checkpoint/);
+    expect(finish.notAuthorized.join(" ")).toMatch(/Human Gate/);
+    expect(finish.notAuthorized.join(" ")).toMatch(/Fazer merge/);
+    expect(finish.notAuthorized.join(" ")).toMatch(/topologia/);
+    expect(finish.publication.mixedDiff).toBe("forbidden");
+    expect(finish.requiresOwner).toBe(true);
   });
 
   it("mark-readiness declara mutação exclusiva de lifecycle com limites explícitos", () => {

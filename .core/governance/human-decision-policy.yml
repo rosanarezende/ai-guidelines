@@ -92,6 +92,62 @@ decision_types:
     confirmation: required
     technical_details: available
 
+  finish-subcheckpoint:
+    title: Concluir ponto atual e iniciar o próximo
+    purpose: >
+      O owner encerra o sub-checkpoint ativo e ativa o próximo em uma única
+      decisão governada quando os critérios de saída já estão satisfeitos. Esta
+      decisão substitui o fluxo humano em duas autorizações para o caso comum
+      interno do checkpoint: não cria uma readiness intermediária persistida, não
+      exerce Human Gate, não converte PR para Ready, não abre outro PR e não mexe
+      na topologia. Aplicar altera EXCLUSIVAMENTE os marcadores de dois
+      sub-checkpoints em tasks.md (atual `[/] → [x]`, próximo `[ ] → [/]`) e
+      nada mais.
+    requires_owner: true
+    sections:
+      - key: completed
+        heading: O que será concluído?
+      - key: exit_criteria
+        heading: Como sabemos que pode encerrar?
+      - key: next_starts
+        heading: O que começará agora?
+      - key: consequences
+        heading: O que acontece se você aprovar?
+      - key: not_authorized
+        heading: O que esta decisão NÃO autoriza?
+    choices:
+      - id: finish
+        label: Concluir o ponto atual e iniciar o próximo
+        mutating: true
+      - id: keep
+        label: Manter o ponto atual em implementação
+        mutating: false
+      - id: request-explanation
+        label: Solicitar mais esclarecimentos (não escreve nada)
+        mutating: false
+      - id: cancel
+        label: Cancelar (não escreve nada)
+        mutating: false
+    consequences:
+      - O sub-checkpoint atual será marcado como concluído.
+      - O próximo sub-checkpoint será marcado como ativo.
+      - "`npm run flow -- work` passará a apontar o próximo como objeto de implementação."
+      - A readiness do atual é validada como critério, mas não vira commit separado.
+    not_authorized:
+      - Implementar o próximo sub-checkpoint automaticamente.
+      - Exercer o Human Gate.
+      - Converter o PR para Ready.
+      - Criar o gate artifact.
+      - Fazer merge.
+      - Abrir outro PR.
+      - Alterar a topologia (state.yml).
+    publication:
+      commit: after-confirmation
+      push: after-confirmation
+      mixed_diff: forbidden
+    confirmation: required
+    technical_details: available
+
   mark-readiness:
     title: Declarar readiness do sub-checkpoint ativo
     purpose: >

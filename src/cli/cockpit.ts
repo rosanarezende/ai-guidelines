@@ -48,22 +48,30 @@ export interface CockpitModel {
 function commandForDecision(id: string, mutating: boolean): string {
   if (!mutating) return `npm run flow -- decide --type ${id} --brief-only`;
   const decision =
-    id === "mark-readiness"
-      ? "mark-ready"
-      : id === "advance-subcheckpoint"
-        ? "advance"
-        : id === "close-dispositions"
-          ? "accept-all"
-          : id === "human-gate"
-            ? "approve"
-            : "<choice>";
+    id === "finish-subcheckpoint"
+      ? "finish"
+      : id === "mark-readiness"
+        ? "mark-ready"
+        : id === "advance-subcheckpoint"
+          ? "advance"
+          : id === "close-dispositions"
+            ? "accept-all"
+            : id === "human-gate"
+              ? "approve"
+              : "<choice>";
   return `npm run flow -- decide --type ${id} --decision ${decision} --authorization explicit-human-decision --confirm`;
 }
 
 function recommendedDecision(model: CockpitModel): CockpitDecisionItem | null {
   if (model.flow?.recommended) return model.flow.recommended;
   const byId = new Map(model.decisions.map((d) => [d.id, d]));
-  const preferred = ["close-dispositions", "mark-readiness", "advance-subcheckpoint", "human-gate"];
+  const preferred = [
+    "close-dispositions",
+    "finish-subcheckpoint",
+    "mark-readiness",
+    "advance-subcheckpoint",
+    "human-gate",
+  ];
   for (const id of preferred) {
     const item = byId.get(id);
     if (item?.availability.status === "available") return item;

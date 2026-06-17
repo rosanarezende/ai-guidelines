@@ -96,6 +96,28 @@ function workBrief(over: Partial<WorkBrief> = {}): CollectedWorkBrief {
 }
 
 describe("cockpit situado", () => {
+  it("prioriza finish-subcheckpoint quando o encerramento interno está disponível", () => {
+    const out = renderCockpit({
+      work: workBrief(),
+      decisions: [
+        decision("finish-subcheckpoint", "Concluir ponto atual e iniciar o próximo", {
+          status: "available",
+          reasons: [],
+          hint: "CO-10.1 satisfaz readiness; CO-10.2 será ativado sem commit intermediário",
+        }),
+        decision("mark-readiness", "Declarar readiness do sub-checkpoint ativo", {
+          status: "available",
+          reasons: [],
+        }),
+      ],
+    });
+
+    expect(out).toMatch(/Próxima ação recomendada\n- Concluir ponto atual e iniciar o próximo/);
+    expect(out).toMatch(
+      /npm run flow -- decide --type finish-subcheckpoint --decision finish --authorization explicit-human-decision --confirm/
+    );
+  });
+
   it("renderiza painel raiz e recomenda readiness quando ela é o próximo ato", () => {
     const out = renderCockpit({
       work: workBrief(),

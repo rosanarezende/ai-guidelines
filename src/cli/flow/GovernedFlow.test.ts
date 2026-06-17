@@ -1,5 +1,6 @@
 import { deriveWorkBrief } from "../workBrief.js";
 import { deriveGovernedFlow, derivePrReadyFlow } from "./GovernedFlow.js";
+import { FinishSubcheckpointDefinition } from "../decide/finishSubcheckpoint.js";
 import { MarkReadinessDefinition } from "../decide/markReadiness.js";
 import { AdvanceSubcheckpointDefinition } from "../decide/advanceSubcheckpoint.js";
 import { HumanGateDefinition } from "../decide/humanGate.js";
@@ -154,7 +155,7 @@ function coFlowFacts(over: Partial<ReturnType<typeof makeHandoffFacts>> = {}) {
 }
 
 describe("GovernedFlow", () => {
-  it("cockpit/work/decide concordam que readiness é a próxima ação disponível", () => {
+  it("cockpit/work/decide concordam que finish-subcheckpoint é a próxima ação interna disponível", () => {
     const facts = coFlowFacts();
     const snapshot = makeDecisionSnapshot({
       facts,
@@ -174,13 +175,14 @@ describe("GovernedFlow", () => {
       workingTreeState: "clean",
       authorization: null,
       advanceEligibility: blockedNoReadiness,
+      finishSubcheckpointEligibility: available,
       markReadinessEligibility: available,
     });
 
-    expect(flow.recommended?.id).toBe("mark-readiness");
-    expect(flow.humanSummary.nextAction).toBe("Declarar readiness do sub-checkpoint ativo");
+    expect(flow.recommended?.id).toBe("finish-subcheckpoint");
+    expect(flow.humanSummary.nextAction).toBe("Concluir ponto atual e iniciar o próximo");
     expect(flow.humanSummary.missing).toContain(
-      "Falta declarar readiness do sub-checkpoint ativo."
+      "Falta uma decisão única para concluir este ponto e iniciar o próximo."
     );
     expect(flow.humanSummary.ready).toEqual(
       expect.arrayContaining([
@@ -189,7 +191,8 @@ describe("GovernedFlow", () => {
         "A CI esta verde.",
       ])
     );
-    expect(work.nextAction.decisionType).toBe("mark-readiness");
+    expect(work.nextAction.decisionType).toBe("finish-subcheckpoint");
+    expect(new FinishSubcheckpointDefinition().detect(snapshot).status).toBe("available");
     expect(new MarkReadinessDefinition().detect(snapshot).status).toBe("available");
     expect(new AdvanceSubcheckpointDefinition().detect(snapshot).status).toBe("blocked");
   });

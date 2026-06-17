@@ -667,7 +667,7 @@ describe("workBrief · próxima ação estruturada [work]", () => {
   const commandOf = (b: ReturnType<typeof derive>, role: string) =>
     b.nextAction.commands.find((c) => c.role === role)?.command;
 
-  it("[38] ESTADO REAL (CO-3.2 [/], CO-3.3 [ ]) ⇒ advance-subcheckpoint: concluir CO-3.2 e ativar CO-3.3", () => {
+  it("[38] ESTADO REAL (CO-3.2 [/], CO-3.3 [ ]) ⇒ finish-subcheckpoint em passo único", () => {
     const b = derive({
       nextAction: nextAction("investigate-checkpoint"),
       facts: facts({
@@ -677,24 +677,35 @@ describe("workBrief · próxima ação estruturada [work]", () => {
           { id: "CO-3.3", title: "migração legacy", state: "pending", line: 3 },
         ]),
       }),
+      advanceEligibility: {
+        status: "blocked",
+        reasons: [
+          'CO-3.2 ainda não declarou seus critérios de saída satisfeitos (sem readiness "ready-for-transition" em tasks.md).',
+        ],
+      },
+      markReadinessEligibility: { status: "available", reasons: [] },
+      finishSubcheckpointEligibility: { status: "available", reasons: [] },
     });
     expect(b.mode).toBe("implement_checkpoint");
     expect(b.object.subCheckpoint?.id).toBe("CO-3.2");
-    expect(b.nextAction.description).toBe("Concluir CO-3.2 e ativar CO-3.3.");
+    expect(b.nextAction.description).toBe(
+      "Concluir CO-3.2 e iniciar o próximo sub-checkpoint em uma única decisão governada."
+    );
+    expect(b.nextAction.decisionType).toBe("finish-subcheckpoint");
     expect(b.nextAction.commands.length).toBeLessThanOrEqual(3);
     expect(commandOf(b, "recommended")).toBe("npm run flow -- decide");
     expect(commandOf(b, "read-only")).toBe(
-      "npm run flow -- decide --type advance-subcheckpoint --brief-only"
+      "npm run flow -- decide --type finish-subcheckpoint --brief-only"
     );
     expect(commandOf(b, "after")).toBe(
       "npm run flow -- work --authorization explicit-work-request"
     );
     expect(b.nextAction.stillForbidden).toEqual(
       expect.arrayContaining([
+        "Implementar o próximo sub-checkpoint automaticamente",
         "Exercer o Human Gate",
         "Converter o PR para Ready",
         "Fazer merge",
-        "Abrir o próximo PR",
       ])
     );
   });
@@ -815,6 +826,14 @@ describe("workBrief · próxima ação estruturada [work]", () => {
           { id: "CO-3.3", state: "pending", line: 3 },
         ]),
       }),
+      advanceEligibility: {
+        status: "blocked",
+        reasons: [
+          'CO-3.2 ainda não declarou seus critérios de saída satisfeitos (sem readiness "ready-for-transition" em tasks.md).',
+        ],
+      },
+      markReadinessEligibility: { status: "available", reasons: [] },
+      finishSubcheckpointEligibility: { status: "available", reasons: [] },
     });
     const out = renderWorkBrief({
       snapshot: {
@@ -830,7 +849,7 @@ describe("workBrief · próxima ação estruturada [work]", () => {
       brief: b,
     });
     expect(out).toContain("comandos governados disponíveis:");
-    expect(out).toContain("npm run flow -- decide --type advance-subcheckpoint --brief-only");
+    expect(out).toContain("npm run flow -- decide --type finish-subcheckpoint --brief-only");
     expect(out).toContain("continua proibido:");
     expect(out).toContain("Exercer o Human Gate");
   });
