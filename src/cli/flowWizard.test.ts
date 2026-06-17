@@ -170,6 +170,16 @@ function model(): CockpitModel {
           "Objeto atual: CO-10.2 — confronto modelo x codigo.",
           "PR #43 Draft; CI 5 ok, 0 falha(s), 0 pendente(s).",
         ],
+        currentObject: {
+          label: "CO-10.2 — confronto modelo x codigo",
+          objective: "Comparar a maquina de estados canonica com os comandos vivos.",
+          output: "Matriz modelo x codigo.",
+        },
+        nextObject: {
+          label: "CO-10.3 — correcao integral",
+          objective: "Corrigir divergencias reais sem criar segunda SSOT.",
+          output: null,
+        },
         ready: ["Os findings do checkpoint estao fechados.", "A CI esta verde."],
         missing: ["Falta uma decisão única para concluir este ponto e iniciar o próximo."],
         nextAction: "Concluir ponto atual e iniciar o próximo",
@@ -238,6 +248,9 @@ describe("flow wizard", () => {
 
     expect(code).toBe(0);
     expect(prompts.notes[0]).toContain("## Resumo simples");
+    expect(prompts.notes[0]).toContain("Escopo em linguagem simples");
+    expect(prompts.notes[0]).toContain("Agora: CO-10.2 — confronto modelo x codigo");
+    expect(prompts.notes[0]).toContain("Depois: CO-10.3 — correcao integral");
     expect(prompts.notes[0]).toContain(
       "Falta uma decisão única para concluir este ponto e iniciar o próximo."
     );

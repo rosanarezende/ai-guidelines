@@ -38,8 +38,16 @@ export interface GovernedFlow {
   readonly humanSummary: HumanSummary;
 }
 
+export interface HumanObjectSummary {
+  readonly label: string;
+  readonly objective: string;
+  readonly output: string | null;
+}
+
 export interface HumanSummary {
   readonly state: readonly string[];
+  readonly currentObject: HumanObjectSummary | null;
+  readonly nextObject: HumanObjectSummary | null;
   readonly ready: readonly string[];
   readonly missing: readonly string[];
   readonly nextAction: string;
@@ -718,6 +726,62 @@ function currentSubCheckpointLabel(snapshot: DecisionSnapshot): string {
   return "sem sub-checkpoint ativo";
 }
 
+function nextPendingSubCheckpoint(
+  subs: readonly HandoffSubCheckpoint[],
+  current: HandoffSubCheckpoint | null
+): HandoffSubCheckpoint | null {
+  if (!current) return null;
+  return (
+    subs
+      .filter((s) => s.state === "pending" && s.line > current.line)
+      .sort((a, b) => a.line - b.line)[0] ?? null
+  );
+}
+
+function stripInlineMarkdown(value: string): string {
+  return value
+    .replace(/`([^`]+)`/g, "$1")
+    .replace(/\*\*([^*]+)\*\*/g, "$1")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function extractBetween(value: string, start: string, ends: readonly string[]): string | null {
+  const startIndex = value.indexOf(start);
+  if (startIndex < 0) return null;
+  const contentStart = startIndex + start.length;
+  const endIndexes = ends
+    .map((end) => value.indexOf(end, contentStart))
+    .filter((index) => index >= 0);
+  const contentEnd = endIndexes.length > 0 ? Math.min(...endIndexes) : value.length;
+  const extracted = stripInlineMarkdown(value.slice(contentStart, contentEnd));
+  return extracted.length > 0 ? extracted : null;
+}
+
+function descriptionFromRawText(sub: HandoffSubCheckpoint): string | null {
+  if (!sub.text) return null;
+  const marker = `**${sub.id} — ${sub.title}**`;
+  const markerIndex = sub.text.indexOf(marker);
+  const afterMarker = markerIndex >= 0 ? sub.text.slice(markerIndex + marker.length) : sub.text;
+  const afterColon = afterMarker.replace(/^[:\s]+/, "");
+  const objective = extractBetween(afterColon, "", ["**Entradas:**", "**Saída:**"]);
+  return objective && objective.length > 0 ? objective : null;
+}
+
+function outputFromRawText(sub: HandoffSubCheckpoint): string | null {
+  if (!sub.text) return null;
+  return extractBetween(sub.text, "**Saída:**", ["**Fronteira:**", "**Entradas:**"]);
+}
+
+function objectSummary(sub: HandoffSubCheckpoint | null): HumanObjectSummary | null {
+  if (!sub) return null;
+  return {
+    label: `${sub.id} — ${sub.title}`,
+    objective: descriptionFromRawText(sub) ?? `Executar ${sub.title}.`,
+    output: outputFromRawText(sub),
+  };
+}
+
 function ciLine(snapshot: DecisionSnapshot): string {
   const pr = snapshot.facts.pullRequest;
   if (!pr) return "PR remoto nao observado.";
@@ -729,6 +793,8 @@ function deriveHumanSummary(
   flow: Omit<GovernedFlow, "humanSummary">
 ): HumanSummary {
   const pr = snapshot.facts.pullRequest;
+  const current = activeSubCheckpoint(snapshot.subCheckpoints);
+  const next = nextPendingSubCheckpoint(snapshot.subCheckpoints, current);
   const ready: string[] = [];
   const missing: string[] = [];
   const ciPending = (pr?.checks.pending ?? 0) > 0;
@@ -777,6 +843,8 @@ function deriveHumanSummary(
       `Objeto atual: ${currentSubCheckpointLabel(snapshot)}.`,
       ciLine(snapshot),
     ],
+    currentObject: objectSummary(current),
+    nextObject: objectSummary(next),
     ready,
     missing: [...new Set(missing)],
     nextAction: flow.recommended

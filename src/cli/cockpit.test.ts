@@ -113,6 +113,12 @@ describe("cockpit situado", () => {
     });
 
     expect(out).toMatch(/Próxima ação recomendada\n- Concluir ponto atual e iniciar o próximo/);
+    expect(out).toContain(
+      "- Recomendada — Concluir ponto atual e iniciar o próximo: `npm run flow -- decide --type finish-subcheckpoint --brief-only`"
+    );
+    expect(out).toContain(
+      "- Alternativa — Declarar readiness do sub-checkpoint ativo: `npm run flow -- decide --type mark-readiness --brief-only`"
+    );
     expect(out).toMatch(
       /npm run flow -- decide --type finish-subcheckpoint --decision finish --authorization explicit-human-decision --confirm/
     );
@@ -154,6 +160,16 @@ describe("cockpit situado", () => {
         recommended: null,
         humanSummary: {
           state: ["Estamos em checkpoint-co-flow-convergence."],
+          currentObject: {
+            label: "CO-10.1 — inventário real + modelo canônico",
+            objective: "Mapear fatos vivos e estados do fluxo governado.",
+            output: "Inventário falsificável do fluxo.",
+          },
+          nextObject: {
+            label: "CO-10.2 — confronto modelo × código",
+            objective: "Comparar o modelo com os comandos vivos.",
+            output: null,
+          },
           ready: ["A CI esta verde."],
           missing: ["Falta declarar readiness do sub-checkpoint ativo."],
           nextAction: "Declarar readiness do sub-checkpoint ativo",
@@ -164,6 +180,12 @@ describe("cockpit situado", () => {
     });
 
     expect(out).toMatch(/## Resumo simples\n- Estamos em checkpoint-co-flow-convergence\./);
+    expect(out).toContain("- Escopo em linguagem simples:");
+    expect(out).toContain("  - Agora: CO-10.1 — inventário real + modelo canônico");
+    expect(out).toContain("    - Objetivo: Mapear fatos vivos e estados do fluxo governado.");
+    expect(out).toContain("    - Entrega esperada: Inventário falsificável do fluxo.");
+    expect(out).toContain("  - Depois: CO-10.2 — confronto modelo × código");
+    expect(out).toContain("    - Objetivo: Comparar o modelo com os comandos vivos.");
     expect(out).toContain("- Proximo passo: Declarar readiness do sub-checkpoint ativo");
     expect(out).toContain("Falta declarar readiness do sub-checkpoint ativo.");
     expect(out.indexOf("## Resumo simples")).toBeLessThan(out.indexOf("## Estado atual"));

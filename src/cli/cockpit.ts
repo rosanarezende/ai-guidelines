@@ -93,6 +93,23 @@ export function renderHumanSummary(summary: HumanSummary): string {
   const lines: string[] = [];
   lines.push("## Resumo simples");
   for (const item of summary.state) lines.push(`- ${item}`);
+  if (summary.currentObject || summary.nextObject) {
+    lines.push("- Escopo em linguagem simples:");
+    if (summary.currentObject) {
+      lines.push(`  - Agora: ${summary.currentObject.label}`);
+      lines.push(`    - Objetivo: ${summary.currentObject.objective}`);
+      if (summary.currentObject.output) {
+        lines.push(`    - Entrega esperada: ${summary.currentObject.output}`);
+      }
+    }
+    if (summary.nextObject) {
+      lines.push(`  - Depois: ${summary.nextObject.label}`);
+      lines.push(`    - Objetivo: ${summary.nextObject.objective}`);
+      if (summary.nextObject.output) {
+        lines.push(`    - Entrega esperada: ${summary.nextObject.output}`);
+      }
+    }
+  }
   lines.push(`- Proximo passo: ${summary.nextAction}`);
   if (summary.command) lines.push(`- Para entender antes de aplicar: \`${summary.command}\``);
   if (summary.ready.length > 0) {
@@ -176,7 +193,10 @@ export function renderCockpit(model: CockpitModel): string {
     lines.push("- (nenhuma decisão mutante disponível agora)");
   } else {
     for (const item of available) {
-      lines.push(`- ${item.title}: \`${item.command ?? commandForDecision(item.id, false)}\``);
+      const role = recommended?.id === item.id ? "Recomendada" : "Alternativa";
+      lines.push(
+        `- ${role} — ${item.title}: \`${item.command ?? commandForDecision(item.id, false)}\``
+      );
     }
   }
   lines.push("");

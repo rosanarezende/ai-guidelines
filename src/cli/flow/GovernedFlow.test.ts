@@ -197,6 +197,50 @@ describe("GovernedFlow", () => {
     expect(new AdvanceSubcheckpointDefinition().detect(snapshot).status).toBe("blocked");
   });
 
+  it("HumanSummary explica o escopo do objeto atual e do proximo sub-checkpoint", () => {
+    const facts = coFlowFacts({
+      subCheckpoints: [
+        { id: "CO-10.1", title: "inventário", state: "done", line: 100 },
+        {
+          id: "CO-10.2",
+          title: "confronto modelo x codigo",
+          state: "in-progress",
+          line: 101,
+          text: "- [/] **CO-10.2 — confronto modelo x codigo**: comparar a maquina de estados canonica com os comandos vivos. **Entradas:** inventario, state.yml e comandos. **Saída:** matriz modelo x codigo com divergencias classificadas.",
+        },
+        {
+          id: "CO-10.3",
+          title: "correcao integral",
+          state: "pending",
+          line: 102,
+          text: "- [ ] **CO-10.3 — correcao integral**: corrigir divergencias reais ainda classificadas em CO-10.2 sem criar segunda SSOT. **Entradas:** matriz CO-10.2 atualizada. **Saída:** runtime/checks/docs convergindo em snapshot comum.",
+        },
+      ],
+    });
+    const snapshot = makeDecisionSnapshot({
+      facts,
+      checkpoint: "checkpoint-co-flow-convergence",
+      openFindings: [],
+      subCheckpoints: facts.subCheckpoints,
+      workingTreeState: "clean",
+      gateExists: false,
+    });
+
+    const summary = deriveGovernedFlow(snapshot).humanSummary;
+
+    expect(summary.currentObject).toEqual({
+      label: "CO-10.2 — confronto modelo x codigo",
+      objective: "comparar a maquina de estados canonica com os comandos vivos.",
+      output: "matriz modelo x codigo com divergencias classificadas.",
+    });
+    expect(summary.nextObject).toEqual({
+      label: "CO-10.3 — correcao integral",
+      objective:
+        "corrigir divergencias reais ainda classificadas em CO-10.2 sem criar segunda SSOT.",
+      output: "runtime/checks/docs convergindo em snapshot comum.",
+    });
+  });
+
   it("bloqueia readiness quando o sub-checkpoint ativo não tem commit de entrega após ativação", () => {
     const facts = coFlowFacts({
       subCheckpoints: [

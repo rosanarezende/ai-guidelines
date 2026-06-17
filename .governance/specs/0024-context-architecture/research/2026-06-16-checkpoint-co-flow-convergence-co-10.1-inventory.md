@@ -884,3 +884,47 @@ Estado de seguranca:
 - CO-10.5 nao foi iniciado;
 - a melhoria e somente de experiencia/derivacao de fluxo, mantendo
   `GovernedFlow`, `work`, `decide` e `CommandRegistry` como fontes de decisao.
+
+## Dogfood CO-10.4 — escopo do ponto atual precisa aparecer no wizard
+
+Friccao observada durante o dogfood do PR #43:
+
+- o wizard ja mostrava o sub-checkpoint ativo e o proximo por id (`CO-10.4`,
+  `CO-10.5`), mas nao explicava, em linguagem simples, o que cada ponto faz;
+- a pessoa precisava abrir `tasks.md` para entender o escopo real de
+  "dogfood ponta a ponta" e "falsificacao + Human Gate";
+- a lista de acoes disponiveis mostrava "concluir ponto atual" e "declarar
+  readiness" no mesmo nivel, sem deixar claro qual era a acao recomendada e
+  qual era uma alternativa menor;
+- isso enfraquecia o objetivo do `flow`: orientar a proxima acao sem exigir que
+  a humana leia o codigo ou o arquivo de tarefas.
+
+Correcao aplicada em CO-10.4:
+
+1. `HumanSummary` passou a carregar `currentObject` e `nextObject`.
+2. Esses objetos sao derivados do mesmo snapshot governado de sub-checkpoints,
+   reaproveitando o texto de `tasks.md` quando disponivel.
+3. O cockpit e o wizard mostram uma secao "Escopo em linguagem simples" com:
+   - "Agora": id, titulo, objetivo e entrega esperada do ponto ativo;
+   - "Depois": id, titulo, objetivo e entrega esperada do proximo ponto.
+4. A lista de acoes disponiveis agora separa "Recomendada" de "Alternativa".
+
+Falsificacao adicionada:
+
+- teste prova que `GovernedFlow` extrai objetivo e saida do objeto atual e do
+  proximo sub-checkpoint;
+- teste prova que `renderHumanSummary` mostra a secao de escopo antes dos
+  detalhes tecnicos;
+- teste prova que o wizard herda o mesmo `HumanSummary`, sem criar regra
+  propria;
+- teste prova que a lista de acoes disponiveis distingue a acao recomendada da
+  alternativa.
+
+Estado de seguranca:
+
+- nenhuma decisao mutante foi executada;
+- nenhum Ready, Human Gate, gate artifact, merge ou advance-subcheckpoint foi
+  executado;
+- CO-10.5 nao foi iniciado;
+- a melhoria e uma correcao de explicabilidade do fluxo, nao uma mudanca de
+  topologia ou de autoridade.
