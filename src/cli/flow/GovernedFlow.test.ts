@@ -286,6 +286,30 @@ describe("GovernedFlow", () => {
     expect(action.availability.reasons.join(" ")).toMatch(/pendente/);
   });
 
+  it("HumanSummary traduz CI pendente como proxima acao de espera", () => {
+    const facts = coFlowFacts({
+      pullRequest: {
+        ...makeHandoffFacts().pullRequest!,
+        number: 43,
+        isDraft: true,
+        checks: { pass: 1, fail: 0, pending: 3 },
+        headRefOid: "abc1234",
+      },
+    });
+    const snapshot = makeDecisionSnapshot({
+      facts,
+      checkpoint: "checkpoint-co-flow-convergence",
+      openFindings: [],
+      subCheckpoints: facts.subCheckpoints,
+      workingTreeState: "clean",
+    });
+
+    const summary = deriveGovernedFlow(snapshot).humanSummary;
+
+    expect(summary.nextAction).toBe("Aguardar a CI terminar.");
+    expect(summary.missing).toContain("A CI tem 3 check(s) pendente(s).");
+  });
+
   it("Human Gate fica bloqueado antes de Ready e sem readiness terminal", () => {
     const facts = coFlowFacts();
     const snapshot = makeDecisionSnapshot({

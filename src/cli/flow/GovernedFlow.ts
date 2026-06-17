@@ -615,6 +615,8 @@ function deriveHumanSummary(
   const pr = snapshot.facts.pullRequest;
   const ready: string[] = [];
   const missing: string[] = [];
+  const ciPending = (pr?.checks.pending ?? 0) > 0;
+  const ciFailing = (pr?.checks.fail ?? 0) > 0;
 
   if (snapshot.openFindings.length === 0) ready.push("Os findings do checkpoint estao fechados.");
   else missing.push(`Ainda ha ${snapshot.openFindings.length} finding(s) aberto(s).`);
@@ -644,7 +646,11 @@ function deriveHumanSummary(
   } else if (flow.recommended?.id === "close-dispositions") {
     missing.push("Falta fechar findings revalidados.");
   } else if (flow.blocked.length > 0) {
-    missing.push(...flow.blocked.slice(0, 2).flatMap((a) => a.availability.reasons.slice(0, 2)));
+    const blockedReasons = flow.blocked
+      .slice(0, 2)
+      .flatMap((a) => a.availability.reasons.slice(0, 2))
+      .filter((reason) => !(ciPending && reason.includes("integração contínua")));
+    missing.push(...blockedReasons);
   }
 
   return {
@@ -657,7 +663,13 @@ function deriveHumanSummary(
     missing: [...new Set(missing)],
     nextAction: flow.recommended
       ? flow.recommended.title
-      : "Nenhuma decisao mutante esta disponivel agora.",
+      : snapshot.workingTreeState !== "clean"
+        ? "Finalizar as mudancas locais e deixar a working tree limpa."
+        : ciPending
+          ? "Aguardar a CI terminar."
+          : ciFailing
+            ? "Corrigir a CI antes de decidir."
+            : "Nenhuma decisao mutante esta disponivel agora.",
     command: flow.recommended?.command ?? null,
     forbidden: flow.forbidden.slice(0, 5),
   };
