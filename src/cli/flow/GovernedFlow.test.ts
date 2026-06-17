@@ -378,5 +378,8 @@ describe("GovernedFlow", () => {
     expect(decide.status).toBe("available");
     expect(flow.recommended?.id).toBe("open-next-node");
     expect(flow.recommended?.availability).toEqual(decide);
+    expect(flow.recommended?.mutatingCommand).toContain(
+      "--type open-next-node --decision open-node"
+    );
   });
 });

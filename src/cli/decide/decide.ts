@@ -36,6 +36,8 @@ import { DecisionRegistry, buildDecisionRegistry } from "./registry.js";
 import { findDecisionType } from "../../infrastructure/yaml/humanDecisionPolicyReader.js";
 import { DecisionListItem, renderBrief, renderDecisionList, renderPlanPreview } from "./render.js";
 import { HandoffOptions } from "../handoff.js";
+import type { StackOps } from "../../app/ports/StackOps.js";
+import { GhCli } from "../../infrastructure/git/GhCli.js";
 
 const defaultLogger: Logger = {
   info: (msg) => process.stdout.write(`${msg}\n`),
@@ -192,6 +194,18 @@ class NodeDecisionGitOps implements DecisionGitOps {
   push(): void {
     execFileSync("git", ["push"], { cwd: this.repoRoot, stdio: ["ignore", "pipe", "pipe"] });
   }
+  createBranch(branchName: string, startPoint: string): void {
+    execFileSync("git", ["checkout", "-b", branchName, startPoint], {
+      cwd: this.repoRoot,
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+  }
+  pushBranch(branchName: string): void {
+    execFileSync("git", ["push", "-u", "origin", branchName], {
+      cwd: this.repoRoot,
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+  }
 }
 
 // ── Dependências injetáveis ──────────────────────────────────────────────────
@@ -203,6 +217,7 @@ export interface DecideDeps {
   readonly remote?: HandoffOptions["remote"];
   readonly collect?: (repoRoot: string, options: DecisionSnapshotOptions) => DecisionSnapshot;
   readonly git?: DecisionGitOps;
+  readonly stack?: StackOps;
   readonly gitConfig?: GitConfigReader;
   readonly externalChecks?: DecisionSnapshotOptions["externalChecks"];
   /** Override de TTY para o modo interativo (default: process.stdin.isTTY). */
@@ -337,6 +352,7 @@ function buildApplyContext(
     logger,
     actor: resolveActor(snapshot, deps.gitConfig ?? nodeGitConfigReader),
     git: deps.git ?? new NodeDecisionGitOps(repoRoot),
+    stack: deps.stack ?? new GhCli(repoRoot),
     authorization: DECISION_AUTHORIZATION,
   };
 }

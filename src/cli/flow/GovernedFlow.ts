@@ -558,7 +558,9 @@ function commandFor(id: GovernedFlowActionId, mutating: boolean): string {
           ? "accept-all"
           : id === "human-gate"
             ? "approve"
-            : "<choice>";
+            : id === "open-next-node"
+              ? "open-node"
+              : "<choice>";
   return `npm run flow -- decide --type ${id} --decision ${decision} --authorization explicit-human-decision --confirm`;
 }
 
@@ -573,9 +575,7 @@ function action(
     title,
     availability,
     command: commandFor(id, false),
-    ...(id !== "pr-ready" && id !== "open-next-node"
-      ? { mutatingCommand: commandFor(id, true) }
-      : {}),
+    ...(id !== "pr-ready" ? { mutatingCommand: commandFor(id, true) } : {}),
     effect,
   };
 }
@@ -615,8 +615,8 @@ export function deriveGovernedFlow(snapshot: DecisionSnapshot): GovernedFlow {
       "cria gate artifact após decisão humana",
       "não executa merge nem transição automática",
     ]),
-    action("open-next-node", "Preparar abertura do próximo nó", openNextNode, [
-      "prepara a transição governada pós-Gate",
+    action("open-next-node", "Abrir o próximo nó planejado", openNextNode, [
+      "cria branch, PR Draft e reconcilia state/active/tasks",
       "não executa merge",
     ]),
   ];

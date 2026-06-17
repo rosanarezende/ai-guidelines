@@ -35,6 +35,17 @@ describe("humanDecisionPolicyReader [decide]", () => {
     expect(mr.requiresOwner).toBe(true);
   });
 
+  it("open-next-node declara abertura mutante do próximo nó sem autorizar merge/gate", () => {
+    const policy = parseHumanDecisionPolicy(REAL);
+    const open = findDecisionType(policy, "open-next-node")!;
+    expect(open.choices.map((c) => [c.id, c.mutating])).toContainEqual(["open-node", true]);
+    expect(open.consequences.join(" ")).toMatch(/PR Draft stacked/);
+    expect(open.notAuthorized.join(" ")).toMatch(/Fazer merge/);
+    expect(open.notAuthorized.join(" ")).toMatch(/Executar Human Gate/);
+    expect(open.publication.mixedDiff).toBe("forbidden");
+    expect(open.requiresOwner).toBe(true);
+  });
+
   it("close-dispositions declara 8 seções humanas + escolhas + limites", () => {
     const policy = parseHumanDecisionPolicy(REAL);
     const cd = findDecisionType(policy, "close-dispositions")!;

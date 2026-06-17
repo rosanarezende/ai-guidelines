@@ -496,7 +496,7 @@ export function deriveWorkNextAction(
         "open-next-node",
         availability.status === "available",
         availability.status === "available"
-          ? `Preparar a abertura do próximo nó planejado: ${facts.activeNode?.id ?? "nó atual"} → ${facts.nextPlannedNode?.id ?? "próximo nó"}.`
+          ? `Abrir governadamente o próximo nó planejado: ${facts.activeNode?.id ?? "nó atual"} → ${facts.nextPlannedNode?.id ?? "próximo nó"}.`
           : `Abertura do próximo nó ainda BLOQUEADA — \`decide\` não a classifica como disponível.`,
         [
           `gate do checkpoint ${object.checkpoint ?? "?"} = approved`,

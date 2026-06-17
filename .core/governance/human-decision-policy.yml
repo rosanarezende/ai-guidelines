@@ -252,15 +252,15 @@ decision_types:
     technical_details: available
 
   open-next-node:
-    title: Preparar abertura do próximo nó
+    title: Abrir o próximo nó planejado
     purpose: >
-      Após Human Gate aprovado em um nó não-terminal, a owner prepara a
-      transição para o próximo PR stacked planejado. Esta decisão cobre o
-      briefing/preflight governado da abertura do próximo nó: qual nó será
-      aberto, qual branch/base/head serão usados, quais artefatos precisarão ser
-      atualizados e quais comandos humanos continuam proibidos. Nesta fase ela
-      não executa merge, não abre CO-5 fora da topologia, não altera main e não
-      cria Human Gate.
+      Após Human Gate aprovado em um nó não-terminal, a owner abre o próximo PR
+      stacked planejado por transição governada. Esta decisão cria/publica a
+      branch do próximo nó, abre um PR Draft factual, registra o número real do
+      PR em state.yml, atualiza active.yml, materializa o próximo checkpoint em
+      tasks.md, comita o efeito exclusivo e faz push normal. Ela NÃO executa
+      merge, NÃO abre nó fora da topologia, NÃO altera main, NÃO cria Human Gate
+      e NÃO implementa o próximo nó.
     requires_owner: true
     sections:
       - key: completed_node
@@ -276,9 +276,9 @@ decision_types:
       - key: not_authorized
         heading: O que esta decisão NÃO autoriza?
     choices:
-      - id: prepare-plan
-        label: Preparar plano de abertura do próximo nó
-        mutating: false
+      - id: open-node
+        label: Abrir o próximo nó planejado
+        mutating: true
       - id: keep
         label: Manter o nó atual como ativo por enquanto
         mutating: false
@@ -289,8 +289,10 @@ decision_types:
         label: Cancelar (não escreve nada)
         mutating: false
     consequences:
-      - O sistema passa a oferecer uma superfície governada para a transição pós-Gate.
-      - A abertura efetiva do próximo PR continua exigindo comando/autoridade explícitos.
+      - A branch do próximo nó será criada e publicada sobre o HEAD aprovado.
+      - Um PR Draft stacked será aberto contra a branch do nó aprovado.
+      - state.yml, active.yml e tasks.md serão reconciliados com o número factual do PR.
+      - O efeito governado será registrado em commit exclusivo e push normal.
       - "`work`, `decide` e cockpit deixam de divergir quando o gate já está aprovado."
     not_authorized:
       - Fazer merge.

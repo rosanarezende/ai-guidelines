@@ -514,7 +514,7 @@ Falha observada depois da transicao governada CO-10.2 -> CO-10.3:
 - isso repetia a classe central de `co-flow-convergence`: o estado parecia pronto
   por criterios globais do checkpoint, nao por evidencia do sub-checkpoint ativo.
 
-Correcao aplicada em CO-10.3:
+Correcao aplicada na primeira fatia de CO-10.3:
 
 1. A derivacao comum de readiness passou a consumir uma evidencia de entrega do
    sub-checkpoint ativo.
@@ -560,22 +560,34 @@ Falha observada no proprio historico do PR #43:
 Correcao aplicada em CO-10.3:
 
 1. `GovernedFlow` ganhou a acao canonica `open-next-node`.
-2. `human-decision-policy.yml` ganhou o tipo `open-next-node` como
-   briefing/preflight governado da transicao pos-Gate.
+2. `human-decision-policy.yml` ganhou o tipo `open-next-node` como transicao
+   pos-Gate governada.
 3. `DecisionRegistry` registra `OpenNextNodeDefinition`.
 4. `work` passa a derivar a acao pos-Gate pela mesma disponibilidade usada por
    `decide`, em vez de emitir apenas uma frase sem comando canonico.
 5. O briefing nomeia o no concluido, o proximo no planejado, a branch pretendida,
    os efeitos esperados e as acoes que continuam proibidas.
 
-Limite deliberado desta fatia:
+Limite identificado depois desta fatia:
 
-- `open-next-node` ainda e briefing/preflight nao-mutante;
-- ele nao cria branch, nao cria PR, nao escreve `state.yml`, nao regenera
-  `active.yml` e nao materializa `tasks.md`;
-- esses efeitos precisam entrar como transacao governada propria antes do Human
-  Gate deste PR, para que uma futura transicao de no nao volte a depender de
+- `open-next-node` ainda havia nascido como briefing/preflight nao-mutante;
+- ele nao criava branch, nao criava PR, nao escrevia `state.yml`, nao regenerava
+  `active.yml` e nao materializava `tasks.md`;
+- portanto, a proxima transicao de no ainda poderia voltar a depender de
   orquestracao informal.
+
+Correcao complementar aplicada em CO-10.3:
+
+1. `open-next-node` passou a ter escolha mutante `open-node`.
+2. A transicao agora e uma transacao governada:
+   `snapshot -> briefing -> preview -> confirmacao -> branch remota -> PR Draft factual -> state.yml/active.yml/tasks.md -> commit exclusivo -> push normal`.
+3. O numero do PR deixa de ser inferido: o efeito abre o PR Draft primeiro e
+   usa o numero retornado pelo GitHub para atualizar `state.yml` e `tasks.md`.
+4. A aplicacao valida working tree limpa antes do efeito e `mixed_diff: forbidden`
+   antes do commit.
+5. O efeito permitido e restrito a `state.yml`, `.governance/runtime/specs/active.yml`
+   e `tasks.md`; `main`, merge, Ready, Human Gate e implementacao do proximo no
+   permanecem fora do escopo.
 
 Falsificacao adicionada:
 
@@ -583,15 +595,23 @@ Falsificacao adicionada:
   planejado sem PR, `open-next-node` fica disponivel;
 - teste prova bloqueios por PR Draft/CI pendente e por proximo no que ja declara
   PR;
-- teste prova que o plano `prepare-plan` e nao-mutante e preserva
-  `state.yml`, `tasks.md`, `active.yml`, branch e PR;
+- teste prova que o plano `open-node` e mutante e declara branch, PR factual,
+  `state.yml`, `active.yml` e `tasks.md`;
+- testes puros provam `state.yml` movendo o no ativo para `concluded`, o proximo
+  no para `active` com PR factual, `active.yml` apontando para a nova branch e
+  `tasks.md` materializando o proximo checkpoint;
+- teste de aplicacao por fakes prova criacao de branch, publicacao de branch,
+  criacao de PR Draft, escrita dos artefatos governados, commit exclusivo e push;
+- testes negativos provam bloqueio por working tree suja e por mixed diff fora
+  dos artefatos esperados;
 - teste de `GovernedFlow` prova que o recomendado pos-Gate e `open-next-node`;
 - teste de `work` prova que gate aprovado nao fica mais sem decisao governada.
 
 Estado de seguranca:
 
 - nenhum Human Gate, Ready, merge, advance-subcheckpoint ou abertura de novo PR
-  foi executado por esta correcao;
+  real foi executado por esta correcao;
 - `open-next-node` nao autoriza implementacao do proximo no;
-- o comando so fecha a divergencia work/decide/cockpit para a leitura e
-  preparacao da transicao pos-Gate.
+- o comando fecha a divergencia work/decide/cockpit para leitura e execucao
+  governada da transicao pos-Gate, mas continua exigindo confirmacao humana
+  explicita para qualquer mutacao real.

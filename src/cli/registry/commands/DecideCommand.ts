@@ -34,6 +34,7 @@ export class DecideCommand implements Command<DecideArgs> {
     "decide --type close-dispositions --technical",
     "decide --type mark-readiness --decision mark-ready --authorization explicit-human-decision --confirm",
     "decide --type close-dispositions --decision accept-all --authorization explicit-human-decision --confirm",
+    "decide --type open-next-node --decision open-node --authorization explicit-human-decision --confirm",
   ];
 
   constructor(private readonly runFn: RunDecideFn = runDecide) {}
