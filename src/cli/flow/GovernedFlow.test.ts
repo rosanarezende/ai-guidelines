@@ -182,6 +182,41 @@ describe("GovernedFlow", () => {
     expect(new AdvanceSubcheckpointDefinition().detect(snapshot).status).toBe("blocked");
   });
 
+  it("bloqueia readiness quando o sub-checkpoint ativo não tem commit de entrega após ativação", () => {
+    const facts = coFlowFacts({
+      subCheckpoints: [
+        { id: "CO-10.1", title: "inventário", state: "done", line: 100 },
+        { id: "CO-10.2", title: "confronto modelo x codigo", state: "done", line: 101 },
+        { id: "CO-10.3", title: "correcao integral", state: "in-progress", line: 102 },
+      ],
+    });
+    const snapshot = makeDecisionSnapshot({
+      facts,
+      checkpoint: "checkpoint-co-flow-convergence",
+      openFindings: [],
+      subCheckpoints: facts.subCheckpoints,
+      workingTreeState: "clean",
+      gateExists: false,
+      subCheckpointDeliveryEvidence: {
+        status: "missing",
+        activeId: "CO-10.3",
+        activationCommit: "bc9278b",
+        reason:
+          "CO-10.3 acabou de ser ativado e ainda não há commit de entrega depois da ativação.",
+      },
+    });
+
+    const flow = deriveGovernedFlow(snapshot);
+    const mark = new MarkReadinessDefinition().detect(snapshot);
+
+    expect(mark.status).toBe("blocked");
+    expect(mark.reasons.join(" ")).toMatch(/ainda não há commit de entrega/);
+    expect(flow.recommended?.id).not.toBe("mark-readiness");
+    expect(
+      flow.blocked.find((a) => a.id === "mark-readiness")?.availability.reasons.join(" ")
+    ).toMatch(/CO-10\.3 acabou de ser ativado/);
+  });
+
   it("work e decide bloqueiam advance sem readiness", () => {
     const facts = coFlowFacts();
     const snapshot = makeDecisionSnapshot({

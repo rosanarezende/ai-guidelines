@@ -502,3 +502,44 @@ Resultado pretendido:
   `update --providers <lista>`;
 - a UX interativa vira uma projecao do mesmo modelo de fluxo, nao uma nova
   fonte de verdade.
+
+## Dogfood CO-10.3 — readiness nao nasce no mesmo commit de ativacao
+
+Falha observada depois da transicao governada CO-10.2 -> CO-10.3:
+
+- CO-10.3 foi ativado por `advance-subcheckpoint`;
+- nenhum trabalho de CO-10.3 existia depois do commit de ativacao;
+- ainda assim, `npm run flow -- work` projetou readiness como proxima acao
+  disponivel, porque `mark-readiness` considerava apenas findings/reviews/CI/tree;
+- isso repetia a classe central de `co-flow-convergence`: o estado parecia pronto
+  por criterios globais do checkpoint, nao por evidencia do sub-checkpoint ativo.
+
+Correcao aplicada em CO-10.3:
+
+1. A derivacao comum de readiness passou a consumir uma evidencia de entrega do
+   sub-checkpoint ativo.
+2. A evidencia localiza no Git o commit que ativou o sub-checkpoint atual em
+   `tasks.md`.
+3. Readiness fica bloqueada enquanto nao existir pelo menos um commit posterior
+   a essa ativacao.
+4. `work`, `decide`, cockpit e wizard consomem a mesma disponibilidade derivada.
+
+Falsificacao adicionada:
+
+- teste com repo Git temporario prova que sub-checkpoint recem-ativado fica sem
+  evidencia de entrega;
+- teste com commit posterior prova que a evidencia passa a existir;
+- teste de `GovernedFlow` prova que `mark-readiness` fica bloqueado para
+  CO-10.3 recem-ativado;
+- dogfood real: `npm run flow -- decide --type mark-readiness --brief-only`
+  agora bloqueia por "CO-10.3 acabou de ser ativado e ainda nao ha commit de
+  entrega depois da ativacao".
+
+Fronteira preservada:
+
+- o bloqueio nao substitui os demais guardas de seguranca; ele soma uma
+  precondicao factual de entrega;
+- nenhum Ready, Human Gate, merge ou advance-subcheckpoint foi executado por
+  esta correcao;
+- depois que esta propria correcao for commitada, ela passa a ser o primeiro
+  commit de entrega de CO-10.3.

@@ -193,6 +193,12 @@ export function makeDecisionSnapshot(over: Partial<DecisionSnapshot> = {}): Deci
     gateExists: false,
     gateFile: null,
     subCheckpoints: over.subCheckpoints ?? makeSubCheckpoints(),
+    subCheckpointDeliveryEvidence: {
+      status: "present",
+      activeId: "CO-3.1",
+      activationCommit: "aaaaaaa",
+      commitsAfterActivation: 1,
+    },
     nextPlannedNode: facts.nextPlannedNode,
     prReady: null,
     gateDecidability: null,

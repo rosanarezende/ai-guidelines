@@ -58,6 +58,10 @@ import {
 import type { DecisionAvailability } from "./decide/model.js";
 import { ADVANCE_SUBCHECKPOINT_ID, deriveAdvanceEligibility } from "./decide/advanceEligibility.js";
 import { deriveMarkReadinessAvailability } from "./flow/GovernedFlow.js";
+import {
+  collectSubCheckpointDeliveryEvidence,
+  SubCheckpointDeliveryEvidence,
+} from "./flow/subCheckpointDeliveryEvidence.js";
 
 export interface Logger {
   info: (msg: string) => void;
@@ -910,7 +914,8 @@ function collectMarkReadinessEligibility(
   findings: readonly WorkFinding[],
   workingTreeState: WorkingTreeState,
   consolidationErrors: readonly string[],
-  policyDeclared: boolean
+  policyDeclared: boolean,
+  deliveryEvidence: SubCheckpointDeliveryEvidence
 ): DecisionAvailability {
   const lc = facts.lifecycle;
   const pr = facts.pullRequest;
@@ -939,6 +944,7 @@ function collectMarkReadinessEligibility(
     ciFail: pr?.checks.fail ?? 0,
     ciPending: pr?.checks.pending ?? 0,
     gateExists: lc?.gateDecision != null,
+    deliveryEvidence,
   });
 }
 
@@ -996,12 +1002,27 @@ export function collectWorkBrief(
     discoverErrors.map(String),
     advanceTypeDeclared(repoRoot)
   );
+  const activeSubCheckpoints = facts.subCheckpoints.filter((s) => s.state === "in-progress");
+  const deliveryEvidence =
+    activeSubCheckpoints.length === 1
+      ? collectSubCheckpointDeliveryEvidence(
+          repoRoot,
+          `${facts.spec.path}/tasks.md`,
+          activeSubCheckpoints[0].id,
+          facts.git.head ?? "HEAD"
+        )
+      : {
+          status: "unknown" as const,
+          activeId: activeSubCheckpoints[0]?.id ?? "(sem ativo)",
+          reason: "Não há sub-checkpoint ativo inequívoco para comprovar entrega.",
+        };
   const markReadinessEligibility = collectMarkReadinessEligibility(
     facts,
     findings,
     freshness.workingTreeState,
     discoverErrors.map(String),
-    advanceTypeDeclared(repoRoot)
+    advanceTypeDeclared(repoRoot),
+    deliveryEvidence
   );
   const brief = deriveWorkBrief({
     facts,

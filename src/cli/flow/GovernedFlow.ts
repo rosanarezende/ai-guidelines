@@ -9,6 +9,7 @@ import {
   type AdvanceEligibilityFacts,
 } from "../decide/advanceEligibility.js";
 import type { ReadyCheckSnapshot } from "../prReadyCheck.js";
+import type { SubCheckpointDeliveryEvidence } from "./subCheckpointDeliveryEvidence.js";
 
 export type GovernedFlowActionId =
   | "close-dispositions"
@@ -49,6 +50,7 @@ export interface MarkReadinessFacts {
   readonly ciFail: number;
   readonly ciPending: number;
   readonly gateExists: boolean;
+  readonly deliveryEvidence: SubCheckpointDeliveryEvidence;
 }
 
 export interface HumanGateFacts {
@@ -152,6 +154,7 @@ export function markReadinessFactsFromDecisionSnapshot(
     ciFail: pr?.checks.fail ?? 0,
     ciPending: pr?.checks.pending ?? 0,
     gateExists: snapshot.gateExists || snapshot.facts.lifecycle?.gateDecision != null,
+    deliveryEvidence: snapshot.subCheckpointDeliveryEvidence,
   };
 }
 
@@ -207,6 +210,9 @@ export function deriveMarkReadinessAvailability(f: MarkReadinessFacts): Decision
   }
   if (f.gateExists) {
     reasons.push("O gate do checkpoint já foi registrado — readiness interna não se aplica.");
+  }
+  if (f.deliveryEvidence.status !== "present") {
+    reasons.push(f.deliveryEvidence.reason);
   }
   if (reasons.length > 0) return { status: "blocked", reasons };
   return {
