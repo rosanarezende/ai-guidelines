@@ -928,3 +928,49 @@ Estado de seguranca:
 - CO-10.5 nao foi iniciado;
 - a melhoria e uma correcao de explicabilidade do fluxo, nao uma mudanca de
   topologia ou de autoridade.
+
+## Dogfood CO-10.4 — primeira tela do wizard deve ser legivel no celular
+
+Friccao observada durante o dogfood do PR #43:
+
+- a primeira tela do `npm run flow` ainda renderizava o resumo como Markdown
+  compacto dentro do `note` do Clack;
+- em telas estreitas, linhas longas de objetivo/entrega quebravam de forma ruim
+  e pareciam um bloco denso;
+- o status dizia apenas que havia "2 acoes disponiveis", mas nao separava a
+  acao recomendada da alternativa;
+- o menu iniciava por "Ver cockpit completo", mesmo quando havia uma proxima
+  acao recomendada pelo modelo governado.
+
+Correcao aplicada em CO-10.4:
+
+1. O wizard passou a usar um renderer proprio, ainda derivado do mesmo
+   `HumanSummary`, com blocos visuais: `ESTADO`, `AGORA`, `DEPOIS`, `PROXIMA
+ACAO RECOMENDADA`, `JA ESTA OK`, `AINDA FALTA` e `NAO FAZER AGORA`.
+2. O texto longo e quebrado antes de entrar no Clack, reduzindo quebras ruins em
+   telas estreitas.
+3. O status visual agora nomeia:
+   - a acao recomendada;
+   - cada alternativa disponivel.
+4. O menu principal coloca "Continuar: <acao recomendada>" como primeira opcao
+   quando ela existe.
+5. A alternativa "Declarar readiness" aparece como briefing explicito, sem
+   aplicar mutacao.
+
+Falsificacao adicionada:
+
+- teste prova que o menu comeca pela acao recomendada e lista a alternativa
+  separadamente;
+- teste prova que a alternativa abre `decide --type mark-readiness --brief-only`
+  sem aplicar mutacao;
+- teste prova que o resumo inicial contem os blocos visuais em vez de Markdown
+  compacto;
+- teste prova que o status do wizard nomeia recomendada e alternativa.
+
+Estado de seguranca:
+
+- nenhuma decisao mutante foi executada;
+- nenhum Ready, Human Gate, gate artifact, merge ou advance-subcheckpoint foi
+  executado;
+- CO-10.5 nao foi iniciado;
+- a mudanca permanece restrita a apresentacao e explicabilidade do wizard.

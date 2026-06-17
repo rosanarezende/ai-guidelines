@@ -2,13 +2,15 @@ import { existsSync } from "node:fs";
 import path from "node:path";
 
 import { isPromptCancelled, Prompts } from "../app/ports/Prompts.js";
-import { CockpitModel, collectCockpitModel, renderCockpit, renderHumanSummary } from "./cockpit.js";
+import { CockpitModel, collectCockpitModel, renderCockpit } from "./cockpit.js";
+import type { HumanObjectSummary, HumanSummary } from "./flow/GovernedFlow.js";
 import { CommandRegistry } from "./registry/CommandRegistry.js";
 import { CommandContext, Logger } from "./registry/Command.js";
 
 export type FlowMenuValue =
   | "cockpit"
   | "next"
+  | "alternative"
   | "validate"
   | "decisions"
   | "blockers"
@@ -31,14 +33,24 @@ export function buildFlowMenu(model: CockpitModel): ReadonlyArray<{
   readonly disabled?: boolean;
 }> {
   const recommended = model.flow?.recommended;
+  const alternative = firstAlternative(model);
   return [
-    { name: "Ver cockpit completo", value: "cockpit" },
     {
-      name: "Continuar próxima ação recomendada",
+      name: recommended ? `Continuar: ${recommended.title}` : "Continuar próxima ação",
       value: "next",
-      hint: recommended?.title ?? "sem ação mutante disponível agora",
-      disabled: recommended === undefined,
+      hint: recommended ? "recomendada pelo modelo governado" : "sem ação mutante disponível agora",
+      disabled: !recommended,
     },
+    ...(alternative
+      ? [
+          {
+            name: `Ver alternativa: ${alternative.title}`,
+            value: "alternative" as const,
+            hint: "abre briefing; não aplica nada",
+          },
+        ]
+      : []),
+    { name: "Ver cockpit completo", value: "cockpit" },
     { name: "Validar minhas mudanças", value: "validate" },
     { name: "Ver decisões disponíveis", value: "decisions" },
     { name: "Entender bloqueios atuais", value: "blockers" },
@@ -51,7 +63,7 @@ export function buildFlowMenu(model: CockpitModel): ReadonlyArray<{
 }
 
 export function renderFlowSummary(model: CockpitModel): string {
-  if (model.flow?.humanSummary) return renderHumanSummary(model.flow.humanSummary);
+  if (model.flow?.humanSummary) return renderWizardHumanSummary(model.flow.humanSummary);
 
   const facts = model.work.snapshot.collected.facts;
   const pr = facts.pullRequest;
@@ -67,6 +79,94 @@ export function renderFlowSummary(model: CockpitModel): string {
     `próxima ação: ${model.flow?.recommended?.title ?? model.work.brief.nextAction.description}`,
   ];
   return lines.join("\n");
+}
+
+function firstAlternative(model: CockpitModel): CockpitModel["decisions"][number] | null {
+  const recommended = model.flow?.recommended;
+  const available =
+    model.flow?.available ?? model.decisions.filter((d) => d.availability.status === "available");
+  return available.find((action) => action.id !== recommended?.id) ?? null;
+}
+
+function wrapText(value: string, indent: string, width = 74): string[] {
+  const words = value.split(/\s+/).filter(Boolean);
+  const lines: string[] = [];
+  let current = "";
+  for (const word of words) {
+    const candidate = current ? `${current} ${word}` : word;
+    if (candidate.length > width && current) {
+      lines.push(`${indent}${current}`);
+      current = word;
+    } else {
+      current = candidate;
+    }
+  }
+  if (current) lines.push(`${indent}${current}`);
+  return lines;
+}
+
+function wrapBullet(value: string, width = 70): string[] {
+  const wrapped = wrapText(value, "", width);
+  return wrapped.map((line, index) => `${index === 0 ? "  - " : "    "}${line}`);
+}
+
+function pushWrapped(lines: string[], label: string, value: string | null, indent = "  "): void {
+  if (!value) return;
+  lines.push(`${indent}${label}`);
+  lines.push(...wrapText(value, `${indent}  `, 66));
+}
+
+function renderObjectBlock(
+  lines: string[],
+  title: "AGORA" | "DEPOIS",
+  object: HumanObjectSummary | null
+): void {
+  if (!object) return;
+  lines.push(title);
+  lines.push(`  ${object.label}`);
+  lines.push("");
+  pushWrapped(lines, "Objetivo:", object.objective);
+  pushWrapped(lines, "Entrega:", object.output);
+  lines.push("");
+}
+
+function renderWizardHumanSummary(summary: HumanSummary): string {
+  const lines: string[] = [];
+  lines.push("ESTADO");
+  for (const item of summary.state) {
+    lines.push(...wrapText(item, "  ", 74));
+  }
+  lines.push("");
+
+  renderObjectBlock(lines, "AGORA", summary.currentObject);
+  renderObjectBlock(lines, "DEPOIS", summary.nextObject);
+
+  lines.push("PRÓXIMA AÇÃO RECOMENDADA");
+  lines.push(...wrapText(summary.nextAction, "  ", 70));
+  if (summary.command) {
+    lines.push("  Para entender antes de aplicar:");
+    lines.push(`  ${summary.command}`);
+  }
+  lines.push("");
+
+  if (summary.ready.length > 0) {
+    lines.push("JÁ ESTÁ OK");
+    for (const item of summary.ready) lines.push(...wrapBullet(item));
+    lines.push("");
+  }
+
+  if (summary.missing.length > 0) {
+    lines.push("AINDA FALTA");
+    for (const item of summary.missing) lines.push(...wrapBullet(item));
+    lines.push("");
+  }
+
+  if (summary.forbidden.length > 0) {
+    lines.push("NÃO FAZER AGORA");
+    for (const item of summary.forbidden) lines.push(...wrapBullet(item));
+  }
+
+  return lines.join("\n").trimEnd();
 }
 
 export function renderBlockedActions(model: CockpitModel): string {
@@ -111,6 +211,8 @@ export async function runFlowWizard(
           return 0;
         }
         return runRecommendedAction(model, registry, context, prompts);
+      case "alternative":
+        return runAlternativeAction(model, registry, context);
       case "validate":
         return runValidationSection(registry, context, prompts);
       case "decisions":
@@ -145,12 +247,18 @@ function renderActionStatus(model: CockpitModel, prompts: Prompts): void {
   const available = model.flow?.available ?? [];
   const blocked = model.flow?.blocked ?? [];
   const forbidden = model.flow?.forbidden ?? [];
-  void prompts.status?.(
-    available.length > 0 ? "success" : "info",
-    available.length > 0
-      ? `${available.length} ação(ões) disponível(is) pelo modelo governado.`
-      : "Nenhuma ação mutante disponível agora."
-  );
+  const recommended = model.flow?.recommended ?? null;
+  const alternatives = available.filter((action) => action.id !== recommended?.id);
+  if (recommended) {
+    void prompts.status?.("success", `Recomendada: ${recommended.title}.`);
+  } else if (available.length > 0) {
+    void prompts.status?.("success", `${available.length} ação(ões) disponível(is).`);
+  } else {
+    void prompts.status?.("info", "Nenhuma ação mutante disponível agora.");
+  }
+  for (const alternative of alternatives) {
+    void prompts.status?.("info", `Alternativa disponível: ${alternative.title}.`);
+  }
   if (blocked.length > 0) {
     void prompts.status?.("warn", `${blocked.length} ação(ões) bloqueada(s) com motivo explícito.`);
   }
@@ -194,6 +302,17 @@ async function runRecommendedAction(
     return 0;
   }
   return (await registry.dispatch(["decide"], context)).exitCode;
+}
+
+async function runAlternativeAction(
+  model: CockpitModel,
+  registry: CommandRegistry,
+  context: CommandContext
+): Promise<number> {
+  const alternative = firstAlternative(model);
+  if (!alternative) return 0;
+  return (await registry.dispatch(["decide", "--type", alternative.id, "--brief-only"], context))
+    .exitCode;
 }
 
 async function runValidationSection(

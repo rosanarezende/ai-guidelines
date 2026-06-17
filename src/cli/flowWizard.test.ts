@@ -18,8 +18,11 @@ class CollectingLogger implements Logger {
 }
 
 class ScriptedPrompts implements Prompts {
-  readonly selectCalls: Array<{ readonly message: string; readonly values: readonly string[] }> =
-    [];
+  readonly selectCalls: Array<{
+    readonly message: string;
+    readonly values: readonly string[];
+    readonly names: readonly string[];
+  }> = [];
   readonly notes: string[] = [];
   readonly outros: string[] = [];
   readonly cancels: string[] = [];
@@ -37,6 +40,7 @@ class ScriptedPrompts implements Prompts {
     this.selectCalls.push({
       message: options.message,
       values: options.choices.map((choice) => String(choice.value)),
+      names: options.choices.map((choice) => String((choice as { name?: string }).name ?? "")),
     });
     const selected = this.selections[this.index++] ?? String(options.choices[0]?.value ?? "");
     if (selected === "__cancel__") {
@@ -122,6 +126,24 @@ function model(): CockpitModel {
       checks: { pass: 5, fail: 0, pending: 0 },
     },
   });
+  const recommendedAction = {
+    id: "finish-subcheckpoint" as const,
+    title: "Concluir ponto atual e iniciar o próximo",
+    availability: { status: "available" as const, reasons: [] },
+    command: "npm run flow -- decide --type finish-subcheckpoint --brief-only",
+    mutatingCommand:
+      "npm run flow -- decide --type finish-subcheckpoint --decision finish --authorization explicit-human-decision --confirm",
+    effect: ["altera somente tasks.md"],
+  };
+  const alternativeAction = {
+    id: "mark-readiness" as const,
+    title: "Declarar readiness do sub-checkpoint ativo",
+    availability: { status: "available" as const, reasons: [] },
+    command: "npm run flow -- decide --type mark-readiness --brief-only",
+    mutatingCommand:
+      "npm run flow -- decide --type mark-readiness --decision mark-ready --authorization explicit-human-decision --confirm",
+    effect: ["altera somente tasks.md"],
+  };
   return {
     work: {
       snapshot: {
@@ -144,7 +166,7 @@ function model(): CockpitModel {
     decisions: [],
     flow: {
       actions: [],
-      available: [],
+      available: [recommendedAction, alternativeAction],
       blocked: [
         {
           id: "human-gate",
@@ -155,15 +177,7 @@ function model(): CockpitModel {
         },
       ],
       forbidden: ["Fazer merge"],
-      recommended: {
-        id: "finish-subcheckpoint",
-        title: "Concluir ponto atual e iniciar o próximo",
-        availability: { status: "available", reasons: [] },
-        command: "npm run flow -- decide --type finish-subcheckpoint --brief-only",
-        mutatingCommand:
-          "npm run flow -- decide --type finish-subcheckpoint --decision finish --authorization explicit-human-decision --confirm",
-        effect: ["altera somente tasks.md"],
-      },
+      recommended: recommendedAction,
       humanSummary: {
         state: [
           "Estamos em checkpoint-co-flow-convergence.",
@@ -192,11 +206,13 @@ function model(): CockpitModel {
 
 describe("flow wizard", () => {
   it("menu principal expõe cockpit/provisioning e não lista providers como ação", () => {
-    const values = buildFlowMenu(model()).map((item) => item.value);
+    const menu = buildFlowMenu(model());
+    const values = menu.map((item) => item.value);
     expect(values).toEqual(
       expect.arrayContaining([
         "cockpit",
         "next",
+        "alternative",
         "validate",
         "decisions",
         "blockers",
@@ -204,6 +220,9 @@ describe("flow wizard", () => {
         "provisioning",
       ])
     );
+    expect(values.slice(0, 3)).toEqual(["next", "alternative", "cockpit"]);
+    expect(menu[0].name).toBe("Continuar: Concluir ponto atual e iniciar o próximo");
+    expect(menu[1].name).toBe("Ver alternativa: Declarar readiness do sub-checkpoint ativo");
     expect(values).not.toContain("providers");
   });
 
@@ -237,6 +256,20 @@ describe("flow wizard", () => {
     expect(decide.calls).toEqual([]);
   });
 
+  it("alternativa disponível abre briefing específico sem aplicar mutação", async () => {
+    const prompts = new ScriptedPrompts(["alternative"]);
+    const decide = spyCommand("decide");
+
+    const code = await runFlowWizard("/repo", new CollectingLogger(), {
+      prompts,
+      registry: registryWith(decide),
+      collectModel: () => model(),
+    });
+
+    expect(code).toBe(0);
+    expect(decide.calls).toEqual([["--type", "mark-readiness", "--brief-only"]]);
+  });
+
   it("resumo inicial do wizard vem do HumanSummary comum", async () => {
     const prompts = new ScriptedPrompts(["quit"]);
 
@@ -247,12 +280,20 @@ describe("flow wizard", () => {
     });
 
     expect(code).toBe(0);
-    expect(prompts.notes[0]).toContain("## Resumo simples");
-    expect(prompts.notes[0]).toContain("Escopo em linguagem simples");
-    expect(prompts.notes[0]).toContain("Agora: CO-10.2 — confronto modelo x codigo");
-    expect(prompts.notes[0]).toContain("Depois: CO-10.3 — correcao integral");
+    expect(prompts.notes[0]).toContain("ESTADO");
+    expect(prompts.notes[0]).toContain("AGORA");
+    expect(prompts.notes[0]).toContain("CO-10.2 — confronto modelo x codigo");
+    expect(prompts.notes[0]).toContain("DEPOIS");
+    expect(prompts.notes[0]).toContain("CO-10.3 — correcao integral");
+    expect(prompts.notes[0]).toContain("PRÓXIMA AÇÃO RECOMENDADA");
     expect(prompts.notes[0]).toContain(
       "Falta uma decisão única para concluir este ponto e iniciar o próximo."
+    );
+    expect(prompts.statuses).toContain(
+      "success:Recomendada: Concluir ponto atual e iniciar o próximo."
+    );
+    expect(prompts.statuses).toContain(
+      "info:Alternativa disponível: Declarar readiness do sub-checkpoint ativo."
     );
   });
 
