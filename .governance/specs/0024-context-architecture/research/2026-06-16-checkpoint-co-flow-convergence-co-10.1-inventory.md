@@ -816,3 +816,71 @@ Estado de seguranca:
 - a validacao intermediaria nao executa Ready, Human Gate, gate artifact, merge
   ou transicao de sub-checkpoint;
 - CO-10.5 nao foi iniciado por esta mudanca.
+
+## Dogfood CO-10.4 — wizard governado avancado com Clack
+
+Friccao observada durante o dogfood do PR #43:
+
+- `npm run flow` ja abria uma experiencia interativa, mas ainda parecia um menu
+  simples;
+- a pessoa precisava alternar mentalmente entre cockpit, work, decide,
+  validacao do diff e provisioning;
+- a proxima acao recomendada aparecia como uma opcao, mas sem briefing curto,
+  preview visual ou separacao clara entre acoes disponiveis, bloqueadas e
+  proibidas;
+- o wizard de provisioning usava selecoes planas para providers/features,
+  embora essas escolhas tenham grupos naturais;
+- isso enfraquecia o objetivo do `co-flow-convergence`: uma entrada humana
+  situada, guiada e derivada do mesmo modelo governado.
+
+Correcao aplicada em CO-10.4:
+
+1. A porta `Prompts` passou a expor affordances avancadas do Clack:
+   `taskList`, `taskLog`, `groupMultiselect` e mensagens de status.
+2. `ClackPrompts` virou o unico adapter interativo e apenas renderiza essas
+   affordances; ele nao decide readiness, CI, PR Ready, Human Gate ou proxima
+   acao.
+3. O wizard raiz passou a mostrar resumo simples, status de acoes
+   disponiveis/bloqueadas/proibidas e menu com a proxima acao destacada.
+4. "Continuar proxima acao recomendada" agora mostra briefing curto,
+   comando canonico e efeito permitido antes de delegar para `decide`.
+5. O wizard nao aplica decisao propria: quando a pessoa confirma, ele abre o
+   fluxo governado de `decide`.
+6. A secao "Validar minhas mudancas" permite rodar `validate changed` e
+   `validate changed --fix`, com confirmacao explicita para o caminho que pode
+   formatar arquivos.
+7. `init`, `adopt` e `update` continuam disponiveis via registry; `providers`
+   continua inexistente como comando.
+8. Providers e features passaram a usar selecao agrupada quando o prompt
+   suporta `groupMultiselect`.
+9. O wizard de `decide` passou a renderizar lista de decisoes, briefing,
+   preview e aplicacao com affordances Clack, mantendo a confirmacao final no
+   proprio `decide`.
+
+Falsificacao adicionada:
+
+- teste prova que `npm run flow` em non-TTY continua imprimindo cockpit
+  textual, sem prompt;
+- teste prova que o menu mostra a proxima acao, provisioning e validacao sem
+  listar `providers`;
+- teste prova que a proxima acao delega para `decide` e pode ser cancelada sem
+  mutacao;
+- teste prova que `validate changed` e `validate changed --fix` executam os
+  comandos corretos, com confirmacao para `--fix`;
+- teste prova que `init`/`adopt`/`update` permanecem no wizard e `providers`
+  nao volta como operacao;
+- teste prova que providers usam grupos de selecao e que a aplicacao do plano
+  mostra spinner;
+- teste prova que o adapter `ClackPrompts` delega `groupMultiselect`, `tasks`,
+  `taskLog` e status para as primitivas do Clack;
+- guard prova que `@inquirer/*`, `InquirerPrompts`, `/cli` legado e comando
+  `providers` nao podem voltar sem falha.
+
+Estado de seguranca:
+
+- nenhuma decisao mutante foi executada durante esta melhoria;
+- nenhum Ready, Human Gate, gate artifact, merge ou advance-subcheckpoint foi
+  executado;
+- CO-10.5 nao foi iniciado;
+- a melhoria e somente de experiencia/derivacao de fluxo, mantendo
+  `GovernedFlow`, `work`, `decide` e `CommandRegistry` como fontes de decisao.

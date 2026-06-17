@@ -44,6 +44,15 @@ export interface MultiSelectOptions<T = string> {
   readonly required?: boolean;
 }
 
+export interface GroupedMultiSelectOptions<T = string> {
+  readonly message: string;
+  readonly groups: Readonly<Record<string, ReadonlyArray<PromptChoice<T>>>>;
+  readonly defaultValues?: ReadonlyArray<T>;
+  readonly required?: boolean;
+  readonly maxItems?: number;
+  readonly groupSpacing?: number;
+}
+
 export interface InputOptions {
   readonly message: string;
   readonly default?: string;
@@ -62,11 +71,40 @@ export interface SpinnerOptions<T = void> {
   readonly task: () => T | Promise<T>;
 }
 
+export interface PromptTask {
+  readonly title: string;
+  readonly task: (
+    message: (value: string) => void
+  ) => string | Promise<string> | void | Promise<void>;
+}
+
+export interface TaskLogGroup {
+  message(message: string): void;
+  success(message: string): void;
+  error(message: string): void;
+}
+
+export interface TaskLog {
+  message(message: string): void;
+  group(name: string): TaskLogGroup;
+  success(message: string, options?: { readonly showLog?: boolean }): void;
+  error(message: string, options?: { readonly showLog?: boolean }): void;
+}
+
+export interface TaskLogOptions {
+  readonly title: string;
+  readonly limit?: number;
+  readonly retainLog?: boolean;
+}
+
+export type PromptStatusKind = "info" | "success" | "warn" | "error" | "step";
+
 type PromptRenderResult = void | Promise<void>;
 
 export interface Prompts {
   select<T = string>(options: SelectOptions<T>): Promise<T>;
   multiselect?<T = string>(options: MultiSelectOptions<T>): Promise<readonly T[]>;
+  groupMultiselect?<T = string>(options: GroupedMultiSelectOptions<T>): Promise<readonly T[]>;
   input(options: InputOptions): Promise<string>;
   /**
    * Prompt y/n. Cravado em `[DEC-0023-L01]` (Bloco L) — necessário para os
@@ -80,4 +118,7 @@ export interface Prompts {
   note?(message: string, title?: string): PromptRenderResult;
   cancel?(message: string): PromptRenderResult;
   spinner?<T = void>(options: SpinnerOptions<T>): Promise<T>;
+  taskList?(tasks: readonly PromptTask[]): Promise<void>;
+  taskLog?(options: TaskLogOptions): TaskLog;
+  status?(kind: PromptStatusKind, message: string): PromptRenderResult;
 }

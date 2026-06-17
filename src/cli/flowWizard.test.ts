@@ -23,9 +23,15 @@ class ScriptedPrompts implements Prompts {
   readonly notes: string[] = [];
   readonly outros: string[] = [];
   readonly cancels: string[] = [];
+  readonly statuses: string[] = [];
+  readonly taskTitles: string[] = [];
   private index = 0;
+  private confirmIndex = 0;
 
-  constructor(private readonly selections: readonly string[]) {}
+  constructor(
+    private readonly selections: readonly string[],
+    private readonly confirmations: readonly boolean[] = []
+  ) {}
 
   async select<T>(options: { message: string; choices: ReadonlyArray<{ value: T }> }): Promise<T> {
     this.selectCalls.push({
@@ -44,7 +50,7 @@ class ScriptedPrompts implements Prompts {
   }
 
   async confirm(): Promise<boolean> {
-    return false;
+    return this.confirmations[this.confirmIndex++] ?? false;
   }
 
   intro(): void {}
@@ -59,6 +65,24 @@ class ScriptedPrompts implements Prompts {
 
   cancel(message: string): void {
     this.cancels.push(message);
+  }
+
+  status(kind: string, message: string): void {
+    this.statuses.push(`${kind}:${message}`);
+  }
+
+  async taskList(
+    tasks: readonly {
+      readonly title: string;
+      readonly task: (
+        message: (value: string) => void
+      ) => string | Promise<string> | void | Promise<void>;
+    }[]
+  ): Promise<void> {
+    for (const task of tasks) {
+      this.taskTitles.push(task.title);
+      await task.task(() => undefined);
+    }
   }
 }
 
@@ -160,13 +184,21 @@ describe("flow wizard", () => {
   it("menu principal expõe cockpit/provisioning e não lista providers como ação", () => {
     const values = buildFlowMenu(model()).map((item) => item.value);
     expect(values).toEqual(
-      expect.arrayContaining(["cockpit", "next", "decisions", "blockers", "work", "provisioning"])
+      expect.arrayContaining([
+        "cockpit",
+        "next",
+        "validate",
+        "decisions",
+        "blockers",
+        "work",
+        "provisioning",
+      ])
     );
     expect(values).not.toContain("providers");
   });
 
   it("continuar próxima ação recomendada delega para decide sem regra própria", async () => {
-    const prompts = new ScriptedPrompts(["next"]);
+    const prompts = new ScriptedPrompts(["next"], [true]);
     const decide = spyCommand("decide");
     const logger = new CollectingLogger();
 
@@ -178,6 +210,21 @@ describe("flow wizard", () => {
 
     expect(code).toBe(0);
     expect(decide.calls).toEqual([[]]);
+    expect(prompts.notes.join("\n")).toContain("Próxima ação recomendada");
+  });
+
+  it("continuar próxima ação recomendada pode ser cancelada antes de abrir decide", async () => {
+    const prompts = new ScriptedPrompts(["next"], [false]);
+    const decide = spyCommand("decide");
+
+    const code = await runFlowWizard("/repo", new CollectingLogger(), {
+      prompts,
+      registry: registryWith(decide),
+      collectModel: () => model(),
+    });
+
+    expect(code).toBe(0);
+    expect(decide.calls).toEqual([]);
   });
 
   it("resumo inicial do wizard vem do HumanSummary comum", async () => {
@@ -212,6 +259,50 @@ describe("flow wizard", () => {
       expect.arrayContaining(["init", "adopt", "update"])
     );
     expect(prompts.selectCalls[1].values).not.toContain("providers");
+  });
+
+  it("validação intermediária executa validate changed com task visual", async () => {
+    const prompts = new ScriptedPrompts(["validate", "changed"]);
+    const validate = spyCommand("validate");
+
+    const code = await runFlowWizard("/repo", new CollectingLogger(), {
+      prompts,
+      registry: registryWith(validate),
+      collectModel: () => model(),
+    });
+
+    expect(code).toBe(0);
+    expect(validate.calls).toEqual([["changed"]]);
+    expect(prompts.taskTitles).toEqual(["Validar o diff"]);
+  });
+
+  it("validação com --fix exige confirmação antes de formatar", async () => {
+    const prompts = new ScriptedPrompts(["validate", "changed-fix"], [true]);
+    const validate = spyCommand("validate");
+
+    const code = await runFlowWizard("/repo", new CollectingLogger(), {
+      prompts,
+      registry: registryWith(validate),
+      collectModel: () => model(),
+    });
+
+    expect(code).toBe(0);
+    expect(validate.calls).toEqual([["changed", "--fix"]]);
+    expect(prompts.taskTitles).toEqual(["Formatar e validar o diff"]);
+  });
+
+  it("validação com --fix cancelada não executa comando", async () => {
+    const prompts = new ScriptedPrompts(["validate", "changed-fix"], [false]);
+    const validate = spyCommand("validate");
+
+    const code = await runFlowWizard("/repo", new CollectingLogger(), {
+      prompts,
+      registry: registryWith(validate),
+      collectModel: () => model(),
+    });
+
+    expect(code).toBe(0);
+    expect(validate.calls).toEqual([]);
   });
 
   it("comando raiz em TTY chama o wizard", async () => {

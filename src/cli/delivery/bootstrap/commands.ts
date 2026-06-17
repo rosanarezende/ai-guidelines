@@ -4,8 +4,13 @@ import { ProvisioningOperation } from "../../../domain/provisioning/Provisioning
 import {
   getSupportedProviders,
   DEFAULT_PROVIDERS,
+  Provider,
 } from "../../../domain/provisioning/ProviderCatalog.js";
-import { FEATURE_OPTIONS } from "../../../domain/provisioning/FeatureCatalog.js";
+import {
+  EDITORIAL_FEATURES,
+  FEATURE_OPTIONS,
+  INFRASTRUCTURE_FEATURES,
+} from "../../../domain/provisioning/FeatureCatalog.js";
 import {
   parseProvisioningCommandOptions,
   ProvisioningCommandOptions,
@@ -49,17 +54,8 @@ abstract class ProvisioningDeliveryCommand implements BootstrapDeliveryCommand<P
     const prompts = requirePrompts(context, this.name);
     const target = await promptString(prompts, "Target directory", ".");
     const projectName = await promptString(prompts, "Project name", "");
-    const providers = await promptChoiceList(
-      prompts,
-      "Providers",
-      DEFAULT_PROVIDERS,
-      getSupportedProviders(),
-      true
-    );
-    const features =
-      this.name === "update"
-        ? undefined
-        : await promptChoiceList(prompts, "Features", FEATURE_OPTIONS, FEATURE_OPTIONS, false);
+    const providers = await promptProviderList(prompts);
+    const features = this.name === "update" ? undefined : await promptFeatureList(prompts);
     const packageManager = await prompts.select<string>({
       message: "Package manager",
       choices: [
@@ -104,41 +100,50 @@ abstract class ProvisioningDeliveryCommand implements BootstrapDeliveryCommand<P
   }
 
   async run(options: ProvisioningCommandOptions, context: CommandContext): Promise<CommandResult> {
-    const targetDir = resolveTargetDir(context.repoRoot, options.target);
-    const config = await this.runtime.resolveConfig({
-      targetDir,
-      options: {
-        mode: options.operation,
-        "sdd-dir": options.sddDir,
-        providers: options.providers,
-        features: options.features,
-        lang: options.lang,
+    const runOperation = async () => {
+      const targetDir = resolveTargetDir(context.repoRoot, options.target);
+      const config = await this.runtime.resolveConfig({
+        targetDir,
+        options: {
+          mode: options.operation,
+          "sdd-dir": options.sddDir,
+          providers: options.providers,
+          features: options.features,
+          lang: options.lang,
+          prune: options.prune,
+        },
+      });
+      const snapshot = await this.runtime.collectSnapshot({
+        targetDir,
+        sddDir: config.sdd_dir,
+        packageManager: options.packageManager,
+      });
+      const adapterRulesByName = await this.runtime.compileAdapterRules(config);
+      const provisioner = this.runtime.createProvisionWorkspace({
+        targetDir,
+        dryRun: options.dryRun,
+      });
+      return provisioner.executeOperation({
+        operation: options.operation,
+        targetDir,
+        projectName: resolveProjectName(targetDir, options.name),
+        config,
+        adapterRulesByName,
+        snapshot,
+        force: options.force,
+        forcePrettier: options.forcePrettier,
         prune: options.prune,
-      },
-    });
-    const snapshot = await this.runtime.collectSnapshot({
-      targetDir,
-      sddDir: config.sdd_dir,
-      packageManager: options.packageManager,
-    });
-    const adapterRulesByName = await this.runtime.compileAdapterRules(config);
-    const provisioner = this.runtime.createProvisionWorkspace({
-      targetDir,
-      dryRun: options.dryRun,
-    });
-    const result = await provisioner.executeOperation({
-      operation: options.operation,
-      targetDir,
-      projectName: resolveProjectName(targetDir, options.name),
-      config,
-      adapterRulesByName,
-      snapshot,
-      force: options.force,
-      forcePrettier: options.forcePrettier,
-      prune: options.prune,
-      install: options.install,
-      providersRequested: options.operation === "update" && options.providers !== undefined,
-    });
+        install: options.install,
+        providersRequested: options.operation === "update" && options.providers !== undefined,
+      });
+    };
+    const result = context.prompts?.spinner
+      ? await context.prompts.spinner({
+          start: `Montando e aplicando plano ${options.operation}...`,
+          stop: `Plano ${options.operation} concluído.`,
+          task: runOperation,
+        })
+      : await runOperation();
 
     for (const action of result.actions) {
       context.logger.info(action);
@@ -252,6 +257,78 @@ async function promptChoiceList(
     });
   }
   return promptList(prompts, message, defaultValues.join(","), allowedValues);
+}
+
+async function promptProviderList(prompts: Prompts): Promise<readonly string[]> {
+  const supported = getSupportedProviders();
+  if (prompts.groupMultiselect) {
+    return prompts.groupMultiselect({
+      message: "Providers",
+      groups: {
+        "Entrypoints com adapter runtime": providerChoices(
+          supported.filter((provider) =>
+            ["claude", "gemini", "openai", "copilot"].includes(provider)
+          )
+        ),
+        "Entrypoints editoriais": providerChoices(
+          supported.filter((provider) => ["cursor", "windsurf", "aider"].includes(provider))
+        ),
+      },
+      defaultValues: DEFAULT_PROVIDERS,
+      required: true,
+      maxItems: 7,
+      groupSpacing: 1,
+    });
+  }
+  return promptChoiceList(prompts, "Providers", DEFAULT_PROVIDERS, supported, true);
+}
+
+async function promptFeatureList(prompts: Prompts): Promise<readonly string[]> {
+  if (prompts.groupMultiselect) {
+    return prompts.groupMultiselect({
+      message: "Features",
+      groups: {
+        Infraestrutura: INFRASTRUCTURE_FEATURES.map((value) => ({
+          name: value,
+          value,
+          hint: featureHint(value),
+        })),
+        "Práticas editoriais": EDITORIAL_FEATURES.map((value) => ({
+          name: value,
+          value,
+          hint: featureHint(value),
+        })),
+      },
+      defaultValues: FEATURE_OPTIONS,
+      required: false,
+      maxItems: 6,
+      groupSpacing: 1,
+    });
+  }
+  return promptChoiceList(prompts, "Features", FEATURE_OPTIONS, FEATURE_OPTIONS, false);
+}
+
+function providerChoices(providers: readonly Provider[]) {
+  return providers.map((value) => ({ name: value, value, hint: providerHint(value) }));
+}
+
+function providerHint(provider: Provider): string {
+  if (provider === "claude") return "CLAUDE.md";
+  if (provider === "gemini") return "GEMINI.md";
+  if (provider === "openai") return "AGENTS.md / Codex";
+  if (provider === "copilot") return "GitHub Copilot";
+  if (provider === "cursor") return "Cursor";
+  if (provider === "windsurf") return "Windsurf";
+  return "Aider";
+}
+
+function featureHint(feature: string): string {
+  if (feature === "prettier") return "formatação";
+  if (feature === "husky") return "hooks locais";
+  if (feature === "ci") return "workflow GitHub Actions";
+  if (feature === "quality-gates") return "gates editoriais";
+  if (feature === "tdd") return "prática TDD";
+  return "prática BDD";
 }
 
 function renderProvisioningPreview(options: ProvisioningCommandOptions): string {

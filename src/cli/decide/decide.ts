@@ -18,6 +18,7 @@
 import { execFileSync } from "node:child_process";
 import {
   DecisionApplyContext,
+  DecisionApplyResult,
   DecisionChoiceParams,
   DecisionGitOps,
   DecisionPlan,
@@ -456,9 +457,29 @@ async function applyPlan(
   def: HumanDecisionDefinition,
   plan: DecisionPlan,
   ctx: DecisionApplyContext,
-  logger: Logger
+  logger: Logger,
+  prompts?: Prompts
 ): Promise<number> {
-  const result = await def.apply(plan, ctx);
+  let result: DecisionApplyResult | undefined;
+  if (prompts?.taskList && plan.mutating) {
+    await prompts.taskList([
+      {
+        title: "Registrar decisão governada",
+        task: async (message) => {
+          message("Aplicando efeito permitido, commit exclusivo e push normal quando aplicável.");
+          result = await def.apply(plan, ctx);
+          if (!result.ok) throw new Error(result.messages.join("\n"));
+          return "Decisão registrada.";
+        },
+      },
+    ]);
+  } else {
+    result = await def.apply(plan, ctx);
+  }
+  if (!result) {
+    logger.error("❌ decide — aplicação não retornou resultado. Nada foi confirmado.");
+    return 1;
+  }
   for (const m of result.messages)
     logger[result.ok ? "info" : "error"](result.ok ? `✅ ${m}` : `❌ ${m}`);
   if (!result.ok) return 1;
@@ -498,6 +519,7 @@ async function runWizard(
   // Tela 1 — decisões pendentes.
   const items = buildListItems(registry, snapshot);
   logger.info(renderDecisionList(items));
+  await io.note?.(renderDecisionList(items), "Decisões humanas pendentes");
   logger.info("");
   const selected = await io.select<string>({
     message: "Qual decisão você quer revisar?",
@@ -505,6 +527,10 @@ async function runWizard(
       ...items.map((it) => ({
         name: `${it.title} — ${it.availability.status === "available" ? "Disponível" : "Indisponível"}`,
         value: it.id,
+        hint:
+          it.availability.status === "available"
+            ? it.availability.hint
+            : it.availability.reasons.join(" "),
       })),
       { name: "Sair", value: "__quit__" },
     ],
@@ -521,6 +547,7 @@ async function runWizard(
     const brief = def.buildBrief(snapshot, { technical });
     logger.info("");
     logger.info(renderBrief(brief, { technical }));
+    await io.note?.(renderBrief(brief, { technical }), brief.title);
     logger.info("");
 
     // O wizard RENDERIZA o briefing governado; não injeta escolhas de decisão.
@@ -559,6 +586,7 @@ async function runWizard(
     // Tela 4 — prévia.
     logger.info("");
     logger.info(renderPlanPreview(plan));
+    await io.note?.(renderPlanPreview(plan), "Prévia governada");
     logger.info("");
 
     if (!plan.mutating) {
@@ -591,7 +619,7 @@ async function runWizard(
       logger.error(`❌ ${authErr}`);
       return 1;
     }
-    return applyPlan(def, freshPlan, ctx, logger);
+    return applyPlan(def, freshPlan, ctx, logger, io);
   }
 }
 

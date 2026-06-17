@@ -38,13 +38,19 @@ function context(logger: Logger, prompts?: Prompts): CommandContext {
 class ScriptedPrompts implements Prompts {
   readonly selectCalls: Array<{ message: string; choices: readonly unknown[] }> = [];
   readonly multiselectCalls: Array<{ message: string; choices: readonly unknown[] }> = [];
+  readonly groupMultiselectCalls: Array<{
+    message: string;
+    groups: Readonly<Record<string, readonly unknown[]>>;
+  }> = [];
   readonly inputCalls: Array<{ message: string; defaultValue?: string }> = [];
   readonly confirmCalls: Array<{ message: string; defaultValue?: boolean }> = [];
+  readonly spinnerStarts: string[] = [];
 
   constructor(
     private readonly answers: {
       readonly select?: Record<string, string>;
       readonly multiselect?: Record<string, readonly string[]>;
+      readonly groupMultiselect?: Record<string, readonly string[]>;
       readonly input?: Record<string, string>;
       readonly confirm?: Record<string, boolean>;
     } = {}
@@ -72,6 +78,19 @@ class ScriptedPrompts implements Prompts {
     return options.defaultValues ?? [];
   }
 
+  async groupMultiselect<T>(options: {
+    message: string;
+    groups: Readonly<Record<string, ReadonlyArray<{ value: T }>>>;
+    defaultValues?: ReadonlyArray<T>;
+  }): Promise<readonly T[]> {
+    this.groupMultiselectCalls.push({ message: options.message, groups: options.groups });
+    const answer = this.answers.groupMultiselect?.[options.message];
+    if (answer !== undefined) {
+      return answer as readonly T[];
+    }
+    return options.defaultValues ?? [];
+  }
+
   async input(options: { message: string; default?: string }): Promise<string> {
     this.inputCalls.push({ message: options.message, defaultValue: options.default });
     return this.answers.input?.[options.message] ?? options.default ?? "";
@@ -80,6 +99,11 @@ class ScriptedPrompts implements Prompts {
   async confirm(options: { message: string; default?: boolean }): Promise<boolean> {
     this.confirmCalls.push({ message: options.message, defaultValue: options.default });
     return this.answers.confirm?.[options.message] ?? options.default ?? false;
+  }
+
+  async spinner<T>(options: { start: string; task: () => T | Promise<T> }): Promise<T> {
+    this.spinnerStarts.push(options.start);
+    return options.task();
   }
 }
 
@@ -400,7 +424,7 @@ describe("bootstrap delivery 2c — wizard", () => {
     const { runtime, delivery: bootstrap } = delivery();
     const prompts = new ScriptedPrompts({
       select: { Operation: "update" },
-      multiselect: { Providers: ["claude", "openai"] },
+      groupMultiselect: { Providers: ["claude", "openai"] },
       confirm: { "Aplicar este plano?": true },
     });
     const { logger } = capturingLogger();
@@ -412,6 +436,12 @@ describe("bootstrap delivery 2c — wizard", () => {
       providersRequested: true,
       config: { providers: ["claude", "openai"] },
     });
+    expect(prompts.groupMultiselectCalls[0].message).toBe("Providers");
+    expect(Object.keys(prompts.groupMultiselectCalls[0].groups)).toEqual([
+      "Entrypoints com adapter runtime",
+      "Entrypoints editoriais",
+    ]);
+    expect(prompts.spinnerStarts).toEqual(["Montando e aplicando plano update..."]);
   });
 
   it("deriva operacao sugerida por snapshot sem conhecer filesystem concreto", () => {

@@ -9,6 +9,7 @@ import { CommandContext, Logger } from "./registry/Command.js";
 export type FlowMenuValue =
   | "cockpit"
   | "next"
+  | "validate"
   | "decisions"
   | "blockers"
   | "work"
@@ -27,6 +28,7 @@ export function buildFlowMenu(model: CockpitModel): ReadonlyArray<{
   readonly name: string;
   readonly value: FlowMenuValue;
   readonly hint?: string;
+  readonly disabled?: boolean;
 }> {
   const recommended = model.flow?.recommended;
   return [
@@ -35,7 +37,9 @@ export function buildFlowMenu(model: CockpitModel): ReadonlyArray<{
       name: "Continuar próxima ação recomendada",
       value: "next",
       hint: recommended?.title ?? "sem ação mutante disponível agora",
+      disabled: recommended === undefined,
     },
+    { name: "Validar minhas mudanças", value: "validate" },
     { name: "Ver decisões disponíveis", value: "decisions" },
     { name: "Entender bloqueios atuais", value: "blockers" },
     { name: "Rodar briefing de trabalho", value: "work" },
@@ -88,6 +92,7 @@ export async function runFlowWizard(
   try {
     await prompts.intro?.("ai-guidelines flow");
     await prompts.note?.(renderFlowSummary(model), "Estado atual");
+    renderActionStatus(model, prompts);
 
     const choice = await prompts.select<FlowMenuValue>({
       message: "O que você quer fazer?",
@@ -105,7 +110,9 @@ export async function runFlowWizard(
           await prompts.outro?.("Nenhuma mutação executada.");
           return 0;
         }
-        return registry.dispatch(["decide"], context).then((r) => r.exitCode);
+        return runRecommendedAction(model, registry, context, prompts);
+      case "validate":
+        return runValidationSection(registry, context, prompts);
       case "decisions":
         return registry.dispatch(["decide"], context).then((r) => r.exitCode);
       case "blockers":
@@ -132,6 +139,130 @@ export async function runFlowWizard(
     }
     throw error;
   }
+}
+
+function renderActionStatus(model: CockpitModel, prompts: Prompts): void {
+  const available = model.flow?.available ?? [];
+  const blocked = model.flow?.blocked ?? [];
+  const forbidden = model.flow?.forbidden ?? [];
+  void prompts.status?.(
+    available.length > 0 ? "success" : "info",
+    available.length > 0
+      ? `${available.length} ação(ões) disponível(is) pelo modelo governado.`
+      : "Nenhuma ação mutante disponível agora."
+  );
+  if (blocked.length > 0) {
+    void prompts.status?.("warn", `${blocked.length} ação(ões) bloqueada(s) com motivo explícito.`);
+  }
+  if (forbidden.length > 0) {
+    void prompts.status?.("info", `${forbidden.length} ação(ões) proibida(s) neste estado.`);
+  }
+}
+
+async function runRecommendedAction(
+  model: CockpitModel,
+  registry: CommandRegistry,
+  context: CommandContext,
+  prompts: Prompts
+): Promise<number> {
+  const recommended = model.flow?.recommended;
+  if (!recommended) {
+    await prompts.note?.(renderBlockedActions(model), "Sem ação disponível");
+    return 0;
+  }
+  const lines = [
+    "## Próxima ação recomendada",
+    "",
+    recommended.title,
+    "",
+    "Comando de inspeção:",
+    recommended.command,
+    "",
+    "Efeito permitido:",
+    ...recommended.effect.map((effect) => `- ${effect}`),
+  ];
+  if (recommended.mutatingCommand) {
+    lines.push("", "Comando mutante, se a owner confirmar:", recommended.mutatingCommand);
+  }
+  await prompts.note?.(lines.join("\n"), "Próxima ação recomendada");
+  const proceed = await prompts.confirm({
+    message: "Abrir o fluxo governado de decisão agora?",
+    default: false,
+  });
+  if (!proceed) {
+    await prompts.outro?.("Nenhuma decisão executada.");
+    return 0;
+  }
+  return (await registry.dispatch(["decide"], context)).exitCode;
+}
+
+async function runValidationSection(
+  registry: CommandRegistry,
+  context: CommandContext,
+  prompts: Prompts
+): Promise<number> {
+  const selected = await prompts.select<string>({
+    message: "Como validar agora?",
+    choices: [
+      {
+        name: "Validar somente o diff atual",
+        value: "changed",
+        hint: "rápido; não reescreve arquivos",
+      },
+      {
+        name: "Formatar arquivos alterados e validar o diff",
+        value: "changed-fix",
+        hint: "pode alterar arquivos com Prettier",
+      },
+      {
+        name: "Ler orientação da validação completa",
+        value: "full-help",
+        hint: "antes de Ready/Human Gate",
+      },
+      { name: "Voltar", value: "__back__" },
+    ],
+  });
+  if (selected === "__back__") return 0;
+  if (selected === "full-help") {
+    await prompts.note?.(
+      [
+        "Use `npm run validate` antes de Ready/Human Gate.",
+        "",
+        "Durante PR Draft, `npm run flow -- validate changed` cobre o ciclo rápido do diff.",
+      ].join("\n"),
+      "Validação completa"
+    );
+    return 0;
+  }
+  const args =
+    selected === "changed-fix" ? ["validate", "changed", "--fix"] : ["validate", "changed"];
+  if (selected === "changed-fix") {
+    const confirmed = await prompts.confirm({
+      message: "Formatar somente arquivos alterados antes de validar?",
+      default: false,
+    });
+    if (!confirmed) {
+      await prompts.outro?.("Validação com --fix cancelada.");
+      return 0;
+    }
+  }
+  if (prompts.taskList) {
+    let exitCode = 0;
+    await prompts.taskList([
+      {
+        title: selected === "changed-fix" ? "Formatar e validar o diff" : "Validar o diff",
+        task: async (message) => {
+          message("Rodando git diff --check, Prettier, build e checks governados aplicáveis.");
+          const result = await registry.dispatch(args, context);
+          exitCode = result.exitCode;
+          if (exitCode !== 0) throw new Error(`Validação retornou exit code ${exitCode}.`);
+          return "Validação intermediária concluída.";
+        },
+      },
+    ]);
+    return exitCode;
+  }
+  return (await registry.dispatch(args, context)).exitCode;
 }
 
 async function runReviewSection(

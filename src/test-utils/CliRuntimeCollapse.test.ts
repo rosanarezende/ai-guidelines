@@ -89,6 +89,10 @@ describe("CO-3.5 runtime collapse guard", () => {
         }
 
         for (const specifier of extractModuleSpecifiers(content)) {
+          if (specifier.startsWith("@inquirer/")) {
+            violations.push(`${rel}: ${specifier}`);
+            continue;
+          }
           if (specifier.startsWith("#cli/")) {
             violations.push(`${rel}: ${specifier}`);
             continue;
@@ -102,7 +106,7 @@ describe("CO-3.5 runtime collapse guard", () => {
         }
 
         if (!rel.endsWith(".test.ts")) {
-          for (const pattern of [/LegacyExecuteFn/, /loadLegacyExecute/]) {
+          for (const pattern of [/LegacyExecuteFn/, /loadLegacyExecute/, /InquirerPrompts/]) {
             if (pattern.test(content)) violations.push(`${rel}: ${pattern}`);
           }
         }
