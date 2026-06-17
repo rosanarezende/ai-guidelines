@@ -3,6 +3,8 @@ import {
   main,
   normalizeCheckRuns,
   detectSmokeTestsSuspended,
+  deriveSmokeReadinessPolicy,
+  smokeRelevantChangedPaths,
   ReadyCheckSnapshot,
   SnapshotCollector,
   Logger,
@@ -123,11 +125,56 @@ describe("CLI — pr-ready:check · precondições de Ready [BR-PR-READY-CHECK]"
   });
 
   it("DADO smoke temporariamente suspenso QUANDO avalia ENTÃO bloqueia Ready/Human Gate", () => {
-    const result = evaluateReadyPreconditions(validSnapshot({ smokeTestsSuspended: true }));
+    const result = evaluateReadyPreconditions(
+      validSnapshot({
+        smokeTestsSuspended: true,
+        smokePolicy: {
+          suspended: true,
+          required: true,
+          reason: "mudança de pacote",
+          changedPaths: ["package.json"],
+          triggerPaths: ["package.json"],
+        },
+      })
+    );
     expect(result.ok).toBe(false);
     expect(
       result.failures.some((f) => f.includes("smoke tests estão temporariamente suspensos"))
     ).toBe(true);
+  });
+
+  it("DADO smoke suspenso em PR intermediário sem impacto de pacote QUANDO avalia ENTÃO não bloqueia Ready", () => {
+    const result = evaluateReadyPreconditions(
+      validSnapshot({
+        smokeTestsSuspended: true,
+        smokePolicy: {
+          suspended: true,
+          required: false,
+          reason: "PR intermediário sem mudança de pacote/consumidor",
+          changedPaths: ["src/cli/flow/GovernedFlow.ts"],
+          triggerPaths: [],
+        },
+      })
+    );
+    expect(result.ok).toBe(true);
+    expect(result.warnings.join(" ")).toContain("smoke real temporariamente suspenso");
+  });
+
+  it("DADO smoke obrigatório ausente QUANDO avalia ENTÃO falha", () => {
+    const result = evaluateReadyPreconditions(
+      validSnapshot({
+        checks: [{ name: "repo-validation", bucket: "pass" }],
+        smokePolicy: {
+          suspended: false,
+          required: true,
+          reason: "último nó antes da integração final",
+          changedPaths: [],
+          triggerPaths: [],
+        },
+      })
+    );
+    expect(result.ok).toBe(false);
+    expect(result.failures.join(" ")).toContain('check obrigatório "smoke" não encontrado');
   });
 
   it("DADO finding bloqueante aberto QUANDO avalia ENTÃO falha", () => {
@@ -258,6 +305,55 @@ describe("CLI — pr-ready:check · precondições de Ready [BR-PR-READY-CHECK]"
     });
     expect(result.ok).toBe(true);
     expect(result.warnings.some((w) => w.includes("já está Ready"))).toBe(true);
+  });
+});
+
+describe("CLI — pr-ready:check · política de smoke real", () => {
+  it("classifica caminhos que afetam pacote/consumidor", () => {
+    expect(
+      smokeRelevantChangedPaths([
+        "src/cli/flow/GovernedFlow.ts",
+        ".github/workflows/smoke-multi-os.yml",
+        "package.json",
+        "src/domain/provisioning/ProviderCatalog.ts",
+      ])
+    ).toEqual(["package.json", "src/domain/provisioning/ProviderCatalog.ts"]);
+  });
+
+  it("não exige smoke real em PR intermediário sem impacto de pacote", () => {
+    const policy = deriveSmokeReadinessPolicy({
+      suspended: true,
+      changedPaths: ["src/cli/flow/GovernedFlow.ts"],
+      activeNode: { id: "co-flow-convergence", role: "execution", terminal: false },
+      nextNode: { id: "co-capture", role: "execution", terminal: false },
+    });
+
+    expect(policy.required).toBe(false);
+    expect(policy.suspended).toBe(true);
+  });
+
+  it("exige smoke real no último nó antes da integração", () => {
+    const policy = deriveSmokeReadinessPolicy({
+      suspended: true,
+      changedPaths: ["docs/scripts.md"],
+      activeNode: { id: "knowledge-readiness", role: "execution", terminal: false },
+      nextNode: { id: "integration-final", role: "integration", terminal: true },
+    });
+
+    expect(policy.required).toBe(true);
+    expect(policy.reason).toContain("integração final");
+  });
+
+  it("exige smoke real quando o diff não pode ser classificado", () => {
+    const policy = deriveSmokeReadinessPolicy({
+      suspended: true,
+      changedPaths: null,
+      activeNode: { id: "co-flow-convergence", role: "execution", terminal: false },
+      nextNode: { id: "co-capture", role: "execution", terminal: false },
+    });
+
+    expect(policy.required).toBe(true);
+    expect(policy.reason).toContain("não foi possível classificar");
   });
 });
 

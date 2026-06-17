@@ -5,7 +5,7 @@
 # de tag `v*`, sem release engine — apenas o caminho mínimo profissional.
 #
 # Trigger: push de tag `v*` (ex.: v1.1.0-preview.0, v1.1.0).
-# Gate: `npm run ci` (install + validate + smoke) — release gate canônico.
+# Gate: `npm run ci` + `npm run test:smoke` — release gate canônico.
 # Publish: `npm publish` (npm com `NODE_AUTH_TOKEN` via registry-url do setup-node).
 # GitHub Release: `gh release create --generate-notes` (notes derivadas de PRs
 # mergeados desde a tag anterior; pre-release marcado como tal).
@@ -68,6 +68,9 @@ jobs:
 
       - name: Release gate — npm run ci
         run: npm run ci
+
+      - name: Release smoke gate — npm run test:smoke
+        run: npm run test:smoke
 
       - name: Determine npm dist-tag and prerelease flag
         id: release_meta

@@ -14,11 +14,12 @@ jobs:
   # (`smoke / ubuntu-latest / node 24.x` …). Required contexts acoplados à matriz
   # são o vetor de drift que este checkpoint elimina (cf. .github/rulesets/README.md).
   #
-  # Suspensão temporária governada (Spec 0024 / co-flow-convergence):
-  # durante CO-10.2/CO-10.3, o contexto required `smoke` continua produzível para
-  # evitar drift do ruleset, mas a suíte smoke real não roda. `pr-ready:check`
-  # falha enquanto AI_GUIDELINES_SMOKE_TEMPORARILY_SUSPENDED=true, bloqueando
-  # Ready/Human Gate até a reativação explícita antes do fechamento do nó.
+  # Suspensão governada em nós intermediários (Spec 0024 / co-flow-convergence):
+  # o contexto required `smoke` continua produzível para evitar drift do ruleset,
+  # mas a suíte smoke real não roda em PRs intermediários sem impacto de pacote.
+  # `pr-ready:check` decide, a partir da topologia e do diff do PR, quando smoke
+  # real volta a ser obrigatório: último nó antes da integração final ou mudança
+  # em pacote/runtime consumidor.
   smoke:
     name: smoke
     runs-on: ubuntu-latest
@@ -27,5 +28,5 @@ jobs:
     steps:
       - name: Record governed smoke suspension
         run: |
-          echo "Smoke tests temporarily suspended for Spec 0024 CO-10.2/CO-10.3."
-          echo "Ready/Human Gate remain blocked by pr-ready:check while AI_GUIDELINES_SMOKE_TEMPORARILY_SUSPENDED=true."
+          echo "Smoke tests are governed by pr-ready:check."
+          echo "Real smoke is required for package/runtime changes and before final integration."

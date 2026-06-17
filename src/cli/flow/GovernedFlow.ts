@@ -118,6 +118,8 @@ export interface PrReadyFlowFacts {
   readonly prDraft: boolean;
   readonly readyBodyContractReasons: readonly string[];
   readonly smokeTestsSuspended: boolean;
+  readonly smokeRequired?: boolean;
+  readonly smokeRequirementReason?: string;
   readonly checks: ReadonlyArray<{ readonly name: string; readonly bucket: string }>;
   readonly localHeadSha: string | null;
   readonly prHeadRefOid: string;
@@ -547,12 +549,15 @@ export function deriveOpenNextNodeAvailability(f: OpenNextNodeFacts): DecisionAv
 }
 
 export function prReadyFlowFactsFromReadySnapshot(snapshot: ReadyCheckSnapshot): PrReadyFlowFacts {
+  const smokePolicy = snapshot.smokePolicy;
   return {
     prNumber: snapshot.pr.number,
     prState: snapshot.pr.state,
     prDraft: snapshot.pr.isDraft,
     readyBodyContractReasons: snapshot.readyBodyContractReasons,
-    smokeTestsSuspended: snapshot.smokeTestsSuspended === true,
+    smokeTestsSuspended: smokePolicy?.suspended ?? snapshot.smokeTestsSuspended === true,
+    smokeRequired: smokePolicy?.required,
+    smokeRequirementReason: smokePolicy?.reason,
     checks: snapshot.checks,
     localHeadSha: snapshot.localHeadSha,
     prHeadRefOid: snapshot.pr.headRefOid,
@@ -564,6 +569,8 @@ export function prReadyFlowFactsFromReadySnapshot(snapshot: ReadyCheckSnapshot):
 export function derivePrReadyFlow(f: PrReadyFlowFacts): PrReadyFlowResult {
   const failures: string[] = [];
   const warnings: string[] = [];
+  const smokeRequired = f.smokeRequired ?? true;
+  const smokeRequirementReason = f.smokeRequirementReason ?? "contrato legado de Ready";
   if (f.prState.toLowerCase() !== "open") {
     failures.push(`PR #${f.prNumber} não está OPEN (estado: ${f.prState}).`);
   }
@@ -575,9 +582,13 @@ export function derivePrReadyFlow(f: PrReadyFlowFacts): PrReadyFlowResult {
   for (const reason of f.readyBodyContractReasons) {
     failures.push(`contrato Ready do body: ${reason}`);
   }
-  if (f.smokeTestsSuspended) {
+  if (f.smokeTestsSuspended && smokeRequired) {
     failures.push(
-      "smoke tests estão temporariamente suspensos — reative `npm run test:smoke` no workflow/ci antes de Ready/Human Gate."
+      `smoke tests estão temporariamente suspensos, mas são obrigatórios agora (${smokeRequirementReason}) — reative \`npm run test:smoke\` no workflow/ci antes de Ready/Human Gate.`
+    );
+  } else if (f.smokeTestsSuspended) {
+    warnings.push(
+      `smoke real temporariamente suspenso neste PR intermediário (${smokeRequirementReason}); ele volta a ser obrigatório no fechamento final da spec ou em mudanças de pacote/consumidor.`
     );
   }
   if (f.checks.length === 0) {
@@ -588,6 +599,18 @@ export function derivePrReadyFlow(f: PrReadyFlowFacts): PrReadyFlowResult {
       failures.push(`CI não está verde no HEAD final: check "${check.name}" = ${check.bucket}.`);
     } else if (check.bucket === "pending") {
       failures.push(`CI ainda não terminou no HEAD final: check "${check.name}" pendente.`);
+    }
+  }
+  if (smokeRequired) {
+    const smokeCheck = f.checks.find((check) => check.name === "smoke");
+    if (!smokeCheck) {
+      failures.push(
+        `check obrigatório "smoke" não encontrado no HEAD final (${smokeRequirementReason}).`
+      );
+    } else if (smokeCheck.bucket === "skipping") {
+      failures.push(
+        `check obrigatório "smoke" não executou a suíte real no HEAD final (${smokeRequirementReason}).`
+      );
     }
   }
   if (f.localHeadSha === null) {

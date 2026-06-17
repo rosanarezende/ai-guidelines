@@ -706,3 +706,52 @@ Estado de seguranca:
 - CO-10.5 nao foi iniciado;
 - nenhum Ready, Human Gate, gate artifact, merge ou abertura de novo PR foi
   executado.
+
+## Dogfood CO-10.4 — smoke real nao deve ser pedagio de todo PR intermediario
+
+Falha observada durante o acompanhamento de CI do PR #43:
+
+- o check `smoke` aparecia como contexto required mesmo quando a suite real
+  estava suspensa;
+- a suspensao era intencional para nao transformar cada no intermediario da
+  stack em validacao de pacote;
+- mas o contrato ainda dizia, de forma ampla, que `pr-ready:check` bloquearia
+  Ready/Human Gate sempre que `AI_GUIDELINES_SMOKE_TEMPORARILY_SUSPENDED=true`;
+- isso misturava dois casos diferentes:
+  1. PR intermediario que nao muda pacote/consumidor;
+  2. fechamento final/publicacao, onde smoke real e obrigatorio.
+
+Correcao aplicada em CO-10.4:
+
+1. `pr-ready:check` passou a derivar uma politica factual de smoke a partir da
+   topologia e do diff do PR.
+2. Smoke real fica **adiado** quando o PR e intermediario e nao muda superficie
+   de pacote/consumidor.
+3. Smoke real fica **obrigatorio** quando:
+   - o PR e o ultimo no antes de `integration-final`;
+   - o diff altera pacote, suite smoke, binario publicado, runtime
+     `init/adopt/update`, provisionamento, adapters usados por consumidor ou
+     templates publicados;
+   - o diff nao pode ser classificado com seguranca.
+4. O workflow `smoke` continua produzindo o contexto required para evitar drift
+   do ruleset, mas a decisao de bloqueio fica em `pr-ready:check`.
+5. O workflow de release agora roda `npm run test:smoke` explicitamente antes
+   de `npm publish`.
+
+Falsificacao adicionada:
+
+- teste prova que smoke suspenso em PR intermediario sem impacto de pacote vira
+  aviso, nao bloqueio;
+- teste prova que smoke suspenso com pacote/runtime consumidor alterado bloqueia;
+- teste prova que o ultimo no antes da integracao exige smoke real;
+- teste prova que diff desconhecido falha fechado e exige smoke real;
+- teste prova que, quando smoke e obrigatorio, ausencia do check `smoke` falha.
+
+Estado de seguranca:
+
+- smoke nao foi removido;
+- publicacao npm continua protegida por smoke real;
+- Ready/Human Gate continuam bloqueados quando o PR altera pacote/consumidor ou
+  quando a spec esta no fechamento final;
+- nenhum Ready, Human Gate, gate artifact, merge ou abertura de novo PR foi
+  executado por esta mudanca.
