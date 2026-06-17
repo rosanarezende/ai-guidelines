@@ -127,8 +127,9 @@ describe("infrastructure/NodeProvisioningSnapshotSource — template/runtime sna
     });
 
     expect(snapshot.runtime.runtimeStub).toContain(
-      "Consumer-local ai-guidelines assets live under `.ai-guidelines/`"
+      "Consumer-local ai-guidelines assets currently live under the `.ai-guidelines/` bridge"
     );
+    expect(snapshot.runtime.runtimeStub).toContain("dualroot-collapse");
     expect(snapshot.initGuard.conflicts).toEqual([".gitattributes", "package.json"]);
     expect(snapshot.templates.sourceExists).toBe(true);
     expect(snapshot.templates.sourceFiles.map((file) => file.relativePath)).toEqual([

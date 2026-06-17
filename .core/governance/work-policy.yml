@@ -1,7 +1,7 @@
 # Contrato GOVERNADO de trabalho (CO-4 / dogfood operacional do PR #42).
 #
 # SSOT machine-readable do contrato de IMPLEMENTAÇÃO e de ENTREGA DO RELATÓRIO,
-# por MODO de trabalho. Projetado por `guidelines work`:
+# por MODO de trabalho. Projetado por `npm run flow -- work`:
 #
 #   contrato permanente (este arquivo)
 #   + estado situado derivado (snapshot do handoff)

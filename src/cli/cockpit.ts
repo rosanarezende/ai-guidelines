@@ -1,5 +1,5 @@
 /**
- * Cockpit situado do comando raiz (`npm run guidelines`).
+ * Cockpit situado do comando raiz (`npm run flow`).
  *
  * Read-only: carrega o snapshot governado, projeta o briefing de trabalho e as
  * decisões humanas aplicáveis. Não executa mutações nem depende de memória de
@@ -41,7 +41,7 @@ export interface CockpitModel {
 }
 
 function commandForDecision(id: string, mutating: boolean): string {
-  if (!mutating) return `npm run guidelines -- decide --type ${id} --brief-only`;
+  if (!mutating) return `npm run flow -- decide --type ${id} --brief-only`;
   const decision =
     id === "mark-readiness"
       ? "mark-ready"
@@ -52,7 +52,7 @@ function commandForDecision(id: string, mutating: boolean): string {
           : id === "human-gate"
             ? "approve"
             : "<choice>";
-  return `npm run guidelines -- decide --type ${id} --decision ${decision} --authorization explicit-human-decision --confirm`;
+  return `npm run flow -- decide --type ${id} --decision ${decision} --authorization explicit-human-decision --confirm`;
 }
 
 function recommendedDecision(model: CockpitModel): CockpitDecisionItem | null {
@@ -164,9 +164,9 @@ export function renderCockpit(model: CockpitModel): string {
   for (const item of forbidden) lines.push(`- ${item}`);
   lines.push("");
   lines.push("## Comandos úteis");
-  lines.push("- handoff: `npm run guidelines -- handoff 0024`");
-  lines.push("- trabalho: `npm run guidelines -- work --authorization explicit-work-request`");
-  lines.push("- decisões: `npm run guidelines -- decide --brief-only`");
+  lines.push("- handoff: `npm run flow -- handoff 0024`");
+  lines.push("- trabalho: `npm run flow -- work --authorization explicit-work-request`");
+  lines.push("- decisões: `npm run flow -- decide --brief-only`");
   lines.push("- validação local: `npm run validate`");
   return `${lines.join("\n")}\n`;
 }
@@ -197,21 +197,26 @@ export function buildCockpitModel(
   };
 }
 
+export function collectCockpitModel(
+  repoRoot: string,
+  options: RunCockpitOptions = {}
+): CockpitModel {
+  const situatedOptions: RunCockpitOptions = {
+    ...options,
+    remote: options.remote === undefined ? ghRemotePrCollector : options.remote,
+  };
+  const work = collectWorkBrief(repoRoot, situatedOptions);
+  const decisionSnapshot = collectDecisionSnapshot(repoRoot, situatedOptions);
+  return buildCockpitModel(work, decisionSnapshot, options.registry);
+}
+
 export function runCockpit(
   repoRoot: string,
   logger: Logger,
   options: RunCockpitOptions = {}
 ): number {
   try {
-    const situatedOptions: RunCockpitOptions = {
-      ...options,
-      remote: options.remote === undefined ? ghRemotePrCollector : options.remote,
-    };
-    const work = collectWorkBrief(repoRoot, situatedOptions);
-    const decisionSnapshot = collectDecisionSnapshot(repoRoot, situatedOptions);
-    logger.info(
-      renderCockpit(buildCockpitModel(work, decisionSnapshot, options.registry)).trimEnd()
-    );
+    logger.info(renderCockpit(collectCockpitModel(repoRoot, options)).trimEnd());
     return 0;
   } catch (error) {
     logger.error(

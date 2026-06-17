@@ -12,6 +12,7 @@ export const INTENT_CATALOG: readonly Intent[] = [
     id: "retomar-trabalho",
     title: "Retomar trabalho",
     actions: [
+      { command: "cockpit", label: "Ver cockpit situado (estado + próxima ação)" },
       { command: "continue", label: "Retomar de onde parei (briefing + próximo passo)" },
       { command: "handoff", label: "Gerar handoff situado para nova sessão IA" },
       { command: "insight", args: ["list"], label: "Ver percepções recentes" },

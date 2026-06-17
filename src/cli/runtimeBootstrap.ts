@@ -9,17 +9,17 @@ const DEFAULT_AGENTS_PATH = "AGENTS.md";
 
 // No repositório do framework o handoff roda pelo script local (não pelo bin
 // publicado via npx, que é o default do stub para consumidores).
-const MAINTAINER_HANDOFF_COMMAND = "npm run guidelines -- handoff [spec]";
+const MAINTAINER_HANDOFF_COMMAND = "npm run flow -- handoff [spec]";
 
 // Verificação da retomada derivada (CO-4): script npm do framework; sem bin
 // publicado ainda, consumidores não recebem este bullet (default null do stub).
 const MAINTAINER_HANDOFF_CHECK_COMMAND = "npm run handoff:check -- [--spec NNNN]";
 
-const MAINTAINER_REVIEW_BRIEF_COMMAND = "npm run guidelines -- review <type>";
+const MAINTAINER_REVIEW_BRIEF_COMMAND = "npm run flow -- review <type>";
 
-const MAINTAINER_WORK_BRIEF_COMMAND = "npm run guidelines -- work";
+const MAINTAINER_WORK_BRIEF_COMMAND = "npm run flow -- work";
 
-const MAINTAINER_DECIDE_COMMAND = "npm run guidelines -- decide";
+const MAINTAINER_DECIDE_COMMAND = "npm run flow -- decide";
 
 export interface RuntimeBootstrapOptions {
   readonly agentsPath?: string;

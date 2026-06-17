@@ -421,7 +421,7 @@ export function derivePrReadyFlow(f: PrReadyFlowFacts): PrReadyFlowResult {
 
 function commandFor(id: GovernedFlowActionId, mutating: boolean): string {
   if (id === "pr-ready") return "npm run pr-ready:check -- --pr <n>";
-  if (!mutating) return `npm run guidelines -- decide --type ${id} --brief-only`;
+  if (!mutating) return `npm run flow -- decide --type ${id} --brief-only`;
   const decision =
     id === "mark-readiness"
       ? "mark-ready"
@@ -432,7 +432,7 @@ function commandFor(id: GovernedFlowActionId, mutating: boolean): string {
           : id === "human-gate"
             ? "approve"
             : "<choice>";
-  return `npm run guidelines -- decide --type ${id} --decision ${decision} --authorization explicit-human-decision --confirm`;
+  return `npm run flow -- decide --type ${id} --decision ${decision} --authorization explicit-human-decision --confirm`;
 }
 
 function action(

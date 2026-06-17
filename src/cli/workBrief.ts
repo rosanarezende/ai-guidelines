@@ -264,12 +264,12 @@ type DecisionType =
   | "mark-readiness"
   | "human-gate";
 
-const DECIDE_WIZARD_COMMAND = "npm run guidelines -- decide";
-const WORK_RELOAD_COMMAND = "npm run guidelines -- work --authorization explicit-work-request";
+const DECIDE_WIZARD_COMMAND = "npm run flow -- decide";
+const WORK_RELOAD_COMMAND = "npm run flow -- work --authorization explicit-work-request";
 
 /** Comando read-only DERIVADO do tipo (briefing da decisão, zero escrita). */
 function decideBriefCommand(type: DecisionType): string {
-  return `npm run guidelines -- decide --type ${type} --brief-only`;
+  return `npm run flow -- decide --type ${type} --brief-only`;
 }
 
 /**

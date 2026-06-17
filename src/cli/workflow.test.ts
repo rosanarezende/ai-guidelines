@@ -686,7 +686,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
     });
 
     // NOTA: o teste antigo "opção desconhecida no wizard" foi removido após migração para
-    // inquirer/select — agora é impossível digitar opção fora da lista (inquirer restringe
+    // select visual — agora é impossível digitar opção fora da lista (o prompt restringe
     // navegação às choices declaradas).
 
     // ─── Wizard options 4 e 5: tier 2 transactional (cf. [DEC-0023-L01]) ───
@@ -1287,7 +1287,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
     });
 
     // NOTA: o teste antigo "tipo desconhecido em visual prompts" foi removido após migração
-    // para inquirer/select — o submenu de tipos restringe escolhas válidas na fonte.
+    // para select visual — o submenu de tipos restringe escolhas válidas na fonte.
 
     it("DADO wizard opção 6 + tipo válido MAS template ausente no filesystem ENTÃO emite erro e retorna 1", async () => {
       const logger = new CollectingLogger();
@@ -1408,7 +1408,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
     const absentResult: ListActiveSpecsResult = {
       indexAvailable: false,
       entries: [],
-      warnings: ["Index not found. Run npm run guidelines -- workflow publish-state to populate."],
+      warnings: ["Index not found. Run npm run flow -- workflow publish-state to populate."],
     };
     const oneEntryResult: ListActiveSpecsResult = {
       indexAvailable: true,
@@ -1575,9 +1575,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
       const absent: ListActiveSpecsResult = {
         indexAvailable: false,
         entries: [],
-        warnings: [
-          "Index not found. Run npm run guidelines -- workflow publish-state to populate.",
-        ],
+        warnings: ["Index not found. Run npm run flow -- workflow publish-state to populate."],
       };
       const code = await runAdvancedOps({
         repoRoot: "/repo",
@@ -1846,7 +1844,7 @@ describe("CLI — workflow [BR-WORKFLOW-CLI]", () => {
       expect(code).toBe(1);
       const out = logger.lines.join("\n");
       expect(out).toMatch(/Índice operacional público.*não encontrado/);
-      expect(out).toMatch(/npm run guidelines -- workflow publish-state/);
+      expect(out).toMatch(/npm run flow -- workflow publish-state/);
     });
 
     it("DADO main(['continue', '<identifier>'], opts) QUANDO entry casa E path existe ENTÃO encaminha identifier para runContinue (lookup via índice)", async () => {
@@ -2073,8 +2071,8 @@ describe("CLI — wizard navegação por Intent [BR-WIZARD-INTENT]", () => {
   describe("runWorkflow (Intent → Action → Command)", () => {
     it("DADO Intent → Action com args QUANDO runWorkflow ENTÃO despacha [command, ...args] via Registry", async () => {
       const { registry, dispatched } = spyRegistry();
-      // retomar-trabalho: action 2 = insight list
-      const prompts = new FakePrompts(["intent:retomar-trabalho", "2"]);
+      // retomar-trabalho: action 3 = insight list (action 0 é o cockpit situado)
+      const prompts = new FakePrompts(["intent:retomar-trabalho", "3"]);
       const code = await runWorkflow({
         repoRoot: "/repo",
         logger: new CollectingLogger(),
@@ -2087,8 +2085,8 @@ describe("CLI — wizard navegação por Intent [BR-WIZARD-INTENT]", () => {
 
     it("DADO Intent → Action sem args QUANDO runWorkflow ENTÃO despacha só o comando", async () => {
       const { registry, dispatched } = spyRegistry();
-      // retomar-trabalho: action 0 = continue
-      const prompts = new FakePrompts(["intent:retomar-trabalho", "0"]);
+      // retomar-trabalho: action 1 = continue (action 0 é o cockpit situado)
+      const prompts = new FakePrompts(["intent:retomar-trabalho", "1"]);
       await runWorkflow({ repoRoot: "/repo", logger: new CollectingLogger(), prompts, registry });
       expect(dispatched).toEqual([["continue"]]);
     });

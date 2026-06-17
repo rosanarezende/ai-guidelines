@@ -89,7 +89,7 @@
   > - **8 · path morto do `gate-decidability-check`** → resíduo menor; follow-up de `housekeeping`/doc.
   > - **9 · desacoplar `decision-brief`** → **`housekeeping` › `checkpoint-decouple-brief`**.
   > - **10 · tasks boilerplate genérico** → absorvido em **`checkpoint-taxonomy-removal`**.
-  > - **11A/B/C · colapso `.specify`/dual-root** → **`dualroot-collapse` › `checkpoint-dualroot-collapse`**.
+  > - **11A/B/C · colapso `.specify` + `.ai-guidelines` / dual-root** → **`dualroot-collapse` › `checkpoint-dualroot-collapse`**.
   > - **12 · limpeza de docs (`workflowType`)** → **`housekeeping` › `checkpoint-doc-cleanup`**.
   >
   > **Forward (autoritativo em `state.yml § topology`):** concluídos na stack até `co-enforcement` (CO-3, PR #42, Human Gate approved) → ativo `co-flow-convergence` (seq 10; **inserido em 2026-06-16 por `[DEC-0024-G10]` antes de `co-capture`**) → planejados `co-capture` (CO-5) → `co-events` (CO-6) → `housekeeping` → `dualroot-collapse` → `knowledge-readiness` → `integration-final`. Esta lista é **ponteiro**, não 2ª fonte: em divergência, `state.yml` vence.

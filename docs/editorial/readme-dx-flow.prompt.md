@@ -46,7 +46,7 @@ OBJETIVO VISUAL
 
 Mostrar 1 sessão típica com o framework, em **4 momentos honestos do que está entregue**:
 
-1. ABERTURA: terminal com `npx ai-guidelines workflow` — wizard aparece com 8 opções declarativas, cada uma com ícone (📍 📍 📡 🔗 🔀 📋 🔍 🎨).
+1. ABERTURA: terminal com `npx ai-guidelines` — wizard situado aparece com opções derivadas do estado, incluindo cockpit, próxima ação e bloqueios.
 2. LEITURA DETERMINÍSTICA (3 boundaries): usuário escolhe uma opção (ex.: continuar spec atual). Runtime lê os artifacts da spec organizados em três boundaries, com rótulos operacionais visíveis na imagem — **Execução** (`tasks.md`), **Prontidão** (`review.md`), **Pós-merge** (`release-log.md`) — representado por linhas finas convergindo no centro. Monta o "contexto pronto para colar" na IA externa.
 3. ESTADO PUBLICADO: `publish-state` projeta o estado interno para `.governance/runtime/specs/active.yml` (índice público). Cross-machine, descoberta zero-prompt.
 4. GOVERNANÇA ATIVA + GATE DE PRONTIDÃO: quando algo está fora de ordem, o runtime intercepta narrativamente — `continue` recusa execução (gate de execução não fechado), e as ops transacionais 🔗 (Integration PR) e 🔀 (merge da stack) ficam **bloqueadas** enquanto os gates do `review.md` não fecharem. Não bloqueia silencioso: explica o que falta.
@@ -92,7 +92,7 @@ COMPOSIÇÃO
 Layout horizontal em 4 momentos com transições orgânicas:
 
 **Momento 1 — esquerda** (~25% da largura):
-Terminal sutil com prompt `> npx ai-guidelines workflow`. Logo abaixo, menu do wizard aparece com 8 opções declarativas curtas (não detalhar todas — sugerir as 3-4 primeiras). Tom: convidativo, não denso. Accent principal #5EEAD4.
+Terminal sutil com prompt `> npx ai-guidelines`. Logo abaixo, menu do wizard aparece com opções situadas curtas (não detalhar todas — sugerir as 3-4 primeiras). Tom: convidativo, não denso. Accent principal #5EEAD4.
 
 **Momento 2 — centro-esquerda** (~25%):
 A escolha materializa uma ação. Linhas finas e silenciosas convergem dos artifacts da spec, sutilmente agrupados em **três boundaries** com rótulos operacionais visíveis — **Execução** (`tasks.md`), **Prontidão** (`review.md`), **Pós-merge** (`release-log.md`) — para o centro do quadro, representação visual de leitura determinística. Pode sugerir um pequeno cartão "contexto pronto para colar". Sem labels narrativos ("executando…", "carregando…"); a geometria comunica.
@@ -111,7 +111,7 @@ TEXTO LITERAL DO TERMINAL (renderizar exatamente, sem traduzir)
 
 Para reduzir alucinação do gerador, use estas linhas reais do runtime nos terminais/cartões (monospace, pt-BR, exatamente como saem na CLI — não inventar outras):
 
-- Momento 1 (prompt): `> npx ai-guidelines workflow`
+- Momento 1 (prompt): `> npx ai-guidelines`
 - Momento 4 (bloqueio): `🔒 Integration PR bloqueado — homologação (review.md) ainda aberta.`
 - Momento 4 (itens abertos): `Itens abertos detectados em review.md:`
 - Momento 2 (handoff de contexto): `──── Contexto pronto para colar na sua IA externa ────`
@@ -172,7 +172,7 @@ A pessoa que olha precisa sentir, sem ler nada:
 LÍNGUA (NÃO-NEGOCIÁVEL)
 ————————————————————
 
-TODO texto renderizado na imagem deve ser em **Português do Brasil (pt-BR)**. NÃO gerar texto em inglês. A única exceção são identificadores em monospace que são literais de comando/código (`npx ai-guidelines workflow`, `tasks.md`, `review.md`, `release-log.md`, `specs/active.yml`, `continue`) — esses mantêm a forma original. Selos, badges, títulos e legendas: sempre pt-BR.
+TODO texto renderizado na imagem deve ser em **Português do Brasil (pt-BR)**. NÃO gerar texto em inglês. A única exceção são identificadores em monospace que são literais de comando/código (`npx ai-guidelines`, `tasks.md`, `review.md`, `release-log.md`, `specs/active.yml`, `continue`) — esses mantêm a forma original. Selos, badges, títulos e legendas: sempre pt-BR.
 </prompt>
 
 ---
@@ -182,7 +182,7 @@ TODO texto renderizado na imagem deve ser em **Português do Brasil (pt-BR)**. N
 Use para validar a imagem gerada antes de salvar em `docs/assets/ai-guidelines-dx-flow.png`:
 
 - [ ] **4 momentos** legíveis da esquerda para a direita, conectados por luz/geometria (não por setas duras).
-- [ ] **Momento 1:** prompt `npx ai-guidelines workflow` + wizard com **8 opções** (sugerir as 3-4 primeiras com ícones 📍 📡 🔗 🔀).
+- [ ] **Momento 1:** prompt `npx ai-guidelines` + wizard situado com opções contextuais (sugerir as 3-4 primeiras com ícones 📍 📡 🔗 🔀).
 - [ ] **Momento 2:** leitura convergente dos artifacts agrupados nos **3 boundaries** (`tasks.md` / `review.md` / `release-log.md`); pode haver cartão "contexto pronto para colar".
 - [ ] **Momento 3:** projeção para o índice público `specs/active.yml` (mini-tabela id/slug/branch/stage/status) + selo "descoberta cross-machine".
 - [ ] **Momento 4:** governança ativa narrativa (`continue` recusa) **+** ops 🔗/🔀 com cadeado (bloqueadas por gates abertos do `review.md`).

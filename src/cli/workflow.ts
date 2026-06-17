@@ -51,7 +51,7 @@ import {
 import { FileInsightStore } from "../infrastructure/yaml/FileInsightStore.js";
 import { NodeWorkflowFileSystem } from "../infrastructure/filesystem/NodeWorkflowFileSystem.js";
 import { NodeClipboard, clipboardInstallHint } from "../infrastructure/io/NodeClipboard.js";
-import { InquirerPrompts } from "../infrastructure/io/InquirerPrompts.js";
+import { ClackPrompts } from "../infrastructure/io/ClackPrompts.js";
 import { ClipboardWriter } from "../app/ports/ClipboardWriter.js";
 import { Prompts } from "../app/ports/Prompts.js";
 import { WorkflowFileSystem } from "../app/ports/WorkflowFileSystem.js";
@@ -720,7 +720,7 @@ export function renderIntegrationReadinessBlock(
     : isIntegration
       ? [
           "Feche os gates R1–R7 no review.md (homologação) e marque-os [x].",
-          "Rode `npm run guidelines -- workflow` de novo — a opção 4 abre quando R1–R7 fecharem.",
+          "Rode `npm run flow -- workflow` de novo — a opção 4 abre quando R1–R7 fecharem.",
         ]
       : [
           "Feche R1–R8 no review.md, incluindo R8 (merge authorization explícita do owner).",
@@ -1096,7 +1096,7 @@ export function buildTopMenu(catalog: readonly Intent[]) {
  */
 export async function runWorkflow(options: RunOptions): Promise<number> {
   const logger = options.logger ?? stdoutLogger;
-  const prompts = options.prompts ?? new InquirerPrompts();
+  const prompts = options.prompts ?? new ClackPrompts();
 
   let choice: string;
   try {
@@ -1176,7 +1176,7 @@ async function selectIntentAction(
 export async function runAdvancedOps(options: RunOptions): Promise<number> {
   const logger = options.logger ?? stdoutLogger;
   const fs = options.fs ?? new NodeWorkflowFileSystem(options.repoRoot);
-  const prompts = options.prompts ?? new InquirerPrompts();
+  const prompts = options.prompts ?? new ClackPrompts();
   const clipboard = options.clipboard ?? new NodeClipboard();
   const loadIndex = options.loadActiveSpecsIndex ?? defaultLoadActiveSpecsIndex(fs);
 
@@ -1208,7 +1208,7 @@ export async function runAdvancedOps(options: RunOptions): Promise<number> {
       logger.info(
         "Índice operacional público (.governance/runtime/specs/active.yml) não encontrado."
       );
-      logger.info("Dica: rode `npm run guidelines -- workflow publish-state` na branch da spec.");
+      logger.info("Dica: rode `npm run flow -- workflow publish-state` na branch da spec.");
       return 0;
     }
     const driftCount = result.entries.filter((e) => !e.specPathExists).length;
@@ -1229,7 +1229,7 @@ export async function runAdvancedOps(options: RunOptions): Promise<number> {
 
   if (choice.kind === "publish-state-help") {
     logger.info(
-      "Comando: npm run guidelines -- workflow publish-state --status=<active|blocked|paused|completed> --updated-by=<@autor> [--title=<título>]"
+      "Comando: npm run flow -- workflow publish-state --status=<active|blocked|paused|completed> --updated-by=<@autor> [--title=<título>]"
     );
     logger.info("Estado da spec corrente é projetado de state.yml para specs/active.yml.");
     logger.info("Detalhes: .governance/specs/0023-workflow-runtime/decision-brief.md § Bloco G.");
@@ -1357,7 +1357,7 @@ export async function runContinue(options: RunOptions, identifier?: string): Pro
         `Índice operacional público (.governance/runtime/specs/active.yml) não encontrado.`
       );
       logger.error(
-        `Dica: rode \`npm run guidelines -- workflow publish-state\` na branch da spec primeiro.`
+        `Dica: rode \`npm run flow -- workflow publish-state\` na branch da spec primeiro.`
       );
       return 1;
     }
@@ -1381,7 +1381,7 @@ export async function runContinue(options: RunOptions, identifier?: string): Pro
       );
       logger.error(
         `Dica: \`git fetch origin && git checkout ${found.entry.branch}\` ` +
-          `para carregar o working tree da spec, depois rode \`npm run guidelines -- continue\` de novo.`
+          `para carregar o working tree da spec, depois rode \`npm run flow -- continue\` de novo.`
       );
       return 1;
     }
@@ -1434,7 +1434,7 @@ function projectInsights(fs: WorkflowFileSystem, logger: Logger): void {
 }
 
 /**
- * Argumentos parseados de `npm run guidelines -- workflow publish-state ...`.
+ * Argumentos parseados de `npm run flow -- workflow publish-state ...`.
  * Estritamente declarativos — nenhum valor é inferido (nem `updatedBy`
  * via git config, nem `lastSyncCommit` via HEAD). Cf. memory
  * `feedback-lookup-not-coordination` — sem inferência de intenção.

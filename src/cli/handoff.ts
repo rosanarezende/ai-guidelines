@@ -95,7 +95,7 @@ interface ProjectionIndex {
 }
 
 const RECONCILE_COMMAND =
-  "npm run guidelines -- workflow publish-state --status=<status> --updated-by=<@autor>";
+  "npm run flow -- workflow publish-state --status=<status> --updated-by=<@autor>";
 
 const AUTHORITY_FILES = [
   "AGENTS.md",

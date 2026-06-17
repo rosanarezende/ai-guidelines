@@ -69,6 +69,7 @@ export class WorkflowCommand implements Command<WorkflowOptions> {
     const code = await this.workflowMainFn(["workflow"], {
       repoRoot: context.repoRoot,
       logger: context.logger,
+      ...(context.prompts ? { prompts: context.prompts } : {}),
     });
     return { exitCode: code };
   }

@@ -404,3 +404,48 @@ Falsificacao adicionada:
   os atos correspondentes;
 - prova que sub-checkpoint terminal com readiness nao tenta
   `advance-subcheckpoint` indevido.
+
+## Dogfood CO-10.2 — `flow` como wizard governado principal
+
+Nova divergencia observada durante a propria implementacao do CO-10.2:
+
+- o comando humano local ainda se chamava `npm run guidelines`;
+- `npm run guidelines` sem subcomando renderizava cockpit textual, mas a
+  expectativa humana era abrir um wizard didatico em TTY;
+- o wizard antigo ainda tinha vinculo conceitual com Inquirer;
+- docs e templates ativos ainda ensinavam `npm run guidelines`;
+- a superficie publica `providers` ja havia sido removida, mas docs antigas
+  ainda citavam `npx ai-guidelines providers`.
+
+Correcao aplicada nesta fatia:
+
+1. `npm run flow` virou a superficie humana local canonica.
+2. `npm run flow` em TTY abre o wizard governado com Clack.
+3. `npm run flow` em non-TTY renderiza o cockpit textual, sem tentar prompt.
+4. `npm run flow -- cockpit` renderiza o cockpit diretamente pelo registry.
+5. `npm run flow -- <comando>` continua roteando para o registry ativo.
+6. `@inquirer/*` e `InquirerPrompts` foram removidos; `ClackPrompts` e o unico
+   adapter interativo.
+7. O wizard nao calcula readiness/Human Gate por conta propria: ele consome o
+   modelo comum do cockpit/GovernedFlow e delega mutacoes ao registry.
+8. `init`, `adopt` e `update` aparecem na secao de provisioning; `providers`
+   nao aparece como comando nem como opcao de menu.
+
+Falsificacao adicionada:
+
+- teste prova que o menu principal expoe cockpit/provisioning e nao lista
+  `providers`;
+- teste prova que `npm run flow` em TTY chama o wizard injetado;
+- teste prova que `npm run flow` em non-TTY chama cockpit e nao prompt;
+- teste prova que provisioning lista `init`/`adopt`/`update` sem `providers`;
+- guard prova que `package.json#scripts` nao reintroduz `guidelines*`;
+- guard prova que dependencias `@inquirer/*` nao voltam.
+
+Resultado pretendido:
+
+- humanos usam `npm run flow` como porta principal;
+- `npx ai-guidelines` permanece como binario publico;
+- `providers` permanece removido; o caminho canonico e
+  `update --providers <lista>`;
+- a UX interativa vira uma projecao do mesmo modelo de fluxo, nao uma nova
+  fonte de verdade.

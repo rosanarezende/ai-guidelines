@@ -36,8 +36,8 @@ OBJETIVO VISUAL
 
 Mostrar 1 ciclo típico com o framework, em **4 momentos honestos**:
 
-1. RETOMADA: `yarn guidelines continue` — wizard exibe o briefing da spec ativa e verifica se a execução está autorizada. Se `tasks.md` tiver tasks abertas, o runtime libera. Se não tiver, bloqueia com mensagem narrativa.
-2. NAVEGAÇÃO: `yarn guidelines workflow` — o wizard aparece com opções declarativas para o estágio atual da spec. As opções disponíveis dependem do estado: algumas estão ativas, outras bloqueadas por gates ainda abertos.
+1. RETOMADA: `npm run flow -- continue` — o runtime exibe o briefing da spec ativa e verifica se a execução está autorizada. Se `tasks.md` tiver tasks abertas, o runtime libera. Se não tiver, bloqueia com mensagem narrativa.
+2. NAVEGAÇÃO: `npm run flow` — o wizard aparece com opções declarativas para o estágio atual da spec. As opções disponíveis dependem do estado: algumas estão ativas, outras bloqueadas por gates ainda abertos.
 3. PREPARO: a branch sendo fechada antes do merge — spec marcada como Done, NEXT.md deletado, historico atualizado. Checklist visual com itens sendo marcados. Nenhum trabalho pendente na branch.
 4. ENCERRAMENTO: `merge-stack unit` executa — 1 commit canônico chega em `main`, os PRs da stack são fechados automaticamente com referência ao SHA. O merge é o encerramento.
 
@@ -80,10 +80,10 @@ COMPOSIÇÃO
 Layout horizontal em 4 momentos com transições orgânicas:
 
 **Momento 1 — esquerda** (~25% da largura):
-Terminal com `yarn guidelines continue`. Logo abaixo, o runtime exibe o briefing da spec ativa — nome da spec, stage atual, o que está aberto em `tasks.md`. Duas ramificações sutis: caminho verde (execução liberada, tasks autorizadas) e caminho terracota (bloqueado, `tasks.md` ausente ou sem tasks abertas). A mensagem de bloqueio aparece como texto humano, não como erro corporativo. Accent principal #5EEAD4.
+Terminal com `npm run flow -- continue`. Logo abaixo, o runtime exibe o briefing da spec ativa — nome da spec, stage atual, o que está aberto em `tasks.md`. Duas ramificações sutis: caminho verde (execução liberada, tasks autorizadas) e caminho terracota (bloqueado, `tasks.md` ausente ou sem tasks abertas). A mensagem de bloqueio aparece como texto humano, não como erro corporativo. Accent principal #5EEAD4.
 
 **Momento 2 — centro-esquerda** (~25%):
-Terminal com `yarn guidelines workflow`. O wizard aparece com 4-5 opções visíveis (não detalhar todas). Algumas opções têm ícone de cadeado discreto — bloqueadas porque gates de prontidão ainda estão abertos. Outras estão ativas. A sensação é de menu contextual que sabe o que está disponível no momento. Linhas finas conectam o estado do `review.md` às opções do menu.
+Terminal com `npm run flow`. O wizard aparece com 4-5 opções visíveis (não detalhar todas). Algumas opções têm ícone de cadeado discreto — bloqueadas porque gates de prontidão ainda estão abertos. Outras estão ativas. A sensação é de menu contextual que sabe o que está disponível no momento. Linhas finas conectam o estado do `review.md` às opções do menu.
 
 **Momento 3 — centro-direita** (~25%):
 A branch sendo preparada para o merge. Checklist visual com 5-6 itens — alguns já marcados com check, um ou dois sendo completados agora. Itens visíveis (em monospace): `spec.md → Done`, `NEXT.md deletado`, `historico.md atualizado`. Sensação de fechamento meticuloso, sem pressa, sem dívida. Accent em #86EFAC nos itens marcados.
@@ -99,10 +99,10 @@ TEXTO LITERAL DO TERMINAL (renderizar exatamente, sem traduzir)
 
 Para reduzir alucinação do gerador, use estas linhas reais do runtime nos terminais/cartões (monospace, exatamente como saem na CLI):
 
-- Momento 1 (prompt): `> yarn guidelines continue`
+- Momento 1 (prompt): `> npm run flow -- continue`
 - Momento 1 (liberado): `✅ Execução autorizada — tasks abertas encontradas em tasks.md`
 - Momento 1 (bloqueado): `🔒 Execução bloqueada — tasks.md ausente ou sem tasks abertas`
-- Momento 2 (prompt): `> yarn guidelines workflow`
+- Momento 2 (prompt): `> npm run flow`
 - Momento 4 (encerramento): `✅ Stack mergeada · PRs fechados · 1 SHA canônico em main`
 
 NÃO renderizar identificadores internos (`DEC-…`, `ADR-…`, `[1.H]`) no texto visível.
@@ -140,7 +140,7 @@ A pessoa que olha precisa sentir, sem ler nada:
 LÍNGUA (NÃO-NEGOCIÁVEL)
 ————————————————————
 
-TODO texto renderizado na imagem deve ser em **Português do Brasil (pt-BR)**. NÃO gerar texto em inglês. A única exceção são identificadores em monospace que são literais de comando/código (`yarn guidelines continue`, `yarn guidelines workflow`, `tasks.md`, `review.md`, `spec.md`, `NEXT.md`, `merge-stack unit`, `main`) — esses mantêm a forma original. Selos, badges, títulos e legendas: sempre pt-BR.
+TODO texto renderizado na imagem deve ser em **Português do Brasil (pt-BR)**. NÃO gerar texto em inglês. A única exceção são identificadores em monospace que são literais de comando/código (`npm run flow -- handoff`, `npm run flow`, `tasks.md`, `review.md`, `spec.md`, `NEXT.md`, `merge-stack unit`, `main`) — esses mantêm a forma original. Selos, badges, títulos e legendas: sempre pt-BR.
 </prompt>
 
 ---
@@ -150,8 +150,8 @@ TODO texto renderizado na imagem deve ser em **Português do Brasil (pt-BR)**. N
 Use para validar a imagem gerada antes de salvar em `docs/assets/ai-guidelines-workflow-guide.png`:
 
 - [ ] **4 momentos** legíveis da esquerda para a direita, conectados por luz/geometria (não por setas duras).
-- [ ] **Momento 1:** `yarn guidelines continue` + briefing da spec + duas ramificações (liberado / bloqueado).
-- [ ] **Momento 2:** `yarn guidelines workflow` + wizard com opções contextuais (algumas com cadeado, outras ativas).
+- [ ] **Momento 1:** `npm run flow -- continue` + briefing da spec + duas ramificações (liberado / bloqueado).
+- [ ] **Momento 2:** `npm run flow` + wizard com opções contextuais (algumas com cadeado, outras ativas).
 - [ ] **Momento 3:** checklist de closure com itens visíveis (`spec.md → Done`, `NEXT.md deletado`, `historico.md atualizado`).
 - [ ] **Momento 4:** `merge-stack unit` + 1 SHA em `main` + PRs da stack fechados em cascata.
 - [ ] **Kernel** `.governance/` discreto na base conectando os 4 momentos.

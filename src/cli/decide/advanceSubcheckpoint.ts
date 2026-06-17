@@ -7,7 +7,7 @@
  * próximo `[ ]→[/]`) por edição ESTRUTURADA (por id + marcador), preservando
  * descrição/indentação/comentários/encoding/line endings e todo o resto.
  *
- * Consistência com `guidelines work`: a elegibilidade vem da derivação ÚNICA
+ * Consistência com `npm run flow -- work`: a elegibilidade vem da derivação ÚNICA
  * `deriveAdvanceEligibility` (advanceEligibility.ts) — a MESMA que `work` consome
  * sobre o mesmo snapshot factual. `decide` e `work` nunca divergem na pergunta "a
  * transição pode ser exercida?". Antes de escrever, simula o estado projetado e
@@ -167,7 +167,7 @@ export class AdvanceSubcheckpointDefinition implements HumanDecisionDefinition {
       ? [
           `${active!.id} será marcado como concluído.`,
           `${next.id} será marcado como ativo.`,
-          "`guidelines work` passará a apontá-lo como objeto de implementação.",
+          "`npm run flow -- work` passará a apontá-lo como objeto de implementação.",
         ]
       : terminalNoNext
         ? [
@@ -358,7 +358,7 @@ export class AdvanceSubcheckpointDefinition implements HumanDecisionDefinition {
         { label: `${pair.next.id} em tasks.md`, expected: "[ ] (pendente)" },
       ],
       nextHuman: [
-        `\`guidelines work\` passará a apontar ${pair.next.id} como objeto de IMPLEMENT_CHECKPOINT.`,
+        `\`npm run flow -- work\` passará a apontar ${pair.next.id} como objeto de IMPLEMENT_CHECKPOINT.`,
         "A transição NÃO implementou o próximo sub-checkpoint nem autorizou Ready/Human Gate/gate/merge.",
       ],
       note: [],

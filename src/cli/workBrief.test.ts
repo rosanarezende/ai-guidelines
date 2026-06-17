@@ -667,12 +667,12 @@ describe("workBrief · próxima ação estruturada [work]", () => {
     expect(b.object.subCheckpoint?.id).toBe("CO-3.2");
     expect(b.nextAction.description).toBe("Concluir CO-3.2 e ativar CO-3.3.");
     expect(b.nextAction.commands.length).toBeLessThanOrEqual(3);
-    expect(commandOf(b, "recommended")).toBe("npm run guidelines -- decide");
+    expect(commandOf(b, "recommended")).toBe("npm run flow -- decide");
     expect(commandOf(b, "read-only")).toBe(
-      "npm run guidelines -- decide --type advance-subcheckpoint --brief-only"
+      "npm run flow -- decide --type advance-subcheckpoint --brief-only"
     );
     expect(commandOf(b, "after")).toBe(
-      "npm run guidelines -- work --authorization explicit-work-request"
+      "npm run flow -- work --authorization explicit-work-request"
     );
     expect(b.nextAction.stillForbidden).toEqual(
       expect.arrayContaining([
@@ -698,7 +698,7 @@ describe("workBrief · próxima ação estruturada [work]", () => {
     expect(b.mode).toBe("prepare_subcheckpoint_transition");
     expect(b.nextAction.description).toBe("Concluir CO-3.1 e ativar CO-3.2.");
     expect(commandOf(b, "read-only")).toBe(
-      "npm run guidelines -- decide --type advance-subcheckpoint --brief-only"
+      "npm run flow -- decide --type advance-subcheckpoint --brief-only"
     );
   });
 
@@ -720,9 +720,7 @@ describe("workBrief · próxima ação estruturada [work]", () => {
     });
     expect(b.mode).toBe("prepare_close");
     expect(b.nextAction.decisionType).toBe("human-gate");
-    expect(commandOf(b, "read-only")).toBe(
-      "npm run guidelines -- decide --type human-gate --brief-only"
-    );
+    expect(commandOf(b, "read-only")).toBe("npm run flow -- decide --type human-gate --brief-only");
     expect(b.nextAction.commands.some((c) => c.command.includes("advance-subcheckpoint"))).toBe(
       false
     );
@@ -732,7 +730,7 @@ describe("workBrief · próxima ação estruturada [work]", () => {
     const b = derive({ nextAction: nextAction("resolve-findings"), findings: [finding()] });
     expect(b.mode).toBe("await_revalidation");
     expect(commandOf(b, "read-only")).toBe(
-      "npm run guidelines -- decide --type close-dispositions --brief-only"
+      "npm run flow -- decide --type close-dispositions --brief-only"
     );
     expect(b.nextAction.stillForbidden).toContain("Criar o gate artifact");
   });
@@ -742,9 +740,7 @@ describe("workBrief · próxima ação estruturada [work]", () => {
     expect(b.mode).toBe("prepare_close");
     expect(b.nextAction.commands).toHaveLength(1);
     expect(b.nextAction.commands[0].role).toBe("read-only");
-    expect(commandOf(b, "read-only")).toBe(
-      "npm run guidelines -- decide --type human-gate --brief-only"
-    );
+    expect(commandOf(b, "read-only")).toBe("npm run flow -- decide --type human-gate --brief-only");
     expect(commandOf(b, "recommended")).toBeUndefined();
     expect(b.nextAction.description).toMatch(/BLOQUEADO/);
   });
@@ -762,10 +758,8 @@ describe("workBrief · próxima ação estruturada [work]", () => {
     });
     expect(b.mode).toBe("current");
     expect(b.nextAction.commands).toHaveLength(3);
-    expect(commandOf(b, "recommended")).toBe("npm run guidelines -- decide");
-    expect(commandOf(b, "read-only")).toBe(
-      "npm run guidelines -- decide --type human-gate --brief-only"
-    );
+    expect(commandOf(b, "recommended")).toBe("npm run flow -- decide");
+    expect(commandOf(b, "read-only")).toBe("npm run flow -- decide --type human-gate --brief-only");
   });
 
   it("[43] ESTADO SEM DECISÃO (resolve_findings) ⇒ NÃO inventa `decide`", () => {
@@ -821,7 +815,7 @@ describe("workBrief · próxima ação estruturada [work]", () => {
       brief: b,
     });
     expect(out).toContain("comandos governados disponíveis:");
-    expect(out).toContain("npm run guidelines -- decide --type advance-subcheckpoint --brief-only");
+    expect(out).toContain("npm run flow -- decide --type advance-subcheckpoint --brief-only");
     expect(out).toContain("continua proibido:");
     expect(out).toContain("Exercer o Human Gate");
   });
@@ -849,7 +843,7 @@ describe("workBrief · próxima ação estruturada [work]", () => {
     expect(b.nextAction.commands).toHaveLength(1);
     expect(b.nextAction.commands[0].role).toBe("read-only");
     expect(commandOf(b, "read-only")).toBe(
-      "npm run guidelines -- decide --type advance-subcheckpoint --brief-only"
+      "npm run flow -- decide --type advance-subcheckpoint --brief-only"
     );
     expect(b.nextAction.decisionType).toBe("advance-subcheckpoint");
     expect(b.nextAction.description).toMatch(/BLOQUEADO/);
@@ -870,7 +864,7 @@ describe("workBrief · próxima ação estruturada [work]", () => {
       advanceEligibility: { status: "available", reasons: [] },
     });
     expect(available.nextAction.decisionType).toBe("advance-subcheckpoint");
-    expect(commandOf(available, "recommended")).toBe("npm run guidelines -- decide");
+    expect(commandOf(available, "recommended")).toBe("npm run flow -- decide");
 
     const blocked = derive({
       nextAction: nextAction("investigate-checkpoint"),

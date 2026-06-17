@@ -324,7 +324,7 @@ export function runReviewTypeAdd(
       `   - aplicabilidade: ${args.profiles.length > 0 ? args.profiles.join(", ") : "qualquer PR"} (avaliação: ${applicability.value})`
     );
     logger.info(`   - requirement default: ${requirement.level} (${requirement.source})`);
-    logger.info(`   - briefing imediato: npm run guidelines -- review ${slug.replace(/_/g, "-")}`);
+    logger.info(`   - briefing imediato: npm run flow -- review ${slug.replace(/_/g, "-")}`);
     return 0;
   } catch (e) {
     logger.error(

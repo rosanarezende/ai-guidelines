@@ -105,7 +105,7 @@ Disposição escolhida deve transmitir: editorial premium · contrato fechado ·
 `npx ai-guidelines adopt`
 "baseline em repo existente"
 
-`npx ai-guidelines workflow`
+`npx ai-guidelines`
 "menu operacional"
 
 `npx ai-guidelines continue`

@@ -37,12 +37,14 @@ function context(logger: Logger, prompts?: Prompts): CommandContext {
 
 class ScriptedPrompts implements Prompts {
   readonly selectCalls: Array<{ message: string; choices: readonly unknown[] }> = [];
+  readonly multiselectCalls: Array<{ message: string; choices: readonly unknown[] }> = [];
   readonly inputCalls: Array<{ message: string; defaultValue?: string }> = [];
   readonly confirmCalls: Array<{ message: string; defaultValue?: boolean }> = [];
 
   constructor(
     private readonly answers: {
       readonly select?: Record<string, string>;
+      readonly multiselect?: Record<string, readonly string[]>;
       readonly input?: Record<string, string>;
       readonly confirm?: Record<string, boolean>;
     } = {}
@@ -55,6 +57,19 @@ class ScriptedPrompts implements Prompts {
       return answer as T;
     }
     return options.choices[0].value;
+  }
+
+  async multiselect<T>(options: {
+    message: string;
+    choices: ReadonlyArray<{ value: T }>;
+    defaultValues?: ReadonlyArray<T>;
+  }): Promise<readonly T[]> {
+    this.multiselectCalls.push({ message: options.message, choices: options.choices });
+    const answer = this.answers.multiselect?.[options.message];
+    if (answer !== undefined) {
+      return answer as readonly T[];
+    }
+    return options.defaultValues ?? [];
   }
 
   async input(options: { message: string; default?: string }): Promise<string> {
@@ -263,7 +278,7 @@ describe("bootstrap delivery 2c — parse/help/registry", () => {
     );
 
     expect(result.exitCode).toBe(1);
-    expect(errors.join("\n")).toContain("Use: guidelines update --providers <lista>");
+    expect(errors.join("\n")).toContain("Use: npm run flow -- update --providers <lista>");
     expect(runtime.provisioner.calls).toEqual([]);
   });
 
@@ -344,7 +359,10 @@ describe("bootstrap delivery 2c — run", () => {
 describe("bootstrap delivery 2c — wizard", () => {
   it("sem argumentos abre fluxo interativo novo e escolhe init", async () => {
     const { runtime, delivery: bootstrap } = delivery();
-    const prompts = new ScriptedPrompts({ select: { Operation: "init" } });
+    const prompts = new ScriptedPrompts({
+      select: { Operation: "init" },
+      confirm: { "Aplicar este plano?": true },
+    });
     const { logger } = capturingLogger();
 
     const result = await bootstrap.dispatch([], context(logger, prompts));
@@ -360,7 +378,10 @@ describe("bootstrap delivery 2c — wizard", () => {
 
   it("wizard permite escolha adopt e preserva defaults", async () => {
     const { runtime, delivery: bootstrap } = delivery();
-    const prompts = new ScriptedPrompts({ select: { Operation: "adopt" } });
+    const prompts = new ScriptedPrompts({
+      select: { Operation: "adopt" },
+      confirm: { "Aplicar este plano?": true },
+    });
     const { logger } = capturingLogger();
 
     await bootstrap.dispatch([], context(logger, prompts));
@@ -379,7 +400,8 @@ describe("bootstrap delivery 2c — wizard", () => {
     const { runtime, delivery: bootstrap } = delivery();
     const prompts = new ScriptedPrompts({
       select: { Operation: "update" },
-      input: { Providers: "claude,openai" },
+      multiselect: { Providers: ["claude", "openai"] },
+      confirm: { "Aplicar este plano?": true },
     });
     const { logger } = capturingLogger();
 

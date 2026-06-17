@@ -333,7 +333,7 @@ describe("handoff · loadHandoff (contrato de carga) [CO-4]", () => {
     const raw = fs.readFileSync(result.receiptFile!, "utf8");
 
     expect(raw).not.toMatch(/##|canonical-next|Escopo|Visão pretendida/);
-    expect(JSON.parse(raw).command).toBe("npm run guidelines -- handoff 0024");
+    expect(JSON.parse(raw).command).toBe("npm run flow -- handoff 0024");
   });
 
   it("DADO uma carga ENTÃO snapshot único — coletor remoto invocado exatamente 1 vez", () => {

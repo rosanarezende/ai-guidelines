@@ -3,7 +3,7 @@
 PERFIL: 🔗 INTEGRATION (contrato-base comum + perfil por tipo de PR)
 
 Caminho canônico: o Integration PR é aberto pelo comando
-`npm run guidelines -- workflow` (opção "Abrir Integration PR") a partir do
+`npm run flow -- workflow` (opção "Abrir Integration PR") a partir do
 arquivo de autoria `integration-pr.md` da spec — instanciado do boilerplate
 `.specify/templates/integration-pr-boilerplate.md`. Este template GitHub
 existe para o caminho manual e espelha o MESMO perfil.

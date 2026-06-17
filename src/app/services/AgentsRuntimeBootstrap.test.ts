@@ -8,7 +8,10 @@ describe("AgentsRuntimeBootstrap", () => {
 
     expect(result).toContain("## Local");
     expect(result).toContain("<AI_GUIDELINES>");
-    expect(result).toContain("Consumer-local ai-guidelines assets live under `.custom/`.");
+    expect(result).toContain(
+      "Consumer-local ai-guidelines assets currently live under the `.custom/` bridge"
+    );
+    expect(result).toContain("dualroot-collapse");
     expect(result).toContain("</AI_GUIDELINES>");
   });
 

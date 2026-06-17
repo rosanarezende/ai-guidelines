@@ -56,7 +56,22 @@ describe("CO-3.5 runtime collapse guard", () => {
     expect(JSON.stringify(pkg.imports ?? {})).not.toContain("./cli/");
     expect(JSON.stringify(pkg.scripts)).not.toContain("node cli/");
     expect(JSON.stringify(pkg.scripts)).not.toContain('"cli/**/*.test.mjs"');
+    expect(pkg.scripts).not.toHaveProperty("guidelines");
+    expect(Object.keys(pkg.scripts ?? {}).filter((name) => name.startsWith("guidelines:"))).toEqual(
+      []
+    );
     expect(pkg.scripts).not.toHaveProperty("guidelines:providers");
+  });
+
+  it("package.json não reintroduz Inquirer como dependência de runtime ou teste", () => {
+    const pkg = readJson("package.json");
+    const dependencyNames = [
+      ...Object.keys(pkg.dependencies ?? {}),
+      ...Object.keys(pkg.devDependencies ?? {}),
+      ...Object.keys(pkg.optionalDependencies ?? {}),
+    ];
+
+    expect(dependencyNames.filter((name) => name.startsWith("@inquirer/"))).toEqual([]);
   });
 
   it("fontes e testes não importam runtime /cli e não reintroduzem legado", () => {

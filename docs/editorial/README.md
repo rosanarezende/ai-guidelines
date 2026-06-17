@@ -2,11 +2,11 @@
 
 Prompts editoriais específicos do framework `ai-guidelines` para imagens do README e material institucional. Diferentes dos templates em [`.governance/visual-prompts/`](../../.governance/visual-prompts/) em dois eixos:
 
-| Eixo             | `.governance/visual-prompts/`                                | `docs/editorial/` (este diretório)                                     |
-| ---------------- | ------------------------------------------------------------ | ---------------------------------------------------------------------- |
-| **Tipo**         | Briefing dirigido a IA conversacional (IA investiga o repo). | Prompt direto para gerador de imagem (Midjourney/DALL-E/Claude).       |
-| **Genericidade** | Genérico — funciona em qualquer repo via wizard CLI.         | Específico ao framework — descreve a arquitetura própria.              |
-| **Invocação**    | `yarn guidelines workflow` → opção 6 (clipboard automático). | Leitura manual + copy-paste do bloco `<prompt>` em ferramenta externa. |
+| Eixo             | `.governance/visual-prompts/`                                   | `docs/editorial/` (este diretório)                                     |
+| ---------------- | --------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| **Tipo**         | Briefing dirigido a IA conversacional (IA investiga o repo).    | Prompt direto para gerador de imagem (Midjourney/DALL-E/Claude).       |
+| **Genericidade** | Genérico — funciona em qualquer repo via wizard CLI.            | Específico ao framework — descreve a arquitetura própria.              |
+| **Invocação**    | `npm run flow` → opção de prompt visual (clipboard automático). | Leitura manual + copy-paste do bloco `<prompt>` em ferramenta externa. |
 
 ## Templates atuais
 

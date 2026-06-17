@@ -116,7 +116,7 @@ describe("cockpit situado", () => {
     expect(out).toMatch(/CO-10\.1/);
     expect(out).toMatch(/Declarar readiness/);
     expect(out).toMatch(
-      /npm run guidelines -- decide --type mark-readiness --decision mark-ready --authorization explicit-human-decision --confirm/
+      /npm run flow -- decide --type mark-readiness --decision mark-ready --authorization explicit-human-decision --confirm/
     );
   });
 
@@ -184,8 +184,8 @@ describe("cockpit situado", () => {
       decisions: [],
     });
 
-    expect(out).toMatch(/npm run guidelines -- handoff 0024/);
-    expect(out).toMatch(/npm run guidelines -- work --authorization explicit-work-request/);
+    expect(out).toMatch(/npm run flow -- handoff 0024/);
+    expect(out).toMatch(/npm run flow -- work --authorization explicit-work-request/);
     expect(out).toMatch(/Não avançar para CO-10\.2/);
     expect(out).toMatch(/Fazer merge/);
   });

@@ -78,7 +78,7 @@ describe("BootstrapCommand flip — caminho ativo via dist", () => {
 
       expect(result.exitCode).toBe(1);
       expect(result.stderr).toContain('Comando não suportado: "providers"');
-      expect(result.stderr).toContain("guidelines update --providers");
+      expect(result.stderr).toContain("npm run flow -- update --providers");
     });
   });
 

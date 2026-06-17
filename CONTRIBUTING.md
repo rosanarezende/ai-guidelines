@@ -84,7 +84,7 @@ Quando: várias candidatas no backlog tocam o mesmo contrato e fazem mais sentid
 Quando: você está executando trabalho via Claude Code, Gemini CLI, Codex, Cursor, Antigravity ou similar.
 
 1. Ler [`AGENTS.md`](AGENTS.md) — bootstrap curto do canal IA e regras locais de autoridade.
-2. Para sessão IA nova, gerar contexto situado com `npm run guidelines -- handoff [spec]`; regras completas vivem em [`.core/rules/catalog.md`](.core/rules/catalog.md) e nos artefatos apontados pelo handoff.
+2. Para sessão IA nova, gerar contexto situado com `npm run flow -- handoff [spec]`; regras completas vivem em [`.core/rules/catalog.md`](.core/rules/catalog.md) e nos artefatos apontados pelo handoff.
 3. Seguir **PR description colaborativo (3 etapas)**:
    - Listar tópicos relevantes para validação humana **antes** do texto final;
    - Só escrever o texto após o humano editar/aprovar a lista;
@@ -156,7 +156,7 @@ Cada conteúdo vive em **um único lugar**; outros documentos apenas linkam:
 
 Antes de começar, leia:
 
-- [`AGENTS.md`](AGENTS.md) — bootstrap obrigatório do canal IA; use `npm run guidelines -- handoff [spec]` para contexto situado.
+- [`AGENTS.md`](AGENTS.md) — bootstrap obrigatório do canal IA; use `npm run flow -- handoff [spec]` para contexto situado.
 - [`.core/rules/catalog.md`](.core/rules/catalog.md) — índice das regras completas.
 - [`.core/process/governance-foundation.md`](.core/process/governance-foundation.md) — quando abrir spec, como estruturar `spec.md`/`plan.md`/`tasks.md` e como fechar débitos/research.
 - [`.governance/specs/roadmap/backlog.md`](.governance/specs/roadmap/backlog.md) — backlog e candidatas (canônico). O legado em [`.specify/specs/roadmap/backlog.md`](.specify/specs/roadmap/backlog.md) permanece como referência histórica até cutover caso-a-caso.
@@ -165,7 +165,7 @@ Antes de começar, leia:
 
 ## Setup local de desenvolvimento
 
-Este repositório é o **framework canônico**, não apenas um exemplo de consumo: alterações em `.core/`, `cli/` e nos templates SDD mudam o baseline distribuído via npm para todos os repositórios consumidores.
+Este repositório é o **framework canônico**, não apenas um exemplo de consumo: alterações em `.core/`, `src/cli` e nos templates SDD mudam o baseline distribuído via npm para todos os repositórios consumidores.
 
 ### Pré-requisitos
 
@@ -185,29 +185,30 @@ npm run validate             # gate local: format:check + build:all + test + liv
 
 ### Operando a CLI a partir deste repositório
 
-Use **`npm run guidelines -- …`** em vez de `npx ai-guidelines …`. Assim o código em desenvolvimento roda direto do checkout (com `dist/` local quando aplicável), sem depender do tarball publicado:
+Use **`npm run flow -- …`** em vez de `npx ai-guidelines …`. Assim o código em desenvolvimento roda direto do checkout (com `dist/` local quando aplicável), sem depender do tarball publicado:
 
 ```bash
-npm run guidelines -- init    --target ../meu-projeto --name meu-projeto
-npm run guidelines -- adopt   --target ../repo-existente --dry-run
-npm run guidelines -- update  --target ../repo --dry-run
+npm run flow -- init    --target ../meu-projeto --name meu-projeto
+npm run flow -- adopt   --target ../repo-existente --dry-run
+npm run flow -- update  --target ../repo --dry-run
 ```
 
-Prefira `npm run guidelines -- …` a invocar `node cli/ai-guidelines-cli.mjs …` direto — o script canônico mantém uma única forma de invocação documentada (e o mesmo entry-point dos hooks/CI).
+Prefira `npm run flow -- …` a invocar `node dist/cli/main.js …` direto — o script canônico mantém uma única forma de invocação documentada para o checkout local.
 
 ### Operando o ciclo da spec (workflow runtime, Spec 0023)
 
 Para conduzir o ciclo de uma spec (não para distribuir baseline), use os comandos do workflow runtime. Todos têm `--help`; o wizard sem argumentos lista as opções.
 
-| Comando                                                   | Para quê                                                                                                                                                      |
-| :-------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `npm run guidelines -- workflow`                          | Wizard operacional: navegar specs ativas, retomar, publicar estado, drift, abrir Integration PR, merge atômico (modos `unit`/`sequential` — ver docs/cli §11) |
-| `npm run guidelines -- continue [<id\|slug>]`             | Briefing da spec ativa + gate de execução (recusa narrativa se não autorizada)                                                                                |
-| `npm run guidelines -- review [<pr>]`                     | Reúne/estrutura os comentários de review de um PR (read-only) para colar na IA                                                                                |
-| `npm run guidelines -- workflow publish-state --status=…` | Projeta o estado interno da spec no índice público `active-specs.yml`                                                                                         |
-| `npm run guidelines -- release-prep [--version <v>]`      | Prepara a release da stack com plano explícito (`--dry-run` audita sem aplicar)                                                                               |
+| Comando                                             | Para quê                                                                                                                          |
+| :-------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------- |
+| `npm run flow`                                      | Wizard governado situado; em non-TTY renderiza o cockpit textual                                                                  |
+| `npm run flow -- workflow`                          | Operações avançadas da stack: publicar estado, abrir Integration PR, merge atômico (modos `unit`/`sequential` — ver docs/cli §11) |
+| `npm run flow -- continue [<id\|slug>]`             | Briefing da spec ativa + gate de execução (recusa narrativa se não autorizada)                                                    |
+| `npm run flow -- review [<tipo>]`                   | Prepara briefing governado de review conforme catálogo/policy                                                                     |
+| `npm run flow -- workflow publish-state --status=…` | Projeta o estado interno da spec no índice público `active-specs.yml`                                                             |
+| `npm run flow -- release-prep [--version <v>]`      | Prepara a release da stack com plano explícito (`--dry-run` audita sem aplicar)                                                   |
 
-> Referência completa dos comandos e flags: `npm run guidelines -- --help` e [`docs/cli/ai-guidelines-cli.md`](docs/cli/ai-guidelines-cli.md) §11. Detalhe do ciclo de boundaries (tasks/review/release-log) em [`.core/process/governance-foundation.md`](.core/process/governance-foundation.md).
+> Referência completa dos comandos e flags: `npm run flow -- --help` e [`docs/cli/ai-guidelines-cli.md`](docs/cli/ai-guidelines-cli.md) §11. Detalhe do ciclo de boundaries (tasks/review/release-log) em [`.core/process/governance-foundation.md`](.core/process/governance-foundation.md).
 
 ## Estrutura do repositório
 
@@ -221,21 +222,12 @@ ai-guidelines/
 │   ├── governance/             # ADRs (adrs/), GOVERNANCE-CATALOG, recipes, partials
 │   ├── process/                # governance-foundation.md (lifecycle canônico)
 │   └── templates/              # Templates injetados pelo init/adopt
-├── cli/                        # CLI (ai-guidelines-cli.mjs)
-│   ├── app/                    # Engine, orquestração, UI
-│   ├── cli/                    # Parser de args + Wizard
-│   ├── commands/               # Comandos de auditoria (ai-check.mjs)
-│   ├── fs/                     # I/O, file-system, merge-utils
-│   ├── governance/             # agents-merge, script-contracts/gate checks (compilador de regras migrou p/ src/)
-│   │   ├── quality-gates/      # Sensores baseados em rules.json
-│   │   └── evaluation/         # Eval Runner
-│   ├── features/               # Módulos de funcionalidade
-│   │   ├── core/               # pointers (compiler), gitattributes
-│   │   └── opt-in/
-│   │       ├── editorial/      # tdd, bdd, quality-gates
-│   │       └── infrastructure/ # prettier, husky, ci
-│   └── formatters/             # Detecção de PM, formatter rival, monorepo
-├── src/                        # Re-arquitetura DDD da CLI + workflow runtime (Spec 0023)
+├── src/                        # CLI/runtime TypeScript: cli, app, domain, infrastructure
+│   ├── cli/                    # Delivery, registry, commands, wizard, renderers
+│   ├── app/                    # Casos de uso e ports
+│   ├── domain/                 # Modelo e políticas puras
+│   └── infrastructure/         # Adapters concretos
+├── dist/                       # Artefato compilado publicado; bin público = dist/cli/main.js
 ├── docs/                       # Documentação exposta ao consumidor
 ├── tests/                      # Testes (integration + smoke)
 ├── .governance/                # SSOT canônica (ADR 0019): specs/ (+ roadmap/, research-library/), registry.yml, runtime/
@@ -254,7 +246,7 @@ Algumas regras locais importam para evitar drift:
 - `AGENTS.md` é documento operacional local **e** artefato runtime de exemplo, mas seu bloco `<AI_GUIDELINES>` é apenas bootstrap/stub.
 - Regras completas vivem em `.core/rules/**`, `.core/rules/catalog.md`, `.core/rules/_meta/rules.json` e no ledger.
 - Ao editar regras em `.core/rules/`, rode `npm run build:rules` (ou `npm run build:all`) para reconstruir `rules.json`, ledger, catálogo e o stub de `AGENTS.md`.
-- Ao editar a CLI, preserve o contrato entre `cli/cli/args.mjs`, `cli/app/engine.mjs` e `docs/cli/ai-guidelines-cli.md`.
+- Ao editar a CLI, preserve o contrato entre `src/cli`, os casos de uso em `src/app`, os adapters em `src/infrastructure` e `docs/cli/ai-guidelines-cli.md`.
 - Features editoriais (`tdd`, `bdd`, `quality-gates`) e de infraestrutura (`prettier`, `husky`, `ci`) têm taxonomias distintas e não devem ser misturadas na documentação nem no wizard.
 - Sequência de release (publish em registry npm) é cravada em [`.core/process/governance-foundation.md`](.core/process/governance-foundation.md) § "Sequência canônica para specs com publish em registry externo" — leia antes de qualquer trabalho que envolva publish.
 

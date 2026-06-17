@@ -9,7 +9,7 @@ Este arquivo define o fluxo obrigatório para qualquer IA atuando neste reposit�
 
 ## Contexto Local
 
-Este repositório é o próprio framework `ai-guidelines`, não um consumidor do framework. Aqui vivem o baseline canônico em `.core/` e a CLI em `cli/` que serão distribuídos para outros repositórios via `init`, `adopt` e `providers`.
+Este repositório é o próprio framework `ai-guidelines`, não um consumidor do framework. Aqui vivem o baseline canônico em `.core/` e a CLI TypeScript em `src/cli`, publicada via `dist/cli/main.js`, que será distribuída para outros repositórios via `init`, `adopt` e `update`.
 
 **O framework é governance-first, AI-as-channel** (`[ADR 0018]`): o core ontológico é governança de engenharia repo-first; a SSOT do estado vive em `.governance/specs/` (canônico em diante per `[ADR 0019]`), com `.specify/specs/` permanecendo como bridge legada via double-lookup. `AGENTS.md` é **um dos outputs runtime** da governança — o canal de integração AI-agnóstica — não o artefato central do framework. Outros canais (Markdown derivado para humanos, `living-docs.yml` para pipelines) coexistem como projeções da mesma SSOT.
 
@@ -24,18 +24,18 @@ Conteúdo específico deste repositório deve ficar fora de `<AI_GUIDELINES>`. O
 
 ## Quickstart Local
 
-Este workspace usa npm puro (`package-lock.json` + `npm ci`). Para execução local da CLI, o caminho suportado é `npm run guidelines -- ...`.
+Este workspace usa npm puro (`package-lock.json` + `npm ci`). Para execução local da CLI humana, o caminho suportado é `npm run flow -- ...`.
 
 ```bash
 npm run setup           # = npm ci + build:all
 npm run format          # prettier --write
 npm run validate        # gate local: format:check + build:all + test + living-docs:check
-npm run guidelines -- adopt --target . --dry-run
+npm run flow -- adopt --target . --dry-run
 ```
 
 > **Referência única dos scripts:** [`docs/scripts.md`](docs/scripts.md) tem o mapa completo (categoria, composição, hooks, workflows). Use este Quickstart só para boot rápido; consulte `docs/scripts.md` antes de qualquer dúvida sobre o que cada script faz.
 
-> **Nota sobre `dist/` (TemplateEngine):** o CLI mjs em `cli/` invoca dinamicamente a TemplateEngine compilada em `dist/` para renderizar recipes mapeadas (sub-bloco 4.C.0 da Spec 0021). Quando uma recipe existe mas `dist/` ainda não foi gerado, o fluxo **falha rapidamente** com mensagem orientada a diagnóstico (em vez de cair silenciosamente no mirror legado — comportamento intencional, ADR-aligned, para evitar regressão silenciosa). **Se estiver rodando o CLI localmente sem `npm run build` prévio**, espere essa falha — execute `npm run build` (ou `npm run build:all` para também regenerar `rules.json`) antes. No pacote publicado via NPM, `prepack: npm run build:all` garante que tanto `dist/` quanto `rules.json` estão sempre presentes; `engine-unavailable` em produção indica regressão real de packaging.
+> **Nota sobre `dist/`:** a superfície executável publicada é `dist/cli/main.js`. **Se estiver rodando a CLI localmente sem `npm run build` prévio**, espere falha por artefato compilado ausente ou stale — execute `npm run build` (ou `npm run build:all` para também regenerar `rules.json`) antes. No pacote publicado via NPM, `prepack: npm run build:all` garante que `dist/` e `rules.json` estejam presentes.
 
 <AI_GUIDELINES>
 
@@ -44,11 +44,11 @@ npm run guidelines -- adopt --target . --dry-run
 This file is the AI-channel bootstrap, not the governance kernel.
 
 - Repository state beats transcript, memory, and agent output.
-- For a fresh AI session, run `npm run guidelines -- handoff [spec]` — it reconciles the sources, records the loaded seal locally, and emits the reading order to follow.
+- For a fresh AI session, run `npm run flow -- handoff [spec]` — it reconciles the sources, records the loaded seal locally, and emits the reading order to follow.
 - To confirm the resumption is still fresh, run `npm run handoff:check -- [--spec NNNN]`.
-- For implementation/correction requested by the human ("fix the current findings", "implement the current task"), load the governed work briefing with `npm run guidelines -- work` — it infers the work mode and projects scope, authority, validations, stop criteria and the final-report contract from `work-policy.yml` + the situated snapshot. The explicit request may authorize commit/push ONLY within the inferred object/checkpoint/branch via `--authorization explicit-work-request`; it never extends to another finding/checkpoint, the next sub-checkpoint, a review, a disposition, Ready, the gate, merge, force-push or `--no-verify`. The briefing projects the contract; it does not execute work.
-- When the human explicitly asks for a governed review (Technical Audit, Architectural Review, or any repository-declared type — see `review types`) or a revalidation, run `npm run guidelines -- review <type>` with `--authorization explicit-review-request` BEFORE reviewing — the explicit request itself authorizes the full LIMITED cycle of that governed artifact (create, seal, validate, exclusive commit, normal push via review:publish); anything beyond the review artifact requires new human authorization. Review types are a catalog, not an obligation: only `required` types block Ready/gate; a stale optional review never forces a revalidation by itself.
-- For decisions reserved to the human (closing revalidated findings, the Human Gate), run `npm run guidelines -- decide` — it prepares a human briefing (what/why/what-was-wrong/what-was-done/how-verified/residual-risks/consequences/not-authorized) BEFORE asking for any choice, shows the exact change preview, and requires explicit confirmation before recording the governed effect. Authority is not assumable by flag; nothing is written without confirmation, and recording a Human Gate does not execute any transition, merge or PR.
+- For implementation/correction requested by the human ("fix the current findings", "implement the current task"), load the governed work briefing with `npm run flow -- work` — it infers the work mode and projects scope, authority, validations, stop criteria and the final-report contract from `work-policy.yml` + the situated snapshot. The explicit request may authorize commit/push ONLY within the inferred object/checkpoint/branch via `--authorization explicit-work-request`; it never extends to another finding/checkpoint, the next sub-checkpoint, a review, a disposition, Ready, the gate, merge, force-push or `--no-verify`. The briefing projects the contract; it does not execute work.
+- When the human explicitly asks for a governed review (Technical Audit, Architectural Review, or any repository-declared type — see `review types`) or a revalidation, run `npm run flow -- review <type>` with `--authorization explicit-review-request` BEFORE reviewing — the explicit request itself authorizes the full LIMITED cycle of that governed artifact (create, seal, validate, exclusive commit, normal push via review:publish); anything beyond the review artifact requires new human authorization. Review types are a catalog, not an obligation: only `required` types block Ready/gate; a stale optional review never forces a revalidation by itself.
+- For decisions reserved to the human (closing revalidated findings, the Human Gate), run `npm run flow -- decide` — it prepares a human briefing (what/why/what-was-wrong/what-was-done/how-verified/residual-risks/consequences/not-authorized) BEFORE asking for any choice, shows the exact change preview, and requires explicit confirmation before recording the governed effect. Authority is not assumable by flag; nothing is written without confirmation, and recording a Human Gate does not execute any transition, merge or PR.
 - The script contract at `.core/governance/script-contracts.yml` is the operational SSOT for scripts, hooks, workflows, and docs.
 - Full rules remain governed in `.core/rules/**`, `.core/rules/catalog.md`, `.core/rules/_meta/rules.json`, and the rule ledger.
 - Never bypass hooks with `--no-verify`; restore setup if hooks or generated script surfaces are missing.
@@ -62,6 +62,6 @@ The root `AGENTS.md` is the channel bootstrap. Project-specific content must rem
 
 ### Consumer Bootstrap
 
-Consumer-local ai-guidelines assets live under `.ai-guidelines/`. Templates mirrored by the CLI live in `.ai-guidelines/templates/`. Specs and roadmap remain under `.specify/specs/`.
+Consumer-local ai-guidelines assets currently live under the `.ai-guidelines/` bridge until `dualroot-collapse` moves the consumer runtime to `.governance/`. Templates mirrored by the CLI live in `.ai-guidelines/templates/` during the bridge. Specs and roadmap remain under `.specify/specs/` until the same collapse node.
 
 </AI_GUIDELINES>

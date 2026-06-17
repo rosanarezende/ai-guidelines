@@ -477,7 +477,7 @@ async function runWizard(
     );
     return 0;
   }
-  const io = prompts ?? (await loadInquirer());
+  const io = prompts ?? (await loadPrompts());
 
   // Tela 1 — decisões pendentes.
   const items = buildListItems(registry, snapshot);
@@ -602,9 +602,9 @@ async function collectIndividual(
   return accepted;
 }
 
-async function loadInquirer(): Promise<Prompts> {
-  const mod = await import("../../infrastructure/io/InquirerPrompts.js");
-  return new mod.InquirerPrompts();
+async function loadPrompts(): Promise<Prompts> {
+  const mod = await import("../../infrastructure/io/ClackPrompts.js");
+  return new mod.ClackPrompts();
 }
 
 export function runDecideCli(

@@ -7,24 +7,12 @@ description: >
 profiles:
   maintainer:
     package_scripts:
-      - name: guidelines
+      - name: flow
         command: node dist/cli/main.js
         category: cli
         mutates: false
         consumers: [human]
-        description: Invocacao local da CLI.
-      - name: guidelines:init
-        command: node dist/cli/main.js init
-        category: cli
-        mutates: true
-        consumers: [human]
-        description: Bootstrap de consumidor via CLI.
-      - name: guidelines:adopt
-        command: node dist/cli/main.js adopt
-        category: cli
-        mutates: true
-        consumers: [human]
-        description: Adocao/atualizacao de consumidor existente.
+        description: Wizard governado local da CLI.
       - name: setup
         command: npm ci && npm run build:all
         category: setup

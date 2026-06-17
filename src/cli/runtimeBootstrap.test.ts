@@ -32,7 +32,7 @@ describe("runtimeBootstrap", () => {
     expect(checkRuntimeBootstrap(repo).ok).toBe(true);
     // O stub do mantenedor usa o script local; o default (consumidores via
     // adopt) usa o bin publicado `npx ai-guidelines …`.
-    expect(readFileSync(agentsPath, "utf-8")).toContain("npm run guidelines -- handoff [spec]");
+    expect(readFileSync(agentsPath, "utf-8")).toContain("npm run flow -- handoff [spec]");
     expect(buildRuntimeBootstrapContent("")).toContain("npx ai-guidelines handoff [spec]");
   });
 

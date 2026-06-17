@@ -134,15 +134,14 @@ Visualmente, a diferença é esta:
   <img src="https://raw.githubusercontent.com/rosanarezende/ai-guidelines/main/docs/assets/ai-guidelines-capability.png" alt="ai-guidelines — superfície de comandos: cinco comandos primários e capacidades opt-in" width="520">
 </p>
 
-| Comando                       | Quando usar                                                         |
-| :---------------------------- | :------------------------------------------------------------------ |
-| `npx ai-guidelines init`      | Projeto novo, baseline governance-first via wizard interativo       |
-| `npx ai-guidelines adopt`     | Repositório existente, adoção conservadora (preserva código legado) |
-| `npx ai-guidelines providers` | Adicionar ou remover AI provider entrypoints específicos            |
-| `npx ai-guidelines update`    | Re-aplicar baseline após upgrade da CLI (headless, idempotente)     |
-| `npx ai-guidelines workflow`  | Menu para operar o ciclo da spec ativa                              |
-| `npx ai-guidelines continue`  | Briefing da spec ativa + governança ativa nas pré-condições         |
-| `npx ai-guidelines review`    | Reúne os comentários de review de um PR para colar na sua IA        |
+| Comando                      | Quando usar                                                                          |
+| :--------------------------- | :----------------------------------------------------------------------------------- |
+| `npx ai-guidelines init`     | Projeto novo, baseline governance-first via wizard interativo                        |
+| `npx ai-guidelines adopt`    | Repositório existente, adoção conservadora (preserva código legado)                  |
+| `npx ai-guidelines update`   | Re-aplicar baseline após upgrade da CLI; use `--providers` para provider entrypoints |
+| `npx ai-guidelines`          | Wizard situado para operar o ciclo da spec ativa                                     |
+| `npx ai-guidelines continue` | Briefing da spec ativa + governança ativa nas pré-condições                          |
+| `npx ai-guidelines review`   | Reúne os comentários de review de um PR para colar na sua IA                         |
 
 Todo comando aceita `--dry-run` para preview e `--help` para detalhes. Sem argumentos, a CLI inicia o wizard.
 
@@ -156,9 +155,9 @@ Todo comando aceita `--dry-run` para preview e `--help` para detalhes. Sem argum
 
 A partir da `1.1.0`, a CLI ganha um conjunto de comandos para **operar o ciclo de governança** sem substituí-lo. Três comandos no dia a dia:
 
-- **`npx ai-guidelines workflow`** — wizard com opções declarativas para navegar specs ativas, retomar trabalho, publicar estado, diagnosticar drift e conduzir as operações de integração da stack (abrir Integration PR, merge atômico). Cada opção mapeia 1:1 para um comando — sem ranking, sem auto-detecção de "próxima ação".
-- **`npx ai-guidelines continue [<id|slug>]`** — briefing da spec ativa (ou da spec que você indicar) com governança ativa nas pré-condições: recusa narrativamente quando a spec ainda não está pronta para execução.
-- **`npx ai-guidelines workflow publish-state --status=<active|blocked|paused|completed>`** — projeta o estado interno da spec no índice público, para que qualquer máquina descubra o que está em curso sem prompt.
+- **`npx ai-guidelines`** — wizard situado: mostra cockpit, próxima ação, decisões disponíveis, bloqueios e operações avançadas sem executar mutação sem confirmação.
+- **`npx ai-guidelines work [--authorization explicit-work-request]`** — briefing da spec ativa com modo, escopo, autoridade, validações, critérios de parada e contrato de relatório.
+- **`npx ai-guidelines decide --brief-only`** — briefing das decisões reservadas à owner, incluindo readiness, avanço de sub-checkpoint e Human Gate quando aplicável.
 
 **Contexto pronto para colar na IA externa.** A CLI não embute LLM: ela lê o estado da spec e monta um bloco de contexto estruturado que você **cola na sua IA** (Claude, Cursor, Codex…). A conversa acontece na IA; a CLI só prepara o contexto e aplica os gates determinísticos.
 

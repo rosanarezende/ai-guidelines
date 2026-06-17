@@ -6,7 +6,7 @@ const AI_GUIDELINES_CLOSE = "</AI_GUIDELINES>";
 /**
  * O comando de handoff difere por audiência: consumidores invocam o bin
  * publicado (`npx ai-guidelines …`, default); o repositório do framework usa o
- * script local (`npm run guidelines -- …`), passado por runtimeBootstrap.
+ * script local (`npm run flow -- …`), passado por runtimeBootstrap.
  * `handoffCheckCommand` só existe como script npm do framework (não há bin
  * publicado ainda) — consumidores não recebem o bullet (null, default).
  */
@@ -44,7 +44,7 @@ export function buildAgentsRuntimeStub(
     "",
     "### Consumer Bootstrap",
     "",
-    `Consumer-local ai-guidelines assets live under \`${sddDir}/\`. Templates mirrored by the CLI live in \`${sddDir}/templates/\`. Specs and roadmap remain under \`.specify/specs/\`.`,
+    `Consumer-local ai-guidelines assets currently live under the \`${sddDir}/\` bridge until \`dualroot-collapse\` moves the consumer runtime to \`.governance/\`. Templates mirrored by the CLI live in \`${sddDir}/templates/\` during the bridge. Specs and roadmap remain under \`.specify/specs/\` until the same collapse node.`,
   ].join("\n");
 }
 

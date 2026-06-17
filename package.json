@@ -32,9 +32,7 @@
     "CHANGELOG.md"
   ],
   "scripts": {
-    "guidelines": "node dist/cli/main.js",
-    "guidelines:init": "node dist/cli/main.js init",
-    "guidelines:adopt": "node dist/cli/main.js adopt",
+    "flow": "node dist/cli/main.js",
     "setup": "npm ci && npm run build:all",
     "build": "tsc",
     "build:rules": "node dist/cli/bin.js build-rules",
@@ -79,7 +77,6 @@
     "prepack": "npm run build:all"
   },
   "devDependencies": {
-    "@inquirer/testing": "^3.3.6",
     "@types/jest": "^30.0.0",
     "@types/node": "^25.6.2",
     "@types/yaml": "^1.9.7",
@@ -96,7 +93,7 @@
     "node": ">=22.0.0"
   },
   "dependencies": {
-    "@inquirer/prompts": "7.8.4",
+    "@clack/prompts": "^1.5.1",
     "yaml": "^2.8.4"
   }
 }

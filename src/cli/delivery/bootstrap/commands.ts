@@ -1,5 +1,5 @@
 import { Command, CommandContext, CommandResult } from "../../registry/Command.js";
-import { Prompts } from "../../../app/ports/Prompts.js";
+import { PromptCancelledError, Prompts } from "../../../app/ports/Prompts.js";
 import { ProvisioningOperation } from "../../../domain/provisioning/ProvisioningPlan.js";
 import {
   getSupportedProviders,
@@ -49,16 +49,17 @@ abstract class ProvisioningDeliveryCommand implements BootstrapDeliveryCommand<P
     const prompts = requirePrompts(context, this.name);
     const target = await promptString(prompts, "Target directory", ".");
     const projectName = await promptString(prompts, "Project name", "");
-    const providers = await promptList(
+    const providers = await promptChoiceList(
       prompts,
       "Providers",
-      DEFAULT_PROVIDERS.join(","),
-      getSupportedProviders()
+      DEFAULT_PROVIDERS,
+      getSupportedProviders(),
+      true
     );
     const features =
       this.name === "update"
         ? undefined
-        : await promptList(prompts, "Features", FEATURE_OPTIONS.join(","), FEATURE_OPTIONS);
+        : await promptChoiceList(prompts, "Features", FEATURE_OPTIONS, FEATURE_OPTIONS, false);
     const packageManager = await prompts.select<string>({
       message: "Package manager",
       choices: [
@@ -73,7 +74,7 @@ abstract class ProvisioningDeliveryCommand implements BootstrapDeliveryCommand<P
     const force = await prompts.confirm({ message: "Force supported overwrites", default: false });
     const install = await prompts.confirm({ message: "Install dependencies", default: false });
 
-    return {
+    const options: ProvisioningCommandOptions = {
       operation: this.name,
       target,
       name: projectName || undefined,
@@ -89,6 +90,17 @@ abstract class ProvisioningDeliveryCommand implements BootstrapDeliveryCommand<P
       yes: false,
       skippedFeatures: [],
     };
+
+    await prompts.note?.(renderProvisioningPreview(options), `Preview: ${this.name}`);
+    const confirmed = await prompts.confirm({
+      message: "Aplicar este plano?",
+      default: false,
+    });
+    if (!confirmed) {
+      throw new PromptCancelledError("Provisionamento cancelado.");
+    }
+
+    return options;
   }
 
   async run(options: ProvisioningCommandOptions, context: CommandContext): Promise<CommandResult> {
@@ -222,4 +234,40 @@ async function promptList(
     .split(",")
     .map((item) => item.trim())
     .filter((item) => item !== "" && allowed.has(item));
+}
+
+async function promptChoiceList(
+  prompts: Prompts,
+  message: string,
+  defaultValues: readonly string[],
+  allowedValues: readonly string[],
+  required: boolean
+): Promise<readonly string[]> {
+  if (prompts.multiselect) {
+    return prompts.multiselect({
+      message,
+      choices: allowedValues.map((value) => ({ name: value, value })),
+      defaultValues,
+      required,
+    });
+  }
+  return promptList(prompts, message, defaultValues.join(","), allowedValues);
+}
+
+function renderProvisioningPreview(options: ProvisioningCommandOptions): string {
+  const lines = [
+    `operation: ${options.operation}`,
+    `target: ${options.target}`,
+    `name: ${options.name ?? "(derivado do target)"}`,
+    `package manager: ${options.packageManager ?? "auto"}`,
+    `providers: ${(options.providers ?? []).join(", ") || "(nenhum)"}`,
+  ];
+  if (options.features !== undefined) {
+    lines.push(`features: ${options.features.join(", ") || "(nenhuma)"}`);
+  }
+  lines.push(`dry-run: ${options.dryRun ? "sim" : "não"}`);
+  lines.push(`force: ${options.force ? "sim" : "não"}`);
+  lines.push(`install: ${options.install ? "sim" : "não"}`);
+  lines.push(`prune: ${options.prune ? "sim" : "não"}`);
+  return lines.join("\n");
 }

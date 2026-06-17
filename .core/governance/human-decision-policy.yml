@@ -128,7 +128,7 @@ decision_types:
         mutating: false
     consequences:
       - O sub-checkpoint ativo continua `[/]`, mas passa a declarar readiness.
-      - "`guidelines work` passará a projetar a próxima decisão governada."
+      - "`npm run flow -- work` passará a projetar a próxima decisão governada."
       - "`advance-subcheckpoint` poderá ser decidido quando houver próximo `[ ]`."
     not_authorized:
       - Marcar o sub-checkpoint atual como `[x]`.
@@ -182,7 +182,7 @@ decision_types:
     consequences:
       - O sub-checkpoint atual será marcado como concluído.
       - O próximo sub-checkpoint será marcado como ativo.
-      - "`guidelines work` passará a apontar o próximo como objeto de implementação."
+      - "`npm run flow -- work` passará a apontar o próximo como objeto de implementação."
     not_authorized:
       - Implementar o próximo sub-checkpoint automaticamente.
       - Exercer o Human Gate.

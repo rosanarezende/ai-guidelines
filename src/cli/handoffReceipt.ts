@@ -62,7 +62,7 @@ export type ReceiptStatus =
   | { readonly kind: "invalid"; readonly reason: string };
 
 export function reloadCommand(specId: string): string {
-  return `npm run guidelines -- handoff ${specId}`;
+  return `npm run flow -- handoff ${specId}`;
 }
 
 /** Extrai o specId numérico do label da spec (ex.: "0024-context-architecture" → "0024"). */

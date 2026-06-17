@@ -35,7 +35,7 @@ describe("renderCommandsHelp (help derivado do registry — auditoria #35, #2)",
 
   it("DADO comando com usage QUANDO renderiza ENTÃO inclui os exemplos com o prefixo do binário", () => {
     const out = renderCommandsHelp([fake("continue", "continua", { usage: ["continue 0023"] })]);
-    expect(out).toContain("Ex.: npm run guidelines -- continue 0023");
+    expect(out).toContain("Ex.: npm run flow -- continue 0023");
   });
 
   it("DADO lista vazia QUANDO renderiza ENTÃO retorna string vazia", () => {

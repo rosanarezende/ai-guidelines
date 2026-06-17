@@ -16,7 +16,7 @@ export function renderCommandsHelp(commands: readonly Command<unknown>[]): strin
     lines.push(`  ${command.name}${aliasNote}`);
     lines.push(`      ${command.description}`);
     for (const example of command.usage ?? []) {
-      lines.push(`      Ex.: npm run guidelines -- ${example}`);
+      lines.push(`      Ex.: npm run flow -- ${example}`);
     }
   }
   return lines.join("\n");

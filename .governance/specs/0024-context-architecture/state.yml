@@ -240,14 +240,15 @@ topology:
           - checkpoint-decouple-brief # ex-9: desacopla decision-brief de evidence-driven
           - checkpoint-doc-cleanup # ex-12: limpa docs arquiteturais (workflowType)
 
-      # Migracao .specify / colapso dual-root (ex-11A/B/C). Ortogonal; reordenado p/ o fim.
+      # Migracao .specify + .ai-guidelines / colapso dual-root (ex-11A/B/C).
+      # Ortogonal; reordenado p/ o fim.
       - id: dualroot-collapse
         github_pr: null
         role: execution
         terminal: false
         sequence: 14
         checkpoints:
-          - checkpoint-dualroot-collapse # colapso do dual-root; migracao .specify (test:smoke gateia)
+          - checkpoint-dualroot-collapse # colapso do dual-root; migracao .specify + .ai-guidelines (test:smoke gateia)
 
       # Knowledge Readiness — NO FINAL antes do PR de integracao. Fecha a divida
       # planejada do CO-2.1: backfill amplo P0/P1, knowledge:health (dossie +

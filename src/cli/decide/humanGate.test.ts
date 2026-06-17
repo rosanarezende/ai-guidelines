@@ -310,9 +310,7 @@ describe("human-gate · elegibilidade [decide]", () => {
     expect(handoff.nextAction.kind).toBe("exercise-human-gate");
     expect(work.mode).toBe("current");
     expect(work.nextAction.decisionType).toBe("human-gate");
-    expect(work.nextAction.commands.some((c) => c.command === "npm run guidelines -- decide")).toBe(
-      true
-    );
+    expect(work.nextAction.commands.some((c) => c.command === "npm run flow -- decide")).toBe(true);
   });
 
   it("readiness terminal do último sub-checkpoint ⇒ available para Human Gate", () => {

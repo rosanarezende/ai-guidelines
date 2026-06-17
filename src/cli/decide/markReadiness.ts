@@ -266,7 +266,7 @@ export class MarkReadinessDefinition implements HumanDecisionDefinition {
         { label: `${active.id} em tasks.md`, expected: "[/] sem readiness" },
       ],
       nextHuman: [
-        "`guidelines work` passará a projetar a próxima decisão governada.",
+        "`npm run flow -- work` passará a projetar a próxima decisão governada.",
         "A readiness NÃO avançou sub-checkpoint, NÃO criou gate e NÃO autorizou Ready/Human Gate/merge.",
       ],
       note: [],

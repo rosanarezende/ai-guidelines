@@ -185,7 +185,7 @@ describe("handoff:check · recibo de carga [CO-4]", () => {
     expect(code).toBe(0);
     const out = lines.join("\n");
     expect(out).toContain("recibo de carga: ausente");
-    expect(out).toContain("npm run guidelines -- handoff 0024");
+    expect(out).toContain("npm run flow -- handoff 0024");
   });
 
   it("DADO carga feita ENTÃO check reporta recibo fresh (retomada reconciliada)", () => {
@@ -218,7 +218,7 @@ describe("handoff:check · recibo de carga [CO-4]", () => {
     const out = lines.join("\n");
     expect(out).toContain("recibo de carga: STALE (fontes)");
     expect(out).toContain("tasks.md");
-    expect(out).toContain("npm run guidelines -- handoff 0024");
+    expect(out).toContain("npm run flow -- handoff 0024");
     // recibo stale NUNCA é atualizado silenciosamente por um check
     expect(fs.readFileSync(receiptFile, "utf8")).toBe(before);
   });
@@ -236,7 +236,7 @@ describe("handoff:check · recibo de carga [CO-4]", () => {
     expect(code).toBe(0);
     const out = lines.join("\n");
     expect(out).toContain("recibo de carga: inválido");
-    expect(out).toContain("npm run guidelines -- handoff 0024");
+    expect(out).toContain("npm run flow -- handoff 0024");
   });
 
   it("DADO bootstrap alterado após a carga ENTÃO check nomeia runtime-bootstrap como divergente", () => {

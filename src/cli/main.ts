@@ -1,6 +1,10 @@
 #!/usr/bin/env node
 import { buildRegistry } from "./registry/buildRegistry.js";
 import { runCockpit } from "./cockpit.js";
+import { ClackPrompts } from "../infrastructure/io/ClackPrompts.js";
+import { Prompts } from "../app/ports/Prompts.js";
+import { CommandRegistry } from "./registry/CommandRegistry.js";
+import { runFlowWizard as runFlowWizardDefault } from "./flowWizard.js";
 
 interface Logger {
   info(message: string): void;
@@ -12,11 +16,21 @@ const logger: Logger = {
   error: (message) => process.stderr.write(`${message}\n`),
 };
 
+export interface RunOptions {
+  readonly logger?: Logger;
+  readonly prompts?: Prompts;
+  readonly registry?: CommandRegistry;
+  readonly isTTY?: boolean;
+  readonly runFlowWizard?: typeof runFlowWizardDefault;
+  readonly runCockpit?: typeof runCockpit;
+}
+
 function renderHelp(): string {
   return `ai-guidelines CLI
 
 Uso:
-  npm run guidelines -- <comando> [opções]
+  npm run flow -- <comando> [opções]
+  npx ai-guidelines <comando> [opções]
 
 ═══ COMANDOS (registry) ═══
 
@@ -24,12 +38,14 @@ ${buildRegistry().renderHelp()}
 
 ═══ FLUXO SITUADO (onde procurar cada passo) ═══
 
-  Retomar contexto:        npm run guidelines -- handoff [spec]
+  Wizard governado:        npm run flow
+  Cockpit direto:          npm run flow -- cockpit
+  Retomar contexto:        npm run flow -- handoff [spec]
   Verificar frescor:       npm run handoff:check -- [--spec NNNN]
-  Briefing de trabalho:    npm run guidelines -- work [--authorization explicit-work-request]
-  Pedir review governado:  npm run guidelines -- review <tipo>
-  Catálogo/policy:         npm run guidelines -- review types | review policy
-  Decisões do humano:      npm run guidelines -- decide [--brief-only] [--type <tipo>]
+  Briefing de trabalho:    npm run flow -- work [--authorization explicit-work-request]
+  Pedir review governado:  npm run flow -- review <tipo>
+  Catálogo/policy:         npm run flow -- review types | review policy
+  Decisões do humano:      npm run flow -- decide [--brief-only] [--type <tipo>]
   Preparar Ready:          npm run pr-ready:check -- --pr <n>
   Gate local completo:     npm run validate
 
@@ -55,20 +71,37 @@ ${buildRegistry().renderHelp()}
 `;
 }
 
-export async function run(argv: readonly string[] = process.argv.slice(2)): Promise<number> {
+export async function run(
+  argv: readonly string[] = process.argv.slice(2),
+  options: RunOptions = {}
+): Promise<number> {
   const repoRoot = process.cwd();
+  const effectiveLogger = options.logger ?? logger;
+  const registry = options.registry ?? buildRegistry();
   const [commandName] = argv;
 
   if (commandName === "--help" || commandName === "-h") {
-    logger.info(renderHelp());
+    effectiveLogger.info(renderHelp());
     return 0;
   }
 
   if (!commandName) {
-    return runCockpit(repoRoot, logger);
+    const isTTY =
+      options.isTTY ?? Boolean(process.stdin.isTTY && process.stdout.isTTY && !process.env.CI);
+    if (!isTTY) {
+      return (options.runCockpit ?? runCockpit)(repoRoot, effectiveLogger);
+    }
+    return (options.runFlowWizard ?? runFlowWizardDefault)(repoRoot, effectiveLogger, {
+      prompts: options.prompts ?? new ClackPrompts(),
+      registry,
+    });
   }
 
-  const result = await buildRegistry().dispatch(argv, { repoRoot, logger });
+  const result = await registry.dispatch(argv, {
+    repoRoot,
+    logger: effectiveLogger,
+    ...(options.prompts ? { prompts: options.prompts } : {}),
+  });
   return result.exitCode;
 }
 
@@ -82,4 +115,6 @@ export async function main(argv: readonly string[] = process.argv.slice(2)): Pro
   }
 }
 
-void main();
+if (require.main === module) {
+  void main();
+}
