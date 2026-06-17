@@ -57,6 +57,7 @@ import {
 } from "../infrastructure/yaml/humanDecisionPolicyReader.js";
 import type { DecisionAvailability } from "./decide/model.js";
 import { ADVANCE_SUBCHECKPOINT_ID, deriveAdvanceEligibility } from "./decide/advanceEligibility.js";
+import { deriveMarkReadinessAvailability } from "./flow/GovernedFlow.js";
 
 export interface Logger {
   info: (msg: string) => void;
@@ -212,6 +213,7 @@ export interface WorkBriefInput {
    * executável quando esta é `available`.
    */
   readonly advanceEligibility: DecisionAvailability;
+  readonly markReadinessEligibility?: DecisionAvailability;
 }
 
 export interface CollectedWorkBrief {
@@ -256,7 +258,11 @@ function derivedValidations(specId: string, object: WorkObject): WorkValidation[
 // ── Próxima ação estruturada: comandos derivados do TIPO de decisão pendente ──
 
 /** Tipos de decisão reservados ao humano (espelham `human-decision-policy.yml`). */
-type DecisionType = "advance-subcheckpoint" | "close-dispositions" | "human-gate";
+type DecisionType =
+  | "advance-subcheckpoint"
+  | "close-dispositions"
+  | "mark-readiness"
+  | "human-gate";
 
 const DECIDE_WIZARD_COMMAND = "npm run guidelines -- decide";
 const WORK_RELOAD_COMMAND = "npm run guidelines -- work --authorization explicit-work-request";
@@ -272,6 +278,12 @@ function decideBriefCommand(type: DecisionType): string {
  * Derivadas do TIPO (lookup determinístico), não texto livre montado por estado.
  */
 const DECISION_STILL_FORBIDDEN: Record<DecisionType, readonly string[]> = {
+  "mark-readiness": [
+    "Avançar sub-checkpoint",
+    "Exercer o Human Gate",
+    "Converter o PR para Ready",
+    "Fazer merge",
+  ],
   "advance-subcheckpoint": [
     "Exercer o Human Gate",
     "Converter o PR para Ready",
@@ -433,6 +445,8 @@ export function deriveWorkNextAction(
     readonly prHeadDiverges: boolean;
     /** Elegibilidade de advance-subcheckpoint (MESMA derivação de `decide`). */
     readonly advanceEligibility: DecisionAvailability;
+    /** Elegibilidade de mark-readiness (MESMA derivação de `decide`). */
+    readonly markReadinessEligibility: DecisionAvailability;
   }
 ): WorkNextAction {
   // BLOQUEADO → reconciliação primeiro (gate approved é abertura do próximo nó).
@@ -467,6 +481,17 @@ export function deriveWorkNextAction(
   // (elegibilidade COMPARTILHADA com `decide`, nunca hardcoded como disponível).
   if (mode === "implement_checkpoint" && object.subCheckpoint) {
     const active = object.subCheckpoint;
+    if (ctx.markReadinessEligibility.status === "available") {
+      return decisionNextAction(
+        "mark-readiness",
+        true,
+        `Declarar readiness de ${active.id} — critérios de saída satisfeitos; o próximo passo é registrar o sinal governado antes de qualquer avanço.`,
+        [
+          `ativo: ${active.id} — ${active.title} (tasks.md linha ${active.line})`,
+          "readiness altera somente tasks.md e não ativa o próximo sub-checkpoint.",
+        ]
+      );
+    }
     const nextPending = facts.subCheckpoints.find((s) => s.state === "pending");
     if (nextPending) {
       return advanceNextAction(ctx.advanceEligibility, active, {
@@ -766,6 +791,10 @@ export function deriveWorkBrief(input: WorkBriefInput): WorkBrief {
     workingTreeState,
     prHeadDiverges,
     advanceEligibility: input.advanceEligibility,
+    markReadinessEligibility: input.markReadinessEligibility ?? {
+      status: "not-applicable",
+      reasons: ["mark-readiness não foi projetado para este snapshot."],
+    },
   });
 
   return {
@@ -876,6 +905,43 @@ function collectAdvanceEligibility(
   });
 }
 
+function collectMarkReadinessEligibility(
+  facts: HandoffFacts,
+  findings: readonly WorkFinding[],
+  workingTreeState: WorkingTreeState,
+  consolidationErrors: readonly string[],
+  policyDeclared: boolean
+): DecisionAvailability {
+  const lc = facts.lifecycle;
+  const pr = facts.pullRequest;
+  const prHeadMatches =
+    pr && facts.git.head ? sameSha(facts.git.head, pr.headRefOid) : pr ? false : null;
+  return deriveMarkReadinessAvailability({
+    subCheckpoints: facts.subCheckpoints,
+    policyDeclared,
+    openFindings: lc?.openFindings ?? 0,
+    openBlocking: lc?.openBlocking ?? 0,
+    someFixAwaitingRevalidation: findings.some(
+      (f) => f.disposition === "open" && f.hasFixedResolution && f.refValid !== false
+    ),
+    blockingReviews: (lc?.reviewStatuses ?? [])
+      .filter((s) => s.blocking)
+      .map((s) => ({ typeId: s.typeId, state: s.state })),
+    consolidationErrors,
+    workingTreeClean: workingTreeState === "clean",
+    behind: facts.git.behind ?? 0,
+    prHeadMatches,
+    ...(pr && facts.git.head && !prHeadMatches
+      ? {
+          prHeadMismatchMessage: `O PR head remoto (${pr.headRefOid.slice(0, 7)}) não cobre o git HEAD local ${facts.git.head.slice(0, 7)} — push/CI precisam convergir antes da readiness.`,
+        }
+      : {}),
+    ciFail: pr?.checks.fail ?? 0,
+    ciPending: pr?.checks.pending ?? 0,
+    gateExists: lc?.gateDecision != null,
+  });
+}
+
 export function collectWorkBrief(
   repoRoot: string,
   options: WorkBriefOptions = {}
@@ -930,6 +996,13 @@ export function collectWorkBrief(
     discoverErrors.map(String),
     advanceTypeDeclared(repoRoot)
   );
+  const markReadinessEligibility = collectMarkReadinessEligibility(
+    facts,
+    findings,
+    freshness.workingTreeState,
+    discoverErrors.map(String),
+    advanceTypeDeclared(repoRoot)
+  );
   const brief = deriveWorkBrief({
     facts,
     nextAction: snapshot.derived.nextAction,
@@ -943,6 +1016,7 @@ export function collectWorkBrief(
     effectiveFunctionalHead: freshness.effectiveFunctionalHead,
     authorization: options.authorization ?? null,
     advanceEligibility,
+    markReadinessEligibility,
   });
 
   return { snapshot, brief };

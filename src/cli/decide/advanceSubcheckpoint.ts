@@ -33,11 +33,11 @@ import { HandoffFacts, parseSubCheckpoints } from "../handoffFacts.js";
 import { resolveSubCheckpointWork } from "../workBrief.js";
 import {
   ADVANCE_SUBCHECKPOINT_ID,
-  AdvanceEligibilityFacts,
   AdvanceTransitionPair,
   advanceTransitionPair,
   deriveAdvanceEligibility,
 } from "./advanceEligibility.js";
+import { advanceEligibilityFactsFromDecisionSnapshot } from "../flow/GovernedFlow.js";
 import {
   findDecisionType,
   HumanDecisionTypePolicy,
@@ -121,35 +121,8 @@ export class AdvanceSubcheckpointDefinition implements HumanDecisionDefinition {
     return advanceTransitionPair(snapshot.subCheckpoints);
   }
 
-  /**
-   * Projeta os fatos de elegibilidade do snapshot governado. É a ponte para a
-   * derivação ÚNICA `deriveAdvanceEligibility` — a MESMA consumida por `work`.
-   */
-  private eligibilityFacts(snapshot: DecisionSnapshot): AdvanceEligibilityFacts {
-    const lc = snapshot.facts.lifecycle;
-    const pr = snapshot.facts.pullRequest;
-    return {
-      subCheckpoints: snapshot.subCheckpoints,
-      policyDeclared: this.policyOf(snapshot) !== undefined,
-      openFindings: snapshot.openFindings.length,
-      openBlocking: snapshot.openFindings.filter((f) => f.blocking).length,
-      someFixAwaitingRevalidation: snapshot.openFindings.some(
-        (f) => f.resolution?.action === "fixed" && !f.verified
-      ),
-      blockingReviews: (lc?.reviewStatuses ?? [])
-        .filter((s) => s.blocking)
-        .map((s) => ({ typeId: s.typeId, state: s.state })),
-      consolidationErrors: snapshot.consolidation.errors,
-      workingTreeClean: snapshot.workingTreeState === "clean",
-      behind: snapshot.facts.git.behind ?? 0,
-      ciFail: pr?.checks.fail ?? 0,
-      ciPending: pr?.checks.pending ?? 0,
-      gateExists: snapshot.gateExists,
-    };
-  }
-
   detect(snapshot: DecisionSnapshot): DecisionAvailability {
-    return deriveAdvanceEligibility(this.eligibilityFacts(snapshot));
+    return deriveAdvanceEligibility(advanceEligibilityFactsFromDecisionSnapshot(snapshot));
   }
 
   choices(snapshot: DecisionSnapshot): readonly HumanDecisionChoice[] {

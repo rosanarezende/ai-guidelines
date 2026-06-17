@@ -19,6 +19,7 @@ import {
 import { ghRemotePrCollector } from "./handoff.js";
 import { DecisionRegistry, buildDecisionRegistry } from "./decide/registry.js";
 import { DecisionAvailability } from "./decide/model.js";
+import { deriveGovernedFlow, GovernedFlow, GovernedFlowAction } from "./flow/GovernedFlow.js";
 
 export interface Logger {
   info(message: string): void;
@@ -29,11 +30,14 @@ export interface CockpitDecisionItem {
   readonly id: string;
   readonly title: string;
   readonly availability: DecisionAvailability;
+  readonly command?: string;
+  readonly mutatingCommand?: string;
 }
 
 export interface CockpitModel {
   readonly work: CollectedWorkBrief;
   readonly decisions: readonly CockpitDecisionItem[];
+  readonly flow?: GovernedFlow;
 }
 
 function commandForDecision(id: string, mutating: boolean): string {
@@ -52,6 +56,7 @@ function commandForDecision(id: string, mutating: boolean): string {
 }
 
 function recommendedDecision(model: CockpitModel): CockpitDecisionItem | null {
+  if (model.flow?.recommended) return model.flow.recommended;
   const byId = new Map(model.decisions.map((d) => [d.id, d]));
   const preferred = ["close-dispositions", "mark-readiness", "advance-subcheckpoint", "human-gate"];
   for (const id of preferred) {
@@ -113,8 +118,12 @@ export function renderCockpit(model: CockpitModel): string {
   if (recommended) {
     lines.push(`- ${recommended.title}`);
     if (recommended.availability.hint) lines.push(`  - ${recommended.availability.hint}`);
-    lines.push(`  - briefing: \`${commandForDecision(recommended.id, false)}\``);
-    lines.push(`  - aplicar: \`${commandForDecision(recommended.id, true)}\``);
+    lines.push(
+      `  - briefing: \`${recommended.command ?? commandForDecision(recommended.id, false)}\``
+    );
+    lines.push(
+      `  - aplicar: \`${recommended.mutatingCommand ?? commandForDecision(recommended.id, true)}\``
+    );
   } else {
     lines.push(`- ${brief.nextAction.description}`);
     for (const basis of brief.nextAction.basis) lines.push(`  - ${basis}`);
@@ -129,7 +138,7 @@ export function renderCockpit(model: CockpitModel): string {
     lines.push("- (nenhuma decisão mutante disponível agora)");
   } else {
     for (const item of available) {
-      lines.push(`- ${item.title}: \`${commandForDecision(item.id, false)}\``);
+      lines.push(`- ${item.title}: \`${item.command ?? commandForDecision(item.id, false)}\``);
     }
   }
   lines.push("");
@@ -140,7 +149,7 @@ export function renderCockpit(model: CockpitModel): string {
     for (const item of blocked) {
       lines.push(`- ${item.title}`);
       for (const reason of item.availability.reasons) lines.push(`  - ${reason}`);
-      lines.push(`  - inspeção: \`${commandForDecision(item.id, false)}\``);
+      lines.push(`  - inspeção: \`${item.command ?? commandForDecision(item.id, false)}\``);
     }
   }
   lines.push("");
@@ -171,14 +180,18 @@ export function buildCockpitModel(
   decisionSnapshot: DecisionSnapshot,
   registry: DecisionRegistry = buildDecisionRegistry()
 ): CockpitModel {
+  void registry;
+  const flow = deriveGovernedFlow(decisionSnapshot);
   return {
     work,
-    decisions: registry
-      .definitions()
-      .map((definition) => ({
+    flow,
+    decisions: flow.actions
+      .map((definition: GovernedFlowAction) => ({
         id: definition.id,
         title: definition.title,
-        availability: definition.detect(decisionSnapshot),
+        availability: definition.availability,
+        command: definition.command,
+        mutatingCommand: definition.mutatingCommand,
       }))
       .filter((item) => item.availability.status !== "not-applicable"),
   };

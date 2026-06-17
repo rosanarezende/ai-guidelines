@@ -369,3 +369,38 @@ Depois:
 - Nao converte PR #43 para Ready.
 - Nao executa Human Gate.
 - Nao abre CO-5.
+
+## Dogfood CO-10.2 — convergencia real da proxima acao
+
+O confronto modelo x codigo confirmou que ainda havia heuristicas locais:
+
+- `mark-readiness` mantinha um bloco proprio de blockers;
+- `human-gate` mantinha outro bloco proprio de blockers;
+- `pr-ready:check` avaliava precondicoes em funcao propria;
+- `cockpit` escolhia a recomendacao por prioridade local;
+- `work` projetava `advance-subcheckpoint` bloqueado por falta de readiness,
+  mesmo quando a acao correta era declarar readiness.
+
+Correcao aplicada em CO-10.2:
+
+1. Criado `GovernedFlow` como derivacao comum de acoes governadas.
+2. `mark-readiness`, `human-gate`, `advance-subcheckpoint`, `pr-ready`, `cockpit`
+   e `work` passaram a consumir a mesma disponibilidade derivada quando o
+   criterio se aplica.
+3. A divergencia eliminada foi:
+   - antes: `work` apontava o avanco bloqueado como proxima inspecao;
+   - depois: `work` e `cockpit` projetam `mark-readiness` quando readiness e a
+     acao disponivel, e `decide` confirma a mesma disponibilidade.
+4. `advance-subcheckpoint` continua bloqueado ate a readiness existir.
+5. Human Gate, Ready e merge continuam proibidos/bloqueados enquanto faltarem
+   criterios.
+
+Falsificacao adicionada:
+
+- `GovernedFlow.test.ts` prova que cockpit/work/decide concordam sobre
+  readiness;
+- prova que `work` e `decide` concordam que advance sem readiness e bloqueado;
+- prova que findings abertos, CI pendente, tree suja e smoke suspenso bloqueiam
+  os atos correspondentes;
+- prova que sub-checkpoint terminal com readiness nao tenta
+  `advance-subcheckpoint` indevido.

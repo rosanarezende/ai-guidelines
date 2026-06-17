@@ -26,6 +26,7 @@ import { runGovernancePrCheck } from "./governance-pr-check.js";
 import { consolidate, discover, observedReviewStates } from "./reviewCheck.js";
 import { buildReviewTypeRegistry, deriveEffectiveReviewStatuses } from "./reviewRequirements.js";
 import { collectFunctionalFreshness } from "./reviewFreshness.js";
+import { derivePrReadyFlow, prReadyFlowFactsFromReadySnapshot } from "./flow/GovernedFlow.js";
 
 export interface ReadyCheckPr {
   readonly number: number;
@@ -134,105 +135,8 @@ export function normalizeCheckRuns(
 
 /** Pure: avalia as precondições de Ready sobre um snapshot. */
 export function evaluateReadyPreconditions(snapshot: ReadyCheckSnapshot): ReadyCheckResult {
-  const failures: string[] = [];
-  const warnings: string[] = [];
-  const { pr } = snapshot;
-
-  if (pr.state.toLowerCase() !== "open") {
-    failures.push(`PR #${pr.number} não está OPEN (estado: ${pr.state}).`);
-  }
-  if (!pr.isDraft) {
-    warnings.push(
-      `PR #${pr.number} já está Ready — este check é pré-conversão; precondições avaliadas mesmo assim.`
-    );
-  }
-
-  for (const reason of snapshot.readyBodyContractReasons) {
-    failures.push(`contrato Ready do body: ${reason}`);
-  }
-
-  if (snapshot.smokeTestsSuspended === true) {
-    failures.push(
-      "smoke tests estão temporariamente suspensos — reative `npm run test:smoke` no workflow/ci antes de Ready/Human Gate."
-    );
-  }
-
-  if (snapshot.checks.length === 0) {
-    failures.push("nenhum check de CI encontrado no HEAD atual — CI verde é precondição de Ready.");
-  }
-  for (const check of snapshot.checks) {
-    if (check.bucket === "fail" || check.bucket === "cancel") {
-      failures.push(`CI não está verde no HEAD final: check "${check.name}" = ${check.bucket}.`);
-    } else if (check.bucket === "pending") {
-      failures.push(`CI ainda não terminou no HEAD final: check "${check.name}" pendente.`);
-    }
-  }
-
-  if (snapshot.localHeadSha === null) {
-    warnings.push(
-      "HEAD local indisponível — não foi possível confirmar que o body/CI cobrem o HEAD final."
-    );
-  } else if (
-    !pr.headRefOid.startsWith(snapshot.localHeadSha) &&
-    !snapshot.localHeadSha.startsWith(pr.headRefOid)
-  ) {
-    failures.push(
-      `HEAD local (${snapshot.localHeadSha.slice(0, 7)}) difere do HEAD remoto do PR (${pr.headRefOid.slice(0, 7)}) — push/pull antes de apresentar o PR como final.`
-    );
-  }
-
-  if (snapshot.workingTreeClean === null) {
-    warnings.push("estado da working tree indisponível.");
-  } else if (!snapshot.workingTreeClean) {
-    failures.push(
-      "working tree local não está limpa — implementação não está concluída/commitada."
-    );
-  }
-
-  const checkpoint = snapshot.checkpoint;
-  if (checkpoint === null) {
-    warnings.push("PR sem checkpoint/topologia associado — reviews/gate não avaliados.");
-  } else {
-    if (checkpoint.gateDecision === "approved") {
-      failures.push(
-        `Human Gate do checkpoint "${checkpoint.id}" já está registrado como approved ANTES do Ready — inconsistência na sequência canônica (o gate artifact nasce DEPOIS da decisão humana sobre o PR em Ready).`
-      );
-    }
-    if (checkpoint.openBlockingCount > 0) {
-      failures.push(
-        `há ${checkpoint.openBlockingCount} finding(s) bloqueante(s) (critical/high) aberto(s) no checkpoint "${checkpoint.id}".`
-      );
-    }
-    for (const s of checkpoint.reviewStatuses) {
-      for (const e of s.errors) {
-        failures.push(`policy de reviews inválida: ${e}`);
-      }
-      if (s.blocking) {
-        const why =
-          s.state === "missing"
-            ? "ausente"
-            : s.state === "stale"
-              ? "stale (não cobre a cabeça funcional atual)"
-              : s.decision !== "approved"
-                ? `com decisão "${s.decision}" (precisa de approved)`
-                : s.state;
-        failures.push(
-          `review OBRIGATÓRIO "${s.typeId}" (${s.source}) ${why} no checkpoint "${checkpoint.id}".`
-        );
-      } else if (
-        s.requirement === "recommended" &&
-        s.applicability !== "no" &&
-        !(s.state === "current" && s.decision === "approved")
-      ) {
-        // Advisory ao Human Gate: informa, NUNCA bloqueia (freshness ≠ obrigação).
-        warnings.push(
-          `review recomendado "${s.typeId}" ${s.state === "missing" ? "não realizado" : s.state} — advisory; não bloqueia Ready/Human Gate.`
-        );
-      }
-    }
-  }
-
-  return { ok: failures.length === 0, failures, warnings };
+  const result = derivePrReadyFlow(prReadyFlowFactsFromReadySnapshot(snapshot));
+  return { ok: result.failures.length === 0, failures: result.failures, warnings: result.warnings };
 }
 
 // ── Coleta do snapshot (gh + git + artefatos locais) ─────────────────────────

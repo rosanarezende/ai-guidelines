@@ -25,6 +25,10 @@ import {
   SUBCHECKPOINT_READINESS,
 } from "../handoffFacts.js";
 import {
+  deriveMarkReadinessAvailability,
+  markReadinessFactsFromDecisionSnapshot,
+} from "../flow/GovernedFlow.js";
+import {
   findDecisionType,
   HumanDecisionTypePolicy,
 } from "../../infrastructure/yaml/humanDecisionPolicyReader.js";
@@ -44,12 +48,6 @@ function toPosix(p: string): string {
 
 function nodeLabel(snapshot: DecisionSnapshot): string {
   return (snapshot.checkpoint ?? "checkpoint").replace(/^checkpoint-/, "");
-}
-
-function sameSha(a: string, b: string): boolean {
-  const x = a.toLowerCase();
-  const y = b.toLowerCase();
-  return x.startsWith(y) || y.startsWith(x);
 }
 
 function escapeRe(s: string): string {
@@ -96,89 +94,8 @@ export class MarkReadinessDefinition implements HumanDecisionDefinition {
     return snapshot.policy ? findDecisionType(snapshot.policy, this.id) : undefined;
   }
 
-  private blockers(snapshot: DecisionSnapshot): string[] {
-    const reasons: string[] = [];
-    const policy = this.policyOf(snapshot);
-    if (!policy) return ["Tipo não declarado na human-decision-policy.yml."];
-
-    const subs = snapshot.subCheckpoints;
-    if (subs.length === 0) {
-      reasons.push("Este checkpoint não tem sub-checkpoints materializados.");
-    }
-    const active = subs.filter((s) => s.state === "in-progress");
-    if (active.length === 0) {
-      reasons.push("Nenhum sub-checkpoint está em andamento ([/]).");
-    }
-    if (active.length > 1) {
-      reasons.push("Mais de um sub-checkpoint em andamento ([/]) — readiness seria ambígua.");
-    }
-    const current = active.length === 1 ? active[0] : null;
-    if (current?.readiness === SUBCHECKPOINT_READINESS) {
-      reasons.push(`${current.id} já declarou readiness "${SUBCHECKPOINT_READINESS}".`);
-    }
-    const invalidReadiness = subs.find(
-      (s) => s.state !== "in-progress" && s.readiness === SUBCHECKPOINT_READINESS
-    );
-    if (invalidReadiness) {
-      reasons.push(
-        `${invalidReadiness.id} carrega readiness em estado ${invalidReadiness.state}; readiness só é válida em [/] ativo.`
-      );
-    }
-
-    if (snapshot.openFindings.some((f) => f.blocking)) {
-      reasons.push("Há finding bloqueante aberto.");
-    } else if (snapshot.openFindings.length > 0) {
-      reasons.push("Há finding aberto.");
-    }
-    if (snapshot.openFindings.some((f) => f.resolution?.action === "fixed" && !f.verified)) {
-      reasons.push("Há correção aguardando revalidação independente.");
-    }
-    for (const s of snapshot.facts.lifecycle?.reviewStatuses ?? []) {
-      if (s.blocking) reasons.push(`Review obrigatório pendente: ${s.typeId} (${s.state}).`);
-    }
-    if (snapshot.consolidation.errors.length > 0) {
-      reasons.push(
-        `Integridade dos artefatos de review comprometida: ${snapshot.consolidation.errors[0]}`
-      );
-    }
-    if (snapshot.workingTreeState !== "clean") {
-      reasons.push("A working tree não está limpa.");
-    }
-    if ((snapshot.facts.git.behind ?? 0) > 0) {
-      reasons.push("A branch está atrás do remoto — reconcilie antes de declarar readiness.");
-    }
-    const pr = snapshot.facts.pullRequest;
-    if (pr) {
-      if (snapshot.gitHead && pr.headRefOid && !sameSha(snapshot.gitHead, pr.headRefOid)) {
-        reasons.push(
-          `O PR head remoto (${pr.headRefOid.slice(0, 7)}) não cobre o git HEAD local ${snapshot.gitHead.slice(0, 7)} — push/CI precisam convergir antes da readiness.`
-        );
-      }
-      if (pr.checks.fail > 0) {
-        reasons.push(`A integração contínua tem ${pr.checks.fail} falha(s).`);
-      }
-      if (pr.checks.pending > 0) {
-        reasons.push(
-          `A integração contínua ainda tem ${pr.checks.pending} verificação(ões) pendente(s).`
-        );
-      }
-    }
-    if (snapshot.gateExists || snapshot.facts.lifecycle?.gateDecision != null) {
-      reasons.push("O gate do checkpoint já foi registrado — readiness interna não se aplica.");
-    }
-    return reasons;
-  }
-
   detect(snapshot: DecisionSnapshot): DecisionAvailability {
-    const reasons = this.blockers(snapshot);
-    if (!this.policyOf(snapshot)) return { status: "not-applicable", reasons };
-    return reasons.length > 0
-      ? { status: "blocked", reasons }
-      : {
-          status: "available",
-          reasons: [],
-          hint: `${activeSubCheckpoint(snapshot.subCheckpoints)!.id} pronto para declarar readiness`,
-        };
+    return deriveMarkReadinessAvailability(markReadinessFactsFromDecisionSnapshot(snapshot));
   }
 
   choices(snapshot: DecisionSnapshot): readonly HumanDecisionChoice[] {
