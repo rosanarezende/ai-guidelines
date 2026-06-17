@@ -282,12 +282,12 @@ projetando criterios proprios vira gap a confrontar em CO-10.2.
 
 ## Contratos dos proximos sub-checkpoints
 
-| Sub-checkpoint | Entradas obrigatorias                                                                                                                          | Saidas obrigatorias                                                                                 | Criterios de aceitacao                                                                                                             | Acoes proibidas antes de concluir  |
-| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
-| `CO-10.2`      | Este inventario, reviews/resolutions, `state.yml`, `tasks.md`, `work`, `decide`, `handoff`, `pr-ready`, `review:check`, registry/help/scripts. | Mapa modelo × codigo com divergencias classificadas (`equivalente`, `intencional`, `bug`, `risco`). | Cada transicao T*/N*/CFG deve apontar para codigo existente, lacuna real ou decisao explicita; sem correcao estrutural antecipada. | corrigir gaps amplos sem confronto |
-| `CO-10.3`      | Mapa de CO-10.2, protocolos CFG, matriz de ameacas e contratos DDD.                                                                            | Correcoes no runtime/checks/docs que removem heuristicas paralelas e segunda SSOT.                  | `handoff`, `work`, `decide`, `pr-ready`, `review:check` e registry/help convergem sobre snapshot/policies comuns.                  | dogfood final sem fixes verdes     |
-| `CO-10.4`      | Runtime corrigido, jornadas TDD, consumidores tarball, PR Draft/Ready/Gate simulaveis.                                                         | Dogfood ponta a ponta com evidencias por jornada e consumidores novo/existente.                     | Todas as jornadas 1-13 têm comando, estado inicial, resultado esperado e falha impedida executados ou justificados.                | readiness sem dogfood real         |
-| `CO-10.5`      | Dogfood, falsificacoes e riscos residuais.                                                                                                     | Checks/testes finais, dossie de falsificacao e preparacao para Human Gate.                          | Invariantes verdes; riscos residuais nomeados; PR body final alinhado; sem CO-5 iniciado.                                          | Ready/Human Gate automatico        |
+| Sub-checkpoint | Entradas obrigatorias                                                                                                                                                                    | Saidas obrigatorias                                                                                                                                                                               | Criterios de aceitacao                                                                                                                                                                                                                                | Acoes proibidas antes de concluir                                 |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| `CO-10.2`      | Este inventario, reviews/resolutions, `state.yml`, `tasks.md`, `work`, `decide`, `handoff`, `pr-ready`, `review:check`, registry/help/scripts, dogfood real do wizard/cockpit/readiness. | Mapa modelo × codigo com divergencias classificadas (`equivalente`, `intencional`, `bug`, `risco`) + convergencia coesa inicial das divergencias ja comprovadas na superficie humana/next-action. | Cada regra substituida deve apontar para heuristica local anterior, regra comum nova, consumidor migrado e teste de nao divergencia; `flow`, cockpit, wizard, `work`, `decide` e readiness nao podem calcular proxima acao por caminhos conflitantes. | iniciar CO-10.3 ou resolver CFG-\* remanescente sem classificacao |
+| `CO-10.3`      | Mapa atualizado de CO-10.2, protocolos CFG, matriz de ameacas, contratos DDD e dogfood de `flow`.                                                                                        | Correcoes remanescentes no runtime/checks/docs que removem heuristicas paralelas e segunda SSOT.                                                                                                  | `handoff`, `work`, `decide`, `pr-ready`, `review:check`, registry/help e transicoes de no convergem sobre snapshot/policies comuns.                                                                                                                   | dogfood final sem fixes verdes                                    |
+| `CO-10.4`      | Runtime corrigido, jornadas TDD, consumidores tarball, PR Draft/Ready/Gate simulaveis.                                                                                                   | Dogfood ponta a ponta com evidencias por jornada e consumidores novo/existente.                                                                                                                   | Todas as jornadas 1-13 têm comando, estado inicial, resultado esperado e falha impedida executados ou justificados.                                                                                                                                   | readiness sem dogfood real                                        |
+| `CO-10.5`      | Dogfood, falsificacoes e riscos residuais.                                                                                                                                               | Checks/testes finais, dossie de falsificacao e preparacao para Human Gate.                                                                                                                        | Invariantes verdes; riscos residuais nomeados; PR body final alinhado; sem CO-5 iniciado.                                                                                                                                                             | Ready/Human Gate automatico                                       |
 
 ## Comandos usados como evidencia inicial
 
@@ -362,7 +362,8 @@ Depois:
 
 ## Fronteira desta fatia
 
-- Nao corrige ainda `CFG-*`; isso pertence a CO-10.2/CO-10.3.
+- Corrige somente o gap de readiness governada descoberto no dogfood imediato
+  de CO-10.1; os `CFG-*` remanescentes pertencem a CO-10.2/CO-10.3.
 - A readiness de `CO-10.1` foi marcada somente pelo fluxo governado
   `mark-readiness`, nao por edicao manual.
 - Nao executa `advance-subcheckpoint`.
@@ -371,6 +372,12 @@ Depois:
 - Nao abre CO-5.
 
 ## Dogfood CO-10.2 — convergencia real da proxima acao
+
+Decisao de escopo aplicada: por `[DEC-0024-G12]`, CO-10.2 nao para em uma
+matriz documental quando o proprio confronto ja prova uma divergencia da
+superficie humana/next-action. A regra local substituida deve ser removida no
+mesmo ciclo e coberta por teste de nao divergencia. CO-10.3 permanece para os
+gaps remanescentes que exigem classificacao/falsificacao adicional.
 
 O confronto modelo x codigo confirmou que ainda havia heuristicas locais:
 

@@ -273,6 +273,29 @@ Cada transição deve declarar: fato de entrada, autoridade, comando, efeito per
 
 ---
 
+### [DEC-0024-G12] CO-10.2 entrega convergência coesa inicial do fluxo, não apenas matriz
+
+**Pergunta:** O CO-10.2 deve parar após mapear o confronto modelo × código, deixando a remoção de heurísticas locais para CO-10.3, ou deve substituir no mesmo ciclo as divergências já comprovadas na superfície humana/next-action?
+
+**Modo de gate:** `aceitação` <!-- decisão operacional da owner, 2026-06-16, durante CO-10.2. -->
+
+**Contexto:** O dogfood de CO-10.2 mostrou que uma migração excessivamente incremental recriaria o padrão que o nó `co-flow-convergence` existe para corrigir: cockpit, wizard, `work`, `decide`, `pr-ready` e readiness poderiam continuar calculando o mesmo estado por heurísticas locais diferentes enquanto aguardam um sub-checkpoint posterior.
+
+**Decisão (Resolved):**
+
+- CO-10.2 continua fazendo o confronto modelo × código, mas também deve entregar uma convergência coesa inicial quando a divergência já estiver comprovada.
+- Cada regra movida para o modelo comum deve remover a regra local correspondente.
+- `npm run flow` é a superfície humana local canônica; o binário público continua `ai-guidelines`.
+- O wizard interativo deve projetar o mesmo modelo usado por cockpit/work/decide, sem lista paralela de comandos ou cálculo próprio de readiness/Human Gate.
+- `@clack/prompts` substitui Inquirer como único adapter interativo; `@inquirer/*` e `InquirerPrompts` não permanecem como débito.
+- CO-10.3 fica responsável pelos gaps remanescentes classificados em CO-10.2, especialmente transições de nó e invariantes que ainda exigem matriz/falsificação adicional.
+
+**O que NÃO está sendo decidido:** iniciar CO-10.3; executar `advance-subcheckpoint`; marcar readiness; converter PR para Ready; executar Human Gate; fazer merge; remover a suspensão temporária dos smoke tests antes do ponto governado.
+
+**Status:** Resolved (2026-06-16) / @rosanarezende — decisão operacional de escopo do CO-10.2, registrada após o dogfood de `flow`.
+
+---
+
 ## 2 · Aberto — pesquisa genuína (única coisa ainda em investigação)
 
 > Estes **não são decisões** — são findings com **alternativas reais ainda competindo**. Vivem em [`research/findings.md`](./research/findings.md); aqui só o ponteiro. Só retornam como `[DEC] Pendente` ao **convergir + exigir julgamento**. **Critério (2026-05-31):** se não há alternativa viva competindo, **não pertence aqui** — é decisão (§ 1) ou trabalho (§ 4).
