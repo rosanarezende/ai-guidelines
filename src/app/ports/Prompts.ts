@@ -116,6 +116,7 @@ export interface Prompts {
   intro?(message: string): PromptRenderResult;
   outro?(message: string): PromptRenderResult;
   note?(message: string, title?: string): PromptRenderResult;
+  box?(message: string, title?: string): PromptRenderResult;
   cancel?(message: string): PromptRenderResult;
   spinner?<T = void>(options: SpinnerOptions<T>): Promise<T>;
   taskList?(tasks: readonly PromptTask[]): Promise<void>;

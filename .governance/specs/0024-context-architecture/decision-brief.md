@@ -6,7 +6,7 @@
 > Plan: [`./plan.md`](./plan.md)
 > Tasks: [`./tasks.md`](./tasks.md)
 > Status agregado: **Resolved (decisões)** — todas as `[DEC]` desta spec estão `Resolved`; a pesquisa estrutural ainda aberta vive em [`research/findings.md`](./research/findings.md), não aqui.
-> Última atualização: 2026-06-16 — **`[DEC-0024-G11]` registrada**: suspensão temporária governada dos smoke tests durante `co-flow-convergence`, com bloqueio de Ready/Human Gate até reativação.
+> Última atualização: 2026-06-17 — **`[DEC-0024-G13]` registrada**: `co-flow-convergence` ganha CO-10.5 próprio para UX, linguagem humana e convergência do wizard com Clack; falsificação/Human Gate passa a CO-10.6.
 
 > **Artefato exclusivo de decisão humana.** Organizado por **estado**, não por numeração histórica (reestruturação 2026-05-31). Quatro estados respondem, à primeira vista, _o que já foi decidido · o que ainda está aberto · o que virou regra · o que virou enforcement_:
 >
@@ -296,6 +296,29 @@ Cada transição deve declarar: fato de entrada, autoridade, comando, efeito per
 
 ---
 
+### [DEC-0024-G13] CO-10.5 dedicado a UX, linguagem humana e convergência do wizard
+
+**Pergunta:** A melhoria de linguagem/UX do `npm run flow` deve ser tratada como ajuste residual dentro do dogfood/falsificação, ou como sub-checkpoint próprio antes da falsificação/Human Gate?
+
+**Modo de gate:** `aceitação` <!-- decisão operacional da owner, 2026-06-17, durante CO-10.4. -->
+
+**Contexto:** O dogfood de CO-10.4 mostrou que a convergência técnica de `flow`, `work`, `decide` e registry ainda não basta para a pessoa humana operar o fluxo sem inspecionar código ou memorizar termos internos. O menu atual ainda expunha vocabulário de implementação (`cockpit`, `briefing`, `review governado`, `comando mutante`, `wizard`, `Entrypoints com adapter runtime`) e ainda parecia carregar camadas legadas em vez de uma experiência única.
+
+**Decisão (Resolved):**
+
+- Inserir `CO-10.5 — UX, linguagem humana e convergência do wizard` antes da etapa de falsificação/Human Gate.
+- Renumerar a etapa anterior `CO-10.5 — falsificação + Human Gate` para `CO-10.6`.
+- Tratar as melhorias já iniciadas no wizard como seed de CO-10.5, não como fechamento do trabalho.
+- `npm run flow` deve projetar o mesmo modelo governado, mas com linguagem humana, menu por intenção e explicações claras de agora/depois/bloqueios/alternativas.
+- O wizard deve aproveitar melhor `@clack/prompts` (`intro/outro`, `note`/`box`, `select`, `groupMultiselect`, `tasks`/`taskLog`, `spinner`, `confirm`, cancelamento limpo), sem criar regra própria de readiness, PR Ready, CI, Human Gate ou próxima ação.
+- `init`/`adopt`/`update` devem continuar disponíveis, mas contextualmente: o caminho normal mostra a operação adequada ao estado do repositório; as demais ficam em caminho avançado com aviso.
+
+**O que NÃO está sendo decidido:** executar Ready; exercer Human Gate; fazer merge; avançar sub-checkpoint; abrir novo PR; reintroduzir Inquirer; recriar comando `providers`; mover regra de lifecycle para o wizard.
+
+**Status:** Resolved (2026-06-17) / @rosanarezende — decisão operacional de UX/convergência antes da falsificação final do nó.
+
+---
+
 ## 2 · Aberto — pesquisa genuína (única coisa ainda em investigação)
 
 > Estes **não são decisões** — são findings com **alternativas reais ainda competindo**. Vivem em [`research/findings.md`](./research/findings.md); aqui só o ponteiro. Só retornam como `[DEC] Pendente` ao **convergir + exigir julgamento**. **Critério (2026-05-31):** se não há alternativa viva competindo, **não pertence aqui** — é decisão (§ 1) ou trabalho (§ 4).
@@ -361,6 +384,8 @@ Cada transição deve declarar: fato de entrada, autoridade, comando, efeito per
 | `G09`        | eliminação integral de `/cli` (→ CO-3.5)              | **Decidido** — § 1 (Resolved 2026-06-15, owner); supersede o "wrapper" do #38; topologia externa inalterada  |
 | `G10`        | `co-flow-convergence` antes de `co-capture`           | **Decidido** — § 1 (Resolved 2026-06-16, owner); nó próprio para convergência ponta a ponta do fluxo         |
 | `G11`        | suspensão temporária de smoke durante co-flow         | **Decidido** — § 1 (Resolved 2026-06-16, owner); bloqueia Ready/Human Gate até reativação                    |
+| `G12`        | CO-10.2 entrega convergência coesa inicial            | **Decidido** — § 1 (Resolved 2026-06-16, owner); remove heurísticas locais já comprovadamente divergentes    |
+| `G13`        | CO-10.5 dedicado a UX/linguagem/wizard Clack          | **Decidido** — § 1 (Resolved 2026-06-17, owner); falsificação/Human Gate passa a CO-10.6                     |
 
 ---
 
@@ -376,6 +401,8 @@ Cada transição deve declarar: fato de entrada, autoridade, comando, efeito per
 - [x] `[DEC-0024-G09]` — Resolved 2026-06-15 / @rosanarezende
 - [x] `[DEC-0024-G10]` — Resolved 2026-06-16 / @rosanarezende
 - [x] `[DEC-0024-G11]` — Resolved 2026-06-16 / @rosanarezende
+- [x] `[DEC-0024-G12]` — Resolved 2026-06-16 / @rosanarezende
+- [x] `[DEC-0024-G13]` — Resolved 2026-06-17 / @rosanarezende
 
 ---
 

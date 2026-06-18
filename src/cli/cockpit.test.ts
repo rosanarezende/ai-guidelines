@@ -140,7 +140,7 @@ describe("cockpit situado", () => {
       ],
     });
 
-    expect(out).toMatch(/Cockpit situado/);
+    expect(out).toMatch(/Resumo do fluxo/);
     expect(out).toMatch(/CO-10\.1/);
     expect(out).toMatch(/Declarar readiness/);
     expect(out).toMatch(
@@ -186,7 +186,7 @@ describe("cockpit situado", () => {
     expect(out).toContain("    - Entrega esperada: Inventário falsificável do fluxo.");
     expect(out).toContain("  - Depois: CO-10.2 — confronto modelo × código");
     expect(out).toContain("    - Objetivo: Comparar o modelo com os comandos vivos.");
-    expect(out).toContain("- Proximo passo: Declarar readiness do sub-checkpoint ativo");
+    expect(out).toContain("- Próximo passo: Declarar readiness do sub-checkpoint ativo");
     expect(out).toContain("Falta declarar readiness do sub-checkpoint ativo.");
     expect(out.indexOf("## Resumo simples")).toBeLessThan(out.indexOf("## Estado atual"));
   });

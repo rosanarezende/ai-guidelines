@@ -10,11 +10,11 @@ import { Intent } from "./Intent.js";
 export const INTENT_CATALOG: readonly Intent[] = [
   {
     id: "retomar-trabalho",
-    title: "Retomar trabalho",
+    title: "Entender onde estamos e continuar",
     actions: [
-      { command: "cockpit", label: "Ver cockpit situado (estado + próxima ação)" },
-      { command: "continue", label: "Retomar de onde parei (briefing + próximo passo)" },
-      { command: "handoff", label: "Gerar handoff situado para nova sessão IA" },
+      { command: "cockpit", label: "Ver resumo completo do estado e do próximo passo" },
+      { command: "continue", label: "Retomar de onde parei" },
+      { command: "handoff", label: "Preparar contexto para uma nova sessão com IA" },
       { command: "insight", args: ["list"], label: "Ver percepções recentes" },
     ],
   },
@@ -41,44 +41,43 @@ export const INTENT_CATALOG: readonly Intent[] = [
   },
   {
     id: "executar-trabalho-governado",
-    title: "Executar o trabalho situado (implementação/correção)",
+    title: "Ver orientação antes de implementar ou corrigir",
     actions: [
       {
         command: "work",
-        label:
-          "Briefing governado de trabalho (modo + escopo/autoridade/validações/parada/relatório)",
+        label: "Ver escopo, permissões, validações e critérios de parada",
       },
       {
         command: "work",
         args: ["--authorization", "explicit-work-request"],
-        label: "Autorizar commit/push no objeto inferido (pedido humano explícito)",
+        label: "Carregar orientação com autorização explícita para o trabalho atual",
       },
     ],
   },
   {
     id: "decidir-reservado-humano",
-    title: "🧭 Decisões humanas pendentes",
+    title: "Ver decisões que só a owner pode tomar",
     actions: [
       {
         command: "decide",
-        label: "Revisar e exercer decisões reservadas à owner (briefing → escolha → confirmação)",
+        label: "Abrir decisão guiada com prévia e confirmação",
       },
       {
         command: "decide",
         args: ["--brief-only"],
-        label: "Só ler o briefing das decisões pendentes (zero escrita)",
+        label: "Só ler as decisões disponíveis, sem escrever nada",
       },
     ],
   },
   {
     id: "pedir-review-governado",
-    title: "Pedir um review governado",
+    title: "Preparar uma revisão do PR",
     actions: [
-      { command: "review", args: ["types"], label: "Ver o catálogo de tipos de review" },
+      { command: "review", args: ["types"], label: "Ver tipos de revisão disponíveis" },
       {
         command: "review",
         args: ["policy"],
-        label: "Ver requirements efetivos no contexto atual (aplicável/força/estado)",
+        label: "Ver quais revisões importam neste momento",
       },
     ],
   },

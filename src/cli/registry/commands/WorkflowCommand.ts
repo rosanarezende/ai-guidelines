@@ -25,7 +25,7 @@ export type WorkflowOptions =
 export class WorkflowCommand implements Command<WorkflowOptions> {
   readonly name = "workflow";
   readonly description =
-    "Wizard operacional da spec (briefing/REPL, publish-state, Integration PR, merge da stack, índice, drift, prompt visual). Sem LLM no runtime (ADR 0018).";
+    "Operações avançadas da spec/stack (publish-state, Integration PR, merge, índice, drift, prompt visual). O guia humano principal é `npm run flow`.";
   readonly usage = ["workflow", "workflow publish-state --status=active --updated-by=@maintainer"];
   /** Subcomandos introspectáveis (read-only) — base do resolver `registry-command:workflow/<sub>` (CO-3). */
   readonly subcommands = ["publish-state"] as const;

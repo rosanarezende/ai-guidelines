@@ -4,7 +4,7 @@ import { runCockpit } from "../../cockpit.js";
 export class CockpitCommand implements Command<void> {
   readonly name = "cockpit";
   readonly description =
-    "Mostra o painel situado atual: estado, próxima ação, decisões disponíveis, bloqueios e ações proibidas. Read-only.";
+    "Mostra o resumo atual: onde estamos, próximo passo, decisões disponíveis, bloqueios e ações proibidas. Read-only.";
   readonly usage = ["cockpit"];
 
   parse(argv: readonly string[]): void {

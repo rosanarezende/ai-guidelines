@@ -182,6 +182,9 @@ export interface HandoffSubCheckpoint {
 export interface HandoffInsightFact {
   readonly id: string;
   readonly excerpt: string;
+  readonly occurrenceCount: number;
+  readonly graduationCandidate: boolean;
+  readonly currentContext: boolean;
 }
 
 export interface HandoffNodeFact {

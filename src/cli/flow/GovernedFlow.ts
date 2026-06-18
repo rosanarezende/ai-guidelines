@@ -18,7 +18,8 @@ export type GovernedFlowActionId =
   | "advance-subcheckpoint"
   | "pr-ready"
   | "human-gate"
-  | "open-next-node";
+  | "open-next-node"
+  | "review-insight-candidates";
 
 export interface GovernedFlowAction {
   readonly id: GovernedFlowActionId;
@@ -680,6 +681,7 @@ export function derivePrReadyFlow(f: PrReadyFlowFacts): PrReadyFlowResult {
 
 function commandFor(id: GovernedFlowActionId, mutating: boolean): string {
   if (id === "pr-ready") return "npm run pr-ready:check -- --pr <n>";
+  if (id === "review-insight-candidates") return "npm run flow -- insight list";
   if (!mutating) return `npm run flow -- decide --type ${id} --brief-only`;
   const decision =
     id === "finish-subcheckpoint"
@@ -709,7 +711,9 @@ function action(
     title,
     availability,
     command: commandFor(id, false),
-    ...(id !== "pr-ready" ? { mutatingCommand: commandFor(id, true) } : {}),
+    ...(id !== "pr-ready" && id !== "review-insight-candidates"
+      ? { mutatingCommand: commandFor(id, true) }
+      : {}),
     effect,
   };
 }
@@ -876,6 +880,17 @@ export function deriveGovernedFlow(snapshot: DecisionSnapshot): GovernedFlow {
   const openNextNode = deriveOpenNextNodeAvailability(
     openNextNodeFactsFromDecisionSnapshot(snapshot)
   );
+  const insightCandidates = snapshot.facts.insights.filter(
+    (insight) => insight.graduationCandidate
+  );
+  const reviewInsightCandidates: DecisionAvailability =
+    insightCandidates.length > 0
+      ? {
+          status: "available",
+          reasons: [],
+          hint: `${insightCandidates.length} percepção(ões) recorrente(s) precisam de decisão humana.`,
+        }
+      : { status: "not-applicable", reasons: ["Não há percepções recorrentes pendentes."] };
   const closeDispositions: DecisionAvailability =
     snapshot.openFindings.length > 0 &&
     snapshot.openFindings.every(
@@ -912,6 +927,16 @@ export function deriveGovernedFlow(snapshot: DecisionSnapshot): GovernedFlow {
       "cria branch, PR Draft e reconcilia state/active/tasks",
       "não executa merge",
     ]),
+    action(
+      "review-insight-candidates",
+      "Ver percepções recorrentes que precisam de decisão",
+      reviewInsightCandidates,
+      [
+        "abre a lista de percepções",
+        "não promove nem descarta automaticamente",
+        "a decisão continua humana",
+      ]
+    ),
   ];
   const priority: GovernedFlowActionId[] = [
     "close-dispositions",

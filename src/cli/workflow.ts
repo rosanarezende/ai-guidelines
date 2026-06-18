@@ -1081,7 +1081,7 @@ export function buildTopMenu(catalog: readonly Intent[]) {
   return [
     ...catalog.map((intent) => ({ name: intent.title, value: `intent:${intent.id}` })),
     {
-      name: "⚙️  Operações avançadas (wizard legado)",
+      name: "⚙️  Operações finais e manutenção da stack",
       value: ADVANCED_OPS_VALUE,
     },
     { name: "Sair", value: "quit" },

@@ -424,7 +424,9 @@ describe("bootstrap delivery 2c — wizard", () => {
     const { runtime, delivery: bootstrap } = delivery();
     const prompts = new ScriptedPrompts({
       select: { Operation: "update" },
-      groupMultiselect: { Providers: ["claude", "openai"] },
+      groupMultiselect: {
+        "Quais ferramentas de IA devem receber arquivos de orientação?": ["claude", "openai"],
+      },
       confirm: { "Aplicar este plano?": true },
     });
     const { logger } = capturingLogger();
@@ -436,10 +438,12 @@ describe("bootstrap delivery 2c — wizard", () => {
       providersRequested: true,
       config: { providers: ["claude", "openai"] },
     });
-    expect(prompts.groupMultiselectCalls[0].message).toBe("Providers");
+    expect(prompts.groupMultiselectCalls[0].message).toBe(
+      "Quais ferramentas de IA devem receber arquivos de orientação?"
+    );
     expect(Object.keys(prompts.groupMultiselectCalls[0].groups)).toEqual([
-      "Entrypoints com adapter runtime",
-      "Entrypoints editoriais",
+      "Assistentes principais do repositório",
+      "Editores e agentes locais",
     ]);
     expect(prompts.spinnerStarts).toEqual(["Montando e aplicando plano update..."]);
   });

@@ -3,6 +3,10 @@ import { resolve } from "node:path";
 import { InsightStatus } from "../domain/insight/Insight.js";
 import { graduationRefOf } from "../domain/insight/insightKnowledge.js";
 import { recurrenceOf } from "../domain/insight/Insight.js";
+import {
+  INSIGHT_GRADUATION_CANDIDATE_THRESHOLD,
+  isInsightGraduationCandidate,
+} from "../domain/insight/InsightMaturation.js";
 import { InsightLedger } from "../domain/insight/InsightLedger.js";
 import { formatRef, isWellFormedRef } from "../domain/knowledge/KnowledgeRef.js";
 import {
@@ -47,8 +51,6 @@ import {
  * do mesmo mecanismo) + 1 de folga contra ruído. Sinaliza; o julgamento
  * (graduar vs descartar) permanece humano.
  */
-const GRADUATION_CANDIDATE_THRESHOLD = 3;
-
 export function main(repoRoot: string): number {
   const legacyPath = resolve(repoRoot, LEGACY_INSIGHTS_LEDGER_PATH);
   if (existsSync(legacyPath)) {
@@ -123,13 +125,11 @@ export function main(repoRoot: string): number {
   // Detector de maturação (não-bloqueante): sinaliza Insights `open` recorrentes
   // que já deveriam graduar. Mecânico detecta; o julgamento (promover/descartar)
   // é humano — não auto-promove, não falha o CI (graduar é evento, não estado).
-  const candidates = ledger
-    .open()
-    .filter((insight) => recurrenceOf(insight) >= GRADUATION_CANDIDATE_THRESHOLD);
+  const candidates = ledger.open().filter((insight) => isInsightGraduationCandidate(insight));
   for (const candidate of candidates) {
     process.stdout.write(
       `⚠️  insights:check — ${candidate.id} acumulou ${recurrenceOf(candidate)} ocorrência(s) ` +
-        `(≥ ${GRADUATION_CANDIDATE_THRESHOLD}) sem graduação — candidato à graduação; ` +
+        `(≥ ${INSIGHT_GRADUATION_CANDIDATE_THRESHOLD}) sem graduação — candidato à graduação; ` +
         `decisão humana necessária (\`insight promote\` ou \`insight discard\`).\n`
     );
   }

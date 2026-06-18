@@ -3,27 +3,33 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Flow - ai-guidelines</title>
+    <title>Flow — ai-guidelines</title>
     <style>
       :root {
         color-scheme: light;
-        --bg: #f5f1e8;
-        --surface: #fffdf8;
-        --surface-strong: #ffffff;
-        --ink: #1f2933;
-        --muted: #5d6b78;
-        --line: #d8d0c3;
-        --accent: #0f766e;
-        --accent-strong: #0a5f59;
+        --bg: #f6f7fb;
+        --ink: #172033;
+        --muted: #5e6b7a;
+        --line: #d8deea;
+        --surface: #ffffff;
+        --surface-soft: #f9fbff;
+        --teal: #0f766e;
+        --teal-dark: #0b5f59;
         --blue: #2563eb;
-        --amber: #a15c07;
-        --red: #b42318;
+        --blue-soft: #e8f0ff;
         --green: #047857;
-        --terminal: #17212b;
-        --terminal-line: rgba(255, 255, 255, 0.1);
-        --terminal-muted: #9bacbd;
+        --green-soft: #e6f8ef;
+        --amber: #b7791f;
+        --amber-soft: #fff3d6;
+        --red: #b42318;
+        --red-soft: #ffe7e5;
+        --purple: #6d28d9;
+        --purple-soft: #f0e8ff;
+        --terminal: #101826;
+        --terminal-line: rgba(255, 255, 255, 0.12);
+        --terminal-muted: #9ba8bb;
         --radius: 8px;
-        --shadow: 0 22px 58px rgba(31, 41, 51, 0.12);
+        --shadow: 0 20px 48px rgba(23, 32, 51, 0.12);
       }
 
       * {
@@ -36,12 +42,10 @@
 
       body {
         margin: 0;
-        background:
-          radial-gradient(circle at 12% 0%, rgba(15, 118, 110, 0.14), transparent 28rem),
-          linear-gradient(180deg, #fffaf1 0, var(--bg) 44rem);
+        background: var(--bg);
         color: var(--ink);
         font:
-          16px/1.56 Inter,
+          16px/1.58 Inter,
           ui-sans-serif,
           system-ui,
           -apple-system,
@@ -51,14 +55,14 @@
       }
 
       a {
-        color: var(--accent-strong);
-        font-weight: 750;
+        color: var(--teal-dark);
+        font-weight: 760;
       }
 
       code {
-        border: 1px solid rgba(31, 41, 51, 0.1);
+        border: 1px solid rgba(23, 32, 51, 0.12);
         border-radius: 6px;
-        background: rgba(31, 41, 51, 0.06);
+        background: rgba(23, 32, 51, 0.06);
         padding: 0.12rem 0.34rem;
         font:
           0.92em/1.35 "SFMono-Regular",
@@ -80,13 +84,24 @@
       }
 
       .hero {
+        min-height: 92vh;
         display: grid;
-        grid-template-columns: minmax(0, 1.02fr) minmax(340px, 0.98fr);
-        gap: clamp(1.4rem, 4vw, 3rem);
         align-items: center;
-        max-width: 1180px;
+        background:
+          linear-gradient(rgba(12, 18, 30, 0.68), rgba(12, 18, 30, 0.5)),
+          url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1400' height='920' viewBox='0 0 1400 920'%3E%3Crect width='1400' height='920' fill='%23172533'/%3E%3Cg opacity='.28' fill='none' stroke='%23ffffff' stroke-width='2'%3E%3Cpath d='M120 170h420v130H120zM630 170h300v130H630zM1010 170h250v130h-250zM190 420h300v130H190zM580 420h360v130H580zM1030 420h210v130h-210zM280 670h340v130H280zM720 670h410v130H720z'/%3E%3Cpath d='M540 235h90M930 235h80M490 485h90M940 485h90M620 735h100'/%3E%3C/g%3E%3Cg opacity='.18' fill='%230f766e'%3E%3Ccircle cx='180' cy='225' r='18'/%3E%3Ccircle cx='690' cy='225' r='18'/%3E%3Ccircle cx='245' cy='485' r='18'/%3E%3Ccircle cx='780' cy='735' r='18'/%3E%3C/g%3E%3C/svg%3E");
+        background-size: cover;
+        background-position: center;
+      }
+
+      .hero-inner {
+        width: min(1180px, calc(100% - 2rem));
         margin: 0 auto;
-        padding: clamp(2rem, 7vw, 5rem) clamp(1rem, 4vw, 2rem) 2rem;
+        padding: 4rem 0 2rem;
+        display: grid;
+        grid-template-columns: minmax(0, 0.95fr) minmax(340px, 0.75fr);
+        gap: clamp(1.4rem, 4vw, 3.2rem);
+        align-items: center;
       }
 
       .eyebrow {
@@ -94,7 +109,7 @@
         align-items: center;
         gap: 0.55rem;
         margin-bottom: 1rem;
-        color: var(--accent-strong);
+        color: #b6f3e8;
         font-size: 0.78rem;
         font-weight: 850;
         text-transform: uppercase;
@@ -104,84 +119,159 @@
         width: 0.66rem;
         height: 0.66rem;
         border-radius: 999px;
-        background: var(--accent);
+        background: #7dd3c7;
         content: "";
       }
 
       h1 {
-        max-width: 11ch;
-        font-size: clamp(3.4rem, 12vw, 8.2rem);
+        max-width: 12ch;
+        color: white;
+        font-size: clamp(3.4rem, 10vw, 7.7rem);
       }
 
       .hero-copy {
-        max-width: 66ch;
-        margin-top: 1.15rem;
-        color: var(--muted);
-        font-size: clamp(1.04rem, 2vw, 1.2rem);
+        max-width: 68ch;
+        margin-top: 1.2rem;
+        color: #e4edf7;
+        font-size: clamp(1.05rem, 2vw, 1.24rem);
       }
 
       .hero-actions {
         display: flex;
         flex-wrap: wrap;
-        gap: 0.75rem;
+        gap: 0.7rem;
         margin-top: 1.55rem;
       }
 
       .button {
         display: inline-flex;
+        min-height: 2.7rem;
         align-items: center;
         justify-content: center;
-        min-height: 2.55rem;
-        border: 1px solid var(--accent);
+        border: 1px solid #8ae7d9;
         border-radius: var(--radius);
-        padding: 0.66rem 0.92rem;
-        background: var(--accent);
-        color: white;
+        padding: 0.68rem 0.95rem;
+        background: #8ae7d9;
+        color: #0d2d35;
         font-weight: 850;
         text-decoration: none;
       }
 
       .button.secondary {
         background: transparent;
-        color: var(--accent-strong);
+        color: #dffbf6;
+      }
+
+      .shell {
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: var(--radius);
+        background: var(--terminal);
+        box-shadow: var(--shadow);
+        color: #f6fbff;
+      }
+
+      .shell-head {
+        display: flex;
+        min-height: 2.4rem;
+        align-items: center;
+        gap: 0.5rem;
+        border-bottom: 1px solid var(--terminal-line);
+        padding: 0 0.78rem;
+        color: var(--terminal-muted);
+        font-size: 0.84rem;
+      }
+
+      .dot {
+        width: 0.68rem;
+        height: 0.68rem;
+        border-radius: 50%;
+        background: #ef4444;
+      }
+
+      .dot:nth-child(2) {
+        background: #f59e0b;
+      }
+
+      .dot:nth-child(3) {
+        background: #22c55e;
+      }
+
+      .shell-body {
+        padding: 1rem;
+        font:
+          0.9rem/1.56 "SFMono-Regular",
+          Consolas,
+          "Liberation Mono",
+          monospace;
+      }
+
+      .terminal-line {
+        display: block;
+        margin: 0.12rem 0;
+      }
+
+      .dim {
+        color: var(--terminal-muted);
+      }
+
+      .choice {
+        display: grid;
+        grid-template-columns: 1.2rem 1fr;
+        gap: 0.4rem;
+        margin: 0.32rem 0;
+      }
+
+      .choice.active {
+        color: #9ff5e8;
+      }
+
+      .choice.disabled {
+        color: #aeb8c8;
       }
 
       main {
-        max-width: 1180px;
+        width: min(1180px, calc(100% - 2rem));
         margin: 0 auto;
-        padding: 0 clamp(1rem, 4vw, 2rem) 4rem;
+        padding: 2rem 0 4rem;
       }
 
       .nav {
+        position: sticky;
+        top: 0;
+        z-index: 5;
         display: flex;
         flex-wrap: wrap;
         gap: 0.55rem;
-        margin: 1.5rem 0 2.6rem;
+        border-bottom: 1px solid var(--line);
+        background: rgba(246, 247, 251, 0.94);
+        padding: 0.9rem 0;
+        backdrop-filter: blur(12px);
       }
 
       .nav a {
         border: 1px solid var(--line);
         border-radius: 999px;
-        background: rgba(255, 255, 255, 0.62);
-        padding: 0.44rem 0.72rem;
+        background: white;
+        padding: 0.42rem 0.72rem;
         color: var(--ink);
         font-size: 0.92rem;
         text-decoration: none;
       }
 
       section {
-        margin-top: clamp(2rem, 6vw, 4rem);
+        margin-top: clamp(2.2rem, 6vw, 4.4rem);
       }
 
       .section-title {
         display: grid;
         gap: 0.55rem;
-        max-width: 880px;
-        margin-bottom: 1.1rem;
+        max-width: 870px;
+        margin-bottom: 1.15rem;
       }
 
       .section-title h2 {
-        font-size: clamp(1.8rem, 4vw, 3rem);
+        font-size: clamp(1.9rem, 4vw, 3.2rem);
       }
 
       .section-title p {
@@ -205,18 +295,13 @@
       .card {
         border: 1px solid var(--line);
         border-radius: var(--radius);
-        background: rgba(255, 253, 248, 0.86);
+        background: var(--surface);
         padding: 1rem;
       }
 
-      .card.strong {
-        background: var(--surface-strong);
-        box-shadow: 0 12px 30px rgba(31, 41, 51, 0.07);
-      }
-
       .card h3 {
-        margin-bottom: 0.5rem;
-        font-size: 1.14rem;
+        margin-bottom: 0.48rem;
+        font-size: 1.16rem;
       }
 
       .card p,
@@ -225,203 +310,425 @@
       }
 
       .card ul {
-        margin: 0;
+        margin: 0.75rem 0 0;
         padding-left: 1.1rem;
       }
 
-      .shell {
-        border: 1px solid rgba(31, 41, 51, 0.16);
-        border-radius: var(--radius);
-        background: var(--terminal);
-        box-shadow: var(--shadow);
-        color: #e9f2f1;
-        overflow: hidden;
-      }
-
-      .shell-head {
-        display: flex;
-        align-items: center;
-        gap: 0.42rem;
-        min-height: 2.4rem;
-        border-bottom: 1px solid var(--terminal-line);
-        padding: 0 0.86rem;
-        background: rgba(255, 255, 255, 0.04);
-        color: var(--terminal-muted);
-        font:
-          0.8rem/1.4 "SFMono-Regular",
-          Consolas,
-          "Liberation Mono",
-          monospace;
-      }
-
-      .dot {
-        width: 0.66rem;
-        height: 0.66rem;
-        border-radius: 999px;
-        background: #ef4444;
-      }
-
-      .dot:nth-child(2) {
-        background: #f59e0b;
-      }
-
-      .dot:nth-child(3) {
-        background: #10b981;
-      }
-
-      .shell-body {
-        min-height: 23rem;
-        padding: 1rem;
-        font:
-          0.9rem/1.58 "SFMono-Regular",
-          Consolas,
-          "Liberation Mono",
-          monospace;
-      }
-
-      .prompt-line {
-        display: block;
-        color: #a9f2df;
-      }
-
-      .dim {
-        color: var(--terminal-muted);
-      }
-
-      .choice {
-        display: grid;
-        grid-template-columns: 1.25rem 1fr;
-        gap: 0.35rem;
-        margin: 0.32rem 0;
-      }
-
-      .choice.active {
-        color: #f7f3d2;
-      }
-
-      .choice.disabled {
-        color: #718293;
+      .highlight {
+        border-color: rgba(15, 118, 110, 0.45);
+        background: linear-gradient(180deg, #ffffff 0, #f2fbf8 100%);
+        box-shadow: 0 14px 34px rgba(15, 118, 110, 0.1);
       }
 
       .status {
         display: inline-flex;
         align-items: center;
-        min-height: 1.6rem;
         border-radius: 999px;
-        padding: 0.18rem 0.58rem;
-        font-size: 0.82rem;
+        padding: 0.2rem 0.52rem;
+        font-size: 0.72rem;
         font-weight: 850;
+        text-transform: uppercase;
       }
 
-      .status.available {
-        background: rgba(4, 120, 87, 0.12);
+      .status.green {
+        background: var(--green-soft);
         color: var(--green);
       }
 
-      .status.blocked {
-        background: rgba(161, 92, 7, 0.14);
+      .status.blue {
+        background: var(--blue-soft);
+        color: var(--blue);
+      }
+
+      .status.amber {
+        background: var(--amber-soft);
         color: var(--amber);
       }
 
-      .status.forbidden {
-        background: rgba(180, 35, 24, 0.12);
+      .status.red {
+        background: var(--red-soft);
         color: var(--red);
       }
 
-      .split {
+      .status.purple {
+        background: var(--purple-soft);
+        color: var(--purple);
+      }
+
+      .path-card {
         display: grid;
-        grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
-        gap: 1rem;
-        align-items: start;
+        grid-template-rows: auto auto 1fr auto;
+        min-height: 18rem;
+      }
+
+      .path-card .command {
+        margin: 0.8rem 0;
+      }
+
+      .command {
+        display: inline-flex;
+        width: fit-content;
+        border: 1px solid rgba(37, 99, 235, 0.2);
+        border-radius: 6px;
+        background: var(--blue-soft);
+        padding: 0.38rem 0.55rem;
+        color: #173d86;
+        font:
+          0.92rem/1.4 "SFMono-Regular",
+          Consolas,
+          "Liberation Mono",
+          monospace;
+      }
+
+      .comparison {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        overflow: hidden;
+        background: white;
+      }
+
+      .comparison > div {
+        min-height: 12rem;
+        padding: 1rem;
+        border-right: 1px solid var(--line);
+      }
+
+      .comparison > div:last-child {
+        border-right: 0;
       }
 
       .flowline {
         display: grid;
-        grid-template-columns: repeat(7, minmax(118px, 1fr));
-        gap: 0.55rem;
+        grid-template-columns: repeat(10, minmax(9rem, 1fr));
+        gap: 0.8rem;
         overflow-x: auto;
-        padding-bottom: 0.4rem;
+        padding: 0.25rem 0 0.8rem;
       }
 
-      .step {
-        min-height: 8.5rem;
+      .stage {
+        position: relative;
+        min-width: 9rem;
         border: 1px solid var(--line);
         border-radius: var(--radius);
-        background: var(--surface);
-        padding: 0.85rem;
+        background: white;
+        padding: 0.9rem;
       }
 
-      .step strong {
-        display: block;
-        margin: 0.35rem 0;
+      .stage::after {
+        position: absolute;
+        top: 2.2rem;
+        right: -0.72rem;
+        width: 0.72rem;
+        height: 2px;
+        background: var(--line);
+        content: "";
       }
 
-      .step small {
-        color: var(--muted);
+      .stage:last-child::after {
+        display: none;
       }
 
       .num {
         display: inline-grid;
-        width: 1.9rem;
-        height: 1.9rem;
+        width: 1.75rem;
+        height: 1.75rem;
         place-items: center;
-        border-radius: 999px;
-        background: var(--accent);
+        border-radius: 50%;
+        background: var(--teal);
         color: white;
-        font-weight: 900;
+        font-weight: 850;
       }
 
-      .wizard-demo {
+      .stage strong {
+        display: block;
+        margin-top: 0.6rem;
+        font-size: 1rem;
+      }
+
+      .stage small {
+        display: block;
+        margin-top: 0.35rem;
+        color: var(--muted);
+      }
+
+      .journey-steps {
         display: grid;
-        grid-template-columns: minmax(280px, 0.94fr) minmax(0, 1.06fr);
+        gap: 1rem;
+        margin: 1.2rem 0 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .journey-steps > li {
+        display: grid;
+        grid-template-columns: 3rem minmax(0, 1fr);
+        gap: 1rem;
+        padding: 1.1rem;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: rgba(255, 255, 255, 0.82);
+        box-shadow: var(--shadow-soft);
+      }
+
+      .step-number {
+        display: grid;
+        width: 2.45rem;
+        height: 2.45rem;
+        place-items: center;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--blue), var(--green));
+        color: #fff;
+        font-weight: 800;
+      }
+
+      .journey-steps h3 {
+        margin: 0 0 0.35rem;
+      }
+
+      .journey-steps p {
+        margin: 0.2rem 0 0.7rem;
+        color: var(--muted);
+      }
+
+      .journey-steps ul {
+        margin: 0.55rem 0 0;
+        padding-left: 1.1rem;
+        color: var(--muted);
+      }
+
+      .journey-steps code {
+        font-size: 0.86rem;
+      }
+
+      .journey-callout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(280px, 0.85fr);
+        gap: 1rem;
+        margin-top: 1.2rem;
+        align-items: stretch;
+      }
+
+      .journey-callout .shell {
+        min-height: 100%;
+      }
+
+      .clack-simulator {
+        display: grid;
+        grid-template-columns: minmax(210px, 0.42fr) minmax(0, 1fr);
+        gap: 1rem;
+        margin: 1.2rem 0;
+        border: 1px solid rgba(15, 118, 110, 0.24);
+        border-radius: var(--radius);
+        background: linear-gradient(180deg, #ffffff 0, #f5fbf9 100%);
+        padding: 1rem;
+        box-shadow: 0 14px 34px rgba(23, 32, 51, 0.08);
+      }
+
+      .simulator-input {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .simulator-tab-row {
+        display: grid;
+        align-content: start;
+        gap: 0.55rem;
+      }
+
+      .simulator-tab-row label {
+        display: grid;
+        gap: 0.2rem;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: white;
+        padding: 0.72rem;
+        cursor: pointer;
+      }
+
+      .simulator-tab-row label strong {
+        line-height: 1.2;
+      }
+
+      .simulator-tab-row label span {
+        color: var(--muted);
+        font-size: 0.88rem;
+      }
+
+      .simulator-panel {
+        display: none;
+        grid-template-columns: minmax(0, 0.86fr) minmax(300px, 1fr);
         gap: 1rem;
         align-items: stretch;
       }
 
-      .option-list {
+      .simulator-copy {
         display: grid;
-        gap: 0.5rem;
-        margin-top: 0.85rem;
-      }
-
-      .option-button {
-        width: 100%;
+        align-content: start;
+        gap: 0.75rem;
         border: 1px solid var(--line);
         border-radius: var(--radius);
         background: var(--surface);
-        color: var(--ink);
-        padding: 0.72rem 0.78rem;
-        text-align: left;
-        font: inherit;
-        font-weight: 760;
-        cursor: pointer;
+        padding: 1rem;
       }
 
+      .simulator-copy h3 {
+        font-size: 1.2rem;
+      }
+
+      .simulator-copy p,
+      .simulator-copy li {
+        color: var(--muted);
+      }
+
+      .simulator-copy ul {
+        margin: 0;
+        padding-left: 1.1rem;
+      }
+
+      .prompt-stack {
+        display: grid;
+        gap: 0.52rem;
+      }
+
+      .prompt-row {
+        display: grid;
+        grid-template-columns: 1.15rem minmax(0, 1fr);
+        gap: 0.45rem;
+      }
+
+      .prompt-row.active {
+        color: #9ff5e8;
+      }
+
+      .prompt-row.warn {
+        color: #ffd58a;
+      }
+
+      .prompt-row.success {
+        color: #9ff5b3;
+      }
+
+      .prompt-row.muted {
+        color: var(--terminal-muted);
+      }
+
+      .prompt-group {
+        display: grid;
+        gap: 0.18rem;
+        margin-top: 0.45rem;
+        padding-left: 1.55rem;
+      }
+
+      .prompt-group-title {
+        color: #d8e8ff;
+        font-weight: 850;
+      }
+
+      .prompt-hint {
+        color: var(--terminal-muted);
+      }
+
+      #new-detect:checked ~ .simulator-tab-row label[for="new-detect"],
+      #new-choose:checked ~ .simulator-tab-row label[for="new-choose"],
+      #new-preview:checked ~ .simulator-tab-row label[for="new-preview"],
+      #new-validate:checked ~ .simulator-tab-row label[for="new-validate"],
+      #existing-detect:checked ~ .simulator-tab-row label[for="existing-detect"],
+      #existing-merge:checked ~ .simulator-tab-row label[for="existing-merge"],
+      #existing-force:checked ~ .simulator-tab-row label[for="existing-force"],
+      #existing-validate:checked ~ .simulator-tab-row label[for="existing-validate"],
+      #active-state:checked ~ .simulator-tab-row label[for="active-state"],
+      #active-next:checked ~ .simulator-tab-row label[for="active-next"],
+      #active-update:checked ~ .simulator-tab-row label[for="active-update"],
+      #active-gate:checked ~ .simulator-tab-row label[for="active-gate"] {
+        border-color: rgba(15, 118, 110, 0.5);
+        background: #e9fbf6;
+        box-shadow: inset 4px 0 0 var(--teal);
+      }
+
+      #new-detect:checked ~ .simulator-panels .panel-new-detect,
+      #new-choose:checked ~ .simulator-panels .panel-new-choose,
+      #new-preview:checked ~ .simulator-panels .panel-new-preview,
+      #new-validate:checked ~ .simulator-panels .panel-new-validate,
+      #existing-detect:checked ~ .simulator-panels .panel-existing-detect,
+      #existing-merge:checked ~ .simulator-panels .panel-existing-merge,
+      #existing-force:checked ~ .simulator-panels .panel-existing-force,
+      #existing-validate:checked ~ .simulator-panels .panel-existing-validate,
+      #active-state:checked ~ .simulator-panels .panel-active-state,
+      #active-next:checked ~ .simulator-panels .panel-active-next,
+      #active-update:checked ~ .simulator-panels .panel-active-update,
+      #active-gate:checked ~ .simulator-panels .panel-active-gate {
+        display: grid;
+      }
+
+      .wizard-demo {
+        display: grid;
+        grid-template-columns: minmax(250px, 0.78fr) minmax(0, 1.22fr);
+        gap: 1rem;
+      }
+
+      .tab-list,
+      .option-list {
+        display: grid;
+        gap: 0.52rem;
+      }
+
+      .tab-list {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        margin-bottom: 1rem;
+      }
+
+      .tab-button,
+      .option-button,
+      .small-button {
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: white;
+        color: var(--ink);
+        cursor: pointer;
+        font: inherit;
+        font-weight: 780;
+      }
+
+      .tab-button {
+        padding: 0.68rem 0.8rem;
+        text-align: center;
+      }
+
+      .option-button {
+        min-height: 3.05rem;
+        padding: 0.6rem 0.72rem;
+        text-align: left;
+      }
+
+      .tab-button[aria-selected="true"],
       .option-button[aria-selected="true"] {
-        border-color: var(--accent);
-        background: rgba(15, 118, 110, 0.1);
-        color: var(--accent-strong);
+        border-color: var(--teal);
+        background: #edfdfa;
+        color: var(--teal-dark);
       }
 
       .demo-panel {
-        display: grid;
-        gap: 1rem;
         border: 1px solid var(--line);
         border-radius: var(--radius);
-        background: var(--surface-strong);
+        background: white;
         padding: 1rem;
-        box-shadow: 0 12px 30px rgba(31, 41, 51, 0.07);
       }
 
       .demo-kicker {
-        color: var(--accent-strong);
+        color: var(--teal-dark);
         font-size: 0.78rem;
         font-weight: 850;
         text-transform: uppercase;
       }
 
       .demo-panel h3 {
-        font-size: clamp(1.45rem, 3vw, 2.2rem);
+        margin: 0.42rem 0;
+        font-size: clamp(1.45rem, 3vw, 2.25rem);
       }
 
       .demo-panel p {
@@ -430,51 +737,32 @@
 
       .demo-steps {
         display: grid;
-        gap: 0.48rem;
-        margin: 0;
-        padding: 0;
-        list-style: none;
+        gap: 0.45rem;
+        margin: 1rem 0;
+        padding-left: 1.1rem;
       }
 
       .demo-steps li {
-        display: grid;
-        grid-template-columns: 1.6rem 1fr;
-        gap: 0.55rem;
-        align-items: start;
         color: var(--muted);
-      }
-
-      .demo-steps span {
-        display: inline-grid;
-        width: 1.35rem;
-        height: 1.35rem;
-        place-items: center;
-        border-radius: 999px;
-        background: rgba(15, 118, 110, 0.14);
-        color: var(--accent-strong);
-        font-size: 0.78rem;
-        font-weight: 900;
       }
 
       .carousel-controls {
         display: flex;
-        flex-wrap: wrap;
-        gap: 0.6rem;
         align-items: center;
         justify-content: space-between;
-        border-top: 1px solid var(--line);
-        padding-top: 0.9rem;
+        gap: 0.75rem;
+        margin-top: 0.85rem;
       }
 
       .small-button {
-        border: 1px solid var(--line);
-        border-radius: var(--radius);
-        background: white;
-        color: var(--ink);
-        padding: 0.48rem 0.72rem;
-        font: inherit;
-        font-weight: 800;
-        cursor: pointer;
+        min-height: 2.25rem;
+        padding: 0.42rem 0.7rem;
+      }
+
+      .safety-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 1rem;
       }
 
       .matrix {
@@ -483,20 +771,20 @@
         overflow: hidden;
         border: 1px solid var(--line);
         border-radius: var(--radius);
-        background: var(--surface-strong);
+        background: white;
       }
 
       .matrix th,
       .matrix td {
         border-bottom: 1px solid var(--line);
-        padding: 0.76rem;
+        padding: 0.78rem;
         text-align: left;
         vertical-align: top;
       }
 
       .matrix th {
-        background: #eee7da;
-        font-size: 0.86rem;
+        background: var(--surface-soft);
+        font-size: 0.82rem;
         text-transform: uppercase;
       }
 
@@ -505,401 +793,1272 @@
       }
 
       .callout {
-        border-left: 4px solid var(--accent);
-        border-radius: 0 var(--radius) var(--radius) 0;
-        background: rgba(15, 118, 110, 0.09);
+        border: 1px solid rgba(15, 118, 110, 0.3);
+        border-left: 6px solid var(--teal);
+        border-radius: var(--radius);
+        background: #f0fdfa;
         padding: 1rem;
       }
 
-      .callout.warning {
-        border-left-color: var(--amber);
-        background: rgba(161, 92, 7, 0.11);
-      }
-
       .footer {
-        margin-top: 4rem;
         border-top: 1px solid var(--line);
-        padding-top: 1.4rem;
+        margin-top: 3rem;
+        padding-top: 1.3rem;
         color: var(--muted);
       }
 
-      @media (max-width: 900px) {
-        .hero,
-        .split,
-        .wizard-demo,
+      @media (max-width: 880px) {
+        .hero {
+          min-height: auto;
+        }
+
+        .hero-inner,
         .grid.two,
-        .grid.three {
+        .grid.three,
+        .wizard-demo,
+        .safety-grid,
+        .comparison,
+        .clack-simulator,
+        .simulator-panel,
+        .journey-callout,
+        .journey-steps > li {
           grid-template-columns: 1fr;
         }
 
-        h1 {
-          max-width: none;
+        .hero-inner {
+          padding: 2rem 0;
+        }
+
+        .comparison > div {
+          border-right: 0;
+          border-bottom: 1px solid var(--line);
+        }
+
+        .comparison > div:last-child {
+          border-bottom: 0;
+        }
+
+        .tab-list {
+          grid-template-columns: 1fr;
+        }
+
+        .nav {
+          position: static;
         }
 
         .flowline {
-          grid-template-columns: repeat(7, minmax(160px, 1fr));
-        }
-      }
-
-      @media (max-width: 560px) {
-        body {
-          font-size: 15px;
+          grid-template-columns: 1fr;
+          overflow: visible;
         }
 
-        .hero {
-          padding-top: 1.35rem;
-        }
-
-        .hero-actions {
-          flex-direction: column;
-        }
-
-        .button,
-        .small-button {
-          width: 100%;
-        }
-
-        .matrix {
-          display: block;
-          overflow-x: auto;
-          white-space: nowrap;
+        .stage::after {
+          display: none;
         }
       }
     </style>
   </head>
   <body>
     <header class="hero">
-      <div>
-        <p class="eyebrow">Fluxo local governado</p>
-        <h1>Flow</h1>
-        <p class="hero-copy">
-          <code>npm run flow</code> é a entrada humana local deste repositório. Em terminal
-          interativo, abre o wizard Clack. Em automação ou saída redirecionada, imprime o cockpit
-          textual sem tentar perguntar nada.
-        </p>
-        <div class="hero-actions" aria-label="Atalhos do guia">
-          <a class="button" href="#simulador">Simular o wizard</a>
-          <a class="button secondary" href="#modelo">Entender o modelo</a>
+      <div class="hero-inner">
+        <div>
+          <p class="eyebrow">Framework de fluxo governado</p>
+          <h1>ai-guidelines Flow</h1>
+          <p class="hero-copy">
+            Transforme decisões de engenharia em um caminho claro: o framework mostra o estado do
+            repo, orienta o próximo passo, protege decisões humanas e registra evidência até o merge
+            final.
+          </p>
+          <div class="hero-actions" aria-label="Atalhos principais">
+            <a class="button" href="#começar">Começar um projeto</a>
+            <a class="button secondary" href="#spec">Ver ciclo de uma spec</a>
+            <a class="button secondary" href="#repo-em-uso">Ver repo em uso</a>
+          </div>
         </div>
-      </div>
 
-      <aside class="shell" aria-label="Simulação do comando npm run flow">
-        <div class="shell-head">
-          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
-          <span>npm run flow</span>
-        </div>
-        <div class="shell-body">
-          <span class="prompt-line">◇ ai-guidelines flow</span>
-          <span class="dim">│ snapshot situado carregado</span><br />
-          <span class="choice active"
-            ><span>◆</span><span>Continuar próxima ação recomendada</span></span
-          >
-          <span class="choice"><span>◇</span><span>Ver cockpit completo</span></span>
-          <span class="choice"><span>◇</span><span>Ver decisões disponíveis</span></span>
-          <span class="choice"><span>◇</span><span>Entender bloqueios</span></span>
-          <span class="choice"
-            ><span>◇</span><span>Configurar/adotar/atualizar repositório</span></span
-          >
-          <span class="choice disabled"
-            ><span>◇</span><span>Human Gate bloqueado até o estado permitir</span></span
-          >
-          <br />
-          <span class="dim">Nenhuma mutação roda sem briefing, prévia e confirmação.</span>
-        </div>
-      </aside>
+        <aside class="shell" aria-label="Resumo simulado do npm run flow">
+          <div class="shell-head">
+            <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+            <span>npm run flow</span>
+          </div>
+          <div class="shell-body">
+            <span class="terminal-line">◇ ai-guidelines flow</span>
+            <span class="terminal-line dim">Estado: PR #43 Draft · CI verde · tree suja</span>
+            <span class="choice"><span>●</span><span>Ver resumo completo do estado</span></span>
+            <span class="choice active"
+              ><span>◆</span><span>PRÓXIMA AÇÃO RECOMENDADA: finalizar mudanças locais</span></span
+            >
+            <span class="choice"><span>○</span><span>ALTERNATIVA: ver PIT-0011</span></span>
+            <span class="choice"><span>○</span><span>Ver orientação / handoff</span></span>
+            <span class="choice disabled"
+              ><span>◇</span><span>Human Gate bloqueado até Ready + CI + política</span></span
+            >
+            <br />
+            <span class="terminal-line dim"
+              >O wizard orienta. Decisões sensíveis continuam com preview e confirmação.</span
+            >
+          </div>
+        </aside>
+      </div>
     </header>
 
     <main>
       <nav class="nav" aria-label="Mapa da página">
-        <a href="#inicio">Início</a>
-        <a href="#modelo">Modelo</a>
-        <a href="#simulador">Simulador</a>
-        <a href="#cockpit">Cockpit</a>
-        <a href="#readiness">Readiness</a>
-        <a href="#provisioning">Init/adopt/update</a>
-        <a href="#seguranca">Segurança</a>
+        <a href="#começar">Começar</a>
+        <a href="#comparar">Init, adopt ou update</a>
+        <a href="#projeto-novo">Projeto novo</a>
+        <a href="#projeto-existente">Projeto existente</a>
+        <a href="#repo-em-uso">Repo em uso</a>
+        <a href="#spec">Spec até merge</a>
+        <a href="#segurança">Segurança</a>
+        <a href="#valor">Por que usar</a>
         <a href="#comandos">Comandos</a>
       </nav>
 
-      <section id="inicio">
+      <section id="começar">
         <div class="section-title">
-          <h2>Uma entrada local, dois comportamentos seguros</h2>
+          <h2>Escolha o ponto de entrada certo</h2>
           <p>
-            O mesmo comando se adapta ao contexto. Ele é interativo quando existe pessoa no terminal
-            e determinístico quando está rodando em CI, pipe ou execução não interativa.
+            O framework não espera que você memorize comandos. Ele separa os cenários reais: projeto
+            novo, projeto existente e repositório que já usa ai-guidelines.
           </p>
         </div>
 
         <div class="grid three">
-          <article class="card strong">
-            <span class="status available">TTY</span>
-            <h3>Terminal interativo</h3>
-            <p>Abre o wizard Clack com menu, escolhas humanas, prévias e confirmações.</p>
-          </article>
-          <article class="card strong">
-            <span class="status available">non-TTY</span>
-            <h3>Automação ou saída redirecionada</h3>
-            <p>Renderiza o cockpit textual. Não tenta prompt interativo em automação.</p>
-          </article>
-          <article class="card strong">
-            <span class="status available">comando direto</span>
-            <h3>Registry ativo</h3>
+          <article class="card path-card highlight">
+            <span class="status green">projeto novo</span>
+            <h3>Inicializar do zero</h3>
+            <span class="command">npm run flow -- init</span>
             <p>
-              <code>work</code>, <code>decide</code>, <code>init</code>, <code>adopt</code> e
-              <code>update</code> continuam roteados pelo registry.
+              Use quando o diretório ainda não tem governança. O fluxo cria o baseline, configura
+              providers/features e mostra preview antes de escrever.
             </p>
+            <ul>
+              <li>Ideal para começar com práticas padronizadas.</li>
+              <li>Escolha providers e features dentro do próprio fluxo.</li>
+              <li>Dry-run permite ver o plano sem tocar no repo.</li>
+            </ul>
+          </article>
+
+          <article class="card path-card">
+            <span class="status blue">repo existente</span>
+            <h3>Adotar sem apagar história</h3>
+            <span class="command">npm run flow -- adopt</span>
+            <p>
+              Use quando o projeto já existe. O fluxo preserva o que está no repo e adiciona a
+              governança de forma conservadora.
+            </p>
+            <ul>
+              <li>Não trata o repo como projeto vazio.</li>
+              <li>Mescla blocos gerenciados quando possível.</li>
+              <li>Explica conflitos antes de qualquer alteração.</li>
+            </ul>
+          </article>
+
+          <article class="card path-card">
+            <span class="status purple">repo governado</span>
+            <h3>Usar e atualizar no dia a dia</h3>
+            <span class="command">npm run flow</span>
+            <p>
+              Use quando o repo já tem ai-guidelines. O wizard mostra o estado, a próxima ação e,
+              quando fizer sentido, oferece update.
+            </p>
+            <ul>
+              <li>Update cobre runtime, templates, providers e práticas.</li>
+              <li>Política de colaboração e revisão vem de <code>review-policy.yml</code>.</li>
+              <li>Handoff copia contexto para sua LLM de preferência.</li>
+              <li>Decisões ficam separadas de execução técnica.</li>
+            </ul>
           </article>
         </div>
       </section>
 
-      <section id="modelo">
+      <section id="comparar">
         <div class="section-title">
-          <h2>O modelo mental</h2>
+          <h2>Init, adopt e update não são a mesma coisa</h2>
           <p>
-            O wizard não é uma segunda fonte de regra. Ele projeta a mesma derivação usada por
-            cockpit, <code>work</code>, <code>decide</code>, <code>pr-ready</code> e briefing de
-            Human Gate.
+            O wizard deve mostrar apenas o caminho que faz sentido para o estado do repositório.
+            Isso evita escolhas perigosas e deixa o fluxo mais simples para humanos.
           </p>
         </div>
 
-        <div class="flowline" aria-label="Do snapshot ao efeito governado">
-          <div class="step">
-            <span class="num">1</span>
-            <strong>Snapshot</strong>
-            <small>Spec, nó, checkpoint, reviews, PR, CI, branch, tree e gate.</small>
+        <div class="comparison" aria-label="Comparação entre init, adopt e update">
+          <div>
+            <span class="status green">init</span>
+            <h3>Nascimento</h3>
+            <p>Cria uma base governada em um diretório novo.</p>
+            <ul>
+              <li>baseline inicial;</li>
+              <li>templates e runtime;</li>
+              <li>providers/features escolhidos no fluxo.</li>
+            </ul>
           </div>
-          <div class="step">
-            <span class="num">2</span>
-            <strong>Ações derivadas</strong>
-            <small>Disponíveis, bloqueadas, proibidas e próxima recomendada.</small>
+          <div>
+            <span class="status blue">adopt</span>
+            <h3>Entrada em um repo vivo</h3>
+            <p>Adiciona governança a um projeto que já existe.</p>
+            <ul>
+              <li>preserva arquivos existentes;</li>
+              <li>faz merge conservador;</li>
+              <li>expõe conflitos de forma clara.</li>
+            </ul>
           </div>
-          <div class="step">
-            <span class="num">3</span>
-            <strong>Briefing</strong>
-            <small>O que, por que, autoridade, evidência, validação e consequência.</small>
-          </div>
-          <div class="step">
-            <span class="num">4</span>
-            <strong>Prévia</strong>
-            <small>Arquivos e efeitos exatos antes de qualquer escrita.</small>
-          </div>
-          <div class="step">
-            <span class="num">5</span>
-            <strong>Confirmação</strong>
-            <small>Decisão humana explícita para cada mutação governada.</small>
-          </div>
-          <div class="step">
-            <span class="num">6</span>
-            <strong>Aplicação</strong>
-            <small>Escrita estreita. Sem Ready, Gate, merge ou transição escondida.</small>
-          </div>
-          <div class="step">
-            <span class="num">7</span>
-            <strong>Próximo estado</strong>
-            <small>O runtime relê o estado; não depende de memória do agente.</small>
+          <div>
+            <span class="status purple">update</span>
+            <h3>Manutenção governada</h3>
+            <p>Atualiza um repo que já usa o framework.</p>
+            <ul>
+              <li>runtime e templates;</li>
+              <li>providers via <code>update --providers</code>;</li>
+              <li>práticas como Prettier, Husky, CI, Quality Gates, TDD e BDD;</li>
+              <li>perfil de colaboração e regras de revisão já governadas.</li>
+            </ul>
           </div>
         </div>
       </section>
 
-      <section id="simulador">
+      <section>
         <div class="section-title">
-          <h2>Simulador do wizard</h2>
+          <h2>Dois perfis diferentes, duas responsabilidades</h2>
           <p>
-            Selecione uma opção para ver o comportamento esperado. Esta simulação é explicativa; a
-            fonte executável continua sendo o runtime, o registry e o snapshot governado.
+            O fluxo não mistura “como o repositório colabora” com “que tipo de PR está aberto”. Essa
+            separação evita que uma equipe maior force reviews semânticos por acidente, ou que um
+            projeto solo pareça menos governado.
           </p>
         </div>
 
-        <div class="wizard-demo">
-          <div class="card strong">
-            <h3>Menu principal</h3>
-            <p>As opções bloqueadas continuam visíveis, mas não são executáveis.</p>
-            <div class="option-list" role="tablist" aria-label="Opções simuladas do wizard">
-              <button class="option-button" type="button" role="tab" data-step="0">
-                Ver cockpit completo
-              </button>
-              <button class="option-button" type="button" role="tab" data-step="1">
-                Continuar próxima ação recomendada
-              </button>
-              <button class="option-button" type="button" role="tab" data-step="2">
-                Ver decisões disponíveis
-              </button>
-              <button class="option-button" type="button" role="tab" data-step="3">
-                Entender bloqueios
-              </button>
-              <button class="option-button" type="button" role="tab" data-step="4">
-                Rodar briefing de trabalho
-              </button>
-              <button class="option-button" type="button" role="tab" data-step="5">
-                Preparar review governado
-              </button>
-              <button class="option-button" type="button" role="tab" data-step="6">
-                Configurar/adotar/atualizar repositório
-              </button>
-              <button class="option-button" type="button" role="tab" data-step="7">
-                Operações avançadas
-              </button>
-              <button class="option-button" type="button" role="tab" data-step="8">Sair</button>
-            </div>
+        <div class="comparison">
+          <div>
+            <span class="status blue">colaboração</span>
+            <h3>Perfil do repositório</h3>
+            <p>Fonte: <code>.governance/review-policy.yml</code>.</p>
+            <ul>
+              <li><strong>solo</strong>: projeto mantido por uma pessoa;</li>
+              <li><strong>contributor</strong>: recebe contribuições ocasionais;</li>
+              <li><strong>team</strong>: equipe com approvals e last-push approval.</li>
+            </ul>
+          </div>
+          <div>
+            <span class="status purple">PR</span>
+            <h3>Perfil do PR</h3>
+            <p>Fonte: contrato de body/template do PR.</p>
+            <ul>
+              <li><strong>execution</strong>: implementação;</li>
+              <li><strong>governance</strong>: decisão/modelagem;</li>
+              <li><strong>integration</strong>: fechamento da stack;</li>
+              <li><strong>fast-track</strong>: correção urgente.</li>
+            </ul>
+          </div>
+          <div>
+            <span class="status green">reviews</span>
+            <h3>Capacidade não é obrigação</h3>
+            <p>Reviews semânticos são decididos por requisitos explícitos.</p>
+            <ul>
+              <li><code>technical_audit</code> pode existir sem ser obrigatório;</li>
+              <li><code>security_review</code> pode ser obrigatório só na integração;</li>
+              <li><code>team</code> não significa “TA obrigatório”.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section id="projeto-novo">
+        <div class="section-title">
+          <h2>Fluxo 1 — Inicializar um projeto novo</h2>
+          <p>
+            Use este caminho quando a pasta ainda está vazia ou quando o produto está nascendo junto
+            com a governança. A experiência deve parecer um onboarding guiado, não uma lista de
+            comandos soltos.
+          </p>
+        </div>
+
+        <div class="clack-simulator" aria-label="Simulação do flow para projeto novo">
+          <input
+            class="simulator-input"
+            id="new-detect"
+            name="new-flow-demo"
+            type="radio"
+            checked
+          />
+          <input class="simulator-input" id="new-choose" name="new-flow-demo" type="radio" />
+          <input class="simulator-input" id="new-preview" name="new-flow-demo" type="radio" />
+          <input class="simulator-input" id="new-validate" name="new-flow-demo" type="radio" />
+
+          <div class="simulator-tab-row" aria-label="Etapas simuladas do init">
+            <label for="new-detect">
+              <strong>1. Contexto</strong>
+              <span>O flow entende que a pasta ainda não tem governança.</span>
+            </label>
+            <label for="new-choose">
+              <strong>2. Escolhas</strong>
+              <span>Providers, features e práticas aparecem agrupados.</span>
+            </label>
+            <label for="new-preview">
+              <strong>3. Preview</strong>
+              <span>Mostra o plano antes de escrever.</span>
+            </label>
+            <label for="new-validate">
+              <strong>4. Validação</strong>
+              <span>Executa as checagens como tarefas visuais.</span>
+            </label>
           </div>
 
-          <article class="demo-panel" aria-live="polite">
-            <span class="demo-kicker" id="demo-kicker">Opção 1 de 9</span>
-            <h3 id="demo-title">Ver cockpit completo</h3>
-            <p id="demo-description">
-              Mostra o estado situado sem escrever nada: spec, checkpoint, PR, CI, findings,
-              readiness e ações.
-            </p>
-            <ul class="demo-steps" id="demo-steps"></ul>
-            <aside class="shell" aria-label="Saída simulada da opção selecionada">
-              <div class="shell-head">
-                <span class="dot"></span><span class="dot"></span><span class="dot"></span>
-                <span id="demo-command">npm run flow -- cockpit</span>
+          <div class="simulator-panels">
+            <article class="simulator-panel panel-new-detect">
+              <div class="simulator-copy">
+                <h3>A pessoa começa com um diretório vazio</h3>
+                <p>
+                  O wizard não pergunta “init, adopt ou update?” sem contexto. Ele explica que este
+                  é um projeto novo e coloca inicializar como caminho principal.
+                </p>
+                <ul>
+                  <li>Não mostra adopt/update como ação principal.</li>
+                  <li>Não exige que a pessoa conheça a topologia interna.</li>
+                  <li>Oferece dry-run antes da primeira escrita.</li>
+                </ul>
               </div>
-              <div class="shell-body" id="demo-terminal"></div>
-            </aside>
-            <div class="carousel-controls">
-              <button class="small-button" type="button" id="prev-step">Anterior</button>
-              <span id="step-count">1 / 9</span>
-              <button class="small-button" type="button" id="next-step">Próximo</button>
+              <aside class="shell" aria-label="Clack simulando contexto de projeto novo">
+                <div class="shell-head">
+                  <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                  <span>npm run flow</span>
+                </div>
+                <div class="shell-body prompt-stack">
+                  <span class="terminal-line">┌ ai-guidelines flow</span>
+                  <span class="prompt-row active"
+                    ><span>◆</span><span>Projeto novo detectado</span></span
+                  >
+                  <span class="prompt-row muted"
+                    ><span>│</span><span>Nenhuma governança local encontrada.</span></span
+                  >
+                  <span class="prompt-row active"
+                    ><span>●</span><span>Inicializar ai-guidelines neste projeto</span></span
+                  >
+                  <span class="prompt-row muted"
+                    ><span>○</span><span>Ver preview sem escrever arquivos</span></span
+                  >
+                  <span class="terminal-line dim">└ Nada será aplicado sem confirmação.</span>
+                </div>
+              </aside>
+            </article>
+
+            <article class="simulator-panel panel-new-choose">
+              <div class="simulator-copy">
+                <h3>As escolhas aparecem como grupos</h3>
+                <p>
+                  A tela simula o uso de seleção agrupada: providers ficam em um grupo, práticas em
+                  outro, e cada item explica o impacto.
+                </p>
+                <ul>
+                  <li>Providers não voltam como comando separado.</li>
+                  <li>Features são escolhas explícitas.</li>
+                  <li>O humano entende o que está ligando.</li>
+                </ul>
+              </div>
+              <aside class="shell" aria-label="Clack simulando group multiselect no init">
+                <div class="shell-head">
+                  <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                  <span>seleção agrupada</span>
+                </div>
+                <div class="shell-body prompt-stack">
+                  <span class="prompt-row active"
+                    ><span>◆</span><span>Escolha canais e práticas iniciais</span></span
+                  >
+                  <span class="prompt-group-title">Providers</span>
+                  <span class="prompt-group"
+                    ><span>◾ Claude <span class="prompt-hint">(AGENTS.md)</span></span
+                    ><span>◾ OpenAI <span class="prompt-hint">(Codex)</span></span></span
+                  >
+                  <span class="prompt-group-title">Práticas do repo</span>
+                  <span class="prompt-group"
+                    ><span>◾ Prettier <span class="prompt-hint">(formatação)</span></span
+                    ><span>◾ CI <span class="prompt-hint">(checks no PR)</span></span
+                    ><span>◻ Husky <span class="prompt-hint">(hooks locais)</span></span></span
+                  >
+                </div>
+              </aside>
+            </article>
+
+            <article class="simulator-panel panel-new-preview">
+              <div class="simulator-copy">
+                <h3>Preview antes de tocar no disco</h3>
+                <p>
+                  O init mostra os efeitos planejados: arquivos, blocos gerenciados, templates e
+                  orientações. O wizard só apresenta; o plano vem do runtime governado.
+                </p>
+                <ul>
+                  <li>Dry-run preserva o filesystem.</li>
+                  <li>Conflitos aparecem como bloqueios claros.</li>
+                  <li>Aplicar exige confirmação explícita.</li>
+                </ul>
+              </div>
+              <aside class="shell" aria-label="Clack simulando preview do init">
+                <div class="shell-head">
+                  <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                  <span>preview</span>
+                </div>
+                <div class="shell-body prompt-stack">
+                  <span class="prompt-row active"
+                    ><span>◇</span><span>Plano de inicialização</span></span
+                  >
+                  <span class="prompt-row muted"
+                    ><span>│</span><span>Criar AGENTS.md e configuração local</span></span
+                  >
+                  <span class="prompt-row muted"
+                    ><span>│</span><span>Espelhar templates e runtime</span></span
+                  >
+                  <span class="prompt-row muted"
+                    ><span>│</span><span>Adicionar blocos gerenciados</span></span
+                  >
+                  <span class="prompt-row warn"
+                    ><span>◆</span><span>Aplicar estas mudanças?</span></span
+                  >
+                  <span class="prompt-row"><span>●</span><span>Sim, aplicar</span></span>
+                  <span class="prompt-row muted"
+                    ><span>○</span><span>Não, manter só o preview</span></span
+                  >
+                </div>
+              </aside>
+            </article>
+
+            <article class="simulator-panel panel-new-validate">
+              <div class="simulator-copy">
+                <h3>Depois de aplicar, validar vira uma lista de tarefas</h3>
+                <p>
+                  A pessoa vê progresso por etapa. Isso fica mais didático do que apenas imprimir um
+                  script longo.
+                </p>
+                <ul>
+                  <li>Checa diff e formatação.</li>
+                  <li>Compila o runtime.</li>
+                  <li>Orienta o primeiro commit.</li>
+                </ul>
+              </div>
+              <aside class="shell" aria-label="Clack simulando tasks de validação do init">
+                <div class="shell-head">
+                  <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                  <span>validação</span>
+                </div>
+                <div class="shell-body prompt-stack">
+                  <span class="prompt-row success"
+                    ><span>◇</span><span>Validar mudanças iniciais</span></span
+                  >
+                  <span class="prompt-row success"
+                    ><span>✓</span><span>Whitespace do diff</span></span
+                  >
+                  <span class="prompt-row success"
+                    ><span>✓</span><span>Formatação dos arquivos novos</span></span
+                  >
+                  <span class="prompt-row success"
+                    ><span>✓</span><span>Build TypeScript</span></span
+                  >
+                  <span class="prompt-row active"
+                    ><span>◆</span><span>Próximo: revisar o diff e commitar</span></span
+                  >
+                </div>
+              </aside>
+            </article>
+          </div>
+        </div>
+
+        <ol class="journey-steps">
+          <li>
+            <span class="step-number">1</span>
+            <div>
+              <h3>Detectar que é um começo limpo</h3>
+              <p>
+                O flow identifica que ainda não existe governança local e oferece um único caminho
+                principal: inicializar o framework neste projeto.
+              </p>
+              <ul>
+                <li>Não mostra update como ação principal.</li>
+                <li>Não oferece o comando antigo <code>providers</code>.</li>
+                <li>Explica que arquivos serão criados antes de escrever qualquer coisa.</li>
+              </ul>
             </div>
-          </article>
-        </div>
+          </li>
+          <li>
+            <span class="step-number">2</span>
+            <div>
+              <h3>Escolher canais e práticas iniciais</h3>
+              <p>
+                A pessoa escolhe providers, features e práticas como CI, Prettier ou Husky em uma
+                tela agrupada, com linguagem de produto e sem precisar lembrar flags.
+              </p>
+              <ul>
+                <li>Providers ficam dentro do fluxo de init.</li>
+                <li>Features entram como escolhas explícitas, não como efeitos escondidos.</li>
+                <li>O preview mostra o impacto antes da confirmação.</li>
+              </ul>
+            </div>
+          </li>
+          <li>
+            <span class="step-number">3</span>
+            <div>
+              <h3>Ver o plano antes de aplicar</h3>
+              <p>
+                O wizard mostra o plano de provisionamento: arquivos, blocos gerenciados, templates,
+                runtime e orientações. O dry-run permite testar sem tocar no disco.
+              </p>
+              <ul>
+                <li>O plano vem do modelo governado, não do wizard.</li>
+                <li>Conflitos aparecem como bloqueios explicados.</li>
+                <li>Sem confirmação, nada é escrito.</li>
+              </ul>
+            </div>
+          </li>
+          <li>
+            <span class="step-number">4</span>
+            <div>
+              <h3>Aplicar, validar e fazer o primeiro commit</h3>
+              <p>
+                Depois da confirmação, o framework cria a base governada. Em seguida, orienta a
+                validação mínima e o commit inicial do projeto.
+              </p>
+              <ul>
+                <li>O humano vê o que foi criado.</li>
+                <li>As validações aparecem como etapas, não como lista solta de scripts.</li>
+                <li>O repositório já nasce com trilha de governança.</li>
+              </ul>
+            </div>
+          </li>
+        </ol>
+
+        <aside class="journey-callout">
+          <div>
+            <strong>O que a pessoa vê</strong>
+            <p>
+              Um caminho curto: começar, escolher, revisar o preview, confirmar e validar. A pessoa
+              não precisa saber a topologia interna para sair com um repo governado.
+            </p>
+          </div>
+          <div class="shell" aria-label="Comandos do fluxo de projeto novo">
+            <div class="shell-head">
+              <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+              <span>projeto novo</span>
+            </div>
+            <div class="shell-body">
+              <span class="terminal-line">npm run flow</span>
+              <span class="terminal-line dim">ou: npm run flow -- init --dry-run</span>
+              <span class="terminal-line dim">depois: npm run flow -- init</span>
+            </div>
+          </div>
+        </aside>
       </section>
 
-      <section id="cockpit">
+      <section id="projeto-existente">
         <div class="section-title">
-          <h2>Cockpit quando prompt não é apropriado</h2>
+          <h2>Fluxo 2 — Adotar um projeto existente</h2>
           <p>
-            Em non-TTY, o comando imprime o cockpit. Ele mostra o que está acontecendo e qual
-            comando canônico inspeciona ou executa a próxima ação.
+            Use este caminho quando o projeto já tem arquivos, histórico e escolhas próprias. A
+            governança entra por merge conservador, preservando o que já existe.
           </p>
         </div>
 
-        <div class="grid three">
-          <article class="card strong">
-            <h3>Estado</h3>
-            <p>Spec ativa, nó, checkpoint, PR, CI, reviews, findings e árvore Git.</p>
-          </article>
-          <article class="card strong">
-            <h3>Próxima ação</h3>
-            <p>Uma recomendação principal, com comando exato para inspeção ou decisão.</p>
-          </article>
-          <article class="card strong">
-            <h3>Fronteiras</h3>
-            <p>Ações disponíveis, bloqueadas e proibidas ficam separadas por motivo.</p>
-          </article>
+        <div class="clack-simulator" aria-label="Simulação do flow para projeto existente">
+          <input
+            class="simulator-input"
+            id="existing-detect"
+            name="existing-flow-demo"
+            type="radio"
+            checked
+          />
+          <input
+            class="simulator-input"
+            id="existing-merge"
+            name="existing-flow-demo"
+            type="radio"
+          />
+          <input
+            class="simulator-input"
+            id="existing-force"
+            name="existing-flow-demo"
+            type="radio"
+          />
+          <input
+            class="simulator-input"
+            id="existing-validate"
+            name="existing-flow-demo"
+            type="radio"
+          />
+
+          <div class="simulator-tab-row" aria-label="Etapas simuladas do adopt">
+            <label for="existing-detect">
+              <strong>1. Contexto</strong>
+              <span>O flow percebe que o repo já tem vida própria.</span>
+            </label>
+            <label for="existing-merge">
+              <strong>2. Merge</strong>
+              <span>Mostra o que será preservado e o que será criado.</span>
+            </label>
+            <label for="existing-force">
+              <strong>3. Conflito</strong>
+              <span>Explica quando force é necessário.</span>
+            </label>
+            <label for="existing-validate">
+              <strong>4. Diferença</strong>
+              <span>Valida o diff antes do commit.</span>
+            </label>
+          </div>
+
+          <div class="simulator-panels">
+            <article class="simulator-panel panel-existing-detect">
+              <div class="simulator-copy">
+                <h3>O repositório não está vazio</h3>
+                <p>
+                  O wizard mostra que encontrou arquivos existentes e muda o caminho principal para
+                  adoção. Assim a pessoa não precisa saber que init seria arriscado neste cenário.
+                </p>
+                <ul>
+                  <li>Detecta package.json, workflows, hooks ou arquivos de produto.</li>
+                  <li>Oferece adopt como caminho seguro.</li>
+                  <li>Mantém dry-run como primeira opção.</li>
+                </ul>
+              </div>
+              <aside class="shell" aria-label="Clack simulando contexto de projeto existente">
+                <div class="shell-head">
+                  <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                  <span>npm run flow</span>
+                </div>
+                <div class="shell-body prompt-stack">
+                  <span class="terminal-line">┌ ai-guidelines flow</span>
+                  <span class="prompt-row active"
+                    ><span>◆</span><span>Projeto existente detectado</span></span
+                  >
+                  <span class="prompt-row muted"
+                    ><span>│</span><span>Encontrado package.json e arquivos locais.</span></span
+                  >
+                  <span class="prompt-row active"
+                    ><span>●</span><span>Adotar ai-guidelines neste repositório</span></span
+                  >
+                  <span class="prompt-row muted"
+                    ><span>○</span><span>Ver preview conservador</span></span
+                  >
+                  <span class="terminal-line dim">└ Init fica fora do caminho principal.</span>
+                </div>
+              </aside>
+            </article>
+
+            <article class="simulator-panel panel-existing-merge">
+              <div class="simulator-copy">
+                <h3>O merge é explicado antes de aplicar</h3>
+                <p>
+                  A tela deixa claro quais blocos serão adicionados, quais arquivos serão
+                  preservados e onde o humano precisa revisar.
+                </p>
+                <ul>
+                  <li>Conteúdo existente não é tratado como descartável.</li>
+                  <li>Blocos gerenciados entram por marcação clara.</li>
+                  <li>Providers e práticas são selecionados dentro de adopt.</li>
+                </ul>
+              </div>
+              <aside class="shell" aria-label="Clack simulando merge conservador">
+                <div class="shell-head">
+                  <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                  <span>preview conservador</span>
+                </div>
+                <div class="shell-body prompt-stack">
+                  <span class="prompt-row active"><span>◇</span><span>Plano de adoção</span></span>
+                  <span class="prompt-row success"
+                    ><span>✓</span><span>Preservar README.md existente</span></span
+                  >
+                  <span class="prompt-row success"
+                    ><span>✓</span><span>Adicionar bloco gerenciado em AGENTS.md</span></span
+                  >
+                  <span class="prompt-row success"
+                    ><span>✓</span><span>Espelhar templates governados</span></span
+                  >
+                  <span class="prompt-row muted"
+                    ><span>│</span><span>Providers: claude, openai</span></span
+                  >
+                </div>
+              </aside>
+            </article>
+
+            <article class="simulator-panel panel-existing-force">
+              <div class="simulator-copy">
+                <h3>Conflito vira escolha explícita</h3>
+                <p>
+                  Se algo importante já existe, o flow não sobrescreve em silêncio. Ele mostra o
+                  conflito e explica quando <code>--force</code> muda o resultado.
+                </p>
+                <ul>
+                  <li>Sem force, a ação bloqueia com motivo.</li>
+                  <li>Com force, o preview precisa mostrar exatamente o que muda.</li>
+                  <li>O humano decide, não o adapter.</li>
+                </ul>
+              </div>
+              <aside class="shell" aria-label="Clack simulando conflito no adopt">
+                <div class="shell-head">
+                  <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                  <span>conflito</span>
+                </div>
+                <div class="shell-body prompt-stack">
+                  <span class="prompt-row warn"
+                    ><span>▲</span><span>Conflito encontrado</span></span
+                  >
+                  <span class="prompt-row muted"
+                    ><span>│</span><span>package.json já define scripts próprios.</span></span
+                  >
+                  <span class="prompt-row active"
+                    ><span>◆</span><span>Como deseja seguir?</span></span
+                  >
+                  <span class="prompt-row"
+                    ><span>●</span><span>Parar e revisar conflito</span></span
+                  >
+                  <span class="prompt-row muted"
+                    ><span>○</span><span>Gerar preview com --force</span></span
+                  >
+                </div>
+              </aside>
+            </article>
+
+            <article class="simulator-panel panel-existing-validate">
+              <div class="simulator-copy">
+                <h3>O onboarding termina com diff verificável</h3>
+                <p>
+                  Depois da adoção, o flow orienta uma validação proporcional: checar o diff,
+                  formatar quando permitido e compilar.
+                </p>
+                <ul>
+                  <li>Não precisa rodar smoke de pacote em todo ajuste intermediário.</li>
+                  <li>Validação completa continua antes de decisões importantes.</li>
+                  <li>O commit registra a adoção como mudança própria.</li>
+                </ul>
+              </div>
+              <aside class="shell" aria-label="Clack simulando validação do adopt">
+                <div class="shell-head">
+                  <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                  <span>validar diff</span>
+                </div>
+                <div class="shell-body prompt-stack">
+                  <span class="prompt-row active"
+                    ><span>◆</span><span>Validar mudanças da adoção</span></span
+                  >
+                  <span class="prompt-row success"
+                    ><span>✓</span><span>Diff sem whitespace inválido</span></span
+                  >
+                  <span class="prompt-row success"
+                    ><span>✓</span><span>Arquivos alterados formatados</span></span
+                  >
+                  <span class="prompt-row success"><span>✓</span><span>Build verde</span></span>
+                  <span class="prompt-row active"
+                    ><span>●</span><span>Pronto para revisar e commitar</span></span
+                  >
+                </div>
+              </aside>
+            </article>
+          </div>
         </div>
+
+        <ol class="journey-steps">
+          <li>
+            <span class="step-number">1</span>
+            <div>
+              <h3>Reconhecer que o repo já existe</h3>
+              <p>
+                O flow detecta sinais como <code>package.json</code>, workflows, hooks, templates ou
+                arquivos de produto. Nesse cenário, o caminho principal é adotar, não inicializar do
+                zero.
+              </p>
+              <ul>
+                <li>Init não deve sobrescrever conteúdo por engano.</li>
+                <li>Adopt começa com leitura e preview.</li>
+                <li>Forçar mudanças exige escolha explícita.</li>
+              </ul>
+            </div>
+          </li>
+          <li>
+            <span class="step-number">2</span>
+            <div>
+              <h3>Mapear o que será preservado</h3>
+              <p>
+                O plano mostra arquivos existentes, blocos gerenciáveis e conflitos. O objetivo é
+                deixar claro o que será mesclado, criado, preservado ou bloqueado.
+              </p>
+              <ul>
+                <li>Conteúdo local é preservado quando possível.</li>
+                <li>Conflitos aparecem antes da escrita.</li>
+                <li>O humano decide se usa <code>--force</code>.</li>
+              </ul>
+            </div>
+          </li>
+          <li>
+            <span class="step-number">3</span>
+            <div>
+              <h3>Escolher providers e práticas do repositório</h3>
+              <p>
+                Providers e features entram dentro de adopt. A pessoa pode ativar práticas como CI,
+                Prettier e Husky sem precisar decorar comandos separados.
+              </p>
+              <ul>
+                <li>Providers são seleção de canais, não comando próprio.</li>
+                <li>Práticas entram como features governadas.</li>
+                <li>O plano mantém dry-run e confirmação.</li>
+              </ul>
+            </div>
+          </li>
+          <li>
+            <span class="step-number">4</span>
+            <div>
+              <h3>Aplicar em pequenos blocos verificáveis</h3>
+              <p>
+                Depois do preview, o adopt aplica somente os efeitos autorizados. O flow orienta a
+                validação do diff e o commit do onboarding.
+              </p>
+              <ul>
+                <li>O repo não precisa parecer novo para ser governado.</li>
+                <li>O humano consegue revisar o impacto por arquivo.</li>
+                <li>A adoção deixa trilha explícita do que mudou.</li>
+              </ul>
+            </div>
+          </li>
+        </ol>
+
+        <aside class="journey-callout">
+          <div>
+            <strong>O que a pessoa vê</strong>
+            <p>
+              Um fluxo cuidadoso: entender o repo, preservar o que existe, escolher o que adicionar,
+              ver conflitos e só então aplicar.
+            </p>
+          </div>
+          <div class="shell" aria-label="Comandos do fluxo de projeto existente">
+            <div class="shell-head">
+              <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+              <span>projeto existente</span>
+            </div>
+            <div class="shell-body">
+              <span class="terminal-line">npm run flow</span>
+              <span class="terminal-line dim">ou: npm run flow -- adopt --dry-run</span>
+              <span class="terminal-line dim"
+                >exemplo: npm run flow -- adopt --providers claude,openai</span
+              >
+            </div>
+          </div>
+        </aside>
       </section>
 
-      <section id="readiness">
+      <section id="repo-em-uso">
         <div class="section-title">
-          <h2>Conclusão de sub-checkpoint é uma decisão única</h2>
+          <h2>Fluxo 3 — Usar e manter um repo governado</h2>
           <p>
-            No caso comum, a pessoa não precisa aprovar readiness e depois aprovar advance. O fluxo
-            valida os critérios de saída e oferece uma única decisão governada.
+            Use este caminho quando o repositório já vive com ai-guidelines. Aqui o flow vira a
+            entrada diária: mostra estado, orienta a próxima ação, prepara contexto para IA e mantém
+            runtime, templates, providers, práticas e política.
           </p>
         </div>
 
-        <table class="matrix">
-          <thead>
-            <tr>
-              <th>Momento</th>
-              <th>Permitido</th>
-              <th>Bloqueado</th>
-              <th>Efeito</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>Sub-checkpoint ativo <code>[/]</code> sem readiness</td>
-              <td>Implementar, validar e inspecionar o próximo ato.</td>
-              <td>Avanço, Human Gate, Ready e merge.</td>
-              <td>Nenhuma escrita.</td>
-            </tr>
-            <tr>
-              <td>Critérios satisfeitos e há próximo <code>[ ]</code></td>
-              <td>Decidir <code>finish-subcheckpoint</code>.</td>
-              <td>Implementar o próximo sub-checkpoint automaticamente.</td>
-              <td>
-                Somente <code>tasks.md</code>: atual <code>[/] → [x]</code> e próximo
-                <code>[ ] → [/]</code>.
-              </td>
-            </tr>
-            <tr>
-              <td>Último sub-checkpoint</td>
-              <td>Usar readiness terminal e preparar fechamento do checkpoint.</td>
-              <td><code>advance-subcheckpoint</code> indevido.</td>
-              <td>Human Gate continua separado e exige Ready/CI/política.</td>
-            </tr>
-          </tbody>
-        </table>
+        <div class="clack-simulator" aria-label="Simulação do flow para repo governado em uso">
+          <input
+            class="simulator-input"
+            id="active-state"
+            name="active-flow-demo"
+            type="radio"
+            checked
+          />
+          <input class="simulator-input" id="active-next" name="active-flow-demo" type="radio" />
+          <input class="simulator-input" id="active-update" name="active-flow-demo" type="radio" />
+          <input class="simulator-input" id="active-gate" name="active-flow-demo" type="radio" />
+
+          <div class="simulator-tab-row" aria-label="Etapas simuladas do repo em uso">
+            <label for="active-state">
+              <strong>1. Estado</strong>
+              <span>Resumo simples do que está acontecendo agora.</span>
+            </label>
+            <label for="active-next">
+              <strong>2. Próximo passo</strong>
+              <span>Ação recomendada e alternativas claras.</span>
+            </label>
+            <label for="active-update">
+              <strong>3. Manutenção</strong>
+              <span>Atualizar runtime, providers e práticas.</span>
+            </label>
+            <label for="active-gate">
+              <strong>4. Lifecycle</strong>
+              <span>Readiness, Ready, Human Gate e merge protegidos.</span>
+            </label>
+          </div>
+
+          <div class="simulator-panels">
+            <article class="simulator-panel panel-active-state">
+              <div class="simulator-copy">
+                <h3>O repo em uso abre no estado atual</h3>
+                <p>
+                  O primeiro contato não deve ser uma lista de comandos. A pessoa vê “onde estamos”,
+                  “o que está ok”, “o que falta” e “qual é o próximo passo”.
+                </p>
+                <ul>
+                  <li>Spec, checkpoint, PR, CI e working tree aparecem juntos.</li>
+                  <li>Termos internos ficam em segundo plano.</li>
+                  <li>O resumo textual continua disponível fora de TTY.</li>
+                </ul>
+              </div>
+              <aside class="shell" aria-label="Clack simulando estado de repo em uso">
+                <div class="shell-head">
+                  <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                  <span>npm run flow</span>
+                </div>
+                <div class="shell-body prompt-stack">
+                  <span class="terminal-line">┌ ai-guidelines flow</span>
+                  <span class="prompt-row active"><span>◇</span><span>Estado atual</span></span>
+                  <span class="prompt-row muted"
+                    ><span>│</span><span>Agora: melhorar UX do flow</span></span
+                  >
+                  <span class="prompt-row muted"
+                    ><span>│</span><span>PR #43 Draft · CI verde · tree suja</span></span
+                  >
+                  <span class="prompt-row success"
+                    ><span>✓</span><span>Findings fechados</span></span
+                  >
+                  <span class="prompt-row warn"
+                    ><span>▲</span><span>Falta finalizar as mudanças locais</span></span
+                  >
+                </div>
+              </aside>
+            </article>
+
+            <article class="simulator-panel panel-active-next">
+              <div class="simulator-copy">
+                <h3>Ação principal, alternativa e bloqueios</h3>
+                <p>
+                  O wizard precisa deixar claro o que é prioridade. Alternativas aparecem separadas,
+                  e bloqueios ficam explicados dentro do contexto da ação.
+                </p>
+                <ul>
+                  <li>A próxima ação vem do mesmo modelo usado por work.</li>
+                  <li>Decisões vêm do mesmo modelo usado por decide.</li>
+                  <li>PIT-0011 aparece como alternativa quando recorrente.</li>
+                </ul>
+              </div>
+              <aside class="shell" aria-label="Clack simulando ação recomendada">
+                <div class="shell-head">
+                  <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                  <span>menu principal</span>
+                </div>
+                <div class="shell-body prompt-stack">
+                  <span class="prompt-row active"
+                    ><span>◆</span><span>O que você quer fazer?</span></span
+                  >
+                  <span class="prompt-row"
+                    ><span>●</span><span>Ver resumo completo do estado</span></span
+                  >
+                  <span class="prompt-row active"
+                    ><span>◆</span><span>Finalizar mudanças locais e validar</span></span
+                  >
+                  <span class="prompt-row muted"
+                    ><span>○</span><span>ALTERNATIVA: ver percepções recorrentes</span></span
+                  >
+                  <span class="prompt-row muted"
+                    ><span>○</span><span>Ver orientação de trabalho / handoff</span></span
+                  >
+                  <span class="prompt-row muted"><span>○</span><span>Sair</span></span>
+                </div>
+              </aside>
+            </article>
+
+            <article class="simulator-panel panel-active-update">
+              <div class="simulator-copy">
+                <h3>Repo governado usa update, não init/adopt</h3>
+                <p>
+                  Quando o framework já está instalado, a seção de manutenção mostra update como
+                  caminho principal: runtime, templates, providers, práticas e política.
+                </p>
+                <ul>
+                  <li>Init/adopt saem do menu principal.</li>
+                  <li>Providers ficam em <code>update --providers</code>.</li>
+                  <li>CI, Prettier e Husky ficam em <code>update --features</code>.</li>
+                </ul>
+              </div>
+              <aside class="shell" aria-label="Clack simulando update de repo governado">
+                <div class="shell-head">
+                  <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                  <span>atualização</span>
+                </div>
+                <div class="shell-body prompt-stack">
+                  <span class="prompt-row active"
+                    ><span>◆</span><span>O que você quer atualizar?</span></span
+                  >
+                  <span class="prompt-row"><span>●</span><span>Runtime e templates</span></span>
+                  <span class="prompt-row"
+                    ><span>○</span><span>Providers usados pelo repo</span></span
+                  >
+                  <span class="prompt-row"
+                    ><span>○</span><span>Práticas: CI, Prettier, Husky</span></span
+                  >
+                  <span class="prompt-row"
+                    ><span>○</span><span>Política de colaboração e revisões</span></span
+                  >
+                  <span class="prompt-row muted"
+                    ><span>│</span><span>Preview antes de aplicar.</span></span
+                  >
+                </div>
+              </aside>
+            </article>
+
+            <article class="simulator-panel panel-active-gate">
+              <div class="simulator-copy">
+                <h3>Decisões importantes continuam protegidas</h3>
+                <p>
+                  O flow pode preparar briefing, preview e validação, mas não executa Ready, Human
+                  Gate, avanço ou merge sem autoridade humana explícita.
+                </p>
+                <ul>
+                  <li>Readiness altera só o artefato permitido.</li>
+                  <li>Human Gate exige PR Ready, checks e política satisfeitos.</li>
+                  <li>Merge final continua no fechamento da spec inteira.</li>
+                </ul>
+              </div>
+              <aside class="shell" aria-label="Clack simulando decisões de lifecycle">
+                <div class="shell-head">
+                  <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                  <span>decisão protegida</span>
+                </div>
+                <div class="shell-body prompt-stack">
+                  <span class="prompt-row active"
+                    ><span>◇</span><span>Decisão disponível</span></span
+                  >
+                  <span class="prompt-row muted"
+                    ><span>│</span><span>Declarar readiness do ponto atual</span></span
+                  >
+                  <span class="prompt-row warn"
+                    ><span>▲</span><span>Human Gate ainda bloqueado</span></span
+                  >
+                  <span class="prompt-row muted"
+                    ><span>│</span><span>Motivo: PR ainda Draft ou critérios faltando</span></span
+                  >
+                  <span class="prompt-row active"
+                    ><span>◆</span><span>Ver briefing antes de decidir?</span></span
+                  >
+                  <span class="prompt-row"><span>●</span><span>Sim, abrir preview</span></span>
+                </div>
+              </aside>
+            </article>
+          </div>
+        </div>
+
+        <ol class="journey-steps">
+          <li>
+            <span class="step-number">1</span>
+            <div>
+              <h3>Abrir o estado do repo</h3>
+              <p>
+                <code>npm run flow</code> mostra onde o trabalho está: spec ativa, checkpoint,
+                sub-checkpoint, PR, CI, reviews, findings, readiness, working tree e próxima ação.
+              </p>
+              <ul>
+                <li>O resumo vem do snapshot governado.</li>
+                <li>O wizard não inventa regra própria.</li>
+                <li>As opções aparecem por intenção humana, não por nome interno.</li>
+              </ul>
+            </div>
+          </li>
+          <li>
+            <span class="step-number">2</span>
+            <div>
+              <h3>Seguir a próxima ação recomendada</h3>
+              <p>
+                O flow separa prioridade, alternativas e bloqueios. Se houver tree suja, ele orienta
+                validar mudanças; se houver readiness disponível, oferece o fluxo governado; se
+                houver bloqueio, explica o motivo.
+              </p>
+              <ul>
+                <li>A recomendação precisa bater com <code>work</code>.</li>
+                <li>Decisões precisam bater com <code>decide</code>.</li>
+                <li>Human Gate, Ready e merge continuam protegidos.</li>
+              </ul>
+            </div>
+          </li>
+          <li>
+            <span class="step-number">3</span>
+            <div>
+              <h3>Preparar contexto para humanos e IA</h3>
+              <p>
+                O flow oferece handoff, orientação de trabalho e tipos de revisão com texto pensado
+                para copiar e colar na LLM ou enviar para uma pessoa revisora.
+              </p>
+              <ul>
+                <li>O handoff evita depender da memória do chat anterior.</li>
+                <li>Reviews são preparadas por tipo e contrato.</li>
+                <li>Nada é publicado sem autorização explícita.</li>
+              </ul>
+            </div>
+          </li>
+          <li>
+            <span class="step-number">4</span>
+            <div>
+              <h3>Atualizar o que já existe</h3>
+              <p>
+                Em um repo governado, a manutenção fica em update: runtime, templates, providers,
+                features, CI, Prettier, Husky e política governada quando aplicável.
+              </p>
+              <ul>
+                <li>Init/adopt deixam de ser o caminho principal.</li>
+                <li>Providers entram como <code>update --providers</code>.</li>
+                <li>Práticas entram como <code>update --features</code>.</li>
+              </ul>
+            </div>
+          </li>
+          <li>
+            <span class="step-number">5</span>
+            <div>
+              <h3>Levar uma spec até o merge final</h3>
+              <p>
+                O fluxo cobre nascimento da spec, implementação, review, resolution, disposition,
+                readiness, Ready, Human Gate, transição de nó, integração e merge final.
+              </p>
+              <ul>
+                <li>Cada transição tem autoridade e efeito permitido.</li>
+                <li>O sistema diferencia ação disponível, bloqueada e proibida.</li>
+                <li>O humano decide os gates; o framework registra evidência.</li>
+              </ul>
+            </div>
+          </li>
+        </ol>
+
+        <aside class="journey-callout">
+          <div>
+            <strong>O que a pessoa vê</strong>
+            <p>
+              Um painel de uso contínuo: entender o estado, seguir o próximo passo, validar
+              mudanças, pedir revisão, atualizar o framework e avançar lifecycle sem depender de
+              memória.
+            </p>
+          </div>
+          <div class="shell" aria-label="Comandos do fluxo de repo em uso">
+            <div class="shell-head">
+              <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+              <span>repo em uso</span>
+            </div>
+            <div class="shell-body">
+              <span class="terminal-line">npm run flow</span>
+              <span class="terminal-line dim">npm run flow -- handoff 0024</span>
+              <span class="terminal-line dim">npm run flow -- work</span>
+              <span class="terminal-line dim"
+                >npm run flow -- update --features prettier,husky,ci</span
+              >
+            </div>
+          </div>
+        </aside>
       </section>
 
-      <section id="provisioning">
+      <section id="spec">
         <div class="section-title">
-          <h2>Provisioning continua disponível</h2>
+          <h2>Da primeira ideia ao merge final</h2>
           <p>
-            <code>init</code>, <code>adopt</code> e <code>update</code> seguem como comandos de
-            primeira classe. A seleção de providers acontece dentro dessas operações.
+            O valor do ai-guidelines aparece quando uma spec deixa de depender da memória de uma
+            pessoa e passa a seguir estados explícitos, decisões auditáveis e evidências.
+          </p>
+        </div>
+
+        <div class="flowline" aria-label="Ciclo de uma spec governada">
+          <div class="stage">
+            <span class="num">1</span>
+            <strong>Nasce a spec</strong>
+            <small>Problema, intenção, escopo e topologia entram em artefatos governados.</small>
+          </div>
+          <div class="stage">
+            <span class="num">2</span>
+            <strong>PR Draft cedo</strong>
+            <small>O PR vira contêiner de trabalho, não sinal de pronto.</small>
+          </div>
+          <div class="stage">
+            <span class="num">3</span>
+            <strong>Handoff</strong>
+            <small>Uma nova sessão recebe fatos, não memória solta.</small>
+          </div>
+          <div class="stage">
+            <span class="num">4</span>
+            <strong>Implementação</strong>
+            <small>Sub-checkpoints limitam escopo, validação e autoridade.</small>
+          </div>
+          <div class="stage">
+            <span class="num">5</span>
+            <strong>Reviews</strong>
+            <small>Auditorias geram findings reproduzíveis.</small>
+          </div>
+          <div class="stage">
+            <span class="num">6</span>
+            <strong>Correções</strong>
+            <small>Resolutions, verification e dispositions fecham o ciclo de review.</small>
+          </div>
+          <div class="stage">
+            <span class="num">7</span>
+            <strong>Readiness</strong>
+            <small>O fluxo declara que o ponto está pronto; não é edição manual solta.</small>
+          </div>
+          <div class="stage">
+            <span class="num">8</span>
+            <strong>Ready + Gate</strong>
+            <small>PR deixa Draft; Human Gate decide se o checkpoint pode avançar.</small>
+          </div>
+          <div class="stage">
+            <span class="num">9</span>
+            <strong>Próximo nó</strong>
+            <small>A stack continua sem merge isolado em main.</small>
+          </div>
+          <div class="stage">
+            <span class="num">10</span>
+            <strong>Merge final</strong>
+            <small>O PR de integração fecha a spec inteira.</small>
+          </div>
+        </div>
+      </section>
+
+      <section id="segurança">
+        <div class="section-title">
+          <h2>O fluxo mostra proteção, não só erro</h2>
+          <p>
+            A mesma ação pode estar disponível, bloqueada ou proibida. O framework explica o motivo
+            e aponta o comando correto para entender antes de aplicar.
+          </p>
+        </div>
+
+        <div class="safety-grid">
+          <article class="card">
+            <span class="status green">disponível</span>
+            <h3>Pode seguir</h3>
+            <p>Exemplo: ver percepções recorrentes, validar o diff ou abrir uma decisão pronta.</p>
+          </article>
+          <article class="card">
+            <span class="status amber">bloqueada</span>
+            <h3>Existe, mas falta algo</h3>
+            <p>Exemplo: tree suja, CI pendente, readiness ausente ou PR ainda Draft.</p>
+          </article>
+          <article class="card">
+            <span class="status red">proibida</span>
+            <h3>Não deve acontecer agora</h3>
+            <p>Exemplo: Ready, Human Gate, merge ou avanço fora da autorização humana.</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="valor">
+        <div class="section-title">
+          <h2>Por que desenvolvedores deveriam usar</h2>
+          <p>
+            O framework reduz trabalho invisível: menos decisões perdidas em chat, menos drift entre
+            PR e artefatos, e menos risco de avançar no estado errado.
           </p>
         </div>
 
         <div class="grid three">
           <article class="card">
-            <span class="status available">init</span>
-            <h3>Repositório novo</h3>
+            <h3>Contexto portátil</h3>
             <p>
-              Cria o baseline governado em target vazio, com providers e features selecionáveis.
+              Handoff e orientação de trabalho viram texto copiável para qualquer LLM, sem depender
+              de memória de agente.
             </p>
           </article>
           <article class="card">
-            <span class="status available">adopt</span>
-            <h3>Repositório existente</h3>
-            <p>Adoção conservadora que preserva arquivos existentes e blocos gerenciados.</p>
-          </article>
-          <article class="card">
-            <span class="status available">update</span>
-            <h3>Reaplicar baseline</h3>
-            <p>Atualiza templates/runtime e aceita <code>--providers claude,openai</code>.</p>
-          </article>
-        </div>
-
-        <div class="callout warning" style="margin-top: 1rem">
-          <strong>Não existe comando <code>providers</code>.</strong>
-          <span>
-            Use <code>npm run flow -- update --providers claude,openai</code>. Isso é substituição
-            canônica, não alias.
-          </span>
-        </div>
-      </section>
-
-      <section id="seguranca">
-        <div class="section-title">
-          <h2>Regras de segurança ficam visíveis</h2>
-          <p>
-            O fluxo mostra por que algo pode, não pode ou ainda não pode acontecer. Essa distinção
-            evita decisões acidentais.
-          </p>
-        </div>
-
-        <div class="grid three">
-          <article class="card">
-            <span class="status available">Disponível</span>
-            <h3>Executável agora</h3>
-            <p>Aparece com comando, autoridade necessária e efeito esperado.</p>
-          </article>
-          <article class="card">
-            <span class="status blocked">Bloqueada</span>
-            <h3>Ainda não executável</h3>
-            <p>Nomeia bloqueios factuais: CI pendente, PR Draft, review stale ou tree suja.</p>
-          </article>
-          <article class="card">
-            <span class="status forbidden">Proibida</span>
-            <h3>Fora da autorização</h3>
+            <h3>Decisão humana preservada</h3>
             <p>
-              Ready, Human Gate, merge, gate artifact e transição de nó só entram quando o estado
-              permite.
+              Ready, Human Gate e merge continuam exigindo estado correto, briefing e confirmação.
+            </p>
+          </article>
+          <article class="card">
+            <h3>Automação sem surpresa</h3>
+            <p>
+              Comandos diretos e non-TTY são determinísticos; o wizard só aparece quando há pessoa
+              no terminal.
             </p>
           </article>
         </div>
@@ -907,41 +2066,60 @@
 
       <section id="comandos">
         <div class="section-title">
-          <h2>Mapa de comandos</h2>
-          <p>Use estes comandos quando quiser o caminho direto em vez do wizard.</p>
+          <h2>Comandos diretos para quem já sabe o que quer</h2>
+          <p>
+            O wizard é a porta humana. O registry continua disponível para automação e inspeção.
+          </p>
         </div>
 
         <table class="matrix">
           <thead>
             <tr>
-              <th>Necessidade</th>
+              <th>Objetivo</th>
               <th>Comando</th>
+              <th>Quando usar</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td>Abrir wizard ou cockpit textual</td>
+              <td>Entrar pelo guia humano</td>
               <td><code>npm run flow</code></td>
+              <td>Uso diário em terminal interativo.</td>
             </tr>
             <tr>
-              <td>Forçar cockpit textual</td>
+              <td>Resumo sem prompt</td>
               <td><code>npm run flow -- cockpit</code></td>
+              <td>Automação, pipe ou quando quiser saída textual direta.</td>
             </tr>
             <tr>
-              <td>Retomar sessão de spec</td>
+              <td>Começar projeto novo</td>
+              <td><code>npm run flow -- init</code></td>
+              <td>Diretório novo ou sem governança.</td>
+            </tr>
+            <tr>
+              <td>Adotar repo existente</td>
+              <td><code>npm run flow -- adopt</code></td>
+              <td>Projeto já existe, mas ainda não usa ai-guidelines.</td>
+            </tr>
+            <tr>
+              <td>Atualizar repo governado</td>
+              <td><code>npm run flow -- update</code></td>
+              <td>Runtime, templates, providers, práticas e política já governada.</td>
+            </tr>
+            <tr>
+              <td>Retomar uma spec</td>
               <td><code>npm run flow -- handoff 0024</code></td>
+              <td>Nova sessão com IA ou humano precisa de contexto factual.</td>
             </tr>
             <tr>
-              <td>Carregar contrato de implementação</td>
+              <td>Ver trabalho atual</td>
               <td><code>npm run flow -- work --authorization explicit-work-request</code></td>
+              <td>Antes de implementar ou resolver algo no checkpoint ativo.</td>
             </tr>
             <tr>
-              <td>Inspecionar decisões humanas</td>
+              <td>Entender decisões</td>
               <td><code>npm run flow -- decide --brief-only</code></td>
-            </tr>
-            <tr>
-              <td>Provisionar repositório</td>
-              <td><code>npm run flow -- init</code>, <code>adopt</code> ou <code>update</code></td>
+              <td>Antes de readiness, avanço, Ready ou Human Gate.</td>
             </tr>
           </tbody>
         </table>
@@ -950,209 +2128,19 @@
       <section>
         <div class="callout">
           <strong>Regra canônica:</strong>
-          esta página explica a experiência. A verdade executável continua sendo o estado versionado
-          do repositório, o registry de comandos e a derivação governada usada pelo runtime.
+          esta página explica a experiência para humanos. A verdade executável continua sendo o
+          estado versionado do repositório, o registry de comandos e a derivação governada usada
+          pelo runtime.
         </div>
       </section>
 
       <footer class="footer">
         <p>
-          Guia visual raiz do fluxo local governado. Usuários do pacote público continuam podendo
-          rodar <code>npx ai-guidelines</code>; contribuidores deste checkout usam
+          Guia visual do fluxo local governado. Usuários do pacote público continuam podendo rodar
+          <code>npx ai-guidelines</code>; contribuidores deste checkout usam
           <code>npm run flow</code>.
         </p>
       </footer>
     </main>
-
-    <script>
-      const steps = [
-        {
-          title: "Ver cockpit completo",
-          command: "npm run flow -- cockpit",
-          description:
-            "Mostra o estado situado sem escrever nada: spec, checkpoint, PR, CI, findings, readiness e ações.",
-          steps: [
-            "Carrega o snapshot governado.",
-            "Renderiza estado atual, próxima ação, bloqueios e ações proibidas.",
-            "Mostra comandos canônicos para inspeção.",
-          ],
-          terminal: [
-            "# Cockpit situado - 0024-context-architecture",
-            "Estado: CO-10.2 ativo, PR #43 Draft, tree clean",
-            "Próxima ação: concluir ponto atual e iniciar o próximo",
-            "Ações bloqueadas/proibidas: Human Gate, Ready, merge",
-          ],
-        },
-        {
-          title: "Continuar próxima ação recomendada",
-          command: "npm run flow -- decide",
-          description:
-            "Leva a pessoa para a decisão recomendada pelo modelo comum. Se estiver bloqueada, mostra o motivo em vez de executar.",
-          steps: [
-            "Lê a mesma próxima ação que o cockpit e o work projetam.",
-            "Abre o briefing da decisão aplicável.",
-            "Só aplica algo depois de prévia e confirmação explícita.",
-          ],
-          terminal: [
-            "Decisão recomendada: finish-subcheckpoint",
-            "Briefing: critérios de saída validados pelo mesmo modelo",
-            "Preview: CO-10.2 [/] -> [x], CO-10.3 [ ] -> [/]",
-            "Confirmar? sim/nao",
-          ],
-        },
-        {
-          title: "Ver decisões disponíveis",
-          command: "npm run flow -- decide --brief-only",
-          description:
-            "Lista decisões humanas disponíveis, bloqueadas e proibidas sem escrever nenhum artefato.",
-          steps: [
-            "Consulta o DecisionRegistry.",
-            "Usa a disponibilidade derivada pelo GovernedFlow.",
-            "Explica por que cada decisão está disponível ou bloqueada.",
-          ],
-          terminal: [
-            "1. Concluir ponto atual e iniciar o próximo",
-            "2. Declarar readiness - fallback/terminal",
-            "3. Human Gate - bloqueado enquanto PR estiver Draft",
-          ],
-        },
-        {
-          title: "Entender bloqueios",
-          command: "npm run flow -- cockpit",
-          description:
-            "Transforma impedimentos em fatos verificáveis: CI pendente, PR Draft, review stale, tree suja, branch behind ou gate já aprovado.",
-          steps: [
-            "Agrupa bloqueios por ação.",
-            "Separa bloqueado de proibido.",
-            "Aponta o comando de inspeção sem mutação.",
-          ],
-          terminal: [
-            "Bloqueio: CI ainda pendente",
-            "Bloqueio: readiness ausente",
-            "Proibido: Human Gate sem Ready",
-            "Inspecionar: npm run flow -- decide --brief-only",
-          ],
-        },
-        {
-          title: "Rodar briefing de trabalho",
-          command: "npm run flow -- work --authorization explicit-work-request",
-          description:
-            "Mostra o contrato da sessão: escopo, autoridade, validações, ações permitidas, ações proibidas e formato do relatório.",
-          steps: [
-            "Infere o modo de trabalho a partir do snapshot.",
-            "Limita autorização ao checkpoint/branch/objeto atual.",
-            "Nunca autoriza review, disposition, Ready, Gate ou merge por tabela.",
-          ],
-          terminal: [
-            "Modo: IMPLEMENT_CHECKPOINT",
-            "Objeto: CO-10.2",
-            "Permitido: modify-functional-files, add-regression-tests",
-            "Proibido: ready, human-gate, merge",
-          ],
-        },
-        {
-          title: "Preparar review governado",
-          command: "npm run flow -- review <tipo>",
-          description:
-            "Gera o briefing governado de review quando a owner pede uma auditoria ou revalidação.",
-          steps: [
-            "Mostra os tipos de review do catálogo.",
-            "Prepara escopo, evidências e contrato do artefato.",
-            "Publicação de review continua exigindo autorização própria.",
-          ],
-          terminal: [
-            "Tipos: technical-audit, architectural-review, security-review",
-            "Escopo: checkpoint ativo",
-            "Saída: briefing governado para auditoria",
-          ],
-        },
-        {
-          title: "Configurar/adotar/atualizar repositório",
-          command: "npm run flow -- init | adopt | update",
-          description:
-            "Abre a área de provisioning. Providers e features são escolhidos dentro de init/adopt/update.",
-          steps: [
-            "Sugere init, adopt ou update pelo contexto, mas permite escolha humana.",
-            "Usa multiselect para providers/features.",
-            "Mostra preview antes de aplicar qualquer efeito.",
-          ],
-          terminal: [
-            "Operações: init, adopt, update",
-            "Providers: claude, openai, gemini",
-            "Preview: arquivos e managed blocks",
-            "Nao existe comando providers",
-          ],
-        },
-        {
-          title: "Operações avançadas",
-          command: "npm run flow -- workflow",
-          description:
-            "Agrupa comandos de stack e release para pessoas que já sabem o que estão fazendo. Continua governado por briefing e confirmação.",
-          steps: [
-            "Exibe operações como publish-state, release-prep e merge-stack.",
-            "Bloqueia efeitos incompatíveis com o estado atual.",
-            "Não substitui Ready, Human Gate nem autorização humana.",
-          ],
-          terminal: [
-            "workflow publish-state",
-            "release-prep --dry-run",
-            "merge-stack - bloqueado fora do gate",
-          ],
-        },
-        {
-          title: "Sair",
-          command: "cancelar ou escolher Sair",
-          description:
-            "Cancela o fluxo sem erro operacional e sem escrever nada. Cancelamento é estado esperado, não exceção misteriosa.",
-          steps: [
-            "Normaliza cancelamento do prompt.",
-            "Encerra com saída limpa.",
-            "Nenhum arquivo é alterado.",
-          ],
-          terminal: ["Operação cancelada.", "Nenhuma mutação aplicada.", "Até a próxima sessão."],
-        },
-      ];
-
-      const buttons = Array.from(document.querySelectorAll(".option-button"));
-      const title = document.getElementById("demo-title");
-      const description = document.getElementById("demo-description");
-      const command = document.getElementById("demo-command");
-      const list = document.getElementById("demo-steps");
-      const terminal = document.getElementById("demo-terminal");
-      const kicker = document.getElementById("demo-kicker");
-      const count = document.getElementById("step-count");
-      const previous = document.getElementById("prev-step");
-      const next = document.getElementById("next-step");
-      let current = 0;
-
-      function render(index) {
-        current = (index + steps.length) % steps.length;
-        const item = steps[current];
-        title.textContent = item.title;
-        description.textContent = item.description;
-        command.textContent = item.command;
-        kicker.textContent = `Opção ${current + 1} de ${steps.length}`;
-        count.textContent = `${current + 1} / ${steps.length}`;
-        list.innerHTML = item.steps
-          .map((step, stepIndex) => `<li><span>${stepIndex + 1}</span><div>${step}</div></li>`)
-          .join("");
-        terminal.innerHTML = item.terminal
-          .map((line, lineIndex) => {
-            const className = lineIndex === 0 ? "prompt-line" : "dim";
-            return `<span class="${className}">${line}</span>`;
-          })
-          .join("<br />");
-        buttons.forEach((button, buttonIndex) => {
-          button.setAttribute("aria-selected", String(buttonIndex === current));
-        });
-      }
-
-      buttons.forEach((button) => {
-        button.addEventListener("click", () => render(Number(button.dataset.step)));
-      });
-      previous.addEventListener("click", () => render(current - 1));
-      next.addEventListener("click", () => render(current + 1));
-      render(0);
-    </script>
   </body>
 </html>

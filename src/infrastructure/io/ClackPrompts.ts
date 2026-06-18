@@ -96,6 +96,11 @@ export class ClackPrompts implements Prompts {
     clack.note(message, title);
   }
 
+  async box(message: string, title?: string): Promise<void> {
+    const clack = await this.loadClack();
+    clack.box(message, title, { contentAlign: "left", titleAlign: "left" });
+  }
+
   async cancel(message: string): Promise<void> {
     const clack = await this.loadClack();
     clack.cancel(message);

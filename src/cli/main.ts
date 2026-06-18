@@ -38,14 +38,14 @@ ${buildRegistry().renderHelp()}
 
 ═══ FLUXO SITUADO (onde procurar cada passo) ═══
 
-  Wizard governado:        npm run flow
-  Cockpit direto:          npm run flow -- cockpit
+  Guia interativo:         npm run flow
+  Resumo direto:           npm run flow -- cockpit
   Retomar contexto:        npm run flow -- handoff [spec]
   Verificar frescor:       npm run handoff:check -- [--spec NNNN]
-  Briefing de trabalho:    npm run flow -- work [--authorization explicit-work-request]
-  Pedir review governado:  npm run flow -- review <tipo>
-  Catálogo/policy:         npm run flow -- review types | review policy
-  Decisões do humano:      npm run flow -- decide [--brief-only] [--type <tipo>]
+  Orientação de trabalho:  npm run flow -- work [--authorization explicit-work-request]
+  Preparar revisão:        npm run flow -- review <tipo>
+  Tipos/regras de revisão: npm run flow -- review types | review policy
+  Decisões da owner:       npm run flow -- decide [--brief-only] [--type <tipo>]
   Validação intermediária: npm run flow -- validate changed [--fix]
   Preparar Ready:          npm run pr-ready:check -- --pr <n>
   Gate local completo:     npm run validate

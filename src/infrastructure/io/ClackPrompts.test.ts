@@ -74,7 +74,7 @@ describe("ClackPrompts", () => {
     expect(executed).toEqual(["diff check", "ran diff"]);
   });
 
-  it("delegates status and taskLog to Clack visual primitives", async () => {
+  it("delegates box, status and taskLog to Clack visual primitives", async () => {
     const logCalls: string[] = [];
     const group = (name: string) => ({
       message: (message: string) => logCalls.push(`group:${name}:message:${message}`),
@@ -89,6 +89,9 @@ describe("ClackPrompts", () => {
         error: (message: string) => logCalls.push(`error:${message}`),
         step: (message: string) => logCalls.push(`step:${message}`),
       },
+      box: (message: string, title?: string, options?: unknown) => {
+        logCalls.push(`box:${title ?? ""}:${message}:${JSON.stringify(options)}`);
+      },
       taskLog: (options: { readonly title?: string }) => {
         logCalls.push(`taskLog:${options.title ?? ""}`);
         return {
@@ -101,6 +104,7 @@ describe("ClackPrompts", () => {
     } as unknown as ClackModule;
     const prompts = new ClackPrompts(async () => clack);
 
+    await prompts.box("state", "Estado");
     await prompts.status("warn", "blocked");
     await prompts.status("step", "checking");
     const taskLog = prompts.taskLog({ title: "checks" });
@@ -110,6 +114,7 @@ describe("ClackPrompts", () => {
     await flushMicrotasks();
 
     expect(logCalls).toEqual([
+      'box:Estado:state:{"contentAlign":"left","titleAlign":"left"}',
       "warning:blocked",
       "step:checking",
       "taskLog:checks",

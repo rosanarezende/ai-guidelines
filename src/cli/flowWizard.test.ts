@@ -1,3 +1,8 @@
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import path from "node:path";
+
+import { ClipboardWriter } from "../app/ports/ClipboardWriter.js";
 import { PromptCancelledError, Prompts } from "../app/ports/Prompts.js";
 import { makeHandoffFacts } from "../test-utils/decisionFixtures.js";
 import { CockpitModel } from "./cockpit.js";
@@ -22,18 +27,26 @@ class ScriptedPrompts implements Prompts {
     readonly message: string;
     readonly values: readonly string[];
     readonly names: readonly string[];
+    readonly hints: readonly string[];
   }> = [];
   readonly notes: string[] = [];
   readonly outros: string[] = [];
   readonly cancels: string[] = [];
   readonly statuses: string[] = [];
   readonly taskTitles: string[] = [];
+  readonly confirmCalls: string[] = [];
+  readonly groupMultiselectCalls: Array<{
+    readonly message: string;
+    readonly groups: readonly string[];
+    readonly names: readonly string[];
+  }> = [];
   private index = 0;
   private confirmIndex = 0;
 
   constructor(
     private readonly selections: readonly string[],
-    private readonly confirmations: readonly boolean[] = []
+    private readonly confirmations: readonly boolean[] = [],
+    private readonly groupSelections: string[][] = []
   ) {}
 
   async select<T>(options: { message: string; choices: ReadonlyArray<{ value: T }> }): Promise<T> {
@@ -41,6 +54,7 @@ class ScriptedPrompts implements Prompts {
       message: options.message,
       values: options.choices.map((choice) => String(choice.value)),
       names: options.choices.map((choice) => String((choice as { name?: string }).name ?? "")),
+      hints: options.choices.map((choice) => String((choice as { hint?: string }).hint ?? "")),
     });
     const selected = this.selections[this.index++] ?? String(options.choices[0]?.value ?? "");
     if (selected === "__cancel__") {
@@ -54,7 +68,23 @@ class ScriptedPrompts implements Prompts {
   }
 
   async confirm(): Promise<boolean> {
+    this.confirmCalls.push("confirm");
     return this.confirmations[this.confirmIndex++] ?? false;
+  }
+
+  async groupMultiselect<T>(options: {
+    message: string;
+    groups: Readonly<Record<string, ReadonlyArray<{ name: string; value: T }>>>;
+  }): Promise<readonly T[]> {
+    this.groupMultiselectCalls.push({
+      message: options.message,
+      groups: Object.keys(options.groups),
+      names: Object.values(options.groups)
+        .flat()
+        .map((choice) => choice.name),
+    });
+    const selected = this.groupSelections.shift() ?? [];
+    return selected as T[];
   }
 
   intro(): void {}
@@ -90,6 +120,16 @@ class ScriptedPrompts implements Prompts {
   }
 }
 
+class FakeClipboard implements ClipboardWriter {
+  readonly copied: string[] = [];
+  constructor(private readonly available = true) {}
+  async copy(text: string): Promise<boolean> {
+    if (!this.available) return false;
+    this.copied.push(text);
+    return true;
+  }
+}
+
 function spyCommand(name: string): Command<void> & { readonly calls: readonly string[][] } {
   const calls: string[][] = [];
   return {
@@ -106,10 +146,37 @@ function spyCommand(name: string): Command<void> & { readonly calls: readonly st
   };
 }
 
+function outputCommand(
+  name: string,
+  output: string
+): Command<void> & { readonly calls: readonly string[][] } {
+  const command = spyCommand(name);
+  return {
+    ...command,
+    async run(_options: void, context): Promise<CommandResult> {
+      context.logger.info(output);
+      return { exitCode: 0 };
+    },
+  };
+}
+
 function registryWith(...commands: Command<unknown>[]): CommandRegistry {
   const registry = new CommandRegistry();
   for (const command of commands) registry.register(command);
   return registry;
+}
+
+async function withTempRepo<T>(
+  setup: (repoRoot: string) => void,
+  run: (repoRoot: string) => Promise<T>
+): Promise<T> {
+  const repoRoot = mkdtempSync(path.join(tmpdir(), "flow-wizard-"));
+  try {
+    setup(repoRoot);
+    return await run(repoRoot);
+  } finally {
+    rmSync(repoRoot, { recursive: true, force: true });
+  }
 }
 
 function model(): CockpitModel {
@@ -204,6 +271,91 @@ function model(): CockpitModel {
   };
 }
 
+function dirtyModel(): CockpitModel {
+  const base = model();
+  return {
+    ...base,
+    work: {
+      ...base.work,
+      brief: {
+        ...base.work.brief,
+        workingTreeState: "functional-dirty",
+        nextAction: {
+          ...base.work.brief.nextAction,
+          description: "Finalizar as mudancas locais e deixar a working tree limpa.",
+        },
+      } as never,
+    },
+    flow: {
+      ...base.flow!,
+      available: [],
+      recommended: null,
+      humanSummary: {
+        ...base.flow!.humanSummary,
+        missing: ["Ha mudancas locais nao finalizadas.", "A working tree não está limpa."],
+        nextAction: "Finalizar as mudancas locais e deixar a working tree limpa.",
+        command: null,
+      },
+    },
+  };
+}
+
+function insightCandidateModel(): CockpitModel {
+  const base = model();
+  const insightAction = {
+    id: "review-insight-candidates" as const,
+    title: "Ver percepções recorrentes que precisam de decisão",
+    availability: {
+      status: "available" as const,
+      reasons: [],
+      hint: "1 percepção recorrente precisa de decisão humana.",
+    },
+    command: "npm run flow -- insight list",
+    effect: ["abre a lista de percepções", "não promove nem descarta automaticamente"],
+  };
+  return {
+    ...base,
+    flow: {
+      ...base.flow!,
+      available: [base.flow!.recommended!, insightAction],
+      actions: [...base.flow!.actions, insightAction],
+      humanSummary: {
+        ...base.flow!.humanSummary,
+        missing: [
+          ...base.flow!.humanSummary.missing,
+          "Há percepção recorrente aguardando decisão humana.",
+        ],
+      },
+    },
+  };
+}
+
+function blockedModel(): CockpitModel {
+  const base = dirtyModel();
+  return {
+    ...base,
+    work: {
+      ...base.work,
+      brief: {
+        ...base.work.brief,
+        workingTreeState: "clean",
+        nextAction: {
+          ...base.work.brief.nextAction,
+          description: "Aguardar a CI terminar.",
+        },
+      } as never,
+    },
+    flow: {
+      ...base.flow!,
+      humanSummary: {
+        ...base.flow!.humanSummary,
+        missing: ["A CI tem 1 check(s) pendente(s)."],
+        nextAction: "Aguardar a CI terminar.",
+      },
+    },
+  };
+}
+
 describe("flow wizard", () => {
   it("menu principal expõe cockpit/provisioning e não lista providers como ação", () => {
     const menu = buildFlowMenu(model());
@@ -215,15 +367,54 @@ describe("flow wizard", () => {
         "alternative",
         "validate",
         "decisions",
-        "blockers",
         "work",
         "provisioning",
       ])
     );
-    expect(values.slice(0, 3)).toEqual(["next", "alternative", "cockpit"]);
-    expect(menu[0].name).toBe("Continuar: Concluir ponto atual e iniciar o próximo");
-    expect(menu[1].name).toBe("Ver alternativa: Declarar readiness do sub-checkpoint ativo");
+    expect(values.slice(0, 3)).toEqual(["cockpit", "next", "alternative"]);
+    expect(menu[0].name).toBe("Ver resumo completo do estado");
+    expect(menu[1].name).toBe("PRÓXIMA AÇÃO RECOMENDADA: Concluir ponto atual e iniciar o próximo");
+    expect(menu[2].name).toBe("ALTERNATIVA: declarar que este ponto está pronto");
     expect(values).not.toContain("providers");
+  });
+
+  it("menu principal usa intenção humana em vez de termos internos", () => {
+    const menuText = buildFlowMenu(model())
+      .map((item) => item.name)
+      .join("\n");
+
+    expect(menuText).toContain("Ver resumo completo do estado");
+    expect(menuText).toContain("Ver orientação de trabalho / handoff");
+    expect(menuText).toContain("Ver tipos de revisão disponíveis");
+    expect(menuText).toContain("Mais opções");
+    expect(menuText).not.toMatch(/\bcockpit\b/i);
+    expect(menuText).not.toMatch(/\bbriefing\b/i);
+    expect(menuText).not.toMatch(/review governado/i);
+    expect(menuText).not.toMatch(/comando mutante/i);
+    expect(menuText).not.toMatch(/\bwizard\b/i);
+  });
+
+  it("quando há mudanças locais e nenhuma mutação disponível, recomenda validar o diff", () => {
+    const menu = buildFlowMenu(dirtyModel());
+    const values = menu.map((item) => item.value);
+
+    expect(values[0]).toBe("cockpit");
+    expect(values[1]).toBe("validate");
+    expect(menu[1].name).toBe(
+      "PRÓXIMA AÇÃO RECOMENDADA: Finalizar as mudancas locais e deixar a working tree limpa."
+    );
+    expect(menu[1].hint).toBe("opção principal agora");
+    expect(values).not.toContain("next");
+  });
+
+  it("quando não há mutação disponível por bloqueio factual, mostra decisões em vez de menu separado de bloqueios", () => {
+    const menu = buildFlowMenu(blockedModel());
+    const values = menu.map((item) => item.value);
+
+    expect(values[0]).toBe("cockpit");
+    expect(values).toContain("decisions");
+    expect(values).not.toContain("blockers");
+    expect(values).not.toContain("next");
   });
 
   it("continuar próxima ação recomendada delega para decide sem regra própria", async () => {
@@ -239,7 +430,7 @@ describe("flow wizard", () => {
 
     expect(code).toBe(0);
     expect(decide.calls).toEqual([[]]);
-    expect(prompts.notes.join("\n")).toContain("Próxima ação recomendada");
+    expect(prompts.notes.join("\n")).toContain("Próximo passo recomendado");
   });
 
   it("continuar próxima ação recomendada pode ser cancelada antes de abrir decide", async () => {
@@ -270,6 +461,76 @@ describe("flow wizard", () => {
     expect(decide.calls).toEqual([["--type", "mark-readiness", "--brief-only"]]);
   });
 
+  it("decisões do fluxo abrem em modo somente leitura", async () => {
+    const prompts = new ScriptedPrompts(["decisions"]);
+    const decide = spyCommand("decide");
+
+    const code = await runFlowWizard("/repo", new CollectingLogger(), {
+      prompts,
+      registry: registryWith(decide),
+      collectModel: () => model(),
+    });
+
+    expect(code).toBe(0);
+    expect(decide.calls).toEqual([["--brief-only"]]);
+  });
+
+  it("orientação de trabalho / handoff copia contexto para clipboard", async () => {
+    const prompts = new ScriptedPrompts(["work"]);
+    const clipboard = new FakeClipboard();
+    const handoff = outputCommand("handoff", "HANDOFF ATUAL");
+    const work = outputCommand("work", "TRABALHO ATUAL");
+
+    const code = await runFlowWizard("/repo", new CollectingLogger(), {
+      prompts,
+      registry: registryWith(handoff, work),
+      clipboard,
+      collectModel: () => model(),
+    });
+
+    expect(code).toBe(0);
+    expect(handoff.calls).toEqual([["0024"]]);
+    expect(work.calls).toEqual([[]]);
+    expect(clipboard.copied[0]).toContain("HANDOFF ATUAL");
+    expect(clipboard.copied[0]).toContain("TRABALHO ATUAL");
+    expect(prompts.statuses.join("\n")).toContain("copiado para o clipboard");
+  });
+
+  it("tipos de revisão disponíveis são copiados para clipboard sem publicar review", async () => {
+    const prompts = new ScriptedPrompts(["review", "types"]);
+    const clipboard = new FakeClipboard();
+    const review = outputCommand("review", "TIPOS DE REVISAO");
+
+    const code = await runFlowWizard("/repo", new CollectingLogger(), {
+      prompts,
+      registry: registryWith(review),
+      clipboard,
+      collectModel: () => model(),
+    });
+
+    expect(code).toBe(0);
+    expect(review.calls).toEqual([["types"]]);
+    expect(clipboard.copied[0]).toContain("TIPOS DE REVISAO");
+    expect(prompts.notes.join("\n")).toContain("não publica review");
+  });
+
+  it("percepção recorrente aparece como alternativa e abre a lista canônica", async () => {
+    const prompts = new ScriptedPrompts(["alternative"]);
+    const insight = spyCommand("insight");
+
+    const code = await runFlowWizard("/repo", new CollectingLogger(), {
+      prompts,
+      registry: registryWith(insight),
+      collectModel: () => insightCandidateModel(),
+    });
+
+    expect(code).toBe(0);
+    expect(prompts.selectCalls[0].names.join("\n")).toContain(
+      "Ver percepções recorrentes que precisam de decisão"
+    );
+    expect(insight.calls).toEqual([["list"]]);
+  });
+
   it("resumo inicial do wizard vem do HumanSummary comum", async () => {
     const prompts = new ScriptedPrompts(["quit"]);
 
@@ -285,34 +546,244 @@ describe("flow wizard", () => {
     expect(prompts.notes[0]).toContain("CO-10.2 — confronto modelo x codigo");
     expect(prompts.notes[0]).toContain("DEPOIS");
     expect(prompts.notes[0]).toContain("CO-10.3 — correcao integral");
+    expect(prompts.notes[0]).toContain("ALTERNATIVAS");
+    expect(prompts.notes[0]).toContain("declarar que este ponto está pronto");
     expect(prompts.notes[0]).toContain("PRÓXIMA AÇÃO RECOMENDADA");
     expect(prompts.notes[0]).toContain(
       "Falta uma decisão única para concluir este ponto e iniciar o próximo."
     );
-    expect(prompts.statuses).toContain(
-      "success:Recomendada: Concluir ponto atual e iniciar o próximo."
+    expect(prompts.notes[0]).not.toContain("NÃO FAZER AGORA");
+    expect(prompts.notes[0].indexOf("PRÓXIMA AÇÃO RECOMENDADA")).toBeLessThan(
+      prompts.notes[0].indexOf("ALTERNATIVAS")
     );
-    expect(prompts.statuses).toContain(
-      "info:Alternativa disponível: Declarar readiness do sub-checkpoint ativo."
+    expect(prompts.statuses).toEqual([]);
+  });
+
+  it("provisioning em repo governado recomenda update e esconde init/adopt do caminho principal", async () => {
+    await withTempRepo(
+      (repoRoot) => {
+        mkdirSync(path.join(repoRoot, ".ai-guidelines"), { recursive: true });
+        writeFileSync(path.join(repoRoot, ".ai-guidelines", "config.json"), "{}\n");
+      },
+      async (repoRoot) => {
+        const prompts = new ScriptedPrompts(["provisioning", "guided-update", "runtime"]);
+        const init = spyCommand("init");
+        const adopt = spyCommand("adopt");
+        const update = spyCommand("update");
+
+        const code = await runFlowWizard(repoRoot, new CollectingLogger(), {
+          prompts,
+          registry: registryWith(init, adopt, update),
+          collectModel: () => model(),
+        });
+
+        expect(code).toBe(0);
+        expect(update.calls).toEqual([[]]);
+        expect(init.calls).toEqual([]);
+        expect(adopt.calls).toEqual([]);
+        expect(prompts.selectCalls[0].names).toContain("Atualizar este repositório");
+        expect(prompts.selectCalls[1].values).toEqual([
+          "guided-update",
+          "policy",
+          "details",
+          "__back__",
+        ]);
+        expect(prompts.selectCalls[1].names[0]).toBe(
+          "Atualizar runtime, templates, providers ou práticas"
+        );
+        expect(prompts.selectCalls[1].values).not.toContain("providers");
+        expect(prompts.selectCalls[1].values).not.toContain("init");
+        expect(prompts.selectCalls[1].values).not.toContain("adopt");
+        expect(prompts.selectCalls[2].values).toEqual([
+          "runtime",
+          "providers",
+          "features",
+          "policy",
+          "details",
+          "__back__",
+        ]);
+        expect(prompts.selectCalls[2].names).toContain("Práticas do repositório");
+        expect(prompts.notes.join("\n")).toContain("Este repositório já usa ai-guidelines.");
+      }
     );
   });
 
-  it("provisioning mostra init/adopt/update e não oferece providers", async () => {
-    const prompts = new ScriptedPrompts(["provisioning", "update"]);
-    const update = spyCommand("update");
+  it("update guiado permite atualizar práticas como Prettier, Husky e CI", async () => {
+    await withTempRepo(
+      (repoRoot) => {
+        mkdirSync(path.join(repoRoot, ".governance"), { recursive: true });
+      },
+      async (repoRoot) => {
+        const prompts = new ScriptedPrompts(
+          ["provisioning", "guided-update", "features"],
+          [],
+          [["prettier", "husky", "ci"]]
+        );
+        const update = spyCommand("update");
+
+        const code = await runFlowWizard(repoRoot, new CollectingLogger(), {
+          prompts,
+          registry: registryWith(spyCommand("init"), spyCommand("adopt"), update),
+          collectModel: () => model(),
+        });
+
+        expect(code).toBe(0);
+        expect(prompts.groupMultiselectCalls[0].groups).toEqual([
+          "Práticas de infraestrutura",
+          "Práticas editoriais",
+        ]);
+        expect(prompts.groupMultiselectCalls[0].names).toEqual(
+          expect.arrayContaining(["Prettier", "Husky", "CI", "Quality Gates", "TDD", "BDD"])
+        );
+        expect(update.calls).toEqual([["--features", "prettier,husky,ci"]]);
+        expect(prompts.notes.join("\n")).toContain("Práticas selecionadas:");
+      }
+    );
+  });
+
+  it("update guiado expõe perfil de colaboração a partir de review-policy.yml", async () => {
+    await withTempRepo(
+      (repoRoot) => {
+        mkdirSync(path.join(repoRoot, ".governance"), { recursive: true });
+        writeFileSync(
+          path.join(repoRoot, ".governance", "review-policy.yml"),
+          [
+            "active_profile: team",
+            "profiles:",
+            "  team:",
+            "    implementation_pr:",
+            "      required_native_approvals: 1",
+            "    integration_pr:",
+            "      required_native_approvals: 2",
+            "    accepted_findings:",
+            "      require_resolution: true",
+            "      require_verification_event_for_fixed: true",
+            "    github:",
+            "      minimum_approving_reviews: 2",
+            "      require_code_owner_review: true",
+            "      dismiss_stale_reviews_on_push: true",
+            "      require_last_push_approval: true",
+            "review_requirements:",
+            "  defaults:",
+            "    technical_audit: optional",
+            "    security_review: required",
+          ].join("\n")
+        );
+      },
+      async (repoRoot) => {
+        const prompts = new ScriptedPrompts(["provisioning", "policy"]);
+
+        const code = await runFlowWizard(repoRoot, new CollectingLogger(), {
+          prompts,
+          registry: registryWith(spyCommand("init"), spyCommand("adopt"), spyCommand("update")),
+          collectModel: () => model(),
+        });
+
+        expect(code).toBe(0);
+        expect(prompts.selectCalls[1].hints).toContain("perfil atual: team");
+        expect(prompts.notes.join("\n")).toContain("Perfil de colaboração atual: team");
+        expect(prompts.notes.join("\n")).toContain("approvals nativos em PR de integração: 2");
+        expect(prompts.notes.join("\n")).toContain("security_review: required");
+      }
+    );
+  });
+
+  it("provisioning não oferece init/adopt/update juntos quando o contexto já escolheu o caminho normal", async () => {
+    await withTempRepo(
+      (repoRoot) => {
+        mkdirSync(path.join(repoRoot, ".governance"), { recursive: true });
+      },
+      async (repoRoot) => {
+        const prompts = new ScriptedPrompts(["provisioning", "details"]);
+        const init = spyCommand("init");
+        const adopt = spyCommand("adopt");
+        const update = spyCommand("update");
+
+        const code = await runFlowWizard(repoRoot, new CollectingLogger(), {
+          prompts,
+          registry: registryWith(init, adopt, update),
+          collectModel: () => model(),
+        });
+
+        expect(code).toBe(0);
+        expect(init.calls).toEqual([]);
+        expect(adopt.calls).toEqual([]);
+        expect(update.calls).toEqual([]);
+        expect(prompts.selectCalls[1].values).toEqual([
+          "guided-update",
+          "policy",
+          "details",
+          "__back__",
+        ]);
+        expect(prompts.selectCalls[1].values).not.toContain("init");
+        expect(prompts.selectCalls[1].values).not.toContain("adopt");
+        expect(prompts.notes.join("\n")).toContain("Para este repo: update.");
+      }
+    );
+  });
+
+  it("mais opções não abre o wizard legado diretamente", async () => {
+    const prompts = new ScriptedPrompts(["advanced", "active-specs"]);
+    const workflow = spyCommand("workflow");
+    const specs = spyCommand("specs");
 
     const code = await runFlowWizard("/repo", new CollectingLogger(), {
       prompts,
-      registry: registryWith(spyCommand("init"), spyCommand("adopt"), update),
+      registry: registryWith(workflow, specs),
       collectModel: () => model(),
     });
 
     expect(code).toBe(0);
-    expect(update.calls).toEqual([[]]);
-    expect(prompts.selectCalls[1].values).toEqual(
-      expect.arrayContaining(["init", "adopt", "update"])
+    expect(specs.calls).toEqual([[]]);
+    expect(workflow.calls).toEqual([]);
+    expect(prompts.selectCalls[1].message).toBe("Mais opções");
+    expect(prompts.selectCalls[1].names).toContain("Ver specs ativas");
+  });
+
+  it("provisioning em repo existente sem governança recomenda adopt no caminho principal", async () => {
+    await withTempRepo(
+      (repoRoot) => {
+        writeFileSync(path.join(repoRoot, "package.json"), '{"name":"consumer"}\n');
+      },
+      async (repoRoot) => {
+        const prompts = new ScriptedPrompts(["provisioning", "adopt"]);
+        const adopt = spyCommand("adopt");
+
+        const code = await runFlowWizard(repoRoot, new CollectingLogger(), {
+          prompts,
+          registry: registryWith(spyCommand("init"), adopt, spyCommand("update")),
+          collectModel: () => model(),
+        });
+
+        expect(code).toBe(0);
+        expect(adopt.calls).toEqual([[]]);
+        expect(prompts.selectCalls[0].names).toContain("Adotar ai-guidelines neste repositório");
+        expect(prompts.selectCalls[1].values).toEqual(["adopt", "details", "__back__"]);
+        expect(prompts.selectCalls[1].names[0]).toBe("Adotar ai-guidelines neste repositório");
+      }
     );
-    expect(prompts.selectCalls[1].values).not.toContain("providers");
+  });
+
+  it("provisioning em diretório vazio recomenda init no caminho principal", async () => {
+    await withTempRepo(
+      () => undefined,
+      async (repoRoot) => {
+        const prompts = new ScriptedPrompts(["provisioning", "init"]);
+        const init = spyCommand("init");
+
+        const code = await runFlowWizard(repoRoot, new CollectingLogger(), {
+          prompts,
+          registry: registryWith(init, spyCommand("adopt"), spyCommand("update")),
+          collectModel: () => model(),
+        });
+
+        expect(code).toBe(0);
+        expect(init.calls).toEqual([[]]);
+        expect(prompts.selectCalls[0].names).toContain("Iniciar ai-guidelines neste repositório");
+        expect(prompts.selectCalls[1].values).toEqual(["init", "details", "__back__"]);
+        expect(prompts.selectCalls[1].names[0]).toBe("Iniciar ai-guidelines neste repositório");
+      }
+    );
   });
 
   it("validação intermediária executa validate changed com task visual", async () => {

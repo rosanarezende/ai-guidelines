@@ -1,7 +1,7 @@
 /**
- * Cockpit situado do comando raiz (`npm run flow`).
+ * Resumo situado do comando raiz (`npm run flow`).
  *
- * Read-only: carrega o snapshot governado, projeta o briefing de trabalho e as
+ * Read-only: carrega o snapshot governado, projeta a orientação de trabalho e as
  * decisões humanas aplicáveis. Não executa mutações nem depende de memória de
  * agente.
  */
@@ -110,19 +110,15 @@ export function renderHumanSummary(summary: HumanSummary): string {
       }
     }
   }
-  lines.push(`- Proximo passo: ${summary.nextAction}`);
+  lines.push(`- Próximo passo: ${summary.nextAction}`);
   if (summary.command) lines.push(`- Para entender antes de aplicar: \`${summary.command}\``);
   if (summary.ready.length > 0) {
-    lines.push("- Ja esta ok:");
+    lines.push("- Já está ok:");
     for (const item of summary.ready) lines.push(`  - ${item}`);
   }
   if (summary.missing.length > 0) {
     lines.push("- Ainda falta:");
     for (const item of summary.missing) lines.push(`  - ${item}`);
-  }
-  if (summary.forbidden.length > 0) {
-    lines.push("- Nao fazer agora:");
-    for (const item of summary.forbidden) lines.push(`  - ${item}`);
   }
   return lines.join("\n");
 }
@@ -137,7 +133,7 @@ export function renderCockpit(model: CockpitModel): string {
   const blocked = model.decisions.filter((d) => d.availability.status === "blocked");
 
   const lines: string[] = [];
-  lines.push(`# Cockpit situado — ${facts.spec.label}`);
+  lines.push(`# Resumo do fluxo — ${facts.spec.label}`);
   lines.push("");
   if (model.flow?.humanSummary) {
     lines.push(renderHumanSummary(model.flow.humanSummary));
@@ -174,7 +170,7 @@ export function renderCockpit(model: CockpitModel): string {
     lines.push(`- ${recommended.title}`);
     if (recommended.availability.hint) lines.push(`  - ${recommended.availability.hint}`);
     lines.push(
-      `  - briefing: \`${recommended.command ?? commandForDecision(recommended.id, false)}\``
+      `  - entender antes de aplicar: \`${recommended.command ?? commandForDecision(recommended.id, false)}\``
     );
     lines.push(
       `  - aplicar: \`${recommended.mutatingCommand ?? commandForDecision(recommended.id, true)}\``
@@ -212,13 +208,15 @@ export function renderCockpit(model: CockpitModel): string {
   }
   lines.push("");
   lines.push("## Ações proibidas");
-  const forbidden = new Set([
-    ...brief.forbiddenActions,
-    ...brief.nextAction.stillForbidden,
-    "Executar Human Gate sem decisão humana explícita",
-    "Converter PR para Ready fora do fluxo governado",
-    "Fazer merge",
-  ]);
+  const forbidden = new Set(
+    [
+      ...brief.forbiddenActions,
+      ...brief.nextAction.stillForbidden,
+      "Executar Human Gate sem decisão humana explícita",
+      "Converter PR para Ready fora do fluxo governado",
+      "Fazer merge",
+    ].map(formatForbiddenAction)
+  );
   for (const item of forbidden) lines.push(`- ${item}`);
   lines.push("");
   lines.push("## Comandos úteis");
@@ -228,6 +226,22 @@ export function renderCockpit(model: CockpitModel): string {
   lines.push("- validação intermediária: `npm run flow -- validate changed`");
   lines.push("- validação completa para decisão: `npm run validate`");
   return `${lines.join("\n")}\n`;
+}
+
+function formatForbiddenAction(action: string): string {
+  const labels: Record<string, string> = {
+    "modify-functional-files": "Alterar arquivos funcionais enquanto o estado estiver divergente",
+    "create-resolutions": "Criar resolutions fora do fluxo autorizado",
+    "update-pr-body": "Atualizar o corpo do PR fora do fluxo autorizado",
+    "run-review": "Executar revisão sem pedido explícito",
+    ready: "Converter o PR para Ready",
+    "human-gate": "Executar o Human Gate",
+    merge: "Fazer merge",
+    "edit-review": "Editar artefato de review publicado",
+    "close-dispositions": "Fechar dispositions fora da decisão governada",
+    "start-next-subcheckpoint": "Iniciar o próximo ponto fora da decisão governada",
+  };
+  return labels[action] ?? action;
 }
 
 export interface RunCockpitOptions extends DecisionSnapshotOptions {

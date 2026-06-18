@@ -23,6 +23,8 @@ import { parseWorkflowState } from "../infrastructure/yaml/workflowStateSerializ
 import { parseInsightsLedger } from "../infrastructure/yaml/insightsLedgerSerializer.js";
 import { ActiveSpecEntry } from "../domain/workflow/ActiveSpecEntry.js";
 import { PrTopologyNode, WorkflowState } from "../domain/workflow/WorkflowState.js";
+import { recurrenceOf } from "../domain/insight/Insight.js";
+import { isInsightGraduationCandidate } from "../domain/insight/InsightMaturation.js";
 import { parseSpecBranch } from "../app/workflow/DetectActiveSpec.js";
 import { consolidate, discover, observedReviewStates } from "./reviewCheck.js";
 import { GhSnapshotCollector, detectRepo } from "./prReadyCheck.js";
@@ -474,9 +476,16 @@ function collectInsights(
           ? occ.origin.cursor === cursorCheckpoint
           : specId !== undefined && occ.origin.spec === specId
       );
-      if (!relevant) continue;
+      const graduationCandidate = isInsightGraduationCandidate(insight);
+      if (!relevant && !graduationCandidate) continue;
       const excerpt = insight.text.length > 110 ? `${insight.text.slice(0, 110)}…` : insight.text;
-      insights.push({ id: insight.id, excerpt });
+      insights.push({
+        id: insight.id,
+        excerpt,
+        occurrenceCount: recurrenceOf(insight),
+        graduationCandidate,
+        currentContext: relevant,
+      });
     }
     return {
       insights,
@@ -923,7 +932,11 @@ function renderLifecycle(facts: HandoffFacts, lines: string[]): void {
   );
   lines.push(`- gate do checkpoint: ${lc.gateDecision ?? "(ausente — decisão humana futura)"}`);
   if (facts.insights.length > 0) {
-    lines.push(`- insights abertos do cursor: ${facts.insights.map((i) => i.id).join(", ")}`);
+    lines.push(
+      `- percepções em atenção: ${facts.insights
+        .map((i) => `${i.id}${i.graduationCandidate ? " (recorrente)" : ""}`)
+        .join(", ")}`
+    );
   }
 }
 

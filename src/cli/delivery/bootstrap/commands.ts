@@ -52,23 +52,32 @@ abstract class ProvisioningDeliveryCommand implements BootstrapDeliveryCommand<P
 
   async prompt(context: CommandContext): Promise<ProvisioningCommandOptions> {
     const prompts = requirePrompts(context, this.name);
-    const target = await promptString(prompts, "Target directory", ".");
-    const projectName = await promptString(prompts, "Project name", "");
+    const target = await promptString(prompts, "Onde aplicar? Use . para este repositório", ".");
+    const projectName = await promptString(prompts, "Nome do projeto", "");
     const providers = await promptProviderList(prompts);
     const features = this.name === "update" ? undefined : await promptFeatureList(prompts);
     const packageManager = await prompts.select<string>({
-      message: "Package manager",
+      message: "Gerenciador de pacotes",
       choices: [
-        { name: "auto", value: "" },
+        { name: "Detectar automaticamente", value: "" },
         { name: "npm", value: "npm" },
         { name: "pnpm", value: "pnpm" },
         { name: "yarn classic", value: "yarn@1.22.22" },
         { name: "yarn berry", value: "yarn@4.1.1" },
       ],
     });
-    const dryRun = await prompts.confirm({ message: "Dry-run", default: false });
-    const force = await prompts.confirm({ message: "Force supported overwrites", default: false });
-    const install = await prompts.confirm({ message: "Install dependencies", default: false });
+    const dryRun = await prompts.confirm({
+      message: "Só mostrar o plano, sem escrever arquivos?",
+      default: true,
+    });
+    const force = await prompts.confirm({
+      message: "Permitir sobrescrever arquivos suportados quando houver conflito?",
+      default: false,
+    });
+    const install = await prompts.confirm({
+      message: "Instalar dependências automaticamente no final?",
+      default: false,
+    });
 
     const options: ProvisioningCommandOptions = {
       operation: this.name,
@@ -87,7 +96,7 @@ abstract class ProvisioningDeliveryCommand implements BootstrapDeliveryCommand<P
       skippedFeatures: [],
     };
 
-    await prompts.note?.(renderProvisioningPreview(options), `Preview: ${this.name}`);
+    await prompts.note?.(renderProvisioningPreview(options), `Prévia: ${this.name}`);
     const confirmed = await prompts.confirm({
       message: "Aplicar este plano?",
       default: false,
@@ -263,14 +272,14 @@ async function promptProviderList(prompts: Prompts): Promise<readonly string[]> 
   const supported = getSupportedProviders();
   if (prompts.groupMultiselect) {
     return prompts.groupMultiselect({
-      message: "Providers",
+      message: "Quais ferramentas de IA devem receber arquivos de orientação?",
       groups: {
-        "Entrypoints com adapter runtime": providerChoices(
+        "Assistentes principais do repositório": providerChoices(
           supported.filter((provider) =>
             ["claude", "gemini", "openai", "copilot"].includes(provider)
           )
         ),
-        "Entrypoints editoriais": providerChoices(
+        "Editores e agentes locais": providerChoices(
           supported.filter((provider) => ["cursor", "windsurf", "aider"].includes(provider))
         ),
       },
@@ -280,20 +289,20 @@ async function promptProviderList(prompts: Prompts): Promise<readonly string[]> 
       groupSpacing: 1,
     });
   }
-  return promptChoiceList(prompts, "Providers", DEFAULT_PROVIDERS, supported, true);
+  return promptChoiceList(prompts, "Ferramentas de IA", DEFAULT_PROVIDERS, supported, true);
 }
 
 async function promptFeatureList(prompts: Prompts): Promise<readonly string[]> {
   if (prompts.groupMultiselect) {
     return prompts.groupMultiselect({
-      message: "Features",
+      message: "Quais práticas quer instalar agora?",
       groups: {
-        Infraestrutura: INFRASTRUCTURE_FEATURES.map((value) => ({
+        "Infraestrutura do repositório": INFRASTRUCTURE_FEATURES.map((value) => ({
           name: value,
           value,
           hint: featureHint(value),
         })),
-        "Práticas editoriais": EDITORIAL_FEATURES.map((value) => ({
+        "Práticas de trabalho": EDITORIAL_FEATURES.map((value) => ({
           name: value,
           value,
           hint: featureHint(value),
@@ -305,7 +314,7 @@ async function promptFeatureList(prompts: Prompts): Promise<readonly string[]> {
       groupSpacing: 1,
     });
   }
-  return promptChoiceList(prompts, "Features", FEATURE_OPTIONS, FEATURE_OPTIONS, false);
+  return promptChoiceList(prompts, "Práticas", FEATURE_OPTIONS, FEATURE_OPTIONS, false);
 }
 
 function providerChoices(providers: readonly Provider[]) {
@@ -333,18 +342,18 @@ function featureHint(feature: string): string {
 
 function renderProvisioningPreview(options: ProvisioningCommandOptions): string {
   const lines = [
-    `operation: ${options.operation}`,
-    `target: ${options.target}`,
-    `name: ${options.name ?? "(derivado do target)"}`,
-    `package manager: ${options.packageManager ?? "auto"}`,
-    `providers: ${(options.providers ?? []).join(", ") || "(nenhum)"}`,
+    `Operação: ${options.operation}`,
+    `Destino: ${options.target}`,
+    `Nome: ${options.name ?? "(derivado da pasta)"}`,
+    `Gerenciador de pacotes: ${options.packageManager ?? "auto"}`,
+    `Ferramentas de IA: ${(options.providers ?? []).join(", ") || "(nenhuma)"}`,
   ];
   if (options.features !== undefined) {
-    lines.push(`features: ${options.features.join(", ") || "(nenhuma)"}`);
+    lines.push(`Práticas: ${options.features.join(", ") || "(nenhuma)"}`);
   }
-  lines.push(`dry-run: ${options.dryRun ? "sim" : "não"}`);
-  lines.push(`force: ${options.force ? "sim" : "não"}`);
-  lines.push(`install: ${options.install ? "sim" : "não"}`);
-  lines.push(`prune: ${options.prune ? "sim" : "não"}`);
+  lines.push(`Só prévia: ${options.dryRun ? "sim" : "não"}`);
+  lines.push(`Sobrescrever conflitos suportados: ${options.force ? "sim" : "não"}`);
+  lines.push(`Instalar dependências: ${options.install ? "sim" : "não"}`);
+  lines.push(`Remover arquivos órfãos gerenciados: ${options.prune ? "sim" : "não"}`);
   return lines.join("\n");
 }

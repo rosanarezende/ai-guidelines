@@ -241,6 +241,36 @@ describe("GovernedFlow", () => {
     });
   });
 
+  it("sinaliza percepções recorrentes como ação visível sem transformar em mutação", () => {
+    const facts = coFlowFacts({
+      insights: [
+        {
+          id: "PIT-0011",
+          excerpt: "Contrato executavel invisivel ainda produz ritual manual",
+          occurrenceCount: 7,
+          graduationCandidate: true,
+          currentContext: false,
+        },
+      ],
+    });
+    const snapshot = makeDecisionSnapshot({
+      facts,
+      checkpoint: "checkpoint-co-flow-convergence",
+      openFindings: [],
+      subCheckpoints: facts.subCheckpoints,
+      workingTreeState: "clean",
+      gateExists: false,
+    });
+
+    const flow = deriveGovernedFlow(snapshot);
+    const action = flow.available.find((item) => item.id === "review-insight-candidates");
+
+    expect(action?.title).toBe("Ver percepções recorrentes que precisam de decisão");
+    expect(action?.command).toBe("npm run flow -- insight list");
+    expect(action?.mutatingCommand).toBeUndefined();
+    expect(action?.availability.hint).toContain("1 percepção");
+  });
+
   it("bloqueia readiness quando o sub-checkpoint ativo não tem commit de entrega após ativação", () => {
     const facts = coFlowFacts({
       subCheckpoints: [
