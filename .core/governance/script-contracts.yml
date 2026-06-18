@@ -109,6 +109,18 @@ profiles:
         mutates: false
         consumers: [script]
         description: Falha se site/flow divergir dos textos reais da CLI.
+      - name: site:dev
+        command: vite --config site/vite.config.ts --host 127.0.0.1
+        category: docs
+        mutates: false
+        consumers: [human]
+        description: Servidor local do site governado em React/Vite.
+      - name: site:build
+        command: npm run site:flow:check && vite build --config site/vite.config.ts
+        category: docs
+        mutates: true
+        consumers: [script, workflow]
+        description: Valida textos do Flow e gera site/dist para deploy estatico.
       - name: state-yml:check
         command: npm run build && node dist/cli/bin.js state-yml-check
         category: governance
@@ -260,7 +272,7 @@ profiles:
         consumers: [workflow, human]
         description: Validacao intermediaria orientada ao diff; com --fix pode formatar somente arquivos alterados.
       - name: validate
-        command: npm run format:check && npm run build:all && npm run script-contracts:check && npm run runtime-bootstrap:check && npm run test && npm run living-docs:check && npm run site:flow:check && npm run state-yml:check && npm run active-specs:check && npm run reconcile:check && npm run co-knowledge:check && npm run co-knowledge:inventory && npm run constraints:check && npm run knowledge:check && npm run gate-decidability:check && npm run ruleset:check && npm run review:check && npm run insights:check && npm run intent:check
+        command: npm run format:check && npm run build:all && npm run script-contracts:check && npm run runtime-bootstrap:check && npm run test && npm run living-docs:check && npm run site:build && npm run state-yml:check && npm run active-specs:check && npm run reconcile:check && npm run co-knowledge:check && npm run co-knowledge:inventory && npm run constraints:check && npm run knowledge:check && npm run gate-decidability:check && npm run ruleset:check && npm run review:check && npm run insights:check && npm run intent:check
         category: aggregate
         mutates: true
         consumers: [hook, workflow, human]

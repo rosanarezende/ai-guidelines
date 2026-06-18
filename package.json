@@ -26,7 +26,6 @@
     "!dist/**/__fixtures__",
     ".core",
     ".specify/templates",
-    "site",
     "docs",
     "!docs/assets",
     "README.md",
@@ -50,6 +49,8 @@
     "living-docs:check": "npm run build && node dist/cli/bin.js living-docs check",
     "site:flow:sync": "npm run build && node dist/cli/bin.js site-flow-copy sync",
     "site:flow:check": "npm run build && node dist/cli/bin.js site-flow-copy check",
+    "site:dev": "vite --config site/vite.config.ts --host 127.0.0.1",
+    "site:build": "npm run site:flow:check && vite build --config site/vite.config.ts",
     "state-yml:check": "npm run build && node dist/cli/bin.js state-yml-check",
     "state-yml:check:all": "npm run build && node dist/cli/bin.js state-yml-check --all",
     "active-specs:check": "npm run build && node dist/cli/bin.js active-specs-check",
@@ -75,7 +76,7 @@
     "pr-body:update": "npm run build && node dist/cli/bin.js pr-body-update",
     "pr-ready:check": "npm run build && node dist/cli/bin.js pr-ready-check",
     "validate:changed": "npm run build && node dist/cli/main.js validate changed",
-    "validate": "npm run format:check && npm run build:all && npm run script-contracts:check && npm run runtime-bootstrap:check && npm run test && npm run living-docs:check && npm run site:flow:check && npm run state-yml:check && npm run active-specs:check && npm run reconcile:check && npm run co-knowledge:check && npm run co-knowledge:inventory && npm run constraints:check && npm run knowledge:check && npm run gate-decidability:check && npm run ruleset:check && npm run review:check && npm run insights:check && npm run intent:check",
+    "validate": "npm run format:check && npm run build:all && npm run script-contracts:check && npm run runtime-bootstrap:check && npm run test && npm run living-docs:check && npm run site:build && npm run state-yml:check && npm run active-specs:check && npm run reconcile:check && npm run co-knowledge:check && npm run co-knowledge:inventory && npm run constraints:check && npm run knowledge:check && npm run gate-decidability:check && npm run ruleset:check && npm run review:check && npm run insights:check && npm run intent:check",
     "ci": "npm ci && npm run validate && npm run state-yml:check:all",
     "prepare": "husky",
     "prepack": "npm run build:all"
@@ -83,15 +84,21 @@
   "devDependencies": {
     "@types/jest": "^30.0.0",
     "@types/node": "^25.6.2",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
     "@types/yaml": "^1.9.7",
+    "@vitejs/plugin-react": "^5.1.4",
     "husky": "^9.1.7",
     "jest": "^30.4.2",
     "jest-util": "^30.4.1",
     "lint-staged": "^17.0.5",
     "prettier": "^3.0.0",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
     "ts-jest": "^29.4.9",
     "ts-node": "^10.9.2",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "vite": "^7.3.5"
   },
   "engines": {
     "node": ">=22.0.0"
