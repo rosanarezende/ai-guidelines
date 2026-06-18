@@ -361,6 +361,39 @@ function insightCandidateModel(): CockpitModel {
   };
 }
 
+function advisoryReviewModel(): CockpitModel {
+  const base = model();
+  const reviewAction = {
+    id: "request-advisory-review" as const,
+    title: "Pedir revisão antes da decisão humana",
+    availability: {
+      status: "available" as const,
+      reasons: [],
+      hint: "technical_audit stale pode reduzir risco antes do Human Gate.",
+    },
+    command: "npm run flow -- review types",
+    effect: [
+      "prepara contexto para uma revisão opcional/recomendada",
+      "não publica review sem autorização explícita",
+    ],
+  };
+  return {
+    ...base,
+    flow: {
+      ...base.flow!,
+      available: [base.flow!.recommended!, reviewAction],
+      actions: [...base.flow!.actions, reviewAction],
+      humanSummary: {
+        ...base.flow!.humanSummary,
+        missing: [
+          ...base.flow!.humanSummary.missing,
+          "Há revisão opcional/recomendada que pode reduzir risco antes do Human Gate.",
+        ],
+      },
+    },
+  };
+}
+
 function blockedModel(): CockpitModel {
   const base = dirtyModel();
   return {
@@ -561,6 +594,29 @@ describe("flow wizard", () => {
       "Ver percepções recorrentes que precisam de decisão"
     );
     expect(insight.calls).toEqual([["list"]]);
+  });
+
+  it("review opcional/recomendada aparece como alternativa e prepara contexto sem publicar review", async () => {
+    const prompts = new ScriptedPrompts(["alternative", "types"]);
+    const clipboard = new FakeClipboard();
+    const review = outputCommand("review", "TIPOS DE REVISAO");
+    const decide = spyCommand("decide");
+
+    const code = await runFlowWizard("/repo", new CollectingLogger(), {
+      prompts,
+      registry: registryWith(review, decide),
+      clipboard,
+      collectModel: () => advisoryReviewModel(),
+    });
+
+    expect(code).toBe(0);
+    expect(prompts.selectCalls[0].names.join("\n")).toContain(
+      "pedir revisão antes da decisão humana"
+    );
+    expect(prompts.selectCalls[1].message).toBe("Qual contexto você quer preparar?");
+    expect(review.calls).toEqual([["types"]]);
+    expect(decide.calls).toEqual([]);
+    expect(clipboard.copied[0]).toContain("TIPOS DE REVISAO");
   });
 
   it("resumo inicial do wizard vem do HumanSummary comum", async () => {

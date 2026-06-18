@@ -19,6 +19,7 @@ export type GovernedFlowActionId =
   | "pr-ready"
   | "human-gate"
   | "open-next-node"
+  | "request-advisory-review"
   | "review-insight-candidates";
 
 export interface GovernedFlowAction {
@@ -178,6 +179,35 @@ function blockingReviews(snapshot: DecisionSnapshot): readonly {
   return (snapshot.facts.lifecycle?.reviewStatuses ?? [])
     .filter((s) => s.blocking)
     .map((s) => ({ typeId: s.typeId, state: s.state }));
+}
+
+function advisoryReviewAvailability(snapshot: DecisionSnapshot): DecisionAvailability {
+  if (snapshot.gateExists || snapshot.facts.lifecycle?.gateDecision === "approved") {
+    return {
+      status: "not-applicable",
+      reasons: ["O Human Gate do checkpoint já foi registrado."],
+    };
+  }
+  const candidates = (snapshot.facts.lifecycle?.reviewStatuses ?? []).filter(
+    (status) =>
+      (status.requirement === "optional" || status.requirement === "recommended") &&
+      status.applicability !== "no" &&
+      !(status.state === "current" && status.decision === "approved")
+  );
+  if (candidates.length === 0) {
+    return {
+      status: "not-applicable",
+      reasons: ["Não há revisão opcional/recomendada pendente para sugerir."],
+    };
+  }
+  const summary = candidates
+    .map((status) => `${status.typeId} (${status.requirement}, ${status.state})`)
+    .join(", ");
+  return {
+    status: "available",
+    reasons: [],
+    hint: `${candidates.length} revisão(ões) opcional(is)/recomendada(s) podem reduzir risco antes do Human Gate: ${summary}.`,
+  };
 }
 
 export function markReadinessFactsFromDecisionSnapshot(
@@ -682,6 +712,7 @@ export function derivePrReadyFlow(f: PrReadyFlowFacts): PrReadyFlowResult {
 function commandFor(id: GovernedFlowActionId, mutating: boolean): string {
   if (id === "pr-ready") return "npm run pr-ready:check -- --pr <n>";
   if (id === "review-insight-candidates") return "npm run flow -- insight list";
+  if (id === "request-advisory-review") return "npm run flow -- review types";
   if (!mutating) return `npm run flow -- decide --type ${id} --brief-only`;
   const decision =
     id === "finish-subcheckpoint"
@@ -711,7 +742,7 @@ function action(
     title,
     availability,
     command: commandFor(id, false),
-    ...(id !== "pr-ready" && id !== "review-insight-candidates"
+    ...(id !== "pr-ready" && id !== "review-insight-candidates" && id !== "request-advisory-review"
       ? { mutatingCommand: commandFor(id, true) }
       : {}),
     effect,
@@ -891,6 +922,7 @@ export function deriveGovernedFlow(snapshot: DecisionSnapshot): GovernedFlow {
           hint: `${insightCandidates.length} percepção(ões) recorrente(s) precisam de decisão humana.`,
         }
       : { status: "not-applicable", reasons: ["Não há percepções recorrentes pendentes."] };
+  const advisoryReview = advisoryReviewAvailability(snapshot);
   const closeDispositions: DecisionAvailability =
     snapshot.openFindings.length > 0 &&
     snapshot.openFindings.every(
@@ -926,6 +958,11 @@ export function deriveGovernedFlow(snapshot: DecisionSnapshot): GovernedFlow {
     action("open-next-node", "Abrir o próximo nó planejado", openNextNode, [
       "cria branch, PR Draft e reconcilia state/active/tasks",
       "não executa merge",
+    ]),
+    action("request-advisory-review", "Pedir revisão antes da decisão humana", advisoryReview, [
+      "prepara contexto para uma revisão opcional/recomendada",
+      "não publica review sem autorização explícita",
+      "não transforma revisão opcional/recomendada em bloqueio de Human Gate",
     ]),
     action(
       "review-insight-candidates",

@@ -350,6 +350,67 @@ describe("CO-10.6 final falsification — fluxo governado ponta a ponta", () => 
     expect(ready.failures).toEqual([]);
   });
 
+  it("reviews opcionais/recomendadas são sugeridas antes do Human Gate sem bloquear a decisão", () => {
+    const readyFacts = coFlowFacts({
+      lifecycle: {
+        ...SETTLED,
+        reviewStatuses: [
+          {
+            typeId: "technical_audit",
+            requirement: "optional",
+            applicability: "yes",
+            state: "stale",
+            decision: "approved",
+            blocking: false,
+            source: "checkpoint-policy",
+          },
+          {
+            typeId: "security_review",
+            requirement: "recommended",
+            applicability: "yes",
+            state: "missing",
+            decision: null,
+            blocking: false,
+            source: "checkpoint-policy",
+          },
+        ],
+      },
+      pullRequest: {
+        ...coFlowFacts().pullRequest!,
+        isDraft: false,
+        checks: { pass: 4, fail: 0, pending: 0 },
+      },
+      subCheckpoints: [
+        ...coFlowFacts().subCheckpoints.slice(0, 5),
+        {
+          id: "CO-10.6",
+          title: "falsificacao + Human Gate",
+          state: "in-progress",
+          line: 114,
+          readiness: "ready-for-transition",
+        },
+      ],
+    });
+    const s = snapshot({
+      facts: readyFacts,
+      subCheckpoints: readyFacts.subCheckpoints,
+      prReady: { ok: true, summary: "verde" },
+      gateDecidability: { ok: true, summary: "verde" },
+    });
+
+    const flow = deriveGovernedFlow(s);
+    const gate = new HumanGateDefinition().detect(s);
+    const advisory = flow.actions.find((action) => action.id === "request-advisory-review");
+
+    expect(gate.status).toBe("available");
+    expect(flow.recommended?.id).toBe("human-gate");
+    expect(advisory?.availability.status).toBe("available");
+    expect(advisory?.command).toBe("npm run flow -- review types");
+    expect(advisory?.mutatingCommand).toBeUndefined();
+    expect(flow.available.map((action) => action.id)).toContain("request-advisory-review");
+    expect(flow.blocked.map((action) => action.id)).not.toContain("request-advisory-review");
+  });
+
   it("estado degradado ou inseguro falha fechado: CI pendente, branch atrás e tree suja bloqueiam readiness/Ready/Gate", () => {
     const unsafeFacts = coFlowFacts({
       git: { ...coFlowFacts().git, behind: 1, workingTreeClean: false },

@@ -176,6 +176,7 @@ function humanActionTitle(id: string, fallback: string): string {
   if (id === "human-gate") return "preparar decisão humana do checkpoint";
   if (id === "open-next-node") return "abrir o próximo PR da stack";
   if (id === "pr-ready") return "verificar se o PR pode sair de Draft";
+  if (id === "request-advisory-review") return "pedir revisão antes da decisão humana";
   if (id === "review-insight-candidates")
     return "Ver percepções recorrentes que precisam de decisão";
   return fallback;
@@ -356,7 +357,7 @@ export async function runFlowWizard(
         }
         return runRecommendedAction(model, registry, context, prompts);
       case "alternative":
-        return runAlternativeAction(model, registry, context, prompts);
+        return runAlternativeAction(model, registry, context, prompts, clipboard);
       case "validate":
         return runValidationSection(registry, context, prompts);
       case "decisions":
@@ -432,7 +433,8 @@ async function runAlternativeAction(
   model: CockpitModel,
   registry: CommandRegistry,
   context: CommandContext,
-  prompts: Prompts
+  prompts: Prompts,
+  clipboard: ClipboardWriter
 ): Promise<number> {
   const alternatives = alternativesFor(model);
   const alternative =
@@ -449,6 +451,9 @@ async function runAlternativeAction(
   if (!alternative) return 0;
   if (alternative.id === "review-insight-candidates") {
     return (await registry.dispatch(["insight", "list"], context)).exitCode;
+  }
+  if (alternative.id === "request-advisory-review") {
+    return runReviewSection(registry, context, prompts, clipboard);
   }
   return (await registry.dispatch(["decide", "--type", alternative.id, "--brief-only"], context))
     .exitCode;

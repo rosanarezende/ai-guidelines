@@ -48,6 +48,7 @@ estado do fluxo e compara consumidores diferentes do mesmo modelo.
 | Entrega de `CO-10.6` feita, sem readiness     | proxima acao vira `mark-readiness`; `advance-subcheckpoint` nao se aplica porque nao ha proximo `[ ]`.                  | `CO-10.6 entregue mas sem readiness...`                  |
 | Readiness terminal + PR Draft                 | `work` aponta Human Gate apenas como inspecao bloqueada; `decide` bloqueia por Draft; nao ha advance interno indevido.  | `readiness terminal + PR Draft...`                       |
 | PR Ready + readiness terminal + checks verdes | Human Gate fica disponivel; `work`, `flow`, `decide` e `pr-ready` convergem.                                            | `PR Ready + readiness terminal + checks verdes...`       |
+| Reviews opcionais/recomendadas pendentes      | o sistema sugere pedir review antes do Human Gate, mas nao transforma isso em bloqueio quando a politica nao exige.     | `reviews opcionais/recomendadas são sugeridas...`        |
 | Estado inseguro/degradado                     | CI pendente, branch atras ou tree suja bloqueiam readiness, Ready e Gate.                                               | `estado degradado ou inseguro falha fechado...`          |
 | Pos-Human Gate aprovado                       | proxima acao e `open-next-node`; o efeito nao autoriza merge nem implementar o novo no.                                 | `pós-Human Gate: a próxima ação...`                      |
 
@@ -97,6 +98,8 @@ explicita. A pessoa nao precisa descobrir manualmente a sequencia entre `work`,
   ausencia de bloqueios reais.
 - `pr-ready` e Human Gate compartilham os fatos de CI/tree/reviews quando
   aplicavel.
+- Reviews opcionais/recomendadas stale ou ausentes podem aparecer como
+  alternativa de reducao de risco antes do Gate, sem virar bloqueio implicito.
 - Estado sujo, branch atras, CI pendente/falha e fonte remota insegura falham
   fechado.
 - Pos-Human Gate nao depende mais de sequencia manual: `open-next-node` e a
@@ -130,6 +133,16 @@ Resultado:
 bootstrapDelivery.test.ts: 21 tests passed
 ProvisionWorkspace.test.ts: 46 tests passed
 ```
+
+Rodada focada adicional para sugestao de reviews antes do Human Gate:
+
+```text
+npm run test:ts -- src/cli/flow/finalFalsification.test.ts src/cli/flowWizard.test.ts
+```
+
+Resultado esperado: o modelo sugere reviews opcionais/recomendadas como
+alternativa, o wizard prepara o contexto de review, e nenhuma review e publicada
+automaticamente.
 
 ## Riscos residuais para o Human Gate
 
