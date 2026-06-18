@@ -66,10 +66,26 @@ se o modelo oferece a orientacao correta em cada estado.
 | Estado inseguro                             | orientar primeiro limpar working tree/reconciliar branch/aguardar CI; bloquear readiness, Ready e Gate. | `simula uma pessoa recebendo uma tarefa...` |
 | Human Gate aprovado                         | recomendar `open-next-node`; continuar proibindo merge e implementacao automatica do proximo no.        | `simula uma pessoa recebendo uma tarefa...` |
 
+### Adoção de repositório já em uso
+
+Foi adicionada uma falsificacao especifica para o caso em que a pessoa quer
+adotar o framework em um repositorio existente, com configuracoes e conflitos
+reais. O objetivo e provar que o sistema nao cobre apenas o caminho feliz.
+
+| Momento da pessoa usuaria              | Cenario simulado                                                                                                   | Resultado esperado                                                                                                  | Cobertura automatizada                                                      |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| Escolhe adotar repo existente          | wizard usa `adopt`, package manager `npm`, providers `claude/openai/cursor` e features `prettier/husky/ci/tdd/bdd` | providers e features aparecem agrupados por intencao humana, com preview antes de aplicar.                          | `wizard de adopt guia conflito, bloqueio e correção com recursos avançados` |
+| Repositorio ja tinha decisoes proprias | `package.json` com Biome, `AGENTS.md` humano, `CLAUDE.md` com bloco gerenciado antigo, CI propria e hook existente | plano preserva contexto humano e so altera blocos/effects explicitamente modelados.                                 | `adopt em repo existente encontra conflitos e corrige...`                   |
+| Tentativa sem forcar                   | hook `pre-commit` tem formato nao suportado.                                                                       | comando falha com mensagem acionavel, nao escreve arquivos e nao executa processo.                                  | `adopt em repo existente encontra conflitos e corrige...`                   |
+| Pessoa corrige a decisao               | nova tentativa com `force`, `force-prettier`, `prune` e install desabilitado.                                      | hook/CI/prettier/templates sao atualizados, template obsoleto e removido e textos humanos sao preservados.          | `adopt em repo existente encontra conflitos e corrige...`                   |
+| Recursos avancados do Clack            | selecao agrupada, task log, lista de tarefas, preview e confirmacao.                                               | wizard conduz a pessoa pela escolha e pela correcao, mas nao cria regra propria fora do provisioning e do registry. | `wizard de adopt guia conflito, bloqueio e correção com recursos avançados` |
+
 Conclusao da simulacao: o sistema esta preparado para orientar o caminho
-principal da pessoa usuaria ate o ponto de decisao humana, sem exigir que ela
-descubra manualmente a sequencia entre `work`, `decide`, Ready, Human Gate e
-transicao de no.
+principal da pessoa usuaria ate o ponto de decisao humana e tambem a jornada de
+adocao em repositorio ja em uso, incluindo conflito, bloqueio e correcao
+explicita. A pessoa nao precisa descobrir manualmente a sequencia entre `work`,
+`decide`, Ready, Human Gate, transicao de no, `adopt`, `force`,
+`force-prettier` e `prune`.
 
 ## Invariantes cobertas
 
@@ -99,6 +115,20 @@ Resultado:
 
 ```text
 7 tests passed
+```
+
+Rodadas focadas adicionais para a jornada de adocao em repositorio existente:
+
+```text
+npm run test:ts -- src/cli/delivery/bootstrap/bootstrapDelivery.test.ts
+npm run test:ts -- src/app/use-cases/ProvisionWorkspace.test.ts
+```
+
+Resultado:
+
+```text
+bootstrapDelivery.test.ts: 21 tests passed
+ProvisionWorkspace.test.ts: 46 tests passed
 ```
 
 ## Riscos residuais para o Human Gate

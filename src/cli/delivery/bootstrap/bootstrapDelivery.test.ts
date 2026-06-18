@@ -179,6 +179,7 @@ class FakeRuntime implements BootstrapDeliveryRuntime {
   readonly created: CreateProvisionWorkspaceInput[] = [];
   readonly compiledConfigs: PointersConfig[] = [];
   readonly provisioner = new FakeProvisioner();
+  snapshot: ProvisioningOperationSnapshot = operationSnapshot();
   checkBudgetExitCode = 0;
 
   async resolveConfig(input: ResolveProvisioningConfigInput): Promise<PointersConfig> {
@@ -195,7 +196,7 @@ class FakeRuntime implements BootstrapDeliveryRuntime {
     input: CollectProvisioningSnapshotInput
   ): Promise<ProvisioningOperationSnapshot> {
     this.snapshots.push(input);
-    return operationSnapshot();
+    return this.snapshot;
   }
 
   async compileAdapterRules(config: PointersConfig): Promise<Readonly<Record<string, string>>> {
@@ -491,6 +492,133 @@ describe("bootstrap delivery 2c — wizard", () => {
     );
     expect(prompts.taskMessages.join("\n")).toContain(
       "Conferir contexto detectado:Projeto existente: preservar arquivos atuais"
+    );
+  });
+
+  it("wizard de adopt guia conflito, bloqueio e correção com recursos avançados", async () => {
+    const runtime = new FakeRuntime();
+    const { registry } = delivery(runtime);
+    const firstLogger = capturingLogger();
+    const firstPrompts = new ScriptedPrompts({
+      select: {
+        Operation: "adopt",
+        "Idioma do baseline e das práticas TDD/BDD": "pt",
+        "Gerenciador de pacotes": "npm",
+      },
+      input: {
+        "Onde aplicar? Use . para este repositório": ".",
+        "Nome do projeto": "consumer-existing",
+      },
+      groupMultiselect: {
+        "Quais ferramentas de IA devem receber arquivos de orientação?": [
+          "claude",
+          "openai",
+          "cursor",
+        ],
+        "Quais práticas quer instalar agora?": ["prettier", "husky", "ci", "tdd", "bdd"],
+      },
+      confirm: {
+        "Só mostrar o plano, sem escrever arquivos?": false,
+        "Permitir sobrescrever arquivos suportados quando houver conflito?": false,
+        "Instalar dependências automaticamente no final?": false,
+        "Abrir opções avançadas?": false,
+        "Aplicar este plano?": true,
+      },
+    });
+    runtime.provisioner.error = new Error(
+      "Hook pre-commit possui shape não suportado para merge conservador. Use --force para sobrescrever."
+    );
+
+    const failed = await registry.dispatch(["adopt"], context(firstLogger.logger, firstPrompts));
+
+    expect(failed.exitCode).toBe(1);
+    expect(firstLogger.errors.join("\n")).toContain("Use --force para sobrescrever");
+    expect(runtime.provisioner.calls[0]).toMatchObject({
+      operation: "adopt",
+      projectName: "consumer-existing",
+      config: {
+        providers: ["claude", "openai", "cursor"],
+        features: ["prettier", "husky", "ci", "tdd", "bdd"],
+        lang: "pt",
+      },
+      force: false,
+      forcePrettier: false,
+      prune: false,
+      install: false,
+    });
+    expect(firstPrompts.groupMultiselectCalls.map((call) => call.message)).toEqual([
+      "Quais ferramentas de IA devem receber arquivos de orientação?",
+      "Quais práticas quer instalar agora?",
+    ]);
+    expect(Object.keys(firstPrompts.groupMultiselectCalls[0].groups)).toEqual([
+      "Assistentes principais do repositório",
+      "Editores e agentes locais",
+    ]);
+    expect(Object.keys(firstPrompts.groupMultiselectCalls[1].groups)).toEqual([
+      "Infraestrutura do repositório",
+      "Práticas de trabalho",
+    ]);
+    expect(firstPrompts.taskLogTitles).toEqual(["Etapas da adoção"]);
+    expect(firstPrompts.taskTitles).toEqual([
+      "Conferir contexto detectado",
+      "Montar preview humano",
+      "Checar travas de segurança",
+    ]);
+    expect(firstPrompts.notes.at(-1)?.message).toContain("Sobrescrever conflitos suportados: não");
+
+    runtime.provisioner.error = null;
+    const secondLogger = capturingLogger();
+    const secondPrompts = new ScriptedPrompts({
+      select: {
+        Operation: "adopt",
+        "Idioma do baseline e das práticas TDD/BDD": "pt",
+        "Gerenciador de pacotes": "npm",
+      },
+      input: {
+        "Onde aplicar? Use . para este repositório": ".",
+        "Nome do projeto": "consumer-existing",
+        "Diretório runtime do ai-guidelines": ".ai-guidelines",
+      },
+      groupMultiselect: {
+        "Quais ferramentas de IA devem receber arquivos de orientação?": [
+          "claude",
+          "openai",
+          "cursor",
+        ],
+        "Quais práticas quer instalar agora?": ["prettier", "husky", "ci", "tdd", "bdd"],
+      },
+      confirm: {
+        "Só mostrar o plano, sem escrever arquivos?": false,
+        "Permitir sobrescrever arquivos suportados quando houver conflito?": true,
+        "Instalar dependências automaticamente no final?": false,
+        "Abrir opções avançadas?": true,
+        "Forçar Prettier mesmo se houver formatter rival?": true,
+        "Remover artefatos gerenciados que não fazem mais parte da seleção?": true,
+        "Aplicar este plano?": true,
+      },
+    });
+
+    const corrected = await registry.dispatch(
+      ["adopt"],
+      context(secondLogger.logger, secondPrompts)
+    );
+
+    expect(corrected.exitCode).toBe(0);
+    expect(secondLogger.infos).toContain("planned adopt");
+    expect(runtime.provisioner.calls[1]).toMatchObject({
+      operation: "adopt",
+      projectName: "consumer-existing",
+      force: true,
+      forcePrettier: true,
+      prune: true,
+      install: false,
+    });
+    expect(secondPrompts.notes.at(-1)?.message).toContain("Sobrescrever conflitos suportados: sim");
+    expect(secondPrompts.notes.at(-1)?.message).toContain(
+      "Forçar Prettier com formatter rival: sim"
+    );
+    expect(secondPrompts.notes.at(-1)?.message).toContain(
+      "Remover arquivos órfãos gerenciados: sim"
     );
   });
 

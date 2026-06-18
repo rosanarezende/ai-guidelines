@@ -1030,6 +1030,88 @@ function operationSnapshot(
   return { ...snapshot, ...overrides };
 }
 
+const EXISTING_ADOPT_PACKAGE = {
+  name: "consumer",
+  scripts: { test: "vitest" },
+  devDependencies: { "@biomejs/biome": "^1.0.0" },
+};
+
+const UNSUPPORTED_PRE_COMMIT = '#!/bin/sh\nif [ -n "$CI" ]; then\n  echo skip\nfi\n';
+const EXISTING_CI_WORKFLOW = "name: existing\njobs:\n  custom:\n    runs-on: ubuntu-latest\n";
+
+function seedExistingRepoWithConflicts(fs: InMemoryFs): void {
+  fs.files.set("package.json", `${JSON.stringify(EXISTING_ADOPT_PACKAGE)}\n`);
+  fs.files.set("AGENTS.md", "# Projeto\n\nRegra local do projeto.\n");
+  fs.files.set(
+    "CLAUDE.md",
+    [
+      "Contexto humano antes",
+      "<!-- ai-guidelines:managed-start v=1 -->",
+      "RULES-OLD",
+      "<!-- ai-guidelines:managed-end -->",
+      "Contexto humano depois",
+      "",
+    ].join("\n")
+  );
+  fs.files.set(".gitattributes", "*.bin binary\n");
+  fs.files.set(".prettierignore", "coverage/\n");
+  fs.files.set(".husky/pre-commit", UNSUPPORTED_PRE_COMMIT);
+  fs.files.set(".github/workflows/ai-guidelines-ci.yml", EXISTING_CI_WORKFLOW);
+  fs.files.set(".ai-guidelines/templates/stale.md", "# antigo\n");
+}
+
+function conflictedAdoptSnapshot(): ProvisioningOperationSnapshot {
+  const packageManager = {
+    id: "npm" as const,
+    label: "npm",
+    runner: "npm run",
+    packageManagerField: null,
+  };
+  const formatterContext = {
+    rival: { id: "biome", label: "Biome" },
+    hasPrettier: false,
+    shouldSkipPrettier: true,
+  } as const;
+
+  return operationSnapshot({
+    templates: {
+      sourceExists: true,
+      sourceFiles: [
+        { relativePath: "spec-boilerplate.md", content: "# Spec\n", origin: "mirror" },
+        { relativePath: "tasks-boilerplate.md", content: "# Tasks\n", origin: "engine" },
+      ],
+      targetRelativePaths: ["stale.md"],
+    },
+    prettier: {
+      packageJson: EXISTING_ADOPT_PACKAGE,
+      prettierIgnoreContent: "coverage/\n",
+      prettierIgnoreBaseline: PRETTIER_BASELINE,
+      formatterContext,
+    },
+    husky: {
+      packageJson: EXISTING_ADOPT_PACKAGE,
+      packageManager,
+      hooks: [
+        { name: "pre-commit", content: UNSUPPORTED_PRE_COMMIT },
+        { name: "pre-push", content: null },
+      ],
+    },
+    ci: {
+      packageManager,
+      workflowTemplate: CI_TEMPLATE,
+      workflowContent: EXISTING_CI_WORKFLOW,
+    },
+    install: { packageManager, yarnBerryReleaseExists: true },
+    guidance: {
+      formatterContext,
+      monorepoContext: { detected: true, flavor: "pnpm", source: "pnpm-workspace.yaml" },
+      gitattributes: { content: "*.bin binary\n", baseline: BASELINE },
+      platform: "win32",
+      hasGitRepo: true,
+    },
+  });
+}
+
 describe("app/use-cases/ProvisionWorkspace — operações completas (2b-4c)", () => {
   it("init aplica plano completo via fake fs", async () => {
     const fs = new InMemoryFs();
@@ -1109,6 +1191,103 @@ describe("app/use-cases/ProvisionWorkspace — operações completas (2b-4c)", (
     expect(fs.files).toEqual(before);
     expect(runner.installs).toEqual([]);
     expect(runner.markedExecutable).toEqual([]);
+  });
+
+  it("adopt em repo existente encontra conflitos e corrige com force/force-prettier sem perder contexto humano", async () => {
+    const fs = new InMemoryFs();
+    seedExistingRepoWithConflicts(fs);
+    const before = new Map(fs.files);
+    const runner = new SpyProcessRunner();
+    const snapshot = conflictedAdoptSnapshot();
+
+    await expect(
+      new ProvisionWorkspace(fs, true, runner).executeOperation({
+        operation: "adopt",
+        targetDir: "C:/fake-target",
+        projectName: "consumer",
+        config: {
+          sdd_dir: ".ai-guidelines",
+          providers: ["claude"],
+          features: ["prettier", "husky", "ci", "tdd", "bdd"],
+          lang: "pt",
+        },
+        adapterRulesByName: { claude: "RULES-CLAUDE" },
+        snapshot,
+        force: false,
+        forcePrettier: false,
+        prune: true,
+        install: false,
+        providersRequested: false,
+      })
+    ).rejects.toThrow(/Hook pre-commit possui shape não suportado/);
+    expect(fs.files).toEqual(before);
+    expect(runner.installs).toEqual([]);
+    expect(runner.markedExecutable).toEqual([]);
+
+    const result = await new ProvisionWorkspace(fs, false, runner).executeOperation({
+      operation: "adopt",
+      targetDir: "C:/fake-target",
+      projectName: "consumer",
+      config: {
+        sdd_dir: ".ai-guidelines",
+        providers: ["claude"],
+        features: ["prettier", "husky", "ci", "tdd", "bdd"],
+        lang: "pt",
+      },
+      adapterRulesByName: { claude: "RULES-CLAUDE" },
+      snapshot,
+      force: true,
+      forcePrettier: true,
+      prune: true,
+      install: false,
+      providersRequested: false,
+    });
+
+    expect(result.actions).toEqual(
+      expect.arrayContaining([
+        "modo --force ativo: o adopt pode atualizar AGENTS.md, hooks Husky e ai-guidelines-ci.yml gerados pelo framework",
+        "atenção: estrutura de monorepo detectada (pnpm)",
+        "atenção: formatador rival detectado (Biome)",
+        "atenção EOL: .gitattributes foi atualizado em ambiente Windows; pode surgir stat-dirty sem diff visível",
+        "sync templates -> target",
+        "prune .ai-guidelines/templates/stale.md",
+        "update managed block in CLAUDE.md",
+        "write AGENTS.md (ai-guidelines runtime updated)",
+        "override prettier (formatter rival detectado: Biome; sobrescrita explícita ativa)",
+        "write package.json (prettier scripts & deps)",
+        "write package.json (husky prepare script)",
+        "write .husky/pre-commit (husky pre-commit)",
+        "write .github/workflows/ai-guidelines-ci.yml (CI baseline)",
+        "Atenção: novas dependências adicionadas (prettier, husky). Execute: npm install",
+      ])
+    );
+    expect(fs.files.get("AGENTS.md")).toContain("Regra local do projeto.");
+    expect(fs.files.get("AGENTS.md")).toContain("<AI_GUIDELINES>");
+    expect(fs.files.get("CLAUDE.md")).toContain("Contexto humano antes");
+    expect(fs.files.get("CLAUDE.md")).toContain("RULES-CLAUDE");
+    expect(fs.files.get("CLAUDE.md")).toContain("Contexto humano depois");
+    expect(fs.files.get("CLAUDE.md")).not.toContain("RULES-OLD");
+    expect(fs.files.get(".husky/pre-commit")).toBe("npm run format\n");
+    expect(fs.files.get(".github/workflows/ai-guidelines-ci.yml")).toContain("AI Governance Check");
+    expect(fs.files.get(".github/workflows/ai-guidelines-ci.yml")).not.toBe(EXISTING_CI_WORKFLOW);
+    expect(fs.files.get(".prettierignore")).toContain("coverage/");
+    expect(fs.files.get(".prettierignore")).toContain("node_modules/");
+    expect(fs.files.get(".gitattributes")).toContain("*.bin binary");
+    expect(fs.files.get(".gitattributes")).toContain("* text=auto eol=lf");
+    expect(fs.files.has(".ai-guidelines/templates/stale.md")).toBe(false);
+    expect(JSON.parse(fs.files.get("package.json") ?? "{}")).toMatchObject({
+      scripts: { test: "vitest", format: "prettier --write .", prepare: "husky" },
+      devDependencies: {
+        "@biomejs/biome": "^1.0.0",
+        prettier: "^3.0.0",
+        husky: "^9.0.0",
+      },
+    });
+    expect(runner.markedExecutable).toEqual([
+      "C:/fake-target/.husky/pre-commit",
+      "C:/fake-target/.husky/pre-push",
+    ]);
+    expect(runner.installs).toEqual([]);
   });
 
   it("update --providers aplica core/pointers sem infra escondida", async () => {
