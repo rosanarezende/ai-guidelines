@@ -232,10 +232,10 @@ export interface MenuItem {
  */
 export function buildMenu(state: WorkflowState): ReadonlyArray<MenuItem> {
   const ordered: { label: string; action: MenuAction }[] = [];
-  ordered.push({ label: "ver briefing novamente", action: "briefing" });
-  ordered.push({ label: "ver lacunas do gate (research §8)", action: "blockers" });
+  ordered.push({ label: "ver resumo novamente", action: "briefing" });
+  ordered.push({ label: "ver pendências do gate (research §8)", action: "blockers" });
   if (state.gate.status !== "closed") {
-    ordered.push({ label: "ver lacunas e critérios do gate", action: "blockers" });
+    ordered.push({ label: "ver pendências e critérios do gate", action: "blockers" });
   }
   if (state.next.length > 0) {
     ordered.push({
@@ -484,13 +484,13 @@ type WizardMenuValue =
 // sem auto-detecção, sem ranking dinâmico, sem inferência de intenção.
 // Agrupamento por posição é implícito (não algorítmico).
 const WIZARD_MENU: ReadonlyArray<{ name: string; value: WizardMenuValue }> = [
-  { name: "📍 Continuar spec atual (briefing + REPL)", value: "continue-current" },
-  { name: "📍 Continuar outra spec (por slug ou id)", value: "continue-other" },
-  { name: "📡 Publicar estado (instruções)", value: "publish-state-help" },
-  { name: "🔗 Abrir Integration PR da spec ativa", value: "open-integration-pr" },
-  { name: "🔀 Executar merge atômico da stack", value: "merge-stack" },
-  { name: "📋 Ver specs ativas (índice público)", value: "list-active" },
-  { name: "🔍 Diagnosticar drift do índice", value: "diagnose-drift" },
+  { name: "📍 Continuar a spec atual", value: "continue-current" },
+  { name: "📍 Trocar para outra spec por slug ou id", value: "continue-other" },
+  { name: "📡 Entender quando publicar o estado", value: "publish-state-help" },
+  { name: "🔗 Abrir PR de integração da spec ativa", value: "open-integration-pr" },
+  { name: "🔀 Executar merge final da stack", value: "merge-stack" },
+  { name: "📋 Ver trabalhos governados ativos", value: "list-active" },
+  { name: "🔍 Diagnosticar divergência do índice", value: "diagnose-drift" },
   {
     name: "🎨 Gerar prompt visual (para gerador de imagem externo)",
     value: "visual-prompt",
@@ -500,7 +500,7 @@ const WIZARD_MENU: ReadonlyArray<{ name: string; value: WizardMenuValue }> = [
 
 async function runWizard(prompts: Prompts, logger: Logger): Promise<WizardChoice> {
   const choice = await prompts.select<WizardMenuValue>({
-    message: "Wizard operacional (workflow runtime)",
+    message: "Ferramentas técnicas do fluxo antigo",
     choices: WIZARD_MENU.map((o) => ({ name: o.name, value: o.value })),
   });
   switch (choice) {

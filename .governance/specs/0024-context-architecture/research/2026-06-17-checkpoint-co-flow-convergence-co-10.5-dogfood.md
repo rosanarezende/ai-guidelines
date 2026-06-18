@@ -73,11 +73,25 @@ nova fonte de verdade.
 
 ## O que ainda falta no CO-10.5
 
-- Revisar todo o vocabulário restante do `flow`, `help`, intents e comandos avançados.
-- Usar `taskLog` onde houver validação com saída contínua útil.
-- Testar mais estados reais do wizard antes de declarar readiness.
-- Garantir que o caminho legado `workflow` fique compatibilizado ou explicitamente subordinado ao
-  novo `flow`, sem parecer outro produto.
+- O vocabulário principal do `flow`, do help e do catálogo de intents foi revisado para reduzir
+  termos internos na superfície humana. Exemplos: "Ver decisões do fluxo" virou "Ver ações
+  disponíveis e bloqueadas"; "Mais opções" virou "Ferramentas técnicas e diagnósticos"; o help
+  passou a falar em "plano da sessão", "ações com confirmação" e "validação completa".
+- A validação intermediária passou a usar `taskLog` junto de `tasks`, mostrando etapas nomeadas
+  para diff, formatação, build/checks aplicáveis e consolidação do resultado.
+- O caminho de ferramentas técnicas ficou explicitamente subordinado ao fluxo principal: ele abre
+  inspeções e diagnósticos, mas não parece mais um produto alternativo ao `flow`.
+- `FLOW.html` foi atualizado com os mesmos rótulos humanos usados pelo wizard, preservando as três
+  jornadas separadas: projeto novo, projeto existente e repo já em uso.
+
+## Riscos residuais para CO-10.6
+
+- Ainda falta rodar uma falsificação dedicada nos estados finais antes de Human Gate.
+- A documentação e o wizard agora explicam o fluxo com menos jargão, mas CO-10.6 ainda deve provar
+  por checks/testes que essa experiência não diverge de `work`, `decide`, PR state e CI.
+- O comando `workflow` segue existindo como superfície técnica histórica; nesta etapa ele ficou
+  subordinado no menu, mas a falsificação final ainda deve garantir que ele não reintroduz caminho
+  paralelo indevido.
 
 ## Fronteira
 

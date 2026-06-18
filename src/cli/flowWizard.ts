@@ -102,7 +102,7 @@ export function buildFlowMenu(
     readonly disabled?: boolean;
   }> = [];
 
-  choices.push({ name: "Ver resumo completo do estado", value: "cockpit" });
+  choices.push({ name: "Ver resumo completo antes de escolher", value: "cockpit" });
 
   if (recommended) {
     choices.push({
@@ -138,9 +138,9 @@ export function buildFlowMenu(
   }
   choices.push(
     {
-      name: "Ver decisões do fluxo",
+      name: "Ver ações disponíveis e bloqueadas",
       value: "decisions",
-      hint: "mostra decisões disponíveis e bloqueadas, com motivo",
+      hint: "mostra o que pode ser feito agora e por quê",
     },
     {
       name: "Ver orientação de trabalho / handoff",
@@ -157,7 +157,11 @@ export function buildFlowMenu(
       value: "provisioning",
       hint: provisioningMainHint(provisioning),
     },
-    { name: "Mais opções", value: "advanced" },
+    {
+      name: "Ferramentas técnicas e diagnósticos",
+      value: "advanced",
+      hint: "para quando você quer inspecionar ou diagnosticar algo específico",
+    },
     { name: "Sair", value: "quit" }
   );
 
@@ -335,7 +339,7 @@ export async function runFlowWizard(
     else await prompts.note?.(summary, "Estado atual");
 
     const choice = await prompts.select<FlowMenuValue>({
-      message: "Opções:",
+      message: "O que você quer fazer agora?",
       choices: buildFlowMenu(model, provisioning),
     });
 
@@ -408,13 +412,13 @@ async function runRecommendedAction(
   if (recommended.mutatingCommand) {
     lines.push(
       "",
-      "Se a owner confirmar, este é o comando que aplica:",
+      "Se houver confirmação humana, este é o comando que aplica:",
       recommended.mutatingCommand
     );
   }
   await prompts.note?.(lines.join("\n"), "Próximo passo");
   const proceed = await prompts.confirm({
-    message: "Abrir a decisão guiada agora?",
+    message: "Abrir a tela de decisão agora?",
     default: false,
   });
   if (!proceed) {
@@ -596,10 +600,28 @@ async function runValidationSection(
       {
         title: selected === "changed-fix" ? "Formatar e validar o diff" : "Validar o diff",
         task: async (message) => {
-          message("Rodando git diff --check, Prettier, build e checks governados aplicáveis.");
+          const log = prompts.taskLog?.({
+            title: "Etapas da validação",
+            limit: 8,
+            retainLog: true,
+          });
+          const group = log?.group(
+            selected === "changed-fix" ? "validate changed --fix" : "validate changed"
+          );
+          message("Conferindo o diff com o comando governado.");
+          group?.message("1/4 Conferindo espaços, finais de linha e conflitos de patch.");
+          group?.message("2/4 Conferindo formatação dos arquivos alterados.");
+          group?.message("3/4 Rodando build/checks aplicáveis ao diff.");
+          group?.message("4/4 Consolidando o resultado para você.");
           const result = await registry.dispatch(args, context);
           exitCode = result.exitCode;
-          if (exitCode !== 0) throw new Error(`Validação retornou exit code ${exitCode}.`);
+          if (exitCode !== 0) {
+            group?.error(`Validação retornou exit code ${exitCode}.`);
+            log?.error("Validação intermediária falhou.", { showLog: true });
+            throw new Error(`Validação retornou exit code ${exitCode}.`);
+          }
+          group?.success("Validação intermediária passou.");
+          log?.success("Validação intermediária concluída.", { showLog: true });
           return "Validação intermediária concluída.";
         },
       },
@@ -621,20 +643,20 @@ async function runReviewSection(
       "",
       "O catálogo pode ser copiado para o clipboard para você colar em uma LLM antes de pedir uma análise.",
       "",
-      "Publicar uma revisão governada continua exigindo comando/autorização explícitos; esta tela não publica review.",
+      "Registrar uma revisão no repositório continua exigindo comando e autorização explícitos; esta tela só prepara contexto.",
     ].join("\n"),
     "Tipos de revisão disponíveis"
   );
   const choice = await prompts.select<string>({
-    message: "O que você quer ver?",
+    message: "Qual contexto você quer preparar?",
     choices: [
       {
-        name: "Copiar/ver tipos de revisão disponíveis",
+        name: "Copiar/ver tipos de revisão possíveis",
         value: "types",
         hint: "catálogo para colar na LLM de sua preferência",
       },
       {
-        name: "Ver regra aplicada neste PR",
+        name: "Ver regra de revisão aplicada neste PR",
         value: "policy",
         hint: "mostra quais revisões são obrigatórias ou opcionais",
       },
@@ -660,20 +682,20 @@ async function runAdvancedSection(
   prompts: Prompts
 ): Promise<number> {
   const selected = await prompts.select<AdvancedMenuChoice>({
-    message: "Mais opções",
+    message: "Ferramentas técnicas e diagnósticos",
     choices: [
       {
-        name: "Retomar outra spec por ID ou nome",
+        name: "Trocar para outra spec pelo ID ou nome",
         value: "continue-other",
         hint: "somente leitura; útil quando você muda de contexto",
       },
       {
-        name: "Ver specs ativas",
+        name: "Ver trabalhos governados ativos",
         value: "active-specs",
         hint: "mostra o índice público",
       },
       {
-        name: "Conferir se o índice de specs está coerente",
+        name: "Conferir se a lista pública está coerente",
         value: "drift",
         hint: "diagnóstico de divergência",
       },
@@ -682,14 +704,14 @@ async function runAdvancedSection(
         value: "visual-prompt",
       },
       {
-        name: "Entender publicação de estado",
+        name: "Entender quando publicar o estado",
         value: "publication",
         hint: "não publica nada sozinho",
       },
       {
-        name: "Entender operações finais da stack",
+        name: "Entender saída de Draft, decisão humana e merge final",
         value: "final-ops",
-        hint: "Ready, Human Gate e merge continuam protegidos",
+        hint: "essas ações continuam protegidas",
       },
       { name: "Voltar", value: "__back__" },
     ],

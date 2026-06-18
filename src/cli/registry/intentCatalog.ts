@@ -12,7 +12,7 @@ export const INTENT_CATALOG: readonly Intent[] = [
     id: "retomar-trabalho",
     title: "Entender onde estamos e continuar",
     actions: [
-      { command: "cockpit", label: "Ver resumo completo do estado e do próximo passo" },
+      { command: "cockpit", label: "Ver resumo completo antes de escolher" },
       { command: "continue", label: "Retomar de onde parei" },
       { command: "handoff", label: "Preparar contexto para uma nova sessão com IA" },
       { command: "insight", args: ["list"], label: "Ver percepções recentes" },
@@ -41,43 +41,43 @@ export const INTENT_CATALOG: readonly Intent[] = [
   },
   {
     id: "executar-trabalho-governado",
-    title: "Ver orientação antes de implementar ou corrigir",
+    title: "Entender o que pode ser feito nesta sessão",
     actions: [
       {
         command: "work",
-        label: "Ver escopo, permissões, validações e critérios de parada",
+        label: "Ver escopo, autorização, validações e quando parar",
       },
       {
         command: "work",
         args: ["--authorization", "explicit-work-request"],
-        label: "Carregar orientação com autorização explícita para o trabalho atual",
+        label: "Carregar o plano da sessão quando a owner já autorizou o trabalho atual",
       },
     ],
   },
   {
     id: "decidir-reservado-humano",
-    title: "Ver decisões que só a owner pode tomar",
+    title: "Ver ações que exigem decisão humana",
     actions: [
       {
         command: "decide",
-        label: "Abrir decisão guiada com prévia e confirmação",
+        label: "Abrir tela de decisão com prévia e confirmação",
       },
       {
         command: "decide",
         args: ["--brief-only"],
-        label: "Só ler as decisões disponíveis, sem escrever nada",
+        label: "Só ler as ações disponíveis e bloqueadas, sem escrever nada",
       },
     ],
   },
   {
     id: "pedir-review-governado",
-    title: "Preparar uma revisão do PR",
+    title: "Ver tipos de revisão disponíveis",
     actions: [
       { command: "review", args: ["types"], label: "Ver tipos de revisão disponíveis" },
       {
         command: "review",
         args: ["policy"],
-        label: "Ver quais revisões importam neste momento",
+        label: "Ver quais revisões importam para este PR",
       },
     ],
   },
@@ -98,7 +98,7 @@ export const INTENT_CATALOG: readonly Intent[] = [
     id: "inspecionar-specs-ativas",
     title: "Inspecionar specs ativas",
     actions: [
-      { command: "specs", label: "Ver specs ativas (índice público)" },
+      { command: "specs", label: "Ver trabalhos governados ativos" },
       { command: "drift", label: "Diagnosticar drift do índice" },
     ],
   },

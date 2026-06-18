@@ -34,6 +34,8 @@ class ScriptedPrompts implements Prompts {
   readonly cancels: string[] = [];
   readonly statuses: string[] = [];
   readonly taskTitles: string[] = [];
+  readonly taskLogTitles: string[] = [];
+  readonly taskLogMessages: string[] = [];
   readonly confirmCalls: string[] = [];
   readonly groupMultiselectCalls: Array<{
     readonly message: string;
@@ -117,6 +119,35 @@ class ScriptedPrompts implements Prompts {
       this.taskTitles.push(task.title);
       await task.task(() => undefined);
     }
+  }
+
+  taskLog(options: { title: string }) {
+    this.taskLogTitles.push(options.title);
+    const messages = this.taskLogMessages;
+    return {
+      message(message: string): void {
+        messages.push(`message:${message}`);
+      },
+      group(name: string) {
+        return {
+          message(message: string): void {
+            messages.push(`${name}:message:${message}`);
+          },
+          success(message: string): void {
+            messages.push(`${name}:success:${message}`);
+          },
+          error(message: string): void {
+            messages.push(`${name}:error:${message}`);
+          },
+        };
+      },
+      success(message: string): void {
+        messages.push(`success:${message}`);
+      },
+      error(message: string): void {
+        messages.push(`error:${message}`);
+      },
+    };
   }
 }
 
@@ -372,7 +403,7 @@ describe("flow wizard", () => {
       ])
     );
     expect(values.slice(0, 3)).toEqual(["cockpit", "next", "alternative"]);
-    expect(menu[0].name).toBe("Ver resumo completo do estado");
+    expect(menu[0].name).toBe("Ver resumo completo antes de escolher");
     expect(menu[1].name).toBe("PRÓXIMA AÇÃO RECOMENDADA: Concluir ponto atual e iniciar o próximo");
     expect(menu[2].name).toBe("ALTERNATIVA: declarar que este ponto está pronto");
     expect(values).not.toContain("providers");
@@ -383,10 +414,11 @@ describe("flow wizard", () => {
       .map((item) => item.name)
       .join("\n");
 
-    expect(menuText).toContain("Ver resumo completo do estado");
+    expect(menuText).toContain("Ver resumo completo antes de escolher");
+    expect(menuText).toContain("Ver ações disponíveis e bloqueadas");
     expect(menuText).toContain("Ver orientação de trabalho / handoff");
     expect(menuText).toContain("Ver tipos de revisão disponíveis");
-    expect(menuText).toContain("Mais opções");
+    expect(menuText).toContain("Ferramentas técnicas e diagnósticos");
     expect(menuText).not.toMatch(/\bcockpit\b/i);
     expect(menuText).not.toMatch(/\bbriefing\b/i);
     expect(menuText).not.toMatch(/review governado/i);
@@ -447,7 +479,7 @@ describe("flow wizard", () => {
     expect(decide.calls).toEqual([]);
   });
 
-  it("alternativa disponível abre briefing específico sem aplicar mutação", async () => {
+  it("alternativa disponível abre prévia específica sem aplicar mutação", async () => {
     const prompts = new ScriptedPrompts(["alternative"]);
     const decide = spyCommand("decide");
 
@@ -511,7 +543,7 @@ describe("flow wizard", () => {
     expect(code).toBe(0);
     expect(review.calls).toEqual([["types"]]);
     expect(clipboard.copied[0]).toContain("TIPOS DE REVISAO");
-    expect(prompts.notes.join("\n")).toContain("não publica review");
+    expect(prompts.notes.join("\n")).toContain("esta tela só prepara contexto");
   });
 
   it("percepção recorrente aparece como alternativa e abre a lista canônica", async () => {
@@ -722,7 +754,7 @@ describe("flow wizard", () => {
     );
   });
 
-  it("mais opções não abre o wizard legado diretamente", async () => {
+  it("ferramentas técnicas não abrem a superfície antiga diretamente", async () => {
     const prompts = new ScriptedPrompts(["advanced", "active-specs"]);
     const workflow = spyCommand("workflow");
     const specs = spyCommand("specs");
@@ -736,8 +768,8 @@ describe("flow wizard", () => {
     expect(code).toBe(0);
     expect(specs.calls).toEqual([[]]);
     expect(workflow.calls).toEqual([]);
-    expect(prompts.selectCalls[1].message).toBe("Mais opções");
-    expect(prompts.selectCalls[1].names).toContain("Ver specs ativas");
+    expect(prompts.selectCalls[1].message).toBe("Ferramentas técnicas e diagnósticos");
+    expect(prompts.selectCalls[1].names).toContain("Ver trabalhos governados ativos");
   });
 
   it("provisioning em repo existente sem governança recomenda adopt no caminho principal", async () => {
@@ -799,6 +831,10 @@ describe("flow wizard", () => {
     expect(code).toBe(0);
     expect(validate.calls).toEqual([["changed"]]);
     expect(prompts.taskTitles).toEqual(["Validar o diff"]);
+    expect(prompts.taskLogTitles).toEqual(["Etapas da validação"]);
+    expect(prompts.taskLogMessages.join("\n")).toContain(
+      "validate changed:success:Validação intermediária passou."
+    );
   });
 
   it("validação com --fix exige confirmação antes de formatar", async () => {
@@ -814,6 +850,9 @@ describe("flow wizard", () => {
     expect(code).toBe(0);
     expect(validate.calls).toEqual([["changed", "--fix"]]);
     expect(prompts.taskTitles).toEqual(["Formatar e validar o diff"]);
+    expect(prompts.taskLogMessages.join("\n")).toContain(
+      "validate changed --fix:message:2/4 Conferindo formatação dos arquivos alterados."
+    );
   });
 
   it("validação com --fix cancelada não executa comando", async () => {
