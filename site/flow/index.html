@@ -605,11 +605,13 @@
 
       #new-detect:checked ~ .card .step-controls label[for="new-detect"],
       #new-name:checked ~ .card .step-controls label[for="new-name"],
+      #new-collaboration:checked ~ .card .step-controls label[for="new-collaboration"],
       #new-practices:checked ~ .card .step-controls label[for="new-practices"],
       #new-preview:checked ~ .card .step-controls label[for="new-preview"],
       #new-apply:checked ~ .card .step-controls label[for="new-apply"],
       #new-validate:checked ~ .card .step-controls label[for="new-validate"],
       #existing-detect:checked ~ .card .step-controls label[for="existing-detect"],
+      #existing-collaboration:checked ~ .card .step-controls label[for="existing-collaboration"],
       #existing-merge:checked ~ .card .step-controls label[for="existing-merge"],
       #existing-force:checked ~ .card .step-controls label[for="existing-force"],
       #existing-apply:checked ~ .card .step-controls label[for="existing-apply"],
@@ -627,11 +629,13 @@
 
       #new-detect:checked ~ .simulator-stage .panel-new-detect,
       #new-name:checked ~ .simulator-stage .panel-new-name,
+      #new-collaboration:checked ~ .simulator-stage .panel-new-collaboration,
       #new-practices:checked ~ .simulator-stage .panel-new-practices,
       #new-preview:checked ~ .simulator-stage .panel-new-preview,
       #new-apply:checked ~ .simulator-stage .panel-new-apply,
       #new-validate:checked ~ .simulator-stage .panel-new-validate,
       #existing-detect:checked ~ .simulator-stage .panel-existing-detect,
+      #existing-collaboration:checked ~ .simulator-stage .panel-existing-collaboration,
       #existing-merge:checked ~ .simulator-stage .panel-existing-merge,
       #existing-force:checked ~ .simulator-stage .panel-existing-force,
       #existing-apply:checked ~ .simulator-stage .panel-existing-apply,
@@ -964,6 +968,7 @@
             checked
           />
           <input class="simulator-input" id="new-name" name="new-flow-demo" type="radio" />
+          <input class="simulator-input" id="new-collaboration" name="new-flow-demo" type="radio" />
           <input class="simulator-input" id="new-practices" name="new-flow-demo" type="radio" />
           <input class="simulator-input" id="new-preview" name="new-flow-demo" type="radio" />
           <input class="simulator-input" id="new-apply" name="new-flow-demo" type="radio" />
@@ -987,29 +992,36 @@
                   <p>Nome, target e package manager entram como opções explícitas.</p>
                 </div>
               </label>
-              <label class="step-button" for="new-practices">
+              <label class="step-button" for="new-collaboration">
                 <span class="step-number">3</span>
+                <div>
+                  <strong>Escolher colaboração</strong>
+                  <p>Solo, contribuições externas ou time definem a política inicial de revisão.</p>
+                </div>
+              </label>
+              <label class="step-button" for="new-practices">
+                <span class="step-number">4</span>
                 <div>
                   <strong>Escolher canais e práticas</strong>
                   <p>Providers, features, CI, Prettier, Husky, TDD e BDD aparecem agrupados.</p>
                 </div>
               </label>
               <label class="step-button" for="new-preview">
-                <span class="step-number">4</span>
+                <span class="step-number">5</span>
                 <div>
                   <strong>Ver preview</strong>
                   <p>A pessoa vê arquivos novos, blocos gerenciados e comandos que serão usados.</p>
                 </div>
               </label>
               <label class="step-button" for="new-apply">
-                <span class="step-number">5</span>
+                <span class="step-number">6</span>
                 <div>
                   <strong>Aplicar com confirmação</strong>
                   <p>Nada é escrito antes da confirmação; dry-run permite revisar sem efeito.</p>
                 </div>
               </label>
               <label class="step-button" for="new-validate">
-                <span class="step-number">6</span>
+                <span class="step-number">7</span>
                 <div>
                   <strong>Validar e commitar</strong>
                   <p>O guia mostra tarefas de validação e orienta o primeiro commit governado.</p>
@@ -1075,6 +1087,42 @@
                     <span class="prompt-row muted"
                       ><span>◇</span
                       ><span>Esses valores entram no plano antes da escrita.</span></span
+                    >
+                  </div>
+                </div>
+              </div>
+
+              <div class="simulator-panel panel-new-collaboration">
+                <div class="simulator-copy">
+                  <span class="status purple">colaboração</span>
+                  <h3>O projeto já nasce com uma política humana explícita.</h3>
+                  <p>
+                    A pessoa escolhe se o repositório é solo, aberto a contribuições externas ou de
+                    time. Isso define expectativas de revisão e approvals sem mexer no código do
+                    produto.
+                  </p>
+                </div>
+                <div class="shell">
+                  <div class="shell-head">
+                    <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                    <span>perfil de colaboração</span>
+                  </div>
+                  <div class="shell-body">
+                    <span class="terminal-line"
+                      >◇ Qual perfil de colaboração este repositório deve usar?</span
+                    >
+                    <span class="choice active"
+                      ><span>◆</span
+                      ><span
+                        >Solo — uma pessoa decide; sem approvals nativos obrigatórios</span
+                      ></span
+                    >
+                    <span class="choice"
+                      ><span>○</span
+                      ><span>Com contribuições externas — mais rastreio de findings</span></span
+                    >
+                    <span class="choice"
+                      ><span>○</span><span>Time — reviews e proteção mais fortes</span></span
                     >
                   </div>
                 </div>
@@ -1218,6 +1266,9 @@
                         <span class="prompt-row success"
                           ><span>+</span><span>AGENTS.md com bloco gerenciado</span></span
                         >
+                        <span class="prompt-row success"
+                          ><span>+</span><span>.governance/review-policy.yml</span></span
+                        >
                       </div>
 
                       <div class="mini-slide" data-mini-panel="quality">
@@ -1332,6 +1383,12 @@
           />
           <input
             class="simulator-input"
+            id="existing-collaboration"
+            name="existing-flow-demo"
+            type="radio"
+          />
+          <input
+            class="simulator-input"
             id="existing-merge"
             name="existing-flow-demo"
             type="radio"
@@ -1366,15 +1423,22 @@
                   <p>package.json, scripts, CI, formatter e docs existentes entram no snapshot.</p>
                 </div>
               </label>
-              <label class="step-button" for="existing-merge">
+              <label class="step-button" for="existing-collaboration">
                 <span class="step-number">2</span>
+                <div>
+                  <strong>Definir colaboração</strong>
+                  <p>A política de revisão entra sem apagar histórico nem práticas existentes.</p>
+                </div>
+              </label>
+              <label class="step-button" for="existing-merge">
+                <span class="step-number">3</span>
                 <div>
                   <strong>Escolher adoção conservadora</strong>
                   <p>O padrão preserva conteúdo e usa blocos gerenciados quando possível.</p>
                 </div>
               </label>
               <label class="step-button" for="existing-force">
-                <span class="step-number">3</span>
+                <span class="step-number">4</span>
                 <div>
                   <strong>Resolver conflito com clareza</strong>
                   <p>
@@ -1383,14 +1447,14 @@
                 </div>
               </label>
               <label class="step-button" for="existing-apply">
-                <span class="step-number">4</span>
+                <span class="step-number">5</span>
                 <div>
                   <strong>Aplicar somente o permitido</strong>
                   <p>Force é opção explícita, nunca consequência escondida.</p>
                 </div>
               </label>
               <label class="step-button" for="existing-validate">
-                <span class="step-number">5</span>
+                <span class="step-number">6</span>
                 <div>
                   <strong>Validar o diff</strong>
                   <p>O resultado precisa ser fácil de revisar e reverter, se necessário.</p>
@@ -1426,6 +1490,67 @@
                     <span class="prompt-row warn"
                       ><span>!</span><span>formatter rival detectado</span></span
                     >
+                  </div>
+                </div>
+              </div>
+
+              <div class="simulator-panel panel-existing-collaboration">
+                <div class="simulator-copy">
+                  <span class="status purple">política preservada</span>
+                  <h3>Adoção também decide como o repo será colaborado.</h3>
+                  <p>
+                    Se já existe política governada, o fluxo altera só o perfil ativo. Se não
+                    existe, cria a baseline sem apagar decisões próprias do projeto.
+                  </p>
+                </div>
+                <div class="shell">
+                  <div class="shell-head">
+                    <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                    <span>perfil de colaboração</span>
+                  </div>
+                  <div class="shell-body">
+                    <span class="terminal-line">◇ Como este repo deve ser colaborado?</span>
+                    <div class="mini-carousel" data-mini-carousel>
+                      <div class="mini-tabs" role="tablist" aria-label="Perfis de colaboração">
+                        <button class="mini-tab is-active" data-mini-slide="solo">Solo</button>
+                        <button class="mini-tab" data-mini-slide="contributor">
+                          Contribuições
+                        </button>
+                        <button class="mini-tab" data-mini-slide="team">Time</button>
+                      </div>
+
+                      <div class="mini-slide is-active" data-mini-panel="solo">
+                        <span class="mini-caption"
+                          >Perfil enxuto para repo mantido por uma pessoa.</span
+                        >
+                        <span class="choice active"><span>◆</span><span>Solo</span></span>
+                        <span class="prompt-row muted"
+                          ><span>=</span><span>sem approvals nativos obrigatórios</span></span
+                        >
+                      </div>
+
+                      <div class="mini-slide" data-mini-panel="contributor">
+                        <span class="mini-caption"
+                          >Perfil leve para contribuições externas com rastreio melhor.</span
+                        >
+                        <span class="choice active"
+                          ><span>◆</span><span>Com contribuições externas</span></span
+                        >
+                        <span class="prompt-row muted"
+                          ><span>=</span><span>findings aceitos exigem resolução</span></span
+                        >
+                      </div>
+
+                      <div class="mini-slide" data-mini-panel="team">
+                        <span class="mini-caption"
+                          >Perfil mais forte para coordenação de equipe.</span
+                        >
+                        <span class="choice active"><span>◆</span><span>Time</span></span>
+                        <span class="prompt-row muted"
+                          ><span>=</span><span>approvals e proteção mais fortes</span></span
+                        >
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1951,7 +2076,8 @@
 
                       <div class="mini-slide" data-mini-panel="providers">
                         <span class="mini-caption"
-                          >Providers entram como seleção de update, não como comando separado.</span
+                          >Providers entram como seleção agrupada de update, não como comando
+                          separado nem campo de texto por vírgula.</span
                         >
                         <span
                           class="prompt-group-title"
@@ -1968,6 +2094,23 @@
                           >◼ <span data-copy-provider-label="openai">OpenAI/Codex</span>
                           <span class="prompt-hint" data-copy-provider-html-hint="openai"
                             >contexto para Codex</span
+                          ></span
+                        >
+                        <span
+                          class="prompt-group-title"
+                          data-copy="provisioning.providerGroups.local"
+                          >Editores e agentes locais</span
+                        >
+                        <span class="prompt-group"
+                          >◼ <span data-copy-provider-label="cursor">Cursor</span>
+                          <span class="prompt-hint" data-copy-provider-html-hint="cursor"
+                            >regras locais para Cursor</span
+                          ></span
+                        >
+                        <span class="prompt-group"
+                          >◼ <span data-copy-provider-label="windsurf">Windsurf</span>
+                          <span class="prompt-hint" data-copy-provider-html-hint="windsurf"
+                            >contexto para Windsurf</span
                           ></span
                         >
                       </div>
@@ -2011,17 +2154,22 @@
 
                       <div class="mini-slide" data-mini-panel="collaboration">
                         <span class="mini-caption"
-                          >O modo de colaboração muda políticas e orientações, não o histórico do
-                          repo.</span
+                          >Mudança de colaboração altera a prática global do repositório. O wizard
+                          avisa que isso exige autoridade.</span
                         >
                         <span class="prompt-group"
-                          >◻ Solo: fluxo mais enxuto para mantenedora única</span
+                          >◻ Solo: uma pessoa decide; sem approvals nativos obrigatórios</span
                         >
                         <span class="prompt-group"
-                          >◻ Contributor: revisão clara para contribuições externas</span
+                          >◻ Com contribuições externas: fluxo leve com mais rastreio de
+                          findings</span
                         >
                         <span class="prompt-group"
-                          >◻ Team: mais coordenação, reviews e handoff explícito</span
+                          >◻ Time: approvals e proteção mais fortes para colaboração em equipe</span
+                        >
+                        <span class="prompt-row warn"
+                          ><span>!</span
+                          ><span>Confirmar só com autoridade para mudar a política</span></span
                         >
                       </div>
                     </div>

@@ -690,6 +690,7 @@ describe("flow wizard", () => {
           "runtime",
           "providers",
           "features",
+          "collaboration",
           "policy",
           "details",
           "__back__",
@@ -746,6 +747,41 @@ describe("flow wizard", () => {
     );
   });
 
+  it("update guiado usa seleção agrupada para providers em vez de texto por vírgula", async () => {
+    await withTempRepo(
+      (repoRoot) => {
+        mkdirSync(path.join(repoRoot, ".governance"), { recursive: true });
+      },
+      async (repoRoot) => {
+        const prompts = new ScriptedPrompts(
+          ["provisioning", "guided-update", "providers"],
+          [],
+          [["claude", "openai", "cursor"]]
+        );
+        const update = spyCommand("update");
+
+        const code = await runFlowWizard(repoRoot, new CollectingLogger(), {
+          prompts,
+          registry: registryWith(spyCommand("init"), spyCommand("adopt"), update),
+          collectModel: () => model(),
+        });
+
+        expect(code).toBe(0);
+        expect(prompts.groupMultiselectCalls[0].message).toBe(
+          "Quais ferramentas de IA devem receber arquivos de orientação?"
+        );
+        expect(prompts.groupMultiselectCalls[0].groups).toEqual([
+          "Assistentes principais do repositório",
+          "Editores e agentes locais",
+        ]);
+        expect(prompts.groupMultiselectCalls[0].names).toEqual(
+          expect.arrayContaining(["Claude", "OpenAI/Codex", "Cursor"])
+        );
+        expect(update.calls).toEqual([["--providers", "claude,openai,cursor"]]);
+      }
+    );
+  });
+
   it("update guiado expõe perfil de colaboração a partir de review-policy.yml", async () => {
     await withTempRepo(
       (repoRoot) => {
@@ -789,6 +825,61 @@ describe("flow wizard", () => {
         expect(prompts.notes.join("\n")).toContain("Perfil de colaboração atual: team");
         expect(prompts.notes.join("\n")).toContain("approvals nativos em PR de integração: 2");
         expect(prompts.notes.join("\n")).toContain("security_review: required");
+      }
+    );
+  });
+
+  it("alterar perfil de colaboração exige confirmação e delega para update", async () => {
+    await withTempRepo(
+      (repoRoot) => {
+        mkdirSync(path.join(repoRoot, ".governance"), { recursive: true });
+        writeFileSync(
+          path.join(repoRoot, ".governance", "review-policy.yml"),
+          [
+            "active_profile: solo",
+            "profiles:",
+            "  solo:",
+            "    implementation_pr: { required_native_approvals: 0 }",
+            "    integration_pr: { required_native_approvals: 0 }",
+            "    accepted_findings:",
+            "      require_resolution: false",
+            "      require_verification_event_for_fixed: false",
+            "    github:",
+            "      minimum_approving_reviews: 1",
+            "      require_code_owner_review: true",
+            "      dismiss_stale_reviews_on_push: true",
+            "      require_last_push_approval: false",
+            "  team:",
+            "    implementation_pr: { required_native_approvals: 1 }",
+            "    integration_pr: { required_native_approvals: 2 }",
+            "    accepted_findings:",
+            "      require_resolution: true",
+            "      require_verification_event_for_fixed: true",
+            "    github:",
+            "      minimum_approving_reviews: 2",
+            "      require_code_owner_review: true",
+            "      dismiss_stale_reviews_on_push: true",
+            "      require_last_push_approval: true",
+          ].join("\n")
+        );
+      },
+      async (repoRoot) => {
+        const prompts = new ScriptedPrompts(
+          ["provisioning", "guided-update", "collaboration", "team"],
+          [true]
+        );
+        const update = spyCommand("update");
+
+        const code = await runFlowWizard(repoRoot, new CollectingLogger(), {
+          prompts,
+          registry: registryWith(spyCommand("init"), spyCommand("adopt"), update),
+          collectModel: () => model(),
+        });
+
+        expect(code).toBe(0);
+        expect(prompts.notes.join("\n")).toContain("mudança de prática global");
+        expect(prompts.confirmCalls).toHaveLength(1);
+        expect(update.calls).toEqual([["--collaboration-profile", "team"]]);
       }
     );
   });

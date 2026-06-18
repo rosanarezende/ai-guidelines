@@ -218,6 +218,7 @@ window.AI_GUIDELINES_FLOW_COPY = {
           "",
           "O assistente vai guiar:",
           "- destino e nome do projeto;",
+          "- perfil de colaboração: solo, contribuições externas ou time;",
           "- ferramentas de IA que receberão orientação;",
           "- práticas opcionais como Prettier, Husky e CI;",
           "- preview antes de qualquer escrita.",
@@ -229,6 +230,7 @@ window.AI_GUIDELINES_FLOW_COPY = {
           "",
           "O assistente vai guiar:",
           "- preservação do conteúdo existente;",
+          "- perfil de colaboração sem apagar histórico do projeto;",
           "- ferramentas de IA que receberão orientação;",
           "- práticas opcionais que podem ser adicionadas sem tratar o repo como vazio;",
           "- preview de conflitos e efeitos antes de qualquer escrita.",
@@ -238,13 +240,14 @@ window.AI_GUIDELINES_FLOW_COPY = {
         "update": [
           "Use este fluxo para manter um repositório que já usa ai-guidelines.",
           "",
-          "O assistente atualiza runtime, templates, providers e práticas governadas."
+          "O assistente atualiza runtime, templates, providers, práticas e política de colaboração."
         ]
       },
       "prompts": {
         "target": "Onde aplicar? Use . para este repositório",
         "projectName": "Nome do projeto",
         "language": "Idioma do baseline e das práticas TDD/BDD",
+        "collaborationProfile": "Qual perfil de colaboração este repositório deve usar?",
         "packageManager": "Gerenciador de pacotes",
         "dryRun": "Só mostrar o plano, sem escrever arquivos?",
         "force": "Permitir sobrescrever arquivos suportados quando houver conflito?",
@@ -271,6 +274,7 @@ window.AI_GUIDELINES_FLOW_COPY = {
         "derivedNameLog": "derivado da pasta",
         "packageManager": "Gerenciador de pacotes",
         "language": "Idioma do baseline e TDD/BDD",
+        "collaborationProfile": "Perfil de colaboração",
         "runtimeDir": "Diretório runtime",
         "integrations": "Integrações",
         "providers": "Ferramentas de IA",
@@ -292,7 +296,7 @@ window.AI_GUIDELINES_FLOW_COPY = {
         "- runtime e templates;",
         "- providers;",
         "- práticas como Prettier, Husky, CI, Quality Gates, TDD e BDD;",
-        "- leitura da política de colaboração/revisão existente.",
+        "- política de colaboração/revisão existente.",
         "",
         "init/adopt não aparecem como caminho principal porque poderiam confundir um repo já governado."
       ],
@@ -300,7 +304,7 @@ window.AI_GUIDELINES_FLOW_COPY = {
       "choices": {
         "guidedUpdate": "Atualizar runtime, templates, providers ou práticas",
         "guidedUpdateHint": "manutenção guiada do repo governado",
-        "policy": "Entender política de colaboração e revisões",
+        "policy": "Ver ou alterar política de colaboração e revisões",
         "policyHintFallback": "usa .governance/review-policy.yml quando existir",
         "runtime": "Runtime e templates do ai-guidelines",
         "runtimeHint": "atualiza arquivos gerenciados sem escolher novas práticas",
@@ -308,7 +312,9 @@ window.AI_GUIDELINES_FLOW_COPY = {
         "providersHint": "Claude, OpenAI, Gemini etc. via update --providers",
         "features": "Práticas do repositório",
         "featuresHint": "Prettier, Husky, CI, Quality Gates, TDD, BDD",
-        "policyHint": "mostra a fonte governada quando existir",
+        "collaboration": "Alterar perfil de colaboração",
+        "collaborationHint": "solo, contribuições externas ou time, com aviso de autoridade",
+        "policyHint": "mostra a fonte governada e permite trocar o perfil ativo",
         "details": "Entender update antes de executar"
       },
       "detailsTitle": "Como o update funciona",
@@ -319,11 +325,10 @@ window.AI_GUIDELINES_FLOW_COPY = {
         "- runtime e templates do framework;",
         "- providers via update --providers;",
         "- práticas opt-in via update --features;",
-        "- leitura da política de colaboração/revisão atual.",
+        "- alteração explícita do perfil ativo em review-policy.yml.",
         "",
         "Ele não recria o projeto e não chama init/adopt como caminho principal."
       ],
-      "providerQuestion": "Quais providers? Separe por vírgula. Ex.: claude,openai",
       "providerEmpty": "Nenhum provider informado; nada executado.",
       "providerTitle": "Atualizar providers",
       "providerNote": [
@@ -335,7 +340,17 @@ window.AI_GUIDELINES_FLOW_COPY = {
       "featuresTitle": "Atualizar práticas",
       "featuresNoteHeading": "O update vai usar o plano governado já existente.",
       "featuresSelected": "Práticas selecionadas:",
-      "commandLabel": "Comando:"
+      "commandLabel": "Comando:",
+      "policyChangeTitle": "Alterar perfil de colaboração",
+      "policyChangeIntro": [
+        "Esta é uma mudança de prática global.",
+        "",
+        "Ela pode mudar approvals, exigências de revisão e como findings são encerrados. Confirme apenas se essa decisão é sua ou foi autorizada."
+      ],
+      "policyChangeConfirm": "Tenho autoridade para alterar a política de colaboração deste repositório.",
+      "policyChangeCancelled": "Alteração de política cancelada.",
+      "policyChangeNote": "O update vai alterar somente o perfil ativo da política quando o arquivo já existir.",
+      "policyChangeSelected": "Perfil selecionado:"
     }
   }
 };

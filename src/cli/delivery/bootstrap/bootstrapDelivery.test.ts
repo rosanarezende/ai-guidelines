@@ -290,6 +290,7 @@ describe("bootstrap delivery 2c — parse/help/registry", () => {
         "--name=Consumer",
         "--providers=claude,openai",
         "--features=prettier,husky,ci",
+        "--collaboration-profile=team",
         "--install",
       ])
     ).toMatchObject({
@@ -298,6 +299,7 @@ describe("bootstrap delivery 2c — parse/help/registry", () => {
       name: "Consumer",
       providers: ["claude", "openai"],
       features: ["prettier", "husky", "ci"],
+      collaborationProfile: "team",
       install: true,
     });
 
@@ -463,6 +465,9 @@ describe("bootstrap delivery 2c — wizard", () => {
       "Quais ferramentas de IA devem receber arquivos de orientação?",
       "Quais práticas quer instalar agora?",
     ]);
+    expect(prompts.selectCalls.map((call) => call.message)).toContain(
+      "Qual perfil de colaboração este repositório deve usar?"
+    );
     const providerChoices = Object.values(prompts.groupMultiselectCalls[0].groups).flat() as Array<{
       name?: string;
       hint?: string;
@@ -510,6 +515,7 @@ describe("bootstrap delivery 2c — wizard", () => {
     expect(runtime.provisioner.calls[0]).toMatchObject({
       operation: "adopt",
       projectName: path.basename(path.resolve("repo")),
+      collaborationProfile: "solo",
       config: {
         providers: ["claude", "gemini", "openai"],
         features: ["prettier", "husky", "ci", "quality-gates", "tdd", "bdd"],
@@ -682,6 +688,26 @@ describe("bootstrap delivery 2c — wizard", () => {
     );
     expect(prompts.notes.at(-1)?.message).toContain("- Idioma do baseline e TDD/BDD: English");
     expect(prompts.taskLogMessages.join("\n")).toContain("Idioma:success:English selecionado.");
+  });
+
+  it("wizard permite escolher perfil de colaboração para init/adopt/update", async () => {
+    const { runtime, delivery: bootstrap } = delivery();
+    const prompts = new ScriptedPrompts({
+      select: {
+        Operation: "init",
+        "Qual perfil de colaboração este repositório deve usar?": "team",
+      },
+      confirm: { "Aplicar este plano?": true },
+    });
+    const { logger } = capturingLogger();
+
+    await bootstrap.dispatch([], context(logger, prompts));
+
+    expect(runtime.provisioner.calls[0]).toMatchObject({
+      operation: "init",
+      collaborationProfile: "team",
+    });
+    expect(prompts.notes.at(-1)?.message).toContain("- Perfil de colaboração: Time");
   });
 
   it("wizard expõe opções avançadas que antes só existiam na CLI direta", async () => {

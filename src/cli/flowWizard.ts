@@ -8,9 +8,18 @@ import {
   activeReviewPolicyProfile,
   parseReviewPolicy,
 } from "../infrastructure/yaml/reviewPolicyReader.js";
+import {
+  DEFAULT_PROVIDERS,
+  Provider,
+  getSupportedProviders,
+} from "../domain/provisioning/ProviderCatalog.js";
+import {
+  CollaborationProfile,
+  COLLABORATION_PROFILES,
+} from "../domain/provisioning/ReviewPolicyBaseline.js";
 import { NodeClipboard, clipboardInstallHint } from "../infrastructure/io/NodeClipboard.js";
 import { CockpitModel, collectCockpitModel, renderCockpit } from "./cockpit.js";
-import { FLOW_COPY, copyLines, featureCopy, formatCopy } from "./copy/flowCopy.js";
+import { FLOW_COPY, copyLines, featureCopy, formatCopy, providerCopy } from "./copy/flowCopy.js";
 import type { HumanObjectSummary, HumanSummary } from "./flow/GovernedFlow.js";
 import { CommandRegistry } from "./registry/CommandRegistry.js";
 import { CommandContext, Logger } from "./registry/Command.js";
@@ -31,6 +40,7 @@ type GovernedRepoUpdateChoice =
   | "runtime"
   | "providers"
   | "features"
+  | "collaboration"
   | "policy"
   | "details"
   | "__back__";
@@ -831,6 +841,13 @@ async function runGovernedRepoUpdate(
         hint: PROVISIONING_COPY.governedUpdate.choices.featuresHint,
       },
       {
+        name: PROVISIONING_COPY.governedUpdate.choices.collaboration,
+        value: "collaboration",
+        hint: detected.reviewPolicy
+          ? `perfil atual: ${detected.reviewPolicy.activeProfile}`
+          : PROVISIONING_COPY.governedUpdate.choices.collaborationHint,
+      },
+      {
         name: PROVISIONING_COPY.governedUpdate.choices.policy,
         value: "policy",
         hint: detected.reviewPolicy
@@ -866,6 +883,9 @@ async function runGovernedRepoUpdate(
   if (selected === "features") {
     return runFeaturesUpdate(registry, context, prompts);
   }
+  if (selected === "collaboration") {
+    return runCollaborationProfileUpdate(registry, context, prompts);
+  }
   return runProvisioningCommand("update", registry, context, prompts);
 }
 
@@ -874,15 +894,8 @@ async function runProvidersUpdate(
   context: CommandContext,
   prompts: Prompts
 ): Promise<number> {
-  const providers = await prompts.input({
-    message: PROVISIONING_COPY.governedUpdate.providerQuestion,
-    default: "claude",
-  });
-  const normalized = providers
-    .split(",")
-    .map((item) => item.trim())
-    .filter(Boolean)
-    .join(",");
+  const providers = await promptProviderSelection(prompts);
+  const normalized = providers.join(",");
   if (!normalized) {
     await prompts.outro?.(PROVISIONING_COPY.governedUpdate.providerEmpty);
     return 0;
@@ -895,6 +908,92 @@ async function runProvidersUpdate(
     PROVISIONING_COPY.governedUpdate.providerTitle
   );
   return (await registry.dispatch(["update", "--providers", normalized], context)).exitCode;
+}
+
+async function runCollaborationProfileUpdate(
+  registry: CommandRegistry,
+  context: CommandContext,
+  prompts: Prompts
+): Promise<number> {
+  await prompts.note?.(
+    copyLines(PROVISIONING_COPY.governedUpdate.policyChangeIntro),
+    PROVISIONING_COPY.governedUpdate.policyChangeTitle
+  );
+  const profile = await promptCollaborationProfile(prompts);
+  await prompts.note?.(
+    [
+      PROVISIONING_COPY.governedUpdate.policyChangeNote,
+      "",
+      PROVISIONING_COPY.governedUpdate.policyChangeSelected,
+      `- ${collaborationProfileLabel(profile)}`,
+      "",
+      PROVISIONING_COPY.governedUpdate.commandLabel,
+      `npm run flow -- update --collaboration-profile ${profile}`,
+    ].join("\n"),
+    PROVISIONING_COPY.governedUpdate.policyChangeTitle
+  );
+  const confirmed = await prompts.confirm({
+    message: PROVISIONING_COPY.governedUpdate.policyChangeConfirm,
+    default: false,
+  });
+  if (!confirmed) {
+    await prompts.outro?.(PROVISIONING_COPY.governedUpdate.policyChangeCancelled);
+    return 0;
+  }
+  return (await registry.dispatch(["update", "--collaboration-profile", profile], context))
+    .exitCode;
+}
+
+async function promptProviderSelection(prompts: Prompts): Promise<readonly Provider[]> {
+  const supported = getSupportedProviders();
+  const groups = {
+    [PROVISIONING_COPY.providerGroups.primary]: providerChoices(
+      supported.filter((provider) => ["claude", "gemini", "openai", "copilot"].includes(provider))
+    ),
+    [PROVISIONING_COPY.providerGroups.local]: providerChoices(
+      supported.filter((provider) => ["cursor", "windsurf", "aider"].includes(provider))
+    ),
+  };
+  if (prompts.groupMultiselect) {
+    return prompts.groupMultiselect({
+      message: PROVISIONING_COPY.providerQuestion,
+      groups,
+      defaultValues: DEFAULT_PROVIDERS,
+      required: true,
+      maxItems: 7,
+      groupSpacing: 1,
+    });
+  }
+  if (prompts.multiselect) {
+    return prompts.multiselect({
+      message: PROVISIONING_COPY.providerQuestion,
+      choices: [
+        ...groups[PROVISIONING_COPY.providerGroups.primary],
+        ...groups[PROVISIONING_COPY.providerGroups.local],
+      ],
+      defaultValues: DEFAULT_PROVIDERS,
+      required: true,
+    });
+  }
+  const value = await prompts.input({
+    message: PROVISIONING_COPY.providerQuestion,
+    default: DEFAULT_PROVIDERS.join(","),
+  });
+  return value
+    .split(",")
+    .map((item) => item.trim().toLowerCase())
+    .filter((item): item is Provider => (supported as readonly string[]).includes(item));
+}
+
+async function promptCollaborationProfile(prompts: Prompts): Promise<CollaborationProfile> {
+  return prompts.select<CollaborationProfile>({
+    message: PROVISIONING_COPY.flow.prompts.collaborationProfile,
+    choices: COLLABORATION_PROFILES.map((profile) => ({
+      name: collaborationProfileLabel(profile),
+      value: profile,
+      hint: collaborationProfileHint(profile),
+    })),
+  });
 }
 
 async function runFeaturesUpdate(
@@ -1145,4 +1244,20 @@ function featureLabel(feature: string): string {
 
 function featureHint(feature: string): string {
   return featureCopy(feature).hint;
+}
+
+function providerChoices(providers: readonly Provider[]) {
+  return providers.map((value) => ({
+    name: providerCopy(value).label,
+    value,
+    hint: providerCopy(value).hint,
+  }));
+}
+
+function collaborationProfileLabel(profile: CollaborationProfile): string {
+  return PROVISIONING_COPY.collaborationProfiles[profile].label;
+}
+
+function collaborationProfileHint(profile: CollaborationProfile): string {
+  return PROVISIONING_COPY.collaborationProfiles[profile].hint;
 }

@@ -12,6 +12,20 @@
     "editorial": "Práticas de trabalho",
     "updateEditorial": "Práticas editoriais"
   },
+  "collaborationProfiles": {
+    "solo": {
+      "label": "Solo",
+      "hint": "uma pessoa decide; sem approvals nativos obrigatórios"
+    },
+    "contributor": {
+      "label": "Com contribuições externas",
+      "hint": "fluxo leve, mas com mais rastreio de findings"
+    },
+    "team": {
+      "label": "Time",
+      "hint": "approvals e proteção mais fortes para colaboração em equipe"
+    }
+  },
   "operationLabels": {
     "init": "Iniciar ai-guidelines neste repositório",
     "adopt": "Adotar ai-guidelines neste repositório",
@@ -65,6 +79,7 @@
         "",
         "O assistente vai guiar:",
         "- destino e nome do projeto;",
+        "- perfil de colaboração: solo, contribuições externas ou time;",
         "- ferramentas de IA que receberão orientação;",
         "- práticas opcionais como Prettier, Husky e CI;",
         "- preview antes de qualquer escrita.",
@@ -76,6 +91,7 @@
         "",
         "O assistente vai guiar:",
         "- preservação do conteúdo existente;",
+        "- perfil de colaboração sem apagar histórico do projeto;",
         "- ferramentas de IA que receberão orientação;",
         "- práticas opcionais que podem ser adicionadas sem tratar o repo como vazio;",
         "- preview de conflitos e efeitos antes de qualquer escrita.",
@@ -85,7 +101,25 @@
       "update": [
         "Use este fluxo para manter um repositório que já usa ai-guidelines.",
         "",
-        "O assistente atualiza runtime, templates, providers e práticas governadas."
+        "O assistente atualiza runtime, templates, providers, práticas e política de colaboração."
+      ]
+    },
+    "collaborationTitle": "Como este repositório será colaborado?",
+    "collaborationIntro": {
+      "init": [
+        "Esta escolha define a política inicial de colaboração.",
+        "",
+        "Ela não muda o código do produto. Ela define quanta revisão humana/GitHub o fluxo espera antes de decisões importantes."
+      ],
+      "adopt": [
+        "Esta escolha cria ou ajusta a política governada sem apagar o conteúdo existente.",
+        "",
+        "Se o projeto já tem uma política própria, o fluxo atualiza apenas o perfil ativo quando o perfil existe."
+      ],
+      "update": [
+        "Alterar colaboração é uma mudança de prática global.",
+        "",
+        "Use esta opção só se você tem autoridade para mudar como o repositório exige revisão, approvals e fechamento de findings."
       ]
     },
     "contextTask": {
@@ -96,12 +130,14 @@
     "taskGroups": {
       "context": "Contexto",
       "language": "Idioma",
+      "collaboration": "Colaboração",
       "integrations": "Integrações",
       "execution": "Execução"
     },
     "taskMessages": {
       "context": "Escolhendo destino e nome do projeto.",
       "language": "Escolhendo idioma do baseline e das práticas TDD/BDD.",
+      "collaboration": "Escolhendo perfil de colaboração e política de revisão.",
       "integrations": "Escolhendo ferramentas de IA e práticas.",
       "execution": "Definindo pacote, segurança e instalação."
     },
@@ -117,6 +153,7 @@
       "target": "Onde aplicar? Use . para este repositório",
       "projectName": "Nome do projeto",
       "language": "Idioma do baseline e das práticas TDD/BDD",
+      "collaborationProfile": "Qual perfil de colaboração este repositório deve usar?",
       "packageManager": "Gerenciador de pacotes",
       "dryRun": "Só mostrar o plano, sem escrever arquivos?",
       "force": "Permitir sobrescrever arquivos suportados quando houver conflito?",
@@ -158,6 +195,7 @@
       "derivedNameLog": "derivado da pasta",
       "packageManager": "Gerenciador de pacotes",
       "language": "Idioma do baseline e TDD/BDD",
+      "collaborationProfile": "Perfil de colaboração",
       "runtimeDir": "Diretório runtime",
       "integrations": "Integrações",
       "providers": "Ferramentas de IA",
@@ -197,7 +235,7 @@
       "- runtime e templates;",
       "- providers;",
       "- práticas como Prettier, Husky, CI, Quality Gates, TDD e BDD;",
-      "- leitura da política de colaboração/revisão existente.",
+      "- política de colaboração/revisão existente.",
       "",
       "init/adopt não aparecem como caminho principal porque poderiam confundir um repo já governado."
     ],
@@ -205,7 +243,7 @@
     "choices": {
       "guidedUpdate": "Atualizar runtime, templates, providers ou práticas",
       "guidedUpdateHint": "manutenção guiada do repo governado",
-      "policy": "Entender política de colaboração e revisões",
+      "policy": "Ver ou alterar política de colaboração e revisões",
       "policyHintFallback": "usa .governance/review-policy.yml quando existir",
       "runtime": "Runtime e templates do ai-guidelines",
       "runtimeHint": "atualiza arquivos gerenciados sem escolher novas práticas",
@@ -213,7 +251,9 @@
       "providersHint": "Claude, OpenAI, Gemini etc. via update --providers",
       "features": "Práticas do repositório",
       "featuresHint": "Prettier, Husky, CI, Quality Gates, TDD, BDD",
-      "policyHint": "mostra a fonte governada quando existir",
+      "collaboration": "Alterar perfil de colaboração",
+      "collaborationHint": "solo, contribuições externas ou time, com aviso de autoridade",
+      "policyHint": "mostra a fonte governada e permite trocar o perfil ativo",
       "details": "Entender update antes de executar"
     },
     "detailsTitle": "Como o update funciona",
@@ -224,11 +264,10 @@
       "- runtime e templates do framework;",
       "- providers via update --providers;",
       "- práticas opt-in via update --features;",
-      "- leitura da política de colaboração/revisão atual.",
+      "- alteração explícita do perfil ativo em review-policy.yml.",
       "",
       "Ele não recria o projeto e não chama init/adopt como caminho principal."
     ],
-    "providerQuestion": "Quais providers? Separe por vírgula. Ex.: claude,openai",
     "providerEmpty": "Nenhum provider informado; nada executado.",
     "providerTitle": "Atualizar providers",
     "providerNote": ["Providers não são um comando separado.", "", "O caminho canônico é:"],
@@ -236,7 +275,17 @@
     "featuresTitle": "Atualizar práticas",
     "featuresNoteHeading": "O update vai usar o plano governado já existente.",
     "featuresSelected": "Práticas selecionadas:",
-    "commandLabel": "Comando:"
+    "commandLabel": "Comando:",
+    "policyChangeTitle": "Alterar perfil de colaboração",
+    "policyChangeIntro": [
+      "Esta é uma mudança de prática global.",
+      "",
+      "Ela pode mudar approvals, exigências de revisão e como findings são encerrados. Confirme apenas se essa decisão é sua ou foi autorizada."
+    ],
+    "policyChangeConfirm": "Tenho autoridade para alterar a política de colaboração deste repositório.",
+    "policyChangeCancelled": "Alteração de política cancelada.",
+    "policyChangeNote": "O update vai alterar somente o perfil ativo da política quando o arquivo já existir.",
+    "policyChangeSelected": "Perfil selecionado:"
   },
   "policy": {
     "missing": [

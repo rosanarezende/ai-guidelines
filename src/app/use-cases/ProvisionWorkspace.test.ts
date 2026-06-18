@@ -11,6 +11,7 @@ import {
   planInitGuard,
   planInstall,
   planPrettier,
+  planReviewPolicy,
   planTemplateMirror,
   CiSnapshot,
   HuskySnapshot,
@@ -206,6 +207,42 @@ describe("app/use-cases/ProvisionWorkspace — efeitos estruturais 2b-1 (fake fs
     );
     expect(result.actions).toEqual(["modo conservador: ..."]);
     expect(fs.files.size).toBe(0);
+  });
+
+  it("review-policy: escreve baseline de colaboração, é idempotente e respeita dry-run", async () => {
+    const fs = new InMemoryFs();
+    const uc = new ProvisionWorkspace(fs, false);
+
+    const first = await uc.applyEffects([planReviewPolicy("team")]);
+    expect(first.actions).toEqual([
+      "write .governance/review-policy.yml (collaboration profile team)",
+    ]);
+    expect(fs.files.get(".governance/review-policy.yml")).toContain("active_profile: team");
+
+    const second = await uc.applyEffects([planReviewPolicy("team")]);
+    expect(second.idempotentNoop).toBe(true);
+    expect(second.actions).toEqual([]);
+
+    const dry = new InMemoryFs();
+    const dryResult = await new ProvisionWorkspace(dry, true).applyEffects([
+      planReviewPolicy("contributor"),
+    ]);
+    expect(dryResult.actions).toEqual([
+      "[dry-run] write .governance/review-policy.yml (collaboration profile contributor)",
+    ]);
+    expect(dry.files.has(".governance/review-policy.yml")).toBe(false);
+  });
+
+  it("review-policy: atualiza apenas active_profile quando política existente declara o perfil", async () => {
+    const fs = new InMemoryFs();
+    await new ProvisionWorkspace(fs, false).applyEffects([planReviewPolicy("solo")]);
+    const before = fs.files.get(".governance/review-policy.yml") as string;
+
+    await new ProvisionWorkspace(fs, false).applyEffects([planReviewPolicy("team")]);
+
+    const after = fs.files.get(".governance/review-policy.yml") as string;
+    expect(after).toContain("active_profile: team");
+    expect(after.replace("active_profile: team", "active_profile: solo")).toBe(before);
   });
 });
 

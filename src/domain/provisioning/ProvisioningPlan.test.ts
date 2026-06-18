@@ -11,6 +11,7 @@ import {
   planProvisioningOperation,
   planPrettier,
   planPointers,
+  planReviewPolicy,
   planTemplateMirror,
   renderCiWorkflow,
   CiSnapshot,
@@ -628,6 +629,20 @@ describe("domain/provisioning/ProvisioningPlan — install (2b-4a)", () => {
   });
 });
 
+describe("domain/provisioning/ProvisioningPlan — collaboration profile", () => {
+  it("planReviewPolicy declara efeito explícito para review-policy.yml", () => {
+    expect(planReviewPolicy("team")).toMatchObject({
+      kind: "write-review-policy",
+      relPath: ".governance/review-policy.yml",
+      profile: "team",
+    });
+    const effect = planReviewPolicy("team");
+    expect(effect.kind === "write-review-policy" ? effect.baseline : "").toContain(
+      "active_profile: team"
+    );
+  });
+});
+
 describe("domain/provisioning/ProvisioningPlan — final guidance (2b-4b)", () => {
   it("planFinalGuidance converte guidance consolidada em efeitos explícitos", () => {
     expect(
@@ -759,6 +774,7 @@ describe("domain/provisioning/ProvisioningPlan — operações completas (2b-4c)
         prune: true,
         install: true,
         providersRequested: false,
+        collaborationProfile: "team",
       }
     );
 
@@ -782,6 +798,7 @@ describe("domain/provisioning/ProvisioningPlan — operações completas (2b-4c)
         "write-husky-hook",
         "mark-executable",
         "write-ci-workflow",
+        "write-review-policy",
         "install-dependencies",
       ])
     );

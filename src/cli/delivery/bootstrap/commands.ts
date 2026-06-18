@@ -12,6 +12,10 @@ import {
   INFRASTRUCTURE_FEATURES,
 } from "../../../domain/provisioning/FeatureCatalog.js";
 import {
+  CollaborationProfile,
+  COLLABORATION_PROFILES,
+} from "../../../domain/provisioning/ReviewPolicyBaseline.js";
+import {
   FLOW_COPY,
   copyLines,
   featureCopy,
@@ -90,6 +94,14 @@ abstract class ProvisioningDeliveryCommand implements BootstrapDeliveryCommand<P
       .success(`${languageLabel(lang)} selecionado.`);
 
     taskLog
+      ?.group(PROVISIONING_COPY.flow.taskGroups.collaboration)
+      .message(PROVISIONING_COPY.flow.taskMessages.collaboration);
+    const collaborationProfile = await promptCollaborationProfile(prompts, this.name);
+    taskLog
+      ?.group(PROVISIONING_COPY.flow.taskGroups.collaboration)
+      .success(collaborationProfileLabel(collaborationProfile));
+
+    taskLog
       ?.group(PROVISIONING_COPY.flow.taskGroups.integrations)
       .message(PROVISIONING_COPY.flow.taskMessages.integrations);
     const providers = await promptProviderList(prompts);
@@ -165,6 +177,7 @@ abstract class ProvisioningDeliveryCommand implements BootstrapDeliveryCommand<P
       dryRun,
       install,
       prune: advanced.prune,
+      collaborationProfile,
       yes: false,
       skippedFeatures: [],
     };
@@ -184,7 +197,12 @@ abstract class ProvisioningDeliveryCommand implements BootstrapDeliveryCommand<P
             message(
               `Providers: ${(options.providers ?? []).join(", ") || COMMON_COPY.none}; ` +
                 `práticas: ${options.features?.join(", ") ?? "não alteradas"}; ` +
-                `idioma: ${languageLabel(options.lang)}`
+                `idioma: ${languageLabel(options.lang)}; ` +
+                `colaboração: ${
+                  options.collaborationProfile
+                    ? collaborationProfileLabel(options.collaborationProfile)
+                    : COMMON_COPY.none
+                }`
             );
             return PROVISIONING_COPY.flow.taskList.previewDone;
           },
@@ -262,6 +280,9 @@ abstract class ProvisioningDeliveryCommand implements BootstrapDeliveryCommand<P
         prune: options.prune,
         install: options.install,
         providersRequested: options.operation === "update" && options.providers !== undefined,
+        ...(options.collaborationProfile
+          ? { collaborationProfile: options.collaborationProfile }
+          : {}),
       });
     };
     const result = context.prompts?.spinner
@@ -373,6 +394,24 @@ async function promptLanguage(prompts: Prompts): Promise<string> {
         hint: PROVISIONING_COPY.flow.language.enHint,
       },
     ],
+  });
+}
+
+async function promptCollaborationProfile(
+  prompts: Prompts,
+  operation: ProvisioningOperation
+): Promise<CollaborationProfile> {
+  await prompts.note?.(
+    copyLines(PROVISIONING_COPY.flow.collaborationIntro[operation]),
+    PROVISIONING_COPY.flow.collaborationTitle
+  );
+  return prompts.select<CollaborationProfile>({
+    message: PROVISIONING_COPY.flow.prompts.collaborationProfile,
+    choices: COLLABORATION_PROFILES.map((profile) => ({
+      name: collaborationProfileLabel(profile),
+      value: profile,
+      hint: collaborationProfileHint(profile),
+    })),
   });
 }
 
@@ -518,6 +557,14 @@ function languageLabel(lang?: string): string {
   return PROVISIONING_COPY.flow.language.pt;
 }
 
+function collaborationProfileLabel(profile: CollaborationProfile): string {
+  return PROVISIONING_COPY.collaborationProfiles[profile].label;
+}
+
+function collaborationProfileHint(profile: CollaborationProfile): string {
+  return PROVISIONING_COPY.collaborationProfiles[profile].hint;
+}
+
 function providerChoices(providers: readonly Provider[]) {
   return providers.map((value) => ({
     name: providerCopy(value).label,
@@ -562,6 +609,11 @@ function renderProvisioningPreview(options: ProvisioningCommandOptions): string 
     `- ${PROVISIONING_COPY.flow.preview.name}: ${options.name ?? PROVISIONING_COPY.flow.preview.derivedName}`,
     `- ${PROVISIONING_COPY.flow.preview.packageManager}: ${options.packageManager ?? COMMON_COPY.auto}`,
     `- ${PROVISIONING_COPY.flow.preview.language}: ${languageLabel(options.lang)}`,
+    `- ${PROVISIONING_COPY.flow.preview.collaborationProfile}: ${
+      options.collaborationProfile
+        ? collaborationProfileLabel(options.collaborationProfile)
+        : COMMON_COPY.none
+    }`,
     `- ${PROVISIONING_COPY.flow.preview.runtimeDir}: ${options.sddDir ?? ".ai-guidelines"}`,
     "",
     PROVISIONING_COPY.flow.preview.integrations,
