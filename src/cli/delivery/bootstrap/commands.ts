@@ -66,6 +66,10 @@ abstract class ProvisioningDeliveryCommand implements BootstrapDeliveryCommand<P
       ?.group("Contexto")
       .success(`Destino ${target}; nome ${projectName || "derivado da pasta"}.`);
 
+    taskLog?.group("Idioma").message("Escolhendo idioma do baseline e das práticas TDD/BDD.");
+    const lang = await promptLanguage(prompts);
+    taskLog?.group("Idioma").success(`${languageLabel(lang)} selecionado.`);
+
     taskLog?.group("Integrações").message("Escolhendo ferramentas de IA e práticas.");
     const providers = await promptProviderList(prompts);
     const features = this.name === "update" ? undefined : await promptFeatureList(prompts);
@@ -103,6 +107,7 @@ abstract class ProvisioningDeliveryCommand implements BootstrapDeliveryCommand<P
       message: "Instalar dependências automaticamente no final?",
       default: false,
     });
+    const advanced = await promptAdvancedProvisioningOptions(prompts, this.name);
     taskLog
       ?.group("Execução")
       .success(
@@ -111,6 +116,7 @@ abstract class ProvisioningDeliveryCommand implements BootstrapDeliveryCommand<P
           dryRun ? "dry-run" : "aplicar arquivos",
           force ? "force habilitado" : "force desligado",
           install ? "install habilitado" : "install desligado",
+          advanced.enabled ? "opções avançadas revisadas" : "opções avançadas padrão",
         ].join("; ")
       );
 
@@ -121,12 +127,13 @@ abstract class ProvisioningDeliveryCommand implements BootstrapDeliveryCommand<P
       packageManager: packageManager || undefined,
       providers,
       features,
-      lang: "pt",
+      lang,
+      sddDir: advanced.sddDir,
       force,
-      forcePrettier: false,
+      forcePrettier: advanced.forcePrettier,
       dryRun,
       install,
-      prune: false,
+      prune: advanced.prune,
       yes: false,
       skippedFeatures: [],
     };
@@ -145,7 +152,8 @@ abstract class ProvisioningDeliveryCommand implements BootstrapDeliveryCommand<P
           task: (message) => {
             message(
               `Providers: ${(options.providers ?? []).join(", ") || "nenhum"}; ` +
-                `práticas: ${options.features?.join(", ") ?? "não alteradas"}`
+                `práticas: ${options.features?.join(", ") ?? "não alteradas"}; ` +
+                `idioma: ${languageLabel(options.lang)}`
             );
             return "Preview pronto para confirmação.";
           },
@@ -306,6 +314,68 @@ async function promptString(
   return value.trim() || defaultValue;
 }
 
+async function promptLanguage(prompts: Prompts): Promise<string> {
+  return prompts.select<string>({
+    message: "Idioma do baseline e das práticas TDD/BDD",
+    choices: [
+      {
+        name: "Português",
+        value: "pt",
+        hint: "usa os templates tdd-pt e bdd-pt",
+      },
+      {
+        name: "English",
+        value: "en",
+        hint: "usa os templates tdd-en e bdd-en",
+      },
+    ],
+  });
+}
+
+interface AdvancedProvisioningPromptOptions {
+  readonly enabled: boolean;
+  readonly sddDir?: string;
+  readonly forcePrettier: boolean;
+  readonly prune: boolean;
+}
+
+async function promptAdvancedProvisioningOptions(
+  prompts: Prompts,
+  operation: ProvisioningOperation
+): Promise<AdvancedProvisioningPromptOptions> {
+  const enabled = await prompts.confirm({
+    message: "Abrir opções avançadas?",
+    default: false,
+  });
+  if (!enabled) {
+    return { enabled: false, forcePrettier: false, prune: false };
+  }
+
+  const sddDir = await promptString(
+    prompts,
+    "Diretório runtime do ai-guidelines",
+    ".ai-guidelines"
+  );
+  const forcePrettier = await prompts.confirm({
+    message: "Forçar Prettier mesmo se houver formatter rival?",
+    default: false,
+  });
+  const prune =
+    operation === "init"
+      ? false
+      : await prompts.confirm({
+          message: "Remover artefatos gerenciados que não fazem mais parte da seleção?",
+          default: false,
+        });
+
+  return {
+    enabled,
+    sddDir: sddDir === ".ai-guidelines" ? undefined : sddDir,
+    forcePrettier,
+    prune,
+  };
+}
+
 async function promptList(
   prompts: Prompts,
   message: string,
@@ -368,12 +438,12 @@ async function promptFeatureList(prompts: Prompts): Promise<readonly string[]> {
       message: "Quais práticas quer instalar agora?",
       groups: {
         "Infraestrutura do repositório": INFRASTRUCTURE_FEATURES.map((value) => ({
-          name: value,
+          name: featureName(value),
           value,
           hint: featureHint(value),
         })),
         "Práticas de trabalho": EDITORIAL_FEATURES.map((value) => ({
-          name: value,
+          name: featureName(value),
           value,
           hint: featureHint(value),
         })),
@@ -385,6 +455,11 @@ async function promptFeatureList(prompts: Prompts): Promise<readonly string[]> {
     });
   }
   return promptChoiceList(prompts, "Práticas", FEATURE_OPTIONS, FEATURE_OPTIONS, false);
+}
+
+function languageLabel(lang?: string): string {
+  if (lang === "en") return "English";
+  return "Português";
 }
 
 function providerChoices(providers: readonly Provider[]) {
@@ -408,6 +483,16 @@ function featureHint(feature: string): string {
   if (feature === "quality-gates") return "gates editoriais";
   if (feature === "tdd") return "prática TDD";
   return "prática BDD";
+}
+
+function featureName(feature: string): string {
+  if (feature === "prettier") return "Prettier";
+  if (feature === "husky") return "Husky";
+  if (feature === "ci") return "CI";
+  if (feature === "quality-gates") return "Quality Gates";
+  if (feature === "tdd") return "TDD";
+  if (feature === "bdd") return "BDD";
+  return feature;
 }
 
 function provisioningFlowTitle(operation: ProvisioningOperation): string {
@@ -470,6 +555,8 @@ function renderProvisioningPreview(options: ProvisioningCommandOptions): string 
     `- Destino: ${options.target}`,
     `- Nome: ${options.name ?? "(derivado da pasta)"}`,
     `- Gerenciador de pacotes: ${options.packageManager ?? "auto"}`,
+    `- Idioma do baseline e TDD/BDD: ${languageLabel(options.lang)}`,
+    `- Diretório runtime: ${options.sddDir ?? ".ai-guidelines"}`,
     "",
     "Integrações",
     `- Ferramentas de IA: ${(options.providers ?? []).join(", ") || "(nenhuma)"}`,
@@ -481,6 +568,7 @@ function renderProvisioningPreview(options: ProvisioningCommandOptions): string 
   lines.push("Segurança");
   lines.push(`- Só prévia: ${options.dryRun ? "sim" : "não"}`);
   lines.push(`- Sobrescrever conflitos suportados: ${options.force ? "sim" : "não"}`);
+  lines.push(`- Forçar Prettier com formatter rival: ${options.forcePrettier ? "sim" : "não"}`);
   lines.push(`- Instalar dependências: ${options.install ? "sim" : "não"}`);
   lines.push(`- Remover arquivos órfãos gerenciados: ${options.prune ? "sim" : "não"}`);
   return lines.join("\n");

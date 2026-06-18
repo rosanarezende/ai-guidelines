@@ -89,6 +89,13 @@ nova fonte de verdade.
   inspeções e diagnósticos, mas não parece mais um produto alternativo ao `flow`.
 - `FLOW.html` foi atualizado com os mesmos rótulos humanos usados pelo wizard, preservando as três
   jornadas separadas: projeto novo, projeto existente e repo já em uso.
+- O fluxo interativo de `init/adopt/update` deixou de fixar `lang: "pt"` silenciosamente. Agora a
+  pessoa escolhe o idioma do baseline e das práticas TDD/BDD entre Português e English, e o preview
+  mostra qual idioma será aplicado.
+- A investigação das opções diretas mostrou que `--sdd-dir`, `--force-prettier` e `--prune`
+  estavam acessíveis só por CLI direta. Elas agora aparecem como opções avançadas no fluxo guiado,
+  atrás de uma confirmação explícita. As flags `--skip-*` continuam cobertas pela seleção de
+  práticas, e `--yes/-y` permanece intencionalmente CLI-only por ser automação não interativa.
 
 ## Riscos residuais para CO-10.6
 

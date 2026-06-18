@@ -480,6 +480,7 @@ describe("bootstrap delivery 2c — wizard", () => {
       config: {
         providers: ["claude", "gemini", "openai"],
         features: ["prettier", "husky", "ci", "quality-gates", "tdd", "bdd"],
+        lang: "pt",
       },
     });
     expect(prompts.notes[0]).toMatchObject({ title: "Adotar projeto existente" });
@@ -491,6 +492,65 @@ describe("bootstrap delivery 2c — wizard", () => {
     expect(prompts.taskMessages.join("\n")).toContain(
       "Conferir contexto detectado:Projeto existente: preservar arquivos atuais"
     );
+  });
+
+  it("wizard permite escolher idioma das práticas TDD/BDD", async () => {
+    const { runtime, delivery: bootstrap } = delivery();
+    const prompts = new ScriptedPrompts({
+      select: {
+        Operation: "init",
+        "Idioma do baseline e das práticas TDD/BDD": "en",
+      },
+      confirm: { "Aplicar este plano?": true },
+    });
+    const { logger } = capturingLogger();
+
+    await bootstrap.dispatch([], context(logger, prompts));
+
+    expect(runtime.provisioner.calls[0]).toMatchObject({
+      operation: "init",
+      config: { lang: "en" },
+    });
+    const languageSelect = prompts.selectCalls.find(
+      (call) => call.message === "Idioma do baseline e das práticas TDD/BDD"
+    );
+    expect(languageSelect?.choices).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: "Português", value: "pt" }),
+        expect.objectContaining({ name: "English", value: "en" }),
+      ])
+    );
+    expect(prompts.notes.at(-1)?.message).toContain("- Idioma do baseline e TDD/BDD: English");
+    expect(prompts.taskLogMessages.join("\n")).toContain("Idioma:success:English selecionado.");
+  });
+
+  it("wizard expõe opções avançadas que antes só existiam na CLI direta", async () => {
+    const { runtime, delivery: bootstrap } = delivery();
+    const prompts = new ScriptedPrompts({
+      select: { Operation: "adopt" },
+      input: {
+        "Diretório runtime do ai-guidelines": ".custom-guidelines",
+      },
+      confirm: {
+        "Abrir opções avançadas?": true,
+        "Forçar Prettier mesmo se houver formatter rival?": true,
+        "Remover artefatos gerenciados que não fazem mais parte da seleção?": true,
+        "Aplicar este plano?": true,
+      },
+    });
+    const { logger } = capturingLogger();
+
+    await bootstrap.dispatch([], context(logger, prompts));
+
+    expect(runtime.resolved[0].options["sdd-dir"]).toBe(".custom-guidelines");
+    expect(runtime.provisioner.calls[0]).toMatchObject({
+      operation: "adopt",
+      forcePrettier: true,
+      prune: true,
+    });
+    expect(prompts.notes.at(-1)?.message).toContain("- Diretório runtime: .custom-guidelines");
+    expect(prompts.notes.at(-1)?.message).toContain("- Forçar Prettier com formatter rival: sim");
+    expect(prompts.notes.at(-1)?.message).toContain("- Remover arquivos órfãos gerenciados: sim");
   });
 
   it("wizard seleciona providers dentro de update", async () => {
