@@ -1,10 +1,10 @@
-const flowImage = new URL("../../docs/assets/ai-guidelines-flow.png", import.meta.url).href;
-const layersImage = new URL(
-  "../../docs/assets/ai-guidelines-governance-layers.png",
+const flowImageWebp = new URL("./assets/generated/ai-guidelines-flow.webp", import.meta.url).href;
+const layersImageWebp = new URL(
+  "./assets/generated/ai-guidelines-governance-layers.webp",
   import.meta.url
 ).href;
-const beforeAfterImage = new URL(
-  "../../docs/assets/ai-guidelines-before-after.png",
+const beforeAfterImageWebp = new URL(
+  "./assets/generated/ai-guidelines-before-after.webp",
   import.meta.url
 ).href;
 
@@ -73,6 +73,15 @@ const lifecycle = [
   "Merge",
 ] as const;
 
+interface OptimizedImageProps {
+  alt: string;
+  webp: string;
+}
+
+function OptimizedImage({ alt, webp }: OptimizedImageProps): JSX.Element {
+  return <img src={webp} alt={alt} />;
+}
+
 export function App(): JSX.Element {
   return (
     <main>
@@ -107,8 +116,8 @@ export function App(): JSX.Element {
           </a>
         </div>
         <figure className="heroFigure">
-          <img
-            src={flowImage}
+          <OptimizedImage
+            webp={flowImageWebp}
             alt="Ciclo ai-guidelines: backlog, spec, plano, execução, PR, gate humano e merge"
           />
         </figure>
@@ -137,8 +146,8 @@ export function App(): JSX.Element {
           </p>
         </div>
         <figure className="visualFrame">
-          <img
-            src={layersImage}
+          <OptimizedImage
+            webp={layersImageWebp}
             alt="Camadas do ai-guidelines: automação estrutural, governança operacional e julgamento humano"
           />
         </figure>
@@ -185,8 +194,8 @@ export function App(): JSX.Element {
           </p>
         </div>
         <figure className="visualFrame">
-          <img
-            src={beforeAfterImage}
+          <OptimizedImage
+            webp={beforeAfterImageWebp}
             alt="Antes e depois do ai-guidelines: do contexto reconstruído para o contexto canônico versionado"
           />
         </figure>

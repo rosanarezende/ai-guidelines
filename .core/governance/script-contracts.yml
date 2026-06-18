@@ -109,6 +109,18 @@ profiles:
         mutates: false
         consumers: [script]
         description: Falha se site/flow divergir dos textos reais da CLI.
+      - name: site:assets:sync
+        command: node site/scripts/optimize-assets.mjs sync
+        category: docs
+        mutates: true
+        consumers: [human]
+        description: Gera WebP otimizado para as imagens do site a partir de docs/assets.
+      - name: site:assets:check
+        command: node site/scripts/optimize-assets.mjs check
+        category: docs
+        mutates: false
+        consumers: [script, workflow]
+        description: Falha se os WebPs do site estiverem ausentes ou desatualizados.
       - name: site:dev
         command: vite --config site/vite.config.ts --host 127.0.0.1
         category: docs
@@ -116,11 +128,11 @@ profiles:
         consumers: [human]
         description: Servidor local do site governado em React/Vite.
       - name: site:build
-        command: npm run site:flow:check && vite build --config site/vite.config.ts
+        command: npm run site:flow:check && npm run site:assets:check && vite build --config site/vite.config.ts
         category: docs
         mutates: true
         consumers: [script, workflow]
-        description: Valida textos do Flow e gera site/dist para deploy estatico.
+        description: Valida textos/imagens do site e gera site/dist para deploy estatico.
       - name: state-yml:check
         command: npm run build && node dist/cli/bin.js state-yml-check
         category: governance
