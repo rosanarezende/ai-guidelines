@@ -1,6 +1,8 @@
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 
+import { FEATURE_OPTIONS } from "../../domain/provisioning/FeatureCatalog.js";
+import { getSupportedProviders } from "../../domain/provisioning/ProviderCatalog.js";
 import { FLOW_COPY, featureCopy, providerCopy } from "./flowCopy.js";
 
 describe("flow copy catalog", () => {
@@ -34,13 +36,19 @@ describe("flow copy catalog", () => {
     expect(html).toContain(FLOW_COPY.provisioning.featureGroups.infrastructure);
     expect(generatedCopy).toContain(FLOW_COPY.provisioning.providerGroups.primary);
     expect(generatedCopy).toContain(FLOW_COPY.provisioning.featureGroups.infrastructure);
-    expect(html).toContain(providerCopy("claude").htmlHint);
-    expect(html).toContain(providerCopy("openai").htmlHint);
-    expect(html).toContain(featureCopy("prettier").htmlLabel);
-    expect(html).toContain(featureCopy("husky").htmlLabel);
-    expect(html).toContain(featureCopy("ci").htmlLabel);
-    expect(html).toContain(featureCopy("tdd").htmlLabel);
-    expect(html).toContain(featureCopy("bdd").htmlLabel);
+    for (const provider of getSupportedProviders()) {
+      expect(html).toContain(providerCopy(provider).htmlHint);
+      expect(generatedCopy).toContain(providerCopy(provider).htmlHint);
+    }
+    for (const feature of FEATURE_OPTIONS) {
+      expect(html).toContain(featureCopy(feature).htmlLabel);
+      expect(generatedCopy).toContain(featureCopy(feature).htmlLabel);
+    }
+    expect(html).toContain(FLOW_COPY.provisioning.flow.prompts.language);
+    expect(html).toContain(FLOW_COPY.provisioning.flow.language.ptHint);
+    expect(html).toContain(FLOW_COPY.provisioning.flow.language.enHint);
+    expect(html).toContain(FLOW_COPY.provisioning.flow.prompts.forcePrettier);
+    expect(html).toContain('data-copy="provisioning.flow.prompts.prune"');
   });
 
   it("mantém mini-carrosséis nos painéis demonstrativos densos", () => {

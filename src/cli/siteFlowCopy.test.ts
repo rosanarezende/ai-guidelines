@@ -18,7 +18,10 @@ describe("site flow copy projection", () => {
     expect(script).toContain("Assistentes principais do repositório");
     expect(script).toContain("Infraestrutura do repositório");
     expect(script).toContain("CLAUDE.md para Claude Code");
+    expect(script).toContain("GEMINI.md para Gemini");
     expect(script).toContain("Hooks locais com Husky - checagens antes do commit");
+    expect(script).toContain("Quality Gates - critérios objetivos para avançar");
+    expect(script).toContain("Idioma do baseline e das práticas TDD/BDD");
     expect(script).not.toContain("flowHtml");
   });
 

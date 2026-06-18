@@ -932,7 +932,7 @@
             <ul>
               <li>preserva scripts e arquivos existentes;</li>
               <li>detecta conflitos reais;</li>
-              <li>usa force apenas como decisão explícita;</li>
+              <li>usa force e force-prettier apenas como decisão explícita;</li>
               <li>termina com diff verificável.</li>
             </ul>
           </div>
@@ -944,6 +944,7 @@
               <li>runtime e templates;</li>
               <li>providers via <code>update --providers</code>;</li>
               <li>features/práticas via <code>update --features</code>;</li>
+              <li>limpeza segura via <code>--prune</code> quando algo deixa de ser gerenciado;</li>
               <li>perfil de colaboração e política de reviews quando governados.</li>
             </ul>
           </div>
@@ -1173,9 +1174,44 @@
                           ></span
                         >
                         <span class="prompt-group"
+                          >◼ <span data-copy-provider-label="gemini">Gemini</span>
+                          <span class="prompt-hint" data-copy-provider-html-hint="gemini"
+                            >GEMINI.md para Gemini</span
+                          ></span
+                        >
+                        <span class="prompt-group"
                           >◼ <span data-copy-provider-label="openai">OpenAI/Codex</span>
                           <span class="prompt-hint" data-copy-provider-html-hint="openai"
                             >contexto para Codex</span
+                          ></span
+                        >
+                        <span class="prompt-group"
+                          >◼ <span data-copy-provider-label="copilot">GitHub Copilot</span>
+                          <span class="prompt-hint" data-copy-provider-html-hint="copilot"
+                            >contexto para Copilot</span
+                          ></span
+                        >
+                        <span
+                          class="prompt-group-title"
+                          data-copy="provisioning.providerGroups.local"
+                          >Editores e agentes locais</span
+                        >
+                        <span class="prompt-group"
+                          >◼ <span data-copy-provider-label="cursor">Cursor</span>
+                          <span class="prompt-hint" data-copy-provider-html-hint="cursor"
+                            >contexto para Cursor</span
+                          ></span
+                        >
+                        <span class="prompt-group"
+                          >◼ <span data-copy-provider-label="windsurf">Windsurf</span>
+                          <span class="prompt-hint" data-copy-provider-html-hint="windsurf"
+                            >contexto para Windsurf</span
+                          ></span
+                        >
+                        <span class="prompt-group"
+                          >◼ <span data-copy-provider-label="aider">Aider</span>
+                          <span class="prompt-hint" data-copy-provider-html-hint="aider"
+                            >contexto para Aider</span
                           ></span
                         >
                       </div>
@@ -1207,11 +1243,41 @@
                             >CI no GitHub Actions - valida o PR no GitHub</span
                           ></span
                         >
+                        <span class="prompt-group"
+                          >◼
+                          <span data-copy-feature-html-label="quality-gates"
+                            >Quality Gates - critérios objetivos para avançar</span
+                          ></span
+                        >
                       </div>
 
                       <div class="mini-slide" data-mini-panel="methods">
                         <span class="mini-caption"
                           >Métodos que ajudam a transformar intenção em testes e exemplos.</span
+                        >
+                        <span class="prompt-row active"
+                          ><span>◆</span
+                          ><span data-copy="provisioning.flow.prompts.language"
+                            >Idioma do baseline e das práticas TDD/BDD</span
+                          ></span
+                        >
+                        <span class="prompt-row success"
+                          ><span>✓</span
+                          ><span
+                            ><span data-copy="provisioning.flow.language.pt">Português</span> —
+                            <span data-copy="provisioning.flow.language.ptHint"
+                              >usa os templates tdd-pt e bdd-pt</span
+                            ></span
+                          ></span
+                        >
+                        <span class="prompt-row muted"
+                          ><span>◇</span
+                          ><span
+                            ><span data-copy="provisioning.flow.language.en">English</span> —
+                            <span data-copy="provisioning.flow.language.enHint"
+                              >usa os templates tdd-en e bdd-en</span
+                            ></span
+                          ></span
                         >
                         <span class="prompt-group-title">Práticas de desenvolvimento</span>
                         <span class="prompt-group"
@@ -1283,6 +1349,9 @@
                         >
                         <span class="prompt-row success"
                           ><span>+</span><span>.husky/pre-commit quando solicitado</span></span
+                        >
+                        <span class="prompt-row success"
+                          ><span>+</span><span>quality-gates.md quando selecionado</span></span
                         >
                       </div>
 
@@ -1617,7 +1686,12 @@
                           ><span>◆</span><span>Manter configuração atual</span></span
                         >
                         <span class="choice"
-                          ><span>○</span><span>Migrar para Prettier com force</span></span
+                          ><span>○</span
+                          ><span>Migrar para Prettier com --force-prettier</span></span
+                        >
+                        <span class="prompt-row muted"
+                          ><span>=</span
+                          ><span>force-prettier vale só para formatter rival</span></span
                         >
                         <span class="choice"
                           ><span>○</span><span>Sair e corrigir manualmente</span></span
@@ -1680,6 +1754,7 @@
                           Dry-run
                         </button>
                         <button class="mini-tab" data-mini-slide="safe-apply">Aplicar</button>
+                        <button class="mini-tab" data-mini-slide="prune">Limpeza</button>
                         <button class="mini-tab" data-mini-slide="force">Force</button>
                       </div>
 
@@ -1708,9 +1783,39 @@
                         >
                       </div>
 
+                      <div class="mini-slide" data-mini-panel="prune">
+                        <span class="mini-caption"
+                          >Prune remove só artefatos gerenciados que deixaram de fazer parte da
+                          seleção.</span
+                        >
+                        <span class="prompt-row active"
+                          ><span>◆</span
+                          ><span data-copy="provisioning.flow.prompts.prune"
+                            >Remover artefatos gerenciados que não fazem mais parte da
+                            seleção?</span
+                          ></span
+                        >
+                        <span class="prompt-row muted"
+                          ><span>=</span
+                          ><span>Não apaga código ou conteúdo próprio do projeto</span></span
+                        >
+                        <span class="prompt-row success"
+                          ><span>✓</span
+                          ><span
+                            >Útil ao remover provider, template ou prática gerenciada</span
+                          ></span
+                        >
+                      </div>
+
                       <div class="mini-slide" data-mini-panel="force">
                         <span class="mini-caption"
                           >Force só aparece quando a consequência está clara.</span
+                        >
+                        <span class="prompt-row active"
+                          ><span>◆</span
+                          ><span data-copy="provisioning.flow.prompts.forcePrettier"
+                            >Forçar Prettier mesmo se houver formatter rival?</span
+                          ></span
                         >
                         <span class="prompt-row warn"
                           ><span>!</span
@@ -2057,6 +2162,7 @@
                         <button class="mini-tab is-active" data-mini-slide="runtime">Base</button>
                         <button class="mini-tab" data-mini-slide="providers">IA</button>
                         <button class="mini-tab" data-mini-slide="quality">Qualidade</button>
+                        <button class="mini-tab" data-mini-slide="cleanup">Limpeza</button>
                         <button class="mini-tab" data-mini-slide="collaboration">
                           Colaboração
                         </button>
@@ -2091,9 +2197,21 @@
                           ></span
                         >
                         <span class="prompt-group"
+                          >◼ <span data-copy-provider-label="gemini">Gemini</span>
+                          <span class="prompt-hint" data-copy-provider-html-hint="gemini"
+                            >GEMINI.md para Gemini</span
+                          ></span
+                        >
+                        <span class="prompt-group"
                           >◼ <span data-copy-provider-label="openai">OpenAI/Codex</span>
                           <span class="prompt-hint" data-copy-provider-html-hint="openai"
                             >contexto para Codex</span
+                          ></span
+                        >
+                        <span class="prompt-group"
+                          >◼ <span data-copy-provider-label="copilot">GitHub Copilot</span>
+                          <span class="prompt-hint" data-copy-provider-html-hint="copilot"
+                            >contexto para Copilot</span
                           ></span
                         >
                         <span
@@ -2111,6 +2229,12 @@
                           >◼ <span data-copy-provider-label="windsurf">Windsurf</span>
                           <span class="prompt-hint" data-copy-provider-html-hint="windsurf"
                             >contexto para Windsurf</span
+                          ></span
+                        >
+                        <span class="prompt-group"
+                          >◼ <span data-copy-provider-label="aider">Aider</span>
+                          <span class="prompt-hint" data-copy-provider-html-hint="aider"
+                            >contexto para Aider</span
                           ></span
                         >
                       </div>
@@ -2140,6 +2264,12 @@
                         >
                         <span class="prompt-group"
                           >◼
+                          <span data-copy-feature-html-label="quality-gates"
+                            >Quality Gates - critérios objetivos para avançar</span
+                          ></span
+                        >
+                        <span class="prompt-group"
+                          >◼
                           <span data-copy-feature-html-label="tdd"
                             >Desenvolvimento guiado por testes (TDD)</span
                           ></span
@@ -2149,6 +2279,28 @@
                           <span data-copy-feature-html-label="bdd"
                             >Especificação por exemplos (BDD)</span
                           ></span
+                        >
+                      </div>
+
+                      <div class="mini-slide" data-mini-panel="cleanup">
+                        <span class="mini-caption"
+                          >Quando uma seleção muda, o update pode limpar apenas arquivos gerenciados
+                          que ficaram órfãos.</span
+                        >
+                        <span class="prompt-row active"
+                          ><span>◆</span
+                          ><span data-copy="provisioning.flow.prompts.prune"
+                            >Remover artefatos gerenciados que não fazem mais parte da
+                            seleção?</span
+                          ></span
+                        >
+                        <span class="prompt-row success"
+                          ><span>✓</span
+                          ><span>Remove provider desmarcado ou template antigo</span></span
+                        >
+                        <span class="prompt-row muted"
+                          ><span>=</span
+                          ><span>Preserva código e arquivos próprios do repositório</span></span
                         >
                       </div>
 
@@ -2170,6 +2322,12 @@
                         <span class="prompt-row warn"
                           ><span>!</span
                           ><span>Confirmar só com autoridade para mudar a política</span></span
+                        >
+                        <span class="prompt-row muted"
+                          ><span>=</span
+                          ><span
+                            >Se remover providers/práticas, use --prune para limpar órfãos</span
+                          ></span
                         >
                       </div>
                     </div>
