@@ -41,6 +41,7 @@ class ScriptedPrompts implements Prompts {
     readonly message: string;
     readonly groups: readonly string[];
     readonly names: readonly string[];
+    readonly hints: readonly string[];
   }> = [];
   private index = 0;
   private confirmIndex = 0;
@@ -84,6 +85,9 @@ class ScriptedPrompts implements Prompts {
       names: Object.values(options.groups)
         .flat()
         .map((choice) => choice.name),
+      hints: Object.values(options.groups)
+        .flat()
+        .map((choice) => String((choice as { hint?: string }).hint ?? "")),
     });
     const selected = this.groupSelections.shift() ?? [];
     return selected as T[];
@@ -721,7 +725,20 @@ describe("flow wizard", () => {
           "Práticas editoriais",
         ]);
         expect(prompts.groupMultiselectCalls[0].names).toEqual(
-          expect.arrayContaining(["Prettier", "Husky", "CI", "Quality Gates", "TDD", "BDD"])
+          expect.arrayContaining([
+            "Prettier",
+            "Hooks locais com Husky",
+            "CI no GitHub Actions",
+            "Quality Gates",
+            "TDD",
+            "BDD",
+          ])
+        );
+        expect(prompts.groupMultiselectCalls[0].hints).toEqual(
+          expect.arrayContaining([
+            "roda checagens antes do commit",
+            "valida o PR automaticamente no GitHub",
+          ])
         );
         expect(update.calls).toEqual([["--features", "prettier,husky,ci"]]);
         expect(prompts.notes.join("\n")).toContain("Práticas selecionadas:");

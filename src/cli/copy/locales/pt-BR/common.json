@@ -1,0 +1,13 @@
+{
+  "locale": "pt-BR",
+  "back": "Voltar",
+  "quit": "Sair",
+  "yes": "sim",
+  "no": "não",
+  "none": "(nenhum)",
+  "auto": "auto",
+  "notObserved": "não observado",
+  "nothingExecuted": "Nada executado.",
+  "noChanges": "Saindo sem alterações.",
+  "clipboardLlm": "Cole na LLM de sua preferência para continuar."
+}

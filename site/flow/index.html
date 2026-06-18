@@ -1,0 +1,2361 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Flow — ai-guidelines</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f6f7fb;
+        --ink: #162033;
+        --muted: #5f6f84;
+        --line: #d8deea;
+        --surface: #ffffff;
+        --surface-soft: #f8fbff;
+        --teal: #0f766e;
+        --teal-dark: #0b5f59;
+        --blue: #2563eb;
+        --blue-soft: #e8f0ff;
+        --green: #047857;
+        --green-soft: #e7f8ef;
+        --amber: #b7791f;
+        --amber-soft: #fff3d6;
+        --red: #b42318;
+        --red-soft: #ffe7e5;
+        --purple: #6d28d9;
+        --purple-soft: #f0e8ff;
+        --terminal: #101826;
+        --terminal-muted: #aab6c7;
+        --terminal-line: rgba(255, 255, 255, 0.14);
+        --radius: 8px;
+        --shadow: 0 20px 48px rgba(22, 32, 51, 0.12);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font:
+          16px/1.58 Inter,
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+      }
+
+      a {
+        color: var(--teal-dark);
+        font-weight: 760;
+      }
+
+      code {
+        border: 1px solid rgba(22, 32, 51, 0.12);
+        border-radius: 6px;
+        background: rgba(22, 32, 51, 0.06);
+        padding: 0.12rem 0.34rem;
+        font:
+          0.92em/1.35 "SFMono-Regular",
+          Consolas,
+          "Liberation Mono",
+          monospace;
+      }
+
+      h1,
+      h2,
+      h3 {
+        margin: 0;
+        line-height: 1.08;
+        letter-spacing: 0;
+      }
+
+      p {
+        margin: 0;
+      }
+
+      ul,
+      ol {
+        margin: 0.75rem 0 0;
+        padding-left: 1.1rem;
+      }
+
+      li {
+        margin: 0.25rem 0;
+      }
+
+      .hero {
+        min-height: 90vh;
+        display: grid;
+        align-items: center;
+        background:
+          linear-gradient(rgba(11, 20, 34, 0.78), rgba(11, 20, 34, 0.56)),
+          url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1500' height='960' viewBox='0 0 1500 960'%3E%3Crect width='1500' height='960' fill='%23162033'/%3E%3Cg opacity='.24' fill='none' stroke='%23ffffff' stroke-width='2'%3E%3Cpath d='M135 150h380v120H135zM610 150h320v120H610zM1015 150h330v120h-330zM195 380h410v120H195zM700 380h280v120H700zM1080 380h240v120h-240zM245 620h350v120H245zM690 620h410v120H690zM1190 620h160v120h-160z'/%3E%3Cpath d='M515 210h95M930 210h85M605 440h95M980 440h100M595 680h95M1100 680h90'/%3E%3C/g%3E%3Cg opacity='.28'%3E%3Ccircle cx='155' cy='210' r='16' fill='%230f766e'/%3E%3Ccircle cx='630' cy='210' r='16' fill='%232563eb'/%3E%3Ccircle cx='215' cy='440' r='16' fill='%23047857'/%3E%3Ccircle cx='715' cy='680' r='16' fill='%236d28d9'/%3E%3C/g%3E%3C/svg%3E");
+        background-size: cover;
+        background-position: center;
+      }
+
+      .hero-inner {
+        width: min(1180px, calc(100% - 2rem));
+        margin: 0 auto;
+        padding: 4rem 0 2rem;
+        display: grid;
+        grid-template-columns: minmax(0, 0.92fr) minmax(340px, 0.78fr);
+        gap: clamp(1.4rem, 4vw, 3.2rem);
+        align-items: center;
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.55rem;
+        margin-bottom: 1rem;
+        color: #b7f4e8;
+        font-size: 0.78rem;
+        font-weight: 850;
+        text-transform: uppercase;
+      }
+
+      .eyebrow::before {
+        width: 0.66rem;
+        height: 0.66rem;
+        border-radius: 999px;
+        background: #7dd3c7;
+        content: "";
+      }
+
+      h1 {
+        max-width: 12ch;
+        color: white;
+        font-size: clamp(3.4rem, 10vw, 7.6rem);
+      }
+
+      .hero-copy {
+        max-width: 66ch;
+        margin-top: 1.2rem;
+        color: #e7eef8;
+        font-size: clamp(1.05rem, 2vw, 1.24rem);
+      }
+
+      .hero-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.7rem;
+        margin-top: 1.55rem;
+      }
+
+      .button {
+        display: inline-flex;
+        min-height: 2.7rem;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #8ae7d9;
+        border-radius: var(--radius);
+        padding: 0.68rem 0.95rem;
+        background: #8ae7d9;
+        color: #0d2d35;
+        font-weight: 850;
+        text-decoration: none;
+      }
+
+      .button.secondary {
+        background: transparent;
+        color: #dffbf6;
+      }
+
+      .shell {
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: var(--radius);
+        background: var(--terminal);
+        box-shadow: var(--shadow);
+        color: #f6fbff;
+      }
+
+      .shell-head {
+        display: flex;
+        min-height: 2.4rem;
+        align-items: center;
+        gap: 0.5rem;
+        border-bottom: 1px solid var(--terminal-line);
+        padding: 0 0.78rem;
+        color: var(--terminal-muted);
+        font-size: 0.84rem;
+      }
+
+      .dot {
+        width: 0.68rem;
+        height: 0.68rem;
+        border-radius: 50%;
+        background: #ef4444;
+      }
+
+      .dot:nth-child(2) {
+        background: #f59e0b;
+      }
+
+      .dot:nth-child(3) {
+        background: #22c55e;
+      }
+
+      .shell-body {
+        padding: 1rem;
+        font:
+          0.9rem/1.56 "SFMono-Regular",
+          Consolas,
+          "Liberation Mono",
+          monospace;
+      }
+
+      .terminal-line {
+        display: block;
+        margin: 0.12rem 0;
+      }
+
+      .dim {
+        color: var(--terminal-muted);
+      }
+
+      .choice {
+        display: grid;
+        grid-template-columns: 1.2rem 1fr;
+        gap: 0.4rem;
+        margin: 0.32rem 0;
+      }
+
+      .choice.active {
+        color: #9ff5e8;
+      }
+
+      .choice.disabled {
+        color: #aeb8c8;
+      }
+
+      main {
+        width: min(1180px, calc(100% - 2rem));
+        margin: 0 auto;
+        padding: 2rem 0 4rem;
+      }
+
+      .nav {
+        position: sticky;
+        top: 0;
+        z-index: 5;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.55rem;
+        border-bottom: 1px solid var(--line);
+        background: rgba(246, 247, 251, 0.94);
+        padding: 0.9rem 0;
+        backdrop-filter: blur(12px);
+      }
+
+      .nav a {
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: white;
+        padding: 0.42rem 0.72rem;
+        color: var(--ink);
+        font-size: 0.92rem;
+        text-decoration: none;
+      }
+
+      section {
+        margin-top: clamp(2.2rem, 6vw, 4.4rem);
+      }
+
+      .section-title {
+        display: grid;
+        gap: 0.55rem;
+        max-width: 860px;
+        margin-bottom: 1.15rem;
+      }
+
+      .section-title h2 {
+        font-size: clamp(1.9rem, 4vw, 3.2rem);
+      }
+
+      .section-title p {
+        color: var(--muted);
+        font-size: 1.04rem;
+      }
+
+      .grid {
+        display: grid;
+        gap: 1rem;
+      }
+
+      .grid.two {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .grid.three {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .card {
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--surface);
+        padding: 1rem;
+      }
+
+      .card h3 {
+        margin-bottom: 0.48rem;
+        font-size: 1.16rem;
+      }
+
+      .card p,
+      .card li {
+        color: var(--muted);
+      }
+
+      .highlight {
+        border-color: rgba(15, 118, 110, 0.45);
+        background: linear-gradient(180deg, #ffffff 0, #f2fbf8 100%);
+        box-shadow: 0 14px 34px rgba(15, 118, 110, 0.1);
+      }
+
+      .status {
+        display: inline-flex;
+        width: fit-content;
+        align-items: center;
+        border-radius: 999px;
+        padding: 0.2rem 0.52rem;
+        font-size: 0.72rem;
+        font-weight: 850;
+        text-transform: uppercase;
+      }
+
+      .status.green {
+        background: var(--green-soft);
+        color: var(--green);
+      }
+
+      .status.blue {
+        background: var(--blue-soft);
+        color: var(--blue);
+      }
+
+      .status.amber {
+        background: var(--amber-soft);
+        color: var(--amber);
+      }
+
+      .status.red {
+        background: var(--red-soft);
+        color: var(--red);
+      }
+
+      .status.purple {
+        background: var(--purple-soft);
+        color: var(--purple);
+      }
+
+      .path-card {
+        display: grid;
+        grid-template-rows: auto auto auto 1fr;
+        gap: 0.65rem;
+        min-height: 18rem;
+      }
+
+      .command {
+        display: inline-flex;
+        width: fit-content;
+        border: 1px solid rgba(37, 99, 235, 0.2);
+        border-radius: 6px;
+        background: var(--blue-soft);
+        padding: 0.38rem 0.55rem;
+        color: #173d86;
+        font:
+          0.92rem/1.4 "SFMono-Regular",
+          Consolas,
+          "Liberation Mono",
+          monospace;
+      }
+
+      .comparison {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        overflow: hidden;
+        background: white;
+      }
+
+      .comparison > div {
+        min-height: 12rem;
+        padding: 1rem;
+        border-right: 1px solid var(--line);
+      }
+
+      .comparison > div:last-child {
+        border-right: 0;
+      }
+
+      .steps {
+        display: grid;
+        gap: 0.8rem;
+        margin-top: 1rem;
+        padding: 0;
+        list-style: none;
+      }
+
+      .steps li {
+        display: grid;
+        grid-template-columns: 2.65rem minmax(0, 1fr);
+        gap: 0.85rem;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: rgba(255, 255, 255, 0.86);
+        padding: 0.95rem;
+      }
+
+      .step-number {
+        display: grid;
+        width: 2.25rem;
+        height: 2.25rem;
+        place-items: center;
+        border-radius: 50%;
+        background: var(--teal);
+        color: white;
+        font-weight: 850;
+      }
+
+      .steps p {
+        margin-top: 0.25rem;
+        color: var(--muted);
+      }
+
+      .step-controls {
+        display: grid;
+        gap: 0.8rem;
+        margin-top: 1rem;
+      }
+
+      .step-button {
+        display: grid;
+        grid-template-columns: 2.65rem minmax(0, 1fr);
+        gap: 0.85rem;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: rgba(255, 255, 255, 0.86);
+        padding: 0.95rem;
+        cursor: pointer;
+      }
+
+      .step-button strong {
+        display: block;
+      }
+
+      .step-button p {
+        margin-top: 0.25rem;
+        color: var(--muted);
+      }
+
+      .flow-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 0.9fr) minmax(360px, 1.1fr);
+        gap: 1rem;
+        align-items: start;
+      }
+
+      .simulator-stage {
+        border: 1px solid rgba(15, 118, 110, 0.24);
+        border-radius: var(--radius);
+        background: linear-gradient(180deg, #ffffff 0, #f5fbf9 100%);
+        padding: 1rem;
+        box-shadow: 0 14px 34px rgba(22, 32, 51, 0.08);
+      }
+
+      .simulator-input {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      .simulator-panel {
+        display: none;
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        align-items: stretch;
+      }
+
+      .simulator-copy {
+        display: grid;
+        align-content: start;
+        gap: 0.75rem;
+        padding: 0.15rem 0.35rem 0.2rem;
+      }
+
+      .simulator-copy h3 {
+        font-size: 1.2rem;
+      }
+
+      .simulator-copy p,
+      .simulator-copy li {
+        color: var(--muted);
+      }
+
+      .simulator-copy ul {
+        margin: 0;
+      }
+
+      .prompt-stack {
+        display: grid;
+        gap: 0.52rem;
+      }
+
+      .prompt-row {
+        display: grid;
+        grid-template-columns: 1.15rem minmax(0, 1fr);
+        gap: 0.45rem;
+      }
+
+      .prompt-row.active {
+        color: #9ff5e8;
+      }
+
+      .prompt-row.warn {
+        color: #ffd58a;
+      }
+
+      .prompt-row.success {
+        color: #9ff5b3;
+      }
+
+      .prompt-row.muted {
+        color: var(--terminal-muted);
+      }
+
+      .prompt-group {
+        display: block;
+        margin-top: 0.45rem;
+        padding-left: 1.55rem;
+        line-height: 1.45;
+      }
+
+      .prompt-group-title {
+        color: #d8e8ff;
+        font-weight: 850;
+      }
+
+      .prompt-group > span {
+        display: inline;
+      }
+
+      .prompt-hint {
+        color: var(--terminal-muted);
+        margin-left: 0.35rem;
+      }
+
+      .mini-carousel {
+        display: grid;
+        gap: 0.7rem;
+        margin-top: 0.72rem;
+      }
+
+      .mini-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+      }
+
+      .mini-tab {
+        border: 1px solid rgba(159, 245, 232, 0.28);
+        border-radius: 999px;
+        background: transparent;
+        padding: 0.22rem 0.58rem;
+        color: var(--terminal-muted);
+        font: inherit;
+        cursor: pointer;
+      }
+
+      .mini-tab.is-active {
+        border-color: rgba(159, 245, 232, 0.72);
+        background: rgba(159, 245, 232, 0.12);
+        color: #9ff5e8;
+      }
+
+      .mini-slide {
+        display: none;
+        border-top: 1px solid var(--terminal-line);
+        padding-top: 0.68rem;
+      }
+
+      .mini-slide.is-active {
+        display: grid;
+        gap: 0.28rem;
+      }
+
+      .mini-caption {
+        color: var(--terminal-muted);
+      }
+
+      #new-detect:checked ~ .card .step-controls label[for="new-detect"],
+      #new-name:checked ~ .card .step-controls label[for="new-name"],
+      #new-practices:checked ~ .card .step-controls label[for="new-practices"],
+      #new-preview:checked ~ .card .step-controls label[for="new-preview"],
+      #new-apply:checked ~ .card .step-controls label[for="new-apply"],
+      #new-validate:checked ~ .card .step-controls label[for="new-validate"],
+      #existing-detect:checked ~ .card .step-controls label[for="existing-detect"],
+      #existing-merge:checked ~ .card .step-controls label[for="existing-merge"],
+      #existing-force:checked ~ .card .step-controls label[for="existing-force"],
+      #existing-apply:checked ~ .card .step-controls label[for="existing-apply"],
+      #existing-validate:checked ~ .card .step-controls label[for="existing-validate"],
+      #active-state:checked ~ .card .step-controls label[for="active-state"],
+      #active-next:checked ~ .card .step-controls label[for="active-next"],
+      #active-validate:checked ~ .card .step-controls label[for="active-validate"],
+      #active-review:checked ~ .card .step-controls label[for="active-review"],
+      #active-update:checked ~ .card .step-controls label[for="active-update"],
+      #active-gate:checked ~ .card .step-controls label[for="active-gate"] {
+        border-color: rgba(15, 118, 110, 0.5);
+        background: #e9fbf6;
+        box-shadow: inset 4px 0 0 var(--teal);
+      }
+
+      #new-detect:checked ~ .simulator-stage .panel-new-detect,
+      #new-name:checked ~ .simulator-stage .panel-new-name,
+      #new-practices:checked ~ .simulator-stage .panel-new-practices,
+      #new-preview:checked ~ .simulator-stage .panel-new-preview,
+      #new-apply:checked ~ .simulator-stage .panel-new-apply,
+      #new-validate:checked ~ .simulator-stage .panel-new-validate,
+      #existing-detect:checked ~ .simulator-stage .panel-existing-detect,
+      #existing-merge:checked ~ .simulator-stage .panel-existing-merge,
+      #existing-force:checked ~ .simulator-stage .panel-existing-force,
+      #existing-apply:checked ~ .simulator-stage .panel-existing-apply,
+      #existing-validate:checked ~ .simulator-stage .panel-existing-validate,
+      #active-state:checked ~ .simulator-stage .panel-active-state,
+      #active-next:checked ~ .simulator-stage .panel-active-next,
+      #active-validate:checked ~ .simulator-stage .panel-active-validate,
+      #active-review:checked ~ .simulator-stage .panel-active-review,
+      #active-update:checked ~ .simulator-stage .panel-active-update,
+      #active-gate:checked ~ .simulator-stage .panel-active-gate {
+        display: grid;
+      }
+
+      .flowline {
+        display: grid;
+        grid-template-columns: repeat(10, minmax(9rem, 1fr));
+        gap: 0.8rem;
+        overflow-x: auto;
+        padding: 0.25rem 0 0.8rem;
+      }
+
+      .stage {
+        position: relative;
+        min-width: 9rem;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: white;
+        padding: 0.9rem;
+      }
+
+      .stage::after {
+        position: absolute;
+        top: 2.2rem;
+        right: -0.72rem;
+        width: 0.72rem;
+        height: 2px;
+        background: var(--line);
+        content: "";
+      }
+
+      .stage:last-child::after {
+        display: none;
+      }
+
+      .num {
+        display: inline-grid;
+        width: 1.75rem;
+        height: 1.75rem;
+        place-items: center;
+        border-radius: 50%;
+        background: var(--teal);
+        color: white;
+        font-weight: 850;
+      }
+
+      .stage strong {
+        display: block;
+        margin-top: 0.6rem;
+        font-size: 1rem;
+      }
+
+      .stage small {
+        display: block;
+        margin-top: 0.35rem;
+        color: var(--muted);
+      }
+
+      .matrix {
+        width: 100%;
+        border-collapse: collapse;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: white;
+      }
+
+      .matrix th,
+      .matrix td {
+        border-bottom: 1px solid var(--line);
+        padding: 0.78rem;
+        text-align: left;
+        vertical-align: top;
+      }
+
+      .matrix th {
+        background: var(--surface-soft);
+        font-size: 0.82rem;
+        text-transform: uppercase;
+      }
+
+      .matrix tr:last-child td {
+        border-bottom: 0;
+      }
+
+      .callout {
+        border: 1px solid rgba(15, 118, 110, 0.3);
+        border-left: 6px solid var(--teal);
+        border-radius: var(--radius);
+        background: #f0fdfa;
+        padding: 1rem;
+      }
+
+      .footer {
+        border-top: 1px solid var(--line);
+        margin-top: 3rem;
+        padding-top: 1.3rem;
+        color: var(--muted);
+      }
+
+      @media (max-width: 880px) {
+        .hero {
+          min-height: auto;
+        }
+
+        .hero-inner,
+        .grid.two,
+        .grid.three,
+        .comparison,
+        .flow-layout,
+        .simulator-panel,
+        .steps li {
+          grid-template-columns: 1fr;
+        }
+
+        .hero-inner {
+          padding: 2rem 0;
+        }
+
+        .comparison > div {
+          border-right: 0;
+          border-bottom: 1px solid var(--line);
+        }
+
+        .comparison > div:last-child {
+          border-bottom: 0;
+        }
+
+        .nav {
+          position: static;
+        }
+
+        .flowline {
+          grid-template-columns: 1fr;
+          overflow: visible;
+        }
+
+        .stage::after {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="hero">
+      <div class="hero-inner">
+        <div>
+          <p class="eyebrow">Fluxo governado para engenharia com IA</p>
+          <h1>ai-guidelines Flow</h1>
+          <p class="hero-copy">
+            Um guia local para começar um projeto, adotar um repositório existente e conduzir uma
+            spec até o merge final sem depender de memória solta, mensagens perdidas ou decisões
+            implícitas.
+          </p>
+          <div class="hero-actions" aria-label="Atalhos principais">
+            <a class="button" href="#começar">Escolher meu cenário</a>
+            <a class="button secondary" href="#projeto-novo">Ver projeto novo</a>
+            <a class="button secondary" href="#repo-em-uso">Ver repo em uso</a>
+          </div>
+        </div>
+
+        <aside class="shell" aria-label="Resumo simulado do npm run flow">
+          <div class="shell-head">
+            <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+            <span>npm run flow</span>
+          </div>
+          <div class="shell-body">
+            <span class="terminal-line">◇ ai-guidelines flow</span>
+            <span class="terminal-line dim">O sistema leu branch, PR, CI, findings e tasks.md</span>
+            <span class="choice active"
+              ><span>◆</span><span>Próxima ação: validar as mudanças locais</span></span
+            >
+            <span class="choice"><span>○</span><span>Ver resumo completo do estado</span></span>
+            <span class="choice"
+              ><span>○</span><span>Pedir uma revisão antes da decisão humana</span></span
+            >
+            <span class="choice disabled"
+              ><span>◇</span><span>Human Gate bloqueado até Ready + CI + política</span></span
+            >
+            <br />
+            <span class="terminal-line dim"
+              >O guia orienta. Ações sensíveis continuam com resumo, prévia e confirmação.</span
+            >
+          </div>
+        </aside>
+      </div>
+    </header>
+
+    <main>
+      <nav class="nav" aria-label="Mapa da página">
+        <a href="#começar">Começar</a>
+        <a href="#comparar">Três caminhos</a>
+        <a href="#projeto-novo">Projeto novo</a>
+        <a href="#projeto-existente">Projeto existente</a>
+        <a href="#repo-em-uso">Repo em uso</a>
+        <a href="#spec">Spec até merge</a>
+        <a href="#regras">Regras</a>
+        <a href="#valor">Valor</a>
+        <a href="#comandos">Comandos</a>
+      </nav>
+
+      <section id="começar">
+        <div class="section-title">
+          <h2>Primeiro: qual é o seu cenário?</h2>
+          <p>
+            A experiência começa pela situação real do repositório. Assim o guia interativo não
+            oferece comandos perigosos, não mistura caminhos e não força a pessoa a saber nomes
+            internos do framework.
+          </p>
+        </div>
+
+        <div class="grid three">
+          <article class="card path-card highlight">
+            <span class="status green">pasta nova</span>
+            <h3>Quero iniciar um projeto</h3>
+            <span class="command">npm run flow -- init</span>
+            <p>
+              Para uma pasta vazia ou um produto nascendo agora. O fluxo cria a base governada,
+              pergunta as escolhas iniciais e mostra o plano antes de escrever.
+            </p>
+            <ul>
+              <li>Não mostra adopt/update como caminho principal.</li>
+              <li>Escolhas aparecem em grupos: IA, práticas e automações.</li>
+              <li>Dry-run deixa revisar tudo antes de aplicar.</li>
+            </ul>
+          </article>
+
+          <article class="card path-card">
+            <span class="status blue">repo existente</span>
+            <h3>Quero adotar sem quebrar o que já existe</h3>
+            <span class="command">npm run flow -- adopt</span>
+            <p>
+              Para um projeto que já tem arquivos, scripts e histórico. O fluxo preserva conteúdo,
+              faz merge conservador e transforma conflito em decisão explícita.
+            </p>
+            <ul>
+              <li>Não trata o repositório como vazio.</li>
+              <li>Mostra o que será preservado, criado ou mesclado.</li>
+              <li>Conflitos exigem escolha humana antes de qualquer força.</li>
+            </ul>
+          </article>
+
+          <article class="card path-card">
+            <span class="status purple">repo governado</span>
+            <h3>Quero usar e manter o framework</h3>
+            <span class="command">npm run flow</span>
+            <p>
+              Para um repo que já usa ai-guidelines. O guia mostra estado, próxima ação,
+              alternativas seguras, validações e updates possíveis.
+            </p>
+            <ul>
+              <li>Não mostra init/adopt como ação normal.</li>
+              <li>Update cobre runtime, templates, providers, features e práticas.</li>
+              <li>Specs seguem handoff, work, review, readiness, Ready, Gate e merge final.</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section id="comparar">
+        <div class="section-title">
+          <h2>Três caminhos, uma regra simples</h2>
+          <p>
+            O comando muda conforme o momento do repositório. O produto fica mais fácil quando cada
+            caminho tem uma responsabilidade clara.
+          </p>
+        </div>
+
+        <div class="comparison" aria-label="Comparação entre init, adopt e update">
+          <div>
+            <span class="status green">init</span>
+            <h3>Nascer certo</h3>
+            <p>Cria a governança inicial em um projeto novo.</p>
+            <ul>
+              <li>nome e package manager;</li>
+              <li>providers e features;</li>
+              <li>Prettier, Husky, CI, Quality Gates, TDD e BDD quando escolhidos;</li>
+              <li>preview antes de aplicar.</li>
+            </ul>
+          </div>
+          <div>
+            <span class="status blue">adopt</span>
+            <h3>Entrar com cuidado</h3>
+            <p>Adiciona ai-guidelines a um repo que já tem vida própria.</p>
+            <ul>
+              <li>preserva scripts e arquivos existentes;</li>
+              <li>detecta conflitos reais;</li>
+              <li>usa force apenas como decisão explícita;</li>
+              <li>termina com diff verificável.</li>
+            </ul>
+          </div>
+          <div>
+            <span class="status purple">update</span>
+            <h3>Manter governado</h3>
+            <p>Atualiza o que já existe sem recriar o projeto.</p>
+            <ul>
+              <li>runtime e templates;</li>
+              <li>providers via <code>update --providers</code>;</li>
+              <li>features/práticas via <code>update --features</code>;</li>
+              <li>perfil de colaboração e política de reviews quando governados.</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section id="projeto-novo">
+        <div class="section-title">
+          <h2>Fluxo 1 — Inicializar um projeto novo</h2>
+          <p>
+            Aqui a pessoa quer sair de uma pasta vazia para um repositório com baseline, práticas e
+            contexto pronto para humanos e IA.
+          </p>
+        </div>
+
+        <div class="flow-layout">
+          <input
+            class="simulator-input"
+            id="new-detect"
+            name="new-flow-demo"
+            type="radio"
+            checked
+          />
+          <input class="simulator-input" id="new-name" name="new-flow-demo" type="radio" />
+          <input class="simulator-input" id="new-practices" name="new-flow-demo" type="radio" />
+          <input class="simulator-input" id="new-preview" name="new-flow-demo" type="radio" />
+          <input class="simulator-input" id="new-apply" name="new-flow-demo" type="radio" />
+          <input class="simulator-input" id="new-validate" name="new-flow-demo" type="radio" />
+
+          <article class="card">
+            <span class="status green">passo a passo</span>
+            <h3>O que acontece</h3>
+            <div class="step-controls" aria-label="Etapas do projeto novo">
+              <label class="step-button" for="new-detect">
+                <span class="step-number">1</span>
+                <div>
+                  <strong>Detectar começo limpo</strong>
+                  <p>O fluxo confirma que não há um projeto vivo para preservar.</p>
+                </div>
+              </label>
+              <label class="step-button" for="new-name">
+                <span class="step-number">2</span>
+                <div>
+                  <strong>Escolher identidade do projeto</strong>
+                  <p>Nome, target e package manager entram como opções explícitas.</p>
+                </div>
+              </label>
+              <label class="step-button" for="new-practices">
+                <span class="step-number">3</span>
+                <div>
+                  <strong>Escolher canais e práticas</strong>
+                  <p>Providers, features, CI, Prettier, Husky, TDD e BDD aparecem agrupados.</p>
+                </div>
+              </label>
+              <label class="step-button" for="new-preview">
+                <span class="step-number">4</span>
+                <div>
+                  <strong>Ver preview</strong>
+                  <p>A pessoa vê arquivos novos, blocos gerenciados e comandos que serão usados.</p>
+                </div>
+              </label>
+              <label class="step-button" for="new-apply">
+                <span class="step-number">5</span>
+                <div>
+                  <strong>Aplicar com confirmação</strong>
+                  <p>Nada é escrito antes da confirmação; dry-run permite revisar sem efeito.</p>
+                </div>
+              </label>
+              <label class="step-button" for="new-validate">
+                <span class="step-number">6</span>
+                <div>
+                  <strong>Validar e commitar</strong>
+                  <p>O guia mostra tarefas de validação e orienta o primeiro commit governado.</p>
+                </div>
+              </label>
+            </div>
+          </article>
+
+          <div class="simulator-stage" aria-label="Simulação do flow para projeto novo">
+            <div class="simulator-panels">
+              <div class="simulator-panel panel-new-detect">
+                <div class="simulator-copy">
+                  <span class="status green">começo limpo</span>
+                  <h3>O guia não oferece adopt/update como caminho principal.</h3>
+                  <p>
+                    Se a pasta está vazia, a ação natural é inicializar. Isso evita que a pessoa
+                    precise entender comandos antes de saber o estado do repo.
+                  </p>
+                </div>
+                <div class="shell">
+                  <div class="shell-head">
+                    <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                    <span>flow init</span>
+                  </div>
+                  <div class="shell-body">
+                    <span class="terminal-line">◇ Pasta vazia detectada</span>
+                    <span class="choice active"
+                      ><span>◆</span><span>Inicializar um projeto governado</span></span
+                    >
+                    <span class="choice disabled"
+                      ><span>◇</span><span>Adotar repo existente não se aplica aqui</span></span
+                    >
+                    <span class="choice disabled"
+                      ><span>◇</span><span>Atualizar repo governado não se aplica aqui</span></span
+                    >
+                  </div>
+                </div>
+              </div>
+
+              <div class="simulator-panel panel-new-name">
+                <div class="simulator-copy">
+                  <span class="status green">identidade</span>
+                  <h3>Nome, pasta e package manager entram antes das práticas.</h3>
+                  <p>
+                    A pessoa define o básico do projeto primeiro. Isso evita misturar configuração
+                    de produto com escolha de ferramentas.
+                  </p>
+                </div>
+                <div class="shell">
+                  <div class="shell-head">
+                    <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                    <span>identidade do projeto</span>
+                  </div>
+                  <div class="shell-body">
+                    <span class="terminal-line">◇ Como este projeto deve nascer?</span>
+                    <span class="prompt-row active"
+                      ><span>◆</span><span>Nome: minha-api</span></span
+                    >
+                    <span class="prompt-row active"><span>◆</span><span>Target: .</span></span>
+                    <span class="prompt-row active"
+                      ><span>◆</span><span>Package manager: npm</span></span
+                    >
+                    <span class="prompt-row muted"
+                      ><span>◇</span
+                      ><span>Esses valores entram no plano antes da escrita.</span></span
+                    >
+                  </div>
+                </div>
+              </div>
+
+              <div class="simulator-panel panel-new-practices">
+                <div class="simulator-copy">
+                  <span class="status blue">seleções agrupadas</span>
+                  <h3>Escolhas aparecem por intenção, não por flag solta.</h3>
+                  <p>
+                    O Clack permite mostrar grupos com ajuda curta. A pessoa entende por que uma
+                    prática existe antes de selecioná-la.
+                  </p>
+                </div>
+                <div class="shell">
+                  <div class="shell-head">
+                    <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                    <span>selecionar práticas</span>
+                  </div>
+                  <div class="shell-body">
+                    <span class="terminal-line">◇ Quais práticas entram agora?</span>
+                    <span class="terminal-line dim"
+                      >Cada grupo explica a intenção antes da pessoa escolher.</span
+                    >
+                    <div class="mini-carousel" data-mini-carousel>
+                      <div class="mini-tabs" role="tablist" aria-label="Grupos de práticas">
+                        <button class="mini-tab is-active" data-mini-slide="assistants">
+                          Assistentes
+                        </button>
+                        <button class="mini-tab" data-mini-slide="quality">Qualidade</button>
+                        <button class="mini-tab" data-mini-slide="methods">TDD/BDD</button>
+                      </div>
+
+                      <div class="mini-slide is-active" data-mini-panel="assistants">
+                        <span class="mini-caption"
+                          >AGENTS.md é o contexto comum; cada assistente recebe entrypoint
+                          próprio.</span
+                        >
+                        <span
+                          class="prompt-group-title"
+                          data-copy="provisioning.providerGroups.primary"
+                          >Assistentes principais do repositório</span
+                        >
+                        <span class="prompt-group"
+                          >◼ <span data-copy-provider-label="claude">Claude</span>
+                          <span class="prompt-hint" data-copy-provider-html-hint="claude"
+                            >CLAUDE.md para Claude Code</span
+                          ></span
+                        >
+                        <span class="prompt-group"
+                          >◼ <span data-copy-provider-label="openai">OpenAI/Codex</span>
+                          <span class="prompt-hint" data-copy-provider-html-hint="openai"
+                            >contexto para Codex</span
+                          ></span
+                        >
+                      </div>
+
+                      <div class="mini-slide" data-mini-panel="quality">
+                        <span class="mini-caption"
+                          >Práticas que protegem o repositório antes do commit e no PR.</span
+                        >
+                        <span
+                          class="prompt-group-title"
+                          data-copy="provisioning.featureGroups.infrastructure"
+                          >Infraestrutura do repositório</span
+                        >
+                        <span class="prompt-group"
+                          >◼
+                          <span data-copy-feature-html-label="prettier"
+                            >Formatação com Prettier - padroniza arquivos automaticamente</span
+                          ></span
+                        >
+                        <span class="prompt-group"
+                          >◼
+                          <span data-copy-feature-html-label="husky"
+                            >Hooks locais com Husky - checagens antes do commit</span
+                          ></span
+                        >
+                        <span class="prompt-group"
+                          >◼
+                          <span data-copy-feature-html-label="ci"
+                            >CI no GitHub Actions - valida o PR no GitHub</span
+                          ></span
+                        >
+                      </div>
+
+                      <div class="mini-slide" data-mini-panel="methods">
+                        <span class="mini-caption"
+                          >Métodos que ajudam a transformar intenção em testes e exemplos.</span
+                        >
+                        <span class="prompt-group-title">Práticas de desenvolvimento</span>
+                        <span class="prompt-group"
+                          >◼
+                          <span data-copy-feature-html-label="tdd"
+                            >Desenvolvimento guiado por testes (TDD)</span
+                          ></span
+                        >
+                        <span class="prompt-group"
+                          >◼
+                          <span data-copy-feature-html-label="bdd"
+                            >Especificação por exemplos (BDD)</span
+                          ></span
+                        >
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="simulator-panel panel-new-preview">
+                <div class="simulator-copy">
+                  <span class="status amber">preview</span>
+                  <h3>A pessoa vê exatamente o que será criado.</h3>
+                  <p>
+                    O plano mostra efeitos: arquivos, blocos gerenciados, scripts e comandos de
+                    instalação. O código que aplica as mudanças só executa o que o plano decidiu.
+                  </p>
+                </div>
+                <div class="shell">
+                  <div class="shell-head">
+                    <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                    <span>preview do plano</span>
+                  </div>
+                  <div class="shell-body">
+                    <span class="terminal-line">◇ Plano de inicialização</span>
+                    <div class="mini-carousel" data-mini-carousel>
+                      <div class="mini-tabs" role="tablist" aria-label="Preview do plano">
+                        <button class="mini-tab is-active" data-mini-slide="files">Arquivos</button>
+                        <button class="mini-tab" data-mini-slide="quality">Qualidade</button>
+                        <button class="mini-tab" data-mini-slide="install">Instalação</button>
+                      </div>
+
+                      <div class="mini-slide is-active" data-mini-panel="files">
+                        <span class="mini-caption">Base governada que nasce junto do projeto.</span>
+                        <span class="prompt-row success"
+                          ><span>+</span><span>.governance/</span></span
+                        >
+                        <span class="prompt-row success"
+                          ><span>+</span><span>.ai-guidelines/</span></span
+                        >
+                        <span class="prompt-row success"
+                          ><span>+</span><span>AGENTS.md com bloco gerenciado</span></span
+                        >
+                      </div>
+
+                      <div class="mini-slide" data-mini-panel="quality">
+                        <span class="mini-caption"
+                          >Práticas selecionadas aparecem como efeitos explícitos.</span
+                        >
+                        <span class="prompt-row success"
+                          ><span>+</span><span>.github/workflows/ci.yml</span></span
+                        >
+                        <span class="prompt-row success"
+                          ><span>+</span><span>.prettierrc + .prettierignore</span></span
+                        >
+                        <span class="prompt-row success"
+                          ><span>+</span><span>.husky/pre-commit quando solicitado</span></span
+                        >
+                      </div>
+
+                      <div class="mini-slide" data-mini-panel="install">
+                        <span class="mini-caption"
+                          >Nada é instalado sem opção explícita e confirmação.</span
+                        >
+                        <span class="prompt-row muted"
+                          ><span>=</span><span>--dry-run mostra o plano sem escrita</span></span
+                        >
+                        <span class="prompt-row warn"
+                          ><span>?</span
+                          ><span>--install roda o package manager escolhido</span></span
+                        >
+                        <span class="prompt-row warn"
+                          ><span>?</span><span>Confirmar antes de aplicar?</span></span
+                        >
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="simulator-panel panel-new-apply">
+                <div class="simulator-copy">
+                  <span class="status amber">confirmação</span>
+                  <h3>Aplicar é uma escolha explícita.</h3>
+                  <p>
+                    O guia separa preview de aplicação. O humano confirma quando está confortável
+                    com o plano, e dry-run continua disponível para revisar sem efeito.
+                  </p>
+                </div>
+                <div class="shell">
+                  <div class="shell-head">
+                    <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                    <span>confirmar aplicação</span>
+                  </div>
+                  <div class="shell-body">
+                    <span class="terminal-line">◇ Aplicar este plano?</span>
+                    <span class="choice active"><span>◆</span><span>Sim, aplicar agora</span></span>
+                    <span class="choice"><span>○</span><span>Rodar apenas em dry-run</span></span>
+                    <span class="choice"><span>○</span><span>Voltar e alterar escolhas</span></span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="simulator-panel panel-new-validate">
+                <div class="simulator-copy">
+                  <span class="status green">tarefas visuais</span>
+                  <h3>Validação vira checklist acompanhado.</h3>
+                  <p>
+                    Etapas discretas usam lista de tarefas. Operações longas usam spinner. Saídas
+                    contínuas podem usar log por grupo.
+                  </p>
+                </div>
+                <div class="shell">
+                  <div class="shell-head">
+                    <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                    <span>validar</span>
+                  </div>
+                  <div class="shell-body">
+                    <span class="prompt-row success"
+                      ><span>✓</span><span>diff sem erro de espaço</span></span
+                    >
+                    <span class="prompt-row success"
+                      ><span>✓</span><span>format aplicado</span></span
+                    >
+                    <span class="prompt-row active"
+                      ><span>◆</span><span>build em execução</span></span
+                    >
+                    <span class="prompt-row muted"
+                      ><span>◇</span><span>checks completos antes do Gate</span></span
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="projeto-existente">
+        <div class="section-title">
+          <h2>Fluxo 2 — Adotar um projeto existente</h2>
+          <p>
+            Aqui a pessoa já tem um produto funcionando. O fluxo precisa ganhar confiança: preservar
+            conteúdo, explicar conflitos e permitir avanço em blocos verificáveis.
+          </p>
+        </div>
+
+        <div class="flow-layout">
+          <input
+            class="simulator-input"
+            id="existing-detect"
+            name="existing-flow-demo"
+            type="radio"
+            checked
+          />
+          <input
+            class="simulator-input"
+            id="existing-merge"
+            name="existing-flow-demo"
+            type="radio"
+          />
+          <input
+            class="simulator-input"
+            id="existing-force"
+            name="existing-flow-demo"
+            type="radio"
+          />
+          <input
+            class="simulator-input"
+            id="existing-apply"
+            name="existing-flow-demo"
+            type="radio"
+          />
+          <input
+            class="simulator-input"
+            id="existing-validate"
+            name="existing-flow-demo"
+            type="radio"
+          />
+
+          <article class="card">
+            <span class="status blue">passo a passo</span>
+            <h3>O que acontece</h3>
+            <div class="step-controls" aria-label="Etapas do projeto existente">
+              <label class="step-button" for="existing-detect">
+                <span class="step-number">1</span>
+                <div>
+                  <strong>Reconhecer repo vivo</strong>
+                  <p>package.json, scripts, CI, formatter e docs existentes entram no snapshot.</p>
+                </div>
+              </label>
+              <label class="step-button" for="existing-merge">
+                <span class="step-number">2</span>
+                <div>
+                  <strong>Escolher adoção conservadora</strong>
+                  <p>O padrão preserva conteúdo e usa blocos gerenciados quando possível.</p>
+                </div>
+              </label>
+              <label class="step-button" for="existing-force">
+                <span class="step-number">3</span>
+                <div>
+                  <strong>Resolver conflito com clareza</strong>
+                  <p>
+                    Quando há formatter rival, hook incompatível ou arquivo sensível, o fluxo para.
+                  </p>
+                </div>
+              </label>
+              <label class="step-button" for="existing-apply">
+                <span class="step-number">4</span>
+                <div>
+                  <strong>Aplicar somente o permitido</strong>
+                  <p>Force é opção explícita, nunca consequência escondida.</p>
+                </div>
+              </label>
+              <label class="step-button" for="existing-validate">
+                <span class="step-number">5</span>
+                <div>
+                  <strong>Validar o diff</strong>
+                  <p>O resultado precisa ser fácil de revisar e reverter, se necessário.</p>
+                </div>
+              </label>
+            </div>
+          </article>
+
+          <div class="simulator-stage" aria-label="Simulação do flow para projeto existente">
+            <div class="simulator-panels">
+              <div class="simulator-panel panel-existing-detect">
+                <div class="simulator-copy">
+                  <span class="status blue">diagnóstico</span>
+                  <h3>Antes de propor ação, o fluxo entende o repo.</h3>
+                  <p>
+                    Scripts, formatter, hooks, CI e arquivos governados viram entrada do plano. O
+                    código que aplica as mudanças não decide regra de negócio.
+                  </p>
+                </div>
+                <div class="shell">
+                  <div class="shell-head">
+                    <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                    <span>flow adopt</span>
+                  </div>
+                  <div class="shell-body">
+                    <span class="terminal-line">◇ Projeto existente detectado</span>
+                    <span class="prompt-row success"
+                      ><span>✓</span><span>package.json encontrado</span></span
+                    >
+                    <span class="prompt-row success"
+                      ><span>✓</span><span>scripts existentes preservados</span></span
+                    >
+                    <span class="prompt-row warn"
+                      ><span>!</span><span>formatter rival detectado</span></span
+                    >
+                  </div>
+                </div>
+              </div>
+
+              <div class="simulator-panel panel-existing-merge">
+                <div class="simulator-copy">
+                  <span class="status green">preservação</span>
+                  <h3>O padrão é adicionar sem apagar.</h3>
+                  <p>
+                    Blocos gerenciados permitem atualização futura. Conteúdo fora do bloco é tratado
+                    como propriedade do projeto.
+                  </p>
+                </div>
+                <div class="shell">
+                  <div class="shell-head">
+                    <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                    <span>plano conservador</span>
+                  </div>
+                  <div class="shell-body">
+                    <span class="terminal-line">◇ O que será feito</span>
+                    <span class="prompt-row success"
+                      ><span>+</span><span>Adicionar bloco gerenciado em AGENTS.md</span></span
+                    >
+                    <span class="prompt-row success"
+                      ><span>+</span><span>Espelhar templates faltantes</span></span
+                    >
+                    <span class="prompt-row muted"
+                      ><span>=</span><span>Manter scripts existentes</span></span
+                    >
+                  </div>
+                </div>
+              </div>
+
+              <div class="simulator-panel panel-existing-force">
+                <div class="simulator-copy">
+                  <span class="status amber">conflito explícito</span>
+                  <h3>Conflito não vira surpresa no diff.</h3>
+                  <p>
+                    Se uma decisão pode alterar comportamento do projeto, o fluxo mostra opções:
+                    manter, migrar com force ou sair para corrigir manualmente.
+                  </p>
+                </div>
+                <div class="shell">
+                  <div class="shell-head">
+                    <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                    <span>resolver conflito</span>
+                  </div>
+                  <div class="shell-body">
+                    <span class="terminal-line">▲ Formatter rival encontrado</span>
+                    <div class="mini-carousel" data-mini-carousel>
+                      <div class="mini-tabs" role="tablist" aria-label="Tipos de conflito">
+                        <button class="mini-tab is-active" data-mini-slide="formatter">
+                          Formatter
+                        </button>
+                        <button class="mini-tab" data-mini-slide="hook">Hook</button>
+                        <button class="mini-tab" data-mini-slide="ci">CI</button>
+                      </div>
+
+                      <div class="mini-slide is-active" data-mini-panel="formatter">
+                        <span class="mini-caption"
+                          >Quando há formatter rival, o padrão é preservar e pedir decisão.</span
+                        >
+                        <span class="choice active"
+                          ><span>◆</span><span>Manter configuração atual</span></span
+                        >
+                        <span class="choice"
+                          ><span>○</span><span>Migrar para Prettier com force</span></span
+                        >
+                        <span class="choice"
+                          ><span>○</span><span>Sair e corrigir manualmente</span></span
+                        >
+                      </div>
+
+                      <div class="mini-slide" data-mini-panel="hook">
+                        <span class="mini-caption"
+                          >Hook incompatível não é sobrescrito sem autorização.</span
+                        >
+                        <span class="prompt-row warn"
+                          ><span>!</span><span>.husky/pre-commit já existe</span></span
+                        >
+                        <span class="choice active"
+                          ><span>◆</span><span>Preservar hook atual</span></span
+                        >
+                        <span class="choice"
+                          ><span>○</span><span>Adicionar bloco gerenciado se suportado</span></span
+                        >
+                      </div>
+
+                      <div class="mini-slide" data-mini-panel="ci">
+                        <span class="mini-caption"
+                          >Workflow existente entra no plano como input, não como surpresa.</span
+                        >
+                        <span class="prompt-row success"
+                          ><span>✓</span><span>.github/workflows detectado</span></span
+                        >
+                        <span class="choice active"
+                          ><span>◆</span><span>Preservar workflow atual</span></span
+                        >
+                        <span class="choice"
+                          ><span>○</span><span>Atualizar com force depois do preview</span></span
+                        >
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="simulator-panel panel-existing-apply">
+                <div class="simulator-copy">
+                  <span class="status amber">aplicação controlada</span>
+                  <h3>O fluxo só aplica o que foi autorizado.</h3>
+                  <p>
+                    Adoção conservadora segue sem force. Quando force é necessário, o guia mostra a
+                    consequência antes de permitir a aplicação.
+                  </p>
+                </div>
+                <div class="shell">
+                  <div class="shell-head">
+                    <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                    <span>aplicar adoção</span>
+                  </div>
+                  <div class="shell-body">
+                    <span class="terminal-line">◇ Aplicação planejada</span>
+                    <div class="mini-carousel" data-mini-carousel>
+                      <div class="mini-tabs" role="tablist" aria-label="Modos de aplicação">
+                        <button class="mini-tab is-active" data-mini-slide="dry-run">
+                          Dry-run
+                        </button>
+                        <button class="mini-tab" data-mini-slide="safe-apply">Aplicar</button>
+                        <button class="mini-tab" data-mini-slide="force">Force</button>
+                      </div>
+
+                      <div class="mini-slide is-active" data-mini-panel="dry-run">
+                        <span class="mini-caption"
+                          >Primeiro a pessoa vê o plano sem tocar no disco.</span
+                        >
+                        <span class="prompt-row muted"
+                          ><span>=</span><span>Arquivos existentes ficam intactos</span></span
+                        >
+                        <span class="prompt-row success"
+                          ><span>✓</span><span>Preview mostra tudo que seria alterado</span></span
+                        >
+                      </div>
+
+                      <div class="mini-slide" data-mini-panel="safe-apply">
+                        <span class="mini-caption"
+                          >A aplicação padrão preserva conteúdo do projeto.</span
+                        >
+                        <span class="prompt-row success"
+                          ><span>✓</span
+                          ><span>Preservar arquivos fora de blocos gerenciados</span></span
+                        >
+                        <span class="prompt-row success"
+                          ><span>✓</span><span>Adicionar apenas templates faltantes</span></span
+                        >
+                      </div>
+
+                      <div class="mini-slide" data-mini-panel="force">
+                        <span class="mini-caption"
+                          >Force só aparece quando a consequência está clara.</span
+                        >
+                        <span class="prompt-row warn"
+                          ><span>!</span
+                          ><span>Substituir configuração exige confirmação separada</span></span
+                        >
+                        <span class="prompt-row warn"
+                          ><span>!</span
+                          ><span>O preview precisa nomear o arquivo afetado</span></span
+                        >
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="simulator-panel panel-existing-validate">
+                <div class="simulator-copy">
+                  <span class="status green">evidência</span>
+                  <h3>O onboarding termina com algo revisável.</h3>
+                  <p>
+                    O fluxo orienta validação do diff, não apenas “deu certo”. Isso é o que permite
+                    adotar o framework em projetos já em uso.
+                  </p>
+                </div>
+                <div class="shell">
+                  <div class="shell-head">
+                    <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                    <span>validar adoção</span>
+                  </div>
+                  <div class="shell-body">
+                    <span class="prompt-row success"
+                      ><span>✓</span><span>dry-run comparado com aplicação real</span></span
+                    >
+                    <span class="prompt-row success"
+                      ><span>✓</span><span>conteúdo existente preservado</span></span
+                    >
+                    <span class="prompt-row success"
+                      ><span>✓</span><span>diff pronto para review</span></span
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="repo-em-uso">
+        <div class="section-title">
+          <h2>Fluxo 3 — Usar e manter um repo governado</h2>
+          <p>
+            Aqui o projeto já usa o framework. O guia vira a porta humana do dia a dia: mostra o
+            estado, sugere o próximo passo, oferece alternativas úteis e deixa ações sensíveis
+            protegidas.
+          </p>
+        </div>
+
+        <div class="flow-layout">
+          <input
+            class="simulator-input"
+            id="active-state"
+            name="active-flow-demo"
+            type="radio"
+            checked
+          />
+          <input class="simulator-input" id="active-next" name="active-flow-demo" type="radio" />
+          <input
+            class="simulator-input"
+            id="active-validate"
+            name="active-flow-demo"
+            type="radio"
+          />
+          <input class="simulator-input" id="active-review" name="active-flow-demo" type="radio" />
+          <input class="simulator-input" id="active-update" name="active-flow-demo" type="radio" />
+          <input class="simulator-input" id="active-gate" name="active-flow-demo" type="radio" />
+
+          <article class="card">
+            <span class="status purple">passo a passo</span>
+            <h3>O que acontece</h3>
+            <div class="step-controls" aria-label="Etapas do repo em uso">
+              <label class="step-button" for="active-state">
+                <span class="step-number">1</span>
+                <div>
+                  <strong>Abrir estado do repo</strong>
+                  <p>Branch, PR, CI, tree, checkpoint, reviews e topologia entram no resumo.</p>
+                </div>
+              </label>
+              <label class="step-button" for="active-next">
+                <span class="step-number">2</span>
+                <div>
+                  <strong>Seguir a próxima ação</strong>
+                  <p>A ação principal vem do modelo governado, não de cálculo local do guia.</p>
+                </div>
+              </label>
+              <label class="step-button" for="active-validate">
+                <span class="step-number">3</span>
+                <div>
+                  <strong>Validar mudanças</strong>
+                  <p>
+                    Durante implementação, o fluxo prioriza validações do diff antes das completas.
+                  </p>
+                </div>
+              </label>
+              <label class="step-button" for="active-review">
+                <span class="step-number">4</span>
+                <div>
+                  <strong>Pedir revisão quando fizer sentido</strong>
+                  <p>
+                    Antes do Gate, o guia pode sugerir revisão técnica, arquitetura ou segurança.
+                  </p>
+                </div>
+              </label>
+              <label class="step-button" for="active-update">
+                <span class="step-number">5</span>
+                <div>
+                  <strong>Atualizar práticas existentes</strong>
+                  <p>
+                    Update altera runtime, templates, providers, features e práticas já governadas.
+                  </p>
+                </div>
+              </label>
+              <label class="step-button" for="active-gate">
+                <span class="step-number">6</span>
+                <div>
+                  <strong>Chegar ao Gate sem improviso</strong>
+                  <p>Ready, Human Gate e merge exigem estado correto, prévia e decisão humana.</p>
+                </div>
+              </label>
+            </div>
+          </article>
+
+          <div class="simulator-stage" aria-label="Simulação do flow para repo em uso">
+            <div class="simulator-panels">
+              <div class="simulator-panel panel-active-state">
+                <div class="simulator-copy">
+                  <span class="status purple">estado situado</span>
+                  <h3>A primeira tela responde “onde estamos?”.</h3>
+                  <p>
+                    O resumo precisa ser legível no celular: agora, depois, o que já está ok, o que
+                    falta e qual decisão não pode ser executada ainda.
+                  </p>
+                </div>
+                <div class="shell">
+                  <div class="shell-head">
+                    <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                    <span>flow</span>
+                  </div>
+                  <div class="shell-body">
+                    <span class="terminal-line">◇ Estado atual</span>
+                    <span class="terminal-line dim">Agora: CO-10.5 — UX e guia governado</span>
+                    <span class="terminal-line dim"
+                      >Depois: CO-10.6 — falsificação + Human Gate</span
+                    >
+                    <span class="terminal-line dim">PR Draft · CI verde · tree limpa</span>
+                    <span class="choice active"
+                      ><span>◆</span
+                      ><span>Próxima ação: declarar readiness quando critérios passarem</span></span
+                    >
+                  </div>
+                </div>
+              </div>
+
+              <div class="simulator-panel panel-active-next">
+                <div class="simulator-copy">
+                  <span class="status green">orientação</span>
+                  <h3>Alternativas aparecem quando ajudam a decidir.</h3>
+                  <p>
+                    Se houver uma percepção recorrente, revisão recomendada ou validação útil, ela
+                    aparece como alternativa. Bloqueios aparecem dentro da ação bloqueada, não como
+                    lista abstrata.
+                  </p>
+                </div>
+                <div class="shell">
+                  <div class="shell-head">
+                    <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                    <span>menu humano</span>
+                  </div>
+                  <div class="shell-body">
+                    <span class="terminal-line">◇ O que você quer fazer?</span>
+                    <div class="mini-carousel" data-mini-carousel>
+                      <div class="mini-tabs" role="tablist" aria-label="Tipos de ação">
+                        <button class="mini-tab is-active" data-mini-slide="recommended">
+                          Recomendada
+                        </button>
+                        <button class="mini-tab" data-mini-slide="alternatives">
+                          Alternativas
+                        </button>
+                        <button class="mini-tab" data-mini-slide="blocked">Bloqueios</button>
+                      </div>
+
+                      <div class="mini-slide is-active" data-mini-panel="recommended">
+                        <span class="mini-caption"
+                          >A primeira opção acompanha o que o modelo governado recomenda.</span
+                        >
+                        <span class="choice active"
+                          ><span>◆</span><span>Finalizar mudanças locais e validar</span></span
+                        >
+                        <span class="choice"
+                          ><span>○</span><span>Ver resumo completo do estado</span></span
+                        >
+                      </div>
+
+                      <div class="mini-slide" data-mini-panel="alternatives">
+                        <span class="mini-caption"
+                          >Alternativas ajudam sem competir com a próxima ação.</span
+                        >
+                        <span class="choice"
+                          ><span>○</span
+                          ><span>Ver percepções recorrentes que precisam de decisão</span></span
+                        >
+                        <span class="choice"
+                          ><span>○</span><span>Ver orientação de trabalho / handoff</span></span
+                        >
+                        <span class="choice"
+                          ><span>○</span><span>Ver tipos de revisão disponíveis</span></span
+                        >
+                      </div>
+
+                      <div class="mini-slide" data-mini-panel="blocked">
+                        <span class="mini-caption"
+                          >Ações sensíveis aparecem com motivo, sem botão de execução.</span
+                        >
+                        <span class="choice disabled"
+                          ><span>◇</span><span>Human Gate: bloqueado por PR Draft</span></span
+                        >
+                        <span class="choice disabled"
+                          ><span>◇</span
+                          ><span>Merge: só depois do Gate e integração final</span></span
+                        >
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="simulator-panel panel-active-validate">
+                <div class="simulator-copy">
+                  <span class="status green">validação guiada</span>
+                  <h3>O guia diferencia validação do diff e validação completa.</h3>
+                  <p>
+                    Durante a implementação, a pessoa consegue limpar formatação e conferir o que
+                    mudou. Antes de Ready ou Gate, o fluxo pede a validação completa.
+                  </p>
+                </div>
+                <div class="shell">
+                  <div class="shell-head">
+                    <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                    <span>validar mudanças</span>
+                  </div>
+                  <div class="shell-body">
+                    <span class="terminal-line">◇ Como validar agora?</span>
+                    <span class="choice active"
+                      ><span>◆</span><span>Validar apenas meu diff</span></span
+                    >
+                    <span class="choice"
+                      ><span>○</span><span>Corrigir formatação do diff e validar</span></span
+                    >
+                    <span class="choice disabled"
+                      ><span>◇</span><span>Validação completa entra antes do Gate</span></span
+                    >
+                  </div>
+                </div>
+              </div>
+
+              <div class="simulator-panel panel-active-review">
+                <div class="simulator-copy">
+                  <span class="status amber">revisão antes da decisão</span>
+                  <h3>O guia pode sugerir revisão sem transformar isso em bloqueio escondido.</h3>
+                  <p>
+                    Quando o risco justificar, a pessoa pode preparar uma revisão técnica,
+                    arquitetural ou de segurança antes do Human Gate.
+                  </p>
+                </div>
+                <div class="shell">
+                  <div class="shell-head">
+                    <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                    <span>tipos de revisão</span>
+                  </div>
+                  <div class="shell-body">
+                    <span class="terminal-line">◇ Que revisão preparar?</span>
+                    <div class="mini-carousel" data-mini-carousel>
+                      <div class="mini-tabs" role="tablist" aria-label="Tipos de revisão">
+                        <button class="mini-tab is-active" data-mini-slide="technical">
+                          Técnica
+                        </button>
+                        <button class="mini-tab" data-mini-slide="architecture">Arquitetura</button>
+                        <button class="mini-tab" data-mini-slide="security">Segurança</button>
+                      </div>
+
+                      <div class="mini-slide is-active" data-mini-panel="technical">
+                        <span class="choice active"
+                          ><span>◆</span><span>Auditoria técnica</span></span
+                        >
+                        <span class="mini-caption"
+                          >Verifica comportamento, testes, paridade e riscos de regressão.</span
+                        >
+                      </div>
+
+                      <div class="mini-slide" data-mini-panel="architecture">
+                        <span class="choice active"
+                          ><span>◆</span><span>Revisão arquitetural</span></span
+                        >
+                        <span class="mini-caption"
+                          >Confere bounded contexts, SSOT, dependências e separação de
+                          responsabilidades.</span
+                        >
+                      </div>
+
+                      <div class="mini-slide" data-mini-panel="security">
+                        <span class="choice active"
+                          ><span>◆</span><span>Revisão de segurança</span></span
+                        >
+                        <span class="mini-caption"
+                          >Procura risco em autoridade humana, comandos mutantes, stale state e
+                          permissões.</span
+                        >
+                      </div>
+                    </div>
+                    <span class="terminal-line dim"
+                      >O texto fica pronto para copiar e colar na IA escolhida.</span
+                    >
+                  </div>
+                </div>
+              </div>
+
+              <div class="simulator-panel panel-active-update">
+                <div class="simulator-copy">
+                  <span class="status blue">manutenção</span>
+                  <h3>Repo governado usa update, não init/adopt.</h3>
+                  <p>
+                    A pessoa pode atualizar runtime, templates, providers, features e práticas como
+                    CI, Prettier e Husky sem reinicializar o projeto.
+                  </p>
+                </div>
+                <div class="shell">
+                  <div class="shell-head">
+                    <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                    <span>flow update</span>
+                  </div>
+                  <div class="shell-body">
+                    <span class="terminal-line">◇ O que atualizar?</span>
+                    <div class="mini-carousel" data-mini-carousel>
+                      <div class="mini-tabs" role="tablist" aria-label="Atualizações disponíveis">
+                        <button class="mini-tab is-active" data-mini-slide="runtime">Base</button>
+                        <button class="mini-tab" data-mini-slide="providers">IA</button>
+                        <button class="mini-tab" data-mini-slide="quality">Qualidade</button>
+                        <button class="mini-tab" data-mini-slide="collaboration">
+                          Colaboração
+                        </button>
+                      </div>
+
+                      <div class="mini-slide is-active" data-mini-panel="runtime">
+                        <span class="mini-caption"
+                          >Atualiza a base do framework sem reinicializar o repositório.</span
+                        >
+                        <span class="prompt-row active"
+                          ><span>◆</span><span>Atualizar CLI e templates governados</span></span
+                        >
+                        <span class="prompt-row muted"
+                          ><span>=</span><span>Preservar specs e arquivos do projeto</span></span
+                        >
+                      </div>
+
+                      <div class="mini-slide" data-mini-panel="providers">
+                        <span class="mini-caption"
+                          >Providers entram como seleção de update, não como comando separado.</span
+                        >
+                        <span
+                          class="prompt-group-title"
+                          data-copy="provisioning.providerGroups.primary"
+                          >Assistentes principais do repositório</span
+                        >
+                        <span class="prompt-group"
+                          >◼ <span data-copy-provider-label="claude">Claude</span>
+                          <span class="prompt-hint" data-copy-provider-html-hint="claude"
+                            >CLAUDE.md para Claude Code</span
+                          ></span
+                        >
+                        <span class="prompt-group"
+                          >◼ <span data-copy-provider-label="openai">OpenAI/Codex</span>
+                          <span class="prompt-hint" data-copy-provider-html-hint="openai"
+                            >contexto para Codex</span
+                          ></span
+                        >
+                      </div>
+
+                      <div class="mini-slide" data-mini-panel="quality">
+                        <span class="mini-caption"
+                          >Práticas podem ser adicionadas ou atualizadas em repositórios já
+                          governados.</span
+                        >
+                        <span class="prompt-group"
+                          >◼
+                          <span data-copy-feature-html-label="ci"
+                            >CI no GitHub Actions - valida o PR no GitHub</span
+                          ></span
+                        >
+                        <span class="prompt-group"
+                          >◼
+                          <span data-copy-feature-html-label="prettier"
+                            >Formatação com Prettier - padroniza arquivos automaticamente</span
+                          ></span
+                        >
+                        <span class="prompt-group"
+                          >◼
+                          <span data-copy-feature-html-label="husky"
+                            >Hooks locais com Husky - checagens antes do commit</span
+                          ></span
+                        >
+                        <span class="prompt-group"
+                          >◼
+                          <span data-copy-feature-html-label="tdd"
+                            >Desenvolvimento guiado por testes (TDD)</span
+                          ></span
+                        >
+                        <span class="prompt-group"
+                          >◼
+                          <span data-copy-feature-html-label="bdd"
+                            >Especificação por exemplos (BDD)</span
+                          ></span
+                        >
+                      </div>
+
+                      <div class="mini-slide" data-mini-panel="collaboration">
+                        <span class="mini-caption"
+                          >O modo de colaboração muda políticas e orientações, não o histórico do
+                          repo.</span
+                        >
+                        <span class="prompt-group"
+                          >◻ Solo: fluxo mais enxuto para mantenedora única</span
+                        >
+                        <span class="prompt-group"
+                          >◻ Contributor: revisão clara para contribuições externas</span
+                        >
+                        <span class="prompt-group"
+                          >◻ Team: mais coordenação, reviews e handoff explícito</span
+                        >
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="simulator-panel panel-active-gate">
+                <div class="simulator-copy">
+                  <span class="status amber">decisão humana</span>
+                  <h3>Revisão pode ser sugerida antes do Gate.</h3>
+                  <p>
+                    Reviews opcionais reduzem risco, mas não viram bloqueio escondido. Reviews
+                    obrigatórios bloqueiam quando a política exigir.
+                  </p>
+                </div>
+                <div class="shell">
+                  <div class="shell-head">
+                    <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                    <span>antes do Human Gate</span>
+                  </div>
+                  <div class="shell-body">
+                    <span class="terminal-line">◇ Preparar decisão humana</span>
+                    <div class="mini-carousel" data-mini-carousel>
+                      <div class="mini-tabs" role="tablist" aria-label="Preparação para Gate">
+                        <button class="mini-tab is-active" data-mini-slide="checks">
+                          Checagens
+                        </button>
+                        <button class="mini-tab" data-mini-slide="reviews">Reviews</button>
+                        <button class="mini-tab" data-mini-slide="decision">Decisão</button>
+                        <button class="mini-tab" data-mini-slide="transition">Depois</button>
+                      </div>
+
+                      <div class="mini-slide is-active" data-mini-panel="checks">
+                        <span class="mini-caption"
+                          >O Gate só entra em pauta quando o estado factual converge.</span
+                        >
+                        <span class="prompt-row success"><span>✓</span><span>CI verde</span></span>
+                        <span class="prompt-row success"
+                          ><span>✓</span><span>findings fechados</span></span
+                        >
+                        <span class="prompt-row success"
+                          ><span>✓</span><span>working tree limpa</span></span
+                        >
+                      </div>
+
+                      <div class="mini-slide" data-mini-panel="reviews">
+                        <span class="mini-caption"
+                          >Reviews opcionais podem reduzir risco; obrigatórios bloqueiam quando a
+                          política exigir.</span
+                        >
+                        <span class="prompt-row active"
+                          ><span>◆</span><span>Sugerir revisão técnica final</span></span
+                        >
+                        <span class="prompt-row muted"
+                          ><span>=</span
+                          ><span>Review opcional stale não bloqueia sozinho</span></span
+                        >
+                      </div>
+
+                      <div class="mini-slide" data-mini-panel="decision">
+                        <span class="mini-caption"
+                          >Ready comunica que o PR está pronto; Human Gate decide avanço.</span
+                        >
+                        <span class="prompt-row warn"
+                          ><span>!</span><span>Ready exige confirmação humana</span></span
+                        >
+                        <span class="prompt-row warn"
+                          ><span>!</span><span>Human Gate exige briefing e confirmação</span></span
+                        >
+                      </div>
+
+                      <div class="mini-slide" data-mini-panel="transition">
+                        <span class="mini-caption"
+                          >A aprovação não faz merge: ela libera a transição governada
+                          seguinte.</span
+                        >
+                        <span class="prompt-row muted"
+                          ><span>→</span><span>abrir próximo PR stacked autorizado</span></span
+                        >
+                        <span class="prompt-row muted"
+                          ><span>→</span><span>merge só no fechamento de integração</span></span
+                        >
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="spec">
+        <div class="section-title">
+          <h2>Da primeira ideia ao merge final</h2>
+          <p>
+            O ai-guidelines é mais valioso quando uma spec inteira deixa de depender da memória de
+            uma pessoa. Cada etapa tem entrada, autoridade, comando, efeito permitido, validação e
+            próximo estado.
+          </p>
+        </div>
+
+        <div class="flowline" aria-label="Ciclo de uma spec governada">
+          <div class="stage">
+            <span class="num">1</span>
+            <strong>Nasce a spec</strong>
+            <small>Problema, escopo, topologia e checkpoints entram em artefatos governados.</small>
+          </div>
+          <div class="stage">
+            <span class="num">2</span>
+            <strong>PR Draft cedo</strong>
+            <small>O PR vira contêiner de trabalho; Draft não significa entrega pronta.</small>
+          </div>
+          <div class="stage">
+            <span class="num">3</span>
+            <strong>Handoff</strong>
+            <small>Nova sessão recebe fatos versionados para colar na LLM de preferência.</small>
+          </div>
+          <div class="stage">
+            <span class="num">4</span>
+            <strong>Implementação</strong>
+            <small>Sub-checkpoints limitam escopo, autoridade e validações.</small>
+          </div>
+          <div class="stage">
+            <span class="num">5</span>
+            <strong>Reviews</strong>
+            <small>Obrigatórios bloqueiam; opcionais podem ser sugeridos para reduzir risco.</small>
+          </div>
+          <div class="stage">
+            <span class="num">6</span>
+            <strong>Correções</strong>
+            <small>Finding, resolution, verification e disposition fecham o ciclo de review.</small>
+          </div>
+          <div class="stage">
+            <span class="num">7</span>
+            <strong>Readiness</strong>
+            <small>O fluxo declara que o ponto está pronto; não é edição manual solta.</small>
+          </div>
+          <div class="stage">
+            <span class="num">8</span>
+            <strong>Ready + Gate</strong>
+            <small>PR deixa Draft; Human Gate decide se o checkpoint pode avançar.</small>
+          </div>
+          <div class="stage">
+            <span class="num">9</span>
+            <strong>Próximo nó</strong>
+            <small>A stack continua sem merge isolado em main.</small>
+          </div>
+          <div class="stage">
+            <span class="num">10</span>
+            <strong>Merge final</strong>
+            <small>O PR de integração fecha a spec inteira.</small>
+          </div>
+        </div>
+      </section>
+
+      <section id="regras">
+        <div class="section-title">
+          <h2>Regras de negócio que o fluxo protege</h2>
+          <p>
+            O guia interativo não é uma segunda fonte de verdade. Ele só apresenta, em linguagem
+            humana, o que o modelo governado já derivou.
+          </p>
+        </div>
+
+        <table class="matrix">
+          <thead>
+            <tr>
+              <th>Regra</th>
+              <th>Como aparece para a pessoa</th>
+              <th>O que evita</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Uma próxima ação principal</td>
+              <td>O menu destaca uma recomendação e move alternativas para baixo.</td>
+              <td>Escolhas paralelas que parecem igualmente certas.</td>
+            </tr>
+            <tr>
+              <td>Ação bloqueada explica o motivo</td>
+              <td>
+                O bloqueio aparece dentro da ação: CI pendente, tree suja, PR Draft, finding aberto.
+              </td>
+              <td>Listas abstratas que obrigam a pessoa a investigar código.</td>
+            </tr>
+            <tr>
+              <td>Ação proibida não vira botão</td>
+              <td>
+                Ready, Human Gate, merge e transição de nó só aparecem quando o fluxo permite.
+              </td>
+              <td>Executar decisão humana por engano.</td>
+            </tr>
+            <tr>
+              <td>Providers não é comando próprio</td>
+              <td>Provider selection aparece dentro de init/adopt/update.</td>
+              <td>Voltar a um verbo legado depois do corte do runtime antigo.</td>
+            </tr>
+            <tr>
+              <td>Review opcional não bloqueia sozinho</td>
+              <td>
+                O guia pode sugerir revisão antes do Gate, mas diferencia recomendação de bloqueio.
+              </td>
+              <td>Transformar prudência em trava escondida.</td>
+            </tr>
+            <tr>
+              <td>Offline ou dado stale muda o estado</td>
+              <td>
+                Sem GitHub/CI confiável, o fluxo mostra modo degradado e impede decisões inseguras.
+              </td>
+              <td>Liberar Gate com PR, CI ou receipt desatualizado.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section id="valor">
+        <div class="section-title">
+          <h2>Por que desenvolvedores deveriam usar</h2>
+          <p>
+            O framework reduz trabalho invisível: menos decisões perdidas em chat, menos drift entre
+            PR e artefatos, e menos risco de avançar no estado errado.
+          </p>
+        </div>
+
+        <div class="grid three">
+          <article class="card">
+            <span class="status green">clareza</span>
+            <h3>A pessoa sabe o que fazer agora</h3>
+            <p>
+              O guia responde “onde estamos?”, “o que falta?” e “qual comando usar?” sem exigir
+              leitura de arquivos internos.
+            </p>
+          </article>
+          <article class="card">
+            <span class="status blue">continuidade</span>
+            <h3>Contexto viaja entre sessões</h3>
+            <p>
+              Handoff e work viram texto copiável para humanos e LLMs, mantendo a fonte factual no
+              repositório.
+            </p>
+          </article>
+          <article class="card">
+            <span class="status purple">controle</span>
+            <h3>Automação não atropela autoridade humana</h3>
+            <p>
+              Ready, Human Gate, merge e mudanças sensíveis exigem estado correto, prévia e
+              confirmação explícita.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section id="comandos">
+        <div class="section-title">
+          <h2>Comandos diretos para quem já sabe o que quer</h2>
+          <p>
+            O guia interativo é a porta humana. Os comandos diretos continuam existindo para
+            automação, inspeção e usuários avançados.
+          </p>
+        </div>
+
+        <table class="matrix">
+          <thead>
+            <tr>
+              <th>Objetivo</th>
+              <th>Comando</th>
+              <th>Quando usar</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Entrar pelo guia humano</td>
+              <td><code>npm run flow</code></td>
+              <td>Uso diário em terminal interativo.</td>
+            </tr>
+            <tr>
+              <td>Resumo sem prompt</td>
+              <td><code>npm run flow -- cockpit</code></td>
+              <td>Automação, pipe ou quando quiser saída textual direta.</td>
+            </tr>
+            <tr>
+              <td>Começar projeto novo</td>
+              <td><code>npm run flow -- init</code></td>
+              <td>Diretório novo ou sem governança.</td>
+            </tr>
+            <tr>
+              <td>Adotar repo existente</td>
+              <td><code>npm run flow -- adopt</code></td>
+              <td>Projeto já existe, mas ainda não usa ai-guidelines.</td>
+            </tr>
+            <tr>
+              <td>Atualizar repo governado</td>
+              <td><code>npm run flow -- update</code></td>
+              <td>Runtime, templates, providers, features e práticas.</td>
+            </tr>
+            <tr>
+              <td>Retomar uma spec</td>
+              <td><code>npm run flow -- handoff 0024</code></td>
+              <td>Nova sessão com IA ou humano precisa de contexto factual.</td>
+            </tr>
+            <tr>
+              <td>Ver trabalho atual</td>
+              <td><code>npm run flow -- work --authorization explicit-work-request</code></td>
+              <td>Antes de implementar ou resolver algo no checkpoint ativo.</td>
+            </tr>
+            <tr>
+              <td>Entender decisões</td>
+              <td><code>npm run flow -- decide --brief-only</code></td>
+              <td>Antes de readiness, avanço, Ready ou Human Gate.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <div class="callout">
+          <strong>Regra canônica:</strong>
+          esta página explica a experiência para humanos. A verdade executável continua sendo o
+          estado versionado do repositório, o catálogo de comandos e a derivação governada usada
+          pelo runtime.
+        </div>
+      </section>
+
+      <footer class="footer">
+        <p>
+          Guia visual do fluxo local governado. Usuários do pacote público continuam podendo rodar
+          <code>npx ai-guidelines</code>; contribuidores deste checkout usam
+          <code>npm run flow</code>.
+        </p>
+      </footer>
+    </main>
+    <script src="assets/flow-copy.generated.js"></script>
+    <script src="assets/flow-site.js"></script>
+  </body>
+</html>

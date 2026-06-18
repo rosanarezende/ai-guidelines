@@ -1,0 +1,166 @@
+{
+  "intro": "ai-guidelines flow",
+  "stateTitle": "Estado atual",
+  "mainQuestion": "O que você quer fazer agora?",
+  "fallbackValidationAction": "Finalizar as mudanças locais e deixar a working tree limpa.",
+  "menu": {
+    "fullSummary": "Ver resumo completo antes de escolher",
+    "recommendedPrefix": "PRÓXIMA AÇÃO RECOMENDADA",
+    "recommendedHint": "opção principal para este estado",
+    "recommendedValidationHint": "opção principal agora",
+    "singleAlternativePrefix": "ALTERNATIVA",
+    "singleAlternativeHint": "mostra detalhes; não aplica nada",
+    "multipleAlternatives": "Analisar alternativas",
+    "multipleAlternativesHint": "caminhos disponíveis sem aplicar nada automaticamente",
+    "validate": "Validar minhas mudanças",
+    "decisions": "Ver ações disponíveis e bloqueadas",
+    "decisionsHint": "mostra o que pode ser feito agora e por quê",
+    "work": "Ver orientação de trabalho / handoff",
+    "workHint": "copia contexto para colar na LLM de sua preferência",
+    "review": "Ver tipos de revisão disponíveis",
+    "reviewHint": "explica quais revisões existem e copia o catálogo",
+    "advanced": "Ferramentas técnicas e diagnósticos",
+    "advancedHint": "para quando você quer inspecionar ou diagnosticar algo específico"
+  },
+  "summary": {
+    "state": "ESTADO",
+    "now": "AGORA",
+    "next": "DEPOIS",
+    "objective": "Objetivo:",
+    "output": "Entrega:",
+    "ready": "JÁ ESTÁ OK",
+    "missing": "AINDA FALTA",
+    "recommended": "PRÓXIMA AÇÃO RECOMENDADA",
+    "understandBeforeApply": "Para entender antes de aplicar:",
+    "alternatives": "ALTERNATIVAS"
+  },
+  "actionTitles": {
+    "close-dispositions": "fechar feedbacks já resolvidos",
+    "finish-subcheckpoint": "concluir este ponto e abrir o próximo",
+    "mark-readiness": "declarar que este ponto está pronto",
+    "advance-subcheckpoint": "abrir o próximo ponto de trabalho",
+    "human-gate": "preparar decisão humana do checkpoint",
+    "open-next-node": "abrir o próximo PR da stack",
+    "pr-ready": "verificar se o PR pode sair de Draft",
+    "request-advisory-review": "pedir revisão antes da decisão humana",
+    "review-insight-candidates": "Ver percepções recorrentes que precisam de decisão"
+  },
+  "results": {
+    "summaryRendered": "Resumo completo renderizado.",
+    "noAction": "Sem ação disponível",
+    "noMutation": "Nenhuma mutação executada.",
+    "blockedRendered": "Bloqueios exibidos.",
+    "cancelled": "Saindo sem alterações.",
+    "blockedEmpty": "Nenhuma ação bloqueada pelo modelo comum.",
+    "blockedFallbackReason": "sem motivo registrado"
+  },
+  "recommendedAction": {
+    "title": "Próximo passo",
+    "heading": "## Próximo passo recomendado",
+    "understand": "Para entender antes de aplicar:",
+    "effects": "O que essa decisão pode mudar:",
+    "mutatingCommand": "Se houver confirmação humana, este é o comando que aplica:",
+    "confirm": "Abrir a tela de decisão agora?",
+    "cancelled": "Nenhuma decisão executada."
+  },
+  "clipboard": {
+    "copied": "{title} copiado para o clipboard. Cole na LLM de sua preferência para continuar.",
+    "manual": "{title} não pôde ser copiado automaticamente; mostrando o conteúdo para cópia manual.",
+    "begin": "--- {title} ---",
+    "end": "--- FIM {title} ---"
+  },
+  "handoff": {
+    "title": "Orientação de trabalho / handoff",
+    "intro": [
+      "Vou preparar um pacote de contexto para colar na LLM de sua preferência.",
+      "",
+      "Ele inclui:",
+      "- handoff situado da spec ativa;",
+      "- orientação de trabalho projetada pelo fluxo atual.",
+      "",
+      "Nada será alterado no repositório."
+    ],
+    "documentTitle": "# Orientação de trabalho / handoff",
+    "handoffHeading": "## Handoff situado",
+    "workHeading": "## Orientação de trabalho"
+  },
+  "review": {
+    "title": "Tipos de revisão disponíveis",
+    "intro": [
+      "Esta área ajuda a entender quais revisões existem e qual política vale para o PR.",
+      "",
+      "O catálogo pode ser copiado para o clipboard para você colar em uma LLM antes de pedir uma análise.",
+      "",
+      "Registrar uma revisão no repositório continua exigindo comando e autorização explícitos; esta tela só prepara contexto."
+    ],
+    "question": "Qual contexto você quer preparar?",
+    "types": "Copiar/ver tipos de revisão possíveis",
+    "typesHint": "catálogo para colar na LLM de sua preferência",
+    "policy": "Ver regra de revisão aplicada neste PR",
+    "policyHint": "mostra quais revisões são obrigatórias ou opcionais",
+    "policyTitle": "Regra de revisão deste PR"
+  },
+  "validation": {
+    "question": "Como você quer conferir suas mudanças?",
+    "changed": "Validar somente o diff atual",
+    "changedHint": "rápido; não reescreve arquivos",
+    "changedFix": "Formatar arquivos alterados e validar o diff",
+    "changedFixHint": "pode reescrever arquivos alterados",
+    "fullHelp": "Entender a validação completa",
+    "fullHelpHint": "antes de Ready/Human Gate",
+    "fullTitle": "Validação completa",
+    "fullNote": [
+      "Use `npm run validate` antes de Ready/Human Gate.",
+      "",
+      "Durante PR Draft, `npm run flow -- validate changed` cobre o ciclo rápido do diff."
+    ],
+    "confirmFix": "Formatar somente arquivos alterados antes de validar?",
+    "fixCancelled": "Validação com --fix cancelada.",
+    "taskFix": "Formatar e validar o diff",
+    "taskChanged": "Validar o diff",
+    "taskLogTitle": "Etapas da validação",
+    "taskMessage": "Conferindo o diff com o comando governado.",
+    "step1": "1/4 Conferindo espaços, finais de linha e conflitos de patch.",
+    "step2": "2/4 Conferindo formatação dos arquivos alterados.",
+    "step3": "3/4 Rodando build/checks aplicáveis ao diff.",
+    "step4": "4/4 Consolidando o resultado para você.",
+    "failed": "Validação intermediária falhou.",
+    "passed": "Validação intermediária passou.",
+    "completed": "Validação intermediária concluída."
+  },
+  "advanced": {
+    "title": "Ferramentas técnicas e diagnósticos",
+    "continueOther": "Trocar para outra spec pelo ID ou nome",
+    "continueOtherHint": "somente leitura; útil quando você muda de contexto",
+    "activeSpecs": "Ver trabalhos governados ativos",
+    "activeSpecsHint": "mostra o índice público",
+    "drift": "Conferir se a lista pública está coerente",
+    "driftHint": "diagnóstico de divergência",
+    "visualPrompt": "Gerar prompt visual para outro gerador de imagem",
+    "publication": "Entender quando publicar o estado",
+    "publicationHint": "não publica nada sozinho",
+    "finalOps": "Entender saída de Draft, decisão humana e merge final",
+    "finalOpsHint": "essas ações continuam protegidas",
+    "specQuestion": "Qual spec? Ex.: 0024",
+    "publicationTitle": "Publicação de estado",
+    "publicationNote": [
+      "Publicar estado atualiza a projeção pública de specs ativas.",
+      "",
+      "Use apenas quando o fluxo governado pedir isso.",
+      "",
+      "Comando direto:",
+      "npm run flow -- workflow publish-state --status=<status> --updated-by=<@owner>"
+    ],
+    "finalOpsTitle": "Operações finais",
+    "finalOpsNote": [
+      "Ready, Human Gate e merge não são atalhos do menu.",
+      "",
+      "O fluxo correto é:",
+      "1. terminar o sub-checkpoint ativo;",
+      "2. validar;",
+      "3. preparar Ready quando o modelo permitir;",
+      "4. só então a owner decide Human Gate;",
+      "5. merge final acontece no nó terminal da spec."
+    ]
+  }
+}

@@ -12,6 +12,13 @@ import {
   INFRASTRUCTURE_FEATURES,
 } from "../../../domain/provisioning/FeatureCatalog.js";
 import {
+  FLOW_COPY,
+  copyLines,
+  featureCopy,
+  formatCopy,
+  providerCopy,
+} from "../../copy/flowCopy.js";
+import {
   parseProvisioningCommandOptions,
   ProvisioningCommandOptions,
   renderOptionUsage,
@@ -21,6 +28,10 @@ import {
 } from "./options.js";
 import { BootstrapDeliveryRuntime } from "./runtime.js";
 import { renderBudgetReportLines } from "./renderers.js";
+
+const COMMON_COPY = FLOW_COPY.common;
+const PROVISIONING_COPY = FLOW_COPY.provisioning;
+const COMMAND_COPY = FLOW_COPY.commands.bootstrap;
 
 export interface WizardCommandMetadata {
   readonly enabled: boolean;
@@ -59,22 +70,32 @@ abstract class ProvisioningDeliveryCommand implements BootstrapDeliveryCommand<P
       retainLog: true,
     });
 
-    taskLog?.group("Contexto").message("Escolhendo destino e nome do projeto.");
-    const target = await promptString(prompts, "Onde aplicar? Use . para este repositório", ".");
-    const projectName = await promptString(prompts, "Nome do projeto", "");
     taskLog
-      ?.group("Contexto")
-      .success(`Destino ${target}; nome ${projectName || "derivado da pasta"}.`);
+      ?.group(PROVISIONING_COPY.flow.taskGroups.context)
+      .message(PROVISIONING_COPY.flow.taskMessages.context);
+    const target = await promptString(prompts, PROVISIONING_COPY.flow.prompts.target, ".");
+    const projectName = await promptString(prompts, PROVISIONING_COPY.flow.prompts.projectName, "");
+    taskLog
+      ?.group(PROVISIONING_COPY.flow.taskGroups.context)
+      .success(
+        `Destino ${target}; nome ${projectName || PROVISIONING_COPY.flow.preview.derivedNameLog}.`
+      );
 
-    taskLog?.group("Idioma").message("Escolhendo idioma do baseline e das práticas TDD/BDD.");
+    taskLog
+      ?.group(PROVISIONING_COPY.flow.taskGroups.language)
+      .message(PROVISIONING_COPY.flow.taskMessages.language);
     const lang = await promptLanguage(prompts);
-    taskLog?.group("Idioma").success(`${languageLabel(lang)} selecionado.`);
+    taskLog
+      ?.group(PROVISIONING_COPY.flow.taskGroups.language)
+      .success(`${languageLabel(lang)} selecionado.`);
 
-    taskLog?.group("Integrações").message("Escolhendo ferramentas de IA e práticas.");
+    taskLog
+      ?.group(PROVISIONING_COPY.flow.taskGroups.integrations)
+      .message(PROVISIONING_COPY.flow.taskMessages.integrations);
     const providers = await promptProviderList(prompts);
     const features = this.name === "update" ? undefined : await promptFeatureList(prompts);
     taskLog
-      ?.group("Integrações")
+      ?.group(PROVISIONING_COPY.flow.taskGroups.integrations)
       .success(
         [
           `${providers.length} provider(s) selecionado(s)`,
@@ -84,39 +105,49 @@ abstract class ProvisioningDeliveryCommand implements BootstrapDeliveryCommand<P
           .join("; ")
       );
 
-    taskLog?.group("Execução").message("Definindo pacote, segurança e instalação.");
+    taskLog
+      ?.group(PROVISIONING_COPY.flow.taskGroups.execution)
+      .message(PROVISIONING_COPY.flow.taskMessages.execution);
     const packageManager = await prompts.select<string>({
-      message: "Gerenciador de pacotes",
+      message: PROVISIONING_COPY.flow.prompts.packageManager,
       choices: [
-        { name: "Detectar automaticamente", value: "" },
+        { name: PROVISIONING_COPY.flow.packageManagers.auto, value: "" },
         { name: "npm", value: "npm" },
         { name: "pnpm", value: "pnpm" },
-        { name: "yarn classic", value: "yarn@1.22.22" },
-        { name: "yarn berry", value: "yarn@4.1.1" },
+        { name: PROVISIONING_COPY.flow.packageManagers.yarnClassic, value: "yarn@1.22.22" },
+        { name: PROVISIONING_COPY.flow.packageManagers.yarnBerry, value: "yarn@4.1.1" },
       ],
     });
     const dryRun = await prompts.confirm({
-      message: "Só mostrar o plano, sem escrever arquivos?",
+      message: PROVISIONING_COPY.flow.prompts.dryRun,
       default: true,
     });
     const force = await prompts.confirm({
-      message: "Permitir sobrescrever arquivos suportados quando houver conflito?",
+      message: PROVISIONING_COPY.flow.prompts.force,
       default: false,
     });
     const install = await prompts.confirm({
-      message: "Instalar dependências automaticamente no final?",
+      message: PROVISIONING_COPY.flow.prompts.install,
       default: false,
     });
     const advanced = await promptAdvancedProvisioningOptions(prompts, this.name);
     taskLog
-      ?.group("Execução")
+      ?.group(PROVISIONING_COPY.flow.taskGroups.execution)
       .success(
         [
-          `pacote ${packageManager || "auto"}`,
-          dryRun ? "dry-run" : "aplicar arquivos",
-          force ? "force habilitado" : "force desligado",
-          install ? "install habilitado" : "install desligado",
-          advanced.enabled ? "opções avançadas revisadas" : "opções avançadas padrão",
+          `pacote ${packageManager || COMMON_COPY.auto}`,
+          dryRun
+            ? PROVISIONING_COPY.flow.stateLabels.dryRunOn
+            : PROVISIONING_COPY.flow.stateLabels.dryRunOff,
+          force
+            ? PROVISIONING_COPY.flow.stateLabels.forceOn
+            : PROVISIONING_COPY.flow.stateLabels.forceOff,
+          install
+            ? PROVISIONING_COPY.flow.stateLabels.installOn
+            : PROVISIONING_COPY.flow.stateLabels.installOff,
+          advanced.enabled
+            ? PROVISIONING_COPY.flow.stateLabels.advancedOn
+            : PROVISIONING_COPY.flow.stateLabels.advancedOff,
         ].join("; ")
       );
 
@@ -141,46 +172,55 @@ abstract class ProvisioningDeliveryCommand implements BootstrapDeliveryCommand<P
     if (prompts.taskList) {
       await prompts.taskList([
         {
-          title: "Conferir contexto detectado",
+          title: PROVISIONING_COPY.flow.taskList.contextTitle,
           task: (message) => {
             message(provisioningContextTaskMessage(this.name));
-            return "Contexto coerente com a operação escolhida.";
+            return PROVISIONING_COPY.flow.taskList.contextDone;
           },
         },
         {
-          title: "Montar preview humano",
+          title: PROVISIONING_COPY.flow.taskList.previewTitle,
           task: (message) => {
             message(
-              `Providers: ${(options.providers ?? []).join(", ") || "nenhum"}; ` +
+              `Providers: ${(options.providers ?? []).join(", ") || COMMON_COPY.none}; ` +
                 `práticas: ${options.features?.join(", ") ?? "não alteradas"}; ` +
                 `idioma: ${languageLabel(options.lang)}`
             );
-            return "Preview pronto para confirmação.";
+            return PROVISIONING_COPY.flow.taskList.previewDone;
           },
         },
         {
-          title: "Checar travas de segurança",
+          title: PROVISIONING_COPY.flow.taskList.safetyTitle,
           task: (message) => {
             message(
               [
-                dryRun ? "dry-run ligado" : "dry-run desligado por escolha humana",
-                force ? "force ligado por escolha humana" : "force desligado",
-                install ? "install ligado por escolha humana" : "install desligado",
+                dryRun
+                  ? PROVISIONING_COPY.flow.stateLabels.dryRunOn
+                  : "dry-run desligado por escolha humana",
+                force
+                  ? "force ligado por escolha humana"
+                  : PROVISIONING_COPY.flow.stateLabels.forceOff,
+                install
+                  ? PROVISIONING_COPY.flow.stateLabels.installOn
+                  : PROVISIONING_COPY.flow.stateLabels.installOff,
               ].join("; ")
             );
-            return "Nenhuma escrita será feita sem confirmação final.";
+            return PROVISIONING_COPY.flow.taskList.safetyDone;
           },
         },
       ]);
     }
 
-    await prompts.note?.(renderProvisioningPreview(options), `Prévia: ${this.name}`);
+    await prompts.note?.(
+      renderProvisioningPreview(options),
+      `${PROVISIONING_COPY.flow.preview.title}: ${this.name}`
+    );
     const confirmed = await prompts.confirm({
-      message: "Aplicar este plano?",
+      message: PROVISIONING_COPY.flow.prompts.confirmApply,
       default: false,
     });
     if (!confirmed) {
-      throw new PromptCancelledError("Provisionamento cancelado.");
+      throw new PromptCancelledError(PROVISIONING_COPY.flow.cancelled);
     }
 
     return options;
@@ -226,8 +266,12 @@ abstract class ProvisioningDeliveryCommand implements BootstrapDeliveryCommand<P
     };
     const result = context.prompts?.spinner
       ? await context.prompts.spinner({
-          start: `Montando e aplicando plano ${options.operation}...`,
-          stop: `Plano ${options.operation} concluído.`,
+          start: formatCopy(PROVISIONING_COPY.flow.spinnerStart, {
+            operation: options.operation,
+          }),
+          stop: formatCopy(PROVISIONING_COPY.flow.spinnerStop, {
+            operation: options.operation,
+          }),
           task: runOperation,
         })
       : await runOperation();
@@ -243,10 +287,10 @@ export class InitCommand extends ProvisioningDeliveryCommand {
   constructor(runtime: BootstrapDeliveryRuntime) {
     super(
       "init",
-      "Cria baseline ai-guidelines em projeto novo.",
+      COMMAND_COPY.init.description,
       runtime,
       ["init --target ./project --providers claude,openai --features prettier,husky,ci"],
-      "Initialize new workspace"
+      COMMAND_COPY.init.wizardLabel
     );
   }
 }
@@ -255,10 +299,10 @@ export class AdoptCommand extends ProvisioningDeliveryCommand {
   constructor(runtime: BootstrapDeliveryRuntime) {
     super(
       "adopt",
-      "Adota ai-guidelines em repositorio existente.",
+      COMMAND_COPY.adopt.description,
       runtime,
       ["adopt --target . --providers claude,gemini --features prettier"],
-      "Adopt existing workspace"
+      COMMAND_COPY.adopt.wizardLabel
     );
   }
 }
@@ -267,25 +311,25 @@ export class UpdateCommand extends ProvisioningDeliveryCommand {
   constructor(runtime: BootstrapDeliveryRuntime) {
     super(
       "update",
-      "Atualiza runtime, templates e provider entrypoints do consumidor.",
+      COMMAND_COPY.update.description,
       runtime,
       ["update --target .", "update --providers claude,openai"],
-      "Update workspace"
+      COMMAND_COPY.update.wizardLabel
     );
   }
 }
 
 export class CheckBudgetCommand implements BootstrapDeliveryCommand<void> {
   readonly name = "check-budget";
-  readonly description = "Imprime o relatorio TypeScript de orcamento de tokens.";
+  readonly description = COMMAND_COPY.checkBudget.description;
   readonly usage = ["check-budget"];
-  readonly wizard = { enabled: false, label: "Check token budget" };
+  readonly wizard = { enabled: false, label: COMMAND_COPY.checkBudget.wizardLabel };
 
   constructor(private readonly runtime: BootstrapDeliveryRuntime) {}
 
   parse(argv: readonly string[]): void {
     if (argv.length > 0) {
-      throw new Error(`Argumento inesperado: ${argv[0]}`);
+      throw new Error(formatCopy(COMMAND_COPY.unexpectedArgument, { argument: argv[0] }));
     }
   }
 
@@ -300,7 +344,7 @@ export class CheckBudgetCommand implements BootstrapDeliveryCommand<void> {
 
 function requirePrompts(context: CommandContext, commandName: string): Prompts {
   if (!context.prompts) {
-    throw new Error(`${commandName}.prompt() requer context.prompts.`);
+    throw new Error(formatCopy(COMMAND_COPY.requiresPrompts, { command: commandName }));
   }
   return context.prompts;
 }
@@ -316,17 +360,17 @@ async function promptString(
 
 async function promptLanguage(prompts: Prompts): Promise<string> {
   return prompts.select<string>({
-    message: "Idioma do baseline e das práticas TDD/BDD",
+    message: PROVISIONING_COPY.flow.prompts.language,
     choices: [
       {
-        name: "Português",
+        name: PROVISIONING_COPY.flow.language.pt,
         value: "pt",
-        hint: "usa os templates tdd-pt e bdd-pt",
+        hint: PROVISIONING_COPY.flow.language.ptHint,
       },
       {
-        name: "English",
+        name: PROVISIONING_COPY.flow.language.en,
         value: "en",
-        hint: "usa os templates tdd-en e bdd-en",
+        hint: PROVISIONING_COPY.flow.language.enHint,
       },
     ],
   });
@@ -344,7 +388,7 @@ async function promptAdvancedProvisioningOptions(
   operation: ProvisioningOperation
 ): Promise<AdvancedProvisioningPromptOptions> {
   const enabled = await prompts.confirm({
-    message: "Abrir opções avançadas?",
+    message: PROVISIONING_COPY.flow.prompts.advanced,
     default: false,
   });
   if (!enabled) {
@@ -353,18 +397,18 @@ async function promptAdvancedProvisioningOptions(
 
   const sddDir = await promptString(
     prompts,
-    "Diretório runtime do ai-guidelines",
+    PROVISIONING_COPY.flow.prompts.runtimeDir,
     ".ai-guidelines"
   );
   const forcePrettier = await prompts.confirm({
-    message: "Forçar Prettier mesmo se houver formatter rival?",
+    message: PROVISIONING_COPY.flow.prompts.forcePrettier,
     default: false,
   });
   const prune =
     operation === "init"
       ? false
       : await prompts.confirm({
-          message: "Remover artefatos gerenciados que não fazem mais parte da seleção?",
+          message: PROVISIONING_COPY.flow.prompts.prune,
           default: false,
         });
 
@@ -412,14 +456,14 @@ async function promptProviderList(prompts: Prompts): Promise<readonly string[]> 
   const supported = getSupportedProviders();
   if (prompts.groupMultiselect) {
     return prompts.groupMultiselect({
-      message: "Quais ferramentas de IA devem receber arquivos de orientação?",
+      message: PROVISIONING_COPY.providerQuestion,
       groups: {
-        "Assistentes principais do repositório": providerChoices(
+        [PROVISIONING_COPY.providerGroups.primary]: providerChoices(
           supported.filter((provider) =>
             ["claude", "gemini", "openai", "copilot"].includes(provider)
           )
         ),
-        "Editores e agentes locais": providerChoices(
+        [PROVISIONING_COPY.providerGroups.local]: providerChoices(
           supported.filter((provider) => ["cursor", "windsurf", "aider"].includes(provider))
         ),
       },
@@ -429,20 +473,26 @@ async function promptProviderList(prompts: Prompts): Promise<readonly string[]> 
       groupSpacing: 1,
     });
   }
-  return promptChoiceList(prompts, "Ferramentas de IA", DEFAULT_PROVIDERS, supported, true);
+  return promptChoiceList(
+    prompts,
+    PROVISIONING_COPY.providerQuestion,
+    DEFAULT_PROVIDERS,
+    supported,
+    true
+  );
 }
 
 async function promptFeatureList(prompts: Prompts): Promise<readonly string[]> {
   if (prompts.groupMultiselect) {
     return prompts.groupMultiselect({
-      message: "Quais práticas quer instalar agora?",
+      message: PROVISIONING_COPY.featureInstallQuestion,
       groups: {
-        "Infraestrutura do repositório": INFRASTRUCTURE_FEATURES.map((value) => ({
+        [PROVISIONING_COPY.featureGroups.infrastructure]: INFRASTRUCTURE_FEATURES.map((value) => ({
           name: featureName(value),
           value,
           hint: featureHint(value),
         })),
-        "Práticas de trabalho": EDITORIAL_FEATURES.map((value) => ({
+        [PROVISIONING_COPY.featureGroups.editorial]: EDITORIAL_FEATURES.map((value) => ({
           name: featureName(value),
           value,
           hint: featureHint(value),
@@ -454,122 +504,92 @@ async function promptFeatureList(prompts: Prompts): Promise<readonly string[]> {
       groupSpacing: 1,
     });
   }
-  return promptChoiceList(prompts, "Práticas", FEATURE_OPTIONS, FEATURE_OPTIONS, false);
+  return promptChoiceList(
+    prompts,
+    PROVISIONING_COPY.featureInstallQuestion,
+    FEATURE_OPTIONS,
+    FEATURE_OPTIONS,
+    false
+  );
 }
 
 function languageLabel(lang?: string): string {
-  if (lang === "en") return "English";
-  return "Português";
+  if (lang === "en") return PROVISIONING_COPY.flow.language.en;
+  return PROVISIONING_COPY.flow.language.pt;
 }
 
 function providerChoices(providers: readonly Provider[]) {
-  return providers.map((value) => ({ name: value, value, hint: providerHint(value) }));
+  return providers.map((value) => ({
+    name: providerCopy(value).label,
+    value,
+    hint: providerHint(value),
+  }));
 }
 
 function providerHint(provider: Provider): string {
-  if (provider === "claude") return "CLAUDE.md";
-  if (provider === "gemini") return "GEMINI.md";
-  if (provider === "openai") return "AGENTS.md / Codex";
-  if (provider === "copilot") return "GitHub Copilot";
-  if (provider === "cursor") return "Cursor";
-  if (provider === "windsurf") return "Windsurf";
-  return "Aider";
+  return providerCopy(provider).hint;
 }
 
 function featureHint(feature: string): string {
-  if (feature === "prettier") return "formatação";
-  if (feature === "husky") return "hooks locais";
-  if (feature === "ci") return "workflow GitHub Actions";
-  if (feature === "quality-gates") return "gates editoriais";
-  if (feature === "tdd") return "prática TDD";
-  return "prática BDD";
+  return featureCopy(feature).hint;
 }
 
 function featureName(feature: string): string {
-  if (feature === "prettier") return "Prettier";
-  if (feature === "husky") return "Husky";
-  if (feature === "ci") return "CI";
-  if (feature === "quality-gates") return "Quality Gates";
-  if (feature === "tdd") return "TDD";
-  if (feature === "bdd") return "BDD";
-  return feature;
+  return featureCopy(feature).label;
 }
 
 function provisioningFlowTitle(operation: ProvisioningOperation): string {
-  if (operation === "init") return "Iniciar projeto novo";
-  if (operation === "adopt") return "Adotar projeto existente";
-  return "Atualizar repositório governado";
+  return PROVISIONING_COPY.operationTitles[operation];
 }
 
 function provisioningFlowTaskLogTitle(operation: ProvisioningOperation): string {
-  if (operation === "init") return "Etapas do projeto novo";
-  if (operation === "adopt") return "Etapas da adoção";
-  return "Etapas do update";
+  return PROVISIONING_COPY.taskLogTitles[operation];
 }
 
 function renderProvisioningIntro(operation: ProvisioningOperation): string {
-  if (operation === "init") {
-    return [
-      "Use este fluxo quando o diretório ainda não tem um projeto configurado.",
-      "",
-      "O assistente vai guiar:",
-      "- destino e nome do projeto;",
-      "- ferramentas de IA que receberão orientação;",
-      "- práticas opcionais como Prettier, Husky e CI;",
-      "- preview antes de qualquer escrita.",
-      "",
-      "Por segurança, o padrão é começar em dry-run.",
-    ].join("\n");
-  }
-  if (operation === "adopt") {
-    return [
-      "Use este fluxo quando já existe um projeto e você quer adicionar ai-guidelines.",
-      "",
-      "O assistente vai guiar:",
-      "- preservação do conteúdo existente;",
-      "- ferramentas de IA que receberão orientação;",
-      "- práticas opcionais que podem ser adicionadas sem tratar o repo como vazio;",
-      "- preview de conflitos e efeitos antes de qualquer escrita.",
-      "",
-      "Por segurança, o padrão é começar em dry-run e sem force.",
-    ].join("\n");
-  }
-  return [
-    "Use este fluxo para manter um repositório que já usa ai-guidelines.",
-    "",
-    "O assistente atualiza runtime, templates, providers e práticas governadas.",
-  ].join("\n");
+  return copyLines(PROVISIONING_COPY.flow.intro[operation]);
 }
 
 function provisioningContextTaskMessage(operation: ProvisioningOperation): string {
-  if (operation === "init") return "Projeto novo: criar baseline sem assumir conteúdo existente.";
-  if (operation === "adopt")
-    return "Projeto existente: preservar arquivos atuais e aplicar só efeitos governados.";
-  return "Repo governado: atualizar sem recriar init/adopt.";
+  return PROVISIONING_COPY.flow.contextTask[operation];
 }
 
 function renderProvisioningPreview(options: ProvisioningCommandOptions): string {
   const lines = [
-    "O que será feito",
-    `- Fluxo: ${provisioningFlowTitle(options.operation)}`,
-    `- Destino: ${options.target}`,
-    `- Nome: ${options.name ?? "(derivado da pasta)"}`,
-    `- Gerenciador de pacotes: ${options.packageManager ?? "auto"}`,
-    `- Idioma do baseline e TDD/BDD: ${languageLabel(options.lang)}`,
-    `- Diretório runtime: ${options.sddDir ?? ".ai-guidelines"}`,
+    PROVISIONING_COPY.flow.preview.heading,
+    `- ${PROVISIONING_COPY.flow.preview.flow}: ${provisioningFlowTitle(options.operation)}`,
+    `- ${PROVISIONING_COPY.flow.preview.target}: ${options.target}`,
+    `- ${PROVISIONING_COPY.flow.preview.name}: ${options.name ?? PROVISIONING_COPY.flow.preview.derivedName}`,
+    `- ${PROVISIONING_COPY.flow.preview.packageManager}: ${options.packageManager ?? COMMON_COPY.auto}`,
+    `- ${PROVISIONING_COPY.flow.preview.language}: ${languageLabel(options.lang)}`,
+    `- ${PROVISIONING_COPY.flow.preview.runtimeDir}: ${options.sddDir ?? ".ai-guidelines"}`,
     "",
-    "Integrações",
-    `- Ferramentas de IA: ${(options.providers ?? []).join(", ") || "(nenhuma)"}`,
+    PROVISIONING_COPY.flow.preview.integrations,
+    `- ${PROVISIONING_COPY.flow.preview.providers}: ${(options.providers ?? []).join(", ") || COMMON_COPY.none}`,
   ];
   if (options.features !== undefined) {
-    lines.push(`- Práticas: ${options.features.join(", ") || "(nenhuma)"}`);
+    lines.push(
+      `- ${PROVISIONING_COPY.flow.preview.features}: ${options.features.join(", ") || COMMON_COPY.none}`
+    );
   }
   lines.push("");
-  lines.push("Segurança");
-  lines.push(`- Só prévia: ${options.dryRun ? "sim" : "não"}`);
-  lines.push(`- Sobrescrever conflitos suportados: ${options.force ? "sim" : "não"}`);
-  lines.push(`- Forçar Prettier com formatter rival: ${options.forcePrettier ? "sim" : "não"}`);
-  lines.push(`- Instalar dependências: ${options.install ? "sim" : "não"}`);
-  lines.push(`- Remover arquivos órfãos gerenciados: ${options.prune ? "sim" : "não"}`);
+  lines.push(PROVISIONING_COPY.flow.preview.safety);
+  lines.push(
+    `- ${PROVISIONING_COPY.flow.preview.dryRun}: ${options.dryRun ? COMMON_COPY.yes : COMMON_COPY.no}`
+  );
+  lines.push(
+    `- ${PROVISIONING_COPY.flow.preview.force}: ${options.force ? COMMON_COPY.yes : COMMON_COPY.no}`
+  );
+  lines.push(
+    `- ${PROVISIONING_COPY.flow.preview.forcePrettier}: ${
+      options.forcePrettier ? COMMON_COPY.yes : COMMON_COPY.no
+    }`
+  );
+  lines.push(
+    `- ${PROVISIONING_COPY.flow.preview.install}: ${options.install ? COMMON_COPY.yes : COMMON_COPY.no}`
+  );
+  lines.push(
+    `- ${PROVISIONING_COPY.flow.preview.prune}: ${options.prune ? COMMON_COPY.yes : COMMON_COPY.no}`
+  );
   return lines.join("\n");
 }

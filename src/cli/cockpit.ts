@@ -25,6 +25,9 @@ import {
   GovernedFlowAction,
   HumanSummary,
 } from "./flow/GovernedFlow.js";
+import { FLOW_COPY, formatCopy } from "./copy/flowCopy.js";
+
+const COCKPIT_COPY = FLOW_COPY.cockpit;
 
 export interface Logger {
   info(message: string): void;
@@ -81,7 +84,7 @@ function recommendedDecision(model: CockpitModel): CockpitDecisionItem | null {
 
 function renderCommandList(lines: string[], commands: readonly WorkNextActionCommand[]): void {
   if (commands.length === 0) {
-    lines.push("- (nenhum comando executável projetado)");
+    lines.push(`- ${COCKPIT_COPY.noExecutableCommand}`);
     return;
   }
   for (const command of commands) {
@@ -91,7 +94,7 @@ function renderCommandList(lines: string[], commands: readonly WorkNextActionCom
 
 export function renderHumanSummary(summary: HumanSummary): string {
   const lines: string[] = [];
-  lines.push("## Resumo simples");
+  lines.push(`## ${COCKPIT_COPY.simpleSummary}`);
   for (const item of summary.state) lines.push(`- ${item}`);
   if (summary.currentObject || summary.nextObject) {
     lines.push("- Escopo em linguagem simples:");
@@ -133,115 +136,126 @@ export function renderCockpit(model: CockpitModel): string {
   const blocked = model.decisions.filter((d) => d.availability.status === "blocked");
 
   const lines: string[] = [];
-  lines.push(`# Resumo do fluxo — ${facts.spec.label}`);
+  lines.push(`# ${COCKPIT_COPY.title} — ${facts.spec.label}`);
   lines.push("");
   if (model.flow?.humanSummary) {
     lines.push(renderHumanSummary(model.flow.humanSummary));
     lines.push("");
   }
-  lines.push("## Estado atual");
-  lines.push(`- branch: ${facts.git.branch ?? "?"} · HEAD: ${facts.git.head ?? "?"}`);
-  lines.push(`- checkpoint: ${brief.checkpoint ?? "(sem cursor)"} · modo: ${brief.mode}`);
+  lines.push(`## ${COCKPIT_COPY.currentState}`);
+  lines.push(
+    `- ${COCKPIT_COPY.branch}: ${facts.git.branch ?? "?"} · ${COCKPIT_COPY.head}: ${
+      facts.git.head ?? "?"
+    }`
+  );
+  lines.push(
+    `- ${COCKPIT_COPY.checkpoint}: ${brief.checkpoint ?? "(sem cursor)"} · ${COCKPIT_COPY.mode}: ${brief.mode}`
+  );
   if (brief.object.subCheckpoint) {
     const sub = brief.object.subCheckpoint;
-    lines.push(`- sub-checkpoint ativo: ${sub.id} — ${sub.title} (tasks.md linha ${sub.line})`);
+    lines.push(
+      `- ${COCKPIT_COPY.activeSubcheckpoint}: ${sub.id} — ${sub.title} (tasks.md linha ${sub.line})`
+    );
   } else if (brief.object.transition) {
     const transition = brief.object.transition;
     if (transition.conclude) {
-      lines.push(`- transição pendente: ${transition.conclude.id} → ${transition.activate.id}`);
+      lines.push(
+        `- ${COCKPIT_COPY.pendingTransition}: ${transition.conclude.id} → ${transition.activate.id}`
+      );
     } else {
-      lines.push(`- ativação pendente: ${transition.activate.id}`);
+      lines.push(`- ${COCKPIT_COPY.pendingActivation}: ${transition.activate.id}`);
     }
   }
   if (facts.lifecycle) {
     lines.push(
-      `- reviews/findings: ${facts.lifecycle.openFindings} open / ${facts.lifecycle.closedFindings} closed · resolutions: ${facts.lifecycle.resolutions}`
+      `- ${COCKPIT_COPY.reviewsFindings}: ${facts.lifecycle.openFindings} ${COCKPIT_COPY.open} / ${facts.lifecycle.closedFindings} ${COCKPIT_COPY.closed} · ${COCKPIT_COPY.resolutions}: ${facts.lifecycle.resolutions}`
     );
   }
   lines.push(
     pr
-      ? `- PR #${pr.number}: ${pr.state}${pr.isDraft ? " · Draft" : " · Ready"} · CI ${pr.checks.pass} ok / ${pr.checks.fail} falha(s) / ${pr.checks.pending} pendente(s)`
-      : "- PR: não observado"
+      ? `- ${COCKPIT_COPY.pr} #${pr.number}: ${pr.state}${
+          pr.isDraft ? ` · ${COCKPIT_COPY.draft}` : ` · ${COCKPIT_COPY.ready}`
+        } · ${COCKPIT_COPY.ci} ${pr.checks.pass} ${COCKPIT_COPY.ok} / ${pr.checks.fail} ${
+          COCKPIT_COPY.failures
+        } / ${pr.checks.pending} ${COCKPIT_COPY.pending}`
+      : `- ${COCKPIT_COPY.pr}: ${COCKPIT_COPY.notObserved}`
   );
-  lines.push(`- working tree: ${brief.workingTreeState}`);
+  lines.push(`- ${COCKPIT_COPY.workingTree}: ${brief.workingTreeState}`);
   lines.push("");
-  lines.push("## Próxima ação recomendada");
+  lines.push(`## ${COCKPIT_COPY.recommended}`);
   if (recommended) {
     lines.push(`- ${recommended.title}`);
     if (recommended.availability.hint) lines.push(`  - ${recommended.availability.hint}`);
     lines.push(
-      `  - entender antes de aplicar: \`${recommended.command ?? commandForDecision(recommended.id, false)}\``
+      `  - ${COCKPIT_COPY.understandBeforeApply}: \`${
+        recommended.command ?? commandForDecision(recommended.id, false)
+      }\``
     );
     lines.push(
-      `  - aplicar: \`${recommended.mutatingCommand ?? commandForDecision(recommended.id, true)}\``
+      `  - ${COCKPIT_COPY.apply}: \`${
+        recommended.mutatingCommand ?? commandForDecision(recommended.id, true)
+      }\``
     );
   } else {
     lines.push(`- ${brief.nextAction.description}`);
     for (const basis of brief.nextAction.basis) lines.push(`  - ${basis}`);
     if (brief.nextAction.commands.length > 0) {
-      lines.push("- comandos:");
+      lines.push(`- ${COCKPIT_COPY.commands}:`);
       renderCommandList(lines, brief.nextAction.commands);
     }
   }
   lines.push("");
-  lines.push("## Ações disponíveis");
+  lines.push(`## ${COCKPIT_COPY.available}`);
   if (available.length === 0) {
-    lines.push("- (nenhuma decisão mutante disponível agora)");
+    lines.push(`- ${COCKPIT_COPY.noAvailableDecision}`);
   } else {
     for (const item of available) {
-      const role = recommended?.id === item.id ? "Recomendada" : "Alternativa";
+      const role =
+        recommended?.id === item.id ? COCKPIT_COPY.recommendedRole : COCKPIT_COPY.alternativeRole;
       lines.push(
         `- ${role} — ${item.title}: \`${item.command ?? commandForDecision(item.id, false)}\``
       );
     }
   }
   lines.push("");
-  lines.push("## Ações bloqueadas");
+  lines.push(`## ${COCKPIT_COPY.blocked}`);
   if (blocked.length === 0) {
-    lines.push("- (nenhuma)");
+    lines.push(`- ${COCKPIT_COPY.noBlockedDecision}`);
   } else {
     for (const item of blocked) {
       lines.push(`- ${item.title}`);
       for (const reason of item.availability.reasons) lines.push(`  - ${reason}`);
-      lines.push(`  - inspeção: \`${item.command ?? commandForDecision(item.id, false)}\``);
+      lines.push(
+        `  - ${COCKPIT_COPY.inspection}: \`${item.command ?? commandForDecision(item.id, false)}\``
+      );
     }
   }
   lines.push("");
-  lines.push("## Ações proibidas");
+  lines.push(`## ${COCKPIT_COPY.forbidden}`);
   const forbidden = new Set(
     [
       ...brief.forbiddenActions,
       ...brief.nextAction.stillForbidden,
-      "Executar Human Gate sem decisão humana explícita",
-      "Converter PR para Ready fora do fluxo governado",
-      "Fazer merge",
+      ...COCKPIT_COPY.extraForbidden,
     ].map(formatForbiddenAction)
   );
   for (const item of forbidden) lines.push(`- ${item}`);
   lines.push("");
-  lines.push("## Comandos úteis");
-  lines.push("- handoff: `npm run flow -- handoff 0024`");
-  lines.push("- trabalho: `npm run flow -- work --authorization explicit-work-request`");
-  lines.push("- decisões: `npm run flow -- decide --brief-only`");
-  lines.push("- validação intermediária: `npm run flow -- validate changed`");
-  lines.push("- validação completa para decisão: `npm run validate`");
+  lines.push(`## ${COCKPIT_COPY.usefulCommands}`);
+  lines.push(`- ${COCKPIT_COPY.useful.handoff}: \`npm run flow -- handoff 0024\``);
+  lines.push(
+    `- ${COCKPIT_COPY.useful.work}: \`npm run flow -- work --authorization explicit-work-request\``
+  );
+  lines.push(`- ${COCKPIT_COPY.useful.decisions}: \`npm run flow -- decide --brief-only\``);
+  lines.push(`- ${COCKPIT_COPY.useful.changedValidation}: \`npm run flow -- validate changed\``);
+  lines.push(`- ${COCKPIT_COPY.useful.fullValidation}: \`npm run validate\``);
   return `${lines.join("\n")}\n`;
 }
 
 function formatForbiddenAction(action: string): string {
-  const labels: Record<string, string> = {
-    "modify-functional-files": "Alterar arquivos funcionais enquanto o estado estiver divergente",
-    "create-resolutions": "Criar resolutions fora do fluxo autorizado",
-    "update-pr-body": "Atualizar o corpo do PR fora do fluxo autorizado",
-    "run-review": "Executar revisão sem pedido explícito",
-    ready: "Converter o PR para Ready",
-    "human-gate": "Executar o Human Gate",
-    merge: "Fazer merge",
-    "edit-review": "Editar artefato de review publicado",
-    "close-dispositions": "Fechar dispositions fora da decisão governada",
-    "start-next-subcheckpoint": "Iniciar o próximo ponto fora da decisão governada",
-  };
-  return labels[action] ?? action;
+  return (
+    COCKPIT_COPY.forbiddenLabels[action as keyof typeof COCKPIT_COPY.forbiddenLabels] ?? action
+  );
 }
 
 export interface RunCockpitOptions extends DecisionSnapshotOptions {
@@ -293,7 +307,9 @@ export function runCockpit(
     return 0;
   } catch (error) {
     logger.error(
-      `❌ cockpit — estado irrecuperável: ${error instanceof Error ? error.message : String(error)}`
+      formatCopy(COCKPIT_COPY.error, {
+        message: error instanceof Error ? error.message : String(error),
+      })
     );
     return 1;
   }

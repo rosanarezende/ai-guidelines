@@ -463,6 +463,38 @@ describe("bootstrap delivery 2c — wizard", () => {
       "Quais ferramentas de IA devem receber arquivos de orientação?",
       "Quais práticas quer instalar agora?",
     ]);
+    const providerChoices = Object.values(prompts.groupMultiselectCalls[0].groups).flat() as Array<{
+      name?: string;
+      hint?: string;
+    }>;
+    expect(providerChoices).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          name: "Claude",
+          hint: "cria CLAUDE.md para sessões com Claude Code",
+        }),
+        expect.objectContaining({
+          name: "OpenAI/Codex",
+          hint: "prepara contexto e comandos para sessões com Codex",
+        }),
+      ])
+    );
+    const featureChoices = Object.values(prompts.groupMultiselectCalls[1].groups).flat() as Array<{
+      name?: string;
+      hint?: string;
+    }>;
+    expect(featureChoices).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          name: "Hooks locais com Husky",
+          hint: "roda checagens antes do commit",
+        }),
+        expect.objectContaining({
+          name: "CI no GitHub Actions",
+          hint: "valida o PR automaticamente no GitHub",
+        }),
+      ])
+    );
   });
 
   it("wizard permite escolha adopt e preserva defaults", async () => {

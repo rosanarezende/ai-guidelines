@@ -10,6 +10,7 @@ import {
 } from "../infrastructure/yaml/reviewPolicyReader.js";
 import { NodeClipboard, clipboardInstallHint } from "../infrastructure/io/NodeClipboard.js";
 import { CockpitModel, collectCockpitModel, renderCockpit } from "./cockpit.js";
+import { FLOW_COPY, copyLines, featureCopy, formatCopy } from "./copy/flowCopy.js";
 import type { HumanObjectSummary, HumanSummary } from "./flow/GovernedFlow.js";
 import { CommandRegistry } from "./registry/CommandRegistry.js";
 import { CommandContext, Logger } from "./registry/Command.js";
@@ -33,6 +34,10 @@ type GovernedRepoUpdateChoice =
   | "policy"
   | "details"
   | "__back__";
+
+const COMMON_COPY = FLOW_COPY.common;
+const WIZARD_COPY = FLOW_COPY.wizard;
+const PROVISIONING_COPY = FLOW_COPY.provisioning;
 type AdvancedMenuChoice =
   | "continue-other"
   | "active-specs"
@@ -102,55 +107,61 @@ export function buildFlowMenu(
     readonly disabled?: boolean;
   }> = [];
 
-  choices.push({ name: "Ver resumo completo antes de escolher", value: "cockpit" });
+  choices.push({ name: WIZARD_COPY.menu.fullSummary, value: "cockpit" });
 
   if (recommended) {
     choices.push({
-      name: `PRÓXIMA AÇÃO RECOMENDADA: ${recommendedActionLabel(model, recommended.title)}`,
+      name: `${WIZARD_COPY.menu.recommendedPrefix}: ${recommendedActionLabel(model, recommended.title)}`,
       value: "next",
-      hint: "opção principal para este estado",
+      hint: WIZARD_COPY.menu.recommendedHint,
     });
   } else if (recommendValidation) {
     choices.push({
-      name: `PRÓXIMA AÇÃO RECOMENDADA: ${recommendedActionLabel(model, "Finalizar as mudanças locais e deixar a working tree limpa.")}`,
+      name: `${WIZARD_COPY.menu.recommendedPrefix}: ${recommendedActionLabel(
+        model,
+        WIZARD_COPY.fallbackValidationAction
+      )}`,
       value: "validate",
-      hint: "opção principal agora",
+      hint: WIZARD_COPY.menu.recommendedValidationHint,
     });
   }
 
   if (alternatives.length === 1) {
     const [alternative] = alternatives;
     choices.push({
-      name: `ALTERNATIVA: ${humanActionTitle(alternative.id, alternative.title)}`,
+      name: `${WIZARD_COPY.menu.singleAlternativePrefix}: ${humanActionTitle(
+        alternative.id,
+        alternative.title
+      )}`,
       value: "alternative",
-      hint: "mostra detalhes; não aplica nada",
+      hint: WIZARD_COPY.menu.singleAlternativeHint,
     });
   } else if (alternatives.length > 1) {
     choices.push({
-      name: "Analisar alternativas",
+      name: WIZARD_COPY.menu.multipleAlternatives,
       value: "alternative",
-      hint: `${alternatives.length} caminhos disponíveis sem aplicar nada automaticamente`,
+      hint: `${alternatives.length} ${WIZARD_COPY.menu.multipleAlternativesHint}`,
     });
   }
 
   if (!recommendValidation) {
-    choices.push({ name: "Validar minhas mudanças", value: "validate" });
+    choices.push({ name: WIZARD_COPY.menu.validate, value: "validate" });
   }
   choices.push(
     {
-      name: "Ver ações disponíveis e bloqueadas",
+      name: WIZARD_COPY.menu.decisions,
       value: "decisions",
-      hint: "mostra o que pode ser feito agora e por quê",
+      hint: WIZARD_COPY.menu.decisionsHint,
     },
     {
-      name: "Ver orientação de trabalho / handoff",
+      name: WIZARD_COPY.menu.work,
       value: "work",
-      hint: "copia contexto para colar na LLM de sua preferência",
+      hint: WIZARD_COPY.menu.workHint,
     },
     {
-      name: "Ver tipos de revisão disponíveis",
+      name: WIZARD_COPY.menu.review,
       value: "review",
-      hint: "explica quais revisões existem e copia o catálogo",
+      hint: WIZARD_COPY.menu.reviewHint,
     },
     {
       name: provisioningMainLabel(provisioning),
@@ -158,28 +169,18 @@ export function buildFlowMenu(
       hint: provisioningMainHint(provisioning),
     },
     {
-      name: "Ferramentas técnicas e diagnósticos",
+      name: WIZARD_COPY.menu.advanced,
       value: "advanced",
-      hint: "para quando você quer inspecionar ou diagnosticar algo específico",
+      hint: WIZARD_COPY.menu.advancedHint,
     },
-    { name: "Sair", value: "quit" }
+    { name: COMMON_COPY.quit, value: "quit" }
   );
 
   return choices;
 }
 
 function humanActionTitle(id: string, fallback: string): string {
-  if (id === "close-dispositions") return "fechar feedbacks já resolvidos";
-  if (id === "finish-subcheckpoint") return "concluir este ponto e abrir o próximo";
-  if (id === "mark-readiness") return "declarar que este ponto está pronto";
-  if (id === "advance-subcheckpoint") return "abrir o próximo ponto de trabalho";
-  if (id === "human-gate") return "preparar decisão humana do checkpoint";
-  if (id === "open-next-node") return "abrir o próximo PR da stack";
-  if (id === "pr-ready") return "verificar se o PR pode sair de Draft";
-  if (id === "request-advisory-review") return "pedir revisão antes da decisão humana";
-  if (id === "review-insight-candidates")
-    return "Ver percepções recorrentes que precisam de decisão";
-  return fallback;
+  return WIZARD_COPY.actionTitles[id as keyof typeof WIZARD_COPY.actionTitles] ?? fallback;
 }
 
 function recommendedActionLabel(model: CockpitModel, fallback: string): string {
@@ -233,15 +234,15 @@ function pushWrapped(lines: string[], label: string, value: string | null, inden
 
 function renderObjectBlock(
   lines: string[],
-  title: "AGORA" | "DEPOIS",
+  title: string,
   object: HumanObjectSummary | null
 ): void {
   if (!object) return;
   lines.push(title);
   lines.push(`  ${object.label}`);
   lines.push("");
-  pushWrapped(lines, "Objetivo:", object.objective);
-  pushWrapped(lines, "Entrega:", object.output);
+  pushWrapped(lines, WIZARD_COPY.summary.objective, object.objective);
+  pushWrapped(lines, WIZARD_COPY.summary.output, object.output);
   lines.push("");
 }
 
@@ -255,10 +256,12 @@ export function renderFlowSummary(model: CockpitModel): string {
     `branch: ${facts.git.branch ?? "?"}`,
     `HEAD: ${facts.git.head ?? "?"}`,
     `modo: ${model.work.brief.mode}`,
-    active ? `sub-checkpoint: ${active.id} — ${active.title}` : "sub-checkpoint: (nenhum)",
+    active
+      ? `sub-checkpoint: ${active.id} — ${active.title}`
+      : `sub-checkpoint: ${COMMON_COPY.none}`,
     pr
       ? `PR #${pr.number}: ${pr.isDraft ? "Draft" : "Ready"} · CI ${pr.checks.pass} ok / ${pr.checks.fail} falha(s) / ${pr.checks.pending} pendente(s)`
-      : "PR: não observado",
+      : `PR: ${COMMON_COPY.notObserved}`,
     `próxima ação: ${model.flow?.recommended?.title ?? model.work.brief.nextAction.description}`,
   ].join("\n");
 }
@@ -269,37 +272,37 @@ function renderWizardHumanSummary(summary: HumanSummary, model: CockpitModel): s
   const alternatives = (model.flow?.available ?? []).filter(
     (action) => action.id !== recommended?.id
   );
-  lines.push("ESTADO");
+  lines.push(WIZARD_COPY.summary.state);
   for (const item of summary.state) {
     lines.push(...wrapText(item, "  ", 74));
   }
   lines.push("");
 
-  renderObjectBlock(lines, "AGORA", summary.currentObject);
-  renderObjectBlock(lines, "DEPOIS", summary.nextObject);
+  renderObjectBlock(lines, WIZARD_COPY.summary.now, summary.currentObject);
+  renderObjectBlock(lines, WIZARD_COPY.summary.next, summary.nextObject);
 
   if (summary.ready.length > 0) {
-    lines.push("JÁ ESTÁ OK");
+    lines.push(WIZARD_COPY.summary.ready);
     for (const item of summary.ready) lines.push(...wrapBullet(item));
     lines.push("");
   }
 
   if (summary.missing.length > 0) {
-    lines.push("AINDA FALTA");
+    lines.push(WIZARD_COPY.summary.missing);
     for (const item of summary.missing) lines.push(...wrapBullet(item));
     lines.push("");
   }
 
-  lines.push("PRÓXIMA AÇÃO RECOMENDADA");
+  lines.push(WIZARD_COPY.summary.recommended);
   lines.push(...wrapText(summary.nextAction, "  ", 70));
   if (summary.command) {
-    lines.push("  Para entender antes de aplicar:");
+    lines.push(`  ${WIZARD_COPY.summary.understandBeforeApply}`);
     lines.push(`  ${summary.command}`);
   }
 
   if (alternatives.length > 0) {
     lines.push("");
-    lines.push("ALTERNATIVAS");
+    lines.push(WIZARD_COPY.summary.alternatives);
     for (const action of alternatives) {
       lines.push(...wrapBullet(humanActionTitle(action.id, action.title)));
       if (action.command) {
@@ -313,11 +316,11 @@ function renderWizardHumanSummary(summary: HumanSummary, model: CockpitModel): s
 
 export function renderBlockedActions(model: CockpitModel): string {
   const blocked = model.flow?.blocked ?? [];
-  if (blocked.length === 0) return "Nenhuma ação bloqueada pelo modelo comum.";
+  if (blocked.length === 0) return WIZARD_COPY.results.blockedEmpty;
   return blocked
     .map((action) => {
       const reasons = action.availability.reasons.map((reason) => `  - ${reason}`).join("\n");
-      return `${action.title}\n${reasons || "  - sem motivo registrado"}`;
+      return `${action.title}\n${reasons || `  - ${WIZARD_COPY.results.blockedFallbackReason}`}`;
     })
     .join("\n\n");
 }
@@ -334,25 +337,25 @@ export async function runFlowWizard(
   const provisioning = detectProvisioningContext(repoRoot);
 
   try {
-    await prompts.intro?.("ai-guidelines flow");
+    await prompts.intro?.(WIZARD_COPY.intro);
     const summary = renderFlowSummary(model);
-    if (prompts.box) await prompts.box(summary, "Estado atual");
-    else await prompts.note?.(summary, "Estado atual");
+    if (prompts.box) await prompts.box(summary, WIZARD_COPY.stateTitle);
+    else await prompts.note?.(summary, WIZARD_COPY.stateTitle);
 
     const choice = await prompts.select<FlowMenuValue>({
-      message: "O que você quer fazer agora?",
+      message: WIZARD_COPY.mainQuestion,
       choices: buildFlowMenu(model, provisioning),
     });
 
     switch (choice) {
       case "cockpit":
         logger.info(renderCockpit(model).trimEnd());
-        await prompts.outro?.("Resumo completo renderizado.");
+        await prompts.outro?.(WIZARD_COPY.results.summaryRendered);
         return 0;
       case "next":
         if (!model.flow?.recommended) {
-          await prompts.note?.(renderBlockedActions(model), "Sem ação disponível");
-          await prompts.outro?.("Nenhuma mutação executada.");
+          await prompts.note?.(renderBlockedActions(model), WIZARD_COPY.results.noAction);
+          await prompts.outro?.(WIZARD_COPY.results.noMutation);
           return 0;
         }
         return runRecommendedAction(model, registry, context, prompts);
@@ -363,8 +366,8 @@ export async function runFlowWizard(
       case "decisions":
         return registry.dispatch(["decide", "--brief-only"], context).then((r) => r.exitCode);
       case "blockers":
-        await prompts.note?.(renderBlockedActions(model), "O que impede o avanço");
-        await prompts.outro?.("Bloqueios exibidos.");
+        await prompts.note?.(renderBlockedActions(model), WIZARD_COPY.menu.decisions);
+        await prompts.outro?.(WIZARD_COPY.results.blockedRendered);
         return 0;
       case "work":
         return runHandoffSection(model, registry, context, prompts, clipboard);
@@ -375,13 +378,13 @@ export async function runFlowWizard(
       case "advanced":
         return runAdvancedSection(registry, context, prompts);
       case "quit":
-        await prompts.outro?.("Saindo sem alterações.");
+        await prompts.outro?.(COMMON_COPY.noChanges);
         return 0;
     }
   } catch (error) {
     if (isPromptCancelled(error)) {
       await prompts.cancel?.(error.message);
-      await prompts.outro?.("Saindo sem alterações.");
+      await prompts.outro?.(COMMON_COPY.noChanges);
       return 0;
     }
     throw error;
@@ -400,30 +403,26 @@ async function runRecommendedAction(
     return 0;
   }
   const lines = [
-    "## Próximo passo recomendado",
+    WIZARD_COPY.recommendedAction.heading,
     "",
     humanActionTitle(recommended.id, recommended.title),
     "",
-    "Para entender antes de aplicar:",
+    WIZARD_COPY.recommendedAction.understand,
     recommended.command,
     "",
-    "O que essa decisão pode mudar:",
+    WIZARD_COPY.recommendedAction.effects,
     ...recommended.effect.map((effect) => `- ${effect}`),
   ];
   if (recommended.mutatingCommand) {
-    lines.push(
-      "",
-      "Se houver confirmação humana, este é o comando que aplica:",
-      recommended.mutatingCommand
-    );
+    lines.push("", WIZARD_COPY.recommendedAction.mutatingCommand, recommended.mutatingCommand);
   }
-  await prompts.note?.(lines.join("\n"), "Próximo passo");
+  await prompts.note?.(lines.join("\n"), WIZARD_COPY.recommendedAction.title);
   const proceed = await prompts.confirm({
-    message: "Abrir a tela de decisão agora?",
+    message: WIZARD_COPY.recommendedAction.confirm,
     default: false,
   });
   if (!proceed) {
-    await prompts.outro?.("Nenhuma decisão executada.");
+    await prompts.outro?.(WIZARD_COPY.recommendedAction.cancelled);
     return 0;
   }
   return (await registry.dispatch(["decide"], context)).exitCode;
@@ -441,7 +440,7 @@ async function runAlternativeAction(
     alternatives.length <= 1
       ? alternatives[0]
       : await prompts.select<CockpitModel["decisions"][number]>({
-          message: "Alternativas disponíveis:",
+          message: WIZARD_COPY.summary.alternatives,
           choices: alternatives.map((action) => ({
             name: humanActionTitle(action.id, action.title),
             value: action,
@@ -488,21 +487,15 @@ async function copyOrPrint(
 ): Promise<void> {
   const copied = await clipboard.copy(text);
   if (copied) {
-    await prompts.status?.(
-      "success",
-      `${title} copiado para o clipboard. Cole na LLM de sua preferência para continuar.`
-    );
+    await prompts.status?.("success", formatCopy(WIZARD_COPY.clipboard.copied, { title }));
     return;
   }
   const hint = clipboardInstallHint();
-  await prompts.status?.(
-    "warn",
-    `${title} não pôde ser copiado automaticamente; mostrando o conteúdo para cópia manual.`
-  );
+  await prompts.status?.("warn", formatCopy(WIZARD_COPY.clipboard.manual, { title }));
   if (hint) context.logger.info(hint);
-  context.logger.info(`--- ${title.toUpperCase()} ---`);
+  context.logger.info(formatCopy(WIZARD_COPY.clipboard.begin, { title: title.toUpperCase() }));
   context.logger.info(text);
-  context.logger.info(`--- FIM ${title.toUpperCase()} ---`);
+  context.logger.info(formatCopy(WIZARD_COPY.clipboard.end, { title: title.toUpperCase() }));
 }
 
 function specIdentifier(model: CockpitModel): string | null {
@@ -517,31 +510,20 @@ async function runHandoffSection(
   prompts: Prompts,
   clipboard: ClipboardWriter
 ): Promise<number> {
-  await prompts.note?.(
-    [
-      "Vou preparar um pacote de contexto para colar na LLM de sua preferência.",
-      "",
-      "Ele inclui:",
-      "- handoff situado da spec ativa;",
-      "- orientação de trabalho projetada pelo fluxo atual.",
-      "",
-      "Nada será alterado no repositório.",
-    ].join("\n"),
-    "Orientação de trabalho / handoff"
-  );
+  await prompts.note?.(copyLines(WIZARD_COPY.handoff.intro), WIZARD_COPY.handoff.title);
   const spec = specIdentifierFromContext(context, model);
   const handoff = await captureCommandOutput(registry, context, ["handoff", spec]);
   const work = await captureCommandOutput(registry, context, ["work"]);
   const text = [
-    "# Orientação de trabalho / handoff",
+    WIZARD_COPY.handoff.documentTitle,
     "",
-    "## Handoff situado",
+    WIZARD_COPY.handoff.handoffHeading,
     handoff.output,
     "",
-    "## Orientação de trabalho",
+    WIZARD_COPY.handoff.workHeading,
     work.output,
   ].join("\n");
-  await copyOrPrint("Orientação de trabalho / handoff", text, context, prompts, clipboard);
+  await copyOrPrint(WIZARD_COPY.handoff.title, text, context, prompts, clipboard);
   return handoff.exitCode || work.exitCode;
 }
 
@@ -555,35 +537,31 @@ async function runValidationSection(
   prompts: Prompts
 ): Promise<number> {
   const selected = await prompts.select<string>({
-    message: "Como você quer conferir suas mudanças?",
+    message: WIZARD_COPY.validation.question,
     choices: [
       {
-        name: "Validar somente o diff atual",
+        name: WIZARD_COPY.validation.changed,
         value: "changed",
-        hint: "rápido; não reescreve arquivos",
+        hint: WIZARD_COPY.validation.changedHint,
       },
       {
-        name: "Formatar arquivos alterados e validar o diff",
+        name: WIZARD_COPY.validation.changedFix,
         value: "changed-fix",
-        hint: "pode reescrever arquivos alterados",
+        hint: WIZARD_COPY.validation.changedFixHint,
       },
       {
-        name: "Entender a validação completa",
+        name: WIZARD_COPY.validation.fullHelp,
         value: "full-help",
-        hint: "antes de Ready/Human Gate",
+        hint: WIZARD_COPY.validation.fullHelpHint,
       },
-      { name: "Voltar", value: "__back__" },
+      { name: COMMON_COPY.back, value: "__back__" },
     ],
   });
   if (selected === "__back__") return 0;
   if (selected === "full-help") {
     await prompts.note?.(
-      [
-        "Use `npm run validate` antes de Ready/Human Gate.",
-        "",
-        "Durante PR Draft, `npm run flow -- validate changed` cobre o ciclo rápido do diff.",
-      ].join("\n"),
-      "Validação completa"
+      copyLines(WIZARD_COPY.validation.fullNote),
+      WIZARD_COPY.validation.fullTitle
     );
     return 0;
   }
@@ -591,11 +569,11 @@ async function runValidationSection(
     selected === "changed-fix" ? ["validate", "changed", "--fix"] : ["validate", "changed"];
   if (selected === "changed-fix") {
     const confirmed = await prompts.confirm({
-      message: "Formatar somente arquivos alterados antes de validar?",
+      message: WIZARD_COPY.validation.confirmFix,
       default: false,
     });
     if (!confirmed) {
-      await prompts.outro?.("Validação com --fix cancelada.");
+      await prompts.outro?.(WIZARD_COPY.validation.fixCancelled);
       return 0;
     }
   }
@@ -603,31 +581,34 @@ async function runValidationSection(
     let exitCode = 0;
     await prompts.taskList([
       {
-        title: selected === "changed-fix" ? "Formatar e validar o diff" : "Validar o diff",
+        title:
+          selected === "changed-fix"
+            ? WIZARD_COPY.validation.taskFix
+            : WIZARD_COPY.validation.taskChanged,
         task: async (message) => {
           const log = prompts.taskLog?.({
-            title: "Etapas da validação",
+            title: WIZARD_COPY.validation.taskLogTitle,
             limit: 8,
             retainLog: true,
           });
           const group = log?.group(
             selected === "changed-fix" ? "validate changed --fix" : "validate changed"
           );
-          message("Conferindo o diff com o comando governado.");
-          group?.message("1/4 Conferindo espaços, finais de linha e conflitos de patch.");
-          group?.message("2/4 Conferindo formatação dos arquivos alterados.");
-          group?.message("3/4 Rodando build/checks aplicáveis ao diff.");
-          group?.message("4/4 Consolidando o resultado para você.");
+          message(WIZARD_COPY.validation.taskMessage);
+          group?.message(WIZARD_COPY.validation.step1);
+          group?.message(WIZARD_COPY.validation.step2);
+          group?.message(WIZARD_COPY.validation.step3);
+          group?.message(WIZARD_COPY.validation.step4);
           const result = await registry.dispatch(args, context);
           exitCode = result.exitCode;
           if (exitCode !== 0) {
             group?.error(`Validação retornou exit code ${exitCode}.`);
-            log?.error("Validação intermediária falhou.", { showLog: true });
+            log?.error(WIZARD_COPY.validation.failed, { showLog: true });
             throw new Error(`Validação retornou exit code ${exitCode}.`);
           }
-          group?.success("Validação intermediária passou.");
-          log?.success("Validação intermediária concluída.", { showLog: true });
-          return "Validação intermediária concluída.";
+          group?.success(WIZARD_COPY.validation.passed);
+          log?.success(WIZARD_COPY.validation.completed, { showLog: true });
+          return WIZARD_COPY.validation.completed;
         },
       },
     ]);
@@ -642,37 +623,28 @@ async function runReviewSection(
   prompts: Prompts,
   clipboard: ClipboardWriter
 ): Promise<number> {
-  await prompts.note?.(
-    [
-      "Esta área ajuda a entender quais revisões existem e qual política vale para o PR.",
-      "",
-      "O catálogo pode ser copiado para o clipboard para você colar em uma LLM antes de pedir uma análise.",
-      "",
-      "Registrar uma revisão no repositório continua exigindo comando e autorização explícitos; esta tela só prepara contexto.",
-    ].join("\n"),
-    "Tipos de revisão disponíveis"
-  );
+  await prompts.note?.(copyLines(WIZARD_COPY.review.intro), WIZARD_COPY.review.title);
   const choice = await prompts.select<string>({
-    message: "Qual contexto você quer preparar?",
+    message: WIZARD_COPY.review.question,
     choices: [
       {
-        name: "Copiar/ver tipos de revisão possíveis",
+        name: WIZARD_COPY.review.types,
         value: "types",
-        hint: "catálogo para colar na LLM de sua preferência",
+        hint: WIZARD_COPY.review.typesHint,
       },
       {
-        name: "Ver regra de revisão aplicada neste PR",
+        name: WIZARD_COPY.review.policy,
         value: "policy",
-        hint: "mostra quais revisões são obrigatórias ou opcionais",
+        hint: WIZARD_COPY.review.policyHint,
       },
-      { name: "Voltar", value: "__back__" },
+      { name: COMMON_COPY.back, value: "__back__" },
     ],
   });
   if (choice === "__back__") return 0;
   const args = ["review", choice] as const;
   const captured = await captureCommandOutput(registry, context, args);
   await copyOrPrint(
-    choice === "types" ? "Tipos de revisão disponíveis" : "Regra de revisão deste PR",
+    choice === "types" ? WIZARD_COPY.review.title : WIZARD_COPY.review.policyTitle,
     captured.output,
     context,
     prompts,
@@ -687,46 +659,46 @@ async function runAdvancedSection(
   prompts: Prompts
 ): Promise<number> {
   const selected = await prompts.select<AdvancedMenuChoice>({
-    message: "Ferramentas técnicas e diagnósticos",
+    message: WIZARD_COPY.advanced.title,
     choices: [
       {
-        name: "Trocar para outra spec pelo ID ou nome",
+        name: WIZARD_COPY.advanced.continueOther,
         value: "continue-other",
-        hint: "somente leitura; útil quando você muda de contexto",
+        hint: WIZARD_COPY.advanced.continueOtherHint,
       },
       {
-        name: "Ver trabalhos governados ativos",
+        name: WIZARD_COPY.advanced.activeSpecs,
         value: "active-specs",
-        hint: "mostra o índice público",
+        hint: WIZARD_COPY.advanced.activeSpecsHint,
       },
       {
-        name: "Conferir se a lista pública está coerente",
+        name: WIZARD_COPY.advanced.drift,
         value: "drift",
-        hint: "diagnóstico de divergência",
+        hint: WIZARD_COPY.advanced.driftHint,
       },
       {
-        name: "Gerar prompt visual para outro gerador de imagem",
+        name: WIZARD_COPY.advanced.visualPrompt,
         value: "visual-prompt",
       },
       {
-        name: "Entender quando publicar o estado",
+        name: WIZARD_COPY.advanced.publication,
         value: "publication",
-        hint: "não publica nada sozinho",
+        hint: WIZARD_COPY.advanced.publicationHint,
       },
       {
-        name: "Entender saída de Draft, decisão humana e merge final",
+        name: WIZARD_COPY.advanced.finalOps,
         value: "final-ops",
-        hint: "essas ações continuam protegidas",
+        hint: WIZARD_COPY.advanced.finalOpsHint,
       },
-      { name: "Voltar", value: "__back__" },
+      { name: COMMON_COPY.back, value: "__back__" },
     ],
   });
 
   if (selected === "__back__") return 0;
   if (selected === "continue-other") {
-    const identifier = (await prompts.input({ message: "Qual spec? Ex.: 0024" })).trim();
+    const identifier = (await prompts.input({ message: WIZARD_COPY.advanced.specQuestion })).trim();
     if (!identifier) {
-      await prompts.outro?.("Nada executado.");
+      await prompts.outro?.(COMMON_COPY.nothingExecuted);
       return 0;
     }
     return (await registry.dispatch(["continue", identifier], context)).exitCode;
@@ -738,30 +710,14 @@ async function runAdvancedSection(
   }
   if (selected === "publication") {
     await prompts.note?.(
-      [
-        "Publicar estado atualiza a projeção pública de specs ativas.",
-        "",
-        "Use apenas quando o fluxo governado pedir isso.",
-        "",
-        "Comando direto:",
-        "npm run flow -- workflow publish-state --status=<status> --updated-by=<@owner>",
-      ].join("\n"),
-      "Publicação de estado"
+      copyLines(WIZARD_COPY.advanced.publicationNote),
+      WIZARD_COPY.advanced.publicationTitle
     );
     return 0;
   }
   await prompts.note?.(
-    [
-      "Ready, Human Gate e merge não são atalhos do menu.",
-      "",
-      "O fluxo correto é:",
-      "1. terminar o sub-checkpoint ativo;",
-      "2. validar;",
-      "3. preparar Ready quando o modelo permitir;",
-      "4. só então a owner decide Human Gate;",
-      "5. merge final acontece no nó terminal da spec.",
-    ].join("\n"),
-    "Operações finais"
+    copyLines(WIZARD_COPY.advanced.finalOpsNote),
+    WIZARD_COPY.advanced.finalOpsTitle
   );
   return 0;
 }
@@ -778,13 +734,16 @@ async function runProvisioningSection(
   );
   const recommended = available.includes(detected.operation) ? detected.operation : available[0];
   if (!recommended) {
-    await prompts.note?.("Nenhum comando de provisioning está registrado.", "Provisioning");
+    await prompts.note?.(
+      PROVISIONING_COPY.section.emptyRegistry,
+      PROVISIONING_COPY.section.emptyRegistryTitle
+    );
     return 0;
   }
 
   await prompts.note?.(renderProvisioningContext(detected), provisioningMainLabel(detected));
   const selected = await prompts.select<ProvisioningMenuChoice>({
-    message: "O que faz sentido agora?",
+    message: PROVISIONING_COPY.section.question,
     choices:
       detected.operation === "update"
         ? governedRepoChoices(detected)
@@ -792,19 +751,25 @@ async function runProvisioningSection(
             {
               name: provisioningActionLabel(recommended),
               value: recommended,
-              hint: "recomendado pelo contexto detectado",
+              hint: PROVISIONING_COPY.section.recommendedHint,
             },
-            { name: "Entender o contexto detectado", value: "details" },
-            { name: "Voltar", value: "__back__" },
+            { name: PROVISIONING_COPY.section.details, value: "details" },
+            { name: COMMON_COPY.back, value: "__back__" },
           ],
   });
   if (selected === "__back__") return 0;
   if (selected === "details") {
-    await prompts.note?.(renderProvisioningDetails(detected), "Como escolher init/adopt/update");
+    await prompts.note?.(
+      renderProvisioningDetails(detected),
+      PROVISIONING_COPY.section.detailsTitle
+    );
     return 0;
   }
   if (selected === "policy") {
-    await prompts.note?.(renderReviewPolicyDetails(detected), "Política de colaboração e revisão");
+    await prompts.note?.(
+      renderReviewPolicyDetails(detected),
+      PROVISIONING_COPY.section.policyTitle
+    );
     return 0;
   }
   if (selected === "guided-update") {
@@ -820,19 +785,19 @@ function governedRepoChoices(summary: ProvisioningContextSummary): ReadonlyArray
 }> {
   return [
     {
-      name: "Atualizar runtime, templates, providers ou práticas",
+      name: PROVISIONING_COPY.governedUpdate.choices.guidedUpdate,
       value: "guided-update",
-      hint: "manutenção guiada do repo governado",
+      hint: PROVISIONING_COPY.governedUpdate.choices.guidedUpdateHint,
     },
     {
-      name: "Entender política de colaboração e revisões",
+      name: PROVISIONING_COPY.governedUpdate.choices.policy,
       value: "policy",
       hint: summary.reviewPolicy
         ? `perfil atual: ${summary.reviewPolicy.activeProfile}`
-        : "usa .governance/review-policy.yml quando existir",
+        : PROVISIONING_COPY.governedUpdate.choices.policyHintFallback,
     },
-    { name: "Entender o contexto detectado", value: "details" },
-    { name: "Voltar", value: "__back__" },
+    { name: PROVISIONING_COPY.section.details, value: "details" },
+    { name: COMMON_COPY.back, value: "__back__" },
   ];
 }
 
@@ -843,60 +808,56 @@ async function runGovernedRepoUpdate(
   detected: ProvisioningContextSummary
 ): Promise<number> {
   await prompts.note?.(
-    [
-      "Este repositório já usa ai-guidelines.",
-      "",
-      "Aqui o update funciona como manutenção do repo governado:",
-      "- runtime e templates;",
-      "- providers;",
-      "- práticas como Prettier, Husky, CI, Quality Gates, TDD e BDD;",
-      "- leitura da política de colaboração/revisão existente.",
-      "",
-      "init/adopt não aparecem como caminho principal porque poderiam confundir um repo já governado.",
-    ].join("\n"),
-    "Atualizar este repositório"
+    copyLines(PROVISIONING_COPY.governedUpdate.intro),
+    PROVISIONING_COPY.governedUpdate.introTitle
   );
 
   const selected = await prompts.select<GovernedRepoUpdateChoice>({
-    message: "O que você quer atualizar?",
+    message: PROVISIONING_COPY.governedUpdate.question,
     choices: [
       {
-        name: "Runtime e templates do ai-guidelines",
+        name: PROVISIONING_COPY.governedUpdate.choices.runtime,
         value: "runtime",
-        hint: "atualiza arquivos gerenciados sem escolher novas práticas",
+        hint: PROVISIONING_COPY.governedUpdate.choices.runtimeHint,
       },
       {
-        name: "Providers",
+        name: PROVISIONING_COPY.governedUpdate.choices.providers,
         value: "providers",
-        hint: "Claude, OpenAI, Gemini etc. via update --providers",
+        hint: PROVISIONING_COPY.governedUpdate.choices.providersHint,
       },
       {
-        name: "Práticas do repositório",
+        name: PROVISIONING_COPY.governedUpdate.choices.features,
         value: "features",
-        hint: "Prettier, Husky, CI, Quality Gates, TDD, BDD",
+        hint: PROVISIONING_COPY.governedUpdate.choices.featuresHint,
       },
       {
-        name: "Política de colaboração e revisões",
+        name: PROVISIONING_COPY.governedUpdate.choices.policy,
         value: "policy",
         hint: detected.reviewPolicy
           ? `perfil atual: ${detected.reviewPolicy.activeProfile}`
-          : "mostra a fonte governada quando existir",
+          : PROVISIONING_COPY.governedUpdate.choices.policyHint,
       },
       {
-        name: "Entender update antes de executar",
+        name: PROVISIONING_COPY.governedUpdate.choices.details,
         value: "details",
       },
-      { name: "Voltar", value: "__back__" },
+      { name: COMMON_COPY.back, value: "__back__" },
     ],
   });
 
   if (selected === "__back__") return 0;
   if (selected === "details") {
-    await prompts.note?.(renderGovernedUpdateDetails(detected), "Como o update funciona");
+    await prompts.note?.(
+      renderGovernedUpdateDetails(detected),
+      PROVISIONING_COPY.governedUpdate.detailsTitle
+    );
     return 0;
   }
   if (selected === "policy") {
-    await prompts.note?.(renderReviewPolicyDetails(detected), "Política de colaboração e revisão");
+    await prompts.note?.(
+      renderReviewPolicyDetails(detected),
+      PROVISIONING_COPY.section.policyTitle
+    );
     return 0;
   }
   if (selected === "providers") {
@@ -914,7 +875,7 @@ async function runProvidersUpdate(
   prompts: Prompts
 ): Promise<number> {
   const providers = await prompts.input({
-    message: "Quais providers? Separe por vírgula. Ex.: claude,openai",
+    message: PROVISIONING_COPY.governedUpdate.providerQuestion,
     default: "claude",
   });
   const normalized = providers
@@ -923,17 +884,15 @@ async function runProvidersUpdate(
     .filter(Boolean)
     .join(",");
   if (!normalized) {
-    await prompts.outro?.("Nenhum provider informado; nada executado.");
+    await prompts.outro?.(PROVISIONING_COPY.governedUpdate.providerEmpty);
     return 0;
   }
   await prompts.note?.(
     [
-      "Providers não são um comando separado.",
-      "",
-      "O caminho canônico é:",
+      ...PROVISIONING_COPY.governedUpdate.providerNote,
       `npm run flow -- update --providers ${normalized}`,
     ].join("\n"),
-    "Atualizar providers"
+    PROVISIONING_COPY.governedUpdate.providerTitle
   );
   return (await registry.dispatch(["update", "--providers", normalized], context)).exitCode;
 }
@@ -943,13 +902,15 @@ async function runFeaturesUpdate(
   context: CommandContext,
   prompts: Prompts
 ): Promise<number> {
+  const infrastructureGroup = PROVISIONING_COPY.featureGroups.updateInfrastructure;
+  const editorialGroup = PROVISIONING_COPY.featureGroups.updateEditorial;
   const choices = {
-    "Práticas de infraestrutura": INFRASTRUCTURE_UPDATE_FEATURES.map((feature) => ({
+    [infrastructureGroup]: INFRASTRUCTURE_UPDATE_FEATURES.map((feature) => ({
       name: featureLabel(feature),
       value: feature,
       hint: featureHint(feature),
     })),
-    "Práticas editoriais": EDITORIAL_UPDATE_FEATURES.map((feature) => ({
+    [editorialGroup]: EDITORIAL_UPDATE_FEATURES.map((feature) => ({
       name: featureLabel(feature),
       value: feature,
       hint: featureHint(feature),
@@ -957,34 +918,34 @@ async function runFeaturesUpdate(
   };
   const selected = prompts.groupMultiselect
     ? await prompts.groupMultiselect({
-        message: "Quais práticas você quer atualizar?",
+        message: PROVISIONING_COPY.featureUpdateQuestion,
         groups: choices,
         required: true,
         groupSpacing: 1,
       })
     : await prompts.multiselect?.({
-        message: "Quais práticas você quer atualizar?",
-        choices: [...choices["Práticas de infraestrutura"], ...choices["Práticas editoriais"]],
+        message: PROVISIONING_COPY.featureUpdateQuestion,
+        choices: [...choices[infrastructureGroup], ...choices[editorialGroup]],
         required: true,
       });
 
   const features = [...(selected ?? [])].map(String);
   if (features.length === 0) {
-    await prompts.outro?.("Nenhuma prática selecionada; nada executado.");
+    await prompts.outro?.(PROVISIONING_COPY.governedUpdate.featuresEmpty);
     return 0;
   }
   const value = features.join(",");
   await prompts.note?.(
     [
-      "O update vai usar o plano governado já existente.",
+      PROVISIONING_COPY.governedUpdate.featuresNoteHeading,
       "",
-      "Práticas selecionadas:",
+      PROVISIONING_COPY.governedUpdate.featuresSelected,
       ...features.map((feature) => `- ${featureLabel(feature)}`),
       "",
-      "Comando:",
+      PROVISIONING_COPY.governedUpdate.commandLabel,
       `npm run flow -- update --features ${value}`,
     ].join("\n"),
-    "Atualizar práticas"
+    PROVISIONING_COPY.governedUpdate.featuresTitle
   );
   return (await registry.dispatch(["update", "--features", value], context)).exitCode;
 }
@@ -1011,19 +972,17 @@ function detectProvisioningContext(repoRoot: string): ProvisioningContextSummary
 
   if (hasConfig || hasGovernance || hasAiGuidelines || hasSpecify) {
     const evidence = [
-      hasConfig ? ".ai-guidelines/config.json existe." : null,
-      hasGovernance ? ".governance/ existe." : null,
-      hasAiGuidelines && !hasConfig ? ".ai-guidelines/ existe." : null,
-      hasSpecify ? ".specify/ existe." : null,
+      hasConfig ? PROVISIONING_COPY.detected.evidence.config : null,
+      hasGovernance ? PROVISIONING_COPY.detected.evidence.governance : null,
+      hasAiGuidelines && !hasConfig ? PROVISIONING_COPY.detected.evidence.aiGuidelines : null,
+      hasSpecify ? PROVISIONING_COPY.detected.evidence.specify : null,
     ].filter((item): item is string => item !== null);
     return {
       operation: "update",
-      stateTitle: "Este repositório já usa ai-guidelines.",
+      stateTitle: PROVISIONING_COPY.detected.governedTitle,
       evidence,
-      guidance:
-        "O caminho normal é atualizar runtime, templates, providers, práticas e políticas já governadas.",
-      advancedReason:
-        "init reinicia bootstrap de projeto novo; adopt tenta adotar um repo existente. Em um repo já governado, essas opções podem confundir o estado em vez de avançar o fluxo.",
+      guidance: PROVISIONING_COPY.detected.governedGuidance,
+      advancedReason: PROVISIONING_COPY.detected.governedAdvancedReason,
       reviewPolicy: readReviewPolicySummary(repoRoot),
     };
   }
@@ -1031,24 +990,25 @@ function detectProvisioningContext(repoRoot: string): ProvisioningContextSummary
   if (hasPackageJson) {
     return {
       operation: "adopt",
-      stateTitle: "Este parece ser um repositório existente ainda não governado.",
+      stateTitle: PROVISIONING_COPY.detected.existingTitle,
       evidence: [
-        "package.json existe.",
-        "Não detectei .ai-guidelines/, .governance/ ou .specify/.",
+        PROVISIONING_COPY.detected.evidence.packageJson,
+        PROVISIONING_COPY.detected.evidence.noGovernedDirs,
       ],
-      guidance: "O caminho normal é adotar o repo existente sem tratá-lo como projeto vazio.",
-      advancedReason:
-        "init é para diretório vazio; update é para repo já governado. Neste estado, adopt preserva o projeto existente e adiciona a governança.",
+      guidance: PROVISIONING_COPY.detected.existingGuidance,
+      advancedReason: PROVISIONING_COPY.detected.existingAdvancedReason,
     };
   }
 
   return {
     operation: "init",
-    stateTitle: "Este parece ser um diretório novo.",
-    evidence: ["Não detectei package.json.", "Não detectei diretórios governados."],
-    guidance: "O caminho normal é iniciar o baseline em um projeto novo.",
-    advancedReason:
-      "adopt pressupõe projeto existente; update pressupõe governança já instalada. Neste estado, init é o caminho direto.",
+    stateTitle: PROVISIONING_COPY.detected.newTitle,
+    evidence: [
+      PROVISIONING_COPY.detected.evidence.noPackageJson,
+      PROVISIONING_COPY.detected.evidence.noGovernedRuntime,
+    ],
+    guidance: PROVISIONING_COPY.detected.newGuidance,
+    advancedReason: PROVISIONING_COPY.detected.newAdvancedReason,
   };
 }
 
@@ -1056,10 +1016,10 @@ function renderProvisioningContext(summary: ProvisioningContextSummary): string 
   const lines = [
     summary.stateTitle,
     "",
-    "Detectado:",
+    PROVISIONING_COPY.section.detectedLabel,
     ...summary.evidence.map((item) => `- ${item}`),
     "",
-    "Opção exibida neste estado:",
+    PROVISIONING_COPY.section.displayedOption,
     `- ${provisioningLabel(summary.operation)}`,
     "",
     summary.guidance,
@@ -1067,12 +1027,16 @@ function renderProvisioningContext(summary: ProvisioningContextSummary): string 
   if (summary.operation === "update") {
     lines.push(
       "",
-      "Também disponível:",
-      "- atualizar práticas como Prettier, Husky, CI, Quality Gates, TDD e BDD;",
-      "- consultar política de colaboração e revisões sem criar nova fonte de verdade."
+      PROVISIONING_COPY.section.alsoAvailable,
+      PROVISIONING_COPY.section.updatePracticesLine,
+      PROVISIONING_COPY.section.policyLine
     );
     if (summary.reviewPolicy) {
-      lines.push(`- perfil de colaboração atual: ${summary.reviewPolicy.activeProfile}.`);
+      lines.push(
+        formatCopy(PROVISIONING_COPY.section.profileLine, {
+          profile: summary.reviewPolicy.activeProfile,
+        })
+      );
     }
   }
   return lines.join("\n");
@@ -1095,57 +1059,43 @@ function renderProvisioningDetails(summary: ProvisioningContextSummary): string 
 }
 
 function renderGovernedUpdateDetails(summary: ProvisioningContextSummary): string {
-  return [
-    "O update é o painel de manutenção de um repo que já usa ai-guidelines.",
-    "",
-    "Ele cobre:",
-    "- runtime e templates do framework;",
-    "- providers via update --providers;",
-    "- práticas opt-in via update --features;",
-    "- leitura da política de colaboração/revisão atual.",
-    "",
-    "Ele não recria o projeto e não chama init/adopt como caminho principal.",
-    "",
-    renderReviewPolicyDetails(summary),
-  ].join("\n");
+  return [...PROVISIONING_COPY.governedUpdate.details, "", renderReviewPolicyDetails(summary)].join(
+    "\n"
+  );
 }
 
 function renderReviewPolicyDetails(summary: ProvisioningContextSummary): string {
   const policy = summary.reviewPolicy;
   if (!policy) {
-    return [
-      "Não encontrei .governance/review-policy.yml neste repo.",
-      "",
-      "Quando existir, essa política é a fonte governada para perfil de colaboração e regras de revisão.",
-    ].join("\n");
+    return copyLines(PROVISIONING_COPY.policy.missing);
   }
   return [
-    `Fonte: ${policy.path}`,
-    `Perfil de colaboração atual: ${policy.activeProfile}`,
+    `${PROVISIONING_COPY.policy.source}: ${policy.path}`,
+    `${PROVISIONING_COPY.policy.profile}: ${policy.activeProfile}`,
     "",
-    "Impacto do perfil atual:",
-    `- approvals nativos em PR de implementação: ${policy.implementationApprovals}`,
-    `- approvals nativos em PR de integração: ${policy.integrationApprovals}`,
-    `- code owner review: ${policy.codeOwnerReview ? "sim" : "não"}`,
-    `- aprovação do último push: ${policy.lastPushApproval ? "sim" : "não"}`,
-    `- findings aceitos exigem resolution: ${policy.acceptedFindingsRequireResolution ? "sim" : "não"}`,
-    `- findings fixed exigem evento de verificação: ${policy.acceptedFindingsRequireVerificationEvent ? "sim" : "não"}`,
+    PROVISIONING_COPY.policy.impact,
+    `- ${PROVISIONING_COPY.policy.implementationApprovals}: ${policy.implementationApprovals}`,
+    `- ${PROVISIONING_COPY.policy.integrationApprovals}: ${policy.integrationApprovals}`,
+    `- ${PROVISIONING_COPY.policy.codeOwner}: ${policy.codeOwnerReview ? COMMON_COPY.yes : COMMON_COPY.no}`,
+    `- ${PROVISIONING_COPY.policy.lastPush}: ${policy.lastPushApproval ? COMMON_COPY.yes : COMMON_COPY.no}`,
+    `- ${PROVISIONING_COPY.policy.requiresResolution}: ${
+      policy.acceptedFindingsRequireResolution ? COMMON_COPY.yes : COMMON_COPY.no
+    }`,
+    `- ${PROVISIONING_COPY.policy.requiresVerification}: ${
+      policy.acceptedFindingsRequireVerificationEvent ? COMMON_COPY.yes : COMMON_COPY.no
+    }`,
     "",
-    "Reviews semânticos continuam separados de perfil de colaboração:",
+    PROVISIONING_COPY.policy.semanticReviews,
     ...policy.requirementsSummary.map((item) => `- ${item}`),
   ].join("\n");
 }
 
 function provisioningActionLabel(operation: ProvisioningOperation): string {
-  if (operation === "init") return "Iniciar ai-guidelines neste repositório";
-  if (operation === "adopt") return "Adotar ai-guidelines neste repositório";
-  return "Atualizar este repositório";
+  return PROVISIONING_COPY.operationActionLabels[operation];
 }
 
 function provisioningLabel(operation: ProvisioningOperation): string {
-  if (operation === "init") return "Iniciar ai-guidelines neste repositório";
-  if (operation === "adopt") return "Adotar ai-guidelines neste repositório";
-  return "Atualizar runtime, templates, providers, práticas ou política governada";
+  return PROVISIONING_COPY.operationLabels[operation];
 }
 
 function provisioningMainLabel(summary?: ProvisioningContextSummary): string {
@@ -1155,13 +1105,7 @@ function provisioningMainLabel(summary?: ProvisioningContextSummary): string {
 
 function provisioningMainHint(summary?: ProvisioningContextSummary): string | undefined {
   if (!summary) return undefined;
-  if (summary.operation === "update") {
-    return "runtime, templates, providers, práticas e política";
-  }
-  if (summary.operation === "adopt") {
-    return "repo existente ainda sem ai-guidelines";
-  }
-  return "diretório novo ainda sem projeto/governança";
+  return PROVISIONING_COPY.mainHints[summary.operation];
 }
 
 function readReviewPolicySummary(repoRoot: string): ReviewPolicySummary | undefined {
@@ -1191,26 +1135,14 @@ function readReviewPolicySummary(repoRoot: string): ReviewPolicySummary | undefi
 function reviewRequirementsSummary(policy: ReviewPolicy): readonly string[] {
   const defaults = policy.requirements?.defaults ?? {};
   const entries = Object.entries(defaults).map(([type, level]) => `${type}: ${level}`);
-  if (entries.length === 0) return ["nenhum requisito semântico obrigatório por padrão."];
+  if (entries.length === 0) return [PROVISIONING_COPY.policy.noneRequired];
   return entries;
 }
 
 function featureLabel(feature: string): string {
-  if (feature === "prettier") return "Prettier";
-  if (feature === "husky") return "Husky";
-  if (feature === "ci") return "CI";
-  if (feature === "quality-gates") return "Quality Gates";
-  if (feature === "tdd") return "TDD";
-  if (feature === "bdd") return "BDD";
-  return feature;
+  return featureCopy(feature).label;
 }
 
 function featureHint(feature: string): string {
-  if (feature === "prettier") return "formatação consistente";
-  if (feature === "husky") return "hooks locais";
-  if (feature === "ci") return "workflow de validação";
-  if (feature === "quality-gates") return "critérios de qualidade";
-  if (feature === "tdd") return "prática editorial de TDD";
-  if (feature === "bdd") return "prática editorial de BDD";
-  return "";
+  return featureCopy(feature).hint;
 }
