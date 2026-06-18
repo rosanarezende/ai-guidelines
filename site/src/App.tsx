@@ -1,100 +1,229 @@
-const cloudflareSettings = [
-  ["Framework preset", "React (Vite)"],
-  ["Build command", "npm run site:build"],
-  ["Build output directory", "site/dist"],
-  ["Root directory", "/"],
-  ["Production branch", "main"],
-  ["Environment variables", "nenhuma por enquanto"],
+const flowImage = new URL("../../docs/assets/ai-guidelines-flow.png", import.meta.url).href;
+const layersImage = new URL(
+  "../../docs/assets/ai-guidelines-governance-layers.png",
+  import.meta.url
+).href;
+const beforeAfterImage = new URL(
+  "../../docs/assets/ai-guidelines-before-after.png",
+  import.meta.url
+).href;
+
+const benefits = [
+  {
+    title: "Responsabilidades separadas",
+    text: "Automação cuida do mecânico, governança organiza o processo e humanos continuam decidindo o que importa.",
+  },
+  {
+    title: "Estado canônico no repositório",
+    text: "Specs, decisões, reviews, gates e próximos passos vivem em arquivos versionados, não em memória de agente.",
+  },
+  {
+    title: "Gates humanos explícitos",
+    text: "Ready, Human Gate e merge deixam de ser gestos soltos e viram decisões situadas com evidência e bloqueios claros.",
+  },
+  {
+    title: "Integração AI-agnóstica",
+    text: "O contexto é preparado para Claude, Codex, Gemini, Copilot, Cursor, Windsurf, Aider e outros canais.",
+  },
+  {
+    title: "Atualizações seguras",
+    text: "Managed blocks preservam conteúdo local e permitem reaplicar runtime, templates, providers e práticas governadas.",
+  },
+  {
+    title: "Living documentation",
+    text: "Testes, scripts e artefatos governados viram documentação verificável, protegida contra drift por validações.",
+  },
 ] as const;
 
-const productTracks = [
+const quickStarts = [
   {
-    title: "Flow visual",
-    text: "Mostra as jornadas de inicializar, adotar e usar o framework em um repositório vivo.",
-    href: "/flow/",
-    action: "Abrir o Flow",
+    label: "Projeto novo",
+    command: "npx ai-guidelines init",
+    text: "Cria baseline governance-first com wizard interativo.",
   },
   {
-    title: "Documentacao governada",
-    text: "Este site passa a ser produto do repositório: revisado, testado e publicado junto do fluxo governado.",
-    href: "#cloudflare",
-    action: "Ver deploy",
+    label: "Repositório existente",
+    command: "npx ai-guidelines adopt --target . --dry-run",
+    text: "Mostra preview conservador antes de preservar e integrar o que já existe.",
   },
   {
-    title: "Base React/Vite",
-    text: "A estrutura já permite evoluir para componentes, rotas e visualizacoes mais ricas sem inflar o pacote npm.",
-    href: "#arquitetura",
-    action: "Entender arquitetura",
+    label: "Repo já governado",
+    command: "npx ai-guidelines",
+    text: "Abre o guia situado para entender estado, bloqueios, próximos passos e decisões.",
   },
+] as const;
+
+const commandRows = [
+  ["init", "começar projeto novo"],
+  ["adopt", "adotar repositório existente"],
+  ["update", "reaplicar baseline, providers e práticas"],
+  ["work", "gerar orientação da sessão para colar na IA"],
+  ["decide", "preparar decisões humanas com briefing e preview"],
+  ["review", "preparar revisão governada do PR"],
+] as const;
+
+const lifecycle = [
+  "Backlog",
+  "Spec",
+  "Plano",
+  "Implementação",
+  "Review",
+  "Human Gate",
+  "Integração",
+  "Merge",
 ] as const;
 
 export function App(): JSX.Element {
   return (
     <main>
+      <header className="siteHeader">
+        <a className="brand" href="/">
+          ai-guidelines
+        </a>
+        <nav aria-label="Navegação principal">
+          <a href="#comecar">Começar</a>
+          <a href="#ganhos">Ganhos</a>
+          <a href="/flow/">Flow visual</a>
+        </nav>
+      </header>
+
       <section className="hero">
-        <p className="eyebrow">ai-guidelines</p>
-        <h1>Documentacao viva para acompanhar o fluxo governado.</h1>
+        <p className="eyebrow">Governança de engenharia para times com IA</p>
+        <h1>ai-guidelines</h1>
+        <p className="tagline">
+          Automação absorve o mecânico. Governança organiza o sistema. Humanos decidem o que
+          importa.
+        </p>
         <p className="lead">
-          Esta pagina é a nova entrada React/Vite do site. O Flow visual atual continua disponivel
-          em
-          <a href="/flow/"> /flow/</a>, e a Cloudflare Pages publica o build estático em{" "}
-          <code>site/dist</code>.
+          Um framework repo-first para transformar specs, decisões, revisões e gates em fluxo
+          rastreável, auditável e pronto para humanos e múltiplas IAs.
         </p>
         <div className="heroActions">
           <a className="primaryAction" href="/flow/">
-            Ver Flow visual
+            Ver o fluxo visual
           </a>
-          <a className="secondaryAction" href="#cloudflare">
-            Configurar Cloudflare
+          <a className="secondaryAction" href="#comecar">
+            Começar em um repo
           </a>
         </div>
+        <figure className="heroFigure">
+          <img
+            src={flowImage}
+            alt="Ciclo ai-guidelines: backlog, spec, plano, execução, PR, gate humano e merge"
+          />
+        </figure>
       </section>
 
-      <section className="trackGrid" aria-label="Áreas do site">
-        {productTracks.map((track) => (
-          <article className="trackCard" key={track.title}>
-            <h2>{track.title}</h2>
-            <p>{track.text}</p>
-            <a href={track.href}>{track.action}</a>
-          </article>
-        ))}
-      </section>
-
-      <section className="sectionBand" id="cloudflare">
+      <section className="statementBand" aria-label="Princípio central">
         <div>
-          <p className="eyebrow">Cloudflare Pages</p>
-          <h2>Configuração para publicar o site</h2>
+          <p className="eyebrow">Princípio central</p>
+          <h2>O objetivo não é automatizar decisões.</h2>
+        </div>
+        <p>
+          O objetivo é remover trabalho mecânico para que o julgamento humano aconteça apenas onde
+          existe incerteza real. A CLI organiza o estado, mostra o próximo passo e bloqueia caminhos
+          inseguros.
+        </p>
+      </section>
+
+      <section className="visualSection">
+        <div className="sectionCopy">
+          <p className="eyebrow">Como funciona</p>
+          <h2>Três camadas que normalmente ficam misturadas.</h2>
           <p>
-            Use estas opções na tela de deploy. O comando de build valida que os textos do Flow
-            continuam sincronizados com a CLI antes de gerar o pacote estático.
+            A automação estrutural remove ruído, a governança operacional protege o fluxo e o
+            julgamento humano fica reservado para Ready, Human Gate, merge e decisões reais de
+            produto.
           </p>
         </div>
-        <dl className="settingsList">
-          {cloudflareSettings.map(([label, value]) => (
-            <div key={label}>
-              <dt>{label}</dt>
-              <dd>{value}</dd>
+        <figure className="visualFrame">
+          <img
+            src={layersImage}
+            alt="Camadas do ai-guidelines: automação estrutural, governança operacional e julgamento humano"
+          />
+        </figure>
+      </section>
+
+      <section className="quickStart" id="comecar">
+        <div className="sectionCopy">
+          <p className="eyebrow">Comece pelo estado do repositório</p>
+          <h2>O comando certo depende do momento do projeto.</h2>
+        </div>
+        <div className="quickGrid">
+          {quickStarts.map((item) => (
+            <article className="quickCard" key={item.label}>
+              <span>{item.label}</span>
+              <code>{item.command}</code>
+              <p>{item.text}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="benefits" id="ganhos">
+        <div className="sectionCopy">
+          <p className="eyebrow">O que você ganha</p>
+          <h2>Menos reconstrução de contexto. Mais coerência operacional.</h2>
+        </div>
+        <div className="benefitGrid">
+          {benefits.map((benefit) => (
+            <article className="benefitCard" key={benefit.title}>
+              <h3>{benefit.title}</h3>
+              <p>{benefit.text}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="visualSection">
+        <div className="sectionCopy">
+          <p className="eyebrow">Antes e depois</p>
+          <h2>O contexto deixa de ser reconstruído a cada sessão.</h2>
+          <p>
+            O estado passa a viver no repositório. Handoff, work, decide, reviews e gates leem a
+            mesma base factual e mostram o que está disponível, bloqueado ou proibido.
+          </p>
+        </div>
+        <figure className="visualFrame">
+          <img
+            src={beforeAfterImage}
+            alt="Antes e depois do ai-guidelines: do contexto reconstruído para o contexto canônico versionado"
+          />
+        </figure>
+      </section>
+
+      <section className="commandBand">
+        <div>
+          <p className="eyebrow">Comandos essenciais</p>
+          <h2>Uma superfície pequena para operar o ciclo inteiro.</h2>
+        </div>
+        <div className="commandList">
+          {commandRows.map(([command, description]) => (
+            <div key={command}>
+              <code>npx ai-guidelines {command}</code>
+              <span>{description}</span>
             </div>
           ))}
-        </dl>
+        </div>
       </section>
 
-      <section className="sectionBand" id="arquitetura">
-        <div>
-          <p className="eyebrow">Arquitetura</p>
-          <h2>Site fora do pacote npm</h2>
-          <p>
-            React, Vite e o build do site ficam em <code>devDependencies</code>. O pacote publicado
-            continua focado no runtime <code>ai-guidelines</code>, sem enviar <code>site/</code>{" "}
-            para consumidores.
-          </p>
+      <section className="lifecycle">
+        <div className="sectionCopy">
+          <p className="eyebrow">Ciclo governado</p>
+          <h2>Da ideia ao merge, sem depender de memória humana.</h2>
         </div>
-        <div className="architectureBox">
-          <span>repo</span>
-          <strong>site/</strong>
-          <span>npm run site:build</span>
-          <strong>site/dist</strong>
-          <span>Cloudflare Pages</span>
+        <ol>
+          {lifecycle.map((step) => (
+            <li key={step}>{step}</li>
+          ))}
+        </ol>
+        <div className="finalActions">
+          <a className="primaryAction" href="/flow/">
+            Explorar o Flow completo
+          </a>
+          <a className="secondaryAction" href="https://www.npmjs.com/package/ai-guidelines">
+            Ver pacote npm
+          </a>
         </div>
       </section>
     </main>

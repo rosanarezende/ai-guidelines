@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import { defineConfig, type Plugin } from "vite";
 
 const siteRoot = path.dirname(fileURLToPath(import.meta.url));
+const repoRoot = path.resolve(siteRoot, "..");
 
 function copyFlowSite(): Plugin {
   return {
@@ -20,6 +21,11 @@ function copyFlowSite(): Plugin {
 export default defineConfig({
   root: siteRoot,
   plugins: [react(), copyFlowSite()],
+  server: {
+    fs: {
+      allow: [repoRoot],
+    },
+  },
   build: {
     outDir: "dist",
     emptyOutDir: true,

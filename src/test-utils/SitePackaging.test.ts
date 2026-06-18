@@ -39,4 +39,13 @@ describe("governed documentation site packaging", () => {
     expect(pkg.scripts["site:dev"]).toBe("vite --config site/vite.config.ts --host 127.0.0.1");
     expect(pkg.scripts.validate).toContain("npm run site:build");
   });
+
+  it("mantem a home como pagina de produto sem instrucoes de deploy", () => {
+    const appSource = fs.readFileSync(path.join(REPO_ROOT, "site/src/App.tsx"), "utf-8");
+
+    expect(appSource).not.toMatch(/Cloudflare/i);
+    expect(appSource).toContain("Automação absorve o mecânico");
+    expect(appSource).toContain("npx ai-guidelines init");
+    expect(appSource).toContain("/flow/");
+  });
 });
