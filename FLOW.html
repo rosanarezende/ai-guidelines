@@ -1147,7 +1147,8 @@
                 <h3>As escolhas aparecem como grupos</h3>
                 <p>
                   A tela simula o uso de seleção agrupada: providers ficam em um grupo, práticas em
-                  outro, e cada item explica o impacto.
+                  outro, e cada item explica o impacto. No terminal real, essa coleta aparece junto
+                  de um log de etapas para a pessoa saber onde está no fluxo.
                 </p>
                 <ul>
                   <li>Providers não voltam como comando separado.</li>
@@ -1158,9 +1159,15 @@
               <aside class="shell" aria-label="Clack simulando group multiselect no init">
                 <div class="shell-head">
                   <span class="dot"></span><span class="dot"></span><span class="dot"></span>
-                  <span>seleção agrupada</span>
+                  <span>seleção agrupada + etapas</span>
                 </div>
                 <div class="shell-body prompt-stack">
+                  <span class="prompt-row active"
+                    ><span>◇</span><span>Etapas do projeto novo</span></span
+                  >
+                  <span class="prompt-row muted"
+                    ><span>│</span><span>Contexto: destino e nome definidos</span></span
+                  >
                   <span class="prompt-row active"
                     ><span>◆</span><span>Escolha canais e práticas iniciais</span></span
                   >
@@ -1184,7 +1191,9 @@
                 <h3>Preview antes de tocar no disco</h3>
                 <p>
                   O init mostra os efeitos planejados: arquivos, blocos gerenciados, templates e
-                  orientações. O wizard só apresenta; o plano vem do runtime governado.
+                  orientações. Antes da confirmação, o Clack também mostra um checklist curto de
+                  contexto, preview e travas de segurança. O wizard só apresenta; o plano vem do
+                  runtime governado.
                 </p>
                 <ul>
                   <li>Dry-run preserva o filesystem.</li>
@@ -1209,6 +1218,12 @@
                   >
                   <span class="prompt-row muted"
                     ><span>│</span><span>Adicionar blocos gerenciados</span></span
+                  >
+                  <span class="prompt-row success"
+                    ><span>✓</span><span>Preview pronto para confirmação</span></span
+                  >
+                  <span class="prompt-row success"
+                    ><span>✓</span><span>Nenhuma escrita sem confirmação final</span></span
                   >
                   <span class="prompt-row warn"
                     ><span>◆</span><span>Aplicar estas mudanças?</span></span
@@ -1444,7 +1459,8 @@
                 <h3>O merge é explicado antes de aplicar</h3>
                 <p>
                   A tela deixa claro quais blocos serão adicionados, quais arquivos serão
-                  preservados e onde o humano precisa revisar.
+                  preservados e onde o humano precisa revisar. A coleta usa as mesmas affordances
+                  visuais do init: etapas, seleção agrupada e checklist antes da confirmação.
                 </p>
                 <ul>
                   <li>Conteúdo existente não é tratado como descartável.</li>
@@ -1459,6 +1475,7 @@
                 </div>
                 <div class="shell-body prompt-stack">
                   <span class="prompt-row active"><span>◇</span><span>Plano de adoção</span></span>
+                  <span class="prompt-row active"><span>◇</span><span>Etapas da adoção</span></span>
                   <span class="prompt-row success"
                     ><span>✓</span><span>Preservar README.md existente</span></span
                   >
@@ -1470,6 +1487,9 @@
                   >
                   <span class="prompt-row muted"
                     ><span>│</span><span>Providers: claude, openai</span></span
+                  >
+                  <span class="prompt-row success"
+                    ><span>✓</span><span>Travas: dry-run e force desligado por padrão</span></span
                   >
                 </div>
               </aside>

@@ -45,6 +45,11 @@ class ScriptedPrompts implements Prompts {
   readonly inputCalls: Array<{ message: string; defaultValue?: string }> = [];
   readonly confirmCalls: Array<{ message: string; defaultValue?: boolean }> = [];
   readonly spinnerStarts: string[] = [];
+  readonly notes: Array<{ title?: string; message: string }> = [];
+  readonly taskTitles: string[] = [];
+  readonly taskMessages: string[] = [];
+  readonly taskLogTitles: string[] = [];
+  readonly taskLogMessages: string[] = [];
 
   constructor(
     private readonly answers: {
@@ -104,6 +109,54 @@ class ScriptedPrompts implements Prompts {
   async spinner<T>(options: { start: string; task: () => T | Promise<T> }): Promise<T> {
     this.spinnerStarts.push(options.start);
     return options.task();
+  }
+
+  async note(message: string, title?: string): Promise<void> {
+    this.notes.push({ title, message });
+  }
+
+  async taskList(
+    tasks: readonly {
+      title: string;
+      task: (message: (value: string) => void) => string | Promise<string> | void | Promise<void>;
+    }[]
+  ): Promise<void> {
+    for (const task of tasks) {
+      this.taskTitles.push(task.title);
+      const result = await task.task((value) => this.taskMessages.push(`${task.title}:${value}`));
+      if (typeof result === "string") {
+        this.taskMessages.push(`${task.title}:${result}`);
+      }
+    }
+  }
+
+  taskLog(options: { title: string }) {
+    this.taskLogTitles.push(options.title);
+    const messages = this.taskLogMessages;
+    return {
+      message(message: string): void {
+        messages.push(`root:${message}`);
+      },
+      group(groupName: string) {
+        return {
+          message(message: string): void {
+            messages.push(`${groupName}:message:${message}`);
+          },
+          success(message: string): void {
+            messages.push(`${groupName}:success:${message}`);
+          },
+          error(message: string): void {
+            messages.push(`${groupName}:error:${message}`);
+          },
+        };
+      },
+      success(message: string): void {
+        messages.push(`success:${message}`);
+      },
+      error(message: string): void {
+        messages.push(`error:${message}`);
+      },
+    };
   }
 }
 
@@ -398,6 +451,17 @@ describe("bootstrap delivery 2c — wizard", () => {
       expect.arrayContaining(["init", "adopt", "update"])
     );
     expect(operationChoices.map((choice) => choice.value)).not.toContain("providers");
+    expect(prompts.notes[0]).toMatchObject({ title: "Iniciar projeto novo" });
+    expect(prompts.taskLogTitles).toEqual(["Etapas do projeto novo"]);
+    expect(prompts.taskTitles).toEqual([
+      "Conferir contexto detectado",
+      "Montar preview humano",
+      "Checar travas de segurança",
+    ]);
+    expect(prompts.groupMultiselectCalls.map((call) => call.message)).toEqual([
+      "Quais ferramentas de IA devem receber arquivos de orientação?",
+      "Quais práticas quer instalar agora?",
+    ]);
   });
 
   it("wizard permite escolha adopt e preserva defaults", async () => {
@@ -418,6 +482,15 @@ describe("bootstrap delivery 2c — wizard", () => {
         features: ["prettier", "husky", "ci", "quality-gates", "tdd", "bdd"],
       },
     });
+    expect(prompts.notes[0]).toMatchObject({ title: "Adotar projeto existente" });
+    expect(prompts.notes[0].message).toContain("preservação do conteúdo existente");
+    expect(prompts.taskLogTitles).toEqual(["Etapas da adoção"]);
+    expect(prompts.taskLogMessages.join("\n")).toContain(
+      "Contexto:success:Destino .; nome derivado da pasta."
+    );
+    expect(prompts.taskMessages.join("\n")).toContain(
+      "Conferir contexto detectado:Projeto existente: preservar arquivos atuais"
+    );
   });
 
   it("wizard seleciona providers dentro de update", async () => {

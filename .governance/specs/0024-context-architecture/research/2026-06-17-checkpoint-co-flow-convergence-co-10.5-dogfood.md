@@ -51,6 +51,10 @@ humana, sem mover regra de negócio para o wizard.
   - operações fora do caminho normal ficam em modo avançado com aviso.
 - Providers/features continuam com os mesmos valores internos, mas agora são apresentados como
   ferramentas de IA e práticas de trabalho, agrupadas por intenção humana.
+- `init` e `adopt` deixaram de ser apenas atalhos para o comando de provisionamento: o prompt real
+  agora mostra introdução contextual, `taskLog` de etapas, `groupMultiselect` para providers e
+  práticas, checklist visual com `tasks`, preview humano e confirmação final antes de qualquer
+  escrita.
 - `FLOW.html` passou a explicar a experiência em três jornadas separadas, cada uma com sua própria
   simulação visual inspirada no Clack:
   - projeto novo → `init`;
@@ -71,7 +75,7 @@ pela intenção real.
 Isso reduz a classe de conflito "dois caminhos tentando explicar o mesmo estado" sem criar uma
 nova fonte de verdade.
 
-## O que ainda falta no CO-10.5
+## Fechamentos adicionais do CO-10.5
 
 - O vocabulário principal do `flow`, do help e do catálogo de intents foi revisado para reduzir
   termos internos na superfície humana. Exemplos: "Ver decisões do fluxo" virou "Ver ações
@@ -79,6 +83,8 @@ nova fonte de verdade.
   passou a falar em "plano da sessão", "ações com confirmação" e "validação completa".
 - A validação intermediária passou a usar `taskLog` junto de `tasks`, mostrando etapas nomeadas
   para diff, formatação, build/checks aplicáveis e consolidação do resultado.
+- As jornadas `init` e `adopt` passaram a usar o mesmo vocabulário visual avançado: resumo
+  contextual, log de progresso, seleção agrupada, checklist de segurança e preview confirmável.
 - O caminho de ferramentas técnicas ficou explicitamente subordinado ao fluxo principal: ele abre
   inspeções e diagnósticos, mas não parece mais um produto alternativo ao `flow`.
 - `FLOW.html` foi atualizado com os mesmos rótulos humanos usados pelo wizard, preservando as três

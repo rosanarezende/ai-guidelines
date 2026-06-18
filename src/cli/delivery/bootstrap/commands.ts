@@ -52,10 +52,35 @@ abstract class ProvisioningDeliveryCommand implements BootstrapDeliveryCommand<P
 
   async prompt(context: CommandContext): Promise<ProvisioningCommandOptions> {
     const prompts = requirePrompts(context, this.name);
+    await prompts.note?.(renderProvisioningIntro(this.name), provisioningFlowTitle(this.name));
+    const taskLog = prompts.taskLog?.({
+      title: provisioningFlowTaskLogTitle(this.name),
+      limit: 8,
+      retainLog: true,
+    });
+
+    taskLog?.group("Contexto").message("Escolhendo destino e nome do projeto.");
     const target = await promptString(prompts, "Onde aplicar? Use . para este repositório", ".");
     const projectName = await promptString(prompts, "Nome do projeto", "");
+    taskLog
+      ?.group("Contexto")
+      .success(`Destino ${target}; nome ${projectName || "derivado da pasta"}.`);
+
+    taskLog?.group("Integrações").message("Escolhendo ferramentas de IA e práticas.");
     const providers = await promptProviderList(prompts);
     const features = this.name === "update" ? undefined : await promptFeatureList(prompts);
+    taskLog
+      ?.group("Integrações")
+      .success(
+        [
+          `${providers.length} provider(s) selecionado(s)`,
+          features === undefined ? null : `${features.length} prática(s) selecionada(s)`,
+        ]
+          .filter((item): item is string => item !== null)
+          .join("; ")
+      );
+
+    taskLog?.group("Execução").message("Definindo pacote, segurança e instalação.");
     const packageManager = await prompts.select<string>({
       message: "Gerenciador de pacotes",
       choices: [
@@ -78,6 +103,16 @@ abstract class ProvisioningDeliveryCommand implements BootstrapDeliveryCommand<P
       message: "Instalar dependências automaticamente no final?",
       default: false,
     });
+    taskLog
+      ?.group("Execução")
+      .success(
+        [
+          `pacote ${packageManager || "auto"}`,
+          dryRun ? "dry-run" : "aplicar arquivos",
+          force ? "force habilitado" : "force desligado",
+          install ? "install habilitado" : "install desligado",
+        ].join("; ")
+      );
 
     const options: ProvisioningCommandOptions = {
       operation: this.name,
@@ -95,6 +130,41 @@ abstract class ProvisioningDeliveryCommand implements BootstrapDeliveryCommand<P
       yes: false,
       skippedFeatures: [],
     };
+
+    if (prompts.taskList) {
+      await prompts.taskList([
+        {
+          title: "Conferir contexto detectado",
+          task: (message) => {
+            message(provisioningContextTaskMessage(this.name));
+            return "Contexto coerente com a operação escolhida.";
+          },
+        },
+        {
+          title: "Montar preview humano",
+          task: (message) => {
+            message(
+              `Providers: ${(options.providers ?? []).join(", ") || "nenhum"}; ` +
+                `práticas: ${options.features?.join(", ") ?? "não alteradas"}`
+            );
+            return "Preview pronto para confirmação.";
+          },
+        },
+        {
+          title: "Checar travas de segurança",
+          task: (message) => {
+            message(
+              [
+                dryRun ? "dry-run ligado" : "dry-run desligado por escolha humana",
+                force ? "force ligado por escolha humana" : "force desligado",
+                install ? "install ligado por escolha humana" : "install desligado",
+              ].join("; ")
+            );
+            return "Nenhuma escrita será feita sem confirmação final.";
+          },
+        },
+      ]);
+    }
 
     await prompts.note?.(renderProvisioningPreview(options), `Prévia: ${this.name}`);
     const confirmed = await prompts.confirm({
@@ -340,20 +410,78 @@ function featureHint(feature: string): string {
   return "prática BDD";
 }
 
+function provisioningFlowTitle(operation: ProvisioningOperation): string {
+  if (operation === "init") return "Iniciar projeto novo";
+  if (operation === "adopt") return "Adotar projeto existente";
+  return "Atualizar repositório governado";
+}
+
+function provisioningFlowTaskLogTitle(operation: ProvisioningOperation): string {
+  if (operation === "init") return "Etapas do projeto novo";
+  if (operation === "adopt") return "Etapas da adoção";
+  return "Etapas do update";
+}
+
+function renderProvisioningIntro(operation: ProvisioningOperation): string {
+  if (operation === "init") {
+    return [
+      "Use este fluxo quando o diretório ainda não tem um projeto configurado.",
+      "",
+      "O assistente vai guiar:",
+      "- destino e nome do projeto;",
+      "- ferramentas de IA que receberão orientação;",
+      "- práticas opcionais como Prettier, Husky e CI;",
+      "- preview antes de qualquer escrita.",
+      "",
+      "Por segurança, o padrão é começar em dry-run.",
+    ].join("\n");
+  }
+  if (operation === "adopt") {
+    return [
+      "Use este fluxo quando já existe um projeto e você quer adicionar ai-guidelines.",
+      "",
+      "O assistente vai guiar:",
+      "- preservação do conteúdo existente;",
+      "- ferramentas de IA que receberão orientação;",
+      "- práticas opcionais que podem ser adicionadas sem tratar o repo como vazio;",
+      "- preview de conflitos e efeitos antes de qualquer escrita.",
+      "",
+      "Por segurança, o padrão é começar em dry-run e sem force.",
+    ].join("\n");
+  }
+  return [
+    "Use este fluxo para manter um repositório que já usa ai-guidelines.",
+    "",
+    "O assistente atualiza runtime, templates, providers e práticas governadas.",
+  ].join("\n");
+}
+
+function provisioningContextTaskMessage(operation: ProvisioningOperation): string {
+  if (operation === "init") return "Projeto novo: criar baseline sem assumir conteúdo existente.";
+  if (operation === "adopt")
+    return "Projeto existente: preservar arquivos atuais e aplicar só efeitos governados.";
+  return "Repo governado: atualizar sem recriar init/adopt.";
+}
+
 function renderProvisioningPreview(options: ProvisioningCommandOptions): string {
   const lines = [
-    `Operação: ${options.operation}`,
-    `Destino: ${options.target}`,
-    `Nome: ${options.name ?? "(derivado da pasta)"}`,
-    `Gerenciador de pacotes: ${options.packageManager ?? "auto"}`,
-    `Ferramentas de IA: ${(options.providers ?? []).join(", ") || "(nenhuma)"}`,
+    "O que será feito",
+    `- Fluxo: ${provisioningFlowTitle(options.operation)}`,
+    `- Destino: ${options.target}`,
+    `- Nome: ${options.name ?? "(derivado da pasta)"}`,
+    `- Gerenciador de pacotes: ${options.packageManager ?? "auto"}`,
+    "",
+    "Integrações",
+    `- Ferramentas de IA: ${(options.providers ?? []).join(", ") || "(nenhuma)"}`,
   ];
   if (options.features !== undefined) {
-    lines.push(`Práticas: ${options.features.join(", ") || "(nenhuma)"}`);
+    lines.push(`- Práticas: ${options.features.join(", ") || "(nenhuma)"}`);
   }
-  lines.push(`Só prévia: ${options.dryRun ? "sim" : "não"}`);
-  lines.push(`Sobrescrever conflitos suportados: ${options.force ? "sim" : "não"}`);
-  lines.push(`Instalar dependências: ${options.install ? "sim" : "não"}`);
-  lines.push(`Remover arquivos órfãos gerenciados: ${options.prune ? "sim" : "não"}`);
+  lines.push("");
+  lines.push("Segurança");
+  lines.push(`- Só prévia: ${options.dryRun ? "sim" : "não"}`);
+  lines.push(`- Sobrescrever conflitos suportados: ${options.force ? "sim" : "não"}`);
+  lines.push(`- Instalar dependências: ${options.install ? "sim" : "não"}`);
+  lines.push(`- Remover arquivos órfãos gerenciados: ${options.prune ? "sim" : "não"}`);
   return lines.join("\n");
 }
