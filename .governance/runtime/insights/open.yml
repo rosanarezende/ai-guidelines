@@ -74,39 +74,6 @@ insights:
         spec: "0024"
         cursor: checkpoint-cli-cutover
         note: "3 tentativas falsificadas em status check (R8/review.md, landing_policy, vehicle-from-topology; a 3ª colidiu com R7). Recorre além de merge: releases, promoções, encerramento, deploys, gates. Mapa + sequência: research-library/architecture/2026-06-05-enforcement-surfaces.md"
-  - id: PIT-0011
-    text: "Contrato executavel invisivel ainda produz ritual manual: existir template/comando/checker/hook nao basta se o agente nao descobre o contrato no momento da acao — descobribilidade situada e parte do contrato, nao acessorio"
-    status: open
-    captured_at: 2026-06-11T03:46:22.345Z
-    occurrences:
-      - at: 2026-06-11T03:46:22.345Z
-        spec: "0024"
-        cursor: checkpoint-npm-toolchain
-        note: "Evidencias (Spec 0024, PRs #38/#39): hooks ja executavam sync/format/test/validate e agentes seguiram repetindo a cadeia manualmente; troca de sessao sem handoff obrigou reconstrucao por prompts extensos da owner; review:seal so foi criado depois de o agente re-derivar o algoritmo de selagem manualmente; constrains sugeridos: AGENTS/handoff, runtime bootstrap, script-contracts, instrucoes de autoria, CO-4/CO-6"
-      - at: 2026-06-11T18:46:40.665Z
-        spec: "0024"
-        cursor: checkpoint-co-projection
-        note: "Dogfood CO-4 (PR #41): handoff derivado retomou branch/PR/cursor corretos, mas active.yml estava 2 geracoes stale (branch bootstrap-compiler vs co-projection); fallback por regex encontrou a spec e mascarou o drift; active-specs:check passou pois validava so stage. O contrato de atualizacao (workflow publish-state na transicao de no) existia e era invisivel no momento da acao — ninguem o descobriu em 2 transicoes. Correcao: invariantes branch/identidade no checker + fallback declarado no handoff (commit 5881a85). Evidencia: research/2026-06-11-checkpoint-co-projection-dogfood-active-specs-drift.md"
-      - at: 2026-06-12T01:12:58.968Z
-        spec: "0024"
-        cursor: checkpoint-co-projection
-        note: "Rodada 5 (review invisivel): pedido simples ('faca uma auditoria tecnica') exigiu mega-prompt da owner reconstruindo papel/escopo/path/schema/fingerprints/validacoes/proibicoes para o Antigravity; mesmo assim o agente publicou comentario redundante no GitHub (sem autoridade governada) e narrou fingerprint divergente do artefato real (538f2be5aed1), exigindo segundo prompt de reconciliacao. review-policy/schemas/templates/review:seal/review:check existiam e nao foram descobertos no momento da acao. Falsifica: 'policy+schema+seal+check bastam para descobribilidade operacional'. Correcao: briefing governado situado (guidelines review <papel>) projetando contrato/modo/artefato/vetores/publicacao do mesmo snapshot da carga; politica de publicacao machine-readable (GitHub forbidden-by-default); subject_ref no contrato de review. Criterio de falsificacao: na proxima sessao a owner pede apenas 'faca o Architectural Review'."
-      - at: 2026-06-12T04:24:50.931Z
-        spec: "0024"
-        cursor: checkpoint-co-projection
-        note: "Rodada 6 (briefing descoberto, artefato impossivel): com o briefing governado, o agente revisor descobriu sozinho o comando e inferiu verification corretamente — mas o artefato prescrito era IMPRODUZIVEL pelo fluxo oficial: ReviewEvent exigia verifies[] com finding existente (review limpo com 0 findings nao tem ref legitimo → finding artificial technical_audit#F1 inventado) e review:seal so selava reviews (agente criou scratch/seal.mjs reproduzindo o algoritmo de fingerprint a mao). Evento/commit improvisados descartados (backup local). Evidencia DISTINTA das anteriores: o contrato foi DESCOBERTO mas ainda exigiu ritual manual NA EXECUCAO. Falsifica: 'projetar policy/path/schema/comandos basta para tornar o review executavel'. Conclusao: o contrato situado tambem precisa garantir que o artefato prescrito seja PRODUZIVEL integralmente pelas ferramentas canonicas. Correcao: scope findings|review no ReviewEvent (review limpo revalidavel sem finding artificial) + review:seal polimorfico (sela eventos)."
-      - at: 2026-06-12T12:58:17.541Z
-        spec: "0024"
-        cursor: checkpoint-co-projection
-        note: "Rodada 7 (review executado, publicacao exigia segundo pedido): owner pediu TA em uma frase; agente descobriu o comando, executou o review completo, criou/selou/validou o EV1 e identificou o commit exclusivo — mas PAROU pedindo 'autorize o commit e o push', forcando segunda interacao humana so para publicar o artefato que ela mesma solicitou. Falsifica: 'briefing completo elimina a friccao do review'. Conclusao: o pedido explicito precisa CARREGAR autorizacao operacional capability-scoped ate a publicacao do artefato canonico. Correcao: --authorization explicit-review-request (fail-closed; ensinada pelo AGENTS) + review:publish (guard executavel: diff EXATAMENTE review-only no path canonico, mensagem derivada, push normal; GitHub segue proibido). Bonus do dogfood: descoberto bug real de contrato — SHA todo-numerico vira NUMERO no YAML e invalidava subject_ref (~1/38); corrigido com erro orientativo + aspas obrigatorias nos templates/briefing."
-      - at: 2026-06-13T19:02:53.283Z
-        spec: "0024"
-        cursor: checkpoint-co-enforcement
-        note: "Dogfood operacional (PR #42, CO-3.1): o contrato de RETOMADA (handoff) e de REVIEW (review brief) ja eram descobriveis, mas a EXECUCAO de trabalho funcional (correcao de F1-F3) exigiu da owner um mega-prompt reconstruindo branch/PR/checkpoint/HEAD, review/findings, acoes permitidas/proibidas, autoridade, necessidade de resolutions, comandos de validacao, politica de commit/push, criterio de parada e formato do relatorio final — tudo derivavel do repo. Hipotese falsificada: handoff + review briefing + policy NAO tornam automaticamente o contrato de IMPLEMENTACAO e de ENTREGA DO RELATORIO descobrivel. Correcao: guidelines work (briefing governado de trabalho) + work-policy.yml (report contract governado por modo). Limite: o briefing projeta o contrato, nao executa trabalho."
-      - at: 2026-06-13T22:53:58.549Z
-        spec: "0024"
-        cursor: checkpoint-co-enforcement
-        note: "Dogfood operacional (PR #42, revalidacao EV1 do CO-3.1): o EV1 (verification approved de F1-F3) era valido e selado, mas review:publish NAO conseguiu publica-lo — circularidade (o evento precisava estar publicado para a lane virar CURRENT, mas review:publish exigia CURRENT antes do commit; a disposition open permanece por contrato). Codex caiu em commit/push manual. Classe distinta de PIT-0011: o contrato era DESCOBERTO (review:publish canonico) e o artefato PRODUZIVEL (EV1 selado), mas a automacao de publicacao nao conseguia CONCLUIR o proprio fluxo canonico — evolucao de 'descoberto != executavel' para 'produzivel != publicavel pela ferramenta'. Correcao: avaliacao prospectiva (a lane FECHARIA como current com o candidato em disco?) + findings ja revalidados por evento cobrindo o functional HEAD nao mantem a lane em verification. Limite: git HEAD avanca por commit review-only, functional HEAD nao."
   - id: PIT-0012
     text: "Capacidade disponivel nao e obrigacao: catalogo de tipos de review e policy de exigencia precisam ser independentes (tipo/aplicabilidade/requisito/estado) para preservar autoridade humana — acoplar perfil de colaboracao ou freshness a obrigatoriedade transforma oferta em imposicao"
     status: open
