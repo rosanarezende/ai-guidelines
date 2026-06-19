@@ -19,6 +19,8 @@
     "workHint": "copia contexto para colar na LLM de sua preferência",
     "review": "Ver tipos de revisão disponíveis",
     "reviewHint": "explica quais revisões existem e copia o catálogo",
+    "specWork": "Escolher ou iniciar uma spec",
+    "specWorkHint": "para times: ver specs abertas, continuar a certa ou preparar uma nova com segurança",
     "advanced": "Ferramentas técnicas e diagnósticos",
     "advancedHint": "para quando você quer inspecionar ou diagnosticar algo específico"
   },
@@ -100,6 +102,43 @@
     "policyHint": "mostra quais revisões são obrigatórias ou opcionais",
     "policyTitle": "Regra de revisão deste PR"
   },
+  "specWork": {
+    "title": "Specs e trabalho em time",
+    "intro": [
+      "Use esta área quando você não tem certeza se está na spec certa, quando existem várias specs abertas ou quando precisa começar uma nova iniciativa.",
+      "",
+      "O guia não troca branch, não cria PR e não cria spec sozinho.",
+      "Ele mostra o estado publicado, carrega a spec escolhida ou explica o caminho governado que precisa de autorização humana."
+    ],
+    "question": "O que você quer fazer com as specs?",
+    "activeSpecs": "Ver specs abertas",
+    "activeSpecsHint": "mostra o índice público, branch e status de cada spec",
+    "continueOther": "Continuar uma spec específica",
+    "continueOtherHint": "informe número ou nome; o sistema carrega handoff/work daquela spec",
+    "newSpec": "Entender como iniciar uma spec nova",
+    "newSpecHint": "mostra autoridade, precondições e passos; não cria nada sozinho",
+    "specQuestion": "Qual spec? Use número ou nome. Ex.: 0024 ou context-architecture",
+    "newSpecNote": [
+      "Para iniciar uma spec nova sem confundir o fluxo atual:",
+      "",
+      "1. Confirme se a demanda não pertence a uma spec já aberta.",
+      "2. Veja as specs abertas com `npm run flow -- specs`.",
+      "3. Defina objetivo, owner, tipo de mudança e impacto esperado.",
+      "4. Peça autorização humana explícita para criar branch, artefatos governados e PR Draft.",
+      "5. Só depois materialize state/tasks/active e publique o novo PR.",
+      "",
+      "Quem pode autorizar:",
+      "- contributor: pode propor e preparar contexto;",
+      "- maintainer: pode autorizar materialização operacional;",
+      "- owner/Rosana: decide mudanças de topologia, Ready, Human Gate e merge.",
+      "",
+      "O que é proibido nesta tela:",
+      "- criar branch ou PR automaticamente;",
+      "- abrir CO-5 ou outro nó fora do fluxo atual;",
+      "- executar Ready, Human Gate ou merge;",
+      "- alterar topologia sem decisão governada."
+    ]
+  },
   "validation": {
     "question": "Como você quer conferir suas mudanças?",
     "changed": "Validar somente o diff atual",
@@ -130,10 +169,6 @@
   },
   "advanced": {
     "title": "Ferramentas técnicas e diagnósticos",
-    "continueOther": "Trocar para outra spec pelo ID ou nome",
-    "continueOtherHint": "somente leitura; útil quando você muda de contexto",
-    "activeSpecs": "Ver trabalhos governados ativos",
-    "activeSpecsHint": "mostra o índice público",
     "drift": "Conferir se a lista pública está coerente",
     "driftHint": "diagnóstico de divergência",
     "visualPrompt": "Gerar prompt visual para outro gerador de imagem",

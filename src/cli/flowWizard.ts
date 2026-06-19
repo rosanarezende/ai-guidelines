@@ -48,14 +48,8 @@ type GovernedRepoUpdateChoice =
 const COMMON_COPY = FLOW_COPY.common;
 const WIZARD_COPY = FLOW_COPY.wizard;
 const PROVISIONING_COPY = FLOW_COPY.provisioning;
-type AdvancedMenuChoice =
-  | "continue-other"
-  | "active-specs"
-  | "drift"
-  | "visual-prompt"
-  | "publication"
-  | "final-ops"
-  | "__back__";
+type AdvancedMenuChoice = "drift" | "visual-prompt" | "publication" | "final-ops" | "__back__";
+type SpecWorkMenuChoice = "active-specs" | "continue-other" | "new-spec" | "__back__";
 
 interface ProvisioningContextSummary {
   readonly operation: ProvisioningOperation;
@@ -87,6 +81,7 @@ export type FlowMenuValue =
   | "blockers"
   | "work"
   | "review"
+  | "spec-work"
   | "provisioning"
   | "advanced"
   | "quit";
@@ -172,6 +167,11 @@ export function buildFlowMenu(
       name: WIZARD_COPY.menu.review,
       value: "review",
       hint: WIZARD_COPY.menu.reviewHint,
+    },
+    {
+      name: WIZARD_COPY.menu.specWork,
+      value: "spec-work",
+      hint: WIZARD_COPY.menu.specWorkHint,
     },
     {
       name: provisioningMainLabel(provisioning),
@@ -383,6 +383,8 @@ export async function runFlowWizard(
         return runHandoffSection(model, registry, context, prompts, clipboard);
       case "review":
         return runReviewSection(registry, context, prompts, clipboard);
+      case "spec-work":
+        return runSpecWorkSection(registry, context, prompts);
       case "provisioning":
         return runProvisioningSection(repoRoot, registry, context, prompts, provisioning);
       case "advanced":
@@ -663,6 +665,49 @@ async function runReviewSection(
   return captured.exitCode;
 }
 
+async function runSpecWorkSection(
+  registry: CommandRegistry,
+  context: CommandContext,
+  prompts: Prompts
+): Promise<number> {
+  await prompts.note?.(copyLines(WIZARD_COPY.specWork.intro), WIZARD_COPY.specWork.title);
+  const selected = await prompts.select<SpecWorkMenuChoice>({
+    message: WIZARD_COPY.specWork.question,
+    choices: [
+      {
+        name: WIZARD_COPY.specWork.activeSpecs,
+        value: "active-specs",
+        hint: WIZARD_COPY.specWork.activeSpecsHint,
+      },
+      {
+        name: WIZARD_COPY.specWork.continueOther,
+        value: "continue-other",
+        hint: WIZARD_COPY.specWork.continueOtherHint,
+      },
+      {
+        name: WIZARD_COPY.specWork.newSpec,
+        value: "new-spec",
+        hint: WIZARD_COPY.specWork.newSpecHint,
+      },
+      { name: COMMON_COPY.back, value: "__back__" },
+    ],
+  });
+
+  if (selected === "__back__") return 0;
+  if (selected === "active-specs") return (await registry.dispatch(["specs"], context)).exitCode;
+  if (selected === "continue-other") {
+    const identifier = (await prompts.input({ message: WIZARD_COPY.specWork.specQuestion })).trim();
+    if (!identifier) {
+      await prompts.outro?.(COMMON_COPY.nothingExecuted);
+      return 0;
+    }
+    return (await registry.dispatch(["continue", identifier], context)).exitCode;
+  }
+
+  await prompts.note?.(copyLines(WIZARD_COPY.specWork.newSpecNote), WIZARD_COPY.specWork.newSpec);
+  return 0;
+}
+
 async function runAdvancedSection(
   registry: CommandRegistry,
   context: CommandContext,
@@ -671,16 +716,6 @@ async function runAdvancedSection(
   const selected = await prompts.select<AdvancedMenuChoice>({
     message: WIZARD_COPY.advanced.title,
     choices: [
-      {
-        name: WIZARD_COPY.advanced.continueOther,
-        value: "continue-other",
-        hint: WIZARD_COPY.advanced.continueOtherHint,
-      },
-      {
-        name: WIZARD_COPY.advanced.activeSpecs,
-        value: "active-specs",
-        hint: WIZARD_COPY.advanced.activeSpecsHint,
-      },
       {
         name: WIZARD_COPY.advanced.drift,
         value: "drift",
@@ -705,15 +740,6 @@ async function runAdvancedSection(
   });
 
   if (selected === "__back__") return 0;
-  if (selected === "continue-other") {
-    const identifier = (await prompts.input({ message: WIZARD_COPY.advanced.specQuestion })).trim();
-    if (!identifier) {
-      await prompts.outro?.(COMMON_COPY.nothingExecuted);
-      return 0;
-    }
-    return (await registry.dispatch(["continue", identifier], context)).exitCode;
-  }
-  if (selected === "active-specs") return (await registry.dispatch(["specs"], context)).exitCode;
   if (selected === "drift") return (await registry.dispatch(["drift"], context)).exitCode;
   if (selected === "visual-prompt") {
     return (await registry.dispatch(["visual-prompt"], context)).exitCode;

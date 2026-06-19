@@ -44,12 +44,14 @@ class ScriptedPrompts implements Prompts {
     readonly hints: readonly string[];
   }> = [];
   private index = 0;
+  private inputIndex = 0;
   private confirmIndex = 0;
 
   constructor(
     private readonly selections: readonly string[],
     private readonly confirmations: readonly boolean[] = [],
-    private readonly groupSelections: string[][] = []
+    private readonly groupSelections: string[][] = [],
+    private readonly inputs: readonly string[] = []
   ) {}
 
   async select<T>(options: { message: string; choices: ReadonlyArray<{ value: T }> }): Promise<T> {
@@ -67,7 +69,7 @@ class ScriptedPrompts implements Prompts {
   }
 
   async input(): Promise<string> {
-    return "";
+    return this.inputs[this.inputIndex++] ?? "";
   }
 
   async confirm(): Promise<boolean> {
@@ -436,6 +438,7 @@ describe("flow wizard", () => {
         "validate",
         "decisions",
         "work",
+        "spec-work",
         "provisioning",
       ])
     );
@@ -455,6 +458,7 @@ describe("flow wizard", () => {
     expect(menuText).toContain("Ver ações disponíveis e bloqueadas");
     expect(menuText).toContain("Ver orientação de trabalho / handoff");
     expect(menuText).toContain("Ver tipos de revisão disponíveis");
+    expect(menuText).toContain("Escolher ou iniciar uma spec");
     expect(menuText).toContain("Ferramentas técnicas e diagnósticos");
     expect(menuText).not.toMatch(/\bcockpit\b/i);
     expect(menuText).not.toMatch(/\bbriefing\b/i);
@@ -919,7 +923,7 @@ describe("flow wizard", () => {
   });
 
   it("ferramentas técnicas não abrem a superfície antiga diretamente", async () => {
-    const prompts = new ScriptedPrompts(["advanced", "active-specs"]);
+    const prompts = new ScriptedPrompts(["spec-work", "active-specs"]);
     const workflow = spyCommand("workflow");
     const specs = spyCommand("specs");
 
@@ -932,8 +936,62 @@ describe("flow wizard", () => {
     expect(code).toBe(0);
     expect(specs.calls).toEqual([[]]);
     expect(workflow.calls).toEqual([]);
+    expect(prompts.selectCalls[0].names).toContain("Escolher ou iniciar uma spec");
+    expect(prompts.selectCalls[1].message).toBe("O que você quer fazer com as specs?");
+    expect(prompts.selectCalls[1].names).toContain("Ver specs abertas");
+  });
+
+  it("continuar uma spec específica pede identificador e delega ao comando continue", async () => {
+    const prompts = new ScriptedPrompts(
+      ["spec-work", "continue-other"],
+      [],
+      [],
+      ["context-architecture"]
+    );
+    const continueCommand = spyCommand("continue");
+
+    const code = await runFlowWizard("/repo", new CollectingLogger(), {
+      prompts,
+      registry: registryWith(continueCommand),
+      collectModel: () => model(),
+    });
+
+    expect(code).toBe(0);
+    expect(continueCommand.calls).toEqual([["context-architecture"]]);
+  });
+
+  it("iniciar spec nova mostra orientação governada sem criar branch, PR ou topologia", async () => {
+    const prompts = new ScriptedPrompts(["spec-work", "new-spec"]);
+    const continueCommand = spyCommand("continue");
+    const workflow = spyCommand("workflow");
+
+    const code = await runFlowWizard("/repo", new CollectingLogger(), {
+      prompts,
+      registry: registryWith(continueCommand, workflow),
+      collectModel: () => model(),
+    });
+
+    expect(code).toBe(0);
+    expect(continueCommand.calls).toEqual([]);
+    expect(workflow.calls).toEqual([]);
+    expect(prompts.notes.join("\n")).toContain("não cria spec sozinho");
+    expect(prompts.notes.join("\n")).toContain("Peça autorização humana explícita");
+    expect(prompts.notes.join("\n")).toContain("criar branch ou PR automaticamente");
+  });
+
+  it("ferramentas técnicas ficam restritas a diagnóstico, publicação e operações finais", async () => {
+    const prompts = new ScriptedPrompts(["advanced", "__back__"]);
+
+    const code = await runFlowWizard("/repo", new CollectingLogger(), {
+      prompts,
+      registry: registryWith(),
+      collectModel: () => model(),
+    });
+
+    expect(code).toBe(0);
     expect(prompts.selectCalls[1].message).toBe("Ferramentas técnicas e diagnósticos");
-    expect(prompts.selectCalls[1].names).toContain("Ver trabalhos governados ativos");
+    expect(prompts.selectCalls[1].names).not.toContain("Ver specs abertas");
+    expect(prompts.selectCalls[1].names).not.toContain("Trocar para outra spec pelo ID ou nome");
   });
 
   it("provisioning em repo existente sem governança recomenda adopt no caminho principal", async () => {
