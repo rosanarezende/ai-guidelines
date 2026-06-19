@@ -627,7 +627,12 @@
       #active-validate:checked ~ .card .step-controls label[for="active-validate"],
       #active-review:checked ~ .card .step-controls label[for="active-review"],
       #active-update:checked ~ .card .step-controls label[for="active-update"],
-      #active-gate:checked ~ .card .step-controls label[for="active-gate"] {
+      #active-gate:checked ~ .card .step-controls label[for="active-gate"],
+      #peer-brief:checked ~ .card .step-controls label[for="peer-brief"],
+      #peer-mode:checked ~ .card .step-controls label[for="peer-mode"],
+      #peer-worktree:checked ~ .card .step-controls label[for="peer-worktree"],
+      #peer-checkout:checked ~ .card .step-controls label[for="peer-checkout"],
+      #peer-review:checked ~ .card .step-controls label[for="peer-review"] {
         border-color: rgba(15, 118, 110, 0.5);
         background: #e9fbf6;
         box-shadow: inset 4px 0 0 var(--teal);
@@ -657,7 +662,12 @@
       #active-validate:checked ~ .simulator-stage .panel-active-validate,
       #active-review:checked ~ .simulator-stage .panel-active-review,
       #active-update:checked ~ .simulator-stage .panel-active-update,
-      #active-gate:checked ~ .simulator-stage .panel-active-gate {
+      #active-gate:checked ~ .simulator-stage .panel-active-gate,
+      #peer-brief:checked ~ .simulator-stage .panel-peer-brief,
+      #peer-mode:checked ~ .simulator-stage .panel-peer-mode,
+      #peer-worktree:checked ~ .simulator-stage .panel-peer-worktree,
+      #peer-checkout:checked ~ .simulator-stage .panel-peer-checkout,
+      #peer-review:checked ~ .simulator-stage .panel-peer-review {
         display: grid;
       }
 
@@ -812,10 +822,9 @@
             implícitas.
           </p>
           <div class="hero-actions" aria-label="Atalhos principais">
-            <a class="button" href="#começar">Escolher meu cenário</a>
-            <a class="button secondary" href="#projeto-novo">Ver projeto novo</a>
-            <a class="button secondary" href="#repo-em-uso">Ver repo em uso</a>
-            <a class="button secondary" href="#time-e-specs">Ver trabalho em time</a>
+            <a class="button" href="#comecar-uma-vez">Começar uma vez</a>
+            <a class="button secondary" href="#uso-diario">Usar no dia a dia</a>
+            <a class="button secondary" href="#review-de-colega">Revisar PR de colega</a>
           </div>
         </div>
 
@@ -848,29 +857,29 @@
 
     <main>
       <nav class="nav" aria-label="Mapa da página">
-        <a href="#começar">Começar</a>
-        <a href="#comparar">Três caminhos</a>
+        <a href="#comecar-uma-vez">Começar uma vez</a>
+        <a href="#uso-diario">Uso diário</a>
         <a href="#projeto-novo">Projeto novo</a>
         <a href="#projeto-existente">Projeto existente</a>
-        <a href="#repo-em-uso">Repo em uso</a>
-        <a href="#time-e-specs">Time/specs</a>
+        <a href="#repo-em-uso">Manutenção</a>
+        <a href="#time-e-specs">Specs/time</a>
+        <a href="#review-de-colega">Review de colega</a>
         <a href="#spec">Spec até merge</a>
         <a href="#regras">Regras</a>
         <a href="#valor">Valor</a>
         <a href="#comandos">Comandos</a>
       </nav>
 
-      <section id="começar">
+      <section id="comecar-uma-vez">
         <div class="section-title">
-          <h2>Primeiro: qual é o seu cenário?</h2>
+          <h2>Bloco 1 — começar com ai-guidelines</h2>
           <p>
-            A experiência começa pela situação real do repositório. Assim o guia interativo não
-            oferece comandos perigosos, não mistura caminhos e não força a pessoa a saber nomes
-            internos do framework.
+            Init e adopt são jornadas de entrada. Elas acontecem uma vez para colocar o repositório
+            no framework; depois disso, o uso normal passa para update e fluxo de spec.
           </p>
         </div>
 
-        <div class="grid three">
+        <div class="grid two">
           <article class="card path-card highlight">
             <span class="status green">pasta nova</span>
             <h3>Quero iniciar um projeto</h3>
@@ -900,10 +909,23 @@
               <li>Conflitos exigem escolha humana antes de qualquer força.</li>
             </ul>
           </article>
+        </div>
+      </section>
 
+      <section id="uso-diario">
+        <div class="section-title">
+          <h2>Bloco 2 — usar ai-guidelines no dia a dia</h2>
+          <p>
+            Depois que o repo já está governado, o guia deixa de perguntar “init ou adopt?” e passa
+            a orientar trabalho real: continuar a spec certa, revisar PR de colega, atualizar
+            práticas e preparar Ready/Human Gate quando o estado permitir.
+          </p>
+        </div>
+
+        <div class="grid three">
           <article class="card path-card">
             <span class="status purple">repo governado</span>
-            <h3>Quero usar e manter o framework</h3>
+            <h3>Quero continuar meu trabalho</h3>
             <span class="command">npm run flow</span>
             <p>
               Para um repo que já usa ai-guidelines. O guia mostra estado, próxima ação,
@@ -913,6 +935,36 @@
               <li>Não mostra init/adopt como ação normal.</li>
               <li>Update cobre runtime, templates, providers, features e práticas.</li>
               <li>Specs seguem handoff, work, review, readiness, Ready, Gate e merge final.</li>
+            </ul>
+          </article>
+
+          <article class="card path-card">
+            <span class="status blue">time</span>
+            <h3>Quero escolher a spec certa</h3>
+            <span class="command">npm run flow -- specs</span>
+            <p>
+              Para times ou trabalhos paralelos. A pessoa vê specs abertas, branch esperada, PR e
+              status antes de continuar.
+            </p>
+            <ul>
+              <li>Não assume a spec pela memória do agente.</li>
+              <li>Para quando a branch atual não combina com a spec escolhida.</li>
+              <li>Spec nova exige autorização antes de branch, PR e topologia.</li>
+            </ul>
+          </article>
+
+          <article class="card path-card">
+            <span class="status amber">review</span>
+            <h3>Quero revisar PR de outra pessoa</h3>
+            <span class="command">npm run flow -- peer-review 43 --brief-only</span>
+            <p>
+              Para revisar sem bagunçar a própria branch. O guia mostra o PR e oferece worktree
+              separado ou checkout guiado.
+            </p>
+            <ul>
+              <li>Worktree é o caminho recomendado para preservar seu trabalho.</li>
+              <li>Checkout exige working tree limpa.</li>
+              <li>Não executa Ready, Human Gate, merge ou avanço de checkpoint.</li>
             </ul>
           </article>
         </div>
@@ -2710,6 +2762,219 @@
         </div>
       </section>
 
+      <section id="review-de-colega">
+        <div class="section-title">
+          <h2>Review entre pares — revisar PR de outra pessoa</h2>
+          <p>
+            Em time, revisar um PR de colega não deve misturar a branch da pessoa revisora com a
+            própria spec em andamento. O fluxo prepara contexto, mostra o PR escolhido e oferece
+            dois caminhos seguros.
+          </p>
+        </div>
+
+        <div class="flow-layout">
+          <input
+            class="simulator-input"
+            id="peer-brief"
+            name="peer-review-demo"
+            type="radio"
+            checked
+          />
+          <input class="simulator-input" id="peer-mode" name="peer-review-demo" type="radio" />
+          <input class="simulator-input" id="peer-worktree" name="peer-review-demo" type="radio" />
+          <input class="simulator-input" id="peer-checkout" name="peer-review-demo" type="radio" />
+          <input class="simulator-input" id="peer-review" name="peer-review-demo" type="radio" />
+
+          <article class="card">
+            <span class="status amber">review de colega</span>
+            <h3>O que acontece</h3>
+            <div class="step-controls" aria-label="Etapas do review entre pares">
+              <label class="step-button" for="peer-brief">
+                <span class="step-number">1</span>
+                <div>
+                  <strong>Escolher o PR</strong>
+                  <p>O guia lê título, branch, base, estado Draft/Ready e link antes de agir.</p>
+                </div>
+              </label>
+              <label class="step-button" for="peer-mode">
+                <span class="step-number">2</span>
+                <div>
+                  <strong>Escolher como abrir</strong>
+                  <p>Worktree separado preserva seu trabalho; checkout usa a pasta atual.</p>
+                </div>
+              </label>
+              <label class="step-button" for="peer-worktree">
+                <span class="step-number">3</span>
+                <div>
+                  <strong>Preferir worktree quando houver trabalho local</strong>
+                  <p>Permite revisar sem sair da branch da sua spec.</p>
+                </div>
+              </label>
+              <label class="step-button" for="peer-checkout">
+                <span class="step-number">4</span>
+                <div>
+                  <strong>Usar checkout só com tree limpa</strong>
+                  <p>Se houver mudanças locais, o fluxo bloqueia e explica o motivo.</p>
+                </div>
+              </label>
+              <label class="step-button" for="peer-review">
+                <span class="step-number">5</span>
+                <div>
+                  <strong>Revisar e voltar ao próprio trabalho</strong>
+                  <p>O fluxo prepara o ambiente, mas não executa Ready, Gate, merge ou avanço.</p>
+                </div>
+              </label>
+            </div>
+          </article>
+
+          <div class="simulator-stage" aria-label="Simulação do flow para review entre pares">
+            <div class="simulator-panels">
+              <div class="simulator-panel panel-peer-brief">
+                <div class="simulator-copy">
+                  <span class="status amber">contexto primeiro</span>
+                  <h3>O guia mostra o PR antes de tocar em branch.</h3>
+                  <p>
+                    Isso evita abrir o PR errado ou revisar com base em memória. O primeiro comando
+                    é sempre uma prévia sem efeito.
+                  </p>
+                </div>
+                <div class="shell">
+                  <div class="shell-head">
+                    <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                    <span>peer-review 58 --brief-only</span>
+                  </div>
+                  <div class="shell-body">
+                    <span class="terminal-line"># Review entre pares — PR #58</span>
+                    <span class="terminal-line dim">título: Ajusta fluxo de billing</span>
+                    <span class="terminal-line dim">branch do PR: feat/spec-0025-billing</span>
+                    <span class="terminal-line dim">base do PR: feat/spec-0024-co-flow</span>
+                    <span class="terminal-line dim">working tree: com mudanças locais</span>
+                    <span class="choice active"
+                      ><span>◆</span><span>Nenhuma alteração foi feita.</span></span
+                    >
+                  </div>
+                </div>
+              </div>
+
+              <div class="simulator-panel panel-peer-mode">
+                <div class="simulator-copy">
+                  <span class="status blue">duas formas seguras</span>
+                  <h3>O modo recomendado depende do estado local.</h3>
+                  <p>
+                    Quem está no meio da própria spec deve escolher worktree. Checkout guiado é útil
+                    quando a pasta atual está limpa e a pessoa quer trocar de branch.
+                  </p>
+                </div>
+                <div class="shell">
+                  <div class="shell-head">
+                    <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                    <span>flow</span>
+                  </div>
+                  <div class="shell-body">
+                    <span class="terminal-line">◇ Como você quer abrir a branch do PR?</span>
+                    <span class="choice active"
+                      ><span>◆</span
+                      ><span>Worktree separado — preserva sua branch atual</span></span
+                    >
+                    <span class="choice"
+                      ><span>○</span><span>Checkout guiado — exige working tree limpa</span></span
+                    >
+                  </div>
+                </div>
+              </div>
+
+              <div class="simulator-panel panel-peer-worktree">
+                <div class="simulator-copy">
+                  <span class="status green">recomendado</span>
+                  <h3>Worktree cria uma pasta isolada para revisar.</h3>
+                  <p>
+                    A branch atual fica parada no seu trabalho. A revisão abre em
+                    <code>.temp/peer-review/pr-N</code>, com comandos de validação do próprio PR.
+                  </p>
+                </div>
+                <div class="shell">
+                  <div class="shell-head">
+                    <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                    <span>preparar worktree</span>
+                  </div>
+                  <div class="shell-body">
+                    <span class="terminal-line"
+                      >npm run flow -- peer-review 58 --mode worktree --confirm</span
+                    >
+                    <span class="prompt-row success"
+                      ><span>✓</span><span>fetch do PR criado em ref local de review</span></span
+                    >
+                    <span class="prompt-row success"
+                      ><span>✓</span><span>worktree criado em .temp/peer-review/pr-58</span></span
+                    >
+                    <span class="prompt-row muted"
+                      ><span>→</span><span>cd .temp/peer-review/pr-58 && npm run flow</span></span
+                    >
+                  </div>
+                </div>
+              </div>
+
+              <div class="simulator-panel panel-peer-checkout">
+                <div class="simulator-copy">
+                  <span class="status amber">com cuidado</span>
+                  <h3>Checkout guiado troca a branch nesta pasta.</h3>
+                  <p>
+                    O fluxo bloqueia se houver mudanças locais. Assim uma revisão de colega não
+                    mistura diff com a spec da pessoa revisora.
+                  </p>
+                </div>
+                <div class="shell">
+                  <div class="shell-head">
+                    <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                    <span>checkout guiado</span>
+                  </div>
+                  <div class="shell-body">
+                    <span class="terminal-line"
+                      >npm run flow -- peer-review 58 --mode checkout --confirm</span
+                    >
+                    <span class="prompt-row warn"
+                      ><span>!</span><span>bloqueado se a working tree estiver suja</span></span
+                    >
+                    <span class="prompt-row muted"
+                      ><span>=</span><span>use worktree separado ou finalize seu diff</span></span
+                    >
+                  </div>
+                </div>
+              </div>
+
+              <div class="simulator-panel panel-peer-review">
+                <div class="simulator-copy">
+                  <span class="status purple">limites claros</span>
+                  <h3>Preparar review não é decidir pelo PR.</h3>
+                  <p>
+                    Depois de abrir a branch, a pessoa revisa, roda validações e publica feedback. O
+                    fluxo não aprova Ready, não cria Gate, não faz merge e não muda topologia.
+                  </p>
+                </div>
+                <div class="shell">
+                  <div class="shell-head">
+                    <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                    <span>durante a revisão</span>
+                  </div>
+                  <div class="shell-body">
+                    <span class="terminal-line">◇ Comandos úteis</span>
+                    <span class="choice active"
+                      ><span>◆</span><span>npm run flow -- validate changed</span></span
+                    >
+                    <span class="choice"
+                      ><span>○</span><span>npm run flow -- review types</span></span
+                    >
+                    <span class="choice disabled"
+                      ><span>◇</span><span>Human Gate e merge continuam proibidos aqui</span></span
+                    >
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section id="spec">
         <div class="section-title">
           <h2>Da primeira ideia ao merge final</h2>
@@ -2913,6 +3178,16 @@
               <td>Atualizar repo governado</td>
               <td><code>npm run flow -- update</code></td>
               <td>Runtime, templates, providers, features e práticas.</td>
+            </tr>
+            <tr>
+              <td>Ver specs abertas</td>
+              <td><code>npm run flow -- specs</code></td>
+              <td>Times, múltiplas frentes de trabalho ou retomada depois de interrupção.</td>
+            </tr>
+            <tr>
+              <td>Revisar PR de colega</td>
+              <td><code>npm run flow -- peer-review 43 --brief-only</code></td>
+              <td>Entender o PR antes de abrir worktree separado ou checkout guiado.</td>
             </tr>
             <tr>
               <td>Retomar uma spec</td>

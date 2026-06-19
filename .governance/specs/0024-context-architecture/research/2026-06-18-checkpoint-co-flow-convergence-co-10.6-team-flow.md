@@ -157,6 +157,62 @@ Falsificacao esperada: se uma futura alteracao remover o Fluxo 3 ao adicionar
 um fluxo de time, o site volta a esconder o caso de repo ja governado e deve
 ser tratado como regressao de produto/documentacao.
 
+### Reorganizacao em dois blocos humanos
+
+Nova rodada de dogfood mostrou que quatro fluxos lineares tambem eram dificeis
+de consumir: a pessoa precisava descobrir sozinha quais caminhos acontecem uma
+vez (`init`/`adopt`) e quais pertencem ao uso diario (`flow`, specs, update,
+review, Gate e merge).
+
+Correcao aplicada:
+
+- o topo do site agora separa **Comecar com ai-guidelines** de **Usar
+  ai-guidelines no dia a dia**;
+- `init` e `adopt` aparecem como jornadas de entrada, nao como acoes normais em
+  repo ja governado;
+- uso diario passou a agrupar continuidade da spec, multiplas specs, manutencao
+  do repo, review entre pares e decisao humana;
+- a matriz de comandos passou a listar `specs` e `peer-review` como superficies
+  explicitas.
+
+Falsificacao esperada: em um repo ja governado, o wizard/site nao deve sugerir
+`init` ou `adopt` como caminho principal; para revisar PR de colega, deve haver
+caminho proprio sem obrigar a trocar de branch manualmente.
+
+### Review entre pares
+
+Novo caso modelado:
+
+```text
+pessoa trabalhando em sua spec
+→ precisa revisar PR de colega
+→ escolhe PR
+→ ve briefing read-only
+→ escolhe worktree separado ou checkout guiado
+→ confirma
+→ revisa sem Ready/Human Gate/merge/transicao
+```
+
+Regra de seguranca:
+
+- worktree separado e recomendado quando ha trabalho local;
+- checkout guiado exige working tree limpa;
+- o fluxo apenas prepara o ambiente de review;
+- Ready, Human Gate, merge e transicao de checkpoint continuam fora desse
+  caminho.
+
+Comandos adicionados ao produto:
+
+```bash
+npm run flow -- peer-review 43 --brief-only
+npm run flow -- peer-review 43 --mode worktree --confirm
+npm run flow -- peer-review 43 --mode checkout --confirm
+```
+
+Falsificacao esperada: `peer-review --mode checkout --confirm` deve falhar com
+working tree suja; `peer-review --mode worktree --confirm` nao deve exigir tree
+limpa e deve criar worktree isolado.
+
 ## Limites preservados
 
 - CO-10.7 nao foi iniciado.

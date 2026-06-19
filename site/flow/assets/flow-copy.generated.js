@@ -33,6 +33,8 @@ window.AI_GUIDELINES_FLOW_COPY = {
       "workHint": "copia contexto para colar na LLM de sua preferência",
       "review": "Ver tipos de revisão disponíveis",
       "reviewHint": "explica quais revisões existem e copia o catálogo",
+      "peerReview": "Revisar PR de outra pessoa",
+      "peerReviewHint": "abre a branch do PR sem misturar com seu trabalho atual",
       "specWork": "Escolher ou iniciar uma spec",
       "specWorkHint": "para times: ver specs abertas, continuar a certa ou preparar uma nova com segurança",
       "advanced": "Ferramentas técnicas e diagnósticos",

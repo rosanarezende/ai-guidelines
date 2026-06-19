@@ -19,6 +19,8 @@
     "workHint": "copia contexto para colar na LLM de sua preferência",
     "review": "Ver tipos de revisão disponíveis",
     "reviewHint": "explica quais revisões existem e copia o catálogo",
+    "peerReview": "Revisar PR de outra pessoa",
+    "peerReviewHint": "abre a branch do PR sem misturar com seu trabalho atual",
     "specWork": "Escolher ou iniciar uma spec",
     "specWorkHint": "para times: ver specs abertas, continuar a certa ou preparar uma nova com segurança",
     "advanced": "Ferramentas técnicas e diagnósticos",
@@ -101,6 +103,28 @@
     "policy": "Ver regra de revisão aplicada neste PR",
     "policyHint": "mostra quais revisões são obrigatórias ou opcionais",
     "policyTitle": "Regra de revisão deste PR"
+  },
+  "peerReview": {
+    "title": "Review entre pares",
+    "intro": [
+      "Use esta área quando você precisa revisar o PR de outra pessoa.",
+      "",
+      "O guia separa esse trabalho da sua spec atual: primeiro mostra o PR, depois oferece worktree separado ou checkout guiado.",
+      "",
+      "Nenhum Ready, Human Gate, merge ou avanço de checkpoint é executado aqui."
+    ],
+    "prQuestion": "Qual PR você quer revisar? Informe apenas o número.",
+    "invalidPr": "Informe um número de PR válido.",
+    "briefTitle": "PR escolhido",
+    "modeQuestion": "Como você quer abrir a branch do PR?",
+    "worktree": "Worktree separado",
+    "worktreeHint": "recomendado: preserva sua branch atual e seu trabalho em andamento",
+    "checkout": "Checkout guiado nesta pasta",
+    "checkoutHint": "troca a branch neste diretório; exige working tree limpa",
+    "previewTitle": "Prévia da preparação",
+    "previewIntro": "Se você confirmar, este comando será executado:",
+    "confirm": "Preparar a revisão agora?",
+    "cancelled": "Review entre pares cancelado; nenhuma branch foi alterada."
   },
   "specWork": {
     "title": "Specs e trabalho em time",

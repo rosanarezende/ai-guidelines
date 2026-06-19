@@ -24,6 +24,17 @@ export const INTENT_CATALOG: readonly Intent[] = [
     actions: [{ command: "triage", label: "Triar comentários de review do PR" }],
   },
   {
+    id: "revisar-pr-de-colega",
+    title: "Revisar PR de outra pessoa",
+    actions: [
+      {
+        command: "peer-review",
+        args: ["<pr>", "--brief-only"],
+        label: "Entender um PR antes de abrir worktree ou checkout guiado",
+      },
+    ],
+  },
+  {
     id: "validar-mudancas",
     title: "Validar mudanças antes de enviar",
     actions: [

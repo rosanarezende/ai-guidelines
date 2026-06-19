@@ -474,6 +474,7 @@ describe("flow wizard", () => {
         "decisions",
         "work",
         "spec-work",
+        "peer-review",
         "provisioning",
       ])
     );
@@ -493,6 +494,7 @@ describe("flow wizard", () => {
     expect(menuText).toContain("Ver ações disponíveis e bloqueadas");
     expect(menuText).toContain("Ver orientação de trabalho / handoff");
     expect(menuText).toContain("Ver tipos de revisão disponíveis");
+    expect(menuText).toContain("Revisar PR de outra pessoa");
     expect(menuText).toContain("Escolher ou iniciar uma spec");
     expect(menuText).toContain("Ferramentas técnicas e diagnósticos");
     expect(menuText).not.toMatch(/\bcockpit\b/i);
@@ -620,6 +622,57 @@ describe("flow wizard", () => {
     expect(review.calls).toEqual([["types"]]);
     expect(clipboard.copied[0]).toContain("TIPOS DE REVISAO");
     expect(prompts.notes.join("\n")).toContain("esta tela só prepara contexto");
+  });
+
+  it("review entre pares mostra briefing do PR antes de preparar branch", async () => {
+    const prompts = new ScriptedPrompts(["peer-review", "worktree"], [false], [], ["43"]);
+    const peerReview = outputCommand("peer-review", "BRIEF DO PR #43");
+
+    const code = await runFlowWizard("/repo", new CollectingLogger(), {
+      prompts,
+      registry: registryWith(peerReview),
+      collectModel: () => model(),
+    });
+
+    expect(code).toBe(0);
+    expect(peerReview.calls).toEqual([["43", "--brief-only"]]);
+    expect(prompts.notes.join("\n")).toContain("BRIEF DO PR #43");
+    expect(prompts.notes.join("\n")).toContain("--mode worktree --confirm");
+    expect(prompts.outros.join("\n")).toContain(
+      "Review entre pares cancelado; nenhuma branch foi alterada."
+    );
+  });
+
+  it("review entre pares confirmado delega para peer-review com modo escolhido", async () => {
+    const prompts = new ScriptedPrompts(["peer-review", "checkout"], [true], [], ["43"]);
+    const peerReview = outputCommand("peer-review", "BRIEF DO PR #43");
+
+    const code = await runFlowWizard("/repo", new CollectingLogger(), {
+      prompts,
+      registry: registryWith(peerReview),
+      collectModel: () => model(),
+    });
+
+    expect(code).toBe(0);
+    expect(peerReview.calls).toEqual([
+      ["43", "--brief-only"],
+      ["43", "--mode", "checkout", "--confirm"],
+    ]);
+  });
+
+  it("review entre pares com PR inválido sai sem tocar em git ou branch", async () => {
+    const prompts = new ScriptedPrompts(["peer-review"], [], [], ["abc"]);
+    const peerReview = spyCommand("peer-review");
+
+    const code = await runFlowWizard("/repo", new CollectingLogger(), {
+      prompts,
+      registry: registryWith(peerReview),
+      collectModel: () => model(),
+    });
+
+    expect(code).toBe(0);
+    expect(peerReview.calls).toEqual([]);
+    expect(prompts.outros).toContain("Informe um número de PR válido.");
   });
 
   it("percepção recorrente aparece como alternativa e abre a lista canônica", async () => {

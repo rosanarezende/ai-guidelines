@@ -14,6 +14,7 @@ import { DecideCommand } from "./commands/DecideCommand.js";
 import { BOOTSTRAP_COMMANDS, BootstrapCommand } from "./commands/BootstrapCommand.js";
 import { CockpitCommand } from "./commands/CockpitCommand.js";
 import { ValidateCommand } from "./commands/ValidateCommand.js";
+import { PeerReviewCommand } from "./commands/PeerReviewCommand.js";
 
 /**
  * Ponto ÚNICO de registro dos comandos da CLI (Spec 0024, pr-cli-cutover).
@@ -33,6 +34,7 @@ export function buildRegistry(): CommandRegistry {
   registry.register(new InsightCommand());
   registry.register(new TriageCommand()); // name "triage" (o verbo "review" migrou p/ ReviewCommand)
   registry.register(new ReviewCommand()); // name "review": briefing por lane; numérico/vazio delega ao triage
+  registry.register(new PeerReviewCommand()); // review entre pares: PR de colega sem misturar com a spec atual
   registry.register(new ReleasePrepCommand());
   registry.register(new WorkflowCommand());
   registry.register(new ListActiveSpecsCommand()); // read-only; migra "list-active-specs" (#35 etapa 2)

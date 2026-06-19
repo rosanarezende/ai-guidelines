@@ -49,6 +49,7 @@ type GovernedRepoUpdateChoice =
   | "policy"
   | "details"
   | "__back__";
+type PeerReviewMode = "worktree" | "checkout";
 
 const COMMON_COPY = FLOW_COPY.common;
 const WIZARD_COPY = FLOW_COPY.wizard;
@@ -92,6 +93,7 @@ export type FlowMenuValue =
   | "blockers"
   | "work"
   | "review"
+  | "peer-review"
   | "spec-work"
   | "provisioning"
   | "advanced"
@@ -179,6 +181,11 @@ export function buildFlowMenu(
       name: WIZARD_COPY.menu.review,
       value: "review",
       hint: WIZARD_COPY.menu.reviewHint,
+    },
+    {
+      name: WIZARD_COPY.menu.peerReview,
+      value: "peer-review",
+      hint: WIZARD_COPY.menu.peerReviewHint,
     },
     {
       name: WIZARD_COPY.menu.specWork,
@@ -395,6 +402,8 @@ export async function runFlowWizard(
         return runHandoffSection(model, registry, context, prompts, clipboard);
       case "review":
         return runReviewSection(registry, context, prompts, clipboard);
+      case "peer-review":
+        return runPeerReviewSection(registry, context, prompts);
       case "spec-work":
         return runSpecWorkSection(repoRoot, model, registry, context, prompts, {
           loadIndex: options.loadActiveSpecsIndex ?? loadActiveSpecsIndex,
@@ -677,6 +686,58 @@ async function runReviewSection(
     clipboard
   );
   return captured.exitCode;
+}
+
+async function runPeerReviewSection(
+  registry: CommandRegistry,
+  context: CommandContext,
+  prompts: Prompts
+): Promise<number> {
+  await prompts.note?.(copyLines(WIZARD_COPY.peerReview.intro), WIZARD_COPY.peerReview.title);
+  const rawPr = (await prompts.input({ message: WIZARD_COPY.peerReview.prQuestion })).trim();
+  if (!/^\d+$/.test(rawPr)) {
+    await prompts.outro?.(WIZARD_COPY.peerReview.invalidPr);
+    return 0;
+  }
+
+  const brief = await captureCommandOutput(registry, context, [
+    "peer-review",
+    rawPr,
+    "--brief-only",
+  ]);
+  await prompts.note?.(brief.output, WIZARD_COPY.peerReview.briefTitle);
+  if (brief.exitCode !== 0) return brief.exitCode;
+
+  const mode = await prompts.select<PeerReviewMode>({
+    message: WIZARD_COPY.peerReview.modeQuestion,
+    choices: [
+      {
+        name: WIZARD_COPY.peerReview.worktree,
+        value: "worktree",
+        hint: WIZARD_COPY.peerReview.worktreeHint,
+      },
+      {
+        name: WIZARD_COPY.peerReview.checkout,
+        value: "checkout",
+        hint: WIZARD_COPY.peerReview.checkoutHint,
+      },
+    ],
+  });
+  const command = `npm run flow -- peer-review ${rawPr} --mode ${mode} --confirm`;
+  await prompts.note?.(
+    [WIZARD_COPY.peerReview.previewIntro, command].join("\n"),
+    WIZARD_COPY.peerReview.previewTitle
+  );
+  const confirmed = await prompts.confirm({
+    message: WIZARD_COPY.peerReview.confirm,
+    default: false,
+  });
+  if (!confirmed) {
+    await prompts.outro?.(WIZARD_COPY.peerReview.cancelled);
+    return 0;
+  }
+  return (await registry.dispatch(["peer-review", rawPr, "--mode", mode, "--confirm"], context))
+    .exitCode;
 }
 
 async function runSpecWorkSection(

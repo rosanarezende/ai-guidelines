@@ -67,6 +67,19 @@ describe("flow copy catalog", () => {
     expect(siteScript).toContain("[data-mini-carousel]");
   });
 
+  it("mantém a página organizada entre entrada inicial, uso diário e review entre pares", () => {
+    const html = readFileSync(path.join(process.cwd(), "site/flow/index.html"), "utf-8");
+
+    expect(html).toContain("Bloco 1 — começar com ai-guidelines");
+    expect(html).toContain("Bloco 2 — usar ai-guidelines no dia a dia");
+    expect(html).toContain("Review entre pares — revisar PR de outra pessoa");
+    expect(html).toContain("npm run flow -- peer-review 43 --brief-only");
+    expect(html).toContain("Worktree separado");
+    expect(html).toContain("Checkout guiado");
+    expect(html).toContain("Fluxo 3 — Usar e manter um repo governado");
+    expect(html).toContain("Fluxo 4 — Trabalhar em time com múltiplas specs");
+  });
+
   it("não cria catálogo separado para FLOW.html", () => {
     expect(existsSync(path.join(process.cwd(), "src/cli/copy/locales/pt-BR/flowHtml.json"))).toBe(
       false
