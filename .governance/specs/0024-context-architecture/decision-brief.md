@@ -6,7 +6,7 @@
 > Plan: [`./plan.md`](./plan.md)
 > Tasks: [`./tasks.md`](./tasks.md)
 > Status agregado: **Resolved (decisões)** — todas as `[DEC]` desta spec estão `Resolved`; a pesquisa estrutural ainda aberta vive em [`research/findings.md`](./research/findings.md), não aqui.
-> Última atualização: 2026-06-19 — **`[DEC-0024-G16]` registrada**: `co-flow-convergence` insere CO-10.8 para arquitetura interna, organização DDD e BDD visual para mantenedores; falsificação ampla passa a CO-10.9 e revisão independente + Human Gate a CO-10.10.
+> Última atualização: 2026-06-19 — **`[DEC-0024-G17]` registrada**: `CO-10.7` foi reaberto por fechamento prematuro; `CO-10.8` fica pausado até a CLI pública ser falsificada em consumidores reais/simulados e refletida no site.
 
 > **Artefato exclusivo de decisão humana.** Organizado por **estado**, não por numeração histórica (reestruturação 2026-05-31). Quatro estados respondem, à primeira vista, _o que já foi decidido · o que ainda está aberto · o que virou regra · o que virou enforcement_:
 >
@@ -433,6 +433,29 @@ Cada transição deve declarar: fato de entrada, autoridade, comando, efeito per
 
 ---
 
+### [DEC-0024-G17] Reabrir CO-10.7 antes de retomar CO-10.8
+
+**Pergunta:** CO-10.7 pode permanecer fechado depois do seed inicial de CLI pública autoexplicável, ou precisa ser reaberto porque a experiência pública real ainda não foi falsificada de ponta a ponta?
+
+**Modo de gate:** `aceitação` <!-- decisão operacional da owner, 2026-06-19, após detectar fechamento prematuro de CO-10.7. -->
+
+**Contexto:** A owner identificou que o fechamento de CO-10.7 ocorreu antes do critério pretendido. A intenção do sub-checkpoint não era apenas ajustar copy, wizard e site, mas provar que uma pessoa usuária roda `npx ai-guidelines` e é orientada pela CLI sem decorar comandos. A prova esperada inclui consumidores simulados/instalados (`consumer-empty`, `consumer-existing-package`, `consumer-existing-formatter-conflict`, `consumer-governed-solo`, `consumer-governed-team`, `consumer-governed-multiple-specs`, `consumer-peer-review`), captura da saída real, verificação das opções oferecidas, dry-run, aplicação quando permitido, arquivos finais, bloqueios e mensagens. O artefato `research/2026-06-19-checkpoint-co-flow-convergence-co-10.7-status.md` já registrava que isso estava apenas parcialmente coberto.
+
+**Decisão (Resolved):**
+
+- Reabrir `CO-10.7 — CLI pública autoexplicável e wizard orientado ao contexto`.
+- Voltar `CO-10.7` de `[x]` para `[/]` em `tasks.md`.
+- Voltar `CO-10.8` de `[/]` para `[ ]` em `tasks.md`, sem apagar o trabalho já produzido.
+- Classificar o commit `2d478b2` como seed antecipado de CO-10.8: inventário, split inicial do wizard e catálogo BDD mínimo ficam preservados, mas pausados.
+- Não continuar a reorganização interna enquanto a experiência pública de CO-10.7 não estiver falsificada e refletida no site/documentação.
+- O próximo trabalho autorizado volta a ser o harness de consumidor/CLI pública, com site como reprodução da experiência real da CLI, não como compensação de lacuna do produto.
+
+**O que NÃO está sendo decidido:** reverter commits; apagar o seed de CO-10.8; executar Ready; exercer Human Gate; fazer merge; avançar sub-checkpoint; abrir novo PR; alterar topologia externa; implementar CO-10.8; iniciar CO-10.9.
+
+**Status:** Resolved (2026-06-19) / @rosanarezende — correção de lifecycle para alinhar tasks/work/handoff à intenção real de CO-10.7.
+
+---
+
 ## 2 · Aberto — pesquisa genuína (única coisa ainda em investigação)
 
 > Estes **não são decisões** — são findings com **alternativas reais ainda competindo**. Vivem em [`research/findings.md`](./research/findings.md); aqui só o ponteiro. Só retornam como `[DEC] Pendente` ao **convergir + exigir julgamento**. **Critério (2026-05-31):** se não há alternativa viva competindo, **não pertence aqui** — é decisão (§ 1) ou trabalho (§ 4).
@@ -502,7 +525,8 @@ Cada transição deve declarar: fato de entrada, autoridade, comando, efeito per
 | `G13`        | CO-10.5 dedicado a UX/linguagem/wizard Clack          | **Decidido** — § 1 (Resolved 2026-06-17, owner); G14 subdivide o fechamento antes do Gate                              |
 | `G14`        | CO-10.6 dedicado a fluxo de time/múltiplas specs      | **Decidido** — § 1 (Resolved 2026-06-18, owner); G15/G16 subdividem o fechamento antes do Gate                         |
 | `G15`        | CLI pública autoexplicável como porta de entrada      | **Decidido** — § 1 (Resolved 2026-06-19, owner); G16 insere arquitetura interna/BDD humano antes da falsificação final |
-| `G16`        | arquitetura interna, organização DDD e BDD visual     | **Decidido** — § 1 (Resolved 2026-06-19, owner); falsificação ampla passa a CO-10.9 e revisão/Gate a CO-10.10          |
+| `G16`        | arquitetura interna, organização DDD e BDD visual     | **Decidido** — § 1 (Resolved 2026-06-19, owner); pausado por G17 até CO-10.7 fechar corretamente                       |
+| `G17`        | reabrir CO-10.7 antes de retomar CO-10.8              | **Decidido** — § 1 (Resolved 2026-06-19, owner); corrige fechamento prematuro de CO-10.7                               |
 
 ---
 
@@ -523,6 +547,7 @@ Cada transição deve declarar: fato de entrada, autoridade, comando, efeito per
 - [x] `[DEC-0024-G14]` — Resolved 2026-06-18 / @rosanarezende
 - [x] `[DEC-0024-G15]` — Resolved 2026-06-19 / @rosanarezende
 - [x] `[DEC-0024-G16]` — Resolved 2026-06-19 / @rosanarezende
+- [x] `[DEC-0024-G17]` — Resolved 2026-06-19 / @rosanarezende
 
 ---
 

@@ -5,7 +5,12 @@
 > Sub-checkpoint planejado: `CO-10.8 — arquitetura interna, organização DDD e BDD visual para mantenedores`  
 > Decisão: `[DEC-0024-G16]`  
 > Data: 2026-06-19  
-> Status: inventário inicial e árvore-alvo proposta; nenhuma migração de código executada neste artefato.
+> Status: seed antecipado pausado por `[DEC-0024-G17]`; CO-10.8 volta a ficar pendente até CO-10.7 fechar corretamente.
+
+> Nota de lifecycle: o commit `2d478b2` já produziu inventário, split inicial do
+> wizard e catálogo BDD mínimo. Esse trabalho fica preservado como seed, mas não
+> autoriza continuar a reorganização interna enquanto a CLI pública de CO-10.7
+> não for falsificada em consumidores reais/simulados e refletida no site.
 
 ## Por que este sub-checkpoint existe
 
@@ -317,11 +322,13 @@ O CO-10.8 deve falhar ou parar se:
 - a árvore-alvo criar outra camada genérica sem vínculo com jornadas reais;
 - BDD virar documentação manual sem lastro em teste executável.
 
-## Dogfood inicial executado no CO-10.8
+## Dogfood inicial executado como seed antecipado de CO-10.8
 
 Data: 2026-06-19
 HEAD de partida: `95c953c`
-Estado governado: `CO-10.8 [/]`, PR #43 Draft, CI remoto verde após a transição CO-10.7 → CO-10.8.
+Estado governado observado no momento do seed: `CO-10.8 [/]`, PR #43 Draft, CI remoto verde após a transição CO-10.7 → CO-10.8.
+
+Estado corrigido por `[DEC-0024-G17]`: `CO-10.7 [/]` volta a ser ativo; `CO-10.8 [ ]` fica pendente. O dogfood abaixo permanece como evidência preservada, não como autorização para continuar CO-10.8 agora.
 
 ### Refactor estrutural behavior-preserving
 
@@ -430,9 +437,11 @@ Resultado:
 
 Uma falha real foi encontrada e corrigida durante o dogfood: o cenário BDD `site-command-fidelity` apontava para uma descrição de teste que não existia literalmente. O novo teste falhou, forçando o catálogo a se ancorar em evidência real.
 
-### O que ainda falta no CO-10.8
+### O que ainda falta antes de retomar CO-10.8
 
-Este primeiro slice não encerra CO-10.8. Ainda faltam:
+Este primeiro slice não encerra CO-10.8 e, após `[DEC-0024-G17]`, não deve ser continuado antes de CO-10.7 fechar. Ainda faltam:
+
+0. concluir CO-10.7 com harness de consumidores e site refletindo a experiência real da CLI pública;
 
 1. avaliar se outro hotspot precisa de split imediato antes da readiness (`workflow.ts`, `workBrief.ts`, `handoff.ts`, `reviewBrief.ts` ou testes muito grandes);
 2. decidir se o seed BDD atual é suficiente para readiness ou se precisa de uma projeção visual mínima ainda neste sub-checkpoint;

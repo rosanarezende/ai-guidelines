@@ -5,6 +5,9 @@
 > implementada e pushed em `cce1dc4`.
 > Ele existe para evitar reavaliar a mesma pergunta a cada passo:
 > "a entrega atual cobre a visao proposta para a CLI publica e o site?"
+> Atualização 2026-06-19: `[DEC-0024-G17]` reabriu CO-10.7 porque esta
+> resposta "parcialmente coberto" não podia ter virado fechamento do
+> sub-checkpoint. CO-10.8 fica pausado até esta prova terminar.
 
 ## 1. Pergunta de controle
 
@@ -21,6 +24,7 @@ Resposta curta no estado atual:
 
 ```text
 parcialmente coberto
+CO-10.7 reaberto por DEC-0024-G17
 ```
 
 A base estrutural correta foi entregue, mas ainda falta falsificar a experiencia
@@ -309,3 +313,34 @@ Este artefato nao executa:
 - implementacao de CO-10.8.
 
 Ele apenas registra o estado atual de CO-10.7 para orientar a proxima rodada.
+
+## 9. Correcao de lifecycle - DEC-0024-G17
+
+CO-10.7 foi reaberto porque o fechamento anterior confundiu base estrutural com
+criterio de saida completo.
+
+O criterio de saida agora fica operacionalmente explicito:
+
+```text
+consumer-empty/
+consumer-existing-package/
+consumer-existing-formatter-conflict/
+consumer-governed-solo/
+consumer-governed-team/
+consumer-governed-multiple-specs/
+consumer-peer-review/
+```
+
+Para cada cenario, o harness deve:
+
+- instalar o pacote empacotado ou executar equivalente controlado;
+- rodar `npx ai-guidelines`;
+- capturar saida/opcoes do wizard;
+- provar que `init`, `adopt` e `update` aparecem apenas quando fazem sentido;
+- verificar `--dry-run`;
+- verificar arquivos finais quando a aplicacao for permitida;
+- verificar bloqueios e mensagens em linguagem humana;
+- alimentar site/documentacao com a experiencia real, sem prints inventados.
+
+O seed de CO-10.8 em `2d478b2` permanece preservado, mas nao e o trabalho ativo
+ate CO-10.7 fechar corretamente.

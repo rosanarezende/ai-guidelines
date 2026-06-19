@@ -4,7 +4,11 @@
 > Nó: `co-flow-convergence`  
 > Sub-checkpoint planejado: CO-10.8  
 > Data: 2026-06-19  
-> Status: candidatos; **não** são escopo aprovado automaticamente.
+> Status: candidatos pausados por `[DEC-0024-G17]`; **não** são escopo aprovado automaticamente.
+
+> Nota: CO-10.8 voltou a ficar pendente porque CO-10.7 foi reaberto. Estes
+> candidatos permanecem preservados para quando a reorganização interna for
+> retomada.
 
 ## Regra deste artefato
 
