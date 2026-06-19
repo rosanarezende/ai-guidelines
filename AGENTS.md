@@ -35,7 +35,9 @@ npm run flow -- adopt --target . --dry-run
 
 > **Referência única dos scripts:** [`docs/scripts.md`](docs/scripts.md) tem o mapa completo (categoria, composição, hooks, workflows). Use este Quickstart só para boot rápido; consulte `docs/scripts.md` antes de qualquer dúvida sobre o que cada script faz.
 
-> **Guia visual do fluxo humano:** [`FLOW.html`](FLOW.html) mostra como `npm run flow` opera o wizard, cockpit, readiness, bloqueios e confirmações governadas.
+> **Guia visual do fluxo humano:** o site governado vive em [`site/`](site/) e
+> documenta a experiencia publica de `npx ai-guidelines`; consulte
+> [`site/README.md`](site/README.md) para build e preview local.
 
 > **Nota sobre `dist/`:** a superfície executável publicada é `dist/cli/main.js`. **Se estiver rodando a CLI localmente sem `npm run build` prévio**, espere falha por artefato compilado ausente ou stale — execute `npm run build` (ou `npm run build:all` para também regenerar `rules.json`) antes. No pacote publicado via NPM, `prepack: npm run build:all` garante que `dist/` e `rules.json` estejam presentes.
 
