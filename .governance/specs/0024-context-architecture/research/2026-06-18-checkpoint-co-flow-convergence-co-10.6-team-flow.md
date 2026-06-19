@@ -255,3 +255,69 @@ nos guards de projecao.
   sistema deve falhar com orientacao, nao inferir por heuristica.
 - A proxima falsificacao deve cobrir branch errada, spec inexistente, indice com
   path ausente, PR stale e permissao insuficiente.
+
+## Validacao externa por outra LLM (2026-06-19) e correcoes de fidelidade
+
+Uma LLM revisora independente avaliou o PR #43 (site Flow em React/Vite no
+Cloudflare Pages) e apontou tres riscos de FIDELIDADE (nao de governanca):
+
+- B1 — narrativa operacional do site hard-coded em `flowData.ts`, fora do
+  catalogo governado: segunda fonte de verdade que pode divergir do runtime.
+- B2 — terminais do site eram strings simuladas que pareciam saida real (apenas
+  `aria-label`, sem rotulo visivel).
+- B3 — `optimize-assets.mjs` comparava bytes de WebP re-renderizado: quebra de
+  build por diferenca de `sharp`/`libvips`, nao por conteudo.
+
+Decisao da owner (autoridade explicita): refazer o site como porta de entrada do
+produto com fatos operacionais derivados do runtime; prioridade dura "o site nao
+pode mentir" antes de qualquer refino visual; transcripts reais quando estaveis.
+
+### Correcoes aplicadas (ordem de fase: verdade antes de produto)
+
+- B1 — `siteFlowCopy` projeta a superficie REAL de comandos (registry), o
+  `INTENT_CATALOG` e a enumeracao de providers/features no modulo gerado.
+  `flowData` deriva toda invocacao via `flowCommand`/`binCommand`; comando
+  inexistente quebra o build. Guard `siteCommandSurface.test.ts`.
+- A2 — auditoria de capacidades: as decisoes reservadas ao humano sao projetadas
+  do registry de decisoes; o site enquadra Ready/Human Gate/merge como autoridade
+  humana/bloqueavel, nunca automacao. Guard `siteCapabilities.test.ts`.
+- B2 — gerador `site-scenarios`: captura stdout/exitCode REAIS de
+  init/adopt/update `--dry-run` em diretorios temporarios (sem vazar caminhos) e
+  deriva exemplos GUIADOS de work/handoff/decide/peer-review/specs a partir do
+  contrato real do comando (gh/`.governance` indisponiveis em sandbox — fallback
+  honesto). O site mostra procedencia VISIVEL por terminal (badge
+  "Exemplo gerado/guiado/ilustrativo"). `site:scenarios:check` entra no
+  `site:build`. Guard `siteScenarios.test.ts`.
+- B3 — `site:assets:check` passa a gatear por hash da fonte PNG + parametros do
+  encoder (`manifest.json`), nunca por bytes WebP. Troca de libvips nao quebra o
+  check; so mudanca de fonte/parametros invalida o manifesto. Guard de
+  determinismo em `tests/integration/site-assets-determinism.test.mjs`.
+- Produto (Fase 2, apos verdade verde) — as jornadas exibem o transcript
+  veridico associado (real/guiado); rota desconhecida vira 404 explicito (fim do
+  soft-404 que caia em "flow"); cada rota recebe `document.title` proprio.
+
+### Falsificacoes que passaram a existir
+
+- Inserir `flowCommand("comando-inexistente")` no site quebra o guard de
+  fidelidade (verificado).
+- Editar a mao `flow-copy.generated.ts` ou `flow-scenarios.generated.ts` faz o
+  respectivo `:check` falhar.
+- Corromper bytes de um WebP NAO quebra `site:assets:check` (encoder tolerado);
+  alterar o hash da fonte no manifesto QUEBRA (ambos verificados).
+- `routeFromPath("/flow/inexistente")` retorna `notFound` (404 explicito).
+
+### Limites preservados (reafirmados nesta rodada)
+
+- Nenhum Ready, Human Gate, merge, advance-subcheckpoint ou mark-readiness.
+- Nenhuma decisao mutante de `guidelines decide`; CO-5/CO-6 nao iniciados.
+- Apenas arquivos funcionais do site/runtime, testes e este artefato de dogfood.
+
+### Riscos residuais
+
+- Transcripts reais cobrem init/adopt/update. work/handoff/decide/peer-review/
+  specs ficam como exemplos GUIADOS rotulados (derivados do contrato), porque
+  exigem `.governance`/git/`gh` e acoplar a saida viva a um artefato versionado
+  seria um footgun de validacao. Promove-los a transcript real exige fixtures de
+  repo governado — follow-up recomendado.
+- A reestruturacao manteve os paths PT (`/flow/comecar` etc.) para nao quebrar
+  links; uma migracao para paths canonicos `/flow/start` fica para depois.
