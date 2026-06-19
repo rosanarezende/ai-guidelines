@@ -81,12 +81,16 @@ describe("cenários de terminal do site (B2)", () => {
   }, 60000);
 
   it("o site mostra procedência VISÍVEL do terminal (não só aria-label)", () => {
-    const terminalFrame = readSite("site/src/components/terminal/TerminalFrame/TerminalFrame.tsx");
+    const terminalFrame = readSite("site/src/features/terminal/TerminalFrame/TerminalFrame.tsx");
+    const terminalFrameLocale = readSite(
+      "site/src/features/terminal/TerminalFrame/locales/pt-BR.json"
+    );
     expect(terminalFrame).toContain("terminalBadge");
-    expect(terminalFrame).toContain("Exemplo gerado");
-    expect(terminalFrame).toContain("Exemplo guiado");
-    expect(terminalFrame).toContain("Exemplo ilustrativo");
-    const styles = readSite("site/src/components/terminal/TerminalFrame/TerminalFrame.css");
+    expect(terminalFrame).toContain("TERMINAL_BADGE");
+    expect(terminalFrameLocale).toContain("Exemplo gerado");
+    expect(terminalFrameLocale).toContain("Exemplo guiado");
+    expect(terminalFrameLocale).toContain("Exemplo ilustrativo");
+    const styles = readSite("site/src/features/terminal/TerminalFrame/TerminalFrame.css");
     expect(styles).toContain(".terminalBadge");
   });
 });

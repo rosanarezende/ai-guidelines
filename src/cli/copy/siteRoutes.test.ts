@@ -16,7 +16,7 @@ function readSite(relativePath: string): string {
 }
 
 describe("rotas navegáveis do site", () => {
-  const flowData = readSite("site/src/flowData.ts");
+  const flowData = readSite("site/src/content/flowData.ts");
 
   it("expõe as rotas canônicas EN do /flow/*", () => {
     for (const route of [
@@ -58,20 +58,20 @@ describe("rotas navegáveis do site", () => {
   it("expõe título por rota (SEO/a11y) e 404 com texto próprio", () => {
     expect(flowData).toContain("export function routeTitle");
     expect(flowData.toLowerCase()).toContain("não encontrada");
-    const app = readSite("site/src/App.tsx");
-    const activePage = readSite("site/src/components/layout/ActivePage/ActivePage.tsx");
-    expect(app).toContain("document.title = routeTitle(route)");
+    const appShell = readSite("site/src/app/shell/AppShell/AppShell.tsx");
+    const activePage = readSite("site/src/app/routing/ActivePage/ActivePage.tsx");
+    expect(appShell).toContain("document.title = routeTitle(route)");
     expect(activePage).toContain("NotFoundPage");
   });
 });
 
 describe("jornadas surface transcripts verídicos", () => {
-  const flowData = readSite("site/src/flowData.ts");
-  const journeySection = readSite("site/src/components/journey/JourneySection/JourneySection.tsx");
+  const flowData = readSite("site/src/content/flowData.ts");
+  const journeySection = readSite("site/src/features/journey/JourneySection/JourneySection.tsx");
   const scenarioTerminal = readSite(
-    "site/src/components/terminal/ScenarioTerminal/ScenarioTerminal.tsx"
+    "site/src/features/terminal/ScenarioTerminal/ScenarioTerminal.tsx"
   );
-  const terminalFrame = readSite("site/src/components/terminal/TerminalFrame/TerminalFrame.tsx");
+  const terminalFrame = readSite("site/src/features/terminal/TerminalFrame/TerminalFrame.tsx");
 
   it("liga jornadas a cenários gerados (real/guiado)", () => {
     expect(flowData).toContain("AI_GUIDELINES_FLOW_SCENARIOS");

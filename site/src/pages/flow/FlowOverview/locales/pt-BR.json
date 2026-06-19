@@ -1,0 +1,31 @@
+{
+  "eyebrow": "Como funciona",
+  "title": "O caminho muda conforme o momento do repositório.",
+  "lead": "Comece pela intenção. Cada área tem um passo a passo e um exemplo de terminal de apoio.",
+  "areas": [
+    {
+      "route": "start",
+      "label": "Começar",
+      "text": "Init para projeto novo, adopt para repo existente."
+    },
+    {
+      "route": "daily",
+      "label": "Uso diário",
+      "text": "Próxima ação, validação, review e decisões."
+    },
+    {
+      "route": "team",
+      "label": "Em time",
+      "text": "Múltiplas specs e troca segura de contexto."
+    },
+    {
+      "route": "peerReview",
+      "label": "Review entre pares",
+      "text": "Revisar o PR de um colega sem perder sua branch."
+    }
+  ],
+  "openLink": "Abrir →",
+  "previewEyebrow": "Veja de verdade",
+  "previewTitle": "Exemplos de terminal gerados do runtime real.",
+  "previewLead": "Estes transcripts são atalhos diretos equivalentes. O caminho principal continua sendo abrir o guia interativo."
+}

@@ -1,0 +1,22 @@
+{
+  "start": {
+    "eyebrow": "Começar",
+    "title": "init para projeto novo, adopt para repo existente.",
+    "lead": "São entradas diferentes. Depois que o repo está governado, o caminho normal vira uso diário."
+  },
+  "daily": {
+    "eyebrow": "Uso diário",
+    "title": "O guia mostra o próximo passo e evita atalhos inseguros.",
+    "lead": "Para quem já usa ai-guidelines no repo: trabalhar, validar, revisar, marcar pronto e preparar decisões."
+  },
+  "team": {
+    "eyebrow": "Em time",
+    "title": "Antes de trabalhar, confirme a frente correta.",
+    "lead": "Escolher a spec certa, evitar branch errada e saber quando criar uma spec nova exige autorização."
+  },
+  "peerReview": {
+    "eyebrow": "Review entre pares",
+    "title": "Revisar o PR de um colega deve ser um fluxo próprio.",
+    "lead": "Abra o PR em worktree separado ou checkout guiado, sem misturar com sua spec atual."
+  }
+}

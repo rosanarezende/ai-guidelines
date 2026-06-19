@@ -44,7 +44,7 @@ const INTERNAL_PATTERNS: readonly RegExp[] = [
 ];
 
 describe("flowData separa consumidor e contribuidor", () => {
-  const flowData = readSite("site/src/flowData.ts");
+  const flowData = readSite("site/src/content/flowData.ts");
   const { publicPart, contributorPart } = splitAtMarker(flowData);
 
   it("a superfície pública não usa `npm run flow`", () => {
@@ -78,16 +78,23 @@ describe("flowData separa consumidor e contribuidor", () => {
 });
 
 describe("App separa consumidor e contribuidor", () => {
-  const app = readSite("site/src/App.tsx");
-  const wizardPanel = readSite("site/src/components/wizard/WizardDemoPanel/WizardDemoPanel.tsx");
+  const app = readSite("site/src/app/App.tsx");
+  const wizardPanel = readSite("site/src/features/wizard-demo/WizardDemoPanel/WizardDemoPanel.tsx");
   const directCommand = readSite(
-    "site/src/components/common/DirectCommandAside/DirectCommandAside.tsx"
+    "site/src/features/command-surface/DirectCommandAside/DirectCommandAside.tsx"
   );
-  const journeySection = readSite("site/src/components/journey/JourneySection/JourneySection.tsx");
-  const contributePage = readSite(
-    "site/src/components/contribute/ContributePage/ContributePage.tsx"
+  const directCommandLocale = readSite(
+    "site/src/features/command-surface/DirectCommandAside/locales/pt-BR.json"
   );
-  const siteFooter = readSite("site/src/components/layout/SiteFooter/SiteFooter.tsx");
+  const journeySection = readSite("site/src/features/journey/JourneySection/JourneySection.tsx");
+  const journeySectionLocale = readSite(
+    "site/src/features/journey/JourneySection/locales/pt-BR.json"
+  );
+  const contributePage = readSite("site/src/pages/contribute/ContributePage/ContributePage.tsx");
+  const contributePageLocale = readSite(
+    "site/src/pages/contribute/ContributePage/locales/pt-BR.json"
+  );
+  const siteFooter = readSite("site/src/shared/layout/SiteFooter/SiteFooter.tsx");
 
   it("App.tsx não contém o alias `npm run flow`", () => {
     expect(app).not.toContain("npm run flow");
@@ -95,15 +102,20 @@ describe("App separa consumidor e contribuidor", () => {
 
   it("a superfície pública diferencia caminho principal de atalhos diretos", () => {
     expect(wizardPanel).toContain("wizardDemoSection");
-    expect(journeySection).toContain("Caminho principal");
-    expect(directCommand).toContain("Atalho direto");
-    expect(directCommand).toContain("Para automação ou para quem já sabe exatamente o que quer.");
+    expect(journeySection).toContain("copy.primaryCommand");
+    expect(journeySectionLocale).toContain("Caminho principal");
+    expect(directCommand).toContain("copy.label");
+    expect(directCommandLocale).toContain("Atalho direto");
+    expect(directCommandLocale).toContain(
+      "Para automação ou para quem já sabe exatamente o que quer."
+    );
   });
 
   it("a seção de contribuidor é uma página separada e discreta", () => {
     expect(contributePage).toContain("ContributePage");
     expect(siteFooter).toContain('route="contribute"');
-    expect(contributePage).toContain("Uso interno");
+    expect(contributePage).toContain("copy.internalLabel");
+    expect(contributePageLocale).toContain("Uso interno");
   });
 });
 

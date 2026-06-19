@@ -78,7 +78,7 @@ describe("projeção da superfície de comandos == runtime real", () => {
 });
 
 describe("o site só exibe comandos que existem no runtime (B1)", () => {
-  const sources = ["site/src/flowData.ts", "site/src/App.tsx"];
+  const sources = ["site/src/content/flowData.ts", "site/src/app/App.tsx"];
   const registryNames = new Set(buildRegistry().commandNames());
 
   for (const relativePath of sources) {
@@ -95,7 +95,7 @@ describe("o site só exibe comandos que existem no runtime (B1)", () => {
   }
 
   it("a referência de comandos humanos cobre apenas comandos reais", () => {
-    const tokens = siteCommandTokens(readSite("site/src/flowData.ts"));
+    const tokens = siteCommandTokens(readSite("site/src/content/flowData.ts"));
     // sanity: a jornada/refa derivada de fato exercita comandos conhecidos.
     expect(tokens.has("init")).toBe(true);
     expect(tokens.has("adopt")).toBe(true);

@@ -37,7 +37,7 @@ describe("flow copy catalog", () => {
 
   it("projeta textos críticos da CLI para o módulo React do Flow", () => {
     const generatedCopy = readSiteSource("site/src/generated/flow-copy.generated.ts");
-    const flowData = readSiteSource("site/src/flowData.ts");
+    const flowData = readSiteSource("site/src/content/flowData.ts");
 
     expect(generatedCopy).toContain(FLOW_COPY.provisioning.providerGroups.primary);
     expect(generatedCopy).toContain(FLOW_COPY.provisioning.featureGroups.infrastructure);
@@ -57,15 +57,15 @@ describe("flow copy catalog", () => {
 
   it("mantém o Flow como páginas React navegáveis e mobile-first", () => {
     const components = readSiteSources([
-      "site/src/components/journey/StepNavigator/StepNavigator.tsx",
-      "site/src/components/terminal/ScenarioTerminal/ScenarioTerminal.tsx",
-      "site/src/components/terminal/TerminalFrame/TerminalFrame.tsx",
+      "site/src/features/journey/StepNavigator/StepNavigator.tsx",
+      "site/src/features/terminal/ScenarioTerminal/ScenarioTerminal.tsx",
+      "site/src/features/terminal/TerminalFrame/TerminalFrame.tsx",
     ]);
-    const data = readSiteSource("site/src/flowData.ts");
+    const data = readSiteSource("site/src/content/flowData.ts");
     const styles = readSiteSources([
-      "site/src/components/layout/SiteHeader/SiteHeader.css",
-      "site/src/components/home/ProblemSection/ProblemSection.css",
-      "site/src/components/journey/StepNavigator/StepNavigator.css",
+      "site/src/shared/layout/SiteHeader/SiteHeader.css",
+      "site/src/pages/home/sections/ProblemSection/ProblemSection.css",
+      "site/src/features/journey/StepNavigator/StepNavigator.css",
     ]);
 
     expect(components).toContain("StepNavigator");
@@ -81,7 +81,7 @@ describe("flow copy catalog", () => {
   });
 
   it("mantém entrada inicial, uso diário, time e review entre pares como jornadas distintas", () => {
-    const data = readSiteSource("site/src/flowData.ts");
+    const data = readSiteSource("site/src/content/flowData.ts");
 
     expect(data).toContain("Inicializar um projeto governado");
     expect(data).toContain("Adotar sem apagar o que já existe");

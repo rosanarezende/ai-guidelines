@@ -1,0 +1,10 @@
+{
+  "eyebrow": "Governança de engenharia para times com IA",
+  "title": "Trabalho com IA que não esquece o contexto.",
+  "leadPrefix": "O",
+  "leadStrong": "ai-guidelines",
+  "leadSuffix": "guarda o estado do projeto no próprio repositório e mostra a próxima ação certa — para humanos e múltiplas IAs trabalharem do mesmo mapa.",
+  "primaryAction": "Ver o guia interativo",
+  "secondaryAction": "Começar",
+  "imageAlt": "Ciclo ai-guidelines: backlog, spec, plano, execução, PR, gate humano e merge"
+}

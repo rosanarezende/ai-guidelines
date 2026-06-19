@@ -47,28 +47,36 @@ describe("governed documentation site packaging", () => {
   });
 
   it("mantem a home como pagina de produto sem instrucoes de deploy", () => {
-    const appSource = fs.readFileSync(path.join(REPO_ROOT, "site/src/App.tsx"), "utf-8");
+    const appSource = fs.readFileSync(path.join(REPO_ROOT, "site/src/app/App.tsx"), "utf-8");
     const homeSource = fs.readFileSync(
-      path.join(REPO_ROOT, "site/src/components/home/HomePage/HomePage.tsx"),
+      path.join(REPO_ROOT, "site/src/pages/home/HomePage/HomePage.tsx"),
       "utf-8"
     );
     const productHero = fs.readFileSync(
-      path.join(REPO_ROOT, "site/src/components/home/ProductHero/ProductHero.tsx"),
+      path.join(REPO_ROOT, "site/src/pages/home/sections/ProductHero/ProductHero.tsx"),
       "utf-8"
     );
     const solutionSection = fs.readFileSync(
-      path.join(REPO_ROOT, "site/src/components/home/SolutionSection/SolutionSection.tsx"),
+      path.join(REPO_ROOT, "site/src/pages/home/sections/SolutionSection/SolutionSection.tsx"),
+      "utf-8"
+    );
+    const solutionSectionLocale = fs.readFileSync(
+      path.join(REPO_ROOT, "site/src/pages/home/sections/SolutionSection/locales/pt-BR.json"),
       "utf-8"
     );
     const productCta = fs.readFileSync(
-      path.join(REPO_ROOT, "site/src/components/home/ProductCTA/ProductCTA.tsx"),
+      path.join(REPO_ROOT, "site/src/pages/home/sections/ProductCTA/ProductCTA.tsx"),
+      "utf-8"
+    );
+    const productHeroLocale = fs.readFileSync(
+      path.join(REPO_ROOT, "site/src/pages/home/sections/ProductHero/locales/pt-BR.json"),
       "utf-8"
     );
     const audienceCards = fs.readFileSync(
-      path.join(REPO_ROOT, "site/src/components/home/AudiencePathCards/AudiencePathCards.tsx"),
+      path.join(REPO_ROOT, "site/src/pages/home/sections/AudiencePathCards/AudiencePathCards.tsx"),
       "utf-8"
     );
-    const flowData = fs.readFileSync(path.join(REPO_ROOT, "site/src/flowData.ts"), "utf-8");
+    const flowData = fs.readFileSync(path.join(REPO_ROOT, "site/src/content/flowData.ts"), "utf-8");
     const viteConfig = fs.readFileSync(path.join(REPO_ROOT, "site/vite.config.ts"), "utf-8");
     const homeBundle = [homeSource, productHero, solutionSection, productCta, audienceCards].join(
       "\n"
@@ -76,12 +84,14 @@ describe("governed documentation site packaging", () => {
 
     expect(appSource).not.toMatch(/Cloudflare/i);
     expect(appSource).not.toContain("../../docs/assets/");
-    expect(homeBundle).toContain("Automação absorve o mecânico");
+    expect(solutionSection).toContain("copy.lead");
+    expect(solutionSectionLocale).toContain("Automação absorve o mecânico");
     expect(homeBundle).toContain("ai-guidelines-flow.webp");
     // A home é uma página de produto com hero, problema, solução e caminhos por público.
     expect(homeSource).toContain("ProductCTA");
     expect(audienceCards).toContain("audiencePaths");
-    expect(productHero).toContain("Ver o guia interativo");
+    expect(productHero).toContain("copy.primaryAction");
+    expect(productHeroLocale).toContain("Ver o guia interativo");
     // O comando do consumidor é DERIVADO (binCommand), não literal no JSX.
     expect(flowData).toContain('directCommand: binCommand("init", "--dry-run")');
     expect(viteConfig).not.toContain("copyFlowSite");
@@ -89,7 +99,10 @@ describe("governed documentation site packaging", () => {
 
   it("publica o site como SPA navegavel em rotas /flow/*", () => {
     const redirects = fs.readFileSync(path.join(REPO_ROOT, "site/public/_redirects"), "utf-8");
-    const routeSource = fs.readFileSync(path.join(REPO_ROOT, "site/src/flowData.ts"), "utf-8");
+    const routeSource = fs.readFileSync(
+      path.join(REPO_ROOT, "site/src/content/flowData.ts"),
+      "utf-8"
+    );
 
     expect(redirects.trim()).toBe("/* /index.html 200");
     expect(routeSource).toContain("/flow/comecar");

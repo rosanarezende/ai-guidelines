@@ -46,8 +46,8 @@ describe("auditoria de capacidades de decisão (A2)", () => {
   });
 
   it("o site enquadra Ready/Human Gate/merge como autoridade humana, não automação", () => {
-    const flowData = readSite("site/src/flowData.ts");
-    const app = readSite("site/src/App.tsx");
+    const flowData = readSite("site/src/content/flowData.ts");
+    const app = readSite("site/src/app/App.tsx");
     const corpus = `${flowData}\n${app}`;
 
     // A capacidade aparece (derivada/guiada) E com enquadramento de autoridade humana.
