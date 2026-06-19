@@ -316,3 +316,125 @@ O CO-10.8 deve falhar ou parar se:
 - os testes ficarem mais difíceis de navegar;
 - a árvore-alvo criar outra camada genérica sem vínculo com jornadas reais;
 - BDD virar documentação manual sem lastro em teste executável.
+
+## Dogfood inicial executado no CO-10.8
+
+Data: 2026-06-19
+HEAD de partida: `95c953c`
+Estado governado: `CO-10.8 [/]`, PR #43 Draft, CI remoto verde após a transição CO-10.7 → CO-10.8.
+
+### Refactor estrutural behavior-preserving
+
+Primeiro hotspot tratado: `src/cli/flowWizard.ts`.
+
+Antes:
+
+```text
+src/cli/flowWizard.ts
+→ wizard principal
+→ detecção de provisioning
+→ update guiado de providers/features/colaboração
+→ leitura de package.json/review-policy
+→ seleção de spec ativa/múltiplas specs
+→ renderização de resumo e ações
+```
+
+Depois:
+
+```text
+src/cli/flowWizard.ts
+→ orquestra o wizard, resumo, ações e seções principais
+
+src/cli/experience/wizard/provisioning.ts
+→ detecta contexto init/adopt/update
+→ renderiza e executa a seção de provisioning
+→ concentra provider/features/colaboração/review-policy
+
+src/cli/experience/wizard/specWork.ts
+→ carrega índice de specs
+→ renderiza foco de trabalho
+→ orienta troca de branch/fetch/continue sem auto-checkout
+```
+
+Resultado medido após o split:
+
+| Arquivo                                     | Linhas |
+| ------------------------------------------- | -----: |
+| `src/cli/flowWizard.ts`                     |    893 |
+| `src/cli/experience/wizard/provisioning.ts` |    597 |
+| `src/cli/experience/wizard/specWork.ts`     |    279 |
+
+O comportamento público não foi alterado: os imports externos continuam usando `src/cli/flowWizard.ts`, os testes existentes do wizard continuam exercitando a mesma API e `npm run build` passou após a migração.
+
+### Guard criado
+
+Foi criado `src/test-utils/InternalArchitectureOrganization.test.ts` para impedir regressão imediata deste hotspot.
+
+O guard não tenta medir "beleza" de código. Ele protege apenas o fato estrutural que motivou a migração:
+
+- o wizard raiz não pode voltar a importar `node:fs`/`node:path`;
+- o wizard raiz não pode voltar a depender diretamente de `reviewPolicyReader`, `ProviderCatalog`, `ReviewPolicyBaseline`, `FormatterContext` ou `PackageJson`;
+- os módulos `experience/wizard/provisioning.ts`, `experience/wizard/specWork.ts` e `testing/bdd/maintainerScenarioCatalog.ts` precisam existir.
+
+### Seed BDD para mantenedores
+
+Foi criado `src/testing/bdd/maintainerScenarioCatalog.ts` com cenários BDD tipados e ancorados em testes reais.
+
+Cada cenário declara:
+
+- pessoa/persona;
+- área;
+- jornada;
+- Given/When/Then;
+- artefatos tocados;
+- teste que prova o comportamento;
+- comando associado quando aplicável.
+
+Foi criado `src/testing/bdd/MaintainerScenarioCatalog.test.ts` para garantir que:
+
+- cada cenário aponta para um arquivo de teste real;
+- o nome do teste citado existe literalmente no arquivo;
+- os artefatos citados existem;
+- há agrupamento navegável por jornada.
+
+Jornadas cobertas no seed:
+
+| Jornada                  | Cenários iniciais                                                       |
+| ------------------------ | ----------------------------------------------------------------------- |
+| uso diário               | tree suja orienta validação; múltiplas specs exigem foco explícito      |
+| decisão governada        | readiness usa a mesma fonte de verdade de `work`/`decide`               |
+| fechamento de checkpoint | último sub-checkpoint pronto não tenta `advance-subcheckpoint` indevido |
+| manutenção de repo       | repo governado usa `update`, não `init/adopt`                           |
+| validação de consumidor  | pacote instalado é validado sem publicar no npm                         |
+| documentação viva        | site não ensina comando inexistente                                     |
+
+Esse seed ainda não é a página visual de mantenedores. Ele é o lastro executável necessário para que uma página futura não vire documentação manual paralela.
+
+### Falsificação já aplicada
+
+Validação focada executada:
+
+```bash
+npm run build
+npx jest --config ./.jest/jest.config.js \
+  src/testing/bdd/MaintainerScenarioCatalog.test.ts \
+  src/test-utils/InternalArchitectureOrganization.test.ts \
+  src/cli/flowWizard.test.ts \
+  --runInBand
+```
+
+Resultado:
+
+- `npm run build`: verde;
+- testes focados: 45 testes verdes.
+
+Uma falha real foi encontrada e corrigida durante o dogfood: o cenário BDD `site-command-fidelity` apontava para uma descrição de teste que não existia literalmente. O novo teste falhou, forçando o catálogo a se ancorar em evidência real.
+
+### O que ainda falta no CO-10.8
+
+Este primeiro slice não encerra CO-10.8. Ainda faltam:
+
+1. avaliar se outro hotspot precisa de split imediato antes da readiness (`workflow.ts`, `workBrief.ts`, `handoff.ts`, `reviewBrief.ts` ou testes muito grandes);
+2. decidir se o seed BDD atual é suficiente para readiness ou se precisa de uma projeção visual mínima ainda neste sub-checkpoint;
+3. rodar validação completa (`git diff --check`, `npm run format`, `npm run build`, `npm run test:ts`, `npm run validate`);
+4. registrar o estado final e só então usar o fluxo governado de readiness, se os critérios estiverem satisfeitos.

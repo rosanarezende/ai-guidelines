@@ -38,6 +38,8 @@ Critério:
 
 **Decisão futura:** começar só nos cenários críticos de `co-flow-convergence` e medir valor antes de expandir.
 
+**Dogfood 2026-06-19:** seed inicial criado em `src/testing/bdd/maintainerScenarioCatalog.ts` com teste de ancoragem em `src/testing/bdd/MaintainerScenarioCatalog.test.ts`. Isto não implementa a feature completa; apenas prova o formato mínimo e impede que o catálogo cite testes/artefatos inexistentes.
+
 ### INTORG-003 — Guard de tamanho/responsabilidade de arquivos
 
 **Problema:** arquivos gigantes voltam a crescer sem sinal precoce.
@@ -47,6 +49,8 @@ Critério:
 **Risco:** limite mecânico pode incentivar splits artificiais.
 
 **Decisão futura:** preferir guard por responsabilidade/import boundary antes de limite bruto de linhas.
+
+**Dogfood 2026-06-19:** guard mínimo criado em `src/test-utils/InternalArchitectureOrganization.test.ts` para o hotspot `flowWizard.ts`. Ele protege responsabilidade/import boundary, não limite bruto de linhas.
 
 ### INTORG-004 — Guard arquitetural de imports por camada
 
