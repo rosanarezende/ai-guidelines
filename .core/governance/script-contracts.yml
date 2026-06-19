@@ -79,6 +79,30 @@ profiles:
         mutates: true
         consumers: [script, workflow]
         description: Smoke cross-plataforma sobre pacote gerado.
+      - name: consumer:journey
+        command: npm run build && node dist/cli/bin.js consumer-journey all
+        category: test
+        mutates: true
+        consumers: [human, script]
+        description: "Valida a jornada de consumidor em tres niveis: tarball, yalc e Verdaccio."
+      - name: consumer:journey:pack
+        command: npm run build && node dist/cli/bin.js consumer-journey pack
+        category: test
+        mutates: true
+        consumers: [human, script]
+        description: "Nivel 1 obrigatorio: npm pack e consumidores temporarios reais."
+      - name: consumer:journey:yalc
+        command: npm run build && node dist/cli/bin.js consumer-journey yalc
+        category: test
+        mutates: false
+        consumers: [human]
+        description: "Nivel 2 opcional: loop local rapido com yalc."
+      - name: consumer:journey:verdaccio
+        command: npm run build && node dist/cli/bin.js consumer-journey verdaccio
+        category: test
+        mutates: false
+        consumers: [human]
+        description: "Nivel 3 opcional: registry local com Verdaccio antes do npm real."
       - name: test:coverage
         command: node --experimental-default-config-file --experimental-test-coverage --test "tests/integration/**/*.test.mjs" && jest --config ./.jest/jest.config.js --coverage
         category: test
