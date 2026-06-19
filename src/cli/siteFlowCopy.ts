@@ -3,6 +3,7 @@ import path from "node:path";
 
 import { FLOW_COPY } from "./copy/flowCopy.js";
 import { buildRegistry } from "./registry/buildRegistry.js";
+import { buildDecisionRegistry } from "./decide/registry.js";
 import { INTENT_CATALOG } from "./registry/intentCatalog.js";
 import { getSupportedProviders } from "../domain/provisioning/ProviderCatalog.js";
 import { FEATURE_OPTIONS } from "../domain/provisioning/FeatureCatalog.js";
@@ -40,6 +41,22 @@ export function siteCommandSurface(): readonly SiteCommandDescriptor[] {
       usage: [...(command.usage ?? [])],
       subcommands: [...(command.subcommands ?? [])],
     }));
+}
+
+/**
+ * Decisões reservadas ao humano REAIS, projetadas do registry de decisões
+ * (CO-3). O site descreve Ready/Human Gate/transição a partir desta lista —
+ * fecha A2 (o site não promete capacidade de decisão que o runtime não tem).
+ */
+export interface SiteDecisionDescriptor {
+  readonly id: string;
+  readonly title: string;
+}
+
+export function siteDecisionSurface(): readonly SiteDecisionDescriptor[] {
+  return buildDecisionRegistry()
+    .definitions()
+    .map((definition) => ({ id: definition.id, title: definition.title }));
 }
 
 export function siteFlowCopyPayload(): unknown {
@@ -81,6 +98,7 @@ export function siteFlowCopyPayload(): unknown {
     // a superfície real de comandos, a navegação curada (INTENT_CATALOG, que
     // referencia comandos por nome) e a enumeração canônica de providers/features.
     commands: siteCommandSurface(),
+    decisions: siteDecisionSurface(),
     intents: INTENT_CATALOG,
     catalogs: {
       providers: getSupportedProviders(),

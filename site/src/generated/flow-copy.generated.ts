@@ -567,6 +567,32 @@ export const AI_GUIDELINES_FLOW_COPY = {
       ]
     }
   ],
+  "decisions": [
+    {
+      "id": "close-dispositions",
+      "title": "Encerrar problemas revalidados da auditoria técnica"
+    },
+    {
+      "id": "finish-subcheckpoint",
+      "title": "Concluir ponto atual e iniciar o próximo"
+    },
+    {
+      "id": "mark-readiness",
+      "title": "Declarar readiness do sub-checkpoint ativo"
+    },
+    {
+      "id": "advance-subcheckpoint",
+      "title": "Iniciar o próximo sub-checkpoint"
+    },
+    {
+      "id": "human-gate",
+      "title": "Decidir o avanço do checkpoint (Human Gate)"
+    },
+    {
+      "id": "open-next-node",
+      "title": "Abrir o próximo nó planejado"
+    }
+  ],
   "intents": [
     {
       "id": "retomar-trabalho",
