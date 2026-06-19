@@ -35,8 +35,12 @@ describe("governed documentation site packaging", () => {
 
     expect(pkg.scripts["site:assets:sync"]).toBe("node site/scripts/optimize-assets.mjs sync");
     expect(pkg.scripts["site:assets:check"]).toBe("node site/scripts/optimize-assets.mjs check");
+    // Transcripts reais do site também são gateados na cadeia de build (B2).
+    expect(pkg.scripts["site:scenarios:check"]).toBe(
+      "npm run build && node dist/cli/bin.js site-scenarios check"
+    );
     expect(pkg.scripts["site:build"]).toBe(
-      "npm run site:flow:check && npm run site:assets:check && vite build --config site/vite.config.ts"
+      "npm run site:flow:check && npm run site:scenarios:check && npm run site:assets:check && vite build --config site/vite.config.ts"
     );
     expect(pkg.scripts["site:dev"]).toBe("vite --config site/vite.config.ts --host 127.0.0.1");
     expect(pkg.scripts.validate).toContain("npm run site:build");
