@@ -345,3 +345,46 @@ Human Gate/merge/advance-subcheckpoint/readiness, sem novo PR, sem topologia.
 
 Risco residual: screenshots nao puderam ser gerados no sandbox (sem browser; CDN
 de browser bloqueado). A revisao visual fica no preview do Cloudflare Pages do PR.
+
+## Separação de perfis: consumidor x contribuidor (2026-06-19)
+
+O site bem visual ainda misturava duas superfícies: o CONSUMIDOR do framework
+(`npx ai-guidelines …`) e o CONTRIBUIDOR deste repositório (`npm run flow …`,
+governança de desenvolvimento). Onde havia mistura:
+
+- jornadas e referência usavam `npm run flow -- <cmd>` como caminho principal;
+- exemplos de terminal guiados despejavam usages internos (PR #43, handoff 0024,
+  `decide --type <sub-checkpoint>`);
+- glossário/descrições puxavam texto interno do registry (state.yml, sub-checkpoint).
+
+Correção (sem runtime novo; fidelidade preservada):
+
+- Superfície PÚBLICA passa a usar `npx ai-guidelines` em tudo (jornadas,
+  referência, cenários). Comandos seguem validados contra o registry (binCommand).
+- Identificadores internos genericizados: `0024`→`<spec>`/genérico, `PR #43`→
+  "PR de um colega", `pr-43`→`pr-<n>`. Nada de Spec 0024 / CO-10 / sub-checkpoint
+  na superfície pública.
+- Nova rota SECUNDÁRIA `/contribute` ("Contribuindo com o ai-guidelines"),
+  isolada da nav principal (só no rodapé), onde — e só onde — aparece
+  `npm run flow` e o fluxo interno de desenvolvimento, marcado "Uso interno".
+- Cenários ganham `surface: public | contributor`. Reais públicos: init/adopt/
+  update/update --providers (npx, dry-run). Guiados públicos: work/specs/
+  peer-review (npx, genéricos, nome validado). Contribuidor: `--help` real +
+  fluxo `npm run flow`.
+- Glossário e "comandos públicos" reescritos consumer-first (nomes validados +
+  hints curados; sem descrição interna do registry).
+
+Gap real da CLI registrado (não maquiado): `ai-guidelines --help` hoje DESTACA o
+alias de contribuidor `npm run flow` antes de `npx ai-guidelines`. Por isso o
+transcript de `--help` foi colocado na área de contribuidor, com nota explícita.
+Melhoria futura sugerida da CLI: o `--help` deve liderar com `npx ai-guidelines
+<comando>` para consumidores; `npm run flow` aparece como nota de contribuidor.
+
+Guards adicionados/ajustados: `siteProfiles.test.ts` (público não usa
+`npm run flow`; sem identificadores internos; init/adopt/update públicos;
+`npm run flow` só na seção de contribuidor; cenários públicos têm
+`surface: public` e começam com `npx ai-guidelines`; comando público existe no
+registry). Fidelidade preservada (B1/B2/B3/A2 intactos).
+
+Limites reafirmados: sem Ready/Human Gate/merge/advance-subcheckpoint/readiness,
+sem decisão mutante de `decide`, sem novo PR, sem topologia.

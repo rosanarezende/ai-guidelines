@@ -79,7 +79,7 @@ describe("flow copy catalog", () => {
     // Invocações agora são DERIVADAS do registry (B1): em vez do literal, o site
     // chama flowCommand("peer-review", …). A fidelidade do nome de comando é
     // garantida por siteCommandSurface.test.ts (guard que valida contra o registry).
-    expect(data).toContain('flowCommand("peer-review"');
+    expect(data).toContain('binCommand("peer-review"');
     expect(data).toContain("Worktree separado");
     expect(data).toContain("Checkout guiado");
   });

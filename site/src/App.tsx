@@ -2,15 +2,16 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 
 import {
   audiencePaths,
+  contributorBlock,
   dailyJourney,
   type FlowScenario,
   FlowStep,
   glossary,
-  humanDecisions,
   Journey,
   peerReviewJourney,
   productProblems,
   productSolutions,
+  publicHumanDecisions,
   referenceGroups,
   routeFromPath,
   routePath,
@@ -18,7 +19,6 @@ import {
   routeTitle,
   safetyRails,
   scenarioById,
-  scenarios,
   startJourneys,
   teamJourney,
   TerminalLine,
@@ -231,7 +231,7 @@ function ScenarioTabs({ scenarioIds }: { readonly scenarioIds: readonly string[]
 
 function StepTerminal({ step }: { readonly step: FlowStep }): JSX.Element {
   return (
-    <TerminalFrame title={step.command ?? "npm run flow"} kind="illustrative">
+    <TerminalFrame title={step.command ?? "npx ai-guidelines"} kind="illustrative">
       {step.lines.map((line, index) => (
         <span className={`terminalLine ${line.tone ?? "normal"}`} key={`${line.text}-${index}`}>
           {line.text}
@@ -290,7 +290,7 @@ function HumanDecisionCallout(): JSX.Element {
         própria.
       </p>
       <ul>
-        {humanDecisions.map((decision) => (
+        {publicHumanDecisions.map((decision) => (
           <li key={decision.id}>{decision.title}</li>
         ))}
       </ul>
@@ -498,7 +498,9 @@ function FlowOverview(): JSX.Element {
           title="Exemplos de terminal gerados do runtime real."
           lead="Estes transcripts são capturados de execução real em dry-run — não são telas inventadas."
         />
-        <ScenarioTabs scenarioIds={["new-project", "existing-repo", "governed-repo"]} />
+        <ScenarioTabs
+          scenarioIds={["new-project", "existing-repo", "governed-repo", "update-providers"]}
+        />
       </section>
     </FlowShell>
   );
@@ -620,6 +622,49 @@ function ReferencePage(): JSX.Element {
   );
 }
 
+// ── Contribuidor (superfície secundária) ──────────────────────────────────
+
+function ContributePage(): JSX.Element {
+  const scenario = scenarioById(contributorBlock.scenarioId);
+  return (
+    <section className="contributeSection">
+      <p className="eyebrow">{contributorBlock.eyebrow}</p>
+      <h1>{contributorBlock.title}</h1>
+      <p className="lead">{contributorBlock.lead}</p>
+      <aside className="callout calloutInternal" role="note">
+        <strong>Uso interno.</strong> {contributorBlock.note}
+      </aside>
+      <div className="contributeGrid">
+        {contributorBlock.points.map((point) => (
+          <article className="contributeCard" key={point.title}>
+            <h3>{point.title}</h3>
+            <p>{point.text}</p>
+          </article>
+        ))}
+      </div>
+      <div className="contributeCommands">
+        {contributorBlock.commands.map((command) => (
+          <div className="contributeCommand" key={command.label}>
+            <code>{command.label}</code>
+            <span>{command.hint}</span>
+          </div>
+        ))}
+      </div>
+      {scenario ? (
+        <div className="scenarioPanel">
+          <p className="scenarioNote">{scenario.note}</p>
+          <ScenarioTerminal scenario={scenario} />
+        </div>
+      ) : null}
+      <div className="heroActions">
+        <SiteLink className="secondaryAction" route="home">
+          Voltar ao site do produto
+        </SiteLink>
+      </div>
+    </section>
+  );
+}
+
 // ── 404 ───────────────────────────────────────────────────────────────────
 
 function NotFoundPage(): JSX.Element {
@@ -697,6 +742,7 @@ function ActivePage({ route }: { readonly route: RouteId }): JSX.Element {
     );
   }
   if (route === "reference") return <ReferencePage />;
+  if (route === "contribute") return <ContributePage />;
   return <NotFoundPage />;
 }
 
@@ -707,6 +753,7 @@ function SiteFooter(): JSX.Element {
       <div className="footerLinks">
         <SiteLink route="flow">Como funciona</SiteLink>
         <SiteLink route="reference">Referência</SiteLink>
+        <SiteLink route="contribute">Contribuindo</SiteLink>
         <a href="https://github.com/rosanarezende/ai-guidelines">GitHub</a>
         <a href="https://www.npmjs.com/package/ai-guidelines">npm</a>
       </div>

@@ -9,14 +9,17 @@ export type RouteId =
   | "team"
   | "peerReview"
   | "reference"
+  | "contribute"
   | "notFound";
 
 export type TerminalKind = "real" | "guided";
+export type TerminalSurface = "public" | "contributor";
 
 export interface FlowScenario {
   readonly id: string;
   readonly title: string;
   readonly kind: TerminalKind;
+  readonly surface: TerminalSurface;
   readonly command: string;
   readonly note: string;
   readonly exitCode: number | null;
@@ -90,44 +93,26 @@ function assertCommand(name: string): string {
   return name;
 }
 
-/** `npm run flow -- <cmd> [args]` — superfície humana local, derivada e validada. */
-export function flowCommand(name: string, ...args: readonly string[]): string {
-  return ["npm run flow --", assertCommand(name), ...args].join(" ");
-}
-
-/** `npx ai-guidelines <cmd> [args]` — superfície do consumidor, derivada e validada. */
+/**
+ * SUPERFÍCIE PÚBLICA (consumidor do framework). `npx ai-guidelines <cmd>` é o
+ * comando que o usuário roda. O nome é validado contra o registry real — comando
+ * inexistente quebra o build (B1). A superfície de contribuidor (alias local
+ * deste repo) fica isolada na seção CONTRIBUTOR no fim do arquivo.
+ */
 export function binCommand(name: string, ...args: readonly string[]): string {
   return ["npx ai-guidelines", assertCommand(name), ...args].join(" ");
 }
 
-/** Invocação nua do guia situado (wizard) — entrada sem subcomando. */
-export const FLOW_WIZARD = "npm run flow";
+/** Invocação nua do binário público — abre o guia situado, sem subcomando. */
+export const BIN_WIZARD = "npx ai-guidelines";
 
-const commandByName = new Map(copy.commands.map((command) => [command.name, command] as const));
-
-/**
- * Item de referência DERIVADO: label e hint vêm do descriptor real do comando
- * (a `description` do registry é a única fonte). Nome inexistente quebra o build.
- * A escolha de QUAIS comandos listar é editorial; a existência e os textos não.
- */
-function commandReference(name: string): { readonly label: string; readonly hint: string } {
-  const command = commandByName.get(assertCommand(name));
-  if (!command) {
-    throw new Error(`flowData: comando "${name}" ausente no registry projetado (referência).`);
-  }
-  return { label: command.name, hint: command.description };
+/** Item de referência público: nome VALIDADO contra o registry + hint curado (consumidor). */
+function publicCommand(
+  name: string,
+  hint: string
+): { readonly label: string; readonly hint: string } {
+  return { label: assertCommand(name), hint };
 }
-
-/** Subconjunto curado da superfície humana exibido na referência (FK validada). */
-const HUMAN_COMMAND_SURFACE: readonly string[] = [
-  "init",
-  "adopt",
-  "update",
-  "work",
-  "decide",
-  "specs",
-  "peer-review",
-];
 
 export const routes: readonly RouteLink[] = [
   { id: "home", path: "/", label: "Produto", shortLabel: "Produto" },
@@ -146,7 +131,7 @@ export const startJourneys: readonly Journey[] = [
     title: "Inicializar um projeto governado",
     summary:
       "Use quando a pasta ainda está limpa e você quer nascer com baseline, práticas, IA e validações já organizadas.",
-    command: flowCommand("init"),
+    command: binCommand("init"),
     scenarioId: "new-project",
     whenToUse: [
       "pasta vazia ou projeto ainda sem histórico para preservar",
@@ -157,7 +142,7 @@ export const startJourneys: readonly Journey[] = [
       {
         title: "Detectar começo limpo",
         text: "O guia entende que o caminho natural é iniciar. Adopt e update não aparecem como ação principal.",
-        command: flowCommand("init"),
+        command: binCommand("init"),
         lines: [
           { text: "Pasta vazia detectada", tone: "normal" },
           { text: "Inicializar um projeto governado", tone: "active" },
@@ -204,7 +189,7 @@ export const startJourneys: readonly Journey[] = [
     title: "Adotar sem apagar o que já existe",
     summary:
       "Use quando o projeto já tem código, configs ou histórico. O caminho conservador preserva conteúdo e mostra conflitos antes de aplicar.",
-    command: flowCommand("adopt"),
+    command: binCommand("adopt"),
     scenarioId: "existing-repo",
     whenToUse: [
       "repo com package.json, código ou práticas existentes",
@@ -259,7 +244,7 @@ export const dailyJourney: Journey = {
   title: "Operar o dia a dia sem lembrar a sequência de comandos",
   summary:
     "Depois que o repo já usa ai-guidelines, o caminho normal é continuar trabalho, validar o diff, atualizar práticas e preparar decisões humanas.",
-  command: FLOW_WIZARD,
+  command: BIN_WIZARD,
   whenToUse: [
     "você voltou para uma sessão e precisa entender o estado",
     "há uma spec ativa, um PR Draft ou decisões pendentes",
@@ -269,7 +254,7 @@ export const dailyJourney: Journey = {
     {
       title: "Entender o estado",
       text: "O guia lê branch, PR, CI, findings, tasks.md e próxima ação sem depender da memória do agente.",
-      command: FLOW_WIZARD,
+      command: BIN_WIZARD,
       lines: [
         { text: "Estado atual: spec, PR, CI e working tree", tone: "normal" },
         { text: "Próxima ação recomendada", tone: "active" },
@@ -280,7 +265,7 @@ export const dailyJourney: Journey = {
     {
       title: "Validar mudanças",
       text: "Durante Draft, o caminho rápido valida só o diff. Antes de Ready/Human Gate, a validação completa continua disponível.",
-      command: flowCommand("validate", "changed"),
+      command: binCommand("validate", "changed"),
       lines: [
         { text: copy.wizard.validation.changed, tone: "active" },
         { text: copy.wizard.validation.changedFix, tone: "warn" },
@@ -290,7 +275,7 @@ export const dailyJourney: Journey = {
     {
       title: "Atualizar o repo governado",
       text: "Update reaplica runtime, templates, providers, features e práticas sem voltar para init/adopt.",
-      command: flowCommand("update"),
+      command: binCommand("update"),
       lines: [
         { text: "Base: runtime, templates e config", tone: "success" },
         { text: "IA: providers por seleção agrupada", tone: "success" },
@@ -301,7 +286,7 @@ export const dailyJourney: Journey = {
     {
       title: "Preparar decisões",
       text: "Ready, Human Gate e merge não são atalhos. O sistema mostra briefing, preview e bloqueios antes de qualquer decisão.",
-      command: flowCommand("decide", "--brief-only"),
+      command: binCommand("decide", "--brief-only"),
       lines: [
         { text: "Decisões disponíveis", tone: "success" },
         { text: "Decisões bloqueadas com motivo factual", tone: "warn" },
@@ -318,7 +303,7 @@ export const teamJourney: Journey = {
   title: "Escolher a frente certa antes de trabalhar",
   summary:
     "Quando existem várias specs ou pessoas trabalhando em paralelo, o fluxo precisa evitar branch errada, PR errado e criação de spec sem autorização.",
-  command: flowCommand("specs"),
+  command: binCommand("specs"),
   whenToUse: [
     "há mais de uma spec aberta",
     "você precisa continuar uma spec específica",
@@ -328,10 +313,10 @@ export const teamJourney: Journey = {
     {
       title: "Ver specs abertas",
       text: "A lista pública mostra id, branch, PR, status e possíveis divergências antes de escolher.",
-      command: flowCommand("specs"),
+      command: binCommand("specs"),
       lines: [
         { text: "Specs abertas no índice governado", tone: "normal" },
-        { text: "0024 context-architecture", tone: "active" },
+        { text: "minha-spec — área do projeto", tone: "active" },
         { text: "Branch esperada e PR associado", tone: "success" },
         { text: "Drift aparece como bloqueio, não como suposição", tone: "warn" },
       ],
@@ -339,9 +324,9 @@ export const teamJourney: Journey = {
     {
       title: "Continuar uma spec específica",
       text: "A pessoa informa número, slug ou branch. O sistema confere se o checkout local combina.",
-      command: flowCommand("continue", "0024"),
+      command: binCommand("continue"),
       lines: [
-        { text: "Spec escolhida: 0024", tone: "active" },
+        { text: "Spec escolhida", tone: "active" },
         { text: "Branch atual combina com a spec", tone: "success" },
         { text: "Se não combinar, orientar checkout antes de continuar", tone: "warn" },
       ],
@@ -374,7 +359,7 @@ export const peerReviewJourney: Journey = {
   title: "Revisar PR de outra pessoa sem perder sua branch",
   summary:
     "O fluxo separa revisão de colega do seu trabalho atual: primeiro mostra o PR, depois prepara worktree separado ou checkout guiado.",
-  command: flowCommand("peer-review", "43", "--brief-only"),
+  command: binCommand("peer-review", "<pr>", "--brief-only"),
   whenToUse: [
     "você está em uma spec própria e precisa revisar outro PR",
     "não quer misturar arquivos locais com a branch do colega",
@@ -384,9 +369,9 @@ export const peerReviewJourney: Journey = {
     {
       title: "Escolher o PR",
       text: "O briefing mostra título, estado, branch, base, link e working tree antes de qualquer ação.",
-      command: flowCommand("peer-review", "43", "--brief-only"),
+      command: binCommand("peer-review", "<pr>", "--brief-only"),
       lines: [
-        { text: "Review entre pares — PR #43", tone: "normal" },
+        { text: "Review entre pares — PR de um colega", tone: "normal" },
         { text: "Branch do PR e base do PR", tone: "active" },
         { text: "Working tree limpa ou suja", tone: "success" },
         { text: "Nenhuma alteração feita no brief-only", tone: "muted" },
@@ -396,7 +381,7 @@ export const peerReviewJourney: Journey = {
       title: "Escolher como abrir",
       text: "Worktree separado é recomendado para preservar sua branch. Checkout guiado troca esta pasta e exige tree limpa.",
       lines: [
-        { text: "Worktree separado em .temp/peer-review/pr-43", tone: "active" },
+        { text: "Worktree separado em .temp/peer-review/pr-<n>", tone: "active" },
         { text: "Checkout guiado nesta pasta", tone: "normal" },
         { text: "Checkout bloqueia se houver mudança local", tone: "warn" },
       ],
@@ -404,11 +389,11 @@ export const peerReviewJourney: Journey = {
     {
       title: "Preparar ambiente",
       text: "A preparação busca a branch do PR e cria o espaço de revisão, sem Ready, Gate, merge ou transição.",
-      command: flowCommand("peer-review", "43", "--mode", "worktree", "--confirm"),
+      command: binCommand("peer-review", "<pr>", "--mode", "worktree", "--confirm"),
       lines: [
-        { text: "Fetch pull/43/head", tone: "normal" },
+        { text: "Fetch pull/<pr>/head", tone: "normal" },
         { text: "Criar worktree isolado", tone: "success" },
-        { text: "Próximo passo: cd .temp/peer-review/pr-43 && npm run flow", tone: "active" },
+        { text: "Próximo passo: cd .temp/peer-review/pr-<n> && npx ai-guidelines", tone: "active" },
       ],
     },
     {
@@ -441,12 +426,15 @@ export const referenceGroups: readonly ReferenceGroup[] = [
     })),
   },
   {
-    title: "Comandos humanos principais",
-    text: "A superfície humana local é npm run flow; o binário público continua ai-guidelines. Cada descrição vem do registry real da CLI.",
+    title: "Comandos públicos",
+    text: "No seu projeto, os comandos rodam com `npx ai-guidelines`. Cada nome abaixo é validado contra o registry real da CLI.",
     items: [
-      // `flow` é a invocação nua do wizard (não é um comando do registry): item editorial explícito.
-      { label: "flow", hint: "abre o guia situado do repo (wizard, sem subcomando)" },
-      ...HUMAN_COMMAND_SURFACE.map(commandReference),
+      publicCommand("init", "inicia um projeto novo, já governado"),
+      publicCommand("adopt", "adota o framework em um repo existente, preservando o que há"),
+      publicCommand("update", "reaplica runtime, templates, assistentes e práticas"),
+      publicCommand("work", "mostra estado, próxima ação e validações da sessão"),
+      publicCommand("specs", "lista as specs abertas do seu projeto"),
+      publicCommand("peer-review", "prepara a revisão do PR de um colega sem perder sua branch"),
     ],
   },
 ];
@@ -535,7 +523,7 @@ export const audiencePaths: readonly AudiencePath[] = [
     title: "Trabalhar no dia a dia",
     text: "Abra o guia situado: estado, próxima ação, validação e decisões — sem decorar comandos.",
     route: "daily",
-    command: FLOW_WIZARD,
+    command: BIN_WIZARD,
   },
 ];
 
@@ -546,11 +534,11 @@ export const safetyRails: readonly ProductPoint[] = [
   },
   {
     title: "Human Gate exige um humano",
-    text: "O avanço do checkpoint é decisão da owner; o gate é registrado depois da decisão, nunca antes.",
+    text: "Aprovar o avanço é decisão da owner; o registro acontece depois da decisão, nunca antes.",
   },
   {
     title: "Merge só no momento certo",
-    text: "A integração acontece no nó terminal do fluxo — não em um PR isolado fora de hora.",
+    text: "A integração acontece no momento certo do fluxo — não em um PR isolado fora de hora.",
   },
   {
     title: "Ação bloqueada mostra o motivo",
@@ -558,66 +546,72 @@ export const safetyRails: readonly ProductPoint[] = [
   },
 ];
 
-/** Decisões reservadas ao humano — DERIVADAS do registry de decisões (A2). */
-export const humanDecisions: readonly { readonly id: string; readonly title: string }[] =
-  copy.decisions;
+/**
+ * O que o humano decide — descrito em linguagem de produto. Os nomes técnicos
+ * das decisões governadas (registry) são validados pelo guard de capacidades
+ * (siteCapabilities.test); aqui o foco é o que a pessoa entende.
+ */
+export const publicHumanDecisions: readonly { readonly id: string; readonly title: string }[] = [
+  { id: "ready", title: "Marcar o trabalho como pronto (Ready)" },
+  { id: "human-gate", title: "Aprovar o avanço (Human Gate)" },
+  { id: "merge", title: "Fazer o merge no momento certo" },
+  { id: "review", title: "Aceitar ou pedir mudanças num review" },
+];
 
 export interface GlossaryEntry {
   readonly term: string;
   readonly definition: string;
 }
 
-/** Termos de comando derivam a definição do registry; conceitos são editoriais. */
-const glossaryFromCommand = (name: string): GlossaryEntry => ({
-  term: name,
-  definition: commandReference(name).hint,
-});
-
+/** Glossário consumer-first: definições em linguagem de produto, sem jargão interno. */
 export const glossary: readonly GlossaryEntry[] = [
-  glossaryFromCommand("init"),
-  glossaryFromCommand("adopt"),
-  glossaryFromCommand("update"),
-  glossaryFromCommand("work"),
-  glossaryFromCommand("decide"),
-  glossaryFromCommand("specs"),
-  glossaryFromCommand("peer-review"),
+  { term: "init", definition: "começa um projeto novo já governado, em uma pasta limpa." },
+  { term: "adopt", definition: "adota o framework em um repo existente, preservando o conteúdo." },
+  { term: "update", definition: "reaplica runtime, templates, assistentes e práticas no repo." },
+  { term: "work", definition: "mostra o estado da sessão, a próxima ação e as validações." },
+  { term: "specs", definition: "lista as specs (frentes de trabalho) abertas do seu projeto." },
   {
-    term: "handoff",
-    definition: commandByName.get("handoff")?.description ?? "retomada situada de contexto.",
-  },
-  {
-    term: "Ready",
-    definition:
-      "estado em que a fatia declara que satisfez seus critérios de saída. Não faz merge.",
-  },
-  {
-    term: "Human Gate",
-    definition: "decisão humana que autoriza concluir o checkpoint. Registrada depois da decisão.",
-  },
-  {
-    term: "merge",
-    definition: "integração final do trabalho, no momento e nó corretos do fluxo governado.",
-  },
-  {
-    term: "worktree",
-    definition: "cópia isolada do repo para revisar o PR de outra pessoa sem perder sua branch.",
-  },
-  {
-    term: "managed block",
-    definition:
-      "trecho gerenciado pelo framework dentro de um arquivo; o resto do conteúdo fica intocado.",
-  },
-  {
-    term: "drift",
-    definition:
-      "divergência entre o estado projetado e os fatos reais; vira bloqueio, não suposição.",
+    term: "peer-review",
+    definition: "prepara a revisão do PR de um colega sem misturar com a sua branch.",
   },
   {
     term: "spec",
-    definition:
-      "unidade de trabalho governado com estado, plano, tarefas, reviews e gates próprios.",
+    definition: "uma frente de trabalho governada, com estado, plano, tarefas e decisões próprias.",
+  },
+  {
+    term: "Ready",
+    definition: "quando o trabalho declara que satisfez seus critérios. Não faz merge sozinho.",
+  },
+  {
+    term: "Human Gate",
+    definition: "a decisão humana que autoriza concluir uma etapa. Registrada após a decisão.",
+  },
+  {
+    term: "merge",
+    definition: "a integração final do trabalho, feita no momento certo do fluxo.",
+  },
+  {
+    term: "worktree",
+    definition: "uma cópia isolada do repo para revisar outro PR sem perder a sua branch.",
+  },
+  {
+    term: "managed block",
+    definition: "um trecho que o framework mantém dentro de um arquivo; o resto fica intocado.",
   },
 ];
+
+/**
+ * Rota SECUNDÁRIA de contribuidor — fora da nav principal para não competir com
+ * os fluxos de usuário (fica no rodapé / link discreto).
+ */
+export const contributeRoute: RouteLink = {
+  id: "contribute",
+  path: "/contribute",
+  label: "Contribuindo",
+  shortLabel: "Contribuindo",
+};
+
+const allRoutes: readonly RouteLink[] = [...routes, contributeRoute];
 
 export function routeFromPath(pathname: string): RouteId {
   const normalized = pathname.replace(/\/+$/, "") || "/";
@@ -630,18 +624,70 @@ export function routeFromPath(pathname: string): RouteId {
   if (normalized === "/flow/review" || normalized === "/flow/review-entre-pares")
     return "peerReview";
   if (normalized === "/flow/reference" || normalized === "/flow/referencia") return "reference";
+  if (normalized === "/contribute") return "contribute";
   // Rota desconhecida vira 404 explícito (não soft-404 silencioso que caía em "flow").
   return "notFound";
 }
 
 export function routePath(id: RouteId): string {
-  return routes.find((route) => route.id === id)?.path ?? "/";
+  return allRoutes.find((route) => route.id === id)?.path ?? "/";
 }
 
 /** Título por rota (SEO/a11y) — projeta o label da rota no <title> do documento. */
 export function routeTitle(id: RouteId): string {
   if (id === "home") return "ai-guidelines — governança de engenharia para times com IA";
   if (id === "notFound") return "ai-guidelines — página não encontrada";
-  const route = routes.find((item) => item.id === id);
+  const route = allRoutes.find((item) => item.id === id);
   return route ? `ai-guidelines — ${route.label}` : "ai-guidelines";
 }
+
+// ═══════════════════════════════════════════════════════════════════════════
+// CONTRIBUTOR SURFACE — para quem trabalha no PRÓPRIO repositório ai-guidelines.
+// Aqui (e só aqui) aparece `npm run flow`, o alias LOCAL deste repo. Nada disto
+// é o caminho do usuário comum do framework.
+// ═══════════════════════════════════════════════════════════════════════════
+
+/** `npm run flow -- <cmd>` — alias LOCAL deste repo (contribuidor). Nome validado. */
+export function flowCommand(name: string, ...args: readonly string[]): string {
+  return ["npm run flow --", assertCommand(name), ...args].join(" ");
+}
+
+export interface ContributorBlock {
+  readonly eyebrow: string;
+  readonly title: string;
+  readonly lead: string;
+  readonly note: string;
+  readonly points: readonly ProductPoint[];
+  readonly commands: readonly { readonly label: string; readonly hint: string }[];
+  readonly scenarioId: string;
+}
+
+export const contributorBlock: ContributorBlock = {
+  eyebrow: "Para contribuidores deste repositório",
+  title: "Contribuindo com o próprio ai-guidelines",
+  lead: "Esta área é para quem desenvolve o framework neste repositório — não é o caminho de quem apenas usa o ai-guidelines no próprio projeto.",
+  note: "Neste repo, `npm run flow` é o alias local do guia situado. Usuários do framework usam `npx ai-guidelines`.",
+  points: [
+    {
+      title: "Guia situado local",
+      text: "`npm run flow` abre o mesmo guia, mas a partir do código-fonte deste repositório.",
+    },
+    {
+      title: "Governança de desenvolvimento",
+      text: "O ciclo do próprio framework usa specs, sub-checkpoints, reviews e Human Gate versionados.",
+    },
+    {
+      title: "Checks internos",
+      text: "`npm run validate` roda o gate completo (build, testes, projeções do site, contratos).",
+    },
+  ],
+  commands: [
+    { label: flowCommand("work"), hint: "briefing de trabalho do próprio framework" },
+    {
+      label: flowCommand("decide", "--brief-only"),
+      hint: "decisões governadas (briefing, sem aplicar)",
+    },
+    { label: "npm run validate", hint: "gate completo de validação do repositório" },
+  ],
+  scenarioId: "contributor-flow",
+};

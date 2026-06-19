@@ -44,16 +44,35 @@ describe("cenários de terminal do site (B2)", () => {
     }
   }, 60000);
 
-  it("deriva exemplos GUIADOS do contrato real do comando, marcados como guiados", async () => {
+  it("exemplos GUIADOS são marcados (guiado público / uso interno) e não-vazios", async () => {
     const scenarios = await buildSiteScenarios();
     const guided = scenarios.filter((scenario) => scenario.kind === "guided");
     expect(guided.length).toBeGreaterThan(0);
     for (const scenario of guided) {
-      expect(scenario.note.toLowerCase()).toContain("guiado");
+      const note = scenario.note.toLowerCase();
+      const marked = note.includes("guiado") || note.includes("interno");
+      expect(marked).toBe(true);
       expect(scenario.lines.length).toBeGreaterThan(0);
     }
     // peer-review é guiado (depende de git/gh): nunca apresentado como saída literal.
     expect(guided.some((scenario) => scenario.id === "peer-review")).toBe(true);
+  }, 60000);
+
+  it("separa superfícies: público usa npx, contribuidor usa npm run flow", async () => {
+    const scenarios = await buildSiteScenarios();
+    const publicScenarios = scenarios.filter((scenario) => scenario.surface === "public");
+    const contributor = scenarios.filter((scenario) => scenario.surface === "contributor");
+
+    expect(publicScenarios.length).toBeGreaterThan(0);
+    for (const scenario of publicScenarios) {
+      // Nenhum cenário público usa o alias local `npm run flow`.
+      expect(scenario.command).not.toContain("npm run flow");
+      for (const line of scenario.lines) {
+        expect(line).not.toContain("npm run flow");
+      }
+    }
+    // O alias `npm run flow` só aparece na superfície de contribuidor.
+    expect(contributor.some((scenario) => scenario.command.includes("npm run flow"))).toBe(true);
   }, 60000);
 
   it("o módulo gerado está em sync com o runtime", async () => {

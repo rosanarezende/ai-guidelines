@@ -30,6 +30,12 @@ describe("rotas navegáveis do site", () => {
     }
   });
 
+  it("tem rota secundária de contribuidor fora da nav principal", () => {
+    expect(flowData).toContain('"/contribute"');
+    expect(flowData).toContain('return "contribute"');
+    expect(flowData).toContain("contributeRoute");
+  });
+
   it("mantém os paths PT antigos como aliases (links existentes seguem válidos)", () => {
     for (const alias of [
       "/flow/comecar",
