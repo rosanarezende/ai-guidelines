@@ -131,6 +131,32 @@ Autoridades:
 | Spec nova nao tinha caminho humano visivel.               | O wizard mostra protocolo seguro sem mutacao automatica.         |
 | A pessoa precisava lembrar autoridade e proibicoes.       | A tela explicita contributor/maintainer/owner e acoes proibidas. |
 
+## Dogfood visual do site
+
+Durante a revisao visual do `site/flow`, a primeira versao do material de
+multiplas specs substituiu o fluxo anterior de repo em uso. Isso repetia a
+classe de erro que o proprio CO-10.6 quer evitar: um novo caso de uso apagando
+um caminho existente em vez de coexistir como fluxo distinto.
+
+Correcao aplicada:
+
+- `Fluxo 3` voltou a ser **Usar e manter um repo governado**;
+- `Fluxo 4` passou a ser **Trabalhar em time com multiplas specs**;
+- a navegacao do site mostra os dois caminhos;
+- o Fluxo 3 explica uso diario, proxima acao, validacao, reviews, update e
+  Gate;
+- o Fluxo 3 recupera a linguagem de manutencao aprovada: repo governado usa
+  `update`, nao `init/adopt`, e pode atualizar base, IA, qualidade, limpeza e
+  colaboracao sem reinicializar o projeto;
+- mudancas de colaboracao aparecem com aviso de autoridade, porque alteram a
+  pratica global do repositorio;
+- o Fluxo 4 explica indice de specs, escolha explicita, branch/PR, retomada,
+  spec nova e trabalho em time.
+
+Falsificacao esperada: se uma futura alteracao remover o Fluxo 3 ao adicionar
+um fluxo de time, o site volta a esconder o caso de repo ja governado e deve
+ser tratado como regressao de produto/documentacao.
+
 ## Limites preservados
 
 - CO-10.7 nao foi iniciado.

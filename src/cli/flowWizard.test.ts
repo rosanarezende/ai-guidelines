@@ -203,6 +203,41 @@ function registryWith(...commands: Command<unknown>[]): CommandRegistry {
   return registry;
 }
 
+function activeSpecsResult() {
+  return {
+    indexAvailable: true,
+    warnings: [],
+    entries: [
+      {
+        specPathExists: true,
+        entry: {
+          id: "0024",
+          slug: "context-architecture",
+          title: "Context Architecture",
+          branch: "feat/spec-0024-co-flow-convergence",
+          stage: "implementation",
+          status: "active",
+          specPath: ".governance/specs/0024-context-architecture",
+          updatedAt: "2026-06-18T00:00:00.000-03:00",
+        },
+      },
+      {
+        specPathExists: true,
+        entry: {
+          id: "0025",
+          slug: "other-work",
+          title: "Other Work",
+          branch: "feat/spec-0025-other-work",
+          stage: "implementation",
+          status: "paused",
+          specPath: ".governance/specs/0025-other-work",
+          updatedAt: "2026-06-18T00:00:00.000-03:00",
+        },
+      },
+    ],
+  } as const;
+}
+
 async function withTempRepo<T>(
   setup: (repoRoot: string) => void,
   run: (repoRoot: string) => Promise<T>
@@ -938,7 +973,69 @@ describe("flow wizard", () => {
     expect(workflow.calls).toEqual([]);
     expect(prompts.selectCalls[0].names).toContain("Escolher ou iniciar uma spec");
     expect(prompts.selectCalls[1].message).toBe("O que você quer fazer com as specs?");
+    expect(prompts.selectCalls[1].names).toContain("Escolher uma spec aberta");
     expect(prompts.selectCalls[1].names).toContain("Ver specs abertas");
+  });
+
+  it("escolher spec aberta na branch atual delega para continue com o id selecionado", async () => {
+    const prompts = new ScriptedPrompts(["spec-work", "choose-spec", "0024"]);
+    const continueCommand = spyCommand("continue");
+
+    const code = await runFlowWizard("/repo", new CollectingLogger(), {
+      prompts,
+      registry: registryWith(continueCommand),
+      collectModel: () => model(),
+      loadActiveSpecsIndex: () => activeSpecsResult(),
+    });
+
+    expect(code).toBe(0);
+    expect(continueCommand.calls).toEqual([["0024"]]);
+    expect(prompts.selectCalls[2].names).toContain("0024 — Context Architecture (branch atual)");
+    expect(prompts.notes.join("\n")).toContain("A spec escolhida combina com a branch atual");
+  });
+
+  it("escolher spec de outra branch orienta checkout e não executa continue", async () => {
+    const prompts = new ScriptedPrompts(["spec-work", "choose-spec", "0025"]);
+    const continueCommand = spyCommand("continue");
+
+    const code = await runFlowWizard("/repo", new CollectingLogger(), {
+      prompts,
+      registry: registryWith(continueCommand),
+      collectModel: () => model(),
+      loadActiveSpecsIndex: () => activeSpecsResult(),
+    });
+
+    expect(code).toBe(0);
+    expect(continueCommand.calls).toEqual([]);
+    expect(prompts.notes.join("\n")).toContain("Branch esperada: feat/spec-0025-other-work");
+    expect(prompts.notes.join("\n")).toContain("troque de branch antes de continuar");
+    expect(prompts.outros.join("\n")).toContain("Nenhuma ação foi executada");
+  });
+
+  it("spec com path local ausente orienta fetch/checkout e não executa continue", async () => {
+    const prompts = new ScriptedPrompts(["spec-work", "choose-spec", "0025"]);
+    const continueCommand = spyCommand("continue");
+    const result = {
+      ...activeSpecsResult(),
+      entries: activeSpecsResult().entries.map((entry) =>
+        entry.entry.id === "0025" ? { ...entry, specPathExists: false } : entry
+      ),
+      warnings: ["Spec other-work declara path ausente."],
+    };
+
+    const code = await runFlowWizard("/repo", new CollectingLogger(), {
+      prompts,
+      registry: registryWith(continueCommand),
+      collectModel: () => model(),
+      loadActiveSpecsIndex: () => result,
+    });
+
+    expect(code).toBe(0);
+    expect(continueCommand.calls).toEqual([]);
+    expect(prompts.notes.join("\n")).toContain("path local ausente");
+    expect(prompts.notes.join("\n")).toContain(
+      "git fetch origin && git checkout feat/spec-0025-other-work"
+    );
   });
 
   it("continuar uma spec específica pede identificador e delega ao comando continue", async () => {

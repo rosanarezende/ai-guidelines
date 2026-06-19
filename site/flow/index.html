@@ -616,6 +616,12 @@
       #existing-force:checked ~ .card .step-controls label[for="existing-force"],
       #existing-apply:checked ~ .card .step-controls label[for="existing-apply"],
       #existing-validate:checked ~ .card .step-controls label[for="existing-validate"],
+      #daily-state:checked ~ .card .step-controls label[for="daily-state"],
+      #daily-next:checked ~ .card .step-controls label[for="daily-next"],
+      #daily-validate:checked ~ .card .step-controls label[for="daily-validate"],
+      #daily-review:checked ~ .card .step-controls label[for="daily-review"],
+      #daily-update:checked ~ .card .step-controls label[for="daily-update"],
+      #daily-gate:checked ~ .card .step-controls label[for="daily-gate"],
       #active-state:checked ~ .card .step-controls label[for="active-state"],
       #active-next:checked ~ .card .step-controls label[for="active-next"],
       #active-validate:checked ~ .card .step-controls label[for="active-validate"],
@@ -640,6 +646,12 @@
       #existing-force:checked ~ .simulator-stage .panel-existing-force,
       #existing-apply:checked ~ .simulator-stage .panel-existing-apply,
       #existing-validate:checked ~ .simulator-stage .panel-existing-validate,
+      #daily-state:checked ~ .simulator-stage .panel-daily-state,
+      #daily-next:checked ~ .simulator-stage .panel-daily-next,
+      #daily-validate:checked ~ .simulator-stage .panel-daily-validate,
+      #daily-review:checked ~ .simulator-stage .panel-daily-review,
+      #daily-update:checked ~ .simulator-stage .panel-daily-update,
+      #daily-gate:checked ~ .simulator-stage .panel-daily-gate,
       #active-state:checked ~ .simulator-stage .panel-active-state,
       #active-next:checked ~ .simulator-stage .panel-active-next,
       #active-validate:checked ~ .simulator-stage .panel-active-validate,
@@ -803,6 +815,7 @@
             <a class="button" href="#começar">Escolher meu cenário</a>
             <a class="button secondary" href="#projeto-novo">Ver projeto novo</a>
             <a class="button secondary" href="#repo-em-uso">Ver repo em uso</a>
+            <a class="button secondary" href="#time-e-specs">Ver trabalho em time</a>
           </div>
         </div>
 
@@ -840,6 +853,7 @@
         <a href="#projeto-novo">Projeto novo</a>
         <a href="#projeto-existente">Projeto existente</a>
         <a href="#repo-em-uso">Repo em uso</a>
+        <a href="#time-e-specs">Time/specs</a>
         <a href="#spec">Spec até merge</a>
         <a href="#regras">Regras</a>
         <a href="#valor">Valor</a>
@@ -1868,49 +1882,44 @@
           <h2>Fluxo 3 — Usar e manter um repo governado</h2>
           <p>
             Aqui o projeto já usa o framework. O guia vira a porta humana do dia a dia: mostra o
-            estado, sugere o próximo passo, oferece alternativas úteis e deixa ações sensíveis
-            protegidas.
+            estado, sugere o próximo passo, oferece alternativas úteis e deixa Ready, Human Gate e
+            merge protegidos por decisão explícita.
           </p>
         </div>
 
         <div class="flow-layout">
           <input
             class="simulator-input"
-            id="active-state"
-            name="active-flow-demo"
+            id="daily-state"
+            name="daily-flow-demo"
             type="radio"
             checked
           />
-          <input class="simulator-input" id="active-next" name="active-flow-demo" type="radio" />
-          <input
-            class="simulator-input"
-            id="active-validate"
-            name="active-flow-demo"
-            type="radio"
-          />
-          <input class="simulator-input" id="active-review" name="active-flow-demo" type="radio" />
-          <input class="simulator-input" id="active-update" name="active-flow-demo" type="radio" />
-          <input class="simulator-input" id="active-gate" name="active-flow-demo" type="radio" />
+          <input class="simulator-input" id="daily-next" name="daily-flow-demo" type="radio" />
+          <input class="simulator-input" id="daily-validate" name="daily-flow-demo" type="radio" />
+          <input class="simulator-input" id="daily-review" name="daily-flow-demo" type="radio" />
+          <input class="simulator-input" id="daily-update" name="daily-flow-demo" type="radio" />
+          <input class="simulator-input" id="daily-gate" name="daily-flow-demo" type="radio" />
 
           <article class="card">
             <span class="status purple">passo a passo</span>
-            <h3>O que acontece</h3>
+            <h3>O que acontece no uso diário</h3>
             <div class="step-controls" aria-label="Etapas do repo em uso">
-              <label class="step-button" for="active-state">
+              <label class="step-button" for="daily-state">
                 <span class="step-number">1</span>
                 <div>
-                  <strong>Abrir estado do repo</strong>
+                  <strong>Ver o estado do repo</strong>
                   <p>Branch, PR, CI, tree, checkpoint, reviews e topologia entram no resumo.</p>
                 </div>
               </label>
-              <label class="step-button" for="active-next">
+              <label class="step-button" for="daily-next">
                 <span class="step-number">2</span>
                 <div>
                   <strong>Seguir a próxima ação</strong>
-                  <p>A ação principal vem do modelo governado, não de cálculo local do guia.</p>
+                  <p>A recomendação vem do modelo governado, não de cálculo local do guia.</p>
                 </div>
               </label>
-              <label class="step-button" for="active-validate">
+              <label class="step-button" for="daily-validate">
                 <span class="step-number">3</span>
                 <div>
                   <strong>Validar mudanças</strong>
@@ -1919,7 +1928,7 @@
                   </p>
                 </div>
               </label>
-              <label class="step-button" for="active-review">
+              <label class="step-button" for="daily-review">
                 <span class="step-number">4</span>
                 <div>
                   <strong>Pedir revisão quando fizer sentido</strong>
@@ -1928,7 +1937,7 @@
                   </p>
                 </div>
               </label>
-              <label class="step-button" for="active-update">
+              <label class="step-button" for="daily-update">
                 <span class="step-number">5</span>
                 <div>
                   <strong>Atualizar práticas existentes</strong>
@@ -1937,7 +1946,7 @@
                   </p>
                 </div>
               </label>
-              <label class="step-button" for="active-gate">
+              <label class="step-button" for="daily-gate">
                 <span class="step-number">6</span>
                 <div>
                   <strong>Chegar ao Gate sem improviso</strong>
@@ -1949,13 +1958,13 @@
 
           <div class="simulator-stage" aria-label="Simulação do flow para repo em uso">
             <div class="simulator-panels">
-              <div class="simulator-panel panel-active-state">
+              <div class="simulator-panel panel-daily-state">
                 <div class="simulator-copy">
                   <span class="status purple">estado situado</span>
                   <h3>A primeira tela responde “onde estamos?”.</h3>
                   <p>
                     O resumo precisa ser legível no celular: agora, depois, o que já está ok, o que
-                    falta e qual decisão não pode ser executada ainda.
+                    falta e qual decisão ainda não pode ser executada.
                   </p>
                 </div>
                 <div class="shell">
@@ -1972,20 +1981,19 @@
                     <span class="terminal-line dim">PR Draft · CI verde · tree limpa</span>
                     <span class="choice active"
                       ><span>◆</span
-                      ><span>Próxima ação: declarar readiness quando critérios passarem</span></span
+                      ><span>Próxima ação: finalizar e validar mudanças locais</span></span
                     >
                   </div>
                 </div>
               </div>
 
-              <div class="simulator-panel panel-active-next">
+              <div class="simulator-panel panel-daily-next">
                 <div class="simulator-copy">
                   <span class="status green">orientação</span>
-                  <h3>Alternativas aparecem quando ajudam a decidir.</h3>
+                  <h3>Alternativas ajudam sem competir com a próxima ação.</h3>
                   <p>
-                    Se houver uma percepção recorrente, revisão recomendada ou validação útil, ela
-                    aparece como alternativa. Bloqueios aparecem dentro da ação bloqueada, não como
-                    lista abstrata.
+                    O guia deixa claro o que é recomendado, o que é alternativa útil e o que está
+                    bloqueado. A pessoa não precisa comparar `work`, `decide`, CI e reviews na mão.
                   </p>
                 </div>
                 <div class="shell">
@@ -2020,11 +2028,7 @@
 
                       <div class="mini-slide" data-mini-panel="alternatives">
                         <span class="mini-caption"
-                          >Alternativas ajudam sem competir com a próxima ação.</span
-                        >
-                        <span class="choice"
-                          ><span>○</span
-                          ><span>Ver percepções recorrentes que precisam de decisão</span></span
+                          >Alternativas são úteis, mas não substituem a ação principal.</span
                         >
                         <span class="choice"
                           ><span>○</span><span>Ver orientação de trabalho / handoff</span></span
@@ -2032,11 +2036,15 @@
                         <span class="choice"
                           ><span>○</span><span>Ver tipos de revisão disponíveis</span></span
                         >
+                        <span class="choice"
+                          ><span>○</span
+                          ><span>Ver percepções recorrentes que precisam de decisão</span></span
+                        >
                       </div>
 
                       <div class="mini-slide" data-mini-panel="blocked">
                         <span class="mini-caption"
-                          >Ações sensíveis aparecem com motivo, sem botão de execução.</span
+                          >Ações sensíveis aparecem com motivo, sem botão perigoso.</span
                         >
                         <span class="choice disabled"
                           ><span>◇</span><span>Human Gate: bloqueado por PR Draft</span></span
@@ -2051,7 +2059,7 @@
                 </div>
               </div>
 
-              <div class="simulator-panel panel-active-validate">
+              <div class="simulator-panel panel-daily-validate">
                 <div class="simulator-copy">
                   <span class="status green">validação guiada</span>
                   <h3>O guia diferencia validação do diff e validação completa.</h3>
@@ -2080,7 +2088,7 @@
                 </div>
               </div>
 
-              <div class="simulator-panel panel-active-review">
+              <div class="simulator-panel panel-daily-review">
                 <div class="simulator-copy">
                   <span class="status amber">revisão antes da decisão</span>
                   <h3>O guia pode sugerir revisão sem transformar isso em bloqueio escondido.</h3>
@@ -2096,44 +2104,9 @@
                   </div>
                   <div class="shell-body">
                     <span class="terminal-line">◇ Que revisão preparar?</span>
-                    <div class="mini-carousel" data-mini-carousel>
-                      <div class="mini-tabs" role="tablist" aria-label="Tipos de revisão">
-                        <button class="mini-tab is-active" data-mini-slide="technical">
-                          Técnica
-                        </button>
-                        <button class="mini-tab" data-mini-slide="architecture">Arquitetura</button>
-                        <button class="mini-tab" data-mini-slide="security">Segurança</button>
-                      </div>
-
-                      <div class="mini-slide is-active" data-mini-panel="technical">
-                        <span class="choice active"
-                          ><span>◆</span><span>Auditoria técnica</span></span
-                        >
-                        <span class="mini-caption"
-                          >Verifica comportamento, testes, paridade e riscos de regressão.</span
-                        >
-                      </div>
-
-                      <div class="mini-slide" data-mini-panel="architecture">
-                        <span class="choice active"
-                          ><span>◆</span><span>Revisão arquitetural</span></span
-                        >
-                        <span class="mini-caption"
-                          >Confere bounded contexts, SSOT, dependências e separação de
-                          responsabilidades.</span
-                        >
-                      </div>
-
-                      <div class="mini-slide" data-mini-panel="security">
-                        <span class="choice active"
-                          ><span>◆</span><span>Revisão de segurança</span></span
-                        >
-                        <span class="mini-caption"
-                          >Procura risco em autoridade humana, comandos mutantes, stale state e
-                          permissões.</span
-                        >
-                      </div>
-                    </div>
+                    <span class="choice active"><span>◆</span><span>Auditoria técnica</span></span>
+                    <span class="choice"><span>○</span><span>Revisão arquitetural</span></span>
+                    <span class="choice"><span>○</span><span>Revisão de segurança</span></span>
                     <span class="terminal-line dim"
                       >O texto fica pronto para copiar e colar na IA escolhida.</span
                     >
@@ -2141,7 +2114,7 @@
                 </div>
               </div>
 
-              <div class="simulator-panel panel-active-update">
+              <div class="simulator-panel panel-daily-update">
                 <div class="simulator-copy">
                   <span class="status blue">manutenção</span>
                   <h3>Repo governado usa update, não init/adopt.</h3>
@@ -2158,7 +2131,7 @@
                   <div class="shell-body">
                     <span class="terminal-line">◇ O que atualizar?</span>
                     <div class="mini-carousel" data-mini-carousel>
-                      <div class="mini-tabs" role="tablist" aria-label="Atualizações disponíveis">
+                      <div class="mini-tabs" role="tablist" aria-label="Atualizações do repo">
                         <button class="mini-tab is-active" data-mini-slide="runtime">Base</button>
                         <button class="mini-tab" data-mini-slide="providers">IA</button>
                         <button class="mini-tab" data-mini-slide="quality">Qualidade</button>
@@ -2183,59 +2156,19 @@
                       <div class="mini-slide" data-mini-panel="providers">
                         <span class="mini-caption"
                           >Providers entram como seleção agrupada de update, não como comando
-                          separado nem campo de texto por vírgula.</span
+                          separado.</span
                         >
-                        <span
-                          class="prompt-group-title"
-                          data-copy="provisioning.providerGroups.primary"
-                          >Assistentes principais do repositório</span
+                        <span class="prompt-row"
+                          ><span>□</span><span>Claude · CLAUDE.md para Claude Code</span></span
                         >
-                        <span class="prompt-group"
-                          >◼ <span data-copy-provider-label="claude">Claude</span>
-                          <span class="prompt-hint" data-copy-provider-html-hint="claude"
-                            >CLAUDE.md para Claude Code</span
-                          ></span
+                        <span class="prompt-row"
+                          ><span>□</span><span>Gemini · GEMINI.md para Gemini</span></span
                         >
-                        <span class="prompt-group"
-                          >◼ <span data-copy-provider-label="gemini">Gemini</span>
-                          <span class="prompt-hint" data-copy-provider-html-hint="gemini"
-                            >GEMINI.md para Gemini</span
-                          ></span
+                        <span class="prompt-row"
+                          ><span>□</span><span>OpenAI/Codex · contexto para Codex</span></span
                         >
-                        <span class="prompt-group"
-                          >◼ <span data-copy-provider-label="openai">OpenAI/Codex</span>
-                          <span class="prompt-hint" data-copy-provider-html-hint="openai"
-                            >contexto para Codex</span
-                          ></span
-                        >
-                        <span class="prompt-group"
-                          >◼ <span data-copy-provider-label="copilot">GitHub Copilot</span>
-                          <span class="prompt-hint" data-copy-provider-html-hint="copilot"
-                            >contexto para Copilot</span
-                          ></span
-                        >
-                        <span
-                          class="prompt-group-title"
-                          data-copy="provisioning.providerGroups.local"
-                          >Editores e agentes locais</span
-                        >
-                        <span class="prompt-group"
-                          >◼ <span data-copy-provider-label="cursor">Cursor</span>
-                          <span class="prompt-hint" data-copy-provider-html-hint="cursor"
-                            >regras locais para Cursor</span
-                          ></span
-                        >
-                        <span class="prompt-group"
-                          >◼ <span data-copy-provider-label="windsurf">Windsurf</span>
-                          <span class="prompt-hint" data-copy-provider-html-hint="windsurf"
-                            >contexto para Windsurf</span
-                          ></span
-                        >
-                        <span class="prompt-group"
-                          >◼ <span data-copy-provider-label="aider">Aider</span>
-                          <span class="prompt-hint" data-copy-provider-html-hint="aider"
-                            >contexto para Aider</span
-                          ></span
+                        <span class="prompt-row"
+                          ><span>□</span><span>GitHub Copilot, Cursor, Windsurf e Aider</span></span
                         >
                       </div>
 
@@ -2244,90 +2177,67 @@
                           >Práticas podem ser adicionadas ou atualizadas em repositórios já
                           governados.</span
                         >
-                        <span class="prompt-group"
-                          >◼
-                          <span data-copy-feature-html-label="ci"
-                            >CI no GitHub Actions - valida o PR no GitHub</span
-                          ></span
+                        <span class="prompt-row"
+                          ><span>□</span
+                          ><span>CI no GitHub Actions · valida o PR no GitHub</span></span
                         >
-                        <span class="prompt-group"
-                          >◼
-                          <span data-copy-feature-html-label="prettier"
-                            >Formatação com Prettier - padroniza arquivos automaticamente</span
-                          ></span
+                        <span class="prompt-row"
+                          ><span>□</span
+                          ><span>Formatação com Prettier · padroniza arquivos</span></span
                         >
-                        <span class="prompt-group"
-                          >◼
-                          <span data-copy-feature-html-label="husky"
-                            >Hooks locais com Husky - checagens antes do commit</span
-                          ></span
+                        <span class="prompt-row"
+                          ><span>□</span
+                          ><span>Hooks locais com Husky · checagens antes do commit</span></span
                         >
-                        <span class="prompt-group"
-                          >◼
-                          <span data-copy-feature-html-label="quality-gates"
-                            >Quality Gates - critérios objetivos para avançar</span
-                          ></span
+                        <span class="prompt-row"
+                          ><span>□</span
+                          ><span>Quality Gates · critérios objetivos para avançar</span></span
                         >
-                        <span class="prompt-group"
-                          >◼
-                          <span data-copy-feature-html-label="tdd"
-                            >Desenvolvimento guiado por testes (TDD)</span
-                          ></span
-                        >
-                        <span class="prompt-group"
-                          >◼
-                          <span data-copy-feature-html-label="bdd"
-                            >Especificação por exemplos (BDD)</span
-                          ></span
+                        <span class="prompt-row"
+                          ><span>□</span><span>TDD e BDD como práticas opcionais</span></span
                         >
                       </div>
 
                       <div class="mini-slide" data-mini-panel="cleanup">
                         <span class="mini-caption"
-                          >Quando uma seleção muda, o update pode limpar apenas arquivos gerenciados
+                          >Quando a seleção muda, o update pode limpar apenas arquivos gerenciados
                           que ficaram órfãos.</span
                         >
                         <span class="prompt-row active"
-                          ><span>◆</span
-                          ><span data-copy="provisioning.flow.prompts.prune"
-                            >Remover artefatos gerenciados que não fazem mais parte da
-                            seleção?</span
-                          ></span
-                        >
-                        <span class="prompt-row success"
-                          ><span>✓</span
-                          ><span>Remove provider desmarcado ou template antigo</span></span
+                          ><span>◆</span><span>Remover artefatos gerenciados órfãos</span></span
                         >
                         <span class="prompt-row muted"
                           ><span>=</span
-                          ><span>Preserva código e arquivos próprios do repositório</span></span
+                          ><span>Preservar código e arquivos próprios do repo</span></span
                         >
                       </div>
 
                       <div class="mini-slide" data-mini-panel="collaboration">
                         <span class="mini-caption"
-                          >Mudança de colaboração altera a prática global do repositório. O wizard
+                          >Mudança de colaboração altera a prática global do repositório. O guia
                           avisa que isso exige autoridade.</span
                         >
-                        <span class="prompt-group"
-                          >◻ Solo: uma pessoa decide; sem approvals nativos obrigatórios</span
+                        <span class="prompt-row"
+                          ><span>□</span
+                          ><span
+                            >Solo · uma pessoa decide; sem approvals nativos obrigatórios</span
+                          ></span
                         >
-                        <span class="prompt-group"
-                          >◻ Com contribuições externas: fluxo leve com mais rastreio de
-                          findings</span
+                        <span class="prompt-row"
+                          ><span>□</span
+                          ><span
+                            >Contribuições externas · fluxo leve com rastreio de findings</span
+                          ></span
                         >
-                        <span class="prompt-group"
-                          >◻ Time: approvals e proteção mais fortes para colaboração em equipe</span
+                        <span class="prompt-row"
+                          ><span>□</span
+                          ><span
+                            >Time · approvals e proteção mais fortes para colaboração</span
+                          ></span
                         >
                         <span class="prompt-row warn"
                           ><span>!</span
                           ><span>Confirmar só com autoridade para mudar a política</span></span
-                        >
-                        <span class="prompt-row muted"
-                          ><span>=</span
-                          ><span
-                            >Se remover providers/práticas, use --prune para limpar órfãos</span
-                          ></span
                         >
                       </div>
                     </div>
@@ -2335,13 +2245,13 @@
                 </div>
               </div>
 
-              <div class="simulator-panel panel-active-gate">
+              <div class="simulator-panel panel-daily-gate">
                 <div class="simulator-copy">
                   <span class="status amber">decisão humana</span>
-                  <h3>Revisão pode ser sugerida antes do Gate.</h3>
+                  <h3>Ready, Human Gate e merge continuam protegidos.</h3>
                   <p>
-                    Reviews opcionais reduzem risco, mas não viram bloqueio escondido. Reviews
-                    obrigatórios bloqueiam quando a política exigir.
+                    O guia pode preparar a decisão, mas não executa avanço sensível sem briefing,
+                    prévia, confirmação e estado correto.
                   </p>
                 </div>
                 <div class="shell">
@@ -2352,25 +2262,413 @@
                   <div class="shell-body">
                     <span class="terminal-line">◇ Preparar decisão humana</span>
                     <div class="mini-carousel" data-mini-carousel>
-                      <div class="mini-tabs" role="tablist" aria-label="Preparação para Gate">
+                      <div class="mini-tabs" role="tablist" aria-label="Preparação para decisão">
                         <button class="mini-tab is-active" data-mini-slide="checks">
                           Checagens
                         </button>
-                        <button class="mini-tab" data-mini-slide="reviews">Reviews</button>
                         <button class="mini-tab" data-mini-slide="decision">Decisão</button>
                         <button class="mini-tab" data-mini-slide="transition">Depois</button>
                       </div>
 
                       <div class="mini-slide is-active" data-mini-panel="checks">
-                        <span class="mini-caption"
-                          >O Gate só entra em pauta quando o estado factual converge.</span
-                        >
                         <span class="prompt-row success"><span>✓</span><span>CI verde</span></span>
                         <span class="prompt-row success"
                           ><span>✓</span><span>findings fechados</span></span
                         >
                         <span class="prompt-row success"
                           ><span>✓</span><span>working tree limpa</span></span
+                        >
+                      </div>
+
+                      <div class="mini-slide" data-mini-panel="decision">
+                        <span class="prompt-row warn"
+                          ><span>!</span><span>Ready exige confirmação humana</span></span
+                        >
+                        <span class="prompt-row warn"
+                          ><span>!</span><span>Human Gate exige briefing e confirmação</span></span
+                        >
+                      </div>
+
+                      <div class="mini-slide" data-mini-panel="transition">
+                        <span class="prompt-row muted"
+                          ><span>→</span><span>Transição de nó só após Gate aprovado</span></span
+                        >
+                        <span class="prompt-row muted"
+                          ><span>→</span
+                          ><span>Merge fica para o fechamento de integração</span></span
+                        >
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="time-e-specs">
+        <div class="section-title">
+          <h2>Fluxo 4 — Trabalhar em time com múltiplas specs</h2>
+          <p>
+            Aqui o projeto já usa o framework. O guia ajuda a pessoa a escolher a spec certa,
+            continuar o trabalho sem trocar contexto na cabeça e iniciar novas iniciativas sem
+            atropelar branch, PR, autoridade ou Gate.
+          </p>
+        </div>
+
+        <div class="flow-layout">
+          <input
+            class="simulator-input"
+            id="active-state"
+            name="active-flow-demo"
+            type="radio"
+            checked
+          />
+          <input class="simulator-input" id="active-next" name="active-flow-demo" type="radio" />
+          <input
+            class="simulator-input"
+            id="active-validate"
+            name="active-flow-demo"
+            type="radio"
+          />
+          <input class="simulator-input" id="active-review" name="active-flow-demo" type="radio" />
+          <input class="simulator-input" id="active-update" name="active-flow-demo" type="radio" />
+          <input class="simulator-input" id="active-gate" name="active-flow-demo" type="radio" />
+
+          <article class="card">
+            <span class="status purple">passo a passo</span>
+            <h3>Como o trabalho em time acontece</h3>
+            <div class="step-controls" aria-label="Etapas do trabalho em time">
+              <label class="step-button" for="active-state">
+                <span class="step-number">1</span>
+                <div>
+                  <strong>Ver o mapa de specs</strong>
+                  <p>
+                    O guia mostra quais specs estão abertas, em que branch vivem e se estão locais.
+                  </p>
+                </div>
+              </label>
+              <label class="step-button" for="active-next">
+                <span class="step-number">2</span>
+                <div>
+                  <strong>Escolher a spec certa</strong>
+                  <p>A pessoa escolhe na lista publicada; o guia evita inferência silenciosa.</p>
+                </div>
+              </label>
+              <label class="step-button" for="active-validate">
+                <span class="step-number">3</span>
+                <div>
+                  <strong>Conferir branch e PR</strong>
+                  <p>Se a branch não combina, o guia orienta checkout e não executa o briefing.</p>
+                </div>
+              </label>
+              <label class="step-button" for="active-review">
+                <span class="step-number">4</span>
+                <div>
+                  <strong>Continuar a sessão</strong>
+                  <p>Com a branch correta, o handoff/work da spec escolhida vira o contrato.</p>
+                </div>
+              </label>
+              <label class="step-button" for="active-update">
+                <span class="step-number">5</span>
+                <div>
+                  <strong>Iniciar spec nova com segurança</strong>
+                  <p>O guia explica autoridade e passos; não cria branch ou PR sozinho.</p>
+                </div>
+              </label>
+              <label class="step-button" for="active-gate">
+                <span class="step-number">6</span>
+                <div>
+                  <strong>Manter o repo e chegar ao Gate</strong>
+                  <p>Update, reviews, Ready, Human Gate e merge continuam protegidos.</p>
+                </div>
+              </label>
+            </div>
+          </article>
+
+          <div class="simulator-stage" aria-label="Simulação do flow para trabalho em time">
+            <div class="simulator-panels">
+              <div class="simulator-panel panel-active-state">
+                <div class="simulator-copy">
+                  <span class="status purple">mapa de specs</span>
+                  <h3>O primeiro passo é saber quais trabalhos existem.</h3>
+                  <p>
+                    Em time, o problema não é só “qual é a próxima ação?”. Antes disso, a pessoa
+                    precisa saber se está na spec certa e se a branch local combina com o trabalho.
+                  </p>
+                </div>
+                <div class="shell">
+                  <div class="shell-head">
+                    <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                    <span>flow specs</span>
+                  </div>
+                  <div class="shell-body">
+                    <span class="terminal-line">◇ Specs abertas no índice público</span>
+                    <span class="choice active"
+                      ><span>◆</span><span>0024 · context-architecture · branch atual</span></span
+                    >
+                    <span class="choice"
+                      ><span>○</span><span>0025 · billing-flow · outra branch</span></span
+                    >
+                    <span class="choice disabled"
+                      ><span>◇</span><span>0099 · ghost · path local ausente</span></span
+                    >
+                  </div>
+                </div>
+              </div>
+
+              <div class="simulator-panel panel-active-next">
+                <div class="simulator-copy">
+                  <span class="status green">escolha explícita</span>
+                  <h3>A pessoa escolhe a spec, não o agente.</h3>
+                  <p>
+                    O wizard usa a lista publicada para evitar que `work`, `handoff` ou uma LLM
+                    assumam silenciosamente a spec errada.
+                  </p>
+                </div>
+                <div class="shell">
+                  <div class="shell-head">
+                    <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                    <span>flow</span>
+                  </div>
+                  <div class="shell-body">
+                    <span class="terminal-line">◇ O que você quer fazer com as specs?</span>
+                    <div class="mini-carousel" data-mini-carousel>
+                      <div class="mini-tabs" role="tablist" aria-label="Escolha de spec">
+                        <button class="mini-tab is-active" data-mini-slide="list">Lista</button>
+                        <button class="mini-tab" data-mini-slide="manual">Manual</button>
+                        <button class="mini-tab" data-mini-slide="new">Nova</button>
+                      </div>
+
+                      <div class="mini-slide is-active" data-mini-panel="list">
+                        <span class="mini-caption"
+                          >A opção principal usa o índice público, com branch e status
+                          visíveis.</span
+                        >
+                        <span class="choice active"
+                          ><span>◆</span><span>Escolher uma spec aberta</span></span
+                        >
+                        <span class="choice"
+                          ><span>○</span><span>Ver specs abertas como texto</span></span
+                        >
+                      </div>
+
+                      <div class="mini-slide" data-mini-panel="manual">
+                        <span class="mini-caption"
+                          >Fallback quando a spec ainda não foi publicada no índice.</span
+                        >
+                        <span class="choice"
+                          ><span>○</span
+                          ><span>Digitar número, nome ou branch manualmente</span></span
+                        >
+                        <span class="terminal-line dim">Ex.: 0024 ou context-architecture</span>
+                      </div>
+
+                      <div class="mini-slide" data-mini-panel="new">
+                        <span class="mini-caption"
+                          >Criar uma spec nova é decisão governada, não atalho de wizard.</span
+                        >
+                        <span class="choice disabled"
+                          ><span>◇</span><span>Não cria branch automaticamente</span></span
+                        >
+                        <span class="choice disabled"
+                          ><span>◇</span><span>Não abre PR sem autorização humana</span></span
+                        >
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="simulator-panel panel-active-validate">
+                <div class="simulator-copy">
+                  <span class="status amber">branch e checkout</span>
+                  <h3>Se a branch não combina, o guia para.</h3>
+                  <p>
+                    `continue &lt;id&gt;` consegue carregar uma spec pelo índice, mas o wizard
+                    humano evita seguir quando a pessoa está numa branch diferente da spec
+                    escolhida.
+                  </p>
+                </div>
+                <div class="shell">
+                  <div class="shell-head">
+                    <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                    <span>spec escolhida</span>
+                  </div>
+                  <div class="shell-body">
+                    <span class="terminal-line">◇ 0025 — billing-flow</span>
+                    <span class="terminal-line dim"
+                      >Branch esperada: feat/spec-0025-billing-flow</span
+                    >
+                    <span class="terminal-line dim"
+                      >Branch atual: feat/spec-0024-co-flow-convergence</span
+                    >
+                    <span class="choice disabled"
+                      ><span>◇</span><span>Troque de branch antes de continuar</span></span
+                    >
+                    <span class="terminal-line dim"
+                      >git fetch origin && git checkout feat/spec-0025-billing-flow</span
+                    >
+                  </div>
+                </div>
+              </div>
+
+              <div class="simulator-panel panel-active-review">
+                <div class="simulator-copy">
+                  <span class="status green">retomada situada</span>
+                  <h3>Com a branch correta, o briefing vira contrato.</h3>
+                  <p>
+                    A continuação carrega a spec escolhida, mostra handoff/work e deixa claro o que
+                    pode ou não ser feito naquela sessão.
+                  </p>
+                </div>
+                <div class="shell">
+                  <div class="shell-head">
+                    <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                    <span>flow continue</span>
+                  </div>
+                  <div class="shell-body">
+                    <span class="terminal-line">◇ Briefing governado de trabalho</span>
+                    <div class="mini-carousel" data-mini-carousel>
+                      <div class="mini-tabs" role="tablist" aria-label="Briefing de trabalho">
+                        <button class="mini-tab is-active" data-mini-slide="facts">Fatos</button>
+                        <button class="mini-tab" data-mini-slide="allowed">Pode</button>
+                        <button class="mini-tab" data-mini-slide="blocked">Não pode</button>
+                      </div>
+
+                      <div class="mini-slide is-active" data-mini-panel="facts">
+                        <span class="choice active"
+                          ><span>◆</span><span>Spec 0024 · PR #43 Draft · CI verde</span></span
+                        >
+                        <span class="mini-caption"
+                          >O resumo vem do estado governado, não da memória.</span
+                        >
+                      </div>
+
+                      <div class="mini-slide" data-mini-panel="allowed">
+                        <span class="choice active"
+                          ><span>◆</span><span>Implementar o sub-checkpoint ativo</span></span
+                        >
+                        <span class="mini-caption"
+                          >Commit/push só quando o modo de trabalho autoriza.</span
+                        >
+                      </div>
+
+                      <div class="mini-slide" data-mini-panel="blocked">
+                        <span class="choice disabled"
+                          ><span>◇</span><span>Não iniciar outro sub-checkpoint</span></span
+                        >
+                        <span class="choice disabled"
+                          ><span>◇</span><span>Não executar Ready, Human Gate ou merge</span></span
+                        >
+                        <span class="mini-caption"
+                          >Ações sensíveis continuam fora do wizard até o estado permitir.</span
+                        >
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="simulator-panel panel-active-update">
+                <div class="simulator-copy">
+                  <span class="status amber">nova iniciativa</span>
+                  <h3>Spec nova exige autorização antes da materialização.</h3>
+                  <p>
+                    O guia ajuda a preparar a conversa, mas não cria branch, PR, `state.yml` ou
+                    topologia sozinho. Isso evita duas specs explicando o mesmo estado.
+                  </p>
+                </div>
+                <div class="shell">
+                  <div class="shell-head">
+                    <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                    <span>iniciar spec nova</span>
+                  </div>
+                  <div class="shell-body">
+                    <span class="terminal-line">◇ Antes de criar qualquer coisa</span>
+                    <div class="mini-carousel" data-mini-carousel>
+                      <div class="mini-tabs" role="tablist" aria-label="Spec nova">
+                        <button class="mini-tab is-active" data-mini-slide="check">Checar</button>
+                        <button class="mini-tab" data-mini-slide="authority">Autoridade</button>
+                        <button class="mini-tab" data-mini-slide="materialize">Materializar</button>
+                      </div>
+
+                      <div class="mini-slide is-active" data-mini-panel="check">
+                        <span class="mini-caption"
+                          >Primeiro confirme se a demanda não pertence a uma spec já aberta.</span
+                        >
+                        <span class="prompt-row active"
+                          ><span>◆</span><span>Ver specs abertas</span></span
+                        >
+                        <span class="prompt-row muted"
+                          ><span>=</span><span>Comparar objetivo, branch e PR</span></span
+                        >
+                      </div>
+
+                      <div class="mini-slide" data-mini-panel="authority">
+                        <span class="mini-caption"
+                          >Cada papel tem um limite diferente no fluxo governado.</span
+                        >
+                        <span class="prompt-group">◻ Contributor: propõe e prepara contexto</span>
+                        <span class="prompt-group"
+                          >◻ Maintainer: autoriza materialização operacional</span
+                        >
+                        <span class="prompt-group"
+                          >◻ Owner: decide topologia, Ready, Gate e merge</span
+                        >
+                      </div>
+
+                      <div class="mini-slide" data-mini-panel="materialize">
+                        <span class="mini-caption"
+                          >Materializar é uma ação governada futura, não um efeito colateral do
+                          menu.</span
+                        >
+                        <span class="prompt-row warn"
+                          ><span>!</span><span>Não criar branch ou PR automaticamente</span></span
+                        >
+                        <span class="prompt-row muted"
+                          ><span>→</span><span>pedir autorização humana explícita</span></span
+                        >
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="simulator-panel panel-active-gate">
+                <div class="simulator-copy">
+                  <span class="status blue">manutenção e Gate</span>
+                  <h3>Depois da spec certa, o resto continua governado.</h3>
+                  <p>
+                    O mesmo guia também atualiza práticas do repo e prepara revisões, Ready, Human
+                    Gate e merge sem transformar essas ações em atalhos perigosos.
+                  </p>
+                </div>
+                <div class="shell">
+                  <div class="shell-head">
+                    <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                    <span>repo governado</span>
+                  </div>
+                  <div class="shell-body">
+                    <span class="terminal-line">◇ O que fazer depois?</span>
+                    <div class="mini-carousel" data-mini-carousel>
+                      <div class="mini-tabs" role="tablist" aria-label="Manutenção e Gate">
+                        <button class="mini-tab is-active" data-mini-slide="update">Update</button>
+                        <button class="mini-tab" data-mini-slide="reviews">Reviews</button>
+                        <button class="mini-tab" data-mini-slide="decision">Gate</button>
+                      </div>
+
+                      <div class="mini-slide is-active" data-mini-panel="update">
+                        <span class="mini-caption"
+                          >Repo governado usa update para runtime, templates, providers e
+                          práticas.</span
+                        >
+                        <span class="prompt-row active"
+                          ><span>◆</span><span>Atualizar este repositório</span></span
+                        >
+                        <span class="prompt-row muted"
+                          ><span>=</span><span>init/adopt não aparecem aqui</span></span
                         >
                       </div>
 
@@ -2390,23 +2688,14 @@
 
                       <div class="mini-slide" data-mini-panel="decision">
                         <span class="mini-caption"
-                          >Ready comunica que o PR está pronto; Human Gate decide avanço.</span
+                          >Ready comunica prontidão; Human Gate decide avanço; merge fica no
+                          fim.</span
                         >
                         <span class="prompt-row warn"
                           ><span>!</span><span>Ready exige confirmação humana</span></span
                         >
                         <span class="prompt-row warn"
                           ><span>!</span><span>Human Gate exige briefing e confirmação</span></span
-                        >
-                      </div>
-
-                      <div class="mini-slide" data-mini-panel="transition">
-                        <span class="mini-caption"
-                          >A aprovação não faz merge: ela libera a transição governada
-                          seguinte.</span
-                        >
-                        <span class="prompt-row muted"
-                          ><span>→</span><span>abrir próximo PR stacked autorizado</span></span
                         >
                         <span class="prompt-row muted"
                           ><span>→</span><span>merge só no fechamento de integração</span></span
