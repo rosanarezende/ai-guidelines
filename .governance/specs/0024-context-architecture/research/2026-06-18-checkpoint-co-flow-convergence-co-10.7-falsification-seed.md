@@ -1,8 +1,10 @@
-# CO-10.6 — falsificacao + preparacao de Human Gate
+# CO-10.7 — falsificacao ampla do fluxo (seed)
 
 > Spec 0024 · PR #43 · `checkpoint-co-flow-convergence`.
-> Este dossie registra a falsificacao terminal do no `co-flow-convergence`.
+> Este dossie registra a semente de falsificacao ampla do no `co-flow-convergence`.
 > Nao executa Ready, Human Gate, merge, abertura de novo PR ou transicao de no.
+> Nota: este artefato nasceu antes de `[DEC-0024-G14]`, quando a falsificacao ainda
+> estava numerada como CO-10.6; apos a decisao, ele foi renomeado como seed de CO-10.7.
 
 ## Retomada factual
 
@@ -13,9 +15,9 @@ Snapshot inicial da sessao:
 - local == origin;
 - PR #43 aberto e Draft;
 - CI remoto verde no HEAD observado;
-- sub-checkpoint ativo: `CO-10.6 — falsificacao + Human Gate`;
+- sub-checkpoint ativo no snapshot original: `CO-10.6 — falsificacao + Human Gate`;
 - `work`: `IMPLEMENT_CHECKPOINT`;
-- Human Gate indisponivel: `CO-10.6` ainda sem entrega/readiness e PR ainda Draft.
+- Human Gate indisponivel: o sub-checkpoint de falsificacao ainda nao tinha entrega/readiness e PR ainda estava Draft.
 
 ## Objetivo da falsificacao
 
@@ -44,8 +46,8 @@ estado do fluxo e compara consumidores diferentes do mesmo modelo.
 
 | Jornada falsificada                           | O que deve acontecer                                                                                                    | Prova automatizada                                       |
 | --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
-| `CO-10.6` recem-ativado                       | `flow`, `work` e `decide` concordam que ainda e implementacao; readiness fica bloqueada por falta de commit de entrega. | `estado recém-ativado: flow, work e decide concordam...` |
-| Entrega de `CO-10.6` feita, sem readiness     | proxima acao vira `mark-readiness`; `advance-subcheckpoint` nao se aplica porque nao ha proximo `[ ]`.                  | `CO-10.6 entregue mas sem readiness...`                  |
+| Falsificacao recem-ativada                    | `flow`, `work` e `decide` concordam que ainda e implementacao; readiness fica bloqueada por falta de commit de entrega. | `estado recém-ativado: flow, work e decide concordam...` |
+| Entrega de falsificacao feita, sem readiness  | proxima acao vira `mark-readiness`; `advance-subcheckpoint` nao se aplica quando nao ha proximo `[ ]`.                  | `CO-10.6 entregue mas sem readiness...`                  |
 | Readiness terminal + PR Draft                 | `work` aponta Human Gate apenas como inspecao bloqueada; `decide` bloqueia por Draft; nao ha advance interno indevido.  | `readiness terminal + PR Draft...`                       |
 | PR Ready + readiness terminal + checks verdes | Human Gate fica disponivel; `work`, `flow`, `decide` e `pr-ready` convergem.                                            | `PR Ready + readiness terminal + checks verdes...`       |
 | Reviews opcionais/recomendadas pendentes      | o sistema sugere pedir review antes do Human Gate, mas nao transforma isso em bloqueio quando a politica nao exige.     | `reviews opcionais/recomendadas são sugeridas...`        |
@@ -58,14 +60,14 @@ A falsificacao tambem cobre uma pessoa que recebeu uma tarefa e precisa usar o
 sistema sem olhar codigo. A simulacao nao executa decisoes mutantes; ela valida
 se o modelo oferece a orientacao correta em cada estado.
 
-| Momento da pessoa usuaria                   | Orientacao esperada do sistema                                                                          | Cobertura automatizada                      |
-| ------------------------------------------- | ------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
-| Recebeu a tarefa do sub-checkpoint atual    | mostrar `CO-10.6`, explicar que ainda e implementacao e nao oferecer decisao mutante antes da entrega.  | `simula uma pessoa recebendo uma tarefa...` |
-| Terminou a entrega local                    | recomendar `mark-readiness`, com briefing read-only e comando mutante separado por autorizacao humana.  | `simula uma pessoa recebendo uma tarefa...` |
-| Declarou readiness terminal, PR ainda Draft | orientar inspeção de Human Gate, mas bloquear por Draft; nao sugerir `advance-subcheckpoint` terminal.  | `simula uma pessoa recebendo uma tarefa...` |
-| PR convertido para Ready com CI verde       | disponibilizar Human Gate e manter `flow`, `work`, `decide` e `pr-ready` convergentes.                  | `simula uma pessoa recebendo uma tarefa...` |
-| Estado inseguro                             | orientar primeiro limpar working tree/reconciliar branch/aguardar CI; bloquear readiness, Ready e Gate. | `simula uma pessoa recebendo uma tarefa...` |
-| Human Gate aprovado                         | recomendar `open-next-node`; continuar proibindo merge e implementacao automatica do proximo no.        | `simula uma pessoa recebendo uma tarefa...` |
+| Momento da pessoa usuaria                   | Orientacao esperada do sistema                                                                                      | Cobertura automatizada                      |
+| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- |
+| Recebeu a tarefa do sub-checkpoint atual    | mostrar o sub-checkpoint ativo, explicar que ainda e implementacao e nao oferecer decisao mutante antes da entrega. | `simula uma pessoa recebendo uma tarefa...` |
+| Terminou a entrega local                    | recomendar `mark-readiness`, com briefing read-only e comando mutante separado por autorizacao humana.              | `simula uma pessoa recebendo uma tarefa...` |
+| Declarou readiness terminal, PR ainda Draft | orientar inspeção de Human Gate, mas bloquear por Draft; nao sugerir `advance-subcheckpoint` terminal.              | `simula uma pessoa recebendo uma tarefa...` |
+| PR convertido para Ready com CI verde       | disponibilizar Human Gate e manter `flow`, `work`, `decide` e `pr-ready` convergentes.                              | `simula uma pessoa recebendo uma tarefa...` |
+| Estado inseguro                             | orientar primeiro limpar working tree/reconciliar branch/aguardar CI; bloquear readiness, Ready e Gate.             | `simula uma pessoa recebendo uma tarefa...` |
+| Human Gate aprovado                         | recomendar `open-next-node`; continuar proibindo merge e implementacao automatica do proximo no.                    | `simula uma pessoa recebendo uma tarefa...` |
 
 ### Adoção de repositório já em uso
 
@@ -176,5 +178,5 @@ Esta rodada nao executou:
 - transicao de no.
 
 Depois da entrega e validacao, o proximo passo governado esperado sera declarar
-readiness terminal de `CO-10.6` por decisao propria, e nao por edicao manual de
+readiness terminal do sub-checkpoint final por decisao propria, e nao por edicao manual de
 `tasks.md`.

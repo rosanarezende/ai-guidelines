@@ -6,7 +6,7 @@
 > Plan: [`./plan.md`](./plan.md)
 > Tasks: [`./tasks.md`](./tasks.md)
 > Status agregado: **Resolved (decisões)** — todas as `[DEC]` desta spec estão `Resolved`; a pesquisa estrutural ainda aberta vive em [`research/findings.md`](./research/findings.md), não aqui.
-> Última atualização: 2026-06-17 — **`[DEC-0024-G13]` registrada**: `co-flow-convergence` ganha CO-10.5 próprio para UX, linguagem humana e convergência do wizard com Clack; falsificação/Human Gate passa a CO-10.6.
+> Última atualização: 2026-06-18 — **`[DEC-0024-G14]` registrada**: `co-flow-convergence` insere CO-10.6 para fluxo de time, múltiplas specs e criação de spec nova; falsificação ampla passa a CO-10.7 e revisão independente + Human Gate a CO-10.8.
 
 > **Artefato exclusivo de decisão humana.** Organizado por **estado**, não por numeração histórica (reestruturação 2026-05-31). Quatro estados respondem, à primeira vista, _o que já foi decidido · o que ainda está aberto · o que virou regra · o que virou enforcement_:
 >
@@ -313,9 +313,40 @@ Cada transição deve declarar: fato de entrada, autoridade, comando, efeito per
 - O wizard deve aproveitar melhor `@clack/prompts` (`intro/outro`, `note`/`box`, `select`, `groupMultiselect`, `tasks`/`taskLog`, `spinner`, `confirm`, cancelamento limpo), sem criar regra própria de readiness, PR Ready, CI, Human Gate ou próxima ação.
 - `init`/`adopt`/`update` devem continuar disponíveis, mas contextualmente: o caminho normal mostra a operação adequada ao estado do repositório; as demais ficam em caminho avançado com aviso.
 
+**Nota posterior:** `[DEC-0024-G14]` subdividiu o fechamento que G13 havia renumerado para CO-10.6: CO-10.6 passa a ser fluxo de time/múltiplas specs/spec nova; falsificação ampla passa a CO-10.7; revisão independente + Human Gate passa a CO-10.8.
+
 **O que NÃO está sendo decidido:** executar Ready; exercer Human Gate; fazer merge; avançar sub-checkpoint; abrir novo PR; reintroduzir Inquirer; recriar comando `providers`; mover regra de lifecycle para o wizard.
 
 **Status:** Resolved (2026-06-17) / @rosanarezende — decisão operacional de UX/convergência antes da falsificação final do nó.
+
+---
+
+### [DEC-0024-G14] CO-10.6 dedicado a fluxo de time, múltiplas specs e criação de spec nova
+
+**Pergunta:** O nó `co-flow-convergence` pode ir direto para falsificação/Human Gate, ou precisa antes modelar o fluxo de desenvolvimento em time, com múltiplas specs abertas e criação/continuação de specs?
+
+**Modo de gate:** `aceitação` <!-- decisão operacional da owner, 2026-06-18, antes do fechamento de co-flow-convergence. -->
+
+**Contexto:** O uso do site/flow como documentação viva expôs que o produto ainda explica bem o fluxo de uma spec ativa, mas não cobre com clareza o caso de time: várias specs abertas, uma pessoa querendo continuar uma spec específica, outra querendo iniciar uma spec nova, branch/PR divergentes e autoridades diferentes para contributor/maintainer/owner. Esse é o mesmo tipo de problema que originou `co-flow-convergence`: o humano vira o reconciliador entre intenção, branch, PR, SSOT e comando.
+
+**Decisão (Resolved):**
+
+- Inserir `CO-10.6 — fluxo de time, múltiplas specs e criação de spec nova` antes da falsificação final.
+- Dividir a antiga etapa `CO-10.6 — falsificação + Human Gate` em:
+  - `CO-10.7 — falsificação ampla do fluxo`;
+  - `CO-10.8 — revisão independente + Human Gate`.
+- `CO-10.6` deve modelar e implementar orientação governada para:
+  - listar specs/nós relevantes quando houver mais de um caminho possível;
+  - continuar uma spec específica sem inferência silenciosa errada;
+  - iniciar uma spec nova pelo fluxo governado;
+  - explicar branch/PR/CI/tree/autoridade antes de qualquer ação;
+  - diferenciar ações de contributor, maintainer e owner.
+- `CO-10.7` deve falsificar o fluxo completo, incluindo cenários negativos e não óbvios.
+- `CO-10.8` deve preparar uma rodada independente de Technical Audit, Architectural Review e Security Review com outra LLM, usando prompts que busquem falsificações não óbvias e reduzam viés antes do Human Gate.
+
+**O que NÃO está sendo decidido:** abrir CO-5; executar Ready; exercer Human Gate; fazer merge; abrir novo PR; criar lock distribuído falso; automatizar criação de PR/spec sem confirmação humana; tornar toda review obrigatória universalmente.
+
+**Status:** Resolved (2026-06-18) / @rosanarezende — decisão operacional de fluxo em time antes da falsificação e Gate do nó.
 
 ---
 
@@ -385,7 +416,8 @@ Cada transição deve declarar: fato de entrada, autoridade, comando, efeito per
 | `G10`        | `co-flow-convergence` antes de `co-capture`           | **Decidido** — § 1 (Resolved 2026-06-16, owner); nó próprio para convergência ponta a ponta do fluxo         |
 | `G11`        | suspensão temporária de smoke durante co-flow         | **Decidido** — § 1 (Resolved 2026-06-16, owner); bloqueia Ready/Human Gate até reativação                    |
 | `G12`        | CO-10.2 entrega convergência coesa inicial            | **Decidido** — § 1 (Resolved 2026-06-16, owner); remove heurísticas locais já comprovadamente divergentes    |
-| `G13`        | CO-10.5 dedicado a UX/linguagem/wizard Clack          | **Decidido** — § 1 (Resolved 2026-06-17, owner); falsificação/Human Gate passa a CO-10.6                     |
+| `G13`        | CO-10.5 dedicado a UX/linguagem/wizard Clack          | **Decidido** — § 1 (Resolved 2026-06-17, owner); G14 subdivide o fechamento antes do Gate                    |
+| `G14`        | CO-10.6 dedicado a fluxo de time/múltiplas specs      | **Decidido** — § 1 (Resolved 2026-06-18, owner); falsificação ampla passa a CO-10.7 e revisão/Gate a CO-10.8 |
 
 ---
 
@@ -403,6 +435,7 @@ Cada transição deve declarar: fato de entrada, autoridade, comando, efeito per
 - [x] `[DEC-0024-G11]` — Resolved 2026-06-16 / @rosanarezende
 - [x] `[DEC-0024-G12]` — Resolved 2026-06-16 / @rosanarezende
 - [x] `[DEC-0024-G13]` — Resolved 2026-06-17 / @rosanarezende
+- [x] `[DEC-0024-G14]` — Resolved 2026-06-18 / @rosanarezende
 
 ---
 
