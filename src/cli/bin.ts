@@ -27,6 +27,7 @@ import { main as runRulesetCheck } from "./rulesetCheck.js";
 import { main as runRuntimeBootstrap } from "./runtimeBootstrap.js";
 import { main as runScriptContracts } from "./scriptContracts.js";
 import { main as runSiteFlowCopy } from "./siteFlowCopy.js";
+import { main as runSiteScenarios } from "./siteScenarios.js";
 import { main as runStateYmlCheck } from "./stateYmlCheck.js";
 
 function packageRoot(): string {
@@ -42,7 +43,7 @@ function usage(): string {
     "constraints-check, knowledge-compile, script-contracts, runtime-bootstrap,",
     "gate-decidability-check, ruleset-check, review-check, insights-check,",
     "intent-check, disclosure-render, review-publish, review-seal,",
-    "pr-body-update, pr-ready-check, site-flow-copy",
+    "pr-body-update, pr-ready-check, site-flow-copy, site-scenarios",
   ].join("\n");
 }
 
@@ -88,6 +89,8 @@ async function dispatch(script: string | undefined, args: readonly string[]): Pr
       return runScriptContracts(args, root);
     case "site-flow-copy":
       return runSiteFlowCopy(args, root);
+    case "site-scenarios":
+      return runSiteScenarios(args, root);
     case "runtime-bootstrap":
       return runRuntimeBootstrap([...args], root);
     case "gate-decidability-check":

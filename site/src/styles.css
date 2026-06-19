@@ -468,6 +468,36 @@ h3 {
   overflow-wrap: anywhere;
 }
 
+/* Procedência visível do terminal (B2): nada parece saída real sem rótulo. */
+.terminalBadge {
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  color: #dce3f0;
+  font-size: 0.7rem;
+  font-style: normal;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  margin-left: auto;
+  padding: 3px 10px;
+  white-space: nowrap;
+}
+
+.terminal-real .terminalBadge {
+  background: rgba(76, 175, 80, 0.18);
+  border-color: rgba(76, 175, 80, 0.55);
+  color: #b6f0bb;
+}
+
+.terminal-guided .terminalBadge {
+  background: rgba(249, 168, 37, 0.16);
+  border-color: rgba(249, 168, 37, 0.5);
+  color: #ffd98a;
+}
+
+.terminal-illustrative .terminalBadge {
+  background: rgba(255, 255, 255, 0.08);
+}
+
 .terminalDemo pre {
   display: grid;
   font:

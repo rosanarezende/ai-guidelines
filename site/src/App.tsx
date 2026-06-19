@@ -457,25 +457,43 @@ function StepDetail({ step }: { readonly step: FlowStep }): JSX.Element {
         <p>{step.text}</p>
         {step.command ? <code>{step.command}</code> : null}
       </div>
-      <TerminalDemo lines={step.lines} title={step.command ?? "npm run flow"} />
+      <TerminalDemo lines={step.lines} title={step.command ?? "npm run flow"} kind="illustrative" />
     </article>
   );
 }
 
+// Procedência visível de cada terminal (fecha B2: nada parece saída real sem ser).
+// - real: stdout capturado de execução real (dry-run);
+// - guided: derivado do contrato real do comando (usage/description);
+// - illustrative: maquete editorial — NÃO é saída literal.
+export type TerminalKind = "real" | "guided" | "illustrative";
+
+const TERMINAL_BADGE: Record<TerminalKind, string> = {
+  real: "Exemplo gerado",
+  guided: "Exemplo guiado",
+  illustrative: "Exemplo ilustrativo",
+};
+
 function TerminalDemo({
   lines,
   title,
+  kind = "illustrative",
 }: {
   readonly lines: readonly TerminalLine[];
   readonly title: string;
+  readonly kind?: TerminalKind;
 }): JSX.Element {
   return (
-    <figure className="terminalDemo" aria-label={`Simulação de terminal: ${title}`}>
+    <figure
+      className={`terminalDemo terminal-${kind}`}
+      aria-label={`${TERMINAL_BADGE[kind]}: ${title}`}
+    >
       <figcaption>
         <span></span>
         <span></span>
         <span></span>
         <strong>{title}</strong>
+        <em className="terminalBadge">{TERMINAL_BADGE[kind]}</em>
       </figcaption>
       <pre>
         {lines.map((line, index) => (
