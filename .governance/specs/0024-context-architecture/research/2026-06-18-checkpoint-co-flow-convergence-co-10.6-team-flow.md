@@ -321,3 +321,27 @@ pode mentir" antes de qualquer refino visual; transcripts reais quando estaveis.
   repo governado — follow-up recomendado.
 - A reestruturacao manteve os paths PT (`/flow/comecar` etc.) para nao quebrar
   links; uma migracao para paths canonicos `/flow/start` fica para depois.
+
+## Redesign do site como porta de entrada (2026-06-19)
+
+Com a fidelidade aceita como base, a owner pediu uma reorganizacao significativa
+de informacao e layout — site como produto, nao colecao tecnica de fluxos.
+
+- Home virou pagina de produto: hero claro, Problema, Solucao, tres caminhos por
+  publico (projeto novo / repo existente / uso diario), teaser de time e trilha
+  de seguranca (o que o sistema impede + callout "o que o humano decide",
+  DERIVADO do registry de decisoes).
+- `/flow` virou visao geral + tabs de cenarios reais; paginas `/flow/start`,
+  `/flow/daily`, `/flow/team`, `/flow/review`, `/flow/reference` (paths PT
+  mantidos como aliases para nao quebrar links). Referencia ganhou glossario.
+- CSS mobile-first reescrito: secoes curtas, segmented control, callouts,
+  skip-link, foco visivel, terminal sem overflow horizontal agressivo.
+- Fidelidade preservada integralmente: comandos derivados/validados,
+  providers/features do catalogo, transcripts reais/guiados rotulados, guards
+  contra comando inexistente, asset check deterministico.
+
+Limites reafirmados: sem runtime novo, sem promover guiados a reais, sem Ready/
+Human Gate/merge/advance-subcheckpoint/readiness, sem novo PR, sem topologia.
+
+Risco residual: screenshots nao puderam ser gerados no sandbox (sem browser; CDN
+de browser bloqueado). A revisao visual fica no preview do Cloudflare Pages do PR.
