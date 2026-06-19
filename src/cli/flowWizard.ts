@@ -723,7 +723,7 @@ async function runPeerReviewSection(
       },
     ],
   });
-  const command = `npm run flow -- peer-review ${rawPr} --mode ${mode} --confirm`;
+  const command = `npx ai-guidelines peer-review ${rawPr} --mode ${mode} --confirm`;
   await prompts.note?.(
     [WIZARD_COPY.peerReview.previewIntro, command].join("\n"),
     WIZARD_COPY.peerReview.previewTitle
@@ -991,7 +991,7 @@ function renderSelectedSpecDetails(
   } else {
     lines.push(
       WIZARD_COPY.specWork.readyToContinue,
-      `npm run flow -- continue ${resolved.entry.id}`
+      `npx ai-guidelines continue ${resolved.entry.id}`
     );
   }
 
@@ -1244,7 +1244,7 @@ async function runProvidersUpdate(
   await prompts.note?.(
     [
       ...PROVISIONING_COPY.governedUpdate.providerNote,
-      `npm run flow -- update --providers ${normalized}`,
+      `npx ai-guidelines update --providers ${normalized}`,
     ].join("\n"),
     PROVISIONING_COPY.governedUpdate.providerTitle
   );
@@ -1269,7 +1269,7 @@ async function runCollaborationProfileUpdate(
       `- ${collaborationProfileLabel(profile)}`,
       "",
       PROVISIONING_COPY.governedUpdate.commandLabel,
-      `npm run flow -- update --collaboration-profile ${profile}`,
+      `npx ai-guidelines update --collaboration-profile ${profile}`,
     ].join("\n"),
     PROVISIONING_COPY.governedUpdate.policyChangeTitle
   );
@@ -1383,7 +1383,7 @@ async function runFeaturesUpdate(
       ...features.map((feature) => `- ${featureLabel(feature)}`),
       "",
       PROVISIONING_COPY.governedUpdate.commandLabel,
-      `npm run flow -- update --features ${value}`,
+      `npx ai-guidelines update --features ${value}`,
     ].join("\n"),
     PROVISIONING_COPY.governedUpdate.featuresTitle
   );

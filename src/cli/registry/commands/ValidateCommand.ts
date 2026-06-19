@@ -11,7 +11,7 @@ export interface ValidateCommandOptions {
 export class ValidateCommand implements Command<ValidateCommandOptions> {
   readonly name = "validate";
   readonly description =
-    "Valida rapidamente o diff atual; use `npm run validate` para o gate completo antes de Ready/Human Gate.";
+    "Valida rapidamente o diff atual; use o gate completo configurado pelo repositório antes de Ready/Human Gate.";
   readonly usage = [
     "validate changed",
     "validate changed --fix",
@@ -22,7 +22,7 @@ export class ValidateCommand implements Command<ValidateCommandOptions> {
   parse(argv: readonly string[]): ValidateCommandOptions {
     const { positionals, flags } = parseFlags(argv, { booleans: ["fix"] });
     if (positionals.length !== 1 || positionals[0] !== "changed") {
-      throw new Error("Uso: npm run flow -- validate changed [--fix] [--base <ref>]");
+      throw new Error("Uso: npx ai-guidelines validate changed [--fix] [--base <ref>]");
     }
 
     const allowed = new Set(["fix", "base"]);

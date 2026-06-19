@@ -358,7 +358,7 @@ describe("bootstrap delivery 2c — parse/help/registry", () => {
     );
 
     expect(result.exitCode).toBe(1);
-    expect(errors.join("\n")).toContain("Use: npm run flow -- update --providers <lista>");
+    expect(errors.join("\n")).toContain("Use: npx ai-guidelines update --providers <lista>");
     expect(runtime.provisioner.calls).toEqual([]);
   });
 

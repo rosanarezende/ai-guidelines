@@ -141,9 +141,9 @@ const REAL_SPECS: readonly RealSpec[] = [
   {
     id: "cli-help",
     title: "Lista de comandos — --help",
-    surface: "contributor",
-    command: "ai-guidelines --help",
-    note: "Saída real do --help. Hoje ela destaca o alias de contribuidor `npm run flow` (gap registrado): para consumidores o comando é `npx ai-guidelines <comando>`.",
+    surface: "public",
+    command: "npx ai-guidelines --help",
+    note: "Saída real do --help: a porta pública começa por `npx ai-guidelines`; o alias local fica separado como uso interno do repo-fonte.",
     withTarget: false,
     argv: ["--help"],
   },

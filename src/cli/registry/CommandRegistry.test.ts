@@ -111,7 +111,7 @@ describe("CommandRegistry", () => {
     expect(result.exitCode).toBe(1);
     expect(reg.resolve("providers")).toBeUndefined();
     expect(errors.join("\n")).toContain('Comando não suportado: "providers"');
-    expect(errors.join("\n")).toContain("npm run flow -- update --providers <lista>");
+    expect(errors.join("\n")).toContain("npx ai-guidelines update --providers <lista>");
   });
 
   it("DADO uma flag no lugar do verbo QUANDO dispatch ENTÃO orienta que falta um comando antes da opção", async () => {
@@ -300,7 +300,7 @@ describe("CommandRegistry — `--help` por comando [CO-4 r9: descoberta situada]
     expect(spy.ranWith).toHaveLength(0);
     expect(infos.join("\n")).toContain("handoff");
     expect(infos.join("\n")).toContain("spy: handoff");
-    expect(infos.join("\n")).toContain("npm run flow -- --help");
+    expect(infos.join("\n")).toContain("npx ai-guidelines --help");
   });
 
   it("DADO `-h` curto QUANDO dispatch ENTÃO mesmo comportamento (help, exit 0, sem execução)", async () => {

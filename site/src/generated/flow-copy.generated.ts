@@ -524,7 +524,7 @@ export const AI_GUIDELINES_FLOW_COPY = {
     {
       "name": "validate",
       "aliases": [],
-      "description": "Valida rapidamente o diff atual; use `npm run validate` para o gate completo antes de Ready/Human Gate.",
+      "description": "Valida rapidamente o diff atual; use o gate completo configurado pelo repositório antes de Ready/Human Gate.",
       "usage": [
         "validate changed",
         "validate changed --fix",
@@ -557,7 +557,7 @@ export const AI_GUIDELINES_FLOW_COPY = {
     {
       "name": "workflow",
       "aliases": [],
-      "description": "Operações avançadas da spec/stack (publish-state, Integration PR, merge, índice, drift, prompt visual). O guia humano principal é `npm run flow`.",
+      "description": "Operações avançadas da spec/stack (publish-state, Integration PR, merge, índice, drift, prompt visual). O guia humano principal é `npx ai-guidelines`.",
       "usage": [
         "workflow",
         "workflow publish-state --status=active --updated-by=@maintainer"

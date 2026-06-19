@@ -73,6 +73,7 @@ describe("cenários de terminal do site (B2)", () => {
     }
     // O alias `npm run flow` só aparece na superfície de contribuidor.
     expect(contributor.some((scenario) => scenario.command.includes("npm run flow"))).toBe(true);
+    expect(publicScenarios.some((scenario) => scenario.id === "cli-help")).toBe(true);
   }, 60000);
 
   it("o módulo gerado está em sync com o runtime", async () => {

@@ -86,7 +86,7 @@ export class CommandRegistry {
     if (!command) {
       if (name === "providers") {
         context.logger.error(
-          'Comando não suportado: "providers". Use: npm run flow -- update --providers <lista>.'
+          'Comando não suportado: "providers". Use: npx ai-guidelines update --providers <lista>.'
         );
         return { exitCode: 1 };
       }
@@ -109,7 +109,7 @@ export class CommandRegistry {
     // fallback de outros produzia erro enganoso (dogfood CO-4, rodada 9).
     if (rest.includes("--help") || rest.includes("-h")) {
       context.logger.info(renderCommandsHelp([command]));
-      context.logger.info(`\n  Help geral: npm run flow -- --help`);
+      context.logger.info(`\n  Help geral: npx ai-guidelines --help`);
       return { exitCode: 0 };
     }
 

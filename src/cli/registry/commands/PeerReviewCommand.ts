@@ -192,7 +192,7 @@ export class PeerReviewCommand implements Command<PeerReviewOptions> {
 
     if (!options.confirm) {
       context.logger.info(
-        `\nPrévia concluída. Para aplicar: npm run flow -- peer-review ${options.pr} --mode ${mode} --confirm`
+        `\nPrévia concluída. Para aplicar: npx ai-guidelines peer-review ${options.pr} --mode ${mode} --confirm`
       );
       return { exitCode: 0 };
     }
@@ -219,7 +219,7 @@ export class PeerReviewCommand implements Command<PeerReviewOptions> {
     git.fetchPullRequest(options.pr, refName);
     git.addWorktree(worktreePath, refName);
     context.logger.info(`Worktree de revisão criado em ${worktreePath}.`);
-    context.logger.info(`Próximo passo: cd ${worktreePath} && npm run flow`);
+    context.logger.info(`Próximo passo: cd ${worktreePath} && npx ai-guidelines`);
     return { exitCode: 0 };
   }
 }
@@ -251,9 +251,9 @@ function renderPeerReviewBrief(input: {
     "- checkout guiado troca a branch neste diretório e exige working tree limpa.",
     "",
     "## Depois de abrir o PR",
-    `- triagem de comentários: npm run flow -- triage ${pr.number}`,
-    "- tipos de revisão: npm run flow -- review types",
-    "- validação rápida: npm run flow -- validate changed",
+    `- triagem de comentários: npx ai-guidelines triage ${pr.number}`,
+    "- tipos de revisão: npx ai-guidelines review types",
+    "- validação rápida: npx ai-guidelines validate changed",
     "",
     "## Proteções",
     "- este fluxo não executa Ready, Human Gate, merge ou avanço de checkpoint.",

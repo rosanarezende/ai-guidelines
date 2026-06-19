@@ -127,6 +127,7 @@ describe("cenários consumidos no público têm surface public", () => {
     "existing-repo",
     "governed-repo",
     "update-providers",
+    "cli-help",
     "daily-work",
     "multi-spec",
     "peer-review",
@@ -141,9 +142,9 @@ describe("cenários consumidos no público têm surface public", () => {
     });
   }
 
-  it("o fluxo interno (npm run flow / --help) é surface contributor", () => {
+  it("o fluxo interno fica em contributor e o help principal é público", () => {
     expect(byId.get("contributor-flow")?.surface).toBe("contributor");
-    expect(byId.get("cli-help")?.surface).toBe("contributor");
+    expect(byId.get("cli-help")?.surface).toBe("public");
   });
 
   it("todo comando público exibido existe no registry real", () => {
@@ -151,7 +152,7 @@ describe("cenários consumidos no público têm surface public", () => {
     for (const id of publicIds) {
       const command = byId.get(id)?.command ?? "";
       const verb = command.replace(/^npx ai-guidelines\s+/, "").split(" ")[0];
-      if (verb && /^[a-z-]+$/.test(verb)) {
+      if (verb && !verb.startsWith("-") && /^[a-z-]+$/.test(verb)) {
         expect(names.has(verb)).toBe(true);
       }
     }

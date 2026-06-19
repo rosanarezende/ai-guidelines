@@ -29,8 +29,11 @@ function renderHelp(): string {
   return `ai-guidelines CLI
 
 Uso:
-  npm run flow -- <comando> [opções]
+  npx ai-guidelines
   npx ai-guidelines <comando> [opções]
+
+Sem comando, abre o guia interativo quando o terminal permite. Em execução
+não interativa, imprime um resumo textual do estado.
 
 ═══ COMANDOS (registry) ═══
 
@@ -38,17 +41,14 @@ ${buildRegistry().renderHelp()}
 
 ═══ FLUXO SITUADO (onde procurar cada passo) ═══
 
-  Guia interativo:         npm run flow
-  Resumo textual:          npm run flow -- cockpit
-  Retomar contexto:        npm run flow -- handoff [spec]
-  Verificar frescor:       npm run handoff:check -- [--spec NNNN]
-  Plano da sessão:         npm run flow -- work [--authorization explicit-work-request]
-  Revisões disponíveis:    npm run flow -- review <tipo>
-  Tipos/regras de revisão: npm run flow -- review types | review policy
-  Ações com confirmação:   npm run flow -- decide [--brief-only] [--type <tipo>]
-  Validação intermediária: npm run flow -- validate changed [--fix]
-  Checar saída de Draft:   npm run pr-ready:check -- --pr <n>
-  Validação completa:      npm run validate
+  Guia interativo:         npx ai-guidelines
+  Resumo textual:          npx ai-guidelines cockpit
+  Retomar contexto:        npx ai-guidelines handoff [spec]
+  Plano da sessão:         npx ai-guidelines work [--authorization explicit-work-request]
+  Revisões disponíveis:    npx ai-guidelines review <tipo>
+  Tipos/regras de revisão: npx ai-guidelines review types | review policy
+  Ações com confirmação:   npx ai-guidelines decide [--brief-only] [--type <tipo>]
+  Validação intermediária: npx ai-guidelines validate changed [--fix]
 
 ═══ OPÇÕES GERAIS ═══
 
