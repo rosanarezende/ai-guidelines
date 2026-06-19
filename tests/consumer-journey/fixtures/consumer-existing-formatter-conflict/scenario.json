@@ -1,0 +1,36 @@
+{
+  "id": "consumer-existing-formatter-conflict",
+  "description": "Pessoa roda npx ai-guidelines em um repositório existente que já usa Biome.",
+  "expectedPrimaryOperation": "adopt",
+  "entrypoint": {
+    "contains": [
+      "Este parece ser um repositório existente ainda não governado.",
+      "Adotar ai-guidelines neste repositório",
+      "formatter rival detectado (Biome)",
+      "--force-prettier",
+      "npx ai-guidelines adopt --dry-run"
+    ],
+    "notContains": ["cockpit — estado irrecuperável"]
+  },
+  "dryRun": {
+    "args": [
+      "adopt",
+      "--dry-run",
+      "--target",
+      ".",
+      "--name",
+      "consumer-existing-formatter-conflict",
+      "--package-manager",
+      "npm",
+      "--providers",
+      "claude",
+      "--skip-husky",
+      "--skip-ci",
+      "--skip-quality-gates",
+      "--skip-tdd",
+      "--skip-bdd"
+    ],
+    "contains": ["dry-run", "formatter rival"],
+    "absentAfter": [".ai-guidelines/config.json"]
+  }
+}

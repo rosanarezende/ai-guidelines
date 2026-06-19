@@ -1,0 +1,27 @@
+stage: implementation
+gate:
+  status: closed
+focus: []
+next: []
+topology:
+  cursor:
+    pr: alpha
+    checkpoint: checkpoint-alpha
+  prs:
+    concluded: []
+    active:
+      - id: alpha
+        github_pr: 101
+        role: execution
+        terminal: false
+        sequence: 1
+        checkpoints:
+          - checkpoint-alpha
+    planned:
+      - id: integration-final
+        github_pr: null
+        role: integration
+        terminal: true
+        sequence: null
+        checkpoints:
+          - checkpoint-integration-final

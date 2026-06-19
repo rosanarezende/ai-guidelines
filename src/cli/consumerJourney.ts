@@ -51,6 +51,7 @@ const PACK_TEST_ARGS = [
   "--experimental-default-config-file",
   "--test",
   "tests/smoke/*.test.mjs",
+  "tests/consumer-journey/*.test.mjs",
 ] as const;
 
 function executableFor(command: string): string {

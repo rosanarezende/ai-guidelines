@@ -5,6 +5,13 @@ import { ClackPrompts } from "../infrastructure/io/ClackPrompts.js";
 import { Prompts } from "../app/ports/Prompts.js";
 import { CommandRegistry } from "./registry/CommandRegistry.js";
 import { runFlowWizard as runFlowWizardDefault } from "./flowWizard.js";
+import {
+  detectProvisioningContext,
+  renderProvisioningEntrySummary,
+  runProvisioningSection,
+  shouldUseProvisioningEntry,
+} from "./experience/wizard/provisioning.js";
+import { loadActiveSpecsIndex } from "./registry/commands/loadActiveSpecsIndex.js";
 
 interface Logger {
   info(message: string): void;
@@ -72,6 +79,82 @@ ${buildRegistry().renderHelp()}
 `;
 }
 
+function isSpecResolutionFailure(messages: readonly string[]): boolean {
+  return messages.some((message) => message.includes("Nao foi possivel resolver a spec"));
+}
+
+function renderSpecFocusRecovery(repoRoot: string): string {
+  const lines: string[] = [];
+  lines.push("# ai-guidelines");
+  lines.push("");
+  lines.push("Não consegui escolher automaticamente qual spec deve ser o foco agora.");
+  lines.push("");
+
+  try {
+    const index = loadActiveSpecsIndex(repoRoot);
+    if (index.indexAvailable && index.entries.length > 0) {
+      lines.push("Specs ativas encontradas:");
+      for (const resolved of index.entries) {
+        const { entry, specPathExists } = resolved;
+        const local = specPathExists ? "disponível localmente" : "não encontrada neste checkout";
+        lines.push(`- ${entry.id} (${entry.slug}) — ${entry.title} · ${entry.branch} · ${local}`);
+      }
+      lines.push("");
+    } else {
+      lines.push("Não encontrei specs ativas publicadas no índice operacional.");
+      lines.push("");
+    }
+
+    for (const warning of index.warnings) {
+      lines.push(`Aviso: ${warning}`);
+    }
+    if (index.warnings.length > 0) lines.push("");
+  } catch (error) {
+    lines.push(
+      `Não consegui ler o índice de specs ativas: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+    lines.push("");
+  }
+
+  lines.push("Próximo passo recomendado:");
+  lines.push("- Veja as specs ativas e escolha o foco antes de continuar.");
+  lines.push("");
+  lines.push("Comandos úteis:");
+  lines.push("- `npx ai-guidelines specs`");
+  lines.push("- `npx ai-guidelines handoff <id-da-spec>`");
+  lines.push("- depois disso, rode `npx ai-guidelines` novamente na branch correta.");
+  return lines.join("\n");
+}
+
+async function runCockpitWithRecovery(
+  repoRoot: string,
+  effectiveLogger: Logger,
+  cockpitRunner: typeof runCockpit
+): Promise<number> {
+  const infos: string[] = [];
+  const errors: string[] = [];
+  const exitCode = await cockpitRunner(repoRoot, {
+    info: (message) => infos.push(message),
+    error: (message) => errors.push(message),
+  });
+
+  if (exitCode === 0) {
+    for (const message of infos) effectiveLogger.info(message);
+    return 0;
+  }
+
+  if (isSpecResolutionFailure(errors)) {
+    effectiveLogger.info(renderSpecFocusRecovery(repoRoot));
+    return 0;
+  }
+
+  for (const message of infos) effectiveLogger.info(message);
+  for (const message of errors) effectiveLogger.error(message);
+  return exitCode;
+}
+
 export async function run(
   argv: readonly string[] = process.argv.slice(2),
   options: RunOptions = {}
@@ -89,11 +172,29 @@ export async function run(
   if (!commandName) {
     const isTTY =
       options.isTTY ?? Boolean(process.stdin.isTTY && process.stdout.isTTY && !process.env.CI);
+    const provisioning = detectProvisioningContext(repoRoot);
+    const prompts = options.prompts ?? new ClackPrompts();
+
+    if (shouldUseProvisioningEntry(provisioning)) {
+      if (!isTTY) {
+        effectiveLogger.info(renderProvisioningEntrySummary(provisioning).trimEnd());
+        return 0;
+      }
+
+      return runProvisioningSection(
+        repoRoot,
+        registry,
+        { repoRoot, logger: effectiveLogger, prompts },
+        prompts,
+        provisioning
+      );
+    }
+
     if (!isTTY) {
-      return (options.runCockpit ?? runCockpit)(repoRoot, effectiveLogger);
+      return runCockpitWithRecovery(repoRoot, effectiveLogger, options.runCockpit ?? runCockpit);
     }
     return (options.runFlowWizard ?? runFlowWizardDefault)(repoRoot, effectiveLogger, {
-      prompts: options.prompts ?? new ClackPrompts(),
+      prompts,
       registry,
     });
   }

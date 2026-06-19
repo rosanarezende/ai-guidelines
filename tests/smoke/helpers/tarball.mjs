@@ -93,8 +93,55 @@ export async function runCommand(command, args, options = {}) {
   });
 }
 
+export async function runCommandRaw(command, args, options = {}) {
+  const cwd = options.cwd ?? ROOT_DIR;
+  const env = {
+    ...process.env,
+    ...options.env,
+  };
+
+  const resolved = resolveExecutable(command);
+  const useShell = process.platform === "win32" && /\.(cmd|bat)$/i.test(resolved);
+
+  return new Promise((resolve, reject) => {
+    const child = spawn(resolved, args, {
+      cwd,
+      env,
+      shell: useShell,
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+
+    let stdout = "";
+    let stderr = "";
+
+    child.stdout.on("data", (chunk) => {
+      stdout += chunk;
+    });
+
+    child.stderr.on("data", (chunk) => {
+      stderr += chunk;
+    });
+
+    child.on("error", (error) => {
+      reject(
+        new Error(
+          `Falha ao executar "${formatCommand(command, args)}": ${error.message}\nstdout:\n${stdout}\nstderr:\n${stderr}`
+        )
+      );
+    });
+
+    child.on("close", (code) => {
+      resolve({ stdout, stderr, code: code ?? 1 });
+    });
+  });
+}
+
 export async function runNode(scriptPath, args, options = {}) {
   return runCommand(process.execPath, [scriptPath, ...args], options);
+}
+
+export async function runNodeRaw(scriptPath, args, options = {}) {
+  return runCommandRaw(process.execPath, [scriptPath, ...args], options);
 }
 
 export async function packLocal() {
@@ -210,6 +257,20 @@ export async function runInstalledCli(packageDir, args, options = {}) {
   assert.ok(relativeBinPath, "package instalado deve declarar bin para ai-guidelines");
 
   return runNode(path.join(packageDir, relativeBinPath), args, {
+    cwd: options.cwd ?? packageDir,
+    env: options.env,
+  });
+}
+
+export async function runInstalledCliRaw(packageDir, args, options = {}) {
+  const packageJsonPath = path.join(packageDir, "package.json");
+  const packageJson = JSON.parse(await fs.readFile(packageJsonPath, "utf8"));
+  const relativeBinPath =
+    typeof packageJson.bin === "string" ? packageJson.bin : packageJson.bin?.["ai-guidelines"];
+
+  assert.ok(relativeBinPath, "package instalado deve declarar bin para ai-guidelines");
+
+  return runNodeRaw(path.join(packageDir, relativeBinPath), args, {
     cwd: options.cwd ?? packageDir,
     env: options.env,
   });

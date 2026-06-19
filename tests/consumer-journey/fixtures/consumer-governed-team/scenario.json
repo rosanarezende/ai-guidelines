@@ -1,0 +1,20 @@
+{
+  "id": "consumer-governed-team",
+  "description": "Pessoa roda npx ai-guidelines em um repositório já governado com política de time.",
+  "expectedPrimaryOperation": "update",
+  "entrypoint": {
+    "contains": [
+      "Este repositório já usa ai-guidelines.",
+      "Atualizar runtime, templates, providers, práticas ou política governada",
+      "npx ai-guidelines update --dry-run",
+      "Perfil de colaboração detectado:",
+      "team"
+    ],
+    "notContains": ["cockpit — estado irrecuperável"]
+  },
+  "dryRun": {
+    "args": ["update", "--dry-run", "--target", "."],
+    "contains": ["dry-run"],
+    "absentAfter": [".ai-guidelines/consumer-journey-unexpected"]
+  }
+}

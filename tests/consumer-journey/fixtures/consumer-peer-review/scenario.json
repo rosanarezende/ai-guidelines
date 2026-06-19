@@ -1,0 +1,16 @@
+{
+  "id": "consumer-peer-review",
+  "description": "Pessoa precisa revisar o PR de outra pessoa sem perder seu trabalho atual.",
+  "expectedPrimaryOperation": "peer-review",
+  "entrypoint": {
+    "args": ["peer-review"],
+    "expectFailure": true,
+    "contains": ["Uso: peer-review <pr>"],
+    "notContains": ["Human Gate", "merge automático"]
+  },
+  "direct": {
+    "args": ["peer-review"],
+    "expectFailure": true,
+    "contains": ["Uso: peer-review <pr>"]
+  }
+}

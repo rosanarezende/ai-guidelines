@@ -344,3 +344,128 @@ Para cada cenario, o harness deve:
 
 O seed de CO-10.8 em `2d478b2` permanece preservado, mas nao e o trabalho ativo
 ate CO-10.7 fechar corretamente.
+
+## 10. Debito registrado - organizacao da pasta `research/`
+
+Durante a retomada de CO-10.7, foi identificado um debito de governanca na forma
+como a pasta `research/` esta sendo usada.
+
+Fato observado:
+
+```text
+research/
+→ pesquisa exploratoria
+→ dogfood
+→ status de checkpoint
+→ inventario arquitetural
+→ candidatos de gaps/features
+→ matrizes de falsificacao
+→ registros que talvez pertençam a plan.md/tasks.md/decision-brief
+```
+
+Problema:
+
+```text
+a pasta esta virando um deposito misto
+→ fica dificil saber o que e evidencia, plano, status, decisao ou backlog
+→ Rosana precisa reler muitos arquivos para reconstruir o estado
+→ agentes podem usar um artefato errado como contrato da sessao
+```
+
+Impacto para CO-10.7:
+
+- o harness de consumidores ainda deve ser concluido antes de qualquer
+  reorganizacao ampla;
+- este debito nao deve bloquear a implementacao da falsificacao publica da CLI;
+- mas o fechamento de CO-10.7 deve revisitar a organizacao dos artefatos gerados
+  neste checkpoint antes de recomendar readiness.
+
+Tratamento esperado no fim do checkpoint atual:
+
+1. separar o que e pesquisa exploratoria, dogfood, status, matriz de teste e
+   backlog;
+2. decidir o que deve permanecer em `research/`;
+3. decidir o que deve ser promovido para `plan.md`, `tasks.md`,
+   `decision-brief.md` ou outro artefato governado mais adequado;
+4. registrar regra simples para evitar que proximos checkpoints continuem
+   inflando `research/` com papeis diferentes;
+5. se a reorganizacao for maior que ajuste documental local, abrir candidato
+   explicito para CO-10.8 ou sub-checkpoint proprio.
+
+Falsificacao:
+
+```text
+se uma nova sessao precisa ler varios arquivos em research/ para descobrir
+qual e o contrato ativo, o debito ainda nao foi resolvido.
+```
+
+## 11. Rodada de implementacao - harness de consumidores reais
+
+Rodada executada nesta sessao:
+
+```text
+npm run build
+node --experimental-default-config-file --test tests/consumer-journey/*.test.mjs
+npm run consumer:journey:pack
+```
+
+Resultado:
+
+```text
+7/7 cenarios de consumer journey passaram
+12/12 testes de pacote instalado passaram no script consumer:journey:pack
+```
+
+Cenarios cobertos:
+
+- `consumer-empty`: pasta vazia recebe orientacao principal para `init`;
+- `consumer-existing-package`: repo Node existente recebe orientacao principal para
+  `adopt`;
+- `consumer-existing-formatter-conflict`: repo com Biome detecta formatter rival
+  e orienta `--force-prettier` como decisao explicita;
+- `consumer-governed-solo`: repo governado com perfil solo recebe orientacao para
+  `update`;
+- `consumer-governed-team`: repo governado com perfil team recebe orientacao para
+  `update` e explicita o perfil detectado;
+- `consumer-governed-multiple-specs`: repo com multiplas specs nao cai mais em
+  erro irrecuperavel; orienta escolha de foco via `specs`/`handoff`;
+- `consumer-peer-review`: comando publico de review entre pares falha de forma
+  orientada quando falta o numero do PR, sem sugerir Human Gate ou merge.
+
+Bug real revelado:
+
+```text
+repo governado com multiplas specs
+→ `npx ai-guidelines` caia em "cockpit — estado irrecuperável"
+→ causa: cockpit tentava resolver foco automaticamente e vazava erro tecnico
+```
+
+Correcao aplicada:
+
+```text
+quando o cockpit nao consegue resolver a spec por falta de foco claro
+→ a entrada publica captura essa falha
+→ renderiza uma orientacao de foco com specs ativas conhecidas
+→ sugere `npx ai-guidelines specs`
+→ sugere `npx ai-guidelines handoff <id-da-spec>`
+→ nao executa decisao, readiness, Ready, Human Gate ou merge
+```
+
+Garantias do harness:
+
+- instala o pacote empacotado em ambiente temporario;
+- roda a CLI publica instalada (`npx ai-guidelines`/bin instalado);
+- captura stdout/stderr e exit code;
+- valida `--dry-run`;
+- aplica `init`/`adopt` quando seguro;
+- verifica arquivos finais esperados;
+- compara preservacao real de arquivo existente antes/depois;
+- garante que o texto "cockpit — estado irrecuperavel" nao apareca para o
+  humano nos cenarios cobertos.
+
+Limite ainda existente:
+
+```text
+os cenarios de uso diario governado ainda precisam ser refletidos no site como
+prints/transcripts reais da CLI publica antes de declarar CO-10.7 pronto.
+```

@@ -1,0 +1,57 @@
+{
+  "id": "consumer-existing-package",
+  "description": "Pessoa roda npx ai-guidelines em um repositório Node existente sem ai-guidelines.",
+  "expectedPrimaryOperation": "adopt",
+  "entrypoint": {
+    "contains": [
+      "Este parece ser um repositório existente ainda não governado.",
+      "Adotar ai-guidelines neste repositório",
+      "Caminhos que o guia oferece agora:",
+      "npx ai-guidelines adopt --dry-run"
+    ],
+    "notContains": ["cockpit — estado irrecuperável"]
+  },
+  "dryRun": {
+    "args": [
+      "adopt",
+      "--dry-run",
+      "--target",
+      ".",
+      "--name",
+      "consumer-existing-package",
+      "--package-manager",
+      "npm",
+      "--providers",
+      "claude",
+      "--skip-prettier",
+      "--skip-husky",
+      "--skip-ci",
+      "--skip-quality-gates",
+      "--skip-tdd",
+      "--skip-bdd"
+    ],
+    "contains": ["dry-run"],
+    "absentAfter": [".ai-guidelines/config.json"]
+  },
+  "apply": {
+    "args": [
+      "adopt",
+      "--target",
+      ".",
+      "--name",
+      "consumer-existing-package",
+      "--package-manager",
+      "npm",
+      "--providers",
+      "claude",
+      "--skip-prettier",
+      "--skip-husky",
+      "--skip-ci",
+      "--skip-quality-gates",
+      "--skip-tdd",
+      "--skip-bdd"
+    ],
+    "existsAfter": ["AGENTS.md", ".ai-guidelines/config.json", "CLAUDE.md"],
+    "preserveText": ["notes.txt"]
+  }
+}

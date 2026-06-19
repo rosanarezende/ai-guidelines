@@ -1,0 +1,21 @@
+{
+  "id": "consumer-governed-solo",
+  "description": "Pessoa roda npx ai-guidelines em um repositório já governado, perfil solo, sem lifecycle de spec ativo.",
+  "expectedPrimaryOperation": "update",
+  "entrypoint": {
+    "contains": [
+      "Este repositório já usa ai-guidelines.",
+      "Atualizar runtime, templates, providers, práticas ou política governada",
+      "Caminhos que o guia oferece agora:",
+      "npx ai-guidelines update --dry-run",
+      "Perfil de colaboração detectado:",
+      "solo"
+    ],
+    "notContains": ["cockpit — estado irrecuperável"]
+  },
+  "dryRun": {
+    "args": ["update", "--dry-run", "--target", "."],
+    "contains": ["dry-run"],
+    "absentAfter": [".ai-guidelines/consumer-journey-unexpected"]
+  }
+}

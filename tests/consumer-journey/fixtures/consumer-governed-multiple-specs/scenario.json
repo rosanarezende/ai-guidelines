@@ -1,0 +1,24 @@
+{
+  "id": "consumer-governed-multiple-specs",
+  "description": "Pessoa roda npx ai-guidelines em um repositório governado com múltiplas specs publicadas no índice.",
+  "expectedPrimaryOperation": "work",
+  "entrypoint": {
+    "contains": [
+      "Não consegui escolher automaticamente qual spec deve ser o foco agora.",
+      "Specs ativas encontradas:",
+      "0024 (alpha)",
+      "0025 (beta)",
+      "npx ai-guidelines specs",
+      "npx ai-guidelines handoff <id-da-spec>"
+    ],
+    "notContains": [
+      "cockpit — estado irrecuperável",
+      "Iniciar ai-guidelines neste repositório",
+      "Adotar ai-guidelines neste repositório"
+    ]
+  },
+  "direct": {
+    "args": ["specs"],
+    "contains": ["0024", "0025", "feat/spec-0024-alpha", "feat/spec-0025-beta"]
+  }
+}

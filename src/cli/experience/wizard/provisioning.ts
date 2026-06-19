@@ -55,6 +55,7 @@ type GovernedRepoUpdateChoice =
 export interface ProvisioningContextSummary {
   readonly operation: ProvisioningOperation;
   readonly workspaceShape: "empty" | "loose-files" | "package-repo" | "governed-repo";
+  readonly hasGovernedLifecycle?: boolean;
   readonly stateTitle: string;
   readonly evidence: readonly string[];
   readonly guidance: string;
@@ -431,8 +432,13 @@ export function detectProvisioningContext(repoRoot: string): ProvisioningContext
   const hasConfig = existsSync(path.join(repoRoot, ".ai-guidelines", "config.json"));
   const hasAiGuidelines = existsSync(path.join(repoRoot, ".ai-guidelines"));
   const hasGovernance = existsSync(path.join(repoRoot, ".governance"));
+  const hasGovernanceSpecs = existsSync(path.join(repoRoot, ".governance", "specs"));
+  const hasActiveSpecsIndex = existsSync(
+    path.join(repoRoot, ".governance", "runtime", "specs", "active.yml")
+  );
   const hasSpecify = existsSync(path.join(repoRoot, ".specify"));
   const hasPackageJson = existsSync(path.join(repoRoot, "package.json"));
+  const hasGovernedLifecycle = hasGovernanceSpecs || hasActiveSpecsIndex;
   const formatter = detectFormatterContext({
     existingFiles: entries,
     packageJson: readPackageJson(repoRoot),
@@ -448,6 +454,7 @@ export function detectProvisioningContext(repoRoot: string): ProvisioningContext
     return {
       operation: "update",
       workspaceShape: "governed-repo",
+      hasGovernedLifecycle,
       stateTitle: PROVISIONING_COPY.detected.governedTitle,
       evidence,
       guidance: PROVISIONING_COPY.detected.governedGuidance,
@@ -490,6 +497,53 @@ export function detectProvisioningContext(repoRoot: string): ProvisioningContext
     ...(formatter.rival ? { formatterRivalLabel: formatter.rival.label } : {}),
     hasPrettier: formatter.hasPrettier,
   };
+}
+
+export function shouldUseProvisioningEntry(summary: ProvisioningContextSummary): boolean {
+  return summary.operation !== "update" || summary.hasGovernedLifecycle === false;
+}
+
+export function renderProvisioningEntrySummary(summary: ProvisioningContextSummary): string {
+  const command = `npx ai-guidelines ${summary.operation} --dry-run`;
+  const unavailable = PROVISIONING_OPERATIONS.filter(
+    (operation) => operation !== summary.operation
+  );
+  const lines = [
+    "# ai-guidelines",
+    "",
+    summary.stateTitle,
+    "",
+    PROVISIONING_COPY.section.detectedLabel,
+    ...summary.evidence.map((item) => `- ${item}`),
+    "",
+    "Próximo passo recomendado:",
+    `- ${provisioningLabel(summary.operation)}`,
+    "",
+    "Caminhos que o guia oferece agora:",
+    `- ${provisioningLabel(summary.operation)}`,
+    "",
+    "Caminhos que não aparecem como ação principal neste contexto:",
+    ...unavailable.map((operation) => `- ${provisioningLabel(operation)}`),
+    "",
+    summary.guidance,
+    "",
+    "Você não precisa decorar comandos:",
+    "- em terminal interativo, rode `npx ai-guidelines` e escolha pelo guia;",
+    `- em automação ou revisão rápida, use \`${command}\` para ver o plano sem escrever arquivos.`,
+  ];
+
+  if (summary.formatterRivalLabel) {
+    lines.push(
+      "",
+      `Atenção: formatter rival detectado (${summary.formatterRivalLabel}). Use --force-prettier apenas com decisão explícita.`
+    );
+  }
+
+  if (summary.reviewPolicy) {
+    lines.push("", "Perfil de colaboração detectado:", `- ${summary.reviewPolicy.activeProfile}`);
+  }
+
+  return `${lines.join("\n")}\n`;
 }
 
 function renderProvisioningContext(summary: ProvisioningContextSummary): string {
