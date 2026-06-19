@@ -75,7 +75,10 @@ describe("flow copy catalog", () => {
     expect(data).toContain("Operar o dia a dia sem lembrar a sequência de comandos");
     expect(data).toContain("Escolher a frente certa antes de trabalhar");
     expect(data).toContain("Revisar PR de outra pessoa sem perder sua branch");
-    expect(data).toContain("npm run flow -- peer-review 43 --brief-only");
+    // Invocações agora são DERIVADAS do registry (B1): em vez do literal, o site
+    // chama flowCommand("peer-review", …). A fidelidade do nome de comando é
+    // garantida por siteCommandSurface.test.ts (guard que valida contra o registry).
+    expect(data).toContain('flowCommand("peer-review"');
     expect(data).toContain("Worktree separado");
     expect(data).toContain("Checkout guiado");
   });

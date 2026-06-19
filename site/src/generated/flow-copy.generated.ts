@@ -356,5 +356,415 @@ export const AI_GUIDELINES_FLOW_COPY = {
       "policyChangeNote": "O update vai alterar somente o perfil ativo da política quando o arquivo já existir.",
       "policyChangeSelected": "Perfil selecionado:"
     }
+  },
+  "commands": [
+    {
+      "name": "adopt",
+      "aliases": [],
+      "description": "Aplica baseline AI-first em repositório existente.",
+      "usage": [
+        "adopt --providers claude,copilot --force"
+      ],
+      "subcommands": []
+    },
+    {
+      "name": "check-budget",
+      "aliases": [],
+      "description": "Imprime o relatório de orçamento de tokens.",
+      "usage": [
+        "check-budget"
+      ],
+      "subcommands": []
+    },
+    {
+      "name": "cockpit",
+      "aliases": [],
+      "description": "Mostra o resumo atual: onde estamos, próximo passo, decisões disponíveis, bloqueios e ações proibidas. Read-only.",
+      "usage": [
+        "cockpit"
+      ],
+      "subcommands": []
+    },
+    {
+      "name": "continue",
+      "aliases": [],
+      "description": "Briefing + próxima ação da spec (lookup de state.yml); recusa se faltar tasks.md ou gate≠closed. Sem argumento = spec da branch atual.",
+      "usage": [
+        "continue",
+        "continue 0023"
+      ],
+      "subcommands": []
+    },
+    {
+      "name": "decide",
+      "aliases": [],
+      "description": "Decisões reservadas ao humano (close-dispositions, finish-subcheckpoint, mark-readiness, advance-subcheckpoint, human-gate, open-next-node): briefing humano → escolha → prévia → confirmação → registro governado. Zero LLM.",
+      "usage": [
+        "decide",
+        "decide --brief-only",
+        "decide --type finish-subcheckpoint --brief-only",
+        "decide --type mark-readiness --brief-only",
+        "decide --type close-dispositions --brief-only",
+        "decide --type advance-subcheckpoint --brief-only",
+        "decide --type human-gate --brief-only",
+        "decide --type open-next-node --brief-only",
+        "decide --type close-dispositions --technical",
+        "decide --type finish-subcheckpoint --decision finish --authorization explicit-human-decision --confirm",
+        "decide --type mark-readiness --decision mark-ready --authorization explicit-human-decision --confirm",
+        "decide --type close-dispositions --decision accept-all --authorization explicit-human-decision --confirm",
+        "decide --type open-next-node --decision open-node --authorization explicit-human-decision --confirm"
+      ],
+      "subcommands": []
+    },
+    {
+      "name": "drift",
+      "aliases": [],
+      "description": "Diagnostica drift do índice público: spec_path declarado que não existe no filesystem local. Read-only.",
+      "usage": [
+        "drift"
+      ],
+      "subcommands": []
+    },
+    {
+      "name": "handoff",
+      "aliases": [],
+      "description": "Gera handoff situado read-only (fatos + proxima acao + selo) a partir de state.yml/topology/git/gh.",
+      "usage": [
+        "handoff",
+        "handoff 0024",
+        "handoff 0024 --hybrid",
+        "handoff 0024 --no-remote"
+      ],
+      "subcommands": []
+    },
+    {
+      "name": "init",
+      "aliases": [],
+      "description": "Cria baseline AI-first em projeto novo.",
+      "usage": [
+        "init --target ./meu-projeto --lang pt"
+      ],
+      "subcommands": []
+    },
+    {
+      "name": "insight",
+      "aliases": [],
+      "description": "Captura e maturação de percepções recorrentes (PIT): add | saw | list | promote | discard.",
+      "usage": [
+        "insight list",
+        "insight add"
+      ],
+      "subcommands": []
+    },
+    {
+      "name": "peer-review",
+      "aliases": [],
+      "description": "Prepara revisão de PR de outra pessoa sem misturar com sua spec atual; oferece worktree separado ou checkout guiado.",
+      "usage": [
+        "peer-review 43 --brief-only",
+        "peer-review 43 --mode worktree --confirm",
+        "peer-review 43 --mode checkout --confirm"
+      ],
+      "subcommands": []
+    },
+    {
+      "name": "release-prep",
+      "aliases": [],
+      "description": "Tier 3: lê a versão de CHANGELOG [Unreleased], mostra o plan, confirma e executa bump + tag + push (dispara o release).",
+      "usage": [
+        "release-prep --dry-run",
+        "release-prep --version 1.1.0-preview.0"
+      ],
+      "subcommands": []
+    },
+    {
+      "name": "review",
+      "aliases": [],
+      "description": "Briefing governado por tipo de review (catálogo extensível: `review types`); `review [<pr>]` delega ao triage (compat).",
+      "usage": [
+        "review technical-audit",
+        "review technical-audit --authorization explicit-review-request",
+        "review architectural-review",
+        "review types",
+        "review policy",
+        "review type add security-review --title 'Security Review' --objective '...' --vector secrets",
+        "review 26"
+      ],
+      "subcommands": []
+    },
+    {
+      "name": "specs",
+      "aliases": [],
+      "description": "Lista as specs ativas do índice operacional público (.governance/runtime/specs/active.yml). Read-only.",
+      "usage": [
+        "specs"
+      ],
+      "subcommands": []
+    },
+    {
+      "name": "triage",
+      "aliases": [],
+      "description": "Triagem read-only dos review comments inline de um PR (sem-resposta × respondidos) + bloco copiável. Não analisa/responde (ADR 0018).",
+      "usage": [
+        "triage",
+        "triage 26"
+      ],
+      "subcommands": []
+    },
+    {
+      "name": "update",
+      "aliases": [],
+      "description": "Re-aplica provider entrypoints, templates e runtime a partir do config existente.",
+      "usage": [
+        "update --target .",
+        "update --providers claude,openai"
+      ],
+      "subcommands": []
+    },
+    {
+      "name": "validate",
+      "aliases": [],
+      "description": "Valida rapidamente o diff atual; use `npm run validate` para o gate completo antes de Ready/Human Gate.",
+      "usage": [
+        "validate changed",
+        "validate changed --fix",
+        "validate changed --base origin/main"
+      ],
+      "subcommands": [
+        "changed"
+      ]
+    },
+    {
+      "name": "visual-prompt",
+      "aliases": [],
+      "description": "Gera o prompt para um gerador de imagem externo (fluxo em 2 etapas via IA conversacional com acesso ao repo).",
+      "usage": [
+        "visual-prompt --type=<tipo>"
+      ],
+      "subcommands": []
+    },
+    {
+      "name": "work",
+      "aliases": [],
+      "description": "Briefing governado de trabalho (modo inferido + escopo/autoridade/validações/parada/report contract) a partir de work-policy.yml + snapshot situado. Read-only.",
+      "usage": [
+        "work",
+        "work --authorization explicit-work-request",
+        "work --no-remote"
+      ],
+      "subcommands": []
+    },
+    {
+      "name": "workflow",
+      "aliases": [],
+      "description": "Operações avançadas da spec/stack (publish-state, Integration PR, merge, índice, drift, prompt visual). O guia humano principal é `npm run flow`.",
+      "usage": [
+        "workflow",
+        "workflow publish-state --status=active --updated-by=@maintainer"
+      ],
+      "subcommands": [
+        "publish-state"
+      ]
+    }
+  ],
+  "intents": [
+    {
+      "id": "retomar-trabalho",
+      "title": "Entender onde estamos e continuar",
+      "actions": [
+        {
+          "command": "cockpit",
+          "label": "Ver resumo completo antes de escolher"
+        },
+        {
+          "command": "continue",
+          "label": "Retomar de onde parei"
+        },
+        {
+          "command": "handoff",
+          "label": "Preparar contexto para uma nova sessão com IA"
+        },
+        {
+          "command": "insight",
+          "args": [
+            "list"
+          ],
+          "label": "Ver percepções recentes"
+        }
+      ]
+    },
+    {
+      "id": "resolver-feedback-de-pr",
+      "title": "Resolver feedback de um PR",
+      "actions": [
+        {
+          "command": "triage",
+          "label": "Triar comentários de review do PR"
+        }
+      ]
+    },
+    {
+      "id": "revisar-pr-de-colega",
+      "title": "Revisar PR de outra pessoa",
+      "actions": [
+        {
+          "command": "peer-review",
+          "args": [
+            "<pr>",
+            "--brief-only"
+          ],
+          "label": "Entender um PR antes de abrir worktree ou checkout guiado"
+        }
+      ]
+    },
+    {
+      "id": "validar-mudancas",
+      "title": "Validar mudanças antes de enviar",
+      "actions": [
+        {
+          "command": "validate",
+          "args": [
+            "changed"
+          ],
+          "label": "Rodar validação intermediária só nos arquivos alterados"
+        },
+        {
+          "command": "validate",
+          "args": [
+            "changed",
+            "--fix"
+          ],
+          "label": "Formatar somente arquivos alterados e validar o diff"
+        }
+      ]
+    },
+    {
+      "id": "executar-trabalho-governado",
+      "title": "Entender o que pode ser feito nesta sessão",
+      "actions": [
+        {
+          "command": "work",
+          "label": "Ver escopo, autorização, validações e quando parar"
+        },
+        {
+          "command": "work",
+          "args": [
+            "--authorization",
+            "explicit-work-request"
+          ],
+          "label": "Carregar o plano da sessão quando a owner já autorizou o trabalho atual"
+        }
+      ]
+    },
+    {
+      "id": "decidir-reservado-humano",
+      "title": "Ver ações que exigem decisão humana",
+      "actions": [
+        {
+          "command": "decide",
+          "label": "Abrir tela de decisão com prévia e confirmação"
+        },
+        {
+          "command": "decide",
+          "args": [
+            "--brief-only"
+          ],
+          "label": "Só ler as ações disponíveis e bloqueadas, sem escrever nada"
+        }
+      ]
+    },
+    {
+      "id": "pedir-review-governado",
+      "title": "Ver tipos de revisão disponíveis",
+      "actions": [
+        {
+          "command": "review",
+          "args": [
+            "types"
+          ],
+          "label": "Ver tipos de revisão disponíveis"
+        },
+        {
+          "command": "review",
+          "args": [
+            "policy"
+          ],
+          "label": "Ver quais revisões importam para este PR"
+        }
+      ]
+    },
+    {
+      "id": "registrar-percepcao",
+      "title": "Registrar uma percepção em trânsito",
+      "actions": [
+        {
+          "command": "insight",
+          "args": [
+            "add"
+          ],
+          "label": "Adicionar uma percepção"
+        },
+        {
+          "command": "insight",
+          "args": [
+            "list"
+          ],
+          "label": "Listar percepções abertas"
+        }
+      ]
+    },
+    {
+      "id": "preparar-release",
+      "title": "Preparar um release",
+      "actions": [
+        {
+          "command": "release-prep",
+          "label": "Preparar release (bump de versão + tag)"
+        }
+      ]
+    },
+    {
+      "id": "inspecionar-specs-ativas",
+      "title": "Inspecionar specs ativas",
+      "actions": [
+        {
+          "command": "specs",
+          "label": "Ver trabalhos governados ativos"
+        },
+        {
+          "command": "drift",
+          "label": "Diagnosticar drift do índice"
+        }
+      ]
+    },
+    {
+      "id": "gerar-prompt-visual",
+      "title": "Gerar um prompt visual",
+      "actions": [
+        {
+          "command": "visual-prompt",
+          "label": "Gerar prompt visual (para gerador de imagem externo)"
+        }
+      ]
+    }
+  ],
+  "catalogs": {
+    "providers": [
+      "claude",
+      "cursor",
+      "copilot",
+      "windsurf",
+      "gemini",
+      "aider",
+      "openai"
+    ],
+    "features": [
+      "prettier",
+      "husky",
+      "ci",
+      "quality-gates",
+      "tdd",
+      "bdd"
+    ]
   }
 } as const;
