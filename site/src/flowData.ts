@@ -59,6 +59,7 @@ export interface Journey {
   readonly title: string;
   readonly summary: string;
   readonly command: string;
+  readonly directCommand?: string;
   readonly whenToUse: readonly string[];
   readonly steps: readonly FlowStep[];
   /** Cenário gerado (real/guiado) associado — surface do terminal verídico. */
@@ -130,8 +131,9 @@ export const startJourneys: readonly Journey[] = [
     eyebrow: "Projeto novo",
     title: "Inicializar um projeto governado",
     summary:
-      "Use quando a pasta ainda está limpa e você quer nascer com baseline, práticas, IA e validações já organizadas.",
-    command: binCommand("init"),
+      "Abra o guia interativo. Ele detecta que a pasta está limpa e oferece inicializar como caminho principal.",
+    command: BIN_WIZARD,
+    directCommand: binCommand("init", "--dry-run"),
     scenarioId: "new-project",
     whenToUse: [
       "pasta vazia ou projeto ainda sem histórico para preservar",
@@ -141,8 +143,8 @@ export const startJourneys: readonly Journey[] = [
     steps: [
       {
         title: "Detectar começo limpo",
-        text: "O guia entende que o caminho natural é iniciar. Adopt e update não aparecem como ação principal.",
-        command: binCommand("init"),
+        text: "A pessoa roda apenas o guia. A CLI entende que o caminho natural é iniciar; adopt e update não aparecem como ação principal.",
+        command: BIN_WIZARD,
         lines: [
           { text: "Pasta vazia detectada", tone: "normal" },
           { text: "Inicializar um projeto governado", tone: "active" },
@@ -188,8 +190,9 @@ export const startJourneys: readonly Journey[] = [
     eyebrow: "Repo existente",
     title: "Adotar sem apagar o que já existe",
     summary:
-      "Use quando o projeto já tem código, configs ou histórico. O caminho conservador preserva conteúdo e mostra conflitos antes de aplicar.",
-    command: binCommand("adopt"),
+      "Abra o guia interativo. Ele detecta arquivos existentes, oferece adoção conservadora e mostra conflitos antes de aplicar.",
+    command: BIN_WIZARD,
+    directCommand: binCommand("adopt", "--dry-run"),
     scenarioId: "existing-repo",
     whenToUse: [
       "repo com package.json, código ou práticas existentes",
@@ -199,7 +202,8 @@ export const startJourneys: readonly Journey[] = [
     steps: [
       {
         title: "Ler o estado atual",
-        text: "O guia olha arquivos existentes, package manager, providers e práticas já presentes.",
+        text: "A pessoa roda o mesmo guia. Ele olha arquivos existentes, package manager, providers e práticas já presentes.",
+        command: BIN_WIZARD,
         lines: [
           { text: "Repo existente detectado", tone: "normal" },
           { text: "Adotar preservando conteúdo local", tone: "active" },
@@ -243,8 +247,9 @@ export const dailyJourney: Journey = {
   eyebrow: "Repo em uso",
   title: "Operar o dia a dia sem lembrar a sequência de comandos",
   summary:
-    "Depois que o repo já usa ai-guidelines, o caminho normal é continuar trabalho, validar o diff, atualizar práticas e preparar decisões humanas.",
+    "Depois que o repo já usa ai-guidelines, abra o guia interativo. Ele mostra estado, próxima ação, validação, atualizações e decisões humanas.",
   command: BIN_WIZARD,
+  directCommand: binCommand("update", "--dry-run"),
   whenToUse: [
     "você voltou para uma sessão e precisa entender o estado",
     "há uma spec ativa, um PR Draft ou decisões pendentes",
@@ -265,7 +270,7 @@ export const dailyJourney: Journey = {
     {
       title: "Validar mudanças",
       text: "Durante Draft, o caminho rápido valida só o diff. Antes de Ready/Human Gate, a validação completa continua disponível.",
-      command: binCommand("validate", "changed"),
+      command: BIN_WIZARD,
       lines: [
         { text: copy.wizard.validation.changed, tone: "active" },
         { text: copy.wizard.validation.changedFix, tone: "warn" },
@@ -275,7 +280,7 @@ export const dailyJourney: Journey = {
     {
       title: "Atualizar o repo governado",
       text: "Update reaplica runtime, templates, providers, features e práticas sem voltar para init/adopt.",
-      command: binCommand("update"),
+      command: BIN_WIZARD,
       lines: [
         { text: "Base: runtime, templates e config", tone: "success" },
         { text: "IA: providers por seleção agrupada", tone: "success" },
@@ -286,7 +291,7 @@ export const dailyJourney: Journey = {
     {
       title: "Preparar decisões",
       text: "Ready, Human Gate e merge não são atalhos. O sistema mostra briefing, preview e bloqueios antes de qualquer decisão.",
-      command: binCommand("decide", "--brief-only"),
+      command: BIN_WIZARD,
       lines: [
         { text: "Decisões disponíveis", tone: "success" },
         { text: "Decisões bloqueadas com motivo factual", tone: "warn" },
@@ -302,8 +307,9 @@ export const teamJourney: Journey = {
   eyebrow: "Time e múltiplas specs",
   title: "Escolher a frente certa antes de trabalhar",
   summary:
-    "Quando existem várias specs ou pessoas trabalhando em paralelo, o fluxo precisa evitar branch errada, PR errado e criação de spec sem autorização.",
-  command: binCommand("specs"),
+    "Quando existem várias specs ou pessoas trabalhando em paralelo, o guia ajuda a escolher a frente certa antes de executar qualquer coisa.",
+  command: BIN_WIZARD,
+  directCommand: binCommand("specs"),
   whenToUse: [
     "há mais de uma spec aberta",
     "você precisa continuar uma spec específica",
@@ -313,7 +319,7 @@ export const teamJourney: Journey = {
     {
       title: "Ver specs abertas",
       text: "A lista pública mostra id, branch, PR, status e possíveis divergências antes de escolher.",
-      command: binCommand("specs"),
+      command: BIN_WIZARD,
       lines: [
         { text: "Specs abertas no índice governado", tone: "normal" },
         { text: "minha-spec — área do projeto", tone: "active" },
@@ -324,7 +330,7 @@ export const teamJourney: Journey = {
     {
       title: "Continuar uma spec específica",
       text: "A pessoa informa número, slug ou branch. O sistema confere se o checkout local combina.",
-      command: binCommand("continue"),
+      command: BIN_WIZARD,
       lines: [
         { text: "Spec escolhida", tone: "active" },
         { text: "Branch atual combina com a spec", tone: "success" },
@@ -358,8 +364,9 @@ export const peerReviewJourney: Journey = {
   eyebrow: "Review entre pares",
   title: "Revisar PR de outra pessoa sem perder sua branch",
   summary:
-    "O fluxo separa revisão de colega do seu trabalho atual: primeiro mostra o PR, depois prepara worktree separado ou checkout guiado.",
-  command: binCommand("peer-review", "<pr>", "--brief-only"),
+    "O guia separa revisão de colega do seu trabalho atual: primeiro mostra o PR, depois prepara worktree separado ou checkout guiado.",
+  command: BIN_WIZARD,
+  directCommand: binCommand("peer-review", "<pr>", "--brief-only"),
   whenToUse: [
     "você está em uma spec própria e precisa revisar outro PR",
     "não quer misturar arquivos locais com a branch do colega",
@@ -369,7 +376,7 @@ export const peerReviewJourney: Journey = {
     {
       title: "Escolher o PR",
       text: "O briefing mostra título, estado, branch, base, link e working tree antes de qualquer ação.",
-      command: binCommand("peer-review", "<pr>", "--brief-only"),
+      command: BIN_WIZARD,
       lines: [
         { text: "Review entre pares — PR de um colega", tone: "normal" },
         { text: "Branch do PR e base do PR", tone: "active" },
@@ -389,7 +396,7 @@ export const peerReviewJourney: Journey = {
     {
       title: "Preparar ambiente",
       text: "A preparação busca a branch do PR e cria o espaço de revisão, sem Ready, Gate, merge ou transição.",
-      command: binCommand("peer-review", "<pr>", "--mode", "worktree", "--confirm"),
+      command: BIN_WIZARD,
       lines: [
         { text: "Fetch pull/<pr>/head", tone: "normal" },
         { text: "Criar worktree isolado", tone: "success" },
@@ -426,8 +433,8 @@ export const referenceGroups: readonly ReferenceGroup[] = [
     })),
   },
   {
-    title: "Comandos públicos",
-    text: "No seu projeto, os comandos rodam com `npx ai-guidelines`. Cada nome abaixo é validado contra o registry real da CLI.",
+    title: "Atalhos diretos públicos",
+    text: "O caminho principal é `npx ai-guidelines`, que abre o guia interativo. Estes atalhos existem para automação ou para quem já sabe exatamente o que quer. Cada nome é validado contra o registry real da CLI.",
     items: [
       publicCommand("init", "inicia um projeto novo, já governado"),
       publicCommand("adopt", "adota o framework em um repo existente, preservando o que há"),
@@ -498,6 +505,7 @@ export interface AudiencePath {
   readonly text: string;
   readonly route: RouteId;
   readonly command: string;
+  readonly directCommand?: string;
 }
 
 export const audiencePaths: readonly AudiencePath[] = [
@@ -507,7 +515,8 @@ export const audiencePaths: readonly AudiencePath[] = [
     title: "Começar do zero, já governado",
     text: "Pasta limpa: nasça com baseline, providers, práticas e validações organizados.",
     route: "start",
-    command: binCommand("init"),
+    command: BIN_WIZARD,
+    directCommand: binCommand("init", "--dry-run"),
   },
   {
     id: "adopt",
@@ -515,7 +524,8 @@ export const audiencePaths: readonly AudiencePath[] = [
     title: "Adotar sem apagar o que existe",
     text: "Já tem código: o caminho conservador preserva conteúdo e mostra conflitos antes de aplicar.",
     route: "start",
-    command: binCommand("adopt", "--dry-run"),
+    command: BIN_WIZARD,
+    directCommand: binCommand("adopt", "--dry-run"),
   },
   {
     id: "daily",
@@ -526,6 +536,56 @@ export const audiencePaths: readonly AudiencePath[] = [
     command: BIN_WIZARD,
   },
 ];
+
+export interface WizardDemoStep {
+  readonly title: string;
+  readonly prompt: string;
+  readonly selected: string;
+  readonly help: string;
+  readonly derivedFrom?: string;
+}
+
+export interface WizardDemo {
+  readonly eyebrow: string;
+  readonly title: string;
+  readonly lead: string;
+  readonly command: string;
+  readonly steps: readonly WizardDemoStep[];
+}
+
+export const publicWizardDemo: WizardDemo = {
+  eyebrow: "Caminho principal",
+  title: "O usuário não precisa decorar comandos.",
+  lead: "Rode o guia interativo e escolha o que quer fazer. Os comandos diretos existem para automação e para quem já sabe exatamente o caminho.",
+  command: BIN_WIZARD,
+  steps: [
+    {
+      title: "Abrir o guia",
+      prompt: "O que você quer fazer?",
+      selected: "Escolher o melhor caminho para este repositório",
+      help: "O guia olha o estado local antes de sugerir init, adopt, update ou trabalho diário.",
+    },
+    {
+      title: "Escolher intenção",
+      prompt: "Este repositório parece estar em qual momento?",
+      selected: "Projeto novo, repo existente ou repo já governado",
+      help: "A escolha principal vem do estado detectado; a pessoa pode revisar antes de aplicar.",
+    },
+    {
+      title: "Selecionar práticas",
+      prompt: copy.provisioning.featureQuestion,
+      selected: `${copy.provisioning.featureGroups.infrastructure}: Prettier, Husky, CI e Quality Gates`,
+      help: "Providers e features vêm dos catálogos reais da CLI, não de uma lista escrita só para o site.",
+      derivedFrom: "features",
+    },
+    {
+      title: "Revisar preview",
+      prompt: "Aplicar estas mudanças?",
+      selected: "Confirmar apenas depois de ver arquivos, blocos gerenciados e validações",
+      help: "Dry-run e preview deixam claro o que será criado ou atualizado antes de tocar no disco.",
+    },
+  ],
+};
 
 export const safetyRails: readonly ProductPoint[] = [
   {

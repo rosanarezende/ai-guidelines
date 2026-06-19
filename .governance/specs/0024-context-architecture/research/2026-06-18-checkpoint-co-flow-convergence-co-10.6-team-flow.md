@@ -388,3 +388,30 @@ registry). Fidelidade preservada (B1/B2/B3/A2 intactos).
 
 Limites reafirmados: sem Ready/Human Gate/merge/advance-subcheckpoint/readiness,
 sem decisão mutante de `decide`, sem novo PR, sem topologia.
+
+## Produto público wizard-first (2026-06-19)
+
+A separação consumidor/contribuidor resolveu a superfície errada (`npm run flow`
+no público), mas a revisão humana ainda identificou um problema de experiência:
+o site fazia parecer que o usuário precisava decorar vários comandos diretos.
+Isso contradiz a intenção do produto — o caminho principal deve ser abrir o guia
+interativo com `npx ai-guidelines` e escolher como seguir.
+
+Correção aplicada:
+
+- Home, cartões de público e jornadas passam a destacar `npx ai-guidelines`
+  como "Caminho principal".
+- `init`, `adopt`, `update`, `specs` e `peer-review` continuam aparecendo, mas
+  como "Atalho direto" para automação ou para quem já sabe exatamente o que
+  quer.
+- `/flow` ganhou uma demonstração Clack-like do guia interativo: abrir o guia,
+  escolher intenção, selecionar práticas derivadas dos catálogos reais e revisar
+  preview antes de confirmar.
+- Os transcripts reais de init/adopt/update seguem disponíveis, mas como apoio
+  e equivalência do atalho direto — não como protagonista do onboarding.
+- Guards atualizados para exigir a narrativa wizard-first: superfície pública
+  contém `publicWizardDemo`, `BIN_WIZARD` como comando principal e a referência
+  enquadra comandos públicos como atalhos diretos.
+
+Limites reafirmados: sem Ready/Human Gate/merge/advance-subcheckpoint/readiness,
+sem decisão mutante de `decide`, sem novo PR, sem topologia.

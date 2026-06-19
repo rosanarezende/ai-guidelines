@@ -7,10 +7,15 @@ import { fileURLToPath } from "node:url";
 
 import sharp from "sharp";
 
-const siteRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const repoRoot = path.resolve(siteRoot, "..");
-const sourceDir = path.join(repoRoot, "docs", "assets");
-const outputDir = path.join(siteRoot, "src", "assets", "generated");
+const defaultSiteRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const siteRoot = path.resolve(process.env.AI_GUIDELINES_SITE_ROOT ?? defaultSiteRoot);
+const repoRoot = path.resolve(process.env.AI_GUIDELINES_REPO_ROOT ?? path.resolve(siteRoot, ".."));
+const sourceDir = path.resolve(
+  process.env.AI_GUIDELINES_ASSET_SOURCE_DIR ?? path.join(repoRoot, "docs", "assets")
+);
+const outputDir = path.resolve(
+  process.env.AI_GUIDELINES_ASSET_OUTPUT_DIR ?? path.join(siteRoot, "src", "assets", "generated")
+);
 const manifestPath = path.join(outputDir, "manifest.json");
 
 // Parâmetros do encoder. Determinismo do CHECK NÃO depende dos bytes WebP

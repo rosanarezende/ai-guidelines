@@ -11,6 +11,7 @@ import {
   peerReviewJourney,
   productProblems,
   productSolutions,
+  publicWizardDemo,
   publicHumanDecisions,
   referenceGroups,
   routeFromPath,
@@ -23,6 +24,7 @@ import {
   teamJourney,
   TerminalLine,
   type RouteId,
+  type WizardDemo,
 } from "./flowData";
 
 const flowImageWebp = new URL("./assets/generated/ai-guidelines-flow.webp", import.meta.url).href;
@@ -241,6 +243,66 @@ function StepTerminal({ step }: { readonly step: FlowStep }): JSX.Element {
   );
 }
 
+// ── Guia interativo público ───────────────────────────────────────────────
+
+function WizardDemoPanel({ demo }: { readonly demo: WizardDemo }): JSX.Element {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const activeStep = demo.steps[activeIndex] ?? demo.steps[0];
+
+  return (
+    <section className="wizardDemoSection" aria-labelledby="wizard-demo-title">
+      <div className="wizardDemoIntro">
+        <p className="eyebrow">{demo.eyebrow}</p>
+        <h2 id="wizard-demo-title">{demo.title}</h2>
+        <p>{demo.lead}</p>
+        <code>{demo.command}</code>
+      </div>
+      <div className="wizardDemoShell">
+        <div className="wizardScreen" aria-live="polite">
+          <div className="wizardPrompt">
+            <span className="wizardGlyph">◇</span>
+            <strong>{activeStep.prompt}</strong>
+          </div>
+          <div className="wizardChoice">
+            <span>◆</span>
+            <strong>{activeStep.selected}</strong>
+          </div>
+          <p>{activeStep.help}</p>
+          {activeStep.derivedFrom ? (
+            <em>Derivado do catálogo real de {activeStep.derivedFrom}.</em>
+          ) : null}
+        </div>
+        <ol className="wizardStepList" aria-label="Demonstração do guia interativo">
+          {demo.steps.map((step, index) => (
+            <li key={step.title}>
+              <button
+                aria-current={index === activeIndex ? "step" : undefined}
+                className={index === activeIndex ? "wizardStep isActive" : "wizardStep"}
+                onClick={() => setActiveIndex(index)}
+                type="button"
+              >
+                <span>{String(index + 1).padStart(2, "0")}</span>
+                <strong>{step.title}</strong>
+              </button>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </section>
+  );
+}
+
+function DirectCommandAside({ command }: { readonly command?: string }): JSX.Element | null {
+  if (!command) return null;
+  return (
+    <aside className="directCommandAside">
+      <span>Atalho direto</span>
+      <p>Para automação ou para quem já sabe exatamente o que quer.</p>
+      <code>{command}</code>
+    </aside>
+  );
+}
+
 // ── Stepper de jornada ────────────────────────────────────────────────────
 
 function StepNavigator({ steps }: { readonly steps: readonly FlowStep[] }): JSX.Element {
@@ -355,7 +417,7 @@ function HomePage(): JSX.Element {
         </p>
         <div className="heroActions">
           <SiteLink className="primaryAction" route="flow">
-            Ver como funciona
+            Ver o guia interativo
           </SiteLink>
           <SiteLink className="secondaryAction" route="start">
             Começar
@@ -419,7 +481,11 @@ function HomePage(): JSX.Element {
               <span className="pill">{path.label}</span>
               <h3>{path.title}</h3>
               <p>{path.text}</p>
-              <code>{path.command}</code>
+              <div className="primaryCommand">
+                <span>Caminho principal</span>
+                <code>{path.command}</code>
+              </div>
+              <DirectCommandAside command={path.directCommand} />
               <SiteLink route={path.route}>Ver passo a passo →</SiteLink>
             </article>
           ))}
@@ -482,6 +548,8 @@ function FlowOverview(): JSX.Element {
       title="O caminho muda conforme o momento do repositório."
       lead="Comece pela intenção. Cada área tem um passo a passo e um exemplo de terminal de apoio."
     >
+      <WizardDemoPanel demo={publicWizardDemo} />
+
       <div className="overviewGrid">
         {areas.map((area) => (
           <SiteLink className="overviewCard" key={area.route} route={area.route}>
@@ -496,7 +564,7 @@ function FlowOverview(): JSX.Element {
         <SectionHead
           eyebrow="Veja de verdade"
           title="Exemplos de terminal gerados do runtime real."
-          lead="Estes transcripts são capturados de execução real em dry-run — não são telas inventadas."
+          lead="Estes transcripts são atalhos diretos equivalentes. O caminho principal continua sendo abrir o guia interativo."
         />
         <ScenarioTabs
           scenarioIds={["new-project", "existing-repo", "governed-repo", "update-providers"]}
@@ -563,7 +631,10 @@ function JourneySection({ journey }: { readonly journey: Journey }): JSX.Element
         <span className="pill">{journey.eyebrow}</span>
         <h2>{journey.title}</h2>
         <p>{journey.summary}</p>
-        <code>{journey.command}</code>
+        <div className="primaryCommand">
+          <span>Caminho principal</span>
+          <code>{journey.command}</code>
+        </div>
         <div className="whenBox">
           <h3>Quando usar</h3>
           <ul>
@@ -576,6 +647,7 @@ function JourneySection({ journey }: { readonly journey: Journey }): JSX.Element
       <div className="journeyBody">
         <StepNavigator steps={journey.steps} />
         {journey.scenarioId ? <ScenarioPanel scenarioId={journey.scenarioId} /> : null}
+        <DirectCommandAside command={journey.directCommand} />
       </div>
     </section>
   );

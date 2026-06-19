@@ -58,9 +58,9 @@ describe("governed documentation site packaging", () => {
     // A home é uma página de produto com hero, problema, solução e caminhos por público.
     expect(appSource).toContain("ProductCTA");
     expect(appSource).toContain("audiencePaths");
-    expect(appSource).toContain("Ver como funciona");
+    expect(appSource).toContain("Ver o guia interativo");
     // O comando do consumidor é DERIVADO (binCommand), não literal no JSX.
-    expect(flowData).toContain('binCommand("init")');
+    expect(flowData).toContain('directCommand: binCommand("init", "--dry-run")');
     expect(viteConfig).not.toContain("copyFlowSite");
   });
 

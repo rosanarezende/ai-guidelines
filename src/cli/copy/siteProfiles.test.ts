@@ -58,10 +58,17 @@ describe("flowData separa consumidor e contribuidor", () => {
   });
 
   it("init/adopt/update aparecem como comandos públicos (npx, derivados)", () => {
-    expect(publicPart).toContain('binCommand("init")');
+    expect(publicPart).toContain('binCommand("init"');
     expect(publicPart).toContain('binCommand("adopt"');
     expect(publicPart).toContain('binCommand("update"');
     expect(publicPart).toContain("BIN_WIZARD");
+  });
+
+  it("a superfície pública apresenta o guia interativo como caminho principal", () => {
+    expect(publicPart).toContain("publicWizardDemo");
+    expect(publicPart).toContain("command: BIN_WIZARD");
+    expect(publicPart).toContain("Atalhos diretos públicos");
+    expect(publicPart).toContain("O caminho principal é `npx ai-guidelines`");
   });
 
   it("`npm run flow` vive apenas na seção de contribuidor", () => {
@@ -75,6 +82,13 @@ describe("App separa consumidor e contribuidor", () => {
 
   it("App.tsx não contém o alias `npm run flow`", () => {
     expect(app).not.toContain("npm run flow");
+  });
+
+  it("App.tsx diferencia caminho principal de atalhos diretos", () => {
+    expect(app).toContain("WizardDemoPanel");
+    expect(app).toContain("Caminho principal");
+    expect(app).toContain("Atalho direto");
+    expect(app).toContain("Para automação ou para quem já sabe exatamente o que quer.");
   });
 
   it("a seção de contribuidor é uma página separada e discreta", () => {
