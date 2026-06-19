@@ -213,6 +213,32 @@ Falsificacao esperada: `peer-review --mode checkout --confirm` deve falhar com
 working tree suja; `peer-review --mode worktree --confirm` nao deve exigir tree
 limpa e deve criar worktree isolado.
 
+### Site React navegavel para o Flow
+
+Novo dogfood visual mostrou que, mesmo com conteudo melhor, o `site/flow` ainda
+era uma pagina HTML longa demais para uso humano em celular. A pessoa precisava
+rolar demais, comparar fluxos mentalmente e interpretar uma documentacao que
+parecia mais um anexo estatico do que uma entrada navegavel do produto.
+
+Correcao aplicada:
+
+- o Flow saiu de `site/flow/index.html` e passou a ser renderizado dentro da
+  aplicacao React/Vite;
+- `/flow`, `/flow/comecar`, `/flow/uso-diario`, `/flow/time`,
+  `/flow/review-entre-pares` e `/flow/referencia` viraram rotas navegaveis;
+- o site passou a ter fallback SPA (`site/public/_redirects`) para abrir rotas
+  diretas em preview/producao;
+- os textos reais da CLI continuam sendo projetados, agora em
+  `site/src/generated/flow-copy.generated.ts`;
+- `init`/`adopt`, uso diario, time/multiplas specs e review entre pares viraram
+  jornadas separadas com passos clicaveis e simulacao de terminal;
+- o layout passou a ser mobile-first: explicacao primeiro, terminal/simulacao
+  depois, e grids so entram em telas maiores.
+
+Falsificacao esperada: se `site/flow/index.html` ou `flowHtml.json` voltar, o
+site recria uma segunda fonte de apresentacao dificil de manter e deve falhar
+nos guards de projecao.
+
 ## Limites preservados
 
 - CO-10.7 nao foi iniciado.

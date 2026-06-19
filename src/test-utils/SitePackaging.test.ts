@@ -44,12 +44,25 @@ describe("governed documentation site packaging", () => {
 
   it("mantem a home como pagina de produto sem instrucoes de deploy", () => {
     const appSource = fs.readFileSync(path.join(REPO_ROOT, "site/src/App.tsx"), "utf-8");
+    const viteConfig = fs.readFileSync(path.join(REPO_ROOT, "site/vite.config.ts"), "utf-8");
 
     expect(appSource).not.toMatch(/Cloudflare/i);
     expect(appSource).not.toContain("../../docs/assets/");
     expect(appSource).toContain("Automação absorve o mecânico");
     expect(appSource).toContain("./assets/generated/ai-guidelines-flow.webp");
     expect(appSource).toContain("npx ai-guidelines init");
-    expect(appSource).toContain("/flow/");
+    expect(appSource).toContain("Flow visual");
+    expect(viteConfig).not.toContain("copyFlowSite");
+  });
+
+  it("publica o site como SPA navegavel em rotas /flow/*", () => {
+    const redirects = fs.readFileSync(path.join(REPO_ROOT, "site/public/_redirects"), "utf-8");
+    const routeSource = fs.readFileSync(path.join(REPO_ROOT, "site/src/flowData.ts"), "utf-8");
+
+    expect(redirects.trim()).toBe("/* /index.html 200");
+    expect(routeSource).toContain("/flow/comecar");
+    expect(routeSource).toContain("/flow/uso-diario");
+    expect(routeSource).toContain("/flow/time");
+    expect(routeSource).toContain("/flow/review-entre-pares");
   });
 });

@@ -102,13 +102,13 @@ profiles:
         category: docs
         mutates: true
         consumers: [human]
-        description: Sincroniza o site visual do flow com os textos reais da CLI.
+        description: Sincroniza o modulo React do Flow com os textos reais da CLI.
       - name: site:flow:check
         command: npm run build && node dist/cli/bin.js site-flow-copy check
         category: docs
         mutates: false
         consumers: [script]
-        description: Falha se site/flow divergir dos textos reais da CLI.
+        description: Falha se o site React do Flow divergir dos textos reais da CLI.
       - name: site:assets:sync
         command: node site/scripts/optimize-assets.mjs sync
         category: docs

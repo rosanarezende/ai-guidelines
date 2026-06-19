@@ -1,6 +1,6 @@
 :root {
+  background: #f5f7fb;
   color: #172033;
-  background: #f6f8fb;
   font-family:
     Inter,
     ui-sans-serif,
@@ -28,7 +28,7 @@ body {
 
 a {
   color: #246bfe;
-  font-weight: 700;
+  font-weight: 800;
   text-decoration: none;
 }
 
@@ -36,59 +36,93 @@ a:hover {
   text-decoration: underline;
 }
 
+a:focus-visible,
+button:focus-visible {
+  outline: 3px solid #2d7ff9;
+  outline-offset: 3px;
+}
+
 code {
-  border-radius: 6px;
   background: #ecf2ff;
+  border-radius: 6px;
   color: #214a9a;
+  display: inline-block;
   font:
     0.95em "SFMono-Regular",
     Consolas,
     "Liberation Mono",
     monospace;
-  padding: 0.08rem 0.32rem;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  padding: 0.12rem 0.36rem;
 }
 
 main {
   margin: 0 auto;
   max-width: 1180px;
-  padding: 28px 20px 64px;
+  padding: 18px 16px 56px;
 }
 
 .siteHeader {
-  align-items: center;
+  align-items: flex-start;
   display: flex;
-  gap: 22px;
-  justify-content: space-between;
+  flex-direction: column;
+  gap: 16px;
   min-height: 56px;
 }
 
 .brand {
   color: #151b2d;
   font-size: 1.05rem;
-  font-weight: 900;
+  font-weight: 950;
 }
 
-nav {
+nav,
+.flowNav,
+.heroActions,
+.finalActions {
   display: flex;
   flex-wrap: wrap;
-  gap: 16px;
+  gap: 10px;
 }
 
-nav a {
+nav a,
+.flowNav a {
+  align-items: center;
+  background: #fff;
+  border: 1px solid #dfe6ef;
+  border-radius: 999px;
   color: #506079;
-  font-size: 0.95rem;
+  display: inline-flex;
+  font-size: 0.93rem;
+  min-height: 40px;
+  padding: 0 14px;
 }
 
-.hero {
-  padding: 56px 0 42px;
+nav a.isCurrent,
+.flowNav a:hover {
+  background: #151b2d;
+  border-color: #151b2d;
+  color: #fff;
+  text-decoration: none;
+}
+
+.hero,
+.flowHero {
+  padding: 42px 0 30px;
+}
+
+.flowHero {
+  border-bottom: 1px solid #dfe6ef;
+  margin-bottom: 28px;
 }
 
 .eyebrow {
   color: #2f7b68;
-  font-size: 0.86rem;
-  font-weight: 800;
+  font-size: 0.83rem;
+  font-weight: 900;
   letter-spacing: 0;
-  margin: 0 0 14px;
+  margin: 0 0 12px;
   text-transform: uppercase;
 }
 
@@ -97,28 +131,28 @@ h2,
 h3 {
   color: #151b2d;
   letter-spacing: 0;
-  line-height: 1.07;
+  line-height: 1.08;
   margin: 0;
 }
 
 h1 {
-  font-size: 4.8rem;
-  line-height: 0.96;
+  font-size: clamp(2.65rem, 12vw, 4.8rem);
+  line-height: 0.98;
   max-width: 980px;
 }
 
 h2 {
-  font-size: 2.35rem;
+  font-size: clamp(1.65rem, 7vw, 2.35rem);
 }
 
 h3 {
-  font-size: 1.2rem;
+  font-size: 1.12rem;
 }
 
 .tagline {
   color: #151b2d;
-  font-size: 1.45rem;
-  font-weight: 800;
+  font-size: clamp(1.14rem, 5vw, 1.45rem);
+  font-weight: 850;
   line-height: 1.45;
   margin: 22px 0 0;
   max-width: 850px;
@@ -128,10 +162,15 @@ h3 {
 .sectionCopy p,
 .statementBand p,
 .quickCard p,
-.benefitCard p {
+.benefitCard p,
+.journeyCard p,
+.journeyIntro p,
+.stepCopy p,
+.referenceGroup p,
+.plainPanel p {
   color: #5f6b82;
-  font-size: 1.08rem;
-  line-height: 1.75;
+  font-size: 1.04rem;
+  line-height: 1.72;
 }
 
 .lead {
@@ -141,10 +180,7 @@ h3 {
 
 .heroActions,
 .finalActions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 30px;
+  margin-top: 28px;
 }
 
 .primaryAction,
@@ -168,7 +204,7 @@ h3 {
 
 .heroFigure,
 .visualFrame {
-  margin: 34px 0 0;
+  margin: 32px 0 0;
 }
 
 .heroFigure img,
@@ -185,27 +221,22 @@ h3 {
 .visualSection,
 .quickStart,
 .benefits,
-.commandBand,
-.lifecycle {
-  margin-top: 34px;
+.lifecycle,
+.plainPanel {
+  margin-top: 32px;
 }
 
 .statementBand,
-.commandBand {
-  align-items: start;
+.plainPanel {
   background: #fff;
   border: 1px solid #dfe6ef;
   border-radius: 8px;
-  display: grid;
-  gap: 28px;
-  grid-template-columns: minmax(0, 0.85fr) minmax(280px, 1.15fr);
-  padding: 32px;
+  padding: 24px;
 }
 
 .visualSection {
   display: grid;
-  gap: 28px;
-  grid-template-columns: minmax(280px, 0.8fr) minmax(0, 1.2fr);
+  gap: 24px;
 }
 
 .sectionCopy {
@@ -213,65 +244,44 @@ h3 {
 }
 
 .quickGrid,
-.benefitGrid {
+.benefitGrid,
+.journeyGrid,
+.referenceGrid {
   display: grid;
   gap: 16px;
   margin-top: 20px;
 }
 
-.quickGrid {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-.benefitGrid {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
 .quickCard,
-.benefitCard {
+.benefitCard,
+.journeyCard,
+.referenceGroup {
   background: #fff;
   border: 1px solid #dfe6ef;
   border-radius: 8px;
-  padding: 22px;
+  padding: 20px;
 }
 
-.quickCard span {
+.quickCard span,
+.pill {
   color: #2f7b68;
-  display: block;
-  font-weight: 900;
-  margin-bottom: 14px;
+  display: inline-flex;
+  font-size: 0.82rem;
+  font-weight: 950;
+  margin-bottom: 12px;
   text-transform: uppercase;
 }
 
 .quickCard code {
   display: block;
   margin-bottom: 12px;
-  overflow-wrap: anywhere;
-}
-
-.commandList {
-  display: grid;
-  gap: 12px;
-}
-
-.commandList div {
-  align-items: center;
-  border-bottom: 1px solid #e8edf5;
-  display: grid;
-  gap: 14px;
-  grid-template-columns: minmax(210px, 0.8fr) minmax(0, 1fr);
-  padding-bottom: 12px;
-}
-
-.commandList span {
-  color: #5f6b82;
 }
 
 .lifecycle {
   background: #101725;
   border-radius: 8px;
   color: #dbe6f7;
-  padding: 34px;
+  padding: 28px;
 }
 
 .lifecycle h2,
@@ -279,17 +289,12 @@ h3 {
   color: #fff;
 }
 
-.lifecycle .sectionCopy p {
-  color: #c3cedf;
-}
-
 .lifecycle ol {
   counter-reset: lifecycle;
   display: grid;
   gap: 10px;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
   list-style: none;
-  margin: 28px 0 0;
+  margin: 26px 0 0;
   padding: 0;
 }
 
@@ -298,7 +303,7 @@ h3 {
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 8px;
   color: #f7fbff;
-  font-weight: 800;
+  font-weight: 850;
   padding: 16px;
 }
 
@@ -316,38 +321,269 @@ h3 {
   color: #fff;
 }
 
-@media (max-width: 880px) {
-  main {
-    padding-top: 18px;
-  }
+.journeyStack {
+  display: grid;
+  gap: 28px;
+}
 
-  .siteHeader,
-  .statementBand,
-  .commandBand,
-  .visualSection {
-    grid-template-columns: 1fr;
+.journeySection {
+  background: #fff;
+  border: 1px solid #dfe6ef;
+  border-radius: 8px;
+  display: grid;
+  gap: 22px;
+  padding: 18px;
+}
+
+.journeyIntro {
+  display: grid;
+  gap: 14px;
+}
+
+.journeyIntro code {
+  justify-self: start;
+}
+
+.whenBox {
+  background: #f3f8f6;
+  border: 1px solid #d7e8e2;
+  border-radius: 8px;
+  padding: 18px;
+}
+
+.whenBox ul,
+.referenceList {
+  margin: 12px 0 0;
+  padding: 0;
+}
+
+.whenBox li {
+  color: #41506a;
+  line-height: 1.6;
+  margin-left: 20px;
+  padding-left: 4px;
+}
+
+.stepNavigator {
+  display: grid;
+  gap: 18px;
+}
+
+.stepList {
+  display: grid;
+  gap: 10px;
+}
+
+.stepButton {
+  background: #f9fbff;
+  border: 1px solid #dfe6ef;
+  border-radius: 8px;
+  color: #172033;
+  cursor: pointer;
+  display: grid;
+  gap: 8px;
+  padding: 16px;
+  text-align: left;
+}
+
+.stepButton:hover,
+.stepButton.isActive {
+  background: #eaf4f1;
+  border-color: #88bbae;
+}
+
+.stepButton span {
+  align-items: center;
+  background: #2f7b68;
+  border-radius: 999px;
+  color: #fff;
+  display: inline-flex;
+  font-size: 0.82rem;
+  font-weight: 900;
+  height: 32px;
+  justify-content: center;
+  width: 32px;
+}
+
+.stepButton strong {
+  font-size: 1rem;
+}
+
+.stepButton small {
+  color: #5f6b82;
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
+.stepDetail {
+  display: grid;
+  gap: 18px;
+}
+
+.stepCopy {
+  display: grid;
+  gap: 10px;
+}
+
+.terminalDemo {
+  background: #111827;
+  border-radius: 8px;
+  color: #e9eef9;
+  margin: 0;
+  overflow: hidden;
+}
+
+.terminalDemo figcaption {
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  display: flex;
+  gap: 8px;
+  min-height: 48px;
+  padding: 0 16px;
+}
+
+.terminalDemo figcaption span {
+  border-radius: 999px;
+  display: inline-block;
+  height: 12px;
+  width: 12px;
+}
+
+.terminalDemo figcaption span:nth-child(1) {
+  background: #ef5350;
+}
+
+.terminalDemo figcaption span:nth-child(2) {
+  background: #f9a825;
+}
+
+.terminalDemo figcaption span:nth-child(3) {
+  background: #4caf50;
+}
+
+.terminalDemo figcaption strong {
+  color: #aeb8ca;
+  font-weight: 700;
+  margin-left: 6px;
+  overflow-wrap: anywhere;
+}
+
+.terminalDemo pre {
+  display: grid;
+  font:
+    0.92rem "SFMono-Regular",
+    Consolas,
+    "Liberation Mono",
+    monospace;
+  gap: 10px;
+  line-height: 1.55;
+  margin: 0;
+  overflow-x: auto;
+  padding: 18px;
+  white-space: pre-wrap;
+}
+
+.terminalLine {
+  color: #eef4ff;
+}
+
+.terminalLine::before {
+  color: #9fb0ca;
+  content: "◇ ";
+}
+
+.terminalLine.active {
+  color: #affff1;
+  font-weight: 850;
+}
+
+.terminalLine.muted {
+  color: #9ca8ba;
+}
+
+.terminalLine.warn {
+  color: #ffd27a;
+}
+
+.terminalLine.success {
+  color: #a6f3cf;
+}
+
+.referenceGroup {
+  display: grid;
+  gap: 12px;
+}
+
+.referenceList {
+  display: grid;
+  gap: 10px;
+}
+
+.referenceList article {
+  border-top: 1px solid #e8edf5;
+  display: grid;
+  gap: 4px;
+  padding-top: 12px;
+}
+
+.referenceList strong {
+  color: #151b2d;
+}
+
+.referenceList span {
+  color: #5f6b82;
+  line-height: 1.5;
+}
+
+@media (min-width: 760px) {
+  main {
+    padding: 28px 20px 64px;
   }
 
   .siteHeader {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-
-  h1 {
-    font-size: 3rem;
-  }
-
-  h2 {
-    font-size: 2rem;
+    align-items: center;
+    flex-direction: row;
+    justify-content: space-between;
   }
 
   .quickGrid,
   .benefitGrid,
-  .lifecycle ol {
-    grid-template-columns: 1fr;
+  .journeyGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  .commandList div {
-    grid-template-columns: 1fr;
+  .journeyGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .lifecycle ol {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 980px) {
+  .statementBand {
+    align-items: start;
+    display: grid;
+    gap: 28px;
+    grid-template-columns: minmax(0, 0.85fr) minmax(280px, 1.15fr);
+    padding: 32px;
+  }
+
+  .visualSection {
+    grid-template-columns: minmax(280px, 0.8fr) minmax(0, 1.2fr);
+  }
+
+  .journeySection {
+    grid-template-columns: minmax(260px, 0.62fr) minmax(0, 1.38fr);
+    padding: 26px;
+  }
+
+  .stepNavigator {
+    grid-template-columns: minmax(230px, 0.52fr) minmax(0, 1fr);
+  }
+
+  .referenceGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }

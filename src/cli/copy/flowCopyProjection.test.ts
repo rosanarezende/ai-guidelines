@@ -5,6 +5,12 @@ import { FEATURE_OPTIONS } from "../../domain/provisioning/FeatureCatalog.js";
 import { getSupportedProviders } from "../../domain/provisioning/ProviderCatalog.js";
 import { FLOW_COPY, featureCopy, providerCopy } from "./flowCopy.js";
 
+const REPO_ROOT = process.cwd();
+
+function readSiteSource(relativePath: string): string {
+  return readFileSync(path.join(REPO_ROOT, relativePath), "utf-8");
+}
+
 describe("flow copy catalog", () => {
   it("descreve providers e práticas em linguagem humana", () => {
     expect(providerCopy("claude")).toMatchObject({
@@ -25,65 +31,62 @@ describe("flow copy catalog", () => {
     });
   });
 
-  it("mantém FLOW.html alinhado aos textos críticos do wizard", () => {
-    const html = readFileSync(path.join(process.cwd(), "site/flow/index.html"), "utf-8");
-    const generatedCopy = readFileSync(
-      path.join(process.cwd(), "site/flow/assets/flow-copy.generated.js"),
-      "utf-8"
-    );
+  it("projeta textos críticos da CLI para o módulo React do Flow", () => {
+    const generatedCopy = readSiteSource("site/src/generated/flow-copy.generated.ts");
+    const flowData = readSiteSource("site/src/flowData.ts");
 
-    expect(html).toContain(FLOW_COPY.provisioning.providerGroups.primary);
-    expect(html).toContain(FLOW_COPY.provisioning.featureGroups.infrastructure);
     expect(generatedCopy).toContain(FLOW_COPY.provisioning.providerGroups.primary);
     expect(generatedCopy).toContain(FLOW_COPY.provisioning.featureGroups.infrastructure);
+    expect(flowData).toContain("AI_GUIDELINES_FLOW_COPY");
     for (const provider of getSupportedProviders()) {
-      expect(html).toContain(providerCopy(provider).htmlHint);
       expect(generatedCopy).toContain(providerCopy(provider).htmlHint);
     }
     for (const feature of FEATURE_OPTIONS) {
-      expect(html).toContain(featureCopy(feature).htmlLabel);
       expect(generatedCopy).toContain(featureCopy(feature).htmlLabel);
     }
-    expect(html).toContain(FLOW_COPY.provisioning.flow.prompts.language);
-    expect(html).toContain(FLOW_COPY.provisioning.flow.language.ptHint);
-    expect(html).toContain(FLOW_COPY.provisioning.flow.language.enHint);
-    expect(html).toContain(FLOW_COPY.provisioning.flow.prompts.forcePrettier);
-    expect(html).toContain('data-copy="provisioning.flow.prompts.prune"');
+    expect(generatedCopy).toContain(FLOW_COPY.provisioning.flow.prompts.language);
+    expect(generatedCopy).toContain(FLOW_COPY.provisioning.flow.language.ptHint);
+    expect(generatedCopy).toContain(FLOW_COPY.provisioning.flow.language.enHint);
+    expect(generatedCopy).toContain(FLOW_COPY.provisioning.flow.prompts.forcePrettier);
+    expect(generatedCopy).toContain(FLOW_COPY.provisioning.flow.prompts.prune);
   });
 
-  it("mantém mini-carrosséis nos painéis demonstrativos densos", () => {
-    const html = readFileSync(path.join(process.cwd(), "site/flow/index.html"), "utf-8");
-    const siteScript = readFileSync(
-      path.join(process.cwd(), "site/flow/assets/flow-site.js"),
-      "utf-8"
-    );
+  it("mantém o Flow como páginas React navegáveis e mobile-first", () => {
+    const app = readSiteSource("site/src/App.tsx");
+    const data = readSiteSource("site/src/flowData.ts");
+    const styles = readSiteSource("site/src/styles.css");
 
-    expect(html.match(/data-mini-carousel/g)?.length).toBeGreaterThanOrEqual(6);
-    expect(html).toContain('data-mini-slide="assistants"');
-    expect(html).toContain('data-mini-slide="formatter"');
-    expect(html).toContain('data-mini-slide="runtime"');
-    expect(html).toContain('data-mini-slide="checks"');
-    expect(siteScript).toContain("initMiniCarousels");
-    expect(siteScript).toContain("[data-mini-carousel]");
+    expect(app).toContain("StepNavigator");
+    expect(app).toContain("aria-current");
+    expect(app).toContain("TerminalDemo");
+    expect(data).toContain("/flow/comecar");
+    expect(data).toContain("/flow/uso-diario");
+    expect(data).toContain("/flow/time");
+    expect(data).toContain("/flow/review-entre-pares");
+    expect(styles).toContain("@media (min-width: 760px)");
+    expect(styles).toContain("grid-template-columns");
   });
 
-  it("mantém a página organizada entre entrada inicial, uso diário e review entre pares", () => {
-    const html = readFileSync(path.join(process.cwd(), "site/flow/index.html"), "utf-8");
+  it("mantém entrada inicial, uso diário, time e review entre pares como jornadas distintas", () => {
+    const data = readSiteSource("site/src/flowData.ts");
 
-    expect(html).toContain("Bloco 1 — começar com ai-guidelines");
-    expect(html).toContain("Bloco 2 — usar ai-guidelines no dia a dia");
-    expect(html).toContain("Review entre pares — revisar PR de outra pessoa");
-    expect(html).toContain("npm run flow -- peer-review 43 --brief-only");
-    expect(html).toContain("Worktree separado");
-    expect(html).toContain("Checkout guiado");
-    expect(html).toContain("Fluxo 3 — Usar e manter um repo governado");
-    expect(html).toContain("Fluxo 4 — Trabalhar em time com múltiplas specs");
+    expect(data).toContain("Inicializar um projeto governado");
+    expect(data).toContain("Adotar sem apagar o que já existe");
+    expect(data).toContain("Operar o dia a dia sem lembrar a sequência de comandos");
+    expect(data).toContain("Escolher a frente certa antes de trabalhar");
+    expect(data).toContain("Revisar PR de outra pessoa sem perder sua branch");
+    expect(data).toContain("npm run flow -- peer-review 43 --brief-only");
+    expect(data).toContain("Worktree separado");
+    expect(data).toContain("Checkout guiado");
   });
 
-  it("não cria catálogo separado para FLOW.html", () => {
-    expect(existsSync(path.join(process.cwd(), "src/cli/copy/locales/pt-BR/flowHtml.json"))).toBe(
+  it("remove o Flow HTML legado e não cria catálogo textual paralelo", () => {
+    expect(existsSync(path.join(REPO_ROOT, "site/flow/index.html"))).toBe(false);
+    expect(existsSync(path.join(REPO_ROOT, "site/flow/assets/flow-site.js"))).toBe(false);
+    expect(existsSync(path.join(REPO_ROOT, "site/flow/assets/flow-copy.generated.js"))).toBe(false);
+    expect(existsSync(path.join(REPO_ROOT, "src/cli/copy/locales/pt-BR/flowHtml.json"))).toBe(
       false
     );
-    expect(existsSync(path.join(process.cwd(), "FLOW.html"))).toBe(false);
+    expect(existsSync(path.join(REPO_ROOT, "FLOW.html"))).toBe(false);
   });
 });

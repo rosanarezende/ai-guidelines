@@ -13,7 +13,7 @@ describe("site flow copy projection", () => {
   it("gera um módulo estático a partir do catálogo real da CLI", () => {
     const script = renderSiteFlowCopyScript();
 
-    expect(script).toContain("window.AI_GUIDELINES_FLOW_COPY");
+    expect(script).toContain("export const AI_GUIDELINES_FLOW_COPY");
     expect(script).toContain("// prettier-ignore");
     expect(script).toContain("Assistentes principais do repositório");
     expect(script).toContain("Infraestrutura do repositório");
@@ -33,5 +33,8 @@ describe("site flow copy projection", () => {
     const generated = readFileSync(siteFlowCopyOutputPath(repoRoot), "utf-8");
     expect(generated).toBe(renderSiteFlowCopyScript());
     expect(checkSiteFlowCopy(repoRoot)).toEqual([]);
+    expect(siteFlowCopyOutputPath(repoRoot)).toContain(
+      path.join("site", "src", "generated", "flow-copy.generated.ts")
+    );
   });
 });

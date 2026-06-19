@@ -1,3 +1,20 @@
+import { useEffect, useMemo, useState, type ReactNode } from "react";
+
+import {
+  dailyJourney,
+  FlowStep,
+  Journey,
+  peerReviewJourney,
+  referenceGroups,
+  routeFromPath,
+  routePath,
+  routes,
+  startJourneys,
+  teamJourney,
+  TerminalLine,
+  type RouteId,
+} from "./flowData";
+
 const flowImageWebp = new URL("./assets/generated/ai-guidelines-flow.webp", import.meta.url).href;
 const layersImageWebp = new URL(
   "./assets/generated/ai-guidelines-governance-layers.webp",
@@ -40,26 +57,20 @@ const quickStarts = [
     label: "Projeto novo",
     command: "npx ai-guidelines init",
     text: "Cria baseline governance-first com wizard interativo.",
+    route: "start" as const,
   },
   {
     label: "Repositório existente",
     command: "npx ai-guidelines adopt --target . --dry-run",
     text: "Mostra preview conservador antes de preservar e integrar o que já existe.",
+    route: "start" as const,
   },
   {
     label: "Repo já governado",
     command: "npx ai-guidelines",
     text: "Abre o guia situado para entender estado, bloqueios, próximos passos e decisões.",
+    route: "daily" as const,
   },
-] as const;
-
-const commandRows = [
-  ["init", "começar projeto novo"],
-  ["adopt", "adotar repositório existente"],
-  ["update", "reaplicar baseline, providers e práticas"],
-  ["work", "gerar orientação da sessão para colar na IA"],
-  ["decide", "preparar decisões humanas com briefing e preview"],
-  ["review", "preparar revisão governada do PR"],
 ] as const;
 
 const lifecycle = [
@@ -79,23 +90,79 @@ interface OptimizedImageProps {
 }
 
 function OptimizedImage({ alt, webp }: OptimizedImageProps): JSX.Element {
-  return <img src={webp} alt={alt} />;
+  return <img src={webp} alt={alt} loading="lazy" decoding="async" />;
 }
 
-export function App(): JSX.Element {
-  return (
-    <main>
-      <header className="siteHeader">
-        <a className="brand" href="/">
-          ai-guidelines
-        </a>
-        <nav aria-label="Navegação principal">
-          <a href="#comecar">Começar</a>
-          <a href="#ganhos">Ganhos</a>
-          <a href="/flow/">Flow visual</a>
-        </nav>
-      </header>
+interface LinkProps {
+  children: ReactNode;
+  className?: string;
+  route: RouteId;
+}
 
+function useRoute(): [RouteId, (route: RouteId) => void] {
+  const initialRoute = useMemo(() => routeFromPath(window.location.pathname), []);
+  const [route, setRoute] = useState<RouteId>(initialRoute);
+
+  function navigate(nextRoute: RouteId): void {
+    const nextPath = routePath(nextRoute);
+    window.history.pushState({}, "", nextPath);
+    setRoute(nextRoute);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  useEffect(() => {
+    const handlePopState = () => setRoute(routeFromPath(window.location.pathname));
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
+
+  return [route, navigate];
+}
+
+function SiteLink({ children, className, route }: LinkProps): JSX.Element {
+  return (
+    <a
+      className={className}
+      href={routePath(route)}
+      onClick={(event) => {
+        event.preventDefault();
+        window.dispatchEvent(new CustomEvent("site:navigate", { detail: route }));
+      }}
+    >
+      {children}
+    </a>
+  );
+}
+
+function SiteHeader({ current }: { readonly current: RouteId }): JSX.Element {
+  return (
+    <header className="siteHeader">
+      <SiteLink className="brand" route="home">
+        ai-guidelines
+      </SiteLink>
+      <nav aria-label="Navegação principal">
+        {routes
+          .filter((route) => route.id !== "reference")
+          .map((route) => (
+            <SiteLink
+              className={route.id === current ? "isCurrent" : undefined}
+              key={route.id}
+              route={route.id}
+            >
+              {route.shortLabel}
+            </SiteLink>
+          ))}
+        <SiteLink className={current === "reference" ? "isCurrent" : undefined} route="reference">
+          Referência
+        </SiteLink>
+      </nav>
+    </header>
+  );
+}
+
+function HomePage(): JSX.Element {
+  return (
+    <>
       <section className="hero">
         <p className="eyebrow">Governança de engenharia para times com IA</p>
         <h1>ai-guidelines</h1>
@@ -108,12 +175,12 @@ export function App(): JSX.Element {
           rastreável, auditável e pronto para humanos e múltiplas IAs.
         </p>
         <div className="heroActions">
-          <a className="primaryAction" href="/flow/">
-            Ver o fluxo visual
-          </a>
-          <a className="secondaryAction" href="#comecar">
+          <SiteLink className="primaryAction" route="flow">
+            Ver o Flow visual
+          </SiteLink>
+          <SiteLink className="secondaryAction" route="start">
             Começar em um repo
-          </a>
+          </SiteLink>
         </div>
         <figure className="heroFigure">
           <OptimizedImage
@@ -164,6 +231,7 @@ export function App(): JSX.Element {
               <span>{item.label}</span>
               <code>{item.command}</code>
               <p>{item.text}</p>
+              <SiteLink route={item.route}>Ver passo a passo</SiteLink>
             </article>
           ))}
         </div>
@@ -201,21 +269,6 @@ export function App(): JSX.Element {
         </figure>
       </section>
 
-      <section className="commandBand">
-        <div>
-          <p className="eyebrow">Comandos essenciais</p>
-          <h2>Uma superfície pequena para operar o ciclo inteiro.</h2>
-        </div>
-        <div className="commandList">
-          {commandRows.map(([command, description]) => (
-            <div key={command}>
-              <code>npx ai-guidelines {command}</code>
-              <span>{description}</span>
-            </div>
-          ))}
-        </div>
-      </section>
-
       <section className="lifecycle">
         <div className="sectionCopy">
           <p className="eyebrow">Ciclo governado</p>
@@ -227,14 +280,313 @@ export function App(): JSX.Element {
           ))}
         </ol>
         <div className="finalActions">
-          <a className="primaryAction" href="/flow/">
+          <SiteLink className="primaryAction" route="flow">
             Explorar o Flow completo
-          </a>
+          </SiteLink>
           <a className="secondaryAction" href="https://www.npmjs.com/package/ai-guidelines">
             Ver pacote npm
           </a>
         </div>
       </section>
+    </>
+  );
+}
+
+function FlowOverview(): JSX.Element {
+  const cards = [
+    {
+      route: "start" as const,
+      label: "Começar uma vez",
+      title: "Projeto novo ou repo existente",
+      text: "Init e adopt colocam o repositório no framework sem misturar com o uso diário.",
+    },
+    {
+      route: "daily" as const,
+      label: "Uso diário",
+      title: "Trabalho, validação e decisões",
+      text: "Depois da adoção, o guia mostra próxima ação, bloqueios, updates e validações.",
+    },
+    {
+      route: "team" as const,
+      label: "Time e specs",
+      title: "Escolher a frente certa",
+      text: "Para múltiplas specs, branch esperada, PR correto e criação segura de spec nova.",
+    },
+    {
+      route: "peerReview" as const,
+      label: "Review entre pares",
+      title: "Revisar PR de colega",
+      text: "Abre o PR em worktree separado ou checkout guiado sem perder o trabalho atual.",
+    },
+  ];
+
+  return (
+    <FlowShell
+      eyebrow="Flow visual"
+      title="O caminho muda conforme o momento do repositório."
+      lead="A página agora é navegável: comece por intenção humana e entre no detalhe apenas quando fizer sentido."
+    >
+      <div className="journeyGrid">
+        {cards.map((card) => (
+          <article className="journeyCard" key={card.route}>
+            <span className="pill">{card.label}</span>
+            <h2>{card.title}</h2>
+            <p>{card.text}</p>
+            <SiteLink route={card.route}>Abrir fluxo</SiteLink>
+          </article>
+        ))}
+      </div>
+      <section className="plainPanel">
+        <h2>Regra simples</h2>
+        <p>
+          `init` e `adopt` acontecem uma vez. Depois disso, o uso normal passa por `npm run flow`,
+          `update`, `specs`, `peer-review`, validações e decisões governadas.
+        </p>
+      </section>
+    </FlowShell>
+  );
+}
+
+function FlowShell({
+  children,
+  eyebrow,
+  lead,
+  title,
+}: {
+  readonly children: ReactNode;
+  readonly eyebrow: string;
+  readonly lead: string;
+  readonly title: string;
+}): JSX.Element {
+  return (
+    <>
+      <section className="flowHero">
+        <p className="eyebrow">{eyebrow}</p>
+        <h1>{title}</h1>
+        <p className="lead">{lead}</p>
+        <div className="flowNav" aria-label="Áreas do flow">
+          {routes
+            .filter((route) => route.id !== "home")
+            .map((route) => (
+              <SiteLink key={route.id} route={route.id}>
+                {route.label}
+              </SiteLink>
+            ))}
+        </div>
+      </section>
+      {children}
+    </>
+  );
+}
+
+function JourneyPage({
+  intro,
+  journeys,
+}: {
+  readonly intro: {
+    readonly eyebrow: string;
+    readonly title: string;
+    readonly lead: string;
+  };
+  readonly journeys: readonly Journey[];
+}): JSX.Element {
+  return (
+    <FlowShell eyebrow={intro.eyebrow} lead={intro.lead} title={intro.title}>
+      <div className="journeyStack">
+        {journeys.map((journey) => (
+          <JourneySection journey={journey} key={`${journey.title}-${journey.command}`} />
+        ))}
+      </div>
+    </FlowShell>
+  );
+}
+
+function JourneySection({ journey }: { readonly journey: Journey }): JSX.Element {
+  return (
+    <section className="journeySection">
+      <div className="journeyIntro">
+        <span className="pill">{journey.eyebrow}</span>
+        <h2>{journey.title}</h2>
+        <p>{journey.summary}</p>
+        <code>{journey.command}</code>
+        <div className="whenBox">
+          <h3>Quando usar</h3>
+          <ul>
+            {journey.whenToUse.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        </div>
+      </div>
+      <StepNavigator steps={journey.steps} />
+    </section>
+  );
+}
+
+function StepNavigator({ steps }: { readonly steps: readonly FlowStep[] }): JSX.Element {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const activeStep = steps[activeIndex] ?? steps[0];
+
+  return (
+    <div className="stepNavigator">
+      <div className="stepList" aria-label="Passos do fluxo">
+        {steps.map((step, index) => (
+          <button
+            aria-current={index === activeIndex ? "step" : undefined}
+            className={index === activeIndex ? "stepButton isActive" : "stepButton"}
+            key={step.title}
+            onClick={() => setActiveIndex(index)}
+            type="button"
+          >
+            <span>{String(index + 1).padStart(2, "0")}</span>
+            <strong>{step.title}</strong>
+            <small>{step.text}</small>
+          </button>
+        ))}
+      </div>
+      <StepDetail step={activeStep} />
+    </div>
+  );
+}
+
+function StepDetail({ step }: { readonly step: FlowStep }): JSX.Element {
+  return (
+    <article className="stepDetail">
+      <div className="stepCopy">
+        <h3>{step.title}</h3>
+        <p>{step.text}</p>
+        {step.command ? <code>{step.command}</code> : null}
+      </div>
+      <TerminalDemo lines={step.lines} title={step.command ?? "npm run flow"} />
+    </article>
+  );
+}
+
+function TerminalDemo({
+  lines,
+  title,
+}: {
+  readonly lines: readonly TerminalLine[];
+  readonly title: string;
+}): JSX.Element {
+  return (
+    <figure className="terminalDemo" aria-label={`Simulação de terminal: ${title}`}>
+      <figcaption>
+        <span></span>
+        <span></span>
+        <span></span>
+        <strong>{title}</strong>
+      </figcaption>
+      <pre>
+        {lines.map((line, index) => (
+          <TerminalLineView key={`${line.text}-${index}`} line={line} />
+        ))}
+      </pre>
+    </figure>
+  );
+}
+
+function TerminalLineView({ line }: { readonly line: TerminalLine }): JSX.Element {
+  return <span className={`terminalLine ${line.tone ?? "normal"}`}>{line.text}</span>;
+}
+
+function ReferencePage(): JSX.Element {
+  return (
+    <FlowShell
+      eyebrow="Referência"
+      title="Comandos, providers e práticas em um lugar só."
+      lead="Esta área é para consulta rápida. Ela usa o mesmo catálogo de textos da CLI, para evitar divergência entre site e wizard."
+    >
+      <div className="referenceGrid">
+        {referenceGroups.map((group) => (
+          <section className="referenceGroup" key={group.title}>
+            <h2>{group.title}</h2>
+            <p>{group.text}</p>
+            <div className="referenceList">
+              {group.items.map((item) => (
+                <article key={`${group.title}-${item.label}`}>
+                  <strong>{item.label}</strong>
+                  <span>{item.hint}</span>
+                </article>
+              ))}
+            </div>
+          </section>
+        ))}
+      </div>
+    </FlowShell>
+  );
+}
+
+function ActivePage({ route }: { readonly route: RouteId }): JSX.Element {
+  if (route === "home") return <HomePage />;
+  if (route === "flow") return <FlowOverview />;
+  if (route === "start") {
+    return (
+      <JourneyPage
+        intro={{
+          eyebrow: "Começar uma vez",
+          title: "Escolha init ou adopt pelo estado real do repo.",
+          lead: "Projeto novo e repo existente são entradas diferentes. Depois que o repo está governado, o caminho normal vira uso diário.",
+        }}
+        journeys={startJourneys}
+      />
+    );
+  }
+  if (route === "daily") {
+    return (
+      <JourneyPage
+        intro={{
+          eyebrow: "Uso diário",
+          title: "O guia mostra o próximo passo e evita atalhos inseguros.",
+          lead: "Esta é a experiência para quem já usa ai-guidelines no repo e precisa trabalhar, validar, atualizar ou preparar decisões.",
+        }}
+        journeys={[dailyJourney]}
+      />
+    );
+  }
+  if (route === "team") {
+    return (
+      <JourneyPage
+        intro={{
+          eyebrow: "Time e múltiplas specs",
+          title: "Antes de trabalhar, confirme a frente correta.",
+          lead: "O fluxo ajuda a escolher a spec certa, evitar branch errada e entender quando criar uma spec nova exige autorização.",
+        }}
+        journeys={[teamJourney]}
+      />
+    );
+  }
+  if (route === "peerReview") {
+    return (
+      <JourneyPage
+        intro={{
+          eyebrow: "Review entre pares",
+          title: "Revisar PR de colega deve ser um fluxo próprio.",
+          lead: "A pessoa pode abrir o PR em worktree separado ou checkout guiado, sem misturar com sua spec atual.",
+        }}
+        journeys={[peerReviewJourney]}
+      />
+    );
+  }
+  return <ReferencePage />;
+}
+
+export function App(): JSX.Element {
+  const [route, navigate] = useRoute();
+
+  useEffect(() => {
+    const handler = (event: Event) => {
+      const routeId = (event as CustomEvent<RouteId>).detail;
+      navigate(routeId);
+    };
+    window.addEventListener("site:navigate", handler);
+    return () => window.removeEventListener("site:navigate", handler);
+  }, [navigate]);
+
+  return (
+    <main>
+      <SiteHeader current={route} />
+      <ActivePage route={route} />
     </main>
   );
 }
