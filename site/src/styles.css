@@ -617,3 +617,31 @@ h3 {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
+
+/* Painel de cenário (transcript verídico) na jornada (Fase 2). */
+.scenarioPanel {
+  display: grid;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.scenarioNote {
+  color: #aeb8ca;
+  font-size: 0.86rem;
+  margin: 0;
+}
+
+.scenarioExit {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  color: #8c97aa;
+  font-size: 0.78rem;
+  margin: 0;
+  padding: 8px 16px;
+}
+
+.notFound {
+  margin: 0 auto;
+  max-width: 720px;
+  padding: 72px 20px;
+  text-align: center;
+}

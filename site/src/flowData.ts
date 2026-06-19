@@ -1,6 +1,35 @@
 import { AI_GUIDELINES_FLOW_COPY } from "./generated/flow-copy.generated";
+import { AI_GUIDELINES_FLOW_SCENARIOS } from "./generated/flow-scenarios.generated";
 
-export type RouteId = "home" | "flow" | "start" | "daily" | "team" | "peerReview" | "reference";
+export type RouteId =
+  | "home"
+  | "flow"
+  | "start"
+  | "daily"
+  | "team"
+  | "peerReview"
+  | "reference"
+  | "notFound";
+
+export type TerminalKind = "real" | "guided";
+
+export interface FlowScenario {
+  readonly id: string;
+  readonly title: string;
+  readonly kind: TerminalKind;
+  readonly command: string;
+  readonly note: string;
+  readonly exitCode: number | null;
+  readonly lines: readonly string[];
+}
+
+/** Transcripts gerados (reais) e exemplos guiados — fonte única para os terminais. */
+export const scenarios: readonly FlowScenario[] =
+  AI_GUIDELINES_FLOW_SCENARIOS as readonly FlowScenario[];
+
+export function scenarioById(id: string): FlowScenario | undefined {
+  return scenarios.find((scenario) => scenario.id === id);
+}
 
 export interface RouteLink {
   readonly id: RouteId;
@@ -29,6 +58,8 @@ export interface Journey {
   readonly command: string;
   readonly whenToUse: readonly string[];
   readonly steps: readonly FlowStep[];
+  /** Cenário gerado (real/guiado) associado — surface do terminal verídico. */
+  readonly scenarioId?: string;
 }
 
 export interface ReferenceGroup {
@@ -121,6 +152,7 @@ export const startJourneys: readonly Journey[] = [
     summary:
       "Use quando a pasta ainda está limpa e você quer nascer com baseline, práticas, IA e validações já organizadas.",
     command: flowCommand("init"),
+    scenarioId: "new-project",
     whenToUse: [
       "pasta vazia ou projeto ainda sem histórico para preservar",
       "você quer escolher providers, práticas e colaboração antes de escrever arquivos",
@@ -178,6 +210,7 @@ export const startJourneys: readonly Journey[] = [
     summary:
       "Use quando o projeto já tem código, configs ou histórico. O caminho conservador preserva conteúdo e mostra conflitos antes de aplicar.",
     command: flowCommand("adopt"),
+    scenarioId: "existing-repo",
     whenToUse: [
       "repo com package.json, código ou práticas existentes",
       "você quer integrar ai-guidelines sem recomeçar o projeto",
@@ -226,6 +259,7 @@ export const startJourneys: readonly Journey[] = [
 
 export const dailyJourney: Journey = {
   id: "daily",
+  scenarioId: "daily-work",
   eyebrow: "Repo em uso",
   title: "Operar o dia a dia sem lembrar a sequência de comandos",
   summary:
@@ -284,6 +318,7 @@ export const dailyJourney: Journey = {
 
 export const teamJourney: Journey = {
   id: "team",
+  scenarioId: "multi-spec",
   eyebrow: "Time e múltiplas specs",
   title: "Escolher a frente certa antes de trabalhar",
   summary:
@@ -339,6 +374,7 @@ export const teamJourney: Journey = {
 
 export const peerReviewJourney: Journey = {
   id: "peerReview",
+  scenarioId: "peer-review",
   eyebrow: "Review entre pares",
   title: "Revisar PR de outra pessoa sem perder sua branch",
   summary:
@@ -429,9 +465,18 @@ export function routeFromPath(pathname: string): RouteId {
   if (normalized === "/flow/time") return "team";
   if (normalized === "/flow/review-entre-pares") return "peerReview";
   if (normalized === "/flow/referencia") return "reference";
-  return "flow";
+  // Rota desconhecida vira 404 explícito (não soft-404 silencioso que caía em "flow").
+  return "notFound";
 }
 
 export function routePath(id: RouteId): string {
-  return routes.find((route) => route.id === id)?.path ?? "/flow/";
+  return routes.find((route) => route.id === id)?.path ?? "/";
+}
+
+/** Título por rota (SEO/a11y) — projeta o label da rota no <title> do documento. */
+export function routeTitle(id: RouteId): string {
+  if (id === "home") return "ai-guidelines — governança de engenharia para times com IA";
+  if (id === "notFound") return "ai-guidelines — página não encontrada";
+  const route = routes.find((item) => item.id === id);
+  return route ? `ai-guidelines — ${route.label}` : "ai-guidelines";
 }

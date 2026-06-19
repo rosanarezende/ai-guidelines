@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 
 import {
   dailyJourney,
+  type FlowScenario,
   FlowStep,
   Journey,
   peerReviewJourney,
@@ -9,6 +10,8 @@ import {
   routeFromPath,
   routePath,
   routes,
+  routeTitle,
+  scenarioById,
   startJourneys,
   teamJourney,
   TerminalLine,
@@ -419,8 +422,58 @@ function JourneySection({ journey }: { readonly journey: Journey }): JSX.Element
         </div>
       </div>
       <StepNavigator steps={journey.steps} />
+      {journey.scenarioId ? <ScenarioPanel scenarioId={journey.scenarioId} /> : null}
     </section>
   );
+}
+
+// Surface o transcript verídico (real/guiado) associado à jornada — o terminal
+// que o humano vê é gerado do runtime, com procedência visível (B2 no produto).
+function ScenarioPanel({ scenarioId }: { readonly scenarioId: string }): JSX.Element | null {
+  const scenario = scenarioById(scenarioId);
+  if (!scenario) return null;
+  return (
+    <div className="scenarioPanel">
+      <p className="scenarioNote">{scenario.note}</p>
+      <ScenarioTerminal scenario={scenario} />
+    </div>
+  );
+}
+
+function ScenarioTerminal({ scenario }: { readonly scenario: FlowScenario }): JSX.Element {
+  const badge = scenario.kind === "real" ? TERMINAL_BADGE.real : TERMINAL_BADGE.guided;
+  return (
+    <figure
+      className={`terminalDemo terminal-${scenario.kind}`}
+      aria-label={`${badge}: ${scenario.command}`}
+    >
+      <figcaption>
+        <span></span>
+        <span></span>
+        <span></span>
+        <strong>{scenario.command}</strong>
+        <em className="terminalBadge">{badge}</em>
+      </figcaption>
+      <pre>
+        {scenario.lines.map((line, index) => (
+          <span className={`terminalLine ${scenarioLineTone(line)}`} key={`${line}-${index}`}>
+            {line === "" ? " " : line}
+          </span>
+        ))}
+      </pre>
+      {scenario.exitCode !== null ? (
+        <p className="scenarioExit">exit code: {scenario.exitCode}</p>
+      ) : null}
+    </figure>
+  );
+}
+
+function scenarioLineTone(line: string): TerminalLine["tone"] {
+  if (/^\$ /.test(line)) return "active";
+  if (/^# /.test(line)) return "muted";
+  if (/atenção|conflito|warn|skip/i.test(line)) return "warn";
+  if (/\[dry-run\]|sync|ok\b/i.test(line)) return "success";
+  return "normal";
 }
 
 function StepNavigator({ steps }: { readonly steps: readonly FlowStep[] }): JSX.Element {
@@ -586,7 +639,29 @@ function ActivePage({ route }: { readonly route: RouteId }): JSX.Element {
       />
     );
   }
-  return <ReferencePage />;
+  if (route === "reference") return <ReferencePage />;
+  return <NotFoundPage />;
+}
+
+function NotFoundPage(): JSX.Element {
+  return (
+    <section className="notFound">
+      <p className="eyebrow">Erro 404</p>
+      <h1>Esta rota não existe no Flow.</h1>
+      <p className="lead">
+        O endereço pedido não corresponde a nenhuma área do guia. Volte ao produto ou abra a visão
+        geral do Flow.
+      </p>
+      <div className="finalActions">
+        <SiteLink className="primaryAction" route="home">
+          Voltar ao produto
+        </SiteLink>
+        <SiteLink className="secondaryAction" route="flow">
+          Ver o Flow
+        </SiteLink>
+      </div>
+    </section>
+  );
 }
 
 export function App(): JSX.Element {
@@ -600,6 +675,11 @@ export function App(): JSX.Element {
     window.addEventListener("site:navigate", handler);
     return () => window.removeEventListener("site:navigate", handler);
   }, [navigate]);
+
+  // Título por rota (SEO/a11y): cada área navegável tem <title> próprio.
+  useEffect(() => {
+    document.title = routeTitle(route);
+  }, [route]);
 
   return (
     <main>
