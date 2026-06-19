@@ -48,14 +48,19 @@ describe("governed documentation site packaging", () => {
 
   it("mantem a home como pagina de produto sem instrucoes de deploy", () => {
     const appSource = fs.readFileSync(path.join(REPO_ROOT, "site/src/App.tsx"), "utf-8");
+    const flowData = fs.readFileSync(path.join(REPO_ROOT, "site/src/flowData.ts"), "utf-8");
     const viteConfig = fs.readFileSync(path.join(REPO_ROOT, "site/vite.config.ts"), "utf-8");
 
     expect(appSource).not.toMatch(/Cloudflare/i);
     expect(appSource).not.toContain("../../docs/assets/");
     expect(appSource).toContain("Automação absorve o mecânico");
     expect(appSource).toContain("./assets/generated/ai-guidelines-flow.webp");
-    expect(appSource).toContain("npx ai-guidelines init");
-    expect(appSource).toContain("Flow visual");
+    // A home é uma página de produto com hero, problema, solução e caminhos por público.
+    expect(appSource).toContain("ProductCTA");
+    expect(appSource).toContain("audiencePaths");
+    expect(appSource).toContain("Ver como funciona");
+    // O comando do consumidor é DERIVADO (binCommand), não literal no JSX.
+    expect(flowData).toContain('binCommand("init")');
     expect(viteConfig).not.toContain("copyFlowSite");
   });
 

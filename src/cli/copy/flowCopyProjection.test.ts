@@ -58,7 +58,8 @@ describe("flow copy catalog", () => {
 
     expect(app).toContain("StepNavigator");
     expect(app).toContain("aria-current");
-    expect(app).toContain("TerminalDemo");
+    expect(app).toContain("ScenarioTerminal");
+    expect(app).toContain("terminalBadge");
     expect(data).toContain("/flow/comecar");
     expect(data).toContain("/flow/uso-diario");
     expect(data).toContain("/flow/time");

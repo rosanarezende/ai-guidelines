@@ -131,17 +131,12 @@ const HUMAN_COMMAND_SURFACE: readonly string[] = [
 
 export const routes: readonly RouteLink[] = [
   { id: "home", path: "/", label: "Produto", shortLabel: "Produto" },
-  { id: "flow", path: "/flow/", label: "Visão geral", shortLabel: "Flow" },
-  { id: "start", path: "/flow/comecar", label: "Começar uma vez", shortLabel: "Começar" },
-  { id: "daily", path: "/flow/uso-diario", label: "Uso diário", shortLabel: "Uso" },
-  { id: "team", path: "/flow/time", label: "Time e specs", shortLabel: "Time" },
-  {
-    id: "peerReview",
-    path: "/flow/review-entre-pares",
-    label: "Review entre pares",
-    shortLabel: "Review",
-  },
-  { id: "reference", path: "/flow/referencia", label: "Referência", shortLabel: "Ref." },
+  { id: "flow", path: "/flow", label: "Como funciona", shortLabel: "Flow" },
+  { id: "start", path: "/flow/start", label: "Começar", shortLabel: "Começar" },
+  { id: "daily", path: "/flow/daily", label: "Uso diário", shortLabel: "Uso" },
+  { id: "team", path: "/flow/team", label: "Em time", shortLabel: "Time" },
+  { id: "peerReview", path: "/flow/review", label: "Review entre pares", shortLabel: "Review" },
+  { id: "reference", path: "/flow/reference", label: "Referência", shortLabel: "Ref." },
 ];
 
 export const startJourneys: readonly Journey[] = [
@@ -456,15 +451,185 @@ export const referenceGroups: readonly ReferenceGroup[] = [
   },
 ];
 
+// ─────────────────────────────────────────────────────────────────────────
+// Conteúdo de produto. Prosa editorial — mas todo FATO operacional (comando,
+// provider, feature, decisão) vem da camada derivada/validada acima.
+// ─────────────────────────────────────────────────────────────────────────
+
+export interface ProductPoint {
+  readonly title: string;
+  readonly text: string;
+}
+
+export const productProblems: readonly ProductPoint[] = [
+  {
+    title: "O contexto se perde",
+    text: "Cada nova sessão começa reconstruindo o que já era sabido: estado, decisões e próximos passos somem entre uma conversa e outra.",
+  },
+  {
+    title: "Decisões ficam espalhadas",
+    text: "O porquê de cada escolha mora em threads, mensagens e memória — não em um lugar versionado que o time e a IA conseguem ler.",
+  },
+  {
+    title: "PRs viram blocos enormes",
+    text: "Sem fatias e gates claros, a revisão acumula e o risco cresce. Ninguém sabe ao certo o que falta para concluir.",
+  },
+  {
+    title: "A IA não tem memória confiável",
+    text: "Assistentes inferem o fluxo a cada vez. Sem fonte de verdade, repetem suposições e divergem do estado real do repo.",
+  },
+  {
+    title: "O fluxo depende de memória humana",
+    text: "Lembrar a sequência certa — validar, revisar, marcar pronto, decidir — vira trabalho manual frágil e fácil de pular.",
+  },
+];
+
+export const productSolutions: readonly ProductPoint[] = [
+  {
+    title: "Estado governado no repositório",
+    text: "Specs, decisões, reviews, gates e próximos passos vivem em arquivos versionados — a mesma base factual para humanos e IAs.",
+  },
+  {
+    title: "Próxima ação derivada",
+    text: "O guia lê o estado real e mostra o próximo passo único, com alternativas e bloqueios explicados em linguagem humana.",
+  },
+  {
+    title: "Decisões humanas explícitas",
+    text: "Ready, Human Gate e merge são decisões situadas, com evidência e bloqueios — nunca atalhos automáticos.",
+  },
+  {
+    title: "Uma fonte, três projeções",
+    text: "CLI, wizard e este site projetam o mesmo fluxo. O que você lê aqui é derivado do runtime real, não reescrito à mão.",
+  },
+];
+
+export interface AudiencePath {
+  readonly id: string;
+  readonly label: string;
+  readonly title: string;
+  readonly text: string;
+  readonly route: RouteId;
+  readonly command: string;
+}
+
+export const audiencePaths: readonly AudiencePath[] = [
+  {
+    id: "new",
+    label: "Projeto novo",
+    title: "Começar do zero, já governado",
+    text: "Pasta limpa: nasça com baseline, providers, práticas e validações organizados.",
+    route: "start",
+    command: binCommand("init"),
+  },
+  {
+    id: "adopt",
+    label: "Repo existente",
+    title: "Adotar sem apagar o que existe",
+    text: "Já tem código: o caminho conservador preserva conteúdo e mostra conflitos antes de aplicar.",
+    route: "start",
+    command: binCommand("adopt", "--dry-run"),
+  },
+  {
+    id: "daily",
+    label: "Repo já governado",
+    title: "Trabalhar no dia a dia",
+    text: "Abra o guia situado: estado, próxima ação, validação e decisões — sem decorar comandos.",
+    route: "daily",
+    command: FLOW_WIZARD,
+  },
+];
+
+export const safetyRails: readonly ProductPoint[] = [
+  {
+    title: "Ready não é merge",
+    text: "Marcar pronto sinaliza que a fatia satisfez seus critérios — não integra nada sozinho.",
+  },
+  {
+    title: "Human Gate exige um humano",
+    text: "O avanço do checkpoint é decisão da owner; o gate é registrado depois da decisão, nunca antes.",
+  },
+  {
+    title: "Merge só no momento certo",
+    text: "A integração acontece no nó terminal do fluxo — não em um PR isolado fora de hora.",
+  },
+  {
+    title: "Ação bloqueada mostra o motivo",
+    text: "O que não pode ser feito agora aparece como bloqueio explicado, não como botão que falha em silêncio.",
+  },
+];
+
+/** Decisões reservadas ao humano — DERIVADAS do registry de decisões (A2). */
+export const humanDecisions: readonly { readonly id: string; readonly title: string }[] =
+  copy.decisions;
+
+export interface GlossaryEntry {
+  readonly term: string;
+  readonly definition: string;
+}
+
+/** Termos de comando derivam a definição do registry; conceitos são editoriais. */
+const glossaryFromCommand = (name: string): GlossaryEntry => ({
+  term: name,
+  definition: commandReference(name).hint,
+});
+
+export const glossary: readonly GlossaryEntry[] = [
+  glossaryFromCommand("init"),
+  glossaryFromCommand("adopt"),
+  glossaryFromCommand("update"),
+  glossaryFromCommand("work"),
+  glossaryFromCommand("decide"),
+  glossaryFromCommand("specs"),
+  glossaryFromCommand("peer-review"),
+  {
+    term: "handoff",
+    definition: commandByName.get("handoff")?.description ?? "retomada situada de contexto.",
+  },
+  {
+    term: "Ready",
+    definition:
+      "estado em que a fatia declara que satisfez seus critérios de saída. Não faz merge.",
+  },
+  {
+    term: "Human Gate",
+    definition: "decisão humana que autoriza concluir o checkpoint. Registrada depois da decisão.",
+  },
+  {
+    term: "merge",
+    definition: "integração final do trabalho, no momento e nó corretos do fluxo governado.",
+  },
+  {
+    term: "worktree",
+    definition: "cópia isolada do repo para revisar o PR de outra pessoa sem perder sua branch.",
+  },
+  {
+    term: "managed block",
+    definition:
+      "trecho gerenciado pelo framework dentro de um arquivo; o resto do conteúdo fica intocado.",
+  },
+  {
+    term: "drift",
+    definition:
+      "divergência entre o estado projetado e os fatos reais; vira bloqueio, não suposição.",
+  },
+  {
+    term: "spec",
+    definition:
+      "unidade de trabalho governado com estado, plano, tarefas, reviews e gates próprios.",
+  },
+];
+
 export function routeFromPath(pathname: string): RouteId {
   const normalized = pathname.replace(/\/+$/, "") || "/";
   if (normalized === "/") return "home";
   if (normalized === "/flow") return "flow";
-  if (normalized === "/flow/comecar") return "start";
-  if (normalized === "/flow/uso-diario") return "daily";
-  if (normalized === "/flow/time") return "team";
-  if (normalized === "/flow/review-entre-pares") return "peerReview";
-  if (normalized === "/flow/referencia") return "reference";
+  // Paths canônicos EN + aliases PT antigos (links existentes continuam válidos).
+  if (normalized === "/flow/start" || normalized === "/flow/comecar") return "start";
+  if (normalized === "/flow/daily" || normalized === "/flow/uso-diario") return "daily";
+  if (normalized === "/flow/team" || normalized === "/flow/time") return "team";
+  if (normalized === "/flow/review" || normalized === "/flow/review-entre-pares")
+    return "peerReview";
+  if (normalized === "/flow/reference" || normalized === "/flow/referencia") return "reference";
   // Rota desconhecida vira 404 explícito (não soft-404 silencioso que caía em "flow").
   return "notFound";
 }

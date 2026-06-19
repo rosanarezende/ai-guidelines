@@ -18,15 +18,27 @@ function readSite(relativePath: string): string {
 describe("rotas navegáveis do site", () => {
   const flowData = readSite("site/src/flowData.ts");
 
-  it("mantém as rotas /flow/* conhecidas", () => {
+  it("expõe as rotas canônicas EN do /flow/*", () => {
     for (const route of [
+      "/flow/start",
+      "/flow/daily",
+      "/flow/team",
+      "/flow/review",
+      "/flow/reference",
+    ]) {
+      expect(flowData).toContain(route);
+    }
+  });
+
+  it("mantém os paths PT antigos como aliases (links existentes seguem válidos)", () => {
+    for (const alias of [
       "/flow/comecar",
       "/flow/uso-diario",
       "/flow/time",
       "/flow/review-entre-pares",
       "/flow/referencia",
     ]) {
-      expect(flowData).toContain(route);
+      expect(flowData).toContain(alias);
     }
   });
 
