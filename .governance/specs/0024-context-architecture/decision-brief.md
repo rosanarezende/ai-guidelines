@@ -6,7 +6,7 @@
 > Plan: [`./plan.md`](./plan.md)
 > Tasks: [`./tasks.md`](./tasks.md)
 > Status agregado: **Resolved (decisões)** — todas as `[DEC]` desta spec estão `Resolved`; a pesquisa estrutural ainda aberta vive em [`research/findings.md`](./research/findings.md), não aqui.
-> Última atualização: 2026-06-18 — **`[DEC-0024-G14]` registrada**: `co-flow-convergence` insere CO-10.6 para fluxo de time, múltiplas specs e criação de spec nova; falsificação ampla passa a CO-10.7 e revisão independente + Human Gate a CO-10.8.
+> Última atualização: 2026-06-19 — **`[DEC-0024-G15]` registrada**: `co-flow-convergence` insere CO-10.7 para a CLI pública autoexplicável (`npx ai-guidelines`) e wizard orientado ao contexto; falsificação ampla passa a CO-10.8 e revisão independente + Human Gate a CO-10.9.
 
 > **Artefato exclusivo de decisão humana.** Organizado por **estado**, não por numeração histórica (reestruturação 2026-05-31). Quatro estados respondem, à primeira vista, _o que já foi decidido · o que ainda está aberto · o que virou regra · o que virou enforcement_:
 >
@@ -344,9 +344,67 @@ Cada transição deve declarar: fato de entrada, autoridade, comando, efeito per
 - `CO-10.7` deve falsificar o fluxo completo, incluindo cenários negativos e não óbvios.
 - `CO-10.8` deve preparar uma rodada independente de Technical Audit, Architectural Review e Security Review com outra LLM, usando prompts que busquem falsificações não óbvias e reduzam viés antes do Human Gate.
 
+**Nota posterior:** `[DEC-0024-G15]` inseriu `CO-10.7 — CLI pública autoexplicável e wizard orientado ao contexto`; por isso a falsificação ampla passou a `CO-10.8` e a revisão independente + Human Gate passou a `CO-10.9`.
+
 **O que NÃO está sendo decidido:** abrir CO-5; executar Ready; exercer Human Gate; fazer merge; abrir novo PR; criar lock distribuído falso; automatizar criação de PR/spec sem confirmação humana; tornar toda review obrigatória universalmente.
 
 **Status:** Resolved (2026-06-18) / @rosanarezende — decisão operacional de fluxo em time antes da falsificação e Gate do nó.
+
+---
+
+### [DEC-0024-G15] CLI pública autoexplicável como porta de entrada do produto
+
+**Pergunta:** O site deve continuar explicando comandos e jornadas como camada editorial principal, ou o produto precisa primeiro garantir que a CLI pública (`npx ai-guidelines`) seja autoexplicável e consiga orientar a pessoa a partir do estado real do repositório?
+
+**Modo de gate:** `aceitação` <!-- decisão operacional da owner, 2026-06-19, durante CO-10.6/planejamento de fechamento do co-flow-convergence. -->
+
+**Contexto:** O redesign do site ajudou a visualizar o produto, mas também revelou uma inversão perigosa: o site começou a explicar um fluxo ideal enquanto a experiência pública ainda podia parecer uma lista de comandos que a pessoa precisa decorar (`init`, `adopt`, `update`, `work`, `specs`, `peer-review`). A owner decidiu que o produto principal deve ser a CLI/wizard: a pessoa deve poder rodar `npx ai-guidelines`, o framework detectar o contexto e oferecer o próximo caminho correto. O site deve funcionar como documentação viva e reprodução fiel dessa experiência, não como fonte paralela que tenta compensar lacunas da CLI.
+
+**Decisão (Resolved):**
+
+- Inserir `CO-10.7 — CLI pública autoexplicável e wizard orientado ao contexto` antes da falsificação ampla.
+- Renumerar:
+  - `CO-10.7 — falsificação ampla do fluxo` para `CO-10.8`;
+  - `CO-10.8 — revisão independente + Human Gate` para `CO-10.9`.
+- `npx ai-guidelines` deve ser tratado como a porta de entrada pública do produto; comandos diretos continuam disponíveis como atalhos para automação ou usuários experientes, mas não devem ser a experiência principal.
+- A CLI deve detectar e explicar, com linguagem humana, pelo menos:
+  - pasta vazia;
+  - projeto novo com arquivos soltos;
+  - repositório existente sem ai-guidelines;
+  - repositório existente com conflitos;
+  - repositório já governado;
+  - perfil solo, contribuições externas ou time;
+  - uma spec ativa;
+  - múltiplas specs abertas;
+  - ausência de spec ativa;
+  - branch errada;
+  - working tree suja;
+  - PR Draft/Ready;
+  - CI verde, pendente ou falha;
+  - findings/reviews/resolutions/dispositions;
+  - readiness ausente, readiness terminal e avanço permitido;
+  - revisão de PR de outra pessoa;
+  - modo offline/degradado.
+- Os cenários mínimos de uso diário devem ser decompostos em subcenários falsificáveis:
+  - nova sessão em repo governado com uma spec ativa;
+  - nova sessão com múltiplas specs e necessidade de escolher foco;
+  - retomar depois de interrupção;
+  - validar mudanças locais com tree suja;
+  - resolver finding de review;
+  - fechar resolution/disposition;
+  - decidir readiness de sub-checkpoint;
+  - avançar sub-checkpoint quando permitido;
+  - bloquear avanço quando readiness, findings, CI ou branch impedem;
+  - preparar Ready sem executar Ready;
+  - preparar Human Gate sem executar Gate;
+  - revisar PR de colega sem perder a branch atual;
+  - atualizar providers/práticas em repo já governado;
+  - distinguir atualização comum de mudança de política de colaboração que exige autoridade.
+- O site deve reproduzir a experiência real da CLI por transcripts/cenários derivados sempre que possível; textos editoriais do site podem explicar intenção e valor, mas não podem inventar comportamento.
+
+**O que NÃO está sendo decidido:** executar Ready; exercer Human Gate; fazer merge; avançar sub-checkpoint; abrir novo PR; alterar topologia externa da Spec 0024; mover narrativa editorial do site para `src/cli/copy`; transformar comandos diretos em única forma de uso; criar alias legado `providers`; introduzir nova fonte paralela de estado.
+
+**Status:** Resolved (2026-06-19) / @rosanarezende — decisão operacional de produto/UX pública antes da falsificação final do nó.
 
 ---
 
@@ -401,23 +459,24 @@ Cada transição deve declarar: fato de entrada, autoridade, comando, efeito per
 
 > Os IDs `[DEC-0024-G##]` permanecem **âncoras estáveis** (citados em findings, ADRs, git, handoffs) — mas **não organizam mais a leitura**. Mapa de equivalência:
 
-| ID histórico | Tema                                                  | Estado atual                                                                                                 |
-| :----------- | :---------------------------------------------------- | :----------------------------------------------------------------------------------------------------------- |
-| `G00`        | identidade (transformação)                            | **Decidido** — § 1 (Resolved 2026-05-31)                                                                     |
-| `G01`        | estrutura/gramática                                   | **Aberto** — § 2 (`F-AG01`)                                                                                  |
-| `G02`        | taxonomia → bloco + propriedade                       | **Decidido** — § 1 (Resolved 2026-05-31) → migração em § 4                                                   |
-| `G03`        | promotion pipeline                                    | **Reaberto (modelagem)** — `[DEC-0024-G08]` 2026-06-03; pipeline `insight→decision→rule\|guardrail→doctrine` |
-| `G04`        | contrato de boilerplate / casa única                  | **Reaberto (modelagem)** — `[DEC-0024-G08]`; casa única / tri-root → SSOT na trilha de convergência          |
-| `G05`        | projeções / decision-session                          | **Reaberto (modelagem)** — `[DEC-0024-G08]`; projeções derivadas (fonte↔projeção) + KnowledgeGraph           |
-| `G06`        | contrato da cadeia                                    | **Decidido** — § 1 (Resolved 2026-05-30) → ADR no fechamento                                                 |
-| `G07`        | topologia-as-data + enforcement L4                    | **Decidido** — § 1 (Resolved 2026-06-01) → enforcement em § 4                                                |
-| `G08`        | reabertura de G03/G04/G05 + direção orientada a grafo | **Decidido** — Resolved 2026-06-03 (owner); a modelagem fica DENTRO da 0024; NÃO há 0025 independente        |
-| `G09`        | eliminação integral de `/cli` (→ CO-3.5)              | **Decidido** — § 1 (Resolved 2026-06-15, owner); supersede o "wrapper" do #38; topologia externa inalterada  |
-| `G10`        | `co-flow-convergence` antes de `co-capture`           | **Decidido** — § 1 (Resolved 2026-06-16, owner); nó próprio para convergência ponta a ponta do fluxo         |
-| `G11`        | suspensão temporária de smoke durante co-flow         | **Decidido** — § 1 (Resolved 2026-06-16, owner); bloqueia Ready/Human Gate até reativação                    |
-| `G12`        | CO-10.2 entrega convergência coesa inicial            | **Decidido** — § 1 (Resolved 2026-06-16, owner); remove heurísticas locais já comprovadamente divergentes    |
-| `G13`        | CO-10.5 dedicado a UX/linguagem/wizard Clack          | **Decidido** — § 1 (Resolved 2026-06-17, owner); G14 subdivide o fechamento antes do Gate                    |
-| `G14`        | CO-10.6 dedicado a fluxo de time/múltiplas specs      | **Decidido** — § 1 (Resolved 2026-06-18, owner); falsificação ampla passa a CO-10.7 e revisão/Gate a CO-10.8 |
+| ID histórico | Tema                                                  | Estado atual                                                                                                                |
+| :----------- | :---------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------- |
+| `G00`        | identidade (transformação)                            | **Decidido** — § 1 (Resolved 2026-05-31)                                                                                    |
+| `G01`        | estrutura/gramática                                   | **Aberto** — § 2 (`F-AG01`)                                                                                                 |
+| `G02`        | taxonomia → bloco + propriedade                       | **Decidido** — § 1 (Resolved 2026-05-31) → migração em § 4                                                                  |
+| `G03`        | promotion pipeline                                    | **Reaberto (modelagem)** — `[DEC-0024-G08]` 2026-06-03; pipeline `insight→decision→rule\|guardrail→doctrine`                |
+| `G04`        | contrato de boilerplate / casa única                  | **Reaberto (modelagem)** — `[DEC-0024-G08]`; casa única / tri-root → SSOT na trilha de convergência                         |
+| `G05`        | projeções / decision-session                          | **Reaberto (modelagem)** — `[DEC-0024-G08]`; projeções derivadas (fonte↔projeção) + KnowledgeGraph                          |
+| `G06`        | contrato da cadeia                                    | **Decidido** — § 1 (Resolved 2026-05-30) → ADR no fechamento                                                                |
+| `G07`        | topologia-as-data + enforcement L4                    | **Decidido** — § 1 (Resolved 2026-06-01) → enforcement em § 4                                                               |
+| `G08`        | reabertura de G03/G04/G05 + direção orientada a grafo | **Decidido** — Resolved 2026-06-03 (owner); a modelagem fica DENTRO da 0024; NÃO há 0025 independente                       |
+| `G09`        | eliminação integral de `/cli` (→ CO-3.5)              | **Decidido** — § 1 (Resolved 2026-06-15, owner); supersede o "wrapper" do #38; topologia externa inalterada                 |
+| `G10`        | `co-flow-convergence` antes de `co-capture`           | **Decidido** — § 1 (Resolved 2026-06-16, owner); nó próprio para convergência ponta a ponta do fluxo                        |
+| `G11`        | suspensão temporária de smoke durante co-flow         | **Decidido** — § 1 (Resolved 2026-06-16, owner); bloqueia Ready/Human Gate até reativação                                   |
+| `G12`        | CO-10.2 entrega convergência coesa inicial            | **Decidido** — § 1 (Resolved 2026-06-16, owner); remove heurísticas locais já comprovadamente divergentes                   |
+| `G13`        | CO-10.5 dedicado a UX/linguagem/wizard Clack          | **Decidido** — § 1 (Resolved 2026-06-17, owner); G14 subdivide o fechamento antes do Gate                                   |
+| `G14`        | CO-10.6 dedicado a fluxo de time/múltiplas specs      | **Decidido** — § 1 (Resolved 2026-06-18, owner); G15 renumera a falsificação ampla para CO-10.8 e revisão/Gate para CO-10.9 |
+| `G15`        | CLI pública autoexplicável como porta de entrada      | **Decidido** — § 1 (Resolved 2026-06-19, owner); falsificação ampla passa a CO-10.8 e revisão/Gate a CO-10.9                |
 
 ---
 
@@ -436,6 +495,7 @@ Cada transição deve declarar: fato de entrada, autoridade, comando, efeito per
 - [x] `[DEC-0024-G12]` — Resolved 2026-06-16 / @rosanarezende
 - [x] `[DEC-0024-G13]` — Resolved 2026-06-17 / @rosanarezende
 - [x] `[DEC-0024-G14]` — Resolved 2026-06-18 / @rosanarezende
+- [x] `[DEC-0024-G15]` — Resolved 2026-06-19 / @rosanarezende
 
 ---
 
