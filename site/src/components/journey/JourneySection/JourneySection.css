@@ -1,0 +1,56 @@
+.journeySection {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  display: grid;
+  gap: 20px;
+  padding: 20px;
+}
+
+.journeyIntro {
+  display: grid;
+  gap: 12px;
+}
+
+.journeyIntro p {
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.journeyIntro code {
+  justify-self: start;
+}
+
+.whenBox {
+  background: var(--accent-soft);
+  border: 1px solid #cfe6df;
+  border-radius: 10px;
+  padding: 16px;
+}
+
+.whenBox h3 {
+  font-size: 0.95rem;
+}
+
+.whenBox ul {
+  margin: 10px 0 0;
+  padding-left: 18px;
+}
+
+.whenBox li {
+  color: #3c5249;
+  line-height: 1.55;
+  margin-bottom: 4px;
+}
+
+.journeyBody {
+  display: grid;
+  gap: 16px;
+}
+
+@media (min-width: 1040px) {
+  .journeySection {
+    grid-template-columns: minmax(260px, 0.6fr) minmax(0, 1.4fr);
+    padding: 26px;
+  }
+}

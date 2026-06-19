@@ -81,12 +81,12 @@ describe("cenários de terminal do site (B2)", () => {
   }, 60000);
 
   it("o site mostra procedência VISÍVEL do terminal (não só aria-label)", () => {
-    const app = readSite("site/src/App.tsx");
-    expect(app).toContain("terminalBadge");
-    expect(app).toContain("Exemplo gerado");
-    expect(app).toContain("Exemplo guiado");
-    expect(app).toContain("Exemplo ilustrativo");
-    const styles = readSite("site/src/styles.css");
+    const terminalFrame = readSite("site/src/components/terminal/TerminalFrame/TerminalFrame.tsx");
+    expect(terminalFrame).toContain("terminalBadge");
+    expect(terminalFrame).toContain("Exemplo gerado");
+    expect(terminalFrame).toContain("Exemplo guiado");
+    expect(terminalFrame).toContain("Exemplo ilustrativo");
+    const styles = readSite("site/src/components/terminal/TerminalFrame/TerminalFrame.css");
     expect(styles).toContain(".terminalBadge");
   });
 });

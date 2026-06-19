@@ -1,0 +1,9 @@
+.scenarioPanel {
+  display: grid;
+  gap: 12px;
+}
+
+.scenarioNote {
+  color: #6a7790;
+  font-size: 0.88rem;
+}

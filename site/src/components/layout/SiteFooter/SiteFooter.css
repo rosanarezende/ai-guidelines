@@ -1,0 +1,15 @@
+.siteFooter {
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  display: grid;
+  gap: 12px;
+  margin: 56px auto 0;
+  max-width: 1120px;
+  padding: 28px 16px 40px;
+}
+
+.footerLinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}

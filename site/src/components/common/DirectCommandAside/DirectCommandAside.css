@@ -1,0 +1,28 @@
+.directCommandAside {
+  background: #f7faff;
+  border: 1px dashed #cbd8e8;
+  border-radius: 10px;
+  display: grid;
+  gap: 6px;
+  margin-top: 4px;
+  padding: 12px;
+}
+
+.directCommandAside span {
+  color: #4f5d75;
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.directCommandAside p {
+  color: var(--muted);
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.directCommandAside code {
+  background: #fff;
+  justify-self: start;
+}

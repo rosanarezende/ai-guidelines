@@ -48,17 +48,40 @@ describe("governed documentation site packaging", () => {
 
   it("mantem a home como pagina de produto sem instrucoes de deploy", () => {
     const appSource = fs.readFileSync(path.join(REPO_ROOT, "site/src/App.tsx"), "utf-8");
+    const homeSource = fs.readFileSync(
+      path.join(REPO_ROOT, "site/src/components/home/HomePage/HomePage.tsx"),
+      "utf-8"
+    );
+    const productHero = fs.readFileSync(
+      path.join(REPO_ROOT, "site/src/components/home/ProductHero/ProductHero.tsx"),
+      "utf-8"
+    );
+    const solutionSection = fs.readFileSync(
+      path.join(REPO_ROOT, "site/src/components/home/SolutionSection/SolutionSection.tsx"),
+      "utf-8"
+    );
+    const productCta = fs.readFileSync(
+      path.join(REPO_ROOT, "site/src/components/home/ProductCTA/ProductCTA.tsx"),
+      "utf-8"
+    );
+    const audienceCards = fs.readFileSync(
+      path.join(REPO_ROOT, "site/src/components/home/AudiencePathCards/AudiencePathCards.tsx"),
+      "utf-8"
+    );
     const flowData = fs.readFileSync(path.join(REPO_ROOT, "site/src/flowData.ts"), "utf-8");
     const viteConfig = fs.readFileSync(path.join(REPO_ROOT, "site/vite.config.ts"), "utf-8");
+    const homeBundle = [homeSource, productHero, solutionSection, productCta, audienceCards].join(
+      "\n"
+    );
 
     expect(appSource).not.toMatch(/Cloudflare/i);
     expect(appSource).not.toContain("../../docs/assets/");
-    expect(appSource).toContain("Automação absorve o mecânico");
-    expect(appSource).toContain("./assets/generated/ai-guidelines-flow.webp");
+    expect(homeBundle).toContain("Automação absorve o mecânico");
+    expect(homeBundle).toContain("ai-guidelines-flow.webp");
     // A home é uma página de produto com hero, problema, solução e caminhos por público.
-    expect(appSource).toContain("ProductCTA");
-    expect(appSource).toContain("audiencePaths");
-    expect(appSource).toContain("Ver o guia interativo");
+    expect(homeSource).toContain("ProductCTA");
+    expect(audienceCards).toContain("audiencePaths");
+    expect(productHero).toContain("Ver o guia interativo");
     // O comando do consumidor é DERIVADO (binCommand), não literal no JSX.
     expect(flowData).toContain('directCommand: binCommand("init", "--dry-run")');
     expect(viteConfig).not.toContain("copyFlowSite");

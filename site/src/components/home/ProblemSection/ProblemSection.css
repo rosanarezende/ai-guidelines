@@ -1,0 +1,48 @@
+.problemSection {
+  background: #0f1626;
+  border-radius: 16px;
+  color: #e8eefb;
+  padding: 28px 22px;
+}
+
+.problemSection .eyebrow {
+  color: #79e7cf;
+}
+
+.problemSection h2 {
+  color: #fff;
+}
+
+.problemGrid {
+  display: grid;
+  gap: 14px;
+}
+
+.problemCard {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.problemCard h3 {
+  color: #fff;
+  margin-bottom: 8px;
+}
+
+.problemCard p {
+  color: #b8c2d6;
+  line-height: 1.6;
+}
+
+@media (min-width: 760px) {
+  .problemGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1040px) {
+  .problemGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}

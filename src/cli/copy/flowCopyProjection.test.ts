@@ -11,6 +11,10 @@ function readSiteSource(relativePath: string): string {
   return readFileSync(path.join(REPO_ROOT, relativePath), "utf-8");
 }
 
+function readSiteSources(relativePaths: readonly string[]): string {
+  return relativePaths.map((relativePath) => readSiteSource(relativePath)).join("\n");
+}
+
 describe("flow copy catalog", () => {
   it("descreve providers e práticas em linguagem humana", () => {
     expect(providerCopy("claude")).toMatchObject({
@@ -52,14 +56,22 @@ describe("flow copy catalog", () => {
   });
 
   it("mantém o Flow como páginas React navegáveis e mobile-first", () => {
-    const app = readSiteSource("site/src/App.tsx");
+    const components = readSiteSources([
+      "site/src/components/journey/StepNavigator/StepNavigator.tsx",
+      "site/src/components/terminal/ScenarioTerminal/ScenarioTerminal.tsx",
+      "site/src/components/terminal/TerminalFrame/TerminalFrame.tsx",
+    ]);
     const data = readSiteSource("site/src/flowData.ts");
-    const styles = readSiteSource("site/src/styles.css");
+    const styles = readSiteSources([
+      "site/src/components/layout/SiteHeader/SiteHeader.css",
+      "site/src/components/home/ProblemSection/ProblemSection.css",
+      "site/src/components/journey/StepNavigator/StepNavigator.css",
+    ]);
 
-    expect(app).toContain("StepNavigator");
-    expect(app).toContain("aria-current");
-    expect(app).toContain("ScenarioTerminal");
-    expect(app).toContain("terminalBadge");
+    expect(components).toContain("StepNavigator");
+    expect(components).toContain("aria-current");
+    expect(components).toContain("ScenarioTerminal");
+    expect(components).toContain("terminalBadge");
     expect(data).toContain("/flow/comecar");
     expect(data).toContain("/flow/uso-diario");
     expect(data).toContain("/flow/time");

@@ -79,22 +79,31 @@ describe("flowData separa consumidor e contribuidor", () => {
 
 describe("App separa consumidor e contribuidor", () => {
   const app = readSite("site/src/App.tsx");
+  const wizardPanel = readSite("site/src/components/wizard/WizardDemoPanel/WizardDemoPanel.tsx");
+  const directCommand = readSite(
+    "site/src/components/common/DirectCommandAside/DirectCommandAside.tsx"
+  );
+  const journeySection = readSite("site/src/components/journey/JourneySection/JourneySection.tsx");
+  const contributePage = readSite(
+    "site/src/components/contribute/ContributePage/ContributePage.tsx"
+  );
+  const siteFooter = readSite("site/src/components/layout/SiteFooter/SiteFooter.tsx");
 
   it("App.tsx não contém o alias `npm run flow`", () => {
     expect(app).not.toContain("npm run flow");
   });
 
-  it("App.tsx diferencia caminho principal de atalhos diretos", () => {
-    expect(app).toContain("WizardDemoPanel");
-    expect(app).toContain("Caminho principal");
-    expect(app).toContain("Atalho direto");
-    expect(app).toContain("Para automação ou para quem já sabe exatamente o que quer.");
+  it("a superfície pública diferencia caminho principal de atalhos diretos", () => {
+    expect(wizardPanel).toContain("wizardDemoSection");
+    expect(journeySection).toContain("Caminho principal");
+    expect(directCommand).toContain("Atalho direto");
+    expect(directCommand).toContain("Para automação ou para quem já sabe exatamente o que quer.");
   });
 
   it("a seção de contribuidor é uma página separada e discreta", () => {
-    expect(app).toContain("ContributePage");
-    expect(app).toContain('route="contribute"');
-    expect(app).toContain("Uso interno");
+    expect(contributePage).toContain("ContributePage");
+    expect(siteFooter).toContain('route="contribute"');
+    expect(contributePage).toContain("Uso interno");
   });
 });
 

@@ -59,14 +59,19 @@ describe("rotas navegáveis do site", () => {
     expect(flowData).toContain("export function routeTitle");
     expect(flowData.toLowerCase()).toContain("não encontrada");
     const app = readSite("site/src/App.tsx");
+    const activePage = readSite("site/src/components/layout/ActivePage/ActivePage.tsx");
     expect(app).toContain("document.title = routeTitle(route)");
-    expect(app).toContain("NotFoundPage");
+    expect(activePage).toContain("NotFoundPage");
   });
 });
 
 describe("jornadas surface transcripts verídicos", () => {
   const flowData = readSite("site/src/flowData.ts");
-  const app = readSite("site/src/App.tsx");
+  const journeySection = readSite("site/src/components/journey/JourneySection/JourneySection.tsx");
+  const scenarioTerminal = readSite(
+    "site/src/components/terminal/ScenarioTerminal/ScenarioTerminal.tsx"
+  );
+  const terminalFrame = readSite("site/src/components/terminal/TerminalFrame/TerminalFrame.tsx");
 
   it("liga jornadas a cenários gerados (real/guiado)", () => {
     expect(flowData).toContain("AI_GUIDELINES_FLOW_SCENARIOS");
@@ -77,8 +82,8 @@ describe("jornadas surface transcripts verídicos", () => {
   });
 
   it("renderiza o painel de cenário com procedência visível", () => {
-    expect(app).toContain("ScenarioPanel");
-    expect(app).toContain("ScenarioTerminal");
-    expect(app).toContain("terminalBadge");
+    expect(journeySection).toContain("ScenarioPanel");
+    expect(scenarioTerminal).toContain("ScenarioTerminal");
+    expect(terminalFrame).toContain("terminalBadge");
   });
 });

@@ -1,0 +1,10 @@
+.notFound {
+  margin: 0 auto;
+  max-width: 640px;
+  padding: 64px 16px;
+  text-align: center;
+}
+
+.notFound .heroActions {
+  justify-content: center;
+}

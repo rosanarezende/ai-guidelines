@@ -1,0 +1,21 @@
+.flowHero {
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 8px;
+  padding: 32px 0 24px;
+}
+
+.flowNav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.flowNav a {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  min-height: 38px;
+  padding: 8px 14px;
+}

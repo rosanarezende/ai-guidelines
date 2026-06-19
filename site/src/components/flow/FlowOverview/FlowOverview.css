@@ -1,0 +1,36 @@
+.overviewGrid {
+  display: grid;
+  gap: 14px;
+}
+
+.overviewCard {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 20px;
+}
+
+.overviewCard:hover {
+  border-color: #9fc6bb;
+  text-decoration: none;
+}
+
+.overviewCard p {
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+@media (min-width: 760px) {
+  .overviewGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1040px) {
+  .overviewGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}

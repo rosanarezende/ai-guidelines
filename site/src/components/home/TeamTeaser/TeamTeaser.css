@@ -1,0 +1,25 @@
+.teamTeaser {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 26px 22px;
+}
+
+.teamTeaser p {
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.teaserActions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+@media (min-width: 760px) {
+  .teaserActions {
+    flex-direction: row;
+    gap: 20px;
+  }
+}

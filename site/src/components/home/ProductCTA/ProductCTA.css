@@ -1,0 +1,26 @@
+.ctaBand {
+  background: linear-gradient(135deg, #15324a, #1d6b5b);
+  border-radius: 16px;
+  color: #fff;
+  padding: 34px 24px;
+  text-align: center;
+}
+
+.ctaBand h2 {
+  color: #fff;
+}
+
+.ctaBand p {
+  color: #d8f0e9;
+  margin: 12px auto 0;
+  max-width: 520px;
+}
+
+.ctaBand .ctaActions {
+  justify-content: center;
+}
+
+.ctaBand .secondaryAction {
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+}
