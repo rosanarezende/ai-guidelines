@@ -146,7 +146,7 @@ export const startJourneys: readonly Journey[] = [
       "Abra o guia interativo. Ele detecta que a pasta está limpa e oferece inicializar como caminho principal.",
     command: BIN_WIZARD,
     directCommand: binCommand("init", "--dry-run"),
-    scenarioId: "new-project",
+    scenarioId: "consumer-empty-entry",
     whenToUse: [
       "pasta vazia ou projeto ainda sem histórico para preservar",
       "você quer escolher providers, práticas e colaboração antes de escrever arquivos",
@@ -205,7 +205,7 @@ export const startJourneys: readonly Journey[] = [
       "Abra o guia interativo. Ele detecta arquivos existentes, oferece adoção conservadora e mostra conflitos antes de aplicar.",
     command: BIN_WIZARD,
     directCommand: binCommand("adopt", "--dry-run"),
-    scenarioId: "existing-repo",
+    scenarioId: "consumer-existing-entry",
     whenToUse: [
       "repo com package.json, código ou práticas existentes",
       "você quer integrar ai-guidelines sem recomeçar o projeto",
@@ -255,7 +255,7 @@ export const startJourneys: readonly Journey[] = [
 
 export const dailyJourney: Journey = {
   id: "daily",
-  scenarioId: "daily-work",
+  scenarioId: "consumer-governed-solo-entry",
   eyebrow: "Repo em uso",
   title: "Operar o dia a dia sem lembrar a sequência de comandos",
   summary:
@@ -315,7 +315,7 @@ export const dailyJourney: Journey = {
 
 export const teamJourney: Journey = {
   id: "team",
-  scenarioId: "multi-spec",
+  scenarioId: "consumer-multiple-specs-entry",
   eyebrow: "Time e múltiplas specs",
   title: "Escolher a frente certa antes de trabalhar",
   summary:

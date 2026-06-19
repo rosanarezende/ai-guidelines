@@ -23,7 +23,17 @@ describe("cenários de terminal do site (B2)", () => {
     const scenarios = await buildSiteScenarios();
     const real = scenarios.filter((scenario) => scenario.kind === "real");
     const ids = real.map((scenario) => scenario.id);
-    expect(ids).toEqual(expect.arrayContaining(["new-project", "existing-repo", "governed-repo"]));
+    expect(ids).toEqual(
+      expect.arrayContaining([
+        "consumer-empty-entry",
+        "consumer-existing-entry",
+        "consumer-governed-solo-entry",
+        "consumer-multiple-specs-entry",
+        "new-project",
+        "existing-repo",
+        "governed-repo",
+      ])
+    );
 
     for (const scenario of real) {
       expect(scenario.lines.length).toBeGreaterThan(0);
@@ -33,6 +43,28 @@ describe("cenários de terminal do site (B2)", () => {
     const initScenario = real.find((scenario) => scenario.id === "new-project");
     expect(initScenario?.exitCode).toBe(0);
     expect(initScenario?.lines.join("\n")).toContain("[dry-run] write CLAUDE.md");
+  }, 60000);
+
+  it("captura a entrada publica sem subcomando nos cenarios do harness de consumidor", async () => {
+    const scenarios = await buildSiteScenarios();
+    const byId = new Map(scenarios.map((scenario) => [scenario.id, scenario]));
+
+    expect(byId.get("consumer-empty-entry")?.command).toBe("npx ai-guidelines");
+    expect(byId.get("consumer-empty-entry")?.lines.join("\n")).toContain(
+      "Iniciar ai-guidelines neste repositório"
+    );
+
+    expect(byId.get("consumer-existing-entry")?.lines.join("\n")).toContain(
+      "Adotar ai-guidelines neste repositório"
+    );
+
+    expect(byId.get("consumer-governed-solo-entry")?.lines.join("\n")).toContain(
+      "Atualizar runtime, templates, providers, práticas ou política governada"
+    );
+
+    expect(byId.get("consumer-multiple-specs-entry")?.lines.join("\n")).toContain(
+      "Não consegui escolher automaticamente qual spec deve ser o foco agora."
+    );
   }, 60000);
 
   it("não vaza caminhos temporários nos transcripts reais", async () => {

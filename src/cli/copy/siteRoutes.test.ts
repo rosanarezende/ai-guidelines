@@ -76,7 +76,7 @@ describe("jornadas surface transcripts verídicos", () => {
   it("liga jornadas a cenários gerados (real/guiado)", () => {
     expect(flowData).toContain("AI_GUIDELINES_FLOW_SCENARIOS");
     expect(flowData).toContain("scenarioById");
-    for (const id of ["new-project", "existing-repo", "peer-review"]) {
+    for (const id of ["consumer-empty-entry", "consumer-existing-entry", "peer-review"]) {
       expect(flowData).toContain(`scenarioId: "${id}"`);
     }
   });

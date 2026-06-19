@@ -469,3 +469,73 @@ Limite ainda existente:
 os cenarios de uso diario governado ainda precisam ser refletidos no site como
 prints/transcripts reais da CLI publica antes de declarar CO-10.7 pronto.
 ```
+
+## 12. Rodada de implementacao - site refletindo a entrada publica real
+
+Rodada executada depois da criacao do harness:
+
+```text
+npm run site:scenarios:sync
+npm run site:scenarios:check
+npm run site:build
+npm run test:ts -- --runTestsByPath src/cli/siteScenarios.test.ts src/cli/copy/siteRoutes.test.ts src/cli/copy/siteProfiles.test.ts
+```
+
+Mudanca principal:
+
+```text
+site antes
+→ mostrava muitos atalhos diretos como init/adopt/update
+
+site agora
+→ usa cenarios gerados a partir do runtime real
+→ roda a entrada publica `npx ai-guidelines` nos fixtures de consumidor
+→ mostra que a pessoa pode comecar pelo guia sem decorar comandos
+```
+
+Cenarios reais agora projetados para o site:
+
+- `consumer-empty-entry`: pasta vazia com `npx ai-guidelines`;
+- `consumer-existing-entry`: repo existente com `npx ai-guidelines`;
+- `consumer-formatter-conflict-entry`: repo existente com formatter rival;
+- `consumer-governed-solo-entry`: repo governado solo;
+- `consumer-governed-team-entry`: repo governado em time;
+- `consumer-multiple-specs-entry`: repo governado com multiplas specs.
+
+O site passou a usar esses cenarios nas jornadas principais:
+
+- projeto novo;
+- repositorio existente;
+- uso diario em repo governado;
+- trabalho com multiplas frentes/specs.
+
+Tambem foi ajustado o guard de comandos publicos para aceitar explicitamente o
+caso raiz:
+
+```text
+npx ai-guidelines
+```
+
+Esse caso nao e um "comando ausente"; ele e a porta publica principal. Comandos
+diretos continuam existindo como atalhos e referencia, mas o site nao deve
+fazer a pessoa decorar esses atalhos para entender o produto.
+
+Falsificacoes adicionadas/ajustadas:
+
+- se o site apontar para um scenario inexistente, `siteRoutes.test` falha;
+- se scenario publico nao iniciar com `npx ai-guidelines`, `siteProfiles.test`
+  falha;
+- se comando publico com verbo nao existir no registry real, `siteProfiles.test`
+  falha;
+- se os transcripts gerados ficarem stale, `site:scenarios:check` falha;
+- se a entrada publica voltar a nao cobrir pasta vazia, repo existente, repo
+  governado ou multiplas specs, `siteScenarios.test` falha.
+
+Limite residual:
+
+```text
+o site agora reflete a entrada publica real para os cenarios principais,
+mas ainda falta revisar visualmente no preview e decidir se os exemplos guiados
+de work/specs/peer-review devem virar transcripts reais com fixtures completos
+antes de readiness.
+```

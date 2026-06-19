@@ -123,6 +123,12 @@ describe("cenários consumidos no público têm surface public", () => {
   const byId = new Map(generatedScenarios().map((scenario) => [scenario.id, scenario]));
 
   const publicIds = [
+    "consumer-empty-entry",
+    "consumer-existing-entry",
+    "consumer-formatter-conflict-entry",
+    "consumer-governed-solo-entry",
+    "consumer-governed-team-entry",
+    "consumer-multiple-specs-entry",
     "new-project",
     "existing-repo",
     "governed-repo",
@@ -151,7 +157,12 @@ describe("cenários consumidos no público têm surface public", () => {
     const names = new Set(buildRegistry().commandNames());
     for (const id of publicIds) {
       const command = byId.get(id)?.command ?? "";
-      const verb = command.replace(/^npx ai-guidelines\s+/, "").split(" ")[0];
+      const tail = command.replace(/^npx ai-guidelines(?:\s+)?/, "").trim();
+      if (!tail) {
+        expect(command).toBe("npx ai-guidelines");
+        continue;
+      }
+      const verb = tail.split(" ")[0];
       if (verb && !verb.startsWith("-") && /^[a-z-]+$/.test(verb)) {
         expect(names.has(verb)).toBe(true);
       }

@@ -30,7 +30,12 @@ export function FlowOverview(): JSX.Element {
           lead={copy.previewLead}
         />
         <ScenarioTabs
-          scenarioIds={["new-project", "existing-repo", "governed-repo", "update-providers"]}
+          scenarioIds={[
+            "consumer-empty-entry",
+            "consumer-existing-entry",
+            "consumer-governed-solo-entry",
+            "consumer-multiple-specs-entry",
+          ]}
         />
       </section>
     </FlowShell>

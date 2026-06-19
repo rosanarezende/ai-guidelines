@@ -1,4 +1,12 @@
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import {
+  cpSync,
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
@@ -53,6 +61,10 @@ interface RealSpec {
   /** argv passado ao runtime real. `--target` é injetado quando `withTarget`. */
   readonly argv: readonly string[];
   readonly withTarget?: boolean;
+  /** Roda o runtime como se o usuário estivesse dentro do repo temporário. */
+  readonly runFromTarget?: boolean;
+  /** Reusa fixtures do harness de consumidores para aproximar site e prova real. */
+  readonly fixtureId?: string;
   readonly seed?: (targetDir: string) => void;
 }
 
@@ -70,6 +82,66 @@ interface GuidedSpec {
 }
 
 const REAL_SPECS: readonly RealSpec[] = [
+  {
+    id: "consumer-empty-entry",
+    title: "Guia em pasta vazia — caminho principal",
+    surface: "public",
+    command: "npx ai-guidelines",
+    note: "Saída real do guia público sem subcomando, em uma pasta vazia.",
+    fixtureId: "consumer-empty",
+    runFromTarget: true,
+    argv: [],
+  },
+  {
+    id: "consumer-existing-entry",
+    title: "Guia em repo existente — adoção conservadora",
+    surface: "public",
+    command: "npx ai-guidelines",
+    note: "Saída real do guia público: repo existente recebe adopt como caminho natural.",
+    fixtureId: "consumer-existing-package",
+    runFromTarget: true,
+    argv: [],
+  },
+  {
+    id: "consumer-formatter-conflict-entry",
+    title: "Guia com formatter rival — conflito explícito",
+    surface: "public",
+    command: "npx ai-guidelines",
+    note: "Saída real do guia público: formatter rival vira decisão explícita, não sobrescrita silenciosa.",
+    fixtureId: "consumer-existing-formatter-conflict",
+    runFromTarget: true,
+    argv: [],
+  },
+  {
+    id: "consumer-governed-solo-entry",
+    title: "Guia em repo governado solo — uso diário",
+    surface: "public",
+    command: "npx ai-guidelines",
+    note: "Saída real do guia público em um repo que já usa ai-guidelines.",
+    fixtureId: "consumer-governed-solo",
+    runFromTarget: true,
+    argv: [],
+  },
+  {
+    id: "consumer-governed-team-entry",
+    title: "Guia em repo de time — política visível",
+    surface: "public",
+    command: "npx ai-guidelines",
+    note: "Saída real do guia público com perfil de colaboração de time detectado.",
+    fixtureId: "consumer-governed-team",
+    runFromTarget: true,
+    argv: [],
+  },
+  {
+    id: "consumer-multiple-specs-entry",
+    title: "Guia com múltiplas specs — escolher foco",
+    surface: "public",
+    command: "npx ai-guidelines",
+    note: "Saída real do guia público quando há mais de uma frente ativa e o foco precisa ser escolhido.",
+    fixtureId: "consumer-governed-multiple-specs",
+    runFromTarget: true,
+    argv: [],
+  },
   {
     id: "new-project",
     title: "Projeto novo — init em pasta limpa",
@@ -225,7 +297,37 @@ function redact(line: string, targetDir: string, tmpDir: string): string {
   return line.split(targetDir).join("<target>").split(tmpDir).join("<tmp>");
 }
 
-async function buildRealScenario(spec: RealSpec): Promise<FlowScenario> {
+function seedFixture(repoRoot: string, fixtureId: string, targetDir: string): void {
+  const fixtureFiles = path.join(
+    repoRoot,
+    "tests",
+    "consumer-journey",
+    "fixtures",
+    fixtureId,
+    "files"
+  );
+  if (existsSync(fixtureFiles)) {
+    cpSync(fixtureFiles, targetDir, { recursive: true });
+  }
+}
+
+async function runWithOptionalCwd(
+  argv: readonly string[],
+  logger: { info(m: string): void; error(m: string): void },
+  cwd?: string
+): Promise<number> {
+  if (!cwd) return run([...argv], { logger, isTTY: false });
+
+  const previous = process.cwd();
+  process.chdir(cwd);
+  try {
+    return await run([...argv], { logger, isTTY: false });
+  } finally {
+    process.chdir(previous);
+  }
+}
+
+async function buildRealScenario(spec: RealSpec, repoRoot: string): Promise<FlowScenario> {
   const base = {
     id: spec.id,
     title: spec.title,
@@ -237,7 +339,7 @@ async function buildRealScenario(spec: RealSpec): Promise<FlowScenario> {
 
   if (spec.withTarget === false) {
     const { logger, lines } = captureRun();
-    const exitCode = await run([...spec.argv], { logger });
+    const exitCode = await runWithOptionalCwd(spec.argv, logger);
     return { ...base, exitCode, lines: lines.flatMap((line) => line.split("\n")) };
   }
 
@@ -245,9 +347,15 @@ async function buildRealScenario(spec: RealSpec): Promise<FlowScenario> {
   const targetDir = path.join(tmpDir, "repo");
   try {
     mkdirSync(targetDir, { recursive: true });
+    if (spec.fixtureId) seedFixture(repoRoot, spec.fixtureId, targetDir);
     spec.seed?.(targetDir);
     const { logger, lines } = captureRun();
-    const exitCode = await run([...spec.argv, "--target", targetDir], { logger });
+    const argv = spec.withTarget ? [...spec.argv, "--target", targetDir] : [...spec.argv];
+    const exitCode = await runWithOptionalCwd(
+      argv,
+      logger,
+      spec.runFromTarget ? targetDir : undefined
+    );
     return {
       ...base,
       exitCode,
@@ -278,17 +386,19 @@ function buildGuidedScenario(spec: GuidedSpec): FlowScenario {
   };
 }
 
-export async function buildSiteScenarios(): Promise<readonly FlowScenario[]> {
+export async function buildSiteScenarios(
+  repoRoot = process.cwd()
+): Promise<readonly FlowScenario[]> {
   const real: FlowScenario[] = [];
   for (const spec of REAL_SPECS) {
-    real.push(await buildRealScenario(spec));
+    real.push(await buildRealScenario(spec, repoRoot));
   }
   const guided = GUIDED_SPECS.map(buildGuidedScenario);
   return [...real, ...guided];
 }
 
-export async function renderSiteScenariosScript(): Promise<string> {
-  const scenarios = await buildSiteScenarios();
+export async function renderSiteScenariosScript(repoRoot = process.cwd()): Promise<string> {
+  const scenarios = await buildSiteScenarios(repoRoot);
   return `// ${GENERATED_NOTICE}\n// prettier-ignore\nexport const AI_GUIDELINES_FLOW_SCENARIOS = ${JSON.stringify(
     scenarios,
     null,
@@ -299,12 +409,12 @@ export async function renderSiteScenariosScript(): Promise<string> {
 export async function syncSiteScenarios(repoRoot: string): Promise<void> {
   const outputPath = siteScenariosOutputPath(repoRoot);
   mkdirSync(path.dirname(outputPath), { recursive: true });
-  writeFileSync(outputPath, await renderSiteScenariosScript(), "utf-8");
+  writeFileSync(outputPath, await renderSiteScenariosScript(repoRoot), "utf-8");
 }
 
 export async function checkSiteScenarios(repoRoot: string): Promise<readonly string[]> {
   const outputPath = siteScenariosOutputPath(repoRoot);
-  const expected = await renderSiteScenariosScript();
+  const expected = await renderSiteScenariosScript(repoRoot);
   if (!existsSync(outputPath)) {
     return [`${OUTPUT_RELATIVE_PATH} não existe; rode npm run site:scenarios:sync`];
   }
