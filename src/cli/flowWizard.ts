@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 
 import { ClipboardWriter } from "../app/ports/ClipboardWriter.js";
@@ -17,6 +17,8 @@ import {
   CollaborationProfile,
   COLLABORATION_PROFILES,
 } from "../domain/provisioning/ReviewPolicyBaseline.js";
+import { detectFormatterContext } from "../domain/provisioning/FormatterContext.js";
+import type { PackageJsonObject } from "../domain/provisioning/PackageJson.js";
 import { NodeClipboard, clipboardInstallHint } from "../infrastructure/io/NodeClipboard.js";
 import { CockpitModel, collectCockpitModel, renderCockpit } from "./cockpit.js";
 import { FLOW_COPY, copyLines, featureCopy, formatCopy, providerCopy } from "./copy/flowCopy.js";
@@ -65,10 +67,13 @@ type SpecSelectionChoice = string | "__manual__" | "__back__";
 
 interface ProvisioningContextSummary {
   readonly operation: ProvisioningOperation;
+  readonly workspaceShape: "empty" | "loose-files" | "package-repo" | "governed-repo";
   readonly stateTitle: string;
   readonly evidence: readonly string[];
   readonly guidance: string;
   readonly advancedReason: string;
+  readonly formatterRivalLabel?: string;
+  readonly hasPrettier?: boolean;
   readonly reviewPolicy?: ReviewPolicySummary;
 }
 
@@ -82,6 +87,14 @@ interface ReviewPolicySummary {
   readonly acceptedFindingsRequireResolution: boolean;
   readonly acceptedFindingsRequireVerificationEvent: boolean;
   readonly requirementsSummary: readonly string[];
+}
+
+interface ContextGuidance {
+  readonly repository: readonly string[];
+  readonly collaboration: readonly string[];
+  readonly specs: readonly string[];
+  readonly dailyWork: readonly string[];
+  readonly safety: readonly string[];
 }
 
 export type FlowMenuValue =
@@ -275,13 +288,24 @@ function renderObjectBlock(
   lines.push("");
 }
 
-export function renderFlowSummary(model: CockpitModel): string {
-  if (model.flow?.humanSummary) return renderWizardHumanSummary(model.flow.humanSummary, model);
+export function renderFlowSummary(
+  model: CockpitModel,
+  provisioning?: ProvisioningContextSummary,
+  specWork?: SpecWorkSnapshot
+): string {
+  if (model.flow?.humanSummary) {
+    return [
+      renderWizardHumanSummary(model.flow.humanSummary, model),
+      renderContextGuidance(buildContextGuidance(model, provisioning, specWork)),
+    ]
+      .filter(Boolean)
+      .join("\n\n");
+  }
 
   const facts = model.work.snapshot.collected.facts;
   const pr = facts.pullRequest;
   const active = model.work.brief.object.subCheckpoint;
-  return [
+  const fallback = [
     `branch: ${facts.git.branch ?? "?"}`,
     `HEAD: ${facts.git.head ?? "?"}`,
     `modo: ${model.work.brief.mode}`,
@@ -293,6 +317,9 @@ export function renderFlowSummary(model: CockpitModel): string {
       : `PR: ${COMMON_COPY.notObserved}`,
     `próxima ação: ${model.flow?.recommended?.title ?? model.work.brief.nextAction.description}`,
   ].join("\n");
+  return [fallback, renderContextGuidance(buildContextGuidance(model, provisioning, specWork))]
+    .filter(Boolean)
+    .join("\n\n");
 }
 
 function renderWizardHumanSummary(summary: HumanSummary, model: CockpitModel): string {
@@ -343,6 +370,196 @@ function renderWizardHumanSummary(summary: HumanSummary, model: CockpitModel): s
   return lines.join("\n").trimEnd();
 }
 
+function renderContextGuidance(guidance: ContextGuidance): string {
+  const sections: Array<[string, readonly string[]]> = [
+    [WIZARD_COPY.context.repository, guidance.repository],
+    [WIZARD_COPY.context.collaboration, guidance.collaboration],
+    [WIZARD_COPY.context.specs, guidance.specs],
+    [WIZARD_COPY.context.dailyWork, guidance.dailyWork],
+    [WIZARD_COPY.context.safety, guidance.safety],
+  ];
+  const lines = [WIZARD_COPY.context.title];
+  for (const [title, items] of sections) {
+    if (items.length === 0) continue;
+    lines.push(title);
+    for (const item of items) lines.push(...wrapBullet(item, 76));
+    lines.push("");
+  }
+  return lines.join("\n").trimEnd();
+}
+
+function buildContextGuidance(
+  model: CockpitModel,
+  provisioning?: ProvisioningContextSummary,
+  specWork?: SpecWorkSnapshot
+): ContextGuidance {
+  return {
+    repository: repositoryContextLines(provisioning),
+    collaboration: collaborationContextLines(provisioning),
+    specs: specContextLines(specWork),
+    dailyWork: dailyWorkContextLines(model),
+    safety: safetyContextLines(model),
+  };
+}
+
+function repositoryContextLines(summary?: ProvisioningContextSummary): readonly string[] {
+  if (!summary) return [];
+  const lines: string[] = [];
+  switch (summary.workspaceShape) {
+    case "empty":
+      lines.push(WIZARD_COPY.context.repoEmpty);
+      break;
+    case "loose-files":
+      lines.push(WIZARD_COPY.context.repoLooseFiles);
+      break;
+    case "package-repo":
+      lines.push(WIZARD_COPY.context.repoExisting);
+      break;
+    case "governed-repo":
+      lines.push(WIZARD_COPY.context.repoGoverned);
+      break;
+  }
+  lines.push(`${WIZARD_COPY.context.pathNormal}: ${provisioningLabel(summary.operation)}.`);
+  if (summary.formatterRivalLabel) {
+    lines.push(
+      formatCopy(WIZARD_COPY.context.formatterRival, { formatter: summary.formatterRivalLabel })
+    );
+  } else if (summary.hasPrettier) {
+    lines.push(WIZARD_COPY.context.prettierPresent);
+  }
+  return lines;
+}
+
+function collaborationContextLines(summary?: ProvisioningContextSummary): readonly string[] {
+  if (!summary) return [];
+  if (summary.reviewPolicy) {
+    return [
+      formatCopy(WIZARD_COPY.context.collaborationProfile, {
+        profile: summary.reviewPolicy.activeProfile,
+      }),
+      formatCopy(WIZARD_COPY.context.collaborationReviews, {
+        implementation: String(summary.reviewPolicy.implementationApprovals),
+        integration: String(summary.reviewPolicy.integrationApprovals),
+      }),
+      WIZARD_COPY.context.collaborationChangeGuard,
+    ];
+  }
+  if (summary.operation === "update") return [WIZARD_COPY.context.collaborationMissingPolicy];
+  return [WIZARD_COPY.context.collaborationPrompted];
+}
+
+function specContextLines(snapshot?: SpecWorkSnapshot): readonly string[] {
+  if (!snapshot) return [];
+  if (!snapshot.indexAvailable) {
+    return [WIZARD_COPY.context.specIndexMissing, ...snapshot.warnings];
+  }
+  if (snapshot.entries.length === 0) {
+    return [WIZARD_COPY.context.specNone];
+  }
+  const current = currentSpecForBranch(snapshot);
+  const countLine =
+    snapshot.entries.length === 1
+      ? WIZARD_COPY.context.specSingle
+      : formatCopy(WIZARD_COPY.context.specMultiple, { count: String(snapshot.entries.length) });
+  const lines = [countLine];
+  if (current) {
+    lines.push(
+      formatCopy(WIZARD_COPY.context.specCurrentBranch, {
+        id: current.entry.id,
+        title: current.entry.title ?? current.entry.slug,
+      })
+    );
+  } else {
+    lines.push(WIZARD_COPY.context.specBranchMismatch);
+  }
+  if (snapshot.warnings.length > 0) lines.push(...snapshot.warnings);
+  return lines;
+}
+
+function dailyWorkContextLines(model: CockpitModel): readonly string[] {
+  const facts = model.work.snapshot.collected.facts;
+  const brief = model.work.brief;
+  const lifecycle = facts.lifecycle;
+  const pr = facts.pullRequest;
+  const lines: string[] = [];
+  if (brief.workingTreeState === "clean") lines.push(WIZARD_COPY.context.treeClean);
+  else lines.push(WIZARD_COPY.context.treeDirty);
+
+  if (pr) {
+    lines.push(
+      formatCopy(pr.isDraft ? WIZARD_COPY.context.prDraft : WIZARD_COPY.context.prReady, {
+        number: String(pr.number),
+      })
+    );
+    if (pr.checks.fail > 0) {
+      lines.push(formatCopy(WIZARD_COPY.context.ciFailing, { count: String(pr.checks.fail) }));
+    } else if (pr.checks.pending > 0) {
+      lines.push(formatCopy(WIZARD_COPY.context.ciPending, { count: String(pr.checks.pending) }));
+    } else {
+      lines.push(WIZARD_COPY.context.ciGreen);
+    }
+  } else {
+    lines.push(WIZARD_COPY.context.remoteNotObserved);
+  }
+
+  if (lifecycle) {
+    if (lifecycle.openFindings > 0) {
+      lines.push(
+        formatCopy(WIZARD_COPY.context.findingsOpen, {
+          open: String(lifecycle.openFindings),
+          blocking: String(lifecycle.openBlocking),
+        })
+      );
+    } else {
+      lines.push(WIZARD_COPY.context.findingsClosed);
+    }
+    lines.push(
+      formatCopy(WIZARD_COPY.context.resolutionsCount, {
+        count: String(lifecycle.resolutions),
+      })
+    );
+    const staleOrBlocking = lifecycle.reviewStatuses.filter(
+      (status) => status.blocking || status.state === "stale" || status.state === "missing"
+    );
+    if (staleOrBlocking.length > 0) {
+      lines.push(
+        formatCopy(WIZARD_COPY.context.reviewsAttention, {
+          count: String(staleOrBlocking.length),
+        })
+      );
+    }
+  }
+
+  const recommended = model.flow?.recommended;
+  if (
+    recommended?.id === "mark-readiness" ||
+    model.flow?.available.some((action) => action.id === "mark-readiness")
+  ) {
+    lines.push(WIZARD_COPY.context.readinessAvailable);
+  }
+  if (recommended?.id === "finish-subcheckpoint") lines.push(WIZARD_COPY.context.finishAvailable);
+  if (model.flow?.blocked.some((action) => action.id === "advance-subcheckpoint")) {
+    lines.push(WIZARD_COPY.context.advanceBlocked);
+  }
+  return lines;
+}
+
+function safetyContextLines(model: CockpitModel): readonly string[] {
+  const facts = model.work.snapshot.collected.facts;
+  const sources = facts.sources ?? [];
+  const degraded = sources.filter((source) => source.status !== "fresh");
+  const lines: string[] = [];
+  if (degraded.length > 0 || !facts.pullRequest) {
+    lines.push(WIZARD_COPY.context.degradedMode);
+  }
+  lines.push(WIZARD_COPY.context.humanGateGuard);
+  lines.push(WIZARD_COPY.context.readyGuard);
+  lines.push(WIZARD_COPY.context.mergeGuard);
+  lines.push(WIZARD_COPY.context.peerReviewAvailable);
+  lines.push(WIZARD_COPY.context.updateAvailable);
+  return lines;
+}
+
 export function renderBlockedActions(model: CockpitModel): string {
   const blocked = model.flow?.blocked ?? [];
   if (blocked.length === 0) return WIZARD_COPY.results.blockedEmpty;
@@ -364,10 +581,12 @@ export async function runFlowWizard(
   const model = (options.collectModel ?? collectCockpitModel)(repoRoot);
   const context: CommandContext = { repoRoot, logger, prompts };
   const provisioning = detectProvisioningContext(repoRoot);
+  const loadIndex = options.loadActiveSpecsIndex ?? loadActiveSpecsIndex;
+  const specWork = collectSpecWorkSnapshot(repoRoot, model, loadIndex);
 
   try {
     await prompts.intro?.(WIZARD_COPY.intro);
-    const summary = renderFlowSummary(model);
+    const summary = renderFlowSummary(model, provisioning, specWork);
     if (prompts.box) await prompts.box(summary, WIZARD_COPY.stateTitle);
     else await prompts.note?.(summary, WIZARD_COPY.stateTitle);
 
@@ -406,7 +625,7 @@ export async function runFlowWizard(
         return runPeerReviewSection(registry, context, prompts);
       case "spec-work":
         return runSpecWorkSection(repoRoot, model, registry, context, prompts, {
-          loadIndex: options.loadActiveSpecsIndex ?? loadActiveSpecsIndex,
+          loadIndex,
         });
       case "provisioning":
         return runProvisioningSection(repoRoot, registry, context, prompts, provisioning);
@@ -1403,12 +1622,37 @@ async function runProvisioningCommand(
   return (await registry.dispatch([operation], context)).exitCode;
 }
 
+function topLevelEntries(repoRoot: string): readonly string[] {
+  try {
+    return readdirSync(repoRoot, { withFileTypes: true })
+      .filter((entry) => entry.name !== ".git" && entry.name !== "node_modules")
+      .map((entry) => entry.name);
+  } catch {
+    return [];
+  }
+}
+
+function readPackageJson(repoRoot: string): PackageJsonObject | null {
+  try {
+    return JSON.parse(
+      readFileSync(path.join(repoRoot, "package.json"), "utf-8")
+    ) as PackageJsonObject;
+  } catch {
+    return null;
+  }
+}
+
 function detectProvisioningContext(repoRoot: string): ProvisioningContextSummary {
+  const entries = topLevelEntries(repoRoot);
   const hasConfig = existsSync(path.join(repoRoot, ".ai-guidelines", "config.json"));
   const hasAiGuidelines = existsSync(path.join(repoRoot, ".ai-guidelines"));
   const hasGovernance = existsSync(path.join(repoRoot, ".governance"));
   const hasSpecify = existsSync(path.join(repoRoot, ".specify"));
   const hasPackageJson = existsSync(path.join(repoRoot, "package.json"));
+  const formatter = detectFormatterContext({
+    existingFiles: entries,
+    packageJson: readPackageJson(repoRoot),
+  });
 
   if (hasConfig || hasGovernance || hasAiGuidelines || hasSpecify) {
     const evidence = [
@@ -1419,10 +1663,13 @@ function detectProvisioningContext(repoRoot: string): ProvisioningContextSummary
     ].filter((item): item is string => item !== null);
     return {
       operation: "update",
+      workspaceShape: "governed-repo",
       stateTitle: PROVISIONING_COPY.detected.governedTitle,
       evidence,
       guidance: PROVISIONING_COPY.detected.governedGuidance,
       advancedReason: PROVISIONING_COPY.detected.governedAdvancedReason,
+      ...(formatter.rival ? { formatterRivalLabel: formatter.rival.label } : {}),
+      hasPrettier: formatter.hasPrettier,
       reviewPolicy: readReviewPolicySummary(repoRoot),
     };
   }
@@ -1430,6 +1677,7 @@ function detectProvisioningContext(repoRoot: string): ProvisioningContextSummary
   if (hasPackageJson) {
     return {
       operation: "adopt",
+      workspaceShape: "package-repo",
       stateTitle: PROVISIONING_COPY.detected.existingTitle,
       evidence: [
         PROVISIONING_COPY.detected.evidence.packageJson,
@@ -1437,18 +1685,26 @@ function detectProvisioningContext(repoRoot: string): ProvisioningContextSummary
       ],
       guidance: PROVISIONING_COPY.detected.existingGuidance,
       advancedReason: PROVISIONING_COPY.detected.existingAdvancedReason,
+      ...(formatter.rival ? { formatterRivalLabel: formatter.rival.label } : {}),
+      hasPrettier: formatter.hasPrettier,
     };
   }
 
   return {
     operation: "init",
+    workspaceShape: entries.length === 0 ? "empty" : "loose-files",
     stateTitle: PROVISIONING_COPY.detected.newTitle,
     evidence: [
+      entries.length === 0
+        ? PROVISIONING_COPY.detected.evidence.emptyDirectory
+        : PROVISIONING_COPY.detected.evidence.looseFiles,
       PROVISIONING_COPY.detected.evidence.noPackageJson,
       PROVISIONING_COPY.detected.evidence.noGovernedRuntime,
     ],
     guidance: PROVISIONING_COPY.detected.newGuidance,
     advancedReason: PROVISIONING_COPY.detected.newAdvancedReason,
+    ...(formatter.rival ? { formatterRivalLabel: formatter.rival.label } : {}),
+    hasPrettier: formatter.hasPrettier,
   };
 }
 

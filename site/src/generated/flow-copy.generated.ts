@@ -211,6 +211,8 @@ export const AI_GUIDELINES_FLOW_COPY = {
         "specify": ".specify/ existe.",
         "packageJson": "package.json existe.",
         "noGovernedDirs": "Não detectei .ai-guidelines/, .governance/ ou .specify/.",
+        "emptyDirectory": "A pasta não tem arquivos relevantes.",
+        "looseFiles": "Há arquivos soltos, mas não detectei package.json.",
         "noPackageJson": "Não detectei package.json.",
         "noGovernedRuntime": "Não detectei diretórios governados."
       }

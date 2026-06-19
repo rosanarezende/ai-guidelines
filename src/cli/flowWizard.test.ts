@@ -252,17 +252,26 @@ async function withTempRepo<T>(
 }
 
 function model(): CockpitModel {
+  const defaults = makeHandoffFacts();
   const facts = makeHandoffFacts({
     git: {
-      ...makeHandoffFacts().git,
+      ...defaults.git,
       branch: "feat/spec-0024-co-flow-convergence",
       head: "abc1234",
     },
     pullRequest: {
-      ...makeHandoffFacts().pullRequest!,
+      ...defaults.pullRequest!,
       number: 43,
       isDraft: true,
       checks: { pass: 5, fail: 0, pending: 0 },
+    },
+    lifecycle: {
+      ...defaults.lifecycle!,
+      openFindings: 0,
+      openBlocking: 0,
+      closedFindings: 6,
+      resolutions: 6,
+      reviewStatuses: [],
     },
   });
   const recommendedAction = {
@@ -459,6 +468,95 @@ function blockedModel(): CockpitModel {
       },
     },
   };
+}
+
+function modelWithFacts(facts: ReturnType<typeof makeHandoffFacts>): CockpitModel {
+  const base = model();
+  return {
+    ...base,
+    work: {
+      ...base.work,
+      snapshot: {
+        collected: { facts },
+      } as never,
+    },
+  };
+}
+
+function degradedModel(): CockpitModel {
+  const defaults = makeHandoffFacts();
+  return modelWithFacts(
+    makeHandoffFacts({
+      ...defaults,
+      pullRequest: null,
+      sources: [
+        {
+          id: "pull-request",
+          origin: "gh",
+          status: "degraded",
+          fingerprint: "offline",
+          detail: "gh indisponível",
+        },
+      ],
+    })
+  );
+}
+
+function openFindingModel(): CockpitModel {
+  const defaults = makeHandoffFacts();
+  return modelWithFacts(
+    makeHandoffFacts({
+      ...defaults,
+      lifecycle: {
+        ...defaults.lifecycle!,
+        openFindings: 2,
+        openBlocking: 1,
+        closedFindings: 4,
+        resolutions: 4,
+      },
+    })
+  );
+}
+
+function ciModel(checks: {
+  readonly pass: number;
+  readonly fail: number;
+  readonly pending: number;
+}): CockpitModel {
+  const defaults = makeHandoffFacts();
+  return modelWithFacts(
+    makeHandoffFacts({
+      ...defaults,
+      pullRequest: {
+        ...defaults.pullRequest!,
+        number: 43,
+        isDraft: true,
+        checks,
+      },
+      lifecycle: {
+        ...defaults.lifecycle!,
+        openFindings: 0,
+        openBlocking: 0,
+        closedFindings: 6,
+        resolutions: 6,
+      },
+    })
+  );
+}
+
+function readyPrModel(): CockpitModel {
+  const defaults = makeHandoffFacts();
+  return modelWithFacts(
+    makeHandoffFacts({
+      ...defaults,
+      pullRequest: {
+        ...defaults.pullRequest!,
+        number: 43,
+        isDraft: false,
+        checks: { pass: 5, fail: 0, pending: 0 },
+      },
+    })
+  );
 }
 
 describe("flow wizard", () => {
@@ -741,6 +839,185 @@ describe("flow wizard", () => {
       prompts.notes[0].indexOf("ALTERNATIVAS")
     );
     expect(prompts.statuses).toEqual([]);
+  });
+
+  it("resumo inicial explica contexto amplo de repo governado antes da escolha humana", async () => {
+    await withTempRepo(
+      (repoRoot) => {
+        mkdirSync(path.join(repoRoot, ".governance"), { recursive: true });
+        mkdirSync(path.join(repoRoot, ".ai-guidelines"), { recursive: true });
+        writeFileSync(path.join(repoRoot, ".ai-guidelines", "config.json"), "{}\n");
+        writeFileSync(path.join(repoRoot, "package.json"), '{"name":"consumer"}\n');
+        writeFileSync(
+          path.join(repoRoot, ".governance", "review-policy.yml"),
+          [
+            "active_profile: team",
+            "profiles:",
+            "  team:",
+            "    implementation_pr: { required_native_approvals: 1 }",
+            "    integration_pr: { required_native_approvals: 2 }",
+            "    accepted_findings:",
+            "      require_resolution: true",
+            "      require_verification_event_for_fixed: true",
+            "    github:",
+            "      minimum_approving_reviews: 2",
+            "      require_code_owner_review: true",
+            "      dismiss_stale_reviews_on_push: true",
+            "      require_last_push_approval: true",
+          ].join("\n")
+        );
+      },
+      async (repoRoot) => {
+        const prompts = new ScriptedPrompts(["quit"]);
+
+        const code = await runFlowWizard(repoRoot, new CollectingLogger(), {
+          prompts,
+          registry: registryWith(),
+          collectModel: () => model(),
+          loadActiveSpecsIndex: () => activeSpecsResult(),
+        });
+
+        expect(code).toBe(0);
+        const summary = prompts.notes[0];
+        expect(summary).toContain("O QUE O GUIA DETECTOU");
+        expect(summary).toContain("O repositório já usa ai-guidelines");
+        expect(summary).toContain("Caminho principal");
+        expect(summary).toContain("Atualizar runtime, templates, providers");
+        expect(summary).toContain("Perfil atual: team.");
+        expect(summary).toContain("2 specs publicadas");
+        expect(summary).toContain("branch atual aponta para 0024");
+        expect(summary).toContain("PR #43 está Draft");
+        expect(summary).toContain("CI verde");
+        expect(summary).toContain("Readiness");
+        expect(summary).toContain("Human Gate nunca é executado");
+        expect(summary).toContain("Review de PR de colega");
+        expect(summary).toContain("Providers, práticas e colaboração");
+      }
+    );
+  });
+
+  it("resumo inicial diferencia pasta vazia, arquivos soltos e repo existente sem governança", async () => {
+    await withTempRepo(
+      () => undefined,
+      async (repoRoot) => {
+        const prompts = new ScriptedPrompts(["quit"]);
+        await runFlowWizard(repoRoot, new CollectingLogger(), {
+          prompts,
+          registry: registryWith(),
+          collectModel: () => model(),
+          loadActiveSpecsIndex: () => ({ indexAvailable: true, warnings: [], entries: [] }),
+        });
+        expect(prompts.notes[0]).toContain("A pasta está vazia");
+        expect(prompts.notes[0]).toContain("Iniciar ai-guidelines neste repositório");
+        expect(prompts.notes[0]).toContain("Nenhuma spec ativa");
+      }
+    );
+
+    await withTempRepo(
+      (repoRoot) => {
+        writeFileSync(path.join(repoRoot, "README.md"), "# projeto\n");
+      },
+      async (repoRoot) => {
+        const prompts = new ScriptedPrompts(["quit"]);
+        await runFlowWizard(repoRoot, new CollectingLogger(), {
+          prompts,
+          registry: registryWith(),
+          collectModel: () => model(),
+          loadActiveSpecsIndex: () => ({ indexAvailable: true, warnings: [], entries: [] }),
+        });
+        expect(prompts.notes[0]).toContain("Há arquivos soltos");
+      }
+    );
+
+    await withTempRepo(
+      (repoRoot) => {
+        writeFileSync(path.join(repoRoot, "package.json"), '{"name":"consumer"}\n');
+      },
+      async (repoRoot) => {
+        const prompts = new ScriptedPrompts(["quit"]);
+        await runFlowWizard(repoRoot, new CollectingLogger(), {
+          prompts,
+          registry: registryWith(),
+          collectModel: () => model(),
+          loadActiveSpecsIndex: () => ({ indexAvailable: true, warnings: [], entries: [] }),
+        });
+        expect(prompts.notes[0]).toContain("projeto existente sem ai-guidelines");
+        expect(prompts.notes[0]).toContain("Adotar ai-guidelines neste repositório");
+      }
+    );
+  });
+
+  it("resumo inicial nomeia conflitos, tree suja, CI pendente/falha, findings e modo degradado", async () => {
+    await withTempRepo(
+      (repoRoot) => {
+        writeFileSync(
+          path.join(repoRoot, "package.json"),
+          '{"name":"consumer","devDependencies":{"@biomejs/biome":"^1.0.0"}}\n'
+        );
+      },
+      async (repoRoot) => {
+        const prompts = new ScriptedPrompts(["quit"]);
+        await runFlowWizard(repoRoot, new CollectingLogger(), {
+          prompts,
+          registry: registryWith(),
+          collectModel: () => openFindingModel(),
+          loadActiveSpecsIndex: () => ({
+            indexAvailable: false,
+            warnings: ["active.yml ausente"],
+            entries: [],
+          }),
+        });
+        expect(prompts.notes[0]).toContain("formatter rival detectado (Biome)");
+        expect(prompts.notes[0]).toContain("Há 2 finding(s) aberto(s), 1 bloqueante(s)");
+        expect(prompts.notes[0]).toContain("índice público de specs não foi observado");
+      }
+    );
+
+    const dirty = new ScriptedPrompts(["quit"]);
+    await runFlowWizard("/repo", new CollectingLogger(), {
+      prompts: dirty,
+      registry: registryWith(),
+      collectModel: () => dirtyModel(),
+      loadActiveSpecsIndex: () => activeSpecsResult(),
+    });
+    expect(dirty.notes[0]).toContain("Há mudanças locais");
+
+    const pending = new ScriptedPrompts(["quit"]);
+    await runFlowWizard("/repo", new CollectingLogger(), {
+      prompts: pending,
+      registry: registryWith(),
+      collectModel: () => ciModel({ pass: 4, fail: 0, pending: 1 }),
+      loadActiveSpecsIndex: () => activeSpecsResult(),
+    });
+    expect(pending.notes[0]).toContain("CI ainda tem");
+
+    const failing = new ScriptedPrompts(["quit"]);
+    await runFlowWizard("/repo", new CollectingLogger(), {
+      prompts: failing,
+      registry: registryWith(),
+      collectModel: () => ciModel({ pass: 4, fail: 1, pending: 0 }),
+      loadActiveSpecsIndex: () => activeSpecsResult(),
+    });
+    expect(failing.notes[0]).toContain("CI tem 1 falha");
+
+    const ready = new ScriptedPrompts(["quit"]);
+    await runFlowWizard("/repo", new CollectingLogger(), {
+      prompts: ready,
+      registry: registryWith(),
+      collectModel: () => readyPrModel(),
+      loadActiveSpecsIndex: () => activeSpecsResult(),
+    });
+    expect(ready.notes[0]).toContain("PR #43 já está Ready");
+
+    const degraded = new ScriptedPrompts(["quit"]);
+    await runFlowWizard("/repo", new CollectingLogger(), {
+      prompts: degraded,
+      registry: registryWith(),
+      collectModel: () => degradedModel(),
+      loadActiveSpecsIndex: () => activeSpecsResult(),
+    });
+    expect(degraded.notes[0].replace(/\s+/g, " ")).toContain("modo seguro/degradado");
+    expect(degraded.notes[0]).toContain("Modo offline/degradado");
   });
 
   it("provisioning em repo governado recomenda update e esconde init/adopt do caminho principal", async () => {
