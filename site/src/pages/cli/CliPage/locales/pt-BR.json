@@ -17,20 +17,80 @@
     "placeholder": "# escolha uma opção acima para ver como o guia aparece na CLI"
   },
   "daily": {
-    "title": "Usar no dia a dia",
-    "lead": "Esta rota será usada para simular a retomada de trabalho em um projeto que já adotou ai-guidelines.",
+    "title": "Continue sem perder o contexto",
+    "lead": "Use este fluxo quando o projeto já adotou ai-guidelines. A experiência começa pelo que você precisa fazer agora: retomar uma sessão, escolher a frente certa ou revisar o PR de outra pessoa.",
     "aria": "Cenários de uso diário",
+    "setupLabel": "Escolha o momento que mais se parece com o seu trabalho agora.",
+    "terminalBadge": "Projeto simulado",
+    "realBadge": "CLI real no navegador",
+    "controlsAria": "Controles do simulador de uso diário",
+    "runReal": "▶ Rodar de verdade",
+    "backToSim": "← Voltar à simulação",
+    "realLoading": "Preparando a CLI real no navegador...",
+    "realUnavailable": "Este navegador não suporta a execução real aqui. A simulação projetada continua disponível.",
+    "realUnsupported": "Este cenário depende de GitHub/PR real. Use a simulação projetada para entender o fluxo sem tocar no seu repositório.",
     "choices": [
       {
-        "label": "Retomar uma sessão",
-        "description": "Ver contexto, spec ativa, próxima ação e validações recomendadas."
+        "id": "resume",
+        "label": "Retomar meu trabalho",
+        "description": "Para voltar a uma sessão, entender o estado atual e ver a próxima ação segura antes de mexer."
       },
       {
-        "label": "Escolher uma frente de trabalho",
-        "description": "Para projetos com mais de uma spec aberta, selecionar o foco antes de agir."
+        "id": "focus",
+        "label": "Escolher a frente certa",
+        "description": "Para projetos com mais de uma spec aberta. O fluxo exige foco explícito antes de qualquer decisão."
+      },
+      {
+        "id": "peer",
+        "label": "Revisar PR de colega",
+        "description": "Para revisar outro PR sem misturar com a sua branch, preservando o seu contexto atual."
       }
     ],
-    "placeholder": "# o fluxo de uso diário será detalhado na próxima iteração"
+    "projects": {
+      "resume": {
+        "aria": "Terminal de retomada em repositório governado com uma spec ativa",
+        "detected": "Repo governado detectado: uma spec ativa em andamento.",
+        "evidence": [
+          "Spec 0024 aberta.",
+          "Checkpoint atual iniciado.",
+          "Working tree limpa.",
+          "Nenhum Human Gate pendente agora."
+        ],
+        "prompt": "O que você quer fazer agora?",
+        "options": ["Retomar o contexto e ver a próxima ação"],
+        "afterSelection": "O guia prepara a retomada antes de qualquer decisão."
+      },
+      "focus": {
+        "aria": "Terminal de escolha de foco em repositório com várias specs abertas",
+        "detected": "Repo governado detectado: três specs abertas ao mesmo tempo.",
+        "evidence": [
+          "0024 · co-flow-convergence · PR Draft.",
+          "0025 · documentação pública · CI pendente.",
+          "0026 · housekeeping · sem PR aberto."
+        ],
+        "prompt": "Qual frente você quer continuar?",
+        "options": [
+          "Continuar 0024 · co-flow-convergence",
+          "Analisar 0025 · documentação pública",
+          "Abrir contexto de 0026 · housekeeping"
+        ],
+        "afterSelection": "O guia fixa o foco antes de liberar próximos passos."
+      },
+      "peer": {
+        "aria": "Terminal de revisão de PR de colega com contexto preservado",
+        "detected": "Repo governado detectado: você está na sua branch e quer revisar outro PR.",
+        "evidence": [
+          "Branch atual preservada.",
+          "Working tree limpa.",
+          "PR de colega informado para revisão.",
+          "Review isolado evita misturar contextos."
+        ],
+        "prompt": "Como revisar sem perder seu trabalho atual?",
+        "options": ["Preparar review isolado em worktree"],
+        "afterSelection": "O guia separa o review do seu trabalho atual."
+      }
+    },
+    "placeholder": "# escolha uma opção acima para ver como o guia aparece na CLI"
   },
   "setupAria": "Escolha o tipo de projeto para começar",
   "setupLabel": "Escolha o cenário que mais se parece com o seu projeto.",

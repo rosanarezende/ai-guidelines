@@ -4,6 +4,8 @@ import { Terminal } from "@xterm/xterm";
 import { FitAddon } from "@xterm/addon-fit";
 import "@xterm/xterm/css/xterm.css";
 
+import { simulatorProjectById } from "@content/simulatorProjects";
+
 import "./RealCliRunner.css";
 import copy from "./locales/pt-BR.json";
 
@@ -46,28 +48,6 @@ function ensureWebContainerAuth(): Promise<void> {
   return webContainerAuthPromise;
 }
 
-/** Árvore de arquivos montada no container, por contexto (espelha as fixtures). */
-function filesFor(context: string): Record<string, unknown> {
-  if (context === "existing" || context === "conflict") {
-    const pkg: Record<string, unknown> = { name: "meu-projeto", version: "1.0.0" };
-    if (context === "conflict") pkg.devDependencies = { "@biomejs/biome": "^1.9.0" };
-    return { "package.json": { file: { contents: `${JSON.stringify(pkg, null, 2)}\n` } } };
-  }
-  if (context === "governed") {
-    return {
-      "package.json": {
-        file: {
-          contents: `${JSON.stringify({ name: "meu-projeto", version: "2.1.0" }, null, 2)}\n`,
-        },
-      },
-      ".ai-guidelines": {
-        directory: { "config.json": { file: { contents: "{}\n" } } },
-      },
-    };
-  }
-  return {};
-}
-
 export function RealCliRunner({ context }: { readonly context: string }): JSX.Element {
   const termHostRef = useRef<HTMLDivElement>(null);
   const [status, setStatus] = useState<RunStatus>("booting");
@@ -79,6 +59,13 @@ export function RealCliRunner({ context }: { readonly context: string }): JSX.El
 
     async function boot(): Promise<void> {
       try {
+        const project = simulatorProjectById(context);
+        if (!project.supportsRealMode) {
+          setErrorMessage(project.unsupportedRealModeReason ?? copy.unsupportedScenario);
+          setStatus("error");
+          return;
+        }
+
         await ensureWebContainerAuth();
         if (disposed) return;
 
@@ -96,7 +83,7 @@ export function RealCliRunner({ context }: { readonly context: string }): JSX.El
           term.dispose();
           return;
         }
-        await container.mount(filesFor(context) as never);
+        await container.mount(project.files as never);
 
         setStatus("installing");
         term.writeln("$ npx ai-guidelines");

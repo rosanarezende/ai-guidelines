@@ -75,6 +75,44 @@ describe("fidelidade do simulador projetado (/cli)", () => {
     expect(cli).toContain("npx ai-guidelines");
   });
 
+  it("a experiência diária escolhe um cenário antes de montar o simulador", () => {
+    const cli = readSite("site/src/pages/cli/CliPage/CliPage.tsx");
+    const locale = readSite("site/src/pages/cli/CliPage/locales/pt-BR.json");
+
+    expect(cli).toContain("DAILY_SCENARIO");
+    expect(cli).toContain("DAILY_PROJECT");
+    expect(cli).toContain('"resume-handoff"');
+    expect(cli).toContain('"five-specs"');
+    expect(cli).toContain('"peer-review"');
+    expect(cli).toContain('"daily-resume"');
+    expect(cli).toContain('"daily-focus"');
+    expect(cli).toContain('"daily-peer"');
+    expect(cli).toContain("DailyTerminal");
+    expect(cli).toContain("dailyTerminalOption");
+    expect(cli).toContain("RealCliRunner");
+    expect(locale).toContain("Retomar meu trabalho");
+    expect(locale).toContain("Escolher a frente certa");
+    expect(locale).toContain("Revisar PR de colega");
+    expect(locale).toContain("Repo governado detectado: uma spec ativa em andamento.");
+    expect(locale).toContain("Repo governado detectado: três specs abertas ao mesmo tempo.");
+    expect(locale).toContain("Review isolado evita misturar contextos.");
+  });
+
+  it("os mini-projetos do simulador alimentam a simulação e o WebContainer", () => {
+    const projects = readSite("site/src/content/simulatorProjects.ts");
+    const runner = readSite("site/src/features/cli-simulator/RealCliRunner/RealCliRunner.tsx");
+
+    expect(projects).toContain("daily-resume");
+    expect(projects).toContain("daily-focus");
+    expect(projects).toContain("daily-peer");
+    expect(projects).toContain("active_specs:");
+    expect(projects).toContain("0024-demo");
+    expect(projects).toContain("0025-docs");
+    expect(projects).toContain("unsupportedRealModeReason");
+    expect(runner).toContain("simulatorProjectById");
+    expect(runner).not.toContain("function filesFor");
+  });
+
   it("a simulação é declarada como simulação, nunca como execução real", () => {
     const locale = JSON.parse(
       readSite("site/src/features/cli-simulator/CliTerminal/locales/pt-BR.json")
