@@ -66,8 +66,9 @@ describe("governed documentation site packaging", () => {
     expect(appSource).not.toMatch(/Cloudflare/i);
     expect(appSource).not.toContain("../../docs/assets/");
     // A home explica o produto e leva ao simulador — não monta mais o terminal.
-    expect(homeSource).toContain('route="cli"');
-    expect(homeSource).toContain("npx ai-guidelines");
+    expect(homeSource).toContain('route="cliStart"');
+    expect(homeSource).toContain('route="cliDaily"');
+    expect(homeSource).toContain("BIN_WIZARD");
     expect(homeSource).not.toContain("CliTerminal");
     // O simulador projetado vive no /cli: terminal derivado da projeção real.
     expect(cliSource).toContain("CliTerminal");
