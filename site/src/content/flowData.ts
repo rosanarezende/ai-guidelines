@@ -1,7 +1,14 @@
 import { AI_GUIDELINES_FLOW_COPY } from "@generated/flow-copy.generated";
 import { AI_GUIDELINES_FLOW_SCENARIOS } from "@generated/flow-scenarios.generated";
 
-export type RouteId = "home" | "cli" | "reference" | "contribute" | "notFound";
+export type RouteId =
+  | "home"
+  | "cli"
+  | "cliStart"
+  | "cliDaily"
+  | "reference"
+  | "contribute"
+  | "notFound";
 
 export type TerminalKind = "real" | "guided";
 export type TerminalSurface = "public" | "contributor";
@@ -92,8 +99,28 @@ export const BIN_WIZARD = "npx ai-guidelines";
 
 export const routes: readonly RouteLink[] = [
   { id: "home", path: "/", label: "O projeto", shortLabel: "Início" },
-  { id: "cli", path: "/cli", label: "Simulador", shortLabel: "Simulador" },
+  {
+    id: "cliStart",
+    path: "/cli/comecar",
+    label: "Começar com ai-guidelines",
+    shortLabel: "Começar",
+  },
+  {
+    id: "cliDaily",
+    path: "/cli/dia-a-dia",
+    label: "Usar no dia a dia",
+    shortLabel: "Dia a dia",
+  },
   { id: "reference", path: "/atalhos", label: "Atalhos avançados", shortLabel: "Atalhos" },
+];
+
+const secondaryRoutes: readonly RouteLink[] = [
+  {
+    id: "cli",
+    path: "/cli",
+    label: "Escolher experiência",
+    shortLabel: "Fluxos",
+  },
 ];
 
 /**
@@ -236,12 +263,30 @@ export const contributeRoute: RouteLink = {
   shortLabel: "Contribuindo",
 };
 
-const allRoutes: readonly RouteLink[] = [...routes, contributeRoute];
+const allRoutes: readonly RouteLink[] = [...routes, ...secondaryRoutes, contributeRoute];
 
 export function routeFromPath(pathname: string): RouteId {
   const normalized = pathname.replace(/\/+$/, "") || "/";
   if (normalized === "/") return "home";
   if (normalized === "/cli") return "cli";
+  if (
+    normalized === "/cli/comecar" ||
+    normalized === "/flow/start" ||
+    normalized === "/flow/comecar"
+  ) {
+    return "cliStart";
+  }
+  if (
+    normalized === "/cli/dia-a-dia" ||
+    normalized === "/flow/daily" ||
+    normalized === "/flow/uso-diario" ||
+    normalized === "/flow/team" ||
+    normalized === "/flow/time" ||
+    normalized === "/flow/review" ||
+    normalized === "/flow/review-entre-pares"
+  ) {
+    return "cliDaily";
+  }
   if (
     normalized === "/atalhos" ||
     normalized === "/flow/reference" ||
@@ -250,8 +295,7 @@ export function routeFromPath(pathname: string): RouteId {
     return "reference";
   }
   if (normalized === "/contribute") return "contribute";
-  // O conteúdo interativo dos links antigos (/flow, /flow/*, aliases PT) agora
-  // vive no simulador /cli — sem soft-404 perdido.
+  // O índice antigo /flow agora vive no hub do simulador /cli — sem soft-404 perdido.
   if (normalized === "/flow" || normalized.startsWith("/flow/")) return "cli";
   // Rota desconhecida vira 404 explícito.
   return "notFound";
@@ -265,6 +309,8 @@ export function routePath(id: RouteId): string {
 export function routeTitle(id: RouteId): string {
   if (id === "home") return "ai-guidelines — governança para desenvolvimento com IA";
   if (id === "cli") return "ai-guidelines — simulador interativo da CLI";
+  if (id === "cliStart") return "ai-guidelines — começar com o framework";
+  if (id === "cliDaily") return "ai-guidelines — uso no dia a dia";
   if (id === "notFound") return "ai-guidelines — página não encontrada";
   const route = allRoutes.find((item) => item.id === id);
   return route ? `ai-guidelines — ${route.label}` : "ai-guidelines";

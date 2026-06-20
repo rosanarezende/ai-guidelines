@@ -40,37 +40,195 @@
   color: #67e8f9;
 }
 
-.cliContextPicker {
+.cliBackLink {
+  align-self: center;
+  display: inline-flex;
+  min-height: 2.4rem;
+  align-items: center;
+  justify-content: center;
+  padding: 0.45rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid var(--border, #cbd5e1);
+  color: var(--muted, #475569);
+  text-decoration: none;
+  font-size: 0.86rem;
+}
+
+.cliBackLink:hover {
+  color: var(--text, #0f172a);
+  border-color: var(--accent, #0891b2);
+}
+
+.cliChoiceStage,
+.cliSetupStage {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.cliChoiceGrid {
   display: grid;
   grid-template-columns: 1fr;
   gap: 0.7rem;
 }
 
-.cliContextCard {
+.cliChoiceCard {
   display: flex;
   flex-direction: column;
-  gap: 0.2rem;
+  gap: 0.35rem;
   text-align: left;
   cursor: pointer;
-  padding: 0.75rem 0.9rem;
-  border-radius: 10px;
+  padding: 0.9rem 1rem;
+  border-radius: 12px;
   border: 1px solid var(--border, #e2e8f0);
   background: var(--surface, #fff);
   font: inherit;
+  min-height: 6rem;
+  text-decoration: none;
+  color: var(--text, #0f172a);
+  transition:
+    border-color 120ms ease,
+    box-shadow 120ms ease,
+    opacity 120ms ease;
 }
-.cliContextCard strong {
-  font-size: 0.95rem;
+.cliChoiceCard strong {
+  font-size: 1rem;
 }
-.cliContextCard span {
-  font-size: 0.82rem;
+.cliChoiceCard span {
+  font-size: 0.88rem;
   color: var(--muted, #64748b);
+  line-height: 1.45;
 }
-.cliContextCard:hover {
+.cliChoiceCard em {
+  margin-top: auto;
+  font-size: 0.74rem;
+  font-style: normal;
+  font-weight: 700;
+  color: var(--accent, #0891b2);
+}
+.cliChoiceCard:hover:not(:disabled),
+.cliChoiceLink:hover {
   border-color: var(--accent, #0891b2);
 }
-.cliContextActive {
+.cliChoiceCard.isSelected {
   border-color: var(--accent, #0891b2);
   box-shadow: 0 0 0 2px rgba(8, 145, 178, 0.18);
+}
+.cliChoiceCard:disabled {
+  cursor: default;
+}
+.cliChoiceCard:disabled:not(.isSelected) {
+  opacity: 0.45;
+}
+
+.cliChoiceStatic {
+  cursor: default;
+}
+
+.cliStageHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.cliStageStep {
+  margin: 0 0 0.2rem;
+  color: var(--accent, #0891b2);
+  font-weight: 700;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.cliStageLabel {
+  margin: 0;
+  color: var(--muted, #64748b);
+  font-size: 0.9rem;
+}
+
+.cliResetButton {
+  border: 1px solid var(--border, #cbd5e1);
+  background: var(--surface, #fff);
+  color: var(--text, #0f172a);
+  border-radius: 8px;
+  padding: 0.42rem 0.75rem;
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.cliResetButton:hover {
+  border-color: var(--accent, #0891b2);
+}
+
+.cliPlaceholderTerminal {
+  display: flex;
+  flex-direction: column;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #1f2937;
+  background: #0b0f17;
+  color: #e5e7eb;
+  font-family: "SFMono-Regular", "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+}
+
+.cliPlaceholderBar {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  padding: 0.55rem 0.85rem;
+  background: #111827;
+  border-bottom: 1px solid #1f2937;
+}
+
+.cliPlaceholderBar code {
+  font-size: 0.85rem;
+  color: #9ca3af;
+}
+
+.cliPlaceholderBar > span:last-child {
+  font-size: 0.72rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.12);
+  color: #cbd5e1;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+}
+
+.cliPlaceholderDots {
+  display: inline-flex;
+  gap: 0.35rem;
+}
+.cliPlaceholderDots span {
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 50%;
+  background: #374151;
+}
+.cliPlaceholderDots span:first-child {
+  background: #ef4444;
+}
+.cliPlaceholderDots span:nth-child(2) {
+  background: #f59e0b;
+}
+.cliPlaceholderDots span:nth-child(3) {
+  background: #22c55e;
+}
+
+.cliPlaceholderScreen {
+  min-height: 14rem;
+  padding: 1.1rem 1.3rem;
+  display: flex;
+  align-items: flex-start;
+}
+
+.cliPlaceholderScreen p {
+  margin: 0;
+  color: #94a3b8;
+  font-size: 0.9rem;
 }
 
 .cliPageFoot {
@@ -86,13 +244,7 @@
 }
 
 @media (min-width: 640px) {
-  .cliContextPicker {
+  .cliChoiceGrid {
     grid-template-columns: 1fr 1fr;
-  }
-}
-
-@media (min-width: 960px) {
-  .cliContextPicker {
-    grid-template-columns: repeat(4, 1fr);
   }
 }

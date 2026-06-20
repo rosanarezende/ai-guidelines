@@ -1,19 +1,26 @@
 import { useState } from "react";
 
-import { promptFlows, PROMPT_FLOW_IDS, promptFlowById } from "@content/promptFlows";
+import { promptFlowById } from "@content/promptFlows";
 import { SiteLink } from "@shared/ui/SiteLink/SiteLink";
 import { CliTerminal } from "@features/cli-simulator/CliTerminal/CliTerminal";
 
 import "./CliPage.css";
 import copy from "./locales/pt-BR.json";
 
-const CONTEXT_LABEL: Record<string, string> = copy.contexts;
+type SetupChoice = "empty" | "existing";
+type CliPageMode = "hub" | "start" | "daily";
 
-function initialFlowId(): string {
-  const fallback = PROMPT_FLOW_IDS[0];
-  if (typeof window === "undefined") return fallback;
+const SETUP_FLOW: Record<SetupChoice, string> = {
+  empty: "empty",
+  existing: "existing",
+};
+
+function initialSetupChoice(): SetupChoice | undefined {
+  if (typeof window === "undefined") return undefined;
   const requested = new URLSearchParams(window.location.search).get("scenario");
-  return requested && PROMPT_FLOW_IDS.includes(requested) ? requested : fallback;
+  return Object.entries(SETUP_FLOW).find(([, flowId]) => flowId === requested)?.[0] as
+    | SetupChoice
+    | undefined;
 }
 
 /**
@@ -22,50 +29,115 @@ function initialFlowId(): string {
  * mesma sequência, mesmos textos, navegação por teclado/clique. As saídas são
  * transcripts de dry-run reais; o modo ativo é declarado de forma visível.
  */
-export function CliPage(): JSX.Element {
-  const [selectedId, setSelectedId] = useState<string>(initialFlowId);
-  const flow = promptFlowById(selectedId) ?? promptFlows[0];
+export function CliPage({ mode }: { readonly mode: CliPageMode }): JSX.Element {
+  const [setupChoice, setSetupChoice] = useState<SetupChoice | undefined>(initialSetupChoice);
+  const selectedId = setupChoice ? SETUP_FLOW[setupChoice] : undefined;
+  const flow = selectedId ? promptFlowById(selectedId) : undefined;
 
-  function select(id: string): void {
-    setSelectedId(id);
+  function selectSetup(choice: SetupChoice): void {
+    setSetupChoice(choice);
     if (typeof window !== "undefined") {
       const url = new URL(window.location.href);
-      url.searchParams.set("scenario", id);
+      url.searchParams.set("scenario", SETUP_FLOW[choice]);
       window.history.replaceState({}, "", url);
     }
   }
+
+  function restartSetup(): void {
+    setSetupChoice(undefined);
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.delete("scenario");
+      window.history.replaceState({}, "", url);
+    }
+  }
+
+  const pageCopy = mode === "start" ? copy.start : mode === "daily" ? copy.daily : copy.hub;
 
   return (
     <div className="cliPage">
       <header className="cliPageHead">
         <p className="cliPageEyebrow">{copy.eyebrow}</p>
-        <h1 className="cliPageTitle">{copy.title}</h1>
-        <p className="cliPageLead">{copy.lead}</p>
+        <h1 className="cliPageTitle">{pageCopy.title}</h1>
+        <p className="cliPageLead">{pageCopy.lead}</p>
         <p className="cliPageEntry">
           <code>npx ai-guidelines</code>
         </p>
+        {mode !== "hub" ? (
+          <SiteLink route="cli" className="cliBackLink">
+            {copy.backToHub}
+          </SiteLink>
+        ) : null}
       </header>
 
-      <nav className="cliContextPicker" aria-label={copy.pickerAria}>
-        {PROMPT_FLOW_IDS.map((id) => {
-          const candidate = promptFlowById(id);
-          if (!candidate) return null;
-          return (
-            <button
-              key={id}
-              type="button"
-              className={`cliContextCard ${id === selectedId ? "cliContextActive" : ""}`}
-              aria-pressed={id === selectedId}
-              onClick={() => select(id)}
-            >
-              <strong>{CONTEXT_LABEL[id] ?? id}</strong>
-              <span>{candidate.detection.title}</span>
-            </button>
-          );
-        })}
-      </nav>
+      {mode === "hub" ? (
+        <>
+          <section className="cliChoiceStage" aria-label={copy.hub.aria}>
+            <div className="cliChoiceGrid">
+              <SiteLink route="cliStart" className="cliChoiceCard cliChoiceLink">
+                <strong>{copy.hub.startLabel}</strong>
+                <span>{copy.hub.startDescription}</span>
+              </SiteLink>
+              <SiteLink route="cliDaily" className="cliChoiceCard cliChoiceLink">
+                <strong>{copy.hub.dailyLabel}</strong>
+                <span>{copy.hub.dailyDescription}</span>
+              </SiteLink>
+            </div>
+          </section>
+          <EmptyTerminal message={copy.hub.placeholder} />
+        </>
+      ) : null}
 
-      <CliTerminal key={flow.id} flow={flow} />
+      {mode === "start" ? (
+        <section className="cliSetupStage" aria-label={copy.setupAria}>
+          <div className="cliStageHeader">
+            <div>
+              <p className="cliStageStep">{copy.start.step}</p>
+              <p className="cliStageLabel">{copy.setupLabel}</p>
+            </div>
+            {setupChoice ? (
+              <button type="button" className="cliResetButton" onClick={restartSetup}>
+                {copy.reset}
+              </button>
+            ) : null}
+          </div>
+          <div className="cliChoiceGrid cliChoiceGridTwo">
+            {copy.setupChoices.map((choice) => (
+              <button
+                key={choice.id}
+                type="button"
+                className={`cliChoiceCard ${setupChoice === choice.id ? "isSelected" : ""}`}
+                aria-pressed={setupChoice === choice.id}
+                disabled={Boolean(setupChoice)}
+                onClick={() => selectSetup(choice.id as SetupChoice)}
+              >
+                <strong>{choice.label}</strong>
+                <span>{choice.description}</span>
+                {setupChoice === choice.id ? <em>{copy.selected}</em> : null}
+              </button>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {mode === "start" && flow ? <CliTerminal key={flow.id} flow={flow} /> : null}
+      {mode === "start" && !flow ? <EmptyTerminal message={copy.start.placeholder} /> : null}
+
+      {mode === "daily" ? (
+        <>
+          <section className="cliChoiceStage" aria-label={copy.daily.aria}>
+            <div className="cliChoiceGrid">
+              {copy.daily.choices.map((choice) => (
+                <article key={choice.label} className="cliChoiceCard cliChoiceStatic">
+                  <strong>{choice.label}</strong>
+                  <span>{choice.description}</span>
+                </article>
+              ))}
+            </div>
+          </section>
+          <EmptyTerminal message={copy.daily.placeholder} />
+        </>
+      ) : null}
 
       <footer className="cliPageFoot">
         <p>{copy.footNote}</p>
@@ -74,5 +146,24 @@ export function CliPage(): JSX.Element {
         </p>
       </footer>
     </div>
+  );
+}
+
+function EmptyTerminal({ message }: { readonly message: string }): JSX.Element {
+  return (
+    <section className="cliPlaceholderTerminal" aria-label={copy.emptyTerminalAria}>
+      <header className="cliPlaceholderBar">
+        <span className="cliPlaceholderDots" aria-hidden="true">
+          <span />
+          <span />
+          <span />
+        </span>
+        <code>npx ai-guidelines</code>
+        <span>{copy.waitingBadge}</span>
+      </header>
+      <div className="cliPlaceholderScreen">
+        <p>{message}</p>
+      </div>
+    </section>
   );
 }

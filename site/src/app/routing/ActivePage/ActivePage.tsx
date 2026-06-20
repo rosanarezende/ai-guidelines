@@ -7,7 +7,9 @@ import { ReferencePage } from "@pages/reference/ReferencePage/ReferencePage";
 
 export function ActivePage({ route }: { readonly route: RouteId }): JSX.Element {
   if (route === "home") return <HomePage />;
-  if (route === "cli") return <CliPage />;
+  if (route === "cli") return <CliPage mode="hub" />;
+  if (route === "cliStart") return <CliPage mode="start" />;
+  if (route === "cliDaily") return <CliPage mode="daily" />;
   if (route === "reference") return <ReferencePage />;
   if (route === "contribute") return <ContributePage />;
   return <NotFoundPage />;

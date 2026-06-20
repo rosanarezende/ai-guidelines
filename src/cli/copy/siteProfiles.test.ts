@@ -8,7 +8,7 @@ import path from "node:path";
  *  - a superfície PÚBLICA (consumidor) usa `npx ai-guidelines …` e começa pelo guia;
  *  - `npm run flow` (alias local deste repo) só aparece na seção de contribuidor;
  *  - identificadores internos (PR/Spec/CO-/sub-checkpoint) não vazam no público;
- *  - a home É o simulador — a pessoa não precisa decorar comandos.
+ *  - a home aponta para experiências do simulador — a pessoa não precisa decorar comandos.
  */
 
 const REPO_ROOT = process.cwd();
@@ -61,26 +61,29 @@ describe("flowData separa consumidor e contribuidor", () => {
   });
 });
 
-describe("home explica o produto; o simulador vive em /cli (req. 1)", () => {
+describe("home explica o produto; o simulador se divide por experiência (req. 1)", () => {
   const home = readSite("site/src/pages/home/HomePage/HomePage.tsx");
   const homeLocale = readSite("site/src/pages/home/HomePage/locales/pt-BR.json");
   const cli = readSite("site/src/pages/cli/CliPage/CliPage.tsx");
   const cliLocale = readSite("site/src/pages/cli/CliPage/locales/pt-BR.json");
 
-  it("a home apresenta o produto e leva ao simulador, sem montar o terminal", () => {
-    expect(home).toContain('route="cli"');
-    expect(home).toContain("npx ai-guidelines");
+  it("a home apresenta o produto e leva às experiências do simulador, sem montar o terminal", () => {
+    expect(home).toContain('route="cliStart"');
+    expect(home).toContain('route="cliDaily"');
+    expect(home).toContain("BIN_WIZARD");
     // A home não é mais o simulador: não monta o terminal interativo.
     expect(home).not.toContain("CliTerminal");
     expect(home).not.toContain("ScenarioChooser");
   });
 
-  it("o /cli monta o simulador projetado e não exige decorar comandos", () => {
+  it("o /cli oferece duas portas de entrada e as rotas internas montam o terminal", () => {
     expect(cli).toContain("CliTerminal");
     expect(cli).toContain("promptFlows");
+    expect(cli).toContain('route="cliStart"');
+    expect(cli).toContain('route="cliDaily"');
     expect(cli).toContain("npx ai-guidelines");
     expect(`${homeLocale}\n${cliLocale}`).toMatch(
-      /não precisa decorar|sem decorar|por experiência/i
+      /não precisa decorar|sem decorar|comando decorado|sem exigir que você saiba o comando/i
     );
   });
 });

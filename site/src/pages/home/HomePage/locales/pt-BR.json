@@ -1,12 +1,34 @@
 {
-  "eyebrow": "Governança para desenvolvimento com IA",
+  "eyebrow": "Sistema de governança para colaboração humano-IA",
   "title": "ai-guidelines",
-  "lead": "Um sistema de governança para a colaboração entre humanos e IA. A CLI é só a superfície: quando você trabalha com um assistente de IA, é ele que roda o ai-guidelines por baixo dos panos — guiado pelo sistema — para que cada mudança passe por specs, revisão e decisões humanas.",
-  "ctaPrimary": "Experimente o simulador",
-  "ctaSecondary": "Como contribuir",
-  "underHood": {
-    "title": "A CLI por baixo dos panos",
-    "body": "Você conversa com a sua LLM. Ela executa npx ai-guidelines no seu repositório, lê o contexto e segue o caminho seguro que o sistema indica. Você não precisa decorar comandos — o sistema direciona, e o simulador mostra exatamente como essa experiência acontece."
+  "heroImageAlt": "Diagrama do ai-guidelines mostrando automação estrutural, governança operacional e julgamento humano",
+  "howItWorks": {
+    "title": "Como funciona",
+    "body": "O ai-guidelines fica no repositório e transforma o estado real do trabalho em orientação prática. A CLI é a ferramenta operacional: ela lê contexto, valida limites e mostra o próximo passo seguro para humanos e assistentes.",
+    "steps": [
+      {
+        "title": "Você ou a IA abre o fluxo",
+        "body": "A pessoa pode rodar o comando diretamente, ou pedir para uma LLM continuar uma tarefa no repositório."
+      },
+      {
+        "title": "ai-guidelines lê o estado real",
+        "body": "O sistema detecta projeto novo, repo existente, specs abertas, branch, PR, validações, reviews e bloqueios."
+      },
+      {
+        "title": "O fluxo mostra o próximo passo seguro",
+        "body": "A resposta orienta o que fazer agora, o que está bloqueado, o que precisa de humano e quais validações rodar."
+      }
+    ]
+  },
+  "simulator": {
+    "title": "Experimente o fluxo",
+    "body": "Escolha a experiência que mais se parece com o seu momento. O simulador abre o caminho certo sem exigir que você saiba o comando antes.",
+    "startLabel": "Começar com ai-guidelines",
+    "startDescription": "Para projeto novo ou projeto em andamento que ainda vai adotar o framework.",
+    "startAction": "Abrir simulador de adoção",
+    "dailyLabel": "Usar no dia a dia",
+    "dailyDescription": "Para projeto que já usa ai-guidelines e precisa continuar o trabalho com contexto.",
+    "dailyAction": "Abrir simulador de uso diário"
   },
   "pillarsTitle": "Os guardrails que tornam isso seguro",
   "pillars": [
@@ -22,7 +44,5 @@
       "title": "Decisão humana (Human Gate)",
       "body": "Marcar pronto, aprovar o avanço e fazer o merge são decisões reservadas a um humano — registradas depois da decisão, nunca antes."
     }
-  ],
-  "closingTitle": "Veja na prática",
-  "closing": "O jeito mais rápido de entender é sentir a CLI funcionando. O simulador reproduz fielmente o wizard real — mesma sequência, mesmos textos — direto do seu navegador."
+  ]
 }

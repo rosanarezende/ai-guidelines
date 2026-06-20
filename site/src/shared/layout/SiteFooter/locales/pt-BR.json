@@ -1,7 +1,7 @@
 {
-  "tagline": "ai-guidelines — governança de IA multi-agente, agnóstica de modelo, IDE e linguagem.",
+  "tagline": "ai-guidelines — specs, validações e decisões humanas para trabalho assistido por IA.",
   "links": {
-    "home": "Simulador",
+    "home": "Início",
     "reference": "Atalhos avançados",
     "contribute": "Contribuindo",
     "github": "GitHub",

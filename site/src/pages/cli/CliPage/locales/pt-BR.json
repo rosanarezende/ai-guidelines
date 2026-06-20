@@ -1,14 +1,56 @@
 {
   "eyebrow": "Simulador interativo",
-  "title": "Sinta a CLI de verdade, sem instalar nada",
-  "lead": "Escolha um contexto e percorra o mesmo wizard que você veria ao rodar npx ai-guidelines no seu repositório. Os textos e a sequência vêm do código real; as saídas são transcripts de dry-run reais. Você não precisa decorar comandos — a experiência guia.",
-  "pickerAria": "Escolha o contexto inicial do repositório",
-  "contexts": {
-    "empty": "Projeto vazio",
-    "existing": "Repo existente",
-    "conflict": "Conflito de formatter",
-    "governed": "Repo já governado"
+  "hub": {
+    "title": "Escolha uma experiência para simular",
+    "lead": "O simulador não começa por comando decorado. Ele começa pela situação da pessoa ou do time.",
+    "aria": "Escolha o tipo de experiência",
+    "startLabel": "Começar com ai-guidelines",
+    "startDescription": "Para criar um projeto governado do zero ou adotar o framework em um projeto que já existe.",
+    "dailyLabel": "Usar no dia a dia",
+    "dailyDescription": "Para continuar em um projeto que já usa ai-guidelines: retomar contexto, validar mudanças e seguir o próximo passo.",
+    "placeholder": "# escolha uma experiência acima para abrir o simulador"
   },
+  "start": {
+    "title": "Começar com ai-guidelines",
+    "lead": "Simule o primeiro contato com o framework. Escolha se o projeto ainda está vazio ou se já existe código para preservar.",
+    "step": "Etapa 1 de 2",
+    "placeholder": "# escolha o tipo de projeto acima para iniciar a simulação"
+  },
+  "daily": {
+    "title": "Usar no dia a dia",
+    "lead": "Esta rota será usada para simular a retomada de trabalho em um projeto que já adotou ai-guidelines.",
+    "aria": "Cenários de uso diário",
+    "choices": [
+      {
+        "label": "Retomar uma sessão",
+        "description": "Ver contexto, spec ativa, próxima ação e validações recomendadas."
+      },
+      {
+        "label": "Escolher uma frente de trabalho",
+        "description": "Para projetos com mais de uma spec aberta, selecionar o foco antes de agir."
+      }
+    ],
+    "placeholder": "# o fluxo de uso diário será detalhado na próxima iteração"
+  },
+  "setupAria": "Escolha o tipo de projeto para começar",
+  "setupLabel": "Agora escolha onde o framework será aplicado.",
+  "setupChoices": [
+    {
+      "id": "empty",
+      "label": "Projeto novo / vazio",
+      "description": "Para uma pasta limpa, em que o ai-guidelines pode criar a base governada desde o início."
+    },
+    {
+      "id": "existing",
+      "label": "Projeto em andamento",
+      "description": "Para um repositório que já tem código ou package.json e precisa adotar o framework sem apagar o que existe."
+    }
+  ],
+  "backToHub": "Trocar experiência",
+  "selected": "selecionado",
+  "reset": "Recomeçar",
+  "emptyTerminalAria": "Terminal aguardando escolha",
+  "waitingBadge": "aguardando escolha",
   "footNote": "Tudo aqui é a simulação fiel gerada do runtime: roda offline, no celular, e nunca inventa um prompt. Em desktop compatível, dá para rodar a CLI de verdade no navegador (modo opcional).",
   "shortcutsLead": "Já sabe o que quer? Veja os atalhos diretos em",
   "shortcutsLink": "Atalhos avançados"

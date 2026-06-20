@@ -18,8 +18,11 @@ function readSite(relativePath: string): string {
 describe("rotas do site (formato simulador)", () => {
   const flowData = readSite("site/src/content/flowData.ts");
 
-  it("home (/) e atalhos avançados (/atalhos) são as rotas canônicas", () => {
+  it("home (/), índice do simulador (/cli) e atalhos (/atalhos) são rotas canônicas", () => {
     expect(flowData).toContain('path: "/"');
+    expect(flowData).toContain('path: "/cli"');
+    expect(flowData).toContain('path: "/cli/comecar"');
+    expect(flowData).toContain('path: "/cli/dia-a-dia"');
     expect(flowData).toContain('"/atalhos"');
   });
 
@@ -29,9 +32,11 @@ describe("rotas do site (formato simulador)", () => {
     expect(flowData).toContain("contributeRoute");
   });
 
-  it("links antigos /flow/* resolvem para o simulador (sem soft-404 perdido)", () => {
+  it("links antigos /flow/* resolvem para o simulador ou atalhos (sem soft-404 perdido)", () => {
     expect(flowData).toContain('startsWith("/flow/")');
-    expect(flowData).toContain('return "home"');
+    expect(flowData).toContain('return "cli"');
+    expect(flowData).toContain('return "cliStart"');
+    expect(flowData).toContain('return "cliDaily"');
     // A referência antiga continua válida e aponta para os atalhos.
     expect(flowData).toContain('"/flow/reference"');
   });
@@ -44,6 +49,8 @@ describe("rotas do site (formato simulador)", () => {
 
   it("expõe título por rota (SEO/a11y) e 404 com texto próprio", () => {
     expect(flowData).toContain("export function routeTitle");
+    expect(flowData).toContain("começar com o framework");
+    expect(flowData).toContain("uso no dia a dia");
     expect(flowData.toLowerCase()).toContain("não encontrada");
     const appShell = readSite("site/src/app/shell/AppShell/AppShell.tsx");
     const activePage = readSite("site/src/app/routing/ActivePage/ActivePage.tsx");
