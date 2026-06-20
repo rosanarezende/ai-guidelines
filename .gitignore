@@ -23,6 +23,10 @@ checks_ai_guidelines.txt
 # Build output do tsc (declarado em tsconfig.json `outDir`)
 dist/
 
+# Artefatos gerados para o simulador real do site (WebContainer)
+site/public/packages/
+site/public/real-cli-package.json
+
 # Logs
 logs/
 *.log

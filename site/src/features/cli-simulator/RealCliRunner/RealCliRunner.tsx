@@ -25,6 +25,20 @@ const CLIENT_ID: string =
 
 type RunStatus = "booting" | "installing" | "running" | "error";
 
+interface RealCliPackageManifest {
+  readonly source: "latest" | "current";
+  readonly packageSpec: string;
+  readonly displayCommand: string;
+  readonly label: string;
+}
+
+const FALLBACK_MANIFEST: RealCliPackageManifest = {
+  source: "latest",
+  packageSpec: "ai-guidelines@latest",
+  displayCommand: "npx ai-guidelines",
+  label: "versão publicada no npm",
+};
+
 let webContainerAuthPromise: Promise<void> | undefined;
 
 function isAlreadyInitializedError(error: unknown): boolean {
@@ -48,10 +62,39 @@ function ensureWebContainerAuth(): Promise<void> {
   return webContainerAuthPromise;
 }
 
+function resolvePackageSpec(packageSpec: string): string {
+  if (packageSpec.startsWith("/")) {
+    return new URL(packageSpec, window.location.href).href;
+  }
+  return packageSpec;
+}
+
+async function loadRealCliPackageManifest(): Promise<RealCliPackageManifest> {
+  try {
+    const response = await fetch(new URL("/real-cli-package.json", window.location.href), {
+      cache: "no-store",
+    });
+    if (!response.ok) return FALLBACK_MANIFEST;
+    const manifest = (await response.json()) as Partial<RealCliPackageManifest>;
+    if (
+      (manifest.source === "latest" || manifest.source === "current") &&
+      typeof manifest.packageSpec === "string" &&
+      typeof manifest.displayCommand === "string" &&
+      typeof manifest.label === "string"
+    ) {
+      return manifest as RealCliPackageManifest;
+    }
+  } catch {
+    /* fallback below */
+  }
+  return FALLBACK_MANIFEST;
+}
+
 export function RealCliRunner({ context }: { readonly context: string }): JSX.Element {
   const termHostRef = useRef<HTMLDivElement>(null);
   const [status, setStatus] = useState<RunStatus>("booting");
   const [errorMessage, setErrorMessage] = useState("");
+  const [packageLabel, setPackageLabel] = useState("");
 
   useEffect(() => {
     let disposed = false;
@@ -85,11 +128,19 @@ export function RealCliRunner({ context }: { readonly context: string }): JSX.El
         }
         await container.mount(project.files as never);
 
+        const manifest = await loadRealCliPackageManifest();
+        const packageSpec = resolvePackageSpec(manifest.packageSpec);
+        setPackageLabel(manifest.label);
+
         setStatus("installing");
-        term.writeln("$ npx ai-guidelines");
-        const proc = await container.spawn("npx", ["-y", "ai-guidelines@latest"], {
-          terminal: { cols: term.cols, rows: term.rows },
-        });
+        term.writeln(`$ ${manifest.displayCommand}`);
+        const proc = await container.spawn(
+          "npm",
+          ["exec", "--yes", "--package", packageSpec, "--", "ai-guidelines"],
+          {
+            terminal: { cols: term.cols, rows: term.rows },
+          }
+        );
         void proc.output.pipeTo(
           new WritableStream({
             write(data) {
@@ -132,7 +183,7 @@ export function RealCliRunner({ context }: { readonly context: string }): JSX.El
         {status === "booting"
           ? copy.booting
           : status === "installing"
-            ? copy.installing
+            ? copy.installing.replace("{package}", packageLabel || copy.packageFallback)
             : status === "running"
               ? copy.running
               : `${copy.error}: ${errorMessage}`}

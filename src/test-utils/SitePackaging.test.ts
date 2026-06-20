@@ -43,10 +43,15 @@ describe("governed documentation site packaging", () => {
     expect(pkg.scripts["site:prompts:check"]).toBe(
       "npm run build && node dist/cli/bin.js site-prompts check"
     );
-    expect(pkg.scripts["site:build"]).toBe(
-      "npm run site:flow:check && npm run site:scenarios:check && npm run site:prompts:check && npm run site:assets:check && vite build --config site/vite.config.ts"
+    expect(pkg.scripts["site:real-package"]).toBe(
+      "npm run build:all && node site/scripts/prepare-real-cli-package.mjs"
     );
-    expect(pkg.scripts["site:dev"]).toBe("vite --config site/vite.config.ts --host 127.0.0.1");
+    expect(pkg.scripts["site:build"]).toBe(
+      "npm run site:flow:check && npm run site:scenarios:check && npm run site:prompts:check && npm run site:assets:check && npm run site:real-package && vite build --config site/vite.config.ts"
+    );
+    expect(pkg.scripts["site:dev"]).toBe(
+      "npm run site:real-package && vite --config site/vite.config.ts --host 127.0.0.1"
+    );
     expect(pkg.scripts.validate).toContain("npm run site:build");
   });
 

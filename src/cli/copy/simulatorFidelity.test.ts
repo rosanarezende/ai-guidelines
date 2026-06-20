@@ -199,10 +199,40 @@ describe("WebContainer é enhancement opcional, com fallback obrigatório", () =
 
   it("o modo real executa a entrada pública raiz, sem pular para init/adopt/update", () => {
     const runner = readSite("site/src/features/cli-simulator/RealCliRunner/RealCliRunner.tsx");
-    expect(runner).toContain('term.writeln("$ npx ai-guidelines")');
+    expect(runner).toContain("displayCommand");
+    expect(runner).toContain("npx ai-guidelines");
+    expect(runner).toContain("loadRealCliPackageManifest");
+    expect(runner).toContain("/real-cli-package.json");
+    expect(runner).toContain("FALLBACK_MANIFEST");
     expect(runner).toContain('"ai-guidelines@latest"');
+    expect(runner).toContain("container.spawn(");
+    expect(runner).toContain('"npm",');
+    expect(runner).toContain('"exec"');
+    expect(runner).toContain('"--package"');
     expect(runner).not.toContain("operationFor");
     expect(runner).not.toContain("term.writeln(`$ npx ai-guidelines ${operation}`)");
     expect(runner).not.toContain('"init" | "adopt" | "update"');
+  });
+
+  it("preview/local empacotam a branch atual e produção pode usar o pacote publicado", () => {
+    const script = readSite("site/scripts/prepare-real-cli-package.mjs");
+    const contract = readSite(".core/governance/script-contracts.yml");
+    const ignore = readSite(".gitignore");
+
+    expect(script).toContain("AI_GUIDELINES_REAL_CLI_SOURCE");
+    expect(script).toContain("CF_PAGES_BRANCH");
+    expect(script).toContain("CF_PAGES");
+    expect(script).toContain('"latest"');
+    expect(script).toContain('"current"');
+    expect(script).toContain("npm");
+    expect(script).toContain("pack");
+    expect(script).toContain("real-cli-package.json");
+    expect(script).toContain("ai-guidelines-current-");
+    expect(contract).toContain("site:real-package");
+    expect(contract).toContain("prepare-real-cli-package.mjs");
+    expect(contract).toContain("site:build");
+    expect(contract).toContain("npm run site:real-package && vite build");
+    expect(ignore).toContain("site/public/packages/");
+    expect(ignore).toContain("site/public/real-cli-package.json");
   });
 });

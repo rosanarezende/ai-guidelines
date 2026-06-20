@@ -169,14 +169,20 @@ profiles:
         mutates: false
         consumers: [script, workflow]
         description: Falha se os WebPs do site estiverem ausentes ou desatualizados.
+      - name: site:real-package
+        command: npm run build:all && node site/scripts/prepare-real-cli-package.mjs
+        category: docs
+        mutates: true
+        consumers: [human, script]
+        description: Prepara o pacote que o modo real do simulador executa em preview/local.
       - name: site:dev
-        command: vite --config site/vite.config.ts --host 127.0.0.1
+        command: npm run site:real-package && vite --config site/vite.config.ts --host 127.0.0.1
         category: docs
         mutates: false
         consumers: [human]
         description: Servidor local do site governado em React/Vite.
       - name: site:build
-        command: npm run site:flow:check && npm run site:scenarios:check && npm run site:prompts:check && npm run site:assets:check && vite build --config site/vite.config.ts
+        command: npm run site:flow:check && npm run site:scenarios:check && npm run site:prompts:check && npm run site:assets:check && npm run site:real-package && vite build --config site/vite.config.ts
         category: docs
         mutates: true
         consumers: [script, workflow]
