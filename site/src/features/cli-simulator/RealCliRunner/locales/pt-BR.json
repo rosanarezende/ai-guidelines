@@ -1,0 +1,6 @@
+{
+  "booting": "Inicializando o ambiente Node real no navegador (WebContainer)…",
+  "installing": "Instalando e rodando ai-guidelines de verdade…",
+  "running": "CLI real rodando — interaja com o teclado, é o @clack de verdade.",
+  "error": "Não foi possível iniciar a CLI real (voltando ao simulador projetado)"
+}

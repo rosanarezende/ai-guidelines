@@ -24,6 +24,17 @@ export default defineConfig({
     fs: {
       allow: [repoRoot],
     },
+    // Cross-origin isolation para o modo "Rodar de verdade" (WebContainer) em dev.
+    headers: {
+      "Cross-Origin-Embedder-Policy": "require-corp",
+      "Cross-Origin-Opener-Policy": "same-origin",
+    },
+  },
+  preview: {
+    headers: {
+      "Cross-Origin-Embedder-Policy": "require-corp",
+      "Cross-Origin-Opener-Policy": "same-origin",
+    },
   },
   build: {
     outDir: "dist",

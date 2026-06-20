@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import {
   flowOutcome,
@@ -12,10 +12,21 @@ import { TerminalFrame } from "@features/terminal/TerminalFrame/TerminalFrame";
 import "./CliTerminal.css";
 import copy from "./locales/pt-BR.json";
 
+// O modo "Rodar de verdade" (WebContainer + xterm) é pesado e opcional: carrega
+// num chunk separado, só quando ativado. Nunca bloqueia a experiência principal.
+const RealCliRunner = lazy(() => import("@features/cli-simulator/RealCliRunner/RealCliRunner"));
+
 type Answer = string | string[] | boolean | "ack";
 type Answers = Record<string, Answer>;
 
 const BAR = "│";
+
+/** Modo real só roda em desktop com cross-origin isolation (WebContainer). */
+function realModeCapable(): boolean {
+  if (typeof window === "undefined") return false;
+  if (window.crossOriginIsolated !== true) return false;
+  return !/Mobi|Android|iPhone|iPad/i.test(window.navigator.userAgent);
+}
 
 function flatChoices(step: PromptStep): readonly PromptChoice[] {
   if (step.choices) return step.choices;
@@ -58,7 +69,12 @@ export function CliTerminal({ flow }: { readonly flow: PromptFlow }): JSX.Elemen
   const [checked, setChecked] = useState<ReadonlySet<string>>(new Set());
   const [inputValue, setInputValue] = useState("");
   const [showRealNote, setShowRealNote] = useState(false);
+  const [realMode, setRealMode] = useState(false);
+  const realCapable = useMemo(() => realModeCapable(), []);
   const screenRef = useRef<HTMLDivElement>(null);
+
+  // Modo real ativo só quando pedido E o navegador suporta (senão, fallback).
+  const realActive = realMode && realCapable;
 
   const active = pointer < steps.length ? steps[pointer] : undefined;
   const done = pointer >= steps.length;
@@ -212,83 +228,106 @@ export function CliTerminal({ flow }: { readonly flow: PromptFlow }): JSX.Elemen
         </span>
         <code className="cliCommand">{flow.command}</code>
         <span className="cliMode" title={copy.modeHint}>
-          {copy.modeProjected}
+          {realActive ? copy.modeReal : copy.modeProjected}
         </span>
         <span className="cliBarActions">
-          <button type="button" className="cliGhostButton" onClick={restart}>
-            {copy.restart}
-          </button>
+          {!realActive ? (
+            <button type="button" className="cliGhostButton" onClick={restart}>
+              {copy.restart}
+            </button>
+          ) : null}
           <button
             type="button"
             className="cliGhostButton cliRealButton"
-            onClick={() => setShowRealNote((v) => !v)}
+            aria-pressed={realMode}
+            onClick={() => {
+              if (realMode) {
+                setRealMode(false);
+                setShowRealNote(false);
+                return;
+              }
+              setRealMode(true);
+              setShowRealNote(!realCapable);
+            }}
           >
-            {copy.runReal}
+            {realMode ? copy.backToSim : copy.runReal}
           </button>
         </span>
       </header>
 
-      {showRealNote ? (
-        <p className="cliRealNote" role="note">
-          {copy.runRealNote}
-        </p>
-      ) : null}
-
-      <div
-        ref={screenRef}
-        className="cliScreen"
-        role="application"
-        aria-label={copy.aria.screen}
-        tabIndex={0}
-        onKeyDown={onKeyDown}
-      >
-        <p className="cliLine cliIntro">
-          <span className="cliGlyph cliCyan">◆</span> ai-guidelines
-        </p>
-
-        {history.map((step) => (
-          <ResolvedStep key={step.id} step={step} answer={answers[step.id]!} />
-        ))}
-
-        {active ? (
-          <ActiveStep
-            step={active}
-            cursor={cursor}
-            checked={checked}
-            inputValue={inputValue}
-            onPick={(value) => commit(active, value)}
-            onToggle={(value) =>
-              setChecked((set) => {
-                const copySet = new Set(set);
-                if (copySet.has(value)) copySet.delete(value);
-                else copySet.add(value);
-                return copySet;
-              })
-            }
-            onCursor={setCursor}
-            onInput={setInputValue}
-          />
-        ) : null}
-
-        {done ? (
-          <div className="cliOutcome">
-            <p className="cliLine">
-              <span className="cliGlyph cliGreen">└</span>{" "}
-              {applied ? copy.outroApplied : copy.outroCancelled}
+      {realActive ? (
+        <Suspense fallback={<p className="cliRealNote">{copy.realLoading}</p>}>
+          <RealCliRunner context={flow.context} />
+        </Suspense>
+      ) : (
+        <>
+          {realMode && !realCapable ? (
+            <p className="cliRealNote" role="note">
+              {copy.runRealUnavailable}
             </p>
-            {applied && outcome ? (
-              <>
-                <p className="cliOutcomeBadge">{copy.outcomeBadge}</p>
-                <TerminalFrame title={outcome.command} kind="real" exitCode={outcome.exitCode}>
-                  {outcome.lines.join("\n")}
-                </TerminalFrame>
-              </>
+          ) : showRealNote ? (
+            <p className="cliRealNote" role="note">
+              {copy.runRealNote}
+            </p>
+          ) : null}
+
+          <div
+            ref={screenRef}
+            className="cliScreen"
+            role="application"
+            aria-label={copy.aria.screen}
+            tabIndex={0}
+            onKeyDown={onKeyDown}
+          >
+            <p className="cliLine cliIntro">
+              <span className="cliGlyph cliCyan">◆</span> ai-guidelines
+            </p>
+
+            {history.map((step) => (
+              <ResolvedStep key={step.id} step={step} answer={answers[step.id]!} />
+            ))}
+
+            {active ? (
+              <ActiveStep
+                step={active}
+                cursor={cursor}
+                checked={checked}
+                inputValue={inputValue}
+                onPick={(value) => commit(active, value)}
+                onToggle={(value) =>
+                  setChecked((set) => {
+                    const copySet = new Set(set);
+                    if (copySet.has(value)) copySet.delete(value);
+                    else copySet.add(value);
+                    return copySet;
+                  })
+                }
+                onCursor={setCursor}
+                onInput={setInputValue}
+              />
+            ) : null}
+
+            {done ? (
+              <div className="cliOutcome">
+                <p className="cliLine">
+                  <span className="cliGlyph cliGreen">└</span>{" "}
+                  {applied ? copy.outroApplied : copy.outroCancelled}
+                </p>
+                {applied && outcome ? (
+                  <>
+                    <p className="cliOutcomeBadge">{copy.outcomeBadge}</p>
+                    <TerminalFrame title={outcome.command} kind="real" exitCode={outcome.exitCode}>
+                      {outcome.lines.join("\n")}
+                    </TerminalFrame>
+                  </>
+                ) : null}
+              </div>
             ) : null}
           </div>
-        ) : null}
-      </div>
 
-      <p className="cliHint">{copy.keyboardHint}</p>
+          <p className="cliHint">{copy.keyboardHint}</p>
+        </>
+      )}
     </section>
   );
 }

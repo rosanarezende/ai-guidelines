@@ -39,6 +39,7 @@ function generatedFlows(): readonly GeneratedFlow[] {
 const PUBLIC_SIM_FILES = [
   "site/src/pages/cli/CliPage/CliPage.tsx",
   "site/src/features/cli-simulator/CliTerminal/CliTerminal.tsx",
+  "site/src/features/cli-simulator/RealCliRunner/RealCliRunner.tsx",
   "site/src/content/promptFlows.ts",
 ];
 
@@ -89,5 +90,29 @@ describe("fidelidade do simulador projetado (/cli)", () => {
     // A saída vem de flowOutcome → scenarioById(transcriptId), o transcript gerado.
     expect(terminal).toContain("flowOutcome");
     expect(terminal).toContain("TerminalFrame");
+  });
+});
+
+describe("WebContainer é enhancement opcional, com fallback obrigatório", () => {
+  it("o modo real é carregado lazy e nunca bloqueia o simulador projetado", () => {
+    const terminal = readSite("site/src/features/cli-simulator/CliTerminal/CliTerminal.tsx");
+    // lazy() => o WebContainer/xterm ficam num chunk separado, fora do caminho padrão.
+    expect(terminal).toContain("lazy(");
+    expect(terminal).toContain("RealCliRunner");
+    // o modo real é gateado por capacidade; sem ela, cai no simulador projetado.
+    expect(terminal).toContain("crossOriginIsolated");
+    expect(terminal).toContain("realModeCapable");
+  });
+
+  it("os headers de cross-origin isolation existem para o WebContainer", () => {
+    const headers = readSite("site/public/_headers");
+    expect(headers).toContain("Cross-Origin-Embedder-Policy: require-corp");
+    expect(headers).toContain("Cross-Origin-Opener-Policy: same-origin");
+  });
+
+  it("a clientId vem de env (com fallback), e o runner usa auth.init", () => {
+    const runner = readSite("site/src/features/cli-simulator/RealCliRunner/RealCliRunner.tsx");
+    expect(runner).toContain("VITE_WEBCONTAINER_CLIENT_ID");
+    expect(runner).toContain("auth.init");
   });
 });
