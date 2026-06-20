@@ -13,9 +13,10 @@ Use estas opções no setup:
 - Production branch: `main`
 - Environment variables: nenhuma por enquanto
 
-O build gera a home e as páginas navegáveis do Flow (`/flow/*`) como uma única
-aplicação React/Vite. O fallback `site/public/_redirects` permite abrir rotas
-diretas como `/flow/time` em previews e produção.
+O build gera a home, os simuladores (`/cli/comecar` e `/cli/dia-a-dia`), os
+atalhos (`/atalhos`) e a área de contribuidor (`/contribute`) como uma única
+aplicação React/Vite. O fallback `site/public/_redirects` permite abrir essas
+rotas diretas em previews e produção.
 O site não é publicado no pacote npm; consumidores continuam recebendo apenas o runtime e os artefatos governados necessários.
 
 ## Imagens otimizadas

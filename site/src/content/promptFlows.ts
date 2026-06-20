@@ -52,7 +52,7 @@ export interface PromptStep {
 
 export interface PromptFlow {
   readonly id: string;
-  readonly operation: "init" | "adopt" | "update";
+  readonly operation: "init" | "adopt" | "update" | "root";
   readonly context: string;
   readonly command: string;
   readonly detection: {

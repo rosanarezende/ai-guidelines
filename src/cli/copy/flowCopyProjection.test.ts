@@ -70,8 +70,10 @@ describe("flow copy catalog", () => {
     expect(components).toContain("aria-current");
     expect(components).toContain("ScenarioTerminal");
     expect(components).toContain("terminalBadge");
-    // Links do formato anterior continuam resolvendo (sem soft-404).
-    expect(data).toContain('startsWith("/flow/")');
+    // O formato /flow não virou contrato público; o site usa rotas /cli.
+    expect(data).not.toContain('startsWith("/flow/")');
+    expect(data).toContain('"/cli/comecar"');
+    expect(data).toContain('"/cli/dia-a-dia"');
     expect(data).toContain('"/atalhos"');
     expect(styles).toContain("@media (min-width:");
     expect(styles).toContain("grid-template-columns: 1fr");

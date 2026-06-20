@@ -269,34 +269,10 @@ export function routeFromPath(pathname: string): RouteId {
   const normalized = pathname.replace(/\/+$/, "") || "/";
   if (normalized === "/") return "home";
   if (normalized === "/cli") return "cli";
-  if (
-    normalized === "/cli/comecar" ||
-    normalized === "/flow/start" ||
-    normalized === "/flow/comecar"
-  ) {
-    return "cliStart";
-  }
-  if (
-    normalized === "/cli/dia-a-dia" ||
-    normalized === "/flow/daily" ||
-    normalized === "/flow/uso-diario" ||
-    normalized === "/flow/team" ||
-    normalized === "/flow/time" ||
-    normalized === "/flow/review" ||
-    normalized === "/flow/review-entre-pares"
-  ) {
-    return "cliDaily";
-  }
-  if (
-    normalized === "/atalhos" ||
-    normalized === "/flow/reference" ||
-    normalized === "/flow/referencia"
-  ) {
-    return "reference";
-  }
+  if (normalized === "/cli/comecar") return "cliStart";
+  if (normalized === "/cli/dia-a-dia") return "cliDaily";
+  if (normalized === "/atalhos") return "reference";
   if (normalized === "/contribute") return "contribute";
-  // O índice antigo /flow agora vive no hub do simulador /cli — sem soft-404 perdido.
-  if (normalized === "/flow" || normalized.startsWith("/flow/")) return "cli";
   // Rota desconhecida vira 404 explícito.
   return "notFound";
 }

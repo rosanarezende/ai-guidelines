@@ -10,6 +10,7 @@ import {
 import os from "node:os";
 import path from "node:path";
 
+import type { ResolvedActiveSpec } from "../app/workflow/ListActiveSpecs.js";
 import {
   ConfirmOptions,
   GroupedMultiSelectOptions,
@@ -24,6 +25,7 @@ import {
   TaskLogOptions,
 } from "../app/ports/Prompts.js";
 import { FLOW_COPY } from "./copy/flowCopy.js";
+import type { CockpitModel } from "./cockpit.js";
 import { NodeBootstrapDeliveryRuntime } from "./delivery/bootstrap/composition.js";
 import { buildBootstrapDeliveryRegistry } from "./delivery/bootstrap/registry.js";
 import { deriveSuggestedOperation } from "./delivery/bootstrap/wizard.js";
@@ -31,6 +33,8 @@ import {
   detectProvisioningContext,
   type ProvisioningContextSummary,
 } from "./experience/wizard/provisioning.js";
+import { runFlowWizard } from "./flowWizard.js";
+import type { GovernedFlowAction } from "./flow/GovernedFlow.js";
 import { CommandContext, Logger as CommandLogger } from "./registry/Command.js";
 import { CommandRegistry } from "./registry/CommandRegistry.js";
 
@@ -65,7 +69,7 @@ const ADVANCED_SUB_MESSAGES = new Set<string>([
 ]);
 
 type Logger = Pick<typeof console, "error" | "log">;
-type Operation = "init" | "adopt" | "update";
+type Operation = "init" | "adopt" | "update" | "root";
 
 export interface PromptChoiceRecord {
   readonly label: string;
@@ -167,6 +171,18 @@ const FLOW_SPECS: readonly FlowSpec[] = [
   },
 ];
 
+interface DailyFlowSpec {
+  readonly id: "daily-resume" | "daily-focus" | "daily-peer";
+  readonly context: "daily-resume" | "daily-focus" | "daily-peer";
+  readonly fixture: "single" | "multiple" | "peer";
+}
+
+const DAILY_FLOW_SPECS: readonly DailyFlowSpec[] = [
+  { id: "daily-resume", context: "daily-resume", fixture: "single" },
+  { id: "daily-focus", context: "daily-focus", fixture: "multiple" },
+  { id: "daily-peer", context: "daily-peer", fixture: "peer" },
+];
+
 export function sitePromptFlowsOutputPath(repoRoot: string): string {
   return path.join(repoRoot, OUTPUT_RELATIVE_PATH);
 }
@@ -180,6 +196,8 @@ class RecordingPrompts implements Prompts {
   readonly steps: PromptStep[] = [];
   private counter = 0;
 
+  constructor(private readonly selectOverrides: Readonly<Record<string, string>> = {}) {}
+
   private nextId(kind: string): string {
     this.counter += 1;
     return `${kind}-${this.counter}`;
@@ -187,7 +205,8 @@ class RecordingPrompts implements Prompts {
 
   async select<T = string>(options: SelectOptions<T>): Promise<T> {
     const choices = options.choices.map(toChoiceRecord);
-    const suggested = choices[0]?.value ?? "";
+    const override = this.selectOverrides[options.message];
+    const suggested = override ?? choices[0]?.value ?? "";
     this.steps.push({
       kind: "select",
       id: this.nextId("select"),
@@ -195,7 +214,8 @@ class RecordingPrompts implements Prompts {
       choices,
       suggested,
     });
-    return options.choices[0]?.value as T;
+    return (options.choices.find((choice) => String(choice.value) === suggested)?.value ??
+      options.choices[0]?.value) as T;
   }
 
   async multiselect<T = string>(options: MultiSelectOptions<T>): Promise<readonly T[]> {
@@ -429,6 +449,316 @@ function detectFromFixture(repoRoot: string, fixtureId: string): ProvisioningCon
   }
 }
 
+function writeDailyGovernedRepo(targetDir: string, specCount: 1 | 3): void {
+  writeFileSync(
+    path.join(targetDir, "package.json"),
+    `${JSON.stringify({ name: "consumer-governed-demo", version: "0.0.1", private: true }, null, 2)}\n`
+  );
+  mkdirSync(path.join(targetDir, ".ai-guidelines"), { recursive: true });
+  writeFileSync(
+    path.join(targetDir, ".ai-guidelines", "config.json"),
+    `${JSON.stringify(
+      {
+        version: 1,
+        project: { name: "consumer-governed-demo", packageManager: "npm" },
+        providers: ["claude"],
+        features: [],
+        lang: "pt",
+      },
+      null,
+      2
+    )}\n`
+  );
+  mkdirSync(path.join(targetDir, ".governance", "runtime", "specs"), { recursive: true });
+  mkdirSync(path.join(targetDir, ".governance", "specs"), { recursive: true });
+  writeFileSync(
+    path.join(targetDir, ".governance", "review-policy.yml"),
+    [
+      "active_profile: solo",
+      "profiles:",
+      "  solo:",
+      "    implementation_pr:",
+      "      required_native_approvals: 0",
+      "    integration_pr:",
+      "      required_native_approvals: 0",
+      "",
+    ].join("\n")
+  );
+  writeFileSync(
+    path.join(targetDir, ".governance", "runtime", "specs", "active.yml"),
+    dailyActiveSpecsYaml(specCount)
+  );
+
+  const specs =
+    specCount === 1 ? ["0024-demo"] : ["0024-co-flow", "0025-docs", "0026-housekeeping"];
+  for (const spec of specs) {
+    const specDir = path.join(targetDir, ".governance", "specs", spec);
+    mkdirSync(specDir, { recursive: true });
+    writeFileSync(
+      path.join(specDir, "state.yml"),
+      [
+        "stage: implementation",
+        "topology:",
+        "  cursor:",
+        `    pr: ${spec.replace(/^\d+-/, "")}`,
+        `    checkpoint: checkpoint-${spec.replace(/^\d+-/, "")}`,
+        "",
+      ].join("\n")
+    );
+  }
+}
+
+function dailyActiveSpecsYaml(specCount: 1 | 3): string {
+  const entries =
+    specCount === 1
+      ? [activeSpecYaml("0024", "demo", "Spec Demo", "feat/spec-0024-demo")]
+      : [
+          activeSpecYaml("0024", "co-flow", "Co-flow convergence", "feat/spec-0024-co-flow"),
+          activeSpecYaml("0025", "docs", "Documentacao publica", "feat/spec-0025-docs"),
+          activeSpecYaml("0026", "housekeeping", "Housekeeping", "feat/spec-0026-housekeeping"),
+        ];
+  return ["version: 1", "active_specs:", ...entries].join("\n");
+}
+
+function activeSpecYaml(id: string, slug: string, title: string, branch: string): string {
+  const folder = `${id}-${slug}`;
+  return [
+    `  - id: "${id}"`,
+    `    slug: ${slug}`,
+    `    title: ${title}`,
+    `    branch: ${branch}`,
+    "    stage: implementation",
+    "    status: active",
+    `    spec_path: .governance/specs/${folder}`,
+    `    source_state_path: .governance/specs/${folder}/state.yml`,
+    "    updated_at: 2026-06-19T00:00:00-03:00",
+    '    updated_by: "@consumer"',
+  ].join("\n");
+}
+
+function resolvedActiveSpec(
+  id: string,
+  slug: string,
+  title: string,
+  branch: string
+): ResolvedActiveSpec {
+  return {
+    entry: {
+      id,
+      slug,
+      title,
+      branch,
+      stage: "implementation",
+      status: "active",
+      specPath: `.governance/specs/${id}-${slug}`,
+      sourceStatePath: `.governance/specs/${id}-${slug}/state.yml`,
+      updatedAt: "2026-06-19T00:00:00-03:00",
+      updatedBy: "@consumer",
+    },
+    specPathExists: true,
+  };
+}
+
+function dailySpecsResult(fixture: DailyFlowSpec["fixture"]): {
+  readonly indexAvailable: true;
+  readonly entries: readonly ResolvedActiveSpec[];
+  readonly warnings: readonly string[];
+} {
+  if (fixture === "multiple") {
+    return {
+      indexAvailable: true,
+      entries: [
+        resolvedActiveSpec("0024", "co-flow", "Co-flow convergence", "feat/spec-0024-co-flow"),
+        resolvedActiveSpec("0025", "docs", "Documentacao publica", "feat/spec-0025-docs"),
+        resolvedActiveSpec("0026", "housekeeping", "Housekeeping", "feat/spec-0026-housekeeping"),
+      ],
+      warnings: [],
+    };
+  }
+  return {
+    indexAvailable: true,
+    entries: [resolvedActiveSpec("0024", "demo", "Spec Demo", "feat/spec-0024-demo")],
+    warnings: [],
+  };
+}
+
+function dailyAction(title: string, command: string): GovernedFlowAction {
+  return {
+    id: "finish-subcheckpoint",
+    title,
+    availability: { status: "available", reasons: [] },
+    command,
+    effect: ["somente orienta a próxima ação neste simulador"],
+  };
+}
+
+function dailyCockpitModel(spec: DailyFlowSpec): CockpitModel {
+  const branch = spec.fixture === "multiple" ? "feat/spec-0024-co-flow" : "feat/spec-0024-demo";
+  const specLabel = spec.fixture === "multiple" ? "0024-co-flow" : "0024-demo";
+  const lifecycle = {
+    openFindings: spec.fixture === "peer" ? 1 : 0,
+    openBlocking: 0,
+    closedFindings: spec.fixture === "peer" ? 2 : 0,
+    resolutions: spec.fixture === "peer" ? 1 : 0,
+    reviewStatuses: [] as readonly {
+      readonly typeId: string;
+      readonly state: string;
+      readonly blocking: boolean;
+    }[],
+  };
+  const facts = {
+    git: { branch, head: "abc1234", behind: 0 },
+    spec: { label: specLabel },
+    pullRequest: {
+      number: spec.fixture === "multiple" ? 143 : 101,
+      state: "open",
+      isDraft: true,
+      checks: { pass: 3, fail: 0, pending: 0 },
+    },
+    lifecycle,
+    sources: [{ status: "fresh" }],
+  };
+  const nextAction =
+    spec.fixture === "multiple"
+      ? "Escolher a frente certa antes de continuar."
+      : spec.fixture === "peer"
+        ? "Preparar review isolado de PR de colega."
+        : "Retomar o contexto e ver a próxima ação segura.";
+  const command =
+    spec.fixture === "multiple"
+      ? "npx ai-guidelines specs"
+      : spec.fixture === "peer"
+        ? "npx ai-guidelines peer-review <pr>"
+        : "npx ai-guidelines work";
+  const recommended =
+    spec.fixture === "multiple" || spec.fixture === "peer"
+      ? null
+      : dailyAction(nextAction, command);
+
+  return {
+    work: {
+      snapshot: {
+        collected: { facts },
+      } as never,
+      brief: {
+        specId: specLabel,
+        checkpoint: `checkpoint-${specLabel}`,
+        gitHead: "abc1234",
+        effectiveFunctionalHead: "abc1234",
+        workingTreeState: "clean",
+        mode: "implement_checkpoint",
+        purpose: "Simular uso diario em repo governado.",
+        modeBasis: [],
+        degraded: [],
+        object: {
+          subCheckpoint: { id: "DEMO-1", title: "trabalho em andamento", line: 1 },
+        },
+        authorization: { granted: false, reason: "site simulator" },
+        allowedActions: [],
+        forbiddenActions: [],
+        validations: [],
+        publication: { commit: false, push: false },
+        expectsResolutions: false,
+        prBodyEditable: false,
+        stopConditions: [],
+        reportSections: [],
+        nextAction: {
+          description: nextAction,
+          basis: [],
+          commands: [{ label: "atalho", command }],
+          stillForbidden: [],
+          decisionType: null,
+        },
+      } as never,
+    },
+    decisions: [],
+    flow: {
+      actions: recommended ? [recommended] : [],
+      available: recommended ? [recommended] : [],
+      blocked: [
+        {
+          id: "human-gate",
+          title: "Decidir Human Gate",
+          availability: { status: "blocked", reasons: ["O PR ainda esta em Draft."] },
+          command: "npx ai-guidelines decide --type human-gate --brief-only",
+          effect: [],
+        },
+      ],
+      forbidden: ["Fazer merge", "Executar Human Gate sem decisão humana explícita"],
+      recommended,
+      humanSummary: {
+        state: [
+          "Repo governado detectado.",
+          spec.fixture === "multiple"
+            ? "Ha mais de uma spec ativa; escolha o foco antes de decidir."
+            : "Ha uma spec ativa em andamento.",
+          "Working tree limpa.",
+        ],
+        currentObject: {
+          label: spec.fixture === "multiple" ? "Várias specs ativas" : "Spec ativa",
+          objective: nextAction,
+          output: null,
+        },
+        nextObject: null,
+        ready: ["O repo ja usa ai-guidelines.", "O contexto local foi carregado."],
+        missing:
+          spec.fixture === "multiple"
+            ? ["Falta escolher qual spec recebera atenção agora."]
+            : ["Falta escolher a ação da sessão."],
+        nextAction,
+        command,
+        forbidden: ["Human Gate", "merge"],
+      },
+    },
+  };
+}
+
+function buildDailyDetectionStep(summary: ProvisioningContextSummary): PromptStep {
+  return {
+    kind: "note",
+    id: "daily-detection",
+    message: summary.stateTitle,
+    title: summary.stateTitle,
+    lines: [
+      PROVISIONING_COPY.section.detectedLabel,
+      ...summary.evidence.map((item) => `- ${item}`),
+    ],
+  };
+}
+
+async function buildDailyFlow(spec: DailyFlowSpec, registry: CommandRegistry): Promise<PromptFlow> {
+  const tmpDir = mkdtempSync(path.join(os.tmpdir(), "aig-daily-prompts-"));
+  const targetDir = path.join(tmpDir, "repo");
+  try {
+    mkdirSync(targetDir, { recursive: true });
+    writeDailyGovernedRepo(targetDir, spec.fixture === "multiple" ? 3 : 1);
+    const detected = detectProvisioningContext(targetDir);
+    const recorder = new RecordingPrompts({ [FLOW_COPY.wizard.mainQuestion]: "quit" });
+    const logger: CommandLogger = { info: () => {}, error: () => {} };
+    await runFlowWizard(targetDir, logger, {
+      prompts: recorder,
+      registry,
+      collectModel: () => dailyCockpitModel(spec),
+      loadActiveSpecsIndex: () => dailySpecsResult(spec.fixture),
+    });
+
+    return {
+      id: spec.id,
+      operation: "root",
+      context: spec.context,
+      command: "npx ai-guidelines",
+      detection: {
+        title: detected.stateTitle,
+        evidence: [...detected.evidence],
+      },
+      transcriptId: spec.id,
+      steps: [buildDailyDetectionStep(detected), ...recorder.steps],
+    };
+  } finally {
+    rmSync(tmpDir, { recursive: true, force: true });
+  }
+}
+
 async function buildFlow(spec: FlowSpec, registry: CommandRegistry): Promise<PromptFlow> {
   const detected = detectFromFixture(process.cwd(), spec.fixtureId);
   const suggested = deriveSuggestedOperation({
@@ -474,6 +804,9 @@ export async function buildSitePromptFlows(
   const flows: PromptFlow[] = [];
   for (const spec of FLOW_SPECS) {
     flows.push(await buildFlow(spec, registry));
+  }
+  for (const spec of DAILY_FLOW_SPECS) {
+    flows.push(await buildDailyFlow(spec, registry));
   }
   return flows;
 }

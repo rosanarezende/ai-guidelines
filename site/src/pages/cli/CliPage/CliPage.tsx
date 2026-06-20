@@ -1,9 +1,6 @@
-import { lazy, Suspense, useMemo, useState } from "react";
+import { useState } from "react";
 
 import { promptFlowById } from "@content/promptFlows";
-import { catalogScenarioById } from "@content/scenarios/catalog";
-import { lineTone, resolveOutput } from "@content/scenarios/resolve";
-import { simulatorProjectById } from "@content/simulatorProjects";
 import { SiteLink } from "@shared/ui/SiteLink/SiteLink";
 import { CliTerminal } from "@features/cli-simulator/CliTerminal/CliTerminal";
 
@@ -14,30 +11,16 @@ type SetupChoice = "empty" | "existing";
 type DailyChoice = "resume" | "focus" | "peer";
 type CliPageMode = "hub" | "start" | "daily";
 
-const RealCliRunner = lazy(() => import("@features/cli-simulator/RealCliRunner/RealCliRunner"));
-
 const SETUP_FLOW: Record<SetupChoice, string> = {
   empty: "empty",
   existing: "existing",
 };
 
-const DAILY_SCENARIO: Record<DailyChoice, string> = {
-  resume: "resume-handoff",
-  focus: "five-specs",
-  peer: "peer-review",
-};
-
-const DAILY_PROJECT: Record<DailyChoice, string> = {
+const DAILY_FLOW: Record<DailyChoice, string> = {
   resume: "daily-resume",
   focus: "daily-focus",
   peer: "daily-peer",
 };
-
-function realModeCapable(): boolean {
-  if (typeof window === "undefined") return false;
-  if (window.crossOriginIsolated !== true) return false;
-  return !/Mobi|Android|iPhone|iPad/i.test(window.navigator.userAgent);
-}
 
 function initialSetupChoice(): SetupChoice | undefined {
   if (typeof window === "undefined") return undefined;
@@ -50,7 +33,7 @@ function initialSetupChoice(): SetupChoice | undefined {
 function initialDailyChoice(): DailyChoice | undefined {
   if (typeof window === "undefined") return undefined;
   const requested = new URLSearchParams(window.location.search).get("scenario");
-  return Object.entries(DAILY_SCENARIO).find(([, scenarioId]) => scenarioId === requested)?.[0] as
+  return Object.entries(DAILY_FLOW).find(([, flowId]) => flowId === requested)?.[0] as
     | DailyChoice
     | undefined;
 }
@@ -66,7 +49,8 @@ export function CliPage({ mode }: { readonly mode: CliPageMode }): JSX.Element {
   const [dailyChoice, setDailyChoice] = useState<DailyChoice | undefined>(initialDailyChoice);
   const selectedId = setupChoice ? SETUP_FLOW[setupChoice] : undefined;
   const flow = selectedId ? promptFlowById(selectedId) : undefined;
-  const dailyScenarioId = dailyChoice ? DAILY_SCENARIO[dailyChoice] : undefined;
+  const dailyFlowId = dailyChoice ? DAILY_FLOW[dailyChoice] : undefined;
+  const dailyFlow = dailyFlowId ? promptFlowById(dailyFlowId) : undefined;
 
   function selectSetup(choice: SetupChoice): void {
     setSetupChoice(choice);
@@ -90,7 +74,7 @@ export function CliPage({ mode }: { readonly mode: CliPageMode }): JSX.Element {
     setDailyChoice(choice);
     if (typeof window !== "undefined") {
       const url = new URL(window.location.href);
-      url.searchParams.set("scenario", DAILY_SCENARIO[choice]);
+      url.searchParams.set("scenario", DAILY_FLOW[choice]);
       window.history.replaceState({}, "", url);
     }
   }
@@ -200,12 +184,8 @@ export function CliPage({ mode }: { readonly mode: CliPageMode }): JSX.Element {
               ))}
             </div>
           </section>
-          {dailyScenarioId && dailyChoice ? (
-            <DailyTerminal
-              key={dailyScenarioId}
-              choice={dailyChoice}
-              scenarioId={dailyScenarioId}
-            />
+          {dailyFlow ? (
+            <CliTerminal key={dailyFlow.id} flow={dailyFlow} />
           ) : (
             <EmptyTerminal message={copy.daily.placeholder} />
           )}
@@ -219,142 +199,6 @@ export function CliPage({ mode }: { readonly mode: CliPageMode }): JSX.Element {
         </p>
       </footer>
     </div>
-  );
-}
-
-function DailyTerminal({
-  choice,
-  scenarioId,
-}: {
-  readonly choice: DailyChoice;
-  readonly scenarioId: string;
-}): JSX.Element | null {
-  const [selectedAction, setSelectedAction] = useState<string | undefined>();
-  const [realMode, setRealMode] = useState(false);
-  const [realNote, setRealNote] = useState("");
-  const scenario = catalogScenarioById(scenarioId);
-  const project = copy.daily.projects[choice];
-  const projectContext = simulatorProjectById(DAILY_PROJECT[choice]);
-  const realCapable = useMemo(() => realModeCapable(), []);
-  if (!scenario) return null;
-
-  const realActive = realMode && realCapable && projectContext.supportsRealMode;
-  const resolvedOutputs = scenario.steps.flatMap((step) =>
-    step.outputs.map((output) => ({ step, output: resolveOutput(output) }))
-  );
-  const lines = resolvedOutputs.flatMap(({ step, output }) => [
-    `◇ ${step.prompt}`,
-    ...(step.options ?? []).map((option) => `│ ${option}`),
-    ...output.lines.filter((line) => !line.startsWith("$ ")),
-    "",
-  ]);
-
-  return (
-    <section className="cliDailyTerminalShell">
-      <section className="cliPlaceholderTerminal cliDailyTerminal" aria-label={project.aria}>
-        <header className="cliPlaceholderBar">
-          <span className="cliPlaceholderDots" aria-hidden="true">
-            <span />
-            <span />
-            <span />
-          </span>
-          <code>{scenario.entryCommand}</code>
-          <span>{realActive ? copy.daily.realBadge : copy.daily.terminalBadge}</span>
-        </header>
-        {realActive ? (
-          <Suspense fallback={<p className="cliDailyRealNote">{copy.daily.realLoading}</p>}>
-            <RealCliRunner context={projectContext.id} />
-          </Suspense>
-        ) : (
-          <div className="cliDailyScreen">
-            <p className="dailyTerminalLine dailyTerminalActive">$ {scenario.entryCommand}</p>
-            <p className="dailyTerminalLine dailyTerminalActive">◆ ai-guidelines</p>
-            <p className="dailyTerminalLine">◇ {project.detected}</p>
-            {project.evidence.map((line) => (
-              <p className="dailyTerminalLine dailyTerminalMuted" key={line}>
-                │ {line}
-              </p>
-            ))}
-            <p className="dailyTerminalLine dailyTerminalActive">◆ {project.prompt}</p>
-            {project.options.map((option) =>
-              selectedAction ? (
-                <p
-                  className={`dailyTerminalLine ${
-                    selectedAction === option ? "dailyTerminalSuccess" : "dailyTerminalMuted"
-                  }`}
-                  key={option}
-                >
-                  │ {selectedAction === option ? "●" : "○"} {option}
-                </p>
-              ) : (
-                <button
-                  className="dailyTerminalOption"
-                  type="button"
-                  key={option}
-                  onClick={() => setSelectedAction(option)}
-                >
-                  │ ○ {option}
-                </button>
-              )
-            )}
-            {selectedAction ? (
-              <>
-                <p className="dailyTerminalLine dailyTerminalSuccess">◇ {project.afterSelection}</p>
-                <p className="dailyTerminalLine dailyTerminalMuted">│ {selectedAction}</p>
-                {lines.map((line, index) => (
-                  <p className={`dailyTerminalLine ${lineTone(line)}`} key={`${index}-${line}`}>
-                    {line === "" ? " " : line}
-                  </p>
-                ))}
-              </>
-            ) : null}
-          </div>
-        )}
-      </section>
-      {realNote ? (
-        <p className="cliDailyRealNote" role="note">
-          {realNote}
-        </p>
-      ) : null}
-      <div className="cliSimulatorControls" aria-label={copy.daily.controlsAria}>
-        {!realActive ? (
-          <button
-            type="button"
-            className="cliResetButton"
-            onClick={() => {
-              setSelectedAction(undefined);
-              setRealNote("");
-            }}
-          >
-            {copy.reset}
-          </button>
-        ) : null}
-        <button
-          type="button"
-          className="cliResetButton cliDailyRealButton"
-          aria-pressed={realMode}
-          onClick={() => {
-            if (realMode) {
-              setRealMode(false);
-              setRealNote("");
-              return;
-            }
-            if (!projectContext.supportsRealMode) {
-              setRealNote(projectContext.unsupportedRealModeReason ?? copy.daily.realUnsupported);
-              return;
-            }
-            if (!realCapable) {
-              setRealNote(copy.daily.realUnavailable);
-              return;
-            }
-            setRealMode(true);
-            setRealNote("");
-          }}
-        >
-          {realMode ? copy.daily.backToSim : copy.daily.runReal}
-        </button>
-      </div>
-    </section>
   );
 }
 

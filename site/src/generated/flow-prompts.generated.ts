@@ -1457,6 +1457,449 @@ export const AI_GUIDELINES_FLOW_PROMPTS = {
           "suggested": true
         }
       ]
+    },
+    {
+      "id": "daily-resume",
+      "operation": "root",
+      "context": "daily-resume",
+      "command": "npx ai-guidelines",
+      "detection": {
+        "title": "Este repositório já usa ai-guidelines.",
+        "evidence": [
+          ".ai-guidelines/config.json existe.",
+          ".governance/ existe."
+        ]
+      },
+      "transcriptId": "daily-resume",
+      "steps": [
+        {
+          "kind": "note",
+          "id": "daily-detection",
+          "message": "Este repositório já usa ai-guidelines.",
+          "title": "Este repositório já usa ai-guidelines.",
+          "lines": [
+            "Detectado:",
+            "- .ai-guidelines/config.json existe.",
+            "- .governance/ existe."
+          ]
+        },
+        {
+          "kind": "note",
+          "id": "note-1",
+          "message": "Estado atual",
+          "title": "Estado atual",
+          "lines": [
+            "ESTADO",
+            "  Repo governado detectado.",
+            "  Ha uma spec ativa em andamento.",
+            "  Working tree limpa.",
+            "",
+            "AGORA",
+            "  Spec ativa",
+            "",
+            "  Objetivo:",
+            "    Retomar o contexto e ver a próxima ação segura.",
+            "",
+            "JÁ ESTÁ OK",
+            "  - O repo ja usa ai-guidelines.",
+            "  - O contexto local foi carregado.",
+            "",
+            "AINDA FALTA",
+            "  - Falta escolher a ação da sessão.",
+            "",
+            "PRÓXIMA AÇÃO RECOMENDADA",
+            "  Retomar o contexto e ver a próxima ação segura.",
+            "  Para entender antes de aplicar:",
+            "  npx ai-guidelines work",
+            "",
+            "O QUE O GUIA DETECTOU",
+            "REPOSITÓRIO",
+            "  - O repositório já usa ai-guidelines; o guia oferece atualização e trabalho",
+            "    diário, não init/adopt.",
+            "  - Caminho principal: Atualizar runtime, templates, providers, práticas ou",
+            "    política governada.",
+            "",
+            "COLABORAÇÃO",
+            "  - Não encontrei review-policy.yml; o update explica a política antes de",
+            "    alterar colaboração.",
+            "",
+            "SPECS E FOCO",
+            "  - Há uma spec ativa publicada; o guia consegue retomar essa frente com",
+            "    segurança.",
+            "  - A branch atual aponta para 0024 — Spec Demo.",
+            "",
+            "TRABALHO DO DIA A DIA",
+            "  - A working tree está limpa.",
+            "  - PR #101 está Draft; Ready/Human Gate continuam protegidos.",
+            "  - CI verde no snapshot atual.",
+            "  - Findings abertos não aparecem no snapshot.",
+            "  - 0 resolution(s)/disposition(s) registradas no checkpoint.",
+            "  - Este ponto pode ser concluído e o próximo iniciado por uma única decisão",
+            "    governada.",
+            "",
+            "TRAVAS DE SEGURANÇA",
+            "  - Human Gate nunca é executado pelo wizard sem decisão humana explícita.",
+            "  - Ready não é atalho do menu; primeiro o modelo precisa liberar as",
+            "    precondições.",
+            "  - Merge continua proibido neste PR stacked.",
+            "  - Review de PR de colega fica em fluxo separado para não misturar com sua",
+            "    branch.",
+            "  - Providers, práticas e colaboração são atualizados por update guiado, não por",
+            "    comando providers separado."
+          ]
+        },
+        {
+          "kind": "select",
+          "id": "select-2",
+          "message": "O que você quer fazer agora?",
+          "choices": [
+            {
+              "label": "Ver resumo completo antes de escolher",
+              "value": "cockpit"
+            },
+            {
+              "label": "PRÓXIMA AÇÃO RECOMENDADA: Retomar o contexto e ver a próxima ação segura.",
+              "value": "next",
+              "hint": "opção principal para este estado"
+            },
+            {
+              "label": "Validar minhas mudanças",
+              "value": "validate"
+            },
+            {
+              "label": "Ver ações disponíveis e bloqueadas",
+              "value": "decisions",
+              "hint": "mostra o que pode ser feito agora e por quê"
+            },
+            {
+              "label": "Ver orientação de trabalho / handoff",
+              "value": "work",
+              "hint": "copia contexto para colar na LLM de sua preferência"
+            },
+            {
+              "label": "Ver tipos de revisão disponíveis",
+              "value": "review",
+              "hint": "explica quais revisões existem e copia o catálogo"
+            },
+            {
+              "label": "Revisar PR de outra pessoa",
+              "value": "peer-review",
+              "hint": "abre a branch do PR sem misturar com seu trabalho atual"
+            },
+            {
+              "label": "Escolher ou iniciar uma spec",
+              "value": "spec-work",
+              "hint": "para times: ver specs abertas, continuar a certa ou preparar uma nova com segurança"
+            },
+            {
+              "label": "Atualizar este repositório",
+              "value": "provisioning",
+              "hint": "runtime, templates, providers, práticas e política"
+            },
+            {
+              "label": "Ferramentas técnicas e diagnósticos",
+              "value": "advanced",
+              "hint": "para quando você quer inspecionar ou diagnosticar algo específico"
+            },
+            {
+              "label": "Sair",
+              "value": "quit"
+            }
+          ],
+          "suggested": "quit"
+        }
+      ]
+    },
+    {
+      "id": "daily-focus",
+      "operation": "root",
+      "context": "daily-focus",
+      "command": "npx ai-guidelines",
+      "detection": {
+        "title": "Este repositório já usa ai-guidelines.",
+        "evidence": [
+          ".ai-guidelines/config.json existe.",
+          ".governance/ existe."
+        ]
+      },
+      "transcriptId": "daily-focus",
+      "steps": [
+        {
+          "kind": "note",
+          "id": "daily-detection",
+          "message": "Este repositório já usa ai-guidelines.",
+          "title": "Este repositório já usa ai-guidelines.",
+          "lines": [
+            "Detectado:",
+            "- .ai-guidelines/config.json existe.",
+            "- .governance/ existe."
+          ]
+        },
+        {
+          "kind": "note",
+          "id": "note-1",
+          "message": "Estado atual",
+          "title": "Estado atual",
+          "lines": [
+            "ESTADO",
+            "  Repo governado detectado.",
+            "  Ha mais de uma spec ativa; escolha o foco antes de decidir.",
+            "  Working tree limpa.",
+            "",
+            "AGORA",
+            "  Várias specs ativas",
+            "",
+            "  Objetivo:",
+            "    Escolher a frente certa antes de continuar.",
+            "",
+            "JÁ ESTÁ OK",
+            "  - O repo ja usa ai-guidelines.",
+            "  - O contexto local foi carregado.",
+            "",
+            "AINDA FALTA",
+            "  - Falta escolher qual spec recebera atenção agora.",
+            "",
+            "PRÓXIMA AÇÃO RECOMENDADA",
+            "  Escolher a frente certa antes de continuar.",
+            "  Para entender antes de aplicar:",
+            "  npx ai-guidelines specs",
+            "",
+            "O QUE O GUIA DETECTOU",
+            "REPOSITÓRIO",
+            "  - O repositório já usa ai-guidelines; o guia oferece atualização e trabalho",
+            "    diário, não init/adopt.",
+            "  - Caminho principal: Atualizar runtime, templates, providers, práticas ou",
+            "    política governada.",
+            "",
+            "COLABORAÇÃO",
+            "  - Não encontrei review-policy.yml; o update explica a política antes de",
+            "    alterar colaboração.",
+            "",
+            "SPECS E FOCO",
+            "  - Há 3 specs publicadas; escolha a frente certa antes de trabalhar para evitar",
+            "    misturar branches.",
+            "  - A branch atual aponta para 0024 — Co-flow convergence.",
+            "",
+            "TRABALHO DO DIA A DIA",
+            "  - A working tree está limpa.",
+            "  - PR #143 está Draft; Ready/Human Gate continuam protegidos.",
+            "  - CI verde no snapshot atual.",
+            "  - Findings abertos não aparecem no snapshot.",
+            "  - 0 resolution(s)/disposition(s) registradas no checkpoint.",
+            "",
+            "TRAVAS DE SEGURANÇA",
+            "  - Human Gate nunca é executado pelo wizard sem decisão humana explícita.",
+            "  - Ready não é atalho do menu; primeiro o modelo precisa liberar as",
+            "    precondições.",
+            "  - Merge continua proibido neste PR stacked.",
+            "  - Review de PR de colega fica em fluxo separado para não misturar com sua",
+            "    branch.",
+            "  - Providers, práticas e colaboração são atualizados por update guiado, não por",
+            "    comando providers separado."
+          ]
+        },
+        {
+          "kind": "select",
+          "id": "select-2",
+          "message": "O que você quer fazer agora?",
+          "choices": [
+            {
+              "label": "Ver resumo completo antes de escolher",
+              "value": "cockpit"
+            },
+            {
+              "label": "Validar minhas mudanças",
+              "value": "validate"
+            },
+            {
+              "label": "Ver ações disponíveis e bloqueadas",
+              "value": "decisions",
+              "hint": "mostra o que pode ser feito agora e por quê"
+            },
+            {
+              "label": "Ver orientação de trabalho / handoff",
+              "value": "work",
+              "hint": "copia contexto para colar na LLM de sua preferência"
+            },
+            {
+              "label": "Ver tipos de revisão disponíveis",
+              "value": "review",
+              "hint": "explica quais revisões existem e copia o catálogo"
+            },
+            {
+              "label": "Revisar PR de outra pessoa",
+              "value": "peer-review",
+              "hint": "abre a branch do PR sem misturar com seu trabalho atual"
+            },
+            {
+              "label": "Escolher ou iniciar uma spec",
+              "value": "spec-work",
+              "hint": "para times: ver specs abertas, continuar a certa ou preparar uma nova com segurança"
+            },
+            {
+              "label": "Atualizar este repositório",
+              "value": "provisioning",
+              "hint": "runtime, templates, providers, práticas e política"
+            },
+            {
+              "label": "Ferramentas técnicas e diagnósticos",
+              "value": "advanced",
+              "hint": "para quando você quer inspecionar ou diagnosticar algo específico"
+            },
+            {
+              "label": "Sair",
+              "value": "quit"
+            }
+          ],
+          "suggested": "quit"
+        }
+      ]
+    },
+    {
+      "id": "daily-peer",
+      "operation": "root",
+      "context": "daily-peer",
+      "command": "npx ai-guidelines",
+      "detection": {
+        "title": "Este repositório já usa ai-guidelines.",
+        "evidence": [
+          ".ai-guidelines/config.json existe.",
+          ".governance/ existe."
+        ]
+      },
+      "transcriptId": "daily-peer",
+      "steps": [
+        {
+          "kind": "note",
+          "id": "daily-detection",
+          "message": "Este repositório já usa ai-guidelines.",
+          "title": "Este repositório já usa ai-guidelines.",
+          "lines": [
+            "Detectado:",
+            "- .ai-guidelines/config.json existe.",
+            "- .governance/ existe."
+          ]
+        },
+        {
+          "kind": "note",
+          "id": "note-1",
+          "message": "Estado atual",
+          "title": "Estado atual",
+          "lines": [
+            "ESTADO",
+            "  Repo governado detectado.",
+            "  Ha uma spec ativa em andamento.",
+            "  Working tree limpa.",
+            "",
+            "AGORA",
+            "  Spec ativa",
+            "",
+            "  Objetivo:",
+            "    Preparar review isolado de PR de colega.",
+            "",
+            "JÁ ESTÁ OK",
+            "  - O repo ja usa ai-guidelines.",
+            "  - O contexto local foi carregado.",
+            "",
+            "AINDA FALTA",
+            "  - Falta escolher a ação da sessão.",
+            "",
+            "PRÓXIMA AÇÃO RECOMENDADA",
+            "  Preparar review isolado de PR de colega.",
+            "  Para entender antes de aplicar:",
+            "  npx ai-guidelines peer-review <pr>",
+            "",
+            "O QUE O GUIA DETECTOU",
+            "REPOSITÓRIO",
+            "  - O repositório já usa ai-guidelines; o guia oferece atualização e trabalho",
+            "    diário, não init/adopt.",
+            "  - Caminho principal: Atualizar runtime, templates, providers, práticas ou",
+            "    política governada.",
+            "",
+            "COLABORAÇÃO",
+            "  - Não encontrei review-policy.yml; o update explica a política antes de",
+            "    alterar colaboração.",
+            "",
+            "SPECS E FOCO",
+            "  - Há uma spec ativa publicada; o guia consegue retomar essa frente com",
+            "    segurança.",
+            "  - A branch atual aponta para 0024 — Spec Demo.",
+            "",
+            "TRABALHO DO DIA A DIA",
+            "  - A working tree está limpa.",
+            "  - PR #101 está Draft; Ready/Human Gate continuam protegidos.",
+            "  - CI verde no snapshot atual.",
+            "  - Há 1 finding(s) aberto(s), 0 bloqueante(s); resolver vem antes de",
+            "    readiness/avanço.",
+            "  - 1 resolution(s)/disposition(s) registradas no checkpoint.",
+            "",
+            "TRAVAS DE SEGURANÇA",
+            "  - Human Gate nunca é executado pelo wizard sem decisão humana explícita.",
+            "  - Ready não é atalho do menu; primeiro o modelo precisa liberar as",
+            "    precondições.",
+            "  - Merge continua proibido neste PR stacked.",
+            "  - Review de PR de colega fica em fluxo separado para não misturar com sua",
+            "    branch.",
+            "  - Providers, práticas e colaboração são atualizados por update guiado, não por",
+            "    comando providers separado."
+          ]
+        },
+        {
+          "kind": "select",
+          "id": "select-2",
+          "message": "O que você quer fazer agora?",
+          "choices": [
+            {
+              "label": "Ver resumo completo antes de escolher",
+              "value": "cockpit"
+            },
+            {
+              "label": "Validar minhas mudanças",
+              "value": "validate"
+            },
+            {
+              "label": "Ver ações disponíveis e bloqueadas",
+              "value": "decisions",
+              "hint": "mostra o que pode ser feito agora e por quê"
+            },
+            {
+              "label": "Ver orientação de trabalho / handoff",
+              "value": "work",
+              "hint": "copia contexto para colar na LLM de sua preferência"
+            },
+            {
+              "label": "Ver tipos de revisão disponíveis",
+              "value": "review",
+              "hint": "explica quais revisões existem e copia o catálogo"
+            },
+            {
+              "label": "Revisar PR de outra pessoa",
+              "value": "peer-review",
+              "hint": "abre a branch do PR sem misturar com seu trabalho atual"
+            },
+            {
+              "label": "Escolher ou iniciar uma spec",
+              "value": "spec-work",
+              "hint": "para times: ver specs abertas, continuar a certa ou preparar uma nova com segurança"
+            },
+            {
+              "label": "Atualizar este repositório",
+              "value": "provisioning",
+              "hint": "runtime, templates, providers, práticas e política"
+            },
+            {
+              "label": "Ferramentas técnicas e diagnósticos",
+              "value": "advanced",
+              "hint": "para quando você quer inspecionar ou diagnosticar algo específico"
+            },
+            {
+              "label": "Sair",
+              "value": "quit"
+            }
+          ],
+          "suggested": "quit"
+        }
+      ]
     }
   ]
 } as const;

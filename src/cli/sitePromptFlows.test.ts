@@ -15,7 +15,8 @@ import type { PromptFlow, PromptStep } from "./sitePromptFlows.js";
  */
 
 const REPO_ROOT = process.cwd();
-const MANDATORY_FLOW_IDS = ["empty", "existing", "conflict", "governed"] as const;
+const MANDATORY_ONBOARDING_FLOW_IDS = ["empty", "existing", "conflict", "governed"] as const;
+const MANDATORY_DAILY_FLOW_IDS = ["daily-resume", "daily-focus", "daily-peer"] as const;
 // "Operation" é a mensagem LITERAL do BootstrapWizard real (wizard.ts), não copy.
 const NON_COPY_MESSAGES = new Set<string>(["Operation"]);
 
@@ -55,7 +56,22 @@ describe("máquina de prompts do site (projeção gerada)", () => {
   });
 
   it("cobre os 4 contextos obrigatórios do onboarding público", () => {
-    expect(flows.map((flow) => flow.id).sort()).toEqual([...MANDATORY_FLOW_IDS].sort());
+    expect(
+      flows
+        .filter((flow) => flow.operation !== "root")
+        .map((flow) => flow.id)
+        .sort()
+    ).toEqual([...MANDATORY_ONBOARDING_FLOW_IDS].sort());
+  });
+
+  it("cobre os 3 contextos obrigatórios de uso diário público", () => {
+    const dailyFlows = flows.filter((flow) => flow.operation === "root");
+
+    expect(dailyFlows.map((flow) => flow.id).sort()).toEqual([...MANDATORY_DAILY_FLOW_IDS].sort());
+    for (const flow of dailyFlows) {
+      expect(flow.command).toBe("npx ai-guidelines");
+      expect(flow.steps.some((step) => step.message === "O que você quer fazer agora?")).toBe(true);
+    }
   });
 
   it("todo cenário começa pela porta pública npx ai-guidelines", () => {
@@ -96,7 +112,7 @@ describe("máquina de prompts do site (projeção gerada)", () => {
       path.join(REPO_ROOT, "site/src/generated/flow-scenarios.generated.ts"),
       "utf-8"
     );
-    for (const flow of flows) {
+    for (const flow of flows.filter((item) => item.operation !== "root")) {
       expect(scenariosSource).toContain(`"id": "${flow.transcriptId}"`);
     }
   });
@@ -120,7 +136,7 @@ describe("máquina de prompts do site (projeção gerada)", () => {
   });
 
   it("o bloco avançado é ramificação real (gated), não passo incondicional", () => {
-    for (const flow of flows) {
+    for (const flow of flows.filter((item) => item.operation !== "root")) {
       const advanced = flow.steps.find(
         (step) => step.message === FLOW_COPY.provisioning.flow.prompts.advanced
       );
@@ -133,7 +149,7 @@ describe("máquina de prompts do site (projeção gerada)", () => {
   });
 
   it("a confirmação de aplicar é o último passo (segurança antes do efeito)", () => {
-    for (const flow of flows) {
+    for (const flow of flows.filter((item) => item.operation !== "root")) {
       const last = flow.steps[flow.steps.length - 1];
       expect(last.kind).toBe("confirm");
       expect(last.message).toBe(FLOW_COPY.provisioning.flow.prompts.confirmApply);

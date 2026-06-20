@@ -102,6 +102,7 @@ function selectLabel(flow: PromptFlow, answers: Answers, message: string, fallba
 }
 
 function shouldShowForcePrettier(flow: PromptFlow, features: readonly string[]): boolean {
+  if (flow.operation === "root") return false;
   return flow.operation === "update" || features.includes("prettier");
 }
 
@@ -112,6 +113,8 @@ interface SimulatedPlan {
 }
 
 function buildSimulatedPlan(flow: PromptFlow, answers: Answers): SimulatedPlan {
+  if (flow.operation === "root") return buildRootSimulatedPlan(flow, answers);
+
   const prompts = PROVISIONING_COPY.flow.prompts;
   const preview = PROVISIONING_COPY.flow.preview;
   const target = textAnswer(flow, answers, prompts.target, ".");
@@ -194,6 +197,25 @@ function buildSimulatedPlan(flow: PromptFlow, answers: Answers): SimulatedPlan {
   };
 }
 
+function buildRootSimulatedPlan(flow: PromptFlow, answers: Answers): SimulatedPlan {
+  const selected = [...flow.steps]
+    .reverse()
+    .find((step) => step.kind === "select" && typeof answers[step.id] === "string");
+  const selectedValue = selected ? (answers[selected.id] as string | undefined) : undefined;
+  const selectedLabel =
+    selected && selectedValue ? choiceLabel(selected, selectedValue) : copy.none;
+  return {
+    previewLines: [],
+    outputCommand: flow.command,
+    outputLines: [
+      "[simulado] Nenhum arquivo foi escrito pelo site.",
+      `[simulado] cenário: ${flow.id}`,
+      `[simulado] ação escolhida: ${selectedLabel}`,
+      "[simulado] este mini-repositório só existe para demonstrar o fluxo.",
+    ],
+  };
+}
+
 function isPreviewNote(step: PromptStep): boolean {
   return (
     step.kind === "note" &&
@@ -233,6 +255,12 @@ export function CliTerminal({ flow }: { readonly flow: PromptFlow }): JSX.Elemen
     [steps]
   );
   const applied = done && (applyStep ? answers[applyStep.id] !== false : true);
+  const outroText =
+    flow.operation === "root"
+      ? copy.outroSelected
+      : applied
+        ? copy.outroApplied
+        : copy.outroCancelled;
 
   // Reinicia a interação ao trocar de cenário.
   useEffect(() => {
@@ -426,8 +454,7 @@ export function CliTerminal({ flow }: { readonly flow: PromptFlow }): JSX.Elemen
             {done ? (
               <div className="cliOutcome">
                 <p className="cliLine">
-                  <span className="cliGlyph cliGreen">└</span>{" "}
-                  {applied ? copy.outroApplied : copy.outroCancelled}
+                  <span className="cliGlyph cliGreen">└</span> {outroText}
                 </p>
                 {applied ? (
                   <>

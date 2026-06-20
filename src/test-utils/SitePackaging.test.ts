@@ -83,7 +83,7 @@ describe("governed documentation site packaging", () => {
     expect(viteConfig).not.toContain("copyFlowSite");
   });
 
-  it("publica o site como SPA navegavel; links antigos /flow/* continuam validos", () => {
+  it("publica o site como SPA navegavel apenas nas rotas públicas atuais", () => {
     const redirects = fs.readFileSync(path.join(REPO_ROOT, "site/public/_redirects"), "utf-8");
     const routeSource = fs.readFileSync(
       path.join(REPO_ROOT, "site/src/content/flowData.ts"),
@@ -93,10 +93,13 @@ describe("governed documentation site packaging", () => {
     expect(redirects.trim()).toBe("/* /index.html 200");
     // Rotas canônicas do formato simulador.
     expect(routeSource).toContain('path: "/"');
+    expect(routeSource).toContain('path: "/cli"');
+    expect(routeSource).toContain('path: "/cli/comecar"');
+    expect(routeSource).toContain('path: "/cli/dia-a-dia"');
     expect(routeSource).toContain('"/atalhos"');
-    // Links do formato anterior resolvem para o simulador (sem soft-404 perdido).
-    expect(routeSource).toContain('startsWith("/flow/")');
-    expect(routeSource).toContain('"/flow/reference"');
+    // O formato /flow foi removido antes de estabilizar o site público.
+    expect(routeSource).not.toContain('startsWith("/flow/")');
+    expect(routeSource).not.toContain('"/flow/reference"');
     // Rota desconhecida vira 404 explícito.
     expect(routeSource).toContain('return "notFound";');
   });

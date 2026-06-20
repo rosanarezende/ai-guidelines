@@ -32,13 +32,13 @@ describe("rotas do site (formato simulador)", () => {
     expect(flowData).toContain("contributeRoute");
   });
 
-  it("links antigos /flow/* resolvem para o simulador ou atalhos (sem soft-404 perdido)", () => {
-    expect(flowData).toContain('startsWith("/flow/")');
-    expect(flowData).toContain('return "cli"');
-    expect(flowData).toContain('return "cliStart"');
-    expect(flowData).toContain('return "cliDaily"');
-    // A referência antiga continua válida e aponta para os atalhos.
-    expect(flowData).toContain('"/flow/reference"');
+  it("não mantém aliases /flow/* porque o formato público atual é /cli", () => {
+    expect(flowData).not.toContain('startsWith("/flow/")');
+    expect(flowData).not.toContain('"/flow"');
+    expect(flowData).not.toContain('"/flow/start"');
+    expect(flowData).not.toContain('"/flow/comecar"');
+    expect(flowData).not.toContain('"/flow/daily"');
+    expect(flowData).not.toContain('"/flow/reference"');
   });
 
   it("rota inexistente vira 404 explícito, não soft-404 (req. 14)", () => {

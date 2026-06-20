@@ -65,6 +65,10 @@ describe("fidelidade do simulador projetado (/cli)", () => {
   it("as operações exibidas existem no registry real da CLI (nada inventado)", () => {
     const realCommands = new Set(siteCommandSurface().map((command) => command.name));
     for (const flow of generatedFlows()) {
+      if (flow.operation === "root") {
+        expect(flow.command).toBe("npx ai-guidelines");
+        continue;
+      }
       expect(realCommands.has(flow.operation)).toBe(true);
     }
   });
@@ -78,24 +82,29 @@ describe("fidelidade do simulador projetado (/cli)", () => {
   it("a experiência diária escolhe um cenário antes de montar o simulador", () => {
     const cli = readSite("site/src/pages/cli/CliPage/CliPage.tsx");
     const locale = readSite("site/src/pages/cli/CliPage/locales/pt-BR.json");
+    const flows = generatedFlows();
 
-    expect(cli).toContain("DAILY_SCENARIO");
-    expect(cli).toContain("DAILY_PROJECT");
-    expect(cli).toContain('"resume-handoff"');
-    expect(cli).toContain('"five-specs"');
-    expect(cli).toContain('"peer-review"');
+    expect(cli).toContain("DAILY_FLOW");
     expect(cli).toContain('"daily-resume"');
     expect(cli).toContain('"daily-focus"');
     expect(cli).toContain('"daily-peer"');
-    expect(cli).toContain("DailyTerminal");
-    expect(cli).toContain("dailyTerminalOption");
-    expect(cli).toContain("RealCliRunner");
+    expect(cli).toContain("CliTerminal");
+    expect(cli).not.toContain("DailyTerminal");
+    expect(cli).not.toContain("dailyTerminalOption");
+    expect(locale).not.toContain("Repo governado detectado: uma spec ativa em andamento.");
+    expect(locale).not.toContain("Repo governado detectado: três specs abertas ao mesmo tempo.");
+    expect(locale).not.toContain("Review isolado evita misturar contextos.");
     expect(locale).toContain("Retomar meu trabalho");
     expect(locale).toContain("Escolher a frente certa");
     expect(locale).toContain("Revisar PR de colega");
-    expect(locale).toContain("Repo governado detectado: uma spec ativa em andamento.");
-    expect(locale).toContain("Repo governado detectado: três specs abertas ao mesmo tempo.");
-    expect(locale).toContain("Review isolado evita misturar contextos.");
+    expect(flows.map((flow) => flow.id)).toEqual(
+      expect.arrayContaining(["daily-resume", "daily-focus", "daily-peer"])
+    );
+    for (const flow of flows.filter((item) => item.id.startsWith("daily-"))) {
+      expect(flow.operation).toBe("root");
+      expect(flow.command).toBe("npx ai-guidelines");
+      expect(flow.steps.some((step) => step.message === "O que você quer fazer agora?")).toBe(true);
+    }
   });
 
   it("os mini-projetos do simulador alimentam a simulação e o WebContainer", () => {
