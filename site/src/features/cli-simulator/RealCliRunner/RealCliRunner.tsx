@@ -9,9 +9,9 @@ import copy from "./locales/pt-BR.json";
 
 /**
  * Modo "Rodar de verdade" (enhancement opcional, desktop): boota a CLI REAL no
- * navegador via WebContainer (Node real) + xterm — exatamente a abordagem do
- * clack. Nada aqui é SSOT: se faltar header, clientId, rede ou for mobile, o
- * simulador projetado (fallback) continua sendo a experiência principal.
+ * navegador via WebContainer (Node real) + xterm. Nada aqui é SSOT: se faltar
+ * header, clientId, rede ou for mobile, o simulador projetado (fallback)
+ * continua sendo a experiência principal.
  *
  * Carregado de forma preguiçosa (lazy) — `@webcontainer/api` + xterm ficam num
  * chunk separado e só baixam quando a pessoa ativa este modo.
@@ -44,12 +44,6 @@ function ensureWebContainerAuth(): Promise<void> {
     });
 
   return webContainerAuthPromise;
-}
-
-function operationFor(context: string): "init" | "adopt" | "update" {
-  if (context === "empty") return "init";
-  if (context === "governed") return "update";
-  return "adopt";
 }
 
 /** Árvore de arquivos montada no container, por contexto (espelha as fixtures). */
@@ -104,10 +98,9 @@ export function RealCliRunner({ context }: { readonly context: string }): JSX.El
         }
         await container.mount(filesFor(context) as never);
 
-        const operation = operationFor(context);
         setStatus("installing");
-        term.writeln(`$ npx ai-guidelines ${operation}`);
-        const proc = await container.spawn("npx", ["-y", "ai-guidelines@latest", operation], {
+        term.writeln("$ npx ai-guidelines");
+        const proc = await container.spawn("npx", ["-y", "ai-guidelines@latest"], {
           terminal: { cols: term.cols, rows: term.rows },
         });
         void proc.output.pipeTo(

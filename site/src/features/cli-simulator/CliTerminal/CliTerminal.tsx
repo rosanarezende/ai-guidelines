@@ -202,11 +202,11 @@ function isPreviewNote(step: PromptStep): boolean {
 }
 
 /**
- * Emulador FIEL do terminal `@clack` do `npx ai-guidelines`. Lê a máquina de
+ * Emulador FIEL do terminal interativo do `npx ai-guidelines`. Lê a máquina de
  * prompts gerada do runtime (texto/opções/ramificação reais) e reproduz a
  * experiência: barra de início, gutter, navegação por teclado e clique, rádios
  * `● ○`, checkboxes `◼ ◻`, e o passo respondido colapsando no histórico — como
- * o clack faz. A SAÍDA é o transcript de dry-run REAL (não execução ao vivo);
+ * a CLI faz. A SAÍDA é o transcript de dry-run REAL (não execução ao vivo);
  * o modo é declarado de forma visível.
  */
 export function CliTerminal({ flow }: { readonly flow: PromptFlow }): JSX.Element {

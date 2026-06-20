@@ -71,21 +71,34 @@
 
 .cliGhostButton {
   font: inherit;
-  font-size: 0.75rem;
+  font-size: 0.85rem;
+  font-weight: 700;
   cursor: pointer;
-  color: #9ca3af;
-  background: transparent;
-  border: 1px solid #374151;
-  border-radius: 6px;
-  padding: 0.2rem 0.55rem;
+  color: #111827;
+  background: #ffffff;
+  border: 1px solid #475569;
+  border-radius: 9px;
+  padding: 0.42rem 0.8rem;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
 }
 .cliGhostButton:hover {
-  color: #e5e7eb;
-  border-color: #4b5563;
+  color: #0f172a;
+  border-color: #0f172a;
+  background: #f8fafc;
 }
 .cliRealButton {
-  color: #67e8f9;
-  border-color: rgba(34, 211, 238, 0.4);
+  color: #052e35;
+  background: #67e8f9;
+  border-color: #0891b2;
+}
+.cliRealButton:hover {
+  color: #041f24;
+  background: #22d3ee;
+  border-color: #0e7490;
+}
+.cliGhostButton:focus-visible {
+  outline: 3px solid rgba(8, 145, 178, 0.28);
+  outline-offset: 2px;
 }
 
 .cliRealNote {

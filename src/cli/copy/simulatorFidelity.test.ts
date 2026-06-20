@@ -96,6 +96,17 @@ describe("fidelidade do simulador projetado (/cli)", () => {
     expect(terminal).toContain("TerminalFrame");
   });
 
+  it("os controles abaixo do terminal mantêm contraste explícito", () => {
+    const css = readSite("site/src/features/cli-simulator/CliTerminal/CliTerminal.css");
+    expect(css).toContain(".cliGhostButton");
+    expect(css).toContain("color: #111827");
+    expect(css).toContain("background: #ffffff");
+    expect(css).toContain("border: 1px solid #475569");
+    expect(css).toContain(".cliRealButton");
+    expect(css).toContain("background: #67e8f9");
+    expect(css).toContain("color: #052e35");
+  });
+
   it("force-prettier no simulador depende da seleção da feature Prettier", () => {
     const flows = generatedFlows();
     const withForcePrettier = flows
@@ -146,5 +157,14 @@ describe("WebContainer é enhancement opcional, com fallback obrigatório", () =
     expect(runner).toContain("ensureWebContainerAuth");
     expect(runner).toContain("isAlreadyInitializedError");
     expect(runner).toContain("await ensureWebContainerAuth()");
+  });
+
+  it("o modo real executa a entrada pública raiz, sem pular para init/adopt/update", () => {
+    const runner = readSite("site/src/features/cli-simulator/RealCliRunner/RealCliRunner.tsx");
+    expect(runner).toContain('term.writeln("$ npx ai-guidelines")');
+    expect(runner).toContain('"ai-guidelines@latest"');
+    expect(runner).not.toContain("operationFor");
+    expect(runner).not.toContain("term.writeln(`$ npx ai-guidelines ${operation}`)");
+    expect(runner).not.toContain('"init" | "adopt" | "update"');
   });
 });
