@@ -39,8 +39,12 @@ describe("governed documentation site packaging", () => {
     expect(pkg.scripts["site:scenarios:check"]).toBe(
       "npm run build && node dist/cli/bin.js site-scenarios check"
     );
+    // A máquina de prompts (sequência real do wizard) também é gateada na cadeia.
+    expect(pkg.scripts["site:prompts:check"]).toBe(
+      "npm run build && node dist/cli/bin.js site-prompts check"
+    );
     expect(pkg.scripts["site:build"]).toBe(
-      "npm run site:flow:check && npm run site:scenarios:check && npm run site:assets:check && vite build --config site/vite.config.ts"
+      "npm run site:flow:check && npm run site:scenarios:check && npm run site:prompts:check && npm run site:assets:check && vite build --config site/vite.config.ts"
     );
     expect(pkg.scripts["site:dev"]).toBe("vite --config site/vite.config.ts --host 127.0.0.1");
     expect(pkg.scripts.validate).toContain("npm run site:build");

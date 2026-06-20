@@ -145,6 +145,18 @@ profiles:
         mutates: false
         consumers: [script]
         description: Falha se os transcripts de terminal do site divergirem do runtime real.
+      - name: site:prompts:sync
+        command: npm run build && node dist/cli/bin.js site-prompts sync
+        category: docs
+        mutates: true
+        consumers: [human]
+        description: Gera a maquina de prompts do site a partir do wizard real (command.prompt).
+      - name: site:prompts:check
+        command: npm run build && node dist/cli/bin.js site-prompts check
+        category: docs
+        mutates: false
+        consumers: [script]
+        description: Falha se a maquina de prompts do site divergir do wizard real.
       - name: site:assets:sync
         command: node site/scripts/optimize-assets.mjs sync
         category: docs
@@ -164,7 +176,7 @@ profiles:
         consumers: [human]
         description: Servidor local do site governado em React/Vite.
       - name: site:build
-        command: npm run site:flow:check && npm run site:scenarios:check && npm run site:assets:check && vite build --config site/vite.config.ts
+        command: npm run site:flow:check && npm run site:scenarios:check && npm run site:prompts:check && npm run site:assets:check && vite build --config site/vite.config.ts
         category: docs
         mutates: true
         consumers: [script, workflow]
