@@ -25,7 +25,7 @@ export function FlowShell({
         <p className="lead">{lead}</p>
         <nav className="flowNav" aria-label={copy.navAria}>
           {routes
-            .filter((route) => route.id !== "home" && route.id !== "flow")
+            .filter((route) => route.id !== "home")
             .map((route) => (
               <SiteLink key={route.id} route={route.id}>
                 {route.label}

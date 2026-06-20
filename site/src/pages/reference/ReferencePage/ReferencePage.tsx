@@ -1,4 +1,4 @@
-import { glossary, referenceGroups } from "@content/flowData";
+import { glossary, publicHumanDecisions, referenceGroups, safetyRails } from "@content/flowData";
 import { SectionHead } from "@shared/ui/SectionHead/SectionHead";
 import { FlowShell } from "@shared/layout/FlowShell/FlowShell";
 import copy from "./locales/pt-BR.json";
@@ -23,6 +23,24 @@ export function ReferencePage(): JSX.Element {
             </div>
           </section>
         ))}
+
+        <section className="referenceGroup">
+          <h2>{copy.decisionsTitle}</h2>
+          <p>{copy.decisionsLead}</p>
+          <ul className="decisionList" role="list">
+            {publicHumanDecisions.map((decision) => (
+              <li key={decision.id}>{decision.title}</li>
+            ))}
+          </ul>
+          <div className="referenceList">
+            {safetyRails.map((rail) => (
+              <article key={rail.title}>
+                <strong>{rail.title}</strong>
+                <span>{rail.text}</span>
+              </article>
+            ))}
+          </div>
+        </section>
       </div>
 
       <section className="glossarySection">

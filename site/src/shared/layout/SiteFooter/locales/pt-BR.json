@@ -1,8 +1,8 @@
 {
   "tagline": "ai-guidelines — governança de IA multi-agente, agnóstica de modelo, IDE e linguagem.",
   "links": {
-    "flow": "Como funciona",
-    "reference": "Referência",
+    "home": "Simulador",
+    "reference": "Atalhos avançados",
     "contribute": "Contribuindo",
     "github": "GitHub",
     "npm": "npm"

@@ -55,45 +55,40 @@ describe("flow copy catalog", () => {
     expect(generatedCopy).toContain(FLOW_COPY.provisioning.flow.prompts.prune);
   });
 
-  it("mantém o Flow como páginas React navegáveis e mobile-first", () => {
+  it("mantém o simulador como páginas React navegáveis e mobile-first", () => {
     const components = readSiteSources([
-      "site/src/features/journey/StepNavigator/StepNavigator.tsx",
+      "site/src/features/scenario-player/ScenarioPlayer/ScenarioPlayer.tsx",
       "site/src/features/terminal/ScenarioTerminal/ScenarioTerminal.tsx",
       "site/src/features/terminal/TerminalFrame/TerminalFrame.tsx",
     ]);
     const data = readSiteSource("site/src/content/flowData.ts");
     const styles = readSiteSources([
-      "site/src/shared/layout/SiteHeader/SiteHeader.css",
-      "site/src/pages/home/sections/ProblemSection/ProblemSection.css",
-      "site/src/features/journey/StepNavigator/StepNavigator.css",
+      "site/src/features/scenario-catalog/ScenarioChooser/ScenarioChooser.css",
+      "site/src/features/cli-simulator/CliSimulator/CliSimulator.css",
     ]);
 
-    expect(components).toContain("StepNavigator");
     expect(components).toContain("aria-current");
     expect(components).toContain("ScenarioTerminal");
     expect(components).toContain("terminalBadge");
-    expect(data).toContain("/flow/comecar");
-    expect(data).toContain("/flow/uso-diario");
-    expect(data).toContain("/flow/time");
-    expect(data).toContain("/flow/review-entre-pares");
-    expect(styles).toContain("@media (min-width: 760px)");
-    expect(styles).toContain("grid-template-columns");
+    // Links do formato anterior continuam resolvendo (sem soft-404).
+    expect(data).toContain('startsWith("/flow/")');
+    expect(data).toContain('"/atalhos"');
+    expect(styles).toContain("@media (min-width:");
+    expect(styles).toContain("grid-template-columns: 1fr");
   });
 
-  it("mantém entrada inicial, uso diário, time e review entre pares como jornadas distintas", () => {
+  it("o catálogo cobre os cenários-chave (entrada, time, review entre pares)", () => {
+    const catalog = readSiteSource("site/src/content/scenarios/catalog.ts");
     const data = readSiteSource("site/src/content/flowData.ts");
 
-    expect(data).toContain("Inicializar um projeto governado");
-    expect(data).toContain("Adotar sem apagar o que já existe");
-    expect(data).toContain("Operar o dia a dia sem lembrar a sequência de comandos");
-    expect(data).toContain("Escolher a frente certa antes de trabalhar");
-    expect(data).toContain("Revisar PR de outra pessoa sem perder sua branch");
-    // Invocações agora são DERIVADAS do registry (B1): em vez do literal, o site
-    // chama flowCommand("peer-review", …). A fidelidade do nome de comando é
-    // garantida por siteCommandSurface.test.ts (guard que valida contra o registry).
+    for (const id of ["empty-project", "existing-repo", "five-specs", "peer-review"]) {
+      expect(catalog).toContain(`"id": "${id}"`);
+    }
+    // Review entre pares preserva contexto: worktree/checkout aparecem no cenário.
+    expect(catalog).toContain("worktree");
+    expect(catalog).toContain("checkout");
+    // Invocações continuam DERIVADAS do registry (B1), validadas por siteCommandSurface.
     expect(data).toContain('binCommand("peer-review"');
-    expect(data).toContain("Worktree separado");
-    expect(data).toContain("Checkout guiado");
   });
 
   it("remove o Flow HTML legado e não cria catálogo textual paralelo", () => {

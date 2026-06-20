@@ -1,0 +1,6 @@
+{
+  "eyebrow": "Documentação viva e interativa",
+  "title": "Entenda o ai-guidelines simulando a CLI",
+  "lead": "Em vez de uma lista de comandos, escolha a situação do seu repositório e veja o que `npx ai-guidelines` perceberia, ofereceria, bloquearia ou decidiria — e por quê.",
+  "entryNote": "Esse é o caminho principal. A CLI lê o contexto e te orienta. Comandos diretos existem como atalho avançado, não como a experiência principal."
+}

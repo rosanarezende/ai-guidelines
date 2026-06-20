@@ -13,7 +13,7 @@ export function NotFoundPage(): JSX.Element {
         <SiteLink className="primaryAction" route="home">
           {copy.homeAction}
         </SiteLink>
-        <SiteLink className="secondaryAction" route="flow">
+        <SiteLink className="secondaryAction" route="reference">
           {copy.flowAction}
         </SiteLink>
       </div>

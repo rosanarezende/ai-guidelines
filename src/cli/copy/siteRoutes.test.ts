@@ -2,11 +2,11 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 
 /**
- * Guards de navegação e de surface de cenários do site (Fase 2 / itens 7,14,15).
+ * Guards de navegação e de procedência do simulador (req. 13,14,15 + render).
  *
- * O módulo do site vive fora do rootDir do tsc (`src`), então auditamos via
- * fonte (mesmo padrão dos demais guards de site). As asserções são falsificáveis:
- * remover o 404 explícito ou o painel de cenário quebra o teste.
+ * O módulo do site vive fora do rootDir do tsc (`src`), então auditamos via fonte.
+ * As asserções são falsificáveis: remover o 404 explícito, o simulador ou o
+ * layout mobile-first quebra o teste.
  */
 
 const REPO_ROOT = process.cwd();
@@ -15,19 +15,12 @@ function readSite(relativePath: string): string {
   return readFileSync(path.join(REPO_ROOT, relativePath), "utf-8");
 }
 
-describe("rotas navegáveis do site", () => {
+describe("rotas do site (formato simulador)", () => {
   const flowData = readSite("site/src/content/flowData.ts");
 
-  it("expõe as rotas canônicas EN do /flow/*", () => {
-    for (const route of [
-      "/flow/start",
-      "/flow/daily",
-      "/flow/team",
-      "/flow/review",
-      "/flow/reference",
-    ]) {
-      expect(flowData).toContain(route);
-    }
+  it("home (/) e atalhos avançados (/atalhos) são as rotas canônicas", () => {
+    expect(flowData).toContain('path: "/"');
+    expect(flowData).toContain('"/atalhos"');
   });
 
   it("tem rota secundária de contribuidor fora da nav principal", () => {
@@ -36,23 +29,17 @@ describe("rotas navegáveis do site", () => {
     expect(flowData).toContain("contributeRoute");
   });
 
-  it("mantém os paths PT antigos como aliases (links existentes seguem válidos)", () => {
-    for (const alias of [
-      "/flow/comecar",
-      "/flow/uso-diario",
-      "/flow/time",
-      "/flow/review-entre-pares",
-      "/flow/referencia",
-    ]) {
-      expect(flowData).toContain(alias);
-    }
+  it("links antigos /flow/* resolvem para o simulador (sem soft-404 perdido)", () => {
+    expect(flowData).toContain('startsWith("/flow/")');
+    expect(flowData).toContain('return "home"');
+    // A referência antiga continua válida e aponta para os atalhos.
+    expect(flowData).toContain('"/flow/reference"');
   });
 
-  it("rota inexistente vira 404 explícito, não soft-404", () => {
-    // routeFromPath deve devolver notFound no fallback — nunca cair em "flow".
-    expect(flowData).toContain('return "notFound";');
-    expect(flowData).not.toMatch(/return "flow";\s*\n\}/);
+  it("rota inexistente vira 404 explícito, não soft-404 (req. 14)", () => {
     expect(flowData).toContain("notFound");
+    // O fallback final de routeFromPath é notFound, não home.
+    expect(flowData).toMatch(/return "notFound";\s*\n\}/);
   });
 
   it("expõe título por rota (SEO/a11y) e 404 com texto próprio", () => {
@@ -65,37 +52,41 @@ describe("rotas navegáveis do site", () => {
   });
 });
 
-describe("jornadas surface transcripts verídicos", () => {
-  const flowData = readSite("site/src/content/flowData.ts");
-  const flowOverview = readSite("site/src/pages/flow/FlowOverview/FlowOverview.tsx");
-  const journeySection = readSite("site/src/features/journey/JourneySection/JourneySection.tsx");
-  const situationExplorer = readSite(
-    "site/src/features/situation/SituationExplorer/SituationExplorer.tsx"
+describe("simulador renderiza cenários com procedência visível", () => {
+  const chooser = readSite(
+    "site/src/features/scenario-catalog/ScenarioChooser/ScenarioChooser.tsx"
   );
-  const scenarioTerminal = readSite(
-    "site/src/features/terminal/ScenarioTerminal/ScenarioTerminal.tsx"
-  );
+  const player = readSite("site/src/features/scenario-player/ScenarioPlayer/ScenarioPlayer.tsx");
   const terminalFrame = readSite("site/src/features/terminal/TerminalFrame/TerminalFrame.tsx");
 
-  it("liga jornadas a cenários gerados (real/guiado)", () => {
-    expect(flowData).toContain("AI_GUIDELINES_FLOW_SCENARIOS");
-    expect(flowData).toContain("scenarioById");
-    for (const id of [
-      "consumer-empty-entry",
-      "consumer-existing-entry",
-      "consumer-governed-solo-entry",
-      "consumer-multiple-specs-entry",
-      "peer-review",
-    ]) {
-      expect(flowData).toContain(`scenarioId: "${id}"`);
-    }
+  it("o chooser lê o catálogo e mostra o badge de procedência", () => {
+    expect(chooser).toContain("scenarioCatalog");
+    expect(chooser).toContain("PROVENANCE_LABEL");
   });
 
-  it("renderiza o painel de cenário com procedência visível", () => {
-    expect(flowOverview).toContain("SituationExplorer");
-    expect(situationExplorer).toContain("ScenarioPanel");
-    expect(journeySection).toContain("ScenarioPanel");
-    expect(scenarioTerminal).toContain("ScenarioTerminal");
+  it("o player mostra procedência por saída e usa o TerminalFrame com badge", () => {
+    expect(player).toContain("ORIGIN_LABEL");
+    expect(player).toContain("resolveOutput");
+    expect(player).toContain("TerminalFrame");
     expect(terminalFrame).toContain("terminalBadge");
+  });
+});
+
+describe("layout mobile-first não quebra (req. 13)", () => {
+  const chooserCss = readSite(
+    "site/src/features/scenario-catalog/ScenarioChooser/ScenarioChooser.css"
+  );
+  const simulatorCss = readSite("site/src/features/cli-simulator/CliSimulator/CliSimulator.css");
+
+  it("o grid começa em coluna única e expande por breakpoint", () => {
+    expect(chooserCss).toContain("grid-template-columns: 1fr");
+    expect(chooserCss).toContain("@media (min-width:");
+    expect(simulatorCss).toContain("grid-template-columns: 1fr");
+    expect(simulatorCss).toContain("@media (min-width:");
+  });
+
+  it("não há largura fixa em px que estoure o mobile", () => {
+    expect(simulatorCss).not.toMatch(/width:\s*\d{4,}px/);
+    expect(chooserCss).not.toMatch(/width:\s*\d{4,}px/);
   });
 });

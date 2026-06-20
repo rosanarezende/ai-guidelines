@@ -46,58 +46,27 @@ describe("governed documentation site packaging", () => {
     expect(pkg.scripts.validate).toContain("npm run site:build");
   });
 
-  it("mantem a home como pagina de produto sem instrucoes de deploy", () => {
+  it("mantem a home como simulador da CLI sem instrucoes de deploy", () => {
     const appSource = fs.readFileSync(path.join(REPO_ROOT, "site/src/app/App.tsx"), "utf-8");
     const homeSource = fs.readFileSync(
       path.join(REPO_ROOT, "site/src/pages/home/HomePage/HomePage.tsx"),
       "utf-8"
     );
-    const productHero = fs.readFileSync(
-      path.join(REPO_ROOT, "site/src/pages/home/sections/ProductHero/ProductHero.tsx"),
-      "utf-8"
-    );
-    const solutionSection = fs.readFileSync(
-      path.join(REPO_ROOT, "site/src/pages/home/sections/SolutionSection/SolutionSection.tsx"),
-      "utf-8"
-    );
-    const solutionSectionLocale = fs.readFileSync(
-      path.join(REPO_ROOT, "site/src/pages/home/sections/SolutionSection/locales/pt-BR.json"),
-      "utf-8"
-    );
-    const productCta = fs.readFileSync(
-      path.join(REPO_ROOT, "site/src/pages/home/sections/ProductCTA/ProductCTA.tsx"),
-      "utf-8"
-    );
-    const productHeroLocale = fs.readFileSync(
-      path.join(REPO_ROOT, "site/src/pages/home/sections/ProductHero/locales/pt-BR.json"),
-      "utf-8"
-    );
-    const audienceCards = fs.readFileSync(
-      path.join(REPO_ROOT, "site/src/pages/home/sections/AudiencePathCards/AudiencePathCards.tsx"),
-      "utf-8"
-    );
     const flowData = fs.readFileSync(path.join(REPO_ROOT, "site/src/content/flowData.ts"), "utf-8");
     const viteConfig = fs.readFileSync(path.join(REPO_ROOT, "site/vite.config.ts"), "utf-8");
-    const homeBundle = [homeSource, productHero, solutionSection, productCta, audienceCards].join(
-      "\n"
-    );
 
     expect(appSource).not.toMatch(/Cloudflare/i);
     expect(appSource).not.toContain("../../docs/assets/");
-    expect(solutionSection).toContain("copy.lead");
-    expect(solutionSectionLocale).toContain("Automação absorve o mecânico");
-    expect(homeBundle).toContain("ai-guidelines-flow.webp");
-    // A home é uma página de produto com hero, problema, solução e caminhos por público.
-    expect(homeSource).toContain("ProductCTA");
-    expect(audienceCards).toContain("audiencePaths");
-    expect(productHero).toContain("copy.primaryAction");
-    expect(productHeroLocale).toContain("Ver o guia interativo");
+    // A home É o simulador da CLI: começa por npx ai-guidelines, não por deploy.
+    expect(homeSource).toContain("ScenarioChooser");
+    expect(homeSource).toContain("CliSimulator");
+    expect(homeSource).toContain("npx ai-guidelines");
     // O comando do consumidor é DERIVADO (binCommand), não literal no JSX.
-    expect(flowData).toContain('directCommand: binCommand("init", "--dry-run")');
+    expect(flowData).toContain('binCommand("init", "--dry-run")');
     expect(viteConfig).not.toContain("copyFlowSite");
   });
 
-  it("publica o site como SPA navegavel em rotas /flow/*", () => {
+  it("publica o site como SPA navegavel; links antigos /flow/* continuam validos", () => {
     const redirects = fs.readFileSync(path.join(REPO_ROOT, "site/public/_redirects"), "utf-8");
     const routeSource = fs.readFileSync(
       path.join(REPO_ROOT, "site/src/content/flowData.ts"),
@@ -105,9 +74,13 @@ describe("governed documentation site packaging", () => {
     );
 
     expect(redirects.trim()).toBe("/* /index.html 200");
-    expect(routeSource).toContain("/flow/comecar");
-    expect(routeSource).toContain("/flow/uso-diario");
-    expect(routeSource).toContain("/flow/time");
-    expect(routeSource).toContain("/flow/review-entre-pares");
+    // Rotas canônicas do formato simulador.
+    expect(routeSource).toContain('path: "/"');
+    expect(routeSource).toContain('"/atalhos"');
+    // Links do formato anterior resolvem para o simulador (sem soft-404 perdido).
+    expect(routeSource).toContain('startsWith("/flow/")');
+    expect(routeSource).toContain('"/flow/reference"');
+    // Rota desconhecida vira 404 explícito.
+    expect(routeSource).toContain('return "notFound";');
   });
 });

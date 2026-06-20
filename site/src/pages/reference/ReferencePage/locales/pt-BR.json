@@ -1,7 +1,9 @@
 {
-  "eyebrow": "Referência",
-  "title": "Comandos, conceitos e glossário em um lugar só.",
-  "lead": "Os comandos e práticas vêm do mesmo catálogo da CLI — site e wizard nunca divergem.",
+  "eyebrow": "Atalhos avançados",
+  "title": "Comandos diretos, conceitos e glossário — para quem já conhece o fluxo.",
+  "lead": "O caminho principal é o simulador (`npx ai-guidelines`). Esta página é secundária: reúne os atalhos diretos, as decisões humanas e o glossário. Os comandos vêm do mesmo catálogo da CLI — site e wizard nunca divergem.",
+  "decisionsTitle": "Decisões humanas & trilhos de segurança",
+  "decisionsLead": "Ready, Human Gate e merge são decisões reservadas a um humano — nunca atalhos automáticos.",
   "glossaryEyebrow": "Glossário",
   "glossaryTitle": "Termos que aparecem no fluxo."
 }

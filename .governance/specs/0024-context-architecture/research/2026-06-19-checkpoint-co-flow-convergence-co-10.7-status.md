@@ -601,3 +601,106 @@ a decisao de readiness ainda depende da revisao visual de Rosana no preview
 e da decisao sobre transformar peer-review/work/specs guiados em transcripts
 reais completos.
 ```
+
+## 14. Rodada de implementacao - site reconstruido como simulador interativo da CLI
+
+### 14.1 Por que a versao anterior ainda nao satisfazia
+
+A versao anterior melhorou tecnicamente (ja consumia cenarios gerados do runtime
+real), mas ainda parecia documentacao montada sobre partes antigas: home de
+marketing + paginas estaticas de jornada (`/flow/start|daily|team|review|reference`)
+que pediam que a pessoa entendesse comandos antes de sentir o produto. O site
+continuava mais claro que a CLI em alguns pontos - o risco 3 deste artefato.
+
+### 14.2 Novo modelo - site como simulador da CLI
+
+O site foi reconstruido (rebuild limpo) em torno de um **simulador interativo**:
+
+```text
+home = simulador (porta do produto)
+→ ScenarioChooser: "Escolha um cenario para simular"
+→ CliSimulator: comeca por `npx ai-guidelines`, avanca passos
+→ GovernanceExplainer: "por que isso apareceu"
+→ EffectPreview: o que seria escrito/bloqueado/validado/decidido
+→ modo iniciante x ver detalhes tecnicos; mobile-first; a11y real
+```
+
+Arquitetura nova (catalogo autoral legivel, separado dos transcripts gerados):
+
+```text
+site/src/content/scenarios/{types,catalog,resolve}.ts
+site/src/features/{cli-simulator,scenario-catalog,scenario-player,effect-preview,governance-explainer}/
+```
+
+Paginas estaticas de jornada/marketing foram removidas; `/flow/*` e aliases PT
+resolvem para o simulador (sem soft-404). Atalhos diretos (init/adopt/update/work/
+specs/peer-review) ficam como `<details>` recolhido ("Atalho para automacao"), nunca
+como caminho principal. `npm run flow` segue so na area de contribuidor.
+
+### 14.3 Correcao de premissa (SSOT) aplicada
+
+O arquivo gerado `site/src/generated/flow-scenarios.generated.ts` e tratado como
+PROJECAO do runtime, **nao** como fonte de verdade. Um cenario so e `real` quando
+TODA saida de passo e `transcript:<id>` (sem texto autoral); a saida `transcript`
+nao duplica `lines` no catalogo (o renderer resolve do gerado). `lines` so existe
+em `simulado`/`gap`. O guard `src/cli/copy/scenarioCatalog.test.ts` falha se um
+cenario `real` virar string manual, se duplicar transcript, ou se houver passo
+autoral marcado como real.
+
+### 14.4 Classificacao conservadora dos 12 cenarios
+
+```text
+real (so captura, sem passo autoral): empty-project, existing-repo,
+  formatter-conflict, governed-solo   → 1-4
+simulado (mistura base real + modelo alvo autoral): governed-team, five-specs,
+  resume-handoff, readiness, pr-ready-human-gate, peer-review, offline-degraded
+gap (comportamento publico ainda ausente): review-finding
+```
+
+Mesmo nos cenarios `real`, o prompt-a-prompt interativo do @clack NAO e capturado
+hoje; por isso o real e renderizado como navegacao entre capturas (guia -> dry-run
+-> efeitos), e qualquer choreography de prompt seria `simulado` explicito, fora do
+conjunto real.
+
+### 14.5 Gaps descobertos (registrados aqui)
+
+```text
+- painel unificado por spec (branch/PR/estado/proxima acao numa tela) — five-specs
+- fluxo publico guiado finding -> disposition -> resolution — review-finding
+- distincao update x mudanca-de-politica + alerta de autoridade — governed-team
+- captura controlada de handoff + persistencia de handoff — resume-handoff
+- captura controlada de --no-remote/degradado — offline-degraded
+- captura controlada de peer-review (depende de gh) — peer-review
+- captura controlada de decide mark-readiness/human-gate (brief-only) — readiness,
+  pr-ready-human-gate
+constraint (nao-gap): providers/practices/collaboration seguem como selecao de
+`update --providers`, nunca comando.
+```
+
+### 14.6 Testes adicionados/ajustados
+
+```text
++ src/cli/copy/scenarioCatalog.test.ts (novo) — 12 cenarios obrigatorios, procedencia
+  por saida, SSOT (sem duplicacao, real=so transcript), providers nao-comando,
+  atalho secundario, invariantes por cenario (5-specs/conflito/offline/peer/gate)
+~ src/cli/copy/siteProfiles.test.ts — reescrito para o simulador (home npx-first,
+  publico x contribuidor, npm run flow so no contribuidor)
+~ src/cli/copy/siteRoutes.test.ts — reescrito (rotas/404 explicito/titulos,
+  procedencia visivel, layout mobile-first)
+= siteCommandSurface.test / siteCapabilities.test / siteScenarios.test seguem verdes
+```
+
+### 14.7 O que ainda impede readiness de CO-10.7
+
+```text
+- revisao visual de Rosana no preview do simulador;
+- transformar simulados/gaps prioritarios em comportamento real da CLI + captura
+  controlada (handoff e offline sao os candidatos mais proximos de virar `real`);
+- o debito da pasta research/ (secao 10) continua aberto.
+```
+
+### 14.8 Fronteira (reafirmada)
+
+Esta rodada **nao** executa readiness, Ready, Human Gate, advance-subcheckpoint,
+mark-readiness, merge nem abertura de novo PR. E implementacao de site + documentacao,
+nao decisao de flow. Vale a mesma fronteira da secao 8.

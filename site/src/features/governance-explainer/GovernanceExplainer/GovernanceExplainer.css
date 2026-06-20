@@ -1,0 +1,28 @@
+.governanceExplainer {
+  border: 1px solid var(--border, #d7dce3);
+  border-radius: 0.6rem;
+  padding: 0.85rem 0.9rem;
+  background: var(--surface-2, #f6f8fb);
+}
+
+.explainerTitle {
+  margin: 0 0 0.5rem;
+  font-size: 0.95rem;
+}
+
+.explainerContext {
+  margin: 0 0 0.5rem;
+  font-size: 0.85rem;
+  color: var(--muted, #5b6472);
+}
+
+.explainerWhy {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.explainerEvolving {
+  margin: 0.6rem 0 0;
+  font-size: 0.8rem;
+  color: #9a6a00;
+}

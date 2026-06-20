@@ -1,16 +1,14 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 
-import { buildRegistry } from "../registry/buildRegistry.js";
-
 /**
- * Separação de perfis do site (consumidor × contribuidor).
+ * Separação de perfis do site (consumidor × contribuidor) no formato simulador.
  *
  * Contrato:
- *  - a superfície PÚBLICA (consumidor) usa `npx ai-guidelines …`;
+ *  - a superfície PÚBLICA (consumidor) usa `npx ai-guidelines …` e começa pelo guia;
  *  - `npm run flow` (alias local deste repo) só aparece na seção de contribuidor;
  *  - identificadores internos (PR/Spec/CO-/sub-checkpoint) não vazam no público;
- *  - os cenários consumidos nas páginas públicas têm `surface: "public"`.
+ *  - a home É o simulador — a pessoa não precisa decorar comandos.
  */
 
 const REPO_ROOT = process.cwd();
@@ -24,13 +22,6 @@ function splitAtMarker(source: string): { publicPart: string; contributorPart: s
   const index = source.indexOf(MARKER);
   expect(index).toBeGreaterThan(-1);
   return { publicPart: source.slice(0, index), contributorPart: source.slice(index) };
-}
-
-function generatedScenarios(): Array<{ id: string; surface: string; command: string }> {
-  const source = readSite("site/src/generated/flow-scenarios.generated.ts");
-  const match = source.match(/AI_GUIDELINES_FLOW_SCENARIOS = (\[[\s\S]*\]) as const/);
-  expect(match).toBeTruthy();
-  return JSON.parse((match as RegExpMatchArray)[1]);
 }
 
 const INTERNAL_PATTERNS: readonly RegExp[] = [
@@ -64,116 +55,65 @@ describe("flowData separa consumidor e contribuidor", () => {
     expect(publicPart).toContain("BIN_WIZARD");
   });
 
-  it("a superfície pública apresenta o guia interativo como caminho principal", () => {
-    expect(publicPart).toContain("flowSituations");
-    expect(publicPart).toContain("command: BIN_WIZARD");
-    expect(publicPart).toContain('scenarioId: "consumer-empty-entry"');
-    expect(publicPart).toContain('scenarioId: "consumer-existing-entry"');
-    expect(publicPart).toContain('scenarioId: "consumer-governed-solo-entry"');
-  });
-
   it("`npm run flow` vive apenas na seção de contribuidor", () => {
     expect(contributorPart).toContain("npm run flow");
     expect(contributorPart).toContain("flowCommand");
   });
 });
 
-describe("App separa consumidor e contribuidor", () => {
-  const app = readSite("site/src/app/App.tsx");
-  const situationExplorer = readSite(
-    "site/src/features/situation/SituationExplorer/SituationExplorer.tsx"
+describe("a home é o simulador da CLI (req. 1)", () => {
+  const home = readSite("site/src/pages/home/HomePage/HomePage.tsx");
+  const homeLocale = readSite("site/src/pages/home/HomePage/locales/pt-BR.json");
+  const chooserLocale = readSite(
+    "site/src/features/scenario-catalog/ScenarioChooser/locales/pt-BR.json"
   );
-  const situationExplorerLocale = readSite(
-    "site/src/features/situation/SituationExplorer/locales/pt-BR.json"
-  );
-  const directCommand = readSite(
-    "site/src/features/command-surface/DirectCommandAside/DirectCommandAside.tsx"
-  );
-  const directCommandLocale = readSite(
-    "site/src/features/command-surface/DirectCommandAside/locales/pt-BR.json"
-  );
-  const journeySection = readSite("site/src/features/journey/JourneySection/JourneySection.tsx");
-  const journeySectionLocale = readSite(
-    "site/src/features/journey/JourneySection/locales/pt-BR.json"
-  );
-  const contributePage = readSite("site/src/pages/contribute/ContributePage/ContributePage.tsx");
-  const contributePageLocale = readSite(
-    "site/src/pages/contribute/ContributePage/locales/pt-BR.json"
-  );
-  const siteFooter = readSite("site/src/shared/layout/SiteFooter/SiteFooter.tsx");
 
-  it("App.tsx não contém o alias `npm run flow`", () => {
-    expect(app).not.toContain("npm run flow");
+  it("a home monta o simulador (ScenarioChooser + CliSimulator)", () => {
+    expect(home).toContain("ScenarioChooser");
+    expect(home).toContain("CliSimulator");
+    expect(home).toContain("MANDATORY_SCENARIO_IDS");
   });
 
-  it("a superfície pública diferencia caminho principal de atalhos diretos", () => {
-    expect(situationExplorer).toContain("BIN_WIZARD");
-    expect(situationExplorer).toContain("ScenarioPanel");
-    expect(situationExplorer).toContain("DirectCommandAside");
-    expect(situationExplorerLocale).toContain("A pessoa não precisa decorar comandos");
-    expect(journeySection).toContain("copy.primaryCommand");
-    expect(journeySectionLocale).toContain("Caminho principal");
-    expect(directCommand).toContain("<details");
-    expect(directCommand).toContain("<summary>{copy.label}</summary>");
-    expect(directCommandLocale).toContain("Atalho para automação");
-    expect(directCommandLocale).toContain("O caminho principal continua sendo abrir o guia.");
-  });
-
-  it("a seção de contribuidor é uma página separada e discreta", () => {
-    expect(contributePage).toContain("ContributePage");
-    expect(siteFooter).toContain('route="contribute"');
-    expect(contributePage).toContain("copy.internalLabel");
-    expect(contributePageLocale).toContain("Uso interno");
+  it("a home começa por `npx ai-guidelines` e não exige decorar comandos", () => {
+    expect(home).toContain("npx ai-guidelines");
+    expect(`${homeLocale}\n${chooserLocale}`).toMatch(
+      /não precisa decorar|sem decorar|por experiência/i
+    );
   });
 });
 
-describe("cenários consumidos no público têm surface public", () => {
-  const byId = new Map(generatedScenarios().map((scenario) => [scenario.id, scenario]));
-
-  const publicIds = [
-    "consumer-empty-entry",
-    "consumer-existing-entry",
-    "consumer-formatter-conflict-entry",
-    "consumer-governed-solo-entry",
-    "consumer-governed-team-entry",
-    "consumer-multiple-specs-entry",
-    "new-project",
-    "existing-repo",
-    "governed-repo",
-    "update-providers",
-    "cli-help",
-    "daily-work",
-    "multi-spec",
-    "peer-review",
+describe("superfície pública × contribuidor nos componentes", () => {
+  const publicFiles = [
+    "site/src/pages/home/HomePage/HomePage.tsx",
+    "site/src/features/cli-simulator/CliSimulator/CliSimulator.tsx",
+    "site/src/features/scenario-catalog/ScenarioChooser/ScenarioChooser.tsx",
+    "site/src/features/scenario-player/ScenarioPlayer/ScenarioPlayer.tsx",
+    "site/src/features/effect-preview/EffectPreview/EffectPreview.tsx",
+    "site/src/features/governance-explainer/GovernanceExplainer/GovernanceExplainer.tsx",
+    "site/src/content/scenarios/catalog.ts",
+    "site/src/app/App.tsx",
   ];
 
-  for (const id of publicIds) {
-    it(`${id} é público e usa npx ai-guidelines`, () => {
-      const scenario = byId.get(id);
-      expect(scenario).toBeDefined();
-      expect(scenario?.surface).toBe("public");
-      expect(scenario?.command.startsWith("npx ai-guidelines")).toBe(true);
-    });
-  }
-
-  it("o fluxo interno fica em contributor e o help principal é público", () => {
-    expect(byId.get("contributor-flow")?.surface).toBe("contributor");
-    expect(byId.get("cli-help")?.surface).toBe("public");
+  it("nenhum arquivo público menciona `npm run flow` (req. 6)", () => {
+    for (const file of publicFiles) {
+      expect(readSite(file)).not.toContain("npm run flow");
+    }
   });
 
-  it("todo comando público exibido existe no registry real", () => {
-    const names = new Set(buildRegistry().commandNames());
-    for (const id of publicIds) {
-      const command = byId.get(id)?.command ?? "";
-      const tail = command.replace(/^npx ai-guidelines(?:\s+)?/, "").trim();
-      if (!tail) {
-        expect(command).toBe("npx ai-guidelines");
-        continue;
-      }
-      const verb = tail.split(" ")[0];
-      if (verb && !verb.startsWith("-") && /^[a-z-]+$/.test(verb)) {
-        expect(names.has(verb)).toBe(true);
-      }
-    }
+  it("o atalho direto fica recolhido como automação, não caminho obrigatório (req. 5)", () => {
+    const simulator = readSite("site/src/features/cli-simulator/CliSimulator/CliSimulator.tsx");
+    const simulatorLocale = readSite(
+      "site/src/features/cli-simulator/CliSimulator/locales/pt-BR.json"
+    );
+    expect(simulator).toContain("<details");
+    expect(simulatorLocale).toContain("Atalho para automação");
+    expect(simulatorLocale).toContain("O caminho principal");
+  });
+
+  it("a seção de contribuidor é uma página separada e discreta", () => {
+    const contributePage = readSite("site/src/pages/contribute/ContributePage/ContributePage.tsx");
+    const siteFooter = readSite("site/src/shared/layout/SiteFooter/SiteFooter.tsx");
+    expect(contributePage).toContain("contributorBlock");
+    expect(siteFooter).toContain('route="contribute"');
   });
 });
