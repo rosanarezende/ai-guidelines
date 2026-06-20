@@ -138,9 +138,13 @@ describe("WebContainer é enhancement opcional, com fallback obrigatório", () =
     expect(headers).toContain("Cross-Origin-Opener-Policy: same-origin");
   });
 
-  it("a clientId vem de env (com fallback), e o runner usa auth.init", () => {
+  it("a clientId vem de env (com fallback), e auth.init fica protegido por singleton", () => {
     const runner = readSite("site/src/features/cli-simulator/RealCliRunner/RealCliRunner.tsx");
     expect(runner).toContain("VITE_WEBCONTAINER_CLIENT_ID");
     expect(runner).toContain("auth.init");
+    expect(runner).toContain("webContainerAuthPromise");
+    expect(runner).toContain("ensureWebContainerAuth");
+    expect(runner).toContain("isAlreadyInitializedError");
+    expect(runner).toContain("await ensureWebContainerAuth()");
   });
 });

@@ -23,6 +23,29 @@ const CLIENT_ID: string =
 
 type RunStatus = "booting" | "installing" | "running" | "error";
 
+let webContainerAuthPromise: Promise<void> | undefined;
+
+function isAlreadyInitializedError(error: unknown): boolean {
+  return error instanceof Error && /init should only be called once/i.test(error.message);
+}
+
+function ensureWebContainerAuth(): Promise<void> {
+  webContainerAuthPromise ??= Promise.resolve()
+    .then(() => {
+      try {
+        auth.init({ clientId: CLIENT_ID, scope: "" });
+      } catch (error) {
+        if (!isAlreadyInitializedError(error)) throw error;
+      }
+    })
+    .catch((error) => {
+      webContainerAuthPromise = undefined;
+      throw error;
+    });
+
+  return webContainerAuthPromise;
+}
+
 function operationFor(context: string): "init" | "adopt" | "update" {
   if (context === "empty") return "init";
   if (context === "governed") return "update";
@@ -62,7 +85,9 @@ export function RealCliRunner({ context }: { readonly context: string }): JSX.El
 
     async function boot(): Promise<void> {
       try {
-        auth.init({ clientId: CLIENT_ID, scope: "" });
+        await ensureWebContainerAuth();
+        if (disposed) return;
+
         const term = new Terminal({ convertEol: true, fontSize: 13, cursorBlink: true });
         const fit = new FitAddon();
         term.loadAddon(fit);
