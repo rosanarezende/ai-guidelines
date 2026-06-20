@@ -704,3 +704,96 @@ constraint (nao-gap): providers/practices/collaboration seguem como selecao de
 Esta rodada **nao** executa readiness, Ready, Human Gate, advance-subcheckpoint,
 mark-readiness, merge nem abertura de novo PR. E implementacao de site + documentacao,
 nao decisao de flow. Vale a mesma fronteira da secao 8.
+
+## 15. Rodada de implementacao - home institucional + simulador projetado da CLI
+
+### 15.1 Por que mudou de novo (feedback da owner)
+
+A versao da secao 14 entregou cenarios em CARDS — a pessoa via cartoes que nunca
+apareceriam numa CLI real. A owner pediu duas correcoes:
+
+```text
+1. a home nao deveria ser o simulador: ela explica o PRODUTO (governanca humano+IA;
+   a LLM roda a CLI por baixo dos panos). O simulador foi para /cli.
+2. a experiencia precisa ser como a do clack (terminal de verdade, navegacao por
+   teclado), com textos vindos do codigo real e SO as saidas mockadas.
+```
+
+### 15.2 Keystone - projecao gerada da maquina de prompts (SSOT)
+
+Decisao da owner: "projecao gerada da sequencia" (maxima fidelidade ao SSOT).
+
+```text
+- src/cli/sitePromptFlows.ts: um RecordingPrompts (porta Prompts) dirige o wizard
+  REAL (command.prompt), que e prompting puro (nao toca filesystem), e registra cada
+  mensagem/opcao/ramificacao reais. Para antes de run().
+- saida: site/src/generated/flow-prompts.generated.ts (4 contextos: vazio, existente,
+  conflito, governado). Deteccao real (inclui rival Biome). O resultado liga ao
+  transcript de dry-run REAL ja capturado (transcriptId).
+- npm run site:prompts:sync/:check + guard sitePromptFlows.test.ts: toda pergunta tem
+  de existir na copy real; falha se virar texto autoral; sem drift.
+- registrado em script-contracts.yml + cadeia site:build.
+```
+
+### 15.3 Site reconstruido
+
+```text
+- home (/) institucional: explica o produto, sem montar o terminal; CTA -> /cli.
+- /cli: CliTerminal reproduz o clack (gutter, radios, checkboxes, scrollback, teclado
+  + clique), dirigido pela projecao. Saida = transcript real de dry-run. Modo
+  declarado: "Simulacao fiel gerada do runtime".
+- rotas: add /cli; /flow e /flow/* -> /cli; /atalhos, /contribute, 404 preservados.
+- guards atualizados (siteProfiles, SitePackaging) + novo simulatorFidelity.test.ts.
+```
+
+### 15.4 Investigacao do clack + decisao WebContainer (hibrido)
+
+O time do clack NAO simula: roda a CLI real no browser via `@webcontainer/api` (Node
+real) + `@xterm/xterm`, com `auth.init({clientId})` e COEP `require-corp`. Decisao da
+owner: HIBRIDO.
+
+```text
+- padrao = simulacao projetada (mobile-first, offline, drift-check) — nao exige
+  StackBlitz nem headers;
+- enhancement opcional (desktop) = "Rodar de verdade no navegador" via WebContainer;
+- se WebContainer falhar/mobile/offline/sem headers/sem clientId -> fallback para o
+  simulador projetado;
+- modo ativo sempre declarado.
+```
+
+### 15.5 Gap registrado - WebContainer como integracao progressiva
+
+```text
+WebContainer exige:
+- um clientId do StackBlitz (a owner tem conta; vai gerar e registrar origens);
+- headers COEP/COOP (cross-origin isolation) no Cloudflare Pages;
+- nao funciona em mobile; precisa de rede + boot/instalacao.
+Enquanto clientId/headers nao existirem, "Rodar de verdade" fica como CTA documentado,
+e o simulador projetado e a experiencia principal. E GAP de integracao, nao bloqueio.
+```
+
+### 15.6 Outros gaps/limitacoes
+
+```text
+- so 4 contextos no primeiro corte; promover handoff/offline/peer-review a real exige
+  captura controlada (secao 14.5 segue valida);
+- componentes de cards antigos (ScenarioChooser/CliSimulator/ScenarioPlayer/catalog)
+  permanecem no repo mas fora do app; limpeza pendente como fatia propria;
+- polimento visual deliberadamente minimo (primeiro corte funcional).
+```
+
+### 15.7 O que ainda impede readiness de CO-10.7
+
+```text
+- revisao visual da owner no preview do /cli;
+- wiring do WebContainer (depende do clientId/headers da owner);
+- promover simulados/gaps prioritarios a comportamento real + captura;
+- limpeza dos componentes de cards antigos;
+- debito da pasta research/ (secao 10) segue aberto.
+```
+
+### 15.8 Fronteira (reafirmada)
+
+Esta rodada **nao** executa readiness, Ready, Human Gate, advance-subcheckpoint,
+mark-readiness, merge nem abertura de novo PR. E implementacao de site + documentacao,
+nao decisao de flow. Vale a mesma fronteira da secao 8.
