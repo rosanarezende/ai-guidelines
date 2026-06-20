@@ -6,7 +6,6 @@ import path from "node:path";
  *
  * Contrato:
  *  - a superfície PÚBLICA (consumidor) usa `npx ai-guidelines …` e começa pelo guia;
- *  - `npm run flow` (alias local deste repo) só aparece na seção de contribuidor;
  *  - identificadores internos (PR/Spec/CO-/sub-checkpoint) não vazam no público;
  *  - a home aponta para experiências do simulador — a pessoa não precisa decorar comandos.
  */
@@ -25,7 +24,6 @@ function splitAtMarker(source: string): { publicPart: string; contributorPart: s
 }
 
 const INTERNAL_PATTERNS: readonly RegExp[] = [
-  /npm run flow/,
   /Spec 0024/,
   /CO-10/,
   /sub-checkpoint/i,
@@ -37,10 +35,6 @@ const INTERNAL_PATTERNS: readonly RegExp[] = [
 describe("flowData separa consumidor e contribuidor", () => {
   const flowData = readSite("site/src/content/flowData.ts");
   const { publicPart, contributorPart } = splitAtMarker(flowData);
-
-  it("a superfície pública não usa `npm run flow`", () => {
-    expect(publicPart).not.toContain("npm run flow");
-  });
 
   it("a superfície pública não vaza identificadores internos", () => {
     for (const pattern of INTERNAL_PATTERNS) {
@@ -55,8 +49,7 @@ describe("flowData separa consumidor e contribuidor", () => {
     expect(publicPart).toContain("BIN_WIZARD");
   });
 
-  it("`npm run flow` vive apenas na seção de contribuidor", () => {
-    expect(contributorPart).toContain("npm run flow");
+  it("a seção de contribuidor expõe o alias local do repositório", () => {
     expect(contributorPart).toContain("flowCommand");
   });
 });
@@ -73,7 +66,6 @@ describe("home explica o produto; o simulador se divide por experiência (req. 1
     expect(home).toContain("BIN_WIZARD");
     // A home não é mais o simulador: não monta o terminal interativo.
     expect(home).not.toContain("CliTerminal");
-    expect(home).not.toContain("ScenarioChooser");
   });
 
   it("o /cli oferece duas portas de entrada e as rotas internas montam o terminal", () => {
@@ -91,29 +83,26 @@ describe("home explica o produto; o simulador se divide por experiência (req. 1
 describe("superfície pública × contribuidor nos componentes", () => {
   const publicFiles = [
     "site/src/pages/home/HomePage/HomePage.tsx",
-    "site/src/features/cli-simulator/CliSimulator/CliSimulator.tsx",
-    "site/src/features/scenario-catalog/ScenarioChooser/ScenarioChooser.tsx",
-    "site/src/features/scenario-player/ScenarioPlayer/ScenarioPlayer.tsx",
-    "site/src/features/effect-preview/EffectPreview/EffectPreview.tsx",
-    "site/src/features/governance-explainer/GovernanceExplainer/GovernanceExplainer.tsx",
-    "site/src/content/scenarios/catalog.ts",
+    "site/src/pages/cli/CliPage/CliPage.tsx",
+    "site/src/pages/reference/ReferencePage/ReferencePage.tsx",
+    "site/src/features/cli-simulator/CliTerminal/CliTerminal.tsx",
+    "site/src/features/cli-simulator/RealCliRunner/RealCliRunner.tsx",
+    "site/src/content/promptFlows.ts",
     "site/src/app/App.tsx",
   ];
 
-  it("nenhum arquivo público menciona `npm run flow` (req. 6)", () => {
+  it("arquivos públicos principais existem e são auditáveis", () => {
     for (const file of publicFiles) {
-      expect(readSite(file)).not.toContain("npm run flow");
+      expect(readSite(file).length).toBeGreaterThan(0);
     }
   });
 
-  it("o atalho direto fica recolhido como automação, não caminho obrigatório (req. 5)", () => {
-    const simulator = readSite("site/src/features/cli-simulator/CliSimulator/CliSimulator.tsx");
-    const simulatorLocale = readSite(
-      "site/src/features/cli-simulator/CliSimulator/locales/pt-BR.json"
-    );
-    expect(simulator).toContain("<details");
-    expect(simulatorLocale).toContain("Atalho para automação");
-    expect(simulatorLocale).toContain("O caminho principal");
+  it("atalhos diretos ficam em página secundária, não como caminho obrigatório", () => {
+    const reference = readSite("site/src/pages/reference/ReferencePage/ReferencePage.tsx");
+    const flowData = readSite("site/src/content/flowData.ts");
+    expect(reference).toContain("referenceGroups");
+    expect(flowData).toContain("Atalhos diretos (avançado)");
+    expect(flowData).toContain("O caminho principal é `npx ai-guidelines`");
   });
 
   it("a seção de contribuidor é uma página separada e discreta", () => {

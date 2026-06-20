@@ -1,9 +1,0 @@
-{
-  "entry": "Caminho principal:",
-  "timelineAria": "Passos do cenário",
-  "stepLabel": "Passo",
-  "optionsAria": "Opções oferecidas neste passo",
-  "prev": "Passo anterior",
-  "next": "Próximo passo",
-  "progress": "Progresso"
-}

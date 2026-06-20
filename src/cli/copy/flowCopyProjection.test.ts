@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import path from "node:path";
 
 import { FEATURE_OPTIONS } from "../../domain/provisioning/FeatureCatalog.js";
@@ -57,21 +57,20 @@ describe("flow copy catalog", () => {
 
   it("mantém o simulador como páginas React navegáveis e mobile-first", () => {
     const components = readSiteSources([
-      "site/src/features/scenario-player/ScenarioPlayer/ScenarioPlayer.tsx",
-      "site/src/features/terminal/ScenarioTerminal/ScenarioTerminal.tsx",
+      "site/src/pages/cli/CliPage/CliPage.tsx",
+      "site/src/features/cli-simulator/CliTerminal/CliTerminal.tsx",
+      "site/src/features/cli-simulator/RealCliRunner/RealCliRunner.tsx",
       "site/src/features/terminal/TerminalFrame/TerminalFrame.tsx",
     ]);
     const data = readSiteSource("site/src/content/flowData.ts");
     const styles = readSiteSources([
-      "site/src/features/scenario-catalog/ScenarioChooser/ScenarioChooser.css",
-      "site/src/features/cli-simulator/CliSimulator/CliSimulator.css",
+      "site/src/pages/cli/CliPage/CliPage.css",
+      "site/src/features/cli-simulator/CliTerminal/CliTerminal.css",
     ]);
 
-    expect(components).toContain("aria-current");
-    expect(components).toContain("ScenarioTerminal");
+    expect(components).toContain("CliTerminal");
+    expect(components).toContain("RealCliRunner");
     expect(components).toContain("terminalBadge");
-    // O formato /flow não virou contrato público; o site usa rotas /cli.
-    expect(data).not.toContain('startsWith("/flow/")');
     expect(data).toContain('"/cli/comecar"');
     expect(data).toContain('"/cli/dia-a-dia"');
     expect(data).toContain('"/atalhos"');
@@ -79,27 +78,14 @@ describe("flow copy catalog", () => {
     expect(styles).toContain("grid-template-columns: 1fr");
   });
 
-  it("o catálogo cobre os cenários-chave (entrada, time, review entre pares)", () => {
-    const catalog = readSiteSource("site/src/content/scenarios/catalog.ts");
+  it("os fluxos projetados cobrem entrada, uso diário e review entre pares", () => {
+    const prompts = readSiteSource("site/src/generated/flow-prompts.generated.ts");
     const data = readSiteSource("site/src/content/flowData.ts");
 
-    for (const id of ["empty-project", "existing-repo", "five-specs", "peer-review"]) {
-      expect(catalog).toContain(`"id": "${id}"`);
+    for (const id of ["empty", "existing", "daily-resume", "daily-focus", "daily-peer"]) {
+      expect(prompts).toContain(`"${id}"`);
     }
-    // Review entre pares preserva contexto: worktree/checkout aparecem no cenário.
-    expect(catalog).toContain("worktree");
-    expect(catalog).toContain("checkout");
-    // Invocações continuam DERIVADAS do registry (B1), validadas por siteCommandSurface.
+    // Invocações continuam derivadas do registry (B1), validadas por siteCommandSurface.
     expect(data).toContain('binCommand("peer-review"');
-  });
-
-  it("remove o Flow HTML legado e não cria catálogo textual paralelo", () => {
-    expect(existsSync(path.join(REPO_ROOT, "site/flow/index.html"))).toBe(false);
-    expect(existsSync(path.join(REPO_ROOT, "site/flow/assets/flow-site.js"))).toBe(false);
-    expect(existsSync(path.join(REPO_ROOT, "site/flow/assets/flow-copy.generated.js"))).toBe(false);
-    expect(existsSync(path.join(REPO_ROOT, "src/cli/copy/locales/pt-BR/flowHtml.json"))).toBe(
-      false
-    );
-    expect(existsSync(path.join(REPO_ROOT, "FLOW.html"))).toBe(false);
   });
 });

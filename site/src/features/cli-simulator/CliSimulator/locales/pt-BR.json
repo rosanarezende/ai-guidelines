@@ -1,9 +1,0 @@
-{
-  "aria": "Simulador da CLI",
-  "modeAria": "Nível de detalhe",
-  "modeBeginner": "Usuário iniciante",
-  "modeTechnical": "Ver detalhes técnicos",
-  "shortcutsSummary": "Atalho para automação",
-  "shortcutsNote": "O caminho principal continua sendo abrir o guia com `npx ai-guidelines`. Estes atalhos diretos existem para automação ou para quem já sabe exatamente o que quer.",
-  "shortcutsEmpty": "Este cenário não tem atalho direto equivalente — o caminho é o guia."
-}

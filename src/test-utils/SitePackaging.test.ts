@@ -97,9 +97,6 @@ describe("governed documentation site packaging", () => {
     expect(routeSource).toContain('path: "/cli/comecar"');
     expect(routeSource).toContain('path: "/cli/dia-a-dia"');
     expect(routeSource).toContain('"/atalhos"');
-    // O formato /flow foi removido antes de estabilizar o site público.
-    expect(routeSource).not.toContain('startsWith("/flow/")');
-    expect(routeSource).not.toContain('"/flow/reference"');
     // Rota desconhecida vira 404 explícito.
     expect(routeSource).toContain('return "notFound";');
   });

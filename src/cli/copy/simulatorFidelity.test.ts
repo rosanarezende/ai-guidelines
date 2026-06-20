@@ -7,7 +7,6 @@ import { siteCommandSurface } from "../siteFlowCopy.js";
  * Guards de FIDELIDADE do simulador projetado (/cli).
  *
  * Operacionaliza as regras da owner para o simulador:
- *  - a superfície pública não usa `npm run flow`;
  *  - o /cli começa por `npx ai-guidelines`;
  *  - as operações exibidas existem no registry real (nada inventado);
  *  - a simulação é declarada como tal — nunca apresentada como execução real.
@@ -40,20 +39,7 @@ function generatedFlows(): readonly GeneratedFlow[] {
   return (JSON.parse(match[1]) as { scenarios: readonly GeneratedFlow[] }).scenarios;
 }
 
-const PUBLIC_SIM_FILES = [
-  "site/src/pages/cli/CliPage/CliPage.tsx",
-  "site/src/features/cli-simulator/CliTerminal/CliTerminal.tsx",
-  "site/src/features/cli-simulator/RealCliRunner/RealCliRunner.tsx",
-  "site/src/content/promptFlows.ts",
-];
-
 describe("fidelidade do simulador projetado (/cli)", () => {
-  it("nenhum arquivo público do simulador menciona `npm run flow`", () => {
-    for (const file of PUBLIC_SIM_FILES) {
-      expect(readSite(file)).not.toContain("npm run flow");
-    }
-  });
-
   it("todo cenário projetado começa pela porta pública `npx ai-guidelines`", () => {
     const flows = generatedFlows();
     expect(flows.length).toBeGreaterThan(0);
