@@ -11,10 +11,10 @@
     "placeholder": "# escolha uma experiência acima para abrir o simulador"
   },
   "start": {
-    "title": "Começar com ai-guidelines",
-    "lead": "Simule o primeiro contato com o framework. Escolha se o projeto ainda está vazio ou se já existe código para preservar.",
-    "step": "Etapa 1 de 2",
-    "placeholder": "# escolha o tipo de projeto acima para iniciar a simulação"
+    "title": "Comece pelo estado do seu projeto",
+    "lead": "O ai-guidelines escolhe o caminho certo a partir do que existe no repositório. Se a pasta está vazia, ele prepara um projeto governado do zero. Se o projeto já existe, ele mostra como adotar o framework sem apagar o que você já tem.",
+    "safety": "Nada é aplicado sem preview e confirmação.",
+    "placeholder": "# escolha uma opção acima para ver como o guia aparece na CLI"
   },
   "daily": {
     "title": "Usar no dia a dia",
@@ -33,20 +33,19 @@
     "placeholder": "# o fluxo de uso diário será detalhado na próxima iteração"
   },
   "setupAria": "Escolha o tipo de projeto para começar",
-  "setupLabel": "Agora escolha onde o framework será aplicado.",
+  "setupLabel": "Escolha o cenário que mais se parece com o seu projeto.",
   "setupChoices": [
     {
       "id": "empty",
-      "label": "Projeto novo / vazio",
-      "description": "Para uma pasta limpa, em que o ai-guidelines pode criar a base governada desde o início."
+      "label": "Projeto novo ou pasta vazia",
+      "description": "Ainda não há um projeto em andamento. O fluxo mostra como criar a base governada desde o começo."
     },
     {
       "id": "existing",
       "label": "Projeto em andamento",
-      "description": "Para um repositório que já tem código ou package.json e precisa adotar o framework sem apagar o que existe."
+      "description": "Já existe código, package.json ou configurações no repositório. O fluxo mostra como adotar o ai-guidelines preservando o que já existe."
     }
   ],
-  "backToHub": "Trocar experiência",
   "selected": "selecionado",
   "reset": "Recomeçar",
   "emptyTerminalAria": "Terminal aguardando escolha",

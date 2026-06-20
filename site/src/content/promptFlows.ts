@@ -28,6 +28,11 @@ export interface PromptGate {
   readonly equals: boolean;
 }
 
+export interface PromptValueGate {
+  readonly stepId: string;
+  readonly includes: string;
+}
+
 export interface PromptStep {
   readonly kind: PromptStepKind;
   readonly id: string;
@@ -42,6 +47,7 @@ export interface PromptStep {
   readonly defaultBool?: boolean;
   readonly suggested?: string | readonly string[] | boolean;
   readonly gatedBy?: PromptGate;
+  readonly requiresSelection?: PromptValueGate;
 }
 
 export interface PromptFlow {
@@ -78,6 +84,12 @@ export function isStepActive(
   step: PromptStep,
   answers: Readonly<Record<string, unknown>>
 ): boolean {
-  if (!step.gatedBy) return true;
-  return answers[step.gatedBy.stepId] === step.gatedBy.equals;
+  if (step.gatedBy && answers[step.gatedBy.stepId] !== step.gatedBy.equals) {
+    return false;
+  }
+  if (step.requiresSelection) {
+    const answer = answers[step.requiresSelection.stepId];
+    return Array.isArray(answer) && answer.includes(step.requiresSelection.includes);
+  }
+  return true;
 }

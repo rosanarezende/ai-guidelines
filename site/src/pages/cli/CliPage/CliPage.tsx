@@ -60,14 +60,10 @@ export function CliPage({ mode }: { readonly mode: CliPageMode }): JSX.Element {
         <p className="cliPageEyebrow">{copy.eyebrow}</p>
         <h1 className="cliPageTitle">{pageCopy.title}</h1>
         <p className="cliPageLead">{pageCopy.lead}</p>
+        {mode === "start" ? <p className="cliPageSafety">{copy.start.safety}</p> : null}
         <p className="cliPageEntry">
           <code>npx ai-guidelines</code>
         </p>
-        {mode !== "hub" ? (
-          <SiteLink route="cli" className="cliBackLink">
-            {copy.backToHub}
-          </SiteLink>
-        ) : null}
       </header>
 
       {mode === "hub" ? (
@@ -92,7 +88,6 @@ export function CliPage({ mode }: { readonly mode: CliPageMode }): JSX.Element {
         <section className="cliSetupStage" aria-label={copy.setupAria}>
           <div className="cliStageHeader">
             <div>
-              <p className="cliStageStep">{copy.start.step}</p>
               <p className="cliStageLabel">{copy.setupLabel}</p>
             </div>
             {setupChoice ? (

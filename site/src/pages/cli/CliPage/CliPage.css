@@ -32,31 +32,20 @@
   color: var(--muted, #475569);
   line-height: 1.6;
 }
+
+.cliPageSafety {
+  margin: 0 auto;
+  color: #0f766e;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
 .cliPageEntry code {
   font-size: 1rem;
   padding: 0.3rem 0.7rem;
   border-radius: 8px;
   background: #0b0f17;
   color: #67e8f9;
-}
-
-.cliBackLink {
-  align-self: center;
-  display: inline-flex;
-  min-height: 2.4rem;
-  align-items: center;
-  justify-content: center;
-  padding: 0.45rem 0.8rem;
-  border-radius: 999px;
-  border: 1px solid var(--border, #cbd5e1);
-  color: var(--muted, #475569);
-  text-decoration: none;
-  font-size: 0.86rem;
-}
-
-.cliBackLink:hover {
-  color: var(--text, #0f172a);
-  border-color: var(--accent, #0891b2);
 }
 
 .cliChoiceStage,
@@ -92,12 +81,13 @@
     opacity 120ms ease;
 }
 .cliChoiceCard strong {
-  font-size: 1rem;
+  font-size: 1.05rem;
+  line-height: 1.25;
 }
 .cliChoiceCard span {
-  font-size: 0.88rem;
+  font-size: 0.92rem;
   color: var(--muted, #64748b);
-  line-height: 1.45;
+  line-height: 1.5;
 }
 .cliChoiceCard em {
   margin-top: auto;
@@ -130,15 +120,6 @@
   justify-content: space-between;
   align-items: flex-start;
   gap: 1rem;
-}
-
-.cliStageStep {
-  margin: 0 0 0.2rem;
-  color: var(--accent, #0891b2);
-  font-weight: 700;
-  font-size: 0.78rem;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
 }
 
 .cliStageLabel {

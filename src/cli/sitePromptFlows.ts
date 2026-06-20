@@ -84,6 +84,11 @@ export interface PromptGate {
   readonly equals: boolean;
 }
 
+export interface PromptValueGate {
+  readonly stepId: string;
+  readonly includes: string;
+}
+
 /**
  * Um passo da sequência. `kind` espelha o affordance real do @clack. Campos
  * opcionais aparecem só quando o tipo os usa (JSON enxuto, igual ao gerado de
@@ -104,6 +109,7 @@ export interface PromptStep {
   readonly defaultBool?: boolean;
   readonly suggested?: string | readonly string[] | boolean;
   readonly gatedBy?: PromptGate;
+  readonly requiresSelection?: PromptValueGate;
 }
 
 export interface PromptFlow {
@@ -380,9 +386,19 @@ function applyAdvancedGate(steps: readonly PromptStep[]): readonly PromptStep[] 
     (step) => step.kind === "confirm" && step.message === ADVANCED_MESSAGE
   );
   if (!advanced) return steps;
+  const features = steps.find(
+    (step) =>
+      step.kind === "multiselect" && step.message === PROVISIONING_COPY.featureInstallQuestion
+  );
   return steps.map((step) =>
     ADVANCED_SUB_MESSAGES.has(step.message)
-      ? { ...step, gatedBy: { stepId: advanced.id, equals: true } }
+      ? {
+          ...step,
+          gatedBy: { stepId: advanced.id, equals: true },
+          ...(step.message === PROVISIONING_COPY.flow.prompts.forcePrettier && features
+            ? { requiresSelection: { stepId: features.id, includes: "prettier" } }
+            : {}),
+        }
       : step
   );
 }

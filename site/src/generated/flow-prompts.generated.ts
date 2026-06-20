@@ -336,6 +336,10 @@ export const AI_GUIDELINES_FLOW_PROMPTS = {
           "gatedBy": {
             "stepId": "confirm-13",
             "equals": true
+          },
+          "requiresSelection": {
+            "stepId": "multiselect-8",
+            "includes": "prettier"
           }
         },
         {
@@ -706,6 +710,10 @@ export const AI_GUIDELINES_FLOW_PROMPTS = {
           "gatedBy": {
             "stepId": "confirm-13",
             "equals": true
+          },
+          "requiresSelection": {
+            "stepId": "multiselect-8",
+            "includes": "prettier"
           }
         },
         {
@@ -1088,6 +1096,10 @@ export const AI_GUIDELINES_FLOW_PROMPTS = {
           "gatedBy": {
             "stepId": "confirm-13",
             "equals": true
+          },
+          "requiresSelection": {
+            "stepId": "multiselect-8",
+            "includes": "prettier"
           }
         },
         {

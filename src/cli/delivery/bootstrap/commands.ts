@@ -142,7 +142,7 @@ abstract class ProvisioningDeliveryCommand implements BootstrapDeliveryCommand<P
       message: PROVISIONING_COPY.flow.prompts.install,
       default: false,
     });
-    const advanced = await promptAdvancedProvisioningOptions(prompts, this.name);
+    const advanced = await promptAdvancedProvisioningOptions(prompts, this.name, features);
     taskLog
       ?.group(PROVISIONING_COPY.flow.taskGroups.execution)
       .success(
@@ -424,7 +424,8 @@ interface AdvancedProvisioningPromptOptions {
 
 async function promptAdvancedProvisioningOptions(
   prompts: Prompts,
-  operation: ProvisioningOperation
+  operation: ProvisioningOperation,
+  features: readonly string[] | undefined
 ): Promise<AdvancedProvisioningPromptOptions> {
   const enabled = await prompts.confirm({
     message: PROVISIONING_COPY.flow.prompts.advanced,
@@ -439,10 +440,12 @@ async function promptAdvancedProvisioningOptions(
     PROVISIONING_COPY.flow.prompts.runtimeDir,
     ".ai-guidelines"
   );
-  const forcePrettier = await prompts.confirm({
-    message: PROVISIONING_COPY.flow.prompts.forcePrettier,
-    default: false,
-  });
+  const forcePrettier = shouldPromptForcePrettier(operation, features)
+    ? await prompts.confirm({
+        message: PROVISIONING_COPY.flow.prompts.forcePrettier,
+        default: false,
+      })
+    : false;
   const prune =
     operation === "init"
       ? false
@@ -457,6 +460,13 @@ async function promptAdvancedProvisioningOptions(
     forcePrettier,
     prune,
   };
+}
+
+function shouldPromptForcePrettier(
+  operation: ProvisioningOperation,
+  features: readonly string[] | undefined
+): boolean {
+  return operation === "update" || (features ?? []).includes("prettier");
 }
 
 async function promptList(
@@ -632,11 +642,13 @@ function renderProvisioningPreview(options: ProvisioningCommandOptions): string 
   lines.push(
     `- ${PROVISIONING_COPY.flow.preview.force}: ${options.force ? COMMON_COPY.yes : COMMON_COPY.no}`
   );
-  lines.push(
-    `- ${PROVISIONING_COPY.flow.preview.forcePrettier}: ${
-      options.forcePrettier ? COMMON_COPY.yes : COMMON_COPY.no
-    }`
-  );
+  if (shouldPromptForcePrettier(options.operation, options.features)) {
+    lines.push(
+      `- ${PROVISIONING_COPY.flow.preview.forcePrettier}: ${
+        options.forcePrettier ? COMMON_COPY.yes : COMMON_COPY.no
+      }`
+    );
+  }
   lines.push(
     `- ${PROVISIONING_COPY.flow.preview.install}: ${options.install ? COMMON_COPY.yes : COMMON_COPY.no}`
   );

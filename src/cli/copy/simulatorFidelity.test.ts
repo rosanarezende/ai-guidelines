@@ -25,7 +25,11 @@ interface GeneratedFlow {
   readonly id: string;
   readonly operation: string;
   readonly command: string;
-  readonly steps: readonly { readonly kind: string; readonly message: string }[];
+  readonly steps: readonly {
+    readonly kind: string;
+    readonly message: string;
+    readonly requiresSelection?: { readonly stepId: string; readonly includes: string };
+  }[];
 }
 
 function generatedFlows(): readonly GeneratedFlow[] {
@@ -78,18 +82,42 @@ describe("fidelidade do simulador projetado (/cli)", () => {
     // O modo padrão é explicitamente uma simulação fiel — não execução ao vivo.
     expect(locale.modeProjected).toMatch(/simula/i);
     expect(locale.modeProjected).not.toMatch(/real rodando/i);
-    // A saída é declarada como transcript real de dry-run, não efeito ao vivo.
-    expect(locale.outcomeBadge).toMatch(/transcript/i);
+    // A saída projetada respeita as escolhas da sessão e não se apresenta como execução ao vivo.
+    expect(locale.outcomeBadge).toMatch(/simulad/i);
     // O modo "CLI real no navegador" existe, mas só como enhancement opcional.
     expect(locale.modeReal).toMatch(/real/i);
     expect(locale.runRealNote).toMatch(/opcional|progressiv|WebContainer/i);
   });
 
-  it("o terminal resolve a saída por transcript real, não por texto autoral", () => {
+  it("o terminal monta preview e saída projetada a partir das respostas da sessão", () => {
     const terminal = readSite("site/src/features/cli-simulator/CliTerminal/CliTerminal.tsx");
-    // A saída vem de flowOutcome → scenarioById(transcriptId), o transcript gerado.
-    expect(terminal).toContain("flowOutcome");
+    expect(terminal).toContain("buildSimulatedPlan");
+    expect(terminal).toContain("answers");
     expect(terminal).toContain("TerminalFrame");
+  });
+
+  it("force-prettier no simulador depende da seleção da feature Prettier", () => {
+    const flows = generatedFlows();
+    const withForcePrettier = flows
+      .filter((flow) => flow.operation !== "update")
+      .flatMap((flow) =>
+        flow.steps.filter(
+          (step) => step.message === "Forçar Prettier mesmo se houver formatter rival?"
+        )
+      );
+    expect(withForcePrettier.length).toBeGreaterThan(0);
+    for (const step of withForcePrettier) {
+      expect(step.requiresSelection).toEqual(expect.objectContaining({ includes: "prettier" }));
+    }
+  });
+
+  it("notas do Clack são informativas e não viram botão/prompt de continuar", () => {
+    const terminal = readSite("site/src/features/cli-simulator/CliTerminal/CliTerminal.tsx");
+    const locale = readSite("site/src/features/cli-simulator/CliTerminal/locales/pt-BR.json");
+
+    expect(terminal).toContain('step.kind !== "note"');
+    expect(terminal).not.toContain("copy.continueLabel");
+    expect(locale).not.toContain("continueLabel");
   });
 });
 

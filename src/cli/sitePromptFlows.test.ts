@@ -109,6 +109,7 @@ describe("máquina de prompts do site (projeção gerada)", () => {
       (step) => step.message === FLOW_COPY.provisioning.flow.prompts.forcePrettier
     );
     expect(forcePrettier?.gatedBy?.equals).toBe(true);
+    expect(forcePrettier?.requiresSelection?.includes).toBe("prettier");
   });
 
   it("update não pergunta práticas; init/adopt perguntam", () => {

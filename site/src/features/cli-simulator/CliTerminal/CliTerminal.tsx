@@ -1,12 +1,12 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import {
-  flowOutcome,
   isStepActive,
   type PromptChoice,
   type PromptFlow,
   type PromptStep,
 } from "@content/promptFlows";
+import { AI_GUIDELINES_FLOW_COPY } from "@generated/flow-copy.generated";
 import { TerminalFrame } from "@features/terminal/TerminalFrame/TerminalFrame";
 
 import "./CliTerminal.css";
@@ -16,10 +16,12 @@ import copy from "./locales/pt-BR.json";
 // num chunk separado, só quando ativado. Nunca bloqueia a experiência principal.
 const RealCliRunner = lazy(() => import("@features/cli-simulator/RealCliRunner/RealCliRunner"));
 
-type Answer = string | string[] | boolean | "ack";
+type Answer = string | string[] | boolean;
 type Answers = Record<string, Answer>;
 
 const BAR = "│";
+const PROVISIONING_COPY = AI_GUIDELINES_FLOW_COPY.provisioning;
+const COMMON_COPY = AI_GUIDELINES_FLOW_COPY.common;
 
 /** Modo real só roda em desktop com cross-origin isolation (WebContainer). */
 function realModeCapable(): boolean {
@@ -33,9 +35,18 @@ function flatChoices(step: PromptStep): readonly PromptChoice[] {
   return (step.groups ?? []).flatMap((group) => group.choices);
 }
 
+function isInteractiveStep(step: PromptStep): boolean {
+  return step.kind !== "note";
+}
+
 function findNextActive(steps: readonly PromptStep[], from: number, answers: Answers): number {
   let index = from;
-  while (index < steps.length && !isStepActive(steps[index], answers)) index += 1;
+  while (
+    index < steps.length &&
+    (!isStepActive(steps[index], answers) || !isInteractiveStep(steps[index]))
+  ) {
+    index += 1;
+  }
   return index;
 }
 
@@ -51,6 +62,143 @@ function answerSummary(step: PromptStep, answer: Answer): string {
   if (step.kind === "select" && typeof answer === "string") return choiceLabel(step, answer);
   if (step.kind === "input") return String(answer || copy.empty);
   return "";
+}
+
+function stepByMessage(flow: PromptFlow, message: string): PromptStep | undefined {
+  return flow.steps.find((step) => step.message === message);
+}
+
+function answerForMessage(flow: PromptFlow, answers: Answers, message: string): Answer | undefined {
+  const step = stepByMessage(flow, message);
+  return step ? answers[step.id] : undefined;
+}
+
+function textAnswer(flow: PromptFlow, answers: Answers, message: string, fallback = ""): string {
+  const answer = answerForMessage(flow, answers, message);
+  return typeof answer === "string" ? answer : fallback;
+}
+
+function boolAnswer(
+  flow: PromptFlow,
+  answers: Answers,
+  message: string,
+  fallback = false
+): boolean {
+  const answer = answerForMessage(flow, answers, message);
+  return typeof answer === "boolean" ? answer : fallback;
+}
+
+function listAnswer(flow: PromptFlow, answers: Answers, message: string): readonly string[] {
+  const answer = answerForMessage(flow, answers, message);
+  return Array.isArray(answer) ? answer : [];
+}
+
+function selectLabel(flow: PromptFlow, answers: Answers, message: string, fallback = ""): string {
+  const step = stepByMessage(flow, message);
+  if (!step) return fallback;
+  const answer = answers[step.id];
+  if (typeof answer !== "string") return fallback;
+  return choiceLabel(step, answer);
+}
+
+function shouldShowForcePrettier(flow: PromptFlow, features: readonly string[]): boolean {
+  return flow.operation === "update" || features.includes("prettier");
+}
+
+interface SimulatedPlan {
+  readonly previewLines: readonly string[];
+  readonly outputCommand: string;
+  readonly outputLines: readonly string[];
+}
+
+function buildSimulatedPlan(flow: PromptFlow, answers: Answers): SimulatedPlan {
+  const prompts = PROVISIONING_COPY.flow.prompts;
+  const preview = PROVISIONING_COPY.flow.preview;
+  const target = textAnswer(flow, answers, prompts.target, ".");
+  const projectName = textAnswer(flow, answers, prompts.projectName, "");
+  const packageManager = selectLabel(flow, answers, prompts.packageManager, COMMON_COPY.auto);
+  const language = selectLabel(flow, answers, prompts.language, PROVISIONING_COPY.flow.language.pt);
+  const collaborationProfile = selectLabel(
+    flow,
+    answers,
+    prompts.collaborationProfile,
+    COMMON_COPY.none
+  );
+  const providers = listAnswer(flow, answers, PROVISIONING_COPY.providerQuestion);
+  const features =
+    flow.operation === "update"
+      ? undefined
+      : listAnswer(flow, answers, PROVISIONING_COPY.featureInstallQuestion);
+  const dryRun = boolAnswer(flow, answers, prompts.dryRun, true);
+  const force = boolAnswer(flow, answers, prompts.force, false);
+  const install = boolAnswer(flow, answers, prompts.install, false);
+  const prune = boolAnswer(flow, answers, prompts.prune, false);
+  const runtimeDir =
+    textAnswer(flow, answers, prompts.runtimeDir, ".ai-guidelines") || ".ai-guidelines";
+  const forcePrettier = shouldShowForcePrettier(flow, features ?? [])
+    ? boolAnswer(flow, answers, prompts.forcePrettier, false)
+    : false;
+
+  const previewLines = [
+    preview.heading,
+    `- ${preview.flow}: ${PROVISIONING_COPY.operationTitles[flow.operation]}`,
+    `- ${preview.target}: ${target}`,
+    `- ${preview.name}: ${projectName || preview.derivedName}`,
+    `- ${preview.packageManager}: ${packageManager || COMMON_COPY.auto}`,
+    `- ${preview.language}: ${language}`,
+    `- ${preview.collaborationProfile}: ${collaborationProfile}`,
+    `- ${preview.runtimeDir}: ${runtimeDir}`,
+    "",
+    preview.integrations,
+    `- ${preview.providers}: ${providers.join(", ") || COMMON_COPY.none}`,
+    ...(features !== undefined
+      ? [`- ${preview.features}: ${features.join(", ") || COMMON_COPY.none}`]
+      : []),
+    "",
+    preview.safety,
+    `- ${preview.dryRun}: ${dryRun ? COMMON_COPY.yes : COMMON_COPY.no}`,
+    `- ${preview.force}: ${force ? COMMON_COPY.yes : COMMON_COPY.no}`,
+    ...(shouldShowForcePrettier(flow, features ?? [])
+      ? [`- ${preview.forcePrettier}: ${forcePrettier ? COMMON_COPY.yes : COMMON_COPY.no}`]
+      : []),
+    `- ${preview.install}: ${install ? COMMON_COPY.yes : COMMON_COPY.no}`,
+    `- ${preview.prune}: ${prune ? COMMON_COPY.yes : COMMON_COPY.no}`,
+  ];
+
+  const outputLines = [
+    "[simulado] Nenhum arquivo foi escrito pelo site.",
+    `[simulado] fluxo: ${flow.operation}`,
+    `[simulado] destino: ${target}`,
+    `[simulado] nome: ${projectName || preview.derivedName}`,
+    `[simulado] providers: ${providers.join(", ") || COMMON_COPY.none}`,
+    ...(features !== undefined
+      ? [`[simulado] práticas: ${features.join(", ") || COMMON_COPY.none}`]
+      : []),
+    `[simulado] dry-run: ${dryRun ? COMMON_COPY.yes : COMMON_COPY.no}`,
+    `[simulado] sobrescrever conflitos suportados: ${force ? COMMON_COPY.yes : COMMON_COPY.no}`,
+    ...(shouldShowForcePrettier(flow, features ?? [])
+      ? [
+          `[simulado] forçar Prettier com formatter rival: ${
+            forcePrettier ? COMMON_COPY.yes : COMMON_COPY.no
+          }`,
+        ]
+      : []),
+    `[simulado] instalar dependências: ${install ? COMMON_COPY.yes : COMMON_COPY.no}`,
+    `[simulado] diretório runtime: ${runtimeDir}`,
+  ];
+
+  return {
+    previewLines,
+    outputCommand: `${flow.command} ${flow.operation}`,
+    outputLines,
+  };
+}
+
+function isPreviewNote(step: PromptStep): boolean {
+  return (
+    step.kind === "note" &&
+    (step.title ?? step.message).startsWith(PROVISIONING_COPY.flow.preview.title)
+  );
 }
 
 /**
@@ -78,7 +226,7 @@ export function CliTerminal({ flow }: { readonly flow: PromptFlow }): JSX.Elemen
 
   const active = pointer < steps.length ? steps[pointer] : undefined;
   const done = pointer >= steps.length;
-  const outcome = flowOutcome(flow);
+  const simulatedPlan = useMemo(() => buildSimulatedPlan(flow, answers), [answers, flow]);
   // O passo de aplicar é o último confirm (mensagem "Aplicar este plano?").
   const applyStep = useMemo(
     () => steps.find((step) => step.kind === "confirm" && step.message.includes("Aplicar")),
@@ -137,13 +285,6 @@ export function CliTerminal({ flow }: { readonly flow: PromptFlow }): JSX.Elemen
       const list = flatChoices(active);
       const key = event.key;
       const isVertical = key === "ArrowDown" || key === "ArrowUp";
-      if (active.kind === "note") {
-        if (key === "Enter" || key === " ") {
-          event.preventDefault();
-          commit(active, "ack");
-        }
-        return;
-      }
       if (active.kind === "select" || active.kind === "multiselect") {
         if (isVertical) {
           event.preventDefault();
@@ -216,61 +357,28 @@ export function CliTerminal({ flow }: { readonly flow: PromptFlow }): JSX.Elemen
 
   const history = steps
     .slice(0, pointer)
-    .filter((step) => isStepActive(step, answers) && step.id in answers);
+    .filter((step) => isStepActive(step, answers) && (step.kind === "note" || step.id in answers));
 
   return (
-    <section className="cliTerminal" aria-label={copy.aria.region}>
-      <header className="cliTerminalBar">
-        <span className="cliDots" aria-hidden="true">
-          <span />
-          <span />
-          <span />
-        </span>
-        <code className="cliCommand">{flow.command}</code>
-        <span className="cliMode" title={copy.modeHint}>
-          {realActive ? copy.modeReal : copy.modeProjected}
-        </span>
-        <span className="cliBarActions">
-          {!realActive ? (
-            <button type="button" className="cliGhostButton" onClick={restart}>
-              {copy.restart}
-            </button>
-          ) : null}
-          <button
-            type="button"
-            className="cliGhostButton cliRealButton"
-            aria-pressed={realMode}
-            onClick={() => {
-              if (realMode) {
-                setRealMode(false);
-                setShowRealNote(false);
-                return;
-              }
-              setRealMode(true);
-              setShowRealNote(!realCapable);
-            }}
-          >
-            {realMode ? copy.backToSim : copy.runReal}
-          </button>
-        </span>
-      </header>
+    <section className="cliTerminalShell" aria-label={copy.aria.region}>
+      <div className="cliTerminal">
+        <header className="cliTerminalBar">
+          <span className="cliDots" aria-hidden="true">
+            <span />
+            <span />
+            <span />
+          </span>
+          <code className="cliCommand">{flow.command}</code>
+          <span className="cliMode" title={copy.modeHint}>
+            {realActive ? copy.modeReal : copy.modeProjected}
+          </span>
+        </header>
 
-      {realActive ? (
-        <Suspense fallback={<p className="cliRealNote">{copy.realLoading}</p>}>
-          <RealCliRunner context={flow.context} />
-        </Suspense>
-      ) : (
-        <>
-          {realMode && !realCapable ? (
-            <p className="cliRealNote" role="note">
-              {copy.runRealUnavailable}
-            </p>
-          ) : showRealNote ? (
-            <p className="cliRealNote" role="note">
-              {copy.runRealNote}
-            </p>
-          ) : null}
-
+        {realActive ? (
+          <Suspense fallback={<p className="cliRealNote">{copy.realLoading}</p>}>
+            <RealCliRunner context={flow.context} />
+          </Suspense>
+        ) : (
           <div
             ref={screenRef}
             className="cliScreen"
@@ -279,12 +387,20 @@ export function CliTerminal({ flow }: { readonly flow: PromptFlow }): JSX.Elemen
             tabIndex={0}
             onKeyDown={onKeyDown}
           >
+            <p className="cliLine cliCommandLine">
+              <span className="cliPrompt">$</span> {flow.command}
+            </p>
             <p className="cliLine cliIntro">
               <span className="cliGlyph cliCyan">◆</span> ai-guidelines
             </p>
 
             {history.map((step) => (
-              <ResolvedStep key={step.id} step={step} answer={answers[step.id]!} />
+              <ResolvedStep
+                key={step.id}
+                step={step}
+                answer={answers[step.id]!}
+                plan={simulatedPlan}
+              />
             ))}
 
             {active ? (
@@ -313,33 +429,76 @@ export function CliTerminal({ flow }: { readonly flow: PromptFlow }): JSX.Elemen
                   <span className="cliGlyph cliGreen">└</span>{" "}
                   {applied ? copy.outroApplied : copy.outroCancelled}
                 </p>
-                {applied && outcome ? (
+                {applied ? (
                   <>
                     <p className="cliOutcomeBadge">{copy.outcomeBadge}</p>
-                    <TerminalFrame title={outcome.command} kind="real" exitCode={outcome.exitCode}>
-                      {outcome.lines.join("\n")}
+                    <TerminalFrame title={simulatedPlan.outputCommand} kind="guided">
+                      {simulatedPlan.outputLines.join("\n")}
                     </TerminalFrame>
                   </>
                 ) : null}
               </div>
             ) : null}
           </div>
+        )}
+      </div>
 
-          <p className="cliHint">{copy.keyboardHint}</p>
-        </>
-      )}
+      {realMode && !realCapable ? (
+        <p className="cliRealNote" role="note">
+          {copy.runRealUnavailable}
+        </p>
+      ) : showRealNote ? (
+        <p className="cliRealNote" role="note">
+          {copy.runRealNote}
+        </p>
+      ) : null}
+
+      <div className="cliSimulatorControls" aria-label={copy.aria.controls}>
+        {!realActive ? (
+          <button type="button" className="cliGhostButton" onClick={restart}>
+            {copy.restart}
+          </button>
+        ) : null}
+        <button
+          type="button"
+          className="cliGhostButton cliRealButton"
+          aria-pressed={realMode}
+          onClick={() => {
+            if (realMode) {
+              setRealMode(false);
+              setShowRealNote(false);
+              return;
+            }
+            setRealMode(true);
+            setShowRealNote(!realCapable);
+          }}
+        >
+          {realMode ? copy.backToSim : copy.runReal}
+        </button>
+      </div>
+
+      {!realActive ? <p className="cliHint">{copy.keyboardHint}</p> : null}
     </section>
   );
 }
 
-function ResolvedStep({ step, answer }: { readonly step: PromptStep; readonly answer: Answer }) {
+function ResolvedStep({
+  step,
+  answer,
+  plan,
+}: {
+  readonly step: PromptStep;
+  readonly answer: Answer;
+  readonly plan: SimulatedPlan;
+}) {
   if (step.kind === "note") {
+    const lines = isPreviewNote(step) ? plan.previewLines : (step.lines ?? []);
     return (
       <div className="cliNote">
         <p className="cliLine">
           <span className="cliGlyph cliGreen">◇</span> {step.title || step.message}
         </p>
-        {(step.lines ?? []).map((line, index) => (
+        {lines.map((line, index) => (
           <p key={index} className="cliLine cliMuted">
             {BAR} {line}
           </p>
@@ -378,24 +537,6 @@ function ActiveStep({
   readonly onCursor: (index: number) => void;
   readonly onInput: (value: string) => void;
 }) {
-  if (step.kind === "note") {
-    return (
-      <div className="cliNote cliActive">
-        <p className="cliLine">
-          <span className="cliGlyph cliCyan">◆</span> {step.title || step.message}
-        </p>
-        {(step.lines ?? []).map((line, index) => (
-          <p key={index} className="cliLine">
-            {BAR} {line}
-          </p>
-        ))}
-        <button type="button" className="cliContinue" onClick={() => onPick("ack")}>
-          {copy.continueLabel}
-        </button>
-      </div>
-    );
-  }
-
   if (step.kind === "input") {
     return (
       <div className="cliActive">
@@ -422,24 +563,26 @@ function ActiveStep({
         <p className="cliLine">
           <span className="cliGlyph cliCyan">◆</span> {step.message}
         </p>
-        <p className="cliLine cliOptions">
+        <p className="cliLine cliOptions" role="group" aria-label={step.message}>
           {BAR}{" "}
-          <button
-            type="button"
+          <span
             className={`cliOpt ${cursor === 0 ? "cliOptActive" : ""}`}
+            role="option"
+            aria-selected={cursor === 0}
             onClick={() => onPick(true)}
             onMouseEnter={() => onCursor(0)}
           >
             <span className="cliGlyph">{cursor === 0 ? "●" : "○"}</span> {copy.yes}
-          </button>
-          <button
-            type="button"
+          </span>
+          <span
             className={`cliOpt ${cursor === 1 ? "cliOptActive" : ""}`}
+            role="option"
+            aria-selected={cursor === 1}
             onClick={() => onPick(false)}
             onMouseEnter={() => onCursor(1)}
           >
             <span className="cliGlyph">{cursor === 1 ? "●" : "○"}</span> {copy.no}
-          </button>
+          </span>
         </p>
       </div>
     );
@@ -457,26 +600,28 @@ function ActiveStep({
         const isOn = step.kind === "multiselect" ? checked.has(choice.value) : isCursor;
         const glyph = step.kind === "multiselect" ? (isOn ? "◼" : "◻") : isCursor ? "●" : "○";
         return (
-          <p key={choice.value} className={`cliLine cliOptionLine ${isCursor ? "cliCursor" : ""}`}>
+          <p
+            key={choice.value}
+            className={`cliLine cliOptionLine ${isCursor ? "cliCursor" : ""}`}
+            role="option"
+            aria-selected={isCursor}
+            onMouseEnter={() => onCursor(index)}
+            onClick={() =>
+              step.kind === "multiselect" ? onToggle(choice.value) : onPick(choice.value)
+            }
+          >
             {BAR}{" "}
-            <button
-              type="button"
-              className={`cliOpt ${isCursor ? "cliOptActive" : ""}`}
-              onMouseEnter={() => onCursor(index)}
-              onClick={() =>
-                step.kind === "multiselect" ? onToggle(choice.value) : onPick(choice.value)
-              }
-            >
+            <span className={`cliOpt ${isCursor ? "cliOptActive" : ""}`}>
               <span className="cliGlyph">{glyph}</span> {choice.label}
               {choice.hint ? <span className="cliOptHint">({choice.hint})</span> : null}
-            </button>
+            </span>
           </p>
         );
       })}
       {step.kind === "multiselect" ? (
-        <button type="button" className="cliContinue" onClick={() => onPick([...checked])}>
-          {copy.confirmSelection}
-        </button>
+        <p className="cliLine cliActionLine" role="button" onClick={() => onPick([...checked])}>
+          {BAR} <span className="cliActionGlyph">↵</span> {copy.confirmSelection}
+        </p>
       ) : null}
     </div>
   );

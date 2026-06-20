@@ -1,3 +1,9 @@
+.cliTerminalShell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
 .cliTerminal {
   display: flex;
   flex-direction: column;
@@ -46,6 +52,7 @@
 }
 
 .cliMode {
+  margin-left: auto;
   font-size: 0.72rem;
   padding: 0.15rem 0.5rem;
   border-radius: 999px;
@@ -54,9 +61,11 @@
   border: 1px solid rgba(34, 211, 238, 0.3);
 }
 
-.cliBarActions {
-  margin-left: auto;
-  display: inline-flex;
+.cliSimulatorControls {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  flex-wrap: wrap;
   gap: 0.4rem;
 }
 
@@ -82,11 +91,12 @@
 .cliRealNote {
   margin: 0;
   padding: 0.7rem 0.95rem;
+  border-radius: 10px;
   font-size: 0.8rem;
   line-height: 1.5;
   color: #cbd5e1;
-  background: rgba(34, 211, 238, 0.06);
-  border-bottom: 1px solid #1f2937;
+  background: #111827;
+  border: 1px solid #1f2937;
 }
 
 .cliScreen {
@@ -104,6 +114,15 @@
   margin: 0;
   white-space: pre-wrap;
   word-break: break-word;
+}
+
+.cliCommandLine {
+  margin-bottom: 0.45rem;
+  color: #e5e7eb;
+}
+
+.cliPrompt {
+  color: #94a3b8;
 }
 
 .cliGlyph {
@@ -186,19 +205,20 @@
   border-bottom-color: #22d3ee;
 }
 
-.cliContinue {
+.cliActionLine {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.3rem;
   font: inherit;
-  font-size: 0.78rem;
   margin-top: 0.4rem;
   cursor: pointer;
-  color: #0b0f17;
-  background: #22d3ee;
-  border: none;
-  border-radius: 6px;
-  padding: 0.25rem 0.7rem;
+  color: #22d3ee;
 }
-.cliContinue:hover {
-  background: #67e8f9;
+.cliActionLine:hover {
+  color: #67e8f9;
+}
+.cliActionGlyph {
+  color: #67e8f9;
 }
 
 .cliOutcome {
@@ -212,10 +232,8 @@
 
 .cliHint {
   margin: 0;
-  padding: 0.55rem 1rem 0.75rem;
   font-size: 0.74rem;
   color: #64748b;
-  border-top: 1px solid #1f2937;
 }
 
 @media (min-width: 720px) {

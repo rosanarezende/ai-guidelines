@@ -739,6 +739,37 @@ describe("bootstrap delivery 2c — wizard", () => {
     expect(prompts.notes.at(-1)?.message).toContain("- Remover arquivos órfãos gerenciados: sim");
   });
 
+  it("wizard não pergunta force-prettier quando Prettier não foi selecionado", async () => {
+    const { runtime, delivery: bootstrap } = delivery();
+    const prompts = new ScriptedPrompts({
+      select: { Operation: "init" },
+      input: { "Nome do projeto": "teste" },
+      groupMultiselect: {
+        "Quais práticas quer instalar agora?": ["tdd"],
+      },
+      confirm: {
+        "Abrir opções avançadas?": true,
+        "Aplicar este plano?": true,
+      },
+    });
+    const { logger } = capturingLogger();
+
+    await bootstrap.dispatch([], context(logger, prompts));
+
+    expect(prompts.confirmCalls.map((call) => call.message)).not.toContain(
+      "Forçar Prettier mesmo se houver formatter rival?"
+    );
+    expect(runtime.provisioner.calls[0]).toMatchObject({
+      operation: "init",
+      projectName: "teste",
+      config: { features: ["tdd"] },
+      forcePrettier: false,
+    });
+    expect(prompts.notes.at(-1)?.message).toContain("- Nome: teste");
+    expect(prompts.notes.at(-1)?.message).toContain("- Práticas: tdd");
+    expect(prompts.notes.at(-1)?.message).not.toContain("Forçar Prettier com formatter rival");
+  });
+
   it("wizard seleciona providers dentro de update", async () => {
     const { runtime, delivery: bootstrap } = delivery();
     const prompts = new ScriptedPrompts({
