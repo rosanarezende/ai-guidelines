@@ -539,3 +539,65 @@ mas ainda falta revisar visualmente no preview e decidir se os exemplos guiados
 de work/specs/peer-review devem virar transcripts reais com fixtures completos
 antes de readiness.
 ```
+
+## 13. Rodada de implementacao - `/flow` orientado por situacao humana
+
+Dogfood da rodada atual:
+
+```text
+problema observado
+→ a pagina ja usava transcripts reais
+→ mas ainda parecia pedir que a pessoa decorasse muitos comandos
+→ exemplos diretos competiam com o guia publico
+```
+
+Decisao aplicada:
+
+```text
+o site publico deve comecar pela pergunta "em que situacao esta o repo?"
+e nao por uma lista de comandos
+```
+
+Mudancas implementadas:
+
+- a pagina `/flow` passou a renderizar um explorador de situacoes;
+- o caminho principal em todas as situacoes e `npx ai-guidelines`;
+- cada situacao mostra:
+  - o que a CLI percebe;
+  - o que ela oferece;
+  - como evita erro;
+  - o transcript gerado correspondente;
+  - o passo a passo detalhado quando a pessoa quiser aprofundar;
+- comandos diretos ficam recolhidos como "atalho para automacao";
+- o fluxo de review de colega continua visivel como "em validacao" enquanto
+  nao houver transcript real completo por fixture;
+- os guards foram atualizados para impedir regressao para uma pagina publica
+  centrada em comandos soltos.
+
+Situacoes cobertas pela entrada da pagina:
+
+| Situacao        | Cenario do site                 | Estado da prova                             |
+| --------------- | ------------------------------- | ------------------------------------------- |
+| projeto novo    | `consumer-empty-entry`          | transcript gerado da CLI publica            |
+| repo existente  | `consumer-existing-entry`       | transcript gerado da CLI publica            |
+| repo governado  | `consumer-governed-solo-entry`  | transcript gerado da CLI publica            |
+| multiplas specs | `consumer-multiple-specs-entry` | transcript gerado da CLI publica            |
+| review colega   | `peer-review`                   | exemplo guiado, explicitamente em validacao |
+
+Falsificacao adicionada/ajustada:
+
+- `siteProfiles.test` exige que a superficie publica apresente o guia como
+  caminho principal;
+- `siteProfiles.test` exige que o atalho direto fique tratado como automacao,
+  nao como caminho obrigatorio;
+- `siteRoutes.test` exige que `/flow` renderize o explorador de situacoes e
+  continue apontando para paineis de scenario com procedencia visivel.
+
+Limite residual:
+
+```text
+esta rodada melhora a entrada publica e a legibilidade;
+a decisao de readiness ainda depende da revisao visual de Rosana no preview
+e da decisao sobre transformar peer-review/work/specs guiados em transcripts
+reais completos.
+```

@@ -1,0 +1,15 @@
+{
+  "eyebrow": "Guia público",
+  "title": "Digite npx ai-guidelines e escolha pelo momento do repositório.",
+  "lead": "A pessoa não precisa decorar comandos. O guia detecta o contexto, mostra as opções que fazem sentido e deixa atalhos diretos só para automação ou uso avançado.",
+  "pickerAria": "Situações simuladas do guia público",
+  "primaryCommand": "Caminho principal",
+  "detectedTitle": "O que o guia percebe",
+  "offeredTitle": "O que ele oferece",
+  "safetyTitle": "Como evita erro",
+  "detailsLink": "Ver passo a passo completo →",
+  "status": {
+    "ready": "Fluxo validado",
+    "validating": "Em validação"
+  }
+}

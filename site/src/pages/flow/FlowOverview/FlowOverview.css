@@ -1,6 +1,12 @@
+.overviewSection {
+  display: grid;
+  gap: 18px;
+}
+
 .overviewGrid {
   display: grid;
   gap: 14px;
+  margin-top: 6px;
 }
 
 .overviewCard {

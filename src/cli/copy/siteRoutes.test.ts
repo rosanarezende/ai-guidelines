@@ -67,7 +67,11 @@ describe("rotas navegáveis do site", () => {
 
 describe("jornadas surface transcripts verídicos", () => {
   const flowData = readSite("site/src/content/flowData.ts");
+  const flowOverview = readSite("site/src/pages/flow/FlowOverview/FlowOverview.tsx");
   const journeySection = readSite("site/src/features/journey/JourneySection/JourneySection.tsx");
+  const situationExplorer = readSite(
+    "site/src/features/situation/SituationExplorer/SituationExplorer.tsx"
+  );
   const scenarioTerminal = readSite(
     "site/src/features/terminal/ScenarioTerminal/ScenarioTerminal.tsx"
   );
@@ -76,12 +80,20 @@ describe("jornadas surface transcripts verídicos", () => {
   it("liga jornadas a cenários gerados (real/guiado)", () => {
     expect(flowData).toContain("AI_GUIDELINES_FLOW_SCENARIOS");
     expect(flowData).toContain("scenarioById");
-    for (const id of ["consumer-empty-entry", "consumer-existing-entry", "peer-review"]) {
+    for (const id of [
+      "consumer-empty-entry",
+      "consumer-existing-entry",
+      "consumer-governed-solo-entry",
+      "consumer-multiple-specs-entry",
+      "peer-review",
+    ]) {
       expect(flowData).toContain(`scenarioId: "${id}"`);
     }
   });
 
   it("renderiza o painel de cenário com procedência visível", () => {
+    expect(flowOverview).toContain("SituationExplorer");
+    expect(situationExplorer).toContain("ScenarioPanel");
     expect(journeySection).toContain("ScenarioPanel");
     expect(scenarioTerminal).toContain("ScenarioTerminal");
     expect(terminalFrame).toContain("terminalBadge");

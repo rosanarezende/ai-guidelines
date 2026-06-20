@@ -1,7 +1,10 @@
 {
   "eyebrow": "Como funciona",
-  "title": "O caminho muda conforme o momento do repositório.",
-  "lead": "Comece pela intenção. Cada área tem um passo a passo e um exemplo de terminal de apoio.",
+  "title": "O guia entende o repositório antes de pedir uma decisão.",
+  "lead": "O caminho principal é abrir `npx ai-guidelines`. Comandos diretos continuam existindo, mas aparecem como atalhos opcionais para quem já sabe exatamente o que quer.",
+  "areasEyebrow": "Aprofundar",
+  "areasTitle": "Depois da visão geral, veja o passo a passo de cada jornada.",
+  "areasLead": "Estas páginas explicam por que cada escolha existe e como o framework protege o repositório.",
   "areas": [
     {
       "route": "start",
@@ -24,8 +27,5 @@
       "text": "Revisar o PR de um colega sem perder sua branch."
     }
   ],
-  "openLink": "Abrir →",
-  "previewEyebrow": "Veja de verdade",
-  "previewTitle": "Exemplos de terminal gerados do runtime real.",
-  "previewLead": "Estes transcripts são atalhos diretos equivalentes. O caminho principal continua sendo abrir o guia interativo."
+  "openLink": "Abrir →"
 }

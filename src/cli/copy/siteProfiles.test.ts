@@ -65,10 +65,11 @@ describe("flowData separa consumidor e contribuidor", () => {
   });
 
   it("a superfície pública apresenta o guia interativo como caminho principal", () => {
-    expect(publicPart).toContain("publicWizardDemo");
+    expect(publicPart).toContain("flowSituations");
     expect(publicPart).toContain("command: BIN_WIZARD");
-    expect(publicPart).toContain("Atalhos diretos públicos");
-    expect(publicPart).toContain("O caminho principal é `npx ai-guidelines`");
+    expect(publicPart).toContain('scenarioId: "consumer-empty-entry"');
+    expect(publicPart).toContain('scenarioId: "consumer-existing-entry"');
+    expect(publicPart).toContain('scenarioId: "consumer-governed-solo-entry"');
   });
 
   it("`npm run flow` vive apenas na seção de contribuidor", () => {
@@ -79,7 +80,12 @@ describe("flowData separa consumidor e contribuidor", () => {
 
 describe("App separa consumidor e contribuidor", () => {
   const app = readSite("site/src/app/App.tsx");
-  const wizardPanel = readSite("site/src/features/wizard-demo/WizardDemoPanel/WizardDemoPanel.tsx");
+  const situationExplorer = readSite(
+    "site/src/features/situation/SituationExplorer/SituationExplorer.tsx"
+  );
+  const situationExplorerLocale = readSite(
+    "site/src/features/situation/SituationExplorer/locales/pt-BR.json"
+  );
   const directCommand = readSite(
     "site/src/features/command-surface/DirectCommandAside/DirectCommandAside.tsx"
   );
@@ -101,14 +107,16 @@ describe("App separa consumidor e contribuidor", () => {
   });
 
   it("a superfície pública diferencia caminho principal de atalhos diretos", () => {
-    expect(wizardPanel).toContain("wizardDemoSection");
+    expect(situationExplorer).toContain("BIN_WIZARD");
+    expect(situationExplorer).toContain("ScenarioPanel");
+    expect(situationExplorer).toContain("DirectCommandAside");
+    expect(situationExplorerLocale).toContain("A pessoa não precisa decorar comandos");
     expect(journeySection).toContain("copy.primaryCommand");
     expect(journeySectionLocale).toContain("Caminho principal");
-    expect(directCommand).toContain("copy.label");
-    expect(directCommandLocale).toContain("Atalho direto");
-    expect(directCommandLocale).toContain(
-      "Para automação ou para quem já sabe exatamente o que quer."
-    );
+    expect(directCommand).toContain("<details");
+    expect(directCommand).toContain("<summary>{copy.label}</summary>");
+    expect(directCommandLocale).toContain("Atalho para automação");
+    expect(directCommandLocale).toContain("O caminho principal continua sendo abrir o guia.");
   });
 
   it("a seção de contribuidor é uma página separada e discreta", () => {

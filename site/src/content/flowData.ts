@@ -66,6 +66,22 @@ export interface Journey {
   readonly scenarioId?: string;
 }
 
+export type SituationStatus = "ready" | "validating";
+
+export interface FlowSituation {
+  readonly id: string;
+  readonly label: string;
+  readonly headline: string;
+  readonly summary: string;
+  readonly route: RouteId;
+  readonly scenarioId: string;
+  readonly status: SituationStatus;
+  readonly detected: readonly string[];
+  readonly offered: readonly string[];
+  readonly safety: readonly string[];
+  readonly shortcut?: string;
+}
+
 export interface ReferenceGroup {
   readonly title: string;
   readonly text: string;
@@ -135,6 +151,139 @@ export const routes: readonly RouteLink[] = [
   { id: "team", path: "/flow/team", label: "Em time", shortLabel: "Time" },
   { id: "peerReview", path: "/flow/review", label: "Review entre pares", shortLabel: "Review" },
   { id: "reference", path: "/flow/reference", label: "Referência", shortLabel: "Ref." },
+];
+
+export const flowSituations: readonly FlowSituation[] = [
+  {
+    id: "new-project",
+    label: "Projeto novo",
+    headline: "Você está começando do zero.",
+    summary:
+      "A pessoa roda apenas o guia público. A CLI detecta uma pasta vazia e oferece inicializar como caminho natural.",
+    route: "start",
+    scenarioId: "consumer-empty-entry",
+    status: "ready",
+    detected: [
+      "não há package.json nem governança existente",
+      "não existe conteúdo local relevante para preservar",
+      "init é o caminho seguro; adopt/update não viram ação principal",
+    ],
+    offered: [
+      "iniciar ai-guidelines neste repositório",
+      "escolher providers, práticas e colaboração",
+      "ver preview antes de escrever arquivos",
+    ],
+    safety: [
+      "dry-run permite revisar o plano sem tocar no disco",
+      "nada é aplicado sem confirmação humana",
+      "atalho direto existe, mas não precisa ser decorado",
+    ],
+    shortcut: binCommand("init", "--dry-run"),
+  },
+  {
+    id: "existing-repo",
+    label: "Repo existente",
+    headline: "Você já tem código e quer preservar o que existe.",
+    summary:
+      "O guia detecta arquivos existentes e conduz uma adoção conservadora, incluindo conflitos antes de qualquer escrita.",
+    route: "start",
+    scenarioId: "consumer-existing-entry",
+    status: "ready",
+    detected: [
+      "package.json ou arquivos do projeto já existem",
+      "ai-guidelines ainda não está instalado",
+      "adopt é mais seguro que init",
+    ],
+    offered: [
+      "adotar preservando conteúdo local",
+      "explicar conflitos de package, formatter ou hooks",
+      "selecionar práticas sem apagar o baseline do repo",
+    ],
+    safety: [
+      "merge conservador evita sobrescrita silenciosa",
+      "formatter rival exige decisão explícita",
+      "o preview mostra o que entra como bloco gerenciado",
+    ],
+    shortcut: binCommand("adopt", "--dry-run"),
+  },
+  {
+    id: "governed-repo",
+    label: "Repo governado",
+    headline: "Você já usa ai-guidelines e quer saber o próximo passo.",
+    summary:
+      "O guia lê o estado do repositório e orienta update, validação, trabalho diário ou decisão humana sem exigir sequência memorizada.",
+    route: "daily",
+    scenarioId: "consumer-governed-solo-entry",
+    status: "ready",
+    detected: [
+      "configuração ai-guidelines já existe",
+      "o perfil de colaboração é lido quando há policy",
+      "init/adopt deixam de ser caminhos principais",
+    ],
+    offered: [
+      "atualizar runtime, templates, providers e práticas",
+      "validar mudanças do diff durante Draft",
+      "mostrar decisões e bloqueios quando houver spec ativa",
+    ],
+    safety: [
+      "mudanças de política global recebem aviso de autoridade",
+      "Ready/Human Gate/merge continuam protegidos",
+      "update comum fica separado de mudança de colaboração",
+    ],
+    shortcut: binCommand("update", "--dry-run"),
+  },
+  {
+    id: "multiple-specs",
+    label: "Múltiplas specs",
+    headline: "Há mais de uma frente aberta e o foco precisa ser escolhido.",
+    summary:
+      "Quando o sistema não pode inferir a spec certa, ele pede escolha explícita em vez de aplicar ações na frente errada.",
+    route: "team",
+    scenarioId: "consumer-multiple-specs-entry",
+    status: "ready",
+    detected: [
+      "o índice governado tem mais de uma spec ativa",
+      "a branch atual não basta para escolher foco com segurança",
+      "decisões ficam bloqueadas até a pessoa escolher a spec",
+    ],
+    offered: [
+      "listar specs abertas com `specs`",
+      "carregar handoff da spec escolhida",
+      "rodar o guia novamente na branch/foco correto",
+    ],
+    safety: [
+      "não há inferência silenciosa de foco",
+      "não há readiness, gate ou merge sem contexto carregado",
+      "o fluxo evita aplicar decisão na spec errada",
+    ],
+    shortcut: binCommand("specs"),
+  },
+  {
+    id: "peer-review",
+    label: "Review de colega",
+    headline: "Você precisa revisar outro PR sem perder seu trabalho.",
+    summary:
+      "Este fluxo já existe como orientação pública, mas ainda depende de fixtures completos para virar transcript real principal.",
+    route: "peerReview",
+    scenarioId: "peer-review",
+    status: "validating",
+    detected: [
+      "há um PR alvo diferente do trabalho atual",
+      "trocar de branch pode misturar contexto se a tree estiver suja",
+      "worktree separado é o caminho recomendado",
+    ],
+    offered: [
+      "ver briefing do PR antes de mudar qualquer coisa",
+      "criar worktree isolado quando confirmado",
+      "voltar ao trabalho original depois da revisão",
+    ],
+    safety: [
+      "brief-only não altera branch nem arquivos",
+      "checkout guiado bloqueia com working tree suja",
+      "Human Gate/merge do PR alheio não aparecem como ação casual",
+    ],
+    shortcut: binCommand("peer-review", "<pr>", "--brief-only"),
+  },
 ];
 
 export const startJourneys: readonly Journey[] = [
