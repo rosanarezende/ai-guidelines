@@ -1,0 +1,15 @@
+{
+  "eyebrow": "Simulador interativo",
+  "title": "Sinta a CLI de verdade, sem instalar nada",
+  "lead": "Escolha um contexto e percorra o mesmo wizard que você veria ao rodar npx ai-guidelines no seu repositório. Os textos e a sequência vêm do código real; as saídas são transcripts de dry-run reais. Você não precisa decorar comandos — a experiência guia.",
+  "pickerAria": "Escolha o contexto inicial do repositório",
+  "contexts": {
+    "empty": "Projeto vazio",
+    "existing": "Repo existente",
+    "conflict": "Conflito de formatter",
+    "governed": "Repo já governado"
+  },
+  "footNote": "Tudo aqui é a simulação fiel gerada do runtime: roda offline, no celular, e nunca inventa um prompt. Em desktop compatível, dá para rodar a CLI de verdade no navegador (modo opcional).",
+  "shortcutsLead": "Já sabe o que quer? Veja os atalhos diretos em",
+  "shortcutsLink": "Atalhos avançados"
+}

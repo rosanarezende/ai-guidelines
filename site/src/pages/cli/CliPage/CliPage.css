@@ -1,0 +1,98 @@
+.cliPage {
+  max-width: 60rem;
+  margin: 0 auto;
+  padding: 2rem 1.1rem 4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.6rem;
+}
+
+.cliPageHead {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.cliPageEyebrow {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.78rem;
+  color: var(--accent, #0891b2);
+  font-weight: 600;
+}
+.cliPageTitle {
+  margin: 0;
+  font-size: clamp(1.5rem, 4vw, 2.2rem);
+  line-height: 1.15;
+}
+.cliPageLead {
+  margin: 0 auto;
+  max-width: 44rem;
+  color: var(--muted, #475569);
+  line-height: 1.6;
+}
+.cliPageEntry code {
+  font-size: 1rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: 8px;
+  background: #0b0f17;
+  color: #67e8f9;
+}
+
+.cliContextPicker {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.7rem;
+}
+
+.cliContextCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  text-align: left;
+  cursor: pointer;
+  padding: 0.75rem 0.9rem;
+  border-radius: 10px;
+  border: 1px solid var(--border, #e2e8f0);
+  background: var(--surface, #fff);
+  font: inherit;
+}
+.cliContextCard strong {
+  font-size: 0.95rem;
+}
+.cliContextCard span {
+  font-size: 0.82rem;
+  color: var(--muted, #64748b);
+}
+.cliContextCard:hover {
+  border-color: var(--accent, #0891b2);
+}
+.cliContextActive {
+  border-color: var(--accent, #0891b2);
+  box-shadow: 0 0 0 2px rgba(8, 145, 178, 0.18);
+}
+
+.cliPageFoot {
+  font-size: 0.85rem;
+  color: var(--muted, #64748b);
+  line-height: 1.55;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.cliPageFoot a {
+  color: var(--accent, #0891b2);
+}
+
+@media (min-width: 640px) {
+  .cliContextPicker {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (min-width: 960px) {
+  .cliContextPicker {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}

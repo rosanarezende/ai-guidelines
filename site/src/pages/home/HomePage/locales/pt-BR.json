@@ -1,6 +1,28 @@
 {
-  "eyebrow": "Documentação viva e interativa",
-  "title": "Entenda o ai-guidelines simulando a CLI",
-  "lead": "Em vez de uma lista de comandos, escolha a situação do seu repositório e veja o que `npx ai-guidelines` perceberia, ofereceria, bloquearia ou decidiria — e por quê.",
-  "entryNote": "Esse é o caminho principal. A CLI lê o contexto e te orienta. Comandos diretos existem como atalho avançado, não como a experiência principal."
+  "eyebrow": "Governança para desenvolvimento com IA",
+  "title": "ai-guidelines",
+  "lead": "Um sistema de governança para a colaboração entre humanos e IA. A CLI é só a superfície: quando você trabalha com um assistente de IA, é ele que roda o ai-guidelines por baixo dos panos — guiado pelo sistema — para que cada mudança passe por specs, revisão e decisões humanas.",
+  "ctaPrimary": "Experimente o simulador",
+  "ctaSecondary": "Como contribuir",
+  "underHood": {
+    "title": "A CLI por baixo dos panos",
+    "body": "Você conversa com a sua LLM. Ela executa npx ai-guidelines no seu repositório, lê o contexto e segue o caminho seguro que o sistema indica. Você não precisa decorar comandos — o sistema direciona, e o simulador mostra exatamente como essa experiência acontece."
+  },
+  "pillarsTitle": "Os guardrails que tornam isso seguro",
+  "pillars": [
+    {
+      "title": "Specs como frentes de trabalho",
+      "body": "Cada mudança vive numa spec governada, com estado, plano, tarefas e decisões próprias — rastreável do começo ao fim."
+    },
+    {
+      "title": "Fluxo governado",
+      "body": "A próxima ação, as validações e o que está bloqueado aparecem explicitamente. Nada de mudança fora do processo."
+    },
+    {
+      "title": "Decisão humana (Human Gate)",
+      "body": "Marcar pronto, aprovar o avanço e fazer o merge são decisões reservadas a um humano — registradas depois da decisão, nunca antes."
+    }
+  ],
+  "closingTitle": "Veja na prática",
+  "closing": "O jeito mais rápido de entender é sentir a CLI funcionando. O simulador reproduz fielmente o wizard real — mesma sequência, mesmos textos — direto do seu navegador."
 }

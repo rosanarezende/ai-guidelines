@@ -50,10 +50,14 @@ describe("governed documentation site packaging", () => {
     expect(pkg.scripts.validate).toContain("npm run site:build");
   });
 
-  it("mantem a home como simulador da CLI sem instrucoes de deploy", () => {
+  it("home institucional aponta para o /cli, que monta o simulador projetado", () => {
     const appSource = fs.readFileSync(path.join(REPO_ROOT, "site/src/app/App.tsx"), "utf-8");
     const homeSource = fs.readFileSync(
       path.join(REPO_ROOT, "site/src/pages/home/HomePage/HomePage.tsx"),
+      "utf-8"
+    );
+    const cliSource = fs.readFileSync(
+      path.join(REPO_ROOT, "site/src/pages/cli/CliPage/CliPage.tsx"),
       "utf-8"
     );
     const flowData = fs.readFileSync(path.join(REPO_ROOT, "site/src/content/flowData.ts"), "utf-8");
@@ -61,10 +65,13 @@ describe("governed documentation site packaging", () => {
 
     expect(appSource).not.toMatch(/Cloudflare/i);
     expect(appSource).not.toContain("../../docs/assets/");
-    // A home É o simulador da CLI: começa por npx ai-guidelines, não por deploy.
-    expect(homeSource).toContain("ScenarioChooser");
-    expect(homeSource).toContain("CliSimulator");
+    // A home explica o produto e leva ao simulador — não monta mais o terminal.
+    expect(homeSource).toContain('route="cli"');
     expect(homeSource).toContain("npx ai-guidelines");
+    expect(homeSource).not.toContain("CliTerminal");
+    // O simulador projetado vive no /cli: terminal derivado da projeção real.
+    expect(cliSource).toContain("CliTerminal");
+    expect(cliSource).toContain("promptFlows");
     // O comando do consumidor é DERIVADO (binCommand), não literal no JSX.
     expect(flowData).toContain('binCommand("init", "--dry-run")');
     expect(viteConfig).not.toContain("copyFlowSite");

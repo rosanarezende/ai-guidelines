@@ -1,7 +1,7 @@
 import { AI_GUIDELINES_FLOW_COPY } from "@generated/flow-copy.generated";
 import { AI_GUIDELINES_FLOW_SCENARIOS } from "@generated/flow-scenarios.generated";
 
-export type RouteId = "home" | "reference" | "contribute" | "notFound";
+export type RouteId = "home" | "cli" | "reference" | "contribute" | "notFound";
 
 export type TerminalKind = "real" | "guided";
 export type TerminalSurface = "public" | "contributor";
@@ -91,7 +91,8 @@ export function binCommand(name: string, ...args: readonly string[]): string {
 export const BIN_WIZARD = "npx ai-guidelines";
 
 export const routes: readonly RouteLink[] = [
-  { id: "home", path: "/", label: "Simulador", shortLabel: "Simulador" },
+  { id: "home", path: "/", label: "O projeto", shortLabel: "Início" },
+  { id: "cli", path: "/cli", label: "Simulador", shortLabel: "Simulador" },
   { id: "reference", path: "/atalhos", label: "Atalhos avançados", shortLabel: "Atalhos" },
 ];
 
@@ -240,6 +241,7 @@ const allRoutes: readonly RouteLink[] = [...routes, contributeRoute];
 export function routeFromPath(pathname: string): RouteId {
   const normalized = pathname.replace(/\/+$/, "") || "/";
   if (normalized === "/") return "home";
+  if (normalized === "/cli") return "cli";
   if (
     normalized === "/atalhos" ||
     normalized === "/flow/reference" ||
@@ -248,9 +250,9 @@ export function routeFromPath(pathname: string): RouteId {
     return "reference";
   }
   if (normalized === "/contribute") return "contribute";
-  // Links do formato anterior (/flow, /flow/*, aliases PT) resolvem para o
-  // simulador (a home) — sem soft-404 perdido.
-  if (normalized === "/flow" || normalized.startsWith("/flow/")) return "home";
+  // O conteúdo interativo dos links antigos (/flow, /flow/*, aliases PT) agora
+  // vive no simulador /cli — sem soft-404 perdido.
+  if (normalized === "/flow" || normalized.startsWith("/flow/")) return "cli";
   // Rota desconhecida vira 404 explícito.
   return "notFound";
 }
@@ -261,7 +263,8 @@ export function routePath(id: RouteId): string {
 
 /** Título por rota (SEO/a11y) — projeta o label da rota no <title> do documento. */
 export function routeTitle(id: RouteId): string {
-  if (id === "home") return "ai-guidelines — simulador interativo da CLI";
+  if (id === "home") return "ai-guidelines — governança para desenvolvimento com IA";
+  if (id === "cli") return "ai-guidelines — simulador interativo da CLI";
   if (id === "notFound") return "ai-guidelines — página não encontrada";
   const route = allRoutes.find((item) => item.id === id);
   return route ? `ai-guidelines — ${route.label}` : "ai-guidelines";

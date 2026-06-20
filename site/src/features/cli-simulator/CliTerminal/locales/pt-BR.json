@@ -1,0 +1,22 @@
+{
+  "aria": {
+    "region": "Simulador interativo da CLI ai-guidelines",
+    "screen": "Terminal: use as setas, espaço e Enter para navegar pelos prompts"
+  },
+  "modeProjected": "Simulação fiel gerada do runtime",
+  "modeHint": "Os textos e a sequência vêm do código real da CLI (projeção verificada por drift-check). As saídas são transcripts de dry-run reais.",
+  "modeReal": "CLI real rodando no navegador",
+  "restart": "recomeçar",
+  "runReal": "▶ Rodar de verdade",
+  "runRealNote": "Modo opcional (desktop): boota a CLI real no navegador com WebContainer + xterm. É um enhancement progressivo — exige um clientId do StackBlitz e headers de cross-origin isolation (COEP/COOP), não funciona em mobile e precisa de rede. A simulação fiel ao lado continua funcionando sem nada disso.",
+  "outroApplied": "Plano aplicado (saída real de dry-run abaixo).",
+  "outroCancelled": "Nenhuma mudança — você escolheu não aplicar.",
+  "outcomeBadge": "Saída: transcript real de dry-run (capturado do runtime).",
+  "keyboardHint": "↑/↓ navega · espaço marca · Enter confirma · também dá pra clicar.",
+  "continueLabel": "continuar →",
+  "confirmSelection": "confirmar seleção →",
+  "yes": "Sim",
+  "no": "Não",
+  "none": "nenhum",
+  "empty": "(vazio)"
+}

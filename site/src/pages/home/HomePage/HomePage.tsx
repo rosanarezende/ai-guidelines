@@ -1,36 +1,15 @@
-import { useState } from "react";
-
-import { MANDATORY_SCENARIO_IDS } from "@content/scenarios/catalog";
-import { CliSimulator } from "@features/cli-simulator/CliSimulator/CliSimulator";
-import { ScenarioChooser } from "@features/scenario-catalog/ScenarioChooser/ScenarioChooser";
+import { SiteLink } from "@shared/ui/SiteLink/SiteLink";
 
 import "./HomePage.css";
 import copy from "./locales/pt-BR.json";
 
-function initialScenarioId(): string {
-  const fallback = MANDATORY_SCENARIO_IDS[0];
-  if (typeof window === "undefined") return fallback;
-  const requested = new URLSearchParams(window.location.search).get("scenario");
-  return requested && MANDATORY_SCENARIO_IDS.includes(requested) ? requested : fallback;
-}
-
 /**
- * Porta do produto: a home É o simulador da CLI. A pessoa começa por
- * `npx ai-guidelines`, escolhe um cenário e entende o framework por experiência
- * guiada — sem decorar comandos.
+ * Home institucional: explica o PRODUTO para quem chega. ai-guidelines é um
+ * sistema de governança humano+IA — a CLI é a superfície que a LLM usa por
+ * baixo dos panos. O simulador interativo vive em /cli; aqui a pessoa entende
+ * o porquê antes de sentir o como.
  */
 export function HomePage(): JSX.Element {
-  const [selectedId, setSelectedId] = useState<string>(initialScenarioId);
-
-  function select(id: string): void {
-    setSelectedId(id);
-    if (typeof window !== "undefined") {
-      const url = new URL(window.location.href);
-      url.searchParams.set("scenario", id);
-      window.history.replaceState({}, "", url);
-    }
-  }
-
   return (
     <div className="homePage">
       <section className="homeHero">
@@ -40,11 +19,40 @@ export function HomePage(): JSX.Element {
         <p className="homeEntry">
           <code>npx ai-guidelines</code>
         </p>
-        <p className="homeEntryNote">{copy.entryNote}</p>
+        <div className="homeCtas">
+          <SiteLink route="cli" className="homeCtaPrimary">
+            {copy.ctaPrimary}
+          </SiteLink>
+          <SiteLink route="contribute" className="homeCtaSecondary">
+            {copy.ctaSecondary}
+          </SiteLink>
+        </div>
       </section>
 
-      <ScenarioChooser selectedId={selectedId} onSelect={select} />
-      <CliSimulator scenarioId={selectedId} />
+      <section className="homeUnderHood">
+        <h2>{copy.underHood.title}</h2>
+        <p>{copy.underHood.body}</p>
+      </section>
+
+      <section className="homePillars">
+        <h2>{copy.pillarsTitle}</h2>
+        <div className="homePillarGrid">
+          {copy.pillars.map((pillar) => (
+            <article key={pillar.title} className="homePillar">
+              <h3>{pillar.title}</h3>
+              <p>{pillar.body}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="homeClosing">
+        <h2>{copy.closingTitle}</h2>
+        <p>{copy.closing}</p>
+        <SiteLink route="cli" className="homeCtaPrimary">
+          {copy.ctaPrimary}
+        </SiteLink>
+      </section>
     </div>
   );
 }

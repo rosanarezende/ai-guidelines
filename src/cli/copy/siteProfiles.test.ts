@@ -61,22 +61,25 @@ describe("flowData separa consumidor e contribuidor", () => {
   });
 });
 
-describe("a home é o simulador da CLI (req. 1)", () => {
+describe("home explica o produto; o simulador vive em /cli (req. 1)", () => {
   const home = readSite("site/src/pages/home/HomePage/HomePage.tsx");
   const homeLocale = readSite("site/src/pages/home/HomePage/locales/pt-BR.json");
-  const chooserLocale = readSite(
-    "site/src/features/scenario-catalog/ScenarioChooser/locales/pt-BR.json"
-  );
+  const cli = readSite("site/src/pages/cli/CliPage/CliPage.tsx");
+  const cliLocale = readSite("site/src/pages/cli/CliPage/locales/pt-BR.json");
 
-  it("a home monta o simulador (ScenarioChooser + CliSimulator)", () => {
-    expect(home).toContain("ScenarioChooser");
-    expect(home).toContain("CliSimulator");
-    expect(home).toContain("MANDATORY_SCENARIO_IDS");
+  it("a home apresenta o produto e leva ao simulador, sem montar o terminal", () => {
+    expect(home).toContain('route="cli"');
+    expect(home).toContain("npx ai-guidelines");
+    // A home não é mais o simulador: não monta o terminal interativo.
+    expect(home).not.toContain("CliTerminal");
+    expect(home).not.toContain("ScenarioChooser");
   });
 
-  it("a home começa por `npx ai-guidelines` e não exige decorar comandos", () => {
-    expect(home).toContain("npx ai-guidelines");
-    expect(`${homeLocale}\n${chooserLocale}`).toMatch(
+  it("o /cli monta o simulador projetado e não exige decorar comandos", () => {
+    expect(cli).toContain("CliTerminal");
+    expect(cli).toContain("promptFlows");
+    expect(cli).toContain("npx ai-guidelines");
+    expect(`${homeLocale}\n${cliLocale}`).toMatch(
       /não precisa decorar|sem decorar|por experiência/i
     );
   });
