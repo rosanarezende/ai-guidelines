@@ -243,6 +243,11 @@
         color: var(--part);
         border: 1px solid rgba(251, 191, 36, 0.4);
       }
+      .tag-block {
+        background: var(--block-bg);
+        color: var(--block);
+        border: 1px solid rgba(192, 132, 252, 0.4);
+      }
       details {
         margin-top: 12px;
         border-top: 1px solid var(--line);
@@ -383,35 +388,40 @@
             levado para o lugar errado, sem perceber.
           </div>
           <div class="qa">
-            <span class="q">O que o framework deve fazer</span>Detectar o descompasso e orientar a
-            pessoa, sem reescrever sozinho decisões de rumo.
+            <span class="q">O que o framework deve fazer</span>Detectar o descompasso, mostrar a
+            fonte de verdade e bloquear reparo automático: corrigir cursor/topologia exige decisão
+            humana.
           </div>
           <div class="stages">
-            <div class="stage st-part">
+            <div class="stage st-done">
               <div class="t">Detectar</div>
-              <div class="s">◐ parcial</div>
+              <div class="s">✓ feito</div>
             </div>
-            <div class="stage st-part">
+            <div class="stage st-done">
               <div class="t">Explicar</div>
-              <div class="s">◐ parcial</div>
+              <div class="s">✓ feito</div>
             </div>
-            <div class="stage st-todo">
+            <div class="stage st-block">
               <div class="t">Reparar</div>
-              <div class="s">○ a fazer</div>
+              <div class="s">⛔ decisão humana</div>
             </div>
-            <div class="stage st-todo">
+            <div class="stage st-done">
               <div class="t">Testar</div>
-              <div class="s">○ a fazer</div>
+              <div class="s">✓ testes existentes</div>
             </div>
           </div>
           <div class="owner">
             <span class="oh">Quem vai resolver</span>
-            <span class="ov">próximos reparos de drift (CO-10.8.x · PR #44)</span>
-            <span class="tag tag-cand">candidato</span>
+            <span class="ov">classificação registrada em CO-10.8.1 · PR #44</span>
+            <span class="tag tag-block">reparo = decisão humana</span>
           </div>
           <details>
             <summary>Detalhe técnico</summary>
-            <p>state.yml § topology.cursor diverge da branch/PR corrente.</p>
+            <p>
+              state.yml § topology.cursor é parte da SSOT estrutural. Não há gerador determinístico
+              que saiba se a realidade mudou ou se o cursor deve mudar; a ferramenta só mostra a
+              divergência.
+            </p>
           </details>
         </div>
 
@@ -428,8 +438,9 @@
             trabalhar na coisa errada.
           </div>
           <div class="qa">
-            <span class="q">O que o framework deve fazer</span>Apontar a diferença e regenerar a
-            frase a partir do mapa real, quando for só texto desatualizado.
+            <span class="q">O que o framework deve fazer</span>Apontar a diferença e mostrar o
+            próximo id canônico derivado da topologia. A prosa ao redor continua sendo contexto
+            humano, não texto para reescrita automática.
           </div>
           <div class="stages">
             <div class="stage st-done">
@@ -440,23 +451,27 @@
               <div class="t">Explicar</div>
               <div class="s">✓ feito</div>
             </div>
-            <div class="stage st-todo">
+            <div class="stage st-block">
               <div class="t">Reparar</div>
-              <div class="s">○ a fazer</div>
+              <div class="s">⛔ decisão humana</div>
             </div>
-            <div class="stage st-todo">
+            <div class="stage st-done">
               <div class="t">Testar</div>
-              <div class="s">○ a fazer</div>
+              <div class="s">✓ testes existentes</div>
             </div>
           </div>
           <div class="owner">
             <span class="oh">Quem vai resolver</span>
-            <span class="ov">próximos reparos de drift (CO-10.8.x · PR #44)</span>
-            <span class="tag tag-cand">candidato</span>
+            <span class="ov">classificação registrada em CO-10.8.1 · PR #44</span>
+            <span class="tag tag-block">reparo = decisão humana</span>
           </div>
           <details>
             <summary>Detalhe técnico</summary>
-            <p>state.yml § next (narrado) diverge da topologia derivável.</p>
+            <p>
+              state.yml § next contém narrativa situada. O id canônico é derivável, mas regenerar a
+              frase inteira sem julgamento humano apagaria contexto; trocar só o id pode deixar a
+              narrativa incoerente.
+            </p>
           </details>
         </div>
 
@@ -474,30 +489,31 @@
           </div>
           <div class="qa">
             <span class="q">O que o framework deve fazer</span>Detectar a incoerência entre o estado
-            e a narrativa da lista e sinalizar para correção.
+            e a narrativa da lista, explicar a fonte de verdade e exigir decisão governada para
+            alterar tarefas humanas.
           </div>
           <div class="stages">
             <div class="stage st-part">
               <div class="t">Detectar</div>
               <div class="s">◐ parcial</div>
             </div>
-            <div class="stage st-part">
+            <div class="stage st-done">
               <div class="t">Explicar</div>
-              <div class="s">◐ parcial</div>
+              <div class="s">✓ classificado</div>
             </div>
-            <div class="stage st-todo">
+            <div class="stage st-block">
               <div class="t">Reparar</div>
-              <div class="s">○ a fazer</div>
+              <div class="s">⛔ decisão humana</div>
             </div>
-            <div class="stage st-todo">
+            <div class="stage st-part">
               <div class="t">Testar</div>
-              <div class="s">○ a fazer</div>
+              <div class="s">◐ parcial</div>
             </div>
           </div>
           <div class="owner">
             <span class="oh">Quem vai resolver</span>
-            <span class="ov">próximos reparos de drift (CO-10.8.x · PR #44)</span>
-            <span class="tag tag-cand">candidato</span>
+            <span class="ov">classificação registrada em CO-10.8.1 · PR #44</span>
+            <span class="tag tag-block">reparo = decisão humana</span>
           </div>
           <details>
             <summary>Detalhe técnico</summary>
@@ -691,7 +707,8 @@
 
       <div class="foot">
         Projeção de acompanhamento do PR #44 · "Quem vai resolver": verde = decidido, âmbar =
-        candidato não cravado · atualizada em 2026-06-21 · não é fonte de verdade estrutural
+        candidato não cravado, roxo = decisão humana · classificação #2/#3/#4 registrada em
+        2026-06-21 · não é fonte de verdade estrutural
       </div>
     </div>
   </body>
