@@ -6,7 +6,7 @@
 > Plan: [`./plan.md`](./plan.md)
 > Tasks: [`./tasks.md`](./tasks.md)
 > Status agregado: **Resolved (decisões)** — todas as `[DEC]` desta spec estão `Resolved`; a pesquisa estrutural ainda aberta vive em [`research/findings.md`](./research/findings.md), não aqui.
-> Última atualização: 2026-06-20 — **`[DEC-0024-G18]` registrada**: `dualroot-collapse` foi antecipado para antes de `co-capture`/`co-events`, como próximo PR dedicado após `co-flow-convergence`; o PR #43 continua focado em CO-10.7..CO-10.10.
+> Última atualização: 2026-06-20 — **`[DEC-0024-G19]` registrada**: o PR #43 passa a fechar o recorte entregue até CO-10.7; CO-10.8..CO-10.10 saem para próximo PR, e uma revisão externa independente será pedida antes do Human Gate deste PR.
 
 > **Artefato exclusivo de decisão humana.** Organizado por **estado**, não por numeração histórica (reestruturação 2026-05-31). Quatro estados respondem, à primeira vista, _o que já foi decidido · o que ainda está aberto · o que virou regra · o que virou enforcement_:
 >
@@ -479,7 +479,7 @@ Cada transição deve declarar: fato de entrada, autoridade, comando, efeito per
   - `integration-final` terminal.
 - Manter `dualroot-collapse` como PR/checkpoint dedicado, não como sub-checkpoint novo dentro do PR #43.
 - Permitir que CO-10.7 registre honestamente o estado bridge quando necessário, mas sem migrar arquivos, paths canônicos ou contratos de consumidor neste PR.
-- Continuar o PR #43 com CO-10.8, CO-10.9 e CO-10.10 conforme já planejado.
+- Continuar o PR #43 com CO-10.8, CO-10.9 e CO-10.10 conforme já planejado. **Supersedida por `[DEC-0024-G19]`: CO-10.8..CO-10.10 saem para próximo PR.**
 - Exigir que `co-capture` e `co-events` sejam desenhados contra a estrutura pós-colapso, não contra `.ai-guidelines/`/`.specify/` como raízes vivas.
 
 **Impacto esperado:**
@@ -492,6 +492,37 @@ Cada transição deve declarar: fato de entrada, autoridade, comando, efeito per
 **O que NÃO está sendo decidido:** implementar `dualroot-collapse` no PR #43; deletar `.ai-guidelines/` ou `.specify/` agora; executar Ready; exercer Human Gate; fazer merge; avançar sub-checkpoint; abrir novo PR automaticamente; iniciar CO-5/CO-6; transformar `active.yml` em fonte primária; criar migração parcial sem PR dedicado.
 
 **Status:** Resolved (2026-06-20) / @rosanarezende — decisão topológica para antecipar o colapso dual-root e manter o PR #43 focado no fechamento de `co-flow-convergence`.
+
+---
+
+### [DEC-0024-G19] Fechar PR #43 no recorte CO-10.1..CO-10.7 e mover CO-10.8..CO-10.10 para próximo PR
+
+**Pergunta:** Depois de CO-10.7, o PR #43 deve continuar absorvendo CO-10.8/CO-10.9/CO-10.10, ou deve parar no recorte já entregue, pedir revisão externa e mover a continuação para um novo PR?
+
+**Modo de gate:** `aceitação` <!-- decisão operacional/arquitetural da owner, 2026-06-20, após concluir CO-10.7 e reavaliar o tamanho/risco do PR #43. -->
+
+**Contexto:** CO-10.7 reabriu a experiência pública de `npx ai-guidelines`, adicionou harnesses de consumidores, simulador/site e ajustes no wizard real. O PR #43 ficou grande e passou a carregar mudanças de runtime, site, testes e artefatos governados. A próxima etapa planejada, CO-10.8, é uma reorganização estrutural de arquitetura interna/DDD/BDD para mantenedores; CO-10.9 e CO-10.10 dependem dessa reorganização e da falsificação ampla subsequente. Continuar no mesmo PR aumentaria o risco de revisar arquitetura interna por cima de um PR já extenso, misturando valor entregue ao usuário com refactor estrutural. Ao mesmo tempo, fechar o PR #43 sem uma revisão externa criaria risco de Human Gate com viés, porque a entrega passou por muitas iterações de UX, CLI pública, site e harness.
+
+**Decisão (Resolved):**
+
+- Encerrar o escopo de entrega do PR #43 no recorte `CO-10.1..CO-10.7`.
+- Tratar `CO-10.8 — arquitetura interna, organização DDD e BDD visual para mantenedores`, `CO-10.9 — falsificação ampla do fluxo` e `CO-10.10 — revisão independente + Human Gate` como continuação a ser executada em próximo PR, não como pendência executável dentro do PR #43.
+- Preservar o seed antecipado de CO-10.8 (`2d478b2`) como material de entrada para o próximo PR, sem tentar expandi-lo neste PR.
+- Antes de qualquer Ready/Human Gate do PR #43, pedir uma revisão externa independente para avaliar o recorte realmente entregue, os riscos residuais e se a decisão de split deixa o PR coerente.
+- Não executar Human Gate, Ready, merge, `advance-subcheckpoint`, `finish-subcheckpoint`, `mark-readiness` ou abertura automática de novo PR por esta decisão.
+
+**Impacto esperado:**
+
+- O PR #43 fica revisável como entrega coesa de convergência do fluxo até a CLI pública autoexplicável.
+- A reorganização interna/DDD/BDD deixa de competir com o fechamento do PR atual e ganha um PR próprio para inventário robusto, árvore-alvo e migração behavior-preserving.
+- A revisão externa passa a ser o próximo passo antes da decisão humana do PR #43, reduzindo o risco de overclaim e de aceitação enviesada por dogfood interno.
+- O próximo PR poderá começar de uma base mais limpa, usando os achados de CO-10.7 e o seed de CO-10.8 como entrada, sem carregar todo o histórico de reescritas do site/CLI pública.
+
+**O que NÃO está sendo decidido:** implementar CO-10.8 agora; apagar o seed já produzido; executar revisão como decisão mutante; converter o PR para Ready; exercer Human Gate; fazer merge; alterar `state.yml`; iniciar `dualroot-collapse`; abrir PR novo automaticamente.
+
+**Status:** Resolved (2026-06-20) / @rosanarezende — decisão de recorte para revisão externa do PR #43 antes do Human Gate e continuação de CO-10.8..CO-10.10 em próximo PR.
+
+**Nota posterior em G18:** a frase "Continuar o PR #43 com CO-10.8, CO-10.9 e CO-10.10" foi supersedida por G19. G18 continua válida para a topologia pós-`co-flow-convergence` (`dualroot-collapse` antes de `co-capture`/`co-events`), mas não define mais o veículo/PR da continuação CO-10.8..CO-10.10.
 
 ---
 
@@ -567,6 +598,7 @@ Cada transição deve declarar: fato de entrada, autoridade, comando, efeito per
 | `G16`        | arquitetura interna, organização DDD e BDD visual     | **Decidido** — § 1 (Resolved 2026-06-19, owner); pausado por G17 até CO-10.7 fechar corretamente                       |
 | `G17`        | reabrir CO-10.7 antes de retomar CO-10.8              | **Decidido** — § 1 (Resolved 2026-06-19, owner); corrige fechamento prematuro de CO-10.7                               |
 | `G18`        | antecipar `dualroot-collapse`                         | **Decidido** — § 1 (Resolved 2026-06-20, owner); próximo PR dedicado após `co-flow-convergence`, antes de CO-5/CO-6    |
+| `G19`        | recorte do PR #43 + revisão externa antes do Gate     | **Decidido** — § 1 (Resolved 2026-06-20, owner); PR #43 fecha CO-10.1..CO-10.7; CO-10.8..CO-10.10 vão para próximo PR  |
 
 ---
 
@@ -589,6 +621,7 @@ Cada transição deve declarar: fato de entrada, autoridade, comando, efeito per
 - [x] `[DEC-0024-G16]` — Resolved 2026-06-19 / @rosanarezende
 - [x] `[DEC-0024-G17]` — Resolved 2026-06-19 / @rosanarezende
 - [x] `[DEC-0024-G18]` — Resolved 2026-06-20 / @rosanarezende
+- [x] `[DEC-0024-G19]` — Resolved 2026-06-20 / @rosanarezende
 
 ---
 
