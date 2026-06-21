@@ -23,6 +23,11 @@
     "peerReviewHint": "abre a branch do PR sem misturar com seu trabalho atual",
     "specWork": "Escolher ou iniciar uma spec",
     "specWorkHint": "para times: ver specs abertas, continuar a certa ou preparar uma nova com segurança",
+    "chooseSpec": "Escolher uma spec para continuar",
+    "chooseSpecHint": "mostra as specs abertas e evita trabalhar na branch errada",
+    "chooseSpecDegradedHint": "o índice precisa ser revisado antes de decisões sensíveis",
+    "startSpec": "Iniciar uma nova spec",
+    "startSpecHint": "para abrir uma nova frente governada com autorização humana",
     "advanced": "Ferramentas técnicas e diagnósticos",
     "advancedHint": "para quando você quer inspecionar ou diagnosticar algo específico"
   },

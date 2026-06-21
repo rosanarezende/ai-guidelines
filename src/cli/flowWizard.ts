@@ -62,24 +62,111 @@ export interface FlowWizardOptions {
   readonly loadActiveSpecsIndex?: LoadActiveSpecsIndex;
 }
 
-export function buildFlowMenu(
-  model: CockpitModel,
-  provisioning?: ProvisioningContextSummary
-): ReadonlyArray<{
+type FlowMenuChoice = {
   readonly name: string;
   readonly value: FlowMenuValue;
   readonly hint?: string;
   readonly disabled?: boolean;
-}> {
+};
+
+export function buildFlowMenu(
+  model: CockpitModel,
+  provisioning?: ProvisioningContextSummary,
+  specWork?: SpecWorkSnapshot
+): ReadonlyArray<FlowMenuChoice> {
+  if (provisioning && provisioning.workspaceShape !== "governed-repo") {
+    return buildProvisioningFirstMenu(provisioning);
+  }
+
+  const focusState = resolveSummaryFocusState(specWork);
+  if (focusState !== "focused") {
+    return buildFocusRecoveryMenu(model, provisioning, focusState);
+  }
+
+  return buildFocusedFlowMenu(model, provisioning);
+}
+
+function buildProvisioningFirstMenu(
+  provisioning: ProvisioningContextSummary
+): ReadonlyArray<FlowMenuChoice> {
+  return [
+    {
+      name: provisioningMainLabel(provisioning),
+      value: "provisioning",
+      hint: provisioningMainHint(provisioning),
+    },
+    { name: COMMON_COPY.quit, value: "quit" },
+  ];
+}
+
+function buildFocusRecoveryMenu(
+  model: CockpitModel,
+  provisioning: ProvisioningContextSummary | undefined,
+  focusState: Exclude<SummaryFocusState, "focused">
+): ReadonlyArray<FlowMenuChoice> {
+  const choices: FlowMenuChoice[] = [];
+
+  if (shouldRecommendValidation(model)) {
+    choices.push({
+      name: `${WIZARD_COPY.menu.recommendedPrefix}: ${recommendedActionLabel(
+        model,
+        WIZARD_COPY.fallbackValidationAction
+      )}`,
+      value: "validate",
+      hint: WIZARD_COPY.menu.recommendedValidationHint,
+    });
+  }
+
+  switch (focusState) {
+    case "branch-missing":
+    case "branch-unmapped":
+    case "index-degraded":
+      choices.push({
+        name: WIZARD_COPY.menu.chooseSpec,
+        value: "spec-work",
+        hint:
+          focusState === "index-degraded"
+            ? WIZARD_COPY.menu.chooseSpecDegradedHint
+            : WIZARD_COPY.menu.chooseSpecHint,
+      });
+      break;
+    case "no-active-specs":
+      choices.push({
+        name: WIZARD_COPY.menu.startSpec,
+        value: "spec-work",
+        hint: WIZARD_COPY.menu.startSpecHint,
+      });
+      break;
+  }
+
+  if (provisioning?.workspaceShape === "governed-repo") {
+    choices.push({
+      name: provisioningMainLabel(provisioning),
+      value: "provisioning",
+      hint: provisioningMainHint(provisioning),
+    });
+  }
+
+  if (focusState === "index-degraded") {
+    choices.push({
+      name: WIZARD_COPY.menu.advanced,
+      value: "advanced",
+      hint: WIZARD_COPY.menu.advancedHint,
+    });
+  }
+
+  choices.push({ name: COMMON_COPY.quit, value: "quit" });
+  return choices;
+}
+
+function buildFocusedFlowMenu(
+  model: CockpitModel,
+  provisioning?: ProvisioningContextSummary
+): ReadonlyArray<FlowMenuChoice> {
   const recommended = model.flow?.recommended;
   const alternatives = alternativesFor(model);
   const recommendValidation = shouldRecommendValidation(model);
-  const choices: Array<{
-    readonly name: string;
-    readonly value: FlowMenuValue;
-    readonly hint?: string;
-    readonly disabled?: boolean;
-  }> = [];
+  const choices: FlowMenuChoice[] = [];
 
   choices.push({ name: WIZARD_COPY.menu.fullSummary, value: "cockpit" });
 
@@ -722,7 +809,7 @@ export async function runFlowWizard(
 
     const choice = await prompts.select<FlowMenuValue>({
       message: WIZARD_COPY.mainQuestion,
-      choices: buildFlowMenu(model, provisioning),
+      choices: buildFlowMenu(model, provisioning, specWork),
     });
 
     switch (choice) {

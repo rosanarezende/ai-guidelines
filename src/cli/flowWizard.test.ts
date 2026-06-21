@@ -7,6 +7,8 @@ import { PromptCancelledError, Prompts } from "../app/ports/Prompts.js";
 import { makeHandoffFacts } from "../test-utils/decisionFixtures.js";
 import { CockpitModel } from "./cockpit.js";
 import { runFlowWizard, buildFlowMenu } from "./flowWizard.js";
+import type { ProvisioningContextSummary } from "./experience/wizard/provisioning.js";
+import type { SpecWorkSnapshot } from "./experience/wizard/specWork.js";
 import { Command, CommandResult, Logger } from "./registry/Command.js";
 import { CommandRegistry } from "./registry/CommandRegistry.js";
 import { run } from "./main.js";
@@ -236,6 +238,39 @@ function activeSpecsResult() {
       },
     ],
   } as const;
+}
+
+function specWorkSnapshot(overrides: Partial<SpecWorkSnapshot> = {}): SpecWorkSnapshot {
+  const activeSpecs = activeSpecsResult();
+  return {
+    currentBranch: "feat/spec-0024-co-flow-convergence",
+    indexAvailable: activeSpecs.indexAvailable,
+    entries: activeSpecs.entries,
+    warnings: activeSpecs.warnings,
+    ...overrides,
+  };
+}
+
+function provisioningSummary(
+  overrides: Partial<ProvisioningContextSummary> = {}
+): ProvisioningContextSummary {
+  return {
+    operation: "update",
+    workspaceShape: "governed-repo",
+    hasGovernedLifecycle: true,
+    stateTitle: "Repo governado detectado",
+    evidence: [],
+    guidance: "Este repositório já usa ai-guidelines.",
+    advancedReason: "Atualizar o runtime e práticas governadas.",
+    ...overrides,
+  };
+}
+
+function setupGovernedRepo(repoRoot: string): void {
+  mkdirSync(path.join(repoRoot, ".ai-guidelines"), { recursive: true });
+  mkdirSync(path.join(repoRoot, ".governance"), { recursive: true });
+  writeFileSync(path.join(repoRoot, ".ai-guidelines", "config.json"), "{}\n");
+  writeFileSync(path.join(repoRoot, "package.json"), '{"name":"consumer"}\n');
 }
 
 async function withTempRepo<T>(
@@ -529,8 +564,8 @@ function openFindingModel(): CockpitModel {
 }
 
 describe("flow wizard", () => {
-  it("menu principal expõe cockpit/provisioning e não lista providers como ação", () => {
-    const menu = buildFlowMenu(model());
+  it("menu principal em spec focada mostra opções de trabalho diário e não lista providers como ação", () => {
+    const menu = buildFlowMenu(model(), provisioningSummary(), specWorkSnapshot());
     const values = menu.map((item) => item.value);
     expect(values).toEqual(
       expect.arrayContaining([
@@ -551,8 +586,8 @@ describe("flow wizard", () => {
     expect(values).not.toContain("providers");
   });
 
-  it("menu principal usa intenção humana em vez de termos internos", () => {
-    const menuText = buildFlowMenu(model())
+  it("menu principal em spec focada usa intenção humana em vez de termos internos", () => {
+    const menuText = buildFlowMenu(model(), provisioningSummary(), specWorkSnapshot())
       .map((item) => item.name)
       .join("\n");
 
@@ -568,6 +603,72 @@ describe("flow wizard", () => {
     expect(menuText).not.toMatch(/review governado/i);
     expect(menuText).not.toMatch(/comando mutante/i);
     expect(menuText).not.toMatch(/\bwizard\b/i);
+  });
+
+  it("repo ainda não governado mostra onboarding, não opções de lifecycle", () => {
+    const menu = buildFlowMenu(
+      model(),
+      provisioningSummary({
+        operation: "init",
+        workspaceShape: "empty",
+        hasGovernedLifecycle: false,
+      }),
+      specWorkSnapshot({ entries: [] })
+    );
+
+    expect(menu.map((item) => item.value)).toEqual(["provisioning", "quit"]);
+    expect(menu.map((item) => item.name)).toContain("Iniciar ai-guidelines neste repositório");
+    expect(menu.map((item) => item.value)).not.toContain("spec-work");
+    expect(menu.map((item) => item.value)).not.toContain("decisions");
+    expect(menu.map((item) => item.value)).not.toContain("work");
+  });
+
+  it("repo governado em branch fora do índice mostra recuperação de foco", () => {
+    const menu = buildFlowMenu(
+      model(),
+      provisioningSummary(),
+      specWorkSnapshot({ currentBranch: "feat/spec-9999-unknown" })
+    );
+
+    expect(menu.map((item) => item.value)).toEqual(["spec-work", "provisioning", "quit"]);
+    expect(menu[0].name).toBe("Escolher uma spec para continuar");
+    expect(menu[0].hint).toBe("mostra as specs abertas e evita trabalhar na branch errada");
+    expect(menu.map((item) => item.value)).not.toContain("next");
+    expect(menu.map((item) => item.value)).not.toContain("decisions");
+    expect(menu.map((item) => item.value)).not.toContain("work");
+  });
+
+  it("repo governado sem specs abertas orienta iniciar uma spec", () => {
+    const menu = buildFlowMenu(model(), provisioningSummary(), specWorkSnapshot({ entries: [] }));
+
+    expect(menu.map((item) => item.value)).toEqual(["spec-work", "provisioning", "quit"]);
+    expect(menu[0].name).toBe("Iniciar uma nova spec");
+    expect(menu[0].hint).toBe("para abrir uma nova frente governada com autorização humana");
+    expect(menu.map((item) => item.value)).not.toContain("next");
+    expect(menu.map((item) => item.value)).not.toContain("review");
+  });
+
+  it("repo governado com índice degradado mostra foco e diagnóstico, não lifecycle", () => {
+    const menu = buildFlowMenu(
+      model(),
+      provisioningSummary(),
+      specWorkSnapshot({
+        indexAvailable: false,
+        entries: [],
+        warnings: ["active.yml ausente"],
+      })
+    );
+
+    expect(menu.map((item) => item.value)).toEqual([
+      "spec-work",
+      "provisioning",
+      "advanced",
+      "quit",
+    ]);
+    expect(menu[0].name).toBe("Escolher uma spec para continuar");
+    expect(menu[0].hint).toBe("o índice precisa ser revisado antes de decisões sensíveis");
+    expect(menu.map((item) => item.value)).not.toContain("next");
+    expect(menu.map((item) => item.value)).not.toContain("decisions");
   });
 
   it("quando há mudanças locais e nenhuma mutação disponível, recomenda validar o diff", () => {
@@ -735,43 +836,49 @@ describe("flow wizard", () => {
   });
 
   it("percepção recorrente aparece como alternativa e abre a lista canônica", async () => {
-    const prompts = new ScriptedPrompts(["alternative"]);
-    const insight = spyCommand("insight");
+    await withTempRepo(setupGovernedRepo, async (repoRoot) => {
+      const prompts = new ScriptedPrompts(["alternative"]);
+      const insight = spyCommand("insight");
 
-    const code = await runFlowWizard("/repo", new CollectingLogger(), {
-      prompts,
-      registry: registryWith(insight),
-      collectModel: () => insightCandidateModel(),
+      const code = await runFlowWizard(repoRoot, new CollectingLogger(), {
+        prompts,
+        registry: registryWith(insight),
+        collectModel: () => insightCandidateModel(),
+        loadActiveSpecsIndex: () => activeSpecsResult(),
+      });
+
+      expect(code).toBe(0);
+      expect(prompts.selectCalls[0].names.join("\n")).toContain(
+        "Ver percepções recorrentes que precisam de decisão"
+      );
+      expect(insight.calls).toEqual([["list"]]);
     });
-
-    expect(code).toBe(0);
-    expect(prompts.selectCalls[0].names.join("\n")).toContain(
-      "Ver percepções recorrentes que precisam de decisão"
-    );
-    expect(insight.calls).toEqual([["list"]]);
   });
 
   it("review opcional/recomendada aparece como alternativa e prepara contexto sem publicar review", async () => {
-    const prompts = new ScriptedPrompts(["alternative", "types"]);
-    const clipboard = new FakeClipboard();
-    const review = outputCommand("review", "TIPOS DE REVISAO");
-    const decide = spyCommand("decide");
+    await withTempRepo(setupGovernedRepo, async (repoRoot) => {
+      const prompts = new ScriptedPrompts(["alternative", "types"]);
+      const clipboard = new FakeClipboard();
+      const review = outputCommand("review", "TIPOS DE REVISAO");
+      const decide = spyCommand("decide");
 
-    const code = await runFlowWizard("/repo", new CollectingLogger(), {
-      prompts,
-      registry: registryWith(review, decide),
-      clipboard,
-      collectModel: () => advisoryReviewModel(),
+      const code = await runFlowWizard(repoRoot, new CollectingLogger(), {
+        prompts,
+        registry: registryWith(review, decide),
+        clipboard,
+        collectModel: () => advisoryReviewModel(),
+        loadActiveSpecsIndex: () => activeSpecsResult(),
+      });
+
+      expect(code).toBe(0);
+      expect(prompts.selectCalls[0].names.join("\n")).toContain(
+        "pedir revisão antes da decisão humana"
+      );
+      expect(prompts.selectCalls[1].message).toBe("Qual contexto você quer preparar?");
+      expect(review.calls).toEqual([["types"]]);
+      expect(decide.calls).toEqual([]);
+      expect(clipboard.copied[0]).toContain("TIPOS DE REVISAO");
     });
-
-    expect(code).toBe(0);
-    expect(prompts.selectCalls[0].names.join("\n")).toContain(
-      "pedir revisão antes da decisão humana"
-    );
-    expect(prompts.selectCalls[1].message).toBe("Qual contexto você quer preparar?");
-    expect(review.calls).toEqual([["types"]]);
-    expect(decide.calls).toEqual([]);
-    expect(clipboard.copied[0]).toContain("TIPOS DE REVISAO");
   });
 
   it("resumo inicial do wizard vem do HumanSummary comum", async () => {
@@ -1405,24 +1512,27 @@ describe("flow wizard", () => {
     );
   });
 
-  it("ferramentas técnicas não abrem a superfície antiga diretamente", async () => {
-    const prompts = new ScriptedPrompts(["spec-work", "active-specs"]);
-    const workflow = spyCommand("workflow");
-    const specs = spyCommand("specs");
+  it("trabalho com specs usa a seção própria e não abre a superfície antiga diretamente", async () => {
+    await withTempRepo(setupGovernedRepo, async (repoRoot) => {
+      const prompts = new ScriptedPrompts(["spec-work", "active-specs"]);
+      const workflow = spyCommand("workflow");
+      const specs = spyCommand("specs");
 
-    const code = await runFlowWizard("/repo", new CollectingLogger(), {
-      prompts,
-      registry: registryWith(workflow, specs),
-      collectModel: () => model(),
+      const code = await runFlowWizard(repoRoot, new CollectingLogger(), {
+        prompts,
+        registry: registryWith(workflow, specs),
+        collectModel: () => model(),
+        loadActiveSpecsIndex: () => activeSpecsResult(),
+      });
+
+      expect(code).toBe(0);
+      expect(specs.calls).toEqual([[]]);
+      expect(workflow.calls).toEqual([]);
+      expect(prompts.selectCalls[0].names).toContain("Escolher ou iniciar uma spec");
+      expect(prompts.selectCalls[1].message).toBe("O que você quer fazer com as specs?");
+      expect(prompts.selectCalls[1].names).toContain("Escolher uma spec aberta");
+      expect(prompts.selectCalls[1].names).toContain("Ver specs abertas");
     });
-
-    expect(code).toBe(0);
-    expect(specs.calls).toEqual([[]]);
-    expect(workflow.calls).toEqual([]);
-    expect(prompts.selectCalls[0].names).toContain("Escolher ou iniciar uma spec");
-    expect(prompts.selectCalls[1].message).toBe("O que você quer fazer com as specs?");
-    expect(prompts.selectCalls[1].names).toContain("Escolher uma spec aberta");
-    expect(prompts.selectCalls[1].names).toContain("Ver specs abertas");
   });
 
   it("escolher spec aberta na branch atual delega para continue com o id selecionado", async () => {
