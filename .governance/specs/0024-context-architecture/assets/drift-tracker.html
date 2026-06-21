@@ -22,6 +22,8 @@
         --todo-bg: rgba(107, 114, 128, 0.1);
         --block: #c084fc;
         --block-bg: rgba(192, 132, 252, 0.12);
+        --drift: #f87171;
+        --drift-bg: rgba(248, 113, 113, 0.12);
         --accent: #7c9cff;
         --accent-bg: rgba(124, 156, 255, 0.1);
       }
@@ -96,13 +98,26 @@
       .card {
         background: var(--panel);
         border: 1px solid var(--line);
+        border-left: 4px solid var(--drift);
         border-radius: 14px;
         padding: 18px 20px;
         position: relative;
       }
       .card.first {
-        border-color: var(--accent);
         box-shadow: 0 0 0 1px var(--accent-bg);
+      }
+      .driftbadge {
+        display: inline-block;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        padding: 2px 8px;
+        border-radius: 99px;
+        background: var(--drift-bg);
+        color: var(--drift);
+        border: 1px solid rgba(248, 113, 113, 0.4);
+        margin-bottom: 8px;
+        margin-right: 6px;
       }
       .badge {
         display: inline-block;
@@ -189,6 +204,45 @@
       .st-block .s {
         color: var(--block);
       }
+      .owner {
+        margin-top: 12px;
+        background: var(--panel2);
+        border: 1px solid var(--line);
+        border-radius: 9px;
+        padding: 9px 12px;
+        font-size: 12.5px;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: 6px;
+      }
+      .owner .oh {
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--mut);
+        font-weight: 700;
+      }
+      .owner .ov {
+        font-weight: 600;
+        color: var(--ink);
+      }
+      .owner .tag {
+        font-size: 10px;
+        padding: 1px 7px;
+        border-radius: 99px;
+        font-weight: 700;
+      }
+      .tag-fact {
+        background: var(--done-bg);
+        color: var(--done);
+        border: 1px solid rgba(52, 211, 153, 0.4);
+      }
+      .tag-cand {
+        background: var(--part-bg);
+        color: var(--part);
+        border: 1px solid rgba(251, 191, 36, 0.4);
+      }
       details {
         margin-top: 12px;
         border-top: 1px solid var(--line);
@@ -230,27 +284,27 @@
         <h2>Como ler este tracker</h2>
         <p>
           O framework guarda alguns arquivos internos para lembrar em que ponto do trabalho você
-          está. Quando esses arquivos discordam da realidade, dá-se o nome de <b>"drift"</b>
-          (desencontro). Cada card abaixo descreve um tipo de desencontro em linguagem comum: o que
-          acontece, por que isso atrapalha você, e o que o framework deveria fazer a respeito.
+          está. Quando esses arquivos discordam da realidade, dá-se o nome de
+          <b style="color: var(--drift)">drift</b> (desencontro) — por isso cada card tem a borda
+          vermelha. O card descreve o desencontro em linguagem comum: o que acontece, por que isso
+          atrapalha você, e o que o framework deveria fazer.
         </p>
         <p>
           Para cada desencontro acompanhamos quatro etapas, e elas <b>não são a mesma coisa</b>:
-          <b>Detectar</b> (perceber que há um problema) e <b>Explicar</b> (descrever em linguagem
-          humana) <b>não resolvem nada sozinhos</b>. Um desencontro só está
-          <b>realmente fechado</b> quando tem <b>Reparar</b> (uma correção segura, com
-          pré-visualização e confirmação) e <b>Testar</b> (provas automáticas de que a correção
-          funciona e não estraga nada).
+          <b>Detectar</b> e <b>Explicar</b> <b>não resolvem nada sozinhos</b>. Um desencontro só
+          está <b>realmente fechado</b> quando tem <b>Reparar</b> (correção segura, com
+          pré-visualização e confirmação) e <b>Testar</b> (provas automáticas).
         </p>
         <p>
-          Alguns reparos envolvem uma <b>decisão humana</b> de verdade (avançar uma etapa, abrir um
-          novo trabalho, aprovar uma entrega). Esses ficam marcados como <b>bloqueado</b> de
-          propósito: o framework não deve decidir isso sozinho.
+          A faixa <b>"Quem vai resolver"</b> mostra qual PR/checkpoint/CO trata cada drift.
+          <span style="color: var(--done)"><b>Verde</b></span> = já decidido no state.yml;
+          <span style="color: var(--part)"><b>âmbar</b></span> = candidato (proposta, ainda não
+          cravada). Reparos que dependem de <b>decisão humana</b> (avançar etapa, abrir trabalho,
+          aprovar) ficam <b>bloqueados</b> de propósito.
         </p>
         <p>
-          Este mapa é só uma <b>projeção de acompanhamento</b> para humanos. Ele <b>não</b> é a
-          fonte oficial da verdade — quem manda são os arquivos governados, os testes e as revisões.
-          Se um dia ele discordar deles, valem eles.
+          Este mapa é uma <b>projeção de acompanhamento</b>. Ele <b>não</b> é a fonte oficial — quem
+          manda são os arquivos governados, os testes e as revisões.
         </p>
         <div class="legend">
           <span><i class="dot" style="background: var(--done)"></i> feito</span>
@@ -260,13 +314,15 @@
           <span
             ><i class="dot" style="background: var(--block)"></i> bloqueado (decisão humana)</span
           >
+          <span><i class="dot" style="background: var(--drift)"></i> drift</span>
         </div>
       </div>
 
       <div class="grid">
         <!-- 1 -->
         <div class="card first">
-          <span class="badge">primeiro caso implementado neste PR</span>
+          <span class="driftbadge">drift #1</span
+          ><span class="badge">primeiro caso implementado</span>
           <h3>"Estou na branch certa, mas o framework ainda aponta para a anterior"</h3>
           <div class="qa">
             <span class="q">O que aconteceu</span>A pessoa já está trabalhando na nova etapa, mas o
@@ -300,6 +356,11 @@
               <div class="s">◆ testes escritos</div>
             </div>
           </div>
+          <div class="owner">
+            <span class="oh">Quem vai resolver</span>
+            <span class="ov">CO-10.8.1 · PR #44</span>
+            <span class="tag tag-fact">decidido · em andamento</span>
+          </div>
           <details>
             <summary>Detalhe técnico</summary>
             <p>
@@ -311,6 +372,7 @@
 
         <!-- 2 -->
         <div class="card">
+          <span class="driftbadge">drift #2</span>
           <h3>"O framework perdeu o fio de onde você está no trabalho"</h3>
           <div class="qa">
             <span class="q">O que aconteceu</span>O ponteiro interno que marca "você está aqui" não
@@ -342,6 +404,11 @@
               <div class="s">○ a fazer</div>
             </div>
           </div>
+          <div class="owner">
+            <span class="oh">Quem vai resolver</span>
+            <span class="ov">próximos reparos de drift (CO-10.8.x · PR #44)</span>
+            <span class="tag tag-cand">candidato</span>
+          </div>
           <details>
             <summary>Detalhe técnico</summary>
             <p>state.yml § topology.cursor diverge da branch/PR corrente.</p>
@@ -350,6 +417,7 @@
 
         <!-- 3 -->
         <div class="card">
+          <span class="driftbadge">drift #3</span>
           <h3>"O 'próximo passo' escrito não bate com o próximo passo real"</h3>
           <div class="qa">
             <span class="q">O que aconteceu</span>A frase que descreve o próximo passo ficou
@@ -381,6 +449,11 @@
               <div class="s">○ a fazer</div>
             </div>
           </div>
+          <div class="owner">
+            <span class="oh">Quem vai resolver</span>
+            <span class="ov">próximos reparos de drift (CO-10.8.x · PR #44)</span>
+            <span class="tag tag-cand">candidato</span>
+          </div>
           <details>
             <summary>Detalhe técnico</summary>
             <p>state.yml § next (narrado) diverge da topologia derivável.</p>
@@ -389,6 +462,7 @@
 
         <!-- 4 -->
         <div class="card">
+          <span class="driftbadge">drift #4</span>
           <h3>"A lista de tarefas não reflete a etapa atual"</h3>
           <div class="qa">
             <span class="q">O que aconteceu</span>A etapa em andamento não tem a tarefa
@@ -420,6 +494,11 @@
               <div class="s">○ a fazer</div>
             </div>
           </div>
+          <div class="owner">
+            <span class="oh">Quem vai resolver</span>
+            <span class="ov">próximos reparos de drift (CO-10.8.x · PR #44)</span>
+            <span class="tag tag-cand">candidato</span>
+          </div>
           <details>
             <summary>Detalhe técnico</summary>
             <p>
@@ -431,6 +510,7 @@
 
         <!-- 5 -->
         <div class="card">
+          <span class="driftbadge">drift #5</span>
           <h3>"A descrição do PR conta uma história diferente do que foi entregue"</h3>
           <div class="qa">
             <span class="q">O que aconteceu</span>O texto que descreve o pull request não reflete o
@@ -462,6 +542,11 @@
               <div class="s">○ a fazer</div>
             </div>
           </div>
+          <div class="owner">
+            <span class="oh">Quem vai resolver</span>
+            <span class="ov">co-events (PR futuro) — apoia em pr-body / pr-ready:check</span>
+            <span class="tag tag-cand">candidato</span>
+          </div>
           <details>
             <summary>Detalhe técnico</summary>
             <p>PR body diverge do recorte aprovado; relacionado a pr-body / pr-ready:check.</p>
@@ -470,6 +555,7 @@
 
         <!-- 6 -->
         <div class="card">
+          <span class="driftbadge">drift #6</span>
           <h3>"Uma decisão já foi aprovada, mas o mapa não avançou"</h3>
           <div class="qa">
             <span class="q">O que aconteceu</span>Houve uma aprovação humana para seguir adiante,
@@ -501,6 +587,11 @@
               <div class="s">○ a fazer</div>
             </div>
           </div>
+          <div class="owner">
+            <span class="oh">Quem vai resolver</span>
+            <span class="ov">co-events (detecção) — avanço continua decisão humana</span>
+            <span class="tag tag-cand">candidato</span>
+          </div>
           <details>
             <summary>Detalhe técnico</summary>
             <p>Gate aprovado, mas topologia/cursor não avançou. Avanço de nó = Human Gate.</p>
@@ -509,6 +600,7 @@
 
         <!-- 7 -->
         <div class="card">
+          <span class="driftbadge">drift #7</span>
           <h3>"O próximo trabalho está previsto, mas ninguém abriu o espaço pra ele"</h3>
           <div class="qa">
             <span class="q">O que aconteceu</span>O mapa prevê um próximo trabalho, mas ainda não
@@ -540,6 +632,11 @@
               <div class="s">○ a fazer</div>
             </div>
           </div>
+          <div class="owner">
+            <span class="oh">Quem vai resolver</span>
+            <span class="ov">co-events (detecção) — abertura continua decisão humana</span>
+            <span class="tag tag-cand">candidato</span>
+          </div>
           <details>
             <summary>Detalhe técnico</summary>
             <p>Topologia aponta próximo nó sem PR/branch correspondente.</p>
@@ -548,6 +645,7 @@
 
         <!-- 8 -->
         <div class="card">
+          <span class="driftbadge">drift #8</span>
           <h3>"Uma anotação de bastidor contradiz o estado oficial"</h3>
           <div class="qa">
             <span class="q">O que aconteceu</span>Uma nota de pesquisa ou rascunho diz algo
@@ -579,6 +677,11 @@
               <div class="s">○ a fazer</div>
             </div>
           </div>
+          <div class="owner">
+            <span class="oh">Quem vai resolver</span>
+            <span class="ov">co-knowledge / housekeeping (PR futuro)</span>
+            <span class="tag tag-cand">candidato</span>
+          </div>
           <details>
             <summary>Detalhe técnico</summary>
             <p>Conteúdo em research/ contradiz o estado governado (research ≠ autoridade).</p>
@@ -587,8 +690,8 @@
       </div>
 
       <div class="foot">
-        Projeção de acompanhamento do PR #44 · atualizada em 2026-06-21 · não é fonte de verdade
-        estrutural
+        Projeção de acompanhamento do PR #44 · "Quem vai resolver": verde = decidido, âmbar =
+        candidato não cravado · atualizada em 2026-06-21 · não é fonte de verdade estrutural
       </div>
     </div>
   </body>
