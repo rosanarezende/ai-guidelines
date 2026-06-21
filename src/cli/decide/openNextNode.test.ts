@@ -231,25 +231,30 @@ function writeRepoFixture(repoRoot: string): void {
 class FakeGitOps implements DecisionGitOps {
   readonly calls: string[] = [];
   readonly staged: string[] = [];
-  commitMessage: string | null = null;
+  readonly commitMessages: string[] = [];
   private readonly beforeDirty: readonly string[] | null;
   private readonly afterDirty: readonly string[] | null;
+  private readonly dirtySequence: readonly (readonly string[] | null)[];
   private statusCalls = 0;
 
   constructor(opts: {
     beforeDirty?: readonly string[] | null;
     afterDirty: readonly string[] | null;
+    dirtySequence?: readonly (readonly string[] | null)[];
   }) {
     this.beforeDirty = opts.beforeDirty ?? [];
     this.afterDirty = opts.afterDirty;
+    this.dirtySequence = opts.dirtySequence ?? [this.beforeDirty, this.afterDirty];
   }
 
   porcelainPaths(): readonly string[] | null {
     this.statusCalls += 1;
-    return this.statusCalls === 1 ? this.beforeDirty : this.afterDirty;
+    return (
+      this.dirtySequence[Math.min(this.statusCalls - 1, this.dirtySequence.length - 1)] ?? null
+    );
   }
   revParseShortHead(): string | null {
-    return "commit44";
+    return `commit${this.commitMessages.length}`;
   }
   createBranch(branchName: string, startPoint: string): void {
     this.calls.push(`createBranch:${branchName}:${startPoint}`);
@@ -262,7 +267,7 @@ class FakeGitOps implements DecisionGitOps {
     this.calls.push(`add:${relFile}`);
   }
   commit(message: string): void {
-    this.commitMessage = message;
+    this.commitMessages.push(message);
     this.calls.push(`commit:${message}`);
   }
   push(): void {
@@ -473,16 +478,21 @@ describe("open-next-node · aplicação por portas [decide]", () => {
     const plan = def.plan(snapshot, "open-node");
     const payload = plan.payload as OpenNextNodePayload;
     const expectedDirty = [payload.stateFile, payload.activeSpecsFile, payload.tasksFile];
-    const git = new FakeGitOps({ afterDirty: expectedDirty });
+    const git = new FakeGitOps({
+      afterDirty: expectedDirty,
+      dirtySequence: [[], [payload.activeSpecsFile], expectedDirty],
+    });
     const stack = new FakeStackOps(44);
 
     const result = await def.apply(plan, applyContext(repoRoot, git, stack));
 
     expect(result.ok).toBe(true);
-    expect(result.committed).toBe("commit44");
+    expect(result.committed).toBe("commit2");
     expect(result.pushed).toBe(true);
     expect(git.calls).toEqual([
       "createBranch:feat/spec-0024-co-capture:abc1234",
+      `add:${payload.activeSpecsFile}`,
+      "commit:docs(spec-0024): prepara branch co-capture",
       "pushBranch:feat/spec-0024-co-capture",
       `add:${payload.stateFile}`,
       `add:${payload.activeSpecsFile}`,
@@ -501,6 +511,8 @@ describe("open-next-node · aplicação por portas [decide]", () => {
       fs.readFileSync(path.join(repoRoot, payload.stateFile), "utf8")
     );
     expect(state.topology?.cursor.pr).toBe("co-capture");
+    expect(state.next[0]).toContain("canonical-next: co-capture");
+    expect(state.next[0]).toContain("PR #44 stacked");
     expect(state.topology?.prs.active[0].github_pr).toBe(44);
     const active = parseActiveSpecs(
       fs.readFileSync(path.join(repoRoot, payload.activeSpecsFile), "utf8")
@@ -532,6 +544,11 @@ describe("open-next-node · aplicação por portas [decide]", () => {
     const payload = plan.payload as OpenNextNodePayload;
     const git = new FakeGitOps({
       afterDirty: [payload.stateFile, payload.activeSpecsFile, payload.tasksFile, "src/x.ts"],
+      dirtySequence: [
+        [],
+        [payload.activeSpecsFile],
+        [payload.stateFile, payload.activeSpecsFile, payload.tasksFile, "src/x.ts"],
+      ],
     });
     const stack = new FakeStackOps(44);
 
@@ -541,8 +558,30 @@ describe("open-next-node · aplicação por portas [decide]", () => {
     expect(result.messages.join(" ")).toMatch(/mixed_diff: forbidden/);
     expect(git.calls).toEqual([
       "createBranch:feat/spec-0024-co-capture:abc1234",
+      `add:${payload.activeSpecsFile}`,
+      "commit:docs(spec-0024): prepara branch co-capture",
       "pushBranch:feat/spec-0024-co-capture",
     ]);
     expect(stack.created).toHaveLength(1);
+  });
+
+  it("bloqueia antes de publicar branch quando a preparação de active.yml gerar diff misto", async () => {
+    const repoRoot = fs.mkdtempSync(path.join(os.tmpdir(), "open-next-node-prep-mixed-"));
+    writeRepoFixture(repoRoot);
+    const snapshot = postGateSnapshot({ repoRoot });
+    const plan = def.plan(snapshot, "open-node");
+    const payload = plan.payload as OpenNextNodePayload;
+    const git = new FakeGitOps({
+      afterDirty: [payload.activeSpecsFile, "src/x.ts"],
+      dirtySequence: [[], [payload.activeSpecsFile, "src/x.ts"]],
+    });
+    const stack = new FakeStackOps(44);
+
+    const result = await def.apply(plan, applyContext(repoRoot, git, stack));
+
+    expect(result.ok).toBe(false);
+    expect(result.messages.join(" ")).toMatch(/diff misto antes de publicar branch/);
+    expect(git.calls).toEqual(["createBranch:feat/spec-0024-co-capture:abc1234"]);
+    expect(stack.created).toHaveLength(0);
   });
 });
