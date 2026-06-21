@@ -6,7 +6,7 @@
 > Plan: [`./plan.md`](./plan.md)
 > Tasks: [`./tasks.md`](./tasks.md)
 > Status agregado: **Resolved (decisões)** — todas as `[DEC]` desta spec estão `Resolved`; a pesquisa estrutural ainda aberta vive em [`research/findings.md`](./research/findings.md), não aqui.
-> Última atualização: 2026-06-19 — **`[DEC-0024-G17]` registrada**: `CO-10.7` foi reaberto por fechamento prematuro; `CO-10.8` fica pausado até a CLI pública ser falsificada em consumidores reais/simulados e refletida no site.
+> Última atualização: 2026-06-20 — **`[DEC-0024-G18]` registrada**: `dualroot-collapse` foi antecipado para antes de `co-capture`/`co-events`, como próximo PR dedicado após `co-flow-convergence`; o PR #43 continua focado em CO-10.7..CO-10.10.
 
 > **Artefato exclusivo de decisão humana.** Organizado por **estado**, não por numeração histórica (reestruturação 2026-05-31). Quatro estados respondem, à primeira vista, _o que já foi decidido · o que ainda está aberto · o que virou regra · o que virou enforcement_:
 >
@@ -247,6 +247,8 @@ Cada transição deve declarar: fato de entrada, autoridade, comando, efeito per
 
 **Status:** Resolved (2026-06-16) / @rosanarezende — decisão topológica da owner, registrada antes do Human Gate do `co-enforcement`.
 
+**Nota posterior:** `[DEC-0024-G18]` preserva a decisão de `co-flow-convergence` vir antes de `co-capture`, mas reordena a cauda planejada para executar `dualroot-collapse` imediatamente depois de `co-flow-convergence` e antes de `co-capture`/`co-events`.
+
 ---
 
 ### [DEC-0024-G11] Suspender temporariamente smoke tests durante `co-flow-convergence`, sem liberar Ready/Human Gate
@@ -456,6 +458,43 @@ Cada transição deve declarar: fato de entrada, autoridade, comando, efeito per
 
 ---
 
+### [DEC-0024-G18] Antecipar `dualroot-collapse` antes de `co-capture` e `co-events`
+
+**Pergunta:** Depois de `co-flow-convergence`, a Spec 0024 deve seguir para `co-capture`/`co-events` como planejado, mesmo com `.ai-guidelines/` e `.specify/` ainda vivos como ponte, ou deve antecipar `dualroot-collapse` para consolidar a estrutura canônica antes de automatizar captura e eventos?
+
+**Modo de gate:** `aceitação` <!-- decisão operacional/arquitetural da owner, 2026-06-20, durante CO-10.7. -->
+
+**Contexto:** O dogfood de CO-10.7 expôs que a experiência pública (`npx ai-guidelines`, site e simulador) ainda precisa explicar um estado transitório: consumidores recebem `.governance/` como raiz de governança, mas `config.json` e templates continuam sob `.ai-guidelines/`, e specs/roadmap ainda carregam ponte com `.specify/`. O próprio runtime bootstrap declara que isso é bridge até `dualroot-collapse`. Se `co-capture` e `co-events` forem implementados antes do colapso, há risco de automatizar e testar a estrutura temporária, aumentando o custo da migração e tornando a explicação do produto mais confusa. Ao mesmo tempo, absorver o colapso completo dentro do PR #43 ampliaria demais o escopo de `co-flow-convergence` e bloquearia CO-10.8/CO-10.9/CO-10.10.
+
+**Decisão (Resolved):**
+
+- Antecipar `dualroot-collapse` para imediatamente depois de `co-flow-convergence`.
+- Atualizar a topologia planejada para:
+  - `co-flow-convergence` seq 10;
+  - `dualroot-collapse` seq 11;
+  - `co-capture` seq 12;
+  - `co-events` seq 13;
+  - `housekeeping` seq 14;
+  - `knowledge-readiness` seq 15;
+  - `integration-final` terminal.
+- Manter `dualroot-collapse` como PR/checkpoint dedicado, não como sub-checkpoint novo dentro do PR #43.
+- Permitir que CO-10.7 registre honestamente o estado bridge quando necessário, mas sem migrar arquivos, paths canônicos ou contratos de consumidor neste PR.
+- Continuar o PR #43 com CO-10.8, CO-10.9 e CO-10.10 conforme já planejado.
+- Exigir que `co-capture` e `co-events` sejam desenhados contra a estrutura pós-colapso, não contra `.ai-guidelines/`/`.specify/` como raízes vivas.
+
+**Impacto esperado:**
+
+- `init`/`adopt`/`update`, templates, config, runtime bootstrap, fixtures de consumidor, smoke tests, site e documentação pública passam a ter uma casa canônica antes da automação de captura/eventos.
+- Repositórios já adotados com `.ai-guidelines/` precisam de migração explícita e falsificável, sem apagar estado do usuário e sem tratar `active.yml` como SSOT.
+- Testes que hoje validam `.ai-guidelines/config.json` e `.ai-guidelines/templates/` deverão migrar no PR de `dualroot-collapse`, junto com fixtures e docs.
+- `co-capture` e `co-events` ganham menos compatibilidade transitória para carregar.
+
+**O que NÃO está sendo decidido:** implementar `dualroot-collapse` no PR #43; deletar `.ai-guidelines/` ou `.specify/` agora; executar Ready; exercer Human Gate; fazer merge; avançar sub-checkpoint; abrir novo PR automaticamente; iniciar CO-5/CO-6; transformar `active.yml` em fonte primária; criar migração parcial sem PR dedicado.
+
+**Status:** Resolved (2026-06-20) / @rosanarezende — decisão topológica para antecipar o colapso dual-root e manter o PR #43 focado no fechamento de `co-flow-convergence`.
+
+---
+
 ## 2 · Aberto — pesquisa genuína (única coisa ainda em investigação)
 
 > Estes **não são decisões** — são findings com **alternativas reais ainda competindo**. Vivem em [`research/findings.md`](./research/findings.md); aqui só o ponteiro. Só retornam como `[DEC] Pendente` ao **convergir + exigir julgamento**. **Critério (2026-05-31):** se não há alternativa viva competindo, **não pertence aqui** — é decisão (§ 1) ou trabalho (§ 4).
@@ -527,6 +566,7 @@ Cada transição deve declarar: fato de entrada, autoridade, comando, efeito per
 | `G15`        | CLI pública autoexplicável como porta de entrada      | **Decidido** — § 1 (Resolved 2026-06-19, owner); G16 insere arquitetura interna/BDD humano antes da falsificação final |
 | `G16`        | arquitetura interna, organização DDD e BDD visual     | **Decidido** — § 1 (Resolved 2026-06-19, owner); pausado por G17 até CO-10.7 fechar corretamente                       |
 | `G17`        | reabrir CO-10.7 antes de retomar CO-10.8              | **Decidido** — § 1 (Resolved 2026-06-19, owner); corrige fechamento prematuro de CO-10.7                               |
+| `G18`        | antecipar `dualroot-collapse`                         | **Decidido** — § 1 (Resolved 2026-06-20, owner); próximo PR dedicado após `co-flow-convergence`, antes de CO-5/CO-6    |
 
 ---
 
@@ -548,6 +588,7 @@ Cada transição deve declarar: fato de entrada, autoridade, comando, efeito per
 - [x] `[DEC-0024-G15]` — Resolved 2026-06-19 / @rosanarezende
 - [x] `[DEC-0024-G16]` — Resolved 2026-06-19 / @rosanarezende
 - [x] `[DEC-0024-G17]` — Resolved 2026-06-19 / @rosanarezende
+- [x] `[DEC-0024-G18]` — Resolved 2026-06-20 / @rosanarezende
 
 ---
 

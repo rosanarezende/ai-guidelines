@@ -205,6 +205,17 @@ topology:
       # null = ainda nao aberto. Objetivo/Deps de cada no: plan.md. Memoria:
       # spec-0024-continuity-operational.
 
+      # DEC-0024-G18 — dualroot-collapse foi antecipado para antes de co-capture/co-events.
+      # A automacao de captura/eventos deve nascer contra a estrutura canonica pos-colapso,
+      # nao contra a ponte .ai-guidelines/.specify ainda transitoria.
+      - id: dualroot-collapse
+        github_pr: null
+        role: execution
+        terminal: false
+        sequence: 11
+        checkpoints:
+          - checkpoint-dualroot-collapse # colapso do dual-root; migracao .specify + .ai-guidelines (test:smoke gateia)
+
       # CO-5 — Fecha o laco: captura do em-transito como no na FORMACAO (PIT-0002) +
       # espinha de ciclo de vida (maturacao/graduacao human-gated). Dissolve NEXT.md
       # (conhecimento load-bearing nao vive so em prosa; INV-5). Absorve ex-decision
@@ -213,7 +224,7 @@ topology:
         github_pr: null
         role: execution
         terminal: false
-        sequence: 11
+        sequence: 12
         checkpoints:
           - checkpoint-co-capture # captura na formacao + espinha de ciclo de vida; dissolve NEXT.md (U5)
 
@@ -224,7 +235,7 @@ topology:
         github_pr: null
         role: execution
         terminal: false
-        sequence: 12
+        sequence: 13
         checkpoints:
           - checkpoint-co-events # dispatcher de eventos / disparo automatico (U6)
 
@@ -234,23 +245,13 @@ topology:
         github_pr: null
         role: execution
         terminal: false
-        sequence: 13
+        sequence: 14
         checkpoints:
           - checkpoint-taxonomy-removal # ex-7 (CRITICO/P0): remove taxonomia evidence-driven/deterministic/mixed + ex-10 (tasks boilerplate)
           - checkpoint-agents-sync # ex-5: AGENTS sync (agents:build + agents:check)
           - checkpoint-gg-0002 # ex-6: GG-0002 banned-concept
           - checkpoint-decouple-brief # ex-9: desacopla decision-brief de evidence-driven
           - checkpoint-doc-cleanup # ex-12: limpa docs arquiteturais (workflowType)
-
-      # Migracao .specify + .ai-guidelines / colapso dual-root (ex-11A/B/C).
-      # Ortogonal; reordenado p/ o fim.
-      - id: dualroot-collapse
-        github_pr: null
-        role: execution
-        terminal: false
-        sequence: 14
-        checkpoints:
-          - checkpoint-dualroot-collapse # colapso do dual-root; migracao .specify + .ai-guidelines (test:smoke gateia)
 
       # Knowledge Readiness — NO FINAL antes do PR de integracao. Fecha a divida
       # planejada do CO-2.1: backfill amplo P0/P1, knowledge:health (dossie +
