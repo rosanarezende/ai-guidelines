@@ -265,7 +265,7 @@ export function renderFlowSummary(
   specWork?: SpecWorkSnapshot
 ): string {
   if (model.flow?.humanSummary) {
-    return renderWizardHumanSummary(model.flow.humanSummary, model);
+    return renderWizardHumanSummary(model.flow.humanSummary, model, specWork);
   }
 
   const facts = model.work.snapshot.collected.facts;
@@ -288,18 +288,31 @@ export function renderFlowSummary(
     .join("\n\n");
 }
 
-function renderWizardHumanSummary(summary: HumanSummary, model: CockpitModel): string {
+function renderWizardHumanSummary(
+  summary: HumanSummary,
+  model: CockpitModel,
+  specWork?: SpecWorkSnapshot
+): string {
+  const focusState = resolveSummaryFocusState(specWork);
+  if (focusState !== "focused") {
+    return renderUnfocusedWizardSummary(model, specWork, focusState);
+  }
+
   const lines: string[] = [];
   const recommended = model.flow?.recommended ?? null;
   const alternatives = (model.flow?.available ?? []).filter(
     (action) => action.id !== recommended?.id && isHumanValueAlternative(action.id)
   );
   lines.push(WIZARD_COPY.summary.state);
+  for (const item of specStateLines(model, specWork)) {
+    lines.push(...wrapText(item, "  ", 74));
+  }
   for (const item of summary.state) {
     lines.push(...wrapText(item, "  ", 74));
   }
   lines.push("");
 
+  renderPublicSpecIndexBlock(lines, specWork);
   renderObjectBlock(lines, WIZARD_COPY.summary.now, summary.currentObject);
   renderRoadmapBlock(lines, summary);
 
@@ -327,6 +340,164 @@ function renderWizardHumanSummary(summary: HumanSummary, model: CockpitModel): s
   }
 
   return lines.join("\n").trimEnd();
+}
+
+type SummaryFocusState =
+  | "focused"
+  | "branch-missing"
+  | "branch-unmapped"
+  | "no-active-specs"
+  | "index-degraded";
+
+function resolveSummaryFocusState(snapshot?: SpecWorkSnapshot): SummaryFocusState {
+  if (!snapshot) return "focused";
+  if (!snapshot.indexAvailable) return "index-degraded";
+  if (snapshot.entries.length === 0) return "no-active-specs";
+  if (!snapshot.currentBranch) return "branch-missing";
+  return currentSpecForBranch(snapshot) ? "focused" : "branch-unmapped";
+}
+
+function renderUnfocusedWizardSummary(
+  model: CockpitModel,
+  snapshot: SpecWorkSnapshot | undefined,
+  focusState: Exclude<SummaryFocusState, "focused">
+): string {
+  const lines: string[] = [WIZARD_COPY.summary.state];
+  for (const item of specStateLines(model, snapshot)) {
+    lines.push(...wrapText(item, "  ", 74));
+  }
+  lines.push("");
+
+  renderPublicSpecIndexBlock(lines, snapshot);
+
+  lines.push(WIZARD_COPY.summary.recommended);
+  lines.push(...wrapText(unfocusedNextAction(snapshot, focusState), "  ", 70));
+
+  const alternatives = unfocusedAlternatives(focusState);
+  if (alternatives.length > 0) {
+    lines.push("");
+    lines.push(WIZARD_COPY.summary.alternatives);
+    for (const alternative of alternatives) lines.push(...wrapBullet(alternative));
+  }
+
+  return lines.join("\n").trimEnd();
+}
+
+function unfocusedNextAction(
+  snapshot: SpecWorkSnapshot | undefined,
+  focusState: Exclude<SummaryFocusState, "focused">
+): string {
+  switch (focusState) {
+    case "branch-missing":
+      return WIZARD_COPY.summary.branchMissingNextAction;
+    case "branch-unmapped":
+      return WIZARD_COPY.summary.branchUnmappedNextAction;
+    case "no-active-specs":
+      return isMainBranch(snapshot?.currentBranch)
+        ? WIZARD_COPY.summary.noActiveSpecsOnMainNextAction
+        : WIZARD_COPY.summary.noActiveSpecsNextAction;
+    case "index-degraded":
+      return WIZARD_COPY.summary.indexDegradedNextAction;
+  }
+}
+
+function unfocusedAlternatives(
+  focusState: Exclude<SummaryFocusState, "focused">
+): readonly string[] {
+  switch (focusState) {
+    case "branch-missing":
+    case "branch-unmapped":
+      return [
+        WIZARD_COPY.summary.alternativeOpenSpecs,
+        WIZARD_COPY.summary.alternativeChooseSpec,
+        WIZARD_COPY.summary.alternativeStartSpec,
+      ];
+    case "no-active-specs":
+      return [WIZARD_COPY.summary.alternativeStartSpec, WIZARD_COPY.summary.alternativeUpdateRepo];
+    case "index-degraded":
+      return [WIZARD_COPY.summary.alternativeChooseSpec, WIZARD_COPY.summary.alternativeStartSpec];
+  }
+}
+
+function isMainBranch(branch: string | null | undefined): boolean {
+  return branch === "main" || branch === "master" || branch === "trunk";
+}
+
+function specStateLines(model: CockpitModel, snapshot?: SpecWorkSnapshot): readonly string[] {
+  const lines: string[] = [];
+  const current = snapshot ? currentSpecForBranch(snapshot) : null;
+  if (current) {
+    lines.push(
+      formatCopy(WIZARD_COPY.summary.currentSpecState, {
+        id: current.entry.id,
+        slug: current.entry.slug,
+      })
+    );
+  } else if (snapshot && snapshot.indexAvailable && snapshot.entries.length === 0) {
+    lines.push(WIZARD_COPY.summary.specNoneState);
+  } else if (snapshot) {
+    lines.push(WIZARD_COPY.summary.specUnknownState);
+  }
+
+  const branch = snapshot?.currentBranch ?? model.work.snapshot.collected.facts.git.branch ?? null;
+  lines.push(
+    branch
+      ? formatCopy(WIZARD_COPY.summary.currentBranch, { branch })
+      : WIZARD_COPY.summary.unknownBranch
+  );
+  return lines;
+}
+
+function renderPublicSpecIndexBlock(lines: string[], snapshot?: SpecWorkSnapshot): void {
+  if (!snapshot || !shouldRenderPublicSpecIndex(snapshot)) return;
+
+  lines.push(WIZARD_COPY.summary.publicIndex);
+  if (!snapshot.indexAvailable) {
+    lines.push(...wrapBullet(WIZARD_COPY.summary.indexUnavailable));
+    for (const warning of snapshot.warnings) lines.push(...wrapBullet(warning));
+    lines.push("");
+    return;
+  }
+
+  if (snapshot.entries.length === 0) {
+    lines.push(...wrapBullet(WIZARD_COPY.summary.indexNone));
+    for (const warning of snapshot.warnings) lines.push(...wrapBullet(warning));
+    lines.push("");
+    return;
+  }
+
+  lines.push(
+    ...wrapBullet(
+      snapshot.entries.length === 1
+        ? WIZARD_COPY.summary.indexSingle
+        : formatCopy(WIZARD_COPY.summary.indexMultiple, {
+            count: String(snapshot.entries.length),
+          })
+    )
+  );
+
+  const current = currentSpecForBranch(snapshot);
+  if (current) {
+    lines.push(
+      ...wrapBullet(
+        formatCopy(WIZARD_COPY.summary.indexCurrentBranch, {
+          id: current.entry.id,
+          slug: current.entry.slug,
+        })
+      )
+    );
+  } else {
+    lines.push(...wrapBullet(WIZARD_COPY.summary.indexBranchMismatch));
+  }
+  for (const warning of snapshot.warnings) lines.push(...wrapBullet(warning));
+  lines.push("");
+}
+
+function shouldRenderPublicSpecIndex(snapshot: SpecWorkSnapshot): boolean {
+  if (!snapshot.indexAvailable) return true;
+  if (snapshot.entries.length === 0) return false;
+  if (snapshot.entries.length > 1) return true;
+  return !currentSpecForBranch(snapshot);
 }
 
 function renderContextGuidance(guidance: ContextGuidance): string {

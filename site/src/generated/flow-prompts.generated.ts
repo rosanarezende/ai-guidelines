@@ -1490,6 +1490,8 @@ export const AI_GUIDELINES_FLOW_PROMPTS = {
           "title": "Estado atual",
           "lines": [
             "ESTADO",
+            "  Spec 0024 — demo.",
+            "  Branch atual: feat/spec-0024-demo.",
             "  Repo governado detectado.",
             "  Ha uma spec ativa em andamento.",
             "  Working tree limpa.",
@@ -1608,9 +1610,15 @@ export const AI_GUIDELINES_FLOW_PROMPTS = {
           "title": "Estado atual",
           "lines": [
             "ESTADO",
+            "  Spec 0024 — co-flow.",
+            "  Branch atual: feat/spec-0024-co-flow.",
             "  Repo governado detectado.",
             "  Ha mais de uma spec ativa; escolha o foco antes de decidir.",
             "  Working tree limpa.",
+            "",
+            "ÍNDICE PÚBLICO",
+            "  - 3 specs abertas.",
+            "  - A branch atual aponta para Spec 0024 — co-flow.",
             "",
             "AGORA",
             "  Várias specs ativas",
@@ -1721,6 +1729,8 @@ export const AI_GUIDELINES_FLOW_PROMPTS = {
           "title": "Estado atual",
           "lines": [
             "ESTADO",
+            "  Spec 0024 — demo.",
+            "  Branch atual: feat/spec-0024-demo.",
             "  Repo governado detectado.",
             "  Ha uma spec ativa em andamento.",
             "  Working tree limpa.",

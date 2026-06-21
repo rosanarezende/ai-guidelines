@@ -781,6 +781,10 @@ describe("flow wizard", () => {
       prompts,
       registry: registryWith(),
       collectModel: () => model(),
+      loadActiveSpecsIndex: () => ({
+        ...activeSpecsResult(),
+        entries: activeSpecsResult().entries.slice(0, 1),
+      }),
     });
 
     expect(code).toBe(0);
@@ -797,6 +801,207 @@ describe("flow wizard", () => {
     expect(prompts.notes[0]).not.toContain("O QUE O GUIA DETECTOU");
     expect(prompts.notes[0]).not.toContain("NÃO FAZER AGORA");
     expect(prompts.statuses).toEqual([]);
+  });
+
+  it("resumo inicial mostra spec, branch e índice público quando há várias specs", async () => {
+    const prompts = new ScriptedPrompts(["quit"]);
+
+    const code = await runFlowWizard("/repo", new CollectingLogger(), {
+      prompts,
+      registry: registryWith(),
+      collectModel: () => model(),
+      loadActiveSpecsIndex: () => activeSpecsResult(),
+    });
+
+    expect(code).toBe(0);
+    expect(prompts.notes[0]).toContain("ESTADO");
+    expect(prompts.notes[0]).toContain("Spec 0024 — context-architecture.");
+    expect(prompts.notes[0]).toContain("Branch atual: feat/spec-0024-co-flow-convergence.");
+    expect(prompts.notes[0]).toContain("PR #43 Draft.");
+    expect(prompts.notes[0]).toContain("ÍNDICE PÚBLICO");
+    expect(prompts.notes[0]).toContain("2 specs abertas.");
+    expect(prompts.notes[0]).toContain(
+      "A branch atual aponta para Spec 0024 — context-architecture."
+    );
+    expect(prompts.notes[0]).not.toContain("O QUE O GUIA DETECTOU");
+  });
+
+  it("resumo inicial não mostra índice público quando há uma única spec alinhada à branch", async () => {
+    const prompts = new ScriptedPrompts(["quit"]);
+
+    const code = await runFlowWizard("/repo", new CollectingLogger(), {
+      prompts,
+      registry: registryWith(),
+      collectModel: () => model(),
+      loadActiveSpecsIndex: () => ({
+        ...activeSpecsResult(),
+        entries: activeSpecsResult().entries.slice(0, 1),
+      }),
+    });
+
+    expect(code).toBe(0);
+    expect(prompts.notes[0]).toContain("Spec 0024 — context-architecture.");
+    expect(prompts.notes[0]).toContain("Branch atual: feat/spec-0024-co-flow-convergence.");
+    expect(prompts.notes[0]).not.toContain("ÍNDICE PÚBLICO");
+    expect(prompts.notes[0]).not.toContain("1 spec aberta.");
+  });
+
+  it("resumo inicial explicita quando a branch não aponta para spec publicada", async () => {
+    const prompts = new ScriptedPrompts(["quit"]);
+    const base = model();
+
+    const code = await runFlowWizard("/repo", new CollectingLogger(), {
+      prompts,
+      registry: registryWith(),
+      collectModel: () =>
+        modelWithFacts(
+          makeHandoffFacts({
+            ...base.work.snapshot.collected.facts,
+            git: {
+              ...base.work.snapshot.collected.facts.git,
+              branch: "feat/spec-9999-unknown",
+            },
+          })
+        ),
+      loadActiveSpecsIndex: () => activeSpecsResult(),
+    });
+
+    expect(code).toBe(0);
+    expect(prompts.notes[0]).toContain("Spec atual: não identificada pela branch.");
+    expect(prompts.notes[0]).toContain("Branch atual: feat/spec-9999-unknown.");
+    expect(prompts.notes[0]).toContain("ÍNDICE PÚBLICO");
+    expect(prompts.notes[0]).toContain(
+      "A branch atual não aponta para nenhuma spec do índice público."
+    );
+    expect(prompts.notes[0]).toContain("PRÓXIMA AÇÃO RECOMENDADA");
+    expect(prompts.notes[0]).toContain("Escolher a spec certa e trocar para a branch governada");
+    expect(prompts.notes[0]).toContain("continuar.");
+    expect(prompts.notes[0]).toContain("ALTERNATIVAS");
+    expect(prompts.notes[0]).toContain("Ver specs abertas");
+    expect(prompts.notes[0]).toContain("Escolher uma spec para continuar");
+    expect(prompts.notes[0]).toContain("Iniciar uma nova spec");
+    expect(prompts.notes[0]).not.toContain("AGORA");
+    expect(prompts.notes[0]).not.toContain("DEPOIS");
+    expect(prompts.notes[0]).not.toContain("CO-10.2 — confronto modelo x codigo");
+  });
+
+  it("resumo inicial mostra estado sem índice extra quando não há specs abertas", async () => {
+    const prompts = new ScriptedPrompts(["quit"]);
+
+    const code = await runFlowWizard("/repo", new CollectingLogger(), {
+      prompts,
+      registry: registryWith(),
+      collectModel: () => model(),
+      loadActiveSpecsIndex: () => ({ indexAvailable: true, warnings: [], entries: [] }),
+    });
+
+    expect(code).toBe(0);
+    expect(prompts.notes[0]).toContain("Nenhuma spec ativa publicada.");
+    expect(prompts.notes[0]).toContain("Branch atual: feat/spec-0024-co-flow-convergence.");
+    expect(prompts.notes[0]).toContain("PRÓXIMA AÇÃO RECOMENDADA");
+    expect(prompts.notes[0]).toContain(
+      "Voltar para a branch principal e iniciar uma nova spec governada."
+    );
+    expect(prompts.notes[0]).toContain("ALTERNATIVAS");
+    expect(prompts.notes[0]).toContain("Iniciar uma nova spec");
+    expect(prompts.notes[0]).toContain("Atualizar este repositório");
+    expect(prompts.notes[0]).not.toContain("ÍNDICE PÚBLICO");
+    expect(prompts.notes[0]).not.toContain("Nenhuma spec ativa publicada no índice.");
+    expect(prompts.notes[0]).not.toContain("AGORA");
+    expect(prompts.notes[0]).not.toContain("DEPOIS");
+  });
+
+  it("resumo inicial orienta iniciar spec diretamente quando não há specs e a branch é main", async () => {
+    const prompts = new ScriptedPrompts(["quit"]);
+    const base = model();
+
+    const code = await runFlowWizard("/repo", new CollectingLogger(), {
+      prompts,
+      registry: registryWith(),
+      collectModel: () =>
+        modelWithFacts(
+          makeHandoffFacts({
+            ...base.work.snapshot.collected.facts,
+            git: {
+              ...base.work.snapshot.collected.facts.git,
+              branch: "main",
+            },
+          })
+        ),
+      loadActiveSpecsIndex: () => ({ indexAvailable: true, warnings: [], entries: [] }),
+    });
+
+    expect(code).toBe(0);
+    expect(prompts.notes[0]).toContain("Nenhuma spec ativa publicada.");
+    expect(prompts.notes[0]).toContain("Branch atual: main.");
+    expect(prompts.notes[0]).toContain("Iniciar uma nova spec governada.");
+    expect(prompts.notes[0]).not.toContain("Voltar para a branch principal");
+    expect(prompts.notes[0]).not.toContain("AGORA");
+    expect(prompts.notes[0]).not.toContain("DEPOIS");
+  });
+
+  it("resumo inicial mostra índice público quando não há branch identificada e há specs abertas", async () => {
+    const prompts = new ScriptedPrompts(["quit"]);
+    const base = model();
+
+    const code = await runFlowWizard("/repo", new CollectingLogger(), {
+      prompts,
+      registry: registryWith(),
+      collectModel: () =>
+        modelWithFacts(
+          makeHandoffFacts({
+            ...base.work.snapshot.collected.facts,
+            git: {
+              ...base.work.snapshot.collected.facts.git,
+              branch: null,
+            },
+          })
+        ),
+      loadActiveSpecsIndex: () => activeSpecsResult(),
+    });
+
+    expect(code).toBe(0);
+    expect(prompts.notes[0]).toContain("Spec atual: não identificada pela branch.");
+    expect(prompts.notes[0]).toContain("Branch atual: não identificada.");
+    expect(prompts.notes[0]).toContain("ÍNDICE PÚBLICO");
+    expect(prompts.notes[0]).toContain("2 specs abertas.");
+    expect(prompts.notes[0]).toContain(
+      "A branch atual não aponta para nenhuma spec do índice público."
+    );
+    expect(prompts.notes[0]).toContain("PRÓXIMA AÇÃO RECOMENDADA");
+    expect(prompts.notes[0]).toContain("Entrar na branch correta da spec que você quer continuar.");
+    expect(prompts.notes[0]).toContain("ALTERNATIVAS");
+    expect(prompts.notes[0]).toContain("Ver specs abertas");
+    expect(prompts.notes[0]).not.toContain("AGORA");
+    expect(prompts.notes[0]).not.toContain("DEPOIS");
+  });
+
+  it("resumo inicial explicita modo degradado quando índice público não foi lido", async () => {
+    const prompts = new ScriptedPrompts(["quit"]);
+
+    const code = await runFlowWizard("/repo", new CollectingLogger(), {
+      prompts,
+      registry: registryWith(),
+      collectModel: () => model(),
+      loadActiveSpecsIndex: () => ({
+        indexAvailable: false,
+        warnings: ["active.yml ausente"],
+        entries: [],
+      }),
+    });
+
+    expect(code).toBe(0);
+    expect(prompts.notes[0]).toContain("Spec atual: não identificada pela branch.");
+    expect(prompts.notes[0]).toContain("Branch atual: feat/spec-0024-co-flow-convergence.");
+    expect(prompts.notes[0]).toContain("ÍNDICE PÚBLICO");
+    expect(prompts.notes[0]).toContain("Não consegui ler o índice público de specs.");
+    expect(prompts.notes[0]).toContain("active.yml ausente");
+    expect(prompts.notes[0]).toContain("PRÓXIMA AÇÃO RECOMENDADA");
+    expect(prompts.notes[0]).toContain(
+      "Recarregar ou corrigir o índice público de specs antes de continuar."
+    );
+    expect(prompts.notes[0]).not.toContain("AGORA");
+    expect(prompts.notes[0]).not.toContain("DEPOIS");
   });
 
   it("resumo inicial não carrega o contexto amplo de repo governado", async () => {
@@ -859,7 +1064,6 @@ describe("flow wizard", () => {
         });
         expect(prompts.notes[0]).not.toContain("A pasta está vazia");
         expect(prompts.notes[0]).not.toContain("Iniciar ai-guidelines neste repositório");
-        expect(prompts.notes[0]).not.toContain("Nenhuma spec ativa");
       }
     );
 
