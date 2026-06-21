@@ -16,6 +16,22 @@ function readSiteSources(relativePaths: readonly string[]): string {
 }
 
 describe("flow copy catalog", () => {
+  it("mantém paridade entre locale, providers suportados e features suportadas", () => {
+    expect(Object.keys(FLOW_COPY.providers).sort()).toEqual(getSupportedProviders().sort());
+    expect(Object.keys(FLOW_COPY.features).sort()).toEqual([...FEATURE_OPTIONS].sort());
+
+    for (const provider of getSupportedProviders()) {
+      expect(providerCopy(provider).label).toBeTruthy();
+      expect(providerCopy(provider).hint).toBeTruthy();
+      expect(providerCopy(provider).htmlHint).toBeTruthy();
+    }
+    for (const feature of FEATURE_OPTIONS) {
+      expect(featureCopy(feature).label).toBeTruthy();
+      expect(featureCopy(feature).hint).toBeTruthy();
+      expect(featureCopy(feature).htmlLabel).toBeTruthy();
+    }
+  });
+
   it("descreve providers e práticas em linguagem humana", () => {
     expect(providerCopy("claude")).toMatchObject({
       label: "Claude",
