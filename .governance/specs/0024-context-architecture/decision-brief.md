@@ -6,7 +6,7 @@
 > Plan: [`./plan.md`](./plan.md)
 > Tasks: [`./tasks.md`](./tasks.md)
 > Status agregado: **Resolved (decisões)** — todas as `[DEC]` desta spec estão `Resolved`; a pesquisa estrutural ainda aberta vive em [`research/findings.md`](./research/findings.md), não aqui.
-> Última atualização: 2026-06-20 — **`[DEC-0024-G19]` registrada**: o PR #43 passa a fechar o recorte entregue até CO-10.7; CO-10.8..CO-10.10 saem para próximo PR, e uma revisão externa independente será pedida antes do Human Gate deste PR.
+> Última atualização: 2026-06-21 — **`[DEC-0024-G20]` registrada**: a revisão externa pré-Human Gate confirmou o recorte do PR #43, mas exigiu reconciliar `state.yml § next`, materializar a continuação CO-10.8..CO-10.10 na topologia e atualizar o body antes de Ready/Human Gate.
 
 > **Artefato exclusivo de decisão humana.** Organizado por **estado**, não por numeração histórica (reestruturação 2026-05-31). Quatro estados respondem, à primeira vista, _o que já foi decidido · o que ainda está aberto · o que virou regra · o que virou enforcement_:
 >
@@ -518,11 +518,50 @@ Cada transição deve declarar: fato de entrada, autoridade, comando, efeito per
 - A revisão externa passa a ser o próximo passo antes da decisão humana do PR #43, reduzindo o risco de overclaim e de aceitação enviesada por dogfood interno.
 - O próximo PR poderá começar de uma base mais limpa, usando os achados de CO-10.7 e o seed de CO-10.8 como entrada, sem carregar todo o histórico de reescritas do site/CLI pública.
 
-**O que NÃO está sendo decidido:** implementar CO-10.8 agora; apagar o seed já produzido; executar revisão como decisão mutante; converter o PR para Ready; exercer Human Gate; fazer merge; alterar `state.yml`; iniciar `dualroot-collapse`; abrir PR novo automaticamente.
+**O que NÃO está sendo decidido:** implementar CO-10.8 agora; apagar o seed já produzido; executar revisão como decisão mutante; converter o PR para Ready; exercer Human Gate; fazer merge; iniciar `dualroot-collapse`; abrir PR novo automaticamente. **Nota posterior:** `[DEC-0024-G20]` revisa a parte "não alterar `state.yml`" somente para reconciliar `next` e topologia antes do Gate; não autoriza implementar a continuação nem mudar o recorte do PR #43.
 
 **Status:** Resolved (2026-06-20) / @rosanarezende — decisão de recorte para revisão externa do PR #43 antes do Human Gate e continuação de CO-10.8..CO-10.10 em próximo PR.
 
-**Nota posterior em G18:** a frase "Continuar o PR #43 com CO-10.8, CO-10.9 e CO-10.10" foi supersedida por G19. G18 continua válida para a topologia pós-`co-flow-convergence` (`dualroot-collapse` antes de `co-capture`/`co-events`), mas não define mais o veículo/PR da continuação CO-10.8..CO-10.10.
+**Nota posterior em G18:** a frase "Continuar o PR #43 com CO-10.8, CO-10.9 e CO-10.10" foi supersedida por G19. G18 continua válida para a ordem relativa pós-continuação (`dualroot-collapse` antes de `co-capture`/`co-events`), mas `[DEC-0024-G20]` materializa a continuação CO-10.8..CO-10.10 como nó próprio antes de `dualroot-collapse`.
+
+---
+
+### [DEC-0024-G20] Ancorar a continuação CO-10.8..CO-10.10 antes de `dualroot-collapse`
+
+**Pergunta:** Depois da revisão externa pré-Human Gate do PR #43, a continuação CO-10.8..CO-10.10 pode permanecer apenas em prosa, ou precisa virar nó planejado na topologia antes de `dualroot-collapse`, `co-capture` e `co-events`?
+
+**Modo de gate:** `aceitação` <!-- decisão operacional/arquitetural da owner, 2026-06-21, após revisão externa independente do PR #43. -->
+
+**Contexto:** A revisão externa independente do PR #43 confirmou que o recorte CO-10.1..CO-10.7 é coerente e entrega valor próprio, mas apontou três fechamentos obrigatórios antes de Ready/Human Gate: o body do PR ainda descrevia majoritariamente CO-10.1; `state.yml § next` ainda narrava "retomar CO-10.8" por G17; e a continuação CO-10.8..CO-10.10 estava registrada em `tasks.md`/`plan.md`, mas não materializada na `state.yml § topology`. Isso criava risco de mis-binding: o Human Gate poderia aprovar o recorte sem deixar explícito qual movimento topológico vem antes de `dualroot-collapse`/`co-capture`/`co-events`.
+
+**Decisão (Resolved):**
+
+- Manter o PR #43 limitado ao recorte entregue `CO-10.1..CO-10.7`.
+- Registrar a revisão externa pré-Human Gate como concluída e usar seus achados para correção documental/topológica antes de Ready.
+- Materializar a continuação CO-10.8..CO-10.10 como nó planejado `co-flow-continuation` imediatamente após `co-flow-convergence`.
+- Atualizar a topologia planejada para:
+  - `co-flow-convergence` seq 10;
+  - `co-flow-continuation` seq 11 — CO-10.8 arquitetura interna/DDD/BDD visual; CO-10.9 falsificação ampla; CO-10.10 revisão independente + Human Gate da continuação;
+  - `dualroot-collapse` seq 12;
+  - `co-capture` seq 13;
+  - `co-events` seq 14;
+  - `housekeeping` seq 15;
+  - `knowledge-readiness` seq 16;
+  - `integration-final` terminal.
+- Reconciliar `state.yml § next`, `plan.md`, `tasks.md` e o body do PR #43 para refletirem o mesmo recorte e o mesmo próximo movimento.
+- Declarar no PR/body/Gate que os reviews formais de TA/AR/Security do nó cobriram o inventário CO-10.1; a superfície entregue até CO-10.7 foi validada por dogfood, harness de consumidores e revisão externa independente, com nova rodada formal prevista na continuação.
+- Declarar que o smoke real/multi-OS segue diferido por política de PR intermediário e retorna no fechamento apropriado; o PR #43 mantém evidência local via harness de consumidores.
+
+**O que NÃO está sendo decidido:** implementar CO-10.8/CO-10.9/CO-10.10 neste PR; iniciar `dualroot-collapse`; iniciar CO-5/CO-6; abrir PR novo automaticamente; converter o PR #43 para Ready; exercer Human Gate; fazer merge; executar `advance-subcheckpoint`, `finish-subcheckpoint`, `mark-readiness` ou qualquer decisão mutante.
+
+**Impacto esperado:**
+
+- O Human Gate do PR #43 passa a ter próximo movimento topológico explícito.
+- `dualroot-collapse`, `co-capture` e `co-events` continuam bloqueados por ordenação até a continuação do fluxo ser executada e falsificada.
+- A revisão externa deixa de ser só narrativa de chat e passa a ser artefato governado com achados rastreáveis.
+- A decisão G19 continua válida no recorte do PR #43; G20 apenas corrige a representação topológica necessária para que o recorte seja honesto.
+
+**Status:** Resolved (2026-06-21) / @rosanarezende — decisão de reconciliação pré-Ready após revisão externa independente do PR #43.
 
 ---
 
@@ -599,6 +638,7 @@ Cada transição deve declarar: fato de entrada, autoridade, comando, efeito per
 | `G17`        | reabrir CO-10.7 antes de retomar CO-10.8              | **Decidido** — § 1 (Resolved 2026-06-19, owner); corrige fechamento prematuro de CO-10.7                               |
 | `G18`        | antecipar `dualroot-collapse`                         | **Decidido** — § 1 (Resolved 2026-06-20, owner); próximo PR dedicado após `co-flow-convergence`, antes de CO-5/CO-6    |
 | `G19`        | recorte do PR #43 + revisão externa antes do Gate     | **Decidido** — § 1 (Resolved 2026-06-20, owner); PR #43 fecha CO-10.1..CO-10.7; CO-10.8..CO-10.10 vão para próximo PR  |
+| `G20`        | ancorar continuação CO-10.8..CO-10.10 na topologia    | **Decidido** — § 1 (Resolved 2026-06-21, owner); nó `co-flow-continuation` seq 11 antes de `dualroot-collapse`         |
 
 ---
 
@@ -622,6 +662,7 @@ Cada transição deve declarar: fato de entrada, autoridade, comando, efeito per
 - [x] `[DEC-0024-G17]` — Resolved 2026-06-19 / @rosanarezende
 - [x] `[DEC-0024-G18]` — Resolved 2026-06-20 / @rosanarezende
 - [x] `[DEC-0024-G19]` — Resolved 2026-06-20 / @rosanarezende
+- [x] `[DEC-0024-G20]` — Resolved 2026-06-21 / @rosanarezende
 
 ---
 
