@@ -178,6 +178,13 @@ export interface PlanHuskyOptions {
   readonly force: boolean;
 }
 
+export const CONSUMER_HUSKY_HOOK_COMMANDS: Readonly<
+  Record<HuskyHookSnapshot["name"], "format" | "check">
+> = {
+  "pre-commit": "format",
+  "pre-push": "check",
+};
+
 export interface CiSnapshot {
   readonly packageManager: PackageManagerSnapshot;
   readonly workflowTemplate: string;
@@ -450,13 +457,10 @@ export function planHusky(
     });
   }
 
-  const desiredHooks: Readonly<Record<HuskyHookSnapshot["name"], string>> = {
-    "pre-commit": `${snapshot.packageManager.runner} format`,
-    "pre-push": `${snapshot.packageManager.runner} check`,
-  };
-
   for (const hook of snapshot.hooks) {
-    const desiredCommand = desiredHooks[hook.name];
+    const desiredCommand = `${snapshot.packageManager.runner} ${
+      CONSUMER_HUSKY_HOOK_COMMANDS[hook.name]
+    }`;
     const mergedHook = mergeHookContent(hook.content, desiredCommand, options.force, hook.name);
     if (mergedHook !== hook.content) {
       const relPath = `.husky/${hook.name}` as const;
