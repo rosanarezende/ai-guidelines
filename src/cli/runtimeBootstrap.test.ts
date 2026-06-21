@@ -36,6 +36,13 @@ describe("runtimeBootstrap", () => {
     expect(buildRuntimeBootstrapContent("")).toContain("npx ai-guidelines handoff [spec]");
   });
 
+  it("DADO repositório do framework ENTÃO AGENTS.md raiz é projeção do gerador runtime", () => {
+    const result = checkRuntimeBootstrap(process.cwd());
+
+    expect(result.ok).toBe(true);
+    expect(readFileSync(result.agentsPath, "utf-8")).toContain("npm run flow -- decide");
+  });
+
   it("DADO comando desconhecido QUANDO main ENTÃO retorna 2", () => {
     expect(main(["wat"], process.cwd())).toBe(2);
   });
