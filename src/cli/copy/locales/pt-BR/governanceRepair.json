@@ -1,0 +1,39 @@
+{
+  "command": {
+    "description": "Repara drift de governança com preview e confirmação. Mostra o que vai mudar antes de escrever.",
+    "usage": ["repair", "repair --apply", "repair --apply --updated-by=@voce"]
+  },
+  "heading": "Reparo de governança",
+  "labels": {
+    "whatHappened": "O que aconteceu",
+    "whyItMatters": "Por que importa",
+    "plan": "Plano de reparo",
+    "authority": "Autoridade",
+    "affected": "Arquivos que vão mudar",
+    "none": "(nenhum arquivo muda)"
+  },
+  "authority": {
+    "auto": "automático",
+    "confirm": "requer sua confirmação",
+    "human-decision": "decisão humana",
+    "blocked": "bloqueado"
+  },
+  "status": {
+    "noneRepairable": "Nenhum drift com reparo automático seguro foi detectado agora. Drifts que envolvem topologia, Ready ou Human Gate ficam reservados para decisão humana.",
+    "needsUpdatedBy": "Para aplicar este reparo, diga quem está autorizando: rode de novo com --updated-by=@voce.",
+    "previewOnly": "Isto é só um preview — nada foi escrito. Para aplicar, rode: repair --apply",
+    "cancelled": "Reparo cancelado. Nada foi escrito.",
+    "applied": "Reparo aplicado. Arquivos atualizados: {files}.",
+    "validatedOk": "Confirmei: o drift de branch não aparece mais no diagnóstico.",
+    "validatedStill": "Atenção: apliquei o reparo, mas o diagnóstico ainda aponta divergência. Rode `drift` para ver os detalhes."
+  },
+  "confirm": {
+    "message": "Aplicar este reparo agora? Vou reescrever a projeção ativa pela via governada (publish-state)."
+  },
+  "branchStale": {
+    "title": "A projeção ativa aponta para outra branch",
+    "whatHappened": "Você está na branch \"{currentBranch}\", mas o índice ativo ainda registra \"{projectedBranch}\" para esta spec.",
+    "whyItMatters": "Os checks e a retomada usam o índice ativo para saber em qual frente você está. Enquanto ele apontar para a branch antiga, uma sessão nova pode se situar no nó errado.",
+    "action": "Republicar a projeção ativa para a branch atual, preservando status e autoria (só a branch e o carimbo de data mudam)."
+  }
+}

@@ -507,6 +507,17 @@ export const AI_GUIDELINES_FLOW_COPY = {
       "subcommands": []
     },
     {
+      "name": "repair",
+      "aliases": [],
+      "description": "Repara drift de governança com preview e confirmação. Mostra o que vai mudar antes de escrever.",
+      "usage": [
+        "repair",
+        "repair --apply",
+        "repair --apply --updated-by=@voce"
+      ],
+      "subcommands": []
+    },
+    {
       "name": "review",
       "aliases": [],
       "description": "Briefing governado por tipo de review (catálogo extensível: `review types`); `review [<pr>]` delega ao triage (compat).",

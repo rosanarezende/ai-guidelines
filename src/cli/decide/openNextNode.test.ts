@@ -507,7 +507,7 @@ describe("open-next-node · aplicação por portas [decide]", () => {
       draft: true,
     });
     expect(stack.created[0].body).toContain(
-      "<summary><strong>Detalhes de escopo e limites</strong></summary>"
+      "<summary><strong>Escopo técnico e limites</strong></summary>"
     );
     expect(stack.created[0].body).toContain("## Valor entregue");
     expect(stack.created[0].body).toContain("co-capture");
