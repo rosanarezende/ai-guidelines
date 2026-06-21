@@ -185,7 +185,13 @@ function availableDecisions(model: CockpitModel): readonly CockpitModel["decisio
 function alternativesFor(model: CockpitModel): readonly CockpitModel["decisions"][number][] {
   const recommended = model.flow?.recommended;
   const available = availableDecisions(model);
-  return available.filter((action) => action.id !== recommended?.id);
+  return available.filter(
+    (action) => action.id !== recommended?.id && isHumanValueAlternative(action.id)
+  );
+}
+
+function isHumanValueAlternative(id: string): boolean {
+  return id === "request-advisory-review" || id === "review-insight-candidates";
 }
 
 function wrapText(value: string, indent: string, width = 74): string[] {
@@ -226,7 +232,30 @@ function renderObjectBlock(
   lines.push(`  ${object.label}`);
   lines.push("");
   pushWrapped(lines, WIZARD_COPY.summary.objective, object.objective);
-  pushWrapped(lines, WIZARD_COPY.summary.output, object.output);
+  if ((object.decisions?.length ?? 0) > 0) {
+    lines.push("");
+    lines.push(`  ${WIZARD_COPY.summary.decisions}:`);
+    for (const decision of object.decisions ?? []) {
+      const summary = decision.summary ? ` — ${decision.summary}` : "";
+      lines.push(...wrapText(`- ${decision.id}${summary}`, "    ", 70));
+    }
+  }
+  lines.push("");
+}
+
+function renderRoadmapBlock(lines: string[], summary: HumanSummary): void {
+  lines.push(WIZARD_COPY.summary.next);
+  const nextObjects = summary.nextObjects ?? [];
+  const objects =
+    nextObjects.length > 0 ? nextObjects : summary.nextObject ? [summary.nextObject] : [];
+  if (objects.length === 0) {
+    lines.push(`  ${COMMON_COPY.none}`);
+    lines.push("");
+    return;
+  }
+  for (const object of objects) {
+    lines.push(`  - ${object.label}`);
+  }
   lines.push("");
 }
 
@@ -236,12 +265,7 @@ export function renderFlowSummary(
   specWork?: SpecWorkSnapshot
 ): string {
   if (model.flow?.humanSummary) {
-    return [
-      renderWizardHumanSummary(model.flow.humanSummary, model),
-      renderContextGuidance(buildContextGuidance(model, provisioning, specWork)),
-    ]
-      .filter(Boolean)
-      .join("\n\n");
+    return renderWizardHumanSummary(model.flow.humanSummary, model);
   }
 
   const facts = model.work.snapshot.collected.facts;
@@ -268,7 +292,7 @@ function renderWizardHumanSummary(summary: HumanSummary, model: CockpitModel): s
   const lines: string[] = [];
   const recommended = model.flow?.recommended ?? null;
   const alternatives = (model.flow?.available ?? []).filter(
-    (action) => action.id !== recommended?.id
+    (action) => action.id !== recommended?.id && isHumanValueAlternative(action.id)
   );
   lines.push(WIZARD_COPY.summary.state);
   for (const item of summary.state) {
@@ -277,7 +301,7 @@ function renderWizardHumanSummary(summary: HumanSummary, model: CockpitModel): s
   lines.push("");
 
   renderObjectBlock(lines, WIZARD_COPY.summary.now, summary.currentObject);
-  renderObjectBlock(lines, WIZARD_COPY.summary.next, summary.nextObject);
+  renderRoadmapBlock(lines, summary);
 
   if (summary.ready.length > 0) {
     lines.push(WIZARD_COPY.summary.ready);
@@ -293,19 +317,12 @@ function renderWizardHumanSummary(summary: HumanSummary, model: CockpitModel): s
 
   lines.push(WIZARD_COPY.summary.recommended);
   lines.push(...wrapText(summary.nextAction, "  ", 70));
-  if (summary.command) {
-    lines.push(`  ${WIZARD_COPY.summary.understandBeforeApply}`);
-    lines.push(`  ${summary.command}`);
-  }
 
   if (alternatives.length > 0) {
     lines.push("");
     lines.push(WIZARD_COPY.summary.alternatives);
     for (const action of alternatives) {
       lines.push(...wrapBullet(humanActionTitle(action.id, action.title)));
-      if (action.command) {
-        lines.push(...wrapText(action.command, "      ", 64));
-      }
     }
   }
 

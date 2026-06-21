@@ -40,16 +40,23 @@ export interface GovernedFlow {
   readonly humanSummary: HumanSummary;
 }
 
+export interface HumanDecisionSummary {
+  readonly id: string;
+  readonly summary: string | null;
+}
+
 export interface HumanObjectSummary {
   readonly label: string;
   readonly objective: string;
   readonly output: string | null;
+  readonly decisions?: readonly HumanDecisionSummary[];
 }
 
 export interface HumanSummary {
   readonly state: readonly string[];
   readonly currentObject: HumanObjectSummary | null;
   readonly nextObject: HumanObjectSummary | null;
+  readonly nextObjects?: readonly HumanObjectSummary[];
   readonly ready: readonly string[];
   readonly missing: readonly string[];
   readonly nextAction: string;
@@ -753,14 +760,6 @@ function currentCheckpointLabel(snapshot: DecisionSnapshot): string {
   return snapshot.checkpoint ?? snapshot.facts.cursor?.checkpoint ?? "checkpoint nao identificado";
 }
 
-function currentSubCheckpointLabel(snapshot: DecisionSnapshot): string {
-  const active = activeSubCheckpoint(snapshot.subCheckpoints);
-  if (active) return `${active.id} — ${active.title}`;
-  const pending = snapshot.subCheckpoints.filter((s) => s.state === "pending");
-  if (pending.length > 0) return `sem ativo; proximo pendente: ${pending[0].id}`;
-  return "sem sub-checkpoint ativo";
-}
-
 function nextPendingSubCheckpoint(
   subs: readonly HandoffSubCheckpoint[],
   current: HandoffSubCheckpoint | null
@@ -779,6 +778,32 @@ function stripInlineMarkdown(value: string): string {
     .replace(/\*\*([^*]+)\*\*/g, "$1")
     .replace(/\s+/g, " ")
     .trim();
+}
+
+function decisionRefsFromRawText(value: string | undefined): readonly HumanDecisionSummary[] {
+  if (!value) return [];
+  return [...new Set([...value.matchAll(/\[?(DEC-\d{4}-G\d+)\]?/g)].map((match) => match[1]))].map(
+    (id) => ({ id, summary: decisionSummary(id) })
+  );
+}
+
+function decisionSummary(id: string): string | null {
+  const summaries: Record<string, string> = {
+    "DEC-0024-G15": "criou CO-10.7 para tornar a CLI pública autoexplicável.",
+    "DEC-0024-G16": "criou CO-10.8 para reorganização interna e BDD visual.",
+    "DEC-0024-G17": "reabriu CO-10.7 porque o fechamento anterior foi prematuro.",
+  };
+  return summaries[id] ?? null;
+}
+
+function stripLeadingDecisionClause(value: string | null): string | null {
+  if (!value) return value;
+  return value.replace(/^\([^)]*DEC-\d{4}-G\d+[^)]*\):\s*/, "").trim();
+}
+
+function sentenceCase(value: string): string {
+  if (value.length === 0) return value;
+  return `${value.charAt(0).toLocaleUpperCase("pt-BR")}${value.slice(1)}`;
 }
 
 function extractBetween(value: string, start: string, ends: readonly string[]): string | null {
@@ -800,7 +825,8 @@ function descriptionFromRawText(sub: HandoffSubCheckpoint): string | null {
   const afterMarker = markerIndex >= 0 ? sub.text.slice(markerIndex + marker.length) : sub.text;
   const afterColon = afterMarker.replace(/^[:\s]+/, "");
   const objective = extractBetween(afterColon, "", ["**Entradas:**", "**Saída:**"]);
-  return objective && objective.length > 0 ? objective : null;
+  const cleaned = stripLeadingDecisionClause(objective);
+  return cleaned && cleaned.length > 0 ? sentenceCase(cleaned) : null;
 }
 
 function outputFromRawText(sub: HandoffSubCheckpoint): string | null {
@@ -814,13 +840,14 @@ function objectSummary(sub: HandoffSubCheckpoint | null): HumanObjectSummary | n
     label: `${sub.id} — ${sub.title}`,
     objective: descriptionFromRawText(sub) ?? `Executar ${sub.title}.`,
     output: outputFromRawText(sub),
+    decisions: decisionRefsFromRawText(sub.text),
   };
 }
 
-function ciLine(snapshot: DecisionSnapshot): string {
+function prStateLine(snapshot: DecisionSnapshot): string {
   const pr = snapshot.facts.pullRequest;
   if (!pr) return "PR remoto nao observado.";
-  return `PR #${pr.number} ${pr.isDraft ? "Draft" : "Ready"}; CI ${pr.checks.pass} ok, ${pr.checks.fail} falha(s), ${pr.checks.pending} pendente(s).`;
+  return `PR #${pr.number} ${pr.isDraft ? "Draft" : "Ready"}.`;
 }
 
 function deriveHumanSummary(
@@ -834,15 +861,23 @@ function deriveHumanSummary(
   const missing: string[] = [];
   const ciPending = (pr?.checks.pending ?? 0) > 0;
   const ciFailing = (pr?.checks.fail ?? 0) > 0;
+  const nextObjects = snapshot.subCheckpoints
+    .filter((sub) => current !== null && sub.state === "pending" && sub.line > current.line)
+    .sort((a, b) => a.line - b.line)
+    .map((sub) => objectSummary(sub))
+    .filter((sub): sub is HumanObjectSummary => sub !== null);
 
-  if (snapshot.openFindings.length === 0) ready.push("Os findings do checkpoint estao fechados.");
-  else missing.push(`Ainda ha ${snapshot.openFindings.length} finding(s) aberto(s).`);
+  if (snapshot.openFindings.length === 0) ready.push("Os findings do checkpoint estão fechados.");
+  else missing.push(`Ainda há ${snapshot.openFindings.length} finding(s) aberto(s).`);
 
-  if (snapshot.workingTreeState === "clean") ready.push("A working tree esta limpa.");
-  else missing.push("Ha mudancas locais nao finalizadas.");
+  if (snapshot.workingTreeState === "clean") ready.push("A working tree está limpa.");
+  else missing.push("Há mudanças locais não finalizadas.");
 
   if (pr) {
-    if (pr.checks.fail === 0 && pr.checks.pending === 0) ready.push("A CI esta verde.");
+    if (pr.checks.fail === 0 && pr.checks.pending === 0)
+      ready.push(
+        `CI ${pr.checks.pass} ok, ${pr.checks.fail} falha(s), ${pr.checks.pending} pendente(s).`
+      );
     else {
       if (pr.checks.fail > 0) missing.push(`A CI tem ${pr.checks.fail} falha(s).`);
       if (pr.checks.pending > 0)
@@ -855,7 +890,11 @@ function deriveHumanSummary(
   if (flow.recommended?.id === "mark-readiness") {
     missing.push("Falta declarar readiness do sub-checkpoint ativo.");
   } else if (flow.recommended?.id === "finish-subcheckpoint") {
-    missing.push("Falta uma decisão única para concluir este ponto e iniciar o próximo.");
+    missing.push(
+      current && next
+        ? `Falta registrar a decisão governada que encerra ${current.id} e ativa ${next.id}.`
+        : "Falta registrar a decisão governada que encerra o ponto atual."
+    );
   } else if (flow.recommended?.id === "advance-subcheckpoint") {
     missing.push("Falta decidir o avanco para o proximo sub-checkpoint.");
   } else if (flow.recommended?.id === "human-gate") {
@@ -873,27 +912,51 @@ function deriveHumanSummary(
   }
 
   return {
-    state: [
-      `Estamos em ${currentCheckpointLabel(snapshot)}.`,
-      `Objeto atual: ${currentSubCheckpointLabel(snapshot)}.`,
-      ciLine(snapshot),
-    ],
+    state: [prStateLine(snapshot), `Estamos em ${currentCheckpointLabel(snapshot)}.`],
     currentObject: objectSummary(current),
     nextObject: objectSummary(next),
+    nextObjects,
     ready,
     missing: [...new Set(missing)],
-    nextAction: flow.recommended
-      ? flow.recommended.title
-      : snapshot.workingTreeState !== "clean"
-        ? "Finalizar as mudancas locais e deixar a working tree limpa."
-        : ciPending
-          ? "Aguardar a CI terminar."
-          : ciFailing
-            ? "Corrigir a CI antes de decidir."
-            : "Nenhuma decisao mutante esta disponivel agora.",
+    nextAction: humanNextAction(
+      flow.recommended?.id ?? null,
+      current,
+      next,
+      snapshot,
+      ciPending,
+      ciFailing
+    ),
     command: flow.recommended?.command ?? null,
     forbidden: flow.forbidden.slice(0, 5),
   };
+}
+
+function humanNextAction(
+  recommendedId: GovernedFlowActionId | null,
+  current: HandoffSubCheckpoint | null,
+  next: HandoffSubCheckpoint | null,
+  snapshot: DecisionSnapshot,
+  ciPending: boolean,
+  ciFailing: boolean
+): string {
+  if (recommendedId === "finish-subcheckpoint") {
+    if (current && next) return `Encerrar ${current.id} e iniciar ${next.id}.`;
+    if (current) return `Encerrar ${current.id}.`;
+  }
+  if (recommendedId === "mark-readiness" && current) {
+    return `Declarar que ${current.id} está pronto para transição.`;
+  }
+  if (recommendedId === "advance-subcheckpoint" && next) {
+    return `Iniciar ${next.id} — ${next.title}.`;
+  }
+  if (recommendedId === "human-gate") return "Preparar a decisão humana do checkpoint.";
+  if (recommendedId === "open-next-node") return "Abrir governadamente o próximo nó planejado.";
+  if (recommendedId === "close-dispositions") return "Fechar findings revalidados.";
+  if (snapshot.workingTreeState !== "clean")
+    return "Finalizar as mudanças locais e deixar a working tree limpa.";
+  if (ciPending) return "Aguardar a CI terminar.";
+  if (ciFailing) return "Corrigir a CI antes de decidir.";
+  return "Nenhuma decisão mutante está disponível agora.";
 }
 
 export function deriveGovernedFlow(snapshot: DecisionSnapshot): GovernedFlow {

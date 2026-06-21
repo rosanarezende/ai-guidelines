@@ -44,6 +44,7 @@ export const AI_GUIDELINES_FLOW_COPY = {
       "state": "ESTADO",
       "now": "AGORA",
       "next": "DEPOIS",
+      "decisions": "Decisões relacionadas",
       "objective": "Objetivo:",
       "output": "Entrega:",
       "ready": "JÁ ESTÁ OK",

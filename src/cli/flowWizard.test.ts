@@ -327,24 +327,34 @@ function model(): CockpitModel {
       forbidden: ["Fazer merge"],
       recommended: recommendedAction,
       humanSummary: {
-        state: [
-          "Estamos em checkpoint-co-flow-convergence.",
-          "Objeto atual: CO-10.2 — confronto modelo x codigo.",
-          "PR #43 Draft; CI 5 ok, 0 falha(s), 0 pendente(s).",
-        ],
+        state: ["PR #43 Draft.", "Estamos em checkpoint-co-flow-convergence."],
         currentObject: {
           label: "CO-10.2 — confronto modelo x codigo",
           objective: "Comparar a maquina de estados canonica com os comandos vivos.",
           output: "Matriz modelo x codigo.",
+          decisions: [],
         },
         nextObject: {
           label: "CO-10.3 — correcao integral",
           objective: "Corrigir divergencias reais sem criar segunda SSOT.",
           output: null,
+          decisions: [],
         },
-        ready: ["Os findings do checkpoint estao fechados.", "A CI esta verde."],
-        missing: ["Falta uma decisão única para concluir este ponto e iniciar o próximo."],
-        nextAction: "Concluir ponto atual e iniciar o próximo",
+        nextObjects: [
+          {
+            label: "CO-10.3 — correcao integral",
+            objective: "Corrigir divergencias reais sem criar segunda SSOT.",
+            output: null,
+            decisions: [],
+          },
+        ],
+        ready: [
+          "Os findings do checkpoint estão fechados.",
+          "A working tree está limpa.",
+          "CI 5 ok, 0 falha(s), 0 pendente(s).",
+        ],
+        missing: ["Falta registrar a decisão governada que encerra CO-10.2 e ativa CO-10.3."],
+        nextAction: "Encerrar CO-10.2 e iniciar CO-10.3.",
         command: "npm run flow -- decide --type finish-subcheckpoint --brief-only",
         forbidden: ["Fazer merge"],
       },
@@ -363,7 +373,7 @@ function dirtyModel(): CockpitModel {
         workingTreeState: "functional-dirty",
         nextAction: {
           ...base.work.brief.nextAction,
-          description: "Finalizar as mudancas locais e deixar a working tree limpa.",
+          description: "Finalizar as mudanças locais e deixar a working tree limpa.",
         },
       } as never,
     },
@@ -373,8 +383,8 @@ function dirtyModel(): CockpitModel {
       recommended: null,
       humanSummary: {
         ...base.flow!.humanSummary,
-        missing: ["Ha mudancas locais nao finalizadas.", "A working tree não está limpa."],
-        nextAction: "Finalizar as mudancas locais e deixar a working tree limpa.",
+        missing: ["Há mudanças locais não finalizadas.", "A working tree não está limpa."],
+        nextAction: "Finalizar as mudanças locais e deixar a working tree limpa.",
         command: null,
       },
     },
@@ -518,47 +528,6 @@ function openFindingModel(): CockpitModel {
   );
 }
 
-function ciModel(checks: {
-  readonly pass: number;
-  readonly fail: number;
-  readonly pending: number;
-}): CockpitModel {
-  const defaults = makeHandoffFacts();
-  return modelWithFacts(
-    makeHandoffFacts({
-      ...defaults,
-      pullRequest: {
-        ...defaults.pullRequest!,
-        number: 43,
-        isDraft: true,
-        checks,
-      },
-      lifecycle: {
-        ...defaults.lifecycle!,
-        openFindings: 0,
-        openBlocking: 0,
-        closedFindings: 6,
-        resolutions: 6,
-      },
-    })
-  );
-}
-
-function readyPrModel(): CockpitModel {
-  const defaults = makeHandoffFacts();
-  return modelWithFacts(
-    makeHandoffFacts({
-      ...defaults,
-      pullRequest: {
-        ...defaults.pullRequest!,
-        number: 43,
-        isDraft: false,
-        checks: { pass: 5, fail: 0, pending: 0 },
-      },
-    })
-  );
-}
-
 describe("flow wizard", () => {
   it("menu principal expõe cockpit/provisioning e não lista providers como ação", () => {
     const menu = buildFlowMenu(model());
@@ -567,7 +536,6 @@ describe("flow wizard", () => {
       expect.arrayContaining([
         "cockpit",
         "next",
-        "alternative",
         "validate",
         "decisions",
         "work",
@@ -576,10 +544,10 @@ describe("flow wizard", () => {
         "provisioning",
       ])
     );
-    expect(values.slice(0, 3)).toEqual(["cockpit", "next", "alternative"]);
+    expect(values.slice(0, 3)).toEqual(["cockpit", "next", "validate"]);
     expect(menu[0].name).toBe("Ver resumo completo antes de escolher");
-    expect(menu[1].name).toBe("PRÓXIMA AÇÃO RECOMENDADA: Concluir ponto atual e iniciar o próximo");
-    expect(menu[2].name).toBe("ALTERNATIVA: declarar que este ponto está pronto");
+    expect(menu[1].name).toBe("PRÓXIMA AÇÃO RECOMENDADA: Encerrar CO-10.2 e iniciar CO-10.3.");
+    expect(values).not.toContain("alternative");
     expect(values).not.toContain("providers");
   });
 
@@ -609,7 +577,7 @@ describe("flow wizard", () => {
     expect(values[0]).toBe("cockpit");
     expect(values[1]).toBe("validate");
     expect(menu[1].name).toBe(
-      "PRÓXIMA AÇÃO RECOMENDADA: Finalizar as mudancas locais e deixar a working tree limpa."
+      "PRÓXIMA AÇÃO RECOMENDADA: Finalizar as mudanças locais e deixar a working tree limpa."
     );
     expect(menu[1].hint).toBe("opção principal agora");
     expect(values).not.toContain("next");
@@ -655,18 +623,11 @@ describe("flow wizard", () => {
     expect(decide.calls).toEqual([]);
   });
 
-  it("alternativa disponível abre prévia específica sem aplicar mutação", async () => {
-    const prompts = new ScriptedPrompts(["alternative"]);
-    const decide = spyCommand("decide");
+  it("readiness disponível não aparece como alternativa de valor no menu inicial", () => {
+    const menu = buildFlowMenu(model());
+    const menuText = menu.map((item) => item.name).join("\n");
 
-    const code = await runFlowWizard("/repo", new CollectingLogger(), {
-      prompts,
-      registry: registryWith(decide),
-      collectModel: () => model(),
-    });
-
-    expect(code).toBe(0);
-    expect(decide.calls).toEqual([["--type", "mark-readiness", "--brief-only"]]);
+    expect(menuText).not.toContain("declarar que este ponto está pronto");
   });
 
   it("decisões do fluxo abrem em modo somente leitura", async () => {
@@ -828,20 +789,17 @@ describe("flow wizard", () => {
     expect(prompts.notes[0]).toContain("CO-10.2 — confronto modelo x codigo");
     expect(prompts.notes[0]).toContain("DEPOIS");
     expect(prompts.notes[0]).toContain("CO-10.3 — correcao integral");
-    expect(prompts.notes[0]).toContain("ALTERNATIVAS");
-    expect(prompts.notes[0]).toContain("declarar que este ponto está pronto");
     expect(prompts.notes[0]).toContain("PRÓXIMA AÇÃO RECOMENDADA");
-    expect(prompts.notes[0]).toContain(
-      "Falta uma decisão única para concluir este ponto e iniciar o próximo."
-    );
+    expect(prompts.notes[0]).toContain("Encerrar CO-10.2 e iniciar CO-10.3.");
+    expect(prompts.notes[0]).toContain("CI 5 ok, 0 falha(s), 0 pendente(s).");
+    expect(prompts.notes[0]).not.toContain("ALTERNATIVAS");
+    expect(prompts.notes[0]).not.toContain("npm run flow -- decide");
+    expect(prompts.notes[0]).not.toContain("O QUE O GUIA DETECTOU");
     expect(prompts.notes[0]).not.toContain("NÃO FAZER AGORA");
-    expect(prompts.notes[0].indexOf("PRÓXIMA AÇÃO RECOMENDADA")).toBeLessThan(
-      prompts.notes[0].indexOf("ALTERNATIVAS")
-    );
     expect(prompts.statuses).toEqual([]);
   });
 
-  it("resumo inicial explica contexto amplo de repo governado antes da escolha humana", async () => {
+  it("resumo inicial não carrega o contexto amplo de repo governado", async () => {
     await withTempRepo(
       (repoRoot) => {
         mkdirSync(path.join(repoRoot, ".governance"), { recursive: true });
@@ -879,24 +837,16 @@ describe("flow wizard", () => {
 
         expect(code).toBe(0);
         const summary = prompts.notes[0];
-        expect(summary).toContain("O QUE O GUIA DETECTOU");
-        expect(summary).toContain("O repositório já usa ai-guidelines");
-        expect(summary).toContain("Caminho principal");
-        expect(summary).toContain("Atualizar runtime, templates, providers");
-        expect(summary).toContain("Perfil atual: team.");
-        expect(summary).toContain("2 specs publicadas");
-        expect(summary).toContain("branch atual aponta para 0024");
-        expect(summary).toContain("PR #43 está Draft");
-        expect(summary).toContain("CI verde");
-        expect(summary).toContain("Readiness");
-        expect(summary).toContain("Human Gate nunca é executado");
-        expect(summary).toContain("Review de PR de colega");
-        expect(summary).toContain("Providers, práticas e colaboração");
+        expect(summary).toContain("ESTADO");
+        expect(summary).not.toContain("O QUE O GUIA DETECTOU");
+        expect(summary).not.toContain("O repositório já usa ai-guidelines");
+        expect(summary).not.toContain("Perfil atual: team.");
+        expect(summary).not.toContain("Providers, práticas e colaboração");
       }
     );
   });
 
-  it("resumo inicial diferencia pasta vazia, arquivos soltos e repo existente sem governança", async () => {
+  it("resumo inicial não renderiza diagnóstico de provisioning", async () => {
     await withTempRepo(
       () => undefined,
       async (repoRoot) => {
@@ -907,9 +857,9 @@ describe("flow wizard", () => {
           collectModel: () => model(),
           loadActiveSpecsIndex: () => ({ indexAvailable: true, warnings: [], entries: [] }),
         });
-        expect(prompts.notes[0]).toContain("A pasta está vazia");
-        expect(prompts.notes[0]).toContain("Iniciar ai-guidelines neste repositório");
-        expect(prompts.notes[0]).toContain("Nenhuma spec ativa");
+        expect(prompts.notes[0]).not.toContain("A pasta está vazia");
+        expect(prompts.notes[0]).not.toContain("Iniciar ai-guidelines neste repositório");
+        expect(prompts.notes[0]).not.toContain("Nenhuma spec ativa");
       }
     );
 
@@ -925,7 +875,7 @@ describe("flow wizard", () => {
           collectModel: () => model(),
           loadActiveSpecsIndex: () => ({ indexAvailable: true, warnings: [], entries: [] }),
         });
-        expect(prompts.notes[0]).toContain("Há arquivos soltos");
+        expect(prompts.notes[0]).not.toContain("Há arquivos soltos");
       }
     );
 
@@ -941,13 +891,13 @@ describe("flow wizard", () => {
           collectModel: () => model(),
           loadActiveSpecsIndex: () => ({ indexAvailable: true, warnings: [], entries: [] }),
         });
-        expect(prompts.notes[0]).toContain("projeto existente sem ai-guidelines");
-        expect(prompts.notes[0]).toContain("Adotar ai-guidelines neste repositório");
+        expect(prompts.notes[0]).not.toContain("projeto existente sem ai-guidelines");
+        expect(prompts.notes[0]).not.toContain("Adotar ai-guidelines neste repositório");
       }
     );
   });
 
-  it("resumo inicial nomeia conflitos, tree suja, CI pendente/falha, findings e modo degradado", async () => {
+  it("resumo inicial omite diagnóstico detalhado de conflitos e modo degradado", async () => {
     await withTempRepo(
       (repoRoot) => {
         writeFileSync(
@@ -967,47 +917,11 @@ describe("flow wizard", () => {
             entries: [],
           }),
         });
-        expect(prompts.notes[0]).toContain("formatter rival detectado (Biome)");
-        expect(prompts.notes[0]).toContain("Há 2 finding(s) aberto(s), 1 bloqueante(s)");
-        expect(prompts.notes[0]).toContain("índice público de specs não foi observado");
+        expect(prompts.notes[0]).not.toContain("formatter rival detectado (Biome)");
+        expect(prompts.notes[0]).not.toContain("Há 2 finding(s) aberto(s), 1 bloqueante(s)");
+        expect(prompts.notes[0]).not.toContain("índice público de specs não foi observado");
       }
     );
-
-    const dirty = new ScriptedPrompts(["quit"]);
-    await runFlowWizard("/repo", new CollectingLogger(), {
-      prompts: dirty,
-      registry: registryWith(),
-      collectModel: () => dirtyModel(),
-      loadActiveSpecsIndex: () => activeSpecsResult(),
-    });
-    expect(dirty.notes[0]).toContain("Há mudanças locais");
-
-    const pending = new ScriptedPrompts(["quit"]);
-    await runFlowWizard("/repo", new CollectingLogger(), {
-      prompts: pending,
-      registry: registryWith(),
-      collectModel: () => ciModel({ pass: 4, fail: 0, pending: 1 }),
-      loadActiveSpecsIndex: () => activeSpecsResult(),
-    });
-    expect(pending.notes[0]).toContain("CI ainda tem");
-
-    const failing = new ScriptedPrompts(["quit"]);
-    await runFlowWizard("/repo", new CollectingLogger(), {
-      prompts: failing,
-      registry: registryWith(),
-      collectModel: () => ciModel({ pass: 4, fail: 1, pending: 0 }),
-      loadActiveSpecsIndex: () => activeSpecsResult(),
-    });
-    expect(failing.notes[0]).toContain("CI tem 1 falha");
-
-    const ready = new ScriptedPrompts(["quit"]);
-    await runFlowWizard("/repo", new CollectingLogger(), {
-      prompts: ready,
-      registry: registryWith(),
-      collectModel: () => readyPrModel(),
-      loadActiveSpecsIndex: () => activeSpecsResult(),
-    });
-    expect(ready.notes[0]).toContain("PR #43 já está Ready");
 
     const degraded = new ScriptedPrompts(["quit"]);
     await runFlowWizard("/repo", new CollectingLogger(), {
@@ -1016,8 +930,8 @@ describe("flow wizard", () => {
       collectModel: () => degradedModel(),
       loadActiveSpecsIndex: () => activeSpecsResult(),
     });
-    expect(degraded.notes[0].replace(/\s+/g, " ")).toContain("modo seguro/degradado");
-    expect(degraded.notes[0]).toContain("Modo offline/degradado");
+    expect(degraded.notes[0].replace(/\s+/g, " ")).not.toContain("modo seguro/degradado");
+    expect(degraded.notes[0]).not.toContain("Modo offline/degradado");
   });
 
   it("provisioning em repo governado recomenda update e esconde init/adopt do caminho principal", async () => {

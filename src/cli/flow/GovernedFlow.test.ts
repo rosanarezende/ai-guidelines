@@ -180,15 +180,15 @@ describe("GovernedFlow", () => {
     });
 
     expect(flow.recommended?.id).toBe("finish-subcheckpoint");
-    expect(flow.humanSummary.nextAction).toBe("Concluir ponto atual e iniciar o próximo");
+    expect(flow.humanSummary.nextAction).toBe("Encerrar CO-10.2 e iniciar CO-10.3.");
     expect(flow.humanSummary.missing).toContain(
-      "Falta uma decisão única para concluir este ponto e iniciar o próximo."
+      "Falta registrar a decisão governada que encerra CO-10.2 e ativa CO-10.3."
     );
     expect(flow.humanSummary.ready).toEqual(
       expect.arrayContaining([
-        "Os findings do checkpoint estao fechados.",
-        "A working tree esta limpa.",
-        "A CI esta verde.",
+        "Os findings do checkpoint estão fechados.",
+        "A working tree está limpa.",
+        "CI 5 ok, 0 falha(s), 0 pendente(s).",
       ])
     );
     expect(work.nextAction.decisionType).toBe("finish-subcheckpoint");
@@ -230,15 +230,20 @@ describe("GovernedFlow", () => {
 
     expect(summary.currentObject).toEqual({
       label: "CO-10.2 — confronto modelo x codigo",
-      objective: "comparar a maquina de estados canonica com os comandos vivos.",
+      objective: "Comparar a maquina de estados canonica com os comandos vivos.",
       output: "matriz modelo x codigo com divergencias classificadas.",
+      decisions: [],
     });
     expect(summary.nextObject).toEqual({
       label: "CO-10.3 — correcao integral",
       objective:
-        "corrigir divergencias reais ainda classificadas em CO-10.2 sem criar segunda SSOT.",
+        "Corrigir divergencias reais ainda classificadas em CO-10.2 sem criar segunda SSOT.",
       output: "runtime/checks/docs convergindo em snapshot comum.",
+      decisions: [],
     });
+    expect(summary.nextObjects?.map((object) => object.label)).toEqual([
+      "CO-10.3 — correcao integral",
+    ]);
   });
 
   it("sinaliza percepções recorrentes como ação visível sem transformar em mutação", () => {

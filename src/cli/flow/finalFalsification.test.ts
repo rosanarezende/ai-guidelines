@@ -227,7 +227,7 @@ describe("CO-10.6 final falsification — fluxo governado ponta a ponta", () => 
     const humanGate = new HumanGateDefinition().detect(s);
 
     expect(flow.recommended).toBeNull();
-    expect(flow.humanSummary.nextAction).toBe("Nenhuma decisao mutante esta disponivel agora.");
+    expect(flow.humanSummary.nextAction).toBe("Nenhuma decisão mutante está disponível agora.");
     expect(work.mode).toBe("implement_checkpoint");
     expect(work.object.subCheckpoint?.id).toBe("CO-10.6");
     expect(work.nextAction.decisionType).toBeNull();
@@ -255,7 +255,7 @@ describe("CO-10.6 final falsification — fluxo governado ponta a ponta", () => 
     const work = deriveWorkFor(withDelivery);
 
     expect(flow.recommended?.id).toBe("mark-readiness");
-    expect(flow.humanSummary.nextAction).toBe("Declarar readiness do sub-checkpoint ativo");
+    expect(flow.humanSummary.nextAction).toBe("Declarar que CO-10.6 está pronto para transição.");
     expect(work.nextAction.decisionType).toBe("mark-readiness");
     expect(actionStatus(withDelivery, "advance-subcheckpoint")).toBe("not-applicable");
     expect(actionStatus(withDelivery, "human-gate")).toBe("blocked");
@@ -516,7 +516,7 @@ describe("CO-10.6 final falsification — fluxo governado ponta a ponta", () => 
     );
     expect(receivedFlow.humanSummary.nextObject).toBeNull();
     expect(receivedFlow.humanSummary.nextAction).toBe(
-      "Nenhuma decisao mutante esta disponivel agora."
+      "Nenhuma decisão mutante está disponível agora."
     );
     expect(receivedFlow.humanSummary.missing.join(" ")).toMatch(/não há commit de entrega/);
     expect(receivedWork.mode).toBe("implement_checkpoint");
@@ -615,7 +615,7 @@ describe("CO-10.6 final falsification — fluxo governado ponta a ponta", () => 
     const unsafeMark = new MarkReadinessDefinition().detect(unsafe);
 
     expect(unsafeFlow.humanSummary.nextAction).toBe(
-      "Finalizar as mudancas locais e deixar a working tree limpa."
+      "Finalizar as mudanças locais e deixar a working tree limpa."
     );
     expect(unsafeMark.status).toBe("blocked");
     expect(unsafeMark.reasons.join(" ")).toMatch(/working tree/);
