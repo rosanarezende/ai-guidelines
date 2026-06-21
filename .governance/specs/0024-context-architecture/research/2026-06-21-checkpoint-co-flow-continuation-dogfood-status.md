@@ -114,3 +114,67 @@ npm run build
 npm run test:ts -- RepairDriftCommand branchProjectionRepair
 npm run validate
 ```
+
+**Atualização (2026-06-21):** a verificação e os commits foram executados fora do sandbox do
+Cowork (terminal/ferramenta com acesso direto ao repo). `format`, `build`, os testes direcionados,
+`site:flow:sync`, `site:scenarios:sync`, `site:build` e `validate` passaram completos (aviso
+não-bloqueante: `PIT-0013` candidato à graduação). Dois commits pushados na branch
+`feat/spec-0024-co-flow-continuation`; PR #44 segue Draft. Pre-push rodou `validate:changed` com
+sucesso.
+
+---
+
+## 8. Candidato de produto — Experiência guiada de "Preparar entrega"
+
+Segundo candidato de produto observado neste PR (além do "PR Progress Map" da seção 3).
+**Registro apenas; não implementar nesta fatia.**
+
+### 8.1 Dor observada neste PR
+
+Para aterrissar a fatia do Drift #1, a sequência de "preparar entrega" foi montada e executada
+**manualmente, passo a passo** (format → build → testes direcionados → sync de projeções derivadas
+quando o `validate` apontava stale → `validate` completo → commits incrementais → push com hook).
+Isso exigiu conhecer a ordem certa, saber qual `:sync` corresponde a qual `:check` que falhou, e
+redigir mensagens de commit coerentes. É exatamente o tipo de custo operacional que a Spec 0024
+quer remover do humano.
+
+### 8.2 Capacidade futura
+
+Uma experiência guiada de "preparar entrega" que orquestre os passos que hoje fazemos à mão, em
+linguagem humana: roda o preflight, explica falhas, oferece o reparo seguro da projeção derivada
+stale (mesmo padrão detectar→explicar→reparar do Drift #1, mas em tempo de build), roda o gate,
+**sugere** commits incrementais e oferece push assistido. Nome provisório: "Preparar entrega"
+(`flow ship` / `land`, a definir).
+
+### 8.3 Comandos existentes que ela reutilizaria (sem reimplementar)
+
+`npm run format`, `npm run build`, `npm run test:ts -- <alvos>`, os `*:sync`/`*:generate` de
+projeções derivadas (`living-docs:generate`, `site:flow:sync`, `site:scenarios:sync`,
+`site:prompts:sync`), `npm run validate` e `pr-ready:check`. A capacidade é **orquestração +
+explicação humana**, não uma segunda fonte de validação.
+
+### 8.4 Decisões que continuam humanas (fronteira)
+
+- Mensagem de commit = intenção humana (a ferramenta **sugere**, a pessoa confirma/edita).
+- **Push** é gesto humano explícito.
+- **Ready, Human Gate, avanço de nó e merge** nunca são automatizados (ADR 0021 — decisão humana no
+  gate; memory `feedback-lookup-not-coordination`).
+- Não cria segunda topologia nem segunda fonte de verdade.
+
+### 8.5 Por que pertence a `co-events` (ou nó futuro), não ao reparo de drift atual
+
+O nó planejado `co-events` (seq 14 em `state.yml § topology.planned`) é definido como o dispatcher
+que dispara o pipeline operacional **nos limites: checkpoint, commit, push, merge, promoção,
+retomada**. "Preparar entrega" é precisamente o pipeline no limite "vou aterrissar uma fatia" — é a
+forma guiada/manual desse mesmo evento. O checkpoint atual (`CO-10.8.1`) está escopado a
+**transformar drift em diagnóstico e reparo seguro**; embutir um orquestrador de entrega aqui
+furaria a fronteira do nó e do `next`. O passo a passo manual executado neste PR fica como
+**evidência/ensaio** da capacidade, a ser materializada quando `co-events` (ou um nó próprio) for
+aberto.
+
+### 8.6 Critério de decisão futura
+
+Se a experiência guiada de entrega provar valor em PRs grandes, avaliar materializá-la em
+`co-events`. Evolução ideal: o disparo do pipeline a partir dos artefatos governados, com os
+mesmos guard-rails de autoridade do reparo de drift (auto/confirm para o determinístico;
+human-decision/blocked para o que envolve decisão).
