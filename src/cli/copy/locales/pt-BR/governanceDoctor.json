@@ -1,0 +1,71 @@
+{
+  "heading": "Diagnóstico de governança",
+  "labels": {
+    "status": "Status",
+    "checks": "Verificações",
+    "issues": "Divergências e reparos seguros",
+    "whatHappened": "O que aconteceu",
+    "whyItMatters": "Por que importa",
+    "safeRepair": "Reparo seguro",
+    "technicalDetails": "Detalhes técnicos"
+  },
+  "checks": {
+    "publicIndex": "índice público de specs",
+    "activeConsistency": "coerência active.yml -> state.yml",
+    "topologyNext": "state.yml § topology / next[0]"
+  },
+  "status": {
+    "attention": "Detectei {count} ponto(s) que precisam de atenção.",
+    "notGoverned": "Este repositório ainda não publicou specs governadas; não há drift para reparar.",
+    "ok": "Nenhum drift de governança detectado nos checks atuais."
+  },
+  "issues": {
+    "activeIndexInvalid": {
+      "title": "Índice público de specs não pôde ser lido",
+      "whyItMatters": "O guia depende desse índice para saber quais specs estão publicadas e qual branch deve orientar a retomada.",
+      "safeRepair": "Recrie a projeção pelo fluxo governado de publicação de estado, em vez de editar o índice manualmente."
+    },
+    "activeIndexMissing": {
+      "title": "Há specs no repositório, mas o índice público não foi publicado",
+      "whyItMatters": "Sem a projeção pública, uma sessão nova pode depender de heurísticas ou de leitura manual para descobrir o trabalho ativo.",
+      "safeRepair": "Na branch da spec ativa, publique o estado pelo comando governado de workflow publish-state."
+    },
+    "missingSpecPath": {
+      "title": "O índice público aponta para uma pasta de spec que não existe aqui",
+      "whyItMatters": "A pessoa pode estar na branch errada, com checkout incompleto, ou a projeção pode ter ficado stale.",
+      "safeRepair": "Confirme a branch correta; se o estado da branch estiver certo, publique novamente a projeção pelo fluxo governado."
+    },
+    "activeConsistencyError": {
+      "title": "Não foi possível comparar active.yml com state.yml",
+      "whyItMatters": "O doctor não conseguiu provar se a projeção pública está fiel ao estado canônico.",
+      "safeRepair": "Corrija primeiro o erro de leitura/schema apontado e rode o diagnóstico novamente."
+    },
+    "stateParse": {
+      "title": "Um state.yml não pôde ser interpretado",
+      "whyItMatters": "Sem ler o estado canônico, o guia não consegue explicar com segurança qual é o próximo movimento.",
+      "safeRepair": "Corrija o schema do state.yml apontado antes de tentar reparar outros drifts."
+    }
+  },
+  "consistency": {
+    "titles": {
+      "branch": "O índice público aponta para a branch errada",
+      "stage": "O índice público aponta para um estágio antigo",
+      "missingState": "O índice público aponta para state.yml ausente",
+      "identity": "O índice público aponta para a spec errada",
+      "sourceState": "O índice público aponta para um state.yml diferente do spec_path",
+      "completed": "Uma spec concluída ainda aparece como ativa",
+      "unknown": "A projeção pública diverge do estado canônico"
+    },
+    "whyItMatters": "O sistema precisa que a projeção pública diga a mesma coisa que os fatos canônicos; caso contrário, a retomada pode orientar a pessoa para o lugar errado.",
+    "safeRepair": "Republique o estado com workflow publish-state a partir da branch correta. Se a divergência envolver topologia, use a decisão governada apropriada antes de publicar."
+  },
+  "divergence": {
+    "titles": {
+      "cursor-not-canonical-next": "O cursor de retomada não aponta para o próximo nó real",
+      "cursor-checkpoint-mismatch": "O checkpoint do cursor não pertence ao nó atual",
+      "narrated-next-omits-canonical": "O próximo narrado diverge da topologia"
+    },
+    "whyItMatters": "A topologia é a fonte estrutural do fluxo. Quando a narração ou o cursor divergem dela, uma sessão nova pode continuar no ponto errado.",
+    "safeRepair": "Use a decisão governada que atualiza cursor, next e topologia juntos; quando for apenas next narrado stale, regenere a narração a partir da topologia."
+  }
+}

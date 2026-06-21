@@ -448,7 +448,7 @@ export const AI_GUIDELINES_FLOW_COPY = {
     {
       "name": "drift",
       "aliases": [],
-      "description": "Diagnostica drift do índice público: spec_path declarado que não existe no filesystem local. Read-only.",
+      "description": "Diagnostica drift de governança e explica reparos seguros. Read-only.",
       "usage": [
         "drift"
       ],

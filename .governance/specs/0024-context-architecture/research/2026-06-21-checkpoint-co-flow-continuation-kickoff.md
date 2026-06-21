@@ -84,6 +84,20 @@ Antes de aplicar:
 
 Não renderizar nomes internos como requisito para a pessoa decidir. Detalhes técnicos ficam em modo expandido.
 
+## Regra de produto: texto operacional locale-first
+
+O dogfood do `GovernanceDoctor` mostrou que a mesma regra aplicada ao site também precisa valer para a CLI: texto humano não deve ficar misturado à lógica de governança.
+
+A partir deste checkpoint:
+
+- mensagens, títulos, labels, hints, avisos, previews e explicações da CLI devem morar em `src/cli/copy/locales/<locale>/`;
+- o código deve consumir esses textos por `FLOW_COPY`;
+- dados dinâmicos continuam no modelo/código, mas a redação humana fica em locale;
+- novos recursos devem começar por `pt-BR`, preservando a estrutura para futura internacionalização;
+- texto autoral hard-coded em lógica só é aceitável quando for dado técnico dinâmico, identificador de erro ou detalhe gerado pelo runtime.
+
+Primeira aplicação: `GovernanceDoctor` usa `src/cli/copy/locales/pt-BR/governanceDoctor.json` para renderizar o diagnóstico humano.
+
 ## Relação com CO-10.8, CO-10.9 e CO-10.10
 
 - CO-10.8 deve reorganizar a arquitetura interna para que esse tipo de serviço exista em lugar previsível, testável e mantível.

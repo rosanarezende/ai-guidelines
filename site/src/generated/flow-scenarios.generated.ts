@@ -403,7 +403,7 @@ export const AI_GUIDELINES_FLOW_SCENARIOS = [
       "      Ex.: npx ai-guidelines decide --type close-dispositions --decision accept-all --authorization explicit-human-decision --confirm",
       "      Ex.: npx ai-guidelines decide --type open-next-node --decision open-node --authorization explicit-human-decision --confirm",
       "  drift",
-      "      Diagnostica drift do índice público: spec_path declarado que não existe no filesystem local. Read-only.",
+      "      Diagnostica drift de governança e explica reparos seguros. Read-only.",
       "      Ex.: npx ai-guidelines drift",
       "  handoff",
       "      Gera handoff situado read-only (fatos + proxima acao + selo) a partir de state.yml/topology/git/gh.",

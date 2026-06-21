@@ -35,6 +35,12 @@ describe("flow copy catalog", () => {
     });
   });
 
+  it("centraliza textos operacionais do Governance Doctor no catálogo de copy", () => {
+    expect(FLOW_COPY.governanceDoctor.heading).toBe("Diagnóstico de governança");
+    expect(FLOW_COPY.governanceDoctor.labels.safeRepair).toBe("Reparo seguro");
+    expect(FLOW_COPY.governanceDoctor.status.ok).toContain("Nenhum drift");
+  });
+
   it("projeta textos críticos da CLI para o módulo React do Flow", () => {
     const generatedCopy = readSiteSource("site/src/generated/flow-copy.generated.ts");
     const flowData = readSiteSource("site/src/content/flowData.ts");
