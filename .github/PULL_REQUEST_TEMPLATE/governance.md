@@ -231,6 +231,9 @@ RESTRIÇÕES:
 
 ## Escopo
 
+<details>
+<summary><strong>Detalhes de escopo e limites</strong></summary>
+
 ### Dentro do escopo
 
 -
@@ -238,6 +241,8 @@ RESTRIÇÕES:
 ### Fora do escopo
 
 -
+
+</details>
 
 ## Evidências e falsificação
 

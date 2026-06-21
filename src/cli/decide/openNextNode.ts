@@ -48,6 +48,7 @@ import {
 } from "../../infrastructure/yaml/activeSpecsSerializer.js";
 import type { HandoffNodeFact } from "../handoffFacts.js";
 import type { PrTopologyNode } from "../../domain/workflow/WorkflowState.js";
+import { buildNextNodePrBody } from "../prBodyCreate.js";
 
 export interface OpenNextNodePayload {
   readonly specId: string;
@@ -93,70 +94,6 @@ export function executionPrTitle(specId: string, node: HandoffNodeFact): string 
   const seq = node.sequence !== null ? `${node.sequence}️⃣` : "";
   const arrow = node.terminal ? "" : "➜";
   return `[🛠️${seq}${arrow}] [Spec ${specId}] ${node.id} — ${humanizeNodeId(node.id)}`;
-}
-
-export function buildNextNodePrBody(input: {
-  readonly specId: string;
-  readonly currentNodeId: string;
-  readonly nextNodeId: string;
-  readonly nextCheckpoint: string;
-  readonly baseBranch: string;
-  readonly headBranch: string;
-}): string {
-  return `## Visão pretendida
-
-\`\`\`text
-Abrir ${input.nextNodeId} como próximo PR stacked da Spec ${input.specId}, a partir do nó aprovado ${input.currentNodeId}, sem merge isolado em main.
-\`\`\`
-
-## Resumo
-
-Este PR entrega o nó ${input.nextNodeId} da Spec ${input.specId}. Ele nasce por transição governada pós-Human Gate de ${input.currentNodeId}.
-
-## Escopo
-
-### Dentro do escopo
-
-- Materializar o checkpoint ${input.nextCheckpoint}.
-- Trabalhar somente o nó ${input.nextNodeId}.
-- Manter a stack em modo unit, com base em \`${input.baseBranch}\` e head \`${input.headBranch}\`.
-
-### Fora do escopo
-
-- Merge em main.
-- Human Gate automático.
-- Implementação fora do checkpoint ${input.nextCheckpoint}.
-
-## Valor entregue
-
-<preencher antes de Ready>
-
-## Test plan
-
-<preencher antes de Ready>
-
-## Validação, evidências e checklist
-
-### Evidências e gates
-
-<preencher antes de Ready>
-
-### Checklist operacional
-
-- [ ] Implementação validada
-- [ ] Reviews aplicáveis reconciliadas
-- [ ] PR convertido para Ready somente após validação humana
-
-## Disclosure de IA
-
-<preencher antes de Ready>
-
-## Cross-refs
-
-- Spec ${input.specId}
-- Nó anterior: ${input.currentNodeId}
-- Próximo nó ativo: ${input.nextNodeId}
-`;
 }
 
 function topologyNodeFromSnapshot(

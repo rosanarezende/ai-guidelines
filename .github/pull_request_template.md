@@ -119,6 +119,9 @@ migração necessária), descreva explicitamente aqui.
 
 ## Escopo
 
+<details>
+<summary><strong>Detalhes de escopo e limites</strong></summary>
+
 ### Dentro do escopo
 
 -
@@ -126,6 +129,8 @@ migração necessária), descreva explicitamente aqui.
 ### Fora do escopo
 
 -
+
+</details>
 
 ## Valor entregue
 

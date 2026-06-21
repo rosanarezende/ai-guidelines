@@ -506,6 +506,11 @@ describe("open-next-node · aplicação por portas [decide]", () => {
       head: "feat/spec-0024-co-capture",
       draft: true,
     });
+    expect(stack.created[0].body).toContain(
+      "<summary><strong>Detalhes de escopo e limites</strong></summary>"
+    );
+    expect(stack.created[0].body).toContain("## Valor entregue");
+    expect(stack.created[0].body).toContain("co-capture");
 
     const state = parseWorkflowState(
       fs.readFileSync(path.join(repoRoot, payload.stateFile), "utf8")

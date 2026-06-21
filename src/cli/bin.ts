@@ -17,6 +17,7 @@ import {
   runCheck as runLivingDocsCheck,
   runGenerate as runLivingDocsGenerate,
 } from "./livingDocs.js";
+import { main as runPrBodyCreate } from "./prBodyCreate.js";
 import { main as runPrBodyUpdate } from "./prBodyUpdate.js";
 import { main as runPrReadyCheck } from "./prReadyCheck.js";
 import { main as runReconcileCheck } from "./reconcileCheck.js";
@@ -45,7 +46,7 @@ function usage(): string {
     "constraints-check, knowledge-compile, script-contracts, runtime-bootstrap,",
     "gate-decidability-check, ruleset-check, review-check, insights-check,",
     "intent-check, disclosure-render, review-publish, review-seal,",
-    "pr-body-update, pr-ready-check, site-flow-copy, site-scenarios,",
+    "pr-body-create, pr-body-update, pr-ready-check, site-flow-copy, site-scenarios,",
     "site-prompts, consumer-journey",
   ].join("\n");
 }
@@ -148,6 +149,8 @@ async function dispatch(script: string | undefined, args: readonly string[]): Pr
         return 2;
       }
     }
+    case "pr-body-create":
+      return runPrBodyCreate(args);
     case "pr-body-update":
       return runPrBodyUpdate(args);
     case "pr-ready-check":
