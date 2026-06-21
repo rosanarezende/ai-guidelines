@@ -1,0 +1,595 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PR #44 — Mapa de progresso dos problemas de governança</title>
+    <style>
+      :root {
+        --bg: #0f1117;
+        --panel: #171a23;
+        --panel2: #1e2230;
+        --line: #2a2f40;
+        --ink: #e8eaf0;
+        --mut: #9aa3b8;
+        --done: #34d399;
+        --done-bg: rgba(52, 211, 153, 0.12);
+        --val: #60a5fa;
+        --val-bg: rgba(96, 165, 250, 0.12);
+        --part: #fbbf24;
+        --part-bg: rgba(251, 191, 36, 0.12);
+        --todo: #6b7280;
+        --todo-bg: rgba(107, 114, 128, 0.1);
+        --block: #c084fc;
+        --block-bg: rgba(192, 132, 252, 0.12);
+        --accent: #7c9cff;
+        --accent-bg: rgba(124, 156, 255, 0.1);
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        line-height: 1.55;
+        padding: 28px 22px 60px;
+      }
+      .wrap {
+        max-width: 1080px;
+        margin: 0 auto;
+      }
+      h1 {
+        font-size: 22px;
+        margin: 0 0 4px;
+      }
+      .sub {
+        color: var(--mut);
+        font-size: 13px;
+        margin-bottom: 22px;
+      }
+      .read {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 18px 20px;
+        margin-bottom: 22px;
+      }
+      .read h2 {
+        font-size: 15px;
+        margin: 0 0 10px;
+      }
+      .read p {
+        font-size: 13px;
+        color: var(--mut);
+        margin: 0 0 8px;
+      }
+      .read b {
+        color: var(--ink);
+      }
+      .legend {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin: 14px 0 0;
+        font-size: 12px;
+        color: var(--mut);
+      }
+      .legend span {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 3px;
+        display: inline-block;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 14px;
+      }
+      .card {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 18px 20px;
+        position: relative;
+      }
+      .card.first {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 1px var(--accent-bg);
+      }
+      .badge {
+        display: inline-block;
+        font-size: 10px;
+        padding: 2px 8px;
+        border-radius: 99px;
+        background: var(--accent-bg);
+        color: var(--accent);
+        border: 1px solid rgba(124, 156, 255, 0.3);
+        margin-bottom: 8px;
+      }
+      .card h3 {
+        font-size: 16px;
+        margin: 0 0 12px;
+        line-height: 1.35;
+      }
+      .qa {
+        font-size: 13px;
+        margin: 0 0 7px;
+      }
+      .qa .q {
+        color: var(--mut);
+        display: block;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 1px;
+      }
+      .stages {
+        display: flex;
+        gap: 8px;
+        margin: 14px 0 4px;
+        flex-wrap: wrap;
+      }
+      .stage {
+        flex: 1;
+        min-width: 120px;
+        border: 1px solid var(--line);
+        border-radius: 9px;
+        padding: 8px 10px;
+      }
+      .stage .t {
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--mut);
+        margin-bottom: 3px;
+      }
+      .stage .s {
+        font-size: 12px;
+        font-weight: 600;
+      }
+      .st-done {
+        background: var(--done-bg);
+        border-color: rgba(52, 211, 153, 0.3);
+      }
+      .st-done .s {
+        color: var(--done);
+      }
+      .st-val {
+        background: var(--val-bg);
+        border-color: rgba(96, 165, 250, 0.3);
+      }
+      .st-val .s {
+        color: var(--val);
+      }
+      .st-part {
+        background: var(--part-bg);
+        border-color: rgba(251, 191, 36, 0.3);
+      }
+      .st-part .s {
+        color: var(--part);
+      }
+      .st-todo {
+        background: var(--todo-bg);
+      }
+      .st-todo .s {
+        color: var(--mut);
+      }
+      .st-block {
+        background: var(--block-bg);
+        border-color: rgba(192, 132, 252, 0.3);
+      }
+      .st-block .s {
+        color: var(--block);
+      }
+      details {
+        margin-top: 12px;
+        border-top: 1px solid var(--line);
+        padding-top: 10px;
+      }
+      summary {
+        cursor: pointer;
+        font-size: 12px;
+        color: var(--mut);
+      }
+      details p {
+        font-size: 12px;
+        color: var(--mut);
+        margin: 8px 0 0;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      }
+      .foot {
+        margin-top: 24px;
+        font-size: 11px;
+        color: var(--todo);
+        text-align: right;
+      }
+      @media (min-width: 760px) {
+        .grid {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <h1>PR #44 — Mapa de progresso dos problemas de governança</h1>
+      <div class="sub">
+        Um acompanhamento visual e humano de oito situações em que o framework pode "se perder" — e
+        de quanto cada uma já está resolvida.
+      </div>
+
+      <div class="read">
+        <h2>Como ler este tracker</h2>
+        <p>
+          O framework guarda alguns arquivos internos para lembrar em que ponto do trabalho você
+          está. Quando esses arquivos discordam da realidade, dá-se o nome de <b>"drift"</b>
+          (desencontro). Cada card abaixo descreve um tipo de desencontro em linguagem comum: o que
+          acontece, por que isso atrapalha você, e o que o framework deveria fazer a respeito.
+        </p>
+        <p>
+          Para cada desencontro acompanhamos quatro etapas, e elas <b>não são a mesma coisa</b>:
+          <b>Detectar</b> (perceber que há um problema) e <b>Explicar</b> (descrever em linguagem
+          humana) <b>não resolvem nada sozinhos</b>. Um desencontro só está
+          <b>realmente fechado</b> quando tem <b>Reparar</b> (uma correção segura, com
+          pré-visualização e confirmação) e <b>Testar</b> (provas automáticas de que a correção
+          funciona e não estraga nada).
+        </p>
+        <p>
+          Alguns reparos envolvem uma <b>decisão humana</b> de verdade (avançar uma etapa, abrir um
+          novo trabalho, aprovar uma entrega). Esses ficam marcados como <b>bloqueado</b> de
+          propósito: o framework não deve decidir isso sozinho.
+        </p>
+        <p>
+          Este mapa é só uma <b>projeção de acompanhamento</b> para humanos. Ele <b>não</b> é a
+          fonte oficial da verdade — quem manda são os arquivos governados, os testes e as revisões.
+          Se um dia ele discordar deles, valem eles.
+        </p>
+        <div class="legend">
+          <span><i class="dot" style="background: var(--done)"></i> feito</span>
+          <span><i class="dot" style="background: var(--val)"></i> implementado, em validação</span>
+          <span><i class="dot" style="background: var(--part)"></i> parcial</span>
+          <span><i class="dot" style="background: var(--todo)"></i> a fazer</span>
+          <span
+            ><i class="dot" style="background: var(--block)"></i> bloqueado (decisão humana)</span
+          >
+        </div>
+      </div>
+
+      <div class="grid">
+        <!-- 1 -->
+        <div class="card first">
+          <span class="badge">primeiro caso implementado neste PR</span>
+          <h3>"Estou na branch certa, mas o framework ainda aponta para a anterior"</h3>
+          <div class="qa">
+            <span class="q">O que aconteceu</span>A pessoa já está trabalhando na nova etapa, mas o
+            arquivo que o framework usa para lembrar a etapa ativa ainda aponta para a etapa antiga.
+          </div>
+          <div class="qa">
+            <span class="q">Por que isso importa</span>Sem correção, comandos como
+            <code>npx ai-guidelines</code> podem orientar a pessoa pelo trabalho errado, ou bloquear
+            um envio sem explicar bem o motivo.
+          </div>
+          <div class="qa">
+            <span class="q">O que o framework deve fazer</span>Mostrar o problema, explicar a
+            diferença, pré-visualizar a atualização necessária e aplicar a correção somente com
+            confirmação.
+          </div>
+          <div class="stages">
+            <div class="stage st-done">
+              <div class="t">Detectar</div>
+              <div class="s">✓ feito</div>
+            </div>
+            <div class="stage st-done">
+              <div class="t">Explicar</div>
+              <div class="s">✓ feito</div>
+            </div>
+            <div class="stage st-val">
+              <div class="t">Reparar</div>
+              <div class="s">◆ em validação</div>
+            </div>
+            <div class="stage st-val">
+              <div class="t">Testar</div>
+              <div class="s">◆ testes escritos</div>
+            </div>
+          </div>
+          <details>
+            <summary>Detalhe técnico</summary>
+            <p>
+              branch atual diverge de .governance/runtime/specs/active.yml. Reparo: comando `repair`
+              reusa publish-state via FS de captura (preview) + confirmação; autoridade `confirm`.
+            </p>
+          </details>
+        </div>
+
+        <!-- 2 -->
+        <div class="card">
+          <h3>"O framework perdeu o fio de onde você está no trabalho"</h3>
+          <div class="qa">
+            <span class="q">O que aconteceu</span>O ponteiro interno que marca "você está aqui" não
+            corresponde à etapa ou ao trabalho que você abriu de fato.
+          </div>
+          <div class="qa">
+            <span class="q">Por que isso importa</span>Quem retoma o trabalho mais tarde pode ser
+            levado para o lugar errado, sem perceber.
+          </div>
+          <div class="qa">
+            <span class="q">O que o framework deve fazer</span>Detectar o descompasso e orientar a
+            pessoa, sem reescrever sozinho decisões de rumo.
+          </div>
+          <div class="stages">
+            <div class="stage st-part">
+              <div class="t">Detectar</div>
+              <div class="s">◐ parcial</div>
+            </div>
+            <div class="stage st-part">
+              <div class="t">Explicar</div>
+              <div class="s">◐ parcial</div>
+            </div>
+            <div class="stage st-todo">
+              <div class="t">Reparar</div>
+              <div class="s">○ a fazer</div>
+            </div>
+            <div class="stage st-todo">
+              <div class="t">Testar</div>
+              <div class="s">○ a fazer</div>
+            </div>
+          </div>
+          <details>
+            <summary>Detalhe técnico</summary>
+            <p>state.yml § topology.cursor diverge da branch/PR corrente.</p>
+          </details>
+        </div>
+
+        <!-- 3 -->
+        <div class="card">
+          <h3>"O 'próximo passo' escrito não bate com o próximo passo real"</h3>
+          <div class="qa">
+            <span class="q">O que aconteceu</span>A frase que descreve o próximo passo ficou
+            desatualizada em relação ao mapa real de etapas do projeto.
+          </div>
+          <div class="qa">
+            <span class="q">Por que isso importa</span>A pessoa pode seguir uma orientação antiga e
+            trabalhar na coisa errada.
+          </div>
+          <div class="qa">
+            <span class="q">O que o framework deve fazer</span>Apontar a diferença e regenerar a
+            frase a partir do mapa real, quando for só texto desatualizado.
+          </div>
+          <div class="stages">
+            <div class="stage st-done">
+              <div class="t">Detectar</div>
+              <div class="s">✓ feito</div>
+            </div>
+            <div class="stage st-done">
+              <div class="t">Explicar</div>
+              <div class="s">✓ feito</div>
+            </div>
+            <div class="stage st-todo">
+              <div class="t">Reparar</div>
+              <div class="s">○ a fazer</div>
+            </div>
+            <div class="stage st-todo">
+              <div class="t">Testar</div>
+              <div class="s">○ a fazer</div>
+            </div>
+          </div>
+          <details>
+            <summary>Detalhe técnico</summary>
+            <p>state.yml § next (narrado) diverge da topologia derivável.</p>
+          </details>
+        </div>
+
+        <!-- 4 -->
+        <div class="card">
+          <h3>"A lista de tarefas não reflete a etapa atual"</h3>
+          <div class="qa">
+            <span class="q">O que aconteceu</span>A etapa em andamento não tem a tarefa
+            correspondente na lista, ou a tarefa diz uma coisa e o marcador de estado diz outra.
+          </div>
+          <div class="qa">
+            <span class="q">Por que isso importa</span>A lista de tarefas deixa de ser um retrato
+            confiável do que está realmente sendo feito.
+          </div>
+          <div class="qa">
+            <span class="q">O que o framework deve fazer</span>Detectar a incoerência entre o estado
+            e a narrativa da lista e sinalizar para correção.
+          </div>
+          <div class="stages">
+            <div class="stage st-part">
+              <div class="t">Detectar</div>
+              <div class="s">◐ parcial</div>
+            </div>
+            <div class="stage st-part">
+              <div class="t">Explicar</div>
+              <div class="s">◐ parcial</div>
+            </div>
+            <div class="stage st-todo">
+              <div class="t">Reparar</div>
+              <div class="s">○ a fazer</div>
+            </div>
+            <div class="stage st-todo">
+              <div class="t">Testar</div>
+              <div class="s">○ a fazer</div>
+            </div>
+          </div>
+          <details>
+            <summary>Detalhe técnico</summary>
+            <p>
+              tasks.md não materializa o checkpoint ativo; coerência de sub-checkpoint já é checada
+              parcialmente em active-specs:check.
+            </p>
+          </details>
+        </div>
+
+        <!-- 5 -->
+        <div class="card">
+          <h3>"A descrição do PR conta uma história diferente do que foi entregue"</h3>
+          <div class="qa">
+            <span class="q">O que aconteceu</span>O texto que descreve o pull request não reflete o
+            que de fato foi feito e aprovado.
+          </div>
+          <div class="qa">
+            <span class="q">Por que isso importa</span>Quem revisa a entrega lê uma promessa que não
+            corresponde ao conteúdo real.
+          </div>
+          <div class="qa">
+            <span class="q">O que o framework deve fazer</span>Comparar a descrição com o recorte
+            entregue e apontar onde elas se afastam.
+          </div>
+          <div class="stages">
+            <div class="stage st-todo">
+              <div class="t">Detectar</div>
+              <div class="s">○ a fazer</div>
+            </div>
+            <div class="stage st-todo">
+              <div class="t">Explicar</div>
+              <div class="s">○ a fazer</div>
+            </div>
+            <div class="stage st-todo">
+              <div class="t">Reparar</div>
+              <div class="s">○ a fazer</div>
+            </div>
+            <div class="stage st-todo">
+              <div class="t">Testar</div>
+              <div class="s">○ a fazer</div>
+            </div>
+          </div>
+          <details>
+            <summary>Detalhe técnico</summary>
+            <p>PR body diverge do recorte aprovado; relacionado a pr-body / pr-ready:check.</p>
+          </details>
+        </div>
+
+        <!-- 6 -->
+        <div class="card">
+          <h3>"Uma decisão já foi aprovada, mas o mapa não avançou"</h3>
+          <div class="qa">
+            <span class="q">O que aconteceu</span>Houve uma aprovação humana para seguir adiante,
+            mas o mapa de etapas ainda mostra a posição anterior.
+          </div>
+          <div class="qa">
+            <span class="q">Por que isso importa</span>O projeto parece parado num ponto que já foi
+            superado, confundindo quem chega depois.
+          </div>
+          <div class="qa">
+            <span class="q">O que o framework deve fazer</span>Detectar e explicar o atraso — mas
+            <b>avançar a etapa é decisão humana</b>, não automática.
+          </div>
+          <div class="stages">
+            <div class="stage st-todo">
+              <div class="t">Detectar</div>
+              <div class="s">○ a fazer</div>
+            </div>
+            <div class="stage st-todo">
+              <div class="t">Explicar</div>
+              <div class="s">○ a fazer</div>
+            </div>
+            <div class="stage st-block">
+              <div class="t">Reparar</div>
+              <div class="s">⛔ decisão humana</div>
+            </div>
+            <div class="stage st-todo">
+              <div class="t">Testar</div>
+              <div class="s">○ a fazer</div>
+            </div>
+          </div>
+          <details>
+            <summary>Detalhe técnico</summary>
+            <p>Gate aprovado, mas topologia/cursor não avançou. Avanço de nó = Human Gate.</p>
+          </details>
+        </div>
+
+        <!-- 7 -->
+        <div class="card">
+          <h3>"O próximo trabalho está previsto, mas ninguém abriu o espaço pra ele"</h3>
+          <div class="qa">
+            <span class="q">O que aconteceu</span>O mapa prevê um próximo trabalho, mas ainda não
+            existe o lugar (branch/PR) onde ele aconteceria.
+          </div>
+          <div class="qa">
+            <span class="q">Por que isso importa</span>Há o risco de começar a trabalhar sem um
+            espaço organizado, ou de achar que algo está pronto quando nem começou.
+          </div>
+          <div class="qa">
+            <span class="q">O que o framework deve fazer</span>Sinalizar a lacuna — mas
+            <b>abrir o novo trabalho é decisão humana</b>.
+          </div>
+          <div class="stages">
+            <div class="stage st-todo">
+              <div class="t">Detectar</div>
+              <div class="s">○ a fazer</div>
+            </div>
+            <div class="stage st-todo">
+              <div class="t">Explicar</div>
+              <div class="s">○ a fazer</div>
+            </div>
+            <div class="stage st-block">
+              <div class="t">Reparar</div>
+              <div class="s">⛔ decisão humana</div>
+            </div>
+            <div class="stage st-todo">
+              <div class="t">Testar</div>
+              <div class="s">○ a fazer</div>
+            </div>
+          </div>
+          <details>
+            <summary>Detalhe técnico</summary>
+            <p>Topologia aponta próximo nó sem PR/branch correspondente.</p>
+          </details>
+        </div>
+
+        <!-- 8 -->
+        <div class="card">
+          <h3>"Uma anotação de bastidor contradiz o estado oficial"</h3>
+          <div class="qa">
+            <span class="q">O que aconteceu</span>Uma nota de pesquisa ou rascunho diz algo
+            diferente do estado oficial do projeto.
+          </div>
+          <div class="qa">
+            <span class="q">Por que isso importa</span>Anotações são úteis, mas se forem confundidas
+            com a verdade oficial podem desorientar a leitura.
+          </div>
+          <div class="qa">
+            <span class="q">O que o framework deve fazer</span>Apontar a contradição deixando claro
+            que a anotação <b>não</b> é a fonte oficial.
+          </div>
+          <div class="stages">
+            <div class="stage st-todo">
+              <div class="t">Detectar</div>
+              <div class="s">○ a fazer</div>
+            </div>
+            <div class="stage st-todo">
+              <div class="t">Explicar</div>
+              <div class="s">○ a fazer</div>
+            </div>
+            <div class="stage st-todo">
+              <div class="t">Reparar</div>
+              <div class="s">○ a fazer</div>
+            </div>
+            <div class="stage st-todo">
+              <div class="t">Testar</div>
+              <div class="s">○ a fazer</div>
+            </div>
+          </div>
+          <details>
+            <summary>Detalhe técnico</summary>
+            <p>Conteúdo em research/ contradiz o estado governado (research ≠ autoridade).</p>
+          </details>
+        </div>
+      </div>
+
+      <div class="foot">
+        Projeção de acompanhamento do PR #44 · atualizada em 2026-06-21 · não é fonte de verdade
+        estrutural
+      </div>
+    </div>
+  </body>
+</html>
