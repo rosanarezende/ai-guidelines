@@ -2,10 +2,10 @@ version: 1
 active_specs:
   - id: "0024"
     slug: context-architecture
-    branch: feat/spec-0024-co-flow-convergence
+    branch: feat/spec-0024-co-flow-continuation
     stage: implementation
     status: active
     spec_path: .governance/specs/0024-context-architecture
     source_state_path: .governance/specs/0024-context-architecture/state.yml
-    updated_at: 2026-06-16T00:00:00.000-03:00
+    updated_at: 2026-06-21T12:27:36.818-03:00
     updated_by: "@rosanarezende"
