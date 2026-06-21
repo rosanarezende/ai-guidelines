@@ -17,7 +17,8 @@
  *      em branch fora do padrão `feat/spec-NNNN-*` ou em branch de OUTRA
  *      spec, o sub-check de branch é SKIPPED — o fato não é observável
  *      nesses ambientes. O ponto de enforcement determinístico é o validate
- *      local (pre-push) rodando na branch da spec.
+ *      completo local/CI rodando na branch da spec; o pre-push diário usa
+ *      validate:changed para manter o ciclo de desenvolvimento curto.
  *
  * Por que existe: o `activeSpecsSerializer` valida deliberadamente só a FORMA.
  * A 0023 ficou listada como `closing/active` ~10 dias após `done` (stage stale);
