@@ -1,0 +1,1257 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Spec 0024 — Mapa humano da jornada</title>
+    <style>
+      :root {
+        --bg: #0f1117;
+        --panel: #171a23;
+        --panel2: #1e2230;
+        --line: #2a2f40;
+        --ink: #e8eaf0;
+        --mut: #9aa3b8;
+        --done: #34d399;
+        --done-bg: rgba(52, 211, 153, 0.14);
+        --active: #60a5fa;
+        --active-bg: rgba(96, 165, 250, 0.16);
+        --plan: #a78bfa;
+        --plan-bg: rgba(167, 139, 250, 0.14);
+        --accent: #7c9cff;
+        --accent-bg: rgba(124, 156, 255, 0.12);
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        line-height: 1.55;
+        padding: 0 0 60px;
+      }
+      .wrap {
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 26px 22px 0;
+      }
+      h1 {
+        font-size: 23px;
+        margin: 0 0 4px;
+      }
+      .sub {
+        color: var(--mut);
+        font-size: 13px;
+        margin-bottom: 18px;
+      }
+      nav {
+        position: sticky;
+        top: 0;
+        z-index: 5;
+        background: rgba(15, 17, 23, 0.92);
+        backdrop-filter: blur(6px);
+        border-bottom: 1px solid var(--line);
+        padding: 10px 22px;
+        margin-bottom: 20px;
+      }
+      nav .inner {
+        max-width: 980px;
+        margin: 0 auto;
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+      nav a {
+        font-size: 12px;
+        text-decoration: none;
+        border-radius: 99px;
+        padding: 4px 12px;
+        border: 1px solid transparent;
+      }
+      nav a.na-done {
+        color: var(--done);
+        background: var(--done-bg);
+      }
+      nav a.na-active {
+        color: var(--active);
+        background: var(--active-bg);
+      }
+      nav a.na-plan {
+        color: var(--plan);
+        background: var(--plan-bg);
+      }
+      nav a:hover {
+        border-color: currentColor;
+      }
+      nav .count {
+        font-size: 11px;
+        color: var(--mut);
+        margin-left: auto;
+      }
+      /* Como ler — colorido e enxuto */
+      .key {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 12px;
+      }
+      .k {
+        flex: 1;
+        min-width: 150px;
+        border-radius: 12px;
+        padding: 12px 14px;
+        border: 1px solid var(--line);
+      }
+      .k .kt {
+        font-size: 13px;
+        font-weight: 700;
+        margin-bottom: 2px;
+      }
+      .k .kd {
+        font-size: 11.5px;
+        color: var(--mut);
+      }
+      .k-done {
+        background: var(--done-bg);
+        border-color: rgba(52, 211, 153, 0.4);
+      }
+      .k-done .kt {
+        color: var(--done);
+      }
+      .k-active {
+        background: var(--active-bg);
+        border-color: rgba(96, 165, 250, 0.4);
+      }
+      .k-active .kt {
+        color: var(--active);
+      }
+      .k-plan {
+        background: var(--plan-bg);
+        border-color: rgba(167, 139, 250, 0.4);
+      }
+      .k-plan .kt {
+        color: var(--plan);
+      }
+      .note {
+        font-size: 12.5px;
+        color: var(--mut);
+        margin: 0 0 22px;
+      }
+      .note b {
+        color: var(--ink);
+      }
+      .section-h {
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        margin: 28px 0 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 700;
+      }
+      .sh-done {
+        color: var(--done);
+      }
+      .sh-active {
+        color: var(--active);
+      }
+      .sh-plan {
+        color: var(--plan);
+      }
+      .node {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-left-width: 4px;
+        border-radius: 12px;
+        padding: 16px 18px;
+        margin-bottom: 12px;
+        display: flex;
+        gap: 14px;
+      }
+      .node.done {
+        border-left-color: var(--done);
+      }
+      .node.active {
+        border-left-color: var(--active);
+        box-shadow: 0 0 0 1px var(--active-bg);
+      }
+      .node.plan {
+        border-left-color: var(--plan);
+      }
+      .seq {
+        flex: 0 0 auto;
+        width: 50px;
+        text-align: center;
+      }
+      .seq .n {
+        font-size: 20px;
+        font-weight: 800;
+        line-height: 1;
+        color: #2c3346;
+      }
+      .node.done .seq .n {
+        color: var(--done);
+      }
+      .node.active .seq .n {
+        color: var(--active);
+      }
+      .node.plan .seq .n {
+        color: var(--plan);
+      }
+      .seq .pr {
+        font-size: 10px;
+        margin-top: 6px;
+        display: block;
+      }
+      .seq .pr a {
+        color: var(--mut);
+        text-decoration: none;
+      }
+      .seq .pr a:hover {
+        color: var(--active);
+      }
+      .body {
+        flex: 1;
+        min-width: 0;
+      }
+      .body h3 {
+        font-size: 15.5px;
+        margin: 0 0 5px;
+        line-height: 1.3;
+      }
+      .status {
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        padding: 2px 8px;
+        border-radius: 99px;
+        font-weight: 600;
+        vertical-align: middle;
+        margin-left: 6px;
+        white-space: nowrap;
+      }
+      .s-done {
+        background: var(--done-bg);
+        color: var(--done);
+      }
+      .s-active {
+        background: var(--active-bg);
+        color: var(--active);
+      }
+      .s-plan {
+        background: var(--plan-bg);
+        color: var(--plan);
+      }
+      .body p.what {
+        font-size: 13px;
+        color: var(--mut);
+        margin: 0 0 10px;
+      }
+      .cps {
+        margin: 0 0 6px;
+        padding: 0;
+        list-style: none;
+        border-top: 1px solid var(--line);
+        padding-top: 10px;
+      }
+      .cps .cps-h {
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--mut);
+        margin-bottom: 6px;
+        font-weight: 700;
+      }
+      .cps li {
+        font-size: 12.5px;
+        color: var(--mut);
+        padding: 3px 0 3px 18px;
+        position: relative;
+      }
+      .cps li::before {
+        content: "";
+        position: absolute;
+        left: 2px;
+        top: 9px;
+        width: 7px;
+        height: 7px;
+        border-radius: 2px;
+        background: var(--done);
+      }
+      .node.plan .cps li::before {
+        background: var(--plan);
+      }
+      .node.active .cps li::before {
+        background: var(--plan);
+      }
+      .node.active .cps li.done::before {
+        background: var(--done);
+      }
+      .node.active .cps li.doing::before {
+        background: var(--active);
+      }
+      .cps li b {
+        color: var(--ink);
+      }
+      .cps li code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 11px;
+        color: var(--mut);
+      }
+      details {
+        margin-top: 8px;
+      }
+      summary {
+        cursor: pointer;
+        font-size: 12px;
+        color: var(--active);
+        user-select: none;
+      }
+      summary:hover {
+        text-decoration: underline;
+      }
+      .valimg {
+        margin-top: 10px;
+      }
+      .valimg img {
+        width: 100%;
+        height: auto;
+        border-radius: 10px;
+        border: 1px solid var(--line);
+        display: block;
+        background: var(--panel2);
+      }
+      .valimg .cap {
+        font-size: 11px;
+        color: var(--mut);
+        margin-top: 6px;
+      }
+      .valimg .cap a {
+        color: var(--active);
+        text-decoration: none;
+      }
+      .noimg {
+        font-size: 12px;
+        color: var(--mut);
+        margin-top: 8px;
+      }
+      .noimg a {
+        color: var(--active);
+        text-decoration: none;
+      }
+      .here {
+        display: inline-block;
+        font-size: 10px;
+        background: var(--accent-bg);
+        color: var(--accent);
+        border: 1px solid rgba(124, 156, 255, 0.3);
+        border-radius: 99px;
+        padding: 1px 8px;
+        margin-bottom: 8px;
+      }
+      .link {
+        color: var(--active);
+        text-decoration: none;
+      }
+      .foot {
+        margin-top: 28px;
+        font-size: 11px;
+        color: #6b7280;
+        text-align: center;
+      }
+      .drifts {
+        margin-top: 12px;
+        border: 1px solid rgba(248, 113, 113, 0.4);
+        border-left: 4px solid #f87171;
+        background: rgba(248, 113, 113, 0.07);
+        border-radius: 10px;
+        padding: 12px 14px;
+      }
+      .drifts-h {
+        font-size: 12px;
+        font-weight: 700;
+        color: #f87171;
+        margin-bottom: 8px;
+      }
+      .drifts-h a {
+        color: var(--active);
+        text-decoration: none;
+      }
+      .drift-list {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+      .drift-list li {
+        font-size: 12px;
+        color: var(--mut);
+        padding: 4px 0;
+      }
+      .drift-list li b {
+        color: var(--ink);
+      }
+      .dpill {
+        display: inline-block;
+        font-size: 10px;
+        font-weight: 700;
+        padding: 1px 7px;
+        border-radius: 99px;
+        background: rgba(248, 113, 113, 0.14);
+        color: #f87171;
+        border: 1px solid rgba(248, 113, 113, 0.4);
+        margin-right: 6px;
+        white-space: nowrap;
+      }
+      .dpill.dp-done {
+        background: rgba(52, 211, 153, 0.14);
+        color: var(--done);
+        border-color: rgba(52, 211, 153, 0.4);
+      }
+    </style>
+  </head>
+  <body>
+    <nav>
+      <div class="inner">
+        <a class="na-done" href="#concluidos">Concluídos</a>
+        <a class="na-active" href="#ativo">Onde estamos</a>
+        <a class="na-plan" href="#proximos">O que vem</a>
+        <span class="count">11 concluídos · 1 ativo · 6 previstos</span>
+      </div>
+    </nav>
+
+    <div class="wrap">
+      <h1>Spec 0024 — Mapa humano da jornada</h1>
+      <div class="sub">Tudo o que esta spec já fez, está fazendo e ainda vai fazer.</div>
+
+      <div class="key">
+        <div class="k k-done">
+          <div class="kt">Concluído</div>
+          <div class="kd">já entregue e aprovado</div>
+        </div>
+        <div class="k k-active">
+          <div class="kt">Onde estamos</div>
+          <div class="kd">em andamento agora</div>
+        </div>
+        <div class="k k-plan">
+          <div class="kt">Previsto</div>
+          <div class="kd">planejado, ainda não começou</div>
+        </div>
+      </div>
+      <p class="note">
+        Cada etapa tem um ou mais <b>checkpoints</b> (unidades de implementação) — quando há vários,
+        o card mostra o que cada um entregou. Este mapa traduz o estado oficial em linguagem humana;
+        ele <b>acompanha, não é a fonte da verdade</b>.
+      </p>
+
+      <!-- CONCLUÍDOS -->
+      <div class="section-h sh-done" id="concluidos">● Concluídos — o caminho já percorrido</div>
+
+      <!-- 0 / #32 -->
+      <div class="node done">
+        <div class="seq">
+          <div class="n">0</div>
+          <span class="pr"
+            ><a
+              href="https://github.com/rosanarezende/ai-guidelines/pull/32"
+              target="_blank"
+              rel="noopener"
+              >PR #32</a
+            ></span
+          >
+        </div>
+        <div class="body">
+          <h3>Fundação da governança<span class="status s-done">concluído</span></h3>
+          <p class="what">
+            Montou a base de toda a spec e a "linha de integração" — o tronco sobre o qual todas as
+            etapas seguintes se empilham. Fixou a topologia canônica (um único merge no fim) e o
+            vocabulário que usamos até hoje.
+          </p>
+          <ul class="cps">
+            <li class="cps-h">4 checkpoints</li>
+            <li>
+              <b>checkpoint-1 e checkpoint-2</b> — bootstrap da governança e definição da stack.
+            </li>
+            <li>
+              <b>checkpoint-2.1 / 2.1a</b> — correção da topologia canônica (base da pilha, não
+              mergeia cedo).
+            </li>
+          </ul>
+          <details open>
+            <summary>Ver visão arquitetural (o que a Spec 0024 se propõe a entregar)</summary>
+            <div class="valimg">
+              <img
+                loading="lazy"
+                alt="Visão arquitetural da Spec 0024 — PR #32"
+                src="./vision-three-layers.png"
+              />
+              <div class="cap">
+                Visão arquitetural da spec inteira (não é "valor entregue" deste PR) ·
+                <a
+                  href="https://github.com/rosanarezende/ai-guidelines/pull/32"
+                  target="_blank"
+                  rel="noopener"
+                  >PR #32</a
+                >
+              </div>
+            </div>
+          </details>
+        </div>
+      </div>
+
+      <!-- 1 / #33 -->
+      <div class="node done">
+        <div class="seq">
+          <div class="n">1</div>
+          <span class="pr"
+            ><a
+              href="https://github.com/rosanarezende/ai-guidelines/pull/33"
+              target="_blank"
+              rel="noopener"
+              >PR #33</a
+            ></span
+          >
+        </div>
+        <div class="body">
+          <h3>Regras reproduzíveis como código<span class="status s-done">concluído</span></h3>
+          <p class="what">
+            Fez com que as regras do framework possam ser geradas e conferidas de forma confiável,
+            com a revisão virando um artefato e a "disclosure" derivada automaticamente.
+          </p>
+          <ul class="cps">
+            <li class="cps-h">10 checkpoints (2.2 → 2.4d)</li>
+            <li><b>2.2 / 2.2b</b> — produtibilidade do ruleset + paridade + agregador de smoke.</li>
+            <li><b>2.3 → 2.3b</b> — review como artefato.</li>
+            <li><b>2.4 → 2.4d</b> — disclosure derivado e ajustes finos.</li>
+          </ul>
+          <details>
+            <summary>Ver imagem de valor entregue</summary>
+            <div class="valimg">
+              <img loading="lazy" alt="Valor entregue — PR #33" src="./pr-value-images/pr-33.png" />
+              <div class="cap">
+                <a
+                  href="https://github.com/rosanarezende/ai-guidelines/pull/33"
+                  target="_blank"
+                  rel="noopener"
+                  >PR #33</a
+                >
+              </div>
+            </div>
+          </details>
+        </div>
+      </div>
+
+      <!-- 2 / #34 -->
+      <div class="node done">
+        <div class="seq">
+          <div class="n">2</div>
+          <span class="pr"
+            ><a
+              href="https://github.com/rosanarezende/ai-guidelines/pull/34"
+              target="_blank"
+              rel="noopener"
+              >PR #34</a
+            ></span
+          >
+        </div>
+        <div class="body">
+          <h3>
+            Conhecimento como grafo + primeiras percepções<span class="status s-done"
+              >concluído</span
+            >
+          </h3>
+          <p class="what">
+            Passou a guardar o conhecimento como uma rede navegável de ideias e capturou as
+            primeiras "percepções" (Insights) que orientam decisões, junto com o núcleo do grafo.
+          </p>
+          <ul class="cps">
+            <li class="cps-h">3 checkpoints</li>
+            <li><b>checkpoint-insights</b> — a capability de Insights (percepções).</li>
+            <li><b>checkpoint-knowledge-kernel</b> — o kernel de Knowledge.</li>
+            <li><b>checkpoint-graph-core</b> — o núcleo do KnowledgeGraph.</li>
+          </ul>
+          <details>
+            <summary>Ver imagem de resumo</summary>
+            <div class="valimg">
+              <img loading="lazy" alt="Resumo — PR #34" src="./pr-value-images/pr-34.png" />
+              <div class="cap">
+                Imagem de resumo (anterior ao template de "valor entregue") ·
+                <a
+                  href="https://github.com/rosanarezende/ai-guidelines/pull/34"
+                  target="_blank"
+                  rel="noopener"
+                  >PR #34</a
+                >
+              </div>
+            </div>
+          </details>
+        </div>
+      </div>
+
+      <!-- 3 / #35 -->
+      <div class="node done">
+        <div class="seq">
+          <div class="n">3</div>
+          <span class="pr"
+            ><a
+              href="https://github.com/rosanarezende/ai-guidelines/pull/35"
+              target="_blank"
+              rel="noopener"
+              >PR #35</a
+            ></span
+          >
+        </div>
+        <div class="body">
+          <h3>A CLI vira um registro de comandos<span class="status s-done">concluído</span></h3>
+          <p class="what">
+            Reorganizou a linha de comando: adicionar um comando passou a custar uma linha, e a
+            ajuda (help) passou a se gerar sozinha. Dissolveu a "costura" antiga entre
+            <code>engine.mjs</code> e <code>args.mjs</code>.
+          </p>
+          <ul class="cps">
+            <li class="cps-h">1 checkpoint</li>
+            <li>
+              <b>checkpoint-cli-cutover</b> — migração para o registry de comandos em
+              <code>src/</code>.
+            </li>
+          </ul>
+          <details>
+            <summary>Ver imagem de valor entregue</summary>
+            <div class="valimg">
+              <img loading="lazy" alt="Valor entregue — PR #35" src="./pr-value-images/pr-35.png" />
+              <div class="cap">
+                <a
+                  href="https://github.com/rosanarezende/ai-guidelines/pull/35"
+                  target="_blank"
+                  rel="noopener"
+                  >PR #35</a
+                >
+              </div>
+            </div>
+          </details>
+        </div>
+      </div>
+
+      <!-- 4 / #36 -->
+      <div class="node done">
+        <div class="seq">
+          <div class="n">4</div>
+          <span class="pr"
+            ><a
+              href="https://github.com/rosanarezende/ai-guidelines/pull/36"
+              target="_blank"
+              rel="noopener"
+              >PR #36</a
+            ></span
+          >
+        </div>
+        <div class="body">
+          <h3>
+            Primeiro guarda de continuidade: reconciliação<span class="status s-done"
+              >concluído</span
+            >
+          </h3>
+          <p class="what">
+            Primeira peça da Continuidade Operacional: o <code>reconcile:check</code> e o contrato
+            de autoridade, que conferem se o que o framework projeta bate com o estado real.
+          </p>
+          <ul class="cps">
+            <li class="cps-h">1 checkpoint</li>
+            <li>
+              <b>checkpoint-co-reconcile</b> — reconcile:check + contrato de autoridade (CO-1).
+            </li>
+          </ul>
+          <details>
+            <summary>Ver imagem de valor entregue</summary>
+            <div class="valimg">
+              <img loading="lazy" alt="Valor entregue — PR #36" src="./pr-value-images/pr-36.png" />
+              <div class="cap">
+                <a
+                  href="https://github.com/rosanarezende/ai-guidelines/pull/36"
+                  target="_blank"
+                  rel="noopener"
+                  >PR #36</a
+                >
+              </div>
+            </div>
+          </details>
+        </div>
+      </div>
+
+      <!-- 5 / #37 -->
+      <div class="node done">
+        <div class="seq">
+          <div class="n">5</div>
+          <span class="pr"
+            ><a
+              href="https://github.com/rosanarezende/ai-guidelines/pull/37"
+              target="_blank"
+              rel="noopener"
+              >PR #37</a
+            ></span
+          >
+        </div>
+        <div class="body">
+          <h3>
+            Conhecimento tipado, rastreável e com ledgers<span class="status s-done"
+              >concluído</span
+            >
+          </h3>
+          <p class="what">
+            Deu forma tipada e rastreável ao conhecimento (incluindo como ele pode ser falsificado)
+            e organizou os "ledgers" de runtime — os registros operacionais do framework.
+          </p>
+          <ul class="cps">
+            <li class="cps-h">6 checkpoints</li>
+            <li>
+              <b>checkpoint-co-knowledge</b> — conhecimento tipado + falsificação/fingerprint.
+            </li>
+            <li><b>checkpoint-co-knowledge-backfill</b> — inventário mínimo (CO-2.1).</li>
+            <li>
+              <b>checkpoint-script-contracts</b> — contrato operacional único para
+              package/docs/hooks (CO-2.2).
+            </li>
+            <li>
+              <b>checkpoint-runtime-bootstrap-readiness</b> — prontidão de bootstrap em runtime
+              (CO-2.3).
+            </li>
+            <li>
+              <b>checkpoint-runtime-ledger-partition</b> — separação de specs ativas/histórico e
+              ledgers (CO-2.4).
+            </li>
+            <li>
+              <b>checkpoint-review-policy-events</b> — política de review + eventos append-only
+              (CO-2.5).
+            </li>
+          </ul>
+          <details>
+            <summary>Ver imagem de valor entregue</summary>
+            <div class="valimg">
+              <img loading="lazy" alt="Valor entregue — PR #37" src="./pr-value-images/pr-37.png" />
+              <div class="cap">
+                <a
+                  href="https://github.com/rosanarezende/ai-guidelines/pull/37"
+                  target="_blank"
+                  rel="noopener"
+                  >PR #37</a
+                >
+              </div>
+            </div>
+          </details>
+        </div>
+      </div>
+
+      <!-- 6 / #38 -->
+      <div class="node done">
+        <div class="seq">
+          <div class="n">6</div>
+          <span class="pr"
+            ><a
+              href="https://github.com/rosanarezende/ai-guidelines/pull/38"
+              target="_blank"
+              rel="noopener"
+              >PR #38</a
+            ></span
+          >
+        </div>
+        <div class="body">
+          <h3>
+            Compilador de regras + fronteira de bootstrap<span class="status s-done"
+              >concluído</span
+            >
+          </h3>
+          <p class="what">
+            Modernizou o motor que compila as regras (de um monólito para <code>TS/src</code>) e fez
+            o bootstrap/registry virar a fronteira operacional; a CLI antiga virou uma camada de
+            compatibilidade.
+          </p>
+          <ul class="cps">
+            <li class="cps-h">2 checkpoints</li>
+            <li>
+              <b>checkpoint-compiler-ts</b> — motor de compilação de regras migrado para TS/src.
+            </li>
+            <li>
+              <b>checkpoint-bootstrap-registry</b> — bootstrap/registry como fronteira;
+              <code>/cli</code> vira wrapper.
+            </li>
+          </ul>
+          <details>
+            <summary>Ver imagem de valor entregue</summary>
+            <div class="valimg">
+              <img loading="lazy" alt="Valor entregue — PR #38" src="./pr-value-images/pr-38.png" />
+              <div class="cap">
+                <a
+                  href="https://github.com/rosanarezende/ai-guidelines/pull/38"
+                  target="_blank"
+                  rel="noopener"
+                  >PR #38</a
+                >
+              </div>
+            </div>
+          </details>
+        </div>
+      </div>
+
+      <!-- 7 / #39 -->
+      <div class="node done">
+        <div class="seq">
+          <div class="n">7</div>
+          <span class="pr"
+            ><a
+              href="https://github.com/rosanarezende/ai-guidelines/pull/39"
+              target="_blank"
+              rel="noopener"
+              >PR #39</a
+            ></span
+          >
+        </div>
+        <div class="body">
+          <h3>npm puro como ferramenta canônica<span class="status s-done">concluído</span></h3>
+          <p class="what">
+            Simplificou a caixa de ferramentas para um único gerenciador (npm puro), unificando
+            script-contracts, hooks, CI, templates e docs num runner só. Consumidores seguem livres
+            para usar outros gerenciadores.
+          </p>
+          <ul class="cps">
+            <li class="cps-h">1 checkpoint</li>
+            <li><b>checkpoint-npm-toolchain</b> — Yarn/Corepack → npm puro.</li>
+          </ul>
+          <details>
+            <summary>Ver imagem de valor entregue</summary>
+            <div class="valimg">
+              <img loading="lazy" alt="Valor entregue — PR #39" src="./pr-value-images/pr-39.png" />
+              <div class="cap">
+                <a
+                  href="https://github.com/rosanarezende/ai-guidelines/pull/39"
+                  target="_blank"
+                  rel="noopener"
+                  >PR #39</a
+                >
+              </div>
+            </div>
+          </details>
+        </div>
+      </div>
+
+      <!-- 8 / #41 -->
+      <div class="node done">
+        <div class="seq">
+          <div class="n">8</div>
+          <span class="pr"
+            ><a
+              href="https://github.com/rosanarezende/ai-guidelines/pull/41"
+              target="_blank"
+              rel="noopener"
+              >PR #41</a
+            ></span
+          >
+        </div>
+        <div class="body">
+          <h3>
+            A retomada vira um "ato de carga situado"<span class="status s-done">concluído</span>
+          </h3>
+          <p class="what">
+            Fez o repositório se explicar para uma sessão nova: o handoff derivado, o briefing
+            governado de reviews e o contrato de carga fazem quem chega entender onde está sem ler
+            os bastidores.
+          </p>
+          <ul class="cps">
+            <li class="cps-h">1 checkpoint</li>
+            <li><b>checkpoint-co-projection</b> — projetor situado + contrato de carga (CO-4).</li>
+          </ul>
+          <details>
+            <summary>Ver imagem de valor entregue</summary>
+            <div class="valimg">
+              <img loading="lazy" alt="Valor entregue — PR #41" src="./pr-value-images/pr-41.png" />
+              <div class="cap">
+                <a
+                  href="https://github.com/rosanarezende/ai-guidelines/pull/41"
+                  target="_blank"
+                  rel="noopener"
+                  >PR #41</a
+                >
+              </div>
+            </div>
+          </details>
+        </div>
+      </div>
+
+      <!-- 9 / #42 -->
+      <div class="node done">
+        <div class="seq">
+          <div class="n">9</div>
+          <span class="pr"
+            ><a
+              href="https://github.com/rosanarezende/ai-guidelines/pull/42"
+              target="_blank"
+              rel="noopener"
+              >PR #42</a
+            ></span
+          >
+        </div>
+        <div class="body">
+          <h3>Conhecimento que dispara enforcement<span class="status s-done">concluído</span></h3>
+          <p class="what">
+            Ligou "o que foi declarado" a "o que é cobrado": o EnforcementBinding faz um nó de
+            conhecimento virar uma regra que age, e o <code>knowledge:compile</code> reusa o
+            compilador de regras.
+          </p>
+          <ul class="cps">
+            <li class="cps-h">1 checkpoint</li>
+            <li>
+              <b>checkpoint-co-enforcement</b> — EnforcementBinding + knowledge:compile (CO-3).
+            </li>
+          </ul>
+          <details>
+            <summary>Ver imagem de valor entregue</summary>
+            <div class="valimg">
+              <img loading="lazy" alt="Valor entregue — PR #42" src="./pr-value-images/pr-42.png" />
+              <div class="cap">
+                <a
+                  href="https://github.com/rosanarezende/ai-guidelines/pull/42"
+                  target="_blank"
+                  rel="noopener"
+                  >PR #42</a
+                >
+              </div>
+            </div>
+          </details>
+        </div>
+      </div>
+
+      <!-- 10 / #43 -->
+      <div class="node done">
+        <div class="seq">
+          <div class="n">10</div>
+          <span class="pr"
+            ><a
+              href="https://github.com/rosanarezende/ai-guidelines/pull/43"
+              target="_blank"
+              rel="noopener"
+              >PR #43</a
+            ></span
+          >
+        </div>
+        <div class="body">
+          <h3>Convergência do fluxo ponta a ponta<span class="status s-done">concluído</span></h3>
+          <p class="what">
+            Uniu o fluxo de trabalho numa experiência só (modelo canônico com invariantes e
+            jornadas): CLI pública autoexplicável, wizard guiado e um site/simulador fiel ao que
+            acontece de verdade. Recorte CO-10.1..CO-10.7, aprovado no Human Gate em 2026-06-21.
+          </p>
+          <ul class="cps">
+            <li class="cps-h">7 sub-checkpoints (CO-10.1 → CO-10.7)</li>
+            <li>
+              <b>CO-10.1 — inventário + modelo canônico:</b> mapear fatos vivos, estados,
+              autoridades, comandos e ações permitidas/proibidas.
+            </li>
+            <li>
+              <b>CO-10.2 — confronto modelo × código:</b> comparar a máquina de estados com
+              handoff/work/decide/reviews e corrigir as divergências da superfície humana.
+            </li>
+            <li>
+              <b>CO-10.3 — correção integral dos gaps:</b> resolver as divergências restantes sem
+              criar segunda fonte de verdade.
+            </li>
+            <li>
+              <b>CO-10.4 — dogfood ponta a ponta:</b> exercitar jornadas reais (sessão nova, review,
+              readiness, retomada, consumidores).
+            </li>
+            <li>
+              <b>CO-10.5 — UX e wizard humano (Clack):</b> menu por intenção, resumo legível, opções
+              bloqueadas explicadas.
+            </li>
+            <li>
+              <b>CO-10.6 — fluxo de time + várias specs:</b> orientar escolha/continuação da spec
+              certa e criação de spec nova pelo caminho governado.
+            </li>
+            <li>
+              <b>CO-10.7 — CLI pública autoexplicável:</b> <code>npx ai-guidelines</code> detecta o
+              contexto e guia sem decorar comandos.
+            </li>
+          </ul>
+          <details>
+            <summary>Ver imagem de valor entregue</summary>
+            <div class="valimg">
+              <img loading="lazy" alt="Valor entregue — PR #43" src="./pr-value-images/pr-43.png" />
+              <div class="cap">
+                <a
+                  href="https://github.com/rosanarezende/ai-guidelines/pull/43"
+                  target="_blank"
+                  rel="noopener"
+                  >PR #43</a
+                >
+              </div>
+            </div>
+          </details>
+        </div>
+      </div>
+
+      <!-- ATIVO -->
+      <div class="section-h sh-active" id="ativo">● Onde estamos agora</div>
+
+      <div class="node active">
+        <div class="seq">
+          <div class="n">11</div>
+          <span class="pr"
+            ><a
+              href="https://github.com/rosanarezende/ai-guidelines/pull/44"
+              target="_blank"
+              rel="noopener"
+              >PR #44</a
+            ></span
+          >
+        </div>
+        <div class="body">
+          <span class="here">você está aqui</span>
+          <h3>
+            Continuação do fluxo: drift vira diagnóstico e reparo<span class="status s-active"
+              >ativo · Draft</span
+            >
+          </h3>
+          <p class="what">
+            Preparar o framework para <b>detectar, explicar e reparar</b> desencontros (drift) em
+            linguagem humana — sem exigir que você conheça os arquivos internos. Começou pelo
+            primeiro reparo seguro de verdade.
+          </p>
+          <ul class="cps">
+            <li class="cps-h">1 checkpoint, 4 sub-checkpoints</li>
+            <li class="doing">
+              <b>CO-10.8.1 — drift explicável e reparável:</b> camada de reparo + primeiro caso
+              (Drift #1) entregue com preview e confirmação. Veja o
+              <a class="link" href="./drift-tracker.html">tracker de drifts</a>.
+            </li>
+            <li>
+              <b>CO-10.8.2 — arquitetura interna / DDD / BDD:</b> reorganizar o código para ser
+              legível e sustentável por humanos, sem mudar comportamento.
+            </li>
+            <li>
+              <b>CO-10.9 — falsificação ampla:</b> transformar invariantes em testes e falsificar
+              jornadas.
+            </li>
+            <li>
+              <b>CO-10.10 — revisão independente + Human Gate:</b> rodada final antes de você
+              decidir.
+            </li>
+          </ul>
+          <details open>
+            <summary>Ver imagem de visão pretendida</summary>
+            <div class="valimg">
+              <img
+                loading="lazy"
+                alt="Visão pretendida — PR #44"
+                src="./pr-value-images/pr-44.png"
+              />
+              <div class="cap">
+                Visão pretendida (a imagem de "valor entregue" é montada ao final, antes do Ready) ·
+                <a
+                  href="https://github.com/rosanarezende/ai-guidelines/pull/44"
+                  target="_blank"
+                  rel="noopener"
+                  >PR #44</a
+                >
+              </div>
+            </div>
+          </details>
+
+          <div class="drifts">
+            <div class="drifts-h">
+              8 desencontros (drifts) que este nó passa a tratar —
+              <a href="./drift-tracker.html">ver tracker completo</a>
+            </div>
+            <ol class="drift-list">
+              <li>
+                <span class="dpill dp-done">drift #1</span> Estou na branch certa, mas o framework
+                aponta para a anterior — <b style="color: var(--done)">reparo entregue</b> ·
+                CO-10.8.1 · PR #44
+              </li>
+              <li>
+                <span class="dpill">drift #2</span> O framework perdeu o fio de onde você está —
+                candidato · CO-10.8.x · PR #44
+              </li>
+              <li>
+                <span class="dpill">drift #3</span> O "próximo passo" escrito não bate com o real —
+                candidato · CO-10.8.x · PR #44
+              </li>
+              <li>
+                <span class="dpill">drift #4</span> A lista de tarefas não reflete a etapa atual —
+                candidato · CO-10.8.x · PR #44
+              </li>
+              <li>
+                <span class="dpill">drift #5</span> A descrição do PR conta história diferente da
+                entregue — candidato · co-events (PR futuro)
+              </li>
+              <li>
+                <span class="dpill">drift #6</span> Uma decisão aprovada, mas o mapa não avançou —
+                candidato · co-events (reparo = decisão humana)
+              </li>
+              <li>
+                <span class="dpill">drift #7</span> Próximo trabalho previsto, sem espaço aberto —
+                candidato · co-events (reparo = decisão humana)
+              </li>
+              <li>
+                <span class="dpill">drift #8</span> Anotação de bastidor contradiz o estado oficial
+                — candidato · co-knowledge / housekeeping
+              </li>
+            </ol>
+          </div>
+        </div>
+      </div>
+
+      <!-- PRÓXIMOS -->
+      <div class="section-h sh-plan" id="proximos">● O que vem pela frente</div>
+
+      <div class="node plan">
+        <div class="seq">
+          <div class="n">12</div>
+          <span class="pr">previsto</span>
+        </div>
+        <div class="body">
+          <h3>Unificar as duas raízes de arquivos<span class="status s-plan">previsto</span></h3>
+          <p class="what">
+            Colapsar as duas pastas-raiz transitórias (<code>.ai-guidelines</code> /
+            <code>.specify</code>) numa estrutura única, antes de automatizar captura e eventos.
+          </p>
+          <ul class="cps">
+            <li class="cps-h">1 checkpoint previsto</li>
+            <li>
+              <b>checkpoint-dualroot-collapse</b> — migração das duas raízes (gateada por smoke
+              test).
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="node plan">
+        <div class="seq">
+          <div class="n">13</div>
+          <span class="pr">previsto</span>
+        </div>
+        <div class="body">
+          <h3>
+            Capturar o trabalho em formação + ciclo de vida<span class="status s-plan"
+              >previsto</span
+            >
+          </h3>
+          <p class="what">
+            Registrar o que ainda está "em trânsito" e dar a ele um ciclo de vida claro; dissolver
+            as anotações soltas de "próximo passo" (NEXT.md).
+          </p>
+          <ul class="cps">
+            <li class="cps-h">1 checkpoint previsto</li>
+            <li>
+              <b>checkpoint-co-capture</b> — captura na formação + espinha de ciclo de vida (CO-5).
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="node plan">
+        <div class="seq">
+          <div class="n">14</div>
+          <span class="pr">previsto</span>
+        </div>
+        <div class="body">
+          <h3>
+            Disparar o pipeline automaticamente nos eventos<span class="status s-plan"
+              >previsto</span
+            >
+          </h3>
+          <p class="what">
+            Tornar o laço contínuo: o framework reage sozinho nos momentos-chave (commit, push,
+            retomada…), mantendo o repo sempre pronto. É aqui que entra o candidato
+            <b>"preparar entrega"</b>.
+          </p>
+          <ul class="cps">
+            <li class="cps-h">1 checkpoint previsto</li>
+            <li>
+              <b>checkpoint-co-events</b> — dispatcher de eventos / disparo automático (CO-6).
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="node plan">
+        <div class="seq">
+          <div class="n">15</div>
+          <span class="pr">previsto</span>
+        </div>
+        <div class="body">
+          <h3>
+            Faxina: remover taxonomias e resíduos antigos<span class="status s-plan">previsto</span>
+          </h3>
+          <p class="what">
+            Limpeza ortogonal: tirar classificações antigas, sincronizar AGENTS, banir conceitos
+            obsoletos e arrumar a documentação técnica.
+          </p>
+          <ul class="cps">
+            <li class="cps-h">5 checkpoints previstos</li>
+            <li><b>checkpoint-taxonomy-removal</b> — remove taxonomia antiga (P0 crítico).</li>
+            <li><b>checkpoint-agents-sync</b> — sincroniza AGENTS (build + check).</li>
+            <li><b>checkpoint-gg-0002</b> — guarda de conceito banido.</li>
+            <li><b>checkpoint-decouple-brief</b> — desacopla o brief da taxonomia antiga.</li>
+            <li><b>checkpoint-doc-cleanup</b> — limpa docs arquiteturais.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="node plan">
+        <div class="seq">
+          <div class="n">16</div>
+          <span class="pr">previsto</span>
+        </div>
+        <div class="body">
+          <h3>
+            Saúde do conhecimento antes da integração<span class="status s-plan">previsto</span>
+          </h3>
+          <p class="what">
+            Garantir que o grafo de conhecimento esteja completo e saudável antes de fechar o
+            projeto, com revisão assistida por IA mas decisão humana.
+          </p>
+          <ul class="cps">
+            <li class="cps-h">3 checkpoints previstos</li>
+            <li>
+              <b>checkpoint-knowledge-health</b> — dossiê de saúde do grafo + candidatos para
+              decisão humana.
+            </li>
+            <li>
+              <b>checkpoint-knowledge-backfill-wide</b> — backfill amplo (P0/P1) antes da
+              integração.
+            </li>
+            <li>
+              <b>checkpoint-co-knowledge-promotion</b> — decide/promove os checks estruturais.
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="node plan">
+        <div class="seq">
+          <div class="n">★</div>
+          <span class="pr">final</span>
+        </div>
+        <div class="body">
+          <h3>Revisão final e merge<span class="status s-plan">previsto · terminal</span></h3>
+          <p class="what">
+            A homologação final e o único momento de merge em main: tudo o que foi empilhado
+            aterrissa de uma vez.
+          </p>
+          <ul class="cps">
+            <li class="cps-h">1 checkpoint previsto</li>
+            <li><b>review-and-merge</b> — revisão de integração e merge canônico.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="foot">
+        Projeção de acompanhamento humano da Spec 0024 · derivada de state.yml § topology · imagens
+        baixadas dos PRs em ./pr-value-images/ · atualizada em 2026-06-21 · não é fonte de verdade
+        estrutural
+      </div>
+    </div>
+  </body>
+</html>
