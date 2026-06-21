@@ -1,0 +1,26 @@
+{
+  "aria": {
+    "region": "Simulador interativo da CLI ai-guidelines",
+    "screen": "Terminal: use as setas, espaço e Enter para navegar pelos prompts",
+    "controls": "Controles do simulador fora do terminal"
+  },
+  "modeProjected": "Simulação fiel gerada do runtime",
+  "modeHint": "Os textos e a sequência vêm do código real da CLI (projeção verificada por drift-check). As saídas são transcripts de dry-run reais.",
+  "modeReal": "CLI real rodando no navegador",
+  "restart": "recomeçar",
+  "runReal": "▶ Rodar de verdade",
+  "backToSim": "← Voltar à simulação",
+  "realLoading": "Carregando o ambiente real (WebContainer + xterm)…",
+  "runRealUnavailable": "O modo \"rodar de verdade\" precisa de um navegador desktop com cross-origin isolation (o site publicado, com os headers COEP/COOP). Aqui ele não está disponível — seguindo com a simulação fiel projetada, que funciona em qualquer lugar.",
+  "runRealNote": "Modo opcional (desktop): boota a CLI real no navegador com WebContainer + xterm. É um enhancement progressivo — exige um clientId do StackBlitz e headers de cross-origin isolation (COEP/COOP), não funciona em mobile e precisa de rede. A simulação fiel ao lado continua funcionando sem nada disso.",
+  "outroApplied": "Plano aplicado na simulação (prévia abaixo, sem escrever arquivos).",
+  "outroSelected": "Ação escolhida na simulação (nada foi executado no seu repositório).",
+  "outroCancelled": "Nenhuma mudança — você escolheu não aplicar.",
+  "outcomeBadge": "Saída simulada com as escolhas desta sessão.",
+  "keyboardHint": "↑/↓ navega · espaço marca · Enter confirma · também dá pra clicar.",
+  "confirmSelection": "confirmar seleção →",
+  "yes": "Sim",
+  "no": "Não",
+  "none": "nenhum",
+  "empty": "(vazio)"
+}

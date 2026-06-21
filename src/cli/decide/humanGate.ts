@@ -28,6 +28,10 @@ import {
   HumanDecisionTypePolicy,
 } from "../../infrastructure/yaml/humanDecisionPolicyReader.js";
 import { SUBCHECKPOINT_READINESS } from "../handoffFacts.js";
+import {
+  deriveHumanGateAvailability,
+  humanGateFactsFromDecisionSnapshot,
+} from "../flow/GovernedFlow.js";
 
 export const HUMAN_GATE_ID = "human-gate";
 
@@ -61,82 +65,8 @@ export class HumanGateDefinition implements HumanDecisionDefinition {
     return snapshot.policy ? findDecisionType(snapshot.policy, this.id) : undefined;
   }
 
-  /** Motivos de bloqueio derivados (linguagem humana). Vazio ⟹ elegível. */
-  private blockers(snapshot: DecisionSnapshot): string[] {
-    const reasons: string[] = [];
-    const pr = snapshot.facts.pullRequest;
-    // Sub-checkpoints pendentes (fonte canônica tasks.md) — em linguagem humana.
-    for (const sc of snapshot.subCheckpoints) {
-      if (sc.state === "pending") reasons.push(`${sc.id} ainda está aberto.`);
-    }
-    const activeSub = snapshot.subCheckpoints.find((s) => s.state === "in-progress");
-    if (activeSub) {
-      const pendingAfter = snapshot.subCheckpoints.filter(
-        (s) => s.state === "pending" && s.line > activeSub.line
-      );
-      if (activeSub.readiness !== SUBCHECKPOINT_READINESS) {
-        reasons.push(`${activeSub.id} ainda não declarou readiness "${SUBCHECKPOINT_READINESS}".`);
-      } else if (pendingAfter.length > 0) {
-        reasons.push(
-          `${activeSub.id} declarou readiness, mas ${pendingAfter[0].id} ainda precisa ser ativado por advance-subcheckpoint.`
-        );
-      }
-    }
-    if (snapshot.openFindings.length > 0) {
-      reasons.push(
-        `A auditoria técnica ainda tem ${snapshot.openFindings.length} problema(s) aberto(s).`
-      );
-    }
-    if (pr) {
-      if (pr.isDraft) reasons.push(`PR #${pr.number} continua Draft (Ready é precondição).`);
-      if (pr.checks.fail > 0 || pr.checks.pending > 0) {
-        reasons.push(
-          `A integração contínua ainda não está verde (${pr.checks.fail} falha(s), ${pr.checks.pending} pendente(s)).`
-        );
-      }
-    } else {
-      reasons.push("Estado do PR não observado — não é possível decidir o avanço.");
-    }
-    // Reviews obrigatórios pendentes.
-    for (const s of snapshot.facts.lifecycle?.reviewStatuses ?? []) {
-      if (s.blocking) reasons.push(`Review obrigatório pendente: ${s.typeId} (${s.state}).`);
-    }
-    if (snapshot.workingTreeState !== "clean") {
-      reasons.push("A working tree tem mudanças não commitadas.");
-    }
-    if ((snapshot.facts.git.behind ?? 0) > 0) {
-      reasons.push("A branch está atrás do remoto — reconcilie antes de decidir.");
-    }
-    // Checks externos (coletados só quando PR Ready).
-    if (pr && !pr.isDraft) {
-      if (!snapshot.prReady || !snapshot.prReady.ok) {
-        reasons.push("pr-ready:check ainda não está verde.");
-      }
-      if (!snapshot.gateDecidability || !snapshot.gateDecidability.ok) {
-        reasons.push("gate-decidability:check ainda não está verde.");
-      }
-    }
-    return reasons;
-  }
-
   detect(snapshot: DecisionSnapshot): DecisionAvailability {
-    const policy = this.policyOf(snapshot);
-    if (!policy) {
-      return {
-        status: "not-applicable",
-        reasons: ["Tipo não declarado na human-decision-policy.yml."],
-      };
-    }
-    if (snapshot.gateExists) {
-      return {
-        status: "not-applicable",
-        reasons: ["Já existe um gate registrado para este checkpoint."],
-      };
-    }
-    const reasons = this.blockers(snapshot);
-    return reasons.length > 0
-      ? { status: "blocked", reasons }
-      : { status: "available", reasons: [] };
+    return deriveHumanGateAvailability(humanGateFactsFromDecisionSnapshot(snapshot));
   }
 
   choices(snapshot: DecisionSnapshot): readonly HumanDecisionChoice[] {

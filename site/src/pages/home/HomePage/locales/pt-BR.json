@@ -1,0 +1,48 @@
+{
+  "eyebrow": "Sistema de governança para colaboração humano-IA",
+  "title": "ai-guidelines",
+  "heroImageAlt": "Diagrama do ai-guidelines mostrando automação estrutural, governança operacional e julgamento humano",
+  "howItWorks": {
+    "title": "Como funciona",
+    "body": "O ai-guidelines fica no repositório e transforma o estado real do trabalho em orientação prática. A CLI é a ferramenta operacional: ela lê contexto, valida limites e mostra o próximo passo seguro para humanos e assistentes.",
+    "steps": [
+      {
+        "title": "Você ou a IA abre o fluxo",
+        "body": "A pessoa pode rodar o comando diretamente, ou pedir para uma LLM continuar uma tarefa no repositório."
+      },
+      {
+        "title": "ai-guidelines lê o estado real",
+        "body": "O sistema detecta projeto novo, repo existente, specs abertas, branch, PR, validações, reviews e bloqueios."
+      },
+      {
+        "title": "O fluxo mostra o próximo passo seguro",
+        "body": "A resposta orienta o que fazer agora, o que está bloqueado, o que precisa de humano e quais validações rodar."
+      }
+    ]
+  },
+  "simulator": {
+    "title": "Experimente o fluxo",
+    "body": "Escolha a experiência que mais se parece com o seu momento. O simulador abre o caminho certo sem exigir que você saiba o comando antes.",
+    "startLabel": "Começar com ai-guidelines",
+    "startDescription": "Para projeto novo ou projeto em andamento que ainda vai adotar o framework.",
+    "startAction": "Abrir simulador de adoção",
+    "dailyLabel": "Usar no dia a dia",
+    "dailyDescription": "Para projeto que já usa ai-guidelines e precisa continuar o trabalho com contexto.",
+    "dailyAction": "Abrir simulador de uso diário"
+  },
+  "pillarsTitle": "Os guardrails que tornam isso seguro",
+  "pillars": [
+    {
+      "title": "Specs como frentes de trabalho",
+      "body": "Cada mudança vive numa spec governada, com estado, plano, tarefas e decisões próprias — rastreável do começo ao fim."
+    },
+    {
+      "title": "Fluxo governado",
+      "body": "A próxima ação, as validações e o que está bloqueado aparecem explicitamente. Nada de mudança fora do processo."
+    },
+    {
+      "title": "Decisão humana (Human Gate)",
+      "body": "Marcar pronto, aprovar o avanço e fazer o merge são decisões reservadas a um humano — registradas depois da decisão, nunca antes."
+    }
+  ]
+}

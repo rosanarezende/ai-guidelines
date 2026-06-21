@@ -23,12 +23,17 @@ checks_ai_guidelines.txt
 # Build output do tsc (declarado em tsconfig.json `outDir`)
 dist/
 
+# Artefatos gerados para o simulador real do site (WebContainer)
+site/public/packages/
+site/public/real-cli-package.json
+
 # Logs
 logs/
 *.log
 
 # Arquivos temporários
 .tmp/
+.temp/
 temp/
 # Scripts de scratch na raiz (ex.: cálculo ad-hoc de hash) — nunca versionar.
 # O repo usa cli/**/*.test.mjs e src/**/*.test.ts; não há test-*.js de raiz legítimo.

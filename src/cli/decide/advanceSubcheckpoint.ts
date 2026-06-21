@@ -7,7 +7,7 @@
  * próximo `[ ]→[/]`) por edição ESTRUTURADA (por id + marcador), preservando
  * descrição/indentação/comentários/encoding/line endings e todo o resto.
  *
- * Consistência com `guidelines work`: a elegibilidade vem da derivação ÚNICA
+ * Consistência com `npm run flow -- work`: a elegibilidade vem da derivação ÚNICA
  * `deriveAdvanceEligibility` (advanceEligibility.ts) — a MESMA que `work` consome
  * sobre o mesmo snapshot factual. `decide` e `work` nunca divergem na pergunta "a
  * transição pode ser exercida?". Antes de escrever, simula o estado projetado e
@@ -33,11 +33,11 @@ import { HandoffFacts, parseSubCheckpoints } from "../handoffFacts.js";
 import { resolveSubCheckpointWork } from "../workBrief.js";
 import {
   ADVANCE_SUBCHECKPOINT_ID,
-  AdvanceEligibilityFacts,
   AdvanceTransitionPair,
   advanceTransitionPair,
   deriveAdvanceEligibility,
 } from "./advanceEligibility.js";
+import { advanceEligibilityFactsFromDecisionSnapshot } from "../flow/GovernedFlow.js";
 import {
   findDecisionType,
   HumanDecisionTypePolicy,
@@ -121,35 +121,8 @@ export class AdvanceSubcheckpointDefinition implements HumanDecisionDefinition {
     return advanceTransitionPair(snapshot.subCheckpoints);
   }
 
-  /**
-   * Projeta os fatos de elegibilidade do snapshot governado. É a ponte para a
-   * derivação ÚNICA `deriveAdvanceEligibility` — a MESMA consumida por `work`.
-   */
-  private eligibilityFacts(snapshot: DecisionSnapshot): AdvanceEligibilityFacts {
-    const lc = snapshot.facts.lifecycle;
-    const pr = snapshot.facts.pullRequest;
-    return {
-      subCheckpoints: snapshot.subCheckpoints,
-      policyDeclared: this.policyOf(snapshot) !== undefined,
-      openFindings: snapshot.openFindings.length,
-      openBlocking: snapshot.openFindings.filter((f) => f.blocking).length,
-      someFixAwaitingRevalidation: snapshot.openFindings.some(
-        (f) => f.resolution?.action === "fixed" && !f.verified
-      ),
-      blockingReviews: (lc?.reviewStatuses ?? [])
-        .filter((s) => s.blocking)
-        .map((s) => ({ typeId: s.typeId, state: s.state })),
-      consolidationErrors: snapshot.consolidation.errors,
-      workingTreeClean: snapshot.workingTreeState === "clean",
-      behind: snapshot.facts.git.behind ?? 0,
-      ciFail: pr?.checks.fail ?? 0,
-      ciPending: pr?.checks.pending ?? 0,
-      gateExists: snapshot.gateExists,
-    };
-  }
-
   detect(snapshot: DecisionSnapshot): DecisionAvailability {
-    return deriveAdvanceEligibility(this.eligibilityFacts(snapshot));
+    return deriveAdvanceEligibility(advanceEligibilityFactsFromDecisionSnapshot(snapshot));
   }
 
   choices(snapshot: DecisionSnapshot): readonly HumanDecisionChoice[] {
@@ -194,7 +167,7 @@ export class AdvanceSubcheckpointDefinition implements HumanDecisionDefinition {
       ? [
           `${active!.id} será marcado como concluído.`,
           `${next.id} será marcado como ativo.`,
-          "`guidelines work` passará a apontá-lo como objeto de implementação.",
+          "`npm run flow -- work` passará a apontá-lo como objeto de implementação.",
         ]
       : terminalNoNext
         ? [
@@ -385,7 +358,7 @@ export class AdvanceSubcheckpointDefinition implements HumanDecisionDefinition {
         { label: `${pair.next.id} em tasks.md`, expected: "[ ] (pendente)" },
       ],
       nextHuman: [
-        `\`guidelines work\` passará a apontar ${pair.next.id} como objeto de IMPLEMENT_CHECKPOINT.`,
+        `\`npm run flow -- work\` passará a apontar ${pair.next.id} como objeto de IMPLEMENT_CHECKPOINT.`,
         "A transição NÃO implementou o próximo sub-checkpoint nem autorizou Ready/Human Gate/gate/merge.",
       ],
       note: [],

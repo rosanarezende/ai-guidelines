@@ -1,0 +1,310 @@
+{
+  "providerQuestion": "Quais ferramentas de IA devem receber arquivos de orientação?",
+  "featureInstallQuestion": "Quais práticas quer instalar agora?",
+  "featureUpdateQuestion": "Quais práticas você quer atualizar?",
+  "providerGroups": {
+    "primary": "Assistentes principais do repositório",
+    "local": "Editores e agentes locais"
+  },
+  "featureGroups": {
+    "infrastructure": "Infraestrutura do repositório",
+    "updateInfrastructure": "Práticas de infraestrutura",
+    "editorial": "Práticas de trabalho",
+    "updateEditorial": "Práticas editoriais"
+  },
+  "collaborationProfiles": {
+    "solo": {
+      "label": "Solo",
+      "hint": "uma pessoa decide; sem approvals nativos obrigatórios"
+    },
+    "contributor": {
+      "label": "Com contribuições externas",
+      "hint": "fluxo leve, mas com mais rastreio de findings"
+    },
+    "team": {
+      "label": "Time",
+      "hint": "approvals e proteção mais fortes para colaboração em equipe"
+    }
+  },
+  "operationLabels": {
+    "init": "Iniciar ai-guidelines neste repositório",
+    "adopt": "Adotar ai-guidelines neste repositório",
+    "update": "Atualizar runtime, templates, providers, práticas ou política governada"
+  },
+  "operationActionLabels": {
+    "init": "Iniciar ai-guidelines neste repositório",
+    "adopt": "Adotar ai-guidelines neste repositório",
+    "update": "Atualizar este repositório"
+  },
+  "operationTitles": {
+    "init": "Iniciar projeto novo",
+    "adopt": "Adotar projeto existente",
+    "update": "Atualizar repositório governado"
+  },
+  "taskLogTitles": {
+    "init": "Etapas do projeto novo",
+    "adopt": "Etapas da adoção",
+    "update": "Etapas do update"
+  },
+  "mainHints": {
+    "init": "diretório novo ainda sem projeto/governança",
+    "adopt": "repo existente ainda sem ai-guidelines",
+    "update": "runtime, templates, providers, práticas e política"
+  },
+  "detected": {
+    "governedTitle": "Este repositório já usa ai-guidelines.",
+    "governedGuidance": "O caminho normal é atualizar runtime, templates, providers, práticas e políticas já governadas.",
+    "governedAdvancedReason": "init reinicia bootstrap de projeto novo; adopt tenta adotar um repo existente. Em um repo já governado, essas opções podem confundir o estado em vez de avançar o fluxo.",
+    "existingTitle": "Este parece ser um repositório existente ainda não governado.",
+    "existingGuidance": "O caminho normal é adotar o repo existente sem tratá-lo como projeto vazio.",
+    "existingAdvancedReason": "init é para diretório vazio; update é para repo já governado. Neste estado, adopt preserva o projeto existente e adiciona a governança.",
+    "newTitle": "Este parece ser um diretório novo.",
+    "newGuidance": "O caminho normal é iniciar o baseline em um projeto novo.",
+    "newAdvancedReason": "adopt pressupõe projeto existente; update pressupõe governança já instalada. Neste estado, init é o caminho direto.",
+    "evidence": {
+      "config": ".ai-guidelines/config.json existe.",
+      "governance": ".governance/ existe.",
+      "aiGuidelines": ".ai-guidelines/ existe.",
+      "specify": ".specify/ existe.",
+      "packageJson": "package.json existe.",
+      "noGovernedDirs": "Não detectei .ai-guidelines/, .governance/ ou .specify/.",
+      "emptyDirectory": "A pasta não tem arquivos relevantes.",
+      "looseFiles": "Há arquivos soltos, mas não detectei package.json.",
+      "noPackageJson": "Não detectei package.json.",
+      "noGovernedRuntime": "Não detectei diretórios governados."
+    }
+  },
+  "flow": {
+    "intro": {
+      "init": [
+        "Use este fluxo quando o diretório ainda não tem um projeto configurado.",
+        "",
+        "O assistente vai guiar:",
+        "- destino e nome do projeto;",
+        "- perfil de colaboração: solo, contribuições externas ou time;",
+        "- ferramentas de IA que receberão orientação;",
+        "- práticas opcionais como Prettier, Husky e CI;",
+        "- preview antes de qualquer escrita.",
+        "",
+        "Por segurança, o padrão é começar em dry-run."
+      ],
+      "adopt": [
+        "Use este fluxo quando já existe um projeto e você quer adicionar ai-guidelines.",
+        "",
+        "O assistente vai guiar:",
+        "- preservação do conteúdo existente;",
+        "- perfil de colaboração sem apagar histórico do projeto;",
+        "- ferramentas de IA que receberão orientação;",
+        "- práticas opcionais que podem ser adicionadas sem tratar o repo como vazio;",
+        "- preview de conflitos e efeitos antes de qualquer escrita.",
+        "",
+        "Por segurança, o padrão é começar em dry-run e sem force."
+      ],
+      "update": [
+        "Use este fluxo para manter um repositório que já usa ai-guidelines.",
+        "",
+        "O assistente atualiza runtime, templates, providers, práticas e política de colaboração."
+      ]
+    },
+    "collaborationTitle": "Como este repositório será colaborado?",
+    "collaborationIntro": {
+      "init": [
+        "Esta escolha define a política inicial de colaboração.",
+        "",
+        "Ela não muda o código do produto. Ela define quanta revisão humana/GitHub o fluxo espera antes de decisões importantes."
+      ],
+      "adopt": [
+        "Esta escolha cria ou ajusta a política governada sem apagar o conteúdo existente.",
+        "",
+        "Se o projeto já tem uma política própria, o fluxo atualiza apenas o perfil ativo quando o perfil existe."
+      ],
+      "update": [
+        "Alterar colaboração é uma mudança de prática global.",
+        "",
+        "Use esta opção só se você tem autoridade para mudar como o repositório exige revisão, approvals e fechamento de findings."
+      ]
+    },
+    "contextTask": {
+      "init": "Projeto novo: criar baseline sem assumir conteúdo existente.",
+      "adopt": "Projeto existente: preservar arquivos atuais e aplicar só efeitos governados.",
+      "update": "Repo governado: atualizar sem recriar init/adopt."
+    },
+    "taskGroups": {
+      "context": "Contexto",
+      "language": "Idioma",
+      "collaboration": "Colaboração",
+      "integrations": "Integrações",
+      "execution": "Execução"
+    },
+    "taskMessages": {
+      "context": "Escolhendo destino e nome do projeto.",
+      "language": "Escolhendo idioma do baseline e das práticas TDD/BDD.",
+      "collaboration": "Escolhendo perfil de colaboração e política de revisão.",
+      "integrations": "Escolhendo ferramentas de IA e práticas.",
+      "execution": "Definindo pacote, segurança e instalação."
+    },
+    "taskList": {
+      "contextTitle": "Conferir contexto detectado",
+      "contextDone": "Contexto coerente com a operação escolhida.",
+      "previewTitle": "Montar preview humano",
+      "previewDone": "Preview pronto para confirmação.",
+      "safetyTitle": "Checar travas de segurança",
+      "safetyDone": "Nenhuma escrita será feita sem confirmação final."
+    },
+    "prompts": {
+      "target": "Onde aplicar? Use . para este repositório",
+      "projectName": "Nome do projeto",
+      "language": "Idioma do baseline e das práticas TDD/BDD",
+      "collaborationProfile": "Qual perfil de colaboração este repositório deve usar?",
+      "packageManager": "Gerenciador de pacotes",
+      "dryRun": "Só mostrar o plano, sem escrever arquivos?",
+      "force": "Permitir sobrescrever arquivos suportados quando houver conflito?",
+      "install": "Instalar dependências automaticamente no final?",
+      "advanced": "Abrir opções avançadas?",
+      "runtimeDir": "Diretório runtime do ai-guidelines",
+      "forcePrettier": "Forçar Prettier mesmo se houver formatter rival?",
+      "prune": "Remover artefatos gerenciados que não fazem mais parte da seleção?",
+      "confirmApply": "Aplicar este plano?"
+    },
+    "language": {
+      "pt": "Português",
+      "ptHint": "usa os templates tdd-pt e bdd-pt",
+      "en": "English",
+      "enHint": "usa os templates tdd-en e bdd-en"
+    },
+    "packageManagers": {
+      "auto": "Detectar automaticamente",
+      "yarnClassic": "yarn classic",
+      "yarnBerry": "yarn berry"
+    },
+    "stateLabels": {
+      "dryRunOn": "dry-run",
+      "dryRunOff": "aplicar arquivos",
+      "forceOn": "force habilitado",
+      "forceOff": "force desligado",
+      "installOn": "install habilitado",
+      "installOff": "install desligado",
+      "advancedOn": "opções avançadas revisadas",
+      "advancedOff": "opções avançadas padrão"
+    },
+    "preview": {
+      "title": "Prévia",
+      "heading": "O que será feito",
+      "flow": "Fluxo",
+      "target": "Destino",
+      "name": "Nome",
+      "derivedName": "(derivado da pasta)",
+      "derivedNameLog": "derivado da pasta",
+      "packageManager": "Gerenciador de pacotes",
+      "language": "Idioma do baseline e TDD/BDD",
+      "collaborationProfile": "Perfil de colaboração",
+      "runtimeDir": "Diretório runtime",
+      "integrations": "Integrações",
+      "providers": "Ferramentas de IA",
+      "features": "Práticas",
+      "safety": "Segurança",
+      "dryRun": "Só prévia",
+      "force": "Sobrescrever conflitos suportados",
+      "forcePrettier": "Forçar Prettier com formatter rival",
+      "install": "Instalar dependências",
+      "prune": "Remover arquivos órfãos gerenciados"
+    },
+    "cancelled": "Provisionamento cancelado.",
+    "spinnerStart": "Montando e aplicando plano {operation}...",
+    "spinnerStop": "Plano {operation} concluído."
+  },
+  "section": {
+    "emptyRegistry": "Nenhum comando de provisioning está registrado.",
+    "emptyRegistryTitle": "Provisioning",
+    "question": "O que faz sentido agora?",
+    "recommendedHint": "recomendado pelo contexto detectado",
+    "details": "Entender o contexto detectado",
+    "detailsTitle": "Como escolher init/adopt/update",
+    "policyTitle": "Política de colaboração e revisão",
+    "alsoAvailable": "Também disponível:",
+    "updatePracticesLine": "- atualizar práticas como Prettier, Husky, CI, Quality Gates, TDD e BDD;",
+    "policyLine": "- consultar política de colaboração e revisões sem criar nova fonte de verdade.",
+    "profileLine": "- perfil de colaboração atual: {profile}.",
+    "detectedLabel": "Detectado:",
+    "displayedOption": "Opção exibida neste estado:"
+  },
+  "governedUpdate": {
+    "introTitle": "Atualizar este repositório",
+    "intro": [
+      "Este repositório já usa ai-guidelines.",
+      "",
+      "Aqui o update funciona como manutenção do repo governado:",
+      "- runtime e templates;",
+      "- providers;",
+      "- práticas como Prettier, Husky, CI, Quality Gates, TDD e BDD;",
+      "- política de colaboração/revisão existente.",
+      "",
+      "init/adopt não aparecem como caminho principal porque poderiam confundir um repo já governado."
+    ],
+    "question": "O que você quer atualizar?",
+    "choices": {
+      "guidedUpdate": "Atualizar runtime, templates, providers ou práticas",
+      "guidedUpdateHint": "manutenção guiada do repo governado",
+      "policy": "Ver ou alterar política de colaboração e revisões",
+      "policyHintFallback": "usa .governance/review-policy.yml quando existir",
+      "runtime": "Runtime e templates do ai-guidelines",
+      "runtimeHint": "atualiza arquivos gerenciados sem escolher novas práticas",
+      "providers": "Providers",
+      "providersHint": "Claude, OpenAI, Gemini etc. via update --providers",
+      "features": "Práticas do repositório",
+      "featuresHint": "Prettier, Husky, CI, Quality Gates, TDD, BDD",
+      "collaboration": "Alterar perfil de colaboração",
+      "collaborationHint": "solo, contribuições externas ou time, com aviso de autoridade",
+      "policyHint": "mostra a fonte governada e permite trocar o perfil ativo",
+      "details": "Entender update antes de executar"
+    },
+    "detailsTitle": "Como o update funciona",
+    "details": [
+      "O update é o painel de manutenção de um repo que já usa ai-guidelines.",
+      "",
+      "Ele cobre:",
+      "- runtime e templates do framework;",
+      "- providers via update --providers;",
+      "- práticas opt-in via update --features;",
+      "- alteração explícita do perfil ativo em review-policy.yml.",
+      "",
+      "Ele não recria o projeto e não chama init/adopt como caminho principal."
+    ],
+    "providerEmpty": "Nenhum provider informado; nada executado.",
+    "providerTitle": "Atualizar providers",
+    "providerNote": ["Providers não são um comando separado.", "", "O caminho canônico é:"],
+    "featuresEmpty": "Nenhuma prática selecionada; nada executado.",
+    "featuresTitle": "Atualizar práticas",
+    "featuresNoteHeading": "O update vai usar o plano governado já existente.",
+    "featuresSelected": "Práticas selecionadas:",
+    "commandLabel": "Comando:",
+    "policyChangeTitle": "Alterar perfil de colaboração",
+    "policyChangeIntro": [
+      "Esta é uma mudança de prática global.",
+      "",
+      "Ela pode mudar approvals, exigências de revisão e como findings são encerrados. Confirme apenas se essa decisão é sua ou foi autorizada."
+    ],
+    "policyChangeConfirm": "Tenho autoridade para alterar a política de colaboração deste repositório.",
+    "policyChangeCancelled": "Alteração de política cancelada.",
+    "policyChangeNote": "O update vai alterar somente o perfil ativo da política quando o arquivo já existir.",
+    "policyChangeSelected": "Perfil selecionado:"
+  },
+  "policy": {
+    "missing": [
+      "Não encontrei .governance/review-policy.yml neste repo.",
+      "",
+      "Quando existir, essa política é a fonte governada para perfil de colaboração e regras de revisão."
+    ],
+    "source": "Fonte",
+    "profile": "Perfil de colaboração atual",
+    "impact": "Impacto do perfil atual:",
+    "implementationApprovals": "approvals nativos em PR de implementação",
+    "integrationApprovals": "approvals nativos em PR de integração",
+    "codeOwner": "code owner review",
+    "lastPush": "aprovação do último push",
+    "requiresResolution": "findings aceitos exigem resolution",
+    "requiresVerification": "findings fixed exigem evento de verificação",
+    "semanticReviews": "Reviews semânticos continuam separados de perfil de colaboração:",
+    "noneRequired": "nenhum requisito semântico obrigatório por padrão."
+  }
+}

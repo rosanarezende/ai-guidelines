@@ -1,0 +1,56 @@
+{
+  "id": "consumer-empty",
+  "description": "Pessoa roda npx ai-guidelines em uma pasta vazia.",
+  "expectedPrimaryOperation": "init",
+  "entrypoint": {
+    "contains": [
+      "Este parece ser um diretório novo.",
+      "Iniciar ai-guidelines neste repositório",
+      "Caminhos que o guia oferece agora:",
+      "npx ai-guidelines init --dry-run"
+    ],
+    "notContains": ["cockpit — estado irrecuperável"]
+  },
+  "dryRun": {
+    "args": [
+      "init",
+      "--dry-run",
+      "--target",
+      ".",
+      "--name",
+      "consumer-empty",
+      "--package-manager",
+      "npm",
+      "--providers",
+      "claude",
+      "--skip-prettier",
+      "--skip-husky",
+      "--skip-ci",
+      "--skip-quality-gates",
+      "--skip-tdd",
+      "--skip-bdd"
+    ],
+    "contains": ["dry-run"],
+    "absentAfter": ["AGENTS.md", ".ai-guidelines/config.json"]
+  },
+  "apply": {
+    "args": [
+      "init",
+      "--target",
+      ".",
+      "--name",
+      "consumer-empty",
+      "--package-manager",
+      "npm",
+      "--providers",
+      "claude",
+      "--skip-prettier",
+      "--skip-husky",
+      "--skip-ci",
+      "--skip-quality-gates",
+      "--skip-tdd",
+      "--skip-bdd"
+    ],
+    "existsAfter": ["AGENTS.md", ".ai-guidelines/config.json", "CLAUDE.md"]
+  }
+}

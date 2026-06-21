@@ -17,6 +17,9 @@
  *   - Em stack modo `unit`, Human Gate intermediário não mergeia em `main`.
  */
 import { execFileSync } from "node:child_process";
+import fs from "node:fs";
+import path from "node:path";
+import { parse as parseYaml } from "yaml";
 
 import { parseSpecBranch } from "../app/workflow/DetectActiveSpec.js";
 import { NodeWorkflowFileSystem } from "../infrastructure/filesystem/NodeWorkflowFileSystem.js";
@@ -24,6 +27,7 @@ import { runGovernancePrCheck } from "./governance-pr-check.js";
 import { consolidate, discover, observedReviewStates } from "./reviewCheck.js";
 import { buildReviewTypeRegistry, deriveEffectiveReviewStatuses } from "./reviewRequirements.js";
 import { collectFunctionalFreshness } from "./reviewFreshness.js";
+import { derivePrReadyFlow, prReadyFlowFactsFromReadySnapshot } from "./flow/GovernedFlow.js";
 
 export interface ReadyCheckPr {
   readonly number: number;
@@ -64,6 +68,14 @@ export interface ReadyCheckCheckpoint {
   readonly reviewStatuses: ReadonlyArray<ReadyCheckReviewStatus>;
 }
 
+export interface ReadyCheckSmokePolicy {
+  readonly suspended: boolean;
+  readonly required: boolean;
+  readonly reason: string;
+  readonly changedPaths: readonly string[] | null;
+  readonly triggerPaths: readonly string[];
+}
+
 export interface ReadyCheckSnapshot {
   readonly pr: ReadyCheckPr;
   /** Checks de CI no HEAD atual do PR (bucket: pass | fail | pending | skipping | cancel). */
@@ -76,6 +88,10 @@ export interface ReadyCheckSnapshot {
   readonly workingTreeClean: boolean | null;
   /** Estado de reviews/gate do checkpoint do cursor (null = PR fora de spec/topologia). */
   readonly checkpoint: ReadyCheckCheckpoint | null;
+  /** Suspensão temporária governada dos smoke tests. Compat: use smokePolicy quando disponível. */
+  readonly smokeTestsSuspended?: boolean;
+  /** Política factual de quando smoke real é obrigatório para Ready/Human Gate. */
+  readonly smokePolicy?: ReadyCheckSmokePolicy;
 }
 
 export interface ReadyCheckResult {
@@ -130,99 +146,8 @@ export function normalizeCheckRuns(
 
 /** Pure: avalia as precondições de Ready sobre um snapshot. */
 export function evaluateReadyPreconditions(snapshot: ReadyCheckSnapshot): ReadyCheckResult {
-  const failures: string[] = [];
-  const warnings: string[] = [];
-  const { pr } = snapshot;
-
-  if (pr.state.toLowerCase() !== "open") {
-    failures.push(`PR #${pr.number} não está OPEN (estado: ${pr.state}).`);
-  }
-  if (!pr.isDraft) {
-    warnings.push(
-      `PR #${pr.number} já está Ready — este check é pré-conversão; precondições avaliadas mesmo assim.`
-    );
-  }
-
-  for (const reason of snapshot.readyBodyContractReasons) {
-    failures.push(`contrato Ready do body: ${reason}`);
-  }
-
-  if (snapshot.checks.length === 0) {
-    failures.push("nenhum check de CI encontrado no HEAD atual — CI verde é precondição de Ready.");
-  }
-  for (const check of snapshot.checks) {
-    if (check.bucket === "fail" || check.bucket === "cancel") {
-      failures.push(`CI não está verde no HEAD final: check "${check.name}" = ${check.bucket}.`);
-    } else if (check.bucket === "pending") {
-      failures.push(`CI ainda não terminou no HEAD final: check "${check.name}" pendente.`);
-    }
-  }
-
-  if (snapshot.localHeadSha === null) {
-    warnings.push(
-      "HEAD local indisponível — não foi possível confirmar que o body/CI cobrem o HEAD final."
-    );
-  } else if (
-    !pr.headRefOid.startsWith(snapshot.localHeadSha) &&
-    !snapshot.localHeadSha.startsWith(pr.headRefOid)
-  ) {
-    failures.push(
-      `HEAD local (${snapshot.localHeadSha.slice(0, 7)}) difere do HEAD remoto do PR (${pr.headRefOid.slice(0, 7)}) — push/pull antes de apresentar o PR como final.`
-    );
-  }
-
-  if (snapshot.workingTreeClean === null) {
-    warnings.push("estado da working tree indisponível.");
-  } else if (!snapshot.workingTreeClean) {
-    failures.push(
-      "working tree local não está limpa — implementação não está concluída/commitada."
-    );
-  }
-
-  const checkpoint = snapshot.checkpoint;
-  if (checkpoint === null) {
-    warnings.push("PR sem checkpoint/topologia associado — reviews/gate não avaliados.");
-  } else {
-    if (checkpoint.gateDecision === "approved") {
-      failures.push(
-        `Human Gate do checkpoint "${checkpoint.id}" já está registrado como approved ANTES do Ready — inconsistência na sequência canônica (o gate artifact nasce DEPOIS da decisão humana sobre o PR em Ready).`
-      );
-    }
-    if (checkpoint.openBlockingCount > 0) {
-      failures.push(
-        `há ${checkpoint.openBlockingCount} finding(s) bloqueante(s) (critical/high) aberto(s) no checkpoint "${checkpoint.id}".`
-      );
-    }
-    for (const s of checkpoint.reviewStatuses) {
-      for (const e of s.errors) {
-        failures.push(`policy de reviews inválida: ${e}`);
-      }
-      if (s.blocking) {
-        const why =
-          s.state === "missing"
-            ? "ausente"
-            : s.state === "stale"
-              ? "stale (não cobre a cabeça funcional atual)"
-              : s.decision !== "approved"
-                ? `com decisão "${s.decision}" (precisa de approved)`
-                : s.state;
-        failures.push(
-          `review OBRIGATÓRIO "${s.typeId}" (${s.source}) ${why} no checkpoint "${checkpoint.id}".`
-        );
-      } else if (
-        s.requirement === "recommended" &&
-        s.applicability !== "no" &&
-        !(s.state === "current" && s.decision === "approved")
-      ) {
-        // Advisory ao Human Gate: informa, NUNCA bloqueia (freshness ≠ obrigação).
-        warnings.push(
-          `review recomendado "${s.typeId}" ${s.state === "missing" ? "não realizado" : s.state} — advisory; não bloqueia Ready/Human Gate.`
-        );
-      }
-    }
-  }
-
-  return { ok: failures.length === 0, failures, warnings };
+  const result = derivePrReadyFlow(prReadyFlowFactsFromReadySnapshot(snapshot));
+  return { ok: result.failures.length === 0, failures: result.failures, warnings: result.warnings };
 }
 
 // ── Coleta do snapshot (gh + git + artefatos locais) ─────────────────────────
@@ -259,11 +184,153 @@ function changedPathsOrNull(repoRoot: string, baseRefName: string | undefined): 
   return out.split(/\r?\n/).filter((line) => line.length > 0);
 }
 
+function normalizeChangedPath(p: string): string {
+  return p.replace(/\\/g, "/").replace(/^\.\//, "");
+}
+
+function smokeTriggerReason(p: string): string | null {
+  const normalized = normalizeChangedPath(p);
+  if (normalized === "package.json" || normalized === "package-lock.json") {
+    return "metadata de pacote";
+  }
+  if (normalized.startsWith("tests/smoke/")) return "suíte smoke";
+  if (normalized === "src/cli/main.ts") return "binário publicado";
+  if (normalized.startsWith("src/cli/delivery/bootstrap/")) {
+    return "runtime init/adopt/update publicado";
+  }
+  if (
+    normalized === "src/app/use-cases/AdoptWorkspace.ts" ||
+    normalized === "src/app/use-cases/ProvisionWorkspace.ts" ||
+    normalized === "src/app/use-cases/loadConsumerConfig.ts"
+  ) {
+    return "provisionamento consumidor";
+  }
+  if (normalized.startsWith("src/domain/provisioning/")) return "modelo de provisionamento";
+  if (
+    normalized.startsWith("src/infrastructure/filesystem/") ||
+    normalized.startsWith("src/infrastructure/process/") ||
+    normalized.startsWith("src/infrastructure/templates/")
+  ) {
+    return "adapter usado por consumidor";
+  }
+  if (normalized.startsWith(".core/templates/") || normalized.startsWith(".specify/templates/")) {
+    return "templates publicados";
+  }
+  return null;
+}
+
+export function smokeRelevantChangedPaths(paths: readonly string[]): string[] {
+  return paths.map(normalizeChangedPath).filter((p) => smokeTriggerReason(p) !== null);
+}
+
+interface SmokeNodeFact {
+  readonly id: string;
+  readonly role: string | null;
+  readonly terminal: boolean;
+}
+
+function asRecord(value: unknown): Record<string, unknown> | null {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : null;
+}
+
+function asArray(value: unknown): readonly unknown[] {
+  return Array.isArray(value) ? value : [];
+}
+
+function nodeFact(value: unknown): SmokeNodeFact | null {
+  const record = asRecord(value);
+  if (!record) return null;
+  const id = record.id;
+  if (typeof id !== "string") return null;
+  return {
+    id,
+    role: typeof record.role === "string" ? record.role : null,
+    terminal: record.terminal === true,
+  };
+}
+
+function nodeCheckpoints(value: unknown): readonly string[] {
+  return asArray(asRecord(value)?.checkpoints).filter((cp): cp is string => typeof cp === "string");
+}
+
+function collectSmokeTopology(
+  repoRoot: string,
+  specDir: string
+): { activeNode: SmokeNodeFact | null; nextNode: SmokeNodeFact | null } {
+  const statePath = path.join(repoRoot, ".governance", "specs", specDir, "state.yml");
+  if (!fs.existsSync(statePath)) return { activeNode: null, nextNode: null };
+  const state = asRecord(parseYaml(fs.readFileSync(statePath, "utf-8")));
+  const topology = asRecord(state?.topology);
+  const prs = asRecord(topology?.prs);
+  const cursor = asRecord(topology?.cursor);
+  const checkpoint = typeof cursor?.checkpoint === "string" ? cursor.checkpoint : null;
+  const activeNodes = asArray(prs?.active);
+  const plannedNodes = asArray(prs?.planned);
+  const active =
+    activeNodes.find((n) => checkpoint !== null && nodeCheckpoints(n).includes(checkpoint)) ??
+    activeNodes[0] ??
+    null;
+  return {
+    activeNode: nodeFact(active),
+    nextNode: nodeFact(plannedNodes[0] ?? null),
+  };
+}
+
+export function deriveSmokeReadinessPolicy(input: {
+  readonly suspended: boolean;
+  readonly changedPaths: readonly string[] | null;
+  readonly activeNode: SmokeNodeFact | null;
+  readonly nextNode: SmokeNodeFact | null;
+}): ReadyCheckSmokePolicy {
+  if (input.changedPaths === null) {
+    return {
+      suspended: input.suspended,
+      required: true,
+      reason: "não foi possível classificar o diff do PR; smoke real é exigido por segurança",
+      changedPaths: null,
+      triggerPaths: [],
+    };
+  }
+  const triggerPaths = smokeRelevantChangedPaths(input.changedPaths);
+  if (
+    input.activeNode?.terminal ||
+    input.nextNode?.terminal ||
+    input.nextNode?.role === "integration"
+  ) {
+    return {
+      suspended: input.suspended,
+      required: true,
+      reason: "último nó antes da integração final exige validação real do pacote",
+      changedPaths: input.changedPaths.map(normalizeChangedPath),
+      triggerPaths: [],
+    };
+  }
+  if (triggerPaths.length > 0) {
+    return {
+      suspended: input.suspended,
+      required: false,
+      reason: `PR intermediário com mudança de pacote/runtime consumidor (${triggerPaths.slice(0, 3).join(", ")}); smoke real fica adiado para o fechamento final da spec e para o release`,
+      changedPaths: input.changedPaths.map(normalizeChangedPath),
+      triggerPaths,
+    };
+  }
+  return {
+    suspended: input.suspended,
+    required: false,
+    reason:
+      "PR intermediário sem mudança de pacote/consumidor; smoke real fica adiado para o fechamento final da spec",
+    changedPaths: input.changedPaths.map(normalizeChangedPath),
+    triggerPaths: [],
+  };
+}
+
 function collectCheckpoint(
   repoRoot: string,
   headRefName: string,
   prLabels: readonly string[],
-  baseRefName: string | undefined
+  changedPaths: readonly string[] | null
 ): ReadyCheckCheckpoint | null {
   const parsed = parseSpecBranch(headRefName);
   if (!parsed) return null;
@@ -297,7 +364,7 @@ function collectCheckpoint(
     ctx: {
       prProfile: nodeCtx?.nodeRole ?? null,
       labels: prLabels,
-      changedPaths: changedPathsOrNull(repoRoot, baseRefName),
+      changedPaths,
     },
     ...(nodeCtx?.overrides ? { nodeOverrides: nodeCtx.overrides } : {}),
     observed: observedReviewStates(artifacts, cursor),
@@ -320,6 +387,44 @@ function collectCheckpoint(
       errors: s.errors,
     })),
   };
+}
+
+export function detectSmokeTestsSuspended(repoRoot: string): boolean {
+  const workflowPath = path.join(repoRoot, ".github", "workflows", "smoke-multi-os.yml");
+  if (!fs.existsSync(workflowPath)) return false;
+  const content = fs.readFileSync(workflowPath, "utf-8");
+  return /AI_GUIDELINES_SMOKE_TEMPORARILY_SUSPENDED:\s*["']?true["']?/i.test(content);
+}
+
+function collectSmokePolicy(
+  repoRoot: string,
+  headRefName: string,
+  changedPaths: readonly string[] | null,
+  suspended: boolean
+): ReadyCheckSmokePolicy {
+  const parsed = parseSpecBranch(headRefName);
+  if (!parsed) {
+    return deriveSmokeReadinessPolicy({
+      suspended,
+      changedPaths,
+      activeNode: null,
+      nextNode: null,
+    });
+  }
+  const specsDir = path.join(repoRoot, ".governance", "specs");
+  const specDir = fs.existsSync(specsDir)
+    ? (fs.readdirSync(specsDir).find((d) => d.startsWith(`${parsed.specId}-`)) ?? null)
+    : null;
+  const topology =
+    specDir === null
+      ? { activeNode: null, nextNode: null }
+      : collectSmokeTopology(repoRoot, specDir);
+  return deriveSmokeReadinessPolicy({
+    suspended,
+    changedPaths,
+    activeNode: topology.activeNode,
+    nextNode: topology.nextNode,
+  });
 }
 
 export class GhSnapshotCollector implements SnapshotCollector {
@@ -358,6 +463,9 @@ export class GhSnapshotCollector implements SnapshotCollector {
       checks = [];
     }
 
+    const changedPaths = changedPathsOrNull(repoRoot, pr.baseRefName);
+    const smokeTestsSuspended = detectSmokeTestsSuspended(repoRoot);
+
     // Contrato READY do body: o MESMO validador do CI, forçando isDraft=false.
     const bodyResult = runGovernancePrCheck(
       {
@@ -380,7 +488,9 @@ export class GhSnapshotCollector implements SnapshotCollector {
       readyBodyContractReasons,
       localHeadSha: gitOrNull(repoRoot, ["rev-parse", "HEAD"]),
       workingTreeClean: status === null ? null : status === "",
-      checkpoint: collectCheckpoint(repoRoot, pr.headRefName, pr.labels, pr.baseRefName),
+      checkpoint: collectCheckpoint(repoRoot, pr.headRefName, pr.labels, changedPaths),
+      smokeTestsSuspended,
+      smokePolicy: collectSmokePolicy(repoRoot, pr.headRefName, changedPaths, smokeTestsSuspended),
     };
   }
 }

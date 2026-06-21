@@ -12,6 +12,7 @@
  * fingerprint; IDs/refs/paths vivem só em `technicalDetails`.
  */
 import type { DecisionSnapshot } from "./snapshot.js";
+import type { StackOps } from "../../app/ports/StackOps.js";
 
 export interface Logger {
   info: (msg: string) => void;
@@ -141,6 +142,10 @@ export interface DecisionGitOps {
   /** Path canônico do arquivo do efeito; falha se a working tree não for exatamente ele. */
   porcelainPaths(): readonly string[] | null;
   revParseShortHead(): string | null;
+  /** Cria/switcha para branch local a partir de um start point factual. */
+  createBranch?(branchName: string, startPoint: string): void;
+  /** Publica a branch recém-criada antes de abrir PR; necessário para `gh pr create`. */
+  pushBranch?(branchName: string): void;
   add(relFile: string): void;
   commit(message: string): void;
   push(): void;
@@ -151,6 +156,7 @@ export interface DecisionApplyContext {
   readonly logger: Logger;
   readonly actor: ResolvedActor;
   readonly git: DecisionGitOps;
+  readonly stack?: StackOps;
   /** Confirmação humana = autorização (interativo) OU explicit-human-decision (direto). */
   readonly authorization: "explicit-human-decision";
 }

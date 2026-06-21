@@ -7,24 +7,12 @@ description: >
 profiles:
   maintainer:
     package_scripts:
-      - name: guidelines
+      - name: flow
         command: node dist/cli/main.js
         category: cli
         mutates: false
         consumers: [human]
-        description: Invocacao local da CLI.
-      - name: guidelines:init
-        command: node dist/cli/main.js init
-        category: cli
-        mutates: true
-        consumers: [human]
-        description: Bootstrap de consumidor via CLI.
-      - name: guidelines:adopt
-        command: node dist/cli/main.js adopt
-        category: cli
-        mutates: true
-        consumers: [human]
-        description: Adocao/atualizacao de consumidor existente.
+        description: Wizard governado local da CLI.
       - name: setup
         command: npm ci && npm run build:all
         category: setup
@@ -91,6 +79,30 @@ profiles:
         mutates: true
         consumers: [script, workflow]
         description: Smoke cross-plataforma sobre pacote gerado.
+      - name: consumer:journey
+        command: npm run build && node dist/cli/bin.js consumer-journey all
+        category: test
+        mutates: true
+        consumers: [human, script]
+        description: "Valida a jornada de consumidor em tres niveis: tarball, yalc e Verdaccio."
+      - name: consumer:journey:pack
+        command: npm run build && node dist/cli/bin.js consumer-journey pack
+        category: test
+        mutates: true
+        consumers: [human, script]
+        description: "Nivel 1 obrigatorio: npm pack e consumidores temporarios reais."
+      - name: consumer:journey:yalc
+        command: npm run build && node dist/cli/bin.js consumer-journey yalc
+        category: test
+        mutates: false
+        consumers: [human]
+        description: "Nivel 2 opcional: loop local rapido com yalc."
+      - name: consumer:journey:verdaccio
+        command: npm run build && node dist/cli/bin.js consumer-journey verdaccio
+        category: test
+        mutates: false
+        consumers: [human]
+        description: "Nivel 3 opcional: registry local com Verdaccio antes do npm real."
       - name: test:coverage
         command: node --experimental-default-config-file --experimental-test-coverage --test "tests/integration/**/*.test.mjs" && jest --config ./.jest/jest.config.js --coverage
         category: test
@@ -109,6 +121,72 @@ profiles:
         mutates: true
         consumers: [script]
         description: Verifica drift dos living docs.
+      - name: site:flow:sync
+        command: npm run build && node dist/cli/bin.js site-flow-copy sync
+        category: docs
+        mutates: true
+        consumers: [human]
+        description: Sincroniza o modulo React do Flow com os textos reais da CLI.
+      - name: site:flow:check
+        command: npm run build && node dist/cli/bin.js site-flow-copy check
+        category: docs
+        mutates: false
+        consumers: [script]
+        description: Falha se o site React do Flow divergir dos textos reais da CLI.
+      - name: site:scenarios:sync
+        command: npm run build && node dist/cli/bin.js site-scenarios sync
+        category: docs
+        mutates: true
+        consumers: [human]
+        description: Gera os transcripts de terminal do site a partir de execucoes reais do runtime.
+      - name: site:scenarios:check
+        command: npm run build && node dist/cli/bin.js site-scenarios check
+        category: docs
+        mutates: false
+        consumers: [script]
+        description: Falha se os transcripts de terminal do site divergirem do runtime real.
+      - name: site:prompts:sync
+        command: npm run build && node dist/cli/bin.js site-prompts sync
+        category: docs
+        mutates: true
+        consumers: [human]
+        description: Gera a maquina de prompts do site a partir do wizard real (command.prompt).
+      - name: site:prompts:check
+        command: npm run build && node dist/cli/bin.js site-prompts check
+        category: docs
+        mutates: false
+        consumers: [script]
+        description: Falha se a maquina de prompts do site divergir do wizard real.
+      - name: site:assets:sync
+        command: node site/scripts/optimize-assets.mjs sync
+        category: docs
+        mutates: true
+        consumers: [human]
+        description: Gera WebP otimizado para as imagens do site a partir de docs/assets.
+      - name: site:assets:check
+        command: node site/scripts/optimize-assets.mjs check
+        category: docs
+        mutates: false
+        consumers: [script, workflow]
+        description: Falha se os WebPs do site estiverem ausentes ou desatualizados.
+      - name: site:real-package
+        command: npm run build:all && node site/scripts/prepare-real-cli-package.mjs
+        category: docs
+        mutates: true
+        consumers: [human, script]
+        description: Prepara o pacote que o modo real do simulador executa em preview/local.
+      - name: site:dev
+        command: npm run site:real-package && vite --config site/vite.config.ts --host 127.0.0.1
+        category: docs
+        mutates: false
+        consumers: [human]
+        description: Servidor local do site governado em React/Vite.
+      - name: site:build
+        command: npm run site:flow:check && npm run site:scenarios:check && npm run site:prompts:check && npm run site:assets:check && npm run site:real-package && vite build --config site/vite.config.ts
+        category: docs
+        mutates: true
+        consumers: [script, workflow]
+        description: Valida textos/transcripts/imagens do site e gera site/dist para deploy estatico.
       - name: state-yml:check
         command: npm run build && node dist/cli/bin.js state-yml-check
         category: governance
@@ -253,18 +331,24 @@ profiles:
         mutates: true
         consumers: [human]
         description: Valida precondicoes da conversao Draft->Ready (FU-2); read-only, nao converte.
+      - name: validate:changed
+        command: npm run build && node dist/cli/main.js validate changed
+        category: aggregate
+        mutates: true
+        consumers: [workflow, human]
+        description: Validacao intermediaria orientada ao diff; com --fix pode formatar somente arquivos alterados.
       - name: validate
-        command: npm run format:check && npm run build:all && npm run script-contracts:check && npm run runtime-bootstrap:check && npm run test && npm run living-docs:check && npm run state-yml:check && npm run active-specs:check && npm run reconcile:check && npm run co-knowledge:check && npm run co-knowledge:inventory && npm run constraints:check && npm run knowledge:check && npm run gate-decidability:check && npm run ruleset:check && npm run review:check && npm run insights:check && npm run intent:check
+        command: npm run format:check && npm run build:all && npm run script-contracts:check && npm run runtime-bootstrap:check && npm run test && npm run living-docs:check && npm run site:build && npm run state-yml:check && npm run active-specs:check && npm run reconcile:check && npm run co-knowledge:check && npm run co-knowledge:inventory && npm run constraints:check && npm run knowledge:check && npm run gate-decidability:check && npm run ruleset:check && npm run review:check && npm run insights:check && npm run intent:check
         category: aggregate
         mutates: true
         consumers: [hook, workflow, human]
         description: Gate local operacional e pre-push.
       - name: ci
-        command: npm ci && npm run validate && npm run state-yml:check:all && npm run test:smoke
+        command: npm ci && npm run validate && npm run state-yml:check:all
         category: aggregate
         mutates: true
         consumers: [workflow, human]
-        description: Pipeline completo replicavel fora do GitHub.
+        description: Pipeline completo replicavel fora do GitHub; smoke real bloqueia Ready no fechamento final da spec, em diff nao classificavel, e antes de release/npm publish.
       - name: prepare
         command: husky
         category: lifecycle
@@ -306,14 +390,16 @@ profiles:
     workflows:
       - file: .github/workflows/repo-validation.yml
         required_runs:
+          - npm run validate:changed
           - npm run validate
           - npm run state-yml:check:all
       - file: .github/workflows/release.yml
         required_runs:
           - npm run ci
+          - npm run test:smoke
       - file: .github/workflows/smoke-multi-os.yml
         required_runs:
-          - npm run test:smoke
+          - echo "Smoke tests are governed by pr-ready:check."
       - file: .github/workflows/ruleset-drift.yml
         required_runs:
           - npm run build && node dist/cli/bin.js ruleset-check --parity --live /tmp/live-ruleset.json

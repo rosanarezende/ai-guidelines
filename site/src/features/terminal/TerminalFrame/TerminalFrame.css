@@ -1,0 +1,125 @@
+.terminalDemo {
+  background: #0f1726;
+  border-radius: 12px;
+  color: #e9eef9;
+  margin: 0;
+  overflow: hidden;
+}
+
+.terminalDemo figcaption {
+  align-items: center;
+  background: #161f33;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  gap: 8px;
+  min-height: 46px;
+  padding: 0 14px;
+}
+
+.terminalDemo figcaption span {
+  border-radius: 999px;
+  display: inline-block;
+  height: 11px;
+  width: 11px;
+}
+
+.terminalDemo figcaption span:nth-child(1) {
+  background: #ef5350;
+}
+
+.terminalDemo figcaption span:nth-child(2) {
+  background: #f9a825;
+}
+
+.terminalDemo figcaption span:nth-child(3) {
+  background: #4caf50;
+}
+
+.terminalDemo figcaption strong {
+  color: #aeb8ca;
+  font-size: 0.86rem;
+  font-weight: 700;
+  margin-left: 6px;
+  overflow-wrap: anywhere;
+}
+
+.terminalBadge {
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  color: #dce3f0;
+  font-size: 0.68rem;
+  font-style: normal;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  margin-left: auto;
+  padding: 3px 10px;
+  white-space: nowrap;
+}
+
+.terminal-real .terminalBadge {
+  background: rgba(76, 175, 80, 0.2);
+  border-color: rgba(76, 175, 80, 0.55);
+  color: #b6f0bb;
+}
+
+.terminal-guided .terminalBadge {
+  background: rgba(249, 168, 37, 0.18);
+  border-color: rgba(249, 168, 37, 0.5);
+  color: #ffd98a;
+}
+
+.terminal-illustrative .terminalBadge {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.terminalDemo pre {
+  display: grid;
+  font:
+    0.86rem "SFMono-Regular",
+    Consolas,
+    "Liberation Mono",
+    monospace;
+  gap: 7px;
+  line-height: 1.5;
+  margin: 0;
+  max-height: 360px;
+  overflow: auto;
+  padding: 16px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.terminalLine {
+  color: #e7eefb;
+}
+
+.terminalLine::before {
+  color: #8696b3;
+  content: "› ";
+}
+
+.terminalLine.active {
+  color: #9ff6e4;
+  font-weight: 700;
+}
+
+.terminalLine.muted {
+  color: #93a0b6;
+}
+
+.terminalLine.warn {
+  color: #ffce85;
+}
+
+.terminalLine.success {
+  color: #a4f0c9;
+}
+
+.scenarioExit {
+  background: #0b1220;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  color: #8c97aa;
+  font-size: 0.76rem;
+  margin: 0;
+  padding: 8px 16px;
+}

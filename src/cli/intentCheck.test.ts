@@ -47,8 +47,9 @@ describe("checkIntents", () => {
     expect(result.warnings).toEqual([]);
   });
 
-  it("DADO o catálogo REAL contra o Registry REAL ENTÃO zero erros de integridade (catálogo válido)", () => {
+  it("DADO o catálogo REAL contra o Registry REAL ENTÃO zero erros e zero warnings", () => {
     const result = checkIntents(INTENT_CATALOG, buildRegistry(), NON_NAVIGABLE_COMMANDS);
     expect(result.errors).toEqual([]);
+    expect(result.warnings).toEqual([]);
   });
 });

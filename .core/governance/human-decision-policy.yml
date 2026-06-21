@@ -92,6 +92,116 @@ decision_types:
     confirmation: required
     technical_details: available
 
+  finish-subcheckpoint:
+    title: Concluir ponto atual e iniciar o próximo
+    purpose: >
+      O owner encerra o sub-checkpoint ativo e ativa o próximo em uma única
+      decisão governada quando os critérios de saída já estão satisfeitos. Esta
+      decisão substitui o fluxo humano em duas autorizações para o caso comum
+      interno do checkpoint: não cria uma readiness intermediária persistida, não
+      exerce Human Gate, não converte PR para Ready, não abre outro PR e não mexe
+      na topologia. Aplicar altera EXCLUSIVAMENTE os marcadores de dois
+      sub-checkpoints em tasks.md (atual `[/] → [x]`, próximo `[ ] → [/]`) e
+      nada mais.
+    requires_owner: true
+    sections:
+      - key: completed
+        heading: O que será concluído?
+      - key: exit_criteria
+        heading: Como sabemos que pode encerrar?
+      - key: next_starts
+        heading: O que começará agora?
+      - key: consequences
+        heading: O que acontece se você aprovar?
+      - key: not_authorized
+        heading: O que esta decisão NÃO autoriza?
+    choices:
+      - id: finish
+        label: Concluir o ponto atual e iniciar o próximo
+        mutating: true
+      - id: keep
+        label: Manter o ponto atual em implementação
+        mutating: false
+      - id: request-explanation
+        label: Solicitar mais esclarecimentos (não escreve nada)
+        mutating: false
+      - id: cancel
+        label: Cancelar (não escreve nada)
+        mutating: false
+    consequences:
+      - O sub-checkpoint atual será marcado como concluído.
+      - O próximo sub-checkpoint será marcado como ativo.
+      - "`npm run flow -- work` passará a apontar o próximo como objeto de implementação."
+      - A readiness do atual é validada como critério, mas não vira commit separado.
+    not_authorized:
+      - Implementar o próximo sub-checkpoint automaticamente.
+      - Exercer o Human Gate.
+      - Converter o PR para Ready.
+      - Criar o gate artifact.
+      - Fazer merge.
+      - Abrir outro PR.
+      - Alterar a topologia (state.yml).
+    publication:
+      commit: after-confirmation
+      push: after-confirmation
+      mixed_diff: forbidden
+    confirmation: required
+    technical_details: available
+
+  mark-readiness:
+    title: Declarar readiness do sub-checkpoint ativo
+    purpose: >
+      O owner declara que o sub-checkpoint ativo satisfez seus critérios de
+      saída e está pronto para a decisão de transição. É uma transição de
+      lifecycle em tasks.md, NÃO um avanço: não marca o sub-checkpoint como
+      concluído, não ativa o próximo, não exerce Human Gate e não mexe na
+      topologia. Aplicar altera EXCLUSIVAMENTE a linha do sub-checkpoint ativo em
+      tasks.md, adicionando `readiness: ready-for-transition`.
+    requires_owner: true
+    sections:
+      - key: active_scope
+        heading: O que está pronto?
+      - key: exit_criteria
+        heading: Como sabemos que pode declarar readiness?
+      - key: next_decision
+        heading: O que acontece depois?
+      - key: consequences
+        heading: O que acontece se você aprovar?
+      - key: not_authorized
+        heading: O que esta decisão NÃO autoriza?
+    choices:
+      - id: mark-ready
+        label: Declarar readiness do sub-checkpoint ativo
+        mutating: true
+      - id: keep
+        label: Manter o sub-checkpoint em implementação
+        mutating: false
+      - id: request-explanation
+        label: Solicitar mais esclarecimentos (não escreve nada)
+        mutating: false
+      - id: cancel
+        label: Cancelar (não escreve nada)
+        mutating: false
+    consequences:
+      - O sub-checkpoint ativo continua `[/]`, mas passa a declarar readiness.
+      - "`npm run flow -- work` passará a projetar a próxima decisão governada."
+      - "`advance-subcheckpoint` poderá ser decidido quando houver próximo `[ ]`."
+    not_authorized:
+      - Marcar o sub-checkpoint atual como `[x]`.
+      - Ativar o próximo sub-checkpoint.
+      - Exercer o Human Gate.
+      - Converter o PR para Ready.
+      - Criar gate artifact.
+      - Fazer merge.
+      - Abrir outro PR.
+      - Alterar a topologia (state.yml).
+    publication:
+      commit: after-confirmation
+      push: after-confirmation
+      mixed_diff: forbidden
+    confirmation: required
+    technical_details: available
+
   advance-subcheckpoint:
     title: Iniciar o próximo sub-checkpoint
     purpose: >
@@ -128,7 +238,7 @@ decision_types:
     consequences:
       - O sub-checkpoint atual será marcado como concluído.
       - O próximo sub-checkpoint será marcado como ativo.
-      - "`guidelines work` passará a apontar o próximo como objeto de implementação."
+      - "`npm run flow -- work` passará a apontar o próximo como objeto de implementação."
     not_authorized:
       - Implementar o próximo sub-checkpoint automaticamente.
       - Exercer o Human Gate.
@@ -190,6 +300,64 @@ decision_types:
       - Abertura automática do próximo PR.
       - Mudança de policy.
       - Fechamento de outro checkpoint.
+    publication:
+      commit: after-confirmation
+      push: after-confirmation
+      mixed_diff: forbidden
+    confirmation: required
+    technical_details: available
+
+  open-next-node:
+    title: Abrir o próximo nó planejado
+    purpose: >
+      Após Human Gate aprovado em um nó não-terminal, a owner abre o próximo PR
+      stacked planejado por transição governada. Esta decisão cria/publica a
+      branch do próximo nó, abre um PR Draft factual, registra o número real do
+      PR em state.yml, atualiza active.yml, materializa o próximo checkpoint em
+      tasks.md, comita o efeito exclusivo e faz push normal. Ela NÃO executa
+      merge, NÃO abre nó fora da topologia, NÃO altera main, NÃO cria Human Gate
+      e NÃO implementa o próximo nó.
+    requires_owner: true
+    sections:
+      - key: completed_node
+        heading: Qual nó foi aprovado?
+      - key: next_node
+        heading: Qual nó será aberto?
+      - key: preflight
+        heading: O que precisa estar verdadeiro antes da abertura?
+      - key: planned_effects
+        heading: Quais efeitos a transição governada deverá produzir?
+      - key: consequences
+        heading: O que acontece se você aprovar?
+      - key: not_authorized
+        heading: O que esta decisão NÃO autoriza?
+    choices:
+      - id: open-node
+        label: Abrir o próximo nó planejado
+        mutating: true
+      - id: keep
+        label: Manter o nó atual como ativo por enquanto
+        mutating: false
+      - id: request-explanation
+        label: Solicitar mais esclarecimentos (não escreve nada)
+        mutating: false
+      - id: cancel
+        label: Cancelar (não escreve nada)
+        mutating: false
+    consequences:
+      - A branch do próximo nó será criada e publicada sobre o HEAD aprovado.
+      - Um PR Draft stacked será aberto contra a branch do nó aprovado.
+      - state.yml, active.yml e tasks.md serão reconciliados com o número factual do PR.
+      - O efeito governado será registrado em commit exclusivo e push normal.
+      - "`work`, `decide` e cockpit deixam de divergir quando o gate já está aprovado."
+    not_authorized:
+      - Fazer merge.
+      - Alterar main.
+      - Abrir nó fora da topologia planejada.
+      - Executar Human Gate.
+      - Converter PR para Ready.
+      - Implementar o próximo nó.
+      - Inferir número de PR sem confirmação factual do GitHub.
     publication:
       commit: after-confirmation
       push: after-confirmation

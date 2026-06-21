@@ -17,10 +17,46 @@ describe("humanDecisionPolicyReader [decide]", () => {
     expect(policy.version).toBe(1);
     expect(policy.decisionTypes.map((t) => t.id)).toEqual([
       "close-dispositions",
+      "finish-subcheckpoint",
+      "mark-readiness",
       "advance-subcheckpoint",
       "human-gate",
+      "open-next-node",
     ]);
     expect(policy.owner.handle).toBe("@rosanarezende");
+  });
+
+  it("finish-subcheckpoint declara conclusão interna em passo único sem autorizar gate/merge", () => {
+    const policy = parseHumanDecisionPolicy(REAL);
+    const finish = findDecisionType(policy, "finish-subcheckpoint")!;
+    expect(finish.choices.map((c) => [c.id, c.mutating])).toContainEqual(["finish", true]);
+    expect(finish.consequences.join(" ")).toMatch(/próximo sub-checkpoint/);
+    expect(finish.notAuthorized.join(" ")).toMatch(/Human Gate/);
+    expect(finish.notAuthorized.join(" ")).toMatch(/Fazer merge/);
+    expect(finish.notAuthorized.join(" ")).toMatch(/topologia/);
+    expect(finish.publication.mixedDiff).toBe("forbidden");
+    expect(finish.requiresOwner).toBe(true);
+  });
+
+  it("mark-readiness declara mutação exclusiva de lifecycle com limites explícitos", () => {
+    const policy = parseHumanDecisionPolicy(REAL);
+    const mr = findDecisionType(policy, "mark-readiness")!;
+    expect(mr.choices.map((c) => c.id)).toContain("mark-ready");
+    expect(mr.notAuthorized.join(" ")).toMatch(/Ativar o próximo sub-checkpoint/);
+    expect(mr.notAuthorized.join(" ")).toMatch(/Human Gate/);
+    expect(mr.publication.mixedDiff).toBe("forbidden");
+    expect(mr.requiresOwner).toBe(true);
+  });
+
+  it("open-next-node declara abertura mutante do próximo nó sem autorizar merge/gate", () => {
+    const policy = parseHumanDecisionPolicy(REAL);
+    const open = findDecisionType(policy, "open-next-node")!;
+    expect(open.choices.map((c) => [c.id, c.mutating])).toContainEqual(["open-node", true]);
+    expect(open.consequences.join(" ")).toMatch(/PR Draft stacked/);
+    expect(open.notAuthorized.join(" ")).toMatch(/Fazer merge/);
+    expect(open.notAuthorized.join(" ")).toMatch(/Executar Human Gate/);
+    expect(open.publication.mixedDiff).toBe("forbidden");
+    expect(open.requiresOwner).toBe(true);
   });
 
   it("close-dispositions declara 8 seções humanas + escolhas + limites", () => {

@@ -37,12 +37,25 @@ function context(logger: Logger, prompts?: Prompts): CommandContext {
 
 class ScriptedPrompts implements Prompts {
   readonly selectCalls: Array<{ message: string; choices: readonly unknown[] }> = [];
+  readonly multiselectCalls: Array<{ message: string; choices: readonly unknown[] }> = [];
+  readonly groupMultiselectCalls: Array<{
+    message: string;
+    groups: Readonly<Record<string, readonly unknown[]>>;
+  }> = [];
   readonly inputCalls: Array<{ message: string; defaultValue?: string }> = [];
   readonly confirmCalls: Array<{ message: string; defaultValue?: boolean }> = [];
+  readonly spinnerStarts: string[] = [];
+  readonly notes: Array<{ title?: string; message: string }> = [];
+  readonly taskTitles: string[] = [];
+  readonly taskMessages: string[] = [];
+  readonly taskLogTitles: string[] = [];
+  readonly taskLogMessages: string[] = [];
 
   constructor(
     private readonly answers: {
       readonly select?: Record<string, string>;
+      readonly multiselect?: Record<string, readonly string[]>;
+      readonly groupMultiselect?: Record<string, readonly string[]>;
       readonly input?: Record<string, string>;
       readonly confirm?: Record<string, boolean>;
     } = {}
@@ -57,6 +70,32 @@ class ScriptedPrompts implements Prompts {
     return options.choices[0].value;
   }
 
+  async multiselect<T>(options: {
+    message: string;
+    choices: ReadonlyArray<{ value: T }>;
+    defaultValues?: ReadonlyArray<T>;
+  }): Promise<readonly T[]> {
+    this.multiselectCalls.push({ message: options.message, choices: options.choices });
+    const answer = this.answers.multiselect?.[options.message];
+    if (answer !== undefined) {
+      return answer as readonly T[];
+    }
+    return options.defaultValues ?? [];
+  }
+
+  async groupMultiselect<T>(options: {
+    message: string;
+    groups: Readonly<Record<string, ReadonlyArray<{ value: T }>>>;
+    defaultValues?: ReadonlyArray<T>;
+  }): Promise<readonly T[]> {
+    this.groupMultiselectCalls.push({ message: options.message, groups: options.groups });
+    const answer = this.answers.groupMultiselect?.[options.message];
+    if (answer !== undefined) {
+      return answer as readonly T[];
+    }
+    return options.defaultValues ?? [];
+  }
+
   async input(options: { message: string; default?: string }): Promise<string> {
     this.inputCalls.push({ message: options.message, defaultValue: options.default });
     return this.answers.input?.[options.message] ?? options.default ?? "";
@@ -65,6 +104,59 @@ class ScriptedPrompts implements Prompts {
   async confirm(options: { message: string; default?: boolean }): Promise<boolean> {
     this.confirmCalls.push({ message: options.message, defaultValue: options.default });
     return this.answers.confirm?.[options.message] ?? options.default ?? false;
+  }
+
+  async spinner<T>(options: { start: string; task: () => T | Promise<T> }): Promise<T> {
+    this.spinnerStarts.push(options.start);
+    return options.task();
+  }
+
+  async note(message: string, title?: string): Promise<void> {
+    this.notes.push({ title, message });
+  }
+
+  async taskList(
+    tasks: readonly {
+      title: string;
+      task: (message: (value: string) => void) => string | Promise<string> | void | Promise<void>;
+    }[]
+  ): Promise<void> {
+    for (const task of tasks) {
+      this.taskTitles.push(task.title);
+      const result = await task.task((value) => this.taskMessages.push(`${task.title}:${value}`));
+      if (typeof result === "string") {
+        this.taskMessages.push(`${task.title}:${result}`);
+      }
+    }
+  }
+
+  taskLog(options: { title: string }) {
+    this.taskLogTitles.push(options.title);
+    const messages = this.taskLogMessages;
+    return {
+      message(message: string): void {
+        messages.push(`root:${message}`);
+      },
+      group(groupName: string) {
+        return {
+          message(message: string): void {
+            messages.push(`${groupName}:message:${message}`);
+          },
+          success(message: string): void {
+            messages.push(`${groupName}:success:${message}`);
+          },
+          error(message: string): void {
+            messages.push(`${groupName}:error:${message}`);
+          },
+        };
+      },
+      success(message: string): void {
+        messages.push(`success:${message}`);
+      },
+      error(message: string): void {
+        messages.push(`error:${message}`);
+      },
+    };
   }
 }
 
@@ -87,6 +179,7 @@ class FakeRuntime implements BootstrapDeliveryRuntime {
   readonly created: CreateProvisionWorkspaceInput[] = [];
   readonly compiledConfigs: PointersConfig[] = [];
   readonly provisioner = new FakeProvisioner();
+  snapshot: ProvisioningOperationSnapshot = operationSnapshot();
   checkBudgetExitCode = 0;
 
   async resolveConfig(input: ResolveProvisioningConfigInput): Promise<PointersConfig> {
@@ -103,7 +196,7 @@ class FakeRuntime implements BootstrapDeliveryRuntime {
     input: CollectProvisioningSnapshotInput
   ): Promise<ProvisioningOperationSnapshot> {
     this.snapshots.push(input);
-    return operationSnapshot();
+    return this.snapshot;
   }
 
   async compileAdapterRules(config: PointersConfig): Promise<Readonly<Record<string, string>>> {
@@ -197,6 +290,7 @@ describe("bootstrap delivery 2c — parse/help/registry", () => {
         "--name=Consumer",
         "--providers=claude,openai",
         "--features=prettier,husky,ci",
+        "--collaboration-profile=team",
         "--install",
       ])
     ).toMatchObject({
@@ -205,6 +299,7 @@ describe("bootstrap delivery 2c — parse/help/registry", () => {
       name: "Consumer",
       providers: ["claude", "openai"],
       features: ["prettier", "husky", "ci"],
+      collaborationProfile: "team",
       install: true,
     });
 
@@ -263,7 +358,7 @@ describe("bootstrap delivery 2c — parse/help/registry", () => {
     );
 
     expect(result.exitCode).toBe(1);
-    expect(errors.join("\n")).toContain("Use: guidelines update --providers <lista>");
+    expect(errors.join("\n")).toContain("Use: npx ai-guidelines update --providers <lista>");
     expect(runtime.provisioner.calls).toEqual([]);
   });
 
@@ -344,7 +439,10 @@ describe("bootstrap delivery 2c — run", () => {
 describe("bootstrap delivery 2c — wizard", () => {
   it("sem argumentos abre fluxo interativo novo e escolhe init", async () => {
     const { runtime, delivery: bootstrap } = delivery();
-    const prompts = new ScriptedPrompts({ select: { Operation: "init" } });
+    const prompts = new ScriptedPrompts({
+      select: { Operation: "init" },
+      confirm: { "Aplicar este plano?": true },
+    });
     const { logger } = capturingLogger();
 
     const result = await bootstrap.dispatch([], context(logger, prompts));
@@ -356,11 +454,60 @@ describe("bootstrap delivery 2c — wizard", () => {
       expect.arrayContaining(["init", "adopt", "update"])
     );
     expect(operationChoices.map((choice) => choice.value)).not.toContain("providers");
+    expect(prompts.notes[0]).toMatchObject({ title: "Iniciar projeto novo" });
+    expect(prompts.taskLogTitles).toEqual(["Etapas do projeto novo"]);
+    expect(prompts.taskTitles).toEqual([
+      "Conferir contexto detectado",
+      "Montar preview humano",
+      "Checar travas de segurança",
+    ]);
+    expect(prompts.groupMultiselectCalls.map((call) => call.message)).toEqual([
+      "Quais ferramentas de IA devem receber arquivos de orientação?",
+      "Quais práticas quer instalar agora?",
+    ]);
+    expect(prompts.selectCalls.map((call) => call.message)).toContain(
+      "Qual perfil de colaboração este repositório deve usar?"
+    );
+    const providerChoices = Object.values(prompts.groupMultiselectCalls[0].groups).flat() as Array<{
+      name?: string;
+      hint?: string;
+    }>;
+    expect(providerChoices).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          name: "Claude",
+          hint: "cria CLAUDE.md para sessões com Claude Code",
+        }),
+        expect.objectContaining({
+          name: "OpenAI/Codex",
+          hint: "prepara contexto e comandos para sessões com Codex",
+        }),
+      ])
+    );
+    const featureChoices = Object.values(prompts.groupMultiselectCalls[1].groups).flat() as Array<{
+      name?: string;
+      hint?: string;
+    }>;
+    expect(featureChoices).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          name: "Hooks locais com Husky",
+          hint: "roda checagens antes do commit",
+        }),
+        expect.objectContaining({
+          name: "CI no GitHub Actions",
+          hint: "valida o PR automaticamente no GitHub",
+        }),
+      ])
+    );
   });
 
   it("wizard permite escolha adopt e preserva defaults", async () => {
     const { runtime, delivery: bootstrap } = delivery();
-    const prompts = new ScriptedPrompts({ select: { Operation: "adopt" } });
+    const prompts = new ScriptedPrompts({
+      select: { Operation: "adopt" },
+      confirm: { "Aplicar este plano?": true },
+    });
     const { logger } = capturingLogger();
 
     await bootstrap.dispatch([], context(logger, prompts));
@@ -368,18 +515,269 @@ describe("bootstrap delivery 2c — wizard", () => {
     expect(runtime.provisioner.calls[0]).toMatchObject({
       operation: "adopt",
       projectName: path.basename(path.resolve("repo")),
+      collaborationProfile: "solo",
       config: {
         providers: ["claude", "gemini", "openai"],
         features: ["prettier", "husky", "ci", "quality-gates", "tdd", "bdd"],
+        lang: "pt",
       },
     });
+    expect(prompts.notes[0]).toMatchObject({ title: "Adotar projeto existente" });
+    expect(prompts.notes[0].message).toContain("preservação do conteúdo existente");
+    expect(prompts.taskLogTitles).toEqual(["Etapas da adoção"]);
+    expect(prompts.taskLogMessages.join("\n")).toContain(
+      "Contexto:success:Destino .; nome derivado da pasta."
+    );
+    expect(prompts.taskMessages.join("\n")).toContain(
+      "Conferir contexto detectado:Projeto existente: preservar arquivos atuais"
+    );
+  });
+
+  it("wizard de adopt guia conflito, bloqueio e correção com recursos avançados", async () => {
+    const runtime = new FakeRuntime();
+    const { registry } = delivery(runtime);
+    const firstLogger = capturingLogger();
+    const firstPrompts = new ScriptedPrompts({
+      select: {
+        Operation: "adopt",
+        "Idioma do baseline e das práticas TDD/BDD": "pt",
+        "Gerenciador de pacotes": "npm",
+      },
+      input: {
+        "Onde aplicar? Use . para este repositório": ".",
+        "Nome do projeto": "consumer-existing",
+      },
+      groupMultiselect: {
+        "Quais ferramentas de IA devem receber arquivos de orientação?": [
+          "claude",
+          "openai",
+          "cursor",
+        ],
+        "Quais práticas quer instalar agora?": ["prettier", "husky", "ci", "tdd", "bdd"],
+      },
+      confirm: {
+        "Só mostrar o plano, sem escrever arquivos?": false,
+        "Permitir sobrescrever arquivos suportados quando houver conflito?": false,
+        "Instalar dependências automaticamente no final?": false,
+        "Abrir opções avançadas?": false,
+        "Aplicar este plano?": true,
+      },
+    });
+    runtime.provisioner.error = new Error(
+      "Hook pre-commit possui shape não suportado para merge conservador. Use --force para sobrescrever."
+    );
+
+    const failed = await registry.dispatch(["adopt"], context(firstLogger.logger, firstPrompts));
+
+    expect(failed.exitCode).toBe(1);
+    expect(firstLogger.errors.join("\n")).toContain("Use --force para sobrescrever");
+    expect(runtime.provisioner.calls[0]).toMatchObject({
+      operation: "adopt",
+      projectName: "consumer-existing",
+      config: {
+        providers: ["claude", "openai", "cursor"],
+        features: ["prettier", "husky", "ci", "tdd", "bdd"],
+        lang: "pt",
+      },
+      force: false,
+      forcePrettier: false,
+      prune: false,
+      install: false,
+    });
+    expect(firstPrompts.groupMultiselectCalls.map((call) => call.message)).toEqual([
+      "Quais ferramentas de IA devem receber arquivos de orientação?",
+      "Quais práticas quer instalar agora?",
+    ]);
+    expect(Object.keys(firstPrompts.groupMultiselectCalls[0].groups)).toEqual([
+      "Assistentes principais do repositório",
+      "Editores e agentes locais",
+    ]);
+    expect(Object.keys(firstPrompts.groupMultiselectCalls[1].groups)).toEqual([
+      "Infraestrutura do repositório",
+      "Práticas de trabalho",
+    ]);
+    expect(firstPrompts.taskLogTitles).toEqual(["Etapas da adoção"]);
+    expect(firstPrompts.taskTitles).toEqual([
+      "Conferir contexto detectado",
+      "Montar preview humano",
+      "Checar travas de segurança",
+    ]);
+    expect(firstPrompts.notes.at(-1)?.message).toContain("Sobrescrever conflitos suportados: não");
+
+    runtime.provisioner.error = null;
+    const secondLogger = capturingLogger();
+    const secondPrompts = new ScriptedPrompts({
+      select: {
+        Operation: "adopt",
+        "Idioma do baseline e das práticas TDD/BDD": "pt",
+        "Gerenciador de pacotes": "npm",
+      },
+      input: {
+        "Onde aplicar? Use . para este repositório": ".",
+        "Nome do projeto": "consumer-existing",
+        "Diretório runtime do ai-guidelines": ".ai-guidelines",
+      },
+      groupMultiselect: {
+        "Quais ferramentas de IA devem receber arquivos de orientação?": [
+          "claude",
+          "openai",
+          "cursor",
+        ],
+        "Quais práticas quer instalar agora?": ["prettier", "husky", "ci", "tdd", "bdd"],
+      },
+      confirm: {
+        "Só mostrar o plano, sem escrever arquivos?": false,
+        "Permitir sobrescrever arquivos suportados quando houver conflito?": true,
+        "Instalar dependências automaticamente no final?": false,
+        "Abrir opções avançadas?": true,
+        "Forçar Prettier mesmo se houver formatter rival?": true,
+        "Remover artefatos gerenciados que não fazem mais parte da seleção?": true,
+        "Aplicar este plano?": true,
+      },
+    });
+
+    const corrected = await registry.dispatch(
+      ["adopt"],
+      context(secondLogger.logger, secondPrompts)
+    );
+
+    expect(corrected.exitCode).toBe(0);
+    expect(secondLogger.infos).toContain("planned adopt");
+    expect(runtime.provisioner.calls[1]).toMatchObject({
+      operation: "adopt",
+      projectName: "consumer-existing",
+      force: true,
+      forcePrettier: true,
+      prune: true,
+      install: false,
+    });
+    expect(secondPrompts.notes.at(-1)?.message).toContain("Sobrescrever conflitos suportados: sim");
+    expect(secondPrompts.notes.at(-1)?.message).toContain(
+      "Forçar Prettier com formatter rival: sim"
+    );
+    expect(secondPrompts.notes.at(-1)?.message).toContain(
+      "Remover arquivos órfãos gerenciados: sim"
+    );
+  });
+
+  it("wizard permite escolher idioma das práticas TDD/BDD", async () => {
+    const { runtime, delivery: bootstrap } = delivery();
+    const prompts = new ScriptedPrompts({
+      select: {
+        Operation: "init",
+        "Idioma do baseline e das práticas TDD/BDD": "en",
+      },
+      confirm: { "Aplicar este plano?": true },
+    });
+    const { logger } = capturingLogger();
+
+    await bootstrap.dispatch([], context(logger, prompts));
+
+    expect(runtime.provisioner.calls[0]).toMatchObject({
+      operation: "init",
+      config: { lang: "en" },
+    });
+    const languageSelect = prompts.selectCalls.find(
+      (call) => call.message === "Idioma do baseline e das práticas TDD/BDD"
+    );
+    expect(languageSelect?.choices).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: "Português", value: "pt" }),
+        expect.objectContaining({ name: "English", value: "en" }),
+      ])
+    );
+    expect(prompts.notes.at(-1)?.message).toContain("- Idioma do baseline e TDD/BDD: English");
+    expect(prompts.taskLogMessages.join("\n")).toContain("Idioma:success:English selecionado.");
+  });
+
+  it("wizard permite escolher perfil de colaboração para init/adopt/update", async () => {
+    const { runtime, delivery: bootstrap } = delivery();
+    const prompts = new ScriptedPrompts({
+      select: {
+        Operation: "init",
+        "Qual perfil de colaboração este repositório deve usar?": "team",
+      },
+      confirm: { "Aplicar este plano?": true },
+    });
+    const { logger } = capturingLogger();
+
+    await bootstrap.dispatch([], context(logger, prompts));
+
+    expect(runtime.provisioner.calls[0]).toMatchObject({
+      operation: "init",
+      collaborationProfile: "team",
+    });
+    expect(prompts.notes.at(-1)?.message).toContain("- Perfil de colaboração: Time");
+  });
+
+  it("wizard expõe opções avançadas que antes só existiam na CLI direta", async () => {
+    const { runtime, delivery: bootstrap } = delivery();
+    const prompts = new ScriptedPrompts({
+      select: { Operation: "adopt" },
+      input: {
+        "Diretório runtime do ai-guidelines": ".custom-guidelines",
+      },
+      confirm: {
+        "Abrir opções avançadas?": true,
+        "Forçar Prettier mesmo se houver formatter rival?": true,
+        "Remover artefatos gerenciados que não fazem mais parte da seleção?": true,
+        "Aplicar este plano?": true,
+      },
+    });
+    const { logger } = capturingLogger();
+
+    await bootstrap.dispatch([], context(logger, prompts));
+
+    expect(runtime.resolved[0].options["sdd-dir"]).toBe(".custom-guidelines");
+    expect(runtime.provisioner.calls[0]).toMatchObject({
+      operation: "adopt",
+      forcePrettier: true,
+      prune: true,
+    });
+    expect(prompts.notes.at(-1)?.message).toContain("- Diretório runtime: .custom-guidelines");
+    expect(prompts.notes.at(-1)?.message).toContain("- Forçar Prettier com formatter rival: sim");
+    expect(prompts.notes.at(-1)?.message).toContain("- Remover arquivos órfãos gerenciados: sim");
+  });
+
+  it("wizard não pergunta force-prettier quando Prettier não foi selecionado", async () => {
+    const { runtime, delivery: bootstrap } = delivery();
+    const prompts = new ScriptedPrompts({
+      select: { Operation: "init" },
+      input: { "Nome do projeto": "teste" },
+      groupMultiselect: {
+        "Quais práticas quer instalar agora?": ["tdd"],
+      },
+      confirm: {
+        "Abrir opções avançadas?": true,
+        "Aplicar este plano?": true,
+      },
+    });
+    const { logger } = capturingLogger();
+
+    await bootstrap.dispatch([], context(logger, prompts));
+
+    expect(prompts.confirmCalls.map((call) => call.message)).not.toContain(
+      "Forçar Prettier mesmo se houver formatter rival?"
+    );
+    expect(runtime.provisioner.calls[0]).toMatchObject({
+      operation: "init",
+      projectName: "teste",
+      config: { features: ["tdd"] },
+      forcePrettier: false,
+    });
+    expect(prompts.notes.at(-1)?.message).toContain("- Nome: teste");
+    expect(prompts.notes.at(-1)?.message).toContain("- Práticas: tdd");
+    expect(prompts.notes.at(-1)?.message).not.toContain("Forçar Prettier com formatter rival");
   });
 
   it("wizard seleciona providers dentro de update", async () => {
     const { runtime, delivery: bootstrap } = delivery();
     const prompts = new ScriptedPrompts({
       select: { Operation: "update" },
-      input: { Providers: "claude,openai" },
+      groupMultiselect: {
+        "Quais ferramentas de IA devem receber arquivos de orientação?": ["claude", "openai"],
+      },
+      confirm: { "Aplicar este plano?": true },
     });
     const { logger } = capturingLogger();
 
@@ -390,6 +788,14 @@ describe("bootstrap delivery 2c — wizard", () => {
       providersRequested: true,
       config: { providers: ["claude", "openai"] },
     });
+    expect(prompts.groupMultiselectCalls[0].message).toBe(
+      "Quais ferramentas de IA devem receber arquivos de orientação?"
+    );
+    expect(Object.keys(prompts.groupMultiselectCalls[0].groups)).toEqual([
+      "Assistentes principais do repositório",
+      "Editores e agentes locais",
+    ]);
+    expect(prompts.spinnerStarts).toEqual(["Montando e aplicando plano update..."]);
   });
 
   it("deriva operacao sugerida por snapshot sem conhecer filesystem concreto", () => {

@@ -2,6 +2,10 @@ import * as path from "node:path";
 import { boolFlag, parseFlags, stringFlag } from "../../registry/parseFlags.js";
 import { ProvisioningOperation } from "../../../domain/provisioning/ProvisioningPlan.js";
 import { FEATURE_OPTIONS } from "../../../domain/provisioning/FeatureCatalog.js";
+import {
+  CollaborationProfile,
+  isCollaborationProfile,
+} from "../../../domain/provisioning/ReviewPolicyBaseline.js";
 
 export type BootstrapDeliveryCommandName = ProvisioningOperation | "check-budget";
 
@@ -26,6 +30,7 @@ export interface ProvisioningCommandOptions {
   readonly dryRun: boolean;
   readonly install: boolean;
   readonly prune: boolean;
+  readonly collaborationProfile?: CollaborationProfile;
   readonly yes: boolean;
   readonly skippedFeatures: readonly string[];
 }
@@ -55,6 +60,11 @@ export const PROVISIONING_OPTION_DEFINITIONS: readonly BootstrapOptionDefinition
   { name: "dry-run", value: "boolean", description: "Planeja sem escrever no filesystem." },
   { name: "install", value: "boolean", description: "Executa install quando houver deps novas." },
   { name: "prune", value: "boolean", description: "Remove artefatos gerenciados obsoletos." },
+  {
+    name: "collaboration-profile",
+    value: "string",
+    description: "Perfil de colaboração: solo, contributor ou team.",
+  },
   { name: "yes", value: "boolean", description: "Aceita defaults seguros do fluxo." },
   { name: "y", value: "boolean", description: "Alias curto de --yes." },
   { name: "skip-bdd", value: "boolean", description: "Remove feature bdd da selecao." },
@@ -121,6 +131,7 @@ export function parseProvisioningCommandOptions(
     dryRun: booleanOption(flags, "dry-run"),
     install: booleanOption(flags, "install"),
     prune: booleanOption(flags, "prune"),
+    collaborationProfile: collaborationProfileOption(flags),
     yes: booleanOption(flags, "yes") || booleanOption(flags, "y"),
     skippedFeatures,
   };
@@ -199,6 +210,25 @@ function collectSkippedFeatures(flags: ReadonlyMap<string, string | true>): read
   return Object.entries(SKIP_FLAG_TO_FEATURE)
     .filter(([flag]) => booleanOption(flags, flag))
     .map(([, feature]) => feature);
+}
+
+function collaborationProfileOption(
+  flags: ReadonlyMap<string, string | true>
+): CollaborationProfile | undefined {
+  const value = stringFlag(flags, "collaboration-profile");
+  if (value === undefined) {
+    if (flags.get("collaboration-profile") === true) {
+      throw new Error("Valor ausente para --collaboration-profile.");
+    }
+    return undefined;
+  }
+  const normalized = value.trim().toLowerCase();
+  if (!isCollaborationProfile(normalized)) {
+    throw new Error(
+      `Perfil de colaboração inválido para --collaboration-profile: ${value}. Use solo, contributor ou team.`
+    );
+  }
+  return normalized;
 }
 
 function removeSkippedFeatures(

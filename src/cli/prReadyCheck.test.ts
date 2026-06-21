@@ -2,10 +2,16 @@ import {
   evaluateReadyPreconditions,
   main,
   normalizeCheckRuns,
+  detectSmokeTestsSuspended,
+  deriveSmokeReadinessPolicy,
+  smokeRelevantChangedPaths,
   ReadyCheckSnapshot,
   SnapshotCollector,
   Logger,
 } from "./prReadyCheck.js";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
 
 /** Builder de status efetivo (CO-4 r8): blocking derivado do contrato real. */
 function readyStatus(
@@ -48,6 +54,7 @@ function validSnapshot(overrides: Partial<ReadyCheckSnapshot> = {}): ReadyCheckS
     readyBodyContractReasons: [],
     localHeadSha: SHA,
     workingTreeClean: true,
+    smokeTestsSuspended: false,
     checkpoint: {
       id: "checkpoint-exemplo",
       gateDecision: null,
@@ -115,6 +122,78 @@ describe("CLI — pr-ready:check · precondições de Ready [BR-PR-READY-CHECK]"
     );
     expect(result.ok).toBe(false);
     expect(result.failures.some((f) => f.includes("pendente"))).toBe(true);
+  });
+
+  it("DADO smoke temporariamente suspenso QUANDO avalia ENTÃO bloqueia Ready/Human Gate", () => {
+    const result = evaluateReadyPreconditions(
+      validSnapshot({
+        smokeTestsSuspended: true,
+        smokePolicy: {
+          suspended: true,
+          required: true,
+          reason: "mudança de pacote",
+          changedPaths: ["package.json"],
+          triggerPaths: ["package.json"],
+        },
+      })
+    );
+    expect(result.ok).toBe(false);
+    expect(
+      result.failures.some((f) => f.includes("smoke tests estão temporariamente suspensos"))
+    ).toBe(true);
+  });
+
+  it("DADO smoke suspenso em PR intermediário sem impacto de pacote QUANDO avalia ENTÃO não bloqueia Ready", () => {
+    const result = evaluateReadyPreconditions(
+      validSnapshot({
+        smokeTestsSuspended: true,
+        smokePolicy: {
+          suspended: true,
+          required: false,
+          reason: "PR intermediário sem mudança de pacote/consumidor",
+          changedPaths: ["src/cli/flow/GovernedFlow.ts"],
+          triggerPaths: [],
+        },
+      })
+    );
+    expect(result.ok).toBe(true);
+    expect(result.warnings.join(" ")).toContain("smoke real temporariamente suspenso");
+  });
+
+  it("DADO smoke suspenso em PR intermediário com mudança de pacote QUANDO avalia ENTÃO avisa sem bloquear", () => {
+    const result = evaluateReadyPreconditions(
+      validSnapshot({
+        smokeTestsSuspended: true,
+        smokePolicy: {
+          suspended: true,
+          required: false,
+          reason:
+            "PR intermediário com mudança de pacote/runtime consumidor (package.json); smoke real fica adiado para o fechamento final da spec e para o release",
+          changedPaths: ["package.json"],
+          triggerPaths: ["package.json"],
+        },
+      })
+    );
+    expect(result.ok).toBe(true);
+    expect(result.failures.join(" ")).not.toContain("smoke");
+    expect(result.warnings.join(" ")).toContain("smoke real temporariamente suspenso");
+  });
+
+  it("DADO smoke obrigatório ausente QUANDO avalia ENTÃO falha", () => {
+    const result = evaluateReadyPreconditions(
+      validSnapshot({
+        checks: [{ name: "repo-validation", bucket: "pass" }],
+        smokePolicy: {
+          suspended: false,
+          required: true,
+          reason: "último nó antes da integração final",
+          changedPaths: [],
+          triggerPaths: [],
+        },
+      })
+    );
+    expect(result.ok).toBe(false);
+    expect(result.failures.join(" ")).toContain('check obrigatório "smoke" não encontrado');
   });
 
   it("DADO finding bloqueante aberto QUANDO avalia ENTÃO falha", () => {
@@ -248,6 +327,68 @@ describe("CLI — pr-ready:check · precondições de Ready [BR-PR-READY-CHECK]"
   });
 });
 
+describe("CLI — pr-ready:check · política de smoke real", () => {
+  it("classifica caminhos que afetam pacote/consumidor", () => {
+    expect(
+      smokeRelevantChangedPaths([
+        "src/cli/flow/GovernedFlow.ts",
+        ".github/workflows/smoke-multi-os.yml",
+        "package.json",
+        "src/domain/provisioning/ProviderCatalog.ts",
+      ])
+    ).toEqual(["package.json", "src/domain/provisioning/ProviderCatalog.ts"]);
+  });
+
+  it("não exige smoke real em PR intermediário sem impacto de pacote", () => {
+    const policy = deriveSmokeReadinessPolicy({
+      suspended: true,
+      changedPaths: ["src/cli/flow/GovernedFlow.ts"],
+      activeNode: { id: "co-flow-convergence", role: "execution", terminal: false },
+      nextNode: { id: "co-capture", role: "execution", terminal: false },
+    });
+
+    expect(policy.required).toBe(false);
+    expect(policy.suspended).toBe(true);
+  });
+
+  it("mantém mudança de pacote como aviso em PR intermediário, não como bloqueio", () => {
+    const policy = deriveSmokeReadinessPolicy({
+      suspended: true,
+      changedPaths: ["package.json", "package-lock.json"],
+      activeNode: { id: "co-flow-convergence", role: "execution", terminal: false },
+      nextNode: { id: "co-capture", role: "execution", terminal: false },
+    });
+
+    expect(policy.required).toBe(false);
+    expect(policy.triggerPaths).toEqual(["package.json", "package-lock.json"]);
+    expect(policy.reason).toContain("PR intermediário");
+  });
+
+  it("exige smoke real no último nó antes da integração", () => {
+    const policy = deriveSmokeReadinessPolicy({
+      suspended: true,
+      changedPaths: ["docs/scripts.md"],
+      activeNode: { id: "knowledge-readiness", role: "execution", terminal: false },
+      nextNode: { id: "integration-final", role: "integration", terminal: true },
+    });
+
+    expect(policy.required).toBe(true);
+    expect(policy.reason).toContain("integração final");
+  });
+
+  it("exige smoke real quando o diff não pode ser classificado", () => {
+    const policy = deriveSmokeReadinessPolicy({
+      suspended: true,
+      changedPaths: null,
+      activeNode: { id: "co-flow-convergence", role: "execution", terminal: false },
+      nextNode: { id: "co-capture", role: "execution", terminal: false },
+    });
+
+    expect(policy.required).toBe(true);
+    expect(policy.reason).toContain("não foi possível classificar");
+  });
+});
+
 describe("CLI — pr-ready:check · normalização de checks", () => {
   it("deduplica check-runs por nome mantendo o run mais recente", () => {
     const checks = normalizeCheckRuns([
@@ -275,6 +416,29 @@ describe("CLI — pr-ready:check · normalização de checks", () => {
       { name: "governance-pr-check", bucket: "pass" },
       { name: "repo-validation", bucket: "pass" },
     ]);
+  });
+});
+
+describe("CLI — pr-ready:check · suspensão temporária de smoke", () => {
+  it("detecta a suspensão governada pelo marcador do workflow smoke", () => {
+    const repo = fs.mkdtempSync(path.join(os.tmpdir(), "ai-guidelines-smoke-suspended-"));
+    const workflow = path.join(repo, ".github", "workflows");
+    fs.mkdirSync(workflow, { recursive: true });
+    fs.writeFileSync(
+      path.join(workflow, "smoke-multi-os.yml"),
+      'env:\n  AI_GUIDELINES_SMOKE_TEMPORARILY_SUSPENDED: "true"\n'
+    );
+
+    expect(detectSmokeTestsSuspended(repo)).toBe(true);
+  });
+
+  it("não marca suspensão quando o workflow smoke não declara o marcador", () => {
+    const repo = fs.mkdtempSync(path.join(os.tmpdir(), "ai-guidelines-smoke-active-"));
+    const workflow = path.join(repo, ".github", "workflows");
+    fs.mkdirSync(workflow, { recursive: true });
+    fs.writeFileSync(path.join(workflow, "smoke-multi-os.yml"), "jobs:\n  smoke:\n");
+
+    expect(detectSmokeTestsSuspended(repo)).toBe(false);
   });
 });
 

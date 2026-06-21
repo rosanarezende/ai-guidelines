@@ -1,0 +1,69 @@
+.referenceGrid {
+  display: grid;
+  gap: 14px;
+}
+
+.referenceGroup {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  display: grid;
+  gap: 12px;
+  padding: 20px;
+}
+
+.referenceList {
+  display: grid;
+  gap: 10px;
+}
+
+.referenceList article {
+  border-top: 1px solid #e8edf5;
+  display: grid;
+  gap: 4px;
+  padding-top: 10px;
+}
+
+.referenceList strong {
+  color: var(--ink);
+}
+
+.referenceList span,
+.glossaryItem dd {
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.glossary {
+  display: grid;
+  gap: 0;
+  margin: 0;
+}
+
+.glossaryItem {
+  border-top: 1px solid var(--line);
+  display: grid;
+  gap: 4px;
+  padding: 14px 0;
+}
+
+.glossaryItem dt {
+  color: var(--ink);
+  font-weight: 800;
+}
+
+.glossaryItem dd {
+  margin: 0;
+}
+
+@media (min-width: 760px) {
+  .referenceGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1040px) {
+  .referenceGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}

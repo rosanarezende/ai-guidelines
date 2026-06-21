@@ -66,6 +66,6 @@ describe("buildRegistry", () => {
     expect(help).toContain("update --providers claude,openai");
     expect(help).toContain("check-budget");
     expect(help).not.toMatch(/^\s+providers\s*$/m);
-    expect(help).toContain("Ex.: npm run guidelines --");
+    expect(help).toContain("Ex.: npx ai-guidelines");
   });
 });

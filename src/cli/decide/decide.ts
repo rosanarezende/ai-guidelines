@@ -18,6 +18,7 @@
 import { execFileSync } from "node:child_process";
 import {
   DecisionApplyContext,
+  DecisionApplyResult,
   DecisionChoiceParams,
   DecisionGitOps,
   DecisionPlan,
@@ -36,6 +37,8 @@ import { DecisionRegistry, buildDecisionRegistry } from "./registry.js";
 import { findDecisionType } from "../../infrastructure/yaml/humanDecisionPolicyReader.js";
 import { DecisionListItem, renderBrief, renderDecisionList, renderPlanPreview } from "./render.js";
 import { HandoffOptions } from "../handoff.js";
+import type { StackOps } from "../../app/ports/StackOps.js";
+import { GhCli } from "../../infrastructure/git/GhCli.js";
 
 const defaultLogger: Logger = {
   info: (msg) => process.stdout.write(`${msg}\n`),
@@ -192,6 +195,18 @@ class NodeDecisionGitOps implements DecisionGitOps {
   push(): void {
     execFileSync("git", ["push"], { cwd: this.repoRoot, stdio: ["ignore", "pipe", "pipe"] });
   }
+  createBranch(branchName: string, startPoint: string): void {
+    execFileSync("git", ["checkout", "-b", branchName, startPoint], {
+      cwd: this.repoRoot,
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+  }
+  pushBranch(branchName: string): void {
+    execFileSync("git", ["push", "-u", "origin", branchName], {
+      cwd: this.repoRoot,
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+  }
 }
 
 // ── Dependências injetáveis ──────────────────────────────────────────────────
@@ -203,6 +218,7 @@ export interface DecideDeps {
   readonly remote?: HandoffOptions["remote"];
   readonly collect?: (repoRoot: string, options: DecisionSnapshotOptions) => DecisionSnapshot;
   readonly git?: DecisionGitOps;
+  readonly stack?: StackOps;
   readonly gitConfig?: GitConfigReader;
   readonly externalChecks?: DecisionSnapshotOptions["externalChecks"];
   /** Override de TTY para o modo interativo (default: process.stdin.isTTY). */
@@ -337,6 +353,7 @@ function buildApplyContext(
     logger,
     actor: resolveActor(snapshot, deps.gitConfig ?? nodeGitConfigReader),
     git: deps.git ?? new NodeDecisionGitOps(repoRoot),
+    stack: deps.stack ?? new GhCli(repoRoot),
     authorization: DECISION_AUTHORIZATION,
   };
 }
@@ -440,9 +457,29 @@ async function applyPlan(
   def: HumanDecisionDefinition,
   plan: DecisionPlan,
   ctx: DecisionApplyContext,
-  logger: Logger
+  logger: Logger,
+  prompts?: Prompts
 ): Promise<number> {
-  const result = await def.apply(plan, ctx);
+  let result: DecisionApplyResult | undefined;
+  if (prompts?.taskList && plan.mutating) {
+    await prompts.taskList([
+      {
+        title: "Registrar decisão governada",
+        task: async (message) => {
+          message("Aplicando efeito permitido, commit exclusivo e push normal quando aplicável.");
+          result = await def.apply(plan, ctx);
+          if (!result.ok) throw new Error(result.messages.join("\n"));
+          return "Decisão registrada.";
+        },
+      },
+    ]);
+  } else {
+    result = await def.apply(plan, ctx);
+  }
+  if (!result) {
+    logger.error("❌ decide — aplicação não retornou resultado. Nada foi confirmado.");
+    return 1;
+  }
   for (const m of result.messages)
     logger[result.ok ? "info" : "error"](result.ok ? `✅ ${m}` : `❌ ${m}`);
   if (!result.ok) return 1;
@@ -477,11 +514,12 @@ async function runWizard(
     );
     return 0;
   }
-  const io = prompts ?? (await loadInquirer());
+  const io = prompts ?? (await loadPrompts());
 
   // Tela 1 — decisões pendentes.
   const items = buildListItems(registry, snapshot);
   logger.info(renderDecisionList(items));
+  await io.note?.(renderDecisionList(items), "Decisões humanas pendentes");
   logger.info("");
   const selected = await io.select<string>({
     message: "Qual decisão você quer revisar?",
@@ -489,6 +527,10 @@ async function runWizard(
       ...items.map((it) => ({
         name: `${it.title} — ${it.availability.status === "available" ? "Disponível" : "Indisponível"}`,
         value: it.id,
+        hint:
+          it.availability.status === "available"
+            ? it.availability.hint
+            : it.availability.reasons.join(" "),
       })),
       { name: "Sair", value: "__quit__" },
     ],
@@ -505,6 +547,7 @@ async function runWizard(
     const brief = def.buildBrief(snapshot, { technical });
     logger.info("");
     logger.info(renderBrief(brief, { technical }));
+    await io.note?.(renderBrief(brief, { technical }), brief.title);
     logger.info("");
 
     // O wizard RENDERIZA o briefing governado; não injeta escolhas de decisão.
@@ -543,6 +586,7 @@ async function runWizard(
     // Tela 4 — prévia.
     logger.info("");
     logger.info(renderPlanPreview(plan));
+    await io.note?.(renderPlanPreview(plan), "Prévia governada");
     logger.info("");
 
     if (!plan.mutating) {
@@ -575,7 +619,7 @@ async function runWizard(
       logger.error(`❌ ${authErr}`);
       return 1;
     }
-    return applyPlan(def, freshPlan, ctx, logger);
+    return applyPlan(def, freshPlan, ctx, logger, io);
   }
 }
 
@@ -602,9 +646,9 @@ async function collectIndividual(
   return accepted;
 }
 
-async function loadInquirer(): Promise<Prompts> {
-  const mod = await import("../../infrastructure/io/InquirerPrompts.js");
-  return new mod.InquirerPrompts();
+async function loadPrompts(): Promise<Prompts> {
+  const mod = await import("../../infrastructure/io/ClackPrompts.js");
+  return new mod.ClackPrompts();
 }
 
 export function runDecideCli(

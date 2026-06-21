@@ -1,0 +1,38 @@
+{
+  "encoder": {
+    "quality": 82,
+    "effort": 6
+  },
+  "images": [
+    {
+      "source": "ai-guidelines-before-after.png",
+      "output": "ai-guidelines-before-after.webp",
+      "sourceSha256": "f045b945a8ab445ab112cd7f8df308e1470d9f0a30087d7bb0cdd48b0c5d8767"
+    },
+    {
+      "source": "ai-guidelines-capability.png",
+      "output": "ai-guidelines-capability.webp",
+      "sourceSha256": "21ed9fe72d9c7387ad967ab4a694f207796b6da299d6dc912875b0f337140d5b"
+    },
+    {
+      "source": "ai-guidelines-dx-flow.png",
+      "output": "ai-guidelines-dx-flow.webp",
+      "sourceSha256": "5edbfb20090933fde5ea94df2b75b7695dd3a3a09348b18c6bf46dc0deeff4b3"
+    },
+    {
+      "source": "ai-guidelines-flow.png",
+      "output": "ai-guidelines-flow.webp",
+      "sourceSha256": "c29e1a90557b08c4f9a6420919394d1e82604a8cb864b073f3acf3f0a146d280"
+    },
+    {
+      "source": "ai-guidelines-governance-layers.png",
+      "output": "ai-guidelines-governance-layers.webp",
+      "sourceSha256": "64ab47413e1b0d9fd5add83144717356135e6a121ad92576b93cfb190a098614"
+    },
+    {
+      "source": "ai-guidelines-workflow-guide.png",
+      "output": "ai-guidelines-workflow-guide.webp",
+      "sourceSha256": "3cb8598ccd1e71b209cb9a6ad368416e7b1a8312110ebe2cc84b4e9274cfd046"
+    }
+  ]
+}

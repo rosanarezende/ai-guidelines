@@ -63,7 +63,7 @@ describe("handoffReceipt · contrato de carga (puro) [CO-4]", () => {
     expect(receipt.specId).toBe("0024");
     expect(receipt.head).toBe("5906666");
     expect(receipt.sourceSeal).toBe("selo12345678");
-    expect(receipt.command).toBe("npm run guidelines -- handoff 0024");
+    expect(receipt.command).toBe("npm run flow -- handoff 0024");
     expect(receipt.sources).toEqual({ "state.yml": "aaa111", git: "bbb222" });
     expect(JSON.stringify(receipt)).not.toMatch(/##|canonical-next|Escopo/);
   });
@@ -197,7 +197,7 @@ describe("handoffReceipt · contrato de carga (puro) [CO-4]", () => {
 
   it("assertFreshHandoffReceipt: guarda p/ comandos mutantes futuros lança com comando de recarga", () => {
     expect(() => assertFreshHandoffReceipt({ kind: "missing" }, "0024")).toThrow(
-      /npm run guidelines -- handoff 0024/
+      /npm run flow -- handoff 0024/
     );
     const receipt = createLoadReceipt(facts(), "seloX", NOW);
     expect(() =>
@@ -220,14 +220,14 @@ describe("formatReceiptAdvisory · advisory-first determinístico (5 estados) [C
   it("missing → nomeia ausência de carga + comando de recarga", () => {
     expect(formatReceiptAdvisory({ kind: "missing" }, "0024")).toBe(
       "⚠️  [advisory] retomada não reconciliada — nenhuma carga registrada. " +
-        "Recarregue com: npm run guidelines -- handoff 0024"
+        "Recarregue com: npm run flow -- handoff 0024"
     );
   });
 
   it("invalid → nomeia a razão da invalidez", () => {
     const line = formatReceiptAdvisory({ kind: "invalid", reason: "JSON ilegível" }, "0024");
     expect(line).toContain("recibo inválido (JSON ilegível)");
-    expect(line).toContain("Recarregue com: npm run guidelines -- handoff 0024");
+    expect(line).toContain("Recarregue com: npm run flow -- handoff 0024");
   });
 
   it("stale-head → diagnostica HEAD carregado × atual", () => {

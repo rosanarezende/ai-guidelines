@@ -6,7 +6,7 @@
 > Plan: [`./plan.md`](./plan.md)
 > Tasks: [`./tasks.md`](./tasks.md)
 > Status agregado: **Resolved (decisões)** — todas as `[DEC]` desta spec estão `Resolved`; a pesquisa estrutural ainda aberta vive em [`research/findings.md`](./research/findings.md), não aqui.
-> Última atualização: 2026-06-16 — **`[DEC-0024-G10]` registrada**: novo nó planejado `co-flow-convergence` antes de `co-capture`.
+> Última atualização: 2026-06-21 — **`[DEC-0024-G20]` registrada**: a revisão externa pré-Human Gate confirmou o recorte do PR #43, mas exigiu reconciliar `state.yml § next`, materializar a continuação CO-10.8..CO-10.10 na topologia e atualizar o body antes de Ready/Human Gate.
 
 > **Artefato exclusivo de decisão humana.** Organizado por **estado**, não por numeração histórica (reestruturação 2026-05-31). Quatro estados respondem, à primeira vista, _o que já foi decidido · o que ainda está aberto · o que virou regra · o que virou enforcement_:
 >
@@ -247,6 +247,322 @@ Cada transição deve declarar: fato de entrada, autoridade, comando, efeito per
 
 **Status:** Resolved (2026-06-16) / @rosanarezende — decisão topológica da owner, registrada antes do Human Gate do `co-enforcement`.
 
+**Nota posterior:** `[DEC-0024-G18]` preserva a decisão de `co-flow-convergence` vir antes de `co-capture`, mas reordena a cauda planejada para executar `dualroot-collapse` imediatamente depois de `co-flow-convergence` e antes de `co-capture`/`co-events`.
+
+---
+
+### [DEC-0024-G11] Suspender temporariamente smoke tests durante `co-flow-convergence`, sem liberar Ready/Human Gate
+
+**Pergunta:** Durante a migração/convergência do fluxo governado no PR #43, os smoke tests remotos devem continuar rodando a cada push, ou podem ser suspensos temporariamente para reduzir atrito operacional enquanto a arquitetura do fluxo é confrontada e corrigida?
+
+**Modo de gate:** `aceitação` <!-- decisão operacional da owner, 2026-06-16, durante CO-10.2. -->
+
+**Contexto:** O nó `co-flow-convergence` precisa alterar e testar o próprio lifecycle do framework. Os smoke tests multi-OS/tarball são valiosos como gate final de distribuição, mas são caros e pouco informativos durante a fase intermediária CO-10.2/CO-10.3, antes da reativação final do fluxo. Ao mesmo tempo, remover silenciosamente o required context `smoke` ou permitir Ready/Human Gate sem smoke real recriaria drift entre validação, ruleset e decisão humana.
+
+**Decisão (Resolved):**
+
+- Suspender temporariamente a execução real dos smoke tests remotos durante CO-10.2/CO-10.3.
+- Preservar o contexto required estável `smoke` como produtor explícito no workflow, evitando required context órfão e drift de ruleset.
+- Manter `npm run validate`, testes TypeScript/unitários e guards governados como validação obrigatória local/CI.
+- Bloquear `pr-ready:check`, Ready e Human Gate enquanto a suspensão estiver ativa.
+- Reativar smoke real antes da readiness final do nó e antes de qualquer Human Gate do PR #43.
+
+**O que NÃO está sendo decidido:** remover definitivamente smoke; enfraquecer o gate final do nó; alterar o ruleset para deixar de exigir `smoke`; autorizar Ready/Human Gate com smoke suspenso; pular validação local; aplicar a suspensão fora do escopo de CO-10.2/CO-10.3.
+
+**Critério de reversão obrigatório:** antes do fechamento do nó `co-flow-convergence`, o workflow `smoke-multi-os.yml` deve voltar a executar `npm run test:smoke`, `npm run ci` deve voltar a incluir smoke, `pr-ready:check` deve deixar de detectar suspensão, e o PR deve validar smoke real antes de Ready/Human Gate.
+
+**Status:** Resolved (2026-06-16) / @rosanarezende — decisão operacional temporária com enforcement de bloqueio em `pr-ready:check`.
+
+---
+
+### [DEC-0024-G12] CO-10.2 entrega convergência coesa inicial do fluxo, não apenas matriz
+
+**Pergunta:** O CO-10.2 deve parar após mapear o confronto modelo × código, deixando a remoção de heurísticas locais para CO-10.3, ou deve substituir no mesmo ciclo as divergências já comprovadas na superfície humana/next-action?
+
+**Modo de gate:** `aceitação` <!-- decisão operacional da owner, 2026-06-16, durante CO-10.2. -->
+
+**Contexto:** O dogfood de CO-10.2 mostrou que uma migração excessivamente incremental recriaria o padrão que o nó `co-flow-convergence` existe para corrigir: cockpit, wizard, `work`, `decide`, `pr-ready` e readiness poderiam continuar calculando o mesmo estado por heurísticas locais diferentes enquanto aguardam um sub-checkpoint posterior.
+
+**Decisão (Resolved):**
+
+- CO-10.2 continua fazendo o confronto modelo × código, mas também deve entregar uma convergência coesa inicial quando a divergência já estiver comprovada.
+- Cada regra movida para o modelo comum deve remover a regra local correspondente.
+- `npm run flow` é a superfície humana local canônica; o binário público continua `ai-guidelines`.
+- O wizard interativo deve projetar o mesmo modelo usado por cockpit/work/decide, sem lista paralela de comandos ou cálculo próprio de readiness/Human Gate.
+- `@clack/prompts` substitui Inquirer como único adapter interativo; `@inquirer/*` e `InquirerPrompts` não permanecem como débito.
+- CO-10.3 fica responsável pelos gaps remanescentes classificados em CO-10.2, especialmente transições de nó e invariantes que ainda exigem matriz/falsificação adicional.
+
+**O que NÃO está sendo decidido:** iniciar CO-10.3; executar `advance-subcheckpoint`; marcar readiness; converter PR para Ready; executar Human Gate; fazer merge; remover a suspensão temporária dos smoke tests antes do ponto governado.
+
+**Status:** Resolved (2026-06-16) / @rosanarezende — decisão operacional de escopo do CO-10.2, registrada após o dogfood de `flow`.
+
+---
+
+### [DEC-0024-G13] CO-10.5 dedicado a UX, linguagem humana e convergência do wizard
+
+**Pergunta:** A melhoria de linguagem/UX do `npm run flow` deve ser tratada como ajuste residual dentro do dogfood/falsificação, ou como sub-checkpoint próprio antes da falsificação/Human Gate?
+
+**Modo de gate:** `aceitação` <!-- decisão operacional da owner, 2026-06-17, durante CO-10.4. -->
+
+**Contexto:** O dogfood de CO-10.4 mostrou que a convergência técnica de `flow`, `work`, `decide` e registry ainda não basta para a pessoa humana operar o fluxo sem inspecionar código ou memorizar termos internos. O menu atual ainda expunha vocabulário de implementação (`cockpit`, `briefing`, `review governado`, `comando mutante`, `wizard`, `Entrypoints com adapter runtime`) e ainda parecia carregar camadas legadas em vez de uma experiência única.
+
+**Decisão (Resolved):**
+
+- Inserir `CO-10.5 — UX, linguagem humana e convergência do wizard` antes da etapa de falsificação/Human Gate.
+- Renumerar a etapa anterior `CO-10.5 — falsificação + Human Gate` para `CO-10.6`.
+- Tratar as melhorias já iniciadas no wizard como seed de CO-10.5, não como fechamento do trabalho.
+- `npm run flow` deve projetar o mesmo modelo governado, mas com linguagem humana, menu por intenção e explicações claras de agora/depois/bloqueios/alternativas.
+- O wizard deve aproveitar melhor `@clack/prompts` (`intro/outro`, `note`/`box`, `select`, `groupMultiselect`, `tasks`/`taskLog`, `spinner`, `confirm`, cancelamento limpo), sem criar regra própria de readiness, PR Ready, CI, Human Gate ou próxima ação.
+- `init`/`adopt`/`update` devem continuar disponíveis, mas contextualmente: o caminho normal mostra a operação adequada ao estado do repositório; as demais ficam em caminho avançado com aviso.
+
+**Nota posterior:** `[DEC-0024-G14]` subdividiu o fechamento que G13 havia renumerado para CO-10.6: CO-10.6 passa a ser fluxo de time/múltiplas specs/spec nova; falsificação ampla passa a CO-10.7; revisão independente + Human Gate passa a CO-10.8.
+
+**O que NÃO está sendo decidido:** executar Ready; exercer Human Gate; fazer merge; avançar sub-checkpoint; abrir novo PR; reintroduzir Inquirer; recriar comando `providers`; mover regra de lifecycle para o wizard.
+
+**Status:** Resolved (2026-06-17) / @rosanarezende — decisão operacional de UX/convergência antes da falsificação final do nó.
+
+---
+
+### [DEC-0024-G14] CO-10.6 dedicado a fluxo de time, múltiplas specs e criação de spec nova
+
+**Pergunta:** O nó `co-flow-convergence` pode ir direto para falsificação/Human Gate, ou precisa antes modelar o fluxo de desenvolvimento em time, com múltiplas specs abertas e criação/continuação de specs?
+
+**Modo de gate:** `aceitação` <!-- decisão operacional da owner, 2026-06-18, antes do fechamento de co-flow-convergence. -->
+
+**Contexto:** O uso do site/flow como documentação viva expôs que o produto ainda explica bem o fluxo de uma spec ativa, mas não cobre com clareza o caso de time: várias specs abertas, uma pessoa querendo continuar uma spec específica, outra querendo iniciar uma spec nova, branch/PR divergentes e autoridades diferentes para contributor/maintainer/owner. Esse é o mesmo tipo de problema que originou `co-flow-convergence`: o humano vira o reconciliador entre intenção, branch, PR, SSOT e comando.
+
+**Decisão (Resolved):**
+
+- Inserir `CO-10.6 — fluxo de time, múltiplas specs e criação de spec nova` antes da falsificação final.
+- Dividir a antiga etapa `CO-10.6 — falsificação + Human Gate` em:
+  - `CO-10.7 — falsificação ampla do fluxo`;
+  - `CO-10.8 — revisão independente + Human Gate`.
+- `CO-10.6` deve modelar e implementar orientação governada para:
+  - listar specs/nós relevantes quando houver mais de um caminho possível;
+  - continuar uma spec específica sem inferência silenciosa errada;
+  - iniciar uma spec nova pelo fluxo governado;
+  - explicar branch/PR/CI/tree/autoridade antes de qualquer ação;
+  - diferenciar ações de contributor, maintainer e owner.
+- `CO-10.7` deve falsificar o fluxo completo, incluindo cenários negativos e não óbvios.
+- `CO-10.8` deve preparar uma rodada independente de Technical Audit, Architectural Review e Security Review com outra LLM, usando prompts que busquem falsificações não óbvias e reduzam viés antes do Human Gate.
+
+**Nota posterior:** `[DEC-0024-G15]` inseriu `CO-10.7 — CLI pública autoexplicável e wizard orientado ao contexto`; `[DEC-0024-G16]` inseriu `CO-10.8 — arquitetura interna, organização DDD e BDD visual para mantenedores`. Por isso a falsificação ampla passou a `CO-10.9` e a revisão independente + Human Gate passou a `CO-10.10`.
+
+**O que NÃO está sendo decidido:** abrir CO-5; executar Ready; exercer Human Gate; fazer merge; abrir novo PR; criar lock distribuído falso; automatizar criação de PR/spec sem confirmação humana; tornar toda review obrigatória universalmente.
+
+**Status:** Resolved (2026-06-18) / @rosanarezende — decisão operacional de fluxo em time antes da falsificação e Gate do nó.
+
+---
+
+### [DEC-0024-G15] CLI pública autoexplicável como porta de entrada do produto
+
+**Pergunta:** O site deve continuar explicando comandos e jornadas como camada editorial principal, ou o produto precisa primeiro garantir que a CLI pública (`npx ai-guidelines`) seja autoexplicável e consiga orientar a pessoa a partir do estado real do repositório?
+
+**Modo de gate:** `aceitação` <!-- decisão operacional da owner, 2026-06-19, durante CO-10.6/planejamento de fechamento do co-flow-convergence. -->
+
+**Contexto:** O redesign do site ajudou a visualizar o produto, mas também revelou uma inversão perigosa: o site começou a explicar um fluxo ideal enquanto a experiência pública ainda podia parecer uma lista de comandos que a pessoa precisa decorar (`init`, `adopt`, `update`, `work`, `specs`, `peer-review`). A owner decidiu que o produto principal deve ser a CLI/wizard: a pessoa deve poder rodar `npx ai-guidelines`, o framework detectar o contexto e oferecer o próximo caminho correto. O site deve funcionar como documentação viva e reprodução fiel dessa experiência, não como fonte paralela que tenta compensar lacunas da CLI.
+
+**Decisão (Resolved):**
+
+- Inserir `CO-10.7 — CLI pública autoexplicável e wizard orientado ao contexto` antes da falsificação ampla.
+- Renumerar:
+  - `CO-10.7 — falsificação ampla do fluxo` para `CO-10.8`;
+  - `CO-10.8 — revisão independente + Human Gate` para `CO-10.9`.
+- `npx ai-guidelines` deve ser tratado como a porta de entrada pública do produto; comandos diretos continuam disponíveis como atalhos para automação ou usuários experientes, mas não devem ser a experiência principal.
+- A CLI deve detectar e explicar, com linguagem humana, pelo menos:
+  - pasta vazia;
+  - projeto novo com arquivos soltos;
+  - repositório existente sem ai-guidelines;
+  - repositório existente com conflitos;
+  - repositório já governado;
+  - perfil solo, contribuições externas ou time;
+  - uma spec ativa;
+  - múltiplas specs abertas;
+  - ausência de spec ativa;
+  - branch errada;
+  - working tree suja;
+  - PR Draft/Ready;
+  - CI verde, pendente ou falha;
+  - findings/reviews/resolutions/dispositions;
+  - readiness ausente, readiness terminal e avanço permitido;
+  - revisão de PR de outra pessoa;
+  - modo offline/degradado.
+- Os cenários mínimos de uso diário devem ser decompostos em subcenários falsificáveis:
+  - nova sessão em repo governado com uma spec ativa;
+  - nova sessão com múltiplas specs e necessidade de escolher foco;
+  - retomar depois de interrupção;
+  - validar mudanças locais com tree suja;
+  - resolver finding de review;
+  - fechar resolution/disposition;
+  - decidir readiness de sub-checkpoint;
+  - avançar sub-checkpoint quando permitido;
+  - bloquear avanço quando readiness, findings, CI ou branch impedem;
+  - preparar Ready sem executar Ready;
+  - preparar Human Gate sem executar Gate;
+  - revisar PR de colega sem perder a branch atual;
+  - atualizar providers/práticas em repo já governado;
+  - distinguir atualização comum de mudança de política de colaboração que exige autoridade.
+- O site deve reproduzir a experiência real da CLI por transcripts/cenários derivados sempre que possível; textos editoriais do site podem explicar intenção e valor, mas não podem inventar comportamento.
+
+**O que NÃO está sendo decidido:** executar Ready; exercer Human Gate; fazer merge; avançar sub-checkpoint; abrir novo PR; alterar topologia externa da Spec 0024; mover narrativa editorial do site para `src/cli/copy`; transformar comandos diretos em única forma de uso; criar alias legado `providers`; introduzir nova fonte paralela de estado.
+
+**Status:** Resolved (2026-06-19) / @rosanarezende — decisão operacional de produto/UX pública antes da falsificação final do nó.
+
+---
+
+### [DEC-0024-G16] Arquitetura interna, organização DDD e BDD visual para mantenedores antes da falsificação final
+
+**Pergunta:** O nó `co-flow-convergence` pode ir direto para falsificação ampla e Human Gate depois da CLI pública autoexplicável, ou precisa antes reorganizar a arquitetura interna para que o próprio framework seja compreensível, navegável e sustentável por humanos?
+
+**Modo de gate:** `aceitação` <!-- decisão operacional/arquitetural da owner, 2026-06-19, durante CO-10.7. -->
+
+**Contexto:** A reorganização do site React mostrou, por dogfood, que organização de arquivos também é parte da experiência humana: quando componentes, conteúdo e projeções ficam misturados, a owner perde capacidade de revisar fluxo, encontrar gaps e acompanhar evolução. O mesmo padrão apareceu no runtime. Apesar da intenção DDD de `src/cli`, `src/app`, `src/domain` e `src/infrastructure`, a migração gradual deixou módulos e testes extensos demais, com responsabilidades difíceis de localizar. Evidência inicial: `src/cli/flowWizard.ts`, `src/cli/workflow.ts`, `src/cli/workBrief.ts`, `src/cli/handoff.ts`, `src/cli/reviewBrief.ts` e testes espelhados concentram grande parte do comportamento humano/fluxo.
+
+**Decisão (Resolved):**
+
+- Inserir `CO-10.8 — arquitetura interna, organização DDD e BDD visual para mantenedores` antes da falsificação ampla.
+- Renumerar:
+  - `CO-10.8 — falsificação ampla do fluxo` para `CO-10.9`;
+  - `CO-10.9 — revisão independente + Human Gate` para `CO-10.10`.
+- O sub-checkpoint deve produzir inventário robusto da organização atual e uma árvore-alvo proposta para `src`, separando domínio, aplicação, infraestrutura, delivery, experiência CLI/wizard, decisões, reviews, PR/GitHub, site projection e testes.
+- O refactor esperado é estrutural e behavior-preserving: mover/splitar/renomear para reduzir acoplamento humano e técnico, removendo arquivos gigantes e agrupando testes por responsabilidade, sem alterar conteúdo de produto nem regras de negócio.
+- O sub-checkpoint deve preparar BDD visual para mantenedores: cenários e testes devem poder ser navegados por humanos, idealmente projetáveis para uma página interna de acompanhamento, do mesmo modo que o site público ajuda a validar a experiência de usuários.
+- Gaps ou features descobertos durante a pesquisa devem ir para artefato exclusivo de candidatos; só viram escopo executável por decisão posterior.
+
+**O que NÃO está sendo decidido:** executar Ready; exercer Human Gate; fazer merge; avançar sub-checkpoint; alterar topologia externa; reescrever comportamento da CLI; redesenhar copy de produto; transformar o site de mantenedores em requisito imediato; criar novo nó sem nova decisão; implementar CO-5/CO-6.
+
+**Status:** Resolved (2026-06-19) / @rosanarezende — decisão de manutenibilidade interna e BDD humano antes da falsificação final do nó.
+
+---
+
+### [DEC-0024-G17] Reabrir CO-10.7 antes de retomar CO-10.8
+
+**Pergunta:** CO-10.7 pode permanecer fechado depois do seed inicial de CLI pública autoexplicável, ou precisa ser reaberto porque a experiência pública real ainda não foi falsificada de ponta a ponta?
+
+**Modo de gate:** `aceitação` <!-- decisão operacional da owner, 2026-06-19, após detectar fechamento prematuro de CO-10.7. -->
+
+**Contexto:** A owner identificou que o fechamento de CO-10.7 ocorreu antes do critério pretendido. A intenção do sub-checkpoint não era apenas ajustar copy, wizard e site, mas provar que uma pessoa usuária roda `npx ai-guidelines` e é orientada pela CLI sem decorar comandos. A prova esperada inclui consumidores simulados/instalados (`consumer-empty`, `consumer-existing-package`, `consumer-existing-formatter-conflict`, `consumer-governed-solo`, `consumer-governed-team`, `consumer-governed-multiple-specs`, `consumer-peer-review`), captura da saída real, verificação das opções oferecidas, dry-run, aplicação quando permitido, arquivos finais, bloqueios e mensagens. O artefato `research/2026-06-19-checkpoint-co-flow-convergence-co-10.7-status.md` já registrava que isso estava apenas parcialmente coberto.
+
+**Decisão (Resolved):**
+
+- Reabrir `CO-10.7 — CLI pública autoexplicável e wizard orientado ao contexto`.
+- Voltar `CO-10.7` de `[x]` para `[/]` em `tasks.md`.
+- Voltar `CO-10.8` de `[/]` para `[ ]` em `tasks.md`, sem apagar o trabalho já produzido.
+- Classificar o commit `2d478b2` como seed antecipado de CO-10.8: inventário, split inicial do wizard e catálogo BDD mínimo ficam preservados, mas pausados.
+- Não continuar a reorganização interna enquanto a experiência pública de CO-10.7 não estiver falsificada e refletida no site/documentação.
+- O próximo trabalho autorizado volta a ser o harness de consumidor/CLI pública, com site como reprodução da experiência real da CLI, não como compensação de lacuna do produto.
+
+**O que NÃO está sendo decidido:** reverter commits; apagar o seed de CO-10.8; executar Ready; exercer Human Gate; fazer merge; avançar sub-checkpoint; abrir novo PR; alterar topologia externa; implementar CO-10.8; iniciar CO-10.9.
+
+**Status:** Resolved (2026-06-19) / @rosanarezende — correção de lifecycle para alinhar tasks/work/handoff à intenção real de CO-10.7.
+
+---
+
+### [DEC-0024-G18] Antecipar `dualroot-collapse` antes de `co-capture` e `co-events`
+
+**Pergunta:** Depois de `co-flow-convergence`, a Spec 0024 deve seguir para `co-capture`/`co-events` como planejado, mesmo com `.ai-guidelines/` e `.specify/` ainda vivos como ponte, ou deve antecipar `dualroot-collapse` para consolidar a estrutura canônica antes de automatizar captura e eventos?
+
+**Modo de gate:** `aceitação` <!-- decisão operacional/arquitetural da owner, 2026-06-20, durante CO-10.7. -->
+
+**Contexto:** O dogfood de CO-10.7 expôs que a experiência pública (`npx ai-guidelines`, site e simulador) ainda precisa explicar um estado transitório: consumidores recebem `.governance/` como raiz de governança, mas `config.json` e templates continuam sob `.ai-guidelines/`, e specs/roadmap ainda carregam ponte com `.specify/`. O próprio runtime bootstrap declara que isso é bridge até `dualroot-collapse`. Se `co-capture` e `co-events` forem implementados antes do colapso, há risco de automatizar e testar a estrutura temporária, aumentando o custo da migração e tornando a explicação do produto mais confusa. Ao mesmo tempo, absorver o colapso completo dentro do PR #43 ampliaria demais o escopo de `co-flow-convergence` e bloquearia CO-10.8/CO-10.9/CO-10.10.
+
+**Decisão (Resolved):**
+
+- Antecipar `dualroot-collapse` para imediatamente depois de `co-flow-convergence`.
+- Atualizar a topologia planejada para:
+  - `co-flow-convergence` seq 10;
+  - `dualroot-collapse` seq 11;
+  - `co-capture` seq 12;
+  - `co-events` seq 13;
+  - `housekeeping` seq 14;
+  - `knowledge-readiness` seq 15;
+  - `integration-final` terminal.
+- Manter `dualroot-collapse` como PR/checkpoint dedicado, não como sub-checkpoint novo dentro do PR #43.
+- Permitir que CO-10.7 registre honestamente o estado bridge quando necessário, mas sem migrar arquivos, paths canônicos ou contratos de consumidor neste PR.
+- Continuar o PR #43 com CO-10.8, CO-10.9 e CO-10.10 conforme já planejado. **Supersedida por `[DEC-0024-G19]`: CO-10.8..CO-10.10 saem para próximo PR.**
+- Exigir que `co-capture` e `co-events` sejam desenhados contra a estrutura pós-colapso, não contra `.ai-guidelines/`/`.specify/` como raízes vivas.
+
+**Impacto esperado:**
+
+- `init`/`adopt`/`update`, templates, config, runtime bootstrap, fixtures de consumidor, smoke tests, site e documentação pública passam a ter uma casa canônica antes da automação de captura/eventos.
+- Repositórios já adotados com `.ai-guidelines/` precisam de migração explícita e falsificável, sem apagar estado do usuário e sem tratar `active.yml` como SSOT.
+- Testes que hoje validam `.ai-guidelines/config.json` e `.ai-guidelines/templates/` deverão migrar no PR de `dualroot-collapse`, junto com fixtures e docs.
+- `co-capture` e `co-events` ganham menos compatibilidade transitória para carregar.
+
+**O que NÃO está sendo decidido:** implementar `dualroot-collapse` no PR #43; deletar `.ai-guidelines/` ou `.specify/` agora; executar Ready; exercer Human Gate; fazer merge; avançar sub-checkpoint; abrir novo PR automaticamente; iniciar CO-5/CO-6; transformar `active.yml` em fonte primária; criar migração parcial sem PR dedicado.
+
+**Status:** Resolved (2026-06-20) / @rosanarezende — decisão topológica para antecipar o colapso dual-root e manter o PR #43 focado no fechamento de `co-flow-convergence`.
+
+---
+
+### [DEC-0024-G19] Fechar PR #43 no recorte CO-10.1..CO-10.7 e mover CO-10.8..CO-10.10 para próximo PR
+
+**Pergunta:** Depois de CO-10.7, o PR #43 deve continuar absorvendo CO-10.8/CO-10.9/CO-10.10, ou deve parar no recorte já entregue, pedir revisão externa e mover a continuação para um novo PR?
+
+**Modo de gate:** `aceitação` <!-- decisão operacional/arquitetural da owner, 2026-06-20, após concluir CO-10.7 e reavaliar o tamanho/risco do PR #43. -->
+
+**Contexto:** CO-10.7 reabriu a experiência pública de `npx ai-guidelines`, adicionou harnesses de consumidores, simulador/site e ajustes no wizard real. O PR #43 ficou grande e passou a carregar mudanças de runtime, site, testes e artefatos governados. A próxima etapa planejada, CO-10.8, é uma reorganização estrutural de arquitetura interna/DDD/BDD para mantenedores; CO-10.9 e CO-10.10 dependem dessa reorganização e da falsificação ampla subsequente. Continuar no mesmo PR aumentaria o risco de revisar arquitetura interna por cima de um PR já extenso, misturando valor entregue ao usuário com refactor estrutural. Ao mesmo tempo, fechar o PR #43 sem uma revisão externa criaria risco de Human Gate com viés, porque a entrega passou por muitas iterações de UX, CLI pública, site e harness.
+
+**Decisão (Resolved):**
+
+- Encerrar o escopo de entrega do PR #43 no recorte `CO-10.1..CO-10.7`.
+- Tratar `CO-10.8 — arquitetura interna, organização DDD e BDD visual para mantenedores`, `CO-10.9 — falsificação ampla do fluxo` e `CO-10.10 — revisão independente + Human Gate` como continuação a ser executada em próximo PR, não como pendência executável dentro do PR #43.
+- Preservar o seed antecipado de CO-10.8 (`2d478b2`) como material de entrada para o próximo PR, sem tentar expandi-lo neste PR.
+- Antes de qualquer Ready/Human Gate do PR #43, pedir uma revisão externa independente para avaliar o recorte realmente entregue, os riscos residuais e se a decisão de split deixa o PR coerente.
+- Não executar Human Gate, Ready, merge, `advance-subcheckpoint`, `finish-subcheckpoint`, `mark-readiness` ou abertura automática de novo PR por esta decisão.
+
+**Impacto esperado:**
+
+- O PR #43 fica revisável como entrega coesa de convergência do fluxo até a CLI pública autoexplicável.
+- A reorganização interna/DDD/BDD deixa de competir com o fechamento do PR atual e ganha um PR próprio para inventário robusto, árvore-alvo e migração behavior-preserving.
+- A revisão externa passa a ser o próximo passo antes da decisão humana do PR #43, reduzindo o risco de overclaim e de aceitação enviesada por dogfood interno.
+- O próximo PR poderá começar de uma base mais limpa, usando os achados de CO-10.7 e o seed de CO-10.8 como entrada, sem carregar todo o histórico de reescritas do site/CLI pública.
+
+**O que NÃO está sendo decidido:** implementar CO-10.8 agora; apagar o seed já produzido; executar revisão como decisão mutante; converter o PR para Ready; exercer Human Gate; fazer merge; iniciar `dualroot-collapse`; abrir PR novo automaticamente. **Nota posterior:** `[DEC-0024-G20]` revisa a parte "não alterar `state.yml`" somente para reconciliar `next` e topologia antes do Gate; não autoriza implementar a continuação nem mudar o recorte do PR #43.
+
+**Status:** Resolved (2026-06-20) / @rosanarezende — decisão de recorte para revisão externa do PR #43 antes do Human Gate e continuação de CO-10.8..CO-10.10 em próximo PR.
+
+**Nota posterior em G18:** a frase "Continuar o PR #43 com CO-10.8, CO-10.9 e CO-10.10" foi supersedida por G19. G18 continua válida para a ordem relativa pós-continuação (`dualroot-collapse` antes de `co-capture`/`co-events`), mas `[DEC-0024-G20]` materializa a continuação CO-10.8..CO-10.10 como nó próprio antes de `dualroot-collapse`.
+
+---
+
+### [DEC-0024-G20] Ancorar a continuação CO-10.8..CO-10.10 antes de `dualroot-collapse`
+
+**Pergunta:** Depois da revisão externa pré-Human Gate do PR #43, a continuação CO-10.8..CO-10.10 pode permanecer apenas em prosa, ou precisa virar nó planejado na topologia antes de `dualroot-collapse`, `co-capture` e `co-events`?
+
+**Modo de gate:** `aceitação` <!-- decisão operacional/arquitetural da owner, 2026-06-21, após revisão externa independente do PR #43. -->
+
+**Contexto:** A revisão externa independente do PR #43 confirmou que o recorte CO-10.1..CO-10.7 é coerente e entrega valor próprio, mas apontou três fechamentos obrigatórios antes de Ready/Human Gate: o body do PR ainda descrevia majoritariamente CO-10.1; `state.yml § next` ainda narrava "retomar CO-10.8" por G17; e a continuação CO-10.8..CO-10.10 estava registrada em `tasks.md`/`plan.md`, mas não materializada na `state.yml § topology`. Isso criava risco de mis-binding: o Human Gate poderia aprovar o recorte sem deixar explícito qual movimento topológico vem antes de `dualroot-collapse`/`co-capture`/`co-events`.
+
+**Decisão (Resolved):**
+
+- Manter o PR #43 limitado ao recorte entregue `CO-10.1..CO-10.7`.
+- Registrar a revisão externa pré-Human Gate como concluída e usar seus achados para correção documental/topológica antes de Ready.
+- Materializar a continuação CO-10.8..CO-10.10 como nó planejado `co-flow-continuation` imediatamente após `co-flow-convergence`.
+- Atualizar a topologia planejada para:
+  - `co-flow-convergence` seq 10;
+  - `co-flow-continuation` seq 11 — CO-10.8 arquitetura interna/DDD/BDD visual; CO-10.9 falsificação ampla; CO-10.10 revisão independente + Human Gate da continuação;
+  - `dualroot-collapse` seq 12;
+  - `co-capture` seq 13;
+  - `co-events` seq 14;
+  - `housekeeping` seq 15;
+  - `knowledge-readiness` seq 16;
+  - `integration-final` terminal.
+- Reconciliar `state.yml § next`, `plan.md`, `tasks.md` e o body do PR #43 para refletirem o mesmo recorte e o mesmo próximo movimento.
+- Declarar no PR/body/Gate que os reviews formais de TA/AR/Security do nó cobriram o inventário CO-10.1; a superfície entregue até CO-10.7 foi validada por dogfood, harness de consumidores e revisão externa independente, com nova rodada formal prevista na continuação.
+- Declarar que o smoke real/multi-OS segue diferido por política de PR intermediário e retorna no fechamento apropriado; o PR #43 mantém evidência local via harness de consumidores.
+
+**O que NÃO está sendo decidido:** implementar CO-10.8/CO-10.9/CO-10.10 neste PR; iniciar `dualroot-collapse`; iniciar CO-5/CO-6; abrir PR novo automaticamente; converter o PR #43 para Ready; exercer Human Gate; fazer merge; executar `advance-subcheckpoint`, `finish-subcheckpoint`, `mark-readiness` ou qualquer decisão mutante.
+
+**Impacto esperado:**
+
+- O Human Gate do PR #43 passa a ter próximo movimento topológico explícito.
+- `dualroot-collapse`, `co-capture` e `co-events` continuam bloqueados por ordenação até a continuação do fluxo ser executada e falsificada.
+- A revisão externa deixa de ser só narrativa de chat e passa a ser artefato governado com achados rastreáveis.
+- A decisão G19 continua válida no recorte do PR #43; G20 apenas corrige a representação topológica necessária para que o recorte seja honesto.
+
+**Status:** Resolved (2026-06-21) / @rosanarezende — decisão de reconciliação pré-Ready após revisão externa independente do PR #43.
+
 ---
 
 ## 2 · Aberto — pesquisa genuína (única coisa ainda em investigação)
@@ -300,19 +616,29 @@ Cada transição deve declarar: fato de entrada, autoridade, comando, efeito per
 
 > Os IDs `[DEC-0024-G##]` permanecem **âncoras estáveis** (citados em findings, ADRs, git, handoffs) — mas **não organizam mais a leitura**. Mapa de equivalência:
 
-| ID histórico | Tema                                                  | Estado atual                                                                                                 |
-| :----------- | :---------------------------------------------------- | :----------------------------------------------------------------------------------------------------------- |
-| `G00`        | identidade (transformação)                            | **Decidido** — § 1 (Resolved 2026-05-31)                                                                     |
-| `G01`        | estrutura/gramática                                   | **Aberto** — § 2 (`F-AG01`)                                                                                  |
-| `G02`        | taxonomia → bloco + propriedade                       | **Decidido** — § 1 (Resolved 2026-05-31) → migração em § 4                                                   |
-| `G03`        | promotion pipeline                                    | **Reaberto (modelagem)** — `[DEC-0024-G08]` 2026-06-03; pipeline `insight→decision→rule\|guardrail→doctrine` |
-| `G04`        | contrato de boilerplate / casa única                  | **Reaberto (modelagem)** — `[DEC-0024-G08]`; casa única / tri-root → SSOT na trilha de convergência          |
-| `G05`        | projeções / decision-session                          | **Reaberto (modelagem)** — `[DEC-0024-G08]`; projeções derivadas (fonte↔projeção) + KnowledgeGraph           |
-| `G06`        | contrato da cadeia                                    | **Decidido** — § 1 (Resolved 2026-05-30) → ADR no fechamento                                                 |
-| `G07`        | topologia-as-data + enforcement L4                    | **Decidido** — § 1 (Resolved 2026-06-01) → enforcement em § 4                                                |
-| `G08`        | reabertura de G03/G04/G05 + direção orientada a grafo | **Decidido** — Resolved 2026-06-03 (owner); a modelagem fica DENTRO da 0024; NÃO há 0025 independente        |
-| `G09`        | eliminação integral de `/cli` (→ CO-3.5)              | **Decidido** — § 1 (Resolved 2026-06-15, owner); supersede o "wrapper" do #38; topologia externa inalterada  |
-| `G10`        | `co-flow-convergence` antes de `co-capture`           | **Decidido** — § 1 (Resolved 2026-06-16, owner); nó próprio para convergência ponta a ponta do fluxo         |
+| ID histórico | Tema                                                  | Estado atual                                                                                                           |
+| :----------- | :---------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------- |
+| `G00`        | identidade (transformação)                            | **Decidido** — § 1 (Resolved 2026-05-31)                                                                               |
+| `G01`        | estrutura/gramática                                   | **Aberto** — § 2 (`F-AG01`)                                                                                            |
+| `G02`        | taxonomia → bloco + propriedade                       | **Decidido** — § 1 (Resolved 2026-05-31) → migração em § 4                                                             |
+| `G03`        | promotion pipeline                                    | **Reaberto (modelagem)** — `[DEC-0024-G08]` 2026-06-03; pipeline `insight→decision→rule\|guardrail→doctrine`           |
+| `G04`        | contrato de boilerplate / casa única                  | **Reaberto (modelagem)** — `[DEC-0024-G08]`; casa única / tri-root → SSOT na trilha de convergência                    |
+| `G05`        | projeções / decision-session                          | **Reaberto (modelagem)** — `[DEC-0024-G08]`; projeções derivadas (fonte↔projeção) + KnowledgeGraph                     |
+| `G06`        | contrato da cadeia                                    | **Decidido** — § 1 (Resolved 2026-05-30) → ADR no fechamento                                                           |
+| `G07`        | topologia-as-data + enforcement L4                    | **Decidido** — § 1 (Resolved 2026-06-01) → enforcement em § 4                                                          |
+| `G08`        | reabertura de G03/G04/G05 + direção orientada a grafo | **Decidido** — Resolved 2026-06-03 (owner); a modelagem fica DENTRO da 0024; NÃO há 0025 independente                  |
+| `G09`        | eliminação integral de `/cli` (→ CO-3.5)              | **Decidido** — § 1 (Resolved 2026-06-15, owner); supersede o "wrapper" do #38; topologia externa inalterada            |
+| `G10`        | `co-flow-convergence` antes de `co-capture`           | **Decidido** — § 1 (Resolved 2026-06-16, owner); nó próprio para convergência ponta a ponta do fluxo                   |
+| `G11`        | suspensão temporária de smoke durante co-flow         | **Decidido** — § 1 (Resolved 2026-06-16, owner); bloqueia Ready/Human Gate até reativação                              |
+| `G12`        | CO-10.2 entrega convergência coesa inicial            | **Decidido** — § 1 (Resolved 2026-06-16, owner); remove heurísticas locais já comprovadamente divergentes              |
+| `G13`        | CO-10.5 dedicado a UX/linguagem/wizard Clack          | **Decidido** — § 1 (Resolved 2026-06-17, owner); G14 subdivide o fechamento antes do Gate                              |
+| `G14`        | CO-10.6 dedicado a fluxo de time/múltiplas specs      | **Decidido** — § 1 (Resolved 2026-06-18, owner); G15/G16 subdividem o fechamento antes do Gate                         |
+| `G15`        | CLI pública autoexplicável como porta de entrada      | **Decidido** — § 1 (Resolved 2026-06-19, owner); G16 insere arquitetura interna/BDD humano antes da falsificação final |
+| `G16`        | arquitetura interna, organização DDD e BDD visual     | **Decidido** — § 1 (Resolved 2026-06-19, owner); pausado por G17 até CO-10.7 fechar corretamente                       |
+| `G17`        | reabrir CO-10.7 antes de retomar CO-10.8              | **Decidido** — § 1 (Resolved 2026-06-19, owner); corrige fechamento prematuro de CO-10.7                               |
+| `G18`        | antecipar `dualroot-collapse`                         | **Decidido** — § 1 (Resolved 2026-06-20, owner); próximo PR dedicado após `co-flow-convergence`, antes de CO-5/CO-6    |
+| `G19`        | recorte do PR #43 + revisão externa antes do Gate     | **Decidido** — § 1 (Resolved 2026-06-20, owner); PR #43 fecha CO-10.1..CO-10.7; CO-10.8..CO-10.10 vão para próximo PR  |
+| `G20`        | ancorar continuação CO-10.8..CO-10.10 na topologia    | **Decidido** — § 1 (Resolved 2026-06-21, owner); nó `co-flow-continuation` seq 11 antes de `dualroot-collapse`         |
 
 ---
 
@@ -327,6 +653,16 @@ Cada transição deve declarar: fato de entrada, autoridade, comando, efeito per
 - [x] `[DEC-0024-G08]` — Resolved 2026-06-03 / @rosanarezende
 - [x] `[DEC-0024-G09]` — Resolved 2026-06-15 / @rosanarezende
 - [x] `[DEC-0024-G10]` — Resolved 2026-06-16 / @rosanarezende
+- [x] `[DEC-0024-G11]` — Resolved 2026-06-16 / @rosanarezende
+- [x] `[DEC-0024-G12]` — Resolved 2026-06-16 / @rosanarezende
+- [x] `[DEC-0024-G13]` — Resolved 2026-06-17 / @rosanarezende
+- [x] `[DEC-0024-G14]` — Resolved 2026-06-18 / @rosanarezende
+- [x] `[DEC-0024-G15]` — Resolved 2026-06-19 / @rosanarezende
+- [x] `[DEC-0024-G16]` — Resolved 2026-06-19 / @rosanarezende
+- [x] `[DEC-0024-G17]` — Resolved 2026-06-19 / @rosanarezende
+- [x] `[DEC-0024-G18]` — Resolved 2026-06-20 / @rosanarezende
+- [x] `[DEC-0024-G19]` — Resolved 2026-06-20 / @rosanarezende
+- [x] `[DEC-0024-G20]` — Resolved 2026-06-21 / @rosanarezende
 
 ---
 

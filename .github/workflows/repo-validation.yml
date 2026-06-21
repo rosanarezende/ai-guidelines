@@ -1,10 +1,12 @@
 name: Repo Validation
 
 # Absorve o que era ai-guidelines-ci.yml + content-guardrails.yml em
-# um workflow único, eliminando duplicação. Usa `npm run validate` como
-# entry-point operacional (format:check + build:all + test + living-docs:check)
-# e adiciona a varredura histórica de state.yml. `npm run ci` adicionaria smoke
-# tests, mas smoke tem workflow próprio (smoke-multi-os.yml).
+# um workflow único, eliminando duplicação.
+#
+# PR Draft: validação intermediária orientada ao diff (`npm run validate:changed`).
+# PR Ready e main: validação completa (`npm run validate`) + varredura histórica
+# de state.yml. `npm run ci` adicionaria smoke tests, mas smoke tem workflow
+# próprio (smoke-multi-os.yml).
 #
 # Roda em Ubuntu + Windows para detectar regressões cross-platform (e.g.
 # coverage contaminada por subprocess externo no Windows — cf. PR #39).
@@ -18,7 +20,29 @@ on:
       - main
 
 jobs:
+  validate-changed:
+    if: github.event_name == 'pull_request' && github.event.pull_request.draft == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: "npm"
+
+      - name: Install dependencies (npm ci)
+        run: npm ci
+
+      - name: Validate changed files only
+        run: npm run validate:changed -- --base origin/${{ github.base_ref }}
+
   validate-os:
+    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     strategy:
       fail-fast: false
       matrix:
@@ -46,13 +70,23 @@ jobs:
   # Aggregator job: produces the stable "repo-validation" required context
   # expected by .github/rulesets/main-governance.json.
   repo-validation:
-    needs: validate-os
+    needs: [validate-changed, validate-os]
     if: always()
     runs-on: ubuntu-latest
     steps:
-      - name: Check matrix results
+      - name: Check validation results
         run: |
-          if [ "${{ needs.validate-os.result }}" != "success" ]; then
+          CHANGED="${{ needs.validate-changed.result }}"
+          FULL="${{ needs.validate-os.result }}"
+          if [ "$CHANGED" = "failure" ] || [ "$CHANGED" = "cancelled" ]; then
+            echo "::error::validate-changed failed or was cancelled"
+            exit 1
+          fi
+          if [ "$FULL" = "failure" ] || [ "$FULL" = "cancelled" ]; then
             echo "::error::validate-os matrix failed or was cancelled"
+            exit 1
+          fi
+          if [ "$CHANGED" != "success" ] && [ "$FULL" != "success" ]; then
+            echo "::error::no validation job succeeded"
             exit 1
           fi

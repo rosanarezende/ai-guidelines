@@ -1,0 +1,22 @@
+version: 1
+active_specs:
+  - id: "0024"
+    slug: alpha
+    title: Spec Alpha
+    branch: feat/spec-0024-alpha
+    stage: implementation
+    status: active
+    spec_path: .governance/specs/0024-alpha
+    source_state_path: .governance/specs/0024-alpha/state.yml
+    updated_at: 2026-06-19T00:00:00-03:00
+    updated_by: "@consumer"
+  - id: "0025"
+    slug: beta
+    title: Spec Beta
+    branch: feat/spec-0025-beta
+    stage: implementation
+    status: active
+    spec_path: .governance/specs/0025-beta
+    source_state_path: .governance/specs/0025-beta/state.yml
+    updated_at: 2026-06-19T00:00:00-03:00
+    updated_by: "@consumer"

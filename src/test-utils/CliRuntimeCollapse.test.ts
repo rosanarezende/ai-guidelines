@@ -56,7 +56,22 @@ describe("CO-3.5 runtime collapse guard", () => {
     expect(JSON.stringify(pkg.imports ?? {})).not.toContain("./cli/");
     expect(JSON.stringify(pkg.scripts)).not.toContain("node cli/");
     expect(JSON.stringify(pkg.scripts)).not.toContain('"cli/**/*.test.mjs"');
+    expect(pkg.scripts).not.toHaveProperty("guidelines");
+    expect(Object.keys(pkg.scripts ?? {}).filter((name) => name.startsWith("guidelines:"))).toEqual(
+      []
+    );
     expect(pkg.scripts).not.toHaveProperty("guidelines:providers");
+  });
+
+  it("package.json não reintroduz Inquirer como dependência de runtime ou teste", () => {
+    const pkg = readJson("package.json");
+    const dependencyNames = [
+      ...Object.keys(pkg.dependencies ?? {}),
+      ...Object.keys(pkg.devDependencies ?? {}),
+      ...Object.keys(pkg.optionalDependencies ?? {}),
+    ];
+
+    expect(dependencyNames.filter((name) => name.startsWith("@inquirer/"))).toEqual([]);
   });
 
   it("fontes e testes não importam runtime /cli e não reintroduzem legado", () => {
@@ -74,6 +89,10 @@ describe("CO-3.5 runtime collapse guard", () => {
         }
 
         for (const specifier of extractModuleSpecifiers(content)) {
+          if (specifier.startsWith("@inquirer/")) {
+            violations.push(`${rel}: ${specifier}`);
+            continue;
+          }
           if (specifier.startsWith("#cli/")) {
             violations.push(`${rel}: ${specifier}`);
             continue;
@@ -87,7 +106,7 @@ describe("CO-3.5 runtime collapse guard", () => {
         }
 
         if (!rel.endsWith(".test.ts")) {
-          for (const pattern of [/LegacyExecuteFn/, /loadLegacyExecute/]) {
+          for (const pattern of [/LegacyExecuteFn/, /loadLegacyExecute/, /InquirerPrompts/]) {
             if (pattern.test(content)) violations.push(`${rel}: ${pattern}`);
           }
         }

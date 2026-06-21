@@ -1,0 +1,32 @@
+{
+  "prettier": {
+    "label": "Prettier",
+    "hint": "padroniza a formatação dos arquivos",
+    "htmlLabel": "Formatação com Prettier - padroniza arquivos automaticamente"
+  },
+  "husky": {
+    "label": "Hooks locais com Husky",
+    "hint": "roda checagens antes do commit",
+    "htmlLabel": "Hooks locais com Husky - checagens antes do commit"
+  },
+  "ci": {
+    "label": "CI no GitHub Actions",
+    "hint": "valida o PR automaticamente no GitHub",
+    "htmlLabel": "CI no GitHub Actions - valida o PR no GitHub"
+  },
+  "quality-gates": {
+    "label": "Quality Gates",
+    "hint": "define critérios objetivos antes de avançar",
+    "htmlLabel": "Quality Gates - critérios objetivos para avançar"
+  },
+  "tdd": {
+    "label": "TDD",
+    "hint": "orienta implementação começando por testes",
+    "htmlLabel": "Desenvolvimento guiado por testes (TDD)"
+  },
+  "bdd": {
+    "label": "BDD",
+    "hint": "descreve comportamento esperado com exemplos",
+    "htmlLabel": "Especificação por exemplos (BDD)"
+  }
+}

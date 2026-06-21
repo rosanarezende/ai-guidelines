@@ -58,7 +58,7 @@ export interface Command<TOptions = void> {
    * descrever (fecha o achado #2 da auditoria do #35 — help acoplado à extensibilidade).
    */
   readonly description: string;
-  /** Exemplos de invocação (sem o prefixo `npm run guidelines --`), opcionais — para o help. */
+  /** Exemplos de invocação (sem o prefixo do binário), opcionais — para o help. */
   readonly usage?: readonly string[];
   /**
    * Subcomandos declarados (descriptor-only, read-only). Permite **introspecção

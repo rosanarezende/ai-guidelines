@@ -1,0 +1,23 @@
+.realCli {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.realCliStatus {
+  margin: 0;
+  font-size: 0.78rem;
+  color: #67e8f9;
+}
+
+.realCliTerm {
+  min-height: 22rem;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #000;
+  padding: 0.5rem;
+}
+
+.realCliTerm .xterm {
+  height: 100%;
+}

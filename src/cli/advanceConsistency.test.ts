@@ -3,7 +3,7 @@
  * sub-checkpoint (refinamento do dogfood do CO-3.2).
  *
  * Dogfood real (2026-06-14): CO-3.2 `[/]`, CO-3.3 `[ ]`, implementação entregue,
- * PR #42 Draft. `guidelines work` recomendava `decide` para concluir CO-3.2 e
+ * PR #42 Draft. `npm run flow -- work` recomendava `decide` para concluir CO-3.2 e
  * ativar CO-3.3, mas o menu de `decide` OCULTAVA `advance-subcheckpoint` como
  * `not-applicable` (guard `done.length > 0`) e mostrava só o Human Gate
  * indisponível. Causa estrutural: `work` e `decide` derivavam a elegibilidade da
@@ -169,7 +169,7 @@ describe("consistência work×decide · estado real CO-3.2 [/] (dogfood CO-3.2)"
     expect(b.nextAction.description).toBe("Concluir CO-3.2 e ativar CO-3.3.");
     expect(b.nextAction.decisionType).toBe("advance-subcheckpoint");
     expect(b.nextAction.commands.find((c) => c.role === "recommended")?.command).toBe(
-      "npm run guidelines -- decide"
+      "npm run flow -- decide"
     );
   });
 

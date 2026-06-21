@@ -89,7 +89,7 @@ export type ConsistencyResult =
 
 /** Comando canônico de reconciliação da projeção (única forma governada de escrita). */
 const RECONCILE_COMMAND =
-  "npm run guidelines -- workflow publish-state --status=<status> --updated-by=<@autor>";
+  "npm run flow -- workflow publish-state --status=<status> --updated-by=<@autor>";
 
 /**
  * Pure: parseia o índice + leitor injetado → compara cada entry com os fatos

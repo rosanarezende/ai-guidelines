@@ -1,0 +1,22 @@
+{
+  "bootstrap": {
+    "init": {
+      "description": "Cria baseline ai-guidelines em projeto novo.",
+      "wizardLabel": "Iniciar projeto novo"
+    },
+    "adopt": {
+      "description": "Adota ai-guidelines em repositório existente.",
+      "wizardLabel": "Adotar projeto existente"
+    },
+    "update": {
+      "description": "Atualiza runtime, templates e provider entrypoints do consumidor.",
+      "wizardLabel": "Atualizar repositório"
+    },
+    "checkBudget": {
+      "description": "Imprime o relatório TypeScript de orçamento de tokens.",
+      "wizardLabel": "Conferir orçamento de tokens"
+    },
+    "unexpectedArgument": "Argumento inesperado: {argument}",
+    "requiresPrompts": "{command}.prompt() requer context.prompts."
+  }
+}

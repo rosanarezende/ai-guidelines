@@ -36,6 +36,10 @@ import {
   planPointers,
   planProvisioningOperation,
 } from "../../domain/provisioning/ProvisioningPlan.js";
+import {
+  CollaborationProfile,
+  updateReviewPolicyProfileContent,
+} from "../../domain/provisioning/ReviewPolicyBaseline.js";
 import { mergeAgentsContent } from "../services/AgentsRuntimeBootstrap.js";
 import { ProvisioningFileSystem } from "../ports/ProvisioningFileSystem.js";
 import { ProcessRunner } from "../ports/ProcessRunner.js";
@@ -61,6 +65,7 @@ export interface ProvisionWorkspaceOperationInput {
   readonly prune: boolean;
   readonly install: boolean;
   readonly providersRequested: boolean;
+  readonly collaborationProfile?: CollaborationProfile;
 }
 
 export interface ProvisionResult {
@@ -91,6 +96,7 @@ export class ProvisionWorkspace {
       prune: input.prune,
       install: input.install,
       providersRequested: input.providersRequested,
+      ...(input.collaborationProfile ? { collaborationProfile: input.collaborationProfile } : {}),
     };
     const effects = planProvisioningOperation(
       {
@@ -154,6 +160,9 @@ export class ProvisionWorkspace {
           break;
         case "write-ci-workflow":
           await this.applyWriteText(effect.relPath, effect.content, "CI baseline", actions);
+          break;
+        case "write-review-policy":
+          await this.applyWriteReviewPolicy(effect, actions);
           break;
         case "install-dependencies":
           await this.applyInstall(effect, actions);
@@ -304,6 +313,24 @@ export class ProvisionWorkspace {
     if (!this.dryRun) {
       await this.fs.ensureDir(path.dirname(relPath));
       await this.fs.writeText(relPath, content);
+    }
+  }
+
+  private async applyWriteReviewPolicy(
+    effect: Extract<ProvisioningEffect, { kind: "write-review-policy" }>,
+    actions: string[]
+  ): Promise<void> {
+    const current = await this.fs.readText(effect.relPath);
+    const next = updateReviewPolicyProfileContent(current, effect.profile);
+    if (next === current) {
+      return;
+    }
+    actions.push(
+      `${this.dryRun ? "[dry-run] " : ""}write ${effect.relPath} (collaboration profile ${effect.profile})`
+    );
+    if (!this.dryRun) {
+      await this.fs.ensureDir(path.dirname(effect.relPath));
+      await this.fs.writeText(effect.relPath, next);
     }
   }
 

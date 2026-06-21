@@ -10,10 +10,11 @@ import { Intent } from "./Intent.js";
 export const INTENT_CATALOG: readonly Intent[] = [
   {
     id: "retomar-trabalho",
-    title: "Retomar trabalho",
+    title: "Entender onde estamos e continuar",
     actions: [
-      { command: "continue", label: "Retomar de onde parei (briefing + próximo passo)" },
-      { command: "handoff", label: "Gerar handoff situado para nova sessão IA" },
+      { command: "cockpit", label: "Ver resumo completo antes de escolher" },
+      { command: "continue", label: "Retomar de onde parei" },
+      { command: "handoff", label: "Preparar contexto para uma nova sessão com IA" },
       { command: "insight", args: ["list"], label: "Ver percepções recentes" },
     ],
   },
@@ -23,45 +24,71 @@ export const INTENT_CATALOG: readonly Intent[] = [
     actions: [{ command: "triage", label: "Triar comentários de review do PR" }],
   },
   {
+    id: "revisar-pr-de-colega",
+    title: "Revisar PR de outra pessoa",
+    actions: [
+      {
+        command: "peer-review",
+        args: ["<pr>", "--brief-only"],
+        label: "Entender um PR antes de abrir worktree ou checkout guiado",
+      },
+    ],
+  },
+  {
+    id: "validar-mudancas",
+    title: "Validar mudanças antes de enviar",
+    actions: [
+      {
+        command: "validate",
+        args: ["changed"],
+        label: "Rodar validação intermediária só nos arquivos alterados",
+      },
+      {
+        command: "validate",
+        args: ["changed", "--fix"],
+        label: "Formatar somente arquivos alterados e validar o diff",
+      },
+    ],
+  },
+  {
     id: "executar-trabalho-governado",
-    title: "Executar o trabalho situado (implementação/correção)",
+    title: "Entender o que pode ser feito nesta sessão",
     actions: [
       {
         command: "work",
-        label:
-          "Briefing governado de trabalho (modo + escopo/autoridade/validações/parada/relatório)",
+        label: "Ver escopo, autorização, validações e quando parar",
       },
       {
         command: "work",
         args: ["--authorization", "explicit-work-request"],
-        label: "Autorizar commit/push no objeto inferido (pedido humano explícito)",
+        label: "Carregar o plano da sessão quando a owner já autorizou o trabalho atual",
       },
     ],
   },
   {
     id: "decidir-reservado-humano",
-    title: "🧭 Decisões humanas pendentes",
+    title: "Ver ações que exigem decisão humana",
     actions: [
       {
         command: "decide",
-        label: "Revisar e exercer decisões reservadas à owner (briefing → escolha → confirmação)",
+        label: "Abrir tela de decisão com prévia e confirmação",
       },
       {
         command: "decide",
         args: ["--brief-only"],
-        label: "Só ler o briefing das decisões pendentes (zero escrita)",
+        label: "Só ler as ações disponíveis e bloqueadas, sem escrever nada",
       },
     ],
   },
   {
     id: "pedir-review-governado",
-    title: "Pedir um review governado",
+    title: "Ver tipos de revisão disponíveis",
     actions: [
-      { command: "review", args: ["types"], label: "Ver o catálogo de tipos de review" },
+      { command: "review", args: ["types"], label: "Ver tipos de revisão disponíveis" },
       {
         command: "review",
         args: ["policy"],
-        label: "Ver requirements efetivos no contexto atual (aplicável/força/estado)",
+        label: "Ver quais revisões importam para este PR",
       },
     ],
   },
@@ -82,7 +109,7 @@ export const INTENT_CATALOG: readonly Intent[] = [
     id: "inspecionar-specs-ativas",
     title: "Inspecionar specs ativas",
     actions: [
-      { command: "specs", label: "Ver specs ativas (índice público)" },
+      { command: "specs", label: "Ver trabalhos governados ativos" },
       { command: "drift", label: "Diagnosticar drift do índice" },
     ],
   },

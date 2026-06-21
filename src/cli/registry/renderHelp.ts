@@ -8,7 +8,15 @@ import { Command } from "./Command.js";
  * extensibilidade) e é a 1ª projeção no estilo da Continuidade Operacional
  * (INV-4: projeção derivada, não autorada à mão).
  */
-export function renderCommandsHelp(commands: readonly Command<unknown>[]): string {
+export interface RenderCommandsHelpOptions {
+  readonly commandPrefix?: string;
+}
+
+export function renderCommandsHelp(
+  commands: readonly Command<unknown>[],
+  options: RenderCommandsHelpOptions = {}
+): string {
+  const commandPrefix = options.commandPrefix ?? "npx ai-guidelines";
   const lines: string[] = [];
   for (const command of commands) {
     const aliases = command.aliases ?? [];
@@ -16,7 +24,7 @@ export function renderCommandsHelp(commands: readonly Command<unknown>[]): strin
     lines.push(`  ${command.name}${aliasNote}`);
     lines.push(`      ${command.description}`);
     for (const example of command.usage ?? []) {
-      lines.push(`      Ex.: npm run guidelines -- ${example}`);
+      lines.push(`      Ex.: ${commandPrefix} ${example}`);
     }
   }
   return lines.join("\n");

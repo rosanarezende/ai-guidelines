@@ -16,7 +16,7 @@ function fakeLogger(): Logger {
 
 /**
  * Prompts fake: respostas predefinidas + registro das mensagens vistas. Espelha o
- * padrão de fakes de porta já usado nos testes do wizard (sem tocar inquirer).
+ * padrão de fakes de porta já usado nos testes do wizard (sem tocar no adapter visual).
  */
 function fakePrompts(answers: {
   select?: string;

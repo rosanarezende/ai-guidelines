@@ -42,6 +42,7 @@ import {
   FinalGuidanceOptions,
   FinalGuidanceSnapshot,
 } from "./Guidance.js";
+import { CollaborationProfile, renderReviewPolicyBaseline } from "./ReviewPolicyBaseline.js";
 
 export type ProvisioningOperation = "init" | "adopt" | "update";
 
@@ -94,6 +95,12 @@ export type ProvisioningEffect =
       readonly kind: "write-ci-workflow";
       readonly relPath: ".github/workflows/ai-guidelines-ci.yml";
       readonly content: string;
+    }
+  | {
+      readonly kind: "write-review-policy";
+      readonly relPath: ".governance/review-policy.yml";
+      readonly profile: CollaborationProfile;
+      readonly baseline: string;
     }
   | {
       readonly kind: "install-dependencies";
@@ -225,6 +232,7 @@ export interface PlanProvisioningOperationOptions {
   readonly prune: boolean;
   readonly install: boolean;
   readonly providersRequested: boolean;
+  readonly collaborationProfile?: CollaborationProfile;
 }
 
 export type { FinalGuidanceOptions, FinalGuidanceSnapshot } from "./Guidance.js";
@@ -543,6 +551,15 @@ export function planInstall(
   ];
 }
 
+export function planReviewPolicy(profile: CollaborationProfile): ProvisioningEffect {
+  return {
+    kind: "write-review-policy",
+    relPath: ".governance/review-policy.yml",
+    profile,
+    baseline: renderReviewPolicyBaseline(profile),
+  };
+}
+
 export function planFinalGuidance(
   snapshot: FinalGuidanceSnapshot,
   options: FinalGuidanceOptions
@@ -575,6 +592,10 @@ export function planProvisioningOperation(
       prune: options.prune,
     })
   );
+
+  if (options.collaborationProfile) {
+    effects.push(planReviewPolicy(options.collaborationProfile));
+  }
 
   if (options.operation !== "update") {
     effects.push(

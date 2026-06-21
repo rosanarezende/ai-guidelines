@@ -1,5 +1,5 @@
 /**
- * CLI standalone para `npm run guidelines -- triage [<pr>]` (tier-1 inspeção;
+ * CLI standalone para `npm run flow -- triage [<pr>]` (tier-1 inspeção;
  * alias transitório: `review`).
  *
  * Reúne e estrutura os review comments de um PR para **triagem** — o passo

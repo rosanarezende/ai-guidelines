@@ -156,14 +156,29 @@ describe("workBrief · inferência de modo [work]", () => {
     expect(b.mode).toBe("prepare_close");
   });
 
-  it("[7] gate aprovado → blocked (sem nova implementação)", () => {
+  it("[7] gate aprovado → blocked, mas com decisão governada open-next-node", () => {
     const b = derive({
       facts: facts({
         lifecycle: { ...facts().lifecycle!, gateDecision: "approved" },
+        nextPlannedNode: {
+          id: "co-flow-convergence",
+          githubPr: null,
+          sequence: 10,
+          terminal: false,
+        },
+        pullRequest: {
+          ...facts().pullRequest!,
+          isDraft: false,
+          checks: { pass: 11, fail: 0, pending: 0 },
+        },
       }),
       nextAction: nextAction("execute-task"),
     });
     expect(b.mode).toBe("blocked");
+    expect(b.nextAction.decisionType).toBe("open-next-node");
+    expect(b.nextAction.description).toContain("co-enforcement → co-flow-convergence");
+    expect(b.nextAction.commands.some((c) => c.role === "recommended")).toBe(true);
+    expect(b.nextAction.commands.some((c) => c.command.includes("open-next-node"))).toBe(true);
   });
 
   it("[8] review opcional stale não cria trabalho (task → implement_checkpoint)", () => {
@@ -652,7 +667,7 @@ describe("workBrief · próxima ação estruturada [work]", () => {
   const commandOf = (b: ReturnType<typeof derive>, role: string) =>
     b.nextAction.commands.find((c) => c.role === role)?.command;
 
-  it("[38] ESTADO REAL (CO-3.2 [/], CO-3.3 [ ]) ⇒ advance-subcheckpoint: concluir CO-3.2 e ativar CO-3.3", () => {
+  it("[38] ESTADO REAL (CO-3.2 [/], CO-3.3 [ ]) ⇒ finish-subcheckpoint em passo único", () => {
     const b = derive({
       nextAction: nextAction("investigate-checkpoint"),
       facts: facts({
@@ -662,24 +677,35 @@ describe("workBrief · próxima ação estruturada [work]", () => {
           { id: "CO-3.3", title: "migração legacy", state: "pending", line: 3 },
         ]),
       }),
+      advanceEligibility: {
+        status: "blocked",
+        reasons: [
+          'CO-3.2 ainda não declarou seus critérios de saída satisfeitos (sem readiness "ready-for-transition" em tasks.md).',
+        ],
+      },
+      markReadinessEligibility: { status: "available", reasons: [] },
+      finishSubcheckpointEligibility: { status: "available", reasons: [] },
     });
     expect(b.mode).toBe("implement_checkpoint");
     expect(b.object.subCheckpoint?.id).toBe("CO-3.2");
-    expect(b.nextAction.description).toBe("Concluir CO-3.2 e ativar CO-3.3.");
+    expect(b.nextAction.description).toBe(
+      "Concluir CO-3.2 e iniciar o próximo sub-checkpoint em uma única decisão governada."
+    );
+    expect(b.nextAction.decisionType).toBe("finish-subcheckpoint");
     expect(b.nextAction.commands.length).toBeLessThanOrEqual(3);
-    expect(commandOf(b, "recommended")).toBe("npm run guidelines -- decide");
+    expect(commandOf(b, "recommended")).toBe("npm run flow -- decide");
     expect(commandOf(b, "read-only")).toBe(
-      "npm run guidelines -- decide --type advance-subcheckpoint --brief-only"
+      "npm run flow -- decide --type finish-subcheckpoint --brief-only"
     );
     expect(commandOf(b, "after")).toBe(
-      "npm run guidelines -- work --authorization explicit-work-request"
+      "npm run flow -- work --authorization explicit-work-request"
     );
     expect(b.nextAction.stillForbidden).toEqual(
       expect.arrayContaining([
+        "Implementar o próximo sub-checkpoint automaticamente",
         "Exercer o Human Gate",
         "Converter o PR para Ready",
         "Fazer merge",
-        "Abrir o próximo PR",
       ])
     );
   });
@@ -698,7 +724,7 @@ describe("workBrief · próxima ação estruturada [work]", () => {
     expect(b.mode).toBe("prepare_subcheckpoint_transition");
     expect(b.nextAction.description).toBe("Concluir CO-3.1 e ativar CO-3.2.");
     expect(commandOf(b, "read-only")).toBe(
-      "npm run guidelines -- decide --type advance-subcheckpoint --brief-only"
+      "npm run flow -- decide --type advance-subcheckpoint --brief-only"
     );
   });
 
@@ -720,9 +746,7 @@ describe("workBrief · próxima ação estruturada [work]", () => {
     });
     expect(b.mode).toBe("prepare_close");
     expect(b.nextAction.decisionType).toBe("human-gate");
-    expect(commandOf(b, "read-only")).toBe(
-      "npm run guidelines -- decide --type human-gate --brief-only"
-    );
+    expect(commandOf(b, "read-only")).toBe("npm run flow -- decide --type human-gate --brief-only");
     expect(b.nextAction.commands.some((c) => c.command.includes("advance-subcheckpoint"))).toBe(
       false
     );
@@ -732,7 +756,7 @@ describe("workBrief · próxima ação estruturada [work]", () => {
     const b = derive({ nextAction: nextAction("resolve-findings"), findings: [finding()] });
     expect(b.mode).toBe("await_revalidation");
     expect(commandOf(b, "read-only")).toBe(
-      "npm run guidelines -- decide --type close-dispositions --brief-only"
+      "npm run flow -- decide --type close-dispositions --brief-only"
     );
     expect(b.nextAction.stillForbidden).toContain("Criar o gate artifact");
   });
@@ -742,9 +766,7 @@ describe("workBrief · próxima ação estruturada [work]", () => {
     expect(b.mode).toBe("prepare_close");
     expect(b.nextAction.commands).toHaveLength(1);
     expect(b.nextAction.commands[0].role).toBe("read-only");
-    expect(commandOf(b, "read-only")).toBe(
-      "npm run guidelines -- decide --type human-gate --brief-only"
-    );
+    expect(commandOf(b, "read-only")).toBe("npm run flow -- decide --type human-gate --brief-only");
     expect(commandOf(b, "recommended")).toBeUndefined();
     expect(b.nextAction.description).toMatch(/BLOQUEADO/);
   });
@@ -762,10 +784,8 @@ describe("workBrief · próxima ação estruturada [work]", () => {
     });
     expect(b.mode).toBe("current");
     expect(b.nextAction.commands).toHaveLength(3);
-    expect(commandOf(b, "recommended")).toBe("npm run guidelines -- decide");
-    expect(commandOf(b, "read-only")).toBe(
-      "npm run guidelines -- decide --type human-gate --brief-only"
-    );
+    expect(commandOf(b, "recommended")).toBe("npm run flow -- decide");
+    expect(commandOf(b, "read-only")).toBe("npm run flow -- decide --type human-gate --brief-only");
   });
 
   it("[43] ESTADO SEM DECISÃO (resolve_findings) ⇒ NÃO inventa `decide`", () => {
@@ -806,6 +826,14 @@ describe("workBrief · próxima ação estruturada [work]", () => {
           { id: "CO-3.3", state: "pending", line: 3 },
         ]),
       }),
+      advanceEligibility: {
+        status: "blocked",
+        reasons: [
+          'CO-3.2 ainda não declarou seus critérios de saída satisfeitos (sem readiness "ready-for-transition" em tasks.md).',
+        ],
+      },
+      markReadinessEligibility: { status: "available", reasons: [] },
+      finishSubcheckpointEligibility: { status: "available", reasons: [] },
     });
     const out = renderWorkBrief({
       snapshot: {
@@ -821,7 +849,7 @@ describe("workBrief · próxima ação estruturada [work]", () => {
       brief: b,
     });
     expect(out).toContain("comandos governados disponíveis:");
-    expect(out).toContain("npm run guidelines -- decide --type advance-subcheckpoint --brief-only");
+    expect(out).toContain("npm run flow -- decide --type finish-subcheckpoint --brief-only");
     expect(out).toContain("continua proibido:");
     expect(out).toContain("Exercer o Human Gate");
   });
@@ -849,7 +877,7 @@ describe("workBrief · próxima ação estruturada [work]", () => {
     expect(b.nextAction.commands).toHaveLength(1);
     expect(b.nextAction.commands[0].role).toBe("read-only");
     expect(commandOf(b, "read-only")).toBe(
-      "npm run guidelines -- decide --type advance-subcheckpoint --brief-only"
+      "npm run flow -- decide --type advance-subcheckpoint --brief-only"
     );
     expect(b.nextAction.decisionType).toBe("advance-subcheckpoint");
     expect(b.nextAction.description).toMatch(/BLOQUEADO/);
@@ -870,7 +898,7 @@ describe("workBrief · próxima ação estruturada [work]", () => {
       advanceEligibility: { status: "available", reasons: [] },
     });
     expect(available.nextAction.decisionType).toBe("advance-subcheckpoint");
-    expect(commandOf(available, "recommended")).toBe("npm run guidelines -- decide");
+    expect(commandOf(available, "recommended")).toBe("npm run flow -- decide");
 
     const blocked = derive({
       nextAction: nextAction("investigate-checkpoint"),

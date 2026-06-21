@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "project": {
+    "name": "consumer-governed-solo",
+    "packageManager": "npm"
+  },
+  "providers": ["claude"],
+  "features": [],
+  "lang": "pt"
+}

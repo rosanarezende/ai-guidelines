@@ -123,7 +123,15 @@ function facts(overrides: Partial<HandoffFacts> = {}): HandoffFacts {
     lifecycle: LIFECYCLE_EMPTY,
     tasks: [OPEN_TASK],
     subCheckpoints: [],
-    insights: [{ id: "PIT-0011", excerpt: "Contrato executavel invisivel…" }],
+    insights: [
+      {
+        id: "PIT-0011",
+        excerpt: "Contrato executavel invisivel…",
+        occurrenceCount: 7,
+        graduationCandidate: true,
+        currentContext: true,
+      },
+    ],
     driftWarnings: [],
     sources: SOURCES_FRESH,
     ...overrides,

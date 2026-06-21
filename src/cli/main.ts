@@ -1,9 +1,17 @@
 #!/usr/bin/env node
-import path from "node:path";
-
-import { InquirerPrompts } from "../infrastructure/io/InquirerPrompts.js";
 import { buildRegistry } from "./registry/buildRegistry.js";
-import { createBootstrapDelivery } from "./delivery/bootstrap/composition.js";
+import { runCockpit } from "./cockpit.js";
+import { ClackPrompts } from "../infrastructure/io/ClackPrompts.js";
+import { Prompts } from "../app/ports/Prompts.js";
+import { CommandRegistry } from "./registry/CommandRegistry.js";
+import { runFlowWizard as runFlowWizardDefault } from "./flowWizard.js";
+import {
+  detectProvisioningContext,
+  renderProvisioningEntrySummary,
+  runProvisioningSection,
+  shouldUseProvisioningEntry,
+} from "./experience/wizard/provisioning.js";
+import { loadActiveSpecsIndex } from "./registry/commands/loadActiveSpecsIndex.js";
 
 interface Logger {
   info(message: string): void;
@@ -15,15 +23,24 @@ const logger: Logger = {
   error: (message) => process.stderr.write(`${message}\n`),
 };
 
-function packageRoot(): string {
-  return path.resolve(__dirname, "../..");
+export interface RunOptions {
+  readonly logger?: Logger;
+  readonly prompts?: Prompts;
+  readonly registry?: CommandRegistry;
+  readonly isTTY?: boolean;
+  readonly runFlowWizard?: typeof runFlowWizardDefault;
+  readonly runCockpit?: typeof runCockpit;
 }
 
 function renderHelp(): string {
   return `ai-guidelines CLI
 
 Uso:
-  npm run guidelines -- <comando> [opções]
+  npx ai-guidelines
+  npx ai-guidelines <comando> [opções]
+
+Sem comando, abre o guia interativo quando o terminal permite. Em execução
+não interativa, imprime um resumo textual do estado.
 
 ═══ COMANDOS (registry) ═══
 
@@ -31,14 +48,14 @@ ${buildRegistry().renderHelp()}
 
 ═══ FLUXO SITUADO (onde procurar cada passo) ═══
 
-  Retomar contexto:        npm run guidelines -- handoff [spec]
-  Verificar frescor:       npm run handoff:check -- [--spec NNNN]
-  Briefing de trabalho:    npm run guidelines -- work [--authorization explicit-work-request]
-  Pedir review governado:  npm run guidelines -- review <tipo>
-  Catálogo/policy:         npm run guidelines -- review types | review policy
-  Decisões do humano:      npm run guidelines -- decide [--brief-only] [--type <tipo>]
-  Preparar Ready:          npm run pr-ready:check -- --pr <n>
-  Gate local completo:     npm run validate
+  Guia interativo:         npx ai-guidelines
+  Resumo textual:          npx ai-guidelines cockpit
+  Retomar contexto:        npx ai-guidelines handoff [spec]
+  Plano da sessão:         npx ai-guidelines work [--authorization explicit-work-request]
+  Revisões disponíveis:    npx ai-guidelines review <tipo>
+  Tipos/regras de revisão: npx ai-guidelines review types | review policy
+  Ações com confirmação:   npx ai-guidelines decide [--brief-only] [--type <tipo>]
+  Validação intermediária: npx ai-guidelines validate changed [--fix]
 
 ═══ OPÇÕES GERAIS ═══
 
@@ -62,31 +79,131 @@ ${buildRegistry().renderHelp()}
 `;
 }
 
-export async function run(argv: readonly string[] = process.argv.slice(2)): Promise<number> {
+function isSpecResolutionFailure(messages: readonly string[]): boolean {
+  return messages.some((message) => message.includes("Nao foi possivel resolver a spec"));
+}
+
+function renderSpecFocusRecovery(repoRoot: string): string {
+  const lines: string[] = [];
+  lines.push("# ai-guidelines");
+  lines.push("");
+  lines.push("Não consegui escolher automaticamente qual spec deve ser o foco agora.");
+  lines.push("");
+
+  try {
+    const index = loadActiveSpecsIndex(repoRoot);
+    if (index.indexAvailable && index.entries.length > 0) {
+      lines.push("Specs ativas encontradas:");
+      for (const resolved of index.entries) {
+        const { entry, specPathExists } = resolved;
+        const local = specPathExists ? "disponível localmente" : "não encontrada neste checkout";
+        lines.push(`- ${entry.id} (${entry.slug}) — ${entry.title} · ${entry.branch} · ${local}`);
+      }
+      lines.push("");
+    } else {
+      lines.push("Não encontrei specs ativas publicadas no índice operacional.");
+      lines.push("");
+    }
+
+    for (const warning of index.warnings) {
+      lines.push(`Aviso: ${warning}`);
+    }
+    if (index.warnings.length > 0) lines.push("");
+  } catch (error) {
+    lines.push(
+      `Não consegui ler o índice de specs ativas: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+    lines.push("");
+  }
+
+  lines.push("Próximo passo recomendado:");
+  lines.push("- Veja as specs ativas e escolha o foco antes de continuar.");
+  lines.push("");
+  lines.push("Comandos úteis:");
+  lines.push("- `npx ai-guidelines specs`");
+  lines.push("- `npx ai-guidelines handoff <id-da-spec>`");
+  lines.push("- depois disso, rode `npx ai-guidelines` novamente na branch correta.");
+  return lines.join("\n");
+}
+
+async function runCockpitWithRecovery(
+  repoRoot: string,
+  effectiveLogger: Logger,
+  cockpitRunner: typeof runCockpit
+): Promise<number> {
+  const infos: string[] = [];
+  const errors: string[] = [];
+  const exitCode = await cockpitRunner(repoRoot, {
+    info: (message) => infos.push(message),
+    error: (message) => errors.push(message),
+  });
+
+  if (exitCode === 0) {
+    for (const message of infos) effectiveLogger.info(message);
+    return 0;
+  }
+
+  if (isSpecResolutionFailure(errors)) {
+    effectiveLogger.info(renderSpecFocusRecovery(repoRoot));
+    return 0;
+  }
+
+  for (const message of infos) effectiveLogger.info(message);
+  for (const message of errors) effectiveLogger.error(message);
+  return exitCode;
+}
+
+export async function run(
+  argv: readonly string[] = process.argv.slice(2),
+  options: RunOptions = {}
+): Promise<number> {
   const repoRoot = process.cwd();
+  const effectiveLogger = options.logger ?? logger;
+  const registry = options.registry ?? buildRegistry();
   const [commandName] = argv;
 
   if (commandName === "--help" || commandName === "-h") {
-    logger.info(renderHelp());
+    effectiveLogger.info(renderHelp());
     return 0;
   }
 
   if (!commandName) {
-    if (!process.stdin.isTTY) {
-      logger.info(renderHelp());
-      return 0;
+    const isTTY =
+      options.isTTY ?? Boolean(process.stdin.isTTY && process.stdout.isTTY && !process.env.CI);
+    const provisioning = detectProvisioningContext(repoRoot);
+    const prompts = options.prompts ?? new ClackPrompts();
+
+    if (shouldUseProvisioningEntry(provisioning)) {
+      if (!isTTY) {
+        effectiveLogger.info(renderProvisioningEntrySummary(provisioning).trimEnd());
+        return 0;
+      }
+
+      return runProvisioningSection(
+        repoRoot,
+        registry,
+        { repoRoot, logger: effectiveLogger, prompts },
+        prompts,
+        provisioning
+      );
     }
 
-    const delivery = createBootstrapDelivery(packageRoot());
-    const result = await delivery.dispatch([], {
-      repoRoot,
-      logger,
-      prompts: new InquirerPrompts(),
+    if (!isTTY) {
+      return runCockpitWithRecovery(repoRoot, effectiveLogger, options.runCockpit ?? runCockpit);
+    }
+    return (options.runFlowWizard ?? runFlowWizardDefault)(repoRoot, effectiveLogger, {
+      prompts,
+      registry,
     });
-    return result.exitCode;
   }
 
-  const result = await buildRegistry().dispatch(argv, { repoRoot, logger });
+  const result = await registry.dispatch(argv, {
+    repoRoot,
+    logger: effectiveLogger,
+    ...(options.prompts ? { prompts: options.prompts } : {}),
+  });
   return result.exitCode;
 }
 
@@ -100,4 +217,6 @@ export async function main(argv: readonly string[] = process.argv.slice(2)): Pro
   }
 }
 
-void main();
+if (require.main === module) {
+  void main();
+}

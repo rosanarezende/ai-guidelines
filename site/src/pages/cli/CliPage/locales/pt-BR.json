@@ -1,0 +1,64 @@
+{
+  "eyebrow": "Simulador interativo",
+  "hub": {
+    "title": "Escolha uma experiência para simular",
+    "lead": "O simulador não começa por comando decorado. Ele começa pela situação da pessoa ou do time.",
+    "aria": "Escolha o tipo de experiência",
+    "startLabel": "Começar com ai-guidelines",
+    "startDescription": "Para criar um projeto governado do zero ou adotar o framework em um projeto que já existe.",
+    "dailyLabel": "Usar no dia a dia",
+    "dailyDescription": "Para continuar em um projeto que já usa ai-guidelines: retomar contexto, validar mudanças e seguir o próximo passo.",
+    "placeholder": "# escolha uma experiência acima para abrir o simulador"
+  },
+  "start": {
+    "title": "Comece pelo estado do seu projeto",
+    "lead": "O ai-guidelines escolhe o caminho certo a partir do que existe no repositório. Se a pasta está vazia, ele prepara um projeto governado do zero. Se o projeto já existe, ele mostra como adotar o framework sem apagar o que você já tem.",
+    "safety": "Nada é aplicado sem preview e confirmação.",
+    "placeholder": "# escolha uma opção acima para ver como o guia aparece na CLI"
+  },
+  "daily": {
+    "title": "Continue sem perder o contexto",
+    "lead": "Use este fluxo quando o projeto já adotou ai-guidelines. A experiência começa pelo que você precisa fazer agora: retomar uma sessão, escolher a frente certa ou revisar o PR de outra pessoa.",
+    "aria": "Cenários de uso diário",
+    "setupLabel": "Escolha o momento que mais se parece com o seu trabalho agora.",
+    "choices": [
+      {
+        "id": "resume",
+        "label": "Retomar meu trabalho",
+        "description": "Para voltar a uma sessão, entender o estado atual e ver a próxima ação segura antes de mexer."
+      },
+      {
+        "id": "focus",
+        "label": "Escolher a frente certa",
+        "description": "Para projetos com mais de uma spec aberta. O fluxo exige foco explícito antes de qualquer decisão."
+      },
+      {
+        "id": "peer",
+        "label": "Revisar PR de colega",
+        "description": "Para revisar outro PR sem misturar com a sua branch, preservando o seu contexto atual."
+      }
+    ],
+    "placeholder": "# escolha uma opção acima para ver como o guia aparece na CLI"
+  },
+  "setupAria": "Escolha o tipo de projeto para começar",
+  "setupLabel": "Escolha o cenário que mais se parece com o seu projeto.",
+  "setupChoices": [
+    {
+      "id": "empty",
+      "label": "Projeto novo ou pasta vazia",
+      "description": "Ainda não há um projeto em andamento. O fluxo mostra como criar a base governada desde o começo."
+    },
+    {
+      "id": "existing",
+      "label": "Projeto em andamento",
+      "description": "Já existe código, package.json ou configurações no repositório. O fluxo mostra como adotar o ai-guidelines preservando o que já existe."
+    }
+  ],
+  "selected": "selecionado",
+  "reset": "Recomeçar",
+  "emptyTerminalAria": "Terminal aguardando escolha",
+  "waitingBadge": "aguardando escolha",
+  "footNote": "Tudo aqui é a simulação fiel gerada do runtime: roda offline, no celular, e nunca inventa um prompt. Em desktop compatível, dá para rodar a CLI de verdade no navegador (modo opcional).",
+  "shortcutsLead": "Já sabe o que quer? Veja os atalhos diretos em",
+  "shortcutsLink": "Atalhos avançados"
+}

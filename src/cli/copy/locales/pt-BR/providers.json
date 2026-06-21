@@ -1,0 +1,37 @@
+{
+  "claude": {
+    "label": "Claude",
+    "hint": "cria CLAUDE.md para sessões com Claude Code",
+    "htmlHint": "CLAUDE.md para Claude Code"
+  },
+  "gemini": {
+    "label": "Gemini",
+    "hint": "cria GEMINI.md para sessões com Gemini",
+    "htmlHint": "GEMINI.md para Gemini"
+  },
+  "openai": {
+    "label": "OpenAI/Codex",
+    "hint": "prepara contexto e comandos para sessões com Codex",
+    "htmlHint": "contexto para Codex"
+  },
+  "copilot": {
+    "label": "GitHub Copilot",
+    "hint": "orienta Copilot a usar o contexto governado",
+    "htmlHint": "contexto para Copilot"
+  },
+  "cursor": {
+    "label": "Cursor",
+    "hint": "orienta o editor Cursor a usar o contexto governado",
+    "htmlHint": "contexto para Cursor"
+  },
+  "windsurf": {
+    "label": "Windsurf",
+    "hint": "orienta o editor Windsurf a usar o contexto governado",
+    "htmlHint": "contexto para Windsurf"
+  },
+  "aider": {
+    "label": "Aider",
+    "hint": "orienta Aider a usar o contexto governado",
+    "htmlHint": "contexto para Aider"
+  }
+}

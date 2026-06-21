@@ -30,7 +30,7 @@ export class BootstrapDelivery {
 
     if (name === "providers") {
       context.logger.error(
-        'Comando desconhecido: "providers". Use: guidelines update --providers <lista>'
+        'Comando desconhecido: "providers". Use: npx ai-guidelines update --providers <lista>'
       );
       return { exitCode: 1 };
     }

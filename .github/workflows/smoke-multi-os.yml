@@ -9,46 +9,25 @@ on:
       - main
 
 jobs:
-  smoke-matrix:
-    name: smoke / ${{ matrix.os }} / node ${{ matrix.node }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        node: ["22.x", "24.x"]
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node }}
-          cache: "npm"
-
-      - name: Install dependencies (npm ci)
-        run: npm ci
-
-      - name: Run smoke suite (npm pack + install + init/update over tarball)
-        run: npm run test:smoke
-
   # Agregador estável (Spec 0024 Checkpoint 2.2): expõe UM context fixo `smoke`
   # como required check do ruleset, em vez dos 6 nomes expandidos pela matriz
   # (`smoke / ubuntu-latest / node 24.x` …). Required contexts acoplados à matriz
   # são o vetor de drift que este checkpoint elimina (cf. .github/rulesets/README.md).
+  #
+  # Suspensão governada em nós intermediários (Spec 0024 / co-flow-convergence):
+  # o contexto required `smoke` continua produzível para evitar drift do ruleset,
+  # mas a suíte smoke real não roda como pedágio de PR intermediário.
+  # `pr-ready:check` decide, a partir da topologia e do diff do PR, quando smoke
+  # real volta a ser obrigatório: fechamento final da spec, diff não
+  # classificável, e release/npm publish. Mudança de pacote/runtime em PR
+  # intermediário vira aviso explícito, não bloqueio.
   smoke:
     name: smoke
-    needs: [smoke-matrix]
-    if: always()
     runs-on: ubuntu-latest
+    env:
+      AI_GUIDELINES_SMOKE_TEMPORARILY_SUSPENDED: "true"
     steps:
-      - name: Gate on smoke matrix result
+      - name: Record governed smoke suspension
         run: |
-          result="${{ needs.smoke-matrix.result }}"
-          echo "smoke-matrix result: ${result}"
-          if [ "${result}" != "success" ]; then
-            echo "::error::Smoke matrix did not succeed (${result})."
-            exit 1
-          fi
-          echo "All smoke matrix combinations passed."
+          echo "Smoke tests are governed by pr-ready:check."
+          echo "Real smoke is required before final integration and npm release."

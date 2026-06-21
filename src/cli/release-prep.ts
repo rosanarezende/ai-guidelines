@@ -1,5 +1,5 @@
 /**
- * CLI standalone para `npm run guidelines -- release-prep` (tier 3).
+ * CLI standalone para `npm run flow -- release-prep` (tier 3).
  *
  * Cravado em `[DEC-0023-L01]` (Bloco L). Repo-specific (não framework):
  * só faz sentido para repos que publicam em npm. Distinção cravada em
@@ -26,7 +26,7 @@ import { WorkflowFileSystem } from "../app/ports/WorkflowFileSystem.js";
 import { ReleasePrep, ReleasePrepError, ReleasePrepPlan } from "../app/workflow/ReleasePrep.js";
 import { NodeWorkflowFileSystem } from "../infrastructure/filesystem/NodeWorkflowFileSystem.js";
 import { NodeGit } from "../infrastructure/git/NodeGit.js";
-import { InquirerPrompts } from "../infrastructure/io/InquirerPrompts.js";
+import { ClackPrompts } from "../infrastructure/io/ClackPrompts.js";
 import { Logger } from "./workflow.js";
 
 export interface ReleasePrepCliArgs {
@@ -59,7 +59,7 @@ export async function runReleasePrep(
   const logger = options.logger ?? stdoutLogger;
   const fs = options.fs ?? new NodeWorkflowFileSystem(options.repoRoot);
   const git = options.git ?? new NodeGit(options.repoRoot);
-  const prompts = options.prompts ?? new InquirerPrompts();
+  const prompts = options.prompts ?? new ClackPrompts();
 
   const useCase = new ReleasePrep(fs, git);
 

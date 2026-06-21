@@ -2,9 +2,9 @@
 
 Este documento mapeia as regras de negócio canônicas da CLI, servindo de fonte única de verdade para os testes unitários BDD.
 
-> **📣 Contrato Governance-Driven (Spec 0021).** O contrato canônico de longo prazo do consumidor é `.governance/` como root unificado (PR2/PR3 da Spec 0021 — ver `.specify/specs/0021-governance-information-architecture/`). A CLI mjs descrita aqui ainda escreve em `.ai-guidelines/` no consumidor — esse caminho funciona como **bridge legado explícita** até a CLI ser plugada no novo `GovernanceWorkspace` (rastreado em PR4). Nenhum alias mágico é introduzido entre os dois roots; a migração acontece por adoção explícita.
+> **📣 Contrato Governance-Driven (Spec 0021 + Spec 0024).** O contrato canônico de longo prazo do consumidor é `.governance/` como root unificado (PR2/PR3 da Spec 0021 — ver `.specify/specs/0021-governance-information-architecture/`). A CLI publicada é TypeScript compilado em `dist/cli/main.js`; `src/cli` faz delivery/composition, `src/app` orquestra casos de uso, `src/domain` concentra políticas puras e `src/infrastructure` aplica adapters concretos.
 >
-> **Reservas canônicas em `.governance/`:** `intake/` (PRD/intake), `handoff/`, `telemetry/`. Materializadas como `RESERVED_GOVERNANCE_DIRS` em `src/domain/workspace/MigrationPlan.ts` e criadas idempotentemente por `AdoptWorkspace`. Smoke tests atuais validam o **bridge legado** (`.ai-guidelines/`); a migração para asserções sob `.governance/` chega quando a CLI plugar o novo workspace.
+> **Reservas canônicas em `.governance/`:** `intake/` (PRD/intake), `handoff/`, `telemetry/`. Materializadas como `RESERVED_GOVERNANCE_DIRS` em `src/domain/workspace/MigrationPlan.ts` e criadas idempotentemente por `AdoptWorkspace`. Smoke tests atuais validam o **bridge legado** (`.ai-guidelines/`); a migração para asserções sob `.governance/` e a remoção da bridge entram no nó `dualroot-collapse`.
 
 ## 0. Política de Update — `managed-block` + `mirror`
 
@@ -34,7 +34,7 @@ Overwrite total é seguro porque esses arquivos **não são editados in-place**:
 
 ### Garantia de não-destruição
 
-`npx ai-guidelines providers --prune` remove apenas os provider entrypoints de providers **não selecionados** — **nunca** apaga arquivos em `.ai-guidelines/templates/` nem conteúdo do consumidor fora de `managed-block`.
+`npx ai-guidelines update --providers <lista> --prune` remove apenas os provider entrypoints de providers **não selecionados** — **nunca** apaga arquivos em `.ai-guidelines/templates/` nem conteúdo do consumidor fora de `managed-block`. O comando separado `providers` não existe no runtime novo.
 
 ---
 
@@ -153,13 +153,13 @@ ENTÃO deve injetar um comando de fallback (echo) no YAML para garantir que o pi
 ## 5. Features Opt-in — Editoriais (📝) [BR-CLI-EDITORIAL]
 
 > Features compiladas como blocos XML dentro de `<AI_GUIDELINES>`.
-> **CLI source**: `cli/features/opt-in/editorial/`
+> **Fonte canônica**: `EDITORIAL_FEATURES` em `src/domain/provisioning/FeatureCatalog.ts`.
 
 ### [BR-CLI-EDITORIAL-01] Taxonomia de Features
 
 DADO o sistema de features opt-in
 QUANDO classificadas
-ENTÃO devem seguir duas categorias: **Editoriais** (geram blocos `<FEATURE_*>` no `AGENTS.md`) e **Infraestrutura** (modificam `package.json`, hooks, CI). A lista canônica é derivada de `EDITORIAL_FEATURES` e `INFRASTRUCTURE_FEATURES` em `cli/cli/args.mjs`.
+ENTÃO devem seguir duas categorias: **Editoriais** (geram blocos `<FEATURE_*>` no `AGENTS.md`) e **Infraestrutura** (modificam `package.json`, hooks, CI). A lista canônica é derivada de `EDITORIAL_FEATURES` e `INFRASTRUCTURE_FEATURES` em `src/domain/provisioning/FeatureCatalog.ts`.
 
 ### [BR-CLI-EDITORIAL-02] Compilação de Regras
 
@@ -184,7 +184,7 @@ ENTÃO deve preservar conteúdo do consumidor fora da tag mãe e remover apenas 
 ## 6. Features Opt-in — Infraestrutura (⚡) [BR-CLI-INFRA]
 
 > Features que modificam `package.json`, hooks e CI/CD do consumidor.
-> **CLI source**: `cli/features/opt-in/infrastructure/`
+> **Fonte canônica**: `INFRASTRUCTURE_FEATURES` em `src/domain/provisioning/FeatureCatalog.ts`.
 > **Nota**: Não geram arquivos de regras no consumidor.
 
 As business rules para features de infraestrutura estão documentadas nas seções anteriores:
@@ -215,9 +215,9 @@ ENTÃO deve aceitar flags com `--` e valores separados por espaço ou `=`, trata
 
 ### [BR-CLI-INPUT-02] Validação de Modos Suportados
 
-DADO um comando inserido pelo usuário
+DADO um comando de provisionamento inserido pelo usuário
 QUANDO validado pelo shell
-ENTÃO deve permitir apenas `init` ou `adopt`, disparando a ajuda (`help`) em caso de comandos desconhecidos.
+ENTÃO deve permitir `init`, `adopt` ou `update`, disparando a ajuda (`help`) em caso de comandos desconhecidos. O verbo legado `providers` deve falhar como comando desconhecido e orientar `update --providers <lista>`.
 
 ---
 
@@ -261,7 +261,7 @@ ENTÃO deve oferecer ao usuário a opção de instalar as dependências imediata
 
 ## 11. Workflow Runtime — operar o ciclo da spec (Spec 0023)
 
-> **Escopo diferente das seções 1–10.** Essas seções mapeiam regras da CLI de _distribuição_ (`init`/`adopt`/`update`), implementadas em `cli/*.mjs`. Os comandos abaixo _operam o ciclo de governança_ de uma spec e vivem na re-arquitetura DDD em `src/` — o contrato canônico e os testes BDD estão na própria spec ([`.governance/specs/0023-workflow-runtime/`](../../.governance/specs/0023-workflow-runtime/)) e nos use cases sob `src/app/workflow/`. Por isso esta seção é **referência de comando**, não um espelho de `[BR-CLI-*]`.
+> **Escopo diferente das seções 1–10.** Essas seções mapeiam regras da CLI de _distribuição_ (`init`/`adopt`/`update`). Os comandos abaixo _operam o ciclo de governança_ de uma spec e vivem no runtime TypeScript em `src/` — o contrato canônico e os testes BDD estão na própria spec ([`.governance/specs/0023-workflow-runtime/`](../../.governance/specs/0023-workflow-runtime/)) e nos use cases sob `src/app/workflow/`. Por isso esta seção é **referência de comando**, não um espelho de `[BR-CLI-*]`.
 >
 > **Invariante ADR 0018 (AI-as-Channel):** nenhum desses comandos embute LLM. Eles leem o estado versionado do repositório (markdown + git + `gh`), aplicam **gates determinísticos** e montam um bloco de contexto **para você colar na sua IA externa**. A inteligência vive no canal (agente), não no runtime.
 
@@ -277,7 +277,8 @@ Cada spec organiza o ciclo em três arquivos lidos pelo runtime (cf. `[DEC-0023-
 
 | Comando                                                                | Tier         | Resumo                                                                                                                              |
 | :--------------------------------------------------------------------- | :----------- | :---------------------------------------------------------------------------------------------------------------------------------- |
-| `workflow`                                                             | Wizard       | Menu operacional com 8 opções fixas declarativas (sem auto-detecção/ranking). Cada opção mapeia 1:1 para um comando.                |
+| `cockpit`                                                              | Cockpit      | Painel textual situado, usado por `npm run flow` em non-TTY e por `npm run flow -- cockpit`.                                        |
+| `workflow`                                                             | Avançado     | Operações avançadas da stack; acessível pelo wizard governado principal (`npm run flow`).                                           |
 | `continue [<id\|slug>]`                                                | Atalho       | Briefing da spec ativa (ou a indicada) + gate de execução: **recusa narrativamente** se `executionAuthorized == false`.             |
 | `handoff [<id\|slug>] [--hybrid]`                                      | Bootstrap    | Handoff situado read-only para iniciar sessão IA nova; monta contexto determinístico e slots humanos opcionais.                     |
 | `workflow publish-state --status=<active\|blocked\|paused\|completed>` | Projeção     | Projeta o estado interno (`state.yml`) no índice público `.governance/runtime/specs/active.yml` (descoberta cross-machine).         |
@@ -304,12 +305,13 @@ O `plan` imprime modo + veículo + PRs reconciliados + receita de rollback antes
 ### Exemplos
 
 ```bash
-yarn guidelines workflow                     # abre o wizard
-yarn guidelines continue 0023                # briefing da spec 0023 + gate
-yarn guidelines handoff 0024 --hybrid        # contexto situado para nova sessão IA
-yarn guidelines review 27                    # triagem dos review comments do PR #27
-yarn guidelines workflow publish-state --status=active --updated-by=@maintainer
-yarn guidelines release-prep --version 1.1.0 --dry-run
+npm run flow                                 # wizard governado em TTY; cockpit em non-TTY
+npm run flow -- cockpit                      # cockpit textual direto
+npm run flow -- continue 0023                # briefing da spec 0023 + gate
+npm run flow -- handoff 0024 --hybrid        # contexto situado para nova sessão IA
+npm run flow -- review technical-audit       # briefing governado de review
+npm run flow -- workflow publish-state --status=active --updated-by=@maintainer
+npm run flow -- release-prep --version 1.1.0 --dry-run
 ```
 
 > Onde fica o estado, no consumidor: `.governance/registry.yml` (SSOT estruturada) e `.governance/runtime/specs/active.yml` (índice derivado, schema fechado). O ciclo de boundaries é canônico em [`.core/process/governance-foundation.md`](../../.core/process/governance-foundation.md).

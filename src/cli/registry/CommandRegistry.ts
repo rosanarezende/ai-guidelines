@@ -1,5 +1,6 @@
 import { Command, CommandContext, CommandResult } from "./Command.js";
 import { renderCommandsHelp } from "./renderHelp.js";
+import { isPromptCancelled } from "../../app/ports/Prompts.js";
 
 /**
  * Registry de comandos da CLI — a espinha dorsal extensível que substitui a
@@ -85,7 +86,7 @@ export class CommandRegistry {
     if (!command) {
       if (name === "providers") {
         context.logger.error(
-          'Comando não suportado: "providers". Use: guidelines update --providers <lista>.'
+          'Comando não suportado: "providers". Use: npx ai-guidelines update --providers <lista>.'
         );
         return { exitCode: 1 };
       }
@@ -108,7 +109,7 @@ export class CommandRegistry {
     // fallback de outros produzia erro enganoso (dogfood CO-4, rodada 9).
     if (rest.includes("--help") || rest.includes("-h")) {
       context.logger.info(renderCommandsHelp([command]));
-      context.logger.info(`\n  Help geral: npm run guidelines -- --help`);
+      context.logger.info(`\n  Help geral: npx ai-guidelines --help`);
       return { exitCode: 0 };
     }
 
@@ -117,6 +118,10 @@ export class CommandRegistry {
         context.prompts && command.prompt ? await command.prompt(context) : command.parse(rest);
       return await command.run(options, context);
     } catch (err) {
+      if (isPromptCancelled(err)) {
+        context.logger.info(err.message);
+        return { exitCode: 0 };
+      }
       // Erro de input (parse) ou de execução (run) vira exitCode 1 com mensagem
       // narrativa — nunca stack trace cru ao usuário. Cada comando lança Error
       // com mensagem orientada (ex.: "PR inválido").

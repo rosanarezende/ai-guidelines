@@ -15,7 +15,7 @@ Estas funcionalidades garantem o piso de governança em qualquer consumidor, ind
 ### 1. Runtime AGENTS.md (Canal AI)
 
 - **O que faz**: Mantém um bootstrap curto dentro da tag `<AI_GUIDELINES>` no `AGENTS.md` da raiz, apontando para `handoff` situado, script contracts e catálogo de regras.
-- **Por que**: Materializa o **canal de integração AI-agnóstica** sem pré-carregar o kernel inteiro; sessões novas recebem contexto via `yarn guidelines handoff`.
+- **Por que**: Materializa o **canal de integração AI-agnóstica** sem pré-carregar o kernel inteiro; sessões novas recebem contexto via `npx ai-guidelines handoff`.
 - **Classificação**: Hoje distribuído como Core porque é o mecanismo central da CLI mjs. A Spec 0021 PR4 (4.C cutover) **declara e arquiteta** a SSOT de governança (`registry.yml`, `living-docs.yml`, etc.) como distribuição canônica independente; a **distribuição operacional completa** no consumidor (geração real via `cli init`/`adopt`) depende do cutover do runtime (Spec 0022+, ainda em discovery). O Runtime AGENTS.md permanece como **canal opt-in primário** para consumidores que querem integração AI ativa.
 - **Arquivos**: `AGENTS.md`.
 

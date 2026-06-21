@@ -38,6 +38,10 @@ import {
 } from "../../infrastructure/yaml/humanDecisionPolicyReader.js";
 import { MainOptions as PrReadyMainOptions, main as runPrReadyCheck } from "../prReadyCheck.js";
 import { main as runGateDecidabilityCheck } from "../gateDecidabilityCheck.js";
+import {
+  collectSubCheckpointDeliveryEvidence,
+  SubCheckpointDeliveryEvidence,
+} from "../flow/subCheckpointDeliveryEvidence.js";
 
 export const HUMAN_DECISION_POLICY_PATH = ".core/governance/human-decision-policy.yml";
 
@@ -140,6 +144,7 @@ export interface DecisionSnapshot {
   readonly gateExists: boolean;
   readonly gateFile: string | null;
   readonly subCheckpoints: readonly DecisionSubCheckpoint[];
+  readonly subCheckpointDeliveryEvidence: SubCheckpointDeliveryEvidence;
   readonly nextPlannedNode: HandoffNodeFact | null;
   /** Coletados só quando PR Ready; null em Draft / não coletado. */
   readonly prReady: ExternalCheckResult | null;
@@ -417,6 +422,20 @@ export function collectDecisionSnapshot(
 
   // Sub-checkpoints: fonte única já coletada nos HandoffFacts (tasks.md).
   const subCheckpoints = facts.subCheckpoints;
+  const activeSubCheckpoints = subCheckpoints.filter((s) => s.state === "in-progress");
+  const subCheckpointDeliveryEvidence =
+    activeSubCheckpoints.length === 1
+      ? collectSubCheckpointDeliveryEvidence(
+          repoRoot,
+          `${facts.spec.path}/tasks.md`,
+          activeSubCheckpoints[0].id,
+          facts.git.head ?? "HEAD"
+        )
+      : {
+          status: "unknown" as const,
+          activeId: activeSubCheckpoints[0]?.id ?? "(sem ativo)",
+          reason: "Não há sub-checkpoint ativo inequívoco para comprovar entrega.",
+        };
 
   const { policy, error: policyError } = loadPolicy(repoRoot);
 
@@ -449,6 +468,7 @@ export function collectDecisionSnapshot(
     gateExists: gate !== null,
     gateFile: gate?.file ?? null,
     subCheckpoints,
+    subCheckpointDeliveryEvidence,
     nextPlannedNode: facts.nextPlannedNode,
     prReady: external.prReady,
     gateDecidability: external.gateDecidability,
