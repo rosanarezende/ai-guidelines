@@ -96,3 +96,7 @@ insights:
         spec: "0024"
         cursor: checkpoint-co-enforcement
         note: "Terceira superfície de decisão humana: advance-subcheckpoint. A transição interna entre sub-checkpoints era detectada pelo work mas só executável por agente editando tasks.md — mesma classe da dor original (decisão humana mediada por edição técnica de artefato)."
+      - at: 2026-06-21T14:38:00.999Z
+        spec: "0024"
+        cursor: checkpoint-co-flow-convergence
+        note: "Dogfood PR #43/CO-10.7: quando uma PIT aparece pronta para promocao, o wizard so lista percepcoes e exige que a pessoa saiba usar insight promote --to backlog|adr|guardrail|dec --ref <ID>; a decisao humana sobre destino nao recebe briefing, opcoes, preview ou confirmacao guiada."

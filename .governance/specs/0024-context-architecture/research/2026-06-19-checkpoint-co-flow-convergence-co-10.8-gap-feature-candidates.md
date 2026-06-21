@@ -111,6 +111,27 @@ Critério:
 
 **Decisão futura:** só considerar depois de um guard arquitetural real existir.
 
+### INTORG-009 — Wizard governado para promover ou descartar PITs
+
+**Problema:** o sistema lista percepções vivas e permite promover uma PIT por comando direto, mas não guia a pessoa na decisão de destino. Hoje a pessoa precisa saber escolher manualmente entre `backlog`, `adr`, `guardrail` ou `dec`, informar uma referência e entender as consequências. Isso transforma uma decisão humana em procedimento técnico, recorrência registrada em `PIT-0013`.
+
+**Possível feature:** quando uma PIT estiver pronta para decisão, o wizard deve oferecer opções humanas:
+
+- transformar em ADR;
+- transformar em guardrail;
+- transformar em DEC;
+- enviar para backlog;
+- descartar com justificativa;
+- manter aberta.
+
+Cada opção deve ter briefing, consequência, preview do efeito e confirmação antes de gravar qualquer mudança.
+
+**Risco:** automatizar promoção sem julgamento humano, ou criar artefatos vazios apenas para satisfazer o fluxo.
+
+**Decisão futura:** decidir se entra no próximo PR como correção de UX governada do fluxo de insights ou se vira sub-checkpoint próprio depois da reorganização interna.
+
+**Teste esperado:** uma PIT promovível aparece no wizard com opções de destino; nenhuma promoção acontece automaticamente; cada escolha cria ou atualiza o artefato correto; descarte exige justificativa; o comando direto continua existindo apenas como atalho avançado.
+
 ## Itens explicitamente fora de escopo do CO-10.8
 
 - mudar a UX pública da CLI;
