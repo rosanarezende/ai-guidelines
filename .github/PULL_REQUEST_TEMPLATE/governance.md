@@ -232,7 +232,13 @@ RESTRIÇÕES:
 ## Escopo
 
 <details>
-<summary><strong>Detalhes de escopo e limites</strong></summary>
+<summary><strong>Escopo técnico e limites</strong></summary>
+
+<!--
+Esta seção fica recolhida para manter a leitura humana focada em valor,
+decisões, evidências e impactos. Agentes/revisores podem abrir para auditar
+fronteiras de implementação.
+-->
 
 ### Dentro do escopo
 

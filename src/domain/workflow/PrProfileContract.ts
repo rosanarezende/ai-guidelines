@@ -2,10 +2,17 @@ export type PrProfileName = "execution" | "governance" | "integration" | "fast-t
 
 export type Phase = "draft" | "ready";
 
+export interface PrBodyTemplateToken {
+  readonly name: string;
+  readonly description: string;
+}
+
 export interface PrBodyProfile {
   readonly name: PrProfileName;
   /** Template markdown correspondente em .github/PULL_REQUEST_TEMPLATE/ ou .github/ */
   readonly templatePath: string;
+  /** Slots explícitos que o script pode preencher. O template é a fonte editorial. */
+  readonly templateTokens: ReadonlyArray<PrBodyTemplateToken>;
   /** Exigidas desde o Draft (intenção declarada na abertura). */
   readonly draftSections: ReadonlyArray<string>;
   /** Exigidas adicionalmente em Ready / fase de decisão (Ready ⊇ Draft). */
@@ -43,6 +50,40 @@ export const PR_BODY_PROFILES: Readonly<Record<PrProfileName, PrBodyProfile>> = 
   execution: {
     name: "execution",
     templatePath: ".github/pull_request_template.md",
+    templateTokens: [
+      {
+        name: "AI_GUIDELINES_EXECUTION_VISION_TEXT",
+        description: "Texto do prompt final da visão pretendida no Draft.",
+      },
+      {
+        name: "AI_GUIDELINES_EXECUTION_SUMMARY",
+        description: "Resumo humano inicial do PR.",
+      },
+      {
+        name: "AI_GUIDELINES_EXECUTION_SCOPE_IN",
+        description: "Itens dentro do escopo técnico.",
+      },
+      {
+        name: "AI_GUIDELINES_EXECUTION_SCOPE_OUT",
+        description: "Itens fora do escopo técnico.",
+      },
+      {
+        name: "AI_GUIDELINES_CROSSREF_SPEC",
+        description: "Spec relacionada ao PR.",
+      },
+      {
+        name: "AI_GUIDELINES_CROSSREF_ADRS",
+        description: "ADRs aplicáveis ao PR.",
+      },
+      {
+        name: "AI_GUIDELINES_CROSSREF_DECS",
+        description: "DECs aplicáveis ao PR.",
+      },
+      {
+        name: "AI_GUIDELINES_CROSSREF_RELATED",
+        description: "Issues, PRs ou nós relacionados.",
+      },
+    ],
     draftSections: [
       "## Visão pretendida",
       "## Resumo",
@@ -78,6 +119,7 @@ export const PR_BODY_PROFILES: Readonly<Record<PrProfileName, PrBodyProfile>> = 
   governance: {
     name: "governance",
     templatePath: ".github/PULL_REQUEST_TEMPLATE/governance.md",
+    templateTokens: [],
     draftSections: [
       "## Visão de valor",
       "## Problema de governança",
@@ -126,6 +168,7 @@ export const PR_BODY_PROFILES: Readonly<Record<PrProfileName, PrBodyProfile>> = 
   integration: {
     name: "integration",
     templatePath: ".github/PULL_REQUEST_TEMPLATE/integration.md",
+    templateTokens: [],
     draftSections: [
       "## Resultado integrado",
       "## Componentes e PRs absorvidos",
@@ -171,6 +214,7 @@ export const PR_BODY_PROFILES: Readonly<Record<PrProfileName, PrBodyProfile>> = 
   "fast-track": {
     name: "fast-track",
     templatePath: ".github/PULL_REQUEST_TEMPLATE/fast-track.md",
+    templateTokens: [],
     draftSections: [
       "## Incidente ou falha",
       "## Correção",

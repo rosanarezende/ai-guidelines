@@ -1,7 +1,11 @@
 #!/usr/bin/env node
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
-import { PR_BODY_PROFILES, PrProfileName } from "../domain/workflow/PrProfileContract.js";
+import {
+  PR_BODY_PROFILES,
+  PrBodyProfile,
+  PrProfileName,
+} from "../domain/workflow/PrProfileContract.js";
 
 interface Logger {
   info(message: string): void;
@@ -12,6 +16,8 @@ const stdoutLogger: Logger = {
   info: (message) => process.stdout.write(`${message}\n`),
   error: (message) => process.stderr.write(`${message}\n`),
 };
+
+const TOKEN_PATTERN = /\{\{([A-Z0-9_]+)\}\}/g;
 
 export interface PrBodyCreateInput {
   readonly profile: PrProfileName;
@@ -39,27 +45,39 @@ function readProfileTemplate(profile: PrProfileName, repoRoot = process.cwd()): 
   return readFileSync(templatePath, "utf8");
 }
 
-function sectionRange(body: string, heading: string): { start: number; end: number } {
-  const headingMatch = new RegExp(`^${escapeRegExp(heading)}\\s*$`, "m").exec(body);
-  if (!headingMatch || headingMatch.index === undefined) {
-    throw new Error(`Template não contém seção esperada: ${heading}`);
+export function extractPrBodyTemplateTokens(template: string): string[] {
+  return Array.from(new Set([...template.matchAll(TOKEN_PATTERN)].map((match) => match[1]))).sort();
+}
+
+function renderTemplateTokens(
+  template: string,
+  values: Readonly<Record<string, string>>,
+  profile: PrBodyProfile
+): string {
+  assertTemplateTokenContract(profile, template);
+
+  return template.replace(TOKEN_PATTERN, (_token, name: string) => {
+    const value = values[name];
+    if (value === undefined) {
+      throw new Error(`Template ${profile.name} exige token sem valor: ${name}`);
+    }
+    return value;
+  });
+}
+
+function assertTemplateTokenContract(profile: PrBodyProfile, template: string): void {
+  const declared = profile.templateTokens.map((token) => token.name).sort();
+  const actual = extractPrBodyTemplateTokens(template);
+
+  if (JSON.stringify(actual) !== JSON.stringify(declared)) {
+    throw new Error(
+      [
+        `Template ${profile.name} diverge dos tokens contratados.`,
+        `declarados: ${declared.join(", ") || "(nenhum)"}`,
+        `no template: ${actual.join(", ") || "(nenhum)"}`,
+      ].join(" ")
+    );
   }
-  const contentStart = headingMatch.index + headingMatch[0].length;
-  const nextHeading = /^##\s+/m.exec(body.slice(contentStart));
-  return {
-    start: contentStart,
-    end: nextHeading ? contentStart + nextHeading.index : body.length,
-  };
-}
-
-function escapeRegExp(text: string): string {
-  return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
-function replaceSection(body: string, heading: string, content: string): string {
-  const range = sectionRange(body, heading);
-  const replacement = `\n\n${content.trimEnd()}\n\n`;
-  return `${body.slice(0, range.start)}${replacement}${body.slice(range.end).replace(/^\n+/, "")}`;
 }
 
 function hasNextNodeContext(input: PrBodyCreateInput): boolean {
@@ -73,9 +91,7 @@ function hasNextNodeContext(input: PrBodyCreateInput): boolean {
   );
 }
 
-function hydrateExecutionTemplate(template: string, input: PrBodyCreateInput): string {
-  if (!hasNextNodeContext(input)) return template;
-
+function executionTemplateValues(input: PrBodyCreateInput): Readonly<Record<string, string>> {
   const specId = valueOrPlaceholder(input.specId, "spec");
   const currentNodeId = valueOrPlaceholder(input.currentNodeId, "nó anterior");
   const nextNodeId = valueOrPlaceholder(input.nextNodeId, "nó deste PR");
@@ -83,59 +99,53 @@ function hydrateExecutionTemplate(template: string, input: PrBodyCreateInput): s
   const baseBranch = valueOrPlaceholder(input.baseBranch, "branch base");
   const headBranch = valueOrPlaceholder(input.headBranch, "branch head");
 
-  let body = template;
-  body = replaceSection(
-    body,
-    "## Visão pretendida",
-    [
-      "```text",
-      `Abrir ${nextNodeId} como próximo PR stacked da Spec ${specId}, a partir do nó aprovado ${currentNodeId}, sem merge isolado em main.`,
-      "```",
-    ].join("\n")
-  );
-  body = replaceSection(
-    body,
-    "## Resumo",
-    [
+  const defaultValues = {
+    AI_GUIDELINES_EXECUTION_VISION_TEXT:
+      "<descreva a visão pretendida em linguagem humana, antes da implementação>",
+    AI_GUIDELINES_EXECUTION_SUMMARY:
+      "<resuma em 2-4 frases o que este PR tenta mudar, por que importa e qual fluxo humano/agente melhora>",
+    AI_GUIDELINES_EXECUTION_SCOPE_IN: "- <item concreto dentro do escopo>",
+    AI_GUIDELINES_EXECUTION_SCOPE_OUT: "- <item explicitamente fora do escopo>",
+    AI_GUIDELINES_CROSSREF_SPEC: "<spec>",
+    AI_GUIDELINES_CROSSREF_ADRS: "<ADRs aplicáveis>",
+    AI_GUIDELINES_CROSSREF_DECS: "<DECs aplicáveis>",
+    AI_GUIDELINES_CROSSREF_RELATED: "<issues/PRs relacionados>",
+  };
+
+  if (!hasNextNodeContext(input)) return defaultValues;
+
+  return {
+    ...defaultValues,
+    AI_GUIDELINES_EXECUTION_VISION_TEXT: `Abrir ${nextNodeId} como próximo PR stacked da Spec ${specId}, a partir do nó aprovado ${currentNodeId}, sem merge isolado em main.`,
+    AI_GUIDELINES_EXECUTION_SUMMARY: [
       `Este PR abre o próximo nó governado da Spec ${specId}: \`${nextNodeId}\`.`,
       "",
       `Ele nasce depois do Human Gate aprovado de \`${currentNodeId}\` e mantém o trabalho limitado ao checkpoint \`${nextCheckpoint}\`.`,
-    ].join("\n")
-  );
-  body = replaceSection(
-    body,
-    "## Escopo",
-    [
-      "<details>",
-      "<summary><strong>Detalhes de escopo e limites</strong></summary>",
-      "",
-      "### Dentro do escopo",
-      "",
+    ].join("\n"),
+    AI_GUIDELINES_EXECUTION_SCOPE_IN: [
       `- Materializar o checkpoint \`${nextCheckpoint}\`.`,
       `- Trabalhar somente o nó \`${nextNodeId}\`.`,
       `- Manter a stack em modo unit, com base em \`${baseBranch}\` e head \`${headBranch}\`.`,
-      "",
-      "### Fora do escopo",
-      "",
+    ].join("\n"),
+    AI_GUIDELINES_EXECUTION_SCOPE_OUT: [
       "- Merge em `main`.",
       "- Human Gate automático.",
       `- Implementação fora do checkpoint \`${nextCheckpoint}\`.`,
-      "",
-      "</details>",
-    ].join("\n")
-  );
-  body = replaceSection(
-    body,
-    "## Cross-refs",
-    [
-      `- **Spec**: ${specId}`,
-      "- **ADRs aplicáveis**:",
-      "- **DECs aplicáveis**:",
-      `- **Nó anterior**: ${currentNodeId}`,
-      `- **Nó ativo**: ${nextNodeId}`,
-    ].join("\n")
-  );
-  return body;
+    ].join("\n"),
+    AI_GUIDELINES_CROSSREF_SPEC: specId,
+    AI_GUIDELINES_CROSSREF_RELATED: [
+      `Nó anterior: \`${currentNodeId}\``,
+      `nó ativo: \`${nextNodeId}\``,
+    ].join("; "),
+  };
+}
+
+function tokenValuesForProfile(
+  profile: PrProfileName,
+  input: PrBodyCreateInput
+): Readonly<Record<string, string>> {
+  if (profile === "execution") return executionTemplateValues(input);
+  return {};
 }
 
 export function buildPrBody(input: PrBodyCreateInput): string {
@@ -145,7 +155,7 @@ export function buildPrBody(input: PrBodyCreateInput): string {
   }
 
   const template = readProfileTemplate(input.profile, input.repoRoot);
-  const body = input.profile === "execution" ? hydrateExecutionTemplate(template, input) : template;
+  const body = renderTemplateTokens(template, tokenValuesForProfile(input.profile, input), profile);
 
   const missing = [...profile.draftSections, ...profile.readySections].filter(
     (section) => !body.includes(section)

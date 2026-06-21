@@ -99,7 +99,7 @@ remover a imagem/prompt originais. Mudança excepcional de visão entra como
 <summary><strong>Prompt final — visão pretendida</strong></summary>
 
 ```text
-<prompt pronto para colar no gerador>
+{{AI_GUIDELINES_EXECUTION_VISION_TEXT}}
 ```
 
 </details>
@@ -107,7 +107,7 @@ remover a imagem/prompt originais. Mudança excepcional de visão entra como
 ## Resumo
 
 <!--
-Explique a intenção humana do PR:
+Texto visível para humanos. Explique:
 - o que este PR tenta mudar;
 - por que importa;
 - qual fluxo humano/agente melhora.
@@ -117,18 +117,26 @@ Se houver impacto downstream (consumidores via `adopt`, breaking changes,
 migração necessária), descreva explicitamente aqui.
 -->
 
+{{AI_GUIDELINES_EXECUTION_SUMMARY}}
+
 ## Escopo
 
 <details>
-<summary><strong>Detalhes de escopo e limites</strong></summary>
+<summary><strong>Escopo técnico e limites</strong></summary>
+
+<!--
+Esta seção é recolhida de propósito: humanos veem primeiro Resumo, Valor
+entregue, Test plan e riscos. Agentes/revisores podem abrir quando precisarem
+auditar limites de implementação.
+-->
 
 ### Dentro do escopo
 
--
+{{AI_GUIDELINES_EXECUTION_SCOPE_IN}}
 
 ### Fora do escopo
 
--
+{{AI_GUIDELINES_EXECUTION_SCOPE_OUT}}
 
 </details>
 
@@ -193,10 +201,10 @@ Para governance: cite os artefatos que mudam de estado (DECs, ADRs, status agreg
 
 ## Cross-refs
 
-- **Spec**:
-- **ADRs aplicáveis**:
-- **DECs aplicáveis**:
-- **Issues/PRs relacionados**:
+- **Spec**: {{AI_GUIDELINES_CROSSREF_SPEC}}
+- **ADRs aplicáveis**: {{AI_GUIDELINES_CROSSREF_ADRS}}
+- **DECs aplicáveis**: {{AI_GUIDELINES_CROSSREF_DECS}}
+- **Issues/PRs relacionados**: {{AI_GUIDELINES_CROSSREF_RELATED}}
 
 ## Disclosure de IA
 

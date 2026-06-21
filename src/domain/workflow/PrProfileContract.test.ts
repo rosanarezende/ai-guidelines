@@ -2,6 +2,12 @@ import { readFileSync, existsSync } from "node:fs";
 import path from "node:path";
 import { PR_BODY_PROFILES } from "./PrProfileContract.js";
 
+const TOKEN_PATTERN = /\{\{([A-Z0-9_]+)\}\}/g;
+
+function extractTemplateTokens(content: string): string[] {
+  return Array.from(new Set([...content.matchAll(TOKEN_PATTERN)].map((match) => match[1]))).sort();
+}
+
 describe("PrProfileContract — Coherence Guard", () => {
   it("templates must exist and contain all required sections", () => {
     const rootDir = path.resolve(__dirname, "../../../");
@@ -22,6 +28,44 @@ describe("PrProfileContract — Coherence Guard", () => {
         expect(content).toContain(section);
       }
     }
+  });
+
+  it("templates must declare only the tokens owned by their profile contract", () => {
+    const rootDir = path.resolve(__dirname, "../../../");
+
+    const tokenProjection = Object.values(PR_BODY_PROFILES).map((profile) => {
+      const content = readFileSync(path.join(rootDir, profile.templatePath), "utf-8");
+      return {
+        profile: profile.name,
+        declared: profile.templateTokens.map((token) => token.name).sort(),
+        template: extractTemplateTokens(content),
+      };
+    });
+
+    expect(tokenProjection).toEqual(
+      Object.values(PR_BODY_PROFILES).map((profile) => ({
+        profile: profile.name,
+        declared: profile.templateTokens.map((token) => token.name).sort(),
+        template: profile.templateTokens.map((token) => token.name).sort(),
+      }))
+    );
+  });
+
+  it("declared template tokens must be documented for humans", () => {
+    const tokenDocs = Object.values(PR_BODY_PROFILES).flatMap((profile) =>
+      profile.templateTokens.map((token) => ({
+        profile: profile.name,
+        name: token.name,
+        documented: token.description.trim().length > 0,
+      }))
+    );
+
+    expect(tokenDocs).toEqual(
+      tokenDocs.map((token) => ({
+        ...token,
+        documented: true,
+      }))
+    );
   });
 
   it("every section in a profile (except sub-headers) must be classified as preserved, final or mutable", () => {
