@@ -325,6 +325,12 @@ profiles:
         mutates: true
         consumers: [human]
         description: Atualiza PR body preservando secoes baseline (FU-1); fallback gh api PATCH.
+      - name: pr-body:create
+        command: npm run build && node dist/cli/bin.js pr-body-create
+        category: governance
+        mutates: true
+        consumers: [human]
+        description: Cria PR body inicial a partir do perfil/template governado; open-next-node delega para esta fabrica.
       - name: pr-ready:check
         command: npm run build && node dist/cli/bin.js pr-ready-check
         category: governance
@@ -335,14 +341,14 @@ profiles:
         command: npm run build && node dist/cli/main.js validate changed
         category: aggregate
         mutates: true
-        consumers: [workflow, human]
-        description: Validacao intermediaria orientada ao diff; com --fix pode formatar somente arquivos alterados.
+        consumers: [hook, workflow, human]
+        description: Validacao intermediaria orientada ao diff; usada no pre-push diario. Com --fix pode formatar somente arquivos alterados.
       - name: validate
         command: npm run format:check && npm run build:all && npm run script-contracts:check && npm run runtime-bootstrap:check && npm run test && npm run living-docs:check && npm run site:build && npm run state-yml:check && npm run active-specs:check && npm run reconcile:check && npm run co-knowledge:check && npm run co-knowledge:inventory && npm run constraints:check && npm run knowledge:check && npm run gate-decidability:check && npm run ruleset:check && npm run review:check && npm run insights:check && npm run intent:check
         category: aggregate
         mutates: true
-        consumers: [hook, workflow, human]
-        description: Gate local operacional e pre-push.
+        consumers: [workflow, human]
+        description: Gate completo para Ready, Human Gate, fechamentos e CI completo; nao roda no pre-push diario.
       - name: ci
         command: npm ci && npm run validate && npm run state-yml:check:all
         category: aggregate
@@ -385,7 +391,7 @@ profiles:
           - run: test:unit
       pre-push:
         steps:
-          - run: validate
+          - run: validate:changed
 
     workflows:
       - file: .github/workflows/repo-validation.yml

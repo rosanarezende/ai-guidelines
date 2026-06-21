@@ -39,7 +39,7 @@ main → branch dedicada → commit atômico → PR Draft → CI verde → Ready
 1. Crie branch: `fix/descricao-curta` ou `docs/descricao-curta`
 2. Faça o ajuste
 3. Abra PR em **modo Draft** usando o template [`.github/pull_request_template.md`](.github/pull_request_template.md)
-4. Garanta CI verde (`npm run format` + `npm run validate`)
+4. Garanta o ciclo diário verde (`npm run format` + `npm run validate:changed`)
 5. Converta para **Ready** e solicite review de pelo menos 1 owner
 
 **Sem spec necessária.**
@@ -62,7 +62,8 @@ backlog.md (candidata) → spec → branch → implementação (stacked PRs) →
    - `NEXT.md` — débitos adiados (apenas se houver; **deletado na branch antes do merge**)
 3. Crie **branch dedicada**: `feat/spec-XXXX-<slug>`.
 4. **Commits atômicos** por unidade lógica.
-5. `npm run validate` antes de qualquer push (hook `pre-push` roda automaticamente).
+5. `npm run validate:changed` antes de qualquer push (hook `pre-push` roda automaticamente).
+   Reserve `npm run validate` completo para Ready, Human Gate, fechamentos e CI completo.
 6. Abra PRs em **modo Draft**, converta para Ready quando CI verde.
 7. **Feche a branch antes do merge** (Estágio 5 do `WORKFLOW.md`): spec Done, state.yml done, NEXT.md deletado, historico/backlog/research atualizados. O merge não acontece com trabalho pendente na branch.
 8. Solicite review de pelo menos **1 owner** (ver [CODEOWNERS](.github/CODEOWNERS)).
@@ -130,15 +131,16 @@ chore(ci): atualizar threshold de cobertura para 85%
 
 ## Padrões obrigatórios
 
-| Regra                            | Detalhe                                                                                 |
-| :------------------------------- | :-------------------------------------------------------------------------------------- |
-| Nunca commitar em `main`         | Toda alteração em branch dedicada                                                       |
-| Commits atômicos                 | Uma unidade lógica por commit                                                           |
-| PRs sempre em Draft              | CI verde → Ready → review de owner                                                      |
-| `npm run format` antes do push   | CI valida formatação                                                                    |
-| `npm run validate` antes do push | Cobre format:check + build:all + test + living-docs:check (idêntico ao `pre-push` hook) |
-| Documentar decisões relevantes   | ADR para mudanças arquiteturais                                                         |
-| Approval humano antes de push    | Aplica-se também a agentes IA                                                           |
+| Regra                                                    | Detalhe                                                              |
+| :------------------------------------------------------- | :------------------------------------------------------------------- |
+| Nunca commitar em `main`                                 | Toda alteração em branch dedicada                                    |
+| Commits atômicos                                         | Uma unidade lógica por commit                                        |
+| PRs sempre em Draft                                      | CI verde → Ready → review de owner                                   |
+| `npm run format` antes do push                           | CI valida formatação                                                 |
+| `npm run validate:changed` antes do push                 | Cobre o ciclo rápido orientado ao diff (idêntico ao `pre-push` hook) |
+| `npm run validate` antes de Ready/Human Gate/fechamentos | Cobre o gate completo do framework                                   |
+| Documentar decisões relevantes                           | ADR para mudanças arquiteturais                                      |
+| Approval humano antes de push                            | Aplica-se também a agentes IA                                        |
 
 ---
 
@@ -178,7 +180,8 @@ Este repositório é o **framework canônico**, não apenas um exemplo de consum
 ```bash
 npm run setup                # = npm ci + build:all
 npm run format               # prettier --write
-npm run validate             # gate local: format:check + build:all + test + living-docs:check
+npm run validate:changed     # gate diário orientado ao diff
+npm run validate             # gate completo antes de Ready/Human Gate/fechamentos
 ```
 
 > **Referência única dos scripts:** [`docs/scripts.md`](docs/scripts.md) é gerado a partir de [`.core/governance/script-contracts.yml`](.core/governance/script-contracts.yml) e traz o mapa completo — categorias, composição, hooks de git, workflows de CI e contrato de commit. Não duplique comandos aqui.

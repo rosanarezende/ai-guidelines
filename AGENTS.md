@@ -29,7 +29,7 @@ Este workspace usa npm puro (`package-lock.json` + `npm ci`). Para execução lo
 ```bash
 npm run setup           # = npm ci + build:all
 npm run format          # prettier --write
-npm run validate        # gate local: format:check + build:all + test + living-docs:check
+npm run validate:changed # gate diário orientado ao diff; use validate completo antes de Ready/Human Gate
 npm run flow -- adopt --target . --dry-run
 ```
 

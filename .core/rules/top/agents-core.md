@@ -208,7 +208,8 @@ tags: [core, agents, always_injected, git, commit, ci, harness_lock]
 Neste repositório, o caminho obrigatório é:
 
 - `pre-commit` instalado via Husky executa a sincronização do contrato, build e testes rápidos;
-- `pre-push` executa o gate local `validate`;
+- `pre-push` executa `validate:changed`, o gate diário orientado ao diff;
+- `validate` completo fica reservado para Ready, Human Gate, fechamentos e CI completo;
 - `script-contracts:check` roda dentro de `validate` e falha se `package.json`, hooks, docs ou templates divergirem da SSOT.
 
 Se os hooks não estiverem instalados, se `.husky/*` divergir do contrato, ou se o ambiente não conseguir executar o runner declarado, pare e restaure o setup (`npm run setup` / `npm run prepare`, conforme `docs/scripts.md`). Não use `git commit --no-verify` sem autorização humana explícita. Não invente uma cadeia manual paralela para "substituir" o contrato.
