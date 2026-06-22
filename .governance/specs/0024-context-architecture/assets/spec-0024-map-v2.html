@@ -23,6 +23,8 @@
         --plan-bg: rgba(167, 139, 250, 0.13);
         --risk: #fb7185;
         --risk-bg: rgba(251, 113, 133, 0.12);
+        --role: #94a3b8;
+        --role-bg: rgba(148, 163, 184, 0.12);
         --white: #ffffff;
       }
 
@@ -208,6 +210,66 @@
         color: var(--risk);
       }
 
+      .tag.role {
+        background: var(--role-bg);
+        color: var(--soft);
+      }
+
+      .status-legend {
+        display: grid;
+        gap: 8px;
+        margin: 18px 0 0;
+        padding: 14px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: rgba(15, 17, 23, 0.42);
+      }
+
+      @media (min-width: 760px) {
+        .status-legend {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+      }
+
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--soft);
+        font-size: 12px;
+      }
+
+      .legend-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 999px;
+        flex: 0 0 auto;
+      }
+
+      .legend-dot.done {
+        background: var(--done);
+      }
+
+      .legend-dot.active {
+        background: var(--active);
+      }
+
+      .legend-dot.decision {
+        background: var(--decision);
+      }
+
+      .legend-dot.plan {
+        background: var(--plan);
+      }
+
+      .legend-dot.risk {
+        background: var(--risk);
+      }
+
+      .legend-dot.role {
+        background: var(--role);
+      }
+
       .model {
         display: grid;
         gap: 14px;
@@ -224,18 +286,10 @@
         position: relative;
         background: var(--panel);
         border: 1px solid var(--line);
-        border-top: 5px solid var(--active);
+        border-top: 5px solid var(--role);
         border-radius: 16px;
         padding: 16px;
         min-height: 190px;
-      }
-
-      .model-card:nth-child(2) {
-        border-top-color: var(--done);
-      }
-
-      .model-card:nth-child(3) {
-        border-top-color: var(--decision);
       }
 
       .model-card h3 {
@@ -333,6 +387,21 @@
         color: var(--muted);
         margin: 0;
         font-size: 13px;
+      }
+
+      .checkpoint ul {
+        margin: 10px 0 0;
+        padding-left: 18px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .checkpoint li + li {
+        margin-top: 6px;
+      }
+
+      .checkpoint strong {
+        color: var(--soft);
       }
 
       .meta {
@@ -457,6 +526,22 @@
             modelo × código, BDD visual e falsificação ampla ficam como checkpoints/PRs posteriores.
           </p>
         </div>
+        <div class="status-legend" aria-label="Legenda de cores">
+          <span class="legend-item"
+            ><span class="legend-dot done"></span>concluído ou decidido</span
+          >
+          <span class="legend-item"><span class="legend-dot active"></span>em andamento agora</span>
+          <span class="legend-item"
+            ><span class="legend-dot decision"></span>decisão pendente ou fronteira a cravar</span
+          >
+          <span class="legend-item"
+            ><span class="legend-dot plan"></span>planejado para depois</span
+          >
+          <span class="legend-item"
+            ><span class="legend-dot risk"></span>risco ou caminho a evitar</span
+          >
+          <span class="legend-item"><span class="legend-dot role"></span>conceito do modelo</span>
+        </div>
       </section>
 
       <nav class="nav" aria-label="Seções do mapa">
@@ -476,7 +561,7 @@
 
         <div class="model">
           <article class="model-card">
-            <span class="tag active">1 · Nó topológico</span>
+            <span class="tag role">1 · Nó topológico</span>
             <h3>Sequência estrutural da spec</h3>
             <p>
               Vive em <code>state.yml § topology</code>. Define a ordem macro:
@@ -486,7 +571,7 @@
           </article>
 
           <article class="model-card">
-            <span class="tag done">2 · Checkpoint</span>
+            <span class="tag role">2 · Checkpoint</span>
             <h3>Entrega governada e revisável</h3>
             <p>
               Unidade de trabalho com objetivo, evidência, validação e critério de saída. Tem nome
@@ -496,7 +581,7 @@
           </article>
 
           <article class="model-card">
-            <span class="tag decision">3 · PR</span>
+            <span class="tag role">3 · PR</span>
             <h3>Contêiner de revisão</h3>
             <p>
               Um PR pode conter um ou mais checkpoints pequenos e coesos. Ele não vira fonte de
@@ -648,24 +733,128 @@
           <section class="lane">
             <div class="lane-header">
               <div>
-                <h3>Depois do nó 11</h3>
-                <p>Apenas depois da continuação: dual-root, captura, eventos e fechamento final.</p>
+                <h3>Nós planejados depois da continuação</h3>
+                <p>
+                  Simulação de ordem: o próximo nó só começa quando a continuação provar que o fluxo
+                  está modelado, confrontado e falsificado.
+                </p>
               </div>
               <span class="tag plan">planejado</span>
             </div>
             <div class="checkpoint-list">
               <article class="checkpoint plan">
-                <h4>dualroot-collapse</h4>
-                <p>
-                  Colapsar a ponte .ai-guidelines/.specify antes de automatizar captura/eventos.
-                </p>
+                <h4>Nó 12 · dualroot-collapse</h4>
+                <p>Colapsar a ponte legada antes de automatizar qualquer captura ou evento.</p>
+                <ul>
+                  <li><strong>Entrada:</strong> lifecycle único validado no nó 11.</li>
+                  <li>
+                    <strong>Execução:</strong> migrar runtime consumidor para
+                    <code>.governance/</code> e remover dependência operacional de
+                    <code>.ai-guidelines/</code>/<code>.specify/</code>.
+                  </li>
+                  <li><strong>Saída:</strong> uma raiz governada, sem double-lookup silencioso.</li>
+                  <li><strong>Trava:</strong> sem perda de dados e com smoke de consumidor.</li>
+                </ul>
+                <div class="meta">
+                  <span class="pill">não começa antes do refactor do fluxo</span>
+                  <span class="pill">reduz legado</span>
+                </div>
               </article>
+
               <article class="checkpoint plan">
-                <h4>co-capture → co-events → housekeeping → knowledge-readiness</h4>
+                <h4>Nó 13 · co-capture</h4>
+                <p>Capturar fatos do fluxo sem transformar evento em estado permanente.</p>
+                <ul>
+                  <li><strong>Entrada:</strong> raiz governada única e comandos já convergidos.</li>
+                  <li>
+                    <strong>Execução:</strong> registrar decisões, validações e recibos como eventos
+                    delimitados.
+                  </li>
+                  <li>
+                    <strong>Saída:</strong> histórico auditável sem reescrever a autoridade humana.
+                  </li>
+                  <li>
+                    <strong>Trava:</strong> captura não pode executar Ready, Human Gate ou merge.
+                  </li>
+                </ul>
+                <div class="meta">
+                  <span class="pill">evento ≠ estado contínuo</span>
+                  <span class="pill">PIT-0008</span>
+                </div>
+              </article>
+
+              <article class="checkpoint plan">
+                <h4>Nó 14 · co-events</h4>
                 <p>
-                  Cauda planejada; não deve começar enquanto o fluxo ainda estiver parcialmente
-                  modelado.
+                  Transformar eventos em automações delimitadas, sem criar uma segunda fonte de
+                  verdade.
                 </p>
+                <ul>
+                  <li><strong>Entrada:</strong> eventos capturados com contrato estável.</li>
+                  <li>
+                    <strong>Execução:</strong> disparar validações e projeções no limite certo:
+                    checkpoint, commit, push, retomada ou review.
+                  </li>
+                  <li><strong>Saída:</strong> menos trabalho manual sem reduzir o Human Gate.</li>
+                  <li>
+                    <strong>Trava:</strong> automação não pode avançar nó nem aprovar decisão
+                    humana.
+                  </li>
+                </ul>
+                <div class="meta">
+                  <span class="pill">pipeline assistido</span>
+                  <span class="pill">sem auto-gate</span>
+                </div>
+              </article>
+
+              <article class="checkpoint plan">
+                <h4>Nó 15 · housekeeping</h4>
+                <p>Remover pontes, nomes, scripts e docs que só existiam para a transição.</p>
+                <ul>
+                  <li><strong>Entrada:</strong> dual-root removido e eventos estabilizados.</li>
+                  <li>
+                    <strong>Execução:</strong> apagar caminhos mortos, reconciliar templates, docs e
+                    guards.
+                  </li>
+                  <li><strong>Saída:</strong> zero runtime legado competindo pelo mesmo estado.</li>
+                  <li>
+                    <strong>Trava:</strong> nenhum teste deve proteger comportamento que deixou de
+                    existir.
+                  </li>
+                </ul>
+                <div class="meta">
+                  <span class="pill">limpeza estrutural</span>
+                  <span class="pill">sem testes negativos legados</span>
+                </div>
+              </article>
+
+              <article class="checkpoint plan">
+                <h4>Nó 16 · knowledge-readiness</h4>
+                <p>
+                  Fechar a spec com documentação, mapa, site e revisão final alinhados ao produto
+                  real.
+                </p>
+                <ul>
+                  <li>
+                    <strong>Entrada:</strong> runtime único, eventos confiáveis e legado removido.
+                  </li>
+                  <li>
+                    <strong>Execução:</strong> atualizar documentação pública, mapas visuais,
+                    prompts de imagem e evidências de adoção.
+                  </li>
+                  <li>
+                    <strong>Saída:</strong> Spec 0024 pronta para decisão humana final e
+                    comunicação.
+                  </li>
+                  <li>
+                    <strong>Trava:</strong> revisão externa deve conseguir falsificar mapa, código e
+                    experiência observada.
+                  </li>
+                </ul>
+                <div class="meta">
+                  <span class="pill">fechamento da spec</span>
+                  <span class="pill">mapa como projeção</span>
+                </div>
               </article>
             </div>
           </section>
@@ -681,7 +870,7 @@
 
         <div class="pr-board">
           <article class="pr-card primary">
-            <span class="tag active">Opção A · escolhida para PR #44</span>
+            <span class="tag done">Opção A · escolhida para PR #44</span>
             <h3>PR #44 fecha decisão de modelo + inventário</h3>
             <p>
               PR #44 ficaria como contêiner de dogfood de drift + modelagem do lifecycle. O refactor
@@ -724,7 +913,7 @@
           </article>
 
           <article class="pr-card">
-            <span class="tag decision">Alternativa por checkpoint</span>
+            <span class="tag plan">Alternativa por checkpoint</span>
             <h3>Um checkpoint por PR a partir daqui</h3>
             <p>
               Mais seguro para revisão, mas pode criar PRs pequenos demais. Útil quando o checkpoint
