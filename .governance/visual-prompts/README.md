@@ -29,6 +29,17 @@ wizard → escolha o tipo de prompt visual
 
 Os templates aqui são **briefings dirigidos a IA conversacional**, não prompts diretos para gerador de imagem. A IA é quem investiga e produz o prompt final — o template apenas estrutura o que ela deve fazer e que forma o output deve ter.
 
+## Dois modos de uso em PRs
+
+- **CLI direta, sem IA acompanhando o preenchimento do PR**: `pr-body:create`
+  injeta no body um `Briefing para IA — visão pretendida`. O humano leva esse
+  briefing a uma IA com contexto do projeto, que então aplica o template
+  versionado e devolve o prompt final para gerador de imagem.
+- **Humano trabalhando com uma IA na sessão atual**: a IA deve aplicar o template
+  versionado imediatamente e preencher o body com `Prompt final — visão
+pretendida`, já autocontido e pronto para qualquer gerador de imagem. Nesse
+  modo, o prompt final não deve depender de o gerador conhecer o repositório.
+
 ## Modo automático (em breve)
 
 Cravado como sub-escopo da candidata [`governance-dashboard-and-visual-artifacts`](../specs/roadmap/backlog.md) no backlog `Now`: investigação determinística local via comandos `git`/`gh` no próprio wizard (sem IA conversacional intermediária). Quando materializar, adicionará variantes `*-auto` ao menu do wizard para fluxo single-stage end-to-end.

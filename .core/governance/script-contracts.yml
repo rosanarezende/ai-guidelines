@@ -337,6 +337,18 @@ profiles:
         mutates: true
         consumers: [human]
         description: Cria PR body inicial a partir do perfil/template governado; open-next-node delega para esta fabrica.
+      - name: pr-body:check
+        command: npm run build && node dist/cli/bin.js pr-body-check
+        category: governance
+        mutates: true
+        consumers: [human]
+        description: Confirma que o body remoto do PR esta sincronizado com o arquivo versionado na spec.
+      - name: pr-body:publish
+        command: npm run build && node dist/cli/bin.js pr-body-publish
+        category: governance
+        mutates: true
+        consumers: [human]
+        description: Publica no GitHub o PR body versionado na spec e confirma por releitura.
       - name: pr-ready:check
         command: npm run build && node dist/cli/bin.js pr-ready-check
         category: governance

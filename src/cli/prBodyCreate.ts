@@ -102,7 +102,8 @@ function buildExecutionVisionBrief(input: {
   readonly headBranch: string;
 }): string {
   return [
-    `Use o prompt versionado ${INTENDED_VISION_PROMPT_PATH} para gerar a visão pretendida deste PR.`,
+    "MODO CLI DIRETA: este bloco não é um prompt final para gerador de imagem.",
+    `Cole este briefing em uma IA com acesso ao projeto e peça para ela aplicar o template versionado ${INTENDED_VISION_PROMPT_PATH}.`,
     "",
     "Substituições para o prompt versionado:",
     `{{context}} = PR governado ${input.nextNodeId} da Spec ${input.specId}`,
@@ -133,7 +134,7 @@ function buildExecutionVisionBrief(input: {
     "    - Não avançar para outro checkpoint sem decisão humana.",
     "    - Não usar imagem ou mapa como fonte da verdade.",
     "",
-    "Não substitua este briefing por um prompt visual ad hoc. Se a visão mudar por decisão humana, adicione um prompt complementar preservando este baseline.",
+    "Quando houver IA auxiliando diretamente o preenchimento do PR, substitua este briefing por um bloco `Prompt final — visão pretendida` já pronto para qualquer gerador de imagem. Se a visão mudar por decisão humana, adicione um prompt complementar preservando este baseline.",
   ].join("\n");
 }
 
@@ -173,9 +174,11 @@ function executionTemplateValues(input: PrBodyCreateInput): Readonly<Record<stri
     ...defaultValues,
     AI_GUIDELINES_EXECUTION_VISION_TEXT: visionPrompt,
     AI_GUIDELINES_EXECUTION_SUMMARY: [
-      `Este PR abre o próximo PR governado da Spec ${specId}: \`${nextNodeId}\`.`,
+      `Este PR inicia a entrega governada \`${nextNodeId}\` da Spec ${specId}.`,
       "",
-      `Ele nasce depois do Human Gate aprovado de \`${currentNodeId}\` e mantém o trabalho limitado a \`${nextCheckpoint}\`.`,
+      "Reescreva este resumo em linguagem humana antes da revisão: explique qual problema o PR pretende resolver, por que importa e qual fluxo humano/agente melhora.",
+      "",
+      `Contexto estrutural: nasce depois do Human Gate aprovado de \`${currentNodeId}\` e mantém o trabalho limitado a \`${nextCheckpoint}\`.`,
     ].join("\n"),
     AI_GUIDELINES_EXECUTION_SCOPE_IN: [
       `- Materializar o checkpoint \`${nextCheckpoint}\`.`,

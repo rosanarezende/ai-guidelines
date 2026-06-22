@@ -74,12 +74,18 @@ describe("CLI — pr-body:create [BR-PR-BODY-CREATE]", () => {
     expect(body).toContain("{{context}} = PR governado co-flow-continuation da Spec 0024");
     expect(body).toContain("{{localContext}} =");
     expect(body).toContain("sourceOfTruth:");
-    expect(body).toContain("Não substitua este briefing por um prompt visual ad hoc");
+    expect(body).toContain(
+      "MODO CLI DIRETA: este bloco não é um prompt final para gerador de imagem."
+    );
+    expect(body).toContain(
+      "substitua este briefing por um bloco `Prompt final — visão pretendida`"
+    );
     expect(body).not.toContain('FAIXA 1 — "Hoje"');
     expect(body).not.toContain("TRILHO DE AUTORIDADE");
     expect(body).toContain(
-      "Este PR abre o próximo PR governado da Spec 0024: `co-flow-continuation`."
+      "Este PR inicia a entrega governada `co-flow-continuation` da Spec 0024."
     );
+    expect(body).toContain("Reescreva este resumo em linguagem humana antes da revisão");
     expect(body).toContain("co-flow-continuation");
     expect(body).toContain("checkpoint-co-flow-continuation");
     expect(body).toContain("## Valor entregue");
