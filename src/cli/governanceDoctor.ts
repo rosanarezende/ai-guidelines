@@ -21,6 +21,7 @@ import {
 } from "../domain/workflow/WorkflowState.js";
 import { PR_BODY_PROFILES, PrProfileName } from "../domain/workflow/PrProfileContract.js";
 import { validateProfileBody } from "./governance-pr-check.js";
+import { parseSubCheckpoints } from "./handoffFacts.js";
 
 const ACTIVE_INDEX_REL = ".governance/runtime/specs/active.yml";
 const HISTORY_INDEX_REL = ".governance/runtime/specs/history.yml";
@@ -366,6 +367,7 @@ function issuesFromTopologyGateProgression(
     if (!fileExists(gatePath)) continue;
     const gateText = readFile(gatePath);
     if (!isApprovedGate(gateText)) continue;
+    if (hasUnfinishedSemanticSubCheckpoints(context, readFile, fileExists)) continue;
 
     issues.push(issueFromApprovedGateNotAdvanced(context, current, gatePath));
 
@@ -378,6 +380,19 @@ function issuesFromTopologyGateProgression(
     }
   }
   return issues;
+}
+
+function hasUnfinishedSemanticSubCheckpoints(
+  context: ParsedStateContext,
+  readFile: (filePath: string) => string,
+  fileExists: (filePath: string) => boolean
+): boolean {
+  const checkpoint = context.state.topology?.cursor.checkpoint;
+  if (!checkpoint) return false;
+  const tasksPath = path.join(context.specDir, "tasks.md");
+  if (!fileExists(tasksPath)) return false;
+  const subCheckpoints = parseSubCheckpoints(readFile(tasksPath), checkpoint);
+  return subCheckpoints.some((item) => item.state !== "done");
 }
 
 function issuesFromPullRequestBodies(

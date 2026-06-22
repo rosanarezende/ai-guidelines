@@ -481,6 +481,9 @@ export function deriveWorkNextAction(
       const availability = deriveOpenNextNodeAvailability({
         policyDeclared: true,
         gateApproved: true,
+        pendingSubCheckpoints: facts.subCheckpoints
+          .filter((item) => item.state !== "done")
+          .map((item) => item.id),
         activeNode: facts.activeNode
           ? {
               id: facts.activeNode.id,
@@ -714,10 +717,17 @@ export function deriveWorkBrief(input: WorkBriefInput): WorkBrief {
       `PR/HEAD divergentes com remoto À FRENTE (behind ${facts.git.behind}): pull/reconcilie antes de trabalhar.`
     );
   } else if (facts.lifecycle?.gateDecision === "approved") {
+    const pendingSubCheckpoints = facts.subCheckpoints.filter((item) => item.state !== "done");
     mode = "blocked";
-    modeBasis.push(
-      `gate do checkpoint ${checkpoint} já está approved — nenhuma nova implementação neste nó; confira o cursor (reconcile:check) ou abra o próximo nó (transição autorizada por gate).`
-    );
+    if (pendingSubCheckpoints.length > 0) {
+      modeBasis.push(
+        `gate do checkpoint ${checkpoint} já está approved para o recorte atual, mas o nó ainda tem checkpoint(s) semântico(s) pendente(s): ${pendingSubCheckpoints.map((item) => item.id).join(", ")}. Abra o próximo PR governado da continuação antes de abrir o próximo nó topológico.`
+      );
+    } else {
+      modeBasis.push(
+        `gate do checkpoint ${checkpoint} já está approved — nenhuma nova implementação neste nó; confira o cursor (reconcile:check) ou abra o próximo nó (transição autorizada por gate).`
+      );
+    }
   }
 
   // ── Mapa nextAction.kind → modo (refinado por findings×resolutions) ─────────

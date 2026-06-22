@@ -143,6 +143,18 @@ function tasksWithoutActiveCheckpoint(): string {
   ].join("\n");
 }
 
+function tasksWithPendingSemanticContinuation(): string {
+  return [
+    "## Execução",
+    "",
+    "- [/] **Checkpoint co-flow-continuation** (nó `co-flow-continuation`)",
+    "    - [x] **drift-diagnosis-and-repair — Governance Doctor**: concluído.",
+    "    - [x] **lifecycle-model-and-artifact-taxonomy-decision — mapa e inventário**: concluído.",
+    "    - [ ] **artifact-taxonomy-and-model-review-contract — implementação robusta da taxonomia**: próximo PR.",
+    "",
+  ].join("\n");
+}
+
 function depsFor(
   files: ReadonlyMap<string, string>,
   branch = "feat/spec-0024-context-architecture"
@@ -367,5 +379,25 @@ describe("GovernanceDoctor — diagnóstico humano de drift", () => {
       title: "O próximo nó ainda não tem PR/branch materializado",
       repairAuthority: "human-decision",
     });
+  });
+
+  it("DADO gate aprovado mas há checkpoint semântico pendente ENTÃO não exige abrir o próximo nó topológico", () => {
+    const files = new Map([
+      [activeIndexPath, activeIndex()],
+      [statePath, stateWithNextExecutionPlanned()],
+      [gatePath, approvedGate()],
+      [tasksPath, tasksWithPendingSemanticContinuation()],
+    ]);
+
+    const report = diagnoseGovernanceDrift(repoRoot, depsFor(files));
+
+    expect(
+      report.issues.find((item) => item.id === "gate-approved-not-advanced:co-flow-continuation")
+    ).toBeUndefined();
+    expect(
+      report.issues.find(
+        (item) => item.id === "next-node-not-materialized:co-flow-continuation->dualroot-collapse"
+      )
+    ).toBeUndefined();
   });
 });

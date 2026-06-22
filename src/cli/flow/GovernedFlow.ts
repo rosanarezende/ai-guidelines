@@ -109,6 +109,7 @@ export interface HumanGateFacts {
 export interface OpenNextNodeFacts {
   readonly policyDeclared: boolean;
   readonly gateApproved: boolean;
+  readonly pendingSubCheckpoints: readonly string[];
   readonly activeNode: {
     readonly id: string;
     readonly sequence: number | null;
@@ -452,6 +453,9 @@ export function openNextNodeFactsFromDecisionSnapshot(
       snapshot.policy !== null &&
       findDecisionType(snapshot.policy, OPEN_NEXT_NODE_ID) !== undefined,
     gateApproved: snapshot.facts.lifecycle?.gateDecision === "approved",
+    pendingSubCheckpoints: snapshot.subCheckpoints
+      .filter((item) => item.state !== "done")
+      .map((item) => item.id),
     activeNode: active
       ? {
           id: active.id,
@@ -567,6 +571,12 @@ export function deriveOpenNextNodeAvailability(f: OpenNextNodeFacts): DecisionAv
   }
 
   const reasons: string[] = [];
+  if (f.pendingSubCheckpoints.length > 0) {
+    const first = f.pendingSubCheckpoints[0];
+    reasons.push(
+      `O nó atual ainda tem checkpoint(s) semântico(s) pendente(s), começando por ${first}; abra o próximo PR governado da continuação antes de abrir o nó ${f.nextNode.id}.`
+    );
+  }
   if (f.nextNode.githubPr !== null) {
     reasons.push(`O próximo nó ${f.nextNode.id} já declara PR #${f.nextNode.githubPr}.`);
   }

@@ -361,12 +361,14 @@ export class OpenNextNodeDefinition implements HumanDecisionDefinition {
 
   buildBrief(snapshot: DecisionSnapshot, opts: { technical: boolean }): HumanDecisionBrief {
     const policy = this.policyOf(snapshot)!;
-    const availability = this.detect(snapshot);
+    const facts = openNextNodeFactsFromDecisionSnapshot(snapshot);
+    const availability = deriveOpenNextNodeAvailability(facts);
     const active = snapshot.facts.activeNode;
     const next = snapshot.facts.nextPlannedNode;
     const pr = snapshot.facts.pullRequest;
     const currentNode = nodeLabel(snapshot);
     const payload = buildPayload(snapshot);
+    const pendingSemantic = facts.pendingSubCheckpoints;
 
     const summary =
       availability.status === "available" && active && next
@@ -385,11 +387,17 @@ export class OpenNextNodeDefinition implements HumanDecisionDefinition {
           ]
         : ["Nenhum nó ativo inequívoco foi derivado da topologia."],
       next_node: next
-        ? [
-            `${next.id} (seq ${next.sequence ?? "?"}) é o próximo nó planejado.`,
-            `Branch pretendida: ${payload?.nextBranch ?? nextNodeBranch(snapshot.specId, next.id)}.`,
-            `Base pretendida: ${pr?.headRefName ?? snapshot.facts.git.branch ?? "(branch atual)"}.`,
-          ]
+        ? pendingSemantic.length > 0
+          ? [
+              `${next.id} (seq ${next.sequence ?? "?"}) é o próximo nó topológico, mas ainda não deve ser aberto.`,
+              `Checkpoint(s) semântico(s) pendente(s) neste nó: ${pendingSemantic.join(", ")}.`,
+              `O próximo PR deve continuar em ${currentNode} até a continuação terminar.`,
+            ]
+          : [
+              `${next.id} (seq ${next.sequence ?? "?"}) é o próximo nó planejado.`,
+              `Branch pretendida: ${payload?.nextBranch ?? nextNodeBranch(snapshot.specId, next.id)}.`,
+              `Base pretendida: ${pr?.headRefName ?? snapshot.facts.git.branch ?? "(branch atual)"}.`,
+            ]
         : ["Não há próximo nó planejado derivável em state.yml § topology."],
       preflight: [
         pr
@@ -402,19 +410,31 @@ export class OpenNextNodeDefinition implements HumanDecisionDefinition {
           ? "Preflight disponível para execução governada."
           : `Bloqueios: ${availability.reasons.join(" | ")}`,
       ],
-      planned_effects: payload
-        ? [
-            `Criar e publicar branch ${payload.nextBranch} a partir do HEAD aprovado ${payload.startPoint}.`,
-            "Criar um commit preparatório mínimo em active.yml antes do primeiro push, para os hooks validarem a branch correta.",
-            "Abrir PR Draft stacked contra a branch do nó aprovado.",
-            "Atualizar state.yml com o número factual retornado pelo GitHub.",
-            "Reconciliar state.yml § next com a topologia ativa.",
-            "Atualizar active.yml para a nova branch.",
-            "Materializar tasks.md para o novo checkpoint não nascer sem objeto de trabalho.",
-            "Comitar e fazer push normal do efeito governado.",
-          ]
-        : ["Sem payload completo, não há efeitos planejáveis."],
-      consequences: policy.consequences,
+      planned_effects:
+        pendingSemantic.length > 0
+          ? [
+              "Nenhum efeito de abertura de nó deve ser executado enquanto houver checkpoint semântico pendente.",
+              "A próxima ação governada pertence à continuação do nó atual, não ao próximo nó topológico.",
+            ]
+          : payload
+            ? [
+                `Criar e publicar branch ${payload.nextBranch} a partir do HEAD aprovado ${payload.startPoint}.`,
+                "Criar um commit preparatório mínimo em active.yml antes do primeiro push, para os hooks validarem a branch correta.",
+                "Abrir PR Draft stacked contra a branch do nó aprovado.",
+                "Atualizar state.yml com o número factual retornado pelo GitHub.",
+                "Reconciliar state.yml § next com a topologia ativa.",
+                "Atualizar active.yml para a nova branch.",
+                "Materializar tasks.md para o novo checkpoint não nascer sem objeto de trabalho.",
+                "Comitar e fazer push normal do efeito governado.",
+              ]
+            : ["Sem payload completo, não há efeitos planejáveis."],
+      consequences:
+        pendingSemantic.length > 0
+          ? [
+              "Nada é aplicado por open-next-node neste estado.",
+              "O próximo PR deve materializar o próximo checkpoint semântico da continuação.",
+            ]
+          : policy.consequences,
       not_authorized: policy.notAuthorized,
     };
 
@@ -484,6 +504,20 @@ export class OpenNextNodeDefinition implements HumanDecisionDefinition {
         preconditions: [],
         nextHuman: [],
         note: ["Nada foi alterado."],
+        payload: null,
+      };
+    }
+    const availability = this.detect(snapshot);
+    if (availability.status !== "available") {
+      return {
+        ...base,
+        mutating: false,
+        changes: [],
+        preserved: ["state.yml inalterado", "tasks.md inalterado", "active.yml inalterado"],
+        commitMessage: null,
+        preconditions: [],
+        nextHuman: [],
+        note: [`Decisão bloqueada: ${availability.reasons.join(" | ")}`],
         payload: null,
       };
     }
