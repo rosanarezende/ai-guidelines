@@ -1,0 +1,822 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Spec 0024 — Mapa V2: nós, checkpoints e PRs</title>
+    <style>
+      :root {
+        --bg: #0f1117;
+        --panel: #171a23;
+        --panel-2: #1e2230;
+        --line: #2b3143;
+        --ink: #eef2ff;
+        --muted: #a4adbf;
+        --soft: #cbd5e1;
+        --done: #34d399;
+        --done-bg: rgba(52, 211, 153, 0.13);
+        --active: #60a5fa;
+        --active-bg: rgba(96, 165, 250, 0.15);
+        --decision: #fbbf24;
+        --decision-bg: rgba(251, 191, 36, 0.13);
+        --plan: #a78bfa;
+        --plan-bg: rgba(167, 139, 250, 0.13);
+        --risk: #fb7185;
+        --risk-bg: rgba(251, 113, 133, 0.12);
+        --white: #ffffff;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background:
+          radial-gradient(circle at top left, rgba(96, 165, 250, 0.16), transparent 28rem),
+          var(--bg);
+        color: var(--ink);
+        font-family:
+          Inter,
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          sans-serif;
+        line-height: 1.5;
+      }
+
+      a {
+        color: inherit;
+      }
+
+      .wrap {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 28px 22px 72px;
+      }
+
+      .hero {
+        border: 1px solid var(--line);
+        background: rgba(23, 26, 35, 0.88);
+        border-radius: 18px;
+        padding: 24px;
+        margin-bottom: 18px;
+      }
+
+      .eyebrow {
+        color: var(--active);
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        margin: 0 0 8px;
+      }
+
+      h1 {
+        font-size: clamp(28px, 5vw, 48px);
+        line-height: 1.05;
+        margin: 0 0 12px;
+      }
+
+      .lead {
+        max-width: 920px;
+        color: var(--soft);
+        font-size: 17px;
+        margin: 0;
+      }
+
+      .warning {
+        margin-top: 18px;
+        border: 1px solid rgba(251, 191, 36, 0.35);
+        background: var(--decision-bg);
+        color: #fde68a;
+        border-radius: 12px;
+        padding: 12px 14px;
+        font-size: 14px;
+      }
+
+      .nav {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin: 18px 0 24px;
+      }
+
+      .nav a {
+        text-decoration: none;
+        color: var(--soft);
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 7px 12px;
+        font-size: 13px;
+      }
+
+      .section {
+        margin-top: 26px;
+      }
+
+      .section h2 {
+        font-size: 22px;
+        margin: 0 0 8px;
+      }
+
+      .section > p {
+        color: var(--muted);
+        margin: 0 0 14px;
+        max-width: 900px;
+      }
+
+      .grid {
+        display: grid;
+        gap: 14px;
+      }
+
+      @media (min-width: 820px) {
+        .grid.cols-2 {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .grid.cols-3 {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+      }
+
+      .card {
+        background: rgba(23, 26, 35, 0.9);
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        padding: 16px;
+      }
+
+      .card h3 {
+        margin: 0 0 7px;
+        font-size: 17px;
+      }
+
+      .card p,
+      .card li {
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .card p {
+        margin: 0;
+      }
+
+      .card ul {
+        padding-left: 18px;
+        margin: 10px 0 0;
+      }
+
+      .tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        border-radius: 999px;
+        padding: 3px 9px;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.02em;
+        margin-bottom: 8px;
+      }
+
+      .tag.done {
+        background: var(--done-bg);
+        color: var(--done);
+      }
+
+      .tag.active {
+        background: var(--active-bg);
+        color: var(--active);
+      }
+
+      .tag.decision {
+        background: var(--decision-bg);
+        color: var(--decision);
+      }
+
+      .tag.plan {
+        background: var(--plan-bg);
+        color: var(--plan);
+      }
+
+      .tag.risk {
+        background: var(--risk-bg);
+        color: var(--risk);
+      }
+
+      .model {
+        display: grid;
+        gap: 14px;
+        margin-top: 14px;
+      }
+
+      @media (min-width: 920px) {
+        .model {
+          grid-template-columns: 1fr 1fr 1fr;
+        }
+      }
+
+      .model-card {
+        position: relative;
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-top: 5px solid var(--active);
+        border-radius: 16px;
+        padding: 16px;
+        min-height: 190px;
+      }
+
+      .model-card:nth-child(2) {
+        border-top-color: var(--done);
+      }
+
+      .model-card:nth-child(3) {
+        border-top-color: var(--decision);
+      }
+
+      .model-card h3 {
+        margin: 0 0 8px;
+      }
+
+      .model-card code,
+      .inline-code {
+        background: rgba(255, 255, 255, 0.07);
+        color: #bfdbfe;
+        border: 1px solid rgba(148, 163, 184, 0.18);
+        border-radius: 6px;
+        padding: 1px 5px;
+      }
+
+      .timeline {
+        display: grid;
+        gap: 12px;
+      }
+
+      .lane {
+        background: rgba(23, 26, 35, 0.92);
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        overflow: hidden;
+      }
+
+      .lane-header {
+        display: flex;
+        gap: 10px;
+        align-items: start;
+        justify-content: space-between;
+        padding: 14px 16px;
+        border-bottom: 1px solid var(--line);
+        background: rgba(30, 34, 48, 0.8);
+      }
+
+      .lane-header h3 {
+        margin: 0;
+        font-size: 18px;
+      }
+
+      .lane-header p {
+        margin: 4px 0 0;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .checkpoint-list {
+        display: grid;
+        gap: 10px;
+        padding: 14px;
+      }
+
+      @media (min-width: 980px) {
+        .checkpoint-list {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      .checkpoint {
+        border: 1px solid var(--line);
+        border-left-width: 4px;
+        border-radius: 14px;
+        padding: 12px;
+        background: rgba(15, 17, 23, 0.54);
+      }
+
+      .checkpoint.done {
+        border-left-color: var(--done);
+      }
+
+      .checkpoint.active {
+        border-left-color: var(--active);
+      }
+
+      .checkpoint.decision {
+        border-left-color: var(--decision);
+      }
+
+      .checkpoint.plan {
+        border-left-color: var(--plan);
+      }
+
+      .checkpoint.risk {
+        border-left-color: var(--risk);
+      }
+
+      .checkpoint h4 {
+        margin: 0 0 6px;
+        font-size: 15px;
+      }
+
+      .checkpoint p {
+        color: var(--muted);
+        margin: 0;
+        font-size: 13px;
+      }
+
+      .meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 10px;
+      }
+
+      .pill {
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.07);
+        border: 1px solid rgba(148, 163, 184, 0.18);
+        color: var(--soft);
+        padding: 3px 8px;
+        font-size: 11px;
+      }
+
+      .pr-board {
+        display: grid;
+        gap: 14px;
+      }
+
+      @media (min-width: 920px) {
+        .pr-board {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      .pr-card {
+        border: 1px solid var(--line);
+        background: rgba(23, 26, 35, 0.9);
+        border-radius: 16px;
+        padding: 16px;
+      }
+
+      .pr-card.primary {
+        outline: 1px solid rgba(96, 165, 250, 0.35);
+        background:
+          linear-gradient(135deg, rgba(96, 165, 250, 0.13), transparent 44%), rgba(23, 26, 35, 0.92);
+      }
+
+      .pr-card h3 {
+        margin: 0 0 8px;
+      }
+
+      .rule-table {
+        width: 100%;
+        border-collapse: collapse;
+        overflow: hidden;
+        border-radius: 14px;
+        border: 1px solid var(--line);
+      }
+
+      .rule-table th,
+      .rule-table td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid var(--line);
+        vertical-align: top;
+      }
+
+      .rule-table th {
+        background: var(--panel-2);
+        color: var(--ink);
+        font-size: 13px;
+      }
+
+      .rule-table td {
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .rule-table tr:last-child td {
+        border-bottom: 0;
+      }
+
+      .decision-box {
+        border: 1px solid rgba(251, 191, 36, 0.35);
+        background: var(--decision-bg);
+        border-radius: 16px;
+        padding: 16px;
+      }
+
+      .decision-box h3 {
+        margin: 0 0 10px;
+        color: var(--decision);
+      }
+
+      .decision-box ol {
+        margin: 0;
+        padding-left: 20px;
+      }
+
+      .decision-box li {
+        margin: 7px 0;
+        color: #fde68a;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="wrap">
+      <section class="hero">
+        <p class="eyebrow">Proposta visual · não é SSOT</p>
+        <h1>Spec 0024 — mapa V2 a partir do PR #44</h1>
+        <p class="lead">
+          Este mapa mostra como a Spec 0024 poderia ficar se abandonarmos a hierarquia decimal
+          <span class="inline-code">CO-10.8.*</span> e passarmos a modelar explicitamente
+          <strong>nó topológico</strong>, <strong>checkpoint de entrega</strong> e
+          <strong>PR como contêiner de revisão</strong>.
+        </p>
+        <div class="warning">
+          Este arquivo é uma maquete para decisão humana. Em caso de divergência, continuam vencendo
+          <span class="inline-code">state.yml</span>, <span class="inline-code">tasks.md</span>,
+          Git/GitHub e os comandos governados.
+        </div>
+      </section>
+
+      <nav class="nav" aria-label="Seções do mapa">
+        <a href="#modelo">Modelo V2</a>
+        <a href="#pr44">PR #44</a>
+        <a href="#opcoes">Opções de divisão</a>
+        <a href="#regras">Regras propostas</a>
+        <a href="#decisoes">Decisões abertas</a>
+      </nav>
+
+      <section class="section" id="modelo">
+        <h2>1. O modelo que estamos testando</h2>
+        <p>
+          A ideia é parar de representar fases internas com nomes como CO-10.8.1/10.8.2 e usar
+          unidades com papéis claros.
+        </p>
+
+        <div class="model">
+          <article class="model-card">
+            <span class="tag active">1 · Nó topológico</span>
+            <h3>Sequência estrutural da spec</h3>
+            <p>
+              Vive em <code>state.yml § topology</code>. Define a ordem macro:
+              <code>co-flow-continuation</code> vem antes de <code>dualroot-collapse</code>,
+              <code>co-capture</code> e <code>co-events</code>.
+            </p>
+          </article>
+
+          <article class="model-card">
+            <span class="tag done">2 · Checkpoint</span>
+            <h3>Entrega governada e revisável</h3>
+            <p>
+              Unidade de trabalho com objetivo, evidência, validação e critério de saída. Tem nome
+              semântico: <code>drift-diagnosis-and-repair</code>,
+              <code>lifecycle-model-inventory</code>.
+            </p>
+          </article>
+
+          <article class="model-card">
+            <span class="tag decision">3 · PR</span>
+            <h3>Contêiner de revisão</h3>
+            <p>
+              Um PR pode conter um ou mais checkpoints pequenos e coesos. Ele não vira fonte de
+              verdade do checkpoint; só agrega diff, CI, review e narrativa de entrega.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="pr44">
+        <h2>2. Como ficaria a Spec 0024 a partir do PR #44</h2>
+        <p>
+          Abaixo está uma leitura candidata do nó
+          <span class="inline-code">co-flow-continuation</span>
+          sem usar a nomenclatura CO-10.8.*.
+        </p>
+
+        <div class="timeline">
+          <section class="lane">
+            <div class="lane-header">
+              <div>
+                <h3>Nó 10 · co-flow-convergence</h3>
+                <p>PR #43 · concluído no recorte CO-10.1..CO-10.7.</p>
+              </div>
+              <span class="tag done">concluído</span>
+            </div>
+            <div class="checkpoint-list">
+              <article class="checkpoint done">
+                <h4>CLI pública autoexplicável + site/simulador + harness</h4>
+                <p>Entrega aprovada por Human Gate, sem merge isolado em main.</p>
+                <div class="meta">
+                  <span class="pill">PR #43</span>
+                  <span class="pill">recorte entregue</span>
+                </div>
+              </article>
+            </div>
+          </section>
+
+          <section class="lane">
+            <div class="lane-header">
+              <div>
+                <h3>Nó 11 · co-flow-continuation</h3>
+                <p>
+                  PR #44 · continuação stacked sobre PR #43. Este é o trecho que estamos
+                  remodelando.
+                </p>
+              </div>
+              <span class="tag active">ativo</span>
+            </div>
+            <div class="checkpoint-list">
+              <article class="checkpoint done">
+                <h4>drift-diagnosis-and-repair</h4>
+                <p>
+                  Governance Doctor transforma desencontros em diagnóstico; drift #1 tem reparo
+                  seguro com preview; #2..#7 são detectados/explicados quando aplicável.
+                </p>
+                <div class="meta">
+                  <span class="pill">PR #44</span>
+                  <span class="pill">feito</span>
+                </div>
+              </article>
+
+              <article class="checkpoint decision">
+                <h4>checkpoint-model-boundaries</h4>
+                <p>
+                  Cravar o modelo node × checkpoint × PR antes de reorganizar o runtime. Esta
+                  maquete é evidência para essa decisão.
+                </p>
+                <div class="meta">
+                  <span class="pill">decisão atual</span>
+                  <span class="pill">sem código funcional</span>
+                </div>
+              </article>
+
+              <article class="checkpoint active">
+                <h4>lifecycle-model-inventory</h4>
+                <p>
+                  Inventariar a máquina completa: handoff, work, implementação, review, resolution,
+                  disposition, Ready, Human Gate, transição e merge.
+                </p>
+                <div class="meta">
+                  <span class="pill">candidato próximo</span>
+                  <span class="pill">artefato + mapa</span>
+                </div>
+              </article>
+
+              <article class="checkpoint plan">
+                <h4>lifecycle-code-confrontation</h4>
+                <p>
+                  Confrontar modelo × código e classificar cada gap como equivalente, intencional,
+                  bug, risco, legado ou ausente.
+                </p>
+                <div class="meta">
+                  <span class="pill">após inventário</span>
+                  <span class="pill">pede revisão externa</span>
+                </div>
+              </article>
+
+              <article class="checkpoint plan">
+                <h4>lifecycle-architecture-refactor</h4>
+                <p>
+                  Reorganizar runtime e testes por responsabilidades, preservando comportamento e
+                  eliminando caminhos duplicados.
+                </p>
+                <div class="meta">
+                  <span class="pill">behavior-preserving</span>
+                  <span class="pill">depois da falsificação do plano</span>
+                </div>
+              </article>
+
+              <article class="checkpoint plan">
+                <h4>maintainer-bdd-visualization</h4>
+                <p>
+                  Criar uma vitrine visual de cenários/testes para mantenedores acompanharem o
+                  fluxo.
+                </p>
+                <div class="meta">
+                  <span class="pill">visual</span>
+                  <span class="pill">sem substituir testes</span>
+                </div>
+              </article>
+
+              <article class="checkpoint plan">
+                <h4>broad-flow-falsification</h4>
+                <p>
+                  Falsificar jornadas reais depois do refactor: consumidor novo/existente, findings,
+                  reviews, readiness, PR, CI, offline/degradado e drift.
+                </p>
+                <div class="meta">
+                  <span class="pill">antes do review final</span>
+                  <span class="pill">CO-10.9 atual</span>
+                </div>
+              </article>
+
+              <article class="checkpoint plan">
+                <h4>continuation-external-review-and-human-gate</h4>
+                <p>
+                  Revisão independente ampla da continuação e Human Gate do nó, sem confundir com a
+                  revisão externa do PR #43.
+                </p>
+                <div class="meta">
+                  <span class="pill">terminal do nó</span>
+                  <span class="pill">CO-10.10 atual</span>
+                </div>
+              </article>
+            </div>
+          </section>
+
+          <section class="lane">
+            <div class="lane-header">
+              <div>
+                <h3>Depois do nó 11</h3>
+                <p>Apenas depois da continuação: dual-root, captura, eventos e fechamento final.</p>
+              </div>
+              <span class="tag plan">planejado</span>
+            </div>
+            <div class="checkpoint-list">
+              <article class="checkpoint plan">
+                <h4>dualroot-collapse</h4>
+                <p>
+                  Colapsar a ponte .ai-guidelines/.specify antes de automatizar captura/eventos.
+                </p>
+              </article>
+              <article class="checkpoint plan">
+                <h4>co-capture → co-events → housekeeping → knowledge-readiness</h4>
+                <p>
+                  Cauda planejada; não deve começar enquanto o fluxo ainda estiver parcialmente
+                  modelado.
+                </p>
+              </article>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section class="section" id="opcoes">
+        <h2>3. Como dividir por PRs?</h2>
+        <p>
+          O mapa V2 não obriga uma divisão; ele mostra as opções para escolhermos uma fronteira
+          revisável.
+        </p>
+
+        <div class="pr-board">
+          <article class="pr-card primary">
+            <span class="tag active">Opção A · recomendada para agora</span>
+            <h3>PR #44 fecha decisão de modelo + inventário</h3>
+            <p>
+              PR #44 ficaria como contêiner de dogfood de drift + modelagem do lifecycle. O refactor
+              estrutural iria para PR posterior.
+            </p>
+            <ul>
+              <li>Inclui: <strong>drift-diagnosis-and-repair</strong>.</li>
+              <li>Inclui: <strong>checkpoint-model-boundaries</strong>.</li>
+              <li>Inclui: <strong>lifecycle-model-inventory</strong>.</li>
+              <li>Não inclui: reorganização pesada de arquivos.</li>
+            </ul>
+          </article>
+
+          <article class="pr-card">
+            <span class="tag plan">Opção B · PR #44 maior</span>
+            <h3>PR #44 também confronta modelo × código</h3>
+            <p>
+              Mantém mais trabalho no PR atual, mas aumenta risco de repetir o problema do PR #43:
+              uma entrega ampla demais para revisão humana confortável.
+            </p>
+            <ul>
+              <li>Inclui inventário e confronto.</li>
+              <li>Adia só o refactor para o próximo PR.</li>
+              <li>Exige revisão externa antes de qualquer split físico.</li>
+            </ul>
+          </article>
+
+          <article class="pr-card">
+            <span class="tag risk">Opção C · evitar</span>
+            <h3>Um PR gigante para toda a continuação</h3>
+            <p>
+              Fechar inventário, refactor, BDD visual, falsificação e review no mesmo PR recria
+              exatamente o custo cognitivo que motivou esta discussão.
+            </p>
+            <ul>
+              <li>Difícil de revisar.</li>
+              <li>Mais chance de drift entre narrativa, código e mapa.</li>
+              <li>Human Gate vira grande demais.</li>
+            </ul>
+          </article>
+
+          <article class="pr-card">
+            <span class="tag decision">Alternativa por checkpoint</span>
+            <h3>Um checkpoint por PR a partir daqui</h3>
+            <p>
+              Mais seguro para revisão, mas pode criar PRs pequenos demais. Útil quando o checkpoint
+              muda arquitetura ou modelo de autoridade.
+            </p>
+            <ul>
+              <li>PR #45: confronto modelo × código.</li>
+              <li>PR #46: refactor estrutural.</li>
+              <li>PR #47: BDD visual + falsificação.</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="regras">
+        <h2>4. Regras de modelagem propostas</h2>
+        <p>
+          Estas regras explicam quando um PR pode conter mais de um checkpoint e quando isso vira
+          risco.
+        </p>
+
+        <table class="rule-table">
+          <thead>
+            <tr>
+              <th>Pergunta</th>
+              <th>Regra proposta</th>
+              <th>Impacto no PR #44</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Um PR pode conter mais de um checkpoint?</td>
+              <td>
+                Sim, quando os checkpoints são pequenos, sequenciais, acoplados e revisáveis como
+                uma entrega coesa.
+              </td>
+              <td>
+                PR #44 pode conter drift + decisão de modelo + inventário, se o refactor ficar fora.
+              </td>
+            </tr>
+            <tr>
+              <td>Um checkpoint pode atravessar mais de um PR?</td>
+              <td>
+                Normalmente não. Se precisa atravessar, o checkpoint provavelmente está grande
+                demais e deve ser quebrado.
+              </td>
+              <td>
+                <span class="inline-code">lifecycle-architecture-refactor</span> não deve começar no
+                PR #44 se não puder fechar nele.
+              </td>
+            </tr>
+            <tr>
+              <td>Quem decide avanço?</td>
+              <td>
+                O PR é contêiner de review; o checkpoint mantém readiness própria; o Human Gate
+                decide a entrega do PR/nó conforme escopo declarado.
+              </td>
+              <td>
+                O PR body precisa listar claramente quais checkpoints foram entregues e quais
+                continuam.
+              </td>
+            </tr>
+            <tr>
+              <td>Como evitar outro CO-10.8.*?</td>
+              <td>
+                Checkpoints devem ter nomes semânticos, não numeração decimal interna. Sequência é
+                atributo do nó, não parte do nome.
+              </td>
+              <td>
+                Trocar <span class="inline-code">CO-10.8.2</span> por
+                <span class="inline-code">lifecycle-model-inventory</span> ou nome equivalente.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="section" id="decisoes">
+        <div class="decision-box">
+          <h3>5. Decisões que este mapa quer facilitar</h3>
+          <ol>
+            <li>
+              O PR #44 deve fechar só <strong>drift + modelo de fronteiras + inventário</strong>,
+              deixando confronto/refactor para PRs posteriores?
+            </li>
+            <li>
+              O checkpoint atual deve ser renomeado para um slug semântico, sem
+              <span class="inline-code">CO-10.8.2</span>?
+            </li>
+            <li>
+              O framework deve formalizar que <strong>PR é contêiner</strong> e
+              <strong>checkpoint é unidade de entrega</strong>?
+            </li>
+            <li>
+              O mapa visual deve virar artefato recomendado sempre que um PR tiver múltiplas
+              frentes?
+            </li>
+          </ol>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
