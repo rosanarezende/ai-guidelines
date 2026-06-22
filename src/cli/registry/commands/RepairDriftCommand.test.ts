@@ -60,6 +60,27 @@ function staleReport(): GovernanceDoctorReport {
         whatHappened: "branch stale",
         whyItMatters: "importa",
         safeRepair: "republique",
+        repairAuthority: "confirm",
+        technicalDetails: [],
+      },
+    ],
+  };
+}
+
+function humanDecisionReport(): GovernanceDoctorReport {
+  return {
+    status: "attention",
+    summary: "1 ponto",
+    checked: [],
+    issues: [
+      {
+        id: "topology:.governance/specs/0024-context-architecture/state.yml:narrated-next-omits-canonical",
+        severity: "warning",
+        title: "O próximo narrado diverge da topologia",
+        whatHappened: "next[0] aponta para outro nó",
+        whyItMatters: "a topologia é a fonte estrutural",
+        safeRepair: "prepare a decisão governada correta",
+        repairAuthority: "human-decision",
         technicalDetails: [],
       },
     ],
@@ -153,6 +174,56 @@ describe("RepairDriftCommand (`repair`) — reparo gated por preview + confirma�
 
     expect(out.exitCode).toBe(0);
     expect(infos.join("\n")).toContain("Nenhum drift com reparo automático");
+  });
+
+  it("DADO drift que exige decisão humana QUANDO run ENTÃO explica sem montar plano de escrita", async () => {
+    const { logger, infos } = capturingLogger();
+    const cmd = new RepairDriftCommand({
+      diagnose: () => humanDecisionReport(),
+      buildPlan: () => {
+        throw new Error("drift de decisão humana não deve montar plano automático");
+      },
+    });
+
+    const out = await cmd.run({ apply: true }, context(logger));
+
+    expect(out.exitCode).toBe(0);
+    const text = infos.join("\n");
+    expect(text).toContain("Nenhum drift com reparo automático");
+    expect(text).toContain("decisão humana");
+    expect(text).toContain("O próximo narrado diverge da topologia");
+  });
+
+  it("DADO drift bloqueado QUANDO run ENTÃO explica sem montar plano de escrita", async () => {
+    const { logger, infos } = capturingLogger();
+    const cmd = new RepairDriftCommand({
+      diagnose: () => ({
+        status: "attention",
+        summary: "1 ponto",
+        checked: [],
+        issues: [
+          {
+            id: "state-parse:state.yml",
+            severity: "warning",
+            title: "Um state.yml não pôde ser interpretado",
+            whatHappened: "schema inválido",
+            whyItMatters: "sem estado não há reparo seguro",
+            safeRepair: "corrija o schema primeiro",
+            repairAuthority: "blocked",
+            technicalDetails: [],
+          },
+        ],
+      }),
+      buildPlan: () => {
+        throw new Error("drift bloqueado não deve montar plano automático");
+      },
+    });
+
+    await cmd.run({ apply: true }, context(logger));
+
+    const text = infos.join("\n");
+    expect(text).toContain("bloqueado");
+    expect(text).toContain("corrija o schema primeiro");
   });
 
   it("DADO drift reparável mas autoria desconhecida QUANDO run ENTÃO orienta a informar --updated-by", async () => {

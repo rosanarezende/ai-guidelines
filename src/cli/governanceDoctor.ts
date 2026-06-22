@@ -20,6 +20,7 @@ const COPY = FLOW_COPY.governanceDoctor;
 
 export type GovernanceDoctorStatus = "ok" | "attention" | "not-governed";
 export type GovernanceDoctorSeverity = "info" | "warning";
+export type GovernanceDoctorRepairAuthority = "auto" | "confirm" | "human-decision" | "blocked";
 
 export interface GovernanceDoctorIssue {
   readonly id: string;
@@ -28,6 +29,7 @@ export interface GovernanceDoctorIssue {
   readonly whatHappened: string;
   readonly whyItMatters: string;
   readonly safeRepair: string;
+  readonly repairAuthority: GovernanceDoctorRepairAuthority;
   readonly technicalDetails: readonly string[];
 }
 
@@ -76,6 +78,7 @@ export function diagnoseGovernanceDrift(
       whatHappened: errorMessage(error),
       whyItMatters: COPY.issues.activeIndexInvalid.whyItMatters,
       safeRepair: COPY.issues.activeIndexInvalid.safeRepair,
+      repairAuthority: "blocked",
       technicalDetails: [ACTIVE_INDEX_REL],
     });
   }
@@ -89,6 +92,7 @@ export function diagnoseGovernanceDrift(
         whatHappened: `${ACTIVE_INDEX_REL} não foi encontrado.`,
         whyItMatters: COPY.issues.activeIndexMissing.whyItMatters,
         safeRepair: COPY.issues.activeIndexMissing.safeRepair,
+        repairAuthority: "confirm",
         technicalDetails: [`state.yml encontrados: ${stateFiles.length}`],
       });
     }
@@ -123,6 +127,7 @@ export function diagnoseGovernanceDrift(
         whatHappened: errorMessage(error),
         whyItMatters: COPY.issues.activeConsistencyError.whyItMatters,
         safeRepair: COPY.issues.activeConsistencyError.safeRepair,
+        repairAuthority: "blocked",
         technicalDetails: [ACTIVE_INDEX_REL],
       });
     }
@@ -172,6 +177,7 @@ export function renderGovernanceDoctorReport(report: GovernanceDoctorReport): st
     lines.push("", `${index + 1}. ${issue.title}`);
     lines.push(`   ${COPY.labels.whatHappened}: ${issue.whatHappened}`);
     lines.push(`   ${COPY.labels.whyItMatters}: ${issue.whyItMatters}`);
+    lines.push(`   ${COPY.labels.repairAuthority}: ${COPY.repairAuthority[issue.repairAuthority]}`);
     lines.push(`   ${COPY.labels.safeRepair}: ${issue.safeRepair}`);
     if (issue.technicalDetails.length > 0) {
       lines.push(`   ${COPY.labels.technicalDetails}:`);
@@ -189,6 +195,7 @@ function issueFromMissingSpecPath(resolved: ResolvedActiveSpec): GovernanceDocto
     whatHappened: `A spec ${resolved.entry.id} (${resolved.entry.slug}) declara spec_path "${resolved.entry.specPath}", mas essa pasta não existe no workspace atual.`,
     whyItMatters: COPY.issues.missingSpecPath.whyItMatters,
     safeRepair: COPY.issues.missingSpecPath.safeRepair,
+    repairAuthority: "human-decision",
     technicalDetails: [`branch declarada: ${resolved.entry.branch}`],
   };
 }
@@ -201,6 +208,7 @@ function issueFromConsistencyFailure(failure: ConsistencyFailure): GovernanceDoc
     whatHappened: failure.message,
     whyItMatters: COPY.consistency.whyItMatters,
     safeRepair: COPY.consistency.safeRepair,
+    repairAuthority: repairAuthorityForConsistencyFailure(failure.message),
     technicalDetails: [`spec: ${failure.id}`],
   };
 }
@@ -220,6 +228,7 @@ function issuesFromReconcileReport(
         whatHappened: spec.result.message,
         whyItMatters: COPY.issues.stateParse.whyItMatters,
         safeRepair: COPY.issues.stateParse.safeRepair,
+        repairAuthority: "blocked",
         technicalDetails: [relPath],
       });
       continue;
@@ -240,6 +249,7 @@ function issueFromDivergence(relPath: string, divergence: Divergence): Governanc
     whatHappened: divergence.message,
     whyItMatters: COPY.divergence.whyItMatters,
     safeRepair: COPY.divergence.safeRepair,
+    repairAuthority: "human-decision",
     technicalDetails: [relPath],
   };
 }
@@ -266,6 +276,16 @@ function classifyConsistencyFailure(message: string): string {
   if (message.includes("source_state_path stale")) return "source-state";
   if (message.includes("completed não pertence")) return "completed";
   return "unknown";
+}
+
+function repairAuthorityForConsistencyFailure(message: string): GovernanceDoctorRepairAuthority {
+  if (message.includes("branch stale")) return "confirm";
+  if (message.includes("stage stale")) return "human-decision";
+  if (message.includes("não encontrado")) return "human-decision";
+  if (message.includes("identidade stale")) return "human-decision";
+  if (message.includes("source_state_path stale")) return "human-decision";
+  if (message.includes("completed não pertence")) return "human-decision";
+  return "human-decision";
 }
 
 function titleForDivergence(code: Divergence["code"]): string {

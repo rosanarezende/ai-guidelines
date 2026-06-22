@@ -6,8 +6,15 @@
     "issues": "Divergências e reparos seguros",
     "whatHappened": "O que aconteceu",
     "whyItMatters": "Por que importa",
+    "repairAuthority": "Classificação do reparo",
     "safeRepair": "Reparo seguro",
     "technicalDetails": "Detalhes técnicos"
+  },
+  "repairAuthority": {
+    "auto": "automático",
+    "confirm": "reparo seguro com preview e confirmação",
+    "human-decision": "decisão humana",
+    "blocked": "bloqueado até corrigir a fonte"
   },
   "checks": {
     "publicIndex": "índice público de specs",
@@ -66,6 +73,6 @@
       "narrated-next-omits-canonical": "O próximo narrado diverge da topologia"
     },
     "whyItMatters": "A topologia é a fonte estrutural do fluxo. Quando a narração ou o cursor divergem dela, uma sessão nova pode continuar no ponto errado.",
-    "safeRepair": "Use a decisão governada que atualiza cursor, next e topologia juntos; quando for apenas next narrado stale, regenere a narração a partir da topologia."
+    "safeRepair": "Mostre a divergência e prepare a decisão governada correta. Não reescreva cursor, topologia ou next narrado automaticamente."
   }
 }

@@ -9,7 +9,12 @@ import {
   BranchProjectionPlanResult,
   buildBranchProjectionRepairPlan,
 } from "../../repair/branchProjectionRepair.js";
-import { renderRepairPlan, selectBranchStaleIssues } from "../../repair/governanceRepair.js";
+import {
+  renderNonAutomaticIssues,
+  renderRepairPlan,
+  selectBranchStaleIssues,
+  selectNonAutomaticIssues,
+} from "../../repair/governanceRepair.js";
 
 const COPY = FLOW_COPY.governanceRepair;
 
@@ -69,8 +74,13 @@ export class RepairDriftCommand implements Command<RepairDriftOptions> {
 
     const report = diagnose(repoRoot);
     const repairable = selectBranchStaleIssues(report);
+    const nonAutomatic = selectNonAutomaticIssues(report);
     if (repairable.length === 0) {
       logger.info(COPY.status.noneRepairable);
+      if (nonAutomatic.length > 0) {
+        logger.info(COPY.status.nonAutomaticIntro);
+        for (const line of renderNonAutomaticIssues(nonAutomatic)) logger.info(line);
+      }
       return { exitCode: 0 };
     }
 

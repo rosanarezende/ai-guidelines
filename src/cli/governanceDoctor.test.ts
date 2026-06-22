@@ -3,6 +3,7 @@ import { diagnoseGovernanceDrift, renderGovernanceDoctorReport } from "./governa
 const repoRoot = "/repo";
 const activeIndexPath = `${repoRoot}/.governance/runtime/specs/active.yml`;
 const statePath = `${repoRoot}/.governance/specs/0024-context-architecture/state.yml`;
+const tasksPath = `${repoRoot}/.governance/specs/0024-context-architecture/tasks.md`;
 
 function activeIndex(branch = "feat/spec-0024-context-architecture"): string {
   return `
@@ -56,6 +57,23 @@ topology:
         checkpoints:
           - review-and-merge
 `;
+}
+
+function stateWithCursorOutsideCanonical(): string {
+  return stateWithTopology()
+    .replace("pr: co-flow-continuation", "pr: integration-final")
+    .replace("checkpoint: checkpoint-co-flow-continuation", "checkpoint: review-and-merge");
+}
+
+function tasksWithIncoherentSubcheckpoint(): string {
+  return [
+    "## Execução",
+    "",
+    "- [/] **Checkpoint co-flow-continuation** (nó `co-flow-continuation`)",
+    "    - [x] **CO-10.8.1 — Governance Doctor**: EM EXECUÇÃO.",
+    "    - [ ] **CO-10.8.2 — reorganização interna**: pendente.",
+    "",
+  ].join("\n");
 }
 
 function depsFor(
@@ -136,6 +154,9 @@ describe("GovernanceDoctor — diagnóstico humano de drift", () => {
     expect(report.issues.map((issue) => issue.title)).toContain(
       "O índice público aponta para a branch errada"
     );
+    expect(report.issues.find((issue) => issue.id.endsWith(":branch"))?.repairAuthority).toBe(
+      "confirm"
+    );
     expect(renderGovernanceDoctorReport(report).join("\n")).toContain("Reparo seguro:");
   });
 
@@ -151,6 +172,36 @@ describe("GovernanceDoctor — diagnóstico humano de drift", () => {
     expect(report.issues.map((issue) => issue.title)).toContain(
       "O próximo narrado diverge da topologia"
     );
+    expect(report.issues[0].repairAuthority).toBe("human-decision");
     expect(report.issues[0].whyItMatters).toContain("topologia");
+  });
+
+  it("DADO cursor incoerente ENTÃO classifica como decisão humana", () => {
+    const files = new Map([
+      [activeIndexPath, activeIndex()],
+      [statePath, stateWithCursorOutsideCanonical()],
+    ]);
+
+    const report = diagnoseGovernanceDrift(repoRoot, depsFor(files));
+
+    expect(report.status).toBe("attention");
+    const topologyIssue = report.issues.find((issue) => issue.id.includes("cursor"));
+    expect(topologyIssue).toMatchObject({ repairAuthority: "human-decision" });
+  });
+
+  it("DADO tasks.md incoerente com o checkpoint ativo ENTÃO classifica como decisão humana", () => {
+    const files = new Map([
+      [activeIndexPath, activeIndex()],
+      [statePath, stateWithTopology()],
+      [tasksPath, tasksWithIncoherentSubcheckpoint()],
+    ]);
+
+    const report = diagnoseGovernanceDrift(repoRoot, depsFor(files));
+
+    expect(report.status).toBe("attention");
+    expect(report.issues.some((issue) => issue.id.includes("active-consistency"))).toBe(true);
+    expect(report.issues.find((issue) => issue.id.includes("active-consistency"))).toMatchObject({
+      repairAuthority: "human-decision",
+    });
   });
 });

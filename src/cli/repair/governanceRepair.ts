@@ -25,6 +25,15 @@ export function selectBranchStaleIssues(
   return report.issues.filter((issue) => BRANCH_STALE_ISSUE.test(issue.id));
 }
 
+/** Issues detectáveis, mas que não devem ser convertidas em escrita automática. */
+export function selectNonAutomaticIssues(
+  report: GovernanceDoctorReport
+): readonly GovernanceDoctorIssue[] {
+  return report.issues.filter(
+    (issue) => issue.repairAuthority === "human-decision" || issue.repairAuthority === "blocked"
+  );
+}
+
 function authorityLabel(authority: RepairAuthority): string {
   return COPY.authority[authority];
 }
@@ -49,5 +58,19 @@ export function renderRepairPlan(plan: RepairPlan): string[] {
   } else {
     for (const file of files) lines.push(`- ${file}`);
   }
+  return lines;
+}
+
+/** Render humano das divergências que exigem decisão humana ou correção prévia. */
+export function renderNonAutomaticIssues(issues: readonly GovernanceDoctorIssue[]): string[] {
+  if (issues.length === 0) return [];
+
+  const lines: string[] = ["", `${COPY.labels.nonAutomatic}:`];
+  issues.forEach((issue, index) => {
+    lines.push(`${index + 1}. ${issue.title}`);
+    lines.push(`   ${COPY.labels.whatHappened}: ${issue.whatHappened}`);
+    lines.push(`   ${COPY.labels.authority}: ${authorityLabel(issue.repairAuthority)}`);
+    lines.push(`   ${COPY.labels.plan}: ${issue.safeRepair}`);
+  });
   return lines;
 }
