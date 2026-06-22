@@ -6,6 +6,17 @@ No: `co-flow-continuation`
 PR: #44 — `feat/spec-0024-co-flow-continuation`  
 Decisao de recorte: **[DEC-0024-G21] — PR #44 fecha decisao de modelo + inventario, com guardrail contra debito arquitetural silencioso**
 
+> **Nota de atualizacao (2026-06-22 / DEC-0024-G21):** este inventario e a
+> evidencia do raciocinio que levou a G21. A decomposicao operacional canonica
+> depois da decisao e: `drift-diagnosis-and-repair`,
+> `lifecycle-model-and-artifact-taxonomy-decision`,
+> `artifact-taxonomy-and-model-review-contract`,
+> `internal-architecture-refactor-ddd-bdd`, `broad-flow-falsification` e
+> `continuation-review-human-gate`. Nomes intermediarios como
+> `checkpoint-model-boundaries`, `lifecycle-model-inventory`,
+> `lifecycle-architecture-refactor`, `maintainer-bdd-visualization` e
+> `continuation-external-review-and-human-gate` ficam superseded por G21.
+
 ## 1. Veredito curto
 
 Este inventario transforma a dor observada na Spec 0024 em modelo analisavel:
@@ -54,18 +65,16 @@ de divisao; o checkpoint deve ganhar um nome semantico.
 O PR #44 fecha o recorte de decisao/inventario/dogfood:
 
 - `drift-diagnosis-and-repair`;
-- `checkpoint-model-boundaries`;
-- `lifecycle-model-inventory`.
-- `artifact-taxonomy-inventory`;
+- `lifecycle-model-and-artifact-taxonomy-decision`;
+- `artifact-taxonomy-and-model-review-contract` como contrato do PR seguinte,
+  sem implementa-lo neste PR;
 - `no-silent-architecture-debt` / GG-0005.
 
 O PR #44 nao deve fechar:
 
-- `lifecycle-code-confrontation`;
-- `lifecycle-architecture-refactor`;
-- `maintainer-bdd-visualization`;
+- `internal-architecture-refactor-ddd-bdd`;
 - `broad-flow-falsification`;
-- `continuation-external-review-and-human-gate`.
+- `continuation-review-human-gate`.
 
 ## 4. Fontes, projecoes e consumidores
 
@@ -164,17 +173,14 @@ O modelo precisa declarar, para cada transicao:
 
 ## 9. Modelo de proximos checkpoints sem `CO-10.8.*`
 
-| Ordem candidata | Checkpoint semantico                          | Objetivo                                                                    | PR sugerido       |
-| --------------- | --------------------------------------------- | --------------------------------------------------------------------------- | ----------------- |
-| 1               | `drift-diagnosis-and-repair`                  | Detectar/explicar/reparar drift seguro quando houver gerador deterministico | PR #44            |
-| 2               | `checkpoint-model-boundaries`                 | Decidir modelo no/checkpoint/PR e abandonar sub-sub checkpoint decimal      | PR #44            |
-| 3               | `lifecycle-model-inventory`                   | Inventariar ciclo completo e fontes/consumidores                            | PR #44            |
-| 4               | `artifact-taxonomy-and-model-review-contract` | Implementar taxonomia de artefatos, index check e review pre-codificacao    | PR seguinte       |
-| 5               | `lifecycle-code-confrontation`                | Comparar modelo x codigo e classificar gaps                                 | PR posterior      |
-| 6               | `lifecycle-architecture-refactor`             | Reorganizar runtime/testes sem alterar comportamento                        | PR posterior      |
-| 7               | `maintainer-bdd-visualization`                | Criar vitrine visual de cenarios para mantenedores                          | PR posterior      |
-| 8               | `broad-flow-falsification`                    | Rodar jornadas reais e falsificacoes amplas                                 | PR posterior      |
-| 9               | `continuation-external-review-and-human-gate` | Revisao independente e decisao humana do no                                 | PR terminal do no |
+| Ordem candidata | Checkpoint semantico                             | Objetivo                                                                                    | PR sugerido       |
+| --------------- | ------------------------------------------------ | ------------------------------------------------------------------------------------------- | ----------------- |
+| 1               | `drift-diagnosis-and-repair`                     | Detectar/explicar/reparar drift seguro quando houver gerador deterministico                 | PR #44            |
+| 2               | `lifecycle-model-and-artifact-taxonomy-decision` | Decidir modelo no/checkpoint/PR, inventariar lifecycle e registrar a taxonomia de artefatos | PR #44            |
+| 3               | `artifact-taxonomy-and-model-review-contract`    | Implementar taxonomia de artefatos, index check e review pre-codificacao                    | PR seguinte       |
+| 4               | `internal-architecture-refactor-ddd-bdd`         | Reorganizar runtime/testes e BDD visual sem alterar comportamento                           | PR posterior      |
+| 5               | `broad-flow-falsification`                       | Rodar jornadas reais e falsificacoes amplas                                                 | PR posterior      |
+| 6               | `continuation-review-human-gate`                 | Revisao independente e decisao humana do no                                                 | PR terminal do no |
 
 ## 10. Perguntas para revisao externa
 

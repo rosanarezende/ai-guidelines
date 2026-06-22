@@ -8,6 +8,11 @@ Artefato visual relacionado: `assets/spec-0024-map-v2.html`
 Inventario relacionado:
 `research/2026-06-22-checkpoint-co-flow-continuation-lifecycle-model-inventory.md`
 
+> **Nota de atualizacao (2026-06-22 / DEC-0024-G21):** este artefato foi
+> reconciliado pela G21. Use `decision-brief.md`, `tasks.md` e `state.yml § next`
+> como fontes atuais do recorte; nomes e decomposicoes anteriores ficam
+> superseded pela nomenclatura semantica registrada em G21.
+
 ## 1. Decisao registrada nesta rodada
 
 A mantenedora registrou a decisao **[DEC-0024-G21]** para o PR #44:

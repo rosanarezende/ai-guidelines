@@ -581,6 +581,8 @@ Cada transição deve declarar: fato de entrada, autoridade, comando, efeito per
 - Definir que o próximo PR de continuação deve implementar a taxonomia de artefatos de forma robusta, não como prova mínima:
   - `kind`/metadado equivalente como fonte única da natureza do artefato;
   - classificação dos artefatos atuais relevantes sem mover arquivos referenciados;
+  - unificação das ordens de autoridade hoje divergentes (`research/README.md` e o inventário de taxonomia) em uma única regra canônica, por domínio;
+  - classificação dos handoffs antigos como `kind: handoff-legacy` ou equivalente, sem criar uma nova pasta para handoff persistido e preservando ADR 0022/PIT-0010;
   - `research-index` canônico reparado e verificado por check;
   - promoção dos artefatos reutilizáveis já maduros para `research-library/<domínio>/` com índice atualizado;
   - projeções visuais, mapas e assets rotulados como não-autoridade;
