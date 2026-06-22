@@ -12,7 +12,7 @@
       },
       {
         "title": "ai-guidelines lê o estado real",
-        "body": "O sistema detecta projeto novo, repo existente, specs abertas, branch, PR, validações, reviews e bloqueios."
+        "body": "O sistema detecta projeto novo, repo existente, specs abertas, branch, PR, validações, reviews, bloqueios e drift de governança."
       },
       {
         "title": "O fluxo mostra o próximo passo seguro",
@@ -43,6 +43,10 @@
     {
       "title": "Decisão humana (Human Gate)",
       "body": "Marcar pronto, aprovar o avanço e fazer o merge são decisões reservadas a um humano — registradas depois da decisão, nunca antes."
+    },
+    {
+      "title": "Drift explicado antes da ação",
+      "body": "Se índice, branch, tarefas ou narrativa divergem, o preflight aparece no fluxo e orienta reparo seguro ou decisão humana antes de continuar."
     }
   ]
 }
