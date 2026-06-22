@@ -46,6 +46,15 @@ topológico `dualroot-collapse`; deveria abrir um PR novo dentro da continuaçã
 - O gerador de body atual é orientado a "next node"; para este caso, o texto do
   PR precisou ser escrito manualmente para não chamar o checkpoint semântico de
   nó governado.
+- O `governance-pr-check` só aceita PRs listados em `state.yml § topology.prs`.
+  Para o PR #45 passar no CI, foi necessário materializar o PR semântico como
+  veículo próprio (`artifact-taxonomy-and-model-review-contract`, seq 12) e
+  deslocar os veículos planejados posteriores. Isso funcionou, mas mostra que o
+  modelo ainda não diferencia bem "nó topológico" de "PR/checkpoint semântico".
+- O body inicial do PR não preservou o template completo: faltava o bloco
+  `<details>` de "Prompt final — visão pretendida". A correção exigiu
+  regenerar o body a partir do template real, mantendo o prompt visual como
+  baseline preservado do Draft.
 - A linguagem runtime ainda usa "checkpoint semântico", "sub-checkpoint" e "nó"
   de forma pouco clara para humanos. Isso reforça a necessidade de uma DEC de
   vocabulário humano do lifecycle.
