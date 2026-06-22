@@ -578,7 +578,7 @@
             <p>
               Unidade de trabalho com objetivo, evidência, validação e critério de saída. Tem nome
               semântico: <code>drift-diagnosis-and-repair</code>,
-              <code>lifecycle-model-inventory</code>.
+              <code>artifact-taxonomy-and-model-review-contract</code>.
             </p>
           </article>
 
@@ -646,39 +646,27 @@
                 </div>
               </article>
 
-              <article class="checkpoint decision">
-                <h4>checkpoint-model-boundaries</h4>
+              <article class="checkpoint done">
+                <h4>lifecycle-model-and-artifact-taxonomy-decision</h4>
                 <p>
-                  Cravar o modelo node × checkpoint × PR antes de reorganizar o runtime. Esta
-                  maquete é evidência para essa decisão.
+                  G21 cravou a fronteira node × checkpoint × PR, abandonou a nomenclatura
+                  operacional CO-10.8.* e registrou a taxonomia de artefatos + GG-0005.
                 </p>
                 <div class="meta">
-                  <span class="pill">decisão atual</span>
-                  <span class="pill">sem código funcional</span>
+                  <span class="pill">PR #44</span>
+                  <span class="pill">decisão + inventário</span>
                 </div>
               </article>
 
               <article class="checkpoint active">
-                <h4>lifecycle-model-inventory</h4>
+                <h4>artifact-taxonomy-and-model-review-contract</h4>
                 <p>
-                  Inventariar a máquina completa: handoff, work, implementação, review, resolution,
-                  disposition, Ready, Human Gate, transição e merge.
+                  Próximo PR: implementar a taxonomia de artefatos e o tipo governado de revisão
+                  pré-codificação/model-review sem mover arquivos referenciados.
                 </p>
                 <div class="meta">
-                  <span class="pill">candidato próximo</span>
-                  <span class="pill">artefato + mapa</span>
-                </div>
-              </article>
-
-              <article class="checkpoint plan">
-                <h4>lifecycle-code-confrontation</h4>
-                <p>
-                  Confrontar modelo × código e classificar cada gap como equivalente, intencional,
-                  bug, risco, legado ou ausente.
-                </p>
-                <div class="meta">
-                  <span class="pill">após inventário</span>
-                  <span class="pill">pede revisão externa</span>
+                  <span class="pill">próximo PR</span>
+                  <span class="pill">sem prova mínima</span>
                 </div>
               </article>
 
@@ -690,7 +678,7 @@
                 </p>
                 <div class="meta">
                   <span class="pill">behavior-preserving</span>
-                  <span class="pill">depois da falsificação do plano</span>
+                  <span class="pill">depois da taxonomia</span>
                 </div>
               </article>
 
@@ -881,8 +869,7 @@
             </p>
             <ul>
               <li>Inclui: <strong>drift-diagnosis-and-repair</strong>.</li>
-              <li>Inclui: <strong>checkpoint-model-boundaries</strong>.</li>
-              <li>Inclui: <strong>lifecycle-model-inventory</strong>.</li>
+              <li>Inclui: <strong>lifecycle-model-and-artifact-taxonomy-decision</strong>.</li>
               <li>Inclui: <strong>artifact-taxonomy-inventory</strong> + GG-0005.</li>
               <li>Não inclui: reorganização pesada de arquivos.</li>
             </ul>
@@ -924,9 +911,9 @@
               muda arquitetura ou modelo de autoridade.
             </p>
             <ul>
-              <li>PR #45: confronto modelo × código.</li>
+              <li>PR #45: taxonomia de artefatos + model-review governado.</li>
               <li>PR #46: refactor estrutural.</li>
-              <li>PR #47: BDD visual + falsificação.</li>
+              <li>PR #47: falsificação ampla + BDD visual.</li>
             </ul>
           </article>
         </div>
