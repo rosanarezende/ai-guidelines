@@ -694,6 +694,29 @@ describe("flow wizard", () => {
     expect(values).not.toContain("next");
   });
 
+  it("menu principal usa GovernedFlow como fonte para próxima ação e alternativas", () => {
+    const base = advisoryReviewModel();
+    const menu = buildFlowMenu(
+      {
+        ...base,
+        decisions: [
+          {
+            id: "human-gate",
+            title: "Human Gate divergente",
+            availability: { status: "available", reasons: [] },
+          },
+        ],
+      },
+      provisioningSummary(),
+      specWorkSnapshot()
+    );
+
+    const labels = menu.map((item) => item.name);
+    expect(labels).toContain("PRÓXIMA AÇÃO RECOMENDADA: Encerrar CO-10.2 e iniciar CO-10.3.");
+    expect(labels).toContain("ALTERNATIVA: pedir revisão antes da decisão humana");
+    expect(labels.join("\n")).not.toContain("Human Gate divergente");
+  });
+
   it("continuar próxima ação recomendada delega para decide sem regra própria", async () => {
     const prompts = new ScriptedPrompts(["next"], [true]);
     const decide = spyCommand("decide");

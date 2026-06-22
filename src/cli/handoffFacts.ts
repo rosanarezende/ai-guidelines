@@ -149,10 +149,12 @@ export interface HandoffTaskFact {
 }
 
 /**
- * Sub-checkpoint (CO-x.y) aninhado sob o checkpoint do cursor em tasks.md. A
+ * Sub-checkpoint aninhado sob o checkpoint do cursor em tasks.md. A
  * granularidade real de TRABALHO de um checkpoint composto vive aqui: o
  * checkpoint-pai é container, os sub-checkpoints é que carregam o objeto
- * executável. Três estados (espelham os marcadores do tasks.md):
+ * executável. O id pode ser legado (`CO-x.y`) ou semântico
+ * (`artifact-taxonomy-and-model-review-contract`). Três estados (espelham os
+ * marcadores do tasks.md):
  * `pending` (`[ ]`), `in-progress` (`[/]`), `done` (`[x]`).
  */
 export interface HandoffSubCheckpoint {
@@ -299,12 +301,12 @@ export function parseCheckpointTasks(
 }
 
 /**
- * Extrai os sub-checkpoints (CO-x.y) aninhados sob o checkpoint do cursor. Lê a
- * fonte CANÔNICA (tasks.md): ancora na linha `**Checkpoint <normalizado>**` e
- * coleta os itens de checkbox subsequentes até o próximo checkpoint de topo.
+ * Extrai os sub-checkpoints aninhados sob o checkpoint do cursor. Lê a fonte
+ * CANÔNICA (tasks.md): ancora na linha `**Checkpoint <normalizado>**` e coleta
+ * os itens de checkbox subsequentes até o próximo checkpoint de topo.
  * Reconhece os três estados — `[ ]` pending, `[/]` in-progress, `[x]` done — e
- * SÓ sub-checkpoints `CO-N.M` (o checkpoint-pai `CO-N` não entra). Conservador:
- * mencionar um sub-checkpoint em prosa de outro bloco NÃO cria pertencimento.
+ * aceita IDs legados `CO-N.M` e slugs semânticos. Conservador: mencionar um
+ * sub-checkpoint em prosa de outro bloco NÃO cria pertencimento.
  */
 /**
  * Valor canônico do sinal de prontidão de transição (ver `HandoffSubCheckpoint.readiness`).
@@ -317,15 +319,25 @@ export const SUBCHECKPOINT_READINESS = "ready-for-transition" as const;
 /** Token de readiness na linha do marcador; captura o valor para validação de coerência. */
 export const READINESS_TOKEN_RE = /`readiness:\s*([A-Za-z0-9-]+)`/;
 
-export function parseSubCheckpoints(tasksMd: string, checkpoint: string): HandoffSubCheckpoint[] {
+export function findCheckpointTaskLine(tasksMd: string, checkpoint: string): number | null {
   const normalized = checkpoint.replace(/^checkpoint-/, "");
   const lines = tasksMd.split(/\r?\n/);
   const anchor = lines.findIndex((l) => l.includes(`**Checkpoint ${normalized}**`));
-  if (anchor < 0) return [];
+  return anchor < 0 ? null : anchor + 1;
+}
+
+export function parseSubCheckpoints(tasksMd: string, checkpoint: string): HandoffSubCheckpoint[] {
+  const lines = tasksMd.split(/\r?\n/);
+  const checkpointLine = findCheckpointTaskLine(tasksMd, checkpoint);
+  if (checkpointLine === null) return [];
+  const anchor = checkpointLine - 1;
   const out: HandoffSubCheckpoint[] = [];
   for (let i = anchor + 1; i < lines.length; i++) {
     if (/\*\*Checkpoint /.test(lines[i])) break; // próximo checkpoint de topo
-    const m = /^\s*-\s*\[([ xX/])\]\s*\*\*(CO-\d+\.\d+)\b\s*[—-]?\s*(.*?)\*\*/.exec(lines[i]);
+    const m =
+      /^\s*-\s*\[([ xX/])\]\s*\*\*((?:CO-\d+\.\d+)|(?:[a-z][a-z0-9]*(?:-[a-z0-9]+)+))\b\s*[—-]?\s*(.*?)\*\*/.exec(
+        lines[i]
+      );
     if (!m) continue;
     const mark = m[1];
     const state = mark === " " ? "pending" : mark === "/" ? "in-progress" : "done";

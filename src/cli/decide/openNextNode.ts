@@ -48,6 +48,7 @@ import {
 } from "../../infrastructure/yaml/activeSpecsSerializer.js";
 import type { HandoffNodeFact } from "../handoffFacts.js";
 import type { PrTopologyNode } from "../../domain/workflow/WorkflowState.js";
+import { buildNextNodePrBody } from "../prBodyCreate.js";
 
 export interface OpenNextNodePayload {
   readonly specId: string;
@@ -93,70 +94,6 @@ export function executionPrTitle(specId: string, node: HandoffNodeFact): string 
   const seq = node.sequence !== null ? `${node.sequence}️⃣` : "";
   const arrow = node.terminal ? "" : "➜";
   return `[🛠️${seq}${arrow}] [Spec ${specId}] ${node.id} — ${humanizeNodeId(node.id)}`;
-}
-
-export function buildNextNodePrBody(input: {
-  readonly specId: string;
-  readonly currentNodeId: string;
-  readonly nextNodeId: string;
-  readonly nextCheckpoint: string;
-  readonly baseBranch: string;
-  readonly headBranch: string;
-}): string {
-  return `## Visão pretendida
-
-\`\`\`text
-Abrir ${input.nextNodeId} como próximo PR stacked da Spec ${input.specId}, a partir do nó aprovado ${input.currentNodeId}, sem merge isolado em main.
-\`\`\`
-
-## Resumo
-
-Este PR entrega o nó ${input.nextNodeId} da Spec ${input.specId}. Ele nasce por transição governada pós-Human Gate de ${input.currentNodeId}.
-
-## Escopo
-
-### Dentro do escopo
-
-- Materializar o checkpoint ${input.nextCheckpoint}.
-- Trabalhar somente o nó ${input.nextNodeId}.
-- Manter a stack em modo unit, com base em \`${input.baseBranch}\` e head \`${input.headBranch}\`.
-
-### Fora do escopo
-
-- Merge em main.
-- Human Gate automático.
-- Implementação fora do checkpoint ${input.nextCheckpoint}.
-
-## Valor entregue
-
-<preencher antes de Ready>
-
-## Test plan
-
-<preencher antes de Ready>
-
-## Validação, evidências e checklist
-
-### Evidências e gates
-
-<preencher antes de Ready>
-
-### Checklist operacional
-
-- [ ] Implementação validada
-- [ ] Reviews aplicáveis reconciliadas
-- [ ] PR convertido para Ready somente após validação humana
-
-## Disclosure de IA
-
-<preencher antes de Ready>
-
-## Cross-refs
-
-- Spec ${input.specId}
-- Nó anterior: ${input.currentNodeId}
-- Próximo nó ativo: ${input.nextNodeId}
-`;
 }
 
 function topologyNodeFromSnapshot(
@@ -250,6 +187,7 @@ export function transitionStateYaml(
 ): string {
   const doc = parseDocument(stateYaml);
   const root = mustMap(doc.contents, "state.yml");
+  const nextNarrative = mustSeq(mapValue(root, "next"), "next");
   const topology = mustMap(mapValue(root, "topology"), "topology");
   const cursor = mustMap(mapValue(topology, "cursor"), "topology.cursor");
   const prs = mustMap(mapValue(topology, "prs"), "topology.prs");
@@ -272,6 +210,12 @@ export function transitionStateYaml(
 
   setMapScalar(cursor, "pr", payload.nextNodeId);
   setMapScalar(cursor, "checkpoint", payload.nextCheckpoint);
+  const renderedNext = `canonical-next: ${payload.nextNodeId}. ${payload.activeNodeId} (seq ${payload.activeNodeSequence ?? "?"}) CONCLUIDO-NA-STACK por Human Gate approved; modo unit, SEM merge isolado em main. No ATIVO = ${payload.nextNodeId} (seq ${payload.nextNodeSequence ?? "?"}, ${payload.nextCheckpoint}; PR #${prNumber} stacked sobre ${payload.baseBranch}). Primeiro passo: detalhar e executar o novo checkpoint na branch ${payload.nextBranch}. NAO executar Ready/Human Gate automatico, merge em main ou implementar nos posteriores fora deste PR.`;
+  if (nextNarrative.items.length === 0) {
+    nextNarrative.items.push(new Scalar(renderedNext));
+  } else {
+    nextNarrative.items[0] = new Scalar(renderedNext);
+  }
 
   const rendered = doc.toString({ lineWidth: 0 });
   parseWorkflowState(rendered);
@@ -378,6 +322,19 @@ function applyFileTransitions(
   return { stateYaml, activeSpecsYaml, tasksMd };
 }
 
+function applyBranchProjection(ctx: DecisionApplyContext, payload: OpenNextNodePayload): void {
+  const activeAbs = path.join(ctx.repoRoot, payload.activeSpecsFile);
+  if (!fs.existsSync(activeAbs)) {
+    throw new Error(`Arquivo obrigatório ausente: ${payload.activeSpecsFile}.`);
+  }
+  const activeSpecsYaml = transitionActiveSpecsYaml(
+    fs.readFileSync(activeAbs, "utf8"),
+    payload,
+    ctx.actor.handle
+  );
+  fs.writeFileSync(activeAbs, activeSpecsYaml, "utf8");
+}
+
 export class OpenNextNodeDefinition implements HumanDecisionDefinition {
   readonly id = OPEN_NEXT_NODE_ID;
   readonly title = "Abrir o próximo nó planejado";
@@ -404,12 +361,14 @@ export class OpenNextNodeDefinition implements HumanDecisionDefinition {
 
   buildBrief(snapshot: DecisionSnapshot, opts: { technical: boolean }): HumanDecisionBrief {
     const policy = this.policyOf(snapshot)!;
-    const availability = this.detect(snapshot);
+    const facts = openNextNodeFactsFromDecisionSnapshot(snapshot);
+    const availability = deriveOpenNextNodeAvailability(facts);
     const active = snapshot.facts.activeNode;
     const next = snapshot.facts.nextPlannedNode;
     const pr = snapshot.facts.pullRequest;
     const currentNode = nodeLabel(snapshot);
     const payload = buildPayload(snapshot);
+    const pendingSemantic = facts.pendingSubCheckpoints;
 
     const summary =
       availability.status === "available" && active && next
@@ -428,11 +387,17 @@ export class OpenNextNodeDefinition implements HumanDecisionDefinition {
           ]
         : ["Nenhum nó ativo inequívoco foi derivado da topologia."],
       next_node: next
-        ? [
-            `${next.id} (seq ${next.sequence ?? "?"}) é o próximo nó planejado.`,
-            `Branch pretendida: ${payload?.nextBranch ?? nextNodeBranch(snapshot.specId, next.id)}.`,
-            `Base pretendida: ${pr?.headRefName ?? snapshot.facts.git.branch ?? "(branch atual)"}.`,
-          ]
+        ? pendingSemantic.length > 0
+          ? [
+              `${next.id} (seq ${next.sequence ?? "?"}) é o próximo nó topológico, mas ainda não deve ser aberto.`,
+              `Checkpoint(s) semântico(s) pendente(s) neste nó: ${pendingSemantic.join(", ")}.`,
+              `O próximo PR deve continuar em ${currentNode} até a continuação terminar.`,
+            ]
+          : [
+              `${next.id} (seq ${next.sequence ?? "?"}) é o próximo nó planejado.`,
+              `Branch pretendida: ${payload?.nextBranch ?? nextNodeBranch(snapshot.specId, next.id)}.`,
+              `Base pretendida: ${pr?.headRefName ?? snapshot.facts.git.branch ?? "(branch atual)"}.`,
+            ]
         : ["Não há próximo nó planejado derivável em state.yml § topology."],
       preflight: [
         pr
@@ -445,17 +410,31 @@ export class OpenNextNodeDefinition implements HumanDecisionDefinition {
           ? "Preflight disponível para execução governada."
           : `Bloqueios: ${availability.reasons.join(" | ")}`,
       ],
-      planned_effects: payload
-        ? [
-            `Criar e publicar branch ${payload.nextBranch} a partir do HEAD aprovado ${payload.startPoint}.`,
-            "Abrir PR Draft stacked contra a branch do nó aprovado.",
-            "Atualizar state.yml com o número factual retornado pelo GitHub.",
-            "Atualizar active.yml para a nova branch.",
-            "Materializar tasks.md para o novo checkpoint não nascer sem objeto de trabalho.",
-            "Comitar e fazer push normal do efeito governado.",
-          ]
-        : ["Sem payload completo, não há efeitos planejáveis."],
-      consequences: policy.consequences,
+      planned_effects:
+        pendingSemantic.length > 0
+          ? [
+              "Nenhum efeito de abertura de nó deve ser executado enquanto houver checkpoint semântico pendente.",
+              "A próxima ação governada pertence à continuação do nó atual, não ao próximo nó topológico.",
+            ]
+          : payload
+            ? [
+                `Criar e publicar branch ${payload.nextBranch} a partir do HEAD aprovado ${payload.startPoint}.`,
+                "Criar um commit preparatório mínimo em active.yml antes do primeiro push, para os hooks validarem a branch correta.",
+                "Abrir PR Draft stacked contra a branch do nó aprovado.",
+                "Atualizar state.yml com o número factual retornado pelo GitHub.",
+                "Reconciliar state.yml § next com a topologia ativa.",
+                "Atualizar active.yml para a nova branch.",
+                "Materializar tasks.md para o novo checkpoint não nascer sem objeto de trabalho.",
+                "Comitar e fazer push normal do efeito governado.",
+              ]
+            : ["Sem payload completo, não há efeitos planejáveis."],
+      consequences:
+        pendingSemantic.length > 0
+          ? [
+              "Nada é aplicado por open-next-node neste estado.",
+              "O próximo PR deve materializar o próximo checkpoint semântico da continuação.",
+            ]
+          : policy.consequences,
       not_authorized: policy.notAuthorized,
     };
 
@@ -525,6 +504,20 @@ export class OpenNextNodeDefinition implements HumanDecisionDefinition {
         preconditions: [],
         nextHuman: [],
         note: ["Nada foi alterado."],
+        payload: null,
+      };
+    }
+    const availability = this.detect(snapshot);
+    if (availability.status !== "available") {
+      return {
+        ...base,
+        mutating: false,
+        changes: [],
+        preserved: ["state.yml inalterado", "tasks.md inalterado", "active.yml inalterado"],
+        commitMessage: null,
+        preconditions: [],
+        nextHuman: [],
+        note: [`Decisão bloqueada: ${availability.reasons.join(" | ")}`],
         payload: null,
       };
     }
@@ -635,9 +628,29 @@ export class OpenNextNodeDefinition implements HumanDecisionDefinition {
 
     const messages: string[] = [];
     let prNumber: number;
+    let preparationCommit: string | null = null;
     try {
       ctx.git.createBranch(payload.nextBranch, payload.startPoint);
       messages.push(`branch criada: ${payload.nextBranch}`);
+      applyBranchProjection(ctx, payload);
+      const branchProjectionDirty = ctx.git.porcelainPaths();
+      if (branchProjectionDirty === null) {
+        throw new Error("git status indisponível após preparar active.yml.");
+      }
+      const branchProjectionUnexpected = branchProjectionDirty
+        .map(toPosix)
+        .filter((p) => p !== payload.activeSpecsFile);
+      if (branchProjectionUnexpected.length > 0) {
+        throw new Error(
+          `diff misto antes de publicar branch (mixed_diff: forbidden) — paths inesperados: ${branchProjectionUnexpected.join(", ")}.`
+        );
+      }
+      ctx.git.add(payload.activeSpecsFile);
+      ctx.git.commit(`docs(spec-${payload.specId}): prepara branch ${payload.nextNodeId}`);
+      preparationCommit = ctx.git.revParseShortHead();
+      messages.push(
+        `projeção ativa preparada: ${preparationCommit ?? "(commit local)"} — ${payload.nextBranch}`
+      );
       ctx.git.pushBranch(payload.nextBranch);
       messages.push(`branch publicada: ${payload.nextBranch}`);
       const pr = ctx.stack.createPullRequest({
@@ -653,7 +666,7 @@ export class OpenNextNodeDefinition implements HumanDecisionDefinition {
     } catch (e) {
       return {
         ok: false,
-        committed: null,
+        committed: preparationCommit,
         pushed: false,
         messages: [
           ...messages,

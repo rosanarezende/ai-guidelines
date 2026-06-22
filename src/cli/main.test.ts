@@ -6,6 +6,7 @@ import { run } from "./main.js";
 import { Prompts } from "../app/ports/Prompts.js";
 import { Command, CommandResult } from "./registry/Command.js";
 import { CommandRegistry } from "./registry/CommandRegistry.js";
+import { GovernancePreflightResult } from "./governancePreflight.js";
 
 class ScriptedPrompts implements Prompts {
   readonly notes: string[] = [];
@@ -74,6 +75,34 @@ function registryWith(...commands: Command<unknown>[]): CommandRegistry {
   const registry = new CommandRegistry();
   for (const command of commands) registry.register(command);
   return registry;
+}
+
+function preflightAttention(): GovernancePreflightResult {
+  const issue = {
+    id: "active-consistency:0024:branch",
+    severity: "warning" as const,
+    title: "O índice público aponta para a branch errada",
+    whatHappened: "branch stale",
+    whyItMatters: "retomada errada",
+    safeRepair: "Republique a projeção ativa.",
+    repairAuthority: "confirm" as const,
+    technicalDetails: [],
+  };
+
+  return {
+    mode: "entry",
+    status: "attention",
+    shouldBlock: false,
+    shouldRender: true,
+    repairable: [issue],
+    nonAutomatic: [],
+    report: {
+      status: "attention",
+      summary: "1 drift",
+      checked: [],
+      issues: [issue],
+    },
+  };
 }
 
 async function withTempCwd<T>(setup: (repoRoot: string) => void, fn: () => Promise<T>): Promise<T> {
@@ -211,6 +240,33 @@ describe("ai-guidelines help público", () => {
 
         expect(exitCode).toBe(0);
         expect(calls).toEqual(["cockpit"]);
+      }
+    );
+  });
+
+  it("DADO drift detectado QUANDO roda sem comando ENTÃO mostra preflight antes do cockpit", async () => {
+    await withTempCwd(
+      (repoRoot) => {
+        mkdirSync(path.join(repoRoot, ".governance", "specs"), { recursive: true });
+      },
+      async () => {
+        const { logger, infos } = makeLogger();
+
+        const exitCode = await run([], {
+          logger,
+          isTTY: false,
+          runGovernancePreflight: () => preflightAttention(),
+          runCockpit: (_repoRoot, cockpitLogger) => {
+            cockpitLogger.info("cockpit situado");
+            return 0;
+          },
+        });
+
+        const out = infos.join("\n");
+        expect(exitCode).toBe(0);
+        expect(out).toContain("Verificação de governança");
+        expect(out).toContain("Reparável com preview");
+        expect(out).toContain("cockpit situado");
       }
     );
   });

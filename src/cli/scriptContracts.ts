@@ -306,7 +306,8 @@ ${workflowTable(contract)}
 O metodo operacional interno e: scripts declarados em
 \`.core/governance/script-contracts.yml\` projetam hooks e docs; o \`pre-commit\`
 executa sincronizacao, build e testes rapidos; o \`pre-push\` executa
-\`npm run validate\`; e o CI acrescenta a varredura historica quando aplicavel.
+\`npm run validate:changed\` para manter o ciclo diario rapido; e o \`validate\`
+completo fica reservado para Ready, Human Gate, fechamentos e CI completo.
 
 Antes de commitar, nao existe mais uma cadeia textual duplicada para copiar. A
 regra e garantir que os hooks estejam instalados e deixar o contrato rodar. Para
@@ -314,7 +315,8 @@ checagem manual ou diagnostico, use:
 
 \`\`\`bash
 npm run script-contracts:sync
-npm run validate
+npm run validate:changed
+npm run validate # antes de Ready/Human Gate/fechamentos
 \`\`\`
 
 ## Consumidores

@@ -1,8 +1,10 @@
 import { Command, CommandContext, CommandResult } from "../Command.js";
 import { DecideArgs, parseDecideArgs, runDecide } from "../../decide/decide.js";
+import { renderGovernancePreflight, runGovernancePreflight } from "../../governancePreflight.js";
 
 /** Assinatura injetável do runner — real por default, fake em teste. */
 export type RunDecideFn = typeof runDecide;
+export type RunGovernancePreflightFn = typeof runGovernancePreflight;
 
 /**
  * Comando `decide` — superfície GOVERNADA das decisões reservadas à owner
@@ -39,13 +41,22 @@ export class DecideCommand implements Command<DecideArgs> {
     "decide --type open-next-node --decision open-node --authorization explicit-human-decision --confirm",
   ];
 
-  constructor(private readonly runFn: RunDecideFn = runDecide) {}
+  constructor(
+    private readonly runFn: RunDecideFn = runDecide,
+    private readonly runPreflightFn: RunGovernancePreflightFn = runGovernancePreflight
+  ) {}
 
   parse(argv: readonly string[]): DecideArgs {
     return parseDecideArgs(argv);
   }
 
   async run(options: DecideArgs, context: CommandContext): Promise<CommandResult> {
+    if (!options.briefOnly) {
+      const preflight = this.runPreflightFn(context.repoRoot, "sensitive");
+      for (const line of renderGovernancePreflight(preflight)) context.logger.info(line);
+      if (preflight.shouldBlock) return { exitCode: 1 };
+    }
+
     const exitCode = await this.runFn(context.repoRoot, options, {
       logger: context.logger,
       ...(context.prompts ? { prompts: context.prompts } : {}),

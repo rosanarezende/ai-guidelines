@@ -1,54 +1,58 @@
 import { Command, CommandContext, CommandResult } from "../Command.js";
-import { LoadActiveSpecsIndex, loadActiveSpecsIndex } from "./loadActiveSpecsIndex.js";
+import {
+  diagnoseGovernanceDrift,
+  GovernanceDoctorDeps,
+  loadPullRequestWithGh,
+  renderGovernanceDoctorReport,
+} from "../../governanceDoctor.js";
+import { deriveGovernancePreflight, renderGovernancePreflight } from "../../governancePreflight.js";
+import { LoadActiveSpecsIndex } from "./loadActiveSpecsIndex.js";
+
+export interface DiagnoseDriftOptions {
+  readonly check: boolean;
+}
 
 /**
- * Comando `drift` — diagnostica drift do índice operacional público: entries cujo
- * `spec_path` declarado não existe no filesystem local (branch não checada ou path
- * renomeado desde o último `publish-state`). Read-only, sem prompts (etapa 2 do
- * #35: convergência da op avançada "diagnose-drift" para Command + Intent).
+ * Comando `drift` — roda o Governance Doctor em modo read-only.
  *
- * Drift guard SOFT (cf. ListActiveSpecs): paths ausentes não falham — apenas
- * informam. Lookup de estado declarado, sem inferência (memory
- * `feedback-lookup-not-coordination`). A lógica migrou verbatim do handler legado
- * `runAdvancedOps` (que a perde na etapa 5).
- *
- * Nome `drift` provisório (taxonomia `state` deferida); a ESTRUTURA é o cravado.
+ * O comando não aplica reparos. Ele agrega checks já existentes e explica, em
+ * linguagem humana, qual drift foi encontrado, por que importa e qual caminho
+ * governado deve ser usado para reparar sem edição manual espalhada.
  */
-export class DiagnoseDriftCommand implements Command<void> {
+export class DiagnoseDriftCommand implements Command<DiagnoseDriftOptions> {
   readonly name = "drift";
-  readonly description =
-    "Diagnostica drift do índice público: spec_path declarado que não existe no filesystem local. Read-only.";
-  readonly usage = ["drift"];
+  readonly description = "Diagnostica drift de governança e explica reparos seguros. Read-only.";
+  readonly usage = ["drift", "drift --check"];
 
-  constructor(private readonly loadIndex: LoadActiveSpecsIndex = loadActiveSpecsIndex) {}
+  private readonly deps: GovernanceDoctorDeps;
 
-  parse(_argv: readonly string[]): void {
-    return undefined;
+  constructor(depsOrLoadIndex: GovernanceDoctorDeps | LoadActiveSpecsIndex = {}) {
+    this.deps =
+      typeof depsOrLoadIndex === "function" ? { loadIndex: depsOrLoadIndex } : depsOrLoadIndex;
   }
 
-  async run(_options: void, context: CommandContext): Promise<CommandResult> {
+  parse(argv: readonly string[]): DiagnoseDriftOptions {
+    return { check: argv.includes("--check") };
+  }
+
+  async run(options: DiagnoseDriftOptions, context: CommandContext): Promise<CommandResult> {
     const { logger } = context;
-    const result = this.loadIndex(context.repoRoot);
-
-    if (!result.indexAvailable) {
-      logger.info(
-        "Índice operacional público (.governance/runtime/specs/active.yml) não encontrado."
-      );
-      logger.info("Dica: rode `npx ai-guidelines workflow publish-state` na branch da spec.");
-      return { exitCode: 0 };
-    }
-
-    const drifted = result.entries.filter((resolved) => !resolved.specPathExists);
-    if (drifted.length === 0) {
-      logger.info("Nenhum drift detectado: todos os spec_path existem no filesystem.");
-    } else {
-      logger.info(`${drifted.length} entry(ies) com drift:`);
-      for (const resolved of drifted) {
-        logger.info(
-          `  - ${resolved.entry.slug} (${resolved.entry.branch}): spec_path "${resolved.entry.specPath}" inexistente.`
-        );
+    const deps =
+      options.check || this.deps.loadPullRequest
+        ? this.deps
+        : { ...this.deps, loadPullRequest: loadPullRequestWithGh };
+    const report = diagnoseGovernanceDrift(context.repoRoot, deps);
+    if (options.check) {
+      const preflight = deriveGovernancePreflight(report, "hook");
+      if (preflight.shouldRender) {
+        for (const line of renderGovernancePreflight(preflight)) logger.info(line);
+      } else {
+        for (const line of renderGovernanceDoctorReport(report)) logger.info(line);
       }
+      return { exitCode: preflight.shouldBlock ? 1 : 0 };
     }
+
+    for (const line of renderGovernanceDoctorReport(report)) logger.info(line);
     return { exitCode: 0 };
   }
 }

@@ -583,6 +583,27 @@ describe("parseSubCheckpoints + resolveSubCheckpointWork — sinal de readiness"
     expect(subs.find((s) => s.id === "CO-3.5")!.readiness).toBeUndefined();
   });
 
+  it("parser extrai checkpoints semânticos definidos por slug", () => {
+    const tasks = [
+      "- [/] **Checkpoint co-flow-continuation** (seq 11)",
+      "    - [x] **drift-diagnosis-and-repair — Governance Doctor**: feito.",
+      "    - [x] **lifecycle-model-and-artifact-taxonomy-decision — mapa e inventário**: feito.",
+      "    - [ ] **artifact-taxonomy-and-model-review-contract — implementação robusta da taxonomia**: próximo PR.",
+    ].join("\n");
+
+    const subs = parseSubCheckpoints(tasks, "checkpoint-co-flow-continuation");
+
+    expect(subs.map((s) => [s.id, s.state, s.title])).toEqual([
+      ["drift-diagnosis-and-repair", "done", "Governance Doctor"],
+      ["lifecycle-model-and-artifact-taxonomy-decision", "done", "mapa e inventário"],
+      [
+        "artifact-taxonomy-and-model-review-contract",
+        "pending",
+        "implementação robusta da taxonomia",
+      ],
+    ]);
+  });
+
   it("parser: sem token ⇒ readiness undefined", () => {
     const subs = parseSubCheckpoints(TASKS(""), "checkpoint-co-enforcement");
     expect(subs.find((s) => s.id === "CO-3.4")!.readiness).toBeUndefined();

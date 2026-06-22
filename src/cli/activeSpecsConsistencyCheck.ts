@@ -17,7 +17,8 @@
  *      em branch fora do padrão `feat/spec-NNNN-*` ou em branch de OUTRA
  *      spec, o sub-check de branch é SKIPPED — o fato não é observável
  *      nesses ambientes. O ponto de enforcement determinístico é o validate
- *      local (pre-push) rodando na branch da spec.
+ *      completo local/CI rodando na branch da spec; o pre-push diário usa
+ *      validate:changed para manter o ciclo de desenvolvimento curto.
  *
  * Por que existe: o `activeSpecsSerializer` valida deliberadamente só a FORMA.
  * A 0023 ficou listada como `closing/active` ~10 dias após `done` (stage stale);
@@ -48,7 +49,11 @@ import {
 } from "../infrastructure/yaml/activeSpecsSerializer.js";
 import { parseWorkflowState } from "../infrastructure/yaml/workflowStateSerializer.js";
 import { parseSpecBranch } from "../app/workflow/DetectActiveSpec.js";
-import { checkSubCheckpointCoherence, parseSubCheckpoints } from "./handoffFacts.js";
+import {
+  checkSubCheckpointCoherence,
+  findCheckpointTaskLine,
+  parseSubCheckpoints,
+} from "./handoffFacts.js";
 
 interface Logger {
   info: (msg: string) => void;
@@ -258,6 +263,17 @@ function validateEntrySubCheckpointCoherence(
   if (!checkpoint) return; // sem cursor/topologia → nada a checar
   const tasksContent = readSpecFile(`${entry.specPath}/tasks.md`);
   if (tasksContent === null) return; // tasks.md ausente não é divergência deste gate
+  if (findCheckpointTaskLine(tasksContent, checkpoint) === null) {
+    failures.push({
+      id: entry.id,
+      message:
+        `checkpoint ativo não materializado em tasks.md: state.yml aponta para "${checkpoint}", ` +
+        `mas tasks.md não contém o item "**Checkpoint ${checkpoint.replace(/^checkpoint-/, "")}**". ` +
+        `A lista de tarefas deve materializar o checkpoint ativo antes de retomar ou decidir; ` +
+        `alterações em tasks.md são decisão governada, não reparo automático.`,
+    });
+    return;
+  }
   const subs = parseSubCheckpoints(tasksContent, checkpoint);
   for (const violation of checkSubCheckpointCoherence(subs)) {
     failures.push({

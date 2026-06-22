@@ -231,6 +231,15 @@ RESTRIÇÕES:
 
 ## Escopo
 
+<details>
+<summary><strong>Escopo técnico e limites</strong></summary>
+
+<!--
+Esta seção fica recolhida para manter a leitura humana focada em valor,
+decisões, evidências e impactos. Agentes/revisores podem abrir para auditar
+fronteiras de implementação.
+-->
+
 ### Dentro do escopo
 
 -
@@ -238,6 +247,8 @@ RESTRIÇÕES:
 ### Fora do escopo
 
 -
+
+</details>
 
 ## Evidências e falsificação
 

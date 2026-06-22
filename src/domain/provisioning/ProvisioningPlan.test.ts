@@ -1,4 +1,5 @@
 import {
+  CONSUMER_HUSKY_HOOK_COMMANDS,
   configRelPath,
   guidanceEffects,
   planAgentsRuntimeBootstrap,
@@ -300,6 +301,13 @@ describe("domain/provisioning/ProvisioningPlan — Prettier (2b-3a)", () => {
 });
 
 describe("domain/provisioning/ProvisioningPlan — Husky (2b-3b)", () => {
+  it("CONSUMER_HUSKY_HOOK_COMMANDS define o contrato do consumidor, separado dos hooks do framework", () => {
+    expect(CONSUMER_HUSKY_HOOK_COMMANDS).toEqual({
+      "pre-commit": "format",
+      "pre-push": "check",
+    });
+  });
+
   it("planHusky gera package.json, hooks e markExecutable", () => {
     expect(
       planHusky(

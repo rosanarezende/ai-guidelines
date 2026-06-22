@@ -1,0 +1,19 @@
+{
+  "heading": "Verificação de governança",
+  "status": {
+    "attention": "Detectei {count} drift(s) de governança antes de continuar.",
+    "blocked": "Esta ação é sensível e fica bloqueada até o drift ser reconciliado.",
+    "ok": "Governança coerente. Nenhum drift detectado.",
+    "notGoverned": "Este repositório ainda não tem governança ativa."
+  },
+  "labels": {
+    "repairable": "Reparável com preview e confirmação",
+    "nonAutomatic": "Exige decisão humana ou correção prévia",
+    "nextSteps": "Próximos passos"
+  },
+  "commands": {
+    "diagnose": "Ver diagnóstico completo: npx ai-guidelines drift",
+    "repairPreview": "Ver preview de reparo seguro: npx ai-guidelines repair",
+    "repairApply": "Aplicar reparo com confirmação: npx ai-guidelines repair --apply --updated-by=@voce"
+  }
+}

@@ -96,6 +96,7 @@ describe("governed documentation site packaging", () => {
     expect(routeSource).toContain('path: "/cli"');
     expect(routeSource).toContain('path: "/cli/comecar"');
     expect(routeSource).toContain('path: "/cli/dia-a-dia"');
+    expect(routeSource).toContain('path: "/cli/avancado"');
     expect(routeSource).toContain('"/atalhos"');
     // Rota desconhecida vira 404 explícito.
     expect(routeSource).toContain('return "notFound";');

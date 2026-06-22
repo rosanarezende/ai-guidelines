@@ -499,4 +499,59 @@ describe("GovernedFlow", () => {
       "--type open-next-node --decision open-node"
     );
   });
+
+  it("pós-Human Gate não recomenda abrir nó topológico quando há checkpoint semântico pendente", () => {
+    const facts = coFlowFacts({
+      lifecycle: { ...GREEN, gateDecision: "approved" },
+      pullRequest: {
+        ...makeHandoffFacts().pullRequest!,
+        number: 44,
+        isDraft: false,
+        checks: { pass: 11, fail: 0, pending: 0 },
+        headRefOid: "def5678",
+        headRefName: "feat/spec-0024-co-flow-continuation",
+        baseRefName: "feat/spec-0024-co-flow-convergence",
+      },
+      nextPlannedNode: {
+        id: "dualroot-collapse",
+        githubPr: null,
+        sequence: 12,
+        terminal: false,
+      },
+      subCheckpoints: [
+        { id: "drift-diagnosis-and-repair", title: "Governance Doctor", state: "done", line: 126 },
+        {
+          id: "lifecycle-model-and-artifact-taxonomy-decision",
+          title: "mapa e inventário",
+          state: "done",
+          line: 127,
+        },
+        {
+          id: "artifact-taxonomy-and-model-review-contract",
+          title: "implementação robusta da taxonomia",
+          state: "pending",
+          line: 128,
+        },
+      ],
+    });
+    const snapshot = makeDecisionSnapshot({
+      facts,
+      checkpoint: "checkpoint-co-flow-continuation",
+      openFindings: [],
+      lanes: [],
+      subCheckpoints: facts.subCheckpoints,
+      gateExists: true,
+      workingTreeState: "clean",
+    });
+
+    const flow = deriveGovernedFlow(snapshot);
+    const decide = new OpenNextNodeDefinition().detect(snapshot);
+    const plan = new OpenNextNodeDefinition().plan(snapshot, "open-node");
+
+    expect(decide.status).toBe("blocked");
+    expect(decide.reasons.join(" ")).toContain("artifact-taxonomy-and-model-review-contract");
+    expect(flow.recommended?.id).not.toBe("open-next-node");
+    expect(plan.mutating).toBe(false);
+    expect(plan.note.join(" ")).toContain("artifact-taxonomy-and-model-review-contract");
+  });
 });

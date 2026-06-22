@@ -50,8 +50,18 @@ Comentários HTML são intencionais; não usar `<details open>`.
 
 ## Rollback
 
+<details>
+<summary><strong>Plano de rollback</strong></summary>
+
+<!--
+Mantido recolhido porque é essencial para operação, mas não precisa competir
+com o resultado integrado e a evidência de integração na leitura humana inicial.
+-->
+
 - **Modo `unit` (default):** `git revert <SHA-canônico>` — 1 comando desfaz a spec inteira. Com `merge-commit`: `git revert -m 1 <SHA>`.
 - **Modo `sequential`:** reverter os N commits na ordem inversa; para spec coesa, prefira rollback total.
+
+</details>
 
 ## Validação final da stack
 

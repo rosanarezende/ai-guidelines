@@ -385,9 +385,8 @@ describe("CO-10.6 final falsification — fluxo governado ponta a ponta", () => 
         {
           id: "CO-10.6",
           title: "falsificacao + Human Gate",
-          state: "in-progress",
+          state: "done",
           line: 114,
-          readiness: "ready-for-transition",
         },
       ],
     });
@@ -475,9 +474,8 @@ describe("CO-10.6 final falsification — fluxo governado ponta a ponta", () => 
         {
           id: "CO-10.6",
           title: "falsificacao + Human Gate",
-          state: "in-progress",
+          state: "done",
           line: 114,
-          readiness: "ready-for-transition",
         },
       ],
     });
@@ -622,6 +620,12 @@ describe("CO-10.6 final falsification — fluxo governado ponta a ponta", () => 
     expect(unsafeMark.reasons.join(" ")).toMatch(/atrás do remoto/);
     expect(unsafeMark.reasons.join(" ")).toMatch(/pendente/);
 
+    const terminalDoneSubCheckpoints = terminalReadyDraftFacts.subCheckpoints.map((item) => ({
+      id: item.id,
+      title: item.title,
+      state: "done" as const,
+      line: item.line,
+    }));
     const postGateFacts = coFlowFacts({
       lifecycle: { ...SETTLED, gateDecision: "approved" },
       pullRequest: {
@@ -629,7 +633,7 @@ describe("CO-10.6 final falsification — fluxo governado ponta a ponta", () => 
         isDraft: false,
         checks: { pass: 4, fail: 0, pending: 0 },
       },
-      subCheckpoints: terminalReadyDraftFacts.subCheckpoints,
+      subCheckpoints: terminalDoneSubCheckpoints,
     });
     const postGate = snapshot({
       facts: postGateFacts,

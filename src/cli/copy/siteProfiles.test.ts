@@ -84,10 +84,12 @@ describe("superfície pública × contribuidor nos componentes", () => {
   const publicFiles = [
     "site/src/pages/home/HomePage/HomePage.tsx",
     "site/src/pages/cli/CliPage/CliPage.tsx",
+    "site/src/pages/advanced/AdvancedPage/AdvancedPage.tsx",
     "site/src/pages/reference/ReferencePage/ReferencePage.tsx",
     "site/src/features/cli-simulator/CliTerminal/CliTerminal.tsx",
     "site/src/features/cli-simulator/RealCliRunner/RealCliRunner.tsx",
     "site/src/content/promptFlows.ts",
+    "site/src/content/advancedCases.ts",
     "site/src/app/App.tsx",
   ];
 

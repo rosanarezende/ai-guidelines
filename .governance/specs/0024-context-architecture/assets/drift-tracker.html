@@ -1,0 +1,733 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PR #44 — Mapa de progresso dos problemas de governança</title>
+    <style>
+      :root {
+        --bg: #0f1117;
+        --panel: #171a23;
+        --panel2: #1e2230;
+        --line: #2a2f40;
+        --ink: #e8eaf0;
+        --mut: #9aa3b8;
+        --done: #34d399;
+        --done-bg: rgba(52, 211, 153, 0.12);
+        --val: #60a5fa;
+        --val-bg: rgba(96, 165, 250, 0.12);
+        --part: #fbbf24;
+        --part-bg: rgba(251, 191, 36, 0.12);
+        --todo: #6b7280;
+        --todo-bg: rgba(107, 114, 128, 0.1);
+        --block: #c084fc;
+        --block-bg: rgba(192, 132, 252, 0.12);
+        --drift: #f87171;
+        --drift-bg: rgba(248, 113, 113, 0.12);
+        --accent: #7c9cff;
+        --accent-bg: rgba(124, 156, 255, 0.1);
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        line-height: 1.55;
+        padding: 28px 22px 60px;
+      }
+      .wrap {
+        max-width: 1080px;
+        margin: 0 auto;
+      }
+      h1 {
+        font-size: 22px;
+        margin: 0 0 4px;
+      }
+      .sub {
+        color: var(--mut);
+        font-size: 13px;
+        margin-bottom: 22px;
+      }
+      .read {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 18px 20px;
+        margin-bottom: 22px;
+      }
+      .read h2 {
+        font-size: 15px;
+        margin: 0 0 10px;
+      }
+      .read p {
+        font-size: 13px;
+        color: var(--mut);
+        margin: 0 0 8px;
+      }
+      .read b {
+        color: var(--ink);
+      }
+      .legend {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin: 14px 0 0;
+        font-size: 12px;
+        color: var(--mut);
+      }
+      .legend span {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 3px;
+        display: inline-block;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 14px;
+      }
+      .card {
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-left: 4px solid var(--drift);
+        border-radius: 14px;
+        padding: 18px 20px;
+        position: relative;
+      }
+      .card.first {
+        box-shadow: 0 0 0 1px var(--accent-bg);
+      }
+      .driftbadge {
+        display: inline-block;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        padding: 2px 8px;
+        border-radius: 99px;
+        background: var(--drift-bg);
+        color: var(--drift);
+        border: 1px solid rgba(248, 113, 113, 0.4);
+        margin-bottom: 8px;
+        margin-right: 6px;
+      }
+      .badge {
+        display: inline-block;
+        font-size: 10px;
+        padding: 2px 8px;
+        border-radius: 99px;
+        background: var(--accent-bg);
+        color: var(--accent);
+        border: 1px solid rgba(124, 156, 255, 0.3);
+        margin-bottom: 8px;
+      }
+      .card h3 {
+        font-size: 16px;
+        margin: 0 0 12px;
+        line-height: 1.35;
+      }
+      .qa {
+        font-size: 13px;
+        margin: 0 0 7px;
+      }
+      .qa .q {
+        color: var(--mut);
+        display: block;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 1px;
+      }
+      .stages {
+        display: flex;
+        gap: 8px;
+        margin: 14px 0 4px;
+        flex-wrap: wrap;
+      }
+      .stage {
+        flex: 1;
+        min-width: 120px;
+        border: 1px solid var(--line);
+        border-radius: 9px;
+        padding: 8px 10px;
+      }
+      .stage .t {
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--mut);
+        margin-bottom: 3px;
+      }
+      .stage .s {
+        font-size: 12px;
+        font-weight: 600;
+      }
+      .st-done {
+        background: var(--done-bg);
+        border-color: rgba(52, 211, 153, 0.3);
+      }
+      .st-done .s {
+        color: var(--done);
+      }
+      .st-val {
+        background: var(--val-bg);
+        border-color: rgba(96, 165, 250, 0.3);
+      }
+      .st-val .s {
+        color: var(--val);
+      }
+      .st-part {
+        background: var(--part-bg);
+        border-color: rgba(251, 191, 36, 0.3);
+      }
+      .st-part .s {
+        color: var(--part);
+      }
+      .st-todo {
+        background: var(--todo-bg);
+      }
+      .st-todo .s {
+        color: var(--mut);
+      }
+      .st-block {
+        background: var(--block-bg);
+        border-color: rgba(192, 132, 252, 0.3);
+      }
+      .st-block .s {
+        color: var(--block);
+      }
+      .owner {
+        margin-top: 12px;
+        background: var(--panel2);
+        border: 1px solid var(--line);
+        border-radius: 9px;
+        padding: 9px 12px;
+        font-size: 12.5px;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: 6px;
+      }
+      .owner .oh {
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--mut);
+        font-weight: 700;
+      }
+      .owner .ov {
+        font-weight: 600;
+        color: var(--ink);
+      }
+      .owner .tag {
+        font-size: 10px;
+        padding: 1px 7px;
+        border-radius: 99px;
+        font-weight: 700;
+      }
+      .tag-fact {
+        background: var(--done-bg);
+        color: var(--done);
+        border: 1px solid rgba(52, 211, 153, 0.4);
+      }
+      .tag-cand {
+        background: var(--part-bg);
+        color: var(--part);
+        border: 1px solid rgba(251, 191, 36, 0.4);
+      }
+      .tag-block {
+        background: var(--block-bg);
+        color: var(--block);
+        border: 1px solid rgba(192, 132, 252, 0.4);
+      }
+      details {
+        margin-top: 12px;
+        border-top: 1px solid var(--line);
+        padding-top: 10px;
+      }
+      summary {
+        cursor: pointer;
+        font-size: 12px;
+        color: var(--mut);
+      }
+      details p {
+        font-size: 12px;
+        color: var(--mut);
+        margin: 8px 0 0;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      }
+      .foot {
+        margin-top: 24px;
+        font-size: 11px;
+        color: var(--todo);
+        text-align: right;
+      }
+      @media (min-width: 760px) {
+        .grid {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <h1>PR #44 — Mapa de progresso dos problemas de governança</h1>
+      <div class="sub">
+        Um acompanhamento visual e humano de oito situações em que o framework pode "se perder" — e
+        de quanto cada uma já está resolvida.
+      </div>
+
+      <div class="read">
+        <h2>Como ler este tracker</h2>
+        <p>
+          O framework guarda alguns arquivos internos para lembrar em que ponto do trabalho você
+          está. Quando esses arquivos discordam da realidade, dá-se o nome de
+          <b style="color: var(--drift)">drift</b> (desencontro) — por isso cada card tem a borda
+          vermelha. O card descreve o desencontro em linguagem comum: o que acontece, por que isso
+          atrapalha você, e o que o framework deveria fazer.
+        </p>
+        <p>
+          Para cada desencontro acompanhamos quatro etapas, e elas <b>não são a mesma coisa</b>:
+          <b>Detectar</b> e <b>Explicar</b> <b>não resolvem nada sozinhos</b>. Um desencontro só
+          está <b>realmente fechado</b> quando tem <b>Reparar</b> (correção segura, com
+          pré-visualização e confirmação) e <b>Testar</b> (provas automáticas).
+        </p>
+        <p>
+          A faixa <b>"Quem vai resolver"</b> mostra qual PR/checkpoint/CO trata cada drift.
+          <span style="color: var(--done)"><b>Verde</b></span> = já decidido no state.yml;
+          <span style="color: var(--part)"><b>âmbar</b></span> = candidato (proposta, ainda não
+          cravada). Reparos que dependem de <b>decisão humana</b> (avançar etapa, abrir trabalho,
+          aprovar) ficam <b>bloqueados</b> de propósito.
+        </p>
+        <p>
+          A partir de CO-10.8.1, o framework também roda um <b>preflight automático</b>: quando você
+          abre o fluxo, pede briefing de trabalho, valida mudanças ou tenta uma decisão sensível, o
+          drift aparece antes da ação. A pessoa não precisa lembrar de rodar o diagnóstico
+          manualmente.
+        </p>
+        <p>
+          Este mapa é uma <b>projeção de acompanhamento</b>. Ele <b>não</b> é a fonte oficial — quem
+          manda são os arquivos governados, os testes e as revisões.
+        </p>
+        <div class="legend">
+          <span><i class="dot" style="background: var(--done)"></i> feito</span>
+          <span><i class="dot" style="background: var(--val)"></i> implementado, em validação</span>
+          <span><i class="dot" style="background: var(--part)"></i> parcial</span>
+          <span><i class="dot" style="background: var(--todo)"></i> a fazer</span>
+          <span
+            ><i class="dot" style="background: var(--block)"></i> bloqueado (decisão humana)</span
+          >
+          <span><i class="dot" style="background: var(--drift)"></i> drift</span>
+        </div>
+      </div>
+
+      <div class="grid">
+        <!-- 1 -->
+        <div class="card first">
+          <span class="driftbadge">drift #1</span
+          ><span class="badge">primeiro caso implementado</span>
+          <h3>"Estou na branch certa, mas o framework ainda aponta para a anterior"</h3>
+          <div class="qa">
+            <span class="q">O que aconteceu</span>A pessoa já está trabalhando na nova etapa, mas o
+            arquivo que o framework usa para lembrar a etapa ativa ainda aponta para a etapa antiga.
+          </div>
+          <div class="qa">
+            <span class="q">Por que isso importa</span>Sem correção, comandos como
+            <code>npx ai-guidelines</code> podem orientar a pessoa pelo trabalho errado, ou bloquear
+            um envio sem explicar bem o motivo.
+          </div>
+          <div class="qa">
+            <span class="q">O que o framework deve fazer</span>Mostrar o problema, explicar a
+            diferença, pré-visualizar a atualização necessária e aplicar a correção somente com
+            confirmação.
+          </div>
+          <div class="stages">
+            <div class="stage st-done">
+              <div class="t">Detectar</div>
+              <div class="s">✓ feito</div>
+            </div>
+            <div class="stage st-done">
+              <div class="t">Explicar</div>
+              <div class="s">✓ feito</div>
+            </div>
+            <div class="stage st-done">
+              <div class="t">Reparar</div>
+              <div class="s">✓ feito</div>
+            </div>
+            <div class="stage st-done">
+              <div class="t">Testar</div>
+              <div class="s">✓ validado</div>
+            </div>
+          </div>
+          <div class="owner">
+            <span class="oh">Quem vai resolver</span>
+            <span class="ov">CO-10.8.1 · PR #44</span>
+            <span class="tag tag-fact">entregue · validado</span>
+          </div>
+          <details>
+            <summary>Detalhe técnico</summary>
+            <p>
+              branch atual diverge de .governance/runtime/specs/active.yml. Reparo: comando `repair`
+              reusa publish-state via FS de captura (preview) + confirmação; autoridade `confirm`.
+            </p>
+          </details>
+        </div>
+
+        <!-- 2 -->
+        <div class="card">
+          <span class="driftbadge">drift #2</span>
+          <h3>"O framework perdeu o fio de onde você está no trabalho"</h3>
+          <div class="qa">
+            <span class="q">O que aconteceu</span>O ponteiro interno que marca "você está aqui" não
+            corresponde à etapa ou ao trabalho que você abriu de fato.
+          </div>
+          <div class="qa">
+            <span class="q">Por que isso importa</span>Quem retoma o trabalho mais tarde pode ser
+            levado para o lugar errado, sem perceber.
+          </div>
+          <div class="qa">
+            <span class="q">O que o framework deve fazer</span>Detectar o descompasso, mostrar a
+            fonte de verdade e bloquear reparo automático: corrigir cursor/topologia exige decisão
+            humana.
+          </div>
+          <div class="stages">
+            <div class="stage st-done">
+              <div class="t">Detectar</div>
+              <div class="s">✓ feito</div>
+            </div>
+            <div class="stage st-done">
+              <div class="t">Explicar</div>
+              <div class="s">✓ feito</div>
+            </div>
+            <div class="stage st-block">
+              <div class="t">Reparar</div>
+              <div class="s">⛔ decisão humana</div>
+            </div>
+            <div class="stage st-done">
+              <div class="t">Testar</div>
+              <div class="s">✓ testes existentes</div>
+            </div>
+          </div>
+          <div class="owner">
+            <span class="oh">Quem vai resolver</span>
+            <span class="ov">classificação registrada em CO-10.8.1 · PR #44</span>
+            <span class="tag tag-block">reparo = decisão humana</span>
+          </div>
+          <details>
+            <summary>Detalhe técnico</summary>
+            <p>
+              state.yml § topology.cursor é parte da SSOT estrutural. Não há gerador determinístico
+              que saiba se a realidade mudou ou se o cursor deve mudar; a ferramenta só mostra a
+              divergência.
+            </p>
+          </details>
+        </div>
+
+        <!-- 3 -->
+        <div class="card">
+          <span class="driftbadge">drift #3</span>
+          <h3>"O 'próximo passo' escrito não bate com o próximo passo real"</h3>
+          <div class="qa">
+            <span class="q">O que aconteceu</span>A frase que descreve o próximo passo ficou
+            desatualizada em relação ao mapa real de etapas do projeto.
+          </div>
+          <div class="qa">
+            <span class="q">Por que isso importa</span>A pessoa pode seguir uma orientação antiga e
+            trabalhar na coisa errada.
+          </div>
+          <div class="qa">
+            <span class="q">O que o framework deve fazer</span>Apontar a diferença e mostrar o
+            próximo id canônico derivado da topologia. A prosa ao redor continua sendo contexto
+            humano, não texto para reescrita automática.
+          </div>
+          <div class="stages">
+            <div class="stage st-done">
+              <div class="t">Detectar</div>
+              <div class="s">✓ feito</div>
+            </div>
+            <div class="stage st-done">
+              <div class="t">Explicar</div>
+              <div class="s">✓ feito</div>
+            </div>
+            <div class="stage st-block">
+              <div class="t">Reparar</div>
+              <div class="s">⛔ decisão humana</div>
+            </div>
+            <div class="stage st-done">
+              <div class="t">Testar</div>
+              <div class="s">✓ testes existentes</div>
+            </div>
+          </div>
+          <div class="owner">
+            <span class="oh">Quem vai resolver</span>
+            <span class="ov">classificação registrada em CO-10.8.1 · PR #44</span>
+            <span class="tag tag-block">reparo = decisão humana</span>
+          </div>
+          <details>
+            <summary>Detalhe técnico</summary>
+            <p>
+              state.yml § next contém narrativa situada. O id canônico é derivável, mas regenerar a
+              frase inteira sem julgamento humano apagaria contexto; trocar só o id pode deixar a
+              narrativa incoerente.
+            </p>
+          </details>
+        </div>
+
+        <!-- 4 -->
+        <div class="card">
+          <span class="driftbadge">drift #4</span>
+          <h3>"A lista de tarefas não reflete a etapa atual"</h3>
+          <div class="qa">
+            <span class="q">O que aconteceu</span>A etapa em andamento não tem a tarefa
+            correspondente na lista, ou a tarefa diz uma coisa e o marcador de estado diz outra.
+          </div>
+          <div class="qa">
+            <span class="q">Por que isso importa</span>A lista de tarefas deixa de ser um retrato
+            confiável do que está realmente sendo feito.
+          </div>
+          <div class="qa">
+            <span class="q">O que o framework deve fazer</span>Detectar quando o checkpoint ativo
+            não existe em tasks.md ou quando seus sub-checkpoints contradizem o marcador, explicar a
+            fonte de verdade e exigir decisão governada para alterar tarefas humanas.
+          </div>
+          <div class="stages">
+            <div class="stage st-done">
+              <div class="t">Detectar</div>
+              <div class="s">✓ feito</div>
+            </div>
+            <div class="stage st-done">
+              <div class="t">Explicar</div>
+              <div class="s">✓ classificado</div>
+            </div>
+            <div class="stage st-block">
+              <div class="t">Reparar</div>
+              <div class="s">⛔ decisão humana</div>
+            </div>
+            <div class="stage st-done">
+              <div class="t">Testar</div>
+              <div class="s">✓ feito</div>
+            </div>
+          </div>
+          <div class="owner">
+            <span class="oh">Quem vai resolver</span>
+            <span class="ov">classificação registrada em CO-10.8.1 · PR #44</span>
+            <span class="tag tag-block">reparo = decisão humana</span>
+          </div>
+          <details>
+            <summary>Detalhe técnico</summary>
+            <p>
+              active-specs:check detecta checkpoint ativo ausente em tasks.md e incoerência de
+              marcadores/narrativa dos sub-checkpoints. O reparo continua sendo decisão humana
+              porque tasks.md é narrativa autoral.
+            </p>
+          </details>
+        </div>
+
+        <!-- 5 -->
+        <div class="card">
+          <span class="driftbadge">drift #5</span>
+          <h3>"A descrição do PR conta uma história diferente do que foi entregue"</h3>
+          <div class="qa">
+            <span class="q">O que aconteceu</span>O texto que descreve o pull request não reflete o
+            que de fato foi feito e aprovado.
+          </div>
+          <div class="qa">
+            <span class="q">Por que isso importa</span>Quem revisa a entrega lê uma promessa que não
+            corresponde ao conteúdo real.
+          </div>
+          <div class="qa">
+            <span class="q">O que o framework deve fazer</span>Comparar a descrição com o recorte
+            entregue e apontar onde elas se afastam.
+          </div>
+          <div class="stages">
+            <div class="stage st-done">
+              <div class="t">Detectar</div>
+              <div class="s">✓ feito</div>
+            </div>
+            <div class="stage st-done">
+              <div class="t">Explicar</div>
+              <div class="s">✓ feito</div>
+            </div>
+            <div class="stage st-block">
+              <div class="t">Reparar</div>
+              <div class="s">⛔ decisão humana</div>
+            </div>
+            <div class="stage st-test">
+              <div class="t">Testar</div>
+              <div class="s">◆ testes escritos</div>
+            </div>
+          </div>
+          <div class="owner">
+            <span class="oh">Quem vai resolver</span>
+            <span class="ov"
+              >CO-10.8.1 · PR #44 — detecção via Governance Doctor + gh quando disponível</span
+            >
+            <span class="tag tag-block">reparo = decisão humana</span>
+          </div>
+          <details>
+            <summary>Detalhe técnico</summary>
+            <p>
+              drift interativo tenta ler o PR atual via gh e valida o body contra o contrato de
+              perfil. Se gh/auth não estiver disponível, o doctor explica a falta de auth e oferece
+              caminho manual. Atualizar o PR continua decisão humana.
+            </p>
+          </details>
+        </div>
+
+        <!-- 6 -->
+        <div class="card">
+          <span class="driftbadge">drift #6</span>
+          <h3>"Uma decisão já foi aprovada, mas o mapa não avançou"</h3>
+          <div class="qa">
+            <span class="q">O que aconteceu</span>Houve uma aprovação humana para seguir adiante,
+            mas o mapa de etapas ainda mostra a posição anterior.
+          </div>
+          <div class="qa">
+            <span class="q">Por que isso importa</span>O projeto parece parado num ponto que já foi
+            superado, confundindo quem chega depois.
+          </div>
+          <div class="qa">
+            <span class="q">O que o framework deve fazer</span>Detectar e explicar o atraso — mas
+            <b>avançar a etapa é decisão humana</b>, não automática.
+          </div>
+          <div class="stages">
+            <div class="stage st-done">
+              <div class="t">Detectar</div>
+              <div class="s">✓ feito</div>
+            </div>
+            <div class="stage st-done">
+              <div class="t">Explicar</div>
+              <div class="s">✓ feito</div>
+            </div>
+            <div class="stage st-block">
+              <div class="t">Reparar</div>
+              <div class="s">⛔ decisão humana</div>
+            </div>
+            <div class="stage st-test">
+              <div class="t">Testar</div>
+              <div class="s">◆ testes escritos</div>
+            </div>
+          </div>
+          <div class="owner">
+            <span class="oh">Quem vai resolver</span>
+            <span class="ov"
+              >CO-10.8.1 · PR #44 — detecção entregue; avanço continua decisão humana</span
+            >
+            <span class="tag tag-block">reparo = decisão humana</span>
+          </div>
+          <details>
+            <summary>Detalhe técnico</summary>
+            <p>Gate aprovado, mas topologia/cursor não avançou. Avanço de nó = Human Gate.</p>
+          </details>
+        </div>
+
+        <!-- 7 -->
+        <div class="card">
+          <span class="driftbadge">drift #7</span>
+          <h3>"O próximo trabalho está previsto, mas ninguém abriu o espaço pra ele"</h3>
+          <div class="qa">
+            <span class="q">O que aconteceu</span>O mapa prevê um próximo trabalho, mas ainda não
+            existe o lugar (branch/PR) onde ele aconteceria.
+          </div>
+          <div class="qa">
+            <span class="q">Por que isso importa</span>Há o risco de começar a trabalhar sem um
+            espaço organizado, ou de achar que algo está pronto quando nem começou.
+          </div>
+          <div class="qa">
+            <span class="q">O que o framework deve fazer</span>Sinalizar a lacuna — mas
+            <b>abrir o novo trabalho é decisão humana</b>.
+          </div>
+          <div class="stages">
+            <div class="stage st-done">
+              <div class="t">Detectar</div>
+              <div class="s">✓ feito</div>
+            </div>
+            <div class="stage st-done">
+              <div class="t">Explicar</div>
+              <div class="s">✓ feito</div>
+            </div>
+            <div class="stage st-block">
+              <div class="t">Reparar</div>
+              <div class="s">⛔ decisão humana</div>
+            </div>
+            <div class="stage st-test">
+              <div class="t">Testar</div>
+              <div class="s">◆ testes escritos</div>
+            </div>
+          </div>
+          <div class="owner">
+            <span class="oh">Quem vai resolver</span>
+            <span class="ov"
+              >CO-10.8.1 · PR #44 — detecção entregue; abertura continua decisão humana</span
+            >
+            <span class="tag tag-block">reparo = decisão humana</span>
+          </div>
+          <details>
+            <summary>Detalhe técnico</summary>
+            <p>Topologia aponta próximo nó sem PR/branch correspondente.</p>
+          </details>
+        </div>
+
+        <!-- 8 -->
+        <div class="card">
+          <span class="driftbadge">drift #8</span>
+          <h3>"Uma anotação de bastidor contradiz o estado oficial"</h3>
+          <div class="qa">
+            <span class="q">O que aconteceu</span>Uma nota de pesquisa ou rascunho diz algo
+            diferente do estado oficial do projeto.
+          </div>
+          <div class="qa">
+            <span class="q">Por que isso importa</span>Anotações são úteis, mas se forem confundidas
+            com a verdade oficial podem desorientar a leitura.
+          </div>
+          <div class="qa">
+            <span class="q">O que o framework deve fazer</span>Apontar a contradição deixando claro
+            que a anotação <b>não</b> é a fonte oficial.
+          </div>
+          <div class="stages">
+            <div class="stage st-todo">
+              <div class="t">Detectar</div>
+              <div class="s">○ a fazer</div>
+            </div>
+            <div class="stage st-todo">
+              <div class="t">Explicar</div>
+              <div class="s">○ a fazer</div>
+            </div>
+            <div class="stage st-todo">
+              <div class="t">Reparar</div>
+              <div class="s">○ a fazer</div>
+            </div>
+            <div class="stage st-todo">
+              <div class="t">Testar</div>
+              <div class="s">○ a fazer</div>
+            </div>
+          </div>
+          <div class="owner">
+            <span class="oh">Quem vai resolver</span>
+            <span class="ov">CO-10.8.2 — reorg interna e higiene de artefatos</span>
+            <span class="tag tag-cand">candidato</span>
+          </div>
+          <details>
+            <summary>Detalhe técnico</summary>
+            <p>Conteúdo em research/ contradiz o estado governado (research ≠ autoridade).</p>
+          </details>
+        </div>
+      </div>
+
+      <div class="foot">
+        Projeção de acompanhamento do PR #44 · "Quem vai resolver": verde = decidido, âmbar =
+        candidato não cravado, roxo = decisão humana · classificação #2/#3/#4 registrada em
+        2026-06-21; #5/#6/#7 cobertos por detecção/explicação no Governance Doctor; #8 deferido para
+        CO-10.8.2 · não é fonte de verdade estrutural
+      </div>
+    </div>
+  </body>
+</html>

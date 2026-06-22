@@ -1,8 +1,10 @@
 import { Command, CommandContext, CommandResult } from "../Command.js";
 import { runWorkBrief } from "../../workBrief.js";
+import { renderGovernancePreflight, runGovernancePreflight } from "../../governancePreflight.js";
 
 /** Assinatura injetável do briefing — real por default, fake em teste. */
 export type RunWorkBriefFn = typeof runWorkBrief;
+export type RunGovernancePreflightFn = typeof runGovernancePreflight;
 
 export interface WorkCommandOptions {
   readonly noRemote: boolean;
@@ -27,7 +29,10 @@ export class WorkCommand implements Command<WorkCommandOptions> {
     "Briefing governado de trabalho (modo inferido + escopo/autoridade/validações/parada/report contract) a partir de work-policy.yml + snapshot situado. Read-only.";
   readonly usage = ["work", "work --authorization explicit-work-request", "work --no-remote"];
 
-  constructor(private readonly runBriefFn: RunWorkBriefFn = runWorkBrief) {}
+  constructor(
+    private readonly runBriefFn: RunWorkBriefFn = runWorkBrief,
+    private readonly runPreflightFn: RunGovernancePreflightFn = runGovernancePreflight
+  ) {}
 
   parse(argv: readonly string[]): WorkCommandOptions {
     let authorization: string | undefined;
@@ -46,6 +51,9 @@ export class WorkCommand implements Command<WorkCommandOptions> {
   }
 
   async run(options: WorkCommandOptions, context: CommandContext): Promise<CommandResult> {
+    const preflight = this.runPreflightFn(context.repoRoot, "work");
+    for (const line of renderGovernancePreflight(preflight)) context.logger.info(line);
+
     const exitCode = this.runBriefFn(
       context.repoRoot,
       context.logger,

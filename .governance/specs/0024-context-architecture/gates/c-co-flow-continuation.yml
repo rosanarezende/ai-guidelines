@@ -1,0 +1,10 @@
+# Human Gate do checkpoint co-flow-continuation — registrado por guidelines decide.
+# O artefato nasce DEPOIS da decisão humana; NÃO executa transição/merge/abertura de PR.
+checkpoint: "checkpoint-co-flow-continuation"
+actor: "@rosanarezende"
+ref: "#44"
+date: "2026-06-22"
+decision: approved
+note: "Human Gate do checkpoint co-flow-continuation APROVADO para avançar. Não autoriza merge, topologia, próximo PR, policy ou outro checkpoint."
+basis: "Decisão registrada DEPOIS da decisão humana, com o estado governado do checkpoint (reviews/findings/CI/validações) projetado pelo briefing. Não executa transição automática."
+next: "Concluir o nó co-flow-continuation e preparar a abertura do próximo PR (dualroot-collapse). Nenhuma transição é executada automaticamente."

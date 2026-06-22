@@ -10,11 +10,11 @@ focus:
   - "Gate por checkpoint: implementacao -> revisoes exigidas pela .governance/review-policy.yml (quando aplicavel) -> Human Gate (owner) -> AVANCA (abre o proximo PR stacked). Na 0024 usamos Technical Audit + Architectural Review como dogfood intensivo, mas isso NAO e obrigacao universal para todo repositorio. O Human Gate decide o PROXIMO MOVIMENTO, NAO mergeia em main. 1 checkpoint atomico por vez; parar no Gate quando o commit estiver pronto. Correcao local pequena nao espera; mudanca estrutural sim."
   - "Criterio (RESSALVADO em 2026-06-03 por [DEC-0024-G08]): 'ja foi validado empiricamente na 0024?' -> absorver/enforcar/executar. NAO re-modelar o DECIDIDO (G00/G02/G06/G07 seguem cravados). EXCECAO assumida: G03/G04/G05 foram reabertos para modelagem deliberada (orientada a grafo) -- nesses eixos, modelar e a direcao, nao o risco. O 'risco dominante' original (modelar em vez de absorver) vale para os eixos resolvidos; nos reabertos, a modelagem e o trabalho."
 next:
-  - "canonical-next: co-flow-convergence. PR #42 (co-enforcement / seq 9 / CO-3) CONCLUIDO-NA-STACK por Human Gate approved 2026-06-16 (gates/c-co-enforcement.yml; PR #42 Ready, HEAD 46ff89b, CI 11/11 verde; pr-ready:check satisfeito; modo unit, SEM merge isolado). Entrega aprovada: Constraint + EnforcementBinding; knowledge:compile + manifesto/paridade; migracao e remocao do substrato legacy; dogfood do enforcement e recibo; CO-3.5 com colapso integral do runtime CLI (/cli inexistente, bin/scripts em dist, providers removido, tarball/consumidores validados). No ATIVO = co-flow-convergence (seq 10, checkpoint-co-flow-convergence; PR stacked sobre #42): convergencia do fluxo ponta a ponta para impedir que co-capture/co-events automatizem um fluxo ainda parcialmente modelado. Estado atual corrigido por [DEC-0024-G20]: PR #43 fecha o recorte CO-10.1..CO-10.7; revisao externa pre-Human Gate concluiu que body, next e topologia precisam ser reconciliados antes de Ready. Continuacao CO-10.8..CO-10.10 materializada como no planejado co-flow-continuation seq 11, a executar em proximo PR antes de dualroot-collapse/co-capture/co-events. Proximo passo do PR #43: aplicar correcoes pre-Ready, revalidar pr-ready:check e submeter Human Gate do recorte. NAO implementar CO-10.8, dualroot-collapse, CO-5/CO-6 neste PR; NAO mergeia isolado em main (modo unit)."
+  - "canonical-next: co-flow-continuation. PR #43 (co-flow-convergence / seq 10) CONCLUIDO-NA-STACK por Human Gate approved 2026-06-21; modo unit, SEM merge isolado em main. No ATIVO = co-flow-continuation (seq 11, checkpoint-co-flow-continuation; PR #44 stacked sobre #43). Recorte revisado por DEC-0024-G21: PR #44 fecha decisao/inventario/dogfood da continuacao, incluindo Governance Doctor/drift repair, mapa V2, inventario de lifecycle, taxonomia de artefatos, revisoes de falsificacao e guardrail GG-0005 contra debito arquitetural silencioso. Proximo movimento esperado apos este recorte: PR governado para artifact-taxonomy-and-model-review-contract, implementando a taxonomia/review pre-codificacao com enforcement real; depois refactor DDD/BDD, falsificacao ampla e review/Human Gate da continuacao. NAO implementar dualroot-collapse, co-capture, co-events, Ready/Human Gate automatico, merge em main ou movimentacao fisica de .specify neste PR."
 topology:
   cursor:
-    pr: co-flow-convergence
-    checkpoint: checkpoint-co-flow-convergence
+    pr: co-flow-continuation
+    checkpoint: checkpoint-co-flow-continuation
   prs:
     concluded:
       - id: base-governance
@@ -172,16 +172,6 @@ topology:
         sequence: 9
         checkpoints:
           - checkpoint-co-enforcement # EnforcementBinding + knowledge:compile (U3); absorve ex-rule-guardrail
-
-    active:
-      # CO-FLOW — Convergencia do fluxo ponta a ponta antes de automatizar captura/eventos.
-      # Inventario real -> modelo canonico -> confronto modelo x codigo -> correcao integral
-      # dos gaps -> dogfood ponta a ponta -> fluxo de time/multiplas specs/spec nova
-      # -> CLI publica autoexplicavel (CO-10.7 reaberto por G17) -> arquitetura interna/BDD humano para mantenedores
-      # -> falsificacao ampla -> revisao independente + Human Gate. Prova uma unica
-      # maquina de estados para handoff/work/review/resolution/disposition/transicoes/Ready/
-      # Human Gate/integracao/merge antes de co-capture e co-events. PR #43 stacked sobre #42;
-      # modo unit, NAO mergeia isolado; NAO implementa CO-5.
       - id: co-flow-convergence
         github_pr: 43
         role: execution
@@ -189,6 +179,23 @@ topology:
         sequence: 10
         checkpoints:
           - checkpoint-co-flow-convergence # convergencia do fluxo ponta a ponta; modelo canonico + invariantes + jornadas
+
+    active:
+      # CO-FLOW-CONTINUATION — continuacao do fluxo governado apos o recorte aprovado no PR #43.
+      # PR #44 stacked sobre #43; modo unit, NAO mergeia isolado em main.
+      # DEC-0024-G21 substitui CO-10.8.* como nomenclatura operacional por checkpoints
+      # semanticos: drift-diagnosis-and-repair; lifecycle-model-and-artifact-taxonomy-decision;
+      # artifact-taxonomy-and-model-review-contract; internal-architecture-refactor-ddd-bdd;
+      # broad-flow-falsification; continuation-review-human-gate. PR #44 fecha decisao/inventario
+      # e dogfood do modelo; o proximo PR implementa a taxonomia/review pre-codificacao com
+      # enforcement real. dualroot-collapse continua separado para o que toca .specify.
+      - id: co-flow-continuation
+        github_pr: 44
+        role: execution
+        terminal: false
+        sequence: 11
+        checkpoints:
+          - checkpoint-co-flow-continuation # PR #44: decisao/inventario/dogfood; continuacao segue por checkpoints semanticos definidos em DEC-0024-G21
 
     planned:
       # CAUDA REESCRITA (2026-06-07, Human Gate #35 / Opcao A — reframe in-place).
@@ -204,17 +211,6 @@ topology:
       # contexto o mais cedo). `sequence` = posicao no stack (4..K contigua). github_pr
       # null = ainda nao aberto. Objetivo/Deps de cada no: plan.md. Memoria:
       # spec-0024-continuity-operational.
-
-      # DEC-0024-G20 — a continuacao CO-10.8..CO-10.10 foi materializada como no proprio
-      # antes de dualroot-collapse, para que o Human Gate do PR #43 tenha proximo movimento
-      # topologico explicito sem implementar a continuacao no PR atual.
-      - id: co-flow-continuation
-        github_pr: null
-        role: execution
-        terminal: false
-        sequence: 11
-        checkpoints:
-          - checkpoint-co-flow-continuation # CO-10.8 arquitetura interna/BDD; CO-10.9 falsificacao ampla; CO-10.10 revisao independente + Human Gate
 
       # DEC-0024-G18 — dualroot-collapse foi antecipado para antes de co-capture/co-events.
       # DEC-0024-G20 preserva essa ordem, mas posiciona a continuacao do fluxo antes do colapso.

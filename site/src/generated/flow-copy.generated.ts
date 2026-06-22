@@ -448,9 +448,10 @@ export const AI_GUIDELINES_FLOW_COPY = {
     {
       "name": "drift",
       "aliases": [],
-      "description": "Diagnostica drift do índice público: spec_path declarado que não existe no filesystem local. Read-only.",
+      "description": "Diagnostica drift de governança e explica reparos seguros. Read-only.",
       "usage": [
-        "drift"
+        "drift",
+        "drift --check"
       ],
       "subcommands": []
     },
@@ -503,6 +504,17 @@ export const AI_GUIDELINES_FLOW_COPY = {
       "usage": [
         "release-prep --dry-run",
         "release-prep --version 1.1.0-preview.0"
+      ],
+      "subcommands": []
+    },
+    {
+      "name": "repair",
+      "aliases": [],
+      "description": "Repara drift de governança com preview e confirmação. Mostra o que vai mudar antes de escrever.",
+      "usage": [
+        "repair",
+        "repair --apply",
+        "repair --apply --updated-by=@voce"
       ],
       "subcommands": []
     },
