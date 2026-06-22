@@ -206,3 +206,12 @@ Este inventario nao autoriza:
 - refactor estrutural sem confronto modelo x codigo;
 - criacao de API/spec-map runtime;
 - uso do mapa como SSOT.
+
+## 13. Revisao de falsificacao relacionada
+
+Este inventario foi submetido a uma revisao de falsificacao pre-implementacao em
+`research/2026-06-22-checkpoint-co-flow-continuation-spec-map-falsification-review.md`.
+
+A revisao confirmou que a matriz e util como inventario de modelo, mas bloqueou seu
+uso como base topologica ate que a decomposicao semantica seja registrada em DEC,
+reconciliada com `state.yml`/`tasks.md` e refletida no body do PR #44.

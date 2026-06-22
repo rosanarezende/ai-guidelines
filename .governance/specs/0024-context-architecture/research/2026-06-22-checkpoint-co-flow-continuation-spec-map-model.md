@@ -278,3 +278,13 @@ Para o proximo ciclo:
 - gerar `spec-map.json` e HTML a partir das fontes governadas;
 - adicionar `spec-map:sync` e `spec-map:check`;
 - depois avaliar publicacao no site e API.
+
+## 12. Revisao de falsificacao relacionada
+
+Este modelo foi submetido a uma revisao de falsificacao pre-implementacao em
+`research/2026-06-22-checkpoint-co-flow-continuation-spec-map-falsification-review.md`.
+
+A revisao e narrativa de apoio, nao autoridade. Ela apontou que o modelo conceitual
+e promissor, mas ainda nao pode liderar a topologia: antes de usar o mapa como base
+dos proximos PRs, a decisao precisa ser registrada em DEC e reconciliada com
+`state.yml`, `tasks.md`, `next` e o body do PR #44.
