@@ -317,11 +317,18 @@ export const SUBCHECKPOINT_READINESS = "ready-for-transition" as const;
 /** Token de readiness na linha do marcador; captura o valor para validação de coerência. */
 export const READINESS_TOKEN_RE = /`readiness:\s*([A-Za-z0-9-]+)`/;
 
-export function parseSubCheckpoints(tasksMd: string, checkpoint: string): HandoffSubCheckpoint[] {
+export function findCheckpointTaskLine(tasksMd: string, checkpoint: string): number | null {
   const normalized = checkpoint.replace(/^checkpoint-/, "");
   const lines = tasksMd.split(/\r?\n/);
   const anchor = lines.findIndex((l) => l.includes(`**Checkpoint ${normalized}**`));
-  if (anchor < 0) return [];
+  return anchor < 0 ? null : anchor + 1;
+}
+
+export function parseSubCheckpoints(tasksMd: string, checkpoint: string): HandoffSubCheckpoint[] {
+  const lines = tasksMd.split(/\r?\n/);
+  const checkpointLine = findCheckpointTaskLine(tasksMd, checkpoint);
+  if (checkpointLine === null) return [];
+  const anchor = checkpointLine - 1;
   const out: HandoffSubCheckpoint[] = [];
   for (let i = anchor + 1; i < lines.length; i++) {
     if (/\*\*Checkpoint /.test(lines[i])) break; // próximo checkpoint de topo

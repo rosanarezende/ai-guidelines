@@ -55,8 +55,8 @@ recompõe o arquivo a partir de `state.yml` + git.
 - **Fonte de verdade:** `tasks.md` é narrativa humana; o estado vem de `state.yml` (cursor) e dos
   comandos governados `decide/*` (`advanceSubcheckpoint`/`finishSubcheckpoint`), que já são
   human-gated.
-- **Detectável hoje:** **parcial.** `active-specs:check` (`validateEntrySubCheckpointCoherence`)
-  detecta incoerência do marcador de sub-checkpoint; **não** detecta "checkpoint ausente".
+- **Detectável hoje:** **sim.** `active-specs:check` (`validateEntrySubCheckpointCoherence`)
+  detecta checkpoint ativo ausente em `tasks.md` e incoerência do marcador de sub-checkpoint.
 - **Classificação:** **decisão humana.** Conteúdo autoral, mutado só por decisão governada; sem
   gerador determinístico do texto da tarefa.
 - **Testes que comprovam:** `src/cli/activeSpecsConsistencyCheck.test.ts`.
@@ -76,7 +76,7 @@ recompõe o arquivo a partir de `state.yml` + git.
 ## Conclusão sobre CO-10.8.1
 
 A camada de reparo entregou: (1) o modelo (`RepairPlan`/autoridade), (2) **um** reparo seguro real
-(#1) como exemplar, (3) detecção/explicação já existente para #2/#3 e parcial para #4, e (4) esta
+(#1) como exemplar, (3) detecção/explicação existente para #2/#3/#4, e (4) esta
 classificação, que estabelece o **invariante de reparabilidade**. Conclusão proposta: o único drift
 com auto-reparo _local_ possível era o #1; os demais são detectar/explicar + decisão humana, exceto
 o #5, que é auto-reparável mas pertence à superfície de PR/GitHub (nó posterior). Isso torna o

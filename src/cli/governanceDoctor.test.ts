@@ -76,6 +76,16 @@ function tasksWithIncoherentSubcheckpoint(): string {
   ].join("\n");
 }
 
+function tasksWithoutActiveCheckpoint(): string {
+  return [
+    "## Execução",
+    "",
+    "- [/] **Checkpoint outro-no** (nó `outro-no`)",
+    "    - [/] **CO-9.1 — outro trabalho**: em execução.",
+    "",
+  ].join("\n");
+}
+
 function depsFor(
   files: ReadonlyMap<string, string>,
   branch = "feat/spec-0024-context-architecture"
@@ -201,6 +211,23 @@ describe("GovernanceDoctor — diagnóstico humano de drift", () => {
     expect(report.status).toBe("attention");
     expect(report.issues.some((issue) => issue.id.includes("active-consistency"))).toBe(true);
     expect(report.issues.find((issue) => issue.id.includes("active-consistency"))).toMatchObject({
+      repairAuthority: "human-decision",
+    });
+  });
+
+  it("DADO checkpoint ativo ausente em tasks.md ENTÃO explica que a lista nao materializa o estado", () => {
+    const files = new Map([
+      [activeIndexPath, activeIndex()],
+      [statePath, stateWithTopology()],
+      [tasksPath, tasksWithoutActiveCheckpoint()],
+    ]);
+
+    const report = diagnoseGovernanceDrift(repoRoot, depsFor(files));
+
+    expect(report.status).toBe("attention");
+    const issue = report.issues.find((item) => item.id.includes("missing-checkpoint-task"));
+    expect(issue).toMatchObject({
+      title: "A lista de tarefas não materializa o checkpoint ativo",
       repairAuthority: "human-decision",
     });
   });

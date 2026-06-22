@@ -265,6 +265,9 @@ function titleForConsistencyFailure(message: string): string {
   if (message.includes("completed não pertence")) {
     return COPY.consistency.titles.completed;
   }
+  if (message.includes("checkpoint ativo não materializado")) {
+    return COPY.consistency.titles.missingCheckpointTask;
+  }
   return COPY.consistency.titles.unknown;
 }
 
@@ -275,6 +278,7 @@ function classifyConsistencyFailure(message: string): string {
   if (message.includes("identidade stale")) return "identity";
   if (message.includes("source_state_path stale")) return "source-state";
   if (message.includes("completed não pertence")) return "completed";
+  if (message.includes("checkpoint ativo não materializado")) return "missing-checkpoint-task";
   return "unknown";
 }
 
@@ -285,6 +289,7 @@ function repairAuthorityForConsistencyFailure(message: string): GovernanceDoctor
   if (message.includes("identidade stale")) return "human-decision";
   if (message.includes("source_state_path stale")) return "human-decision";
   if (message.includes("completed não pertence")) return "human-decision";
+  if (message.includes("checkpoint ativo não materializado")) return "human-decision";
   return "human-decision";
 }
 

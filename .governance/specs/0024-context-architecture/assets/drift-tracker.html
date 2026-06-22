@@ -358,19 +358,19 @@
               <div class="t">Explicar</div>
               <div class="s">✓ feito</div>
             </div>
-            <div class="stage st-val">
+            <div class="stage st-done">
               <div class="t">Reparar</div>
-              <div class="s">◆ em validação</div>
+              <div class="s">✓ feito</div>
             </div>
-            <div class="stage st-val">
+            <div class="stage st-done">
               <div class="t">Testar</div>
-              <div class="s">◆ testes escritos</div>
+              <div class="s">✓ validado</div>
             </div>
           </div>
           <div class="owner">
             <span class="oh">Quem vai resolver</span>
             <span class="ov">CO-10.8.1 · PR #44</span>
-            <span class="tag tag-fact">decidido · em andamento</span>
+            <span class="tag tag-fact">entregue · validado</span>
           </div>
           <details>
             <summary>Detalhe técnico</summary>
@@ -494,14 +494,14 @@
             confiável do que está realmente sendo feito.
           </div>
           <div class="qa">
-            <span class="q">O que o framework deve fazer</span>Detectar a incoerência entre o estado
-            e a narrativa da lista, explicar a fonte de verdade e exigir decisão governada para
-            alterar tarefas humanas.
+            <span class="q">O que o framework deve fazer</span>Detectar quando o checkpoint ativo
+            não existe em tasks.md ou quando seus sub-checkpoints contradizem o marcador, explicar a
+            fonte de verdade e exigir decisão governada para alterar tarefas humanas.
           </div>
           <div class="stages">
-            <div class="stage st-part">
+            <div class="stage st-done">
               <div class="t">Detectar</div>
-              <div class="s">◐ parcial</div>
+              <div class="s">✓ feito</div>
             </div>
             <div class="stage st-done">
               <div class="t">Explicar</div>
@@ -511,9 +511,9 @@
               <div class="t">Reparar</div>
               <div class="s">⛔ decisão humana</div>
             </div>
-            <div class="stage st-part">
+            <div class="stage st-done">
               <div class="t">Testar</div>
-              <div class="s">◐ parcial</div>
+              <div class="s">✓ feito</div>
             </div>
           </div>
           <div class="owner">
@@ -524,8 +524,9 @@
           <details>
             <summary>Detalhe técnico</summary>
             <p>
-              tasks.md não materializa o checkpoint ativo; coerência de sub-checkpoint já é checada
-              parcialmente em active-specs:check.
+              active-specs:check detecta checkpoint ativo ausente em tasks.md e incoerência de
+              marcadores/narrativa dos sub-checkpoints. O reparo continua sendo decisão humana
+              porque tasks.md é narrativa autoral.
             </p>
           </details>
         </div>

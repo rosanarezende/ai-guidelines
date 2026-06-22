@@ -382,6 +382,32 @@ describe("CLI — active-specs:check · coerência ESTADO↔NARRATIVA de sub-che
     }
   });
 
+  it("DADO checkpoint ativo ausente em tasks.md QUANDO checa ENTÃO falha explicando a materialização", () => {
+    const r = runActiveSpecsConsistencyCheck({
+      indexText: indexOf(entryYaml()),
+      readStateYml: reader(
+        stateWithCursor("checkpoint-co-enforcement"),
+        [
+          "## Execução",
+          "",
+          "- [/] **Checkpoint outro-no** (nó `outro-no`)",
+          "    - [/] **CO-9.1 — outro trabalho**: em execução.",
+          "",
+        ].join("\n")
+      ),
+    });
+    expect(r.kind).toBe("fail");
+    if (r.kind === "fail") {
+      expect(
+        r.failures.some((f) =>
+          /checkpoint ativo não materializado em tasks\.md.*checkpoint-co-enforcement/i.test(
+            f.message
+          )
+        )
+      ).toBe(true);
+    }
+  });
+
   it("DADO state.yml sem topologia QUANDO checa ENTÃO coerência é SKIPPED (sem cursor)", () => {
     const r = runActiveSpecsConsistencyCheck({
       indexText: indexOf(entryYaml()),

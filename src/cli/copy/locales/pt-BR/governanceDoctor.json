@@ -61,6 +61,7 @@
       "identity": "O índice público aponta para a spec errada",
       "sourceState": "O índice público aponta para um state.yml diferente do spec_path",
       "completed": "Uma spec concluída ainda aparece como ativa",
+      "missingCheckpointTask": "A lista de tarefas não materializa o checkpoint ativo",
       "unknown": "A projeção pública diverge do estado canônico"
     },
     "whyItMatters": "O sistema precisa que a projeção pública diga a mesma coisa que os fatos canônicos; caso contrário, a retomada pode orientar a pessoa para o lugar errado.",
