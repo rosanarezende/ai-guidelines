@@ -2,6 +2,7 @@ import { Command, CommandContext, CommandResult } from "../Command.js";
 import {
   diagnoseGovernanceDrift,
   GovernanceDoctorDeps,
+  loadPullRequestWithGh,
   renderGovernanceDoctorReport,
 } from "../../governanceDoctor.js";
 import { deriveGovernancePreflight, renderGovernancePreflight } from "../../governancePreflight.js";
@@ -36,7 +37,11 @@ export class DiagnoseDriftCommand implements Command<DiagnoseDriftOptions> {
 
   async run(options: DiagnoseDriftOptions, context: CommandContext): Promise<CommandResult> {
     const { logger } = context;
-    const report = diagnoseGovernanceDrift(context.repoRoot, this.deps);
+    const deps =
+      options.check || this.deps.loadPullRequest
+        ? this.deps
+        : { ...this.deps, loadPullRequest: loadPullRequestWithGh };
+    const report = diagnoseGovernanceDrift(context.repoRoot, deps);
     if (options.check) {
       const preflight = deriveGovernancePreflight(report, "hook");
       if (preflight.shouldRender) {

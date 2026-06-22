@@ -112,4 +112,34 @@ describe("DiagnoseDriftCommand (`drift`) — Governance Doctor read-only", () =>
     expect(text).toContain("Verificação de governança");
     expect(text).toContain("Exige decisão humana");
   });
+
+  it("DADO loader de PR QUANDO roda sem --check ENTÃO inclui checks que dependem de GitHub", async () => {
+    const { logger, infos } = capturingLogger();
+
+    await new DiagnoseDriftCommand({
+      loadIndex: () => ({ indexAvailable: false, entries: [], warnings: [] }),
+      discoverStateFiles: () => [],
+      fileExists: () => false,
+      loadPullRequest: () => {
+        throw new Error("não deveria consultar PR sem state.yml");
+      },
+    }).run({ check: false }, context(logger));
+
+    const text = infos.join("\n");
+    expect(text).toContain("descrição do PR no GitHub");
+  });
+
+  it("DADO --check sem loader de PR ENTÃO completa o diagnóstico local determinístico", async () => {
+    const { logger, infos } = capturingLogger();
+
+    const out = await new DiagnoseDriftCommand({
+      loadIndex: () => ({ indexAvailable: false, entries: [], warnings: [] }),
+      discoverStateFiles: () => [],
+      fileExists: () => false,
+    }).run({ check: true }, context(logger));
+
+    const text = infos.join("\n");
+    expect(out.exitCode).toBe(0);
+    expect(text).toContain("índice público de specs");
+  });
 });

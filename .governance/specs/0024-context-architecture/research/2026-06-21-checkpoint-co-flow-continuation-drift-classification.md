@@ -61,24 +61,32 @@ recompõe o arquivo a partir de `state.yml` + git.
   gerador determinístico do texto da tarefa.
 - **Testes que comprovam:** `src/cli/activeSpecsConsistencyCheck.test.ts`.
 
-## Os demais drifts (#5–#8), em resumo (para informar o fechamento)
+## Atualização pós-implementação — drifts #5, #6 e #7
 
-- **#5 — PR body ≠ recorte:** _tem_ gerador determinístico (`pr-body:create`), então é o único outro
-  candidato a auto-reparo. Porém o alvo é o **GitHub** (precisa de auth e cai na regra "não editar PR
-  sem go") — superfície diferente do reparo local. Detecção ainda não existe. Pertence melhor a um nó
-  que possua a superfície de PR/GitHub (ex.: `co-events`), não a este checkpoint local.
-- **#6 — gate aprovado, topologia não avançou:** avançar nó = Human Gate. Reparo = decisão humana.
-- **#7 — topologia aponta nó sem PR/branch:** abrir PR/branch = decisão humana (`open-next-node`
-  governado). Reparo = decisão humana.
-- **#8 — `research/` contradiz o estado:** `research/` não é autoridade; sem gerador. Reparo = decisão
-  humana.
+Depois da primeira classificação, a owner decidiu que #5, #6 e #7 não deveriam ficar apenas como
+candidatos narrativos. A implementação posterior ampliou o `GovernanceDoctor`:
+
+- **#5 — PR body ≠ recorte:** agora é detectado/explicado no comando interativo `drift`, que tenta
+  ler o PR atual via `gh` autenticado e valida o body contra o contrato de perfil (`PrProfileContract`
+  - `validateProfileBody`). Se `gh` não estiver instalado/autenticado, o doctor explica isso em
+    linguagem humana e orienta login/instalação ou edição manual assistida. **Reparo:** decisão humana,
+    porque o alvo é GitHub/PR body; o framework pode gerar o template (`pr-body:create`/`pr-body:update`),
+    mas não deve editar a descrição do PR sem go.
+- **#6 — gate aprovado, topologia não avançou:** agora é detectado/explicado quando o gate do nó ativo
+  está `decision: approved` e o cursor ainda aponta para o mesmo nó. **Reparo:** decisão humana, pois
+  avançar nó/topologia é efeito de Human Gate/decisão governada.
+- **#7 — topologia aponta próximo nó sem PR/branch:** agora é detectado/explicado quando o próximo nó
+  de execução segue planejado ou sem `github_pr`. **Reparo:** decisão humana, porque abrir branch/PR é
+  a materialização governada de novo trabalho.
+- **#8 — `research/` contradiz o estado:** permanece fora desta fatia. Entra no **CO-10.8.2**, junto
+  da reorganização/higiene de artefatos e separação entre evidência, status, research e backlog.
 
 ## Conclusão sobre CO-10.8.1
 
 A camada de reparo entregou: (1) o modelo (`RepairPlan`/autoridade), (2) **um** reparo seguro real
-(#1) como exemplar, (3) detecção/explicação existente para #2/#3/#4, e (4) esta
-classificação, que estabelece o **invariante de reparabilidade**. Conclusão proposta: o único drift
-com auto-reparo _local_ possível era o #1; os demais são detectar/explicar + decisão humana, exceto
-o #5, que é auto-reparável mas pertence à superfície de PR/GitHub (nó posterior). Isso torna o
-CO-10.8.1 **fechável** como exemplar + invariante, deixando #5 para o nó que possui a superfície de
-PR e #6/#7/#8 como detecção/explicação futura. Decisão de fechamento é da owner (Human Gate).
+(#1) como exemplar, (3) detecção/explicação para #2/#3/#4, (4) detecção/explicação para #5/#6/#7,
+e (5) esta classificação, que estabelece o **invariante de reparabilidade**. Conclusão proposta:
+o único drift com auto-reparo local possível era o #1. #2..#7 são agora diagnosticáveis quando seus
+fatos estão disponíveis, mas os reparos que tocam narrativa humana, topologia, Human Gate, PR body
+ou GitHub permanecem como decisão humana. #8 fica explicitamente para CO-10.8.2. Decisão de
+fechamento é da owner (Human Gate).

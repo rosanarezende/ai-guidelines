@@ -19,7 +19,9 @@
   "checks": {
     "publicIndex": "índice público de specs",
     "activeConsistency": "coerência active.yml -> state.yml",
-    "topologyNext": "state.yml § topology / next[0]"
+    "topologyNext": "state.yml § topology / next[0]",
+    "gateProgression": "gate humano aprovado -> avanço/materialização",
+    "pullRequestBody": "descrição do PR no GitHub"
   },
   "status": {
     "attention": "Detectei {count} ponto(s) que precisam de atenção.",
@@ -51,6 +53,30 @@
       "title": "Um state.yml não pôde ser interpretado",
       "whyItMatters": "Sem ler o estado canônico, o guia não consegue explicar com segurança qual é o próximo movimento.",
       "safeRepair": "Corrija o schema do state.yml apontado antes de tentar reparar outros drifts."
+    },
+    "pullRequestUnavailable": {
+      "title": "Não consegui ler a descrição do PR no GitHub",
+      "whatHappened": "PR #{pr}: {reason}",
+      "whyItMatters": "Sem ler o body real do PR, o doctor não consegue provar se a descrição comunica o recorte governado atual.",
+      "safeRepair": "Faça login no GitHub CLI com `gh auth login` ou instale/autentique o `gh`. Se preferir não usar auth aqui, gere o template com `npm run pr-body:create` e atualize o PR manualmente."
+    },
+    "pullRequestBodyContract": {
+      "title": "A descrição do PR não segue o template governado atual",
+      "whatHappened": "PR #{pr} (perfil {profile}) diverge do contrato:\n{reasons}",
+      "whyItMatters": "O PR é a porta de leitura humana do trabalho. Se ele conta outra história, revisores e gates podem decidir com base em narrativa stale.",
+      "safeRepair": "Gere o corpo pelo template governado com `npm run pr-body:create -- --profile <perfil>` ou use `npm run pr-body:update` para atualizar as seções mutáveis. Aplique no GitHub somente após revisão humana."
+    },
+    "gateApprovedNotAdvanced": {
+      "title": "Gate humano aprovado, mas a topologia ainda não avançou",
+      "whatHappened": "O gate do nó {node} está aprovado, mas `state.yml § topology.cursor` ainda aponta para {node}/{checkpoint}.",
+      "whyItMatters": "Depois do Human Gate, continuar no nó antigo pode fazer a próxima sessão trabalhar no lugar errado ou repetir uma decisão já tomada.",
+      "safeRepair": "Prepare o fluxo governado de avanço/abertura do próximo nó. Não edite cursor, topologia ou gate manualmente fora da decisão humana."
+    },
+    "nextNodeNotMaterialized": {
+      "title": "O próximo nó ainda não tem PR/branch materializado",
+      "whatHappened": "Após {current}, o próximo nó de execução é {next}, mas ele ainda está planejado ou sem PR associado.",
+      "whyItMatters": "A pessoa sabe que o trabalho deve continuar, mas ainda não há contêiner seguro de branch/PR para executar sem misturar contextos.",
+      "safeRepair": "Use o fluxo governado de abertura do próximo nó/PR. Se GitHub/auth não estiver disponível, apresente as instruções manuais ao humano em vez de tentar improvisar."
     }
   },
   "consistency": {

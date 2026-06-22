@@ -25,6 +25,10 @@ sensível.
 - `drift --check` vira modo read-only bloqueante para hooks e validações.
 - `validate:changed` passa a chamar `drift:check`.
 - `validate` completo passa a chamar `drift:check`.
+- O comando interativo `drift` tenta validar a descrição do PR atual via `gh` autenticado; se
+  GitHub/auth não estiver disponível, explica a ausência de auth e oferece caminho manual.
+- O doctor detecta gate aprovado sem avanço de topologia e próximo nó de execução ainda não
+  materializado como PR/branch.
 
 ## Fronteira de autoridade
 
@@ -33,7 +37,7 @@ Autodetectar não significa auto-reparar.
 - `drift` continua read-only.
 - `repair` continua separado, com preview, confirmação e revalidação.
 - Drift #1 é reparável porque `active.yml` é projeção derivável e tem gerador determinístico.
-- Drifts #2, #3 e #4 permanecem como detectar/explicar + decisão humana, conforme classificação
+- Drifts #2, #3, #4, #5, #6 e #7 permanecem como detectar/explicar + decisão humana, conforme classificação
   registrada em `2026-06-21-checkpoint-co-flow-continuation-drift-classification.md`.
 - Human Gate, Ready, merge, avanço de nó e alterações de topologia continuam fora de reparo automático.
 
@@ -50,7 +54,9 @@ O framework passa a fazer três coisas no fluxo normal:
 
 ## O que permanece para depois
 
-- Ampliar a cobertura de detecção de drifts #5 a #8.
+- Ampliar a cobertura de detecção do drift #8 dentro do CO-10.8.2, junto da reorganização/higiene
+  de artefatos `research/`.
+- Refletir no site público o valor de autodetecção de drift depois que o fluxo estabilizar.
 - Transformar o "PR Progress Map" em artefato/produto governado quando o padrão amadurecer.
 - Refletir a experiência final no site público depois que o fluxo estabilizar.
 

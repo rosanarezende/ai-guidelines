@@ -548,31 +548,37 @@
             entregue e apontar onde elas se afastam.
           </div>
           <div class="stages">
-            <div class="stage st-todo">
+            <div class="stage st-done">
               <div class="t">Detectar</div>
-              <div class="s">○ a fazer</div>
+              <div class="s">✓ feito</div>
             </div>
-            <div class="stage st-todo">
+            <div class="stage st-done">
               <div class="t">Explicar</div>
-              <div class="s">○ a fazer</div>
+              <div class="s">✓ feito</div>
             </div>
-            <div class="stage st-todo">
+            <div class="stage st-block">
               <div class="t">Reparar</div>
-              <div class="s">○ a fazer</div>
+              <div class="s">⛔ decisão humana</div>
             </div>
-            <div class="stage st-todo">
+            <div class="stage st-test">
               <div class="t">Testar</div>
-              <div class="s">○ a fazer</div>
+              <div class="s">◆ testes escritos</div>
             </div>
           </div>
           <div class="owner">
             <span class="oh">Quem vai resolver</span>
-            <span class="ov">co-events (PR futuro) — apoia em pr-body / pr-ready:check</span>
-            <span class="tag tag-cand">candidato</span>
+            <span class="ov"
+              >CO-10.8.1 · PR #44 — detecção via Governance Doctor + gh quando disponível</span
+            >
+            <span class="tag tag-block">reparo = decisão humana</span>
           </div>
           <details>
             <summary>Detalhe técnico</summary>
-            <p>PR body diverge do recorte aprovado; relacionado a pr-body / pr-ready:check.</p>
+            <p>
+              drift interativo tenta ler o PR atual via gh e valida o body contra o contrato de
+              perfil. Se gh/auth não estiver disponível, o doctor explica a falta de auth e oferece
+              caminho manual. Atualizar o PR continua decisão humana.
+            </p>
           </details>
         </div>
 
@@ -593,27 +599,29 @@
             <b>avançar a etapa é decisão humana</b>, não automática.
           </div>
           <div class="stages">
-            <div class="stage st-todo">
+            <div class="stage st-done">
               <div class="t">Detectar</div>
-              <div class="s">○ a fazer</div>
+              <div class="s">✓ feito</div>
             </div>
-            <div class="stage st-todo">
+            <div class="stage st-done">
               <div class="t">Explicar</div>
-              <div class="s">○ a fazer</div>
+              <div class="s">✓ feito</div>
             </div>
             <div class="stage st-block">
               <div class="t">Reparar</div>
               <div class="s">⛔ decisão humana</div>
             </div>
-            <div class="stage st-todo">
+            <div class="stage st-test">
               <div class="t">Testar</div>
-              <div class="s">○ a fazer</div>
+              <div class="s">◆ testes escritos</div>
             </div>
           </div>
           <div class="owner">
             <span class="oh">Quem vai resolver</span>
-            <span class="ov">co-events (detecção) — avanço continua decisão humana</span>
-            <span class="tag tag-cand">candidato</span>
+            <span class="ov"
+              >CO-10.8.1 · PR #44 — detecção entregue; avanço continua decisão humana</span
+            >
+            <span class="tag tag-block">reparo = decisão humana</span>
           </div>
           <details>
             <summary>Detalhe técnico</summary>
@@ -638,27 +646,29 @@
             <b>abrir o novo trabalho é decisão humana</b>.
           </div>
           <div class="stages">
-            <div class="stage st-todo">
+            <div class="stage st-done">
               <div class="t">Detectar</div>
-              <div class="s">○ a fazer</div>
+              <div class="s">✓ feito</div>
             </div>
-            <div class="stage st-todo">
+            <div class="stage st-done">
               <div class="t">Explicar</div>
-              <div class="s">○ a fazer</div>
+              <div class="s">✓ feito</div>
             </div>
             <div class="stage st-block">
               <div class="t">Reparar</div>
               <div class="s">⛔ decisão humana</div>
             </div>
-            <div class="stage st-todo">
+            <div class="stage st-test">
               <div class="t">Testar</div>
-              <div class="s">○ a fazer</div>
+              <div class="s">◆ testes escritos</div>
             </div>
           </div>
           <div class="owner">
             <span class="oh">Quem vai resolver</span>
-            <span class="ov">co-events (detecção) — abertura continua decisão humana</span>
-            <span class="tag tag-cand">candidato</span>
+            <span class="ov"
+              >CO-10.8.1 · PR #44 — detecção entregue; abertura continua decisão humana</span
+            >
+            <span class="tag tag-block">reparo = decisão humana</span>
           </div>
           <details>
             <summary>Detalhe técnico</summary>
@@ -702,7 +712,7 @@
           </div>
           <div class="owner">
             <span class="oh">Quem vai resolver</span>
-            <span class="ov">co-knowledge / housekeeping (PR futuro)</span>
+            <span class="ov">CO-10.8.2 — reorg interna e higiene de artefatos</span>
             <span class="tag tag-cand">candidato</span>
           </div>
           <details>
@@ -715,7 +725,8 @@
       <div class="foot">
         Projeção de acompanhamento do PR #44 · "Quem vai resolver": verde = decidido, âmbar =
         candidato não cravado, roxo = decisão humana · classificação #2/#3/#4 registrada em
-        2026-06-21 · não é fonte de verdade estrutural
+        2026-06-21; #5/#6/#7 cobertos por detecção/explicação no Governance Doctor; #8 deferido para
+        CO-10.8.2 · não é fonte de verdade estrutural
       </div>
     </div>
   </body>

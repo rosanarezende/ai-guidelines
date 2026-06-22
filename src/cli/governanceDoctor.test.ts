@@ -4,6 +4,7 @@ const repoRoot = "/repo";
 const activeIndexPath = `${repoRoot}/.governance/runtime/specs/active.yml`;
 const statePath = `${repoRoot}/.governance/specs/0024-context-architecture/state.yml`;
 const tasksPath = `${repoRoot}/.governance/specs/0024-context-architecture/tasks.md`;
+const gatePath = `${repoRoot}/.governance/specs/0024-context-architecture/gates/c-co-flow-continuation.yml`;
 
 function activeIndex(branch = "feat/spec-0024-context-architecture"): string {
   return `
@@ -59,10 +60,66 @@ topology:
 `;
 }
 
+function stateWithNextExecutionPlanned(nextLine = "canonical-next: dualroot-collapse"): string {
+  return `stage: implementation
+gate:
+  status: closed
+focus: []
+next:
+  - "${nextLine}"
+topology:
+  cursor:
+    pr: co-flow-continuation
+    checkpoint: checkpoint-co-flow-continuation
+  prs:
+    concluded:
+      - id: co-flow-convergence
+        github_pr: 43
+        role: execution
+        terminal: false
+        sequence: 1
+        checkpoints:
+          - checkpoint-co-flow-convergence
+    active:
+      - id: co-flow-continuation
+        github_pr: 44
+        role: execution
+        terminal: false
+        sequence: 2
+        checkpoints:
+          - checkpoint-co-flow-continuation
+    planned:
+      - id: dualroot-collapse
+        github_pr: null
+        role: execution
+        terminal: false
+        sequence: 3
+        checkpoints:
+          - checkpoint-dualroot-collapse
+      - id: integration-final
+        github_pr: null
+        role: integration
+        terminal: true
+        sequence: null
+        checkpoints:
+          - review-and-merge
+`;
+}
+
 function stateWithCursorOutsideCanonical(): string {
   return stateWithTopology()
     .replace("pr: co-flow-continuation", "pr: integration-final")
     .replace("checkpoint: checkpoint-co-flow-continuation", "checkpoint: review-and-merge");
+}
+
+function approvedGate(): string {
+  return `schema_version: 1
+node: co-flow-continuation
+checkpoint: checkpoint-co-flow-continuation
+decision: approved
+decided_at: "2026-06-21T00:00:00Z"
+decided_by: Rosana
+`;
 }
 
 function tasksWithIncoherentSubcheckpoint(): string {
@@ -228,6 +285,86 @@ describe("GovernanceDoctor — diagnóstico humano de drift", () => {
     const issue = report.issues.find((item) => item.id.includes("missing-checkpoint-task"));
     expect(issue).toMatchObject({
       title: "A lista de tarefas não materializa o checkpoint ativo",
+      repairAuthority: "human-decision",
+    });
+  });
+
+  it("DADO PR inacessível ENTÃO explica que GitHub/auth precisa ser resolvido pelo humano", () => {
+    const files = new Map([
+      [activeIndexPath, activeIndex()],
+      [statePath, stateWithTopology()],
+    ]);
+
+    const report = diagnoseGovernanceDrift(repoRoot, {
+      ...depsFor(files),
+      loadPullRequest: () => ({
+        kind: "unavailable",
+        reason: "gh auth required",
+        guidance: "Faça gh auth login",
+      }),
+    });
+
+    expect(report.status).toBe("attention");
+    const issue = report.issues.find((item) => item.id === "pull-request-body-unavailable:44");
+    expect(issue).toMatchObject({
+      title: "Não consegui ler a descrição do PR no GitHub",
+      repairAuthority: "human-decision",
+      safeRepair: "Faça gh auth login",
+    });
+  });
+
+  it("DADO body do PR fora do contrato ENTÃO detecta drift de descrição", () => {
+    const files = new Map([
+      [activeIndexPath, activeIndex()],
+      [statePath, stateWithTopology()],
+    ]);
+
+    const report = diagnoseGovernanceDrift(repoRoot, {
+      ...depsFor(files),
+      loadPullRequest: () => ({
+        kind: "ok",
+        pullRequest: {
+          number: 44,
+          title: "PR stale",
+          body: "## Resumo\ntexto",
+          branch: "feat/spec-0024-co-flow-continuation",
+          isDraft: true,
+          labels: [],
+        },
+      }),
+    });
+
+    expect(report.status).toBe("attention");
+    const issue = report.issues.find((item) => item.id === "pull-request-body-contract:44");
+    expect(issue).toMatchObject({
+      title: "A descrição do PR não segue o template governado atual",
+      repairAuthority: "human-decision",
+    });
+    expect(issue?.whatHappened).toContain("perfil execution");
+  });
+
+  it("DADO gate aprovado sem avanço ENTÃO aponta decisão humana de progressão", () => {
+    const files = new Map([
+      [activeIndexPath, activeIndex()],
+      [statePath, stateWithNextExecutionPlanned()],
+      [gatePath, approvedGate()],
+    ]);
+
+    const report = diagnoseGovernanceDrift(repoRoot, depsFor(files));
+
+    expect(report.status).toBe("attention");
+    expect(
+      report.issues.find((item) => item.id === "gate-approved-not-advanced:co-flow-continuation")
+    ).toMatchObject({
+      title: "Gate humano aprovado, mas a topologia ainda não avançou",
+      repairAuthority: "human-decision",
+    });
+    expect(
+      report.issues.find(
+        (item) => item.id === "next-node-not-materialized:co-flow-continuation->dualroot-collapse"
+      )
+    ).toMatchObject({
+      title: "O próximo nó ainda não tem PR/branch materializado",
       repairAuthority: "human-decision",
     });
   });
