@@ -83,7 +83,14 @@ Preencher ao abrir o Draft PR.
 
 Inclua:
 - imagem principal, se já existir; e/ou
-- prompt final paste-ready.
+- prompt final paste-ready; ou
+- briefing governado gerado por `pr-body:create`, apontando para o template
+  versionado que deve produzir o prompt final.
+
+Use o padrão versionado `.governance/visual-prompts/pr-intended-vision.prompt.md`
+para gerar/refinar este prompt quando houver apoio de IA. Não escreva um prompt
+solto sem explicitar problema, mudança pretendida, estado esperado, autoridade e
+fora de escopo.
 
 Objetivo: deixar claro o que este PR pretende entregar antes da implementação.
 
@@ -96,7 +103,7 @@ remover a imagem/prompt originais. Mudança excepcional de visão entra como
 <!-- Cole a imagem principal aqui, quando existir. -->
 
 <details>
-<summary><strong>Prompt final — visão pretendida</strong></summary>
+<summary><strong>Prompt governado — visão pretendida</strong></summary>
 
 ```text
 {{AI_GUIDELINES_EXECUTION_VISION_TEXT}}

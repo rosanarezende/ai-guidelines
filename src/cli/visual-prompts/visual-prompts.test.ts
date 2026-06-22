@@ -1,6 +1,8 @@
+import { existsSync } from "node:fs";
 import { parseContextTarget } from "./parseContextTarget.js";
 import { renderVisualPrompt } from "./renderVisualPrompt.js";
 import { collectLocalContext } from "./collectLocalContext.js";
+import { VISUAL_PROMPT_OPTIONS } from "./visualPromptCatalog.js";
 import { WorkflowFileSystem } from "../../app/ports/WorkflowFileSystem.js";
 
 class StubFs implements WorkflowFileSystem {
@@ -37,6 +39,24 @@ class StubFs implements WorkflowFileSystem {
 }
 
 describe("CLI — Visual Prompts [BR-WORKFLOW-VISUAL-PROMPTS]", () => {
+  describe("visualPromptCatalog", () => {
+    it("DADO o catálogo de prompts visuais QUANDO validar ENTÃO cada slug aponta para template versionado", () => {
+      for (const option of VISUAL_PROMPT_OPTIONS) {
+        expect(existsSync(`.governance/visual-prompts/${option.slug}.prompt.md`)).toBe(true);
+      }
+    });
+
+    it("DADO o modo visão pretendida QUANDO consultar o catálogo ENTÃO exige contexto de PR/spec", () => {
+      expect(VISUAL_PROMPT_OPTIONS).toContainEqual(
+        expect.objectContaining({
+          value: "pr-intended-vision",
+          slug: "pr-intended-vision",
+          needsContext: true,
+        })
+      );
+    });
+  });
+
   describe("parseContextTarget", () => {
     it("DADO um input de PR com cerquilha QUANDO parsear ENTÃO retorna o tipo pr e o número correto", () => {
       const result = parseContextTarget("PR #25");

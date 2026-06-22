@@ -7,6 +7,7 @@ Templates de prompts versionados invocados pelo **wizard CLI** (opção "Gerar p
 | Slug                                | Variáveis                         | Foco da investigação                                                |
 | ----------------------------------- | --------------------------------- | ------------------------------------------------------------------- |
 | `architecture-end-to-end.prompt.md` | (nenhuma)                         | Estrutura arquitetural do repositório atual (camadas, componentes). |
+| `pr-intended-vision.prompt.md`      | `{{context}}`, `{{localContext}}` | Baseline visual pretendido de um Draft PR, antes da implementação.  |
 | `value-delivered.prompt.md`         | `{{context}}`, `{{localContext}}` | Comparativo antes/depois de um PR ou spec específica.               |
 
 > **Prompts editoriais específicos do framework `ai-guidelines`** (capa do README, capas DX) vivem em [`docs/editorial/`](../../docs/editorial/) — gênero distinto (prompts diretos para gerador de imagem, não briefings dirigidos a IA conversacional); não invocáveis via wizard.
