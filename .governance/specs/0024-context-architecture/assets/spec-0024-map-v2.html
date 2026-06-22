@@ -449,6 +449,14 @@
           <span class="inline-code">state.yml</span>, <span class="inline-code">tasks.md</span>,
           Git/GitHub e os comandos governados.
         </div>
+        <div class="decision-box">
+          <h3>Decisão registrada para o PR #44</h3>
+          <p>
+            A opção escolhida é a <strong>Opção A</strong>: o PR #44 fecha
+            <strong>decisão de modelo + inventário</strong>. Refatoração arquitetural, confronto
+            modelo × código, BDD visual e falsificação ampla ficam como checkpoints/PRs posteriores.
+          </p>
+        </div>
       </section>
 
       <nav class="nav" aria-label="Seções do mapa">
@@ -673,7 +681,7 @@
 
         <div class="pr-board">
           <article class="pr-card primary">
-            <span class="tag active">Opção A · recomendada para agora</span>
+            <span class="tag active">Opção A · escolhida para PR #44</span>
             <h3>PR #44 fecha decisão de modelo + inventário</h3>
             <p>
               PR #44 ficaria como contêiner de dogfood de drift + modelagem do lifecycle. O refactor
@@ -796,23 +804,24 @@
 
       <section class="section" id="decisoes">
         <div class="decision-box">
-          <h3>5. Decisões que este mapa quer facilitar</h3>
+          <h3>5. Decisão escolhida e pendências</h3>
           <ol>
             <li>
-              O PR #44 deve fechar só <strong>drift + modelo de fronteiras + inventário</strong>,
-              deixando confronto/refactor para PRs posteriores?
+              <strong>Escolhido:</strong> o PR #44 fecha
+              <strong>drift + modelo de fronteiras + inventário</strong>, deixando
+              confronto/refactor para PRs posteriores.
             </li>
             <li>
-              O checkpoint atual deve ser renomeado para um slug semântico, sem
-              <span class="inline-code">CO-10.8.2</span>?
+              <strong>Pendente:</strong> decidir como representar o checkpoint atual com slug
+              semântico, sem depender de <span class="inline-code">CO-10.8.2</span>.
             </li>
             <li>
-              O framework deve formalizar que <strong>PR é contêiner</strong> e
+              <strong>Pendente:</strong> formalizar que <strong>PR é contêiner</strong> e
               <strong>checkpoint é unidade de entrega</strong>?
             </li>
             <li>
-              O mapa visual deve virar artefato recomendado sempre que um PR tiver múltiplas
-              frentes?
+              <strong>Pendente:</strong> decidir se o mapa visual vira artefato recomendado sempre
+              que um PR tiver múltiplas frentes.
             </li>
           </ol>
         </div>

@@ -5,6 +5,8 @@ Spec: 0024 — context-architecture
 No: `co-flow-continuation`  
 PR: #44 — `feat/spec-0024-co-flow-continuation`  
 Artefato visual relacionado: `assets/spec-0024-map-v2.html`
+Inventario relacionado:
+`research/2026-06-22-checkpoint-co-flow-continuation-lifecycle-model-inventory.md`
 
 ## 1. Decisao registrada nesta rodada
 
@@ -16,6 +18,9 @@ Isso significa que o PR #44 deve entregar uma decisao clara sobre como o framewo
 modela no, checkpoint e PR, alem de um inventario robusto do ciclo ponta a ponta.
 Ele nao deve tentar absorver toda a refatoracao arquitetural, a falsificacao ampla
 ou a implementacao final do runtime unificado.
+
+O inventario passa a ser a saida principal de analise do PR #44. O mapa visual e
+uma projecao humana dessa decisao, nao a fonte de verdade.
 
 ## 2. Problema observado
 
@@ -262,7 +267,8 @@ Para o PR #44:
 
 - manter `spec-0024-map-v2.html` como prototipo visual;
 - registrar a Opcao A como decisao de recorte;
-- usar o inventario para definir os proximos checkpoints sem `CO-10.8.*`;
+- usar o inventario de lifecycle para definir os proximos checkpoints sem
+  `CO-10.8.*`;
 - nao implementar a API agora;
 - registrar o mapa gerado e os prompts visuais como candidatos fortes de produto.
 
