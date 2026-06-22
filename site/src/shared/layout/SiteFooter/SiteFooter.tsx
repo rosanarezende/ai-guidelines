@@ -9,6 +9,7 @@ export function SiteFooter(): JSX.Element {
       <p>{copy.tagline}</p>
       <div className="footerLinks">
         <SiteLink route="home">{copy.links.home}</SiteLink>
+        <SiteLink route="cliAdvanced">{copy.links.advanced}</SiteLink>
         <SiteLink route="reference">{copy.links.reference}</SiteLink>
         <SiteLink route="contribute">{copy.links.contribute}</SiteLink>
         <a href="https://github.com/rosanarezende/ai-guidelines">{copy.links.github}</a>

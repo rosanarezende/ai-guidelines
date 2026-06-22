@@ -1,0 +1,25 @@
+{
+  "eyebrow": "Casos avançados",
+  "title": "Quando o fluxo governado encontra desencontros",
+  "lead": "Esta área mostra situações em que os artefatos do repositório deixam de contar a mesma história. O objetivo é que a pessoa veja o problema, entenda o impacto e saiba qual ação é segura.",
+  "desencontros": {
+    "eyebrow": "Laboratório de desencontros",
+    "title": "Oito mini projetos para falsificar a governança",
+    "lead": "Cada mini projeto representa uma falha possível entre branch, índice público, topologia, tarefas, PR, gate e artefatos narrativos. O terminal mostra o que a pessoa ou a LLM veria ao rodar o diagnóstico.",
+    "commandLabel": "O humano ou a LLM roda",
+    "terminalTitle": "npx ai-guidelines drift",
+    "terminalBadge": "diagnóstico simulado",
+    "projectLabel": "Mini projeto",
+    "whatHappenedLabel": "O que aconteceu",
+    "nextStepLabel": "O que fazer",
+    "stageTitle": "Cobertura atual",
+    "selected": "selecionado"
+  },
+  "status": {
+    "detectado": "detectado",
+    "explicado": "explicado",
+    "reparavel": "reparável",
+    "decisao": "decisão humana",
+    "pendente": "pendente"
+  }
+}

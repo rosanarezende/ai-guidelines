@@ -6,6 +6,7 @@ export type RouteId =
   | "cli"
   | "cliStart"
   | "cliDaily"
+  | "cliAdvanced"
   | "reference"
   | "contribute"
   | "notFound";
@@ -111,7 +112,12 @@ export const routes: readonly RouteLink[] = [
     label: "Usar no dia a dia",
     shortLabel: "Dia a dia",
   },
-  { id: "reference", path: "/atalhos", label: "Atalhos avançados", shortLabel: "Atalhos" },
+  {
+    id: "cliAdvanced",
+    path: "/cli/avancado",
+    label: "Casos avançados",
+    shortLabel: "Avançado",
+  },
 ];
 
 const secondaryRoutes: readonly RouteLink[] = [
@@ -121,6 +127,7 @@ const secondaryRoutes: readonly RouteLink[] = [
     label: "Escolher experiência",
     shortLabel: "Fluxos",
   },
+  { id: "reference", path: "/atalhos", label: "Atalhos avançados", shortLabel: "Atalhos" },
 ];
 
 /**
@@ -271,6 +278,7 @@ export function routeFromPath(pathname: string): RouteId {
   if (normalized === "/cli") return "cli";
   if (normalized === "/cli/comecar") return "cliStart";
   if (normalized === "/cli/dia-a-dia") return "cliDaily";
+  if (normalized === "/cli/avancado") return "cliAdvanced";
   if (normalized === "/atalhos") return "reference";
   if (normalized === "/contribute") return "contribute";
   // Rota desconhecida vira 404 explícito.
@@ -287,6 +295,7 @@ export function routeTitle(id: RouteId): string {
   if (id === "cli") return "ai-guidelines — simulador interativo da CLI";
   if (id === "cliStart") return "ai-guidelines — começar com o framework";
   if (id === "cliDaily") return "ai-guidelines — uso no dia a dia";
+  if (id === "cliAdvanced") return "ai-guidelines — casos avançados";
   if (id === "notFound") return "ai-guidelines — página não encontrada";
   const route = allRoutes.find((item) => item.id === id);
   return route ? `ai-guidelines — ${route.label}` : "ai-guidelines";

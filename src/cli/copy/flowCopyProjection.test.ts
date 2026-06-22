@@ -83,6 +83,7 @@ describe("flow copy catalog", () => {
   it("mantém o simulador como páginas React navegáveis e mobile-first", () => {
     const components = readSiteSources([
       "site/src/pages/cli/CliPage/CliPage.tsx",
+      "site/src/pages/advanced/AdvancedPage/AdvancedPage.tsx",
       "site/src/features/cli-simulator/CliTerminal/CliTerminal.tsx",
       "site/src/features/cli-simulator/RealCliRunner/RealCliRunner.tsx",
       "site/src/features/terminal/TerminalFrame/TerminalFrame.tsx",
@@ -98,6 +99,7 @@ describe("flow copy catalog", () => {
     expect(components).toContain("terminalBadge");
     expect(data).toContain('"/cli/comecar"');
     expect(data).toContain('"/cli/dia-a-dia"');
+    expect(data).toContain('"/cli/avancado"');
     expect(data).toContain('"/atalhos"');
     expect(styles).toContain("@media (min-width:");
     expect(styles).toContain("grid-template-columns: 1fr");

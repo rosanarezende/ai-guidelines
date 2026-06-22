@@ -18,11 +18,12 @@ function readSite(relativePath: string): string {
 describe("rotas do site (formato simulador)", () => {
   const flowData = readSite("site/src/content/flowData.ts");
 
-  it("home (/), índice do simulador (/cli) e atalhos (/atalhos) são rotas canônicas", () => {
+  it("home (/), simuladores (/cli/*), casos avançados e atalhos são rotas canônicas", () => {
     expect(flowData).toContain('path: "/"');
     expect(flowData).toContain('path: "/cli"');
     expect(flowData).toContain('path: "/cli/comecar"');
     expect(flowData).toContain('path: "/cli/dia-a-dia"');
+    expect(flowData).toContain('path: "/cli/avancado"');
     expect(flowData).toContain('"/atalhos"');
   });
 
@@ -42,11 +43,13 @@ describe("rotas do site (formato simulador)", () => {
     expect(flowData).toContain("export function routeTitle");
     expect(flowData).toContain("começar com o framework");
     expect(flowData).toContain("uso no dia a dia");
+    expect(flowData).toContain("casos avançados");
     expect(flowData.toLowerCase()).toContain("não encontrada");
     const appShell = readSite("site/src/app/shell/AppShell/AppShell.tsx");
     const activePage = readSite("site/src/app/routing/ActivePage/ActivePage.tsx");
     expect(appShell).toContain("document.title = routeTitle(route)");
     expect(activePage).toContain("NotFoundPage");
+    expect(activePage).toContain("AdvancedPage");
   });
 });
 

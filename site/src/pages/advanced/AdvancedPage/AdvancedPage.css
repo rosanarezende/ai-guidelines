@@ -1,0 +1,211 @@
+.desencontroLab {
+  display: grid;
+  gap: 18px;
+}
+
+.desencontroLabHead {
+  display: grid;
+  gap: 8px;
+  max-width: 780px;
+}
+
+.desencontroLabHead p:last-child {
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+.desencontroLayout {
+  display: grid;
+  gap: 18px;
+}
+
+.desencontroPicker {
+  display: grid;
+  gap: 10px;
+}
+
+.desencontroOption {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-left: 5px solid #b9c4d5;
+  border-radius: 10px;
+  color: var(--ink);
+  cursor: pointer;
+  display: grid;
+  gap: 6px;
+  min-height: 112px;
+  padding: 14px 16px;
+  text-align: left;
+}
+
+.desencontroOption span {
+  color: var(--accent);
+  font-size: 0.74rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.desencontroOption strong {
+  font-size: 0.98rem;
+  line-height: 1.3;
+}
+
+.desencontroOption em {
+  color: var(--muted);
+  font-size: 0.86rem;
+  font-style: normal;
+  line-height: 1.45;
+}
+
+.desencontroOption small {
+  color: var(--accent);
+  font-size: 0.72rem;
+  font-weight: 900;
+  margin-top: 4px;
+  text-transform: uppercase;
+}
+
+.desencontroOption:hover,
+.desencontroOption.isSelected {
+  border-color: #78b7ad;
+  border-left-color: var(--accent);
+}
+
+.desencontroOption.isSelected {
+  background: #f7fcfb;
+}
+
+.desencontroWorkArea {
+  display: grid;
+  gap: 16px;
+}
+
+.desencontroTerminalBlock {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+.commandHint {
+  align-items: center;
+  color: var(--muted);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  line-height: 1.4;
+}
+
+.desencontroBrief {
+  align-content: start;
+  display: grid;
+  gap: 12px;
+}
+
+.desencontroBrief section {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 16px;
+}
+
+.desencontroBrief h3 {
+  font-size: 0.98rem;
+}
+
+.desencontroBrief p,
+.desencontroStages dd {
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.desencontroStages {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+}
+
+.stageRow {
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  display: grid;
+  gap: 5px;
+  padding: 10px;
+}
+
+.stageRow dt {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: space-between;
+}
+
+.stageRow dt span {
+  color: var(--ink);
+  font-size: 0.82rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.stageRow dt strong {
+  border-radius: 999px;
+  font-size: 0.72rem;
+  padding: 3px 8px;
+}
+
+.stageRow dd {
+  font-size: 0.86rem;
+  margin: 0;
+}
+
+.stage-detectado dt strong,
+.stage-explicado dt strong {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.stage-reparavel dt strong {
+  background: #dff7ef;
+  color: #1d6b5b;
+}
+
+.stage-decisao dt strong {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.stage-pendente dt strong {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.desencontroTerminalBlock .terminalDemo pre {
+  max-height: 480px;
+}
+
+@media (min-width: 760px) {
+  .desencontroPicker {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1080px) {
+  .desencontroLayout {
+    grid-template-columns: 320px minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .desencontroPicker {
+    grid-template-columns: 1fr;
+    position: sticky;
+    top: 16px;
+  }
+
+  .desencontroWorkArea {
+    grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.65fr);
+  }
+}
