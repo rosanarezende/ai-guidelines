@@ -10,9 +10,11 @@ Inventario relacionado:
 
 ## 1. Decisao registrada nesta rodada
 
-A mantenedora escolheu a **Opcao A** para o PR #44:
+A mantenedora registrou a decisao **[DEC-0024-G21]** para o PR #44:
 
-> PR #44 fecha a decisao de modelo + inventario.
+> PR #44 fecha a decisao de modelo + inventario, registra o guardrail contra
+> debito arquitetural silencioso e prepara o proximo PR de implementacao robusta
+> da taxonomia de artefatos e do review pre-codificacao.
 
 Isso significa que o PR #44 deve entregar uma decisao clara sobre como o framework
 modela no, checkpoint e PR, alem de um inventario robusto do ciclo ponta a ponta.
@@ -246,9 +248,10 @@ Regras candidatas:
 - Prompts e imagens devem ser versionados quando forem usados para comunicar o
   andamento de um PR grande.
 
-## 10. Decisoes ainda pendentes
+## 10. Decisoes ainda pendentes apos G21
 
-Antes de transformar isso em implementacao estrutural, ainda precisamos decidir:
+G21 decidiu o recorte semantico do PR #44 e a obrigacao de nao deixar debito
+arquitetural silencioso. Ainda ficam decisoes de implementacao para o proximo PR:
 
 1. O mapa passa a ser artefato recomendado para todo PR grande ou so para specs
    complexas?
@@ -258,7 +261,9 @@ Antes de transformar isso em implementacao estrutural, ainda precisamos decidir:
    `generated/` e publicado no site?
 4. Os prompts de imagem devem morar no proprio modelo do mapa, em `research/`, ou
    em um novo catalogo visual?
-5. A API deve ficar para um no futuro (`co-events`/dashboard) ou ja deve entrar no
+5. O tipo `model-review` entra como review governado com policy propria ou como
+   artefato de falsificacao pre-codificacao com check mais leve?
+6. A API deve ficar para um no futuro (`co-events`/dashboard) ou ja deve entrar no
    backlog da continuacao?
 
 ## 11. Recomendacao atual
@@ -266,7 +271,8 @@ Antes de transformar isso em implementacao estrutural, ainda precisamos decidir:
 Para o PR #44:
 
 - manter `spec-0024-map-v2.html` como prototipo visual;
-- registrar a Opcao A como decisao de recorte;
+- registrar `[DEC-0024-G21]` como decisao de recorte;
+- registrar GG-0005 como guardrail contra debito arquitetural silencioso;
 - usar o inventario de lifecycle para definir os proximos checkpoints sem
   `CO-10.8.*`;
 - nao implementar a API agora;
@@ -274,10 +280,10 @@ Para o PR #44:
 
 Para o proximo ciclo:
 
-- criar `SpecMapViewModel`;
-- gerar `spec-map.json` e HTML a partir das fontes governadas;
-- adicionar `spec-map:sync` e `spec-map:check`;
-- depois avaliar publicacao no site e API.
+- implementar `artifact-taxonomy-and-model-review-contract` como contrato robusto;
+- depois criar `SpecMapViewModel`, gerar `spec-map.json`/HTML a partir das fontes
+  governadas e adicionar `spec-map:sync`/`spec-map:check`;
+- avaliar publicacao no site e API quando o modelo gerado existir.
 
 ## 12. Revisao de falsificacao relacionada
 

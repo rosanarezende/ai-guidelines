@@ -521,9 +521,11 @@
         <div class="decision-box">
           <h3>Decisão registrada para o PR #44</h3>
           <p>
-            A opção escolhida é a <strong>Opção A</strong>: o PR #44 fecha
-            <strong>decisão de modelo + inventário</strong>. Refatoração arquitetural, confronto
-            modelo × código, BDD visual e falsificação ampla ficam como checkpoints/PRs posteriores.
+            A decisão registrada é <strong>DEC-0024-G21</strong>: o PR #44 fecha
+            <strong>decisão de modelo + inventário + dogfood de drift</strong> e registra o
+            guardrail contra débito arquitetural silencioso. A implementação da taxonomia, a
+            refatoração arquitetural, o confronto modelo × código, BDD visual e falsificação ampla
+            ficam como checkpoints/PRs posteriores com critério explícito.
           </p>
         </div>
         <div class="status-legend" aria-label="Legenda de cores">
@@ -870,16 +872,18 @@
 
         <div class="pr-board">
           <article class="pr-card primary">
-            <span class="tag done">Opção A · escolhida para PR #44</span>
-            <h3>PR #44 fecha decisão de modelo + inventário</h3>
+            <span class="tag done">G21 · recorte escolhido para PR #44</span>
+            <h3>PR #44 fecha decisão, inventário e dogfood</h3>
             <p>
-              PR #44 ficaria como contêiner de dogfood de drift + modelagem do lifecycle. O refactor
-              estrutural iria para PR posterior.
+              PR #44 fica como contêiner de dogfood de drift + modelagem do lifecycle + taxonomia de
+              artefatos. O refactor estrutural e a implementação da taxonomia vão para PRs
+              governados seguintes, com critério explícito.
             </p>
             <ul>
               <li>Inclui: <strong>drift-diagnosis-and-repair</strong>.</li>
               <li>Inclui: <strong>checkpoint-model-boundaries</strong>.</li>
               <li>Inclui: <strong>lifecycle-model-inventory</strong>.</li>
+              <li>Inclui: <strong>artifact-taxonomy-inventory</strong> + GG-0005.</li>
               <li>Não inclui: reorganização pesada de arquivos.</li>
             </ul>
           </article>
@@ -983,8 +987,10 @@
                 atributo do nó, não parte do nome.
               </td>
               <td>
-                Trocar <span class="inline-code">CO-10.8.2</span> por
-                <span class="inline-code">lifecycle-model-inventory</span> ou nome equivalente.
+                G21 substitui <span class="inline-code">CO-10.8.*</span> por checkpoints semânticos
+                e registra
+                <span class="inline-code">artifact-taxonomy-and-model-review-contract</span>
+                como próximo PR de implementação.
               </td>
             </tr>
           </tbody>
@@ -996,21 +1002,23 @@
           <h3>5. Decisão escolhida e pendências</h3>
           <ol>
             <li>
-              <strong>Escolhido:</strong> o PR #44 fecha
-              <strong>drift + modelo de fronteiras + inventário</strong>, deixando
-              confronto/refactor para PRs posteriores.
+              <strong>Escolhido por G21:</strong> o PR #44 fecha
+              <strong>drift + modelo de fronteiras + inventário + taxonomia candidata</strong>,
+              deixando implementação da taxonomia, confronto/refactor e falsificação para PRs
+              governados posteriores.
             </li>
             <li>
-              <strong>Pendente:</strong> decidir como representar o checkpoint atual com slug
-              semântico, sem depender de <span class="inline-code">CO-10.8.2</span>.
+              <strong>Próximo PR:</strong> implementar
+              <span class="inline-code">artifact-taxonomy-and-model-review-contract</span> de forma
+              robusta: metadado/índice/check/review pré-codificação ou rejeição explícita por DEC.
             </li>
             <li>
-              <strong>Pendente:</strong> formalizar que <strong>PR é contêiner</strong> e
-              <strong>checkpoint é unidade de entrega</strong>?
+              <strong>Já derivado de ADR 0025:</strong> <strong>PR é contêiner</strong> e
+              <strong>checkpoint é unidade de entrega</strong>; o mapa apenas projeta essa decisão.
             </li>
             <li>
-              <strong>Pendente:</strong> decidir se o mapa visual vira artefato recomendado sempre
-              que um PR tiver múltiplas frentes.
+              <strong>Ainda aberto:</strong> decidir se o mapa visual vira artefato recomendado
+              sempre que um PR tiver múltiplas frentes, e se será gerado por `SpecMapViewModel`.
             </li>
           </ol>
         </div>

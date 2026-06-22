@@ -6,7 +6,7 @@
 > Plan: [`./plan.md`](./plan.md)
 > Tasks: [`./tasks.md`](./tasks.md)
 > Status agregado: **Resolved (decisões)** — todas as `[DEC]` desta spec estão `Resolved`; a pesquisa estrutural ainda aberta vive em [`research/findings.md`](./research/findings.md), não aqui.
-> Última atualização: 2026-06-21 — **`[DEC-0024-G20]` registrada**: a revisão externa pré-Human Gate confirmou o recorte do PR #43, mas exigiu reconciliar `state.yml § next`, materializar a continuação CO-10.8..CO-10.10 na topologia e atualizar o body antes de Ready/Human Gate.
+> Última atualização: 2026-06-22 — **`[DEC-0024-G21]` registrada**: o dogfood do PR #44 substitui a leitura `CO-10.8.*` por checkpoints semânticos, registra o guardrail de "sem débito arquitetural silencioso" e define que a próxima implementação deve materializar a taxonomia de artefatos e o review pré-codificação como contrato real, sem mover `.specify` fora do `dualroot-collapse`.
 
 > **Artefato exclusivo de decisão humana.** Organizado por **estado**, não por numeração histórica (reestruturação 2026-05-31). Quatro estados respondem, à primeira vista, _o que já foi decidido · o que ainda está aberto · o que virou regra · o que virou enforcement_:
 >
@@ -565,6 +565,42 @@ Cada transição deve declarar: fato de entrada, autoridade, comando, efeito per
 
 ---
 
+### [DEC-0024-G21] Checkpoints semânticos, taxonomia de artefatos e veto a débito arquitetural silencioso
+
+**Pergunta:** Depois do dogfood do PR #44, a continuação deve seguir usando a nomenclatura `CO-10.8.*` e adiar a taxonomia/review-policy para "depois", ou deve registrar agora o modelo semântico e exigir que a próxima implementação entregue o contrato arquitetural completo, sem débito silencioso?
+
+**Modo de gate:** `aceitação` <!-- decisão arquitetural da owner, 2026-06-22, após mapa V2, inventário de lifecycle, inventário de árvore, revisões de falsificação e dogfood de drift/research. -->
+
+**Contexto:** O PR #44 começou como continuação de CO-10.8..CO-10.10, mas o dogfood mostrou que a própria estrutura decimal virou ruído: ela escondia entregas diferentes sob `CO-10.8.*` e dificultava acompanhar o que estava decidido, implementado, revisado ou apenas projetado. Em paralelo, a pasta `research/` deixou de conter apenas pesquisa para `decision-brief` e passou a misturar pesquisa, status, dogfood, revisão pré-codificação, inventário, prompt e projeção visual. As revisões de falsificação registradas em `research/2026-06-22-checkpoint-co-flow-continuation-spec-map-falsification-review.md`, `research/2026-06-22-checkpoint-co-flow-continuation-artifact-taxonomy-falsification-review.md`, `research/2026-06-22-checkpoint-co-flow-continuation-decomposition-falsification-review.md` e `research/2026-06-22-checkpoint-co-flow-continuation-repo-tree-inventory.md` confirmaram três fatos: (1) o modelo semântico é coerente, mas ainda não estava em fonte governada; (2) mover arquivos agora quebraria referências, inclusive ADRs, porque `.specify` ainda é dual-root; (3) uma decisão arquitetural sem implementação contratual viraria o mesmo débito silencioso que a Spec 0024 foi criada para eliminar.
+
+**Decisão (Resolved):**
+
+- Abandonar `CO-10.8.*` como nomenclatura operacional da continuação a partir deste ponto. Os IDs históricos G16/G20 continuam válidos como âncoras, mas a execução passa a usar nomes semânticos de checkpoint.
+- Reinterpretar o PR #44 como o PR de **decisão, inventário e dogfood de reparo de drift** do nó `co-flow-continuation`: ele fecha a camada de Governance Doctor já implementada, registra os inventários/revisões de falsificação e decide a fronteira da taxonomia de artefatos. Ele não deve absorver o refactor DDD/BDD amplo.
+- Criar o guardrail interno **GG-0005 — Sem débito arquitetural silencioso**: quando o dogfood expõe uma decisão arquitetural estruturante, ela só pode ser encerrada se (a) for implementada como contrato coerente no mesmo PR; (b) for agendada em PR/checkpoint governado imediatamente seguinte com aceitação, enforcement e fronteira explícitos; ou (c) for rejeitada por DEC. Não é aceitável deixá-la apenas em `research/`, backlog genérico ou memória de agente.
+- Definir que o próximo PR de continuação deve implementar a taxonomia de artefatos de forma robusta, não como prova mínima:
+  - `kind`/metadado equivalente como fonte única da natureza do artefato;
+  - classificação dos artefatos atuais relevantes sem mover arquivos referenciados;
+  - `research-index` canônico reparado e verificado por check;
+  - promoção dos artefatos reutilizáveis já maduros para `research-library/<domínio>/` com índice atualizado;
+  - projeções visuais, mapas e assets rotulados como não-autoridade;
+  - tipo governado de **review pré-codificação/model-review** materializado quando aceito: schema/home, autoridade, lifecycle, check/documentação e exemplo mínimo. Se a owner rejeitar esse tipo, a rejeição deve ser DEC explícita, não ausência silenciosa.
+- Manter fora desse próximo PR a migração física de `.specify/specs/researchs`, a unificação do índice legado `.specify`, a consolidação ampla de templates e a remoção da ponte runtime `.specify`/`.ai-guidelines`. Esses itens continuam pertencendo ao `dualroot-collapse`, porque tocam referências concretas e devem ser migrados no mesmo movimento que atualiza os links.
+- Reescrever `tasks.md`, `plan.md` e `state.yml § next` para refletir o recorte semântico, evitando que uma sessão nova leia `CO-10.8.2` como trabalho ativo dentro do PR #44.
+
+**Impacto esperado:**
+
+- O PR #44 fica honesto: decisão e inventário arquitetural, reparo inicial de drift, revisões de falsificação e mapa visual, sem overclaim de implementação da arquitetura final.
+- O próximo PR ganha critério de saída forte: entregar a taxonomia e o review pré-codificação como produto governado real, com check, documentação e exemplo, em vez de apenas etiquetar arquivos.
+- `dualroot-collapse` permanece coeso: ele não vira depósito de decisões adiadas; fica responsável pelo que realmente toca `.specify`, templates e ponte runtime.
+- O framework passa a registrar o padrão aprendido no dogfood: **decisão arquitetural sem contrato implementado vira drift**, não "planejamento".
+
+**O que NÃO está sendo decidido:** executar Ready, Human Gate, merge, `advance-subcheckpoint`, `finish-subcheckpoint`, `mark-readiness` ou abrir PR automaticamente; mover arquivos de `.specify`; reescrever a árvore de `src/cli`; implementar a taxonomia neste mesmo commit; promover `model-review` como review obrigatório universal; transformar mapas visuais em SSOT.
+
+**Status:** Resolved (2026-06-22) / @rosanarezende — decisão de recorte semântico e enforcement contra débito arquitetural silencioso no PR #44.
+
+---
+
 ## 2 · Aberto — pesquisa genuína (única coisa ainda em investigação)
 
 > Estes **não são decisões** — são findings com **alternativas reais ainda competindo**. Vivem em [`research/findings.md`](./research/findings.md); aqui só o ponteiro. Só retornam como `[DEC] Pendente` ao **convergir + exigir julgamento**. **Critério (2026-05-31):** se não há alternativa viva competindo, **não pertence aqui** — é decisão (§ 1) ou trabalho (§ 4).
@@ -616,29 +652,30 @@ Cada transição deve declarar: fato de entrada, autoridade, comando, efeito per
 
 > Os IDs `[DEC-0024-G##]` permanecem **âncoras estáveis** (citados em findings, ADRs, git, handoffs) — mas **não organizam mais a leitura**. Mapa de equivalência:
 
-| ID histórico | Tema                                                  | Estado atual                                                                                                           |
-| :----------- | :---------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------- |
-| `G00`        | identidade (transformação)                            | **Decidido** — § 1 (Resolved 2026-05-31)                                                                               |
-| `G01`        | estrutura/gramática                                   | **Aberto** — § 2 (`F-AG01`)                                                                                            |
-| `G02`        | taxonomia → bloco + propriedade                       | **Decidido** — § 1 (Resolved 2026-05-31) → migração em § 4                                                             |
-| `G03`        | promotion pipeline                                    | **Reaberto (modelagem)** — `[DEC-0024-G08]` 2026-06-03; pipeline `insight→decision→rule\|guardrail→doctrine`           |
-| `G04`        | contrato de boilerplate / casa única                  | **Reaberto (modelagem)** — `[DEC-0024-G08]`; casa única / tri-root → SSOT na trilha de convergência                    |
-| `G05`        | projeções / decision-session                          | **Reaberto (modelagem)** — `[DEC-0024-G08]`; projeções derivadas (fonte↔projeção) + KnowledgeGraph                     |
-| `G06`        | contrato da cadeia                                    | **Decidido** — § 1 (Resolved 2026-05-30) → ADR no fechamento                                                           |
-| `G07`        | topologia-as-data + enforcement L4                    | **Decidido** — § 1 (Resolved 2026-06-01) → enforcement em § 4                                                          |
-| `G08`        | reabertura de G03/G04/G05 + direção orientada a grafo | **Decidido** — Resolved 2026-06-03 (owner); a modelagem fica DENTRO da 0024; NÃO há 0025 independente                  |
-| `G09`        | eliminação integral de `/cli` (→ CO-3.5)              | **Decidido** — § 1 (Resolved 2026-06-15, owner); supersede o "wrapper" do #38; topologia externa inalterada            |
-| `G10`        | `co-flow-convergence` antes de `co-capture`           | **Decidido** — § 1 (Resolved 2026-06-16, owner); nó próprio para convergência ponta a ponta do fluxo                   |
-| `G11`        | suspensão temporária de smoke durante co-flow         | **Decidido** — § 1 (Resolved 2026-06-16, owner); bloqueia Ready/Human Gate até reativação                              |
-| `G12`        | CO-10.2 entrega convergência coesa inicial            | **Decidido** — § 1 (Resolved 2026-06-16, owner); remove heurísticas locais já comprovadamente divergentes              |
-| `G13`        | CO-10.5 dedicado a UX/linguagem/wizard Clack          | **Decidido** — § 1 (Resolved 2026-06-17, owner); G14 subdivide o fechamento antes do Gate                              |
-| `G14`        | CO-10.6 dedicado a fluxo de time/múltiplas specs      | **Decidido** — § 1 (Resolved 2026-06-18, owner); G15/G16 subdividem o fechamento antes do Gate                         |
-| `G15`        | CLI pública autoexplicável como porta de entrada      | **Decidido** — § 1 (Resolved 2026-06-19, owner); G16 insere arquitetura interna/BDD humano antes da falsificação final |
-| `G16`        | arquitetura interna, organização DDD e BDD visual     | **Decidido** — § 1 (Resolved 2026-06-19, owner); pausado por G17 até CO-10.7 fechar corretamente                       |
-| `G17`        | reabrir CO-10.7 antes de retomar CO-10.8              | **Decidido** — § 1 (Resolved 2026-06-19, owner); corrige fechamento prematuro de CO-10.7                               |
-| `G18`        | antecipar `dualroot-collapse`                         | **Decidido** — § 1 (Resolved 2026-06-20, owner); próximo PR dedicado após `co-flow-convergence`, antes de CO-5/CO-6    |
-| `G19`        | recorte do PR #43 + revisão externa antes do Gate     | **Decidido** — § 1 (Resolved 2026-06-20, owner); PR #43 fecha CO-10.1..CO-10.7; CO-10.8..CO-10.10 vão para próximo PR  |
-| `G20`        | ancorar continuação CO-10.8..CO-10.10 na topologia    | **Decidido** — § 1 (Resolved 2026-06-21, owner); nó `co-flow-continuation` seq 11 antes de `dualroot-collapse`         |
+| ID histórico | Tema                                                        | Estado atual                                                                                                                                              |
+| :----------- | :---------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `G00`        | identidade (transformação)                                  | **Decidido** — § 1 (Resolved 2026-05-31)                                                                                                                  |
+| `G01`        | estrutura/gramática                                         | **Aberto** — § 2 (`F-AG01`)                                                                                                                               |
+| `G02`        | taxonomia → bloco + propriedade                             | **Decidido** — § 1 (Resolved 2026-05-31) → migração em § 4                                                                                                |
+| `G03`        | promotion pipeline                                          | **Reaberto (modelagem)** — `[DEC-0024-G08]` 2026-06-03; pipeline `insight→decision→rule\|guardrail→doctrine`                                              |
+| `G04`        | contrato de boilerplate / casa única                        | **Reaberto (modelagem)** — `[DEC-0024-G08]`; casa única / tri-root → SSOT na trilha de convergência                                                       |
+| `G05`        | projeções / decision-session                                | **Reaberto (modelagem)** — `[DEC-0024-G08]`; projeções derivadas (fonte↔projeção) + KnowledgeGraph                                                        |
+| `G06`        | contrato da cadeia                                          | **Decidido** — § 1 (Resolved 2026-05-30) → ADR no fechamento                                                                                              |
+| `G07`        | topologia-as-data + enforcement L4                          | **Decidido** — § 1 (Resolved 2026-06-01) → enforcement em § 4                                                                                             |
+| `G08`        | reabertura de G03/G04/G05 + direção orientada a grafo       | **Decidido** — Resolved 2026-06-03 (owner); a modelagem fica DENTRO da 0024; NÃO há 0025 independente                                                     |
+| `G09`        | eliminação integral de `/cli` (→ CO-3.5)                    | **Decidido** — § 1 (Resolved 2026-06-15, owner); supersede o "wrapper" do #38; topologia externa inalterada                                               |
+| `G10`        | `co-flow-convergence` antes de `co-capture`                 | **Decidido** — § 1 (Resolved 2026-06-16, owner); nó próprio para convergência ponta a ponta do fluxo                                                      |
+| `G11`        | suspensão temporária de smoke durante co-flow               | **Decidido** — § 1 (Resolved 2026-06-16, owner); bloqueia Ready/Human Gate até reativação                                                                 |
+| `G12`        | CO-10.2 entrega convergência coesa inicial                  | **Decidido** — § 1 (Resolved 2026-06-16, owner); remove heurísticas locais já comprovadamente divergentes                                                 |
+| `G13`        | CO-10.5 dedicado a UX/linguagem/wizard Clack                | **Decidido** — § 1 (Resolved 2026-06-17, owner); G14 subdivide o fechamento antes do Gate                                                                 |
+| `G14`        | CO-10.6 dedicado a fluxo de time/múltiplas specs            | **Decidido** — § 1 (Resolved 2026-06-18, owner); G15/G16 subdividem o fechamento antes do Gate                                                            |
+| `G15`        | CLI pública autoexplicável como porta de entrada            | **Decidido** — § 1 (Resolved 2026-06-19, owner); G16 insere arquitetura interna/BDD humano antes da falsificação final                                    |
+| `G16`        | arquitetura interna, organização DDD e BDD visual           | **Decidido** — § 1 (Resolved 2026-06-19, owner); pausado por G17 até CO-10.7 fechar corretamente                                                          |
+| `G17`        | reabrir CO-10.7 antes de retomar CO-10.8                    | **Decidido** — § 1 (Resolved 2026-06-19, owner); corrige fechamento prematuro de CO-10.7                                                                  |
+| `G18`        | antecipar `dualroot-collapse`                               | **Decidido** — § 1 (Resolved 2026-06-20, owner); próximo PR dedicado após `co-flow-convergence`, antes de CO-5/CO-6                                       |
+| `G19`        | recorte do PR #43 + revisão externa antes do Gate           | **Decidido** — § 1 (Resolved 2026-06-20, owner); PR #43 fecha CO-10.1..CO-10.7; CO-10.8..CO-10.10 vão para próximo PR                                     |
+| `G20`        | ancorar continuação CO-10.8..CO-10.10 na topologia          | **Decidido** — § 1 (Resolved 2026-06-21, owner); nó `co-flow-continuation` seq 11 antes de `dualroot-collapse`                                            |
+| `G21`        | checkpoints semânticos + sem débito arquitetural silencioso | **Decidido** — § 1 (Resolved 2026-06-22, owner); PR #44 fecha decisão/inventário e próximo PR implementa taxonomia/review pré-codificação com enforcement |
 
 ---
 
@@ -663,6 +700,7 @@ Cada transição deve declarar: fato de entrada, autoridade, comando, efeito per
 - [x] `[DEC-0024-G18]` — Resolved 2026-06-20 / @rosanarezende
 - [x] `[DEC-0024-G19]` — Resolved 2026-06-20 / @rosanarezende
 - [x] `[DEC-0024-G20]` — Resolved 2026-06-21 / @rosanarezende
+- [x] `[DEC-0024-G21]` — Resolved 2026-06-22 / @rosanarezende
 
 ---
 

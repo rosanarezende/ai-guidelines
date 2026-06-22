@@ -4,7 +4,7 @@ Data: 2026-06-22
 Spec: 0024 — context-architecture  
 No: `co-flow-continuation`  
 PR: #44 — `feat/spec-0024-co-flow-continuation`  
-Decisao de recorte: **Opcao A — PR #44 fecha decisao de modelo + inventario**
+Decisao de recorte: **[DEC-0024-G21] — PR #44 fecha decisao de modelo + inventario, com guardrail contra debito arquitetural silencioso**
 
 ## 1. Veredito curto
 
@@ -49,13 +49,15 @@ Um checkpoint que precisa atravessar varios PRs deve ser dividido em checkpoints
 menores. A nomenclatura decimal (`CO-10.8.1`) nao deve ser usada como mecanismo
 de divisao; o checkpoint deve ganhar um nome semantico.
 
-### Aplicacao ao PR #44
+### Aplicacao ao PR #44 apos G21
 
-O PR #44 pode fechar:
+O PR #44 fecha o recorte de decisao/inventario/dogfood:
 
 - `drift-diagnosis-and-repair`;
 - `checkpoint-model-boundaries`;
 - `lifecycle-model-inventory`.
+- `artifact-taxonomy-inventory`;
+- `no-silent-architecture-debt` / GG-0005.
 
 O PR #44 nao deve fechar:
 
@@ -167,11 +169,12 @@ O modelo precisa declarar, para cada transicao:
 | 1               | `drift-diagnosis-and-repair`                  | Detectar/explicar/reparar drift seguro quando houver gerador deterministico | PR #44            |
 | 2               | `checkpoint-model-boundaries`                 | Decidir modelo no/checkpoint/PR e abandonar sub-sub checkpoint decimal      | PR #44            |
 | 3               | `lifecycle-model-inventory`                   | Inventariar ciclo completo e fontes/consumidores                            | PR #44            |
-| 4               | `lifecycle-code-confrontation`                | Comparar modelo x codigo e classificar gaps                                 | PR posterior      |
-| 5               | `lifecycle-architecture-refactor`             | Reorganizar runtime/testes sem alterar comportamento                        | PR posterior      |
-| 6               | `maintainer-bdd-visualization`                | Criar vitrine visual de cenarios para mantenedores                          | PR posterior      |
-| 7               | `broad-flow-falsification`                    | Rodar jornadas reais e falsificacoes amplas                                 | PR posterior      |
-| 8               | `continuation-external-review-and-human-gate` | Revisao independente e decisao humana do no                                 | PR terminal do no |
+| 4               | `artifact-taxonomy-and-model-review-contract` | Implementar taxonomia de artefatos, index check e review pre-codificacao    | PR seguinte       |
+| 5               | `lifecycle-code-confrontation`                | Comparar modelo x codigo e classificar gaps                                 | PR posterior      |
+| 6               | `lifecycle-architecture-refactor`             | Reorganizar runtime/testes sem alterar comportamento                        | PR posterior      |
+| 7               | `maintainer-bdd-visualization`                | Criar vitrine visual de cenarios para mantenedores                          | PR posterior      |
+| 8               | `broad-flow-falsification`                    | Rodar jornadas reais e falsificacoes amplas                                 | PR posterior      |
+| 9               | `continuation-external-review-and-human-gate` | Revisao independente e decisao humana do no                                 | PR terminal do no |
 
 ## 10. Perguntas para revisao externa
 
@@ -180,7 +183,7 @@ O modelo precisa declarar, para cada transicao:
 3. A matriz de transicoes omite algum estado obrigatorio do lifecycle real?
 4. Alguma transicao tem autoridade indefinida ou efeito amplo demais?
 5. Alguma projecao esta sendo tratada como fonte?
-6. O PR #44 fica revisavel com a Opcao A?
+6. O PR #44 fica revisavel com o recorte de G21?
 7. O inventario e suficiente para orientar o confronto modelo x codigo?
 8. O mapa visual cria risco de nova SSOT paralela?
 
@@ -188,9 +191,10 @@ O modelo precisa declarar, para cada transicao:
 
 Este recorte pode ser considerado fechado quando:
 
-- a Opcao A estiver registrada;
+- `[DEC-0024-G21]` estiver registrada;
 - o mapa V2 estiver disponivel como artefato visual nao-SSOT;
 - este inventario estiver versionado;
+- o guardrail GG-0005 estiver registrado;
 - o PR body declarar claramente o que o PR #44 fecha e o que fica fora;
 - revisao/falsificacao puder avaliar o inventario antes de refactor;
 - nenhum `CO-10.8.*` novo for introduzido como checkpoint real.

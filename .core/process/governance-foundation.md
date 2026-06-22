@@ -415,6 +415,20 @@ Quando um fluxo depende de o agente **"lembrar"** a sequência correta, o format
 
 Formulação curta: **memória de agente é canal; contrato governado é fonte de verdade.** Material longo: `.governance/specs/0024-context-architecture/research/2026-06-10-pit-0010-memoria-de-agente-nao-e-contrato.md`.
 
+### [GG-0005] Sem débito arquitetural silencioso
+
+**Origem:** `DOGFOOD-0024` (PR #44 / `[DEC-0024-G21]`, 2026-06-22). **Enforcement atual:** forma obrigatória da decisão + reconciliação em `decision-brief.md`, `tasks.md`, `state.yml § next` e PR body. **Enforcement mecânico esperado:** checks da taxonomia de artefatos e do `research-index` no próximo PR de implementação da continuação. **Projeção (seam):** mapas visuais e inventários podem explicar o plano, mas não decidem nem substituem a SSOT.
+
+Quando o dogfood revela uma decisão arquitetural estruturante, ela não pode virar um item solto em `research/`, backlog genérico, prompt ou memória de agente. Encerrar a discussão exige uma das três saídas governadas:
+
+1. **implementar o contrato coerente no mesmo PR**; _(🤖/👁 conforme o contrato)_
+2. **agendar em PR/checkpoint imediatamente seguinte**, com fronteira, aceitação, enforcement e critério de saída explícitos; _(👁 agora; 🤖 quando houver check do contrato)_
+3. **rejeitar por DEC**, explicando por que a proposta não será implementada. _(👁)_
+
+Se a entrega atual depende do item para ser verdadeira, não é permitido empurrá-lo para "depois". Se o item precisa esperar por motivo estrutural real (por exemplo, mover `.specify` junto de centenas de referências), a decisão deve dizer **qual valor já está entregue sem ele**, **qual nó o assumirá**, **qual é o critério de aceitação** e **qual check/prova impedirá que desapareça**.
+
+Formulação curta: **decisão arquitetural sem contrato implementado ou follow-up governado vira drift.** Não confundir recorte prudente com débito silencioso.
+
 ---
 
 ## SDD Guardrails

@@ -6,6 +6,15 @@ No ativo: `co-flow-continuation`
 Checkpoint ativo: `checkpoint-co-flow-continuation`  
 Natureza: inventario de modelagem; narrativa de apoio; nao autoridade.
 
+> **Nota pós-G21 (2026-06-22):** `[DEC-0024-G21]` aceitou a necessidade de
+> taxonomia e de review pre-codificacao, mas **não** aceitou mover arquivos por
+> tipo neste PR. A implementacao esperada no proximo PR e robusta e canônica:
+> `kind`/metadado como fonte única, `research-index` reparado e verificado,
+> promocao de artefatos maduros para `research-library/<domínio>`, projeções
+> rotuladas como não-autoridade e `model-review` materializado como tipo
+> governado ou rejeitado por DEC. Migração física de `.specify` segue para
+> `dualroot-collapse`.
+
 ## 1. Por que este inventario existe
 
 A pasta `research/` nasceu para guardar pesquisas usadas como insumo do
