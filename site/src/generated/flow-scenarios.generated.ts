@@ -405,6 +405,7 @@ export const AI_GUIDELINES_FLOW_SCENARIOS = [
       "  drift",
       "      Diagnostica drift de governança e explica reparos seguros. Read-only.",
       "      Ex.: npx ai-guidelines drift",
+      "      Ex.: npx ai-guidelines drift --check",
       "  handoff",
       "      Gera handoff situado read-only (fatos + proxima acao + selo) a partir de state.yml/topology/git/gh.",
       "      Ex.: npx ai-guidelines handoff",

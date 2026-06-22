@@ -450,7 +450,8 @@ export const AI_GUIDELINES_FLOW_COPY = {
       "aliases": [],
       "description": "Diagnostica drift de governança e explica reparos seguros. Read-only.",
       "usage": [
-        "drift"
+        "drift",
+        "drift --check"
       ],
       "subcommands": []
     },

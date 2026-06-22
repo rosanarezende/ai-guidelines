@@ -3,6 +3,7 @@ import common from "./locales/pt-BR/common.json";
 import cockpit from "./locales/pt-BR/cockpit.json";
 import features from "./locales/pt-BR/features.json";
 import governanceDoctor from "./locales/pt-BR/governanceDoctor.json";
+import governancePreflight from "./locales/pt-BR/governancePreflight.json";
 import governanceRepair from "./locales/pt-BR/governanceRepair.json";
 import providers from "./locales/pt-BR/providers.json";
 import provisioning from "./locales/pt-BR/provisioning.json";
@@ -39,6 +40,7 @@ interface FlowCopyCatalog {
   readonly wizard: typeof wizard;
   readonly cockpit: typeof cockpit;
   readonly governanceDoctor: typeof governanceDoctor;
+  readonly governancePreflight: typeof governancePreflight;
   readonly governanceRepair: typeof governanceRepair;
   readonly commands: typeof commands;
   readonly providers: Readonly<Record<string, FlowProviderCopy>>;
@@ -65,6 +67,7 @@ export const FLOW_COPY = {
   wizard,
   cockpit,
   governanceDoctor,
+  governancePreflight,
   governanceRepair,
   commands,
   providers,

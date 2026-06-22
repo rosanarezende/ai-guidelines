@@ -55,6 +55,9 @@ describe("flow copy catalog", () => {
     expect(FLOW_COPY.governanceDoctor.heading).toBe("Diagnóstico de governança");
     expect(FLOW_COPY.governanceDoctor.labels.safeRepair).toBe("Reparo seguro");
     expect(FLOW_COPY.governanceDoctor.status.ok).toContain("Nenhum drift");
+    expect(FLOW_COPY.governancePreflight.heading).toBe("Verificação de governança");
+    expect(FLOW_COPY.governancePreflight.commands.diagnose).toContain("npx ai-guidelines drift");
+    expect(FLOW_COPY.governancePreflight.status.blocked).toContain("ação é sensível");
   });
 
   it("projeta textos críticos da CLI para o módulo React do Flow", () => {

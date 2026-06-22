@@ -106,6 +106,11 @@ export function planChangedValidation(
   const paths = unique(changedPaths);
   const steps: ChangedValidationStep[] = [
     { label: "Verificar whitespace do diff", command: "git", args: ["diff", "--check"] },
+    {
+      label: "Verificar drift de governança",
+      command: binary("npm"),
+      args: ["run", "drift:check"],
+    },
   ];
 
   const formattable = formatCandidates(paths);

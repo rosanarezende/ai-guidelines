@@ -1,6 +1,7 @@
 import { WorkCommand } from "./WorkCommand.js";
 import { buildRegistry } from "../buildRegistry.js";
 import { CommandContext } from "../Command.js";
+import { GovernancePreflightResult } from "../../governancePreflight.js";
 
 function ctx(): { context: CommandContext; logs: string[] } {
   const logs: string[] = [];
@@ -9,6 +10,45 @@ function ctx(): { context: CommandContext; logs: string[] } {
     context: {
       repoRoot: process.cwd(),
       logger: { info: (m) => logs.push(m), error: (m) => logs.push(m) },
+    },
+  };
+}
+
+function driftPreflight(): GovernancePreflightResult {
+  return {
+    mode: "work",
+    status: "attention",
+    shouldBlock: false,
+    shouldRender: true,
+    repairable: [],
+    nonAutomatic: [
+      {
+        id: "topology:state.yml:narrated-next-omits-canonical",
+        severity: "warning",
+        title: "O próximo narrado diverge da topologia",
+        whatHappened: "next stale",
+        whyItMatters: "topologia vence",
+        safeRepair: "Reconciliar por decisão humana.",
+        repairAuthority: "human-decision",
+        technicalDetails: [],
+      },
+    ],
+    report: {
+      status: "attention",
+      summary: "1 drift",
+      checked: [],
+      issues: [
+        {
+          id: "topology:state.yml:narrated-next-omits-canonical",
+          severity: "warning",
+          title: "O próximo narrado diverge da topologia",
+          whatHappened: "next stale",
+          whyItMatters: "topologia vence",
+          safeRepair: "Reconciliar por decisão humana.",
+          repairAuthority: "human-decision",
+          technicalDetails: [],
+        },
+      ],
     },
   };
 }
@@ -46,6 +86,23 @@ describe("WorkCommand · CLI e descoberta [work]", () => {
     expect(calls).toHaveLength(1);
     expect(calls[0].remote).toBeNull();
     expect(calls[0].auth).toBe("explicit-work-request");
+  });
+
+  it("run mostra preflight de drift antes do briefing", async () => {
+    const calls: string[] = [];
+    const fake = ((_repo: string) => {
+      calls.push("briefing");
+      return 0;
+    }) as unknown as ConstructorParameters<typeof WorkCommand>[0];
+    const cmd = new WorkCommand(fake, () => driftPreflight());
+    const { context, logs } = ctx();
+
+    const result = await cmd.run({ noRemote: false }, context);
+
+    expect(result.exitCode).toBe(0);
+    expect(calls).toEqual(["briefing"]);
+    expect(logs.join("\n")).toContain("Verificação de governança");
+    expect(logs.join("\n")).toContain("Exige decisão humana");
   });
 
   it("[31] dispatch `work --help` mostra ajuda e NÃO executa o briefing", async () => {

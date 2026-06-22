@@ -12,6 +12,7 @@ import {
   shouldUseProvisioningEntry,
 } from "./experience/wizard/provisioning.js";
 import { loadActiveSpecsIndex } from "./registry/commands/loadActiveSpecsIndex.js";
+import { renderGovernancePreflight, runGovernancePreflight } from "./governancePreflight.js";
 
 interface Logger {
   info(message: string): void;
@@ -30,6 +31,7 @@ export interface RunOptions {
   readonly isTTY?: boolean;
   readonly runFlowWizard?: typeof runFlowWizardDefault;
   readonly runCockpit?: typeof runCockpit;
+  readonly runGovernancePreflight?: typeof runGovernancePreflight;
 }
 
 function renderHelp(): string {
@@ -162,6 +164,7 @@ export async function run(
   const repoRoot = process.cwd();
   const effectiveLogger = options.logger ?? logger;
   const registry = options.registry ?? buildRegistry();
+  const preflightRunner = options.runGovernancePreflight ?? runGovernancePreflight;
   const [commandName] = argv;
 
   if (commandName === "--help" || commandName === "-h") {
@@ -191,8 +194,12 @@ export async function run(
     }
 
     if (!isTTY) {
+      const preflight = preflightRunner(repoRoot, "entry");
+      for (const line of renderGovernancePreflight(preflight)) effectiveLogger.info(line);
       return runCockpitWithRecovery(repoRoot, effectiveLogger, options.runCockpit ?? runCockpit);
     }
+    const preflight = preflightRunner(repoRoot, "entry");
+    for (const line of renderGovernancePreflight(preflight)) effectiveLogger.info(line);
     return (options.runFlowWizard ?? runFlowWizardDefault)(repoRoot, effectiveLogger, {
       prompts,
       registry,

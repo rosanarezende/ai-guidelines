@@ -85,7 +85,12 @@ describe("changedValidation", () => {
 
     expect(code).toBe(0);
     expect(calls.map((call) => call.args.join(" "))).toEqual(
-      expect.arrayContaining(["diff --check", "prettier --check -- src/cli/foo.ts", "run build"])
+      expect.arrayContaining([
+        "diff --check",
+        "run drift:check",
+        "prettier --check -- src/cli/foo.ts",
+        "run build",
+      ])
     );
   });
 
