@@ -495,7 +495,7 @@ describe("CO-10.6 final falsification — fluxo governado ponta a ponta", () => 
       ])
     );
     expect(work.nextAction.stillForbidden).toEqual(
-      expect.arrayContaining(["Fazer merge", "Implementar o próximo nó"])
+      expect.arrayContaining(["Fazer merge", "Implementar o próximo nó da topologia"])
     );
   });
 
@@ -644,7 +644,7 @@ describe("CO-10.6 final falsification — fluxo governado ponta a ponta", () => 
     );
     expect(postGateWork.nextAction.decisionType).toBe("open-next-topology-node");
     expect(postGateWork.nextAction.stillForbidden).toEqual(
-      expect.arrayContaining(["Fazer merge", "Implementar o próximo nó"])
+      expect.arrayContaining(["Fazer merge", "Implementar o próximo nó da topologia"])
     );
   });
 });

@@ -197,7 +197,7 @@ describe("consistência work×decide · estado real CO-3.2 [/] (dogfood CO-3.2)"
     expect(code).toBe(0);
     const out = lines.join("\n");
     // listado no menu (não omitido como not-applicable) e marcado Disponível.
-    expect(out).toMatch(/Iniciar o próxima etapa/);
+    expect(out).toMatch(/Iniciar a próxima etapa/);
     expect(out).toMatch(/Disponível/);
     // o Human Gate continua presente como indisponível (Draft).
     expect(out).toMatch(/Human Gate/);
@@ -212,7 +212,7 @@ describe("consistência work×decide · estado real CO-3.2 [/] (dogfood CO-3.2)"
     );
     expect(code).toBe(0);
     const out = lines.join("\n");
-    expect(out).toMatch(/Iniciar o próxima etapa/);
+    expect(out).toMatch(/Iniciar a próxima etapa/);
     expect(out).toMatch(/concluir CO-3\.2 e ativar CO-3\.3/);
     // available ⇒ NÃO renderiza o bloco "não pode ser exercida/não se aplica".
     expect(out).not.toMatch(/ainda não pode ser exercida|não se aplica agora/);
@@ -277,7 +277,7 @@ describe("consistência work×decide · terminal do última etapa", () => {
     });
     expect(code).toBe(0);
     const out = lines.join("\n");
-    expect(out).not.toMatch(/Iniciar o próxima etapa/);
+    expect(out).not.toMatch(/Iniciar a próxima etapa/);
     expect(out).toMatch(/Human Gate/);
     expect(out).toMatch(/Draft/);
   });

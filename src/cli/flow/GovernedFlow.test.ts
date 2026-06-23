@@ -450,7 +450,7 @@ describe("GovernedFlow", () => {
     expect(result.failures.join(" ")).toMatch(/working tree/);
   });
 
-  it("última etapa pronto não recomenda advance-step", () => {
+  it("última etapa pronta não recomenda advance-step", () => {
     const facts = coFlowFacts({
       steps: [
         { id: "CO-10.1", title: "inventário", state: "done", line: 100 },

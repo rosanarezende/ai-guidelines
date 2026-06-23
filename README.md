@@ -159,7 +159,7 @@ A partir da `1.1.0`, a CLI ganha um conjunto de comandos para **operar o ciclo d
 
 - **`npx ai-guidelines`** — wizard situado: mostra cockpit, próxima ação, decisões disponíveis, bloqueios e operações avançadas sem executar mutação sem confirmação.
 - **`npx ai-guidelines work [--authorization explicit-work-request]`** — briefing da spec ativa com modo, escopo, autoridade, validações, critérios de parada e contrato de relatório.
-- **`npx ai-guidelines decide --brief-only`** — briefing das decisões reservadas à owner, incluindo readiness, avanço de sub-checkpoint e Human Gate quando aplicável.
+- **`npx ai-guidelines decide --brief-only`** — briefing das decisões reservadas à owner, incluindo readiness, avanço de Etapa e Human Gate quando aplicável.
 
 **Contexto pronto para colar na IA externa.** A CLI não embute LLM: ela lê o estado da spec e monta um bloco de contexto estruturado que você **cola na sua IA** (Claude, Cursor, Codex…). A conversa acontece na IA; a CLI só prepara o contexto e aplica os gates determinísticos.
 
