@@ -349,6 +349,27 @@ describe("CLI — active-specs:check · coerência ESTADO↔NARRATIVA de etapas 
     }
   });
 
+  it("DADO etapa CO hierárquica incoerente QUANDO checa ENTÃO falha citando a etapa", () => {
+    const r = runActiveSpecsConsistencyCheck({
+      indexText: indexOf(entryYaml()),
+      readStateYml: reader(
+        stateWithCursor("checkpoint-co-enforcement"),
+        [
+          "## Execução",
+          "",
+          "- [/] **Checkpoint co-enforcement** (nó `co-enforcement`)",
+          "    - [x] **CO-10.8.1 — Governance Doctor**: EM EXECUÇÃO.",
+          "    - [ ] **CO-10.8.2 — reorganização interna**: pendente.",
+          "",
+        ].join("\n")
+      ),
+    });
+    expect(r.kind).toBe("fail");
+    if (r.kind === "fail") {
+      expect(r.failures.some((f) => /CO-10\.8\.1.*em execução/i.test(f.message))).toBe(true);
+    }
+  });
+
   it("DADO dois etapas [/] QUANDO checa ENTÃO falha (exatamente um pode estar ativo)", () => {
     const r = runActiveSpecsConsistencyCheck({
       indexText: indexOf(entryYaml()),

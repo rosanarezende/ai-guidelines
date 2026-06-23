@@ -305,7 +305,7 @@ export function parseCheckpointTasks(
  * CANÔNICA (tasks.md): ancora na linha `**Checkpoint <normalizado>**` e coleta
  * os itens de checkbox subsequentes até o próximo checkpoint de topo.
  * Reconhece os três estados — `[ ]` pending, `[/]` in-progress, `[x]` done — e
- * aceita IDs legados `CO-N.M` e slugs semânticos. Conservador: mencionar um
+ * aceita IDs legados/hierárquicos `CO-N.M[.K...]` e slugs semânticos. Conservador: mencionar um
  * etapa em prosa de outro bloco NÃO cria pertencimento.
  */
 /**
@@ -371,7 +371,7 @@ export function parseSteps(tasksMd: string, checkpoint: string): HandoffStep[] {
   for (let i = anchor + 1; i < lines.length; i++) {
     if (CHECKBOX_CHECKPOINT_RE.test(lines[i]) && indentation(lines[i]) <= anchorIndent) break;
     const m =
-      /^\s*-\s*\[([ xX/])\]\s*\*\*(?:Checkpoint\s+)?((?:CO-\d+\.\d+)|(?:[a-z][a-z0-9]*(?:-[a-z0-9]+)+))\b(?:\s*[—-]\s*([^*]+?))?\*\*(?:\s*(.*?))?$/.exec(
+      /^\s*-\s*\[([ xX/])\]\s*\*\*(?:Checkpoint\s+)?((?:CO-\d+(?:\.\d+)+)|(?:[a-z][a-z0-9]*(?:-[a-z0-9]+)+))\b(?:\s*[—-]\s*([^*]+?))?\*\*(?:\s*(.*?))?$/.exec(
         lines[i]
       );
     if (!m) continue;
