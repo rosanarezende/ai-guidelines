@@ -604,6 +604,53 @@ describe("parseSubCheckpoints + resolveSubCheckpointWork — sinal de readiness"
     ]);
   });
 
+  it("parser resolve checkpoint semântico ativo quando o cursor aponta para o filho", () => {
+    const tasks = [
+      "- [/] **Checkpoint co-flow-continuation** (seq 11)",
+      "  - [x] **Checkpoint drift-diagnosis-and-repair** — Governance Doctor concluído.",
+      "  - [/] **Checkpoint artifact-taxonomy-and-model-review-contract** — implementação robusta da taxonomia: PR #45 governado.",
+      "  - [ ] **internal-architecture-refactor-ddd-bdd — reorganização behavior-preserving**: próximo checkpoint.",
+      "- [ ] **Checkpoint dualroot-collapse** (seq 13)",
+      "  - [ ] **legacy-bridge-removal — não deve aparecer**: fora do checkpoint atual.",
+    ].join("\n");
+
+    const subs = parseSubCheckpoints(
+      tasks,
+      "checkpoint-artifact-taxonomy-and-model-review-contract"
+    );
+
+    expect(subs.map((s) => [s.id, s.state, s.title])).toEqual([
+      ["drift-diagnosis-and-repair", "done", "Governance Doctor concluído"],
+      [
+        "artifact-taxonomy-and-model-review-contract",
+        "in-progress",
+        "implementação robusta da taxonomia",
+      ],
+      ["internal-architecture-refactor-ddd-bdd", "pending", "reorganização behavior-preserving"],
+    ]);
+  });
+
+  it("resolve: checkpoint semântico ativo SEM readiness ⇒ implement", () => {
+    const tasks = [
+      "- [/] **Checkpoint co-flow-continuation** (seq 11)",
+      "  - [x] **Checkpoint drift-diagnosis-and-repair** — Governance Doctor concluído.",
+      "  - [/] **Checkpoint artifact-taxonomy-and-model-review-contract** — implementação robusta da taxonomia: PR #45 governado.",
+      "  - [ ] **internal-architecture-refactor-ddd-bdd — reorganização behavior-preserving**: próximo checkpoint.",
+    ].join("\n");
+
+    const subs = parseSubCheckpoints(
+      tasks,
+      "checkpoint-artifact-taxonomy-and-model-review-contract"
+    );
+    const r = resolveSubCheckpointWork(facts({ subCheckpoints: subs }));
+
+    expect(r.kind).toBe("implement");
+    if (r.kind === "implement") {
+      expect(r.subCheckpoint.id).toBe("artifact-taxonomy-and-model-review-contract");
+      expect(r.subCheckpoint.title).toBe("implementação robusta da taxonomia");
+    }
+  });
+
   it("parser: sem token ⇒ readiness undefined", () => {
     const subs = parseSubCheckpoints(TASKS(""), "checkpoint-co-enforcement");
     expect(subs.find((s) => s.id === "CO-3.4")!.readiness).toBeUndefined();

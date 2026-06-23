@@ -319,6 +319,41 @@ export const SUBCHECKPOINT_READINESS = "ready-for-transition" as const;
 /** Token de readiness na linha do marcador; captura o valor para validação de coerência. */
 export const READINESS_TOKEN_RE = /`readiness:\s*([A-Za-z0-9-]+)`/;
 
+const CHECKBOX_CHECKPOINT_RE = /^(\s*)-\s*\[[ xX/]\]\s+\*\*Checkpoint\s+/;
+
+function indentation(line: string): number {
+  return /^\s*/.exec(line)?.[0].length ?? 0;
+}
+
+function findCheckpointSectionAnchor(lines: readonly string[], checkpointIndex: number): number {
+  const checkpointLine = lines[checkpointIndex] ?? "";
+  const checkpointIndent = indentation(checkpointLine);
+  if (!CHECKBOX_CHECKPOINT_RE.test(checkpointLine) || checkpointIndent === 0)
+    return checkpointIndex;
+
+  for (let i = checkpointIndex - 1; i >= 0; i--) {
+    const candidate = lines[i] ?? "";
+    if (indentation(candidate) < checkpointIndent && CHECKBOX_CHECKPOINT_RE.test(candidate))
+      return i;
+  }
+  return checkpointIndex;
+}
+
+function subCheckpointTitle(inlineTitle: string | undefined, tail: string | undefined): string {
+  const inline = inlineTitle?.trim();
+  if (inline) return inline;
+
+  const cleanedTail = (tail ?? "")
+    .replace(/^[:—\-\s]+/, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/[.]$/, "");
+  if (!cleanedTail) return "";
+
+  const firstClause = cleanedTail.split(/[:.]\s+/)[0]?.trim();
+  return firstClause || cleanedTail;
+}
+
 export function findCheckpointTaskLine(tasksMd: string, checkpoint: string): number | null {
   const normalized = checkpoint.replace(/^checkpoint-/, "");
   const lines = tasksMd.split(/\r?\n/);
@@ -330,12 +365,13 @@ export function parseSubCheckpoints(tasksMd: string, checkpoint: string): Handof
   const lines = tasksMd.split(/\r?\n/);
   const checkpointLine = findCheckpointTaskLine(tasksMd, checkpoint);
   if (checkpointLine === null) return [];
-  const anchor = checkpointLine - 1;
+  const anchor = findCheckpointSectionAnchor(lines, checkpointLine - 1);
+  const anchorIndent = indentation(lines[anchor] ?? "");
   const out: HandoffSubCheckpoint[] = [];
   for (let i = anchor + 1; i < lines.length; i++) {
-    if (/\*\*Checkpoint /.test(lines[i])) break; // próximo checkpoint de topo
+    if (CHECKBOX_CHECKPOINT_RE.test(lines[i]) && indentation(lines[i]) <= anchorIndent) break;
     const m =
-      /^\s*-\s*\[([ xX/])\]\s*\*\*((?:CO-\d+\.\d+)|(?:[a-z][a-z0-9]*(?:-[a-z0-9]+)+))\b\s*[—-]?\s*(.*?)\*\*/.exec(
+      /^\s*-\s*\[([ xX/])\]\s*\*\*(?:Checkpoint\s+)?((?:CO-\d+\.\d+)|(?:[a-z][a-z0-9]*(?:-[a-z0-9]+)+))\b(?:\s*[—-]\s*([^*]+?))?\*\*(?:\s*(.*?))?$/.exec(
         lines[i]
       );
     if (!m) continue;
@@ -345,7 +381,7 @@ export function parseSubCheckpoints(tasksMd: string, checkpoint: string): Handof
     const readiness = rm && rm[1] === SUBCHECKPOINT_READINESS ? SUBCHECKPOINT_READINESS : undefined;
     out.push({
       id: m[2],
-      title: m[3].trim(),
+      title: subCheckpointTitle(m[3], m[4]),
       state,
       line: i + 1,
       ...(readiness ? { readiness } : {}),
