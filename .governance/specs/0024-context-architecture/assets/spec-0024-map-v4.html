@@ -1,0 +1,1723 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      Spec 0024 — Mapa V4: Frentes, Checkpoints, Etapas e Tarefas (vocabulário em teste)
+    </title>
+    <style>
+      :root {
+        --bg: #0f1117;
+        --panel: #171a23;
+        --panel-2: #1e2230;
+        --line: #2b3143;
+        --ink: #eef2ff;
+        --muted: #a4adbf;
+        --soft: #cbd5e1;
+        --done: #34d399;
+        --active: #60a5fa;
+        --planned: #a78bfa;
+        --terminal: #f59e0b;
+        --risk: #fb7185;
+        --done-bg: rgba(52, 211, 153, 0.13);
+        --active-bg: rgba(96, 165, 250, 0.15);
+        --planned-bg: rgba(167, 139, 250, 0.13);
+        --terminal-bg: rgba(245, 158, 11, 0.13);
+        --risk-bg: rgba(251, 113, 133, 0.12);
+        --hier: rgba(148, 163, 184, 0.14);
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background:
+          radial-gradient(circle at top left, rgba(96, 165, 250, 0.15), transparent 28rem),
+          var(--bg);
+        color: var(--ink);
+        font-family:
+          Inter,
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          "Segoe UI",
+          sans-serif;
+        line-height: 1.5;
+      }
+      a {
+        color: #93c5fd;
+      }
+      code {
+        background: rgba(255, 255, 255, 0.07);
+        color: #bfdbfe;
+        border: 1px solid rgba(148, 163, 184, 0.18);
+        border-radius: 6px;
+        padding: 1px 5px;
+        font-size: 0.92em;
+      }
+      .wrap {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 28px 22px 72px;
+      }
+      .hero {
+        border: 1px solid var(--line);
+        background: rgba(23, 26, 35, 0.9);
+        border-radius: 18px;
+        padding: 24px;
+      }
+      .eyebrow {
+        color: var(--active);
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        margin: 0 0 8px;
+      }
+      h1 {
+        font-size: clamp(27px, 5vw, 46px);
+        line-height: 1.05;
+        margin: 0 0 12px;
+      }
+      h2 {
+        font-size: 22px;
+        margin: 0 0 8px;
+      }
+      p {
+        color: var(--muted);
+      }
+      .lead {
+        max-width: 940px;
+        color: var(--soft);
+        font-size: 17px;
+        margin: 0;
+      }
+      .warn {
+        margin-top: 16px;
+        border: 1px solid rgba(251, 191, 36, 0.35);
+        background: rgba(251, 191, 36, 0.1);
+        color: #fde68a;
+        border-radius: 12px;
+        padding: 12px 14px;
+        font-size: 14px;
+      }
+      .nav {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin: 18px 0 8px;
+      }
+      .nav a {
+        text-decoration: none;
+        color: var(--soft);
+        background: var(--panel);
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 7px 12px;
+        font-size: 13px;
+      }
+      .section {
+        margin-top: 28px;
+      }
+      .section > p {
+        max-width: 920px;
+        margin: 0 0 14px;
+      }
+
+      /* hierarchy badges — LETTERS only (no color meaning) */
+      .badge {
+        display: inline-grid;
+        place-items: center;
+        width: 24px;
+        height: 24px;
+        flex: 0 0 24px;
+        border: 1px solid rgba(203, 213, 225, 0.3);
+        border-radius: 8px;
+        background: var(--hier);
+        color: var(--soft);
+        font-size: 11px;
+        font-weight: 900;
+      }
+      .badge.sm {
+        width: 18px;
+        height: 18px;
+        flex-basis: 18px;
+        border-radius: 6px;
+        font-size: 9px;
+      }
+
+      .legend {
+        display: grid;
+        gap: 10px;
+        margin-top: 8px;
+      }
+      @media (min-width: 900px) {
+        .legend {
+          grid-template-columns: repeat(5, 1fr);
+        }
+      }
+      .lg-card {
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: rgba(15, 17, 23, 0.42);
+        padding: 12px;
+      }
+      .lg-card h3 {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 15px;
+        margin: 0 0 6px;
+      }
+      .lg-card p {
+        font-size: 13px;
+        margin: 0;
+      }
+      .status-legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 14px;
+        align-items: center;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        border-radius: 999px;
+        padding: 3px 9px;
+        font-size: 11px;
+        font-weight: 800;
+        white-space: nowrap;
+      }
+      .tag.done {
+        background: var(--done-bg);
+        color: var(--done);
+      }
+      .tag.active {
+        background: var(--active-bg);
+        color: var(--active);
+      }
+      .tag.planned {
+        background: var(--planned-bg);
+        color: var(--planned);
+      }
+      .tag.terminal {
+        background: var(--terminal-bg);
+        color: var(--terminal);
+      }
+
+      .firm {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        border-radius: 999px;
+        padding: 3px 9px;
+        font-size: 11px;
+        font-weight: 700;
+      }
+      .firm.historico {
+        border: 1px solid rgba(148, 163, 184, 0.3);
+        color: var(--muted);
+      }
+      .firm.firme {
+        border: 1px solid var(--done);
+        color: var(--done);
+      }
+      .firm.revisavel {
+        border: 1px dashed var(--planned);
+        color: var(--planned);
+      }
+
+      .timeline {
+        display: grid;
+        gap: 16px;
+      }
+      .front {
+        background: rgba(23, 26, 35, 0.92);
+        border: 1px solid var(--line);
+        border-left: 5px solid rgba(148, 163, 184, 0.3);
+        border-radius: 18px;
+        overflow: hidden;
+      }
+      .front.done {
+        border-left-color: var(--done);
+      }
+      .front.active {
+        border-left-color: var(--active);
+        box-shadow: 0 0 0 1px rgba(96, 165, 250, 0.22);
+      }
+      .front.planned {
+        border-left-color: var(--planned);
+      }
+      .front.terminal {
+        border-left-color: var(--terminal);
+      }
+      .front-head {
+        display: flex;
+        align-items: start;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 16px;
+        border-bottom: 1px solid var(--line);
+        background: rgba(30, 34, 48, 0.8);
+      }
+      .front-head h3 {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 19px;
+        margin: 0;
+      }
+      .front-head p {
+        margin: 5px 0 0;
+        font-size: 13px;
+      }
+      .front-meta {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        align-items: end;
+      }
+      .front-body {
+        padding: 14px;
+      }
+      .cp-grid {
+        display: grid;
+        gap: 10px;
+      }
+      @media (min-width: 880px) {
+        .cp-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+
+      .cp {
+        border: 1px solid var(--line);
+        border-left: 4px solid rgba(148, 163, 184, 0.3);
+        border-radius: 14px;
+        padding: 12px;
+        background: rgba(15, 17, 23, 0.52);
+      }
+      .cp.done {
+        border-left-color: var(--done);
+      }
+      .cp.active {
+        border-left-color: var(--active);
+      }
+      .cp.planned {
+        border-left-color: var(--planned);
+      }
+      .cp.terminal {
+        border-left-color: var(--terminal);
+      }
+      .cp h4 {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0 0 8px;
+        font-size: 15px;
+      }
+      .cp-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin: 0 0 10px;
+      }
+      .blocks {
+        display: grid;
+        gap: 7px;
+      }
+      .blk {
+        border: 1px solid rgba(148, 163, 184, 0.14);
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.025);
+        padding: 8px 9px;
+      }
+      .blk strong {
+        display: block;
+        margin-bottom: 2px;
+        color: var(--ink);
+        font-size: 10px;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+      }
+      .blk span {
+        color: var(--muted);
+        font-size: 12.5px;
+      }
+      .etapas {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 9px;
+      }
+      .etapa {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        border-radius: 9px;
+        background: rgba(148, 163, 184, 0.08);
+        color: var(--soft);
+        padding: 4px 7px;
+        font-size: 11px;
+      }
+      .meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 10px;
+      }
+      .pill {
+        border-radius: 999px;
+        padding: 3px 8px;
+        font-size: 11px;
+        border: 1px solid rgba(148, 163, 184, 0.18);
+      }
+      .pill.pr {
+        background: var(--active-bg);
+        color: #bfdbfe;
+      }
+      .pill.rel {
+        background: var(--planned-bg);
+        color: #d8b4fe;
+      }
+      .pill.casa {
+        background: rgba(52, 211, 153, 0.1);
+        color: #a7f3d0;
+      }
+      .pill.casa::before {
+        content: "🏛 ";
+      }
+      .asset {
+        margin-top: 11px;
+        border: 1px solid rgba(148, 163, 184, 0.18);
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.03);
+        overflow: hidden;
+      }
+      .asset summary {
+        cursor: pointer;
+        padding: 9px 11px;
+        color: var(--soft);
+        font-size: 13px;
+        font-weight: 700;
+      }
+      .asset figure {
+        margin: 0;
+        border-top: 1px solid rgba(148, 163, 184, 0.18);
+      }
+      .asset img {
+        display: block;
+        width: 100%;
+        height: auto;
+        background: #fff;
+      }
+      .asset figcaption {
+        padding: 8px 11px 10px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+      .note {
+        margin-top: 10px;
+        border-top: 1px solid rgba(148, 163, 184, 0.16);
+        padding-top: 9px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .grid3 {
+        display: grid;
+        gap: 12px;
+      }
+      @media (min-width: 860px) {
+        .grid3 {
+          grid-template-columns: repeat(3, 1fr);
+        }
+      }
+      .grid2 {
+        display: grid;
+        gap: 12px;
+      }
+      @media (min-width: 760px) {
+        .grid2 {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+      .card {
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: rgba(23, 26, 35, 0.8);
+        padding: 14px;
+      }
+      .card h3 {
+        font-size: 15px;
+        margin: 0 0 6px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .card p {
+        font-size: 13px;
+        margin: 0;
+      }
+      .num {
+        display: inline-grid;
+        place-items: center;
+        width: 22px;
+        height: 22px;
+        flex: 0 0 22px;
+        border-radius: 999px;
+        background: var(--active-bg);
+        color: #bfdbfe;
+        font-size: 12px;
+        font-weight: 800;
+      }
+      .tension {
+        border-left: 4px solid var(--risk);
+      }
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+      }
+    </style>
+  </head>
+  <body>
+    <main class="wrap">
+      <h2 class="sr-only">
+        Mapa V4 da Spec 0024, projeção experimental que testa o vocabulário Spec, Frente,
+        Checkpoint, Etapa e Tarefa. Frentes 0 a 4 são histórico factual; das Frentes 5 a final há
+        uma proposta ideal e revisável. Não é fonte de verdade: em divergência vencem state.yml,
+        tasks.md, decision-brief, gates e Git.
+      </h2>
+
+      <section class="hero">
+        <p class="eyebrow">Mapa V4 · projeção experimental de vocabulário · NÃO é SSOT</p>
+        <h1>Spec 0024 — mapa V4 por Frentes, Checkpoints, Etapas e Tarefas</h1>
+        <p class="lead">
+          Esta V4 <strong>testa um vocabulário</strong> ainda não decidido:
+          <strong>Spec › Frente › Checkpoint › Etapa › Tarefa</strong>. "Frente" é o candidato ao
+          nível acima de checkpoint (substitui a leitura de "nó" e evita reusar "Fase"). As Frentes
+          0–4 são <strong>histórico factual</strong>; a partir da Frente 5 há uma
+          <strong>proposta ideal e revisável</strong>.
+        </p>
+        <div class="warn">
+          Vocabulário em teste, não decidido. Esta página é maquete para decisão humana futura — não
+          registra DEC e não altera topologia. Em qualquer divergência vencem
+          <code>state.yml</code>, <code>tasks.md</code>, <code>decision-brief.md</code>,
+          <code>gates/</code> e Git/GitHub. Cada checkpoint aponta a sua
+          <strong>casa governada</strong>.
+        </div>
+        <nav class="nav" aria-label="Seções">
+          <a href="#vocab">Vocabulário</a>
+          <a href="#nome">Por que "Frente"</a>
+          <a href="#timeline">Linha do tempo</a>
+          <a href="#gaps">Como gaps entram</a>
+          <a href="#tensoes">Tensões que a V4 expõe</a>
+          <a href="#dec">O que a DEC precisa resolver</a>
+        </nav>
+      </section>
+
+      <section class="section" id="vocab">
+        <h2>1. Vocabulário testado (letras = hierarquia · cores = status/firmeza)</h2>
+        <p>A hierarquia é de linguagem humana e opcional: nem todo nível aparece em todo caso.</p>
+        <div class="legend">
+          <article class="lg-card">
+            <h3><span class="badge">S</span>Spec</h3>
+            <p>O objetivo completo. Aqui: a Spec 0024 inteira.</p>
+          </article>
+          <article class="lg-card">
+            <h3><span class="badge">F</span>Frente</h3>
+            <p>
+              Grande frente sequencial. Rótulo humano de um conjunto ordenado de nós de
+              <code>state.yml</code>.
+            </p>
+          </article>
+          <article class="lg-card">
+            <h3><span class="badge">C</span>Checkpoint</h3>
+            <p>Entrega governada e revisável. Normalmente um PR principal claro.</p>
+          </article>
+          <article class="lg-card">
+            <h3><span class="badge">E</span>Etapa</h3>
+            <p>Subdivisão opcional dentro de checkpoint grande (ex-"sub-checkpoint").</p>
+          </article>
+          <article class="lg-card">
+            <h3><span class="badge">T</span>Tarefa</h3>
+            <p>Folha executável ou evidência. Não carrega autoridade.</p>
+          </article>
+        </div>
+        <div class="status-legend">
+          <strong>Status:</strong>
+          <span class="tag done">concluído</span><span class="tag active">ativo</span>
+          <span class="tag planned">planejado</span
+          ><span class="tag terminal">terminal</span> &nbsp;·&nbsp; <strong>Firmeza:</strong>
+          <span class="firm historico">histórico</span><span class="firm firme">firme</span>
+          <span class="firm revisavel">intenção revisável</span>
+        </div>
+      </section>
+
+      <section class="section" id="nome">
+        <h2>2. Por que "Frente" (e não "Fase" ou "Nó")</h2>
+        <p>
+          Investigação registrada em
+          <code>research/2026-06-22-checkpoint-artifact-taxonomy-map-v4-nomenclature-review.md</code
+          >. Medida de colisão no repo (linhas em <code>.md/.yml/.html</code>):
+          <code>bloco</code> 1058 · <code>fase</code> 543 · <code>camada</code> 201 ·
+          <code>ciclo</code> 195 · <code>frente</code> 42 (e quase tudo é o idioma "à frente").
+          "Frente" tem a menor colisão real entre os nomes com sentido de <em>span</em>, já é usado
+          informalmente no repo (<code>Frente C+D</code>) e é linguagem humana natural.
+        </p>
+        <div class="grid3">
+          <article class="card">
+            <h3>Evita "Nó"</h3>
+            <p>
+              "Nó" confunde com grafo/topologia; "Frente" é leitura humana, derivada da topologia.
+            </p>
+          </article>
+          <article class="card">
+            <h3>Evita "Fase"</h3>
+            <p>
+              <code>tasks.md</code> já usa "Fase" (Absorção/Review/Encerramento) com outra
+              granularidade — colisão forte.
+            </p>
+          </article>
+          <article class="card">
+            <h3>Derivada, não autoridade</h3>
+            <p>
+              Uma Frente = conjunto ordenado de nós rotulado. A SSOT continua em
+              <code>state.yml § topology</code>.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="timeline">
+        <h2>3. Spec 0024 por Frentes</h2>
+        <p>
+          Frentes 0–4: histórico factual (relabel, sem reescrever decisões). Frentes 5–final:
+          proposta ideal/revisável.
+        </p>
+        <div class="timeline">
+          <!-- FRENTE 0 -->
+          <article class="front done">
+            <div class="front-head">
+              <div>
+                <h3>
+                  <span class="badge">F</span>Frente 0 · Instanciação, pesquisa e decisões iniciais
+                </h3>
+                <p>Do bootstrap ao gate inicial de research/decision-brief.</p>
+              </div>
+              <div class="front-meta">
+                <span class="tag done">concluída</span><span class="firm historico">histórico</span>
+              </div>
+            </div>
+            <div class="front-body">
+              <div class="cp-grid">
+                <article class="cp done">
+                  <h4><span class="badge">C</span>Fundação da Spec 0024</h4>
+                  <div class="blocks">
+                    <div class="blk">
+                      <strong>Por que existe</strong
+                      ><span>Dar casa governada à investigação de arquitetura contextual.</span>
+                    </div>
+                    <div class="blk">
+                      <strong>Valor entregue</strong
+                      ><span
+                        >Spec materializada: plano, tarefas, decisão inicial e PR contêiner.</span
+                      >
+                    </div>
+                    <div class="blk">
+                      <strong>Evidência</strong
+                      ><span
+                        ><code>spec.md</code>, <code>plan.md</code>, <code>tasks.md</code>,
+                        <code>decision-brief.md</code>.</span
+                      >
+                    </div>
+                  </div>
+                  <div class="etapas">
+                    <span class="etapa"><span class="badge sm">E</span>setup inicial</span
+                    ><span class="etapa"><span class="badge sm">E</span>research + gate</span>
+                  </div>
+                  <div class="meta">
+                    <span class="pill pr">PR principal: #32</span
+                    ><span class="pill casa">state.yml: base-governance · DEC G00/G02/G06</span>
+                  </div>
+                </article>
+                <article class="cp done">
+                  <h4><span class="badge">C</span>Vocabulário inicial e topologia canônica</h4>
+                  <div class="blocks">
+                    <div class="blk">
+                      <strong>Por que existe</strong
+                      ><span
+                        >Impedir que número de PR fosse confundido com unidade de trabalho.</span
+                      >
+                    </div>
+                    <div class="blk">
+                      <strong>Valor entregue</strong
+                      ><span
+                        >Checkpoint/Gate orientando a entrega; #32 como linha de integração que não
+                        mergeia cedo.</span
+                      >
+                    </div>
+                    <div class="blk">
+                      <strong>Evidência</strong
+                      ><span>DECs, ADRs e topologia canônica em <code>state.yml</code>.</span>
+                    </div>
+                  </div>
+                  <div class="etapas">
+                    <span class="etapa"><span class="badge sm">E</span>2</span
+                    ><span class="etapa"><span class="badge sm">E</span>2.1</span
+                    ><span class="etapa"><span class="badge sm">E</span>2.1a</span>
+                  </div>
+                  <div class="meta">
+                    <span class="pill pr">PR principal: #32</span
+                    ><span class="pill casa">DEC G07 · state.yml topology</span>
+                  </div>
+                  <p class="note">
+                    No V4 vira "ajuste de vocabulário/topologia"; a numeração histórica é só ponte.
+                  </p>
+                </article>
+              </div>
+            </div>
+          </article>
+
+          <!-- FRENTE 1 -->
+          <article class="front done">
+            <div class="front-head">
+              <div>
+                <h3>
+                  <span class="badge">F</span>Frente 1 · Produtibilidade e revisão como artefato
+                </h3>
+                <p>Regras, topologia e reviews viraram superfícies verificáveis.</p>
+              </div>
+              <div class="front-meta">
+                <span class="tag done">concluída</span><span class="firm historico">histórico</span>
+              </div>
+            </div>
+            <div class="front-body">
+              <div class="cp-grid">
+                <article class="cp done">
+                  <h4><span class="badge">C</span>Ruleset e topologia como dados</h4>
+                  <div class="blocks">
+                    <div class="blk">
+                      <strong>Por que existe</strong
+                      ><span
+                        >Tornar regras e topologia dados verificáveis, não instrução solta.</span
+                      >
+                    </div>
+                    <div class="blk">
+                      <strong>Valor entregue</strong
+                      ><span>Ruleset/checks começaram a falsificar o estado governado.</span>
+                    </div>
+                    <div class="blk">
+                      <strong>Evidência</strong
+                      ><span
+                        >Rules, script-contracts, topology e validações versionadas. Imagem do PR
+                        #33.</span
+                      >
+                    </div>
+                  </div>
+                  <div class="etapas">
+                    <span class="etapa"><span class="badge sm">E</span>2.2..2.3b</span>
+                  </div>
+                  <div class="meta">
+                    <span class="pill pr">PR principal: #33</span
+                    ><span class="pill casa">state.yml: ruleset-producibility</span>
+                  </div>
+                  <details class="asset">
+                    <summary>Ver valor entregue — PR #33</summary>
+                    <figure>
+                      <img
+                        loading="lazy"
+                        src="./pr-value-images/pr-33.png"
+                        alt="Valor entregue do PR 33"
+                      />
+                      <figcaption>Fonte: <code>assets/pr-value-images/pr-33.png</code>.</figcaption>
+                    </figure>
+                  </details>
+                </article>
+                <article class="cp done">
+                  <h4><span class="badge">C</span>Review como artefato</h4>
+                  <div class="blocks">
+                    <div class="blk">
+                      <strong>Por que existe</strong
+                      ><span
+                        >Fazer revisão deixar rastro governado, com achados e resolução
+                        auditáveis.</span
+                      >
+                    </div>
+                    <div class="blk">
+                      <strong>Valor entregue</strong
+                      ><span
+                        >Review virou artefato versionado, revisável e fechado por evidência.</span
+                      >
+                    </div>
+                    <div class="blk">
+                      <strong>Evidência</strong
+                      ><span>Arquivos de review, findings, resolutions, fingerprints e gates.</span>
+                    </div>
+                  </div>
+                  <div class="etapas">
+                    <span class="etapa"><span class="badge sm">E</span>2.4..2.4c</span>
+                  </div>
+                  <div class="meta">
+                    <span class="pill pr">PR principal: #33</span
+                    ><span class="pill casa">reviews/ + review-policy.yml</span>
+                  </div>
+                  <p class="note">
+                    Caso real de um PR carregando 2 checkpoints coesos — separação por valor, não
+                    por número do PR.
+                  </p>
+                </article>
+              </div>
+            </div>
+          </article>
+
+          <!-- FRENTE 2 -->
+          <article class="front done">
+            <div class="front-head">
+              <div>
+                <h3>
+                  <span class="badge">F</span>Frente 2 · Knowledge graph, registry e bootstrap da
+                  CLI
+                </h3>
+                <p>Base de conhecimento governado, comandos reais e runtime distribuível.</p>
+              </div>
+              <div class="front-meta">
+                <span class="tag done">concluída</span><span class="firm historico">histórico</span>
+              </div>
+            </div>
+            <div class="front-body">
+              <div class="cp-grid">
+                <article class="cp done">
+                  <h4><span class="badge">C</span>Grafo e insights</h4>
+                  <div class="blocks">
+                    <div class="blk">
+                      <strong>Por que existe</strong
+                      ><span
+                        >Separar conhecimento governado de texto solto e permitir
+                        falsificação.</span
+                      >
+                    </div>
+                    <div class="blk">
+                      <strong>Valor entregue</strong
+                      ><span>KnowledgeRef, insights e grafo como base para decisões futuras.</span>
+                    </div>
+                    <div class="blk">
+                      <strong>Evidência</strong
+                      ><span>KnowledgeRef, testes de falsificação, imagens dos PRs #34/#37.</span>
+                    </div>
+                  </div>
+                  <div class="etapas">
+                    <span class="etapa"><span class="badge sm">E</span>referência</span
+                    ><span class="etapa"><span class="badge sm">E</span>falsificação</span
+                    ><span class="etapa"><span class="badge sm">E</span>grafo/insights</span>
+                  </div>
+                  <div class="meta">
+                    <span class="pill pr">PR principal: #37</span
+                    ><span class="pill rel">relacionado: #34</span
+                    ><span class="pill casa"
+                      >state.yml: insights-in-flight · co-knowledge · gate c-graph-core</span
+                    >
+                  </div>
+                  <details class="asset">
+                    <summary>Ver valor entregue — PR #37</summary>
+                    <figure>
+                      <img
+                        loading="lazy"
+                        src="./pr-value-images/pr-37.png"
+                        alt="Valor entregue do PR 37"
+                      />
+                      <figcaption>Fonte: <code>assets/pr-value-images/pr-37.png</code>.</figcaption>
+                    </figure>
+                  </details>
+                </article>
+                <article class="cp done">
+                  <h4><span class="badge">C</span>Registry e bootstrap da CLI</h4>
+                  <div class="blocks">
+                    <div class="blk">
+                      <strong>Por que existe</strong
+                      ><span>Evitar comandos divergentes entre registry, help, CLI e docs.</span>
+                    </div>
+                    <div class="blk">
+                      <strong>Valor entregue</strong
+                      ><span>Registry e bootstrap publicável com smoke real do pacote.</span>
+                    </div>
+                    <div class="blk">
+                      <strong>Evidência</strong
+                      ><span>Registry, pacote, smoke; imagens dos PRs #35/#38.</span>
+                    </div>
+                  </div>
+                  <div class="etapas">
+                    <span class="etapa"><span class="badge sm">E</span>registry</span
+                    ><span class="etapa"><span class="badge sm">E</span>bootstrap</span
+                    ><span class="etapa"><span class="badge sm">E</span>packaging smoke</span>
+                  </div>
+                  <div class="meta">
+                    <span class="pill pr">PR principal: #38</span
+                    ><span class="pill rel">relacionados: #35 · #36</span
+                    ><span class="pill casa"
+                      >state.yml: pr-cli-cutover · co-reconcile · bootstrap-compiler</span
+                    >
+                  </div>
+                  <p class="note">
+                    Checkpoint que, no modelo ideal, seria quebrado em menores. PRs relacionados
+                    explicam a trajetória, não a autoridade.
+                  </p>
+                  <details class="asset">
+                    <summary>Ver valor entregue — PR #38</summary>
+                    <figure>
+                      <img
+                        loading="lazy"
+                        src="./pr-value-images/pr-38.png"
+                        alt="Valor entregue do PR 38"
+                      />
+                      <figcaption>Fonte: <code>assets/pr-value-images/pr-38.png</code>.</figcaption>
+                    </figure>
+                  </details>
+                </article>
+              </div>
+            </div>
+          </article>
+
+          <!-- FRENTE 3 -->
+          <article class="front done">
+            <div class="front-head">
+              <div>
+                <h3><span class="badge">F</span>Frente 3 · Continuidade operacional</h3>
+                <p>Menos dependência de memória humana entre retomadas, checks e runtime.</p>
+              </div>
+              <div class="front-meta">
+                <span class="tag done">concluída</span><span class="firm historico">histórico</span>
+              </div>
+            </div>
+            <div class="front-body">
+              <div class="cp-grid">
+                <article class="cp done">
+                  <h4><span class="badge">C</span>Toolchain e projeção situada</h4>
+                  <div class="blocks">
+                    <div class="blk">
+                      <strong>Por que existe</strong
+                      ><span
+                        >Reduzir retomadas manuais e alinhar PR, checks, handoff e reviews.</span
+                      >
+                    </div>
+                    <div class="blk">
+                      <strong>Valor entregue</strong
+                      ><span>Fluxo diário situado; policy de reviews; body/checks governados.</span>
+                    </div>
+                    <div class="blk">
+                      <strong>Evidência</strong
+                      ><span>Handoff situado, PR body/checks; imagem do PR #41.</span>
+                    </div>
+                  </div>
+                  <div class="etapas">
+                    <span class="etapa"><span class="badge sm">E</span>npm</span
+                    ><span class="etapa"><span class="badge sm">E</span>body/checks</span
+                    ><span class="etapa"><span class="badge sm">E</span>handoff situado</span>
+                  </div>
+                  <div class="meta">
+                    <span class="pill pr">PR principal: #41</span
+                    ><span class="pill rel">relacionado: #39</span
+                    ><span class="pill casa"
+                      >state.yml: toolchain-simplification · co-projection</span
+                    >
+                  </div>
+                  <details class="asset">
+                    <summary>Ver valor entregue — PR #41</summary>
+                    <figure>
+                      <img
+                        loading="lazy"
+                        src="./pr-value-images/pr-41.png"
+                        alt="Valor entregue do PR 41"
+                      />
+                      <figcaption>Fonte: <code>assets/pr-value-images/pr-41.png</code>.</figcaption>
+                    </figure>
+                  </details>
+                </article>
+                <article class="cp done">
+                  <h4><span class="badge">C</span>Enforcement e colapso do runtime antigo</h4>
+                  <div class="blocks">
+                    <div class="blk">
+                      <strong>Por que existe</strong
+                      ><span
+                        >Enforcement antes da consciência humana; remover o runtime antigo.</span
+                      >
+                    </div>
+                    <div class="blk">
+                      <strong>Valor entregue</strong
+                      ><span
+                        >CLI/runtime TypeScript com constraints, receipts e checks coerentes.</span
+                      >
+                    </div>
+                    <div class="blk">
+                      <strong>Evidência</strong
+                      ><span>Receipts, runtime e validações; imagem do PR #42.</span>
+                    </div>
+                  </div>
+                  <div class="etapas">
+                    <span class="etapa"><span class="badge sm">E</span>constraints</span
+                    ><span class="etapa"><span class="badge sm">E</span>receipts</span
+                    ><span class="etapa"
+                      ><span class="badge sm">E</span>runtime TS (CO-3.1..3.5)</span
+                    >
+                  </div>
+                  <div class="meta">
+                    <span class="pill pr">PR principal: #42</span
+                    ><span class="pill casa"
+                      >state.yml: co-enforcement · gate c-co-enforcement</span
+                    >
+                  </div>
+                  <details class="asset">
+                    <summary>Ver valor entregue — PR #42</summary>
+                    <figure>
+                      <img
+                        loading="lazy"
+                        src="./pr-value-images/pr-42.png"
+                        alt="Valor entregue do PR 42"
+                      />
+                      <figcaption>Fonte: <code>assets/pr-value-images/pr-42.png</code>.</figcaption>
+                    </figure>
+                  </details>
+                </article>
+              </div>
+            </div>
+          </article>
+
+          <!-- FRENTE 4 -->
+          <article class="front done">
+            <div class="front-head">
+              <div>
+                <h3>
+                  <span class="badge">F</span>Frente 4 · Convergência da experiência pública e do
+                  fluxo governado
+                </h3>
+                <p>Lifecycle ponta a ponta modelado; CLI pública como experiência guiada.</p>
+              </div>
+              <div class="front-meta">
+                <span class="tag done">concluída</span><span class="firm historico">histórico</span>
+              </div>
+            </div>
+            <div class="front-body">
+              <div class="cp-grid">
+                <article class="cp done">
+                  <h4><span class="badge">C</span>Modelo canônico e correção dos gaps</h4>
+                  <div class="blocks">
+                    <div class="blk">
+                      <strong>Por que existe</strong
+                      ><span
+                        >Parar de tratar bugs de lifecycle como casos isolados; modelar o fluxo
+                        ponta a ponta.</span
+                      >
+                    </div>
+                    <div class="blk">
+                      <strong>Valor entregue</strong
+                      ><span
+                        >Modelo canônico confrontado com código, com gaps corrigidos ou
+                        explicitados.</span
+                      >
+                    </div>
+                    <div class="blk">
+                      <strong>Evidência</strong
+                      ><span>Inventário, dogfood, guards, revisão externa; imagem do PR #43.</span>
+                    </div>
+                  </div>
+                  <div class="etapas">
+                    <span class="etapa"><span class="badge sm">E</span>inventário</span
+                    ><span class="etapa"><span class="badge sm">E</span>modelo × código</span
+                    ><span class="etapa"><span class="badge sm">E</span>correção gaps</span
+                    ><span class="etapa"><span class="badge sm">E</span>CO-10.1..10.6</span>
+                  </div>
+                  <div class="meta">
+                    <span class="pill pr">PR principal: #43</span
+                    ><span class="pill casa">state.yml: co-flow-convergence</span>
+                  </div>
+                  <details class="asset">
+                    <summary>Ver valor entregue — PR #43</summary>
+                    <figure>
+                      <img
+                        loading="lazy"
+                        src="./pr-value-images/pr-43.png"
+                        alt="Valor entregue do PR 43"
+                      />
+                      <figcaption>Fonte: <code>assets/pr-value-images/pr-43.png</code>.</figcaption>
+                    </figure>
+                  </details>
+                </article>
+                <article class="cp done">
+                  <h4><span class="badge">C</span>CLI pública e simulador</h4>
+                  <div class="blocks">
+                    <div class="blk">
+                      <strong>Por que existe</strong
+                      ><span
+                        >Fazer o produto ser sentido pela experiência guiada, não por lista de
+                        comandos.</span
+                      >
+                    </div>
+                    <div class="blk">
+                      <strong>Valor entregue</strong
+                      ><span
+                        >CLI pública autoexplicável e site/simulador como projeção fiel do
+                        runtime.</span
+                      >
+                    </div>
+                    <div class="blk">
+                      <strong>Evidência</strong
+                      ><span>Site, simulador, harness de consumidor, Human Gate aprovado.</span>
+                    </div>
+                  </div>
+                  <div class="etapas">
+                    <span class="etapa"><span class="badge sm">E</span>npx-first</span
+                    ><span class="etapa"><span class="badge sm">E</span>simulador/site</span
+                    ><span class="etapa"><span class="badge sm">E</span>harness</span
+                    ><span class="etapa"><span class="badge sm">E</span>CO-10.7</span>
+                  </div>
+                  <div class="meta">
+                    <span class="pill pr">PR principal: #43</span
+                    ><span class="pill casa">gates/c-co-flow-convergence</span>
+                  </div>
+                  <p class="note">
+                    #43 fechou 2 checkpoints grandes (recorte de convergência); no modelo ideal isso
+                    exige explicitar a fronteira de cada entrega no body.
+                  </p>
+                </article>
+              </div>
+            </div>
+          </article>
+
+          <!-- FRENTE 5 -->
+          <article class="front active">
+            <div class="front-head">
+              <div>
+                <h3>
+                  <span class="badge">F</span>Frente 5 · Continuação do fluxo e contrato de
+                  artefatos
+                </h3>
+                <p>Onde estamos: drift reparável, decisão de modelo e taxonomia/model-review.</p>
+              </div>
+              <div class="front-meta">
+                <span class="tag active">ativa</span><span class="firm firme">firme</span>
+              </div>
+            </div>
+            <div class="front-body">
+              <div class="cp-grid">
+                <article class="cp done">
+                  <h4><span class="badge">C</span>Drift explicável e reparável</h4>
+                  <div class="cp-tags">
+                    <span class="tag done">concluído</span><span class="firm firme">firme</span>
+                  </div>
+                  <div class="blocks">
+                    <div class="blk">
+                      <strong>Por que existe</strong
+                      ><span
+                        >O dogfood mostrou que humanos não deveriam reconciliar drift
+                        manualmente.</span
+                      >
+                    </div>
+                    <div class="blk">
+                      <strong>Valor entregue</strong
+                      ><span
+                        >Detecção/explicação dos drifts e primeiro reparo seguro com
+                        preview/confirmação.</span
+                      >
+                    </div>
+                    <div class="blk">
+                      <strong>Evidência</strong
+                      ><span
+                        >Comando <code>repair</code>, tracker, rota avançada, classificação dos 8
+                        drifts.</span
+                      >
+                    </div>
+                  </div>
+                  <div class="etapas">
+                    <span class="etapa"><span class="badge sm">E</span>diagnosticar</span
+                    ><span class="etapa"><span class="badge sm">E</span>reparar #1</span
+                    ><span class="etapa"><span class="badge sm">E</span>classificar #2..#8</span>
+                  </div>
+                  <div class="meta">
+                    <span class="pill pr">PR principal: #44</span
+                    ><span class="pill casa"
+                      >tasks.md: checkpoint-co-flow-continuation · gate c-co-flow-continuation</span
+                    >
+                  </div>
+                  <details class="asset">
+                    <summary>Ver valor entregue e tracker — PR #44</summary>
+                    <figure>
+                      <img
+                        loading="lazy"
+                        src="./pr-value-images/pr-44.png"
+                        alt="Valor entregue do PR 44"
+                      />
+                      <figcaption>
+                        Fonte: <code>assets/pr-value-images/pr-44.png</code>. Detalhe em
+                        <a href="drift-tracker.html">drift-tracker.html</a>.
+                      </figcaption>
+                    </figure>
+                  </details>
+                </article>
+                <article class="cp done">
+                  <h4><span class="badge">C</span>Decisão de modelo e inventário</h4>
+                  <div class="cp-tags">
+                    <span class="tag done">concluído</span><span class="firm firme">firme</span>
+                  </div>
+                  <div class="blocks">
+                    <div class="blk">
+                      <strong>Por que existe</strong
+                      ><span
+                        >Evitar que mapa/research liderem a realidade sem decisão governada.</span
+                      >
+                    </div>
+                    <div class="blk">
+                      <strong>Valor entregue</strong
+                      ><span
+                        >Recorte do #44 decidido por DEC-0024-G21 + GG-0005 (sem débito arquitetural
+                        silencioso).</span
+                      >
+                    </div>
+                    <div class="blk">
+                      <strong>Evidência</strong
+                      ><span
+                        ><code>DEC-0024-G21</code>, <code>GG-0005</code>, inventários, mapa V2 e
+                        revisões de falsificação.</span
+                      >
+                    </div>
+                  </div>
+                  <div class="etapas">
+                    <span class="etapa"><span class="badge sm">E</span>falsificação do mapa</span
+                    ><span class="etapa"><span class="badge sm">E</span>decisão G21</span
+                    ><span class="etapa"><span class="badge sm">E</span>recorte do próximo PR</span>
+                  </div>
+                  <div class="meta">
+                    <span class="pill pr">PR principal: #44</span
+                    ><span class="pill casa">decision-brief: DEC-0024-G21 · GG-0005</span>
+                  </div>
+                  <details class="asset">
+                    <summary>Ver mapa de decisão (V2)</summary>
+                    <figure>
+                      <figcaption>
+                        Abrir <a href="spec-0024-map-v2.html">spec-0024-map-v2.html</a>: transição
+                        da decomposição antiga para checkpoints semânticos e o veto a débito
+                        arquitetural silencioso.
+                      </figcaption>
+                    </figure>
+                  </details>
+                </article>
+                <article class="cp active">
+                  <h4><span class="badge">C</span>Taxonomia de artefatos + model-review</h4>
+                  <div class="cp-tags">
+                    <span class="tag active">ativo</span><span class="firm firme">firme</span>
+                  </div>
+                  <div class="blocks">
+                    <div class="blk">
+                      <strong>Por que existe</strong
+                      ><span
+                        >Implementar a taxonomia sem repetir a confusão entre pesquisa, decisão,
+                        review e projeção.</span
+                      >
+                    </div>
+                    <div class="blk">
+                      <strong>Valor esperado</strong
+                      ><span
+                        >Artefatos com natureza explícita (<code>kind:</code>) e contrato governado
+                        de revisão antes do código.</span
+                      >
+                    </div>
+                    <div class="blk">
+                      <strong>Evidência</strong
+                      ><span
+                        >Body versionado do PR #45, vocabulário (este mapa) e futuro comando de
+                        abertura interna.</span
+                      >
+                    </div>
+                  </div>
+                  <div class="etapas">
+                    <span class="etapa"><span class="badge sm">E</span>vocabulário V3/V4</span
+                    ><span class="etapa"
+                      ><span class="badge sm">E</span>abertura governada do PR</span
+                    ><span class="etapa"><span class="badge sm">E</span>taxonomia</span
+                    ><span class="etapa"><span class="badge sm">E</span>model-review</span>
+                  </div>
+                  <div class="meta">
+                    <span class="pill pr">PR principal: #45</span
+                    ><span class="pill casa"
+                      >state.yml active: artifact-taxonomy-and-model-review-contract (seq 12)</span
+                    >
+                  </div>
+                  <details class="asset">
+                    <summary>Ver visão pretendida — PR #45</summary>
+                    <figure>
+                      <img
+                        src="./pr-value-images/pr-45.png"
+                        alt="Infográfico da visão pretendida do PR 45"
+                      />
+                      <figcaption>
+                        Fonte: <code>assets/pr-value-images/pr-45.png</code>. Projeção visual; não
+                        substitui <code>state.yml</code>, DEC, testes ou review.
+                      </figcaption>
+                    </figure>
+                  </details>
+                  <p class="note">
+                    Tensão exposta na seção 5: este checkpoint está estruturado em
+                    <code>state.yml</code> com <code>sequence: 12</code>, mas comentado como "não é
+                    novo nó".
+                  </p>
+                </article>
+              </div>
+            </div>
+          </article>
+
+          <!-- FRENTE 6 -->
+          <article class="front planned">
+            <div class="front-head">
+              <div>
+                <h3>
+                  <span class="badge">F</span>Frente 6 · Refactor interno, falsificação ampla e gate
+                  da continuação
+                </h3>
+                <p>Organizar o runtime e provar o lifecycle em jornadas reais antes do gate.</p>
+              </div>
+              <div class="front-meta">
+                <span class="tag planned">planejada</span><span class="firm firme">firme</span>
+              </div>
+            </div>
+            <div class="front-body">
+              <div class="cp-grid">
+                <article class="cp planned">
+                  <h4><span class="badge">C</span>Arquitetura interna DDD/BDD</h4>
+                  <div class="cp-tags">
+                    <span class="tag planned">planejado</span><span class="firm firme">firme</span>
+                  </div>
+                  <div class="blocks">
+                    <div class="blk">
+                      <strong>Por que existe</strong
+                      ><span
+                        >Reduzir conflito entre runtime antigo/novo e bounded contexts
+                        misturados.</span
+                      >
+                    </div>
+                    <div class="blk">
+                      <strong>Valor esperado</strong
+                      ><span
+                        >Código reorganizado sem alterar comportamento, com testes e BDD visual para
+                        mantenedores.</span
+                      >
+                    </div>
+                    <div class="blk">
+                      <strong>Evidência esperada</strong
+                      ><span
+                        >Diff behavior-preserving, suíte verde, cenários BDD, revisão arquitetural.
+                        (Sem imagem de valor entregue — ainda não existe.)</span
+                      >
+                    </div>
+                  </div>
+                  <div class="etapas">
+                    <span class="etapa"
+                      ><span class="badge sm">E</span>inventário de bounded contexts</span
+                    ><span class="etapa"
+                      ><span class="badge sm">E</span>reorg sem mudança funcional</span
+                    ><span class="etapa"><span class="badge sm">E</span>BDD visual</span>
+                  </div>
+                  <div class="meta">
+                    <span class="pill pr">PR principal: futuro</span
+                    ><span class="pill casa"
+                      >tasks.md: internal-architecture-refactor-ddd-bdd · DEC G16 (seed
+                      2d478b2)</span
+                    >
+                  </div>
+                </article>
+                <article class="cp planned">
+                  <h4><span class="badge">C</span>Falsificação ampla + revisão/Human Gate</h4>
+                  <div class="cp-tags">
+                    <span class="tag planned">planejado</span><span class="firm firme">firme</span>
+                  </div>
+                  <div class="blocks">
+                    <div class="blk">
+                      <strong>Por que existe</strong
+                      ><span
+                        >Provar que o modelo novo funciona em jornadas reais, inclusive caminhos de
+                        bloqueio.</span
+                      >
+                    </div>
+                    <div class="blk">
+                      <strong>Valor esperado</strong
+                      ><span
+                        >Fluxos falsificados ponta a ponta, findings fechados e decisão humana
+                        preparada.</span
+                      >
+                    </div>
+                    <div class="blk">
+                      <strong>Evidência esperada</strong
+                      ><span
+                        >Jornadas reais, revisão independente, relatório de riscos e Human Gate da
+                        continuação.</span
+                      >
+                    </div>
+                  </div>
+                  <div class="etapas">
+                    <span class="etapa"><span class="badge sm">E</span>jornadas felizes</span
+                    ><span class="etapa"><span class="badge sm">E</span>jornadas bloqueadas</span
+                    ><span class="etapa"><span class="badge sm">E</span>revisão externa</span
+                    ><span class="etapa"><span class="badge sm">E</span>Human Gate</span>
+                  </div>
+                  <div class="meta">
+                    <span class="pill pr">PR principal: futuro</span
+                    ><span class="pill casa"
+                      >tasks.md: broad-flow-falsification · continuation-review-human-gate</span
+                    >
+                  </div>
+                </article>
+              </div>
+            </div>
+          </article>
+
+          <!-- FRENTE 7 -->
+          <article class="front planned">
+            <div class="front-head">
+              <div>
+                <h3><span class="badge">F</span>Frente 7 · Raiz canônica única</h3>
+                <p>Depois da continuação modelada e falsificada: remover a raiz legada.</p>
+              </div>
+              <div class="front-meta">
+                <span class="tag planned">planejada</span
+                ><span class="firm revisavel">intenção revisável</span>
+              </div>
+            </div>
+            <div class="front-body">
+              <div class="cp-grid">
+                <article class="cp planned">
+                  <h4><span class="badge">C</span>dualroot-collapse</h4>
+                  <div class="cp-tags">
+                    <span class="tag planned">planejado</span
+                    ><span class="firm revisavel">intenção revisável</span>
+                  </div>
+                  <div class="blocks">
+                    <div class="blk">
+                      <strong>Por que existe</strong
+                      ><span
+                        >Eliminar a raiz legada e a dupla leitura que ainda confunde pesquisa,
+                        templates e runtime.</span
+                      >
+                    </div>
+                    <div class="blk">
+                      <strong>Valor esperado</strong
+                      ><span
+                        >Uma raiz canônica, ~17 pontes de runtime removidas, ~17 citações de ADR
+                        repointadas, índices unificados.</span
+                      >
+                    </div>
+                    <div class="blk">
+                      <strong>Evidência esperada</strong
+                      ><span
+                        >Inventário de referências, migração física, checks de lookup e ADRs
+                        atualizadas.</span
+                      >
+                    </div>
+                  </div>
+                  <div class="etapas">
+                    <span class="etapa"
+                      ><span class="badge sm">E</span>inventário de referências</span
+                    ><span class="etapa"><span class="badge sm">E</span>migração canônica</span
+                    ><span class="etapa"><span class="badge sm">E</span>remover ponte legada</span>
+                  </div>
+                  <div class="meta">
+                    <span class="pill pr">PR principal: futuro</span
+                    ><span class="pill casa"
+                      >state.yml planned: dualroot-collapse (seq 13) · DEC G18/G20</span
+                    >
+                  </div>
+                </article>
+              </div>
+            </div>
+          </article>
+
+          <!-- FRENTE 8 -->
+          <article class="front planned">
+            <div class="front-head">
+              <div>
+                <h3><span class="badge">F</span>Frente 8 · Automação e prontidão</h3>
+                <p>
+                  Automatizar só depois que lifecycle, artefatos e raiz canônica estiverem estáveis.
+                </p>
+              </div>
+              <div class="front-meta">
+                <span class="tag planned">planejada</span
+                ><span class="firm revisavel">intenção revisável</span>
+              </div>
+            </div>
+            <div class="front-body">
+              <div class="cp-grid">
+                <article class="cp planned">
+                  <h4><span class="badge">C</span>Captura e eventos</h4>
+                  <div class="cp-tags">
+                    <span class="tag planned">planejado</span
+                    ><span class="firm revisavel">intenção revisável</span>
+                  </div>
+                  <div class="blocks">
+                    <div class="blk">
+                      <strong>Por que existe</strong
+                      ><span
+                        >Capturar o em-trânsito na formação e tornar o laço contínuo por eventos
+                        delimitados.</span
+                      >
+                    </div>
+                    <div class="blk">
+                      <strong>Valor esperado</strong
+                      ><span
+                        >Captura na formação (dissolve NEXT.md) e dispatcher de eventos
+                        advisory-first.</span
+                      >
+                    </div>
+                    <div class="blk">
+                      <strong>Evidência esperada</strong
+                      ><span>Capturas, dispatcher e gates advisory.</span>
+                    </div>
+                  </div>
+                  <div class="meta">
+                    <span class="pill pr">PR principal: futuro</span
+                    ><span class="pill casa"
+                      >state.yml planned: co-capture (seq 14) · co-events (seq 15)</span
+                    >
+                  </div>
+                </article>
+                <article class="cp planned">
+                  <h4><span class="badge">C</span>Housekeeping e knowledge readiness</h4>
+                  <div class="cp-tags">
+                    <span class="tag planned">planejado</span
+                    ><span class="firm revisavel">intenção revisável</span>
+                  </div>
+                  <div class="blocks">
+                    <div class="blk">
+                      <strong>Por que existe</strong
+                      ><span
+                        >Remover legado (incl. taxonomy-removal P0) e fechar a dívida de
+                        conhecimento antes da integração.</span
+                      >
+                    </div>
+                    <div class="blk">
+                      <strong>Valor esperado</strong
+                      ><span
+                        >Limpeza de legado, backfill amplo e <code>knowledge:health</code> com
+                        decisão humana.</span
+                      >
+                    </div>
+                    <div class="blk">
+                      <strong>Evidência esperada</strong
+                      ><span
+                        >Checks de housekeeping, dossiê de saúde do grafo e candidatos
+                        semânticos.</span
+                      >
+                    </div>
+                  </div>
+                  <div class="meta">
+                    <span class="pill pr">PR principal: futuro</span
+                    ><span class="pill casa"
+                      >state.yml planned: housekeeping (seq 16) · knowledge-readiness (seq 17)</span
+                    >
+                  </div>
+                  <p class="note">
+                    O V3 fundia esta cauda numa frente só; a V4 separa Frente 7 (colapso) de Frente
+                    8 (automação/prontidão) e devolve <code>knowledge-readiness</code> como entrega
+                    distinta.
+                  </p>
+                </article>
+              </div>
+            </div>
+          </article>
+
+          <!-- FRENTE FINAL -->
+          <article class="front terminal">
+            <div class="front-head">
+              <div>
+                <h3><span class="badge">F</span>Frente final · Integração da Spec 0024</h3>
+                <p>Homologação final e merge único em main, depois dos gates humanos aplicáveis.</p>
+              </div>
+              <div class="front-meta">
+                <span class="tag terminal">terminal</span
+                ><span class="firm revisavel">intenção revisável</span>
+              </div>
+            </div>
+            <div class="front-body">
+              <div class="cp-grid">
+                <article class="cp terminal">
+                  <h4><span class="badge">C</span>integration-final</h4>
+                  <div class="cp-tags"><span class="tag terminal">terminal</span></div>
+                  <div class="blocks">
+                    <div class="blk">
+                      <strong>Por que existe</strong
+                      ><span
+                        >Encerrar a Spec 0024 como unidade, depois de todos os checkpoints e
+                        gates.</span
+                      >
+                    </div>
+                    <div class="blk">
+                      <strong>Valor esperado</strong
+                      ><span
+                        >Revisão final, release log e integração única em main quando a spec estiver
+                        pronta.</span
+                      >
+                    </div>
+                    <div class="blk">
+                      <strong>Evidência esperada</strong
+                      ><span
+                        ><code>review.md</code>, <code>release-log.md</code>, CI final e gate
+                        terminal.</span
+                      >
+                    </div>
+                  </div>
+                  <div class="meta">
+                    <span class="pill pr">PR principal: integração final</span
+                    ><span class="pill casa">state.yml: integration-final (terminal)</span>
+                  </div>
+                  <p class="note">
+                    Não substitui os Human Gates das frentes anteriores e não autoriza merge
+                    antecipado (modo unit, ADR 0024).
+                  </p>
+                </article>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="gaps">
+        <h2>4. Como gaps entram no modelo (sem débito silencioso)</h2>
+        <p>
+          Um gap descoberto no caminho só pode aparecer no mapa
+          <strong>com uma disposição anexada</strong>. Gap sem disposição = débito silencioso,
+          vetado por <code>GG-0005</code> (não pode ficar só em <code>research/</code>, backlog ou
+          memória de agente).
+        </p>
+        <div class="grid3">
+          <article class="card">
+            <h3><span class="num">1</span>Absorver no checkpoint atual</h3>
+            <p>Pequeno e dentro do escopo já em andamento. Vira tarefa do checkpoint ativo.</p>
+          </article>
+          <article class="card">
+            <h3><span class="num">2</span>Virar etapa explícita</h3>
+            <p>
+              Amplia um checkpoint grande sem mudar a entrega. Aparece como
+              <span class="badge sm">E</span> Etapa.
+            </p>
+          </article>
+          <article class="card">
+            <h3><span class="num">3</span>Virar checkpoint novo</h3>
+            <p>
+              É entrega governada própria, revisável e com PR principal. Entra como
+              <span class="badge sm">C</span> Checkpoint.
+            </p>
+          </article>
+          <article class="card">
+            <h3><span class="num">4</span>Virar agrupamento futuro (Frente)</h3>
+            <p>
+              É uma frente macro nova. Entra como <span class="badge sm">F</span> Frente planejada,
+              com firmeza revisável.
+            </p>
+          </article>
+          <article class="card">
+            <h3><span class="num">5</span>Rejeitar por DEC</h3>
+            <p>
+              Não vale o trabalho ou está fora de escopo. A rejeição é DEC explícita, não ausência
+              silenciosa.
+            </p>
+          </article>
+          <article class="card">
+            <h3>Regra GG-0005</h3>
+            <p>
+              A decisão (1–5) precisa ser registrada na casa governada. O mapa só projeta o
+              resultado da disposição.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="tensoes">
+        <h2>5. Tensões que a V4 expõe (não esconde)</h2>
+        <div class="grid2">
+          <article class="card tension">
+            <h3>Colisão de vocabulário</h3>
+            <p>
+              "Fase" já existe em <code>tasks.md</code> (Absorção/Review/Encerramento). A V4 usa
+              "Frente" para evitar a colisão, mas a escolha só vira oficial por DEC. Até lá,
+              "Frente" é rótulo de teste.
+            </p>
+          </article>
+          <article class="card tension">
+            <h3>#45: <code>sequence: 12</code> vs "não é nó"</h3>
+            <p>
+              O <code>state.yml</code> estrutura
+              <code>artifact-taxonomy-and-model-review-contract</code> com
+              <code>sequence: 12</code> sob <code>active</code>, mas o comentário diz que "não é um
+              novo nó topológico". A V4 mostra os dois fatos; a DEC precisa decidir nó vs
+              checkpoint-de-nó.
+            </p>
+          </article>
+          <article class="card tension">
+            <h3>Risco de plano-sombra</h3>
+            <p>
+              Esta V4 propõe uma decomposição ideal (Frentes 7–8 separadas) que ainda não está no
+              <code>state.yml</code>. Enquanto não houver DEC, a topologia real continua sendo a do
+              <code>state.yml</code>; a V4 é proposta, não plano.
+            </p>
+          </article>
+          <article class="card tension">
+            <h3>Como manter <code>state.yml</code>/<code>tasks.md</code> como autoridade</h3>
+            <p>
+              Cada checkpoint aponta sua casa governada. Em divergência, vence o governado. O mapa
+              nunca é editado e relido como fonte — é projeção. Idealmente, uma V5 derivaria isto de
+              <code>state.yml</code> automaticamente.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="dec">
+        <h2>6. O que a DEC futura precisa resolver</h2>
+        <div class="grid2">
+          <article class="card">
+            <h3>Vocabulário e derivação</h3>
+            <p>
+              Adotar/rejeitar "Frente" e cravar a regra:
+              <strong>Frente = conjunto ordenado de nós de <code>state.yml</code></strong
+              >, derivada, não autoridade nova.
+            </p>
+          </article>
+          <article class="card">
+            <h3>Tensão #45</h3>
+            <p>
+              Decidir se <code>artifact-taxonomy-and-model-review-contract</code> é nó próprio ou
+              checkpoint de <code>co-flow-continuation</code> — e reconciliar comentário e
+              estrutura.
+            </p>
+          </article>
+          <article class="card">
+            <h3>Colisão "Fase"</h3>
+            <p>
+              Se algum "Fase" sobreviver, renomear as fases legadas do <code>tasks.md</code> para
+              não competir com a macro-sequência.
+            </p>
+          </article>
+          <article class="card">
+            <h3>Regra de firmeza</h3>
+            <p>
+              Cravar firmeza (firme/revisável) como <strong>atributo</strong>, não como decomposição
+              fixa da cauda — o futuro distante segue revisável.
+            </p>
+          </article>
+        </div>
+        <p style="margin-top: 14px">
+          Investigação de nomenclatura e confronto:
+          <code>research/2026-06-22-checkpoint-artifact-taxonomy-map-v4-nomenclature-review.md</code
+          >. Esta página não registra DEC, não altera topologia e não é SSOT.
+        </p>
+      </section>
+    </main>
+  </body>
+</html>
