@@ -559,6 +559,21 @@ export function deriveWorkNextAction(
     const active = object.step;
     const activeFacts = facts.steps.find((s) => s.id === active.id && s.line === active.line);
     if (activeFacts?.readiness !== STEP_READINESS) {
+      // Entrega suficiente mas readiness ainda não declarada → mark-readiness é a
+      // próxima ação governada. `decide` e `work` concordam pela MESMA elegibilidade
+      // (markReadinessEligibility). finish-step, advance-step e Human Gate seguem
+      // bloqueados enquanto a readiness não existir — não os recomendamos aqui.
+      if (ctx.markReadinessEligibility.status === "available") {
+        return decisionNextAction(
+          "mark-readiness",
+          true,
+          `Declarar readiness de ${active.id} — entrega suficiente; readiness ainda não declarada em tasks.md.`,
+          [
+            `ativo: ${active.id} — ${active.title} (tasks.md linha ${active.line})`,
+            "readiness só altera tasks.md; finish-step/advance-step/Human Gate seguem bloqueados até então.",
+          ]
+        );
+      }
       return plainNextAction(`Implementar o checkpoint ativo ${active.id} — ${active.title}.`, [
         `ativo: ${active.id} — ${active.title} (tasks.md linha ${active.line})`,
         `sem readiness "${STEP_READINESS}" em tasks.md; conclusão/avanço não é próxima ação de trabalho.`,

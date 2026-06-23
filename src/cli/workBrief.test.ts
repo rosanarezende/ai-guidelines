@@ -669,7 +669,7 @@ describe("workBrief · próxima ação estruturada [work]", () => {
   const commandOf = (b: ReturnType<typeof derive>, role: string) =>
     b.nextAction.commands.find((c) => c.role === role)?.command;
 
-  it("[38] ESTADO REAL (CO-3.2 [/], CO-3.3 [ ]) sem readiness ⇒ continua implementando", () => {
+  it("[38] ESTADO REAL (CO-3.2 [/], CO-3.3 [ ]) entregue sem readiness ⇒ recomenda mark-readiness", () => {
     const b = derive({
       nextAction: nextAction("investigate-checkpoint"),
       facts: facts({
@@ -685,18 +685,21 @@ describe("workBrief · próxima ação estruturada [work]", () => {
           'CO-3.2 ainda não declarou seus critérios de saída satisfeitos (sem readiness "ready-for-transition" em tasks.md).',
         ],
       },
+      // Entrega suficiente (markReadiness available) mas readiness ainda não
+      // declarada: finish-step/advance-step seguem BLOQUEADOS; mark-readiness é a
+      // próxima ação. `work` concorda com `decide` — não fica em silêncio.
       markReadinessEligibility: { status: "available", reasons: [] },
-      finishStepEligibility: { status: "available", reasons: [] },
+      finishStepEligibility: {
+        status: "blocked",
+        reasons: ['sem readiness "ready-for-transition" em tasks.md'],
+      },
     });
     expect(b.mode).toBe("implement_checkpoint");
     expect(b.object.step?.id).toBe("CO-3.2");
-    expect(b.nextAction.description).toBe(
-      "Implementar o checkpoint ativo CO-3.2 — knowledge:compile."
-    );
-    expect(b.nextAction.decisionType).toBeNull();
-    expect(b.nextAction.commands).toHaveLength(0);
+    expect(b.nextAction.decisionType).toBe("mark-readiness");
+    expect(b.nextAction.description).toContain("Declarar readiness de CO-3.2");
     expect(b.nextAction.basis.join(" ")).toContain(
-      'sem readiness "ready-for-transition" em tasks.md'
+      "finish-step/advance-step/Human Gate seguem bloqueados"
     );
   });
 
@@ -804,7 +807,7 @@ describe("workBrief · próxima ação estruturada [work]", () => {
     expect(b.nextAction.commands.some((c) => /decide/.test(c.command))).toBe(false);
   });
 
-  it("[46] o renderer (§11) projeta implementação enquanto não há readiness explícita", () => {
+  it("[46] o renderer (§11) projeta mark-readiness quando entregue sem readiness explícita", () => {
     const b = derive({
       nextAction: nextAction("investigate-checkpoint"),
       facts: facts({
@@ -821,7 +824,10 @@ describe("workBrief · próxima ação estruturada [work]", () => {
         ],
       },
       markReadinessEligibility: { status: "available", reasons: [] },
-      finishStepEligibility: { status: "available", reasons: [] },
+      finishStepEligibility: {
+        status: "blocked",
+        reasons: ['sem readiness "ready-for-transition" em tasks.md'],
+      },
     });
     const out = renderWorkBrief({
       snapshot: {
@@ -836,10 +842,8 @@ describe("workBrief · próxima ação estruturada [work]", () => {
       } as never,
       brief: b,
     });
-    expect(out).toContain("Implementar o checkpoint ativo CO-3.2 — t.");
-    expect(out).toContain(
-      'sem readiness "ready-for-transition" em tasks.md; conclusão/avanço não é próxima ação de trabalho.'
-    );
+    expect(out).toContain("Declarar readiness de CO-3.2");
+    expect(out).toContain("mark-readiness");
   });
 
   it("[47] advance BLOQUEADO ⇒ work NÃO recomenda wizard; só inspeção read-only + requisito nomeado", () => {
