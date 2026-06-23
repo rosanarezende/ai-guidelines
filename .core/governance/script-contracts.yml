@@ -349,6 +349,12 @@ profiles:
         mutates: true
         consumers: [human]
         description: Publica no GitHub o PR body versionado na spec e confirma por releitura.
+      - name: pr-body:pull
+        command: npm run build && node dist/cli/bin.js pr-body-pull
+        category: governance
+        mutates: true
+        consumers: [human]
+        description: Importa o body remoto do GitHub para o arquivo versionado da spec com preview e confirmacao explicita.
       - name: pr-ready:check
         command: npm run build && node dist/cli/bin.js pr-ready-check
         category: governance

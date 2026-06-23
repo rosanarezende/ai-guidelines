@@ -1,6 +1,13 @@
 #!/usr/bin/env node
 import { execFileSync } from "node:child_process";
-import { existsSync, mkdtempSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 
@@ -82,6 +89,7 @@ export interface PrBodyVersionedOptions {
   readonly specId?: string;
   readonly repo?: string;
   readonly repoRoot?: string;
+  readonly confirm?: boolean;
   readonly gateway: PrBodyGateway;
   readonly logger?: Logger;
 }
@@ -96,6 +104,15 @@ function readVersionedBody(file: string): string {
 function formatBodyPath(repoRoot: string, file: string): string {
   const relative = path.relative(repoRoot, file);
   return relative.startsWith("..") ? file : relative;
+}
+
+function previewBodyDiff(local: string, remote: string): readonly string[] {
+  if (local === remote) return ["   Sem diferenças."];
+  return [
+    "   Diff resumido:",
+    `   - arquivo local: ${local.length} caractere(s), ${local.split("\n").length} linha(s)`,
+    `   + body GitHub: ${remote.length} caractere(s), ${remote.split("\n").length} linha(s)`,
+  ];
 }
 
 export function runPrBodyCheck(options: PrBodyVersionedOptions): number {
@@ -125,7 +142,7 @@ export function runPrBodyCheck(options: PrBodyVersionedOptions): number {
   logger.error(`❌ pr-body:check — PR #${options.prNumber} diverge do body versionado.`);
   logger.error(`   Fonte versionada: ${formatBodyPath(repoRoot, file)}`);
   logger.error(
-    "   Atualize o arquivo no repo e rode pr-body:publish, ou copie o body remoto para o arquivo se o GitHub estiver correto."
+    "   Se o arquivo local está correto, rode pr-body:publish. Se o GitHub está correto, rode pr-body:pull para importar com preview/confirm."
   );
   return 1;
 }
@@ -162,11 +179,50 @@ export function runPrBodyPublish(options: PrBodyVersionedOptions): number {
   return 0;
 }
 
+export function runPrBodyPull(options: PrBodyVersionedOptions): number {
+  const repoRoot = options.repoRoot ?? process.cwd();
+  const logger = options.logger ?? stdoutLogger;
+  const file = resolveVersionedPrBodyPath({
+    repoRoot,
+    prNumber: options.prNumber,
+    file: options.file,
+    specId: options.specId,
+  });
+  const local = existsSync(file) ? normalizePrBody(readVersionedBody(file)) : "";
+  const remote = normalizePrBody(
+    options.gateway.fetchBody({ prNumber: options.prNumber, repo: options.repo })
+  );
+
+  if (local === remote) {
+    logger.info(
+      `✅ pr-body:pull — ${formatBodyPath(repoRoot, file)} já está sincronizado com o PR #${
+        options.prNumber
+      }.`
+    );
+    return 0;
+  }
+
+  logger.info(`ℹ️ pr-body:pull — PR #${options.prNumber} difere do arquivo versionado.`);
+  logger.info(`   Destino local: ${formatBodyPath(repoRoot, file)}`);
+  for (const line of previewBodyDiff(local, remote)) logger.info(line);
+
+  if (!options.confirm) {
+    logger.info("   Dry-run: nada foi escrito. Reexecute com --confirm para importar do GitHub.");
+    return 0;
+  }
+
+  mkdirSync(path.dirname(file), { recursive: true });
+  writeFileSync(file, remote, "utf8");
+  logger.info(`✅ pr-body:pull — body do PR #${options.prNumber} importado para o arquivo local.`);
+  return 0;
+}
+
 interface ParsedArgs {
   readonly prNumber: number;
   readonly file?: string;
   readonly specId?: string;
   readonly repo?: string;
+  readonly confirm?: boolean;
 }
 
 function parseCliArgs(argv: ReadonlyArray<string>): ParsedArgs {
@@ -174,6 +230,7 @@ function parseCliArgs(argv: ReadonlyArray<string>): ParsedArgs {
   let file: string | undefined;
   let specId: string | undefined;
   let repo: string | undefined;
+  let confirm = false;
 
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
@@ -181,14 +238,17 @@ function parseCliArgs(argv: ReadonlyArray<string>): ParsedArgs {
     else if (arg === "--file") file = argv[++i];
     else if (arg === "--spec") specId = argv[++i];
     else if (arg === "--repo") repo = argv[++i];
+    else if (arg === "--confirm") confirm = true;
     else throw new Error(`Argumento desconhecido: ${arg}`);
   }
 
   if (!prNumber || !Number.isInteger(prNumber)) {
-    throw new Error("Uso: npm run pr-body:check -- --pr <n> (--spec <id>|--file <arquivo.md>)");
+    throw new Error(
+      "Uso: npm run pr-body:<check|publish|pull> -- --pr <n> (--spec <id>|--file <arquivo.md>) [--confirm]"
+    );
   }
 
-  return { prNumber, file, specId, repo };
+  return { prNumber, file, specId, repo, confirm };
 }
 
 export interface MainOptions {
@@ -223,4 +283,8 @@ export function mainCheck(argv: ReadonlyArray<string> = [], options: MainOptions
 
 export function mainPublish(argv: ReadonlyArray<string> = [], options: MainOptions = {}): number {
   return runWithCliErrors(argv, options, runPrBodyPublish);
+}
+
+export function mainPull(argv: ReadonlyArray<string> = [], options: MainOptions = {}): number {
+  return runWithCliErrors(argv, options, runPrBodyPull);
 }

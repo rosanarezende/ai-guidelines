@@ -18,7 +18,11 @@ import {
   runGenerate as runLivingDocsGenerate,
 } from "./livingDocs.js";
 import { main as runPrBodyCreate } from "./prBodyCreate.js";
-import { mainCheck as runPrBodyCheck, mainPublish as runPrBodyPublish } from "./prBodyVersioned.js";
+import {
+  mainCheck as runPrBodyCheck,
+  mainPublish as runPrBodyPublish,
+  mainPull as runPrBodyPull,
+} from "./prBodyVersioned.js";
 import { main as runPrBodyUpdate } from "./prBodyUpdate.js";
 import { main as runPrReadyCheck } from "./prReadyCheck.js";
 import { main as runReconcileCheck } from "./reconcileCheck.js";
@@ -47,7 +51,7 @@ function usage(): string {
     "constraints-check, knowledge-compile, script-contracts, runtime-bootstrap,",
     "gate-decidability-check, ruleset-check, review-check, insights-check,",
     "intent-check, disclosure-render, review-publish, review-seal,",
-    "pr-body-create, pr-body-update, pr-body-check, pr-body-publish, pr-ready-check, site-flow-copy, site-scenarios,",
+    "pr-body-create, pr-body-update, pr-body-check, pr-body-publish, pr-body-pull, pr-ready-check, site-flow-copy, site-scenarios,",
     "site-prompts, consumer-journey",
   ].join("\n");
 }
@@ -158,6 +162,8 @@ async function dispatch(script: string | undefined, args: readonly string[]): Pr
       return runPrBodyCheck(args, { repoRoot: root });
     case "pr-body-publish":
       return runPrBodyPublish(args, { repoRoot: root });
+    case "pr-body-pull":
+      return runPrBodyPull(args, { repoRoot: root });
     case "pr-ready-check":
       return runPrReadyCheck(args, { repoRoot: root });
     default:

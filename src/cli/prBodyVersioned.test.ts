@@ -1,4 +1,4 @@
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -7,10 +7,12 @@ import {
   findSpecDirectory,
   mainCheck,
   mainPublish,
+  mainPull,
   normalizePrBody,
   resolveVersionedPrBodyPath,
   runPrBodyCheck,
   runPrBodyPublish,
+  runPrBodyPull,
 } from "./prBodyVersioned.js";
 
 class FakePrBodyGateway implements PrBodyGateway {
@@ -135,7 +137,39 @@ describe("CLI — pr-body versionado [BR-PR-BODY-VERSIONED]", () => {
       expect(silentLogger.info).toHaveBeenCalledWith(expect.stringContaining("PR #45 publicado"));
     }));
 
-  it("expõe comandos CLI para check e publish", () =>
+  it("importa o body remoto somente com confirmação explícita", () =>
+    withRepo((repoRoot) => {
+      const file = writeVersionedBody(repoRoot, "## Resumo\nrepo\n");
+      const gateway = new FakePrBodyGateway("## Resumo\ngithub\n");
+
+      const dryRun = runPrBodyPull({
+        prNumber: 45,
+        specId: "0024",
+        repoRoot,
+        gateway,
+        logger: silentLogger,
+      });
+
+      expect(dryRun).toBe(0);
+      expect(readFileSync(file, "utf8")).toBe("## Resumo\nrepo\n");
+      expect(silentLogger.info).toHaveBeenCalledWith(expect.stringContaining("Dry-run"));
+
+      jest.clearAllMocks();
+      const applied = runPrBodyPull({
+        prNumber: 45,
+        specId: "0024",
+        repoRoot,
+        gateway,
+        logger: silentLogger,
+        confirm: true,
+      });
+
+      expect(applied).toBe(0);
+      expect(readFileSync(file, "utf8")).toBe("## Resumo\ngithub\n");
+      expect(silentLogger.info).toHaveBeenCalledWith(expect.stringContaining("importado"));
+    }));
+
+  it("expõe comandos CLI para check, publish e pull", () =>
     withRepo((repoRoot) => {
       const file = writeVersionedBody(repoRoot, "## Resumo\nrepo\n");
       const gateway = new FakePrBodyGateway("## Resumo\nrepo\n");
@@ -145,6 +179,13 @@ describe("CLI — pr-body versionado [BR-PR-BODY-VERSIONED]", () => {
       ).toBe(0);
       expect(
         mainPublish(["--pr", "45", "--file", file], { repoRoot, gateway, logger: silentLogger })
+      ).toBe(0);
+      expect(
+        mainPull(["--pr", "45", "--file", file, "--confirm"], {
+          repoRoot,
+          gateway,
+          logger: silentLogger,
+        })
       ).toBe(0);
     }));
 });
