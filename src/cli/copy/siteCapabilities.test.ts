@@ -41,8 +41,8 @@ describe("auditoria de capacidades de decisão (A2)", () => {
   it("inclui human-gate e advance/transição como decisões humanas reais", () => {
     const ids = new Set(siteDecisionSurface().map((decision) => decision.id));
     expect(ids.has("human-gate")).toBe(true);
-    expect(ids.has("advance-subcheckpoint")).toBe(true);
-    expect(ids.has("open-next-node")).toBe(true);
+    expect(ids.has("advance-step")).toBe(true);
+    expect(ids.has("open-next-topology-node")).toBe(true);
   });
 
   it("o site enquadra Ready/Human Gate/merge como autoridade humana, não automação", () => {

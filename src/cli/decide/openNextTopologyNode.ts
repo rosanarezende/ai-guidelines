@@ -1,5 +1,5 @@
 /**
- * Decisão `open-next-node` — transição governada pós-Human Gate para o próximo
+ * Decisão `open-next-topology-node` — transição governada pós-Human Gate para o próximo
  * PR stacked planejado. Diferente do preflight inicial de CO-10.3, esta
  * definição materializa a operação completa sob confirmação humana:
  *
@@ -33,9 +33,9 @@ import {
 } from "./model.js";
 import { DecisionSnapshot } from "./snapshot.js";
 import {
-  deriveOpenNextNodeAvailability,
-  OPEN_NEXT_NODE_ID,
-  openNextNodeFactsFromDecisionSnapshot,
+  deriveOpenNextTopologyNodeAvailability,
+  OPEN_NEXT_TOPOLOGY_NODE_ID,
+  openNextTopologyNodeFactsFromDecisionSnapshot,
 } from "../flow/GovernedFlow.js";
 import {
   findDecisionType,
@@ -50,7 +50,7 @@ import type { HandoffNodeFact } from "../handoffFacts.js";
 import type { PrTopologyNode } from "../../domain/workflow/WorkflowState.js";
 import { buildNextNodePrBody } from "../prBodyCreate.js";
 
-export interface OpenNextNodePayload {
+export interface OpenNextTopologyNodePayload {
   readonly specId: string;
   readonly specPath: string;
   readonly stateFile: string;
@@ -68,7 +68,7 @@ export interface OpenNextNodePayload {
   readonly prBody: string;
 }
 
-interface OpenNextNodeAppliedFiles {
+interface OpenNextTopologyNodeAppliedFiles {
   readonly stateYaml: string;
   readonly activeSpecsYaml: string;
   readonly tasksMd: string;
@@ -114,7 +114,7 @@ function nextCheckpointFromSnapshot(snapshot: DecisionSnapshot, nodeId: string):
   return node?.checkpoints[0] ?? null;
 }
 
-function buildPayload(snapshot: DecisionSnapshot): OpenNextNodePayload | null {
+function buildPayload(snapshot: DecisionSnapshot): OpenNextTopologyNodePayload | null {
   const active = snapshot.facts.activeNode;
   const next = snapshot.facts.nextPlannedNode;
   const pr = snapshot.facts.pullRequest;
@@ -182,7 +182,7 @@ function findYamlNodeIndex(seq: any, nodeId: string): number {
 
 export function transitionStateYaml(
   stateYaml: string,
-  payload: OpenNextNodePayload,
+  payload: OpenNextTopologyNodePayload,
   prNumber: number
 ): string {
   const doc = parseDocument(stateYaml);
@@ -229,7 +229,7 @@ function formatTimestampUtcMinus3(instant: Date): string {
 
 export function transitionActiveSpecsYaml(
   activeSpecsYaml: string,
-  payload: OpenNextNodePayload,
+  payload: OpenNextTopologyNodePayload,
   actorHandle: string | null,
   now: Date = new Date()
 ): string {
@@ -256,7 +256,7 @@ function checkpointHeading(nodeId: string): string {
 
 export function transitionTasksMarkdown(
   tasksMd: string,
-  payload: OpenNextNodePayload,
+  payload: OpenNextTopologyNodePayload,
   prNumber: number
 ): string {
   const lines = tasksMd.split(/\r?\n/);
@@ -294,9 +294,9 @@ export function transitionTasksMarkdown(
 
 function applyFileTransitions(
   ctx: DecisionApplyContext,
-  payload: OpenNextNodePayload,
+  payload: OpenNextTopologyNodePayload,
   prNumber: number
-): OpenNextNodeAppliedFiles {
+): OpenNextTopologyNodeAppliedFiles {
   const stateAbs = path.join(ctx.repoRoot, payload.stateFile);
   const activeAbs = path.join(ctx.repoRoot, payload.activeSpecsFile);
   const tasksAbs = path.join(ctx.repoRoot, payload.tasksFile);
@@ -322,7 +322,10 @@ function applyFileTransitions(
   return { stateYaml, activeSpecsYaml, tasksMd };
 }
 
-function applyBranchProjection(ctx: DecisionApplyContext, payload: OpenNextNodePayload): void {
+function applyBranchProjection(
+  ctx: DecisionApplyContext,
+  payload: OpenNextTopologyNodePayload
+): void {
   const activeAbs = path.join(ctx.repoRoot, payload.activeSpecsFile);
   if (!fs.existsSync(activeAbs)) {
     throw new Error(`Arquivo obrigatório ausente: ${payload.activeSpecsFile}.`);
@@ -335,16 +338,18 @@ function applyBranchProjection(ctx: DecisionApplyContext, payload: OpenNextNodeP
   fs.writeFileSync(activeAbs, activeSpecsYaml, "utf8");
 }
 
-export class OpenNextNodeDefinition implements HumanDecisionDefinition {
-  readonly id = OPEN_NEXT_NODE_ID;
-  readonly title = "Abrir o próximo nó planejado";
+export class OpenNextTopologyNodeDefinition implements HumanDecisionDefinition {
+  readonly id = OPEN_NEXT_TOPOLOGY_NODE_ID;
+  readonly title = "Abrir o próximo nó da topologia";
 
   private policyOf(snapshot: DecisionSnapshot): HumanDecisionTypePolicy | undefined {
     return snapshot.policy ? findDecisionType(snapshot.policy, this.id) : undefined;
   }
 
   detect(snapshot: DecisionSnapshot): DecisionAvailability {
-    return deriveOpenNextNodeAvailability(openNextNodeFactsFromDecisionSnapshot(snapshot));
+    return deriveOpenNextTopologyNodeAvailability(
+      openNextTopologyNodeFactsFromDecisionSnapshot(snapshot)
+    );
   }
 
   choices(snapshot: DecisionSnapshot): readonly HumanDecisionChoice[] {
@@ -361,19 +366,19 @@ export class OpenNextNodeDefinition implements HumanDecisionDefinition {
 
   buildBrief(snapshot: DecisionSnapshot, opts: { technical: boolean }): HumanDecisionBrief {
     const policy = this.policyOf(snapshot)!;
-    const facts = openNextNodeFactsFromDecisionSnapshot(snapshot);
-    const availability = deriveOpenNextNodeAvailability(facts);
+    const facts = openNextTopologyNodeFactsFromDecisionSnapshot(snapshot);
+    const availability = deriveOpenNextTopologyNodeAvailability(facts);
     const active = snapshot.facts.activeNode;
     const next = snapshot.facts.nextPlannedNode;
     const pr = snapshot.facts.pullRequest;
     const currentNode = nodeLabel(snapshot);
     const payload = buildPayload(snapshot);
-    const pendingSemantic = facts.pendingSubCheckpoints;
+    const pendingSemantic = facts.pendingSteps;
 
     const summary =
       availability.status === "available" && active && next
-        ? `Abrir, de forma governada, o próximo nó: ${active.id} → ${next.id}.`
-        : `A abertura do próximo nó ainda não pode ser executada.`;
+        ? `Abrir, de forma governada, o próximo nó da topologia: ${active.id} → ${next.id}.`
+        : `A abertura do próximo nó da topologia ainda não pode ser executada.`;
     const whyNow =
       "Após Human Gate aprovado, a transição de nó é lifecycle governado. O sistema deve criar branch/PR e reconciliar as fontes estruturais sem depender de sequência manual.";
 
@@ -389,12 +394,12 @@ export class OpenNextNodeDefinition implements HumanDecisionDefinition {
       next_node: next
         ? pendingSemantic.length > 0
           ? [
-              `${next.id} (seq ${next.sequence ?? "?"}) é o próximo nó topológico, mas ainda não deve ser aberto.`,
-              `Checkpoint(s) semântico(s) pendente(s) neste nó: ${pendingSemantic.join(", ")}.`,
+              `${next.id} (seq ${next.sequence ?? "?"}) é o próximo nó da topologia, mas ainda não deve ser aberto.`,
+              `Checkpoint(s) pendente(s) nesta Frente: ${pendingSemantic.join(", ")}.`,
               `O próximo PR deve continuar em ${currentNode} até a continuação terminar.`,
             ]
           : [
-              `${next.id} (seq ${next.sequence ?? "?"}) é o próximo nó planejado.`,
+              `${next.id} (seq ${next.sequence ?? "?"}) é o próximo nó planejado da topologia.`,
               `Branch pretendida: ${payload?.nextBranch ?? nextNodeBranch(snapshot.specId, next.id)}.`,
               `Base pretendida: ${pr?.headRefName ?? snapshot.facts.git.branch ?? "(branch atual)"}.`,
             ]
@@ -413,7 +418,7 @@ export class OpenNextNodeDefinition implements HumanDecisionDefinition {
       planned_effects:
         pendingSemantic.length > 0
           ? [
-              "Nenhum efeito de abertura de nó deve ser executado enquanto houver checkpoint semântico pendente.",
+              "Nenhum efeito de abertura de nó da topologia deve ser executado enquanto houver checkpoint pendente nesta Frente.",
               "A próxima ação governada pertence à continuação do nó atual, não ao próximo nó topológico.",
             ]
           : payload
@@ -431,8 +436,8 @@ export class OpenNextNodeDefinition implements HumanDecisionDefinition {
       consequences:
         pendingSemantic.length > 0
           ? [
-              "Nada é aplicado por open-next-node neste estado.",
-              "O próximo PR deve materializar o próximo checkpoint semântico da continuação.",
+              "Nada é aplicado por open-next-topology-node neste estado.",
+              "O próximo PR deve materializar o próximo checkpoint da Frente atual.",
             ]
           : policy.consequences,
       not_authorized: policy.notAuthorized,
@@ -567,19 +572,19 @@ export class OpenNextNodeDefinition implements HumanDecisionDefinition {
         "merge da stack",
         "Human Gate",
         "Ready do novo PR",
-        "implementação funcional do próximo nó",
+        "implementação funcional do próximo nó da topologia",
       ],
       commitMessage: `docs(spec-${snapshot.specId}): abre nó ${payload.nextNodeId}`,
       preconditions: [
         { label: "selo do snapshot", expected: snapshot.seal },
         { label: "git HEAD aprovado", expected: payload.startPoint },
         { label: "Human Gate", expected: "approved" },
-        { label: "próximo nó", expected: `${payload.nextNodeId} sem github_pr` },
+        { label: "próximo nó da topologia", expected: `${payload.nextNodeId} sem github_pr` },
       ],
       nextHuman: [
         `Novo PR Draft deve apontar para ${payload.nextBranch}.`,
-        "`npm run flow -- handoff 0024` deve projetar o novo nó como ativo após checkout da nova branch.",
-        "A transição NÃO implementa o novo nó, NÃO faz Ready, NÃO executa Human Gate e NÃO faz merge.",
+        "`npm run flow -- handoff 0024` deve projetar o novo nó da topologia como ativo após checkout da nova branch.",
+        "A transição NÃO implementa o novo nó da topologia, NÃO faz Ready, NÃO executa Human Gate e NÃO faz merge.",
       ],
       note: [],
       payload,
@@ -595,13 +600,15 @@ export class OpenNextNodeDefinition implements HumanDecisionDefinition {
         messages: ["Nada a aplicar (read-only)."],
       };
     }
-    const payload = plan.payload as OpenNextNodePayload;
+    const payload = plan.payload as OpenNextTopologyNodePayload;
     if (!ctx.git.createBranch || !ctx.git.pushBranch) {
       return {
         ok: false,
         committed: null,
         pushed: false,
-        messages: ["git ops não suportam criação/publicação de branch para open-next-node."],
+        messages: [
+          "git ops não suportam criação/publicação de branch para open-next-topology-node.",
+        ],
       };
     }
     if (!ctx.stack) {

@@ -54,7 +54,7 @@ describe("CLI — pr-body:create [BR-PR-BODY-CREATE]", () => {
     ]);
   });
 
-  it("gera execution body contextual por slots do template para open-next-node", () => {
+  it("gera execution body contextual por slots do template para open-next-topology-node", () => {
     const body = buildNextNodePrBody({
       specId: "0024",
       currentNodeId: "co-flow-convergence",

@@ -1,6 +1,6 @@
 import { execFileSync } from "node:child_process";
 
-export type SubCheckpointDeliveryEvidence =
+export type StepDeliveryEvidence =
   | {
       readonly status: "present";
       readonly activeId: string;
@@ -50,7 +50,7 @@ function firstParent(repoRoot: string, commit: string): string | null {
   }
 }
 
-export function findSubCheckpointActivationCommit(
+export function findStepActivationCommit(
   repoRoot: string,
   tasksPath: string,
   activeId: string,
@@ -76,13 +76,13 @@ export function findSubCheckpointActivationCommit(
   return null;
 }
 
-export function collectSubCheckpointDeliveryEvidence(
+export function collectStepDeliveryEvidence(
   repoRoot: string,
   tasksPath: string,
   activeId: string,
   head = "HEAD"
-): SubCheckpointDeliveryEvidence {
-  const activationCommit = findSubCheckpointActivationCommit(repoRoot, tasksPath, activeId, head);
+): StepDeliveryEvidence {
+  const activationCommit = findStepActivationCommit(repoRoot, tasksPath, activeId, head);
   if (!activationCommit) {
     return {
       status: "unknown",

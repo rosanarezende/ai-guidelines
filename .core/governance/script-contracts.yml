@@ -336,7 +336,7 @@ profiles:
         category: governance
         mutates: true
         consumers: [human]
-        description: Cria PR body inicial a partir do perfil/template governado; open-next-node delega para esta fabrica.
+        description: Cria PR body inicial a partir do perfil/template governado; open-next-topology-node delega para esta fabrica.
       - name: pr-body:check
         command: npm run build && node dist/cli/bin.js pr-body-check
         category: governance

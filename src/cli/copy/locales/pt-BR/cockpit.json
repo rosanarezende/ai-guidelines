@@ -20,7 +20,7 @@
   "head": "HEAD",
   "checkpoint": "checkpoint",
   "mode": "modo",
-  "activeSubcheckpoint": "sub-checkpoint ativo",
+  "activeStep": "etapa ativa",
   "pendingTransition": "transição pendente",
   "pendingActivation": "ativação pendente",
   "reviewsFindings": "reviews/findings",
@@ -46,7 +46,7 @@
     "merge": "Fazer merge",
     "edit-review": "Editar artefato de review publicado",
     "close-dispositions": "Fechar dispositions fora da decisão governada",
-    "start-next-subcheckpoint": "Iniciar o próximo ponto fora da decisão governada"
+    "start-next-step": "Iniciar a próxima etapa fora da decisão governada"
   },
   "extraForbidden": [
     "Executar Human Gate sem decisão humana explícita",

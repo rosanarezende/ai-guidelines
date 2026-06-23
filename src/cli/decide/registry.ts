@@ -9,11 +9,11 @@
  */
 import { HumanDecisionDefinition } from "./model.js";
 import { CloseDispositionsDefinition } from "./closeDispositions.js";
-import { FinishSubcheckpointDefinition } from "./finishSubcheckpoint.js";
+import { FinishStepDefinition } from "./finishStep.js";
 import { MarkReadinessDefinition } from "./markReadiness.js";
-import { AdvanceSubcheckpointDefinition } from "./advanceSubcheckpoint.js";
+import { AdvanceStepDefinition } from "./advanceStep.js";
 import { HumanGateDefinition } from "./humanGate.js";
-import { OpenNextNodeDefinition } from "./openNextNode.js";
+import { OpenNextTopologyNodeDefinition } from "./openNextTopologyNode.js";
 
 export class DecisionRegistry {
   private readonly byId = new Map<string, HumanDecisionDefinition>();
@@ -51,10 +51,10 @@ export class DecisionRegistry {
 export function buildDecisionRegistry(): DecisionRegistry {
   const registry = new DecisionRegistry();
   registry.register(new CloseDispositionsDefinition());
-  registry.register(new FinishSubcheckpointDefinition());
+  registry.register(new FinishStepDefinition());
   registry.register(new MarkReadinessDefinition());
-  registry.register(new AdvanceSubcheckpointDefinition());
+  registry.register(new AdvanceStepDefinition());
   registry.register(new HumanGateDefinition());
-  registry.register(new OpenNextNodeDefinition());
+  registry.register(new OpenNextTopologyNodeDefinition());
   return registry;
 }

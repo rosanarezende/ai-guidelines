@@ -24,7 +24,7 @@ import { siteCommandSurface } from "./siteFlowCopy.js";
  *  - real   → stdout capturado de execução real (dry-run/--help). Determinístico.
  *  - guided → linhas curadas, genéricas e consumer-safe; o NOME do comando é
  *             validado contra o registry (fidelidade), os exemplos não vazam
- *             identificadores internos (PR/spec/sub-checkpoint).
+ *             identificadores internos (PR/spec/etapa).
  *
  * O site exibe `kind` como badge e usa `surface` para separar perfis.
  */

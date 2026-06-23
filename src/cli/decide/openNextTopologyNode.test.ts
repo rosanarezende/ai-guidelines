@@ -4,19 +4,19 @@ import * as path from "node:path";
 import type { PullRequestData, StackOps } from "../../app/ports/StackOps.js";
 import type { DecisionApplyContext, DecisionGitOps, Logger } from "./model.js";
 import {
-  OpenNextNodeDefinition,
-  type OpenNextNodePayload,
+  OpenNextTopologyNodeDefinition,
+  type OpenNextTopologyNodePayload,
   executionPrTitle,
   nextNodeBranch,
   transitionActiveSpecsYaml,
   transitionStateYaml,
   transitionTasksMarkdown,
-} from "./openNextNode.js";
+} from "./openNextTopologyNode.js";
 import { parseWorkflowState } from "../../infrastructure/yaml/workflowStateSerializer.js";
 import { parseActiveSpecs } from "../../infrastructure/yaml/activeSpecsSerializer.js";
 import { makeDecisionSnapshot, makeHandoffFacts } from "../../test-utils/decisionFixtures.js";
 
-const def = new OpenNextNodeDefinition();
+const def = new OpenNextTopologyNodeDefinition();
 
 const SETTLED_GATE = {
   reviewDecisions: [],
@@ -190,7 +190,7 @@ function postGateSnapshot(
     specId: "0024",
     openFindings: [],
     lanes: [],
-    subCheckpoints: [
+    steps: [
       { id: "CO-10.1", title: "inventário", state: "done", line: 1 },
       { id: "CO-10.2", title: "convergência", state: "done", line: 2 },
       { id: "CO-10.3", title: "correções", state: "done", line: 3 },
@@ -202,8 +202,8 @@ function postGateSnapshot(
   });
 }
 
-function payloadFrom(snapshot = postGateSnapshot()): OpenNextNodePayload {
-  return def.plan(snapshot, "open-node").payload as OpenNextNodePayload;
+function payloadFrom(snapshot = postGateSnapshot()): OpenNextTopologyNodePayload {
+  return def.plan(snapshot, "open-node").payload as OpenNextTopologyNodePayload;
 }
 
 function writeRepoFixture(repoRoot: string): void {
@@ -334,7 +334,7 @@ function applyContext(
   };
 }
 
-describe("open-next-node · elegibilidade [decide]", () => {
+describe("open-next-topology-node · elegibilidade [decide]", () => {
   it("fica disponível após Human Gate aprovado, PR Ready, CI verde e próximo nó planejado sem PR", () => {
     const av = def.detect(postGateSnapshot());
     expect(av.status).toBe("available");
@@ -385,7 +385,7 @@ describe("open-next-node · elegibilidade [decide]", () => {
   });
 });
 
-describe("open-next-node · contrato e transformações puras [decide]", () => {
+describe("open-next-topology-node · contrato e transformações puras [decide]", () => {
   it("briefing disponível nomeia nó atual, próximo nó e efeitos transacionais", () => {
     const brief = def.buildBrief(postGateSnapshot(), { technical: false });
     const text = JSON.stringify(brief.sections);
@@ -409,7 +409,7 @@ describe("open-next-node · contrato e transformações puras [decide]", () => {
       ".governance/specs/0024-context-architecture/tasks.md",
     ]);
     expect(plan.preserved).toContain("merge da stack");
-    expect(plan.preserved).toContain("implementação funcional do próximo nó");
+    expect(plan.preserved).toContain("implementação funcional do próximo nó da topologia");
   });
 
   it("não aceita mais prepare-plan como alias de transição", () => {
@@ -470,13 +470,13 @@ describe("open-next-node · contrato e transformações puras [decide]", () => {
   });
 });
 
-describe("open-next-node · aplicação por portas [decide]", () => {
+describe("open-next-topology-node · aplicação por portas [decide]", () => {
   it("cria branch, publica, abre PR factual, escreve artefatos, comita e faz push", async () => {
-    const repoRoot = fs.mkdtempSync(path.join(os.tmpdir(), "open-next-node-"));
+    const repoRoot = fs.mkdtempSync(path.join(os.tmpdir(), "open-next-topology-node-"));
     writeRepoFixture(repoRoot);
     const snapshot = postGateSnapshot({ repoRoot });
     const plan = def.plan(snapshot, "open-node");
-    const payload = plan.payload as OpenNextNodePayload;
+    const payload = plan.payload as OpenNextTopologyNodePayload;
     const expectedDirty = [payload.stateFile, payload.activeSpecsFile, payload.tasksFile];
     const git = new FakeGitOps({
       afterDirty: expectedDirty,
@@ -542,11 +542,11 @@ describe("open-next-node · aplicação por portas [decide]", () => {
   });
 
   it("bloqueia commit quando a transição produzir mixed diff fora dos artefatos esperados", async () => {
-    const repoRoot = fs.mkdtempSync(path.join(os.tmpdir(), "open-next-node-mixed-"));
+    const repoRoot = fs.mkdtempSync(path.join(os.tmpdir(), "open-next-topology-node-mixed-"));
     writeRepoFixture(repoRoot);
     const snapshot = postGateSnapshot({ repoRoot });
     const plan = def.plan(snapshot, "open-node");
-    const payload = plan.payload as OpenNextNodePayload;
+    const payload = plan.payload as OpenNextTopologyNodePayload;
     const git = new FakeGitOps({
       afterDirty: [payload.stateFile, payload.activeSpecsFile, payload.tasksFile, "src/x.ts"],
       dirtySequence: [
@@ -571,11 +571,11 @@ describe("open-next-node · aplicação por portas [decide]", () => {
   });
 
   it("bloqueia antes de publicar branch quando a preparação de active.yml gerar diff misto", async () => {
-    const repoRoot = fs.mkdtempSync(path.join(os.tmpdir(), "open-next-node-prep-mixed-"));
+    const repoRoot = fs.mkdtempSync(path.join(os.tmpdir(), "open-next-topology-node-prep-mixed-"));
     writeRepoFixture(repoRoot);
     const snapshot = postGateSnapshot({ repoRoot });
     const plan = def.plan(snapshot, "open-node");
-    const payload = plan.payload as OpenNextNodePayload;
+    const payload = plan.payload as OpenNextTopologyNodePayload;
     const git = new FakeGitOps({
       afterDirty: [payload.activeSpecsFile, "src/x.ts"],
       dirtySequence: [[], [payload.activeSpecsFile, "src/x.ts"]],

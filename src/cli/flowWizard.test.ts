@@ -310,17 +310,17 @@ function model(): CockpitModel {
     },
   });
   const recommendedAction = {
-    id: "finish-subcheckpoint" as const,
+    id: "finish-step" as const,
     title: "Concluir ponto atual e iniciar o próximo",
     availability: { status: "available" as const, reasons: [] },
-    command: "npm run flow -- decide --type finish-subcheckpoint --brief-only",
+    command: "npm run flow -- decide --type finish-step --brief-only",
     mutatingCommand:
-      "npm run flow -- decide --type finish-subcheckpoint --decision finish --authorization explicit-human-decision --confirm",
+      "npm run flow -- decide --type finish-step --decision finish --authorization explicit-human-decision --confirm",
     effect: ["altera somente tasks.md"],
   };
   const alternativeAction = {
     id: "mark-readiness" as const,
-    title: "Declarar readiness do sub-checkpoint ativo",
+    title: "Declarar readiness da etapa ativa",
     availability: { status: "available" as const, reasons: [] },
     command: "npm run flow -- decide --type mark-readiness --brief-only",
     mutatingCommand:
@@ -335,14 +335,14 @@ function model(): CockpitModel {
       brief: {
         mode: "implement_checkpoint",
         object: {
-          subCheckpoint: { id: "CO-10.2", title: "confronto modelo x codigo", line: 110 },
+          step: { id: "CO-10.2", title: "confronto modelo x codigo", line: 110 },
         },
         nextAction: {
           description: "Concluir CO-10.2 e iniciar CO-10.3",
           basis: [],
           commands: [],
           stillForbidden: [],
-          decisionType: "finish-subcheckpoint",
+          decisionType: "finish-step",
         },
       } as never,
     },
@@ -390,7 +390,7 @@ function model(): CockpitModel {
         ],
         missing: ["Falta registrar a decisão governada que encerra CO-10.2 e ativa CO-10.3."],
         nextAction: "Encerrar CO-10.2 e iniciar CO-10.3.",
-        command: "npm run flow -- decide --type finish-subcheckpoint --brief-only",
+        command: "npm run flow -- decide --type finish-step --brief-only",
         forbidden: ["Fazer merge"],
       },
     },

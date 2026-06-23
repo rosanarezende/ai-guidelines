@@ -122,7 +122,7 @@ decided_by: Rosana
 `;
 }
 
-function tasksWithIncoherentSubcheckpoint(): string {
+function tasksWithIncoherentStep(): string {
   return [
     "## Execução",
     "",
@@ -272,7 +272,7 @@ describe("GovernanceDoctor — diagnóstico humano de drift", () => {
     const files = new Map([
       [activeIndexPath, activeIndex()],
       [statePath, stateWithTopology()],
-      [tasksPath, tasksWithIncoherentSubcheckpoint()],
+      [tasksPath, tasksWithIncoherentStep()],
     ]);
 
     const report = diagnoseGovernanceDrift(repoRoot, depsFor(files));

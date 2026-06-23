@@ -4,7 +4,7 @@ import * as path from "node:path";
 import { DecisionGitOps } from "./model.js";
 import { DecisionSnapshot } from "./snapshot.js";
 import { MarkReadinessDefinition, markReadinessMarker } from "./markReadiness.js";
-import { HandoffSubCheckpoint, resolveSubCheckpointWork } from "../handoffFacts.js";
+import { HandoffStep, resolveStepWork } from "../handoffFacts.js";
 import { makeDecisionSnapshot, makeHandoffFacts } from "../../test-utils/decisionFixtures.js";
 
 const def = new MarkReadinessDefinition();
@@ -21,7 +21,7 @@ const SETTLED = {
   gateDecision: null,
 } as const;
 
-function subs(list: Array<Partial<HandoffSubCheckpoint>>): HandoffSubCheckpoint[] {
+function subs(list: Array<Partial<HandoffStep>>): HandoffStep[] {
   return list.map((o, i) => ({
     id: o.id ?? `CO-10.${i + 1}`,
     title: o.title ?? "t",
@@ -57,7 +57,7 @@ function snap(over: Partial<DecisionSnapshot> = {}): DecisionSnapshot {
       checks: { pass: 11, fail: 0, pending: 0 },
     },
     lifecycle: { ...SETTLED },
-    subCheckpoints: subs([
+    steps: subs([
       { id: "CO-10.1", title: "inventário real + modelo canônico", state: "in-progress" },
       { id: "CO-10.2", title: "confronto modelo × código", state: "pending" },
     ]),
@@ -69,7 +69,7 @@ function snap(over: Partial<DecisionSnapshot> = {}): DecisionSnapshot {
     openFindings: [],
     lanes: [],
     workingTreeState: "clean",
-    subCheckpoints: facts.subCheckpoints,
+    steps: facts.steps,
     gateExists: false,
     gateFile: null,
     ...over,
@@ -145,20 +145,20 @@ describe("mark-readiness · elegibilidade [decide]", () => {
     expect(av.reasons.join(" ")).toMatch(/gate/);
   });
 
-  it("bloqueia sem sub-checkpoint ativo", () => {
+  it("bloqueia sem etapa ativa", () => {
     const av = def.detect(
       snap({
-        subCheckpoints: subs([{ id: "CO-10.1", state: "pending" }]),
+        steps: subs([{ id: "CO-10.1", state: "pending" }]),
       })
     );
     expect(av.status).toBe("blocked");
-    expect(av.reasons.join(" ")).toMatch(/Nenhum sub-checkpoint/);
+    expect(av.reasons.join(" ")).toMatch(/Nenhuma etapa/);
   });
 
-  it("bloqueia com múltiplos sub-checkpoints ativos", () => {
+  it("bloqueia com múltiplas etapas ativas", () => {
     const av = def.detect(
       snap({
-        subCheckpoints: subs([
+        steps: subs([
           { id: "CO-10.1", state: "in-progress" },
           { id: "CO-10.2", state: "in-progress" },
         ]),
@@ -171,7 +171,7 @@ describe("mark-readiness · elegibilidade [decide]", () => {
   it("bloqueia readiness em [ ] ou [x]", () => {
     const av = def.detect(
       snap({
-        subCheckpoints: subs([
+        steps: subs([
           { id: "CO-10.1", state: "in-progress" },
           { id: "CO-10.2", state: "pending", readiness: "ready-for-transition" },
         ]),
@@ -204,7 +204,7 @@ describe("mark-readiness · efeito governado [decide]", () => {
         "# Tasks",
         "",
         "- [/] **Checkpoint co-flow-convergence** (nó `co-flow-convergence`) — em execução.",
-        "  - **Sub-checkpoints (CO-10):**",
+        "  - **Etapas (CO-10):**",
         "    - [/] **CO-10.1 — inventário real + modelo canônico**: em execução.",
         "    - [ ] **CO-10.2 — confronto modelo × código**: pendente.",
       ].join("\n")
@@ -219,7 +219,7 @@ describe("mark-readiness · efeito governado [decide]", () => {
     return snap({
       repoRoot,
       specPath: ".governance/specs/0024-context-architecture",
-      subCheckpoints: subs([
+      steps: subs([
         {
           id: "CO-10.1",
           title: "inventário real + modelo canônico",
@@ -277,9 +277,9 @@ describe("mark-readiness · efeito governado [decide]", () => {
     const md = fs.readFileSync(tasksAbs, "utf8");
     const edited = markReadinessMarker(md, "CO-10.1");
     expect(edited.ok).toBe(true);
-    const projected = resolveSubCheckpointWork({
+    const projected = resolveStepWork({
       ...makeHandoffFacts(),
-      subCheckpoints: [
+      steps: [
         {
           id: "CO-10.1",
           title: "inventário real + modelo canônico",

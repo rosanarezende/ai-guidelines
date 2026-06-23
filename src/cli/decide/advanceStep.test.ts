@@ -1,18 +1,15 @@
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import {
-  AdvanceSubcheckpointDefinition,
-  advanceSubCheckpointMarkers,
-} from "./advanceSubcheckpoint.js";
+import { AdvanceStepDefinition, advanceStepMarkers } from "./advanceStep.js";
 import { DecisionGitOps } from "./model.js";
 import { DecisionSnapshot } from "./snapshot.js";
-import { HandoffSubCheckpoint } from "../handoffFacts.js";
-import { resolveSubCheckpointWork } from "../workBrief.js";
+import { HandoffStep } from "../handoffFacts.js";
+import { resolveStepWork } from "../workBrief.js";
 import { renderBrief } from "./render.js";
 import { makeDecisionSnapshot, makeHandoffFacts } from "../../test-utils/decisionFixtures.js";
 
-const def = new AdvanceSubcheckpointDefinition();
+const def = new AdvanceStepDefinition();
 const OWNER = { name: "Rosana", email: "rosanarezende.com@gmail.com", handle: "@rosanarezende" };
 
 const SETTLED = {
@@ -26,7 +23,7 @@ const SETTLED = {
   gateDecision: null,
 } as const;
 
-function subs(list: Array<Partial<HandoffSubCheckpoint>>): HandoffSubCheckpoint[] {
+function subs(list: Array<Partial<HandoffStep>>): HandoffStep[] {
   return list.map((o, i) => ({
     id: o.id ?? `CO-3.${i + 1}`,
     title: o.title ?? "t",
@@ -44,7 +41,7 @@ function snap(over: Partial<DecisionSnapshot> = {}): DecisionSnapshot {
     openFindings: [],
     lanes: [],
     workingTreeState: "clean",
-    subCheckpoints: subs([
+    steps: subs([
       {
         id: "CO-3.1",
         title: "Constraint + EnforcementBinding",
@@ -91,7 +88,7 @@ class FakeGit implements DecisionGitOps {
   }
 }
 
-describe("advance-subcheckpoint · elegibilidade [decide]", () => {
+describe("advance-step · elegibilidade [decide]", () => {
   it("[1] atual [/] com readiness + próximo [ ] (tree limpa) ⇒ available", () => {
     const av = def.detect(snap());
     expect(av.status).toBe("available");
@@ -101,7 +98,7 @@ describe("advance-subcheckpoint · elegibilidade [decide]", () => {
   it("[2] sem próximo não se aplica (terminal do checkpoint)", () => {
     const av = def.detect(
       snap({
-        subCheckpoints: subs([
+        steps: subs([
           {
             id: "CO-3.1",
             state: "in-progress",
@@ -112,12 +109,12 @@ describe("advance-subcheckpoint · elegibilidade [decide]", () => {
       })
     );
     expect(av.status).toBe("not-applicable");
-    expect(av.reasons.join(" ")).toMatch(/Não há próximo sub-checkpoint pendente/);
+    expect(av.reasons.join(" ")).toMatch(/Não há próxima etapa pendente/);
   });
 
   it("[3] dois atuais ([/]) bloqueiam", () => {
     const s = snap({
-      subCheckpoints: subs([
+      steps: subs([
         { id: "CO-3.1", state: "in-progress", line: 101 },
         { id: "CO-3.2", state: "in-progress", line: 102 },
       ]),
@@ -127,7 +124,7 @@ describe("advance-subcheckpoint · elegibilidade [decide]", () => {
 
   it("[4] ordem ambígua (pendente antes do ativo) bloqueia", () => {
     const s = snap({
-      subCheckpoints: subs([
+      steps: subs([
         { id: "CO-3.1", state: "pending", line: 101 },
         { id: "CO-3.2", state: "in-progress", line: 102 },
         { id: "CO-3.3", state: "pending", line: 103 },
@@ -188,7 +185,7 @@ describe("advance-subcheckpoint · elegibilidade [decide]", () => {
     // do menu enquanto `work` o recomendava). Com o ATIVO declarando readiness,
     // a transição CO-3.2 → CO-3.3 é AVAILABLE.
     const s = snap({
-      subCheckpoints: subs([
+      steps: subs([
         { id: "CO-3.1", state: "done", line: 101 },
         { id: "CO-3.2", state: "in-progress", line: 102, readiness: "ready-for-transition" },
         { id: "CO-3.3", state: "pending", line: 103 },
@@ -202,7 +199,7 @@ describe("advance-subcheckpoint · elegibilidade [decide]", () => {
 
   it("[28] atual [/] SEM readiness ⇒ blocked (critérios de saída não declarados)", () => {
     const s = snap({
-      subCheckpoints: subs([
+      steps: subs([
         { id: "CO-3.1", state: "done", line: 101 },
         { id: "CO-3.2", state: "in-progress", line: 102 }, // sem readiness
         { id: "CO-3.3", state: "pending", line: 103 },
@@ -224,7 +221,7 @@ describe("advance-subcheckpoint · elegibilidade [decide]", () => {
   it("[30] findings fechados (do CO-3.1) NÃO liberam o ativo SEM readiness", () => {
     // closedFindings=3 (audit do CO-3.1) presentes, mas o ativo não declarou readiness.
     const s = snap({
-      subCheckpoints: subs([
+      steps: subs([
         { id: "CO-3.1", state: "done", line: 101 },
         { id: "CO-3.2", state: "in-progress", line: 102 }, // sem readiness
         { id: "CO-3.3", state: "pending", line: 103 },
@@ -240,7 +237,7 @@ describe("advance-subcheckpoint · elegibilidade [decide]", () => {
     });
     const s = snap({
       facts,
-      subCheckpoints: subs([
+      steps: subs([
         { id: "CO-3.1", state: "done", line: 101 },
         { id: "CO-3.2", state: "in-progress", line: 102 },
         { id: "CO-3.3", state: "pending", line: 103 },
@@ -252,7 +249,7 @@ describe("advance-subcheckpoint · elegibilidade [decide]", () => {
   });
 });
 
-describe("advance-subcheckpoint · briefing humano [decide]", () => {
+describe("advance-step · briefing humano [decide]", () => {
   it("[11] resumo não começa por ID/SHA; seções humanas", () => {
     const b = def.buildBrief(snap(), { technical: false });
     expect(b.summary).not.toMatch(/^[0-9a-f]{7,}/i);
@@ -269,10 +266,10 @@ describe("advance-subcheckpoint · briefing humano [decide]", () => {
     expect(techOut).toMatch(/tasks\.md linha 101/);
   });
 
-  it("[12b] terminal sem próximo explica que advance-subcheckpoint não se aplica", () => {
+  it("[12b] terminal sem próximo explica que advance-step não se aplica", () => {
     const b = def.buildBrief(
       snap({
-        subCheckpoints: subs([
+        steps: subs([
           { id: "CO-3.4", state: "in-progress", readiness: "ready-for-transition", line: 104 },
         ]),
       }),
@@ -280,12 +277,12 @@ describe("advance-subcheckpoint · briefing humano [decide]", () => {
     );
     expect(b.status).toBe("not-applicable");
     expect(b.summary).toMatch(/não se aplica ao terminal/);
-    expect(b.consequences.join(" ")).toMatch(/Nenhum sub-checkpoint será marcado ou ativado/);
-    expect(b.blockedReasons.join(" ")).toMatch(/Não há próximo sub-checkpoint pendente/);
+    expect(b.consequences.join(" ")).toMatch(/Nenhuma etapa será marcada ou ativada/);
+    expect(b.blockedReasons.join(" ")).toMatch(/Não há próxima etapa pendente/);
   });
 });
 
-describe("advance-subcheckpoint · plano e marcadores [decide]", () => {
+describe("advance-step · plano e marcadores [decide]", () => {
   it("[13] preview altera exatamente dois marcadores", () => {
     const plan = def.plan(snap(), "advance");
     expect(plan.mutating).toBe(true);
@@ -310,7 +307,7 @@ describe("advance-subcheckpoint · plano e marcadores [decide]", () => {
 
   it("marcadores: troca só os dois caracteres, preserva o resto e CRLF", () => {
     const md = ["x", "- [/] **CO-3.1 — A** desc", "- [ ] **CO-3.2 — B** desc", "y"].join("\r\n");
-    const r = advanceSubCheckpointMarkers(md, "CO-3.1", "CO-3.2");
+    const r = advanceStepMarkers(md, "CO-3.1", "CO-3.2");
     expect(r.ok).toBe(true);
     expect(r.text).toBe(
       ["x", "- [x] **CO-3.1 — A** desc", "- [/] **CO-3.2 — B** desc", "y"].join("\r\n")
@@ -322,7 +319,7 @@ describe("advance-subcheckpoint · plano e marcadores [decide]", () => {
       "- [/] **CO-3.4 — dogfood** `readiness: ready-for-transition`: desc",
       "- [ ] **CO-3.5 — colapso**: desc",
     ].join("\n");
-    const r = advanceSubCheckpointMarkers(md, "CO-3.4", "CO-3.5");
+    const r = advanceStepMarkers(md, "CO-3.4", "CO-3.5");
     expect(r.ok).toBe(true);
     expect(r.text).toBe(
       ["- [x] **CO-3.4 — dogfood**: desc", "- [/] **CO-3.5 — colapso**: desc"].join("\n")
@@ -333,7 +330,7 @@ describe("advance-subcheckpoint · plano e marcadores [decide]", () => {
 
   it("[17] marcador ausente ⇒ edição falha (sem escrita)", () => {
     const md = "- [/] **CO-3.1 — A**\n- [/] **CO-3.2 — B**"; // CO-3.2 não está [ ]
-    expect(advanceSubCheckpointMarkers(md, "CO-3.1", "CO-3.2").ok).toBe(false);
+    expect(advanceStepMarkers(md, "CO-3.1", "CO-3.2").ok).toBe(false);
   });
 });
 
@@ -341,7 +338,7 @@ describe("advance-subcheckpoint · plano e marcadores [decide]", () => {
 const TASKS_MD = `# Tasks
 
 - [/] **Checkpoint co-enforcement** (nó \`co-enforcement\`) — em execução.
-  - **Sub-checkpoints (CO-3):**
+  - **Etapas (CO-3):**
     - [/] **CO-3.1 — Constraint + EnforcementBinding** (modelo): EM EXECUÇÃO.
     - [ ] **CO-3.2 — knowledge:compile + manifesto/paridade**: entrypoint humano.
     - [ ] **CO-3.3 — migração legacy**: port TS.
@@ -358,7 +355,7 @@ function applySnap(repoRoot: string): DecisionSnapshot {
     openFindings: [],
     lanes: [],
     workingTreeState: "clean",
-    subCheckpoints: subs([
+    steps: subs([
       { id: "CO-3.1", title: "Constraint + EnforcementBinding", state: "in-progress", line: 5 },
       { id: "CO-3.2", title: "knowledge:compile + manifesto/paridade", state: "pending", line: 6 },
       { id: "CO-3.3", title: "migração legacy", state: "pending", line: 7 },
@@ -366,7 +363,7 @@ function applySnap(repoRoot: string): DecisionSnapshot {
   });
 }
 
-describe("advance-subcheckpoint · apply (efeito governado) [decide]", () => {
+describe("advance-step · apply (efeito governado) [decide]", () => {
   let repoRoot: string;
   let tasksAbs: string;
   let stateAbs: string;
@@ -429,12 +426,12 @@ describe("advance-subcheckpoint · apply (efeito governado) [decide]", () => {
 });
 
 // ── simulação prospectiva: o estado projetado vira IMPLEMENT com objeto ───────
-describe("advance-subcheckpoint · simulação prospectiva [decide]", () => {
+describe("advance-step · simulação prospectiva [decide]", () => {
   it("[16] o estado projetado infere IMPLEMENT_CHECKPOINT com objeto CO-3.2", () => {
-    const r = advanceSubCheckpointMarkers(TASKS_MD, "CO-3.1", "CO-3.2");
+    const r = advanceStepMarkers(TASKS_MD, "CO-3.1", "CO-3.2");
     expect(r.ok).toBe(true);
-    const projected = resolveSubCheckpointWork({
-      subCheckpoints: [
+    const projected = resolveStepWork({
+      steps: [
         { id: "CO-3.1", title: "a", state: "done", line: 5 },
         {
           id: "CO-3.2",
@@ -447,6 +444,6 @@ describe("advance-subcheckpoint · simulação prospectiva [decide]", () => {
       lifecycle: { ...SETTLED, resolutions: 0 },
     } as never);
     expect(projected.kind).toBe("implement");
-    if (projected.kind === "implement") expect(projected.subCheckpoint.id).toBe("CO-3.2");
+    if (projected.kind === "implement") expect(projected.step.id).toBe("CO-3.2");
   });
 });

@@ -12,7 +12,7 @@
  *                             → modo direto não interativo (escrita sob autoridade);
  *   - (sem flags)             → wizard interativo (a confirmação final = autorização).
  *
- * Anti-TOCTOU (Etapa 11): UMA coleta por execução; antes de aplicar, RE-coleta e
+ * Anti-TOCTOU (regra 11): UMA coleta por execução; antes de aplicar, RE-coleta e
  * compara o selo — mudou ⟹ aborta e pede recarga.
  */
 import { execFileSync } from "node:child_process";

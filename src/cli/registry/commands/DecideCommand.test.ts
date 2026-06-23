@@ -107,7 +107,7 @@ describe("DecideCommand [decide]", () => {
     const { context, logs } = ctx();
 
     const result = await cmd.run(
-      cmd.parse(["--type", "finish-subcheckpoint", "--decision", "finish", "--confirm"]),
+      cmd.parse(["--type", "finish-step", "--decision", "finish", "--confirm"]),
       context
     );
 

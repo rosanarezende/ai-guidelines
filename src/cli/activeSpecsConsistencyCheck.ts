@@ -49,11 +49,7 @@ import {
 } from "../infrastructure/yaml/activeSpecsSerializer.js";
 import { parseWorkflowState } from "../infrastructure/yaml/workflowStateSerializer.js";
 import { parseSpecBranch } from "../app/workflow/DetectActiveSpec.js";
-import {
-  checkSubCheckpointCoherence,
-  findCheckpointTaskLine,
-  parseSubCheckpoints,
-} from "./handoffFacts.js";
+import { checkStepCoherence, findCheckpointTaskLine, parseSteps } from "./handoffFacts.js";
 
 interface Logger {
   info: (msg: string) => void;
@@ -121,7 +117,7 @@ export function runActiveSpecsConsistencyCheck(
     validateEntryIdentity(entry, "active-specs", failures);
     validateEntryStage(entry, "active-specs", input.readStateYml, failures);
     validateEntryBranch(entry, input.currentBranch ?? null, failures);
-    validateEntrySubCheckpointCoherence(entry, input.readStateYml, failures);
+    validateEntryStepCoherence(entry, input.readStateYml, failures);
   }
 
   if (input.historyText !== undefined) {
@@ -239,14 +235,14 @@ function validateEntryStage(
 }
 
 /**
- * Coerência ESTADO↔NARRATIVA dos sub-checkpoints (CO-x.y) do checkpoint ATIVO da
- * spec. `branch`/`stage` driftam fato→projeção; a narrativa dos sub-checkpoints é
+ * Coerência ESTADO↔NARRATIVA das etapas do checkpoint ATIVO da
+ * spec. `branch`/`stage` driftam fato→projeção; a narrativa das etapas é
  * a mesma classe — um `[x]` que ainda diz "EM EXECUÇÃO" mente para a retomada.
- * Reusa `parseSubCheckpoints` (parser canônico de handoffFacts) — sem parser
+ * Reusa `parseSteps` (parser canônico de handoffFacts) — sem parser
  * paralelo. O checkpoint ativo vem do cursor da topologia (state.yml). Reusa o
  * mesmo leitor injetado de `state.yml` para ler também o `tasks.md` da spec.
  */
-function validateEntrySubCheckpointCoherence(
+function validateEntryStepCoherence(
   entry: { id: string; specPath: string; sourceStatePath?: string },
   readSpecFile: (relPath: string) => string | null,
   failures: ConsistencyFailure[]
@@ -274,12 +270,12 @@ function validateEntrySubCheckpointCoherence(
     });
     return;
   }
-  const subs = parseSubCheckpoints(tasksContent, checkpoint);
-  for (const violation of checkSubCheckpointCoherence(subs)) {
+  const subs = parseSteps(tasksContent, checkpoint);
+  for (const violation of checkStepCoherence(subs)) {
     failures.push({
       id: entry.id,
       message:
-        `coerência de sub-checkpoint (${checkpoint}): ${violation} ` +
+        `coerência de etapa (${checkpoint}): ${violation} ` +
         `A narrativa em tasks.md deve refletir o marcador de estado ([ ]/[/]/[x]).`,
     });
   }
@@ -327,7 +323,7 @@ export function main(repoRoot: string, logger: Logger = defaultLogger): number {
 
   if (result.kind === "ok") {
     logger.info(
-      `✅ active-specs:check — ${result.count} entry(ies); stage/branch/identidade + coerência de sub-checkpoints fiéis aos fatos (state.yml + git + spec_path + tasks.md).`
+      `✅ active-specs:check — ${result.count} entry(ies); stage/branch/identidade + coerência de etapas fiéis aos fatos (state.yml + git + spec_path + tasks.md).`
     );
     return 0;
   }

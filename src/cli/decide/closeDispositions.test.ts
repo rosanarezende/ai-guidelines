@@ -227,7 +227,7 @@ function applySnapshot(repoRoot: string, rel: string) {
       }),
     ],
     lanes: [makeLane({ reviewFile: rel })],
-    subCheckpoints: [],
+    steps: [],
   });
 }
 

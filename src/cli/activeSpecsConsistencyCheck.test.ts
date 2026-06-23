@@ -266,10 +266,10 @@ describe("CLI — active-specs:check · coerência branch/identidade fatos→pro
   });
 });
 
-// Coerência ESTADO↔NARRATIVA dos sub-checkpoints (dogfood CO-3.3): um `[x]` que
+// Coerência ESTADO↔NARRATIVA das etapas (dogfood CO-3.3): um `[x]` que
 // ainda diz "EM EXECUÇÃO" mente para a retomada — mesma classe de drift que
-// stage/branch. O check reusa `parseSubCheckpoints` e lê o cursor da topologia.
-describe("CLI — active-specs:check · coerência ESTADO↔NARRATIVA de sub-checkpoints [dogfood CO-3.3]", () => {
+// stage/branch. O check reusa `parseSteps` e lê o cursor da topologia.
+describe("CLI — active-specs:check · coerência ESTADO↔NARRATIVA de etapas [dogfood CO-3.3]", () => {
   /** state.yml com cursor de topologia apontando para o checkpoint dado. */
   function stateWithCursor(checkpoint: string): string {
     return [
@@ -335,7 +335,7 @@ describe("CLI — active-specs:check · coerência ESTADO↔NARRATIVA de sub-che
     expect(r.kind).toBe("ok");
   });
 
-  it("DADO um [x] que ainda diz 'EM EXECUÇÃO' QUANDO checa ENTÃO falha citando o sub-checkpoint", () => {
+  it("DADO um [x] que ainda diz 'EM EXECUÇÃO' QUANDO checa ENTÃO falha citando a etapa", () => {
     const r = runActiveSpecsConsistencyCheck({
       indexText: indexOf(entryYaml()),
       readStateYml: reader(
@@ -349,7 +349,7 @@ describe("CLI — active-specs:check · coerência ESTADO↔NARRATIVA de sub-che
     }
   });
 
-  it("DADO dois sub-checkpoints [/] QUANDO checa ENTÃO falha (exatamente um pode estar ativo)", () => {
+  it("DADO dois etapas [/] QUANDO checa ENTÃO falha (exatamente um pode estar ativo)", () => {
     const r = runActiveSpecsConsistencyCheck({
       indexText: indexOf(entryYaml()),
       // CO-3.1 vira [/] também → dois ativos.
@@ -360,9 +360,7 @@ describe("CLI — active-specs:check · coerência ESTADO↔NARRATIVA de sub-che
     });
     expect(r.kind).toBe("fail");
     if (r.kind === "fail") {
-      expect(
-        r.failures.some((f) => /mais de um sub-checkpoint \[\/\] ativo/i.test(f.message))
-      ).toBe(true);
+      expect(r.failures.some((f) => /mais de uma etapa \[\/\] ativa/i.test(f.message))).toBe(true);
     }
   });
 

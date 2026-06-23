@@ -61,7 +61,7 @@ function facts(overrides: Partial<HandoffFacts> = {}): HandoffFacts {
       gateDecision: null,
     },
     tasks: [],
-    subCheckpoints: [],
+    steps: [],
     insights: [],
     driftWarnings: [],
     sources: [

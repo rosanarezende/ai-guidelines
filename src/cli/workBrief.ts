@@ -27,16 +27,16 @@ import { execFileSync } from "node:child_process";
 import {
   HandoffFacts,
   NextAction,
-  SUBCHECKPOINT_READINESS,
-  SubCheckpointRef,
-  SubCheckpointResolution,
-  resolveSubCheckpointWork,
+  STEP_READINESS,
+  StepRef,
+  StepResolution,
+  resolveStepWork,
 } from "./handoffFacts.js";
 
 // Re-export da derivação compartilhada (fonte: handoffFacts) para consumidores
-// que historicamente a importavam de `workBrief` (advanceSubcheckpoint, testes).
-export { resolveSubCheckpointWork };
-export type { SubCheckpointResolution };
+// que historicamente a importavam de `workBrief` (advanceStep, testes).
+export { resolveStepWork };
+export type { StepResolution };
 import {
   HandoffLoadSnapshot,
   HandoffOptions,
@@ -57,17 +57,14 @@ import {
   parseHumanDecisionPolicy,
 } from "../infrastructure/yaml/humanDecisionPolicyReader.js";
 import type { DecisionAvailability } from "./decide/model.js";
-import { ADVANCE_SUBCHECKPOINT_ID, deriveAdvanceEligibility } from "./decide/advanceEligibility.js";
+import { ADVANCE_STEP_ID, deriveAdvanceEligibility } from "./decide/advanceEligibility.js";
 import {
   deriveMarkReadinessAvailability,
-  deriveFinishSubcheckpointAvailability,
-  FINISH_SUBCHECKPOINT_ID,
-  deriveOpenNextNodeAvailability,
+  deriveFinishStepAvailability,
+  FINISH_STEP_ID,
+  deriveOpenNextTopologyNodeAvailability,
 } from "./flow/GovernedFlow.js";
-import {
-  collectSubCheckpointDeliveryEvidence,
-  SubCheckpointDeliveryEvidence,
-} from "./flow/subCheckpointDeliveryEvidence.js";
+import { collectStepDeliveryEvidence, StepDeliveryEvidence } from "./flow/stepDeliveryEvidence.js";
 
 export interface Logger {
   info: (msg: string) => void;
@@ -85,7 +82,7 @@ export const WORK_POLICY_PATH = ".core/governance/work-policy.yml";
  * Autorização capability-scoped: o PEDIDO HUMANO EXPLÍCITO de trabalho
  * ("Corrija os findings atuais." / "Implemente a tarefa atual.") autoriza commit
  * e push APENAS no objeto/checkpoint/branch inferidos e nas ações do modo. NÃO
- * cobre outro finding/checkpoint, próximo sub-checkpoint, review, disposition,
+ * cobre outro finding/checkpoint, próxima etapa, review, disposition,
  * Ready, gate, merge, force-push ou `--no-verify`. O runtime não interpreta
  * linguagem natural: o AGENTS.md ensina o mapeamento; execução espontânea =
  * sem autorização (fail-closed).
@@ -126,7 +123,7 @@ export interface WorkTaskRef {
 }
 
 /** Alias do ref compartilhado (definido em handoffFacts) — forma idêntica. */
-export type WorkSubCheckpointRef = SubCheckpointRef;
+export type WorkStepRef = StepRef;
 
 export interface WorkObject {
   readonly checkpoint: string | null;
@@ -134,12 +131,12 @@ export interface WorkObject {
   readonly findings?: readonly WorkFinding[];
   /** Lane de review pendente (quando o trabalho aponta um review, não implementação). */
   readonly reviewLane?: string;
-  /** Sub-checkpoint ATIVO (objeto concreto do implement_checkpoint). */
-  readonly subCheckpoint?: WorkSubCheckpointRef;
-  /** Transição de sub-checkpoint pendente (concluir um, ativar o próximo). */
+  /** Etapa ATIVO (objeto concreto do implement_checkpoint). */
+  readonly step?: WorkStepRef;
+  /** Transição de etapa pendente (concluir um, ativar o próximo). */
   readonly transition?: {
-    readonly conclude: WorkSubCheckpointRef | null;
-    readonly activate: WorkSubCheckpointRef;
+    readonly conclude: WorkStepRef | null;
+    readonly activate: WorkStepRef;
   };
 }
 
@@ -217,13 +214,13 @@ export interface WorkBriefInput {
   readonly effectiveFunctionalHead?: string | null;
   readonly authorization: WorkAuthorizationArg | null;
   /**
-   * Elegibilidade de `advance-subcheckpoint` DERIVADA pela MESMA função que
+   * Elegibilidade de `advance-step` DERIVADA pela MESMA função que
    * `decide` usa (`deriveAdvanceEligibility`) sobre o mesmo snapshot factual. O
    * collector a calcula; testes a injetam. `work` só recomenda a transição como
    * executável quando esta é `available`.
    */
   readonly advanceEligibility: DecisionAvailability;
-  readonly finishSubcheckpointEligibility?: DecisionAvailability;
+  readonly finishStepEligibility?: DecisionAvailability;
   readonly markReadinessEligibility?: DecisionAvailability;
 }
 
@@ -270,12 +267,12 @@ function derivedValidations(specId: string, object: WorkObject): WorkValidation[
 
 /** Tipos de decisão reservados ao humano (espelham `human-decision-policy.yml`). */
 type DecisionType =
-  | "advance-subcheckpoint"
+  | "advance-step"
   | "close-dispositions"
-  | "finish-subcheckpoint"
+  | "finish-step"
   | "mark-readiness"
   | "human-gate"
-  | "open-next-node";
+  | "open-next-topology-node";
 
 const DECIDE_WIZARD_COMMAND = "npm run flow -- decide";
 const WORK_RELOAD_COMMAND = "npm run flow -- work --authorization explicit-work-request";
@@ -291,19 +288,19 @@ function decideBriefCommand(type: DecisionType): string {
  * Derivadas do TIPO (lookup determinístico), não texto livre montado por estado.
  */
 const DECISION_STILL_FORBIDDEN: Record<DecisionType, readonly string[]> = {
-  "finish-subcheckpoint": [
-    "Implementar o próximo sub-checkpoint automaticamente",
+  "finish-step": [
+    "Implementar a próxima etapa automaticamente",
     "Exercer o Human Gate",
     "Converter o PR para Ready",
     "Fazer merge",
   ],
   "mark-readiness": [
-    "Avançar sub-checkpoint",
+    "Avançar para a próxima etapa",
     "Exercer o Human Gate",
     "Converter o PR para Ready",
     "Fazer merge",
   ],
-  "advance-subcheckpoint": [
+  "advance-step": [
     "Exercer o Human Gate",
     "Converter o PR para Ready",
     "Fazer merge",
@@ -320,11 +317,11 @@ const DECISION_STILL_FORBIDDEN: Record<DecisionType, readonly string[]> = {
     "Alterar a topologia (state.yml) automaticamente",
     "Abrir o próximo PR automaticamente",
   ],
-  "open-next-node": [
+  "open-next-topology-node": [
     "Fazer merge",
     "Alterar main",
     "Executar Human Gate",
-    "Implementar o próximo nó",
+    "Implementar o próximo nó da topologia",
   ],
 };
 
@@ -379,15 +376,15 @@ function decisionNextAction(
 }
 
 /**
- * Próxima ação de uma TRANSIÇÃO de sub-checkpoint, derivada da elegibilidade
+ * Próxima ação de uma TRANSIÇÃO de etapa, derivada da elegibilidade
  * COMPARTILHADA com `decide` (nunca hardcoded). Available → recomenda o wizard;
  * blocked → só inspeção read-only com os requisitos NOMEADOS, e `work` NÃO o
  * recomenda como executável; not-applicable → descreve o trabalho, sem `decide`.
  */
 function advanceNextAction(
   availability: DecisionAvailability,
-  conclude: WorkSubCheckpointRef | null,
-  activate: WorkSubCheckpointRef
+  conclude: WorkStepRef | null,
+  activate: WorkStepRef
 ): WorkNextAction {
   const transitionDesc = conclude
     ? `Concluir ${conclude.id} e ativar ${activate.id}.`
@@ -399,14 +396,14 @@ function advanceNextAction(
     `ativar: ${activate.id} — ${activate.title} (tasks.md linha ${activate.line})`,
   ];
   if (availability.status === "available") {
-    return decisionNextAction("advance-subcheckpoint", true, transitionDesc, [
+    return decisionNextAction("advance-step", true, transitionDesc, [
       ...transitionBasis,
       "ao satisfazer os critérios de saída, a transição é decisão GOVERNADA da owner.",
     ]);
   }
   if (availability.status === "blocked") {
     return decisionNextAction(
-      "advance-subcheckpoint",
+      "advance-step",
       false,
       `Avanço ${conclude ? `${conclude.id} → ` : ""}${activate.id} ainda BLOQUEADO — \`decide\` não o classifica como disponível.`,
       [
@@ -468,10 +465,10 @@ export function deriveWorkNextAction(
   ctx: {
     readonly workingTreeState: WorkingTreeState;
     readonly prHeadDiverges: boolean;
-    /** Elegibilidade de advance-subcheckpoint (MESMA derivação de `decide`). */
+    /** Elegibilidade de advance-step (MESMA derivação de `decide`). */
     readonly advanceEligibility: DecisionAvailability;
-    /** Elegibilidade de finish-subcheckpoint (MESMA derivação de `decide`). */
-    readonly finishSubcheckpointEligibility: DecisionAvailability;
+    /** Elegibilidade de finish-step (MESMA derivação de `decide`). */
+    readonly finishStepEligibility: DecisionAvailability;
     /** Elegibilidade de mark-readiness (MESMA derivação de `decide`). */
     readonly markReadinessEligibility: DecisionAvailability;
   }
@@ -479,12 +476,10 @@ export function deriveWorkNextAction(
   // BLOQUEADO → reconciliação primeiro (gate approved é abertura do próximo nó).
   if (mode === "blocked") {
     if (facts.lifecycle?.gateDecision === "approved") {
-      const availability = deriveOpenNextNodeAvailability({
+      const availability = deriveOpenNextTopologyNodeAvailability({
         policyDeclared: true,
         gateApproved: true,
-        pendingSubCheckpoints: facts.subCheckpoints
-          .filter((item) => item.state !== "done")
-          .map((item) => item.id),
+        pendingSteps: facts.steps.filter((item) => item.state !== "done").map((item) => item.id),
         activeNode: facts.activeNode
           ? {
               id: facts.activeNode.id,
@@ -509,7 +504,7 @@ export function deriveWorkNextAction(
         behind: facts.git.behind ?? 0,
       });
       return decisionNextAction(
-        "open-next-node",
+        "open-next-topology-node",
         availability.status === "available",
         availability.status === "available"
           ? `Abrir governadamente o próximo nó planejado: ${facts.activeNode?.id ?? "nó atual"} → ${facts.nextPlannedNode?.id ?? "próximo nó"}.`
@@ -538,49 +533,60 @@ export function deriveWorkNextAction(
     );
   }
 
-  // TRANSIÇÃO pendente (sub-checkpoint sem ativo, ou ativo concluído) → advance,
-  // recomendável SOMENTE quando `decide` classifica como disponível.
-  if (mode === "prepare_subcheckpoint_transition" && object.transition) {
+  // TRANSIÇÃO pendente (sem etapa ativa, ou etapa ativa pronta) → caminho
+  // canônico `finish-step` quando disponível; `advance-step` fica como
+  // contrato explícito/fallback para estados que ainda dependem dele.
+  if (mode === "prepare_step_transition" && object.transition) {
     const t = object.transition;
+    if (ctx.finishStepEligibility.status === "available" && t.conclude) {
+      return decisionNextAction(
+        "finish-step",
+        true,
+        `Concluir a etapa ${t.conclude.id} e iniciar a próxima etapa em uma única decisão governada.`,
+        [
+          `ativo: ${t.conclude.id} — ${t.conclude.title} (tasks.md linha ${t.conclude.line})`,
+          `próxima etapa: ${t.activate.id} — ${t.activate.title} (tasks.md linha ${t.activate.line})`,
+          "o efeito autorizado altera somente marcadores de etapas em tasks.md.",
+        ]
+      );
+    }
     return advanceNextAction(ctx.advanceEligibility, t.conclude, t.activate);
   }
 
-  // IMPLEMENT com sub-checkpoint ativo → olha à frente para a transição governada
+  // IMPLEMENT com etapa ativa → olha à frente para a transição governada
   // (elegibilidade COMPARTILHADA com `decide`, nunca hardcoded como disponível).
-  if (mode === "implement_checkpoint" && object.subCheckpoint) {
-    const active = object.subCheckpoint;
-    const activeFacts = facts.subCheckpoints.find(
-      (s) => s.id === active.id && s.line === active.line
-    );
-    if (activeFacts?.readiness !== SUBCHECKPOINT_READINESS) {
+  if (mode === "implement_checkpoint" && object.step) {
+    const active = object.step;
+    const activeFacts = facts.steps.find((s) => s.id === active.id && s.line === active.line);
+    if (activeFacts?.readiness !== STEP_READINESS) {
       return plainNextAction(`Implementar o checkpoint ativo ${active.id} — ${active.title}.`, [
         `ativo: ${active.id} — ${active.title} (tasks.md linha ${active.line})`,
-        `sem readiness "${SUBCHECKPOINT_READINESS}" em tasks.md; conclusão/avanço não é próxima ação de trabalho.`,
+        `sem readiness "${STEP_READINESS}" em tasks.md; conclusão/avanço não é próxima ação de trabalho.`,
       ]);
     }
-    if (ctx.finishSubcheckpointEligibility.status === "available") {
+    if (ctx.finishStepEligibility.status === "available") {
       return decisionNextAction(
-        "finish-subcheckpoint",
+        "finish-step",
         true,
-        `Concluir ${active.id} e iniciar o próximo sub-checkpoint em uma única decisão governada.`,
+        `Concluir a etapa ${active.id} e iniciar a próxima etapa em uma única decisão governada.`,
         [
           `ativo: ${active.id} — ${active.title} (tasks.md linha ${active.line})`,
           "readiness é validada como critério, mas não vira uma autorização/commit separado.",
-          "o efeito autorizado altera somente marcadores de sub-checkpoints em tasks.md.",
+          "o efeito autorizado altera somente marcadores de etapas em tasks.md.",
         ]
       );
     }
     if (
-      ctx.finishSubcheckpointEligibility.status === "blocked" &&
+      ctx.finishStepEligibility.status === "blocked" &&
       ctx.markReadinessEligibility.status === "available"
     ) {
       return decisionNextAction(
-        "finish-subcheckpoint",
+        "finish-step",
         false,
         `Conclusão de ${active.id} ainda BLOQUEADA — \`decide\` não a classifica como disponível.`,
         [
           `ativo: ${active.id} — ${active.title} (tasks.md linha ${active.line})`,
-          ...ctx.finishSubcheckpointEligibility.reasons.map((r) => `requisito pendente: ${r}`),
+          ...ctx.finishStepEligibility.reasons.map((r) => `requisito pendente: ${r}`),
           "`work` não recomenda readiness isolada quando a conclusão em passo único é a transição aplicável.",
         ]
       );
@@ -592,11 +598,11 @@ export function deriveWorkNextAction(
         `Declarar readiness de ${active.id} — critérios de saída satisfeitos; este é o caminho terminal ou fallback explícito.`,
         [
           `ativo: ${active.id} — ${active.title} (tasks.md linha ${active.line})`,
-          "readiness altera somente tasks.md e não ativa o próximo sub-checkpoint.",
+          "readiness altera somente tasks.md e não ativa a próxima etapa.",
         ]
       );
     }
-    const nextPending = facts.subCheckpoints.find((s) => s.state === "pending");
+    const nextPending = facts.steps.find((s) => s.state === "pending");
     if (nextPending) {
       return advanceNextAction(ctx.advanceEligibility, active, {
         id: nextPending.id,
@@ -605,7 +611,7 @@ export function deriveWorkNextAction(
       });
     }
     return plainNextAction(
-      `Concluir ${active.id} (último sub-checkpoint do nó) — o avanço passa ao Human Gate, fora deste modo.`,
+      `Concluir ${active.id} (última etapa do checkpoint) — o avanço passa ao Human Gate, fora deste modo.`,
       [`ativo: ${active.id} — ${active.title} (tasks.md linha ${active.line})`]
     );
   }
@@ -681,8 +687,8 @@ export function deriveWorkBrief(input: WorkBriefInput): WorkBrief {
   const workingTreeState = input.workingTreeState;
   const modeBasis: string[] = [];
   const degraded: string[] = [];
-  // Objeto resolvido por sub-checkpoint (preenchido nos casos sem tarefa de topo).
-  let subObject: WorkSubCheckpointRef | undefined;
+  // Objeto resolvido por etapa (preenchido nos casos sem tarefa de topo).
+  let subObject: WorkStepRef | undefined;
   let transitionObject: WorkObject["transition"] | undefined;
 
   const openFindings = findings.filter((f) => f.disposition === "open");
@@ -727,15 +733,15 @@ export function deriveWorkBrief(input: WorkBriefInput): WorkBrief {
       `PR/HEAD divergentes com remoto À FRENTE (behind ${facts.git.behind}): pull/reconcilie antes de trabalhar.`
     );
   } else if (facts.lifecycle?.gateDecision === "approved") {
-    const pendingSubCheckpoints = facts.subCheckpoints.filter((item) => item.state !== "done");
+    const pendingSteps = facts.steps.filter((item) => item.state !== "done");
     mode = "blocked";
-    if (pendingSubCheckpoints.length > 0) {
+    if (pendingSteps.length > 0) {
       modeBasis.push(
-        `gate do checkpoint ${checkpoint} já está approved para o recorte atual, mas o nó ainda tem checkpoint(s) semântico(s) pendente(s): ${pendingSubCheckpoints.map((item) => item.id).join(", ")}. Abra o próximo PR governado da continuação antes de abrir o próximo nó topológico.`
+        `gate do checkpoint ${checkpoint} já está approved para o recorte atual, mas a Frente ainda tem checkpoint(s) pendente(s): ${pendingSteps.map((item) => item.id).join(", ")}. Abra o próximo PR governado de checkpoint antes de abrir o próximo nó da topologia.`
       );
     } else {
       modeBasis.push(
-        `gate do checkpoint ${checkpoint} já está approved — nenhuma nova implementação neste nó; confira o cursor (reconcile:check) ou abra o próximo nó (transição autorizada por gate).`
+        `gate do checkpoint ${checkpoint} já está approved — nenhuma nova implementação neste nó da topologia; confira o cursor (reconcile:check) ou abra o próximo nó da topologia (transição autorizada por gate).`
       );
     }
   }
@@ -794,29 +800,29 @@ export function deriveWorkBrief(input: WorkBriefInput): WorkBrief {
         mode = "implement_checkpoint";
         modeBasis.push(nextAction.description, ...nextAction.basis.map((b) => `  ${b}`));
         break;
-      case "implement-subcheckpoint":
-      case "advance-subcheckpoint-transition":
+      case "implement-step":
+      case "advance-step-transition":
       case "investigate-checkpoint":
       default: {
-        // O handoff já nomeia o sub-checkpoint (kinds acima) ou cai no fallback de
+        // O handoff já nomeia a etapa (kinds acima) ou cai no fallback de
         // investigação. Em todos os casos, RE-DERIVA o objeto pela MESMA função
-        // (resolveSubCheckpointWork) — handoff↔work nomeiam o mesmo objeto.
-        // FAIL-CLOSED: IMPLEMENT_CHECKPOINT exige um sub-checkpoint ATIVO concreto;
+        // (resolveStepWork) — handoff↔work nomeiam o mesmo objeto.
+        // FAIL-CLOSED: IMPLEMENT_CHECKPOINT exige uma etapa ATIVA concreta;
         // sem objeto, nunca autoriza modificar código.
-        const sub = resolveSubCheckpointWork(facts);
+        const sub = resolveStepWork(facts);
         if (sub.kind === "transition") {
-          mode = "prepare_subcheckpoint_transition";
+          mode = "prepare_step_transition";
           transitionObject = sub.transition;
           modeBasis.push(...sub.basis);
         } else if (sub.kind === "implement") {
           mode = "implement_checkpoint";
-          subObject = sub.subCheckpoint;
+          subObject = sub.step;
           modeBasis.push(...sub.basis);
         } else {
           mode = "blocked";
           modeBasis.push(
-            "nenhum objeto executável materializado (sem tarefa de topo nem sub-checkpoint ativo) — " +
-              "materialize uma tarefa/sub-checkpoint em tasks.md antes de implementar. " +
+            "nenhum objeto executável materializado (sem tarefa de topo nem etapa ativa) — " +
+              "materialize uma tarefa/etapa em tasks.md antes de implementar. " +
               "IMPLEMENT_CHECKPOINT sem objeto é estado inválido (fail-closed)."
           );
         }
@@ -868,10 +874,8 @@ export function deriveWorkBrief(input: WorkBriefInput): WorkBrief {
     ...(mode === "await_revalidation" && reqPending.length > 0
       ? { reviewLane: reqPending[0] }
       : {}),
-    ...(mode === "implement_checkpoint" && !firstOpenTask && subObject
-      ? { subCheckpoint: subObject }
-      : {}),
-    ...(mode === "prepare_subcheckpoint_transition" && transitionObject
+    ...(mode === "implement_checkpoint" && !firstOpenTask && subObject ? { step: subObject } : {}),
+    ...(mode === "prepare_step_transition" && transitionObject
       ? { transition: transitionObject }
       : {}),
   };
@@ -902,9 +906,9 @@ export function deriveWorkBrief(input: WorkBriefInput): WorkBrief {
     workingTreeState,
     prHeadDiverges,
     advanceEligibility: input.advanceEligibility,
-    finishSubcheckpointEligibility: input.finishSubcheckpointEligibility ?? {
+    finishStepEligibility: input.finishStepEligibility ?? {
       status: "not-applicable",
-      reasons: ["finish-subcheckpoint não foi projetado para este snapshot."],
+      reasons: ["A decisão de conclusão de etapa não foi projetada para este snapshot."],
     },
     markReadinessEligibility: input.markReadinessEligibility ?? {
       status: "not-applicable",
@@ -986,7 +990,7 @@ function decisionTypeDeclared(repoRoot: string, typeId: string): boolean {
 }
 
 /**
- * Projeta a elegibilidade de `advance-subcheckpoint` do lado do `work`, pela
+ * Projeta a elegibilidade de avanço de etapa do lado do `work`, pela
  * MESMA função `deriveAdvanceEligibility` que `decide` usa, sobre os mesmos
  * `HandoffFacts` da carga. Contagens vêm do lifecycle do handoff; os erros de
  * integridade vêm do mesmo `discover` que alimenta os findings.
@@ -1001,7 +1005,7 @@ function collectAdvanceEligibility(
   const lc = facts.lifecycle;
   const pr = facts.pullRequest;
   return deriveAdvanceEligibility({
-    subCheckpoints: facts.subCheckpoints,
+    steps: facts.steps,
     policyDeclared,
     openFindings: lc?.openFindings ?? 0,
     openBlocking: lc?.openBlocking ?? 0,
@@ -1026,14 +1030,14 @@ function collectMarkReadinessEligibility(
   workingTreeState: WorkingTreeState,
   consolidationErrors: readonly string[],
   policyDeclared: boolean,
-  deliveryEvidence: SubCheckpointDeliveryEvidence
+  deliveryEvidence: StepDeliveryEvidence
 ): DecisionAvailability {
   const lc = facts.lifecycle;
   const pr = facts.pullRequest;
   const prHeadMatches =
     pr && facts.git.head ? sameSha(facts.git.head, pr.headRefOid) : pr ? false : null;
   return deriveMarkReadinessAvailability({
-    subCheckpoints: facts.subCheckpoints,
+    steps: facts.steps,
     policyDeclared,
     openFindings: lc?.openFindings ?? 0,
     openBlocking: lc?.openBlocking ?? 0,
@@ -1111,21 +1115,21 @@ export function collectWorkBrief(
     findings,
     freshness.workingTreeState,
     discoverErrors.map(String),
-    decisionTypeDeclared(repoRoot, ADVANCE_SUBCHECKPOINT_ID)
+    decisionTypeDeclared(repoRoot, ADVANCE_STEP_ID)
   );
-  const activeSubCheckpoints = facts.subCheckpoints.filter((s) => s.state === "in-progress");
+  const activeSteps = facts.steps.filter((s) => s.state === "in-progress");
   const deliveryEvidence =
-    activeSubCheckpoints.length === 1
-      ? collectSubCheckpointDeliveryEvidence(
+    activeSteps.length === 1
+      ? collectStepDeliveryEvidence(
           repoRoot,
           `${facts.spec.path}/tasks.md`,
-          activeSubCheckpoints[0].id,
+          activeSteps[0].id,
           facts.git.head ?? "HEAD"
         )
       : {
           status: "unknown" as const,
-          activeId: activeSubCheckpoints[0]?.id ?? "(sem ativo)",
-          reason: "Não há sub-checkpoint ativo inequívoco para comprovar entrega.",
+          activeId: activeSteps[0]?.id ?? "(sem ativo)",
+          reason: "Não há etapa ativa inequívoca para comprovar entrega.",
         };
   const markReadinessEligibility = collectMarkReadinessEligibility(
     facts,
@@ -1135,11 +1139,11 @@ export function collectWorkBrief(
     decisionTypeDeclared(repoRoot, "mark-readiness"),
     deliveryEvidence
   );
-  const finishSubcheckpointEligibility = deriveFinishSubcheckpointAvailability({
-    policyDeclared: decisionTypeDeclared(repoRoot, FINISH_SUBCHECKPOINT_ID),
-    subCheckpoints: facts.subCheckpoints,
+  const finishStepEligibility = deriveFinishStepAvailability({
+    policyDeclared: decisionTypeDeclared(repoRoot, FINISH_STEP_ID),
+    steps: facts.steps,
     markReadiness: markReadinessEligibility,
-    advanceSubcheckpoint: advanceEligibility,
+    advanceStep: advanceEligibility,
   });
   const brief = deriveWorkBrief({
     facts,
@@ -1154,7 +1158,7 @@ export function collectWorkBrief(
     effectiveFunctionalHead: freshness.effectiveFunctionalHead,
     authorization: options.authorization ?? null,
     advanceEligibility,
-    finishSubcheckpointEligibility,
+    finishStepEligibility,
     markReadinessEligibility,
   });
 
@@ -1215,9 +1219,9 @@ export function renderWorkBrief(collected: CollectedWorkBrief): string {
   if (brief.object.reviewLane) {
     lines.push(`- lane de review pendente: ${brief.object.reviewLane}`);
   }
-  if (brief.object.subCheckpoint) {
-    const s = brief.object.subCheckpoint;
-    lines.push(`- sub-checkpoint ativo: ${s.id} — ${s.title} (tasks.md linha ${s.line})`);
+  if (brief.object.step) {
+    const s = brief.object.step;
+    lines.push(`- etapa ativa: ${s.id} — ${s.title} (tasks.md linha ${s.line})`);
   }
   if (brief.object.transition) {
     const t = brief.object.transition;
@@ -1246,7 +1250,7 @@ export function renderWorkBrief(collected: CollectedWorkBrief): string {
     !brief.object.task &&
     !brief.object.findings &&
     !brief.object.reviewLane &&
-    !brief.object.subCheckpoint &&
+    !brief.object.step &&
     !brief.object.transition
   ) {
     lines.push("- (nenhum objeto materializado para este modo)");
@@ -1293,7 +1297,7 @@ export function renderWorkBrief(collected: CollectedWorkBrief): string {
       `  - push: ${brief.authorization.pushAllowed ? "autorizado (normal; nunca --force/--no-verify)" : "NÃO autorizado neste modo"}`
     );
     lines.push(
-      "  - NÃO cobre: outro finding/checkpoint, próximo sub-checkpoint, review, disposition, Ready, gate, merge."
+      "  - NÃO cobre: outro finding/checkpoint, próxima etapa, review, disposition, Ready, gate, merge."
     );
     if (!brief.authorization.commitAllowed) {
       lines.push("  - autorização NÃO cria trabalho: este modo não tem escrita a publicar.");

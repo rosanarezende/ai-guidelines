@@ -7,9 +7,9 @@ import {
   deriveWorkBrief,
   parseWorkAuthorization,
   renderWorkBrief,
-  resolveSubCheckpointWork,
+  resolveStepWork,
 } from "./workBrief.js";
-import { HandoffSubCheckpoint } from "./handoffFacts.js";
+import { HandoffStep } from "./handoffFacts.js";
 import { WorkMode, WorkPolicy, parseWorkPolicy } from "../infrastructure/yaml/workPolicyReader.js";
 
 const POLICY: WorkPolicy = parseWorkPolicy(
@@ -59,7 +59,7 @@ function facts(over: Partial<HandoffFacts> = {}): HandoffFacts {
       gateDecision: null,
     },
     tasks: [],
-    subCheckpoints: [],
+    steps: [],
     insights: [],
     driftWarnings: [],
     sources: [{ id: "pull-request", origin: "gh", status: "fresh", fingerprint: "x" }],
@@ -156,7 +156,7 @@ describe("workBrief · inferência de modo [work]", () => {
     expect(b.mode).toBe("prepare_close");
   });
 
-  it("[7] gate aprovado → blocked, mas com decisão governada open-next-node", () => {
+  it("[7] gate aprovado → blocked, mas com decisão governada open-next-topology-node", () => {
     const b = derive({
       facts: facts({
         lifecycle: { ...facts().lifecycle!, gateDecision: "approved" },
@@ -175,10 +175,12 @@ describe("workBrief · inferência de modo [work]", () => {
       nextAction: nextAction("execute-task"),
     });
     expect(b.mode).toBe("blocked");
-    expect(b.nextAction.decisionType).toBe("open-next-node");
+    expect(b.nextAction.decisionType).toBe("open-next-topology-node");
     expect(b.nextAction.description).toContain("co-enforcement → co-flow-convergence");
     expect(b.nextAction.commands.some((c) => c.role === "recommended")).toBe(true);
-    expect(b.nextAction.commands.some((c) => c.command.includes("open-next-node"))).toBe(true);
+    expect(b.nextAction.commands.some((c) => c.command.includes("open-next-topology-node"))).toBe(
+      true
+    );
   });
 
   it("[8] review opcional stale não cria trabalho (task → implement_checkpoint)", () => {
@@ -278,13 +280,13 @@ describe("workBrief · autoridade [work]", () => {
     expect(parseWorkAuthorization("explicit-work-request")).toBe("explicit-work-request");
   });
 
-  it("[15] escopo não se estende ao próximo sub-checkpoint", () => {
+  it("[15] escopo não se estende ao próxima etapa", () => {
     const b = derive({
       nextAction: nextAction("resolve-findings"),
       findings: [finding({ hasFixedResolution: false })],
       authorization: "explicit-work-request",
     });
-    expect(b.forbiddenActions).toContain("start-next-subcheckpoint");
+    expect(b.forbiddenActions).toContain("start-next-step");
   });
 });
 
@@ -293,7 +295,7 @@ describe("workBrief · report contract governado [work]", () => {
     "blocked",
     "resolve_findings",
     "await_revalidation",
-    "prepare_subcheckpoint_transition",
+    "prepare_step_transition",
     "implement_checkpoint",
     "prepare_close",
     "current",
@@ -321,12 +323,12 @@ describe("workBrief · report contract governado [work]", () => {
         });
       case "await_revalidation":
         return derive({ nextAction: nextAction("resolve-findings"), findings: [finding()] });
-      case "prepare_subcheckpoint_transition":
+      case "prepare_step_transition":
         return derive({
           nextAction: nextAction("investigate-checkpoint"),
           facts: facts({
             lifecycle: { ...AUDIT_SETTLED },
-            subCheckpoints: [
+            steps: [
               { id: "CO-3.1", title: "x", state: "in-progress", line: 1 },
               { id: "CO-3.2", title: "y", state: "pending", line: 2 },
             ],
@@ -487,8 +489,8 @@ describe("workBrief · estado real (F1–F3 fixed/open) [work]", () => {
     expect(realStateBrief().nextAction.description).toMatch(/revalidação independente/i);
   });
 
-  it("[29] CO-3.2 aparece proibido (start-next-subcheckpoint)", () => {
-    expect(realStateBrief().forbiddenActions).toContain("start-next-subcheckpoint");
+  it("[29] CO-3.2 aparece proibido (start-next-step)", () => {
+    expect(realStateBrief().forbiddenActions).toContain("start-next-step");
   });
 
   it("[30] nenhuma resolution nova é sugerida (expects_resolutions=false; create-resolutions proibido)", () => {
@@ -539,7 +541,7 @@ describe("workBrief · sincronização do PR usa git HEAD [work]", () => {
       facts: facts({
         git: { ...facts().git, head: "f3b4ee3", behind: 0 },
         pullRequest: { ...facts().pullRequest!, headRefOid: "c933438" },
-        subCheckpoints: [{ id: "CO-3.2", title: "y", state: "in-progress", line: 2 }],
+        steps: [{ id: "CO-3.2", title: "y", state: "in-progress", line: 2 }],
       }),
       nextAction: nextAction("investigate-checkpoint"),
     });
@@ -548,9 +550,9 @@ describe("workBrief · sincronização do PR usa git HEAD [work]", () => {
   });
 });
 
-// ── Bug 2/4: sub-checkpoints, transição e fail-closed ────────────────────────
-describe("workBrief · sub-checkpoints e transição [work]", () => {
-  const subs = (over: Partial<HandoffSubCheckpoint>[] = []): HandoffSubCheckpoint[] =>
+// ── Bug 2/4: etapas, transição e fail-closed ────────────────────────
+describe("workBrief · etapas e transição [work]", () => {
+  const subs = (over: Partial<HandoffStep>[] = []): HandoffStep[] =>
     over.map((o, i) => ({
       id: o.id ?? `CO-3.${i + 1}`,
       title: o.title ?? "t",
@@ -570,10 +572,10 @@ describe("workBrief · sub-checkpoints e transição [work]", () => {
   } as const;
 
   it("estado real (CO-3.1 [/] com readiness, CO-3.2-3.4 [ ]) ⇒ transição CO-3.1→CO-3.2", () => {
-    const r = resolveSubCheckpointWork(
+    const r = resolveStepWork(
       facts({
         lifecycle: { ...settled },
-        subCheckpoints: subs([
+        steps: subs([
           { id: "CO-3.1", state: "in-progress", readiness: "ready-for-transition" },
           { id: "CO-3.2", state: "pending" },
           { id: "CO-3.3", state: "pending" },
@@ -589,10 +591,10 @@ describe("workBrief · sub-checkpoints e transição [work]", () => {
   });
 
   it("após a transição (CO-3.1 [x], CO-3.2 [/]) ⇒ implement com objeto CO-3.2", () => {
-    const r = resolveSubCheckpointWork(
+    const r = resolveStepWork(
       facts({
         lifecycle: { ...settled, resolutions: 1 },
-        subCheckpoints: subs([
+        steps: subs([
           { id: "CO-3.1", state: "done" },
           { id: "CO-3.2", state: "in-progress" },
           { id: "CO-3.3", state: "pending" },
@@ -600,44 +602,44 @@ describe("workBrief · sub-checkpoints e transição [work]", () => {
       })
     );
     expect(r.kind).toBe("implement");
-    if (r.kind === "implement") expect(r.subCheckpoint.id).toBe("CO-3.2");
+    if (r.kind === "implement") expect(r.step.id).toBe("CO-3.2");
   });
 
-  it("deriveWorkBrief: estado real ⇒ modo prepare_subcheckpoint_transition com objeto", () => {
+  it("deriveWorkBrief: estado real ⇒ modo prepare_step_transition com objeto", () => {
     const b = derive({
       nextAction: nextAction("investigate-checkpoint"),
       facts: facts({
         lifecycle: { ...settled },
-        subCheckpoints: subs([
+        steps: subs([
           { id: "CO-3.1", state: "in-progress", readiness: "ready-for-transition" },
           { id: "CO-3.2", state: "pending" },
         ]),
       }),
     });
-    expect(b.mode).toBe("prepare_subcheckpoint_transition");
+    expect(b.mode).toBe("prepare_step_transition");
     expect(b.object.transition?.conclude?.id).toBe("CO-3.1");
     expect(b.object.transition?.activate.id).toBe("CO-3.2");
   });
 
-  it("deriveWorkBrief: pós-transição ⇒ implement_checkpoint com sub-checkpoint concreto", () => {
+  it("deriveWorkBrief: pós-transição ⇒ implement_checkpoint com etapa concreto", () => {
     const b = derive({
       nextAction: nextAction("investigate-checkpoint"),
       facts: facts({
         lifecycle: { ...settled, resolutions: 1 },
-        subCheckpoints: subs([
+        steps: subs([
           { id: "CO-3.1", state: "done" },
           { id: "CO-3.2", state: "in-progress" },
         ]),
       }),
     });
     expect(b.mode).toBe("implement_checkpoint");
-    expect(b.object.subCheckpoint?.id).toBe("CO-3.2");
+    expect(b.object.step?.id).toBe("CO-3.2");
   });
 
-  it("FAIL-CLOSED: sem tarefa de topo e sem sub-checkpoint ativo ⇒ NUNCA implement_checkpoint", () => {
+  it("FAIL-CLOSED: sem tarefa de topo e sem etapa ativa ⇒ NUNCA implement_checkpoint", () => {
     const b = derive({
       nextAction: nextAction("investigate-checkpoint"),
-      facts: facts({ subCheckpoints: [] }),
+      facts: facts({ steps: [] }),
     });
     expect(b.mode).not.toBe("implement_checkpoint");
     expect(b.mode).toBe("blocked");
@@ -646,7 +648,7 @@ describe("workBrief · sub-checkpoints e transição [work]", () => {
 
 // ── next_action estruturada: comandos governados derivados do tipo de decisão ──
 describe("workBrief · próxima ação estruturada [work]", () => {
-  const subs = (over: Partial<HandoffSubCheckpoint>[]): HandoffSubCheckpoint[] =>
+  const subs = (over: Partial<HandoffStep>[]): HandoffStep[] =>
     over.map((o, i) => ({
       id: o.id ?? `CO-3.${i + 1}`,
       title: o.title ?? "t",
@@ -671,7 +673,7 @@ describe("workBrief · próxima ação estruturada [work]", () => {
     const b = derive({
       nextAction: nextAction("investigate-checkpoint"),
       facts: facts({
-        subCheckpoints: subs([
+        steps: subs([
           { id: "CO-3.1", state: "done" },
           { id: "CO-3.2", title: "knowledge:compile", state: "in-progress", line: 2 },
           { id: "CO-3.3", title: "migração legacy", state: "pending", line: 3 },
@@ -684,10 +686,10 @@ describe("workBrief · próxima ação estruturada [work]", () => {
         ],
       },
       markReadinessEligibility: { status: "available", reasons: [] },
-      finishSubcheckpointEligibility: { status: "available", reasons: [] },
+      finishStepEligibility: { status: "available", reasons: [] },
     });
     expect(b.mode).toBe("implement_checkpoint");
-    expect(b.object.subCheckpoint?.id).toBe("CO-3.2");
+    expect(b.object.step?.id).toBe("CO-3.2");
     expect(b.nextAction.description).toBe(
       "Implementar o checkpoint ativo CO-3.2 — knowledge:compile."
     );
@@ -698,28 +700,28 @@ describe("workBrief · próxima ação estruturada [work]", () => {
     );
   });
 
-  it("[39] transição pendente (ativo com readiness) ⇒ advance-subcheckpoint (concluir o ativo, ativar o próximo)", () => {
+  it("[39] transição pendente (ativo com readiness) ⇒ advance-step (concluir o ativo, ativar o próximo)", () => {
     const b = derive({
       nextAction: nextAction("investigate-checkpoint"),
       facts: facts({
         lifecycle: { ...settled },
-        subCheckpoints: subs([
+        steps: subs([
           { id: "CO-3.1", state: "in-progress", readiness: "ready-for-transition" },
           { id: "CO-3.2", state: "pending" },
         ]),
       }),
     });
-    expect(b.mode).toBe("prepare_subcheckpoint_transition");
+    expect(b.mode).toBe("prepare_step_transition");
     expect(b.nextAction.description).toBe("Concluir CO-3.1 e ativar CO-3.2.");
     expect(commandOf(b, "read-only")).toBe(
-      "npm run flow -- decide --type advance-subcheckpoint --brief-only"
+      "npm run flow -- decide --type advance-step --brief-only"
     );
   });
 
-  it("[39b] readiness terminal (sem próximo pendente) ⇒ prepare_close, sem advance-subcheckpoint", () => {
+  it("[39b] readiness terminal (sem próximo pendente) ⇒ prepare_close, sem advance-step", () => {
     const f = facts({
       lifecycle: { ...settled },
-      subCheckpoints: subs([
+      steps: subs([
         { id: "CO-3.1", state: "done" },
         { id: "CO-3.2", state: "in-progress", readiness: "ready-for-transition" },
       ]),
@@ -729,15 +731,13 @@ describe("workBrief · próxima ação estruturada [work]", () => {
       facts: f,
       advanceEligibility: {
         status: "not-applicable",
-        reasons: ["Não há próximo sub-checkpoint pendente após CO-3.2."],
+        reasons: ["Não há próxima etapa pendente após CO-3.2."],
       },
     });
     expect(b.mode).toBe("prepare_close");
     expect(b.nextAction.decisionType).toBe("human-gate");
     expect(commandOf(b, "read-only")).toBe("npm run flow -- decide --type human-gate --brief-only");
-    expect(b.nextAction.commands.some((c) => c.command.includes("advance-subcheckpoint"))).toBe(
-      false
-    );
+    expect(b.nextAction.commands.some((c) => c.command.includes("advance-step"))).toBe(false);
   });
 
   it("[40] await_revalidation ⇒ close-dispositions (decisão da owner) com comando derivado", () => {
@@ -808,7 +808,7 @@ describe("workBrief · próxima ação estruturada [work]", () => {
     const b = derive({
       nextAction: nextAction("investigate-checkpoint"),
       facts: facts({
-        subCheckpoints: subs([
+        steps: subs([
           { id: "CO-3.1", state: "done" },
           { id: "CO-3.2", state: "in-progress", line: 2 },
           { id: "CO-3.3", state: "pending", line: 3 },
@@ -821,7 +821,7 @@ describe("workBrief · próxima ação estruturada [work]", () => {
         ],
       },
       markReadinessEligibility: { status: "available", reasons: [] },
-      finishSubcheckpointEligibility: { status: "available", reasons: [] },
+      finishStepEligibility: { status: "available", reasons: [] },
     });
     const out = renderWorkBrief({
       snapshot: {
@@ -846,7 +846,7 @@ describe("workBrief · próxima ação estruturada [work]", () => {
     const b = derive({
       nextAction: nextAction("investigate-checkpoint"),
       facts: facts({
-        subCheckpoints: subs([
+        steps: subs([
           { id: "CO-3.1", state: "done" },
           {
             id: "CO-3.2",
@@ -865,15 +865,15 @@ describe("workBrief · próxima ação estruturada [work]", () => {
         ],
       },
     });
-    expect(b.mode).toBe("prepare_subcheckpoint_transition");
+    expect(b.mode).toBe("prepare_step_transition");
     // bloqueado: nenhum comando recomendado (executável); só inspeção read-only.
     expect(commandOf(b, "recommended")).toBeUndefined();
     expect(b.nextAction.commands).toHaveLength(1);
     expect(b.nextAction.commands[0].role).toBe("read-only");
     expect(commandOf(b, "read-only")).toBe(
-      "npm run flow -- decide --type advance-subcheckpoint --brief-only"
+      "npm run flow -- decide --type advance-step --brief-only"
     );
-    expect(b.nextAction.decisionType).toBe("advance-subcheckpoint");
+    expect(b.nextAction.decisionType).toBe("advance-step");
     expect(b.nextAction.description).toMatch(/BLOQUEADO/);
     // requisito NOMEADO explicitamente.
     expect(b.nextAction.basis.join(" ")).toMatch(/verificação\(ões\) pendente/);
@@ -883,7 +883,7 @@ describe("workBrief · próxima ação estruturada [work]", () => {
     const available = derive({
       nextAction: nextAction("investigate-checkpoint"),
       facts: facts({
-        subCheckpoints: subs([
+        steps: subs([
           { id: "CO-3.1", state: "done" },
           { id: "CO-3.2", state: "in-progress", line: 2, readiness: "ready-for-transition" },
           { id: "CO-3.3", state: "pending", line: 3 },
@@ -891,13 +891,13 @@ describe("workBrief · próxima ação estruturada [work]", () => {
       }),
       advanceEligibility: { status: "available", reasons: [] },
     });
-    expect(available.nextAction.decisionType).toBe("advance-subcheckpoint");
+    expect(available.nextAction.decisionType).toBe("advance-step");
     expect(commandOf(available, "recommended")).toBe("npm run flow -- decide");
 
     const blocked = derive({
       nextAction: nextAction("investigate-checkpoint"),
       facts: facts({
-        subCheckpoints: subs([
+        steps: subs([
           { id: "CO-3.1", state: "done" },
           { id: "CO-3.2", state: "in-progress", line: 2, readiness: "ready-for-transition" },
           { id: "CO-3.3", state: "pending", line: 3 },

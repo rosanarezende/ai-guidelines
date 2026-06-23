@@ -1,13 +1,13 @@
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
-import { FinishSubcheckpointDefinition } from "./finishSubcheckpoint.js";
+import { FinishStepDefinition } from "./finishStep.js";
 import { DecisionGitOps } from "./model.js";
 import { DecisionSnapshot } from "./snapshot.js";
-import { HandoffSubCheckpoint } from "../handoffFacts.js";
+import { HandoffStep } from "../handoffFacts.js";
 import { makeDecisionSnapshot, makeHandoffFacts } from "../../test-utils/decisionFixtures.js";
 
-const def = new FinishSubcheckpointDefinition();
+const def = new FinishStepDefinition();
 const OWNER = { name: "Rosana", email: "rosanarezende.com@gmail.com", handle: "@rosanarezende" };
 
 const SETTLED = {
@@ -21,7 +21,7 @@ const SETTLED = {
   gateDecision: null,
 } as const;
 
-function subs(list: Array<Partial<HandoffSubCheckpoint>>): HandoffSubCheckpoint[] {
+function subs(list: Array<Partial<HandoffStep>>): HandoffStep[] {
   return list.map((o, i) => ({
     id: o.id ?? `CO-10.${i + 1}`,
     title: o.title ?? "t",
@@ -39,12 +39,12 @@ function snap(over: Partial<DecisionSnapshot> = {}): DecisionSnapshot {
     openFindings: [],
     lanes: [],
     workingTreeState: "clean",
-    subCheckpoints: subs([
+    steps: subs([
       { id: "CO-10.3", state: "done", line: 103 },
       { id: "CO-10.4", title: "dogfood ponta a ponta", state: "in-progress", line: 104 },
       { id: "CO-10.5", title: "falsificação + Human Gate", state: "pending", line: 105 },
     ]),
-    subCheckpointDeliveryEvidence: {
+    stepDeliveryEvidence: {
       status: "present",
       activeId: "CO-10.4",
       activationCommit: "aaaaaaa",
@@ -76,7 +76,7 @@ class FakeGit implements DecisionGitOps {
   }
 }
 
-describe("finish-subcheckpoint · elegibilidade [decide]", () => {
+describe("finish-step · elegibilidade [decide]", () => {
   it("sem readiness persistida, mas critérios satisfeitos e próximo pendente ⇒ available", () => {
     const av = def.detect(snap());
     expect(av.status).toBe("available");
@@ -86,7 +86,7 @@ describe("finish-subcheckpoint · elegibilidade [decide]", () => {
   it("com readiness já existente, usa a mesma elegibilidade de advance ⇒ available", () => {
     const av = def.detect(
       snap({
-        subCheckpoints: subs([
+        steps: subs([
           { id: "CO-10.3", state: "done", line: 103 },
           {
             id: "CO-10.4",
@@ -111,10 +111,10 @@ describe("finish-subcheckpoint · elegibilidade [decide]", () => {
     expect(av.reasons.join(" ")).toMatch(/pendente/);
   });
 
-  it("terminal sem próximo pendente não usa finish-subcheckpoint", () => {
+  it("terminal sem próximo pendente não usa finish-step", () => {
     const av = def.detect(
       snap({
-        subCheckpoints: subs([
+        steps: subs([
           { id: "CO-10.4", state: "done", line: 104 },
           { id: "CO-10.5", state: "in-progress", line: 105 },
         ]),
@@ -125,7 +125,7 @@ describe("finish-subcheckpoint · elegibilidade [decide]", () => {
   });
 });
 
-describe("finish-subcheckpoint · plano e apply [decide]", () => {
+describe("finish-step · plano e apply [decide]", () => {
   const TASKS = `# Tasks
 
 - [/] **Checkpoint co-flow-convergence** (nó \`co-flow-convergence\`) — ativo.

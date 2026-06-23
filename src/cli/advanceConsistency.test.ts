@@ -1,10 +1,10 @@
 /**
  * Integração `work` × `decide` — INVARIANTE de consistência da transição de
- * sub-checkpoint (refinamento do dogfood do CO-3.2).
+ * etapa (refinamento do dogfood do CO-3.2).
  *
  * Dogfood real (2026-06-14): CO-3.2 `[/]`, CO-3.3 `[ ]`, implementação entregue,
  * PR #42 Draft. `npm run flow -- work` recomendava `decide` para concluir CO-3.2 e
- * ativar CO-3.3, mas o menu de `decide` OCULTAVA `advance-subcheckpoint` como
+ * ativar CO-3.3, mas o menu de `decide` OCULTAVA `advance-step` como
  * `not-applicable` (guard `done.length > 0`) e mostrava só o Human Gate
  * indisponível. Causa estrutural: `work` e `decide` derivavam a elegibilidade da
  * transição em LUGARES diferentes, com regras divergentes.
@@ -17,8 +17,8 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { deriveWorkBrief, WorkBrief } from "./workBrief.js";
-import { deriveNextAction, HandoffSubCheckpoint } from "./handoffFacts.js";
-import { AdvanceSubcheckpointDefinition } from "./decide/advanceSubcheckpoint.js";
+import { deriveNextAction, HandoffStep } from "./handoffFacts.js";
+import { AdvanceStepDefinition } from "./decide/advanceStep.js";
 import { buildDecisionRegistry } from "./decide/registry.js";
 import { parseDecideArgs, runDecide } from "./decide/decide.js";
 import { DecisionSnapshot } from "./decide/snapshot.js";
@@ -29,7 +29,7 @@ const WORK_POLICY: WorkPolicy = parseWorkPolicy(
   fs.readFileSync(path.join(process.cwd(), ".core/governance/work-policy.yml"), "utf-8")
 );
 
-const def = new AdvanceSubcheckpointDefinition();
+const def = new AdvanceStepDefinition();
 const registry = buildDecisionRegistry();
 
 /** Auditoria fechada do CO-3.1 (3 dispositions CLOSED 3/0; nenhuma aberta). */
@@ -54,7 +54,7 @@ const AUDIT_SETTLED = {
   gateDecision: null,
 } as const;
 
-function realSubs(): HandoffSubCheckpoint[] {
+function realSubs(): HandoffStep[] {
   return [
     { id: "CO-3.1", title: "Constraint + EnforcementBinding", state: "done", line: 101 },
     {
@@ -75,11 +75,11 @@ function realSubs(): HandoffSubCheckpoint[] {
  * variar UM fato (ex.: CI pendente) preservando o resto.
  */
 function realSnapshot(over: { ciPending?: number; ciFail?: number } = {}): DecisionSnapshot {
-  // Fonte ÚNICA dos sub-checkpoints: os HandoffFacts (decide projeta
-  // snapshot.subCheckpoints === facts.subCheckpoints; `work` lê facts).
+  // Fonte ÚNICA das etapas: os HandoffFacts (decide projeta
+  // snapshot.steps === facts.steps; `work` lê facts).
   const facts = makeHandoffFacts({
     lifecycle: { ...AUDIT_SETTLED },
-    subCheckpoints: realSubs(),
+    steps: realSubs(),
     pullRequest: {
       ...makeHandoffFacts().pullRequest!,
       isDraft: true,
@@ -93,14 +93,14 @@ function realSnapshot(over: { ciPending?: number; ciFail?: number } = {}): Decis
     closedFindingsCount: 3,
     workingTreeState: "clean",
     gateExists: false,
-    subCheckpoints: facts.subCheckpoints,
+    steps: facts.steps,
   });
 }
 
 function terminalSnapshot(): DecisionSnapshot {
   const facts = makeHandoffFacts({
     lifecycle: { ...AUDIT_SETTLED },
-    subCheckpoints: [
+    steps: [
       { id: "CO-3.1", title: "Constraint + EnforcementBinding", state: "done", line: 101 },
       { id: "CO-3.2", title: "knowledge:compile + manifesto/paridade", state: "done", line: 102 },
       { id: "CO-3.3", title: "migração e remoção do substrato legacy", state: "done", line: 103 },
@@ -125,7 +125,7 @@ function terminalSnapshot(): DecisionSnapshot {
     closedFindingsCount: 3,
     workingTreeState: "clean",
     gateExists: false,
-    subCheckpoints: facts.subCheckpoints,
+    steps: facts.steps,
   });
 }
 
@@ -155,19 +155,19 @@ function recordingLogger() {
 }
 
 describe("consistência work×decide · estado real CO-3.2 [/] (dogfood CO-3.2)", () => {
-  it("[1] decide: advance-subcheckpoint é AVAILABLE no estado real (não mais oculto)", () => {
+  it("[1] decide: advance-step é AVAILABLE no estado real (não mais oculto)", () => {
     const av = def.detect(realSnapshot());
     expect(av.status).toBe("available");
     expect(av.hint).toMatch(/CO-3\.2 concluível; CO-3\.3 é o próximo/);
   });
 
-  it("[2] work: recomenda advance-subcheckpoint (concluir CO-3.2 e ativar CO-3.3)", () => {
+  it("[2] work: recomenda advance-step (concluir CO-3.2 e ativar CO-3.3)", () => {
     const b = workBriefFor(realSnapshot());
-    expect(b.mode).toBe("prepare_subcheckpoint_transition");
+    expect(b.mode).toBe("prepare_step_transition");
     expect(b.object.transition?.conclude?.id).toBe("CO-3.2");
     expect(b.object.transition?.activate.id).toBe("CO-3.3");
     expect(b.nextAction.description).toBe("Concluir CO-3.2 e ativar CO-3.3.");
-    expect(b.nextAction.decisionType).toBe("advance-subcheckpoint");
+    expect(b.nextAction.decisionType).toBe("advance-step");
     expect(b.nextAction.commands.find((c) => c.role === "recommended")?.command).toBe(
       "npm run flow -- decide"
     );
@@ -186,7 +186,7 @@ describe("consistência work×decide · estado real CO-3.2 [/] (dogfood CO-3.2)"
     }
   });
 
-  it("[4] decide menu: advance-subcheckpoint APARECE como Disponível (brief-only)", async () => {
+  it("[4] decide menu: advance-step APARECE como Disponível (brief-only)", async () => {
     const { lines, logger } = recordingLogger();
     const code = await runDecide("/x", parseDecideArgs(["--brief-only"]), {
       logger,
@@ -197,29 +197,29 @@ describe("consistência work×decide · estado real CO-3.2 [/] (dogfood CO-3.2)"
     expect(code).toBe(0);
     const out = lines.join("\n");
     // listado no menu (não omitido como not-applicable) e marcado Disponível.
-    expect(out).toMatch(/Iniciar o próximo sub-checkpoint/);
+    expect(out).toMatch(/Iniciar o próxima etapa/);
     expect(out).toMatch(/Disponível/);
     // o Human Gate continua presente como indisponível (Draft).
     expect(out).toMatch(/Human Gate/);
   });
 
-  it("[5] decide direto --type advance-subcheckpoint --brief-only EXPLICA available", async () => {
+  it("[5] decide direto --type advance-step --brief-only EXPLICA available", async () => {
     const { lines, logger } = recordingLogger();
     const code = await runDecide(
       "/x",
-      parseDecideArgs(["--type", "advance-subcheckpoint", "--brief-only"]),
+      parseDecideArgs(["--type", "advance-step", "--brief-only"]),
       { logger, registry: buildDecisionRegistry(), collect: () => realSnapshot(), remote: null }
     );
     expect(code).toBe(0);
     const out = lines.join("\n");
-    expect(out).toMatch(/Iniciar o próximo sub-checkpoint/);
+    expect(out).toMatch(/Iniciar o próxima etapa/);
     expect(out).toMatch(/concluir CO-3\.2 e ativar CO-3\.3/);
     // available ⇒ NÃO renderiza o bloco "não pode ser exercida/não se aplica".
     expect(out).not.toMatch(/ainda não pode ser exercida|não se aplica agora/);
   });
 
   it("[6] preserva CO-3.2 [/] e CO-3.3 [ ] — o teste é read-only (nenhuma escrita)", () => {
-    const subs = realSnapshot().subCheckpoints;
+    const subs = realSnapshot().steps;
     expect(subs.find((s) => s.id === "CO-3.2")?.state).toBe("in-progress");
     expect(subs.find((s) => s.id === "CO-3.3")?.state).toBe("pending");
   });
@@ -235,7 +235,7 @@ describe("consistência work×decide · transição BLOQUEADA (requisito nomeado
   it("[8] CI pendente: work NÃO recomenda advance como executável (só inspeção read-only)", () => {
     const snapshot = realSnapshot({ ciPending: 2 });
     const b = workBriefFor(snapshot);
-    expect(b.nextAction.decisionType).toBe("advance-subcheckpoint");
+    expect(b.nextAction.decisionType).toBe("advance-step");
     expect(b.nextAction.commands.find((c) => c.role === "recommended")).toBeUndefined();
     expect(b.nextAction.commands).toHaveLength(1);
     expect(b.nextAction.commands[0].role).toBe("read-only");
@@ -249,12 +249,12 @@ describe("consistência work×decide · transição BLOQUEADA (requisito nomeado
     const recommendsExecutable = b.nextAction.commands.some((c) => c.role === "recommended");
     expect(recommendsExecutable).toBe(false);
     // e o registry real concorda: a mesma decisão está blocked.
-    expect(registry.resolve("advance-subcheckpoint")!.detect(snapshot).status).toBe("blocked");
+    expect(registry.resolve("advance-step")!.detect(snapshot).status).toBe("blocked");
   });
 
   it("[10] CI pendente: decide menu mostra advance como Indisponível com o requisito; direto explica blocked", async () => {
     const { lines, logger } = recordingLogger();
-    await runDecide("/x", parseDecideArgs(["--type", "advance-subcheckpoint", "--brief-only"]), {
+    await runDecide("/x", parseDecideArgs(["--type", "advance-step", "--brief-only"]), {
       logger,
       registry: buildDecisionRegistry(),
       collect: () => realSnapshot({ ciPending: 2 }),
@@ -266,8 +266,8 @@ describe("consistência work×decide · transição BLOQUEADA (requisito nomeado
   });
 });
 
-describe("consistência work×decide · terminal do último sub-checkpoint", () => {
-  it("[11] decide menu omite advance-subcheckpoint e mantém Human Gate bloqueado por Draft", async () => {
+describe("consistência work×decide · terminal do última etapa", () => {
+  it("[11] decide menu omite advance-step e mantém Human Gate bloqueado por Draft", async () => {
     const { lines, logger } = recordingLogger();
     const code = await runDecide("/x", parseDecideArgs(["--brief-only"]), {
       logger,
@@ -277,16 +277,16 @@ describe("consistência work×decide · terminal do último sub-checkpoint", () 
     });
     expect(code).toBe(0);
     const out = lines.join("\n");
-    expect(out).not.toMatch(/Iniciar o próximo sub-checkpoint/);
+    expect(out).not.toMatch(/Iniciar o próxima etapa/);
     expect(out).toMatch(/Human Gate/);
     expect(out).toMatch(/Draft/);
   });
 
-  it("[12] work projeta prepare_close, não advance-subcheckpoint", () => {
+  it("[12] work projeta prepare_close, não advance-step", () => {
     const snapshot = terminalSnapshot();
     const b = workBriefFor(snapshot);
     expect(b.mode).toBe("prepare_close");
     expect(b.nextAction.decisionType).toBe("human-gate");
-    expect(b.nextAction.commands.some((c) => /advance-subcheckpoint/.test(c.command))).toBe(false);
+    expect(b.nextAction.commands.some((c) => /advance-step/.test(c.command))).toBe(false);
   });
 });

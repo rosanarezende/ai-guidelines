@@ -2,7 +2,7 @@ import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
 import { execFileSync } from "node:child_process";
-import { collectSubCheckpointDeliveryEvidence } from "./subCheckpointDeliveryEvidence.js";
+import { collectStepDeliveryEvidence } from "./stepDeliveryEvidence.js";
 
 function git(repo: string, args: readonly string[]): string {
   return execFileSync("git", [...args], {
@@ -34,8 +34,8 @@ function makeRepo(): string {
 
 const TASKS = ".governance/specs/0024-context-architecture/tasks.md";
 
-describe("sub-checkpoint delivery evidence", () => {
-  it("bloqueia readiness quando o sub-checkpoint acabou de ser ativado", () => {
+describe("etapa delivery evidence", () => {
+  it("bloqueia readiness quando a etapa acabou de ser ativado", () => {
     const repo = makeRepo();
     write(
       repo,
@@ -47,7 +47,7 @@ describe("sub-checkpoint delivery evidence", () => {
     );
     const activation = commit(repo, "docs(spec-0024): avança co-flow-convergence para CO-10.3");
 
-    const evidence = collectSubCheckpointDeliveryEvidence(repo, TASKS, "CO-10.3");
+    const evidence = collectStepDeliveryEvidence(repo, TASKS, "CO-10.3");
 
     expect(evidence).toEqual({
       status: "missing",
@@ -73,7 +73,7 @@ describe("sub-checkpoint delivery evidence", () => {
     );
     commit(repo, "docs(spec-0024): registra dogfood do CO-10.3");
 
-    const evidence = collectSubCheckpointDeliveryEvidence(repo, TASKS, "CO-10.3");
+    const evidence = collectStepDeliveryEvidence(repo, TASKS, "CO-10.3");
 
     expect(evidence).toEqual({
       status: "present",

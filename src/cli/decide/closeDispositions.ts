@@ -48,9 +48,9 @@ function nodeLabel(snapshot: DecisionSnapshot): string {
   return (snapshot.checkpoint ?? "checkpoint").replace(/^checkpoint-/, "");
 }
 
-/** Sub-checkpoint pendente seguinte (o que vira "próxima tarefa"). */
-function nextPendingSubCheckpoint(snapshot: DecisionSnapshot): string | null {
-  const pending = snapshot.subCheckpoints.find((s) => s.state === "pending");
+/** Etapa pendente seguinte (o que vira "próxima tarefa"). */
+function nextPendingStep(snapshot: DecisionSnapshot): string | null {
+  const pending = snapshot.steps.find((s) => s.state === "pending");
   return pending ? pending.id : null;
 }
 
@@ -346,7 +346,7 @@ export class CloseDispositionsDefinition implements HumanDecisionDefinition {
       path: toPosix(snapshot.lanes.find((l) => l.role === f.role)?.reviewFile ?? "?"),
       description: `${f.localId}: open → accepted`,
     }));
-    const nextPending = nextPendingSubCheckpoint(snapshot);
+    const nextPending = nextPendingStep(snapshot);
     return {
       ...base,
       mutating: true,
@@ -369,8 +369,8 @@ export class CloseDispositionsDefinition implements HumanDecisionDefinition {
       ],
       nextHuman: [
         nextPending
-          ? `O próximo sub-checkpoint pendente (${nextPending}) passa a ser a tarefa seguinte.`
-          : "O próximo sub-checkpoint pendente passa a ser a tarefa seguinte.",
+          ? `A próxima etapa pendente (${nextPending}) passa a ser a tarefa seguinte.`
+          : "A próxima etapa pendente passa a ser a tarefa seguinte.",
         "Nada de Ready, Human Gate, gate artifact, merge ou próximo PR foi autorizado.",
       ],
       note: [],

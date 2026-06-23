@@ -6,7 +6,7 @@ import path from "node:path";
  *
  * Contrato:
  *  - a superfície PÚBLICA (consumidor) usa `npx ai-guidelines …` e começa pelo guia;
- *  - identificadores internos (PR/Spec/CO-/sub-checkpoint) não vazam no público;
+ *  - identificadores internos (PR/Spec/CO-) não vazam no público;
  *  - a home aponta para experiências do simulador — a pessoa não precisa decorar comandos.
  */
 
@@ -26,7 +26,6 @@ function splitAtMarker(source: string): { publicPart: string; contributorPart: s
 const INTERNAL_PATTERNS: readonly RegExp[] = [
   /Spec 0024/,
   /CO-10/,
-  /sub-checkpoint/i,
   /#43\b/,
   /\b0024\b/,
   /\b0023\b/,

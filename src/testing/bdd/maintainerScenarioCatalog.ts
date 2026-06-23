@@ -72,14 +72,14 @@ export const MAINTAINER_BDD_SCENARIOS: readonly MaintainerBddScenario[] = [
     persona: "owner",
     area: "flow",
     journey: "decisao governada",
-    given: ["sub-checkpoint ativo", "findings ou CI ainda pendentes", "sem readiness declarada"],
+    given: ["etapa ativa", "findings ou CI ainda pendentes", "sem readiness declarada"],
     when: ["a pessoa consulta work, decide ou o wizard"],
     then: [
       "todos mostram o mesmo bloqueio",
-      "advance-subcheckpoint não aparece como executável",
+      "advance-step não aparece como executável",
       "Human Gate permanece proibido antes do momento correto",
     ],
-    artifacts: ["src/cli/flow/GovernedFlow.ts", "src/cli/decide/advanceSubcheckpoint.ts"],
+    artifacts: ["src/cli/flow/GovernedFlow.ts", "src/cli/decide/advanceStep.ts"],
     evidence: {
       testFile: "src/cli/flow/GovernedFlow.test.ts",
       testName: "findings abertos e CI pendente bloqueiam readiness pela fonte comum",
@@ -87,26 +87,22 @@ export const MAINTAINER_BDD_SCENARIOS: readonly MaintainerBddScenario[] = [
     },
   },
   {
-    id: "flow-terminal-subcheckpoint",
-    title: "Último sub-checkpoint pronto não tenta avançar para um item inexistente",
+    id: "flow-terminal-step",
+    title: "Última etapa pronta não tenta avançar para um item inexistente",
     persona: "owner",
     area: "flow",
     journey: "fechamento de checkpoint",
-    given: [
-      "último sub-checkpoint ativo",
-      "readiness declarada",
-      "nenhum próximo sub-checkpoint pendente",
-    ],
+    given: ["última etapa ativa", "readiness declarada", "nenhuma próxima etapa pendente"],
     when: ["o runtime deriva a próxima ação"],
     then: [
       "o próximo movimento vira fechamento do checkpoint",
-      "advance-subcheckpoint não é recomendado indevidamente",
+      "advance-step não é recomendado indevidamente",
       "Human Gate continua separado de Ready e merge",
     ],
     artifacts: ["src/cli/flow/GovernedFlow.ts", "src/cli/decide/humanGate.ts"],
     evidence: {
       testFile: "src/cli/flow/GovernedFlow.test.ts",
-      testName: "último sub-checkpoint pronto não recomenda advance-subcheckpoint",
+      testName: "última etapa pronta não recomenda advance-step",
       command: "npx ai-guidelines decide --brief-only",
     },
   },
@@ -153,7 +149,7 @@ export const MAINTAINER_BDD_SCENARIOS: readonly MaintainerBddScenario[] = [
     then: [
       "o tarball é criado e instalado em consumidor temporário",
       "o bin publicado é exercitado",
-      "smoke continua útil como etapa final de pacote",
+      "smoke continua útil coma etapa final de pacote",
     ],
     artifacts: ["src/cli/consumerJourney.ts", "tests/smoke"],
     evidence: {

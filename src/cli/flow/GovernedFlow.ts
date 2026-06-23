@@ -1,24 +1,24 @@
-import type { HandoffSubCheckpoint } from "../handoffFacts.js";
-import { SUBCHECKPOINT_READINESS } from "../handoffFacts.js";
+import type { HandoffStep } from "../handoffFacts.js";
+import { STEP_READINESS } from "../handoffFacts.js";
 import type { DecisionAvailability } from "../decide/model.js";
 import type { DecisionSnapshot } from "../decide/snapshot.js";
 import { findDecisionType } from "../../infrastructure/yaml/humanDecisionPolicyReader.js";
 import {
-  ADVANCE_SUBCHECKPOINT_ID,
+  ADVANCE_STEP_ID,
   deriveAdvanceEligibility,
   type AdvanceEligibilityFacts,
 } from "../decide/advanceEligibility.js";
 import type { ReadyCheckSnapshot } from "../prReadyCheck.js";
-import type { SubCheckpointDeliveryEvidence } from "./subCheckpointDeliveryEvidence.js";
+import type { StepDeliveryEvidence } from "./stepDeliveryEvidence.js";
 
 export type GovernedFlowActionId =
   | "close-dispositions"
-  | "finish-subcheckpoint"
+  | "finish-step"
   | "mark-readiness"
-  | "advance-subcheckpoint"
+  | "advance-step"
   | "pr-ready"
   | "human-gate"
-  | "open-next-node"
+  | "open-next-topology-node"
   | "request-advisory-review"
   | "review-insight-candidates";
 
@@ -66,7 +66,7 @@ export interface HumanSummary {
 
 export interface MarkReadinessFacts {
   readonly policyDeclared: boolean;
-  readonly subCheckpoints: readonly HandoffSubCheckpoint[];
+  readonly steps: readonly HandoffStep[];
   readonly openFindings: number;
   readonly openBlocking: number;
   readonly someFixAwaitingRevalidation: boolean;
@@ -79,20 +79,20 @@ export interface MarkReadinessFacts {
   readonly ciFail: number;
   readonly ciPending: number;
   readonly gateExists: boolean;
-  readonly deliveryEvidence: SubCheckpointDeliveryEvidence;
+  readonly deliveryEvidence: StepDeliveryEvidence;
 }
 
-export interface FinishSubcheckpointFacts {
+export interface FinishStepFacts {
   readonly policyDeclared: boolean;
-  readonly subCheckpoints: readonly HandoffSubCheckpoint[];
+  readonly steps: readonly HandoffStep[];
   readonly markReadiness: DecisionAvailability;
-  readonly advanceSubcheckpoint: DecisionAvailability;
+  readonly advanceStep: DecisionAvailability;
 }
 
 export interface HumanGateFacts {
   readonly policyDeclared: boolean;
   readonly gateExists: boolean;
-  readonly subCheckpoints: readonly HandoffSubCheckpoint[];
+  readonly steps: readonly HandoffStep[];
   readonly openFindings: number;
   readonly prObserved: boolean;
   readonly prNumber?: number;
@@ -106,10 +106,10 @@ export interface HumanGateFacts {
   readonly gateDecidabilityOk: boolean | null;
 }
 
-export interface OpenNextNodeFacts {
+export interface OpenNextTopologyNodeFacts {
   readonly policyDeclared: boolean;
   readonly gateApproved: boolean;
-  readonly pendingSubCheckpoints: readonly string[];
+  readonly pendingSteps: readonly string[];
   readonly activeNode: {
     readonly id: string;
     readonly sequence: number | null;
@@ -165,9 +165,9 @@ export interface PrReadyFlowResult {
 }
 
 const MARK_READINESS_ID = "mark-readiness";
-export const FINISH_SUBCHECKPOINT_ID = "finish-subcheckpoint";
+export const FINISH_STEP_ID = "finish-step";
 const HUMAN_GATE_ID = "human-gate";
-export const OPEN_NEXT_NODE_ID = "open-next-node";
+export const OPEN_NEXT_TOPOLOGY_NODE_ID = "open-next-topology-node";
 
 function sameSha(a: string, b: string): boolean {
   const x = a.toLowerCase();
@@ -175,7 +175,7 @@ function sameSha(a: string, b: string): boolean {
   return x.startsWith(y) || y.startsWith(x);
 }
 
-function activeSubCheckpoint(subs: readonly HandoffSubCheckpoint[]): HandoffSubCheckpoint | null {
+function activeStep(subs: readonly HandoffStep[]): HandoffStep | null {
   const active = subs.filter((s) => s.state === "in-progress");
   return active.length === 1 ? active[0] : null;
 }
@@ -228,7 +228,7 @@ export function markReadinessFactsFromDecisionSnapshot(
     policyDeclared:
       snapshot.policy !== null &&
       findDecisionType(snapshot.policy, MARK_READINESS_ID) !== undefined,
-    subCheckpoints: snapshot.subCheckpoints,
+    steps: snapshot.steps,
     openFindings: snapshot.openFindings.length,
     openBlocking: snapshot.openFindings.filter((f) => f.blocking).length,
     someFixAwaitingRevalidation: snapshot.openFindings.some(
@@ -247,7 +247,7 @@ export function markReadinessFactsFromDecisionSnapshot(
     ciFail: pr?.checks.fail ?? 0,
     ciPending: pr?.checks.pending ?? 0,
     gateExists: snapshot.gateExists || snapshot.facts.lifecycle?.gateDecision != null,
-    deliveryEvidence: snapshot.subCheckpointDeliveryEvidence,
+    deliveryEvidence: snapshot.stepDeliveryEvidence,
   };
 }
 
@@ -259,20 +259,20 @@ export function deriveMarkReadinessAvailability(f: MarkReadinessFacts): Decision
       reasons: ["Tipo não declarado na human-decision-policy.yml."],
     };
   }
-  if (f.subCheckpoints.length === 0) {
-    reasons.push("Este checkpoint não tem sub-checkpoints materializados.");
+  if (f.steps.length === 0) {
+    reasons.push("Este checkpoint não tem etapas materializadas.");
   }
-  const active = f.subCheckpoints.filter((s) => s.state === "in-progress");
-  if (active.length === 0) reasons.push("Nenhum sub-checkpoint está em andamento ([/]).");
+  const active = f.steps.filter((s) => s.state === "in-progress");
+  if (active.length === 0) reasons.push("Nenhuma etapa está em andamento ([/]).");
   if (active.length > 1) {
-    reasons.push("Mais de um sub-checkpoint em andamento ([/]) — readiness seria ambígua.");
+    reasons.push("Mais de uma etapa em andamento ([/]) — readiness seria ambígua.");
   }
   const current = active.length === 1 ? active[0] : null;
-  if (current?.readiness === SUBCHECKPOINT_READINESS) {
-    reasons.push(`${current.id} já declarou readiness "${SUBCHECKPOINT_READINESS}".`);
+  if (current?.readiness === STEP_READINESS) {
+    reasons.push(`${current.id} já declarou readiness "${STEP_READINESS}".`);
   }
-  const invalidReadiness = f.subCheckpoints.find(
-    (s) => s.state !== "in-progress" && s.readiness === SUBCHECKPOINT_READINESS
+  const invalidReadiness = f.steps.find(
+    (s) => s.state !== "in-progress" && s.readiness === STEP_READINESS
   );
   if (invalidReadiness) {
     reasons.push(
@@ -311,61 +311,53 @@ export function deriveMarkReadinessAvailability(f: MarkReadinessFacts): Decision
   return {
     status: "available",
     reasons: [],
-    hint: `${activeSubCheckpoint(f.subCheckpoints)!.id} pronto para declarar readiness`,
+    hint: `${activeStep(f.steps)!.id} pronto para declarar readiness`,
   };
 }
 
-export function deriveFinishSubcheckpointAvailability(
-  f: FinishSubcheckpointFacts
-): DecisionAvailability {
+export function deriveFinishStepAvailability(f: FinishStepFacts): DecisionAvailability {
   if (!f.policyDeclared) {
     return {
       status: "not-applicable",
       reasons: ["Tipo não declarado na human-decision-policy.yml."],
     };
   }
-  if (f.subCheckpoints.length === 0) {
-    return { status: "not-applicable", reasons: ["Este checkpoint não tem sub-checkpoints."] };
+  if (f.steps.length === 0) {
+    return { status: "not-applicable", reasons: ["Este checkpoint não tem etapas."] };
   }
-  const active = f.subCheckpoints.filter((s) => s.state === "in-progress");
+  const active = f.steps.filter((s) => s.state === "in-progress");
   if (active.length === 0) {
     return {
       status: "not-applicable",
-      reasons: ["Nenhum sub-checkpoint está em andamento ([/])."],
+      reasons: ["Nenhuma etapa está em andamento ([/])."],
     };
   }
   if (active.length > 1) {
     return {
       status: "blocked",
-      reasons: ["Mais de um sub-checkpoint em andamento ([/]) — conclusão seria ambígua."],
+      reasons: ["Mais de uma etapa em andamento ([/]) — conclusão seria ambígua."],
     };
   }
   const current = active[0];
-  const pendingAfter = f.subCheckpoints.filter(
-    (s) => s.state === "pending" && s.line > current.line
-  );
-  const pendingBefore = f.subCheckpoints.filter(
-    (s) => s.state === "pending" && s.line < current.line
-  );
+  const pendingAfter = f.steps.filter((s) => s.state === "pending" && s.line > current.line);
+  const pendingBefore = f.steps.filter((s) => s.state === "pending" && s.line < current.line);
   if (pendingAfter.length === 0) {
     return {
       status: "not-applicable",
       reasons: [
-        `Não há próximo sub-checkpoint pendente após ${current.id}; use o caminho terminal de fechamento do checkpoint.`,
+        `Não há próxima etapa pendente após ${current.id}; use o caminho terminal de fechamento do checkpoint.`,
       ],
     };
   }
   if (pendingBefore.length > 0) {
     return {
       status: "blocked",
-      reasons: [
-        `Ordem ambígua: há sub-checkpoint pendente antes do ativo (${pendingBefore[0].id}).`,
-      ],
+      reasons: [`Ordem ambígua: há etapa pendente antes da ativa (${pendingBefore[0].id}).`],
     };
   }
 
-  if (current.readiness === SUBCHECKPOINT_READINESS) {
-    if (f.advanceSubcheckpoint.status === "available") {
+  if (current.readiness === STEP_READINESS) {
+    if (f.advanceStep.status === "available") {
       return {
         status: "available",
         reasons: [],
@@ -373,11 +365,11 @@ export function deriveFinishSubcheckpointAvailability(
       };
     }
     return {
-      status: f.advanceSubcheckpoint.status === "not-applicable" ? "blocked" : "blocked",
+      status: f.advanceStep.status === "not-applicable" ? "blocked" : "blocked",
       reasons:
-        f.advanceSubcheckpoint.reasons.length > 0
-          ? f.advanceSubcheckpoint.reasons
-          : ["advance-subcheckpoint ainda não está disponível para este snapshot."],
+        f.advanceStep.reasons.length > 0
+          ? f.advanceStep.reasons
+          : ["Avanço de etapa ainda não está disponível para este snapshot."],
     };
   }
 
@@ -393,7 +385,7 @@ export function deriveFinishSubcheckpointAvailability(
     reasons:
       f.markReadiness.reasons.length > 0
         ? f.markReadiness.reasons
-        : ["Critérios de readiness não puderam ser projetados para o sub-checkpoint ativo."],
+        : ["Critérios de readiness não puderam ser projetados para a etapa ativa."],
   };
 }
 
@@ -402,10 +394,9 @@ export function advanceEligibilityFactsFromDecisionSnapshot(
 ): AdvanceEligibilityFacts {
   const pr = snapshot.facts.pullRequest;
   return {
-    subCheckpoints: snapshot.subCheckpoints,
+    steps: snapshot.steps,
     policyDeclared:
-      snapshot.policy !== null &&
-      findDecisionType(snapshot.policy, ADVANCE_SUBCHECKPOINT_ID) !== undefined,
+      snapshot.policy !== null && findDecisionType(snapshot.policy, ADVANCE_STEP_ID) !== undefined,
     openFindings: snapshot.openFindings.length,
     openBlocking: snapshot.openFindings.filter((f) => f.blocking).length,
     someFixAwaitingRevalidation: snapshot.openFindings.some(
@@ -427,7 +418,7 @@ export function humanGateFactsFromDecisionSnapshot(snapshot: DecisionSnapshot): 
     policyDeclared:
       snapshot.policy !== null && findDecisionType(snapshot.policy, HUMAN_GATE_ID) !== undefined,
     gateExists: snapshot.gateExists,
-    subCheckpoints: snapshot.subCheckpoints,
+    steps: snapshot.steps,
     openFindings: snapshot.openFindings.length,
     prObserved: pr !== null,
     ...(pr ? { prNumber: pr.number } : {}),
@@ -442,20 +433,18 @@ export function humanGateFactsFromDecisionSnapshot(snapshot: DecisionSnapshot): 
   };
 }
 
-export function openNextNodeFactsFromDecisionSnapshot(
+export function openNextTopologyNodeFactsFromDecisionSnapshot(
   snapshot: DecisionSnapshot
-): OpenNextNodeFacts {
+): OpenNextTopologyNodeFacts {
   const pr = snapshot.facts.pullRequest;
   const active = snapshot.facts.activeNode;
   const next = snapshot.facts.nextPlannedNode;
   return {
     policyDeclared:
       snapshot.policy !== null &&
-      findDecisionType(snapshot.policy, OPEN_NEXT_NODE_ID) !== undefined,
+      findDecisionType(snapshot.policy, OPEN_NEXT_TOPOLOGY_NODE_ID) !== undefined,
     gateApproved: snapshot.facts.lifecycle?.gateDecision === "approved",
-    pendingSubCheckpoints: snapshot.subCheckpoints
-      .filter((item) => item.state !== "done")
-      .map((item) => item.id),
+    pendingSteps: snapshot.steps.filter((item) => item.state !== "done").map((item) => item.id),
     activeNode: active
       ? {
           id: active.id,
@@ -495,19 +484,17 @@ export function deriveHumanGateAvailability(f: HumanGateFacts): DecisionAvailabi
     };
   }
   const reasons: string[] = [];
-  for (const sc of f.subCheckpoints) {
+  for (const sc of f.steps) {
     if (sc.state === "pending") reasons.push(`${sc.id} ainda está aberto.`);
   }
-  const activeSub = f.subCheckpoints.find((s) => s.state === "in-progress");
+  const activeSub = f.steps.find((s) => s.state === "in-progress");
   if (activeSub) {
-    const pendingAfter = f.subCheckpoints.filter(
-      (s) => s.state === "pending" && s.line > activeSub.line
-    );
-    if (activeSub.readiness !== SUBCHECKPOINT_READINESS) {
-      reasons.push(`${activeSub.id} ainda não declarou readiness "${SUBCHECKPOINT_READINESS}".`);
+    const pendingAfter = f.steps.filter((s) => s.state === "pending" && s.line > activeSub.line);
+    if (activeSub.readiness !== STEP_READINESS) {
+      reasons.push(`${activeSub.id} ainda não declarou readiness "${STEP_READINESS}".`);
     } else if (pendingAfter.length > 0) {
       reasons.push(
-        `${activeSub.id} declarou readiness, mas ${pendingAfter[0].id} ainda precisa ser ativado por advance-subcheckpoint.`
+        `${activeSub.id} declarou readiness, mas ${pendingAfter[0].id} ainda precisa ser ativado por advance-step.`
       );
     }
   }
@@ -538,7 +525,9 @@ export function deriveHumanGateAvailability(f: HumanGateFacts): DecisionAvailabi
   return reasons.length > 0 ? { status: "blocked", reasons } : { status: "available", reasons: [] };
 }
 
-export function deriveOpenNextNodeAvailability(f: OpenNextNodeFacts): DecisionAvailability {
+export function deriveOpenNextTopologyNodeAvailability(
+  f: OpenNextTopologyNodeFacts
+): DecisionAvailability {
   if (!f.policyDeclared) {
     return {
       status: "not-applicable",
@@ -571,17 +560,21 @@ export function deriveOpenNextNodeAvailability(f: OpenNextNodeFacts): DecisionAv
   }
 
   const reasons: string[] = [];
-  if (f.pendingSubCheckpoints.length > 0) {
-    const first = f.pendingSubCheckpoints[0];
+  if (f.pendingSteps.length > 0) {
+    const first = f.pendingSteps[0];
     reasons.push(
-      `O nó atual ainda tem checkpoint(s) semântico(s) pendente(s), começando por ${first}; abra o próximo PR governado da continuação antes de abrir o nó ${f.nextNode.id}.`
+      `O nó atual ainda tem checkpoint(s) pendente(s) nesta Frente, começando por ${first}; abra o próximo PR governado da continuação antes de abrir o nó da topologia ${f.nextNode.id}.`
     );
   }
   if (f.nextNode.githubPr !== null) {
-    reasons.push(`O próximo nó ${f.nextNode.id} já declara PR #${f.nextNode.githubPr}.`);
+    reasons.push(
+      `O próximo nó da topologia ${f.nextNode.id} já declara PR #${f.nextNode.githubPr}.`
+    );
   }
   if (!f.prObserved) {
-    reasons.push("Estado do PR atual não observado — não é seguro abrir o próximo nó.");
+    reasons.push(
+      "Estado do PR atual não observado — não é seguro abrir o próximo nó da topologia."
+    );
   } else {
     if (f.prDraft) {
       reasons.push("O PR atual ainda está Draft; o Human Gate aprovado pressupõe PR Ready.");
@@ -593,7 +586,9 @@ export function deriveOpenNextNodeAvailability(f: OpenNextNodeFacts): DecisionAv
   }
   if (!f.workingTreeClean) reasons.push("A working tree não está limpa.");
   if (f.behind > 0) {
-    reasons.push("A branch está atrás do remoto — reconcilie antes de abrir o próximo nó.");
+    reasons.push(
+      "A branch está atrás do remoto — reconcilie antes de abrir o próximo nó da topologia."
+    );
   }
   return reasons.length > 0
     ? { status: "blocked", reasons }
@@ -732,17 +727,17 @@ function commandFor(id: GovernedFlowActionId, mutating: boolean): string {
   if (id === "request-advisory-review") return "npm run flow -- review types";
   if (!mutating) return `npm run flow -- decide --type ${id} --brief-only`;
   const decision =
-    id === "finish-subcheckpoint"
+    id === "finish-step"
       ? "finish"
       : id === "mark-readiness"
         ? "mark-ready"
-        : id === "advance-subcheckpoint"
+        : id === "advance-step"
           ? "advance"
           : id === "close-dispositions"
             ? "accept-all"
             : id === "human-gate"
               ? "approve"
-              : id === "open-next-node"
+              : id === "open-next-topology-node"
                 ? "open-node"
                 : "<choice>";
   return `npm run flow -- decide --type ${id} --decision ${decision} --authorization explicit-human-decision --confirm`;
@@ -770,10 +765,10 @@ function currentCheckpointLabel(snapshot: DecisionSnapshot): string {
   return snapshot.checkpoint ?? snapshot.facts.cursor?.checkpoint ?? "checkpoint nao identificado";
 }
 
-function nextPendingSubCheckpoint(
-  subs: readonly HandoffSubCheckpoint[],
-  current: HandoffSubCheckpoint | null
-): HandoffSubCheckpoint | null {
+function nextPendingStep(
+  subs: readonly HandoffStep[],
+  current: HandoffStep | null
+): HandoffStep | null {
   if (!current) return null;
   return (
     subs
@@ -828,7 +823,7 @@ function extractBetween(value: string, start: string, ends: readonly string[]): 
   return extracted.length > 0 ? extracted : null;
 }
 
-function descriptionFromRawText(sub: HandoffSubCheckpoint): string | null {
+function descriptionFromRawText(sub: HandoffStep): string | null {
   if (!sub.text) return null;
   const marker = `**${sub.id} — ${sub.title}**`;
   const markerIndex = sub.text.indexOf(marker);
@@ -839,12 +834,12 @@ function descriptionFromRawText(sub: HandoffSubCheckpoint): string | null {
   return cleaned && cleaned.length > 0 ? sentenceCase(cleaned) : null;
 }
 
-function outputFromRawText(sub: HandoffSubCheckpoint): string | null {
+function outputFromRawText(sub: HandoffStep): string | null {
   if (!sub.text) return null;
   return extractBetween(sub.text, "**Saída:**", ["**Fronteira:**", "**Entradas:**"]);
 }
 
-function objectSummary(sub: HandoffSubCheckpoint | null): HumanObjectSummary | null {
+function objectSummary(sub: HandoffStep | null): HumanObjectSummary | null {
   if (!sub) return null;
   return {
     label: `${sub.id} — ${sub.title}`,
@@ -865,13 +860,13 @@ function deriveHumanSummary(
   flow: Omit<GovernedFlow, "humanSummary">
 ): HumanSummary {
   const pr = snapshot.facts.pullRequest;
-  const current = activeSubCheckpoint(snapshot.subCheckpoints);
-  const next = nextPendingSubCheckpoint(snapshot.subCheckpoints, current);
+  const current = activeStep(snapshot.steps);
+  const next = nextPendingStep(snapshot.steps, current);
   const ready: string[] = [];
   const missing: string[] = [];
   const ciPending = (pr?.checks.pending ?? 0) > 0;
   const ciFailing = (pr?.checks.fail ?? 0) > 0;
-  const nextObjects = snapshot.subCheckpoints
+  const nextObjects = snapshot.steps
     .filter((sub) => current !== null && sub.state === "pending" && sub.line > current.line)
     .sort((a, b) => a.line - b.line)
     .map((sub) => objectSummary(sub))
@@ -898,18 +893,18 @@ function deriveHumanSummary(
   }
 
   if (flow.recommended?.id === "mark-readiness") {
-    missing.push("Falta declarar readiness do sub-checkpoint ativo.");
-  } else if (flow.recommended?.id === "finish-subcheckpoint") {
+    missing.push("Falta declarar readiness da etapa ativa.");
+  } else if (flow.recommended?.id === "finish-step") {
     missing.push(
       current && next
         ? `Falta registrar a decisão governada que encerra ${current.id} e ativa ${next.id}.`
-        : "Falta registrar a decisão governada que encerra o ponto atual."
+        : "Falta registrar a decisão governada que encerra a etapa atual."
     );
-  } else if (flow.recommended?.id === "advance-subcheckpoint") {
-    missing.push("Falta decidir o avanco para o proximo sub-checkpoint.");
+  } else if (flow.recommended?.id === "advance-step") {
+    missing.push("Falta decidir o avanço para a próxima etapa.");
   } else if (flow.recommended?.id === "human-gate") {
     missing.push("Falta decisao humana de Human Gate.");
-  } else if (flow.recommended?.id === "open-next-node") {
+  } else if (flow.recommended?.id === "open-next-topology-node") {
     missing.push("Falta abrir governadamente o proximo no planejado.");
   } else if (flow.recommended?.id === "close-dispositions") {
     missing.push("Falta fechar findings revalidados.");
@@ -943,24 +938,25 @@ function deriveHumanSummary(
 
 function humanNextAction(
   recommendedId: GovernedFlowActionId | null,
-  current: HandoffSubCheckpoint | null,
-  next: HandoffSubCheckpoint | null,
+  current: HandoffStep | null,
+  next: HandoffStep | null,
   snapshot: DecisionSnapshot,
   ciPending: boolean,
   ciFailing: boolean
 ): string {
-  if (recommendedId === "finish-subcheckpoint") {
+  if (recommendedId === "finish-step") {
     if (current && next) return `Encerrar ${current.id} e iniciar ${next.id}.`;
     if (current) return `Encerrar ${current.id}.`;
   }
   if (recommendedId === "mark-readiness" && current) {
     return `Declarar que ${current.id} está pronto para transição.`;
   }
-  if (recommendedId === "advance-subcheckpoint" && next) {
+  if (recommendedId === "advance-step" && next) {
     return `Iniciar ${next.id} — ${next.title}.`;
   }
   if (recommendedId === "human-gate") return "Preparar a decisão humana do checkpoint.";
-  if (recommendedId === "open-next-node") return "Abrir governadamente o próximo nó planejado.";
+  if (recommendedId === "open-next-topology-node")
+    return "Abrir governadamente o próximo nó da topologia.";
   if (recommendedId === "close-dispositions") return "Fechar findings revalidados.";
   if (snapshot.workingTreeState !== "clean")
     return "Finalizar as mudanças locais e deixar a working tree limpa.";
@@ -972,17 +968,16 @@ function humanNextAction(
 export function deriveGovernedFlow(snapshot: DecisionSnapshot): GovernedFlow {
   const mark = deriveMarkReadinessAvailability(markReadinessFactsFromDecisionSnapshot(snapshot));
   const advance = deriveAdvanceEligibility(advanceEligibilityFactsFromDecisionSnapshot(snapshot));
-  const finish = deriveFinishSubcheckpointAvailability({
+  const finish = deriveFinishStepAvailability({
     policyDeclared:
-      snapshot.policy !== null &&
-      findDecisionType(snapshot.policy, FINISH_SUBCHECKPOINT_ID) !== undefined,
-    subCheckpoints: snapshot.subCheckpoints,
+      snapshot.policy !== null && findDecisionType(snapshot.policy, FINISH_STEP_ID) !== undefined,
+    steps: snapshot.steps,
     markReadiness: mark,
-    advanceSubcheckpoint: advance,
+    advanceStep: advance,
   });
   const humanGate = deriveHumanGateAvailability(humanGateFactsFromDecisionSnapshot(snapshot));
-  const openNextNode = deriveOpenNextNodeAvailability(
-    openNextNodeFactsFromDecisionSnapshot(snapshot)
+  const openNextTopologyNode = deriveOpenNextTopologyNodeAvailability(
+    openNextTopologyNodeFactsFromDecisionSnapshot(snapshot)
   );
   const insightCandidates = snapshot.facts.insights.filter(
     (insight) => insight.graduationCandidate
@@ -1013,22 +1008,22 @@ export function deriveGovernedFlow(snapshot: DecisionSnapshot): GovernedFlow {
     action("close-dispositions", "Fechar findings revalidados", closeDispositions, [
       "altera artefato de review/resolution conforme decisão humana",
     ]),
-    action("finish-subcheckpoint", "Concluir ponto atual e iniciar o próximo", finish, [
-      "altera somente markers de sub-checkpoints em tasks.md",
+    action("finish-step", "Concluir etapa atual e iniciar a próxima", finish, [
+      "altera somente marcadores de etapas em tasks.md",
       "valida readiness sem exigir commit intermediário",
     ]),
-    action("mark-readiness", "Declarar readiness do sub-checkpoint ativo", mark, [
+    action("mark-readiness", "Declarar readiness da etapa ativa", mark, [
       "altera somente tasks.md",
-      "não avança sub-checkpoint",
+      "não avança etapa",
     ]),
-    action("advance-subcheckpoint", "Iniciar o próximo sub-checkpoint", advance, [
-      "altera somente markers de sub-checkpoints em tasks.md",
+    action("advance-step", "Iniciar a próxima etapa", advance, [
+      "altera somente marcadores de etapas em tasks.md",
     ]),
     action("human-gate", "Decidir o avanço do checkpoint (Human Gate)", humanGate, [
       "cria gate artifact após decisão humana",
       "não executa merge nem transição automática",
     ]),
-    action("open-next-node", "Abrir o próximo nó planejado", openNextNode, [
+    action("open-next-topology-node", "Abrir o próximo nó da topologia", openNextTopologyNode, [
       "cria branch, PR Draft e reconcilia state/active/tasks",
       "não executa merge",
     ]),
@@ -1050,11 +1045,11 @@ export function deriveGovernedFlow(snapshot: DecisionSnapshot): GovernedFlow {
   ];
   const priority: GovernedFlowActionId[] = [
     "close-dispositions",
-    "finish-subcheckpoint",
+    "finish-step",
     "mark-readiness",
-    "advance-subcheckpoint",
+    "advance-step",
     "human-gate",
-    "open-next-node",
+    "open-next-topology-node",
   ];
   const available = actions.filter((a) => a.availability.status === "available");
   const blocked = actions.filter((a) => a.availability.status === "blocked");
@@ -1065,9 +1060,11 @@ export function deriveGovernedFlow(snapshot: DecisionSnapshot): GovernedFlow {
   const forbidden = [
     ...(advance.status === "available"
       ? []
-      : ["Avançar sub-checkpoint enquanto advance-subcheckpoint estiver bloqueado"]),
+      : ["Avançar etapa enquanto advance-step estiver bloqueado"]),
     ...(humanGate.status === "available" ? [] : ["Executar Human Gate antes dos critérios"]),
-    ...(openNextNode.status === "available" ? [] : ["Abrir próximo nó fora do fluxo governado"]),
+    ...(openNextTopologyNode.status === "available"
+      ? []
+      : ["Abrir próximo nó da topologia fora do fluxo governado"]),
     "Converter PR para Ready fora do fluxo governado",
     "Fazer merge",
   ];

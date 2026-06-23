@@ -1,9 +1,9 @@
 /**
- * Decisão `finish-subcheckpoint` — caminho humano único para o caso comum:
- * critérios de saída satisfeitos + próximo sub-checkpoint pendente.
+ * Decisão `finish-step` — caminho humano único para o caso comum:
+ * critérios de saída satisfeitos + próxima etapa pendente.
  *
  * Diferente de `mark-readiness`, não persiste uma readiness intermediária.
- * Diferente de `advance-subcheckpoint`, não exige que essa readiness já exista
+ * Diferente de `advance-step`, não exige que essa readiness já exista
  * em commit separado. A elegibilidade reaproveita a mesma derivação comum de
  * readiness/advance; o efeito permitido continua sendo só tasks.md.
  */
@@ -22,13 +22,13 @@ import {
   HumanDecisionTechnicalDetail,
 } from "./model.js";
 import { DecisionSnapshot } from "./snapshot.js";
-import { HandoffFacts, parseSubCheckpoints, resolveSubCheckpointWork } from "../handoffFacts.js";
+import { HandoffFacts, parseSteps, resolveStepWork } from "../handoffFacts.js";
 import { advanceTransitionPair, deriveAdvanceEligibility } from "./advanceEligibility.js";
-import { advanceSubCheckpointMarkers } from "./advanceSubcheckpoint.js";
+import { advanceStepMarkers } from "./advanceStep.js";
 import {
-  FINISH_SUBCHECKPOINT_ID,
+  FINISH_STEP_ID,
   advanceEligibilityFactsFromDecisionSnapshot,
-  deriveFinishSubcheckpointAvailability,
+  deriveFinishStepAvailability,
   deriveMarkReadinessAvailability,
   markReadinessFactsFromDecisionSnapshot,
 } from "../flow/GovernedFlow.js";
@@ -54,9 +54,9 @@ function nodeLabel(snapshot: DecisionSnapshot): string {
   return (snapshot.checkpoint ?? "checkpoint").replace(/^checkpoint-/, "");
 }
 
-export class FinishSubcheckpointDefinition implements HumanDecisionDefinition {
-  readonly id = FINISH_SUBCHECKPOINT_ID;
-  readonly title = "Concluir ponto atual e iniciar o próximo";
+export class FinishStepDefinition implements HumanDecisionDefinition {
+  readonly id = FINISH_STEP_ID;
+  readonly title = "Concluir etapa atual e iniciar a próxima";
 
   private policyOf(snapshot: DecisionSnapshot): HumanDecisionTypePolicy | undefined {
     return snapshot.policy ? findDecisionType(snapshot.policy, this.id) : undefined;
@@ -66,16 +66,15 @@ export class FinishSubcheckpointDefinition implements HumanDecisionDefinition {
     const markReadiness = deriveMarkReadinessAvailability(
       markReadinessFactsFromDecisionSnapshot(snapshot)
     );
-    const advanceSubcheckpoint = deriveAdvanceEligibility(
+    const advanceStep = deriveAdvanceEligibility(
       advanceEligibilityFactsFromDecisionSnapshot(snapshot)
     );
-    return deriveFinishSubcheckpointAvailability({
+    return deriveFinishStepAvailability({
       policyDeclared:
-        snapshot.policy !== null &&
-        findDecisionType(snapshot.policy, FINISH_SUBCHECKPOINT_ID) !== undefined,
-      subCheckpoints: snapshot.subCheckpoints,
+        snapshot.policy !== null && findDecisionType(snapshot.policy, FINISH_STEP_ID) !== undefined,
+      steps: snapshot.steps,
       markReadiness,
-      advanceSubcheckpoint,
+      advanceStep,
     });
   }
 
@@ -94,9 +93,8 @@ export class FinishSubcheckpointDefinition implements HumanDecisionDefinition {
   buildBrief(snapshot: DecisionSnapshot, opts: { technical: boolean }): HumanDecisionBrief {
     const policy = this.policyOf(snapshot)!;
     const availability = this.detect(snapshot);
-    const pair = advanceTransitionPair(snapshot.subCheckpoints);
-    const active =
-      pair?.active ?? snapshot.subCheckpoints.find((s) => s.state === "in-progress") ?? null;
+    const pair = advanceTransitionPair(snapshot.steps);
+    const active = pair?.active ?? snapshot.steps.find((s) => s.state === "in-progress") ?? null;
     const next = pair?.next ?? null;
     const lc = snapshot.facts.lifecycle;
     const pr = snapshot.facts.pullRequest;
@@ -106,12 +104,12 @@ export class FinishSubcheckpointDefinition implements HumanDecisionDefinition {
         ? `Concluir ${pair.active.id} e iniciar ${pair.next.id} no checkpoint ${nodeLabel(snapshot)}.`
         : "A conclusão em passo único ainda não está disponível.";
     const whyNow =
-      "Este é o caminho normal de fim de sub-checkpoint interno: o sistema valida readiness como critério e registra a troca de marcadores em uma única decisão humana.";
+      "Este é o caminho normal de fim de etapa: o sistema valida readiness como critério e registra a troca de marcadores em uma única decisão humana.";
 
     const bodyByKey: Record<string, readonly string[]> = {
       completed: active
         ? [`${active.id} — ${active.title}.`]
-        : ["(nenhum sub-checkpoint ativo inequívoco)"],
+        : ["(nenhuma etapa ativa inequívoca)"],
       exit_criteria: [
         availability.status === "available"
           ? "Critérios de saída satisfeitos pela mesma regra que governa readiness/advance."
@@ -125,7 +123,7 @@ export class FinishSubcheckpointDefinition implements HumanDecisionDefinition {
       ],
       next_starts: next
         ? [`Começa ${next.id} — ${next.title}.`]
-        : ["(não há próximo sub-checkpoint pendente)"],
+        : ["(não há próxima etapa pendente)"],
       consequences: policy.consequences,
       not_authorized: policy.notAuthorized,
     };
@@ -191,7 +189,7 @@ export class FinishSubcheckpointDefinition implements HumanDecisionDefinition {
         ...base,
         mutating: false,
         changes: [],
-        preserved: ["tasks.md inalterado", "sub-checkpoint atual permanece ativo"],
+        preserved: ["tasks.md inalterado", "etapa atual permanece ativa"],
         commitMessage: null,
         preconditions: [],
         nextHuman: [],
@@ -200,7 +198,7 @@ export class FinishSubcheckpointDefinition implements HumanDecisionDefinition {
       };
     }
 
-    const pair = advanceTransitionPair(snapshot.subCheckpoints);
+    const pair = advanceTransitionPair(snapshot.steps);
     if (!pair) {
       return {
         ...base,
@@ -237,7 +235,7 @@ export class FinishSubcheckpointDefinition implements HumanDecisionDefinition {
         "PR",
         "código funcional",
         "reviews e gate",
-        "demais sub-checkpoints",
+        "demais etapas",
         "indentação, comentários, encoding e line endings de tasks.md",
       ],
       commitMessage: `docs(spec-${snapshot.specId}): conclui ${pair.active.id} e ativa ${pair.next.id}`,
@@ -249,7 +247,7 @@ export class FinishSubcheckpointDefinition implements HumanDecisionDefinition {
       ],
       nextHuman: [
         `\`npm run flow -- work\` passará a apontar ${pair.next.id} como objeto de IMPLEMENT_CHECKPOINT.`,
-        "A decisão NÃO implementou o próximo sub-checkpoint nem autorizou Ready/Human Gate/gate/merge.",
+        "A decisão NÃO implementou a próxima etapa nem autorizou Ready/Human Gate/gate/merge.",
       ],
       note: [],
       payload,
@@ -276,7 +274,7 @@ export class FinishSubcheckpointDefinition implements HumanDecisionDefinition {
       };
     }
     const before = fs.readFileSync(abs, "utf8");
-    const edited = advanceSubCheckpointMarkers(before, payload.concludeId, payload.activateId);
+    const edited = advanceStepMarkers(before, payload.concludeId, payload.activateId);
     if (!edited.ok) {
       return {
         ok: false,
@@ -286,7 +284,7 @@ export class FinishSubcheckpointDefinition implements HumanDecisionDefinition {
       };
     }
 
-    const newSubs = parseSubCheckpoints(edited.text, payload.checkpoint);
+    const newSubs = parseSteps(edited.text, payload.checkpoint);
     const inProgress = newSubs.filter((s) => s.state === "in-progress");
     const concluded = newSubs.find((s) => s.id === payload.concludeId);
     if (inProgress.length !== 1 || inProgress[0].id !== payload.activateId) {
@@ -295,7 +293,7 @@ export class FinishSubcheckpointDefinition implements HumanDecisionDefinition {
         committed: null,
         pushed: false,
         messages: [
-          "Simulação falhou: o estado projetado não tem exatamente o próximo sub-checkpoint ativo.",
+          "Simulação falhou: o estado projetado não tem exatamente a próxima etapa ativa.",
         ],
       };
     }
@@ -304,13 +302,11 @@ export class FinishSubcheckpointDefinition implements HumanDecisionDefinition {
         ok: false,
         committed: null,
         pushed: false,
-        messages: [
-          "Simulação falhou: o sub-checkpoint atual não ficou concluído no estado projetado.",
-        ],
+        messages: ["Simulação falhou: a etapa atual não ficou concluída no estado projetado."],
       };
     }
-    const projected = resolveSubCheckpointWork({
-      subCheckpoints: newSubs,
+    const projected = resolveStepWork({
+      steps: newSubs,
       lifecycle: {
         reviewDecisions: [],
         requiredReviewRoles: [],
@@ -322,7 +318,7 @@ export class FinishSubcheckpointDefinition implements HumanDecisionDefinition {
         gateDecision: null,
       },
     } as unknown as HandoffFacts);
-    if (projected.kind !== "implement" || projected.subCheckpoint.id !== payload.activateId) {
+    if (projected.kind !== "implement" || projected.step.id !== payload.activateId) {
       return {
         ok: false,
         committed: null,
@@ -358,7 +354,7 @@ export class FinishSubcheckpointDefinition implements HumanDecisionDefinition {
     const messages: string[] = [];
     try {
       ctx.git.add(payload.tasksFile);
-      ctx.git.commit(plan.commitMessage ?? "docs: conclui sub-checkpoint");
+      ctx.git.commit(plan.commitMessage ?? "docs: conclui etapa");
     } catch (e) {
       return {
         ok: false,
@@ -368,7 +364,7 @@ export class FinishSubcheckpointDefinition implements HumanDecisionDefinition {
       };
     }
     const committed = ctx.git.revParseShortHead();
-    messages.push(`sub-checkpoint concluído: ${committed} — "${plan.commitMessage}"`);
+    messages.push(`etapa concluída: ${committed} — "${plan.commitMessage}"`);
     try {
       ctx.git.push();
     } catch (e) {

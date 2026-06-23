@@ -1,6 +1,6 @@
 /**
- * Decisão `advance-subcheckpoint` — a owner conclui o sub-checkpoint atual e ativa
- * o próximo dentro do MESMO checkpoint (transição de estado interno de execução).
+ * Decisão `advance-step` — a owner conclui a etapa atual e ativa a próxima dentro
+ * do MESMO checkpoint (transição de estado interno de execução).
  *
  * NÃO é Human Gate: não conclui o nó, não exerce gate, não mexe na topologia. O
  * efeito altera EXCLUSIVAMENTE dois marcadores em tasks.md (atual `[/]→[x]`,
@@ -29,10 +29,10 @@ import {
   HumanDecisionTechnicalDetail,
 } from "./model.js";
 import { DecisionSnapshot } from "./snapshot.js";
-import { HandoffFacts, parseSubCheckpoints } from "../handoffFacts.js";
-import { resolveSubCheckpointWork } from "../workBrief.js";
+import { HandoffFacts, parseSteps } from "../handoffFacts.js";
+import { resolveStepWork } from "../workBrief.js";
 import {
-  ADVANCE_SUBCHECKPOINT_ID,
+  ADVANCE_STEP_ID,
   AdvanceTransitionPair,
   advanceTransitionPair,
   deriveAdvanceEligibility,
@@ -43,7 +43,7 @@ import {
   HumanDecisionTypePolicy,
 } from "../../infrastructure/yaml/humanDecisionPolicyReader.js";
 
-export { ADVANCE_SUBCHECKPOINT_ID };
+export { ADVANCE_STEP_ID };
 
 interface AdvancePayload {
   readonly tasksFile: string;
@@ -68,7 +68,7 @@ function escapeRe(s: string): string {
 }
 
 /**
- * Edição ESTRUTURADA dos marcadores: localiza a linha pelo id do sub-checkpoint
+ * Edição ESTRUTURADA dos marcadores: localiza a linha pelo id da etapa
  * e troca SOMENTE o caractere do marcador (`/`→`x` no concluído, ` `→`/` no
  * ativado). Não toca newlines (preserva CRLF/LF e bytes do resto da linha).
  *
@@ -76,7 +76,7 @@ function escapeRe(s: string): string {
  * só vale para o `[/]` ativo (invariante de coerência), então um `[x]` jamais o
  * carrega. O ativado nasce `[/]` SEM readiness (ainda em implementação).
  */
-export function advanceSubCheckpointMarkers(
+export function advanceStepMarkers(
   tasksMd: string,
   concludeId: string,
   activateId: string
@@ -108,9 +108,9 @@ export function advanceSubCheckpointMarkers(
   return { text, ok: true, error: null };
 }
 
-export class AdvanceSubcheckpointDefinition implements HumanDecisionDefinition {
-  readonly id = ADVANCE_SUBCHECKPOINT_ID;
-  readonly title = "Iniciar o próximo sub-checkpoint";
+export class AdvanceStepDefinition implements HumanDecisionDefinition {
+  readonly id = ADVANCE_STEP_ID;
+  readonly title = "Iniciar a próxima etapa";
 
   private policyOf(snapshot: DecisionSnapshot): HumanDecisionTypePolicy | undefined {
     return snapshot.policy ? findDecisionType(snapshot.policy, this.id) : undefined;
@@ -118,7 +118,7 @@ export class AdvanceSubcheckpointDefinition implements HumanDecisionDefinition {
 
   /** Par (atual, próximo) quando a forma é exatamente uma transição concluir+ativar. */
   private pair(snapshot: DecisionSnapshot): AdvanceTransitionPair | null {
-    return advanceTransitionPair(snapshot.subCheckpoints);
+    return advanceTransitionPair(snapshot.steps);
   }
 
   detect(snapshot: DecisionSnapshot): DecisionAvailability {
@@ -142,8 +142,7 @@ export class AdvanceSubcheckpointDefinition implements HumanDecisionDefinition {
     const availability = this.detect(snapshot);
     const node = nodeLabel(snapshot);
     const pair = this.pair(snapshot);
-    const active =
-      pair?.active ?? snapshot.subCheckpoints.find((s) => s.state === "in-progress") ?? null;
+    const active = pair?.active ?? snapshot.steps.find((s) => s.state === "in-progress") ?? null;
     const next = pair?.next ?? null;
     const lc = snapshot.facts.lifecycle;
     const pr = snapshot.facts.pullRequest;
@@ -151,15 +150,15 @@ export class AdvanceSubcheckpointDefinition implements HumanDecisionDefinition {
       !next &&
       active !== null &&
       availability.status === "not-applicable" &&
-      availability.reasons.some((r) => r.includes("Não há próximo sub-checkpoint pendente"));
+      availability.reasons.some((r) => r.includes("Não há próxima etapa pendente"));
 
     const summary = next
-      ? `Iniciar o próximo sub-checkpoint do ${node}: concluir ${active!.id} e ativar ${next.id}.`
+      ? `Iniciar a próxima etapa do ${node}: concluir ${active!.id} e ativar ${next.id}.`
       : terminalNoNext
-        ? `A transição interna de sub-checkpoint não se aplica ao terminal do ${node}.`
-        : `O ${node} ainda não pode avançar para o próximo sub-checkpoint.`;
+        ? `A transição interna de etapa não se aplica ao terminal do ${node}.`
+        : `O ${node} ainda não pode avançar para a próxima etapa.`;
     const whyNow = terminalNoNext
-      ? "Não há próximo sub-checkpoint pendente; o próximo movimento governado é fechamento do checkpoint/Ready/Human Gate."
+      ? "Não há próxima etapa pendente; o próximo movimento governado é fechamento do checkpoint/Ready/Human Gate."
       : "O trabalho identifica uma transição interna pendente; ativar o próximo é um ato " +
         "explícito da owner — não um efeito colateral do fechamento dos problemas.";
 
@@ -171,7 +170,7 @@ export class AdvanceSubcheckpointDefinition implements HumanDecisionDefinition {
         ]
       : terminalNoNext
         ? [
-            "Nenhum sub-checkpoint será marcado ou ativado por esta decisão.",
+            "Nenhuma etapa será marcada ou ativada por esta decisão.",
             "Use o fechamento do checkpoint/Ready/Human Gate conforme a política governada.",
           ]
         : policy.consequences;
@@ -179,14 +178,14 @@ export class AdvanceSubcheckpointDefinition implements HumanDecisionDefinition {
     const bodyByKey: Record<string, readonly string[]> = {
       completed: active
         ? [`O ${active.id} entregou: ${active.title}.`]
-        : ["(nenhum sub-checkpoint concluível no estado atual)"],
+        : ["(nenhuma etapa concluível no estado atual)"],
       exit_criteria: [
         active?.readiness === "ready-for-transition"
           ? `${active.id} declarou seus critérios de saída satisfeitos (readiness em tasks.md).`
-          : `${active?.id ?? "O sub-checkpoint atual"} ainda não declarou seus critérios de saída satisfeitos (readiness).`,
+          : `${active?.id ?? "A etapa atual"} ainda não declarou seus critérios de saída satisfeitos (readiness).`,
         lc && lc.openFindings > 0
           ? "Há problemas abertos na auditoria — resolva antes de avançar."
-          : "Sem findings bloqueantes abertos (findings fechados NÃO concluem o sub-checkpoint).",
+          : "Sem findings bloqueantes abertos (findings fechados NÃO concluem a etapa).",
         pr && pr.checks.fail === 0 && pr.checks.pending === 0
           ? "Integração contínua e validações estão verdes."
           : "As validações locais estão verdes.",
@@ -195,9 +194,9 @@ export class AdvanceSubcheckpointDefinition implements HumanDecisionDefinition {
         ? [`Começa o ${next.id} — ${next.title}.`]
         : terminalNoNext
           ? [
-              "(nenhum próximo sub-checkpoint pendente; a próxima ação é fechamento do checkpoint/Ready/Human Gate)",
+              "(nenhuma próxima etapa pendente; a próxima ação é fechamento do checkpoint/Ready/Human Gate)",
             ]
-          : ["(nenhum próximo sub-checkpoint pendente)"],
+          : ["(nenhuma próxima etapa pendente)"],
       consequences,
       not_authorized: policy.notAuthorized,
     };
@@ -283,11 +282,11 @@ export class AdvanceSubcheckpointDefinition implements HumanDecisionDefinition {
         ...base,
         mutating: false,
         changes: [],
-        preserved: ["tasks.md inalterado", "sub-checkpoint atual permanece ativo"],
+        preserved: ["tasks.md inalterado", "etapa atual permanece ativa"],
         commitMessage: null,
         preconditions: [],
         nextHuman: [],
-        note: ["O sub-checkpoint atual permanece ativo. Nada foi alterado."],
+        note: ["A etapa atual permanece ativa. Nada foi alterado."],
         payload: null,
       };
     }
@@ -347,7 +346,7 @@ export class AdvanceSubcheckpointDefinition implements HumanDecisionDefinition {
         "PR",
         "código funcional",
         "reviews e gate",
-        "demais sub-checkpoints",
+        "demais etapas",
         "indentação, comentários, encoding e line endings de tasks.md",
       ],
       commitMessage: `docs(spec-${snapshot.specId}): avança ${nodeLabel(snapshot)} para ${pair.next.id}`,
@@ -359,7 +358,7 @@ export class AdvanceSubcheckpointDefinition implements HumanDecisionDefinition {
       ],
       nextHuman: [
         `\`npm run flow -- work\` passará a apontar ${pair.next.id} como objeto de IMPLEMENT_CHECKPOINT.`,
-        "A transição NÃO implementou o próximo sub-checkpoint nem autorizou Ready/Human Gate/gate/merge.",
+        "A transição NÃO implementou a próxima etapa nem autorizou Ready/Human Gate/gate/merge.",
       ],
       note: [],
       payload,
@@ -388,7 +387,7 @@ export class AdvanceSubcheckpointDefinition implements HumanDecisionDefinition {
     const before = fs.readFileSync(abs, "utf8");
 
     // ── Edição estruturada (em memória) ──────────────────────────────────────
-    const edited = advanceSubCheckpointMarkers(before, payload.concludeId, payload.activateId);
+    const edited = advanceStepMarkers(before, payload.concludeId, payload.activateId);
     if (!edited.ok) {
       return {
         ok: false,
@@ -399,7 +398,7 @@ export class AdvanceSubcheckpointDefinition implements HumanDecisionDefinition {
     }
 
     // ── Validação PROSPECTIVA: o estado projetado deve virar IMPLEMENT com objeto ──
-    const newSubs = parseSubCheckpoints(edited.text, payload.checkpoint);
+    const newSubs = parseSteps(edited.text, payload.checkpoint);
     const inProgress = newSubs.filter((s) => s.state === "in-progress");
     const concluded = newSubs.find((s) => s.id === payload.concludeId);
     if (inProgress.length !== 1 || inProgress[0].id !== payload.activateId) {
@@ -408,7 +407,7 @@ export class AdvanceSubcheckpointDefinition implements HumanDecisionDefinition {
         committed: null,
         pushed: false,
         messages: [
-          "Simulação falhou: o estado projetado não tem exatamente o próximo sub-checkpoint ativo.",
+          "Simulação falhou: o estado projetado não tem exatamente a próxima etapa ativa.",
         ],
       };
     }
@@ -417,13 +416,11 @@ export class AdvanceSubcheckpointDefinition implements HumanDecisionDefinition {
         ok: false,
         committed: null,
         pushed: false,
-        messages: [
-          "Simulação falhou: o sub-checkpoint atual não ficou concluído no estado projetado.",
-        ],
+        messages: ["Simulação falhou: a etapa atual não ficou concluída no estado projetado."],
       };
     }
     const projectedFacts = {
-      subCheckpoints: newSubs,
+      steps: newSubs,
       lifecycle: {
         reviewDecisions: [],
         requiredReviewRoles: [],
@@ -435,8 +432,8 @@ export class AdvanceSubcheckpointDefinition implements HumanDecisionDefinition {
         gateDecision: null,
       },
     } as unknown as HandoffFacts;
-    const projected = resolveSubCheckpointWork(projectedFacts);
-    if (projected.kind !== "implement" || projected.subCheckpoint.id !== payload.activateId) {
+    const projected = resolveStepWork(projectedFacts);
+    if (projected.kind !== "implement" || projected.step.id !== payload.activateId) {
       return {
         ok: false,
         committed: null,
@@ -474,7 +471,7 @@ export class AdvanceSubcheckpointDefinition implements HumanDecisionDefinition {
     const messages: string[] = [];
     try {
       ctx.git.add(payload.tasksFile);
-      ctx.git.commit(plan.commitMessage ?? `docs: avança sub-checkpoint`);
+      ctx.git.commit(plan.commitMessage ?? `docs: avança etapa`);
     } catch (e) {
       return {
         ok: false,

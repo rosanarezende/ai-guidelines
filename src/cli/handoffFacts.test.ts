@@ -4,16 +4,16 @@ import {
   HandoffPrFact,
   HandoffReviewStatusFact,
   HandoffSourceFact,
-  HandoffSubCheckpoint,
+  HandoffStep,
   HandoffTaskFact,
-  checkSubCheckpointCoherence,
+  checkStepCoherence,
   computeSeal,
   deriveHandoff,
   deriveNextAction,
   deriveProhibitions,
   parseCheckpointTasks,
-  parseSubCheckpoints,
-  resolveSubCheckpointWork,
+  parseSteps,
+  resolveStepWork,
 } from "./handoffFacts.js";
 
 // ── Fixtures ─────────────────────────────────────────────────────────────────
@@ -122,7 +122,7 @@ function facts(overrides: Partial<HandoffFacts> = {}): HandoffFacts {
     pullRequest: PR_DRAFT,
     lifecycle: LIFECYCLE_EMPTY,
     tasks: [OPEN_TASK],
-    subCheckpoints: [],
+    steps: [],
     insights: [
       {
         id: "PIT-0011",
@@ -464,8 +464,8 @@ describe("deriveHandoff · derivado completo [CO-4]", () => {
   });
 });
 
-describe("checkSubCheckpointCoherence — estado ↔ narrativa", () => {
-  const sc = (over: Partial<HandoffSubCheckpoint>): HandoffSubCheckpoint => ({
+describe("checkStepCoherence — estado ↔ narrativa", () => {
+  const sc = (over: Partial<HandoffStep>): HandoffStep => ({
     id: "CO-3.1",
     title: "x",
     state: "done",
@@ -476,7 +476,7 @@ describe("checkSubCheckpointCoherence — estado ↔ narrativa", () => {
 
   it("DADO marcadores coerentes ENTÃO sem violações", () => {
     expect(
-      checkSubCheckpointCoherence([
+      checkStepCoherence([
         sc({ id: "CO-3.1", state: "done", text: "[x] **CO-3.1** concluído." }),
         sc({ id: "CO-3.2", state: "in-progress", text: "[/] **CO-3.2** em andamento." }),
         sc({ id: "CO-3.3", state: "pending", text: "[ ] **CO-3.3** a fazer." }),
@@ -485,7 +485,7 @@ describe("checkSubCheckpointCoherence — estado ↔ narrativa", () => {
   });
 
   it("DADO [x] que diz 'EM EXECUÇÃO' ENTÃO viola", () => {
-    const v = checkSubCheckpointCoherence([
+    const v = checkStepCoherence([
       sc({ id: "CO-3.1", state: "done", text: "[x] **CO-3.1** ... **EM EXECUÇÃO.**" }),
     ]);
     expect(v).toHaveLength(1);
@@ -493,7 +493,7 @@ describe("checkSubCheckpointCoherence — estado ↔ narrativa", () => {
   });
 
   it("DADO [ ] que diz 'IMPLEMENTADO' ENTÃO viola", () => {
-    const v = checkSubCheckpointCoherence([
+    const v = checkStepCoherence([
       sc({ id: "CO-3.4", state: "pending", text: "[ ] **CO-3.4** IMPLEMENTADO 2026-06-14." }),
     ]);
     expect(v).toHaveLength(1);
@@ -501,17 +501,17 @@ describe("checkSubCheckpointCoherence — estado ↔ narrativa", () => {
   });
 
   it("DADO mais de um [/] ENTÃO viola (exatamente um pode estar ativo)", () => {
-    const v = checkSubCheckpointCoherence([
+    const v = checkStepCoherence([
       sc({ id: "CO-3.2", state: "in-progress", text: "[/] x" }),
       sc({ id: "CO-3.3", state: "in-progress", text: "[/] y" }),
     ]);
-    expect(v.some((m) => /mais de um sub-checkpoint \[\/\] ativo/i.test(m))).toBe(true);
+    expect(v.some((m) => /mais de uma etapa \[\/\] ativa/i.test(m))).toBe(true);
   });
 
   it("DADO [/] ATIVO que diz 'Implementado' ENTÃO NÃO viola (foi implementado, falta avançar)", () => {
     // Caso real do CO-3.3: implementado mas ainda [/] aguardando advance humano.
     expect(
-      checkSubCheckpointCoherence([
+      checkStepCoherence([
         sc({
           id: "CO-3.3",
           state: "in-progress",
@@ -523,7 +523,7 @@ describe("checkSubCheckpointCoherence — estado ↔ narrativa", () => {
 
   it("DADO readiness em [/] ativo ENTÃO NÃO viola (lugar canônico do sinal)", () => {
     expect(
-      checkSubCheckpointCoherence([
+      checkStepCoherence([
         sc({
           id: "CO-3.4",
           state: "in-progress",
@@ -534,7 +534,7 @@ describe("checkSubCheckpointCoherence — estado ↔ narrativa", () => {
   });
 
   it("DADO readiness em [ ] pendente ENTÃO viola", () => {
-    const v = checkSubCheckpointCoherence([
+    const v = checkStepCoherence([
       sc({
         id: "CO-3.5",
         state: "pending",
@@ -545,7 +545,7 @@ describe("checkSubCheckpointCoherence — estado ↔ narrativa", () => {
   });
 
   it("DADO readiness em [x] concluído ENTÃO viola (deve ser removida ao concluir)", () => {
-    const v = checkSubCheckpointCoherence([
+    const v = checkStepCoherence([
       sc({
         id: "CO-3.4",
         state: "done",
@@ -556,14 +556,14 @@ describe("checkSubCheckpointCoherence — estado ↔ narrativa", () => {
   });
 
   it("DADO valor de readiness inválido ENTÃO viola (único valor aceito)", () => {
-    const v = checkSubCheckpointCoherence([
+    const v = checkStepCoherence([
       sc({ id: "CO-3.4", state: "in-progress", text: "[/] **CO-3.4 — x** `readiness: done`: x." }),
     ]);
     expect(v.some((m) => /marcador de readiness inválido "done"/.test(m))).toBe(true);
   });
 });
 
-describe("parseSubCheckpoints + resolveSubCheckpointWork — sinal de readiness", () => {
+describe("parseSteps + resolveStepWork — sinal de readiness", () => {
   const TASKS = (co34: string) =>
     [
       "- [/] **Checkpoint co-enforcement** (seq 9 / CO-3)",
@@ -573,7 +573,7 @@ describe("parseSubCheckpoints + resolveSubCheckpointWork — sinal de readiness"
     ].join("\n");
 
   it("parser extrai readiness do code-span inline", () => {
-    const subs = parseSubCheckpoints(
+    const subs = parseSteps(
       TASKS(" `readiness: ready-for-transition`"),
       "checkpoint-co-enforcement"
     );
@@ -591,7 +591,7 @@ describe("parseSubCheckpoints + resolveSubCheckpointWork — sinal de readiness"
       "    - [ ] **artifact-taxonomy-and-model-review-contract — implementação robusta da taxonomia**: próximo PR.",
     ].join("\n");
 
-    const subs = parseSubCheckpoints(tasks, "checkpoint-co-flow-continuation");
+    const subs = parseSteps(tasks, "checkpoint-co-flow-continuation");
 
     expect(subs.map((s) => [s.id, s.state, s.title])).toEqual([
       ["drift-diagnosis-and-repair", "done", "Governance Doctor"],
@@ -614,10 +614,7 @@ describe("parseSubCheckpoints + resolveSubCheckpointWork — sinal de readiness"
       "  - [ ] **legacy-bridge-removal — não deve aparecer**: fora do checkpoint atual.",
     ].join("\n");
 
-    const subs = parseSubCheckpoints(
-      tasks,
-      "checkpoint-artifact-taxonomy-and-model-review-contract"
-    );
+    const subs = parseSteps(tasks, "checkpoint-artifact-taxonomy-and-model-review-contract");
 
     expect(subs.map((s) => [s.id, s.state, s.title])).toEqual([
       ["drift-diagnosis-and-repair", "done", "Governance Doctor concluído"],
@@ -638,30 +635,27 @@ describe("parseSubCheckpoints + resolveSubCheckpointWork — sinal de readiness"
       "  - [ ] **internal-architecture-refactor-ddd-bdd — reorganização behavior-preserving**: próximo checkpoint.",
     ].join("\n");
 
-    const subs = parseSubCheckpoints(
-      tasks,
-      "checkpoint-artifact-taxonomy-and-model-review-contract"
-    );
-    const r = resolveSubCheckpointWork(facts({ subCheckpoints: subs }));
+    const subs = parseSteps(tasks, "checkpoint-artifact-taxonomy-and-model-review-contract");
+    const r = resolveStepWork(facts({ steps: subs }));
 
     expect(r.kind).toBe("implement");
     if (r.kind === "implement") {
-      expect(r.subCheckpoint.id).toBe("artifact-taxonomy-and-model-review-contract");
-      expect(r.subCheckpoint.title).toBe("implementação robusta da taxonomia");
+      expect(r.step.id).toBe("artifact-taxonomy-and-model-review-contract");
+      expect(r.step.title).toBe("implementação robusta da taxonomia");
     }
   });
 
   it("parser: sem token ⇒ readiness undefined", () => {
-    const subs = parseSubCheckpoints(TASKS(""), "checkpoint-co-enforcement");
+    const subs = parseSteps(TASKS(""), "checkpoint-co-enforcement");
     expect(subs.find((s) => s.id === "CO-3.4")!.readiness).toBeUndefined();
   });
 
   it("resolve: [/] ativo COM readiness + próximo [ ] ⇒ transition", () => {
-    const subs = parseSubCheckpoints(
+    const subs = parseSteps(
       TASKS(" `readiness: ready-for-transition`"),
       "checkpoint-co-enforcement"
     );
-    const r = resolveSubCheckpointWork(facts({ subCheckpoints: subs }));
+    const r = resolveStepWork(facts({ steps: subs }));
     expect(r.kind).toBe("transition");
     if (r.kind === "transition") {
       expect(r.transition.conclude?.id).toBe("CO-3.4");
@@ -670,10 +664,10 @@ describe("parseSubCheckpoints + resolveSubCheckpointWork — sinal de readiness"
   });
 
   it("resolve: [/] ativo SEM readiness ⇒ implement (ainda implementando)", () => {
-    const subs = parseSubCheckpoints(TASKS(""), "checkpoint-co-enforcement");
-    const r = resolveSubCheckpointWork(facts({ subCheckpoints: subs }));
+    const subs = parseSteps(TASKS(""), "checkpoint-co-enforcement");
+    const r = resolveStepWork(facts({ steps: subs }));
     expect(r.kind).toBe("implement");
-    if (r.kind === "implement") expect(r.subCheckpoint.id).toBe("CO-3.4");
+    if (r.kind === "implement") expect(r.step.id).toBe("CO-3.4");
   });
 
   it("resolve: readiness mas SEM próximo pendente ⇒ terminal-ready (sem advance)", () => {
@@ -682,16 +676,16 @@ describe("parseSubCheckpoints + resolveSubCheckpointWork — sinal de readiness"
       "    - [x] **CO-3.3 — migração**: feito.",
       "    - [/] **CO-3.4 — dogfood** `readiness: ready-for-transition`: advisory-first.",
     ].join("\n");
-    const subs = parseSubCheckpoints(tasks, "checkpoint-co-enforcement");
+    const subs = parseSteps(tasks, "checkpoint-co-enforcement");
     const f = facts({
       lifecycle: LIFECYCLE_REQUIRED_SATISFIED,
       tasks: [],
-      subCheckpoints: subs,
+      steps: subs,
     });
-    const r = resolveSubCheckpointWork(f);
+    const r = resolveStepWork(f);
     expect(r.kind).toBe("terminal-ready");
     const next = deriveNextAction(f);
     expect(next.kind).toBe("prepare-ready");
-    expect(next.description).not.toMatch(/advance-subcheckpoint/);
+    expect(next.description).not.toMatch(/advance-step/);
   });
 });
