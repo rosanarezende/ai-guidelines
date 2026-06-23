@@ -4,7 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>
-      Spec 0024 — Mapa V4: Frentes, Checkpoints, Etapas e Tarefas (vocabulário em teste)
+      Spec 0024 — Mapa V4: Frentes, Checkpoints, Etapas e Tarefas (vocabulário governado ·
+      DEC-0024-G22)
     </title>
     <style>
       :root {
@@ -500,18 +501,18 @@
       </h2>
 
       <section class="hero">
-        <p class="eyebrow">Mapa V4 · projeção experimental de vocabulário · NÃO é SSOT</p>
+        <p class="eyebrow">Mapa V4 · vocabulário governado (DEC-0024-G22) · projeção, não SSOT</p>
         <h1>Spec 0024 — mapa V4 por Frentes, Checkpoints, Etapas e Tarefas</h1>
         <p class="lead">
-          Esta V4 <strong>testa um vocabulário</strong> ainda não decidido:
-          <strong>Spec › Frente › Checkpoint › Etapa › Tarefa</strong>. "Frente" é o candidato ao
-          nível acima de checkpoint (substitui a leitura de "nó" e evita reusar "Fase"). As Frentes
-          0–4 são <strong>histórico factual</strong>; a partir da Frente 5 há uma
+          Esta V4 projeta o vocabulário <strong>governado por DEC-0024-G22</strong>:
+          <strong>Spec › Frente › Checkpoint › Etapa › Tarefa</strong>. "Frente" é o nível acima de
+          checkpoint (substitui a leitura de "nó" e evita reusar "Fase"). As Frentes 0–4 são
+          <strong>histórico factual</strong>; a partir da Frente 5 há uma
           <strong>proposta ideal e revisável</strong>.
         </p>
         <div class="warn">
-          Vocabulário em teste, não decidido. Esta página é maquete para decisão humana futura — não
-          registra DEC e não altera topologia. Em qualquer divergência vencem
+          Vocabulário <strong>decidido</strong> em DEC-0024-G22 — esta página é projeção governada
+          de acompanhamento, não SSOT, e não altera topologia. Em qualquer divergência vencem
           <code>state.yml</code>, <code>tasks.md</code>, <code>decision-brief.md</code>,
           <code>gates/</code> e Git/GitHub. Cada checkpoint aponta a sua
           <strong>casa governada</strong>.
@@ -1265,9 +1266,9 @@
                     </figure>
                   </details>
                   <p class="note">
-                    Tensão exposta na seção 5: este checkpoint está estruturado em
-                    <code>state.yml</code> com <code>sequence: 12</code>, mas comentado como "não é
-                    novo nó".
+                    Tensão reconciliada por DEC-0024-G22: este checkpoint <strong>é</strong> o nó
+                    topológico ativo em <code>state.yml</code> (<code>sequence: 12</code>); o
+                    comentário que dizia "não é novo nó" foi corrigido.
                   </p>
                 </article>
               </div>
@@ -1645,18 +1646,18 @@
             <h3>Colisão de vocabulário</h3>
             <p>
               "Fase" já existe em <code>tasks.md</code> (Absorção/Review/Encerramento). A V4 usa
-              "Frente" para evitar a colisão, mas a escolha só vira oficial por DEC. Até lá,
-              "Frente" é rótulo de teste.
+              "Frente" para evitar a colisão — agora oficial por <strong>DEC-0024-G22</strong>. Os
+              headers legados "Fase de X" ficam como estágios de lifecycle, distintos de "Frente".
             </p>
           </article>
           <article class="card tension">
-            <h3>#45: <code>sequence: 12</code> vs "não é nó"</h3>
+            <h3>#45: <code>sequence: 12</code> — RESOLVIDO (DEC-0024-G22)</h3>
             <p>
-              O <code>state.yml</code> estrutura
+              O <code>state.yml</code> estruturava
               <code>artifact-taxonomy-and-model-review-contract</code> com
-              <code>sequence: 12</code> sob <code>active</code>, mas o comentário diz que "não é um
-              novo nó topológico". A V4 mostra os dois fatos; a DEC precisa decidir nó vs
-              checkpoint-de-nó.
+              <code>sequence: 12</code> sob <code>active</code> enquanto um comentário dizia "não é
+              um novo nó topológico". <strong>Reconciliado:</strong> #45 É o nó topológico ativo
+              (seq 12); o comentário foi corrigido. <code>state.yml</code> segue a SSOT estrutural.
             </p>
           </article>
           <article class="card tension">
@@ -1679,43 +1680,44 @@
       </section>
 
       <section class="section" id="dec">
-        <h2>6. O que a DEC futura precisa resolver</h2>
+        <h2>6. O que DEC-0024-G22 decidiu — e o que segue aberto</h2>
         <div class="grid2">
           <article class="card">
-            <h3>Vocabulário e derivação</h3>
+            <h3>✓ Vocabulário e derivação (decidido)</h3>
             <p>
-              Adotar/rejeitar "Frente" e cravar a regra:
-              <strong>Frente = conjunto ordenado de nós de <code>state.yml</code></strong
-              >, derivada, não autoridade nova.
+              <strong>Frente</strong> adotada como
+              <strong>conjunto ordenado de nós de <code>state.yml</code></strong
+              >, derivada, não autoridade nova. "Fase" rejeitada por colisão.
             </p>
           </article>
           <article class="card">
-            <h3>Tensão #45</h3>
+            <h3>✓ Tensão #45 (resolvida)</h3>
             <p>
-              Decidir se <code>artifact-taxonomy-and-model-review-contract</code> é nó próprio ou
-              checkpoint de <code>co-flow-continuation</code> — e reconciliar comentário e
-              estrutura.
+              <code>artifact-taxonomy-and-model-review-contract</code> é nó topológico ativo (seq
+              12); comentário e estrutura do <code>state.yml</code> reconciliados.
             </p>
           </article>
           <article class="card">
-            <h3>Colisão "Fase"</h3>
+            <h3>✓ Colisão "Fase" (resolvida)</h3>
             <p>
-              Se algum "Fase" sobreviver, renomear as fases legadas do <code>tasks.md</code> para
-              não competir com a macro-sequência.
+              "Fase" rejeitada para agrupamento; os headers legados "Fase de X" no
+              <code>tasks.md</code> ficam como estágios de lifecycle (histórico), distintos de
+              "Frente".
             </p>
           </article>
           <article class="card">
-            <h3>Regra de firmeza</h3>
+            <h3>○ Segue aberto</h3>
             <p>
-              Cravar firmeza (firme/revisável) como <strong>atributo</strong>, não como decomposição
-              fixa da cauda — o futuro distante segue revisável.
+              Firmeza (firme/revisável) como <strong>atributo</strong> da cauda; e a implementação
+              da taxonomia/model-review (próximo trabalho do #45). Não decididos aqui.
             </p>
           </article>
         </div>
         <p style="margin-top: 14px">
           Investigação de nomenclatura e confronto:
           <code>research/2026-06-22-checkpoint-artifact-taxonomy-map-v4-nomenclature-review.md</code
-          >. Esta página não registra DEC, não altera topologia e não é SSOT.
+          >. O vocabulário foi decidido em <strong>DEC-0024-G22</strong>; esta página o projeta —
+          não altera topologia e não é SSOT.
         </p>
       </section>
     </main>
