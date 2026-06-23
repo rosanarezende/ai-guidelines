@@ -196,10 +196,13 @@ topology:
           - checkpoint-co-flow-continuation # PR #44: decisao/inventario/dogfood; continuacao segue por checkpoints semanticos definidos em DEC-0024-G21
 
     active:
-      # #45 MATERIALIZA o checkpoint semantico artifact-taxonomy-and-model-review-contract
-      # dentro de co-flow-continuation. Este veiculo NAO abre dualroot-collapse e NAO e um
-      # novo no topologico; existe para manter o PR real rastreavel enquanto a continuacao
-      # segue dentro do mesmo no sequencial.
+      # #45 e o NO TOPOLOGICO ATIVO (sequence: 12) que materializa o checkpoint semantico
+      # artifact-taxonomy-and-model-review-contract da continuacao, STACKED sobre
+      # co-flow-continuation (#44, seq 11). NAO reabre dualroot-collapse. Os checkpoints
+      # semanticos restantes da continuacao (internal-architecture-refactor-ddd-bdd,
+      # broad-flow-falsification, continuation-review-human-gate) seguem como PRs governados
+      # futuros. Tensao reconciliada por DEC-0024-G22: "Frente" e leitura HUMANA DERIVADA
+      # destes nos (nao campo do state.yml); esta topologia continua a SSOT estrutural.
       - id: artifact-taxonomy-and-model-review-contract
         github_pr: 45
         role: execution

@@ -6,7 +6,7 @@
 > Plan: [`./plan.md`](./plan.md)
 > Tasks: [`./tasks.md`](./tasks.md)
 > Status agregado: **Resolved (decisões)** — todas as `[DEC]` desta spec estão `Resolved`; a pesquisa estrutural ainda aberta vive em [`research/findings.md`](./research/findings.md), não aqui.
-> Última atualização: 2026-06-22 — **`[DEC-0024-G21]` registrada**: o dogfood do PR #44 substitui a leitura `CO-10.8.*` por checkpoints semânticos, registra o guardrail de "sem débito arquitetural silencioso" e define que a próxima implementação deve materializar a taxonomia de artefatos e o review pré-codificação como contrato real, sem mover `.specify` fora do `dualroot-collapse`.
+> Última atualização: 2026-06-22 — **`[DEC-0024-G22]` registrada**: adota o vocabulário de modelagem **Spec › Frente › Checkpoint › Etapa › Tarefa** (`Frente` no lugar de `Fase`, como leitura derivada da topologia — não SSOT) e reconcilia a tensão estrutural do #45 (`sequence: 12` ⇒ é nó topológico ativo). Não implementa a taxonomia/model-review.
 
 > **Artefato exclusivo de decisão humana.** Organizado por **estado**, não por numeração histórica (reestruturação 2026-05-31). Quatro estados respondem, à primeira vista, _o que já foi decidido · o que ainda está aberto · o que virou regra · o que virou enforcement_:
 >
@@ -603,6 +603,36 @@ Cada transição deve declarar: fato de entrada, autoridade, comando, efeito per
 
 ---
 
+### [DEC-0024-G22] Vocabulário de modelagem: Spec › Frente › Checkpoint › Etapa › Tarefa
+
+**Pergunta:** Como nomear, de forma humana e estável, o nível de agrupamento acima de checkpoint — sem reusar "nó" (confunde com grafo/topologia) nem "Fase" (colide com usos legados em `tasks.md`) — e como resolver a tensão estrutural do #45?
+
+**Modo de gate:** `aceitação` <!-- decisão de vocabulário da owner, 2026-06-22, após mapa V4 e investigação empírica de colisão (`research/2026-06-22-checkpoint-artifact-taxonomy-map-v4-nomenclature-review.md`). -->
+
+**Contexto:** A V3/V4 testaram um vocabulário humano para acompanhar a spec. A revisão de confronto da V4 mediu a colisão empírica dos candidatos (`git grep` em `.md/.yml/.html`): `bloco` 1058, `fase` 543 (incl. `Fase de Absorção/Review/Encerramento` no próprio `tasks.md`), `camada` 201, `frente` 42 (quase tudo o idioma "à frente"). "Frente" tem a menor colisão real entre os nomes com sentido de _span_ e já é usado informalmente no repo (`Frente C+D`). A V4 também expôs uma incoerência: o nó `artifact-taxonomy-and-model-review-contract` (#45) tem `sequence: 12` em `state.yml § topology`, mas um comentário dizia que "não é um novo nó topológico".
+
+**Decisão (Resolved):**
+
+- Adotar o vocabulário humano de modelagem: **Spec › Frente › Checkpoint › Etapa › Tarefa**.
+- **Frente** = termo humano para um agrupamento de trabalho maior que checkpoint. É **projeção/leitura derivada** de um conjunto ordenado de nós/checkpoints de `state.yml § topology` — **não** é nova SSOT, nem novo campo obrigatório de `state.yml`, nem segunda topologia.
+- **Rejeitar `Fase`** para esse uso, por colisão forte com os usos legados em `tasks.md` (Setup/Absorção/Review/Encerramento, que são **estágios de lifecycle** — sentido diferente). Os headers históricos permanecem como registro; o termo humano para agrupamento passa a ser "Frente".
+- **Checkpoint** = entrega governada e revisável (normalmente com PR principal claro). **Etapa** = subdivisão opcional dentro de checkpoint grande (ex-"sub-checkpoint"). **Tarefa** = folha executável ou evidência, sem autoridade. **PR** = contêiner de revisão no GitHub, **não** unidade de autoridade do lifecycle (ADR 0025).
+- **Níveis intermediários são opcionais:** nem toda Frente precisa de Checkpoints+Etapas+Tarefas; a profundidade acompanha o tamanho real do trabalho.
+- **Como gaps entram no modelo (via `GG-0005`, sem débito silencioso):** (a) absorver no checkpoint atual; (b) virar etapa explícita; (c) virar checkpoint novo; (d) virar frente futura; (e) rejeitar por DEC. Gap sem uma dessas disposições registrada na casa governada = débito silencioso, vetado.
+- **Resolver a tensão do #45:** `artifact-taxonomy-and-model-review-contract` **é** um nó topológico ativo (`sequence: 12`, `github_pr: 45`), _stacked_ sobre `co-flow-continuation` (#44, seq 11). O comentário que dizia "não é um novo nó" foi removido de `state.yml`, que segue a SSOT estrutural. "Frente" não vira campo de `state.yml`; permanece como leitura derivada (V4 + este DEC).
+
+**Impacto esperado:**
+
+- Acompanhamento humano da spec ganha vocabulário estável e de baixa colisão, sem criar segunda fonte de verdade.
+- `state.yml` fica honesto sobre o #45 (estrutura e comentário concordam).
+- A V4 (`assets/spec-0024-map-v4.html`) deixa de ser "experimental" e passa a projetar uma decisão governada — continuando projeção, não SSOT.
+
+**O que NÃO está sendo decidido:** implementar a taxonomia de artefatos ou o tipo governado `model-review`; criar campo `frente` em `state.yml`; renomear os headers históricos de `tasks.md`; alterar sequência/ordem/cursor da topologia; executar Ready, Human Gate, merge, `advance-subcheckpoint`, `finish-subcheckpoint` ou `mark-readiness`.
+
+**Status:** Resolved (2026-06-22) / @rosanarezende — adoção do vocabulário de modelagem e reconciliação da tensão estrutural do #45.
+
+---
+
 ## 2 · Aberto — pesquisa genuína (única coisa ainda em investigação)
 
 > Estes **não são decisões** — são findings com **alternativas reais ainda competindo**. Vivem em [`research/findings.md`](./research/findings.md); aqui só o ponteiro. Só retornam como `[DEC] Pendente` ao **convergir + exigir julgamento**. **Critério (2026-05-31):** se não há alternativa viva competindo, **não pertence aqui** — é decisão (§ 1) ou trabalho (§ 4).
@@ -654,30 +684,31 @@ Cada transição deve declarar: fato de entrada, autoridade, comando, efeito per
 
 > Os IDs `[DEC-0024-G##]` permanecem **âncoras estáveis** (citados em findings, ADRs, git, handoffs) — mas **não organizam mais a leitura**. Mapa de equivalência:
 
-| ID histórico | Tema                                                        | Estado atual                                                                                                                                              |
-| :----------- | :---------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `G00`        | identidade (transformação)                                  | **Decidido** — § 1 (Resolved 2026-05-31)                                                                                                                  |
-| `G01`        | estrutura/gramática                                         | **Aberto** — § 2 (`F-AG01`)                                                                                                                               |
-| `G02`        | taxonomia → bloco + propriedade                             | **Decidido** — § 1 (Resolved 2026-05-31) → migração em § 4                                                                                                |
-| `G03`        | promotion pipeline                                          | **Reaberto (modelagem)** — `[DEC-0024-G08]` 2026-06-03; pipeline `insight→decision→rule\|guardrail→doctrine`                                              |
-| `G04`        | contrato de boilerplate / casa única                        | **Reaberto (modelagem)** — `[DEC-0024-G08]`; casa única / tri-root → SSOT na trilha de convergência                                                       |
-| `G05`        | projeções / decision-session                                | **Reaberto (modelagem)** — `[DEC-0024-G08]`; projeções derivadas (fonte↔projeção) + KnowledgeGraph                                                        |
-| `G06`        | contrato da cadeia                                          | **Decidido** — § 1 (Resolved 2026-05-30) → ADR no fechamento                                                                                              |
-| `G07`        | topologia-as-data + enforcement L4                          | **Decidido** — § 1 (Resolved 2026-06-01) → enforcement em § 4                                                                                             |
-| `G08`        | reabertura de G03/G04/G05 + direção orientada a grafo       | **Decidido** — Resolved 2026-06-03 (owner); a modelagem fica DENTRO da 0024; NÃO há 0025 independente                                                     |
-| `G09`        | eliminação integral de `/cli` (→ CO-3.5)                    | **Decidido** — § 1 (Resolved 2026-06-15, owner); supersede o "wrapper" do #38; topologia externa inalterada                                               |
-| `G10`        | `co-flow-convergence` antes de `co-capture`                 | **Decidido** — § 1 (Resolved 2026-06-16, owner); nó próprio para convergência ponta a ponta do fluxo                                                      |
-| `G11`        | suspensão temporária de smoke durante co-flow               | **Decidido** — § 1 (Resolved 2026-06-16, owner); bloqueia Ready/Human Gate até reativação                                                                 |
-| `G12`        | CO-10.2 entrega convergência coesa inicial                  | **Decidido** — § 1 (Resolved 2026-06-16, owner); remove heurísticas locais já comprovadamente divergentes                                                 |
-| `G13`        | CO-10.5 dedicado a UX/linguagem/wizard Clack                | **Decidido** — § 1 (Resolved 2026-06-17, owner); G14 subdivide o fechamento antes do Gate                                                                 |
-| `G14`        | CO-10.6 dedicado a fluxo de time/múltiplas specs            | **Decidido** — § 1 (Resolved 2026-06-18, owner); G15/G16 subdividem o fechamento antes do Gate                                                            |
-| `G15`        | CLI pública autoexplicável como porta de entrada            | **Decidido** — § 1 (Resolved 2026-06-19, owner); G16 insere arquitetura interna/BDD humano antes da falsificação final                                    |
-| `G16`        | arquitetura interna, organização DDD e BDD visual           | **Decidido** — § 1 (Resolved 2026-06-19, owner); pausado por G17 até CO-10.7 fechar corretamente                                                          |
-| `G17`        | reabrir CO-10.7 antes de retomar CO-10.8                    | **Decidido** — § 1 (Resolved 2026-06-19, owner); corrige fechamento prematuro de CO-10.7                                                                  |
-| `G18`        | antecipar `dualroot-collapse`                               | **Decidido** — § 1 (Resolved 2026-06-20, owner); próximo PR dedicado após `co-flow-convergence`, antes de CO-5/CO-6                                       |
-| `G19`        | recorte do PR #43 + revisão externa antes do Gate           | **Decidido** — § 1 (Resolved 2026-06-20, owner); PR #43 fecha CO-10.1..CO-10.7; CO-10.8..CO-10.10 vão para próximo PR                                     |
-| `G20`        | ancorar continuação CO-10.8..CO-10.10 na topologia          | **Decidido** — § 1 (Resolved 2026-06-21, owner); nó `co-flow-continuation` seq 11 antes de `dualroot-collapse`                                            |
-| `G21`        | checkpoints semânticos + sem débito arquitetural silencioso | **Decidido** — § 1 (Resolved 2026-06-22, owner); PR #44 fecha decisão/inventário e próximo PR implementa taxonomia/review pré-codificação com enforcement |
+| ID histórico | Tema                                                         | Estado atual                                                                                                                                                      |
+| :----------- | :----------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `G00`        | identidade (transformação)                                   | **Decidido** — § 1 (Resolved 2026-05-31)                                                                                                                          |
+| `G01`        | estrutura/gramática                                          | **Aberto** — § 2 (`F-AG01`)                                                                                                                                       |
+| `G02`        | taxonomia → bloco + propriedade                              | **Decidido** — § 1 (Resolved 2026-05-31) → migração em § 4                                                                                                        |
+| `G03`        | promotion pipeline                                           | **Reaberto (modelagem)** — `[DEC-0024-G08]` 2026-06-03; pipeline `insight→decision→rule\|guardrail→doctrine`                                                      |
+| `G04`        | contrato de boilerplate / casa única                         | **Reaberto (modelagem)** — `[DEC-0024-G08]`; casa única / tri-root → SSOT na trilha de convergência                                                               |
+| `G05`        | projeções / decision-session                                 | **Reaberto (modelagem)** — `[DEC-0024-G08]`; projeções derivadas (fonte↔projeção) + KnowledgeGraph                                                                |
+| `G06`        | contrato da cadeia                                           | **Decidido** — § 1 (Resolved 2026-05-30) → ADR no fechamento                                                                                                      |
+| `G07`        | topologia-as-data + enforcement L4                           | **Decidido** — § 1 (Resolved 2026-06-01) → enforcement em § 4                                                                                                     |
+| `G08`        | reabertura de G03/G04/G05 + direção orientada a grafo        | **Decidido** — Resolved 2026-06-03 (owner); a modelagem fica DENTRO da 0024; NÃO há 0025 independente                                                             |
+| `G09`        | eliminação integral de `/cli` (→ CO-3.5)                     | **Decidido** — § 1 (Resolved 2026-06-15, owner); supersede o "wrapper" do #38; topologia externa inalterada                                                       |
+| `G10`        | `co-flow-convergence` antes de `co-capture`                  | **Decidido** — § 1 (Resolved 2026-06-16, owner); nó próprio para convergência ponta a ponta do fluxo                                                              |
+| `G11`        | suspensão temporária de smoke durante co-flow                | **Decidido** — § 1 (Resolved 2026-06-16, owner); bloqueia Ready/Human Gate até reativação                                                                         |
+| `G12`        | CO-10.2 entrega convergência coesa inicial                   | **Decidido** — § 1 (Resolved 2026-06-16, owner); remove heurísticas locais já comprovadamente divergentes                                                         |
+| `G13`        | CO-10.5 dedicado a UX/linguagem/wizard Clack                 | **Decidido** — § 1 (Resolved 2026-06-17, owner); G14 subdivide o fechamento antes do Gate                                                                         |
+| `G14`        | CO-10.6 dedicado a fluxo de time/múltiplas specs             | **Decidido** — § 1 (Resolved 2026-06-18, owner); G15/G16 subdividem o fechamento antes do Gate                                                                    |
+| `G15`        | CLI pública autoexplicável como porta de entrada             | **Decidido** — § 1 (Resolved 2026-06-19, owner); G16 insere arquitetura interna/BDD humano antes da falsificação final                                            |
+| `G16`        | arquitetura interna, organização DDD e BDD visual            | **Decidido** — § 1 (Resolved 2026-06-19, owner); pausado por G17 até CO-10.7 fechar corretamente                                                                  |
+| `G17`        | reabrir CO-10.7 antes de retomar CO-10.8                     | **Decidido** — § 1 (Resolved 2026-06-19, owner); corrige fechamento prematuro de CO-10.7                                                                          |
+| `G18`        | antecipar `dualroot-collapse`                                | **Decidido** — § 1 (Resolved 2026-06-20, owner); próximo PR dedicado após `co-flow-convergence`, antes de CO-5/CO-6                                               |
+| `G19`        | recorte do PR #43 + revisão externa antes do Gate            | **Decidido** — § 1 (Resolved 2026-06-20, owner); PR #43 fecha CO-10.1..CO-10.7; CO-10.8..CO-10.10 vão para próximo PR                                             |
+| `G20`        | ancorar continuação CO-10.8..CO-10.10 na topologia           | **Decidido** — § 1 (Resolved 2026-06-21, owner); nó `co-flow-continuation` seq 11 antes de `dualroot-collapse`                                                    |
+| `G21`        | checkpoints semânticos + sem débito arquitetural silencioso  | **Decidido** — § 1 (Resolved 2026-06-22, owner); PR #44 fecha decisão/inventário e próximo PR implementa taxonomia/review pré-codificação com enforcement         |
+| `G22`        | vocabulário Spec›Frente›Checkpoint›Etapa›Tarefa + tensão #45 | **Decidido** — § 1 (Resolved 2026-06-22, owner); `Frente` (rejeita `Fase`) como agrupamento derivado/não-SSOT; #45 reconciliado como nó topológico ativo (seq 12) |
 
 ---
 
@@ -703,6 +734,7 @@ Cada transição deve declarar: fato de entrada, autoridade, comando, efeito per
 - [x] `[DEC-0024-G19]` — Resolved 2026-06-20 / @rosanarezende
 - [x] `[DEC-0024-G20]` — Resolved 2026-06-21 / @rosanarezende
 - [x] `[DEC-0024-G21]` — Resolved 2026-06-22 / @rosanarezende
+- [x] `[DEC-0024-G22]` — Resolved 2026-06-22 / @rosanarezende
 
 ---
 

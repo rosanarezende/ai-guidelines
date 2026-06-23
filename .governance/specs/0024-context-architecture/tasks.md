@@ -12,6 +12,8 @@
 > ## 📖 Vocabulário (cf. `plan.md § Glossário operacional`)
 >
 > **PR / `#N`** = Pull Request real do GitHub · **Checkpoint N** = unidade de implementação da spec · **Gate** = ritual de validação conforme review-policy + Human Gate. _"PR-N" foi aposentado (Checkpoint 2.1) — conflitava com Pull Request real; a 0023 já diagnosticara (review R6)._
+>
+> **Vocabulário de modelagem (`[DEC-0024-G22]`):** **Spec › Frente › Checkpoint › Etapa › Tarefa**. **Frente** = agrupamento humano (leitura **derivada** de `state.yml § topology`, não SSOT) maior que checkpoint — adotado no lugar de "Fase", que colidia com os usos legados deste arquivo. ⚠️ **Os headers `Fase 0` / `Fase de Absorção` / `Fase de Review` / `Fase de Encerramento` abaixo são estágios de lifecycle (registro histórico), NÃO "Frentes".** **Etapa** = subdivisão opcional; **Tarefa** = folha/evidência; **PR** = contêiner (ADR 0025). Projeção visual: [`assets/spec-0024-map-v4.html`](./assets/spec-0024-map-v4.html) (não-SSOT).
 
 > ## 🔁 Nota de fase — ABSORÇÃO OPERACIONAL (2026-05-31, Checkpoint 2)
 >
