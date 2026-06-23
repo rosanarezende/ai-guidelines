@@ -404,6 +404,44 @@
         color: var(--soft);
       }
 
+      .checkpoint.visual {
+        grid-column: 1 / -1;
+      }
+
+      .checkpoint details {
+        margin-top: 10px;
+      }
+
+      .checkpoint summary {
+        cursor: pointer;
+        color: var(--active);
+        font-size: 12px;
+        user-select: none;
+      }
+
+      .checkpoint summary:hover {
+        text-decoration: underline;
+      }
+
+      .checkpoint-image {
+        margin-top: 10px;
+      }
+
+      .checkpoint-image img {
+        display: block;
+        width: 100%;
+        height: auto;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: var(--panel-2);
+      }
+
+      .checkpoint-image .caption {
+        margin-top: 6px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
       .meta {
         display: flex;
         flex-wrap: wrap;
@@ -658,16 +696,32 @@
                 </div>
               </article>
 
-              <article class="checkpoint active">
+              <article class="checkpoint active visual">
                 <h4>artifact-taxonomy-and-model-review-contract</h4>
                 <p>
-                  Próximo PR: implementar a taxonomia de artefatos e o tipo governado de revisão
-                  pré-codificação/model-review sem mover arquivos referenciados.
+                  PR #45: implementar a taxonomia de artefatos, o contrato governado de
+                  model-review, a visão pretendida versionada e o fluxo de abertura da próxima etapa
+                  sem mover arquivos referenciados.
                 </p>
                 <div class="meta">
-                  <span class="pill">próximo PR</span>
-                  <span class="pill">sem prova mínima</span>
+                  <span class="pill">PR #45</span>
+                  <span class="pill">checkpoint ativo</span>
+                  <span class="pill">sem migração física</span>
                 </div>
+                <details>
+                  <summary>Ver imagem de visão pretendida</summary>
+                  <div class="checkpoint-image">
+                    <img
+                      loading="lazy"
+                      alt="Visão pretendida do PR #45 — taxonomia de artefatos e revisão antes do código"
+                      src="../pr-bodies/pr-45-visao-pretendida.png"
+                    />
+                    <div class="caption">
+                      Fonte: <code>pr-bodies/pr-45-visao-pretendida.png</code> · projeção visual do
+                      PR #45.
+                    </div>
+                  </div>
+                </details>
               </article>
 
               <article class="checkpoint plan">
