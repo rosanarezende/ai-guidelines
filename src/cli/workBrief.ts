@@ -27,6 +27,7 @@ import { execFileSync } from "node:child_process";
 import {
   HandoffFacts,
   NextAction,
+  SUBCHECKPOINT_READINESS,
   SubCheckpointRef,
   SubCheckpointResolution,
   resolveSubCheckpointWork,
@@ -548,6 +549,15 @@ export function deriveWorkNextAction(
   // (elegibilidade COMPARTILHADA com `decide`, nunca hardcoded como disponível).
   if (mode === "implement_checkpoint" && object.subCheckpoint) {
     const active = object.subCheckpoint;
+    const activeFacts = facts.subCheckpoints.find(
+      (s) => s.id === active.id && s.line === active.line
+    );
+    if (activeFacts?.readiness !== SUBCHECKPOINT_READINESS) {
+      return plainNextAction(`Implementar o checkpoint ativo ${active.id} — ${active.title}.`, [
+        `ativo: ${active.id} — ${active.title} (tasks.md linha ${active.line})`,
+        `sem readiness "${SUBCHECKPOINT_READINESS}" em tasks.md; conclusão/avanço não é próxima ação de trabalho.`,
+      ]);
+    }
     if (ctx.finishSubcheckpointEligibility.status === "available") {
       return decisionNextAction(
         "finish-subcheckpoint",
