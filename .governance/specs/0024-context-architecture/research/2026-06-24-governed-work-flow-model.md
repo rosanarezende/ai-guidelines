@@ -85,7 +85,43 @@ que alguns tipos habitam como sua atividade principal. _A burocracia escala com 
 `grounded-by` · `supersedes`/`superseded-by` · `authorizes` · `breaks-into` · `projection-of` ·
 `approved-by` · `verdicted-by` · `promotes-to` · `enforced-by`.
 
-## 6. Os dois seams que doíam na 0024 — e a cura
+## 6. O percurso da pergunta: `finding` → `research` → `decision` (resolve §9.4 e §9.6)
+
+**Um `finding` é a unidade de "o que aprendemos", não "o que decidimos"** (FATO `findings.md`):
+estrutura `Observação · Evidências(→research) · Impacto(→DEC) · Status(Aberto|Convergido)`. Dois
+contratos cravados: (1) o finding **referencia** a research, não a duplica (já é aresta, não prosa);
+(2) `Convergido` é **imutável** — _revisões abrem um novo finding_.
+
+**Nó vs estado (resolve §9.4):** o **`finding` é o NÓ** (a pergunta), com `status`
+(`Aberto→Convergido` = o "estado" do `F-006`); **`research` e `decision` são NÓS-artefato** que o
+finding referencia (`Evidências`/`Impacto`). `F-006` ("são estados") fala do **percurso da pergunta**;
+o grafo fala dos **artefatos** pendurados nele — não competem.
+
+**Quando a research nasce (resolve §9.6):** investiga um **`finding` aberto**; ao **convergir e exigir
+julgamento**, vira `[DEC] Pendente`. O `intent-brief` **lista as perguntas abertas** ao abrir o
+trabalho — viram os findings iniciais (`intent-brief --raises--> finding`).
+
+### Não-linearidade — o grafo cresce, não se reescreve
+
+O dev **não é linear**: durante a execução, uma tarefa pode revelar nova pergunta, reabrir uma decisão
+e gerar novas tarefas. O `findings.md` já tem o mecanismo (**`Convergido` imutável; revisão abre novo
+finding**), então o grafo **cresce append-only** (`KnowledgeGraph`: _"cresce monotonicamente"_):
+
+```
+intent-brief ─opens─▶ finding(Aberto) ─investigated-by─▶ research
+                          │ converges
+                          ▼
+                      finding(Convergido) ─feeds─▶ decision ─authorizes─▶ tasks ─▶ checkpoint/etapa/tarefa
+                                                     ▲                                   │
+                                                     │ supersedes                        │ raises
+                                                     └────────── new finding(Aberto) ◀───┘
+```
+
+Uma tarefa `raises` um novo finding → research → `decision` que `supersedes` o anterior → quebra novas
+tarefas. O velho fica `Convergido`/`Resolved` (histórico honesto); o grafo ganha nós+arestas. **A
+não-linearidade vira topologia rastreável**, não reescrita — a cura do drift que doía.
+
+## 7. Os dois seams que doíam na 0024 — e a cura
 
 - **Seam 2 (`research → decision`)** — confuso porque a research vivia em 3 lugares (`research/` +
   `findings.md` + `decision-brief §2`) e a promoção era prosa. **Cura:** arestas tipadas
@@ -96,7 +132,7 @@ que alguns tipos habitam como sua atividade principal. _A burocracia escala com 
   reivindicam SSOT**. **Cura:** **uma SSOT** (`state.yml § topology`, dado) + **derivados**
   (`tasks` checklist, `Frente` agrupamento); **`plan.md` se aposenta** (narra o que já é dado).
 
-## 7. O que o G25 decide vs. o que é fundacional
+## 8. O que o G25 decide vs. o que é fundacional
 
 - **G25 (agora):** a **cadeia** `intent-brief → research → decision → tasks` como **grafo tipado**
   (nós + arestas); **como os 7 tipos a percorrem** (§3); a **hierarquia G22 validada/refinada** (§4);
@@ -104,17 +140,18 @@ que alguns tipos habitam como sua atividade principal. _A burocracia escala com 
 - **Fundacional (depois, trilho grafo/internal-refactor):** colapsar `state`/`tasks`/`plan` numa SSOT
   - derivados (seam 4); **aposentar `plan.md`**; o motor de grafo que torna as arestas consultáveis.
 
-## 8. Em aberto (iterar aqui)
+## 9. Em aberto (iterar aqui)
 
-1. **Nome do topo:** pós `spec→delivery`, o container ainda se chama "Spec"? Ou o workspace é
-   "delivery" e "spec" some? (toca G22 + a hierarquia).
-2. **`Frente` fica ou sai?** É view derivada útil, ou ruído? (o `tasks.md` já alertou da confusão Fase/Frente.)
-3. **`spike`/`incident`:** se a research **é** o trabalho deles, eles precisam de `intent-brief` +
-   `learning-record` separados, ou colapsam num doc só? (paralelo ao "incident = doc vivo").
-4. **`research` é nó ou estado?** `F-006` diz **estado**; aqui tratei como nó com arestas. Reconciliar.
-5. **Gate × learning-record** como nós de fechamento: um referencia o outro? (veredito de valor ≠ aprovação).
-6. **Quando a research nasce:** de um `finding` aberto (pergunta com alternativas competindo) — quem
-   abre o finding? O `intent-brief` lista perguntas abertas que viram findings?
+1. ✅ **Topo = `delivery`** (não "spec"); o termo "spec" some (owner 2026-06-24).
+2. ⏳ **`Frente` fica ou sai?** — decidir via **simulação** de cenário multi-checkpoint (trabalho em time).
+3. **`spike`/`incident`:** colapsam num doc só (a research **é** o trabalho deles)?
+4. ✅ **`research` nó ou estado** — resolvido (§6): `finding`=nó c/ status; `research`/`decision`=nós-artefato.
+5. **`gate` × `learning-record`** no fechamento: um referencia o outro? (veredito de valor ≠ aprovação).
+6. ✅ **Quando a research nasce** — resolvido (§6): investiga um `finding` aberto; `intent-brief` o `raises`.
+7. **🆕 Modo de investigação de um `finding` (owner 2026-06-24):** e se a pergunta precisa de uma **PoC**
+   (não desk-research) para ser respondida com segurança? Candidato: `investigated-by` é **polimórfico**
+   — `research` (análise) | `spike` (PoC/protótipo) | `experiment` (teste de valor); spike/experiment são
+   **work items filhos** cujo `learning-record` resolve o `finding`. **Analisar antes de cravar.**
 
 ## Âncoras
 
