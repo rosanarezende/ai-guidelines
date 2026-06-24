@@ -1,3 +1,7 @@
+---
+artifact-kind: dogfood
+---
+
 # CO-3.5 — dogfood do colapso integral do runtime CLI
 
 > Registro factual do fechamento técnico do sub-checkpoint interno CO-3.5 no PR #42

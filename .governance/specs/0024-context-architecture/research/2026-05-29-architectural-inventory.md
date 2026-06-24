@@ -1,3 +1,7 @@
+---
+artifact-kind: inventory
+---
+
 # Research — Inventário arquitetural do backlog (Grupo A / B / C)
 
 > **Data:** 2026-05-29

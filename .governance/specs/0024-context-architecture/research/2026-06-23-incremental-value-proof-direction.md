@@ -1,3 +1,7 @@
+---
+artifact-kind: research
+---
+
 # Direcao — Prova de valor incremental
 
 - **Data:** 2026-06-23

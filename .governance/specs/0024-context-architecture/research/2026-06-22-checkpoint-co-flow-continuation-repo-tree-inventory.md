@@ -1,3 +1,7 @@
+---
+artifact-kind: inventory
+---
+
 # PR #44 — Inventário completo da árvore do repositório (snapshot)
 
 Data: 2026-06-22

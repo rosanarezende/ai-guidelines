@@ -1,3 +1,7 @@
+---
+artifact-kind: pre-coding-review
+---
+
 # Revisão adversarial — co-enforcement
 
 > Data: 2026-06-13. Escopo: falsificar o framing arquitetural do checkpoint

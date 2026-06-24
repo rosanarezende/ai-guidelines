@@ -1,3 +1,7 @@
+---
+artifact-kind: pre-coding-review
+---
+
 # Auditoria — perguntas do modelo de governança (decidido vs aberto)
 
 - **Data:** 2026-06-23 · **Spec:** 0024 — context-architecture

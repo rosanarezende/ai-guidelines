@@ -1,3 +1,7 @@
+---
+artifact-kind: research
+---
+
 # Direcao — Papel dos 7 MECE e catalogo de queries do grafo
 
 - **Data:** 2026-06-23

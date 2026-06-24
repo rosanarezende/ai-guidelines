@@ -1,3 +1,7 @@
+---
+artifact-kind: dogfood
+---
+
 # PR #45 — Dogfood/status: abertura de PR semântico dentro de `co-flow-continuation`
 
 Data: 2026-06-22  

@@ -1,3 +1,7 @@
+---
+artifact-kind: dogfood
+---
+
 # Dogfood CO-3.3 — migração e remoção do substrato legacy (2026-06-14)
 
 > Spec 0024 · `checkpoint-co-enforcement` · sub-checkpoint CO-3.3 (PR #42, modo

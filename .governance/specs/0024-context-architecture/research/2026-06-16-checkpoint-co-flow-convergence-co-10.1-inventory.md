@@ -1,3 +1,7 @@
+---
+artifact-kind: inventory
+---
+
 # CO-10.1 — inventario real + modelo canonico inicial
 
 > Spec 0024 · `checkpoint-co-flow-convergence` · PR #43 (Draft, modo unit).

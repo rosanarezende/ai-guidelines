@@ -1,3 +1,7 @@
+---
+artifact-kind: dogfood
+---
+
 # PR #44 — Dogfood/Status: reparo de drift + candidato de produto "PR Progress Map"
 
 Data: 2026-06-21

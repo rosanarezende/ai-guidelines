@@ -1,3 +1,7 @@
+---
+artifact-kind: handoff-legacy
+---
+
 > ⚠️ **SUPERSEDIDO (2026-06-04)** por `research/2026-06-04-checkpoint-human-gate-pr34.md` — use **aquele** como SSOT de retomada (cobre até o Human Gate do #34: contratos 2.4e→2.4g, technical_audit + architectural_review approved). Este arquivo é mantido como **histórico**.
 
 # Handoff — Spec 0024, retomada pós-reabertura de G03/G04/G05 (sessão nova)

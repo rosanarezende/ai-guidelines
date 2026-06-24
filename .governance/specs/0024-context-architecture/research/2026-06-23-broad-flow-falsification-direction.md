@@ -1,3 +1,7 @@
+---
+artifact-kind: research
+---
+
 # Direção — Falsificação ampla via simulador de jornadas governadas
 
 - **Data:** 2026-06-23

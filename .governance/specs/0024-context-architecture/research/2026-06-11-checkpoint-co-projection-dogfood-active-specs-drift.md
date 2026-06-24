@@ -1,3 +1,7 @@
+---
+artifact-kind: dogfood
+---
+
 # Dogfood CO-4 — active specs drift mascarado por fallback (2026-06-11)
 
 > **Natureza deste documento:** evidência arquitetural do checkpoint `checkpoint-co-projection`

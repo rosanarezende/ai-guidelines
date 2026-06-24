@@ -1,3 +1,7 @@
+---
+artifact-kind: handoff-legacy
+---
+
 # Handoff — Retomada da Spec 0024 (G00 quase-fechável)
 
 > **Para:** próxima sessão (qualquer agente/máquina). **De:** sessão 2026-05-29 (owner + Claude Opus 4.8 + ChatGPT leitor tardio).

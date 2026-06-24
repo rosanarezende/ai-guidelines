@@ -1,3 +1,7 @@
+---
+artifact-kind: dogfood
+---
+
 # Dogfood CO-3.4 — enforcement advisory-first do recibo de carga (2026-06-15)
 
 > Spec 0024 · `checkpoint-co-enforcement` · sub-checkpoint CO-3.4 (PR #42, modo

@@ -1,3 +1,7 @@
+---
+artifact-kind: dogfood
+---
+
 # CO-10.7 status - CLI publica autoexplicavel e wizard orientado ao contexto
 
 > Spec 0024 · PR #43 · `checkpoint-co-flow-convergence`.

@@ -1,3 +1,7 @@
+---
+artifact-kind: handoff-legacy
+---
+
 # Handoff v2 — Retomada da Spec 0024 `context-architecture` (fase de ABSORÇÃO OPERACIONAL)
 
 > **Para:** próxima sessão (qualquer agente/máquina). **De:** sessão 2026-05-31 (owner + Claude Opus 4.8 + Codex GPT-5.5 + ChatGPT GPT-5.5).

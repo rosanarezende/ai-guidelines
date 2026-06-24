@@ -1,3 +1,7 @@
+---
+artifact-kind: dogfood
+---
+
 # Dogfood CO-10.5 — UX, linguagem humana e convergência do wizard
 
 ## Contexto

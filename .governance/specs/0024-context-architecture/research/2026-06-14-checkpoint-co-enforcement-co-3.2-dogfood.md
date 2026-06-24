@@ -1,3 +1,7 @@
+---
+artifact-kind: dogfood
+---
+
 # Dogfood CO-3.2 — knowledge:compile + manifesto/paridade, e bug das duas opções de cancelar (2026-06-14)
 
 > **Natureza deste documento:** evidência arquitetural do sub-checkpoint `CO-3.2`

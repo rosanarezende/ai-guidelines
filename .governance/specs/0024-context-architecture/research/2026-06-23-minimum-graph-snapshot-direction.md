@@ -1,3 +1,7 @@
+---
+artifact-kind: research
+---
+
 # Direcao — Graph snapshot minimo
 
 - **Data:** 2026-06-23

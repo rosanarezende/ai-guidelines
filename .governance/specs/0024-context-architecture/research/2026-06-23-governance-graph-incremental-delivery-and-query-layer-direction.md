@@ -1,3 +1,7 @@
+---
+artifact-kind: research
+---
+
 # Direcao — Grafo de governanca, entrega incremental e camada de consulta
 
 - **Data:** 2026-06-23

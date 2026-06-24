@@ -1,3 +1,7 @@
+---
+artifact-kind: handoff-legacy
+---
+
 # Handoff operacional — Spec 0024 (retomada em nova sessão)
 
 > ⚠️ **SUPERSEDED por [`2026-06-02-handoff-checkpoint-3.md`](./2026-06-02-handoff-checkpoint-3.md)** (estado pós-2.4d). Snapshot histórico anterior ao fechamento do gate do #33: as referências abaixo a "#33 Draft", "gate PENDENTE" e "último checkpoint 2.4c" refletem o estado de **quando foi escrito**, não o atual. Não usar para retomada — ver o handoff-checkpoint-3.

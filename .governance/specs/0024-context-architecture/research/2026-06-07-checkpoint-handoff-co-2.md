@@ -1,3 +1,7 @@
+---
+artifact-kind: handoff-legacy
+---
+
 > ⚠️ **HISTÓRICO — NÃO USAR PARA RETOMADA (marcado em 2026-06-11).** Snapshot do estado de
 > 2026-06-07/08 (cursor `co-knowledge`, PR #37, comandos Yarn). O estado avançou: #37 e #38
 > concluídos; cursor em `toolchain-simplification` (PR #39); toolchain migrada para npm puro.

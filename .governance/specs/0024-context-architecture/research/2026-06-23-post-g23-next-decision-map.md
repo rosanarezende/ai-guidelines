@@ -1,3 +1,7 @@
+---
+artifact-kind: research
+---
+
 # Direcionamento pos-G23 — proximas decisoes, pesquisas e spikes
 
 - **Data:** 2026-06-23
