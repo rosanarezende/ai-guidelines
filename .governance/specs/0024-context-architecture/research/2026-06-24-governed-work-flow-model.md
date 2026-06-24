@@ -93,6 +93,25 @@ tipo); o `gate` é o eixo de **autoridade** por cima, onde a topologia avança.
 (intent→research→decision). Eram confundidas porque tudo vivia em prosa espalhada. No grafo, é uma
 **sub-árvore `breaks-into`** pendurada no nó `decision` (`decision --authorizes--> Checkpoints`).
 
+### `Frente` = lente derivada opcional + guardrails (resolve §9.2)
+
+Simulação (delivery de 9 checkpoints, time de 3): a `Frente` **ganha o lugar** quando há **muitos
+checkpoints + ownership paralelo** (lente de navegação/ownership/paralelismo) e é **ruído** no
+solo/pequeno. Conclusão: **não é nível fixo** — é **lente derivada e opcional** (como o `Etapa`).
+Guardrails mínimos:
+
+1. **Derivada, nunca entidade armazenada** — não se "cria uma Frente"; tagueia-se o checkpoint com um
+   campo (`owner`/`area`) e a Frente é `group-by` desse campo. (mata 2ª SSOT)
+2. **Eixo de agrupamento declarado e fechado** — `area ∈ {…}` ou `owner`, não free-text; um checkpoint =
+   uma Frente por eixo (MECE no eixo).
+3. **Limiar pra aparecer** — só renderiza com ≥ N checkpoints **E** ≥ 2 owners/áreas distintos; some
+   abaixo (derivado, não toggle manual).
+4. **Sem autoridade** — navegação/ownership só; o `gate` continua **por checkpoint**.
+5. **Check de coerência** — campo de grupo válido em todo checkpoint; view 100% derivável (round-trip).
+
+→ G22 refinada: `delivery › (Frente: lente derivada opcional) › Checkpoint › (Etapa: opcional) › Tarefa`
+— `Frente`/`Etapa` são **dois opcionais derivados** que ligam/desligam conforme o tamanho do trabalho.
+
 ## 5. Os nós e as arestas (o grafo tipado)
 
 **Tipos de nó:** `intent-brief` · `finding` · `research` · `decision`(DEC) · `checkpoint` · `etapa` ·
@@ -189,18 +208,20 @@ silencioso (senão perde-se o "por quê" = drift). O label `paused` deriva **des
   (nós + arestas); **como os 7 tipos a percorrem** (§3); a **hierarquia G22 validada/refinada** (§4);
   o conjunto fechado de **arestas** (§5); e o `grounded-by` como 1ª aresta concreta (seam 2).
 - **Fundacional (depois, trilho grafo/internal-refactor):** colapsar `state`/`tasks`/`plan` numa SSOT
-  - derivados (seam 4); **aposentar `plan.md`**; o motor de grafo que torna as arestas consultáveis.
+  - derivados (seam 4); **aposentar `plan.md`**; o motor de grafo que torna as arestas consultáveis; e o
+    **cross-repo** (multi-repo + banco como agregação derivada) → `research/2026-06-24-cross-repo-governance-graph.md`.
 
 ## 9. Em aberto (iterar aqui)
 
 1. ✅ **Topo = `delivery`** (não "spec"); o termo "spec" some (owner 2026-06-24).
-2. ⏳ **`Frente` fica ou sai?** — decidir via **simulação** de cenário multi-checkpoint (trabalho em time).
+2. ✅ **`Frente` fica ou sai?** — resolvido (§4): **lente derivada opcional** (não nível fixo) + 5 guardrails (derivada / eixo fechado / limiar / sem-autoridade / check). Ganha o lugar em time+muitos CPs; some no solo.
 3. ✅ **`spike`/`incident` colapsam?** — resolvido (§6): `spike` é **work item de 1ª classe** (não doc colado); `incident` segue doc vivo (§3).
 4. ✅ **`research` nó ou estado** — resolvido (§6): `finding`=nó c/ status; `research`/`decision`=nós-artefato.
 5. ✅ **`gate` × `learning-record`** — resolvido (§3): dois eixos — **resultado** (polimórfico por tipo) × **autoridade** (`gate`); `gate --references--> learning-record`; experiment tem os dois, delivery só o gate.
 6. ✅ **Quando a research nasce** — resolvido (§6): investiga um `finding` aberto; `intent-brief` o `raises`.
 7. ✅ **Modo de investigação + pausa** — resolvido (§6): finding `investigated-by` `research` ou `spike` (por risco); **`experiment` é primário** (`promotes-to` `delivery`, não filho); **bloqueio = derivado** de finding aberto, não 6º status.
 8. **🆕 Registro de pausa deliberada (owner 2026-06-24):** a pausa por despriorização (**sem** finding) **acontece e precisa de registro próprio** (quem/quando/porquê/retomar-quando) — artefato leve a desenhar; o label `paused` deriva dele.
+9. **🆕 Cross-repo (owner 2026-06-24):** delivery que toca vários repos precisa entender o fluxo um do outro (não só API) — **spun off** para `research/2026-06-24-cross-repo-governance-graph.md` (fundacional/futuro).
 
 ## Âncoras
 
