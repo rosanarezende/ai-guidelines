@@ -26,6 +26,7 @@ import {
 import { main as runPrBodyUpdate } from "./prBodyUpdate.js";
 import { main as runPrReadyCheck } from "./prReadyCheck.js";
 import { main as runReconcileCheck } from "./reconcileCheck.js";
+import { main as runResearchIndexCheck } from "./researchIndexCheck.js";
 import { main as runReviewCheck } from "./reviewCheck.js";
 import { main as runReviewPublish } from "./reviewPublish.js";
 import { sealReview } from "./reviewSeal.js";
@@ -47,7 +48,7 @@ function usage(): string {
     "Uso: node dist/cli/bin.js <script> [args]",
     "",
     "Scripts: build-rules, living-docs, state-yml-check, active-specs-check,",
-    "reconcile-check, handoff-check, co-knowledge-check, co-knowledge-inventory,",
+    "reconcile-check, research-index-check, handoff-check, co-knowledge-check, co-knowledge-inventory,",
     "constraints-check, knowledge-compile, script-contracts, runtime-bootstrap,",
     "gate-decidability-check, ruleset-check, review-check, insights-check,",
     "intent-check, disclosure-render, review-publish, review-seal,",
@@ -84,6 +85,8 @@ async function dispatch(script: string | undefined, args: readonly string[]): Pr
       return runActiveSpecsCheck(root);
     case "reconcile-check":
       return runReconcileCheck(root);
+    case "research-index-check":
+      return runResearchIndexCheck(root);
     case "handoff-check":
       return runHandoffCheck(root, args);
     case "co-knowledge-check":

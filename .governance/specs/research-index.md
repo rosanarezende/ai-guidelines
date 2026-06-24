@@ -7,6 +7,7 @@
 ## 🏗️ Arquitetura
 
 - [Convergência taxonomy ↔ lifecycle (Spec 0023)](./research-library/architecture/2026-05-19-lifecycle-architecture.md) — invariantes universais leves (accountability + traceability + outcome registration), lifecycle intent categories como eixo de leitura (5 classes), runtime taxonomy-aware sem orchestration engine. Base do Bloco F da Spec 0023.
+- [Superfícies de enforcement — evento ≠ estado contínuo](./research-library/architecture/2026-06-05-enforcement-surfaces.md) — uma restrição sobre um EVENTO não deve ser enforçada numa superfície de ESTADO CONTÍNUO; superfície de DECLARAÇÃO ≠ superfície de ENFORCEMENT. Taxonomia arquitetural viva da rodada "merge prematuro" (Spec 0024 / PR #35), 2026-06-05.
 
 ---
 
