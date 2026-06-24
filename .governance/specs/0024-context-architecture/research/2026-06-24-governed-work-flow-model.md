@@ -123,12 +123,18 @@ não-linearidade vira topologia rastreável**, não reescrita — a cura do drif
 
 ### Modo de investigação + pausa derivada (resolve §9.7 e §9.3)
 
-**Um `finding` é investigado por um de três modos** (todos já em ADR 0010), escolhidos por **risco**
-(custo-de-estar-errado): `research` (análise de mesa) | `spike` (PoC/protótipo — _"dá pra fazer?"_) |
-`experiment` (teste de valor — _"gera resultado?"_). `spike`/`experiment` **são work items filhos**
-(ciclo completo `intent-brief → build → learning-record`); o `learning-record` deles **`resolves` o
-`finding` pai**. O grafo **aninha** (work item dentro de work item), limitado pelo **time-box** do
-spike. _(Resolve §9.3: o `spike` **não** colapsa num doc colado — é work item filho de 1ª classe.)_
+**Um `finding` é investigado por `research`** (análise de mesa) **ou — quando só dá pra responder
+construindo — por um `spike`** (PoC/protótipo time-boxed, _"dá pra fazer?"_), escolhidos por **risco**
+(custo-de-estar-errado). O `spike` é o **pilar de investigação**: pode ser standalone **ou** aberto
+para resolver um `finding` (`finding --investigated-by--> spike`); seu `learning-record` **`resolves`
+o finding**, limitado pelo **time-box**. _(Resolve §9.3: o `spike` é work item de 1ª classe, não doc colado.)_
+
+⚠️ **`experiment` NÃO é um investigador-filho.** É um **tipo primário** — em times de growth, o trabalho
+**principal**, com **entrega de valor real** e **destinos diversos** no fecho (`learning-record`):
+`won` → **promove a `delivery`** (herda `hypothesis`/`successMetrics`, ADR 0010); `lost` → clean-up
+(`resolution: cleaned-up`) ou `kept`; `inconclusive` → itera/novo experimento. A relação com `delivery`
+é **promoção** (lateral, com o experiment **a montante**), **não** subordinação. Tipos se ligam por
+arestas (`investigated-by`, **`promotes-to`**), **não** por contenção pai-filho.
 
 **A pausa do pai é DERIVADA, não um 6º status.** Hoje `LifecycleStatus = draft|in-progress|review|
 done|archived` — sem "pausado". Mas o limbo ("nem ativo, nem fechado") **não precisa de status
@@ -172,11 +178,11 @@ silencioso (senão perde-se o "por quê" = drift). O label `paused` deriva **des
 
 1. ✅ **Topo = `delivery`** (não "spec"); o termo "spec" some (owner 2026-06-24).
 2. ⏳ **`Frente` fica ou sai?** — decidir via **simulação** de cenário multi-checkpoint (trabalho em time).
-3. ✅ **`spike`/`incident` colapsam?** — resolvido (§6): `spike` é **work item filho** completo (não doc colado); `incident` segue doc vivo (§3).
+3. ✅ **`spike`/`incident` colapsam?** — resolvido (§6): `spike` é **work item de 1ª classe** (não doc colado); `incident` segue doc vivo (§3).
 4. ✅ **`research` nó ou estado** — resolvido (§6): `finding`=nó c/ status; `research`/`decision`=nós-artefato.
 5. **`gate` × `learning-record`** no fechamento: um referencia o outro? (veredito de valor ≠ aprovação).
 6. ✅ **Quando a research nasce** — resolvido (§6): investiga um `finding` aberto; `intent-brief` o `raises`.
-7. ✅ **Modo de investigação + pausa** — resolvido (§6): `investigated-by` polimórfico (`research`|`spike`|`experiment`, por risco); spike/experiment = work items filhos; **bloqueio = derivado** de finding aberto, não 6º status.
+7. ✅ **Modo de investigação + pausa** — resolvido (§6): finding `investigated-by` `research` ou `spike` (por risco); **`experiment` é primário** (`promotes-to` `delivery`, não filho); **bloqueio = derivado** de finding aberto, não 6º status.
 8. **🆕 Registro de pausa deliberada (owner 2026-06-24):** a pausa por despriorização (**sem** finding) **acontece e precisa de registro próprio** (quem/quando/porquê/retomar-quando) — artefato leve a desenhar; o label `paused` deriva dele.
 
 ## Âncoras
