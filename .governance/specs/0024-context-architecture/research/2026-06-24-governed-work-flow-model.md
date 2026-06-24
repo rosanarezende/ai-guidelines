@@ -121,6 +121,34 @@ Uma tarefa `raises` um novo finding → research → `decision` que `supersedes`
 tarefas. O velho fica `Convergido`/`Resolved` (histórico honesto); o grafo ganha nós+arestas. **A
 não-linearidade vira topologia rastreável**, não reescrita — a cura do drift que doía.
 
+### Modo de investigação + pausa derivada (resolve §9.7 e §9.3)
+
+**Um `finding` é investigado por um de três modos** (todos já em ADR 0010), escolhidos por **risco**
+(custo-de-estar-errado): `research` (análise de mesa) | `spike` (PoC/protótipo — _"dá pra fazer?"_) |
+`experiment` (teste de valor — _"gera resultado?"_). `spike`/`experiment` **são work items filhos**
+(ciclo completo `intent-brief → build → learning-record`); o `learning-record` deles **`resolves` o
+`finding` pai**. O grafo **aninha** (work item dentro de work item), limitado pelo **time-box** do
+spike. _(Resolve §9.3: o `spike` **não** colapsa num doc colado — é work item filho de 1ª classe.)_
+
+**A pausa do pai é DERIVADA, não um 6º status.** Hoje `LifecycleStatus = draft|in-progress|review|
+done|archived` — sem "pausado". Mas o limbo ("nem ativo, nem fechado") **não precisa de status
+armazenado**: deriva de o `checkpoint` ter um `finding` aberto sob investigação
+(`checkpoint --blocked-by--> finding(Aberto)`); quando o spike `resolves` o finding, **o bloqueio cai
+sozinho**. Mais preciso que um flag (bloqueia o checkpoint dependente, não o delivery inteiro) e sem
+drift de despausar à mão. O repo **já** deriva bloqueios assim (briefing `work`: CI pendente, tree suja).
+
+**Duas origens do limbo — ambas derivadas de uma FONTE, nenhuma é status armazenado:**
+
+| Limbo       | Fonte                                                                          | Some quando                              |
+| ----------- | ------------------------------------------------------------------------------ | ---------------------------------------- |
+| **blocked** | um `finding` aberto sob investigação                                           | o `learning-record` `resolves` o finding |
+| **paused**  | uma **pausa deliberada** (registro próprio: quem/quando/porquê/retomar-quando) | a condição de retomada se cumpre         |
+
+**Pausa deliberada** (despriorizei, **sem** finding aberto) **acontece de verdade e precisa de registro
+próprio** — é uma **intenção humana** com proveniência (motivo + condição de retomada), **não** um flag
+silencioso (senão perde-se o "por quê" = drift). O label `paused` deriva **desse registro**, igual o
+`blocked` deriva do finding.
+
 ## 7. Os dois seams que doíam na 0024 — e a cura
 
 - **Seam 2 (`research → decision`)** — confuso porque a research vivia em 3 lugares (`research/` +
@@ -144,14 +172,12 @@ não-linearidade vira topologia rastreável**, não reescrita — a cura do drif
 
 1. ✅ **Topo = `delivery`** (não "spec"); o termo "spec" some (owner 2026-06-24).
 2. ⏳ **`Frente` fica ou sai?** — decidir via **simulação** de cenário multi-checkpoint (trabalho em time).
-3. **`spike`/`incident`:** colapsam num doc só (a research **é** o trabalho deles)?
+3. ✅ **`spike`/`incident` colapsam?** — resolvido (§6): `spike` é **work item filho** completo (não doc colado); `incident` segue doc vivo (§3).
 4. ✅ **`research` nó ou estado** — resolvido (§6): `finding`=nó c/ status; `research`/`decision`=nós-artefato.
 5. **`gate` × `learning-record`** no fechamento: um referencia o outro? (veredito de valor ≠ aprovação).
 6. ✅ **Quando a research nasce** — resolvido (§6): investiga um `finding` aberto; `intent-brief` o `raises`.
-7. **🆕 Modo de investigação de um `finding` (owner 2026-06-24):** e se a pergunta precisa de uma **PoC**
-   (não desk-research) para ser respondida com segurança? Candidato: `investigated-by` é **polimórfico**
-   — `research` (análise) | `spike` (PoC/protótipo) | `experiment` (teste de valor); spike/experiment são
-   **work items filhos** cujo `learning-record` resolve o `finding`. **Analisar antes de cravar.**
+7. ✅ **Modo de investigação + pausa** — resolvido (§6): `investigated-by` polimórfico (`research`|`spike`|`experiment`, por risco); spike/experiment = work items filhos; **bloqueio = derivado** de finding aberto, não 6º status.
+8. **🆕 Registro de pausa deliberada (owner 2026-06-24):** a pausa por despriorização (**sem** finding) **acontece e precisa de registro próprio** (quem/quando/porquê/retomar-quando) — artefato leve a desenhar; o label `paused` deriva dele.
 
 ## Âncoras
 
