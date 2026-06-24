@@ -1,3 +1,7 @@
+---
+artifact-kind: pre-coding-review
+---
+
 # PR #44 — Revisão de falsificação pré-decisão da taxonomia de artefatos
 
 Data: 2026-06-22

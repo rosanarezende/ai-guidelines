@@ -1,3 +1,7 @@
+---
+artifact-kind: pre-coding-review
+---
+
 # PR #45 — Revisão de nomenclatura e confronto para o mapa V4
 
 Data: 2026-06-22

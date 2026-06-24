@@ -1,3 +1,7 @@
+---
+artifact-kind: pre-coding-review
+---
+
 # PR #44 — Revisão de falsificação da hipótese de decomposição (decidir agora, migrar depois)
 
 Data: 2026-06-22

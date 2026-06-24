@@ -1,3 +1,7 @@
+---
+artifact-kind: pre-coding-review
+---
+
 # Falsificação — `confirmOrAbort` (confirm-in-run): a extração mínima NÃO se justifica
 
 > Auditoria adversarial (a pedido) sobre a **única** extração candidata do padrão

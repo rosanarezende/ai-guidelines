@@ -1,3 +1,7 @@
+---
+artifact-kind: pre-coding-review
+---
+
 # PR #44 — Revisão de falsificação pré-implementação do modelo de mapa/inventário
 
 Data: 2026-06-22

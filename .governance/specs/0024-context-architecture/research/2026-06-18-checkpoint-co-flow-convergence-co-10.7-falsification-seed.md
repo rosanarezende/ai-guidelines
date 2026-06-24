@@ -1,3 +1,7 @@
+---
+artifact-kind: pre-coding-review
+---
+
 # CO-10.7 — falsificacao ampla do fluxo (seed)
 
 > Spec 0024 · PR #43 · `checkpoint-co-flow-convergence`.
