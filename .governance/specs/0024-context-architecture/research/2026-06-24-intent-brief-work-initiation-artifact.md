@@ -435,22 +435,38 @@ fix: o que estava errado: regex de frontmatter não casava CRLF.
 
 **Itens fundacionais (caem na G01 / ADR 0010 — fora do #45):**
 
-- **Renomear o kind `spec`** (de-conflação, owner 2026-06-24). FATO (ADR 0010): a intenção do
-  pilar é _"entrega estruturada que muda capacidade"_ — mais ampla que "feature"; o **item 6 da
-  ADR sanciona renomear por colisão sem reabrir a taxonomia** (precedente `exploration→spike`).
-  Candidatos: `delivery` (ecoa a ADR, sem colisão), `initiative` (⚠️ colide com nível de
-  hierarquia de PM/Jira — falha o critério do item 6), `initiative-delivery` (composto pesado).
-  A renomeação do **documento** (`spec.md→intent-brief`) e a do **kind** são **duas metades da
-  mesma de-conflação** — decidir juntas. _Pesquisar antes de bater o martelo._
-- **Onde mora o intent de um Virtual** (durabilidade × acoplamento, owner 2026-06-24). FATO:
-  ADR 0010 manda Virtual viver _"apenas no registry"_ (arquivo versionado) e _"nunca tocar
-  filesystem"_; `pr-bodies/` + ADR 0022 estabelecem que **não se delega memória ao GitHub**.
-  Logo "inline no PR/commit" é o degrau **menos durável** (branch deletável / squash-merge).
-  Direção: corte principiado = _sem pasta pesada_ (manter) **≠** _sem registro durável_
-  (rejeitar) → Virtual ganha registro leve **no repo** (registry/ledger). Pré-requisito real:
-  materializar o `registry.yml` (hoje inexistente neste repo).
-- **`plan.md` sobrevive?** `plan.md` narra topologia que o `state.yml` já guarda como dado —
-  forte candidato a redundância (fundacional, fora do #45).
+**(a) Renomes da taxonomia de trabalho** (de-conflação, owner 2026-06-24) — benchmark de naming com a lente de colisão do item 6 da ADR:
+
+| Termo                    | Consagrado em                    | Significa lá                    | Colisão | Encaixe                                            |
+| ------------------------ | -------------------------------- | ------------------------------- | ------- | -------------------------------------------------- |
+| `type`/`kind` (umbrella) | Jira, Azure (_"work item type"_) | a dimensão de classificação     | nenhuma | ✅ neutro; "7 tipos" é o difícil de explicar       |
+| `pillar` (umbrella)      | estratégia de produto            | tema/foco (3–5)                 | soft    | ✅ explicável, ADR-native; mitigar definindo       |
+| `initiative`             | roadmap/SAFe                     | agrupa epics (nível médio)      | hard    | ✗ descartado                                       |
+| `feature` (pilar)        | SAFe                             | valor de 1 PI/1 ART             | hard    | ✗ estreito                                         |
+| `capability` (pilar)     | SAFe Large Solution              | funcionalidade grande multi-ART | hard    | ✗ baggage de escala                                |
+| `delivery` (pilar)       | PM/DevOps                        | ato de entregar / deliverable   | baixa   | ✅ amplo, ecoa a ADR, alinha com `delivery-review` |
+
+- **Pilar `spec → delivery`: confirmado.** Único amplo + baixa colisão; os "óbvios"
+  (feature/capability/epic) carregam escala fixa, que a ADR rejeita como eixo. Doc
+  (`spec.md→intent-brief`) + pilar = duas metades da mesma de-conflação; item 6 sanciona
+  (precedente `exploration→spike`).
+- **Umbrella `kind → ?`: em iteração.** `pillar` ganha em didática (colisão soft mitigável);
+  `type` é a opção neutra de indústria. Em PT `kind`=`type`="tipo" → `kind→type` tem ganho
+  baixo (só alinhamento EN/Jira); `pillar` é a única troca que muda o vocabulário falado.
+- **Explicabilidade:** a dificuldade real é o jargão **"MECE"**, não o umbrella. MECE é garantia
+  de design interna, não rótulo de usuário → dizer _"7 tipos de trabalho; cada item é exatamente
+  um; juntos cobrem tudo"_.
+
+**(b) Onde mora o intent de um Virtual** (durabilidade × acoplamento, owner 2026-06-24). FATO:
+ADR 0010 manda Virtual viver _"apenas no registry"_ (arquivo versionado) e _"nunca tocar
+filesystem"_; `pr-bodies/` + ADR 0022 estabelecem que **não se delega memória ao GitHub**.
+Logo "inline no PR/commit" é o degrau **menos durável** (branch deletável / squash-merge).
+Direção: corte principiado = _sem pasta pesada_ (manter) **≠** _sem registro durável_
+(rejeitar) → Virtual ganha registro leve **no repo** (registry/ledger). Pré-requisito real:
+materializar o `registry.yml` (hoje inexistente neste repo).
+
+**(c) `plan.md` sobrevive?** `plan.md` narra topologia que o `state.yml` já guarda como dado —
+forte candidato a redundância (fundacional, fora do #45).
 
 ## 8. Próximo artefato
 
