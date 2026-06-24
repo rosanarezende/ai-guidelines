@@ -450,12 +450,25 @@ fix: o que estava errado: regex de frontmatter não casava CRLF.
   (feature/capability/epic) carregam escala fixa, que a ADR rejeita como eixo. Doc
   (`spec.md→intent-brief`) + pilar = duas metades da mesma de-conflação; item 6 sanciona
   (precedente `exploration→spike`).
-- **Umbrella `kind → ?`: em iteração.** `pillar` ganha em didática (colisão soft mitigável);
-  `type` é a opção neutra de indústria. Em PT `kind`=`type`="tipo" → `kind→type` tem ganho
-  baixo (só alinhamento EN/Jira); `pillar` é a única troca que muda o vocabulário falado.
-- **Explicabilidade:** a dificuldade real é o jargão **"MECE"**, não o umbrella. MECE é garantia
-  de design interna, não rótulo de usuário → dizer _"7 tipos de trabalho; cada item é exatamente
-  um; juntos cobrem tudo"_.
+- **Umbrella: MANTER `kind` — decidido por scan do código (2026-06-24).** `type` seria pior
+  aqui: (1) quebra a convenção `XxxKind` da casa (≥7 discriminadores: `WorkItemKind`,
+  `ReadinessKind`, `ConstraintOriginKind`, `ReviewEventKind`, `PromotionKind`, `repositoryKind`,
+  `artifactKind`); (2) **colide** com o `type` já usado como _tipo de decisão/evento_ (subsistema
+  `decide/`: `type: this.id`) e com schema externo (GitHub ruleset `type`). O campo fica `kind`.
+- **Explicabilidade (a dor real, resolvida à parte):** a dificuldade era o jargão **"MECE"**, não
+  o umbrella. MECE é garantia de design interna, não rótulo → dizer _"7 tipos de trabalho; cada
+  item é exatamente um; juntos cobrem tudo"_. O conceito falado já tem nome no repo: **"pilares de
+  valor"** (ADR 0010 + `Pillars.test.ts`). Resolução latente: **campo = `kind`; fala = "pilares /
+  tipos de trabalho"**; só `spec → delivery` é rename real.
+
+**Convenção `kind` vs `type` no repo (manter — visibilidade do padrão):**
+
+| Palavra | Papel no código                                              | Exemplos                                                                                   |
+| ------- | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------ |
+| `kind`  | natureza de **conjunto-fechado** de uma entidade (`XxxKind`) | `WorkItemKind`, `ReadinessKind`, `ConstraintOriginKind`, `ReviewEventKind`, `artifactKind` |
+| `type`  | discriminador de **decisão/evento/comando** + schema externo | `decide/` (`type: this.id`, `DecisionType`), GitHub ruleset (`type: "pull_request"`)       |
+
+→ Regra para manter: **nova natureza de entidade governada nasce `kind`**; `type` reserva-se a evento/decisão e a contratos externos.
 
 **(b) Onde mora o intent de um Virtual** (durabilidade × acoplamento, owner 2026-06-24). FATO:
 ADR 0010 manda Virtual viver _"apenas no registry"_ (arquivo versionado) e _"nunca tocar
