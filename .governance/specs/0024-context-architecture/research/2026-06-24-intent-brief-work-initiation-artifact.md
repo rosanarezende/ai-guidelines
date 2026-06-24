@@ -108,12 +108,25 @@ sub-blocos opcionais _dentro do mesmo kind_ — sem abrir taxonomia de lentes.
 | `fix`        | **Virtual** | **proibido** | —                              |
 
 > **3 dos 7 kinds (`proposal`/`patch`/`fix`) têm workspace _proibido_** → nunca ganham
-> arquivo versionado. O `intent-brief` só vira **arquivo** para os 4 Dense. Para os Virtual,
-> o intent vive **inline** (corpo do PR/issue/commit), 1–3 linhas. A burocracia escala com o
-> peso do trabalho, por construção — não por regra nova.
+> **pasta** de workspace. O `intent-brief` só vira **arquivo** (Dense). A burocracia escala
+> com o peso do trabalho, por construção — não por regra nova.
 
 Os campos `⊛` (`hypothesis`/`successMetrics`/`severity`) **já são obrigatórios hoje no
 `WorkItem.ts`**. O intent-brief só lhes dá um lar legível — **não adiciona rigidez nova**.
+
+> ⚠️ **Dois vieses fundacionais detectados na leitura (owner, 2026-06-24) — detalhados na §7:**
+>
+> 1. **Nome do kind `spec`** ainda ecoa o spec-kit. Os 6 irmãos nomeiam a _natureza_ do
+>    trabalho; só `spec` nomeia o _documento_. Renomear (candidatos `delivery`/`initiative`)
+>    **completa** o anti-espec-centrismo que a própria ADR 0010 buscou.
+> 2. **Onde mora o intent de um Virtual.** "Inline no PR/commit" **acopla à ferramenta** e
+>    contradiz o repo-como-SSOT (mesmo princípio que levou a versionar `pr-bodies/`). A ADR 0010
+>    já manda Virtual viver no `registry.yml` (arquivo do repo), não no GitHub — mas o registry
+>    não foi materializado, então o fallback derivou para o PR. Correção: Virtual segue **sem
+>    pasta**, mas seu intent aterrissa num **registro versionado** (registry/ledger), nunca num
+>    branch/PR deletável.
+>
+> Ambos são **fundacionais (caem na G01), fora do #45** — aqui ficam capturados, não decididos.
 
 ## 4. Schema do `intent-brief` em 3 camadas
 
@@ -127,11 +140,11 @@ A rigidez é um **botão** girado perto de zero: só a Camada 1 é dura.
 
 **4 válvulas de escape (anti-camisa-de-força):**
 
-1. **Gradiente de densidade** — 3/7 kinds são inline, sem arquivo.
+1. **Gradiente de densidade** — 3/7 kinds são leves (sem pasta; registro curto — _onde_ ele mora é tensão aberta, §7).
 2. **`N/A` é resposta de 1ª classe** — marcar "não se aplica" > campo vazio.
 3. **Kind evolui sem reescrever** — `proposal → spec`, `experiment → spec` (herda
    `hypothesis`/`successMetrics`). O brief acompanha a promoção.
-4. **Progressive disclosure** — o mesmo template serve um fix de 4 linhas e um experiment de
+4. **Progressive disclosure** — o mesmo template serve um spike de 4 linhas e um experiment de
    2 páginas, porque só o kernel é obrigatório.
 
 ## 5. Template proposto (`_TEMPLATE.intent-brief.md`)
@@ -141,7 +154,7 @@ A rigidez é um **botão** girado perto de zero: só a Camada 1 é dura.
 ```markdown
 ---
 artifact: intent-brief
-kind: spec | experiment | spike | incident # Virtual (proposal/patch/fix) → inline, sem arquivo
+kind: spec | experiment | spike | incident # Virtual (proposal/patch/fix) → registro curto no repo, sem pasta (ver §7)
 title: <curto>
 date: <YYYY-MM-DD>
 status: draft | active | closed # opcional (estilo design doc)
@@ -204,7 +217,7 @@ Pretendemos <resultado/intenção>
 <!-- qualquer coisa fora do andaime -->
 ```
 
-**Virtual kinds (sem arquivo — micro-forma inline no PR/issue):**
+**Virtual kinds (sem pasta — micro-forma curta; ⚠️ _onde_ ela mora é tensão aberta, §7):**
 
 ```text
 proposal: <decisão proposta> · alternativas: <…> · recomendação: <…>
@@ -387,7 +400,7 @@ Pretendemos restaurar commits no Windows · fazendo corrigir o resolve do hook
 - Prevenção: doctor check do PATH; nota no onboarding.
 ```
 
-### 6.5 `proposal` (Virtual — inline, **sem arquivo**)
+### 6.5 `proposal` (Virtual — registro curto; home em aberto, §7)
 
 ```text
 proposal: adotar `intent-brief` no lugar de `spec.md` como doc de início-de-trabalho.
@@ -395,36 +408,56 @@ alternativas: manter `spec.md`; renomear só (Caminho C); compor lentes (Caminho
 recomendação: Caminho A + regra Dense/Virtual. (se aceita → vira `spec`, herda contexto)
 ```
 
-### 6.6 `patch` (Virtual — inline, **sem arquivo**)
+### 6.6 `patch` (Virtual — registro curto; home em aberto, §7)
 
 ```text
 patch: o que estava errado: dep `yaml` em versão antiga sem o parser usado pelos checks.
        correção: bump para 2.x. como verifiquei: `validate` verde + testes dos checks.
 ```
 
-### 6.7 `fix` (Virtual — inline, **sem arquivo**)
+### 6.7 `fix` (Virtual — registro curto; home em aberto, §7)
 
 ```text
 fix: o que estava errado: regex de frontmatter não casava CRLF.
      correção: `\r?\n` no separador. como verifiquei: teste novo com arquivo CRLF.
 ```
 
-## 7. Em aberto (insumo para a DEC-0024-G25)
+## 7. Em aberto
+
+**Itens do #45 / da DEC do intent-brief (G25):**
 
 - **Resultado/aprendizado do experiment**: anexa no próprio intent-brief (vira registro vivo)
   ou vira artefato de fechamento separado (paralelo ao `gate`)?
-- **`plan.md` sobrevive?** A pesquisa reforça que `plan.md` narra topologia que o `state.yml`
-  já guarda como dado — forte candidato a redundância (decisão fundacional, fora do #45).
 - **Migração de `spec.md`**: as specs existentes (0021/0023/0024) renomeiam/reenquadram, ou
   só specs novas nascem como `intent-brief`? (blast radius)
 - **Placement físico** do arquivo (Dense): raiz da spec como `intent-brief.md`? Liga-se à
   reorg de pastas (parada) — coordenar com a futura DEC de pastas.
 
+**Itens fundacionais (caem na G01 / ADR 0010 — fora do #45):**
+
+- **Renomear o kind `spec`** (de-conflação, owner 2026-06-24). FATO (ADR 0010): a intenção do
+  pilar é _"entrega estruturada que muda capacidade"_ — mais ampla que "feature"; o **item 6 da
+  ADR sanciona renomear por colisão sem reabrir a taxonomia** (precedente `exploration→spike`).
+  Candidatos: `delivery` (ecoa a ADR, sem colisão), `initiative` (⚠️ colide com nível de
+  hierarquia de PM/Jira — falha o critério do item 6), `initiative-delivery` (composto pesado).
+  A renomeação do **documento** (`spec.md→intent-brief`) e a do **kind** são **duas metades da
+  mesma de-conflação** — decidir juntas. _Pesquisar antes de bater o martelo._
+- **Onde mora o intent de um Virtual** (durabilidade × acoplamento, owner 2026-06-24). FATO:
+  ADR 0010 manda Virtual viver _"apenas no registry"_ (arquivo versionado) e _"nunca tocar
+  filesystem"_; `pr-bodies/` + ADR 0022 estabelecem que **não se delega memória ao GitHub**.
+  Logo "inline no PR/commit" é o degrau **menos durável** (branch deletável / squash-merge).
+  Direção: corte principiado = _sem pasta pesada_ (manter) **≠** _sem registro durável_
+  (rejeitar) → Virtual ganha registro leve **no repo** (registry/ledger). Pré-requisito real:
+  materializar o `registry.yml` (hoje inexistente neste repo).
+- **`plan.md` sobrevive?** `plan.md` narra topologia que o `state.yml` já guarda como dado —
+  forte candidato a redundância (fundacional, fora do #45).
+
 ## 8. Próximo artefato
 
 **DEC-0024-G25** cravando: nome `intent-brief`; Caminho A + regra de densidade; o schema de
-3 camadas; e decidindo os 4 itens da §7. Depois: execução (template vivo + extensão do
-`artifact-kind`/check + migração).
+3 camadas; e decidindo os itens **#45** da §7. Os itens **fundacionais** (renomear `spec`;
+durabilidade do intent Virtual; `plan.md`) são roteados para a **G01 / ADR 0010**, não para
+esta DEC. Depois: execução (template vivo + extensão do `artifact-kind`/check + migração).
 
 ## Benchmarks (públicos)
 
