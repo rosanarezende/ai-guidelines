@@ -1,0 +1,85 @@
+schema_version: 1
+description: >
+  Contrato de ENFORCEMENT da taxonomia de artefatos (`artifact-kind`). SSOT legivel
+  por maquina do conjunto FECHADO de naturezas de DOCUMENTO e da ordem de autoridade
+  canonica. NAO e narrativa: a leitura humana vive em GOVERNANCE-CATALOG.md §1.A e
+  aponta para ca. Em divergencia entre o catalogo humano e este arquivo, vence este.
+
+  Sujeito = artefato/documento. NAO confundir com `WorkItemKind` (7 pilares MECE,
+  ADR 0010), cujo sujeito e a unidade de trabalho. Mecanismo analogo (`kind` como
+  natureza governada), eixo e sujeito diferentes.
+
+# Campo declarado no frontmatter. Aplica-se a artefatos de classe `research/` e
+# `assets/`. Artefatos governados (decision-brief.md, reviews/, gates/, tasks.md,
+# state.yml, ADRs) derivam a natureza do LAR canonico e NAO carregam `artifact-kind`.
+field: artifact-kind
+
+# Conjunto FECHADO. Item que nao cabe => abrir DEC, nao criar kind de oportunidade
+# (mesmo criterio MECE da ADR 0010 aplicado a documentos).
+kinds:
+  - id: research
+    purpose: Investigacao exploratoria, comparativo ou direcao que alimenta decisao.
+    authority: none
+  - id: pre-coding-review
+    purpose: >
+      Revisao/falsificacao PRE-codificacao de um modelo, direcao, arquitetura, mapa,
+      taxonomia ou decomposicao, ANTES de implementar. Sujeito = um modelo/desenho,
+      nao a entrega nem codigo/LLM. Materializa o "review pre-codificacao/model-review"
+      de [DEC-0024-G21].
+    authority: advisory # findings precisam virar DEC/task/review governado
+  - id: delivery-review
+    purpose: >
+      Parecer sobre uma fatia entregue / PR antes do gate, quando NAO e um review
+      governado de gate (technical_audit/architectural_review/security_review em
+      reviews/). Sujeito = a entrega.
+    authority: advisory
+  - id: dogfood
+    purpose: Experiencia situada, status narrativo datado, aprendizado de uso.
+    authority: none
+  - id: inventory
+    purpose: Mapa de conceitos, transicoes, fontes e gaps de um modelo.
+    authority: none
+  - id: gap
+    purpose: Lacuna/backlog candidato ainda nao promovido a task/DEC/PIT.
+    authority: none
+  - id: prompt
+    purpose: "Prompt operacional/visual (ex.: pedido de review externo, imagem de mapa)."
+    authority: none
+  - id: projection
+    purpose: Mapa/HTML/asset visual derivavel; ajuda humana, nunca SSOT.
+    authority: none
+  - id: handoff-legacy
+    purpose: Handoff/snapshot antigo preservado como evidencia datada; NAO e contrato atual.
+    authority: none
+
+# Metadado OPCIONAL, ortogonal ao kind (NAO cria kind novo). Por isso "external review"
+# e "falsification review" nao sao kinds: sao atributos. Um pre-coding-review pode ser
+# external e por falsificacao.
+metadata:
+  reviewer: [internal, external] # quem revisou (Codex/Antigravity/Gemini = external)
+  method: [falsification, assessment] # como (falsificacao adversarial vs parecer)
+
+# Ordem de autoridade canonica (mantenedor). Em divergencia, vence o nivel mais alto.
+# Fonte UNICA: research/README.md e inventarios apontam para ca, nao restabelecem.
+authority_order:
+  - level: 1
+    source: state.yml
+    scope: topologia, cursor, proximo movimento estrutural
+  - level: 2
+    source: tasks.md
+    scope: checkpoint/etapa e checklist vigente
+  - level: 3
+    source: decision-brief.md
+    scope: decisoes humanas registradas (DEC)
+  - level: 4
+    source: reviews/ + gates/
+    scope: findings, dispositions, Human Gate
+  - level: 5
+    source: git + github
+    scope: branch, PR, commits, CI
+  - level: 6
+    source: assets/
+    scope: projecao visual; nunca SSOT
+  - level: 7
+    source: research/
+    scope: contexto datado (com artifact-kind); nunca contrato atual

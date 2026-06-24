@@ -6,13 +6,15 @@ Ela **não é fonte operacional de verdade**.
 
 ## Ordem de autoridade
 
-Quando houver divergência, use esta ordem:
+**Ordem canônica única:** [`GOVERNANCE-CATALOG.md` §1.A](../../../../.core/governance/GOVERNANCE-CATALOG.md) (Ordem de autoridade). Esta pasta **não** mantém ordem própria; abaixo, só a instância local da Spec 0024, coerente com a canônica:
 
-1. `.governance/specs/0024-context-architecture/state.yml` para topologia, cursor e próximo movimento estrutural.
-2. `.governance/specs/0024-context-architecture/tasks.md` para checkpoint/sub-checkpoint e checklist vigente.
-3. `.governance/specs/0024-context-architecture/decision-brief.md` para decisões humanas registradas.
-4. `reviews/`, `gates/`, Git e GitHub para fatos de review, gate, branch, PR e CI.
-5. Arquivos desta pasta apenas como evidência histórica ou contexto explicativo.
+1. `state.yml` — topologia, cursor e próximo movimento estrutural.
+2. `tasks.md` — checkpoint/etapa e checklist vigente.
+3. `decision-brief.md` — decisões humanas registradas (DEC).
+4. `reviews/` + `gates/` — findings, dispositions, Human Gate.
+5. Git/GitHub — branch, PR, commits, CI.
+6. `assets/` — projeção visual; nunca SSOT.
+7. Arquivos desta pasta (`research/`, com `artifact-kind`) — contexto datado; nunca contrato atual.
 
 ## Como usar
 
