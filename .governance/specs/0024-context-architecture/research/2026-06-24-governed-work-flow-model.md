@@ -59,6 +59,23 @@ Cada tipo **percorre um subconjunto** da mesma cadeia. Dense percorrem mais; Vir
 É a research**. Isso mostra que `research` não é um arquivo a mais — é um **estado da cadeia** (`F-006`)
 que alguns tipos habitam como sua atividade principal. _A burocracia escala com o peso_ (Dense/Virtual).
 
+### Fechamento: dois eixos (resultado polimórfico × autoridade `gate`) — resolve §9.5
+
+O fecho tem **dois eixos distintos**, não um:
+
+| Eixo                             | Pergunta            | Quem                                                                                                                                                                                             |
+| -------------------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Resultado** (o que aconteceu)  | "o que saiu disso?" | **polimórfico por tipo**: `delivery`→capacidade entregue (PR/merge, sem verdict) · `experiment`/`spike`→`learning-record` · `incident`→postmortem · `patch`/`fix`→commit+verificação             |
+| **Autoridade** (podemos fechar?) | "está aprovado?"    | **`gate`** (Human Gate): decisão de quem tem **autoridade** sobre o checkpoint (papel — **nem sempre quem desenvolve**, relevante em time); `gates/c-<checkpoint>.yml`, gated por reviews limpos |
+
+**`gate` ≠ `learning-record`:** um é _"o que decidimos"_ (autoridade), o outro é _"o que aconteceu"_
+(evidência). A relação é `gate --references--> learning-record` — o resultado **alimenta** o gate. Num
+`experiment`: os dois (o `learning-record` won/lost é a evidência sobre a qual se bate o gate). Num
+`delivery`: só o `gate` (a evidência é o próprio trabalho mergeado).
+
+**Simetria:** o fechamento é polimórfico (resultado por tipo), igual a abertura (`intent-brief` por
+tipo); o `gate` é o eixo de **autoridade** por cima, onde a topologia avança.
+
 ## 4. A hierarquia de decomposição (validação de `[DEC-0024-G22]`)
 
 `Spec › Frente › Checkpoint › Etapa › Tarefa`. **Onde vive:** **dentro do Stage 2** (o ramo
@@ -180,7 +197,7 @@ silencioso (senão perde-se o "por quê" = drift). O label `paused` deriva **des
 2. ⏳ **`Frente` fica ou sai?** — decidir via **simulação** de cenário multi-checkpoint (trabalho em time).
 3. ✅ **`spike`/`incident` colapsam?** — resolvido (§6): `spike` é **work item de 1ª classe** (não doc colado); `incident` segue doc vivo (§3).
 4. ✅ **`research` nó ou estado** — resolvido (§6): `finding`=nó c/ status; `research`/`decision`=nós-artefato.
-5. **`gate` × `learning-record`** no fechamento: um referencia o outro? (veredito de valor ≠ aprovação).
+5. ✅ **`gate` × `learning-record`** — resolvido (§3): dois eixos — **resultado** (polimórfico por tipo) × **autoridade** (`gate`); `gate --references--> learning-record`; experiment tem os dois, delivery só o gate.
 6. ✅ **Quando a research nasce** — resolvido (§6): investiga um `finding` aberto; `intent-brief` o `raises`.
 7. ✅ **Modo de investigação + pausa** — resolvido (§6): finding `investigated-by` `research` ou `spike` (por risco); **`experiment` é primário** (`promotes-to` `delivery`, não filho); **bloqueio = derivado** de finding aberto, não 6º status.
 8. **🆕 Registro de pausa deliberada (owner 2026-06-24):** a pausa por despriorização (**sem** finding) **acontece e precisa de registro próprio** (quem/quando/porquê/retomar-quando) — artefato leve a desenhar; o label `paused` deriva dele.
