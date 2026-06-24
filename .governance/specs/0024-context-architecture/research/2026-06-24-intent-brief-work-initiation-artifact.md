@@ -481,7 +481,48 @@ materializar o `registry.yml` (hoje inexistente neste repo).
 **(c) `plan.md` sobrevive?** `plan.md` narra topologia que o `state.yml` já guarda como dado —
 forte candidato a redundância (fundacional, fora do #45).
 
-## 8. Próximo artefato
+## 8. Ciclo de vida dos 7 tipos (investigação — NÃO decidido)
+
+> Mapa exploratório owner↔Claude (2026-06-24). Bom caminho, **ainda em investigação** — não é
+> decisão. Insumo para a DEC-G25 e para a questão de traceability (ponto 3 abaixo).
+
+Cada slot é decidido por uma **regra**, não por gosto:
+
+- **Abertura** = o intent (arquivo se Dense; inline/ledger se Virtual).
+- **`decision-brief`** quando há build pra quebrar (delivery, experiment).
+- **`learning-record`** quando há **afirmação-para-frente a vereditar** (experiment: hipótese;
+  spike: pergunta) — **selado e separado** do brief (anti-mover-trave).
+- **`gate`** quando a topologia avança (autoridade humana).
+- **Reativo (`incident`)** = **doc vivo** (não há afirmação a proteger; o registro _é_ o doc).
+
+| Tipo         | Dens. | Abre com        | Meio                       | Fecha com                       | Promove?                         |
+| ------------ | ----- | --------------- | -------------------------- | ------------------------------- | -------------------------------- |
+| `delivery`   | D     | `intent-brief`  | `decision-brief` + reviews | `gate`                          | —                                |
+| `experiment` | D     | `intent-brief`  | `decision-brief`           | `learning-record` → `gate`      | won → `delivery` (herda hyp/mtr) |
+| `spike`      | D     | `intent-brief`  | leve                       | `learning-record` (leve)        | resposta → delivery/experiment   |
+| `incident`   | D     | `intent-brief`  | mitigação                  | doc vivo (causa-raiz+prevenção) | — (ciclo fechado)                |
+| `proposal`   | V     | inline (ledger) | —                          | promoção / descarte             | accepted → `delivery`            |
+| `patch`      | V     | inline (ledger) | —                          | commit + verificação            | — (ciclo fechado)                |
+| `fix`        | V     | inline (ledger) | —                          | commit + verificação            | — (ciclo fechado)                |
+
+`learning-record` (proposto): par de fechamento do `intent-brief`, molde do `gate` + Learning
+Card (Strategyzer). Frontmatter `artifact: learning-record · kind · brief: <ref> · outcome`;
+corpo = veredito 3-linhas + **tabela métricas-vs-alvo** (o mecanismo anti-mover-trave) +
+aprendizados + próximo passo. Formato `.md`; `outcome` espelha o registry.
+
+**Pontos abertos (investigação):**
+
+1. Os **2 chapéus do `decision-brief`**: ledger de DEC (hoje) × quebra de cards (discovery).
+   Mesmo artefato ou dois?
+2. `spike` precisa de `learning-record` ou sela a resposta no próprio brief?
+3. **Não são "2 arquivos", é um sistema conectado.** Falta um **de-para DEC ↔ research** (cada
+   DEC declara a(s) pesquisa(s) que a embasam — como esta research embasa a G25). Isso são **nós**
+   (intent-brief, decision-brief, learning-record, gate, review, research, DEC) + **arestas**
+   (`breaks-into`, `verdicted-by`, `approved-by`, **`grounded-by`**, `promotes-to`). É a semente
+   do grafo tipado de `[DEC-0024-G08]`/`G23` (derived-only): materializar arestas como **campo de
+   frontmatter** (ex.: DEC `grounded-by: [research/...]`), não como engine/2ª SSOT.
+
+## 9. Próximo artefato
 
 **DEC-0024-G25** cravando: nome `intent-brief`; Caminho A + regra de densidade; o schema de
 3 camadas; e decidindo os itens **#45** da §7. Os itens **fundacionais** (renomear `spec`;
