@@ -2,10 +2,7 @@
 node: intent-brief
 kind: delivery # meta: o próprio redesenho é uma "delivery" do framework
 date: 2026-06-24
-raises:
-  - F-G25-01
-  - F-G25-02
-  # … F-G25-03..08 (seed cobre 01–02)
+sealed: true # abertura selada — não cresce com as questions; elas apontam de volta (raised-by)
 ---
 
 # Intent — redesenhar o artefato de início + o modelo de fluxo (G25)
@@ -15,8 +12,11 @@ raises:
 · saberemos por **consulta determinística por intenção**
 · pronto quando a cadeia `intent → research → decision → tasks` estiver cravada.
 
-**Perguntas abertas levantadas (→ viram findings):**
+## Requisitos (corpo — o que já se sabe/pretende)
 
-- **F-G25-01** — qual artefato o humano alimenta para iniciar?
-- **F-G25-02** — naming (`spec`/`delivery`, `kind`/`type`)?
-- _(F-G25-03 prosa×grafo · 04 7-tipos · 05 hierarquia/Frente · 06 fechamento · 07 pausa · 08 derived-only)_
+- O fluxo é um **grafo tipado** (nós + arestas como dado), **derived-only**, sem 2ª SSOT.
+- Cobre os **7 tipos** sem reescrever a árvore (_modelar = adicionar projeção + contrato_).
+
+> **As `questions` emergem durante o trabalho** e ligam de volta via `raised-by: intent-brief`. Este
+> doc fica **selado e enxuto** — "questions levantadas por este intent" é **view derivada** (query
+> `questions where raised-by = intent-brief`), **não** uma lista mantida à mão aqui.
