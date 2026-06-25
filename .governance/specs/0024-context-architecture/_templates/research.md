@@ -1,20 +1,17 @@
 ---
 node: research
-id: res-NNN # sequencial; arquivo: res-NNN_<slug>.md (sem data no nome)
-investigates: # back-pointer: as questions que investiga (1..N)
+id: res-NNN
+investigates:
   - q-NNN
-method: <benchmark | análise | scan de código | spike-PoC | dogfood>
-# data da investigação: no corpo
+method: <benchmark | análise | scan de código | dogfood> # ⚠️ tirei "spike-PoC": spike é TIPO de trabalho, não método de research (iterar)
 ---
 
 # res-NNN — <título da investigação>
 
-> Data: <YYYY-MM-DD> · (data no corpo, não no nome)
+> Data: <YYYY-MM-DD>
 
-**Questão(ões):** <quais questions investiga e por quê>
+**Questão(ões):** <quais questions investiga>
 
-**Evidência / achados:** <o que encontrou; refs verificáveis `file#anchor`>
+**Evidência / achados:** <o que encontrou; refs `file#anchor`>
 
-**Recomendação (só em `escolha`, _bounded_):** <a opção sugerida + por quê. O humano DECIDE e pode divergir — a recomendação não enviesa o menu de opções, que mora na `question`.>
-
-<!-- Research é IMUTÁVEL após registrada. Declara só `investigates`. A `decision` declara `grounded-by`. -->
+**Recomendação (só em `escolha`, _bounded_):** <a opção sugerida + por quê — o humano DECIDE e pode divergir>

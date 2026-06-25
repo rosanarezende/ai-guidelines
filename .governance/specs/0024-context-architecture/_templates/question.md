@@ -1,29 +1,23 @@
 ---
 node: question
-id: q-NNN # sequencial; arquivo: q-NNN_<slug>.md (sem data no nome)
+id: q-NNN
 raised-by: <intent-brief | q-XXX | tarefa>
-mode: escolha # escolha (alternativas vivas → owner arbitra) | aceitação (finding convergido)
-status: aberta # aberta | resolvida
-# ↓ GERADO dos back-pointers (A+) — NÃO editar à mão; um check garante consistência.
-#   Vazio enquanto `aberta`; preenche quando a research investiga / a decision resolve.
-investigated-by: [] # = research(es) cujo `investigates` contém esta question
-resolved-by: null # = "dec-NNN §Dx" da decision cujo `resolves` contém esta question
+mode: <escolha | aceitação> # escolha = arbitrar entre opções vivas · aceitação = aceitar/rejeitar uma resposta convergida
+status: <aberta | resolvida>
+investigated-by: [] # GERADO (A+) — não editar à mão
+resolved-by: null # GERADO (A+) — "dec-NNN §Dx"
 ---
 
 # q-NNN — <a pergunta, no interrogativo>
 
 **Pergunta:** <o que precisa ser respondido>
 
-## Opções (modo `escolha`) — SEM enviesar (conjunto mínimo, nunca Pró/Contra)
+## Opções (modo `escolha`) — SEM enviesar (nunca Pró/Contra)
 
 ### Opção A — <nome>
 
-- **Problema que resolve:** …
-- **Benefícios:** …
-- **Tradeoffs:** …
-- **Riscos:** …
-- **Quando escolher:** …
-- **Quando NÃO escolher:** …
+- **Problema que resolve:** … · **Benefícios:** … · **Tradeoffs:** … · **Riscos:** …
+- **Quando escolher:** … · **Quando NÃO escolher:** …
 
 ### Opção B — <nome>
 
@@ -31,8 +25,6 @@ resolved-by: null # = "dec-NNN §Dx" da decision cujo `resolves` contém esta qu
 
 ## Estado da iteração (enquanto `aberta`)
 
-> <o que já convergiu / o que falta NAQUELA question — é o que a retomada lê>
+> <o que já convergiu / o que falta — é o que a retomada lê>
 
-**Resposta convergida:** <preencher ao `resolver`>
-
-<!-- A question declara só `raised-by`. `investigated-by`/`resolved-by` são GERADOS (A+). A ESCOLHA + justificativa moram na `decision`; a RECOMENDAÇÃO (bounded) na `research`. -->
+**Resposta convergida:** <preencher ao resolver>

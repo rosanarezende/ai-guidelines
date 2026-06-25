@@ -1,13 +1,11 @@
-# registry-entry — schema de UMA entrada no ÍNDICE de trabalho (registry/<kind>.yml → active-work).
-# TODO trabalho é registrado aqui (índice leve). Se a DENSIDADE pedir, ganha um workspace/ com os artefatos próprios.
-# (Dense/Virtual caiu: densidade é por instância, não por tipo.)
-id: <kind-prefix>-NNN # deliv | exp | spike | inc | patch | fix  (ex.: deliv-001)
-kind: <delivery|experiment|spike|incident|fix|patch> # os 6 tipos (proposal é a FERRAMENTA — ver proposal.yml)
+# registry-entry.yml — entrada no índice de trabalho (registry/<kind>.yml → active-work).
+id: <kind-prefix>-NNN # deliv | exp | spike | inc | patch | fix
+kind: <delivery | experiment | spike | incident | fix | patch>
 title: <curto>
-status: <draft|active|closed|done> # vocabulário por kind
-workspace: works/<kind>_<slug>/ # quando a densidade pede artefatos próprios; senão, omitir (índice basta)
+status: <draft | active | closed | done> # ⚠️ o vocabulário de status POR KIND ainda não está definido (iterar)
+workspace: works/<kind>_<slug>/ # só quando a densidade pede artefatos próprios; senão, omitir
 # arestas (opcionais):
-promotes-to: <id> # experiment won → delivery
-coordinates-with: <repo/id> # CROSS-REPO (ex.: frontend/deliv-001) — o que o banco agrega
-spawned-by: <id> # ex.: fix nascido de um incident
+promotes-to: <id>
+coordinates-with: <repo/id>
+spawned-by: <id>
 date: <YYYY-MM-DD>

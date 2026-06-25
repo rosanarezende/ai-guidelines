@@ -1,12 +1,11 @@
-# decision-brief — VIEW DERIVADA de decisions/*.md. NÃO editar à mão (regenerada).
-# Rastreável tipo `state`: status + progresso k/N por decisão. É a "Resumo de status", derivada.
+# decision-brief.yml — índice DERIVADO de decisions/*.md (não editar à mão).
 decisions:
   - id: dec-NNN
     title: <…>
-    status: draft # draft | partial | resolved
+    status: <draft | partial | resolved>
     questions:
       resolved: [q-NNN]
       open: [q-NNN]
     progress: "k/N"
     owner: null # vem da decision quando resolved
-    date: null # no corpo da decision quando resolved
+    date: null

@@ -178,6 +178,18 @@ Exemplos vivos **não ficam aqui** — templates e exemplos moram em `_templates
 - 🔴 A ligação **"andam juntas"** fica nas **entregas** (não na ideia/proposta)?
 - 🔴 Uma ideia que mexe em **2 repos** vira **2 entregas** (uma por repo)?
 
+**Templates (⚠️ pontos a fechar — também marcados nos próprios moldes em `_templates/`)**
+
+> Vários fecham **sozinhos** ao avançarmos nas lentes/frentes; os demais atacamos 1 a 1.
+
+- 🔴 `stage` (state) → fecha com a **Lente 2** (os momentos).
+- 🔴 `sealed: "leve"` (intent-brief) → o que "leve" significa pro `spike`?
+- 🔴 **limiar de densidade** → quando um trabalho merece `intent-brief` vs só `registry-entry`?
+- 🔴 **`status` por kind** (registry-entry) → vocabulário não definido.
+- 🔴 `incident`: `severity` **PT × EN** (enum do código é EN) · `status` próprio (fora do LifecycleStatus).
+- 🔴 `spike-answer`: `verdict` ainda informal.
+- _(já cobertos por frentes existentes: bypass-com-prazo do incident · intake↔backlog do proposal · PR-sem-merge do spike.)_
+
 **Frentes de fundo (abertas, mas são trabalhos próprios — não desta rodada)**
 
 - 🔴 **Fechar `experiment` (resultado) vs `spike` (resposta)** — moldes separados. No `spike`: **como registrar o fechamento sem merge do código testado** (ex.: PR de investigação fechado sem merge, que só registra as descobertas no repo).
@@ -220,16 +232,25 @@ Exemplos vivos **não ficam aqui** — templates e exemplos moram em `_templates
 
 ## Próximo (retomar aqui — pós-compactação)
 
-**Como retomar (pra não me perder):** este é o **único tracker**. 🟢 = decidido (Parte 3, **não reabrir**) · 🔴 = aberto (Parte 2). **Recência vence** · **conferir o já-decidido antes de desenhar** (não re-perguntar o respondido; não tomar docs externos como verdade — eles inspiram, **não definem**). Modelo vivo, não-autoridade.
+**Como retomar (pra não me perder):** este é o **único tracker**. 🟢 = decidido (Parte 3, **não reabrir**) · 🔴 =
+aberto (Parte 2). Regras: **recência vence** · **conferir o já-decidido antes de desenhar** · **uma pergunta por
+vez** · **linguagem simples no chat** · **não re-perguntar o respondido** · **docs externos inspiram, NÃO
+definem** (e não se versionam/citam). Modelo vivo, não-autoridade.
 
-**Aprofundar na volta (owner 2026-06-25):**
+**Estado:** ✅ **Lente 1 FECHADA** — 6 tipos MECE (delivery/experiment/spike/incident/fix/patch); `proposal` =
+ferramenta de intake (não tipo); Dense/Virtual fora (densidade por instância). Templates limpos, com ⚠️ rastreados.
 
-1. **`delivery` × `experiment`** — fechar o MECE; e **expor o `incident`** (ficou pendente).
-2. **Como o backlog se alimenta:** **interno** (a ferramenta `proposal`) **× externo** (outros backlogs/ferramentas — 2ª iteração).
-3. **Backlog → `intent`:** como um item priorizado **sai do backlog e vira um `intent`** (a abertura de um trabalho).
+**Próximo passo direto — Lente 2 (2 perguntas):**
 
-**Contexto (outros artefatos):** `_repo-simulation/` (2 repos, 6 tipos, índice derivado) · `_templates/` ·
-`2026-06-24-decided-g25-work-flow-model.md` (D1–D9) · `2026-06-24-governed-work-flow-model.md` (§5 ligações).
+1. Os **6 momentos** (abrir → investigar → decidir → executar → entregar → acompanhar) são os certos?
+2. **"Acompanhar"** (pós-merge) é um momento **de verdade** ou só "ainda não acabou"? _(fecha o `stage` do state.)_
+
+**Depois:** Lente 3 (P1/P3/P4 na Parte 2) · os ⚠️ dos templates (vários fecham na iteração) · frentes de fundo —
+em especial **backlog interno (`proposal`) × externo** e **backlog → `intent`** (owner marcou pra aprofundar).
+
+**Contexto (artefatos):** `_templates/` (moldes, com ⚠️) · `_archive/repo-simulation-v1/` (simulação v1
+**arquivada** — nova só quando as lentes fecharem) · `2026-06-24-decided-g25-work-flow-model.md` (D1–D9) ·
+`2026-06-24-governed-work-flow-model.md` (§5 ligações).
 
 ---
 

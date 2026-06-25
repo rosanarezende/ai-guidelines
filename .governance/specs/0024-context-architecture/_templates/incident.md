@@ -1,20 +1,21 @@
 ---
 node: incident
-severity: <baixa | média | alta | crítica> # ⊛ exigido
-status: <mitigando | mitigado | resolvido> # doc VIVO — acretua até a prevenção
-unlocks: # registro RÁPIDO destrava barreiras COM PRAZO (apaga incêndio sem débito; o bypass EXPIRA — GG-0005)
+severity: <low | medium | high | critical> # ⚠️ idioma: o enum do código é EN (IncidentSeverity); manter EN ou PT? (iterar)
+status: <mitigando | mitigado | resolvido> # ⚠️ status próprio do incident (não está no LifecycleStatus do código) — confirmar (iterar)
+# ⚠️ MECANISMO A DEFINIR (frente dedicada): o registro destrava merge-priority + ci-bypass COM PRAZO (o bypass
+#    EXPIRA → sem débito; um alerta garante o postmortem no prazo). COMO exatamente, ainda em aberto.
+unlocks:
   merge-priority-ate: <YYYY-MM-DD>
-  ci-bypass-ate: <YYYY-MM-DD> # um ALERTA dispara no prazo pra garantir o postmortem
-# data no corpo
+  ci-bypass-ate: <YYYY-MM-DD>
 ---
 
 # 🚨 Incidente — <título>
 
-> **Blameless.** Não é sobre "quem causou" — é sobre conter e **não repetir**. Registrar é rápido e simples.
+> **Blameless:** não é sobre "quem causou".
 
 ## Informações gerais
 
-- **Data:** · **Severidade:** · **Status:** · **O que/quem foi afetado:**
+- **Data:** · **Severidade:** · **Status:** · **Afetado:**
 
 ## O que aconteceu
 
@@ -22,18 +23,14 @@ unlocks: # registro RÁPIDO destrava barreiras COM PRAZO (apaga incêndio sem d�
 
 ## Investigação
 
-- **Evidências:** (refs `file#anchor`)
-- **Hipótese mais provável:**
+- **Evidências:** (refs `file#anchor`) · **Hipótese mais provável:**
 
 ## Ações executadas (mitigação)
 
-- <o que foi feito pra apagar o incêndio>
+- <o que apagou o incêndio>
 
-## Postmortem (causa-raiz + prevenção) — **leve, mas garantido pelo alerta**
+## Postmortem (causa-raiz + prevenção)
 
 - **Causa raiz:**
 - **Prevenção:** <regras/checks/monitoramento pra não repetir>
-- **Follow-ups:** <gera `fix` (correção definitiva) / `patch` (hardening) / `proposal`>
-
-<!-- O registro RÁPIDO destrava merge/CI COM PRAZO (bypass expira → sem débito). O postmortem é o artefato
-     principal: LEVE o bastante pra dar vontade de fazer, e GARANTIDO por um alerta atrelado ao prazo. Blameless. -->
+- **Follow-ups:** <gera `fix` / `patch` / `proposal`>

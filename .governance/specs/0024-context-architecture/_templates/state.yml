@@ -1,11 +1,9 @@
-# state — SSOT estrutural (progresso/topologia). Mutado por comando governado, NÃO à mão.
-# (timestamps no próprio arquivo; arquivo único por trabalho, sem NNN.)
-work: <id-do-trabalho> # antes "spec"; um dos 6 tipos (delivery/experiment/spike/incident/fix/patch). proposal = ferramenta, não trabalho.
-kind: delivery
-stage: deciding # deciding (Stage 1: question→research→decision) | executing (Stage 2: tasks)
-cursor: # foco ÚNICO ativo + o sub-ponto (retomada específica)
+# state.yml — progresso/topologia do trabalho (mutado por comando, não à mão).
+work: <id-do-trabalho>
+kind: <delivery | experiment | spike | incident | fix | patch>
+stage: <deciding | executing> # ⚠️ a Lente 2 (os "momentos" do ciclo) ainda está aberta — esses 2 estágios podem virar mais/outros (iterar)
+cursor:
   node: <q-NNN aberta | checkpoint ativo>
-  note: "<o sub-ponto em discussão agora — uma linha>"
-topology: [] # Stage 2: checkpoints com status; vazia enquanto `deciding`
-next: <próximo movimento governado>
-# decisões abertas = DERIVADAS (decision-brief.yml lista as draft/partial); NÃO ficam aqui (podem ser 0/1/N).
+  note: "<o sub-ponto em discussão — uma linha>"
+topology: [] # checkpoints com status (Stage 2)
+next: <próximo movimento>
