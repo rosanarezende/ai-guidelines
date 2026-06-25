@@ -1,0 +1,10 @@
+# registry/experiment.yml — frontend (acme-web). Dense: indexa o workspace.
+works:
+  - id: exp-001
+    kind: experiment
+    title: posição do botão de login social aumenta conversão?
+    status: closed
+    workspace: works/experiment_login-button/
+    outcome: won
+    promotes-to: deliv-002 # won → vira uma delivery de UI (ainda não instanciada nesta rodada)
+    date: 2026-06-24

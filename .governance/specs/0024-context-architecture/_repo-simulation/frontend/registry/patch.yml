@@ -1,0 +1,8 @@
+# registry/patch.yml — frontend (acme-web). Virtual: a entrada É o trabalho (sem workspace).
+works:
+  - id: patch-001
+    kind: patch
+    title: bump da lib de ícones (botões OAuth)
+    status: done
+    intent: "errado: ícones desatualizados nos botões OAuth · correção: bump 3.x · verifiquei: visual regression verde"
+    date: 2026-06-24

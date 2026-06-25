@@ -1,0 +1,6 @@
+work: deliv-001
+kind: delivery
+stage: executing
+closes-with: gate # eixo Resultado = capacidade entregue (sem learning-record)
+promoted-from: prop-001
+coordinates-with: frontend/deliv-001 # CROSS-REPO

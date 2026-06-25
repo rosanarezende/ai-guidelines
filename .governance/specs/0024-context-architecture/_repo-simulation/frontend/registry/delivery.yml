@@ -1,0 +1,18 @@
+# registry/delivery.yml — frontend (acme-web). Dense: indexa o workspace.
+works:
+  - id: deliv-001
+    kind: delivery
+    title: tela de login social (ui)
+    status: active
+    workspace: works/delivery_oauth-ui/
+    coordinates-with: backend/deliv-001 # depende dos endpoints da api
+    date: 2026-06-24
+  - id: deliv-003
+    kind: delivery
+    title: UI de checkout 1-clique
+    status: active
+    workspace: works/delivery_checkout-ui/
+    coordinates-with: backend/deliv-002
+    owner: "@dev-b"
+    date: 2026-06-25
+# deliv-002 reservado: é o destino de promotes-to do exp-001 (won) — ver registry/experiment.yml.

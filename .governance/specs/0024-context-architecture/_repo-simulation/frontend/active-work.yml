@@ -1,0 +1,21 @@
+# DERIVADO — índice público de trabalho do repo (projeção; NÃO editar à mão). Drift-guarded.
+version: 1
+repo: frontend
+active_work:
+  - id: deliv-001
+    kind: delivery
+    stage: executing
+    status: active
+    workspace: works/delivery_oauth-ui/
+    branch: feat/oauth-ui
+    coordinates-with: backend/deliv-001
+    updated_by: "@rosanarezende"
+  - id: deliv-003
+    kind: delivery
+    stage: executing
+    status: active
+    workspace: works/delivery_checkout-ui/
+    branch: feat/checkout-ui
+    coordinates-with: backend/deliv-002
+    updated_by: "@dev-b"
+# closed (exp-001) e Virtual done (patch-001) → equivalente a history.

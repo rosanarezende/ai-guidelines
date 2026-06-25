@@ -1,0 +1,23 @@
+# DERIVADO — índice público de trabalho do repo (projeção; NÃO editar à mão; escrito por `publish-state`). Drift-guarded.
+# Adapta o active.yml real: spec-cêntrico/single-repo → work-cêntrico por KIND + aresta cross-repo.
+# Projeção: Dense projeta de workspace/state.yml; Virtual projetaria de registry/<kind>.yml (sem state.yml).
+version: 1
+repo: backend
+active_work:
+  - id: deliv-001
+    kind: delivery # ← campo NOVO (o eixo do modelo); o active.yml real só conhece "spec"
+    stage: executing # projeção de state.yml (igual ao active.yml real)
+    status: active
+    workspace: works/delivery_oauth-api/
+    branch: feat/oauth-api
+    coordinates-with: frontend/deliv-001 # ← aresta cross-repo NOVA no índice
+    updated_by: "@rosanarezende"
+  - id: deliv-002
+    kind: delivery
+    stage: executing
+    status: active
+    workspace: works/delivery_checkout-api/
+    branch: feat/checkout-api
+    coordinates-with: frontend/deliv-003
+    updated_by: "@dev-a"
+# closed/done (spike-001, inc-001, fix-001) e proposals consumidas (prop-001/002) → equivalente a specs/history.yml.

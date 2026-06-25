@@ -1,0 +1,6 @@
+work: inc-001
+kind: incident
+stage: closed
+severity: alta
+closes-with: living-doc # postmortem é o próprio intent vivo; sem gate/learning-record
+spawned: fix-001 # follow-up virou um fix (Virtual) no registry

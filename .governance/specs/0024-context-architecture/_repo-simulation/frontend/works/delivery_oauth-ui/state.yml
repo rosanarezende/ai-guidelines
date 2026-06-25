@@ -1,0 +1,6 @@
+work: deliv-001
+kind: delivery
+stage: executing
+closes-with: gate
+coordinates-with: backend/deliv-001 # CROSS-REPO: a UI depende dos endpoints da api
+informed-by: exp-001 # a posição do botão veio do experiment won (mesmo repo)

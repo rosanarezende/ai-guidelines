@@ -1,0 +1,17 @@
+work: deliv-003
+kind: delivery
+stage: executing
+owner: "@dev-b"
+coordinates-with: backend/deliv-002 # CROSS-REPO
+topology:
+  cursor: { checkpoint: cp-ui-shell }
+  checkpoints:
+    - { id: cp-ui-shell, owner: "@dev-b", status: in-progress } # PARALELO — o shell não depende da api
+    - {
+        id: cp-ui-integration,
+        owner: "@dev-b",
+        status: blocked,
+        depends-on: ["backend/deliv-002#cp-payment"],
+      }
+# `blocked` é DERIVADO da dependência cross-repo não-pronta (§D7), NÃO status escrito à mão:
+#   cai sozinho quando backend/deliv-002#cp-payment ficar `done`. Sem despausar manual = sem drift.

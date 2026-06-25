@@ -1,0 +1,9 @@
+# registry/incident.yml — backend (acme-api). Dense: indexa o workspace.
+works:
+  - id: inc-001
+    kind: incident
+    title: refresh de token OAuth quebrou em produção
+    status: closed
+    workspace: works/incident_token-refresh/
+    spawned: fix-001 # o follow-up virou um fix (Virtual) no registry
+    date: 2026-06-24

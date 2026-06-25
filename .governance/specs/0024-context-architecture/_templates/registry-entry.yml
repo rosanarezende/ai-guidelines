@@ -1,0 +1,14 @@
+# registry-entry — schema de UMA entrada num `registry/<kind>.yml` (substitui o `intent-inline`).
+# Virtual (proposal/patch/fix): a entrada É o trabalho (sem workspace, durável no REPO — não no PR/GitHub).
+# Dense (delivery/experiment/spike/incident): a entrada INDEXA o workspace (o detalhe mora no intent-brief.md).
+id: <kind-prefix>-NNN # deliv | exp | spike | inc | prop | patch | fix  (ex.: deliv-001)
+kind: <delivery|experiment|spike|incident|proposal|patch|fix>
+title: <curto>
+status: <draft|active|closed|accepted|discarded|done> # vocabulário por kind
+workspace: works/<kind>_<slug>/ # Dense: aponta a pasta · Virtual: omitir (não tem)
+intent: "<1 linha — OBRIGATÓRIO p/ Virtual (é o trabalho); opcional p/ Dense (está no intent-brief)>"
+# arestas (opcionais):
+promotes-to: <id> # proposal aceito / experiment won → delivery
+coordinates-with: <repo/id> # CROSS-REPO (ex.: frontend/deliv-001) — o que o banco agrega
+spawned-by: <id> # ex.: fix nascido de um incident
+date: <YYYY-MM-DD>

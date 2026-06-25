@@ -112,6 +112,16 @@ O limbo ("nem ativo, nem fechado") deriva de uma **fonte**, nunca é status arma
 O grafo, snapshots e qualquer banco são **projeções estritamente derivadas** do Markdown/YAML; **o repo
 vence** (reafirma `[DEC-0024-G07]`/`G08`/`G23` e `GG-0005`).
 
+### D9 · Retomada específica — `cursor` + "Estado da iteração"
+
+A retomada não é genérica. **`state.cursor` = `node` + `note`** (o sub-ponto em discussão, 1 linha); a
+**`question` aberta carrega "Estado da iteração"** (o que convergiu / o que falta NAQUELA question). Retomar =
+ler `cursor` → abrir a question → ver o detalhe + as opções vivas. O `note` é mutação pequena de **progresso**
+no `state` (não cria SSOT nova); a seção da question **sela ao resolver**.
+
+> **Proveniência:** convergido no dogfood do modelo (`_flow-model-dogfood/`, `q-009`) — uma pergunta
+> **levantada durante o próprio trabalho**, i.e. a não-linearidade append-only do §D3 em ação.
+
 ## Roteamento (critérios de aceite, não nova topologia)
 
 - **`internal-architecture-refactor-ddd-bdd`:** forma do grafo de governança (estende `KnowledgeGraph`);
@@ -134,5 +144,6 @@ sequência; executar Ready, Human Gate, merge, advance, `mark-readiness` ou abri
 
 - `research/2026-06-24-intent-brief-work-initiation-artifact.md` (nome/schema/exemplos/ciclo-de-vida).
 - `research/2026-06-24-governed-work-flow-model.md` (cadeia/7-tipos/hierarquia/fechamento/pausa).
+- `_flow-model-dogfood/` (`q-009`) — converge **§D9** (retomada/cursor), levantada durante o dogfood (não-autoridade).
 - Linhagem: `[DEC-0024-G08]`/`G23` (grafo derived-only) · `[DEC-0024-G22]` (hierarquia) · `F-006`
   (research/finding/decision/execution = estados) · ADR 0010 (7 pilares; item 6 rename).
