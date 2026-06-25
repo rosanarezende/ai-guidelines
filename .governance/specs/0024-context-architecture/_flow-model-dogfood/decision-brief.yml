@@ -1,0 +1,11 @@
+# DERIVADO de decisions/*.md — não editar à mão (regenerada).
+decisions:
+  - id: dec-001
+    title: Modelo de fluxo do trabalho governado
+    status: draft
+    questions:
+      resolved: [q-001, q-002]
+      open: [q-003, q-004, q-005, q-006, q-007, q-008]
+    progress: "2/8" # a barra de progresso da iteração incremental
+    owner: null
+    date: null

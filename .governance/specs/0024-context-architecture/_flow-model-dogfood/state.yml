@@ -1,0 +1,9 @@
+work: dogfood-g25 # antes "spec: 0024 / dogfood-g25"
+kind: delivery
+stage: deciding # ainda em Stage 1 (decidir antes de quebrar tarefas)
+cursor: # foco único ativo + o sub-ponto (retomada específica)
+  node: q-003
+  note: "decidindo como a retomada mostra o sub-ponto (cursor basta? ou precisa de sub-estado?)"
+topology: [] # Stage 2 não começou
+next: resolver q-003 → q-004..08 → dec-001 vira partial → resolved → cravar
+# decisões abertas NÃO ficam aqui — são DERIVADAS (decision-brief.yml lista as draft/partial; pode haver 0/1/N).
