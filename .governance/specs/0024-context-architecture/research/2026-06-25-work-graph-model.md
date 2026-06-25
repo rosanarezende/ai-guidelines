@@ -38,16 +38,21 @@ vira outro? · o que o torna único.**
 - **Abre→investiga→fecha:** intent **selado** → questions/research (se houver pergunta aberta) → **gate** (a prova é o próprio merge).
 - **Resultado depois?** opcional — verificar se a entrega moveu o valor.
 - **Vira outro?** não — é **destino** (proposta e experimento-won viram delivery).
-- **Único:** o trabalho "padrão"; o valor está na capacidade entregue.
+- **Único:** o trabalho "padrão"; o valor **é** a capacidade entregue; **comprometido** (fica — _pode_ ser
+  removido no futuro, mas isso **não é o core**).
 
-**`experiment`** — _validar uma aposta de valor_
+**`experiment`** — _intervir pra aprender sobre uma tese_
 
-- **Entrega:** **valida uma hipótese** de valor, com métrica.
-- **Exige:** **hipótese + métricas** (por tipo) · densidade escala com o peso.
-- **Abre→investiga→fecha:** intent que **sela a hipótese** → discovery (questions/research; pode disparar spikes) → gate no merge — **mas...**
-- **Resultado depois?** **SIM** — roda um período → **won / lost / inconclusivo**.
-- **Vira outro?** **won → delivery** (sistematiza); lost → remove o código; inconclusivo → itera.
-- **Único:** o **único cujo valor só se conhece depois do merge** — não acaba ao entregar.
+- **Entrega:** **qualquer intervenção no produto pra APRENDER** sobre uma tese — A/B (controle × variante) **ou**
+  **rollout medido** (liberar pra uma fatia e medir). **Não** é só teste A/B. O valor **é o aprendizado**.
+- **Exige:** **hipótese + métricas** (por tipo) · **ideal:** atrás de **feature flag** (pra desligar/remover a
+  qualquer hora) · densidade escala com o peso.
+- **Abre→investiga→fecha:** intent que **sela a hipótese** → discovery (questions/research; pode disparar spikes) → gate no merge — **mas o resultado vem depois**.
+- **Resultado depois?** **SIM** — roda um período → **won / lost / inconclusivo**. _(Em growth, **lost > won é
+  saudável** — taxa de sucesso alta demais = só ideias óbvias, pouco risco.)_
+- **Vira outro?** **won → delivery** (sistematiza), com **flexibilidade**: hoje (com IA) **reaproveita-se bem mais
+  o código testado** do que antes (quando won = refatorar muito). `lost` → clean-up; `inconclusivo` → itera.
+- **Único:** o **único cujo valor só se conhece depois do merge**, e que se **espera perder com frequência**.
 
 **`spike`** — _provar um ponto antes de entregar valor_
 
@@ -65,14 +70,18 @@ vira outro? · o que o torna único.**
   **descartado**. Quando dá certo, pode sair um `delivery`/`experiment`/`fix` (a explorar).
 - **Único:** prova um ponto **antes** de entregar valor; pode **nascer em qualquer lugar** e **levar a qualquer entrega**.
 
-**`incident`** — _conter um problema grave_
+**`incident`** — _conter um problema grave (sem culpa, sem débito)_
 
-- **Entrega:** **contém e documenta** uma fricção grave, com severidade.
-- **Exige:** **severidade** (por tipo) · densidade escala com o peso.
-- **Abre→investiga→fecha:** **inverte a ordem** — corrige primeiro (urgência) e mergeia → **documenta depois** (postmortem vivo).
-- **Resultado depois?** **SIM** — o postmortem (causa-raiz + prevenção) é o peso.
-- **Vira outro?** não — mas pode **gerar um fix** de follow-up.
-- **Único:** reativo; a abertura **não** é selada antes; o valor está na **prevenção**.
+- **Entrega:** **contém e documenta** uma fricção grave, com **severidade**. O valor está em **não repetir** (prevenção).
+- **Cultura:** **blameless** — não é sobre "quem causou". _(owner: **não** queremos que as pessoas tenham medo de lidar com incidentes.)_
+- **Abre (rápido, simples):** um **template simples/interativo** registra o incidente (severidade · o que quebrou
+  · status). Esse registro **destrava barreiras com PRAZO** — prioridade de merge, bypass de CI — pra **apagar o
+  incêndio sem virar débito** (o bypass **expira**; `GG-0005`).
+- **Investiga/corrige:** mitiga → mergeia rápido (com o bypass).
+- **Fecha:** **postmortem** (causa-raiz + ações + prevenção). **Leve** (pra dar vontade de fazer) **mas garantido**
+  por um **alerta** atrelado ao prazo (pra não despriorizar). É o artefato principal; doc vivo.
+- **Vira outro?** não (terminal) — mas **gera prevenção:** um `fix` (correção definitiva), um `patch` (hardening) ou uma `proposal`.
+- **Único:** o **único reativo** — age antes, documenta depois.
 
 **`fix`** — _corrigir um bug que o usuário vê_
 
@@ -158,13 +167,6 @@ Exemplos vivos **não ficam aqui** — templates e exemplos moram em `_templates
 
 > _(As que eu tinha listado mas **já estavam respondidas** foram removidas — eram erros meus.)_
 
-**Lente 1**
-
-- 🔴 **Os 6 são mesmo MECE?** (já varremos quase todos; falta expor o `incident`). Cada trabalho cai em **um só**
-  e juntos cobrem **toda** intenção de saída?
-  - 🟢 já confirmados distintos: `experiment` × `spike` (níveis diferentes) · `fix` × `patch` (o usuário vê / não vê).
-  - 🔴 falta: `delivery` × `experiment`, e expor o `incident`.
-
 **Lente 2**
 
 - 🔴 Os **6 momentos** (abrir/investigar/decidir/executar/entregar/acompanhar) são os certos?
@@ -178,14 +180,9 @@ Exemplos vivos **não ficam aqui** — templates e exemplos moram em `_templates
 
 **Frentes de fundo (abertas, mas são trabalhos próprios — não desta rodada)**
 
-- 🔴 **Fechar `experiment` (resultado) vs `spike` (resposta)** — moldes separados. No `spike`: **como registrar
-  o fechamento sem merge do código testado** (ex.: PR de investigação fechado sem merge, que só registra as
-  descobertas no repo).
-- 🔴 **`incident`** como frente dedicada (corrige antes, documenta depois).
-- 🔴 **Conectar `proposal` ↔ backlog ↔ histórico** (owner 2026-06-25) — a entrada de ideias hoje está
-  **espalhada**: `NEXT.md` (débitos/escopo por-spec), `insights`/PIT (percepções), o artefato `gap` (candidato a
-  backlog) e o `roadmap/backlog.md` (canônico). O `proposal` parece ser a **entrada unificada** que alimenta o
-  backlog → vira trabalho → `history`. Como amarrar tudo? **Backlogs externos = 2ª iteração** (não agora).
+- 🔴 **Fechar `experiment` (resultado) vs `spike` (resposta)** — moldes separados. No `spike`: **como registrar o fechamento sem merge do código testado** (ex.: PR de investigação fechado sem merge, que só registra as descobertas no repo).
+- 🔴 **`incident` — frente dedicada (owner 2026-06-25, com exemplo real):** desenhar (1) o **template simples/interativo** de registro; (2) o **destravamento com PRAZO** (prioridade de merge + bypass de CI que **expira** → apaga incêndio sem débito, `GG-0005`); (3) o **alerta** que garante o postmortem no prazo; (4) o postmortem **leve** o bastante pra ser feito. Princípio: **blameless** (o oposto do medo).
+- 🔴 **Conectar `proposal` ↔ backlog ↔ histórico** (owner 2026-06-25) — a entrada de ideias hoje está **espalhada**: `NEXT.md` (débitos/escopo por-spec), `insights`/PIT (percepções), o artefato `gap` (candidato a backlog) e o `roadmap/backlog.md` (canônico). O `proposal` parece ser a **entrada unificada** que alimenta o backlog → vira trabalho → `history`. Como amarrar tudo? **Backlogs externos = 2ª iteração** (não agora).
 - 🔴 **Identidade entre repos + banco + dashboards de valor** — fundacional/futuro.
 
 ---
@@ -197,12 +194,13 @@ Exemplos vivos **não ficam aqui** — templates e exemplos moram em `_templates
 - 🟢 `spec` → `delivery` (o nome muda).
 - 🟢 MECE é **por intenção de saída** (não por tamanho/tecnologia).
 - 🟢 **Promoção polimórfica:** proposta vira **qualquer tipo**; `experiment` won → `delivery`. _(recência vence a ADR antiga.)_
-- 🟢 **6 tipos de trabalho** (delivery/experiment/spike/incident/fix/patch); **`proposal` = ferramenta de intake,
-  NÃO um tipo** (como o `insight`). _(muda a ADR 0010 — execução depois.)_
-- 🟢 **Dense × Virtual caiu** — densidade (pasta/registro próprio) é **por instância** (escala com o peso); só os
-  **campos exigidos** (hipótese/métricas, severidade) são por tipo.
+- 🟢 **6 tipos de trabalho** (delivery/experiment/spike/incident/fix/patch); **`proposal` = ferramenta de intake, NÃO um tipo** (como o `insight`). _(muda a ADR 0010 — execução depois.)_
+- 🟢 **Dense × Virtual caiu** — densidade (pasta/registro próprio) é **por instância** (escala com o peso); só os **campos exigidos** (hipótese/métricas, severidade) são por tipo.
 - 🟢 **`fix` vs `patch`** = o usuário **vê** (fix) ou **não vê** (patch).
+- 🟢 **`delivery` vs `experiment` = HIPÓTESE:** delivery = capacidade **já decidida** (comprometida); experiment = **hipótese a testar** (aprender; won/lost). A remoção é **probabilidade** (experiment provavelmente removido se perde; delivery _pode_, mas não é o core) — **não** é a linha. _(won > lost é saudável em growth; won→delivery reaproveita código com flexibilidade.)_
 - 🟢 Explorar **por tipo**, não em "5 classes".
+- 🟢 **Os 6 são MECE** (varridos tipo a tipo): cada um é uma intenção distinta. As zonas cinza (fix↔patch, fix↔incident, delivery↔experiment, spike↔experiment) ficam **com a pessoa** — o framework não auto-classifica.
+- 🟢 **`incident` = reativo + blameless** — registro rápido **destrava merge/CI com prazo** (sem débito) + **alerta** garante o postmortem (leve). _(detalhe na frente dedicada.)_
 
 **Ciclo de vida**
 
@@ -222,15 +220,12 @@ Exemplos vivos **não ficam aqui** — templates e exemplos moram em `_templates
 
 ## Próximo (retomar aqui — pós-compactação)
 
-**Como retomar (pra não me perder):** este é o **único tracker**. 🟢 = decidido (Parte 3, **não reabrir**) · 🔴 =
-aberto (Parte 2). **Recência vence** · **conferir o já-decidido antes de desenhar** (não re-perguntar o
-respondido; não tomar docs externos como verdade — eles inspiram, **não definem**). Modelo vivo, não-autoridade.
+**Como retomar (pra não me perder):** este é o **único tracker**. 🟢 = decidido (Parte 3, **não reabrir**) · 🔴 = aberto (Parte 2). **Recência vence** · **conferir o já-decidido antes de desenhar** (não re-perguntar o respondido; não tomar docs externos como verdade — eles inspiram, **não definem**). Modelo vivo, não-autoridade.
 
 **Aprofundar na volta (owner 2026-06-25):**
 
 1. **`delivery` × `experiment`** — fechar o MECE; e **expor o `incident`** (ficou pendente).
-2. **Como o backlog se alimenta:** **interno** (a ferramenta `proposal`) **× externo** (outros backlogs/
-   ferramentas — 2ª iteração).
+2. **Como o backlog se alimenta:** **interno** (a ferramenta `proposal`) **× externo** (outros backlogs/ferramentas — 2ª iteração).
 3. **Backlog → `intent`:** como um item priorizado **sai do backlog e vira um `intent`** (a abertura de um trabalho).
 
 **Contexto (outros artefatos):** `_repo-simulation/` (2 repos, 6 tipos, índice derivado) · `_templates/` ·

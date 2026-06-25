@@ -1,0 +1,12 @@
+# proposal — a FERRAMENTA de intake (NÃO é um tipo de trabalho; como o `insight` já é).
+# Captura uma ideia/problema DURANTE o trabalho (que você não pode parar ou não tem autoridade pra resolver),
+# num registry DEDICADO que alimenta o backlog. Triagem OBRIGATÓRIA (anti-buraco-negro). Schema de uma entrada:
+id: prop-NNN
+what: "<a ideia ou problema — 1-2 linhas>"
+raised-by: <trabalho/tarefa onde surgiu> # proveniência: de onde veio (rastreabilidade)
+owner: <@quem tria>
+status: <aberta | promovida | descartada> # disposição OBRIGATÓRIA — não fica "aberta" em silêncio (GG-0005)
+promote-to: <delivery | experiment | spike | patch | fix | —> # se promovida, vira esse tipo de trabalho
+discard-reason: "<se descartada, por quê>"
+date: <YYYY-MM-DD>
+# alimenta: roadmap/backlog.md (vira item priorizável) — ver 🔴 conectar intake↔backlog no work-graph-model.

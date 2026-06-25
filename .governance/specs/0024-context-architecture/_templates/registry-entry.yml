@@ -1,14 +1,13 @@
-# registry-entry — schema de UMA entrada num `registry/<kind>.yml` (substitui o `intent-inline`).
-# Virtual (proposal/patch/fix): a entrada É o trabalho (sem workspace, durável no REPO — não no PR/GitHub).
-# Dense (delivery/experiment/spike/incident): a entrada INDEXA o workspace (o detalhe mora no intent-brief.md).
-id: <kind-prefix>-NNN # deliv | exp | spike | inc | prop | patch | fix  (ex.: deliv-001)
-kind: <delivery|experiment|spike|incident|proposal|patch|fix>
+# registry-entry — schema de UMA entrada no ÍNDICE de trabalho (registry/<kind>.yml → active-work).
+# TODO trabalho é registrado aqui (índice leve). Se a DENSIDADE pedir, ganha um workspace/ com os artefatos próprios.
+# (Dense/Virtual caiu: densidade é por instância, não por tipo.)
+id: <kind-prefix>-NNN # deliv | exp | spike | inc | patch | fix  (ex.: deliv-001)
+kind: <delivery|experiment|spike|incident|fix|patch> # os 6 tipos (proposal é a FERRAMENTA — ver proposal.yml)
 title: <curto>
-status: <draft|active|closed|accepted|discarded|done> # vocabulário por kind
-workspace: works/<kind>_<slug>/ # Dense: aponta a pasta · Virtual: omitir (não tem)
-intent: "<1 linha — OBRIGATÓRIO p/ Virtual (é o trabalho); opcional p/ Dense (está no intent-brief)>"
+status: <draft|active|closed|done> # vocabulário por kind
+workspace: works/<kind>_<slug>/ # quando a densidade pede artefatos próprios; senão, omitir (índice basta)
 # arestas (opcionais):
-promotes-to: <id> # proposal aceito / experiment won → delivery
+promotes-to: <id> # experiment won → delivery
 coordinates-with: <repo/id> # CROSS-REPO (ex.: frontend/deliv-001) — o que o banco agrega
 spawned-by: <id> # ex.: fix nascido de um incident
 date: <YYYY-MM-DD>

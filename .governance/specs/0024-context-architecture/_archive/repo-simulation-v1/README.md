@@ -1,5 +1,10 @@
 # Simulação de 2 repos irmãos — falsificação ampla do modelo (cross-repo)
 
+> ⚠️ **ARQUIVADO (2026-06-25).** Cumpriu o papel de **falsificação** — levou às decisões da Lente 1 do
+> `research/2026-06-25-work-graph-model.md`. Foi construído com o modelo **ANTIGO** (proposal como tipo,
+> Dense/Virtual, learning-record) → **não usar como referência atual**. Um **novo** repo-simulation será criado
+> quando as 3 lentes (ou ao menos as 2 primeiras) fecharem.
+
 > **Ambiente controlado, não-autoridade.** Simula **2 repositórios irmãos** de um mesmo produto — `backend/`
 > (api) e `frontend/` (web) — cada um governado pelo modelo de fluxo (G25), para falsificar os templates **e**
 > preparar a validação de **multi-repositório + banco**. Grounding:

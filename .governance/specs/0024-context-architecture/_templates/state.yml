@@ -1,6 +1,6 @@
 # state — SSOT estrutural (progresso/topologia). Mutado por comando governado, NÃO à mão.
 # (timestamps no próprio arquivo; arquivo único por trabalho, sem NNN.)
-work: <id-do-trabalho> # antes "spec"; o trabalho é um delivery/experiment/spike/incident
+work: <id-do-trabalho> # antes "spec"; um dos 6 tipos (delivery/experiment/spike/incident/fix/patch). proposal = ferramenta, não trabalho.
 kind: delivery
 stage: deciding # deciding (Stage 1: question→research→decision) | executing (Stage 2: tasks)
 cursor: # foco ÚNICO ativo + o sub-ponto (retomada específica)
