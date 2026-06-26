@@ -70,6 +70,10 @@ vira outro? · o que o torna único.**
   **descartado**. Quando dá certo, pode sair um `delivery`/`experiment`/`fix` (a explorar).
 - **Único:** prova um ponto **antes** de entregar valor; pode **nascer em qualquer lugar** e **levar a qualquer entrega**.
 
+> **Quando o spike gera conteúdo — 3 destinos (decidido 2026-06-25):** o eixo **não** é "durável × jogável", é **"tem casa / priorizado agora?"** → (1) **jogável** → morre (PR sem merge; aprendizado → answer); (2) **durável com casa** → promove pro home (ex.: `_templates/`), answer indexa; (3) **valioso mas sem casa** → **parqueado na pasta do spike** (o valor **não se rascunha**) + uma **`proposal`** (leve) aponta pro **backlog** → quando priorizado, promove (descongela). O **`spike-answer`** é o índice de tudo. _(conecta a frente `proposal`↔backlog.)_
+
+![Spike — os 3 destinos da saída (jogável→morre · com casa→promove · valioso sem casa→parqueado + proposal)](../assets/spike-output-fates.svg)
+
 **`incident`** — _conter um problema grave (sem culpa, sem débito)_
 
 - **Entrega:** **contém e documenta** uma fricção grave, com **severidade**. O valor está em **não repetir** (prevenção).
@@ -133,15 +137,26 @@ vira outro? · o que o torna único.**
 
 ### Lente 2 · O ciclo de vida (momentos pelos quais o trabalho passa)
 
-```
-abrir → investigar → decidir → executar → entregar(merge) → acompanhar
- flow (delivery/experiment): passa por todos; no fim, acompanha (resultado/valor)
- spike:     abre → investiga (= o trabalho) → entrega a RESPOSTA
- incident:  pula tudo (urgência) → merge → postmortem (o peso fica aqui)
- patch/fix: abre → commit → verifica
-```
+> 🔴 obrigatório (o framework **reclamaria** se faltar) · 🟡 opcional (apoia, nunca trava) · ⚪ pula · ✦ **coração** · `nomes` = documento · _itálico_ = ação.
+
+| tipo           | abrir                 | investigar/decidir ✦                | executar   | entregar                    | acompanhar               |
+| -------------- | --------------------- | ----------------------------------- | ---------- | --------------------------- | ------------------------ |
+| **delivery**   | 🔴 `delivery-brief`   | 🟡 `question`·`research`·`decision` | 🔴 _fazer_ | 🔴 _merge_                  | 🟡 _verificar_           |
+| **experiment** | 🔴 `experiment-brief` | 🟡 `question`·`research`·`decision` | 🔴 _fazer_ | 🔴 _merge_                  | 🔴 `experiment-outcome`  |
+| **spike**      | 🔴 `spike-brief`      | 🟡 `question`·`research`·`decision` | 🔴 _fazer_ | 🔴 _merge (`spike-answer`)_ | ⚪                       |
+| **incident**   | 🔴 `incident-brief`   | 🟡 `question`·`research`·`decision` | 🔴 _fazer_ | 🔴 _merge (bypass)_         | 🔴 `incident-postmortem` |
+| **fix**        | 🔴 `fix-brief`        | 🟡 `question`·`research`·`decision` | 🔴 _fazer_ | 🔴 _merge_                  | 🟡 _verificar_           |
+| **patch**      | 🔴 `patch-brief`      | 🟡 `question`·`research`·`decision` | 🔴 _fazer_ | 🔴 _merge_                  | 🟡 _verificar_           |
 
 _(O `proposal` **não** está aqui — é a ferramenta de intake que **alimenta** esses 6, não percorre o ciclo.)_
+
+> _fazer_ (`executar`, 🔴 sempre): produzir o que realiza o intent — **ação, não documento**. Geralmente **código**; pode ser **doc** (ex.: spike de análise, patch de documentação), **config**, **dados/migração** ou **infra** — depende do tipo + instância.
+>
+> _merge_ (`entregar`, 🔴 sempre): **todos** merjam a saída — inclusive o `spike` (merja o `spike-answer` + duráveis). O que **não** merja é só o **código-PoC jogável** do spike (morre — ver 3-destinos). O `incident` merja com **bypass-com-prazo**.
+
+> ✦ **Coração do framework** = `question` → `research` → `decision`: 🟡 (opcional, sem lint) **mas é onde está o valor** — pular é permitido e você ainda entrega, mas **abre mão dos benefícios** (rastro de decisão, apoio ao julgamento, grafo de raciocínio). O framework **sinaliza o trade-off**, não o esconde.
+>
+> ⚠️ Aberto na Lente 2: **"acompanhar" = momento real** (🔴 no experiment/incident — recomendo gravar resolvido). O SVG `../assets/work-types-lifecycle-paths.svg` é **regenerado desta tabela** quando fechar.
 
 ### Lente 3 · As ligações entre trabalhos (o grafo)
 
@@ -182,9 +197,6 @@ Exemplos vivos **não ficam aqui** — templates e exemplos moram em `_templates
 
 > Vários fecham **sozinhos** ao avançarmos nas lentes/frentes; os demais atacamos 1 a 1.
 
-- 🔴 `stage` (state) → fecha com a **Lente 2** (os momentos).
-- 🔴 `sealed: "leve"` (intent-brief) → o que "leve" significa pro `spike`?
-- 🔴 **limiar de densidade** → quando um trabalho merece `intent-brief` vs só `registry-entry`?
 - 🔴 **`status` por kind** (registry-entry) → vocabulário não definido.
 - 🔴 `incident`: `severity` **PT × EN** (enum do código é EN) · `status` próprio (fora do LifecycleStatus).
 - 🔴 `spike-answer`: `verdict` ainda informal.
@@ -195,7 +207,7 @@ Exemplos vivos **não ficam aqui** — templates e exemplos moram em `_templates
 - 🔴 **Fechar `experiment` (resultado) vs `spike` (resposta)** — moldes separados. No `spike`: **como registrar o fechamento sem merge do código testado** (ex.: PR de investigação fechado sem merge, que só registra as descobertas no repo).
 - 🔴 **`incident` — frente dedicada (owner 2026-06-25, com exemplo real):** desenhar (1) o **template simples/interativo** de registro; (2) o **destravamento com PRAZO** (prioridade de merge + bypass de CI que **expira** → apaga incêndio sem débito, `GG-0005`); (3) o **alerta** que garante o postmortem no prazo; (4) o postmortem **leve** o bastante pra ser feito. Princípio: **blameless** (o oposto do medo).
 - 🔴 **Conectar `proposal` ↔ backlog ↔ histórico** (owner 2026-06-25) — a entrada de ideias hoje está **espalhada**: `NEXT.md` (débitos/escopo por-spec), `insights`/PIT (percepções), o artefato `gap` (candidato a backlog) e o `roadmap/backlog.md` (canônico). O `proposal` parece ser a **entrada unificada** que alimenta o backlog → vira trabalho → `history`. Como amarrar tudo? **Backlogs externos = 2ª iteração** (não agora).
-- 🔴 **Identidade entre repos + banco + dashboards de valor** — fundacional/futuro.
+- 🔴 **Identidade entre repos + banco + dashboards de valor** — fundacional/futuro. _(O `proposal` carrega `raised-by` — ex.: o `spike` de origem; essa **proveniência** alimenta os dashboards de liderança/stakeholder.)_
 
 ---
 
@@ -213,6 +225,8 @@ Exemplos vivos **não ficam aqui** — templates e exemplos moram em `_templates
 - 🟢 Explorar **por tipo**, não em "5 classes".
 - 🟢 **Os 6 são MECE** (varridos tipo a tipo): cada um é uma intenção distinta. As zonas cinza (fix↔patch, fix↔incident, delivery↔experiment, spike↔experiment) ficam **com a pessoa** — o framework não auto-classifica.
 - 🟢 **`incident` = reativo + blameless** — registro rápido **destrava merge/CI com prazo** (sem débito) + **alerta** garante o postmortem (leve). _(detalhe na frente dedicada.)_
+- 🟢 **Saída do `spike` = 3 destinos** (eixo: _tem casa / priorizado agora?_): **jogável**→morre · **durável-com-casa**→promove pro home · **valioso-sem-casa**→**parqueado na pasta do spike + `proposal`** aponta pro backlog. `spike-answer` indexa. _(diagrama: `../assets/spike-output-fates.svg`; conecta a frente proposal↔backlog.)_
+- 🟢 **Abertura = 6 moldes `<kind>-brief.md`** (1 por tipo), **todos `node: intent-brief`** — abertura **uniforme** no grafo, **forma sob medida** por kind (ajuda automação + "percebo se errei o tipo"). `incident` separa **abertura** (`incident-brief`) × **fechamento** (`incident-postmortem`). `registry/<kind>.yml` = **índice** (não abertura). _(materializado em `_templates/` + `registry/<kind>.yml`; **base v0 aprovada 2026-06-25 — conteúdo ainda será refinado**.)_
 
 **Ciclo de vida**
 
@@ -220,6 +234,10 @@ Exemplos vivos **não ficam aqui** — templates e exemplos moram em `_templates
 - 🟢 **Pausa é derivada** (não é um status guardado).
 - 🟢 **Fechamento em 2 eixos:** o resultado (o que aconteceu) × a autoridade (o gate humano).
 - 🟢 Retomada pelo **cursor** (onde paramos).
+- 🟢 **`investigar` + `decidir` = um momento (`investigar/decidir`)** — 5 momentos: abrir → investigar/decidir → executar → entregar → acompanhar. Os artefatos (`question`/`research`/`decision`) seguem distintos **dentro** dele.
+- 🟢 **Coração do framework = `question`→`research`→`decision`** — 🟡 (opcional, **sem lint**) **mas é onde está o valor**; pular é permitido (ainda entrega) e **abre mão dos benefícios** (rastro de decisão, apoio, grafo de raciocínio) — o framework **sinaliza o trade-off**, não esconde.
+- 🟢 **Cor = enforcement:** 🔴 = reclamaria se faltar · 🟡 = apoia, nunca trava · ⚪ = pula. (`investigar/decidir` é 🟡 pra **todos**; `spike` **não** é método de investigação — é tipo → vira relação.)
+- 🟢 **`acompanhar` é momento real** (pós-merge): **🔴** no `experiment` (`experiment-outcome`, won/lost) e no `incident` (`incident-postmortem`, garantido pelo alerta) · **🟡** no delivery/fix/patch (verificar valor) · **⚪** no `spike` (**terminal** — a resposta já é o desfecho; o futuro do que ele gerou vive na `proposal`/arestas). **Fecha o `stage`** (os 5 momentos mapeiam em deciding/executing).
 
 **Ligações**
 
@@ -237,16 +255,13 @@ aberto (Parte 2). Regras: **recência vence** · **conferir o já-decidido antes
 vez** · **linguagem simples no chat** · **não re-perguntar o respondido** · **docs externos inspiram, NÃO
 definem** (e não se versionam/citam). Modelo vivo, não-autoridade.
 
-**Estado:** ✅ **Lente 1 FECHADA** — 6 tipos MECE (delivery/experiment/spike/incident/fix/patch); `proposal` =
-ferramenta de intake (não tipo); Dense/Virtual fora (densidade por instância). Templates limpos, com ⚠️ rastreados.
+**Estado:** ✅ **Lente 1 FECHADA** (6 tipos MECE; `proposal` = intake; Dense/Virtual fora). ✅ **Base v0 dos
+moldes aprovada** (2026-06-25): 6 `<kind>-brief` + `registry/<kind>.yml` + fechos (experiment-outcome /
+spike-answer / incident-postmortem) — **conteúdo ainda será refinado**. ✅ **Lente 2 FECHADA** — tabela colorida no doc (5 momentos · coração ✦ · cores 🔴/🟡/⚪); `stage` resolvido. 🔶 **Próximo: Lente 3** (ligações).
 
-**Próximo passo direto — Lente 2 (2 perguntas):**
+**Próximo passo — Lente 3 (ligações).** ✅ **Lente 2 fechada**. Atacar os 🔴 da Lente 3 (Parte 2): (1) algo que **"vira" outro** → o alvo **já existe** ou é **criado na hora**? · (2) **"andam juntas"** fica nas **entregas**? · (3) ideia em **2 repos** = **2 entregas**?
 
-1. Os **6 momentos** (abrir → investigar → decidir → executar → entregar → acompanhar) são os certos?
-2. **"Acompanhar"** (pós-merge) é um momento **de verdade** ou só "ainda não acabou"? _(fecha o `stage` do state.)_
-
-**Depois:** Lente 3 (P1/P3/P4 na Parte 2) · os ⚠️ dos templates (vários fecham na iteração) · frentes de fundo —
-em especial **backlog interno (`proposal`) × externo** e **backlog → `intent`** (owner marcou pra aprofundar).
+**Depois:** frentes de fundo (**backlog interno×externo** · **backlog→intent** · **bypass-com-prazo** do incident · **dashboards/proveniência**).
 
 **Contexto (artefatos):** `_templates/` (moldes, com ⚠️) · `_archive/repo-simulation-v1/` (simulação v1
 **arquivada** — nova só quando as lentes fecharem) · `2026-06-24-decided-g25-work-flow-model.md` (D1–D9) ·

@@ -1,0 +1,9 @@
+# registry/incident.yml — índice (projeção) dos trabalhos kind=incident deste repo.
+# 1 entrada por trabalho (schema: ../registry-entry.yml) → alimenta active-work.
+entries: []
+# exemplo:
+#   - id: inc-001
+#     title: <curto>
+#     status: <draft | active | closed | done>
+#     workspace: works/incident_<slug>/ # abertura + postmortem
+#     date: <YYYY-MM-DD>

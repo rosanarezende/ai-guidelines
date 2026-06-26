@@ -5,13 +5,24 @@
 
 ## Catálogo
 
-**Abertura**
+**Abertura — 1 template por tipo (`<kind>-brief.md`), todos `node: intent-brief`**
 
-| Molde                | Pra quê                                                                               |
-| -------------------- | ------------------------------------------------------------------------------------- |
-| `intent-brief.md`    | abre `delivery`/`experiment`/`spike` (sealed por-kind; **densidade por instância**)   |
-| `incident.md`        | abre `incident` (registro rápido + bypass-com-prazo + postmortem leve; **blameless**) |
-| `registry-entry.yml` | índice leve de **qualquer** trabalho (→ active-work); `fix`/`patch` abrem assim       |
+> Mesmo nó no grafo (abertura uniforme), forma sob medida por kind. Ao escolher o tipo, o molde já vem
+> direcionado — e a pessoa logo percebe se escolheu o caminho errado.
+
+| Molde                 | Abre         | Forma                                                         |
+| --------------------- | ------------ | ------------------------------------------------------------- |
+| `delivery-brief.md`   | `delivery`   | kernel + espinha + corpo (sealed)                             |
+| `experiment-brief.md` | `experiment` | kernel + ⊛ hipótese/métricas (sealed — pré-registro)          |
+| `spike-brief.md`      | `spike`      | kernel + ⊛ timebox; saída = a **resposta**                    |
+| `incident-brief.md`   | `incident`   | registro rápido (severidade + status) + bypass-com-prazo      |
+| `fix-brief.md`        | `fix`        | simples — sintoma (o usuário vê) → esperado → origem → pronto |
+| `patch-brief.md`      | `patch`      | simples — o-quê (invisível) → por quê → pronto                |
+
+**Índice (projeção, não abertura)**
+
+| `registry-entry.yml` | schema de uma entrada do índice **per-kind** `registry/<kind>.yml` (→ active-work). Todo trabalho ganha uma. |
+| -------------------- | ------------------------------------------------------------------------------------------------------------ |
 
 **Investigação / Decisão**
 
@@ -25,12 +36,12 @@
 
 **Fecho (polimórfico por tipo)**
 
-| Molde                   | Fecha                                                         |
-| ----------------------- | ------------------------------------------------------------- |
-| `experiment-outcome.md` | o `experiment` (won/lost, **pós-merge**)                      |
-| `spike-answer.md`       | o `spike` (a **resposta**; o código de POC **não** dá merge)  |
-| _(postmortem)_          | o `incident` — dentro do `incident.md` (doc vivo)             |
-| _(gate)_                | o `delivery` — molde canônico em `.core/governance/templates` |
+| Molde                    | Fecha                                                         |
+| ------------------------ | ------------------------------------------------------------- |
+| `experiment-outcome.md`  | o `experiment` (won/lost, **pós-merge**)                      |
+| `spike-answer.md`        | o `spike` (a **resposta**; o código de POC **não** dá merge)  |
+| `incident-postmortem.md` | o `incident` (causa-raiz + prevenção, **pós-merge**)          |
+| _(gate)_                 | o `delivery` — molde canônico em `.core/governance/templates` |
 
 **Ferramenta de intake (não é tipo)**
 
@@ -39,9 +50,14 @@
 
 ## Mudanças desta rodada (vs antes)
 
-- ❌ **Removidos:** `intent-inline.md` (Dense/Virtual caiu) · `learning-record.md` (split em experiment-outcome × spike-answer).
-- 🆕 **Criados:** `incident.md` · `proposal.yml` · `experiment-outcome.md` · `spike-answer.md`.
-- ✏️ **Adaptados:** `intent-brief.md` (6 tipos; sealed por-kind; densidade por instância) · `registry-entry.yml` (sem Dense/Virtual).
-- ✅ **Mantidos:** `question` · `research` · `decision` · `decision-brief` · `state`.
+- 🔀 **Abertura virou 6 moldes** `<kind>-brief.md` (todos `node: intent-brief`) — aposentados `intent-brief.md`
+  (genérico) e `incident.md` (bundle); `fix`/`patch` ganham brief próprio (não "abrem como registry" — isso era o
+  pensamento Virtual, que caiu).
+- ✂️ **`incident` separado em abertura × fechamento:** `incident-brief.md` (registro) + `incident-postmortem.md`
+  (causa-raiz). Simétrico a experiment-outcome / spike-answer.
+- ✏️ **`registry-entry.yml`** reposicionado como **índice** (entrada de `registry/<kind>.yml`), não abertura.
+- ✅ **Mantidos:** `question` · `research` · `decision` · `decision-brief` · `state` · `experiment-outcome` ·
+  `spike-answer` · `proposal`.
 
-> Validados contra os exemplos em `../_repo-simulation/`; o que não encaixar, ajusta-se aqui.
+> ⚠️ Em aberto (iterar): `sealed` nos briefs · limiar densidade (brief vs só registry) · status por-kind no
+> registry · mecanismo do bypass-com-prazo + alerta do postmortem (frente do incident).

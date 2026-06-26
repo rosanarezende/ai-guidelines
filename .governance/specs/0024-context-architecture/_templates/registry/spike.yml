@@ -1,0 +1,10 @@
+# registry/spike.yml — índice (projeção) dos trabalhos kind=spike deste repo.
+# 1 entrada por trabalho (schema: ../registry-entry.yml) → alimenta active-work.
+entries: []
+# exemplo:
+#   - id: spike-001
+#     title: <curto>
+#     status: <draft | active | closed | done>
+#     workspace: works/spike_<slug>/ # só se denso (parqueia conteúdo de valor)
+#     resolves: <id da decisão/finding que abriu> # a resposta destrava isto
+#     date: <YYYY-MM-DD>

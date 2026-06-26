@@ -1,0 +1,9 @@
+# registry/fix.yml — índice (projeção) dos trabalhos kind=fix deste repo.
+# 1 entrada por trabalho (schema: ../registry-entry.yml) → alimenta active-work.
+entries: []
+# exemplo:
+#   - id: fix-001
+#     title: <curto>
+#     status: <draft | active | closed | done>
+#     workspace: works/fix_<slug>/ # só se cresceu (1 linha não precisa)
+#     date: <YYYY-MM-DD>

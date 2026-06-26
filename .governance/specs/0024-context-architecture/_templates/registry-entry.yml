@@ -1,4 +1,5 @@
-# registry-entry.yml — entrada no índice de trabalho (registry/<kind>.yml → active-work).
+# registry-entry.yml — schema de UMA entrada do índice per-kind `registry/<kind>.yml` (→ active-work).
+# É ÍNDICE (projeção), NÃO a abertura: todo trabalho abre com um `<kind>-brief` E ganha uma entrada aqui.
 id: <kind-prefix>-NNN # deliv | exp | spike | inc | patch | fix
 kind: <delivery | experiment | spike | incident | fix | patch>
 title: <curto>

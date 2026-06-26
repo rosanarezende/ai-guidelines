@@ -1,0 +1,9 @@
+# registry/delivery.yml — índice (projeção) dos trabalhos kind=delivery deste repo.
+# 1 entrada por trabalho (schema: ../registry-entry.yml) → alimenta active-work.
+entries: []
+# exemplo:
+#   - id: deliv-001
+#     title: <curto>
+#     status: <draft | active | closed | done>
+#     workspace: works/delivery_<slug>/ # só se denso (artefatos próprios)
+#     date: <YYYY-MM-DD>
