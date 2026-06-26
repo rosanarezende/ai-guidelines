@@ -201,7 +201,7 @@ Exemplos vivos **não ficam aqui** — moram em `_templates/`, `_archive/repo-si
 
 - ✅ **Decidido (ver Parte 3):** intents vivem numa **camada de governança global** (por org/BU), **não** nos repos. Resta:
 - ✅ **Resolvido (ver Parte 3):** a forma **não** é uma escolha fixa — é um **espectro plugável** (arquivo → meta-repo → store/serviço); o framework define o **contrato**, o backend escala.
-- 🔴 **Todo trabalho tem uma intent?** ou intents só pros objetivos que valem (trivial colapsa → aparece só no banco)?
+- ✅ **Resolvido (ver Parte 3, com benchmark):** `intent` é **opcional/emergente** — reativos (`incident`/`fix`/`patch`) ficam **sem intent** e aparecem no banco; objetivo (`delivery`/`experiment`/`spike`) fica sob uma intent.
 
 **Templates (⚠️ pontos a fechar — também marcados nos próprios moldes em `_templates/`)**
 
@@ -242,6 +242,8 @@ Exemplos vivos **não ficam aqui** — moram em `_templates/`, `_archive/repo-si
 - 🟢 **Retroalimentação SEM aresta nova:** o resultado de um trabalho (ex.: `spike-answer`) **`resolves`** uma `question`/contrato que a `intent` segura; a intent então **`breaks-into`** o próximo trabalho. A `intent` é a **dona do coração (q→r→d) no nível do objetivo** (carrega as questions/decisions cross-trabalho). Contrato **conhecido** → declara no t0; **incerto** → `spike` resolve antes de paralelizar.
 - 🟢 **Intents vivem na camada de GOVERNANÇA GLOBAL** (por **org / unidade de negócio**), não nos repos: **todas** (single _e_ multi repo) → habilita **cross-referência · padrões · SDD/DDD consistente**. Não briga com "repo vence" (a intent é **governança**, não trabalho; os trabalhos seguem **SSOT no repo** com back-ref `intent: <id>`); o **banco** = agregado **derivado** de todos.
 - 🟢 **Governança é CONTRATO-first, backend PLUGÁVEL** (um framework não escolhe a forma — abraça o espectro): a **forma da intent** (objetivo·contratos·toques·back-ref) + **publicar** + **banco=derivado** são **invariantes**; o **backend** tem **knobs INDEPENDENTES** (não uma escada amarrada ao tamanho): _onde as intents moram_ · _como o banco é computado_ · _dashboard_ · _escopo_ — **qualquer combinação vale** (dev solo pode meta-repo + dashboard). Crescer = **trocar um knob, sem re-modelar**. _(diagrama: `../assets/governance-backend-knobs.svg`; exemplos de combinação no `2026-06-26-cross-repo-feature-graph.md`.)_
+- 🟢 **`intent` é OPCIONAL/emergente** (benchmark: Jira · Linear · Azure DevOps · SAFe · Shape Up — todos deixam tarefa/bug **standalone**; pai opcional; reativo é **lane separada**): os tipos **reativos** (`incident`/`fix`/`patch`) ficam **sem intent** por padrão e vivem no **banco**; `delivery`/`experiment`/`spike` rumo a objetivo ficam **sob uma intent**; um trabalho pode ser **adotado** depois. A visibilidade de _tudo_ = o **banco** (= o board). _(benchmark: `2026-06-26-benchmark-intent-vs-standalone-work.md`.)_
+- 🟢 **Framework é TOOL-PLUGÁVEL** (facilita adoção): o modelo **mapeia** aos conceitos da indústria — `intent` ≈ epic/initiative/bet · `work` ≈ story/task/bug · `banco` ≈ board. Isso habilita **adapters** (sync/integração com Jira/Linear/Azure/…); times adotam **incremental** (mantêm a ferramenta deles + a camada de governança). É o "contrato-first" estendido pra **integração**, não só storage. _(construir adapters = frente futura.)_
 
 **Ciclo de vida**
 
