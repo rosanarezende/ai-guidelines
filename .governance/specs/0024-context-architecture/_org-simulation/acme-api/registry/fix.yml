@@ -1,0 +1,7 @@
+# registry/fix.yml — acme-api · índice kind=fix (→ active-work).
+entries:
+  - id: fix-201
+    title: corrige timeout no endpoint de login
+    status: done
+    intent: null # reativo/standalone — sem intent (aparece no banco mesmo assim)
+    date: 2026-06-15

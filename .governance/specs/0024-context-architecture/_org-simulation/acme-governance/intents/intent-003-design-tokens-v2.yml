@@ -1,0 +1,14 @@
+# intents/intent-003-design-tokens-v2.yml — plano da intent (meta-repo / governança global).
+id: intent-003
+title: Design tokens v2 (cores + tipografia)
+status: done # finalizada
+scope: org
+objetivo: padronizar tokens entre todos os MFEs (consistência visual)
+contratos:
+  - "API dos componentes (tokens v2) — acme-design-system"
+toques:
+  - acme-design-system/deliv-130
+breaks-into: [acme-design-system/deliv-130]
+aprendizado:
+  - "de acme-design-system/deliv-130: tokens v2 estáveis; consumidores migram via patch (sem quebrar)"
+date: 2026-06-05

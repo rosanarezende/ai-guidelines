@@ -1,0 +1,8 @@
+# registry/delivery.yml — acme-shell · índice kind=delivery (→ active-work).
+entries:
+  - id: deliv-110
+    title: wiring do onboarding (rota + mount + contexto)
+    status: active
+    intent: intent-001
+    depends-on: [acme-mfe-identity/deliv-120] # espera as telas (dep de entrega)
+    date: 2026-06-21

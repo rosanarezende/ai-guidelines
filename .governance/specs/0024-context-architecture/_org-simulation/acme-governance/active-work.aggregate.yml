@@ -1,0 +1,24 @@
+# active-work.aggregate.yml — o BANCO (DERIVADO, regenerável): união cross-repo dos grafos publicados.
+# ids namespaceados <repo>/<id>. Inclui TODOS os trabalhos — com ou sem intent. NÃO é SSOT (os repos são).
+
+intents:
+  - { id: intent-001, title: Revamp do onboarding, status: active, scope: org }
+  - { id: intent-002, title: Testar novo billing, status: active, scope: BU }
+  - { id: intent-003, title: Design tokens v2, status: done, scope: org }
+
+works: # todos os trabalhos publicados pelos repos
+  # --- sob uma intent (objetivo) ---
+  - { id: acme-api/deliv-101, kind: delivery, status: active, intent: intent-001 }
+  - { id: acme-shell/deliv-110, kind: delivery, status: active, intent: intent-001 }
+  - { id: acme-mfe-identity/deliv-120, kind: delivery, status: active, intent: intent-001 }
+  - { id: acme-api/deliv-050, kind: delivery, status: active, intent: intent-002 }
+  - { id: acme-mfe-growth/exp-140, kind: experiment, status: active, intent: intent-002 }
+  - { id: acme-design-system/deliv-130, kind: delivery, status: done, intent: intent-003 }
+  # --- standalone (reativo/rotina, SEM intent — aparece no banco mesmo assim) ---
+  - { id: acme-api/fix-201, kind: fix, status: done, intent: null }
+  - { id: acme-mfe-identity/fix-210, kind: fix, status: done, intent: null }
+  - { id: acme-design-system/patch-310, kind: patch, status: done, intent: null }
+  - { id: acme-mfe-growth/patch-320, kind: patch, status: done, intent: null }
+  - { id: acme-mfe-platform/patch-330, kind: patch, status: done, intent: null }
+
+# views derivadas (ex.: por intent, por repo, por kind, por status) — calculadas daqui pro dashboard.

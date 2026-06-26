@@ -35,7 +35,7 @@ vira outro? · o que o torna único.**
 
 - **Entrega:** muda a **capacidade** do sistema.
 - **Exige:** nada além do intent · **densidade escala com o peso** (geralmente densa).
-- **Abre→investiga→fecha:** intent **selado** → questions/research (se houver pergunta aberta) → **gate** (a prova é o próprio merge).
+- **Abre→investiga→fecha:** `delivery-brief` **selado** → questions/research (se houver pergunta aberta) → **gate** (a prova é o próprio merge).
 - **Resultado depois?** opcional — verificar se a entrega moveu o valor.
 - **Vira outro?** não — é **destino** (proposta e experimento-won viram delivery).
 - **Único:** o trabalho "padrão"; o valor **é** a capacidade entregue; **comprometido** (fica — _pode_ ser
@@ -47,7 +47,7 @@ vira outro? · o que o torna único.**
   **rollout medido** (liberar pra uma fatia e medir). **Não** é só teste A/B. O valor **é o aprendizado**.
 - **Exige:** **hipótese + métricas** (por tipo) · **ideal:** atrás de **feature flag** (pra desligar/remover a
   qualquer hora) · densidade escala com o peso.
-- **Abre→investiga→fecha:** intent que **sela a hipótese** → discovery (questions/research; pode disparar spikes) → gate no merge — **mas o resultado vem depois**.
+- **Abre→investiga→fecha:** `experiment-brief` que **sela a hipótese** → discovery (questions/research; pode disparar spikes) → gate no merge — **mas o resultado vem depois**.
 - **Resultado depois?** **SIM** — roda um período → **won / lost / inconclusivo**. _(Em growth, **lost > won é
   saudável** — taxa de sucesso alta demais = só ideias óbvias, pouco risco.)_
 - **Vira outro?** **won → delivery** (sistematiza), com **flexibilidade**: hoje (com IA) **reaproveita-se bem mais
@@ -156,7 +156,7 @@ _(O `proposal` **não** está aqui — é a ferramenta de intake que **alimenta*
 
 > ✦ **Coração do framework** = `question` → `research` → `decision`: 🟡 (opcional, sem lint) **mas é onde está o valor** — pular é permitido e você ainda entrega, mas **abre mão dos benefícios** (rastro de decisão, apoio ao julgamento, grafo de raciocínio). O framework **sinaliza o trade-off**, não o esconde.
 >
-> ⚠️ Aberto na Lente 2: **"acompanhar" = momento real** (🔴 no experiment/incident — recomendo gravar resolvido). O SVG `../assets/work-types-lifecycle-paths.svg` é **regenerado desta tabela** quando fechar.
+> ✅ **Lente 2 FECHADA** (decididos na Parte 3). O SVG `../assets/work-types-lifecycle-paths.svg` está **regenerado** desta tabela.
 
 ### Lente 3 · As ligações entre trabalhos (o grafo)
 
@@ -186,22 +186,9 @@ Exemplos vivos **não ficam aqui** — moram em `_templates/`, `_archive/repo-si
 
 > _(A **Lente 2** saiu daqui — está **fechada** na Parte 3.)_
 
-**Lente 3**
+**Lente 3** _(quase fechada — na Parte 3: ligações nas entregas · 1 ideia→N entregas · camada `intent` · governança global · contrato-first/knobs · intent opcional · tool-plugável)_
 
-- 🔴 A ligação **"andam juntas"** fica nas **entregas** (não na ideia/proposta)?
-- 🔴 Uma ideia que mexe em **2 repos** vira **2 entregas** (uma por repo)?
-
-**Exemplo trabalhado (multi-repo, anonimizado) — achados, ainda NÃO cravados.** Detalhe denso em [`2026-06-26-cross-repo-feature-graph.md`](2026-06-26-cross-repo-feature-graph.md) _(diagrama: `../assets/feature-multirepo-login.svg`)_
-
-- Reforça a **P2**: coordenação/dependência vivem **nas entregas** (incl. `coordinates-with` **MFE↔MFE**: login → suporte proativo).
-- 🔴 **Dois sabores de `depends-on`:** _plataforma/versão_ (estável, não-por-tarefa) × _entrega_ (espera um trabalho concreto). Distinguir?
-- ✅ **Feature cross-repo virou a camada `intent`** (Parte 3): a feature **é** uma `intent` multi-repo (`breaks-into` os trabalhos; banco agrega; dashboard = plano × atual). Aberto só: **onde mora** (abaixo).
-
-**Camada `intent`** — as 2 perguntas (sempre×emergente · retroalimenta) **resolvidas** (Parte 3); `intent.md` v0 + `node` = `work-brief` feitos. Resta:
-
-- ✅ **Decidido (ver Parte 3):** intents vivem numa **camada de governança global** (por org/BU), **não** nos repos. Resta:
-- ✅ **Resolvido (ver Parte 3):** a forma **não** é uma escolha fixa — é um **espectro plugável** (arquivo → meta-repo → store/serviço); o framework define o **contrato**, o backend escala.
-- ✅ **Resolvido (ver Parte 3, com benchmark):** `intent` é **opcional/emergente** — reativos (`incident`/`fix`/`patch`) ficam **sem intent** e aparecem no banco; objetivo (`delivery`/`experiment`/`spike`) fica sob uma intent.
+- 🔴 **Dois sabores de `depends-on`:** _plataforma/versão_ (estável, não-por-tarefa) × _entrega_ (espera um trabalho concreto ficar pronto). Distinguir? — **único aberto da Lente 3.** _(exemplos: `2026-06-26-cross-repo-feature-graph.md`; diagrama `../assets/feature-multirepo-login.svg`.)_
 
 **Templates (⚠️ pontos a fechar — também marcados nos próprios moldes em `_templates/`)**
 
@@ -263,6 +250,8 @@ Exemplos vivos **não ficam aqui** — moram em `_templates/`, `_archive/repo-si
 - 🟢 As **partes** (decisão, checkpoint) **contam como nós**.
 - 🟢 O **resultado** do experiment já tem ligação (`verdicted-by`); a **origem** da ideia também (`raises`).
 - 🟢 **Promover (`promotes-to`) CRIA o alvo por padrão** — nasce um trabalho novo que herda o contexto da origem; **salvo** quando se aponta explicitamente pra um nó **que já existe** (ex.: `delivery` reservado). A aresta é a mesma nos dois casos.
+- 🟢 **`coordinates-with`/`depends-on` ficam NAS ENTREGAS** (P2) — nos trabalhos concretos de cada repo (nós **duráveis**), não na ideia; a ideia só **origina**. Resolvem em **contratos** (coordinates-with = compartilhar um contrato; depends-on = esperar um build/versão). _(exemplos: login multi-repo + 3-devs.)_
+- 🟢 **Uma ideia em N repos → N entregas** (P3) — uma `delivery`/trabalho por repo que precisa de trabalho; a **feature** é uma `intent` multi-repo que **`breaks-into`** essas entregas (não um repo dedicado; o **banco** agrega).
 
 ---
 
@@ -273,19 +262,14 @@ aberto (Parte 2). Regras: **recência vence** · **conferir o já-decidido antes
 vez** · **linguagem simples no chat** · **não re-perguntar o respondido** · **docs externos inspiram, NÃO
 definem** (e não se versionam/citam). Modelo vivo, não-autoridade.
 
-**Estado:** ✅ **Lente 1 FECHADA** (6 tipos MECE; `proposal` = intake; Dense/Virtual fora). ✅ **Base v0 dos
-moldes aprovada** (2026-06-25): 6 `<kind>-brief` + `registry/<kind>.yml` + fechos (experiment-outcome /
-spike-answer / incident-postmortem) — **conteúdo ainda será refinado**. ✅ **Lente 2 FECHADA** — tabela colorida no doc (5 momentos · coração ✦ · cores 🔴/🟡/⚪); `stage` resolvido. 🔶 **Próximo: Lente 3** (ligações).
+**Estado:** ✅ **Lentes 1, 2 e 3 essencialmente FECHADAS.** Lente 1 (6 tipos MECE + `proposal`-ferramenta; Dense/Virtual fora). Lente 2 (5 momentos · coração ✦ · cores 🔴/🟡/⚪; `stage` resolvido). Lente 3 (ligações **nas entregas** = contratos; **camada `intent`** acima dos trabalhos; **governança global** por org/BU; **contrato-first, backend plugável**; **intent opcional/emergente** com benchmark; **tool-plugável**). Base v0 dos moldes aprovada (`<kind>-brief` + `intent.md` + `registry/<kind>.yml` + fechos).
 
-**Próximo passo — Lente 3 (ligações).** ✅ **Lente 2 fechada**. Atacar os 🔴 da Lente 3 (Parte 2): (1) algo que **"vira" outro** → o alvo **já existe** ou é **criado na hora**? · (2) **"andam juntas"** fica nas **entregas**? · (3) ideia em **2 repos** = **2 entregas**?
+**Aberto (Parte 2):** só os **2 sabores de `depends-on`** (plataforma/versão × entrega — único da Lente 3) + os **⚠️ de templates** (status-por-kind · severity PT×EN · verdict do spike).
 
-**Depois:** frentes de fundo (**backlog interno×externo** · **backlog→intent** · **bypass-com-prazo** do incident · **dashboards/proveniência**).
+**Frentes de fundo (trabalhos próprios, não desta rodada):** `incident` dedicada (template + bypass-com-prazo + alerta + postmortem) · conectar `proposal`↔backlog↔history · **adapters** (Jira/Linear/Azure — adoção incremental) · identidade cross-repo + banco + dashboards de valor.
 
-**Contexto (artefatos):** `_templates/` (moldes, com ⚠️) · `_archive/repo-simulation-v1/` (simulação v1
-**arquivada** — nova só quando as lentes fecharem) · `2026-06-24-decided-g25-work-flow-model.md` (D1–D9) ·
-`2026-06-24-governed-work-flow-model.md` (§5 ligações).
+**Contexto (artefatos):** `_templates/` (moldes v0 + `intent.md`) · `../assets/` (diagramas) · research: `2026-06-26-cross-repo-feature-graph.md` (cross-repo + backend plugável) · `2026-06-26-benchmark-intent-vs-standalone-work.md` (benchmark) · **`_org-simulation/`** (nova simulação — 6 repos + meta-repo `acme-governance` com intents/banco; **falta materializar a intent `login system`** + retrospectiva por-repo) · `_archive/repo-simulation-v1/` · `2026-06-24-decided-g25-work-flow-model.md` (D1–D9) · `2026-06-24-governed-work-flow-model.md` (§5 ligações).
 
 ---
 
-Âncoras: simulação `_repo-simulation/` · decisões em `2026-06-24-decided-g25-work-flow-model.md`,
-`2026-06-24-governed-work-flow-model.md` (§5 ligações), ADR 0010 (tipos).
+Âncoras: `_archive/repo-simulation-v1/` · decisões em `2026-06-24-decided-g25-work-flow-model.md`, `2026-06-24-governed-work-flow-model.md` (§5 ligações), ADR 0010 (tipos).

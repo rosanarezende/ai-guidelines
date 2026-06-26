@@ -1,0 +1,9 @@
+# registry/delivery.yml — acme-mfe-identity · índice kind=delivery (→ active-work).
+entries:
+  - id: deliv-120
+    title: telas de onboarding (MFE)
+    status: active
+    intent: intent-001
+    workspace: works/delivery_onboarding-screens/ # DENSO (tem brief próprio)
+    depends-on: [acme-api/deliv-101] # espera a API de onboarding (dep de entrega)
+    date: 2026-06-21
