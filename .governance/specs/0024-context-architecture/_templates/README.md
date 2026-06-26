@@ -5,7 +5,13 @@
 
 ## Catálogo
 
-**Abertura — 1 template por tipo (`<kind>-brief.md`), todos `node: intent-brief`**
+**Intent — a camada ACIMA dos trabalhos**
+
+| Molde       | Pra quê                                                                                                                                                     |
+| ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `intent.md` | o **objetivo durável**: dispara N trabalhos (tipos variados) + se **retroalimenta**; coração no nível do objetivo; **colapsa** no trabalho quando é simples |
+
+**Abertura (do trabalho) — 1 template por tipo (`<kind>-brief.md`), todos `node: work-brief`**
 
 > Mesmo nó no grafo (abertura uniforme), forma sob medida por kind. Ao escolher o tipo, o molde já vem
 > direcionado — e a pessoa logo percebe se escolheu o caminho errado.
@@ -50,7 +56,8 @@
 
 ## Mudanças desta rodada (vs antes)
 
-- 🔀 **Abertura virou 6 moldes** `<kind>-brief.md` (todos `node: intent-brief`) — aposentados `intent-brief.md`
+- 🆕 **Camada `intent`** (`intent.md`) acima dos trabalhos — o `node` dos briefs passou de `intent-brief` → `work-brief` (intent é a camada de cima; o que era "intent-brief" era só o `<kind>-brief`).
+- 🔀 **Abertura virou 6 moldes** `<kind>-brief.md` (todos `node: work-brief`) — aposentados `intent-brief.md`
   (genérico) e `incident.md` (bundle); `fix`/`patch` ganham brief próprio (não "abrem como registry" — isso era o
   pensamento Virtual, que caiu).
 - ✂️ **`incident` separado em abertura × fechamento:** `incident-brief.md` (registro) + `incident-postmortem.md`

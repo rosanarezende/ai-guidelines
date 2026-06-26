@@ -1,5 +1,5 @@
 ---
-node: intent-brief
+node: work-brief
 kind: patch
 id: patch-NNN
 ---

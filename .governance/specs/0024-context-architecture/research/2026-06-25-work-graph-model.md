@@ -174,7 +174,9 @@ A lista de ligações **já está decidida** (conjunto fechado) — em palavras 
 | `coordinates-with` | "andam juntas" (entre repos) | api ↔ web                  |
 | `depends-on`       | "espera" (entre repos)       | tela **espera** a api      |
 
-Exemplos vivos **não ficam aqui** — templates e exemplos moram em `_templates/` e `_repo-simulation/`.
+Exemplos vivos **não ficam aqui** — moram em `_templates/`, `_archive/repo-simulation-v1/` e `../assets/` (diagramas).
+
+**Cross-repo + camada `intent` (modelo maduro — detalhe na Parte 3 e em [`2026-06-26-cross-repo-feature-graph.md`](2026-06-26-cross-repo-feature-graph.md)):** as arestas cross-repo (`coordinates-with`/`depends-on`) vivem **nas entregas** e resolvem em **contratos** (`coordinates-with` = compartilhar um contrato · `depends-on` = esperar um build/versão). **Acima** dos trabalhos há a camada **`intent`** (objetivo durável) que **`breaks-into`** N trabalhos e se **retroalimenta** via `resolves` + `breaks-into`. Intent **multi-repo** → **registry cross-repo** (plano autorado + banco derivado → dashboard).
 
 ---
 
@@ -186,9 +188,20 @@ Exemplos vivos **não ficam aqui** — templates e exemplos moram em `_templates
 
 **Lente 3**
 
-- 🔴 Quando algo **"vira" outro**, esse outro **já existe** ou **é criado na hora**?
 - 🔴 A ligação **"andam juntas"** fica nas **entregas** (não na ideia/proposta)?
 - 🔴 Uma ideia que mexe em **2 repos** vira **2 entregas** (uma por repo)?
+
+**Exemplo trabalhado (multi-repo, anonimizado) — achados, ainda NÃO cravados.** Detalhe denso em [`2026-06-26-cross-repo-feature-graph.md`](2026-06-26-cross-repo-feature-graph.md) _(diagrama: `../assets/feature-multirepo-login.svg`)_
+
+- Reforça a **P2**: coordenação/dependência vivem **nas entregas** (incl. `coordinates-with` **MFE↔MFE**: login → suporte proativo).
+- 🔴 **Dois sabores de `depends-on`:** _plataforma/versão_ (estável, não-por-tarefa) × _entrega_ (espera um trabalho concreto). Distinguir?
+- ✅ **Feature cross-repo virou a camada `intent`** (Parte 3): a feature **é** uma `intent` multi-repo (`breaks-into` os trabalhos; banco agrega; dashboard = plano × atual). Aberto só: **onde mora** (abaixo).
+
+**Camada `intent`** — as 2 perguntas (sempre×emergente · retroalimenta) **resolvidas** (Parte 3); `intent.md` v0 + `node` = `work-brief` feitos. Resta:
+
+- ✅ **Decidido (ver Parte 3):** intents vivem numa **camada de governança global** (por org/BU), **não** nos repos. Resta:
+- ✅ **Resolvido (ver Parte 3):** a forma **não** é uma escolha fixa — é um **espectro plugável** (arquivo → meta-repo → store/serviço); o framework define o **contrato**, o backend escala.
+- 🔴 **Todo trabalho tem uma intent?** ou intents só pros objetivos que valem (trivial colapsa → aparece só no banco)?
 
 **Templates (⚠️ pontos a fechar — também marcados nos próprios moldes em `_templates/`)**
 
@@ -223,7 +236,12 @@ Exemplos vivos **não ficam aqui** — templates e exemplos moram em `_templates
 - 🟢 **Os 6 são MECE** (varridos tipo a tipo): cada um é uma intenção distinta. As zonas cinza (fix↔patch, fix↔incident, delivery↔experiment, spike↔experiment) ficam **com a pessoa** — o framework não auto-classifica.
 - 🟢 **`incident` = reativo + blameless** — registro rápido **destrava merge/CI com prazo** (sem débito) + **alerta** garante o postmortem (leve). _(detalhe na frente dedicada.)_
 - 🟢 **Saída do `spike` = 3 destinos** (eixo: _tem casa / priorizado agora?_): **jogável**→morre · **durável-com-casa**→promove pro home · **valioso-sem-casa**→**parqueado na pasta do spike + `proposal`** aponta pro backlog. `spike-answer` indexa. _(diagrama: `../assets/spike-output-fates.svg`; conecta a frente proposal↔backlog.)_
-- 🟢 **Abertura = 6 moldes `<kind>-brief.md`** (1 por tipo), **todos `node: intent-brief`** — abertura **uniforme** no grafo, **forma sob medida** por kind (ajuda automação + "percebo se errei o tipo"). `incident` separa **abertura** (`incident-brief`) × **fechamento** (`incident-postmortem`). `registry/<kind>.yml` = **índice** (não abertura). _(materializado em `_templates/` + `registry/<kind>.yml`; **base v0 aprovada 2026-06-25 — conteúdo ainda será refinado**.)_
+- 🟢 **Abertura = 6 moldes `<kind>-brief.md`** (1 por tipo), **todos com o mesmo node de abertura** (o `node` deixa de ser `intent-brief` — ver camada `intent` abaixo), **forma sob medida** por kind (ajuda automação + "percebo se errei o tipo"). `incident` separa **abertura** (`incident-brief`) × **fechamento** (`incident-postmortem`). `registry/<kind>.yml` = **índice** (não abertura). _(materializado em `_templates/` + `registry/<kind>.yml`; **base v0 aprovada 2026-06-25 — conteúdo ainda será refinado**.)_
+- 🟢 **Camada `intent` acima dos trabalhos — 3 níveis:** **intake** (`proposal`/`insight`) → **`intent`** (objetivo durável) → **trabalho** (6 tipos, cada um com seu `<kind>-brief`). Uma `intent` **dispara N trabalhos de tipos variados** ao longo do tempo e **se retroalimenta** com o que eles aprendem (ex.: intent → `spike` → [retroalimenta] → `experiment` → [retroalimenta] → `delivery`). É o **coração (q→r→d) no nível do objetivo**. **Emergente/por instância:** num trabalho trivial a `intent` **colapsa** no próprio trabalho. A **feature cross-repo** é um caso de `intent` (multi-repo). _(o que era "intent-brief" era só o `<kind>-brief`; "intent" volta pra camada de cima.)_
+- 🟢 **A `intent` materializa quando há COORDENAÇÃO** (≥2 trabalhos/devs); colapsa no trabalho quando é solo/trivial — o **gatilho** da camada é a necessidade de coordenar. **Seu valor: declarar os contratos upfront** (api · eventos · componentes) → os devs trabalham **contra os contratos**, em **paralelo**, antes das implementações (**cross-repo resolve em contratos**). Dá **previsibilidade** (caminho crítico); se um contrato é **incerto**, a intent **dispara um spike** pra resolvê-lo **antes** das deliveries. _(estresse 3-devs: `../assets/feature-3devs-parallelization.svg`.)_
+- 🟢 **Retroalimentação SEM aresta nova:** o resultado de um trabalho (ex.: `spike-answer`) **`resolves`** uma `question`/contrato que a `intent` segura; a intent então **`breaks-into`** o próximo trabalho. A `intent` é a **dona do coração (q→r→d) no nível do objetivo** (carrega as questions/decisions cross-trabalho). Contrato **conhecido** → declara no t0; **incerto** → `spike` resolve antes de paralelizar.
+- 🟢 **Intents vivem na camada de GOVERNANÇA GLOBAL** (por **org / unidade de negócio**), não nos repos: **todas** (single _e_ multi repo) → habilita **cross-referência · padrões · SDD/DDD consistente**. Não briga com "repo vence" (a intent é **governança**, não trabalho; os trabalhos seguem **SSOT no repo** com back-ref `intent: <id>`); o **banco** = agregado **derivado** de todos.
+- 🟢 **Governança é CONTRATO-first, backend PLUGÁVEL** (um framework não escolhe a forma — abraça o espectro): a **forma da intent** (objetivo·contratos·toques·back-ref) + **publicar** + **banco=derivado** são **invariantes**; o **backend** tem **knobs INDEPENDENTES** (não uma escada amarrada ao tamanho): _onde as intents moram_ · _como o banco é computado_ · _dashboard_ · _escopo_ — **qualquer combinação vale** (dev solo pode meta-repo + dashboard). Crescer = **trocar um knob, sem re-modelar**. _(diagrama: `../assets/governance-backend-knobs.svg`; exemplos de combinação no `2026-06-26-cross-repo-feature-graph.md`.)_
 
 **Ciclo de vida**
 
@@ -242,6 +260,7 @@ Exemplos vivos **não ficam aqui** — templates e exemplos moram em `_templates
 - 🟢 **Anotar uma vez** (o sentido contrário o sistema deduz).
 - 🟢 As **partes** (decisão, checkpoint) **contam como nós**.
 - 🟢 O **resultado** do experiment já tem ligação (`verdicted-by`); a **origem** da ideia também (`raises`).
+- 🟢 **Promover (`promotes-to`) CRIA o alvo por padrão** — nasce um trabalho novo que herda o contexto da origem; **salvo** quando se aponta explicitamente pra um nó **que já existe** (ex.: `delivery` reservado). A aresta é a mesma nos dois casos.
 
 ---
 

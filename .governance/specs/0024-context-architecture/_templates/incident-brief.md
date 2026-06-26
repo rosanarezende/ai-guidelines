@@ -1,5 +1,5 @@
 ---
-node: intent-brief
+node: work-brief
 kind: incident
 id: inc-NNN
 severity: <low | medium | high | critical> # ⚠️ idioma EN p/ casar o enum do código (iterar)

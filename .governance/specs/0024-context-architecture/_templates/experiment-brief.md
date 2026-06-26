@@ -1,11 +1,11 @@
 ---
-node: intent-brief
+node: work-brief
 kind: experiment
 id: exp-NNN
 sealed: true # sela a hipótese (pré-registro)
 ---
 
-# Intent (experiment) — <título>
+# Experiment — <título>
 
 > Intervir pra **aprender** sobre uma tese. O valor é o aprendizado; o resultado vem **depois do merge**.
 

@@ -1,11 +1,11 @@
 ---
-node: intent-brief
+node: work-brief
 kind: delivery
 id: deliv-NNN
 sealed: true
 ---
 
-# Intent (delivery) — <título>
+# Delivery — <título>
 
 > Construir uma capacidade **já decidida**. O valor é a capacidade entregue; a prova é o merge.
 

@@ -1,10 +1,10 @@
 ---
-node: intent-brief
+node: work-brief
 kind: spike
 id: spike-NNN
 ---
 
-# Intent (spike) — <título>
+# Spike — <título>
 
 > Provar um ponto / responder uma pergunta **antes** de entregar valor. A saída é a **resposta**, não o código.
 
