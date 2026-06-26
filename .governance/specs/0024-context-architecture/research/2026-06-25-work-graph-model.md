@@ -182,10 +182,7 @@ Exemplos vivos **não ficam aqui** — templates e exemplos moram em `_templates
 
 > _(As que eu tinha listado mas **já estavam respondidas** foram removidas — eram erros meus.)_
 
-**Lente 2**
-
-- 🔴 Os **6 momentos** (abrir/investigar/decidir/executar/entregar/acompanhar) são os certos?
-- 🔴 **"Acompanhar"** (depois de entregar) é um momento **de verdade**, ou só "ainda não acabou"?
+> _(A **Lente 2** saiu daqui — está **fechada** na Parte 3.)_
 
 **Lente 3**
 
@@ -204,7 +201,7 @@ Exemplos vivos **não ficam aqui** — templates e exemplos moram em `_templates
 
 **Frentes de fundo (abertas, mas são trabalhos próprios — não desta rodada)**
 
-- 🔴 **Fechar `experiment` (resultado) vs `spike` (resposta)** — moldes separados. No `spike`: **como registrar o fechamento sem merge do código testado** (ex.: PR de investigação fechado sem merge, que só registra as descobertas no repo).
+- 🔴 **`spike` — registrar o fechamento sem merge do código-PoC** (ex.: PR de investigação fechado sem merge; a **resposta + descobertas** vão pro repo, o código **jogável** não). _(Os moldes `experiment-outcome` × `spike-answer` já estão separados, e os **destinos do experiment foram cravados** — won→`delivery` · lost→`patch` · inconclusive→polimórfico.)_
 - 🔴 **`incident` — frente dedicada (owner 2026-06-25, com exemplo real):** desenhar (1) o **template simples/interativo** de registro; (2) o **destravamento com PRAZO** (prioridade de merge + bypass de CI que **expira** → apaga incêndio sem débito, `GG-0005`); (3) o **alerta** que garante o postmortem no prazo; (4) o postmortem **leve** o bastante pra ser feito. Princípio: **blameless** (o oposto do medo).
 - 🔴 **Conectar `proposal` ↔ backlog ↔ histórico** (owner 2026-06-25) — a entrada de ideias hoje está **espalhada**: `NEXT.md` (débitos/escopo por-spec), `insights`/PIT (percepções), o artefato `gap` (candidato a backlog) e o `roadmap/backlog.md` (canônico). O `proposal` parece ser a **entrada unificada** que alimenta o backlog → vira trabalho → `history`. Como amarrar tudo? **Backlogs externos = 2ª iteração** (não agora).
 - 🔴 **Identidade entre repos + banco + dashboards de valor** — fundacional/futuro. _(O `proposal` carrega `raised-by` — ex.: o `spike` de origem; essa **proveniência** alimenta os dashboards de liderança/stakeholder.)_
@@ -221,7 +218,7 @@ Exemplos vivos **não ficam aqui** — templates e exemplos moram em `_templates
 - 🟢 **6 tipos de trabalho** (delivery/experiment/spike/incident/fix/patch); **`proposal` = ferramenta de intake, NÃO um tipo** (como o `insight`). _(muda a ADR 0010 — execução depois.)_
 - 🟢 **Dense × Virtual caiu** — densidade (pasta/registro próprio) é **por instância** (escala com o peso); só os **campos exigidos** (hipótese/métricas, severidade) são por tipo.
 - 🟢 **`fix` vs `patch`** = o usuário **vê** (fix) ou **não vê** (patch).
-- 🟢 **`delivery` vs `experiment` = HIPÓTESE:** delivery = capacidade **já decidida** (comprometida); experiment = **hipótese a testar** (aprender; won/lost). A remoção é **probabilidade** (experiment provavelmente removido se perde; delivery _pode_, mas não é o core) — **não** é a linha. _(won > lost é saudável em growth; won→delivery reaproveita código com flexibilidade.)_
+- 🟢 **`delivery` vs `experiment` = HIPÓTESE:** delivery = capacidade **já decidida** (comprometida); experiment = **hipótese a testar** (aprender; won/lost). A remoção é **probabilidade** (experiment provavelmente removido se perde; delivery _pode_, mas não é o core) — **não** é a linha. _(won > lost é saudável em growth; won→delivery reaproveita código com flexibilidade.)_ **Destinos do resultado:** won → `delivery` · lost → `patch` (clean-up) · inconclusive → polimórfico (`spike` / novo `experiment` / `patch`).
 - 🟢 Explorar **por tipo**, não em "5 classes".
 - 🟢 **Os 6 são MECE** (varridos tipo a tipo): cada um é uma intenção distinta. As zonas cinza (fix↔patch, fix↔incident, delivery↔experiment, spike↔experiment) ficam **com a pessoa** — o framework não auto-classifica.
 - 🟢 **`incident` = reativo + blameless** — registro rápido **destrava merge/CI com prazo** (sem débito) + **alerta** garante o postmortem (leve). _(detalhe na frente dedicada.)_

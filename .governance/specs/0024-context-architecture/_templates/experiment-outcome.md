@@ -13,7 +13,7 @@ sealed: true
 
 - **Resultado:** <won | lost | inconclusive>
 - **O que aprendemos:** <a lição>
-- **Próximo passo:** <promove a `delivery` | clean-up | itera>
+- **Próximo passo:** <won → `delivery` | lost → `patch` (clean-up) | inconclusive → `spike` / novo `experiment` / `patch`>
 
 ## Métricas vs alvo
 
@@ -21,7 +21,8 @@ sealed: true
 | ------- | --------------------- | --------- | ----- |
 | <…>     | <…>                   | <…>       | ✓ / ✗ |
 
-## Destino
+## Destino (polimórfico)
 
-- **won** → `promotes-to` `delivery` (reaproveita o código testado com flexibilidade).
-- **lost** → clean-up. · **inconclusive** → itera.
+- **won** → `promotes-to` `delivery` (sistematiza; reaproveita o código testado com flexibilidade).
+- **lost** → **clean-up = um `patch`** (remove o código/flag testado — invisível ao usuário).
+- **inconclusive** → **depende do sinal**: `patch` (clean-up) · `spike` (investigar o porquê) · novo `experiment` (iterar) · etc.
