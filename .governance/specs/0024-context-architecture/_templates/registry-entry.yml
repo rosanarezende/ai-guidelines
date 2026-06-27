@@ -29,5 +29,5 @@ closed-by: <ref ao artefato de fecho> # ref ao answer/outcome/postmortem (quando
 #   delivery · fix · patch → nenhum (só a base)
 #   experiment            → outcome (won | lost | inconclusive) = disposição terminal (paralelo a exploration→fate)
 #   incident              → severity (low|medium|high|critical) · status (mitigating|mitigated|resolved) · merge-priority-until · ci-bypass-until
-#   exploration                 → fate (throwaway | promoted | parked) = destino do output. Conteúdo (question/verdict/timebox) mora no exploration-brief/exploration-answer; resolves/raises são DERIVADOS (intent.open-question.exploration · proposal.raised-by) — não guardar aqui.
+#   exploration           → fate (throwaway|promoted|parked) · answers: <repo>/<intent-id>#<qN> (a question que esta exploration responde — ANCORADA AQUI; a intent DERIVA `answered-by`, A+ anti-drift). Conteúdo (question/verdict/timebox) → exploration-brief/answer; `raises` derivado (proposal.raised-by). _(exploration diverge → template próprio: registry/exploration.yml)_
 #   proposal              → NÃO é work: schema próprio em registry/proposal.yml

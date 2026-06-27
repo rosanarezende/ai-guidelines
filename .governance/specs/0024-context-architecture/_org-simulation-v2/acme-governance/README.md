@@ -7,7 +7,6 @@
     acme-governance/
       intents/
         intent-0001/
-          intent.yml          ← a intent-registry (governança)
-          deliberation/       ← as questions do objetivo (a definir se vive aqui ou na exploration)
+          intent.yml          ← a intent-registry (governança): objetivo + open-questions + contratos
 
-_(por ora há 2 variantes — `intent.robusta.yml` × `intent.enxuta.yml` — pra decidir quanto a intent EMBUTE × REFERENCIA.)_
+_(o CONTEÚDO das investigações NÃO vive aqui: cada open-question é respondida por uma `exploration` num repo, que declara `answers: intent-0001#qN` — a intent deriva `answered-by` (A+). O banco derivado (`../_derive.mjs`) recomputa a projeção a partir das registries.)_

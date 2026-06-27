@@ -9,7 +9,7 @@ Espelha a regra **referência ≠ conteúdo**: a raiz guarda **estrutura / índi
 
 ```
 _templates/
-  intent.yml · registry-entry.yml · proposal.yml · state.yml    ← estrutura / índice / referência (ancoram arestas)
+  intent.yml · registry-entry.yml · proposal.yml · exploration.yml · state.yml    ← estrutura / índice / referência (ancoram arestas)
   briefs/         ← CONTEÚDO de abertura por kind (sem arestas)
   closings/       ← CONTEÚDO de fecho por kind (sem arestas)
   deliberation/   ← q/r/d: question · research · decision · decision-brief
@@ -39,8 +39,10 @@ _templates/
 
 **Índice (projeção, não abertura)**
 
-| `registry-entry.yml` | **schema BASE** da entrada de índice → crie `registry/<kind>.yml` (no repo) a partir dele (só os extras por kind). Só `proposal` tem template próprio (intake, não é work); `exploration` usa a base + `fate` (conteúdo vai pro brief/answer). |
-| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Molde                | Pra quê                                                                                                                                |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `registry-entry.yml` | **schema BASE** da entrada de índice → crie `registry/<kind>.yml` (no repo) a partir dele (só os extras por kind).                     |
+| `exploration.yml`    | template próprio do **registry da exploration** (diverge da base pela aresta **`answers`** + `fate`); o conteúdo vai pro brief/answer. |
 
 **Deliberação (q/r/d) — pasta `deliberation/`**
 
@@ -78,30 +80,32 @@ _templates/
 - ✅ **Mantidos:** `question` · `research` · `decision` · `decision-brief` · `state` · `experiment-outcome` ·
   `exploration-answer` · `proposal`.
 - 📁 **Reorg de pastas (referência ≠ conteúdo):** `registry-entry`/`proposal` subiram pra raiz; `briefs/` + `closings/` separam o **conteúdo por kind**; a pasta `registry/` saiu. **Briefs viraram conteúdo puro** — as arestas (`intent`, `closes-with`) migraram pro `registry`.
+- 🔗 **Amarra intent↔exploration migrada (forma v2, validada na sim):** a **exploration** ancora a aresta **`answers: intent#qN`**; a intent **deriva** `answered-by`/`status`/`verdict` (**A+**, visível + check anti-drift); `contracts` viraram `pending:[{name,awaits}]`; **`unlocks` saiu** (o destrave é derivado). Novo `exploration.yml` (registry próprio); briefs/answers **referenciam** o id (`exploration: <id>`), não duplicam.
 
 ## Validação dos templates (tracker)
 
-> Inventário dos **17 moldes**, **agrupado pela pasta** e **ordenado por status** (✅ → 🔶 → ❓) pra escanear rápido. **Confirmar 1 a 1** com a owner — o status é **leitura proposta** (rever detalhes é permitido mesmo nos ✅). Legenda: **✅** validado · **🔶** 1ª passada / parcial · **❓** não revisado (ou bloqueado por frente aberta).
+> Inventário dos **18 moldes**, **agrupado pela pasta** e **ordenado por status** (✅ → 🔶 → ❓) pra escanear rápido. **Confirmar 1 a 1** com a owner — o status é **leitura proposta** (rever detalhes é permitido mesmo nos ✅). Legenda: **✅** validado · **🔶** 1ª passada / parcial · **❓** não revisado (ou bloqueado por frente aberta).
 
 ### Raiz — estrutura / índice / referência
 
-| Molde                | Status | Nota / o que falta confirmar                                                                                     |
-| -------------------- | ------ | ---------------------------------------------------------------------------------------------------------------- |
-| `intent.yml`         | ✅     | yml + objective + open-questions + contracts + breaks-into (agrupado) + references + details.                    |
-| `registry-entry.yml` | ✅     | base + arestas agrupadas + status próprio + `intent`/`closed-at`/`closed-by` gerais + extras por kind (`fate`…). |
-| `proposal.yml`       | ✅     | triagem (ICE) + owner + status EN.                                                                               |
-| `state.yml`          | ❓     | **bloqueado pela Lente 2** (`stage: deciding \| executing` ainda aberto).                                        |
+| Molde                | Status | Nota / o que falta confirmar                                                                                                                                      |
+| -------------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `intent.yml`         | ✅     | forma v2: open-questions (`answered-by`/`status`/`verdict` **A+**) + contracts (`pending:[{name,awaits}]`/`known`) + breaks-into agrupado + references + details. |
+| `registry-entry.yml` | ✅     | base + arestas agrupadas + status próprio + gerais (`intent`/`closed-at`/`closed-by`) + extras por kind (exploration → `fate`+**`answers`**).                     |
+| `exploration.yml`    | ✅     | registry próprio da exploration: base + **`answers`** (ancora a aresta) + `fate`; não fica "blocked" (bloqueio vira a resposta).                                  |
+| `proposal.yml`       | ✅     | triagem (ICE) + owner + status EN.                                                                                                                                |
+| `state.yml`          | ❓     | **bloqueado pela Lente 2** (`stage: deciding \| executing` ainda aberto).                                                                                         |
 
 ### `briefs/` — conteúdo de abertura (sem arestas)
 
-| Molde                   | Status | Nota / o que falta confirmar                                                                     |
-| ----------------------- | ------ | ------------------------------------------------------------------------------------------------ |
-| `delivery-brief.yml`    | ✅     | enxugado (`out-of-scope` · `done-when`); conteúdo puro.                                          |
-| `exploration-brief.yml` | ✅     | `question` no topo (= open-question da intent) + timebox + approach/success-signal.              |
-| `experiment-brief.yml`  | 🔶     | falta rever ⊛ hipótese/métricas + `sealed`/pré-registro.                                         |
-| `incident-brief.yml`    | 🔶     | enums EN; ⚠️ tirar campos de ÍNDICE (`severity`/`status`/datas) → registry (frente do incident). |
-| `fix-brief.yml`         | 🔶     | confirmar sintoma→esperado→origem→pronto.                                                        |
-| `patch-brief.yml`       | 🔶     | confirmar o-quê→por quê→pronto.                                                                  |
+| Molde                   | Status | Nota / o que falta confirmar                                                                                                               |
+| ----------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `delivery-brief.yml`    | ✅     | enxugado (`out-of-scope` · `done-when`); conteúdo puro.                                                                                    |
+| `exploration-brief.yml` | ✅     | `question` (= open-question da intent) + timebox + approach/success-signal; **referencia o registry via `exploration:`** (não duplica id). |
+| `experiment-brief.yml`  | 🔶     | falta rever ⊛ hipótese/métricas + `sealed`/pré-registro.                                                                                   |
+| `incident-brief.yml`    | 🔶     | enums EN; ⚠️ tirar campos de ÍNDICE (`severity`/`status`/datas) → registry (frente do incident).                                           |
+| `fix-brief.yml`         | 🔶     | confirmar sintoma→esperado→origem→pronto.                                                                                                  |
+| `patch-brief.yml`       | 🔶     | confirmar o-quê→por quê→pronto.                                                                                                            |
 
 ### `closings/` — conteúdo de fecho (sem arestas)
 

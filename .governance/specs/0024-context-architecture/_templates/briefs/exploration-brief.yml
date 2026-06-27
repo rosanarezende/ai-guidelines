@@ -1,6 +1,6 @@
 node: work-brief
 kind: exploration
-id: exploration-NNN
+exploration: <exploration-id> # REFERENCIA a registry (o `id` é DELA); o brief é CONTEÚDO, não duplica o id
 question: # ⊛ a PERGUNTA — texto IDÊNTICO à open-question da intent (o exploration-brief é a casa do conteúdo do exploration)
 timebox: # ⊛ prazo
 references: []
