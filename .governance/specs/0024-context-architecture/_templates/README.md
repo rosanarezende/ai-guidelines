@@ -3,6 +3,18 @@
 > Coletânea **canônica** dos moldes, adaptada às decisões do `research/2026-06-25-work-graph-model.md`.
 > Não-autoridade (o template vivo real, pós-DEC, vai para `.core/governance/templates/`).
 
+## Estrutura da pasta
+
+Espelha a regra **referência ≠ conteúdo**: a raiz guarda **estrutura / índice / referência** (que ancoram as arestas); as subpastas guardam **conteúdo por kind** (que **não** carrega aresta).
+
+```
+_templates/
+  intent.yml · registry-entry.yml · proposal.yml · state.yml    ← estrutura / índice / referência (ancoram arestas)
+  briefs/         ← CONTEÚDO de abertura por kind (sem arestas)
+  closings/       ← CONTEÚDO de fecho por kind (sem arestas)
+  deliberation/   ← q/r/d: question · research · decision · decision-brief
+```
+
 ## Catálogo
 
 **Intent — a camada ACIMA dos trabalhos**
@@ -27,10 +39,10 @@
 
 **Índice (projeção, não abertura)**
 
-| `registry/registry-entry.yml` | **schema BASE** da entrada de índice → crie `registry/<kind>.yml` a partir dele (só os extras por kind). `spike`/`proposal` têm template próprio (divergem). |
-| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `registry-entry.yml` | **schema BASE** da entrada de índice → crie `registry/<kind>.yml` (no repo) a partir dele (só os extras por kind). Só `proposal` tem template próprio (intake, não é work); `spike` usa a base + `fate` (conteúdo vai pro brief/answer). |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 
-**Investigação / Decisão**
+**Deliberação (q/r/d) — pasta `deliberation/`**
 
 | `question.md` · `research.md` · `decision.md` · `decision-brief.yml` | a cadeia pergunta → investigação → decisão (+ índice derivado) |
 | -------------------------------------------------------------------- | -------------------------------------------------------------- |
@@ -51,8 +63,8 @@
 
 **Ferramenta de intake (não é tipo)**
 
-| `registry/proposal.yml` | captura ideia/problema → triagem → promove/descarta → backlog |
-| ----------------------- | ------------------------------------------------------------- |
+| `proposal.yml` | captura ideia/problema → triagem → promove/descarta → backlog |
+| -------------- | ------------------------------------------------------------- |
 
 ## Mudanças desta rodada (vs antes)
 
@@ -65,6 +77,51 @@
 - ✏️ **`registry-entry.yml`** reposicionado como **índice** (entrada de `registry/<kind>.yml`), não abertura.
 - ✅ **Mantidos:** `question` · `research` · `decision` · `decision-brief` · `state` · `experiment-outcome` ·
   `spike-answer` · `proposal`.
+- 📁 **Reorg de pastas (referência ≠ conteúdo):** `registry-entry`/`proposal` subiram pra raiz; `briefs/` + `closings/` separam o **conteúdo por kind**; a pasta `registry/` saiu. **Briefs viraram conteúdo puro** — as arestas (`intent`, `closes-with`) migraram pro `registry`.
 
-> ⚠️ Em aberto (iterar): `sealed` nos briefs · limiar densidade (brief vs só registry) · status por-kind no
-> registry · mecanismo do bypass-com-prazo + alerta do postmortem (frente do incident).
+## Validação dos templates (tracker)
+
+> Inventário dos **17 moldes**, **agrupado pela pasta** e **ordenado por status** (✅ → 🔶 → ❓) pra escanear rápido. **Confirmar 1 a 1** com a owner — o status é **leitura proposta** (rever detalhes é permitido mesmo nos ✅). Legenda: **✅** validado · **🔶** 1ª passada / parcial · **❓** não revisado (ou bloqueado por frente aberta).
+
+### Raiz — estrutura / índice / referência
+
+| Molde                | Status | Nota / o que falta confirmar                                                                                     |
+| -------------------- | ------ | ---------------------------------------------------------------------------------------------------------------- |
+| `intent.yml`         | ✅     | yml + objective + open-questions + contracts + breaks-into (agrupado) + references + details.                    |
+| `registry-entry.yml` | ✅     | base + arestas agrupadas + status próprio + `intent`/`closed-at`/`closed-by` gerais + extras por kind (`fate`…). |
+| `proposal.yml`       | ✅     | triagem (ICE) + owner + status EN.                                                                               |
+| `state.yml`          | ❓     | **bloqueado pela Lente 2** (`stage: deciding \| executing` ainda aberto).                                        |
+
+### `briefs/` — conteúdo de abertura (sem arestas)
+
+| Molde                  | Status | Nota / o que falta confirmar                                                                     |
+| ---------------------- | ------ | ------------------------------------------------------------------------------------------------ |
+| `delivery-brief.yml`   | ✅     | enxugado (`out-of-scope` · `done-when`); conteúdo puro.                                          |
+| `spike-brief.yml`      | ✅     | `question` no topo (= open-question da intent) + timebox + approach/success-signal.              |
+| `experiment-brief.yml` | 🔶     | falta rever ⊛ hipótese/métricas + `sealed`/pré-registro.                                         |
+| `incident-brief.yml`   | 🔶     | enums EN; ⚠️ tirar campos de ÍNDICE (`severity`/`status`/datas) → registry (frente do incident). |
+| `fix-brief.yml`        | 🔶     | confirmar sintoma→esperado→origem→pronto.                                                        |
+| `patch-brief.yml`      | 🔶     | confirmar o-quê→por quê→pronto.                                                                  |
+
+### `closings/` — conteúdo de fecho (sem arestas)
+
+| Molde                    | Status | Nota / o que falta confirmar                                                                  |
+| ------------------------ | ------ | --------------------------------------------------------------------------------------------- |
+| `spike-answer.md`        | ✅     | `verdict`/evidência/recomendação + `fate`; conteúdo puro (vínculo = `closed-by` do registry). |
+| `experiment-outcome.md`  | 🔶     | won→`results-in`; ⚠️ ref `brief` stale + `outcome` duplicado (validação do experiment).       |
+| `incident-postmortem.md` | ❓     | bloqueado pela **frente do incident**.                                                        |
+
+### `deliberation/` — q/r/d (question · research · decision · decision-brief)
+
+| Molde                | Status | Nota / o que falta confirmar                                                                       |
+| -------------------- | ------ | -------------------------------------------------------------------------------------------------- |
+| `question.md`        | 🔶     | vocab PT decidido; confirmar mode/opções/estado-iteração + relação com `open-questions` da intent. |
+| `decision.md`        | 🔶     | `grounded-by`→`supported-by` feito; resto não revisado.                                            |
+| `research.md`        | ❓     | não revisado nesta rodada.                                                                         |
+| `decision-brief.yml` | ❓     | índice derivado; não revisado nesta rodada.                                                        |
+
+**Transversais (valem p/ vários):** `sealed` nos briefs · limiar de densidade (brief vs só registry) · a
+**frente do incident** (bypass-com-prazo + alerta + postmortem). _(o "status por-kind no registry" já
+fechou → enums em EN + status próprio derivado.)_
+
+**Briefs = conteúdo puro** (sem arestas): `intent`/`closes-with` saíram pro `registry` (o índice é dono dos vínculos).

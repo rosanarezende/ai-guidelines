@@ -1,7 +1,6 @@
 node: work-brief
 kind: experiment
 id: exp-NNN
-intent: # id da intent dona (se houver)
 sealed: true # sela a hipótese (pré-registro)
 references: []
 

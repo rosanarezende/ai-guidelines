@@ -1,7 +1,6 @@
 node: work-brief
 kind: delivery
 id: deliv-NNN
-intent: # id da intent dona (se houver; reativo/standalone = vazio)
 sealed: true
 references: []
 

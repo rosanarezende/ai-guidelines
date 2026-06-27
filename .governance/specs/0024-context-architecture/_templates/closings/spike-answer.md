@@ -1,26 +1,27 @@
 ---
 node: spike-answer
-brief: <ref ao intent-brief do spike>
-verdict: <respondido | inconclusivo> # ⚠️ o vocabulário do veredito do spike ainda é informal (iterar)
 sealed: true
 ---
 
 # Resposta do spike — <título>
 
-> O entregável é a **resposta**, não o código.
-> ⚠️ A DEFINIR (frente do spike): o código de POC fecha num **PR de investigação SEM merge**; só a resposta +
-> descobertas vão pro repo. Como amarrar isso (e o que exatamente fica registrado) ainda está aberto.
+> O entregável é a **resposta**, não o código. Este doc é a **casa do conteúdo** do fecho;
+> o registry indexa `status`/`fate`/`closed-at` e **referencia este doc via `closed-by`** — aqui é só conteúdo, sem aresta.
 
 ## A resposta
 
-- **Pergunta:** <a dúvida investigada>
-- **Resposta:** <funciona / não funciona / depende — com a evidência>
+- **Pergunta:** <a mesma `question` do spike-brief>
+- **Verdict (1 linha):** <a resposta — espelha o `verdict-inline` da intent; no spike simples, a intent É a casa>
+- **Evidência:** <funciona / não funciona / depende — com a prova>
 - **Recomendação (_bounded_):** <adotar | descartar | seguir por X>
 
 ## Descobertas (pra não re-investigar)
 
 - <achados úteis, refs `file#anchor`>
 
-## Destino
+## Destino (`fate`)
 
-- **resolve** a decisão/finding que abriu o spike; pode **levar a** delivery/experiment/fix — ou nada (descartado).
+- **`promoted`** → a POC de valor persiste em `works/spike_<slug>/poc/`; o trabalho que a produtiza declara `derives-from` apontando o spike.
+- **`throwaway`** → o código jogável morre **depois** de capturar esta resposta (não dá merge).
+- **`parked`** → guardado, sem ação agora.
+- pode **levantar** um `proposal` (lado `raised-by` do proposal) e **resolver** a open-question da intent.

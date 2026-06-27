@@ -1,13 +1,12 @@
 node: work-brief
 kind: spike
 id: spike-NNN
-intent: # id da intent dona (se houver)
+question: # ⊛ a PERGUNTA — texto IDÊNTICO à open-question da intent (o spike-brief é a casa do conteúdo do spike)
 timebox: # ⊛ prazo
 references: []
 
-# kernel — provar um ponto ANTES de entregar valor
+# kernel — provar um ponto ANTES de entregar valor (a `question` acima é o goal)
 objective:
-  goal: # a pergunta / o ponto a provar
   approach: # como investigar — PoC, benchmark, análise
   success-signal: # o que conta como resposta
 

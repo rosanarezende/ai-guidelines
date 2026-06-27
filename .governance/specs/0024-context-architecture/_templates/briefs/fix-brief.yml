@@ -1,7 +1,6 @@
 node: work-brief
 kind: fix
 id: fix-NNN
-intent: # fix reativo → normalmente sem intent
 references: []
 
 symptom: # sintoma (o usuário vê)
