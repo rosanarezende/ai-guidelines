@@ -9,4 +9,4 @@
         intent-0001/
           intent.yml          ← a intent-registry (governança): objetivo + open-questions + contratos
 
-_(o CONTEÚDO das investigações NÃO vive aqui: cada open-question é respondida por uma `exploration` num repo, que declara `answers: intent-0001#qN` — a intent deriva `answered-by` (A+). O banco derivado (`../_derive.mjs`) recomputa a projeção a partir das registries.)_
+_(o CONTEÚDO das investigações NÃO vive aqui: cada open-question é respondida por uma `exploration` num repo, que declara `answers: intent-0001#qN` — a intent deriva `answered-by` (A+). Os bancos derivados (`../_banks/`, TS) recomputam a projeção: o do repo deriva local; o de governança consome a projeção do repo (banco→banco).)_
