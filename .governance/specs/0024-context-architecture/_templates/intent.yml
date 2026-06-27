@@ -40,8 +40,12 @@ contracts:
   pending-spike: # dependem de um spike
     - "<contrato> — <repo> (qN)"
 
-breaks-into: # trabalhos disparados (cresce no tempo: t0 = só os spikes)
-  - <repo>/<work-id>
+breaks-into: # VISTA derivada dos works, AGRUPADA por status (a intent mostra plano + estado + caminho crítico num lugar); cresce no tempo
+  done: [<repo>/<work-id>, ...]
+  active: [<repo>/<work-id>, ...]
+  draft: # bloqueadas — o blocked-by (derivado) explica o draft
+    - work: <repo>/<work-id>
+      blocked-by: [<repo>/<work-id>, ...]
 
 # opcional: texto livre — síntese do aprendizado da intent como um todo, o porquê do status/dropped, etc.
 details: |

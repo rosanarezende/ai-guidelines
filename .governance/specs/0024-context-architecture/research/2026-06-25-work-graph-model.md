@@ -195,7 +195,7 @@ Exemplos vivos **não ficam aqui** — moram em `_templates/`, `_archive/repo-si
 
 > Vários fecham **sozinhos** ao avançarmos nas lentes/frentes; os demais atacamos 1 a 1.
 
-- 🔴 **`status` por kind** (registry-entry) → vocabulário não definido.
+- ✅ **`status` — RESOLVIDO (ver Ciclo de vida):** progresso próprio = `draft | active | done`; **bloqueado/pausado são DERIVADOS** (não status guardados).
 - 🔴 `incident`: `severity` **PT × EN** (enum do código é EN) · `status` próprio (fora do LifecycleStatus).
 - ✅ **`spike` verdict — resolvido** (Parte 3): `verdict` (resposta 1 linha) + `fate` (throwaway|promoted|parked) + `closed-at`; spike simples espelha em `verdict-inline` na intent.
 - _(já cobertos por frentes existentes: bypass-com-prazo do incident · intake↔backlog do proposal · PR-sem-merge do spike.)_
@@ -244,6 +244,8 @@ Exemplos vivos **não ficam aqui** — moram em `_templates/`, `_archive/repo-si
 
 - 🟢 É um **grafo de estados**, não uma tabela.
 - 🟢 **Pausa é derivada** (não é um status guardado).
+- 🟢 **`status` = progresso PRÓPRIO do trabalho** (`draft | active | done`). **"Bloqueado" é DERIVADO** (de `blocked-by` + o status dos bloqueadores), igual à pausa — **não** é status guardado nem 6º estado. Logo, uma delivery com `blocked-by` pendente fica **`draft`** (planejada, não iniciada), não `active`. _(kinds reativos têm status próprio à parte: incident `mitigando/mitigado/resolvido`; proposal `aberta/promovida/descartada`.)_
+- 🟢 **A intent mostra o PLANO num lugar só:** o `breaks-into` é uma **vista derivada** dos works, **agrupada por status** (`done`/`active`/`draft`); as `draft` carregam o `blocked-by` que explica o bloqueio. Assim a intent revela **estado + caminho crítico** sem abrir cada work (a fonte continua sendo os works → não viola "anotar uma vez"). Espelha o padrão das `open-questions` (objetos com `verdict-inline`/`unlocks`).
 - 🟢 **Fechamento em 2 eixos:** o resultado (o que aconteceu) × a autoridade (o gate humano).
 - 🟢 Retomada pelo **cursor** (onde paramos).
 - 🟢 **`investigar` + `decidir` = um momento (`investigar/decidir`)** — 5 momentos: abrir → investigar/decidir → executar → entregar → acompanhar. Os artefatos (`question`/`research`/`decision`) seguem distintos **dentro** dele.
@@ -274,7 +276,7 @@ definem** (e não se versionam/citam). Modelo vivo, não-autoridade.
 
 **Estado:** ✅ **Lentes 1, 2 e 3 essencialmente FECHADAS.** Lente 1 (6 tipos MECE + `proposal`-ferramenta; Dense/Virtual fora). Lente 2 (5 momentos · coração ✦ · cores 🔴/🟡/⚪; `stage` resolvido). Lente 3 (ligações **nas entregas** = contratos; **camada `intent`** acima dos trabalhos; **governança global** por org/BU; **contrato-first, backend plugável**; **intent opcional/emergente** com benchmark; **tool-plugável**). Base v0 dos moldes aprovada (`<kind>-brief` + `intent.yml` + `registry/<kind>.yml` + fechos).
 
-**Aberto (Parte 2):** os **⚠️ de templates** (status-por-kind · severity PT×EN) + a **rodada de system design dos bancos** (frente dedicada).
+**Aberto (Parte 2):** os **⚠️ de templates** (severity PT×EN do incident) + a **rodada de system design dos bancos** (frente dedicada).
 
 **Frentes de fundo (trabalhos próprios, não desta rodada):** `incident` dedicada (template + bypass-com-prazo + alerta + postmortem) · conectar `proposal`↔backlog↔history · **adapters** (Jira/Linear/Azure — adoção incremental) · **banco(s): rodada dedicada de system design** (separar intents/works · banco de proposals na governança · grafos comunicantes) · identidade cross-repo + dashboards de valor.
 
