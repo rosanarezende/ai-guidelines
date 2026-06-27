@@ -3,7 +3,7 @@ kind: incident
 id: inc-NNN
 intent: # incidente é reativo → normalmente sem intent
 severity: # low | medium | high | critical
-status: # mitigando | mitigado | resolvido
+status: # mitigating | mitigated | resolved
 merge-priority-until: # data
 ci-bypass-until: # data (expira → sem débito, GG-0005)
 references: []

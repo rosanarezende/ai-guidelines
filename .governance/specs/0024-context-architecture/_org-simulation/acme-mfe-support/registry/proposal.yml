@@ -5,7 +5,7 @@ entries:
     what: "testar se o suporte proativo (abordar após N falhas de login) melhora a conclusão do login vs atrapalha"
     raised-by: acme-mfe-support/spike-302 # surgiu do spike de viabilidade
     owner: "@produto-growth"
-    status: aberta # disposição obrigatória (não fica aberta em silêncio)
+    status: open # disposição obrigatória (não fica em aberto em silêncio)
     tags: [growth, login, suporte-proativo]
     impact: high # menos abandono no login
     confidence: medium # viável (spike), mas o efeito de abordar proativamente é incerto

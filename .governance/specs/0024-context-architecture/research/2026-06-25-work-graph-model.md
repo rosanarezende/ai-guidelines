@@ -126,7 +126,7 @@ vira outro? · o que o torna único.**
 - **De onde surge:** **qualquer lugar** — percebido durante outro trabalho (delivery/experiment/spike/patch) e
   aberto **em paralelo** sem travar, ou registrado standalone (ideia de backlog).
 - **Não percorre o fluxo:** é uma ideia **parada**, esperando triagem — não investiga/decide/executa por si.
-- **Triagem (anti-buraco-negro):** status (aberta/promovida/descartada) · dono · **disposição obrigatória**
+- **Triagem (anti-buraco-negro):** status (open/promoted/dismissed) · dono · **disposição obrigatória**
   (promove ou descarta com motivo). Reusa o **padrão** do `insight` (separado dele).
 - **Vira outro?** **qualquer tipo** (delivery/experiment/spike/patch/fix) ou **descartado**. Se precisa investigar antes → vira `spike`.
 - **Densidade:** **leve por natureza** — não é trabalho ainda, é ideia parada; o peso só aparece **ao promover**
@@ -196,8 +196,9 @@ Exemplos vivos **não ficam aqui** — moram em `_templates/`, `_archive/repo-si
 > Vários fecham **sozinhos** ao avançarmos nas lentes/frentes; os demais atacamos 1 a 1.
 
 - ✅ **`status` — RESOLVIDO (ver Ciclo de vida):** progresso próprio = `draft | active | done`; **bloqueado/pausado são DERIVADOS** (não status guardados).
-- 🔴 `incident`: `severity` **PT × EN** (enum do código é EN) · `status` próprio (fora do LifecycleStatus).
+- ✅ **`incident.severity` — RESOLVIDO:** **enums controlados em EN** (regra do repo: nomes/enums em inglês, só texto livre em PT). `severity: low|medium|high|critical` (bate com o enum do código); o `status` próprio do incident (separado do LifecycleStatus) também em EN: `mitigating|mitigated|resolved`. Mesmo alinhamento aplicado ao `proposal.status` (`open|promoted|dismissed`).
 - ✅ **`spike` verdict — resolvido** (Parte 3): `verdict` (resposta 1 linha) + `fate` (throwaway|promoted|parked) + `closed-at`; spike simples espelha em `verdict-inline` na intent.
+- ✅ **Vocabulário q/r/d — RESOLVIDO (decisão: manter PT por design):** os templates `question`/`decision`/`research` usam vocabulário **conceitual** em PT (`mode: escolha|aceitação`, `status: aberta|resolvida`). **A linha:** enums do **work-graph** (severity · status-do-work · kind · fate) = vocabulário de máquina → **EN**; o q→r→d é a **camada de raciocínio humano** (o coração) → PT **por design** — exceção _explícita_, não vazamento. _(o "A+" governa a GERAÇÃO de arestas forward, não a língua dos enums → não bloqueia a escolha.)_
 - _(já cobertos por frentes existentes: bypass-com-prazo do incident · intake↔backlog do proposal · PR-sem-merge do spike.)_
 
 **Frentes de fundo (abertas, mas são trabalhos próprios — não desta rodada)**
@@ -244,7 +245,7 @@ Exemplos vivos **não ficam aqui** — moram em `_templates/`, `_archive/repo-si
 
 - 🟢 É um **grafo de estados**, não uma tabela.
 - 🟢 **Pausa é derivada** (não é um status guardado).
-- 🟢 **`status` = progresso PRÓPRIO do trabalho** (`draft | active | done`). **"Bloqueado" é DERIVADO** (de `blocked-by` + o status dos bloqueadores), igual à pausa — **não** é status guardado nem 6º estado. Logo, uma delivery com `blocked-by` pendente fica **`draft`** (planejada, não iniciada), não `active`. _(kinds reativos têm status próprio à parte: incident `mitigando/mitigado/resolvido`; proposal `aberta/promovida/descartada`.)_
+- 🟢 **`status` = progresso PRÓPRIO do trabalho** (`draft | active | done`). **"Bloqueado" é DERIVADO** (de `blocked-by` + o status dos bloqueadores), igual à pausa — **não** é status guardado nem 6º estado. Logo, uma delivery com `blocked-by` pendente fica **`draft`** (planejada, não iniciada), não `active`. _(kinds reativos têm status próprio à parte: incident `mitigating/mitigated/resolved`; proposal `open/promoted/dismissed`.)_
 - 🟢 **A intent mostra o PLANO num lugar só:** o `breaks-into` é uma **vista derivada** dos works, **agrupada por status** (`done`/`active`/`draft`); as `draft` carregam o `blocked-by` que explica o bloqueio. Assim a intent revela **estado + caminho crítico** sem abrir cada work (a fonte continua sendo os works → não viola "anotar uma vez"). Espelha o padrão das `open-questions` (objetos com `verdict-inline`/`unlocks`).
 - 🟢 **Fechamento em 2 eixos:** o resultado (o que aconteceu) × a autoridade (o gate humano).
 - 🟢 Retomada pelo **cursor** (onde paramos).
@@ -276,7 +277,7 @@ definem** (e não se versionam/citam). Modelo vivo, não-autoridade.
 
 **Estado:** ✅ **Lentes 1, 2 e 3 FECHADAS.** Lente 1 (6 tipos MECE + `proposal`-ferramenta). Lente 2 (5 momentos · coração ✦). **Lente 3 = 10 arestas, cada uma com critério único** (estrutura · proveniência · dependência · investigação · fecho · histórico); renomeios `grounded-by`→`supported-by` · `verdicted-by`→`closed-by` · `promotes-to`→`results-in`; `spawned-by`/`from-spike`/`promoted-to` fundidos/derivados; **princípio: o dado fica no NÓ, não na aresta** (grafo: `../assets/lente3-edge-graph.svg`). **Camada `intent`** na governança global por **org/BU = PASTAS** (sem campo `scope`); a intent é **`.yml`** (`objective`/`references`/`open-questions`/`contracts`/`breaks-into`/`details`); o **`breaks-into` = vista agrupada por status** (`done`/`active`/`draft`, as draft com `blocked-by`). **Registries:** `registry/registry-entry.yml` = base canônica; só `spike`/`proposal` têm template próprio. **Status** = progresso PRÓPRIO (`draft|active|done`); **bloqueado/pausado = DERIVADO**. **Experiment** = decisão deliberada (benchmark), via `proposal`→intent dedicada (recomendado) ou inline.
 
-**Aberto (Parte 2):** os **⚠️ de templates** (severity PT×EN do incident) + a **rodada de system design dos bancos** (frente dedicada).
+**Aberto (Parte 2):** a **rodada de system design dos bancos** (🔴🔥, frente dedicada). _(fechados: `severity` do incident → enums EN; vocabulário q/r/d → PT por design.)_
 
 **Frentes de fundo (trabalhos próprios, não desta rodada):** `incident` dedicada (template + bypass-com-prazo + alerta + postmortem) · conectar `proposal`↔backlog↔history · **adapters** (Jira/Linear/Azure — adoção incremental) · **banco(s): rodada dedicada de system design** (separar intents/works · banco de proposals na governança · grafos comunicantes · identidade cross-repo + dashboards) · o **experiment do proativo** (via `prop-001` → intent dedicada) · **completar as deliveries do login** (`draft`→`active`→`done` conforme destravam).
 

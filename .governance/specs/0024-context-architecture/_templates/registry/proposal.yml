@@ -6,7 +6,7 @@ entries: []
 #     what: "<a ideia ou problema — 1-2 linhas, acionável>"
 #     raised-by: <repo>/<work-id> # de onde surgiu (spike/delivery/…): a proveniência
 #     owner: "<@quem TRIA — o responsável por decidir promover/descartar; papel ou pessoa>"
-#     status: <aberta | promovida | descartada> # disposição OBRIGATÓRIA (não fica aberta em silêncio)
+#     status: <open | promoted | dismissed> # disposição OBRIGATÓRIA (não fica em aberto em silêncio)
 #     # --- ajuda a TRIAGEM / priorização (estilo ICE) ---
 #     tags: [<área/keyword>, …] # ex.: growth · onboarding · segurança — agrupa e filtra
 #     impact: <low | medium | high> # ganho esperado
