@@ -1,0 +1,41 @@
+# intent-0001 — cadastrada via "form" de governança (Lente 5). A intent é uma REGISTRY:
+# guarda o que o cadastrante informa + REFERÊNCIAS; o conteúdo das investigações vive nas explorations (repos).
+node: intent
+id: intent-0001
+status: active
+created-at: 2026-06-27
+
+# ===== o que o CADASTRANTE preenche no form =====
+title: Sistema de login (multi-repo)
+objective:
+  goal: novo fluxo de login, com ajuda sob demanda e proativa
+  success-signal: login navegável atrás de flag
+
+references: # anexos / links que ele junta
+  - {
+      type: modeling,
+      label: "modelagem do login (produto)",
+      url: "https://docs.acme.example/login-modeling",
+    }
+
+details: |
+  Feature cross-repo. As deliveries só nascem depois que as open-questions forem respondidas pelas explorations.
+
+open-questions: # as incertezas do cadastro → cada uma DISPARA uma exploration
+  - id: q1
+    question: "o design system tem um formulário validado (email/site/telefone), ou cada MFE reimplementa?"
+    # ↓ GERADO (A+) do `answers` da exploration — VISÍVEL aqui (as 2 pontas se referenciam), mas NÃO se edita à mão; um check garante que bate:
+    answered-by: acme-design-system/exploration-001 # a exploration que responde q1
+    status: open # GERADO: open → resolved quando a exploration fecha (done)
+    verdict: null # GERADO: espelha o verdict da exploration-answer quando houver
+
+# ===== contratos que a feature coordena (governança) =====
+contracts:
+  # um contrato PENDENTE espera uma open-question → bloqueia quem depende dele até resolver:
+  pending:
+    - { name: form-component, awaits: q1 } # vira `known` quando q1 resolver → destrava as deliveries do form
+  known: []
+
+# breaks-into = VISTA derivada das work-registries (no t0 só existe a exploration disparada):
+breaks-into:
+  active: [acme-design-system/exploration-001]

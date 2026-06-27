@@ -15,7 +15,7 @@ method: assessment
 
 ---
 
-## Parte 1 — O modelo, em 4 lentes (referência)
+## Parte 1 — O modelo, em 5 lentes (referência)
 
 ### Lente 1 · Os tipos: 5 de TRABALHO + 2 FERRAMENTAS (`proposal` · `exploration`)
 
@@ -206,7 +206,22 @@ Exemplos vivos **não ficam aqui** — moram em `_templates/`, `_archive/repo-si
 
 **Os FECHOS** (`exploration-answer` · `experiment-outcome` · `incident-postmortem`) **não são uma 4ª família** — são a **face de CONTEÚDO DE FECHO** de trabalho & exploration, **espelho do `brief`** (abertura ↔ fecho); vivem em `closings/`. Papel especial: são a **ponte** onde a execução **vira conhecimento** que alimenta a deliberação (`answer` → responde uma `question` · `outcome` → vira `decision` won/lost · `postmortem` → vira aprendizado).
 
-**Decidido (owner 2026-06-27):** ✅ `spike` → **`exploration`** · ✅ **fecho = face** (não 4ª família, confirmado). · 🔴 **`deliberation` × `state`:** validar se o `deliberation` (o mapa vivo) **substitui** o `state` na nova modelagem — vai ficando claro **aos poucos na SIMULAÇÃO**. · 🔴 **Propagação do rename** `spike`→`exploration` pendente: arquivos (`spike-brief`→`exploration-brief` · `spike-answer`→`exploration-answer` · asset `spike-output-fates.svg` · instâncias no `_org-simulation`) + menções restantes no tracker.
+**Decidido (owner 2026-06-27):** ✅ `spike` → **`exploration`** · ✅ **fecho = face** (não 4ª família, confirmado). · 🔴 **`deliberation` × `state`:** validar se o `deliberation` (o mapa vivo) **substitui** o `state` na nova modelagem — vai ficando claro **aos poucos na SIMULAÇÃO**. · ✅ **Propagação do rename** `spike`→`exploration` — **feita** nos arquivos (templates + `_org-simulation` + prosa do tracker); falta só os **SVGs** (redraw).
+
+### Lente 5 · As CAMADAS: governança (grafo de registries) × conteúdo
+
+> Insight owner 2026-06-27. As lentes 1-4 falam de tipos/ciclo/arestas/famílias; esta separa **CAMADAS** — e **subsome a rodada dos bancos** (🔴🔥).
+
+A **governança** é um **grafo de REGISTRIES** — o que uma **app/form de intents** criaria/salvaria (num **banco** OU em **arquivos** do repo: backend **plugável**, do dev solo à escala). Os registries: **`intent`** · **work-registries** · **`exploration`-registry** · **`proposal`** · **`deliberation`-map**. Eles **só se comunicam com outros registries** (as arestas da Lente 3) → formam o **board/dashboard** consultável.
+
+O **CONTEÚDO** (briefs · closings/answers · texto do q/r/d) **vive à parte**, **referenciado** pelos registries — é o que se lê ao **abrir** um nó, não o que o grafo **consulta**.
+
+| Camada         | O que é                                         | Onde mora                    | Quem cria                                     |
+| -------------- | ----------------------------------------------- | ---------------------------- | --------------------------------------------- |
+| **GOVERNANÇA** | grafo de registries (índice + arestas + estado) | banco OU arquivos (plugável) | a app/form (modelamos só **o que ela salva**) |
+| **CONTEÚDO**   | briefs · answers · texto do q/r/d               | arquivos (no repo/workspace) | a pessoa, ao **abrir** o nó                   |
+
+**Em aberto (na simulação v2):** quanto a `intent` **embute** (resumo de governança auto-contido) × **referencia** (conteúdo na deliberation/works) — exercitado com **2 variantes** (robusta × enxuta).
 
 ---
 
