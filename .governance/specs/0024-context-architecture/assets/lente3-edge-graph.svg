@@ -1,0 +1,78 @@
+<svg viewBox="0 0 920 560" width="920" height="560" xmlns="http://www.w3.org/2000/svg" font-family="ui-sans-serif, system-ui, sans-serif" role="img">
+  <title>Lente 3 — o conjunto fechado de arestas do grafo do trabalho (anonimizado)</title>
+  <desc>Tipos de nó (intent, proposal, question, spike, spike-answer, decision, delivery, platform) e as 10 arestas em 3 categorias: estrutura e proveniência (breaks-into, results-in/derives-from, raises); dependência (blocked-by/blocks, depends-on, coordinates-with); investigação e fecho (resolves, supported-by, closed-by, supersedes).</desc>
+
+  <rect x="0" y="0" width="920" height="560" fill="#ffffff"/>
+  <text x="24" y="24" font-size="15" font-weight="700" fill="#2A2A28">Lente 3 — o grafo completo (10 arestas)</text>
+
+  <!-- arestas -->
+  <!-- azul: estrutura & proveniência -->
+  <g stroke="#2563EB" fill="#2563EB">
+    <line x1="575" y1="72" x2="575" y2="148" stroke-width="1.7" marker-end="url(#a1)"/>
+    <line x1="500" y1="58" x2="404" y2="95" stroke-width="1.7" marker-end="url(#a1)"/>
+    <line x1="750" y1="62" x2="654" y2="162" stroke-width="1.7" marker-end="url(#a1)"/>
+    <line x1="500" y1="164" x2="404" y2="112" stroke-width="1.7" marker-end="url(#a1)"/>
+    <path d="M 372 80 C 470 16, 720 12, 792 30" fill="none" stroke-width="1.7" marker-end="url(#a1)"/>
+    <g stroke="none" font-size="10.5">
+      <text x="583" y="116">breaks-into</text>
+      <text x="688" y="104">results-in</text>
+      <text x="406" y="142">derives-from</text>
+      <text x="566" y="16">raises</text>
+    </g>
+  </g>
+  <!-- teal: dependência -->
+  <g stroke="#0D9488" fill="#0D9488">
+    <line x1="575" y1="282" x2="575" y2="194" stroke-width="1.7" marker-end="url(#a2)"/>
+    <line x1="652" y1="303" x2="716" y2="303" stroke-width="1.7" marker-start="url(#a2)" marker-end="url(#a2)"/>
+    <line x1="795" y1="324" x2="818" y2="386" stroke-width="1.7" marker-end="url(#a2)"/>
+    <g stroke="none" font-size="10.5">
+      <text x="583" y="242">blocked-by</text>
+      <text x="650" y="295">coordinates-with</text>
+      <text x="800" y="360" text-anchor="end">depends-on</text>
+    </g>
+  </g>
+  <!-- âmbar: investigação & fecho -->
+  <g stroke="#C2740A" fill="#C2740A">
+    <line x1="325" y1="122" x2="325" y2="180" stroke-width="1.7" marker-end="url(#a3)"/>
+    <line x1="250" y1="196" x2="184" y2="114" stroke-width="1.7" marker-end="url(#a3)"/>
+    <line x1="182" y1="236" x2="290" y2="124" stroke-width="1.7" marker-end="url(#a3)"/>
+    <line x1="105" y1="266" x2="105" y2="322" stroke-width="1.7" marker-end="url(#a3)"/>
+    <g stroke="none" font-size="10.5">
+      <text x="333" y="156">closed-by</text>
+      <text x="150" y="156">resolves</text>
+      <text x="232" y="200">supported-by</text>
+      <text x="113" y="298">supersedes</text>
+    </g>
+  </g>
+
+  <defs>
+    <marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7.5" markerHeight="7.5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#2563EB"/></marker>
+    <marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7.5" markerHeight="7.5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0D9488"/></marker>
+    <marker id="a3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7.5" markerHeight="7.5" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#C2740A"/></marker>
+  </defs>
+
+  <!-- nós -->
+  <g font-size="12" font-weight="700" fill="#44413C" text-anchor="middle">
+    <rect x="30" y="80" width="150" height="42" rx="8" fill="#FBFAF8" stroke="#C9C7BE"/><text x="105" y="106">question</text>
+    <rect x="250" y="80" width="150" height="42" rx="8" fill="#FBFAF8" stroke="#C9C7BE"/><text x="325" y="106">spike</text>
+    <rect x="250" y="180" width="150" height="42" rx="8" fill="#FBFAF8" stroke="#C9C7BE"/><text x="325" y="206">spike-answer</text>
+    <rect x="30" y="224" width="150" height="42" rx="8" fill="#FBFAF8" stroke="#C9C7BE"/><text x="105" y="250">decision</text>
+    <rect x="30" y="324" width="150" height="42" rx="8" fill="#FBFAF8" stroke="#C9C7BE" opacity="0.55"/><text x="105" y="350" opacity="0.7">decision (antiga)</text>
+    <rect x="500" y="30" width="150" height="42" rx="8" fill="#FBFAF8" stroke="#C9C7BE"/><text x="575" y="56">intent</text>
+    <rect x="750" y="30" width="140" height="42" rx="8" fill="#FBFAF8" stroke="#C9C7BE"/><text x="820" y="56">proposal</text>
+    <rect x="500" y="150" width="150" height="42" rx="8" fill="#FBFAF8" stroke="#C9C7BE"/><text x="575" y="176">delivery</text>
+    <rect x="500" y="282" width="150" height="42" rx="8" fill="#FBFAF8" stroke="#C9C7BE"/><text x="575" y="308">delivery</text>
+    <rect x="720" y="282" width="150" height="42" rx="8" fill="#FBFAF8" stroke="#C9C7BE"/><text x="795" y="308">delivery</text>
+    <rect x="740" y="390" width="160" height="42" rx="8" fill="#FBFAF8" stroke="#C9C7BE"/><text x="820" y="416">platform / versão</text>
+  </g>
+
+  <!-- legenda -->
+  <g font-size="11.5" fill="#5F5E5A">
+    <line x1="30" y1="474" x2="58" y2="474" stroke="#2563EB" stroke-width="2.4"/>
+    <text x="64" y="478"><tspan font-weight="700" fill="#2563EB">estrutura &amp; proveniência</tspan> — breaks-into · results-in/derives-from · raises</text>
+    <line x1="30" y1="500" x2="58" y2="500" stroke="#0D9488" stroke-width="2.4"/>
+    <text x="64" y="504"><tspan font-weight="700" fill="#0D9488">dependência</tspan> — blocked-by/blocks · depends-on · coordinates-with</text>
+    <line x1="30" y1="526" x2="58" y2="526" stroke="#C2740A" stroke-width="2.4"/>
+    <text x="64" y="530"><tspan font-weight="700" fill="#C2740A">investigação &amp; fecho</tspan> — resolves · supported-by · closed-by · supersedes</text>
+  </g>
+</svg>

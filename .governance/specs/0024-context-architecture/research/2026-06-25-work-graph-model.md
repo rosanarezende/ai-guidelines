@@ -160,19 +160,20 @@ _(O `proposal` **não** está aqui — é a ferramenta de intake que **alimenta*
 
 ### Lente 3 · As ligações entre trabalhos (o grafo)
 
-A lista de ligações **já está decidida** (conjunto fechado) — em palavras simples:
+A lista de ligações está **fechada: 10 arestas, cada uma com 1 critério único** (grafo completo em [`../assets/lente3-edge-graph.svg`](../assets/lente3-edge-graph.svg)):
 
-| Ligação            | Quer dizer                   | Exemplo                    |
-| ------------------ | ---------------------------- | -------------------------- |
-| `promotes-to`      | "vira"                       | proposta **vira** entrega  |
-| `resolves`         | "destrava"                   | spike **destrava** decisão |
-| `grounded-by`      | "se apoia em"                | decisão ← spike            |
-| `verdicted-by`     | "tem como resultado"         | experiment ← resultado     |
-| `raises`           | "levanta"                    | tarefa **levanta** ideia   |
-| `breaks-into`      | "se quebra em"               | entrega → checkpoints      |
-| `supersedes`       | "substitui"                  | decisão nova ← antiga      |
-| `coordinates-with` | "andam juntas" (entre repos) | api ↔ web                  |
-| `depends-on`       | "espera" (entre repos)       | tela **espera** a api      |
+| Aresta                        | Categoria    | Critério (o teste único)                                        |
+| ----------------------------- | ------------ | --------------------------------------------------------------- |
+| `breaks-into`                 | estrutura    | intent/entrega → suas PARTES                                    |
+| `derives-from` ⟷ `results-in` | proveniência | B se baseia na SAÍDA de A (consumido × persiste = status do NÓ) |
+| `raises`                      | proveniência | trabalho levanta um `proposal`                                  |
+| `blocked-by` ⟷ `blocks`       | dependência  | espera um TRABALHO concreto concluir                            |
+| `depends-on`                  | dependência  | depende de PLATAFORMA/VERSÃO/build                              |
+| `coordinates-with`            | dependência  | compartilham um CONTRATO (simétrica)                            |
+| `resolves`                    | investigação | `spike-answer` FECHA uma `question`                             |
+| `supported-by`                | investigação | `decision` se apoia na sua EVIDÊNCIA                            |
+| `closed-by`                   | fecho        | trabalho → seu ARTEFATO DE FECHO (answer/outcome/postmortem)    |
+| `supersedes`                  | histórico    | `decision` nova substitui a antiga                              |
 
 Exemplos vivos **não ficam aqui** — moram em `_templates/`, `_archive/repo-simulation-v1/` e `../assets/` (diagramas).
 
@@ -188,7 +189,7 @@ Exemplos vivos **não ficam aqui** — moram em `_templates/`, `_archive/repo-si
 
 **Lente 3** _(quase fechada — na Parte 3: ligações nas entregas · 1 ideia→N entregas · camada `intent` · governança global · contrato-first/knobs · intent opcional · tool-plugável)_
 
-- 🔴 **Dois sabores de `depends-on`:** _plataforma/versão_ (estável, não-por-tarefa) × _entrega_ (espera um trabalho concreto ficar pronto). Distinguir? — **único aberto da Lente 3.** _(exemplos: `2026-06-26-cross-repo-feature-graph.md`; diagrama `../assets/feature-multirepo-login.svg`.)_
+- ✅ **`depends-on` — RESOLVIDO (os 2 sabores viram 2 arestas):** **`blocked-by`** = espera um **trabalho** concreto concluir (bloqueio na quebra de tarefas) · **`depends-on`** = depende de **plataforma/versão/build** (estável, não-por-tarefa). **`blocks`** = o reverso de `blocked-by` (derivado; basta anotar 1 lado). Vivem no `registry-entry` (1-N). **Lente 3 fechada.**
 
 **Templates (⚠️ pontos a fechar — também marcados nos próprios moldes em `_templates/`)**
 
@@ -201,10 +202,10 @@ Exemplos vivos **não ficam aqui** — moram em `_templates/`, `_archive/repo-si
 
 **Frentes de fundo (abertas, mas são trabalhos próprios — não desta rodada)**
 
-- ✅ **`spike` fechamento — RESOLVIDO (Parte 3):** `fate` (`throwaway`|`promoted`|`parked`); a POC durável persiste no workspace + `from-spike` absorve; o código jogável morre só **depois** de capturar a resposta. **Demonstrado:** spike → `proposal` (`prop-001`, levantada pelo `spike-302`, `promote-to: experiment`) → **experiment** (abre quando priorizada, em intent dedicada — a **decisão de negócio**).
+- ✅ **`spike` fechamento — RESOLVIDO (Parte 3):** `fate` (`throwaway`|`promoted`|`parked`); a POC durável persiste no workspace + `derives-from` absorve; o código jogável morre só **depois** de capturar a resposta. **Demonstrado:** spike → `proposal` (`prop-001`, levantada pelo `spike-302`, `promote-to: experiment`) → **experiment** (abre quando priorizada, em intent dedicada — a **decisão de negócio**).
 - 🔴 **`incident` — frente dedicada (owner 2026-06-25, com exemplo real):** desenhar (1) o **template simples/interativo** de registro; (2) o **destravamento com PRAZO** (prioridade de merge + bypass de CI que **expira** → apaga incêndio sem débito, `GG-0005`); (3) o **alerta** que garante o postmortem no prazo; (4) o postmortem **leve** o bastante pra ser feito. Princípio: **blameless** (o oposto do medo).
 - 🔴 **Conectar `proposal` ↔ backlog ↔ histórico** (owner 2026-06-25) — a entrada de ideias hoje está **espalhada**: `NEXT.md` (débitos/escopo por-spec), `insights`/PIT (percepções), o artefato `gap` (candidato a backlog) e o `roadmap/backlog.md` (canônico). O `proposal` parece ser a **entrada unificada** que alimenta o backlog → vira trabalho → `history`. Como amarrar tudo? **Backlogs externos = 2ª iteração** (não agora).
-- 🔴🔥 **Banco(s) — RODADA DEDICADA de system design (owner 2026-06-26):** o `active-work.aggregate` atual (intent **+** works num arquivo só) **não é sustentável**. Desenhar: **(a)** **separar** os bancos — um só de **intents**, um só de **works**; **(b)** um **banco de `proposals`** dedicado no meta-repo de governança (intake ≠ trabalho); **(c)** o modelo de **grafos que se comunicam** (grafo por repo + grafo de governança → bancos **derivados**) que escale de verdade — 1 arquivo agregado não escala; **(d)** identidade cross-repo + a proveniência (`raised-by`/`from-spike`/`promoted-to`/`raises`, todas **1-N**) que alimenta dashboards de valor. _(o banco atual é **provisório** até esta rodada.)_
+- 🔴🔥 **Banco(s) — RODADA DEDICADA de system design (owner 2026-06-26):** o `active-work.aggregate` atual (intent **+** works num arquivo só) **não é sustentável**. Desenhar: **(a)** **separar** os bancos — um só de **intents**, um só de **works**; **(b)** um **banco de `proposals`** dedicado no meta-repo de governança (intake ≠ trabalho); **(c)** o modelo de **grafos que se comunicam** (grafo por repo + grafo de governança → bancos **derivados**) que escale de verdade — 1 arquivo agregado não escala; **(d)** identidade cross-repo + a proveniência (`derives-from`/`results-in`/`raises`, **1-N**) que alimenta dashboards de valor. _(o banco atual é **provisório** até esta rodada.)_
 
 ---
 
@@ -233,9 +234,10 @@ Exemplos vivos **não ficam aqui** — moram em `_templates/`, `_archive/repo-si
 - 🟢 **Framework é TOOL-PLUGÁVEL** (facilita adoção): o modelo **mapeia** aos conceitos da indústria — `intent` ≈ epic/initiative/bet · `work` ≈ story/task/bug · `banco` ≈ board. Isso habilita **adapters** (sync/integração com Jira/Linear/Azure/…); times adotam **incremental** (mantêm a ferramenta deles + a camada de governança). É o "contrato-first" estendido pra **integração**, não só storage. _(construir adapters = frente futura.)_
 - 🟢 **Forma da `intent` = arquivo `.yml` (dado estruturado) + 1 campo livre `details` (block scalar `|`, opcional).** Provou-se que quase tudo é dado → voltou de `.md`+tags pra **`.yml` puro**. Campos: `node`·`id`·`title`·`status` (`active|paused|done|dropped`)·`sealed`·`created-at`·`closed-at` (só terminal)·`objective` (`goal`/`success-signal`/`out-of-scope`)·`references` (`{type,label,url,note}`)·`target-repos`·`open-questions` (`{id,question,spike,unlocks}`)·`contracts` (`known`/`pending-spike`)·`breaks-into`·`details`. **Aprendizado NÃO é campo:** são as `open-questions` respondidas (o `spike-answer`, no arquivo do spike, **consumível por grafo**) + `unlocks` ligando a resposta ao `breaks-into`; o per-trabalho mora no arquivo do kind. `status` separa **`paused`** (repriorização, retomável) de **`dropped`** (descarte por decisão) — `abandoned` era ruim. _(`references` nasceu do gap da modelagem-por-produto.)_
 - 🟢 **Escopo (BU/time) = ESTRUTURA DE PASTAS na governança, não campo na intent.** A intent não carrega `scope`; a BU/time dona É a **localização** (`acme-governance/business-units/<bu>/teams/<time>/intents/…`); org-wide fica em `intents/`; **solo = pasta única, sem partição**. _(README do `_org-simulation/acme-governance` explica os casos.)_
-- 🟢 **Os 6 `<kind>-brief` adotaram a forma `.yml` da intent** (1ª passada): dados estruturados + `objective` (goal/approach/success-signal/done-when) + `details: |` (prosa opcional) + back-ref **`intent:`** (opcional; reativo = vazio) + `references`. Estruturado-mas-escalar sobe pro topo (spike `timebox`; incident `severity`/`status`/datas de bypass). _(refino detalhado por kind = em curso, começando pelo spike.)_
+- 🟢 **Os 6 `<kind>-brief` adotaram a forma `.yml` da intent** (1ª passada): dados estruturados + `objective` (goal/approach/success-signal/done-when) + `details: |` (prosa opcional) + back-ref **`intent:`** (opcional; reativo = vazio) + `references`. Estruturado-mas-escalar sobe pro topo (spike `timebox`; incident `severity`/`status`/datas de bypass). _(refino detalhado por kind = em curso: o `delivery-brief` **enxugou redundâncias** — `non-goals`→`out-of-scope`; `success-signal`/`acceptance`→`done-when`.)_
+- 🟢 **Registries: `registry/registry-entry.yml` é a base canônica — crie `<kind>.yml` a partir dele.** Removidos os duplicados: delivery/fix/patch/incident/experiment **não têm template próprio** (o base documenta os extras por kind — incident → severity/status/bypass; experiment → `closed-by`; demais → nenhum). Só **`spike`** (divergente: `question`≠`title` + resolves/timebox/verdict/fate/raises/closed-at) e **`proposal`** (não é work, intake) têm template próprio. **Arestas no base, AGRUPADAS** (bloqueio: `blocked-by`/`blocks` · cross-repo: `depends-on`/`coordinates-with` · proveniência: `derives-from`/`results-in`); **`spawned-by` fundido em `derives-from`** ("de onde veio" — POC de spike, proposal promovido, trabalho anterior). **Conteúdo→brief, arestas→registry.** _(proveniência fechada na Lente 3.)_
 - 🟢 **Spike: abertura → fecho, densidade por instância + intent auto-contida.** Abre **leve** (só a entrada no registry) ou **denso** (workspace + `spike-brief`, p/ POC). Fecha com **`verdict`** (resposta em 1 linha) · **`fate`** (`throwaway`|`promoted`|`parked` = os 3 destinos) · **`closed-at`**. **Consistência intent↔spike:** a `open-question.question` da intent é **idêntica** à `question` do spike no registry (spikes usam `question`, não `title`); p/ **spike simples** a intent espelha a resposta em **`verdict-inline`** (= o `verdict` do spike) → a intent fica **auto-contida** (pergunta+resposta sem sair dela), mas o **spike é a fonte**. Retroalimentação: spike `done` → preenche `unlocks` (na open-question) + move contrato `pending-spike`→`known`; os works destravados entram no `breaks-into` quando criados.
-- 🟢 **Spike promovido NÃO se deleta — a POC persiste e é absorvida.** Em `fate: promoted`, a saída durável (POC/achado) fica no **workspace do spike** (`works/spike_<slug>/poc/`); o trabalho que a productiza referencia via **`from-spike: <repo>/<spike-id>`**. Um spike promove pra **`delivery` · `fix` · `patch`** (saídas de código) — **não** pra `experiment` (decisão de negócio). _(`parked` = fica no workspace + `proposal`; `throwaway` = só o código jogável morre, e depois de capturar a resposta.)_
+- 🟢 **Spike promovido NÃO se deleta — a POC persiste e é absorvida.** Em `fate: promoted`, a saída durável (POC/achado) fica no **workspace do spike** (`works/spike_<slug>/poc/`); o trabalho que a productiza referencia via **`derives-from: <repo>/<spike-id>`**. Um spike promove pra **`delivery` · `fix` · `patch`** (saídas de código) — **não** pra `experiment` (decisão de negócio). _(`parked` = fica no workspace + `proposal`; `throwaway` = só o código jogável morre, e depois de capturar a resposta.)_
 - 🟢 **Experiment = DECISÃO DELIBERADA, podendo nascer em qualquer trabalho (benchmark robusto).** A ideia pode surgir em qualquer lugar — inclusive **durante** um `delivery`/`spike`, que **surfa** a oportunidade (não auto-promove). Dois caminhos: **(recomendado) diferido** — salva num **`proposal`** → backlog → abre uma **intent própria** (às vezes paralela) [= o _experiment backlog_ ICE/RICE da indústria]; **(permitido, raro) inline** — adiciona à intent atual mesmo nascida pra delivery [= o bottom-up de Spotify/Netflix]. Em ambos: **rigor** (`experiment-brief` `sealed`, hipótese+métricas pré-registradas) e **escolha** (não é todo trabalho; bug óbvio = só conserta). O spike **não vira** experiment sozinho. _(benchmark: `2026-06-26-benchmark-experiment-origins.md`.)_
 
 **Ciclo de vida**
@@ -253,9 +255,11 @@ Exemplos vivos **não ficam aqui** — moram em `_templates/`, `_archive/repo-si
 
 - 🟢 A **lista de ligações já existe** (conjunto fechado) + `coordinates-with`/`depends-on` (entre repos).
 - 🟢 **Anotar uma vez** (o sentido contrário o sistema deduz).
+- 🟢 **Bloqueio = 2 arestas (`registry-entry`, 1-N):** `blocked-by` (espera um **trabalho** concreto concluir — bloqueio na quebra de tarefas) × `depends-on` (depende de **plataforma/versão/build**); `blocks` = reverso derivado de `blocked-by`. Resolve os "2 sabores de `depends-on`".
+- 🟢 **Lente 3 FECHADA — 10 arestas, cada uma com critério ÚNICO** (humano e IA classificam sem confundir): estrutura (`breaks-into`) · proveniência (`derives-from`⟷`results-in`, `raises`) · dependência (`blocked-by`/`blocks`, `depends-on`, `coordinates-with`) · investigação (`resolves`, `supported-by`) · fecho (`closed-by`) · histórico (`supersedes`). **Renomeios:** `grounded-by`→`supported-by` · `verdicted-by`→`closed-by` (genérico: answer/outcome/postmortem) · `promotes-to`→`results-in`. **Fundidos/removidos:** `spawned-by`+`from-spike`→`derives-from`; `promoted-to` saiu (os works declaram `derives-from`; o spike só marca `fate: promoted`). **Princípio: o dado fica no NÓ, não na aresta.** _(grafo: `../assets/lente3-edge-graph.svg`.)_
 - 🟢 As **partes** (decisão, checkpoint) **contam como nós**.
-- 🟢 O **resultado** do experiment já tem ligação (`verdicted-by`); a **origem** da ideia também (`raises`).
-- 🟢 **Promover (`promotes-to`) CRIA o alvo por padrão** — nasce um trabalho novo que herda o contexto da origem; **salvo** quando se aponta explicitamente pra um nó **que já existe** (ex.: `delivery` reservado). A aresta é a mesma nos dois casos.
+- 🟢 O **fecho** de um trabalho tem ligação (`closed-by` — answer/outcome/postmortem); a **origem** da ideia também (`raises`).
+- 🟢 **Proveniência = `derives-from` ⟷ `results-in`** (mesma aresta, 2 direções). `A results-in B` **CRIA o alvo B** por padrão (herda o contexto); **salvo** quando aponta pra um nó **que já existe**. **`consumido × persiste`** (proposal vira / spike permanece) = **status do NÓ**, não da aresta — por isso `spawned-by`/`promoted-to`/`from-spike` sumiram.
 - 🟢 **`coordinates-with`/`depends-on` ficam NAS ENTREGAS** (P2) — nos trabalhos concretos de cada repo (nós **duráveis**), não na ideia; a ideia só **origina**. Resolvem em **contratos** (coordinates-with = compartilhar um contrato; depends-on = esperar um build/versão). _(exemplos: login multi-repo + 3-devs.)_
 - 🟢 **Uma ideia em N repos → N entregas** (P3) — uma `delivery`/trabalho por repo que precisa de trabalho; a **feature** é uma `intent` multi-repo que **`breaks-into`** essas entregas (não um repo dedicado; o **banco** agrega).
 
@@ -270,7 +274,7 @@ definem** (e não se versionam/citam). Modelo vivo, não-autoridade.
 
 **Estado:** ✅ **Lentes 1, 2 e 3 essencialmente FECHADAS.** Lente 1 (6 tipos MECE + `proposal`-ferramenta; Dense/Virtual fora). Lente 2 (5 momentos · coração ✦ · cores 🔴/🟡/⚪; `stage` resolvido). Lente 3 (ligações **nas entregas** = contratos; **camada `intent`** acima dos trabalhos; **governança global** por org/BU; **contrato-first, backend plugável**; **intent opcional/emergente** com benchmark; **tool-plugável**). Base v0 dos moldes aprovada (`<kind>-brief` + `intent.yml` + `registry/<kind>.yml` + fechos).
 
-**Aberto (Parte 2):** só os **2 sabores de `depends-on`** (plataforma/versão × entrega — único da Lente 3) + os **⚠️ de templates** (status-por-kind · severity PT×EN).
+**Aberto (Parte 2):** os **⚠️ de templates** (status-por-kind · severity PT×EN) + a **rodada de system design dos bancos** (frente dedicada).
 
 **Frentes de fundo (trabalhos próprios, não desta rodada):** `incident` dedicada (template + bypass-com-prazo + alerta + postmortem) · conectar `proposal`↔backlog↔history · **adapters** (Jira/Linear/Azure — adoção incremental) · **banco(s): rodada dedicada de system design** (separar intents/works · banco de proposals na governança · grafos comunicantes) · identidade cross-repo + dashboards de valor.
 
