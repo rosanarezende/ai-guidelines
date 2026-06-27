@@ -2,7 +2,6 @@ node: work-brief
 kind: fix
 id: fix-NNN
 intent: # fix reativo → normalmente sem intent
-from-spike: # opcional: o spike cuja investigação este fix productiza (ver fate: promoted)
 references: []
 
 symptom: # sintoma (o usuário vê)

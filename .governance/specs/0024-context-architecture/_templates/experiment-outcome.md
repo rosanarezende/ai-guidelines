@@ -23,6 +23,6 @@ sealed: true
 
 ## Destino (polimórfico)
 
-- **won** → `promotes-to` `delivery` (sistematiza; reaproveita o código testado com flexibilidade).
+- **won** → `results-in` `delivery` (sistematiza; reaproveita o código testado com flexibilidade).
 - **lost** → **clean-up = um `patch`** (remove o código/flag testado — invisível ao usuário).
 - **inconclusive** → **depende do sinal**: `patch` (clean-up) · `spike` (investigar o porquê) · novo `experiment` (iterar) · etc.

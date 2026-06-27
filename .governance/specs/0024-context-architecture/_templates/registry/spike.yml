@@ -1,5 +1,5 @@
 # registry/spike.yml — índice (projeção) dos trabalhos kind=spike deste repo.
-# 1 entrada por trabalho (schema base: ../registry-entry.yml; spikes usam `question` no lugar de `title`).
+# 1 entrada por trabalho (schema base: registry-entry.yml; spikes usam `question` no lugar de `title`).
 entries: []
 # exemplo (abertura → fecho):
 #   - id: spike-001
@@ -11,8 +11,7 @@ entries: []
 #     workspace: works/spike_<slug>/ # só se DENSO (POC: parqueia conteúdo de valor)
 #     # --- preenchidos no FECHO ---
 #     verdict: <a resposta em 1 linha — espelha o `verdict-inline` da intent (spike simples)>
-#     fate: <throwaway | promoted | parked> # destino da saída
-#     promoted-to: [<repo>/<work>, ...] # se promoted: os works que productizam a POC (1-N)
+#     fate: <throwaway | promoted | parked> # destino (promoted: os works que o productizam declaram `derives-from` apontando o spike)
 #     raises: [<repo>/<prop-id>, ...]    # proposals levantados pelo spike (1-N)
 #     date: <YYYY-MM-DD>      # abertura
 #     closed-at: <YYYY-MM-DD> # fecho

@@ -27,8 +27,8 @@
 
 **Índice (projeção, não abertura)**
 
-| `registry-entry.yml` | schema de uma entrada do índice **per-kind** `registry/<kind>.yml` (→ active-work). Todo trabalho ganha uma. |
-| -------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `registry/registry-entry.yml` | **schema BASE** da entrada de índice → crie `registry/<kind>.yml` a partir dele (só os extras por kind). `spike`/`proposal` têm template próprio (divergem). |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 
 **Investigação / Decisão**
 

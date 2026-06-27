@@ -3,7 +3,7 @@ node: decision
 id: dec-NNN
 resolves:
   - { question: q-NNN, into: "§D1" }
-grounded-by:
+supported-by:
   - res-NNN
 body: <ref à consolidação, se houver>
 status: <draft | partial | resolved>

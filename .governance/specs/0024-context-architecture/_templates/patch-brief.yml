@@ -2,7 +2,6 @@ node: work-brief
 kind: patch
 id: patch-NNN
 intent: # patch reativo/rotina → normalmente sem intent
-from-spike: # opcional: o spike cuja investigação este patch productiza (ver fate: promoted)
 references: []
 
 what: # o que (invisível): dep bump | lint | refactor | security
