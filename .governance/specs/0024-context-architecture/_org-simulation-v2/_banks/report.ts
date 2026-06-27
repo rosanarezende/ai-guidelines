@@ -21,6 +21,10 @@ export function reportRepoBank(p: RepoProjection): void {
       .join(" · ");
     console.log(`  ${w.ref}: ${facts}`);
     if (w.verdict) console.log(`      ↳ verdict (DERIVADO do answer): "${w.verdict}"`);
+    if (w.promotedOutput)
+      console.log(
+        `      ↳ promovido → ${w.promotedOutput} (POC durável p/ absorver via derives-from)`
+      );
   }
 }
 
@@ -30,11 +34,14 @@ export function reportGovernanceBank(g: GovernanceProjection, repos: string[]): 
     `  consome as projeções dos repos [${repos.join(", ")}] — banco→banco, sem ler arquivo de repo`
   );
 
-  console.log("\n  open-questions:");
+  console.log("\n  open-questions (RESPONDIDA pela exploration ≠ RESOLVIDA pelo aceite humano):");
   for (const q of g.questions) {
-    console.log(
-      `    ${q.id}: ${q.resolved ? "RESOLVED" : "open"}${q.answeredBy ? `  ← ${q.answeredBy}` : ""}`
-    );
+    const state = q.resolved
+      ? "RESOLVED"
+      : q.answered
+        ? `answered · decisão ${q.decision}`
+        : "open";
+    console.log(`    ${q.id}: ${state}${q.answeredBy ? `  ← ${q.answeredBy}` : ""}`);
     if (q.verdict) console.log(`        ↳ verdict: "${q.verdict}"`);
   }
 

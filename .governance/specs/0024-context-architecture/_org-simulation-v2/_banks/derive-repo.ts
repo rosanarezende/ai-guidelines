@@ -12,19 +12,24 @@ export function deriveRepo(repo: string): RepoProjection {
 }
 
 function projectExploration(repo: string, entry: ExplorationEntry): WorkProjection {
+  const answer = readAnswer(repo, entry);
   return {
     ref: `${repo}/${entry.id}`,
     kind: "exploration",
     status: entry.status,
     fate: entry.fate,
     answers: entry.answers,
-    verdict: deriveVerdict(repo, entry),
+    verdict: answer.verdict,
+    promotedOutput: answer.promoted,
   };
 }
 
-/** O verdict é DERIVADO do answer (conteúdo, co-locado no workspace) — só quando fechou. */
-function deriveVerdict(repo: string, entry: ExplorationEntry): string | undefined {
+/** O answer é CONTEÚDO (co-locado no workspace): verdict + a POC promovida, se houver. Só quando fechou. */
+function readAnswer(
+  repo: string,
+  entry: ExplorationEntry
+): { verdict?: string; promoted?: string } {
   const closedBy = entry["closed-by"];
-  if (entry.status !== "done" || !closedBy) return undefined;
-  return readFrontmatter<{ verdict?: string }>(`${repo}/${closedBy}`).verdict;
+  if (entry.status !== "done" || !closedBy) return {};
+  return readFrontmatter<{ verdict?: string; promoted?: string }>(`${repo}/${closedBy}`);
 }

@@ -2,6 +2,7 @@
 // (comunicação banco→banco) e resolve as questions/contratos da intent pela aresta `answers`.
 import type {
   Intent,
+  Deliberation,
   RepoProjection,
   WorkProjection,
   GovernanceProjection,
@@ -11,6 +12,7 @@ import type {
 
 export function deriveGovernance(
   intent: Intent,
+  deliberation: Deliberation,
   repoProjections: RepoProjection[]
 ): GovernanceProjection {
   const publishedWorks: WorkProjection[] = repoProjections.flatMap((p) => p.explorations);
@@ -18,12 +20,16 @@ export function deriveGovernance(
   const questions = (intent["open-questions"] ?? []).map((q): QuestionResolution => {
     const edge = `${intent.id}#${q.id}`;
     const answer = publishedWorks.find((w) => answersEdge(w, edge));
-    const resolved = answer?.status === "done";
+    const answered = answer?.status === "done"; // a exploration respondeu (evidência existe)
+    const decision = deliberation.decisions.find((d) => d.decides === q.id)?.status ?? "none"; // o gate
+    const resolved = answered && decision === "accepted"; // só resolve com ACEITE humano
     return {
       id: q.id,
+      answered,
+      decision,
       resolved,
       answeredBy: answer?.ref,
-      verdict: resolved ? answer?.verdict : undefined,
+      verdict: answered ? answer?.verdict : undefined,
     };
   });
 

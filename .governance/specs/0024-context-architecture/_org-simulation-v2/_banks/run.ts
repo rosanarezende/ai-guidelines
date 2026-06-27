@@ -1,5 +1,5 @@
 // Orquestra os bancos que se comunicam (Lente 5). Rode:  node _banks/run.ts
-import type { Intent } from "./types.ts";
+import type { Intent, Deliberation } from "./types.ts";
 import { readYaml, listRepos } from "./io.ts";
 import { deriveRepo } from "./derive-repo.ts";
 import { deriveGovernance } from "./derive-governance.ts";
@@ -11,7 +11,8 @@ const repos = listRepos();
 const repoProjections = repos.map(deriveRepo);
 repoProjections.forEach(reportRepoBank);
 
-// 2) a governança deriva CONSUMINDO as projeções dos repos (comunicação banco→banco)
+// 2) a governança deriva CONSUMINDO as projeções dos repos + o mapa de deliberação (o gate humano)
 const intent = readYaml<Intent>("acme-governance/intents/intent-0001/intent.yml");
-const governance = deriveGovernance(intent, repoProjections);
+const deliberation = readYaml<Deliberation>("acme-governance/intents/intent-0001/deliberation.yml");
+const governance = deriveGovernance(intent, deliberation, repoProjections);
 reportGovernanceBank(governance, repos);

@@ -1,0 +1,13 @@
+node: work-brief
+kind: exploration
+exploration: exploration-001 # REFERENCIA a registry (o id é dela); este brief é só CONTEÚDO
+question: "suporte proativo é viável? (detectar N falhas de login por pub/sub e abordar o usuário)" # = a open-question q2 da intent (texto IDÊNTICO)
+timebox: 3 dias
+references: []
+
+objective:
+  approach: POC de um listener que conta falhas por sessão (pub/sub genérico) e dispara após N
+  success-signal: prova de que dá pra contar + disparar + um contrato de evento definido
+
+unblocks-decision: criar (ou não) a ajuda sob demanda que absorve o listener
+output: "a RESPOSTA + a POC durável → fecha em exploration-answer (fate: promoted)"

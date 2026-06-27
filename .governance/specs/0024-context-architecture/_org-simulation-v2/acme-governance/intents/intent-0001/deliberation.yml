@@ -1,0 +1,16 @@
+# deliberation.yml — mapa VIVO da deliberação da intent-0001 (≈ state). Lista APPEND-ONLY de decisões (nós).
+# O humano REVISA o verdict da exploration e DECIDE — é o GATE. Reabrir = novo nó + `supersedes` (nunca virar status).
+# Aqui ficam os NÓS + ARESTAS (decides · supported-by · spawns · supersedes); o rationale é conteúdo (inline curto na sim).
+decisions:
+  - id: d1
+    decides: q1
+    status: accepted # o humano ACEITOU o verdict
+    supported-by: acme-design-system/exploration-001 # a evidência (aresta Lente 3)
+    rationale: "verdict claro: o DS não tem form validado → criar o componente"
+    spawns: [acme-design-system/deliv-form-component] # o que fazer em seguida
+    decided-at: 2026-06-27
+  - id: d2
+    decides: q2
+    status: pending # AINDA não decidido — a exploration respondeu (verdict existe), mas falta o humano aceitar
+    supported-by: acme-mfe-support/exploration-001
+    # rationale / spawns / decided-at: preenchem quando decidir

@@ -49,6 +49,8 @@ export interface WorkProjection {
   answers?: string;
   /** DERIVADO do answer (via closed-by) quando `done`; é conteúdo, não fica no registry. */
   verdict?: string;
+  /** se `fate: promoted`, o caminho da POC durável (derivado do answer) — a absorver via `derives-from`. */
+  promotedOutput?: string;
 }
 
 export interface RepoProjection {
@@ -56,10 +58,31 @@ export interface RepoProjection {
   explorations: WorkProjection[];
 }
 
-/** O que o banco de GOVERNANÇA publica. */
+// ── a DELIBERAÇÃO (o gate humano): a exploration RESPONDE; a question só RESOLVE quando um humano ACEITA ──
+
+export type DecisionStatus = "accepted" | "rejected" | "pending";
+
+/** Nó de decisão no mapa de deliberação da intent (append-only; reabrir = novo nó + `supersedes`). */
+export interface Decision {
+  id: string;
+  decides: string; // qN
+  status: DecisionStatus;
+  "supported-by"?: string; // "<repo>/<exploration>" — a evidência (aresta Lente 3)
+  rationale?: string;
+  spawns?: string[]; // o trabalho que a decisão dispara
+  supersedes?: string; // id de uma decisão anterior (reabertura)
+}
+
+export interface Deliberation {
+  decisions: Decision[];
+}
+
+/** O que o banco de GOVERNANÇA publica por question. */
 export interface QuestionResolution {
   id: string;
-  resolved: boolean;
+  answered: boolean; // a exploration fechou → o verdict (evidência) existe
+  decision: DecisionStatus | "none"; // o gate humano
+  resolved: boolean; // answered && decision === "accepted"
   answeredBy?: string; // "<repo>/<id>"
   verdict?: string;
 }
