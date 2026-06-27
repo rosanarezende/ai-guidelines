@@ -201,6 +201,15 @@ Exemplos vivos **não ficam aqui** — moram em `_templates/`, `_archive/repo-si
 
 - ✅ **`depends-on` — RESOLVIDO (os 2 sabores viram 2 arestas):** **`blocked-by`** = espera um **trabalho** concreto concluir (bloqueio na quebra de tarefas) · **`depends-on`** = depende de **plataforma/versão/build** (estável, não-por-tarefa). **`blocks`** = o reverso de `blocked-by` (derivado; basta anotar 1 lado). Vivem no `registry-entry` (1-N). **Lente 3 fechada.**
 
+**Lente 1 — modalidade: `spike`/`proposal` são FERRAMENTAS, não work-items?** _(🔴 em PESQUISA — owner 2026-06-27; benchmark: [`2026-06-27-benchmark-spikes-discovery-modality.md`](2026-06-27-benchmark-spikes-discovery-modality.md))_
+
+- 🔴 **Reframe (owner):** `proposal` e `spike` são **ferramentas disponíveis o ciclo INTEIRO (e antes dele)**, não unidades de entrega → talvez **não sejam work-items**. Separá-los deixa os **work-items = entregas de valor** (com densidades variadas) e as ferramentas **ortogonais**. (`proposal` já saiu como ferramenta de intake; `spike` seria a de **investigação**.)
+- 🔴 **Valor do spike (correção da owner):** spike **entrega valor SIM — valor de APRENDIZADO** (não "nenhum valor"); às vezes com **robustez** (POC) ou **gerando templates/base** pro trabalho seguinte (que declara `derives-from`). Muda o **tipo** de valor (produto × aprendizado), não a existência.
+- 🔴 **Eixo de modalidade (a fechar):** valor de **produto** (`delivery`·`experiment`·`incident`·`fix`·`patch`) × **ferramentas** (`proposal` intake · `spike`/`discovery` investigação). `experiment` **fica no valor** (no `won` prova valor desde o dia 0 — não é descartável). `spike` é o único de **só aprendizado** → mora **entre** delivery e experiment e **atrela-se a qualquer um**.
+- 🔴 **Onde mora a incerteza (3 lares — modelar a flexibilidade):** _upstream_/negócio (shaping, antes de definir a tarefa) · no **limiar** de uma tarefa · **durante** o dev. Só exercitamos o _upstream_ (login); falta o "spike nasce no meio de uma delivery".
+- 🔴 **Nome:** "spike" é estreito (sonda XP); cobre spike·POC·pesquisa·benchmark → guarda-chuva candidato **`discovery`**/`exploration`.
+- _(tudo isto = **alvo de pesquisa, não definição** — owner. Próximo: workbench + 2ª rodada de benchmark.)_
+
 **Templates (⚠️ pontos a fechar — também marcados nos próprios moldes em `_templates/`)**
 
 > Vários fecham **sozinhos** ao avançarmos nas lentes/frentes; os demais atacamos 1 a 1.
