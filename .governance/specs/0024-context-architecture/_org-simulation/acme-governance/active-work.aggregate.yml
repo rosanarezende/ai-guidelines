@@ -20,6 +20,7 @@ works: # todos os trabalhos publicados pelos repos
   # --- intent-004 (login system) — spikes PRIMEIRO; deliveries entram pós-retroalimentação ---
   - { id: acme-design-system/spike-301, kind: spike, status: done, intent: intent-004 }
   - { id: acme-mfe-support/spike-302, kind: spike, status: done, intent: intent-004 }
+  - { id: acme-design-system/deliv-210, kind: delivery, status: active, intent: intent-004 }
   # --- standalone (reativo/rotina, SEM intent — aparece no banco mesmo assim) ---
   - { id: acme-api/fix-201, kind: fix, status: done, intent: null }
   - { id: acme-mfe-identity/fix-210, kind: fix, status: done, intent: null }

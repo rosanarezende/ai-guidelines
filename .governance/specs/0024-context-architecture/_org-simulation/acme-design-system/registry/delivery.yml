@@ -5,3 +5,10 @@ entries:
     status: done
     intent: intent-003
     date: 2026-06-10
+  - id: deliv-210
+    title: componente de formulário validado (login)
+    status: active
+    intent: intent-004
+    workspace: works/delivery_login-form/ # denso
+    # destravada por q1/spike-301 (sem derives-from: spike-301 foi throwaway, sem POC)
+    date: 2026-06-29

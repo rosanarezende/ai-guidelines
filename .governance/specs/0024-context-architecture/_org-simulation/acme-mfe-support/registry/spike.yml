@@ -8,9 +8,7 @@ entries:
     timebox: 3d
     workspace: works/spike_proactive-support/ # DENSO (POC)
     verdict: "viável — o canal pub/sub conta as falhas e dispara após N; SE proativo ajuda vs atrapalha é hipótese de produto → experiment dedicado"
-    fate: promoted # o listener (POC) tem casa → base do suporte
-    promoted-to: # 1-N: os works que productizam a POC
-      - acme-mfe-support/deliv-230 # a ajuda sob demanda absorve o listener
+    fate: promoted # o listener (POC) tem casa → os works que o productizam declaram `derives-from`
     raises: # 1-N: proposals levantados pelo spike
       - acme-mfe-support/prop-001 # a ideia do proativo A/B virou proposal (não se perde)
     date: 2026-06-26

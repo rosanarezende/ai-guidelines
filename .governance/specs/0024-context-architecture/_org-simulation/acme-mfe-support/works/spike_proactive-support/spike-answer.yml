@@ -16,5 +16,5 @@ answer: |
 value-beyond-answer: |
   A POC (o listener de contagem de falhas) está REGISTRADA no workspace: `poc/failure-listener.md`
   (esboço + contrato de evento). `fate: promoted` → a delivery de ajuda sob demanda
-  (acme-mfe-support/deliv-230) a ABSORVE por referência (`from-spike: spike-302`) e productiza.
+  (acme-mfe-support/deliv-230) a ABSORVE por referência (`derives-from: spike-302`) e productiza.
   Nada é deletado — o conhecimento fica no repo.

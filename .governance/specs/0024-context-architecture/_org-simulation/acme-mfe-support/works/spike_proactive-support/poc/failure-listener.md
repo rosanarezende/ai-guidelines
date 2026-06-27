@@ -19,5 +19,5 @@ O support consegue escutar o evento de falha, contar por sessão e disparar um h
 
 ## Como a delivery absorve
 
-`deliv-230` referencia este spike (`from-spike: acme-mfe-support/spike-302`) e productiza o listener + o
+`deliv-230` referencia este spike (`derives-from: acme-mfe-support/spike-302`) e productiza o listener + o
 gancho `offerProactiveHelp`. _(o A/B do proativo = experiment dedicado — próxima iteração, via proposal.)_
