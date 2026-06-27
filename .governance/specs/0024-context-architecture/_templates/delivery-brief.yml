@@ -1,0 +1,23 @@
+node: work-brief
+kind: delivery
+id: deliv-NNN
+intent: # id da intent dona (se houver; reativo/standalone = vazio)
+from-spike: # opcional: o spike cuja POC/achado este trabalho productiza (ver fate: promoted)
+sealed: true
+references: []
+
+# kernel — a capacidade já decidida
+objective:
+  goal: # a capacidade que o sistema passa a ter
+  approach: # abordagem
+  success-signal: # sinal de que entregou
+  done-when: # critério de aceite / done
+
+context: # problema / contexto que motiva
+out-of-scope: # limite / fora-de-escopo
+requirements: # requisitos / comportamento esperado
+acceptance: # critério de aceite
+non-goals: # não-objetivos · restrições de design
+
+details: |
+  <nuance opcional>

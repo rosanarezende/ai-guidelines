@@ -1,10 +1,16 @@
 # registry/spike.yml — índice (projeção) dos trabalhos kind=spike deste repo.
-# 1 entrada por trabalho (schema: ../registry-entry.yml) → alimenta active-work.
+# 1 entrada por trabalho (schema base: ../registry-entry.yml; spikes usam `question` no lugar de `title`).
 entries: []
-# exemplo:
+# exemplo (abertura → fecho):
 #   - id: spike-001
-#     title: <curto>
-#     status: <draft | active | closed | done>
-#     workspace: works/spike_<slug>/ # só se denso (parqueia conteúdo de valor)
-#     resolves: <id da decisão/finding que abriu> # a resposta destrava isto
-#     date: <YYYY-MM-DD>
+#     question: <a pergunta — IDÊNTICA à open-question da intent que abriu>
+#     status: <active | done>
+#     intent: <id da intent dona, se houver>
+#     resolves: <intent-id#qN> # a open-question que esta resposta resolve
+#     timebox: <prazo>
+#     workspace: works/spike_<slug>/ # só se DENSO (POC: parqueia conteúdo de valor)
+#     # --- preenchidos no FECHO ---
+#     verdict: <a resposta em 1 linha — espelha o `verdict-inline` da intent (spike simples)>
+#     fate: <throwaway | promoted | parked> # destino da saída
+#     date: <YYYY-MM-DD>      # abertura
+#     closed-at: <YYYY-MM-DD> # fecho

@@ -1,0 +1,48 @@
+# intent — plano do objetivo durável (meta-repo / governança global). Explicações: no tracker work-graph-model.
+node: intent
+sealed: false # intent é viva (não sela)
+
+created-at: 2026-NN-NN
+closed-at: # só quando terminal (done | dropped); vazio em active/paused
+
+id: intent-NNN
+title: <título curto>
+
+# active=em andamento · paused=pausada por repriorização (retomável) · done=objetivo atingido · dropped=descartada por decisão (terminal)
+status: # active | paused | done | dropped
+
+objective:
+  goal: # a mudança / resultado durável que se quer no mundo
+  success-signal: # o sinal de que o objetivo foi atingido
+  out-of-scope: # o que esta intent NÃO persegue
+
+references: # type: modeling | spec | design | benchmark | dashboard | alignment | other
+  - type: modeling
+    label: "<doc>"
+    url: "<link>"
+    note: "<nuance que sobrevive ao link>"
+
+target-repos: # repos tocados (≠ breaks-into)
+  - <repo>
+
+# o APRENDIZADO da intent: cada incerteza → 1 spike; a resposta = `verdict-inline` (spike simples) ou o `spike-answer` (POC, no arquivo do spike, consumível por grafo)
+open-questions:
+  - id: q1
+    question: "<incerteza — IDÊNTICA ao campo `question` do spike no registry>"
+    spike: <repo>/<spike-id> # quem investiga
+    verdict-inline: # a resposta em 1 linha (espelha o `verdict` do spike no registry); no POC o detalhe mora também no `spike-answer`
+    unlocks: # (na retroalimentação) os trabalhos que a resposta destrava → explica o breaks-into abaixo
+      - <repo>/<work-id>
+
+contracts:
+  known: # estáveis no t0 → as deliveries já podem trabalhar contra
+    - "<contrato> — <repo>"
+  pending-spike: # dependem de um spike
+    - "<contrato> — <repo> (qN)"
+
+breaks-into: # trabalhos disparados (cresce no tempo: t0 = só os spikes)
+  - <repo>/<work-id>
+
+# opcional: texto livre — síntese do aprendizado da intent como um todo, o porquê do status/dropped, etc.
+details: |
+  <prosa livre multi-linha, se necessário>

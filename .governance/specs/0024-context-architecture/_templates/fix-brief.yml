@@ -1,0 +1,14 @@
+node: work-brief
+kind: fix
+id: fix-NNN
+intent: # fix reativo → normalmente sem intent
+from-spike: # opcional: o spike cuja investigação este fix productiza (ver fate: promoted)
+references: []
+
+symptom: # sintoma (o usuário vê)
+expected: # esperado
+origin: # report cliente/interno · percebido durante X
+done-when: # corrigido + verificado
+
+details: |
+  <nuance opcional — ex.: se crescer vira spike/delivery>

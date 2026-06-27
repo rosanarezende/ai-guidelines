@@ -1,0 +1,28 @@
+node: work-brief
+kind: experiment
+id: exp-NNN
+intent: # id da intent dona (se houver)
+sealed: true # sela a hipótese (pré-registro)
+references: []
+
+# kernel — intervir pra APRENDER
+objective:
+  goal: # o que a tese quer descobrir (pretendemos aprender)
+  approach: # A/B | rollout medido · ideal: atrás de feature flag
+  success-signal: # a métrica que decide
+  done-when: # rodou o período / atingiu N
+
+background-hypothesis: # hipótese de fundo
+win-outcome: # resultado se a tese vencer
+out-of-scope: # limite / fora-de-escopo
+
+# ⊛ exigidos por ser experiment
+hypothesis: # ⊛ "acreditamos que…"
+metrics: # ⊛
+  primary:
+  auxiliary:
+  guardrail:
+segmentation: # segmentação · objetivos de aprendizado
+
+details: |
+  <nuance opcional>

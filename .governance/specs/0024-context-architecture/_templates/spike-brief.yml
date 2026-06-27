@@ -1,0 +1,18 @@
+node: work-brief
+kind: spike
+id: spike-NNN
+intent: # id da intent dona (se houver)
+timebox: # ⊛ prazo
+references: []
+
+# kernel — provar um ponto ANTES de entregar valor
+objective:
+  goal: # a pergunta / o ponto a provar
+  approach: # como investigar — PoC, benchmark, análise
+  success-signal: # o que conta como resposta
+
+unblocks-decision: # a decisão que isto destrava
+output: # a RESPOSTA (não o código) → fecha em spike-answer
+
+details: |
+  <nuance opcional>
