@@ -11,8 +11,8 @@ intents:
 
 works: # todos os trabalhos publicados pelos repos
   # --- sob uma intent (objetivo) ---
-  - { id: acme-api/deliv-101, kind: delivery, status: active, intent: intent-001 }
-  - { id: acme-shell/deliv-110, kind: delivery, status: active, intent: intent-001 }
+  - { id: acme-api/deliv-101, kind: delivery, status: done, intent: intent-001 }
+  - { id: acme-shell/deliv-110, kind: delivery, status: draft, intent: intent-001 } # bloqueada
   - { id: acme-mfe-identity/deliv-120, kind: delivery, status: active, intent: intent-001 }
   - { id: acme-api/deliv-050, kind: delivery, status: active, intent: intent-002 }
   - { id: acme-mfe-growth/exp-140, kind: experiment, status: active, intent: intent-002 }
@@ -21,6 +21,10 @@ works: # todos os trabalhos publicados pelos repos
   - { id: acme-design-system/spike-301, kind: spike, status: done, intent: intent-004 }
   - { id: acme-mfe-support/spike-302, kind: spike, status: done, intent: intent-004 }
   - { id: acme-design-system/deliv-210, kind: delivery, status: active, intent: intent-004 }
+  - { id: acme-api/deliv-201, kind: delivery, status: active, intent: intent-004 }
+  - { id: acme-mfe-identity/deliv-220, kind: delivery, status: draft, intent: intent-004 } # bloqueada
+  - { id: acme-mfe-support/deliv-230, kind: delivery, status: draft, intent: intent-004 } # bloqueada
+  - { id: acme-shell/deliv-240, kind: delivery, status: draft, intent: intent-004 } # bloqueada
   # --- standalone (reativo/rotina, SEM intent — aparece no banco mesmo assim) ---
   - { id: acme-api/fix-201, kind: fix, status: done, intent: null }
   - { id: acme-mfe-identity/fix-210, kind: fix, status: done, intent: null }

@@ -51,7 +51,18 @@ contracts:
     - "evento de comunicação MFE↔MFE p/ suporte proativo (canal `login`:`step-failed`, payload {field,attempts}) — acme-mfe-identity ↔ acme-mfe-support (resolvido por q2/spike-302)"
   pending-spike: [] # todos os spikes respondidos → pronto pra quebrar as deliveries
 
+# breaks-into — VISTA derivada dos works, AGRUPADA por status (a intent mostra plano + estado + caminho crítico num lugar só).
 breaks-into:
-  - acme-design-system/spike-301
-  - acme-mfe-support/spike-302
-  - acme-design-system/deliv-210 # destravada por q1 (componente de form)
+  done:
+    - acme-design-system/spike-301
+    - acme-mfe-support/spike-302
+  active:
+    - acme-api/deliv-201 # auth (contrato known no t0)
+    - acme-design-system/deliv-210 # form (destravado por q1)
+  draft: # bloqueadas — o blocked-by (derivado) explica o draft
+    - work: acme-mfe-identity/deliv-220 # login MFE
+      blocked-by: [acme-design-system/deliv-210, acme-api/deliv-201]
+    - work: acme-mfe-support/deliv-230 # ajuda sob demanda
+      blocked-by: [acme-design-system/deliv-210]
+    - work: acme-shell/deliv-240 # wiring (monta os MFEs)
+      blocked-by: [acme-mfe-identity/deliv-220, acme-mfe-support/deliv-230]

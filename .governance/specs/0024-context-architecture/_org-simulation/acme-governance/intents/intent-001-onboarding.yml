@@ -21,6 +21,10 @@ contracts:
     - "api de onboarding (schema dos passos + eventos) — acme-api"
 
 breaks-into:
-  - acme-api/deliv-101
-  - acme-shell/deliv-110
-  - acme-mfe-identity/deliv-120
+  done:
+    - acme-api/deliv-101
+  active:
+    - acme-mfe-identity/deliv-120
+  draft:
+    - work: acme-shell/deliv-110
+      blocked-by: [acme-mfe-identity/deliv-120]

@@ -20,5 +20,6 @@ contracts:
     - "contrato de eventos de uso (medição) — acme-api ↔ acme-mfe-growth"
 
 breaks-into:
-  - acme-api/deliv-050
-  - acme-mfe-growth/exp-140
+  active:
+    - acme-api/deliv-050
+    - acme-mfe-growth/exp-140

@@ -2,7 +2,13 @@
 entries:
   - id: deliv-110
     title: wiring do onboarding (rota + mount + contexto)
-    status: active
+    status: draft # bloqueada (blocked-by deliv-120)
     intent: intent-001
-    depends-on: [acme-mfe-identity/deliv-120] # espera as telas (dep de entrega)
+    blocked-by: [acme-mfe-identity/deliv-120] # espera as telas (um trabalho)
     date: 2026-06-21
+  - id: deliv-240
+    title: wiring do login (rota + mount + contexto)
+    status: draft # bloqueada (blocked-by os 2 MFEs) → draft até destravar
+    intent: intent-004
+    blocked-by: [acme-mfe-identity/deliv-220, acme-mfe-support/deliv-230] # monta os 2 MFEs
+    date: 2026-06-29

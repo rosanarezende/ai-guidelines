@@ -1,0 +1,22 @@
+node: work-brief
+kind: delivery
+id: deliv-220
+intent: intent-004
+sealed: true
+references:
+  - type: design
+    label: "protótipo do login"
+    url: "https://design.acme.example/login"
+    note: "fluxo de login + estados de erro"
+
+objective:
+  goal: o MFE de login (formulário + autenticação), montado pelo shell
+  approach: MFE em acme-mfe-identity, consumindo o form do DS e a auth da api; emite login:step-failed a cada falha
+  done-when: login navegável atrás de flag; consome o form (deliv-210) + auth (deliv-201); emite o evento de falha
+
+context: novo fluxo de login (intent-004); destravado por q1 (form validado disponível)
+out-of-scope: não trata o suporte proativo (acme-mfe-support); não mexe em signup
+requirements: usa o componente de form validado (acme-design-system/deliv-210) e o contrato de auth (acme-api/deliv-201); emite o evento canal `login` mensagem `step-failed` { field, attempts }
+
+details: |
+  Emite o evento que o suporte (acme-mfe-support/deliv-230) escuta — `coordinates-with` via o contrato de evento.

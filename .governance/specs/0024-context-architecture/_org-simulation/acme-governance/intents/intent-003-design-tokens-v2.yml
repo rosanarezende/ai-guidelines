@@ -20,7 +20,8 @@ contracts:
     - "API dos componentes (tokens v2) — acme-design-system"
 
 breaks-into:
-  - acme-design-system/deliv-130
+  done:
+    - acme-design-system/deliv-130
 
 details: |
   Tokens v2 ficaram estáveis; os consumidores migraram via patch (sem quebrar) — não exigiu re-trabalho nos MFEs.
