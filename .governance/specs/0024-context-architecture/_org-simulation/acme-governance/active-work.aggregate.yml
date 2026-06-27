@@ -2,9 +2,10 @@
 # ids namespaceados <repo>/<id>. Inclui TODOS os trabalhos — com ou sem intent. NÃO é SSOT (os repos são).
 
 intents:
-  - { id: intent-001, title: Revamp do onboarding, status: active, scope: org }
-  - { id: intent-002, title: Testar novo billing, status: active, scope: BU }
-  - { id: intent-003, title: Design tokens v2, status: done, scope: org }
+  - { id: intent-001, title: Revamp do onboarding, status: active }
+  - { id: intent-002, title: Testar novo billing, status: active, bu: monetizacao } # derivado da pasta
+  - { id: intent-003, title: Design tokens v2, status: done }
+  - { id: intent-004, title: Sistema de login, status: active }
 
 works: # todos os trabalhos publicados pelos repos
   # --- sob uma intent (objetivo) ---
@@ -14,6 +15,9 @@ works: # todos os trabalhos publicados pelos repos
   - { id: acme-api/deliv-050, kind: delivery, status: active, intent: intent-002 }
   - { id: acme-mfe-growth/exp-140, kind: experiment, status: active, intent: intent-002 }
   - { id: acme-design-system/deliv-130, kind: delivery, status: done, intent: intent-003 }
+  # --- intent-004 (login system) — spikes PRIMEIRO; deliveries entram pós-retroalimentação ---
+  - { id: acme-design-system/spike-301, kind: spike, status: done, intent: intent-004 }
+  - { id: acme-mfe-support/spike-302, kind: spike, status: done, intent: intent-004 }
   # --- standalone (reativo/rotina, SEM intent — aparece no banco mesmo assim) ---
   - { id: acme-api/fix-201, kind: fix, status: done, intent: null }
   - { id: acme-mfe-identity/fix-210, kind: fix, status: done, intent: null }

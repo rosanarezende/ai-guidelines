@@ -1,0 +1,12 @@
+# registry/spike.yml — acme-design-system · índice kind=spike (→ active-work).
+entries:
+  - id: spike-301
+    question: "o design system tem um formulário dedicado com validação (email/site/telefone), ou cada MFE reimplementa?"
+    status: done
+    intent: intent-004 # login system
+    resolves: intent-004#q1 # a resposta retroalimenta a intent (sem aresta nova — reusa `resolves`)
+    timebox: 2d
+    verdict: "não — o DS não tem form validado; cada MFE reimplementa hoje → precisa criar o componente"
+    fate: throwaway # simples: só análise, sem código durável (destinos: throwaway | promoted | parked)
+    date: 2026-06-26
+    closed-at: 2026-06-27

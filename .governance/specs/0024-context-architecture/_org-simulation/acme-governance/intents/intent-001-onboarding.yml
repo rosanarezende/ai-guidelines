@@ -1,15 +1,26 @@
-# intents/intent-001-onboarding.yml — plano da intent (meta-repo / governança global).
+node: intent
+sealed: false
+created-at: 2026-06-17
+
 id: intent-001
 title: Revamp do fluxo de onboarding
-status: active # em andamento
-scope: org # org | BU | único
-objetivo: reduzir o abandono de novos usuários no onboarding
-contratos:
-  - "api de onboarding (schema dos passos + eventos) — acme-api"
-toques: # repos/trabalhos planejados (declarado no nascimento → paraleliza)
+status: active
+
+objective:
+  goal: reduzir o abandono de novos usuários no onboarding
+  success-signal: queda na taxa de abandono do fluxo
+  out-of-scope: não mexe em billing
+
+target-repos:
+  - acme-api
+  - acme-shell
+  - acme-mfe-identity
+
+contracts:
+  known:
+    - "api de onboarding (schema dos passos + eventos) — acme-api"
+
+breaks-into:
   - acme-api/deliv-101
   - acme-shell/deliv-110
   - acme-mfe-identity/deliv-120
-breaks-into: [acme-api/deliv-101, acme-shell/deliv-110, acme-mfe-identity/deliv-120]
-aprendizado: [] # retroalimentação (spike-answer/experiment-outcome) vai aqui
-date: 2026-06-17

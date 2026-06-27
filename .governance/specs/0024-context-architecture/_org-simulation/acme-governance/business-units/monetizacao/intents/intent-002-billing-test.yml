@@ -1,0 +1,24 @@
+node: intent
+sealed: false
+created-at: 2026-06-18
+
+id: intent-002
+title: Testar novo modelo de billing
+status: active
+
+objective:
+  goal: validar se o billing por uso aumenta a conversão (hipótese)
+  success-signal: o resultado do experiment (won/lost) em acme-mfe-growth/exp-140
+  out-of-scope: só a unidade de negócio "monetização"
+
+target-repos:
+  - acme-api
+  - acme-mfe-growth
+
+contracts:
+  known:
+    - "contrato de eventos de uso (medição) — acme-api ↔ acme-mfe-growth"
+
+breaks-into:
+  - acme-api/deliv-050
+  - acme-mfe-growth/exp-140

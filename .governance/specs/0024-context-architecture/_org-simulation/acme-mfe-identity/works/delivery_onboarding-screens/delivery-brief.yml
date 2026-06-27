@@ -1,0 +1,21 @@
+node: work-brief
+kind: delivery
+id: deliv-120
+intent: intent-001
+sealed: true
+references: []
+
+objective:
+  goal: o usuário completa o onboarding em telas guiadas dentro do MFE
+  approach: MFE em acme-mfe-identity, consumindo o acme-design-system e a API
+  success-signal: telas integradas e montadas pelo shell
+  done-when: fluxo completo navegável, atrás de feature flag
+
+context: abandono alto no onboarding atual
+out-of-scope: não mexe em billing
+requirements: consome o contrato da API de onboarding (acme-api/deliv-101)
+acceptance: shell monta o MFE; o progresso dos passos persiste
+non-goals: "—"
+
+details: |
+  Fluxo mais simples e guiado.

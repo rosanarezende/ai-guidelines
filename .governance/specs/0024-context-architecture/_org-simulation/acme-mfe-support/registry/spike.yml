@@ -1,0 +1,14 @@
+# registry/spike.yml — acme-mfe-support · índice kind=spike (→ active-work).
+entries:
+  - id: spike-302
+    question: "suporte proativo é viável? (detectar N falhas de login pelo canal de comunicação e abordar o usuário)"
+    status: done
+    intent: intent-004 # login system
+    resolves: intent-004#q2
+    timebox: 3d
+    workspace: works/spike_proactive-support/ # DENSO (POC)
+    verdict: "viável — o canal pub/sub conta as falhas e dispara após N; SE proativo ajuda vs atrapalha é hipótese de produto → experiment dedicado"
+    fate: promoted # o listener (POC) tem casa → base do suporte
+    promoted-to: acme-mfe-support/deliv-230 # a ajuda sob demanda absorve o listener
+    date: 2026-06-26
+    closed-at: 2026-06-28

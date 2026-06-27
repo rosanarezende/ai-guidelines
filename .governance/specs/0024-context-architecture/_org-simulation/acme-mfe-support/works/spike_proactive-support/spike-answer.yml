@@ -1,0 +1,19 @@
+node: spike-answer
+kind: spike
+id: spike-302
+intent: intent-004
+resolves: intent-004#q2
+
+answer: |
+  A POC confirmou: o support escuta `login:step-failed`, mantém um contador por sessão e dispara um
+  handler ao atingir N falhas. Contrato de evento definido: canal `login`, mensagem `step-failed`,
+  payload `{ field, attempts }`.
+
+  Viabilidade ≠ valor: se ABORDAR proativamente ajuda ou atrapalha a conclusão do login é uma
+  hipótese de PRODUTO — não se resolve aqui → vira um experiment em intent dedicada.
+
+value-beyond-answer: |
+  A POC (o listener de contagem de falhas) está REGISTRADA no workspace: `poc/failure-listener.md`
+  (esboço + contrato de evento). `fate: promoted` → a delivery de ajuda sob demanda
+  (acme-mfe-support/deliv-230) a ABSORVE por referência (`from-spike: spike-302`) e productiza.
+  Nada é deletado — o conhecimento fica no repo.
