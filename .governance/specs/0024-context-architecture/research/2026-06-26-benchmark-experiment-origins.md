@@ -9,8 +9,7 @@ method: benchmark
 # Benchmark — origem dos experimentos (e o caminho no nosso framework)
 
 > Não-autoridade. Em divergência vencem `state.yml`, `tasks.md`, gates, Git/GitHub.
-> **Pergunta:** o experiment **só** nasce de modelagem-de-produto (jeito que eu via na ex-empresa), ou pode ser
-> **decidido durante o trabalho**? E o framework deve permitir isso sem virar rígido?
+> **Pergunta:** o experiment **só** nasce de modelagem-de-produto (jeito que eu via na ex-empresa), ou pode ser **decidido durante o trabalho**? E o framework deve permitir isso sem virar rígido?
 
 ## O que a indústria faz
 

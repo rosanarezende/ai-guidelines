@@ -12,5 +12,7 @@ entries: []
 #     # --- preenchidos no FECHO ---
 #     verdict: <a resposta em 1 linha — espelha o `verdict-inline` da intent (spike simples)>
 #     fate: <throwaway | promoted | parked> # destino da saída
+#     promoted-to: [<repo>/<work>, ...] # se promoted: os works que productizam a POC (1-N)
+#     raises: [<repo>/<prop-id>, ...]    # proposals levantados pelo spike (1-N)
 #     date: <YYYY-MM-DD>      # abertura
 #     closed-at: <YYYY-MM-DD> # fecho

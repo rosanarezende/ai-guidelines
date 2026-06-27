@@ -1,5 +1,7 @@
 # active-work.aggregate.yml — o BANCO (DERIVADO, regenerável): união cross-repo dos grafos publicados.
 # ids namespaceados <repo>/<id>. Inclui TODOS os trabalhos — com ou sem intent. NÃO é SSOT (os repos são).
+# ⚠️ PROVISÓRIO: mistura intent+works num arquivo só — não escala. Será redesenhado na rodada de system design dos
+# bancos (separar intents/works · banco de proposals na governança · grafos que se comunicam → bancos derivados).
 
 intents:
   - { id: intent-001, title: Revamp do onboarding, status: active }

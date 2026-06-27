@@ -201,10 +201,10 @@ Exemplos vivos **não ficam aqui** — moram em `_templates/`, `_archive/repo-si
 
 **Frentes de fundo (abertas, mas são trabalhos próprios — não desta rodada)**
 
-- ✅ **`spike` fechamento — RESOLVIDO (Parte 3):** `fate` (`throwaway`|`promoted`|`parked`); a POC durável persiste no workspace + `from-spike` absorve; o código jogável morre só **depois** de capturar a resposta. **Próxima iteração:** spike → `proposal` → **experiment** (a ideia de testar valor vira `proposal`; a **decisão de negócio** abre o experiment em intent dedicada).
+- ✅ **`spike` fechamento — RESOLVIDO (Parte 3):** `fate` (`throwaway`|`promoted`|`parked`); a POC durável persiste no workspace + `from-spike` absorve; o código jogável morre só **depois** de capturar a resposta. **Demonstrado:** spike → `proposal` (`prop-001`, levantada pelo `spike-302`, `promote-to: experiment`) → **experiment** (abre quando priorizada, em intent dedicada — a **decisão de negócio**).
 - 🔴 **`incident` — frente dedicada (owner 2026-06-25, com exemplo real):** desenhar (1) o **template simples/interativo** de registro; (2) o **destravamento com PRAZO** (prioridade de merge + bypass de CI que **expira** → apaga incêndio sem débito, `GG-0005`); (3) o **alerta** que garante o postmortem no prazo; (4) o postmortem **leve** o bastante pra ser feito. Princípio: **blameless** (o oposto do medo).
 - 🔴 **Conectar `proposal` ↔ backlog ↔ histórico** (owner 2026-06-25) — a entrada de ideias hoje está **espalhada**: `NEXT.md` (débitos/escopo por-spec), `insights`/PIT (percepções), o artefato `gap` (candidato a backlog) e o `roadmap/backlog.md` (canônico). O `proposal` parece ser a **entrada unificada** que alimenta o backlog → vira trabalho → `history`. Como amarrar tudo? **Backlogs externos = 2ª iteração** (não agora).
-- 🔴 **Identidade entre repos + banco + dashboards de valor** — fundacional/futuro. _(O `proposal` carrega `raised-by` — ex.: o `spike` de origem; essa **proveniência** alimenta os dashboards de liderança/stakeholder.)_
+- 🔴🔥 **Banco(s) — RODADA DEDICADA de system design (owner 2026-06-26):** o `active-work.aggregate` atual (intent **+** works num arquivo só) **não é sustentável**. Desenhar: **(a)** **separar** os bancos — um só de **intents**, um só de **works**; **(b)** um **banco de `proposals`** dedicado no meta-repo de governança (intake ≠ trabalho); **(c)** o modelo de **grafos que se comunicam** (grafo por repo + grafo de governança → bancos **derivados**) que escale de verdade — 1 arquivo agregado não escala; **(d)** identidade cross-repo + a proveniência (`raised-by`/`from-spike`/`promoted-to`/`raises`, todas **1-N**) que alimenta dashboards de valor. _(o banco atual é **provisório** até esta rodada.)_
 
 ---
 
@@ -272,7 +272,7 @@ definem** (e não se versionam/citam). Modelo vivo, não-autoridade.
 
 **Aberto (Parte 2):** só os **2 sabores de `depends-on`** (plataforma/versão × entrega — único da Lente 3) + os **⚠️ de templates** (status-por-kind · severity PT×EN).
 
-**Frentes de fundo (trabalhos próprios, não desta rodada):** `incident` dedicada (template + bypass-com-prazo + alerta + postmortem) · conectar `proposal`↔backlog↔history · **adapters** (Jira/Linear/Azure — adoção incremental) · identidade cross-repo + banco + dashboards de valor.
+**Frentes de fundo (trabalhos próprios, não desta rodada):** `incident` dedicada (template + bypass-com-prazo + alerta + postmortem) · conectar `proposal`↔backlog↔history · **adapters** (Jira/Linear/Azure — adoção incremental) · **banco(s): rodada dedicada de system design** (separar intents/works · banco de proposals na governança · grafos comunicantes) · identidade cross-repo + dashboards de valor.
 
 **Contexto (artefatos):** `_templates/` (moldes v0 + `intent.yml`) · `../assets/` (diagramas) · research: `2026-06-26-cross-repo-feature-graph.md` (cross-repo + backend plugável) · `2026-06-26-benchmark-intent-vs-standalone-work.md` (benchmark) · **`_org-simulation/`** (simulação — 7 repos + meta-repo `acme-governance` com intents `.yml`/banco/pastas-de-BU; login materializado spike-first; template da intent refinado pra `.yml`; retrospectiva por-repo em curso) · `_archive/repo-simulation-v1/` · `2026-06-24-decided-g25-work-flow-model.md` (D1–D9) · `2026-06-24-governed-work-flow-model.md` (§5 ligações).
 

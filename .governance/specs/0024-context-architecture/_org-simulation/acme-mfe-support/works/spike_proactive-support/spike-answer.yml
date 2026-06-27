@@ -10,7 +10,8 @@ answer: |
   payload `{ field, attempts }`.
 
   Viabilidade ≠ valor: se ABORDAR proativamente ajuda ou atrapalha a conclusão do login é uma
-  hipótese de PRODUTO — não se resolve aqui → vira um experiment em intent dedicada.
+  hipótese de PRODUTO — não se resolve aqui. A ideia foi PARKEADA como `prop-001` (proposal,
+  `promote-to: experiment`) → quando priorizada, abre um experiment em intent dedicada.
 
 value-beyond-answer: |
   A POC (o listener de contagem de falhas) está REGISTRADA no workspace: `poc/failure-listener.md`

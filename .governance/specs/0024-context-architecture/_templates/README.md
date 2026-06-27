@@ -51,8 +51,8 @@
 
 **Ferramenta de intake (não é tipo)**
 
-| `proposal.yml` | captura ideia/problema → triagem → promove/descarta → backlog |
-| -------------- | ------------------------------------------------------------- |
+| `registry/proposal.yml` | captura ideia/problema → triagem → promove/descarta → backlog |
+| ----------------------- | ------------------------------------------------------------- |
 
 ## Mudanças desta rodada (vs antes)
 

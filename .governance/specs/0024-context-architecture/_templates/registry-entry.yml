@@ -5,8 +5,10 @@ kind: <delivery | experiment | spike | incident | fix | patch>
 title: <curto>
 status: <draft | active | closed | done> # ⚠️ o vocabulário de status POR KIND ainda não está definido (iterar)
 workspace: works/<kind>_<slug>/ # só quando a densidade pede artefatos próprios; senão, omitir
-# arestas (opcionais):
-promotes-to: <id>
-coordinates-with: <repo/id>
-spawned-by: <id>
+# arestas (opcionais; multi-valoradas = LISTAS 1-N):
+promotes-to: [<id>, ...] # 1-N
+coordinates-with: [<repo/id>, ...] # 1-N (entre repos)
+depends-on: [<repo/id>, ...] # 1-N (entre repos)
+spawned-by: <id> # origem (1)
+# (arestas por-kind: spike → promoted-to/raises 1-N; delivery/fix/patch → from-spike)
 date: <YYYY-MM-DD>
