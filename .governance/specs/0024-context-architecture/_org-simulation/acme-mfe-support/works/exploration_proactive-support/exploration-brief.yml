@@ -1,6 +1,6 @@
 node: work-brief
-kind: spike
-id: spike-302
+kind: exploration
+id: exploration-302
 intent: intent-004
 timebox: 3d
 references: []
@@ -11,7 +11,7 @@ objective:
   success-signal: prova de que o canal pub/sub conta as falhas e dispara o handler
 
 unblocks-decision: se o suporte proativo entra como delivery ou vira experiment (decisão de produto)
-output: a RESPOSTA + a POC do listener → fecha em spike-answer
+output: a RESPOSTA + a POC do listener → fecha em exploration-answer
 
 details: |
   Hipótese técnica: o login MFE emite `login:step-failed` a cada falha; o support escuta, mantém um

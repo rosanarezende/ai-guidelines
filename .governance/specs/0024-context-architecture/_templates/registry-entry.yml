@@ -1,8 +1,8 @@
 # registry/registry-entry.yml — SCHEMA BASE de uma entrada de índice (não é um registry de uso).
-# CRIE um registry/<kind>.yml (delivery/experiment/spike/incident/fix/patch) com base neste;
+# CRIE um registry/<kind>.yml (delivery/experiment/exploration/incident/fix/patch) com base neste;
 # documente APENAS os campos próprios do kind (lista no fim). Os comuns não têm extras → só `entries: []`.
-id: <kind-prefix>-NNN # deliv | exp | spike | inc | patch | fix
-kind: <delivery | experiment | spike | incident | fix | patch>
+id: <kind-prefix>-NNN # deliv | exp | exploration | inc | patch | fix
+kind: <delivery | experiment | exploration | incident | fix | patch>
 title: <curto>
 status: <draft | active | done> # progresso PRÓPRIO do trabalho; "bloqueado"/"pausado" são DERIVADOS (de blocked-by/pausa), não status guardados
 workspace: works/<kind>_<slug>/ # só quando a densidade pede artefatos próprios; senão, omitir
@@ -16,7 +16,7 @@ blocks: [<repo/id>, ...] # bloqueia estes (reverso de blocked-by; basta anotar 1
 depends-on: [<repo/id>, ...] # depende de PLATAFORMA/VERSÃO/build
 coordinates-with: [<repo/id>, ...] # compartilha um CONTRATO
 # · proveniência (de onde veio ⟷ pra onde leva):
-derives-from: [<repo/id>, ...] # DE ONDE veio / no que se baseia: POC de spike, proposal promovido, trabalho anterior (funde spawned-by + from-spike)
+derives-from: [<repo/id>, ...] # DE ONDE veio / no que se baseia: POC de exploration, proposal promovido, trabalho anterior (funde spawned-by + from-exploration)
 results-in: [<id>, ...] # PRA ONDE leva (reverso de derives-from; basta anotar 1 lado)
 # As DEMAIS arestas da Lente 3 NÃO moram aqui — ancoradas noutro nó: breaks-into/resolves → intent · raises → proposal · supported-by/supersedes → decision. Mapa completo: "Casa de cada aresta" na Lente 3 do tracker.
 
@@ -27,7 +27,7 @@ closed-by: <ref ao artefato de fecho> # ref ao answer/outcome/postmortem (quando
 
 # campos PRÓPRIOS por kind (documente só o extra ao criar o registry/<kind>.yml):
 #   delivery · fix · patch → nenhum (só a base)
-#   experiment            → outcome (won | lost | inconclusive) = disposição terminal (paralelo a spike→fate)
+#   experiment            → outcome (won | lost | inconclusive) = disposição terminal (paralelo a exploration→fate)
 #   incident              → severity (low|medium|high|critical) · status (mitigating|mitigated|resolved) · merge-priority-until · ci-bypass-until
-#   spike                 → fate (throwaway | promoted | parked) = destino do output. Conteúdo (question/verdict/timebox) mora no spike-brief/spike-answer; resolves/raises são DERIVADOS (intent.open-question.spike · proposal.raised-by) — não guardar aqui.
+#   exploration                 → fate (throwaway | promoted | parked) = destino do output. Conteúdo (question/verdict/timebox) mora no exploration-brief/exploration-answer; resolves/raises são DERIVADOS (intent.open-question.exploration · proposal.raised-by) — não guardar aqui.
 #   proposal              → NÃO é work: schema próprio em registry/proposal.yml

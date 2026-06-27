@@ -25,19 +25,19 @@ references: # type: modeling | spec | design | benchmark | dashboard | alignment
 target-repos: # repos tocados (≠ breaks-into)
   - <repo>
 
-# o APRENDIZADO da intent: cada incerteza → 1 spike; a resposta = `verdict-inline` (spike simples) ou o `spike-answer` (POC, no arquivo do spike, consumível por grafo)
+# o APRENDIZADO da intent: cada incerteza → 1 exploration; a resposta = `verdict-inline` (exploration simples) ou o `exploration-answer` (POC, no arquivo do exploration, consumível por grafo)
 open-questions:
   - id: q1
-    question: "<incerteza — IDÊNTICA ao campo `question` do spike no registry>"
-    spike: <repo>/<spike-id> # quem investiga
-    verdict-inline: # a resposta em 1 linha (espelha o `verdict` do spike no registry); no POC o detalhe mora também no `spike-answer`
+    question: "<incerteza — IDÊNTICA ao campo `question` do exploration no registry>"
+    exploration: <repo>/<exploration-id> # quem investiga
+    verdict-inline: # a resposta em 1 linha (espelha o `verdict` do exploration no registry); no POC o detalhe mora também no `exploration-answer`
     unlocks: # (na retroalimentação) os trabalhos que a resposta destrava → explica o breaks-into abaixo
       - <repo>/<work-id>
 
 contracts:
   known: # estáveis no t0 → as deliveries já podem trabalhar contra
     - "<contrato> — <repo>"
-  pending-spike: # dependem de um spike
+  pending-exploration: # dependem de um exploration
     - "<contrato> — <repo> (qN)"
 
 breaks-into: # VISTA derivada dos works, AGRUPADA por status (a intent mostra plano + estado + caminho crítico num lugar); cresce no tempo

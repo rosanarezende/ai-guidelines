@@ -1,4 +1,4 @@
-# \_templates — os moldes do modelo (6 tipos + a ferramenta de intake), adaptados às 3 lentes
+# \_templates — os moldes do modelo (5 trabalho + 2 ferramentas), adaptados às 4 lentes
 
 > Coletânea **canônica** dos moldes, adaptada às decisões do `research/2026-06-25-work-graph-model.md`.
 > Não-autoridade (o template vivo real, pós-DEC, vai para `.core/governance/templates/`).
@@ -28,19 +28,19 @@ _templates/
 > Mesmo nó no grafo (abertura uniforme), forma sob medida por kind. Ao escolher o tipo, o molde já vem
 > direcionado — e a pessoa logo percebe se escolheu o caminho errado.
 
-| Molde                  | Abre         | Forma                                                         |
-| ---------------------- | ------------ | ------------------------------------------------------------- |
-| `delivery-brief.yml`   | `delivery`   | kernel + espinha + corpo (sealed)                             |
-| `experiment-brief.yml` | `experiment` | kernel + ⊛ hipótese/métricas (sealed — pré-registro)          |
-| `spike-brief.yml`      | `spike`      | kernel + ⊛ timebox; saída = a **resposta**                    |
-| `incident-brief.yml`   | `incident`   | registro rápido (severidade + status) + bypass-com-prazo      |
-| `fix-brief.yml`        | `fix`        | simples — sintoma (o usuário vê) → esperado → origem → pronto |
-| `patch-brief.yml`      | `patch`      | simples — o-quê (invisível) → por quê → pronto                |
+| Molde                   | Abre          | Forma                                                         |
+| ----------------------- | ------------- | ------------------------------------------------------------- |
+| `delivery-brief.yml`    | `delivery`    | kernel + espinha + corpo (sealed)                             |
+| `experiment-brief.yml`  | `experiment`  | kernel + ⊛ hipótese/métricas (sealed — pré-registro)          |
+| `exploration-brief.yml` | `exploration` | kernel + ⊛ timebox; saída = a **resposta**                    |
+| `incident-brief.yml`    | `incident`    | registro rápido (severidade + status) + bypass-com-prazo      |
+| `fix-brief.yml`         | `fix`         | simples — sintoma (o usuário vê) → esperado → origem → pronto |
+| `patch-brief.yml`       | `patch`       | simples — o-quê (invisível) → por quê → pronto                |
 
 **Índice (projeção, não abertura)**
 
-| `registry-entry.yml` | **schema BASE** da entrada de índice → crie `registry/<kind>.yml` (no repo) a partir dele (só os extras por kind). Só `proposal` tem template próprio (intake, não é work); `spike` usa a base + `fate` (conteúdo vai pro brief/answer). |
-| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `registry-entry.yml` | **schema BASE** da entrada de índice → crie `registry/<kind>.yml` (no repo) a partir dele (só os extras por kind). Só `proposal` tem template próprio (intake, não é work); `exploration` usa a base + `fate` (conteúdo vai pro brief/answer). |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 
 **Deliberação (q/r/d) — pasta `deliberation/`**
 
@@ -54,12 +54,12 @@ _templates/
 
 **Fecho (polimórfico por tipo)**
 
-| Molde                    | Fecha                                                         |
-| ------------------------ | ------------------------------------------------------------- |
-| `experiment-outcome.md`  | o `experiment` (won/lost, **pós-merge**)                      |
-| `spike-answer.md`        | o `spike` (a **resposta**; o código de POC **não** dá merge)  |
-| `incident-postmortem.md` | o `incident` (causa-raiz + prevenção, **pós-merge**)          |
-| _(gate)_                 | o `delivery` — molde canônico em `.core/governance/templates` |
+| Molde                    | Fecha                                                              |
+| ------------------------ | ------------------------------------------------------------------ |
+| `experiment-outcome.md`  | o `experiment` (won/lost, **pós-merge**)                           |
+| `exploration-answer.md`  | o `exploration` (a **resposta**; o código de POC **não** dá merge) |
+| `incident-postmortem.md` | o `incident` (causa-raiz + prevenção, **pós-merge**)               |
+| _(gate)_                 | o `delivery` — molde canônico em `.core/governance/templates`      |
 
 **Ferramenta de intake (não é tipo)**
 
@@ -69,14 +69,14 @@ _templates/
 ## Mudanças desta rodada (vs antes)
 
 - 🆕 **Camada `intent`** (`intent.yml`) acima dos trabalhos — o `node` dos briefs passou de `intent-brief` → `work-brief` (intent é a camada de cima; o que era "intent-brief" era só o `<kind>-brief`).
-- 🔀 **Abertura virou 6 moldes** `<kind>-brief.md` (todos `node: work-brief`) — aposentados `intent-brief.md`
+- 🔀 **Abertura = moldes** `<kind>-brief.yml` (todos `node: work-brief`) — aposentados `intent-brief.md`
   (genérico) e `incident.md` (bundle); `fix`/`patch` ganham brief próprio (não "abrem como registry" — isso era o
   pensamento Virtual, que caiu).
 - ✂️ **`incident` separado em abertura × fechamento:** `incident-brief.md` (registro) + `incident-postmortem.md`
-  (causa-raiz). Simétrico a experiment-outcome / spike-answer.
+  (causa-raiz). Simétrico a experiment-outcome / exploration-answer.
 - ✏️ **`registry-entry.yml`** reposicionado como **índice** (entrada de `registry/<kind>.yml`), não abertura.
 - ✅ **Mantidos:** `question` · `research` · `decision` · `decision-brief` · `state` · `experiment-outcome` ·
-  `spike-answer` · `proposal`.
+  `exploration-answer` · `proposal`.
 - 📁 **Reorg de pastas (referência ≠ conteúdo):** `registry-entry`/`proposal` subiram pra raiz; `briefs/` + `closings/` separam o **conteúdo por kind**; a pasta `registry/` saiu. **Briefs viraram conteúdo puro** — as arestas (`intent`, `closes-with`) migraram pro `registry`.
 
 ## Validação dos templates (tracker)
@@ -94,20 +94,20 @@ _templates/
 
 ### `briefs/` — conteúdo de abertura (sem arestas)
 
-| Molde                  | Status | Nota / o que falta confirmar                                                                     |
-| ---------------------- | ------ | ------------------------------------------------------------------------------------------------ |
-| `delivery-brief.yml`   | ✅     | enxugado (`out-of-scope` · `done-when`); conteúdo puro.                                          |
-| `spike-brief.yml`      | ✅     | `question` no topo (= open-question da intent) + timebox + approach/success-signal.              |
-| `experiment-brief.yml` | 🔶     | falta rever ⊛ hipótese/métricas + `sealed`/pré-registro.                                         |
-| `incident-brief.yml`   | 🔶     | enums EN; ⚠️ tirar campos de ÍNDICE (`severity`/`status`/datas) → registry (frente do incident). |
-| `fix-brief.yml`        | 🔶     | confirmar sintoma→esperado→origem→pronto.                                                        |
-| `patch-brief.yml`      | 🔶     | confirmar o-quê→por quê→pronto.                                                                  |
+| Molde                   | Status | Nota / o que falta confirmar                                                                     |
+| ----------------------- | ------ | ------------------------------------------------------------------------------------------------ |
+| `delivery-brief.yml`    | ✅     | enxugado (`out-of-scope` · `done-when`); conteúdo puro.                                          |
+| `exploration-brief.yml` | ✅     | `question` no topo (= open-question da intent) + timebox + approach/success-signal.              |
+| `experiment-brief.yml`  | 🔶     | falta rever ⊛ hipótese/métricas + `sealed`/pré-registro.                                         |
+| `incident-brief.yml`    | 🔶     | enums EN; ⚠️ tirar campos de ÍNDICE (`severity`/`status`/datas) → registry (frente do incident). |
+| `fix-brief.yml`         | 🔶     | confirmar sintoma→esperado→origem→pronto.                                                        |
+| `patch-brief.yml`       | 🔶     | confirmar o-quê→por quê→pronto.                                                                  |
 
 ### `closings/` — conteúdo de fecho (sem arestas)
 
 | Molde                    | Status | Nota / o que falta confirmar                                                                  |
 | ------------------------ | ------ | --------------------------------------------------------------------------------------------- |
-| `spike-answer.md`        | ✅     | `verdict`/evidência/recomendação + `fate`; conteúdo puro (vínculo = `closed-by` do registry). |
+| `exploration-answer.md`  | ✅     | `verdict`/evidência/recomendação + `fate`; conteúdo puro (vínculo = `closed-by` do registry). |
 | `experiment-outcome.md`  | 🔶     | won→`results-in`; ⚠️ ref `brief` stale + `outcome` duplicado (validação do experiment).       |
 | `incident-postmortem.md` | ❓     | bloqueado pela **frente do incident**.                                                        |
 

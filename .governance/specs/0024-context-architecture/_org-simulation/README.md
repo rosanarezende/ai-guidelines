@@ -28,6 +28,6 @@
 - Estados mistos: **em andamento** (`active`) e **finalizado** (`done`).
 - O **banco** agrega **tudo** (com ou sem intent) com ids namespaceados `<repo>/<id>`.
 
-> **Iteração 1 — `intent-004` (login system), modelagem spike-first:** a intent nasce com 2 perguntas → 2
-> spikes (form validado no DS? · suporte proativo viável?). As **deliveries nascem só após a retroalimentação**
+> **Iteração 1 — `intent-004` (login system), modelagem exploration-first:** a intent nasce com 2 perguntas → 2
+> explorations (form validado no DS? · suporte proativo viável?). As **deliveries nascem só após a retroalimentação**
 > (não pré-quebradas). `acme-mfe-support` é **repo próprio** (segue o diagrama, não o growth).

@@ -3,7 +3,7 @@ node: research
 id: res-NNN
 investigates:
   - q-NNN
-method: <benchmark | análise | scan de código | dogfood> # ⚠️ tirei "spike-PoC": spike é TIPO de trabalho, não método de research (iterar)
+method: <benchmark | análise | scan de código | dogfood> # ⚠️ tirei "exploration-PoC": exploration é FERRAMENTA (não tipo), não método de research (iterar)
 ---
 
 # res-NNN — <título da investigação>

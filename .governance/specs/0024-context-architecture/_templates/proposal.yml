@@ -4,7 +4,7 @@ entries: []
 # exemplo:
 #   - id: prop-001
 #     what: "<a ideia ou problema — 1-2 linhas, acionável>"
-#     raised-by: <repo>/<work-id> # de onde surgiu (spike/delivery/…): a proveniência
+#     raised-by: <repo>/<work-id> # de onde surgiu (exploration/delivery/…): a proveniência
 #     owner: "<@quem TRIA — o responsável por decidir promover/descartar; papel ou pessoa>"
 #     status: <open | promoted | dismissed> # disposição OBRIGATÓRIA (não fica em aberto em silêncio)
 #     # --- ajuda a TRIAGEM / priorização (estilo ICE) ---
@@ -14,7 +14,7 @@ entries: []
 #     effort: <low | medium | high> # custo estimado
 #     evidence: [<link/ref>, …] # dado/print/doc que sustenta a ideia
 #     # --- na disposição ---
-#     promote-to: <delivery | experiment | spike | patch | fix> # se promovida, o tipo que vira
+#     promote-to: <delivery | experiment | exploration | patch | fix> # se promovida, o tipo que vira
 #     opens-intent: <intent-id> # se promove pra experiment/objetivo → a intent aberta (às vezes paralela)
 #     discard-reason: "<se descartada, por quê>"
 #     date: <YYYY-MM-DD>

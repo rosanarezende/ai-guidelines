@@ -7,12 +7,12 @@ references: []
 
 objective:
   goal: o MFE de ajuda/suporte sob demanda (o usuário aciona quando quer)
-  approach: MFE em acme-mfe-support; productiza o listener de falhas da POC do spike-302 (base do proativo futuro)
+  approach: MFE em acme-mfe-support; productiza o listener de falhas da POC do exploration-302 (base do proativo futuro)
   done-when: ajuda acionável sob demanda atrás de flag; o listener de login:step-failed integrado
 
 context: parte do login (intent-004); destravado por q2 (suporte proativo viável)
 out-of-scope: o suporte PROATIVO (abordar após N falhas) é experiment dedicado (prop-001), não esta delivery
-requirements: consome o DS (deliv-210); absorve o listener da POC (derives-from spike-302); escuta login:step-failed do login MFE
+requirements: consome o DS (deliv-210); absorve o listener da POC (derives-from exploration-302); escuta login:step-failed do login MFE
 
 details: |
   Entrega só a ajuda SOB DEMANDA + a base (o listener). O proativo A/B fica pro experiment (prop-001).

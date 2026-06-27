@@ -1,6 +1,6 @@
-# registry/spike.yml — acme-design-system · índice kind=spike (→ active-work).
+# registry/exploration.yml — acme-design-system · índice kind=exploration (→ active-work).
 entries:
-  - id: spike-301
+  - id: exploration-301
     question: "o design system tem um formulário dedicado com validação (email/site/telefone), ou cada MFE reimplementa?"
     status: done
     intent: intent-004 # login system

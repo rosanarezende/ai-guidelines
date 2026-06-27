@@ -1,7 +1,7 @@
 node: work-brief
-kind: spike
-id: spike-NNN
-question: # ⊛ a PERGUNTA — texto IDÊNTICO à open-question da intent (o spike-brief é a casa do conteúdo do spike)
+kind: exploration
+id: exploration-NNN
+question: # ⊛ a PERGUNTA — texto IDÊNTICO à open-question da intent (o exploration-brief é a casa do conteúdo do exploration)
 timebox: # ⊛ prazo
 references: []
 
@@ -11,7 +11,7 @@ objective:
   success-signal: # o que conta como resposta
 
 unblocks-decision: # a decisão que isto destrava
-output: # a RESPOSTA (não o código) → fecha em spike-answer
+output: # a RESPOSTA (não o código) → fecha em exploration-answer
 
 details: |
   <nuance opcional>

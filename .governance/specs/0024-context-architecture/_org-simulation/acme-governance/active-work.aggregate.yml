@@ -17,9 +17,9 @@ works: # todos os trabalhos publicados pelos repos
   - { id: acme-api/deliv-050, kind: delivery, status: active, intent: intent-002 }
   - { id: acme-mfe-growth/exp-140, kind: experiment, status: active, intent: intent-002 }
   - { id: acme-design-system/deliv-130, kind: delivery, status: done, intent: intent-003 }
-  # --- intent-004 (login system) — spikes PRIMEIRO; deliveries entram pós-retroalimentação ---
-  - { id: acme-design-system/spike-301, kind: spike, status: done, intent: intent-004 }
-  - { id: acme-mfe-support/spike-302, kind: spike, status: done, intent: intent-004 }
+  # --- intent-004 (login system) — explorations PRIMEIRO; deliveries entram pós-retroalimentação ---
+  - { id: acme-design-system/exploration-301, kind: exploration, status: done, intent: intent-004 }
+  - { id: acme-mfe-support/exploration-302, kind: exploration, status: done, intent: intent-004 }
   - { id: acme-design-system/deliv-210, kind: delivery, status: active, intent: intent-004 }
   - { id: acme-api/deliv-201, kind: delivery, status: active, intent: intent-004 }
   - { id: acme-mfe-identity/deliv-220, kind: delivery, status: draft, intent: intent-004 } # bloqueada

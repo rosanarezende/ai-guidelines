@@ -8,8 +8,8 @@ status: active
 
 objective:
   goal: novo fluxo de login, com ajuda/suporte sob demanda e proativa (aborda quem falha repetidas vezes)
-  success-signal: login navegável atrás de flag + os 2 spikes respondidos antes de quebrar as deliveries
-  out-of-scope: as deliveries só nascem após a retroalimentação dos spikes
+  success-signal: login navegável atrás de flag + os 2 explorations respondidos antes de quebrar as deliveries
+  out-of-scope: as deliveries só nascem após a retroalimentação dos explorations
 
 references:
   - type: modeling
@@ -31,31 +31,31 @@ target-repos:
 open-questions:
   - id: q1
     question: "o design system tem um formulário dedicado com validação (email/site/telefone), ou cada MFE reimplementa?"
-    spike: acme-design-system/spike-301
+    exploration: acme-design-system/exploration-301
     verdict-inline: "não — o DS não tem form validado; cada MFE reimplementa hoje → precisa criar o componente"
-    unlocks: # q1 RESPONDIDA (spike-301 done) → destrava
+    unlocks: # q1 RESPONDIDA (exploration-301 done) → destrava
       - acme-design-system/deliv-210 # criar o componente de form validado
       - acme-mfe-identity/deliv-220 # login MFE (consome o form)
   - id: q2
     question: "suporte proativo é viável? (detectar N falhas de login pelo canal de comunicação e abordar o usuário)"
-    spike: acme-mfe-support/spike-302
+    exploration: acme-mfe-support/exploration-302
     verdict-inline: "viável (pub/sub conta as falhas e dispara após N); SE proativo ajuda é hipótese de produto → experiment dedicado"
-    unlocks: # q2 RESPONDIDA (spike-302 done) → destrava
+    unlocks: # q2 RESPONDIDA (exploration-302 done) → destrava
       - acme-mfe-support/deliv-230 # ajuda sob demanda (absorve a POC do listener)
       # proativo A/B = experiment futuro, em intent dedicada (não entra aqui)
 
 contracts:
   known:
     - "auth endpoints (schema de sessão/token) — acme-api"
-    - "componente de formulário validado — acme-design-system (resolvido por q1/spike-301)"
-    - "evento de comunicação MFE↔MFE p/ suporte proativo (canal `login`:`step-failed`, payload {field,attempts}) — acme-mfe-identity ↔ acme-mfe-support (resolvido por q2/spike-302)"
-  pending-spike: [] # todos os spikes respondidos → pronto pra quebrar as deliveries
+    - "componente de formulário validado — acme-design-system (resolvido por q1/exploration-301)"
+    - "evento de comunicação MFE↔MFE p/ suporte proativo (canal `login`:`step-failed`, payload {field,attempts}) — acme-mfe-identity ↔ acme-mfe-support (resolvido por q2/exploration-302)"
+  pending-exploration: [] # todos os explorations respondidos → pronto pra quebrar as deliveries
 
 # breaks-into — VISTA derivada dos works, AGRUPADA por status (a intent mostra plano + estado + caminho crítico num lugar só).
 breaks-into:
   done:
-    - acme-design-system/spike-301
-    - acme-mfe-support/spike-302
+    - acme-design-system/exploration-301
+    - acme-mfe-support/exploration-302
   active:
     - acme-api/deliv-201 # auth (contrato known no t0)
     - acme-design-system/deliv-210 # form (destravado por q1)

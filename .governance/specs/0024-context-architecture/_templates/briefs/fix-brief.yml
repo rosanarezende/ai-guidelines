@@ -9,4 +9,4 @@ origin: # report cliente/interno · percebido durante X
 done-when: # corrigido + verificado
 
 details: |
-  <nuance opcional — ex.: se crescer vira spike/delivery>
+  <nuance opcional — ex.: se crescer vira exploration/delivery>

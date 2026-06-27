@@ -1,15 +1,15 @@
-# registry/spike.yml — acme-mfe-support · índice kind=spike (→ active-work).
+# registry/exploration.yml — acme-mfe-support · índice kind=exploration (→ active-work).
 entries:
-  - id: spike-302
+  - id: exploration-302
     question: "suporte proativo é viável? (detectar N falhas de login pelo canal de comunicação e abordar o usuário)"
     status: done
     intent: intent-004 # login system
     resolves: intent-004#q2
     timebox: 3d
-    workspace: works/spike_proactive-support/ # DENSO (POC)
+    workspace: works/exploration_proactive-support/ # DENSO (POC)
     verdict: "viável — o canal pub/sub conta as falhas e dispara após N; SE proativo ajuda vs atrapalha é hipótese de produto → experiment dedicado"
     fate: promoted # o listener (POC) tem casa → os works que o productizam declaram `derives-from`
-    raises: # 1-N: proposals levantados pelo spike
+    raises: # 1-N: proposals levantados pelo exploration
       - acme-mfe-support/prop-001 # a ideia do proativo A/B virou proposal (não se perde)
     date: 2026-06-26
     closed-at: 2026-06-28
