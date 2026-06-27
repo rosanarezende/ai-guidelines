@@ -80,7 +80,7 @@ _templates/
 - ✅ **Mantidos:** `question` · `research` · `decision` · `decision-brief` · `state` · `experiment-outcome` ·
   `exploration-answer` · `proposal`.
 - 📁 **Reorg de pastas (referência ≠ conteúdo):** `registry-entry`/`proposal` subiram pra raiz; `briefs/` + `closings/` separam o **conteúdo por kind**; a pasta `registry/` saiu. **Briefs viraram conteúdo puro** — as arestas (`intent`, `closes-with`) migraram pro `registry`.
-- 🔗 **Amarra intent↔exploration migrada (forma v2, validada na sim):** a **exploration** ancora a aresta **`answers: intent#qN`**; a intent **deriva** `answered-by`/`status`/`verdict` (**A+**, visível + check anti-drift); `contracts` viraram `pending:[{name,awaits}]`; **`unlocks` saiu** (o destrave é derivado). Novo `exploration.yml` (registry próprio); briefs/answers **referenciam** o id (`exploration: <id>`), não duplicam.
+- 🔗 **Amarra intent↔exploration migrada (forma v2, validada na sim):** a **exploration** ancora a aresta **`answers: intent#qN`**; a intent **deriva** `answered-by`/`status`/`verdict` (**A+**, visível + check anti-drift); `contracts` viraram **uma lista** `[{name, awaits?}]` (known/pending derivado); **`unlocks` saiu** (o destrave é derivado). Novo `exploration.yml` (registry próprio); briefs/answers **referenciam** o id (`exploration: <id>`), não duplicam.
 
 ## Validação dos templates (tracker)
 
@@ -88,13 +88,13 @@ _templates/
 
 ### Raiz — estrutura / índice / referência
 
-| Molde                | Status | Nota / o que falta confirmar                                                                                                                                      |
-| -------------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `intent.yml`         | ✅     | forma v2: open-questions (`answered-by`/`status`/`verdict` **A+**) + contracts (`pending:[{name,awaits}]`/`known`) + breaks-into agrupado + references + details. |
-| `registry-entry.yml` | ✅     | base + arestas agrupadas + status próprio + gerais (`intent`/`closed-at`/`closed-by`) + extras por kind (exploration → `fate`+**`answers`**).                     |
-| `exploration.yml`    | ✅     | registry próprio da exploration: base + **`answers`** (ancora a aresta) + `fate`; não fica "blocked" (bloqueio vira a resposta).                                  |
-| `proposal.yml`       | ✅     | triagem (ICE) + owner + status EN.                                                                                                                                |
-| `state.yml`          | ❓     | **bloqueado pela Lente 2** (`stage: deciding \| executing` ainda aberto).                                                                                         |
+| Molde                | Status | Nota / o que falta confirmar                                                                                                                                                      |
+| -------------------- | ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `intent.yml`         | ✅     | forma v2: open-questions (`answered-by`/`status`/`verdict` **A+**) + contracts (lista `[{name, awaits?}]`, known/pending derivado) + breaks-into agrupado + references + details. |
+| `registry-entry.yml` | ✅     | base + arestas agrupadas + status próprio + gerais (`intent`/`closed-at`/`closed-by`) + extras por kind (exploration → `fate`+**`answers`**).                                     |
+| `exploration.yml`    | ✅     | registry próprio da exploration: base + **`answers`** (ancora a aresta) + `fate`; não fica "blocked" (bloqueio vira a resposta).                                                  |
+| `proposal.yml`       | ✅     | triagem (ICE) + owner + status EN.                                                                                                                                                |
+| `state.yml`          | ❓     | **bloqueado pela Lente 2** (`stage: deciding \| executing` ainda aberto).                                                                                                         |
 
 ### `briefs/` — conteúdo de abertura (sem arestas)
 

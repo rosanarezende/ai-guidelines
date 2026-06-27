@@ -26,15 +26,12 @@ open-questions: # as incertezas do cadastro → cada uma DISPARA uma exploration
     question: "o design system tem um formulário validado (email/site/telefone), ou cada MFE reimplementa?"
     # ↓ GERADO (A+) do `answers` da exploration — VISÍVEL aqui (as 2 pontas se referenciam), mas NÃO se edita à mão; um check garante que bate:
     answered-by: acme-design-system/exploration-001 # a exploration que responde q1
-    status: open # GERADO: open → resolved quando a exploration fecha (done)
-    verdict: null # GERADO: espelha o verdict da exploration-answer quando houver
+    status: resolved # GERADO: a exploration fechou (done) → q1 resolveu
+    verdict: "não — o DS não tem form validado; cada MFE reimplementa hoje → precisa criar o componente" # GERADO: espelha o verdict do exploration-answer
 
-# ===== contratos que a feature coordena (governança) =====
+# ===== contratos que a feature coordena — UMA lista; o status known/pending é DERIVADO (sem baldes) =====
 contracts:
-  # um contrato PENDENTE espera uma open-question → bloqueia quem depende dele até resolver:
-  pending:
-    - { name: form-component, awaits: q1 } # vira `known` quando q1 resolver → destrava as deliveries do form
-  known: []
+  - { name: form-component, awaits: q1 } # pending até q1 resolver; aí known (DERIVADO) → destrava as deliveries do form
 
 # breaks-into = VISTA derivada das work-registries (no t0 só existe a exploration disparada):
 breaks-into:

@@ -34,11 +34,11 @@ open-questions:
     status: open # GERADO: open → resolved quando a exploration fecha (done)
     verdict: # GERADO: espelha o verdict do exploration-answer quando houver
 
+# contratos que a feature coordena — UMA lista; o status known/pending é DERIVADO (sem baldes):
+#   sem `awaits` = known no t0 · com `awaits: qN` = known quando a question resolve (→ destrava as deliveries).
 contracts:
-  # um contrato PENDING espera uma open-question → bloqueia quem depende dele até resolver:
-  pending:
-    - { name: <contrato>, awaits: q1 } # vira `known` (DERIVADO) quando a question resolve → destrava as deliveries
-  known: [] # estáveis no t0 → as deliveries já trabalham contra (cada uma referencia o contrato via coordinates-with)
+  - { name: <contrato-t0> } # known no t0 → as deliveries já trabalham contra (via coordinates-with)
+  - { name: <contrato>, awaits: q1 } # pending até q1 resolver; aí known (DERIVADO)
 
 breaks-into: # VISTA derivada dos works, AGRUPADA por status (a intent mostra plano + estado + caminho crítico num lugar); cresce no tempo
   done: [<repo>/<work-id>, ...]
