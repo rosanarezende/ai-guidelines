@@ -2,17 +2,24 @@
 import type { RegistryEntry, RepoProjection, WorkProjection, WorkKind } from "./types.ts";
 import { readYaml, readFrontmatter, fileExists } from "./io.ts";
 
-const KINDS: WorkKind[] = ["delivery", "experiment", "incident", "fix", "patch", "exploration"];
+const WORK_KINDS: WorkKind[] = ["delivery", "experiment", "incident", "fix", "patch"];
 
 export function deriveRepo(repo: string): RepoProjection {
   const works: WorkProjection[] = [];
-  for (const kind of KINDS) {
+  for (const kind of WORK_KINDS) {
     const registry = `${repo}/.governance/registry/${kind}.yml`;
     if (!fileExists(registry)) continue;
     const entries = readYaml<{ entries?: RegistryEntry[] }>(registry).entries ?? [];
     for (const entry of entries) works.push(projectWork(repo, kind, entry));
   }
-  return { repo, works };
+  // FERRAMENTA `exploration` (Lente 4): coleção PRÓPRIA, fora dos works
+  const explorations: WorkProjection[] = [];
+  const expReg = `${repo}/.governance/registry/exploration.yml`;
+  if (fileExists(expReg)) {
+    const entries = readYaml<{ entries?: RegistryEntry[] }>(expReg).entries ?? [];
+    for (const entry of entries) explorations.push(projectWork(repo, "exploration", entry));
+  }
+  return { repo, works, explorations };
 }
 
 function projectWork(repo: string, kind: WorkKind, entry: RegistryEntry): WorkProjection {

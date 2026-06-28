@@ -21,7 +21,7 @@ sealed: true
 
 ## Destino (`fate`)
 
-- **`promoted`** → a POC de valor persiste em `works/exploration_<slug>/poc/`; o trabalho que a produtiza declara `derives-from` apontando o exploration.
+- **`promoted`** → a POC de valor persiste em `explorations/<slug>_<num>/poc/`; o trabalho que a produtiza declara `derives-from` apontando o exploration.
 - **`throwaway`** → o código jogável morre **depois** de capturar esta resposta (não dá merge).
 - **`parked`** → guardado, sem ação agora.
 - pode **levantar** um `proposal` (lado `raised-by` do proposal) e **resolver** a open-question da intent.

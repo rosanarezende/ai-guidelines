@@ -7,10 +7,10 @@ entries:
     # ===== A AMARRA (a comunicação intent ↔ exploration) =====
     answers: acme-governance/intents/login_1#q1 # back-ref TIPADO: esta exploration responde à q1 da intent
     # (anota-se 1 lado: a exploration declara `answers`; a intent DERIVA "q1 answered-by form-validation_1")
-    workspace: works/exploration/form-validation_1/
+    workspace: explorations/form-validation_1/
     # ===== FECHO (simples: só a resposta, sem POC) =====
     fate: throwaway # só análise, sem código durável (destinos: throwaway | promoted | parked)
-    closed-by: works/exploration/form-validation_1/exploration-answer.md # o verdict (CONTEÚDO) mora aqui; o registry só REFERENCIA
+    closed-by: explorations/form-validation_1/exploration-answer.md # o verdict (CONTEÚDO) mora aqui; o registry só REFERENCIA
     closed-at: 2026-06-27
     created-at: 2026-06-27
     updated-at: 2026-06-27

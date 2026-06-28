@@ -7,7 +7,7 @@ title: <curto>
 status: <draft | active | done> # progresso PRÓPRIO; NASCE draft no breakdown; "bloqueado"/"pausado" são DERIVADOS (não guardados)
 assignee: <@quem | null> # quem ASSUMIU o trabalho. `active` EXIGE assignee + início real; sem assignee = draft (ready/blocked, esperando alguém pegar). Vale p/ TODO work, incl. exploration
 weight: <S | M | L | XL> # peso/tamanho do trabalho — p/ medir + o caminho crítico ponderado (planning do breakdown)
-workspace: works/<kind>/<slug>_<num>/ # relativo a .governance/; subpasta por TIPO; só quando a densidade pede artefatos próprios
+workspace: works/<kind>/<slug>_<num>/ # relativo a .governance/; TRABALHO vai em works/<kind>/ (a ferramenta exploration vai em explorations/ — ver exploration.yml); só quando a densidade pede
 intent: <intent-id | null> # a intent dona (back-ref); null = reativo/standalone
 
 # arestas (opcionais; 1-N = listas) — AGRUPADAS por categoria pra não se confundirem:

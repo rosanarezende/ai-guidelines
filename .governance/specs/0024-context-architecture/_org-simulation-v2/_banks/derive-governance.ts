@@ -17,6 +17,7 @@ export function deriveGovernance(
   repoProjections: RepoProjection[]
 ): GovernanceProjection {
   const publishedWorks: WorkProjection[] = repoProjections.flatMap((p) => p.works);
+  const publishedExplorations: WorkProjection[] = repoProjections.flatMap((p) => p.explorations);
 
   // decisões SUPERSEDED saem de vigor (append-only; nada se reescreve)
   const dead = new Set<string>();
@@ -25,7 +26,7 @@ export function deriveGovernance(
 
   const questions = (intent["open-questions"] ?? []).map((q): QuestionResolution => {
     const edge = `${intent.id}#${q.id}`;
-    const answer = publishedWorks.find((w) => answersEdge(w, edge));
+    const answer = publishedExplorations.find((w) => answersEdge(w, edge)); // answers vêm das EXPLORATIONS (ferramenta)
     const answered = answer?.status === "done"; // a exploration respondeu (evidência existe)
     // o gate: a decisão é o nó (accepted|rejected); senão `pending` (respondida, sem decisão) ou `none` (sem resposta)
     const decision =
@@ -51,16 +52,12 @@ export function deriveGovernance(
     })
   );
 
-  // breaks-into = vista DERIVADA: os works da intent (via `intent` ou `answers`) agrupados por status
-  const mine = publishedWorks.filter(
-    (w) => w.intent === intent.id || (w.answers?.includes(intent.id) ?? false)
-  );
-  // o PLANO (breaks-into) = só as ENTREGAS; explorations são a investigação (aparecem nas questions)
-  const deliverables = mine.filter((w) => w.kind !== "exploration");
+  // o PLANO (breaks-into) = os works (TRABALHO) da intent por status; explorations não entram (coleção própria → aparecem nas questions acima)
+  const mine = publishedWorks.filter((w) => w.intent === intent.id);
   const breaksInto: BreaksInto = {
-    done: deliverables.filter((w) => w.status === "done").map((w) => w.ref),
-    active: deliverables.filter((w) => w.status === "active").map((w) => w.ref),
-    draft: deliverables.filter((w) => w.status === "draft").map((w) => w.ref),
+    done: mine.filter((w) => w.status === "done").map((w) => w.ref),
+    active: mine.filter((w) => w.status === "active").map((w) => w.ref),
+    draft: mine.filter((w) => w.status === "draft").map((w) => w.ref),
   };
 
   return {

@@ -73,7 +73,8 @@ export interface WorkProjection {
 
 export interface RepoProjection {
   repo: string;
-  works: WorkProjection[];
+  works: WorkProjection[]; // TRABALHO (os 5 tipos)
+  explorations: WorkProjection[]; // FERRAMENTA exploration (Lente 4 — coleção própria, fora de works)
 }
 
 // ── a DELIBERAÇÃO (o gate humano): a exploration RESPONDE; a question só RESOLVE quando um humano ACEITA ──

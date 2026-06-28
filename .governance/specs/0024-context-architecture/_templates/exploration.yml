@@ -1,20 +1,22 @@
 # exploration.yml — TEMPLATE do índice (vira `registry/exploration.yml` num repo). Base: `registry-entry.yml` + os extras da exploration.
-# A exploration é uma FERRAMENTA executada; sua registry é GOVERNANÇA (o conteúdo vive no exploration-brief/answer).
+# A exploration é uma FERRAMENTA executada (Lente 4); mora em `.governance/explorations/` (FORA de works/). A registry é GOVERNANÇA; o conteúdo vive no exploration-brief/answer.
 entries:
-  - id: exploration-NNN
+  - id: <slug>_<num> # slug + numérico embutido (sem prefixo de tipo); a pasta é explorations/<slug>_<num>/
     title: <curto>
-    status: <active | done> # progresso próprio — a exploration NÃO fica "bloqueada" (um bloqueio que ela acha vira a RESPOSTA)
+    status: <draft | active | done> # nasce DRAFT; `active` exige assignee + início (a exploration NÃO fica "bloqueada" — um bloqueio que ela acha vira a RESPOSTA)
+    assignee: <@quem | null> # quem ASSUMIU
     intent: <intent-id | null> # a intent dona (back-ref)
 
     # ===== a AMARRA (Lente 5): o que esta exploration RESPONDE =====
-    answers: <repo>/<intent-id>#<qN> # back-ref TIPADO → a intent DERIVA `answered-by` (A+, check anti-drift). Ancorada AQUI (anota-se 1 lado).
+    answers: <repo>/intents/<intent-id>#<qN> # back-ref TIPADO → a intent DERIVA `answered-by` (A+, check anti-drift). Ancorada AQUI (anota-se 1 lado).
 
-    workspace: works/exploration_<slug>/ # quando densa (POC); o brief/answer vivem aí dentro
+    workspace: explorations/<slug>_<num>/ # relativo a .governance/; quando densa (POC); o brief/answer vivem aí dentro
 
     # ===== fecho =====
     fate: <throwaway | promoted | parked> # destino do output (preenche no FECHO) ⇒ dispara por DERIVAÇÃO: a question resolve → o contrato destrava
     closed-by: <ref ao exploration-answer> # quando há fecho denso
     closed-at: <YYYY-MM-DD>
 
-    date: <YYYY-MM-DD> # abertura
+    created-at: <YYYY-MM-DD> # abertura
+    updated-at: <YYYY-MM-DD>
     # demais arestas da base (blocked-by/depends-on/coordinates-with) são RARAS p/ exploration — ela não agenda; ver registry-entry.yml

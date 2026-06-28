@@ -11,8 +11,7 @@ entries:
     impact: high # menos abandono no login
     confidence: medium # viável (exploration), mas o EFEITO de abordar proativamente é incerto
     effort: medium
-    evidence:
-      [acme-mfe-support/.governance/works/exploration/proactive-support_1/exploration-answer.md]
+    evidence: [acme-mfe-support/.governance/explorations/proactive-support_1/exploration-answer.md]
     # --- disposição ---
     promote-to: experiment # quando priorizada (decisão de negócio) → abre uma intent PRÓPRIA pro experiment
     created-at: 2026-06-27

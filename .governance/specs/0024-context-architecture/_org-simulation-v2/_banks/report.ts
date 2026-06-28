@@ -1,36 +1,45 @@
 // Renderização (separada da lógica). Só formata e imprime — não deriva nada.
-import type { RepoProjection, GovernanceProjection } from "./types.ts";
+import type { RepoProjection, GovernanceProjection, WorkProjection } from "./types.ts";
 
 function header(title: string): void {
   console.log(`\n══ ${title} ══`);
 }
 
+function printWork(w: WorkProjection): void {
+  const facts = [
+    w.kind,
+    w.status,
+    `dono ${w.assignee ?? "(ninguém)"}`,
+    w.weight ? `peso ${w.weight}` : null,
+    w.fate ? `fate ${w.fate}` : null,
+    w.blockedBy?.length ? `blocked-by ${w.blockedBy.join("/")}` : null,
+    w.coordinatesWith?.length ? `coordinates-with ${w.coordinatesWith.join("/")}` : null,
+    w.answers ? `answers ${w.answers}` : null,
+    w.updatedAt ? `upd ${w.updatedAt}` : null,
+  ]
+    .filter((x): x is string => x !== null)
+    .join(" · ");
+  console.log(`  ${w.ref}: ${facts}`);
+  if (w.verdict) console.log(`      ↳ verdict (DERIVADO do answer): "${w.verdict}"`);
+  if (w.promotedOutput)
+    console.log(
+      `      ↳ promovido → ${w.promotedOutput} (POC durável p/ absorver via derives-from)`
+    );
+}
+
 export function reportRepoBank(p: RepoProjection): void {
   header(`BANCO DO REPO · ${p.repo}   (deriva só os arquivos DELE)`);
-  if (p.works.length === 0) {
-    console.log("  (sem works)");
+  if (p.works.length === 0 && p.explorations.length === 0) {
+    console.log("  (sem trabalhos nem explorations)");
     return;
   }
-  for (const w of p.works) {
-    const facts = [
-      w.kind,
-      w.status,
-      `dono ${w.assignee ?? "(ninguém)"}`,
-      w.weight ? `peso ${w.weight}` : null,
-      w.fate ? `fate ${w.fate}` : null,
-      w.blockedBy?.length ? `blocked-by ${w.blockedBy.join("/")}` : null,
-      w.coordinatesWith?.length ? `coordinates-with ${w.coordinatesWith.join("/")}` : null,
-      w.answers ? `answers ${w.answers}` : null,
-      w.updatedAt ? `upd ${w.updatedAt}` : null,
-    ]
-      .filter((x): x is string => x !== null)
-      .join(" · ");
-    console.log(`  ${w.ref}: ${facts}`);
-    if (w.verdict) console.log(`      ↳ verdict (DERIVADO do answer): "${w.verdict}"`);
-    if (w.promotedOutput)
-      console.log(
-        `      ↳ promovido → ${w.promotedOutput} (POC durável p/ absorver via derives-from)`
-      );
+  if (p.works.length) {
+    console.log("  — trabalho —");
+    for (const w of p.works) printWork(w);
+  }
+  if (p.explorations.length) {
+    console.log("  — explorations (ferramenta) —");
+    for (const w of p.explorations) printWork(w);
   }
 }
 
