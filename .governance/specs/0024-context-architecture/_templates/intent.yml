@@ -25,14 +25,11 @@ references: # type: modeling | spec | design | benchmark | dashboard | alignment
 target-repos: # repos tocados (≠ breaks-into)
   - <repo>
 
-# o APRENDIZADO da intent: cada incerteza → 1 exploration a responde. A exploration DECLARA `answers: intent#qN` (a aresta, ancorada lá);
-# os campos abaixo são DERIVADOS (A+) do grafo — VISÍVEIS aqui (as 2 pontas se referenciam), mas GERADOS, não editados à mão (um check anti-drift garante que batem):
+# o APRENDIZADO da intent: cada incerteza → 1 exploration a responde (a exploration DECLARA `answers: intent#qN`).
+# Aqui fica só o INPUT (id + question). Quem responde / status / verdict / resolvido = DERIVADO → projetado no BANCO, não no arquivo.
 open-questions:
   - id: q1
     question: "<incerteza — texto IDÊNTICO ao `question` do exploration-brief>"
-    answered-by: <repo>/<exploration-id> # GERADO (A+): a exploration cujo `answers` aponta pra esta qN
-    status: open # GERADO: open → resolved quando a exploration fecha (done)
-    verdict: # GERADO: espelha o verdict do exploration-answer quando houver
 
 # contratos que a feature coordena — UMA lista; o status known/pending é DERIVADO (sem baldes):
 #   sem `awaits` = known no t0 · com `awaits: qN` = known quando a question resolve (→ destrava as deliveries).
@@ -40,12 +37,7 @@ contracts:
   - { name: <contrato-t0> } # known no t0 → as deliveries já trabalham contra (via coordinates-with)
   - { name: <contrato>, awaits: q1 } # pending até q1 resolver; aí known (DERIVADO)
 
-breaks-into: # VISTA derivada dos works, AGRUPADA por status (a intent mostra plano + estado + caminho crítico num lugar); cresce no tempo
-  done: [<repo>/<work-id>, ...]
-  active: [<repo>/<work-id>, ...]
-  draft: # bloqueadas — o blocked-by (derivado) explica o draft
-    - work: <repo>/<work-id>
-      blocked-by: [<repo>/<work-id>, ...]
+# breaks-into NÃO mora no arquivo — é VISTA DERIVADA (os works por status); o BANCO projeta o plano + caminho crítico.
 
 # opcional: texto livre — síntese do aprendizado da intent como um todo, o porquê do status/dropped, etc.
 details: |

@@ -8,6 +8,7 @@ import type {
   GovernanceProjection,
   QuestionResolution,
   ContractStatus,
+  BreaksInto,
 } from "./types.ts";
 
 export function deriveGovernance(
@@ -42,7 +43,17 @@ export function deriveGovernance(
     })
   );
 
-  return { intent: intent.id, title: intent.title, questions, contracts };
+  // breaks-into = vista DERIVADA: os works da intent (via `intent` ou `answers`) agrupados por status
+  const mine = publishedWorks.filter(
+    (w) => w.intent === intent.id || (w.answers?.includes(intent.id) ?? false)
+  );
+  const breaksInto: BreaksInto = {
+    done: mine.filter((w) => w.status === "done").map((w) => w.ref),
+    active: mine.filter((w) => w.status === "active").map((w) => w.ref),
+    draft: mine.filter((w) => w.status === "draft").map((w) => w.ref),
+  };
+
+  return { intent: intent.id, title: intent.title, questions, contracts, breaksInto };
 }
 
 /** A aresta cross-grafo é qualificada ("<repo>/intent#qN"); casa pelo sufixo. */

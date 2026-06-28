@@ -17,6 +17,8 @@ export interface ExplorationEntry {
   fate?: Fate;
   /** referência ao exploration-answer (CONTEÚDO), relativa ao repo — o verdict mora lá, não aqui. */
   "closed-by"?: string;
+  /** back-ref opcional à intent dona (deliveries usam; explorations geralmente se ligam via `answers`). */
+  intent?: string;
 }
 
 export interface Contract {
@@ -51,6 +53,8 @@ export interface WorkProjection {
   verdict?: string;
   /** se `fate: promoted`, o caminho da POC durável (derivado do answer) — a absorver via `derives-from`. */
   promotedOutput?: string;
+  /** a intent a que o trabalho pertence (via `intent` ou via `answers`) — p/ o breaks-into. */
+  intent?: string;
 }
 
 export interface RepoProjection {
@@ -93,9 +97,17 @@ export interface ContractStatus {
   awaits?: string;
 }
 
+/** Vista DERIVADA do plano: os works da intent agrupados por status (substitui o `breaks-into` do arquivo). */
+export interface BreaksInto {
+  done: string[];
+  active: string[];
+  draft: string[];
+}
+
 export interface GovernanceProjection {
   intent: string;
   title: string;
   questions: QuestionResolution[];
   contracts: ContractStatus[];
+  breaksInto: BreaksInto;
 }

@@ -21,6 +21,7 @@ function projectExploration(repo: string, entry: ExplorationEntry): WorkProjecti
     answers: entry.answers,
     verdict: answer.verdict,
     promotedOutput: answer.promoted,
+    intent: entry.intent,
   };
 }
 

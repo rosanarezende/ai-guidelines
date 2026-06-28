@@ -56,4 +56,9 @@ export function reportGovernanceBank(g: GovernanceProjection, repos: string[]): 
   console.log(
     `\n  → destravados por resolução: ${destravados.length ? destravados.join(", ") : "(nenhum)"}`
   );
+
+  console.log("\n  breaks-into (vista DERIVADA do plano — os works da intent por status):");
+  for (const [status, refs] of Object.entries(g.breaksInto)) {
+    if (refs.length > 0) console.log(`    ${status}: ${refs.join(", ")}`);
+  }
 }
