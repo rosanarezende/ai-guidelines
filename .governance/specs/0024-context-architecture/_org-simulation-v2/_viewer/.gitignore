@@ -1,0 +1,4 @@
+node_modules
+dist
+# o snapshot é DERIVADO (gerado pelo banco) — não versionar
+public/snapshot.json

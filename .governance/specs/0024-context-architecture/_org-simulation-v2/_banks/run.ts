@@ -20,4 +20,4 @@ reportGovernanceBank(governance, repos);
 
 // 3) MATERIALIZA o snapshot JSON em _banks/_out/ (o app _viewer/ consome) — além do console
 const written = materialize(repoProjections, governance);
-console.log(`\n📁 snapshot: ${written.join(" · ")} — abra _viewer/index.html no navegador`);
+console.log(`\n📁 snapshot: ${written} — rode o viewer:  cd _viewer && npm install && npm run dev`);
