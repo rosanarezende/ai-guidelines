@@ -16,7 +16,12 @@ interface AppIntent {
   title: string;
   objective: string;
   questions: { id: string; question: string; verdict?: string }[];
-  decisions: { decides: string; status: "accepted" | "rejected" }[];
+  decisions: {
+    id: string;
+    decides: string[];
+    status: "accepted" | "rejected";
+    supersedes?: string[];
+  }[];
 }
 interface BoardQuestion {
   id: string;
@@ -40,7 +45,10 @@ interface Snapshot {
 
 // o GATE: respondida (tem verdict) ≠ resolvida (decisão aceita)
 function deriveQuestion(intent: AppIntent, q: AppIntent["questions"][number]): BoardQuestion {
-  const dec = intent.decisions.find((d) => d.decides === q.id);
+  const dead = new Set<string>();
+  for (const d of intent.decisions)
+    if (d.status === "accepted" && d.supersedes) for (const id of d.supersedes) dead.add(id);
+  const dec = intent.decisions.find((d) => !dead.has(d.id) && d.decides.includes(q.id));
   const answered = Boolean(q.verdict);
   const decision: DecisionStatus = dec ? dec.status : answered ? "pending" : "none";
   return {
@@ -49,7 +57,7 @@ function deriveQuestion(intent: AppIntent, q: AppIntent["questions"][number]): B
     verdict: q.verdict,
     answered,
     decision,
-    resolved: answered && decision === "accepted",
+    resolved: decision === "accepted",
   };
 }
 

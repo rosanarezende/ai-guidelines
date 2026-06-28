@@ -24,10 +24,17 @@ export function fileExists(relToSim: string): boolean {
   return fs.existsSync(abs(relToSim));
 }
 
-/** Os repos da sim = pastas com `registry/` (exclui a governança e o tooling `_*`). */
+/** Os repos da sim = pastas com `.governance/registry/` (exclui a governança e o tooling `_*`). */
 export function listRepos(): string[] {
   return fs
     .readdirSync(SIM_ROOT)
     .filter((name) => !name.startsWith("_") && name !== "acme-governance")
-    .filter((name) => fileExists(`${name}/registry`));
+    .filter((name) => fileExists(`${name}/.governance/registry`));
+}
+
+/** As intents da governança = pastas em `acme-governance/intents/` com `intent.yml`. */
+export function listIntents(): string[] {
+  const dir = "acme-governance/intents";
+  if (!fileExists(dir)) return [];
+  return fs.readdirSync(abs(dir)).filter((name) => fileExists(`${dir}/${name}/intent.yml`));
 }

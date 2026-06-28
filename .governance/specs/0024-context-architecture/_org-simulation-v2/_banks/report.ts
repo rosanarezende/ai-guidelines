@@ -7,15 +7,20 @@ function header(title: string): void {
 
 export function reportRepoBank(p: RepoProjection): void {
   header(`BANCO DO REPO · ${p.repo}   (deriva só os arquivos DELE)`);
-  if (p.explorations.length === 0) {
-    console.log("  (sem explorations)");
+  if (p.works.length === 0) {
+    console.log("  (sem works)");
     return;
   }
-  for (const w of p.explorations) {
+  for (const w of p.works) {
     const facts = [
+      w.kind,
       w.status,
+      `dono ${w.assignee ?? "(ninguém)"}`,
+      w.weight ? `peso ${w.weight}` : null,
       w.fate ? `fate ${w.fate}` : null,
+      w.coordinatesWith?.length ? `coordinates-with ${w.coordinatesWith.join("/")}` : null,
       w.answers ? `answers ${w.answers}` : null,
+      w.updatedAt ? `upd ${w.updatedAt}` : null,
     ]
       .filter((x): x is string => x !== null)
       .join(" · ");
@@ -57,7 +62,9 @@ export function reportGovernanceBank(g: GovernanceProjection, repos: string[]): 
     `\n  → destravados por resolução: ${destravados.length ? destravados.join(", ") : "(nenhum)"}`
   );
 
-  console.log("\n  breaks-into (vista DERIVADA do plano — os works da intent por status):");
+  console.log(
+    "\n  breaks-into (o PLANO — só as ENTREGAS por status; explorations = na investigação acima):"
+  );
   for (const [status, refs] of Object.entries(g.breaksInto)) {
     if (refs.length > 0) console.log(`    ${status}: ${refs.join(", ")}`);
   }

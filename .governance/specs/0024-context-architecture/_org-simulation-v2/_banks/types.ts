@@ -6,19 +6,27 @@ export type Fate = "throwaway" | "promoted" | "parked";
 
 // ───────────────────────── o grafo (o que está nos arquivos) ─────────────────────────
 
-/** Uma entrada no `registry/exploration.yml` de um repo. */
-export interface ExplorationEntry {
+export type WorkKind = "delivery" | "experiment" | "incident" | "fix" | "patch" | "exploration";
+
+/** Uma entrada num `registry/<kind>.yml` de um repo (genérica — campos por-kind são opcionais). */
+export interface RegistryEntry {
   id: string;
   title: string;
   status: WorkStatus;
-  /** aresta CROSS-GRAFO: "<repo>/<intent>#<qN>" que esta exploration responde. */
-  answers?: string;
-  workspace?: string;
-  fate?: Fate;
-  /** referência ao exploration-answer (CONTEÚDO), relativa ao repo — o verdict mora lá, não aqui. */
-  "closed-by"?: string;
-  /** back-ref opcional à intent dona (deliveries usam; explorations geralmente se ligam via `answers`). */
+  assignee?: string | null; // quem ASSUMIU; `active` exige assignee + início (born draft)
+  /** back-ref à intent dona (deliveries usam; explorations geralmente se ligam via `answers`). */
   intent?: string;
+  workspace?: string;
+  // delivery/experiment/…:
+  weight?: string;
+  "coordinates-with"?: string[]; // contratos comuns
+  "blocked-by"?: string[]; // outros works
+  // exploration:
+  answers?: string; // aresta CROSS-GRAFO: "<repo>/intents/<intent>#<qN>"
+  fate?: Fate;
+  "closed-by"?: string; // ref ao answer (CONTEÚDO), relativa a .governance/
+  "created-at"?: string;
+  "updated-at"?: string; // última mutação (só nós mutáveis)
 }
 
 export interface Contract {
@@ -35,31 +43,36 @@ export interface OpenQuestion {
 export interface Intent {
   id: string;
   title: string;
+  "updated-at"?: string;
   "open-questions"?: OpenQuestion[];
   contracts?: Contract[];
 }
 
 // ───────────────────────── a projeção (o que cada banco PUBLICA) ─────────────────────────
 
-/** O que o banco de um REPO publica por trabalho. */
+/** O que o banco de um REPO publica por trabalho (qualquer kind). */
 export interface WorkProjection {
-  ref: string; // "<repo>/<id>"
-  kind: "exploration";
+  ref: string; // "<repo>/<kind>/<id>"
+  kind: WorkKind;
   status: WorkStatus;
-  fate?: Fate;
-  /** a aresta cross-grafo que ele responde (a governança casa por aqui). */
-  answers?: string;
-  /** DERIVADO do answer (via closed-by) quando `done`; é conteúdo, não fica no registry. */
-  verdict?: string;
-  /** se `fate: promoted`, o caminho da POC durável (derivado do answer) — a absorver via `derives-from`. */
-  promotedOutput?: string;
+  assignee?: string | null; // quem ASSUMIU (born draft; active exige assignee)
+  updatedAt?: string; // última mutação (frescor)
   /** a intent a que o trabalho pertence (via `intent` ou via `answers`) — p/ o breaks-into. */
   intent?: string;
+  // delivery/experiment/…:
+  weight?: string;
+  coordinatesWith?: string[];
+  blockedBy?: string[];
+  // exploration:
+  fate?: Fate;
+  answers?: string; // a aresta cross-grafo que ele responde (a governança casa por aqui)
+  verdict?: string; // DERIVADO do answer (via closed-by) quando `done`
+  promotedOutput?: string; // se `fate: promoted`, a POC durável (a absorver via derives-from)
 }
 
 export interface RepoProjection {
   repo: string;
-  explorations: WorkProjection[];
+  works: WorkProjection[];
 }
 
 // ── a DELIBERAÇÃO (o gate humano): a exploration RESPONDE; a question só RESOLVE quando um humano ACEITA ──
@@ -69,12 +82,12 @@ export type DecisionStatus = "accepted" | "rejected" | "pending";
 /** Nó de decisão no mapa de deliberação da intent (append-only; reabrir = novo nó + `supersedes`). */
 export interface Decision {
   id: string;
-  decides: string; // qN
+  decides: string[]; // [qN] — uma decisão pode fechar VÁRIAS questions
   status: "accepted" | "rejected"; // só decisões CONCLUÍDAS são nós; "pending" não é nó (é DERIVADO)
-  "supported-by"?: string; // "<repo>/<exploration>" — a evidência (aresta Lente 3)
+  "supported-by"?: string; // "<repo>/<tipo>/<exploration>" — a evidência (aresta Lente 3)
   rationale?: string;
-  spawns?: string[]; // o trabalho que a decisão dispara
-  supersedes?: string; // id de uma decisão anterior (reabertura)
+  "results-in"?: string[]; // o trabalho que a decisão CRIA (aresta results-in)
+  supersedes?: string[]; // ids de decisões anteriores (reabertura, append-only)
 }
 
 export interface Deliberation {

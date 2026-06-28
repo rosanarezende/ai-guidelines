@@ -11,10 +11,10 @@ const OUT_FILE = path.join(SIM_ROOT, "_viewer", "public", "snapshot.json");
 /** O snapshot que o viewer renderiza: os bancos de repo + o de governança. */
 export interface Snapshot {
   repos: RepoProjection[];
-  governance: GovernanceProjection;
+  governance: GovernanceProjection[];
 }
 
-export function materialize(repos: RepoProjection[], governance: GovernanceProjection): string {
+export function materialize(repos: RepoProjection[], governance: GovernanceProjection[]): string {
   const snapshot: Snapshot = { repos, governance };
   fs.mkdirSync(path.dirname(OUT_FILE), { recursive: true });
   fs.writeFileSync(OUT_FILE, JSON.stringify(snapshot, null, 2) + "\n");
