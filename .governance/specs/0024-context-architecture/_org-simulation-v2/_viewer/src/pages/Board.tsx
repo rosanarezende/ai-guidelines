@@ -1,57 +1,52 @@
-import { useEffect, useState } from "react";
-import type { Snapshot, BoardQuestion } from "../types";
+import { useState } from "react";
+import { useIntents } from "../store";
+import type { AppIntent, AppQuestion, BoardQuestion } from "../types";
 
-// Board = a projeção DERIVADA pelo banco a partir do db.json (autoria → banco → board).
+// Board = a projeção DERIVADA, AO VIVO do db.json (via o store/API) — sem snapshot no meio, sempre reflete a autoria.
+// (O banco node `derive-app.ts` também deriva o db.json → snapshot.json, mas pra uso HEADLESS/export; o app não depende dele.)
+function deriveQuestion(intent: AppIntent, q: AppQuestion): BoardQuestion {
+  const dec = intent.decisions.find((d) => d.decides === q.id);
+  const answered = Boolean(q.verdict); // tem verdict (uma exploração respondeu)
+  const decision = dec ? dec.status : answered ? "pending" : "none"; // o gate humano
+  return {
+    id: q.id,
+    question: q.question,
+    verdict: q.verdict,
+    answered,
+    decision,
+    resolved: answered && decision === "accepted",
+  };
+}
+
 export function Board() {
-  const [snap, setSnap] = useState<Snapshot | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  function load() {
-    setError(null);
-    // cache-bust p/ pegar o snapshot recém-derivado pelo watcher
-    fetch(`${import.meta.env.BASE_URL}snapshot.json?t=${Date.now()}`)
-      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`))))
-      .then((d: Snapshot) => setSnap(d))
-      .catch((e: unknown) => setError(String(e)));
-  }
-  useEffect(load, []);
-
-  if (error)
-    return (
-      <p className="err">
-        Sem snapshot ({error}). O banco gera em <code>npm run dev:all</code> (ou{" "}
-        <code>npm run bank</code>).
-      </p>
-    );
-  if (!snap) return <p>Carregando…</p>;
-
+  const { intents } = useIntents();
   return (
     <>
       <header>
         <h1>
-          Board <span className="hint">(DERIVADO pelo banco a partir do db.json)</span>
+          Board <span className="hint">(derivado das Iniciativas — ao vivo do db.json)</span>
         </h1>
-        <div className="toolbar">
-          <button onClick={load}>↻ recarregar</button>
-          <span className="hint">cadastrou/decidiu? o watcher re-deriva — clique aqui</span>
-        </div>
       </header>
 
-      {snap.intents.length === 0 && <p className="hint">Nenhuma iniciativa ainda.</p>}
-      {snap.intents.map((i) => (
-        <section key={i.id}>
-          <h2>
-            {i.title}{" "}
-            <span className="hint">
-              ({i.resolved}/{i.total} resolvidas)
-            </span>
-          </h2>
-          {i.questions.map((q) => (
-            <QuestionRow key={q.id} q={q} />
-          ))}
-          {i.questions.length === 0 && <p className="hint">(sem perguntas)</p>}
-        </section>
-      ))}
+      {intents.length === 0 && <p className="hint">Nenhuma iniciativa ainda.</p>}
+      {intents.map((intent) => {
+        const questions = intent.questions.map((q) => deriveQuestion(intent, q));
+        const resolved = questions.filter((q) => q.resolved).length;
+        return (
+          <section key={intent.id}>
+            <h2>
+              {intent.title}{" "}
+              <span className="hint">
+                ({resolved}/{questions.length} resolvidas)
+              </span>
+            </h2>
+            {questions.map((q) => (
+              <QuestionRow key={q.id} q={q} />
+            ))}
+            {questions.length === 0 && <p className="hint">(sem perguntas)</p>}
+          </section>
+        );
+      })}
     </>
   );
 }
