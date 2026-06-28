@@ -4,7 +4,7 @@ import { readYaml, listRepos } from "./io.ts";
 import { deriveRepo } from "./derive-repo.ts";
 import { deriveGovernance } from "./derive-governance.ts";
 import { reportRepoBank, reportGovernanceBank } from "./report.ts";
-import { materializeRepoBank, materializeGovernanceBank } from "./materialize.ts";
+import { materialize } from "./materialize.ts";
 
 const repos = listRepos();
 
@@ -18,9 +18,6 @@ const deliberation = readYaml<Deliberation>("acme-governance/intents/intent-0001
 const governance = deriveGovernance(intent, deliberation, repoProjections);
 reportGovernanceBank(governance, repos);
 
-// 3) MATERIALIZA as projeções em _banks/_out/ (boards visualizáveis) — além do console
-const written = [
-  ...repoProjections.map(materializeRepoBank),
-  materializeGovernanceBank(governance, repos),
-];
-console.log(`\n📁 materializado: ${written.join(" · ")}`);
+// 3) MATERIALIZA o snapshot JSON em _banks/_out/ (o app _viewer/ consome) — além do console
+const written = materialize(repoProjections, governance);
+console.log(`\n📁 snapshot: ${written.join(" · ")} — abra _viewer/index.html no navegador`);
