@@ -1,0 +1,35 @@
+{
+  "intents": [
+    {
+      "id": "intent-0001",
+      "title": "Novo fluxo de login (com ajuda sob demanda e proativa)",
+      "objective": "login navegável atrás de flag, com ajuda ao usuário que falha",
+      "details": "Feature cross-repo. As entregas só nascem depois das perguntas respondidas.",
+      "references": [
+        { "label": "modelagem do login (produto)", "url": "https://docs.acme.example/login" }
+      ],
+      "questions": [
+        {
+          "id": "q1",
+          "question": "o design system tem um formulário validado, ou cada MFE reimplementa?",
+          "verdict": "não — o DS não tem form validado; cada MFE reimplementa → precisa criar o componente"
+        },
+        {
+          "id": "q2",
+          "question": "suporte proativo é viável (detectar N falhas por pub/sub e abordar o usuário)?",
+          "verdict": "viável (pub/sub conta as falhas e dispara após N); SE ajuda é hipótese → experiment"
+        }
+      ],
+      "decisions": [
+        {
+          "id": "d1",
+          "decides": "q1",
+          "status": "accepted",
+          "rationale": "verdict claro: criar o componente de form validado",
+          "at": "2026-06-27"
+        }
+      ],
+      "createdAt": "2026-06-27"
+    }
+  ]
+}

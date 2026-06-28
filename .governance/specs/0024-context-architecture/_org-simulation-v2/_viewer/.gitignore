@@ -2,3 +2,5 @@ node_modules
 dist
 # o snapshot é DERIVADO (gerado pelo banco) — não versionar
 public/snapshot.json
+# db local do json-server (o seed versionado é db.seed.json) — não versionar
+db.json

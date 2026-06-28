@@ -10,7 +10,7 @@ node _banks/run.ts
 
 _(TypeScript nativo do Node 24 — type-stripping, sem build nem dependência extra.)_
 
-Gera o **snapshot** em `_viewer/public/snapshot.json` (**GERADO** — derivado, regenerável). **Visualize** com o app Vite + React: `cd _viewer && npm install && npm run dev` (lê o snapshot via `fetch`; interativo).
+Gera o **snapshot** em `_viewer/public/snapshot.json` (**GERADO** — derivado, regenerável). **Visualize** com o app Vite + React: `cd _viewer && npm install && npm run dev:all` (autoria via json-server + o board do snapshot; ver `_viewer/README`).
 
 ## Arquivos (1 responsabilidade cada)
 

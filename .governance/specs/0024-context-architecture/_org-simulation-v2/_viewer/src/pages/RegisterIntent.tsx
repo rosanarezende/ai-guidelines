@@ -15,7 +15,7 @@ export function RegisterIntent() {
 
   const nextId = `intent-${String(intents.length + 1).padStart(4, "0")}`;
 
-  function submit(e: FormEvent) {
+  async function submit(e: FormEvent) {
     e.preventDefault();
     const qs = questions
       .split("\n")
@@ -32,7 +32,7 @@ export function RegisterIntent() {
       decisions: [],
       createdAt: new Date().toISOString().slice(0, 10),
     };
-    addIntent(intent);
+    await addIntent(intent);
     nav(`/intent/${intent.id}`);
   }
 
@@ -48,8 +48,11 @@ export function RegisterIntent() {
       </header>
 
       <form onSubmit={submit} className="form">
+        <p className="hint">
+          <span className="req">*</span> campos obrigatórios
+        </p>
         <label>
-          Título <span className="hint">(o objetivo, em uma frase)</span>
+          Título <span className="req">*</span>
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
@@ -58,12 +61,23 @@ export function RegisterIntent() {
           />
         </label>
         <label>
-          Objetivo <span className="hint">(o resultado durável que se quer no mundo)</span>
-          <input value={objective} onChange={(e) => setObjective(e.target.value)} required />
+          Objetivo <span className="req">*</span>{" "}
+          <span className="hint">(o resultado durável que se quer)</span>
+          <input
+            value={objective}
+            onChange={(e) => setObjective(e.target.value)}
+            required
+            placeholder="ex.: login navegável atrás de flag, com ajuda ao usuário que falha"
+          />
         </label>
         <label>
           Detalhes <span className="hint">(opcional)</span>
-          <textarea value={details} onChange={(e) => setDetails(e.target.value)} rows={3} />
+          <textarea
+            value={details}
+            onChange={(e) => setDetails(e.target.value)}
+            rows={3}
+            placeholder="ex.: feature cross-repo; as entregas só nascem após as perguntas respondidas"
+          />
         </label>
         <label>
           Perguntas em aberto <span className="hint">(uma por linha — opcional)</span>

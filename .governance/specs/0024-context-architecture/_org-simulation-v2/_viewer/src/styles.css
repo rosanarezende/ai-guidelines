@@ -307,3 +307,8 @@ code {
   display: flex;
   gap: 8px;
 }
+
+.req {
+  color: #c0392b;
+  font-weight: 700;
+}
