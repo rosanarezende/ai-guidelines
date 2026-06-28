@@ -43,6 +43,7 @@ export interface OpenQuestion {
 export interface Intent {
   id: string;
   title: string;
+  owner?: string; // quem TOCA a iniciativa (a dona)
   "updated-at"?: string;
   "open-questions"?: OpenQuestion[];
   contracts?: Contract[];
@@ -120,6 +121,7 @@ export interface BreaksInto {
 export interface GovernanceProjection {
   intent: string;
   title: string;
+  owner?: string;
   questions: QuestionResolution[];
   contracts: ContractStatus[];
   breaksInto: BreaksInto;

@@ -7,6 +7,7 @@ entries:
     weight: L
     intent: login_1
     workspace: works/delivery/help-on-demand_1/
+    blocked-by: [acme-design-system/delivery/form-component_1] # consome o form do DS → espera ele
     coordinates-with: [failure-event] # o CONTRATO que consome (resolvido por q2)
     derives-from: [acme-mfe-support/exploration/proactive-support_1] # absorve a POC do listener
     created-at: 2026-06-28

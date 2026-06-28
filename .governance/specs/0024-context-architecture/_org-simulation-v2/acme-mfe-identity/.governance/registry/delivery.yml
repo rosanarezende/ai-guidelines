@@ -1,0 +1,13 @@
+# registry/delivery.yml — acme-mfe-identity · índice kind=delivery (→ banco/active-work).
+entries:
+  - id: login-mfe_1
+    title: tela de login (MFE) consumindo o form
+    status: draft # blocked (espera o form-component) → draft até destravar
+    assignee: null
+    weight: L
+    intent: login_1
+    workspace: works/delivery/login-mfe_1/
+    blocked-by: [acme-design-system/delivery/form-component_1] # consome o form do DS
+    coordinates-with: [form-component] # o CONTRATO que consome (provido pelo DS)
+    created-at: 2026-06-28
+    updated-at: 2026-06-28

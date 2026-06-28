@@ -63,7 +63,14 @@ export function deriveGovernance(
     draft: deliverables.filter((w) => w.status === "draft").map((w) => w.ref),
   };
 
-  return { intent: intent.id, title: intent.title, questions, contracts, breaksInto };
+  return {
+    intent: intent.id,
+    title: intent.title,
+    owner: intent.owner,
+    questions,
+    contracts,
+    breaksInto,
+  };
 }
 
 /** A aresta cross-grafo é qualificada ("<repo>/intent#qN"); casa pelo sufixo. */

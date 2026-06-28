@@ -3,6 +3,7 @@
 node: intent
 id: login_1
 status: active
+owner: "@ana-pm" # quem TOCA a iniciativa (a dona)
 created-at: 2026-06-27
 updated-at: 2026-06-28 # último toque: breakdown criou as deliveries draft
 

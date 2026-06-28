@@ -8,7 +8,10 @@ decisions:
     status: accepted # o humano ACEITOU o verdict
     supported-by: acme-design-system/exploration/form-validation_1 # a evidência (aresta Lente 3)
     rationale: "verdict claro: o DS não tem form validado → criar o componente"
-    results-in: [acme-design-system/delivery/form-component_1] # a decisão CRIA o trabalho (aresta results-in)
+    results-in: [
+        acme-design-system/delivery/form-component_1,
+        acme-mfe-identity/delivery/login-mfe_1,
+      ] # q1 destrava form + login-mfe
     decided-at: 2026-06-27
   - id: d2
     decides: [q2]

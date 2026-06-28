@@ -18,6 +18,7 @@ export function reportRepoBank(p: RepoProjection): void {
       `dono ${w.assignee ?? "(ninguém)"}`,
       w.weight ? `peso ${w.weight}` : null,
       w.fate ? `fate ${w.fate}` : null,
+      w.blockedBy?.length ? `blocked-by ${w.blockedBy.join("/")}` : null,
       w.coordinatesWith?.length ? `coordinates-with ${w.coordinatesWith.join("/")}` : null,
       w.answers ? `answers ${w.answers}` : null,
       w.updatedAt ? `upd ${w.updatedAt}` : null,
@@ -35,6 +36,7 @@ export function reportRepoBank(p: RepoProjection): void {
 
 export function reportGovernanceBank(g: GovernanceProjection, repos: string[]): void {
   header(`BANCO DE GOVERNANÇA · ${g.intent}: ${g.title}`);
+  console.log(`  dona da iniciativa: ${g.owner ?? "(sem dona)"}`);
   console.log(
     `  consome as projeções dos repos [${repos.join(", ")}] — banco→banco, sem ler arquivo de repo`
   );

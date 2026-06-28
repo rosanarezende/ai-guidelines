@@ -11,6 +11,7 @@ title: <título curto>
 
 # active=em andamento · paused=pausada por repriorização (retomável) · done=objetivo atingido · dropped=descartada por decisão (terminal)
 status: # active | paused | done | dropped
+owner: # quem TOCA a iniciativa (a dona) — papel ou pessoa
 
 objective:
   goal: # a mudança / resultado durável que se quer no mundo
