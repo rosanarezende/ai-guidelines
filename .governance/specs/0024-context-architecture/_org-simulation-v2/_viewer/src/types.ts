@@ -15,10 +15,17 @@ export interface AppQuestion {
 
 export interface AppDecision {
   id: string;
-  decides: string; // id da question
+  decides: string[]; // ids das questions que resolve — uma decisão pode fechar VÁRIAS
   status: "accepted" | "rejected";
+  supersedes?: string[]; // ids de decisões anteriores que esta substitui (reabertura, append-only)
   rationale?: string;
   at: string; // data ISO
+}
+
+// qualquer nó que hospeda q/r/d (deliberação): a intent E o work (intent ≈ work como host).
+export interface DeliberationHost {
+  questions: AppQuestion[];
+  decisions: AppDecision[];
 }
 
 export interface AppContract {
@@ -36,6 +43,7 @@ export interface AppIntent {
   decisions: AppDecision[];
   contracts?: AppContract[]; // os contratos que a feature coordena (known/pending = DERIVADO)
   createdAt: string;
+  updatedAt?: string;
 }
 
 export type Level = "low" | "medium" | "high";
@@ -45,7 +53,7 @@ export type PromoteTo = "delivery" | "experiment" | "exploration" | "patch" | "f
 export interface AppProposal {
   id: string;
   what: string;
-  raisedFrom?: string; // proveniência: onde foi notada (ex.: "intent-0001#q2")
+  raisedFrom?: string; // proveniência: onde foi notada (ex.: "login_1#q2")
   owner: string; // quem TRIA (time/pessoa)
   status: "open" | "promoted" | "dismissed"; // disposição obrigatória
   tags: string[];
@@ -56,6 +64,7 @@ export interface AppProposal {
   opensIntent?: string; // se promovida p/ experiment/objetivo
   discardReason?: string; // se descartada
   createdAt: string;
+  updatedAt?: string;
 }
 
 export type Weight = "S" | "M" | "L" | "XL";
@@ -72,7 +81,11 @@ export interface AppWork {
   blockedBy: string[]; // ids de outros works (blocked-by)
   coordinatesWith: string[]; // nomes de contratos (coordinates-with)
   status: "draft" | "active" | "done"; // progresso PRÓPRIO; "bloqueado" é DERIVADO
+  assignee?: string | null; // quem ASSUMIU; `active` exige assignee + início (born draft)
+  questions?: AppQuestion[]; // q/r/d do PRÓPRIO work (Lente 2: todo work delibera durante a execução)
+  decisions?: AppDecision[];
   createdAt: string;
+  updatedAt?: string;
 }
 
 // ── o BOARD DERIVADO pelo banco (lê db.json → snapshot.json) ──

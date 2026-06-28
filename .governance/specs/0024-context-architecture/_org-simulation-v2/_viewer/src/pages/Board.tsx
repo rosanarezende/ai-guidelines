@@ -1,21 +1,19 @@
 import { useState } from "react";
 import { useIntents } from "../store";
 import type { AppIntent, AppQuestion, AppWork, BoardQuestion } from "../types";
-import { workPhase, criticalPath } from "../derive";
+import { workPhase, criticalPath, questionView } from "../derive";
 import type { WorkPhase } from "../derive";
 
 // Board = a projeção DERIVADA, AO VIVO do db.json (via o store/API). Sem snapshot no meio.
 function deriveQuestion(intent: AppIntent, q: AppQuestion): BoardQuestion {
-  const dec = intent.decisions.find((d) => d.decides === q.id);
-  const answered = Boolean(q.verdict);
-  const decision = dec ? dec.status : answered ? "pending" : "none";
+  const v = questionView(intent, q.id);
   return {
     id: q.id,
     question: q.question,
     verdict: q.verdict,
-    answered,
-    decision,
-    resolved: answered && decision === "accepted",
+    answered: v.answered,
+    decision: v.decision,
+    resolved: v.resolved,
   };
 }
 

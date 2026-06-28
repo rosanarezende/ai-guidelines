@@ -1,17 +1,61 @@
-// Derivação do PLANO (client-side, ao vivo): contrato known · work bloqueado · caminho crítico ponderado.
-import type { AppContract, AppIntent, AppWork, Weight } from "./types";
+// Derivação (client-side, ao vivo): q/r/d (o GATE + append-only/supersedes) · contrato known · plano.
+import type {
+  AppContract,
+  AppDecision,
+  AppIntent,
+  AppWork,
+  DeliberationHost,
+  Weight,
+} from "./types";
 
 const WEIGHT_NUM: Record<Weight, number> = { S: 1, M: 2, L: 3, XL: 5 };
 
-/** Um contrato é `known` se não espera nada, ou se a question que ele espera RESOLVEU (respondida + decisão aceita). */
-export function contractKnown(intent: AppIntent, c: AppContract): boolean {
-  if (!c.awaits) return true;
-  const q = intent.questions.find((x) => x.id === c.awaits);
-  const dec = intent.decisions.find((d) => d.decides === c.awaits);
-  return Boolean(q?.verdict) && dec?.status === "accepted";
+// ── DELIBERAÇÃO (q/r/d) ──
+
+/** ids de decisões SUPERSEDED por alguma decisão aceita (saem de vigor; nada se reescreve). */
+export function supersededIds(decisions: AppDecision[]): Set<string> {
+  const dead = new Set<string>();
+  for (const d of decisions) {
+    if (d.status === "accepted" && d.supersedes) for (const id of d.supersedes) dead.add(id);
+  }
+  return dead;
 }
 
-/** Por que um work está bloqueado (lista de razões): `blocked-by` não-done + contratos `coordinates-with` pending. */
+export interface QuestionView {
+  answered: boolean; // tem verdict (uma exploração respondeu)
+  decision: "accepted" | "rejected" | "pending" | "none"; // o gate
+  resolved: boolean; // decisão aceita EM VIGOR (gate fechado)
+  reopened: boolean; // tinha decisão aceita, foi superseded, sem nova em vigor
+  inEffect?: AppDecision; // a decisão em vigor (aceita/rejeitada, não-superseded) que a decide
+}
+
+/** O GATE por question: respondida (verdict) ≠ resolvida (decisão aceita EM VIGOR). */
+export function questionView(host: DeliberationHost, qid: string): QuestionView {
+  const q = host.questions.find((x) => x.id === qid);
+  const answered = Boolean(q?.verdict);
+  const dead = supersededIds(host.decisions);
+  const inEffect = host.decisions.find((d) => !dead.has(d.id) && d.decides.includes(qid));
+  const hadAccepted = host.decisions.some(
+    (d) => d.status === "accepted" && d.decides.includes(qid)
+  );
+  return {
+    answered,
+    decision: inEffect ? inEffect.status : answered ? "pending" : "none",
+    resolved: inEffect?.status === "accepted",
+    reopened: !inEffect && hadAccepted,
+    inEffect,
+  };
+}
+
+// ── CONTRATOS + PLANO ──
+
+/** Um contrato é `known` se não espera nada, ou se a question que ele espera RESOLVEU (gate aceito, em vigor). */
+export function contractKnown(intent: AppIntent, c: AppContract): boolean {
+  if (!c.awaits) return true;
+  return questionView(intent, c.awaits).resolved;
+}
+
+/** Por que um work está bloqueado: `blocked-by` não-done + contratos `coordinates-with` pending. */
 export function blockedReasons(intent: AppIntent, work: AppWork, works: AppWork[]): string[] {
   const reasons: string[] = [];
   for (const dep of work.blockedBy) {
@@ -27,10 +71,11 @@ export function blockedReasons(intent: AppIntent, work: AppWork, works: AppWork[
 
 export type WorkPhase = "done" | "active" | "ready" | "blocked";
 
-/** Fase DERIVADA: done/active (status próprio) · ready (destravado, pode começar) · blocked (espera deps/contratos). */
+/** Fase DERIVADA: done/active (status próprio) · ready (destravado) · blocked (espera deps/contratos). */
 export function workPhase(intent: AppIntent, work: AppWork, works: AppWork[]): WorkPhase {
   if (work.status === "done") return "done";
-  if (work.status === "active") return "active";
+  // `active` exige um assignee (born draft; ready = destravado mas SEM dono, esperando alguém pegar)
+  if (work.status === "active" && work.assignee) return "active";
   return blockedReasons(intent, work, works).length > 0 ? "blocked" : "ready";
 }
 

@@ -372,3 +372,24 @@ code {
   align-items: center;
   font-weight: 400;
 }
+
+/* deliberação: log append-only (decisões; superseded = riscado) */
+.log {
+  margin-top: 16px;
+}
+
+.logitem {
+  font-size: 13px;
+  padding: 6px 0;
+  border-top: 1px solid var(--line);
+}
+
+.logitem.dead {
+  opacity: 0.55;
+  text-decoration: line-through;
+}
+
+.logitem.dead .meta,
+.logitem.dead .badge {
+  text-decoration: none;
+}

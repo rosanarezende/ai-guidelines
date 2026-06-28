@@ -3,6 +3,7 @@ import { LABEL, LABEL_PLURAL } from "./labels";
 import { Home } from "./pages/Home";
 import { RegisterIntent } from "./pages/RegisterIntent";
 import { IntentDetail } from "./pages/IntentDetail";
+import { WorkDetail } from "./pages/WorkDetail";
 import { Board } from "./pages/Board";
 import { Proposals } from "./pages/Proposals";
 import { RegisterProposal } from "./pages/RegisterProposal";
@@ -33,6 +34,7 @@ export function App() {
         <Route path="/" element={<Home />} />
         <Route path="/novo" element={<RegisterIntent />} />
         <Route path="/intent/:id" element={<IntentDetail />} />
+        <Route path="/work/:id" element={<WorkDetail />} />
         <Route path="/propostas" element={<Proposals />} />
         <Route path="/propostas/nova" element={<RegisterProposal />} />
         <Route path="/board" element={<Board />} />

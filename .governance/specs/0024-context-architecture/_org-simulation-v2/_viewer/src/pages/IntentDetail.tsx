@@ -3,10 +3,9 @@ import type { FormEvent } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useIntents } from "../store";
 import { LABEL, LABEL_PLURAL } from "../labels";
-import type { AppIntent, AppQuestion, AppWork, WorkKind, Weight } from "../types";
-import { contractKnown, workPhase, blockedReasons } from "../derive";
-
-type UpdateIntent = (id: string, fn: (i: AppIntent) => AppIntent) => void;
+import type { AppIntent, AppWork, WorkKind, Weight } from "../types";
+import { contractKnown, workPhase, blockedReasons, questionView } from "../derive";
+import { Deliberation } from "../Deliberation";
 
 export function IntentDetail() {
   const { id } = useParams();
@@ -38,11 +37,17 @@ export function IntentDetail() {
           Perguntas{" "}
           <span className="hint">(decidir é restrito ao resultado de uma exploração)</span>
         </h2>
-        {intent.questions.map((q) => (
-          <QuestionRow key={q.id} intent={intent} q={q} updateIntent={updateIntent} />
-        ))}
-        {intent.questions.length === 0 && <p className="hint">Nenhuma pergunta ainda.</p>}
-        <AddQuestion intent={intent} updateIntent={updateIntent} />
+        <Deliberation
+          host={intent}
+          onChange={(next) => updateIntent(intent.id, (i) => ({ ...i, ...next }))}
+          renderExtra={(q) => (
+            <div className="hint">
+              <Link to={`/propostas/nova?from=${encodeURIComponent(`${intent.id}#${q.id}`)}`}>
+                levantar proposta a partir desta pergunta →
+              </Link>
+            </div>
+          )}
+        />
       </section>
 
       <ContractsSection intent={intent} />
@@ -94,38 +99,69 @@ function BreakdownSection({ intent }: { intent: AppIntent }) {
 
 function WorkRow({ intent, work, works }: { intent: AppIntent; work: AppWork; works: AppWork[] }) {
   const { updateWork } = useIntents();
+  const [who, setWho] = useState("");
   const phase = workPhase(intent, work, works);
   const reasons = blockedReasons(intent, work, works);
   const badge =
     phase === "done" ? "ok" : phase === "active" ? "info" : phase === "ready" ? "ok" : "warn";
+  const qs = work.questions ?? [];
+  const decs = work.decisions ?? [];
+  const open = qs.filter(
+    (q) => !questionView({ questions: qs, decisions: decs }, q.id).resolved
+  ).length;
   return (
     <div className="card">
       <div className="card-head">
-        <strong>{work.id}</strong>
+        <Link to={`/work/${work.id}`}>
+          <strong>{work.id}</strong>
+        </Link>
         <span className={`badge ${badge}`}>{phase}</span>
         <span className="badge muted">peso {work.weight}</span>
         {work.repo && <span className="badge muted">{work.repo}</span>}
+        {work.assignee ? (
+          <span className="badge info">{work.assignee}</span>
+        ) : (
+          <span className="badge muted">sem dono</span>
+        )}
+        {open > 0 && <span className="badge warn">❓ {open} aberta(s)</span>}
       </div>
       <div className="meta">{work.title}</div>
       {work.coordinatesWith.length > 0 && (
         <div className="meta">coordinates-with: {work.coordinatesWith.join(", ")}</div>
       )}
       {phase === "blocked" && <div className="meta">⛔ bloqueado por: {reasons.join(" · ")}</div>}
-      {work.status !== "done" && phase !== "blocked" && (
+      {work.status === "active" && (
         <div className="form inline">
           <button
             className="btn"
-            onClick={() =>
-              updateWork(work.id, (w) => ({
-                ...w,
-                status: w.status === "draft" ? "active" : "done",
-              }))
-            }
+            onClick={() => updateWork(work.id, (w) => ({ ...w, status: "done" }))}
           >
-            marcar {work.status === "draft" ? "active" : "done"}
+            marcar done
           </button>
         </div>
       )}
+      {work.status === "draft" && phase === "ready" && (
+        <form
+          className="form inline"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (!who.trim()) return;
+            updateWork(work.id, (w) => ({ ...w, assignee: who.trim(), status: "active" }));
+          }}
+        >
+          <input
+            placeholder="quem assume? (@dono)"
+            value={who}
+            onChange={(e) => setWho(e.target.value)}
+          />
+          <button type="submit" className="btn primary">
+            atribuir + iniciar
+          </button>
+        </form>
+      )}
+      <div className="hint">
+        <Link to={`/work/${work.id}`}>abrir trabalho (q/r/d) →</Link>
+      </div>
     </div>
   );
 }
@@ -230,143 +266,6 @@ function CreateWork({ intent, works }: { intent: AppIntent; works: AppWork[] }) 
           Criar como {id}
         </button>
       </div>
-    </form>
-  );
-}
-
-function QuestionRow({
-  intent,
-  q,
-  updateIntent,
-}: {
-  intent: AppIntent;
-  q: AppQuestion;
-  updateIntent: UpdateIntent;
-}) {
-  const decision = intent.decisions.find((d) => d.decides === q.id);
-  return (
-    <div className="card">
-      <div className="card-head">
-        <strong>{q.id}</strong>
-        {decision ? (
-          <span className={`badge ${decision.status === "accepted" ? "ok" : "warn"}`}>
-            decisão: {decision.status}
-          </span>
-        ) : q.verdict ? (
-          <span className="badge warn">aguardando decisão</span>
-        ) : (
-          <span className="badge muted">aguardando exploração</span>
-        )}
-      </div>
-      <div className="meta">{q.question}</div>
-      {q.verdict && <div className="verdict">resultado da exploração: {q.verdict}</div>}
-      {decision?.rationale && <div className="meta">→ {decision.rationale}</div>}
-      {q.verdict && !decision && <DecideForm intent={intent} q={q} updateIntent={updateIntent} />}
-      {!q.verdict && <RecordVerdict intent={intent} q={q} updateIntent={updateIntent} />}
-      <div className="hint">
-        <Link to={`/propostas/nova?from=${encodeURIComponent(`${intent.id}#${q.id}`)}`}>
-          levantar proposta a partir desta pergunta →
-        </Link>
-      </div>
-    </div>
-  );
-}
-
-function DecideForm({
-  intent,
-  q,
-  updateIntent,
-}: {
-  intent: AppIntent;
-  q: AppQuestion;
-  updateIntent: UpdateIntent;
-}) {
-  const [rationale, setRationale] = useState("");
-  function decide(status: "accepted" | "rejected") {
-    updateIntent(intent.id, (i) => ({
-      ...i,
-      decisions: [
-        ...i.decisions,
-        {
-          id: `d${i.decisions.length + 1}`,
-          decides: q.id,
-          status,
-          rationale: rationale.trim() || undefined,
-          at: new Date().toISOString().slice(0, 10),
-        },
-      ],
-    }));
-  }
-  return (
-    <div className="form inline">
-      <input
-        placeholder="por quê? (rationale, opcional)"
-        value={rationale}
-        onChange={(e) => setRationale(e.target.value)}
-      />
-      <button className="btn ok" onClick={() => decide("accepted")}>
-        Aceitar
-      </button>
-      <button className="btn warn" onClick={() => decide("rejected")}>
-        Rejeitar
-      </button>
-    </div>
-  );
-}
-
-function RecordVerdict({
-  intent,
-  q,
-  updateIntent,
-}: {
-  intent: AppIntent;
-  q: AppQuestion;
-  updateIntent: UpdateIntent;
-}) {
-  const [verdict, setVerdict] = useState("");
-  function record(e: FormEvent) {
-    e.preventDefault();
-    if (!verdict.trim()) return;
-    updateIntent(intent.id, (i) => ({
-      ...i,
-      questions: i.questions.map((x) => (x.id === q.id ? { ...x, verdict: verdict.trim() } : x)),
-    }));
-  }
-  return (
-    <form className="form inline" onSubmit={record}>
-      <input
-        placeholder="registrar resultado da exploração (verdict)…"
-        value={verdict}
-        onChange={(e) => setVerdict(e.target.value)}
-      />
-      <button type="submit" className="btn">
-        Registrar resultado
-      </button>
-    </form>
-  );
-}
-
-function AddQuestion({ intent, updateIntent }: { intent: AppIntent; updateIntent: UpdateIntent }) {
-  const [text, setText] = useState("");
-  function add(e: FormEvent) {
-    e.preventDefault();
-    if (!text.trim()) return;
-    updateIntent(intent.id, (i) => ({
-      ...i,
-      questions: [...i.questions, { id: `q${i.questions.length + 1}`, question: text.trim() }],
-    }));
-    setText("");
-  }
-  return (
-    <form className="form inline" onSubmit={add}>
-      <input
-        placeholder="nova pergunta em aberto…"
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-      />
-      <button type="submit" className="btn primary">
-        + Pergunta
-      </button>
     </form>
   );
 }

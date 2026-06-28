@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useIntents } from "../store";
 import { LABEL, LABEL_PLURAL } from "../labels";
+import { questionView } from "../derive";
 
 export function Home() {
   const { intents } = useIntents();
@@ -23,7 +24,7 @@ export function Home() {
         {intents.map((i) => {
           const decided = i.decisions.length;
           const pend = i.questions.filter(
-            (q) => q.verdict && !i.decisions.some((d) => d.decides === q.id)
+            (q) => questionView(i, q.id).decision === "pending"
           ).length;
           return (
             <Link key={i.id} to={`/intent/${i.id}`} className="card click block">

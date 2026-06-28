@@ -1,38 +1,41 @@
 {
   "intents": [
     {
-      "id": "intent-0001",
-      "title": "Novo fluxo de login (com ajuda sob demanda e proativa)",
-      "objective": "login navegável atrás de flag, com ajuda ao usuário que falha",
-      "details": "Feature cross-repo. As entregas só nascem depois das perguntas respondidas.",
+      "id": "login_1",
+      "title": "Sistema de login (multi-repo)",
+      "objective": "novo fluxo de login, com ajuda sob demanda e proativa — navegável atrás de flag",
+      "details": "Feature cross-repo. As deliveries só nascem depois que as open-questions forem respondidas pelas explorations.",
       "references": [
-        { "label": "modelagem do login (produto)", "url": "https://docs.acme.example/login" }
+        {
+          "label": "modelagem do login (produto)",
+          "url": "https://docs.acme.example/login-modeling"
+        }
       ],
       "questions": [
         {
           "id": "q1",
-          "question": "o design system tem um formulário validado, ou cada MFE reimplementa?",
-          "verdict": "não — o DS não tem form validado; cada MFE reimplementa → precisa criar o componente"
+          "question": "o design system tem um formulário validado (email/site/telefone), ou cada MFE reimplementa?",
+          "verdict": "não — o DS não tem form validado; cada MFE reimplementa hoje → precisa criar o componente"
         },
         {
           "id": "q2",
-          "question": "suporte proativo é viável (detectar N falhas por pub/sub e abordar o usuário)?",
-          "verdict": "viável (pub/sub conta as falhas e dispara após N); SE ajuda é hipótese → experiment"
+          "question": "suporte proativo é viável? (detectar N falhas de login por pub/sub e abordar o usuário)",
+          "verdict": "viável (pub/sub conta as falhas e dispara após N); SE proativo AJUDA é hipótese de produto → experiment dedicado"
         }
       ],
       "decisions": [
         {
           "id": "d1",
-          "decides": "q1",
+          "decides": ["q1"],
           "status": "accepted",
-          "rationale": "verdict claro: criar o componente de form validado",
+          "rationale": "verdict claro: o DS não tem form validado → criar o componente",
           "at": "2026-06-27"
         },
         {
           "id": "d2",
-          "decides": "q2",
+          "decides": ["q2"],
           "status": "accepted",
-          "rationale": "viável; a ajuda sob demanda absorve a POC (o proativo A/B vira experiment via proposal)",
+          "rationale": "viável; a ajuda sob demanda absorve a POC (o proativo A/B vira experiment dedicado, via proposal)",
           "at": "2026-06-27"
         }
       ],
@@ -40,14 +43,15 @@
         { "name": "form-component", "awaits": "q1" },
         { "name": "failure-event", "awaits": "q2" }
       ],
-      "createdAt": "2026-06-27"
+      "createdAt": "2026-06-27",
+      "updatedAt": "2026-06-28"
     }
   ],
   "proposals": [
     {
       "id": "prop-001",
       "what": "testar se o suporte proativo (abordar após N falhas de login) melhora a conclusão do login, ou atrapalha",
-      "raisedFrom": "intent-0001#q2",
+      "raisedFrom": "login_1#q2",
       "owner": "@produto-growth",
       "status": "open",
       "tags": ["growth", "login", "suporte-proativo"],
@@ -55,13 +59,14 @@
       "confidence": "medium",
       "effort": "medium",
       "promoteTo": "experiment",
-      "createdAt": "2026-06-27"
+      "createdAt": "2026-06-27",
+      "updatedAt": "2026-06-27"
     }
   ],
   "works": [
     {
-      "id": "deliv-form-component",
-      "intent": "intent-0001",
+      "id": "form-component_1",
+      "intent": "login_1",
       "kind": "delivery",
       "title": "Componente de formulário validado (no design system)",
       "weight": "M",
@@ -69,31 +74,27 @@
       "blockedBy": [],
       "coordinatesWith": ["form-component"],
       "status": "draft",
-      "createdAt": "2026-06-28"
+      "assignee": null,
+      "questions": [],
+      "decisions": [],
+      "createdAt": "2026-06-28",
+      "updatedAt": "2026-06-28"
     },
     {
-      "id": "deliv-login-mfe",
-      "intent": "intent-0001",
-      "kind": "delivery",
-      "title": "Tela de login (MFE) consumindo o form",
-      "weight": "L",
-      "repo": "acme-mfe-identity",
-      "blockedBy": ["deliv-form-component"],
-      "coordinatesWith": ["form-component"],
-      "status": "draft",
-      "createdAt": "2026-06-28"
-    },
-    {
-      "id": "deliv-help-on-demand",
-      "intent": "intent-0001",
+      "id": "help-on-demand_1",
+      "intent": "login_1",
       "kind": "delivery",
       "title": "Ajuda sob demanda (absorve a POC do listener)",
       "weight": "L",
       "repo": "acme-mfe-support",
-      "blockedBy": ["deliv-form-component"],
+      "blockedBy": [],
       "coordinatesWith": ["failure-event"],
       "status": "draft",
-      "createdAt": "2026-06-28"
+      "assignee": null,
+      "questions": [],
+      "decisions": [],
+      "createdAt": "2026-06-28",
+      "updatedAt": "2026-06-28"
     }
   ]
 }
