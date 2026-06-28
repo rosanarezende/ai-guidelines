@@ -165,7 +165,7 @@ A lista de ligações está **fechada: 10 arestas, cada uma com 1 critério úni
 | `raises`                      | proveniência | trabalho levanta um `proposal`                                                                         |
 | `blocked-by` ⟷ `blocks`       | dependência  | espera um TRABALHO concreto concluir                                                                   |
 | `depends-on`                  | dependência  | depende de PLATAFORMA/VERSÃO/build                                                                     |
-| `coordinates-with`            | dependência  | compartilham um CONTRATO (simétrica)                                                                   |
+| `coordinates-with`            | dependência  | o CONTRATO comum que coordena (nome na intent); work↔work = blocked-by/blocks                          |
 | `answers`                     | investigação | a exploration DECLARA a `question` que responde (→ `answered`; `resolved` exige a `decision` = o GATE) |
 | `supported-by`                | investigação | `decision` se apoia na sua EVIDÊNCIA                                                                   |
 | `closed-by`                   | fecho        | trabalho → seu ARTEFATO DE FECHO (answer/outcome/postmortem)                                           |
@@ -222,6 +222,8 @@ O **CONTEÚDO** (briefs · closings/answers · texto do q/r/d) **vive à parte**
 | **CONTEÚDO**   | briefs · answers · texto do q/r/d               | arquivos (no repo/workspace) | a pessoa, ao **abrir** o nó                   |
 
 **Decidido na sim v2 (2026-06-27 — supersede a forma antiga de 274/278):** a amarra intent↔exploration = a **exploration declara `answers: intent#qN`** (qualificado, cross-repo); a intent **deriva** `answered-by`/`status`/`verdict` (**A+**, check anti-drift); contratos = UMA lista `[{name, awaits?}]` (known/pending **derivado**, sem baldes); saiu o `unlocks` (destrave derivado). **Provado rodando** pelos bancos TS (`_banks/`): fechar a exploration → q **`answered`** (evidência); o **GATE** (`decision` humano aceita, `supported-by` o answer) → q `resolved` → contrato `known` → deliveries destravam. **Decidido (enxugar, 2026-06-27):** o `intent.yml` fica só **INPUT** (título/objetivo/refs · `open-questions {id,question}` · `contracts`); o DERIVADO (`answered-by`/`status`/`verdict`/`breaks-into`) o **BANCO** projeta — não duplica no arquivo. Resolve o `embute × referencia`: **input no arquivo, derivado no banco**.
+
+**Decidido (owner 2026-06-28) — o LAYOUT físico do backend "arquivos":** cada **repo de trabalho** carrega um **`.governance/` na raiz** (sidecar, separado do código) com `registry/<kind>.yml` (índices) + `works/<tipo>/<slug>_<num>/` (cada work na subpasta do seu tipo). O **meta-repo** (`acme-governance`) é a governança da **org** → guarda `intents/` (não aninha `.governance/` em si mesmo). _(o `.governance/` é também a casa natural do manifesto de **capabilities/contratos** do repo — elo com a investigação framework × conhecimento.)_ É a forma "arquivos" da Lente 5; o **banco deriva** de cada `.governance/`.
 
 ---
 
@@ -317,6 +319,12 @@ O **CONTEÚDO** (briefs · closings/answers · texto do q/r/d) **vive à parte**
 - 🟢 **Proveniência = `derives-from` ⟷ `results-in`** (mesma aresta, 2 direções). `A results-in B` **CRIA o alvo B** por padrão (herda o contexto); **salvo** quando aponta pra um nó **que já existe**. **`consumido × persiste`** (proposal vira / exploration permanece) = **status do NÓ**, não da aresta — por isso `spawned-by`/`promoted-to`/`from-spike` sumiram.
 - 🟢 **`coordinates-with`/`depends-on` ficam NAS ENTREGAS** (P2) — nos trabalhos concretos de cada repo (nós **duráveis**), não na ideia; a ideia só **origina**. Resolvem em **contratos** (coordinates-with = compartilhar um contrato; depends-on = esperar um build/versão). _(exemplos: login multi-repo + 3-devs.)_
 - 🟢 **Uma ideia em N repos → N entregas** (P3) — uma `delivery`/trabalho por repo que precisa de trabalho; a **feature** é uma `intent` multi-repo que **`breaks-into`** essas entregas (não um repo dedicado; o **banco** agrega).
+
+**Estrutura física & ids (Lente 5/3 — owner 2026-06-28)**
+
+- 🟢 **`.governance/` por repo** — cada repo de trabalho tem `.governance/{registry/<kind>.yml · works/<tipo>/<slug>_<num>/}` (sidecar, separa governança do código); o meta-repo guarda `intents/`. Forma "arquivos" da Lente 5; o **banco deriva** de cada `.governance/`. _(também a casa do manifesto de capabilities/contratos do repo.)_
+- 🟢 **id = slug + numérico EMBUTIDO** (`deliv-form-component_1`): slug legível + sufixo numérico estável (≈16-bit, por repo) = a chave que o banco indexa e sobrevive a rename do slug. _(some o campo `ref` separado.)_
+- 🟢 **`coordinates-with` aponta pro CONTRATO** comum (nome declarado na intent), **não** pro work; a dependência work↔work (um espera o outro) vai em **`blocked-by`/`blocks`**. Tira a redundância da aresta "simétrica".
 
 ---
 
