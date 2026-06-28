@@ -12,7 +12,7 @@ _templates/
   intent.yml · registry-entry.yml · proposal.yml · exploration.yml · state.yml    ← estrutura / índice / referência (ancoram arestas)
   briefs/         ← CONTEÚDO de abertura por kind (sem arestas)
   closings/       ← CONTEÚDO de fecho por kind (sem arestas)
-  deliberation/   ← q/r/d: question · research · decision · decision-brief
+  deliberation/   ← q/r/d: question · research · decision + deliberation.yml (o mapa)
 ```
 
 ## Catálogo
@@ -46,8 +46,8 @@ _templates/
 
 **Deliberação (q/r/d) — pasta `deliberation/`**
 
-| `question.md` · `research.md` · `decision.md` · `decision-brief.yml` | a cadeia pergunta → investigação → decisão (+ índice derivado) |
-| -------------------------------------------------------------------- | -------------------------------------------------------------- |
+| `question.md` · `research.md` · `decision.md` · `deliberation.yml` | a cadeia pergunta → investigação → decisão (+ o mapa append-only) |
+| ------------------------------------------------------------------ | ----------------------------------------------------------------- |
 
 **Estado**
 
@@ -77,7 +77,7 @@ _templates/
 - ✂️ **`incident` separado em abertura × fechamento:** `incident-brief.md` (registro) + `incident-postmortem.md`
   (causa-raiz). Simétrico a experiment-outcome / exploration-answer.
 - ✏️ **`registry-entry.yml`** reposicionado como **índice** (entrada de `registry/<kind>.yml`), não abertura.
-- ✅ **Mantidos:** `question` · `research` · `decision` · `decision-brief` · `state` · `experiment-outcome` ·
+- ✅ **Mantidos:** `question` · `research` · `decision` · `deliberation` _(ex-`decision-brief`)_ · `state` · `experiment-outcome` ·
   `exploration-answer` · `proposal`.
 - 📁 **Reorg de pastas (referência ≠ conteúdo):** `registry-entry`/`proposal` subiram pra raiz; `briefs/` + `closings/` separam o **conteúdo por kind**; a pasta `registry/` saiu. **Briefs viraram conteúdo puro** — as arestas (`intent`, `closes-with`) migraram pro `registry`.
 - 🔗 **Amarra intent↔exploration migrada (forma v2, validada na sim):** a **exploration** ancora a aresta **`answers: intent#qN`**; a intent **deriva** `answered-by`/`status`/`verdict` — **materializado no BANCO** (o `intent.yml` fica só INPUT); `contracts` viraram **uma lista** `[{name, awaits?}]` (known/pending derivado); **`unlocks` saiu** (o destrave é derivado). Novo `exploration.yml` (registry próprio); briefs/answers **referenciam** o id (`exploration: <id>`), não duplicam.
@@ -115,14 +115,14 @@ _templates/
 | `experiment-outcome.md`  | 🔶     | won→`results-in`; ⚠️ ref `brief` stale + `outcome` duplicado (validação do experiment).       |
 | `incident-postmortem.md` | ❓     | bloqueado pela **frente do incident**.                                                        |
 
-### `deliberation/` — q/r/d (question · research · decision · decision-brief)
+### `deliberation/` — q/r/d (question · research · decision · deliberation)
 
-| Molde                | Status | Nota / o que falta confirmar                                                                       |
-| -------------------- | ------ | -------------------------------------------------------------------------------------------------- |
-| `question.md`        | 🔶     | vocab PT decidido; confirmar mode/opções/estado-iteração + relação com `open-questions` da intent. |
-| `decision.md`        | 🔶     | `grounded-by`→`supported-by` feito; resto não revisado.                                            |
-| `research.md`        | ❓     | não revisado nesta rodada.                                                                         |
-| `decision-brief.yml` | ❓     | índice derivado; não revisado nesta rodada.                                                        |
+| Molde              | Status | Nota / o que falta confirmar                                                                              |
+| ------------------ | ------ | --------------------------------------------------------------------------------------------------------- |
+| `question.md`      | 🔶     | vocab PT decidido; confirmar mode/opções/estado-iteração + relação com `open-questions` da intent.        |
+| `decision.md`      | 🔶     | `grounded-by`→`supported-by` feito; resto não revisado.                                                   |
+| `research.md`      | ❓     | não revisado nesta rodada.                                                                                |
+| `deliberation.yml` | 🔶     | mapa VIVO append-only (decisão = nó · `decides`/`supported-by`/`spawns`/`supersedes`); ex-decision-brief. |
 
 **Transversais (valem p/ vários):** `sealed` nos briefs · limiar de densidade (brief vs só registry) · a
 **frente do incident** (bypass-com-prazo + alerta + postmortem). _(o "status por-kind no registry" já
