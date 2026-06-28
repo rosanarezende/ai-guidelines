@@ -393,3 +393,115 @@ code {
 .logitem.dead .badge {
   text-decoration: none;
 }
+
+/* board-painel: a iniciativa contada pra um humano */
+.panel {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 18px 20px;
+  margin-bottom: 18px;
+}
+
+.panel-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.panel-head h2 {
+  margin: 0;
+  border: none;
+  padding: 0;
+}
+
+.metarow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  font-size: 13px;
+  color: var(--muted);
+  margin: 8px 0 16px;
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.metric {
+  background: var(--bg);
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.metric-label {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.metric-value {
+  font-size: 22px;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.metric-sub {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.workline {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 9px 0;
+  border-top: 1px solid var(--line);
+  font-size: 14px;
+}
+
+.workline .who {
+  margin-left: auto;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.next {
+  margin-top: 14px;
+  padding: 10px 12px;
+  background: var(--bg);
+  border-radius: 8px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.tag {
+  font-size: 11px;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  padding: 2px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.panel-title {
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.panel-title:hover {
+  color: var(--info);
+}
+
+.open-link {
+  margin-left: auto;
+  color: var(--info);
+  text-decoration: none;
+  font-weight: 600;
+  white-space: nowrap;
+}

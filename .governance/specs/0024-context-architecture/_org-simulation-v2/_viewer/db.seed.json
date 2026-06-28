@@ -5,6 +5,8 @@
       "title": "Sistema de login (multi-repo)",
       "objective": "novo fluxo de login, com ajuda sob demanda e proativa — navegável atrás de flag",
       "details": "Feature cross-repo. As deliveries só nascem depois que as open-questions forem respondidas pelas explorations.",
+      "owner": "@ana-pm",
+      "status": "active",
       "references": [
         {
           "label": "modelagem do login (produto)",
@@ -81,13 +83,29 @@
       "updatedAt": "2026-06-28"
     },
     {
+      "id": "login-mfe_1",
+      "intent": "login_1",
+      "kind": "delivery",
+      "title": "Tela de login (MFE) consumindo o form",
+      "weight": "L",
+      "repo": "acme-mfe-identity",
+      "blockedBy": ["form-component_1"],
+      "coordinatesWith": ["form-component"],
+      "status": "draft",
+      "assignee": null,
+      "questions": [],
+      "decisions": [],
+      "createdAt": "2026-06-28",
+      "updatedAt": "2026-06-28"
+    },
+    {
       "id": "help-on-demand_1",
       "intent": "login_1",
       "kind": "delivery",
       "title": "Ajuda sob demanda (absorve a POC do listener)",
       "weight": "L",
       "repo": "acme-mfe-support",
-      "blockedBy": [],
+      "blockedBy": ["form-component_1"],
       "coordinatesWith": ["failure-event"],
       "status": "draft",
       "assignee": null,

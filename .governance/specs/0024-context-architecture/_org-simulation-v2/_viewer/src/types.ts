@@ -42,6 +42,8 @@ export interface AppIntent {
   questions: AppQuestion[];
   decisions: AppDecision[];
   contracts?: AppContract[]; // os contratos que a feature coordena (known/pending = DERIVADO)
+  owner?: string; // quem TOCA a iniciativa (a dona)
+  status?: string; // active | paused | done | dropped
   createdAt: string;
   updatedAt?: string;
 }
