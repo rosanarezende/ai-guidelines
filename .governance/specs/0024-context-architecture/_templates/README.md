@@ -117,12 +117,12 @@ _templates/
 
 ### `deliberation/` — q/r/d (question · research · decision · deliberation)
 
-| Molde              | Status | Nota / o que falta confirmar                                                                              |
-| ------------------ | ------ | --------------------------------------------------------------------------------------------------------- |
-| `question.md`      | 🔶     | vocab PT decidido; confirmar mode/opções/estado-iteração + relação com `open-questions` da intent.        |
-| `decision.md`      | 🔶     | `grounded-by`→`supported-by` feito; resto não revisado.                                                   |
-| `research.md`      | ❓     | não revisado nesta rodada.                                                                                |
-| `deliberation.yml` | 🔶     | mapa VIVO append-only (decisão = nó · `decides`/`supported-by`/`spawns`/`supersedes`); ex-decision-brief. |
+| Molde              | Status | Nota / o que falta confirmar                                                                                  |
+| ------------------ | ------ | ------------------------------------------------------------------------------------------------------------- |
+| `question.md`      | 🔶     | vocab PT decidido; confirmar mode/opções/estado-iteração + relação com `open-questions` da intent.            |
+| `decision.md`      | 🔶     | `grounded-by`→`supported-by` feito; resto não revisado.                                                       |
+| `research.md`      | ❓     | não revisado nesta rodada.                                                                                    |
+| `deliberation.yml` | 🔶     | mapa VIVO append-only (decisão = nó · `decides`/`supported-by`/`results-in`/`supersedes`); ex-decision-brief. |
 
 **Transversais (valem p/ vários):** `sealed` nos briefs · limiar de densidade (brief vs só registry) · a
 **frente do incident** (bypass-com-prazo + alerta + postmortem). _(o "status por-kind no registry" já

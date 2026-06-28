@@ -1,6 +1,6 @@
 node: work-brief
 kind: fix
-id: fix-NNN
+id: <slug>_<num>
 references: []
 
 symptom: # sintoma (o usuário vê)

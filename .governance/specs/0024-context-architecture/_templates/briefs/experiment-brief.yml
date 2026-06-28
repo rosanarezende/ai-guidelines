@@ -1,6 +1,6 @@
 node: work-brief
 kind: experiment
-id: exp-NNN
+id: <slug>_<num>
 sealed: true # sela a hipótese (pré-registro)
 references: []
 

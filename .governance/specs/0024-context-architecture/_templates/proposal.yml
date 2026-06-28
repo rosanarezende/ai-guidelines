@@ -17,4 +17,5 @@ entries: []
 #     promote-to: <delivery | experiment | exploration | patch | fix> # se promovida, o tipo que vira
 #     opens-intent: <intent-id> # se promove pra experiment/objetivo → a intent aberta (às vezes paralela)
 #     discard-reason: "<se descartada, por quê>"
-#     date: <YYYY-MM-DD>
+#     created-at: <YYYY-MM-DD>
+#     updated-at: <YYYY-MM-DD> # última mutação (status/disposição)

@@ -1,7 +1,7 @@
 ---
 node: incident-postmortem
 kind: incident
-id: inc-NNN # mesmo id da abertura
+id: <slug>_<num> # mesmo id da abertura
 ---
 
 # Postmortem — <título do incidente>

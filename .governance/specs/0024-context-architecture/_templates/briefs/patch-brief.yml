@@ -1,6 +1,6 @@
 node: work-brief
 kind: patch
-id: patch-NNN
+id: <slug>_<num>
 references: []
 
 what: # o que (invisível): dep bump | lint | refactor | security

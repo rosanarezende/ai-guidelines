@@ -3,6 +3,7 @@ node: intent
 sealed: false # intent é viva (não sela)
 
 created-at: 2026-NN-NN
+updated-at: 2026-NN-NN # última mutação (status/decisões/works); só nós MUTÁVEIS — append-only não atualiza
 closed-at: # só quando terminal (done | dropped); vazio em active/paused
 
 id: intent-NNN

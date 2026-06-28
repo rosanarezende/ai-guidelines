@@ -1,13 +1,13 @@
 # deliberation.yml — mapa VIVO da deliberação de uma intent (≈ state; renomeado de decision-brief).
 # Decidir = APPEND um nó (status accepted|rejected). "Pending" NÃO é nó — é o estado DERIVADO de uma question
 #   respondida (tem verdict) e ainda SEM decisão. Reabrir = nó NOVO + `supersedes` (nunca virar o status do antigo).
-# Carrega os NÓS + ARESTAS (decides · supported-by · spawns · supersedes); o texto/rationale é conteúdo (denso → decision.md).
+# Carrega os NÓS + ARESTAS (decides · supported-by · results-in · supersedes); o texto/rationale é conteúdo (denso → decision.md).
 decisions:
   - id: d1
-    decides: q1 # a open-question da intent que esta decisão resolve
+    decides: [q1] # as open-questions que a decisão resolve (lista — uma decisão pode fechar VÁRIAS)
     status: accepted # accepted | rejected (só decisões CONCLUÍDAS são nós)
     supported-by: <repo>/<exploration-id> # a evidência (o exploration-answer) — aresta Lente 3
     rationale: "<por quê — 1 linha; denso → decision.md>"
-    spawns: [<repo>/<work-id>, ...] # o trabalho que a decisão dispara
+    results-in: [<repo>/<tipo>/<work-id>, ...] # o trabalho que a decisão CRIA (aresta Lente 3 results-in)
     # supersedes: <id de uma decisão anterior> # SÓ na reabertura (append-only)
     decided-at: <YYYY-MM-DD>

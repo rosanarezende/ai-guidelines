@@ -1,12 +1,13 @@
 # registry/registry-entry.yml — SCHEMA BASE de uma entrada de índice (não é um registry de uso).
 # CRIE um registry/<kind>.yml (delivery/experiment/exploration/incident/fix/patch) com base neste;
 # documente APENAS os campos próprios do kind (lista no fim). Os comuns não têm extras → só `entries: []`.
-id: <kind-prefix>-NNN # deliv | exp | exploration | inc | patch | fix
+id: <slug>_<num> # slug LEGÍVEL + numérico embutido (form-component_1); SEM prefixo de tipo nem diminutivo — o TIPO vem do registry/<kind>.yml + da pasta works/<kind>/. o _num é a chave estável (≈16-bit, por repo) que sobrevive a rename
 kind: <delivery | experiment | exploration | incident | fix | patch>
 title: <curto>
-status: <draft | active | done> # progresso PRÓPRIO do trabalho; "bloqueado"/"pausado" são DERIVADOS (de blocked-by/pausa), não status guardados
+status: <draft | active | done> # progresso PRÓPRIO; NASCE draft no breakdown; "bloqueado"/"pausado" são DERIVADOS (não guardados)
+assignee: <@quem | null> # quem ASSUMIU o trabalho. `active` EXIGE assignee + início real; sem assignee = draft (ready/blocked, esperando alguém pegar). Vale p/ TODO work, incl. exploration
 weight: <S | M | L | XL> # peso/tamanho do trabalho — p/ medir + o caminho crítico ponderado (planning do breakdown)
-workspace: works/<kind>_<slug>/ # só quando a densidade pede artefatos próprios; senão, omitir
+workspace: works/<kind>/<slug>_<num>/ # relativo a .governance/; subpasta por TIPO; só quando a densidade pede artefatos próprios
 intent: <intent-id | null> # a intent dona (back-ref); null = reativo/standalone
 
 # arestas (opcionais; 1-N = listas) — AGRUPADAS por categoria pra não se confundirem:
@@ -15,13 +16,14 @@ blocked-by: [<repo/id>, ...] # espera estes TRABALHOS concluírem
 blocks: [<repo/id>, ...] # bloqueia estes (reverso de blocked-by; basta anotar 1 lado, o sistema deduz)
 # · cross-repo:
 depends-on: [<repo/id>, ...] # depende de PLATAFORMA/VERSÃO/build
-coordinates-with: [<repo/id>, ...] # compartilha um CONTRATO
+coordinates-with: [<contrato>, ...] # o(s) CONTRATO(s) comum(ns) que coordena (nome declarado na intent) — a dependência work↔work vai em blocked-by/blocks
 # · proveniência (de onde veio ⟷ pra onde leva):
 derives-from: [<repo/id>, ...] # DE ONDE veio / no que se baseia: POC de exploration, proposal promovido, trabalho anterior (funde spawned-by + from-exploration)
 results-in: [<id>, ...] # PRA ONDE leva (reverso de derives-from; basta anotar 1 lado)
 # As DEMAIS arestas da Lente 3 NÃO moram aqui — ancoradas noutro nó: breaks-into/resolves → intent · raises → proposal · supported-by/supersedes → decision. Mapa completo: "Casa de cada aresta" na Lente 3 do tracker.
 
-date: <YYYY-MM-DD> # abertura
+created-at: <YYYY-MM-DD> # abertura
+updated-at: <YYYY-MM-DD> # última mutação (status/assignee/…) — só nós MUTÁVEIS
 closed-at: <YYYY-MM-DD> # só quando terminal (done/resolved) — vale p/ qualquer kind
 closed-by: <ref ao artefato de fecho> # ref ao answer/outcome/postmortem (quando há fecho denso) — o registry referencia; o doc é só conteúdo
 

@@ -1,6 +1,6 @@
 node: work-brief
 kind: incident
-id: inc-NNN
+id: <slug>_<num>
 severity: # low | medium | high | critical
 status: # mitigating | mitigated | resolved
 merge-priority-until: # data

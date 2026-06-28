@@ -1,6 +1,6 @@
 node: work-brief
 kind: delivery
-id: deliv-NNN
+id: <slug>_<num>
 sealed: true
 references: []
 
