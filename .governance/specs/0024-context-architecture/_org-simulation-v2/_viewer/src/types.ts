@@ -90,6 +90,19 @@ export interface AppWork {
   updatedAt?: string;
 }
 
+// exploration = FERRAMENTA (Lente 4): investiga e RESPONDE uma question (a FONTE do verdict). Coleção própria.
+export interface AppExploration {
+  id: string;
+  repo?: string;
+  answers: string; // "<intent>#<qN>" — a question que responde
+  status: "draft" | "active" | "done";
+  assignee?: string | null;
+  fate?: "throwaway" | "promoted" | "parked";
+  verdict?: string; // o resultado (a resposta) — a question DERIVA o `answered`/verdict daqui
+  createdAt: string;
+  updatedAt?: string;
+}
+
 // ── o BOARD DERIVADO pelo banco (lê db.json → snapshot.json) ──
 export interface BoardQuestion {
   id: string;

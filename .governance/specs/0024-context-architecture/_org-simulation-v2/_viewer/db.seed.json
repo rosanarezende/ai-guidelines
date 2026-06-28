@@ -16,13 +16,11 @@
       "questions": [
         {
           "id": "q1",
-          "question": "o design system tem um formulário validado (email/site/telefone), ou cada MFE reimplementa?",
-          "verdict": "não — o DS não tem form validado; cada MFE reimplementa hoje → precisa criar o componente"
+          "question": "o design system tem um formulário validado (email/site/telefone), ou cada MFE reimplementa?"
         },
         {
           "id": "q2",
-          "question": "suporte proativo é viável? (detectar N falhas de login por pub/sub e abordar o usuário)",
-          "verdict": "viável (pub/sub conta as falhas e dispara após N); SE proativo AJUDA é hipótese de produto → experiment dedicado"
+          "question": "suporte proativo é viável? (detectar N falhas de login por pub/sub e abordar o usuário)"
         }
       ],
       "decisions": [
@@ -47,6 +45,30 @@
       ],
       "createdAt": "2026-06-27",
       "updatedAt": "2026-06-28"
+    }
+  ],
+  "explorations": [
+    {
+      "id": "form-validation_1",
+      "repo": "acme-design-system",
+      "answers": "login_1#q1",
+      "status": "done",
+      "assignee": "@dev-ds",
+      "fate": "throwaway",
+      "verdict": "não — o DS não tem form validado; cada MFE reimplementa hoje → precisa criar o componente",
+      "createdAt": "2026-06-27",
+      "updatedAt": "2026-06-27"
+    },
+    {
+      "id": "proactive-support_1",
+      "repo": "acme-mfe-support",
+      "answers": "login_1#q2",
+      "status": "done",
+      "assignee": "@dev-support",
+      "fate": "promoted",
+      "verdict": "viável (pub/sub conta as falhas e dispara após N); SE proativo AJUDA é hipótese de produto → experiment dedicado",
+      "createdAt": "2026-06-26",
+      "updatedAt": "2026-06-27"
     }
   ],
   "proposals": [

@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useIntents } from "../store";
-import type { AppIntent, AppQuestion, AppWork } from "../types";
+import type { AppIntent, AppQuestion, AppWork, AppExploration } from "../types";
 import { workPhase, criticalPath, questionView, contractKnown, blockedReasons } from "../derive";
 import type { WorkPhase } from "../derive";
 
 // Board = PAINEL das iniciativas, derivado AO VIVO do db.json (via o store). Conta a história pra um humano.
 export function Board() {
-  const { intents, works } = useIntents();
+  const { intents, works, explorations } = useIntents();
   return (
     <>
       <header>
@@ -21,13 +21,22 @@ export function Board() {
           key={intent.id}
           intent={intent}
           works={works.filter((w) => w.intent === intent.id)}
+          explorations={explorations.filter((e) => e.answers.startsWith(`${intent.id}#`))}
         />
       ))}
     </>
   );
 }
 
-function IntentPanel({ intent, works }: { intent: AppIntent; works: AppWork[] }) {
+function IntentPanel({
+  intent,
+  works,
+  explorations,
+}: {
+  intent: AppIntent;
+  works: AppWork[];
+  explorations: AppExploration[];
+}) {
   const qResolved = intent.questions.filter((q) => questionView(intent, q.id).resolved).length;
   const contracts = intent.contracts ?? [];
   const known = contracts.filter((c) => contractKnown(intent, c)).length;
@@ -98,6 +107,26 @@ function IntentPanel({ intent, works }: { intent: AppIntent; works: AppWork[] })
       {intent.questions.map((q) => (
         <QuestionRow key={q.id} intent={intent} q={q} />
       ))}
+
+      {explorations.length > 0 && (
+        <>
+          <h3>
+            Investigação{" "}
+            <span className="hint">(as explorations que responderam — ferramenta, Lente 4)</span>
+          </h3>
+          {explorations.map((e) => (
+            <div className="workline" key={e.id}>
+              <span className={`badge ${e.status === "done" ? "ok" : "info"}`}>{e.status}</span>
+              <strong>{e.id}</strong>
+              <span className="hint">
+                {e.repo} · responde {e.answers.split("#")[1]}
+                {e.fate ? ` · ${e.fate}` : ""}
+              </span>
+              <span className="who">{e.assignee ? <>👤 {e.assignee}</> : "sem dono"}</span>
+            </div>
+          ))}
+        </>
+      )}
 
       <h3>Trabalhos — quem está em quê</h3>
       {works.length === 0 && <p className="hint">(sem trabalhos — faça o breakdown no detalhe)</p>}
