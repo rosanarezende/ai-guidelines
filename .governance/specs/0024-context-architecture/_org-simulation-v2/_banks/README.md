@@ -1,6 +1,6 @@
 # \_banks — os bancos derivados (Lente 5), em TypeScript
 
-> **Grafos que se comunicam → bancos derivados.** Cada banco lê SÓ o seu grafo; a governança consome as **projeções** dos repos (banco→banco), não os arquivos deles. Nada de estado derivado guardado — recomputa do grafo a cada run.
+> **Grafos que se comunicam → bancos derivados.** Cada banco lê SÓ o seu grafo; a governança consome as **projeções** dos repos (banco→banco), não os arquivos deles. Recomputa do grafo a cada run; o que ele **materializa** em `_out/` é um **snapshot regenerável** (GERADO), não autoridade.
 
 ## Rodar
 
@@ -10,16 +10,19 @@ node _banks/run.ts
 
 _(TypeScript nativo do Node 24 — type-stripping, sem build nem dependência extra.)_
 
+Gera os **boards** em `_banks/_out/` (Markdown, **GERADO** — projeção derivada, regenerável): um por repo + o dashboard da governança.
+
 ## Arquivos (1 responsabilidade cada)
 
-| arquivo                | papel                                                                                  |
-| ---------------------- | -------------------------------------------------------------------------------------- |
-| `types.ts`             | tipos do grafo (registries) × tipos das projeções (o que cada banco publica)           |
-| `io.ts`                | leitura tipada do disco (YAML + frontmatter); descoberta dos repos                     |
-| `derive-repo.ts`       | **banco do repo** — projeta só os arquivos do repo (verdict ← answer, via closed-by)   |
-| `derive-governance.ts` | **banco de governança** — consome as projeções dos repos e resolve questions/contratos |
-| `report.ts`            | renderização (separada da lógica)                                                      |
-| `run.ts`               | orquestra: deriva os repos → passa as projeções pra governança → imprime               |
+| arquivo                | papel                                                                                    |
+| ---------------------- | ---------------------------------------------------------------------------------------- |
+| `types.ts`             | tipos do grafo (registries) × tipos das projeções (o que cada banco publica)             |
+| `io.ts`                | leitura tipada do disco (YAML + frontmatter); descoberta dos repos                       |
+| `derive-repo.ts`       | **banco do repo** — projeta só os arquivos do repo (verdict ← answer, via closed-by)     |
+| `derive-governance.ts` | **banco de governança** — consome as projeções dos repos e resolve questions/contratos   |
+| `report.ts`            | renderização pro **console** (separada da lógica)                                        |
+| `materialize.ts`       | salva as projeções como **boards Markdown** em `_out/` (snapshot derivado, visualizável) |
+| `run.ts`               | orquestra: deriva → reporta (console) → **materializa** os boards em `_out/`             |
 
 ## A comunicação
 
