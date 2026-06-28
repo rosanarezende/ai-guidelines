@@ -366,6 +366,12 @@ definem** (e não se versionam/citam). Modelo vivo, não-autoridade.
 - ⚠️ **Correção pendente no sim atual:** os arquivos hoje têm `help-on-demand_1` SEM `blocked-by` e SEM `login-mfe_1` (drift da reconciliação) → **1º passo da aplicação = corrigir os deps + criar `login-mfe_1`** (file-sim + app).
 - _(a v1 também tinha **auth** (acme-api, contrato t0) + **wiring** (acme-shell, blocked-by login-mfe+help) — FORA do foco agora; decidir depois se entram.)_
 
+**1b) O EXPERIMENT do suporte PROATIVO (via `prop-001`):** a `proactive-support` (exploration-2) respondeu "viável" — mas **SE abordar proativamente AJUDA ou ATRAPALHA é HIPÓTESE** → nasceu a **`prop-001`** (raised-by a exploration · `promote-to: experiment`). A distinção que o login expõe:
+
+- **ajuda SOB DEMANDA** (o usuário clica) = `delivery` comprometida → é o `help-on-demand_1`.
+- **ajuda PROATIVA** (o sistema aborda após N falhas) = **`experiment`** (A/B: proativo on/off → reduz abandono?).
+- Quando promovida, a `prop-001` abre uma **intent DEDICADA** (recomendado: experiment em intent própria, às vezes paralela) — é aí que iteramos o **`experiment-brief`** (hipótese · métricas · instrumentação · feature-flag) e depois o **`experiment-outcome`** (won/lost), contra um caso real. **FUTURO** — depois do q/r/d da 1ª delivery.
+
 **2) PRÓXIMO PASSO — simular a 1ª delivery sendo CONSTRUÍDA (`form-component_1`):** ao atribuir+iniciar (→`active`), o **próprio work** levanta seu q/r/d. Vamos **ESCREVER os arquivos** (em `works/delivery/form-component_1/`): as `question`s, os `research`/answers (verdicts), as `decision`s + um **`deliberation.yml` do work**. Cenário de stress (de propósito: 1 pergunta sem decisão · 1 decisão multi-questão · 1 reabertura):
 
 | #   | pergunta                                            | research (verdict)               | decisão                                              |
