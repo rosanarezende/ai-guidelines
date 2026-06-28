@@ -36,6 +36,10 @@
           "at": "2026-06-27"
         }
       ],
+      "contracts": [
+        { "name": "form-component", "awaits": "q1" },
+        { "name": "failure-event", "awaits": "q2" }
+      ],
       "createdAt": "2026-06-27"
     }
   ],
@@ -52,6 +56,44 @@
       "effort": "medium",
       "promoteTo": "experiment",
       "createdAt": "2026-06-27"
+    }
+  ],
+  "works": [
+    {
+      "id": "deliv-form-component",
+      "intent": "intent-0001",
+      "kind": "delivery",
+      "title": "Componente de formulário validado (no design system)",
+      "weight": "M",
+      "repo": "acme-design-system",
+      "blockedBy": [],
+      "coordinatesWith": ["form-component"],
+      "status": "draft",
+      "createdAt": "2026-06-28"
+    },
+    {
+      "id": "deliv-login-mfe",
+      "intent": "intent-0001",
+      "kind": "delivery",
+      "title": "Tela de login (MFE) consumindo o form",
+      "weight": "L",
+      "repo": "acme-mfe-identity",
+      "blockedBy": ["deliv-form-component"],
+      "coordinatesWith": ["form-component"],
+      "status": "draft",
+      "createdAt": "2026-06-28"
+    },
+    {
+      "id": "deliv-help-on-demand",
+      "intent": "intent-0001",
+      "kind": "delivery",
+      "title": "Ajuda sob demanda (absorve a POC do listener)",
+      "weight": "L",
+      "repo": "acme-mfe-support",
+      "blockedBy": ["deliv-form-component"],
+      "coordinatesWith": ["failure-event"],
+      "status": "draft",
+      "createdAt": "2026-06-28"
     }
   ]
 }

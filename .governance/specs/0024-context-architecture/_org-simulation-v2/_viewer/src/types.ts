@@ -21,6 +21,11 @@ export interface AppDecision {
   at: string; // data ISO
 }
 
+export interface AppContract {
+  name: string;
+  awaits?: string; // a question que precisa resolver p/ o contrato ficar known
+}
+
 export interface AppIntent {
   id: string;
   title: string; // o nome humano da iniciativa
@@ -29,6 +34,7 @@ export interface AppIntent {
   references: AppReference[];
   questions: AppQuestion[];
   decisions: AppDecision[];
+  contracts?: AppContract[]; // os contratos que a feature coordena (known/pending = DERIVADO)
   createdAt: string;
 }
 
@@ -49,6 +55,23 @@ export interface AppProposal {
   promoteTo?: PromoteTo; // na disposição: o tipo que vira
   opensIntent?: string; // se promovida p/ experiment/objetivo
   discardReason?: string; // se descartada
+  createdAt: string;
+}
+
+export type Weight = "S" | "M" | "L" | "XL";
+export type WorkKind = "delivery" | "fix" | "patch" | "experiment" | "incident";
+
+// um TRABALHO criado no breakdown da intent (a quebra em tarefas).
+export interface AppWork {
+  id: string;
+  intent: string;
+  kind: WorkKind;
+  title: string;
+  weight: Weight; // peso/tamanho — p/ medir + o caminho crítico ponderado
+  repo?: string;
+  blockedBy: string[]; // ids de outros works (blocked-by)
+  coordinatesWith: string[]; // nomes de contratos (coordinates-with)
+  status: "draft" | "active" | "done"; // progresso PRÓPRIO; "bloqueado" é DERIVADO
   createdAt: string;
 }
 

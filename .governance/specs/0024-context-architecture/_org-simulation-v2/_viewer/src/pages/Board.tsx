@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { useIntents } from "../store";
-import type { AppIntent, AppQuestion, BoardQuestion } from "../types";
+import type { AppIntent, AppQuestion, AppWork, BoardQuestion } from "../types";
+import { workPhase, criticalPath } from "../derive";
+import type { WorkPhase } from "../derive";
 
-// Board = a projeção DERIVADA, AO VIVO do db.json (via o store/API) — sem snapshot no meio, sempre reflete a autoria.
-// (O banco node `derive-app.ts` também deriva o db.json → snapshot.json, mas pra uso HEADLESS/export; o app não depende dele.)
+// Board = a projeção DERIVADA, AO VIVO do db.json (via o store/API). Sem snapshot no meio.
 function deriveQuestion(intent: AppIntent, q: AppQuestion): BoardQuestion {
   const dec = intent.decisions.find((d) => d.decides === q.id);
-  const answered = Boolean(q.verdict); // tem verdict (uma exploração respondeu)
-  const decision = dec ? dec.status : answered ? "pending" : "none"; // o gate humano
+  const answered = Boolean(q.verdict);
+  const decision = dec ? dec.status : answered ? "pending" : "none";
   return {
     id: q.id,
     question: q.question,
@@ -19,7 +20,7 @@ function deriveQuestion(intent: AppIntent, q: AppQuestion): BoardQuestion {
 }
 
 export function Board() {
-  const { intents } = useIntents();
+  const { intents, works } = useIntents();
   return (
     <>
       <header>
@@ -32,21 +33,74 @@ export function Board() {
       {intents.map((intent) => {
         const questions = intent.questions.map((q) => deriveQuestion(intent, q));
         const resolved = questions.filter((q) => q.resolved).length;
+        const mine = works.filter((w) => w.intent === intent.id);
         return (
           <section key={intent.id}>
-            <h2>
-              {intent.title}{" "}
+            <h2>{intent.title}</h2>
+
+            <h3>
+              Perguntas{" "}
               <span className="hint">
-                ({resolved}/{questions.length} resolvidas)
+                ({resolved}/{questions.length} resolvidas — respondida ≠ resolvida)
               </span>
-            </h2>
+            </h3>
             {questions.map((q) => (
               <QuestionRow key={q.id} q={q} />
             ))}
-            {questions.length === 0 && <p className="hint">(sem perguntas)</p>}
+
+            <Plan intent={intent} works={mine} />
           </section>
         );
       })}
+    </>
+  );
+}
+
+function Plan({ intent, works }: { intent: AppIntent; works: AppWork[] }) {
+  if (works.length === 0)
+    return (
+      <>
+        <h3>Plano</h3>
+        <p className="hint">(sem trabalhos — faça o breakdown no detalhe da iniciativa)</p>
+      </>
+    );
+
+  const phases: Record<WorkPhase, AppWork[]> = { ready: [], active: [], blocked: [], done: [] };
+  for (const w of works) phases[workPhase(intent, w, works)].push(w);
+  const cp = criticalPath(works);
+  const parallel = phases.ready.map((w) => w.id); // os "ready" podem começar AGORA, em paralelo
+
+  return (
+    <>
+      <h3>
+        Plano{" "}
+        <span className="hint">(breaks-into derivado · caminho crítico · o que paraleliza)</span>
+      </h3>
+      <div className="cols four">
+        {(["ready", "active", "blocked", "done"] as WorkPhase[]).map((ph) => (
+          <div className="col" key={ph}>
+            <div className="col-head">
+              {ph} ({phases[ph].length})
+            </div>
+            {phases[ph].length === 0 ? (
+              <div className="item muted">—</div>
+            ) : (
+              phases[ph].map((w) => (
+                <div className="item" key={w.id}>
+                  {w.id} <span className="hint">[{w.weight}]</span>
+                </div>
+              ))
+            )}
+          </div>
+        ))}
+      </div>
+      <p className="meta">
+        ⏱️ caminho crítico (peso {cp.weight}): <strong>{cp.refs.join(" → ") || "—"}</strong>
+      </p>
+      <p className="meta">
+        ⚡ pode rodar AGORA em paralelo:{" "}
+        <strong>{parallel.length ? parallel.join(", ") : "(nada destravado)"}</strong>
+      </p>
     </>
   );
 }
