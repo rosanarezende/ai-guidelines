@@ -349,6 +349,41 @@ definem** (e não se versionam/citam). Modelo vivo, não-autoridade.
 - **O BANCO é parte da peça** — deriva de cada `.governance/` e **projeta TODO tipo de work** (delivery/exploration/…), **descobrindo** as intents (sem hard-code). Ao tocar num tipo novo na sim, **estender o banco pra projetá-lo é parte do trabalho**, não um extra — senão o plano/`breaks-into` nasce incompleto.
 - **O app (`_viewer`) é UMA projeção (backend = banco) — visualiza/prova, NÃO é o modelo.** Não pode introduzir nada que não venha das lentes + do sim de arquivo. **⚠️ Erro a NÃO repetir (2026-06-28):** modelei no app (q/r/d de work, `decides`-lista, `supersedes`) e inventei deliveries/repo só no `db.seed` (`deliv-login-mfe`/`acme-mfe-identity`) **antes** de fazer nos arquivos + templates. **Regra: modela-se nos ARQUIVOS + TEMPLATES primeiro; o app reflete depois.**
 
+### Plano de simulação — o sistema de login (o que vamos ESCREVER de verdade)
+
+> **Foco: SÓ o sistema de login (`login_1`)** — não as demais intents do v1 legado (onboarding/billing/tokens). A próxima etapa simula **de verdade**: escreve os ARQUIVOS de `question`/`research`/`decision` + `deliberation.yml` — assim descobrimos inclusive **se um arquivo `state` ainda é necessário** (a 🔴 `deliberation × state` da Parte 2).
+
+**1) O plano do login (fiel à v1 `intent-004` — deps corrigidas):** a intent quebra em **3 deliveries do lado MFE** (q1 destrava form + login-mfe; q2 destrava help):
+
+| delivery (repo)                         | dep                                                | fase      | aresta                                                |
+| --------------------------------------- | -------------------------------------------------- | --------- | ----------------------------------------------------- |
+| `form-component_1` (acme-design-system) | —                                                  | **ready** | provê o contrato `form-component`                     |
+| `login-mfe_1` (acme-mfe-identity)       | **blocked-by `form-component_1`**                  | blocked   | coordinates-with `form-component`                     |
+| `help-on-demand_1` (acme-mfe-support)   | **blocked-by `form-component_1`** ("consome o DS") | blocked   | coordinates-with `failure-event` · derives-from a POC |
+
+- Caminho crítico: **`form-component_1` → `login-mfe_1` (peso 5)**; paralelo AGORA: **só o form**; depois do form `done` → login-mfe + help **paralelizam**.
+- Deliberação: **`d1` (q1) `results-in` [form-component_1, login-mfe_1]** · **`d2` (q2) `results-in` [help-on-demand_1]**.
+- ⚠️ **Correção pendente no sim atual:** os arquivos hoje têm `help-on-demand_1` SEM `blocked-by` e SEM `login-mfe_1` (drift da reconciliação) → **1º passo da aplicação = corrigir os deps + criar `login-mfe_1`** (file-sim + app).
+- _(a v1 também tinha **auth** (acme-api, contrato t0) + **wiring** (acme-shell, blocked-by login-mfe+help) — FORA do foco agora; decidir depois se entram.)_
+
+**2) PRÓXIMO PASSO — simular a 1ª delivery sendo CONSTRUÍDA (`form-component_1`):** ao atribuir+iniciar (→`active`), o **próprio work** levanta seu q/r/d. Vamos **ESCREVER os arquivos** (em `works/delivery/form-component_1/`): as `question`s, os `research`/answers (verdicts), as `decision`s + um **`deliberation.yml` do work**. Cenário de stress (de propósito: 1 pergunta sem decisão · 1 decisão multi-questão · 1 reabertura):
+
+| #   | pergunta                                            | research (verdict)               | decisão                                              |
+| --- | --------------------------------------------------- | -------------------------------- | ---------------------------------------------------- |
+| q1  | validação: schema declarativo ou regra imperativa?  | schema cobre ~90% + escape hatch | **d1** aceita (schema + escape hatch)                |
+| q2  | quando validar: só no submit ou reativo (on-blur)?  | on-blur + revalida no submit     | **d2** aceita (híbrido)                              |
+| q3  | expor erros: estado controlado ou render-prop/slot? | controlado + slot opcional       | **— sem decisão** (gate: respondida≠resolvida)       |
+| q4  | a11y: on-blur quebra leitor de tela?                | sim → só submit + aria-live      | **d3** `decides [q4,q2]` `supersedes d2` (reabre q2) |
+
+**3) O que este cenário TESTA (achados a confirmar nos ARQUIVOS + templates):**
+
+- **work = host de q/r/d?** o work tem `question`/`research`/`decision` + `deliberation.yml` PRÓPRIO, igual à intent? → pista de **intent ≈ work** (um nó só, q/r/d em qualquer nível).
+- **`decides` = LISTA** (d3 fecha q4 + q2) · **`supersedes`/reabertura** (d3 supersedes d2 → q2 reabre, DERIVADO; append-only) · **gate no nível do work** (q3 = respondida-sem-decisão = `pending`).
+- **precisa de `state`?** ao escrever a deliberação (+ talvez um cursor do work), ver se o `state.yml` (topologia/cursor) ainda é necessário ou se deliberação + derivação bastam.
+- **templates/banco/viz que faltam:** o work-`deliberation` no `_templates/`; o banco projetar o q/r/d do work; a **tela de Work** mostrar o histórico (d2 superseded por d3 · q2 reaberta→re-resolvida).
+
+**Casos extras a empilhar (se quisermos estressar mais):** uma decisão que **REJEITA**; uma pergunta que só **re-recebe verdict** sem mexer em decisão.
+
 **Sim FILE-FIRST (canônica — o estado ATUAL, validada pelo banco do YAML `_banks/run.ts`):** os repos `acme-*` em **`.governance/`**: a intent **`login_1`** (q1/q2 + contratos) + `deliberation.yml` (d1/d2 aceitas, `results-in` as deliveries); **2 explorations done** (`form-validation_1` no DS · `proactive-support_1` no mfe-support — answered q1/q2, dono `@dev-*`); o **breakdown** materializou **2 deliveries `draft`** (`form-component_1`, `help-on-demand_1` — dono ninguém, deps postas). **O banco do YAML deriva PONTA-A-PONTA** (projeta TODO work · descobre intents · refs-caminho) → q1/q2 `RESOLVED`, contratos `known`, **plano (breaks-into) = só as entregas** (draft); explorations na investigação. Ids `slug_num` · `created/updated-at` · `assignee` (active exige dono). _(decisões: "Estrutura física & ids" na Parte 3.)_
 
 **Estado:** ✅ **Lentes 1-3 fechadas; Lente 4 (famílias: trabalho/ferramentas/deliberação) em CONVERGÊNCIA.** Lente 1 (5 tipos de trabalho + `proposal`/`exploration` ferramentas). Lente 2 (5 momentos · coração ✦). **Lente 4 (famílias)** + casa-de-cada-aresta + `deliberation.yml` ancora arestas. **Lente 3 = 10 arestas, cada uma com critério único** (estrutura · proveniência · dependência · investigação · fecho · histórico); renomeios `grounded-by`→`supported-by` · `verdicted-by`→`closed-by` · `promotes-to`→`results-in` · `resolves`→`answers`; `spawned-by`/`from-spike`/`promoted-to` fundidos/derivados; **princípio: o dado fica no NÓ, não na aresta** (grafo: `../assets/lente3-edge-graph.svg`). **Camada `intent`** na governança global por **org/BU = PASTAS** (sem campo `scope`); a intent é **`.yml`** (`objective`/`references`/`open-questions`/`contracts`/`details` — **`breaks-into` é DERIVADO**, o banco projeta); o **`breaks-into` = vista agrupada por status** (`done`/`active`/`draft`, as draft com `blocked-by`). **Registries:** `registry-entry.yml` (raiz de `_templates/`) = base canônica; `proposal` e `exploration` têm template próprio. **Amarra intent↔exploration (forma v2):** a exploration declara `answers: intent#qN`; a intent deriva `answered-by`/`status`/`verdict` (A+); destrave derivado (bancos `_banks/`). **Status** = progresso PRÓPRIO (`draft|active|done`); **bloqueado/pausado = DERIVADO**. **Experiment** = decisão deliberada (benchmark), via `proposal`→intent dedicada (recomendado) ou inline.
