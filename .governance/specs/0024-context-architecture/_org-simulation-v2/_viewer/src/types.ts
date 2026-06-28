@@ -32,6 +32,26 @@ export interface AppIntent {
   createdAt: string;
 }
 
+export type Level = "low" | "medium" | "high";
+export type PromoteTo = "delivery" | "experiment" | "exploration" | "patch" | "fix";
+
+// proposal = intake (FERRAMENTA): capturada por um HUMANO, a qualquer momento do trabalho.
+export interface AppProposal {
+  id: string;
+  what: string;
+  raisedFrom?: string; // proveniência: onde foi notada (ex.: "intent-0001#q2")
+  owner: string; // quem TRIA (time/pessoa)
+  status: "open" | "promoted" | "dismissed"; // disposição obrigatória
+  tags: string[];
+  impact: Level;
+  confidence: Level;
+  effort: Level;
+  promoteTo?: PromoteTo; // na disposição: o tipo que vira
+  opensIntent?: string; // se promovida p/ experiment/objetivo
+  discardReason?: string; // se descartada
+  createdAt: string;
+}
+
 // ── o BOARD DERIVADO pelo banco (lê db.json → snapshot.json) ──
 export interface BoardQuestion {
   id: string;

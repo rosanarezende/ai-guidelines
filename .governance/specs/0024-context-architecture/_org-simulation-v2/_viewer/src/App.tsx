@@ -4,6 +4,8 @@ import { Home } from "./pages/Home";
 import { RegisterIntent } from "./pages/RegisterIntent";
 import { IntentDetail } from "./pages/IntentDetail";
 import { Board } from "./pages/Board";
+import { Proposals } from "./pages/Proposals";
+import { RegisterProposal } from "./pages/RegisterProposal";
 import { useIntents } from "./store";
 
 export function App() {
@@ -15,6 +17,7 @@ export function App() {
           {LABEL_PLURAL}
         </NavLink>
         <NavLink to="/novo">Cadastrar {LABEL.toLowerCase()}</NavLink>
+        <NavLink to="/propostas">Propostas</NavLink>
         <NavLink to="/board">Board (derivado)</NavLink>
       </nav>
       {error && (
@@ -30,6 +33,8 @@ export function App() {
         <Route path="/" element={<Home />} />
         <Route path="/novo" element={<RegisterIntent />} />
         <Route path="/intent/:id" element={<IntentDetail />} />
+        <Route path="/propostas" element={<Proposals />} />
+        <Route path="/propostas/nova" element={<RegisterProposal />} />
         <Route path="/board" element={<Board />} />
       </Routes>
     </div>

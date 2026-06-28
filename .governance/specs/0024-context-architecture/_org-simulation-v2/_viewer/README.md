@@ -18,7 +18,9 @@ npm run dev:all    # sobe a API (json-server) + o app (vite) juntos
 
 - `/` — lista das Iniciativas + cadastrar
 - `/novo` — **cadastro** (título · objetivo · detalhes · perguntas)
-- `/intent/:id` — **atualização**: adicionar pergunta · registrar resultado da exploração · **decidir**
+- `/intent/:id` — **atualização**: adicionar pergunta · registrar resultado · **decidir** · **levantar proposta**
+- `/propostas` — **dashboard de propostas** (backlog de intake): filtra por status/time/tag, ordena por **ICE**, **tria** (promove/descarta)
+- `/propostas/nova` — **levantar proposta** (intake HUMANO, capturado a QUALQUER momento; ou via link numa pergunta)
 - `/board` — o dashboard **DERIVADO** (lê o snapshot do banco)
 
 ## Camadas (ciclo FECHADO)

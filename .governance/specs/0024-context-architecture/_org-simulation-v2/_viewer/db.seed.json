@@ -31,5 +31,20 @@
       ],
       "createdAt": "2026-06-27"
     }
+  ],
+  "proposals": [
+    {
+      "id": "prop-001",
+      "what": "testar se o suporte proativo (abordar após N falhas de login) melhora a conclusão do login, ou atrapalha",
+      "raisedFrom": "intent-0001#q2",
+      "owner": "@produto-growth",
+      "status": "open",
+      "tags": ["growth", "login", "suporte-proativo"],
+      "impact": "high",
+      "confidence": "medium",
+      "effort": "medium",
+      "promoteTo": "experiment",
+      "createdAt": "2026-06-27"
+    }
   ]
 }

@@ -76,6 +76,11 @@ function QuestionRow({
       {decision?.rationale && <div className="meta">→ {decision.rationale}</div>}
       {q.verdict && !decision && <DecideForm intent={intent} q={q} updateIntent={updateIntent} />}
       {!q.verdict && <RecordVerdict intent={intent} q={q} updateIntent={updateIntent} />}
+      <div className="hint">
+        <Link to={`/propostas/nova?from=${encodeURIComponent(`${intent.id}#${q.id}`)}`}>
+          levantar proposta a partir desta pergunta →
+        </Link>
+      </div>
     </div>
   );
 }
