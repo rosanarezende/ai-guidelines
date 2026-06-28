@@ -27,6 +27,13 @@
           "status": "accepted",
           "rationale": "verdict claro: criar o componente de form validado",
           "at": "2026-06-27"
+        },
+        {
+          "id": "d2",
+          "decides": "q2",
+          "status": "accepted",
+          "rationale": "viável; a ajuda sob demanda absorve a POC (o proativo A/B vira experiment via proposal)",
+          "at": "2026-06-27"
         }
       ],
       "createdAt": "2026-06-27"
