@@ -70,7 +70,7 @@ export type DecisionStatus = "accepted" | "rejected" | "pending";
 export interface Decision {
   id: string;
   decides: string; // qN
-  status: DecisionStatus;
+  status: "accepted" | "rejected"; // só decisões CONCLUÍDAS são nós; "pending" não é nó (é DERIVADO)
   "supported-by"?: string; // "<repo>/<exploration>" — a evidência (aresta Lente 3)
   rationale?: string;
   spawns?: string[]; // o trabalho que a decisão dispara

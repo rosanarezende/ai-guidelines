@@ -22,7 +22,10 @@ export function deriveGovernance(
     const edge = `${intent.id}#${q.id}`;
     const answer = publishedWorks.find((w) => answersEdge(w, edge));
     const answered = answer?.status === "done"; // a exploration respondeu (evidência existe)
-    const decision = deliberation.decisions.find((d) => d.decides === q.id)?.status ?? "none"; // o gate
+    // o gate: a decisão é o nó (accepted|rejected); senão `pending` (respondida, sem decisão) ou `none` (sem resposta)
+    const decision =
+      deliberation.decisions.find((d) => d.decides === q.id)?.status ??
+      (answered ? "pending" : "none");
     const resolved = answered && decision === "accepted"; // só resolve com ACEITE humano
     return {
       id: q.id,
