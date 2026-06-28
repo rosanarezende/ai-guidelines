@@ -1,59 +1,5 @@
-// Espelha as projeções publicadas pelo banco (_banks/types.ts) — o formato do snapshot.
-export type WorkStatus = "draft" | "active" | "done";
-export type Fate = "throwaway" | "promoted" | "parked";
-export type DecisionStatus = "accepted" | "rejected" | "pending";
-
-export interface WorkProjection {
-  ref: string;
-  kind: string;
-  status: WorkStatus;
-  fate?: Fate;
-  answers?: string;
-  verdict?: string;
-  promotedOutput?: string;
-}
-
-export interface RepoProjection {
-  repo: string;
-  explorations: WorkProjection[];
-}
-
-export interface QuestionResolution {
-  id: string;
-  answered: boolean;
-  decision: DecisionStatus | "none";
-  resolved: boolean;
-  answeredBy?: string;
-  verdict?: string;
-}
-
-export interface ContractStatus {
-  name: string;
-  known: boolean;
-  awaits?: string;
-}
-
-export interface BreaksInto {
-  done: string[];
-  active: string[];
-  draft: string[];
-}
-
-export interface GovernanceProjection {
-  intent: string;
-  title: string;
-  questions: QuestionResolution[];
-  contracts: ContractStatus[];
-  breaksInto: BreaksInto;
-}
-
-export interface Snapshot {
-  repos: RepoProjection[];
-  governance: GovernanceProjection;
-}
-
 // ── modelo de AUTORIA (o que a app salva — Lente 5: "app/form de intents") ──
-// É o INPUT (o que a pessoa preenche). O DERIVADO (resolvido, contratos, plano) o banco computaria depois.
+export type DecisionStatus = "accepted" | "rejected" | "pending";
 
 export interface AppReference {
   label: string;
@@ -77,11 +23,34 @@ export interface AppDecision {
 
 export interface AppIntent {
   id: string;
-  title: string; // o nome humano do objetivo
+  title: string; // o nome humano da iniciativa
   objective: string;
   details?: string;
   references: AppReference[];
   questions: AppQuestion[];
   decisions: AppDecision[];
   createdAt: string;
+}
+
+// ── o BOARD DERIVADO pelo banco (lê db.json → snapshot.json) ──
+export interface BoardQuestion {
+  id: string;
+  question: string;
+  verdict?: string;
+  answered: boolean; // tem verdict (uma exploração respondeu)
+  decision: DecisionStatus | "none"; // o gate humano
+  resolved: boolean; // answered && decisão accepted
+}
+
+export interface BoardIntent {
+  id: string;
+  title: string;
+  objective: string;
+  questions: BoardQuestion[];
+  resolved: number;
+  total: number;
+}
+
+export interface Snapshot {
+  intents: BoardIntent[];
 }

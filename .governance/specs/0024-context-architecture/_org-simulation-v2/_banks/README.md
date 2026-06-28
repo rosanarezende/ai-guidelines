@@ -23,6 +23,7 @@ Gera o **snapshot** em `_viewer/public/snapshot.json` (**GERADO** — derivado, 
 | `report.ts`            | renderização pro **console** (separada da lógica)                                      |
 | `materialize.ts`       | materializa o **snapshot JSON** em `_viewer/public/` (o app Vite consome via `fetch`)  |
 | `run.ts`               | orquestra: deriva → console → materializa o **snapshot** p/ o viewer                   |
+| `derive-app.ts`        | **ciclo da app**: lê `_viewer/db.json` → deriva o board → `snapshot.json` (`--watch`)  |
 
 ## A comunicação
 

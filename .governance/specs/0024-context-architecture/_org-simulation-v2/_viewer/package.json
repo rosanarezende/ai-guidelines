@@ -5,8 +5,10 @@
   "description": "Viewer do banco derivado (sim v2) — lê public/snapshot.json gerado por _banks/run.ts.",
   "scripts": {
     "dev": "vite",
-    "dev:all": "concurrently -k -n api,web \"npm:api\" \"npm:dev\"",
+    "dev:all": "concurrently -k -n api,bank,web \"npm:api\" \"npm:bank:watch\" \"npm:dev\"",
     "api": "node -e \"const fs=require('fs');if(!fs.existsSync('db.json'))fs.copyFileSync('db.seed.json','db.json')\" && json-server --watch db.json --port 5174",
+    "bank": "node ../_banks/derive-app.ts",
+    "bank:watch": "node ../_banks/derive-app.ts --watch",
     "build": "tsc && vite build",
     "preview": "vite preview"
   },

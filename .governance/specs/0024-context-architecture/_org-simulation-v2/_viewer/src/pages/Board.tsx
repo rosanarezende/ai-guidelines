@@ -1,17 +1,17 @@
 import { useEffect, useState } from "react";
-import type { Snapshot, QuestionResolution, WorkProjection, BreaksInto } from "../types";
+import type { Snapshot, BoardQuestion } from "../types";
 
-// Board = a projeção DERIVADA pelo banco (read-only). Lê o snapshot via fetch.
+// Board = a projeção DERIVADA pelo banco a partir do db.json (autoria → banco → board).
 export function Board() {
   const [snap, setSnap] = useState<Snapshot | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [onlyOpen, setOnlyOpen] = useState(false);
 
   function load() {
     setError(null);
-    fetch(`${import.meta.env.BASE_URL}snapshot.json`)
+    // cache-bust p/ pegar o snapshot recém-derivado pelo watcher
+    fetch(`${import.meta.env.BASE_URL}snapshot.json?t=${Date.now()}`)
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`))))
-      .then((data: Snapshot) => setSnap(data))
+      .then((d: Snapshot) => setSnap(d))
       .catch((e: unknown) => setError(String(e)));
   }
   useEffect(load, []);
@@ -19,129 +19,59 @@ export function Board() {
   if (error)
     return (
       <p className="err">
-        Sem snapshot ({error}). Rode <code>node _banks/run.ts</code> e recarregue.
+        Sem snapshot ({error}). O banco gera em <code>npm run dev:all</code> (ou{" "}
+        <code>npm run bank</code>).
       </p>
     );
   if (!snap) return <p>Carregando…</p>;
 
-  const g = snap.governance;
-  const questions = onlyOpen ? g.questions.filter((q) => !q.resolved) : g.questions;
-
   return (
     <>
       <header>
-        <h1>Board — {g.title}</h1>
-        <div className="sub">
-          projeção DERIVADA do banco · intent <code>{g.intent}</code>
-        </div>
+        <h1>
+          Board <span className="hint">(DERIVADO pelo banco a partir do db.json)</span>
+        </h1>
         <div className="toolbar">
-          <label>
-            <input
-              type="checkbox"
-              checked={onlyOpen}
-              onChange={(e) => setOnlyOpen(e.target.checked)}
-            />{" "}
-            só não-resolvidas
-          </label>
-          <button onClick={load}>↻ recarregar snapshot</button>
+          <button onClick={load}>↻ recarregar</button>
+          <span className="hint">cadastrou/decidiu? o watcher re-deriva — clique aqui</span>
         </div>
       </header>
 
-      <section>
-        <h2>
-          Perguntas <span className="hint">(respondida ≠ resolvida — o gate humano)</span>
-        </h2>
-        {questions.map((q) => (
-          <QuestionCard key={q.id} q={q} />
-        ))}
-        {questions.length === 0 && <p className="hint">(nenhuma com esse filtro)</p>}
-      </section>
-
-      <section>
-        <h2>Contratos</h2>
-        <div className="chips">
-          {g.contracts.map((c) => (
-            <span key={c.name} className={`badge ${c.known ? "ok" : "warn"}`}>
-              {c.name}: {c.known ? "known" : "pending"}
-              {c.awaits ? ` (awaits ${c.awaits})` : ""}
+      {snap.intents.length === 0 && <p className="hint">Nenhuma iniciativa ainda.</p>}
+      {snap.intents.map((i) => (
+        <section key={i.id}>
+          <h2>
+            {i.title}{" "}
+            <span className="hint">
+              ({i.resolved}/{i.total} resolvidas)
             </span>
+          </h2>
+          {i.questions.map((q) => (
+            <QuestionRow key={q.id} q={q} />
           ))}
-        </div>
-      </section>
-
-      <section>
-        <h2>
-          Plano <span className="hint">(breaks-into — derivado dos works)</span>
-        </h2>
-        <div className="cols">
-          {(["done", "active", "draft"] as (keyof BreaksInto)[]).map((s) => (
-            <div key={s} className="col">
-              <div className="col-head">{s}</div>
-              {g.breaksInto[s].length > 0 ? (
-                g.breaksInto[s].map((r) => (
-                  <div key={r} className="item">
-                    {r}
-                  </div>
-                ))
-              ) : (
-                <div className="item muted">—</div>
-              )}
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section>
-        <h2>
-          Bancos de repo <span className="hint">(cada um deriva só os arquivos dele)</span>
-        </h2>
-        {snap.repos.map((repo) => (
-          <div key={repo.repo}>
-            <h3>{repo.repo}</h3>
-            {repo.explorations.map((w) => (
-              <WorkCard key={w.ref} w={w} />
-            ))}
-          </div>
-        ))}
-      </section>
+          {i.questions.length === 0 && <p className="hint">(sem perguntas)</p>}
+        </section>
+      ))}
     </>
   );
 }
 
-function QuestionCard({ q }: { q: QuestionResolution }) {
+function QuestionRow({ q }: { q: BoardQuestion }) {
   const [open, setOpen] = useState(false);
   const [kind, label] = q.resolved
     ? (["ok", "RESOLVED"] as const)
     : q.answered
       ? (["warn", `respondida · decisão ${q.decision}`] as const)
-      : (["muted", "open"] as const);
+      : (["muted", "aguardando exploração"] as const);
   return (
     <div className="card click" onClick={() => setOpen((o) => !o)}>
       <div className="card-head">
         <strong>{q.id}</strong>
         <span className={`badge ${kind}`}>{label}</span>
-        {q.answeredBy && <span className="meta">← {q.answeredBy}</span>}
       </div>
+      <div className="meta">{q.question}</div>
       {open && q.verdict && <div className="verdict">{q.verdict}</div>}
       {!open && q.verdict && <div className="hint">(clique p/ ver o verdict)</div>}
-    </div>
-  );
-}
-
-function WorkCard({ w }: { w: WorkProjection }) {
-  return (
-    <div className="card">
-      <div className="card-head">
-        <strong>{w.ref}</strong>
-        <span className={`badge ${w.status === "done" ? "ok" : "muted"}`}>{w.status}</span>
-        {w.fate && <span className="badge info">fate {w.fate}</span>}
-      </div>
-      {w.verdict && <div className="verdict">{w.verdict}</div>}
-      {w.promotedOutput && (
-        <div className="meta">
-          promovido → <code>{w.promotedOutput}</code>
-        </div>
-      )}
     </div>
   );
 }
