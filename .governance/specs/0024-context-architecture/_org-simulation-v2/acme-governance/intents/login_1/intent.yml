@@ -1,9 +1,10 @@
-# intent-0001 — cadastrada via "form" de governança (Lente 5). A intent é uma REGISTRY:
+# login_1 — cadastrada via "form" de governança (Lente 5). A intent é uma REGISTRY:
 # guarda o que o cadastrante informa + REFERÊNCIAS; o conteúdo das investigações vive nas explorations (repos).
 node: intent
-id: intent-0001
+id: login_1
 status: active
 created-at: 2026-06-27
+updated-at: 2026-06-28 # último toque: breakdown criou as deliveries draft
 
 # ===== o que o CADASTRANTE preenche no form =====
 title: Sistema de login (multi-repo)

@@ -3,7 +3,7 @@
 entries:
   - id: prop-001
     what: "testar se o suporte proativo (abordar após N falhas de login) MELHORA a conclusão do login, ou atrapalha"
-    raised-by: acme-mfe-support/exploration-001 # surgiu da exploration de viabilidade (a aresta `raises`)
+    raised-by: acme-mfe-support/exploration/proactive-support_1 # surgiu da exploration de viabilidade (a aresta `raises`)
     owner: "@produto-growth" # quem TRIA (promove/descarta)
     status: open # disposição OBRIGATÓRIA (não fica em aberto em silêncio)
     # --- triagem (estilo ICE) ---
@@ -11,7 +11,9 @@ entries:
     impact: high # menos abandono no login
     confidence: medium # viável (exploration), mas o EFEITO de abordar proativamente é incerto
     effort: medium
-    evidence: [acme-mfe-support/works/exploration_proactive-support/exploration-answer.md]
+    evidence:
+      [acme-mfe-support/.governance/works/exploration/proactive-support_1/exploration-answer.md]
     # --- disposição ---
     promote-to: experiment # quando priorizada (decisão de negócio) → abre uma intent PRÓPRIA pro experiment
-    date: 2026-06-27
+    created-at: 2026-06-27
+    updated-at: 2026-06-27

@@ -1,13 +1,15 @@
 # registry/exploration.yml — acme-mfe-support · índice das explorations deste repo (a GOVERNANÇA do trabalho).
 entries:
-  - id: exploration-001
+  - id: proactive-support_1
     title: "suporte proativo é viável? (POC do listener de falhas)"
+    assignee: "@dev-support" # quem assumiu + iniciou (hoje done)
     status: done # FECHOU — densa: gerou uma POC durável
     # ===== A AMARRA: responde a q2 da intent =====
-    answers: acme-governance/intent-0001#q2
-    workspace: works/exploration_proactive-support/
+    answers: acme-governance/intents/login_1#q2
+    workspace: works/exploration/proactive-support_1/
     # ===== FECHO (densa: tem POC durável) =====
     fate: promoted # a POC vira base de uma delivery (absorvida via derives-from) — não é throwaway
-    closed-by: works/exploration_proactive-support/exploration-answer.md # verdict + value-beyond-answer (CONTEÚDO)
+    closed-by: works/exploration/proactive-support_1/exploration-answer.md # verdict + value-beyond-answer (CONTEÚDO)
     closed-at: 2026-06-27
-    date: 2026-06-26
+    created-at: 2026-06-26
+    updated-at: 2026-06-27

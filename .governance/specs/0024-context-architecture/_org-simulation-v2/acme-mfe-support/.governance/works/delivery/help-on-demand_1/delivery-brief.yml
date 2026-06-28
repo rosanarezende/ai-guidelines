@@ -1,0 +1,19 @@
+node: work-brief
+kind: delivery
+id: help-on-demand_1
+intent: login_1
+sealed: true
+references: []
+
+objective:
+  goal: ajuda/suporte sob demanda no login (o usuário aciona quando quer)
+  approach: MFE em acme-mfe-support; productiza o listener de falhas da POC (proactive-support_1)
+  done-when: ajuda acionável sob demanda atrás de flag; o listener de falha integrado
+
+context: q2 (decisão d2) — suporte proativo viável; a ajuda sob demanda absorve a POC do listener
+out-of-scope: o suporte PROATIVO (abordar após N falhas) = experiment dedicado (prop-001), não esta delivery
+requirements: consome o contrato failure-event; absorve a POC (derives-from proactive-support_1); escuta o evento de falha
+
+details: |
+  Entrega só a ajuda SOB DEMANDA + a base (o listener). O proativo A/B fica pro experiment (prop-001).
+  Nasceu da decisão d2 da intent login_1.

@@ -1,6 +1,6 @@
 node: work-brief
 kind: exploration
-exploration: exploration-001 # REFERENCIA a registry (o `id` é DELA); este brief é só CONTEÚDO desta exploration — não duplica o id
+exploration: form-validation_1 # REFERENCIA a registry (o `id` é DELA); este brief é só CONTEÚDO desta exploration — não duplica o id
 question: "o design system tem um formulário validado (email/site/telefone), ou cada MFE reimplementa?" # = a open-question q1 da intent (texto IDÊNTICO)
 timebox: 2 dias
 references: []

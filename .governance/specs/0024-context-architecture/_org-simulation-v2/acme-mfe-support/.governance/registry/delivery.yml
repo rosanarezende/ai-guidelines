@@ -1,0 +1,13 @@
+# registry/delivery.yml — acme-mfe-support · índice kind=delivery (→ banco/active-work).
+entries:
+  - id: help-on-demand_1
+    title: ajuda sob demanda (absorve a POC do listener)
+    status: draft # nasce draft no breakdown; ready (failure-event known), mas sem assignee → não-iniciada
+    assignee: null # ninguém assumiu ainda
+    weight: L
+    intent: login_1
+    workspace: works/delivery/help-on-demand_1/
+    coordinates-with: [failure-event] # o CONTRATO que consome (resolvido por q2)
+    derives-from: [acme-mfe-support/exploration/proactive-support_1] # absorve a POC do listener
+    created-at: 2026-06-28
+    updated-at: 2026-06-28

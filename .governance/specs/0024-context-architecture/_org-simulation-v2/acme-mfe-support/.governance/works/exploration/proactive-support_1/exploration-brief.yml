@@ -1,6 +1,6 @@
 node: work-brief
 kind: exploration
-exploration: exploration-001 # REFERENCIA a registry (o id é dela); este brief é só CONTEÚDO
+exploration: proactive-support_1 # REFERENCIA a registry (o id é dela); este brief é só CONTEÚDO
 question: "suporte proativo é viável? (detectar N falhas de login por pub/sub e abordar o usuário)" # = a open-question q2 da intent (texto IDÊNTICO)
 timebox: 3 dias
 references: []

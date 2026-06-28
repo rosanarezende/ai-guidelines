@@ -1,0 +1,13 @@
+# registry/delivery.yml — acme-design-system · índice kind=delivery (→ banco/active-work).
+entries:
+  - id: form-component_1
+    title: componente de formulário validado (DS)
+    status: draft # nasce draft no breakdown; ready (destravado: form-component known), mas sem assignee → não-iniciada
+    assignee: null # ninguém assumiu ainda
+    weight: M
+    intent: login_1
+    workspace: works/delivery/form-component_1/
+    coordinates-with: [form-component] # o CONTRATO que provê (declarado na intent); o login MFE consome
+    # destravada por q1 (decisão d1); sem derives-from (form-validation_1 = throwaway, sem POC)
+    created-at: 2026-06-28
+    updated-at: 2026-06-28
