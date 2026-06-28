@@ -202,3 +202,108 @@ code {
   padding: 16px;
   border-radius: 10px;
 }
+
+/* nav + páginas de autoria */
+.nav {
+  display: flex;
+  gap: 18px;
+  padding-bottom: 14px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.nav a {
+  text-decoration: none;
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.nav a.active {
+  color: var(--ink);
+}
+
+.lead {
+  color: #2b3440;
+  font-size: 15px;
+  max-width: 620px;
+}
+
+.block {
+  display: block;
+}
+
+.btn {
+  display: inline-block;
+  cursor: pointer;
+  font: inherit;
+  text-decoration: none;
+  border: 1px solid var(--line);
+  background: var(--card);
+  color: var(--ink);
+  border-radius: 8px;
+  padding: 6px 12px;
+}
+
+.btn:hover {
+  border-color: var(--muted);
+}
+
+.btn.primary {
+  background: var(--ink);
+  color: #fff;
+  border-color: var(--ink);
+}
+
+.btn.ok {
+  color: var(--ok);
+  border-color: var(--ok);
+}
+
+.btn.warn {
+  color: var(--warn);
+  border-color: var(--warn);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 560px;
+}
+
+.form.inline {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  max-width: none;
+  margin-top: 10px;
+}
+
+.form label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.form input,
+.form textarea {
+  font: inherit;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--card);
+  color: var(--ink);
+}
+
+.form.inline input {
+  flex: 1;
+}
+
+.row {
+  display: flex;
+  gap: 8px;
+}

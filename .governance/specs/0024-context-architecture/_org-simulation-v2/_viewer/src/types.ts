@@ -51,3 +51,37 @@ export interface Snapshot {
   repos: RepoProjection[];
   governance: GovernanceProjection;
 }
+
+// ── modelo de AUTORIA (o que a app salva — Lente 5: "app/form de intents") ──
+// É o INPUT (o que a pessoa preenche). O DERIVADO (resolvido, contratos, plano) o banco computaria depois.
+
+export interface AppReference {
+  label: string;
+  url?: string;
+}
+
+export interface AppQuestion {
+  id: string;
+  question: string;
+  /** o resultado de uma exploração (o verdict). Por enquanto é só até aqui que chegamos. */
+  verdict?: string;
+}
+
+export interface AppDecision {
+  id: string;
+  decides: string; // id da question
+  status: "accepted" | "rejected";
+  rationale?: string;
+  at: string; // data ISO
+}
+
+export interface AppIntent {
+  id: string;
+  title: string; // o nome humano do objetivo
+  objective: string;
+  details?: string;
+  references: AppReference[];
+  questions: AppQuestion[];
+  decisions: AppDecision[];
+  createdAt: string;
+}
