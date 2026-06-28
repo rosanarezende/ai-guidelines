@@ -1,6 +1,6 @@
 ---
 artifact-kind: pre-coding-review
-subject: "ARQUIVO ÚNICO de acompanhamento do modelo do trabalho (grafo) — o modelo em 3 lentes + perguntas abertas (🔴) e decididas (🟢)"
+subject: "ARQUIVO ÚNICO de acompanhamento do modelo do trabalho (grafo) — o modelo em 5 lentes + perguntas abertas (🔴) e decididas (🟢)"
 date: 2026-06-25
 reviewer: internal
 method: assessment
@@ -124,7 +124,7 @@ _(↓ O que era `spike` **saiu daqui** — virou a ferramenta **`exploration`**,
   aberto **em paralelo** sem travar, ou registrado standalone (ideia de backlog). _(o "trabalho" inclui a ferramenta `exploration`.)_
 - **Não percorre o fluxo:** é uma ideia **parada**, esperando triagem — não investiga/decide/executa por si.
 - **Triagem (anti-buraco-negro):** status (open/promoted/dismissed) · dono · **disposição obrigatória**
-  (promove ou descarta com motivo). Reusa o **padrão** do `insight` (separado dele).
+  (promove ou descarta com motivo). Reusa o **padrão** do `insight` (separado dele). **Captura HUMANA, a QUALQUER momento** (não auto do verdict); **2 triagens:** captura (nasce) + disposição (owner promove/descarta); `raised-from` = proveniência. _(sim v2: dashboard `/propostas` filtrável por time/ICE/tag.)_
 - **Vira outro?** **qualquer tipo** (delivery/experiment/fix/patch) ou **descartado**. Se precisa investigar antes → vira uma `exploration`.
 - **Densidade:** **leve por natureza** — não é trabalho ainda, é ideia parada; o peso só aparece **ao promover**
   (no tipo que vira). Leve **porque é pré-trabalho**, não por regra estrutural.
@@ -206,7 +206,7 @@ Exemplos vivos **não ficam aqui** — moram em `_templates/`, `_archive/repo-si
 
 **Os FECHOS** (`exploration-answer` · `experiment-outcome` · `incident-postmortem`) **não são uma 4ª família** — são a **face de CONTEÚDO DE FECHO** de trabalho & exploration, **espelho do `brief`** (abertura ↔ fecho); vivem em `closings/`. Papel especial: são a **ponte** onde a execução **vira conhecimento** que alimenta a deliberação (`answer` → responde uma `question` · `outcome` → vira `decision` won/lost · `postmortem` → vira aprendizado).
 
-**Decidido (owner 2026-06-27):** ✅ `spike` → **`exploration`** · ✅ **fecho = face** (não 4ª família, confirmado). · 🔴 **`deliberation` × `state`:** validar se o `deliberation` (o mapa vivo) **substitui** o `state` na nova modelagem — vai ficando claro **aos poucos na SIMULAÇÃO**. · ✅ **Propagação do rename** `spike`→`exploration` — **feita** nos arquivos (templates + `_org-simulation` + prosa do tracker); falta só os **SVGs** (redraw).
+**Decidido (owner 2026-06-27):** ✅ `spike` → **`exploration`** · ✅ **fecho = face** (não 4ª família, confirmado). · 🔴 **`deliberation` × `state`:** a sim indica **camadas distintas** (`deliberation.yml` = decisões por intent · `state` = topologia/cursor), não substituição — ver Parte 2. · ✅ **Propagação do rename** `spike`→`exploration` — **feita** nos arquivos (templates + `_org-simulation` + prosa do tracker); falta só os **SVGs** (redraw).
 
 ### Lente 5 · As CAMADAS: governança (grafo de registries) × conteúdo
 
@@ -231,9 +231,9 @@ O **CONTEÚDO** (briefs · closings/answers · texto do q/r/d) **vive à parte**
 
 **Deliberação (q/r/d) — a modelagem precisa ser VIVA** _(🔴 owner 2026-06-27)_
 
-- 🔴 **Status de question = VIVO, não binário (sim/não):** um `decision-brief` com buckets `resolved`/`open` **não resolve**. Precisa de uma **LISTA de questions, cada uma com seu status próprio**. Reabrir uma question fechada = **criar um NÓ NOVO** (append-only + `supersedes`), nunca virar o status de volta. O grafo de deliberação **evolui** (nós novos); nada se reescreve. _(✅ início na sim v2: `deliberation.yml` por intent — lista de `decision` (nós), cada uma `decides` uma q + `supported-by` o answer. O **GATE**: a exploration RESPONDE (`answered`), o humano ACEITA (`accepted`→`resolved`) — verdict ≠ aceite. **Decidir = APPEND um nó** (accepted|rejected); **`pending` NÃO é nó** (é o derivado de respondida-sem-decisão); reabrir = nó novo + `supersedes` (nunca virar status).)_
-- 🔴 **MÉTODO = SIMULAÇÃO, não dogfood:** modelar a NOSSA deliberação (dogfood) **confunde** o registro do nosso trabalho com a estrutura do framework. Testa-se num **caso fictício** (estilo `_org-simulation`/`acme-*`). _(o `_dogfood` foi removido por isso.)_
-- 🔴 **`deliberation` × `state`:** validar se o **mapa vivo `deliberation.yml`** (lista de questions + cursor) **substitui** o `state` na nova modelagem — fica claro **na simulação**.
+- ✅ **Status de question = VIVO, não binário — DECIDIDO (append-only):** o antigo `decision-brief` com buckets `resolved`/`open` **não resolvia**. Precisa de uma **LISTA de questions, cada uma com seu status próprio**. Reabrir uma question fechada = **criar um NÓ NOVO** (append-only + `supersedes`), nunca virar o status de volta. O grafo de deliberação **evolui** (nós novos); nada se reescreve. _(✅ início na sim v2: `deliberation.yml` por intent — lista de `decision` (nós), cada uma `decides` uma q + `supported-by` o answer. O **GATE**: a exploration RESPONDE (`answered`), o humano ACEITA (`accepted`→`resolved`) — verdict ≠ aceite. **Decidir = APPEND um nó** (accepted|rejected); **`pending` NÃO é nó** (é o derivado de respondida-sem-decisão); reabrir = nó novo + `supersedes` (nunca virar status).)_
+- ✅ **MÉTODO = SIMULAÇÃO, não dogfood (decidido):** modelar a NOSSA deliberação (dogfood) **confunde** o registro do nosso trabalho com a estrutura do framework. Testa-se num **caso fictício** (estilo `_org-simulation`/`acme-*`). _(o `_dogfood` foi removido por isso.)_
+- 🔴 **`deliberation` × `state`:** na sim v2, o **`deliberation.yml`** é o mapa de **decisões por intent**; o `state.yml` (topologia/cursor) **não foi exercitado** — indício de que são **camadas distintas** (deliberation = decisões · state = topologia), não substituição. Falta confirmar fora da sim.
 
 **Convergência (Lente 4) — propagação do rename** _(owner 2026-06-27)_
 
