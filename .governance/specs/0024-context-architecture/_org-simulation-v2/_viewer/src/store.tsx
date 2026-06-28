@@ -31,12 +31,14 @@ export function IntentsProvider({ children }: { children: ReactNode }) {
 
   function reload() {
     setError(null);
-    Promise.all([getJson<AppIntent[]>(INTENTS), getJson<AppProposal[]>(PROPOSALS)])
-      .then(([is, ps]) => {
-        setIntents(is);
-        setProposals(ps);
-      })
+    getJson<AppIntent[]>(INTENTS)
+      .then(setIntents)
       .catch((e: unknown) => setError(String(e)));
+    // proposals é opcional: um db.json antigo pode não ter a coleção (404 → lista vazia)
+    fetch(PROPOSALS)
+      .then((r) => (r.ok ? (r.json() as Promise<AppProposal[]>) : []))
+      .then(setProposals)
+      .catch(() => setProposals([]));
   }
   useEffect(reload, []);
 
