@@ -390,6 +390,23 @@ definem** (e não se versionam/citam). Modelo vivo, não-autoridade.
 
 **Casos extras a empilhar (se quisermos estressar mais):** uma decisão que **REJEITA**; uma pergunta que só **re-recebe verdict** sem mexer em decisão.
 
+### Plano de UX (app) — o board reflete a INICIATIVA + um grafo vivo (construir aos poucos)
+
+> O board hoje carrega 1 intent mas **não conta a história pra um humano**. Desenho (mockups na conversa de 2026-06-28). Construir **aos poucos**.
+
+**A) Board = PAINEL da iniciativa (o que um humano quer saber):**
+
+- **Cabeçalho:** título + objetivo + **status** + **dona da iniciativa** (campo NOVO `owner` na intent) + `created/updated-at` + nº de repos.
+- **Métricas:** perguntas resolvidas (gate) · contratos known · trabalhos (quantos ready/active/blocked/done).
+- **"Quem está em quê":** cada trabalho como linha — estado · repo · peso · **responsável** (`assignee`, ou "sem dono — alguém pode pegar") · **"⟵ espera X"** quando blocked.
+- **"Próximo":** o que destrava + o caminho crítico, em linguagem humana.
+
+**B) Dashboard de intents = GRAFO VIVO:** todas as intents + um grafo derivado dos arquivos — **nós** (intent · exploration · delivery/work · proposal · [futuro] experiment) + **arestas** da Lente 3 (`answers` · `results-in`/`derives-from` · `blocked-by` · `coordinates-with` · `raises` · `supersedes`). Vivo = recomputa do banco. Começar simples (nós + arestas estáticas) → evoluir p/ layout interativo.
+
+**O que isso pede (lacunas):** **`owner` na intent** (quem toca — campo NOVO; a intent ainda não tem dono) · `assignee` no work (✅ já tem) · o **banco** expor as arestas pro grafo · a **tela de grafo** (nova rota) + o board enriquecido.
+
+**Ordem (aos poucos):** (1) board-painel (cabeçalho + `owner` + `assignee` + "espera X" + métricas) — junto do **Passo A**; (2) o grafo vivo — depois, incremental.
+
 **Sim FILE-FIRST (canônica — o estado ATUAL, validada pelo banco do YAML `_banks/run.ts`):** os repos `acme-*` em **`.governance/`**: a intent **`login_1`** (q1/q2 + contratos) + `deliberation.yml` (d1/d2 aceitas, `results-in` as deliveries); **2 explorations done** (`form-validation_1` no DS · `proactive-support_1` no mfe-support — answered q1/q2, dono `@dev-*`); o **breakdown** materializou **2 deliveries `draft`** (`form-component_1`, `help-on-demand_1` — dono ninguém, deps postas). **O banco do YAML deriva PONTA-A-PONTA** (projeta TODO work · descobre intents · refs-caminho) → q1/q2 `RESOLVED`, contratos `known`, **plano (breaks-into) = só as entregas** (draft); explorations na investigação. Ids `slug_num` · `created/updated-at` · `assignee` (active exige dono). _(decisões: "Estrutura física & ids" na Parte 3.)_
 
 **Estado:** ✅ **Lentes 1-3 fechadas; Lente 4 (famílias: trabalho/ferramentas/deliberação) em CONVERGÊNCIA.** Lente 1 (5 tipos de trabalho + `proposal`/`exploration` ferramentas). Lente 2 (5 momentos · coração ✦). **Lente 4 (famílias)** + casa-de-cada-aresta + `deliberation.yml` ancora arestas. **Lente 3 = 10 arestas, cada uma com critério único** (estrutura · proveniência · dependência · investigação · fecho · histórico); renomeios `grounded-by`→`supported-by` · `verdicted-by`→`closed-by` · `promotes-to`→`results-in` · `resolves`→`answers`; `spawned-by`/`from-spike`/`promoted-to` fundidos/derivados; **princípio: o dado fica no NÓ, não na aresta** (grafo: `../assets/lente3-edge-graph.svg`). **Camada `intent`** na governança global por **org/BU = PASTAS** (sem campo `scope`); a intent é **`.yml`** (`objective`/`references`/`open-questions`/`contracts`/`details` — **`breaks-into` é DERIVADO**, o banco projeta); o **`breaks-into` = vista agrupada por status** (`done`/`active`/`draft`, as draft com `blocked-by`). **Registries:** `registry-entry.yml` (raiz de `_templates/`) = base canônica; `proposal` e `exploration` têm template próprio. **Amarra intent↔exploration (forma v2):** a exploration declara `answers: intent#qN`; a intent deriva `answered-by`/`status`/`verdict` (A+); destrave derivado (bancos `_banks/`). **Status** = progresso PRÓPRIO (`draft|active|done`); **bloqueado/pausado = DERIVADO**. **Experiment** = decisão deliberada (benchmark), via `proposal`→intent dedicada (recomendado) ou inline.
