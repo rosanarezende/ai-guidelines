@@ -4,10 +4,10 @@
 - É a **Parte 2 / a 🔴🔥** do tracker. Usa o `capabilities`/`provides` criados na [deliberação do shape do manifesto](2026-06-29-manifest-shape-deliberation.md).
 - Em divergência vencem `state.yml`/`tasks.md`/`decision-brief.md`/gates/Git. Prior art **pública** nas referências.
 
-> **⚠️ RASCUNHO — as `Decisions` estão VAZIAS de propósito.** No método q/r/d (refinado pela owner): a `question`
-> é **iterativa** (as opções amadurecem na pesquisa) · as `researches` **embasam** (aqui, só referências; num
-> q/r/d real cada uma seria um `research.md`) · a `decision` **só nasce depois**, no **gate humano**. Abaixo cada
-> question já leva opções + prós/contras + a **proposta** que eu levaria ao gate — mas **quem decide é você**.
+> **GATE 1 (owner, 2026-06-29):** **Q1/Q3/Q4 DECIDIDAS** · **Q2 em ITERAÇÃO** (a owner pediu aprofundar: `capabilities`
+> `{ texto, tags }` + adapter LLM **local** → embasado em [`2026-06-29-capability-matching-and-llm-research.md`](2026-06-29-capability-matching-and-llm-research.md);
+> a Q2 refinada **volta ao gate**) · **Q5 NOVA** (parqueada). No método q/r/d: a `question` é **iterativa** (as opções
+> amadurecem na pesquisa) · as `researches` **embasam** · a `decision` **só nasce no gate humano**.
 
 ---
 
@@ -78,6 +78,16 @@ O léxico é estável (poderia até versionar), mas tratá-lo como **view** mant
 investigar aqui"), não um despachante. O `derives-from` (proveniência) continua sendo a decisão humana que o gate
 deriva.
 
+### Q5 — (emergiu no gate, a partir da Q3) um "GATE DE EVOLUÇÃO": consultas periódicas → proposals/insights?
+
+**Ideia da owner:** consultar o grafo de conhecimento **regularmente** pra **SURFACE** sinais de governança
+automaticamente — ex.: 2 repos coordenam muito num contrato → propor uma **lib compartilhada**; uma tag que ninguém
+provê mas intents pedem → **gap** → `proposal`; contrato `beta` muito consumido → propor **estabilizar**. É o grafo
+virando **fonte de `proposal`/insight** (conecta com a ferramenta `proposal` + o experiment "proativo" parqueado).
+
+**Status:** 🅿️ **PARQUEADA** — "ainda preciso entender isso melhor" (owner). **Precisa da própria deliberação**;
+não se desenha aqui. _(embasamento inicial: a seção "thread adiante" da [research de matching](2026-06-29-capability-matching-and-llm-research.md).)_
+
 ---
 
 ## Researches (só REFERÊNCIAS — num q/r/d real, cada uma seria um `research.md`)
@@ -89,15 +99,18 @@ deriva.
 
 ---
 
-## Decisions (VAZIO — aguardam o gate humano)
+## Decisions (gate 1 — owner, 2026-06-29)
 
-> Preencher **só** quando você bater o martelo em cada question. As propostas acima são o que eu levaria; nada
-> está decidido.
-
-- **D1 (Q1):** _aguardando gate_ — (proposta: B).
-- **D2 (Q2):** _aguardando gate_ — (proposta: D, default léxico).
-- **D3 (Q3):** _aguardando gate_ — (proposta: A, view no read-model do host).
-- **D4 (Q4):** _aguardando gate_ — (proposta: A, advisory-only).
+- **D1 (Q1) ✅ DECIDIDA — B:** o vertical sugere **explore-point → repo** (onde investigar) **e** **contrato → repo**
+  (quem entrega/breakdown). Mesma máquina (need × oferta).
+- **D2 (Q2) ⏳ EM ITERAÇÃO:** aceita o **D (matcher plugável, default léxico)**, mas a owner pediu **aprofundar 2
+  coisas** antes de fechar: (i) `capabilities` virar **`{ text, tags? }`** (híbrido A+C; habilita o **grafo** repo×tag)
+  e (ii) já planejar um **adapter LLM com modelos LOCAIS** (soberania de dados — a "virada de chave"). → embasado em
+  [`2026-06-29-capability-matching-and-llm-research.md`](2026-06-29-capability-matching-and-llm-research.md); **a Q2
+  refinada volta ao gate** (ver a Conclusão da research).
+- **D3 (Q3) ✅ DECIDIDA — A:** roteamento é **view derivada no read-model do host** (não versionada). _(brotou a **Q5**:
+  consultas periódicas → proposals/insights — parqueada.)_
+- **D4 (Q4) ✅ DECIDIDA — A:** **advisory-only** — nunca alimenta o gate; o breakdown/`derives-from` segue humano.
 
 ---
 
