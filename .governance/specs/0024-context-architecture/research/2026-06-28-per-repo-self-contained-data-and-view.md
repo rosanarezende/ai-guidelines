@@ -1,12 +1,12 @@
 # Banco e view POR-REPO, auto-contidos via lib compartilhada (padrão contrato-first + implementação swappable)
 
-- Data: 2026-06-28 · Spec 0024 · Natureza: **research, não-autoridade** (insumo de DEC; não decide sozinho).
+- Data: 2026-06-28 (atualizado **2026-06-29 — ✅ IMPLEMENTADO**, ver §8) · Spec 0024 · Natureza: **research, não-autoridade** (insumo de DEC; não decide sozinho).
 - Motivação: a sim (`_org-simulation-v2`) hoje tem **1 banco central** que deriva todos os repos e **escreve** dashboards dentro deles. Isso não é fiel à **Lente 5**: o repo deveria ser a **fonte da verdade auto-contida** — dono do seu **dado** (um db próprio) e da sua **view** —, consumindo uma **lib compartilhada**, em vez de receber projeções de uma ferramenta externa. _"Não vejo como um banco fora do repo seja sustentável: para saber uma informação interna seria necessária uma consulta externa."_ (owner, 2026-06-28).
 - Prior art pública abaixo; o padrão é genérico (repository pattern + fake API + context como DI).
 
 ---
 
-## 1 · O problema (na nossa sim)
+## 1 · O problema (na nossa sim) — ✅ RESOLVIDO (ver §8)
 
 - **Hoje:** `_banks/run.ts` (central) lê o `.governance/` de TODOS os repos e materializa db/HTML para dentro deles. O repo não tem autonomia — depende da ferramenta central rodar.
 - **Queremos:** cada repo **auto-contido** — seu próprio **banco/db** + sua própria **view** — montados a partir de uma **lib compartilhada**; o repo **projeta pra dentro** (detalhe interno) e **pra fora** (o que a governança agrega). O banco central vira só o **host de agregação**.
@@ -64,3 +64,28 @@ Backend = **repository plugável** com backends **REAIS** (não mock-pra-rapidez
 - **Consumidores:** a **deliberação** (WRITE via porta → grava o `.governance/`) · a **view** React (READ via porta → deriva → renderiza) · o **host** (agrega).
 
 O `db.json`/dashboards viram **read-models derivados** (cache regenerável), não a fonte. Impl em fases: domínio → portas → `FileRepository` → host → view.
+
+## 8 · ✅ O que foi CONSTRUÍDO (atualização 2026-06-29 — supersede o "a fazer" dos §5–§7)
+
+O desenho do §7 foi **implementado e provado** na `_org-simulation-v2/`. As perguntas abertas do §5 fecharam:
+
+- **Q1 (fake-only?)** → **NÃO**: a owner cravou **backends REAIS** plugáveis (não mock-pra-rapidez), do dev-solo (arquivos) à escala (grafo).
+- **Q2 (lib = 1 pacote)** → **sim**: `_lib/` é a lib compartilhada (DDD); cada repo a consome **e tem `package.json` próprio** pra rodar o seu backend.
+- **Q3 (view estática × app)** → **React como view-lib**: os MESMOS componentes geram o **HTML estático** (SSR via `renderToStaticMarkup`) e servem o app vivo.
+- **Q4 (context)** → `deriveContext` publica as arestas (`coordinates-with`/`answers`/`blocked-by`) + status; o host (`deriveGovernance`) agrega.
+- **Q5 (artefatos por-repo)** → `<repo>/.governance/{db.json, dashboard.html}` (read-models gerados, gitignored) + o **backend real** (file/sqlite/neo4j/mongo).
+
+**Estrutura DDD entregue** (`_lib/`): `domain/{model,derive}.ts` (puro) · `ports.ts` (`Repository` interno + `HostRepository`, **async**) · `adapters/{file,sqlite,neo4j,mongo}/` · `backend.ts` (**selector** por repo, via `.governance/backend.yml`) · `build.ts` (runner) · `seed.ts` (migra arquivos→backend) · `check/neo4j-check/mongo-check.ts` (smokes).
+
+**Pluggability VALIDADA em 4 paradigmas** (a porta `Repository` é neutra; domínio/derive/view INTACTOS):
+
+| backend | paradigma                            | infra   | repo               |
+| ------- | ------------------------------------ | ------- | ------------------ |
+| file    | arquivos (`.governance/` versionado) | nenhuma | acme-design-system |
+| sqlite  | relacional (`node:sqlite` embarcado) | nenhuma | acme-mfe-identity  |
+| neo4j   | grafo (Docker + volume, persistente) | Docker  | acme-mfe-support   |
+| mongo   | documento                            | Docker  | smoke              |
+
+Uso + como rodar cada um: **`_org-simulation-v2/README.md`**. Estado e ponto de retomada: o **tracker** (`2026-06-25-work-graph-model.md`).
+
+_Refinamentos abertos:_ as arestas da Lente 3 como **relações** no grafo (hoje nós-only) · `Neo4jHostRepository` · fiar o **app vivo** do `_viewer` à lib nova.
