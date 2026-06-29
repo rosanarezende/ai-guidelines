@@ -195,6 +195,10 @@ npx tsc --noEmit                   # a view
 
 `cd _viewer && npm run dev` sobe a app antiga de **autoria** (json-server + db central). Ela ainda está no **modelo antigo** e **pendente** de ser fiada à lib nova — use os dashboards estáticos (§6.2) como a view atual.
 
+### 6.9 Roteamento — matcher léxico (solo) ou LLM local
+
+O grafo VERTICAL (sugere ONDE investigar / QUEM entrega) usa um **`Matcher` plugável** — **léxico** (default, zero infra) ou **LLM LOCAL** (Ollama, soberania de dados). O espectro solo→enterprise, o `matcher.yml`, como puxar os modelos (`npm --prefix acme-governance run models:pull`) e a escada de viabilidade: **[`MATCHER.md`](MATCHER.md)**. Dogfood do roteamento: `node _lib/routing-check.ts`.
+
 ---
 
 ## 7 · Estado atual + próximos passos
@@ -202,7 +206,8 @@ npx tsc --noEmit                   # a view
 - ✅ **Modelo (Lentes 1–5) fechado** no tracker. Decisões recentes: **a intent NÃO delibera** (q/r/d é etapa de work/exploration; o gate deriva do breakdown — `derives-from`) · **manifesto-por-repo** (auto-discovery + arestas cross-repo derivadas de `provides×consumes`) · **host agrega projeções PUBLICADAS** (`build` em 2 fases; `context.json` versionado + freshness no pre-commit).
 - ✅ **A lib DDD pronta:** domínio + portas + adapters **file/sqlite/neo4j/mongo** (a porta validada em 4 paradigmas; `explores` carrega nos 4) + runner + view.
 - ✅ **Padrão de repo + scaffold:** `src/` (produto) + `.governance/` (sidecar) + `dev`/`.gitignore`/`README` por repo; criar novo via `node _lib/scaffold.ts`. Os **3 explore-points resolvem** no dashboard (e1/e2 aceitos · e3 rejeitado; e2 fecha **offline** pela projeção publicada do `support`).
-- ▶ **Fila:** 🔴🔥 **grafo vertical de roteamento** (`capabilities` → onde rodar a exploration + o breakdown) · os **2 checks** (anti-typo das arestas bloqueante · freshness do `architecture` via arquitetura-lint) · `Neo4jHostRepository` · arestas da Lente 3 como relações no Neo4j · fiar o app vivo do `_viewer`.
+- ✅ **Checks + roteamento:** os **2 checks do manifesto** (anti-typo · freshness do `architecture`, em `manifest-check.ts`) e o **roteamento vertical v1** (matcher léxico+tags · `deriveRouting`/`deriveTagGraph` · dogfood verde) feitos; a porta `Matcher` é **async (LLM-ready)** com adapter **Ollama local** ([`MATCHER.md`](MATCHER.md)).
+- ▶ **Fila:** **v2 do roteamento** (rodar a escada de modelos local: nomic/qwen3/gemma3) · a **rodada do `_viewer`** (fiar o app à lib + a viz de roteamento/tag-graph) · `Neo4jHostRepository` + arestas da Lente 3 como relações no Neo4j.
 
 **O ponto-a-ponto de retomada é o bloco "✅ ESTADO ATUAL" no topo da retomada do tracker** (supersede a retomada histórica).
 
