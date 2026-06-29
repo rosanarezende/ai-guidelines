@@ -37,3 +37,7 @@ packages/*/dist/
 # Artefatos de ferramentas de IA (aider, etc.) — scratch local, fora de versão e
 # format (CORE-05: não versionar stray context; GR-0202: excluir do contexto).
 .aider*
+
+# Projeção PUBLICADA da sim (context.json): a forma é OWNED pelo `build.ts` (deriveContext) e a paridade é
+# gateada por `freshness.ts` (compara o DADO, não os bytes). Prettier reformatar criaria diff falso vs o build.
+.governance/specs/0024-context-architecture/_org-simulation-v2/**/.governance/context.json

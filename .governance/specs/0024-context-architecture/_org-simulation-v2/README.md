@@ -78,26 +78,32 @@ Detalhe completo (as 10 arestas da Lente 3, o ciclo de vida, etc.): **no tracker
 ```
 _org-simulation-v2/
   _lib/                     ← a LIB (DDD) — o coração
-    domain/{model,derive}.ts · ports.ts · backend.ts · build.ts · seed.ts
-    adapters/{file,sqlite,neo4j,mongo}/
-    check.ts · neo4j-check.ts · mongo-check.ts   ← smokes (provas)
-    tsconfig.json · package.json
-  _viewer/                  ← a VIEW (Vite/React/TS)
-    src/dashboard/{Dashboards,types}.ts  + render-dashboards.tsx  (a view-lib + SSR)
-    src/… (app VIVO antigo — autoria; pendente de fiar à lib nova)
-  acme-governance/          ← META-REPO da governança (HOST)
-    intents/login_1/{intent,deliberation}.yml · proposals.yml · package.json
-  acme-design-system/       ← repo de trabalho   [backend: file]
-    .governance/{registry/, works/delivery/form-component_1/{questions/,research/,deliberation.yml}, explorations/}
-    package.json
-  acme-mfe-identity/        ← repo de trabalho   [backend: sqlite]
-    .governance/{registry/, backend.yml(kind: sqlite)} · package.json
-  acme-mfe-support/         ← repo de trabalho   [backend: neo4j]
-    .governance/{registry/, explorations/, backend.yml(kind: neo4j)} · docker-compose.yml · package.json
-  _archive/                 ← simulações antigas (referência)
+    domain/{model,derive}.ts · ports.ts · backend.ts · build.ts · seed.ts · freshness.ts · scaffold.ts
+    adapters/{file,sqlite,neo4j,mongo}/ · check.ts/neo4j-check.ts/mongo-check.ts (smokes)
+  _viewer/                  ← a VIEW (Vite/React/TS): src/dashboard/ + render-dashboards.tsx
+  acme-governance/          ← META-REPO da governança (HOST·back): src/ · intents/ · proposals.yml · .gitignore · README · package.json
+  <repo-de-trabalho>/       ← PADRÃO de cada repo (front OU back):
+    src/                    ←   o PRODUTO (index.html+main.js p/ front · index.js p/ back) — mínimo na sim
+    .governance/            ←   a GOVERNANÇA (sidecar, fora do código):
+      manifest.yml          ←     a face EXTERNA — o host DESCOBRE o repo por aqui
+      registry/<kind>.yml   ←     índices dos works/explorations
+      works/ · explorations/←     o conteúdo (briefs/q-r-d/answers)
+      context.json          ←     a projeção PUBLICADA (VERSIONADA — é o contrato)
+      .cache/               ←     read-models (db.json/dashboard.html) — gitignored
+      backend.yml           ←     o banco do repo (ausente = file; sqlite/neo4j/mongo)
+    .gitignore · README.md · package.json
+  acme-design-system/[file] · acme-mfe-identity/[sqlite] · acme-mfe-support/[neo4j]+docker-compose.yml
+  _archive/                 ← simulações antigas + o _banks legado (referência)
 ```
 
-> **Gerados (gitignored):** `**/dashboard.html` · `**/.governance/db.json` · `**/.governance/*.db` (SQLite) · `_writecheck/`. Regeneram com `build` / `dashboards`.
+> **Criar um repo novo (o padrão, via script):** `node _lib/scaffold.ts <nome> <front|back> ["papel"] [file|sqlite|neo4j|mongo]`
+> → gera o padrão completo (`src/` + `.governance/` + `.gitignore` + `README` + `package.json`); o host
+> **auto-descobre** (basta ter `.governance/registry/`).
+>
+> **VERSIONADO** (a fonte + o contrato): o `.governance/` source (`registry`/`works`/`explorations`/`manifest`) + o
+> **`context.json`** (projeção publicada; freshness no pre-commit). **Gitignored** (caches regeneráveis): o
+> `.governance/.cache/` (`db.json`/`dashboard.html`) · `*.db` (sqlite) · `node_modules/`. **Cada repo tem o seu
+> `.gitignore` + `README`** (este README da raiz é a visão geral).
 
 ---
 

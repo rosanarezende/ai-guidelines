@@ -5,8 +5,12 @@
       "ref": "acme-design-system/delivery/form-component_1",
       "status": "active",
       "intent": "login_1",
-      "coordinatesWith": ["form-component"],
-      "derivesFrom": ["acme-design-system/exploration/form-validation_1"]
+      "coordinatesWith": [
+        "form-component"
+      ],
+      "derivesFrom": [
+        "acme-design-system/exploration/form-validation_1"
+      ]
     }
   ],
   "answers": [

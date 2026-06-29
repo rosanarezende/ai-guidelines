@@ -1,0 +1,6 @@
+# governança da ORG — read-models derivados (regeneráveis)
+.cache/
+# produto/host
+node_modules/
+dist/
+build/

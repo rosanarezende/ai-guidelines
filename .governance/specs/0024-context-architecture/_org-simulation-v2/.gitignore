@@ -1,6 +1,8 @@
-# Caches/derivados regeneráveis (read-models internos + a view) — NÃO versionar.
-# A FONTE é o `.governance/` source; o `context.json` (projeção PUBLICADA) é VERSIONADO (é contrato — freshness via lint no pre-commit).
+# Sim-level + rede de segurança (cada repo simulado TAMBÉM tem o SEU .gitignore). NÃO versionar derivados.
+# A FONTE é o `.governance/` source; o `context.json` (projeção PUBLICADA) é VERSIONADO (é contrato — freshness no pre-commit).
+**/node_modules/
 **/.governance/.cache/
 acme-governance/.cache/
 **/.governance/*.db
+_viewer/dist/
 _writecheck/
