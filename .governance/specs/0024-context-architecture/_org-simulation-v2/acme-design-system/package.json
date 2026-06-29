@@ -1,0 +1,10 @@
+{
+  "name": "acme-design-system",
+  "private": true,
+  "description": "Repo simulado — Design System. Backend: ARQUIVOS (.governance/ versionado). Consome a lib _lib/.",
+  "scripts": {
+    "seed": "node ../_lib/seed.ts acme-design-system",
+    "build": "node ../_lib/build.ts",
+    "dashboard": "node ../_lib/build.ts && npm --prefix ../_viewer run dashboards"
+  }
+}

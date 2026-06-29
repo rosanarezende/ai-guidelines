@@ -1,0 +1,10 @@
+{
+  "name": "acme-mfe-identity",
+  "private": true,
+  "description": "Repo simulado — MFE de identidade/login. Backend: SQLite (relacional EMBARCADO, node:sqlite, sem servidor).",
+  "scripts": {
+    "seed": "node ../_lib/seed.ts acme-mfe-identity",
+    "build": "node ../_lib/build.ts",
+    "dashboard": "node ../_lib/build.ts && npm --prefix ../_viewer run dashboards"
+  }
+}
