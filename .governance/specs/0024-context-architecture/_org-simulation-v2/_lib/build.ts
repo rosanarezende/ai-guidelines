@@ -18,7 +18,9 @@ import type { RepoContext, DeliberationView, GovernanceView } from "./domain/der
 import type { Work, Proposal } from "./domain/model.ts";
 
 function writeDb(rel: string, data: unknown): void {
-  fs.writeFileSync(path.join(SIM_ROOT, rel), `${JSON.stringify(data, null, 2)}\n`, "utf8");
+  const abs = path.join(SIM_ROOT, rel);
+  fs.mkdirSync(path.dirname(abs), { recursive: true });
+  fs.writeFileSync(abs, `${JSON.stringify(data, null, 2)}\n`, "utf8");
 }
 function readJson<T>(rel: string): T {
   return JSON.parse(fs.readFileSync(path.join(SIM_ROOT, rel), "utf8")) as T;
@@ -48,8 +50,8 @@ for (const repoName of repos) {
       worksWithDelib.push({ ...w, deliberation });
     }
 
-    // INTERNO (camada interna, auto-contida no repo):
-    writeDb(`${repoName}/.governance/db.json`, {
+    // INTERNO (cache: read-model auto-contido no repo) — vai pro .cache/ (regenerável, gitignored):
+    writeDb(`${repoName}/.governance/.cache/db.json`, {
       repo: repoName,
       generatedAt: new Date().toISOString(),
       works: worksWithDelib,
@@ -87,7 +89,7 @@ const governance: GovernanceView[] = intents.map((intent) =>
 );
 const knowledge = deriveManifestGraph(await host.listManifests());
 
-writeDb("acme-governance/db.json", {
+writeDb("acme-governance/.cache/db.json", {
   generatedAt: new Date().toISOString(),
   governance,
   repos,

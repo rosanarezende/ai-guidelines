@@ -1,0 +1,13 @@
+{
+  "repo": "acme-mfe-identity",
+  "works": [
+    {
+      "ref": "acme-mfe-identity/delivery/login-mfe_1",
+      "status": "draft",
+      "intent": "login_1",
+      "coordinatesWith": ["form-component"],
+      "blockedBy": ["acme-design-system/delivery/form-component_1"]
+    }
+  ],
+  "answers": []
+}

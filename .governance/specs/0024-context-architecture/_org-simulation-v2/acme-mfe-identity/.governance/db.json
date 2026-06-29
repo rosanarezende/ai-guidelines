@@ -1,0 +1,20 @@
+{
+  "repo": "acme-mfe-identity",
+  "generatedAt": "2026-06-29T18:59:45.824Z",
+  "works": [
+    {
+      "id": "login-mfe_1",
+      "kind": "delivery",
+      "title": "tela de login (MFE) consumindo o form",
+      "status": "draft",
+      "weight": "L",
+      "intent": "login_1",
+      "blockedBy": ["acme-design-system/delivery/form-component_1"],
+      "coordinatesWith": ["form-component"],
+      "createdAt": "2026-06-28",
+      "updatedAt": "2026-06-28",
+      "deliberation": null
+    }
+  ],
+  "explorations": []
+}

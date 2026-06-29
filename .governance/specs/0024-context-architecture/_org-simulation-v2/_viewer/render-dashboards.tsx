@@ -12,17 +12,20 @@ import type { RepoDb, GovernanceDb } from "./src/dashboard/types.ts";
 const SIM_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const read = <T,>(rel: string): T =>
   JSON.parse(fs.readFileSync(path.join(SIM_ROOT, rel), "utf8")) as T;
-const write = (rel: string, html: string): void =>
-  fs.writeFileSync(path.join(SIM_ROOT, rel), html, "utf8");
+const write = (rel: string, html: string): void => {
+  const abs = path.join(SIM_ROOT, rel);
+  fs.mkdirSync(path.dirname(abs), { recursive: true });
+  fs.writeFileSync(abs, html, "utf8");
+};
 const page = (el: ReactElement): string => `<!doctype html>\n${renderToStaticMarkup(el)}`;
 
-const gov = read<GovernanceDb>("acme-governance/db.json");
+const gov = read<GovernanceDb>("acme-governance/.cache/db.json");
 
 // LOCAL: cada repo projeta pra dentro (o db.json é a fonte; o componente é a view compartilhada)
 for (const repo of gov.repos) {
-  const db = read<RepoDb>(`${repo}/.governance/db.json`);
+  const db = read<RepoDb>(`${repo}/.governance/.cache/db.json`);
   write(
-    `${repo}/.governance/dashboard.html`,
+    `${repo}/.governance/.cache/dashboard.html`,
     page(
       createElement(
         Page,
@@ -39,7 +42,7 @@ for (const repo of gov.repos) {
 
 // PRINCIPAL: a governança projeta a visão geral (host)
 write(
-  "acme-governance/dashboard.html",
+  "acme-governance/.cache/dashboard.html",
   page(
     createElement(
       Page,

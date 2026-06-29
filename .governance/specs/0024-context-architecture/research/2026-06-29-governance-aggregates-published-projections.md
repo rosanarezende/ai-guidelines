@@ -55,11 +55,11 @@ banco de **UM** repo quando edita os **internos dele** (e **republica** o `conte
 
 A projeção publicada precisa estar onde o host alcança **sem o backend do repo**. O espectro:
 
-| porte                  | onde a projeção é publicada                                                                                                                                            |
-| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **dev solo / MVP**     | **cache local** (`context.json` gitignored, como o `db.json`). Publica por-repo conforme trabalha; agrega offline.                                                     |
-| **time pequeno/médio** | publicado no **meta-repo de governança** (commitado) ou um diretório compartilhado; CI republica no push.                                                              |
-| **grande empresa**     | cada repo publica sua projeção num **store/registry compartilhado** (ou no catálogo) via **CI**; o host/dashboard agrega de lá. O dev nunca sobe os bancos dos outros. |
+| porte                  | onde a projeção é publicada                                                                                                                                                          |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **dev solo / MVP**     | **versionado no git** (`context.json` commitado — git = distribuição + auditoria, zero infra). Freshness via **pre-commit hook**. Agrega offline em qualquer clone, sem subir banco. |
+| **time pequeno/médio** | publicado no **meta-repo de governança** (commitado) ou um diretório compartilhado; CI republica no push.                                                                            |
+| **grande empresa**     | cada repo publica sua projeção num **store/registry compartilhado** (ou no catálogo) via **CI**; o host/dashboard agrega de lá. O dev nunca sobe os bancos dos outros.               |
 
 **Drift / anti-2ª-SSOT:** o `context.json` é um **snapshot regenerável** (não a fonte). Um **check de freshness**
 (estilo lock-file) garante que ele bate com o backend — republicar é barato. A fonte continua sendo o repo; a
@@ -75,7 +75,7 @@ projeção é o **contrato** publicado (como uma spec OpenAPI publicada, ou um l
   bancos dos times. Escala pra dezenas/centenas de repos.
 
 → o **backend plugável + a publicação da projeção** dão os dois extremos com o **mesmo** modelo (contrato-first):
-o que muda é **onde** a projeção é publicada (cache local ↔ store compartilhado) — um **knob**, não um redesenho.
+o que muda é **onde** a projeção é publicada (commitado no git ↔ store compartilhado) — um **knob**, não um redesenho.
 
 ## 6 · Prior art (pública)
 
@@ -96,15 +96,16 @@ O `build.ts` fazia tudo num passo, **abrindo cada backend** pra agregar. O refac
 2. **FASE 2 · agregar:** lê os `context.json` **dos arquivos** (sem abrir banco) + intents + manifestos →
    `acme-governance/db.json`.
 
-`context.json` fica **gitignored** (cache local, como `db.json`) na sim; em produção, publica-se no store
+`context.json` é **VERSIONADO** na sim (commitado — é contrato; freshness via pre-commit hook = `_lib/freshness.ts` no lint-staged, evita drift e mantém o repo FONTE), e os caches/read-models (`db.json`/`dashboard.html`) vão pro **`.governance/.cache/`** (gitignored); em produção, publica-se no store
 compartilhado (§4). _(follow-up: um comando `aggregate` separado, que roda SÓ a fase 2.)_
 
 ## 8 · Perguntas abertas (o que a DEC decide)
 
 - **Q1 — formato do `context.json`:** o conteúdo exato da projeção externa (works publicados + answers + arestas +
   manifesto agregado?). Hoje = a saída de `deriveContext`. Incluir o manifesto na mesma projeção?
-- **Q2 — onde publica por porte:** gitignored-local (solo) × commitado no meta-repo × store/registry compartilhado
-  (enterprise). Provável: **plugável** (um knob), default local.
+- **Q2 — onde publica por porte (DECIDIDO 2026-06-29):** **solo = commitado no git** (+ freshness hook · git =
+  distribuição + auditoria) · time = meta-repo/store · enterprise = store/registry compartilhado (CI). O
+  gitignored-cache foi **descartado** (não ganha em lugar nenhum: clone fresco/backend fora precisaria subir banco).
 - **Q3 — freshness/drift:** o check que garante `context.json` == backend (republicar no CI / um lint). Quando roda?
 - **Q4 — comando `aggregate` separado:** rodar a fase 2 sozinha (sem nenhum backend) — confirmar como 1ª classe.
 - **Q5 — identidade/versão da projeção:** a projeção carrega um hash/versão pra o host saber se está fresca?

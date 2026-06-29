@@ -1,7 +1,6 @@
-# Artefatos GERADOS pela lib (regeneram com `node _lib/build.ts`) — não versionar.
-**/dashboard.html
-**/.governance/db.json
-**/.governance/context.json
+# Caches/derivados regeneráveis (read-models internos + a view) — NÃO versionar.
+# A FONTE é o `.governance/` source; o `context.json` (projeção PUBLICADA) é VERSIONADO (é contrato — freshness via lint no pre-commit).
+**/.governance/.cache/
+acme-governance/.cache/
 **/.governance/*.db
-acme-governance/db.json
 _writecheck/

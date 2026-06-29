@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charSet="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><title>acme-design-system — dashboard local</title><style>
+  :root { color-scheme: light dark; }
+  body { font: 14px/1.5 system-ui, -apple-system, sans-serif; margin: 2rem auto; max-width: 880px; padding: 0 1rem; }
+  h1 { font-size: 1.3rem; margin-bottom: .2rem; } h1 small { font-weight: 400; opacity: .55; font-size: .72rem; display: block; }
+  h2 { font-size: 1rem; margin: 0 0 .3rem; } h2 small { font-weight: 400; opacity: .6; }
+  h3 { font-size: .72rem; text-transform: uppercase; letter-spacing: .05em; opacity: .55; margin: .8rem 0 .3rem; }
+  .card { border: 1px solid #8884; border-radius: 10px; padding: .9rem 1.1rem; margin: 1rem 0; }
+  .meta { font-size: .82rem; opacity: .75; margin-bottom: .2rem; }
+  .badge { display: inline-block; padding: .04rem .5rem; border-radius: 999px; font-size: .76rem; font-weight: 600; }
+  .ok { background: #1c8a4522; color: #1c8a45; } .warn { background: #b4690e22; color: #c9770f; }
+  .info { background: #2563eb22; color: #3b82f6; } .muted { background: #8883; opacity: .75; }
+  ul.q { list-style: none; padding: 0; margin: 0; } ul.q li { padding: .12rem 0; }
+  table { border-collapse: collapse; width: 100%; font-size: .86rem; margin-top: .3rem; }
+  th, td { text-align: left; padding: .33rem .5rem; border-bottom: 1px solid #8883; vertical-align: top; }
+  th { font-size: .66rem; text-transform: uppercase; letter-spacing: .04em; opacity: .5; }
+  .mode { font-size: .76rem; opacity: .7; } .res { font-size: .8rem; opacity: .8; }
+  .stage { font-size: .74rem; padding: .06rem .5rem; border-radius: 999px; background: #b4690e22; color: #c9770f; font-weight: 600; }
+  .stage.executing { background: #1c8a4522; color: #1c8a45; }
+  .layer { float: right; font-size: .68rem; padding: .08rem .5rem; border-radius: 6px; opacity: .8; }
+  .layer.ext { background: #2563eb18; color: #3b82f6; } .layer.int { background: #8882; }
+</style></head><body><h1>acme-design-system — dashboard local <small>auto-contido no repo · projeta PRA DENTRO · regenera com npm run dashboards</small></h1><section class="card"><h2>Trabalho <span class="layer int">interna · auto-contida no repo</span></h2><table><thead><tr><th>work</th><th>kind</th><th>status</th><th>dono</th><th>peso</th><th>blocked-by</th><th>coordena</th></tr></thead><tbody><tr><td><b>form-component_1</b></td><td>delivery</td><td><span class="badge info">active</span></td><td>@dev-ds</td><td>M</td><td class="res">—</td><td class="res">form-component</td></tr></tbody></table></section><section class="card"><h2>Explorations <span class="layer int">ferramenta</span></h2><table><thead><tr><th>id</th><th>status</th><th>fate</th><th>responde</th></tr></thead><tbody><tr><td><b>form-validation_1</b></td><td><span class="badge ok">done</span></td><td>throwaway</td><td class="res">acme-governance/intents/login_1#e1</td></tr><tr><td><b>captcha-spike_1</b></td><td><span class="badge ok">done</span></td><td>throwaway</td><td class="res">acme-governance/intents/login_1#e3</td></tr></tbody></table></section><section class="card"><h2>Deliberação · form-component_1 <span class="stage deciding">deciding</span></h2><div class="meta">cursor (state DERIVADO): <b>gate pendente em: q1, q2, q3, q4</b></div><table><thead><tr><th>question</th><th>modo</th><th>gate</th><th>research</th></tr></thead><tbody><tr><td><b>q1</b></td><td><span class="mode">escolha</span></td><td><span class="badge warn">respondida ≠ resolvida</span></td><td class="res">res-001, res-002</td></tr><tr><td><b>q2</b></td><td><span class="mode">escolha</span></td><td><span class="badge warn">respondida ≠ resolvida</span></td><td class="res">res-003, res-005</td></tr><tr><td><b>q3</b></td><td><span class="mode">escolha</span></td><td><span class="badge warn">respondida ≠ resolvida</span></td><td class="res">res-004</td></tr><tr><td><b>q4</b></td><td><span class="mode">aceitação</span></td><td><span class="badge warn">respondida ≠ resolvida</span></td><td class="res">res-005</td></tr></tbody></table></section></body></html>

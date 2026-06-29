@@ -1,0 +1,34 @@
+{
+  "repo": "acme-mfe-support",
+  "generatedAt": "2026-06-29T02:34:19.883Z",
+  "works": [
+    {
+      "id": "help-on-demand_1",
+      "kind": "delivery",
+      "title": "ajuda sob demanda (absorve a POC do listener)",
+      "status": "draft",
+      "weight": "L",
+      "intent": "login_1",
+      "blockedBy": ["acme-design-system/delivery/form-component_1"],
+      "coordinatesWith": ["failure-event"],
+      "derivesFrom": ["acme-mfe-support/exploration/proactive-support_1"],
+      "createdAt": "2026-06-28",
+      "updatedAt": "2026-06-28",
+      "deliberation": null
+    }
+  ],
+  "explorations": [
+    {
+      "id": "proactive-support_1",
+      "answers": "acme-governance/intents/login_1#q2",
+      "status": "done",
+      "assignee": "@dev-support",
+      "fate": "promoted",
+      "closedBy": "explorations/proactive-support_1/exploration-answer.md",
+      "verdict": "viável (pub/sub conta as falhas e dispara após N); SE proativo AJUDA é hipótese de produto → experiment dedicado",
+      "createdAt": "2026-06-26",
+      "updatedAt": "2026-06-27",
+      "closedAt": "2026-06-27"
+    }
+  ]
+}

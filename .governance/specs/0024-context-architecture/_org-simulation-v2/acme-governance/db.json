@@ -1,0 +1,170 @@
+{
+  "generatedAt": "2026-06-29T18:59:45.850Z",
+  "governance": [
+    {
+      "intent": "login_1",
+      "title": "Sistema de login (multi-repo)",
+      "owner": "@ana-pm",
+      "explores": [
+        {
+          "id": "e1",
+          "answered": true,
+          "decided": "accepted",
+          "resolved": true,
+          "answeredBy": "acme-design-system/exploration/form-validation_1",
+          "verdict": "não — o DS não tem form validado; cada MFE reimplementa hoje → precisa criar o componente"
+        },
+        {
+          "id": "e2",
+          "answered": false,
+          "decided": "none",
+          "resolved": false
+        },
+        {
+          "id": "e3",
+          "answered": true,
+          "decided": "rejected",
+          "resolved": false,
+          "answeredBy": "acme-design-system/exploration/captcha-spike_1",
+          "verdict": "viável, mas serviço externo (hCaptcha/Turnstile) cobre melhor com menos custo — NÃO construir no DS agora"
+        }
+      ],
+      "contracts": [
+        {
+          "name": "form-component",
+          "awaits": "e1",
+          "known": true
+        },
+        {
+          "name": "failure-event",
+          "awaits": "e2",
+          "known": false
+        }
+      ],
+      "breaksInto": {
+        "done": [],
+        "active": ["acme-design-system/delivery/form-component_1"],
+        "draft": ["acme-mfe-identity/delivery/login-mfe_1"]
+      }
+    }
+  ],
+  "repos": ["acme-design-system", "acme-mfe-identity", "acme-mfe-support"],
+  "proposals": [
+    {
+      "id": "prop-001",
+      "what": "testar se o suporte proativo (abordar após N falhas de login) MELHORA a conclusão do login, ou atrapalha",
+      "raisedFrom": "acme-mfe-support/exploration/proactive-support_1",
+      "owner": "@produto-growth",
+      "status": "open",
+      "tags": ["growth", "login", "suporte-proativo"],
+      "impact": "high",
+      "confidence": "medium",
+      "effort": "medium",
+      "evidence": [
+        "acme-mfe-support/.governance/explorations/proactive-support_1/exploration-answer.md"
+      ],
+      "promoteTo": "experiment",
+      "createdAt": "2026-06-27",
+      "updatedAt": "2026-06-27"
+    }
+  ],
+  "knowledge": {
+    "nodes": [
+      {
+        "repo": "acme-design-system",
+        "role": "design system — componentes de UI compartilhados (form, inputs, tema) consumidos pelos MFEs",
+        "owner": "team-design-system",
+        "domain": "foundations",
+        "capabilities": [
+          "validação de formulários (declarativa + imperativa)",
+          "acessibilidade (a11y / leitor de tela)",
+          "tema e design tokens compartilhados"
+        ],
+        "provides": [
+          {
+            "name": "form-component",
+            "kind": "component",
+            "status": "stable",
+            "owner": "team-design-system"
+          }
+        ],
+        "architecture": {
+          "stack": ["react", "typescript", "styled-components"],
+          "patterns": ["headless-components", "design-tokens"],
+          "boundaries": ["base: não importa de acme-mfe-* (o DS é fundação, não consome MFEs)"]
+        }
+      },
+      {
+        "repo": "acme-mfe-identity",
+        "role": "MFE de identidade/login — orquestra o fluxo de login montado pela shell",
+        "owner": "team-identity",
+        "domain": "access",
+        "capabilities": [
+          "fluxo de autenticação/login na shell",
+          "emissão de eventos de falha de login"
+        ],
+        "provides": [
+          {
+            "name": "login-mfe",
+            "kind": "component",
+            "status": "beta",
+            "owner": "team-identity"
+          },
+          {
+            "name": "failure-event",
+            "kind": "event",
+            "status": "beta",
+            "owner": "team-identity"
+          }
+        ],
+        "architecture": {
+          "stack": ["react", "typescript"],
+          "patterns": ["microfrontend", "event-emitter"]
+        }
+      },
+      {
+        "repo": "acme-mfe-support",
+        "role": "MFE de suporte — ajuda ao usuário (sob demanda e, em experimento, proativa)",
+        "owner": "team-support",
+        "domain": "engagement",
+        "capabilities": [
+          "conteúdo de ajuda contextual",
+          "suporte proativo após N falhas de login (em experimento)"
+        ],
+        "provides": [
+          {
+            "name": "help-on-demand",
+            "kind": "component",
+            "status": "beta",
+            "owner": "team-support"
+          }
+        ],
+        "architecture": {
+          "stack": ["react", "typescript"],
+          "patterns": ["microfrontend", "event-listener"]
+        }
+      }
+    ],
+    "edges": [
+      {
+        "from": "acme-mfe-identity",
+        "to": "acme-design-system",
+        "contract": "acme-design-system/form-component",
+        "kind": "coordinates-with"
+      },
+      {
+        "from": "acme-mfe-support",
+        "to": "acme-design-system",
+        "contract": "acme-design-system/form-component",
+        "kind": "coordinates-with"
+      },
+      {
+        "from": "acme-mfe-support",
+        "to": "acme-mfe-identity",
+        "contract": "acme-mfe-identity/failure-event",
+        "kind": "coordinates-with"
+      }
+    ],
+    "warnings": []
+  }
+}
