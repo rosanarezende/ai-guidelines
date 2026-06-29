@@ -1,6 +1,6 @@
 // render-dashboards.tsx — gera os dashboards ESTÁTICOS com os MESMOS componentes React do app (Lente 5: view única).
-// Lê os db.json (a data layer, gerada por `node _banks/run.ts`) → renderToStaticMarkup → escreve os dashboard.html.
-// Rode:  cd _viewer && npm run dashboards   (após `node ../_banks/run.ts`).
+// Lê os db.json (a data layer, gerada por `node _lib/build.ts`) → renderToStaticMarkup → escreve os dashboard.html.
+// Rode:  cd _viewer && npm run dashboards   (após `node ../_lib/build.ts`).
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";

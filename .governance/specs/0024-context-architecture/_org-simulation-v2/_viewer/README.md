@@ -1,5 +1,7 @@
 # \_viewer — app de autoria + dashboard (Vite + React + TS)
 
+> ⚠️ **Legado:** o banco `_banks/` foi **arquivado** em `_archive/_banks/` (SUPERSEDED pela `_lib`). A **view atual** é estática: `node ../_lib/build.ts` → `npm run dashboards` (ver `src/dashboard/`). Esta README descreve a **app de autoria antiga** (json-server + `derive-app`), pendente de fiação à lib nova.
+
 A "app/form de **Iniciativas**" (Lente 5): cadastra/atualiza Iniciativas (intents) e mostra o **board DERIVADO** pelo banco. Prova a ponta-a-ponta: **autoria (INPUT) → banco (deriva) → board**.
 
 ## Rodar
@@ -26,7 +28,7 @@ npm run dev:all    # sobe a API (json-server) + o app (vite) juntos
 ## Camadas (ciclo FECHADO)
 
 - **Autoria** (json-server / `db.json`) = o INPUT que a app salva.
-- **Banco** (`../_banks/derive-app.ts`) lê o `db.json` → **DERIVA** → `public/snapshot.json`.
+- **Banco** (`../../_archive/_banks/derive-app.ts`, **arquivado**) lia o `db.json` → **DERIVA** → `public/snapshot.json`.
 - **Board** (`/board`) renderiza o snapshot. Cadastrou/decidiu → o watcher re-deriva → clique **↻** no board.
 
-_(o simulador YAML — `_banks/run.ts` — é outra frente, retomada depois.)_
+_(o simulador YAML — `_archive/_banks/run.ts`, arquivado — era outra frente.)_

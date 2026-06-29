@@ -85,7 +85,6 @@ _org-simulation-v2/
   _viewer/                  ← a VIEW (Vite/React/TS)
     src/dashboard/{Dashboards,types}.ts  + render-dashboards.tsx  (a view-lib + SSR)
     src/… (app VIVO antigo — autoria; pendente de fiar à lib nova)
-  _banks/                   ← LEGADO (derive central read-only) — SUPERSEDED pelo _lib; NÃO rodar
   acme-governance/          ← META-REPO da governança (HOST)
     intents/login_1/{intent,deliberation}.yml · proposals.yml · package.json
   acme-design-system/       ← repo de trabalho   [backend: file]

@@ -1,4 +1,4 @@
-# Artefatos GERADOS pela lib/banco (regeneram com `node _banks/run.ts`) — não versionar.
+# Artefatos GERADOS pela lib (regeneram com `node _lib/build.ts`) — não versionar.
 **/dashboard.html
 **/.governance/db.json
 **/.governance/*.db

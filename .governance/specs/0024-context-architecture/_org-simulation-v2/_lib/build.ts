@@ -1,4 +1,4 @@
-// build.ts — o RUNNER da lib (substitui o _banks/run.ts central): consome os adapters File (read) + as
+// build.ts — o RUNNER da lib (substituiu o _banks central, hoje arquivado): consome os adapters File (read) + as
 // derivações puras → regenera os READ-MODELS (db.json) que a view consome. Engine do workflow:
 //   editar .governance/  →  node _lib/build.ts  →  db.json  →  (cd _viewer && npm run dashboards)
 import fs from "node:fs";
