@@ -1,0 +1,26 @@
+# docker-compose.yml — o BACKEND deste repo (acme-mfe-support) é Neo4j (Lente 5: backend plugável POR REPO).
+# Declara o serviço como código, com VOLUME → os dados PERSISTEM entre up/down (não é mais descartável).
+# Uso (de dentro de acme-mfe-support/):
+#   docker compose up -d     # sobe o Neo4j (browser http://localhost:7474 · bolt 7687)
+#   docker compose down      # para (mantém os dados no volume)
+#   docker compose down -v   # para E apaga os dados (volume)
+services:
+  neo4j:
+    image: neo4j:5
+    container_name: acme-mfe-support-neo4j
+    ports:
+      - "7474:7474" # interface web
+      - "7687:7687" # bolt (o protocolo que o código usa)
+    environment:
+      NEO4J_AUTH: neo4j/simsim123 # senha de DEV/sim — em produção vai por secret/env, nunca no repo
+    volumes:
+      - neo4j-data:/data # PERSISTÊNCIA: os dados do grafo vivem aqui e sobrevivem ao down
+    healthcheck: # deixa o `docker compose up -d --wait` esperar o Neo4j aceitar consultas
+      test: ["CMD-SHELL", "cypher-shell -u neo4j -p simsim123 'RETURN 1' || exit 1"]
+      interval: 5s
+      timeout: 10s
+      retries: 20
+      start_period: 20s
+
+volumes:
+  neo4j-data:
