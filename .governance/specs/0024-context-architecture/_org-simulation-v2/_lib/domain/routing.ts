@@ -14,9 +14,9 @@ export interface Match {
   score: number;
   why: string;
 }
-/** ranqueia repos por afinidade do `need` (texto livre) com as capabilities de cada um. Léxico hoje; LLM local amanhã. */
+/** ranqueia repos por afinidade do `need` × capabilities. ASYNC (LLM-ready, igual a porta Repository é "Neo4j-ready"). */
 export interface Matcher {
-  rank(need: string, candidates: MatchCandidate[]): Match[];
+  rank(need: string, candidates: MatchCandidate[]): Promise<Match[]>;
 }
 
 // ───────────────────────── o default: LÉXICO (determinístico, zero infra, explicável) ─────────────────────────
@@ -65,7 +65,7 @@ const tokenMatch = (a: string, b: string): boolean =>
   a === b || (a.length >= 4 && b.startsWith(a)) || (b.length >= 4 && a.startsWith(b));
 
 export class LexicalMatcher implements Matcher {
-  rank(need: string, candidates: MatchCandidate[]): Match[] {
+  async rank(need: string, candidates: MatchCandidate[]): Promise<Match[]> {
     const needTokens = tokenize(need);
     return candidates
       .map((c) => {
@@ -102,11 +102,11 @@ export interface RoutingSuggestion {
   ranked: Match[]; // ordenado; ranked[0] = a sugestão (advisory)
 }
 /** pra cada explore-point (→ capabilities, "quem SABE") e cada contrato (→ provides exato, "quem ENTREGA") sugere o repo. */
-export function deriveRouting(
+export async function deriveRouting(
   intent: Intent,
   manifests: Manifest[],
   matcher: Matcher
-): RoutingSuggestion[] {
+): Promise<RoutingSuggestion[]> {
   const candidates: MatchCandidate[] = manifests.map((m) => ({
     repo: m.repo,
     capabilities: m.capabilities ?? [],
@@ -119,7 +119,7 @@ export function deriveRouting(
     out.push({
       need: ep.subject,
       kind: "explore-point",
-      ranked: matcher.rank(ep.subject, candidates),
+      ranked: await matcher.rank(ep.subject, candidates),
     });
   for (const c of intent.contracts) {
     const provider = providerOf.get(c.name);
@@ -128,7 +128,7 @@ export function deriveRouting(
       kind: "contract",
       ranked: provider
         ? [{ repo: provider, score: 99, why: `provê o contrato "${c.name}"` }]
-        : matcher.rank(c.name, candidates), // ninguém provê → cai no léxico (quem mais se aproxima)
+        : await matcher.rank(c.name, candidates), // ninguém provê → cai no matcher (quem mais se aproxima)
     });
   }
   return out;

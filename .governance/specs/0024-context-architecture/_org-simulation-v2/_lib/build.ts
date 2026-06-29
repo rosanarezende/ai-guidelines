@@ -14,7 +14,8 @@ import {
   deriveGovernance,
   deriveManifestGraph,
 } from "./domain/derive.ts";
-import { LexicalMatcher, deriveRouting, deriveTagGraph } from "./domain/routing.ts";
+import { deriveRouting, deriveTagGraph } from "./domain/routing.ts";
+import { loadMatcher } from "./matcher.ts";
 import type { RepoContext, DeliberationView, GovernanceView } from "./domain/derive.ts";
 import type { Work, Proposal } from "./domain/model.ts";
 
@@ -90,11 +91,13 @@ const governance: GovernanceView[] = intents.map((intent) =>
 );
 const manifests = await host.listManifests();
 const knowledge = deriveManifestGraph(manifests);
-const matcher = new LexicalMatcher(); // Q2: léxico default; trocar por LlmMatcher (local) é o v2 — só muda esta linha
-const routing = intents.map((intent) => ({
-  intent: intent.id,
-  suggestions: deriveRouting(intent, manifests, matcher),
-}));
+const { matcher, label: matcherLabel } = loadMatcher(); // Q2: léxico default; ollama-embed (LLM local) via matcher.yml
+const routing = await Promise.all(
+  intents.map(async (intent) => ({
+    intent: intent.id,
+    suggestions: await deriveRouting(intent, manifests, matcher),
+  }))
+);
 const tagGraph = deriveTagGraph(manifests);
 
 writeDb("acme-governance/.cache/db.json", {
@@ -108,6 +111,6 @@ writeDb("acme-governance/.cache/db.json", {
 });
 console.log(
   `🗃️  acme-governance/db.json — AGREGOU ${publishedContexts.length}/${repos.length} projeções publicadas (SEM abrir banco) · ` +
-    `${governance.length} intent, ${knowledge.edges.length} arestas cross-repo\n📊 view: cd _viewer && npm run dashboards`
+    `${governance.length} intent, ${knowledge.edges.length} arestas cross-repo · matcher: ${matcherLabel}\n📊 view: cd _viewer && npm run dashboards`
 );
 for (const w of knowledge.warnings) console.warn(`⚠️  manifesto: ${w}`);

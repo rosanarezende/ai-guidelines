@@ -8,7 +8,7 @@ const manifests = await host.listManifests();
 const intent = await host.getIntent("login_1");
 if (!intent) throw new Error("intent login_1 não encontrada");
 
-const suggestions = deriveRouting(intent, manifests, new LexicalMatcher());
+const suggestions = await deriveRouting(intent, manifests, new LexicalMatcher());
 const top = (need: string): string | undefined =>
   suggestions.find((s) => s.need === need || s.need === `contrato: ${need}`)?.ranked[0]?.repo;
 
