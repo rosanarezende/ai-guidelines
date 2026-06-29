@@ -1,0 +1,3 @@
+# backend.yml — este repo usa SQLite (relacional EMBARCADO, via `node:sqlite` — zero infra, sem Docker).
+# O dado vive em .governance/governance.db (gitignored). 1ª vez: node _lib/seed.ts acme-mfe-identity.
+kind: sqlite

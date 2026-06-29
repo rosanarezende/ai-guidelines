@@ -49,6 +49,10 @@ for (const repoName of repos) {
     console.log(
       `🗃️  ${repoName}/.governance/db.json (${works.length} works, ${explorations.length} exploration) [backend: ${backendOf(repoName)}]`
     );
+  } catch (e) {
+    console.warn(
+      `⚠️  ${repoName} [${backendOf(repoName)}]: backend indisponível — pulado (${(e as Error).message.slice(0, 70)})`
+    );
   } finally {
     await close();
   }

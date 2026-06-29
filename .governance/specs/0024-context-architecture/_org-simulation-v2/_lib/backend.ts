@@ -4,10 +4,11 @@
 import type { Repository } from "./ports.ts";
 import { FileRepository } from "./adapters/file/FileRepository.ts";
 import { Neo4jRepository, neo4jDriver } from "./adapters/neo4j/Neo4jRepository.ts";
+import { SqliteRepository } from "./adapters/sqlite/SqliteRepository.ts";
 import { exists, readYaml } from "./adapters/file/io.ts";
 
 interface BackendConfig {
-  kind?: "file" | "neo4j";
+  kind?: "file" | "neo4j" | "sqlite";
   uri?: string;
   user?: string;
   password?: string;
@@ -24,7 +25,7 @@ function configOf(repo: string): BackendConfig {
 }
 
 /** o tipo de backend do repo (pra log/diagnóstico). */
-export function backendOf(repo: string): "file" | "neo4j" {
+export function backendOf(repo: string): "file" | "neo4j" | "sqlite" {
   return configOf(repo).kind ?? "file";
 }
 
@@ -38,6 +39,10 @@ export function openRepository(repo: string): OpenedRepo {
       cfg.password ?? process.env.NEO4J_PASSWORD ?? "simsim123"
     );
     return { repo: new Neo4jRepository(repo, driver), close: () => driver.close() };
+  }
+  if (cfg.kind === "sqlite") {
+    const r = new SqliteRepository(repo); // relacional embarcado (node:sqlite); o dado é um .governance/governance.db
+    return { repo: r, close: async () => r.close() };
   }
   return { repo: new FileRepository(repo), close: async () => {} };
 }
