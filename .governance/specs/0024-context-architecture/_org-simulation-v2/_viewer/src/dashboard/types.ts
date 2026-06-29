@@ -1,25 +1,26 @@
-// Tipos do db.json (a FONTE = a projeção da lib/banco; reusa os tipos da lib — single source).
-import type {
-  WorkProjection,
-  DeliberationProjection,
-  GovernanceProjection,
-} from "../../../_banks/types.ts";
+// Tipos do db.json (read-models) = a FONTE são as projeções da LIB (single source — domínio + derivações).
+import type { Work, Exploration, Proposal } from "../../../_lib/domain/model.ts";
+import type { DeliberationView, GovernanceView } from "../../../_lib/domain/derive.ts";
 
-export interface RepoWork extends WorkProjection {
-  deliberation: DeliberationProjection | null;
+export type { Proposal };
+
+/** um work do repo + a sua deliberação derivada (null se não delibera). */
+export interface RepoWork extends Work {
+  deliberation: DeliberationView | null;
 }
 
-/** o db.json LOCAL de um repo (fake-api) — dado auto-contido. */
+/** o db.json LOCAL de um repo (camada interna, auto-contida). */
 export interface RepoDb {
   repo: string;
   generatedAt: string;
   works: RepoWork[];
-  explorations: WorkProjection[];
+  explorations: Exploration[];
 }
 
-/** o db.json da governança (host) — a iniciativa agregada. */
+/** o db.json da governança (host) — a iniciativa agregada + o intake. */
 export interface GovernanceDb {
   generatedAt: string;
-  intents: GovernanceProjection[];
+  governance: GovernanceView[];
   repos: string[];
+  proposals: Proposal[];
 }

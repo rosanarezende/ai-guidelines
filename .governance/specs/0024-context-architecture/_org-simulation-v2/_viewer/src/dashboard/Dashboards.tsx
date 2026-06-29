@@ -2,7 +2,7 @@
 // servem tanto o render estático (render-dashboards.tsx via renderToStaticMarkup) quanto o app vivo.
 import type { ReactNode } from "react";
 import type { RepoDb, GovernanceDb } from "./types";
-import type { QuestionGate, DeliberationProjection } from "../../../_banks/types.ts";
+import type { QuestionGate, DeliberationView } from "../../../_lib/domain/derive.ts";
 
 export const STYLE = `
   :root { color-scheme: light dark; }
@@ -64,7 +64,7 @@ function gateBadge(q: QuestionGate): { cls: string; label: string } {
   return { cls: "muted", label: "open" };
 }
 
-function DelibCard({ d }: { d: DeliberationProjection }) {
+function DelibCard({ d }: { d: DeliberationView }) {
   return (
     <section className="card">
       <h2>
@@ -137,9 +137,9 @@ export function RepoDashboard({ db }: { db: RepoDb }) {
             {db.works.map((w) => {
               const stCls = w.status === "done" ? "ok" : w.status === "active" ? "info" : "muted";
               return (
-                <tr key={w.ref}>
+                <tr key={w.id}>
                   <td>
-                    <b>{id(w.ref)}</b>
+                    <b>{w.id}</b>
                   </td>
                   <td>{w.kind}</td>
                   <td>
@@ -172,9 +172,9 @@ export function RepoDashboard({ db }: { db: RepoDb }) {
             </thead>
             <tbody>
               {db.explorations.map((e) => (
-                <tr key={e.ref}>
+                <tr key={e.id}>
                   <td>
-                    <b>{id(e.ref)}</b>
+                    <b>{e.id}</b>
                   </td>
                   <td>
                     <span className={`badge ${e.status === "done" ? "ok" : "muted"}`}>
@@ -190,7 +190,7 @@ export function RepoDashboard({ db }: { db: RepoDb }) {
         </section>
       )}
 
-      {db.works.map((w) => (w.deliberation ? <DelibCard key={w.ref} d={w.deliberation} /> : null))}
+      {db.works.map((w) => (w.deliberation ? <DelibCard key={w.id} d={w.deliberation} /> : null))}
     </>
   );
 }
@@ -199,7 +199,7 @@ export function RepoDashboard({ db }: { db: RepoDb }) {
 export function MainDashboard({ db }: { db: GovernanceDb }) {
   return (
     <>
-      {db.intents.map((g) => (
+      {db.governance.map((g) => (
         <section className="card" key={g.intent}>
           <h2>
             {g.title} <small>· {g.intent}</small> <span className="layer ext">visão geral</span>
@@ -212,7 +212,7 @@ export function MainDashboard({ db }: { db: GovernanceDb }) {
               const label = q.resolved
                 ? "RESOLVED"
                 : q.answered
-                  ? `answered · ${q.decision}`
+                  ? `answered · ${q.decided}`
                   : "open";
               return (
                 <li key={q.id}>
