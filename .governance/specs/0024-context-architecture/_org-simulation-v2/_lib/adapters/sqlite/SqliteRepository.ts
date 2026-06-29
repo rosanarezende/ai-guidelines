@@ -1,7 +1,8 @@
 // SqliteRepository — 3º adapter da MESMA porta `Repository`, num banco RELACIONAL EMBARCADO (`node:sqlite`,
-// zero infra/sem Docker). Cada repo = um arquivo `.governance/governance.db`; uma tabela por entidade;
+// zero infra/sem Docker). Cada repo = um arquivo `.governance/.cache/governance.db` (CACHE/store, gitignored); uma tabela por entidade;
 // campos lista → JSON em coluna TEXT. Prova que a porta cobre o paradigma RELACIONAL (tabelas), não só grafo.
 import { DatabaseSync } from "node:sqlite";
+import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import type { Repository } from "../../ports.ts";
@@ -92,7 +93,9 @@ export class SqliteRepository implements Repository {
 
   constructor(repo: string) {
     this.repo = repo;
-    this.#db = new DatabaseSync(path.join(SIM_ROOT, repo, ".governance", "governance.db"));
+    const dbPath = path.join(SIM_ROOT, repo, ".governance", ".cache", "governance.db");
+    fs.mkdirSync(path.dirname(dbPath), { recursive: true }); // o .db é CACHE/store → .cache/ (gitignored)
+    this.#db = new DatabaseSync(dbPath);
     this.#db.exec(SCHEMA);
   }
 

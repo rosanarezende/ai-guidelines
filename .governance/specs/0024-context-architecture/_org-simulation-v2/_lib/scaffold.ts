@@ -128,6 +128,13 @@ w(
       private: true,
       description: `Repo simulado (${type}). Produto em src/ + governança em .governance/.`,
       scripts: {
+        dev: [
+          backend === "neo4j" ? "npm run db:up" : null,
+          backend !== "file" ? "npm run seed" : null,
+          "npm run dashboard",
+        ]
+          .filter(Boolean)
+          .join(" && "), // "roda o repo por completo": [db:up] + [seed] + build + view
         ...(backend === "neo4j"
           ? { "db:up": "docker compose up -d --wait", "db:down": "docker compose down" }
           : {}),

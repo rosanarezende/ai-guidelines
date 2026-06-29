@@ -3,6 +3,7 @@
   "private": true,
   "description": "Meta-repo da governança da org (intents + proposals + deliberação no nível da intent). É o HOST que agrega o contexto que os repos publicam.",
   "scripts": {
+    "dev": "npm run dashboard && node src/index.js",
     "build": "node ../_lib/build.ts",
     "dashboard": "node ../_lib/build.ts && npm --prefix ../_viewer run dashboards"
   }
