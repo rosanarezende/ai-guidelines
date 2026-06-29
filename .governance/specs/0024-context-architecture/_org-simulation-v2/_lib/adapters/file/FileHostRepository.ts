@@ -3,7 +3,7 @@
 // Reconcilia o LEGADO: a deliberation.yml da intent usa `decides` + `supported-by` single; o domínio usa
 // `resolves` + array → o `toDecision` mapeia os dois (read), e o write passa a gravar a forma do domínio.
 import type { HostRepository } from "../../ports.ts";
-import type { Intent, Decision, Proposal } from "../../domain/model.ts";
+import type { Intent, Decision, Proposal, Manifest, ContractKind } from "../../domain/model.ts";
 import { exists, readYaml, writeYaml, listNames, listRepoDirs } from "./io.ts";
 
 const GOV = "acme-governance";
@@ -56,6 +56,23 @@ interface ProposalEntry {
   "discard-reason"?: string;
   "created-at"?: string;
   "updated-at"?: string;
+}
+
+interface ManifestFile {
+  repo: string;
+  role?: string;
+  owner: string;
+  domain?: string;
+  provides?: {
+    name: string;
+    kind: ContractKind;
+    description?: string;
+    status?: "stable" | "beta" | "experimental";
+    owner?: string;
+  }[];
+  consumes?: { contract: string; awaits?: string }[];
+  capabilities?: string[];
+  architecture?: { stack?: string[]; patterns?: string[]; boundaries?: string[] };
 }
 
 // ───────────────────────── mappers ─────────────────────────
@@ -133,6 +150,17 @@ const fromProposal = (p: Proposal): ProposalEntry => ({
   "updated-at": p.updatedAt,
 });
 
+const toManifest = (f: ManifestFile): Manifest => ({
+  repo: f.repo,
+  role: f.role,
+  owner: f.owner,
+  domain: f.domain,
+  provides: f.provides ?? [],
+  consumes: f.consumes ?? [],
+  capabilities: f.capabilities,
+  architecture: f.architecture,
+});
+
 // ───────────────────────── o adapter ─────────────────────────
 
 export class FileHostRepository implements HostRepository {
@@ -197,5 +225,13 @@ export class FileHostRepository implements HostRepository {
     const entries = cur.filter((e) => e.id !== p.id);
     entries.push(fromProposal(p));
     writeYaml(PROPOSALS, { entries });
+  }
+
+  // ── manifesto (auto-discovery: varre as .governance/manifest.yml dos repos) ──
+
+  async listManifests(): Promise<Manifest[]> {
+    return (await this.listRepos())
+      .filter((repo) => exists(`${repo}/.governance/manifest.yml`))
+      .map((repo) => toManifest(readYaml<ManifestFile>(`${repo}/.governance/manifest.yml`)));
   }
 }

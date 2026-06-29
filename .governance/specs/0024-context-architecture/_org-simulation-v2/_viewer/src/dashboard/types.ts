@@ -1,6 +1,10 @@
 // Tipos do db.json (read-models) = a FONTE são as projeções da LIB (single source — domínio + derivações).
 import type { Work, Exploration, Proposal } from "../../../_lib/domain/model.ts";
-import type { DeliberationView, GovernanceView } from "../../../_lib/domain/derive.ts";
+import type {
+  DeliberationView,
+  GovernanceView,
+  ManifestGraph,
+} from "../../../_lib/domain/derive.ts";
 
 export type { Proposal };
 
@@ -23,4 +27,5 @@ export interface GovernanceDb {
   governance: GovernanceView[];
   repos: string[];
   proposals: Proposal[];
+  knowledge?: ManifestGraph; // o grafo de conhecimento cross-repo (derivado dos manifestos)
 }

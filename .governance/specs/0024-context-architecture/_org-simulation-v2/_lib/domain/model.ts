@@ -121,3 +121,39 @@ export interface Intent {
   createdAt?: string;
   updatedAt?: string;
 }
+
+// ───────────────────────── MANIFESTO (a camada de CONHECIMENTO — Lente 5, face externa) ─────────────────────────
+
+export type ContractKind = "component" | "api" | "event" | "service";
+
+/** Um contrato OFERTADO pelo repo (a face pública; outro repo o consome → o host deriva a aresta). */
+export interface ProvidedContract {
+  name: string;
+  kind: ContractKind;
+  description?: string;
+  status?: "stable" | "beta" | "experimental";
+  owner?: string; // override do owner do repo (modelo CODEOWNERS) — herda o do repo se ausente
+}
+
+/** Um contrato CONSUMIDO de outro repo (ref qualificada "<repo>/<contrato>"). */
+export interface ConsumedContract {
+  contract: Ref; // "<repo>/<name>"
+  awaits?: string;
+}
+
+/**
+ * O MANIFESTO do repo — auto-declaração de CONHECIMENTO (role/owner/domain/provides/consumes/capabilities/
+ * architecture). Camada EXTERNA: o host DESCOBRE os repos por ele e DERIVA as arestas cross-repo
+ * (provides×consumes; anota-se 1 lado). owner = 1 responsável-chave (accountable) + override por provides.
+ * (shape deliberado em research/2026-06-29-manifest-shape-deliberation.md.)
+ */
+export interface Manifest {
+  repo: string;
+  role?: string;
+  owner: string;
+  domain?: string;
+  provides: ProvidedContract[];
+  consumes: ConsumedContract[];
+  capabilities?: string[];
+  architecture?: { stack?: string[]; patterns?: string[]; boundaries?: string[] };
+}

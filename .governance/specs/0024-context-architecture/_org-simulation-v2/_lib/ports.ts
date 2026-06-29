@@ -8,6 +8,7 @@ import type {
   Research,
   Decision,
   Intent,
+  Manifest,
 } from "./domain/model.ts";
 
 /** O banco INTERNO de um repo de trabalho (read E write). O backend é plugável (File/Neo4j). */
@@ -48,4 +49,7 @@ export interface HostRepository {
   // proposal (intake — captura humana; vive na governança, não percorre o fluxo)
   listProposals(): Promise<Proposal[]>;
   saveProposal(p: Proposal): Promise<void>;
+
+  // manifesto (a camada de CONHECIMENTO — auto-discovery: o host varre as .governance/manifest.yml)
+  listManifests(): Promise<Manifest[]>;
 }

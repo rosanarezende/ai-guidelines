@@ -6,7 +6,12 @@ import path from "node:path";
 import { FileHostRepository } from "./adapters/file/FileHostRepository.ts";
 import { SIM_ROOT } from "./adapters/file/io.ts";
 import { openRepository, backendOf } from "./backend.ts";
-import { deriveDeliberation, deriveContext, deriveGovernance } from "./domain/derive.ts";
+import {
+  deriveDeliberation,
+  deriveContext,
+  deriveGovernance,
+  deriveManifestGraph,
+} from "./domain/derive.ts";
 import type { RepoContext, DeliberationView, GovernanceView } from "./domain/derive.ts";
 import type { Work, Exploration, Proposal } from "./domain/model.ts";
 
@@ -65,13 +70,19 @@ const governance: GovernanceView[] = [];
 for (const intent of intents) {
   governance.push(deriveGovernance(intent, await host.listDecisions(intent.id), contexts));
 }
+// 3) conhecimento: auto-discovery dos manifestos → o grafo HORIZONTAL (provides×consumes → coordinates-with)
+const knowledge = deriveManifestGraph(await host.listManifests());
+
 writeDb("acme-governance/db.json", {
   generatedAt: new Date().toISOString(),
   governance,
   repos,
   proposals,
+  knowledge,
 });
 console.log(
-  `🗃️  acme-governance/db.json (${governance.length} intent, ${proposals.length} proposal)\n` +
+  `🗃️  acme-governance/db.json (${governance.length} intent, ${proposals.length} proposal, ` +
+    `${knowledge.nodes.length} repos no grafo, ${knowledge.edges.length} arestas cross-repo)\n` +
     `📊 view: cd _viewer && npm run dashboards`
 );
+for (const w of knowledge.warnings) console.warn(`⚠️  manifesto: ${w}`);

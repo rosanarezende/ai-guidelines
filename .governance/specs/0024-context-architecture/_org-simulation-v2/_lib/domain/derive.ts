@@ -1,6 +1,6 @@
 // derive.ts — derivações PURAS: o "banco" derivado a partir do que o Repository leu. Não conhece persistência.
 // O GATE (respondida ≠ resolvida) e o STATE (stage/cursor) saem daqui; a view só renderiza o resultado.
-import type { Work, Exploration, Question, Research, Decision, Intent } from "./model.ts";
+import type { Work, Exploration, Question, Research, Decision, Intent, Manifest } from "./model.ts";
 
 // ───────────────────────── projeções (read-models derivados) ─────────────────────────
 
@@ -189,4 +189,68 @@ export function deriveGovernance(
       draft: refsByStatus("draft"),
     },
   };
+}
+
+// ───────────────────────── o GRAFO DE CONHECIMENTO (cross-repo, derivado dos manifestos) ─────────────────────────
+
+/** Uma aresta cross-repo DERIVADA: `from` CONSOME um contrato que `to` PROVÊ (anota-se 1 lado; o reverso é o grafo). */
+export interface CrossRepoEdge {
+  from: string; // o repo que CONSOME
+  to: string; // o repo que PROVÊ
+  contract: string; // "<to>/<name>"
+  kind: "coordinates-with";
+}
+
+/** Um nó do grafo de conhecimento (um repo, com o owner de cada provides já resolvido — override ?? repo). */
+export interface ManifestNode {
+  repo: string;
+  role?: string;
+  owner: string;
+  domain?: string;
+  capabilities: string[];
+  provides: { name: string; kind: string; status?: string; owner: string }[];
+  architecture?: { stack?: string[]; patterns?: string[]; boundaries?: string[] };
+}
+
+export interface ManifestGraph {
+  nodes: ManifestNode[];
+  edges: CrossRepoEdge[];
+  warnings: string[]; // check anti-typo: um `consumes` sem provider correspondente
+}
+
+/** cruza provides × consumes dos manifestos → as arestas coordinates-with (o grafo HORIZONTAL) + warnings anti-typo. */
+export function deriveManifestGraph(manifests: Manifest[]): ManifestGraph {
+  const providerOf = new Map<string, string>(); // "<repo>/<name>" → o repo que provê
+  for (const m of manifests)
+    for (const p of m.provides) providerOf.set(`${m.repo}/${p.name}`, m.repo);
+
+  const edges: CrossRepoEdge[] = [];
+  const warnings: string[] = [];
+  for (const m of manifests) {
+    for (const c of m.consumes) {
+      const to = providerOf.get(c.contract);
+      if (to) edges.push({ from: m.repo, to, contract: c.contract, kind: "coordinates-with" });
+      else
+        warnings.push(
+          `${m.repo} consome "${c.contract}", mas nenhum repo PROVÊ esse contrato (typo no manifesto, ou o provedor não declarou?).`
+        );
+    }
+  }
+
+  const nodes: ManifestNode[] = manifests.map((m) => ({
+    repo: m.repo,
+    role: m.role,
+    owner: m.owner,
+    domain: m.domain,
+    capabilities: m.capabilities ?? [],
+    provides: m.provides.map((p) => ({
+      name: p.name,
+      kind: p.kind,
+      status: p.status,
+      owner: p.owner ?? m.owner, // resolve o override (modelo CODEOWNERS)
+    })),
+    architecture: m.architecture,
+  }));
+
+  return { nodes, edges, warnings };
 }

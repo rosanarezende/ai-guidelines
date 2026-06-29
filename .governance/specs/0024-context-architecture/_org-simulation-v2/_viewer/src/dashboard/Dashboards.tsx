@@ -2,7 +2,7 @@
 // servem tanto o render estático (render-dashboards.tsx via renderToStaticMarkup) quanto o app vivo.
 import type { ReactNode } from "react";
 import type { RepoDb, GovernanceDb } from "./types";
-import type { QuestionGate, DeliberationView } from "../../../_lib/domain/derive.ts";
+import type { QuestionGate, DeliberationView, ManifestGraph } from "../../../_lib/domain/derive.ts";
 
 export const STYLE = `
   :root { color-scheme: light dark; }
@@ -195,6 +195,72 @@ export function RepoDashboard({ db }: { db: RepoDb }) {
   );
 }
 
+/** o GRAFO DE CONHECIMENTO cross-repo (camada externa) — nós (repos) + arestas coordinates-with DERIVADAS. */
+function KnowledgeCard({ k }: { k: ManifestGraph }) {
+  return (
+    <section className="card">
+      <h2>
+        Conhecimento dos repos <span className="layer ext">externa · auto-descoberta</span>
+      </h2>
+      <div className="meta">
+        cada repo se declara no <b>manifesto</b>; o host DERIVA as arestas (provides×consumes).
+      </div>
+
+      <h3>repos (o que cada um É / provê / sabe)</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>repo</th>
+            <th>papel</th>
+            <th>dona</th>
+            <th>provê</th>
+            <th>capabilities</th>
+          </tr>
+        </thead>
+        <tbody>
+          {k.nodes.map((n) => (
+            <tr key={n.repo}>
+              <td>
+                <b>{n.repo}</b>
+              </td>
+              <td className="res">{n.role ?? "—"}</td>
+              <td>{n.owner}</td>
+              <td className="res">
+                {n.provides.map((p) => `${p.name} (${p.kind})`).join(", ") || "—"}
+              </td>
+              <td className="res">{n.capabilities.join(" · ") || "—"}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      <h3>arestas cross-repo (coordinates-with — DERIVADAS, anota 1 lado)</h3>
+      <ul className="q">
+        {k.edges.length === 0 && <li className="res">(nenhuma)</li>}
+        {k.edges.map((e) => (
+          <li key={`${e.from}|${e.contract}`}>
+            <b>{e.from}</b> <span className="mode">consome</span> <code>{e.contract}</code>{" "}
+            <span className="mode">→ provido por</span> <b>{e.to}</b>
+          </li>
+        ))}
+      </ul>
+
+      {k.warnings.length > 0 && (
+        <>
+          <h3>checks</h3>
+          <ul className="q">
+            {k.warnings.map((w) => (
+              <li key={w}>
+                <span className="badge warn">anti-typo</span> {w}
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+    </section>
+  );
+}
+
 /** projeta PRA FORA: o dashboard PRINCIPAL da governança (host) — a visão geral. */
 export function MainDashboard({ db }: { db: GovernanceDb }) {
   return (
@@ -242,6 +308,7 @@ export function MainDashboard({ db }: { db: GovernanceDb }) {
           )}
         </section>
       ))}
+      {db.knowledge && <KnowledgeCard k={db.knowledge} />}
     </>
   );
 }
