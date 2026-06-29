@@ -1,0 +1,27 @@
+# manifest.yml — acme-mfe-identity (camada EXTERNA).
+node: manifest
+repo: acme-mfe-identity
+role: "MFE de identidade/login — orquestra o fluxo de login montado pela shell"
+owner: team-identity
+domain: access
+
+provides:
+  - name: login-mfe
+    kind: component
+    description: "micro-frontend de login, montável pela shell por nome"
+    status: beta
+
+consumes:
+  - contract: acme-design-system/form-component
+    awaits: ">=1.0"
+
+references:
+  - {
+      type: intent,
+      label: "iniciativa login",
+      url: "acme-governance/intents/login_1",
+      note: "consome o form-component do design system",
+    }
+
+created-at: 2026-06-28
+updated-at: 2026-06-29

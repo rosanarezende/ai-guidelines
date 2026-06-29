@@ -1,0 +1,25 @@
+# manifest.yml — acme-design-system (camada EXTERNA: o que o repo publica pra governança).
+node: manifest
+repo: acme-design-system
+role: "design system — componentes de UI compartilhados (form, inputs, tema) consumidos pelos MFEs"
+owner: team-design-system
+domain: foundations
+
+provides:
+  - name: form-component
+    kind: component
+    description: "componente de formulário com validação declarativa + acessibilidade"
+    status: stable
+
+consumes: []
+
+references:
+  - {
+      type: intent,
+      label: "iniciativa login",
+      url: "acme-governance/intents/login_1",
+      note: "provê o contrato do form usado no login",
+    }
+
+created-at: 2026-06-28
+updated-at: 2026-06-29

@@ -1,0 +1,32 @@
+# manifest.yml — MANIFESTO do repo: a auto-declaração de CONHECIMENTO/capabilities do repositório.
+#
+# Casa: <repo>/.governance/manifest.yml. É a camada EXTERNA da Lente 5 — o que o repo PUBLICA pra a
+# governança agregar (≠ o conteúdo interno: works/deliberação/state). O host de governança DESCOBRE os
+# repos por este arquivo (auto-discovery: varre as .governance/) e DERIVA as arestas cross-repo:
+#   o `provides` deste repo × o `consumes` de outro, no MESMO contrato ⇒ coordinates-with / depends-on.
+#   (regra da Lente 3: anota-se 1 lado; o banco deriva o reverso.)
+# É o slot GENÉRICO (o framework dá os campos); cada repo PREENCHE (a camada de conhecimento é plugável).
+
+node: manifest
+repo: <slug> # = o nome da pasta do repo (chave estável)
+role: <o que este repo É, em 1 linha> # papel/domínio (ex.: "design system: componentes de UI compartilhados")
+owner: <time/BU dona> # OBRIGATÓRIO — ownership é a base do roteamento (quem cuida)
+domain: <bounded context> # opcional — agrupa repos por área de negócio
+
+# Os CONTRATOS/capabilities que este repo OFERECE (a face pública; outro repo os consome):
+provides:
+  - name: <contrato> # ex.: form-component
+    kind: component | api | event | service
+    description: <1 linha>
+    status: stable | beta | experimental
+
+# O que este repo PRECISA de OUTROS repos (→ deriva depends-on / coordinates-with):
+consumes:
+  - contract: <repo>/<contrato> # ref qualificada cross-repo (ex.: acme-design-system/form-component)
+    awaits: <versão | condição> # opcional — pending até o contrato ficar known
+
+references: # links externos (board, docs, dashboards) — mesmo formato da intent
+  - { type: <tipo>, label: <rótulo>, url: <url>, note: <nota> }
+
+created-at: <iso-8601>
+updated-at: <iso-8601>
