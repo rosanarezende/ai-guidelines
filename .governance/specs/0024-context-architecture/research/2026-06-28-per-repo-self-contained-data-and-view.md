@@ -52,4 +52,15 @@
 
 ## 6 · Direção proposta (seed — o detalhe vai no plano)
 
-Reestruturar a sim em **3 camadas**: **(1)** um **`_lib/` compartilhado** (derive/fake-repository sobre `.governance/` + builder do `db.json` local + context provider + renderer de view); **(2)** **cada repo** monta seu **`db.json` + view** **a partir da lib**, lendo só o seu `.governance/` (auto-contido); **(3)** **governança = host** que agrega o **contexto** publicado → **dashboard principal**. Mantém **contrato-first** entre interno e externo. _Não implementar antes da DEC/aprovação._
+Reestruturar a sim em **3 camadas**: **(1)** um **`_lib/` compartilhado** (derive/fake-repository sobre `.governance/` + builder do `db.json` local + context provider + renderer de view); **(2)** **cada repo** monta seu **`db.json` + view** **a partir da lib**, lendo só o seu `.governance/` (auto-contido); **(3)** **governança = host** que agrega o **contexto** publicado → **dashboard principal**. Mantém **contrato-first** entre interno e externo.
+
+## 7 · Desenho CONFIRMADO (owner 2026-06-28) — repository plugável (DDD), file-versionado → Neo4j
+
+Backend = **repository plugável** com backends **REAIS** (não mock-pra-rapidez): **local versionado** (dev solo/MVP) → **Neo4j** (grafo, escala). Contrato-first, **async** de propósito (Neo4j-ready; assumir sync seria a gambiarra que quebraria na troca). 4 camadas (DDD; SDD = este § é o spec):
+
+- **Domínio (puro):** entidades (`Work` · `Exploration` · **`Proposal`** · `Question` · `Research` · `Decision` · `Intent`) com **todas as arestas da Lente 3** (fonte = o tracker; previstas, adaptáveis nas iterações) + derivações puras (`deriveDeliberation` = gate/state · `deriveContext` = o que o repo publica · `deriveGovernance` = o host). Não conhece persistência.
+- **Portas:** **`Repository`** (o banco **INTERNO** de um repo — read/write works + q/r/d) · **`HostRepository`** (a **governança** — intents + `proposal` intake + agrega o externo). Separados: um é interno, o outro reflete pra fora.
+- **Adapters (plugáveis — só aqui o banco muda):** `FileRepository`/`FileHostRepository` (`.governance/` **versionado**, fs) ← MVP · `Neo4jRepository` (mesmo contrato) ← próxima rodada (testar num repo).
+- **Consumidores:** a **deliberação** (WRITE via porta → grava o `.governance/`) · a **view** React (READ via porta → deriva → renderiza) · o **host** (agrega).
+
+O `db.json`/dashboards viram **read-models derivados** (cache regenerável), não a fonte. Impl em fases: domínio → portas → `FileRepository` → host → view.
