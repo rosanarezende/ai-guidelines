@@ -102,7 +102,7 @@ async function hostProof(): Promise<void> {
   }
   const gov = deriveGovernance(intent, contexts);
   console.log(`  deriveGovernance(${intent.id}) · gate DERIVADO do breakdown (sem deliberation):`);
-  for (const q of gov.questions)
+  for (const q of gov.explores)
     console.log(`    ${q.id}: ${q.resolved ? "RESOLVED" : q.decided} ← ${q.answeredBy ?? "—"}`);
   console.log(
     "    contratos:",

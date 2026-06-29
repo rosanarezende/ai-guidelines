@@ -19,7 +19,7 @@ interface IntentFile {
   status?: Intent["status"];
   "created-at"?: string;
   "updated-at"?: string;
-  "open-questions"?: { id: string; question: string }[];
+  explores?: { id: string; subject: string }[];
   contracts?: { name: string; awaits?: string }[];
 }
 interface ProposalFile {
@@ -67,7 +67,7 @@ const toIntent = (f: IntentFile): Intent => ({
   title: f.title,
   owner: f.owner,
   status: f.status,
-  openQuestions: f["open-questions"] ?? [],
+  explores: f.explores ?? [],
   contracts: f.contracts ?? [],
   createdAt: f["created-at"],
   updatedAt: f["updated-at"],
@@ -152,7 +152,7 @@ export class FileHostRepository implements HostRepository {
       status: intent.status,
       "created-at": intent.createdAt,
       "updated-at": intent.updatedAt,
-      "open-questions": intent.openQuestions,
+      explores: intent.explores,
       contracts: intent.contracts,
     });
   }

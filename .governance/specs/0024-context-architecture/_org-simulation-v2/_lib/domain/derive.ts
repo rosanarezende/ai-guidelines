@@ -40,14 +40,14 @@ export interface RepoContext {
     blockedBy?: string[];
     derivesFrom?: string[];
   }[];
-  answers: { exploration: string; question: string; verdict?: string; fate?: string }[];
+  answers: { exploration: string; point: string; verdict?: string; fate?: string }[];
 }
 
 export interface GovernanceView {
   intent: string;
   title: string;
   owner?: string;
-  questions: {
+  explores: {
     id: string;
     answered: boolean;
     decided: GateDecision;
@@ -135,14 +135,14 @@ export function deriveContext(
       .filter((e) => e.status === "done")
       .map((e) => ({
         exploration: `${repo}/exploration/${e.id}`,
-        question: e.answers,
+        point: e.answers,
         verdict: e.verdict,
         fate: e.fate,
       })),
   };
 }
 
-/** o HOST: a intent agregada — gate das open-questions (respondidas pelas explorations), contratos, breakdown. */
+/** o HOST: a intent agregada — gate dos EXPLORE-POINTS (respondidos pelas explorations), contratos, breakdown. */
 export function deriveGovernance(intent: Intent, contexts: RepoContext[]): GovernanceView {
   const allAnswers = contexts.flatMap((c) => c.answers);
   const allWorks = contexts.flatMap((c) => c.works);
@@ -150,9 +150,9 @@ export function deriveGovernance(intent: Intent, contexts: RepoContext[]): Gover
     a === b || a.endsWith(`/${b}`) || b.endsWith(`/${a}`);
 
   // A intent NÃO delibera (q/r/d é etapa de work/exploration). O gate deriva do BREAKDOWN, sem deliberation.yml:
-  const questions = intent.openQuestions.map((q) => {
-    const edge = `${intent.id}#${q.id}`;
-    const ans = allAnswers.find((a) => a.question === edge || a.question.endsWith(`/${edge}`));
+  const explores = intent.explores.map((e) => {
+    const edge = `${intent.id}#${e.id}`;
+    const ans = allAnswers.find((a) => a.point === edge || a.point.endsWith(`/${edge}`));
     const answered = ans !== undefined; // a exploration está DONE e devolveu verdict
     // aceito = alguma work NASCEU (derives-from = proveniência) da exploration que respondeu; rejeitado = nenhuma.
     const pursued =
@@ -160,7 +160,7 @@ export function deriveGovernance(intent: Intent, contexts: RepoContext[]): Gover
       allWorks.some((w) => (w.derivesFrom ?? []).some((d) => refMatches(d, ans.exploration)));
     const decided: GateDecision = !answered ? "none" : pursued ? "accepted" : "rejected";
     return {
-      id: q.id,
+      id: e.id,
       answered,
       decided,
       resolved: decided === "accepted",
@@ -169,7 +169,7 @@ export function deriveGovernance(intent: Intent, contexts: RepoContext[]): Gover
     };
   });
 
-  const resolvedIds = new Set(questions.filter((q) => q.resolved).map((q) => q.id));
+  const resolvedIds = new Set(explores.filter((e) => e.resolved).map((e) => e.id));
   const contracts = intent.contracts.map(
     (c): ContractStatus => ({
       name: c.name,
@@ -186,7 +186,7 @@ export function deriveGovernance(intent: Intent, contexts: RepoContext[]): Gover
     intent: intent.id,
     title: intent.title,
     owner: intent.owner,
-    questions,
+    explores,
     contracts,
     breaksInto: {
       done: refsByStatus("done"),

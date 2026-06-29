@@ -21,19 +21,19 @@ references: # anexos / links que ele junta
     }
 
 details: |
-  Feature cross-repo. As deliveries só nascem depois que as open-questions forem respondidas pelas explorations.
+  Feature cross-repo. As deliveries só nascem depois que os explore-points forem respondidos pelas explorations.
 
-open-questions: # INPUT (as incertezas do cadastro). Quem responde / verdict / resolvido = DERIVADO → lê-se no BANCO, não aqui.
-  - id: q1
-    question: "o design system tem um formulário validado (email/site/telefone), ou cada MFE reimplementa?"
-  - id: q2
-    question: "suporte proativo é viável? (detectar N falhas de login por pub/sub e abordar o usuário)"
-  - id: q3
-    question: "captcha/anti-bot no login: o design system provê um componente, ou usamos serviço externo?"
+explores: # INPUT (os pontos a EXPLORAR). NÃO é q/r/d ("question" é só do work/exploration). Quem responde/verdict/resolvido = DERIVADO.
+  - id: e1
+    subject: "o design system tem um formulário validado (email/site/telefone), ou cada MFE reimplementa?"
+  - id: e2
+    subject: "suporte proativo é viável? (detectar N falhas de login por pub/sub e abordar o usuário)"
+  - id: e3
+    subject: "captcha/anti-bot no login: o design system provê um componente, ou usamos serviço externo?"
 
 # ===== contratos que a feature coordena (INPUT — a declaração); known/pending é DERIVADO (sem baldes) =====
 contracts:
-  - { name: form-component, awaits: q1 }
-  - { name: failure-event, awaits: q2 }
+  - { name: form-component, awaits: e1 }
+  - { name: failure-event, awaits: e2 }
 
 # (breaks-into NÃO mora aqui — é DERIVADO; o banco projeta a vista do plano por status.)

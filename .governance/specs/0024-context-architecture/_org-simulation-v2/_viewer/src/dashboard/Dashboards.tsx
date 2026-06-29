@@ -271,9 +271,9 @@ export function MainDashboard({ db }: { db: GovernanceDb }) {
             {g.title} <small>· {g.intent}</small> <span className="layer ext">visão geral</span>
           </h2>
           <div className="meta">dona: {g.owner ?? "—"}</div>
-          <h3>perguntas (o gate)</h3>
+          <h3>explore-points (o gate)</h3>
           <ul className="q">
-            {g.questions.map((q) => {
+            {g.explores.map((q) => {
               const rejected = q.decided === "rejected";
               const cls = q.resolved ? "ok" : rejected ? "muted" : q.answered ? "warn" : "muted";
               const label = q.resolved

@@ -102,13 +102,13 @@ export interface Decision {
 
 // ───────────────────────── INTENT (a camada acima dos trabalhos) ─────────────────────────
 
-export interface OpenQuestion {
+export interface ExplorePoint {
   id: string;
-  question: string; // só INPUT; answered-by/status/verdict = DERIVADOS (no banco)
+  subject: string; // só INPUT — o que a intent precisa EXPLORAR (uma exploration responde com verdict). NÃO é q/r/d.
 }
 export interface Contract {
   name: string;
-  awaits?: string; // a question que precisa resolver p/ o contrato ficar known (known/pending = DERIVADO)
+  awaits?: string; // o explore-point que precisa resolver p/ o contrato ficar known (known/pending = DERIVADO)
 }
 
 /** A INTENT — o objetivo durável; breaks-into N trabalhos; retroalimenta via answers. Vive na governança. */
@@ -117,7 +117,7 @@ export interface Intent {
   title: string;
   owner?: string; // quem TOCA (a dona)
   status?: "active" | "paused" | "done" | "dropped";
-  openQuestions: OpenQuestion[];
+  explores: ExplorePoint[]; // os pontos que a intent dispara como explorations (a ferramenta); "question" é só do work/exploration
   contracts: Contract[];
   createdAt?: string;
   updatedAt?: string;

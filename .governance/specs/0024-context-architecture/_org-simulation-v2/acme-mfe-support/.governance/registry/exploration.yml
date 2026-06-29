@@ -6,7 +6,7 @@ entries:
     assignee: "@dev-support" # quem assumiu + iniciou (hoje done)
     status: done # FECHOU — densa: gerou uma POC durável
     # ===== A AMARRA: responde a q2 da intent =====
-    answers: acme-governance/intents/login_1#q2
+    answers: acme-governance/intents/login_1#e2
     workspace: explorations/proactive-support_1/
     # ===== FECHO (densa: tem POC durável) =====
     fate: promoted # a POC vira base de uma delivery (absorvida via derives-from) — não é throwaway

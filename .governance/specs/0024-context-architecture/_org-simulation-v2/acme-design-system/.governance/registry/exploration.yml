@@ -6,8 +6,8 @@ entries:
     assignee: "@dev-ds" # quem assumiu + iniciou (hoje done — passou por active com este dono)
     status: done # FECHOU (era active) — DISPARA por derivação: q1 resolved → contrato form-component known → deliveries destravam
     # ===== A AMARRA (a comunicação intent ↔ exploration) =====
-    answers: acme-governance/intents/login_1#q1 # back-ref TIPADO: esta exploration responde à q1 da intent
-    # (anota-se 1 lado: a exploration declara `answers`; a intent DERIVA "q1 answered-by form-validation_1")
+    answers: acme-governance/intents/login_1#e1 # back-ref TIPADO: esta exploration responde ao e1 da intent
+    # (anota-se 1 lado: a exploration declara `answers`; a intent DERIVA "e1 answered-by form-validation_1")
     workspace: explorations/form-validation_1/
     # ===== FECHO (simples: só a resposta, sem POC) =====
     fate: throwaway # só análise, sem código durável (destinos: throwaway | promoted | parked)
@@ -22,7 +22,7 @@ entries:
     explores: "captcha/anti-bot no login: o DS provê um componente, ou usamos serviço externo?" # o SUBJECT
     assignee: "@dev-ds"
     status: done # explorou e fechou (devolveu verdict)
-    answers: acme-governance/intents/login_1#q3 # responde a q3 da intent
+    answers: acme-governance/intents/login_1#e3 # responde ao e3 da intent
     workspace: explorations/captcha-spike_1/
     fate: throwaway # serviço externo cobre melhor → não construir no DS (output jogado fora — IGUAL ao form-validation, mas este foi REJEITADO)
     closed-by: explorations/captcha-spike_1/exploration-answer.md
