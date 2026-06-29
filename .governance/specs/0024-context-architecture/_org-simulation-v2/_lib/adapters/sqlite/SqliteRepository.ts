@@ -21,7 +21,7 @@ const SIM_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), ".."
 
 const SCHEMA = `
 CREATE TABLE IF NOT EXISTS works (id TEXT PRIMARY KEY, kind TEXT, title TEXT, status TEXT, assignee TEXT, weight TEXT, intent TEXT, blockedBy TEXT, dependsOn TEXT, coordinatesWith TEXT, derivesFrom TEXT, closedBy TEXT, createdAt TEXT, updatedAt TEXT, closedAt TEXT);
-CREATE TABLE IF NOT EXISTS explorations (id TEXT PRIMARY KEY, answers TEXT, status TEXT, assignee TEXT, fate TEXT, derivesFrom TEXT, closedBy TEXT, verdict TEXT, createdAt TEXT, updatedAt TEXT, closedAt TEXT);
+CREATE TABLE IF NOT EXISTS explorations (id TEXT PRIMARY KEY, explores TEXT, answers TEXT, status TEXT, assignee TEXT, fate TEXT, derivesFrom TEXT, closedBy TEXT, verdict TEXT, createdAt TEXT, updatedAt TEXT, closedAt TEXT);
 CREATE TABLE IF NOT EXISTS questions (workId TEXT, id TEXT, mode TEXT, raisedBy TEXT, body TEXT, PRIMARY KEY (workId, id));
 CREATE TABLE IF NOT EXISTS researches (workId TEXT, id TEXT, investigates TEXT, method TEXT, body TEXT, PRIMARY KEY (workId, id));
 CREATE TABLE IF NOT EXISTS decisions (workId TEXT, id TEXT, resolves TEXT, supportedBy TEXT, supersedes TEXT, resultsIn TEXT, status TEXT, body TEXT, decidedAt TEXT, PRIMARY KEY (workId, id));
@@ -53,6 +53,7 @@ const toWork = (r: Row): Work => ({
 });
 const toExploration = (r: Row): Exploration => ({
   id: r.id as string,
+  explores: str(r.explores),
   answers: r.answers as string,
   status: r.status as WorkStatus,
   assignee: str(r.assignee),
@@ -141,10 +142,11 @@ export class SqliteRepository implements Repository {
   async saveExploration(e: Exploration): Promise<void> {
     this.#db
       .prepare(
-        "INSERT OR REPLACE INTO explorations (id,answers,status,assignee,fate,derivesFrom,closedBy,verdict,createdAt,updatedAt,closedAt) VALUES (?,?,?,?,?,?,?,?,?,?,?)"
+        "INSERT OR REPLACE INTO explorations (id,explores,answers,status,assignee,fate,derivesFrom,closedBy,verdict,createdAt,updatedAt,closedAt) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)"
       )
       .run(
         e.id,
+        e.explores ?? null,
         e.answers,
         e.status,
         e.assignee ?? null,

@@ -46,6 +46,7 @@ const toWork = (p: Props): Work => ({
 
 const toExploration = (p: Props): Exploration => ({
   id: p.id as string,
+  explores: p.explores as string | undefined,
   answers: p.answers as string,
   status: p.status as WorkStatus,
   assignee: p.assignee as string | undefined,
