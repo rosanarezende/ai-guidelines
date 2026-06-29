@@ -1,4 +1,7 @@
 {
   "type": "module",
-  "private": true
+  "private": true,
+  "dependencies": {
+    "neo4j-driver": "^6.1.0"
+  }
 }
