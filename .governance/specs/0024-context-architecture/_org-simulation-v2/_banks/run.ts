@@ -6,7 +6,6 @@ import { deriveGovernance } from "./derive-governance.ts";
 import { deriveDeliberation } from "./derive-deliberation.ts";
 import { reportRepoBank, reportGovernanceBank, reportDeliberation } from "./report.ts";
 import { materialize } from "./materialize.ts";
-import { materializeRepoDashboard, materializeMainDashboard } from "./dashboard.ts";
 import { writeRepoDb, writeGovernanceDb } from "./db.ts";
 
 const repos = listRepos();
@@ -48,8 +47,7 @@ for (const rp of repoProjections) {
 }
 console.log(`🗃️  db · governança: ${writeGovernanceDb(governances, repos)}`);
 
-// 5) VIEW: dashboards self-contained (por repo + principal) — fase 3 fará a view LER o db.json acima
-for (const rp of repoProjections) {
-  console.log(`📊 local · ${rp.repo}: ${materializeRepoDashboard(rp, deliberations)}`);
-}
-console.log(`📊 principal: ${materializeMainDashboard(governances)}`);
+// 5) VIEW = os componentes React (a lib de view): geram os dashboards estáticos a partir do db.json acima
+console.log(
+  `\n📊 dashboards (view React): cd _viewer && npm run dashboards   (lê os db.json e renderiza)`
+);
