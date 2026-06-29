@@ -59,6 +59,7 @@ export interface Proposal {
   impact: Level;
   confidence: Level;
   effort: Level; // ICE
+  evidence?: string[]; // refs ao que embasa (ex.: o exploration-answer)
   promoteTo?: WorkKind | "experiment" | "exploration"; // o tipo que vira ao promover
   opensIntent?: string; // se promovida p/ experiment/objetivo
   discardReason?: string;

@@ -2,8 +2,10 @@
 import fs from "node:fs";
 import path from "node:path";
 import { FileRepository } from "./adapters/file/FileRepository.ts";
+import { FileHostRepository } from "./adapters/file/FileHostRepository.ts";
 import { SIM_ROOT } from "./adapters/file/io.ts";
-import { deriveDeliberation } from "./domain/derive.ts";
+import { deriveDeliberation, deriveContext, deriveGovernance } from "./domain/derive.ts";
+import type { RepoContext } from "./domain/derive.ts";
 
 async function readProof(): Promise<void> {
   const repo = new FileRepository("acme-design-system");
@@ -78,5 +80,40 @@ async function writeProof(): Promise<void> {
   }
 }
 
+async function hostProof(): Promise<void> {
+  const host = new FileHostRepository();
+  const repos = await host.listRepos();
+  const intents = await host.listIntents();
+  const props = await host.listProposals();
+  console.log("\n── HOST · acme-governance (agrega o que os repos publicam) ──");
+  console.log("  repos:", repos.join(", "));
+  console.log("  intents:", intents.map((i) => `${i.id} (${i.owner ?? "—"})`).join(", "));
+  console.log(
+    "  proposals:",
+    props.map((p) => `${p.id} [${p.status} → ${p.promoteTo}]`).join(", ")
+  );
+  const intent = intents[0];
+  if (!intent) return;
+  // cada repo PUBLICA seu contexto (camada externa) → o host deriva a governança
+  const contexts: RepoContext[] = [];
+  for (const repo of repos) {
+    const r = new FileRepository(repo);
+    contexts.push(deriveContext(repo, await r.listWorks(), await r.listExplorations()));
+  }
+  const decisions = await host.listDecisions(intent.id);
+  const gov = deriveGovernance(intent, decisions, contexts);
+  console.log(
+    `  deriveGovernance(${intent.id}) · ${decisions.length} decisões (legado decides→resolves):`
+  );
+  for (const q of gov.questions)
+    console.log(`    ${q.id}: ${q.resolved ? "RESOLVED" : q.decided} ← ${q.answeredBy ?? "—"}`);
+  console.log(
+    "    contratos:",
+    gov.contracts.map((c) => `${c.name}:${c.known ? "known" : "pending"}`).join(", ")
+  );
+  console.log("    breakdown:", JSON.stringify(gov.breaksInto));
+}
+
 await readProof();
 await writeProof();
+await hostProof();

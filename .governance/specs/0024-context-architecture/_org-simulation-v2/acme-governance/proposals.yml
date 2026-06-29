@@ -1,5 +1,5 @@
-# registry/proposal.yml — acme-mfe-support · intake (FERRAMENTA, não um tipo): ideias/problemas levantados durante o trabalho.
-# Proposal NÃO é trabalho (não entra no banco de works) — alimenta o backlog → vira trabalho quando priorizada.
+# proposals.yml — acme-governance · INTAKE da org (ferramenta `proposal`, Lente 4). Vive na GOVERNANÇA
+# (não nos repos de trabalho): ideias/problemas levantados durante o trabalho → backlog → vira trabalho quando priorizada.
 entries:
   - id: prop-001
     what: "testar se o suporte proativo (abordar após N falhas de login) MELHORA a conclusão do login, ou atrapalha"
@@ -8,11 +8,11 @@ entries:
     status: open # disposição OBRIGATÓRIA (não fica em aberto em silêncio)
     # --- triagem (estilo ICE) ---
     tags: [growth, login, suporte-proativo]
-    impact: high # menos abandono no login
+    impact: high
     confidence: medium # viável (exploration), mas o EFEITO de abordar proativamente é incerto
     effort: medium
     evidence: [acme-mfe-support/.governance/explorations/proactive-support_1/exploration-answer.md]
     # --- disposição ---
-    promote-to: experiment # quando priorizada (decisão de negócio) → abre uma intent PRÓPRIA pro experiment
+    promote-to: experiment # quando priorizada → abre uma intent PRÓPRIA pro experiment
     created-at: 2026-06-27
     updated-at: 2026-06-27

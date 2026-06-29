@@ -51,6 +51,20 @@ export function listMarkdown(rel: string): string[] {
     : [];
 }
 
+/** Os nomes das entradas de uma pasta (ordenados); [] se não existir. */
+export function listNames(rel: string): string[] {
+  return exists(rel) ? fs.readdirSync(abs(rel)).sort() : [];
+}
+
+/** Os repos de trabalho da sim = pastas com `.governance/registry/` (exclui a governança e o tooling `_*`). */
+export function listRepoDirs(): string[] {
+  return fs
+    .readdirSync(SIM_ROOT)
+    .filter((n) => !n.startsWith("_") && n !== "acme-governance")
+    .filter((n) => exists(`${n}/.governance/registry`))
+    .sort();
+}
+
 function ensureDir(rel: string): void {
   fs.mkdirSync(path.dirname(abs(rel)), { recursive: true });
 }
