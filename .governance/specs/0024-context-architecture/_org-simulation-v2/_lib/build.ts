@@ -14,6 +14,7 @@ import {
   deriveGovernance,
   deriveManifestGraph,
 } from "./domain/derive.ts";
+import { LexicalMatcher, deriveRouting, deriveTagGraph } from "./domain/routing.ts";
 import type { RepoContext, DeliberationView, GovernanceView } from "./domain/derive.ts";
 import type { Work, Proposal } from "./domain/model.ts";
 
@@ -87,7 +88,14 @@ const proposals: Proposal[] = await host.listProposals();
 const governance: GovernanceView[] = intents.map((intent) =>
   deriveGovernance(intent, publishedContexts)
 );
-const knowledge = deriveManifestGraph(await host.listManifests());
+const manifests = await host.listManifests();
+const knowledge = deriveManifestGraph(manifests);
+const matcher = new LexicalMatcher(); // Q2: léxico default; trocar por LlmMatcher (local) é o v2 — só muda esta linha
+const routing = intents.map((intent) => ({
+  intent: intent.id,
+  suggestions: deriveRouting(intent, manifests, matcher),
+}));
+const tagGraph = deriveTagGraph(manifests);
 
 writeDb("acme-governance/.cache/db.json", {
   generatedAt: new Date().toISOString(),
@@ -95,6 +103,8 @@ writeDb("acme-governance/.cache/db.json", {
   repos,
   proposals,
   knowledge,
+  routing,
+  tagGraph,
 });
 console.log(
   `🗃️  acme-governance/db.json — AGREGOU ${publishedContexts.length}/${repos.length} projeções publicadas (SEM abrir banco) · ` +
