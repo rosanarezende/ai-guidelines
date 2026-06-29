@@ -7,6 +7,7 @@ import { deriveDeliberation } from "./derive-deliberation.ts";
 import { reportRepoBank, reportGovernanceBank, reportDeliberation } from "./report.ts";
 import { materialize } from "./materialize.ts";
 import { materializeRepoDashboard, materializeMainDashboard } from "./dashboard.ts";
+import { writeRepoDb, writeGovernanceDb } from "./db.ts";
 
 const repos = listRepos();
 
@@ -40,8 +41,14 @@ const governances = listIntents().map((dir) => {
 const written = materialize(repoProjections, governances);
 console.log(`\n📁 snapshot: ${written} — rode o viewer:  cd _viewer && npm install && npm run dev`);
 
-// 4) projeções HTML self-contained (Lente 5) — o repo projeta PRA DENTRO (local) e a governança PRA FORA (principal)
+// 4) DADO por repo (fake-api): cada repo escreve o SEU db.json auto-contido; a governança escreve a dela (host)
 console.log("");
+for (const rp of repoProjections) {
+  console.log(`🗃️  db · ${rp.repo}: ${writeRepoDb(rp, deliberations)}`);
+}
+console.log(`🗃️  db · governança: ${writeGovernanceDb(governances, repos)}`);
+
+// 5) VIEW: dashboards self-contained (por repo + principal) — fase 3 fará a view LER o db.json acima
 for (const rp of repoProjections) {
   console.log(`📊 local · ${rp.repo}: ${materializeRepoDashboard(rp, deliberations)}`);
 }
