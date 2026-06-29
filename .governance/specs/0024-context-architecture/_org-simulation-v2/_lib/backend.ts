@@ -5,10 +5,12 @@ import type { Repository } from "./ports.ts";
 import { FileRepository } from "./adapters/file/FileRepository.ts";
 import { Neo4jRepository, neo4jDriver } from "./adapters/neo4j/Neo4jRepository.ts";
 import { SqliteRepository } from "./adapters/sqlite/SqliteRepository.ts";
+import { MongoClient } from "mongodb";
+import { MongoRepository } from "./adapters/mongo/MongoRepository.ts";
 import { exists, readYaml } from "./adapters/file/io.ts";
 
 interface BackendConfig {
-  kind?: "file" | "neo4j" | "sqlite";
+  kind?: "file" | "neo4j" | "sqlite" | "mongo";
   uri?: string;
   user?: string;
   password?: string;
@@ -25,7 +27,7 @@ function configOf(repo: string): BackendConfig {
 }
 
 /** o tipo de backend do repo (pra log/diagnóstico). */
-export function backendOf(repo: string): "file" | "neo4j" | "sqlite" {
+export function backendOf(repo: string): "file" | "neo4j" | "sqlite" | "mongo" {
   return configOf(repo).kind ?? "file";
 }
 
@@ -43,6 +45,13 @@ export function openRepository(repo: string): OpenedRepo {
   if (cfg.kind === "sqlite") {
     const r = new SqliteRepository(repo); // relacional embarcado (node:sqlite); o dado é um .governance/governance.db
     return { repo: r, close: async () => r.close() };
+  }
+  if (cfg.kind === "mongo") {
+    const client = new MongoClient(cfg.uri ?? process.env.MONGO_URI ?? "mongodb://localhost:27017");
+    return {
+      repo: new MongoRepository(repo, client.db("governance")),
+      close: () => client.close(),
+    };
   }
   return { repo: new FileRepository(repo), close: async () => {} };
 }
