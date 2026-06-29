@@ -28,9 +28,10 @@ consumes:
   - contract: <repo>/<contrato> # ref qualificada cross-repo (ex.: acme-design-system/form-component)
     awaits: <versão | condição> # opcional — pending até o contrato ficar known
 
-# (2) capabilities → "quem SABE sobre X?" — o que o repo sabe fazer (semântico; ROTEIA exploration + busca/IA):
+# (2) capabilities → "quem SABE sobre X?" — `text` (semântico; ROTEIA exploration + busca/IA) + `tags` controladas
+#     (match exato + viram NÓS do grafo repo×tag → "quem sabe de X?"):
 capabilities:
-  - <capability em linguagem natural> # ex.: "validação de formulários (declarativa + imperativa)"
+  - { text: <capability em linguagem natural>, tags: [<tag>, <tag>] } # ex.: "validação de formulários" / [forms, validation]
 
 # (3) architecture → "COMO é feito / o que quebra se eu mexer?" — stack/padrões/fronteiras.
 #     NÃO é doc passiva: `stack` é validável vs package.json (freshness check) e `boundaries` viram regras de

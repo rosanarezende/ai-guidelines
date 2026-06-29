@@ -142,6 +142,12 @@ export interface ConsumedContract {
   awaits?: string;
 }
 
+/** Uma CAPABILITY (o que o repo SABE): `text` livre (semântico → léxico/IA) + `tags` controladas (match exato + viram nós do grafo repo×tag). */
+export interface Capability {
+  text: string;
+  tags?: string[];
+}
+
 /**
  * O MANIFESTO do repo — auto-declaração de CONHECIMENTO (role/owner/domain/provides/consumes/capabilities/
  * architecture). Camada EXTERNA: o host DESCOBRE os repos por ele e DERIVA as arestas cross-repo
@@ -155,6 +161,6 @@ export interface Manifest {
   domain?: string;
   provides: ProvidedContract[];
   consumes: ConsumedContract[];
-  capabilities?: string[];
+  capabilities?: Capability[];
   architecture?: { stack?: string[]; patterns?: string[]; boundaries?: string[] };
 }

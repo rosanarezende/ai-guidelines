@@ -247,7 +247,7 @@ export function deriveManifestGraph(manifests: Manifest[]): ManifestGraph {
     role: m.role,
     owner: m.owner,
     domain: m.domain,
-    capabilities: m.capabilities ?? [],
+    capabilities: (m.capabilities ?? []).map((c) => c.text), // o nó do grafo de conhecimento mostra os textos; as tags vão pro deriveTagGraph
     provides: m.provides.map((p) => ({
       name: p.name,
       kind: p.kind,

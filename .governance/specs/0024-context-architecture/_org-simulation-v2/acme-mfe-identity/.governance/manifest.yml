@@ -20,8 +20,8 @@ consumes:
     awaits: ">=1.0"
 
 capabilities:
-  - "fluxo de autenticação/login na shell"
-  - "emissão de eventos de falha de login"
+  - { text: "fluxo de autenticação/login na shell", tags: [auth, login, microfrontend] }
+  - { text: "emissão de eventos de falha de login", tags: [auth, login, events, observability] }
 
 architecture:
   stack: [react, typescript]

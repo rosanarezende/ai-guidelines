@@ -18,8 +18,11 @@ consumes:
     awaits: ">=1.0"
 
 capabilities:
-  - "conteúdo de ajuda contextual"
-  - "suporte proativo após N falhas de login (em experimento)"
+  - { text: "conteúdo de ajuda contextual", tags: [support, help, ui] }
+  - {
+      text: "suporte proativo após N falhas de login (em experimento)",
+      tags: [support, proactive, auth, login, observability],
+    }
 
 architecture:
   stack: [react, typescript]

@@ -70,7 +70,7 @@ domain: <bounded context>
 
 provides: [] # contratos que este repo OFERECE — { name, kind: component|api|event|service, status }
 consumes: [] # contratos de OUTROS repos — { contract: "<repo>/<nome>", awaits? }
-capabilities: [] # o que o repo SABE fazer (semântico → roteia exploration)
+capabilities: [] # o que o repo SABE: [{ text, tags: [..] }] — text (semântico/IA) + tags (match exato + grafo repo×tag)
 architecture:
   stack: [${type === "front" ? "html, js" : "node"}]
   patterns: []

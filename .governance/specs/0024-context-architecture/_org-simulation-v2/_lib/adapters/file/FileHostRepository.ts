@@ -56,7 +56,7 @@ interface ManifestFile {
     owner?: string;
   }[];
   consumes?: { contract: string; awaits?: string }[];
-  capabilities?: string[];
+  capabilities?: { text: string; tags?: string[] }[];
   architecture?: { stack?: string[]; patterns?: string[]; boundaries?: string[] };
 }
 
