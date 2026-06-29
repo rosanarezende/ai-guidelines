@@ -199,12 +199,12 @@ npx tsc --noEmit                   # a view
 
 ## 7 · Estado atual + próximos passos
 
-- ✅ **Modelo (Lentes 1–5) fechado** no tracker; deliberação q/r/d simulada via templates.
-- ✅ **A lib DDD pronta:** domínio + portas + adapters **file/sqlite/neo4j/mongo** (a porta validada em 4 paradigmas) + runner + view.
-- ▶ **Retomar a simulação:** as **decisions** do `form-component_1` (o gate evoluindo — `d1/d2/d3`, com `d3` reabrindo q2). Cenário no tracker (seção "Plano de simulação").
-- 🔵 **Refinamentos do grafo:** as **arestas da Lente 3 como relações** no Neo4j (hoje nós-only) · `Neo4jHostRepository`.
+- ✅ **Modelo (Lentes 1–5) fechado** no tracker. Decisões recentes: **a intent NÃO delibera** (q/r/d é etapa de work/exploration; o gate deriva do breakdown — `derives-from`) · **manifesto-por-repo** (auto-discovery + arestas cross-repo derivadas de `provides×consumes`) · **host agrega projeções PUBLICADAS** (`build` em 2 fases; `context.json` versionado + freshness no pre-commit).
+- ✅ **A lib DDD pronta:** domínio + portas + adapters **file/sqlite/neo4j/mongo** (a porta validada em 4 paradigmas; `explores` carrega nos 4) + runner + view.
+- ✅ **Padrão de repo + scaffold:** `src/` (produto) + `.governance/` (sidecar) + `dev`/`.gitignore`/`README` por repo; criar novo via `node _lib/scaffold.ts`. Os **3 explore-points resolvem** no dashboard (e1/e2 aceitos · e3 rejeitado; e2 fecha **offline** pela projeção publicada do `support`).
+- ▶ **Fila:** 🔴🔥 **grafo vertical de roteamento** (`capabilities` → onde rodar a exploration + o breakdown) · os **2 checks** (anti-typo das arestas bloqueante · freshness do `architecture` via arquitetura-lint) · `Neo4jHostRepository` · arestas da Lente 3 como relações no Neo4j · fiar o app vivo do `_viewer`.
 
-Detalhe e ponto-a-ponto de retomada: **no tracker** (seção "Próximo / retomar AQUI").
+**O ponto-a-ponto de retomada é o bloco "✅ ESTADO ATUAL" no topo da retomada do tracker** (supersede a retomada histórica).
 
 ---
 
