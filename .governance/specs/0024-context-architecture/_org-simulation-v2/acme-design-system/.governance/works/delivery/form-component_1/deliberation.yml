@@ -1,0 +1,6 @@
+# deliberation.yml — o MAPA append-only das DECISÕES do work form-component_1 (a camada INTERNA, Lente 5).
+# As QUESTIONS moram em questions/, as RESEARCHES em research/ (cada uma com `investigates` — a aresta, anota 1 lado).
+# Aqui ficam SÓ as decisões (o gate); o conteúdo denso de cada uma vai em decisions/<id>.md.
+# AGORA: NENHUMA decisão → o banco deriva TODAS as questions como "answered, pending" (respondida ≠ resolvida)
+#   e o state do work como `deciding`. Decidir = APPEND um nó aqui (com decides/supported-by/supersedes).
+decisions: []

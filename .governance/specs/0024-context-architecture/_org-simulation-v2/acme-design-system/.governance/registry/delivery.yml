@@ -2,8 +2,8 @@
 entries:
   - id: form-component_1
     title: componente de formulário validado (DS)
-    status: draft # nasce draft no breakdown; ready (destravado: form-component known), mas sem assignee → não-iniciada
-    assignee: null # ninguém assumiu ainda
+    status: active # @dev-ds assumiu + iniciou (era draft/ready); na execução levanta seu PRÓPRIO q/r/d (deliberation.yml)
+    assignee: "@dev-ds" # assumiu + iniciou
     weight: M
     intent: login_1
     workspace: works/delivery/form-component_1/

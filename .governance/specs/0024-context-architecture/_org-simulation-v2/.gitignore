@@ -1,0 +1,4 @@
+# Artefatos GERADOS pela lib/banco (regeneram com `node _banks/run.ts`) — não versionar.
+**/dashboard.html
+**/.governance/db.json
+acme-governance/db.json

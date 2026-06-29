@@ -96,13 +96,51 @@ export interface Deliberation {
   decisions: Decision[];
 }
 
+// ── q/r/d do WORK = a CAMADA INTERNA do repo (Lente 5): decisões + impacto no código ──
+// Os artefatos moram em FOLDERS (questions/ · research/ · decisions/) + deliberation.yml (mapa append-only de decisões).
+// O banco LÊ os folders e DERIVA o GATE (answered/pending/resolved) E o STATE (stage/cursor) — prova deliberation → gate + state.
+
+/** Frontmatter de questions/<id>.md */
+export interface QuestionNode {
+  id: string;
+  mode?: "escolha" | "aceitação";
+  status?: string; // autorado inicial; o EFETIVO é DERIVADO pelo banco (research → answered · decision → resolved)
+}
+
+/** Frontmatter de research/<id>.md — `investigates` é a aresta (1:N / N:M), anota 1 lado. */
+export interface ResearchNode {
+  id: string;
+  investigates?: string[];
+  method?: string;
+}
+
+/** deliberation.yml = o MAPA append-only das DECISÕES (conteúdo denso em decisions/<id>.md). */
+export interface DeliberationMap {
+  decisions?: Decision[];
+}
+
+/** Gate por question (camada interna) + as researches que a investigam (derivado de `investigates`, A+). */
+export interface QuestionGate extends QuestionResolution {
+  mode?: string;
+  researches: string[];
+}
+
+/** A projeção da camada INTERNA: o gate por question + o STATE DERIVADO (stage/cursor). */
+export interface DeliberationProjection {
+  work: string;
+  stage: "deciding" | "executing"; // DERIVADO: há question não-resolvida → deciding
+  cursor: string; // "onde estamos" — DERIVADO (o que o state.cursor.node referencia)
+  questions: QuestionGate[];
+}
+
 /** O que o banco de GOVERNANÇA publica por question. */
 export interface QuestionResolution {
   id: string;
-  answered: boolean; // a exploration fechou → o verdict (evidência) existe
+  answered: boolean; // a exploration/research respondeu (evidência existe)
   decision: DecisionStatus | "none"; // o gate humano
   resolved: boolean; // answered && decision === "accepted"
-  answeredBy?: string; // "<repo>/<id>"
+  reopened?: boolean; // teve uma decisão SUPERSEDED (append-only) → reabriu por derivação
+  answeredBy?: string; // "<repo>/<id>" (vazio quando o research é inline, no work)
   verdict?: string;
 }
 

@@ -38,3 +38,16 @@ export function listIntents(): string[] {
   if (!fileExists(dir)) return [];
   return fs.readdirSync(abs(dir)).filter((name) => fileExists(`${dir}/${name}/intent.yml`));
 }
+
+/** O `deliberation.yml` de um work (q/r/d do nível-work), se existir. workRef = "<repo>/<kind>/<id>". */
+export function workDeliberationPath(workRef: string): string | null {
+  const [repo, kind, id] = workRef.split("/");
+  const rel = `${repo}/.governance/works/${kind}/${id}/deliberation.yml`;
+  return fileExists(rel) ? rel : null;
+}
+
+/** Lista os arquivos de uma pasta (relativa ao SIM_ROOT); [] se não existir. */
+export function listDir(relToSim: string): string[] {
+  if (!fileExists(relToSim)) return [];
+  return fs.readdirSync(abs(relToSim));
+}

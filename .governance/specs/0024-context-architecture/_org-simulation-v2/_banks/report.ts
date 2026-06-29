@@ -1,5 +1,10 @@
 // Renderização (separada da lógica). Só formata e imprime — não deriva nada.
-import type { RepoProjection, GovernanceProjection, WorkProjection } from "./types.ts";
+import type {
+  RepoProjection,
+  GovernanceProjection,
+  WorkProjection,
+  DeliberationProjection,
+} from "./types.ts";
 
 function header(title: string): void {
   console.log(`\n══ ${title} ══`);
@@ -41,6 +46,23 @@ export function reportRepoBank(p: RepoProjection): void {
     console.log("  — explorations (ferramenta) —");
     for (const w of p.explorations) printWork(w);
   }
+}
+
+export function reportDeliberation(d: DeliberationProjection): void {
+  header(`DELIBERAÇÃO · camada INTERNA · ${d.work}   [stage DERIVADO: ${d.stage}]`);
+  for (const q of d.questions) {
+    const state = q.resolved
+      ? `RESOLVED${q.reopened ? " (reaberta → re-resolvida)" : ""}`
+      : q.reopened
+        ? "REABERTA (sem decisão viva)"
+        : q.answered
+          ? `answered · ${q.decision} (respondida ≠ resolvida)`
+          : "open (sem research)";
+    console.log(
+      `    ${q.id} [${q.mode ?? "?"}]: ${state}  ← research: ${q.researches.join(", ") || "(nenhuma)"}`
+    );
+  }
+  console.log(`  cursor (STATE derivado do deliberation): ${d.cursor}`);
 }
 
 export function reportGovernanceBank(g: GovernanceProjection, repos: string[]): void {
