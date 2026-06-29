@@ -10,10 +10,22 @@ provides:
     kind: component
     description: "micro-frontend de login, montável pela shell por nome"
     status: beta
+  - name: failure-event
+    kind: event
+    description: "evento emitido a cada falha de login (consumido p/ suporte proativo)"
+    status: beta
 
 consumes:
   - contract: acme-design-system/form-component
     awaits: ">=1.0"
+
+capabilities:
+  - "fluxo de autenticação/login na shell"
+  - "emissão de eventos de falha de login"
+
+architecture:
+  stack: [react, typescript]
+  patterns: [microfrontend, event-emitter]
 
 references:
   - {

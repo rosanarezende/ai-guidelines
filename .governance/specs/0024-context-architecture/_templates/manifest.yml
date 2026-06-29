@@ -1,31 +1,46 @@
 # manifest.yml — MANIFESTO do repo: a auto-declaração de CONHECIMENTO/capabilities do repositório.
 #
 # Casa: <repo>/.governance/manifest.yml. É a camada EXTERNA da Lente 5 — o que o repo PUBLICA pra a
-# governança agregar (≠ o conteúdo interno: works/deliberação/state). O host de governança DESCOBRE os
-# repos por este arquivo (auto-discovery: varre as .governance/) e DERIVA as arestas cross-repo:
-#   o `provides` deste repo × o `consumes` de outro, no MESMO contrato ⇒ coordinates-with / depends-on.
-#   (regra da Lente 3: anota-se 1 lado; o banco deriva o reverso.)
-# É o slot GENÉRICO (o framework dá os campos); cada repo PREENCHE (a camada de conhecimento é plugável).
+# governança agregar (≠ o conteúdo interno: works/deliberação/state). O host DESCOBRE os repos por este
+# arquivo (auto-discovery: varre as .governance/). Shape iterado com a owner (2026-06-29):
+#   • owner = 1 responsável-chave (accountable, nunca vazio) + override por capability/parte (modelo CODEOWNERS).
+#   • 3 faces de conhecimento: provides (contratos formais) · capabilities (o que sabe) · architecture (como é feito).
+#   • arestas DERIVADAS: provides (deste) × consumes (de outro) no MESMO contrato ⇒ coordinates-with/depends-on
+#     (anota 1 lado; o banco deriva o reverso). `coordinates-with` EXPLÍCITO = escape hatch (coordenação sem
+#     contrato formal). CHECK anti-typo: consumes apontando p/ contrato sem provides ⇒ warning (não aresta calada).
 
 node: manifest
 repo: <slug> # = o nome da pasta do repo (chave estável)
-role: <o que este repo É, em 1 linha> # papel/domínio (ex.: "design system: componentes de UI compartilhados")
-owner: <time/BU dona> # OBRIGATÓRIO — ownership é a base do roteamento (quem cuida)
+role: <o que este repo É, em 1 linha> # papel/domínio
+owner: <time/BU responsável-chave> # OBRIGATÓRIO — 1 accountable (nunca vazio); override por item abaixo
 domain: <bounded context> # opcional — agrupa repos por área de negócio
 
-# Os CONTRATOS/capabilities que este repo OFERECE (a face pública; outro repo os consome):
+# (1) provides → "a que outro repo eu me LIGO?" — os CONTRATOS FORMAIS ofertados (geram a aresta derivável):
 provides:
   - name: <contrato> # ex.: form-component
     kind: component | api | event | service
     description: <1 linha>
     status: stable | beta | experimental
+    owner: <override opcional> # herda o `owner` do repo se omitido (granularidade onde a realidade pedir)
 
-# O que este repo PRECISA de OUTROS repos (→ deriva depends-on / coordinates-with):
+# consumes → o que este repo PRECISA de OUTROS repos (→ deriva depends-on / coordinates-with):
 consumes:
   - contract: <repo>/<contrato> # ref qualificada cross-repo (ex.: acme-design-system/form-component)
     awaits: <versão | condição> # opcional — pending até o contrato ficar known
 
-references: # links externos (board, docs, dashboards) — mesmo formato da intent
+# (2) capabilities → "quem SABE sobre X?" — o que o repo sabe fazer (semântico; ROTEIA exploration + busca/IA):
+capabilities:
+  - <capability em linguagem natural> # ex.: "validação de formulários (declarativa + imperativa)"
+
+# (3) architecture → "COMO é feito / o que quebra se eu mexer?" — stack/padrões/fronteiras.
+#     NÃO é doc passiva: `stack` é validável vs package.json (freshness check) e `boundaries` viram regras de
+#     arquitetura-lint (eslint-plugin-boundaries / dependency-cruiser / Nx) → CHECK que gateia o CI no drift.
+architecture:
+  stack: [<libs/linguagens>] # validável vs package.json
+  patterns: [<padrões>] # ex.: headless-components, design-tokens, DDD
+  boundaries: [<regra em 1 linha>] # opcional — fronteiras de dependência (→ arquitetura-lint)
+
+references: # links externos — mesmo formato da intent
   - { type: <tipo>, label: <rótulo>, url: <url>, note: <nota> }
 
 created-at: <iso-8601>

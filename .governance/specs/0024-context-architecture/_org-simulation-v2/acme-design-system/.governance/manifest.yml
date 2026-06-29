@@ -10,15 +10,26 @@ provides:
     kind: component
     description: "componente de formulário com validação declarativa + acessibilidade"
     status: stable
+    # owner herda team-design-system
 
 consumes: []
+
+capabilities:
+  - "validação de formulários (declarativa + imperativa)"
+  - "acessibilidade (a11y / leitor de tela)"
+  - "tema e design tokens compartilhados"
+
+architecture:
+  stack: [react, typescript, styled-components]
+  patterns: [headless-components, design-tokens]
+  boundaries: ["base: não importa de acme-mfe-* (o DS é fundação, não consome MFEs)"]
 
 references:
   - {
       type: intent,
       label: "iniciativa login",
       url: "acme-governance/intents/login_1",
-      note: "provê o contrato do form usado no login",
+      note: "provê o form usado no login",
     }
 
 created-at: 2026-06-28
