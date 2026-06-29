@@ -103,11 +103,10 @@ não se desenha aqui. _(embasamento inicial: a seção "thread adiante" da [rese
 
 - **D1 (Q1) ✅ DECIDIDA — B:** o vertical sugere **explore-point → repo** (onde investigar) **e** **contrato → repo**
   (quem entrega/breakdown). Mesma máquina (need × oferta).
-- **D2 (Q2) ⏳ EM ITERAÇÃO:** aceita o **D (matcher plugável, default léxico)**, mas a owner pediu **aprofundar 2
-  coisas** antes de fechar: (i) `capabilities` virar **`{ text, tags? }`** (híbrido A+C; habilita o **grafo** repo×tag)
-  e (ii) já planejar um **adapter LLM com modelos LOCAIS** (soberania de dados — a "virada de chave"). → embasado em
-  [`2026-06-29-capability-matching-and-llm-research.md`](2026-06-29-capability-matching-and-llm-research.md); **a Q2
-  refinada volta ao gate** (ver a Conclusão da research).
+- **D2 (Q2) ✅ DECIDIDA (gate 2) — D refinado:** matcher **plugável** com **default léxico** + `capabilities` vira
+  **`{ text, tags? }`** (híbrido A+C → habilita o **grafo** repo×tag) + **adapter LLM LOCAL em sequência (v2)**.
+  Embasado em [`2026-06-29-capability-matching-and-llm-research.md`](2026-06-29-capability-matching-and-llm-research.md).
+  **v1 (léxico+tags) FEITO e dogfood VERDE** ↓; **v2 (LLM local)** é o próximo passo.
 - **D3 (Q3) ✅ DECIDIDA — A:** roteamento é **view derivada no read-model do host** (não versionada). _(brotou a **Q5**:
   consultas periódicas → proposals/insights — parqueada.)_
 - **D4 (Q4) ✅ DECIDIDA — A:** **advisory-only** — nunca alimenta o gate; o breakdown/`derives-from` segue humano.
@@ -129,6 +128,15 @@ quiser plugar embeddings/LLM depois). Esse é o critério de aceite do v1.
 
 ## Aplicado
 
-Nada ainda — **é rascunho pré-código** (o ponto é deliberar antes de implementar a 🔴🔥). Quando as Decisions
-fecharem: `deriveRouting(intent, manifests)` no domínio (+ porta `Matcher` com adapter léxico) → card "roteamento"
-no dashboard do host → o dogfood acima como teste.
+**v1 (léxico) FEITO** (commits `dccce9fc` shape + `39039ffc` routing):
+
+- `capabilities → { text, tags? }` no domínio + adapters + 3 manifestos + template + scaffold.
+- `domain/routing.ts`: porta `Matcher` + `LexicalMatcher` (tokens + prefixo PT + boost de tag) + `deriveRouting`
+  (explore-point→capabilities · contrato→provides) + `deriveTagGraph` (repo×tag). `build` fia `routing`+`tagGraph`
+  no `db.json` do host.
+- **dogfood `routing-check.ts` VERDE**: o léxico REPRODUZIU as escolhas humanas (e1→DS · e2→support 6>identity 4 ·
+  form-component→DS · failure-event→identity). Advisory: não toca o gate.
+
+**Pendente:** (a) a **viz** (cards de roteamento + grafo repo×tag na tela) → vai pra a **rodada do `_viewer`** (o app
+vai ser bem mexido; os dados já estão no `db.json`, evita view dupla). (b) **v2 — adapter `LlmMatcher` LOCAL** (Ollama;
+trocar o matcher = 1 linha no `build`).
