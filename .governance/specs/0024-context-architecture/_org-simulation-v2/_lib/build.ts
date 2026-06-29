@@ -1,10 +1,12 @@
-// build.ts — o RUNNER da lib (substituiu o _banks central, hoje arquivado): consome os adapters File (read) + as
-// derivações puras → regenera os READ-MODELS (db.json) que a view consome. Engine do workflow:
-//   editar .governance/  →  node _lib/build.ts  →  db.json  →  (cd _viewer && npm run dashboards)
+// build.ts — o RUNNER, em DUAS FASES desacopladas (Lente 5 · "banco→banco"):
+//   FASE 1 (PUBLICAR): cada repo, com o SEU backend, deriva e PUBLICA sua projeção externa (context.json) + o db.json interno.
+//   FASE 2 (AGREGAR):  o host lê os context.json PUBLICADOS (SEM abrir banco nenhum) + intents + manifestos → a governança.
+// Assim, desenvolver a intent/governança NÃO exige subir os bancos dos repos — só LER as projeções publicadas.
+// (detalhe + espectro solo→enterprise: research/2026-06-29-governance-aggregates-published-projections.md)
 import fs from "node:fs";
 import path from "node:path";
 import { FileHostRepository } from "./adapters/file/FileHostRepository.ts";
-import { SIM_ROOT } from "./adapters/file/io.ts";
+import { SIM_ROOT, exists } from "./adapters/file/io.ts";
 import { openRepository, backendOf } from "./backend.ts";
 import {
   deriveDeliberation,
@@ -13,19 +15,21 @@ import {
   deriveManifestGraph,
 } from "./domain/derive.ts";
 import type { RepoContext, DeliberationView, GovernanceView } from "./domain/derive.ts";
-import type { Work, Exploration, Proposal } from "./domain/model.ts";
+import type { Work, Proposal } from "./domain/model.ts";
 
 function writeDb(rel: string, data: unknown): void {
   fs.writeFileSync(path.join(SIM_ROOT, rel), `${JSON.stringify(data, null, 2)}\n`, "utf8");
+}
+function readJson<T>(rel: string): T {
+  return JSON.parse(fs.readFileSync(path.join(SIM_ROOT, rel), "utf8")) as T;
 }
 
 const host = new FileHostRepository();
 const repos = await host.listRepos();
 
-// 1) cada repo: read via FileRepository + deriva a deliberação por work → db.json LOCAL (camada interna)
-const contexts: RepoContext[] = [];
+// ───────────────────────── FASE 1 · PUBLICAR (cada repo usa o SEU backend) ─────────────────────────
 for (const repoName of repos) {
-  const { repo: r, close } = openRepository(repoName); // backend do repo (file OU neo4j)
+  const { repo: r, close } = openRepository(repoName); // backend do repo (file/sqlite/neo4j/mongo)
   try {
     const works = await r.listWorks();
     const explorations = await r.listExplorations();
@@ -44,33 +48,43 @@ for (const repoName of repos) {
       worksWithDelib.push({ ...w, deliberation });
     }
 
+    // INTERNO (camada interna, auto-contida no repo):
     writeDb(`${repoName}/.governance/db.json`, {
       repo: repoName,
       generatedAt: new Date().toISOString(),
       works: worksWithDelib,
       explorations,
     });
-    contexts.push(deriveContext(repoName, works, explorations));
+    // EXTERNO (a projeção PUBLICADA — o que o host agrega; portátil, backend-agnóstica):
+    writeDb(`${repoName}/.governance/context.json`, deriveContext(repoName, works, explorations));
     console.log(
-      `🗃️  ${repoName}/.governance/db.json (${works.length} works, ${explorations.length} exploration) [backend: ${backendOf(repoName)}]`
+      `📤 ${repoName} publicou context.json (${works.length} works, ${explorations.length} exploration) [backend: ${backendOf(repoName)}]`
     );
   } catch (e) {
     console.warn(
-      `⚠️  ${repoName} [${backendOf(repoName)}]: backend indisponível — pulado (${(e as Error).message.slice(0, 70)})`
+      `⚠️  ${repoName} [${backendOf(repoName)}]: backend fora — NÃO republicou (o host usa o context.json anterior, se houver) — ${(e as Error).message.slice(0, 50)}`
     );
   } finally {
     await close();
   }
 }
 
-// 2) governança (host): agrega o contexto publicado → db.json do host (a visão geral)
+// ───────────────────────── FASE 2 · AGREGAR (o host lê os context.json PUBLICADOS — SEM abrir banco) ──────────────
+const publishedContexts: RepoContext[] = [];
+for (const repoName of repos) {
+  const rel = `${repoName}/.governance/context.json`;
+  if (exists(rel)) publishedContexts.push(readJson<RepoContext>(rel));
+  else
+    console.warn(
+      `⚠️  ${repoName} ainda não publicou context.json — rode o build do repo com o backend no ar 1x (depois agrega offline)`
+    );
+}
+
 const intents = await host.listIntents();
 const proposals: Proposal[] = await host.listProposals();
-const governance: GovernanceView[] = [];
-for (const intent of intents) {
-  governance.push(deriveGovernance(intent, contexts)); // a intent não delibera; o gate deriva do breakdown
-}
-// 3) conhecimento: auto-discovery dos manifestos → o grafo HORIZONTAL (provides×consumes → coordinates-with)
+const governance: GovernanceView[] = intents.map((intent) =>
+  deriveGovernance(intent, publishedContexts)
+);
 const knowledge = deriveManifestGraph(await host.listManifests());
 
 writeDb("acme-governance/db.json", {
@@ -81,8 +95,7 @@ writeDb("acme-governance/db.json", {
   knowledge,
 });
 console.log(
-  `🗃️  acme-governance/db.json (${governance.length} intent, ${proposals.length} proposal, ` +
-    `${knowledge.nodes.length} repos no grafo, ${knowledge.edges.length} arestas cross-repo)\n` +
-    `📊 view: cd _viewer && npm run dashboards`
+  `🗃️  acme-governance/db.json — AGREGOU ${publishedContexts.length}/${repos.length} projeções publicadas (SEM abrir banco) · ` +
+    `${governance.length} intent, ${knowledge.edges.length} arestas cross-repo\n📊 view: cd _viewer && npm run dashboards`
 );
 for (const w of knowledge.warnings) console.warn(`⚠️  manifesto: ${w}`);

@@ -1,6 +1,7 @@
 # Artefatos GERADOS pela lib (regeneram com `node _lib/build.ts`) — não versionar.
 **/dashboard.html
 **/.governance/db.json
+**/.governance/context.json
 **/.governance/*.db
 acme-governance/db.json
 _writecheck/
