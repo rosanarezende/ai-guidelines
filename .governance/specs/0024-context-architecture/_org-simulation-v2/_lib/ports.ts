@@ -10,6 +10,7 @@ import type {
   Intent,
   Manifest,
 } from "./domain/model.ts";
+// Decision: usado pela deliberação de WORK (Repository); a intent não delibera (HostRepository).
 
 /** O banco INTERNO de um repo de trabalho (read E write). O backend é plugável (File/Neo4j). */
 export interface Repository {
@@ -42,9 +43,7 @@ export interface HostRepository {
   getIntent(id: string): Promise<Intent | null>;
   saveIntent(intent: Intent): Promise<void>;
 
-  // deliberação no nível da intent (q/r/d cross-trabalho)
-  listDecisions(intentId: string): Promise<Decision[]>;
-  addDecision(intentId: string, d: Decision): Promise<void>;
+  // (a intent NÃO delibera: q/r/d é etapa de work/exploration. O gate da intent DERIVA do breakdown — sem deliberation.)
 
   // proposal (intake — captura humana; vive na governança, não percorre o fluxo)
   listProposals(): Promise<Proposal[]>;

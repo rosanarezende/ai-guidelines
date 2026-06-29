@@ -2,6 +2,7 @@
 entries:
   - id: form-validation_1
     title: "o DS tem form validado? (investigação)"
+    explores: "o DS tem um formulário validado (email/site/telefone), ou cada MFE reimplementa?" # o SUBJECT (na ferramenta)
     assignee: "@dev-ds" # quem assumiu + iniciou (hoje done — passou por active com este dono)
     status: done # FECHOU (era active) — DISPARA por derivação: q1 resolved → contrato form-component known → deliveries destravam
     # ===== A AMARRA (a comunicação intent ↔ exploration) =====
@@ -14,3 +15,18 @@ entries:
     closed-at: 2026-06-27
     created-at: 2026-06-27
     updated-at: 2026-06-27
+
+  # ===== a SPIKE rejeitada (teste: a ausência de deliberation se sustenta?) =====
+  - id: captcha-spike_1
+    title: "captcha no DS? (spike — rejeitada)"
+    explores: "captcha/anti-bot no login: o DS provê um componente, ou usamos serviço externo?" # o SUBJECT
+    assignee: "@dev-ds"
+    status: done # explorou e fechou (devolveu verdict)
+    answers: acme-governance/intents/login_1#q3 # responde a q3 da intent
+    workspace: explorations/captcha-spike_1/
+    fate: throwaway # serviço externo cobre melhor → não construir no DS (output jogado fora — IGUAL ao form-validation, mas este foi REJEITADO)
+    closed-by: explorations/captcha-spike_1/exploration-answer.md
+    closed-at: 2026-06-29
+    created-at: 2026-06-29
+    updated-at: 2026-06-29
+    # REJEITADA: NENHUMA delivery `derives-from` esta exploration → o gate DERIVADO marca q3 como rejected (sem deliberation)

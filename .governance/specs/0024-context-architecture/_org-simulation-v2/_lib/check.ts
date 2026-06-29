@@ -100,11 +100,8 @@ async function hostProof(): Promise<void> {
     const r = new FileRepository(repo);
     contexts.push(deriveContext(repo, await r.listWorks(), await r.listExplorations()));
   }
-  const decisions = await host.listDecisions(intent.id);
-  const gov = deriveGovernance(intent, decisions, contexts);
-  console.log(
-    `  deriveGovernance(${intent.id}) · ${decisions.length} decisões (legado decides→resolves):`
-  );
+  const gov = deriveGovernance(intent, contexts);
+  console.log(`  deriveGovernance(${intent.id}) · gate DERIVADO do breakdown (sem deliberation):`);
   for (const q of gov.questions)
     console.log(`    ${q.id}: ${q.resolved ? "RESOLVED" : q.decided} ← ${q.answeredBy ?? "—"}`);
   console.log(

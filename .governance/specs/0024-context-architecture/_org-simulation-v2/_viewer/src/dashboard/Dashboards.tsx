@@ -274,12 +274,15 @@ export function MainDashboard({ db }: { db: GovernanceDb }) {
           <h3>perguntas (o gate)</h3>
           <ul className="q">
             {g.questions.map((q) => {
-              const cls = q.resolved ? "ok" : q.answered ? "warn" : "muted";
+              const rejected = q.decided === "rejected";
+              const cls = q.resolved ? "ok" : rejected ? "muted" : q.answered ? "warn" : "muted";
               const label = q.resolved
                 ? "RESOLVED"
-                : q.answered
-                  ? `answered · ${q.decided}`
-                  : "open";
+                : rejected
+                  ? "REJEITADA (explorada, não-seguida)"
+                  : q.answered
+                    ? `answered · ${q.decided}`
+                    : "open";
               return (
                 <li key={q.id}>
                   <b>{q.id}</b> <span className={`badge ${cls}`}>{label}</span>

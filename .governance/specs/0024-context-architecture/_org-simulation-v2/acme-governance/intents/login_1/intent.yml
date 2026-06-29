@@ -28,6 +28,8 @@ open-questions: # INPUT (as incertezas do cadastro). Quem responde / verdict / r
     question: "o design system tem um formulário validado (email/site/telefone), ou cada MFE reimplementa?"
   - id: q2
     question: "suporte proativo é viável? (detectar N falhas de login por pub/sub e abordar o usuário)"
+  - id: q3
+    question: "captcha/anti-bot no login: o design system provê um componente, ou usamos serviço externo?"
 
 # ===== contratos que a feature coordena (INPUT — a declaração); known/pending é DERIVADO (sem baldes) =====
 contracts:

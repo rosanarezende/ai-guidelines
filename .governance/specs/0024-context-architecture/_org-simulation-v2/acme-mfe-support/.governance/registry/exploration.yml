@@ -2,6 +2,7 @@
 entries:
   - id: proactive-support_1
     title: "suporte proativo é viável? (POC do listener de falhas)"
+    explores: "suporte proativo é viável? (detectar N falhas de login por pub/sub e abordar o usuário)" # o SUBJECT
     assignee: "@dev-support" # quem assumiu + iniciou (hoje done)
     status: done # FECHOU — densa: gerou uma POC durável
     # ===== A AMARRA: responde a q2 da intent =====

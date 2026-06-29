@@ -42,6 +42,7 @@ interface ExplorationFile {
 }
 interface ExplorationEntry {
   id: string;
+  explores?: string; // o SUBJECT (o que investiga) — a "question" renomeada, na ferramenta
   answers: string;
   status: Work["status"];
   assignee?: string | null;
@@ -115,6 +116,7 @@ const fromWork = (w: Work): WorkEntry => ({
 
 const toExploration = (e: ExplorationEntry, verdict?: string): Exploration => ({
   id: e.id,
+  explores: e.explores,
   answers: e.answers,
   status: e.status,
   assignee: e.assignee,
@@ -200,6 +202,7 @@ export class FileRepository implements Repository {
     const entries = cur.filter((e) => e.id !== exp.id);
     entries.push({
       id: exp.id,
+      explores: exp.explores,
       answers: exp.answers,
       status: exp.status,
       assignee: exp.assignee,

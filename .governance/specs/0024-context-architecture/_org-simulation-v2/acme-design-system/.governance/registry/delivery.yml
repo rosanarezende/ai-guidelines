@@ -8,6 +8,6 @@ entries:
     intent: login_1
     workspace: works/delivery/form-component_1/
     coordinates-with: [form-component] # o CONTRATO que provê (declarado na intent); o login MFE consome
-    # destravada por q1 (decisão d1); sem derives-from (form-validation_1 = throwaway, sem POC)
+    derives-from: [acme-design-system/exploration/form-validation_1] # PROVENIÊNCIA: nasceu do verdict de q1 (mesmo throwaway, sem POC). É o gate DERIVADO "aceito".
     created-at: 2026-06-28
     updated-at: 2026-06-28

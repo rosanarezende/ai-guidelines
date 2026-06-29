@@ -208,3 +208,5 @@ Detalhe e ponto-a-ponto de retomada: **no tracker** (seção "Próximo / retomar
 - **Ids:** `<slug>_<num>` (ex. `form-component_1`) — sem prefixo de tipo (o tipo vem da pasta/registry). Refs cross-repo = o caminho `<repo>/<tipo>/<id>`.
 - **Gerados ≠ fonte:** `db.json`/`dashboard.html`/`*.db` são read-models derivados (gitignored). A fonte é o `.governance/` (file) ou o banco (sqlite/neo4j/mongo).
 - **Commits incrementais**, nunca `--no-verify`.
+- **Rename é livre na simulação:** reestruturar/renomear aqui custa **0** — o custo de rename só existe rodando de verdade. É um valor de simular: erra-se nome/forma à vontade antes de cravar (a sim flexiona do dev-solo à grande empresa).
+- **A intent NÃO delibera:** q/r/d é etapa de **work**/**exploration**; a intent usa a ferramenta `exploration` (que `explores` um subject → `verdict`) e o **gate deriva do breakdown** (uma work `derives-from` a exploration = aceito; nenhuma = rejeitado). Sem `deliberation.yml` na intent.

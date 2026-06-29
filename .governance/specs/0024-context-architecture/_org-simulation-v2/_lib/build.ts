@@ -68,7 +68,7 @@ const intents = await host.listIntents();
 const proposals: Proposal[] = await host.listProposals();
 const governance: GovernanceView[] = [];
 for (const intent of intents) {
-  governance.push(deriveGovernance(intent, await host.listDecisions(intent.id), contexts));
+  governance.push(deriveGovernance(intent, contexts)); // a intent não delibera; o gate deriva do breakdown
 }
 // 3) conhecimento: auto-discovery dos manifestos → o grafo HORIZONTAL (provides×consumes → coordinates-with)
 const knowledge = deriveManifestGraph(await host.listManifests());

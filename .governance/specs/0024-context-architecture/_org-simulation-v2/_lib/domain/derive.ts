@@ -38,8 +38,9 @@ export interface RepoContext {
     intent?: string | null;
     coordinatesWith?: string[];
     blockedBy?: string[];
+    derivesFrom?: string[];
   }[];
-  answers: { exploration: string; question: string; verdict?: string }[];
+  answers: { exploration: string; question: string; verdict?: string; fate?: string }[];
 }
 
 export interface GovernanceView {
@@ -128,6 +129,7 @@ export function deriveContext(
       intent: w.intent,
       coordinatesWith: w.coordinatesWith,
       blockedBy: w.blockedBy,
+      derivesFrom: w.derivesFrom,
     })),
     answers: explorations
       .filter((e) => e.status === "done")
@@ -135,30 +137,33 @@ export function deriveContext(
         exploration: `${repo}/exploration/${e.id}`,
         question: e.answers,
         verdict: e.verdict,
+        fate: e.fate,
       })),
   };
 }
 
 /** o HOST: a intent agregada — gate das open-questions (respondidas pelas explorations), contratos, breakdown. */
-export function deriveGovernance(
-  intent: Intent,
-  intentDecisions: Decision[],
-  contexts: RepoContext[]
-): GovernanceView {
-  const dead = deadDecisions(intentDecisions);
+export function deriveGovernance(intent: Intent, contexts: RepoContext[]): GovernanceView {
   const allAnswers = contexts.flatMap((c) => c.answers);
+  const allWorks = contexts.flatMap((c) => c.works);
+  const refMatches = (a: string, b: string): boolean =>
+    a === b || a.endsWith(`/${b}`) || b.endsWith(`/${a}`);
 
+  // A intent NÃO delibera (q/r/d é etapa de work/exploration). O gate deriva do BREAKDOWN, sem deliberation.yml:
   const questions = intent.openQuestions.map((q) => {
     const edge = `${intent.id}#${q.id}`;
     const ans = allAnswers.find((a) => a.question === edge || a.question.endsWith(`/${edge}`));
-    const answered = Boolean(ans);
-    const live = intentDecisions.find((d) => !dead.has(d.id) && decidesQuestion(d, q.id));
-    const decided: GateDecision = live?.status ?? (answered ? "pending" : "none");
+    const answered = ans !== undefined; // a exploration está DONE e devolveu verdict
+    // aceito = alguma work NASCEU (derives-from = proveniência) da exploration que respondeu; rejeitado = nenhuma.
+    const pursued =
+      ans !== undefined &&
+      allWorks.some((w) => (w.derivesFrom ?? []).some((d) => refMatches(d, ans.exploration)));
+    const decided: GateDecision = !answered ? "none" : pursued ? "accepted" : "rejected";
     return {
       id: q.id,
       answered,
       decided,
-      resolved: answered && decided === "accepted",
+      resolved: decided === "accepted",
       answeredBy: ans?.exploration,
       verdict: ans?.verdict,
     };
@@ -173,7 +178,7 @@ export function deriveGovernance(
     })
   );
 
-  const mine = contexts.flatMap((c) => c.works).filter((w) => w.intent === intent.id);
+  const mine = allWorks.filter((w) => w.intent === intent.id);
   const refsByStatus = (s: WorkStatus): string[] =>
     mine.filter((w) => w.status === s).map((w) => w.ref);
 

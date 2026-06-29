@@ -3,7 +3,7 @@
 // Reconcilia o LEGADO: a deliberation.yml da intent usa `decides` + `supported-by` single; o domínio usa
 // `resolves` + array → o `toDecision` mapeia os dois (read), e o write passa a gravar a forma do domínio.
 import type { HostRepository } from "../../ports.ts";
-import type { Intent, Decision, Proposal, Manifest, ContractKind } from "../../domain/model.ts";
+import type { Intent, Proposal, Manifest, ContractKind } from "../../domain/model.ts";
 import { exists, readYaml, writeYaml, listNames, listRepoDirs } from "./io.ts";
 
 const GOV = "acme-governance";
@@ -21,21 +21,6 @@ interface IntentFile {
   "updated-at"?: string;
   "open-questions"?: { id: string; question: string }[];
   contracts?: { name: string; awaits?: string }[];
-}
-interface DeliberationFile {
-  decisions?: DecisionEntry[];
-}
-interface DecisionEntry {
-  id: string;
-  decides?: string[]; // LEGADO
-  resolves?: { question: string; into: string }[]; // DOMÍNIO
-  "supported-by"?: string | string[]; // legado single OU array
-  supersedes?: string[];
-  "results-in"?: string[];
-  status: Decision["status"];
-  rationale?: string; // legado
-  body?: string; // domínio
-  "decided-at"?: string;
 }
 interface ProposalFile {
   entries?: ProposalEntry[];
@@ -86,32 +71,6 @@ const toIntent = (f: IntentFile): Intent => ({
   contracts: f.contracts ?? [],
   createdAt: f["created-at"],
   updatedAt: f["updated-at"],
-});
-
-const toDecision = (d: DecisionEntry): Decision => ({
-  id: d.id,
-  resolves: d.resolves ?? (d.decides ?? []).map((q, i) => ({ question: q, into: `§D${i + 1}` })),
-  supportedBy: Array.isArray(d["supported-by"])
-    ? d["supported-by"]
-    : d["supported-by"]
-      ? [d["supported-by"]]
-      : [],
-  supersedes: d.supersedes,
-  resultsIn: d["results-in"],
-  status: d.status,
-  body: d.body ?? d.rationale,
-  decidedAt: d["decided-at"] ?? "",
-});
-
-const fromDecision = (d: Decision): DecisionEntry => ({
-  id: d.id,
-  resolves: d.resolves,
-  "supported-by": d.supportedBy,
-  supersedes: d.supersedes,
-  "results-in": d.resultsIn,
-  status: d.status,
-  body: d.body,
-  "decided-at": d.decidedAt,
 });
 
 const toProposal = (e: ProposalEntry): Proposal => ({
@@ -198,20 +157,7 @@ export class FileHostRepository implements HostRepository {
     });
   }
 
-  // ── deliberação no nível da intent ──
-
-  async listDecisions(intentId: string): Promise<Decision[]> {
-    const rel = `${intentDir(intentId)}/deliberation.yml`;
-    const decisions = exists(rel) ? (readYaml<DeliberationFile>(rel).decisions ?? []) : [];
-    return decisions.map(toDecision);
-  }
-
-  async addDecision(intentId: string, d: Decision): Promise<void> {
-    const rel = `${intentDir(intentId)}/deliberation.yml`;
-    const decisions = exists(rel) ? (readYaml<DeliberationFile>(rel).decisions ?? []) : [];
-    decisions.push(fromDecision(d)); // APPEND-ONLY
-    writeYaml(rel, { decisions });
-  }
+  // (a intent NÃO delibera — sem deliberation.yml; o gate da intent deriva do breakdown.)
 
   // ── proposal (intake — vive na governança) ──
 

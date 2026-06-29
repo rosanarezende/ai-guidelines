@@ -36,6 +36,7 @@ export interface Work {
 /** EXPLORATION (ferramenta): investiga e RESPONDE uma question (ancora a aresta `answers`). */
 export interface Exploration {
   id: string;
+  explores?: string; // o SUBJECT — o que esta exploration investiga (a "question" renomeada; universal, mora na ferramenta)
   answers: string; // "<repo>/intents/<intent>#<qN>" — a aresta que ela ancora (a intent deriva answered-by)
   status: WorkStatus;
   assignee?: string | null;
