@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { api, type OrgGraph, type Intent } from "../api.ts";
 import { LayeredGraph, type GNode, type GEdge } from "../graph/LayeredGraph.tsx";
 
@@ -8,6 +9,7 @@ export function IntentGraph() {
   const [graph, setGraph] = useState<OrgGraph | null>(null);
   const [intents, setIntents] = useState<Intent[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const nav = useNavigate();
 
   useEffect(() => {
     Promise.all([api.graph(), api.intents()])
@@ -53,7 +55,13 @@ export function IntentGraph() {
         <span className="dot repo" /> repo — passe o mouse num nó pra destacar as ligações.
       </p>
       <div className="graph-wrap">
-        <LayeredGraph nodes={nodes} edges={edges} />
+        <LayeredGraph
+          nodes={nodes}
+          edges={edges}
+          onSelect={(nid) => {
+            if (nid.startsWith("intent:")) nav(`/intent/${nid.slice(7)}`);
+          }}
+        />
       </div>
     </section>
   );

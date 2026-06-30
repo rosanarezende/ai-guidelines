@@ -217,3 +217,172 @@ code {
   border-radius: 12px;
   padding: 1rem;
 }
+
+/* ── cards clicáveis ── */
+a.card-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  transition: border-color 0.12s;
+}
+a.card-link:hover {
+  border-color: var(--accent);
+}
+
+/* ── botões ── */
+.block-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.8rem;
+}
+.block-head h2 {
+  margin: 0;
+  flex: 1;
+}
+.btn {
+  display: inline-block;
+  text-decoration: none;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+  border-radius: 8px;
+  padding: 0.32rem 0.8rem;
+  cursor: pointer;
+}
+.btn:hover {
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
+}
+.btn.primary {
+  color: white;
+  background: var(--accent);
+}
+.btn-secondary {
+  align-self: flex-start;
+  font-size: 0.78rem;
+  background: #8881;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0.28rem 0.7rem;
+  cursor: pointer;
+  color: inherit;
+}
+.btn-icon {
+  background: none;
+  border: none;
+  cursor: pointer;
+  opacity: 0.5;
+  font-size: 0.9rem;
+  color: inherit;
+}
+.btn-icon:hover {
+  opacity: 1;
+  color: #c0392b;
+}
+
+/* ── detalhe ── */
+.crumb {
+  font-size: 0.82rem;
+  margin: 0 0 0.6rem;
+}
+.crumb a {
+  color: var(--accent);
+  text-decoration: none;
+}
+.detail-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.4rem;
+}
+.detail-head h2 {
+  margin: 0 0 0.2rem;
+}
+.detail-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+h3 {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.55;
+  margin: 1.2rem 0 0.4rem;
+}
+h3 small {
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 400;
+}
+ul.rows {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+ul.rows li {
+  padding: 0.18rem 0;
+  border-bottom: 1px solid #8882;
+}
+
+/* ── formulários ── */
+.form {
+  max-width: 640px;
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-bottom: 0.9rem;
+}
+.field > span {
+  font-size: 0.74rem;
+  opacity: 0.7;
+}
+.field-row {
+  display: flex;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+}
+.field-row .field {
+  flex: 1;
+  min-width: 130px;
+}
+input,
+select,
+textarea {
+  font: inherit;
+  padding: 0.4rem 0.55rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: Canvas;
+  color: inherit;
+}
+input:focus,
+select:focus,
+textarea:focus {
+  outline: 2px solid color-mix(in srgb, var(--accent) 40%, transparent);
+  border-color: var(--accent);
+}
+input:disabled {
+  opacity: 0.6;
+}
+.edit-row {
+  display: flex;
+  gap: 0.4rem;
+  margin-bottom: 0.4rem;
+  align-items: center;
+}
+.edit-row input {
+  flex: 1;
+}
+.edit-row .narrow {
+  flex: 0 0 4.5rem;
+}
+.form-actions {
+  margin-top: 1rem;
+}

@@ -2,6 +2,10 @@ import { NavLink, Route, Routes } from "react-router-dom";
 import { Home } from "./pages/Home.tsx";
 import { IntentGraph } from "./pages/IntentGraph.tsx";
 import { ProposalGraph } from "./pages/ProposalGraph.tsx";
+import { IntentDetail } from "./pages/IntentDetail.tsx";
+import { ProposalDetail } from "./pages/ProposalDetail.tsx";
+import { IntentForm } from "./pages/IntentForm.tsx";
+import { ProposalForm } from "./pages/ProposalForm.tsx";
 
 export function App() {
   return (
@@ -21,6 +25,12 @@ export function App() {
           <Route path="/" element={<Home />} />
           <Route path="/grafo/intents" element={<IntentGraph />} />
           <Route path="/grafo/proposals" element={<ProposalGraph />} />
+          <Route path="/intent/novo" element={<IntentForm />} />
+          <Route path="/intent/:id/editar" element={<IntentForm />} />
+          <Route path="/intent/:id" element={<IntentDetail />} />
+          <Route path="/proposal/nova" element={<ProposalForm />} />
+          <Route path="/proposal/:id/editar" element={<ProposalForm />} />
+          <Route path="/proposal/:id" element={<ProposalDetail />} />
           <Route path="*" element={<p className="muted">página não encontrada</p>} />
         </Routes>
       </main>

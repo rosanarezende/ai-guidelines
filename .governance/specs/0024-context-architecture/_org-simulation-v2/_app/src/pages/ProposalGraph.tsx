@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { api, type Proposal } from "../api.ts";
 import { LayeredGraph, type GNode, type GEdge } from "../graph/LayeredGraph.tsx";
 
@@ -8,6 +9,7 @@ const shortRef = (ref: string): string => ref.split("/").pop() ?? ref;
 export function ProposalGraph() {
   const [proposals, setProposals] = useState<Proposal[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const nav = useNavigate();
 
   useEffect(() => {
     api
@@ -68,7 +70,13 @@ export function ProposalGraph() {
         {proposals.length === 0 ? (
           <p className="muted">(nenhuma proposta ainda)</p>
         ) : (
-          <LayeredGraph nodes={nodes} edges={edges} />
+          <LayeredGraph
+            nodes={nodes}
+            edges={edges}
+            onSelect={(nid) => {
+              if (nid.startsWith("prop:")) nav(`/proposal/${nid.slice(5)}`);
+            }}
+          />
         )}
       </div>
     </section>
