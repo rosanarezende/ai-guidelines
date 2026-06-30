@@ -87,10 +87,11 @@ importa, não pro ranking puro. Critério: reproduzir e1→DS · e2→support ·
 | ----------------------------- | ------- | -------- | -------------------------------------------------------------------- |
 | `lexical` (t0)                | **2/8** | 0.0s     | **colapsa** — sem tags + paráfrase, cai pro repo de + tokens         |
 | embed `nomic-embed-text` (t1) | **1/8** | 7s       | colapsa **porque o `nomic` é inglês** — em PT não separa (≠ falha)   |
+| embed `bge-m3` [multi] (t1)   | **4/8** | 34s      | multilíngue **DOBRA** o nomic em PT (1→4), mas ainda longe — + lento |
 | gen `gemma3:12b` (t2)         | **8/8** | 489s     | **acerta tudo** (cross-lingual + distractors); entende PT, mas LENTO |
 
 **Leitura (o oposto do caso limpo):** no difícil, **o barato COLAPSA e o LLM ganha** — a hipótese da owner. Dois
-alertas: (1) o `nomic` é EN → o tier 1 precisa de um **embed multilíngue** (ex.: `bge-m3`) pra ser justo em PT; (2) o
+alertas: (1) embed multilíngue **ajuda mas não basta** — o `bge-m3` dobrou o `nomic` em PT (1→**4/8**), mas segue muito abaixo do LLM (8/8): embeddings sozinho não dá conta da paráfrase difícil; (2) o
 `gemma3:12b` acerta 8/8 mas a **489s** → abre a pergunta dos **modelos hosted** (mesma acurácia, mais rápido?).
 Reforça o **gerador de capabilities**: capabilities bem-escritas fariam os tiers baratos recuperarem (garbage-in → só
 o LLM sobrevive).
