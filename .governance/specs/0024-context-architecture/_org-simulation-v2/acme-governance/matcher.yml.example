@@ -1,0 +1,6 @@
+# matcher.yml — qual matcher o HOST usa no roteamento vertical. Copie p/ `matcher.yml` (na raiz do host) pra ATIVAR.
+# Ausente = lexical (tier 0, zero infra, determinístico) = o DEFAULT. Os outros kinds: ver MATCHER.md.
+# (mora na raiz do acme-governance, ao lado do proposals.yml — o host É a governança, não tem .governance/ sidecar.)
+kind: ollama-embed # lexical | ollama-embed (+ ollama-generate / openai / agent: planejados)
+endpoint: http://localhost:11434
+model: nomic-embed-text

@@ -6,7 +6,7 @@ cruzando o `need` × o `capabilities`/`provides` dos manifestos. É **advisory**
 
 Quem faz o "cruzar" é o **`Matcher`** — uma **porta plugável** (igual a `Repository` é file/sqlite/neo4j/mongo). O
 default é **léxico, zero-infra**; dá pra plugar um **LLM LOCAL** (Ollama) sem mudar mais nada. Config no **host**:
-`acme-governance/.governance/matcher.yml`.
+`acme-governance/matcher.yml` (raiz do host).
 
 ## O espectro (do mais simples ao mais complexo)
 
@@ -40,7 +40,7 @@ Sem `matcher.yml`, o matcher é **léxico**, zero infra. `node _lib/build.ts` lo
    ```
 3. **ative** copiando o exemplo:
    ```bash
-   cp acme-governance/.governance/matcher.yml.example acme-governance/.governance/matcher.yml
+   cp acme-governance/matcher.yml.example acme-governance/matcher.yml
    ```
    ```yaml
    kind: ollama-embed

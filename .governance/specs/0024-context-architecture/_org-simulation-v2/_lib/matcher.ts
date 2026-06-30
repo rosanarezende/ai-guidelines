@@ -14,7 +14,7 @@ interface MatcherConfig {
 
 /** o matcher do host + um rótulo p/ log. Default = léxico (solo, zero infra, determinístico). */
 export function loadMatcher(): { matcher: Matcher; label: string } {
-  const rel = "acme-governance/.governance/matcher.yml";
+  const rel = "acme-governance/matcher.yml"; // raiz do host (≠ sidecar .governance/ dos work-repos; o host É a governança)
   const cfg: MatcherConfig = exists(rel) ? readYaml<MatcherConfig>(rel) : {};
   const endpoint = cfg.endpoint ?? "http://localhost:11434";
   if (cfg.kind === "ollama-embed") {
