@@ -30,6 +30,7 @@ const today = (): string => new Date().toISOString().slice(0, 10);
 interface IntentFile {
   id: string;
   title: string;
+  description?: string;
   status?: Intent["status"];
   "registered-by"?: string;
   owner?: string;
@@ -84,6 +85,7 @@ interface ManifestFile {
 interface RegisterFile {
   id: string;
   title: string;
+  description?: string;
   status?: RegisterStatus;
   "registered-by"?: string;
   owner?: string;
@@ -123,6 +125,7 @@ interface GateFile {
 const toIntent = (f: IntentFile): Intent => ({
   id: f.id,
   title: f.title,
+  description: f.description,
   status: f.status,
   registeredBy: f["registered-by"],
   owner: f.owner,
@@ -191,6 +194,7 @@ const toManifest = (f: ManifestFile): Manifest => ({
 const toRegister = (f: RegisterFile): Register => ({
   id: f.id,
   title: f.title,
+  description: f.description,
   status: f.status ?? "registrada",
   registeredBy: f["registered-by"],
   owner: f.owner,
@@ -206,6 +210,7 @@ const toRegister = (f: RegisterFile): Register => ({
 const fromRegister = (r: Register): RegisterFile => ({
   id: r.id,
   title: r.title,
+  description: r.description,
   status: r.status,
   "registered-by": r.registeredBy,
   owner: r.owner,
@@ -291,6 +296,7 @@ export class FileHostRepository implements HostRepository {
       ...cur,
       id: intent.id,
       title: intent.title,
+      description: intent.description,
       status: intent.status,
       "registered-by": intent.registeredBy,
       owner: intent.owner,
@@ -349,6 +355,7 @@ export class FileHostRepository implements HostRepository {
     const intent: Intent = {
       id: reg.id,
       title: reg.title,
+      description: reg.description,
       status: "active",
       registeredBy: reg.registeredBy,
       owner: reg.owner,

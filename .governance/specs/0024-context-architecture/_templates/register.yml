@@ -2,8 +2,9 @@
 # Fluxo: registrada (aqui) → triagem/investigação (eng, ver triage.yml) → ativada (vira intent.yml, em intents/).
 # Shape: research/2026-06-30-intent-authoring-shape-deliberation.md (D7/D9). A intent NÃO delibera.
 node: register
-id: <slug>_<rand> # slug do título + _num random (~16-bit, chave estável que sobrevive a rename)
+id: <slug>_<rand> # GERADO no registro (não editável): slug do título + _num random ~16-bit (chave estável)
 title: <título curto>
+description: <a descrição da iniciativa — junto do título, o parâmetro mais importante>
 status: registrada # registrada | triagem | investigacao (a CANDIDATA; quando ativada vira um Intent)
 created-at: 2026-NN-NN
 updated-at: 2026-NN-NN

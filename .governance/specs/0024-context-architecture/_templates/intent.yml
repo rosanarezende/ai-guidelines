@@ -5,11 +5,12 @@
 node: intent
 sealed: false # intent é viva (não sela)
 
-id: <slug>_<rand> # slug do título + _num RANDOM (~16-bit, chave estável que sobrevive a rename)
+id: <slug>_<rand> # herda o id da candidata (gerado no registro: slug do título + _num random ~16-bit)
 title: <título curto>
+description: <a descrição da iniciativa — junto do título, o parâmetro mais importante>
 
-# draft=rascunho (nasce aqui) · active=em andamento · paused=repriorizada (retomável) · done=atingida · dropped=descartada
-status: draft # draft | active | paused | done | dropped
+# intent ATIVADA (consolidada de register+triage no gate). active=em andamento · paused=repriorizada · done=atingida · dropped=descartada
+status: active # active | paused | done | dropped
 
 created-at: 2026-NN-NN
 updated-at: 2026-NN-NN # última mutação; só nós MUTÁVEIS — append-only não atualiza

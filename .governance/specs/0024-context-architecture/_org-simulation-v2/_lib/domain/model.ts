@@ -133,6 +133,7 @@ export interface Stakeholder {
 export interface Intent {
   id: string;
   title: string;
+  description?: string; // a DESCRIÇÃO da iniciativa (consolidada do register)
   status?: "draft" | "active" | "paused" | "done" | "dropped"; // nasce draft → "ativar" → active
   // ── pessoas ──
   registeredBy?: string; // quem CADASTROU (autoria/registro)
@@ -160,6 +161,7 @@ export type RegisterStatus = "registrada" | "triagem" | "investigacao";
 export interface Register {
   id: string;
   title: string;
+  description?: string; // a DESCRIÇÃO da iniciativa — junto do título, o parâmetro mais importante
   status: RegisterStatus;
   registeredBy?: string; // quem CADASTROU
   owner?: string; // o accountable (pessoa OU papel/time)

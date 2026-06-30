@@ -86,6 +86,8 @@ Ao usar a tela, a owner percebeu o cerne: a tela de registro virou um **document
   - **Refs por id estável** (`login_1#e1`); o host resolve em `candidates/`→`intents/`→`archived/` — mover **não quebra** link.
 - **Encaixe (FATO):** consistente com _intents vivem na governança · o banco é DERIVADO · o host agrega projeções publicadas · a exploration roda num repo · o breakdown é ato humano · blocked/paused = derivado_. Não cria store novo — só fases (status) + 3 faces na candidata + as explorations nos repos.
 
+- **D10 — descrição + id (refino UI, 2026-06-30):** o registro ganha um campo **`description`** primário — junto do **título**, o par **mais importante** (o enquadramento problema/negócio vira o 2º tópico). O **id** é **gerado no submit** (não a cada tecla) e **não é editável à mão** — slug do título + `_num` random.
+
 ## Resíduo / a iterar
 
 Candidatos a próximas voltas: o detalhe das **dispositions** por explore-point (exploration/responde-direto/falta-info) na UI de triagem; **upload de anexos** (D6); o **problema do cliente** em what/who/why; e se o `experiment` (work) herda a estrutura pesada (hipótese/métricas) num `experiment-brief` enriquecido.
