@@ -197,7 +197,7 @@ npx tsc --noEmit                   # a view
 
 ### 6.9 Roteamento — matcher léxico (solo) ou LLM local
 
-O grafo VERTICAL (sugere ONDE investigar / QUEM entrega) usa um **`Matcher` plugável** — **léxico** (default, zero infra) ou **LLM LOCAL** (Ollama, soberania de dados). O espectro solo→enterprise, o `matcher.yml`, como puxar os modelos (`npm --prefix acme-governance run models:pull`) e a escada de viabilidade: **[`MATCHER.md`](MATCHER.md)**. Dogfood do roteamento: `node _lib/routing-check.ts`.
+O grafo VERTICAL (sugere ONDE investigar / QUEM entrega) usa um **`Matcher` plugável** — **léxico** (default, zero infra) · **LLM LOCAL** (Ollama, soberania) · **hosted via PLANO** (Claude/OpenAI, sem tokens) **ou API** (Gemini). O espectro solo→enterprise, o `matcher.yml`, como rodar cada tier e as **tabelas medidas**: **[`MATCHER.md`](MATCHER.md)**. Dogfood: `node _lib/routing-check.ts` · stress: `node _bench/stress-bench.ts`.
 
 ---
 
@@ -206,8 +206,8 @@ O grafo VERTICAL (sugere ONDE investigar / QUEM entrega) usa um **`Matcher` plug
 - ✅ **Modelo (Lentes 1–5) fechado** no tracker. Decisões recentes: **a intent NÃO delibera** (q/r/d é etapa de work/exploration; o gate deriva do breakdown — `derives-from`) · **manifesto-por-repo** (auto-discovery + arestas cross-repo derivadas de `provides×consumes`) · **host agrega projeções PUBLICADAS** (`build` em 2 fases; `context.json` versionado + freshness no pre-commit).
 - ✅ **A lib DDD pronta:** domínio + portas + adapters **file/sqlite/neo4j/mongo** (a porta validada em 4 paradigmas; `explores` carrega nos 4) + runner + view.
 - ✅ **Padrão de repo + scaffold:** `src/` (produto) + `.governance/` (sidecar) + `dev`/`.gitignore`/`README` por repo; criar novo via `node _lib/scaffold.ts`. Os **3 explore-points resolvem** no dashboard (e1/e2 aceitos · e3 rejeitado; e2 fecha **offline** pela projeção publicada do `support`).
-- ✅ **Checks + roteamento:** os **2 checks do manifesto** (anti-typo · freshness do `architecture`, em `manifest-check.ts`) e o **roteamento vertical v1** (matcher léxico+tags · `deriveRouting`/`deriveTagGraph` · dogfood verde) feitos; a porta `Matcher` é **async (LLM-ready)** com adapter **Ollama local** ([`MATCHER.md`](MATCHER.md)).
-- ▶ **Fila:** **v2 do roteamento** (rodar a escada de modelos local: nomic/qwen3/gemma3) · a **rodada do `_viewer`** (fiar o app à lib + a viz de roteamento/tag-graph) · `Neo4jHostRepository` + arestas da Lente 3 como relações no Neo4j.
+- ✅ **Checks + roteamento (COMPLETO, medido):** os **2 checks do manifesto** (anti-typo · freshness do `architecture`) e o **roteamento vertical v1+v2** — porta `Matcher` async plugável (léxico → embed local → LLM local → **hosted via plano/API**), `deriveRouting`/`deriveTagGraph`, build resiliente, **bench + stress test** ([`MATCHER.md`](MATCHER.md): no difícil o barato colapsa e o LLM ganha; **maior ≠ melhor**; Claude/OpenAI via plano = 8/8 **sem tokens**).
+- ▶ **Fila:** a **rodada do `_viewer`** (fiar o app vivo à lib + a viz de roteamento/tag-graph) · `Neo4jHostRepository` + arestas da Lente 3 como relações no Neo4j · revisitar a **D3** (arestas). 🅿️ parqueado: **gerador de capabilities** · Q5 (gate de evolução).
 
 **O ponto-a-ponto de retomada é o bloco "✅ ESTADO ATUAL" no topo da retomada do tracker** (supersede a retomada histórica).
 
