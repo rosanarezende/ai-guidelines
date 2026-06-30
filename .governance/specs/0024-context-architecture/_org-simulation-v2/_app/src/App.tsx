@@ -1,5 +1,7 @@
 import { NavLink, Route, Routes } from "react-router-dom";
 import { Home } from "./pages/Home.tsx";
+import { IntentGraph } from "./pages/IntentGraph.tsx";
+import { ProposalGraph } from "./pages/ProposalGraph.tsx";
 
 export function App() {
   return (
@@ -10,11 +12,15 @@ export function App() {
           <NavLink to="/" end>
             Início
           </NavLink>
+          <NavLink to="/grafo/intents">Grafo · intents</NavLink>
+          <NavLink to="/grafo/proposals">Grafo · proposals</NavLink>
         </nav>
       </header>
       <main className="content">
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/grafo/intents" element={<IntentGraph />} />
+          <Route path="/grafo/proposals" element={<ProposalGraph />} />
           <Route path="*" element={<p className="muted">página não encontrada</p>} />
         </Routes>
       </main>

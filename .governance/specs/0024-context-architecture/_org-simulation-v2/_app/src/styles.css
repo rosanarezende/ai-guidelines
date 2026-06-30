@@ -178,3 +178,42 @@ code {
   padding: 0.8rem 1rem;
   border-radius: 10px;
 }
+
+/* ── grafo ── */
+.legend {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.78rem;
+  opacity: 0.8;
+  margin: 0.2rem 0 0.6rem;
+}
+.dot {
+  display: inline-block;
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 3px;
+  margin-left: 0.6rem;
+  margin-right: 0.1rem;
+}
+.dot:first-child {
+  margin-left: 0;
+}
+.dot.intent {
+  background: #3b82f6;
+}
+.dot.repo {
+  background: #1c8a45;
+}
+.dot.proposal {
+  background: #c9770f;
+}
+.dot.exploration {
+  background: #8b5cf6;
+}
+.graph-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 1rem;
+}
