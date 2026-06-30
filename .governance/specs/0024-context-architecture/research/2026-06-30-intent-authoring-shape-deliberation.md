@@ -62,6 +62,30 @@ contracts:
 
 _(Mantidos no arquivo, preservados na escrita: `objective`, `target-repos`, `closed-at`. `breaks-into` segue DERIVADO.)_
 
+## Refino — o CICLO DE VIDA (4 fases), a TRIAGEM e a estrutura física (2026-06-30, 2ª rodada · GATE owner)
+
+Ao usar a tela, a owner percebeu o cerne: a tela de registro virou um **documento de NEGÓCIO** (certo), mas estávamos enfiando nela **explore-points e contratos** como se a intent já nascesse quebrada e roteada — **não nasce**. São **dois papéis e duas fases**: o **negócio** registra o enquadramento; a **engenharia** faz a **triagem** (decide o que investigar, roda o matcher, valida contratos); só depois a intent é **real**. Isto **supersede** o D2 (status) e completa o D5 (contratos).
+
+- **D7 — ciclo de vida em 4 fases (supersede D2):** `registrada` → `triagem` → `investigação` → `ativada`.
+  - **registrada** (negócio): enquadramento cadastrado.
+  - **triagem** (eng): cada dúvida do negócio vira **explore-point**; o eng decide _exploration / responde-direto / falta-info_; **roda o matcher** e **valida** os contratos/conexões sugeridos (aceita/corrige/adiciona/remove). É o **breakdown/refino** que estava implícito.
+  - **investigação**: as explorations **disparadas rodam** (nascem nos repos de trabalho, publicam verdict). **Disparar exploration NÃO ativa** a intent — é aqui que a **viabilidade** é testada (uma exploration pode mostrar que a intent é inviável).
+  - **ativada**: viável + contratos validados → as **deliveries podem nascer**.
+  - terminais `concluída`/`descartada` (descartada distingue inviabilidade × repriorização pelo motivo).
+- **D8 — "falta-info" volta pro NEGÓCIO, e é MEDÍVEL:** uma dúvida sem resposta retorna ao time de negócio com um **assignee** + timestamp → o read-model deriva **quem** segura e **por quanto tempo** o fluxo está bloqueado (a dor do remoto, agora visível). Sem status novo — é **bloqueio derivado** (estilo `blocked-by`).
+- **D9 — estrutura física (a localização encoda a fase, como BU/time=pasta):**
+  ```
+  acme-governance/
+    registers/
+      candidates/<id>/   register.yml (negócio) · triage.yml (eng) · gate.yml (decisão)
+      archived/<id>/     a jornada completa (promovidas E descartadas) — histórico imutável
+    intents/<id>/        intent.yml — só o RELEVANTE, consolidado (a intent REAL, ativada)
+  ```
+  - **register.yml** = enquadramento (negócio). **triage.yml** = dispositions por explore-point + contratos validados + viabilidade (eng). **gate.yml** = a DECISÃO de gate (`outcome: promoted|discarded` · `decided-by` · `decided-at` · `rationale` · viabilidade). É **decisão, não deliberação** (a intent não delibera — tem um **gate de ativação**).
+  - **Promover** = **consolida** (não copia cru) → gera `intents/<id>/intent.yml` limpo (enquadramento + explores validados + contratos) **e move** a candidata pra `archived/`. **Descartar** = move pra `archived/` (motivo no gate); nada nasce em `intents/`. **Ciclo fechado.**
+  - **Refs por id estável** (`login_1#e1`); o host resolve em `candidates/`→`intents/`→`archived/` — mover **não quebra** link.
+- **Encaixe (FATO):** consistente com _intents vivem na governança · o banco é DERIVADO · o host agrega projeções publicadas · a exploration roda num repo · o breakdown é ato humano · blocked/paused = derivado_. Não cria store novo — só fases (status) + 3 faces na candidata + as explorations nos repos.
+
 ## Resíduo / a iterar
 
-A owner vai testar a forma nova e dizer "se foi suficiente". Candidatos a 2ª volta: o passo de **confirmar/anexar** as conexões sugeridas (D5 completo); **upload de anexos** (D6); o **problema do cliente** em what/who/why (como na inspiração) se a granularidade ajudar; e se o `experiment` (work) deve herdar o resto da estrutura (hipótese/métricas/instrumentação) num `experiment-brief` enriquecido.
+Candidatos a próximas voltas: o detalhe das **dispositions** por explore-point (exploration/responde-direto/falta-info) na UI de triagem; **upload de anexos** (D6); o **problema do cliente** em what/who/why; e se o `experiment` (work) herda a estrutura pesada (hipótese/métricas) num `experiment-brief` enriquecido.
