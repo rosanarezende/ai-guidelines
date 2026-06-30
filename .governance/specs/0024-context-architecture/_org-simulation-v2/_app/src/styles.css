@@ -386,3 +386,33 @@ input:disabled {
 .form-actions {
   margin-top: 1rem;
 }
+.st-draft {
+  background: #8883;
+  opacity: 0.85;
+}
+textarea {
+  width: 100%;
+  resize: vertical;
+}
+.explore-edit {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+.exp-id {
+  font-size: 0.72rem;
+  opacity: 0.5;
+  align-self: center;
+  white-space: nowrap;
+}
+.hint {
+  font-size: 0.82rem;
+  opacity: 0.8;
+  border-left: 2px solid var(--line);
+  padding-left: 0.6rem;
+  margin: 1rem 0;
+}
+button.btn {
+  font-family: inherit;
+}

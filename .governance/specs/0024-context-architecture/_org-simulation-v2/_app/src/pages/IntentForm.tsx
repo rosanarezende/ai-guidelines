@@ -2,11 +2,15 @@ import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { api, type Intent } from "../api.ts";
-
-type Explore = { id: string; subject: string };
-type Contract = { name: string; awaits?: string };
+import type {
+  Contract,
+  ExplorePoint,
+  IntentReference,
+  Stakeholder,
+} from "../../../_lib/domain/model.ts";
 
 const today = (): string => new Date().toISOString().slice(0, 10);
+const rand16 = (): number => Math.floor(Math.random() * 65536); // chave estável ~16-bit (não colide na prática)
 const slugify = (s: string): string =>
   s
     .toLowerCase()
@@ -14,9 +18,12 @@ const slugify = (s: string): string =>
     .replace(/[̀-ͯ]/g, "")
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "");
+const clean = <T,>(arr: T[]): T[] | undefined => (arr.length ? arr : undefined);
+const REF_TYPES = ["modeling", "spec", "design", "benchmark", "dashboard", "alignment", "other"];
 
-// Cadastro/edição de INICIATIVA — grava o intent.yml de verdade (via _lib). A intent NÃO delibera:
-// só title/owner/status + explore-points (o que investigar) + contratos.
+// Cadastro/edição de INICIATIVA — grava o intent.yml de verdade (via _lib). Forma rica deliberada em
+// research/2026-06-30-intent-authoring-shape-deliberation.md: enquadramento + pessoas + explore-points; nasce draft;
+// contratos NÃO se digitam (o matcher sugere no detalhe).
 export function IntentForm() {
   const { id: editId } = useParams();
   const editing = Boolean(editId);
@@ -24,10 +31,18 @@ export function IntentForm() {
 
   const [id, setId] = useState("");
   const [title, setTitle] = useState("");
+  const [status, setStatus] = useState<NonNullable<Intent["status"]>>("draft");
+  const [registeredBy, setRegisteredBy] = useState("");
   const [owner, setOwner] = useState("");
-  const [status, setStatus] = useState<NonNullable<Intent["status"]>>("active");
-  const [explores, setExplores] = useState<Explore[]>([]);
-  const [contracts, setContracts] = useState<Contract[]>([]);
+  const [stakeholders, setStakeholders] = useState<Stakeholder[]>([]);
+  const [pBusiness, setPBusiness] = useState("");
+  const [pCustomer, setPCustomer] = useState("");
+  const [bcDriver, setBcDriver] = useState("");
+  const [bcMetric, setBcMetric] = useState("");
+  const [details, setDetails] = useState("");
+  const [references, setReferences] = useState<IntentReference[]>([]);
+  const [explores, setExplores] = useState<ExplorePoint[]>([]);
+  const [contracts, setContracts] = useState<Contract[]>([]); // preservados (não editados aqui)
   const [createdAt, setCreatedAt] = useState<string | undefined>();
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -39,8 +54,16 @@ export function IntentForm() {
       .then((i) => {
         setId(i.id);
         setTitle(i.title);
+        setStatus(i.status ?? "draft");
+        setRegisteredBy(i.registeredBy ?? "");
         setOwner(i.owner ?? "");
-        setStatus(i.status ?? "active");
+        setStakeholders(i.stakeholders ?? []);
+        setPBusiness(i.problem?.business ?? "");
+        setPCustomer(i.problem?.customer ?? "");
+        setBcDriver(i.businessConnection?.driver ?? "");
+        setBcMetric(i.businessConnection?.metric ?? "");
+        setDetails(i.details ?? "");
+        setReferences(i.references ?? []);
         setExplores(i.explores);
         setContracts(i.contracts);
         setCreatedAt(i.createdAt);
@@ -48,25 +71,43 @@ export function IntentForm() {
       .catch((e: unknown) => setError(String(e instanceof Error ? e.message : e)));
   }, [editId]);
 
-  const effectiveId = editing ? id : id || (title ? `${slugify(title)}_1` : "");
+  const effectiveId = editing ? id : id || (title ? `${slugify(title)}_${rand16()}` : "");
 
-  const setExplore = (i: number, patch: Partial<Explore>): void =>
+  const setStk = (i: number, patch: Partial<Stakeholder>): void =>
+    setStakeholders((xs) => xs.map((x, j) => (j === i ? { ...x, ...patch } : x)));
+  const setRef = (i: number, patch: Partial<IntentReference>): void =>
+    setReferences((xs) => xs.map((x, j) => (j === i ? { ...x, ...patch } : x)));
+  const setExp = (i: number, patch: Partial<ExplorePoint>): void =>
     setExplores((xs) => xs.map((x, j) => (j === i ? { ...x, ...patch } : x)));
-  const setContract = (i: number, patch: Partial<Contract>): void =>
-    setContracts((cs) => cs.map((c, j) => (j === i ? { ...c, ...patch } : c)));
 
   async function submit(ev: FormEvent): Promise<void> {
     ev.preventDefault();
     setError(null);
     if (!title.trim()) return setError("título é obrigatório");
     if (!effectiveId.trim()) return setError("id é obrigatório");
+    const problem =
+      pBusiness.trim() || pCustomer.trim()
+        ? { business: pBusiness.trim() || undefined, customer: pCustomer.trim() || undefined }
+        : undefined;
+    const businessConnection =
+      bcDriver.trim() || bcMetric.trim()
+        ? { driver: bcDriver.trim() || undefined, metric: bcMetric.trim() || undefined }
+        : undefined;
     const intent: Intent = {
       id: effectiveId.trim(),
       title: title.trim(),
-      owner: owner.trim() || undefined,
       status,
-      explores: explores.filter((e) => e.id.trim() && e.subject.trim()),
-      contracts: contracts.filter((c) => c.name.trim()),
+      registeredBy: registeredBy.trim() || undefined,
+      owner: owner.trim() || undefined,
+      stakeholders: clean(stakeholders.filter((s) => s.role.trim() && s.who.trim())),
+      problem,
+      businessConnection,
+      details: details.trim() || undefined,
+      references: clean(references.filter((r) => r.label.trim())),
+      explores: explores
+        .filter((e) => e.title.trim())
+        .map((e) => ({ ...e, title: e.title.trim() })),
+      contracts,
       createdAt: createdAt ?? today(),
       updatedAt: today(),
     };
@@ -96,47 +137,150 @@ export function IntentForm() {
           placeholder="Sistema de login"
         />
       </label>
-
       <div className="field-row">
         <label className="field">
-          <span>id {editing ? "" : "(gerado do título; editável)"}</span>
+          <span>id {editing ? "" : "(slug do título + nº random; editável)"}</span>
+          <input value={effectiveId} onChange={(e) => setId(e.target.value)} disabled={editing} />
+        </label>
+        {editing ? (
+          <label className="field">
+            <span>status</span>
+            <select value={status} onChange={(e) => setStatus(e.target.value as typeof status)}>
+              {(["draft", "active", "paused", "done", "dropped"] as const).map((s) => (
+                <option key={s}>{s}</option>
+              ))}
+            </select>
+          </label>
+        ) : (
+          <label className="field">
+            <span>status</span>
+            <input value="draft (nasce como rascunho → ativa depois)" disabled />
+          </label>
+        )}
+      </div>
+
+      <h3>pessoas</h3>
+      <div className="field-row">
+        <label className="field">
+          <span>quem cadastrou</span>
           <input
-            value={effectiveId}
-            onChange={(e) => setId(e.target.value)}
-            disabled={editing}
-            placeholder="login_1"
+            value={registeredBy}
+            onChange={(e) => setRegisteredBy(e.target.value)}
+            placeholder="@você"
           />
         </label>
         <label className="field">
-          <span>dona</span>
+          <span>dona (accountable)</span>
           <input value={owner} onChange={(e) => setOwner(e.target.value)} placeholder="@ana-pm" />
         </label>
-        <label className="field">
-          <span>status</span>
-          <select value={status} onChange={(e) => setStatus(e.target.value as typeof status)}>
-            <option value="active">active</option>
-            <option value="paused">paused</option>
-            <option value="done">done</option>
-            <option value="dropped">dropped</option>
-          </select>
-        </label>
       </div>
-
       <div className="field">
-        <span>explore-points · o que investigar</span>
-        {explores.map((e, i) => (
+        <span>stakeholders (cargos/pessoas relacionadas)</span>
+        {stakeholders.map((s, i) => (
           <div className="edit-row" key={i}>
             <input
               className="narrow"
-              value={e.id}
-              onChange={(ev) => setExplore(i, { id: ev.target.value })}
-              placeholder="e1"
+              value={s.role}
+              onChange={(e) => setStk(i, { role: e.target.value })}
+              placeholder="papel"
             />
             <input
-              value={e.subject}
-              onChange={(ev) => setExplore(i, { subject: ev.target.value })}
-              placeholder="o design system tem um form validado?"
+              value={s.who}
+              onChange={(e) => setStk(i, { who: e.target.value })}
+              placeholder="@quem / time"
             />
+            <button
+              type="button"
+              className="btn-icon"
+              onClick={() => setStakeholders((xs) => xs.filter((_, j) => j !== i))}
+            >
+              ✕
+            </button>
+          </div>
+        ))}
+        <button
+          type="button"
+          className="btn-secondary"
+          onClick={() => setStakeholders((xs) => [...xs, { role: "", who: "" }])}
+        >
+          + stakeholder
+        </button>
+      </div>
+
+      <h3>enquadramento</h3>
+      <label className="field">
+        <span>problema de negócio</span>
+        <textarea value={pBusiness} onChange={(e) => setPBusiness(e.target.value)} rows={2} />
+      </label>
+      <label className="field">
+        <span>problema do cliente</span>
+        <textarea value={pCustomer} onChange={(e) => setPCustomer(e.target.value)} rows={2} />
+      </label>
+      <div className="field-row">
+        <label className="field">
+          <span>driver estratégico</span>
+          <input value={bcDriver} onChange={(e) => setBcDriver(e.target.value)} />
+        </label>
+        <label className="field">
+          <span>métrica de negócio impactada</span>
+          <input value={bcMetric} onChange={(e) => setBcMetric(e.target.value)} />
+        </label>
+      </div>
+      <label className="field">
+        <span>detalhes</span>
+        <textarea value={details} onChange={(e) => setDetails(e.target.value)} rows={3} />
+      </label>
+      <div className="field">
+        <span>referências / links</span>
+        {references.map((r, i) => (
+          <div className="edit-row" key={i}>
+            <select
+              className="narrow"
+              value={r.type ?? "other"}
+              onChange={(e) => setRef(i, { type: e.target.value })}
+            >
+              {REF_TYPES.map((t) => (
+                <option key={t}>{t}</option>
+              ))}
+            </select>
+            <input
+              value={r.label}
+              onChange={(e) => setRef(i, { label: e.target.value })}
+              placeholder="rótulo"
+            />
+            <input
+              value={r.url ?? ""}
+              onChange={(e) => setRef(i, { url: e.target.value || undefined })}
+              placeholder="https://…"
+            />
+            <button
+              type="button"
+              className="btn-icon"
+              onClick={() => setReferences((xs) => xs.filter((_, j) => j !== i))}
+            >
+              ✕
+            </button>
+          </div>
+        ))}
+        <button
+          type="button"
+          className="btn-secondary"
+          onClick={() => setReferences((xs) => [...xs, { type: "other", label: "" }])}
+        >
+          + link
+        </button>
+      </div>
+
+      <h3>explore-points · o que investigar (abre as explorations)</h3>
+      {explores.map((e, i) => (
+        <div className="explore-edit" key={e.id}>
+          <div className="edit-row">
+            <input
+              value={e.title}
+              onChange={(ev) => setExp(i, { title: ev.target.value })}
+              placeholder="título — o que investigar"
+            />
+            <span className="exp-id">{e.id}</span>
             <button
               type="button"
               className="btn-icon"
@@ -145,53 +289,32 @@ export function IntentForm() {
               ✕
             </button>
           </div>
-        ))}
-        <button
-          type="button"
-          className="btn-secondary"
-          onClick={() => setExplores((xs) => [...xs, { id: `e${xs.length + 1}`, subject: "" }])}
-        >
-          + explore-point
-        </button>
-      </div>
+          <textarea
+            value={e.details ?? ""}
+            onChange={(ev) => setExp(i, { details: ev.target.value || undefined })}
+            rows={2}
+            placeholder="detalhes — o que a exploration precisa responder (alimenta o matcher)"
+          />
+        </div>
+      ))}
+      <button
+        type="button"
+        className="btn-secondary"
+        onClick={() => setExplores((xs) => [...xs, { id: `e${rand16()}`, title: "", details: "" }])}
+      >
+        + explore-point
+      </button>
 
-      <div className="field">
-        <span>contratos · o que a feature coordena</span>
-        {contracts.map((c, i) => (
-          <div className="edit-row" key={i}>
-            <input
-              value={c.name}
-              onChange={(ev) => setContract(i, { name: ev.target.value })}
-              placeholder="form-component"
-            />
-            <input
-              className="narrow"
-              value={c.awaits ?? ""}
-              onChange={(ev) => setContract(i, { awaits: ev.target.value || undefined })}
-              placeholder="aguarda e1"
-            />
-            <button
-              type="button"
-              className="btn-icon"
-              onClick={() => setContracts((cs) => cs.filter((_, j) => j !== i))}
-            >
-              ✕
-            </button>
-          </div>
-        ))}
-        <button
-          type="button"
-          className="btn-secondary"
-          onClick={() => setContracts((cs) => [...cs, { name: "" }])}
-        >
-          + contrato
-        </button>
-      </div>
+      <p className="hint">
+        <b>contratos/conexões:</b> não se digitam aqui — depois de cadastrar, o <b>matcher</b>{" "}
+        sugere as conexões no detalhe da iniciativa.
+        {contracts.length > 0 && ` (${contracts.length} já anexado(s), preservado(s).)`}
+      </p>
 
       {error && <p className="error">{error}</p>}
       <div className="form-actions">
         <button type="submit" className="btn primary" disabled={saving}>
-          {saving ? "gravando…" : editing ? "salvar" : "cadastrar"}
+          {saving ? "gravando…" : editing ? "salvar" : "cadastrar (rascunho)"}
         </button>
       </div>
     </form>
