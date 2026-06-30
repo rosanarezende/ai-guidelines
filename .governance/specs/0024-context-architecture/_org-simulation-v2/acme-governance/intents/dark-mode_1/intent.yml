@@ -1,0 +1,20 @@
+# dark-mode_1 — intent SIMPLES (criada p/ dar volume ao grafo da org). A intent NÃO delibera:
+# só declara o que EXPLORAR (explores) + os contratos que coordena. Quem responde/resolve = DERIVADO.
+node: intent
+id: dark-mode_1
+status: active
+owner: "@bia-design"
+created-at: 2026-06-30
+updated-at: 2026-06-30
+
+title: Tema escuro na organização
+objective:
+  goal: oferecer tema escuro consistente nos produtos
+  success-signal: os MFEs trocam de tema sem reestilizar
+
+explores:
+  - id: e1
+    subject: "o design system expõe tokens de tema (claro/escuro) prontos, ou cada MFE estiliza por conta?"
+
+contracts:
+  - { name: theme-tokens, awaits: e1 }
