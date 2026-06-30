@@ -14,7 +14,7 @@ import {
   deriveGovernance,
   deriveManifestGraph,
 } from "./domain/derive.ts";
-import { deriveRouting, deriveTagGraph } from "./domain/routing.ts";
+import { deriveRouting, deriveTagGraph, LexicalMatcher, type Matcher } from "./domain/routing.ts";
 import { loadMatcher } from "./matcher.ts";
 import type { RepoContext, DeliberationView, GovernanceView } from "./domain/derive.ts";
 import type { Work, Proposal } from "./domain/model.ts";
@@ -91,13 +91,23 @@ const governance: GovernanceView[] = intents.map((intent) =>
 );
 const manifests = await host.listManifests();
 const knowledge = deriveManifestGraph(manifests);
-const { matcher, label: matcherLabel } = loadMatcher(); // Q2: léxico default; ollama-embed (LLM local) via matcher.yml
-const routing = await Promise.all(
-  intents.map(async (intent) => ({
-    intent: intent.id,
-    suggestions: await deriveRouting(intent, manifests, matcher),
-  }))
-);
+const { matcher, label: matcherLabel } = loadMatcher(); // Q2: léxico default; ollama-embed/generate (LLM local) via matcher.yml
+const routeWith = (
+  m: Matcher
+): Promise<{ intent: string; suggestions: Awaited<ReturnType<typeof deriveRouting>> }[]> =>
+  Promise.all(
+    intents.map(async (intent) => ({
+      intent: intent.id,
+      suggestions: await deriveRouting(intent, manifests, m),
+    }))
+  );
+// resiliente (como "backend fora"): se o matcher LLM falhar (Ollama fora?), cai pro léxico e segue
+const routing = await routeWith(matcher).catch((e: Error) => {
+  console.warn(
+    `⚠️  matcher "${matcherLabel}" falhou (${e.message.split("\n")[0]}) — fallback p/ léxico.`
+  );
+  return routeWith(new LexicalMatcher());
+});
 const tagGraph = deriveTagGraph(manifests);
 
 writeDb("acme-governance/.cache/db.json", {

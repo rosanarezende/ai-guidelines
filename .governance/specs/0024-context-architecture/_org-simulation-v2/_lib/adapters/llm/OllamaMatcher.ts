@@ -64,3 +64,60 @@ export class OllamaEmbedMatcher implements Matcher {
     return out.sort((a, b) => b.score - a.score);
   }
 }
+
+// ─── tier 2: GENERATIVO — o modelo LÊ o need + as capabilities e devolve um ranking + o "porquê" (JSON). ───
+export class OllamaGenerateMatcher implements Matcher {
+  #endpoint: string;
+  #model: string;
+
+  constructor(endpoint: string, model: string) {
+    this.#endpoint = endpoint.replace(/\/$/, "");
+    this.#model = model;
+  }
+
+  async rank(need: string, candidates: MatchCandidate[]): Promise<Match[]> {
+    const repos = candidates
+      .map((c) => `- ${c.repo}: ${c.capabilities.map((cap) => cap.text).join("; ")}`)
+      .join("\n");
+    const prompt =
+      `NEED: ${need}\n\nREPOS (nome: capabilities):\n${repos}\n\n` +
+      `Ranqueie os repos pelo quão bem as capabilities atendem o NEED. Responda APENAS JSON: ` +
+      `{"ranked":[{"repo":"<nome EXATO da lista>","score":<0-100>,"why":"<curto>"}]} — melhor primeiro, TODOS os repos.`;
+    const res = await fetch(`${this.#endpoint}/api/generate`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        model: this.#model,
+        prompt,
+        stream: false,
+        format: "json", // saída JSON estruturada (Ollama)
+        options: { temperature: 0 }, // determinístico-o-possível
+      }),
+    });
+    if (!res.ok)
+      throw new Error(
+        `Ollama ${res.status} em ${this.#endpoint} — o modelo "${this.#model}" foi puxado? (ollama pull ${this.#model})`
+      );
+    const data = (await res.json()) as { response: string };
+    const valid = new Set(candidates.map((c) => c.repo));
+    let ranked: Match[] = [];
+    try {
+      const parsed = JSON.parse(data.response) as {
+        ranked?: { repo: string; score?: number; why?: string }[];
+      };
+      ranked = (parsed.ranked ?? [])
+        .filter((r) => valid.has(r.repo))
+        .map((r) => ({
+          repo: r.repo,
+          score: typeof r.score === "number" ? r.score : 0,
+          why: r.why ?? "",
+        }));
+    } catch {
+      ranked = []; // modelo pequeno às vezes devolve JSON inválido → conta como "não ranqueou" (parte da viabilidade)
+    }
+    for (const c of candidates)
+      if (!ranked.some((r) => r.repo === c.repo))
+        ranked.push({ repo: c.repo, score: 0, why: "(não ranqueado pelo modelo)" });
+    return ranked.sort((a, b) => b.score - a.score);
+  }
+}

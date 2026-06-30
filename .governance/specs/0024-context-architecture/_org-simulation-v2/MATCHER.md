@@ -53,17 +53,23 @@ Sem `matcher.yml`, o matcher é **léxico**, zero infra. `node _lib/build.ts` lo
 > **Docker (opcional, paridade):** o Ollama pode rodar em container **no HOST** (`acme-governance`, não num work-repo —
 > o matcher é host-level), mas exige o nvidia-container-toolkit pro GPU passthrough. **Nativo é mais simples.**
 
-## Escada de viabilidade (RTX 3060 12GB) — _a preencher rodando_
+## Escada de viabilidade (RTX 3060 12GB) — medido via `node _lib/routing-bench.ts`
 
-| nível         | modelo             | reproduz o dogfood? | latência | VRAM | nota                          |
-| ------------- | ------------------ | ------------------- | -------- | ---- | ----------------------------- |
-| **embedding** | `nomic-embed-text` | ⏳                  | —        | —    | tier 1 (a ferramenta do rank) |
-| **simples**   | `qwen3:1.7b`       | ⏳                  | —        | —    | vê o piso                     |
-| **médio**     | `qwen3:4b`         | ⏳                  | —        | —    | sweet spot provável           |
-| **alto**      | `gemma3:12b`       | ⏳                  | —        | —    | justo mas roda                |
+| matcher                     | reproduz o dogfood | latência\* | nota                                       |
+| --------------------------- | ------------------ | ---------- | ------------------------------------------ |
+| **`lexical`** (tier 0)      | ✅ 4/4             | **0.0s**   | zero infra, determinístico — **o default** |
+| **`nomic-embed-text`** (t1) | ✅ 4/4             | **0.6s**   | semântico, local — **o sweet spot**        |
+| `qwen3:1.7b` (t2 simples)   | ✅ 4/4             | 42s        | o pequeno surpreende; lento                |
+| `qwen3:4b` (t2 médio)       | ⚠️ 3/4 (errou e2)  | 113s       | **maior ≠ melhor** + o mais lento          |
+| `gemma3:12b` (t2 alto)      | ✅ 4/4             | 86s        | acerta, mas caro pra a tarefa              |
 
-Critério: **reproduz as escolhas humanas** do dogfood (e1→DS · e2→support · contratos via provides) **e** onde a
-semântica pega sinônimo/conjugação que o léxico erra.
+\* latência da rodada completa (3 explore-points); inclui **cold-start** (carregar o modelo na VRAM). O `embed` já
+aparece **warm** (0.6s) — a 1ª chamada fria foi ~38s.
+
+**Conclusão (medida):** pra a tarefa estreita de **ranquear**, o **léxico e o embed (`nomic`) ganham** — exatos e
+baratíssimos. O **generativo é mais lento e _não_ mais exato** aqui (o `qwen3:4b` até **regrediu** pra 3/4). Confirma
+a research: **embeddings é o workhorse**; o generativo (tier 2) só compensa quando o **"porquê" em linguagem natural**
+importa, não pro ranking puro. Critério: reproduzir e1→DS · e2→support · contratos via provides.
 
 ## Determinismo
 

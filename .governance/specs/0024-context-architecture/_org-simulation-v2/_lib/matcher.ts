@@ -1,13 +1,13 @@
 // matcher.ts — SELECTOR do matcher do roteamento, no NÍVEL DO HOST (≠ backend.ts, que é por-repo).
-// Lê acme-governance/.governance/matcher.yml. Ausente / kind:lexical → LexicalMatcher (zero infra, o default solo).
-// kind:ollama-embed → OllamaEmbedMatcher (LLM LOCAL, soberania de dados). É o espectro solo→enterprise. Ver MATCHER.md.
+// Lê acme-governance/matcher.yml (RAIZ do host). Ausente / kind:lexical → LexicalMatcher (zero infra, o default solo).
+// kind:ollama-embed|ollama-generate → adapter Ollama LOCAL (soberania de dados). É o espectro solo→enterprise. Ver MATCHER.md.
 import { exists, readYaml } from "./adapters/file/io.ts";
 import { LexicalMatcher } from "./domain/routing.ts";
 import type { Matcher } from "./domain/routing.ts";
-import { OllamaEmbedMatcher } from "./adapters/llm/OllamaMatcher.ts";
+import { OllamaEmbedMatcher, OllamaGenerateMatcher } from "./adapters/llm/OllamaMatcher.ts";
 
 interface MatcherConfig {
-  kind?: "lexical" | "ollama-embed";
+  kind?: "lexical" | "ollama-embed" | "ollama-generate";
   endpoint?: string;
   model?: string;
 }
@@ -22,6 +22,13 @@ export function loadMatcher(): { matcher: Matcher; label: string } {
     return {
       matcher: new OllamaEmbedMatcher(endpoint, model),
       label: `ollama-embed (${model}) @ ${endpoint}`,
+    };
+  }
+  if (cfg.kind === "ollama-generate") {
+    const model = cfg.model ?? "qwen3:4b";
+    return {
+      matcher: new OllamaGenerateMatcher(endpoint, model),
+      label: `ollama-generate (${model}) @ ${endpoint}`,
     };
   }
   return { matcher: new LexicalMatcher(), label: "lexical (zero infra)" };
