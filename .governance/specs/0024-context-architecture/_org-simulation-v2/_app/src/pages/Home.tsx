@@ -1,16 +1,18 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { api, type Intent, type Proposal } from "../api.ts";
+import { api, type Register, type Intent, type Proposal } from "../api.ts";
 
-// Início: a visão geral da org — as iniciativas (intents) + o intake (proposals), lidas dos arquivos .governance/ reais.
+// Início: a visão geral da org — candidatas em triagem · iniciativas ativas · intake (proposals). Tudo dos arquivos reais.
 export function Home() {
+  const [registers, setRegisters] = useState<Register[] | null>(null);
   const [intents, setIntents] = useState<Intent[] | null>(null);
   const [proposals, setProposals] = useState<Proposal[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    Promise.all([api.intents(), api.proposals()])
-      .then(([i, p]) => {
+    Promise.all([api.registers(), api.intents(), api.proposals()])
+      .then(([r, i, p]) => {
+        setRegisters(r);
         setIntents(i);
         setProposals(p);
       })
@@ -23,22 +25,49 @@ export function Home() {
         Sem conexão com o backend ({error}). Rode <code>npm run dev</code> em <code>_app/</code>.
       </p>
     );
-  if (!intents || !proposals) return <p className="muted">carregando…</p>;
+  if (!registers || !intents || !proposals) return <p className="muted">carregando…</p>;
 
   return (
     <>
       <section className="block">
         <div className="block-head">
           <h2>
-            Iniciativas <small>intents · o objetivo durável</small>{" "}
-            <span className="count">{intents.length}</span>
+            Candidatas <small>em triagem · viram intent quando ativadas</small>{" "}
+            <span className="count">{registers.length}</span>
           </h2>
-          <Link className="btn" to="/intent/novo">
-            + intent
+          <Link className="btn primary" to="/register/novo">
+            + iniciativa
           </Link>
         </div>
         <div className="grid">
-          {intents.length === 0 && <p className="muted">(nenhuma intent ainda)</p>}
+          {registers.length === 0 && (
+            <p className="muted">(nenhuma candidata — cadastre uma iniciativa)</p>
+          )}
+          {registers.map((r) => (
+            <Link className="card card-link" key={r.id} to={`/triagem/${r.id}`}>
+              <div className="card-head">
+                <strong>{r.title}</strong>
+                <span className={`badge st-${r.status}`}>{r.status}</span>
+              </div>
+              <div className="meta">
+                <code>{r.id}</code> · dona {r.owner ?? "—"}
+              </div>
+              <div className="chips">
+                <span className="chip">{(r.openQuestions ?? []).length} dúvidas</span>
+                <span className="chip">→ triagem</span>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      <section className="block">
+        <h2>
+          Iniciativas ativas <small>intents · ativadas pelo gate</small>{" "}
+          <span className="count">{intents.length}</span>
+        </h2>
+        <div className="grid">
+          {intents.length === 0 && <p className="muted">(nenhuma intent ativada ainda)</p>}
           {intents.map((i) => (
             <Link className="card card-link" key={i.id} to={`/intent/${i.id}`}>
               <div className="card-head">

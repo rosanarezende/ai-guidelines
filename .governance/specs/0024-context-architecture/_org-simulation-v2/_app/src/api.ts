@@ -1,9 +1,16 @@
 // api.ts — acesso ao backend (/api → server.ts). O MODELO é o da _lib (FONTE ÚNICA); aqui só os helpers de fetch.
-import type { Intent, Proposal, Manifest } from "../../_lib/domain/model.ts";
+import type {
+  Intent,
+  Register,
+  Triage,
+  Gate,
+  Proposal,
+  Manifest,
+} from "../../_lib/domain/model.ts";
 import type { ManifestGraph } from "../../_lib/domain/derive.ts";
 import type { RoutingSuggestion, TagGraph } from "../../_lib/domain/routing.ts";
 
-export type { Intent, Proposal, Manifest };
+export type { Intent, Register, Triage, Gate, Proposal, Manifest };
 
 /** o grafo da ORG, derivado no backend (advisory): conhecimento + roteamento + repo×tag. */
 export interface OrgGraph {
@@ -39,6 +46,19 @@ export const api = {
   proposal: (id: string) => json<Proposal>(`/api/proposals/${enc(id)}`),
   createProposal: (p: Proposal) => json<Proposal>("/api/proposals", post(p)),
   updateProposal: (id: string, p: Proposal) => json<Proposal>(`/api/proposals/${enc(id)}`, put(p)),
+
+  // candidata (pré-ativação)
+  registers: () => json<Register[]>("/api/registers"),
+  register: (id: string) => json<Register>(`/api/registers/${enc(id)}`),
+  createRegister: (r: Register) => json<Register>("/api/registers", post(r)),
+  updateRegister: (id: string, r: Register) => json<Register>(`/api/registers/${enc(id)}`, put(r)),
+  triage: (id: string) => json<Triage>(`/api/registers/${enc(id)}/triage`),
+  saveTriage: (id: string, t: Triage) => json<Triage>(`/api/registers/${enc(id)}/triage`, put(t)),
+  gate: (id: string) => json<Gate | null>(`/api/registers/${enc(id)}/gate`),
+  registerRouting: (id: string) => json<RoutingSuggestion[]>(`/api/registers/${enc(id)}/routing`),
+  promote: (id: string, g: Gate) => json<Intent>(`/api/registers/${enc(id)}/promote`, post(g)),
+  discard: (id: string, g: Gate) =>
+    json<{ ok: boolean }>(`/api/registers/${enc(id)}/discard`, post(g)),
 
   repos: () => json<string[]>("/api/repos"),
   graph: () => json<OrgGraph>("/api/graph"),

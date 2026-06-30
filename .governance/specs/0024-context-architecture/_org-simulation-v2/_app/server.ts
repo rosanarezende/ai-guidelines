@@ -6,7 +6,7 @@ import http from "node:http";
 import { FileHostRepository } from "../_lib/adapters/file/FileHostRepository.ts";
 import { deriveManifestGraph } from "../_lib/domain/derive.ts";
 import { deriveRouting, deriveTagGraph, LexicalMatcher } from "../_lib/domain/routing.ts";
-import type { Intent, Proposal } from "../_lib/domain/model.ts";
+import type { Intent, Register, Triage, Gate, Proposal } from "../_lib/domain/model.ts";
 
 const PORT = 5180;
 const host = new FileHostRepository();
@@ -54,6 +54,18 @@ async function orgGraph() {
   };
 }
 
+// roteamento p/ a TRIAGEM: dado as dúvidas de uma candidata, sugere repos (advisory) — monta um pseudo-intent.
+async function routeRegister(reg: Register) {
+  const manifests = await host.listManifests();
+  const pseudo: Intent = {
+    id: reg.id,
+    title: reg.title,
+    explores: (reg.openQuestions ?? []).map((q) => ({ id: q.id, title: q.question })),
+    contracts: [],
+  };
+  return deriveRouting(pseudo, manifests, new LexicalMatcher());
+}
+
 const server = http.createServer(async (req, res) => {
   try {
     const url = new URL(req.url ?? "/", `http://localhost:${PORT}`);
@@ -81,6 +93,63 @@ const server = http.createServer(async (req, res) => {
         await host.saveIntent(merged);
         return send(res, 200, merged);
       }
+    }
+
+    // ── candidata: register / triage / gate / promote / discard (pré-ativação) ──
+    if (path === "/registers" && method === "GET")
+      return send(res, 200, await host.listRegisters());
+    if (path === "/registers" && method === "POST") {
+      const b = (await readBody(req)) as Register;
+      await host.saveRegister(b);
+      return send(res, 201, b);
+    }
+    const mReg = path.match(/^\/registers\/([^/]+)$/);
+    if (mReg) {
+      const id = decodeURIComponent(mReg[1]);
+      if (method === "GET") {
+        const r = await host.getRegister(id);
+        return r ? send(res, 200, r) : send(res, 404, { error: `register "${id}" não encontrado` });
+      }
+      if (method === "PUT") {
+        const b = (await readBody(req)) as Register;
+        const merged = { ...b, id };
+        await host.saveRegister(merged);
+        return send(res, 200, merged);
+      }
+    }
+    const mTriage = path.match(/^\/registers\/([^/]+)\/triage$/);
+    if (mTriage) {
+      const id = decodeURIComponent(mTriage[1]);
+      if (method === "GET") return send(res, 200, (await host.getTriage(id)) ?? { items: [] });
+      if (method === "PUT") {
+        const b = (await readBody(req)) as Triage;
+        await host.saveTriage(id, b);
+        return send(res, 200, b);
+      }
+    }
+    const mGate = path.match(/^\/registers\/([^/]+)\/gate$/);
+    if (mGate && method === "GET") {
+      return send(res, 200, (await host.getGate(decodeURIComponent(mGate[1]))) ?? null);
+    }
+    const mRoute = path.match(/^\/registers\/([^/]+)\/routing$/);
+    if (mRoute && method === "GET") {
+      const r = await host.getRegister(decodeURIComponent(mRoute[1]));
+      return r
+        ? send(res, 200, await routeRegister(r))
+        : send(res, 404, { error: "register não encontrado" });
+    }
+    const mPromote = path.match(/^\/registers\/([^/]+)\/promote$/);
+    if (mPromote && method === "POST") {
+      const intent = await host.promote(
+        decodeURIComponent(mPromote[1]),
+        (await readBody(req)) as Gate
+      );
+      return send(res, 200, intent);
+    }
+    const mDiscard = path.match(/^\/registers\/([^/]+)\/discard$/);
+    if (mDiscard && method === "POST") {
+      await host.discard(decodeURIComponent(mDiscard[1]), (await readBody(req)) as Gate);
+      return send(res, 200, { ok: true });
     }
 
     // ── proposals ──

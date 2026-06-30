@@ -458,3 +458,28 @@ button.btn {
   padding: 0.55rem 0.8rem;
   margin: 0.4rem 0 1rem;
 }
+
+/* ── ciclo da candidata + gate ── */
+.st-registrada {
+  background: #8883;
+}
+.st-triagem {
+  background: #b4690e22;
+  color: #c9770f;
+}
+.st-investigacao {
+  background: #8b5cf622;
+  color: #8b5cf6;
+}
+.btn.danger {
+  color: #c0392b;
+  background: #c0392b14;
+  border-color: #c0392b55;
+}
+.btn.danger:hover {
+  background: #c0392b22;
+}
+.gate-actions {
+  display: flex;
+  gap: 0.6rem;
+}
