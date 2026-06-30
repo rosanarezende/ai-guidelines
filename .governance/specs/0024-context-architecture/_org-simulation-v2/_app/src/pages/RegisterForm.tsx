@@ -30,15 +30,16 @@ const Nudge = ({ show, children }: { show: boolean; children: ReactNode }): Reac
 
 type Doubt = { id: string; question: string };
 
-// Tela de REGISTRO (negócio): cadastra a CANDIDATA à intent. Só enquadramento + dúvidas em linguagem de negócio.
-// Os explore-points/contratos NÃO entram aqui — a engenharia decide na TRIAGEM. Nasce status `registrada`.
+// Tela de REGISTRO (negócio): cadastra a CANDIDATA à intent. Título + DESCRIÇÃO são o primário; enquadramento é o 2º
+// tópico. Os explore-points/contratos NÃO entram aqui (a eng decide na triagem). O id é GERADO no submit (não editável).
 export function RegisterForm() {
   const { id: editId } = useParams();
   const editing = Boolean(editId);
   const nav = useNavigate();
 
-  const [id, setId] = useState("");
+  const [id, setId] = useState(""); // só usado na EDIÇÃO (carregado); na criação o id é gerado no submit
   const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
   const [registeredBy, setRegisteredBy] = useState("");
   const [owner, setOwner] = useState("");
   const [stakeholders, setStakeholders] = useState<Stakeholder[]>([]);
@@ -61,6 +62,7 @@ export function RegisterForm() {
       .then((r) => {
         setId(r.id);
         setTitle(r.title);
+        setDescription(r.description ?? "");
         setStatus(r.status);
         setRegisteredBy(r.registeredBy ?? "");
         setOwner(r.owner ?? "");
@@ -77,7 +79,8 @@ export function RegisterForm() {
       .catch((e: unknown) => setError(String(e instanceof Error ? e.message : e)));
   }, [editId]);
 
-  const effectiveId = editing ? id : id || (title ? `${slugify(title)}_${rand16()}` : "");
+  const slug = slugify(title);
+  const idPreview = editing ? id : slug ? `${slug}_…` : "…";
   const problemEmpty = !pBusiness.trim() && !pCustomer.trim();
 
   const setStk = (i: number, patch: Partial<Stakeholder>): void =>
@@ -91,7 +94,9 @@ export function RegisterForm() {
     ev.preventDefault();
     setError(null);
     if (!title.trim()) return setError("título é obrigatório");
-    if (!effectiveId.trim()) return setError("id é obrigatório");
+    // o id é GERADO aqui (uma vez), não a cada tecla; o número não é editável à mão.
+    const finalId = editing ? id : `${slug}_${rand16()}`;
+    if (!editing && !slug) return setError("o título precisa ter letras ou números p/ gerar o id");
     const problem =
       pBusiness.trim() || pCustomer.trim()
         ? { business: pBusiness.trim() || undefined, customer: pCustomer.trim() || undefined }
@@ -101,8 +106,9 @@ export function RegisterForm() {
         ? { driver: bcDriver.trim() || undefined, metric: bcMetric.trim() || undefined }
         : undefined;
     const reg: Register = {
-      id: effectiveId.trim(),
+      id: finalId,
       title: title.trim(),
+      description: description.trim() || undefined,
       status,
       registeredBy: registeredBy.trim() || undefined,
       owner: owner.trim() || undefined,
@@ -135,8 +141,8 @@ export function RegisterForm() {
         {editing ? `Editar registro ${title || editId}` : "Nova iniciativa (registro de negócio)"}
       </h2>
       <p className="field-hint">
-        Aqui é só o <b>enquadramento de negócio</b> + suas <b>dúvidas</b>. A engenharia faz a
-        triagem (explore-points, matcher, contratos) depois.
+        Aqui é o <b>quê</b> da iniciativa (título + descrição) e seu enquadramento de negócio. A
+        engenharia faz a triagem (explore-points, matcher, contratos) depois.
       </p>
 
       <label className="field">
@@ -148,9 +154,21 @@ export function RegisterForm() {
         />
       </label>
       <label className="field">
-        <span>id {editing ? "" : "(slug do título + nº random; editável)"}</span>
-        <input value={effectiveId} onChange={(e) => setId(e.target.value)} disabled={editing} />
+        <Lbl rec>descrição</Lbl>
+        <textarea
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          rows={3}
+          placeholder="ex.: novo fluxo de login com ajuda ao usuário, reaproveitando componentes entre os produtos"
+        />
+        <Nudge show={!description.trim()}>
+          título + descrição são os parâmetros mais importantes.
+        </Nudge>
       </label>
+      <p className="field-hint">
+        id: <code>{idPreview}</code>{" "}
+        {editing ? "" : "— gerado automaticamente ao registrar (não editável)"}
+      </p>
 
       <h3>pessoas</h3>
       <div className="field-row">
@@ -249,12 +267,12 @@ export function RegisterForm() {
         </label>
       </div>
       <label className="field">
-        <span>detalhes</span>
+        <span>detalhes (contexto adicional)</span>
         <textarea
           value={details}
           onChange={(e) => setDetails(e.target.value)}
           rows={3}
-          placeholder="contexto, premissas…"
+          placeholder="premissas, restrições, links de contexto…"
         />
       </label>
       <div className="field">
@@ -312,7 +330,6 @@ export function RegisterForm() {
             onChange={(e) => setDoubt(i, e.target.value)}
             placeholder="ex.: dá pra reaproveitar o formulário entre os produtos?"
           />
-          <span className="exp-id">{d.id}</span>
           <button
             type="button"
             className="btn-icon"

@@ -43,6 +43,7 @@ export function IntentForm() {
 
   const [id, setId] = useState("");
   const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
   const [status, setStatus] = useState<NonNullable<Intent["status"]>>("draft");
   const [registeredBy, setRegisteredBy] = useState("");
   const [owner, setOwner] = useState("");
@@ -66,6 +67,7 @@ export function IntentForm() {
       .then((i) => {
         setId(i.id);
         setTitle(i.title);
+        setDescription(i.description ?? "");
         setStatus(i.status ?? "draft");
         setRegisteredBy(i.registeredBy ?? "");
         setOwner(i.owner ?? "");
@@ -110,6 +112,7 @@ export function IntentForm() {
     const intent: Intent = {
       id: effectiveId.trim(),
       title: title.trim(),
+      description: description.trim() || undefined,
       status,
       registeredBy: registeredBy.trim() || undefined,
       owner: owner.trim() || undefined,
@@ -150,6 +153,10 @@ export function IntentForm() {
           onChange={(e) => setTitle(e.target.value)}
           placeholder="ex.: Sistema de login (multi-repo)"
         />
+      </label>
+      <label className="field">
+        <Lbl rec>descrição</Lbl>
+        <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} />
       </label>
       <div className="field-row">
         <label className="field">

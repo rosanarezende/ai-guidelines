@@ -73,6 +73,8 @@ export function IntentDetail() {
         </div>
       </div>
 
+      {intent.description && <p className="lead">{intent.description}</p>}
+
       {(p?.business || p?.customer || bc?.driver || bc?.metric || intent.details) && (
         <>
           <h3>enquadramento</h3>
