@@ -13,7 +13,7 @@ const top = (need: string): string | undefined =>
   suggestions.find((s) => s.need === need || s.need === `contrato: ${need}`)?.ranked[0]?.repo;
 
 // o ESPERADO = onde o humano de fato pôs cada coisa na sim (form-validation/proactive-support/form-component)
-const subjectOf = (id: string): string => intent.explores.find((e) => e.id === id)?.subject ?? "";
+const subjectOf = (id: string): string => intent.explores.find((e) => e.id === id)?.title ?? "";
 const expect = [
   { label: "e1 (form validado)", need: subjectOf("e1"), want: "acme-design-system" },
   { label: "e2 (suporte proativo)", need: subjectOf("e2"), want: "acme-mfe-support" },

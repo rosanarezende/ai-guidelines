@@ -1,46 +1,57 @@
 # intent — plano do objetivo durável (meta-repo / governança global). Explicações: no tracker work-graph-model.
+# Forma de autoria deliberada em research/2026-06-30-intent-authoring-shape-deliberation.md.
+# A intent carrega o ENQUADRAMENTO (problema/negócio/refs/pessoas); a riqueza pesada (hipótese/métricas) é do
+# work `experiment`, não daqui (intent ≠ work). A intent NÃO delibera (q/r/d é do work/exploration).
 node: intent
 sealed: false # intent é viva (não sela)
 
-created-at: 2026-NN-NN
-updated-at: 2026-NN-NN # última mutação (status/decisões/works); só nós MUTÁVEIS — append-only não atualiza
-closed-at: # só quando terminal (done | dropped); vazio em active/paused
-
-id: intent-NNN
+id: <slug>_<rand> # slug do título + _num RANDOM (~16-bit, chave estável que sobrevive a rename)
 title: <título curto>
 
-# active=em andamento · paused=pausada por repriorização (retomável) · done=objetivo atingido · dropped=descartada por decisão (terminal)
-status: # active | paused | done | dropped
-owner: # quem TOCA a iniciativa (a dona) — papel ou pessoa
+# draft=rascunho (nasce aqui) · active=em andamento · paused=repriorizada (retomável) · done=atingida · dropped=descartada
+status: draft # draft | active | paused | done | dropped
 
-objective:
-  goal: # a mudança / resultado durável que se quer no mundo
-  success-signal: # o sinal de que o objetivo foi atingido
-  out-of-scope: # o que esta intent NÃO persegue
+created-at: 2026-NN-NN
+updated-at: 2026-NN-NN # última mutação; só nós MUTÁVEIS — append-only não atualiza
+closed-at: # só quando terminal (done | dropped); vazio em active/paused
 
-references: # type: modeling | spec | design | benchmark | dashboard | alignment | other
+# ===== pessoas (3 papéis distintos) =====
+registered-by: # quem CADASTROU a intent (autoria/registro)
+owner: # a DONA accountable — responde pela iniciativa (papel ou pessoa)
+stakeholders: # cargos/pessoas relacionadas (o "alinhamento com stakeholders")
+  - { role: <papel>, who: <pessoa/time> }
+
+# ===== enquadramento =====
+problem:
+  business: # o problema de NEGÓCIO que a iniciativa endereça
+  customer: # o problema do CLIENTE (a dor percebida)
+business-connection:
+  driver: # o driver estratégico da empresa
+  metric: # o indicador/métrica de negócio impactado
+
+details: | # opcional: prosa livre — síntese, contexto, o porquê do status/dropped
+  <prosa livre multi-linha, se necessário>
+
+references: # links/anexos — type: modeling | spec | design | benchmark | dashboard | alignment | other
   - type: modeling
     label: "<doc>"
     url: "<link>"
     note: "<nuance que sobrevive ao link>"
 
-target-repos: # repos tocados (≠ breaks-into)
-  - <repo>
+# ===== investigação (abre explorations) =====
+# o APRENDIZADO da intent: cada ponto → 1 exploration o responde (a exploration DECLARA `answers: intent#<id>`).
+# Aqui fica só o INPUT (id + title + details). Quem responde / verdict / resolvido = DERIVADO → projetado no BANCO.
+explores:
+  - id: <rand> # id RANDOM (chave estável)
+    title: "<o que investigar — curto>"
+    details: "<o detalhe: o que a exploration precisa responder>"
 
-# o APRENDIZADO da intent: cada incerteza → 1 exploration a responde (a exploration DECLARA `answers: intent#qN`).
-# Aqui fica só o INPUT (id + question). Quem responde / status / verdict / resolvido = DERIVADO → projetado no BANCO, não no arquivo.
-open-questions:
-  - id: q1
-    question: "<incerteza — texto IDÊNTICO ao `question` do exploration-brief>"
-
-# contratos que a feature coordena — UMA lista; o status known/pending é DERIVADO (sem baldes):
-#   sem `awaits` = known no t0 · com `awaits: qN` = known quando a question resolve (→ destrava as deliveries).
+# ===== contratos que a feature coordena =====
+# NÃO se digita à mão: depois do cadastro, o MATCHER (léxico/IA) sugere conexões sobre os explore-points/problema;
+# o humano CONFIRMA o que anexar (advisory + gate humano). known/pending = DERIVADO (sem awaits=known no t0).
 contracts:
-  - { name: <contrato-t0> } # known no t0 → as deliveries já trabalham contra (via coordinates-with)
-  - { name: <contrato>, awaits: q1 } # pending até q1 resolver; aí known (DERIVADO)
+  - { name: <contrato>, awaits: <explore-id> } # pending até o explore resolver; aí known (DERIVADO)
+
 
 # breaks-into NÃO mora no arquivo — é VISTA DERIVADA (os works por status); o BANCO projeta o plano + caminho crítico.
-
-# opcional: texto livre — síntese do aprendizado da intent como um todo, o porquê do status/dropped, etc.
-details: |
-  <prosa livre multi-linha, se necessário>
+# objective (goal/success-signal/out-of-scope) e target-repos podem coexistir no arquivo (preservados na escrita).

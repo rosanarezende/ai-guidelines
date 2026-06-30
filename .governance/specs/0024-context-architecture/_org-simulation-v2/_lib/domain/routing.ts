@@ -117,9 +117,9 @@ export async function deriveRouting(
   const out: RoutingSuggestion[] = [];
   for (const ep of intent.explores)
     out.push({
-      need: ep.subject,
+      need: ep.title,
       kind: "explore-point",
-      ranked: await matcher.rank(ep.subject, candidates),
+      ranked: await matcher.rank(`${ep.title} ${ep.details ?? ""}`.trim(), candidates),
     });
   for (const c of intent.contracts) {
     const provider = providerOf.get(c.name);

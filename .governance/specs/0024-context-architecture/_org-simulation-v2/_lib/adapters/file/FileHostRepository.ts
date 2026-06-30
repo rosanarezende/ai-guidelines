@@ -15,11 +15,17 @@ const intentDir = (id: string): string => `${GOV}/intents/${id}`;
 interface IntentFile {
   id: string;
   title: string;
-  owner?: string;
   status?: Intent["status"];
+  "registered-by"?: string;
+  owner?: string;
+  stakeholders?: { role: string; who: string }[];
+  problem?: { business?: string; customer?: string };
+  "business-connection"?: { driver?: string; metric?: string };
+  details?: string;
+  references?: { type?: string; label: string; url?: string; note?: string }[];
   "created-at"?: string;
   "updated-at"?: string;
-  explores?: { id: string; subject: string }[];
+  explores?: { id: string; title?: string; subject?: string; details?: string }[]; // subject = back-compat
   contracts?: { name: string; awaits?: string }[];
 }
 interface ProposalFile {
@@ -65,9 +71,19 @@ interface ManifestFile {
 const toIntent = (f: IntentFile): Intent => ({
   id: f.id,
   title: f.title,
-  owner: f.owner,
   status: f.status,
-  explores: f.explores ?? [],
+  registeredBy: f["registered-by"],
+  owner: f.owner,
+  stakeholders: f.stakeholders,
+  problem: f.problem,
+  businessConnection: f["business-connection"],
+  details: f.details,
+  references: f.references,
+  explores: (f.explores ?? []).map((e) => ({
+    id: e.id,
+    title: e.title ?? e.subject ?? "", // back-compat: arquivos antigos usavam `subject`
+    details: e.details,
+  })),
   contracts: f.contracts ?? [],
   createdAt: f["created-at"],
   updatedAt: f["updated-at"],
@@ -142,14 +158,22 @@ export class FileHostRepository implements HostRepository {
 
   async saveIntent(intent: Intent): Promise<void> {
     const rel = `${intentDir(intent.id)}/intent.yml`;
-    // preserva o CONTEÚDO do form (objective/references/details) e sobrepõe os campos do domínio
-    const cur = exists(rel) ? readYaml<Record<string, unknown>>(rel) : { node: "intent" };
+    // preserva o que o domínio não modela (objective/target-repos/sealed/closed-at) e sobrepõe os campos do domínio
+    const cur = exists(rel)
+      ? readYaml<Record<string, unknown>>(rel)
+      : { node: "intent", sealed: false };
     writeYaml(rel, {
       ...cur,
       id: intent.id,
       title: intent.title,
-      owner: intent.owner,
       status: intent.status,
+      "registered-by": intent.registeredBy,
+      owner: intent.owner,
+      stakeholders: intent.stakeholders,
+      problem: intent.problem,
+      "business-connection": intent.businessConnection,
+      details: intent.details,
+      references: intent.references,
       "created-at": intent.createdAt,
       "updated-at": intent.updatedAt,
       explores: intent.explores,

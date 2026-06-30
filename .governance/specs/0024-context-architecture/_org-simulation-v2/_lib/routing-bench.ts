@@ -11,7 +11,7 @@ const intent = await host.getIntent("login_1");
 if (!intent) throw new Error("intent login_1 não encontrada");
 
 const ENDPOINT = "http://localhost:11434";
-const subjectOf = (id: string): string => intent.explores.find((e) => e.id === id)?.subject ?? "";
+const subjectOf = (id: string): string => intent.explores.find((e) => e.id === id)?.title ?? "";
 const want: [string, string][] = [
   [subjectOf("e1"), "acme-design-system"],
   [subjectOf("e2"), "acme-mfe-support"],

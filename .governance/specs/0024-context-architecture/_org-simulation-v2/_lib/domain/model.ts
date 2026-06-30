@@ -103,22 +103,49 @@ export interface Decision {
 // ───────────────────────── INTENT (a camada acima dos trabalhos) ─────────────────────────
 
 export interface ExplorePoint {
-  id: string;
-  subject: string; // só INPUT — o que a intent precisa EXPLORAR (uma exploration responde com verdict). NÃO é q/r/d.
+  id: string; // chave estável (~16-bit random)
+  title: string; // o que investigar (curto) — abre uma exploration. (era `subject`; back-compat na leitura.)
+  details?: string; // o detalhe: o que a exploration precisa responder. Alimenta o matcher (need mais rico).
 }
 export interface Contract {
   name: string;
   awaits?: string; // o explore-point que precisa resolver p/ o contrato ficar known (known/pending = DERIVADO)
 }
 
-/** A INTENT — o objetivo durável; breaks-into N trabalhos; retroalimenta via answers. Vive na governança. */
+/** Uma referência/link da intent (anexo "leve" — na prática quase tudo é link). */
+export interface IntentReference {
+  type?: string; // modeling | spec | design | benchmark | dashboard | alignment | other
+  label: string;
+  url?: string;
+  note?: string; // a nuance que sobrevive ao link
+}
+/** Uma pessoa/cargo relacionado à iniciativa (o "alinhamento com stakeholders"). */
+export interface Stakeholder {
+  role: string; // o papel/cargo
+  who: string; // a pessoa/time
+}
+
+/**
+ * A INTENT — o objetivo durável; breaks-into N trabalhos; retroalimenta via answers. Vive na governança.
+ * Carrega o ENQUADRAMENTO (problema/negócio/refs/pessoas) — a riqueza pesada (hipótese/métricas) é do work
+ * `experiment`, não daqui (intent ≠ work). Shape deliberado em research/2026-06-30-intent-authoring-shape-deliberation.md.
+ */
 export interface Intent {
   id: string;
   title: string;
-  owner?: string; // quem TOCA (a dona)
-  status?: "active" | "paused" | "done" | "dropped";
-  explores: ExplorePoint[]; // os pontos que a intent dispara como explorations (a ferramenta); "question" é só do work/exploration
-  contracts: Contract[];
+  status?: "draft" | "active" | "paused" | "done" | "dropped"; // nasce draft → "ativar" → active
+  // ── pessoas ──
+  registeredBy?: string; // quem CADASTROU (autoria/registro)
+  owner?: string; // a DONA accountable (responde pela iniciativa)
+  stakeholders?: Stakeholder[]; // cargos/pessoas relacionadas
+  // ── enquadramento ──
+  problem?: { business?: string; customer?: string };
+  businessConnection?: { driver?: string; metric?: string };
+  details?: string;
+  references?: IntentReference[]; // links/anexos
+  // ── investigação / coordenação ──
+  explores: ExplorePoint[]; // os pontos que a intent dispara como explorations (a ferramenta)
+  contracts: Contract[]; // sugeridos pelo matcher (não digitados); o humano confirma o que anexar
   createdAt?: string;
   updatedAt?: string;
 }
