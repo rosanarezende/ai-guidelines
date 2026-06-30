@@ -8,6 +8,9 @@ import type {
   Research,
   Decision,
   Intent,
+  Register,
+  Triage,
+  Gate,
   Manifest,
 } from "./domain/model.ts";
 // Decision: usado pela deliberação de WORK (Repository); a intent não delibera (HostRepository).
@@ -38,12 +41,22 @@ export interface Repository {
 export interface HostRepository {
   listRepos(): Promise<string[]>;
 
-  // intents (o objetivo durável)
+  // intents ATIVADAS (o objetivo durável) — vivem em intents/ (só populada na ativação)
   listIntents(): Promise<Intent[]>;
   getIntent(id: string): Promise<Intent | null>;
   saveIntent(intent: Intent): Promise<void>;
 
-  // (a intent NÃO delibera: q/r/d é etapa de work/exploration. O gate da intent DERIVA do breakdown — sem deliberation.)
+  // CANDIDATA à intent (pré-ativação) — registers/candidates/<id>/ (register.yml · triage.yml · gate.yml)
+  listRegisters(): Promise<Register[]>;
+  getRegister(id: string): Promise<Register | null>;
+  saveRegister(reg: Register): Promise<void>; // negócio cadastra/edita o enquadramento
+  getTriage(id: string): Promise<Triage | null>;
+  saveTriage(id: string, triage: Triage): Promise<void>; // eng dispõe + valida contratos
+  getGate(id: string): Promise<Gate | null>;
+  promote(id: string, gate: Gate): Promise<Intent>; // consolida register+triage → intents/<id>/intent.yml + arquiva
+  discard(id: string, gate: Gate): Promise<void>; // arquiva a candidata (gate discarded); nada nasce em intents/
+
+  // (a intent NÃO delibera: q/r/d é etapa de work/exploration. A candidata tem um GATE de ativação, não deliberação.)
 
   // proposal (intake — captura humana; vive na governança, não percorre o fluxo)
   listProposals(): Promise<Proposal[]>;

@@ -1,0 +1,29 @@
+# triage — a TRIAGEM (face de ENGENHARIA) da candidata. Vive ao lado do register.yml.
+# A eng dispõe cada dúvida do negócio, roda o matcher e valida os contratos. Shape: D7/D8/D9 da deliberação 2026-06-30.
+node: triage
+updated-at: 2026-NN-NN
+
+# para cada dúvida (open-question) do register, a disposição da engenharia:
+items:
+  - question: <open-question-id> # ref à dúvida no register
+    disposition: exploration # exploration | answered | needs-info
+    # se exploration → o explore-point refinado (vira a exploration, DISPARADA no repo de trabalho):
+    explore-point:
+      {
+        id: <rand>,
+        title: "<o que investigar>",
+        details: "<o que a exploration precisa responder>",
+      }
+    # se answered → a resposta direta do eng (não precisa investigar):
+    # answer: "<resposta>"
+    # se needs-info → volta pro NEGÓCIO: quem responde + desde quando (o read-model mede o tempo bloqueado, D8):
+    # assignee: "@quem-de-negocio"
+    # blocked-since: 2026-NN-NN
+
+# contratos/conexões VALIDADOS depois de rodar o matcher (aceitos / corrigidos / adicionados / removidos):
+contracts:
+  - { name: <contrato>, awaits: <explore-id> }
+
+viability:
+  | # notas de viabilidade (a investigação pode mostrar que a intent é INVIÁVEL → descartar no gate)
+  <avaliação ao longo da investigação>

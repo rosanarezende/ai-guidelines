@@ -145,9 +145,60 @@ export interface Intent {
   references?: IntentReference[]; // links/anexos
   // ── investigação / coordenação ──
   explores: ExplorePoint[]; // os pontos que a intent dispara como explorations (a ferramenta)
-  contracts: Contract[]; // sugeridos pelo matcher (não digitados); o humano confirma o que anexar
+  contracts: Contract[]; // os contratos VALIDADOS na triagem (não digitados no registro)
   createdAt?: string;
   updatedAt?: string;
+}
+
+// ───────────────── CANDIDATA À INTENT (pré-ativação) — registers/ (D7/D8/D9 da deliberação 2026-06-30) ─────────────────
+// Fluxo: registrada (negócio) → triagem (eng) → investigação → ativada (vira `Intent`, movida p/ intents/).
+// Físico: acme-governance/registers/candidates/<id>/{register.yml · triage.yml · gate.yml}; archived/ guarda a jornada.
+
+export type RegisterStatus = "registrada" | "triagem" | "investigacao";
+
+/** REGISTER — a face de NEGÓCIO da candidata (register.yml): enquadramento + dúvidas em linguagem de negócio. */
+export interface Register {
+  id: string;
+  title: string;
+  status: RegisterStatus;
+  registeredBy?: string; // quem CADASTROU
+  owner?: string; // o accountable (pessoa OU papel/time)
+  stakeholders?: Stakeholder[];
+  problem?: { business?: string; customer?: string };
+  businessConnection?: { driver?: string; metric?: string };
+  details?: string;
+  references?: IntentReference[];
+  openQuestions?: { id: string; question: string }[]; // dúvidas do NEGÓCIO (a eng dispõe na triagem)
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+/** a disposição de uma dúvida na triagem: vira exploration · respondida direto · falta-info (volta pro negócio). */
+export type Disposition = "exploration" | "answered" | "needs-info";
+export interface TriageItem {
+  question: string; // ref ao openQuestions[].id da register
+  disposition?: Disposition;
+  explorePoint?: ExplorePoint; // se exploration: o explore-point refinado pela eng
+  answer?: string; // se answered: a resposta direta do eng
+  assignee?: string; // se needs-info: quem (de negócio) precisa responder
+  blockedSince?: string; // timestamp — o read-model deriva o TEMPO bloqueado (D8)
+}
+
+/** TRIAGE — a face de ENGENHARIA da candidata (triage.yml): dispositions + contratos validados + viabilidade. */
+export interface Triage {
+  items?: TriageItem[];
+  contracts?: Contract[]; // contratos/conexões VALIDADOS (pós-matcher): aceitos/corrigidos/adicionados
+  viability?: string; // notas de viabilidade (avaliadas ao longo da investigação)
+  updatedAt?: string;
+}
+
+/** GATE — a DECISÃO de ativação (gate.yml). É DECISÃO, não deliberação (a intent não delibera). */
+export interface Gate {
+  outcome: "promoted" | "discarded";
+  decidedBy?: string;
+  decidedAt?: string;
+  rationale?: string;
+  viability?: string;
 }
 
 // ───────────────────────── MANIFESTO (a camada de CONHECIMENTO — Lente 5, face externa) ─────────────────────────

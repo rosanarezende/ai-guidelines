@@ -65,6 +65,18 @@ export function listRepoDirs(): string[] {
     .sort();
 }
 
+/** move uma pasta (rename) — a ativação/arquivamento movem a candidata; a localização encoda a fase. */
+export function moveDir(fromRel: string, toRel: string): void {
+  const to = abs(toRel);
+  fs.mkdirSync(path.dirname(to), { recursive: true });
+  fs.renameSync(abs(fromRel), to);
+}
+
+/** remove uma pasta recursivamente (raro — preferimos MOVER pra archived). */
+export function removeDir(rel: string): void {
+  fs.rmSync(abs(rel), { recursive: true, force: true });
+}
+
 function ensureDir(rel: string): void {
   fs.mkdirSync(path.dirname(abs(rel)), { recursive: true });
 }

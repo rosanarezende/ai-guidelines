@@ -3,12 +3,27 @@
 // Reconcilia o LEGADO: a deliberation.yml da intent usa `decides` + `supported-by` single; o domínio usa
 // `resolves` + array → o `toDecision` mapeia os dois (read), e o write passa a gravar a forma do domínio.
 import type { HostRepository } from "../../ports.ts";
-import type { Intent, Proposal, Manifest, ContractKind } from "../../domain/model.ts";
-import { exists, readYaml, writeYaml, listNames, listRepoDirs } from "./io.ts";
+import type {
+  Intent,
+  Register,
+  RegisterStatus,
+  Triage,
+  Disposition,
+  Gate,
+  ExplorePoint,
+  Proposal,
+  Manifest,
+  ContractKind,
+} from "../../domain/model.ts";
+import { exists, readYaml, writeYaml, listNames, listRepoDirs, moveDir } from "./io.ts";
 
 const GOV = "acme-governance";
 const PROPOSALS = `${GOV}/proposals.yml`;
 const intentDir = (id: string): string => `${GOV}/intents/${id}`;
+const candidatesDir = `${GOV}/registers/candidates`;
+const archivedDir = `${GOV}/registers/archived`;
+const regDir = (id: string): string => `${candidatesDir}/${id}`;
+const today = (): string => new Date().toISOString().slice(0, 10);
 
 // ───────────────────────── shapes do ARQUIVO ─────────────────────────
 
@@ -64,6 +79,43 @@ interface ManifestFile {
   consumes?: { contract: string; awaits?: string }[];
   capabilities?: { text: string; tags?: string[] }[];
   architecture?: { stack?: string[]; patterns?: string[]; boundaries?: string[] };
+}
+
+interface RegisterFile {
+  id: string;
+  title: string;
+  status?: RegisterStatus;
+  "registered-by"?: string;
+  owner?: string;
+  stakeholders?: { role: string; who: string }[];
+  problem?: { business?: string; customer?: string };
+  "business-connection"?: { driver?: string; metric?: string };
+  details?: string;
+  references?: { type?: string; label: string; url?: string; note?: string }[];
+  "open-questions"?: { id: string; question: string }[];
+  "created-at"?: string;
+  "updated-at"?: string;
+}
+interface TriageItemFile {
+  question: string;
+  disposition?: Disposition;
+  "explore-point"?: { id: string; title: string; details?: string };
+  answer?: string;
+  assignee?: string;
+  "blocked-since"?: string;
+}
+interface TriageFile {
+  items?: TriageItemFile[];
+  contracts?: { name: string; awaits?: string }[];
+  viability?: string;
+  "updated-at"?: string;
+}
+interface GateFile {
+  outcome: Gate["outcome"];
+  "decided-by"?: string;
+  "decided-at"?: string;
+  rationale?: string;
+  viability?: string;
 }
 
 // ───────────────────────── mappers ─────────────────────────
@@ -136,6 +188,79 @@ const toManifest = (f: ManifestFile): Manifest => ({
   architecture: f.architecture,
 });
 
+const toRegister = (f: RegisterFile): Register => ({
+  id: f.id,
+  title: f.title,
+  status: f.status ?? "registrada",
+  registeredBy: f["registered-by"],
+  owner: f.owner,
+  stakeholders: f.stakeholders,
+  problem: f.problem,
+  businessConnection: f["business-connection"],
+  details: f.details,
+  references: f.references,
+  openQuestions: f["open-questions"],
+  createdAt: f["created-at"],
+  updatedAt: f["updated-at"],
+});
+const fromRegister = (r: Register): RegisterFile => ({
+  id: r.id,
+  title: r.title,
+  status: r.status,
+  "registered-by": r.registeredBy,
+  owner: r.owner,
+  stakeholders: r.stakeholders,
+  problem: r.problem,
+  "business-connection": r.businessConnection,
+  details: r.details,
+  references: r.references,
+  "open-questions": r.openQuestions,
+  "created-at": r.createdAt,
+  "updated-at": r.updatedAt,
+});
+
+const toTriage = (f: TriageFile): Triage => ({
+  items: f.items?.map((it) => ({
+    question: it.question,
+    disposition: it.disposition,
+    explorePoint: it["explore-point"],
+    answer: it.answer,
+    assignee: it.assignee,
+    blockedSince: it["blocked-since"],
+  })),
+  contracts: f.contracts,
+  viability: f.viability,
+  updatedAt: f["updated-at"],
+});
+const fromTriage = (t: Triage): TriageFile => ({
+  items: t.items?.map((it) => ({
+    question: it.question,
+    disposition: it.disposition,
+    "explore-point": it.explorePoint,
+    answer: it.answer,
+    assignee: it.assignee,
+    "blocked-since": it.blockedSince,
+  })),
+  contracts: t.contracts,
+  viability: t.viability,
+  "updated-at": t.updatedAt,
+});
+
+const toGate = (f: GateFile): Gate => ({
+  outcome: f.outcome,
+  decidedBy: f["decided-by"],
+  decidedAt: f["decided-at"],
+  rationale: f.rationale,
+  viability: f.viability,
+});
+const fromGate = (g: Gate): GateFile => ({
+  outcome: g.outcome,
+  "decided-by": g.decidedBy,
+  "decided-at": g.decidedAt,
+  rationale: g.rationale,
+  viability: g.viability,
+});
+
 // ───────────────────────── o adapter ─────────────────────────
 
 export class FileHostRepository implements HostRepository {
@@ -182,6 +307,75 @@ export class FileHostRepository implements HostRepository {
   }
 
   // (a intent NÃO delibera — sem deliberation.yml; o gate da intent deriva do breakdown.)
+
+  // ── candidata à intent (registers/candidates/<id>/) — pré-ativação ──
+
+  async listRegisters(): Promise<Register[]> {
+    return listNames(candidatesDir)
+      .filter((id) => exists(`${regDir(id)}/register.yml`))
+      .map((id) => toRegister(readYaml<RegisterFile>(`${regDir(id)}/register.yml`)));
+  }
+  async getRegister(id: string): Promise<Register | null> {
+    const rel = `${regDir(id)}/register.yml`;
+    return exists(rel) ? toRegister(readYaml<RegisterFile>(rel)) : null;
+  }
+  async saveRegister(reg: Register): Promise<void> {
+    writeYaml(`${regDir(reg.id)}/register.yml`, { node: "register", ...fromRegister(reg) });
+  }
+  async getTriage(id: string): Promise<Triage | null> {
+    const rel = `${regDir(id)}/triage.yml`;
+    return exists(rel) ? toTriage(readYaml<TriageFile>(rel)) : null;
+  }
+  async saveTriage(id: string, triage: Triage): Promise<void> {
+    writeYaml(`${regDir(id)}/triage.yml`, { node: "triage", ...fromTriage(triage) });
+  }
+  async getGate(id: string): Promise<Gate | null> {
+    const rel = `${regDir(id)}/gate.yml`;
+    return exists(rel) ? toGate(readYaml<GateFile>(rel)) : null;
+  }
+
+  /** PROMOVER: consolida register+triage → intents/<id>/intent.yml e MOVE a candidata p/ archived/ (ciclo fechado). */
+  async promote(id: string, gate: Gate): Promise<Intent> {
+    const reg = await this.getRegister(id);
+    if (!reg) throw new Error(`register "${id}" não encontrado`);
+    const triage = await this.getTriage(id);
+    writeYaml(`${regDir(id)}/gate.yml`, {
+      node: "gate",
+      ...fromGate({ ...gate, outcome: "promoted" }),
+    });
+    const explores: ExplorePoint[] = (triage?.items ?? [])
+      .filter((it) => it.disposition === "exploration" && it.explorePoint)
+      .map((it) => it.explorePoint as ExplorePoint);
+    const intent: Intent = {
+      id: reg.id,
+      title: reg.title,
+      status: "active",
+      registeredBy: reg.registeredBy,
+      owner: reg.owner,
+      stakeholders: reg.stakeholders,
+      problem: reg.problem,
+      businessConnection: reg.businessConnection,
+      details: reg.details,
+      references: reg.references,
+      explores,
+      contracts: triage?.contracts ?? [],
+      createdAt: reg.createdAt,
+      updatedAt: today(),
+    };
+    await this.saveIntent(intent);
+    moveDir(regDir(id), `${archivedDir}/${id}`);
+    return intent;
+  }
+
+  /** DESCARTAR: grava o gate (discarded) e MOVE a candidata p/ archived/. Nada nasce em intents/. */
+  async discard(id: string, gate: Gate): Promise<void> {
+    if (!exists(`${regDir(id)}/register.yml`)) throw new Error(`register "${id}" não encontrado`);
+    writeYaml(`${regDir(id)}/gate.yml`, {
+      node: "gate",
+      ...fromGate({ ...gate, outcome: "discarded" }),
+    });
+    moveDir(regDir(id), `${archivedDir}/${id}`);
+  }
 
   // ── proposal (intake — vive na governança) ──
 
