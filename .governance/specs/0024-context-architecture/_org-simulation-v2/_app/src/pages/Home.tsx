@@ -44,7 +44,7 @@ export function Home() {
             <p className="muted">(nenhuma candidata — cadastre uma iniciativa)</p>
           )}
           {registers.map((r) => (
-            <Link className="card card-link" key={r.id} to={`/triagem/${r.id}`}>
+            <Link className="card card-link" key={r.id} to={`/register/${r.id}`}>
               <div className="card-head">
                 <strong>{r.title}</strong>
                 <span className={`badge st-${r.status}`}>{r.status}</span>
@@ -54,7 +54,6 @@ export function Home() {
               </div>
               <div className="chips">
                 <span className="chip">{(r.openQuestions ?? []).length} dúvidas</span>
-                <span className="chip">→ triagem</span>
               </div>
             </Link>
           ))}

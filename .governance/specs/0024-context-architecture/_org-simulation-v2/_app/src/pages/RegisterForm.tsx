@@ -125,7 +125,7 @@ export function RegisterForm() {
     try {
       if (editing) await api.updateRegister(reg.id, reg);
       else await api.createRegister(reg);
-      nav(`/triagem/${reg.id}`);
+      nav(`/register/${reg.id}`); // pós-registro → detalhe da candidata (não direto pra triagem)
     } catch (e: unknown) {
       setError(String(e instanceof Error ? e.message : e));
       setSaving(false);
@@ -135,7 +135,7 @@ export function RegisterForm() {
   return (
     <form className="block form" onSubmit={submit}>
       <p className="crumb">
-        <Link to={editing ? `/triagem/${editId}` : "/"}>← cancelar</Link>
+        <Link to={editing ? `/register/${editId}` : "/"}>← cancelar</Link>
       </p>
       <h2>
         {editing ? `Editar registro ${title || editId}` : "Nova iniciativa (registro de negócio)"}

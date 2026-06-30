@@ -7,6 +7,7 @@ import { ProposalDetail } from "./pages/ProposalDetail.tsx";
 import { IntentForm } from "./pages/IntentForm.tsx";
 import { ProposalForm } from "./pages/ProposalForm.tsx";
 import { RegisterForm } from "./pages/RegisterForm.tsx";
+import { RegisterDetail } from "./pages/RegisterDetail.tsx";
 import { TriageDashboard } from "./pages/TriageDashboard.tsx";
 import { TriageDetail } from "./pages/TriageDetail.tsx";
 
@@ -32,6 +33,7 @@ export function App() {
           {/* candidata (negócio → triagem) */}
           <Route path="/register/novo" element={<RegisterForm />} />
           <Route path="/register/:id/editar" element={<RegisterForm />} />
+          <Route path="/register/:id" element={<RegisterDetail />} />
           <Route path="/triagem" element={<TriageDashboard />} />
           <Route path="/triagem/:id" element={<TriageDetail />} />
           {/* intent ativada */}
