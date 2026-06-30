@@ -14,9 +14,9 @@ default é **léxico, zero-infra**; dá pra plugar um **LLM LOCAL** (Ollama) sem
 | ------ | ---------------------------------- | ----------------------------------------------------- | -------------------- | ------------------------------------------- |
 | **0**  | `lexical`                          | overlap de tokens + tags (determinístico, explicável) | **nenhuma**          | solo · CI · offline — **o default**         |
 | **1**  | `ollama-embed`                     | embeddings num modelo LOCAL → cosine                  | Ollama nativo (+GPU) | solo+ com semântica, **dados na máquina**   |
-| **2**  | `ollama-generate` _(planejado)_    | o modelo LOCAL lê e ranqueia **+ explica**            | Ollama + GPU         | ranking com racional, soberania             |
+| **2**  | `ollama-generate`                  | o modelo LOCAL lê e ranqueia **+ explica**            | Ollama + GPU         | ranking com racional, soberania             |
 | **3a** | `openai`/`anthropic` _(planejado)_ | API hosted                                            | nuvem                | enterprise, escala/SLA — **gasta tokens**   |
-| **3b** | `agent` _(planejado)_              | delega a um agente já instalado (Claude Code/Gemini…) | login do agente      | **usa o PLANO, sem tokens extras** (⚠️ ToS) |
+| **3b** | `agent` (`CliDelegateMatcher`)     | delega a um agente já instalado (Claude Code/Gemini…) | login do agente      | **usa o PLANO, sem tokens extras** (⚠️ ToS) |
 
 > **tokens × plano (3a × 3b):** as APIs hosted (OpenAI/Anthropic) cobram **por token** (API key) — a assinatura de
 > consumidor (ChatGPT Plus, Claude Pro) **não** é uma API. Pra usar o **plano** sem tokens extras, o tier `3b` delega
@@ -94,6 +94,20 @@ alertas: (1) o `nomic` é EN → o tier 1 precisa de um **embed multilíngue** (
 `gemma3:12b` acerta 8/8 mas a **489s** → abre a pergunta dos **modelos hosted** (mesma acurácia, mais rápido?).
 Reforça o **gerador de capabilities**: capabilities bem-escritas fariam os tiers baratos recuperarem (garbage-in → só
 o LLM sobrevive).
+
+### Agent-delegate (tier 3b: via PLANO/login, SEM tokens) — `node _bench/cli-bench.ts [claude|codex|agy]`
+
+Delega a um agente JÁ INSTALADO em modo headless (usa o plano/login — sem API tokens; ⚠️ ToS). No MESMO stress:
+
+| matcher (3b)          | acertos | latência | nota                                                               |
+| --------------------- | ------- | -------- | ------------------------------------------------------------------ |
+| `claude -p` (Claude)  | **8/8** | 77s      | JSON limpo                                                         |
+| `codex exec` (OpenAI) | **8/8** | 56s      | precisa `--skip-git-repo-check`; ecoa o prompt (pega o último {…}) |
+| `agy -p` (Gemini)     | ⏳      | —        | output murky — pendente de tuning da invocação/parse               |
+
+**Leitura:** no difícil, os hosted-via-plano (Claude **8/8 77s** · OpenAI **8/8 56s**) dão a MESMA acurácia do
+`gemma3:12b` local (8/8) **~6–8× mais rápido** e **SEM tokens** (plano). O trade-off real: **local** = soberania mas
+lento na 3060; **hosted-via-plano** = rápido + sem custo de token, ao preço de **mandar o texto pra fora** (⚠️ + ToS).
 
 ## Determinismo
 

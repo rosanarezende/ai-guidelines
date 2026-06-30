@@ -13,7 +13,8 @@ const candidates: MatchCandidate[] = REPOS.map((r) => ({
 
 const matchers: { label: string; matcher: Matcher }[] = [
   { label: "lexical (tier 0)", matcher: new LexicalMatcher() },
-  { label: "embed nomic (t1)", matcher: new OllamaEmbedMatcher(O, "nomic-embed-text") },
+  { label: "embed nomic [EN] (t1)", matcher: new OllamaEmbedMatcher(O, "nomic-embed-text") },
+  { label: "embed bge-m3 [multi] (t1)", matcher: new OllamaEmbedMatcher(O, "bge-m3") },
   { label: "gen gemma3:12b (t2)", matcher: new OllamaGenerateMatcher(O, "gemma3:12b") },
 ];
 
