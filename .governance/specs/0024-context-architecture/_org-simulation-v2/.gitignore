@@ -6,3 +6,6 @@ acme-governance/.cache/
 **/.governance/*.db
 _viewer/dist/
 _writecheck/
+# segredos locais (chaves de API hosted — NUNCA versionar)
+**/.gemini-key
+**/.api-key
