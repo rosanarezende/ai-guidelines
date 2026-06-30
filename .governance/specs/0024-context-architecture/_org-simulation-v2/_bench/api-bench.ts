@@ -26,8 +26,8 @@ const candidates: MatchCandidate[] = REPOS.map((r) => ({
 
 const models = [
   { label: "gemini-2.5-flash-lite (barato)", model: "gemini-2.5-flash-lite" },
-  { label: "gemini-flash-latest (médio)", model: "gemini-flash-latest" },
-  { label: "gemini-2.5-pro (maior)", model: "gemini-2.5-pro" }, // pode dar free=0 (pro costuma exigir billing)
+  { label: "gemini-2.5-flash (médio)", model: "gemini-2.5-flash" },
+  { label: "gemini-2.5-pro (maior)", model: "gemini-2.5-pro" },
 ];
 
 console.log(

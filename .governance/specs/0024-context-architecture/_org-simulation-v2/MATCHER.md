@@ -130,18 +130,18 @@ lento na 3060; **hosted-via-plano** = rápido + sem custo de token, ao preço de
 
 ### tier 3a (API hosted) no stress — `node _bench/api-bench.ts`
 
-API direta (key free do AI Studio; gasta cota). No MESMO stress:
+API direta (key do AI Studio, no header; gasta cota). No MESMO stress, o **ladder de 3 tamanhos** (key Tier-1):
 
-| modelo                         | acertos | latência | nota                                                     |
-| ------------------------------ | ------- | -------- | -------------------------------------------------------- |
-| `gemini-2.5-flash-lite` (free) | **6/8** | **15s**  | pequeno/rápido — bom, mas < os grandes (8/8); o + rápido |
-| `gemini-flash-latest` (free)   | —       | —        | 503 (overload transitório do Google)                     |
-| `gemini-2.5-pro`               | —       | —        | **free=0** (pro exige billing pago)                      |
+| modelo                           | acertos | latência  | nota                                             |
+| -------------------------------- | ------- | --------- | ------------------------------------------------ |
+| `gemini-2.5-flash-lite` (barato) | **6/8** | **6s** ⚡ | pequeno/rápido — bom, mas < os grandes           |
+| `gemini-2.5-flash` (médio)       | **8/8** | 60s       | **o sweet spot** — perfeito e + rápido que o pro |
+| `gemini-2.5-pro` (maior)         | **8/8** | 100s      | perfeito, mas + lento (**maior ≠ melhor** aqui)  |
 
-**Leitura:** um LLM hosted **pequeno e FREE** (flash-lite) já dá **6/8** — bem acima dos embeddings (1–4/8), mas abaixo
-dos LLMs grandes (Claude/OpenAI/`gemma3:12b` = 8/8). E é o **mais rápido** (15s). Trade-off **tamanho × acurácia**
-dentro do próprio hosted. ⚠️ o free tier do Gemini é **por modelo**: `flash-lite`/`latest` têm cota; `2.0-flash` e
-`pro` = free 0 → exigem billing. (Key via header, gitignored; ver tier 3a no "Como rodar".)
+**Leitura:** dentro de UM provedor, o **ladder confirma o padrão**: o pequeno (flash-lite) é **6/8 em 6s** (acima dos
+embeddings 1–4/8, abaixo dos grandes); o **médio (flash) é o sweet spot** (8/8 e mais rápido que o pro); o maior (pro)
+**não acerta mais e é + lento**. ⚠️ o **free tier** do Gemini é **por modelo** (`flash-lite`/`latest` free; `2.0-flash`/
+`pro` = free 0 → billing) — aqui usei key **Tier-1** (paga). Key via header, gitignored.
 
 ## Determinismo
 
