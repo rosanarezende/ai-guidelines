@@ -3,6 +3,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { execFileSync } from "node:child_process";
 import { parse, stringify } from "yaml";
 
 /** Raiz do _org-simulation-v2 (este arquivo: _lib/adapters/file/io.ts → 3 níveis acima). */
@@ -65,10 +66,36 @@ export function listRepoDirs(): string[] {
     .sort();
 }
 
-/** move uma pasta (rename) — a ativação/arquivamento movem a candidata; a localização encoda a fase. */
+/** a origem está RASTREADA pelo git (e git disponível)? Best-effort: qualquer falha → false. */
+function gitTracks(rel: string): boolean {
+  try {
+    execFileSync("git", ["ls-files", "--error-unmatch", rel], {
+      cwd: SIM_ROOT,
+      stdio: ["ignore", "ignore", "ignore"],
+    });
+    return true;
+  } catch {
+    return false; // não-rastreada, ou git indisponível
+  }
+}
+
+/**
+ * Move uma pasta (a ativação/arquivamento movem a candidata; a localização encoda a fase).
+ * Se a origem é RASTREADA pelo git → usa `git mv` (rename explícito + estagiado, preserva histórico).
+ * Senão → `fs.rename` (candidata nunca commitada = nada a preservar; e o git DETECTA o rename no commit
+ * mesmo assim — provado: `git log --follow` atravessa um move simples).
+ */
 export function moveDir(fromRel: string, toRel: string): void {
   const to = abs(toRel);
   fs.mkdirSync(path.dirname(to), { recursive: true });
+  if (gitTracks(fromRel)) {
+    try {
+      execFileSync("git", ["mv", fromRel, toRel], { cwd: SIM_ROOT, stdio: "ignore" });
+      return;
+    } catch {
+      /* git mv falhou (ex.: pasta parcial) → cai pro fs.rename abaixo */
+    }
+  }
   fs.renameSync(abs(fromRel), to);
 }
 
