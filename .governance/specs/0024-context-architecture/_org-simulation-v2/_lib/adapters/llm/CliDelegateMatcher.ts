@@ -21,6 +21,7 @@ export class CliDelegateMatcher implements Matcher {
       `Qual repo melhor atende o NEED? Responda APENAS com JSON, sem markdown e sem explicação: ` +
       `{"ranked":["<nome EXATO da lista>", ...]} do melhor pro pior, com TODOS os repos.`;
     const [bin, ...args] = this.#cmd;
+    if (!bin) throw new Error("CliDelegateMatcher: comando vazio (cmd[])");
     let out = "";
     try {
       out = execFileSync(bin, [...args, prompt], {
