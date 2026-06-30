@@ -6,6 +6,7 @@ import http from "node:http";
 import { FileHostRepository } from "../_lib/adapters/file/FileHostRepository.ts";
 import { deriveManifestGraph } from "../_lib/domain/derive.ts";
 import { deriveRouting, deriveTagGraph, LexicalMatcher } from "../_lib/domain/routing.ts";
+import { buildMatcher, type MatcherConfig } from "../_lib/matcher.ts";
 import type { Intent, Register, Triage, Gate, Proposal } from "../_lib/domain/model.ts";
 
 const PORT = 5180;
@@ -150,6 +151,42 @@ const server = http.createServer(async (req, res) => {
     if (mDiscard && method === "POST") {
       await host.discard(decodeURIComponent(mDiscard[1]), (await readBody(req)) as Gate);
       return send(res, 200, { ok: true });
+    }
+
+    // ── SIMULAR matcher (triagem): constrói o backend escolhido e ranqueia os needs ──
+    if (path === "/match" && method === "POST") {
+      const b = (await readBody(req)) as {
+        needs?: { key: string; text: string }[];
+        kind?: string;
+        model?: string;
+        endpoint?: string;
+      };
+      const manifests = await host.listManifests();
+      const candidates = manifests.map((m) => ({
+        repo: m.repo,
+        capabilities: m.capabilities ?? [],
+      }));
+      let built: { matcher: import("../_lib/domain/routing.ts").Matcher; label: string };
+      try {
+        built = buildMatcher({
+          kind: b.kind as MatcherConfig["kind"],
+          model: b.model,
+          endpoint: b.endpoint,
+        });
+      } catch (e) {
+        return send(res, 400, { error: (e as Error).message }); // infra ausente (ex.: sem key)
+      }
+      const t0 = Date.now();
+      try {
+        const results = [];
+        for (const n of b.needs ?? [])
+          results.push({ key: n.key, ranked: await built.matcher.rank(n.text, candidates) });
+        return send(res, 200, { label: built.label, ms: Date.now() - t0, results });
+      } catch (e) {
+        return send(res, 502, {
+          error: `matcher "${built.label}" falhou: ${(e as Error).message.split("\n")[0]}`,
+        });
+      }
     }
 
     // ── proposals ──

@@ -22,6 +22,11 @@ export function readYaml<T>(rel: string): T {
   return parse(fs.readFileSync(abs(rel), "utf8")) as T;
 }
 
+/** lê um arquivo de texto cru (ex.: a key da API, gitignored). */
+export function readText(rel: string): string {
+  return fs.readFileSync(abs(rel), "utf8");
+}
+
 export function writeYaml(rel: string, data: unknown): void {
   ensureDir(rel);
   fs.writeFileSync(abs(rel), stringify(data), "utf8");
